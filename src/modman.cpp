@@ -120,7 +120,7 @@ int v_counter = 0; 				//counter of the v[ i ] variables inserted in the equatio
  *************************************/
 int main( int argn, char **argv )
 {
-	int res;
+	int res = 0;
 	
 	// register all signal handlers
 	handle_signals( );
@@ -157,7 +157,7 @@ int main( int argn, char **argv )
  *************************************/
 int ModManMain( int argn, char **argv )
 {
-int i, num, sourcefile, macro = 1;
+int i, num, sourcefile = 0, macro = 1;
 char *s, str[ MAX_LINE_SIZE + 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], str2[ 2 * MAX_PATH_LENGTH ];
 FILE *f;
 
@@ -1124,9 +1124,9 @@ if ( choice == 8 )
 	cmd( ".f.t.t tag add bc \"1.0\"" );
 	cmd( ".f.t.t tag add fc \"1.0\"" );
 
-	sourcefile=1;
+	sourcefile = 1;
 	cmd( "savCurIni; savCurFin; updCurWnd" );	// save data for recolor
-	color(shigh, 0, 0 );			// set color types (all text)
+	color( shigh, 0, 0 );			// set color types (all text)
 	  
 	cmd( "catch [unset -nocomplain ud]" );
 	cmd( "catch [unset -nocomplain udi]" );
@@ -6015,7 +6015,7 @@ void cmd( const char *cm, ... )
 	
 	if ( strlen( cm ) >= TCL_BUFF_STR )
 	{
-		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR to at least %ld bytes.", strlen( cm ) );
+		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR to at least %ld bytes.", ( long int ) strlen( cm ) );
 		log_tcl_error( cm, message );
 		if ( tk_ok )
 			cmd( "tk_messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Save your data and close LMM after pressing 'OK'.\"" );
@@ -6153,101 +6153,101 @@ int comphit(const void *p1, const void *p2)
 #define TOT_COLOR ITEM_COUNT( cTypes )
 void color(int hiLev, long iniLin, long finLin)
 {
-int i, maxColor, newCnt;
-long j, k, tsize = 0, curLin = 0, curCol = 0, newLin, newCol, size[TOT_COLOR];
-char type, *pcount, *ppos, *count[TOT_COLOR], *pos[TOT_COLOR], finStr[16], *s;
-struct hit *hits;
+	char *pcount, *ppos, *count[ TOT_COLOR ], *pos[ TOT_COLOR ], finStr[ 16 ], *s;
+	int i, maxColor, newCnt;
+	long j, k, tsize = 0, curLin = 0, curCol = 0, newLin, newCol, size[ TOT_COLOR ];
+	struct hit *hits;
 
-// prepare parameters
-maxColor = map_color(hiLev);	// convert option to # of color types
-if (finLin == 0)			// convert code 0 for end of text
-	sprintf(finStr, "end");
-else
-	sprintf(finStr, "%ld.end", finLin);
-
-// remove color tags
-for (i = 0; i < TOT_COLOR; ++i )
-{
-	cmd( ".f.t.t tag remove %s %ld.0 %s", cTypes[ i ], iniLin == 0 ? 1 : iniLin, finStr );
-}
-
-// find & copy all occurrence types to arrays of C strings
-for (i = 0; i < maxColor; ++i )
-{
-	// locate all occurrences of each color group
-	Tcl_UnsetVar( inter, "ccount", 0 );
-	if (! strcmp(cTypes[ i ], "comment1") )	// multi line search element?
-		cmd( "set pos [.f.t.t search -regexp -all -nolinestop -count ccount -- {%s} %ld.0 %s]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr);
+	// prepare parameters
+	maxColor = map_color( hiLev );	// convert option to # of color types
+	if ( finLin == 0 )			// convert code 0 for end of text
+		sprintf( finStr, "end");
 	else
-		cmd( "set pos [.f.t.t search -regexp -all -count ccount -- {%s} %ld.0 %s]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr );
+		sprintf( finStr, "%ld.end", finLin );
 
-	// check number of ocurrences
-	pcount = ( char* ) Tcl_GetVar( inter, "ccount", 0 );
-	size[ i ] = strwrds(pcount);
-	if (size[ i ] == 0)				// nothing to do?
-		continue;
-	tsize += size[ i ];
+	// remove color tags
+	for ( i = 0; ( unsigned ) i < TOT_COLOR; ++i )
+		cmd( ".f.t.t tag remove %s %ld.0 %s", cTypes[ i ], iniLin == 0 ? 1 : iniLin, finStr );
 
-	// do intermediate store in C memory
-	count[ i ] = ( char* ) calloc(strlen(pcount) + 1, sizeof( char ) );
-	strcpy(count[ i ], pcount);
-	ppos = ( char* ) Tcl_GetVar( inter, "pos", 0 );
-	pos[ i ] = ( char* ) calloc(strlen(ppos) + 1, sizeof( char ) );
-	strcpy(pos[ i ], ppos); 
-}
-if (tsize == 0)
-	return;							// nothing to do
-
-// organize all occurrences in a single array of C numbers (struct hit)
-hits = (hit*)calloc(tsize, sizeof(hit) );
-for (i = 0, k = 0; i < maxColor; ++i )
-{
-	if (size[ i ] == 0)				// nothing to do?
-		continue;
-	pcount = ( char* ) count[ i ] - 1;
-	ppos = ( char* ) pos[ i ] - 1;
-	for (j = 0; j < size[ i ] && k < tsize; j++, ++k )
+	// find & copy all occurrence types to arrays of C strings
+	for ( i = 0; i < maxColor; ++i )
 	{
-		hits[k].type = i;
-		s = strtok(pcount + 1, " \t");
-		hits[k].count = atoi(s);
-		pcount = s + strlen(s);
-		s = strtok(ppos + 1, " \t");
-		sscanf(strtok( s, " \t"), "%ld.%ld", &hits[k].iniLin, &hits[k].iniCol);
-		ppos = s + strlen(s);
+		// locate all occurrences of each color group
+		Tcl_UnsetVar( inter, "ccount", 0 );
+		if ( ! strcmp( cTypes[ i ], "comment1" ) )	// multi line search element?
+			cmd( "set pos [.f.t.t search -regexp -all -nolinestop -count ccount -- {%s} %ld.0 %s]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr );
+		else
+			cmd( "set pos [.f.t.t search -regexp -all -count ccount -- {%s} %ld.0 %s]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr );
+
+		// check number of ocurrences
+		pcount = ( char * ) Tcl_GetVar( inter, "ccount", 0 );
+		size[ i ] = strwrds(pcount);
+		if (size[ i ] == 0)				// nothing to do?
+			continue;
+		tsize += size[ i ];
+
+		// do intermediate store in C memory
+		count[ i ] = ( char * ) calloc( strlen( pcount ) + 1, sizeof( char ) );
+		strcpy(count[ i ], pcount);
+		ppos = ( char * ) Tcl_GetVar( inter, "pos", 0 );
+		pos[ i ] = ( char * ) calloc( strlen( ppos ) + 1, sizeof( char ) );
+		strcpy(pos[ i ], ppos); 
 	}
-	free(count[ i ]);
-	free(pos[ i ]);
-}
+	if ( tsize == 0 )
+		return;							// nothing to do
 
-// Sort the single list for processing
-qsort((void *)hits, tsize, sizeof(hit), comphit);
-
-// process each occurrence, if applicable
-Tcl_LinkVar( inter, "lin", ( char* ) &newLin, TCL_LINK_LONG | TCL_LINK_READ_ONLY);
-Tcl_LinkVar( inter, "col", ( char* ) &newCol, TCL_LINK_LONG | TCL_LINK_READ_ONLY);
-Tcl_LinkVar( inter, "cnt", ( char* ) &newCnt, TCL_LINK_INT | TCL_LINK_READ_ONLY);
-for (k = 0; k < tsize; ++k )
-	// skip occurrences inside other occurrence
-	if (hits[k].iniLin > curLin || (hits[k].iniLin == curLin && hits[k].iniCol >= curCol) )
+	// organize all occurrences in a single array of C numbers (struct hit)
+	hits = ( hit * ) calloc( tsize, sizeof( hit ) );
+	for ( i = 0, k = 0; i < maxColor; ++i )
 	{
-		newLin = hits[k].iniLin;
-		newCol = hits[k].iniCol;
-		newCnt = hits[k].count;
-		cmd( "set end [.f.t.t index \"$lin.$col + $cnt char\"]" );
-		// treats each type of color case properly
-		if (hits[k].type < 4)			// non token?
-			cmd( ".f.t.t tag add %s $lin.$col $end", cTypes[hits[k].type]);
-		else							// token - should not be inside another word
-			cmd( "if {[regexp {\\w} [.f.t.t get \"$lin.$col - 1 any chars\"]]==0 && [regexp {\\w} [.f.t.t get $end]]==0} {.f.t.t tag add %s $lin.$col $end}", cTypes[hits[k].type] );
-		// next search position
-		ppos = ( char* ) Tcl_GetVar( inter, "end", 0 );
-		sscanf(ppos, "%ld.%ld", &curLin, &curCol);
+		if ( size[ i ] == 0 )			// nothing to do?
+			continue;
+		pcount = ( char* ) count[ i ] - 1;
+		ppos = ( char* ) pos[ i ] - 1;
+		for ( j = 0; j < size[ i ] && k < tsize; j++, ++k )
+		{
+			hits[ k ].type = i;
+			s = strtok( pcount + 1, " \t" );
+			hits[ k ].count = atoi( s );
+			pcount = s + strlen( s );
+			s = strtok( ppos + 1, " \t" );
+			sscanf( strtok( s, " \t" ), "%ld.%ld", &hits[ k ].iniLin, &hits[ k ].iniCol );
+			ppos = s + strlen( s );
+		}
+		free( count[ i ] );
+		free( pos[ i ] );
 	}
-Tcl_UnlinkVar( inter, "lin");
-Tcl_UnlinkVar( inter, "col");
-Tcl_UnlinkVar( inter, "cnt");
-free(hits);
+
+	// Sort the single list for processing
+	qsort( ( void * ) hits, tsize, sizeof( hit ), comphit );
+
+	// process each occurrence, if applicable
+	Tcl_LinkVar( inter, "lin", ( char * ) &newLin, TCL_LINK_LONG | TCL_LINK_READ_ONLY );
+	Tcl_LinkVar( inter, "col", ( char * ) &newCol, TCL_LINK_LONG | TCL_LINK_READ_ONLY );
+	Tcl_LinkVar( inter, "cnt", ( char * ) &newCnt, TCL_LINK_INT | TCL_LINK_READ_ONLY );
+
+	for (k = 0; k < tsize; ++k )
+		// skip occurrences inside other occurrence
+		if ( hits[ k ].iniLin > curLin || ( hits[ k ].iniLin == curLin && hits[ k ].iniCol >= curCol ) )
+		{
+			newLin = hits[ k ].iniLin;
+			newCol = hits[ k ].iniCol;
+			newCnt = hits[ k ].count;
+			cmd( "set end [.f.t.t index \"$lin.$col + $cnt char\"]" );
+			// treats each type of color case properly
+			if ( hits[ k ].type < 4 )		// non token?
+				cmd( ".f.t.t tag add %s $lin.$col $end", cTypes[ hits[ k ].type ] );
+			else							// token - should not be inside another word
+				cmd( "if {[regexp {\\w} [.f.t.t get \"$lin.$col - 1 any chars\"]]==0 && [regexp {\\w} [.f.t.t get $end]]==0} {.f.t.t tag add %s $lin.$col $end}", cTypes[ hits[ k ].type ] );
+			// next search position
+			ppos = ( char * ) Tcl_GetVar( inter, "end", 0 );
+			sscanf( ppos, "%ld.%ld", &curLin, &curCol );
+		}
+		
+	Tcl_UnlinkVar( inter, "lin");
+	Tcl_UnlinkVar( inter, "col");
+	Tcl_UnlinkVar( inter, "cnt");
+	free( hits );
 }
 
 

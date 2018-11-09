@@ -149,7 +149,7 @@ DRAW_OBJ
 void draw_obj( object *t, int level, int center, int from )
 {
 	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_ELEM_LENGTH ];
-	int i, j, k, step_type, begin, count, num_groups;
+	int i, j, k, step_type, begin, count;
 	object *cur;
 	variable *cv;
 	bridge *cb;
@@ -183,16 +183,16 @@ void draw_obj( object *t, int level, int center, int from )
 		sprintf( ch, "%s", t->label );
 		strcpy( ch1, "" );
 		
-		for ( cur = t, num_groups = 0; cur != NULL ; ++num_groups, cur = cur->hyper_next( cur->label ) )
+		for ( cur = t; cur != NULL ; cur = cur->hyper_next( cur->label ) )
 		{
-			if ( num_groups >= MAX_COUNTS )
+			if ( strlen( ch1 ) >= 9 )
 			{
 				strcat( ch1, "\u2026" );
 				break;
 			}
 			
 			skip_next_obj( cur, &count );
-			sprintf( str, "%d ", count );
+			sprintf( str, "%s%d", strlen( ch1 ) ? " " : "", count );
 			strcat( ch1, str );
 			
 			for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group

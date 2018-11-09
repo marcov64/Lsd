@@ -148,7 +148,6 @@ int lsdmain( int argn, char **argv )
 {
 	char *str;
 	int i, j = 0, len, done;
-	FILE *f;
 
 	path = new char[ strlen( "" ) + 1 ];
 	simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
@@ -613,12 +612,12 @@ RUN
 *********************************/
 void run( void )
 {
-	int i, j, perc_done, last_done;
-	bool batch_sequential_loop = false;
 	char bar_done[ 2 * BAR_DONE_SIZE ];
+	int i, perc_done, last_done;
+	bool batch_sequential_loop = false;
 	FILE *f;
-	result *rf;					// pointer for results files (may be zipped or not)
 	clock_t start, end;
+	result *rf;					// pointer for results files (may be zipped or not)
 
 #ifdef PARALLEL_MODE
 	// check if there are parallel computing variables
@@ -1507,7 +1506,6 @@ bool search_parallel( object *r )
 {
 	bridge *cb; 
 	variable *cv;
-	object *co;
 
 	// search among the variables 
 	for ( cv = r->v; cv != NULL; cv=cv->next )

@@ -92,7 +92,6 @@ CREATE
 void create( void )
 {
 	object *cur = root;
-	char *s;
 
 	Tcl_LinkVar( inter, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "choice_g", ( char * ) &choice_g, TCL_LINK_INT );
@@ -194,7 +193,6 @@ int browse( object *r, int *choice )
 	char ch[ TCL_BUFF_STR ];
 	int num;
 	bridge *cb;
-	object *ap_o;
 	variable *ap_v;
 
 	currObj = r;			// global pointer to C Tcl routines
@@ -981,14 +979,14 @@ OPERATE
 object *operate( object *r, int *choice )
 {
 bool saveAs, delVar, renVar, table;
-char observe, initial, cc, *lab1, *lab2, *lab3, *lab4, lab[ 2 * MAX_PATH_LENGTH ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ];
+char observe, initial, *lab1, *lab2, *lab3, *lab4, lab[ 2 * MAX_PATH_LENGTH ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ];
 int sl, done = 0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, ffirst, fnext, temp[ 10 ];
 long nLinks;
 double fake = 0;
 FILE *f;
 bridge *cb;
 object *n, *cur, *cur1, *cur2;
-variable *cur_v, *cv, *app;
+variable *cv, *cur_v;
 result *rf;					// pointer for results files (may be zipped or not)
 sense *cs;
 description *cur_descr;
@@ -1755,6 +1753,7 @@ case 83:
 			if ( strcmp( lab, r->label ) )
 			{
 				for ( cur1 = r; cur1->up != NULL; cur1 = cur1->up );
+				
 				done = check_label( lab, cur1 );
 				if ( done == 1 )
 				{
@@ -1762,6 +1761,7 @@ case 83:
 					cmd( "focus .chgnam.e.e; .chgnam.e.e selection range 0 end" );
 					goto here_newname;
 				}
+				
 				if ( done == 2 )
 				{
 					cmd( "tk_messageBox -parent .chgnam -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
@@ -5021,12 +5021,14 @@ case 68:
 	if ( *choice == 1 || *choice == 4 )			// Windows header
 	{
 		// convert to Windows folder separators (\)
-		for ( i = 0; i < strlen( ch ); ++i ) 
+		for ( i = 0; ( unsigned ) i < strlen( ch ); ++i ) 
 			if ( ch[ i ] == '/' ) 
 				ch[ i ] = '\\';
+			
 		win_dir[ MAX_PATH_LENGTH - 1 ] = '\0';
 		strcpy( win_dir, out_dir );
-		for ( i = 0; i < strlen( win_dir ); ++i ) 
+		
+		for ( i = 0; ( unsigned ) i < strlen( win_dir ); ++i ) 
 			if ( win_dir[ i ] == '/' ) 
 				win_dir[ i ]='\\';
 		
@@ -5710,7 +5712,6 @@ SHOW_OBSERVE
 ****************************************************/
 void show_observe( object *n )
 {
-	int app;
 	bridge *cb;
 	description *cd;
 	object *co;
@@ -6294,7 +6295,7 @@ bool sort_listbox( int box, int order, object *r )
 		if ( r->v == NULL || order < 0 || order > 5 )	// invalid sort?
 			return false;
 		
-		variable *cv, *cv1;
+		variable *cv, *cv1 = NULL;
 		list < variable > newv, newvV, newvP, newvF;
 		list < variable > :: iterator it;
 		
@@ -6394,7 +6395,7 @@ bool sort_listbox( int box, int order, object *r )
 		if ( r->b == NULL || order < 0 || order > 1 )	// invalid sort?
 			return false;
 		
-		bridge *cb, *cb1;	
+		bridge *cb, *cb1 = NULL;	
 		list < bridge > newb;
 		list < bridge > :: iterator it;
 		
@@ -6470,7 +6471,6 @@ Also restore sensitivity configuration
 bool load_prev_configuration( void )
 {
 	char *saFile = NULL;
-	object *cur;
 	FILE *f;
 	
 	if ( sens_file != NULL )					// save SA file name if one is loaded

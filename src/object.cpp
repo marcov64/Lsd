@@ -768,7 +768,7 @@ int object::initturbo( char const *label, double tot = 0 )
 	cb->mn = new mnode;
 	cb->mn->create( lev );
 	
-	return tot;
+	return ( int ) tot;
 }
 
 
@@ -1593,7 +1593,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 	bool net;
 	int i;
 	bridge *cb, *cb1, *cb2;
-	object *cur, *cur1, *last, *first;
+	object *cur, *cur1, *last, *first = NULL;
 	variable *cv;
 
 	// check the labels and prepare the bridge to attach to
@@ -1784,6 +1784,7 @@ void object::delete_obj( void )
 			return;					
 		
 		if ( under_computation( ) )
+		{
 			if ( wait_delete != NULL && wait_delete != this )
 			{
 				sprintf( msg, "cannot schedule the deletion of object '%s'", label );
@@ -1797,6 +1798,7 @@ void object::delete_obj( void )
 				wait_delete = this;
 				return;
 			}
+		}
 			
 		deleting = true;		// signal deletion to other threads
 		
@@ -1933,7 +1935,7 @@ Change the label of the Object, for all the instances
 void object::chg_lab( char const *lab )
 {
 	object *cur;
-	bridge *cb, *cb1;
+	bridge *cb;
 
 	// change all groups of this objects
 	cur = up->hyper_next( up->label );
@@ -2332,7 +2334,7 @@ double object::sd( char const *lab, int lag )
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( n = 0, tot = 0; cur != NULL; cur = go_brother( cur ), ++n )
+	for ( n = 0, tot = 0, tot2 = 0; cur != NULL; cur = go_brother( cur ), ++n )
 	{
 		tot += x = cur->cal( this, lab, lag );
 		tot2 += x * x;
@@ -2351,8 +2353,8 @@ Count the number of object lab instances below this
 ****************************************************/
 double object::count( char const *lab )
 {
-	int count, temp;
-	object *cur, *cur1;
+	int count;
+	object *cur;
 	
 	cur = search( lab );
 	
@@ -2381,8 +2383,8 @@ and besides the current object type (include siblings)
 ****************************************************/
 double object::count_all( char const *lab )
 {
-	int count, temp;
-	object *cur, *cur1;
+	int count;
+	object *cur;
 	
 	if ( up->b->head != NULL )
 		cur = up->b->head->search( lab );			// pick always first instance
@@ -2517,7 +2519,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 {
 	int num, i;
 	bridge *cb;
-	object *cur, *nex, **mylist;
+	object *cur, **mylist;
 	variable *cv;
 	bool useNodeId = ( var == NULL ) ? true : false;		// sort on node id and not on variable
 
@@ -2591,7 +2593,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 	cb->counter_updated = false;
 	cur = cb->head;
 
-	nex = skip_next_obj( cur, &num );
+	skip_next_obj( cur, &num );
 	mylist = new object *[ num ];
 	for ( i = 0; i < num; ++i )
 	{
@@ -2672,7 +2674,7 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 {
 	int num, i;
 	bridge *cb;
-	object *cur, *nex, **mylist;
+	object *cur, **mylist;
 	variable *cv;
 
 	cb = search_bridge( obj, true );			// try to find the bridge
@@ -2725,7 +2727,7 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 	cb->counter_updated = false;
 	cur = cb->head;
 
-	nex = skip_next_obj( cur, &num );
+	skip_next_obj( cur, &num );
 	mylist = new object *[ num ];
 	for ( i = 0; i < num; ++i )
 	{

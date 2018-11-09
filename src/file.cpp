@@ -53,7 +53,7 @@ OBJECT::SAVE_STRUCT
 void object::save_struct( FILE *f, char const *tab )
 {
 	char tab1[ 30 ];
-	bridge *cb, *cb1;
+	bridge *cb;
 	object *o;
 	variable *var;
 
@@ -64,9 +64,6 @@ void object::save_struct( FILE *f, char const *tab )
 	fprintf( f, "%sLabel %s\n%s{\n", tab1, label, tab1 );
 	strcat( tab1, "\t" );
 	
-	if ( b != NULL )
-		cb1 = b->next;
-
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		fprintf( f, "%sSon: %s\n", tab1, cb->blabel );

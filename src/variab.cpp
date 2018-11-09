@@ -237,7 +237,7 @@ Standard version (non parallel computation)
 double variable::cal( object *caller, int lag )
 {
 	int i, eff_lag, time;
-	clock_t start, end;
+	clock_t pstart, pend;
 	double app;
 
 	if ( param == 1 )
@@ -327,7 +327,7 @@ double variable::cal( object *caller, int lag )
 		{
 			++stack;
 			stacklog->next = new lsdstack;
-			stacklog->next->next=NULL;
+			stacklog->next->next = NULL;
 			stacklog->next->prev = stacklog;
 			strcpy( stacklog->next->label, label );
 			stacklog->next->ns = stack;
@@ -345,16 +345,16 @@ double variable::cal( object *caller, int lag )
 
 #ifndef NO_WINDOW
 		if ( stack_info >= stack && ( ! prof_obs_only || observe ) )
-			start_profile[ stack - 1 ] = start = clock( );
+			start_profile[ stack - 1 ] = pstart = clock( );
 		else
 			if ( prof_aggr_time )
-				start = clock( );				
+				pstart = clock( );				
 #endif
 	}
 #ifndef NO_WINDOW
 	else
 		if ( prof_aggr_time )
-			start = clock( );				
+			pstart = clock( );				
 #endif	
 
 	// Compute the Variable's equation
@@ -404,22 +404,20 @@ double variable::cal( object *caller, int lag )
 #ifndef NO_WINDOW
 		if ( prof_aggr_time )
 		{
-			end = clock( );
-			time = end - start;
+			pend = clock( );
+			time = pend - pstart;
 			
 			if ( ( ! prof_obs_only || observe ) && time > prof_min_msecs )
 			{
 				string var_name = label;
-				int a = prof[ var_name ].ticks, b = prof[ var_name ].comp;
 				prof[ var_name ].ticks += time;
 				prof[ var_name ].comp++;
-				a = prof[ var_name ].ticks; b = prof[ var_name ].comp;
 			}
 		}
 
 		if ( stack_info >= stack && ( ! prof_obs_only || observe ) )
 		{
-			end_profile[ stack - 1 ] = prof_aggr_time ? end : clock( );
+			end_profile[ stack - 1 ] = prof_aggr_time ? pend : clock( );
 
 			time = 1000 * ( end_profile[ stack - 1 ] - start_profile[ stack - 1 ] ) / CLOCKS_PER_SEC;
 
@@ -757,7 +755,7 @@ void parallel_update( variable *v, object* p, object *caller )
 {
 	bool ready[ max_threads ], wait = false;
 	int i, nt, wait_time;
-	clock_t start;
+	clock_t pstart;
 	bridge *cb;
 	object *co;
 	variable *cv;
@@ -791,7 +789,7 @@ void parallel_update( variable *v, object* p, object *caller )
 	
 	if ( nt > 0 )
 	{
-		sprintf( msg, "variable '%s' (object '%s') %d parallel worker(s) crashed", cv->label, cv->up->label, i );
+		sprintf( msg, "variable '%s' (object '%s') %d parallel worker(s) crashed", v->label, v->up->label, i );
 		error_hard( msg, "parallel computation problem", 
 					"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 		return;
@@ -812,11 +810,11 @@ void parallel_update( variable *v, object* p, object *caller )
 				if ( ! wait )
 				{
 					wait = true;
-					start = clock( );
+					pstart = clock( );
 				}
 				else		// already waiting
 				{
-					wait_time = ( clock( ) - start ) / CLOCKS_PER_SEC;
+					wait_time = ( clock( ) - pstart ) / CLOCKS_PER_SEC;
 					if ( wait_time > MAX_WAIT_TIME )
 					{
 						sprintf( msg, "variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->label, cv->up->label, MAX_WAIT_TIME, t );
@@ -882,11 +880,11 @@ void parallel_update( variable *v, object* p, object *caller )
 		if ( ! wait )
 		{
 			wait = true;
-			start = clock( );
+			pstart = clock( );
 		}
 		else		// already waiting
 		{
-			wait_time = ( clock( ) - start ) / CLOCKS_PER_SEC;
+			wait_time = ( clock( ) - pstart ) / CLOCKS_PER_SEC;
 			if ( wait_time > MAX_WAIT_TIME )
 			{
 				sprintf( msg, "variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->up->label, cv->label, MAX_WAIT_TIME, t );

@@ -45,13 +45,11 @@ void set_all(int *choice, object *original, char *lab, int lag )
 {
 char *l, ch[MAX_ELEM_LENGTH];
 int res, i, kappa, cases_from=1, cases_to=0, to_all, update_description, fill=0;
-bool exist;
 object *cur, *r;
 double value, value1, value2, step, counter;
 variable *cv;
 FILE *f;
 description *cd; 
-sense *cs;
 
 if (original->up != NULL )
 	for (r=original->up; r->up!=NULL; r=r->up);//go for the root
@@ -633,37 +631,40 @@ case 5:
 
       if ( update_description == 1 )
       {
-      cd=search_description(lab);
-    
-      if (cd == NULL )
-      {  cv=r->search_var(NULL, lab);
-       if (cv->param == 0 )
-         add_description(lab, "Variable", "(no description available)");
-       if (cv->param == 1 )
-         add_description(lab, "Parameter", "(no description available)");  
-       if (cv->param==2)
-         add_description(lab, "Function", "(no description available)");  
-       plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
-       cd=search_description(lab);
-      } 
-      
-      if (to_all == 1 )
-        {sprintf( msg, "All %d instances set to random values drawn from a normal with mean=%g and std. deviation=%g.", i-1, value1, value2);
-         change_descr_lab(lab, "", "", "", msg);      
-        } 
-      else
-        {
-
-         if (cd->init != NULL )
-           sprintf( msg, "%s Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g",cd->init, cases_from, cases_to, value1, value2);
-         else
-           sprintf( msg, "Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g", cases_from, cases_to, value1, value2);         
-           change_descr_lab(lab, "", "", "", msg);        
-        }  
-       }
+		  cd = search_description( lab );
+		
+		if ( cd == NULL )
+		{  
+			cv = r->search_var( NULL, lab );
+			if ( cv->param == 0 )
+				add_description( lab, "Variable", "(no description available)" );
+			if ( cv->param == 1 )
+				add_description( lab, "Parameter", "(no description available)" );  
+			if ( cv->param == 2 )
+				add_description( lab, "Function", "(no description available)"); 
+			
+			plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
+			cd=search_description( lab );
+		} 
+		  
+		if ( to_all == 1 )
+		{
+			sprintf( msg, "All %d instances set to random values drawn from a normal with mean=%g and std. deviation=%g.", i-1, value1, value2);
+			change_descr_lab(lab, "", "", "", msg);      
+		} 
+		else
+		{
+			if ( cd->init != NULL )
+			   sprintf( msg, "%s Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g",cd->init, cases_from, cases_to, value1, value2 );
+			else
+				sprintf( msg, "Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g", cases_from, cases_to, value1, value2 );   
+		   
+			change_descr_lab(lab, "", "", "", msg);        
+		}  
+      }
   		unsaved_change( true );		// signal unsaved change
 
-		  break;
+		break;
 
 case 6: 
 		cv=r->search_var(NULL, lab);
@@ -722,70 +723,84 @@ case 6:
 
 
 case 7:
-  cmd( "set oldpath [pwd]" );
-  cmd( "set filename [ tk_getOpenFile -parent . -title \"File to Import Data\" -filetypes { { {Text Files} {.txt} } { {All Files} {*} }} ]" );
-  l = ( char * ) Tcl_GetVar( inter, "filename", 0 );
-  if ( l != NULL && strcmp( l, "" ) )
- { cmd( "cd [file dirname $filename]" );
-   cmd( "set fn [file tail $filename]" );
-   l=( char * ) Tcl_GetVar( inter, "fn", 0 );
-   f = fopen(l, "r");
-   cmd( "cd $oldpath" );
-   if (f != NULL )
-    {
-    fscanf(f, "%99s", ch); //the label
-    kappa=fscanf(f, "%lf", &value);
-    for (i=1,cur=r; cur!=NULL && kappa!=EOF; cur=cur->hyper_next(r->label), ++i )
-		  {
-      if (to_all==1 || (cases_from<=i && cases_to>=i))
-      {
-      cv=cur->search_var(NULL, lab);
-			cv->data_loaded='+';
-			if (cv->param == 0 )
-			  cv->val[lag]=value;
-			else
-			  cv->val[ 0 ]=value;
-      kappa=fscanf(f, "%lf", &value);
-		  }
-     }
-     if (cur!=NULL || kappa!=EOF)
-      plog("\nWarning: problem loading data, the file may contain a different number\nof values compared to the objects to initialize");
-      if ( update_description == 1 )
-      {
-      cd=search_description(lab);
-    
-      if (cd == NULL )
-      {  cv=r->search_var(NULL, lab);
-       if (cv->param == 0 )
-         add_description(lab, "Variable", "(no description available)");
-       if (cv->param == 1 )
-         add_description(lab, "Parameter", "(no description available)");  
-       if (cv->param==2)
-         add_description(lab, "Function", "(no description available)");  
-       plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
-       cd=search_description(lab);
-      } 
-      
-      if (to_all == 1 )
-        {sprintf( msg, "All %d instances set with data from file %s.", i-1, l);
-         change_descr_lab(lab, "", "", "", msg);      
-        } 
-      else
-        {
-
-         if (cd->init != NULL )
-         sprintf( msg, "%s Instances from %d to %d with data from file %s", cd->init, cases_from, cases_to, l);
-         else
-           sprintf( msg, "Instances from %d to %d with data from file %s", cases_from, cases_to, l);         
-         change_descr_lab(lab, "", "", "", msg);        
-        }  
-       }
-
-    
-    }
-  unsaved_change( true );		// signal unsaved change
-   }
-break;
+	cmd( "set oldpath [pwd]" );
+	cmd( "set filename [ tk_getOpenFile -parent . -title \"File to Import Data\" -filetypes { { {Text Files} {.txt} } { {All Files} {*} }} ]" );
+	l = ( char * ) Tcl_GetVar( inter, "filename", 0 );
+	if ( l != NULL && strcmp( l, "" ) )
+	{ 
+		cmd( "cd [file dirname $filename]" );
+		cmd( "set fn [file tail $filename]" );
+		l = ( char * ) Tcl_GetVar( inter, "fn", 0 );
+		f = fopen( l, "r" );
+		cmd( "cd $oldpath" );
+		if (f != NULL )
+		{
+			fscanf( f, "%99s", ch );				// the label
+			kappa = fscanf( f, "%lf", &value );
+			
+			for ( i = 1, cur = r; cur != NULL && kappa != EOF; cur = cur->hyper_next( r->label ), ++i )
+			{
+				if (to_all==1 || (cases_from<=i && cases_to>=i))
+				{
+					cv = cur->search_var( NULL, lab );
+					cv->data_loaded = '+';
+					
+					if ( cv->param == 0 )
+						cv->val[ lag ] = value;
+					else
+						cv->val[ 0 ] = value;
+				  
+					kappa = fscanf( f, "%lf", &value );
+				}
+			}
+			
+			if ( cur != NULL || kappa != EOF )
+				plog( "\nWarning: problem loading data, the file may contain a different number\nof values compared to the objects to initialize" );
+			
+			if ( update_description == 1 )
+			{
+				cd = search_description( lab );
+		
+				if ( cd == NULL )
+				{  
+					cv = r->search_var( NULL, lab );
+					
+					if ( cv->param == 0 )
+						add_description( lab, "Variable", "(no description available)" );
+					
+					if ( cv->param == 1 )
+						add_description( lab, "Parameter", "(no description available)" );  
+					
+					if ( cv->param == 2 )
+						add_description( lab, "Function", "(no description available)" );
+					
+					plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
+					
+					cd = search_description( lab );
+				} 
+			  
+				if ( to_all == 1 )
+				{
+					sprintf( msg, "All %d instances set with data from file %s.", i - 1, l );
+					change_descr_lab( lab, "", "", "", msg );      
+				} 
+				else
+				{
+					if ( cd->init != NULL )
+						sprintf( msg, "%s Instances from %d to %d with data from file %s", cd->init, cases_from, cases_to, l );
+					else
+						sprintf( msg, "Instances from %d to %d with data from file %s", cases_from, cases_to, l );
+					
+					change_descr_lab( lab, "", "", "", msg );        
+				}  
+			}
+		}
+	  
+		unsaved_change( true );		// signal unsaved change
+	}
+	
+	break;
+	
 
 case 8:
      cmd( "set choice $fill" );
@@ -1213,7 +1228,7 @@ int **NOLH_0 = NULL;				// pointer to the design loaded from file
 // function to get the index to the default NOLH design table or -1 otherwise
 int NOLH_table( int k )				
 {
-	for ( int i = 0; i < ( ( sizeof NOLH ) / sizeof NOLH[ 0 ] ); ++i )
+	for ( unsigned int i = 0; i < ( ( sizeof NOLH ) / sizeof NOLH[ 0 ] ); ++i )
 		if ( k >= NOLH[ i ].kMin && k <= NOLH[ i ].kMax )
 			return i;
 	
@@ -1234,7 +1249,7 @@ char *NOLH_valid_tables( int k, char* ch )
 	else
 	{
 		strcpy( ch, "" );
-		for ( int i = min_tab; i < ( ( sizeof NOLH ) / sizeof NOLH[ 0 ] ); ++i )
+		for ( int i = min_tab; ( unsigned ) i < ( ( sizeof NOLH ) / sizeof NOLH[ 0 ] ); ++i )
 			sprintf( ch, "%s \"%d\u00D7%d\u00D7%d\"", ch, NOLH[ i ].kMax, NOLH[ i ].n1, NOLH[ i ].n2 );
 	}
 	
@@ -1265,7 +1280,7 @@ If option 'force' is used, will be used for any number of factors
 ******************************************************************************/
 bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )			
 {
-	int i, j, k, n = 1, loLevel = INT_MAX, hiLevel = 1, kFile = 0;
+	int i, j, n = 1, loLevel = INT_MAX, hiLevel = 1, kFile = 0;
 	char *fileName, *lBuffer, *str, *num;
 	bool ok = false;
 	FILE *NOLHfile;
@@ -1352,7 +1367,8 @@ bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )
 	if ( force )
 		NOLH[ 0 ].kMin = 1;
 	else
-		NOLH[ 0 ].kMin = NOLH[ sizeof NOLH - 1 ].kMax + 1;
+		NOLH[ 0 ].kMin = NOLH[ sizeof NOLH / sizeof NOLH[ 0 ] - 1 ].kMax + 1;
+	
 	NOLH[ 0 ].kMax = kFile;
 	NOLH[ 0 ].n1 = NOLH[ 0 ].n2 = n;
 	NOLH[ 0 ].loLevel = loLevel;
@@ -1667,7 +1683,6 @@ vector < vector < int > > combinations( list < int > indices, int r )
 SUM_DISTANCES
   Calculate combinatorial distance between a select group of trajectories, 
   indicated by indices
-    
     indices: list of candidate pairs of points = list < int >
     DM: distance matrix = array (M,M)
 ******************************************************************************/
@@ -1678,7 +1693,7 @@ double sum_distances( list < int > indices, double **DM )
 
     // add distance of all points pairs
 	double D = 0;
-	for ( int j = 0; j < combs.size( ); ++j )
+	for ( unsigned int j = 0; j < combs.size( ); ++j )
 		D += DM[ combs[ j ][ 0 ] ][ combs[ j ][ 1 ] ];
 	
 	return D;
@@ -1693,6 +1708,7 @@ list < int > top_idx( double *a, int n, int i )
 {
 	list < int > top;
 	vector < bool > used( n, false );
+	
 	for ( int k = 0; k < i; ++k )
 	{
 		int max_idx = -1;
@@ -1706,6 +1722,7 @@ list < int > top_idx( double *a, int n, int i )
 		used[ max_idx ] = true;
 		top.push_back( max_idx );
 	}
+	
 	return top;
 }
 
@@ -1713,7 +1730,6 @@ list < int > top_idx( double *a, int n, int i )
 /*****************************************************************************
 GET_MAX_SUM_IND
 	Get the indice that belong to the maximum distance in an array of distances
-    
     indices_list = list of points
     distance = array (M)
 ******************************************************************************/
@@ -1721,12 +1737,14 @@ list < int > get_max_sum_ind( vector < list < int > > indices_list, vector < dou
 {
 	int max_idx = -1;
 	double max = -INFINITY;
-	for ( int j = 0; j < indices_list.size( ); ++j )
+	
+	for ( unsigned int j = 0; j < indices_list.size( ); ++j )
 		if ( row_maxima_i[ j ] > max )
 		{
 			max_idx = j;
 			max = row_maxima_i[ j ];
 		}
+		
 	return indices_list[ max_idx ];
 }
 
@@ -1740,6 +1758,7 @@ vector < list < int > > add_indices( list < int > m_max_ind, int M )
 {
 	vector < list < int > > list_new_indices;
 	list < int > copy = m_max_ind;
+	
 	for ( int i = 0; i < M; ++i )
 		if ( find( m_max_ind.begin( ), m_max_ind.end( ), i ) == m_max_ind.end( ) )
 		{
@@ -1747,6 +1766,7 @@ vector < list < int > > add_indices( list < int > m_max_ind, int M )
 			list_new_indices.push_back( copy );
 			copy.pop_back( );
 		}
+		
 	return list_new_indices;
 }
 
@@ -1800,7 +1820,7 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 			m_ind = add_indices( m_max_ind, M );
             vector < double > m_maxima( m_ind.size( ), 0 );
 			
-            for ( int n = 0; n < m_ind.size( ); ++n )
+            for ( unsigned int n = 0; n < m_ind.size( ); ++n )
                 m_maxima[ n ] = sum_distances( m_ind[ n ], DM );
             
             m_max_ind = get_max_sum_ind( m_ind, m_maxima );

@@ -15,5 +15,5 @@ LIBS=-lz
 
 # Compiler options
 CC=g++
-GLOBAL_CC=-march=pentium-mmx -mtune=prescott
+GLOBAL_CC=-march=pentium-mmx -mtune=prescott -w
 SSWITCH_CC=-mthreads -mwindows -O3

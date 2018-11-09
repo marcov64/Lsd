@@ -58,8 +58,6 @@ REPORT
 void report( int *choice, object *r )
 {
 	char *app, ch;
-	object *cur;
-	variable *cv;
 	FILE *ffun, *f;
 
 	if ( ! struct_loaded )
@@ -369,7 +367,7 @@ WRITE_OBJ
 **********************************/
 void write_obj( object *r, FILE *frep )
 {
-	int count, i;
+	int count;
 	bridge *cb;
 	object *cur, *cur2;
 	variable *cv;
@@ -426,7 +424,7 @@ void write_var( variable *v, FILE *frep )
 	bool one;
 	char *app, *fname, c1_lab[ 2 * MAX_LINE_SIZE ], c2_lab[ 2 * MAX_LINE_SIZE ], c3_lab[ 2 * MAX_LINE_SIZE ], updt_in[ MAX_ELEM_LENGTH + 1 ];
 	int i, j, k, done, flag_begin, flag_string, flag_comm, flag_var, nfiles;
-	object *cur, *cur2;
+	object *cur;
 	FILE *ffun ;
 
 	cmd( "update" );
@@ -746,7 +744,7 @@ CONTAINS
 bool contains( FILE *f, char *lab, int len )
 {
 	bool found = false;
-	int bra, start, i, got, j, comm = 0;
+	int bra, start, i, j, got, comm = 0;
 	char c1_lab[ MAX_LINE_SIZE ], pot[ MAX_LINE_SIZE ];
 	
 	if ( ! macro )
@@ -801,11 +799,12 @@ bool contains( FILE *f, char *lab, int len )
 						pot[ j - i - 1 ] = c1_lab[ j ];
 		
 						// scan the whole word, until a different char is not found
+						got = 1;
 						if ( pot[ 0 ] != '\"' ) 			// in case the eq. contains "" it gets fucked up..
-							for ( j = 0, got = 1 ; got == 1 && pot[ j ] != '\"' && lab+j != NULL; ++j )
+							for ( j = 0; got == 1 && pot[ j ] != '\"' && lab+j != NULL; ++j )
 								if ( pot[ j ] != lab[ j ])
 									got = 0;
-						for ( ; pot[ j ] != '\"'; ++j ); //finishes the word, until the closed quotes
+						for ( ; pot[ j ] != '\"'; ++j ); 	//finishes the word, until the closed quotes
 						
 						i = i + j + 1;
 						
@@ -827,17 +826,19 @@ void write_str( object *r, FILE *frep, int dep, char const *prefix )
 {
 	int len, i, j, trash;
 	bridge *cb;
-	object *cur, *cur2;
+	object *cur;
 	
 	trash = 0;
 	if ( r->up != NULL )
 	{
 		if ( r->up->b->head != r )
 			for ( i = 0; i < dep; ++i )
+			{
 				if ( msg[ i ] == ' ' )
 					fprintf( frep, "<TT>&nbsp;</TT>" );
 				else
 					fprintf( frep, "<TT>|</TT>" );
+			}
 			
 		fprintf( frep, "<TT>&mdash;&gt;</TT>" );
 		cur = skip_next_obj( r, &trash );
@@ -983,9 +984,7 @@ FILL_LIST_VAR
 *********************************/
 void fill_list_var( object *r, int flag_all, int flag_init )
 {
-	int count;
 	bridge *cb;
-	object *cur;
 	variable *cv;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
@@ -1007,9 +1006,7 @@ FILL_LIST_PAR
 *********************************/
 void fill_list_par( object *r, int flag_all )
 {
-	int count;
 	bridge *cb;
-	object *cur;
 	variable *cv;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
@@ -1033,10 +1030,9 @@ Create recursively the help table for an Object
 void create_table_init(object *r)
 {
 	int i;
-	object *cur;
-	variable *curv;
-	description *cur_descr;
 	bridge *cb;
+	description *cur_descr;
+	variable *curv;
 
 	fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
 	 
@@ -1131,7 +1127,7 @@ void create_table_init(object *r)
 		 add_description( curv->label, "Parameter", "(no description available)" );  
 	   if ( curv->param == 2 )
 		 add_description( curv->label, "Function", "(no description available)" );  
-	   plog( "\nWarning: description for '%s' not found. New one created.", "", cur->label );
+	   plog( "\nWarning: description for '%s' not found. New one created.", "", curv->label );
 	   cur_descr=search_description( curv->label );
 	  } 
 
@@ -1202,10 +1198,9 @@ Create recursively the help table for the initial values of an Object
 void create_initial_values(object *r)
 {
 	int count = 0, i, j;
-	object *cur, *cur1;
-	variable *curv, *cv;
-	description *cur_descr;
 	bridge *cb;
+	object *cur;
+	variable *curv, *cv;
 
 	for ( curv=r->v; curv!=NULL; curv=curv->next )
 	  if ( curv->param == 1 || curv->num_lag > 0)
@@ -1460,11 +1455,10 @@ SHOW_REP_OBSERVE
 ****************************************************/
 void show_rep_observe(FILE *f, object *n, int *begin)
 {
-	int app, i;
+	int i;
 	bridge *cb;
-	object *co;
 	description *cd;
-	variable *cv, *cv1;
+	variable *cv;
 
 	for ( cv=n->v; cv != NULL; cv = cv->next )
 	{
@@ -1548,11 +1542,10 @@ if ( n->up == NULL && table )
  ****************************************************/
 void show_rep_initial( FILE *f, object *n, int *begin )
 {
-	int app, i;
+	int i;
 	bridge *cb;
-	object *co;
 	description *cd;
-	variable *cv, *cv1;
+	variable *cv;
 
 	for ( cv=n->v; cv != NULL; cv = cv->next )
 	{
@@ -1788,7 +1781,6 @@ void tex_report_head( FILE *f, bool table )
  ****************************************************/
 void tex_report_struct( object *r, FILE *f, bool table )
 {
-	int i;
 	char *ol, *vl;
 	bridge *cb;
 	description *cd;
@@ -1904,7 +1896,6 @@ void tex_report_struct( object *r, FILE *f, bool table )
  ****************************************************/
 void tex_report_observe( object *r, FILE *f, bool table )
 {
-	int i;
 	char *ol, *vl;
 	bridge *cb;
 	description *cd;
@@ -1978,7 +1969,6 @@ void tex_report_observe( object *r, FILE *f, bool table )
  ****************************************************/
 void tex_report_init( object *r, FILE *f, bool table )
 {
-	int i;
 	char *ol, *vl;
 	bridge *cb;
 	description *cd;
@@ -2067,7 +2057,6 @@ void tex_report_initall( object *r, FILE *f, bool table )
 	int i, j;
 	char *ol, *vl;
 	bridge *cb;
-	description *cd;
 	object *cur;
 	variable *cv, *cv1;
 

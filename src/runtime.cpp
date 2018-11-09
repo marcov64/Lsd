@@ -149,7 +149,7 @@ void init_plot( int num, int id_sim )
 {
 	int i, j, k, l;
 	
-	plot_step = ( max_step > width ) ? 1 : plot_step = width / ( double ) max_step;
+	plot_step = ( max_step > width ) ? 1 : width / ( double ) max_step;
 	cmd( "set scrollB 0" );
 
 	cmd( "set activeplot .plt%d", id_sim );

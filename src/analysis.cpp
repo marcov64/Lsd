@@ -123,8 +123,8 @@ READ_DATA
 ****************************************************/
 void read_data( int *choice )
 {
-int rot, i, h, j, k, l, m, n, p, q, r;
-char *app, *app1, *app2, dirname[ MAX_PATH_LENGTH ], str1[ MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ];
+int i, h, j, k, l, m, p, r;
+char *app, dirname[ MAX_PATH_LENGTH ], str1[ MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ];
 double *datum, compvalue = 0;
 store *app_store;
 FILE *f;
@@ -1445,13 +1445,17 @@ while ( true )
 				break;
 
 			app_store = new store[ num_var ];
+			
 			for ( i = 0; i < num_var; ++i )
 				app_store[ i ] = vs[ i ];
+			
 			sort_on_end( app_store );
 			cmd( ".da.vars.lb.v delete 0 end" );
+			
 			for ( i = 0; i < num_var; ++i )
 				cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", app_store[ i ].label, app_store[ i ].tag, app_store[ i ].start, app_store[ i ].end, app_store[ i ].rank );
-				delete [ ] app_store;
+			
+			delete [ ] app_store;
 				
 			break;
 
@@ -2415,9 +2419,8 @@ while ( true )
  ****************************************************/
 void plot_tseries( int *choice )
 {
-
 char *app, **str, **tag;
-int i, j, k, *start, *end, done, doney2, idseries;
+int i, j, *start, *end, done, doney2, idseries;
 double **data,**logdata;
 int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool y2on, stopErr = false;
@@ -2634,213 +2637,214 @@ PLOT_CROSS
 ****************************************************/
 void plot_cross( int *choice )
 {
+	char *app, **str, **tag;
+	double **val, **data, **logdata;
+	int i, j, k, first, nt, new_nv, idseries, *list_times, *pos, *start, *end, *erase;
 
-int idseries;
+	int logErrCnt = 0;				// log errors counter to prevent excess messages
+	bool stopErr = false;
 
-char *app;
-char **str;
-char **tag;
-int *start, *end, new_nv;
-int *erase;
-FILE *f;
-int i, j, *pos, k, nt, *list_times, h,  first;
-double **val, **data, **logdata;
+	Tcl_LinkVar( inter, "nt", ( char * ) &nt, TCL_LINK_INT );
+	cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
+	Tcl_UnlinkVar( inter, "nt" );
 
-int logErrCnt = 0;				// log errors counter to prevent excess messages
-bool stopErr = false;
-
-Tcl_LinkVar( inter, "nt", ( char * ) &nt, TCL_LINK_INT );
-cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
-Tcl_UnlinkVar( inter, "nt" );
-
-if ( nv<2 || nt <= 0 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series/time steps selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one time step (case ).\"" );
-	*choice = 2;
-	return;
-}
-
-//Sets the list of cases to plot
-list_times = new int [nt];
-Tcl_LinkVar( inter, "k", ( char * ) &k, TCL_LINK_INT );
-for ( i = 0; i < nt; ++i )
-{
-  cmd( "set k [lindex $list_times %d]", i );
-  list_times[ i ] = k;
-}
-Tcl_UnlinkVar( inter, "k" );
-
-pos = new int [ nv ];
-val = new double *[ nv ];
-start = new int [ nv ];
-end = new int [ nv ];
-erase = new int [ nv ];
-str = new char *[ nv ];
-tag = new char *[ nv ];
-data = new double *[ nv ];
-logdata = new double *[ nv ];
-
-if ( autom_x )
-{
-	min_c = 1;
-  max_c = num_c;
-}
-
-// prepare data from selected series
-for ( i = 0, new_nv = 0; i < nv; ++i )
-{
-	str[ i ] = new char[ MAX_ELEM_LENGTH ];
-  tag[ i ] = new char[ MAX_ELEM_LENGTH ];
-  data[ i ] = NULL;
-  logdata[ i ] = NULL;
-
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-  strcpy( msg, app );
-  sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
-  
-  // check if series has data for all CS selected cases
-  for ( k = 0, erase[ i ] = 0; k<nt; ++k )
-    if ( list_times[k] < start[ i ] || list_times[k] > end[ i ] )
-		{
-		 erase[ i ] = 1;
-		break;
-		}
-	
-  // get series data and take logs if necessary
-  if (erase[ i ] == 0 )
-   {
-    data[ i ] = vs[ idseries ].data;
-    if ( data[ i ] == NULL )
-	plog( "\nError: invalid data\n" );
-   
-    if ( logs )			// apply log to the values to show "log scale"
-    {
-	  logdata[new_nv] = new double[ end[ i ] + 1 ];	// create space for the logged values
-	for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-	  if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-		 logdata[new_nv][ j ] = log( data[ i ][ j ] );
-	  else
-	  {
-		 logdata[new_nv][ j ] = NAN;
-		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		 {
-			plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
-		 }
-		 else
-			if ( ! stopErr )
-			{
-				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-				stopErr = true;
-			}
-	  }
-	  data[ i ] = logdata[new_nv];				// replace the data series
-    }
-    val[new_nv] = new double[nt];
-    new_nv++;
-   }
-  else
-   data[ i ] = NULL;			// discard series not in all selected cases
-}
- 
- // organize useful/valid data in 'val' matrix and find max/mins
- if ( miny >= maxy )
-	 autom = true;
- for ( j = 0, first = 1, i = 0; j < nv; ++j )
-  {
-	for ( k = 0; k<nt; ++k )
+	if ( nv < 2 || nt <= 0 )
 	{
-	 if (erase[ j ] == 0 && is_finite( data[ j ][list_times[k] ] ) )		// ignore NaNs
-	  {
-		val[ i ][k] = data[ j ][list_times[k] ];
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series/time steps selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one time step (case ).\"" );
+		*choice = 2;
+		return;
+	}
+
+	// Sets the list of cases to plot
+	list_times = new int [nt];
+	Tcl_LinkVar( inter, "k", ( char * ) &k, TCL_LINK_INT );
+
+	for ( i = 0; i < nt; ++i )
+	{
+		cmd( "set k [lindex $list_times %d]", i );
+		list_times[ i ] = k;
+	}
+	Tcl_UnlinkVar( inter, "k" );
+
+	pos = new int [ nv ];
+	val = new double *[ nv ];
+	start = new int [ nv ];
+	end = new int [ nv ];
+	erase = new int [ nv ];
+	str = new char *[ nv ];
+	tag = new char *[ nv ];
+	data = new double *[ nv ];
+	logdata = new double *[ nv ];
+
+	if ( autom_x )
+	{
+		min_c = 1;
+		max_c = num_c;
+	}
+
+	// prepare data from selected series
+	for ( i = 0, new_nv = 0; i < nv; ++i )
+	{
+		str[ i ] = new char[ MAX_ELEM_LENGTH ];
+		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+		data[ i ] = NULL;
+		logdata[ i ] = NULL;
+
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		strcpy( msg, app );
+		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
 		
-		// auto-find minimums and maximums
-		if ( autom )
-		{
-
-			if ( first)  //The first value is assigned to both min and max
+		// check if series has data for all CS selected cases
+		for ( k = 0, erase[ i ] = 0; k < nt; ++k )
+			if ( list_times[ k ] < start[ i ] || list_times[ k ] > end[ i ] )
 			{
-				miny = maxy=val[ i ][k];
-				first = false;
+				erase[ i ] = 1;
+				break;
 			}
-			if ( miny>val[ i ][k] )
-				miny=val[ i ][k];
-			if ( maxy<val[ i ][k] )
-				maxy=val[ i ][k];
+		
+		// get series data and take logs if necessary
+		if ( erase[ i ] == 0 )
+		{
+			data[ i ] = vs[ idseries ].data;
+			if ( data[ i ] == NULL )
+				plog( "\nError: invalid data\n" );
+	   
+			if ( logs )			// apply log to the values to show "log scale"
+			{
+				logdata[new_nv] = new double[ end[ i ] + 1 ];	// create space for the logged values
+				for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
+					if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
+						logdata[new_nv][ j ] = log( data[ i ][ j ] );
+					else
+					{
+						logdata[new_nv][ j ] = NAN;
+						if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+							plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+						else
+							if ( ! stopErr )
+							{
+								plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+								stopErr = true;
+							}
+					}
+					
+				data[ i ] = logdata[ new_nv ];		// replace the data series
+			}
+			
+			val[ new_nv ] = new double[ nt ];
+			new_nv++;
 		}
-     }
-	 else
-	 {
-		 if ( ! erase[ j ] )	// mark NANs
-			val[ i ][ k ] = NAN;
-	 }//End if of erase[ ]
+		else
+			data[ i ] = NULL;						// discard series not in all selected cases
+	}
+	 
+	// organize useful/valid data in 'val' matrix and find max/mins
+	if ( miny >= maxy )
+		autom = true;
 
-	} //end for over times
-    if (erase[ j ] == 0 )
-     i++;
-  } //End for ( j on num_var)
-
-//To avoid divisions by zero for constant values
-if ( miny == maxy )
-{
-	if ( miny == 0 )
+	for ( j = 0, first = 1, i = 0; j < nv; ++j )
 	{
-	maxy = 0.1;
-    miny = -0.1;
-   }
-  else
-   {if ( miny>0 )
+		for ( k = 0; k<nt; ++k )
+		{
+			if ( erase[ j ] == 0 && is_finite( data[ j ][ list_times[ k ] ] ) )		// ignore NaNs
+			{
+				val[ i ][ k ] = data[ j ][list_times[ k ] ];
+			
+				// auto-find minimums and maximums
+				if ( autom )
+				{
+
+					if ( first )  //The first value is assigned to both min and max
+					{
+						miny = maxy=val[ i ][ k ];
+						first = false;
+					}
+					
+					if ( miny>val[ i ][ k ] )
+						miny=val[ i ][ k ];
+					
+					if ( maxy<val[ i ][ k ] )
+						maxy=val[ i ][ k ];
+				}
+			}
+			else
+			{
+				if ( ! erase[ j ] )	// mark NANs
+					val[ i ][ k ] = NAN;
+			}
+
+		}
+		
+		if ( erase[ j ] == 0 )
+			++i;
+	}
+
+	// to avoid divisions by zero for constant values
+	if ( miny == maxy )
 	{
-	miny *= 0.9;
-     maxy *= 1.1;
-    }
-    else
+		if ( miny == 0 )
+		{
+			maxy = 0.1;
+			miny = -0.1;
+		}
+		else
+		{
+			if ( miny > 0 )
+			{
+				miny *= 0.9;
+				maxy *= 1.1;
+			}
+			else
+			{
+				miny *= 1.1;
+				maxy *= 0.9;
+			}
+		}
+	}
+	 
+	cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
+	cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
+
+	// sort series if required
+	for ( k = 0; k < nt; ++k )		// find index to time reference
+		if ( list_times[ k ] == res )
+			break;
+
+	if ( k < nt )
 	{
-	miny *= 1.1;
-     maxy *= 0.9;
-    }
-   }
-}
- 
-cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
-cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
+		if ( dir == -1 )
+			sort_cs_desc( str, tag, val, new_nv, nt, k );
+		if ( dir == 1 )
+			sort_cs_asc( str, tag, val, new_nv, nt, k );
+	}
 
-// sort series if required
-for ( k = 0; k < nt; ++k )		// find index to time reference
-	if ( list_times[ k ] == res )
-		break;
+	// plot all series
+	plot( CRSSECT, new_nv, val, list_times, &nt, str, tag, choice );
 
-if ( k < nt )
-{
-	if ( dir == -1 )
-	  sort_cs_desc( str, tag, val, new_nv, nt, k );
-	if ( dir == 1 )
-	  sort_cs_asc( str, tag, val, new_nv, nt, k );
-}
+	for ( i = 0; i < nv; ++i )
+	{
+		delete [ ] str[ i ];
+		delete [ ] tag[ i ];
+	}
 
-// plot all series
-plot( CRSSECT, new_nv, val, list_times, &nt, str, tag, choice );
+	for ( i = 0; i < new_nv; ++i )
+	{
+		delete [ ] val[ i ];
+		if ( logs )
+			delete [ ] logdata[ i ];
+	}
 
-for ( i = 0; i < nv; ++i )
-{delete [ ] str[ i ];
-  delete [ ] tag[ i ];
-}
-for ( i = 0; i < new_nv; ++i )
-{
-  delete [ ] val[ i ];
-  if ( logs )
-    delete [ ] logdata[ i ];
-}
-delete [ ] list_times;
-delete [ ] str;
-delete [ ] tag;
-delete [ ] pos;
-delete [ ] val;
-delete [ ] start;
-delete [ ] end;
-delete [ ] erase;
-delete [ ] logdata;
-delete [ ] data;
+	delete [ ] list_times;
+	delete [ ] str;
+	delete [ ] tag;
+	delete [ ] pos;
+	delete [ ] val;
+	delete [ ] start;
+	delete [ ] end;
+	delete [ ] erase;
+	delete [ ] logdata;
+	delete [ ] data;
 }
 
 
@@ -2965,9 +2969,9 @@ for ( i = nv-2; i >= 0; i--)
   {
    for ( h = 0;h<nt; h++)
     {
-     dapp = v[ j ][h ];
-     v[ j ][h ] = v[ j + 1 ][h ];
-     v[ j + 1 ][h ] = dapp;
+     dapp = v[ j ][ h ];
+     v[ j ][ h ] = v[ j + 1 ][ h ];
+     v[ j + 1 ][ h ] = dapp;
     }
    strcpy( sapp, s[ j ] );
    strcpy( s[ j ], s[ j + 1 ] );
@@ -2996,9 +3000,9 @@ for ( i = nv-2; i >= 0; i--)
   {
    for ( h = 0;h<nt; h++)
     {
-     dapp = v[ j ][h ];
-     v[ j ][h ] = v[ j + 1 ][h ];
-     v[ j + 1 ][h ] = dapp;
+     dapp = v[ j ][ h ];
+     v[ j ][ h ] = v[ j + 1 ][ h ];
+     v[ j + 1 ][ h ] = dapp;
     }
    strcpy( sapp, s[ j ] );
    strcpy( s[ j ], s[ j + 1 ] );
@@ -3118,60 +3122,49 @@ void insert_store_mem( object *r, int *num_v )
 				insert_store_mem( cur, num_v );
 	 
 	if ( r->up == NULL )
-	 for ( cv = cemetery; cv != NULL; cv = cv->next )
-	  {
-		 strcpy( vs[ *num_v ].label,cv->label );
-		 strcpy( vs[ *num_v ].tag,cv->lab_tit);
-		 vs[ *num_v ].start = cv->start;
-		 vs[ *num_v ].end = cv->end;
-		 vs[ *num_v ].rank = *num_v;
-		 vs[ *num_v ].data = cv->data;
-		 *num_v += 1;
-	  }
+		for ( cv = cemetery; cv != NULL; cv = cv->next )
+		{
+			strcpy( vs[ *num_v ].label,cv->label );
+			strcpy( vs[ *num_v ].tag,cv->lab_tit);
+			vs[ *num_v ].start = cv->start;
+			vs[ *num_v ].end = cv->end;
+			vs[ *num_v ].rank = *num_v;
+			vs[ *num_v ].data = cv->data;
+			*num_v += 1;
+		}
 }
 
 
 /***************************************************
-INSERT_data_FILE
+INSERT_DATA_FILE
 ****************************************************/
 void insert_data_file( bool gz, int *num_v, int *num_c )
 {
-FILE *f;
+	FILE *f = NULL;
 #ifdef LIBZ
-gzFile fz;
+	gzFile fz = NULL;
 #endif
-char ch, label[ MAX_ELEM_LENGTH ], tag[ MAX_ELEM_LENGTH ], app_str[20], *tok, *linbuf;
-int i, j, new_v, new_c;
-bool header = false;
-long linsiz = 1;
-store *app;
+	char ch, app_str[ 20 ], *tok, *linbuf;
+	int i, j, new_v, new_c;
+	bool header = false;
+	long linsiz = 1;
+	store *app;
 
-if ( ! gz )
-	f = fopen( filename, "rt" );
-else
-{
+	if ( ! gz )
+		f = fopen( filename, "rt" );
+	else
+	{
 #ifdef LIBZ
-	fz = gzopen( filename, "rt" );
+		fz = gzopen( filename, "rt" );
 #endif
-}
+	}
 
-new_v = 0;
-if ( *num_v == 0 )
-  plog( "\nResult data from file %s:\n", "", filename );
-else
-  plog( "\nAdditional data file number %d.\nResult data from file %s:\n", "", file_counter, filename );  
+	new_v = 0;
+	if ( *num_v == 0 )
+		plog( "\nResult data from file %s:\n", "", filename );
+	else
+		plog( "\nAdditional data file number %d.\nResult data from file %s:\n", "", file_counter, filename );  
 
-if ( ! gz )
-	ch = ( char ) fgetc( f );
-else
-{
-#ifdef LIBZ
-	ch = ( char ) gzgetc( fz );
-#endif
-}
-
-while ( ch != '\n' )
-{
 	if ( ! gz )
 		ch = ( char ) fgetc( f );
 	else
@@ -3180,199 +3173,212 @@ while ( ch != '\n' )
 		ch = ( char ) gzgetc( fz );
 #endif
 	}
-	if ( ch == '\t' )
-	   new_v += 1;
-   
-	if ( ch == '(' )		// check for header-less .tot files
-		header = true;
-	
-	linsiz++;				// count line size
-}
 
-if ( ! header )
-{
-	plog( "\nError: invalid header, aborting file load.\nCheck if '.tot' files where created with the -g option.\n" );
-	goto end;
-}
-
-if ( ! gz )
-	fclose( f );
-else
-{
+	while ( ch != '\n' )
+	{
+		if ( ! gz )
+			ch = ( char ) fgetc( f );
+		else
+		{
 #ifdef LIBZ
-	gzclose( fz );
+			ch = ( char ) gzgetc( fz );
 #endif
-}
+		}
+		if ( ch == '\t' )
+			new_v += 1;
+	   
+		if ( ch == '(' )		// check for header-less .tot files
+			header = true;
+		
+		linsiz++;				// count line size
+	}
 
-plog( "- %d Variables\n", "",  new_v );
+	if ( ! header )
+	{
+		plog( "\nError: invalid header, aborting file load.\nCheck if '.tot' files where created with the -g option.\n" );
+		goto end;
+	}
 
-cmd( "update" );
-
-if ( ! gz )
-	f = fopen( filename, "rt" );
-else
-{
-#ifdef LIBZ
-	fz = gzopen( filename, "rt" );
-#endif
-}
-
-new_c = -1;
-while ( ch != EOF )
-{
 	if ( ! gz )
-		ch = ( char ) fgetc( f );
+		fclose( f );
 	else
 	{
 #ifdef LIBZ
-		ch = ( char ) gzgetc( fz );
+		gzclose( fz );
 #endif
 	}
-	if ( ch == '\n' )
-		new_c += 1;
-}
 
-if ( ! gz )
-	fclose( f );
-else
-{
-#ifdef LIBZ
-	gzclose( fz );
-#endif
-}
+	plog( "- %d Variables\n", "",  new_v );
 
-plog( "- %d Cases\nLoading...", "", new_c );
+	cmd( "update" );
 
-if ( *num_v == 0 )
-{
-  vs = new store[new_v];
-}
-else
-{
- app = new store[new_v+ *num_v];
- for ( i = 0; i < *num_v; ++i )
-  {app[ i ] = vs[ i ];
-   strcpy( app[ i ].label, vs[ i ].label );
-   strcpy( app[ i ].tag, vs[ i ].tag);
-  } 
- delete [ ] vs;
- vs = app;
-}  
-
-if ( ! gz )
-	f = fopen( filename, "rt" );
-else
-{
-#ifdef LIBZ
-	fz = gzopen( filename, "rt" );
-#endif
-}
-
-if ( *num_v>-1 )
- sprintf( app_str, " (file=%d)",file_counter);
-else
- strcpy( app_str, "" );
-
-linsiz = ( int ) max( linsiz, new_v * ( DBL_DIG + 4 ) ) + 1;
-linbuf = new char[ linsiz ];
-if ( linbuf == NULL )
-{
-	plog( "\nError: not enough memory or invalid format, aborting file load.\n" );
-	goto end;
-}
-
-// read header line
-if ( ! gz )
-	fgets( linbuf, linsiz, f );	// buffers one entire line
-else
-{
-#ifdef LIBZ
-	gzgets( fz, linbuf, linsiz );
-#endif
-}
-
-tok = strtok( linbuf , "\t" ); // prepares for parsing and get first one
-for ( i = *num_v; i < new_v + *num_v; ++i )
-{
-  if ( tok == NULL )
-  {
-	  plog( "\nError: invalid header, aborting file load.\n" );
-	  goto end;
-  }
-  
-  sscanf( tok, "%s %s (%d %d)", vs[ i ].label, vs[ i ].tag, &( vs[ i ].start ), &( vs[ i ].end ) );	
-  strcat( vs[ i ].label, "F" );
-  sprintf( msg, "%d_%s", file_counter, vs[ i ].tag);
-  strcpy( vs[ i ].tag, msg );
-  vs[ i ].rank=i;
-
- if ( vs[ i ].start != -1 )
-   cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d %s\"", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, i, app_str );
- else
-   {
-	cmd( ".da.vars.lb.v insert end \"%s %s (0 - %d) # %d %s\"", vs[ i ].label, vs[ i ].tag, new_c-1, i, app_str );
-    vs[ i ].start = 0;
-    vs[ i ].end = new_c-1;
-   }
- 
- cmd( "lappend DaModElem %s", vs[ i ].label );
-
- vs[ i ].data = new double[new_c+2 ];
- 
- tok=strtok( NULL, "\t" );		// get next token, if any
-}
-
-// read data lines
-for ( j = 0; j < new_c; ++j )
-{
- if ( ! gz )
-	fgets( linbuf, linsiz, f );	// buffers one entire line
- else
-{
-#ifdef LIBZ
-	gzgets( fz, linbuf, linsiz );
-#endif
-}
- 
- tok = strtok( linbuf , "\t" ); // prepares for parsing and get first one
- for ( i = *num_v; i < new_v + *num_v; ++i )
-{
-	if ( tok == NULL )
-	{
-	  plog( "\nError: invalid data, aborting file load.\n" );
-	  *num_c += ( j > 0 ? j - 1 : 0 ) > *num_c ? ( j > 0 ? j - 1 : 0 ) : 0;
-	  goto end;
-	}
-  
-	if ( ! strcmp( tok, nonavail ) )	// it's a non-available observation
-		vs[ i ].data[ j ] = NAN;
+	if ( ! gz )
+		f = fopen( filename, "rt" );
 	else
-		sscanf( tok, "%lf", &( vs[ i ].data[ j ] ) );
-	
-	tok=strtok( NULL, "\t" );		// get next token, if any
-}
-}
-
-*num_v += new_v;
-new_c--;
-if ( new_c > *num_c )
- *num_c = new_c;
-if ( new_c > max_c )
- max_c = new_c; 
-
-plog( " Done\n" );
-
-end:
-
-if ( ! gz )
-	fclose( f );
-else
-{
+	{
 #ifdef LIBZ
-	gzclose( fz );
+		fz = gzopen( filename, "rt" );
 #endif
-}
+	}
 
+	new_c = -1;
+	while ( ch != EOF )
+	{
+		if ( ! gz )
+			ch = ( char ) fgetc( f );
+		else
+		{
+#ifdef LIBZ
+			ch = ( char ) gzgetc( fz );
+#endif
+		}
+		if ( ch == '\n' )
+			new_c += 1;
+	}
+
+	if ( ! gz )
+		fclose( f );
+	else
+	{
+#ifdef LIBZ
+		gzclose( fz );
+#endif
+	}
+
+	plog( "- %d Cases\nLoading...", "", new_c );
+
+	if ( *num_v == 0 )
+	{
+		vs = new store[ new_v ];
+	}
+	else
+	{
+		app = new store[ new_v + *num_v ];
+		for ( i = 0; i < *num_v; ++i )
+		{
+			app[ i ] = vs[ i ];
+			strcpy( app[ i ].label, vs[ i ].label );
+			strcpy( app[ i ].tag, vs[ i ].tag);
+		} 
+		
+		delete [ ] vs;
+		vs = app;
+	}  
+
+	if ( ! gz )
+		f = fopen( filename, "rt" );
+	else
+	{
+#ifdef LIBZ
+		fz = gzopen( filename, "rt" );
+#endif
+	}
+
+	if ( *num_v>-1 )
+		sprintf( app_str, " (file=%d)", file_counter );
+	else
+		strcpy( app_str, "" );
+
+	linsiz = ( int ) max( linsiz, new_v * ( DBL_DIG + 4 ) ) + 1;
+	linbuf = new char[ linsiz ];
+	if ( linbuf == NULL )
+	{
+		plog( "\nError: not enough memory or invalid format, aborting file load.\n" );
+		goto end;
+	}
+
+	// read header line
+	if ( ! gz )
+		fgets( linbuf, linsiz, f );		// buffers one entire line
+	else
+	{
+#ifdef LIBZ
+		gzgets( fz, linbuf, linsiz );
+#endif
+	}
+
+	tok = strtok( linbuf , "\t" ); 		// prepares for parsing and get first one
+	for ( i = *num_v; i < new_v + *num_v; ++i )
+	{
+		if ( tok == NULL )
+		{
+			plog( "\nError: invalid header, aborting file load.\n" );
+			goto end;
+		}
+		
+		sscanf( tok, "%s %s (%d %d)", vs[ i ].label, vs[ i ].tag, &( vs[ i ].start ), &( vs[ i ].end ) );	
+		strcat( vs[ i ].label, "F" );
+		sprintf( msg, "%d_%s", file_counter, vs[ i ].tag);
+		strcpy( vs[ i ].tag, msg );
+		vs[ i ].rank = i;
+
+		if ( vs[ i ].start != -1 )
+			cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d %s\"", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, i, app_str );
+		else
+		{
+			cmd( ".da.vars.lb.v insert end \"%s %s (0 - %d) # %d %s\"", vs[ i ].label, vs[ i ].tag, new_c-1, i, app_str );
+			vs[ i ].start = 0;
+			vs[ i ].end = new_c-1;
+		}
+	 
+		cmd( "lappend DaModElem %s", vs[ i ].label );
+
+		vs[ i ].data = new double[ new_c + 2 ];
+	 
+		tok = strtok( NULL, "\t" );			// get next token, if any
+	}
+
+	// read data lines
+	for ( j = 0; j < new_c; ++j )
+	{
+		if ( ! gz )
+			fgets( linbuf, linsiz, f );		// buffers one entire line
+		else
+		{
+#ifdef LIBZ
+			gzgets( fz, linbuf, linsiz );
+#endif
+		}
+	 
+		tok = strtok( linbuf , "\t" ); 		// prepares for parsing and get first one
+		
+		for ( i = *num_v; i < new_v + *num_v; ++i )
+		{
+			if ( tok == NULL )
+			{
+				plog( "\nError: invalid data, aborting file load.\n" );
+				*num_c += ( j > 0 ? j - 1 : 0 ) > *num_c ? ( j > 0 ? j - 1 : 0 ) : 0;
+				goto end;
+			}
+	  
+			if ( ! strcmp( tok, nonavail ) )	// it's a non-available observation
+				vs[ i ].data[ j ] = NAN;
+			else
+				sscanf( tok, "%lf", &( vs[ i ].data[ j ] ) );
+			
+			tok = strtok( NULL, "\t" );			// get next token, if any
+		}
+	}
+
+	*num_v += new_v;
+	new_c--;
+	if ( new_c > *num_c )
+		*num_c = new_c;
+	if ( new_c > max_c )
+		max_c = new_c; 
+
+	plog( " Done\n" );
+
+	end:
+
+	if ( ! gz )
+		fclose( f );
+	else
+	{
+#ifdef LIBZ
+		gzclose( fz );
+#endif
+	}
 }
 
 
@@ -3526,153 +3532,158 @@ STATISTICS_CROSS
 ************************/
 void statistics_cross( int *choice )
 {
-int idseries;
-char *app;
-char **str, **tag;
-char str1[50], longmsg[300];
-int i, j, *start, *end, nt, *list_times, h, k;
-double **data,**logdata, av, var, num, ymin, ymax, sig;
-bool first;
+	bool first;
+	char *app, **str, **tag, str1[ 50 ], longmsg[ 300 ];
+	int i, j, h, k, idseries, *start, *end, nt, *list_times;
+	double **data,**logdata, av, var, num, ymin = 0, ymax = 0, sig;
 
-int logErrCnt = 0;				// log errors counter to prevent excess messages
-bool stopErr = false;
+	int logErrCnt = 0;				// log errors counter to prevent excess messages
+	bool stopErr = false;
 
-Tcl_LinkVar( inter, "nt", ( char * ) &nt, TCL_LINK_INT );
-cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
-Tcl_UnlinkVar( inter, "nt" );
+	Tcl_LinkVar( inter, "nt", ( char * ) &nt, TCL_LINK_INT );
+	cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
+	Tcl_UnlinkVar( inter, "nt" );
 
-if ( nv<2 || nt <= 0 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Not enough series selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one time step (case ).\"" );
-	*choice = 2;
-	return;
-}
+	if ( nv < 2 || nt <= 0 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Not enough series selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one time step (case ).\"" );
+		*choice = 2;
+		return;
+	}
 
-//Sets the list of cases to plot
-list_times = new int [nt];
-cmd( "set k 0" );
-Tcl_LinkVar( inter, "k", ( char * ) &k, TCL_LINK_INT );
-for ( i = 0; i < nt; ++i )    
-{
-  cmd( "set k [lindex $list_times %d]", i );
-  list_times[ i ] = k;
-}
-Tcl_UnlinkVar( inter, "k" );
+	//Sets the list of cases to plot
+	list_times = new int [ nt ];
+	cmd( "set k 0" );
+	Tcl_LinkVar( inter, "k", ( char * ) &k, TCL_LINK_INT );
+	for ( i = 0; i < nt; ++i )    
+	{
+		cmd( "set k [lindex $list_times %d]", i );
+		list_times[ i ] = k;
+	}
+	Tcl_UnlinkVar( inter, "k" );
 
-data = new double *[ nv ];
-logdata = new double *[ nv ];
-start = new int [ nv ];
-end = new int [ nv ];
-str = new char *[ nv ];
-tag = new char *[ nv ];
+	data = new double *[ nv ];
+	logdata = new double *[ nv ];
+	start = new int [ nv ];
+	end = new int [ nv ];
+	str = new char *[ nv ];
+	tag = new char *[ nv ];
 
-if ( autom_x )
-{
-	min_c = 1;
-  max_c = num_c;
-}
+	if ( autom_x )
+	{
+		min_c = 1;
+		max_c = num_c;
+	}
 
-// prepare data from selected series
-for ( i = 0; i < nv; ++i )
-{
-	str[ i ] = new char[ MAX_ELEM_LENGTH ];
-  tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+	// prepare data from selected series
+	for ( i = 0; i < nv; ++i )
+	{
+		str[ i ] = new char[ MAX_ELEM_LENGTH ];
+		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+		
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		strcpy( msg, app );
+		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries );
+		data[ i ] = vs[ idseries ].data;
+		if ( data[ i ] == NULL )
+			plog( "\nError: invalid data\n" );
+	   
+		if ( logs )			// apply log to the values to show "log scale" in the y-axis
+		{
+			logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
+			for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
+				if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
+					logdata[ i ][ j ] = log( data[ i ][ j ] );
+				else
+				{
+					logdata[ i ][ j ] = NAN;
+					if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+						plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+					else
+						if ( ! stopErr )
+						{
+							plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+							stopErr = true;
+						}
+				}
+				
+			data[ i ] = logdata[ i ];				// replace the data series
+		}
+	}
 
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-  strcpy( msg, app );
-  sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
-  data[ i ] = vs[ idseries ].data;
-  if ( data[ i ] == NULL )
-    plog( "\nError: invalid data\n" );
-   
-   if ( logs )			// apply log to the values to show "log scale" in the y-axis
-   {
-	 logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-     for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-	   if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-		 logdata[ i ][ j ] = log( data[ i ][ j ] );
-	   else
-	   {
-		 logdata[ i ][ j ] = NAN;
-		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		 {
-			plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
-		 }
-		 else
-			if ( ! stopErr )
+	if ( logs )
+		cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics (in log):\n\n\" tabel" );
+	else
+		cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics:\n\n\" tabel" );
+
+	sprintf( str1, "%d Variables", nv );
+	sprintf( longmsg, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
+	cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
+
+	for ( j = 0; j < nt; ++j )
+	{
+		h = list_times[ j ];
+		first = true;
+		for ( av = var = num = 0, i = 0; i < nv; ++i )
+		{
+			if ( h >= start[ i ] && h <= end[ i ] && is_finite( data[ i ][ h ] ) )		// ignore NaNs
 			{
-				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-				stopErr = true;
+				if ( first )
+				{
+					ymin = ymax = data[ i ][ h ];
+					first = false;
+				}
+				
+				if ( data[ i ][ h ] < ymin )
+					ymin = data[ i ][ h ];
+				
+				if ( data[ i ][ h ] > ymax )
+					ymax = data[ i ][ h ];
+				
+				av += data[ i ][ h ];
+				num++;
+				var += data[ i ][ h ]*data[ i ][ h ];
 			}
-	   }
-	 data[ i ] = logdata[ i ];				// replace the data series
-   }
-}
+		}
 
-if ( logs )
- cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics (in log):\n\n\" tabel" );
-else
- cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics:\n\n\" tabel" );
+		if ( num > 1 )
+		{
+			av = av / num;
+			var = var / num - av * av;
+			sig = sqrt( var * num / ( num-1 ) );
+		}
+		else
+			var = sig = 0;
 
-sprintf( str1, "%d Variables",nv);
-sprintf( longmsg, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
-cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
+		if ( num > 0 )
+		{
+			sprintf( str1, "Case %d (%.*g)\t", h, pdigits, num );
+			cmd( ".log.text.text.internal insert end \"%s\" tabel", str1 );
+			sprintf( longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax );
+			cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
+		}
+	}
 
-for ( j = 0; j < nt; ++j )
-{h=list_times[ j ];
- first = true;
- for ( av=var=num = 0, i = 0; i < nv; ++i )
-  {
-  if (h>=start[ i ] && h<=end[ i ] && is_finite( data[ i ][h ] ) )		// ignore NaNs
-  {
-  if ( first)
-  {
-     ymin=ymax = data[ i ][h ];
-	 first = false;
-  }
-   if ( data[ i ][h ] < ymin)
-    ymin = data[ i ][h ];
-   if ( data[ i ][h ] > ymax)
-    ymax = data[ i ][h ];
-   av += data[ i ][h ];
-   num++;
-   var += data[ i ][h ]*data[ i ][h ];
-  }
-}
+	plog( "\n" );
 
- if ( num>1 )
-{
-	av=av/num;
- var=var/num-av*av;
- sig=sqrt( var*num/( num-1 ) );
-}
- else
-  var=sig = 0;
- if ( num>0 )
-{
- sprintf( str1, "Case %d (%.*g)\t",h, pdigits, num );
- cmd( ".log.text.text.internal insert end \"%s\" tabel", str1 );
+	delete [ ] list_times;
 
- sprintf( longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax);
- cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
+	for ( i = 0; i < nv; ++i )
+	{
+		delete [ ] str[ i ];
+		delete [ ] tag[ i ];
+		if ( logs )
+			delete [ ] logdata[ i ];
+	}
+
+	delete [ ] str;
+	delete [ ] tag;
+	delete [ ] logdata;
+	delete [ ] data;
+	delete [ ] start;
+	delete [ ] end;
 }
-}
-plog( "\n" );
-delete [ ] list_times;
-for ( i = 0; i < nv; ++i )
-{delete [ ] str[ i ];
-  delete [ ] tag[ i ];
-  if ( logs )
-    delete [ ] logdata[ i ];
-}
-delete [ ] str;
-delete [ ] tag;
-delete [ ] logdata;
-delete [ ] data;
-delete [ ] start;
-delete [ ] end;
-} //end Statistics_cross
 
 
 /************************
@@ -3762,7 +3773,7 @@ void plot_gnu( int *choice )
 {
 bool stopErr = false;
 char *app, **str, **tag, str1[ 50 ], str2[ 100 ], str3[ 10 ], dirname[ MAX_PATH_LENGTH ];
-int i, j, k, *start, *end, done, box, idseries, ndim, gridd, nanv = 0, logErrCnt = 0;
+int i, j, *start, *end, done, box, idseries, ndim, gridd, nanv = 0, logErrCnt = 0;
 double **data, **logdata;
 FILE *f, *f2;
 
@@ -4229,7 +4240,6 @@ show_plot_gnu( cur_plot, choice, *choice, str, tag );
 
 chdir( dirname );
 
-end:
 for ( i = 0; i < nv; ++i )
 {
 	delete [ ] str[ i ];
@@ -4258,7 +4268,7 @@ char **str, **tag;
 char str1[5*MAX_ELEM_LENGTH], str2[5*MAX_ELEM_LENGTH], str3[ 10], dirname[MAX_PATH_LENGTH];
 FILE *f, *f2;
 double **data,**logdata, previous_row;
-int i, j, k, *start, *end, done, color;
+int i, j, *start, *end, done;
 int time_sel, block_length, ndim;
 
 int logErrCnt = 0;				// log errors counter to prevent excess messages
@@ -4648,254 +4658,263 @@ PLOT_PHASE_DIAGRAM
 ****************************************************/
 void plot_phase_diagram( int *choice )
 {
+	char *app, **str, **tag, str1[ 50 ], str2[ 100 ], str3[ 100 ], dirname[ MAX_PATH_LENGTH ];
+	double **data,**logdata;
+	int i, j, idseries, *start, *end, done, nlags;
+	FILE *f, *f2;
 
-int idseries;
-char *app;
-char **str, **tag;
-char str1[50], str2[ 100], str3[ 100], dirname[MAX_PATH_LENGTH];
-FILE *f, *f2;
-double **data,**logdata;
+	int logErrCnt = 0;				// log errors counter to prevent excess messages
+	bool stopErr = false;
 
-int i, j, k, *start, *end, done, nlags;
+	if ( nv != 1 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"One and only one series must be selected.\"" );
+		*choice = 2;
+		return;
+	}
 
-int logErrCnt = 0;				// log errors counter to prevent excess messages
-bool stopErr = false;
+	data = new double *[ nv ];
+	logdata = new double *[ nv ];
+	start = new int [ nv ];
+	end = new int [ nv ];
+	str = new char *[ nv ];
+	tag = new char *[ nv ];
 
-if ( nv != 1 )
-{
- cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"One and only one series must be selected.\"" );
- *choice = 2;
- return;
-}
+	if ( autom_x )
+	{
+		min_c = 1;
+		max_c = num_c;
+	}
 
-data = new double *[ nv ];
-logdata = new double *[ nv ];
-start = new int [ nv ];
-end = new int [ nv ];
-str = new char *[ nv ];
-tag = new char *[ nv ];
-
-if ( autom_x )
-{
-	min_c = 1;
-  max_c = num_c;
-}
-
-// prepare data from selected series
-for ( i = 0; i < nv; ++i )
-{
-	str[ i ] = new char[ MAX_ELEM_LENGTH ];
-  tag[ i ] = new char[ MAX_ELEM_LENGTH ];
-  data[ i ] = NULL;
-  logdata[ i ] = NULL;
-
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-  strcpy( msg, app );
-  sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
-  
-  // get series data and take logs if necessary
-  if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
-   {
-    data[ i ] = vs[ idseries ].data;
-    if ( data[ i ] == NULL )
-	plog( "\nError: invalid data\n" );
-   
-   if ( logs )			// apply log to the values to show "log scale" in the y-axis
-   {
-	 logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-     for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-	   if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-		 logdata[ i ][ j ] = log( data[ i ][ j ] );
-	   else
-	   {
-		 logdata[ i ][ j ] = NAN;
-		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		 {
-			plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
-		 }
-		 else
-			if ( ! stopErr )
+	// prepare data from selected series
+	for ( i = 0; i < nv; ++i )
+	{
+		str[ i ] = new char[ MAX_ELEM_LENGTH ];
+		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+		data[ i ] = NULL;
+		logdata[ i ] = NULL;
+		
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		strcpy( msg, app );
+		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
+		
+		// get series data and take logs if necessary
+		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		{
+			data[ i ] = vs[ idseries ].data;
+			if ( data[ i ] == NULL )
+				plog( "\nError: invalid data\n" );
+	   
+			if ( logs )			// apply log to the values to show "log scale" in the y-axis
 			{
-				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-				stopErr = true;
+				logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
+				for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
+					if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
+						logdata[ i ][ j ] = log( data[ i ][ j ] );
+					else
+					{
+						logdata[ i ][ j ] = NAN;
+						if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+							plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+						else
+							if ( ! stopErr )
+							{
+								plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+								stopErr = true;
+							}
+					}
+					
+				data[ i ] = logdata[ i ];				// replace the data series
 			}
-	   }
-	 data[ i ] = logdata[ i ];				// replace the data series
-   }
-   }
-}
+		}
+	}
 
-// handle case selection
-if ( autom_x || min_c >= max_c )
-{
-for ( i = 0; i < nv; ++i )
-{
-	if ( i == 0 )
-   min_c = max_c = start[ i ];
-  if ( start[ i ] < min_c )
-   min_c = start[ i ];
-  if (end[ i ] > max_c )
-   max_c = end[ i ] > num_c?num_c:end[ i ];
-}
-}
+	// handle case selection
+	if ( autom_x || min_c >= max_c )
+		for ( i = 0; i < nv; ++i )
+		{
+			if ( i == 0 )
+				min_c = max_c = start[ i ];
+			
+			if ( start[ i ] < min_c )
+				min_c = start[ i ];
+			
+			if (end[ i ] > max_c )
+				max_c = end[ i ] > num_c?num_c:end[ i ];
+		}
 
-// auto-find minimums and maximums
-if ( miny >= maxy )
-	autom = true;
-if ( autom )
-{
-for ( done = 0, i = 0; i < nv; ++i )
-{
-  for ( j = min_c; j <= max_c; ++j )
-   {
-    if ( done == 0 && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )		// ignore NaNs
-     {miny = maxy = data[ i ][ j ];
-	done = 1;
-     }
-    if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny )		// ignore NaNs
-     miny = data[ i ][ j ];
-    if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )		// ignore NaNs
-     maxy = data[ i ][ j ];
-   }
-}
-} //End for finding min-max
+	// auto-find minimums and maximums
+	if ( miny >= maxy )
+		autom = true;
 
-cmd( "newtop .da.s \"Lags Selection\" { set choice 2 } .da" );
+	if ( autom )
+		for ( done = 0, i = 0; i < nv; ++i )
+			for ( j = min_c; j <= max_c; ++j )
+			{
+				if ( done == 0 && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )		// ignore NaNs
+				{
+					miny = maxy = data[ i ][ j ];
+					done = 1;
+				}
+				
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny )		// ignore NaNs
+					miny = data[ i ][ j ];
+					
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )		// ignore NaNs
+					maxy = data[ i ][ j ];
+			}
 
-cmd( "frame .da.s.i" );
-cmd( "label .da.s.i.l -text \"Number of lags\"" );
-cmd( "set bidi 1" );
-cmd( "entry .da.s.i.e -width 10 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
-cmd( ".da.s.i.e insert 0 $bidi" ); 
-cmd( "pack .da.s.i.l .da.s.i.e" );
+	cmd( "newtop .da.s \"Lags Selection\" { set choice 2 } .da" );
 
-cmd( "if { ! [ info exists dia ] } { set dia 0 }" );
-cmd( "checkbutton .da.s.arrow -text \"Plot 45\u00B0 diagonal\" -variable dia" );
-cmd( "pack .da.s.i .da.s.arrow -padx 5 -pady 5" );
+	cmd( "frame .da.s.i" );
+	cmd( "label .da.s.i.l -text \"Number of lags\"" );
+	cmd( "set bidi 1" );
+	cmd( "entry .da.s.i.e -width 10 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+	cmd( ".da.s.i.e insert 0 $bidi" ); 
+	cmd( "pack .da.s.i.l .da.s.i.e" );
 
-cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#phaseplot } { set choice 2 }" );
+	cmd( "if { ! [ info exists dia ] } { set dia 0 }" );
+	cmd( "checkbutton .da.s.arrow -text \"Plot 45\u00B0 diagonal\" -variable dia" );
+	cmd( "pack .da.s.i .da.s.arrow -padx 5 -pady 5" );
 
-cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
-cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
+	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#phaseplot } { set choice 2 }" );
 
-cmd( "showtop .da.s" );
-cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
+	cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
+	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 
-*choice = 0;
-while ( *choice == 0 )
-  Tcl_DoOneEvent( 0 );
+	cmd( "showtop .da.s" );
+	cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
 
-cmd( "set bidi [ .da.s.i.e get ]" ); 
-cmd( "destroytop .da.s" );
+	*choice = 0;
+	while ( *choice == 0 )
+	  Tcl_DoOneEvent( 0 );
 
-if ( *choice == 2 )
- goto end;
-cmd( "set dirxy plotxy_%d", cur_plot );
+	cmd( "set bidi [ .da.s.i.e get ]" ); 
+	cmd( "destroytop .da.s" );
 
-cmd( "file mkdir $dirxy" );
-getcwd( dirname, MAX_PATH_LENGTH-1 );
-sprintf( msg, "plotxy_%d",cur_plot);
-chdir( msg );
+	if ( *choice == 2 )
+		goto end;
 
-cmd( "set choice $bidi" );
-nlags = *choice;
+	cmd( "set dirxy plotxy_%d", cur_plot );
 
-f = fopen( "data.gp", "w" );
-fprintf( f, "#" );
-for ( i = 0; i <= nlags; ++i )
-  if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
-     fprintf( f, "%s_%s(%d)\t", str[ 0 ], tag[ 0 ], i);
-fprintf( f, "\n" );
-for ( j = min_c; j <= max_c-nlags; ++j )
-{
- for ( i = 0; i <= nlags; ++i )
-  if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
-    fprintf( f, "%lf\t", data[ 0 ][ j+i ] );
- fprintf( f, "\n" );
-}
-fclose( f );
+	cmd( "file mkdir $dirxy" );
+	getcwd( dirname, MAX_PATH_LENGTH - 1 );
+	sprintf( msg, "plotxy_%d", cur_plot );
+	chdir( msg );
 
-*choice = 0;
-f = fopen( "gnuplot.lsd", "w" );
-f2 = fopen( "gnuplot.gp", "w" );
-fprintf( f, "set datafile missing \"nan\" \n" );		//handle NaNs
-fprintf( f2, "set datafile missing \"nan\" \n" );
-fprintf( f, "set term tkcanvas\n" );
-fprintf( f, "set output 'plot.file'\n" );
+	cmd( "set choice $bidi" );
+	nlags = *choice;
 
-if ( grid )
-{
-	fprintf( f, "set grid\n" );
-	fprintf( f2, "set grid\n" );
-}
-if ( line_point == 2 )
-{
-	sprintf( str1, "set pointsize %lf\n", point_size );
-  fprintf( f, "%s", str1 );
-  fprintf( f2, "%s", str1 );
-}
-sprintf( msg, "set yrange [%.*g:%.*g]\n", pdigits, miny, pdigits, maxy );
-fprintf( f, "%s", msg );
-fprintf( f2, "%s", msg );
-sprintf( msg, "set xlabel \"%s_%s\"\n", str[ 0 ], tag[ 0 ] );
-fprintf( f, "%s", msg );
-fprintf( f2, "%s", msg );
+	f = fopen( "data.gp", "w" );
 
-cmd( "set choice $dia" );
-if ( *choice == 1 )
-{
-  fprintf( f, "set arrow from %.*g,%.*g to %.*g,%.*g lt -1\n", pdigits, miny, pdigits, miny, pdigits, maxy, pdigits, maxy );
-  fprintf( f2, "set arrow from %.*g,%.*g to %.*g,%.*g lt -1\n", pdigits, miny, pdigits, miny, pdigits, maxy, pdigits, maxy );
-}
-if ( line_point == 1 )
- sprintf( str1, "smooth csplines" );
-else
- strcpy( str1, "" );
+	fprintf( f, "#" );
 
-if ( allblack )
- sprintf( str3, " lt -1" );
-else
- str3[ 0 ] = 0;
+	for ( i = 0; i <= nlags; ++i )
+		if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
+			fprintf( f, "%s_%s(%d)\t", str[ 0 ], tag[ 0 ], i );
+	 
+	fprintf( f, "\n" );
 
- sprintf( msg, "plot 'data.gp' using 1:2 %s t \"t + 1\"", str1 );
- if ( allblack )
-  strcat( msg, str3);
-for ( i = 2; i <= nlags; ++i )
- if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
-  {sprintf( str2, ", 'data.gp' using 1:%d %s t \"t+%d\"", i + 1, str1, i);
-   strcat( msg, str2 );
-   if ( allblack )
-    strcat( msg, str3);
-  }
+	for ( j = min_c; j <= max_c-nlags; ++j )
+	{
+		for ( i = 0; i <= nlags; ++i )
+			if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
+				fprintf( f, "%lf\t", data[ 0 ][ j+i ] );
 
-strcat( msg, "\n" );
-fprintf( f, "%s", msg );
-fprintf( f2, "%s", msg );
+		fprintf( f, "\n" );
+	}
 
-fclose( f );
-fclose( f2 );
+	fclose( f );
 
-cmd( "set choice $gnu" );
+	*choice = 0;
+	f = fopen( "gnuplot.lsd", "w" );
+	f2 = fopen( "gnuplot.gp", "w" );
+	fprintf( f, "set datafile missing \"nan\" \n" );		// handle NaNs
+	fprintf( f2, "set datafile missing \"nan\" \n" );
+	fprintf( f, "set term tkcanvas\n" );
+	fprintf( f, "set output 'plot.file'\n" );
 
-show_plot_gnu( cur_plot, choice, *choice, str, tag );
+	if ( grid )
+	{
+		fprintf( f, "set grid\n" );
+		fprintf( f2, "set grid\n" );
+	}
 
-chdir( dirname );
+	if ( line_point == 2 )
+	{
+		sprintf( str1, "set pointsize %lf\n", point_size );
+		fprintf( f, "%s", str1 );
+		fprintf( f2, "%s", str1 );
+	}
 
-end:
-for ( i = 0; i < nv; ++i )
-{
-	delete [ ] str[ i ];
-	delete [ ] tag[ i ];
-	if ( logs )
-		delete [ ] logdata[ i ];
-}
-delete [ ] str;
-delete [ ] tag;
-delete [ ] logdata;
-delete [ ] data;
-delete [ ] start;
-delete [ ] end;
+	sprintf( msg, "set yrange [%.*g:%.*g]\n", pdigits, miny, pdigits, maxy );
+	fprintf( f, "%s", msg );
+	fprintf( f2, "%s", msg );
+	sprintf( msg, "set xlabel \"%s_%s\"\n", str[ 0 ], tag[ 0 ] );
+	fprintf( f, "%s", msg );
+	fprintf( f2, "%s", msg );
+
+	cmd( "set choice $dia" );
+	if ( *choice == 1 )
+	{
+		fprintf( f, "set arrow from %.*g,%.*g to %.*g,%.*g lt -1\n", pdigits, miny, pdigits, miny, pdigits, maxy, pdigits, maxy );
+		fprintf( f2, "set arrow from %.*g,%.*g to %.*g,%.*g lt -1\n", pdigits, miny, pdigits, miny, pdigits, maxy, pdigits, maxy );
+	}
+
+	if ( line_point == 1 )
+		sprintf( str1, "smooth csplines" );
+	else
+		strcpy( str1, "" );
+
+	if ( allblack )
+		sprintf( str3, " lt -1" );
+	else
+		str3[ 0 ] = 0;
+
+	sprintf( msg, "plot 'data.gp' using 1:2 %s t \"t + 1\"", str1 );
+
+	if ( allblack )
+		strcat( msg, str3 );
+
+	for ( i = 2; i <= nlags; ++i )
+		if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
+		{
+			sprintf( str2, ", 'data.gp' using 1:%d %s t \"t+%d\"", i + 1, str1, i );
+			strcat( msg, str2 );
+			
+			if ( allblack )
+				strcat( msg, str3 );
+		}
+
+	strcat( msg, "\n" );
+	fprintf( f, "%s", msg );
+	fprintf( f2, "%s", msg );
+
+	fclose( f );
+	fclose( f2 );
+
+	cmd( "set choice $gnu" );
+
+	show_plot_gnu( cur_plot, choice, *choice, str, tag );
+
+	chdir( dirname );
+
+	end:
+
+	for ( i = 0; i < nv; ++i )
+	{
+		delete [ ] str[ i ];
+		delete [ ] tag[ i ];
+		if ( logs )
+			delete [ ] logdata[ i ];
+	}
+	delete [ ] str;
+	delete [ ] tag;
+	delete [ ] logdata;
+	delete [ ] data;
+	delete [ ] start;
+	delete [ ] end;
 }
 
 
@@ -4904,284 +4923,283 @@ SHOW_PLOT_GNU
 ****************************************************/
 void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 {
-int i, hsize, vsize, sbordsize, lim[ 4 ];
-double rang[ 4 ];
+	int i, hsize, vsize, sbordsize, lim[ 4 ];
+	double rang[ 4 ];
 
-if ( type == 2 )
-{
-	if ( ! gnu )
+	if ( type == 2 )
+	{
+		if ( ! gnu )
+			
+	cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Unsupported options for the internal graphical window\" -detail \"Gnuplot automatically selected to support the chosen 3D plot options.\"" );
+		gnu = true;
+		type = 1;
+	}
+
+	cmd( "raise .da ." );
 		
-cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Unsupported options for the internal graphical window\" -detail \"Gnuplot automatically selected to support the chosen 3D plot options.\"" );
-	gnu = true;
-	type = 1;
-}
+	if ( type == 1 )
+	{	// plot with external gnuplot
+		cmd( "set choice [ open_gnuplot gnuplot.gp \"Please check if you have selected an adequate configuration for the plot.\" ]" );
+		
+		if ( *choice != 0 )			// Gnuplot failed
+		{
+			*choice = 2;
+			return;
+		}
+				
+		type_plot[ n ] = -1; 		// external plot
+		plot_w[ n ] = -1;
+		plot_l[ n ] = -1;
+		plot_nl[ n ] = -1;   
+		
+		*choice = 0;
+		return;
+	}
 
-cmd( "raise .da ." );
-	
-if ( type == 1 )
-{	// plot with external gnuplot
-	cmd( "set choice [ open_gnuplot gnuplot.gp \"Please check if you have selected an adequate configuration for the plot.\" ]" );
-	
-	if ( *choice != 0 )			// Gnuplot failed
+	// get graphical configuration from Tk ( file defaults.tcl )
+	get_int( "hsizePxy", & hsize );			// 640
+	get_int( "vsizePxy", & vsize );			// 450
+	get_int( "sbordsizeP", & sbordsize );	// 0
+
+
+	// generate tk canvas filling routine using Gnuplot
+	cmd( "set choice [ open_gnuplot gnuplot.lsd \"Please check if you have selected an adequate configuration for the plot and if Gnuplot is set up properly.\" true ]" );
+
+	if ( *choice != 0 )						// Gnuplot failed
 	{
 		*choice = 2;
 		return;
 	}
-			
-	type_plot[ n ] = -1; 		// external plot
-	plot_w[ n ] = -1;
-	plot_l[ n ] = -1;
-	plot_nl[ n ] = -1;   
-	
-	*choice = 0;
-	return;
-}
 
-// get graphical configuration from Tk ( file defaults.tcl )
-get_int( "hsizePxy", & hsize );			// 640
-get_int( "vsizePxy", & vsize );			// 450
-get_int( "sbordsizeP", & sbordsize );	// 0
-
-
-// generate tk canvas filling routine using Gnuplot
-cmd( "set choice [ open_gnuplot gnuplot.lsd \"Please check if you have selected an adequate configuration for the plot and if Gnuplot is set up properly.\" true ]" );
-
-if ( *choice != 0 )						// Gnuplot failed
-{
-	*choice = 2;
-	return;
-}
-
-if ( shrink_gnufile( ) != 0 )			// file conversion failed
-{
-	*choice = 2;
-	return;
-}
-	
-
-cmd( "file delete plot.file; file rename plot_clean.file plot.file" );
-
-// create plot window & canvas
-cmd( "set w .da.f.new%d", n );			// plot window
-cmd( "set p $w.f.plots" );				// plot canvas
-
-cmd( "newtop $w $tit \"wm withdraw $w\" \"\"" );
-
-cmd( "frame $w.f" );
-cmd( "scrollbar $w.f.vs -command \"$p yview\"" );
-cmd( "scrollbar $w.f.hs -orient horiz -command \"$p xview\"" );
-cmd( "pack $w.f.vs -side right -fill y" );
-cmd( "pack $w.f.hs -side bottom -fill x" );
-
-cmd( "canvas $p -width %d -height %d -background white -relief flat -yscrollcommand \"$w.f.vs set\" -xscrollcommand \"$w.f.hs set\" -scrollregion \"%d %d %d %d\" -relief flat -highlightthickness 0", 
-		hsize, vsize, - sbordsize, - sbordsize, hsize + sbordsize, vsize + sbordsize  );
-
-cmd( "pack $p -expand yes -fill both" );
-cmd( "pack $w.f -expand yes -fill both" );
-
-// add buttons bottom bar
-cmd( "frame $w.b" );
-
-cmd( "frame $w.b.c" );
-
-cmd( "frame $w.b.c.case" );
-if ( logs )
-	cmd( "label $w.b.c.case.l -text \"log(X) value:\" -width 11 -anchor e" );
-else
-	cmd( "label $w.b.c.case.l -text \"X value:\" -width 11 -anchor e" );
-cmd( "label $w.b.c.case.v -text \"\" -fg red -width 20 -anchor w" );
-cmd( "pack $w.b.c.case.l $w.b.c.case.v -side left -anchor w" );
-
-cmd( "frame $w.b.c.y" );
-if ( logs )
-	cmd( "label $w.b.c.y.l -text \"log(Y) value:\" -width 11 -anchor e" );
-else
-	cmd( "label $w.b.c.y.l -text \"Y value:\" -width 11 -anchor e" );
-cmd( "label $w.b.c.y.v1 -text \"\" -fg red -width 20 -anchor w" );
-cmd( "pack $w.b.c.y.l $w.b.c.y.v1 -side left -anchor w" );
-
-cmd( "pack $w.b.c.case $w.b.c.y -anchor w" );
-
-cmd( "frame $w.b.o" );
-cmd( "label $w.b.o.l1 -text \"Right-click: edit properties\"" );
-cmd( "label $w.b.o.l2 -text \"Shift-click: insert text\"" );
-cmd( "label $w.b.o.l3 -text \"Ctrl-click: insert line\"" );
-cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
-
-cmd( "frame $w.b.s" );
-cmd( "button $w.b.s.save -width $butWid -text Save -command { set it \"%d) $tit\"; set fromPlot 1; set choice 11 } -state disabled -underline 0", n );
-cmd( "button $w.b.s.gnu -width $butWid -text Gnuplot -command { \
-		set oldpath [pwd]; \
-		cd plotxy_%d; \
-		open_gnuplot gnuplot.gp; \
-		cd $oldpath; \
-	} -state disabled -underline 0", n );
-cmd( "pack $w.b.s.save $w.b.s.gnu -pady 5" );
-
-cmd( "label $w.b.pad -width 6" );
-
-cmd( "frame $w.b.z -bd 2 -relief groove" );
-cmd( "label $w.b.z.l -text Zoom" );
-
-cmd( "frame $w.b.z.b" );
-cmd( "button $w.b.z.b.p -width 3 -text + -command { scale_canvas .da.f.new%d.f.plots \"+\" zoomLevel%d } -state disabled", n, n );
-cmd( "button $w.b.z.b.m -width 3 -text - -command { scale_canvas .da.f.new%d.f.plots \"-\" zoomLevel%d } -state disabled", n, n  );
-cmd( "pack $w.b.z.b.p $w.b.z.b.m" );
-
-cmd( "pack  $w.b.z.l $w.b.z.b -side left -padx 2 -pady 2" );
-
-cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -expand no -padx 10 -pady 5 -side left" );
-cmd( "pack $w.b -side right -expand no" );
-
-cmd( "mouse_wheel $p" );
-
-cmd( "showtop $w current yes yes no" ); 
-cmd( "$p xview moveto 0; $p yview moveto 0" );
-cmd( "set zoomLevel%d 1.0", n );
-
-// create list with the series names+tags in Tk
-if ( str != NULL && tag != NULL )
-{
-	cmd( "set series%d [ list ]", n );
-	for ( i = 0; i < nv; ++i )
-		cmd( "lappend series%d \"%s_%s\"", n, str[ i ], tag[ i ] );
-}
-
-// draw canvas
-cmd( "source plot.file" );
-cmd( "catch { gnuplot $p }" );
-cmd( "catch { rename gnuplot \"\" }" );
-
-// canvas plot limits (canvas & series)
-cmd( "set cmx [ expr [ winfo width $p ] - 2 * [ $p cget -border ] - 2 * [ $p cget -highlightthickness ] ]" );
-cmd( "if { $cmx <= 1 } { set cmx [ $p cget -width ] }" );
-cmd( "set cmy [ expr [ winfo height $p ] - 2 * [ $p cget -border ] - 2 * [ $p cget -highlightthickness ] ]" );
-cmd( "if { $cmy <= 1 } { set cmy [ $p cget -height ] }" );
-cmd( "unset -nocomplain lim rang" );
-cmd( "catch { set lim [ gnuplot_plotarea ] }" );
-cmd( "catch { set rang [ gnuplot_axisranges ] }" );
-cmd( "if { [ info exists lim ] && [ info exists rang ] } { set choice 1 } { set choice 0 }" );
-if ( *choice == 1 )
-{
-	cmd( "set res [ expr int( $cmx * [ lindex $lim 0 ] / 1000.0 ) ]" );
-	get_int( "res", &lim[ 0 ] );
-	cmd( "set res [ expr int( $cmx * [ lindex $lim 1 ] / 1000.0 ) ]" );
-	get_int( "res", &lim[ 1 ] );
-	cmd( "set res [ expr int( $cmy * [ lindex $lim 2 ] / 1000.0 ) ]" );
-	get_int( "res", &lim[ 2 ] );
-	cmd( "set res [ expr int( $cmy * [ lindex $lim 3 ] / 1000.0 ) ]" );
-	get_int( "res", &lim[ 3 ] );
-	for ( i = 0; i < 4; ++i )
-	{	
-		cmd( "set res [ lindex $rang %d ]", i );
-		get_double( "res", &rang[ i ] );
+	if ( shrink_gnufile( ) != 0 )			// file conversion failed
+	{
+		*choice = 2;
+		return;
 	}
-}
-else
-	for ( i = 0; i < 4; ++i )
-		rang[ i ] = lim[ i ] = 0;
+		
+	cmd( "file delete plot.file; file rename plot_clean.file plot.file" );
 
-// enable buttons
-cmd( "$w.b.s.save configure -state normal" );
-cmd( "$w.b.s.gnu configure -state normal" );
-cmd( "$w.b.z.b.p configure -state normal" );
-cmd( "$w.b.z.b.m configure -state normal" );
+	// create plot window & canvas
+	cmd( "set w .da.f.new%d", n );			// plot window
+	cmd( "set p $w.f.plots" );				// plot canvas
 
-// update cursor indicators at bottom window
-cmd( "bind $p <Motion> { \
-		set zoom $zoomLevel%d; \
-		set series $series%d; \
-		set w .da.f.new%d; \
-		set llim [ expr %d * $zoom ]; \
-		set rlim [ expr %d * $zoom ]; \
-		set tlim [ expr %d * $zoom ]; \
-		set blim [ expr %d * $zoom ]; \
-		set cx [ $w.f.plots canvasx %%x ]; \
-		set cy [ $w.f.plots canvasy %%y ]; \
-		if { $cx >= $llim && $cx <= $rlim && $cy >= $tlim && $cy <= $blim && [ expr $rlim - $llim ] > 0 && [ expr $blim - $tlim ] > 0 } { \
-			$w.b.c.case.v configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $cx - $llim ) * ( %lf - %lf ) / ( $rlim - $llim ) + %lf ] ]; \
-			$w.b.c.y.v1 configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ] ]; \
-		} \
-	}", n, n, n, lim[ 0 ], lim[ 1 ], lim[ 2 ], lim[ 3 ], rang[ 1 ], rang[ 0 ], rang[ 0 ], rang[ 3 ], rang[ 2 ], rang[ 2 ] );
+	cmd( "newtop $w $tit \"wm withdraw $w\" \"\"" );
 
-// window bindings (return to Analysis, insert text, insert line )
-cmd( "bind $w <Escape> \"wm withdraw $w\"" );
-cmd( "bind $w <s> { $w.b.s.save invoke }; bind $w <S> { $w.b.s.save invoke }" );
-cmd( "bind $w <g> { $w.b.s.gnu invoke }; bind $w <G> { $w.b.s.gnu invoke }" );
-cmd( "bind $w <plus> { $w.b.z.b.p invoke }" );
-cmd( "bind $w <minus> { $w.b.z.b.m invoke }" );
-cmd( "bind $p <Double-Button-1> { wm deiconify .da; raise .da; focus .da }" );
+	cmd( "frame $w.f" );
+	cmd( "scrollbar $w.f.vs -command \"$p yview\"" );
+	cmd( "scrollbar $w.f.hs -orient horiz -command \"$p xview\"" );
+	cmd( "pack $w.f.vs -side right -fill y" );
+	cmd( "pack $w.f.hs -side bottom -fill x" );
 
-cmd( "bind $p <Shift-1> { \
-		set ccanvas .da.f.new%d.f.plots; \
-		set LX %%X; \
-		set LY %%Y; \
-		set hereX [ $ccanvas canvasx %%x ]; \
-		set hereY [ $ccanvas canvasy %%y ]; \
-		set choice 27 \
-	}", n );
-	
-cmd( "bind $p <Control-1> { \
-		set ccanvas .da.f.new%d.f.plots; \
-		set ncanvas %d; \
-		set hereX [ $ccanvas canvasx %%x ]; \
-		set hereY [ $ccanvas canvasy %%y ]; \
-		unset -nocomplain cl; \
-		set choice 28 \
-	}", n, n );
+	cmd( "canvas $p -width %d -height %d -background white -relief flat -yscrollcommand \"$w.f.vs set\" -xscrollcommand \"$w.f.hs set\" -scrollregion \"%d %d %d %d\" -relief flat -highlightthickness 0", 
+			hsize, vsize, - sbordsize, - sbordsize, hsize + sbordsize, vsize + sbordsize  );
 
-// moving and editing lines and text
-cmd( "bind $p <Button-1> { \
-		set ccanvas .da.f.new%d.f.plots; \
-		set type [ $ccanvas gettags current ]; \
-		if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
-			set moving true; \
+	cmd( "pack $p -expand yes -fill both" );
+	cmd( "pack $w.f -expand yes -fill both" );
+
+	// add buttons bottom bar
+	cmd( "frame $w.b" );
+
+	cmd( "frame $w.b.c" );
+
+	cmd( "frame $w.b.c.case" );
+	if ( logs )
+		cmd( "label $w.b.c.case.l -text \"log(X) value:\" -width 11 -anchor e" );
+	else
+		cmd( "label $w.b.c.case.l -text \"X value:\" -width 11 -anchor e" );
+	cmd( "label $w.b.c.case.v -text \"\" -fg red -width 20 -anchor w" );
+	cmd( "pack $w.b.c.case.l $w.b.c.case.v -side left -anchor w" );
+
+	cmd( "frame $w.b.c.y" );
+	if ( logs )
+		cmd( "label $w.b.c.y.l -text \"log(Y) value:\" -width 11 -anchor e" );
+	else
+		cmd( "label $w.b.c.y.l -text \"Y value:\" -width 11 -anchor e" );
+	cmd( "label $w.b.c.y.v1 -text \"\" -fg red -width 20 -anchor w" );
+	cmd( "pack $w.b.c.y.l $w.b.c.y.v1 -side left -anchor w" );
+
+	cmd( "pack $w.b.c.case $w.b.c.y -anchor w" );
+
+	cmd( "frame $w.b.o" );
+	cmd( "label $w.b.o.l1 -text \"Right-click: edit properties\"" );
+	cmd( "label $w.b.o.l2 -text \"Shift-click: insert text\"" );
+	cmd( "label $w.b.o.l3 -text \"Ctrl-click: insert line\"" );
+	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
+
+	cmd( "frame $w.b.s" );
+	cmd( "button $w.b.s.save -width $butWid -text Save -command { set it \"%d) $tit\"; set fromPlot 1; set choice 11 } -state disabled -underline 0", n );
+	cmd( "button $w.b.s.gnu -width $butWid -text Gnuplot -command { \
+			set oldpath [pwd]; \
+			cd plotxy_%d; \
+			open_gnuplot gnuplot.gp; \
+			cd $oldpath; \
+		} -state disabled -underline 0", n );
+	cmd( "pack $w.b.s.save $w.b.s.gnu -pady 5" );
+
+	cmd( "label $w.b.pad -width 6" );
+
+	cmd( "frame $w.b.z -bd 2 -relief groove" );
+	cmd( "label $w.b.z.l -text Zoom" );
+
+	cmd( "frame $w.b.z.b" );
+	cmd( "button $w.b.z.b.p -width 3 -text + -command { scale_canvas .da.f.new%d.f.plots \"+\" zoomLevel%d } -state disabled", n, n );
+	cmd( "button $w.b.z.b.m -width 3 -text - -command { scale_canvas .da.f.new%d.f.plots \"-\" zoomLevel%d } -state disabled", n, n  );
+	cmd( "pack $w.b.z.b.p $w.b.z.b.m" );
+
+	cmd( "pack  $w.b.z.l $w.b.z.b -side left -padx 2 -pady 2" );
+
+	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -expand no -padx 10 -pady 5 -side left" );
+	cmd( "pack $w.b -side right -expand no" );
+
+	cmd( "mouse_wheel $p" );
+
+	cmd( "showtop $w current yes yes no" ); 
+	cmd( "$p xview moveto 0; $p yview moveto 0" );
+	cmd( "set zoomLevel%d 1.0", n );
+
+	// create list with the series names+tags in Tk
+	if ( str != NULL && tag != NULL )
+	{
+		cmd( "set series%d [ list ]", n );
+		for ( i = 0; i < nv; ++i )
+			cmd( "lappend series%d \"%s_%s\"", n, str[ i ], tag[ i ] );
+	}
+
+	// draw canvas
+	cmd( "source plot.file" );
+	cmd( "catch { gnuplot $p }" );
+	cmd( "catch { rename gnuplot \"\" }" );
+
+	// canvas plot limits (canvas & series)
+	cmd( "set cmx [ expr [ winfo width $p ] - 2 * [ $p cget -border ] - 2 * [ $p cget -highlightthickness ] ]" );
+	cmd( "if { $cmx <= 1 } { set cmx [ $p cget -width ] }" );
+	cmd( "set cmy [ expr [ winfo height $p ] - 2 * [ $p cget -border ] - 2 * [ $p cget -highlightthickness ] ]" );
+	cmd( "if { $cmy <= 1 } { set cmy [ $p cget -height ] }" );
+	cmd( "unset -nocomplain lim rang" );
+	cmd( "catch { set lim [ gnuplot_plotarea ] }" );
+	cmd( "catch { set rang [ gnuplot_axisranges ] }" );
+	cmd( "if { [ info exists lim ] && [ info exists rang ] } { set choice 1 } { set choice 0 }" );
+	if ( *choice == 1 )
+	{
+		cmd( "set res [ expr int( $cmx * [ lindex $lim 0 ] / 1000.0 ) ]" );
+		get_int( "res", &lim[ 0 ] );
+		cmd( "set res [ expr int( $cmx * [ lindex $lim 1 ] / 1000.0 ) ]" );
+		get_int( "res", &lim[ 1 ] );
+		cmd( "set res [ expr int( $cmy * [ lindex $lim 2 ] / 1000.0 ) ]" );
+		get_int( "res", &lim[ 2 ] );
+		cmd( "set res [ expr int( $cmy * [ lindex $lim 3 ] / 1000.0 ) ]" );
+		get_int( "res", &lim[ 3 ] );
+		for ( i = 0; i < 4; ++i )
+		{	
+			cmd( "set res [ lindex $rang %d ]", i );
+			get_double( "res", &rang[ i ] );
+		}
+	}
+	else
+		for ( i = 0; i < 4; ++i )
+			rang[ i ] = lim[ i ] = 0;
+
+	// enable buttons
+	cmd( "$w.b.s.save configure -state normal" );
+	cmd( "$w.b.s.gnu configure -state normal" );
+	cmd( "$w.b.z.b.p configure -state normal" );
+	cmd( "$w.b.z.b.m configure -state normal" );
+
+	// update cursor indicators at bottom window
+	cmd( "bind $p <Motion> { \
+			set zoom $zoomLevel%d; \
+			set series $series%d; \
+			set w .da.f.new%d; \
+			set llim [ expr %d * $zoom ]; \
+			set rlim [ expr %d * $zoom ]; \
+			set tlim [ expr %d * $zoom ]; \
+			set blim [ expr %d * $zoom ]; \
+			set cx [ $w.f.plots canvasx %%x ]; \
+			set cy [ $w.f.plots canvasy %%y ]; \
+			if { $cx >= $llim && $cx <= $rlim && $cy >= $tlim && $cy <= $blim && [ expr $rlim - $llim ] > 0 && [ expr $blim - $tlim ] > 0 } { \
+				$w.b.c.case.v configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $cx - $llim ) * ( %lf - %lf ) / ( $rlim - $llim ) + %lf ] ]; \
+				$w.b.c.y.v1 configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ] ]; \
+			} \
+		}", n, n, n, lim[ 0 ], lim[ 1 ], lim[ 2 ], lim[ 3 ], rang[ 1 ], rang[ 0 ], rang[ 0 ], rang[ 3 ], rang[ 2 ], rang[ 2 ] );
+
+	// window bindings (return to Analysis, insert text, insert line )
+	cmd( "bind $w <Escape> \"wm withdraw $w\"" );
+	cmd( "bind $w <s> { $w.b.s.save invoke }; bind $w <S> { $w.b.s.save invoke }" );
+	cmd( "bind $w <g> { $w.b.s.gnu invoke }; bind $w <G> { $w.b.s.gnu invoke }" );
+	cmd( "bind $w <plus> { $w.b.z.b.p invoke }" );
+	cmd( "bind $w <minus> { $w.b.z.b.m invoke }" );
+	cmd( "bind $p <Double-Button-1> { wm deiconify .da; raise .da; focus .da }" );
+
+	cmd( "bind $p <Shift-1> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			set LX %%X; \
+			set LY %%Y; \
 			set hereX [ $ccanvas canvasx %%x ]; \
 			set hereY [ $ccanvas canvasy %%y ]; \
-			$ccanvas raise current \
-		} { \
-			set moving false \
-		} \
-	}", cur_plot );
-cmd( "bind $p <B1-Motion> { \
-		set ccanvas .da.f.new%d.f.plots; \
-		if $moving { \
-			$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
-				[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
+			set choice 27 \
+		}", n );
+		
+	cmd( "bind $p <Control-1> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			set ncanvas %d; \
 			set hereX [ $ccanvas canvasx %%x ]; \
-			set hereY [ $ccanvas canvasy %%y ] \
-		} \
-	}", cur_plot );
-cmd( "bind $p <ButtonRelease-1> { set moving false }" );
+			set hereY [ $ccanvas canvasy %%y ]; \
+			unset -nocomplain cl; \
+			set choice 28 \
+		}", n, n );
 
-cmd( "bind $p <Button-2> { \
-		set ccanvas .da.f.new%d.f.plots; \
-		set LX %%X; set LY %%Y; \
-		set type [ $ccanvas gettags current ]; \
-		if { [ lsearch $type line ] >= 0 || [ lsearch $type dots ] >= 0 } { \
-			if { [ lsearch $type series ] >= 0 } { \
-				set cline [ lindex $type 0 ]; \
-				set draw false \
+	// moving and editing lines and text
+	cmd( "bind $p <Button-1> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			set type [ $ccanvas gettags current ]; \
+			if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
+				set moving true; \
+				set hereX [ $ccanvas canvasx %%x ]; \
+				set hereY [ $ccanvas canvasy %%y ]; \
+				$ccanvas raise current \
 			} { \
-				set cline current; \
-				set draw true \
-			}; \
-			set choice 31 \
-		} { \
-			if { [ lsearch $type text ] >= 0 } { \
-				set choice 26 \
+				set moving false \
 			} \
-		} \
-	}", cur_plot );
-cmd( "bind $p <Button-3> { event generate .da.f.new%d.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
+		}", cur_plot );
+	cmd( "bind $p <B1-Motion> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			if $moving { \
+				$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
+					[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
+				set hereX [ $ccanvas canvasx %%x ]; \
+				set hereY [ $ccanvas canvasy %%y ] \
+			} \
+		}", cur_plot );
+	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
 
-// save plot info
-type_plot[ n ] = GNUPLOT; //Gnuplot plot
-plot_w[ n ] = hsize;	// plot width
-plot_l[ n ] = vsize; 	//height of plot with labels
-plot_nl[ n ] = vsize; 	//height of plot without labels   
- 
-*choice = 0;
+	cmd( "bind $p <Button-2> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			set LX %%X; set LY %%Y; \
+			set type [ $ccanvas gettags current ]; \
+			if { [ lsearch $type line ] >= 0 || [ lsearch $type dots ] >= 0 } { \
+				if { [ lsearch $type series ] >= 0 } { \
+					set cline [ lindex $type 0 ]; \
+					set draw false \
+				} { \
+					set cline current; \
+					set draw true \
+				}; \
+				set choice 31 \
+			} { \
+				if { [ lsearch $type text ] >= 0 } { \
+					set choice 26 \
+				} \
+			} \
+		}", cur_plot );
+	cmd( "bind $p <Button-3> { event generate .da.f.new%d.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
+
+	// save plot info
+	type_plot[ n ] = GNUPLOT; //Gnuplot plot
+	plot_w[ n ] = hsize;	// plot width
+	plot_l[ n ] = vsize; 	//height of plot with labels
+	plot_nl[ n ] = vsize; 	//height of plot without labels   
+	 
+	*choice = 0;
 }
 
 
@@ -5190,880 +5208,853 @@ PLOT_LATTICE
 ****************************************************/
 void plot_lattice( int *choice )
 {
+	char *app, **str, **tag;
+	int i, j, hi, le, first = 1, last, time, hsize, vsize, ncol, nlin, tot, *start, *end, idseries;
+	double val, color, cscale, **data,**logdata;
 
-FILE *f, *f2;
-int i, j, hi, le, done, first, last, time, hsize, vsize, ncol, nlin, tot, *start, *end, idseries;
-char *app, **str, **tag;
-double val, color, cscale, **data,**logdata;
-int logErrCnt = 0;				// log errors counter to prevent excess messages
-bool stopErr = false;
+	int logErrCnt = 0;				// log errors counter to prevent excess messages
+	bool stopErr = false;
 
-if ( nv == 0 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-	*choice = 2;
-	return;
-}
-
-if ( time_cross == 0 && nv > 1 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For time series lattices select only one series.\"" );
-	*choice = 2;
-	return;
-}
-
-if ( time_cross == 1 && nv < 2 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For cross-section lattices select at least two series.\"" );
-	*choice = 2;
-	return;
-}
-
-// lattice window size
-get_int( "hsizeLat", & hsize );			// 400
-get_int( "vsizeLat", & vsize );			// 400
-get_double( "cscaleLat", & cscale );	// 1.0
-
-// find column number suggestion
-tot = time_cross == 1 ? nv : max_c - min_c + 1;
-ncol = ( int ) max( sqrt( tot ), 1 );
-while ( tot % ncol != 0 && ncol > 0 )
-	ncol--;
-
-data = new double *[ nv ];
-logdata = new double *[ nv ];
-start = new int [ nv ];
-end = new int [ nv ];
-str = new char *[ nv ];
-tag = new char *[ nv ];
-
-cmd( "newtop .da.s \"Lattice Options\" { set choice 2 } .da" );
-
-cmd( "frame .da.s.t" );
-cmd( "label .da.s.t.l -width 25 -anchor e -text \"Cross-section time step\"" );
-cmd( "set time %d", num_c );
-cmd( "entry .da.s.t.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invcmd { bell } -justify center" );
-cmd( ".da.s.t.e insert 0 $time" ); 
-cmd( "pack .da.s.t.l .da.s.t.e -side left -anchor w -padx 2 -pady 2" );
-
-cmd( "frame .da.s.i" );
-cmd( "label .da.s.i.l -width 25 -anchor e -text \"Number of data columns\"" );
-cmd( "set bidi %d", ncol );
-cmd( "entry .da.s.i.e -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
-cmd( ".da.s.i.e insert 0 $bidi" ); 
-cmd( "pack .da.s.i.l .da.s.i.e -side left -anchor w -padx 2 -pady 2" );
-
-if ( time_cross == 1 )
-{
-	cmd( "pack .da.s.t .da.s.i -anchor w -padx 5 -pady 5" );
-	cmd( "bind .da.s.t.e <KeyPress-Return> {focus .da.s.i.e; .da.s.i.e selection range 0 end}" );
-	cmd( "focus .da.s.t.e; .da.s.t.e selection range 0 end" );
-}
-else
-{
-	cmd( "pack .da.s.i -anchor w -padx 5 -pady 5" );
-	cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
-}
-
-cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#lattice } { set choice 2 }" );
-
-cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
-	
-cmd( "showtop .da.s" );
-
-*choice = 0;
-while ( *choice == 0 )
-  Tcl_DoOneEvent( 0 );
-
-cmd( "set bidi [ .da.s.i.e get ]" ); 
-cmd( "set time [ .da.s.t.e get ]" ); 
-cmd( "destroytop .da.s" );
-
-if ( *choice == 2 )
- goto end;
-
-// prepare data from selected series
-cmd( "set choice $time" );
-time = *choice;
-
-for ( i = 0; i < nv; ++i )
-{
-	str[ i ] = new char[ MAX_ELEM_LENGTH ];
-  tag[ i ] = new char[ MAX_ELEM_LENGTH ];
-
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-  strcpy( msg, app );
-  sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
-  
-  // check if series has data for all selected cases (cross-section only )
-  if ( time_cross == 1 && ( time < start[ i ] || time > end[ i ] ) )
-  {
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid time step\" -detail \"One or more of the series do not have a value associated to the selected cross-section time step.\"" );
-	*choice = 2;
-	for ( j = i + 1; j < nv; ++j )		// indicate non allocated positions
+	if ( nv == 0 )
 	{
-		str[ j ] = tag[ j ] = NULL;
-		logdata[ j ] = NULL;
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
+		*choice = 2;
+		return;
 	}
-	goto end;
-  }
-	
-  // get series data and take logs if necessary
-  data[ i ] = vs[ idseries ].data;
-  if ( data[ i ] == NULL )
-    plog( "\nError: invalid data\n" );
-  
-  if ( logs )			// apply log to the values to show "log scale"
-  {
-    logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-    for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-	if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-		logdata[ i ][ j ] = log( data[ i ][ j ] );
+
+	if ( time_cross == 0 && nv > 1 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For time series lattices select only one series.\"" );
+		*choice = 2;
+		return;
+	}
+
+	if ( time_cross == 1 && nv < 2 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For cross-section lattices select at least two series.\"" );
+		*choice = 2;
+		return;
+	}
+
+	// lattice window size
+	get_int( "hsizeLat", & hsize );			// 400
+	get_int( "vsizeLat", & vsize );			// 400
+	get_double( "cscaleLat", & cscale );	// 1.0
+
+	// find column number suggestion
+	tot = time_cross == 1 ? nv : max_c - min_c + 1;
+	ncol = ( int ) max( sqrt( tot ), 1 );
+	while ( tot % ncol != 0 && ncol > 0 )
+		ncol--;
+
+	data = new double *[ nv ];
+	logdata = new double *[ nv ];
+	start = new int [ nv ];
+	end = new int [ nv ];
+	str = new char *[ nv ];
+	tag = new char *[ nv ];
+
+	cmd( "newtop .da.s \"Lattice Options\" { set choice 2 } .da" );
+
+	cmd( "frame .da.s.t" );
+	cmd( "label .da.s.t.l -width 25 -anchor e -text \"Cross-section time step\"" );
+	cmd( "set time %d", num_c );
+	cmd( "entry .da.s.t.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invcmd { bell } -justify center" );
+	cmd( ".da.s.t.e insert 0 $time" ); 
+	cmd( "pack .da.s.t.l .da.s.t.e -side left -anchor w -padx 2 -pady 2" );
+
+	cmd( "frame .da.s.i" );
+	cmd( "label .da.s.i.l -width 25 -anchor e -text \"Number of data columns\"" );
+	cmd( "set bidi %d", ncol );
+	cmd( "entry .da.s.i.e -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+	cmd( ".da.s.i.e insert 0 $bidi" ); 
+	cmd( "pack .da.s.i.l .da.s.i.e -side left -anchor w -padx 2 -pady 2" );
+
+	if ( time_cross == 1 )
+	{
+		cmd( "pack .da.s.t .da.s.i -anchor w -padx 5 -pady 5" );
+		cmd( "bind .da.s.t.e <KeyPress-Return> {focus .da.s.i.e; .da.s.i.e selection range 0 end}" );
+		cmd( "focus .da.s.t.e; .da.s.t.e selection range 0 end" );
+	}
 	else
 	{
-		logdata[ i ][ j ] = NAN;
-		if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		cmd( "pack .da.s.i -anchor w -padx 5 -pady 5" );
+		cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
+	}
+
+	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#lattice } { set choice 2 }" );
+
+	cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
+		
+	cmd( "showtop .da.s" );
+
+	*choice = 0;
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	cmd( "set bidi [ .da.s.i.e get ]" ); 
+	cmd( "set time [ .da.s.t.e get ]" ); 
+	cmd( "destroytop .da.s" );
+
+	if ( *choice == 2 )
+		goto end;
+
+	// prepare data from selected series
+	cmd( "set choice $time" );
+	time = *choice;
+
+	for ( i = 0; i < nv; ++i )
+	{
+		str[ i ] = new char[ MAX_ELEM_LENGTH ];
+		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		strcpy( msg, app );
+		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries );
+	  
+		// check if series has data for all selected cases (cross-section only )
+		if ( time_cross == 1 && ( time < start[ i ] || time > end[ i ] ) )
 		{
-			plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+			cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid time step\" -detail \"One or more of the series do not have a value associated to the selected cross-section time step.\"" );
+			*choice = 2;
+			
+			for ( j = i + 1; j < nv; ++j )		// indicate non allocated positions
+			{
+				str[ j ] = tag[ j ] = NULL;
+				logdata[ j ] = NULL;
+			}
+			
+			goto end;
+		}
+		
+		// get series data and take logs if necessary
+		data[ i ] = vs[ idseries ].data;
+		if ( data[ i ] == NULL )
+			plog( "\nError: invalid data\n" );
+	  
+		if ( logs )			// apply log to the values to show "log scale"
+		{
+			logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
+			for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
+			if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
+				logdata[ i ][ j ] = log( data[ i ][ j ] );
+			else
+			{
+				logdata[ i ][ j ] = NAN;
+				if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+					plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+				else
+					if ( ! stopErr )
+					{
+						plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+						stopErr = true;
+					}
+				}
+				
+			data[ i ] = logdata[ i ];				// replace the data series
+		}
+	}
+
+
+	// define lattice configuration
+	cmd( "set choice $bidi" );
+	ncol = *choice;
+
+	if ( time_cross == 0 )
+	{
+		if ( autom_x || min_c >= max_c )
+		{
+			first = start[ 0 ];
+			last = end[ 0 ];
 		}
 		else
-			if ( ! stopErr )
-			{
-				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-				stopErr = true;
-			}
+		{
+			if ( min_c > start[ 0 ] )
+				first = min_c;
+			else
+				first = start[ 0 ];
+			
+			if ( max_c < end[ 0 ] )  
+				last = max_c;
+			else
+				last = end[ 0 ];
 		}
-    data[ i ] = logdata[ i ];				// replace the data series
-  }
-}
-
-
-// define lattice configuration
-cmd( "set choice $bidi" );
-ncol = *choice;
-
-if ( time_cross == 0 )
-{
-	if ( autom_x || min_c >= max_c )
-	{
-		first = start[ 0 ];
-		last = end[ 0 ];
+		
+		for ( tot = 0, i = first; i <= last; ++i )	// count number of points excluding NaNs
+			if ( ! is_nan( data[ 0 ][ i ] ) && is_finite( data[ 0 ][ i ] ) )
+				tot++;
 	}
 	else
+		tot = nv;
+
+	nlin = tot / ncol;
+
+	if ( nlin * ncol != tot )
 	{
-		if ( min_c > start[ 0 ] )
-			first = min_c;
-		else
-			first = start[ 0 ];
-		if ( max_c < end[ 0 ] )  
-			last = max_c;
-		else
-			last = end[ 0 ];
-	}
-	
-	for ( tot = 0, i = first; i <= last; ++i )	// count number of points excluding NaNs
-		if ( ! is_nan( data[ 0 ][ i ] ) && is_finite( data[ 0 ][ i ] ) )
-			tot++;
-}
-else
-	tot = nv;
-
-nlin = tot / ncol;
-
-if ( nlin * ncol != tot )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of columns\" -detail \"The number of columns must be an exact divisor of the number (%d) of time steps (time series) or selected variables (cross section).\"", tot );
-	*choice = 2;
-	goto end;
-}
-
-// draw lattice
-hi = vsize/nlin;
-le=hsize/ncol;
-
-cmd( "set w .da.f.new%d", cur_plot );
-cmd( "newtop $w $tit { wm withdraw .da.f.new%d } \"\"", cur_plot );
-
-cmd( "frame $w.f -width %d -height %d", ncol*le, nlin*hi );
-cmd( "pack $w.f" );
-
-cmd( "set p $w.f.plots" );
-cmd( "canvas $p -width %d -height %d -background white -relief flat", ncol*le, nlin*hi );
-cmd( "pack $p" );
-
-cmd( "showtop $w current yes yes no" );
-
-for ( j = 0; j < nlin; ++j )
-	for ( i = 0; i < ncol; ++i )
-	{
-		val = time_cross == 1 ? data[ ncol * j + i ][ time ] : 
-								data[ 0 ][ first + ncol * j + i ];
-		color = max( 0, min( 1100, round( val * cscale ) ) );
-		if ( is_nan( color ) || ! is_finite( color ) )
-		  color = 0;
-
-		cmd( "plot_bars $p %d %d %d %d p%d_%d $c%d %lf", 
-		   i * le, j * hi, ( i + 1 ) * le, ( j + 1 ) * hi, j, i, 
-		   ( int ) color, grid ? point_size : 0.0 );
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of columns\" -detail \"The number of columns must be an exact divisor of the number (%d) of time steps (time series) or selected variables (cross section).\"", tot );
+		*choice = 2;
+		goto end;
 	}
 
-// window bindings (return to Analysis, insert text, insert line )
-cmd( "bind $w <Escape> \"wm withdraw $w\"" );
-cmd( "bind $p <Double-Button-1> { wm deiconify .da; raise .da; focus .da }" );
+	// draw lattice
+	hi = vsize / nlin;
+	le = hsize / ncol;
 
-cmd( "bind $p <Shift-1> { \
-		set ccanvas .da.f.new%d.f.plots; \
-		set LX %%X; \
-		set LY %%Y; \
-		set hereX [ $ccanvas canvasx %%x ]; \
-		set hereY [ $ccanvas canvasy %%y ]; \
-		set choice 27 \
-	}", cur_plot );
-	
-cmd( "bind $p <Control-1> { \
-		set ccanvas .da.f.new%d.f.plots; \
-		set ncanvas %d; \
-		set hereX [ $ccanvas canvasx %%x ]; \
-		set hereY [ $ccanvas canvasy %%y ]; \
-		unset -nocomplain cl; \
-		set choice 28 \
-	}", cur_plot, cur_plot );
+	cmd( "set w .da.f.new%d", cur_plot );
+	cmd( "newtop $w $tit { wm withdraw .da.f.new%d } \"\"", cur_plot );
 
-// moving and editing lines and text
-cmd( "bind $p <Button-1> { \
-		set ccanvas .da.f.new%d.f.plots; \
-		set type [ $ccanvas gettags current ]; \
-		if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
-			set moving true; \
+	cmd( "frame $w.f -width %d -height %d", ncol * le, nlin * hi );
+	cmd( "pack $w.f" );
+
+	cmd( "set p $w.f.plots" );
+	cmd( "canvas $p -width %d -height %d -background white -relief flat", ncol * le, nlin * hi );
+	cmd( "pack $p" );
+
+	cmd( "showtop $w current yes yes no" );
+
+	for ( j = 0; j < nlin; ++j )
+		for ( i = 0; i < ncol; ++i )
+		{
+			val = time_cross == 1 ? data[ ncol * j + i ][ time ] : 
+									data[ 0 ][ first + ncol * j + i ];
+			color = max( 0, min( 1100, round( val * cscale ) ) );
+			if ( is_nan( color ) || ! is_finite( color ) )
+			  color = 0;
+
+			cmd( "plot_bars $p %d %d %d %d p%d_%d $c%d %lf", 
+			   i * le, j * hi, ( i + 1 ) * le, ( j + 1 ) * hi, j, i, 
+			   ( int ) color, grid ? point_size : 0.0 );
+		}
+
+	// window bindings (return to Analysis, insert text, insert line )
+	cmd( "bind $w <Escape> \"wm withdraw $w\"" );
+	cmd( "bind $p <Double-Button-1> { wm deiconify .da; raise .da; focus .da }" );
+
+	cmd( "bind $p <Shift-1> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			set LX %%X; \
+			set LY %%Y; \
 			set hereX [ $ccanvas canvasx %%x ]; \
 			set hereY [ $ccanvas canvasy %%y ]; \
-			$ccanvas raise current \
-		} { \
-			set moving false \
-		} \
-	}", cur_plot );
-cmd( "bind $p <B1-Motion> { \
-		set ccanvas .da.f.new%d.f.plots; \
-		if $moving { \
-			$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
-				[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
+			set choice 27 \
+		}", cur_plot );
+		
+	cmd( "bind $p <Control-1> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			set ncanvas %d; \
 			set hereX [ $ccanvas canvasx %%x ]; \
-			set hereY [ $ccanvas canvasy %%y ] \
-		} \
-	}", cur_plot );
-cmd( "bind $p <ButtonRelease-1> { set moving false }" );
+			set hereY [ $ccanvas canvasy %%y ]; \
+			unset -nocomplain cl; \
+			set choice 28 \
+		}", cur_plot, cur_plot );
 
-cmd( "bind $p <Button-2> { \
-		set ccanvas .da.f.new%d.f.plots; \
-		set LX %%X; set LY %%Y; \
-		set type [ $ccanvas gettags current ]; \
-		if { [ lsearch $type line ] >= 0 || [ lsearch $type dots ] >= 0 } { \
-			if { [ lsearch $type series ] >= 0 } { \
-				set cline [ lindex $type 0 ]; \
-				set draw false \
+	// moving and editing lines and text
+	cmd( "bind $p <Button-1> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			set type [ $ccanvas gettags current ]; \
+			if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
+				set moving true; \
+				set hereX [ $ccanvas canvasx %%x ]; \
+				set hereY [ $ccanvas canvasy %%y ]; \
+				$ccanvas raise current \
 			} { \
-				set cline current; \
-				set draw true \
-			}; \
-			set choice 31 \
-		} elseif { [ lsearch $type bar ] >= 0 } { \
-			set choice 42 \
-		} elseif { [ lsearch $type text ] >= 0 } { \
-			set choice 26 \
-		} \
-	}", cur_plot );
-cmd( "bind $p <Button-3> { event generate .da.f.new%d.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
+				set moving false \
+			} \
+		}", cur_plot );
+	cmd( "bind $p <B1-Motion> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			if $moving { \
+				$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
+					[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
+				set hereX [ $ccanvas canvasx %%x ]; \
+				set hereY [ $ccanvas canvasy %%y ] \
+			} \
+		}", cur_plot );
+	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
 
-// save plot info
-type_plot[ cur_plot ] = LATTICE;
-plot_w[ cur_plot ] = ncol * le;	// plot width
-plot_l[ cur_plot ] = nlin * hi;
-plot_nl[ cur_plot ] = nlin * hi;  
+	cmd( "bind $p <Button-2> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			set LX %%X; set LY %%Y; \
+			set type [ $ccanvas gettags current ]; \
+			if { [ lsearch $type line ] >= 0 || [ lsearch $type dots ] >= 0 } { \
+				if { [ lsearch $type series ] >= 0 } { \
+					set cline [ lindex $type 0 ]; \
+					set draw false \
+				} { \
+					set cline current; \
+					set draw true \
+				}; \
+				set choice 31 \
+			} elseif { [ lsearch $type bar ] >= 0 } { \
+				set choice 42 \
+			} elseif { [ lsearch $type text ] >= 0 } { \
+				set choice 26 \
+			} \
+		}", cur_plot );
+	cmd( "bind $p <Button-3> { event generate .da.f.new%d.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
 
-for ( i = 0; i < nv; ++i )
-{
-  delete [ ] str[ i ];
-  delete [ ] tag[ i ];
-  if ( logs )
-    delete [ ] logdata[ i ];
+	// save plot info
+	type_plot[ cur_plot ] = LATTICE;
+	plot_w[ cur_plot ] = ncol * le;	// plot width
+	plot_l[ cur_plot ] = nlin * hi;
+	plot_nl[ cur_plot ] = nlin * hi;  
+
+	for ( i = 0; i < nv; ++i )
+	{
+		delete [ ] str[ i ];
+		delete [ ] tag[ i ];
+		if ( logs )
+			delete [ ] logdata[ i ];
+	}
+
+	*choice = 0;
+
+	end:
+
+	delete [ ] str;
+	delete [ ] tag;
+	delete [ ] logdata;
+	delete [ ] data;
+	delete [ ] start;
+	delete [ ] end;
 }
-
-*choice = 0;
-
-end:
-
-delete [ ] str;
-delete [ ] tag;
-delete [ ] logdata;
-delete [ ] data;
-delete [ ] start;
-delete [ ] end;
-}
-
-
-/*********
-WORK IN PROGRESS
-object *skip_next_obj(object *t, int *count);
-
-void add_list(object *r)
-{
-int i = 0;
-object *cur;
-variable *cv;
-
-for (cur=r; cur != NULL; cur=skip_next_obj(object cur, &i) )
-{
-	for ( cv = cur->v; cv != NULL; cv = cv->next )
-    {
-     cmd( "lappend series_bylab \"%s (Obj. %s)\"",cv->label, cur->label );
-     cmd( "lappend series_byobj \"(Obj. %s) %s\"", cur->label, cv->label );
-
-    }
-  if (cur->son != NULL )
-   add_list(cur->son);
-
-}
-
-}
-
-void list_series(object *r)
-{
-cmd( "set a [ info vars series_bylab]" );
-cmd( "if {$a==\"\" } {} {unset series_bylab; unset series_byobj}" );
-add_list(r);
-cmd( "set temp [lsort -dictionary -integer $series_bylab]" );
-cmd( "unset series_bylab" );
-cmd( "set series_bylab $temp" );
-cmd( "set temp [lsort -dictionary -integer $series_byobj ]" );
-cmd( "unset series_byobj" );
-cmd( "set series_byobj $temp" );
-
-}
-*********/
 
 
 /***************************************************
 HISTOGRAMS
 ****************************************************/
-
 struct bin
 {
-double num;
-double min;
-double max;
-double center;
-double av;
-double lowb;
-double highb;
+	double num;
+	double min;
+	double max;
+	double center;
+	double av;
+	double lowb;
+	double highb;
 };
+
 bin *bins;	
 int num_bins, cases, time_cs;
 double mean, var;
 
 void histograms( int *choice )
 {
-char *app, **str, **tag;
-int i, x1, x2, y1, y2, j, first, last, stat, start, end, idseries;
-double mx, mn, step, a, s, lminy, lmaxy, *data, *logdata = NULL;
-int logErrCnt = 0;				// log errors counter to prevent excess messages
-bool norm, stopErr = false;
+	char *app, **str, **tag;
+	double mx = 0, mn = 0, step, a, lminy, lmaxy, *data, *logdata = NULL;
+	int i, j, first, last, stat, start, end, idseries;
 
-if ( nv != 1 )
-{
-	if ( nv == 0 )			// no variables selected
-		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one series in the Series Selected listbox.\"" );
+	int logErrCnt = 0;				// log errors counter to prevent excess messages
+	bool norm, stopErr = false;
+
+	if ( nv != 1 )
+	{
+		if ( nv == 0 )			// no variables selected
+			cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one series in the Series Selected listbox.\"" );
+		else
+			cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For time series histograms select only one series.\"" );
+		*choice = 2;
+		return;
+	} 
+	 
+	str = new char *[ 1 ];
+	tag = new char *[ 1 ];
+	str[ 0 ] = new char[ MAX_ELEM_LENGTH ];
+	tag[ 0 ] = new char[ MAX_ELEM_LENGTH ];
+
+	cmd( "set res [.da.vars.ch.v get 0]" );
+	app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+	strcpy( msg, app );
+	sscanf( msg, "%s %s (%d - %d) # %d", str[ 0 ], tag[ 0 ], &start, &end, &idseries );
+
+	data = vs[ idseries ].data;
+	if ( data == NULL )
+		plog( "\nError: invalid data\n" );
+
+	if ( logs )			// apply log to the values to show "log scale" in the y-axis
+	{
+		logdata = new double[ end + 1 ];		// create space for the logged values
+		for ( j = start; j <= end; ++j )		// log everything possible
+			if ( ! is_nan( data[ j ] ) && data[ j ] > 0.0 )	// ignore NaNs
+				logdata[ j ] = log( data[ j ] );
+			else
+			{
+				logdata[ j ] = NAN;
+				if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+				{
+					plog( "\nWarning: zero or negative values in log plot ( set to NaN)\nCase: %d", "", j );
+				}
+				else
+					if ( ! stopErr )
+					{
+						plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+						stopErr = true;
+					}
+		   }
+		   
+		data = logdata;							// replace the data series
+	}
+
+	if ( autom_x || min_c >= max_c )
+	{
+		first = start;
+		last = end;
+	}
 	else
-		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For time series histograms select only one series.\"" );
-	*choice = 2;
-	return;
-} 
- 
-str = new char *[ 1 ];
-tag = new char *[ 1 ];
-str[ 0 ] = new char[ MAX_ELEM_LENGTH ];
-tag[ 0 ] = new char[ MAX_ELEM_LENGTH ];
+	{
+		if ( min_c>start)
+			first = min_c;
+		else
+			first = start;
+		
+		if ( max_c < end )  
+			last = max_c;
+		else
+			last = end;
+	}  
 
-cmd( "set res [.da.vars.ch.v get 0]" );
-app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-strcpy( msg, app );
-sscanf( msg, "%s %s (%d - %d) # %d", str[ 0 ], tag[ 0 ], &start, &end, &idseries);
+	for ( j = 0, i = first; i <= last; ++i )	// count number of points excluding NaNs
+		if ( ! is_nan( data[ i ] ) && is_finite( data[ i ] ) )
+			++j;
 
-data = vs[ idseries ].data;
-if ( data == NULL )
-  plog( "\nError: invalid data\n" );
+	cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
 
-if ( logs )			// apply log to the values to show "log scale" in the y-axis
-{
-	logdata = new double[ end + 1 ];		// create space for the logged values
-	for ( j = start; j <= end; ++j )		// log everything possible
-		if ( ! is_nan( data[ j ] ) && data[ j ] > 0.0 )	// ignore NaNs
-			logdata[ j ] = log( data[ j ] );
+	cmd( "frame .da.s.i" );
+	cmd( "label .da.s.i.l -text \"Number of classes/bins\"" );
+	cmd( "set bidi %d", j < 25 ? j : 25 );
+	cmd( "entry .da.s.i.e -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+	cmd( ".da.s.i.e insert 0 $bidi" ); 
+	cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
+
+	cmd( "set norm 0" );
+	cmd( "checkbutton .da.s.norm -text \"Fit a Normal\" -variable norm" );
+	cmd( "set stat 0" );
+	cmd( "checkbutton .da.s.st -text \"Show statistics\" -variable stat" );
+	cmd( "pack .da.s.i .da.s.norm .da.s.st -pady 5" );
+
+	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#histogram } { set choice 2 }" );
+
+	cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
+
+	cmd( "showtop .da.s" );
+	cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
+
+	*choice = 0;
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	cmd( "set bidi [ .da.s.i.e get ]" ); 
+	cmd( "destroytop .da.s" );
+
+	if ( *choice == 2 )
+		goto end;
+
+	cmd( "set choice $bidi" );
+	num_bins = *choice;
+
+	mean = var = cases = 0;
+	for ( i = first; i <= last; ++i )
+	{
+		if ( is_nan( data[ i ] ) || !is_finite( data[ i ] ) )		// ignore NaNs
+			continue;
+			
+		if ( i == first )
+			mx = mn = data[ i ];
 		else
 		{
-			logdata[ j ] = NAN;
-			if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-			{
-				plog( "\nWarning: zero or negative values in log plot ( set to NaN)\nCase: %d", "", j );
-			}
+			if ( data[ i ] > mx )
+				mx = data[ i ];
 			else
-				if ( ! stopErr )
-				{
-					plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-					stopErr = true;
-				}
-	   }
-	data = logdata;							// replace the data series
+				if ( data[ i ] < mn )
+					mn = data[ i ];
+		}  
+		mean += data[ i ];
+		var += data[ i ]*data[ i ];
+		cases++;
+	}
+
+	if ( cases == 0 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no valid data for the chosen time step cases.\"" );
+		*choice = 2;
+		goto end;
+	}
+
+	if ( mx - mn <= 0 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no data variation for the chosen time step cases.\"" );
+		*choice = 2;
+		goto end;
+	}
+
+	mean = mean / cases;
+	var = var / cases - mean * mean;
+
+	bins = new bin[ num_bins ];
+	for ( i = 0; i < num_bins; ++i )
+	{
+		bins[ i ].num = 0;
+		bins[ i ].av = 0;
+		bins[ i ].min = 0;
+		bins[ i ].max = 0;
+		bins[ i ].center = 0; 
+	}
+	 
+	for ( i = first; i <= last; ++i )
+	{
+		if ( is_nan( data[ i ] ) || ! is_finite( data[ i ] ) )
+			continue;
+
+		a = floor( num_bins*( data[ i ] - mn ) / ( mx - mn ) );
+
+		j = ( int ) a;
+		if ( j == num_bins)
+			j--;
+
+		if ( bins[ j ].num == 0 )
+			bins[ j ].min=bins[ j ].max = data[ i ];
+		else
+		{
+			if ( bins[ j ].min > data[ i ] )
+				bins[ j ].min = data[ i ];
+			else
+				if ( bins[ j ].max < data[ i ] )
+					bins[ j ].max = data[ i ];
+		}  
+		
+		bins[ j ].num++;   
+		bins[ j ].av += data[ i ];
+	} 
+
+	a = ( mx - mn ) / ( num_bins - 1 );
+
+	for ( i = 1; i < num_bins; ++i )
+		if ( bins[ i ].num != 0 && bins[ i - 1 ].num != 0 && bins[ i ].min - bins[ i - 1 ].max < a )
+			a = bins[ i ].min - bins[ i - 1 ].max;
+
+	cmd( "set choice $stat" );
+	stat = *choice;
+
+	if ( stat == 1 )
+		plog( "\nTime series histogram statistics\n #   Boundaries(center)\t\tMin.\tAverage\tMax.\tNum.\tFreq." );
+
+	step = ( mx + a / 2 - ( mn - a / 2 ) ) / num_bins;
+	lminy = cases;
+	lmaxy = 0;
+
+	for ( i = 0; i < num_bins; ++i )
+	{
+		if ( bins[ i ].num != 0 )
+			bins[ i ].av /= bins[ i ].num;
+		
+		bins[ i ].lowb = mn - a / 2 + ( double ) i * step;
+		bins[ i ].highb = mn - a / 2 + ( double ) ( i + 1 ) * step;
+		bins[ i ].center = bins[ i ].highb / 2 + bins[ i ].lowb / 2;
+		
+		if ( stat == 1 )
+			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", "", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, bins[ i ].min, pdigits, bins[ i ].av, pdigits, bins[ i ].max, pdigits, bins[ i ].num, pdigits, bins[ i ].num / cases );
+		
+		if ( bins[ i ].num < lminy )
+			lminy = bins[ i ].num;
+		
+		if ( bins[ i ].num > lmaxy )
+			lmaxy = bins[ i ].num;
+	}
+
+	if ( stat == 1 )
+	{
+		plog( "\n\n" );
+		cmd( "wm deiconify .log; raise .log .da" ); 
+	}
+
+	if ( autom || miny >= maxy )
+	{
+		maxy = lmaxy / cases;
+		miny = lminy > 0 ? ( lminy - 1 ) / cases : 0;
+		cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
+		cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
+	}
+
+	cmd( "set choice $norm" );
+	norm = *choice ? true : false;
+
+	// plot histogram
+	plot( HISTOGR, &start, &end, str, tag, choice, norm );
+
+	*choice = 0;
+
+	delete [ ] bins;
+
+	end:
+
+	delete [ ] str[ 0 ];
+	delete [ ] tag[ 0 ];
+	delete [ ] str;
+	delete [ ] tag;
+	delete [ ] logdata;
 }
 
-if ( autom_x || min_c >= max_c )
-{
-  first = start;
-  last=end;
-}
-else
-{
- if ( min_c>start)
-   first = min_c;
- else
-   first = start;
- if ( max_c < end )  
-   last = max_c;
- else
-   last=end;
-}  
-
-for ( j = 0, i = first; i <= last; ++i )	// count number of points excluding NaNs
- if ( ! is_nan( data[ i ] ) && is_finite( data[ i ] ) )
-  j++;
-
-cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
-
-cmd( "frame .da.s.i" );
-cmd( "label .da.s.i.l -text \"Number of classes/bins\"" );
-cmd( "set bidi %d", j < 25 ? j : 25 );
-cmd( "entry .da.s.i.e -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
-cmd( ".da.s.i.e insert 0 $bidi" ); 
-cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
-
-cmd( "set norm 0" );
-cmd( "checkbutton .da.s.norm -text \"Fit a Normal\" -variable norm" );
-cmd( "set stat 0" );
-cmd( "checkbutton .da.s.st -text \"Show statistics\" -variable stat" );
-cmd( "pack .da.s.i .da.s.norm .da.s.st -pady 5" );
-
-cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#histogram } { set choice 2 }" );
-
-cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
-
-cmd( "showtop .da.s" );
-cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
-
-*choice = 0;
-while ( *choice == 0 )
-  Tcl_DoOneEvent( 0 );
-
-cmd( "set bidi [ .da.s.i.e get ]" ); 
-cmd( "destroytop .da.s" );
-
-if ( *choice == 2 )
-	goto end;
-
-cmd( "set choice $bidi" );
-num_bins = *choice;
-
-mean = var = cases = 0;
-for ( i = first; i <= last; ++i )
-{
- if ( is_nan( data[ i ] ) || !is_finite( data[ i ] ) )		// ignore NaNs
-  continue;
- if ( i == first)
-  mx = mn = data[ i ];
- else
-{
-  if ( data[ i ] > mx)
-   mx = data[ i ];
-  else
-   if ( data[ i ] < mn)
-    mn = data[ i ];
-}  
- mean += data[ i ];
- var += data[ i ]*data[ i ];
- cases++;
-}
-
-if ( cases == 0 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no valid data for the chosen time step cases.\"" );
-	*choice = 2;
-	goto end;
-}
-
-if ( mx - mn <= 0 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no data variation for the chosen time step cases.\"" );
-	*choice = 2;
-	goto end;
-}
-
-mean = mean/cases;
-var=var/cases-mean*mean;
-
-bins = new bin[ num_bins];
-for ( i = 0; i < num_bins; ++i )
-{
- bins[ i ].num = 0;
- bins[ i ].av = 0;
- bins[ i ].min = 0;
- bins[ i ].max = 0;
- bins[ i ].center = 0; 
-}
- 
-for ( i = first; i <= last; ++i )
-{
-  if ( is_nan( data[ i ] ) || ! is_finite( data[ i ] ) )
-	continue;
-	
-  a=floor( num_bins*( data[ i ]-mn)/( mx-mn) );
-  s=num_bins*( data[ i ]-mn)/( mx-mn);
-    
-  j = ( int ) a;
-  if ( j == num_bins)
-   j--;
-
-  if ( bins[ j ].num == 0 )
-   bins[ j ].min=bins[ j ].max = data[ i ];
-  else
-  {
-   if ( bins[ j ].min>data[ i ] )
-    bins[ j ].min = data[ i ];
-   else
-    if ( bins[ j ].max<data[ i ] )
-     bins[ j ].max = data[ i ];
-  }  
-  bins[ j ].num++;   
-  bins[ j ].av += data[ i ];
-} 
-
-a=( mx-mn)/( num_bins-1 );
-for ( i = 1; i < num_bins; ++i )
-  if ( bins[ i ].num != 0 && bins[ i-1 ].num != 0 && bins[ i ].min-bins[ i-1 ].max<a)
-    a=bins[ i ].min-bins[ i-1 ].max;
-
-cmd( "set choice $stat" );
-stat = *choice;
-
-if ( stat == 1 )
- plog( "\nTime series histogram statistics\n #   Boundaries(center)\t\tMin.\tAverage\tMax.\tNum.\tFreq." );
-
-step=( mx+a/2-( mn-a/2 ) )/num_bins;
-lminy=cases;
-lmaxy = 0;
-for ( i = 0; i < num_bins; ++i )
-{
-  if ( bins[ i ].num != 0 )
-    bins[ i ].av/=bins[ i ].num;
-  bins[ i ].lowb = mn-a/2+( double )( i)*step;
-  bins[ i ].highb = mn -a/2 + ( double )( i + 1 )*step;
-  bins[ i ].center=  bins[ i ].highb/2+  bins[ i ].lowb/2;
-  if ( stat == 1 )
-    plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", "", i + 1, pdigits, mn-a/2+( double )( i)*step, pdigits, mn -a/2 + ( double )( i + 1 )*step, pdigits, mn -a/2 +( double )( i)*step +step/2, pdigits, bins[ i ].min, pdigits, bins[ i ].av, pdigits, bins[ i ].max, pdigits, bins[ i ].num, pdigits, bins[ i ].num/(cases) );
-  if ( bins[ i ].num<lminy )
-   lminy=bins[ i ].num;
-  if ( bins[ i ].num>lmaxy )
-   lmaxy=bins[ i ].num;
-}
-
-if ( stat == 1 )
-{
- plog( "\n\n" );
- cmd( "wm deiconify .log; raise .log .da" ); 
-}
-
-if ( autom || miny >= maxy )
-{
-  maxy = lmaxy / cases;
-  miny = lminy > 0 ? ( lminy - 1 ) / cases : 0;
-  cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
-  cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
-}
-
-cmd( "set choice $norm" );
-norm = *choice ? true : false;
-
-// plot histogram
-plot( HISTOGR, &start, &end, str, tag, choice, norm );
-
-*choice = 0;
-
-delete [ ] bins;
-
-end:
-
-delete [ ] str[ 0 ];
-delete [ ] tag[ 0 ];
-delete [ ] str;
-delete [ ] tag;
-delete [ ] logdata;
-}
 
 /***************************************************
 HISTOGRAMS CS
 ****************************************************/
 void histograms_cs( int *choice )
 {
-char *app, **str, **tag;
-int i, x1, x2, y1, y2, j, first, last, stat, active_v, *start, *end, idseries;
-double mx, mn, step, a, s, lminy, lmaxy, **data, **logdata = NULL;
-int logErrCnt = 0;				// log errors counter to prevent excess messages
-bool norm, stopErr = false;
+	char *app, **str, **tag;
+	double mx = 0, mn = 0, step, a, lminy, lmaxy, **data, **logdata = NULL;
+	int i, j, stat, active_v, *start, *end, idseries;
 
-if ( nv < 2 )
-{
-	if ( nv == 0 )			// no variables selected
-		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place two or more series in the Series Selected listbox.\"" );
-	else
-		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For cross-section histograms select at least two series.\"" );
-	*choice = 2;
-	return;
-}
+	int logErrCnt = 0;				// log errors counter to prevent excess messages
+	bool norm, stopErr = false;
 
-data = new double *[ nv ];
-logdata = new double *[ nv ];
-start = new int [ nv ];
-end = new int [ nv ];
-str = new char *[ nv ];
-tag = new char *[ nv ];
+	if ( nv < 2 )
+	{
+		if ( nv == 0 )			// no variables selected
+			cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place two or more series in the Series Selected listbox.\"" );
+		else
+			cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For cross-section histograms select at least two series.\"" );
+		
+		*choice = 2;
+		return;
+	}
 
-if ( autom_x )
-{
-	min_c = 1;
-  max_c = num_c;
-}
+	data = new double *[ nv ];
+	logdata = new double *[ nv ];
+	start = new int [ nv ];
+	end = new int [ nv ];
+	str = new char *[ nv ];
+	tag = new char *[ nv ];
 
-// prepare data from selected series
-for ( i = 0; i < nv; ++i )
-{
-	str[ i ] = new char[ MAX_ELEM_LENGTH ];
-  tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+	if ( autom_x )
+	{
+		min_c = 1;
+		max_c = num_c;
+	}
 
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-  strcpy( msg, app );
-  sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
-  
-  data[ i ] = vs[ idseries ].data;
-  if ( data[ i ] == NULL )
-    plog( "\nError: invalid data\n" );
-  
-   if ( logs )			// apply log to the values to show "log scale" in the y-axis
-   {
-	 logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-     for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-	   if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-		 logdata[ i ][ j ] = log( data[ i ][ j ] );
-	   else
-	   {
-		 logdata[ i ][ j ] = NAN;
-		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		 {
-			plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
-		 }
-		 else
-			if ( ! stopErr )
+	// prepare data from selected series
+	for ( i = 0; i < nv; ++i )
+	{
+		str[ i ] = new char[ MAX_ELEM_LENGTH ];
+		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+		
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		strcpy( msg, app );
+		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries );
+		
+		data[ i ] = vs[ idseries ].data;
+		if ( data[ i ] == NULL )
+			plog( "\nError: invalid data\n" );
+	  
+		if ( logs )			// apply log to the values to show "log scale" in the y-axis
+		{
+			logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
+			for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
+				if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
+					logdata[ i ][ j ] = log( data[ i ][ j ] );
+				else
+				{
+					logdata[ i ][ j ] = NAN;
+					if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+						plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+					else
+						if ( ! stopErr )
+						{
+							plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+							stopErr = true;
+						}
+				}
+				
+			data[ i ] = logdata[ i ];				// replace the data series
+		}
+	}
+
+	cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
+
+	cmd( "frame .da.s.t" );
+	cmd( "label .da.s.t.l -text \"Cross-section time step\"" );
+	cmd( "set time %d", end[ 0 ] );
+	cmd( "entry .da.s.t.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invcmd { bell } -justify center" );
+	cmd( ".da.s.t.e insert 0 $time" ); 
+	cmd( "pack .da.s.t.l .da.s.t.e -side left -padx 2" );
+
+	cmd( "frame .da.s.i" );
+	cmd( "label .da.s.i.l -text \"Number of classes/bins\"" );
+	cmd( "set bidi %d", nv < 25 ? nv : 25 );
+	cmd( "entry .da.s.i.e -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+	cmd( ".da.s.i.e insert 0 $bidi" ); 
+	cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
+
+	cmd( "set norm 0" );
+	cmd( "checkbutton .da.s.norm -text \"Fit a Normal\" -variable norm" );
+	cmd( "set stat 0" );
+	cmd( "checkbutton .da.s.st -text \"Show statistics\" -variable stat" );
+	cmd( "pack .da.s.t .da.s.i .da.s.norm .da.s.st -pady 5" );
+
+	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#histogram } { set choice 2 }" );
+
+	cmd( "bind .da.s.t.e <Return> {focus .da.s.i.e; .da.s.i.e selection range 0 end}" );
+	cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
+
+	cmd( "showtop .da.s" );
+	cmd( "focus .da.s.t.e; .da.s.t.e selection range 0 end" );
+
+	*choice = 0;
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	cmd( "set bidi [ .da.s.i.e get ]" ); 
+	cmd( "set time [ .da.s.t.e get ]" ); 
+	cmd( "destroytop .da.s" );
+
+	if ( *choice == 2 )
+		goto end;
+
+	cmd( "set choice $bidi" );
+	num_bins = *choice;
+	cmd( "set choice $time" );
+	time_cs = *choice;
+
+	mean = var = cases = 0;
+	active_v = 0;
+	for ( i = 0; i < nv; ++i )
+		if ( start[ i ] <= time_cs && end[ i ] >= time_cs && is_finite( data[ i ][ time_cs ] ) )		// ignore NaNs
+		{
+			if ( active_v == 0 )
+				mx = mn = data[ i ][ time_cs ];
+			else
 			{
-				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-				stopErr = true;
-			}
-	   }
-	 data[ i ] = logdata[ i ];				// replace the data series
-   }
-}
+				if ( data[ i ][ time_cs ] > mx )
+					mx = data[ i ][ time_cs ];
+				else
+					if ( data[ i ][ time_cs ] < mn )
+						mn = data[ i ][ time_cs ];
+			}  
+			
+			mean += data[ i ][ time_cs ];
+			var += data[ i ][ time_cs ]*data[ i ][ time_cs ];
+			cases++;
+			active_v++;
+		}
 
-cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
+	if ( cases == 0 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series have no valid data in the chosen time step.\"" );
+		*choice = 2;
+		goto end;
+	}
 
-cmd( "frame .da.s.t" );
-cmd( "label .da.s.t.l -text \"Cross-section time step\"" );
-cmd( "set time %d", end[ 0 ] );
-cmd( "entry .da.s.t.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invcmd { bell } -justify center" );
-cmd( ".da.s.t.e insert 0 $time" ); 
-cmd( "pack .da.s.t.l .da.s.t.e -side left -padx 2" );
+	mean = mean / cases;
+	var = var / cases - mean * mean;
 
-cmd( "frame .da.s.i" );
-cmd( "label .da.s.i.l -text \"Number of classes/bins\"" );
-cmd( "set bidi %d", nv < 25 ? nv : 25 );
-cmd( "entry .da.s.i.e -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
-cmd( ".da.s.i.e insert 0 $bidi" ); 
-cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
+	bins = new bin[ num_bins ];
+	for ( i = 0; i < num_bins; ++i )
+	{
+		bins[ i ].num = 0;
+		bins[ i ].av = 0;
+		bins[ i ].min = 0;
+		bins[ i ].max = 0;  
+		bins[ i ].center = 0; 
+	}
+	 
+	for ( i = 0; i < nv; ++i )
+	{
+		if ( start[ i ] > time_cs || end[ i ] < time_cs || ! is_finite( data[ i ][ time_cs ] ) )
+			continue;
 
-cmd( "set norm 0" );
-cmd( "checkbutton .da.s.norm -text \"Fit a Normal\" -variable norm" );
-cmd( "set stat 0" );
-cmd( "checkbutton .da.s.st -text \"Show statistics\" -variable stat" );
-cmd( "pack .da.s.t .da.s.i .da.s.norm .da.s.st -pady 5" );
+		a = floor( num_bins * ( data[ i ][ time_cs ] - mn ) / ( mx - mn ) );
+			
+		j = ( int ) a;
+		if ( j == num_bins )
+			--j;
+		
+		if ( bins[ j ].num == 0 )
+			bins[ j ].min=bins[ j ].max = data[ i ][ time_cs ];
+		else
+		{
+			if ( bins[ j ].min > data[ i ][ time_cs ] )
+				bins[ j ].min = data[ i ][ time_cs ];
+			else
+				if ( bins[ j ].max < data[ i ][ time_cs ] )
+					bins[ j ].max = data[ i ][ time_cs ];
+		}
+		
+		bins[ j ].num++;   
+		bins[ j ].av += data[ i ][ time_cs ];
+	} 
 
-cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#histogram } { set choice 2 }" );
+	a = ( mx - mn ) / ( num_bins - 1 );
+	for ( i = 1; i < num_bins; ++i )
+		if ( bins[ i ].num != 0 && bins[ i - 1 ].num != 0 && bins[ i ].min - bins[ i - 1 ].max < a )
+			a = bins[ i ].min - bins[ i - 1 ].max;
 
-cmd( "bind .da.s.t.e <Return> {focus .da.s.i.e; .da.s.i.e selection range 0 end}" );
-cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
+	cmd( "set choice $stat" );
+	stat = *choice;
 
-cmd( "showtop .da.s" );
-cmd( "focus .da.s.t.e; .da.s.t.e selection range 0 end" );
+	if ( stat == 1 )
+		plog( "\nCross-section histogram statistics\n#    Boundaries(center)\t\tMin\tAve\tMax\tNum.\tFreq." );
 
-*choice = 0;
-while ( *choice == 0 )
-  Tcl_DoOneEvent( 0 );
+	step = ( mx + a / 2 - ( mn - a / 2 ) ) / num_bins;
+	lminy = active_v;
+	lmaxy = 0;
 
-cmd( "set bidi [ .da.s.i.e get ]" ); 
-cmd( "set time [ .da.s.t.e get ]" ); 
-cmd( "destroytop .da.s" );
+	for ( i = 0; i < num_bins; ++i )
+	{
+		if ( bins[ i ].num != 0 )
+			bins[ i ].av /= bins[ i ].num;
+		bins[ i ].lowb = mn - a / 2 + ( double ) i * step;
+		bins[ i ].highb = mn - a / 2 + ( double ) ( i + 1 ) * step;
+		bins[ i ].center = bins[ i ].highb / 2 + bins[ i ].lowb / 2;
+		
+		if ( stat == 1 )
+			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", "", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, bins[ i ].min, pdigits, bins[ i ].av, pdigits, bins[ i ].max, pdigits, bins[ i ].num, pdigits, bins[ i ].num / cases );
+		
+		if ( bins[ i ].num < lminy )
+			lminy = bins[ i ].num;
+		if ( bins[ i ].num > lmaxy )
+			lmaxy = bins[ i ].num;
+	}
 
-if ( *choice == 2 )
-	goto end;
+	if ( stat == 1 )
+	{
+		plog( "\n\n" );
+		cmd( "wm deiconify .log; raise .log .da" ); 
+	}
 
-cmd( "set choice $bidi" );
-num_bins = *choice;
-cmd( "set choice $time" );
-time_cs = *choice;
+	if ( autom || miny >= maxy )
+	{
+		maxy = lmaxy / cases;
+		miny = lminy > 0 ? ( lminy - 1 ) / cases : 0;
+		cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
+		cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
+	}
 
-mean = var = cases = 0;
-active_v = 0;
-for ( i = 0; i < nv; ++i )
-{
- if ( start[ i ] <= time_cs && end[ i ] >= time_cs && is_finite( data[ i ][time_cs] ) )		// ignore NaNs
-{
- if ( active_v == 0 )
-  mx = mn = data[ i ][time_cs];
- else
-  {
-  if ( data[ i ][time_cs] > mx)
-   mx = data[ i ][time_cs];
-  else
-   if ( data[ i ][time_cs] < mn)
-    mn = data[ i ][time_cs];
-  }  
-  mean += data[ i ][time_cs];
-  var += data[ i ][time_cs]*data[ i ][time_cs];
-  cases++;
-  active_v++;
-  }
-}
+	cmd( "set choice $norm" );
+	norm = *choice ? true : false;
 
-if ( cases == 0 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series have no valid data in the chosen time step.\"" );
-	*choice = 2;
-	goto end;
-}
+	// plot histogram
+	plot( HISTOCS, start, end, str, tag, choice, norm );
 
-mean = mean/cases;
-var=var/cases-mean*mean;
+	*choice = 0;
 
-bins = new bin[ num_bins];
-for ( i = 0; i < num_bins; ++i )
-{
- bins[ i ].num = 0;
- bins[ i ].av = 0;
- bins[ i ].min = 0;
- bins[ i ].max = 0;  
- bins[ i ].center = 0; 
-}
- 
-for ( i = 0; i < nv; ++i )
-{
-  if ( start[ i ] > time_cs || end[ i ] < time_cs || ! is_finite( data[ i ][ time_cs ] ) )
-	continue;
+	delete [ ] bins;
 
-  a=floor( num_bins*( data[ i ][time_cs]-mn)/( mx-mn) );
-  s=num_bins*( data[ i ][time_cs]-mn)/( mx-mn);
-    
-  j = ( int ) a;
-  if ( j == num_bins)
-   j--;
+	end:
 
-  if ( bins[ j ].num == 0 )
-   {bins[ j ].min=bins[ j ].max = data[ i ][time_cs];
-   }
-  else
-   {
-   if ( bins[ j ].min>data[ i ][time_cs] )
-    bins[ j ].min = data[ i ][time_cs];
-   else
-   if ( bins[ j ].max<data[ i ][time_cs] )
-    bins[ j ].max = data[ i ][time_cs];
-   }  
-  bins[ j ].num++;   
-  bins[ j ].av += data[ i ][time_cs];
-} 
-
-a=( mx-mn)/( num_bins-1 );
-for ( i = 1; i < num_bins; ++i )
-  if ( bins[ i ].num != 0 && bins[ i-1 ].num != 0 && bins[ i ].min-bins[ i-1 ].max<a)
-    a=bins[ i ].min-bins[ i-1 ].max;
-
-cmd( "set choice $stat" );
-stat = *choice;
-
-if ( stat == 1 )
- plog( "\nCross-section histogram statistics\n#    Boundaries(center)\t\tMin\tAve\tMax\tNum.\tFreq." );
-
-step=( mx+a/2-( mn-a/2 ) )/num_bins;
-lminy=active_v;
-lmaxy = 0;
-for ( i = 0; i < num_bins; ++i )
-{
-  if ( bins[ i ].num != 0 )
-    bins[ i ].av/=bins[ i ].num;
-  bins[ i ].lowb = mn-a/2+( double )( i)*step;
-  bins[ i ].highb = mn -a/2 + ( double )( i + 1 )*step;
-  bins[ i ].center=  bins[ i ].highb/2+  bins[ i ].lowb/2;
-  if ( stat == 1 )
-   plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", "", i + 1, pdigits, mn-a/2+( double )( i)*step, pdigits, mn -a/2 + ( double )( i + 1 )*step, pdigits, mn -a/2 +( double )( i)*step +step/2, pdigits, bins[ i ].min, pdigits, bins[ i ].av, pdigits, bins[ i ].max, pdigits, bins[ i ].num, pdigits, bins[ i ].num/(cases) );
-  if ( bins[ i ].num<lminy )
-   lminy=bins[ i ].num;
-  if ( bins[ i ].num>lmaxy )
-   lmaxy=bins[ i ].num;
-}
-
-if ( stat == 1 )
-{
- plog( "\n\n" );
- cmd( "wm deiconify .log; raise .log .da" ); 
-}
-
-if ( autom || miny >= maxy )
-{
-  maxy = lmaxy / cases;
-  miny = lminy > 0 ? ( lminy - 1 ) / cases : 0;
-  cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
-  cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
-}
-
-cmd( "set choice $norm" );
-norm = *choice ? true : false;
-
-// plot histogram
-plot( HISTOCS, start, end, str, tag, choice, norm );
-
-*choice = 0;
-
-delete [ ] bins;
-
-end:
-
-delete [ ] start;
-delete [ ] end;
-delete [ ] data;
-for ( i = 0; i < nv; ++i )
-{
- delete [ ] str[ i ];
- delete [ ] tag[ i ];
- if ( logs )
-   delete [ ] logdata[ i ];
-}
-delete [ ] logdata;
-delete [ ] str;
-delete [ ] tag; 
+	delete [ ] start;
+	delete [ ] end;
+	delete [ ] data;
+	for ( i = 0; i < nv; ++i )
+	{
+		delete [ ] str[ i ];
+		delete [ ] tag[ i ];
+		if ( logs )
+			delete [ ] logdata[ i ];
+	}
+	delete [ ] logdata;
+	delete [ ] str;
+	delete [ ] tag; 
 }
 
 
@@ -6075,11 +6066,10 @@ double z_star[ ] = { 1.281552, 1.310579, 1.340755, 1.372204, 1.405072, 1.439531,
 
 void create_series( int *choice )
 {
-	int i, j, k, *start, *end, idseries, flt, cs_long, type_series, new_series, confi;
-	double nmax, nmin, nmean, nvar, nn, thflt, z_crit;
-	double step;
 	bool first;
 	char *lapp, **str, **tag;
+	int i, j, k, *start, *end, idseries, flt, cs_long, type_series, new_series, confi;
+	double nmax = 0, nmin = 0, nmean, nvar, nn, thflt, z_crit;
 	store *app;
 
 	if ( nv == 0 )
@@ -6217,7 +6207,10 @@ void create_series( int *choice )
 		z_crit = z_star[ ( int ) max( min( confi, 99 ), 80 ) - 80 ];	
 	}
 	else
+	{
 		new_series = 1;
+		z_crit = 0;
+	}
 	
 	data = new double *[ nv ];
 	start = new int [ nv ];
@@ -6268,8 +6261,8 @@ void create_series( int *choice )
 				min_c = max_c = start[ i ];
 			if ( start[ i ] < min_c )
 				min_c = start[ i ];
-			if (end[ i ] > max_c )
-				max_c = end[ i ] > num_c?num_c:end[ i ];
+			if ( end[ i ] > max_c )
+				max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
 
 	// handle creation of multiple series
@@ -6437,11 +6430,13 @@ void create_series( int *choice )
 	delete [ ] start;
 	delete [ ] end;
 	delete [ ] data;
+	
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
 		delete [ ] tag[ i ];
 	}
+	
 	delete [ ] str;
 	delete [ ] tag; 
 }
@@ -6452,11 +6447,9 @@ CREATE_MAVERAG
 ****************************************************/
 void create_maverag( int *choice )
 {
-	int h, i, j, k, *start, *end, flt, ma_type, idseries;
-	double xapp;
-	double step;
-
 	char *lapp, **str, **tag;
+	double xapp;
+	int h, i, j, k, *start, *end, flt, ma_type, idseries;
 	store *app;
 
 	if ( nv == 0 )
@@ -6651,501 +6644,511 @@ void create_maverag( int *choice )
 /************************
  SAVE_DATAzip
  ************************/
- 
 int numcol = 16;
 
 void save_datazip( int *choice )
 {
-int idseries, memstep;
-char *app;
-char **str, **tag;
-char delimiter[ 10], misval[ 10], labprefix[ MAX_ELEM_LENGTH ];
-int i, j, *start, *end, fr, typelab, del, headprefix, type_res;
-double **data, *dd, *ddstart;
-const char *descr, *ext;
-const char str0[ ] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000";
-const char strsp[ ] = "                                                                                ";
-const char descrRes[ ] = "LSD Result File";
-const char descrTxt[ ] = "Text File";
-const char extResZip[ ] = ".res.gz";
-const char extTxtZip[ ] = ".txt.gz";
-const char extRes[ ] = ".res";
-const char extTxt[ ] = ".txt";
-FILE *fsave;
+	char *app, **str, **tag, delimiter[ 10 ], misval[ 10 ], labprefix[ MAX_ELEM_LENGTH ];
+	const char *descr, *ext;
+	double **data;
+	int i, j, idseries, *start, *end, fr, typelab, del, type_res, headprefix = 0;
+	FILE *fsave = NULL;
+
 #ifdef LIBZ
-gzFile fsavez;
+	gzFile fsavez = NULL;
 #else
-FILE *fsavez; 
+	FILE *fsavez = NULL; 
 #endif 
 
-if ( nv == 0 )			// no variables selected
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-	return;
-}
+	const char str0[ ] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000";
+	const char strsp[ ] = "                                                                                ";
+	const char descrRes[ ] = "LSD Result File";
+	const char descrTxt[ ] = "Text File";
+	const char extResZip[ ] = ".res.gz";
+	const char extTxtZip[ ] = ".txt.gz";
+	const char extRes[ ] = ".res";
+	const char extTxt[ ] = ".txt";
 
-if ( logs )
-  cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
-
-data = new double *[ nv ];
-start = new int [ nv ];
-end = new int [ nv ];
-str = new char *[ nv ];
-tag = new char *[ nv ];
-
-max_c = min_c = 0;
-
-for ( i = 0; i < nv; ++i )
-{
-	str[ i ] = new char[ MAX_ELEM_LENGTH ];
-  tag[ i ] = new char[ MAX_ELEM_LENGTH ];
-
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-  strcpy( msg, app );
-  sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
-  data[ i ] = vs[ idseries ].data;
-  if ( data[ i ] == NULL )
-    plog( "\nError: invalid data\n" );
-
-  if ( max_c<end[ i ] )
-   max_c = end[ i ];
-}
-
-Tcl_LinkVar( inter, "fr", ( char * ) &fr, TCL_LINK_BOOLEAN);
-Tcl_LinkVar( inter, "dozip", ( char * ) &dozip, TCL_LINK_BOOLEAN);
-Tcl_LinkVar( inter, "typelab", ( char * ) &typelab, TCL_LINK_INT );
-Tcl_LinkVar( inter, "deli", ( char * ) &del, TCL_LINK_INT );
-Tcl_LinkVar( inter, "numcol", ( char * ) &numcol, TCL_LINK_INT );
-
-strncpy( misval, nonavail, 9 );
-typelab = 3;
-fr = 1;
-del = 1;
-
-cmd( "newtop .da.lab \"Data Save Options\" { set choice 2 } .da" );
-
-cmd( "frame .da.lab.f" );
-cmd( "label .da.lab.f.l -text \"File format\"" );
-
-cmd( "frame .da.lab.f.t -relief groove -bd 2" );
-cmd( "radiobutton .da.lab.f.t.lsd -text \"LSD results file\" -variable typelab -value 3" );
-cmd( "radiobutton .da.lab.f.t.nolsd -text \"Text file\" -variable typelab -value 4" );
-cmd( "pack .da.lab.f.t.lsd .da.lab.f.t.nolsd -anchor w" );
-
-cmd( "pack .da.lab.f.l .da.lab.f.t" );
-
-cmd( "checkbutton .da.lab.dozip -text \"Generate zipped file\" -variable dozip" );
-
-#ifdef LIBZ
-cmd( "pack .da.lab.f .da.lab.dozip -padx 5 -pady 5" );
-#else
-cmd( "pack .da.lab.f -padx 5 -pady 5" );
-#endif
-
-cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp menudata_res.html#save } { set choice 2 }" );
-
-cmd( "bind .da.lab <Return> {.da.lab.ok invoke}" );
-cmd( "bind .da.lab <Escape> {.da.lab.esc invoke}" );
-
-cmd( "showtop .da.lab" );
-
-*choice = 0;
-while ( *choice == 0 )
- Tcl_DoOneEvent( 0 );
-
-if ( *choice == 2 )
- goto end;
-type_res=typelab;
-
-*choice = 0;
-cmd( "destroytop .da.lab" );
-
-if (typelab==4)
-{
-typelab = 1;
-cmd( "if { ! [ info exists labprefix ] } { set labprefix \"V\" }" );
-cmd( "if { ! [ info exists headprefix ] } { set headprefix 0 }" );
-cmd( "if { ! [ info exists delimiter ] } { set delimiter \"%s\" }", CSV_SEP );
-cmd( "if { ! [ info exists misval ] } { set misval \"%s\" }", nonavail );
-
-cmd( "newtop .da.lab \"Data Save Options\" { set choice 2 } .da" );
-
-cmd( "checkbutton .da.lab.fr -text \"Header in first row\" -variable fr -command { if { $fr == 0 } { .da.lab.gp configure -state disabled; .da.lab.f.r.orig configure -state disabled; .da.lab.f.r.new configure -state disabled; .da.lab.d.r.tab configure -state disabled; .da.lab.d.r.oth configure -state disabled; .da.lab.d.r.col configure -state disabled; .da.lab.gen.mis_val configure -state disabled; if { $typelab == 2 } { .da.lab.n.en configure -state disabled }; if { $deli == 2 } { .da.lab.c.del configure -state disabled }; if { $deli == 3 } { .da.lab.e.ecol configure -state disabled } } else { .da.lab.gp configure -state normal; .da.lab.f.r.orig configure -state normal; .da.lab.f.r.new configure -state normal; .da.lab.d.r.tab configure -state normal; .da.lab.d.r.oth configure -state normal; .da.lab.d.r.col configure -state normal; .da.lab.gen.mis_val configure -state normal; if { $typelab == 2 } { .da.lab.n.en configure -state normal }; if { $deli == 2 } { .da.lab.c.del configure -state normal }; if { $deli == 3 } { .da.lab.e.ecol configure -state normal } } }" );
-cmd( "checkbutton .da.lab.gp -text \"Prefix header with #\" -variable headprefix" );
-
-cmd( "frame .da.lab.f" );
-cmd( "label .da.lab.f.tit -text \"First row labels\"" );
-
-cmd( "frame .da.lab.f.r -relief groove -bd 2" );
-cmd( "radiobutton .da.lab.f.r.orig -text Original -variable typelab -value 1 -command { .da.lab.n.en configure -state disabled }" );
-cmd( "radiobutton .da.lab.f.r.new -text Numeric -variable typelab -value 2 -command { .da.lab.n.en configure -state normal }" );
-cmd( "pack .da.lab.f.r.orig .da.lab.f.r.new -anchor w" );
-
-cmd( "pack .da.lab.f.tit .da.lab.f.r" );
-
-cmd( "frame .da.lab.n" );
-cmd( "label .da.lab.n.l -text \"Numeric labels prefix\"" );
-cmd( "entry .da.lab.n.en -width 10 -justify center -textvariable labprefix -state disabled" );
-cmd( "pack .da.lab.n.l .da.lab.n.en" );
-
-cmd( "frame .da.lab.d" );
-cmd( "label .da.lab.d.tit -text \"Columns delimiter\"" );
-
-cmd( "frame .da.lab.d.r -relief groove -bd 2" );
-cmd( "radiobutton .da.lab.d.r.tab -text Tabs -variable deli -value 1 -command { .da.lab.c.del configure -state disabled; .da.lab.e.ecol configure -state disabled }" );
-cmd( "radiobutton .da.lab.d.r.oth -text Custom -variable deli -value 2 -command { .da.lab.c.del configure -state normal; .da.lab.e.ecol configure -state disabled }" );
-cmd( "radiobutton .da.lab.d.r.col -text \"Fixed width\" -variable deli -value 3 -command { .da.lab.c.del configure -state disabled; .da.lab.e.ecol configure -state normal }" );
-cmd( "pack .da.lab.d.r.tab .da.lab.d.r.oth .da.lab.d.r.col -anchor w" );
-
-cmd( "pack .da.lab.d.tit .da.lab.d.r" );
-
-cmd( "frame .da.lab.c" );
-cmd( "label .da.lab.c.l -text \"Custom delimiter\"" );
-cmd( "entry .da.lab.c.del -width 3 -textvariable delimiter -justify center -state disabled" );
-cmd( "pack .da.lab.c.l .da.lab.c.del" );
-
-cmd( "frame .da.lab.e" );
-cmd( "label .da.lab.e.l -text \"Column width (10-80 chars)\"" );
-cmd( "entry .da.lab.e.ecol -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set numcol %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numcol; return 0 } } -invcmd { bell } -justify center -state disabled" );
-cmd( "write_disabled .da.lab.e.ecol $numcol" );
-cmd( "pack .da.lab.e.l .da.lab.e.ecol" );
-
-cmd( "frame .da.lab.gen" );
-cmd( "label .da.lab.gen.miss -text \"Missing values\"" );
-cmd( "entry .da.lab.gen.mis_val -width 5 -textvariable misval -justify center" );
-cmd( "pack .da.lab.gen.miss .da.lab.gen.mis_val" );
-
-cmd( "pack .da.lab.fr .da.lab.gp .da.lab.f .da.lab.n .da.lab.d .da.lab.c .da.lab.e .da.lab.gen -padx 5 -pady 5" );
-
-cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp menudata_res.html#save } { set choice 2 }" );
-
-cmd( "showtop .da.lab" );
-
-*choice = 0;
-while ( *choice == 0 )
- Tcl_DoOneEvent( 0 );
-
-if ( *choice == 2 )
- goto end;
-
-cmd( "set numcol [ .da.lab.e.ecol get ]" ); 
-cmd( "set choice $headprefix" );
-headprefix = *choice;
-app = ( char * ) Tcl_GetVar( inter, "misval", 0 );
-strncpy( misval, app, 9 );
-
-*choice = 0;
-}
-
-if ( type_res == 4 )
-{
-	descr = descrTxt;
-	if ( ! dozip )
-		ext = extTxt;
-	else
-		ext = extTxtZip;
-}
-else
-{
-	descr = descrRes;
-	if ( ! dozip )
-		ext = extRes;
-	else
-		ext = extResZip;
-}
-
-// make sure there is a path set
-cmd( "set path \"%s\"", path );
-if ( strlen( path ) > 0 )
-	cmd( "cd \"$path\"" );
-
-cmd( "set bah [tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes {{{%s} {%s}} {{All files} {*}} }]", ext, descr, ext );
-app = ( char * ) Tcl_GetVar( inter, "bah", 0 );
-strcpy( msg, app );
-
-if ( strlen( msg ) == 0 )
- goto end;
-
-if ( dozip == 1 ) 
-{
-#ifdef LIBZ
-  fsavez=gzopen( msg, "wt" );
-#endif 
-} 
-else
- fsave = fopen( msg, "wt" );  // use text mode for Windows better compatibility
-
-if ( del!=3) //Delimited files
-{
-	if ( del == 2 )
-{
-	app = ( char * ) Tcl_GetVar( inter, "delimiter", 0 );
-  if ( strlen( app ) == 0 )
-    strcpy( delimiter, "\t" );
-  else
-    strncpy( delimiter, app, 9 );
-}
- else
-  strcpy( delimiter, "\t" );
-}
-
-if ( typelab == 2 )
-{
-	app = ( char * ) Tcl_GetVar( inter, "labprefix", 0 );
-	if ( strlen( app ) == 0 )
-		strcpy( labprefix, "V" );
-	else
-		strncpy( labprefix, app, MAX_ELEM_LENGTH - 1  );
-}
-
-numcol = ( int ) max( 10, min( numcol, 80 ) );
-
-if ( fr == 1 )
-{
-if ( del!=3)
-{
-switch (typelab)
-{
-case 1:   //Original labels
-if (headprefix == 1 )
-{
-  if ( dozip == 1 ) 
-    {
-     #ifdef LIBZ
-     gzprintf( fsavez, "#" );
-     #endif
-    } 
-  else
-    fprintf( fsave, "#" );
-}  
- 
-for ( i = 0; i < nv; ++i )
-{
-   if ( dozip == 1 ) 
-   {
-    #ifdef LIBZ 
-     gzprintf( fsavez, "%s_%s", str[ i ], tag[ i ] );
-	   
-     if ( i < nv - 1 )  
-		gzprintf( fsavez, "%s", delimiter );
-    #endif 
-   } 
-   else
-   {
-     fprintf( fsave, "%s_%s", str[ i ], tag[ i ] ); 
-	   
-     if ( i < nv - 1 )  
-		fprintf( fsave, "%s", delimiter );
-   } 
-}  
-break;
-
-case 2: //New names for labels
- if (headprefix == 1 )
-{
-  if ( dozip == 1 ) 
-   {
-#ifdef LIBZ
-    gzprintf( fsavez, "#" );
-#endif
-   } 
-  else
-   fprintf( fsave, "#" );
-}  
- 
- for ( i = 0; i < nv; ++i )
-  {
-	if ( dozip == 1 ) 
-    {
-#ifdef LIBZ
-		gzprintf( fsavez, "%s%d", labprefix, i );
-	   
-		if ( i < nv - 1 )  
-		  gzprintf( fsavez, "%s", delimiter );
-#endif
-    } 
-    else
+	if ( nv == 0 )			// no variables selected
 	{
-		fprintf( fsave, "%s%d", labprefix, i );  
-	   
-		if ( i < nv - 1 )  
-		  fprintf( fsave, "%s", delimiter );
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
+		return;
 	}
-  }   
- break;
 
-case 3: //LSD result files
-for ( i = 0; i < nv; ++i )
-{
+	if ( logs )
+	  cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
+
+	data = new double *[ nv ];
+	start = new int [ nv ];
+	end = new int [ nv ];
+	str = new char *[ nv ];
+	tag = new char *[ nv ];
+
+	max_c = min_c = 0;
+
+	for ( i = 0; i < nv; ++i )
+	{
+		str[ i ] = new char[ MAX_ELEM_LENGTH ];
+		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+		
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		strcpy( msg, app );
+		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries );
+		data[ i ] = vs[ idseries ].data;
+		if ( data[ i ] == NULL )
+			plog( "\nError: invalid data\n" );
+		
+		if ( max_c < end[ i ] )
+			max_c = end[ i ];
+	}
+
+	Tcl_LinkVar( inter, "fr", ( char * ) &fr, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( inter, "dozip", ( char * ) &dozip, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( inter, "typelab", ( char * ) &typelab, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "deli", ( char * ) &del, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "numcol", ( char * ) &numcol, TCL_LINK_INT );
+
+	strncpy( misval, nonavail, 9 );
+	typelab = 3;
+	fr = 1;
+	del = 1;
+
+	cmd( "newtop .da.lab \"Data Save Options\" { set choice 2 } .da" );
+
+	cmd( "frame .da.lab.f" );
+	cmd( "label .da.lab.f.l -text \"File format\"" );
+
+	cmd( "frame .da.lab.f.t -relief groove -bd 2" );
+	cmd( "radiobutton .da.lab.f.t.lsd -text \"LSD results file\" -variable typelab -value 3" );
+	cmd( "radiobutton .da.lab.f.t.nolsd -text \"Text file\" -variable typelab -value 4" );
+	cmd( "pack .da.lab.f.t.lsd .da.lab.f.t.nolsd -anchor w" );
+
+	cmd( "pack .da.lab.f.l .da.lab.f.t" );
+
+	cmd( "checkbutton .da.lab.dozip -text \"Generate zipped file\" -variable dozip" );
+
+#ifdef LIBZ
+	cmd( "pack .da.lab.f .da.lab.dozip -padx 5 -pady 5" );
+#else
+	cmd( "pack .da.lab.f -padx 5 -pady 5" );
+#endif
+
+	cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp menudata_res.html#save } { set choice 2 }" );
+
+	cmd( "bind .da.lab <Return> {.da.lab.ok invoke}" );
+	cmd( "bind .da.lab <Escape> {.da.lab.esc invoke}" );
+
+	cmd( "showtop .da.lab" );
+
+	*choice = 0;
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	if ( *choice == 2 )
+		goto end;
+
+	*choice = 0;
+	type_res = typelab;
+	cmd( "destroytop .da.lab" );
+
+	if ( typelab == 4 )
+	{
+		typelab = 1;
+		cmd( "if { ! [ info exists labprefix ] } { set labprefix \"V\" }" );
+		cmd( "if { ! [ info exists headprefix ] } { set headprefix 0 }" );
+		cmd( "if { ! [ info exists delimiter ] } { set delimiter \"%s\" }", CSV_SEP );
+		cmd( "if { ! [ info exists misval ] } { set misval \"%s\" }", nonavail );
+
+		cmd( "newtop .da.lab \"Data Save Options\" { set choice 2 } .da" );
+
+		cmd( "checkbutton .da.lab.fr -text \"Header in first row\" -variable fr -command { if { $fr == 0 } { .da.lab.gp configure -state disabled; .da.lab.f.r.orig configure -state disabled; .da.lab.f.r.new configure -state disabled; .da.lab.d.r.tab configure -state disabled; .da.lab.d.r.oth configure -state disabled; .da.lab.d.r.col configure -state disabled; .da.lab.gen.mis_val configure -state disabled; if { $typelab == 2 } { .da.lab.n.en configure -state disabled }; if { $deli == 2 } { .da.lab.c.del configure -state disabled }; if { $deli == 3 } { .da.lab.e.ecol configure -state disabled } } else { .da.lab.gp configure -state normal; .da.lab.f.r.orig configure -state normal; .da.lab.f.r.new configure -state normal; .da.lab.d.r.tab configure -state normal; .da.lab.d.r.oth configure -state normal; .da.lab.d.r.col configure -state normal; .da.lab.gen.mis_val configure -state normal; if { $typelab == 2 } { .da.lab.n.en configure -state normal }; if { $deli == 2 } { .da.lab.c.del configure -state normal }; if { $deli == 3 } { .da.lab.e.ecol configure -state normal } } }" );
+		cmd( "checkbutton .da.lab.gp -text \"Prefix header with #\" -variable headprefix" );
+
+		cmd( "frame .da.lab.f" );
+		cmd( "label .da.lab.f.tit -text \"First row labels\"" );
+
+		cmd( "frame .da.lab.f.r -relief groove -bd 2" );
+		cmd( "radiobutton .da.lab.f.r.orig -text Original -variable typelab -value 1 -command { .da.lab.n.en configure -state disabled }" );
+		cmd( "radiobutton .da.lab.f.r.new -text Numeric -variable typelab -value 2 -command { .da.lab.n.en configure -state normal }" );
+		cmd( "pack .da.lab.f.r.orig .da.lab.f.r.new -anchor w" );
+
+		cmd( "pack .da.lab.f.tit .da.lab.f.r" );
+
+		cmd( "frame .da.lab.n" );
+		cmd( "label .da.lab.n.l -text \"Numeric labels prefix\"" );
+		cmd( "entry .da.lab.n.en -width 10 -justify center -textvariable labprefix -state disabled" );
+		cmd( "pack .da.lab.n.l .da.lab.n.en" );
+
+		cmd( "frame .da.lab.d" );
+		cmd( "label .da.lab.d.tit -text \"Columns delimiter\"" );
+
+		cmd( "frame .da.lab.d.r -relief groove -bd 2" );
+		cmd( "radiobutton .da.lab.d.r.tab -text Tabs -variable deli -value 1 -command { .da.lab.c.del configure -state disabled; .da.lab.e.ecol configure -state disabled }" );
+		cmd( "radiobutton .da.lab.d.r.oth -text Custom -variable deli -value 2 -command { .da.lab.c.del configure -state normal; .da.lab.e.ecol configure -state disabled }" );
+		cmd( "radiobutton .da.lab.d.r.col -text \"Fixed width\" -variable deli -value 3 -command { .da.lab.c.del configure -state disabled; .da.lab.e.ecol configure -state normal }" );
+		cmd( "pack .da.lab.d.r.tab .da.lab.d.r.oth .da.lab.d.r.col -anchor w" );
+
+		cmd( "pack .da.lab.d.tit .da.lab.d.r" );
+
+		cmd( "frame .da.lab.c" );
+		cmd( "label .da.lab.c.l -text \"Custom delimiter\"" );
+		cmd( "entry .da.lab.c.del -width 3 -textvariable delimiter -justify center -state disabled" );
+		cmd( "pack .da.lab.c.l .da.lab.c.del" );
+
+		cmd( "frame .da.lab.e" );
+		cmd( "label .da.lab.e.l -text \"Column width (10-80 chars)\"" );
+		cmd( "entry .da.lab.e.ecol -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set numcol %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numcol; return 0 } } -invcmd { bell } -justify center -state disabled" );
+		cmd( "write_disabled .da.lab.e.ecol $numcol" );
+		cmd( "pack .da.lab.e.l .da.lab.e.ecol" );
+
+		cmd( "frame .da.lab.gen" );
+		cmd( "label .da.lab.gen.miss -text \"Missing values\"" );
+		cmd( "entry .da.lab.gen.mis_val -width 5 -textvariable misval -justify center" );
+		cmd( "pack .da.lab.gen.miss .da.lab.gen.mis_val" );
+
+		cmd( "pack .da.lab.fr .da.lab.gp .da.lab.f .da.lab.n .da.lab.d .da.lab.c .da.lab.e .da.lab.gen -padx 5 -pady 5" );
+
+		cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp menudata_res.html#save } { set choice 2 }" );
+
+		cmd( "showtop .da.lab" );
+
+		*choice = 0;
+		while ( *choice == 0 )
+			Tcl_DoOneEvent( 0 );
+
+		if ( *choice == 2 )
+			goto end;
+
+		cmd( "set numcol [ .da.lab.e.ecol get ]" ); 
+		cmd( "set choice $headprefix" );
+		
+		headprefix = *choice;
+		app = ( char * ) Tcl_GetVar( inter, "misval", 0 );
+		strncpy( misval, app, 9 );
+
+		*choice = 0;
+	}
+
+	if ( type_res == 4 )
+	{
+		descr = descrTxt;
+		if ( ! dozip )
+			ext = extTxt;
+		else
+			ext = extTxtZip;
+	}
+	else
+	{
+		descr = descrRes;
+		if ( ! dozip )
+			ext = extRes;
+		else
+			ext = extResZip;
+	}
+
+	// make sure there is a path set
+	cmd( "set path \"%s\"", path );
+	if ( strlen( path ) > 0 )
+		cmd( "cd \"$path\"" );
+
+	cmd( "set bah [tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes {{{%s} {%s}} {{All files} {*}} }]", ext, descr, ext );
+	app = ( char * ) Tcl_GetVar( inter, "bah", 0 );
+	strcpy( msg, app );
+
+	if ( strlen( msg ) == 0 )
+		goto end;
+
 	if ( dozip == 1 ) 
-    {
-#ifdef LIBZ 
-	gzprintf( fsavez, "%s %s (%d %d)\t", str[ i ], tag[ i ], start[ i ], end[ i ] );
+	{
+#ifdef LIBZ
+		fsavez = gzopen( msg, "wt" );
 #endif 
-    } 
-    else
-	fprintf( fsave, "%s %s (%d %d)\t", str[ i ], tag[ i ], start[ i ], end[ i ] );  
-}   
-break;
-} //end switch delimiter
-} //and of delimiter header writing
-else //header for fixed Column text files
-{
-   if (headprefix == 1 )
-    {
-     if ( dozip == 1 ) 
+	} 
+	else
+		fsave = fopen( msg, "wt" );  // use text mode for Windows better compatibility
+
+	if ( del != 3 ) //Delimited files
+	{
+		if ( del == 2 )
+		{
+			app = ( char * ) Tcl_GetVar( inter, "delimiter", 0 );
+			
+			if ( strlen( app ) == 0 )
+				strcpy( delimiter, "\t" );
+			else
+				strncpy( delimiter, app, 9 );
+		}
+		else
+			strcpy( delimiter, "\t" );
+	}
+
+	if ( typelab == 2 )
+	{
+		app = ( char * ) Tcl_GetVar( inter, "labprefix", 0 );
+		
+		if ( strlen( app ) == 0 )
+			strcpy( labprefix, "V" );
+		else
+			strncpy( labprefix, app, MAX_ELEM_LENGTH - 1 );
+	}
+
+	numcol = ( int ) max( 10, min( numcol, 80 ) );
+
+	if ( fr == 1 )
+	{
+		if ( del != 3 )
+		{
+			switch ( typelab )
+			{
+				case 1:   				// Original labels
+					if ( headprefix == 1 )
+					{
+						if ( dozip == 1 ) 
+						{
+#ifdef LIBZ
+							gzprintf( fsavez, "#" );
+#endif
+						} 
+						else
+							fprintf( fsave, "#" );
+					}  
+					 
+					for ( i = 0; i < nv; ++i )
+					{
+						if ( dozip == 1 ) 
+						{
+#ifdef LIBZ 
+							gzprintf( fsavez, "%s_%s", str[ i ], tag[ i ] );
+						   
+							if ( i < nv - 1 )  
+								gzprintf( fsavez, "%s", delimiter );
+#endif 
+						} 
+						else
+						{
+							fprintf( fsave, "%s_%s", str[ i ], tag[ i ] ); 
+						   
+							if ( i < nv - 1 )  
+								fprintf( fsave, "%s", delimiter );
+						} 
+					}  
+					
+					break;
+
+				case 2: 				// New names for labels
+					if ( headprefix == 1 )
+					{
+						if ( dozip == 1 ) 
+						{
+#ifdef LIBZ
+							gzprintf( fsavez, "#" );
+#endif
+						} 
+						else
+							fprintf( fsave, "#" );
+					}  
+				 
+					for ( i = 0; i < nv; ++i )
+					{
+						if ( dozip == 1 ) 
+						{
+#ifdef LIBZ
+							gzprintf( fsavez, "%s%d", labprefix, i );
+					   
+							if ( i < nv - 1 )  
+								gzprintf( fsavez, "%s", delimiter );
+#endif
+						} 
+						else
+						{
+							fprintf( fsave, "%s%d", labprefix, i );  
+						   
+							if ( i < nv - 1 )  
+								fprintf( fsave, "%s", delimiter );
+						}
+					}   
+					
+					break;
+
+				case 3: 				// LSD result files
+					for ( i = 0; i < nv; ++i )
+					{
+						if ( dozip == 1 ) 
+						{
+#ifdef LIBZ 
+							gzprintf( fsavez, "%s %s (%d %d)\t", str[ i ], tag[ i ], start[ i ], end[ i ] );
+#endif 
+						} 
+						else
+							fprintf( fsave, "%s %s (%d %d)\t", str[ i ], tag[ i ], start[ i ], end[ i ] );  
+					}  
+					
+					break;
+			}
+		}
+		else 							// header for fixed Column text files
+		{
+			if ( headprefix == 1 )
+			{
+				if ( dozip == 1 ) 
+				{
+#ifdef LIBZ 
+					gzprintf( fsavez, "#" );
+#endif 
+				} 
+				else
+					fprintf( fsave, "#" );  
+			}    
+
+			for ( i = 0; i < nv; ++i )
+			{
+				if ( typelab == 2 )
+					sprintf( msg, "%s%d", labprefix, i + 1 );
+				else
+					sprintf( msg, "%s_%s", str[ i ], tag[ i ] );
+					
+				if ( strlen( msg ) < ( unsigned ) numcol )
+					strcat( msg, strsp );
+				
+				if ( i == 0 && headprefix == 1 )
+					msg[ numcol - 1 ] = '\0';
+				else
+					msg[ numcol ] = '\0';
+					
+				if ( dozip == 1 ) 
+				{
+#ifdef LIBZ
+					gzprintf( fsavez, "%s", msg );
+#endif
+				} 
+				else
+					fprintf( fsave, "%s", msg ); 
+			}
+		}
+
+		if ( dozip == 1 ) 
 		{
 #ifdef LIBZ 
-		gzprintf( fsavez, "#" );
+			gzprintf( fsavez, "\n" );
 #endif 
 		} 
-     else
-		fprintf( fsave, "#" );  
-    }    
+		else
+			fprintf( fsave, "\n" );  
+	}
 
-   for ( i = 0; i < nv; ++i )
-    {
-	 if ( typelab == 2 )
-		sprintf( msg, "%s%d", labprefix, i + 1 );
-	 else
-		sprintf( msg, "%s_%s", str[ i ], tag[ i ] );
-		 
-     if ( strlen( msg ) < numcol )
-		strcat( msg, strsp );
-	
-	 if ( i == 0 && headprefix == 1 )
-		msg[ numcol - 1 ] = '\0';
-	 else
-		msg[ numcol ] = '\0';
-		 
-     if ( dozip == 1 ) 
+	if ( del != 3 ) 					// data delimited writing
+	{
+		if ( dozip == 1 )
+		{
+#ifdef LIBZ
+			for ( j = min_c; j <= max_c; ++j )
+			{
+				for ( i = 0; i < nv; ++i )
+				{
+					if ( j >= start[ i ] && j <= end[ i ] && !is_nan( data[ i ][ j ] ) )		// write NaN as n/a
+						gzprintf( fsavez, "%.*G", SIG_DIG, data[ i ][ j ] );
+					else
+						gzprintf( fsavez, "%s", misval );
+			  
+					if ( typelab == 3 || i < nv - 1 )  
+						gzprintf( fsavez, "%s", delimiter );
+				}
+				
+				gzprintf( fsavez, "\n" );
+			}
+#endif 
+		}
+		else
+		{
+			for ( j = min_c; j <= max_c; ++j )
+			{
+				for ( i = 0; i < nv; ++i )
+				{
+					if ( j >= start[ i ] && j <= end[ i ] && !is_nan( data[ i ][ j ] ) )		// write NaN as n/a
+						fprintf( fsave, "%.*G", SIG_DIG, data[ i ][ j ] );  
+					else
+						fprintf( fsave, "%s", misval );  
+			  
+					if ( typelab == 3 || i < nv - 1 )  
+						fprintf( fsave, "%s", delimiter );
+				}
+			   
+				fprintf( fsave, "\n" );  
+			}
+		}
+	}
+	else 								//fixed column data writing
+	{
+		for ( j = min_c; j <= max_c; ++j )
+		{
+			for ( i = 0; i < nv; ++i )
+			{
+				if ( j >= start[ i ] && j <= end[ i ] && !is_nan( data[ i ][ j ] ) )		// write NaN as n/a
+				{
+					sprintf( msg, "%.*G", ( int ) min( numcol - 6, SIG_DIG ), data[ i ][ j ] );
+					strcat( msg, str0 );
+					msg[ numcol ] = '\0';
+				}
+				else
+				{
+					sprintf( msg, "%s", misval );
+					strcat( msg, strsp );
+					msg[ numcol ] = '\0';
+				}
+				
+				if ( dozip == 1 ) 
+				{
+#ifdef LIBZ
+					gzprintf( fsavez, "%s", msg );
+#endif 
+				}
+				else
+					fprintf( fsave, "%s", msg );  
+			}
+			
+			if ( dozip == 1 ) 
+			{
+#ifdef LIBZ
+				gzprintf( fsavez, "\n" );
+#endif
+			} 
+			else
+				fprintf( fsave, "\n" );  
+		}
+	}
+
+	if ( dozip == 1 ) 
 	{
 #ifdef LIBZ
-		gzprintf( fsavez, "%s", msg );
+		gzclose( fsavez);
 #endif
-	} 
-     else
-	fprintf( fsave, "%s", msg ); 
-    }
-  }
+	}
+	else
+		fclose( fsave );  
 
-if ( dozip == 1 ) 
-  {
-  #ifdef LIBZ 
-   gzprintf( fsavez, "\n" );
-  #endif 
-  } 
-else
-  fprintf( fsave, "\n" );  
-}//end of header writing
+	end:
 
-if ( del!=3) //data delimited writing
-{
+	cmd( "destroytop .da.lab" );
+	Tcl_UnlinkVar( inter, "typelab" );
+	Tcl_UnlinkVar( inter, "dozip" );
+	Tcl_UnlinkVar( inter, "numcol" );
+	Tcl_UnlinkVar( inter, "deli" );
+	Tcl_UnlinkVar( inter, "fr" );
+	*choice = 0;
 
-if ( dozip == 1 )
-{
-#ifdef LIBZ
-for ( j = min_c; j <= max_c; ++j )
-{
-  for ( i = 0; i < nv; ++i )
-   {if ( j >= start[ i ] && j <= end[ i ] && !is_nan( data[ i ][ j ] ) )		// write NaN as n/a
-	gzprintf( fsavez, "%.*G", SIG_DIG, data[ i ][ j ] );
-    else
-	gzprintf( fsavez, "%s", misval );
-  
-    if ( typelab == 3 || i < nv - 1 )  
-	gzprintf( fsavez, "%s", delimiter );
-   }
-  gzprintf( fsavez, "\n" );
-}
-#endif 
-}
-else
-{
-for ( j = min_c; j <= max_c; ++j )
-{
 	for ( i = 0; i < nv; ++i )
-   {if ( j >= start[ i ] && j <= end[ i ] && !is_nan( data[ i ][ j ] ) )		// write NaN as n/a
-	fprintf( fsave, "%.*G", SIG_DIG, data[ i ][ j ] );  
-    else
-	fprintf( fsave, "%s", misval );  
-  
-    if ( typelab == 3 || i < nv - 1 )  
-	fprintf( fsave, "%s", delimiter );
-   }
-   fprintf( fsave, "\n" );  
-}
-}
-}
-else //fixed column data writing
-{
-for ( j = min_c; j <= max_c; ++j )
-{
-	for ( i = 0; i < nv; ++i )
-   {
-   if ( j >= start[ i ] && j <= end[ i ] && !is_nan( data[ i ][ j ] ) )		// write NaN as n/a
-   {
-	sprintf( msg, "%.*G", ( int ) min( numcol - 6, SIG_DIG ), data[ i ][ j ] );
-	  strcat( msg, str0 );
-	  msg[ numcol ] = '\0';
-   }
-   else
-   {
-	sprintf( msg, "%s", misval );
-	  strcat( msg, strsp );
-	  msg[ numcol ] = '\0';
-   }
-  
-   if ( dozip == 1 ) 
-     {
-     #ifdef LIBZ
-	gzprintf( fsavez, "%s", msg );
-     #endif 
-     }
-   else
-     fprintf( fsave, "%s", msg );  
-   }
-  if ( dozip == 1 ) 
-    {
-     #ifdef LIBZ
-     gzprintf( fsavez, "\n" );
-     #endif
-    } 
-   else
-    fprintf( fsave, "\n" );  
-}
+	{
+		delete [ ] str[ i ];
+		delete [ ] tag[ i ];
+	}
 
+	delete [ ] str;
+	delete [ ] tag;
+	delete [ ] data;
+	delete [ ] start;
+	delete [ ] end;
 }
-if ( dozip == 1 ) 
-  {
-  #ifdef LIBZ
-  gzclose( fsavez);
-  #endif
-  }
-else
-  fclose( fsave );  
-
-end:
-cmd( "destroytop .da.lab" );
-Tcl_UnlinkVar( inter, "typelab" );
-Tcl_UnlinkVar( inter, "dozip" );
-Tcl_UnlinkVar( inter, "numcol" );
-Tcl_UnlinkVar( inter, "deli" );
-Tcl_UnlinkVar( inter, "fr" );
-
-for ( i = 0; i < nv; ++i )
-{delete [ ] str[ i ];
-  delete [ ] tag[ i ];
-}
-delete [ ] str;
-delete [ ] tag;
-delete [ ] data;
-delete [ ] start;
-delete [ ] end;
-*choice = 0;
-
-} //end of save_datazip
 
 
 /************************
@@ -7153,119 +7156,123 @@ delete [ ] end;
  ************************/
 void plog_series( int *choice )
 {
-int i, j, k, *start, *end, idseries, flt;
-double nmax, nmin, nmean, nvar, nn, thflt;
-double step;
+	char *lapp, **str, **tag;
+	int i, j, *start, *end, idseries;
+	store *app;
 
-char *lapp, **str, **tag;
-store *app;
+	if ( nv == 0 )			// no variables selected
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
+		return;
+	}
 
-if ( nv == 0 )			// no variables selected
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-	return;
-}
+	double **data;
 
-double **data;
+	if ( logs )
+	  cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
 
-if ( logs )
-  cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
+	data = new double *[ nv ];
+	start = new int [ nv ];
+	end = new int [ nv ];
+	str = new char *[ nv ];
+	tag = new char *[ nv ];
 
-data = new double *[ nv ];
-start = new int [ nv ];
-end = new int [ nv ];
-str = new char *[ nv ];
-tag = new char *[ nv ];
+	app = new store[ 1 + num_var ];
 
- app = new store[ 1 + num_var ];
- for ( i = 0; i < num_var; ++i )
-  {app[ i ] = vs[ i ];
-   strcpy( app[ i ].label, vs[ i ].label );
-   strcpy( app[ i ].tag, vs[ i ].tag);
-  } 
- delete [ ] vs;
- vs = app;
+	for ( i = 0; i < num_var; ++i )
+	{
+		app[ i ] = vs[ i ];
+		strcpy( app[ i ].label, vs[ i ].label );
+		strcpy( app[ i ].tag, vs[ i ].tag);
+	}
+	 
+	delete [ ] vs;
+	vs = app;
 
-for ( i = 0; i < nv; ++i )
-{
-	str[ i ] = new char[ MAX_ELEM_LENGTH ];
-  tag[ i ] = new char[ MAX_ELEM_LENGTH ];
-  data[ i ] = NULL;
+	for ( i = 0; i < nv; ++i )
+	{
+		str[ i ] = new char[ MAX_ELEM_LENGTH ];
+		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+		data[ i ] = NULL;
+		
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		strcpy( msg,lapp );
+		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries );
+		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		{
+			data[ i ] = vs[ idseries ].data;
+			if ( data[ i ] == NULL )
+				plog( "\nError: invalid data\n" );
+		}
+	}
 
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
-  strcpy( msg,lapp );
-  sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
-  if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
-  {
-   data[ i ] = vs[ idseries ].data;
-   if ( data[ i ] == NULL )
-     plog( "\nError: invalid data\n" );
-  }
-}
+	if ( autom_x || min_c >= max_c )
+	{
+		for ( i = 0; i < nv; ++i )
+		{
+			if ( i == 0 )
+				min_c = max_c = start[ i ];
+			
+			if ( start[ i ] < min_c )
+				min_c = start[ i ];
+			
+			if ( end[ i ] > max_c )
+			max_c = end[ i ] > num_c ? num_c : end[ i ];
+		}
+	}
 
-if ( autom_x || min_c >= max_c )
-{
+	plog( "\n\nTime series data\n" );
+	plog( "t\t%s_%s", "series", str[ 0 ], tag[ 0 ] );
 
-for ( i = 0; i < nv; ++i )
-{
-	if ( i == 0 )
-   min_c = max_c = start[ i ];
-  if ( start[ i ] < min_c )
-   min_c = start[ i ];
-  if (end[ i ] > max_c )
-   max_c = end[ i ] > num_c?num_c:end[ i ];
-}
-}
+	for ( i = 1; i < nv; ++i )
+		plog( "\t%s_%s", "series", str[ i ], tag[ i ] );
 
-plog( "\n\nTime series data\n" );
-plog( "t\t%s_%s", "series", str[ 0 ], tag[ 0 ] );
+	plog( "\n" );
 
-for ( i = 1; i < nv; ++i )
-  plog( "\t%s_%s", "series", str[ i ], tag[ i ] );
-plog( "\n" );
+	for ( i = min_c; i <= max_c; ++i )
+	{
+		if ( ! is_nan( data[ 0 ][ i ] ) && start[ 0 ] <= i )
+			plog( "%d\t%.*g", "series", i, pdigits, data[ 0 ][ i ] );
+		else
+			plog( "%d\t%s", "series", i, nonavail );		// write NaN as n/a
+		
+		for ( j = 1; j < nv; ++j )
+		{
+			if ( ! is_nan( data[ j ][ i ] ) && start[ j ] <= i )
+				plog( "\t%.*g", "series", pdigits, data[ j ][ i ] );
+			else
+				plog( "\t%s", "series", nonavail );		// write NaN as n/a
+		}
+		
+		plog( "\n" );
+	}
 
-for ( i = min_c; i <= max_c; ++i )
-{
- if ( ! is_nan( data[ 0 ][ i ] ) && start[ 0 ] <= i )
-	plog( "%d\t%.*g", "series", i, pdigits, data[ 0 ][ i ] );
- else
-	plog( "%d\t%s", "series", i, nonavail );		// write NaN as n/a
+	delete [ ] start;
+	delete [ ] end;
+	delete [ ] data;
 
- for ( j = 1; j < nv; ++j )
-   {
-   if ( ! is_nan( data[ j ][ i ] ) && start[ j ] <= i )
-	plog( "\t%.*g", "series", pdigits, data[ j ][ i ] );
-   else
-	plog( "\t%s", "series", nonavail );		// write NaN as n/a
-   }
- plog( "\n" );
-}
+	for ( i = 0; i < nv; ++i )
+	{
+		delete [ ] str[ i ];
+		delete [ ] tag[ i ];
+	}
 
-delete [ ] start;
-delete [ ] end;
-delete [ ] data;
-for ( i = 0; i < nv; ++i )
-{
- delete [ ] str[ i ];
- delete [ ] tag[ i ];
-}
-delete [ ] str;
-delete [ ] tag; 
+	delete [ ] str;
+	delete [ ] tag; 
 }    
 
 
  /*****************************************
  PLOT (curves)
- 
  Effectively create the plot in canvas
  *****************************************/
 void plot( int type, int nv, double **data, int *start, int *end, char **str, char **tag, int *choice )
 {
 	int h, i, j, k, color, hsize, vsize, hbordsize, tbordsize, lheight, hcanvas, vcanvas, nLine, endCase, iniCase;
-	double x1, x2, *y, yVal, cminy, cmaxy, step;
+	double x1, x2, *y, yVal = 0, cminy, cmaxy, step;
 	char txtLab[ 2 * MAX_ELEM_LENGTH ];
-	bool tOk, y2on = ( type == TSERIES ) ? ( num_y2 <= nv ? true : false ) : false;
+	bool tOk = false, y2on = ( type == TSERIES ) ? ( num_y2 <= nv ? true : false ) : false;
 	
 	// define type-specific parameters
 	switch ( type )
@@ -7621,7 +7628,6 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 
  /*****************************************
  PLOT (histogram)
- 
  Effectively create the histogram in canvas
  *****************************************/
 void plot( int type, int *start, int *end, char **str, char **tag, int *choice, bool norm )
@@ -7848,15 +7854,14 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 
 /*****************************
  PLOT_CANVAS
- 
  create the plot window & canvas 
  *****************************/
 void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag, int *choice )
 {
-	int h, i, j, color, hsize, vsize, hbordsize, tbordsize, bbordsize, sbordsize, htmargin, vtmargin, hticks, vticks, lheight, hcanvas, vcanvas, hscroll, vscroll, *htick, *vtick, nLine;
-	double cminy2, cmaxy2;
+	bool tOk, y2on;
 	char *txtValue, *txtCase, *txtLine, txtLab[ 2 * MAX_ELEM_LENGTH ];
-	bool first, tOk, y2on;
+	int h, i, color, hsize, vsize, hbordsize, tbordsize, bbordsize, sbordsize, htmargin, vtmargin, hticks, vticks, lheight, hcanvas, vcanvas, nLine;
+	double cminy2, cmaxy2;
 	
 	// get graphical configuration from Tk ( file defaults.tcl )
 	get_int( "hsizeP", & hsize );			// 600
@@ -7933,8 +7938,6 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 				( y2on ? 0 : ( max_c < 1000 ? 10 : 20 ) );
 	vcanvas = vsize + tbordsize + bbordsize;
 	cmd( "set hcanvasP %d; set vcanvasP %d", hcanvas, vcanvas );
-	hscroll = hcanvas + sbordsize;
-	vscroll = vcanvas + sbordsize;
 	
 	// create plot window & canvas
 	cmd( "set w .da.f.new%d", cur_plot );	// plot window
@@ -8186,13 +8189,13 @@ int store( struct s *c, int x4 )
 {
 	struct s *app, *prev;
 
-	for ( app = c; app != NULL; app = app->next )
+	for ( prev = NULL, app = c; app != NULL; app = app->next )
 		if ( app->x == x4 )
 			return 0;
 		else
 			prev = app; 
 	
-	if ( app == NULL )
+	if ( app == NULL && prev != NULL )
 	{
 		prev->next = new struct s;
 		app = prev->next;
@@ -8216,13 +8219,13 @@ int store( struct s *c, int x3, int x4 )
 {
 	struct s *app, *prev;
 
-	for ( app = c; app != NULL; app = app->next )
+	for ( prev = NULL, app = c; app != NULL; app = app->next )
 		if ( app->x == x3 )
 			return store( app->son, x4 );
 		else
 			prev = app;
 	
-	if ( app == NULL )
+	if ( app == NULL && prev != NULL )
 	{
 		prev->next = new struct s;
 		app = prev->next;
@@ -8251,13 +8254,13 @@ int store( struct s *c, int x2, int x3, int x4 )
 {
 	struct s *app, *prev;
 
-	for ( app = c; app != NULL; app = app->next )
+	for ( prev = NULL, app = c; app != NULL; app = app->next )
 		if ( app->x == x2 )
 			return store( app->son, x3, x4 );
 		else
 			prev = app;
 		
-	if ( app == NULL )
+	if ( app == NULL && prev != NULL )
 	{
 		prev->next = new struct s;
 		app = prev->next;
@@ -8291,13 +8294,13 @@ int store( int x1, int x2, int x3, int x4 )
 {
 	struct s *app, *prev;
 
-	for ( app = &d; app != NULL; app = app->next )
+	for ( prev = NULL, app = &d; app != NULL; app = app->next )
 		if ( app->x == x1 )
 			return store( app->son, x2, x3, x4 );
 		else
 			prev = app;
 	
-	if ( app == NULL )
+	if ( app == NULL && prev != NULL )
 	{
 		prev->next = new struct s;
 		app = prev->next;
@@ -8334,8 +8337,6 @@ int store( int x1, int x2, int x3, int x4 )
 
 void free_storage( struct s *c )
 {
-	struct s *app, *n, *down;
-
 	if ( c->next != NULL )
 		free_storage( c->next );
 	

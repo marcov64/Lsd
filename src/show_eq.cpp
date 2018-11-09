@@ -43,8 +43,8 @@ SHOW_EQ
 void show_eq( char *lab, int *choice )
 {
 	bool done;
-	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], c3_lab[ MAX_LINE_SIZE ], c4_lab[ MAX_LINE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ], updt_in[ MAX_ELEM_LENGTH + 1 ], *app, *fname;
-	int i, j, k, bra, start, lun, printing_var = 0, comment_line = 0, temp_var = 0;
+	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], c3_lab[ MAX_LINE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ], updt_in[ MAX_ELEM_LENGTH + 1 ], *app, *fname;
+	int i, k, bra, start, printing_var = 0, comment_line = 0, temp_var = 0;
 	FILE *f;
 
 	cmd( "if [ string compare [ info command .eq_%s ] .eq_%s ] { set ex yes } { set ex no }", lab, lab );
@@ -177,7 +177,7 @@ void show_eq( char *lab, int *choice )
 		bra = 2;
 	}
 	
-	strcpy( c4_lab, c1_lab );						// save original first line
+	strcpy( c3_lab, c1_lab );						// save original first line
 			
 	do
 	{	
@@ -185,7 +185,7 @@ void show_eq( char *lab, int *choice )
 		clean_spaces( c2_lab );
 		
 		// handle dummy equations without RESULT closing
-		if ( eq_dum && strcmp( c1_lab, c4_lab ) && ( ! strncmp( c2_lab, "EQUATION(", 9 ) || ! strncmp( c2_lab, "EQUATION_DUMMY(", 15 ) || ! strncmp( c2_lab, "FUNCTION(", 9 ) || ! strncmp( c2_lab, "MODELEND", 8 ) ) )
+		if ( eq_dum && strcmp( c1_lab, c3_lab ) && ( ! strncmp( c2_lab, "EQUATION(", 9 ) || ! strncmp( c2_lab, "EQUATION_DUMMY(", 15 ) || ! strncmp( c2_lab, "FUNCTION(", 9 ) || ! strncmp( c2_lab, "MODELEND", 8 ) ) )
 		{
 			if ( strlen( updt_in ) > 0 )
 				cmd( ".eq_%s.f.text insert end \"\n(DUMMY EQUATION: variable '%s' updated in '%s')\"", lab, lab, updt_in );
@@ -321,7 +321,7 @@ void scan_used_lab( char *lab, int *choice )
 {
 	bool exist, no_window;
 	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], *fname;
-	int i, j, k, nfiles, done, bra, start, caller = *choice;
+	int i, j, k, nfiles, done, caller = *choice;
 	FILE *f;
 
 	no_window = ( *choice == -1 ) ? true : false;
@@ -432,9 +432,8 @@ SCAN_USING_LAB
 ****************************************************/
 void scan_using_lab( char *lab, int *choice )
 {
-	int i, j, done, bra, start, exist, caller = *choice;
+	int caller = *choice;
 	variable *cv;
-	FILE *f;
 
 	cmd( "set list .listusing_%s", lab );
 

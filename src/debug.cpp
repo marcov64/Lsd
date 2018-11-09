@@ -63,8 +63,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact )
 {
 bool pre_running;
 char ch[ 4 * MAX_ELEM_LENGTH ], *ch1;
-const char *bah;
-int count, old, i, cond;
+int count, i, cond;
 double value_search, app_res, *app_values;
 object *cur, *cur1, *cur2;
 bridge *cb, *cb1;
@@ -880,7 +879,7 @@ while ( choice == 0 )
 
 		// Last
 		case 14: 
-			for ( cur = r; cur != NULL; cur = cur->next )
+			for ( cur = r, cur1 = NULL; cur != NULL; cur = cur->next )
 				cur1 = cur;
 			choice = deb( cur1, c, lab, res, interact );
 			break;
@@ -1067,8 +1066,7 @@ void deb_show( object *r )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ];
 	variable *ap_v;
-	int count, i;
-	object *ap_o;
+	int i;
 
 	// fix the top frame before proceeding
 	cmd( "if { ! [ winfo exists .deb.v ] } { frame .deb.v -relief groove -bd 2 }" );
@@ -1324,10 +1322,11 @@ int depth;
 void attach_instance_number( char *ch, object *r )
 {
 	object *cur;
-	int i, j;
+	int i, j = 1;
 
 	if ( r == NULL )
 		return;
+	
 	attach_instance_number( ch, r->up );
 
 	if ( r->up != NULL )

@@ -23,7 +23,7 @@ Sets all OS signal handlers.
  *************************************/
 int main( int argn, char **argv )
 {
-	int res;
+	int res = 0;
 
 #ifndef NO_ERROR_TRAP
 	// register all signal handlers
