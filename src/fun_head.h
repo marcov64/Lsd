@@ -36,8 +36,18 @@ using namespace Eigen;
 #endif
 
 // user defined variables for all equations (to be defined in equation file)
-#if ! defined EQ_USER_VARS
+#ifndef EQ_USER_VARS
 #define EQ_USER_VARS
+#endif
+
+// set pointers to NULL to protect users (small overhead) if not disabled
+#ifndef NOT_INIT_POINTERS
+#define INIT_POINTERS \
+	cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cur10 = cyccur = cyccur2 = cyccur3 = NULL; \
+	curl = curl1 = curl2 = curl3 = curl4 = curl5 = NULL; \
+	f = NULL;
+#else
+#define INIT_POINTERS
 #endif
 
 #define EQ_BEGIN \
@@ -46,10 +56,9 @@ using namespace Eigen;
 	int i, j, h, k; \
 	double v[1000]; \
 	object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur, *cyccur2, *cyccur3; \
-	cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cur10 = cyccur = cyccur2 = cyccur3 = NULL; \
 	netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5; \
-	curl = curl1 = curl2 = curl3 = curl4 = curl5 = NULL; \
-	FILE *f = NULL; \
+	FILE *f; \
+	INIT_POINTERS \
 	EQ_USER_VARS
 
 #define EQ_NOT_FOUND \
