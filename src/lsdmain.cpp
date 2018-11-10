@@ -653,6 +653,7 @@ void run( void )
 
 	for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
 	{
+		running = true;		// signal simulation is running
 		cur_sim = i;	 	// Update the global variable holding information on the current run in the set of runs
 		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed (sorry Nadia!)
 
@@ -721,7 +722,6 @@ void run( void )
 		seed++;
 		scroll = false;
 		pause_run = false;
-		running = true;
 		debug_flag = false;
 		wait_delete = NULL;
 		stack_info = 0;

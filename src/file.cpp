@@ -754,10 +754,6 @@ endLoad:
 	
 	t = 0;
 	
-#ifndef NO_WINDOW
-	unsaved_change( false );
-#endif
-
 	return load;
 }
 
@@ -791,10 +787,14 @@ void unload_configuration ( bool full )
 #ifndef NO_WINDOW
 	unsaved_change( false );					// signal no unsaved change
 	cmd( "destroytop .lat" );					// remove lattice window
-	cmd( "set a [ split [ winfo children . ] ]" );	// remove run-time plot windows
-	cmd( "foreach i $a { if [ string match .plt* $i ] { destroytop $i } }" );
-	cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );	// delete temporary files
 	cmd( "unset -nocomplain modElem" );			// no elements in model structure
+	
+	if ( ! running )
+	{
+		cmd( "set a [ split [ winfo children . ] ]" );	// remove run-time plot windows
+		cmd( "foreach i $a { if [ string match .plt* $i ] { destroytop $i } }" );
+		cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );	// delete temporary files
+	}
 #endif
 
 	if ( full )									// full unload? (no new config?)

@@ -516,17 +516,15 @@ bridge *object::search_bridge( char const *lab, bool no_error )
 	b_mapT::iterator bit;
 
 	// find the bridge which contains the object
-	if ( ( bit = b_map.find( lab ) ) == b_map.end( ) )
-	{
-		if ( ! no_error )
-			error_hard( "invalid data structure (bridge not found)",
-						"internal problem in LSD", 
-						"if error persists, please contact developers",
-						true );
-		return NULL;
-	}
-	
-	return bit->second;
+	if ( ( bit = b_map.find( lab ) ) != b_map.end( ) )
+		return bit->second;
+
+	if ( ! no_error )
+		error_hard( "invalid data structure (bridge not found)",
+					"internal problem in LSD", 
+					"if error persists, please contact developers",
+					true );
+	return NULL;
 }
 
 
@@ -549,7 +547,6 @@ object *object::search( char const *lab )
 	// Search among the variables of current object
 	if ( ( bit = b_map.find( lab ) ) != b_map.end( ) )
 		return bit->second->head;
-	
 #else
 	
 	int i;
@@ -849,10 +846,10 @@ variable *object::search_var( object *caller, char const *lab, bool no_error, bo
 	v_mapT::iterator vit;
 
 #ifndef DEBUG_MAPS
+
 	// Search among the variables of current object
 	if ( ( vit = v_map.find( lab ) ) != v_map.end( ) )
 		return vit->second;
-	
 #else
 	
 	int i;
@@ -1094,7 +1091,7 @@ object *object::turbosearch_cond( char const *label, double value )
 	}
 	
 	cb = bit->second;
-	
+
 	if ( cb->o_map.size( ) == 0 || cb->search_var == NULL || strcmp( cb->search_var, label ) )
 	{
 		sprintf( msg, "element '%s' is not initialized for turbo conditional search", label ); 
