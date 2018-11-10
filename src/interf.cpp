@@ -608,7 +608,7 @@ int browse( object *r, int *choice )
 		cmd( "label .l.p.up_name.d -text \"Parent Object:\" -width 12 -anchor w" );
 		if ( r->up != NULL )
 		{
-			cmd( "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" -command { set itemfocus 0; set choice 5 } -foreground red", r->up->label );
+			cmd( "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" -command { set ttip \"\"; set itemfocus 0; set choice 5 } -foreground red", r->up->label );
 			cmd( "bind .l.p.up_name.n <Enter> { set ttip \"Make current\" }" );
 			cmd( "bind .l.p.up_name.n <Leave> { set ttip \"\" }" );
 			cmd( "bind . <KeyPress-u> { catch { .l.p.up_name.n invoke } }; bind . <KeyPress-U> { catch { .l.p.up_name.n invoke } }" );
@@ -621,7 +621,7 @@ int browse( object *r, int *choice )
 
 		cmd( "frame .l.p.tit" );
 		cmd( "label .l.p.tit.lab -text \"Current Object:\" -width 12 -anchor w" );
-		cmd( "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" %s", r->label, r->up == NULL ? "" : "-command { set choice 6 }" );
+		cmd( "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" %s", r->label, r->up == NULL ? "" : "-command { set ttip \"\"; set choice 6 }" );
 
 		if ( r->up != NULL ) 
 		{
@@ -1505,7 +1505,7 @@ case 4:
 	
 	sscanf( lab1, "%99s", lab_old );
 
-	n = r->search( lab_old );
+	n = root->search( lab_old );
 	if ( n == NULL )
 		break;
 
