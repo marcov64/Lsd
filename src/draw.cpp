@@ -19,13 +19,13 @@ The main functions contained in this file are:
 - void show_graph( object *t )
 initialize the canvas and calls show_obj for the root
 
-- void draw_obj( object *blk, object *t, int level, int center, int from )
+- void draw_obj( object *top, object *sel, int level, int center, int from )
 recursive function that according to the level of the object type sets the
 distances among the objects. Rather rigid, but it should work nicely
 for most of the model structures. It assigns all the labels (above and below the
 symbols) and the writing bound to the mouse.
 
-- void put_node( int x1, int y1, int x2, int y2, char *str )
+- void put_node( int x1, int y1, int x2, int y2, char *str, bool sel )
 Draw the circle.
 
 - void put_line( int x1, int y1, int x2, int y2 )
@@ -69,9 +69,10 @@ void show_graph( object *t )
 		return;
 	}
 
-	cmd( "set n_color white" );	// node color
-	cmd( "set t_color red" );	// node name color
-	cmd( "set l_color gray" );	// line color
+	cmd( "set n_color white" );		// node color
+	cmd( "set n_color_sel blue" );	// selected node color
+	cmd( "set t_color red" );		// node name color
+	cmd( "set l_color gray" );		// line color
 	
 	cmd( "set g .str" );
 	for ( top = t; top->up != NULL; top = top->up );
@@ -104,7 +105,7 @@ void show_graph( object *t )
 					} \
 				}" );
 
-		draw_obj( top, v0, h0, 0 );
+		draw_obj( top, t, v0, h0, 0 );
 
 		cmd( "bind $g.f.c <Button-1> { if [ info exists res_g ] { set choice_g 24 } }" );
 		cmd( "bind $g.f.c <Button-2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $g.f.c.v %%X %%Y } }" );
@@ -136,7 +137,7 @@ void show_graph( object *t )
 	else	// or just update canvas
 	{
 		cmd( "$g.f.c delete all" );
-		draw_obj( top, v0, h0, 0 );
+		draw_obj( top, t, v0, h0, 0 );
 	}
 
 	cmd( "wm title $g \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
@@ -146,7 +147,7 @@ void show_graph( object *t )
 /****************************************************
 DRAW_OBJ
 ****************************************************/
-void draw_obj( object *t, int level, int center, int from )
+void draw_obj( object *t, object *sel, int level, int center, int from )
 {
 	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_ELEM_LENGTH ];
 	int i, j, k, step_type, begin, count;
@@ -200,7 +201,7 @@ void draw_obj( object *t, int level, int center, int from )
 		
 		if ( t->up->up != NULL )
 			put_line( from, level - step_level + v_margin + n_size / 2, center, level + n_size / 2 );
-		put_node( center - n_size / 2, level + v_margin - n_size / 2, center + n_size / 2, level + v_margin + n_size / 2, t->label );
+		put_node( center - n_size / 2, level + v_margin - n_size / 2, center + n_size / 2, level + v_margin + n_size / 2, t->label, t == sel ? true : false );
 		put_text( ch, ch1, center, level, t->label );
 	}
 
@@ -277,16 +278,16 @@ void draw_obj( object *t, int level, int center, int from )
 	// draw sons
 	for ( i = begin, cb = t->b; cb != NULL; i += step_type, cb = cb->next )
 		if ( cb->head != NULL )
-			draw_obj( cb->head, level + step_level, i, center );
+			draw_obj( cb->head, sel, level + step_level, i, center );
 }
 
 
 /****************************************************
 PUT_NODE
 ****************************************************/
-void put_node( int x1, int y1, int x2, int y2, char *str )
+void put_node( int x1, int y1, int x2, int y2, char *str, bool sel )
 {
-	cmd( "$g.f.c create oval %d.m %d.m %d.m %d.m -fill $n_color -outline $l_color -tags node -tags %s", x1, y1, x2, y2, str );
+	cmd( "$g.f.c create oval %d.m %d.m %d.m %d.m -fill $%s -outline $l_color -tags node -tags %s", x1, y1, x2, y2, sel ? "n_color_sel" : "n_color", str );
 }
 
 

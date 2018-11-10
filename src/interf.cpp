@@ -606,36 +606,30 @@ int browse( object *r, int *choice )
 
 		cmd( "frame .l.p.up_name" );
 		cmd( "label .l.p.up_name.d -text \"Parent Object:\" -width 12 -anchor w" );
-		strcpy( ch, "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \" " );
-		if ( r->up == NULL )
-			strcat( ch, "(none) \" -command { }" );
-		else
+		if ( r->up != NULL )
 		{
-			strcat( ch, ( r->up )->label );
-			strcat( ch, " \" -command { set itemfocus 0; set choice 5 } -foreground red" );
+			cmd( "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" -command { set itemfocus 0; set choice 5 } -foreground red", r->up->label );
+			cmd( "bind .l.p.up_name.n <Enter> { set ttip \"Make current\" }" );
+			cmd( "bind .l.p.up_name.n <Leave> { set ttip \"\" }" );
+			cmd( "bind . <KeyPress-u> { catch { .l.p.up_name.n invoke } }; bind . <KeyPress-U> { catch { .l.p.up_name.n invoke } }" );
 		}
-		cmd( ch );
-
-		cmd( "bind .l.p.up_name.n <Enter> { set ttip \"Select parent object\" }" );
-		cmd( "bind .l.p.up_name.n <Leave> { set ttip \"\" }" );
-		cmd( "bind . <KeyPress-u> { catch { .l.p.up_name.n invoke } }; bind . <KeyPress-U> { catch { .l.p.up_name.n invoke } }" );
+		else
+			cmd( "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \"\" -state disabled" );
 
 		cmd( "pack .l.p.up_name.d .l.p.up_name.n -side left" );
 		cmd( "pack .l.p.up_name -padx 9 -anchor w" );
 
 		cmd( "frame .l.p.tit" );
 		cmd( "label .l.p.tit.lab -text \"Current Object:\" -width 12 -anchor w" );
-		strcpy( ch, "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text \" " );
-		strcat( ch, r->label);
+		cmd( "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" %s", r->label, r->up == NULL ? "" : "-command { set choice 6 }" );
 
 		if ( r->up != NULL ) 
-			strcat( ch, " \" -command { set choice 6 }" );
+		{
+			cmd( "bind .l.p.tit.but <Enter> { set ttip \"Change...\" }" );
+			cmd( "bind .l.p.tit.but <Leave> { set ttip \"\" }" );
+		}
 		else
-			strcat( ch, " \" -command { }" );
-		cmd( ch );
-
-		cmd( "bind .l.p.tit.but <Enter> { set ttip \"Change...\" }" );
-		cmd( "bind .l.p.tit.but <Leave> { set ttip \"\" }" );
+			cmd( ".l.p.tit.but configure -disabledforeground red -state disabled" );
 
 		cmd( "pack .l.p.tit.lab .l.p.tit.but -side left" );
 		cmd( "pack .l.p.tit -padx 8 -anchor w" );
@@ -1505,7 +1499,6 @@ break;
 // Move browser to show one of the descendant object (defined in tcl $vname)
 case 4:
 
-	*choice = 0;
 	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) || ! strcmp( lab1, "(none)" ) )
 		break;
@@ -1514,13 +1507,11 @@ case 4:
 
 	n = r->search( lab_old );
 	if ( n == NULL )
-	{
-		plog( "\nDescendant %s not found", "", lab_old );
 		break;
-	}
 
 	cmd( "set listfocus 2; set itemfocus 0" );
 
+	*choice = 0;
 	redrawRoot = true;			// force browser redraw
 	return n;
 
@@ -1528,7 +1519,6 @@ case 4:
 // Move browser to show the parent object
 case 5:
 
-	*choice = 0;
 	if ( r->up == NULL )
 		return r;
 	
@@ -1536,6 +1526,7 @@ case 5:
 	
 	cmd( "set listfocus 2; set itemfocus %d", i ); 
 
+	*choice = 0;
 	redrawRoot = true;					// force browser redraw
 	return r->up;
 
