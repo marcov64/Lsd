@@ -266,7 +266,7 @@ int lsdmain( int argn, char **argv )
 		strcpy( struct_file, msg );
 	}
 	 
-	f = fopen( struct_file, "r" );
+	FILE *f = fopen( struct_file, "r" );
 	if ( f == NULL )
 	{
 		fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n", struct_file );
