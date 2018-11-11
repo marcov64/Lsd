@@ -549,6 +549,14 @@ int browse( object *r, int *choice )
 						set choice 4 \
 					} \
 				}" );
+			cmd( "bind .l.s.c.son_name <Control-Return> { \
+					set listfocus 2; \
+					set itemfocus [ .l.s.c.son_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						set useCurrObj no; \
+						set choice 6 \
+					} \
+				}" );
 			cmd( "bind .l.s.c.son_name <Double-Button-1> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
@@ -747,7 +755,7 @@ int browse( object *r, int *choice )
 			cmd( "$w add separator" );
 			
 			cmd( "$w add command -label \"Change Element...\" -underline 0 -accelerator Enter -command { set useCurrObj yes; set choice 7 }" );
-			cmd( "$w add command -label \"Change Object...\" -underline 7 -accelerator Enter -command { set useCurrObj yes; set choice 6 }" );
+			cmd( "$w add command -label \"Change Object...\" -underline 7 -accelerator Ctrl+Enter -command { set useCurrObj yes; set choice 6 }" );
 			cmd( "$w add command -label \"Find Element...\" -underline 0 -accelerator Ctrl+F -command { set choice 50 }" );
 
 			cmd( "$w add cascade -label \"Sort Elements\" -underline 0 -menu $w.sort" );
@@ -1058,8 +1066,8 @@ case 2:
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+		
+		n = root->search( lab_old );		// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -1325,8 +1333,8 @@ case 3:
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+
+		n = root->search( lab_old );		// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -1437,8 +1445,8 @@ case 32:
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+
+		n = root->search( lab_old );		// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -1594,8 +1602,7 @@ case 6:
 	// check if current or pointed object and save current if needed
 	if ( strcmp( r->label, lab_old ) )	// check if not current variable
 	{
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+		n = root->search( lab_old );	// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -1672,7 +1679,6 @@ case 6:
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	redrawRoot = false;				// no browser redraw yet
 	done = *choice;
 
 	if ( *choice != 2 )
@@ -1694,8 +1700,6 @@ case 6:
 				cur->to_compute = *choice;
 			for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				cur->to_compute = *choice;
-
-			redrawRoot = true;		// force browser redraw
 		}   
 
 		// control for elements to save in objects to be not computed
@@ -1704,22 +1708,25 @@ case 6:
 	}
 
 	cmd( "destroytop .objprop" );
+	
+	redrawRoot = true;				// always redraw, because of different vname
 
 	// dispatch chosen option
 	if ( done > 2 )
 	{
 		cmd( "set vname $lab" );
+		cmd( "set useCurrObj no" );
 		*choice = done;
-		return r;
 	}
-	
-	// avoid entering into descendant
-	if ( done == 1 )
-	{
+	else
 		*choice = 0;
-		return r->up;
-	}
 
+	// avoid entering into descendant
+	if ( cur2 != NULL )
+		return cur2;
+	else
+		return r;
+	
 break;
 
 
@@ -1735,14 +1742,10 @@ case 83:
 		break;
 	sscanf( lab1, "%99s", lab_old );
 
-	for ( cur = r; cur->up != NULL; cur = cur->up );
-	cur = cur->search( lab_old );		// get pointer to vname
+	cur = root->search( lab_old );	// get pointer to vname
 	if ( cur == NULL )
-	{
-		plog( "\nObject %s not found", "", lab_old );
 		break;
-	}
-
+		
 	if ( nature == 74 )		// delete
 	{
 		cmd( "set answer [tk_messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete object?\" -detail \"Press 'Yes' to confirm deleting '$vname'\n\nNote that all descendants will be also deleted!\"]" );
@@ -2868,14 +2871,14 @@ break;
 
 // Edit Objects' numbers
 case 19:
-
-	for ( n = r; n->up != NULL; n = n->up );
-
-	*choice = 0;
+	
 	strcpy( lab, r->label );
-	set_obj_number( n, choice );
+	
+	*choice = 0;
+	set_obj_number( root, choice );
 	cmd( "destroytop .ini" );
-	r = n->search( lab );
+	
+	r = root->search( lab );
 
 	unsaved_change( true );							// signal unsaved change
 
@@ -2893,8 +2896,8 @@ case 21:
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+
+		n = root->search( lab_old );		// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -3053,8 +3056,7 @@ case 24:
 	if ( res_g == NULL )
 		break;
 
-	for ( n = r; n->up != NULL; n = n->up );
-	n = n->search( res_g );
+	n = root->search( res_g );
 
 	if ( n != r )
 	{
@@ -3072,15 +3074,13 @@ case 25:
 	if (res_g == NULL )
 	  break;
 
-	for ( n = r; n->up != NULL; n = n->up );
-	r = n->search( res_g );
+	r = root->search( res_g );
 
 	*choice = 0;
-	edit_data( n, choice, r->label );
+	edit_data( root, choice, r->label );
 	cmd( "destroytop .ini" );
 
 	unsaved_change( true );		// signal unsaved change
-	choice_g = 0;
 
 break;
 
@@ -3100,8 +3100,7 @@ case 27:
 
 	if ( *choice == 1 )
 	{
-		for ( n = r; n->up != NULL; n = n->up );
-		clean_debug( n );
+		clean_debug( root );
 		unsaved_change( true );		// signal unsaved change
 	}
 
@@ -3127,6 +3126,7 @@ case 28:
 		break;
 	sscanf( lab1, "%499s", lab );
 	strncpy( equation_name, lab, MAX_PATH_LENGTH - 1 );
+	
 	unsaved_change( true );		// signal unsaved change
 
 break;
@@ -3153,8 +3153,7 @@ case 30:
 
 	if ( *choice == 1 )
 	{
-		for ( n = r; n->up != NULL; n = n->up );
-		clean_save( n );
+		clean_save( root );
 		unsaved_change( true );		// signal unsaved change
 	}
 
@@ -3164,15 +3163,14 @@ break;
 // Show variables to be saved
 case 39:
 
-	for ( n = r; n->up != NULL; n = n->up );
 	i = 0;
-	count_save( n, &i );
+	count_save( root, &i );
 	if ( i == 0 )
 		plog( " \nNo variable or parameter saved." );
 	else
 	{
 		plog( "\n\nVariables and parameters saved (%d):\n", "", i );
-		show_save( n );
+		show_save( root );
 	}
 
 break;
@@ -3181,10 +3179,9 @@ break;
 // Show variables to be observed
 case 42:
 
-	for ( n = r; n->up != NULL; n = n->up );
 	plog( "\n\nVariables and parameters containing results:\n" );
 	lcount = 0;
-	show_observe( n );
+	show_observe( root );
 	if ( lcount == 0 )
 		plog( "(none)\n" );
 
@@ -3194,10 +3191,9 @@ break;
 // Show variables to be initialized
 case 49:
 
-	for ( n = r; n->up != NULL; n = n->up );
 	plog( "\n\nVariables and parameters relevant to initialize:\n" );
 	lcount = 0;
-	show_initial( n );
+	show_initial( root );
 	if ( lcount == 0 )
 		plog( "(none)\n" );
 
@@ -3207,10 +3203,9 @@ break;
 // Show variables to be plot
 case 84:
 
-	for ( n = r; n->up != NULL; n = n->up );
 	plog( "\n\nVariables and parameters to plot in run time:\n" );
 	lcount = 0;
-	show_plot( n );
+	show_plot( root );
 	if ( lcount == 0 )
 		plog( "(none)\n" );
 
@@ -3220,10 +3215,9 @@ break;
 // Show variables to debug
 case 85:
 
-	for ( n = r; n->up != NULL; n = n->up );
 	plog( "\n\nVariables to debug:\n" );
 	lcount = 0;
-	show_debug( n );
+	show_debug( root );
 	if ( lcount == 0 )
 		plog( "(none)\n" );
 
@@ -3233,10 +3227,9 @@ break;
 // Show variables to parallelize
 case 86:
 
-	for ( n = r; n->up != NULL; n = n->up );
 	plog( "\n\nMulti-object variables to run in parallel:\n" );
 	lcount = 0;
-	show_parallel( n );
+	show_parallel( root );
 	if ( lcount == 0 )
 		plog( "(none)\n" );
 
@@ -3259,8 +3252,7 @@ case 31:
 
 	if ( *choice == 1 )
 	{
-		for ( n = r; n->up != NULL; n = n->up );
-		clean_plot( n );
+		clean_plot( root );
 		unsaved_change( true );		// signal unsaved change
 	}
 
@@ -3274,8 +3266,7 @@ case 87:
 
 	if ( *choice == 1 )
 	{
-		for ( n = r; n->up != NULL; n = n->up );
-		clean_parallel(n);
+		clean_parallel( root );
 		unsaved_change( true );		// signal unsaved change
 	}
 
@@ -3294,8 +3285,8 @@ case 33:
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+
+		n = root->search( lab_old );	// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -3411,8 +3402,8 @@ case 34:
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+
+		n = root->search( lab_old );		// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -3441,9 +3432,7 @@ break;
 // Create model report
 case 36:
 
-	for ( n = r; n->up != NULL; n = n->up );
-
-	report( choice, n );
+	report( choice, root );
 
 break;
 
@@ -3633,8 +3622,8 @@ break;
 // Save descriptions
 case 45:
 
-	lab1= ( char * ) Tcl_GetVar( inter, "vname", 0 );
-	strncpy( lab, lab1, MAX_PATH_LENGTH - 1);
+	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
 
 	change_descr_text( lab );
 
@@ -3652,7 +3641,7 @@ case 46:
 	sscanf( lab1, "%99s", lab );
 
 	*choice = 0;				// make . the parent window
-	scan_using_lab( lab, choice);
+	scan_using_lab( lab, choice );
 
 break;
 
@@ -3666,7 +3655,7 @@ case 47:
 	sscanf( lab1, "%99s", lab );
 
 	*choice = 0;				// make . the parent window
-	scan_used_lab( lab, choice);
+	scan_used_lab( lab, choice );
 
 break;
 
@@ -3810,10 +3799,11 @@ case 52:
 		break;
 	}
 
-	if ( !strcmp( eq_file, lsd_eq_file ) )
-	 {cmd( "tk_messageBox -parent . -title \"Offload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be offloaded differing from the current equation file.\" -type ok" );
-	 break;
-	 }
+	if ( ! strcmp( eq_file, lsd_eq_file ) )
+	{
+		cmd( "tk_messageBox -parent . -title \"Offload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be offloaded differing from the current equation file.\" -type ok" );
+		break;
+	}
 
 	cmd( "set res1 fun_%s.cpp", simul_name );
 	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ]", exec_path );
@@ -4705,9 +4695,8 @@ case 91:
 	}
 
 	// warn about no variable being saved
-	for ( n = r; n->up != NULL; n = n->up );
 	i = 0;
-	count_save( n, &i );
+	count_save( root, &i );
 	if ( i == 0 )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"Please mark the variables and parameters to be saved before trying to export the details on the elements to save.\"" );
