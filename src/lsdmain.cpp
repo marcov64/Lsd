@@ -498,7 +498,9 @@ int lsdmain( int argn, char **argv )
 	// create a Tcl command that calls the C discard_change function before killing LSD
 	Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 
-	// create Tcl commands that get and set LSD variable properties
+	// create Tcl commands that get and set LSD object/variable properties
+	Tcl_CreateCommand( inter, "get_obj_conf", Tcl_get_obj_conf, NULL, NULL );
+	Tcl_CreateCommand( inter, "set_obj_conf", Tcl_set_obj_conf, NULL, NULL );
 	Tcl_CreateCommand( inter, "get_var_conf", Tcl_get_var_conf, NULL, NULL );
 	Tcl_CreateCommand( inter, "set_var_conf", Tcl_set_var_conf, NULL, NULL );
 

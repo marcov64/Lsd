@@ -433,6 +433,44 @@ int browse( object *r, int *choice )
 					set sort_order 5; \
 					set choice 94 \
 				}" );
+			cmd( "bind .l.v.c.var_name <F5> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
+						set save [ expr ! [ get_var_conf $vname save ] ]; \
+						set_var_conf $vname save $save; \
+						set choice 70 \
+					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <F6> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
+						set plot [ expr ! [ get_var_conf $vname plot ] ]; \
+						set_var_conf $vname plot $plot; \
+						set choice 70 \
+					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <F7> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color black ] } { \
+						set num [ expr ! [ get_var_conf $vname debug ] ]; \
+						set_var_conf $vname debug $num; \
+						set choice 70 \
+					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <F8> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color black ] && ! [ string equal $color tomato ] && ! [ string equal $color firebrick ] } { \
+						set parallel [ expr ! [ get_var_conf $vname parallel ] ]; \
+						set_var_conf $vname parallel $parallel; \
+						set choice 70 \
+					} \
+				}" );
 		}
 
 		cmd( "bind .l.v.c.var_name <Button-1> { \
@@ -489,10 +527,12 @@ int browse( object *r, int *choice )
 		cmd( ".l.s.c.son_name.v add command -label Number -command { set choice 33 }" );	// entryconfig 9
 		cmd( ".l.s.c.son_name.v add command -label Delete -command { set choice 74 }" );	// entryconfig 10
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 11
-		cmd( ".l.s.c.son_name.v add cascade -label Add -menu .l.s.c.son_name.v.a" );	// entryconfig 12
+		cmd( ".l.s.c.son_name.v add cascade -label Add -menu .l.s.c.son_name.v.a" );	// entryconfig 12=14
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 13
-		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );	// entryconfig 14
-		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );	// entryconfig 15
+		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -command { if { $actual_steps == 0 } { set_obj_conf $vname comp $comp; set choice 70 } { set choice 7 } }" );	// entryconfig 14
+		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 15
+		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );	// entryconfig 14=16
+		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );	// entryconfig 15=17
 		cmd( "menu .l.s.c.son_name.v.a -tearoff 0" );
 		cmd( ".l.s.c.son_name.v.a add command -label Variable -command { set choice 2; set param 0 }" );
 		cmd( ".l.s.c.son_name.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
@@ -523,6 +563,8 @@ int browse( object *r, int *choice )
 					set itemfocus [ .l.s.c.son_name curselection ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set useCurrObj no; \
+						set comp [ get_obj_conf $vname comp ]; \
+						set no_comp [ expr ! $comp ]; \
 						if { $itemfocus == 0 } { \
 							.l.s.c.son_name.v entryconfig 4 -state disabled \
 						} { \
@@ -582,6 +624,15 @@ int browse( object *r, int *choice )
 					set listfocus 2; \
 					set sort_order 1; \
 					set choice 94 \
+				}" );
+			cmd( "bind .l.s.c.son_name <F5> { \
+					set listfocus 2; \
+					set itemfocus [ .l.s.c.son_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
+						set comp [ expr ! [ get_obj_conf $vname comp ] ]; \
+						set_obj_conf $vname comp $comp; \
+						set choice 70 \
+					} \
 				}" );
 		}
 
@@ -6804,6 +6855,7 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 						else
 							return TCL_ERROR;
 	}
+	
 	unsaved_change( true );				// signal unsaved change
 	redrawReq = true;
 
@@ -6816,5 +6868,76 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 			}
 	}
 	
+	return TCL_OK;		
+}
+
+
+/****************************************************
+TCL_GET_OBJ_CONF
+Function to get object configuration from Tcl
+****************************************************/
+int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+{
+	char vname[ MAX_ELEM_LENGTH ], res[ 2 ];
+	object *cur;
+	
+	if ( argc != 3 )					// require 2 parameters: variable name and property
+		return TCL_ERROR;
+		
+	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
+		return TCL_ERROR;
+	
+	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
+	cur = root->search( vname );
+
+	if ( cur == NULL )					// variable not found
+		return TCL_ERROR;
+
+	// get the appropriate value for variable
+	res[ 1 ] = '\0';					// default is 1 char string array
+	if ( ! strcmp( argv[ 2 ], "comp" ) )
+		res[ 0 ] = cur->to_compute ? '1' : '0';
+	else 
+		return TCL_ERROR;
+	
+	Tcl_SetResult( inter, res, TCL_VOLATILE );
+	return TCL_OK;		
+}
+
+
+/****************************************************
+TCL_SET_OBJ_CONF
+Function to set object configuration from Tcl
+****************************************************/
+int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+{
+	char vname[ MAX_ELEM_LENGTH ];
+	object *cur, *cur1;
+	
+	if ( argc != 4 )					// require 3 parameters: variable name, property and value
+		return TCL_ERROR;
+		
+	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL || 
+		 argv[ 3 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
+		return TCL_ERROR;
+	
+	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
+	cur = root->search( vname );
+	
+	if ( cur == NULL )					// variable not found
+		return TCL_ERROR;
+
+	// set the appropriate value for variable (all instances)
+	for ( cur1 = cur; cur1 != NULL; cur1 = cur1->hyper_next( cur1->label ) )
+	{
+		if ( ! strcmp( argv[ 2 ], "comp" ) )
+			cur1->to_compute = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+		else 
+			return TCL_ERROR;
+	}
+	
+	unsaved_change( true );				// signal unsaved change
+	redrawReq = true;
+
 	return TCL_OK;		
 }
