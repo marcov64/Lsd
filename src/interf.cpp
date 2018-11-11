@@ -529,7 +529,7 @@ int browse( object *r, int *choice )
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 11
 		cmd( ".l.s.c.son_name.v add cascade -label Add -menu .l.s.c.son_name.v.a" );	// entryconfig 12=14
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 13
-		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -command { if { $actual_steps == 0 } { set_obj_conf $vname comp $comp; set choice 70 } { set choice 7 } }" );	// entryconfig 14
+		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -command { if { $actual_steps == 0 } { set_obj_conf $vname comp [ expr ! $nocomp ]; set choice 70 } { set choice 6 } }" );	// entryconfig 14
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 15
 		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );	// entryconfig 14=16
 		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );	// entryconfig 15=17
@@ -563,8 +563,7 @@ int browse( object *r, int *choice )
 					set itemfocus [ .l.s.c.son_name curselection ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set useCurrObj no; \
-						set comp [ get_obj_conf $vname comp ]; \
-						set no_comp [ expr ! $comp ]; \
+						set nocomp [ expr ! [ get_obj_conf $vname comp ] ]; \
 						if { $itemfocus == 0 } { \
 							.l.s.c.son_name.v entryconfig 4 -state disabled \
 						} { \
@@ -629,8 +628,8 @@ int browse( object *r, int *choice )
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
-						set comp [ expr ! [ get_obj_conf $vname comp ] ]; \
-						set_obj_conf $vname comp $comp; \
+						set nocomp [ expr ! [ get_obj_conf $vname comp ] ]; \
+						set_obj_conf $vname comp $nocomp; \
 						set choice 70 \
 					} \
 				}" );
@@ -2112,7 +2111,7 @@ case 7:
 		if ( save == 1 || savei == 1 )
 			for ( cur = r; cur != NULL; cur = cur->up )
 				if ( ! cur->to_compute )
-					cmd( "tk_messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item\n'%s'\nset to be saved but it will not be registered for the Analysis of Results, since object\n'%s'\nis not set to be computed.\"", lab_old, cur->label );
+					cmd( "tk_messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\"", lab_old, cur->label );
 	}
 
 	if ( done != 8 )
@@ -6124,6 +6123,7 @@ CONTROL_TOCOMPUTE
 ****************************************************/
 void control_tocompute( object *r, char *l )
 {
+	int res;
 	bridge *cb;
 	object *cur;
 	variable *cv;
@@ -6131,7 +6131,14 @@ void control_tocompute( object *r, char *l )
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
 		if ( cv->save == 1 )
-			cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item '%s' set to be saved but it will not be registered for the Analysis of Results, since object '%s' is not set to be computed.\"", cv->label, l );
+		{
+			cmd( "set res [ tk_messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, l );
+			cmd( "if [ string equal $res cancel ] { set res 1 } { set res 0 }" );
+			get_int( "res", &res );
+			
+			if ( res == 1 )
+				return;
+		}
 	}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
@@ -6859,12 +6866,14 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 	unsaved_change( true );				// signal unsaved change
 	redrawReq = true;
 
-	if ( cv->save || cv->savei )
+	if ( ( ! strcmp( argv[ 2 ], "save" ) && cv->save ) || 
+		 ( ! strcmp( argv[ 2 ], "savei" ) && cv->savei ) )
 	{
 		for ( cur = currObj; cur != NULL; cur = cur->up )
 			if ( ! cur->to_compute )
 			{
-				cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item\n'%s'\nset to be saved but it will not be registered for the Analysis of Results, since object\n'%s'\nis not set to be computed.\"", vname, cur->label );
+				cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\"", vname, cur->label );
+				break;
 			}
 	}
 	
@@ -6911,6 +6920,7 @@ Function to set object configuration from Tcl
 ****************************************************/
 int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
 {
+	bool check_save = true;
 	char vname[ MAX_ELEM_LENGTH ];
 	object *cur, *cur1;
 	
@@ -6929,15 +6939,22 @@ int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 
 	// set the appropriate value for variable (all instances)
 	for ( cur1 = cur; cur1 != NULL; cur1 = cur1->hyper_next( cur1->label ) )
-	{
 		if ( ! strcmp( argv[ 2 ], "comp" ) )
+		{
 			cur1->to_compute = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+			
+			if ( ! cur1->to_compute && check_save )
+			{
+				// control for elements to save in objects to be not computed
+				control_tocompute( cur, cur->label );
+				check_save = false;		// do it just once
+			}
+		}
 		else 
 			return TCL_ERROR;
-	}
 	
 	unsaved_change( true );				// signal unsaved change
 	redrawReq = true;
-
+	
 	return TCL_OK;		
 }
