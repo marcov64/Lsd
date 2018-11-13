@@ -376,6 +376,10 @@ to get the pointer to such an object by calling UNIQUE_OBJ(id).
 
 Subsequently create objects of the same type will automatically become uniques
 ****************************************************/
+bool object::is_unique()
+{
+  return !(uID == NULL);
+}
 
 void object::declare_as_unique(char const *uLab)
 {

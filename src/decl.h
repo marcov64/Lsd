@@ -296,6 +296,7 @@ struct object
 	void write( char const *lab, double value, int time, int lag );	// write value in the lag field
 	#ifdef CPP11
 	// Fast look-up of agents via individual, unique IDs
+  bool is_unique();
 	void declare_as_unique(char const *uLab); //this object and all of its kind will become "unique", allowing for fast access by the new unique id.
 	object* obj_by_unique_id(double id); //when the object is deleted, clean up and update info.
 	void declare_as_nonUnique(); //function to retreave object by unique id.

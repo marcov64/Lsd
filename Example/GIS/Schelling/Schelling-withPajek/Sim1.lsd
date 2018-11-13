@@ -52,7 +52,7 @@ Var: EndOfSim 0 n + d n
 
 Object: Model C	1
 Var: Scheduler 0 s + n n
-Param: xn 0 s + n n	25
+Param: xn 0 s + n n	10
 Param: fracAgents 0 s + n n	0.7
 Param: fracBlue 0 s + n n	0.5
 Param: wrapping 0 s + n n	0
@@ -66,7 +66,7 @@ Var: dissimilarity 0 s + n p
 Param: SequentialUpdating 0 s + n n	1
 Param: RationalExpectations 0 s + n n	0
 Param: lattice 0 n + n n	1
-Param: yn 0 s + n n	25
+Param: yn 0 s + n n	10
 
 Object: Agent C	1
 Param: Colour 0 n + n n	0
@@ -78,8 +78,8 @@ Object: Patch C	1
 Func: isOption 0 n + n n
 
 SIM_NUM 1
-SEED 1
-MAX_STEP 50
+SEED 2
+MAX_STEP 10
 EQUATION fun_Schelling.cpp
 MODELREPORT report_Sim1.html
 
