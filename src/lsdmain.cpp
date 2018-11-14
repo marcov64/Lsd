@@ -148,7 +148,6 @@ int lsdmain( int argn, char **argv )
 {
 	char *str;
 	int i, j = 0, len, done;
-	FILE *f;
 
 	path = new char[ strlen( "" ) + 1 ];
 	simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
@@ -267,7 +266,7 @@ int lsdmain( int argn, char **argv )
 		strcpy( struct_file, msg );
 	}
 	 
-	f = fopen( struct_file, "r" );
+	FILE *f = fopen( struct_file, "r" );
 	if ( f == NULL )
 	{
 		fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n", struct_file );
@@ -499,7 +498,9 @@ int lsdmain( int argn, char **argv )
 	// create a Tcl command that calls the C discard_change function before killing LSD
 	Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 
-	// create Tcl commands that get and set LSD variable properties
+	// create Tcl commands that get and set LSD object/variable properties
+	Tcl_CreateCommand( inter, "get_obj_conf", Tcl_get_obj_conf, NULL, NULL );
+	Tcl_CreateCommand( inter, "set_obj_conf", Tcl_set_obj_conf, NULL, NULL );
 	Tcl_CreateCommand( inter, "get_var_conf", Tcl_get_var_conf, NULL, NULL );
 	Tcl_CreateCommand( inter, "set_var_conf", Tcl_set_var_conf, NULL, NULL );
 
@@ -613,12 +614,12 @@ RUN
 *********************************/
 void run( void )
 {
-	int i, j, perc_done, last_done;
-	bool batch_sequential_loop = false;
 	char bar_done[ 2 * BAR_DONE_SIZE ];
+	int i, perc_done, last_done;
+	bool batch_sequential_loop = false;
 	FILE *f;
-	result *rf;					// pointer for results files (may be zipped or not)
 	clock_t start, end;
+	result *rf;					// pointer for results files (may be zipped or not)
 
 #ifdef PARALLEL_MODE
 	// check if there are parallel computing variables
@@ -654,6 +655,7 @@ void run( void )
 
 	for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
 	{
+		running = true;		// signal simulation is running
 		cur_sim = i;	 	// Update the global variable holding information on the current run in the set of runs
 		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed (sorry Nadia!)
 
@@ -722,7 +724,6 @@ void run( void )
 		seed++;
 		scroll = false;
 		pause_run = false;
-		running = true;
 		debug_flag = false;
 		wait_delete = NULL;
 		stack_info = 0;
@@ -1507,7 +1508,6 @@ bool search_parallel( object *r )
 {
 	bridge *cb; 
 	variable *cv;
-	object *co;
 
 	// search among the variables 
 	for ( cv = r->v; cv != NULL; cv=cv->next )

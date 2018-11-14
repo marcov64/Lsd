@@ -71,7 +71,7 @@ void set_obj_number( object *r, int *choice )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ], *l;
 	int i, num, res, count, done;
-	object *cur, *first;
+
 	Tcl_LinkVar( inter, "val", ( char * ) &count, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
@@ -216,8 +216,7 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ], indent[ 30 ];
 	object *c, *cur;
-	variable *var;
-	int num = 0, multi = 0;
+	int num = 0;
 	bridge *cb; 
 
 	strcpy( ch, tag );
@@ -279,11 +278,6 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 		
 		Tcl_DoOneEvent( 0 );
 
-		if ( go_brother( c ) != NULL )
-			multi = 1;
-		else
-			multi = 0;
-		
 		if ( max_depth < 1 || level < max_depth )
 		{
 			for ( cur = c; cur != NULL; ++counter, cur=go_brother( cur ) )
@@ -313,7 +307,7 @@ int compute_copyfrom( object *c, int *choice )
 	object *cur, *cur1, *cur2, *cur3;
 	int i, j, k, h, res;
 
-	if ( c->up == NULL )
+	if ( c == NULL || c->up == NULL )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Element in Root object\" -detail \"The Root object is always single-instanced, so any element contained in it has only one instance.\"" );
 		return 1;
@@ -330,7 +324,7 @@ int compute_copyfrom( object *c, int *choice )
 
 	cmd( "frame $cc.f" );
 
-	for ( j = 1, cur = c; cur->up != NULL; cur = cur->up, ++j ) 
+	for ( i = 1, j = 1, cur = c; cur->up != NULL; cur = cur->up, ++j ) 
 	{
 		cmd( "frame $cc.f.f%d", j );
 		cmd( "label $cc.f.f%d.l -text \"Instance number of '%s'\"", j, cur->label );
@@ -370,7 +364,7 @@ int compute_copyfrom( object *c, int *choice )
 	for ( cur = c->up; cur->up != NULL; cur = cur->up ); //cur is root
 	cur = cur->search( c->label ); //find the first
 
-	for ( i = 0, k = 0; k == 0 && cur != NULL ; cur3 = cur, cur = cur->hyper_next( c->label ), ++i )
+	for ( i = 0, k = 0, cur3 = NULL; k == 0 && cur != NULL ; cur3 = cur, cur = cur->hyper_next( c->label ), ++i )
 	{
 		k = 1;
 		for ( j = 1, cur1 = cur; cur1->up != NULL; cur1 = cur1->up, ++j )
@@ -393,7 +387,7 @@ int compute_copyfrom( object *c, int *choice )
 	res = i;
 	
 	// reset possibly erroneous values
-	for ( j = 1, cur2 = cur3; cur2->up != NULL; cur2 = cur2->up, ++j ) 
+	for ( j = 1, cur2 = cur3; cur2 != NULL && cur2->up != NULL; cur2 = cur2->up, ++j ) 
 	{
 		for ( i = 1, cur1 = cur2->up->search( cur2->label ); cur1 != cur2; cur1 = cur1->next, ++i );
 
@@ -580,12 +574,10 @@ EDIT_STR
 void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ];
-	object *c, *cur, *first;
-	variable *var;
-	int multi = 0, cazzo, param, cfrom, j, affect, k;
+	object *c, *cur;
+	int multi = 0;
 	bridge *cb;
 
-	param = 0;
 	strcpy( ch, tag );
 	for ( cb = root->b, counter = 1; cb != NULL && *done == 0; cb = cb->next, counter = 1 )
 	{ 
@@ -630,7 +622,6 @@ ELIMINATE_OBJ
 ****************************************************/
 void eliminate_obj( object **r, int actual, int desired , int *choice )
 {
-	char ch[ 2 * MAX_ELEM_LENGTH ];
 	int i, j, *del, value, last;
 	object *cur, *app;
 
@@ -828,20 +819,25 @@ void chg_obj_num( object **c, int value, int level, int pippo[ ], int *choice, i
 			}
 		}// end check_pippo
 		
-		for ( cur1 = cur; cur1 != NULL; cur1 = go_brother( cur1 ) )
+		for ( last = NULL, cur1 = cur; cur1 != NULL; cur1 = go_brother( cur1 ) )
 			last = cur1 ; 	// skip the just updated group of objects
 		
-		cur = last->hyper_next( cur->label );	// first copy of the object to change after the just adjusted bunch
+		if ( last == NULL )
+			cur = NULL;
+		else
+		{
+			cur = last->hyper_next( cur->label );	// first copy of the object to change after the just adjusted bunch
 
-		if ( level > 0 && cur != NULL )
-		{	//search the next pivot
-			for ( cur1 = cur->up, i = 1; i < level; ++i, cur1 = cur1->up );	// hopefully, cur1 is of type pivot
-			
-			// a new set of objects to change has been found, but descends from another pivo
-			if ( cur1 != pivot )
+			if ( level > 0 && cur != NULL )
+			{	//search the next pivot
+				for ( cur1 = cur->up, i = 1; i < level; ++i, cur1 = cur1->up );	// hopefully, cur1 is of type pivot
+				
+				// a new set of objects to change has been found, but descends from another pivo
+				if ( cur1 != pivot )
+					cur = NULL;
+			}
+			else
 				cur = NULL;
 		}
-		else
-			cur = NULL;
 	}
 }

@@ -278,17 +278,19 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 <h2><a name="_Current_Object_information"></a>Current Object information bar</h2>
 
 <p class=MsoNormal>The second red label (<span class=Cdigo>Current Object</span>)
-in the bar indicates the name of the current <a href="LSD_faqs.html#object">Object
-type</a>, the one “pointed” by the Browser. Clicking on it opens the window for
-<a href="#_Editing_Objects_1">editing the Object</a> (except for the <span
-class=Cdigo>Root</span> object, which cannot be edited). Please note that any
-operation in an Object type affects all the <a href="LSD_faqs.html#object">instances</a>
-of this Object in the model.</p>
+in the bar indicates the name of the currently selected <a
+href="LSD_faqs.html#object">Object type</a>, the one “pointed” by the Browser.
+Clicking on it opens the window for <a href="#_Editing_Objects_1">editing the
+Object</a> (except for the <span class=Cdigo>Root</span> object, which cannot
+be edited). Please note that any operation in an Object type affects all the <a
+href="LSD_faqs.html#object">instances</a> of this Object in the model.</p>
 
 <p class=MsoNormal>The information bar also reports the name of the Object from
-which the current Object descends (<span class=Cdigo>Parent Object</span>). The
-parent Object name can be clicked to move the Browser to this Object, that is,
-move up in the <a href="LSD_faqs.html#modelstructure">model structure hierarchy</a>.</p>
+which the current Object descends (<span class=Cdigo>Parent Object</span>), if
+any. The parent Object name can be clicked to move the Browser to this Object,
+that is, move up in the <a href="LSD_faqs.html#modelstructure">model structure
+hierarchy</a>. Alternatively, the <span class=Cdigo>U</span> key can be also
+used to move up in the model structure.</p>
 
 <h2><a name=objects></a><a name=descendants></a>Descending Objects list box</h2>
 
@@ -315,9 +317,10 @@ href="#_Editing_Objects_1">below</a>).</p>
 <p class=MsoNormal>Additionally to the names, the LSD Browser also shows the
 number of instances of each Object type as in <span class=Cdigo>XXXX (#n)</span>,
 where <span class=Cdigo>n</span> is the corresponding number of instances of
-Object <span class=Cdigo>XXXX</span>. Additionally, Objects set not to be
-computed (see <a href="#_Changing_Objects">below</a>) have the symbol “<span
-class=Cdigo>-</span>” (minus) appended to <span class=Cdigo>n</span>.</p>
+Object <span class=Cdigo>XXXX</span>. Also, Objects set not to be computed (see
+<a href="#_Changing_Objects">below</a>) have the symbol “<span class=Cdigo>-</span>”
+(minus) appended to <span class=Cdigo>n</span>. The state of the computation
+flag can be toggled using the <span class=Cdigo>F5</span> key.</p>
 
 <p class=MsoNormal>The order in which the Objects are listed depends on the
 order in which they have been created during the <a
@@ -376,26 +379,32 @@ href="#_Changing_properties">below</a>):</p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
 Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>“<span class=Cdigo><b>+</b></span>” (plus): element configured to
-have its time series <a href="LSD_quickhelp.html#save">saved for analysis</a>.</p>
+</span></span>“<span class=Cdigo><b>+</b></span>” (plus) (<i>toggle shortcut</i>:
+<span class=Cdigo>F5</span>): element configured to have its time series <a
+href="LSD_quickhelp.html#save">saved for analysis</a>. </p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
 Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>“<span class=Cdigo><b>*</b></span>” (asterisk): element set to be
-presented during the <a href="LSD_faqs.html#simulationrun">simulation run</a>
-on the <a href="runtime.html">Run-time Plot</a> window.</p>
+</span></span>“<span class=Cdigo><b>*</b></span>” (asterisk) (<i>toggle
+shortcut</i>: <span class=Cdigo>F6</span>): element set to be presented during
+the <a href="LSD_faqs.html#simulationrun">simulation run</a> on the <a
+href="runtime.html">Run-time Plot</a> window.</p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
 Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>“<span class=Cdigo><b>!</b></span>” (exclamation): Variable
-marked for interrupting the <a href="debug.html">LSD Debugger</a> at the time
-step selected in menu <span class=Cdigo><a href="menurun.html#simsetting">Run&gt;Simulation
-Settings</a></span>.</p>
+</span></span>“<span class=Cdigo><b>!</b></span>” (exclamation) (<i>toggle
+shortcut</i>: <span class=Cdigo>F7</span>): Variable marked for interrupting
+the <a href="debug.html">LSD Debugger</a> at the time step selected in menu <span
+class=Cdigo><a href="menurun.html#simsetting">Run&gt;Simulation Settings</a></span>.</p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
 Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>“<span class=Cdigo><b>&amp;</b></span>” (ampersand): Variable
-configured to have all of its instances computed in parallel.</p>
+</span></span>“<span class=Cdigo><b>&amp;</b></span>” (ampersand) (<i>toggle
+shortcut</i>: <span class=Cdigo>F8</span>): Variable configured to have all of
+its instances computed in parallel.</p>
+
+<p class=MsoNormal>The state of the option flags for the selected element can
+be directly toggled using the indicated shortcuts when applicable. </p>
 
 <p class=MsoNormal>The names of the elements can be double-clicked to open the
 corresponding <a href="#_Editing_Variables_and">Change Element</a> window. The
@@ -435,9 +444,9 @@ name=chobjname></a><a name="_Changing_Objects"></a>Changing Objects</h1>
 
 <p class=MsoNormal>Click on any Object name in the <span class=Cdigo>Descending
 Objects</span> list box or the <a href="graphrep.html">LSD Model Structure</a>
-window and select the menu option <span class=Cdigo>Model&gt;Change Object</span>
-or <span class=Cdigo>Change</span> in the (right-click) context menu to open
-the Change Object window. </p>
+window and select the menu option <span class=Cdigo>Model&gt;Change Object</span>,
+or <span class=Cdigo>Change</span> in the (right-click) context menu, or press <span
+class=Cdigo>Ctrl+Enter</span> to open the Change Object window. </p>
 
 <p class=MsoNormal align=center style='text-align:center'><img border=0
 width=358 height=283 src="image/object_options.png"></p>
@@ -482,8 +491,7 @@ href="LSD_faqs.html#equation">Equation</a>. Unchecking this option will disable
 this behavior and unused variables are simply not computed (without affecting
 the simulation). This can increase the speed of the <a
 href="LSD_faqs.html#simulationrun">simulation run</a> when many unused
-Variables are present in the <a href="LSD_faqs.html#modelsetting">model
-configuration</a>.</p>
+Variables are present in the <a href="LSD_faqs.html#modelsetting">model configuration</a>.</p>
 
 <p class=MsoNormal>Finally, there is a box for entering the textual description
 of the Object, which is used in the model <a
@@ -551,8 +559,8 @@ class=Cdigo>Ctrl+L</span>) After confirmation, deletes the element from the <a
 href="LSD_faqs.html#modelsetting">model configuration</a>. See <a
 href="#_Delete_the_element">below</a></p>
 
-<p class=MsoNormal>Below the action buttons there are many options, according
-to the type of the current element: </p>
+<p class=MsoNormal>Below the action buttons there are many options, according to
+the type of the current element: </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
@@ -629,9 +637,9 @@ href="LSD_faqs.html#modeldocumentation">documentation</a> of the model.</p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>Initialized</b></span>: (<i>shortcut</i>: <span
 class=Cdigo>Ctrl+I</span>)<b> </b>(lagged Variables and Parameters only) Check
-to include this element in the list of lagged Variables and Parameters requiring
-careful initialization values, typically the ones most relevant for the
-simulation results, in the <a href="LSD_faqs.html#modeldocumentation">documentation</a>
+to include this element in the list of lagged Variables and Parameters
+requiring careful initialization values, typically the ones most relevant for
+the simulation results, in the <a href="LSD_faqs.html#modeldocumentation">documentation</a>
 of the model. </p>
 
 <p class=MsoNormal>Next, there is a box for entering the textual description of
@@ -722,8 +730,8 @@ the Change Element window or select <span class=Cdigo>Properties</span> in the
 (right-click) context menu of the target <a href="LSD_faqs.html#variable">Variable</a>
 or <a href="LSD_faqs.html#parameter">Parameter</a> or press <span class=Cdigo>F2</span>
 on the element to change its properties. After having inserted a Variable or a
-Parameter, it is possible to change the properties of any element by modifying
-its name, transforming a Parameter into a Variable (of <a
+Parameter, it is possible to change the properties of any element by modifying its
+name, transforming a Parameter into a Variable (of <a
 href="LSD_faqs.html#function">Function</a>), a Variable into a Parameter or
 changing the maximum <a href="LSD_faqs.html#variable">number of lags</a> to use
 (Variables only). </p>

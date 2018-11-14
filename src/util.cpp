@@ -106,7 +106,7 @@ void cmd( const char *cm, ... )
 	
 	if ( strlen( cm ) >= TCL_BUFF_STR )
 	{
-		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %lu bytes.", strlen( cm ) + 1 );
+		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %lu bytes.", ( long unsigned int ) strlen( cm ) + 1 );
 		log_tcl_error( cm, message );
 		if ( tk_ok )
 			cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"LSD will close immediately after pressing 'OK'.\"" );
@@ -203,10 +203,7 @@ void plog( char const *cm, char const *tag, ... )
 	
 	// handle the "bar" pseudo tag
 	if ( ! strcmp( tag, "bar" ) )
-	{
-		strcmp( tag, "" );
 		tag_ok = true;
-	}
 	else
 		on_bar = false;
 	
@@ -252,7 +249,7 @@ void plog( char const *cm, char const *tag, ... )
 	else
 		plog( "\nError: invalid tag, message ignored:\n%s\n", "", message );
 #endif 
-	delete[] message;
+	delete [ ] message;
 	
 	message_logged = true;
 }
@@ -721,13 +718,15 @@ void change_descr_lab(char const *lab_old, char const *lab, char const *type, ch
 		  delete [ ] cur->init;
 		  
 		if (cur==descr)
-		 {descr=cur->next;	
+		{
+			descr = cur->next;	
 		  delete cur;
 		 }
 		else
-		 {
-      for (cur1=descr; cur1->next!=cur; cur1=cur1->next);
-		  cur1->next=cur->next;
+		{
+			for ( cur1 = descr; cur1->next != cur; cur1 = cur1->next );
+			
+			cur1->next = cur->next;
 		  delete cur;
 		 } 
 		 
@@ -1433,7 +1432,7 @@ char *upload_eqfile( void )
 {
 	//load into the string eq_file the equation file
 	char s[ MAX_PATH_LENGTH+1 ], *eq;
-	int i, sz = 0;
+	int i;
 	FILE *f;
 
 	Tcl_LinkVar( inter, "eqfiledim", ( char * ) &i, TCL_LINK_INT );
@@ -1453,6 +1452,7 @@ char *upload_eqfile( void )
 			break;
 		strcat( eq, msg );
 	}
+	
 	fclose( f );
 	return eq;
 }
@@ -1621,7 +1621,7 @@ void result::title( object *root, int flag )
 
 void result::title_recursive( object *r, int header )
 {
-	bool single;
+	bool single = false;
 	bridge *cb;
 	object *cur;
 	variable *cv;
@@ -1633,8 +1633,6 @@ void result::title_recursive( object *r, int header )
 			set_lab_tit( cv );
 			if ( ( ! strcmp( cv->lab_tit, "1" ) || ! strcmp( cv->lab_tit, "1_1" ) || ! strcmp( cv->lab_tit, "1_1_1" ) || ! strcmp( cv->lab_tit, "1_1_1_1" ) ) && cv->up->hyper_next( ) == NULL )
 				single = true;					// prevent adding suffix to single objects
-			else
-				single = false;
 			
 			if ( header )
 			{

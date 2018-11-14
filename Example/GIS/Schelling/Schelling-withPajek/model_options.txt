@@ -1,5 +1,5 @@
 TARGET=lsd_gnu
 FUN=fun_Schelling
 FUN_EXTRA=
-SWITCH_CC=-Og -ggdb3 -Wall -pedantic -Wextra
+SWITCH_CC= -O3
 SWITCH_CC_LNK=

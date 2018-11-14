@@ -53,7 +53,7 @@ OBJECT::SAVE_STRUCT
 void object::save_struct( FILE *f, char const *tab )
 {
 	char tab1[ 30 ];
-	bridge *cb, *cb1;
+	bridge *cb;
 	object *o;
 	variable *var;
 
@@ -64,9 +64,6 @@ void object::save_struct( FILE *f, char const *tab )
 	fprintf( f, "%sLabel %s\n%s{\n", tab1, label, tab1 );
 	strcat( tab1, "\t" );
 	
-	if ( b != NULL )
-		cb1 = b->next;
-
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		fprintf( f, "%sSon: %s\n", tab1, cb->blabel );
@@ -757,10 +754,6 @@ endLoad:
 	
 	t = 0;
 	
-#ifndef NO_WINDOW
-	unsaved_change( false );
-#endif
-
 	return load;
 }
 
@@ -794,10 +787,14 @@ void unload_configuration ( bool full )
 #ifndef NO_WINDOW
 	unsaved_change( false );					// signal no unsaved change
 	cmd( "destroytop .lat" );					// remove lattice window
-	cmd( "set a [ split [ winfo children . ] ]" );	// remove run-time plot windows
-	cmd( "foreach i $a { if [ string match .plt* $i ] { destroytop $i } }" );
-	cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );	// delete temporary files
 	cmd( "unset -nocomplain modElem" );			// no elements in model structure
+	
+	if ( ! running )
+	{
+		cmd( "set a [ split [ winfo children . ] ]" );	// remove run-time plot windows
+		cmd( "foreach i $a { if [ string match .plt* $i ] { destroytop $i } }" );
+		cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );	// delete temporary files
+	}
 #endif
 
 	if ( full )									// full unload? (no new config?)
@@ -871,10 +868,14 @@ SAVE_CONFIGURATION
 ******************************************************************************/
 bool save_configuration( int findex )
 {
-	int indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
-	char *save_file;
-	object *cur;
+	bool save_ok = false;
+	int delta, indexDig;
+	char *save_file, *bak_file = NULL;
 	description *cur_descr;
+	FILE *f; 
+	
+	delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
+	indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
 	
 	if ( strlen( path ) > 0 )
 	{
@@ -890,17 +891,39 @@ bool save_configuration( int findex )
 	if ( findex > 0 )
 		sprintf( save_file, "%s_%d.lsd", save_file, findex );
 	else
-		sprintf( save_file, "%s.lsd", save_file );
+	{
+		// create backup file when not indexed saving
+		bak_file = new char[ strlen( save_file ) + 5 ];
+		sprintf( bak_file, "%s.bak", save_file );
+		
+		strcat( save_file, ".lsd" );
 	
-	FILE * f = fopen( save_file, "w" );
+		f = fopen( save_file, "r" );
+		if ( f != NULL )
+		{
+			fclose( f );
+			
+			f = fopen( bak_file, "r" );
+			if ( f != NULL )
+			{
+				fclose( f );
+				if( remove( bak_file ) )
+					goto error;
+			}
+			
+			if ( rename( save_file, bak_file ) )
+				goto error;
+		}
+	}
+	
+	f = fopen( save_file, "w" );
 	if ( f == NULL )
-		return false;
+		goto error;
 
 	root->save_struct( f, "" );
 	fprintf( f, "\nDATA\n" );
 	root->save_param( f );
 	
-	int delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
 	fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", sim_num, seed + delta, max_step, equation_name, name_rep );
 	
 	fprintf( f, "\nDESCRIPTION\n\n" );
@@ -920,9 +943,17 @@ bool save_configuration( int findex )
 	
 	save_eqfile( f );
 	
+	if ( ! ferror( f ) )
+		save_ok = true;
+	
 	fclose( f );
 	
-	return true;
+	error:
+	
+	delete [ ] save_file;
+	delete [ ] bak_file;
+	
+	return save_ok;
 }
 
 
@@ -936,7 +967,7 @@ int load_sensitivity( FILE *f )
 	int i;
 	char cc, lab[ MAX_ELEM_LENGTH ];
 	variable *cv;
-	sense *cs;
+	sense *cs = rsense;
 	
 	// read data from file (1 line per element, '#' indicate comment)
 	while ( ! feof( f ) )

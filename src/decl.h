@@ -109,7 +109,6 @@ Global definitions among all LSD C++ modules
 #define MAX_WAIT_TIME 10				// maximum wait time for a variable computation ( sec.)
 #define MAX_TIMEOUT 100					// maximum timeout for multi-thread scheduler (millisec.)
 #define MAX_LEVEL 10					// maximum number of object levels (plotting only)
-#define MAX_COUNTS 5					// maximum number of object counts (plotting only)
 #define ERR_LIM 10						// maximum number of repeated error messages
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define SIG_DIG 10						// number of significant digits in data files
@@ -899,7 +898,7 @@ void create_table_init( object *r );
 void dataentry_sensitivity( int *choice, sense *s, int nval = 0 );
 void deb_show( object *r );
 void delete_bridge( object *d );
-void draw_obj( object *t, int level, int center, int from );
+void draw_obj( object *t, object *sel, int level, int center, int from );
 void edit_data( object *root, int *choice, char *obj_name );
 void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done );
 void eliminate_obj( object **r, int actual, int desired , int *choice );
@@ -945,7 +944,7 @@ void plot_tseries( int *choice );
 void prepare_plot( object *r, int id_sim );
 void print_stack( void );
 void put_line( int x1, int y1, int x2, int y2);
-void put_node( int x1, int y1, int x2, int y2, char *str );
+void put_node( int x1, int y1, int x2, int y2, char *str, bool sel );
 void put_text( char *str, char *num, int x, int y, char *str2);
 void read_data( int *choice );
 void read_eq_filename( char *s );
@@ -1096,6 +1095,8 @@ extern worker *workers;					// multi-thread parallel worker data
 // Tcl/Tk specific definitions (for the windowed version only)
 #ifndef NO_WINDOW
 int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[ ] );	// ask before discarding unsaved changes
+int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
+int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_set_c_var( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );

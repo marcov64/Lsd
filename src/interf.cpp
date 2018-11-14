@@ -92,7 +92,6 @@ CREATE
 void create( void )
 {
 	object *cur = root;
-	char *s;
 
 	Tcl_LinkVar( inter, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "choice_g", ( char * ) &choice_g, TCL_LINK_INT );
@@ -194,7 +193,6 @@ int browse( object *r, int *choice )
 	char ch[ TCL_BUFF_STR ];
 	int num;
 	bridge *cb;
-	object *ap_o;
 	variable *ap_v;
 
 	currObj = r;			// global pointer to C Tcl routines
@@ -435,6 +433,44 @@ int browse( object *r, int *choice )
 					set sort_order 5; \
 					set choice 94 \
 				}" );
+			cmd( "bind .l.v.c.var_name <F5> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
+						set save [ expr ! [ get_var_conf $vname save ] ]; \
+						set_var_conf $vname save $save; \
+						set choice 70 \
+					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <F6> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
+						set plot [ expr ! [ get_var_conf $vname plot ] ]; \
+						set_var_conf $vname plot $plot; \
+						set choice 70 \
+					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <F7> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color black ] } { \
+						set num [ expr ! [ get_var_conf $vname debug ] ]; \
+						set_var_conf $vname debug $num; \
+						set choice 70 \
+					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <F8> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color black ] && ! [ string equal $color tomato ] && ! [ string equal $color firebrick ] } { \
+						set parallel [ expr ! [ get_var_conf $vname parallel ] ]; \
+						set_var_conf $vname parallel $parallel; \
+						set choice 70 \
+					} \
+				}" );
 		}
 
 		cmd( "bind .l.v.c.var_name <Button-1> { \
@@ -491,10 +527,12 @@ int browse( object *r, int *choice )
 		cmd( ".l.s.c.son_name.v add command -label Number -command { set choice 33 }" );	// entryconfig 9
 		cmd( ".l.s.c.son_name.v add command -label Delete -command { set choice 74 }" );	// entryconfig 10
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 11
-		cmd( ".l.s.c.son_name.v add cascade -label Add -menu .l.s.c.son_name.v.a" );	// entryconfig 12
+		cmd( ".l.s.c.son_name.v add cascade -label Add -menu .l.s.c.son_name.v.a" );	// entryconfig 12=14
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 13
-		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );	// entryconfig 14
-		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );	// entryconfig 15
+		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -command { if { $actual_steps == 0 } { set_obj_conf $vname comp [ expr ! $nocomp ]; set choice 70 } { set choice 6 } }" );	// entryconfig 14
+		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 15
+		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );	// entryconfig 14=16
+		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );	// entryconfig 15=17
 		cmd( "menu .l.s.c.son_name.v.a -tearoff 0" );
 		cmd( ".l.s.c.son_name.v.a add command -label Variable -command { set choice 2; set param 0 }" );
 		cmd( ".l.s.c.son_name.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
@@ -511,6 +549,14 @@ int browse( object *r, int *choice )
 						set choice 4 \
 					} \
 				}" );
+			cmd( "bind .l.s.c.son_name <Control-Return> { \
+					set listfocus 2; \
+					set itemfocus [ .l.s.c.son_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						set useCurrObj no; \
+						set choice 6 \
+					} \
+				}" );
 			cmd( "bind .l.s.c.son_name <Double-Button-1> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
@@ -525,6 +571,7 @@ int browse( object *r, int *choice )
 					set itemfocus [ .l.s.c.son_name curselection ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set useCurrObj no; \
+						set nocomp [ expr ! [ get_obj_conf $vname comp ] ]; \
 						if { $itemfocus == 0 } { \
 							.l.s.c.son_name.v entryconfig 4 -state disabled \
 						} { \
@@ -585,6 +632,15 @@ int browse( object *r, int *choice )
 					set sort_order 1; \
 					set choice 94 \
 				}" );
+			cmd( "bind .l.s.c.son_name <F5> { \
+					set listfocus 2; \
+					set itemfocus [ .l.s.c.son_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
+						set nocomp [ expr ! [ get_obj_conf $vname comp ] ]; \
+						set_obj_conf $vname comp $nocomp; \
+						set choice 70 \
+					} \
+				}" );
 		}
 
 		cmd( "bind .l.s.c.son_name <BackSpace> { set choice 5 }" );
@@ -608,36 +664,30 @@ int browse( object *r, int *choice )
 
 		cmd( "frame .l.p.up_name" );
 		cmd( "label .l.p.up_name.d -text \"Parent Object:\" -width 12 -anchor w" );
-		strcpy( ch, "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \" " );
-		if ( r->up == NULL )
-			strcat( ch, "(none) \" -command { }" );
-		else
+		if ( r->up != NULL )
 		{
-			strcat( ch, ( r->up )->label );
-			strcat( ch, " \" -command { set itemfocus 0; set choice 5 } -foreground red" );
+			cmd( "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" -command { set ttip \"\"; set itemfocus 0; set choice 5 } -foreground red", r->up->label );
+			cmd( "bind .l.p.up_name.n <Enter> { set ttip \"Make current\" }" );
+			cmd( "bind .l.p.up_name.n <Leave> { set ttip \"\" }" );
+			cmd( "bind . <KeyPress-u> { catch { .l.p.up_name.n invoke } }; bind . <KeyPress-U> { catch { .l.p.up_name.n invoke } }" );
 		}
-		cmd( ch );
-
-		cmd( "bind .l.p.up_name.n <Enter> { set ttip \"Select parent object\" }" );
-		cmd( "bind .l.p.up_name.n <Leave> { set ttip \"\" }" );
-		cmd( "bind . <KeyPress-u> { catch { .l.p.up_name.n invoke } }; bind . <KeyPress-U> { catch { .l.p.up_name.n invoke } }" );
+		else
+			cmd( "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \"\" -state disabled" );
 
 		cmd( "pack .l.p.up_name.d .l.p.up_name.n -side left" );
 		cmd( "pack .l.p.up_name -padx 9 -anchor w" );
 
 		cmd( "frame .l.p.tit" );
 		cmd( "label .l.p.tit.lab -text \"Current Object:\" -width 12 -anchor w" );
-		strcpy( ch, "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text \" " );
-		strcat( ch, r->label);
+		cmd( "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" %s", r->label, r->up == NULL ? "" : "-command { set ttip \"\"; set choice 6 }" );
 
 		if ( r->up != NULL ) 
-			strcat( ch, " \" -command { set choice 6 }" );
+		{
+			cmd( "bind .l.p.tit.but <Enter> { set ttip \"Change...\" }" );
+			cmd( "bind .l.p.tit.but <Leave> { set ttip \"\" }" );
+		}
 		else
-			strcat( ch, " \" -command { }" );
-		cmd( ch );
-
-		cmd( "bind .l.p.tit.but <Enter> { set ttip \"Change...\" }" );
-		cmd( "bind .l.p.tit.but <Leave> { set ttip \"\" }" );
+			cmd( ".l.p.tit.but configure -disabledforeground red -state disabled" );
 
 		cmd( "pack .l.p.tit.lab .l.p.tit.but -side left" );
 		cmd( "pack .l.p.tit -padx 8 -anchor w" );
@@ -705,7 +755,7 @@ int browse( object *r, int *choice )
 			cmd( "$w add separator" );
 			
 			cmd( "$w add command -label \"Change Element...\" -underline 0 -accelerator Enter -command { set useCurrObj yes; set choice 7 }" );
-			cmd( "$w add command -label \"Change Object...\" -underline 7 -accelerator Enter -command { set useCurrObj yes; set choice 6 }" );
+			cmd( "$w add command -label \"Change Object...\" -underline 7 -accelerator Ctrl+Enter -command { set useCurrObj yes; set choice 6 }" );
 			cmd( "$w add command -label \"Find Element...\" -underline 0 -accelerator Ctrl+F -command { set choice 50 }" );
 
 			cmd( "$w add cascade -label \"Sort Elements\" -underline 0 -menu $w.sort" );
@@ -981,14 +1031,14 @@ OPERATE
 object *operate( object *r, int *choice )
 {
 bool saveAs, delVar, renVar, table;
-char observe, initial, cc, *lab1, *lab2, *lab3, *lab4, lab[ 2 * MAX_PATH_LENGTH ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ];
+char observe, initial, *lab1, *lab2, *lab3, *lab4, lab[ 2 * MAX_PATH_LENGTH ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ];
 int sl, done = 0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, ffirst, fnext, temp[ 10 ];
 long nLinks;
 double fake = 0;
 FILE *f;
 bridge *cb;
 object *n, *cur, *cur1, *cur2;
-variable *cur_v, *cv, *app;
+variable *cv, *cur_v;
 result *rf;					// pointer for results files (may be zipped or not)
 sense *cs;
 description *cur_descr;
@@ -1016,8 +1066,8 @@ case 2:
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+		
+		n = root->search( lab_old );		// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -1283,8 +1333,8 @@ case 3:
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+
+		n = root->search( lab_old );		// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -1395,8 +1445,8 @@ case 32:
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+
+		n = root->search( lab_old );		// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -1507,22 +1557,19 @@ break;
 // Move browser to show one of the descendant object (defined in tcl $vname)
 case 4:
 
-	*choice = 0;
 	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) || ! strcmp( lab1, "(none)" ) )
 		break;
 	
 	sscanf( lab1, "%99s", lab_old );
 
-	n = r->search( lab_old );
+	n = root->search( lab_old );
 	if ( n == NULL )
-	{
-		plog( "\nDescendant %s not found", "", lab_old );
 		break;
-	}
 
 	cmd( "set listfocus 2; set itemfocus 0" );
 
+	*choice = 0;
 	redrawRoot = true;			// force browser redraw
 	return n;
 
@@ -1530,7 +1577,6 @@ case 4:
 // Move browser to show the parent object
 case 5:
 
-	*choice = 0;
 	if ( r->up == NULL )
 		return r;
 	
@@ -1538,6 +1584,7 @@ case 5:
 	
 	cmd( "set listfocus 2; set itemfocus %d", i ); 
 
+	*choice = 0;
 	redrawRoot = true;					// force browser redraw
 	return r->up;
 
@@ -1555,8 +1602,7 @@ case 6:
 	// check if current or pointed object and save current if needed
 	if ( strcmp( r->label, lab_old ) )	// check if not current variable
 	{
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+		n = root->search( lab_old );	// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -1633,7 +1679,6 @@ case 6:
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	redrawRoot = false;				// no browser redraw yet
 	done = *choice;
 
 	if ( *choice != 2 )
@@ -1655,8 +1700,6 @@ case 6:
 				cur->to_compute = *choice;
 			for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				cur->to_compute = *choice;
-
-			redrawRoot = true;		// force browser redraw
 		}   
 
 		// control for elements to save in objects to be not computed
@@ -1665,22 +1708,25 @@ case 6:
 	}
 
 	cmd( "destroytop .objprop" );
+	
+	redrawRoot = true;				// always redraw, because of different vname
 
 	// dispatch chosen option
 	if ( done > 2 )
 	{
 		cmd( "set vname $lab" );
+		cmd( "set useCurrObj no" );
 		*choice = done;
-		return r;
 	}
-	
-	// avoid entering into descendant
-	if ( done == 1 )
-	{
+	else
 		*choice = 0;
-		return r->up;
-	}
 
+	// avoid entering into descendant
+	if ( cur2 != NULL )
+		return cur2;
+	else
+		return r;
+	
 break;
 
 
@@ -1696,14 +1742,10 @@ case 83:
 		break;
 	sscanf( lab1, "%99s", lab_old );
 
-	for ( cur = r; cur->up != NULL; cur = cur->up );
-	cur = cur->search( lab_old );		// get pointer to vname
+	cur = root->search( lab_old );	// get pointer to vname
 	if ( cur == NULL )
-	{
-		plog( "\nObject %s not found", "", lab_old );
 		break;
-	}
-
+		
 	if ( nature == 74 )		// delete
 	{
 		cmd( "set answer [tk_messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete object?\" -detail \"Press 'Yes' to confirm deleting '$vname'\n\nNote that all descendants will be also deleted!\"]" );
@@ -1755,6 +1797,7 @@ case 83:
 			if ( strcmp( lab, r->label ) )
 			{
 				for ( cur1 = r; cur1->up != NULL; cur1 = cur1->up );
+				
 				done = check_label( lab, cur1 );
 				if ( done == 1 )
 				{
@@ -1762,6 +1805,7 @@ case 83:
 					cmd( "focus .chgnam.e.e; .chgnam.e.e selection range 0 end" );
 					goto here_newname;
 				}
+				
 				if ( done == 2 )
 				{
 					cmd( "tk_messageBox -parent .chgnam -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
@@ -2070,7 +2114,7 @@ case 7:
 		if ( save == 1 || savei == 1 )
 			for ( cur = r; cur != NULL; cur = cur->up )
 				if ( ! cur->to_compute )
-					cmd( "tk_messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item\n'%s'\nset to be saved but it will not be registered for the Analysis of Results, since object\n'%s'\nis not set to be computed.\"", lab_old, cur->label );
+					cmd( "tk_messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\"", lab_old, cur->label );
 	}
 
 	if ( done != 8 )
@@ -2827,14 +2871,14 @@ break;
 
 // Edit Objects' numbers
 case 19:
-
-	for ( n = r; n->up != NULL; n = n->up );
-
-	*choice = 0;
+	
 	strcpy( lab, r->label );
-	set_obj_number( n, choice );
+	
+	*choice = 0;
+	set_obj_number( root, choice );
 	cmd( "destroytop .ini" );
-	r = n->search( lab );
+	
+	r = root->search( lab );
 
 	unsaved_change( true );							// signal unsaved change
 
@@ -2852,8 +2896,8 @@ case 21:
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+
+		n = root->search( lab_old );		// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -3012,8 +3056,7 @@ case 24:
 	if ( res_g == NULL )
 		break;
 
-	for ( n = r; n->up != NULL; n = n->up );
-	n = n->search( res_g );
+	n = root->search( res_g );
 
 	if ( n != r )
 	{
@@ -3031,15 +3074,13 @@ case 25:
 	if (res_g == NULL )
 	  break;
 
-	for ( n = r; n->up != NULL; n = n->up );
-	r = n->search( res_g );
+	r = root->search( res_g );
 
 	*choice = 0;
-	edit_data( n, choice, r->label );
+	edit_data( root, choice, r->label );
 	cmd( "destroytop .ini" );
 
 	unsaved_change( true );		// signal unsaved change
-	choice_g = 0;
 
 break;
 
@@ -3059,8 +3100,7 @@ case 27:
 
 	if ( *choice == 1 )
 	{
-		for ( n = r; n->up != NULL; n = n->up );
-		clean_debug( n );
+		clean_debug( root );
 		unsaved_change( true );		// signal unsaved change
 	}
 
@@ -3086,6 +3126,7 @@ case 28:
 		break;
 	sscanf( lab1, "%499s", lab );
 	strncpy( equation_name, lab, MAX_PATH_LENGTH - 1 );
+	
 	unsaved_change( true );		// signal unsaved change
 
 break;
@@ -3112,8 +3153,7 @@ case 30:
 
 	if ( *choice == 1 )
 	{
-		for ( n = r; n->up != NULL; n = n->up );
-		clean_save( n );
+		clean_save( root );
 		unsaved_change( true );		// signal unsaved change
 	}
 
@@ -3123,15 +3163,14 @@ break;
 // Show variables to be saved
 case 39:
 
-	for ( n = r; n->up != NULL; n = n->up );
 	i = 0;
-	count_save( n, &i );
+	count_save( root, &i );
 	if ( i == 0 )
 		plog( " \nNo variable or parameter saved." );
 	else
 	{
 		plog( "\n\nVariables and parameters saved (%d):\n", "", i );
-		show_save( n );
+		show_save( root );
 	}
 
 break;
@@ -3140,10 +3179,9 @@ break;
 // Show variables to be observed
 case 42:
 
-	for ( n = r; n->up != NULL; n = n->up );
 	plog( "\n\nVariables and parameters containing results:\n" );
 	lcount = 0;
-	show_observe( n );
+	show_observe( root );
 	if ( lcount == 0 )
 		plog( "(none)\n" );
 
@@ -3153,10 +3191,9 @@ break;
 // Show variables to be initialized
 case 49:
 
-	for ( n = r; n->up != NULL; n = n->up );
 	plog( "\n\nVariables and parameters relevant to initialize:\n" );
 	lcount = 0;
-	show_initial( n );
+	show_initial( root );
 	if ( lcount == 0 )
 		plog( "(none)\n" );
 
@@ -3166,10 +3203,9 @@ break;
 // Show variables to be plot
 case 84:
 
-	for ( n = r; n->up != NULL; n = n->up );
 	plog( "\n\nVariables and parameters to plot in run time:\n" );
 	lcount = 0;
-	show_plot( n );
+	show_plot( root );
 	if ( lcount == 0 )
 		plog( "(none)\n" );
 
@@ -3179,10 +3215,9 @@ break;
 // Show variables to debug
 case 85:
 
-	for ( n = r; n->up != NULL; n = n->up );
 	plog( "\n\nVariables to debug:\n" );
 	lcount = 0;
-	show_debug( n );
+	show_debug( root );
 	if ( lcount == 0 )
 		plog( "(none)\n" );
 
@@ -3192,10 +3227,9 @@ break;
 // Show variables to parallelize
 case 86:
 
-	for ( n = r; n->up != NULL; n = n->up );
 	plog( "\n\nMulti-object variables to run in parallel:\n" );
 	lcount = 0;
-	show_parallel( n );
+	show_parallel( root );
 	if ( lcount == 0 )
 		plog( "(none)\n" );
 
@@ -3218,8 +3252,7 @@ case 31:
 
 	if ( *choice == 1 )
 	{
-		for ( n = r; n->up != NULL; n = n->up );
-		clean_plot( n );
+		clean_plot( root );
 		unsaved_change( true );		// signal unsaved change
 	}
 
@@ -3233,8 +3266,7 @@ case 87:
 
 	if ( *choice == 1 )
 	{
-		for ( n = r; n->up != NULL; n = n->up );
-		clean_parallel(n);
+		clean_parallel( root );
 		unsaved_change( true );		// signal unsaved change
 	}
 
@@ -3253,8 +3285,8 @@ case 33:
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+
+		n = root->search( lab_old );	// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -3370,8 +3402,8 @@ case 34:
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lab_old );		// set pointer to $vname
+
+		n = root->search( lab_old );		// set pointer to $vname
 		if ( n == NULL )
 			break;
 		cur2 = r;
@@ -3400,9 +3432,7 @@ break;
 // Create model report
 case 36:
 
-	for ( n = r; n->up != NULL; n = n->up );
-
-	report( choice, n );
+	report( choice, root );
 
 break;
 
@@ -3592,8 +3622,8 @@ break;
 // Save descriptions
 case 45:
 
-	lab1= ( char * ) Tcl_GetVar( inter, "vname", 0 );
-	strncpy( lab, lab1, MAX_PATH_LENGTH - 1);
+	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
 
 	change_descr_text( lab );
 
@@ -3611,7 +3641,7 @@ case 46:
 	sscanf( lab1, "%99s", lab );
 
 	*choice = 0;				// make . the parent window
-	scan_using_lab( lab, choice);
+	scan_using_lab( lab, choice );
 
 break;
 
@@ -3625,7 +3655,7 @@ case 47:
 	sscanf( lab1, "%99s", lab );
 
 	*choice = 0;				// make . the parent window
-	scan_used_lab( lab, choice);
+	scan_used_lab( lab, choice );
 
 break;
 
@@ -3769,10 +3799,11 @@ case 52:
 		break;
 	}
 
-	if ( !strcmp( eq_file, lsd_eq_file ) )
-	 {cmd( "tk_messageBox -parent . -title \"Offload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be offloaded differing from the current equation file.\" -type ok" );
-	 break;
-	 }
+	if ( ! strcmp( eq_file, lsd_eq_file ) )
+	{
+		cmd( "tk_messageBox -parent . -title \"Offload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be offloaded differing from the current equation file.\" -type ok" );
+		break;
+	}
 
 	cmd( "set res1 fun_%s.cpp", simul_name );
 	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ]", exec_path );
@@ -4664,9 +4695,8 @@ case 91:
 	}
 
 	// warn about no variable being saved
-	for ( n = r; n->up != NULL; n = n->up );
 	i = 0;
-	count_save( n, &i );
+	count_save( root, &i );
 	if ( i == 0 )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"Please mark the variables and parameters to be saved before trying to export the details on the elements to save.\"" );
@@ -5021,12 +5051,14 @@ case 68:
 	if ( *choice == 1 || *choice == 4 )			// Windows header
 	{
 		// convert to Windows folder separators (\)
-		for ( i = 0; i < strlen( ch ); ++i ) 
+		for ( i = 0; ( unsigned ) i < strlen( ch ); ++i ) 
 			if ( ch[ i ] == '/' ) 
 				ch[ i ] = '\\';
+			
 		win_dir[ MAX_PATH_LENGTH - 1 ] = '\0';
 		strcpy( win_dir, out_dir );
-		for ( i = 0; i < strlen( win_dir ); ++i ) 
+		
+		for ( i = 0; ( unsigned ) i < strlen( win_dir ); ++i ) 
 			if ( win_dir[ i ] == '/' ) 
 				win_dir[ i ]='\\';
 		
@@ -5710,7 +5742,6 @@ SHOW_OBSERVE
 ****************************************************/
 void show_observe( object *n )
 {
-	int app;
 	bridge *cb;
 	description *cd;
 	object *co;
@@ -6081,6 +6112,7 @@ CONTROL_TOCOMPUTE
 ****************************************************/
 void control_tocompute( object *r, char *l )
 {
+	int res;
 	bridge *cb;
 	object *cur;
 	variable *cv;
@@ -6088,7 +6120,14 @@ void control_tocompute( object *r, char *l )
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
 		if ( cv->save == 1 )
-			cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item '%s' set to be saved but it will not be registered for the Analysis of Results, since object '%s' is not set to be computed.\"", cv->label, l );
+		{
+			cmd( "set res [ tk_messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, l );
+			cmd( "if [ string equal $res cancel ] { set res 1 } { set res 0 }" );
+			get_int( "res", &res );
+			
+			if ( res == 1 )
+				return;
+		}
 	}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
@@ -6294,7 +6333,7 @@ bool sort_listbox( int box, int order, object *r )
 		if ( r->v == NULL || order < 0 || order > 5 )	// invalid sort?
 			return false;
 		
-		variable *cv, *cv1;
+		variable *cv, *cv1 = NULL;
 		list < variable > newv, newvV, newvP, newvF;
 		list < variable > :: iterator it;
 		
@@ -6394,7 +6433,7 @@ bool sort_listbox( int box, int order, object *r )
 		if ( r->b == NULL || order < 0 || order > 1 )	// invalid sort?
 			return false;
 		
-		bridge *cb, *cb1;	
+		bridge *cb, *cb1 = NULL;	
 		list < bridge > newb;
 		list < bridge > :: iterator it;
 		
@@ -6470,7 +6509,6 @@ Also restore sensitivity configuration
 bool load_prev_configuration( void )
 {
 	char *saFile = NULL;
-	object *cur;
 	FILE *f;
 	
 	if ( sens_file != NULL )					// save SA file name if one is loaded
@@ -6813,17 +6851,99 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 						else
 							return TCL_ERROR;
 	}
+	
 	unsaved_change( true );				// signal unsaved change
 	redrawReq = true;
 
-	if ( cv->save || cv->savei )
+	if ( ( ! strcmp( argv[ 2 ], "save" ) && cv->save ) || 
+		 ( ! strcmp( argv[ 2 ], "savei" ) && cv->savei ) )
 	{
 		for ( cur = currObj; cur != NULL; cur = cur->up )
 			if ( ! cur->to_compute )
 			{
-				cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item\n'%s'\nset to be saved but it will not be registered for the Analysis of Results, since object\n'%s'\nis not set to be computed.\"", vname, cur->label );
+				cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\"", vname, cur->label );
+				break;
 			}
 	}
+	
+	return TCL_OK;		
+}
+
+
+/****************************************************
+TCL_GET_OBJ_CONF
+Function to get object configuration from Tcl
+****************************************************/
+int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+{
+	char vname[ MAX_ELEM_LENGTH ], res[ 2 ];
+	object *cur;
+	
+	if ( argc != 3 )					// require 2 parameters: variable name and property
+		return TCL_ERROR;
+		
+	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
+		return TCL_ERROR;
+	
+	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
+	cur = root->search( vname );
+
+	if ( cur == NULL )					// variable not found
+		return TCL_ERROR;
+
+	// get the appropriate value for variable
+	res[ 1 ] = '\0';					// default is 1 char string array
+	if ( ! strcmp( argv[ 2 ], "comp" ) )
+		res[ 0 ] = cur->to_compute ? '1' : '0';
+	else 
+		return TCL_ERROR;
+	
+	Tcl_SetResult( inter, res, TCL_VOLATILE );
+	return TCL_OK;		
+}
+
+
+/****************************************************
+TCL_SET_OBJ_CONF
+Function to set object configuration from Tcl
+****************************************************/
+int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+{
+	bool check_save = true;
+	char vname[ MAX_ELEM_LENGTH ];
+	object *cur, *cur1;
+	
+	if ( argc != 4 )					// require 3 parameters: variable name, property and value
+		return TCL_ERROR;
+		
+	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL || 
+		 argv[ 3 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
+		return TCL_ERROR;
+	
+	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
+	cur = root->search( vname );
+	
+	if ( cur == NULL )					// variable not found
+		return TCL_ERROR;
+
+	// set the appropriate value for variable (all instances)
+	for ( cur1 = cur; cur1 != NULL; cur1 = cur1->hyper_next( cur1->label ) )
+		if ( ! strcmp( argv[ 2 ], "comp" ) )
+		{
+			cur1->to_compute = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+			
+			if ( ! cur1->to_compute && check_save )
+			{
+				// control for elements to save in objects to be not computed
+				control_tocompute( cur, cur->label );
+				check_save = false;		// do it just once
+			}
+		}
+		else 
+			return TCL_ERROR;
+	
+	unsaved_change( true );				// signal unsaved change
+	redrawReq = true;
 	
 	return TCL_OK;		
 }

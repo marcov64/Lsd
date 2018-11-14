@@ -1108,7 +1108,7 @@ long object::init_small_world_net( char const *lab, long numNodes, long outDeg, 
 
 long object::init_scale_free_net( char const *lab, long numNodes, long outDeg, double expLink )
 {
-	long idNode, numLinks, startNode, endNode, nLinks, i;
+	long idNode, numLinks, nLinks, i;
 	double curProb;
 	bool node1;
 	object *firstNode, *cur, *cur1;
@@ -1336,7 +1336,7 @@ long object::read_file_net( char const *lab, char const dir[ ], char const base_
 	long idNode, numNodes, countNodes, numLinks, startNode, endNode;
 	int rd;
 	double weight;
-	char *p, fileName[2*MAX_PATH_LENGTH], textLine[MAX_LINE_SIZE], nameNode[MAX_LINE_SIZE];
+	char fileName[2*MAX_PATH_LENGTH], textLine[MAX_LINE_SIZE], nameNode[MAX_LINE_SIZE];
 	bool inSection;
 	object *cur, *cur1;
 	netLink *cur2, *cur3;
@@ -1480,7 +1480,7 @@ long object::write_file_net( char const *lab, char const dir[ ], char const base
 	int tCur = ( t > max_step ) ? max_step : t;				// effective current time
 	long numNodes, numLinks = 0;
 	double weight;
-	char *c, mode[ 2 ], fileName[2*MAX_PATH_LENGTH], name[MAX_PATH_LENGTH], actIntv[64];
+	char *c, mode[ 2 ], fileName[ 2 * MAX_PATH_LENGTH ], name[ MAX_PATH_LENGTH ];
 	object *firstNode, *cur;
 	netLink *cur1;
 	FILE *pajekFile;

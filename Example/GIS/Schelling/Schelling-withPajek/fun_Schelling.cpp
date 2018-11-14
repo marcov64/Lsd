@@ -1,5 +1,4 @@
 //#define EIGENLIB			// uncomment to use Eigen linear algebra library
-//uncomment to follow usage of random numbers
 #include "fun_head_fast.h"
 
 // do not add Equations in this area
