@@ -153,10 +153,13 @@ Tcl_LinkVar( inter, "gnu", ( char * ) &gnu, TCL_LINK_BOOLEAN );
 Tcl_LinkVar( inter, "num_y2", ( char * ) &num_y2, TCL_LINK_INT );
 
 avgSmplMsg = false;
+logs = false;
 cur_plot = 0;
 file_counter = 0;
 num_var = 0;
+autom_x = true;
 max_c = min_c = num_c = 1;
+autom = true;
 miny = maxy = 0;
 time_cross = xy = false;
 gnu = false;
@@ -2419,216 +2422,231 @@ while ( true )
  ****************************************************/
 void plot_tseries( int *choice )
 {
-char *app, **str, **tag;
-int i, j, *start, *end, done, doney2, idseries;
-double **data,**logdata;
-int logErrCnt = 0;				// log errors counter to prevent excess messages
-bool y2on, stopErr = false;
+	char *app, **str, **tag;
+	int i, j, *start, *end, done, doney2, idseries;
+	double **data,**logdata;
 
-if ( nv > 1000 )
-{
-  cmd( "set answer [tk_messageBox -parent .da -type okcancel -title \"Too Many Series\" -icon warning -default ok -message \"You selected too many ($nv) series to plot\" -detail \"This may cause a crash of LSD, with the loss of all unsaved data.\nIf you continue the system may become slow, please be patient.\nPress 'OK' to continue anyway.\"]" );
-  cmd( "if {[string compare $answer ok] == 0} {set choice 1 } {set choice 2}" );
-  if ( *choice == 2 )
-   return;
-}
- 
-if ( nv == 0 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-	*choice = 2;
-	return;
-}
+	int logErrCnt = 0;				// log errors counter to prevent excess messages
+	bool y2on, stopErr = false;
 
-data = new double *[ nv ];
-logdata = new double *[ nv ];
-start = new int [ nv ];
-end = new int [ nv ];
-str = new char *[ nv ];
-tag = new char *[ nv ];
+	if ( nv > 1000 )
+	{
+		cmd( "set answer [tk_messageBox -parent .da -type okcancel -title \"Too Many Series\" -icon warning -default ok -message \"You selected too many ($nv) series to plot\" -detail \"This may cause a crash of LSD, with the loss of all unsaved data.\nIf you continue the system may become slow, please be patient.\nPress 'OK' to continue anyway.\"]" );
+		cmd( "if { [ string compare $answer ok ] == 0 } { set choice 1 } { set choice 2 }" );
+		if ( *choice == 2 )
+			return;
+	}
+	 
+	if ( nv == 0 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
+		*choice = 2;
+		return;
+	}
 
-if ( autom_x )
-{
-	min_c = 1;
-  max_c = num_c;
-}
+	data = new double *[ nv ];
+	logdata = new double *[ nv ];
+	start = new int [ nv ];
+	end = new int [ nv ];
+	str = new char *[ nv ];
+	tag = new char *[ nv ];
 
-// prepare data from selected series
-for ( i = 0; i < nv; ++i )
-{
-	str[ i ] = new char[ MAX_ELEM_LENGTH ];
-  tag[ i ] = new char[ MAX_ELEM_LENGTH ];
-  data[ i ] = NULL;
-  logdata[ i ] = NULL;
+	if ( autom_x )
+	{
+		min_c = 1;
+		max_c = num_c;
+	}
 
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-  strcpy( msg, app );
-  sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
-  
-  // get series data and take logs if necessary
-  if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
-   {
-    data[ i ] = vs[ idseries ].data;
-    if ( data[ i ] == NULL )
-	plog( "\nError: invalid data\n" );
-   
-   if ( logs )			// apply log to the values to show "log scale" in the y-axis
-   {
-	 logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-     for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-	   if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-		 logdata[ i ][ j ] = log( data[ i ][ j ] );
-	   else
-	   {
-		 logdata[ i ][ j ] = NAN;
-		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-			plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
-		 else
-			if ( ! stopErr )
+	// prepare data from selected series
+	for ( i = 0; i < nv; ++i )
+	{
+		str[ i ] = new char[ MAX_ELEM_LENGTH ];
+		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+		data[ i ] = NULL;
+		logdata[ i ] = NULL;
+
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		strcpy( msg, app );
+		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries );
+	  
+		// get series data and take logs if necessary
+		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		{
+			data[ i ] = vs[ idseries ].data;
+			if ( data[ i ] == NULL )
+			plog( "\nError: invalid data\n" );
+	   
+			if ( logs )			// apply log to the values to show "log scale" in the y-axis
 			{
-				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-				stopErr = true;
+				logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
+				for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
+				if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
+					logdata[ i ][ j ] = log( data[ i ][ j ] );
+				else
+				{
+					logdata[ i ][ j ] = NAN;
+					if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+						plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+					else
+						if ( ! stopErr )
+						{
+							plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+							stopErr = true;
+						}
+				}
+				
+				data[ i ] = logdata[ i ];			// replace the data series
 			}
-	   }
-	 data[ i ] = logdata[ i ];				// replace the data series
-   }
-  }
-}
+		}
+	}
 
-// handle case selection
-if ( autom_x || min_c >= max_c )
-{
-for ( i = 0; i < nv; ++i )
-{
-	if ( i == 0 )
-   min_c = max_c = start[ i ];
-  if ( start[ i ] < min_c )
-   min_c = start[ i ];
-  if (end[ i ] > max_c )
-   max_c = end[ i ] > num_c?num_c:end[ i ];
-}
-}
-
-// handle 2nd y-axis scale
-cmd( "set choice $y2" );
-y2on = *choice;
-
-if ( y2on )
-{
-  if ( num_y2 > nv || num_y2 < 2 )
-  {
-   num_y2 = nv + 1;
-   y2on = false;
-  }
-}
-else
- num_y2 = nv + 1; 
- 
-// auto-find minimums and maximums
-if ( miny >= maxy )
-	autom = true;
-if ( autom )
-{
-miny2 = miny;
-maxy2 = maxy;
-for ( done = doney2 = 0, i = 0; i < nv; ++i )
-{
-  if ( i < num_y2 - 1 )
-  {
-  for ( j = min_c; j <= max_c; ++j )
-   {
-    if ( done == 0 && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )		// ignore NaNs
-     {miny = maxy = data[ i ][ j ];
-	done = 1;
-     }
-    if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny )		// ignore NaNs
-     miny = data[ i ][ j ];
-    if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )		// ignore NaNs
-     maxy = data[ i ][ j ];
-   }
-  }
-  else
-  {
-  for ( j = min_c; j <= max_c; ++j )
-   {
-    if ( doney2 == 0 && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )		// ignore NaNs
-     {miny2 = maxy2 = data[ i ][ j ];
-	doney2 = 1;
-     }
-    if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny2 )		// ignore NaNs
-     miny2 = data[ i ][ j ];
-    if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy2 )		// ignore NaNs
-     maxy2 = data[ i ][ j ];
-   }
-  }
-}
-} //End for finding min-max
-
-//To avoid divisions by zero for constant values
-if ( miny == maxy )
-{
-	if ( miny == 0 )
+	// handle case selection
+	if ( autom_x || min_c >= max_c )
 	{
-	maxy = 0.1;
-    miny = -0.1;
-   }
-  else
-   {if ( miny>0 )
-	{
-	miny *= 0.9;
-     maxy *= 1.1;
-    }
-    else
-	{
-	miny *= 1.1;
-     maxy *= 0.9;
-    }
-   }
-}
+		for ( i = 0; i < nv; ++i )
+		{
+			if ( i == 0 )
+			min_c = max_c = start[ i ];
 
-if ( miny2 == maxy2 )	// to avoid divisions by zero for constant values
-{
-	if ( miny2 == 0 )
-	{
-	maxy2 = 0.1;
-    miny2 = -0.1;
-   }
-  else
-   {if ( miny2>0 )
-	{
-	miny2 *= 0.9;
-     maxy2 *= 1.1;
-    }
-    else
-	{
-	miny2 *= 1.1;
-     maxy2 *= 0.9;
-    }
-   }
-}
+			if ( start[ i ] < min_c )
+				min_c = start[ i ];
+			
+			if (end[ i ] > max_c )
+				max_c = end[ i ] > num_c?num_c:end[ i ];
+		}
+	}
 
-cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
-cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
-cmd( "write_disabled .da.f.h.v.ft.from.mnc $minc" );
-cmd( "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
+	// handle 2nd y-axis scale
+	cmd( "set choice $y2" );
+	y2on = *choice;
 
-// plot all series
-plot( TSERIES, nv, data, start, end, str, tag, choice );
+	if ( y2on )
+	{
+		if ( num_y2 > nv || num_y2 < 2 )
+		{
+			num_y2 = nv + 1;
+			y2on = false;
+		}
+	}
+	else
+		num_y2 = nv + 1; 
+	 
+	// auto-find minimums and maximums
+	if ( miny >= maxy )
+		autom = true;
 
-for ( i = 0; i < nv; ++i )
-{
-	delete [ ] str[ i ];
-	delete [ ] tag[ i ];
-	if ( logs )
-		delete [ ] logdata[ i ];
-}
-delete [ ] str;
-delete [ ] tag;
-delete [ ] logdata;
-delete [ ] data;
-delete [ ] start;
-delete [ ] end;
+	if ( autom )
+	{
+		miny2 = miny;
+		maxy2 = maxy;
+		for ( done = doney2 = 0, i = 0; i < nv; ++i )
+		{
+			if ( i < num_y2 - 1 )
+			{
+				for ( j = min_c; j <= max_c; ++j )
+				{
+					if ( done == 0 && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )		// ignore NaNs
+					{
+						miny = maxy = data[ i ][ j ];
+						done = 1;
+					}
+					
+					if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny )		// ignore NaNs
+						miny = data[ i ][ j ];
+						
+					if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )		// ignore NaNs
+						maxy = data[ i ][ j ];
+				}
+			}
+			else
+			{
+				for ( j = min_c; j <= max_c; ++j )
+				{
+					if ( doney2 == 0 && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )		// ignore NaNs
+					{
+						miny2 = maxy2 = data[ i ][ j ];
+						doney2 = 1;
+					}
+					
+					if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny2 )		// ignore NaNs
+						miny2 = data[ i ][ j ];
+						
+					if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy2 )		// ignore NaNs
+						maxy2 = data[ i ][ j ];
+				}
+			}
+		}
+	}
+
+	// to avoid divisions by zero for constant values
+	if ( miny == maxy )
+	{
+		if ( miny == 0 )
+		{
+			maxy = 0.1;
+			miny = -0.1;
+		}
+		else
+		{
+			if ( miny > 0 )
+			{
+				miny *= 0.9;
+				maxy *= 1.1;
+			}
+			else
+			{
+				miny *= 1.1;
+				maxy *= 0.9;
+			}
+		}
+	}
+
+	// to avoid divisions by zero for constant values
+	if ( miny2 == maxy2 )	
+	{
+		if ( miny2 == 0 )
+		{
+			maxy2 = 0.1;
+			miny2 = -0.1;
+		}
+		else
+		{
+			if ( miny2 > 0 )
+			{
+				miny2 *= 0.9;
+				maxy2 *= 1.1;
+			}
+			else
+			{
+				miny2 *= 1.1;
+				maxy2 *= 0.9;
+			}
+		}
+	}
+
+	cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
+	cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
+	cmd( "write_disabled .da.f.h.v.ft.from.mnc $minc" );
+	cmd( "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
+
+	// plot all series
+	plot( TSERIES, nv, data, start, end, str, tag, choice );
+
+	for ( i = 0; i < nv; ++i )
+	{
+		delete [ ] str[ i ];
+		delete [ ] tag[ i ];
+		if ( logs )
+			delete [ ] logdata[ i ];
+	}
+
+	delete [ ] str;
+	delete [ ] tag;
+	delete [ ] logdata;
+	delete [ ] data;
+	delete [ ] start;
+	delete [ ] end;
 }
 
 
@@ -4939,7 +4957,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 		
 	if ( type == 1 )
 	{	// plot with external gnuplot
-		cmd( "set choice [ open_gnuplot gnuplot.gp \"Please check if you have selected an adequate configuration for the plot.\" ]" );
+		cmd( "set choice [ open_gnuplot gnuplot.gp \"Please check if you have selected an adequate configuration for the plot.\nIf the error persists please check if Gnuplot is installed and set up properly.\" ]" );
 		
 		if ( *choice != 0 )			// Gnuplot failed
 		{
@@ -4963,7 +4981,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 
 
 	// generate tk canvas filling routine using Gnuplot
-	cmd( "set choice [ open_gnuplot gnuplot.lsd \"Please check if you have selected an adequate configuration for the plot and if Gnuplot is set up properly.\" true ]" );
+	cmd( "set choice [ open_gnuplot gnuplot.lsd \"Please check if you have selected an adequate configuration for the plot and if Gnuplot is set up properly.\nIf the error persists please check if Gnuplot is installed and set up properly.\" true ]" );
 
 	if ( *choice != 0 )						// Gnuplot failed
 	{
@@ -8363,7 +8381,7 @@ int shrink_gnufile( void )
 	
 	if ( f == NULL )
 	{
-		cmd( "tk_messageBox -parent .da -title Error -icon error -type ok -message \"Cannot open plot\" -detail \"The plot file produced by Gnuplot is not available.\nPlease check if you have selected an adequate configuration for the plot.\nIf the error persists if Gnuplot is installed and set up properly.\"" );
+		cmd( "tk_messageBox -parent .da -title Error -icon error -type ok -message \"Cannot open plot\" -detail \"The plot file produced by Gnuplot is not available.\nPlease check if you have selected an adequate configuration for the plot.\nIf the error persists please check if Gnuplot is installed and set up properly.\"" );
 		return 1;
 	}
 
