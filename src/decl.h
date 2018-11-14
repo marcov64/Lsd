@@ -25,8 +25,9 @@ Global definitions among all LSD C++ modules
 #endif
 
 //DEBUGGING MODES?
-#define DEBUG_RAN_CPP11
-
+#ifdef CPP11
+  #define DEBUG_RAN_CPP11
+#endif
 // standard libraries used
 #include <stdio.h>
 #include <string.h>
@@ -147,8 +148,8 @@ Global definitions among all LSD C++ modules
 
 #ifndef RND
     double ran1( long *idum_loc = NULL );
-		double ran1_count(const char fname[]);    //DEBUG_RAN_CPP11
   #ifdef DEBUG_RAN_CPP11
+  	double ran1_count(const char fname[]);    //DEBUG_RAN_CPP11
 		#define RND ( ran1_count( __FUNCTION__ ) )
 	#else
 		#define RND ( ran1( ) )
