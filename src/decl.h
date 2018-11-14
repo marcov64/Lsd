@@ -24,6 +24,9 @@ Global definitions among all LSD C++ modules
 #endif
 #endif
 
+//DEBUGGING MODES?
+#define DEBUG_RAN_CPP11
+
 // standard libraries used
 #include <stdio.h>
 #include <string.h>
@@ -138,9 +141,19 @@ Global definitions among all LSD C++ modules
 #define foldersep( dir ) ( dir[ 0 ] == '\0' ? "" : "/" )
 
 // define the base pseudo random number generator
+#ifdef DEBUG_RAN_CPP11
+  extern int ran_callntimes;
+  extern char ran_callntimes_name[300];                //DEBUG_RAN_CPP11
+#endif
+
 #ifndef RND
-double ran1( long *idum_loc = NULL );
-#define RND ( ran1( ) )
+    double ran1( long *idum_loc = NULL );
+		double ran1_count(const char fname[]);    //DEBUG_RAN_CPP11
+  #ifdef DEBUG_RAN_CPP11
+		#define RND ( ran1_count( __FUNCTION__ ) )
+	#else
+		#define RND ( ran1( ) )
+	#endif
 #endif
 
 using namespace std;
