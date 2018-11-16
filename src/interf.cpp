@@ -59,7 +59,7 @@ Eliminate all the Object like d from the model. Cancel also the their descendant
 *************************************************************/
 
 /*
-USED CASE 94
+USED CASE 95
 */
 
 #include "decl.h"
@@ -75,7 +75,7 @@ int lcount;
 object *currObj;
 
 // list of choices that are bad with existing run data
-int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94 };
+int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95 };
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
@@ -91,7 +91,7 @@ CREATE
 ****************************************************/
 void create( void )
 {
-	object *cur = root;
+	object *cur;
 
 	Tcl_LinkVar( inter, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "choice_g", ( char * ) &choice_g, TCL_LINK_INT );
@@ -127,18 +127,8 @@ void create( void )
 		}" );
 
 	// restore previous object and cursor position in browser, if any
-	if ( strlen( lastObj ) > 0 )
-	{
-		cur = root->search( lastObj );
-		if ( cur != NULL )
-		{
-			cmd( "if [ info exists lastList ] { set listfocus $lastList }" );
-			cmd( "if [ info exists lastItem ] { set itemfocus $lastItem }" );
-		}
-	}
-
+	cur = restore_pos( root );
 	redrawRoot = true;					// browser redraw when drawing the first time
-
 	choice_g = choice = 0;
 
 	// Main Cycle ********************************
@@ -173,7 +163,7 @@ void create( void )
 		if ( choice < 0 )
 		{
 			choice = - choice;
-			cur = root;
+			cur = restore_pos( root );	// restore pointed object and variable
 		}
 
 		cur = operate( cur, &choice );
@@ -281,10 +271,10 @@ int browse( object *r, int *choice )
 		cmd( ".l.v.c.var_name.v add command -label Change -command { set choice 7 }" );	// entryconfig 0
 		cmd( ".l.v.c.var_name.v add command -label Properties -command { set choice 75 }" );	// entryconfig 1
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 2
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Save (+)\" -variable save -command { if { $actual_steps == 0 } { set_var_conf $vname save $save; set choice 70 } { set choice 7 } }" );	// entryconfig 3
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Run Plot (*)\" -variable plot -command { if { $actual_steps == 0 } { set_var_conf $vname plot $plot; set choice 70 } { set choice 7 } }" );	// entryconfig 4
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Debug (!)\" -state disabled -variable num -command { if { $actual_steps == 0 } { set_var_conf $vname debug $num; set choice 70 } { set choice 7 } }" );	// entryconfig 5
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Parallel (&)\" -state disabled -variable parallel -command { if { $actual_steps == 0 } { set_var_conf $vname parallel $parallel; set choice 70 } { set choice 7 } }" );	// entryconfig 6
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Save (+)\" -variable save -command { set ctxMenuCmd \"set_var_conf $vname save $save\"; set choice 95 }" );	// entryconfig 3
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Run Plot (*)\" -variable plot -command { set ctxMenuCmd \"set_var_conf $vname plot $plot\"; set choice 95 }" );	// entryconfig 4
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Debug (!)\" -state disabled -variable num -command { set ctxMenuCmd \"set_var_conf $vname debug $num\"; set choice 95 }" );	// entryconfig 5
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Parallel (&)\" -state disabled -variable parallel -command { set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; set choice 95 }" );	// entryconfig 6
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 7
 		cmd( ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 8
 		cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 9
@@ -438,18 +428,24 @@ int browse( object *r, int *choice )
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
 						set save [ expr ! [ get_var_conf $vname save ] ]; \
-						set_var_conf $vname save $save; \
-						set choice 70 \
+						set ctxMenuCmd \"set_var_conf $vname save $save\"; \
+						set choice 95 \
 					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <plus> { \
+					event generate .l.v.c.var_name <F5> \
 				}" );
 			cmd( "bind .l.v.c.var_name <F6> { \
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
 						set plot [ expr ! [ get_var_conf $vname plot ] ]; \
-						set_var_conf $vname plot $plot; \
-						set choice 70 \
+						set ctxMenuCmd \"set_var_conf $vname plot $plot\"; \
+						set choice 95 \
 					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <asterisk> { \
+					event generate .l.v.c.var_name <F6> \
 				}" );
 			cmd( "bind .l.v.c.var_name <F7> { \
 					set listfocus 1; \
@@ -457,9 +453,12 @@ int browse( object *r, int *choice )
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color black ] } { \
 						set num [ expr ! [ get_var_conf $vname debug ] ]; \
-						set_var_conf $vname debug $num; \
-						set choice 70 \
+						set ctxMenuCmd \"set_var_conf $vname debug $num\"; \
+						set choice 95 \
 					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <exclam> { \
+					event generate .l.v.c.var_name <F7> \
 				}" );
 			cmd( "bind .l.v.c.var_name <F8> { \
 					set listfocus 1; \
@@ -467,9 +466,12 @@ int browse( object *r, int *choice )
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color black ] && ! [ string equal $color tomato ] && ! [ string equal $color firebrick ] } { \
 						set parallel [ expr ! [ get_var_conf $vname parallel ] ]; \
-						set_var_conf $vname parallel $parallel; \
-						set choice 70 \
+						set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; \
+						set choice 95 \
 					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <ampersand> { \
+					event generate .l.v.c.var_name <F8> \
 				}" );
 		}
 
@@ -529,7 +531,7 @@ int browse( object *r, int *choice )
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 11
 		cmd( ".l.s.c.son_name.v add cascade -label Add -menu .l.s.c.son_name.v.a" );	// entryconfig 12=14
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 13
-		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -command { if { $actual_steps == 0 } { set_obj_conf $vname comp [ expr ! $nocomp ]; set choice 70 } { set choice 6 } }" );	// entryconfig 14
+		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -command { set ctxMenuCmd \"set_obj_conf $vname comp [ expr ! $nocomp ]\"; set choice 95 }" );	// entryconfig 14
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 15
 		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );	// entryconfig 14=16
 		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );	// entryconfig 15=17
@@ -637,9 +639,12 @@ int browse( object *r, int *choice )
 					set itemfocus [ .l.s.c.son_name curselection ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
 						set nocomp [ expr ! [ get_obj_conf $vname comp ] ]; \
-						set_obj_conf $vname comp $nocomp; \
-						set choice 70 \
+						set ctxMenuCmd \"set_obj_conf $vname comp $nocomp\"; \
+						set choice 95 \
 					} \
+				}" );
+			cmd( "bind .l.s.c.son_name <minus> { \
+					event generate .l.s.c.son_name <F5> \
 				}" );
 		}
 
@@ -867,7 +872,7 @@ int browse( object *r, int *choice )
 			cmd( "button .bbar.open -image openImg -relief $bRlf -overrelief $ovBrlf -command {set choice 17}" );
 			cmd( "button .bbar.reload -image reloadImg -relief $bRlf -overrelief $ovBrlf -command {set choice 38}" );
 			cmd( "button .bbar.save -image saveImg -relief $bRlf -overrelief $ovBrlf -command {set choice 18}" );
-			cmd( "button .bbar.struct -image structImg -relief $bRlf -overrelief $ovBrlf -command {set strWindowOn [expr ! $strWindowOn]; set choice 70} -state $strWindowB" );
+			cmd( "button .bbar.struct -image structImg -relief $bRlf -overrelief $ovBrlf -command {set strWindowOn [ expr ! $strWindowOn ]; set choice 70} -state $strWindowB" );
 			cmd( "button .bbar.find -image findImg -relief $bRlf -overrelief $ovBrlf -command {set choice 50}" );
 			cmd( "button .bbar.init -image initImg -relief $bRlf -overrelief $ovBrlf -command {set choice 21}" );
 			cmd( "button .bbar.number -image numberImg -relief $bRlf -overrelief $ovBrlf -command {set choice 19}" );
@@ -1012,7 +1017,7 @@ int browse( object *r, int *choice )
 				if ( open_configuration( r, true ) )
 					*choice = - *choice;	// signal the reload
 				else
-					*choice = 20;	// reload failed, unload configuration
+					*choice = 20;			// reload failed, unload configuration
 			}
 			else
 			{
@@ -1539,7 +1544,7 @@ case 32:
 	lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
 	add_description( lab, "Object", lab1 );
 
-	unsaved_change( true );	// signal unsaved change
+	unsaved_change( true );		// signal unsaved change
 	redrawRoot = true;			// force browser redraw
 
 	here_endparent:
@@ -2606,10 +2611,7 @@ case 1:
 	Tcl_LinkVar( inter, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
 
 	// save the current object & cursor position for quick reload
-	strcpy( lastObj, r->label );
-	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { set lastList 2 } { set lastList 1 }" );
-	cmd( "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ] } { set lastItem [ .l.s.c.son_name curselection ] }" );
-	cmd( "if { $lastItem == \"\" } { set lastItem 0 }" );
+	save_pos( r );
 
 	// Only ask to overwrite configuration if there are changes
 	overwConf = unsaved_change( ) ? true : false;
@@ -5680,6 +5682,20 @@ case 93:
 break;
 
 
+// Context-menu operation: execute the command in 'ctxMenuCmd'
+case 95:
+
+	if ( Tcl_GetVar( inter, "ctxMenuCmd", 0 ) == NULL )
+		break;
+
+	cmd( "eval $ctxMenuCmd" );					// execute command
+	
+	cmd( "unset -nocomplain ctxMenuCmd" );
+	redrawRoot = true;							// force browser redraw
+
+break;
+
+
 // No-operation: toggle the state of the model structure windows, refresh window
 case 70:
 
@@ -6103,7 +6119,7 @@ void set_shortcuts( const char *window, const char *help )
 	cmd( "bind %s <Control-b> {set choice 34}; bind %s <Control-B> {set choice 34}", window, window  );
 	cmd( "bind %s <Control-z> {set choice 37}; bind %s <Control-Z> {set choice 37}", window, window  );
 	cmd( "bind %s <Control-w> {set choice 38}; bind %s <Control-W> {set choice 38}", window, window  );
-	cmd( "bind %s <Control-Tab> {set strWindowOn [expr ! $strWindowOn]; set choice 70}", window  );
+	cmd( "bind %s <Control-Tab> { set strWindowOn [ expr ! $strWindowOn ]; set choice 70 }", window  );
 }
 
 
@@ -6649,8 +6665,7 @@ object *restore_pos( object *r )
 	
 	if ( r != NULL && strlen( lastObj ) > 0 )
 	{
-		for ( cur = r; cur->up != NULL; cur = cur->up );
-		cur = cur->search( lastObj );
+		cur = root->search( lastObj );
 		if ( cur != NULL )
 		{
 			cmd( "if [ info exists lastList ] { set listfocus $lastList }" );
