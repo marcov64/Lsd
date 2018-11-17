@@ -97,7 +97,9 @@ Global definitions among all LSD C++ modules
 #define MAX_WAIT_TIME 10				// maximum wait time for a variable computation ( sec.)
 #define MAX_TIMEOUT 100					// maximum timeout for multi-thread scheduler (millisec.)
 #define MAX_LEVEL 10					// maximum number of object levels (plotting only)
-#define ERR_LIM 10						// maximum number of repeated error messages
+#define ERR_LIM 5						// maximum number of repeated error messages
+#define MARG 0.01						// y-axis % plot clearance margin
+#define MARG_CONST 0.1					// y-axis % plot clearance margin for constant series
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define SIG_DIG 10						// number of significant digits in data files
 #define CSV_SEP ","						// single char string with the .csv format separator
@@ -518,6 +520,7 @@ double poisson( double m );
 double poissoncdf( double lambda, double k );			// poisson cumulative distribution function
 double read_lattice( double line, double col );
 double round( double r );
+double round_digits( double value, int digits );
 double save_lattice( const char fname[ ] = "lattice" );
 double unifcdf( double a, double b, double x );			// uniform cumulative distribution function
 double uniform( double min, double max );
@@ -604,6 +607,8 @@ char *clean_path( char * );
 char *upload_eqfile( void );
 description *search_description( char *lab );
 double get_double( const char *tcl_var, double *var = NULL );
+double lower_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
+double upper_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
 int browse( object *r, int *choice );
 int check_label( char *l, object *r );
 int compute_copyfrom( object *c, int *choice );
@@ -696,7 +701,7 @@ void log_tcl_error( const char *cm, const char *message );
 void myexit( int v );
 void plog_series( int *choice );
 void plot( int type, int *start, int *end, char **str, char **tag, int *choice, bool norm );
-void plot( int type, int nv, double **data, int *start, int *end, char **str, char **tag, int *choice );
+void plot( int type, int nv, double **data, int *start, int *end, int *id, char **str, char **tag, int *choice );
 void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag, int *choice );
 void plot_cross( int *choice );
 void plot_cs_xy( int *choice );
