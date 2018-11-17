@@ -2475,7 +2475,7 @@ void plot_tseries( int *choice )
 		{
 			data[ i ] = vs[ idseries ].data;
 			if ( data[ i ] == NULL )
-			plog( "\nError: invalid data\n" );
+				plog( "\nError: invalid data\n" );
 	   
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
 			{
@@ -7375,11 +7375,14 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 					if ( data[ k ] == NULL )
 						continue;
 					
-					yVal = data[ k ][ i ];
 					if ( start[ k ] < i && end[ k ] >= i )
+					{
+						yVal = data[ k ][ i ];
 						tOk = true;
+					}
 					else
 						tOk = false;
+					
 					break;
 					
 				case CRSSECT:
@@ -7387,8 +7390,11 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 					if ( data[ i ] == NULL )
 						continue;
 					
-					yVal = data[ i ][ k ];
+					if ( start[ i ] < k && end[ i ] >= k )
+						yVal = data[ i ][ k ];
+					
 					tOk = true;
+					
 					break;
 			}
 
