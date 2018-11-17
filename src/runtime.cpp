@@ -50,11 +50,12 @@ int tick = 5;
 int lab_lin = 5;				// labels per line
 int lin_lab = 3;				// lines of label
 int lin_height = 18;
-
+int p_digits = 3;				// precision digits
 char intval[ 100 ];				// string buffer
 char **tp;						// labels of variables to plot in runtime
-double ymin;
 double ymax;
+double ymed;
+double ymin;
 double *old_val;
 double plot_step;
 int shift = 20;					// new window shift
@@ -251,8 +252,9 @@ PLOT_RT
 **************************************/
 void plot_rt( variable *v )
 {
+	bool relabel = false;
 	int x1, x2, y1, y2;
-	double step, value;
+	double step, value, scale, zero_lim;
 	
 	// limit the number of run-time plot variables
 	if ( cur_plt > 100 )
@@ -261,54 +263,55 @@ void plot_rt( variable *v )
 	if ( ymax == ymin ) 		// very initial setting
 	{ 
 		if ( v->val[ 0 ] > 0 )
-		{
-			ymax = v->val[ 0 ] * 1.001;
-			ymin = v->val[ 0 ];
-		}
+			ymax = round_digits( v->val[ 0 ] * ( 1 + MARG ), p_digits );
 		else
-		{
-			ymax = v->val[ 0 ] * 0.009;
-			ymin = v->val[ 0 ];
-		}
+			ymax = round_digits( v->val[ 0 ] * ( 1 - MARG ), p_digits );
+		
+		ymin = round_digits( v->val[ 0 ], p_digits );
 		
 		if ( ymax == ymin )
-			ymax += 0.0001;
-
-		cmd( "$activeplot.c.yscale itemconf ymax -text %.4g", ymax );
-		cmd( "$activeplot.c.yscale itemconf ymin -text %.4g", ymin );
-		cmd( "$activeplot.c.yscale itemconf medy -text %.4g", ( ymax - ymin ) / 2 + ymin );
+			ymax += MARG;
+		
+		relabel = true;
 	}
 	
 	if ( v->val[ 0 ] >= ymax )
 	{
-		if ( v->val[ 0 ] >= 0 )
-			step = 1.1;
-		else
-			step = 0.9;
+		value = v->val[ 0 ] * ( v->val[ 0 ] > 0 ? 1 + MARG_CONST : 1 - MARG_CONST );
+		value = round_digits( value, p_digits );
 	  
-		double scale = ( ymax - ymin ) / ( v->val[ 0 ] * step - ymin );
+		scale = ( ymax - ymin ) / ( value - ymin );
+		ymax = value;	
+		
+		relabel = true;
+		
 		cmd( "$activeplot.c.c.cn scale punto 0 %d 1 %lf", height, scale  < 0.01 ? 0.01 : scale  );
-		ymax = v->val[ 0 ] * step;
-		cmd( "$activeplot.c.yscale itemconf ymax -text %.4g", ymax );
-		cmd( "$activeplot.c.yscale itemconf medy -text %.4g", ( ymax - ymin ) / 2 + ymin );
 	}
 
 	if ( v->val[ 0 ] <= ymin )
 	{
-		if ( v->val[ 0 ] > 0 )
-			step = 0.9;
-		else
-			step = 1.1;
-		
-		value = min( v->val[ 0 ] * step, ymin - ( ymax - ymin ) / height );
+		value = v->val[ 0 ] * ( v->val[ 0 ] > 0 ? 1 - MARG_CONST : 1 + MARG_CONST );
+		value = min( value, ymin - ( ymax - ymin ) / height );
+		value = round_digits( value, p_digits );
 
-		double scale = ( ymax - ymin ) / ( ymax - value );
-		cmd( "$activeplot.c.c.cn scale punto 0 0 1 %lf", scale < 0.01 ? 0.01 : scale  );
+		scale = ( ymax - ymin ) / ( ymax - value );
 		ymin = value;
-		cmd( "$activeplot.c.yscale itemconf ymin -text %.4g", ymin );
-		cmd( "$activeplot.c.yscale itemconf medy -text %.4g", ( ymax - ymin ) / 2 + ymin );
+		
+		relabel = true;
+		
+		cmd( "$activeplot.c.c.cn scale punto 0 0 1 %lf", scale < 0.01 ? 0.01 : scale  );
 	}
 
+	if ( relabel )
+	{
+		ymed = round_digits( ( ymax - ymin ) / 2 + ymin, p_digits );
+		zero_lim = ( ymax - ymin ) * MARG;
+		
+		cmd( "$activeplot.c.yscale itemconf ymax -text %.*g", p_digits, fabs( ymax ) < zero_lim ? 0 : ymax );
+		cmd( "$activeplot.c.yscale itemconf medy -text %.*g", p_digits, fabs( ymed ) < zero_lim ? 0 : ymed );
+		cmd( "$activeplot.c.yscale itemconf ymin -text %.*g", p_digits, fabs( ymin ) < zero_lim ? 0 : ymin );
+	}
+		
 	if ( t == 1 )
 	{
 		old_val[ cur_plt ] = v->val[ 0 ];
