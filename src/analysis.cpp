@@ -2487,7 +2487,7 @@ void plot_tseries( int *choice )
 				{
 					logdata[ i ][ j ] = NAN;
 					if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-						plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+						plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 					else
 						if ( ! stopErr )
 						{
@@ -2738,7 +2738,7 @@ void plot_cross( int *choice )
 					{
 						logdata[new_nv][ j ] = NAN;
 						if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-							plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+							plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 						else
 							if ( ! stopErr )
 							{
@@ -3405,144 +3405,146 @@ STATISTICS
 ************************/
 void statistics( int *choice )
 {
+	char *app, **str, **tag, str1[ 50 ], longmsg[ 300 ];
+	int i, j, *start, *end, idseries;
+	double **data,**logdata, av, var, num, ymin, ymax, sig;
 
-int idseries;
-char *app;
-char **str, **tag;
-char str1[50], longmsg[300];
-int i, j, *start, *end;
+	int logErrCnt = 0;				// log errors counter to prevent excess messages
+	bool stopErr = false;
 
-int logErrCnt = 0;				// log errors counter to prevent excess messages
-bool stopErr = false;
-double **data,**logdata, av, var, num, ymin, ymax, sig;
+	if ( nv == 0 )			// no variables selected
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
+		return;
+	}
 
-if ( nv == 0 )			// no variables selected
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-	return;
-}
+	data = new double *[ nv ];
+	logdata = new double *[ nv ];
+	start = new int [ nv ];
+	end = new int [ nv ];
+	str = new char *[ nv ];
+	tag = new char *[ nv ];
 
-data = new double *[ nv ];
-logdata = new double *[ nv ];
-start = new int [ nv ];
-end = new int [ nv ];
-str = new char *[ nv ];
-tag = new char *[ nv ];
+	if ( autom_x )
+	{
+		min_c = 1;
+		max_c = num_c;
+	}
 
-if ( autom_x )
-{
-	min_c = 1;
-  max_c = num_c;
-}
-
-// prepare data from selected series
-for ( i = 0; i < nv; ++i )
-{
-	str[ i ] = new char[ MAX_ELEM_LENGTH ];
-  tag[ i ] = new char[ MAX_ELEM_LENGTH ];
-  data[ i ] = NULL;
-  logdata[ i ] = NULL;
-
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-  strcpy( msg, app );
-  sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
-  
-  // get series data and take logs if necessary
-  if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
-   {
-    data[ i ] = vs[ idseries ].data; 
-    if ( data[ i ] == NULL )
-	plog( "\nError: invalid data\n" );
-   
-   if ( logs )			// apply log to the values to show "log scale" in the y-axis
-   {
-	 logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-     for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-	   if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-		 logdata[ i ][ j ] = log( data[ i ][ j ] );
-	   else
-	   {
-		 logdata[ i ][ j ] = NAN;
-		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		 {
-			plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
-		 }
-		 else
-			if ( ! stopErr )
+	// prepare data from selected series
+	for ( i = 0; i < nv; ++i )
+	{
+		str[ i ] = new char[ MAX_ELEM_LENGTH ];
+		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+		data[ i ] = NULL;
+		logdata[ i ] = NULL;
+		
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		strcpy( msg, app );
+		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries );
+		
+		// get series data and take logs if necessary
+		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		{
+			data[ i ] = vs[ idseries ].data; 
+			if ( data[ i ] == NULL )
+			plog( "\nError: invalid data\n" );
+	   
+			if ( logs )			// apply log to the values to show "log scale" in the y-axis
 			{
-				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-				stopErr = true;
+				logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
+				for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
+					if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )	// ignore NaNs
+						logdata[ i ][ j ] = log( data[ i ][ j ] );
+					else
+					{
+						logdata[ i ][ j ] = NAN;
+						if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+						{
+							plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+						}
+						else
+							if ( ! stopErr )
+							{
+								plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+								stopErr = true;
+							}
+					}
+					
+					data[ i ] = logdata[ i ];			// replace the data series
 			}
-	   }
-	 data[ i ] = logdata[ i ];				// replace the data series
-   }
-  }
+		}
+	}
+
+	if ( logs )
+		cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics (in log):\n\n\" tabel" );
+	else
+		cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics:\n\n\" tabel" );
+
+	sprintf( str1, "%d Cases", max_c - min_c + 1 );
+	sprintf( longmsg, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
+	cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
+
+	for ( i = 0; i < nv; ++i )
+	{
+		ymin = DBL_MAX;
+		ymax = - DBL_MAX;
+
+		for ( av = var = num = 0, j = min_c; j <= max_c; ++j )
+		{
+			if ( j >= start[ i ] && j <= end[ i ] && is_finite( data[ i ][ j ] ) )	// ignore NaNs
+			{
+				if ( data[ i ][ j ] < ymin )
+					ymin = data[ i ][ j ];
+				
+				if ( data[ i ][ j ] > ymax )
+					ymax = data[ i ][ j ];
+				
+				av += data[ i ][ j ];
+				var += data[ i ][ j ] * data[ i ][ j ];
+				num++;
+			}
+		}
+
+		if ( num > 1 )
+		{
+			av = av / num;
+			var = fabs( var / num - av * av );
+			sig = sqrt( var * num / ( num - 1 ) );
+		}
+		else
+			var = sig = 0;
+		
+		if ( num > 0 )
+		{
+			sprintf( msg, "%s %s (%.*g)", str[ i ], tag[ i ], pdigits, num );
+			sprintf( str1, "%-20s\t", msg );
+			cmd( ".log.text.text.internal insert end \"%s\" tabel", str1 );
+			
+			
+			sprintf( longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax);
+			cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
+		}
+	}
+
+	plog( "\n" );
+
+	for ( i = 0; i < nv; ++i )
+	{
+		delete [ ] str[ i ];
+		delete [ ] tag[ i ];
+		if ( logs )
+			delete [ ] logdata[ i ];
+	}
+
+	delete [ ] str;
+	delete [ ] tag;
+	delete [ ] logdata;
+	delete [ ] data;
+	delete [ ] start;
+	delete [ ] end;
 }
-
-if ( logs )
- cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics (in log):\n\n\" tabel" );
-else
- cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics:\n\n\" tabel" );
-
-sprintf( str1, "%d Cases", max_c-min_c + 1 );
-sprintf( longmsg, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
-cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
-
-for ( i = 0; i < nv; ++i )
-{
- ymin = DBL_MAX;
- ymax = - DBL_MAX;
-
- for ( av=var=num = 0, j = min_c; j <= max_c; ++j )
-  {
-  if ( j >= start[ i ] && j <= end[ i ] && is_finite( data[ i ][ j ] ) )		// ignore NaNs
-  {
-   if ( data[ i ][ j ] < ymin)
-    ymin = data[ i ][ j ];
-   if ( data[ i ][ j ] > ymax)
-    ymax = data[ i ][ j ];
-   av += data[ i ][ j ];
-   num++;
-   var += data[ i ][ j ]*data[ i ][ j ];
-  }
-  }
-
- if ( num>1 )
-{
-  av=av/num;
-  var=fabs( var/num-av*av);
-  sig=sqrt( var*num/( num-1 ) );
-}
- else
-  var=sig = 0;
- if ( num>0 )
-{
- sprintf( msg, "%s %s (%.*g)", str[ i ], tag[ i ], pdigits, num );
- sprintf( str1, "%-20s\t", msg );
- cmd( ".log.text.text.internal insert end \"%s\" tabel", str1 );
-
-
- sprintf( longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax);
- cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
-
-
-}
-}
-plog( "\n" );
-for ( i = 0; i < nv; ++i )
-{delete [ ] str[ i ];
-  delete [ ] tag[ i ];
-  if ( logs )
-    delete [ ] logdata[ i ];
-}
-delete [ ] str;
-delete [ ] tag;
-delete [ ] logdata;
-delete [ ] data;
-delete [ ] start;
-delete [ ] end;
-} //end Statistics
 
 
 /************************
@@ -3617,7 +3619,7 @@ void statistics_cross( int *choice )
 				{
 					logdata[ i ][ j ] = NAN;
 					if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-						plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+						plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 					else
 						if ( ! stopErr )
 						{
@@ -3685,8 +3687,6 @@ void statistics_cross( int *choice )
 
 	plog( "\n" );
 
-	delete [ ] list_times;
-
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
@@ -3695,6 +3695,7 @@ void statistics_cross( int *choice )
 			delete [ ] logdata[ i ];
 	}
 
+	delete [ ] list_times;
 	delete [ ] str;
 	delete [ ] tag;
 	delete [ ] logdata;
@@ -3789,488 +3790,501 @@ Draws the XY plots, with the first series as X and the others as Y's
 ****************************************************/
 void plot_gnu( int *choice )
 {
-bool stopErr = false;
-char *app, **str, **tag, str1[ 50 ], str2[ 100 ], str3[ 10 ], dirname[ MAX_PATH_LENGTH ];
-int i, j, *start, *end, done, box, idseries, ndim, gridd, nanv = 0, logErrCnt = 0;
-double **data, **logdata;
-FILE *f, *f2;
+	char *app, **str, **tag, str1[ 50 ], str2[ 100 ], str3[ 10 ], dirname[ MAX_PATH_LENGTH ];
+	int i, j, *start, *end, done, box, idseries, ndim, gridd, nanv = 0, logErrCnt = 0;
+	double **data, **logdata;
+	FILE *f, *f2;
 
-if ( nv == 0 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-	*choice = 2;
-	return;
-}
+	bool stopErr = false;
 
-if ( nv > 2 )
-{
-	cmd( "newtop .da.s \"XY Plot Options\" { set choice 2 } .da" );
-
-	cmd( "frame .da.s.t" );
-	cmd( "label .da.s.t.l -text \"Plot type\"" );
-
-	cmd( "frame .da.s.t.d -relief groove -bd 2" );
-	cmd( "if { ! [ info exists ndim ] } { set ndim 2 }" );
-	cmd( "radiobutton .da.s.t.d.2d -text \"2D plot\" -variable ndim -value 2 -command { .da.s.d.o.a configure -state disabled; .da.s.d.o.c configure -state disabled; .da.s.d.o.b configure -state disabled; .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled; set box 0; set gridd 0; set pm3d 0 }" );
-	cmd( "radiobutton .da.s.t.d.3d -text \"3D plot \" -variable ndim -value 3 -command { .da.s.d.o.a configure -state normal; .da.s.d.o.c configure -state normal; .da.s.d.o.b configure -state normal; .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
-	cmd( "pack .da.s.t.d.2d .da.s.t.d.3d -anchor w" );
-
-	cmd( "pack .da.s.t.l .da.s.t.d" );
-
-	cmd( "frame .da.s.d" );
-	cmd( "label .da.s.d.l -text \"3D XY plane options\"" );
-
-	cmd( "frame .da.s.d.o -relief groove -bd 2" );
-	cmd( "if { ! [ info exists box ] } { set box 0 }" );
-	cmd( "radiobutton .da.s.d.o.a -text \"Use 1st and 2nd series\" -variable box -value 0" );
-	cmd( "radiobutton .da.s.d.o.c -text \"Use time and 1st series\" -variable box -value 2" );
-	cmd( "radiobutton .da.s.d.o.b -text \"Use time and rank\" -variable box -value 1" );
-	cmd( "pack .da.s.d.o.a .da.s.d.o.c .da.s.d.o.b -anchor w" );
-
-	cmd( "pack .da.s.d.l .da.s.d.o" );
-
-	cmd( "frame .da.s.o" );
-	cmd( "checkbutton .da.s.o.g -text \"Use gridded data\" -variable gridd" );
-	cmd( "checkbutton .da.s.o.p -text \"Render 3D surface\" -variable pm3d" );
-	cmd( "pack .da.s.o.g .da.s.o.p" );
-
-	cmd( "pack .da.s.t .da.s.d .da.s.o -padx 5 -pady 5" );
-
-	cmd( "if { $ndim == 2 } { .da.s.d.o.a configure -state disabled; .da.s.d.o.c configure -state disabled; .da.s.d.o.b configure -state disabled; .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled; set box 0; set gridd 0; set pm3d 0 } { .da.s.d.o.a configure -state normal; .da.s.d.o.c configure -state normal; .da.s.d.o.b configure -state normal; .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
-
-	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#3dTime } { set choice 2 }" );
-
-	cmd( "showtop .da.s" );
-
-	*choice = 0;
-	while ( *choice == 0 )
-	  Tcl_DoOneEvent( 0 );
-
-	cmd( "destroytop .da.s" );
-
-	if ( *choice == 2 )
-	 return;
-
-	cmd( "set choice $ndim" );
-	ndim = *choice;
-}
-else
-	ndim = 2; 
-
-data = new double *[ nv ];
-logdata = new double *[ nv ];
-start = new int [ nv ];
-end = new int [ nv ];
-str = new char *[ nv ];
-tag = new char *[ nv ];
-
-if ( autom_x )
-{
-	min_c = 1;
-	max_c = num_c;
-}
-
-// prepare data from selected series
-for ( i = 0; i < nv; ++i )
-{
-  str[ i ] = new char[ MAX_ELEM_LENGTH ];
-  tag[ i ] = new char[ MAX_ELEM_LENGTH ];
-  data[ i ] = NULL;
-  logdata[ i ] = NULL;
-
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-  strcpy( msg, app );
-  sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
-  
-  // get series data and take logs if necessary
-  if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
-   {
-    data[ i ] = vs[ idseries ].data;
-    if ( data[ i ] == NULL )
-	plog( "\nError: invalid data\n" );
-
-   if ( logs )			// apply log to the values to show "log scale" in the y-axis
-   {
-	 logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-     for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-	   if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-		 logdata[ i ][ j ] = log( data[ i ][ j ] );
-	   else
-	   {
-		 logdata[ i ][ j ] = NAN;
-		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		 {
-			plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
-		 }
-		 else
-			if ( ! stopErr )
-			{
-				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-				stopErr = true;
-			}
-	   }
-	 data[ i ] = logdata[ i ];				// replace the data series
-   }
-   }
-  else
-   nanv++; 
-}
-
-// handle case selection
-if ( autom_x || min_c >= max_c )
-{
-for ( i = 0; i < nv; ++i )
-{
-	if ( i == 0 )
-   min_c = max_c = start[ i ];
-  if ( start[ i ] < min_c )
-   min_c = start[ i ];
-  if (end[ i ] > max_c )
-   max_c = end[ i ] > num_c?num_c:end[ i ];
-}
-}
-
-// auto-find minimums and maximums
-if ( miny >= maxy )
-	autom = true;
-if ( autom )
-{
-for ( done = 0, i = 1; i < nv; ++i )
-{
-  for ( j = min_c; j <= max_c; ++j )
-   {
-    if ( done == 0 && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )		// ignore NaNs
-     {miny = maxy = data[ i ][ j ];
-	done = 1;
-     }
-    if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny )		// ignore NaNs
-     miny = data[ i ][ j ];
-    if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )		// ignore NaNs
-     maxy = data[ i ][ j ];
-
-   }
-}
-} //End for finding min-max
-   
-cmd( "set dirxy plotxy_%d", cur_plot );
-cmd( "file mkdir $dirxy" );
-getcwd( dirname, MAX_PATH_LENGTH - 1 );
-sprintf( msg, "plotxy_%d", cur_plot );
-chdir( msg );
-f = fopen( "data.gp", "w" );
-fprintf( f, "#" );
-
-if ( nv > 2 )
-{
-	cmd( "set choice $box" );
-	box = *choice;
-	cmd( "set choice $gridd" );
-	gridd = *choice;
-}
-else
-	box = gridd = 0;
-
-if ( box == 0 )
-{
-	for ( i = 0; i < nv; ++i )
-		if ( start[ i ] <= max_c && end[ i ] >= min_c )
-			fprintf( f, "%s_%s\t", str[ i ], tag[ i ] ); 
-}    
-else
-{
-	if ( gridd == 0 )
+	if ( nv == 0 )
 	{
-		fprintf( f, "Time\t" );
-		if ( box == 1 )
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
+		*choice = 2;
+		return;
+	}
+
+	if ( nv > 2 )
+	{
+		cmd( "newtop .da.s \"XY Plot Options\" { set choice 2 } .da" );
+
+		cmd( "frame .da.s.t" );
+		cmd( "label .da.s.t.l -text \"Plot type\"" );
+
+		cmd( "frame .da.s.t.d -relief groove -bd 2" );
+		cmd( "if { ! [ info exists ndim ] } { set ndim 2 }" );
+		cmd( "radiobutton .da.s.t.d.2d -text \"2D plot\" -variable ndim -value 2 -command { .da.s.d.o.a configure -state disabled; .da.s.d.o.c configure -state disabled; .da.s.d.o.b configure -state disabled; .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled; set box 0; set gridd 0; set pm3d 0 }" );
+		cmd( "radiobutton .da.s.t.d.3d -text \"3D plot \" -variable ndim -value 3 -command { .da.s.d.o.a configure -state normal; .da.s.d.o.c configure -state normal; .da.s.d.o.b configure -state normal; .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
+		cmd( "pack .da.s.t.d.2d .da.s.t.d.3d -anchor w" );
+
+		cmd( "pack .da.s.t.l .da.s.t.d" );
+
+		cmd( "frame .da.s.d" );
+		cmd( "label .da.s.d.l -text \"3D XY plane options\"" );
+
+		cmd( "frame .da.s.d.o -relief groove -bd 2" );
+		cmd( "if { ! [ info exists box ] } { set box 0 }" );
+		cmd( "radiobutton .da.s.d.o.a -text \"Use 1st and 2nd series\" -variable box -value 0" );
+		cmd( "radiobutton .da.s.d.o.c -text \"Use time and 1st series\" -variable box -value 2" );
+		cmd( "radiobutton .da.s.d.o.b -text \"Use time and rank\" -variable box -value 1" );
+		cmd( "pack .da.s.d.o.a .da.s.d.o.c .da.s.d.o.b -anchor w" );
+
+		cmd( "pack .da.s.d.l .da.s.d.o" );
+
+		cmd( "frame .da.s.o" );
+		cmd( "checkbutton .da.s.o.g -text \"Use gridded data\" -variable gridd" );
+		cmd( "checkbutton .da.s.o.p -text \"Render 3D surface\" -variable pm3d" );
+		cmd( "pack .da.s.o.g .da.s.o.p" );
+
+		cmd( "pack .da.s.t .da.s.d .da.s.o -padx 5 -pady 5" );
+
+		cmd( "if { $ndim == 2 } { .da.s.d.o.a configure -state disabled; .da.s.d.o.c configure -state disabled; .da.s.d.o.b configure -state disabled; .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled; set box 0; set gridd 0; set pm3d 0 } { .da.s.d.o.a configure -state normal; .da.s.d.o.c configure -state normal; .da.s.d.o.b configure -state normal; .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
+
+		cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#3dTime } { set choice 2 }" );
+
+		cmd( "showtop .da.s" );
+
+		*choice = 0;
+		while ( *choice == 0 )
+			Tcl_DoOneEvent( 0 );
+
+		cmd( "destroytop .da.s" );
+
+		if ( *choice == 2 )
+			return;
+
+		cmd( "set choice $ndim" );
+		ndim = *choice;
+	}
+	else
+		ndim = 2; 
+
+	data = new double *[ nv ];
+	logdata = new double *[ nv ];
+	start = new int [ nv ];
+	end = new int [ nv ];
+	str = new char *[ nv ];
+	tag = new char *[ nv ];
+
+	if ( autom_x )
+	{
+		min_c = 1;
+		max_c = num_c;
+	}
+
+	// prepare data from selected series
+	for ( i = 0; i < nv; ++i )
+	{
+		str[ i ] = new char[ MAX_ELEM_LENGTH ];
+		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+		data[ i ] = NULL;
+		logdata[ i ] = NULL;
+		
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		strcpy( msg, app );
+		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries );
+		
+		// get series data and take logs if necessary
+		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
-			for ( i = 0; i < nv; ++i )
-				if ( start[ i ] <= max_c && end[ i ] >= min_c )
-					fprintf( f, "Var%d\t%s_%s\t", i, str[ i ], tag[ i ] );
+			data[ i ] = vs[ idseries ].data;
+			if ( data[ i ] == NULL )
+				plog( "\nError: invalid data\n" );
+
+			if ( logs )		// apply log to the values to show "log scale" in the y-axis
+			{
+				logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
+				for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
+					if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )	// ignore NaNs
+						logdata[ i ][ j ] = log( data[ i ][ j ] );
+					else
+					{
+						logdata[ i ][ j ] = NAN;
+						if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+						{
+							plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+						}
+						else
+							if ( ! stopErr )
+							{
+								plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+								stopErr = true;
+							}
+					}
+					
+				data[ i ] = logdata[ i ];				// replace the data series
+			}
 		}
 		else
+			nanv++; 
+	}
+
+	// handle case selection
+	if ( autom_x || min_c >= max_c )
+	{
+		for ( i = 0; i < nv; ++i )
 		{
-			for ( i = 0; i < nv; ++i )
-				if ( start[ i ] <= max_c && end[ i ] >= min_c )
-					fprintf( f, "%s_%s\t", str[ i ], tag[ i ] );   
+			if ( i == 0 )
+				min_c = max_c = start[ i ];
+			
+			if ( start[ i ] < min_c )
+				min_c = start[ i ];
+			
+			if ( end[ i ] > max_c )
+				max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
-	}    
+	}
+
+	// auto-find minimums and maximums
+	if ( miny >= maxy )
+		autom = true;
+
+	if ( autom )
+		for ( done = 0, i = 1; i < nv; ++i )
+			for ( j = min_c; j <= max_c; ++j )
+			{
+				if ( done == 0 && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )	// ignore NaNs
+				{
+					miny = maxy = data[ i ][ j ];
+					done = 1;
+				}
+				
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny )	// ignore NaNs
+					miny = data[ i ][ j ];
+					
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )	// ignore NaNs
+					maxy = data[ i ][ j ];
+			}
+	   
+	cmd( "set dirxy plotxy_%d", cur_plot );
+	cmd( "file mkdir $dirxy" );
+	getcwd( dirname, MAX_PATH_LENGTH - 1 );
+	sprintf( msg, "plotxy_%d", cur_plot );
+	chdir( msg );
+	f = fopen( "data.gp", "w" );
+	fprintf( f, "#" );
+
+	if ( nv > 2 )
+	{
+		cmd( "set choice $box" );
+		box = *choice;
+		cmd( "set choice $gridd" );
+		gridd = *choice;
+	}
 	else
-		fprintf( f, "Time\tRank\tVal" );
-} 
+		box = gridd = 0;
 
-fprintf( f, "\n" );
-
-if ( box == 0 )
-{
-	for ( j = min_c; j <= max_c; ++j )
+	if ( box == 0 )
 	{
 		for ( i = 0; i < nv; ++i )
 			if ( start[ i ] <= max_c && end[ i ] >= min_c )
-			{
-				if ( j >= start[ i ] && i <= end[ i ] )
-					fprintf( f, "%.*g\t", pdigits, data[ i ][ j ] );
-				else
-					fprintf( f, "nan\t" );  
-			}
-		fprintf( f, "\n" );
-	}
-}
-else
-{
-	if ( gridd == 0 )
-	{	//not gridded
-		if ( box == 1 )			// 3D with time and rank
+				fprintf( f, "%s_%s\t", str[ i ], tag[ i ] ); 
+	}    
+	else
+	{
+		if ( gridd == 0 )
 		{
-			for ( j = min_c; j <= max_c; ++j )
+			fprintf( f, "Time\t" );
+			if ( box == 1 )
 			{
-				fprintf( f, "%d\t", j );
 				for ( i = 0; i < nv; ++i )
 					if ( start[ i ] <= max_c && end[ i ] >= min_c )
-					{
-						if ( j >= start[ i ] && i <= end[ i ] )
-							fprintf( f, "%d\t%.*g\t", i + 1, pdigits, data[ i ][ j ] );
-						else
-							fprintf( f, "%d\tnan\t", i + 1 );        
-					}
-					
-				fprintf( f, "\n" );
-			}	
+						fprintf( f, "Var%d\t%s_%s\t", i, str[ i ], tag[ i ] );
+			}
+			else
+			{
+				for ( i = 0; i < nv; ++i )
+					if ( start[ i ] <= max_c && end[ i ] >= min_c )
+						fprintf( f, "%s_%s\t", str[ i ], tag[ i ] );   
+			}
+		}    
+		else
+			fprintf( f, "Time\tRank\tVal" );
+	} 
+
+	fprintf( f, "\n" );
+
+	if ( box == 0 )
+	{
+		for ( j = min_c; j <= max_c; ++j )
+		{
+			for ( i = 0; i < nv; ++i )
+				if ( start[ i ] <= max_c && end[ i ] >= min_c )
+				{
+					if ( j >= start[ i ] && i <= end[ i ] )
+						fprintf( f, "%.*g\t", pdigits, data[ i ][ j ] );
+					else
+						fprintf( f, "nan\t" );  
+				}
+			fprintf( f, "\n" );
 		}
-		else					// 3D with time and 1st series
-		{
-			for ( j = min_c; j <= max_c; ++j )
-			{
-				fprintf( f, "%d\t", j );
-				for ( i = 0; i < nv; ++i )
-					if ( start[ i ] <= max_c && end[ i ] >= min_c )
-					{
-						if ( j >= start[ i ] && i <= end[ i ] ) 
-							fprintf( f, "%.*g\t", pdigits, data[ i ][ j ] );
-						else
-							fprintf( f, "nan\t" );  
-					} 
-					
-				fprintf( f, "\n" );
-			}
-		} 
 	}
 	else
-	{	//gridded
-		if ( box == 1 )			// 3D with time and rank
-		{
-			for ( i = 0; i < nv; ++i )
+	{
+		if ( gridd == 0 )
+		{	//not gridded
+			if ( box == 1 )			// 3D with time and rank
 			{
 				for ( j = min_c; j <= max_c; ++j )
-					if ( start[ i ] <= max_c && end[ i ] >= min_c )
-					{
-						if ( j >= start[ i ] && i <= end[ i ] )
-							fprintf( f, "%d\t%d\t%.*g\n", j, i + 1, pdigits, data[ i ][ j ] );
-						else
-							fprintf( f, "%d\t%d\tnan\n", j , i + 1 );         
-					}
-			}  
-		}
-		else					// 3D with time and 1st series
-		{
-			for ( i = 0; i < nv; ++i )
+				{
+					fprintf( f, "%d\t", j );
+					for ( i = 0; i < nv; ++i )
+						if ( start[ i ] <= max_c && end[ i ] >= min_c )
+						{
+							if ( j >= start[ i ] && i <= end[ i ] )
+								fprintf( f, "%d\t%.*g\t", i + 1, pdigits, data[ i ][ j ] );
+							else
+								fprintf( f, "%d\tnan\t", i + 1 );        
+						}
+						
+					fprintf( f, "\n" );
+				}	
+			}
+			else					// 3D with time and 1st series
 			{
 				for ( j = min_c; j <= max_c; ++j )
-					if ( start[ i ] <= max_c && end[ i ] >= min_c )
-					{
-						if ( j >= start[ i ] && i <= end[ i ] )
-							fprintf( f, "%d\t%.*g\n", j, pdigits, data[ i ][ j ] );
-						else
-							fprintf( f, "%d\tnan\n", j );         
-					}
-			}  
+				{
+					fprintf( f, "%d\t", j );
+					for ( i = 0; i < nv; ++i )
+						if ( start[ i ] <= max_c && end[ i ] >= min_c )
+						{
+							if ( j >= start[ i ] && i <= end[ i ] ) 
+								fprintf( f, "%.*g\t", pdigits, data[ i ][ j ] );
+							else
+								fprintf( f, "nan\t" );  
+						} 
+						
+					fprintf( f, "\n" );
+				}
+			} 
 		}
+		else
+		{	//gridded
+			if ( box == 1 )			// 3D with time and rank
+			{
+				for ( i = 0; i < nv; ++i )
+				{
+					for ( j = min_c; j <= max_c; ++j )
+						if ( start[ i ] <= max_c && end[ i ] >= min_c )
+						{
+							if ( j >= start[ i ] && i <= end[ i ] )
+								fprintf( f, "%d\t%d\t%.*g\n", j, i + 1, pdigits, data[ i ][ j ] );
+							else
+								fprintf( f, "%d\t%d\tnan\n", j , i + 1 );         
+						}
+				}  
+			}
+			else					// 3D with time and 1st series
+			{
+				for ( i = 0; i < nv; ++i )
+				{
+					for ( j = min_c; j <= max_c; ++j )
+						if ( start[ i ] <= max_c && end[ i ] >= min_c )
+						{
+							if ( j >= start[ i ] && i <= end[ i ] )
+								fprintf( f, "%d\t%.*g\n", j, pdigits, data[ i ][ j ] );
+							else
+								fprintf( f, "%d\tnan\n", j );         
+						}
+				}  
+			}
+		} 
 	} 
-} 
 
-fclose( f );
+	fclose( f );
 
-*choice = 0;
+	*choice = 0;
 
-f = fopen( "gnuplot.lsd", "w" );
-f2 = fopen( "gnuplot.gp", "w" );
+	f = fopen( "gnuplot.lsd", "w" );
+	f2 = fopen( "gnuplot.gp", "w" );
 
-fprintf( f, "set datafile missing \"nan\" \n" );		//handle NaNs
-fprintf( f2, "set datafile missing \"nan\" \n" );
+	fprintf( f, "set datafile missing \"nan\" \n" );		//handle NaNs
+	fprintf( f2, "set datafile missing \"nan\" \n" );
 
-app = ( char * ) Tcl_GetVar( inter, "gpterm", 0 );
-fprintf( f, "set term tkcanvas\n" );
-if ( strlen( app ) > 0 )
-	fprintf( f2, "set term %s\n", app );
-fprintf( f, "set output 'plot.file'\n" );
+	app = ( char * ) Tcl_GetVar( inter, "gpterm", 0 );
+	fprintf( f, "set term tkcanvas\n" );
+	if ( strlen( app ) > 0 )
+		fprintf( f2, "set term %s\n", app );
 
-if ( grid )
-{
-	fprintf( f, "set grid\n" );
-	fprintf( f2, "set grid\n" );
-}
-if ( line_point == 2 )
-{
-	sprintf( str1, "set pointsize %lf\n", point_size );
-	fprintf( f, "%s", str1 );
-	fprintf( f2, "%s", str1 );
-}
-if ( ndim == 2 )
-{
-	sprintf( msg, "set yrange [%.*g:%.*g]\n", pdigits, miny, pdigits, maxy );
+	fprintf( f, "set output 'plot.file'\n" );
+
+	if ( grid )
+	{
+		fprintf( f, "set grid\n" );
+		fprintf( f2, "set grid\n" );
+	}
+
+	if ( line_point == 2 )
+	{
+		sprintf( str1, "set pointsize %lf\n", point_size );
+		fprintf( f, "%s", str1 );
+		fprintf( f2, "%s", str1 );
+	}
+
+	if ( ndim == 2 )
+	{
+		sprintf( msg, "set yrange [%.*g:%.*g]\n", pdigits, miny, pdigits, maxy );
+		fprintf( f, "%s", msg );
+		fprintf( f2, "%s", msg );
+	} 
+
+	if ( box == 0 )
+		sprintf( msg, "set xlabel \"%s_%s\"\n", str[ 0 ], tag[ 0 ] );
+	else
+		sprintf( msg, "set xlabel \"Time\"\n" );  
+
 	fprintf( f, "%s", msg );
 	fprintf( f2, "%s", msg );
-} 
 
-if ( box == 0 )
-  sprintf( msg, "set xlabel \"%s_%s\"\n", str[ 0 ], tag[ 0 ] );
-else
-  sprintf( msg, "set xlabel \"Time\"\n" );  
-fprintf( f, "%s", msg );
-fprintf( f2, "%s", msg );
-
-if ( ndim > 2 )
-{
-if ( box == 0 )
- sprintf( msg, "set ylabel \"%s_%s\"\n", str[ 1 ], tag[ 1 ] );
-else
-  sprintf( msg, "set ylabel \"Series\"\n" ); 
- fprintf( f, "%s", msg );
- fprintf( f2, "%s", msg );
-} 
-
-if ( line_point == 1 && ndim == 2 )
- sprintf( str1, "smooth csplines" );
-else
- if ( line_point == 1 && ndim > 2 )
-  sprintf( str1, "with lines" );
- else
-  strcpy( str1, "" ); 
-
-if ( ndim == 2 )
-{
-if ( allblack )
- sprintf( str3, " lt -1" );
-else
- strcpy( str3, "" );
-}
-else
-{
-  cmd( "set choice $gridd" );
- if ( *choice == 1 )
-  {
-   app = ( char * ) Tcl_GetVar( inter, "gpdgrid3d", 0 );
-   fprintf( f, "set dgrid3d %s\nset hidden3d\n", app );
-   fprintf( f2, "set dgrid3d %s\nset hidden3d\n", app );
-  }
- cmd( "set choice $pm3d" );
- if ( *choice == 1 )
-  {
-   fprintf( f, "set pm3d\n" );
-   fprintf( f2, "set pm3d\n" );
-   sprintf( str1, "with pm3d " );
-  }
-
-  if ( allblack )
-   {
-   fprintf( f, "set palette gray\n" );
-   fprintf( f2, "set palette gray\n" );
-   }
-}
-
-app = ( char * ) Tcl_GetVar( inter, "gpoptions", 0 );
-fprintf( f, "%s\n", app );
-fprintf( f2, "%s\n", app );
- 
-if ( ndim == 2 ) 
-{
-  sprintf( msg, "plot 'data.gp' using 1:2 %s t \"%s_%s\"", str1, str[ 1 ], tag[ 1 ] );
-  if ( allblack )
-   strcat( msg, str3);
-  i = 2;
-} 
-else
-{
-
-  if ( box == 0 )
-    {sprintf( msg, "splot 'data.gp' using 1:2:3 %s t \"%s_%s\"", str1, str[ 2 ], tag[ 2 ] ); 
-     i = 3;
-    } 
-  else
-   {
-    i = 1;  
-    if ( box == 1 )
-	sprintf( msg, "splot 'data.gp' using 1:2:3 %s t \"\"", str1 ); 
-    else 
+	if ( ndim > 2 )
 	{
-		sprintf( msg, "splot 'data.gp' using 1:2:%d %s t \"\"",( nv-nanv) / 2+2, str1 );   
+		if ( box == 0 )
+			sprintf( msg, "set ylabel \"%s_%s\"\n", str[ 1 ], tag[ 1 ] );
+		else
+			sprintf( msg, "set ylabel \"Series\"\n" ); 
+		
+		fprintf( f, "%s", msg );
+		fprintf( f2, "%s", msg );
+	} 
+
+	if ( line_point == 1 && ndim == 2 )
+		sprintf( str1, "smooth csplines" );
+	else
+		if ( line_point == 1 && ndim > 2 )
+			sprintf( str1, "with lines" );
+		else
+			strcpy( str1, "" ); 
+
+	if ( ndim == 2 )
+	{
+		if ( allblack )
+			sprintf( str3, " lt -1" );
+		else
+			strcpy( str3, "" );
+	}
+	else
+	{
+		cmd( "set choice $gridd" );
+		if ( *choice == 1 )
+		{
+			app = ( char * ) Tcl_GetVar( inter, "gpdgrid3d", 0 );
+			fprintf( f, "set dgrid3d %s\nset hidden3d\n", app );
+			fprintf( f2, "set dgrid3d %s\nset hidden3d\n", app );
+		}
+		
+		cmd( "set choice $pm3d" );
+		if ( *choice == 1 )
+		{
+		   fprintf( f, "set pm3d\n" );
+		   fprintf( f2, "set pm3d\n" );
+		   sprintf( str1, "with pm3d " );
+		}
+
+		if ( allblack )
+		{
+			fprintf( f, "set palette gray\n" );
+			fprintf( f2, "set palette gray\n" );
+		}
+	}
+
+	app = ( char * ) Tcl_GetVar( inter, "gpoptions", 0 );
+	fprintf( f, "%s\n", app );
+	fprintf( f2, "%s\n", app );
+	 
+	if ( ndim == 2 ) 
+	{
+		sprintf( msg, "plot 'data.gp' using 1:2 %s t \"%s_%s\"", str1, str[ 1 ], tag[ 1 ] );
+		
+		if ( allblack )
+			strcat( msg, str3);
+		
 		i = 2;
 	} 
-   } 
-} 
-
-fprintf( f, "%s", msg );
-fprintf( f2, "%s", msg );
-
-for ( ; i < nv; ++i )
- if ( start[ i ] <= max_c && end[ i ] >= min_c )
-  {
-   if ( ndim == 2 )
-    sprintf( str2, ", 'data.gp' using 1:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] );
-   else
-    {
-		if ( box == 0 )
-	sprintf( str2, ", 'data.gp' using 1:2:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] ); 
-     else
-	if ( gridd == 0 )
-		{
-		if ( box == 1 )
-			sprintf( str2, ", 'data.gp' using 1:%d:%d %s t \"\"",2+2*i, 2*i+3, str1 ); 
-		else
-			if ( i <= nv/2 )
-				sprintf( str2, ", 'data.gp' using 1:%d:%d %s t \"\"", i + 1, ( nv-nanv) / 2+i + 1, str1 ); 
-			else
-				strcpy( str2, "" );     
-		} 
 	else
-		strcpy( str2, "" );  
-    }  
+	{
+		if ( box == 0 )
+		{
+			sprintf( msg, "splot 'data.gp' using 1:2:3 %s t \"%s_%s\"", str1, str[ 2 ], tag[ 2 ] ); 
+			i = 3;
+		} 
+		else
+		{
+			i = 1;  
+			if ( box == 1 )
+				sprintf( msg, "splot 'data.gp' using 1:2:3 %s t \"\"", str1 ); 
+			else 
+			{
+				sprintf( msg, "splot 'data.gp' using 1:2:%d %s t \"\"", ( nv - nanv ) / 2 + 2, str1 );   
+				i = 2;
+			} 
+		} 
+	} 
 
-   if ( strlen( str2 ) > 0 && allblack )
-     strcat( str2, str3 );
-   fprintf( f, "%s", str2 );
-   fprintf( f2, "%s", str2 );
-  }
+	fprintf( f, "%s", msg );
+	fprintf( f2, "%s", msg );
 
-fprintf( f, "\n" );
-fprintf( f2, "\n" );
+	for ( ; i < nv; ++i )
+		if ( start[ i ] <= max_c && end[ i ] >= min_c )
+		{
+			if ( ndim == 2 )
+				sprintf( str2, ", 'data.gp' using 1:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] );
+			else
+			{
+				if ( box == 0 )
+					sprintf( str2, ", 'data.gp' using 1:2:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] ); 
+				else
+					if ( gridd == 0 )
+					{
+						if ( box == 1 )
+							sprintf( str2, ", 'data.gp' using 1:%d:%d %s t \"\"",2+2*i, 2*i+3, str1 ); 
+						else
+							if ( i <= nv / 2 )
+								sprintf( str2, ", 'data.gp' using 1:%d:%d %s t \"\"", i + 1, ( nv-nanv) / 2+i + 1, str1 ); 
+							else
+								strcpy( str2, "" );     
+					} 
+					else
+						strcpy( str2, "" );  
+			}  
 
-fclose( f );
-fclose( f2 );
+			if ( strlen( str2 ) > 0 && allblack )
+				strcat( str2, str3 );
+			
+			fprintf( f, "%s", str2 );
+			fprintf( f2, "%s", str2 );
+		}
 
-cmd( "if { [ info exists pm3d ] } { set choice $pm3d } { set choice 0 }" );
-if ( *choice != 0 )
-	*choice = 2;	// require filled polygons, not supported by tkcanvas terminal
-else
-	*choice = gnu;
+	fprintf( f, "\n" );
+	fprintf( f2, "\n" );
 
-show_plot_gnu( cur_plot, choice, *choice, str, tag );
+	fclose( f );
+	fclose( f2 );
 
-chdir( dirname );
+	cmd( "if { [ info exists pm3d ] } { set choice $pm3d } { set choice 0 }" );
+	if ( *choice != 0 )
+		*choice = 2;	// require filled polygons, not supported by tkcanvas terminal
+	else
+		*choice = gnu;
 
-for ( i = 0; i < nv; ++i )
-{
-	delete [ ] str[ i ];
-	delete [ ] tag[ i ];
-	if ( logs )
-		delete [ ] logdata[ i ];
-}
-delete [ ] str;
-delete [ ] tag;
-delete [ ] logdata;
-delete [ ] data;
-delete [ ] start;
-delete [ ] end;
+	show_plot_gnu( cur_plot, choice, *choice, str, tag );
+
+	chdir( dirname );
+
+	for ( i = 0; i < nv; ++i )
+	{
+		delete [ ] str[ i ];
+		delete [ ] tag[ i ];
+		if ( logs )
+			delete [ ] logdata[ i ];
+	}
+
+	delete [ ] str;
+	delete [ ] tag;
+	delete [ ] logdata;
+	delete [ ] data;
+	delete [ ] start;
+	delete [ ] end;
 }
 
 
@@ -4279,395 +4293,400 @@ PLOT_CS_XY
 *****************************************/
 void plot_cs_xy( int *choice )
 {
+	char *app, **str, **tag, str1[ 5 * MAX_ELEM_LENGTH ], str2[ 5 * MAX_ELEM_LENGTH ], str3[ 10 ], dirname[ MAX_PATH_LENGTH ];
+	int i, j, *start, *end, done, idseries, time_sel, block_length, ndim;
+	double **data,**logdata, previous_row;
+	FILE *f, *f2;
 
-int idseries;
-char *app;
-char **str, **tag;
-char str1[5*MAX_ELEM_LENGTH], str2[5*MAX_ELEM_LENGTH], str3[ 10], dirname[MAX_PATH_LENGTH];
-FILE *f, *f2;
-double **data,**logdata, previous_row;
-int i, j, *start, *end, done;
-int time_sel, block_length, ndim;
+	int logErrCnt = 0;				// log errors counter to prevent excess messages
+	bool stopErr = false;
 
-int logErrCnt = 0;				// log errors counter to prevent excess messages
-bool stopErr = false;
+	if ( nv < 2 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Not enough series selected\" -detail \"Place at least two series in the Series Selected listbox.\"" );
+		*choice = 2;
+		return;
+	}
 
-if ( nv < 2 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Not enough series selected\" -detail \"Place at least two series in the Series Selected listbox.\"" );
-	*choice = 2;
-	return;
-}
+	data = new double *[ nv ];
+	logdata = new double *[ nv ];
+	start = new int [ nv ];
+	end = new int [ nv ];
+	str = new char *[ nv ];
+	tag = new char *[ nv ];
 
-data = new double *[ nv ];
-logdata = new double *[ nv ];
-start = new int [ nv ];
-end = new int [ nv ];
-str = new char *[ nv ];
-tag = new char *[ nv ];
+	if ( autom_x )
+	{
+		min_c = 1;
+		max_c = num_c;
+	}
 
-if ( autom_x )
-{
-	min_c = 1;
-  max_c = num_c;
-}
-
-// prepare data from selected series
-for ( i = 0; i < nv; ++i )
-{
-	str[ i ] = new char[ MAX_ELEM_LENGTH ];
-  tag[ i ] = new char[ MAX_ELEM_LENGTH ];
-  data[ i ] = NULL;
-  logdata[ i ] = NULL;
-
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-  strcpy( msg, app );
-  sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries);
-  
-  // get series data and take logs if necessary
-  if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
-   {
-    data[ i ] = vs[ idseries ].data;
-    if ( data[ i ] == NULL )
-	plog( "\nError: invalid data\n" );
-   
-   if ( logs )			// apply log to the values to show "log scale" in the y-axis
-   {
-	 logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-     for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-	   if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-		 logdata[ i ][ j ] = log( data[ i ][ j ] );
-	   else
-	   {
-		 logdata[ i ][ j ] = NAN;
-		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		 {
-			plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
-		 }
-		 else
-			if ( ! stopErr )
+	// prepare data from selected series
+	for ( i = 0; i < nv; ++i )
+	{
+		str[ i ] = new char[ MAX_ELEM_LENGTH ];
+		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+		data[ i ] = NULL;
+		logdata[ i ] = NULL;
+		
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		strcpy( msg, app );
+		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &idseries );
+		
+		// get series data and take logs if necessary
+		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		{
+			data[ i ] = vs[ idseries ].data;
+			if ( data[ i ] == NULL )
+				plog( "\nError: invalid data\n" );
+	   
+			if ( logs )		// apply log to the values to show "log scale" in the y-axis
 			{
-				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-				stopErr = true;
+				logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
+				for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
+					if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
+						logdata[ i ][ j ] = log( data[ i ][ j ] );
+					else
+					{
+						logdata[ i ][ j ] = NAN;
+						if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+							plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+						else
+							if ( ! stopErr )
+							{
+								plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+								stopErr = true;
+							}
+					}
+					
+				data[ i ] = logdata[ i ];			// replace the data series
 			}
-	   }
-	 data[ i ] = logdata[ i ];				// replace the data series
-   }
-  }
-}
+		}
+	}
 
-// handle case selection
-if ( autom_x || min_c >= max_c )
-{
-for ( i = 0; i < nv; ++i )
-{
-	if ( i == 0 )
-   min_c = max_c = start[ i ];
-  if ( start[ i ] < min_c )
-   min_c = start[ i ];
-  if (end[ i ] > max_c )
-   max_c = end[ i ] > num_c?num_c:end[ i ];
-}
-}
+	// handle case selection
+	if ( autom_x || min_c >= max_c )
+	{
+		for ( i = 0; i < nv; ++i )
+		{
+			if ( i == 0 )
+				min_c = max_c = start[ i ];
+			
+			if ( start[ i ] < min_c )
+				min_c = start[ i ];
+			
+			if ( end[ i ] > max_c )
+				max_c = end[ i ] > num_c ? num_c : end[ i ];
+		}
+	}
 
-// auto-find minimums and maximums
-if ( miny >= maxy )
-	autom = true;
-if ( autom )
-{
-for ( done = 0, i = 1; i < nv; ++i )
-{
-  for ( j = min_c; j <= max_c; ++j )
-   {
-    if ( done == 0 && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )		// ignore NaNs
-     {miny = maxy = data[ i ][ j ];
-	done = 1;
-     }
-    if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny )		// ignore NaNs
-     miny = data[ i ][ j ];
-    if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )		// ignore NaNs
-     maxy = data[ i ][ j ];
-   }
-}
-} //End for finding min-max
+	// auto-find minimums and maximums
+	if ( miny >= maxy )
+		autom = true;
+	if ( autom )
+		for ( done = 0, i = 1; i < nv; ++i )
+			for ( j = min_c; j <= max_c; ++j )
+			{
+				if ( done == 0 && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )	// ignore NaNs
+				{
+					miny = maxy = data[ i ][ j ];
+					done = 1;
+				}
+				
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny )	// ignore NaNs
+					miny = data[ i ][ j ];
+					
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )	// ignore NaNs
+					maxy = data[ i ][ j ];
+			}
 
-cmd( "set bidi %d", end[ 0 ] );
+	cmd( "set bidi %d", end[ 0 ] );
 
-cmd( "newtop .da.s \"XY Plot Options\" { set choice 2 } .da" );
+	cmd( "newtop .da.s \"XY Plot Options\" { set choice 2 } .da" );
 
-cmd( "frame .da.s.i" );
-cmd( "label .da.s.i.l -text \"Time step\"" );
-cmd( "entry .da.s.i.e -width 10 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
-cmd( ".da.s.i.e insert 0 $bidi" ); 
-cmd( "pack .da.s.i.l .da.s.i.e" );
+	cmd( "frame .da.s.i" );
+	cmd( "label .da.s.i.l -text \"Time step\"" );
+	cmd( "entry .da.s.i.e -width 10 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+	cmd( ".da.s.i.e insert 0 $bidi" ); 
+	cmd( "pack .da.s.i.l .da.s.i.e" );
 
-cmd( "frame .da.s.d" );
-cmd( "label .da.s.d.l -text \"Type\"" );
+	cmd( "frame .da.s.d" );
+	cmd( "label .da.s.d.l -text \"Type\"" );
 
-cmd( "frame .da.s.d.r -relief groove -bd 2" );
-cmd( "if { ! [ info exists ndim ] } { set ndim 2 }" );
-cmd( "radiobutton .da.s.d.r.2d -text \"2D plot\" -variable ndim -value 2 -command  { .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled; set gridd 0; set pm3d 0 }" );
-cmd( "radiobutton .da.s.d.r.3d -text \"3D plot\" -variable ndim -value 3 -command  { .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
-cmd( "pack .da.s.d.r.2d .da.s.d.r.3d -anchor w" );
+	cmd( "frame .da.s.d.r -relief groove -bd 2" );
+	cmd( "if { ! [ info exists ndim ] } { set ndim 2 }" );
+	cmd( "radiobutton .da.s.d.r.2d -text \"2D plot\" -variable ndim -value 2 -command  { .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled; set gridd 0; set pm3d 0 }" );
+	cmd( "radiobutton .da.s.d.r.3d -text \"3D plot\" -variable ndim -value 3 -command  { .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
+	cmd( "pack .da.s.d.r.2d .da.s.d.r.3d -anchor w" );
 
-cmd( "pack .da.s.d.l .da.s.d.r" );
+	cmd( "pack .da.s.d.l .da.s.d.r" );
 
-cmd( "frame .da.s.o" );
-cmd( "label .da.s.o.l -text \"3D options\"" );
-cmd( "checkbutton .da.s.o.g -text \"Use gridded data\" -variable gridd -anchor w" );
-cmd( "checkbutton .da.s.o.p -text \"Render 3D surface\" -variable pm3d -anchor w" );
-cmd( "if { $ndim == 2 } { .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled; set gridd 0; set pm3d 0 } { .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
-cmd( "pack .da.s.o.l .da.s.o.g .da.s.o.p" );
+	cmd( "frame .da.s.o" );
+	cmd( "label .da.s.o.l -text \"3D options\"" );
+	cmd( "checkbutton .da.s.o.g -text \"Use gridded data\" -variable gridd -anchor w" );
+	cmd( "checkbutton .da.s.o.p -text \"Render 3D surface\" -variable pm3d -anchor w" );
+	cmd( "if { $ndim == 2 } { .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled; set gridd 0; set pm3d 0 } { .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
+	cmd( "pack .da.s.o.l .da.s.o.g .da.s.o.p" );
 
-cmd( "set choice $ndim" );
-if ( *choice == 2 )
-	cmd( "set blength %d", ( int )( nv / 2 ) );
-else
-	cmd( "set blength %d", ( int )( nv / 3 ) ); 
+	cmd( "set choice $ndim" );
+	if ( *choice == 2 )
+		cmd( "set blength %d", ( int )( nv / 2 ) );
+	else
+		cmd( "set blength %d", ( int )( nv / 3 ) ); 
 
-cmd( "set numv 1" );
-cmd( "frame .da.s.v" );
-cmd( "label .da.s.v.l -text \"Number of dependent variables\"" );
-cmd( "entry .da.s.v.e -width 10 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P < %d } { set numv %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numv; return 0 } } -invcmd { bell } -justify center", nv );
-cmd( ".da.s.v.e insert 0 $numv" ); 
-cmd( "label .da.s.v.n -text \"Block length: $blength\"" );
-cmd( "pack .da.s.v.l .da.s.v.e .da.s.v.n" );
+	cmd( "set numv 1" );
+	cmd( "frame .da.s.v" );
+	cmd( "label .da.s.v.l -text \"Number of dependent variables\"" );
+	cmd( "entry .da.s.v.e -width 10 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P < %d } { set numv %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numv; return 0 } } -invcmd { bell } -justify center", nv );
+	cmd( ".da.s.v.e insert 0 $numv" ); 
+	cmd( "label .da.s.v.n -text \"Block length: $blength\"" );
+	cmd( "pack .da.s.v.l .da.s.v.e .da.s.v.n" );
 
-cmd( "pack .da.s.i .da.s.d .da.s.o .da.s.v -padx 5 -pady 5" );
+	cmd( "pack .da.s.i .da.s.d .da.s.o .da.s.v -padx 5 -pady 5" );
 
-cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#3dCrossSection } { set choice 2 }" );
+	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#3dCrossSection } { set choice 2 }" );
 
-cmd( "bind .da.s.v.e <KeyRelease> {set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-cmd( "set nnvar %d", nv );
-cmd( "bind .da.s.v.e <Return> {set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-cmd( "bind .da.s.v.e <Tab> {set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-cmd( "bind .da.s.d.r.2d <Return> {set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-cmd( "bind .da.s.d.r.2d <ButtonRelease-1> {set ndim 2; set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-cmd( "bind .da.s.d.r.3d <ButtonRelease-1> {set ndim 3; set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-cmd( "bind .da.s.d.r.2d <Down> {.da.s.d.r.3d invoke; focus .da.s.d.r.3d; set ndim 3; set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-cmd( "bind .da.s.d.r.3d <Up> {.da.s.d.r.2d invoke; focus .da.s.d.r.2d; set ndim 2; set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
-cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
-cmd( "bind .da.s.i.e <KeyPress-Return> {if {$ndim == 2} { focus .da.s.d.r.2d } {focus .da.s.d.r.3d}}" );
-cmd( "bind .da.s.d.r.2d <KeyPress-Return> {.da.s.v.e selection range 0 end; focus .da.s.v.e}" );
-cmd( "bind .da.s.d.r.3d <KeyPress-Return> {.da.s.v.e selection range 0 end; focus .da.s.v.e}" );
-cmd( "bind .da.s.v.e <KeyPress-Return> {focus .da.s.b.ok}" );
+	cmd( "bind .da.s.v.e <KeyRelease> {set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
+	cmd( "set nnvar %d", nv );
+	cmd( "bind .da.s.v.e <Return> {set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
+	cmd( "bind .da.s.v.e <Tab> {set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
+	cmd( "bind .da.s.d.r.2d <Return> {set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
+	cmd( "bind .da.s.d.r.2d <ButtonRelease-1> {set ndim 2; set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
+	cmd( "bind .da.s.d.r.3d <ButtonRelease-1> {set ndim 3; set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
+	cmd( "bind .da.s.d.r.2d <Down> {.da.s.d.r.3d invoke; focus .da.s.d.r.3d; set ndim 3; set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
+	cmd( "bind .da.s.d.r.3d <Up> {.da.s.d.r.2d invoke; focus .da.s.d.r.2d; set ndim 2; set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
+	cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
+	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
+	cmd( "bind .da.s.i.e <KeyPress-Return> {if {$ndim == 2} { focus .da.s.d.r.2d } {focus .da.s.d.r.3d}}" );
+	cmd( "bind .da.s.d.r.2d <KeyPress-Return> {.da.s.v.e selection range 0 end; focus .da.s.v.e}" );
+	cmd( "bind .da.s.d.r.3d <KeyPress-Return> {.da.s.v.e selection range 0 end; focus .da.s.v.e}" );
+	cmd( "bind .da.s.v.e <KeyPress-Return> {focus .da.s.b.ok}" );
 
-cmd( "showtop .da.s" );
+	cmd( "showtop .da.s" );
 
-cmd( "focus .da.s.i.e" );
-cmd( ".da.s.i.e selection range 0 end" );
+	cmd( "focus .da.s.i.e" );
+	cmd( ".da.s.i.e selection range 0 end" );
 
-*choice = 0;
-while ( *choice == 0 )
-  Tcl_DoOneEvent( 0 );
+	*choice = 0;
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
 
-cmd( "set bidi [ .da.s.i.e get ]" ); 
-cmd( "set numv [ .da.s.v.e get ]" ); 
+	cmd( "set bidi [ .da.s.i.e get ]" ); 
+	cmd( "set numv [ .da.s.v.e get ]" ); 
 
-cmd( "destroytop .da.s" );
+	cmd( "destroytop .da.s" );
 
-if ( *choice == 2 )
- goto end;
+	if ( *choice == 2 )
+		goto end;
 
-cmd( "set choice $ndim" );
-ndim = *choice;
+	cmd( "set choice $ndim" );
+	ndim = *choice;
 
-cmd( "set choice $bidi" );
-time_sel = *choice;
+	cmd( "set choice $bidi" );
+	time_sel = *choice;
 
-cmd( "set blength [ expr $nnvar / ($numv + $ndim-1 )]" );
-cmd( "set choice $blength" );
-block_length = *choice;
-*choice = 0;
+	cmd( "set blength [ expr $nnvar / ($numv + $ndim-1 )]" );
+	cmd( "set choice $blength" );
 
-if ( block_length <= 0 || nv % block_length != 0 )
-{
-  cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid block length\" -detail \"Block length should be an exact divisor of the number of variables. You may also try a 3D plot.\"" );
-  *choice = 2;
-  goto end;
-}
+	block_length = *choice;
+	*choice = 0;
 
-//here we are
-cmd( "set dirxy plotxy_%d", cur_plot );
+	if ( block_length <= 0 || nv % block_length != 0 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid block length\" -detail \"Block length should be an exact divisor of the number of variables. You may also try a 3D plot.\"" );
+		*choice = 2;
+		goto end;
+	}
 
-cmd( "file mkdir $dirxy" );
-getcwd( dirname, MAX_PATH_LENGTH-1 );
-sprintf( msg, "plotxy_%d",cur_plot);
-chdir( msg );
+	cmd( "set dirxy plotxy_%d", cur_plot );
 
-f = fopen( "data.gp", "w" );
-if ( start[ 0 ] == end[ 0 ] )  
-  previous_row = data[ 0 ][ end[ 0 ] ];
-else
-  previous_row = data[ 0 ][ time_sel ];  
-  
-for ( j = 0; j < block_length; ++j )
-{
+	cmd( "file mkdir $dirxy" );
+	getcwd( dirname, MAX_PATH_LENGTH - 1 );
+	sprintf( msg, "plotxy_%d", cur_plot );
+	chdir( msg );
 
-if ( start[ 0 ] == end[ 0 ] )  
-{
-  if ( data[ j ][ end[ j ] ] != previous_row )
-   {
-     previous_row = data[ j ][ end[ j ] ];
-   }
-}
-else
-{
-  if ( data[ j ][ time_sel ] != previous_row )
-   {
-    previous_row = data[ j ][ time_sel ];
-   }
-}
- 
- for ( i = 0; i < nv; i+=block_length)
-  {
-  if ( start[ i + j ] == end[ i + j ] )  
-     fprintf( f, "%.*g\t", pdigits, data[ i + j ][ end[ i + j ] ] );
-  else
-   {
-	if ( start[ i + j ] <= max_c && end[ i + j ] >= min_c && start[ i + j ] <= time_sel && end[ i + j ] >= time_sel )
-	fprintf( f, "%.*g\t", pdigits, data[ i + j ][ time_sel ] );
-   }
-  } 
- fprintf( f, "\n" );
-}
-fclose( f );
+	f = fopen( "data.gp", "w" );
 
-f = fopen( "gnuplot.lsd", "w" );
-f2 = fopen( "gnuplot.gp", "w" );
+	if ( start[ 0 ] == end[ 0 ] )  
+		previous_row = data[ 0 ][ end[ 0 ] ];
+	else
+		previous_row = data[ 0 ][ time_sel ];  
+	  
+	for ( j = 0; j < block_length; ++j )
+	{
 
-fprintf( f, "set datafile missing \"nan\" \n" );		//handle NaNs
-fprintf( f2, "set datafile missing \"nan\" \n" );
-app = ( char * ) Tcl_GetVar( inter, "gpterm", 0 );
-fprintf( f, "set term tkcanvas\n" );
-if ( strlen( app ) > 0 )
-	fprintf( f2, "set term %s\n", app );
-fprintf( f, "set output 'plot.file'\n" );
+		if ( start[ 0 ] == end[ 0 ] )  
+		{
+			if ( data[ j ][ end[ j ] ] != previous_row )
+				previous_row = data[ j ][ end[ j ] ];
+		}
+		else
+		{
+			if ( data[ j ][ time_sel ] != previous_row )
+				previous_row = data[ j ][ time_sel ];
+		}
+		 
+		for ( i = 0; i < nv; i += block_length )
+			if ( start[ i + j ] == end[ i + j ] )  
+				fprintf( f, "%.*g\t", pdigits, data[ i + j ][ end[ i + j ] ] );
+			else
+				if ( start[ i + j ] <= max_c && end[ i + j ] >= min_c && start[ i + j ] <= time_sel && end[ i + j ] >= time_sel )
+					fprintf( f, "%.*g\t", pdigits, data[ i + j ][ time_sel ] );
 
-if ( grid )
-{
-	fprintf( f, "set grid\n" );
-	fprintf( f2, "set grid\n" );
-}
-if ( line_point == 2 )
-{ fprintf( f, "set pointsize %lf\n", point_size );
-   fprintf( f2, "set pointsize %lf\n", point_size );
-   if ( ndim == 2 )
-    strcpy( str2, "" );
-   else
-    sprintf( str2, "with points " );       
-}
-else
-{
- if ( ndim == 2 )
-  sprintf( str2, "smooth csplines " );
- else
-   sprintf( str2, "with lines " ); 
-}
+		fprintf( f, "\n" );
+	}
 
-sprintf( msg, "set xlabel \"%s_%s\"\n", str[ 0 ], tag[ 0 ] );
-fprintf( f, "%s", msg );
-fprintf( f2, "%s", msg );
+	fclose( f );
 
-if ( ndim==3)
-{
- sprintf( msg, "set ylabel \"%s_%s\"\n", str[ block_length ], tag[ block_length ] );
- fprintf( f, "%s", msg );
- fprintf( f2, "%s", msg );
-} 
+	f = fopen( "gnuplot.lsd", "w" );
+	f2 = fopen( "gnuplot.gp", "w" );
 
-if ( allblack )
- sprintf( str3, " lt -1" );
-else
-  str3[ 0 ] = 0;
+	fprintf( f, "set datafile missing \"nan\" \n" );		//handle NaNs
+	fprintf( f2, "set datafile missing \"nan\" \n" );
 
-if ( ndim==3)
-{
- cmd( "set choice $gridd" );
- if ( *choice == 1 )
-  {
-   app = ( char * ) Tcl_GetVar( inter, "gpdgrid3d", 0 );
-   fprintf( f, "set dgrid3d %s\nset hidden3d\n", app );
-   fprintf( f2, "set dgrid3d %s\nset hidden3d\n", app );
-  }
- cmd( "set choice $pm3d" );
- if ( *choice == 1 )
-  {
-	sprintf( str2, "with pm3d " );
-   fprintf( f, "set pm3d\n" );
-   fprintf( f2, "set pm3d\n" );
-  }
+	app = ( char * ) Tcl_GetVar( inter, "gpterm", 0 );
+	fprintf( f, "set term tkcanvas\n" );
+	if ( strlen( app ) > 0 )
+		fprintf( f2, "set term %s\n", app );
 
-if ( allblack )
-{
-   strcpy( str3, "" );
-  fprintf( f, "set palette gray\n" );
-  fprintf( f2, "set palette gray\n" );
-} 
-}
- 
-if ( ndim == 2 )
-{
-  sprintf( msg, "plot 'data.gp' using 1:2 %s t \"%s_%s(%d)\"", str2, str[ block_length ], tag[ block_length ], time_sel );
-  if ( allblack )
-   strcat( msg, str3);
-  i = 2; //init from the second variable
-} 
-else
-{
-  sprintf( msg, "splot 'data.gp' using 1:2:3 %s t \"%s_%s(%d)\"", str2, str[2*block_length ], tag[2*block_length ], time_sel ); 
- i = 3;
-}  
-for (; i < nv/block_length; ++i )
-{j=i*block_length;
- if ( start[ j ] <= max_c && end[ j ] >= min_c )
-  {
-   if ( ndim == 2 )
-    {
-     sprintf( str1, ", 'data.gp' using 1:%d %s t \"%s_%s(%d)\"", i + 1, str2, str[ j ], tag[ j ], time_sel );
-     if ( allblack )
-	strcat( str1, str3);
-    }  
-   else
-    sprintf( str1, ", 'data.gp' using 1:2:%d %s t \"%s_%s(%d)\"", i + 1, str2, str[ j ], tag[ j ], time_sel ); 
-   strcat( msg, str1 );
+	fprintf( f, "set output 'plot.file'\n" );
 
-  }
-}
+	if ( grid )
+	{
+		fprintf( f, "set grid\n" );
+		fprintf( f2, "set grid\n" );
+	}
 
-strcat( msg, "\n" );
-fprintf( f, "%s", msg );
-fprintf( f2, "%s", msg );
+	if ( line_point == 2 )
+	{ 
+		fprintf( f, "set pointsize %lf\n", point_size );
+		fprintf( f2, "set pointsize %lf\n", point_size );
+		
+		if ( ndim == 2 )
+			strcpy( str2, "" );
+		else
+			sprintf( str2, "with points " );       
+	}
+	else
+	{
+		if ( ndim == 2 )
+			sprintf( str2, "smooth csplines " );
+		else
+			sprintf( str2, "with lines " ); 
+	}
 
-fclose( f );
-fclose( f2 );
+	sprintf( msg, "set xlabel \"%s_%s\"\n", str[ 0 ], tag[ 0 ] );
+	fprintf( f, "%s", msg );
+	fprintf( f2, "%s", msg );
 
-cmd( "if { [ info exists pm3d ] } { set choice $pm3d } { set choice 0 }" );
-if ( *choice != 0 )
-	*choice = 2;	// require filled polygons, not supported by tkcanvas terminal
-else
-	*choice = gnu;
+	if ( ndim == 3 )
+	{
+		sprintf( msg, "set ylabel \"%s_%s\"\n", str[ block_length ], tag[ block_length ] );
+		fprintf( f, "%s", msg );
+		fprintf( f2, "%s", msg );
+	} 
 
-show_plot_gnu( cur_plot, choice, *choice, str, tag );
+	if ( allblack )
+		sprintf( str3, " lt -1" );
+	else
+		str3[ 0 ] = 0;
 
-chdir( dirname );
+	if ( ndim == 3 )
+	{
+		cmd( "set choice $gridd" );
+		if ( *choice == 1 )
+		{
+			app = ( char * ) Tcl_GetVar( inter, "gpdgrid3d", 0 );
+			fprintf( f, "set dgrid3d %s\nset hidden3d\n", app );
+			fprintf( f2, "set dgrid3d %s\nset hidden3d\n", app );
+		}
+		
+		cmd( "set choice $pm3d" );
+		if ( *choice == 1 )
+		{
+			sprintf( str2, "with pm3d " );
+			fprintf( f, "set pm3d\n" );
+			fprintf( f2, "set pm3d\n" );
+		}
 
-end:
-for ( i = 0; i < nv; ++i )
-{
-	delete [ ] str[ i ];
-	delete [ ] tag[ i ];
-	if ( logs )
-		delete [ ] logdata[ i ];
-}
-delete [ ] str;
-delete [ ] tag;
-delete [ ] logdata;
-delete [ ] data;
-delete [ ] start;
-delete [ ] end;
+		if ( allblack )
+		{
+			strcpy( str3, "" );
+			fprintf( f, "set palette gray\n" );
+			fprintf( f2, "set palette gray\n" );
+		} 
+	}
+	 
+	if ( ndim == 2 )
+	{
+		sprintf( msg, "plot 'data.gp' using 1:2 %s t \"%s_%s(%d)\"", str2, str[ block_length ], tag[ block_length ], time_sel );
+		
+		if ( allblack )
+			strcat( msg, str3);
+		
+		i = 2;			// init from the second variable
+	} 
+	else
+	{
+		sprintf( msg, "splot 'data.gp' using 1:2:3 %s t \"%s_%s(%d)\"", str2, str[2*block_length ], tag[2*block_length ], time_sel ); 
+		
+		i = 3;
+	}  
+
+	for ( ; i < nv / block_length; ++i )
+	{
+		j = i * block_length;
+		
+		if ( start[ j ] <= max_c && end[ j ] >= min_c )
+		{
+			if ( ndim == 2 )
+			{
+				sprintf( str1, ", 'data.gp' using 1:%d %s t \"%s_%s(%d)\"", i + 1, str2, str[ j ], tag[ j ], time_sel );
+				
+				if ( allblack )
+					strcat( str1, str3);
+			}  
+			else
+				sprintf( str1, ", 'data.gp' using 1:2:%d %s t \"%s_%s(%d)\"", i + 1, str2, str[ j ], tag[ j ], time_sel ); 
+			
+			strcat( msg, str1 );
+		}
+	}
+
+	strcat( msg, "\n" );
+	fprintf( f, "%s", msg );
+	fprintf( f2, "%s", msg );
+
+	fclose( f );
+	fclose( f2 );
+
+	cmd( "if { [ info exists pm3d ] } { set choice $pm3d } { set choice 0 }" );
+	if ( *choice != 0 )
+		*choice = 2;	// require filled polygons, not supported by tkcanvas terminal
+	else
+		*choice = gnu;
+
+	show_plot_gnu( cur_plot, choice, *choice, str, tag );
+
+	chdir( dirname );
+
+	end:
+	
+	for ( i = 0; i < nv; ++i )
+	{
+		delete [ ] str[ i ];
+		delete [ ] tag[ i ];
+		if ( logs )
+			delete [ ] logdata[ i ];
+	}
+
+	delete [ ] str;
+	delete [ ] tag;
+	delete [ ] logdata;
+	delete [ ] data;
+	delete [ ] start;
+	delete [ ] end;
 }
 
 
@@ -4677,8 +4696,8 @@ PLOT_PHASE_DIAGRAM
 void plot_phase_diagram( int *choice )
 {
 	char *app, **str, **tag, str1[ 50 ], str2[ 100 ], str3[ 100 ], dirname[ MAX_PATH_LENGTH ];
-	double **data,**logdata;
 	int i, j, idseries, *start, *end, done, nlags;
+	double **data,**logdata;
 	FILE *f, *f2;
 
 	int logErrCnt = 0;				// log errors counter to prevent excess messages
@@ -4734,7 +4753,7 @@ void plot_phase_diagram( int *choice )
 					{
 						logdata[ i ][ j ] = NAN;
 						if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-							plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+							plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 						else
 							if ( ! stopErr )
 							{
@@ -4927,6 +4946,7 @@ void plot_phase_diagram( int *choice )
 		if ( logs )
 			delete [ ] logdata[ i ];
 	}
+	
 	delete [ ] str;
 	delete [ ] tag;
 	delete [ ] logdata;
@@ -5315,7 +5335,7 @@ void plot_lattice( int *choice )
 	cmd( "destroytop .da.s" );
 
 	if ( *choice == 2 )
-		goto end;
+		goto end1;
 
 	// prepare data from selected series
 	cmd( "set choice $time" );
@@ -5343,7 +5363,7 @@ void plot_lattice( int *choice )
 				logdata[ j ] = NULL;
 			}
 			
-			goto end;
+			goto end1;
 		}
 		
 		// get series data and take logs if necessary
@@ -5361,7 +5381,7 @@ void plot_lattice( int *choice )
 			{
 				logdata[ i ][ j ] = NAN;
 				if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-					plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+					plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 				else
 					if ( ! stopErr )
 					{
@@ -5412,7 +5432,7 @@ void plot_lattice( int *choice )
 	{
 		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of columns\" -detail \"The number of columns must be an exact divisor of the number (%d) of time steps (time series) or selected variables (cross section).\"", tot );
 		*choice = 2;
-		goto end;
+		goto end2;
 	}
 
 	// draw lattice
@@ -5518,6 +5538,8 @@ void plot_lattice( int *choice )
 	plot_l[ cur_plot ] = nlin * hi;
 	plot_nl[ cur_plot ] = nlin * hi;  
 
+	end2:
+	
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
@@ -5528,7 +5550,7 @@ void plot_lattice( int *choice )
 
 	*choice = 0;
 
-	end:
+	end1:
 
 	delete [ ] str;
 	delete [ ] tag;
@@ -5601,7 +5623,7 @@ void histograms( int *choice )
 				logdata[ j ] = NAN;
 				if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
 				{
-					plog( "\nWarning: zero or negative values in log plot ( set to NaN)\nCase: %d", "", j );
+					plog( "\nWarning: zero or negative values in log plot (set to NaN)\nCase: %d", "", j );
 				}
 				else
 					if ( ! stopErr )
@@ -5609,7 +5631,7 @@ void histograms( int *choice )
 						plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
 						stopErr = true;
 					}
-		   }
+			}
 		   
 		data = logdata;							// replace the data series
 	}
@@ -5875,7 +5897,7 @@ void histograms_cs( int *choice )
 				{
 					logdata[ i ][ j ] = NAN;
 					if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-						plog( "\nWarning: zero or negative values in log plot ( set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
+						plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 					else
 						if ( ! stopErr )
 						{
@@ -6060,9 +6082,6 @@ void histograms_cs( int *choice )
 
 	end:
 
-	delete [ ] start;
-	delete [ ] end;
-	delete [ ] data;
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
@@ -6070,9 +6089,13 @@ void histograms_cs( int *choice )
 		if ( logs )
 			delete [ ] logdata[ i ];
 	}
-	delete [ ] logdata;
+	
 	delete [ ] str;
 	delete [ ] tag; 
+	delete [ ] start;
+	delete [ ] end;
+	delete [ ] data;
+	delete [ ] logdata;
 }
 
 
@@ -6445,10 +6468,6 @@ void create_series( int *choice )
 
 	cmd( ".da.vars.lb.v see end" );
 	
-	delete [ ] start;
-	delete [ ] end;
-	delete [ ] data;
-	
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
@@ -6457,6 +6476,9 @@ void create_series( int *choice )
 	
 	delete [ ] str;
 	delete [ ] tag; 
+	delete [ ] start;
+	delete [ ] end;
+	delete [ ] data;	
 }
 
 
@@ -6646,16 +6668,17 @@ void create_maverag( int *choice )
 	cmd( ".da.vars.lb.v see end" );
 	num_var += nv; 
 
-	delete [ ] start;
-	delete [ ] end;
-	delete [ ] data;
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
 		delete [ ] tag[ i ];
 	}
+	
 	delete [ ] str;
 	delete [ ] tag; 
+	delete [ ] start;
+	delete [ ] end;
+	delete [ ] data;
 }
 
 
@@ -7153,6 +7176,7 @@ void save_datazip( int *choice )
 	Tcl_UnlinkVar( inter, "numcol" );
 	Tcl_UnlinkVar( inter, "deli" );
 	Tcl_UnlinkVar( inter, "fr" );
+	
 	*choice = 0;
 
 	for ( i = 0; i < nv; ++i )
@@ -7250,14 +7274,14 @@ void plog_series( int *choice )
 
 	for ( i = min_c; i <= max_c; ++i )
 	{
-		if ( ! is_nan( data[ 0 ][ i ] ) && start[ 0 ] <= i )
+		if ( ! is_nan( data[ 0 ][ i ] ) && start[ 0 ] <= i && end[ 0 ] >= i )
 			plog( "%d\t%.*g", "series", i, pdigits, data[ 0 ][ i ] );
 		else
 			plog( "%d\t%s", "series", i, nonavail );		// write NaN as n/a
 		
 		for ( j = 1; j < nv; ++j )
 		{
-			if ( ! is_nan( data[ j ][ i ] ) && start[ j ] <= i )
+			if ( ! is_nan( data[ j ][ i ] ) && start[ j ] <= i && end[ j ] >= i )
 				plog( "\t%.*g", "series", pdigits, data[ j ][ i ] );
 			else
 				plog( "\t%s", "series", nonavail );		// write NaN as n/a
@@ -7265,10 +7289,6 @@ void plog_series( int *choice )
 		
 		plog( "\n" );
 	}
-
-	delete [ ] start;
-	delete [ ] end;
-	delete [ ] data;
 
 	for ( i = 0; i < nv; ++i )
 	{
@@ -7278,6 +7298,9 @@ void plog_series( int *choice )
 
 	delete [ ] str;
 	delete [ ] tag; 
+	delete [ ] start;
+	delete [ ] end;
+	delete [ ] data;
 }    
 
 
@@ -7288,7 +7311,7 @@ void plog_series( int *choice )
 void plot( int type, int nv, double **data, int *start, int *end, char **str, char **tag, int *choice )
 {
 	int h, i, j, k, color, hsize, vsize, hbordsize, tbordsize, lheight, hcanvas, vcanvas, nLine, endCase, iniCase;
-	double x1, x2, *y, yVal = 0, cminy, cmaxy, step;
+	double x1, x2, *y, yVal, cminy, cmaxy, step;
 	char txtLab[ 2 * MAX_ELEM_LENGTH ];
 	bool tOk = false, y2on = ( type == TSERIES ) ? ( num_y2 <= nv ? true : false ) : false;
 	
@@ -7352,6 +7375,7 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 
 	// calculate screen plot values for all series
 	x1 = hbordsize - 1;
+	yVal = NAN;
 	for ( h = 0, j = 0, i = iniCase; i <= endCase; ++i )
 	{
 		// move the x-axis pointer in discrete steps
