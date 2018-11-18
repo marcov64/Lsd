@@ -889,6 +889,47 @@ proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
 
 
 #************************************************
+# XYZOKHELPCANCEL
+# Procedure to create standard button set
+#************************************************
+proc XYZokhelpcancel { w fr nameX nameY nameZ comX comY comZ comOk comHelp comCancel } {
+	global butWid
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
+	if { [ string length "$nameX" ] > $butWid } { 
+		set Xwid [ string length "$nameX" ] 
+	} else {
+		set Xwid $butWid 
+	}
+	if { [ string length "$nameY" ] > $butWid } { 
+		set Ywid [ string length "$nameY" ] 
+	} else {
+		set Ywid $butWid 
+	}
+	frame $w.$fr.r1
+	button $w.$fr.r1.x -width $Xwid -text $nameX -command $comX
+	button $w.$fr.r1.y -width $Ywid -text $nameY -command $comY
+	button $w.$fr.r1.z -width $Ywid -text $nameZ -command $comZ
+	frame $w.$fr.r2
+	button $w.$fr.r2.ok -width $butWid -text OK -command $comOk
+	button $w.$fr.r2.help -width $butWid -text Help -command $comHelp
+	button $w.$fr.r2.can -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.r1.x <KeyPress-Return> "$w.$fr.r1.x invoke"
+	bind $w.$fr.r1.y <KeyPress-Return> "$w.$fr.r1.y invoke"
+	bind $w.$fr.r1.z <KeyPress-Return> "$w.$fr.r1.z invoke"
+	bind $w.$fr.r2.ok <KeyPress-Return> "$w.$fr.r2.ok invoke"
+	bind $w.$fr.r2.help <KeyPress-Return> "$w.$fr.r2.help invoke"
+	bind $w.$fr.r2.can <KeyPress-Return> "$w.$fr.r2.can invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.r2.can invoke"
+	bind $w <F1> "$w.$fr.r2.help invoke"
+	pack $w.$fr.r1.x $w.$fr.r1.y $w.$fr.r1.z -padx 10 -side left
+	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.can -padx 10 -side left
+	pack $w.$fr.r1 -anchor w
+	pack $w.$fr.r2  -pady 10
+	pack $w.$fr -side right 
+}
+
+
+#************************************************
 # DONEHELP
 # Procedure to create standard button set
 #************************************************

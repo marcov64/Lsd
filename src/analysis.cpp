@@ -2555,10 +2555,6 @@ void plot_tseries( int *choice )
 					maxy = data[ i ][ j ];
 			}
 		
-		// check if not all invalid data
-		if ( ! done )
-			goto error;
-		
 		// condition the max and min values 
 		temp = lower_bound( miny, maxy, MARG, MARG_CONST, pdigits );
 		maxy = upper_bound( miny, maxy, MARG, MARG_CONST, pdigits );
@@ -2573,7 +2569,7 @@ void plot_tseries( int *choice )
 	}
 
 	// 2nd y axis is always automatic scaled
-	for ( done = false, i = num_y2 - 1; i < nv; ++i )
+	for ( miny2 = maxy2 = 0, done = false, i = num_y2 - 1; i < nv; ++i )
 		for ( j = min_c; j <= max_c; ++j )
 		{
 			if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )		// ignore NaNs
@@ -2590,7 +2586,7 @@ void plot_tseries( int *choice )
 		}
 		
 	// check if not all invalid data
-	if ( ! done )
+	if ( miny2 == 0 && maxy2 == 0 )
 	{
 		num_y2 = nv + 1;
 		y2on = false;
@@ -2611,8 +2607,6 @@ void plot_tseries( int *choice )
 	// plot all series
 	plot( TSERIES, nv, data, start, end, id, str, tag, choice );
 
-	error:
-	
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
@@ -2776,10 +2770,6 @@ void plot_cross( int *choice )
 			++i;
 	}
 
-	// check if not all invalid data
-	if ( first )
-		goto error;
-	
 	// condition the max and min values 
 	if ( autom )
 	{
@@ -2813,8 +2803,6 @@ void plot_cross( int *choice )
 	// plot all series
 	plot( CRSSECT, new_nv, val, list_times, &nt, id, str, tag, choice );
 
-	error:
-	
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
@@ -2920,13 +2908,60 @@ void set_cs_data( int *choice )
 	cmd( "pack $p.u -pady 5" );
 
 	cmd( "bind $p.u.i.e.e <KeyPress-Return> { .da.s.fb.r1.x invoke }" );
+	cmd( "bind $p.u.i.lb.lb.lb <Delete> { .da.s.fb.r1.y invoke }" );
 
 	cmd( "bind $p.u.i.e.e <Control-f> { set sfrom [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-F> { set sfrom [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }" );
 	cmd( "bind $p.u.i.e.e <Control-t> { set sto [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-T> { set sto [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }" );
 	cmd( "bind $p.u.i.e.e <Control-s> { set sskip [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-S> { set sskip [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }" );
-	cmd( "bind $p.u.i.e.e <Control-z> { if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer -strict $sfrom ] && [ string is integer -strict $sto ] && [ expr $sto - $sfrom ] > 0 } { if { ! [ info exists sskip ] } { set sskip 1 }; for { set x $sfrom } { $x <= $sto && $x <= $maxc } { incr x $sskip } { .da.s.u.i.lb.lb.lb insert end $x } }; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-Z> { if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer -strict $sfrom ] && [ string is integer -strict $sto ] && [ expr $sto - $sfrom ] > 0 } { if { ! [ info exists sskip ] } { set sskip 1 }; for { set x $sfrom } { $x <= $sto && $x <= $maxc } { incr x $sskip } { .da.s.u.i.lb.lb.lb insert end $x } }; .da.s.u.i.e.e selection range 0 end }" );
+	cmd( "bind $p.u.i.e.e <Control-z> { \
+			if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer -strict $sfrom ] && [ string is integer -strict $sto ] && [ expr $sto - $sfrom ] > 0 } { \
+				if { ! [ info exists sskip ] } { \
+					set sskip 1 \
+				}; \
+				for { set x $sfrom } { $x <= $sto && $x <= $maxc } { incr x $sskip } { \
+					.da.s.u.i.lb.lb.lb insert end $x \
+				} \
+			}; \
+			.da.s.u.i.e.e selection range 0 end \
+		}; bind $p.u.i.e.e <Control-Z> { \
+			if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer -strict $sfrom ] && [ string is integer -strict $sto ] && [ expr $sto - $sfrom ] > 0 } { \
+				if { ! [ info exists sskip ] } { \
+					set sskip 1 \
+				}; \
+				for { set x $sfrom } { $x <= $sto && $x <= $maxc } { incr x $sskip } { \
+					.da.s.u.i.lb.lb.lb insert end $x \
+				} \
+			}; \
+			.da.s.u.i.e.e selection range 0 end \
+		}" );
 
-	cmd( "XYokhelpcancel $p fb Add Delete { set a [ .da.s.u.i.e.e get ]; if { [ lsearch $list_times $a ] < 0 && [ string is integer -strict $a ] && $a >= 0 && $a <= $maxc } { .da.s.u.i.lb.lb.lb insert end $a; .da.s.u.i.lb.lb.lb see end; focus .da.s.u.i.e.e; .da.s.u.i.e.e selection range 0 end; .da.s.u.i.lb.lb.lb selection set end } { bell } } { set sel [ .da.s.u.i.lb.lb.lb curselection ]; if { [ llength $sel ] > 0 } { .da.s.u.i.lb.lb.lb delete [ lindex $sel 0 ] [ lindex $sel [ expr [ llength $sel ] - 1 ] ]; .da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e } } { set choice 1 } { LsdHelp menudata_res.html#crosssection } { set choice 2 }" );
+	cmd( "XYZokhelpcancel $p fb Add Delete \"Delete All\" { \
+			set a [ .da.s.u.i.e.e get ]; \
+			if { [ lsearch $list_times $a ] < 0 && [ string is integer -strict $a ] && $a >= $minc && $a <= $maxc } { \
+				.da.s.u.i.lb.lb.lb insert end $a; \
+				.da.s.u.i.lb.lb.lb see end; \
+				focus .da.s.u.i.e.e; \
+				.da.s.u.i.e.e selection range 0 end; \
+				.da.s.u.i.lb.lb.lb selection clear 0 end \
+			} { \
+				bell \
+			} \
+		} { \
+			set sel [ .da.s.u.i.lb.lb.lb curselection ]; \
+			if { [ llength $sel ] > 0 } { \
+				.da.s.u.i.lb.lb.lb delete [ lindex $sel 0 ] [ lindex $sel [ expr [ llength $sel ] - 1 ] ]; \
+				.da.s.u.i.e.e selection range 0 end; \
+				focus .da.s.u.i.e.e \
+			} \
+		} { \
+			.da.s.u.i.lb.lb.lb delete 0 end \
+		} {\
+			set choice 1 \
+		} { \
+			LsdHelp menudata_res.html#crosssection \
+		} { \
+			set choice 2 \
+		}" );
 
 	cmd( "showtop $p centerW no no yes 0 0 .da.s.fb.r1.add" );
 	cmd( ".da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e" );
@@ -3934,7 +3969,6 @@ void plot_gnu( int *choice )
 		autom = true;
 
 	if ( autom )
-	{
 		for ( done = false, i = 1; i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
@@ -3950,11 +3984,6 @@ void plot_gnu( int *choice )
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )	// ignore NaNs
 					maxy = data[ i ][ j ];
 			}
-
-		// check if not all invalid data
-		if ( ! done )
-			goto error;
-	}
 	   
 	cmd( "set dirxy plotxy_%d", cur_plot );
 	cmd( "file mkdir $dirxy" );
@@ -4270,8 +4299,6 @@ void plot_gnu( int *choice )
 
 	chdir( dirname );
 	
-	error:
-
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
@@ -4388,7 +4415,6 @@ void plot_cs_xy( int *choice )
 		autom = true;
 	
 	if ( autom )
-	{
 		for ( done = false, i = 1; i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
@@ -4405,11 +4431,6 @@ void plot_cs_xy( int *choice )
 					maxy = data[ i ][ j ];
 			}
 
-		// check if not all invalid data
-		if ( ! done )
-			goto end;
-	}
-		
 	cmd( "set bidi %d", end[ 0 ] );
 
 	cmd( "newtop .da.s \"XY Plot Options\" { set choice 2 } .da" );
@@ -4796,7 +4817,6 @@ void plot_phase_diagram( int *choice )
 		autom = true;
 
 	if ( autom )
-	{
 		for ( done = false, i = 0; i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
@@ -4812,11 +4832,6 @@ void plot_phase_diagram( int *choice )
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )		// ignore NaNs
 					maxy = data[ i ][ j ];
 			}
-
-		// check if not all invalid data
-		if ( ! done )
-			goto end;
-	}
 		
 	cmd( "newtop .da.s \"Lags Selection\" { set choice 2 } .da" );
 
@@ -7601,7 +7616,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 					if { $type == 0 } { \
 						$w.b.c.case.v configure -text $case \
 					} elseif { $type == 1 } { \
-						$w.b.c.case.v configure -text \"[ lindex $series $case ] (#[ expr $case + 1 ] )\" \
+						$w.b.c.case.v configure -text \"[ lindex $series $case ] (#[ expr $case + 1 ])\" \
 					}; \
 					$w.b.c.y.v1 configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ] ]; \
 				} \
@@ -7612,7 +7627,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 		switch ( type )
 		{
 			case TSERIES:
-				sprintf( txtLab, "%s_%s #%d", str[ i ], tag[ i ], id[ i ] );
+				sprintf( txtLab, "%s_%s (#%d)", str[ i ], tag[ i ], id[ i ] );
 				break;
 			case CRSSECT:
 				sprintf( txtLab, "t = %d ", start[ i ] );
