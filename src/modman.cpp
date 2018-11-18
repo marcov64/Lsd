@@ -5299,7 +5299,7 @@ if ( choice == 48 )
 					file delete -force \"$i\" \
 				} \
 			}; \
-			set objs [ glob -nocomplain -directory \"$modeldir\" *.o *.obj src break.gdb makefile* makemessage.txt elements.txt lsd_gnu* LSD ]; \
+			set objs [ glob -nocomplain -directory \"$modeldir\" *.o *.obj src break.gdb makefile* makemessage.txt elements.txt lsd_gnu* *.exe *.app ]; \
 			foreach i $objs { \
 				catch { \
 					file delete -force \"$i\" \

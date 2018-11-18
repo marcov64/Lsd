@@ -16,8 +16,8 @@ make deploy
 
 make install-embedded INSTALL_ROOT=/Users/Marcelo/TclTk/
 
-In both LMM.app/Contents and src/LSD.app/Contents, remove the Framework subfolder.
+In both LMM.app/Contents and src/LSD.app/Contents, remove the Frameworks subfolder.
 
-Copy the Framework subfolder from Applications/Utilities/Wish.app/Contents, into both LMM.app/Contents and src/LSD.app/Contents.
+Copy the Frameworks subfolder from Applications/Utilities/Wish.app/Contents, into both LMM.app/Contents and src/LSD.app/Contents.
 
 Copy to src/LSD.app/Contents/Framework the MISSING header and library items from build/tcl/Tcl.Framework and build/tk/Tk.Framework, being careful to not overwrite the existing files (Headers and PrivateHeaders folders, libtclstubX.X.a, libtkstubX.X.a, and respective link files). Copy link files ONLY after copying real files/folders.
