@@ -1064,7 +1064,7 @@ while ( true )
 					cmd( "set res [lindex $tot %d]", i );
 					app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 					strcpy( msg, app );
-					sscanf( msg, "%s %s (%d - %d) # %d", str1, str2, &l, &m, &k );
+					sscanf( msg, "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
 					if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 					{
 						datum = vs[ k ].data;
@@ -1296,8 +1296,8 @@ while ( true )
 					cmd( "set res [lindex $tot %d]", i );
 					app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 					strcpy( msg, app );
-					sscanf( msg, "%s %s (%d - %d) # %d", str1, str2, &l, &m, &k );
-					if (h >= l && h <= m && ! strcmp( str1, str3 ) )
+					sscanf( msg, "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
+					if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 					{
 						datum = vs[ k ].data;
 						if ( is_finite( datum[ h ] ) )		// ignore NaNs
@@ -1437,7 +1437,7 @@ while ( true )
 
 			cmd( ".da.vars.lb.v delete 0 end" );
 			for ( i = 0; i < num_var; ++i )
-				cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, vs[ i ].rank );
+				cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d\"", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, vs[ i ].rank );
 			
 			break;
 
@@ -1458,7 +1458,7 @@ while ( true )
 			cmd( ".da.vars.lb.v delete 0 end" );
 			
 			for ( i = 0; i < num_var; ++i )
-				cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", app_store[ i ].label, app_store[ i ].tag, app_store[ i ].start, app_store[ i ].end, app_store[ i ].rank );
+				cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d\"", app_store[ i ].label, app_store[ i ].tag, app_store[ i ].start, app_store[ i ].end, app_store[ i ].rank );
 			
 			delete [ ] app_store;
 				
@@ -2469,7 +2469,7 @@ void plot_tseries( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 	  
 		// get series data and take logs if necessary
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
@@ -2686,7 +2686,7 @@ void plot_cross( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 		
 		// check if series has data for all CS selected cases
 		for ( k = 0, erase[ i ] = 0; k < nt; ++k )
@@ -3114,7 +3114,7 @@ void insert_labels_mem( object *r, int *num_v, int *num_c )
 		if ( cv->save )
 			{
 				set_lab_tit( cv );
-				cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
+				cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
 				if ( cv->end > *num_c )
 					*num_c = cv->end;
 				*num_v += 1;
@@ -3128,7 +3128,7 @@ void insert_labels_mem( object *r, int *num_v, int *num_c )
 	if ( r->up == NULL )
 		for ( cv = cemetery; cv != NULL; cv = cv->next )
 		{  
-			cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
+			cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
 			if ( cv->end > *num_c )
 				*num_c = cv->end;
 			*num_v += 1;
@@ -3355,10 +3355,10 @@ void insert_data_file( bool gz, int *num_v, int *num_c )
 		vs[ i ].rank = i;
 
 		if ( vs[ i ].start != -1 )
-			cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d %s\"", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, i, app_str );
+			cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d %s\"", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, i, app_str );
 		else
 		{
-			cmd( ".da.vars.lb.v insert end \"%s %s (0 - %d) # %d %s\"", vs[ i ].label, vs[ i ].tag, new_c-1, i, app_str );
+			cmd( ".da.vars.lb.v insert end \"%s %s (0-%d) #%d %s\"", vs[ i ].label, vs[ i ].tag, new_c-1, i, app_str );
 			vs[ i ].start = 0;
 			vs[ i ].end = new_c-1;
 		}
@@ -3465,7 +3465,7 @@ void statistics( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 		
 		// get series data and take logs if necessary
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
@@ -3629,7 +3629,7 @@ void statistics_cross( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 		
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
@@ -3911,7 +3911,7 @@ void plot_gnu( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 		
 		// get series data and take logs if necessary
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
@@ -4361,7 +4361,7 @@ void plot_cs_xy( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 		
 		// get series data and take logs if necessary
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
@@ -4765,7 +4765,7 @@ void plot_phase_diagram( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 		
 		// get series data and take logs if necessary
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
@@ -5382,7 +5382,7 @@ void plot_lattice( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 	  
 		// check if series has data for all selected cases (cross-section only )
 		if ( time_cross == 1 && ( time < start[ i ] || time > end[ i ] ) )
@@ -5641,7 +5641,7 @@ void histograms( int *choice )
 	cmd( "set res [.da.vars.ch.v get 0]" );
 	app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 	strcpy( msg, app );
-	sscanf( msg, "%s %s (%d - %d) # %d", str[ 0 ], tag[ 0 ], &start, &end, &id );
+	sscanf( msg, "%s %s (%d-%d) #%d", str[ 0 ], tag[ 0 ], &start, &end, &id );
 
 	data = vs[ id ].data;
 	if ( data == NULL )
@@ -5916,7 +5916,7 @@ void histograms_cs( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 		
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
@@ -6323,7 +6323,7 @@ void create_series( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg,lapp );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 		
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
@@ -6414,7 +6414,7 @@ void create_series( int *choice )
 					vs[ num_var ].data[ i ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
 					
 			}
-			cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[ num_var ].label, vs[ num_var ].tag, min_c, max_c, num_var ); 
+			cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d (created)\"", vs[ num_var ].label, vs[ num_var ].tag, min_c, max_c, num_var ); 
 
 			cmd( "lappend DaModElem %s", vs[ num_var ].label  );
 		} 
@@ -6485,7 +6485,7 @@ void create_series( int *choice )
 					
 			 }
 
-			cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[ num_var ].label, vs[ num_var ].tag, 0, nv - 1, num_var ); 
+			cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d (created)\"", vs[ num_var ].label, vs[ num_var ].tag, 0, nv - 1, num_var ); 
 
 			cmd( "lappend DaModElem %s", vs[ num_var ].label  );
 		}
@@ -6630,7 +6630,7 @@ void create_maverag( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, lapp );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 
 		sprintf( msg, "%cMA%d_%s", ma_type == 0 ? 'S' : 'C', flt, str[ i ] );
 		strcpy( vs[ num_var + i ].label, msg );
@@ -6698,7 +6698,7 @@ void create_maverag( int *choice )
 			}
 		}
 		
-		cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[ num_var + i ].label, vs[ num_var + i ].tag, vs[ num_var + i ].start, vs[ num_var + i ].end, num_var + i ); 
+		cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d (created)\"", vs[ num_var + i ].label, vs[ num_var + i ].tag, vs[ num_var + i ].start, vs[ num_var + i ].end, num_var + i ); 
 
 		cmd( "lappend DaModElem %s", vs[ num_var + i ].label );
 	}
@@ -6775,7 +6775,7 @@ void save_datazip( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
 			plog( "\nError: invalid data\n" );
@@ -7281,7 +7281,7 @@ void plog_series( int *choice )
 		cmd( "set res [.da.vars.ch.v get %d]", i );
 		lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg,lapp );
-		sscanf( msg, "%s %s (%d - %d) # %d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
@@ -7956,7 +7956,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	bool tOk, y2on;
 	char *txtValue, *txtCase, *txtLine, txtLab[ 2 * MAX_ELEM_LENGTH ];
 	int h, i, color, hsize, vsize, hbordsize, tbordsize, bbordsize, sbordsize, htmargin, vtmargin, hticks, vticks, lheight, hcanvas, vcanvas, nLine;
-	double cminy2, cmaxy2;
+	double yVal, cminy2, cmaxy2;
 	
 	// get graphical configuration from Tk ( file defaults.tcl )
 	get_int( "hsizeP", & hsize );			// 600
@@ -8159,11 +8159,19 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	// y-axis values
 	for ( i = 0; i < vticks + 2; ++i )
 	{
-		cmd( "$p create text %d %d -font $fontP -anchor e -text %.*g -tag { p text }", hbordsize - htmargin - 5, tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, miny + ( vticks + 1 - i ) * ( maxy - miny ) / ( vticks + 1 ) );
+		yVal = miny + ( vticks + 1 - i ) * ( maxy - miny ) / ( vticks + 1 );
+		yVal = ( fabs( yVal ) < ( maxy - miny ) * MARG ) ? 0 : yVal;
+		
+		cmd( "$p create text %d %d -font $fontP -anchor e -text %.*g -tag { p text }", hbordsize - htmargin - 5, tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, yVal );
 		
 		// second y-axis series values ( if any )
 		if ( y2on )
-			cmd( "$p create text %d %d -font $fontP -anchor w -text %.*g -tag { p text }", hbordsize + hsize + htmargin + 5, tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, cminy2 + ( vticks + 1 - i ) * ( cmaxy2 - cminy2 ) / ( vticks + 1 ) );
+		{
+			yVal = cminy2 + ( vticks + 1 - i ) * ( cmaxy2 - cminy2 ) / ( vticks + 1 );
+			yVal = ( fabs( yVal ) < ( cmaxy2 - cminy2 ) * MARG ) ? 0 : yVal;
+		
+			cmd( "$p create text %d %d -font $fontP -anchor w -text %.*g -tag { p text }", hbordsize + hsize + htmargin + 5, tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, yVal );
+		}
 	}
 
 	// series labels
