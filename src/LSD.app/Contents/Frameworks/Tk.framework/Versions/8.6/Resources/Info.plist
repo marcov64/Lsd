@@ -14,7 +14,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Tk</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Tk AQUA 8.6.8,
+	<string>Tk AQUA 8.6.9,
 Copyright © 1989-2018 Tcl Core Team,
 Copyright © 2002-2018 Daniel A. Steffen,
 	Copyright © 1989-2018 Contributors,
@@ -32,10 +32,10 @@ Copyright © 2001-2002 Jim Ingham &amp; Ian Reid</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
-	<string>8.6.8</string>
+	<string>8.6.9</string>
 	<key>CFBundleSignature</key>
 	<string>Tk  </string>
 	<key>CFBundleVersion</key>
-	<string>8.6.8</string>
+	<string>8.6.9</string>
 </dict>
 </plist>
