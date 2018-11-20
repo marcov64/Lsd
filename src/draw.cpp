@@ -184,7 +184,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from )
 		sprintf( ch, "%s", t->label );
 		strcpy( ch1, "" );
 		
-		for ( cur = t; cur != NULL ; cur = cur->hyper_next( cur->label ) )
+		for ( cur = t; cur != NULL ; cur = cur->hyper_next( ) )
 		{
 			if ( strlen( ch1 ) >= 9 )
 			{

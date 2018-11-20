@@ -544,7 +544,7 @@ object *object::search( char const *lab )
 		return this;
 	
 #ifndef DEBUG_MAPS
-	// Search among the variables of current object
+	// Search among the descendants of current object
 	if ( ( bit = b_map.find( lab ) ) != b_map.end( ) )
 		return bit->second->head;
 #else
@@ -735,7 +735,7 @@ Generate the data structure required to use the turbosearch.
 - label must be the label of the descending object whose set is to be organized 
 - num is the total number of objects (if not provided or zero, it's calculated).
 *****************************/
-int object::initturbo( char const *label, double tot = 0 )
+double object::initturbo( char const *label, double tot = 0 )
 {
 	bridge *cb;
 	object *cur;
@@ -765,7 +765,7 @@ int object::initturbo( char const *label, double tot = 0 )
 	cb->mn = new mnode;
 	cb->mn->create( lev );
 	
-	return ( int ) tot;
+	return tot;
 }
 
 
@@ -815,6 +815,44 @@ object *object::turbosearch( char const *label, double tot, double num )
 		lev = 0;					// if not, use default
 	
 	return( cb->mn->fetch( &val, lev ) );
+}
+
+
+/*******************************************
+SEARCH_INSTANCE
+Searches the model for an object instance
+pointed by 'obj' among the object descendants, 
+returning the instance number or 0 if not found
+********************************************/
+int object::search_instance( object *obj )
+{
+	int i, pos;
+	bridge *cb;
+	object *cur;
+	
+	if ( up == NULL )					// root?
+	{
+		if ( obj == this )
+			return 1;
+		
+		cb = b;
+	}
+	else
+		cb = up->search( label )->b;	// get first instance
+	
+	for ( ; cb != NULL; cb = cb->next )	// search all brothers in current chain
+		if ( cb->head != NULL )
+			// check all instances of current object
+			for ( cur = cb->head, i = 1; cur != NULL; cur = cur->hyper_next( ), ++i )
+			{
+				if ( cur == obj )		// done if found
+					return i;
+				else					// check among current's sons
+					if ( ( pos = cur->search_instance( obj ) ) != 0 )
+						return pos;
+			}
+					
+	return 0;
 }
 
 
@@ -1001,7 +1039,7 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 INITTURBO_COND
 Generate the data structure required to use the turbosearch with condition.
 *****************************/
-int object::initturbo_cond( char const *label )
+double object::initturbo_cond( char const *label )
 {
 	bridge *cb;
 	object *cur;

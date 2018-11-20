@@ -1,13 +1,8 @@
 #include "fun_head.h"
 
+object *supply, *cur10;
 
-object *supply;
 MODELBEGIN
-
-
-
-
-
 
 
 EQUATION("InitSlow")

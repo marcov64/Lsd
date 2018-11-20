@@ -24,15 +24,12 @@ using namespace Eigen;
 
 #include "decl.h"										// LSD classes
 
-#ifndef NO_WINDOW
-#define DEBUG_CODE \
-	if ( debug_flag ) \
-	{ \
-		for ( int n = 0; n < 1000; n++ ) \
-			i_values[ n ] = v[ n ]; \
-	};
+// create and set fast lookup flag
+#if ! defined FAST_LOOKUP || ! defined CPP11
+	bool fast_lookup = false;
+	void init_map( ) { };
 #else
-#define DEBUG_CODE
+	bool fast_lookup = true;
 #endif
 
 // user defined variables for all equations (to be defined in equation file)
@@ -43,8 +40,8 @@ using namespace Eigen;
 // set pointers to NULL to protect users (small overhead) if not disabled
 #ifndef NOT_INIT_POINTERS
 #define INIT_POINTERS \
-	cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cur10 = cyccur = cyccur2 = cyccur3 = NULL; \
-	curl = curl1 = curl2 = curl3 = curl4 = curl5 = NULL; \
+	cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cyccur = cyccur2 = cyccur3 = NULL; \
+	curl = curl1 = curl2 = curl3 = curl4 = curl5 = curl6 = curl7 = curl8 = curl9 = NULL; \
 	f = NULL;
 #else
 #define INIT_POINTERS
@@ -53,10 +50,10 @@ using namespace Eigen;
 #define EQ_BEGIN \
 	double res = def_res; \
 	object *p = var->up, *c = caller, app; \
-	int i, j, h, k; \
-	double v[1000]; \
-	object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur, *cyccur2, *cyccur3; \
-	netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5; \
+	int h, i, j, k; \
+	double v[ USER_D_VARS ]; \
+	object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cyccur, *cyccur2, *cyccur3; \
+	netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
 	FILE *f; \
 	INIT_POINTERS \
 	EQ_USER_VARS
@@ -77,16 +74,43 @@ using namespace Eigen;
 		debug = 'd'; \
 	}
 
-// create and set fast lookup flag
-#if ! defined FAST_LOOKUP || ! defined CPP11
-	bool fast_lookup = false;
+#ifndef NO_WINDOW
+#define DEBUG_CODE \
+	if ( debug_flag ) \
+	{ \
+		for ( int n = 0; n < USER_D_VARS; ++n ) \
+			d_values[ n ] = v[ n ]; \
+		i_values[ 0 ] = i; \
+		i_values[ 1 ] = j; \
+		i_values[ 2 ] = h; \
+		i_values[ 3 ] = k; \
+		o_values[ 0 ] = cur; \
+		o_values[ 1 ] = cur1; \
+		o_values[ 2 ] = cur2; \
+		o_values[ 3 ] = cur3; \
+		o_values[ 4 ] = cur4; \
+		o_values[ 5 ] = cur5; \
+		o_values[ 6 ] = cur6; \
+		o_values[ 7 ] = cur7; \
+		o_values[ 8 ] = cur8; \
+		o_values[ 9 ] = cur9; \
+		n_values[ 0 ] = curl; \
+		n_values[ 1 ] = curl1; \
+		n_values[ 2 ] = curl2; \
+		n_values[ 3 ] = curl3; \
+		n_values[ 4 ] = curl4; \
+		n_values[ 5 ] = curl5; \
+		n_values[ 6 ] = curl6; \
+		n_values[ 7 ] = curl7; \
+		n_values[ 8 ] = curl8; \
+		n_values[ 9 ] = curl9; \
+	};
 #else
-	bool fast_lookup = true;
+#define DEBUG_CODE
 #endif
 
 // handle fast equation look-up if enabled and C++11 is available
 #if ! defined FAST_LOOKUP || ! defined CPP11
-	void init_map( ) { };
 // use standard chain method for look-up
 #define MODELBEGIN \
 	double variable::fun( object *caller ) \
@@ -223,8 +247,12 @@ using namespace Eigen;
 #define T ( ( double ) t )
 #define LAST_T ( ( double ) max_step )
 
-#define INTERACT( X, Y )  p->interact( ( char * ) X, Y, v)
-#define INTERACTS( Z, X, Y ) Z->interact( ( char * ) X, Y, v)
+#define INTERACT( X, Y ) p->interact( ( char * ) X, Y, v, i, j, h, k, \
+	cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, \
+	curl, curl1, curl2, curl3, curl4, curl5, curl6, curl7, curl8, curl9 )
+#define INTERACTS( O, X, Y ) O->interact( ( char * ) X, Y, v, i, j, h, k, \
+	cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, \
+	curl, curl1, curl2, curl3, curl4, curl5, curl6, curl7, curl8, curl9 )
 
 // regular logging (disabled in any fast mode)
 #define LOG( ... ) \
@@ -296,11 +324,11 @@ using namespace Eigen;
 #define SDS( X, Y ) X->sd( ( char * ) Y, 0 )
 #define SDLS( X, Y, Z ) X->sd( ( char * ) Y, Z )
 
-#define INCRS(Q, X, Y ) Q->increment( ( char * ) X, Y )
 #define INCR( X, Y ) p->increment( ( char * ) X, Y )
+#define INCRS( O, X, Y ) O->increment( ( char * ) X, Y )
 
 #define MULT( X, Y ) p->multiply( ( char * ) X, Y )
-#define MULTS(Q, X, Y ) Q->multiply( ( char * ) X, Y )
+#define MULTS( O, X, Y ) O->multiply( ( char * ) X, Y )
 
 #define CYCLE( O, L ) for ( O = get_cycle_obj( p, ( char * ) L, "CYCLE" ); O != NULL; O = go_brother( O ) )
 #define CYCLES( C, O, L ) for ( O = get_cycle_obj( C, ( char * ) L, "CYCLES" ); O != NULL; O = go_brother( O ) )
@@ -334,73 +362,73 @@ using namespace Eigen;
 #define RECALC( X ) p->recal( ( char * ) X )
 #define RECALCS( O, X ) O->recal( ( char * ) X )
 
-#define SEARCH_CND( X, Y ) p->search_var_cond( ( char * ) X, Y, 0 )
-#define SEARCH_CNDL( X, Y, Z ) p->search_var_cond( ( char * ) X, Y, Z )
-#define SEARCH_CNDS( O, X, Y ) O->search_var_cond( ( char * ) X, Y, 0 )
-#define SEARCH_CNDLS( O, X, Y, Z ) O->search_var_cond( ( char * ) X, Y, Z )
+#define SEARCH_CND( X, Y ) ( p->search_var_cond( ( char * ) X, Y, 0 ) )
+#define SEARCH_CNDL( X, Y, Z ) ( p->search_var_cond( ( char * ) X, Y, Z ) )
+#define SEARCH_CNDS( O, X, Y ) ( O == NULL ? NULL : O->search_var_cond( ( char * ) X, Y, 0 ) )
+#define SEARCH_CNDLS( O, X, Y, Z ) ( O == NULL ? NULL : O->search_var_cond( ( char * ) X, Y, Z ) )
 
-#define SEARCH( X ) p->search( ( char * ) X )
-#define SEARCHS( Y, X ) Y->search( ( char * ) X )
+#define SEARCH( X ) ( p->search( ( char * ) X ) )
+#define SEARCHS( O, X ) ( O == NULL ? NULL : O->search( ( char * ) X ) )
 
 // Seeds turbo search: O=pointer to container object where searched objects are
 //                     X=name of object contained inside the searched objects
 //					   Y=total number of objects
-#define INIT_TSEARCH( X ) ( ( double ) p->initturbo( ( char * ) X, 0 ) ) )
-#define INIT_TSEARCHS( O, X ) ( ( double ) O->initturbo( ( char * ) X, 0 ) )
-#define INIT_TSEARCHT( X, Y ) ( ( double ) p->initturbo( ( char * ) X, Y ) )
-#define INIT_TSEARCHTS( O, X, Y ) ( ( double ) O->initturbo( ( char * ) X, Y ) )
+#define INIT_TSEARCH( X ) ( p->initturbo( ( char * ) X, 0 ) ) )
+#define INIT_TSEARCHS( O, X ) ( O == NULL ? 0. : O->initturbo( ( char * ) X, 0 ) )
+#define INIT_TSEARCHT( X, Y ) ( p->initturbo( ( char * ) X, Y ) )
+#define INIT_TSEARCHTS( O, X, Y ) ( O == NULL ? 0. : O->initturbo( ( char * ) X, Y ) )
 //                     X=name of variable to be indexed
-#define INIT_TSEARCH_CND( X ) ( ( double ) p->initturbo_cond( ( char * ) X ) )
-#define INIT_TSEARCH_CNDS( O, X ) ( ( double ) O->initturbo_cond( ( char * ) X ) )
+#define INIT_TSEARCH_CND( X ) ( p->initturbo_cond( ( char * ) X ) )
+#define INIT_TSEARCH_CNDS( O, X ) ( O == NULL ? 0. : O->initturbo_cond( ( char * ) X ) )
 
 
 // Performs turbo search: O, X as in TSEARCHS_INI
 //                        Z=position of the object to be searched for
-#define TSEARCH( X, Z ) p->turbosearch( ( char * ) X, 0, Z )
-#define TSEARCHS( O, X, Z ) O->turbosearch( ( char * ) X, 0, Z )
+#define TSEARCH( X, Z ) ( p->turbosearch( ( char * ) X, 0, Z ) )
+#define TSEARCHS( O, X, Z ) ( O == NULL ? NULL : O->turbosearch( ( char * ) X, 0, Z ) )
 //                        Z=value of variable X to be searched for
-#define TSEARCH_CND( X, Z ) p->turbosearch_cond( ( char * ) X, Z )
-#define TSEARCH_CNDS( O, X, Z ) O->turbosearch_cond( ( char * ) X, Z )
+#define TSEARCH_CND( X, Z ) ( p->turbosearch_cond( ( char * ) X, Z ) )
+#define TSEARCH_CNDS( O, X, Z ) ( O == NULL ? NULL : O->turbosearch_cond( ( char * ) X, Z ) )
 
 #define SORT( X, Y, Z ) p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z )
 #define SORTS( O, X, Y, Z ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z )
 #define SORT2( X, Y, L, Z ) p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) L, ( char * ) Z )
 #define SORT2S( O, X, Y, L, Z ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) L, ( char * ) Z )
 
-#define ADDOBJ( X ) p->add_n_objects2( ( char * ) X, 1 )
-#define ADDOBJL( X, Y ) p->add_n_objects2( ( char * ) X, 1 , ( int ) Y )
-#define ADDOBJS( O, X ) O->add_n_objects2( ( char * ) X, 1 )
-#define ADDOBJLS( O, X, Y ) O->add_n_objects2( ( char * ) X, 1 , ( int ) Y )
+#define ADDOBJ( X ) ( p->add_n_objects2( ( char * ) X, 1 ) )
+#define ADDOBJL( X, Y ) ( p->add_n_objects2( ( char * ) X, 1 , ( int ) Y ) )
+#define ADDOBJS( O, X ) ( O == NULL ? NULL : O->add_n_objects2( ( char * ) X, 1 ) )
+#define ADDOBJLS( O, X, Y ) ( O == NULL ? NULL : O->add_n_objects2( ( char * ) X, 1 , ( int ) Y ) )
 
-#define ADDOBJ_EX( X, Y ) p->add_n_objects2( ( char * ) X, 1 , Y )
-#define ADDOBJ_EXL( X, Y, Z ) p->add_n_objects2( ( char * ) X, 1 , Y, ( int ) Z )
-#define ADDOBJ_EXS( O, X, Y ) O->add_n_objects2( ( char * ) X, 1 , Y )
-#define ADDOBJ_EXLS( O, X, Y, Z ) O->add_n_objects2( ( char * ) X, 1 , Y, ( int ) Z )
+#define ADDOBJ_EX( X, Y ) ( p->add_n_objects2( ( char * ) X, 1 , Y ) )
+#define ADDOBJ_EXL( X, Y, Z ) ( p->add_n_objects2( ( char * ) X, 1 , Y, ( int ) Z ) )
+#define ADDOBJ_EXS( O, X, Y ) ( O == NULL ? NULL : O->add_n_objects2( ( char * ) X, 1, Y ) )
+#define ADDOBJ_EXLS( O, X, Y, Z ) ( O == NULL ? NULL : O->add_n_objects2( ( char * ) X, 1 , Y, ( int ) Z ) )
 
-#define ADDNOBJ( X, Y ) p->add_n_objects2( ( char * ) X, ( int ) Y )
-#define ADDNOBJL( X, Y, Z ) p->add_n_objects2( ( char * ) X, ( int ) Y, ( int ) Z )
-#define ADDNOBJS( O, X, Y ) O->add_n_objects2( ( char * ) X, ( int ) Y )
-#define ADDNOBJLS( O, X, Y, Z ) O->add_n_objects2( ( char * ) X, ( int ) Y, ( int ) Z )
+#define ADDNOBJ( X, Y ) ( p->add_n_objects2( ( char * ) X, ( int ) Y ) )
+#define ADDNOBJL( X, Y, Z ) ( p->add_n_objects2( ( char * ) X, ( int ) Y, ( int ) Z ) )
+#define ADDNOBJS( O, X, Y ) ( O == NULL ? NULL : O->add_n_objects2( ( char * ) X, ( int ) Y ) )
+#define ADDNOBJLS( O, X, Y, Z ) ( O == NULL ? NULL : O->add_n_objects2( ( char * ) X, ( int ) Y, ( int ) Z ) )
 
-#define ADDNOBJ_EX( X, Y, Z ) p->add_n_objects2( ( char * ) X, ( int ) Y, Z )
-#define ADDNOBJ_EXL( X, Y, Z, W ) p->add_n_objects2( ( char * ) X, ( int ) Y, Z, ( int ) W )
-#define ADDNOBJ_EXS( O, X, Y, Z ) O->add_n_objects2( ( char * ) X, ( int ) Y, Z )
-#define ADDNOBJ_EXLS( O, X, Y, Z, W ) O->add_n_objects2( ( char * ) X, ( int ) Y, Z, ( int ) W )
+#define ADDNOBJ_EX( X, Y, Z ) ( p->add_n_objects2( ( char * ) X, ( int ) Y, Z ) )
+#define ADDNOBJ_EXL( X, Y, Z, W ) ( p->add_n_objects2( ( char * ) X, ( int ) Y, Z, ( int ) W ) )
+#define ADDNOBJ_EXS( O, X, Y, Z ) ( O == NULL ? NULL : O->add_n_objects2( ( char * ) X, ( int ) Y, Z ) )
+#define ADDNOBJ_EXLS( O, X, Y, Z, W ) ( O == NULL ? NULL : O->add_n_objects2( ( char * ) X, ( int ) Y, Z, ( int ) W ) )
 
 #define DELETE( X ) ( X == NULL ? nop( ) : X->delete_obj( ) )
 
-#define RNDDRAW( X, Y ) p->draw_rnd( ( char * ) X, ( char * ) Y, 0 )
-#define RNDDRAWL( X, Y, Z ) p->draw_rnd( ( char * ) X, ( char * ) Y, Z )
-#define RNDDRAWS( Z, X, Y ) Z->draw_rnd( ( char * ) X, ( char * ) Y, 0 )
-#define RNDDRAWLS( O, X, Y, Z ) O->draw_rnd( ( char * ) X, ( char * ) Y, Z )
+#define RNDDRAW( X, Y ) ( p->draw_rnd( ( char * ) X, ( char * ) Y, 0 ) )
+#define RNDDRAWL( X, Y, Z ) ( p->draw_rnd( ( char * ) X, ( char * ) Y, Z ) )
+#define RNDDRAWS( O, X, Y ) ( O == NULL ? NULL : O->draw_rnd( ( char * ) X, ( char * ) Y, 0 ) )
+#define RNDDRAWLS( O, X, Y, Z ) ( O == NULL ? NULL : O->draw_rnd( ( char * ) X, ( char * ) Y, Z ) )
 
-#define RNDDRAW_FAIR( X ) p->draw_rnd( ( char * ) X )
-#define RNDDRAW_FAIRS( Z, X ) Z->draw_rnd( ( char * ) X )
+#define RNDDRAW_FAIR( X ) ( p->draw_rnd( ( char * ) X ) )
+#define RNDDRAW_FAIRS( O, X ) ( O == NULL ? NULL : O->draw_rnd( ( char * ) X ) )
 
-#define RNDDRAW_TOT( X, Y, T ) p->draw_rnd( ( char * ) X, ( char * ) Y, 0 ,T )
-#define RNDDRAW_TOTL( X, Y, Z, T ) p->draw_rnd( ( char * ) X, ( char * ) Y, Z, T )
-#define RNDDRAW_TOTS( Z, X, Y,T ) Z->draw_rnd( ( char * ) X, ( char * ) Y, 0 ,T )
-#define RNDDRAW_TOTLS( O, X, Y, Z, T ) O->draw_rnd( ( char * ) X, ( char * ) Y, Z, T )
+#define RNDDRAW_TOT( X, Y, Z ) ( p->draw_rnd( ( char * ) X, ( char * ) Y, 0, Z ) )
+#define RNDDRAW_TOTL( X, Y, Z, T ) ( p->draw_rnd( ( char * ) X, ( char * ) Y, Z, T ) )
+#define RNDDRAW_TOTS( O, X, Y, Z ) ( O == NULL ? NULL : O->draw_rnd( ( char * ) X, ( char * ) Y, 0, Z ) )
+#define RNDDRAW_TOTLS( O, X, Y, Z, T ) ( O == NULL ? NULL : O->draw_rnd( ( char * ) X, ( char * ) Y, Z, T ) )
 
 // LATTICE MACROS
 #define INIT_LAT( ... ) init_lattice( __VA_ARGS__ )
@@ -410,21 +438,21 @@ using namespace Eigen;
 #define V_LAT( Y, X ) read_lattice( Y, X )
 #define WRITE_LAT( Y, X, ... ) update_lattice( Y, X, __VA_ARGS__ )
 
-#define UP_LAT lat_up( )
-#define UP_LATS( O ) O->lat_up( )
-#define DOWN_LAT lat_down( )
-#define DOWN_LATS( O ) O->lat_down( )
-#define RIGHT_LAT lat_right( )
-#define RIGHT_LATS( O ) O->lat_right( )
-#define LEFT_LAT lat_left( )
-#define LEFT_LATS( O ) O->lat_left( )
+#define UP_LAT ( p->lat_up( ) )
+#define UP_LATS( O ) ( O == NULL ? NULL : O->lat_up( ) )
+#define DOWN_LAT ( p->lat_down( ) )
+#define DOWN_LATS( O ) ( O == NULL ? NULL : O->lat_down( ) )
+#define RIGHT_LAT ( p->lat_right( ) )
+#define RIGHT_LATS( O ) ( O == NULL ? NULL : O->lat_right( ) )
+#define LEFT_LAT ( p->lat_left( ) )
+#define LEFT_LATS( O ) ( O == NULL ? NULL : O->lat_left( ) )
 
 // NETWORK MACROS
 // create a network using as nodes object label X, located inside object O,
 // applying generator Y, number of nodes Z, out-degree W and 
 // parameter V
-#define INIT_NET( X, Y, ... ) ( p->init_stub_net( ( char * ) X, ( char * ) Y, __VA_ARGS__ ) )
-#define INIT_NETS( O, X, Y, ... ) ( O == NULL ? 0. : O->init_stub_net( ( char * ) X, ( char * ) Y, __VA_ARGS__ ) )
+#define INIT_NET( X, ... ) ( p->init_stub_net( ( char * ) X, __VA_ARGS__ ) )
+#define INIT_NETS( O, X, ... ) ( O == NULL ? 0. : O->init_stub_net( ( char * ) X, __VA_ARGS__ ) )
 
 // read a network in Pajek format from file named Z_xx.net (xx is the current seed) 
 // using as nodes object with label X located inside object O
@@ -474,15 +502,15 @@ using namespace Eigen;
 #define DELETE_NODES( O ) if ( O != NULL ) O->delete_node_net( );
 
 // get the id of the node object O
-#define V_NODEID ( p->node==NULL?0.:(double)p->node->id)
-#define V_NODEIDS( O ) ( O == NULL ? 0. : O->node==NULL?0.:(double)O->node->id)
+#define V_NODEID ( p->node == NULL ? 0. : ( double ) p->node->id )
+#define V_NODEIDS( O ) ( O == NULL ? 0. : O->node == NULL ? 0. : ( double ) O->node->id )
 
 // get the name of the node object O
 #define V_NODENAME ( p->node == NULL ? "" : p->node->name == NULL ? "" : p->node->name )
-#define V_NODENAMES( O ) ( O == NULL ? "" : O->node == NULL ? "" : O->node->name==NULL ? "" : O->node->name )
+#define V_NODENAMES( O ) ( O == NULL ? "" : O->node == NULL ? "" : O->node->name == NULL ? "" : O->node->name )
 
 // set the id of the node object O
-#define WRITE_NODEID( X ) if ( p->node != NULL )p->node->id=(double)X;
+#define WRITE_NODEID( X ) if ( p->node != NULL ) p->node->id = ( double ) X;
 #define WRITE_NODEIDS( O, X ) if ( O != NULL ) if ( O->node != NULL ) O->node->id = ( double ) X;
 
 // set the name of the node object O to X

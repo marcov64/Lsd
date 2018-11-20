@@ -104,6 +104,7 @@ Global definitions among all LSD C++ modules
 #define SIG_DIG 10						// number of significant digits in data files
 #define CSV_SEP ","						// single char string with the .csv format separator
 #define SENS_SEP " ,;|/#\t\n"			// sensitivity data valid separators
+#define USER_D_VARS 1000				// number of user double variables
 
 // user defined signals
 #define SIGMEM NSIG + 1					// out of memory signal
@@ -194,7 +195,14 @@ struct object
 	double count( char const *lab );
 	double count_all( char const *lab );
 	double increment( char const *lab, double value );
-	double interact( char const *text, double v, double *tv );
+	double initturbo( char const *label, double num );
+	double initturbo_cond( char const *label );
+	double init_stub_net( char const *lab, const char* gen, long numNodes = 0, long par1 = 0, double par2 = 0.0 );
+	double interact( char const *text, double v, double *tv, int i, int j, int h, int k,
+		object *cur, object *cur1, object *cur2, object *cur3, object *cur4, object *cur5,
+		object *cur6, object *cur7, object *cur8, object *cur9, netLink *curl, netLink *curl1,
+		netLink *curl2, netLink *curl3, netLink *curl4, netLink *curl5, netLink *curl6, 
+		netLink *curl7, netLink *curl8, netLink *curl9 );
 	double multiply( char const *lab, double value );
 	double overall_max( char const *lab, int lag );
 	double overall_min( char const *lab, int lag );
@@ -203,9 +211,9 @@ struct object
 	double sum( char const *lab, int lag );
 	double whg_av( char const *lab, char const *lab2, int lag );
 	int init( object *_up, char const *_label );
-	int initturbo( char const *label, double num );
-	int initturbo_cond( char const *label );
+	int search_instance( object *obj );
 	long init_circle_net( char const *lab, long numNodes, long outDeg );
+	long init_connect_net( char const *lab, long numNodes );
 	long init_discon_net( char const *lab, long numNodes );
 	long init_lattice_net( int nRow, int nCol, char const *lab, int eightNeigbr );
 	long init_random_dir_net( char const *lab, long numNodes, long numLinks );
@@ -214,7 +222,6 @@ struct object
 	long init_scale_free_net( char const *lab, long numNodes, long outDeg, double expLink );
 	long init_small_world_net( char const *lab, long numNodes, long outDeg, double rho );
 	long init_star_net( char const *lab, long numNodes );
-	long init_stub_net( char const *lab, const char* gen, long numNodes, long par1 = 0, double par2 = 0.0 );
 	long init_uniform_net( char const *lab, long numNodes, long outDeg );
 	long read_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, char const *ext = "net" );
 	long write_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, bool append = false );
@@ -574,7 +581,10 @@ extern eq_mapT eq_map;					// map to fast equation look-up
 #endif
 
 #ifndef NO_WINDOW
-extern double i_values[ ];				// user temporary variables copy
+extern int i_values[ ];					// user temporary variables copy
+extern double d_values[ ];
+extern object *o_values[ ];
+extern netLink *n_values[ ];
 extern Tcl_Interp *inter;				// Tcl standard interpreter pointer
 #endif
 
@@ -758,7 +768,7 @@ void show_prof_aggr( void );
 void show_rep_initial( FILE *f, object *n, int *begin );
 void show_rep_observe( FILE *f, object *n, int *begin );
 void show_save( object *n );
-void show_tmp_vars( bool update );
+void show_tmp_vars( object *r, bool update );
 void signal_handler( int );
 void sort_cs_asc( char **s,char **t, double **v, int nv, int nt, int c );
 void sort_cs_desc( char **s,char **t, double **v, int nv, int nt, int c );

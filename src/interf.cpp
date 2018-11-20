@@ -3517,9 +3517,8 @@ case 37:
 		sprintf( msg, "%s/%s.%s", path, lab, docsv ? "csv" : "res" );
 		
 	rf = new result( msg, "wt", dozip, docsv );	// create results file object
-	for ( n = r; n->up != NULL; n = n->up );	// get root object
-	rf->title( n, 1 );							// write header
-	rf->data( n, 0, actual_steps );				// write all data
+	rf->title( root, 1 );							// write header
+	rf->data( root, 0, actual_steps );				// write all data
 	delete rf;									// close file and delete object
 	plog( " Done\n" );
 
