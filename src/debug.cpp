@@ -1188,7 +1188,7 @@ void show_tmp_vars( object *r, bool update )
 		cmd( "frame $in.n");
 		cmd( "scrollbar $in.n.yscroll -command \"$in.n.t yview\"" ); 
 		cmd( "pack $in.n.yscroll -side right -fill y" ); 
-		cmd( "text $in.n.t -width 21 -height 31 -yscrollcommand \"$in.n.yscroll set\" -wrap none -font [ font create -family \"$fonttype\" -size $dim_character ]" ); 
+		cmd( "text $in.n.t -width 20 -height 30 -yscrollcommand \"$in.n.yscroll set\" -wrap none -font [ font create -family \"$fonttype\" -size $small_character ]" ); 
 		cmd( "mouse_wheel $in.n.t" );
 		cmd( "pack $in.n.t -expand yes -fill both" );
 		cmd( "pack $in.n -expand yes -fill both" );
@@ -1215,15 +1215,15 @@ void show_tmp_vars( object *r, bool update )
 	
 	cmd( "$in.n.t insert end \"Temporary storage\n\" bold" );
 	
-	for ( i = 0; i < min( 100, USER_D_VARS ); ++i )
+	for ( i = 0; i < 10; ++i )
 	{
 		cmd( "$in.n.t insert end \"v\\\[%d\\] = \"", i );
 		
 		if ( is_nan( d_values[ i ] ) )
-			cmd( "$in.n.t insert end \"NaN\n\" red" );
+			cmd( "$in.n.t insert end \"NAN\n\" red" );
 		else
 			if ( is_inf( d_values[ i ] ) )
-				cmd( "$in.n.t insert end \"%sINFINITE\n\" red", d_values[ i ] < 0 ? "-" : "" );
+				cmd( "$in.n.t insert end \"%sINFINITY\n\" red", d_values[ i ] < 0 ? "-" : "" );
 			else
 				if ( fabs( d_values[ i ] ) < 1e-299 )		// insignificant value?
 					cmd( "$in.n.t insert end \"~0\n\" red" );
@@ -1255,7 +1255,7 @@ void show_tmp_vars( object *r, bool update )
 			if ( ( n = root->search_instance( o_values[ i ] ) ) > 0 && o_values[ i ]->label!= NULL )
 				cmd( "$in.n.t insert end \"%s(%d)\n\" red", o_values[ i ]->label, n );
 			else
-				cmd( "$in.n.t insert end \"INVALID\n\" red" );
+				cmd( "$in.n.t insert end \"(invalid)\n\" red" );
 	}
 	
 	cmd( "$in.n.t insert end \"\nNetwork link pointers\n\" bold" );
@@ -1285,8 +1285,26 @@ void show_tmp_vars( object *r, bool update )
 			}
 			
 			if ( ! done )
-				cmd( "$in.n.t insert end \"UNKNOWN\n\" red" );
+				cmd( "$in.n.t insert end \"(unknown)\n\" red" );
 		}
+	}
+	
+	cmd( "$in.n.t insert end \"\nMore temporary storage\n\" bold" );
+	
+	for ( i = 10; i < min( 100, USER_D_VARS ); ++i )
+	{
+		cmd( "$in.n.t insert end \"v\\\[%d\\] = \"", i );
+		
+		if ( is_nan( d_values[ i ] ) )
+			cmd( "$in.n.t insert end \"NAN\n\" red" );
+		else
+			if ( is_inf( d_values[ i ] ) )
+				cmd( "$in.n.t insert end \"%sINFINITY\n\" red", d_values[ i ] < 0 ? "-" : "" );
+			else
+				if ( fabs( d_values[ i ] ) < 1e-299 )		// insignificant value?
+					cmd( "$in.n.t insert end \"~0\n\" red" );
+				else
+					cmd( "$in.n.t insert end \"%g\n\" red", d_values[ i ] );
 	}
 	
 	cmd( "$in.n.t configure -state disabled" );
