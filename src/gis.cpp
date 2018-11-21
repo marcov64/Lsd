@@ -697,7 +697,7 @@ char gismsg[300];
           }
 
           //sort the interval by random numbers of associated list, using a buffer
-          std::sort(rnd_vals.begin(),rnd_vals.end());
+          std::sort( rnd_vals.begin(),rnd_vals.end(), [](auto const &A, auto const &B ){return A.first < B.first; } ); //sort only by RND
           i_intvl = i_start;
           for (auto const & item : rnd_vals){
              position->objDis_inRadius.at(i_intvl++)=item.second; //copy information from sorted intvl
