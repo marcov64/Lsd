@@ -25,9 +25,9 @@ Global definitions among all LSD C++ modules
 #endif
 
 //DEBUGGING MODES?
-#ifdef CPP11
-  #define DEBUG_RAN_CPP11
-#endif
+// #ifdef CPP11
+//   #define DEBUG_RAN_CPP11
+// #endif
 // standard libraries used
 #include <stdio.h>
 #include <string.h>
@@ -162,8 +162,9 @@ Global definitions among all LSD C++ modules
 using namespace std;
 
 // classes definitions
-class object;
-class variable;
+class result;
+struct object;
+struct variable;
 struct bridge;
 struct mnode;
 struct netNode;
@@ -334,9 +335,9 @@ struct object
 	double pseudo_distance(double x, double y); //pseudo distance to point in plain
 	variable* search_var_local(char const l[]); //search only in object
 	void it_rnd_full(char const lab[]);
-	void it_in_radius(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="0", char const condition[]="", double condVal=0.0);
+	void it_in_radius(char const lab[], double radius, object* caller=NULL, int lag=-1, char const varLab[]="0", char const condition[]="", double condVal=0.0);
 	object* first_neighbour_rnd_full(char const lab[]);
-	object* first_neighbour(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
+	object* first_neighbour(char const lab[], double radius, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
 	bool next_neighbour_exists();
 	object* next_neighbour();
 	void sort_objDisSet(bool pointer_sort);

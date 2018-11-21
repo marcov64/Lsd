@@ -37,11 +37,14 @@ using namespace Eigen;
 #endif
 
 // set pointers to NULL to protect users (small overhead) if not disabled
+// also set v's 0.0 for same reason
 #ifndef NOT_INIT_POINTERS
 #define INIT_POINTERS \
 	cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cyccur = cyccur2 = cyccur3 = NULL; \
 	curl = curl1 = curl2 = curl3 = curl4 = curl5 = curl6 = curl7 = curl8 = curl9 = NULL; \
-	f = NULL;
+	f = NULL; \
+  h=i=j=k=0; \
+  for (i = 0; i<USER_D_VARS; v[i++]=0.0);
 #else
 #define INIT_POINTERS
 #endif
@@ -53,7 +56,7 @@ using namespace Eigen;
 	double v[ USER_D_VARS ]; \
 	object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cyccur, *cyccur2, *cyccur3; \
 	netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
-	FILE *f; \
+	FILE *f=NULL; \
 	INIT_POINTERS \
 	EQ_USER_VARS
 
@@ -755,17 +758,17 @@ using namespace Eigen;
 // either the candidate or CHEAT_C is  COND (<,>,==,!=) CONDVAL
 // Note that CHEAT does not work with NULL.
 
-#define CYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD, true); O != NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD, true); O != NULL; O = C->next_neighbour() )
+#define CYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD); O != NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD); O != NULL; O = C->next_neighbour() )
 
-#define CYCLE_NEIGHBOUR_CND(O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = p->first_neighbour(LAB, RAD, true, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOUR_CNDS(C, O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = C->first_neighbour(LAB, RAD, true, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CND(O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = p->first_neighbour(LAB, RAD, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CNDS(C, O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = C->first_neighbour(LAB, RAD, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
-#define CYCLE_NEIGHBOUR_CNDL(O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = p->first_neighbour(LAB, RAD, true, NULL,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOUR_CNDLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = C->first_neighbour(LAB, RAD, true, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CNDL(O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = p->first_neighbour(LAB, RAD, NULL,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CNDLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = C->first_neighbour(LAB, RAD, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
-#define CYCLE_NEIGHBOUR_CND_CHEAT(O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, true,CHEAT_C,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOUR_CND_CHEATS(C, O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CND_CHEAT(O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD,CHEAT_C,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CND_CHEATS(C, O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD,CHEAT_C,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
 
 // NEAREST_IN_DISTANCE

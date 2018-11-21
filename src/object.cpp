@@ -660,19 +660,20 @@ Uses the fast bridge look-up map.
 ***************************************************/
 bridge *object::search_bridge( char const *lab, bool no_error )
 {
-	b_mapT::iterator bit;
+	b_mapT::iterator bit = b_map.find( lab );
 
 	// find the bridge which contains the object
-	if ( ( bit = b_map.find( lab ) ) != b_map.end( ) )
+	if ( bit != b_map.end( ) )
 		return bit->second;
 
-		if ( ! no_error )
-			error_hard( "invalid data structure (bridge not found)",
-						"internal problem in LSD", 
-						"if error persists, please contact developers",
-						true );
-		return NULL;
-	}
+	if ( ! no_error )
+		error_hard( "invalid data structure (bridge not found)",
+					"internal problem in LSD", 
+					"if error persists, please contact developers",
+					true );
+
+	return NULL;
+}
 	
 
 /****************************************************

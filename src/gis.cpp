@@ -731,7 +731,7 @@ char gismsg[300];
   // produce iterable list of objects with label inside of radius around origin.
   // the list is stored with the asking object. This allows parallelisation AND easy iterating with a macro.
   // give back first element in list
-  void object::it_in_radius(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
+  void object::it_in_radius(char const lab[], double radius, object* caller, int lag, char const varLab[], char const condition[], double condVal)
   {
 
     position->objDis_inRadius.clear();//reset vector
@@ -786,7 +786,7 @@ char gismsg[300];
 
   //  first_neighbour
   //  Initialise the nearest neighbour search and return nearest neighbours
-  object* object::first_neighbour(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
+  object* object::first_neighbour(char const lab[], double radius, object* caller, int lag, char const varLab[], char const condition[], double condVal)
   {
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in next_neighbour() for object '%s'", label );
@@ -794,7 +794,7 @@ char gismsg[300];
 					"check your code to prevent this situation" );
       return NULL;
     }
-    it_in_radius(lab, radius, random, caller, lag, varLab, condition, condVal);
+    it_in_radius(lab, radius, caller, lag, varLab, condition, condVal);
     return next_neighbour();
   }
 

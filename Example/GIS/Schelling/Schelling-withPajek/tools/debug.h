@@ -38,7 +38,7 @@ It also includes the other core-code files (all not fun_*)
    ..  the maximum steps tracking is active: #define TRACK_SEQUENCE_MAX_T n
       //n>0 is the number of steps tracking is active
 
-/********************************************************/
+********************************************************/
 #ifndef MODULE_DEBUG //GUARD
   #define MODULE_DEBUG
 
