@@ -140,7 +140,7 @@ set makeMac			"make"
 set makeLinux		"make"
 set makeWin32		"make.exe"
 set makeWin64cyg	"make.exe"
-set makeWin64mgw	"gnumake.exe"
+set makeWin64mgw	"mingw32-make.exe"
 
 # OS specific default gnuplot terminal (empty string=gnuplot default)
 set gnuplotTermMac		""	; # "qt", "x11"

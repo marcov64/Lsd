@@ -207,11 +207,11 @@ struct object
 	double overall_max( char const *lab, int lag );
 	double overall_min( char const *lab, int lag );
 	double sd( char const *lab, int lag );
+	double search_inst( object *obj = NULL );
 	double stat( char const *lab, double *v = NULL );
 	double sum( char const *lab, int lag );
 	double whg_av( char const *lab, char const *lab2, int lag );
 	int init( object *_up, char const *_label );
-	int search_instance( object *obj );
 	long init_circle_net( char const *lab, long numNodes, long outDeg );
 	long init_connect_net( char const *lab, long numNodes );
 	long init_discon_net( char const *lab, long numNodes );
@@ -272,6 +272,7 @@ struct object
 	void replicate( int num, int propagate );
 	void save_param( FILE *f );
 	void save_struct( FILE *f, char const *tab );
+	void search_inst( object *obj, int *pos );
 	void sort( char const *obj, char const *var, char *direction );
 	void sort_asc( object *from, char *l_var );
 	void sort_desc( object *from, char *l_var );

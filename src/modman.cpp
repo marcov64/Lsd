@@ -3523,13 +3523,13 @@ if ( choice == 72 )
 // create a new network
 if ( choice == 73 )
 {
-	cmd( "set netListLong [ list \"Disconnected (no links)\" \"Star (undirected)\" \"Circle (undirected)\" \"Lattice (directed)\" \"Random (directed)\" \"Random (undirected)\" \"Uniform random (directed)\" \"Renyi-Erdos random (undirected)\" \"Small World (undirected)\" \"Scale-free (undirected)\" ]");
-	cmd( "set netListShort [ list \"DISCONNECTED\" \"STAR\" \"CIRCLE\" \"LATTICE\" \"RANDOM-DIR\" \"RANDOM-UNDIR\" \"UNIFORM\" \"RENYI-ERDOS\" \"SMALL-WORLD\" \"SCALE-FREE\" ]");
-	cmd( "set netListPar [ list [ list ] [ list ] [ list \"Number of neighbors\" ] [ list \"Number of columns\" \"Neighbors (4 or 8)\" ] [ list \"Number of links\" ] [ list \"Number of links (2 per connection)\" ] [ list \"Out-degree\" ] [ list \"Out-degree\" ] [ list \"Out-degree\" \"Reconnection probability\" ] [ list \"Out-degree\" \"Power-law degree\" ] ]");
+	cmd( "set netListLong [ list \"Disconnected (no links)\" \"Fully connected\" \"Star (undirected)\" \"Circle (undirected)\" \"Lattice (directed)\" \"Random (directed)\" \"Random (undirected)\" \"Uniform random (directed)\" \"Renyi-Erdos random (undirected)\" \"Small World (undirected)\" \"Scale-free (undirected)\" ]");
+	cmd( "set netListShort [ list \"DISCONNECTED\" \"CONNECTED\" \"STAR\" \"CIRCLE\" \"LATTICE\" \"RANDOM-DIR\" \"RANDOM-UNDIR\" \"UNIFORM\" \"RENYI-ERDOS\" \"SMALL-WORLD\" \"SCALE-FREE\" ]");
+	cmd( "set netListPar [ list [ list ] [ list ] [ list ] [ list \"Number of neighbors\" ] [ list \"Number of columns\" \"Neighbors (4 or 8)\" ] [ list \"Number of links\" ] [ list \"Number of links (2 per connection)\" ] [ list \"Out-degree\" ] [ list \"Out-degree\" ] [ list \"Out-degree\" \"Reconnection probability\" ] [ list \"Out-degree\" \"Power-law degree\" ] ]");
 	
 	cmd( "set v_net [ lindex $netListLong 0 ]" );
 	cmd( "set v_label \"\"" );
-	cmd( "set v_num 1" );
+	cmd( "set v_num 2" );
 	cmd( "set v_obj p" );
 	cmd( "set v_par1 \"\"" );
 	cmd( "set v_par2 \"\"" );
@@ -6105,7 +6105,7 @@ const char *cTypes[ ] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdm
 	"^(\\s)*#\[^/]*",
 	"\\\"\[^\\\"]*\\\"",
 	"v\\[\[0-9]{1,3}]|curl?\[1-9]?|root|up|next|hook",
-	"MODEL(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|FUNCTION|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM|SUML?S?|COUNTS?(_ALLS?)?|STATS?|STAT_(NETS?|NODES?)|(WHT)?AVEL?S?|SDL?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAXL?S?|MINL?S?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|LAT)|SEARCH_CNDL?S?|SEARCHS?|SEARCH_(NODES?|LINKS?)|TSEARCH(_CND)?S?|SORT2?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?)|DELETE|DELETE_(EXTS?|NETS?|NODES?|LINKS?)|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?T?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_SEARCH|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|RECALCS?|DEFAULT_RESULT|abs|min|max|round|(sq|cb)rt|pow|exp|log(10)?|fact|(t|l)?gamma|a?sin|a?cos|a?tan|pi|is_(finite|inf|nan)|uniform(_int)?|l?norm(cdf)?|poisson(cdf)?|beta(cdf)?|alapl(cdf)?|unifcdf|gammacdf|close_sim",
+	"MODEL(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|FUNCTION|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM|SUML?S?|COUNTS?(_ALLS?)?|STATS?|STAT_(NETS?|NODES?)|(WHT)?AVEL?S?|SDL?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAXL?S?|MINL?S?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|LAT)|SEARCH(_CNDL?|_INST|_NODE|_LINK)?S?|SEARCHS?|TSEARCH(_CND)?S?|SORT2?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?)|DELETE|DELETE_(EXTS?|NETS?|NODES?|LINKS?)|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?T?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_SEARCH|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|RECALCS?|DEFAULT_RESULT|abs|min|max|round|(sq|cb)rt|pow|exp|log(10)?|fact|(t|l)?gamma|a?sin|a?cos|a?tan|pi|is_(finite|inf|nan)|uniform(_int)?|l?norm(cdf)?|poisson(cdf)?|beta(cdf)?|alapl(cdf)?|unifcdf|gammacdf|close_sim",
 	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
 	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 };

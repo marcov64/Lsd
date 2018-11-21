@@ -819,40 +819,59 @@ object *object::turbosearch( char const *label, double tot, double num )
 
 
 /*******************************************
-SEARCH_INSTANCE
+SEARCH_INST
 Searches the model for an object instance
-pointed by 'obj' among the object descendants, 
-returning the instance number or 0 if not found
+pointed by 'obj' searching first among the 
+calling object instances and then into its
+descendants, returning the instance number 
+or 0 if not found
 ********************************************/
-int object::search_instance( object *obj )
+void object::search_inst( object *obj, int *pos )
 {
-	int i, pos;
+	int i;
 	bridge *cb;
 	object *cur;
+
+	// search among brothers
+	for ( cur = this, i = 1; cur != NULL; cur = cur->hyper_next( ), ++i )
+		if ( cur == obj )				// done if found
+		{
+			*pos = i;
+			return;
+		}
+	
+	// search among descendants
+	for ( cb = b; cb != NULL && *pos == 0; cb = cb->next )
+		if ( cb->head != NULL )
+			cb->head->search_inst( obj, pos );
+}
+
+double object::search_inst( object *obj )
+{
+	int pos;
+	object *cur;
+	
+	if ( obj == NULL )					// default is self
+		obj = this;
 	
 	if ( up == NULL )					// root?
 	{
 		if ( obj == this )
-			return 1;
+			return 1.;
 		
-		cb = b;
+		if ( b->head == NULL )
+			return 0.;					// no instance in model
+		else
+			cur = b->head;
 	}
 	else
-		cb = up->search( label )->b;	// get first instance
+		// get first instance of current object brotherhood
+		cur = up->search_bridge( label )->head;
 	
-	for ( ; cb != NULL; cb = cb->next )	// search all brothers in current chain
-		if ( cb->head != NULL )
-			// check all instances of current object
-			for ( cur = cb->head, i = 1; cur != NULL; cur = cur->hyper_next( ), ++i )
-			{
-				if ( cur == obj )		// done if found
-					return i;
-				else					// check among current's sons
-					if ( ( pos = cur->search_instance( obj ) ) != 0 )
-						return pos;
-			}
-					
-	return 0;
+	pos = 0;
+	cur->search_inst( obj, &pos );		// check for instance recursively
+	
+	return pos;
 }
 
 

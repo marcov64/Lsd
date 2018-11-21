@@ -370,6 +370,9 @@ using namespace Eigen;
 #define SEARCH( X ) ( p->search( ( char * ) X ) )
 #define SEARCHS( O, X ) ( O == NULL ? NULL : O->search( ( char * ) X ) )
 
+#define SEARCH_INST( X ) ( p->search_inst( X ) )
+#define SEARCH_INSTS( O, X ) ( O == NULL ? 0. : O->search_inst( X ) )
+
 // Seeds turbo search: O=pointer to container object where searched objects are
 //                     X=name of object contained inside the searched objects
 //					   Y=total number of objects
