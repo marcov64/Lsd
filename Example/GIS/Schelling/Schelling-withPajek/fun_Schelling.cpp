@@ -5,7 +5,7 @@
 
 #define latt2d true //to switch between 1d (false) and 2d (true) lat.
 
-#include "PajekFromCpp/PajekFromCpp_head.h"
+#include "PajekFromCppFixVer/PajekFromCpp_head.h"
 #define NO_WINDOW_TRACKING
 #include "tools/debug.h"  //TEQUATION command
 #define PAJEK
