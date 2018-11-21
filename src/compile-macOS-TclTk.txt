@@ -9,14 +9,15 @@ To build, use the scripts in both tclX.X.X/macosx and tkX.X.X/macosx, in this or
 
 export CFLAGS="-mmacosx-version-min=10.10"
 
-./configure --enable-threads --enable-framework
+./configure --enable-threads --enable-framework # tcl
+./configure --enable-threads --enable-framework --enable-aqua # tk
 
 make deploy
 
 make install-embedded INSTALL_ROOT=/Users/Marcelo/TclTk/
 
-In both LMM.app/Contents and src/LSD.app/Contents, remove the Framework subfolder.
+In both LMM.app/Contents and src/LSD.app/Contents, remove the Frameworks subfolder.
 
-Copy the Framework subfolder from Applications/Utilities/Wish.app/Contents, into both LMM.app/Contents and src/LSD.app/Contents.
+Copy the Frameworks subfolder from Applications/Utilities/Wish.app/Contents, into both LMM.app/Contents and src/LSD.app/Contents.
 
-Copy to src/LSD.app/Contents/Framework the MISSING header and library items from build/tcl/Tcl.Framework and build/tcl/Tk.Framework, being careful to not overwrite the existing files (Headers and PrivateHeaders folders, libtclstubX.X.a, libtkstubX.X.a, and respective link files). Copy link files ONLY after copying real files/folders.
+Copy to src/LSD.app/Contents/Framework the MISSING header and library items from build/tcl/Tcl.Framework and build/tk/Tk.Framework, being careful to not overwrite the existing files (Headers and PrivateHeaders folders, libtclstubX.X.a, libtkstubX.X.a, and respective link files). Copy link files ONLY after copying real files/folders.

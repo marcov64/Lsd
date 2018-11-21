@@ -110,11 +110,14 @@ Global definitions among all LSD C++ modules
 #define MAX_WAIT_TIME 10				// maximum wait time for a variable computation ( sec.)
 #define MAX_TIMEOUT 100					// maximum timeout for multi-thread scheduler (millisec.)
 #define MAX_LEVEL 10					// maximum number of object levels (plotting only)
-#define ERR_LIM 10						// maximum number of repeated error messages
+#define ERR_LIM 5						// maximum number of repeated error messages
+#define MARG 0.01						// y-axis % plot clearance margin
+#define MARG_CONST 0.1					// y-axis % plot clearance margin for constant series
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define SIG_DIG 10						// number of significant digits in data files
 #define CSV_SEP ","						// single char string with the .csv format separator
 #define SENS_SEP " ,;|/#\t\n"			// sensitivity data valid separators
+#define USER_D_VARS 1000				// number of user double variables
 
 // user defined signals
 #define SIGMEM NSIG + 1					// out of memory signal
@@ -229,18 +232,25 @@ struct object
 	double count( char const *lab );
 	double count_all( char const *lab );
 	double increment( char const *lab, double value );
-	double interact( char const *text, double v, double *tv );
+	double initturbo( char const *label, double num );
+	double initturbo_cond( char const *label );
+	double init_stub_net( char const *lab, const char* gen, long numNodes = 0, long par1 = 0, double par2 = 0.0 );
+	double interact( char const *text, double v, double *tv, int i, int j, int h, int k,
+		object *cur, object *cur1, object *cur2, object *cur3, object *cur4, object *cur5,
+		object *cur6, object *cur7, object *cur8, object *cur9, netLink *curl, netLink *curl1,
+		netLink *curl2, netLink *curl3, netLink *curl4, netLink *curl5, netLink *curl6, 
+		netLink *curl7, netLink *curl8, netLink *curl9 );
 	double multiply( char const *lab, double value );
 	double overall_max( char const *lab, int lag );
 	double overall_min( char const *lab, int lag );
 	double sd( char const *lab, int lag );
+	double search_inst( object *obj = NULL );
 	double stat( char const *lab, double *v = NULL );
 	double sum( char const *lab, int lag );
 	double whg_av( char const *lab, char const *lab2, int lag );
 	int init( object *_up, char const *_label );
-	int initturbo( char const *label, double num );
-	int initturbo_cond( char const *label );
 	long init_circle_net( char const *lab, long numNodes, long outDeg );
+	long init_connect_net( char const *lab, long numNodes );
 	long init_discon_net( char const *lab, long numNodes );
 	long init_lattice_net( int nRow, int nCol, char const *lab, int eightNeigbr );
 	long init_random_dir_net( char const *lab, long numNodes, long numLinks );
@@ -249,7 +259,6 @@ struct object
 	long init_scale_free_net( char const *lab, long numNodes, long outDeg, double expLink );
 	long init_small_world_net( char const *lab, long numNodes, long outDeg, double rho );
 	long init_star_net( char const *lab, long numNodes );
-	long init_stub_net( char const *lab, const char* gen, long numNodes, long par1 = 0, double par2 = 0.0 );
 	long init_uniform_net( char const *lab, long numNodes, long outDeg );
 	long read_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, char const *ext = "net" );
 	long write_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, bool append = false );
@@ -300,6 +309,7 @@ struct object
 	void replicate( int num, int propagate );
 	void save_param( FILE *f );
 	void save_struct( FILE *f, char const *tab );
+	void search_inst( object *obj, int *pos );
 	void sort( char const *obj, char const *var, char *direction );
 	void sort_asc( object *from, char *l_var );
 	void sort_desc( object *from, char *l_var );
@@ -747,6 +757,7 @@ double poisson( double m );
 double poissoncdf( double lambda, double k );			// poisson cumulative distribution function
 double read_lattice( double line, double col );
 double round( double r );
+double round_digits( double value, int digits );
 double save_lattice( const char fname[ ] = "lattice" );
 double unifcdf( double a, double b, double x );			// uniform cumulative distribution function
 double uniform( double min, double max );
@@ -779,7 +790,6 @@ double weibull( double a, double b );					// draw from a Weibull distribution
 
 // global variables (visible to the users)
 extern bool fast;				// flag to hide LOG messages & runtime (read-only)
-extern bool invalidHooks;		// flag to invalid hooks pointers (set by simulation)
 extern bool no_search;					// disable the standard variable search mechanism
 extern bool use_nan;			// flag to allow using Not a Number value
 extern char *path;				// folder where the configuration is
@@ -808,7 +818,10 @@ extern eq_mapT eq_map;			// map to fast equation look-up
 #endif //#ifdef CPP11
 
 #ifndef NO_WINDOW
-extern double i_values[ ];		// user temporary variables copy
+extern int i_values[ ];					// user temporary variables copy
+extern double d_values[ ];
+extern object *o_values[ ];
+extern netLink *n_values[ ];
 extern Tcl_Interp *inter;		// Tcl standard interpreter pointer
 #endif
 
@@ -841,6 +854,8 @@ char *clean_path( char * );
 char *upload_eqfile( void );
 description *search_description( char *lab );
 double get_double( const char *tcl_var, double *var = NULL );
+double lower_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
+double upper_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
 int browse( object *r, int *choice );
 int check_label( char *l, object *r );
 int compute_copyfrom( object *c, int *choice );
@@ -933,7 +948,7 @@ void log_tcl_error( const char *cm, const char *message );
 void myexit( int v );
 void plog_series( int *choice );
 void plot( int type, int *start, int *end, char **str, char **tag, int *choice, bool norm );
-void plot( int type, int nv, double **data, int *start, int *end, char **str, char **tag, int *choice );
+void plot( int type, int nv, double **data, int *start, int *end, int *id, char **str, char **tag, int *choice );
 void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag, int *choice );
 void plot_cross( int *choice );
 void plot_cs_xy( int *choice );
@@ -990,7 +1005,7 @@ void show_prof_aggr( void );
 void show_rep_initial( FILE *f, object *n, int *begin );
 void show_rep_observe( FILE *f, object *n, int *begin );
 void show_save( object *n );
-void show_tmp_vars( bool update );
+void show_tmp_vars( object *r, bool update );
 void signal_handler( int );
 void sort_cs_asc( char **s,char **t, double **v, int nv, int nt, int c );
 void sort_cs_desc( char **s,char **t, double **v, int nv, int nt, int c );

@@ -45,7 +45,7 @@ int hcvsz = 1280;				// horizontal canvas size
 int vcvsz = 800;				// vertical canvas size
 int h0 = 170;					// initial horizontal position
 int v0 = 10;					// initial vertical position
-int range_init = 150;			// horizontal initial width (4 root sons)
+int range_init = 190;			// horizontal initial width (4 root sons)
 int range_incr = 20;			// horizontal width increase step
 int step_level = 20;			// vertical step
 int n_size = 4;					// node size (diameter)
@@ -184,7 +184,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from )
 		sprintf( ch, "%s", t->label );
 		strcpy( ch1, "" );
 		
-		for ( cur = t; cur != NULL ; cur = cur->hyper_next( cur->label ) )
+		for ( cur = t; cur != NULL ; cur = cur->hyper_next( ) )
 		{
 			if ( strlen( ch1 ) >= 9 )
 			{
@@ -307,8 +307,11 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 {
 	cmd( "$g.f.c create text %d.m %d.m -text \"%s\" -fill $t_color -tags node -tags %s", x, y - 1, str, str2 );
 
-	// text for node numerosity
-	cmd( "$g.f.c create text %d.m %d.m -text \"%s\" -tags node -tags %s", x, y + 2 * v_margin + 1, n, str2 );
+	// text for node numerosity (handle single "1" differently to displace from line)
+	if ( ! strcmp( n, "1" ) )
+		cmd( "$g.f.c create text %.1lfm %d.m -text \"%s\" -tags node -tags %s", x - 0.5, y + 2 * v_margin + 1, n, str2 );
+	else
+		cmd( "$g.f.c create text %d.m %d.m -text \"%s\" -tags node -tags %s", x, y + 2 * v_margin + 1, n, str2 );
 
 	cmd( "$g.f.c bind %s <Enter> { set res_g %s; if [winfo exists .list] { destroy .list }; toplevel .list; wm transient .list $g; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; frame .list.h; label .list.h.l -text \"Object:\"; label .list.h.n -fg red -text \"%s\"; pack .list.h.l .list.h.n -side left -padx 2; label .list.l -text \"$list_%s\" -justify left; pack .list.h .list.l; align .list $g }", str2, str2, str2, str2 );
 

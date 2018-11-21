@@ -618,12 +618,16 @@ long nodes2create( object *parent, char const *lab, long numNodes )
 	Stub function to call the appropriate network generator.
 */
 
-long object::init_stub_net( char const *lab, const char* gen, long numNodes, long par1, double par2 )
+double object::init_stub_net( char const *lab, const char* gen, long numNodes, long par1, double par2 )
 {
 	char option[ 32 ];
 	strncpy( option, gen, 31 );
 	option[ 31 ] = '\0';
 	strupr( option );
+	
+	// auto set all instances as nodes if necessary
+	if ( numNodes <= 0 )
+		numNodes = count( lab );
 	
 	// must have a label, and two nodes except is a disconnected network (1 node minimum)
 	if ( ( numNodes < 2 && strcmp( option, "DISCONNECTED" ) ) || lab == NULL )
@@ -637,6 +641,9 @@ long object::init_stub_net( char const *lab, const char* gen, long numNodes, lon
 	
 	if ( ! strcmp( option, "DISCONNECTED" ) )
 			return init_discon_net( lab, numNodes );
+	
+	if ( ! strcmp( option, "CONNECTED" ) )
+			return init_connect_net( lab, numNodes );
 	
 	if ( ! strcmp( option, "RANDOM-DIR" ) )
 		if ( par1 > 0 )
@@ -715,6 +722,49 @@ long object::init_discon_net( char const *lab, long numNodes )
 		cur->add_node_net( idNode );								// scan all nodes aplying ID numbers
 	
 	return 0;
+}
+
+
+/*
+	Create a fully connected undirected network.
+	All links/arcs are reciprocal.
+*/
+
+long object::init_connect_net( char const *lab, long numNodes )
+{
+	long idNode, links = 0;
+	object *cur, *cur1, *cur2;
+	
+	if ( numNodes < 2 || lab == NULL )
+	{
+		sprintf( msg, "invalid parameter values for fully connected network in object '%s'", lab );
+		error_hard( msg, "cannot create network", 
+					"check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
+					true );
+		return 0;
+	}
+	
+	// make sure this is being called from the parent (container) object
+	cur = check_net_struct( this, lab );
+	if ( cur == NULL )
+		return 0;
+
+	add_n_objects2( lab, nodes2create( this, lab, numNodes ) );		// creates the missing node objects,
+																	// cloning the first one
+
+	for ( idNode = 1; cur != NULL; cur = go_brother( cur ) )
+		cur->add_node_net( idNode++ );								// scan all nodes applying ID numbers
+		
+	for ( cur1 = search( lab ), links = 0; cur1 != NULL; cur1 = go_brother( cur1 ) )
+		for ( cur2 = go_brother( cur1 ); cur2 != NULL; cur2 = go_brother( cur2 ) )
+		{
+			cur1->add_link_net( cur2 );		// arc from hub to spoke
+			cur2->add_link_net( cur1 );		// arc from spoke to hub
+			
+			links += 2;
+		}
+
+	return links;
 }
 
 

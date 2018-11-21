@@ -52,7 +52,6 @@ fill in all the content of the object.
 
 #include "decl.h"
 
-bool invalidHooks = false;		// flag to invalid hooks pointers (set by simulation)
 lsdstack *asl = NULL;			// debug stack
 
 
@@ -286,7 +285,7 @@ while ( choice == 0 )
 	// update the temporary variables watch window
 	cmd( "set existVal [ winfo exists .deb.val ]" );
 	if ( ! strcmp( Tcl_GetVar( inter, "existVal", 0 ), "1" ) )
-			show_tmp_vars( true );
+			show_tmp_vars( r, true );
 
 	// remove or update the network window
 	if ( r->node == NULL )
@@ -886,7 +885,7 @@ while ( choice == 0 )
 
 		// show v[...] variables 
 		case 15:
-			show_tmp_vars( false );
+			show_tmp_vars( r, false );
 			choice = 0;
 			break;
 
@@ -945,34 +944,19 @@ while ( choice == 0 )
 		case 21: 
 			if ( r->hook != NULL )
 			{
-				if ( ! invalidHooks )
+				if ( root->search_inst( r->hook ) == 0 )
 				{
-					int lstUpd;
-					// check if the hook contains a valid LSD object pointer (not very effective, most likely will crash...)
-					try { lstUpd = r->hook->lstCntUpd; }
-					catch ( ... ) {	lstUpd = 0; }
-					
-					if ( lstUpd < 0 || lstUpd > t )
-					{
-						cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to LSD objects or avoid using this option. If non-standard hooks are used, consider adding the command 'invalidHooks = true' to your model code.\"" );
-						choice = 0;
-						break;
-					}
-					
-					choice = deb( r->hook, c, lab, res, interact );
-				}
-				else
-				{
-					cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Unavailable option\" -detail \"Your code is using non-standard pointers ('invalidHooks = true').\"" );
+					cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to LSD objects or avoid using this option.\"" );
 					choice = 0;
 					break;
 				}
+				
+				choice = deb( r->hook, c, lab, res, interact );
 			}
 			else
 				choice = 0;
 
 			break;
-					
 					
 		// Network
 		case 22:
@@ -1172,8 +1156,13 @@ void deb_show( object *r )
 /*******************************************
 SHOW_TMP_VARS
 ********************************************/
-void show_tmp_vars( bool update )
+void show_tmp_vars( object *r, bool update )
 {
+	bool done;
+	char i_names[ ] = { 'i', 'j', 'h', 'k' };
+	int i, n;
+	netLink *curLnk;
+	
 	cmd( "set in .deb.val" );
 	cmd( "set existVal [ winfo exists $in ]" );
 	if ( ! strcmp( Tcl_GetVar( inter, "existVal", 0 ), "0" ) )
@@ -1183,7 +1172,7 @@ void show_tmp_vars( bool update )
 		cmd( "frame $in.n");
 		cmd( "scrollbar $in.n.yscroll -command \"$in.n.t yview\"" ); 
 		cmd( "pack $in.n.yscroll -side right -fill y" ); 
-		cmd( "text $in.n.t -width 20 -height 30 -yscrollcommand \"$in.n.yscroll set\" -wrap none -font \"$font_normal\"" ); 
+		cmd( "text $in.n.t -width 20 -height 31 -yscrollcommand \"$in.n.yscroll set\" -wrap none -font [ font create -family \"$fonttype\" -size $small_character ]" ); 
 		cmd( "mouse_wheel $in.n.t" );
 		cmd( "pack $in.n.t -expand yes -fill both" );
 		cmd( "pack $in.n -expand yes -fill both" );
@@ -1191,6 +1180,7 @@ void show_tmp_vars( bool update )
 		cmd( "showtop $in topleftW 0 1 0" );
 
 		cmd( "$in.n.t tag configure red -foreground red" );
+		cmd( "$in.n.t tag configure bold -font [ font create -family TkDefaultFont -size $small_character -weight bold ]" );
 
 		cmd( "if { ! [ winfo exists .deb.net ] } { align $in .deb } { align $in .deb.net }" );
 	}
@@ -1207,12 +1197,117 @@ void show_tmp_vars( bool update )
 			return;
 		}
 	
-	for ( int i = 0; i < 100; ++i )
+	cmd( "$in.n.t insert end \"Temporary storage\n\" bold" );
+	
+	for ( i = 0; i < 10; ++i )
 	{
 		cmd( "$in.n.t insert end \"v\\\[%d\\] = \"", i );
-		cmd( "$in.n.t insert end \"%g\n\" red", i_values[ i ] );
+		
+		if ( is_nan( d_values[ i ] ) )
+			cmd( "$in.n.t insert end \"NAN\n\" red" );
+		else
+			if ( is_inf( d_values[ i ] ) )
+				cmd( "$in.n.t insert end \"%sINFINITY\n\" red", d_values[ i ] < 0 ? "-" : "" );
+			else
+				if ( fabs( d_values[ i ] ) < 1e-299 )		// insignificant value?
+					cmd( "$in.n.t insert end \"~0\n\" red" );
+				else
+					cmd( "$in.n.t insert end \"%g\n\" red", d_values[ i ] );
+	}
+	
+	cmd( "$in.n.t insert end \"\nInteger indexes\n\" bold" );
+	
+	for ( i = 0; i < ( sizeof i_names / sizeof i_names[ 0 ] ); ++i )
+	{
+		cmd( "$in.n.t insert end \"%c = \"", i_names[ i ] );
+		cmd( "$in.n.t insert end \"%d\n\" red", i_values[ i ] );
+	}
+	
+	cmd( "$in.n.t insert end \"\nObject pointers\n\" bold" );
+	
+	for ( i = 0; i < 10; ++i )
+	{
+		if ( i == 0 )
+			cmd( "$in.n.t insert end \"cur  = \"" );
+		else
+			cmd( "$in.n.t insert end \"cur%d = \"", i );
+		
+		if ( o_values[ i ] == NULL )
+			cmd( "$in.n.t insert end \"NULL\n\" red" );
+		else
+		{
+			// search an object pointed by the pointer
+			n = ( int ) root->search_inst( o_values[ i ] );
+			if ( n > 0 && o_values[ i ]->label != NULL )
+				cmd( "$in.n.t insert end \"%s(%d)\n\" red", o_values[ i ]->label, n );
+			else
+				cmd( "$in.n.t insert end \"(invalid)\n\" red" );
+		}
+	}
+	
+	cmd( "$in.n.t insert end \"hook = \"" );
+	
+	if ( r->hook == NULL )
+		cmd( "$in.n.t insert end \"NULL\n\" red" );
+	else
+	{
+		// search an object pointed by the hook
+		n = ( int ) root->search_inst( r->hook );
+		if ( n > 0 && r->hook->label != NULL )
+			cmd( "$in.n.t insert end \"%s(%d)\n\" red", r->hook->label, n );
+		else
+			cmd( "$in.n.t insert end \"(invalid)\n\" red" );
 	}
 
+	cmd( "$in.n.t insert end \"\nNetwork link pointers\n\" bold" );
+	
+	for ( i = 0; i < 10; ++i )
+	{
+		if ( i == 0 )
+			cmd( "$in.n.t insert end \"curl  = \"" );
+		else
+			cmd( "$in.n.t insert end \"curl%d = \"", i );
+		
+		if ( n_values[ i ] == NULL )
+			cmd( "$in.n.t insert end \"NULL\n\" red" );
+		else
+		{
+			// try search a link pointed by the pointer in current object only
+			done = false;
+			if ( r->node != NULL )
+			{
+				for ( curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next )
+					if ( curLnk == n_values[ i ] && curLnk->ptrTo != NULL && curLnk->ptrTo->label != NULL )
+					{
+						cmd( "$in.n.t insert end \"%s(%ld)\n\" red", curLnk->ptrTo->label, curLnk->serTo );
+						done = true;
+						break;
+					}
+			}
+			
+			if ( ! done )
+				cmd( "$in.n.t insert end \"(unknown)\n\" red" );
+		}
+	}
+	
+	cmd( "$in.n.t insert end \"\nMore temporary storage\n\" bold" );
+	
+	for ( i = 10; i < min( 100, USER_D_VARS ); ++i )
+	{
+		cmd( "$in.n.t insert end \"v\\\[%d\\] = \"", i );
+		
+		if ( is_nan( d_values[ i ] ) )
+			cmd( "$in.n.t insert end \"NAN\n\" red" );
+		else
+			if ( is_inf( d_values[ i ] ) )
+				cmd( "$in.n.t insert end \"%sINFINITY\n\" red", d_values[ i ] < 0 ? "-" : "" );
+			else
+				if ( fabs( d_values[ i ] ) < 1e-299 )		// insignificant value?
+					cmd( "$in.n.t insert end \"~0\n\" red" );
+				else
+					cmd( "$in.n.t insert end \"%g\n\" red", d_values[ i ] );
+	}
+	
 	cmd( "$in.n.t configure -state disabled" );
 } 
 
@@ -1222,6 +1317,9 @@ SHOW_NEIGHBORS
 ********************************************/
 void show_neighbors( object *r, bool update )
 {
+	int i;
+	netLink *curLnk;
+	
 	if ( r->node == NULL )
 		return;
 
@@ -1289,10 +1387,9 @@ void show_neighbors( object *r, bool update )
 	cmd( "$n.l1.n.name configure -text \"%s\"", r->node->name == NULL ? "" : r->node->name );
 	cmd( "$n.l2.n configure -text %ld", r->node->nLinks );
 	
-	int i = 1;
 	Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
 	
-	for ( netLink *curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next, ++i )
+	for ( i = 1, curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next, ++i )
 	{
 		cmd( "frame $n.n.t.n$i" );
 		cmd( "label $n.n.t.n$i.nodeto -width 6 -pady 0 -bd 0 -text %ld", curLnk->ptrTo->node->id );

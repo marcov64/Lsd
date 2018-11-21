@@ -2006,17 +2006,6 @@ double _abs( double a )
 
 
 /****************************************************
-ROUND
-****************************************************/
-double round( double x )
-{
-	if ( ( x - floor( x ) ) > ( ceil( x ) - x ) )
-		return ceil( x );
-	return floor( x );
-}
-
-
-/****************************************************
 MAX
 ****************************************************/
 double max( double a, double b )
@@ -2057,6 +2046,104 @@ double fact( double x )
 		fact *= i++;
 	
 	return fact;
+}
+
+
+/****************************************************
+ROUND
+****************************************************/
+double round( double x )
+{
+	if ( ( x - floor( x ) ) > ( ceil( x ) - x ) )
+		return ceil( x );
+	
+	return floor( x );
+}
+
+
+/****************************************************
+ROUND_DIGITS
+****************************************************/
+double round_digits( double value, int digits )
+{
+	if ( value == 0.0 )
+		return 0.0;
+
+	double factor = pow( 10.0, digits - ceil( log10( fabs( value ) ) ) );
+	
+	return round( value * factor ) / factor;   
+}
+
+
+/****************************************************
+LOWER_BOUND
+****************************************************/
+double lower_bound( double a, double b, double marg, double marg_eq, int dig )
+{
+	double rmin = round_digits( a, dig );
+	double rmax = round_digits( b, dig );
+	
+	if ( rmin > rmax )
+	{
+		double temp = rmin;
+		rmin = rmax;
+		rmax = temp;
+	}
+	
+	if ( rmin == rmax )
+	{
+		if ( rmin == 0.0 )
+			return round_digits( - marg_eq, dig );
+		else
+			if ( rmin > 0 )
+				return round_digits( rmin * ( 1 - marg_eq ), dig );
+			else
+				return round_digits( rmin * ( 1 + marg_eq ), dig );
+	}
+
+	if ( rmin == 0.0 )
+		return round_digits( - marg, dig );
+	else
+		if ( rmin > 0 )
+			return round_digits( rmin * ( 1 - marg ), dig );
+		else
+			return round_digits( rmin * ( 1 + marg ), dig );
+}
+
+
+/****************************************************
+UPPER_BOUND
+****************************************************/
+double upper_bound( double a, double b, double marg, double marg_eq, int dig )
+{
+	double rmin = round_digits( a, dig );
+	double rmax = round_digits( b, dig );
+	
+	if ( rmin > rmax )
+	{
+		double temp = rmin;
+		rmin = rmax;
+		rmax = temp;
+	}
+	
+	if ( rmin == rmax )
+	{
+		if ( rmax == 0.0 )
+			return round_digits( marg_eq, dig );
+		else
+			if ( rmax > 0 )
+				return round_digits( rmax * ( 1 + marg_eq ), dig );
+			else
+				return round_digits( rmax * ( 1 - marg_eq ), dig );
+	}
+
+	if ( rmax == 0.0 )
+		return round_digits( marg, dig );
+	else
+		if ( rmax > 0 )
+			return round_digits( rmax * ( 1 + marg ), dig );
+		else
+			return round_digits( rmax * ( 1 - marg ), dig );
 }
 
 
