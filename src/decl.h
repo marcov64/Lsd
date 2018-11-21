@@ -560,7 +560,6 @@ double weibull( double a, double b );					// draw from a Weibull distribution
 
 // global variables (visible to the users)
 extern bool fast;						// flag to hide LOG messages & runtime (read-only)
-extern bool invalidHooks;				// flag to invalid hooks pointers (set by simulation)
 extern bool no_search;					// disable the standard variable search mechanism
 extern bool use_nan;					// flag to allow using Not a Number value
 extern char *path;						// folder where the configuration is

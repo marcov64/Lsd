@@ -52,7 +52,6 @@ fill in all the content of the object.
 
 #include "decl.h"
 
-bool invalidHooks = false;		// flag to invalid hooks pointers (set by simulation)
 lsdstack *asl = NULL;			// debug stack
 
 
@@ -945,34 +944,19 @@ while ( choice == 0 )
 		case 21: 
 			if ( r->hook != NULL )
 			{
-				if ( ! invalidHooks )
+				if ( root->search_inst( r->hook ) == 0 )
 				{
-					int lstUpd;
-					// check if the hook contains a valid LSD object pointer (not very effective, most likely will crash...)
-					try { lstUpd = r->hook->lstCntUpd; }
-					catch ( ... ) {	lstUpd = 0; }
-					
-					if ( lstUpd < 0 || lstUpd > t )
-					{
-						cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to LSD objects or avoid using this option. If non-standard hooks are used, consider adding the command 'invalidHooks = true' to your model code.\"" );
-						choice = 0;
-						break;
-					}
-					
-					choice = deb( r->hook, c, lab, res, interact );
-				}
-				else
-				{
-					cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Unavailable option\" -detail \"Your code is using non-standard pointers ('invalidHooks = true').\"" );
+					cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to LSD objects or avoid using this option.\"" );
 					choice = 0;
 					break;
 				}
+				
+				choice = deb( r->hook, c, lab, res, interact );
 			}
 			else
 				choice = 0;
 
 			break;
-					
 					
 		// Network
 		case 22:
@@ -1188,7 +1172,7 @@ void show_tmp_vars( object *r, bool update )
 		cmd( "frame $in.n");
 		cmd( "scrollbar $in.n.yscroll -command \"$in.n.t yview\"" ); 
 		cmd( "pack $in.n.yscroll -side right -fill y" ); 
-		cmd( "text $in.n.t -width 20 -height 30 -yscrollcommand \"$in.n.yscroll set\" -wrap none -font [ font create -family \"$fonttype\" -size $small_character ]" ); 
+		cmd( "text $in.n.t -width 20 -height 31 -yscrollcommand \"$in.n.yscroll set\" -wrap none -font [ font create -family \"$fonttype\" -size $small_character ]" ); 
 		cmd( "mouse_wheel $in.n.t" );
 		cmd( "pack $in.n.t -expand yes -fill both" );
 		cmd( "pack $in.n -expand yes -fill both" );
@@ -1251,13 +1235,30 @@ void show_tmp_vars( object *r, bool update )
 		if ( o_values[ i ] == NULL )
 			cmd( "$in.n.t insert end \"NULL\n\" red" );
 		else
+		{
 			// search an object pointed by the pointer
-			if ( ( n = root->search_instance( o_values[ i ] ) ) > 0 && o_values[ i ]->label!= NULL )
+			n = ( int ) root->search_inst( o_values[ i ] );
+			if ( n > 0 && o_values[ i ]->label != NULL )
 				cmd( "$in.n.t insert end \"%s(%d)\n\" red", o_values[ i ]->label, n );
 			else
 				cmd( "$in.n.t insert end \"(invalid)\n\" red" );
+		}
 	}
 	
+	cmd( "$in.n.t insert end \"hook = \"" );
+	
+	if ( r->hook == NULL )
+		cmd( "$in.n.t insert end \"NULL\n\" red" );
+	else
+	{
+		// search an object pointed by the hook
+		n = ( int ) root->search_inst( r->hook );
+		if ( n > 0 && r->hook->label != NULL )
+			cmd( "$in.n.t insert end \"%s(%d)\n\" red", r->hook->label, n );
+		else
+			cmd( "$in.n.t insert end \"(invalid)\n\" red" );
+	}
+
 	cmd( "$in.n.t insert end \"\nNetwork link pointers\n\" bold" );
 	
 	for ( i = 0; i < 10; ++i )
