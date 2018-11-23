@@ -379,14 +379,125 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 
 
 /****************************
-NOP
-No operation.
-Escape function for invalid pointers
-in macros.
+CHK_PTR
+User pointer check
 *****************************/
-void nop( void )
+bool chk_ptr( object *ptr )
 {
+	if ( ptr == NULL )
+		return true;
 	
+	if ( no_ptr_chk )
+		return false;
+	
+	if ( obj_list.find( ptr ) != obj_list.end( ) )
+		return false;
+	
+	return true;
+}
+
+
+/****************************
+BAD_POINTER_*
+Bad pointer error message
+Escape function for invalid 
+pointers in macros
+*****************************/
+double bad_ptr_dbl( object *ptr, const char *file, int line )
+{
+	char msg[ TCL_BUFF_STR ];
+	
+	if ( ptr == NULL )
+		sprintf( msg, "NULL pointer used in file '%s', line %d", file, line );
+	else
+		sprintf( msg, "pointer to non-existing object used\nin file '%s', line %d", file, line );
+	
+	error_hard( msg, "invalid pointer operation", 
+				"check your equation code to ensure pointer points\nto a valid object before the operation",
+				true );
+
+	return 0.;
+}
+
+char *bad_ptr_chr( object *ptr, const char *file, int line )
+{
+	bad_ptr_dbl( ptr, file, line );
+	return NULL;
+}
+
+netLink *bad_ptr_lnk( object *ptr, const char *file, int line )
+{
+	bad_ptr_dbl( ptr, file, line );
+	return NULL;
+}
+
+object *bad_ptr_obj( object *ptr, const char *file, int line )
+{
+	bad_ptr_dbl( ptr, file, line );
+	return NULL;
+}
+
+void bad_ptr_void( object *ptr, const char *file, int line )
+{
+	bad_ptr_dbl( ptr, file, line );
+	return;
+}
+
+
+/****************************
+NUL_LINK_*
+NULL link error message
+Escape function for invalid 
+network link pointers in macros
+*****************************/
+double nul_lnk_dbl( const char *file, int line )
+{
+	char msg[ TCL_BUFF_STR ];
+	
+	sprintf( msg, "NULL network link pointer used\nin file '%s', line %d", file, line );
+	
+	error_hard( msg, "invalid network link", 
+				"check your equation code to ensure pointer points\nto a valid link before the operation",
+				true );
+
+	return 0.;
+}
+
+object *nul_lnk_obj( const char *file, int line )
+{
+	nul_lnk_dbl( file, line );
+	return NULL;
+}
+
+void nul_lnk_void( const char *file, int line )
+{
+	nul_lnk_dbl( file, line );
+	return;
+}
+
+
+/****************************
+NO_NODE_*
+No network node error message
+Escape function for invalid 
+network object in macros 
+*****************************/
+double no_node_dbl( const char *lab, const char *file, int line )
+{
+	char msg[ TCL_BUFF_STR ];
+	
+	sprintf( msg, "object '%s' has no network data structure\nin file '%s', line %d", lab, file, line );
+	error_hard( msg, "invalid network object", 
+				"check your equation code to add\nthe network structure before using this macro",
+				true );
+				
+	return 0.;
+}
+
+char *no_node_chr( const char *lab, const char *file, int line )
+{
+	no_node_dbl( lab, file, line );
+	return NULL;
 }
 
 

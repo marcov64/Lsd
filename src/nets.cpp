@@ -478,14 +478,14 @@ object *object::search_node_net( char const *lab, long destId )
 	r[ 5 ]: density (including loops)
 */
 
-void object::stats_net( char const *lab, double *r )
+double object::stats_net( char const *lab, double *r )
 {
 	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = r[ 5 ] = 0;
 	
 	object *cur = search( lab );
 
 	if ( cur == NULL || cur->node == NULL )			// invalid network node?
-		return;
+		return NAN;
 		
 	for ( ; cur != NULL; cur = go_brother( cur ) )	// scan all nodes
 		if ( cur->node != NULL )					// valid node?
@@ -506,6 +506,8 @@ void object::stats_net( char const *lab, double *r )
 		r[ 2 ] = r[ 1 ] / r[ 0 ];
 		r[ 5 ] = r[ 1 ] / ( r[ 0 ] * ( r[ 0 ] - 1 ) );
 	}
+	
+	return r[ 0 ];
 }
 
 
@@ -1380,7 +1382,7 @@ void get_line( char *lBuffer, FILE *fPtr )
 		strupr( lBuffer );									// to uppercase
 }
 
-long object::read_file_net( char const *lab, char const dir[ ], char const base_name[ ], 
+double object::read_file_net( char const *lab, char const dir[ ], char const base_name[ ], 
 							int serial, char const ext[ ] )
 {
 	long idNode, numNodes, countNodes, numLinks, startNode, endNode;
@@ -1524,7 +1526,7 @@ long object::read_file_net( char const *lab, char const dir[ ], char const base_
 	Write directed network in Pajek text file format.
 */
 
-long object::write_file_net( char const *lab, char const dir[ ], char const base_name[ ], 
+double object::write_file_net( char const *lab, char const dir[ ], char const base_name[ ], 
 							 int serial, bool append )
 {
 	int tCur = ( t > max_step ) ? max_step : t;				// effective current time

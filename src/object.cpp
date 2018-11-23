@@ -264,7 +264,7 @@ METHODS FOR FILE OPERATION
 see file.cpp
 *************************************************************/
 
-//#define DEBUG_MAPS				// define to enable fast lookup maps debugging
+//#define DEBUG_MAPS			// define to enable fast lookup maps debugging
 
 
 #include "decl.h"
@@ -273,6 +273,11 @@ bool zero_instances = false;	// flag to allow deleting last object instance
 char *qsort_lab;
 char *qsort_lab_secondary;
 object *globalcur;
+
+#ifdef PARALLEL_MODE
+mutex parallel_collect;			// mutex lock for parallel object list update
+mutex parallel_delete;			// mutex lock for parallel deletion
+#endif
 
 
 /****************************************************
@@ -1285,12 +1290,6 @@ void object::add_var_from_example( variable *example )
 	}
 		
 	cv->init( this, example->label, example->num_lag, example->val, example->save );
-	
-#ifdef PARALLEL_MODE
-	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( cv->parallel_comp );
-#endif	
-	
 	cv->savei = example->savei;
 	cv->last_update = example->last_update;
 	cv->plot = ( ! running ) ? example->plot : false;
@@ -1686,6 +1685,10 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 		
 		cur->init( this, lab );
 
+		// update object list for user pointer checking
+		if ( ! no_ptr_chk )
+			obj_list.insert( cur );
+		
 		if ( net )						// if objects are nodes in a network
 		{
 			cur->node = new netNode( );	// insert new nodes in network (as isolated nodes)
@@ -1899,6 +1902,10 @@ void object::delete_obj( void )
 	if ( cb->search_var != NULL )	// indexed objects?
 		cb->o_map.erase( cal( cb->search_var, 0 ) );	// try to remove map entry
 
+	// update object list for user pointer checking
+	if ( ! no_ptr_chk )
+		obj_list.erase( this );
+		
 	empty( );
 	
 	delete this;
@@ -2137,7 +2144,7 @@ RECAL
 Mark variable as not calculated in the current time,
 forcing recalculation if already calculated
 ****************************************************/
-void object::recal( char const *lab )
+double object::recal( char const *lab )
 {
 	variable *cv;
 
@@ -2159,10 +2166,12 @@ void object::recal( char const *lab )
 						true );
 		}
 		
-		return;
+		return NAN;
 	}
 	
 	cv->last_update = t - 1;
+	
+	return cv->val[ 0 ];
 }
 
 
@@ -2311,13 +2320,26 @@ double object::av( char const *lab, int lag )
 
 /****************************************************
 WHG_AV
-Compute the weighted average of lab (lab2 are the weights)
+Compute the weighted average of lab
 ****************************************************/
-double object::whg_av( char const *lab, char const *lab2, int lag )
+double object::whg_av( char const *weight, char const *lab, int lag )
 {
 	double tot, c1, c2;
 	object *cur;
 	variable *cv;
+
+	cv = search_var( this, weight, true, no_search );
+	if ( cv == NULL )
+	{	// check if it is not a zero-instance object
+		if ( blueprint->search_var( this, weight, true, no_search ) == NULL )
+		{
+			sprintf( msg, "element '%s' is missing for weighted averaging", weight );
+			error_hard( msg, "variable or parameter not found", 
+						"create variable or parameter in model structure" );
+		}
+		
+		return NAN;
+	}
 
 	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
@@ -2332,27 +2354,14 @@ double object::whg_av( char const *lab, char const *lab2, int lag )
 		return NAN;
 	}
 
-	cv = search_var( this, lab2, true, no_search );
-	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, lab2, true, no_search ) == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for weighted averaging", lab2 );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-		
-		return NAN;
-	}
-
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
 	for ( tot = 0; cur != NULL; cur = go_brother( cur ) )
 	{
-		c1 = cur->cal( this, lab, lag );
-		c2 = cur->cal( this, lab2, lag );
+		c1 = cur->cal( this, weight, lag );
+		c2 = cur->cal( this, lab, lag );
 		tot += c1 * c2;
 	}
 
@@ -2569,7 +2578,7 @@ int sort_function_down( const void *a, const void *b )
 		return 1;
 }
 
-void object::lsdqsort( char const *obj, char const *var, char const *direction )
+object *object::lsdqsort( char const *obj, char const *var, char const *direction )
 {
 	int num, i;
 	bridge *cb;
@@ -2596,7 +2605,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 							true );
 			}
 			
-			return;
+			return NULL;
 		}
 		
 		cur = cv->up;
@@ -2605,7 +2614,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 			sprintf( msg, "element '%s' is missing (object '%s') for sorting", var, obj );
 			error_hard( msg, "variable or parameter not found", 
 						"create variable or parameter in model structure" );
-			return;
+			return NULL;
 		}
 	
 		if ( cur->up == NULL )
@@ -2613,7 +2622,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 			sprintf( msg, "object '%s' is missing for sorting", obj );
 			error_hard( msg, "object not found", 
 						"create object in model structure" );
-			return;
+			return NULL;
 		}
 	
 		cb = cv->up->up->b;
@@ -2630,7 +2639,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 				error_hard( msg, "invalid network object", 
 							"check your equation code to add\nthe network structure before using this macro", 
 							true );
-				return;
+				return NULL;
 			}
 		else
 			cb = NULL;
@@ -2641,7 +2650,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 		sprintf( msg, "object '%s' is missing for sorting", label);
 		error_hard( msg, "object not found", 
 					"create object in model structure" );
-		return;
+		return NULL;
 	}
 	
 	cb->counter_updated = false;
@@ -2668,7 +2677,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 						"check your equation code to prevent this situation",
 						true );
 			delete [ ] mylist;
-			return;
+			return NULL;
 		}
 	
 	cb->head = mylist[ 0 ];
@@ -2679,6 +2688,8 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 	mylist[ i - 1 ]->next = NULL;
 
 	delete [ ] mylist;
+	
+	return cb->head;
 }
 
 
@@ -2724,7 +2735,7 @@ int sort_function_down_two( const void *a, const void *b )
 				return 1;
 }
 
-void object::lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction )
+object *object::lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction )
 {
 	int num, i;
 	bridge *cb;
@@ -2738,7 +2749,7 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 		sprintf( msg, "object '%s' is missing for sorting", obj );
 		error_hard( msg, "object not found", 
 					"create object in model structure" );
-		return;
+		return NULL;
 	}
 	
 	cv = search_var( this, var1, true, no_search );
@@ -2758,7 +2769,7 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 						true );
 		}
 		
-		return;
+		return NULL;
 	}
 	 
 	cur = cv->up;
@@ -2767,7 +2778,7 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 		sprintf( msg, "element '%s' is missing (object '%s') for sorting", var1, obj );
 		error_hard( msg, "variable or parameter not found", 
 					"create variable or parameter in model structure" );
-		return;
+		return NULL;
 	}
 
 	if ( cur->up == NULL )
@@ -2775,7 +2786,7 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 		sprintf( msg, "object '%s' is missing for sorting", obj );
 		error_hard( msg, "object not found", 
 					"create object in model structure" );
-		return;
+		return NULL;
 	}
 
 	cb->counter_updated = false;
@@ -2803,7 +2814,7 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 						"check your equation code to prevent this situation",
 						true );
 			delete [ ] mylist;
-			return;
+			return NULL;
 		}
 
 	cb->head = mylist[ 0 ];
@@ -2814,6 +2825,8 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 	mylist[ i - 1 ]->next = NULL;
 
 	delete [ ] mylist;
+	
+	return cb->head;
 }
 
 
@@ -2987,7 +3000,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
  Write the value in the Variable or Parameter lab, making it appearing as if
  it was computed at time lag and the variable updated at time time.
  ***************************************************/
-void object::write( char const *lab, double value, int time, int lag )
+double object::write( char const *lab, double value, int time, int lag )
 {
     variable *cv;
 	
@@ -2997,7 +3010,7 @@ void object::write( char const *lab, double value, int time, int lag )
 		error_hard( msg, "invalid write operation", 
 					"check your equation code to prevent this situation",
 					true );
-        return;
+        return NAN;
     }
     
     for ( cv = v; cv != NULL; cv = cv->next)
@@ -3012,7 +3025,7 @@ void object::write( char const *lab, double value, int time, int lag )
 					error_hard( msg, "invalid write operation", 
 								"check your equation code to prevent this situation",
 								true );
-					return;
+					return NAN;
 				}
 
 #ifdef PARALLEL_MODE
@@ -3024,7 +3037,7 @@ void object::write( char const *lab, double value, int time, int lag )
 					error_hard( msg, "deadlock during parallel computation", 
 								"check your equation code to prevent this situation",
 								true );
-					return;
+					return NAN;
 				}
 #endif
 			}
@@ -3081,18 +3094,19 @@ void object::write( char const *lab, double value, int time, int lag )
 				}
 			}
 			
-			return;
+			return value;
 		}
     }
 	
     sprintf( msg, "element '%s' is missing for writing", lab );
 	error_hard( msg, "variable or parameter not found", 
 				"create variable or parameter in model structure" );
+	return NAN;
 }
 
-void object::write( char const *lab, double value, int time )
+double object::write( char const *lab, double value, int time )
 {
-	this->write( lab, value, time, 0 );
+	return this->write( lab, value, time, 0 );
 }
 
 
@@ -3247,4 +3261,49 @@ object *object::lat_left( void )
 		for ( cur = up->search( label ); go_brother( cur ) != this; cur = go_brother( cur ) );
 
 	return cur;
+}
+
+
+/****************************************************
+BUILD_OBJ_LIST
+Build the object list for user pointer checking
+****************************************************/
+double build_obj_list( bool set_list )
+{
+#ifdef PARALLEL_MODE
+	// prevent concurrent update by more than one thread
+	lock_guard < mutex > lock( parallel_collect );
+#endif	
+	
+	obj_list.clear( );			// reset list
+	
+	if ( set_list )
+	{
+		collect_inst( root, obj_list );
+		no_ptr_chk = false;
+	}
+	else
+		no_ptr_chk = true;
+	
+	return obj_list.size( );
+}
+
+
+/****************************************************
+COLLECT_INST
+Collect all object under the selected object and
+stores it in the provided C++ set container
+****************************************************/
+void collect_inst( object *r, o_setT &list )
+{
+	bridge *cb;
+	object *cur;
+	
+	// collect own address
+	list.insert( r );
+	
+	// search among descendants
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		for ( cur = cb->head; cur != NULL; cur = cur->hyper_next( ) )
+			collect_inst( cur, list );	
 }

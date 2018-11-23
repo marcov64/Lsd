@@ -41,6 +41,7 @@ Global definitions among all LSD C++ modules
 #include <list>
 #include <new>
 #include <map>
+#include <set>
 
 #ifdef CPP11
 // comment the next line to disable parallel mode (multi-threading)
@@ -54,6 +55,7 @@ Global definitions among all LSD C++ modules
 #include <condition_variable>
 #include <functional>
 #include <unordered_map>
+#include <unordered_set>
 #include <chrono>
 #endif
 
@@ -154,12 +156,14 @@ typedef pair < string, variable * > v_pairT;
 typedef map < string, bridge * > b_mapT;
 typedef map < double, object * > o_mapT;
 typedef map < string, variable * > v_mapT;
+typedef set < object * > o_setT;
 #else
 typedef function < double( object *caller, variable *var ) > eq_funcT;
 typedef unordered_map < string, eq_funcT > eq_mapT;
 typedef unordered_map < string, bridge * > b_mapT;
 typedef unordered_map < double, object * > o_mapT;
 typedef unordered_map < string, variable * > v_mapT;
+typedef unordered_set < object * > o_setT;
 #endif
 
 struct object
@@ -180,10 +184,6 @@ struct object
 	
 	b_mapT b_map;						// fast lookup map to object bridges
 	v_mapT v_map;						// fast lookup map to variables
-
-#ifdef PARALLEL_MODE
-	mutex parallel_delete;				// mutex lock for parallel deletion
-#endif
 
 	bool load_param( char *file_name, int repl, FILE *f );
 	bool load_struct( FILE *f );
@@ -206,11 +206,17 @@ struct object
 	double multiply( char const *lab, double value );
 	double overall_max( char const *lab, int lag );
 	double overall_min( char const *lab, int lag );
+	double read_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, char const *ext = "net" );
+	double recal( char const *l );
 	double sd( char const *lab, int lag );
 	double search_inst( object *obj = NULL );
 	double stat( char const *lab, double *v = NULL );
+	double stats_net( char const *lab, double *r );
 	double sum( char const *lab, int lag );
-	double whg_av( char const *lab, char const *lab2, int lag );
+	double whg_av( char const *weight, char const *lab, int lag );
+	double write( char const *lab, double value, int time );	// write value as if computed at time
+	double write( char const *lab, double value, int time, int lag );	// write value in the lag field
+	double write_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, bool append = false );
 	int init( object *_up, char const *_label );
 	long init_circle_net( char const *lab, long numNodes, long outDeg );
 	long init_connect_net( char const *lab, long numNodes );
@@ -223,8 +229,6 @@ struct object
 	long init_small_world_net( char const *lab, long numNodes, long outDeg, double rho );
 	long init_star_net( char const *lab, long numNodes );
 	long init_uniform_net( char const *lab, long numNodes, long outDeg );
-	long read_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, char const *ext = "net" );
-	long write_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, bool append = false );
 	netLink *add_link_net( object *destPtr, double weight = 0, double probTo = 1 );
 	netLink *draw_link_net( void ); 
 	netLink *search_link_net( long id ); 
@@ -243,6 +247,8 @@ struct object
 	object *lat_left( void );
 	object *lat_right( void );
 	object *lat_up( void );
+	object *lsdqsort( char const *obj, char const *var, char const *direction );
+	object *lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
 	object *search( char const *lab );
 	object *search_node_net( char const *lab, long id ); 
 	object *search_var_cond( char const *lab, double value, int lag );
@@ -264,22 +270,15 @@ struct object
 	void empty( void );
 	void emptyturbo( void );			// remove turbo search structure
 	void insert_parent_obj( char const *lab );
-	void lsdqsort( char const *obj, char const *var, char const *direction );
-	void lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
 	void name_node_net( char const *nodeName );
-	void recal( char const *l );
 	void recreate_maps( void );
 	void replicate( int num, int propagate );
 	void save_param( FILE *f );
 	void save_struct( FILE *f, char const *tab );
 	void search_inst( object *obj, int *pos );
-	void sort( char const *obj, char const *var, char *direction );
 	void sort_asc( object *from, char *l_var );
 	void sort_desc( object *from, char *l_var );
-	void stats_net( char const *lab, double *r );
 	void update( void );
-	void write( char const *lab, double value, int time );	// write value as if computed at time
-	void write( char const *lab, double value, int time, int lag );	// write value in the lag field
 };
 
 struct variable
@@ -503,16 +502,21 @@ struct worker							// multi-thread parallel worker data structure
 
 // standalone C functions/procedures (visible to the users)
 
+bool chk_ptr( object *ptr );							// user pointer check
 bool is_finite( double x );
 bool is_inf( double x );
 bool is_nan( double x );
+char *bad_ptr_chr( object *ptr, const char *file, int line );// invalid pointer error message
+char *no_node_chr( const char *lab, const char *file, int line );
 double _abs( double a );
 double alapl( double mu, double alpha1, double alpha2 );// draw from an asymmetric laplace distribution
 double alaplcdf( double mu, double alpha1, double alpha2, double x );	// asymmetric laplace cdf
+double bad_ptr_dbl( object *ptr, const char *file, int line );// invalid pointer error message
 double bernoulli( double p );							// draw from a Bernoulli distribution
 double beta( double alpha, double beta );				// draw from a beta distribution
 double betacdf( double alpha, double beta, double x );	// beta cumulative distribution function
 double betacf( double a, double b, double x );			// beta distribution function
+double build_obj_list( bool set_list );					// build the object list for pointer checking
 double fact( double x );								// Factorial function
 double gamma( double alpha, double beta = 1 );			// draw from a gamma distribution
 double init_lattice( int init_color = -0xffffff, double nrow = 100, double ncol = 100, double pixW = 0, double pixH = 0 );
@@ -522,6 +526,8 @@ double max( double a, double b );
 double min( double a, double b );
 double norm( double mean, double dev );
 double normcdf( double mu, double sigma, double x );	// normal cumulative distribution function
+double no_node_dbl( const char *lab, const char *file, int line );// invalid node
+double nul_lnk_dbl( const char *file, int line );		// invalid link error
 double pareto( double mu, double alpha );
 double paretocdf( double mu, double alpha, double x );
 double poisson( double m );
@@ -534,14 +540,18 @@ double unifcdf( double a, double b, double x );			// uniform cumulative distribu
 double uniform( double min, double max );
 double uniform_int( double min, double max );
 double update_lattice( double line, double col, double val = 1 );
+netLink *bad_ptr_lnk( object *ptr, const char *file, int line );// invalid pointer error message
+object *bad_ptr_obj( object *ptr, const char *file, int line );// invalid pointer error message
 object *get_cycle_obj( object *c, char const *label, char const *command );
 object *go_brother( object *c );
+object *nul_lnk_obj( const char *file, int line );		// invalid link error
+void bad_ptr_void( object *ptr, const char *file, int line );// invalid pointer error message
 void close_lattice( void );
 void deb_log( bool on, int time = 0 );					// control debug mode
 void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "", bool defQuit = false );
 void init_random( unsigned seed );						// reset the random number generator seed
 void msleep( unsigned msec = 1000 );					// sleep process for milliseconds
-void nop( void );										// no operation
+void nul_lnk_void( const char *file, int line );		// invalid link error
 void plog( char const *msg, char const *tag = "", ... );
 void results_alt_path( const char * );  				// change where results are saved.
 void set_fast( int level );								// enable fast mode
@@ -560,6 +570,8 @@ double weibull( double a, double b );					// draw from a Weibull distribution
 
 // global variables (visible to the users)
 extern bool fast;						// flag to hide LOG messages & runtime (read-only)
+extern bool fast_lookup;				// flag for fast equation look-up mode
+extern bool no_ptr_chk;					// disable user pointer checking
 extern bool no_search;					// disable the standard variable search mechanism
 extern bool use_nan;					// flag to allow using Not a Number value
 extern char *path;						// folder where the configuration is
@@ -662,6 +674,7 @@ void clean_spaces( char *s );
 void close_sim( void );
 void cmd( const char *cc, ... );
 void collect_cemetery( object *o );
+void collect_inst( object *r, o_setT &list );
 void control_tocompute(object *r, char *ch);
 void copy_descendant( object *from, object *to );
 void count( object *r, int *i );
@@ -798,7 +811,6 @@ void parallel_update( variable *v, object* p, object *caller = NULL );
 extern FILE *log_file;			// log file, if any
 extern bool brCovered;			// browser cover currently covered
 extern bool eq_dum;				// current equation is dummy
-extern bool fast_lookup;		// flag for fast look-up mode
 extern bool ignore_eq_file;		// control of configuration files equation updating
 extern bool in_edit_data;		// in initial settings mode
 extern bool in_set_obj;			// in setting number of objects mode
@@ -860,6 +872,7 @@ extern lsdstack *stacklog;		// LSD stack
 extern map< string, profile > prof;// set of saved profiling times
 extern object *blueprint;   	// LSD blueprint (effective model in use )
 extern object *wait_delete;		// LSD object waiting for deletion
+extern o_setT obj_list;			// list with all existing LSD objects
 extern sense *rsense;       	// LSD sensitivity analysis structure
 extern variable *cemetery;  	// LSD saved data series (from last simulation run )
 

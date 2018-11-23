@@ -111,12 +111,13 @@ int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
 lsdstack *stacklog = NULL;	// LSD stack
+map < string, profile > prof;	// set of saved profiling times
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
 object *root = NULL;		// LSD root object
 object *wait_delete = NULL;	// LSD object waiting for deletion
+o_setT obj_list;			// set with all existing LSD objects
 sense *rsense = NULL;		// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
-map < string, profile > prof;	// set of saved profiling times
 FILE *log_file = NULL;		// log file, if any
 
 #ifdef CPP11
@@ -701,6 +702,10 @@ void run( void )
 #endif
 				myexit( 10 );
 			}
+			
+		// build initial object list for user pointer checking
+		if ( ! no_ptr_chk )
+			build_obj_list( true );
 
 		series_saved = 0;
 
