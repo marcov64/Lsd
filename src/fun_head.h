@@ -523,7 +523,14 @@ double init_lattice( double pixW = 0, double pixH = 0, double nrow = 100, double
 double poidev( double xm, long *idum_loc = NULL );
 int deb( object *r, object *c, char const *lab, double *res, bool interact = false );
 void cmd( const char *cm, ... );
-#define FUNCTION( X ) EQUATION( X )
+#define FUNCTION( X ) \
+	if ( ! strcmp( label, X ) ) { \
+		last_update--; \
+		if ( c == NULL ) { \
+			res = val[ 0 ]; \
+			goto end; \
+		}
+
 #define UNIFORM( X, Y ) uniform( X, Y )
 #define rnd_integer( X, Y ) uniform_int( X, Y )
 #define VL_CHEAT( X, Y, C ) V_CHEATL( X, Y, C )

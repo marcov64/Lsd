@@ -2105,6 +2105,15 @@ double object::cal( object *caller, char const *lab, int lag )
 	if ( quit == 2 )
 		return NAN;
 
+	if ( this == NULL )
+	{
+		sprintf( msg, "variable '%s' computation requested from NULL object", lab );
+		error_hard( msg, "invalid pointer operation", 
+					"check your equation code to ensure pointer points\nto a valid object before the operation",
+					true );
+		return NAN;
+	}
+	
 	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
