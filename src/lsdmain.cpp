@@ -38,8 +38,8 @@ int add_to_tot = false;		// flag to append results to existing totals file (bool
 int max_step = 100;			// default number of simulation runs
 int overwConf = true;		// overwrite configuration on run flag (bool)
 int saveConf = false;		// save configuration on results saving (bool)
-int seed = 1;				// random number generator initial seed
 int strWindowOn = true;		// control the presentation of the model structure window (bool)
+unsigned seed = 1;			// random number generator initial seed
 
 bool batch_sequential = false;	// no-window multi configuration job running
 bool brCovered = false;		// browser cover currently covered

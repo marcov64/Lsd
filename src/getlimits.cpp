@@ -57,12 +57,12 @@ int prof_min_msecs = 0;		// profile only variables taking more than X msecs.
 int prof_obs_only = false;	// profile only observed variables
 int quit = 0;				// simulation interruption mode (0=none)
 int t;						// current time step
-int seed = 1;				// random number generator initial seed
 int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
+unsigned seed = 1;			// random number generator initial seed
 description *descr = NULL;	// model description structure
 lsdstack *stacklog = NULL;	// LSD stack
 object *blueprint = NULL;	// LSD blueprint (effective model in use)

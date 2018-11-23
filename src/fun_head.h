@@ -234,12 +234,12 @@ using namespace Eigen;
 #define NO_SEARCH no_search = true;
 #define DEFAULT_RESULT( X ) def_res = X;
 #define RND_GENERATOR( X ) ran_gen = ( int ) X;
-#define RND_SETSEED( X ) seed = ( int ) X; init_random( seed );
 #define SLEEP( X ) msleep( ( unsigned ) X );
 #define DEBUG_START deb_log( true );
 #define DEBUG_START_AT( X ) deb_log( true, ( int ) X );
 #define DEBUG_STOP deb_log( false );
 #define DEBUG_STOP_AT( X ) deb_log( false, ( int ) X );
+#define RND_SETSEED( X ) { seed = ( unsigned ) X; init_random( seed ); }
 
 #define RND_SEED ( ( double ) seed - 1 )
 #define PATH ( ( const char * ) path )

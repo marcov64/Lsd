@@ -23,7 +23,7 @@ model. That is, the value for this variable contained in the first object of thi
 type.
 The options are the following:
 1) set all values equal to the entered value
-2) the first value is not changed and all the others are computed as the previous
+2 ) the first value is not changed and all the others are computed as the previous
 plus the entered object.
 3) as before, but instead of producing a ever increasing series, it re-initialize
 any new group.
@@ -41,833 +41,832 @@ standard deviation is the inserted value.
 SET_ALL
 ****************************************************/
 
-void set_all(int *choice, object *original, char *lab, int lag )
+void set_all( int *choice, object *original, char *lab, int lag )
 {
-char *l, ch[MAX_ELEM_LENGTH];
-int res, i, kappa, cases_from=1, cases_to=0, to_all, update_description, fill=0;
-object *cur, *r;
-double value, value1, value2, step, counter;
-variable *cv;
-FILE *f;
-description *cd; 
-
-if (original->up != NULL )
-	for (r=original->up; r->up!=NULL; r=r->up);//go for the root
-else
-	r=original; 
-
-r=r->search(original->label);//select the first instance
-cv=r->search_var(NULL, lab);
-if ( cv == NULL )
-	return;
-
-Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
-Tcl_LinkVar( inter, "value1", ( char * ) &value1, TCL_LINK_DOUBLE );
-Tcl_LinkVar( inter, "value2", ( char * ) &value2, TCL_LINK_DOUBLE );
-
-// preload the existing value of the first object
-if ( cv->param == 0 )
-	value1 = cv->val [ lag ];
-else
-	value1 = cv->val[ 0 ];
-
-// default values
-res = 1;
-value2 = 0;
-cmd( "set value 1" ); 	// method
-cmd( "set to_all 1" );
-cmd( "set step_in 1" );
-cmd( "set cases_from 1; set cases_to 1000" );
-cmd( "set rnd_seed 1" );
-cmd( "set use_seed 0" );
-cmd( "set update_d 1" );
-
-cmd( "newtop .sa \"Set All Objects Initialization\" { set choice 2 }" );
-
-// heading
-cmd( "frame .sa.head" );
-cmd( "label .sa.head.lg -text \"Set initial values for every copy of\"" );
-
-cmd( "frame .sa.head.l" );
-if ( cv->param != 0 )
-{
-  if ( cv->param == 2 )
-	cmd( "label .sa.head.l.c -text \"Function: \"" );
-  else
-	cmd( "label .sa.head.l.c -text \"Parameter: \"" );
-  cmd( "label .sa.head.l.n -text \"%s\" -fg red", lab  );
-  cmd( "pack .sa.head.l.c .sa.head.l.n -side left" );
-}
-else
-{
-  cmd( "label .sa.head.l.c -text \"Variable: \"" );
-  cmd( "label .sa.head.l.n1 -text \"%s  \" -fg red", lab );
-  cmd( "label .sa.head.l.n2 -text \"\\[  lag \"" );
-  cmd( "label .sa.head.l.n3 -text \"%d\" -fg red", t - cv->last_update + lag + 1  );
-  cmd( "label .sa.head.l.n4 -text \"\\]\"" );
-  cmd( "pack .sa.head.l.c .sa.head.l.n1 .sa.head.l.n2 .sa.head.l.n3 .sa.head.l.n4 -side left" );
-}
-  
-
-cmd( "frame .sa.head.lo" );
-cmd( "label .sa.head.lo.l -text \"Contained in object: \"" );
-cmd( "label .sa.head.lo.o -text \"%s\" -fg red", cv->up->label  );
-cmd( "pack .sa.head.lo.l .sa.head.lo.o -side left" );
-
-cmd( "pack .sa.head.lg .sa.head.l .sa.head.lo" );
-
-// main content
-cmd( "frame .sa.m" );
-
-// left column
-cmd( "frame .sa.m.f1" );
-
-cmd( "frame .sa.m.f1.val" );
-cmd( "label .sa.m.f1.val.l -text \"Initialization data\"" );
-
-cmd( "frame .sa.m.f1.val.i -relief groove -bd 2" );
-
-
-cmd( "frame .sa.m.f1.val.i.l1" );
-cmd( "label .sa.m.f1.val.i.l1.l1 -text \"Equal to\"" );
-cmd( "entry .sa.m.f1.val.i.l1.e1 -validate focusout -vcmd { if [ string is double -strict %%P ] { set value1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value1; return 0 } } -invcmd { bell } -justify center" );
-cmd( "pack .sa.m.f1.val.i.l1.l1 .sa.m.f1.val.i.l1.e1" );
-
-cmd( "frame .sa.m.f1.val.i.l2" );
-cmd( "label .sa.m.f1.val.i.l2.l2 -text \"(none)\"" );
-cmd( "entry .sa.m.f1.val.i.l2.e2 -validate focusout -vcmd { if [ string is double -strict %%P ] { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; return 0 } } -invcmd { bell } -justify center -state disabled" );
-cmd( "pack .sa.m.f1.val.i.l2.l2 .sa.m.f1.val.i.l2.e2" );
-
-cmd( "pack .sa.m.f1.val.i.l1 .sa.m.f1.val.i.l2 -expand yes -fill x  -ipadx 5 -ipady 2" );
-
-cmd( "pack .sa.m.f1.val.l .sa.m.f1.val.i" );
-
-
-cmd( "frame .sa.m.f1.rd" );
-cmd( "label .sa.m.f1.rd.l -text \"Initialization method\"" );
-
-cmd( "frame .sa.m.f1.rd.i -relief groove -bd 2" );
-cmd( "radiobutton .sa.m.f1.rd.i.r1 -text \"Equal to\" -variable res -value 1 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Value\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"(none)\"; .sa.m.f1.val.i.l2.e2 conf -state disabled }" );
-cmd( "bind .sa.m.f1.rd.i.r1 <Down> {focus .sa.m.f1.rd.i.r9; .sa.m.f1.rd.i.r9 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r1 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
-
-cmd( "radiobutton .sa.m.f1.rd.i.r9 -text \"Range\" -variable res -value 9 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
-cmd( "bind .sa.m.f1.rd.i.r9 <Down> {focus .sa.m.f1.rd.i.r2; .sa.m.f1.rd.i.r2 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r9 <Up> {focus .sa.m.f1.rd.i.r1; .sa.m.f1.rd.i.r1 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r9 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
-
-cmd( "radiobutton .sa.m.f1.rd.i.r2 -text \"Increasing\" -variable res -value 2 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Start\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Step\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
-cmd( "bind .sa.m.f1.rd.i.r2 <Down> {focus .sa.m.f1.rd.i.r4; .sa.m.f1.rd.i.r4 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r2 <Up> {focus .sa.m.f1.rd.i.r9; .sa.m.f1.rd.i.r9 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r2 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
-
-cmd( "radiobutton .sa.m.f1.rd.i.r4 -text \"Increasing (groups)\" -variable res -value 4 -command {.sa.m.f1.val.i.l1.l1 conf -text \"Start\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Step\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
-cmd( "bind .sa.m.f1.rd.i.r4 <Up> {focus .sa.m.f1.rd.i.r2; .sa.m.f1.rd.i.r2 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r4 <Down> {focus .sa.m.f1.rd.i.r3; .sa.m.f1.rd.i.r3 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r4 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
-
-cmd( "radiobutton .sa.m.f1.rd.i.r3 -text \"Random (uniform)\" -variable res -value 3 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
-cmd( "bind .sa.m.f1.rd.i.r3 <Up> {focus .sa.m.f1.rd.i.r4; .sa.m.f1.rd.i.r4 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r3 <Down> {focus .sa.m.f1.rd.i.r8; .sa.m.f1.rd.i.r8 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r3 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
-
-cmd( "radiobutton .sa.m.f1.rd.i.r8 -text \"Random integer (uniform)\" -variable res -value 8 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
-cmd( "bind .sa.m.f1.rd.i.r8 <Up> {focus .sa.m.f1.rd.i.r3; .sa.m.f1.rd.i.r3 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r8 <Down> {focus .sa.m.f1.rd.i.r5; .sa.m.f1.rd.i.r5 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r8 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
-
-cmd( "radiobutton .sa.m.f1.rd.i.r5 -text \"Random (normal)\" -variable res -value 5 -command {.sa.m.f1.val.i.l1.l1 conf -text \"Mean\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Std. deviation\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
-cmd( "bind .sa.m.f1.rd.i.r5 <Up> {focus .sa.m.f1.rd.i.r8; .sa.m.f1.rd.i.r8 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r5 <Down> {focus .sa.m.f1.rd.i.r7; .sa.m.f1.rd.i.r7 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r5 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
-
-cmd( "radiobutton .sa.m.f1.rd.i.r7 -text \"Import from data file\" -variable res -value 7 -command { .sa.m.f1.val.i.l1.l1 conf -text \"(none)\"; .sa.m.f1.val.i.l1.e1 conf -state disabled; .sa.m.f1.val.i.l2.l2 conf -text \"(none)\"; .sa.m.f1.val.i.l2.e2 conf -state disabled }" );
-cmd( "bind .sa.m.f1.rd.i.r7 <Up> {focus .sa.m.f1.rd.i.r5; .sa.m.f1.rd.i.r5 invoke}" );
-cmd( "bind .sa.m.f1.rd.i.r7 <Return> {.sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
-
-cmd( "pack .sa.m.f1.rd.i.r1 .sa.m.f1.rd.i.r9 .sa.m.f1.rd.i.r2 .sa.m.f1.rd.i.r4 .sa.m.f1.rd.i.r3 .sa.m.f1.rd.i.r8 .sa.m.f1.rd.i.r5 .sa.m.f1.rd.i.r7 -anchor w -padx 2" );
-
-cmd( "pack .sa.m.f1.rd.l .sa.m.f1.rd.i" );
-
-cmd( "pack .sa.m.f1.val .sa.m.f1.rd -expand yes -fill x  -padx 5 -pady 5" );
-
-// right column
-cmd( "frame .sa.m.f2" );
-
-cmd( "frame .sa.m.f2.s" );
-cmd( "label .sa.m.f2.s.tit -text \"Object instances selection\"" );
-
-cmd( "frame .sa.m.f2.s.i -relief groove -bd 2" );
-
-cmd( "frame .sa.m.f2.s.i.l" );
-
-cmd( "frame .sa.m.f2.s.i.l.a" );
-cmd( "label .sa.m.f2.s.i.l.a.l -text \"Apply every\"" );
-cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.l.a.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.l.a.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invcmd { bell } -justify center }" );
-cmd( "label .sa.m.f2.s.i.l.a.l1 -text \"instance(s)\"" );
-cmd( "pack .sa.m.f2.s.i.l.a.l .sa.m.f2.s.i.l.a.e .sa.m.f2.s.i.l.a.l1 -side left -padx 1" );
-
-cmd( "checkbutton .sa.m.f2.s.i.l.f -text \"Fill-in\" -variable fill" );
-cmd( "pack  .sa.m.f2.s.i.l.a .sa.m.f2.s.i.l.f -padx 5 -side left" );
-cmd( "pack  .sa.m.f2.s.i.l -pady 2" );
-
-cmd( "frame .sa.m.f2.s.i.sel -relief groove -bd 2" );
-cmd( "radiobutton .sa.m.f2.s.i.sel.all -text \"Apply to all instances\" -variable to_all -value 1 -command { .sa.m.f2.s.i.sel2.c.to conf -state disabled; .sa.m.f2.s.i.sel2.c.from conf -state disabled; bind .sa.m.f2.s.i.sel2.c.from <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { } }" );
-cmd( "radiobutton .sa.m.f2.s.i.sel.sel -text \"Apply to a range of instances\" -variable to_all -value 2 -command { .sa.m.f2.s.i.sel2.c.to conf -state normal; .sa.m.f2.s.i.sel2.c.from conf -state normal; bind .sa.m.f2.s.i.sel2.c.from <Button-3> {set choice 9}; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { set choice 10 }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> {set choice 9}; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { set choice 10 } }" );
-cmd( "pack .sa.m.f2.s.i.sel.all .sa.m.f2.s.i.sel.sel -anchor w" );
-cmd( "pack .sa.m.f2.s.i.sel -pady 2" );
-
-cmd( "frame .sa.m.f2.s.i.sel2" );
-
-cmd( "frame .sa.m.f2.s.i.sel2.c" );
-cmd( "label .sa.m.f2.s.i.sel2.c.lfrom -text \"From\"" );
-cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.sel2.c.from -width 5 -from 1 -to 9999 -state disabled -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.sel2.c.from -width 5 -state disabled -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invcmd { bell } -justify center }" );
-cmd( "label .sa.m.f2.s.i.sel2.c.lto -text \"to\"" );
-cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.sel2.c.to -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.sel2.c.to -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invcmd { bell } -justify center }" );
-cmd( "pack .sa.m.f2.s.i.sel2.c.lfrom .sa.m.f2.s.i.sel2.c.from .sa.m.f2.s.i.sel2.c.lto .sa.m.f2.s.i.sel2.c.to -side left -pady 1" );
-
-cmd( "label .sa.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
-cmd( "pack .sa.m.f2.s.i.sel2.c .sa.m.f2.s.i.sel2.obs" );
-cmd( "pack .sa.m.f2.s.i.sel2 -pady 2" );
-
-cmd( "pack .sa.m.f2.s.tit .sa.m.f2.s.i" );
-
-cmd( "pack .sa.m.f2.s" );
-
-cmd( "frame .sa.m.f2.rnd" );
-cmd( "label .sa.m.f2.rnd.l -text \"Random number generator\"" );
-
-cmd( "frame .sa.m.f2.rnd.i -relief groove -bd 2" );
-
-cmd( "frame .sa.m.f2.rnd.i.le" );
-cmd( "checkbutton .sa.m.f2.rnd.i.le.f -text \"Reset the generator\" -variable use_seed -command { if $use_seed { .sa.m.f2.rnd.i.le.s.e1 conf -state normal } { .sa.m.f2.rnd.i.le.s.e1 conf -state disabled } }" );
-cmd( "frame .sa.m.f2.rnd.i.le.s" );
-cmd( "label .sa.m.f2.rnd.i.le.s.l1 -text \"Seed\"" );
-cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.rnd.i.le.s.e1 -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.rnd.i.le.s.e1 -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invcmd { bell } -justify center }" );
-cmd( "pack .sa.m.f2.rnd.i.le.s.l1 .sa.m.f2.rnd.i.le.s.e1 -side left -padx 1" );
-
-cmd( "pack .sa.m.f2.rnd.i.le.f .sa.m.f2.rnd.i.le.s -side left -padx 5" );
-
-cmd( "pack .sa.m.f2.rnd.i.le -pady 2" );
-
-cmd( "pack .sa.m.f2.rnd.l .sa.m.f2.rnd.i" );
-
-cmd( "checkbutton .sa.m.f2.ud -text \"Update initialization comments\" -variable update_d" );
-
-cmd( "pack .sa.m.f2.s .sa.m.f2.rnd .sa.m.f2.ud -anchor w -expand yes -fill x" );
-
-cmd( "pack .sa.m.f1 .sa.m.f2 -side left -expand yes -fill both -padx 5 -pady 5" );
-cmd( "pack .sa.head .sa.m -pady 5" );
-
-cmd( "okhelpcancel .sa b { set choice 1 } { LsdHelp menudata_init.html#setall } { set choice 2 }" );
-
-cmd( "bind .sa.m.f1.rd.i <Return> {  if [ string equal [ .sa.m.f1.val.i.l2.e2 cget -state ] normal ] { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1 } }" );
-cmd( "bind .sa.m.f1.val.i.l1.e1 <Return> { if [ string equal [ .sa.m.f1.val.i.l2.e2 cget -state ] normal ] { focus .sa.m.f1.val.i.l2.e2; .sa.m.f1.val.i.l2.e2 selection range 0 end } { set choice 1 } }" );
-cmd( "bind .sa.m.f1.val.i.l2.e2 <Return> { set choice 1 }" );
-cmd( "bind .sa.m.f2.s.i.l.a.e <Return> {focus .sa.m.f2.s.i.sel.all; .sa.m.f2.s.i.sel.all invoke}" );
-cmd( "bind .sa.m.f2.s.i.sel.all <Return> {focus .sa.b.ok}" );
-cmd( "bind .sa.m.f2.s.i.sel.sel <Return> {focus .sa.m.f2.s.i.sel2.c.from; .sa.m.f2.s.i.sel2.c.from selection range 0 end }" );
-cmd( "bind .sa.m.f2.s.i.sel2.c.from <Return> {focus .sa.m.f2.s.i.sel2.c.to; .sa.m.f2.s.i.sel2.c.from selection range 0 end }" );
-cmd( "bind .sa.m.f2.s.i.sel2.c.to <Return> {focus .sa.b.ok}" );
-cmd( "bind .sa.m.f2.rnd.i.le.s.e1 <Return> {focus .sa.b.ok}" );
-
-cmd( "showtop .sa topleftW" );
-bool selFocus = true;
-
-here_setall:
-
-// update current linked variables values
-cmd( "write_any .sa.m.f1.val.i.l1.e1 $value1" ); 
-cmd( "write_any .sa.m.f1.val.i.l2.e2 $value2" );
-cmd( "write_any .sa.m.f2.s.i.l.a.e $step_in" ); 
-cmd( "write_any .sa.m.f2.s.i.sel2.c.from $cases_from" ); 
-cmd( "write_any .sa.m.f2.s.i.sel2.c.to $cases_to" ); 
-cmd( "write_any .sa.m.f2.rnd.i.le.s.e1 $rnd_seed" ); 
-
-if ( selFocus )
-{
-	cmd( "focus .sa.m.f1.val.i.l1.e1; .sa.m.f1.val.i.l1.e1 selection range 0 end" );	// speed-up data entry focusing first data field
-	selFocus = false;
-}
-
-*choice = 0;
-while ( *choice == 0 )
-  Tcl_DoOneEvent( 0 );
-
-if (*choice==9)
-{//search instance from
- i=compute_copyfrom(original, choice);
- cmd( "set cases_from %d", i );
- goto here_setall;
-}
-
-if (*choice==10)
-{
- //search instance to
- i=compute_copyfrom(original, choice);
- cmd( "set cases_to %d", i );
- goto here_setall;
-}
-
-// save current linked variables values before closing
-cmd( "set value1 [ .sa.m.f1.val.i.l1.e1 get ]" ); 
-cmd( "set value2 [ .sa.m.f1.val.i.l2.e2 get ]" ); 
-cmd( "set cases_from [ .sa.m.f2.s.i.sel2.c.from get ]" ); 
-cmd( "set cases_to [ .sa.m.f2.s.i.sel2.c.to get ]" ); 
-cmd( "set step_in [ .sa.m.f2.s.i.l.a.e get ]" ); 
-cmd( "set rnd_seed [ .sa.m.f2.rnd.i.le.s.e1 get ]" ); 
-
-cmd( "destroytop .sa" );
-
-if ( (*choice==1 && res != 0 ) || *choice==9 || *choice==10)
-{
-cmd( "set choice $use_seed" );
-if ( *choice == 1 )
- {
-  cmd( "set choice $rnd_seed" );
-  init_random(*choice);
- }
-cmd( "set choice $to_all" );
-to_all=*choice;
-cmd( "set choice $cases_from" );
-cases_from=*choice;
-cmd( "set choice $cases_to" );
-cases_to=*choice;
-cmd( "set choice $update_d" );
-update_description=*choice;
-
-switch (res)
-{
-//Equal 
-case 1:
-     cmd( "set choice $fill" );
-     fill=*choice;
-     cmd( "set choice $step_in" );
-      
-     for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
-      {
-      if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice) == 0 )))
-       {
-        cv=cur->search_var(NULL, lab);
-  			cv->data_loaded='+';
-  			if (cv->param == 0 )
-  			  cv->val[lag]=value1;
-  			else
-  			  cv->val[ 0 ]=value1;
-       }
-		  }
-      if ( update_description == 1 )
-      {
-      cd=search_description(lab);
-    
-      if (cd == NULL )
-      {  cv=r->search_var(NULL, lab);
-       if (cv->param == 0 )
-         add_description(lab, "Variable", "(no description available)");
-       if (cv->param == 1 )
-         add_description(lab, "Parameter", "(no description available)");  
-       if (cv->param==2)
-         add_description(lab, "Function", "(no description available)");  
-       plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
-       cd=search_description(lab);
-      } 
-    
-      if (to_all == 1 )
-        {sprintf( msg, "All %d instances equal to %g.", i-1, value1);
-         change_descr_lab(lab, "", "", "", msg);      
-        } 
-      else
-        {
-         if (cd->init != NULL )
-           sprintf( msg, "%s Instances from %d to %d equal to %g.",cd->init, cases_from, cases_to, value1);
-         else
-           sprintf( msg, "Instances from %d to %d equal to %g.", cases_from, cases_to, value1);  
-         change_descr_lab(lab, "", "", "", msg);
-        }  
-       } 
-  		unsaved_change( true );		// signal unsaved change
-		  break;
-
-//Range
-case 9:
-     cmd( "set choice $fill" );
-     fill=*choice;
-     cmd( "set choice $step_in" );
-     counter=-1;
-     for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
-      {
-      if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (((i-cases_from)%(*choice) == 0 )))
-       {
-         //here the counter
-         counter++;
-       }
-		  }
-     value=(value2-value1)/counter;
-     counter=0; 
-     for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
-      {
-      if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice) == 0 )))
-       {
-        cv=cur->search_var(NULL, lab);
-  			cv->data_loaded='+';
-  			if (cv->param == 0 )
-  			  cv->val[lag]=value1+value*counter;
-  			else
-  			  cv->val[ 0 ]=value1+value*counter;
-       }
-      if (i>=cases_from && ((i-cases_from+1)% (*choice)) == 0 )
-        counter++; 
-
-		  }
-      if ( update_description == 1 )
-      {
-      cd=search_description(lab);
-    
-      if (cd == NULL )
-      {  cv=r->search_var(NULL, lab);
-       if (cv->param == 0 )
-         add_description(lab, "Variable", "(no description available)");
-       if (cv->param == 1 )
-         add_description(lab, "Parameter", "(no description available)");  
-       if (cv->param==2)
-         add_description(lab, "Function", "(no description available)");  
-       plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
-       cd=search_description(lab);
-      } 
-      
-      if (to_all == 1 )
-        {sprintf( msg, "All %d instances set ranging from %g to %g (i.e. increments of %g).", i-1, value1, value2, value);
-         change_descr_lab(lab, "", "", "", msg);      
-        } 
-      else
-        {
-         if (cd->init != NULL )
-           sprintf( msg, "%s Instances from %d to %d ranging from %g to %g (i.e. increments of %g).",cd->init, cases_from, cases_to, value1, value2, value);
-         else
-           sprintf( msg, "Instances from %d to %d ranging from %g to %g (i.e. increments of %g).", cases_from, cases_to, value1, value2, value);  
-         change_descr_lab(lab, "", "", "", msg);
-        }  
-       } 
-  		unsaved_change( true );		// signal unsaved change
-		  break;
-
-case 2: //increasing
-     
-     cv=r->search_var(NULL, lab);
-  	  cv->data_loaded='+';
-     cmd( "set choice $fill" );
-     fill=*choice;
-     cmd( "set choice $step_in" );
-     
-      for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
-        {
-        if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice) == 0 )))
-        {
-         cv=cur->search_var(NULL, lab);
-         cv->data_loaded='+';
-         if (cv->param == 0 )
-           cv->val[lag]=value1 +step*value2;
-         else
-           cv->val[ 0 ]=value1 +step*value2;
-        }
-        if (i>=cases_from && ((i-cases_from+1)% (*choice)) == 0 )
-          step+=1;
-        }
-      if ( update_description == 1 )
-      {
-      cd=search_description(lab);
-    
-      if (cd == NULL )
-      {  cv=r->search_var(NULL, lab);
-       if (cv->param == 0 )
-         add_description(lab, "Variable", "(no description available)");
-       if (cv->param == 1 )
-         add_description(lab, "Parameter", "(no description available)");  
-       if (cv->param==2)
-         add_description(lab, "Function", "(no description available)");  
-       plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
-       cd=search_description(lab);
-      } 
-      
-      if (to_all == 1 )
-        {sprintf( msg, "All %d instances increasing from %g with steps %g. The value is increased every %d instances.", i-1, value1, value2, *choice);
-         change_descr_lab(lab, "", "", "", msg);
-        }
-      else
-        {
-         if (cd->init != NULL )
-           sprintf( msg, "%s Instances from %d to %d increasing from %g with steps %g. The value is increased every %d instances.",cd->init, cases_from, cases_to, value1, value2, *choice);
-         else
-           sprintf( msg, "Instances from %d to %d increasing from %g with steps %g. The value is increased every %d instances.", cases_from, cases_to, value1, value2, *choice);            
-         change_descr_lab(lab, "", "", "", msg);
-        }  
-        }
-  		unsaved_change( true );		// signal unsaved change
-        break;
-		
-case 4: 
-		cv=r->search_var(NULL, lab);
-		  for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
-        {
-      if (to_all==1 || (cases_from<=i && cases_to>=i))
-      {
-        cv=cur->search_var(NULL, lab);
-        cv->data_loaded='+';
-        if (cv->param == 0 )
-           cv->val[lag]=value1 +step*value2;
-		   	else
-           cv->val[ 0 ]=value1 +step*value2;
-        if (cur->next!=cur->hyper_next(r->label))
-          step=-1;
-        step+=1;
-
-        }
-       } 
-
-      if ( update_description == 1 )
-      {
-      cd=search_description(lab);
-    
-      if (cd == NULL )
-      {  cv=r->search_var(NULL, lab);
-       if (cv->param == 0 )
-         add_description(lab, "Variable", "(no description available)");
-       if (cv->param == 1 )
-         add_description(lab, "Parameter", "(no description available)");  
-       if (cv->param==2)
-         add_description(lab, "Function", "(no description available)");  
-       plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
-       cd=search_description(lab);
-      } 
-      
-      if (to_all == 1 )
-        {sprintf( msg, "All %d instances increasing from %g with steps %g re-starting for each group of objects.", i-1, value1, value2);
-         change_descr_lab(lab, "", "", "", msg);      
-        } 
-      else
-        {
-         if (cd->init != NULL )
-           sprintf( msg, "%s Instances from %d to %d increasing from %g with steps %g re-starting for each group of objects.",cd->init, cases_from, cases_to, value1, value2);
-         else
-           sprintf( msg, "Instances from %d to %d increasing from %g with steps %g re-starting for each group of objects.", cases_from, cases_to, value1, value2);
-           
-         change_descr_lab(lab, "", "", "", msg);        
-        }  
-       }
-  		unsaved_change( true );		// signal unsaved change
-
-        break;
-
-case 3: 
-     cmd( "set choice $fill" );
-     fill=*choice;
-     cmd( "set choice $step_in" );
-      
-     for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
-      {
-      if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice) == 0 )))
-       {
-       cv=cur->search_var(NULL, lab);
-       cv->data_loaded='+';
-       if (cv->param == 0 )
- 			  cv->val[lag]=value1+RND*(value2-value1);
- 			else
- 			  cv->val[ 0 ]=value1+RND*(value2-value1);
-       }
-      }
-
-      if ( update_description == 1 )
-      {
-      cd=search_description(lab);
-    
-      if (cd == NULL )
-      {  cv=r->search_var(NULL, lab);
-       if (cv->param == 0 )
-         add_description(lab, "Variable", "(no description available)");
-       if (cv->param == 1 )
-         add_description(lab, "Parameter", "(no description available)");  
-       if (cv->param==2)
-         add_description(lab, "Function", "(no description available)");  
-       plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
-       cd=search_description(lab);
-      } 
-      
-      if (to_all == 1 )
-        {sprintf( msg, "All %d instances set to random values drawn from a uniform in the range [%g,%g].", i-1, value1, value2);
-         change_descr_lab(lab, "", "", "", msg);      
-        } 
-      else
-        {
-
-         if (cd->init != NULL )
-           sprintf( msg, "%s Instances from %d to %d set to random values drawn from a uniform in the range [%g,%g].", cd->init, cases_from, cases_to, value1, value2);
-         else
-           sprintf( msg, "Instances from %d to %d set to random values drawn from a uniform in the range [%g,%g].", cases_from, cases_to, value1, value2);         
-         change_descr_lab(lab, "", "", "", msg);        
-        }  
-       }
-
-  		unsaved_change( true );		// signal unsaved change
-
-		  break;
-		  
-case 5: 
-     cmd( "set choice $fill" );
-     fill=*choice;
-     cmd( "set choice $step_in" );
-      
-     for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
-      {
-      if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice) == 0 )))
-       {
-			cv=cur->search_var(NULL, lab);
-         cv->data_loaded='+';
-			if (cv->param == 0 )
-			  cv->val[lag]=norm(value1, value2);
-			else
-			  cv->val[ 0 ]=norm(value1, value2);
-		  }
-      }
-
-      if ( update_description == 1 )
-      {
-		  cd = search_description( lab );
-		
-		if ( cd == NULL )
-		{  
-			cv = r->search_var( NULL, lab );
-			if ( cv->param == 0 )
-				add_description( lab, "Variable", "(no description available)" );
-			if ( cv->param == 1 )
-				add_description( lab, "Parameter", "(no description available)" );  
-			if ( cv->param == 2 )
-				add_description( lab, "Function", "(no description available)"); 
-			
-			plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
-			cd=search_description( lab );
-		} 
-		  
-		if ( to_all == 1 )
-		{
-			sprintf( msg, "All %d instances set to random values drawn from a normal with mean=%g and std. deviation=%g.", i-1, value1, value2);
-			change_descr_lab(lab, "", "", "", msg);      
-		} 
+	bool selFocus = true;
+	char *l, ch[ MAX_ELEM_LENGTH ];
+	double value, value1, value2, step, counter;
+	int res, i, kappa, to_all, update_description, cases_from = 1, cases_to = 0, fill = 0;
+	description *cd; 
+	object *cur, *r;
+	variable *cv;
+	FILE *f;
+
+	r = root->search( original->label );		// select the first instance
+	cv = r->search_var( NULL, lab );
+	if ( cv == NULL )
+		return;
+
+	Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "value1", ( char * ) &value1, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( inter, "value2", ( char * ) &value2, TCL_LINK_DOUBLE );
+
+	// preload the existing value of the first object
+	if ( cv->param == 0 )
+		value1 = cv->val [ lag ];
+	else
+		value1 = cv->val[ 0 ];
+
+	// default values
+	res = 1;
+	value2 = 0;
+	cmd( "set value 1" ); 						// method
+	cmd( "set to_all 1" );
+	cmd( "set step_in 1" );
+	cmd( "set cases_from 1; set cases_to 1000" );
+	cmd( "set rnd_seed 1" );
+	cmd( "set use_seed 0" );
+	cmd( "set update_d 1" );
+
+	cmd( "newtop .sa \"Set All Objects Initialization\" { set choice 2 }" );
+
+	cmd( "frame .sa.head" );					// heading
+	cmd( "label .sa.head.lg -text \"Set initial values for every copy of\"" );
+
+	cmd( "frame .sa.head.l" );
+	if ( cv->param != 0 )
+	{
+		if ( cv->param == 2 )
+			cmd( "label .sa.head.l.c -text \"Function: \"" );
 		else
-		{
-			if ( cd->init != NULL )
-			   sprintf( msg, "%s Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g",cd->init, cases_from, cases_to, value1, value2 );
-			else
-				sprintf( msg, "Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g", cases_from, cases_to, value1, value2 );   
-		   
-			change_descr_lab(lab, "", "", "", msg);        
-		}  
-      }
-  		unsaved_change( true );		// signal unsaved change
-
-		break;
-
-case 6: 
-		cv=r->search_var(NULL, lab);
-		cv->data_loaded='+';
-        for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
-        {
-       if (to_all==1 || (cases_from<=i && cases_to>=i))
-        {
-         cv=cur->search_var(NULL, lab);
-         cv->data_loaded='+';
-         if (step==value2)
-          {if (cv->param == 0 )
-            cv->val[lag]=value1;
-           else
-            cv->val[ 0 ]=value1;
-           step=0;
-          }
-         else
-           step++;
-
-        }
-        }
-
-      if ( update_description == 1 )
-      {
-      cd=search_description(lab);
-    
-      if (cd == NULL )
-      {  cv=r->search_var(NULL, lab);
-       if (cv->param == 0 )
-         add_description(lab, "Variable", "(no description available)");
-       if (cv->param == 1 )
-         add_description(lab, "Parameter", "(no description available)");  
-       if (cv->param==2)
-         add_description(lab, "Function", "(no description available)");  
-       plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
-       cd=search_description(lab);
-      } 
-      
-      if (to_all == 1 )
-        {sprintf( msg, "All %d instances set to %g skipping %g instances.", i-1, value1, value2);
-         change_descr_lab(lab, "", "", "", msg);      
-        } 
-      else
-        {
-         if (cd->init != NULL )
-           sprintf( msg, "%s Instances from %d to %d set to %g skipping %g instances.",cd->init, cases_from, cases_to, value1, value2);
-         else
-           sprintf( msg, "Instances from %d to %d set to %g skipping %g instances.", cases_from, cases_to, value1, value2);         
-         change_descr_lab(lab, "", "", "", msg);        
-        }  
-       }
-  		unsaved_change( true );		// signal unsaved change
-
-        break;
-
-
-case 7:
-	cmd( "set oldpath [pwd]" );
-	cmd( "set filename [ tk_getOpenFile -parent . -title \"File to Import Data\" -filetypes { { {Text Files} {.txt} } { {All Files} {*} }} ]" );
-	l = ( char * ) Tcl_GetVar( inter, "filename", 0 );
-	if ( l != NULL && strcmp( l, "" ) )
-	{ 
-		cmd( "cd [file dirname $filename]" );
-		cmd( "set fn [file tail $filename]" );
-		l = ( char * ) Tcl_GetVar( inter, "fn", 0 );
-		f = fopen( l, "r" );
-		cmd( "cd $oldpath" );
-		if (f != NULL )
-		{
-			fscanf( f, "%99s", ch );				// the label
-			kappa = fscanf( f, "%lf", &value );
-			
-			for ( i = 1, cur = r; cur != NULL && kappa != EOF; cur = cur->hyper_next( r->label ), ++i )
-			{
-				if (to_all==1 || (cases_from<=i && cases_to>=i))
-				{
-					cv = cur->search_var( NULL, lab );
-					cv->data_loaded = '+';
-					
-					if ( cv->param == 0 )
-						cv->val[ lag ] = value;
-					else
-						cv->val[ 0 ] = value;
-				  
-					kappa = fscanf( f, "%lf", &value );
-				}
-			}
-			
-			if ( cur != NULL || kappa != EOF )
-				plog( "\nWarning: problem loading data, the file may contain a different number\nof values compared to the objects to initialize" );
-			
-			if ( update_description == 1 )
-			{
-				cd = search_description( lab );
-		
-				if ( cd == NULL )
-				{  
-					cv = r->search_var( NULL, lab );
-					
-					if ( cv->param == 0 )
-						add_description( lab, "Variable", "(no description available)" );
-					
-					if ( cv->param == 1 )
-						add_description( lab, "Parameter", "(no description available)" );  
-					
-					if ( cv->param == 2 )
-						add_description( lab, "Function", "(no description available)" );
-					
-					plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
-					
-					cd = search_description( lab );
-				} 
-			  
-				if ( to_all == 1 )
-				{
-					sprintf( msg, "All %d instances set with data from file %s.", i - 1, l );
-					change_descr_lab( lab, "", "", "", msg );      
-				} 
-				else
-				{
-					if ( cd->init != NULL )
-						sprintf( msg, "%s Instances from %d to %d with data from file %s", cd->init, cases_from, cases_to, l );
-					else
-						sprintf( msg, "Instances from %d to %d with data from file %s", cases_from, cases_to, l );
-					
-					change_descr_lab( lab, "", "", "", msg );        
-				}  
-			}
-		}
-	  
-		unsaved_change( true );		// signal unsaved change
+			cmd( "label .sa.head.l.c -text \"Parameter: \"" );
+		cmd( "label .sa.head.l.n -text \"%s\" -fg red", lab  );
+		cmd( "pack .sa.head.l.c .sa.head.l.n -side left" );
 	}
-	
-	break;
-	
+	else
+	{
+		cmd( "label .sa.head.l.c -text \"Variable: \"" );
+		cmd( "label .sa.head.l.n1 -text \"%s  \" -fg red", lab );
+		cmd( "label .sa.head.l.n2 -text \"\\[  lag \"" );
+		cmd( "label .sa.head.l.n3 -text \"%d\" -fg red", t - cv->last_update + lag + 1  );
+		cmd( "label .sa.head.l.n4 -text \"\\]\"" );
+		cmd( "pack .sa.head.l.c .sa.head.l.n1 .sa.head.l.n2 .sa.head.l.n3 .sa.head.l.n4 -side left" );
+	}
 
-case 8:
-     cmd( "set choice $fill" );
-     fill=*choice;
-     cmd( "set choice $step_in" );
-      
-     for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
-      {
-      if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice) == 0 )))
-       {
-       cv=cur->search_var(NULL, lab);
-       cv->data_loaded='+';
-       if (cv->param == 0 )
- 			  cv->val[lag]=uniform_int(value1,value2);
- 			else
- 			  cv->val[ 0 ]=uniform_int(value1,value2);
-       }
-      }
+	cmd( "frame .sa.head.lo" );
+	cmd( "label .sa.head.lo.l -text \"Contained in object: \"" );
+	cmd( "label .sa.head.lo.o -text \"%s\" -fg red", cv->up->label  );
+	cmd( "pack .sa.head.lo.l .sa.head.lo.o -side left" );
 
-      if ( update_description == 1 )
-      {
-      cd=search_description(lab);
-    
-      if (cd == NULL )
-      {  cv=r->search_var(NULL, lab);
-       if (cv->param == 0 )
-         add_description(lab, "Variable", "(no description available)");
-       if (cv->param == 1 )
-         add_description(lab, "Parameter", "(no description available)");  
-       if (cv->param==2)
-         add_description(lab, "Function", "(no description available)");  
-       plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
-       cd=search_description(lab);
-      } 
+	cmd( "pack .sa.head.lg .sa.head.l .sa.head.lo" );
 
-      if (to_all == 1 )
-        {sprintf( msg, "All %d instances set to integer random values drawn from a uniform in the range [%g,%g].", i-1, value1, value2);
-         change_descr_lab(lab, "", "", "", msg);      
-        } 
-      else
-        {
+	cmd( "frame .sa.m" );			
 
-         if (cd->init != NULL )
-           sprintf( msg, "%s Instances from %d to %d set to integer random values drawn from a uniform in the range [%g,%g].", cd->init, cases_from, cases_to, value1, value2);
-         else
-           sprintf( msg, "Instances from %d to %d set to integer random values drawn from a uniform in the range [%g,%g].", cases_from, cases_to, value1, value2);         
-         change_descr_lab(lab, "", "", "", msg);        
-        }  
-       }
+	cmd( "frame .sa.m.f1" );					// left column
 
-  		unsaved_change( true );		// signal unsaved change
+	cmd( "frame .sa.m.f1.val" );
+	cmd( "label .sa.m.f1.val.l -text \"Initialization data\"" );
 
-		  break;
+	cmd( "frame .sa.m.f1.val.i -relief groove -bd 2" );
 
+	cmd( "frame .sa.m.f1.val.i.l1" );
+	cmd( "label .sa.m.f1.val.i.l1.l1 -text \"Equal to\"" );
+	cmd( "entry .sa.m.f1.val.i.l1.e1 -validate focusout -vcmd { if [ string is double -strict %%P ] { set value1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value1; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "pack .sa.m.f1.val.i.l1.l1 .sa.m.f1.val.i.l1.e1" );
 
-default:
-		error_hard( "invalid option for setting values", 
-					"internal problem in LSD", 
-					"if error persists, please contact developers",
-					true );
-		myexit( 22 );
-}
-}
+	cmd( "frame .sa.m.f1.val.i.l2" );
+	cmd( "label .sa.m.f1.val.i.l2.l2 -text \"(none )\"" );
+	cmd( "entry .sa.m.f1.val.i.l2.e2 -validate focusout -vcmd { if [ string is double -strict %%P ] { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; return 0 } } -invcmd { bell } -justify center -state disabled" );
+	cmd( "pack .sa.m.f1.val.i.l2.l2 .sa.m.f1.val.i.l2.e2" );
 
-Tcl_UnlinkVar( inter, "value1");
-Tcl_UnlinkVar( inter, "value2");
-Tcl_UnlinkVar( inter, "res");
+	cmd( "pack .sa.m.f1.val.i.l1 .sa.m.f1.val.i.l2 -expand yes -fill x  -ipadx 5 -ipady 2" );
+
+	cmd( "pack .sa.m.f1.val.l .sa.m.f1.val.i" );
+
+	cmd( "frame .sa.m.f1.rd" );
+	cmd( "label .sa.m.f1.rd.l -text \"Initialization method\"" );
+
+	cmd( "frame .sa.m.f1.rd.i -relief groove -bd 2" );
+	cmd( "radiobutton .sa.m.f1.rd.i.r1 -text \"Equal to\" -variable res -value 1 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Value\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"(none )\"; .sa.m.f1.val.i.l2.e2 conf -state disabled }" );
+	cmd( "bind .sa.m.f1.rd.i.r1 <Down> {focus .sa.m.f1.rd.i.r9; .sa.m.f1.rd.i.r9 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r1 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+
+	cmd( "radiobutton .sa.m.f1.rd.i.r9 -text \"Range\" -variable res -value 9 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
+	cmd( "bind .sa.m.f1.rd.i.r9 <Down> {focus .sa.m.f1.rd.i.r2; .sa.m.f1.rd.i.r2 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r9 <Up> {focus .sa.m.f1.rd.i.r1; .sa.m.f1.rd.i.r1 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r9 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+
+	cmd( "radiobutton .sa.m.f1.rd.i.r2 -text \"Increasing\" -variable res -value 2 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Start\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Step\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
+	cmd( "bind .sa.m.f1.rd.i.r2 <Down> {focus .sa.m.f1.rd.i.r4; .sa.m.f1.rd.i.r4 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r2 <Up> {focus .sa.m.f1.rd.i.r9; .sa.m.f1.rd.i.r9 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r2 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+
+	cmd( "radiobutton .sa.m.f1.rd.i.r4 -text \"Increasing (groups)\" -variable res -value 4 -command {.sa.m.f1.val.i.l1.l1 conf -text \"Start\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Step\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
+	cmd( "bind .sa.m.f1.rd.i.r4 <Up> {focus .sa.m.f1.rd.i.r2; .sa.m.f1.rd.i.r2 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r4 <Down> {focus .sa.m.f1.rd.i.r3; .sa.m.f1.rd.i.r3 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r4 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+
+	cmd( "radiobutton .sa.m.f1.rd.i.r3 -text \"Random (uniform)\" -variable res -value 3 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
+	cmd( "bind .sa.m.f1.rd.i.r3 <Up> {focus .sa.m.f1.rd.i.r4; .sa.m.f1.rd.i.r4 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r3 <Down> {focus .sa.m.f1.rd.i.r8; .sa.m.f1.rd.i.r8 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r3 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+
+	cmd( "radiobutton .sa.m.f1.rd.i.r8 -text \"Random integer (uniform)\" -variable res -value 8 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
+	cmd( "bind .sa.m.f1.rd.i.r8 <Up> {focus .sa.m.f1.rd.i.r3; .sa.m.f1.rd.i.r3 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r8 <Down> {focus .sa.m.f1.rd.i.r5; .sa.m.f1.rd.i.r5 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r8 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+
+	cmd( "radiobutton .sa.m.f1.rd.i.r5 -text \"Random (normal)\" -variable res -value 5 -command {.sa.m.f1.val.i.l1.l1 conf -text \"Mean\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Std. deviation\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
+	cmd( "bind .sa.m.f1.rd.i.r5 <Up> {focus .sa.m.f1.rd.i.r8; .sa.m.f1.rd.i.r8 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r5 <Down> {focus .sa.m.f1.rd.i.r7; .sa.m.f1.rd.i.r7 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r5 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+
+	cmd( "radiobutton .sa.m.f1.rd.i.r7 -text \"Import from data file\" -variable res -value 7 -command { .sa.m.f1.val.i.l1.l1 conf -text \"(none )\"; .sa.m.f1.val.i.l1.e1 conf -state disabled; .sa.m.f1.val.i.l2.l2 conf -text \"(none )\"; .sa.m.f1.val.i.l2.e2 conf -state disabled }" );
+	cmd( "bind .sa.m.f1.rd.i.r7 <Up> {focus .sa.m.f1.rd.i.r5; .sa.m.f1.rd.i.r5 invoke}" );
+	cmd( "bind .sa.m.f1.rd.i.r7 <Return> {.sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+
+	cmd( "pack .sa.m.f1.rd.i.r1 .sa.m.f1.rd.i.r9 .sa.m.f1.rd.i.r2 .sa.m.f1.rd.i.r4 .sa.m.f1.rd.i.r3 .sa.m.f1.rd.i.r8 .sa.m.f1.rd.i.r5 .sa.m.f1.rd.i.r7 -anchor w -padx 2" );
+
+	cmd( "pack .sa.m.f1.rd.l .sa.m.f1.rd.i" );
+
+	cmd( "pack .sa.m.f1.val .sa.m.f1.rd -expand yes -fill x  -padx 5 -pady 5" );
+
+	cmd( "frame .sa.m.f2" );					// right column
+
+	cmd( "frame .sa.m.f2.s" );
+	cmd( "label .sa.m.f2.s.tit -text \"Object instances selection\"" );
+
+	cmd( "frame .sa.m.f2.s.i -relief groove -bd 2" );
+
+	cmd( "frame .sa.m.f2.s.i.l" );
+
+	cmd( "frame .sa.m.f2.s.i.l.a" );
+	cmd( "label .sa.m.f2.s.i.l.a.l -text \"Apply every\"" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.l.a.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.l.a.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "label .sa.m.f2.s.i.l.a.l1 -text \"instance( s)\"" );
+	cmd( "pack .sa.m.f2.s.i.l.a.l .sa.m.f2.s.i.l.a.e .sa.m.f2.s.i.l.a.l1 -side left -padx 1" );
+
+	cmd( "checkbutton .sa.m.f2.s.i.l.f -text \"Fill-in\" -variable fill" );
+	cmd( "pack  .sa.m.f2.s.i.l.a .sa.m.f2.s.i.l.f -padx 5 -side left" );
+	cmd( "pack  .sa.m.f2.s.i.l -pady 2" );
+
+	cmd( "frame .sa.m.f2.s.i.sel -relief groove -bd 2" );
+	cmd( "radiobutton .sa.m.f2.s.i.sel.all -text \"Apply to all instances\" -variable to_all -value 1 -command { .sa.m.f2.s.i.sel2.c.to conf -state disabled; .sa.m.f2.s.i.sel2.c.from conf -state disabled; bind .sa.m.f2.s.i.sel2.c.from <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { } }" );
+	cmd( "radiobutton .sa.m.f2.s.i.sel.sel -text \"Apply to a range of instances\" -variable to_all -value 2 -command { .sa.m.f2.s.i.sel2.c.to conf -state normal; .sa.m.f2.s.i.sel2.c.from conf -state normal; bind .sa.m.f2.s.i.sel2.c.from <Button-3> {set choice 9}; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { set choice 10 }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> {set choice 9}; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { set choice 10 } }" );
+	cmd( "pack .sa.m.f2.s.i.sel.all .sa.m.f2.s.i.sel.sel -anchor w" );
+	cmd( "pack .sa.m.f2.s.i.sel -pady 2" );
+
+	cmd( "frame .sa.m.f2.s.i.sel2" );
+
+	cmd( "frame .sa.m.f2.s.i.sel2.c" );
+	cmd( "label .sa.m.f2.s.i.sel2.c.lfrom -text \"From\"" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.sel2.c.from -width 5 -from 1 -to 9999 -state disabled -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.sel2.c.from -width 5 -state disabled -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "label .sa.m.f2.s.i.sel2.c.lto -text \"to\"" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.sel2.c.to -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.sel2.c.to -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "pack .sa.m.f2.s.i.sel2.c.lfrom .sa.m.f2.s.i.sel2.c.from .sa.m.f2.s.i.sel2.c.lto .sa.m.f2.s.i.sel2.c.to -side left -pady 1" );
+
+	cmd( "label .sa.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
+	cmd( "pack .sa.m.f2.s.i.sel2.c .sa.m.f2.s.i.sel2.obs" );
+	cmd( "pack .sa.m.f2.s.i.sel2 -pady 2" );
+
+	cmd( "pack .sa.m.f2.s.tit .sa.m.f2.s.i" );
+
+	cmd( "pack .sa.m.f2.s" );
+
+	cmd( "frame .sa.m.f2.rnd" );
+	cmd( "label .sa.m.f2.rnd.l -text \"Random number generator\"" );
+
+	cmd( "frame .sa.m.f2.rnd.i -relief groove -bd 2" );
+
+	cmd( "frame .sa.m.f2.rnd.i.le" );
+	cmd( "checkbutton .sa.m.f2.rnd.i.le.f -text \"Reset the generator\" -variable use_seed -command { if $use_seed { .sa.m.f2.rnd.i.le.s.e1 conf -state normal } { .sa.m.f2.rnd.i.le.s.e1 conf -state disabled } }" );
+	cmd( "frame .sa.m.f2.rnd.i.le.s" );
+	cmd( "label .sa.m.f2.rnd.i.le.s.l1 -text \"Seed\"" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.rnd.i.le.s.e1 -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.rnd.i.le.s.e1 -width 5 -state disabled -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 } { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "pack .sa.m.f2.rnd.i.le.s.l1 .sa.m.f2.rnd.i.le.s.e1 -side left -padx 1" );
+
+	cmd( "pack .sa.m.f2.rnd.i.le.f .sa.m.f2.rnd.i.le.s -side left -padx 5" );
+
+	cmd( "pack .sa.m.f2.rnd.i.le -pady 2" );
+
+	cmd( "pack .sa.m.f2.rnd.l .sa.m.f2.rnd.i" );
+
+	cmd( "checkbutton .sa.m.f2.ud -text \"Update initialization comments\" -variable update_d" );
+
+	cmd( "pack .sa.m.f2.s .sa.m.f2.rnd .sa.m.f2.ud -anchor w -expand yes -fill x" );
+
+	cmd( "pack .sa.m.f1 .sa.m.f2 -side left -expand yes -fill both -padx 5 -pady 5" );
+	cmd( "pack .sa.head .sa.m -pady 5" );
+
+	cmd( "okhelpcancel .sa b { set choice 1 } { LsdHelp menudata_init.html#setall } { set choice 2 }" );
+
+	cmd( "bind .sa.m.f1.rd.i <Return> {  if [ string equal [ .sa.m.f1.val.i.l2.e2 cget -state ] normal ] { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1 } }" );
+	cmd( "bind .sa.m.f1.val.i.l1.e1 <Return> { if [ string equal [ .sa.m.f1.val.i.l2.e2 cget -state ] normal ] { focus .sa.m.f1.val.i.l2.e2; .sa.m.f1.val.i.l2.e2 selection range 0 end } { set choice 1 } }" );
+	cmd( "bind .sa.m.f1.val.i.l2.e2 <Return> { set choice 1 }" );
+	cmd( "bind .sa.m.f2.s.i.l.a.e <Return> {focus .sa.m.f2.s.i.sel.all; .sa.m.f2.s.i.sel.all invoke}" );
+	cmd( "bind .sa.m.f2.s.i.sel.all <Return> {focus .sa.b.ok}" );
+	cmd( "bind .sa.m.f2.s.i.sel.sel <Return> {focus .sa.m.f2.s.i.sel2.c.from; .sa.m.f2.s.i.sel2.c.from selection range 0 end }" );
+	cmd( "bind .sa.m.f2.s.i.sel2.c.from <Return> {focus .sa.m.f2.s.i.sel2.c.to; .sa.m.f2.s.i.sel2.c.from selection range 0 end }" );
+	cmd( "bind .sa.m.f2.s.i.sel2.c.to <Return> {focus .sa.b.ok}" );
+	cmd( "bind .sa.m.f2.rnd.i.le.s.e1 <Return> {focus .sa.b.ok}" );
+
+	cmd( "showtop .sa topleftW" );
+
+	here_setall:
+
+	// update current linked variables values
+	cmd( "write_any .sa.m.f1.val.i.l1.e1 $value1" ); 
+	cmd( "write_any .sa.m.f1.val.i.l2.e2 $value2" );
+	cmd( "write_any .sa.m.f2.s.i.l.a.e $step_in" ); 
+	cmd( "write_any .sa.m.f2.s.i.sel2.c.from $cases_from" ); 
+	cmd( "write_any .sa.m.f2.s.i.sel2.c.to $cases_to" ); 
+	cmd( "write_any .sa.m.f2.rnd.i.le.s.e1 $rnd_seed" ); 
+
+	if ( selFocus )
+	{
+		cmd( "focus .sa.m.f1.val.i.l1.e1; .sa.m.f1.val.i.l1.e1 selection range 0 end" );	// speed-up data entry focusing first data field
+		selFocus = false;
+	}
+
+	*choice = 0;
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	if ( *choice == 9 )
+	{
+		// search instance from
+		i = compute_copyfrom( original, choice );
+		cmd( "set cases_from %d", i );
+		goto here_setall;
+	}
+
+	if ( *choice == 10 )
+	{
+		// search instance to
+		i = compute_copyfrom( original, choice );
+		cmd( "set cases_to %d", i );
+		goto here_setall;
+	}
+
+	// save current linked variables values before closing
+	cmd( "set value1 [ .sa.m.f1.val.i.l1.e1 get ]" ); 
+	cmd( "set value2 [ .sa.m.f1.val.i.l2.e2 get ]" ); 
+	cmd( "set cases_from [ .sa.m.f2.s.i.sel2.c.from get ]" ); 
+	cmd( "set cases_to [ .sa.m.f2.s.i.sel2.c.to get ]" ); 
+	cmd( "set step_in [ .sa.m.f2.s.i.l.a.e get ]" ); 
+	cmd( "set rnd_seed [ .sa.m.f2.rnd.i.le.s.e1 get ]" ); 
+
+	cmd( "destroytop .sa" );
+
+	if ( ( *choice == 1 && res != 0 ) || *choice == 9 || *choice == 10 )
+	{
+		cmd( "set choice $use_seed" );
+		if ( *choice == 1 )
+		{
+			cmd( "set choice $rnd_seed" );
+			init_random( ( unsigned ) *choice );
+		}
+
+		cmd( "set choice $to_all" );
+		to_all = *choice;
+		cmd( "set choice $cases_from" );
+		cases_from = *choice;
+		cmd( "set choice $cases_to" );
+		cases_to = *choice;
+		cmd( "set choice $update_d" );
+		update_description = *choice;
+
+		switch ( res )
+		{
+			case 1:								// equal 
+				cmd( "set choice $fill" );
+				fill = *choice;
+				cmd( "set choice $step_in" );
+				  
+				for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+					if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % ( *choice ) == 0 ) ) )
+					{
+						cv = cur->search_var( NULL, lab );
+						cv->data_loaded = '+';
+						if ( cv->param == 0 )
+							cv->val[ lag ] = value1;
+						else
+							cv->val[ 0 ] = value1;
+					}
+				
+				if ( update_description == 1 )
+				{
+					cd = search_description( lab );
+					
+					if ( cd == NULL )
+					{  
+						cv = r->search_var( NULL, lab );
+						if ( cv->param == 0 )
+							add_description( lab, "Variable", "(no description available )" );
+						if ( cv->param == 1 )
+							add_description( lab, "Parameter", "(no description available )" );  
+						if ( cv->param == 2 )
+							add_description( lab, "Function", "(no description available )" );  
+						
+						plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
+						cd = search_description( lab );
+					} 
+					
+					if ( to_all == 1 )
+					{
+						sprintf( msg, "All %d instances equal to %g.", i - 1, value1 );
+						change_descr_lab( lab, "", "", "", msg );      
+					} 
+					else
+					{
+						if ( cd->init != NULL )
+							sprintf( msg, "%s Instances from %d to %d equal to %g.", cd->init, cases_from, cases_to, value1 );
+						else
+							sprintf( msg, "Instances from %d to %d equal to %g.", cases_from, cases_to, value1 );  
+						
+						change_descr_lab( lab, "", "", "", msg );
+					}  
+				}
+				
+				unsaved_change( true );			// signal unsaved change
+				break;
+
+			case 9:								// range
+				cmd( "set choice $fill" );
+				fill = *choice;
+				cmd( "set choice $step_in" );
+				counter = -1;
+				for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+					if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( ( ( i - cases_from ) % ( *choice ) == 0 ) ) )
+						counter++;
+
+				value = ( value2 - value1 ) / counter;
+				counter = 0; 
+				for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+				{
+					if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % ( *choice ) == 0 ) ) )
+					{
+						cv = cur->search_var( NULL, lab );
+						cv->data_loaded = '+';
+						if ( cv->param == 0 )
+							cv->val[ lag ] = value1 + value * counter;
+						else
+							cv->val[ 0 ] = value1 + value * counter;
+					}
+					
+					if ( i >= cases_from && ( ( i - cases_from + 1 ) % ( *choice ) ) == 0 )
+						counter++; 
+				}
+				
+				if ( update_description == 1 )
+				{
+					cd = search_description( lab );
+				
+					if ( cd == NULL )
+					{  
+						cv = r->search_var( NULL, lab );
+						if ( cv->param == 0 )
+							add_description( lab, "Variable", "(no description available )" );
+						if ( cv->param == 1 )
+							add_description( lab, "Parameter", "(no description available )" );  
+						if ( cv->param == 2 )
+							add_description( lab, "Function", "(no description available )" );  
+						
+						plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
+						cd = search_description( lab );
+					} 
+				 
+					if ( to_all == 1 )
+					{
+						sprintf( msg, "All %d instances set ranging from %g to %g (i.e. increments of %g).", i - 1, value1, value2, value );
+						change_descr_lab( lab, "", "", "", msg );      
+					} 
+					else
+					{
+						if ( cd->init != NULL )
+							sprintf( msg, "%s Instances from %d to %d ranging from %g to %g (i.e. increments of %g).", cd->init, cases_from, cases_to, value1, value2, value );
+						else
+							sprintf( msg, "Instances from %d to %d ranging from %g to %g (i.e. increments of %g).", cases_from, cases_to, value1, value2, value );  
+						
+						change_descr_lab( lab, "", "", "", msg );
+					}  
+				} 
+				
+				unsaved_change( true );			// signal unsaved change
+				break;
+
+			case 2: 							// increasing	 
+				cv = r->search_var( NULL, lab );
+				cv->data_loaded = '+';
+				cmd( "set choice $fill" );
+				fill = *choice;
+				cmd( "set choice $step_in" );
+				 
+				for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+				{
+					if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % ( *choice ) == 0 ) ) )
+					{
+						cv = cur->search_var( NULL, lab );
+						cv->data_loaded = '+';
+						if ( cv->param == 0 )
+							cv->val[ lag ] = value1 + step * value2;
+						else
+						cv->val[ 0 ] = value1 + step * value2;
+					}
+					
+					if ( i >= cases_from && ( ( i - cases_from + 1 ) % ( *choice ) ) == 0 )
+						step++;
+				}
+				
+				if ( update_description == 1 )
+				{
+					cd = search_description( lab );
+					if ( cd == NULL )
+					{  
+						cv = r->search_var( NULL, lab );
+						if ( cv->param == 0 )
+							add_description( lab, "Variable", "(no description available )" );
+						if ( cv->param == 1 )
+							add_description( lab, "Parameter", "(no description available )" );  
+						if ( cv->param == 2 )
+							add_description( lab, "Function", "(no description available )" );  
+						
+						plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
+						cd = search_description( lab );
+					} 
+					 
+					if ( to_all == 1 )
+					{
+						sprintf( msg, "All %d instances increasing from %g with steps %g. The value is increased every %d instances.", i - 1, value1, value2, *choice );
+						change_descr_lab( lab, "", "", "", msg );
+					}
+					else
+					{
+						if ( cd->init != NULL )
+							sprintf( msg, "%s Instances from %d to %d increasing from %g with steps %g. The value is increased every %d instances.", cd->init, cases_from, cases_to, value1, value2, *choice );
+						else
+							sprintf( msg, "Instances from %d to %d increasing from %g with steps %g. The value is increased every %d instances.", cases_from, cases_to, value1, value2, *choice );            
+						change_descr_lab( lab, "", "", "", msg );
+					}  
+				}
+				
+				unsaved_change( true );			// signal unsaved change
+				break;
+					
+			case 4: 
+				cv = r->search_var( NULL, lab );
+				
+				for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+					if ( to_all == 1 || ( cases_from <= i && cases_to >= i ) )
+					{
+						cv = cur->search_var( NULL, lab );
+						cv->data_loaded = '+';
+						if ( cv->param == 0 )
+							cv->val[ lag ] = value1 + step * value2;
+						else
+							cv->val[ 0 ] = value1 + step * value2;
+						
+						if ( cur->next != cur->hyper_next( r->label ) )
+							step--;
+						
+						step++;        
+					}
+				
+				if ( update_description == 1 )
+				{
+					cd = search_description( lab );			
+					if ( cd == NULL )
+					{  
+						cv = r->search_var( NULL, lab );
+						if ( cv->param == 0 )
+							add_description( lab, "Variable", "(no description available )" );
+						if ( cv->param == 1 )
+							add_description( lab, "Parameter", "(no description available )" );  
+						if ( cv->param == 2 )
+							add_description( lab, "Function", "(no description available )" );  
+						
+						plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
+						cd = search_description( lab );
+					} 
+					
+					if ( to_all == 1 )
+					{
+						sprintf( msg, "All %d instances increasing from %g with steps %g re-starting for each group of objects.", i - 1, value1, value2 );
+						change_descr_lab( lab, "", "", "", msg );      
+					} 
+					else
+					{
+						if ( cd->init != NULL )
+							sprintf( msg, "%s Instances from %d to %d increasing from %g with steps %g re-starting for each group of objects.", cd->init, cases_from, cases_to, value1, value2 );
+						else
+							sprintf( msg, "Instances from %d to %d increasing from %g with steps %g re-starting for each group of objects.", cases_from, cases_to, value1, value2 );
+					   
+						change_descr_lab( lab, "", "", "", msg );        
+					}  
+				}
+				
+				unsaved_change( true );			// signal unsaved change           
+				break;
+
+			case 3: 
+				cmd( "set choice $fill" );
+				fill = *choice;
+				cmd( "set choice $step_in" );
+				 
+				for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+					if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % ( *choice ) == 0 ) ) )
+					{
+						cv = cur->search_var( NULL, lab );
+						cv->data_loaded = '+';
+						if ( cv->param == 0 )
+							cv->val[ lag ] = value1 + RND*( value2 - value1 );
+						else
+							cv->val[ 0 ] = value1 + RND*( value2 - value1 );
+					}
+				
+				if ( update_description == 1 )
+				{
+					cd = search_description( lab );
+					if ( cd == NULL )
+					{  
+						cv = r->search_var( NULL, lab );
+						if ( cv->param == 0 )
+							add_description( lab, "Variable", "(no description available )" );
+						if ( cv->param == 1 )
+							add_description( lab, "Parameter", "(no description available )" );  
+						if ( cv->param == 2 )
+							add_description( lab, "Function", "(no description available )" );  
+						
+						plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
+						cd = search_description( lab );
+					} 
+					 
+					if ( to_all == 1 )
+					{
+						sprintf( msg, "All %d instances set to random values drawn from a uniform in the range [%g,%g].", i - 1, value1, value2 );
+						change_descr_lab( lab, "", "", "", msg );      
+					} 
+					else
+					{
+						if ( cd->init != NULL )
+							sprintf( msg, "%s Instances from %d to %d set to random values drawn from a uniform in the range [%g,%g].", cd->init, cases_from, cases_to, value1, value2 );
+						else
+							sprintf( msg, "Instances from %d to %d set to random values drawn from a uniform in the range [%g,%g].", cases_from, cases_to, value1, value2 ); 
+						
+						change_descr_lab( lab, "", "", "", msg );        
+					}  
+				}
+				
+				unsaved_change( true );			// signal unsaved change
+				break;
+				  
+			case 5: 
+				cmd( "set choice $fill" );
+				fill = *choice;
+				cmd( "set choice $step_in" );
+				 
+				for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+					if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % ( *choice ) == 0 ) ) )
+					{
+						cv = cur->search_var( NULL, lab );
+						cv->data_loaded = '+';
+						if ( cv->param == 0 )
+							cv->val[ lag ] = norm( value1, value2 );
+						else
+							cv->val[ 0 ] = norm( value1, value2 );
+					}
+				
+				if ( update_description == 1 )
+				{
+					cd = search_description( lab );
+					if ( cd == NULL )
+					{  
+						cv = r->search_var( NULL, lab );
+						if ( cv->param == 0 )
+							add_description( lab, "Variable", "(no description available )" );
+						if ( cv->param == 1 )
+							add_description( lab, "Parameter", "(no description available )" );  
+						if ( cv->param == 2 )
+							add_description( lab, "Function", "(no description available )" ); 
+						
+						plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
+						cd = search_description( lab );
+					} 
+					  
+					if ( to_all == 1 )
+					{
+						sprintf( msg, "All %d instances set to random values drawn from a normal with mean=%g and std. deviation=%g.", i - 1, value1, value2 );
+						change_descr_lab( lab, "", "", "", msg );      
+					} 
+					else
+					{
+						if ( cd->init != NULL )
+							sprintf( msg, "%s Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g", cd->init, cases_from, cases_to, value1, value2 );
+						else
+							sprintf( msg, "Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g", cases_from, cases_to, value1, value2 );   
+					   
+						change_descr_lab( lab, "", "", "", msg );        
+					}  
+				}
+				
+				unsaved_change( true );			// signal unsaved change
+				break;
+				
+			case 6: 
+				cv = r->search_var( NULL, lab );
+				cv->data_loaded = '+';
+				
+				for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+					if ( to_all == 1 || ( cases_from <= i && cases_to >= i ) )
+					{
+						cv = cur->search_var( NULL, lab );
+						cv->data_loaded = '+';
+						if ( step == value2 )
+						{
+							if ( cv->param == 0 )
+								cv->val[ lag ] = value1;
+							else
+								cv->val[ 0 ] = value1;
+							
+							step = 0;
+						}
+						else
+							step++;
+					}
+				
+				if ( update_description == 1 )
+				{
+					cd = search_description( lab );
+					if ( cd == NULL )
+					{  
+						cv = r->search_var( NULL, lab );
+						if ( cv->param == 0 )
+							add_description( lab, "Variable", "(no description available )" );
+						if ( cv->param == 1 )
+							add_description( lab, "Parameter", "(no description available )" );  
+						if ( cv->param == 2 )
+							add_description( lab, "Function", "(no description available )" );  
+					 
+						plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
+						cd = search_description( lab );
+					} 
+					
+					if ( to_all == 1 )
+					{
+						sprintf( msg, "All %d instances set to %g skipping %g instances.", i - 1, value1, value2 );
+						change_descr_lab( lab, "", "", "", msg );      
+					} 
+					else
+					{
+						if ( cd->init != NULL )
+							sprintf( msg, "%s Instances from %d to %d set to %g skipping %g instances.", cd->init, cases_from, cases_to, value1, value2 );
+						else
+							sprintf( msg, "Instances from %d to %d set to %g skipping %g instances.", cases_from, cases_to, value1, value2 );         
+						
+						change_descr_lab( lab, "", "", "", msg );        
+					}  
+				}
+				
+				unsaved_change( true );			// signal unsaved change
+				break;
+				
+				
+			case 7:
+				cmd( "set oldpath [ pwd ]" );
+				cmd( "set filename [ tk_getOpenFile -parent . -title \"File to Import Data\" -filetypes { { {Text Files} {.txt} } { {All Files} {*} }} ]" );
+				l = ( char * ) Tcl_GetVar( inter, "filename", 0 );
+				
+				if ( l != NULL && strcmp( l, "" ) )
+				{ 
+					cmd( "cd [file dirname $filename]" );
+					cmd( "set fn [file tail $filename]" );
+					l = ( char * ) Tcl_GetVar( inter, "fn", 0 );
+					f = fopen( l, "r" );
+					cmd( "cd $oldpath" );
+					if ( f != NULL )
+					{
+						fscanf( f, "%99s", ch );				// the label
+						kappa = fscanf( f, "%lf", &value );
+						
+						for ( i = 1, cur = r; cur != NULL && kappa != EOF; cur = cur->hyper_next( r->label ), ++i )
+						{
+							if ( to_all == 1 || ( cases_from <= i && cases_to >= i ) )
+							{
+								cv = cur->search_var( NULL, lab );
+								cv->data_loaded = '+';
+								
+								if ( cv->param == 0 )
+									cv->val[ lag ] = value;
+								else
+									cv->val[ 0 ] = value;
+							  
+								kappa = fscanf( f, "%lf", &value );
+							}
+						}
+						
+						if ( cur != NULL || kappa != EOF )
+							plog( "\nWarning: problem loading data, the file may contain a different number\nof values compared to the objects to initialize" );
+						
+						if ( update_description == 1 )
+						{
+							cd = search_description( lab );
+					
+							if ( cd == NULL )
+							{  
+								cv = r->search_var( NULL, lab );
+								
+								if ( cv->param == 0 )
+									add_description( lab, "Variable", "(no description available )" );
+								
+								if ( cv->param == 1 )
+									add_description( lab, "Parameter", "(no description available )" );  
+								
+								if ( cv->param == 2 )
+									add_description( lab, "Function", "(no description available )" );
+								
+								plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
+								
+								cd = search_description( lab );
+							} 
+						  
+							if ( to_all == 1 )
+							{
+								sprintf( msg, "All %d instances set with data from file %s.", i - 1, l );
+								change_descr_lab( lab, "", "", "", msg );      
+							} 
+							else
+							{
+								if ( cd->init != NULL )
+									sprintf( msg, "%s Instances from %d to %d with data from file %s", cd->init, cases_from, cases_to, l );
+								else
+									sprintf( msg, "Instances from %d to %d with data from file %s", cases_from, cases_to, l );
+								
+								change_descr_lab( lab, "", "", "", msg );        
+							}  
+						}
+					}
+				  
+					unsaved_change( true );		// signal unsaved change
+				}
+				
+				break;
+				
+
+			case 8:
+				cmd( "set choice $fill" );
+				fill = *choice;
+				cmd( "set choice $step_in" );
+				 
+				for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+					if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % ( *choice ) == 0 ) ) )
+					{
+						cv = cur->search_var( NULL, lab );
+						cv->data_loaded = '+';
+						if ( cv->param == 0 )
+							cv->val[ lag ] = uniform_int( value1, value2 );
+						else
+							cv->val[ 0 ] = uniform_int( value1, value2 );
+					  }
+				
+				if ( update_description == 1 )
+				{
+					cd = search_description( lab );
+					if ( cd == NULL )
+					{  
+						cv = r->search_var( NULL, lab );
+						if ( cv->param == 0 )
+							add_description( lab, "Variable", "(no description available )" );
+						if ( cv->param == 1 )
+							add_description( lab, "Parameter", "(no description available )" );  
+						if ( cv->param == 2 )
+							add_description( lab, "Function", "(no description available )" );  
+						
+						plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
+						cd = search_description( lab );
+					} 
+					
+					if ( to_all == 1 )
+					{
+						sprintf( msg, "All %d instances set to integer random values drawn from a uniform in the range [%g,%g].", i - 1, value1, value2 );
+						change_descr_lab( lab, "", "", "", msg );      
+					} 
+					else
+					{
+						if ( cd->init != NULL )
+							sprintf( msg, "%s Instances from %d to %d set to integer random values drawn from a uniform in the range [%g,%g].", cd->init, cases_from, cases_to, value1, value2 );
+						else
+							sprintf( msg, "Instances from %d to %d set to integer random values drawn from a uniform in the range [%g,%g].", cases_from, cases_to, value1, value2 );   
+						
+						change_descr_lab( lab, "", "", "", msg );        
+					}  
+				}
+				
+				unsaved_change( true );			// signal unsaved change
+				break;
+				
+				
+			default:
+				error_hard( "invalid option for setting values", 
+							"internal problem in LSD", 
+							"if error persists, please contact developers",
+							true );
+				myexit( 22 );
+		}
+	}
+
+	Tcl_UnlinkVar( inter, "value1" );
+	Tcl_UnlinkVar( inter, "value2" );
+	Tcl_UnlinkVar( inter, "res" );
 }
 
 
@@ -954,7 +953,6 @@ file. In practice, this allows for the Monte Carlo sampling of the parameter
 space, which is often necessary when the s.a. space is too big to be analyzed 
 in its entirety.
 *******************************************************************************/
-
 void sensitivity_sequential( int *findex, sense *s, double probSampl )
 {
 	int i, nv;
@@ -1059,7 +1057,7 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 	if ( nval > 0)								// number of values defined (0=no)?
 		cmd( "label .sens.lab.l1 -text \"Enter n=%d values for:\"", s->nvalues );
 	else
-		cmd( "label .sens.lab.l1 -text \"Enter the desired values (at least 2) for:\"" );
+		cmd( "label .sens.lab.l1 -text \"Enter the desired values (at least 2 ) for:\"" );
 
 	cmd( "label .sens.lab.l2 -fg red -text \"%s\"", s->label );
 	cmd( "pack .sens.lab.l1 .sens.lab.l2 -side left -padx 2" );
@@ -1212,13 +1210,13 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 /*******************************************************************************
 NOLH_TABLE
 Calculate a Near Orthogonal Latin Hypercube (NOLH) design for sampling.
-Include tables to up to 29 variables (Sanchez 2009, Cioppa and Lucas 2007).
+Include tables to up to 29 variables ( sanchez 2009, Cioppa and Lucas 2007).
 Returns the number of samples (n) required for the calculated design and a 
-pointer 	to the matrix n x k, where k is the number of factors (variables).
+pointer 	to the matrix n x k, where k is the number of factors ( variables).
 
-It is possible to load one additional design table from disk (file NOLH.csv in
+It is possible to load one additional design table from disk ( file NOLH.csv in
 the same folder as the configuration file .lsd). The table should be formed
-by positive integers only, in the n (rows) x k (columns), separated by commas,
+by positive integers only, in the n (rows) x k ( columns), separated by commas,
 one row per text line and no empty lines. The table can be loaded manually
 (NOLH_load function) or automatically as needed during sampling (NOLH_sampler).
 *******************************************************************************/
@@ -1275,7 +1273,7 @@ void NOLH_clear( void )
 
 /*****************************************************************************
 NOLH_LOAD
-Function to load a .csv file named NOLH.csv as table 0 (first to be used)
+Function to load a .csv file named NOLH.csv as table 0 ( first to be used)
 If option 'force' is used, will be used for any number of factors
 ******************************************************************************/
 bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )			
@@ -1298,7 +1296,7 @@ bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )
 		fileName = new char[ strlen( baseName ) + 1 ];
 		sprintf( fileName, "%s", baseName );
 	}
-	NOLHfile = fopen( fileName, "r");
+	NOLHfile = fopen( fileName, "r" );
 	if ( NOLHfile == NULL )
 	{
 		sprintf( msg, "cannot open NOHL design file '%s'", fileName );
@@ -1384,6 +1382,7 @@ end:
 	return ok;
 }
 
+
 /*****************************************************************************
 MAT_*
 Matrix operations support functions for morris_oat() and enhancements
@@ -1415,7 +1414,7 @@ void mat_del( double **a, int m, int n )
 	delete [ ] a;
 }
 
-// multiply two matrices (c<-a*b)
+// multiply two matrices ( c<-a*b)
 double **mat_mult_mat( double **a, int m, int n, double **b, int o, int p, double **c )
 {
 	if ( n != o )
@@ -1430,7 +1429,7 @@ double **mat_mult_mat( double **a, int m, int n, double **b, int o, int p, doubl
 	return c;
 }
 
-// add two same size matrices (c<-a+b)
+// add two same size matrices ( c<-a+b)
 double **mat_add_mat( double **a, int m, int n, double **b, double **c )
 {
 	for ( int i = 0; i < m ; ++i )	 	//rows
@@ -1550,7 +1549,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 			B[ i ][ j ] = ( i > j ) ? 1 : -1;
     
     // Create r trajectories. Each trajectory contains k+1 parameter sets.
-    // (Starts at a base point, and then changes one parameter at a time)
+    // ( starts at a base point, and then changes one parameter at a time )
 	
 	for ( l = 0; l < r; ++l )
 	{
@@ -1752,7 +1751,7 @@ list < int > get_max_sum_ind( vector < list < int > > indices_list, vector < dou
 /*****************************************************************************
 ADD_INDICES
 	Adds extra indices for the combinatorial problem. 
-	For indices = (1,2) and M=5, the method returns [(1,2,3),(1,2,4),(1,2,5)]
+	For indices = (1,2 ) and M=5, the method returns [(1,2,3),(1,2,4),(1,2,5)]
 ******************************************************************************/
 vector < list < int > > add_indices( list < int > m_max_ind, int M )
 {
@@ -1773,7 +1772,7 @@ vector < list < int > > add_indices( list < int > m_max_ind, int M )
 
 /*****************************************************************************
 OPT_TRAJECTORIES
-	An alternative by Ruano et al. (2012) for the brute force approach as 
+	An alternative by Ruano et al. (2012 ) for the brute force approach as 
 	originally proposed by Campolongo et al. (2007). The method should improve 
 	the speed with which an optimal set of trajectories is found tremendously 
 	for larger sample sizes.
@@ -1812,7 +1811,7 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 		// Find the indices belonging to the maximum distance
 		i_max_ind = get_max_sum_ind( indices_list, row_maxima_i );
 
-		//#########Loop 'm' (called loop 'k' in Ruano)############
+		//#########Loop 'm' ( called loop 'k' in Ruano)############
 		m_max_ind = i_max_ind;
 		// m starts at 1
         for ( int m = 1; m <= r - i - 1; ++m )
@@ -1879,7 +1878,7 @@ DESIGN
 		type = 1: NOLH
 		type = 2: random sampling
 		type = 3: Elementary Effects sampling (Morris, 1991)
-		samples = -1: use extended predefined sample size (n2)
+		samples = -1: use extended predefined sample size (n2 )
 		factors = 0: use automatic DoE size
 ******************************************************************************/
 design::design( sense *rsens, int typ, char const *fname, int findex, 
@@ -1915,7 +1914,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 			}
 				
 			tab = NOLH_table( kTab );		// design table to use
-			if ( tab == -1 )				// number of factors too large, try to load external table (file)
+			if ( tab == -1 )				// number of factors too large, try to load external table ( file )
 			{
 				if ( NOLH_load( ) )			// tentative table load from disk ok?
 				{
@@ -1943,7 +1942,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 			plog( "\nNOLH table used: %d (%s), n = %d", "", tab, tab > 0 ? "built-in" : "from file", n );
 			
 			// allocate memory for data
-			par = new int[ k ];				// vector of variable type (parameter / lagged value)
+			par = new int[ k ];				// vector of variable type (parameter / lagged value )
 			lag = new int[ k ];				// vector of lags
 			intg = new bool[ k ];			// vector of format (integer/float)
 			hi = new double[ k ];			// vector of high factor value
@@ -1968,7 +1967,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 				par[ i ] = cs->param;		// set variable type
 				lag[ i ] = cs->lag;			// set number of lags
 				
-				// copy label (name)
+				// copy label (name )
 				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
 				strcpy( lab[ i ], cs->label );
 				
@@ -1995,7 +1994,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 				goto invalid;
 			
 			// allocate memory for data
-			par = new int[ k ];				// vector of variable type (parameter / lagged value)
+			par = new int[ k ];				// vector of variable type (parameter / lagged value )
 			lag = new int[ k ];				// vector of lags
 			intg = new bool[ k ];			// vector of format (integer/float)
 			hi = new double[ k ];			// vector of high factor value
@@ -2020,7 +2019,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 				par[ i ] = cs->param;		// set variable type
 				lag[ i ] = cs->lag;			// set number of lags
 				
-				// copy label (name)
+				// copy label (name )
 				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
 				strcpy( lab[ i ], cs->label );
 				
@@ -2045,7 +2044,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 				goto invalid;
 			
 			// allocate memory for data
-			par = new int[ k ];				// vector of variable type (parameter / lagged value)
+			par = new int[ k ];				// vector of variable type (parameter / lagged value )
 			lag = new int[ k ];				// vector of lags
 			intg = new bool[ k ];			// vector of format (integer/float)
 			hi = new double[ k ];			// vector of high factor value
@@ -2075,7 +2074,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 				par[ i ] = cs->param;		// set variable type
 				lag[ i ] = cs->lag;			// set number of lags
 				
-				// copy label (name)
+				// copy label (name )
 				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
 				strcpy( lab[ i ], cs->label );
 				
@@ -2152,7 +2151,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 /*****************************************************************************
 SENSITIVITY_DOE
 	Generate the configuration files for the 
-	Design of Experiment (DOE)
+	Design of Experiment (DOe )
 ******************************************************************************/
 void sensitivity_doe( int *findex, design *doe )
 {
@@ -2164,11 +2163,11 @@ void sensitivity_doe( int *findex, design *doe )
 	
 	for ( i = 0; i < doe->n; i++ )				// run through all experiments
 	{
-		// set up the variables (factors) with the experiment values
+		// set up the variables ( factors) with the experiment values
 		for ( j = 0; j < doe->k; j++ )			// run through all factors
 		{
 			cvar = root->search_var( root, doe->lab[ j ] );	// find variable to set
-			for ( cur = cvar->up; cur!=NULL; cur = cur->hyper_next( cur->label ) )
+			for ( cur = cvar->up; cur != NULL; cur = cur->hyper_next( cur->label ) )
 			{									// run through all objects containing var
 				cvar = cur->search_var( cur, doe->lab[ j ] ); 
 				if ( doe->par[ j ] == 1 )		// handle lags > 0

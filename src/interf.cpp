@@ -2962,7 +2962,7 @@ case 22:
 
 	cmd( "frame $T.f.b" );
 	cmd( "label $T.f.b.l1 -width 25 -anchor e -text \"Random numbers initial seed\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.b.e1 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.b.e1 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.b.e1 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.b.e1 -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 } { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invcmd { bell } -justify center }" );
 	cmd( "$T.f.b.e1 insert 0 $seed" ); 
 	cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
 

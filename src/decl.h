@@ -539,7 +539,7 @@ object *go_brother( object *c );
 void close_lattice( void );
 void deb_log( bool on, int time = 0 );					// control debug mode
 void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "", bool defQuit = false );
-void init_random( int seed );							// reset the random number generator seed
+void init_random( unsigned seed );						// reset the random number generator seed
 void msleep( unsigned msec = 1000 );					// sleep process for milliseconds
 void nop( void );										// no operation
 void plog( char const *msg, char const *tag = "", ... );
@@ -571,9 +571,9 @@ extern int fast_mode;
 extern int max_step;
 extern int quit;
 extern int ran_gen;						// pseudo-random number generator to use (1-5) )
-extern int seed;
 extern int sim_num;
 extern int t;
+extern unsigned seed;
 extern object *root;
 
 #ifdef CPP11

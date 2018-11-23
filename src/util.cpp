@@ -2414,11 +2414,8 @@ mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
 ranlux24 lf24;						// lagged fibonacci 24 bits generator
 ranlux48 lf48;						// lagged fibonacci 48 bits generator
 
-void init_random( int seed )
+void init_random( unsigned seed )
 {
-	if ( seed < 0 )
-		seed = - seed;
-	
 	lc.seed( seed );				// linear congruential
 	mt32.seed( seed );				// Mersenne-Twister 32 bits
 	mt64.seed( seed );				// Mersenne-Twister 64 bits
@@ -3175,7 +3172,7 @@ MTRand mt4; 		// Mersenne-Twister object in [0,1)
 MTRand53 mt5;		// Mersenne-Twister object with 53 bits resolution in [0,1)
 
 // Set seed to all random generators
-void init_random( int seed )
+void init_random( unsigned seed )
 {
 	dum = 0;
 	idum = -seed;
