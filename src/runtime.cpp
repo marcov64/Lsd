@@ -254,7 +254,7 @@ void plot_rt( variable *v )
 {
 	bool relabel = false;
 	int x1, x2, y1, y2;
-	double step, value, scale, zero_lim;
+	double value, scale, zero_lim;
 	
 	// limit the number of run-time plot variables
 	if ( cur_plt > 100 )

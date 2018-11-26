@@ -180,7 +180,6 @@ BROWSE
 ****************************************************/
 int browse( object *r, int *choice )
 {
-	char ch[ TCL_BUFF_STR ];
 	int num;
 	bridge *cb;
 	variable *ap_v;
@@ -1036,7 +1035,7 @@ OPERATE
 object *operate( object *r, int *choice )
 {
 bool saveAs, delVar, renVar, table;
-char observe, initial, *lab1, *lab2, *lab3, *lab4, lab[ 2 * MAX_PATH_LENGTH ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ];
+char observe, initial, *lab1, *lab2, *lab3, *lab4, lab[ TCL_BUFF_STR ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ];
 int sl, done = 0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, ffirst, fnext, temp[ 10 ];
 long nLinks;
 double fake = 0;
@@ -3027,7 +3026,7 @@ case 22:
 	if ( *choice == 2 )	// Escape - revert previous values
 	{
 		sim_num = temp[ 1 ];
-		seed = temp[ 2 ];
+		seed = ( unsigned) temp[ 2 ];
 		max_step = temp[ 3 ];
 		when_debug = temp[ 4 ];
 		stack_info = temp[ 5 ];
@@ -3037,7 +3036,7 @@ case 22:
 	}
 	else
 		// signal unsaved change if anything to be saved
-		if ( temp[ 1 ] != sim_num || temp[ 2 ] != seed || temp[ 3 ] != max_step ) 
+		if ( temp[ 1 ] != sim_num || ( unsigned ) temp[ 2 ] != seed || temp[ 3 ] != max_step ) 
 			unsaved_change( true );
 
 	Tcl_UnlinkVar( inter, "sim_num" );

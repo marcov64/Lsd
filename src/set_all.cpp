@@ -1241,6 +1241,7 @@ Determine the valid NOLH tables for the number of factors
 char *NOLH_valid_tables( int k, char* ch )	
 {
 	int min_tab = NOLH_table( k );
+	char buff[ MAX_ELEM_LENGTH ];
 	
 	if ( min_tab <= 0 )
 		strcpy( ch, "External only" );
@@ -1248,7 +1249,10 @@ char *NOLH_valid_tables( int k, char* ch )
 	{
 		strcpy( ch, "" );
 		for ( int i = min_tab; ( unsigned ) i < ( ( sizeof NOLH ) / sizeof NOLH[ 0 ] ); ++i )
-			sprintf( ch, "%s \"%d\u00D7%d\u00D7%d\"", ch, NOLH[ i ].kMax, NOLH[ i ].n1, NOLH[ i ].n2 );
+		{
+			sprintf( buff, " \"%d\u00D7%d\u00D7%d\"", NOLH[ i ].kMax, NOLH[ i ].n1, NOLH[ i ].n2 );
+			strcat( ch, buff );
+		}
 	}
 	
 	return ch;
@@ -1387,10 +1391,6 @@ end:
 MAT_*
 Matrix operations support functions for morris_oat() and enhancements
 ******************************************************************************/
-#include <list>
-#include <vector>
-#include <algorithm>
-using namespace std;
 
 // Integer random in [min,max]
 #define RND_RANGE( min, max ) ( min + ( rand( ) % ( int )( max - min + 1 ) ) )

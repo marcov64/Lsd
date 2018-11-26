@@ -37,7 +37,9 @@ Global definitions among all LSD C++ modules
 #include <unistd.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <algorithm>
 #include <string>
+#include <vector>
 #include <list>
 #include <new>
 #include <map>
@@ -152,6 +154,7 @@ struct netLink;
 typedef pair < string, bridge * > b_pairT;
 typedef pair < double, object * > o_pairT;
 typedef pair < string, variable * > v_pairT;
+typedef vector < object * > o_vecT;
 #ifndef CPP11
 typedef map < string, bridge * > b_mapT;
 typedef map < double, object * > o_mapT;
@@ -182,6 +185,7 @@ struct object
 	void *cext;							// pointer to a C++ object extension to the LSD object
 	bool *del_flag;						// address of flag to signal deletion
 	
+	o_vecT hooks;
 	b_mapT b_map;						// fast lookup map to object bridges
 	v_mapT v_map;						// fast lookup map to variables
 
@@ -502,16 +506,12 @@ struct worker							// multi-thread parallel worker data structure
 
 // standalone C functions/procedures (visible to the users)
 
-bool chk_ptr( object *ptr );							// user pointer check
 bool is_finite( double x );
 bool is_inf( double x );
 bool is_nan( double x );
-char *bad_ptr_chr( object *ptr, const char *file, int line );// invalid pointer error message
-char *no_node_chr( const char *lab, const char *file, int line );
 double _abs( double a );
 double alapl( double mu, double alpha1, double alpha2 );// draw from an asymmetric laplace distribution
 double alaplcdf( double mu, double alpha1, double alpha2, double x );	// asymmetric laplace cdf
-double bad_ptr_dbl( object *ptr, const char *file, int line );// invalid pointer error message
 double bernoulli( double p );							// draw from a Bernoulli distribution
 double beta( double alpha, double beta );				// draw from a beta distribution
 double betacdf( double alpha, double beta, double x );	// beta cumulative distribution function
@@ -526,8 +526,6 @@ double max( double a, double b );
 double min( double a, double b );
 double norm( double mean, double dev );
 double normcdf( double mu, double sigma, double x );	// normal cumulative distribution function
-double no_node_dbl( const char *lab, const char *file, int line );// invalid node
-double nul_lnk_dbl( const char *file, int line );		// invalid link error
 double pareto( double mu, double alpha );
 double paretocdf( double mu, double alpha, double x );
 double poisson( double m );
@@ -540,18 +538,11 @@ double unifcdf( double a, double b, double x );			// uniform cumulative distribu
 double uniform( double min, double max );
 double uniform_int( double min, double max );
 double update_lattice( double line, double col, double val = 1 );
-netLink *bad_ptr_lnk( object *ptr, const char *file, int line );// invalid pointer error message
-object *bad_ptr_obj( object *ptr, const char *file, int line );// invalid pointer error message
-object *get_cycle_obj( object *c, char const *label, char const *command );
-object *go_brother( object *c );
-object *nul_lnk_obj( const char *file, int line );		// invalid link error
-void bad_ptr_void( object *ptr, const char *file, int line );// invalid pointer error message
 void close_lattice( void );
 void deb_log( bool on, int time = 0 );					// control debug mode
 void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "", bool defQuit = false );
 void init_random( unsigned seed );						// reset the random number generator seed
 void msleep( unsigned msec = 1000 );					// sleep process for milliseconds
-void nul_lnk_void( const char *file, int line );		// invalid link error
 void plog( char const *msg, char const *tag = "", ... );
 void results_alt_path( const char * );  				// change where results are saved.
 void set_fast( int level );								// enable fast mode
@@ -646,6 +637,7 @@ int shrink_gnufile( void );
 long get_long( const char *tcl_var, long *var = NULL );
 long num_sensitivity_points( sense *rsens );
 object *check_net_struct( object *caller, char const *nodeLab, bool noErr = false );
+object *go_brother( object *c );
 object *operate( object *r, int *choice );
 object *restore_pos( object * );
 object *sensitivity_parallel( object *o, sense *s );

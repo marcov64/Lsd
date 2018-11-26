@@ -870,7 +870,7 @@ bool save_configuration( int findex )
 {
 	bool save_ok = false;
 	int delta, indexDig;
-	char *save_file, *bak_file = NULL;
+	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file = NULL;
 	description *cur_descr;
 	FILE *f; 
 	
@@ -889,7 +889,10 @@ bool save_configuration( int findex )
 	}
 	
 	if ( findex > 0 )
-		sprintf( save_file, "%s_%d.lsd", save_file, findex );
+	{
+		sprintf( ch, "_%d.lsd", findex );
+		strcat( save_file, ch );
+	}
 	else
 	{
 		// create backup file when not indexed saving

@@ -352,6 +352,7 @@ int object::init( object *_up, char const *lab )
 	b = NULL;
 	b_map.clear( );
 	hook = NULL;
+	hooks.clear( );
 	node = NULL;				// not part of a network yet
 	cext = NULL;				// no C++ object extension yet
 	acounter = 0;				// "fail safe" when creating labels
@@ -1706,7 +1707,6 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 		for ( cv = ex->v; cv != NULL; cv = cv->next )  
 		  cur->add_var_from_example( cv );
 
-
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 		{
 #ifdef PARALLEL_MODE
@@ -2046,26 +2046,6 @@ void object::chg_var_lab( char const *old, char const *newname )
 }
 
 
-/***************************************************
-GET_CYCLE_OBJ
-Support function used in CYCLEx macros
-***************************************************/
-object *get_cycle_obj( object *parent, char const *label, char const *command )
-{
-	object *cur;
-
-	cur = parent->search( label );
-	if ( cur == NULL )
-	{
-		sprintf( msg, "'%s' is missing for cycling", label );
-		error_hard( msg, "object not found", 
-					"create object in model structure" );
-	}
-	
-	return cur;
-}
-
-
 /****************************************************
 UNDER_COMPUTATION
 Check if any variable in or below the object is
@@ -2100,12 +2080,14 @@ the function variable->cal(caller, lag )
 ***************************************************/
 double object::cal( object *caller, char const *lab, int lag )
 {
+	object *cur = this;
 	variable *cv;
 
 	if ( quit == 2 )
 		return NAN;
 
-	if ( this == NULL )
+	// detect malformed pointer manipulations (ignore warning messages!)
+	if ( cur == NULL )
 	{
 		sprintf( msg, "variable '%s' computation requested from NULL object", lab );
 		error_hard( msg, "invalid pointer operation", 
@@ -2114,10 +2096,10 @@ double object::cal( object *caller, char const *lab, int lag )
 		return NAN;
 	}
 	
-	cv = search_var( this, lab, true, no_search );
+	cv = search_var( cur, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+		cv = blueprint->search_var( cur, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for retrieving", lab );
@@ -2137,7 +2119,7 @@ double object::cal( object *caller, char const *lab, int lag )
 
 #ifdef PARALLEL_MODE
 	if ( parallel_ready && cv->parallel && cv->last_update < t && lag == 0 && ! cv->dummy )
-		parallel_update( cv, this, caller );
+		parallel_update( cv, cur, caller );
 #endif
 	return cv->cal( caller, lag );
 }

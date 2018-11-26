@@ -77,7 +77,7 @@ $(SRC_DIR)report.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)re
 $(SRC_DIR)nets.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)nets.cpp $(SRC_DIR)decl.h
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.o $(INCLUDE)
 
-$(FUN).o: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)choose.h $(SRC_DIR)decl.h $(SRC_DIR)fun_head.h
+$(FUN).o: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)choose.h $(SRC_DIR)decl.h $(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(SRC_DIR)fun_head_fast.h
 	$(CC) $(GLOBAL_CC) $(SWITCH_CC) -c $(FUN).cpp $(INCLUDE)
 	
 clean:

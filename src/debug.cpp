@@ -62,8 +62,9 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact )
 {
 bool pre_running;
 char ch[ 4 * MAX_ELEM_LENGTH ], *ch1;
-int count, i, cond;
+int count, i, j, cond;
 double value_search, app_res, *app_values;
+long node;
 object *cur, *cur1, *cur2;
 bridge *cb, *cb1;
 variable *cv, *cv1;
@@ -493,10 +494,10 @@ while ( choice == 0 )
 			cmd( "frame $e.v" );
 			for ( i = 0; i <= cv->num_lag; ++i )
 			{
-				cmd( "set val%d %g",i, cv->val[ i ] );
-				app_values[ i ]=cv->val[ i ];
-				sprintf( ch, "val%d",i);
-				Tcl_LinkVar( inter, ch, ( char * ) &(app_values[ i ]), TCL_LINK_DOUBLE );
+				cmd( "set val%d %g", i, cv->val[ i ] );
+				app_values[ i ] = cv->val[ i ];
+				sprintf( ch, "val%d", i );
+				Tcl_LinkVar( inter, ch, ( char * ) &( app_values[ i ] ), TCL_LINK_DOUBLE );
 
 				cmd( "frame $e.v.l$i" );
 
@@ -967,10 +968,21 @@ while ( choice == 0 )
 		// double-click (change to) network node
 		case 23:
 			ch1 = ( char * ) Tcl_GetVar( inter, "nodeLab", 0 );
-			long nodeId;
-			get_long( "nodeId", & nodeId );
-			for ( cur = r; cur->up != NULL; cur = cur->up );
-			cur = cur->search_node_net( ( const char * ) ch1, nodeId );
+			get_long( "nodeId", & node );
+			cur = root->search_node_net( ( const char * ) ch1, node );
+			if ( cur != NULL )
+				choice = deb( cur, c, lab, res, interact );
+			else
+				choice = 0;
+
+			break;
+
+		// double-click (change to) object pointer
+		case 24:
+			ch1 = ( char * ) Tcl_GetVar( inter, "objLab", 0 );
+			get_int( "objNum", & i );
+			cur = root->search( ( const char * ) ch1 );
+			for ( j = 1; j != i && cur != NULL; ++j, cur = cur->hyper_next( ) );
 			if ( cur != NULL )
 				choice = deb( cur, c, lab, res, interact );
 			else
@@ -1078,22 +1090,25 @@ void deb_show( object *r )
 	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
 
 	// adjust spacing to align labels with data and increase columns width to better fill window
-	cmd( "if {$tcl_platform(platform) == \"windows\"} {set w1 26; set w2 10; set w3 20} {set w1 19; set w2 9; set w3 15}" );
-	cmd( "if {$tcl_platform(os)==\"Darwin\"} {set wwidth 115} {set wwidth 100}" );
+	cmd( "if [ string equal $tcl_platform(platform) windows ] { set w1 20; set w2 25; set w3 10 } { set w1 15; set w2 18; set w3 9 }" );
+	cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wwidth 115 } { set wwidth 100 }" );
 
 	cmd( "if { ! [ winfo exists .deb.tit ] } { \
 			frame .deb.tit; \
 			frame .deb.tit.h1; \
+			label .deb.tit.h1.pad -width 1 -pady 0 -bd 0 ; \
 			label .deb.tit.h1.name -text Variable -width $w1 -pady 0 -bd 0 -anchor w; \
-			label .deb.tit.h1.last -text LastUpdate -width $w2 -pady 0 -bd 0 -anchor w; \
-			label .deb.tit.h1.val -text Value -width $w3 -pady 0 -bd 0 -fg red -anchor w; \
-			pack .deb.tit.h1.name .deb.tit.h1.val .deb.tit.h1.last -side left; \
+			label .deb.tit.h1.val -text Value -width $w2 -pady 0 -bd 0 -fg red; \
+			label .deb.tit.h1.last -text \"Last update\" -width $w3 -pady 0 -bd 0; \
+			pack .deb.tit.h1.pad .deb.tit.h1.name .deb.tit.h1.val .deb.tit.h1.last -side left; \
+			label .deb.tit.pad -pady 0 -bd 0 -text \u2009; \
 			frame .deb.tit.h2; \
+			label .deb.tit.h2.pad -width 1 -pady 0 -bd 0 ; \
 			label .deb.tit.h2.name -text Variable -width $w1 -pady 0 -bd 0 -anchor w; \
-			label .deb.tit.h2.last -text LastUpdate -width $w2 -pady 0 -bd 0 -anchor w; \
-			label .deb.tit.h2.val -text Value -width $w3 -pady 0 -bd 0 -fg red -anchor w; \
-			pack .deb.tit.h2.name .deb.tit.h2.val .deb.tit.h2.last -side left -anchor w; \
-			pack .deb.tit.h1 .deb.tit.h2 -expand no -side left; \
+			label .deb.tit.h2.val -text Value -width $w2 -pady 0 -bd 0 -fg red; \
+			label .deb.tit.h2.last -text \"Last update\" -width $w3 -pady 0 -bd 0; \
+			pack .deb.tit.h2.pad .deb.tit.h2.name .deb.tit.h2.val .deb.tit.h2.last -side left -anchor w; \
+			pack .deb.tit.h1 .deb.tit.pad .deb.tit.h2 -expand no -side left; \
 			pack .deb.tit -side top -anchor w -expand no -after .deb.v \
 		}" );
 
@@ -1125,22 +1140,42 @@ void deb_show( object *r )
 			cmd( "set last %d", ap_v->last_update );
 			cmd( "set val %g", ap_v->val[ 0 ] );
 			cmd( "frame .deb.cc.l.e$i" );
+			cmd( "label .deb.cc.l.e$i.pad1 -width 1 -pady 0 -bd 0" );
 			cmd( "label .deb.cc.l.e$i.name -width $w1 -pady 0 -anchor w -bd 0 -text %s", ap_v->label );
-			if (ap_v->param == 0 )
-				cmd( "label .deb.cc.l.e$i.last -width $w2 -pady 0 -bd 0 -text $last" );
-			if (ap_v->param == 1 )
-				cmd( "label .deb.cc.l.e$i.last -width $w2 -pady 0 -bd 0 -text Par" );
-			if (ap_v->param==2)
-				cmd( "label .deb.cc.l.e$i.last -width $w2 -pady 0 -bd 0 -text Fun" );
-			cmd( "label .deb.cc.l.e$i.val -width $w3 -pady 0 -bd 0 -fg red -anchor w -text $val" );
-			cmd( "pack .deb.cc.l.e$i.name .deb.cc.l.e$i.val .deb.cc.l.e$i.last -side left" );
+			
+			if ( is_nan( ap_v->val[ 0 ] ) )
+				cmd( "label .deb.cc.l.e$i.val -width $w2 -pady 0 -bd 0 -fg red -text NAN" );
+			else
+				if ( is_inf( ap_v->val[ 0 ] ) )
+					cmd( "label .deb.cc.l.e$i.val -width $w2 -pady 0 -bd 0 -fg red -text %sINFINITY", ap_v->val[ 0 ] < 0 ? "-" : "" );
+				else
+					if ( fabs( ap_v->val[ 0 ] ) < 1e-299 )	// insignificant value?			
+						cmd( "label .deb.cc.l.e$i.val -width $w2 -pady 0 -bd 0 -fg red -text ~0" );
+					else
+						cmd( "label .deb.cc.l.e$i.val -width $w2 -pady 0 -bd 0 -fg red -text $val" );
+			
+			if ( ap_v->param == 0 )
+				cmd( "label .deb.cc.l.e$i.last -width $w3 -pady 0 -bd 0 -text $last" );
+			if ( ap_v->param == 1 )
+				cmd( "label .deb.cc.l.e$i.last -width $w3 -pady 0 -bd 0 -text (P)" );
+			if ( ap_v->param == 2 )
+				cmd( "label .deb.cc.l.e$i.last -width $w3 -pady 0 -bd 0 -text (F)" );
+			
+			if ( i % 2 == 0 )
+			{
+				cmd( "label .deb.cc.l.e$i.pad2 -pady 0 -bd 0 -bg white -text \u2009" );
+			
+				cmd( "pack .deb.cc.l.e$i.pad2 .deb.cc.l.e$i.pad1 .deb.cc.l.e$i.name .deb.cc.l.e$i.val .deb.cc.l.e$i.last -side left" );
+			}
+			else
+				cmd( "pack .deb.cc.l.e$i.pad1 .deb.cc.l.e$i.name .deb.cc.l.e$i.val .deb.cc.l.e$i.last -side left" );
 
 			cmd( "bind .deb.cc.l.e$i.name <Button-1> { set res %s; set lstDebPos [ .deb.cc.l index @%%x,%%y ]; set choice 8 }", ap_v->label );
 			cmd( "bind .deb.cc.l.e$i.name <Button-2> { set res %s; set lstDebPos [ .deb.cc.l index @%%x,%%y ]; set choice 29 }", ap_v->label );
 			cmd( "bind .deb.cc.l.e$i.name <Button-3> { event generate .deb.cc.l.e$i.name <Button-2> -x %%x -y %%y }" );
 
 			cmd( ".deb.cc.l window create end -window .deb.cc.l.e$i" );
-			if ( ( i % 2 ) == 0 )
+			if ( i % 2 == 0 )
 				cmd( ".deb.cc.l insert end \\n" );
 		}
 	   
@@ -1158,10 +1193,11 @@ SHOW_TMP_VARS
 ********************************************/
 void show_tmp_vars( object *r, bool update )
 {
-	bool done;
+	bool valid;
 	char i_names[ ] = { 'i', 'j', 'h', 'k' };
-	int i, n;
+	int i, j, m, n;
 	netLink *curLnk;
+	object *cur;
 	
 	cmd( "set in .deb.val" );
 	cmd( "set existVal [ winfo exists $in ]" );
@@ -1169,17 +1205,36 @@ void show_tmp_vars( object *r, bool update )
 	{
 		cmd( "newtop $in \"v\\[...\\]\" { destroytop .deb.val } .deb" ); 
 
-		cmd( "frame $in.n");
-		cmd( "scrollbar $in.n.yscroll -command \"$in.n.t yview\"" ); 
-		cmd( "pack $in.n.yscroll -side right -fill y" ); 
-		cmd( "text $in.n.t -width 20 -height 31 -yscrollcommand \"$in.n.yscroll set\" -wrap none -font [ font create -family \"$fonttype\" -size $small_character ]" ); 
+		cmd( "frame $in.l1" );
+		cmd( "label $in.l1.l -text \"Name and instance\"" );
+		cmd( "frame $in.l1.n" );
+		cmd( "label $in.l1.n.name -foreground red" );
+		cmd( "label $in.l1.n.sep -text |" );
+		cmd( "label $in.l1.n.id -foreground red" );
+		cmd( "pack $in.l1.n.name $in.l1.n.sep $in.l1.n.id -side left" );
+		cmd( "pack $in.l1.l $in.l1.n" );
+		
+		cmd( "frame $in.l2" );
+		cmd( "label $in.l2.id -width 6 -text Variable" );
+		cmd( "label $in.l2.pad" );
+		cmd( "label $in.l2.val -width 14 -fg red -text Value" );
+		cmd( "pack $in.l2.id $in.l2.pad $in.l2.val -side left" );
+
+		cmd( "pack $in.l1 $in.l2 -pady 2" );
+
+		cmd( "frame $in.n" );
+		cmd( "scrollbar $in.n.yscroll -command \"$in.n.t yview\"" );
+		cmd( "pack $in.n.yscroll -side right -fill y" );
+		cmd( "text $in.n.t -width 18 -height 27 -yscrollcommand \"$in.n.yscroll set\" -wrap none -cursor arrow" );
 		cmd( "mouse_wheel $in.n.t" );
 		cmd( "pack $in.n.t -expand yes -fill both" );
 		cmd( "pack $in.n -expand yes -fill both" );
+		
+		cmd( "label $in.l3 -text \"(double-click name to\nchange to object)\"" );
+		cmd( "pack $in.l3 -pady 5" );
 
 		cmd( "showtop $in topleftW 0 1 0" );
 
-		cmd( "$in.n.t tag configure red -foreground red" );
 		cmd( "$in.n.t tag configure bold -font [ font create -family TkDefaultFont -size $small_character -weight bold ]" );
 
 		cmd( "if { ! [ winfo exists .deb.net ] } { align $in .deb } { align $in .deb.net }" );
@@ -1197,117 +1252,210 @@ void show_tmp_vars( object *r, bool update )
 			return;
 		}
 	
+	m = root->search_inst( r );
+	cmd( "$in.l1.n.name configure -text \"%s\"", r->label == NULL ? "" : r->label );
+	cmd( "$in.l1.n.id configure -text \"%d\"", m );
+	
+	Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
+	
 	cmd( "$in.n.t insert end \"Temporary storage\n\" bold" );
 	
-	for ( i = 0; i < 10; ++i )
+	for ( i = 1, j = 0; j < 10; ++i, ++j )
 	{
-		cmd( "$in.n.t insert end \"v\\\[%d\\] = \"", i );
+		cmd( "frame $in.n.t.n$i" );
+		cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text \"v\\\[%d\\]\"", j );
+		cmd( "label $in.n.t.n$i.pad -width 1 -pady 0 -bd 0" );
 		
-		if ( is_nan( d_values[ i ] ) )
-			cmd( "$in.n.t insert end \"NAN\n\" red" );
+		if ( is_nan( d_values[ j ] ) )
+			cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text NAN" );
 		else
-			if ( is_inf( d_values[ i ] ) )
-				cmd( "$in.n.t insert end \"%sINFINITY\n\" red", d_values[ i ] < 0 ? "-" : "" );
+			if ( is_inf( d_values[ j ] ) )
+				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %sINFINITY", d_values[ j ] < 0 ? "-" : "" );
 			else
-				if ( fabs( d_values[ i ] ) < 1e-299 )		// insignificant value?
-					cmd( "$in.n.t insert end \"~0\n\" red" );
+				if ( fabs( d_values[ j ] ) < 1e-299 )		// insignificant value?
+					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text ~0" );
 				else
-					cmd( "$in.n.t insert end \"%g\n\" red", d_values[ i ] );
-	}
-	
-	cmd( "$in.n.t insert end \"\nInteger indexes\n\" bold" );
-	
-	for ( i = 0; i < ( sizeof i_names / sizeof i_names[ 0 ] ); ++i )
-	{
-		cmd( "$in.n.t insert end \"%c = \"", i_names[ i ] );
-		cmd( "$in.n.t insert end \"%d\n\" red", i_values[ i ] );
-	}
-	
-	cmd( "$in.n.t insert end \"\nObject pointers\n\" bold" );
-	
-	for ( i = 0; i < 10; ++i )
-	{
-		if ( i == 0 )
-			cmd( "$in.n.t insert end \"cur  = \"" );
-		else
-			cmd( "$in.n.t insert end \"cur%d = \"", i );
+					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %g", d_values[ j ] );
+				
+		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 		
-		if ( o_values[ i ] == NULL )
-			cmd( "$in.n.t insert end \"NULL\n\" red" );
+		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
+		cmd( "$in.n.t insert end \\n" );
+	}
+	
+	cmd( "$in.n.t insert end \"Integer indexes\n\" bold" );
+	
+	for ( j = 0; j < ( int ) ( sizeof i_names / sizeof i_names[ 0 ] ); ++i, ++j )
+	{
+		cmd( "frame $in.n.t.n$i" );
+		cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text \"%c\"", i_names[ j ] );
+		cmd( "label $in.n.t.n$i.pad -width 1 -pady 0 -bd 0" );
+		
+		cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %d", i_values[ j ] );
+
+		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
+		
+		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
+		cmd( "$in.n.t insert end \\n" );
+	}
+	
+	cmd( "$in.n.t insert end \"Object pointers\n\" bold" );
+	
+	for ( j = 0; j < 10; ++i, ++j )
+	{
+		cmd( "frame $in.n.t.n$i" );
+		cmd( "label $in.n.t.n$i.pad -width 1 -pady 0 -bd 0" );
+		
+		if ( j == 0 )
+			cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text cur" );
+		else
+			cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text \"cur%d\"", j );
+		
+		valid = false;
+		if ( o_values[ j ] == NULL )
+			cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text NULL" );
 		else
 		{
 			// search an object pointed by the pointer
-			n = ( int ) root->search_inst( o_values[ i ] );
-			if ( n > 0 && o_values[ i ]->label != NULL )
-				cmd( "$in.n.t insert end \"%s(%d)\n\" red", o_values[ i ]->label, n );
+			n = ( int ) root->search_inst( o_values[ j ] );
+			if ( n > 0 && o_values[ j ]->label != NULL )
+			{
+				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"%s(%d)\"", o_values[ j ]->label, n );
+				valid = true;
+			}
 			else
-				cmd( "$in.n.t insert end \"(invalid)\n\" red" );
+				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"(invalid)\"" );
 		}
-	}
-	
-	cmd( "$in.n.t insert end \"hook = \"" );
-	
-	if ( r->hook == NULL )
-		cmd( "$in.n.t insert end \"NULL\n\" red" );
-	else
-	{
-		// search an object pointed by the hook
-		n = ( int ) root->search_inst( r->hook );
-		if ( n > 0 && r->hook->label != NULL )
-			cmd( "$in.n.t insert end \"%s(%d)\n\" red", r->hook->label, n );
-		else
-			cmd( "$in.n.t insert end \"(invalid)\n\" red" );
-	}
-
-	cmd( "$in.n.t insert end \"\nNetwork link pointers\n\" bold" );
-	
-	for ( i = 0; i < 10; ++i )
-	{
-		if ( i == 0 )
-			cmd( "$in.n.t insert end \"curl  = \"" );
-		else
-			cmd( "$in.n.t insert end \"curl%d = \"", i );
 		
-		if ( n_values[ i ] == NULL )
-			cmd( "$in.n.t insert end \"NULL\n\" red" );
+		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
+		
+		if ( valid )
+		{
+			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", o_values[ j ]->label, n );
+			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", o_values[ j ]->label, n );
+		}
+		
+		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
+		cmd( "$in.n.t insert end \\n" );
+	}
+	
+	cmd( "$in.n.t insert end \"Network link pointers\n\" bold" );
+	
+	for ( j = 0; j < 10; ++i, ++j )
+	{
+		cmd( "frame $in.n.t.n$i" );
+		cmd( "label $in.n.t.n$i.pad -width 1 -pady 0 -bd 0" );
+		
+		if ( j == 0 )
+			cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text curl" );
+		else
+			cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text \"curl%d\"", j );
+		
+		if ( n_values[ j ] == NULL )
+			cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text NULL" );
 		else
 		{
 			// try search a link pointed by the pointer in current object only
-			done = false;
+			valid = false;
 			if ( r->node != NULL )
 			{
 				for ( curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next )
-					if ( curLnk == n_values[ i ] && curLnk->ptrTo != NULL && curLnk->ptrTo->label != NULL )
+					if ( curLnk == n_values[ j ] && curLnk->ptrTo != NULL && curLnk->ptrTo->label != NULL )
 					{
-						cmd( "$in.n.t insert end \"%s(%ld)\n\" red", curLnk->ptrTo->label, curLnk->serTo );
-						done = true;
+						cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"%s(%ld)\"", curLnk->ptrTo->label, curLnk->serTo );
+						valid = true;
 						break;
 					}
 			}
 			
-			if ( ! done )
-				cmd( "$in.n.t insert end \"(unknown)\n\" red" );
+			if ( ! valid )
+				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"(unknown)\"" );
 		}
-	}
-	
-	cmd( "$in.n.t insert end \"\nMore temporary storage\n\" bold" );
-	
-	for ( i = 10; i < min( 100, USER_D_VARS ); ++i )
-	{
-		cmd( "$in.n.t insert end \"v\\\[%d\\] = \"", i );
 		
-		if ( is_nan( d_values[ i ] ) )
-			cmd( "$in.n.t insert end \"NAN\n\" red" );
-		else
-			if ( is_inf( d_values[ i ] ) )
-				cmd( "$in.n.t insert end \"%sINFINITY\n\" red", d_values[ i ] < 0 ? "-" : "" );
-			else
-				if ( fabs( d_values[ i ] ) < 1e-299 )		// insignificant value?
-					cmd( "$in.n.t insert end \"~0\n\" red" );
-				else
-					cmd( "$in.n.t insert end \"%g\n\" red", d_values[ i ] );
+		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
+		
+		if ( valid )
+		{
+			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, curLnk->ptrTo->label );
+			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, curLnk->ptrTo->label );
+		}
+		
+		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
+		cmd( "$in.n.t insert end \\n" );
 	}
 	
+	cmd( "$in.n.t insert end \"Object hook pointers\n\" bold" );
+	
+	for ( j = -1; j < ( int ) r->hooks.size( ); ++i, ++j )
+	{
+		cmd( "frame $in.n.t.n$i" );
+		cmd( "label $in.n.t.n$i.pad -width 1 -pady 0 -bd 0" );
+
+		if ( j < 0 )
+		{
+			cmd( "label $in.n.t.n$i.var -width 7 -pady 0 -bd 0 -text SHOOK" );
+			cur = r->hook;	
+		}
+		else
+		{
+			cmd( "label $in.n.t.n$i.var -width 7 -pady 0 -bd 0 -text \"HOOK(%d)\"", j );
+			cur = r->hooks[ j ];	
+		}
+		
+		valid = false;
+		if ( cur == NULL )
+			cmd( "label $in.n.t.n$i.val -width 12 -pady 0 -bd 0 -foreground red -text NULL" );
+		else
+		{
+			// search an object pointed by the hook
+			n = ( int ) root->search_inst( cur );
+			if ( n > 0 && cur->label != NULL )
+			{
+				cmd( "label $in.n.t.n$i.val -width 12 -pady 0 -bd 0 -foreground red -text \"%s(%d)\"", cur->label, n );
+				valid = true;
+			}
+			else
+				cmd( "label $in.n.t.n$i.val -width 12 -pady 0 -bd 0 -foreground red -text \"(invalid)\"" );
+		}
+		
+		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
+		
+		if ( valid )
+		{
+			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", cur->label, n );
+			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", cur->label, n );
+		}
+		
+		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
+		cmd( "$in.n.t insert end \\n" );
+	}
+
+	cmd( "$in.n.t insert end \"More temporary storage\n\" bold" );
+	
+	for ( j = 10; j < min( 100, USER_D_VARS ); ++i, ++j )
+	{
+		cmd( "frame $in.n.t.n$i" );
+		cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text \"v\\\[%d\\]\"", j );
+		cmd( "label $in.n.t.n$i.pad -width 1 -pady 0 -bd 0" );
+		
+		if ( is_nan( d_values[ j ] ) )
+			cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text NAN" );
+		else
+			if ( is_inf( d_values[ j ] ) )
+				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %sINFINITY", d_values[ j ] < 0 ? "-" : "" );
+			else
+				if ( fabs( d_values[ j ] ) < 1e-299 )		// insignificant value?
+					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text ~0" );
+				else
+					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %g", d_values[ j ] );
+				
+		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
+		
+		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
+		cmd( "$in.n.t insert end \\n" );
+	}
+	
+	Tcl_UnlinkVar( inter, "i" );
 	cmd( "$in.n.t configure -state disabled" );
 } 
 
@@ -1329,8 +1477,8 @@ void show_neighbors( object *r, bool update )
 	{
 		cmd( "newtop $n \"Network\" { destroytop .deb.net } .deb" );
 		
-		cmd( "frame $n.l1");
-		cmd( "label $n.l1.l -text \"Node ID and name:\"" );
+		cmd( "frame $n.l1" );
+		cmd( "label $n.l1.l -text \"Node ID and name\"" );
 		cmd( "frame $n.l1.n" );
 		cmd( "label $n.l1.n.id -foreground red" );
 		cmd( "label $n.l1.n.sep -text |" );
@@ -1338,15 +1486,15 @@ void show_neighbors( object *r, bool update )
 		cmd( "pack $n.l1.n.id $n.l1.n.sep $n.l1.n.name -side left" );
 		cmd( "pack $n.l1.l $n.l1.n" );
 		
-		cmd( "frame $n.l2");
+		cmd( "frame $n.l2" );
 		cmd( "label $n.l2.l -text \"Num. links out:\"" );
 		cmd( "label $n.l2.n -foreground red" );
 		cmd( "pack $n.l2.l $n.l2.n -side left" );
 		
-		cmd( "frame $n.l3");
+		cmd( "frame $n.l3" );
 		cmd( "label $n.l3.l -text \"Outgoing links\"" );
 		
-		cmd( "frame $n.l3.h");
+		cmd( "frame $n.l3.h" );
 		cmd( "label $n.l3.h.id -width 6 -text \"Dest. ID\"" );
 		cmd( "label $n.l3.h.pad -width 2" );
 		cmd( "label $n.l3.h.wght -width 12 -foreground red -text \"(Weight) \"" );
@@ -1356,7 +1504,7 @@ void show_neighbors( object *r, bool update )
 
 		cmd( "pack $n.l1 $n.l2 $n.l3 -pady 2" );
 
-		cmd( "frame $n.n");
+		cmd( "frame $n.n" );
 		cmd( "scrollbar $n.n.yscroll -command \".deb.net.n.t yview\"" );
 		cmd( "pack $n.n.yscroll -side right -fill y" );
 		cmd( "text $n.n.t -width 18 -height 19 -yscrollcommand \"$n.n.yscroll set\" -wrap none -cursor arrow" );
@@ -1398,9 +1546,13 @@ void show_neighbors( object *r, bool update )
 			cmd( "label $n.n.t.n$i.weight -width 12 -pady 0 -bd 0 -foreground red -text %g", curLnk->weight );
 		else
 			cmd( "label $n.n.t.n$i.weight -width 12 -pady 0 -bd 0" );
+		
 		cmd( "pack $n.n.t.n$i.nodeto $n.n.t.n$i.pad $n.n.t.n$i.weight -side left" );
 		
 		cmd( "bind $n.n.t.n$i.nodeto <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, r->label );
+		
+		if ( curLnk->weight != 0 )
+			cmd( "bind $n.n.t.n$i.weight <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, r->label );
 		
 		cmd( "$n.n.t window create end -window $n.n.t.n$i" );
 		cmd( "$n.n.t insert end \\n" );

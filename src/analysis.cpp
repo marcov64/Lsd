@@ -3495,7 +3495,7 @@ void statistics( int *choice )
 							}
 					}
 					
-					data[ i ] = logdata[ i ];			// replace the data series
+				data[ i ] = logdata[ i ];				// replace the data series
 			}
 		}
 	}
@@ -4324,7 +4324,7 @@ PLOT_CS_XY
 void plot_cs_xy( int *choice )
 {
 	bool done, stopErr = false;
-	char *app, **str, **tag, str1[ 5 * MAX_ELEM_LENGTH ], str2[ 5 * MAX_ELEM_LENGTH ], str3[ 10 ], dirname[ MAX_PATH_LENGTH ];
+	char *app, **str, **tag, str1[ TCL_BUFF_STR ], str2[ 5 * MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
 	double **data, **logdata, previous_row;
 	int i, j, time_sel, block_length, ndim, *start, *end, *id, logErrCnt = 0;
 	FILE *f, *f2;

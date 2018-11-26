@@ -198,6 +198,15 @@ indicating the Variable or Parameter to be fast searched.</p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Pointer checking</b>. By default, LSD now checks all pointers
+used in Macros for validity. As this may have performance impact for some
+models, new Macros (<span class=Cdigo>USE_POINTER_CHECK</span> and <span
+class=Cdigo>NO_POINTER_CHECK</span>) are available for the modeler control <a
+href="LSD_macros.html#POINTER_CHECK">pointer checking</a>.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><a href="LSD_macros.html#eigen">Eigen library</a>.</b> A
 powerful library for executing linear algebra in Equations code, including
 native C++ support to matrix and vector containers, numerical solvers, and
@@ -252,6 +261,13 @@ documentation.</p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Unlimited hook pointers.</b> A modeler-defined number of <a
+href="LSD_macros.html#hook">hook pointers</a> can now be associated to any
+Object, allowing for the fast processing of multi-connected Objects.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>No-</b><b>instance Objects handling</b>. Some Macros now deal
 with Objects which have all instances deleted (only during run-time), when
 meaningful (e.g., when counting instances). The modeler has to handle the
@@ -295,9 +311,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 
 <h1>Version 7.0 (Apr 2018)</h1>
 
-<p class=MsoNormal>The new version maintains the compatibility with all the models
-built with previous versions of LSD (some optimizations require C++11 and <span
-class=Cdigo>fun_head_fast.h</span>). Main changes:</p>
+<p class=MsoNormal>The new version maintains the compatibility with all the
+models built with previous versions of LSD (some optimizations require C++11
+and <span class=Cdigo>fun_head_fast.h</span>). Main changes:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -339,9 +355,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 CRAN (LSDinterface and LSDsensitivity). Transparent use of LSD Object-oriented
 hierarchical data in R (multidimensional arrays). Parallel multi-core reading
 of multiple results files. Automatic handling of compressed results files.
-Advanced tools for sensitivity analysis and the study of response surfaces of simulation
-models (Morris Elementary Effects, Sobol Decomposition, Kriging Meta-modelling
-etc.).</p>
+Advanced tools for sensitivity analysis and the study of response surfaces of
+simulation models (Morris Elementary Effects, Sobol Decomposition, Kriging
+Meta-modelling etc.).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -571,8 +587,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 
 <h1>Version 5.2</h1>
 
-<p class=MsoNormal>The new version maintains the compatibility with all the models
-built with previous versions of LSD. There are several improvements:</p>
+<p class=MsoNormal>The new version maintains the compatibility with all the
+models built with previous versions of LSD. There are several improvements:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -624,8 +640,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span><b>Stricter error catching.</b> The number of errors spotted by
 LSD model programs is vastly increased. Moreover, detailed information is
 provided when an error occurs. For example, among other things, the system
-controls the amount of memory required to save the results, and indicated when
-it is not sufficient, leaving to the user the decision on whether to reduce the
+controls the amount of memory required to save the results, and indicated when it
+is not sufficient, leaving to the user the decision on whether to reduce the
 model dimension, simulation length, or amount of data to save.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:

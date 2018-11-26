@@ -23,6 +23,7 @@ using namespace Eigen;
 #endif
 
 #include "decl.h"										// LSD classes
+#include "check.h"										// LSD macro check support code
 
 // create and set fast lookup flag
 #if ! defined FAST_LOOKUP || ! defined CPP11
@@ -36,14 +37,18 @@ bool fast_lookup = true;
 #if defined FAST_LOOKUP && ! defined NO_POINTER_INIT
 bool no_ptr_chk = false;
 #define INIT_POINTERS \
+	h = i = j = k = 0; \
 	cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cyccur = cyccur2 = cyccur3 = NULL; \
 	curl = curl1 = curl2 = curl3 = curl4 = curl5 = curl6 = curl7 = curl8 = curl9 = NULL; \
 	f = NULL;
-#define CHK_PTR_CHR( O ) chk_ptr ( O ) ? bad_ptr_chr( O, __FILE__, __LINE__ ) :
-#define CHK_PTR_DBL( O ) chk_ptr ( O ) ? bad_ptr_dbl( O, __FILE__, __LINE__ ) :
-#define CHK_PTR_LNK( O ) chk_ptr ( O ) ? bad_ptr_lnk( O, __FILE__, __LINE__ ) :
-#define CHK_PTR_OBJ( O ) chk_ptr ( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
-#define CHK_PTR_VOID( O ) chk_ptr ( O ) ? bad_ptr_void( O, __FILE__, __LINE__ ) :
+#define CHK_PTR_NOP( O ) if ( chk_ptr( O ) ) bad_ptr_void( O, __FILE__, __LINE__ );
+#define CHK_PTR_CHR( O ) chk_ptr( O ) ? bad_ptr_chr( O, __FILE__, __LINE__ ) :
+#define CHK_PTR_DBL( O ) chk_ptr( O ) ? bad_ptr_dbl( O, __FILE__, __LINE__ ) :
+#define CHK_PTR_LNK( O ) chk_ptr( O ) ? bad_ptr_lnk( O, __FILE__, __LINE__ ) :
+#define CHK_PTR_OBJ( O ) chk_ptr( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
+#define CHK_PTR_VOID( O ) chk_ptr( O ) ? bad_ptr_void( O, __FILE__, __LINE__ ) :
+#define CHK_OBJ_OBJ( O ) chk_obj( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
+#define CHK_HK_OBJ( O, X ) chk_hook( O, X ) ? no_hook_obj( O, X, __FILE__, __LINE__ ) :
 #define CHK_LNK_DBL( O ) O == NULL ? nul_lnk_dbl( __FILE__, __LINE__ ) :
 #define CHK_LNK_OBJ( O ) O == NULL ? nul_lnk_obj( __FILE__, __LINE__ ) :
 #define CHK_LNK_VOID( O ) O == NULL ? nul_lnk_void( __FILE__, __LINE__ ) :
@@ -52,11 +57,14 @@ bool no_ptr_chk = false;
 #else
 bool no_ptr_chk = true;
 #define INIT_POINTERS
+#define CHK_PTR_NOP( O )
 #define CHK_PTR_CHR( O )
 #define CHK_PTR_DBL( O )
 #define CHK_PTR_LNK( O )
 #define CHK_PTR_OBJ( O )
 #define CHK_PTR_VOID( O )
+#define CHK_OBJ_OBJ( O )
+#define CHK_HK_OBJ( O, X )
 #define CHK_LNK_DBL( O )
 #define CHK_LNK_OBJ( O )
 #define CHK_LNK_VOID( O )
@@ -267,6 +275,8 @@ bool no_ptr_chk = true;
 #define CONFIG ( ( const char * ) simul_name )
 #define PATH ( ( const char * ) path )
 #define CURRENT ( var->val[ 0 ] )
+#define PARENT ( p->up )
+#define GRANDPARENT ( CHK_PTR_OBJ( p->up ) p->up->up )
 #define RND_SEED ( ( double ) seed - 1 )
 #define T ( ( double ) t )
 #define LAST_T ( ( double ) max_step )
@@ -379,6 +389,18 @@ bool no_ptr_chk = true;
 #define SORTS( O, X, Y, Z ) ( CHK_PTR_OBJ( O ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z ) )
 #define SORT2( X, Y, Z, W ) ( p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z, ( char * ) W ) )
 #define SORT2S( O, X, Y, Z, W ) ( CHK_PTR_OBJ( O ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z, ( char * ) W ) )
+#define HOOK( X ) ( CHK_HK_OBJ( p, X ) p->hooks[ X ] )
+#define HOOKS( O, X ) ( CHK_PTR_OBJ( O ) CHK_HK_OBJ( O, X ) O->hooks[ X ] )
+#define SHOOK ( p->hook )
+#define SHOOKS( O ) ( CHK_PTR_OBJ( O ) O->hook )
+#define WRITE_HOOK( X, Y ) ( CHK_HK_OBJ( p, X ) CHK_OBJ_OBJ( Y ) p->hooks[ X ] = Y )
+#define WRITE_HOOKS( O, X, Y ) ( CHK_PTR_OBJ( O ) CHK_HK_OBJ( O, X ) CHK_OBJ_OBJ( Y ) O->hooks[ X ] = Y )
+#define WRITE_SHOOK( X ) ( CHK_OBJ_OBJ( X ) p->hook = X )
+#define WRITE_SHOOKS( O, X ) ( CHK_PTR_OBJ( O ) CHK_OBJ_OBJ( X ) O->hook = X )
+#define ADDHOOK( X ) ( p->hooks.resize( ( unsigned ) X ), NULL )
+#define ADDHOOKS( O, X ) ( CHK_PTR_VOID( O ) O->hooks.resize( ( unsigned ) X, NULL ) )
+#define COUNT_HOOK ( p->hooks.size( ) )
+#define COUNT_HOOKS( O ) ( CHK_PTR_DBL( O ) O->hooks.size( ) )
 #define DOWN_LAT ( p->lat_down( ) )
 #define DOWN_LATS( O ) ( CHK_PTR_OBJ( O ) O->lat_down( ) )
 #define LEFT_LAT ( p->lat_left( ) )
@@ -457,42 +479,46 @@ bool no_ptr_chk = true;
 #define V_CHEATS( O, X, Y ) ( CHK_PTR_DBL( O ) O->cal( Y, ( char * ) X, 0 ) )
 #define V_CHEATLS( O, X, Y, Z ) ( CHK_PTR_DBL( O ) O->cal( Z, ( char * ) X, Y ) )
 #define ADDEXT( X ) { if ( p->cext != NULL ) DELETE_EXT( X ); p->cext = reinterpret_cast< void * >( new X ); }
-#define ADDEXTS( O, X ) { if ( O->cext != NULL ) DELETE_EXTS( O, X ); O->cext = reinterpret_cast< void * >( new X ); }
-#define DELETE_EXT( X ) { delete reinterpret_cast< X * >( p->cext ); p->cext = NULL; }
-#define DELETE_EXTS( O, X ) { delete reinterpret_cast< X * >( O->cext ); O->cext = NULL; }
+#define ADDEXTS( O, X ) { CHK_PTR_NOP( O ); if ( O->cext != NULL ) DELETE_EXTS( O, X ); O->cext = reinterpret_cast< void * >( new X ); }
+#define ADDEXT_INIT( X, ... ) { if ( p->cext != NULL ) DELETE_EXT( X ); p->cext = reinterpret_cast< void * >( new X( __VA_ARGS__ ) ); }
+#define ADDEXT_INITS( O, X, ... ) { CHK_PTR_NOP( O ); if ( O->cext != NULL ) DELETE_EXTS( O, X ); O->cext = reinterpret_cast< void * >( new X( __VA_ARGS__ ) ); }
+#define DELETE_EXT( X ) { delete P_EXT( X ); p->cext = NULL; }
+#define DELETE_EXTS( O, X ) { CHK_PTR_NOP( O ); delete P_EXTS( O, X ); O->cext = NULL; }
 #define DO_EXT( X, Y, ... ) ( P_EXT( X ) -> Y( __VA_ARGS__ ) )
 #define DO_EXTS( O, X, Y, ... ) ( P_EXTS( O, X ) -> Y( __VA_ARGS__ ) )
-#define EXT( X ) ( * P_EXT( X ) )
-#define EXTS( O, X ) ( * P_EXTS( O, X ) )
 #define EXEC_EXT( X, Y, Z, ... ) ( P_EXT( X ) -> Y.Z( __VA_ARGS__ ) )
 #define EXEC_EXTS( O, X, Y, Z, ... ) ( P_EXTS( O, X ) -> Y.Z( __VA_ARGS__ ) )
+#define EXT( X ) ( * P_EXT( X ) )
+#define EXTS( O, X ) ( * P_EXTS( O, X ) )
 #define P_EXT( X ) ( reinterpret_cast< X * >( p->cext ) )
 #define P_EXTS( O, X ) ( reinterpret_cast< X * >( O->cext ) )
 #define V_EXT( X, Y ) ( P_EXT( X ) -> Y )
 #define V_EXTS( O, X, Y ) ( P_EXTS( O, X ) -> Y )
 #define WRITE_EXT( X, Y, Z ) ( P_EXT( X ) -> Y = Z )
 #define WRITE_EXTS( O, X, Y, Z ) ( P_EXTS( O, X ) -> Y = Z )
+#define WRITE_ARG_EXT( X, Y, Z, ... ) ( P_EXT( X ) -> Y( __VA_ARGS__ ) = Z )
+#define WRITE_ARG_EXTS( O, X, Y, Z, ... ) ( P_EXTS( O, X ) -> Y( __VA_ARGS__ ) = Z )
 
-#define CYCLE( X, Y ) for ( X = get_cycle_obj( p, ( char * ) Y, "CYCLE" ); X != NULL; X = go_brother( X ) )
-#define CYCLE_SAFE( X, Y ) for ( X = get_cycle_obj( p, ( char * ) Y, "CYCLE_SAFE" ), \
-							  cyccur = go_brother( X ); X != NULL; X = cyccur, \
-							  cyccur != NULL ? cyccur = go_brother( cyccur ) : cyccur = cyccur )
-#define CYCLE2_SAFE( X, Y ) for ( X = get_cycle_obj( p, ( char * ) Y, "CYCLE_SAFE" ), \
-							  cyccur2 = go_brother( X ); X != NULL; X = cyccur2, \
-							  cyccur2 != NULL ? cyccur2 = go_brother( cyccur2 ) : cyccur2 = cyccur2 )
-#define CYCLE3_SAFE( X, Y ) for ( X = get_cycle_obj( p, ( char * ) Y, "CYCLE_SAFE" ), \
-							  cyccur3 = go_brother( X ); X != NULL; X = cyccur3, \
-							  cyccur3 != NULL ? cyccur3 = go_brother( cyccur3 ) : cyccur3 = cyccur3 )
-#define CYCLES( O, X, Y ) for ( X = get_cycle_obj( O, ( char * ) Y, "CYCLES" ); X != NULL; X = go_brother( X ) )
-#define CYCLE_SAFES( O, X, Y ) for ( X = get_cycle_obj( O, ( char * ) Y, "CYCLE_SAFES" ), \
-								 cyccur = go_brother( X ); X != NULL; X = cyccur, \
-								 cyccur != NULL ? cyccur = go_brother( cyccur ) : cyccur = cyccur )
-#define CYCLE2_SAFES( O, X, Y ) for ( X = get_cycle_obj( O, ( char * ) Y, "CYCLE_SAFES" ), \
-								 cyccur2 = go_brother( X ); X != NULL; X = cyccur2, \
-								 cyccur2 != NULL ? cyccur2 = go_brother( cyccur2 ) : cyccur2 = cyccur2 )
-#define CYCLE3_SAFES( O, X, Y ) for ( X = get_cycle_obj( O, ( char * ) Y, "CYCLE_SAFES" ), \
-								 cyccur3 = go_brother( X ); X != NULL; X = cyccur3, \
-								 cyccur3 != NULL ? cyccur3 = go_brother( cyccur3 ) : cyccur3 = cyccur3 )
+#define CYCLE( X, Y ) for ( X = cycle_obj( p, ( char * ) Y, "CYCLE" ); X != NULL; X = brother( X ) )
+#define CYCLE_SAFE( X, Y ) for ( X = cycle_obj( p, ( char * ) Y, "CYCLE_SAFE" ), \
+							  cyccur = brother( X ); X != NULL; X = cyccur, \
+							  cyccur != NULL ? cyccur = brother( cyccur ) : cyccur = cyccur )
+#define CYCLE2_SAFE( X, Y ) for ( X = cycle_obj( p, ( char * ) Y, "CYCLE_SAFE" ), \
+							  cyccur2 = brother( X ); X != NULL; X = cyccur2, \
+							  cyccur2 != NULL ? cyccur2 = brother( cyccur2 ) : cyccur2 = cyccur2 )
+#define CYCLE3_SAFE( X, Y ) for ( X = cycle_obj( p, ( char * ) Y, "CYCLE_SAFE" ), \
+							  cyccur3 = brother( X ); X != NULL; X = cyccur3, \
+							  cyccur3 != NULL ? cyccur3 = brother( cyccur3 ) : cyccur3 = cyccur3 )
+#define CYCLES( O, X, Y ) for ( X = cycle_obj( O, ( char * ) Y, "CYCLES" ); X != NULL; X = brother( X ) )
+#define CYCLE_SAFES( O, X, Y ) for ( X = cycle_obj( O, ( char * ) Y, "CYCLE_SAFES" ), \
+								 cyccur = brother( X ); X != NULL; X = cyccur, \
+								 cyccur != NULL ? cyccur = brother( cyccur ) : cyccur = cyccur )
+#define CYCLE2_SAFES( O, X, Y ) for ( X = cycle_obj( O, ( char * ) Y, "CYCLE_SAFES" ), \
+								 cyccur2 = brother( X ); X != NULL; X = cyccur2, \
+								 cyccur2 != NULL ? cyccur2 = brother( cyccur2 ) : cyccur2 = cyccur2 )
+#define CYCLE3_SAFES( O, X, Y ) for ( X = cycle_obj( O, ( char * ) Y, "CYCLE_SAFES" ), \
+								 cyccur3 = brother( X ); X != NULL; X = cyccur3, \
+								 cyccur3 != NULL ? cyccur3 = brother( cyccur3 ) : cyccur3 = cyccur3 )
 								 
 #ifdef NO_POINTER_INIT
 #define CYCLE_LINK( O ) for ( O = p->node->first; O != NULL; O = O->next )
