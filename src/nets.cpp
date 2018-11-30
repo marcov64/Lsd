@@ -133,10 +133,10 @@ char *strupr( char *s )
 #endif
 
 
-/*
+/****************************************************
+NETLINK
 	Initialize new link, at the end of linked list.
-*/
-
+****************************************************/
 netLink::netLink( object *origNode, object *destNode, double linkWeight, double destProb )
 {
 	time = t;							// save creation time
@@ -183,10 +183,10 @@ netLink::netLink( object *origNode, object *destNode, double linkWeight, double 
 }
 
 
-/*
+/****************************************************
+~NETLINK
 	Destroy link, preserving linked list integrity.
-*/
-
+****************************************************/
 netLink::~netLink( void )
 {
 	if ( ptrFrom->node->first != this && ptrFrom->node->last != this )
@@ -214,11 +214,12 @@ netLink::~netLink( void )
 }
 
 
-/*
-	Add new link from LSD object. Does NOT check if the link already exists.
-	So, if multiple links are to be prevented, caller has to check before calling.
-*/
-
+/****************************************************
+ADD_LINK_NET (*)
+	Add new link from LSD object. Does NOT check if 
+	the link already exists. So, if multiple links 
+	are to be prevented, caller has to check before calling.
+****************************************************/
 netLink *object::add_link_net( object *destPtr, double weight, double probTo )
 {
 	netLink *cur;
@@ -239,10 +240,10 @@ netLink *object::add_link_net( object *destPtr, double weight, double probTo )
 }
 
 
-/*
+/****************************************************
+DELETE_LINK_NET (*)
 	Remove link from LSD object.
-*/
-
+****************************************************/
 void object::delete_link_net( netLink *ptr )
 {
 	netLink *cur;
@@ -256,11 +257,12 @@ void object::delete_link_net( netLink *ptr )
 }
 
 
-/*
-	Search for existing link from LSD object. Return pointer to the first 
-	link found or NULL if link to destination does not exist.
-*/
-
+/****************************************************
+SEARCH_LINK_NET (*)
+	Search for existing link from LSD object. 
+	Return pointer to the first link found or NULL 
+	if link to destination does not exist.
+****************************************************/
 netLink *object::search_link_net( long destId )
 {
 	netLink *cur;
@@ -276,12 +278,12 @@ netLink *object::search_link_net( long destId )
 }
 
 
-/*
+/****************************************************
+DRAW_LINK_NET (*)
 	Draw one of the outgoing links of a node randomly, 
 	with probability equal to probTo.
 	Returns NULL if no link exists.
-*/
-
+****************************************************/
 netLink *object::draw_link_net( void )
 {
 	double sum, drawPoint, accProb;
@@ -318,10 +320,10 @@ netLink *object::draw_link_net( void )
 }
 
 
-/*
+/****************************************************
+NETNODE
 	Initialize netNode struct (no links).
-*/
-
+****************************************************/
 netNode::netNode( long nodeId, char const *nodeName, double nodeProb )
 {
 	id = nodeId;
@@ -353,10 +355,10 @@ netNode::netNode( long nodeId, char const *nodeName, double nodeProb )
 }
 
 
-/*
+/****************************************************
+~NETNODE
 	Destroy netNode struct.
-*/
-
+****************************************************/
 netNode::~netNode( void )
 {
 	if ( name != NULL )			// name assigned?
@@ -367,10 +369,10 @@ netNode::~netNode( void )
 }
 
 
-/*
+/****************************************************
+ADD_NODE_NET (*)
 	Add netNode data structure to LSD object
-*/
-
+****************************************************/
 netNode *object::add_node_net( long id, char const nodeName[ ], 
 							   bool silent )
 {
@@ -407,10 +409,10 @@ netNode *object::add_node_net( long id, char const nodeName[ ],
 }
 
 
-/*
+/****************************************************
+DELETE_NODE_NET (*)
 	Remove netNode data structure from LSD object.
-*/
-
+****************************************************/
 void object::delete_node_net( void )
 {
 	delete node;
@@ -418,10 +420,10 @@ void object::delete_node_net( void )
 }
 
 
-/*
+/****************************************************
+NAME_NODE_NET (*)
 	Set or reset the name of a node.
-*/
-
+****************************************************/
 void object::name_node_net( char const *nodeName )
 {
 	if ( node == 0 )				// invalid node?
@@ -448,12 +450,12 @@ void object::name_node_net( char const *nodeName )
 }
 
 
-/*
-	Search for existing node. Return pointer to the object containing it
-	or NULL if node does not exist.
+/****************************************************
+SEARCH_NODE_NET (*)
+	Search for existing node. Return pointer to the 
+	object containing it or NULL if node does not exist.
 	Slow for large networks, turbosearch is better in this case.
-*/
-
+****************************************************/
 object *object::search_node_net( char const *lab, long destId )
 {
 	object *cur;
@@ -468,7 +470,8 @@ object *object::search_node_net( char const *lab, long destId )
 }
 
 
-/*
+/****************************************************
+STATS_NET (*)
 	Returns some basic statistics about the directed network.
 	r[ 0 ]: number of nodes
 	r[ 1 ]: number of links (arcs)
@@ -476,8 +479,7 @@ object *object::search_node_net( char const *lab, long destId )
 	r[ 3 ]: minimum out-degree
 	r[ 4 ]: maximum out-degree
 	r[ 5 ]: density (including loops)
-*/
-
+****************************************************/
 double object::stats_net( char const *lab, double *r )
 {
 	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = r[ 5 ] = 0;
@@ -511,10 +513,10 @@ double object::stats_net( char const *lab, double *r )
 }
 
 
-/*
+/****************************************************
+DRAW_NODE_NET (*)
 	Draw a node randomly, with probability equal to prob.
-*/
-
+****************************************************/
 object *object::draw_node_net( char const *lab )
 {
 	double sum, drawPoint, accProb;
@@ -550,11 +552,11 @@ object *object::draw_node_net( char const *lab )
 }
 
 
-/*
+/****************************************************
+SHUFFLE_NODES_NET (*)
 	Shuffle nodes order in the linked list of node objects.
 	Use Fischer-Yates shuffling algorithm.
-*/
-
+****************************************************/
 object *object::shuffle_nodes_net( char const *lab )
 {
 	long i, j, iId, jId, numNodes;
@@ -597,11 +599,12 @@ object *object::shuffle_nodes_net( char const *lab )
 }
 
 
-/*
-	Calculate the missing number of object copies. Prints a warning if there are more
+/****************************************************
+NODES2CREATE
+	Calculate the missing number of object copies. 
+	Prints a warning if there are more
 	existing copies than needed and returns 0.
-*/
-
+****************************************************/
 long nodes2create( object *parent, char const *lab, long numNodes )
 {
 	long count;
@@ -616,10 +619,10 @@ long nodes2create( object *parent, char const *lab, long numNodes )
 }
 
 
-/*
+/****************************************************
+INIT_STUB_NET (*)
 	Stub function to call the appropriate network generator.
-*/
-
+****************************************************/
 double object::init_stub_net( char const *lab, const char* gen, long numNodes, long par1, double par2 )
 {
 	char option[ 32 ];
@@ -694,11 +697,11 @@ double object::init_stub_net( char const *lab, const char* gen, long numNodes, l
 }
 
 
-/*
+/****************************************************
+INIT_DISCON_NET
 	Create a disconnected network, just with nodes and no links.
 	Links can be added node by node by the user.
-*/
-
+****************************************************/
 long object::init_discon_net( char const *lab, long numNodes )
 {
 	long idNode;
@@ -727,11 +730,11 @@ long object::init_discon_net( char const *lab, long numNodes )
 }
 
 
-/*
+/****************************************************
+INIT_CONNECT_NET
 	Create a fully connected undirected network.
 	All links/arcs are reciprocal.
-*/
-
+****************************************************/
 long object::init_connect_net( char const *lab, long numNodes )
 {
 	long idNode, links = 0;
@@ -770,11 +773,11 @@ long object::init_connect_net( char const *lab, long numNodes )
 }
 
 
-/*
+/****************************************************
+INIT_STAR_NET
 	Create a star network, first object in the chain is the hub.
 	All other objects are spokes with bi-directional links to hub.
-*/
-
+****************************************************/
 long object::init_star_net( char const *lab, long numNodes )
 {
 	long links;
@@ -799,11 +802,12 @@ long object::init_star_net( char const *lab, long numNodes )
 }
 
 
-/*
-	Create a completely random network with a fixed number of directed links.
+/****************************************************
+INIT_RANDOM_DIR_NET
+	Create a completely random network with a fixed 
+	number of directed links.
 	Links/arcs are directed and not reciprocal.
-*/
-
+****************************************************/
 long object::init_random_dir_net( char const *lab, long numNodes, long numLinks )
 {
 	long idNode, links = 0;
@@ -854,11 +858,12 @@ long object::init_random_dir_net( char const *lab, long numNodes, long numLinks 
 }
 
 
-/*
-	Create a completely random network with a fixed number of directed links.
-	Links/arcs are reciprocal to form an undirected network.
-*/
-
+/****************************************************
+INIT_RANDOM_UNDIR_NET
+	Create a completely random network with a fixed 
+	number of directed links. Links/arcs are reciprocal 
+	to form an undirected network.
+****************************************************/
 long object::init_random_undir_net( char const *lab, long numNodes, long numLinks )
 {
 	long idNode, links = 0;
@@ -910,11 +915,12 @@ long object::init_random_undir_net( char const *lab, long numNodes, long numLink
 }
 
 
-/*
-	Create a uniform random network with a fixed number of directed links per node.
-	The objects representing the nodes must be located inside the current object.
-*/
-
+/****************************************************
+INIT_UNIFORM_NET
+	Create a uniform random network with a fixed number 
+	of directed links per node. The objects representing 
+	the nodes must be located inside the current object.
+****************************************************/
 long object::init_uniform_net( char const *lab, long numNodes, long outDeg )
 {
 	long link, idNode, numLinks, newNode, tryNode;
@@ -965,12 +971,12 @@ long object::init_uniform_net( char const *lab, long numNodes, long outDeg )
 }
 
 
-/*
+/****************************************************
+INIT_RENYI_ERDOS_NET
 	Create a undirected network with random links. The probability of any two 
 	nodes being linked is: linkProb. This is the classic Renyi-Erdos network.
 	The objects representing the nodes must be located inside the current object.
-*/
-
+****************************************************/
 long object::init_renyi_erdos_net( char const *lab, long numNodes, double linkProb )
 {
 	long idNode, numLinks, startNode, endNode;
@@ -1017,11 +1023,12 @@ long object::init_renyi_erdos_net( char const *lab, long numNodes, double linkPr
 }
 
 
-/*
-Create a network placing agents on a circle with avgOutDeg/2 neighbours on each 
-side (efficient algorithm). If avgOutDeg is odd, rounds neighbours # down.
-*/
-
+/****************************************************
+INIT_CIRCLE_NET
+	Create a network placing agents on a circle with avgOutDeg/2 
+	neighbours on each side (efficient algorithm). If avgOutDeg 
+	is odd, rounds neighbours # down.
+****************************************************/
 long object::init_circle_net( char const *lab, long numNodes, long outDeg )
 {
 	long link, idNode, numLinks, lowNeigh;
@@ -1082,11 +1089,12 @@ long object::init_circle_net( char const *lab, long numNodes, long outDeg )
 }
 
 
-/*
-	Implement the Small-World rewiring according to the Watts&Strogatz Nature '98 paper. 
+/****************************************************
+INIT_SMALL_WORLD_NET
+	Implement the Small-World rewiring according to 
+	the Watts&Strogatz Nature '98 paper. 
 	rho is the rewiring parameter.
-*/
-
+****************************************************/
 long object::init_small_world_net( char const *lab, long numNodes, long outDeg, double rho )
 {
 	long link, idNode, numLinks, numNeigh, tryNode, newNode;
@@ -1144,7 +1152,8 @@ long object::init_small_world_net( char const *lab, long numNodes, long outDeg, 
 }			
 
 
-/*
+/****************************************************
+INIT_SCALE_FREE_NET
 	Create a scale-free network with preferential attachment generating a power law 
 	distribution of number of links. The procedure can be read as a generalization 
 	of Barabasi procedure with two constraints:
@@ -1156,8 +1165,7 @@ long object::init_small_world_net( char const *lab, long numNodes, long outDeg, 
 	to each node the probability of being chosen. These probabilities are used in 
 	subsequent rounds in which all nodes choose new links according to the 
 	probabilities fixed at the first round.
-*/
-
+****************************************************/
 long object::init_scale_free_net( char const *lab, long numNodes, long outDeg, double expLink )
 {
 	long idNode, numLinks, nLinks, i;
@@ -1254,7 +1262,8 @@ long object::init_scale_free_net( char const *lab, long numNodes, long outDeg, d
 }
 
 
-/*
+/****************************************************
+INIT_LATTICE_NET
 	Generates a lattice, a regular square network where each cell in row i and 
 	column j is connected to its 4 or 8 neighbours, depending on an optional parameter
 	The links are generated clockwise starting from "North", that is cell (i-1, j), 
@@ -1262,8 +1271,7 @@ long object::init_scale_free_net( char const *lab, long numNodes, long outDeg, d
 	(i-1,j+1), respectively.
 	The lattice is a torus, i.e. cells at the borders are connected to the opposite 
 	border.
-*/
-
+****************************************************/
 long object::init_lattice_net( int nRow, int nCol, char const *lab, int eightNeigbr )
 {
 	long idNode, i, j, h, numNodes = nRow * nCol, numLinks = 0;
@@ -1363,10 +1371,10 @@ long object::init_lattice_net( int nRow, int nCol, char const *lab, int eightNei
 }
 
 
-/*
+/****************************************************
+READ_FILE_NET (*)
 	Read directed or undirected network text file in Pajek format.
-*/
-
+****************************************************/
 void get_line( char *lBuffer, FILE *fPtr )
 {
 	char firstChar;
@@ -1522,10 +1530,10 @@ double object::read_file_net( char const *lab, char const dir[ ], char const bas
 }
 
 
-/*
+/****************************************************
+WRITE_FILE_NET (*)
 	Write directed network in Pajek text file format.
-*/
-
+****************************************************/
 double object::write_file_net( char const *lab, char const dir[ ], char const base_name[ ], 
 							 int serial, bool append )
 {
@@ -1619,10 +1627,10 @@ double object::write_file_net( char const *lab, char const dir[ ], char const ba
 }
 
 
-/*
+/****************************************************
+DELETE_NET (*)
 	Delete a network, removing nodes and links.
-*/
-
+****************************************************/
 void object::delete_net( char const *lab )
 {
 	object *cur;
@@ -1632,12 +1640,12 @@ void object::delete_net( char const *lab )
 }
 
 
-/*
+/****************************************************
+CHECK_NET_STRUCT
 	Check the contextual objects structure.
 	The calling object has to be a immediate parent of the existing object named 'lab'.
 	Root cannot be the calling object (not a valid network container).
-*/
-
+****************************************************/
 object *check_net_struct( object *caller, char const *nodeLab, bool noErr )
 {
 	object *cur = caller->search( nodeLab );

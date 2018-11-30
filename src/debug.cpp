@@ -1149,7 +1149,7 @@ void deb_show( object *r )
 				if ( is_inf( ap_v->val[ 0 ] ) )
 					cmd( "label .deb.cc.l.e$i.val -width $w2 -pady 0 -bd 0 -fg red -text %sINFINITY", ap_v->val[ 0 ] < 0 ? "-" : "" );
 				else
-					if ( fabs( ap_v->val[ 0 ] ) < 1e-299 )	// insignificant value?			
+					if ( ap_v->val[ 0 ] != 0 && fabs( ap_v->val[ 0 ] ) < SIG_MIN )	// insignificant value?			
 						cmd( "label .deb.cc.l.e$i.val -width $w2 -pady 0 -bd 0 -fg red -text ~0" );
 					else
 						cmd( "label .deb.cc.l.e$i.val -width $w2 -pady 0 -bd 0 -fg red -text $val" );
@@ -1272,7 +1272,7 @@ void show_tmp_vars( object *r, bool update )
 			if ( is_inf( d_values[ j ] ) )
 				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %sINFINITY", d_values[ j ] < 0 ? "-" : "" );
 			else
-				if ( fabs( d_values[ j ] ) < 1e-299 )		// insignificant value?
+				if ( d_values[ j ] != 0 && fabs( d_values[ j ] ) < SIG_MIN )	// insignificant value?
 					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text ~0" );
 				else
 					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %g", d_values[ j ] );
@@ -1444,7 +1444,7 @@ void show_tmp_vars( object *r, bool update )
 			if ( is_inf( d_values[ j ] ) )
 				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %sINFINITY", d_values[ j ] < 0 ? "-" : "" );
 			else
-				if ( fabs( d_values[ j ] ) < 1e-299 )		// insignificant value?
+				if ( d_values[ j ] != 0 && fabs( d_values[ j ] ) < SIG_MIN )	// insignificant value?
 					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text ~0" );
 				else
 					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %g", d_values[ j ] );

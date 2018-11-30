@@ -87,7 +87,7 @@ because of the functionalities, since all the methods are actually public, and
 could be used anyway. It is just that you wouldn't like to, say, save a model
 in the middle of an equation.
 
-METHODS FOR EQUATIONS
+METHODS FOR EQUATIONS (marked with an *)
 
 - double cal( char *l, int lag );
 Interface to another type of cal(see below), that uses also the address of this.
@@ -535,7 +535,7 @@ bridge *object::search_bridge( char const *lab, bool no_error )
 
 
 /****************************************************
-SEARCH
+SEARCH (*)
 Search the first Object lab in the branch of the model below this.
 Uses the fast bridge look-up map.
 ***************************************************/
@@ -736,7 +736,7 @@ object *mnode::fetch( double *n, double level )
 
 
 /****************************
-INITTURBO
+INITTURBO (*)
 Generate the data structure required to use the turbosearch.
 - label must be the label of the descending object whose set is to be organized 
 - num is the total number of objects (if not provided or zero, it's calculated).
@@ -776,7 +776,7 @@ double object::initturbo( char const *label, double tot = 0 )
 
 
 /****************************
-TURBOSEARCH
+TURBOSEARCH (*)
 Search the object label placed in num position.
 This search exploits the structure created with 'initturbo'
 If tot is 0, previous set value is used
@@ -825,7 +825,7 @@ object *object::turbosearch( char const *label, double tot, double num )
 
 
 /*******************************************
-SEARCH_INST
+SEARCH_INST (*)
 Searches the model for an object instance
 pointed by 'obj' searching first among the 
 calling object instances and then into its
@@ -1020,7 +1020,7 @@ variable *object::search_var( object *caller, char const *lab, bool no_error, bo
 
 
 /****************************************************
-SEARCH_VAR_COND
+SEARCH_VAR_COND (*)
 Search for the Variable or Parameter lab with value value and return it, if found.
 Return NULL if not found.
 ****************************************************/
@@ -1061,7 +1061,7 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 
 
 /****************************
-INITTURBO_COND
+INITTURBO_COND (*)
 Generate the data structure required to use the turbosearch with condition.
 *****************************/
 double object::initturbo_cond( char const *label )
@@ -1114,7 +1114,7 @@ double object::initturbo_cond( char const *label )
 
 
 /****************************
-TURBOSEARCH_COND
+TURBOSEARCH_COND (*)
 Search the object instance containing a variable label with given value.
 Return the containing object instance, if found, or NULL if not found.
 This search exploits the structure created with 'initturbo_cond'.
@@ -1598,7 +1598,7 @@ void copy_descendant( object *from, object *to )
 
 
 /****************************************************
-ADD_N_OBJECTS2 
+ADD_N_OBJECTS2 (*)
 As the type with the example, but the example is taken from the blueprint
 ****************************************************/
 object *object::add_n_objects2( char const *lab, int n )
@@ -1608,7 +1608,7 @@ object *object::add_n_objects2( char const *lab, int n )
 
 
 /****************************************************
-ADD_N_OBJECTS2 
+ADD_N_OBJECTS2 (*)
 As the type with the example, but the example is taken from the blueprint
 In respect of the original version, it allows for the specification
 of the time of last update if t_update is positive or zero. If
@@ -1622,7 +1622,7 @@ object *object::add_n_objects2( char const *lab, int n, int t_update )
 
 
 /****************************************************
-ADD_N_OBJECTS2 
+ADD_N_OBJECTS2 (*)
 Add N objects to the model making a copies of the example object ex
 In respect of the original version, it leaves time of last update
 as in the example object
@@ -1634,7 +1634,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex )
 
 
 /****************************************************
-ADD_N_OBJECTS2 
+ADD_N_OBJECTS2 (*)
 Add N objects to the model making a copies of the example object ex
 In respect of the original version, it allows for the specification
 of the time of last update if t_update is positive or zero. If
@@ -1821,15 +1821,18 @@ void delete_bridge( object *d )
 
 
 /****************************************************
-DELETE_OBJ
+DELETE_OBJ (*)
 Remove the object from the model
 Before killing the Variables data to be saved are stored
 in the "cemetery", a linked chain storing data to be analyzed.
 ****************************************************/
 void object::delete_obj( void ) 
 {
-	object *cur;
+	object *cur = this;
 	bridge *cb;
+	
+	if ( cur == NULL )
+		return;					// ignore deleting null object
 	
 	{							// create context for lock
 #ifdef PARALLEL_MODE
@@ -2073,7 +2076,7 @@ bool object::under_computation( void )
 	
 	
 /****************************************************
-CAL
+CAL (*)
 Return the value of Variable or Parameter with label lab with lag lag.
 The method search for the Variable starting from this Object and then calls
 the function variable->cal(caller, lag )
@@ -2086,20 +2089,10 @@ double object::cal( object *caller, char const *lab, int lag )
 	if ( quit == 2 )
 		return NAN;
 
-	// detect malformed pointer manipulations (ignore warning messages!)
-	if ( cur == NULL )
-	{
-		sprintf( msg, "variable '%s' computation requested from NULL object", lab );
-		error_hard( msg, "invalid pointer operation", 
-					"check your equation code to ensure pointer points\nto a valid object before the operation",
-					true );
-		return NAN;
-	}
-	
-	cv = search_var( cur, lab, true, no_search );
+	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( cur, lab, true, no_search );
+		cv = blueprint->search_var( this, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for retrieving", lab );
@@ -2119,7 +2112,7 @@ double object::cal( object *caller, char const *lab, int lag )
 
 #ifdef PARALLEL_MODE
 	if ( parallel_ready && cv->parallel && cv->last_update < t && lag == 0 && ! cv->dummy )
-		parallel_update( cv, cur, caller );
+		parallel_update( cv, this, caller );
 #endif
 	return cv->cal( caller, lag );
 }
@@ -2131,7 +2124,7 @@ double object::cal( char const *lab, int lag )
 
 
 /****************************************************
-RECAL
+RECAL (*)
 Mark variable as not calculated in the current time,
 forcing recalculation if already calculated
 ****************************************************/
@@ -2167,7 +2160,7 @@ double object::recal( char const *lab )
 
 
 /****************************************************
-SUM
+SUM (*)
 Compute the sum of Variables or Parameters lab with lag lag.
 The sum is computed over the elements in a single branch of the model.
 ****************************************************/
@@ -2202,7 +2195,7 @@ double object::sum( char const *lab, int lag )
 
 
 /****************************************************
-OVERALL_MAX
+OVERALL_MAX (*)
 Compute the maximum of lab, considering only the Objects in a single branch of the model.
 ****************************************************/
 double object::overall_max( char const *lab, int lag )
@@ -2237,7 +2230,7 @@ double object::overall_max( char const *lab, int lag )
 
 
 /****************************************************
-OVERALL_MIN
+OVERALL_MIN (*)
 Compute the minimum of lab, considering only the Objects in a single branch of the model.
 ****************************************************/
 double object::overall_min( char const *lab, int lag )
@@ -2272,7 +2265,7 @@ double object::overall_min( char const *lab, int lag )
 
 
 /****************************************************
-AV
+AV (*)
 Compute the average of lab
 ****************************************************/
 double object::av( char const *lab, int lag )
@@ -2310,7 +2303,7 @@ double object::av( char const *lab, int lag )
 
 
 /****************************************************
-WHG_AV
+WHG_AV (*)
 Compute the weighted average of lab
 ****************************************************/
 double object::whg_av( char const *weight, char const *lab, int lag )
@@ -2361,7 +2354,7 @@ double object::whg_av( char const *weight, char const *lab, int lag )
 
 
 /****************************************************
-SD
+SD (*)
 Compute the (population) standard deviation of lab
 ****************************************************/
 double object::sd( char const *lab, int lag )
@@ -2402,7 +2395,7 @@ double object::sd( char const *lab, int lag )
 
 
 /****************************************************
-COUNT
+COUNT (*)
 Count the number of object lab instances below this 
 ****************************************************/
 double object::count( char const *lab )
@@ -2431,7 +2424,7 @@ double object::count( char const *lab )
 
 
 /****************************************************
-COUNT_ALL
+COUNT_ALL (*)
 Count the number of all object lab instances below 
 and besides the current object type (include siblings) 
 ****************************************************/
@@ -2464,7 +2457,7 @@ double object::count_all( char const *lab )
 
 
 /****************************************************
-STAT
+STAT (*)
 Compute some basic statistics of a group of Variables or Paramters with lab lab
 and storing the results in a vector of double.
 Return the number of element instances counted (same as r[ 0 ]).
@@ -2530,7 +2523,7 @@ double object::stat( char const *lab, double *r )
 
 
 /****************************************************
-LSDQSORT
+LSDQSORT (*)
 Use the qsort function in the standard library to sort
 a group of Object with label obj according to the values of var
 if var is NULL, try sorting using the network node id
@@ -2822,7 +2815,9 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 
 
 /*********************
-Draw randomly an object with label lo with probabilities proportional to the values of their Variables or Parameters lv
+DRAW_RND (*)
+Draw randomly an object with label lo with probabilities proportional 
+to the values of their Variables or Parameters lv
 *********************/
 object *object::draw_rnd( char const *lo, char const *lv, int lag )
 {
@@ -2987,7 +2982,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 
 
 /****************************************************
- WRITE
+ WRITE (*)
  Write the value in the Variable or Parameter lab, making it appearing as if
  it was computed at time lag and the variable updated at time time.
  ***************************************************/
@@ -3102,7 +3097,7 @@ double object::write( char const *lab, double value, int time )
 
 
 /************************************************
-INCREMENT
+INCREMENT (*)
 Increment the value of the variable lab with value.
 If variable was not updated in the current period, first updates it.
 Return the new value.
@@ -3141,7 +3136,7 @@ double object::increment( char const *lab, double value )
 
 
 /************************************************
-MULTIPLY
+MULTIPLY (*)
 Multiply the value of the variable lv with value.
 If variable was not updated in the current period, first updates it.
 Return the new value.
@@ -3180,7 +3175,7 @@ double object::multiply( char const *lab, double value )
 
 
 /****************************
-LAT_DOWN
+LAT_DOWN (*)
 return the object "up" the cell of a lattice
 *****************************/
 object *object::lat_down( void ) 
@@ -3201,7 +3196,7 @@ object *object::lat_down( void )
 
 
 /****************************
-LAT_UP
+LAT_UP (*)
 return the object "down" the cell of a lattice
 *****************************/
 object *object::lat_up( void ) 
@@ -3224,7 +3219,7 @@ object *object::lat_up( void )
 
 
 /****************************
-LAT_RIGHT
+LAT_RIGHT (*)
 return the object "right" the cell of a lattice
 *****************************/
 object *object::lat_right( void ) 
@@ -3239,7 +3234,7 @@ object *object::lat_right( void )
 
 
 /****************************
-LAT_LEFT
+LAT_LEFT (*)
 return the object "left" the cell of a lattice
 *****************************/
 object *object::lat_left( void ) 
@@ -3297,4 +3292,62 @@ void collect_inst( object *r, o_setT &list )
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL; cur = cur->hyper_next( ) )
 			collect_inst( cur, list );	
+}
+
+
+/*******************************************
+INTERACT (*)
+Interrupt the simulation, as for the debugger, allowing the insertion of a value.
+Note that the debugging window, in this model, accept the entry key stroke as a run.
+********************************************/
+double object::interact( char const *text, double v, double *tv, int i, int j, 
+						 int h, int k, object *cur, object *cur1, object *cur2, 
+						 object *cur3, object *cur4, object *cur5, object *cur6, 
+						 object *cur7, object *cur8, object *cur9, netLink *curl, 
+						 netLink *curl1, netLink *curl2, netLink *curl3, 
+						 netLink *curl4, netLink *curl5, netLink *curl6, 
+						 netLink *curl7, netLink *curl8, netLink *curl9 )
+{
+#ifndef NO_WINDOW
+	int n;
+	double app = v;
+
+	if ( quit == 0 )
+	{
+		for ( n = 0; n < USER_D_VARS; ++n )
+			d_values[ n ] = tv[ n ];
+		
+		i_values[ 0 ] = i;
+		i_values[ 1 ] = j;
+		i_values[ 2 ] = h;
+		i_values[ 3 ] = k;
+		o_values[ 0 ] = cur;
+		o_values[ 1 ] = cur1;
+		o_values[ 2 ] = cur2;
+		o_values[ 3 ] = cur3;
+		o_values[ 4 ] = cur4;
+		o_values[ 5 ] = cur5;
+		o_values[ 6 ] = cur6;
+		o_values[ 7 ] = cur7;
+		o_values[ 8 ] = cur8;
+		o_values[ 9 ] = cur9;
+		n_values[ 0 ] = curl;
+		n_values[ 1 ] = curl1;
+		n_values[ 2 ] = curl2;
+		n_values[ 3 ] = curl3;
+		n_values[ 4 ] = curl4;
+		n_values[ 5 ] = curl5;
+		n_values[ 6 ] = curl6;
+		n_values[ 7 ] = curl7;
+		n_values[ 8 ] = curl8;
+		n_values[ 9 ] = curl9;
+		
+		non_var = true;					// signals INTERACT macro
+		deb( this, NULL, text, &app, true );
+	}
+	
+	return app;
+#else
+	return v;
+#endif
 }

@@ -214,9 +214,13 @@ object *no_hook_obj( object *ptr, unsigned num, const char *file, int line )
 					true );
 	else
 	{
-		sprintf( msg, "hook number %d over maximum set (%d)\nin file '%s', line %d", num, ( int ) ptr->hooks.size( ) - 1, file, line );
+		if ( ptr->hooks.size( ) > 0 )
+			sprintf( msg, "hook number %d over maximum set (%d)\nin file '%s', line %d", num, ( int ) ptr->hooks.size( ) - 1, file, line );
+		else
+			sprintf( msg, "hook used but none is allocated\nin file '%s', line %d", file, line );
+		
 		error_hard( msg, "invalid hook index", 
-					"check your equation code to ensure setting hook indexes\nto valid values (0 to n-1, n is the number of hooks)",
+					"check your equation code to ensure setting hook indexes\nto valid values (0 to n-1, n is the number of hooks)\nor use ADDHOOK to allocate the requested hook",
 					true );
 	}
 	

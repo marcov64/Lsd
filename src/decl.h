@@ -106,6 +106,7 @@ Global definitions among all LSD C++ modules
 #define MARG_CONST 0.1					// y-axis % plot clearance margin for constant series
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define SIG_DIG 10						// number of significant digits in data files
+#define SIG_MIN 1e-100					// Minimum significant value (different than zero)
 #define CSV_SEP ","						// single char string with the .csv format separator
 #define SENS_SEP " ,;|/#\t\n"			// sensitivity data valid separators
 #define USER_D_VARS 1000				// number of user double variables

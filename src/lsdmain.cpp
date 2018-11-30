@@ -1533,64 +1533,6 @@ bool search_parallel( object *r )
 
 
 /*******************************************
-INTERACT
-Interrupt the simulation, as for the debugger, allowing the insertion of a value.
-Note that the debugging window, in this model, accept the entry key stroke as a run.
-********************************************/
-double object::interact( char const *text, double v, double *tv, int i, int j, 
-						 int h, int k, object *cur, object *cur1, object *cur2, 
-						 object *cur3, object *cur4, object *cur5, object *cur6, 
-						 object *cur7, object *cur8, object *cur9, netLink *curl, 
-						 netLink *curl1, netLink *curl2, netLink *curl3, 
-						 netLink *curl4, netLink *curl5, netLink *curl6, 
-						 netLink *curl7, netLink *curl8, netLink *curl9 )
-{
-#ifndef NO_WINDOW
-	int n;
-	double app = v;
-
-	if ( quit == 0 )
-	{
-		for ( n = 0; n < USER_D_VARS; ++n )
-			d_values[ n ] = tv[ n ];
-		
-		i_values[ 0 ] = i;
-		i_values[ 1 ] = j;
-		i_values[ 2 ] = h;
-		i_values[ 3 ] = k;
-		o_values[ 0 ] = cur;
-		o_values[ 1 ] = cur1;
-		o_values[ 2 ] = cur2;
-		o_values[ 3 ] = cur3;
-		o_values[ 4 ] = cur4;
-		o_values[ 5 ] = cur5;
-		o_values[ 6 ] = cur6;
-		o_values[ 7 ] = cur7;
-		o_values[ 8 ] = cur8;
-		o_values[ 9 ] = cur9;
-		n_values[ 0 ] = curl;
-		n_values[ 1 ] = curl1;
-		n_values[ 2 ] = curl2;
-		n_values[ 3 ] = curl3;
-		n_values[ 4 ] = curl4;
-		n_values[ 5 ] = curl5;
-		n_values[ 6 ] = curl6;
-		n_values[ 7 ] = curl7;
-		n_values[ 8 ] = curl8;
-		n_values[ 9 ] = curl9;
-		
-		non_var = true;					// signals INTERACT macro
-		deb( this, NULL, text, &app, true );
-	}
-	
-	return app;
-#else
-	return v;
-#endif
-}
-
-
-/*******************************************
 DEB_LOG
 Creates/saves the file "log.txt" and 
 enable/disable logging the variables 
