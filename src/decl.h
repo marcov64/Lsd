@@ -25,10 +25,11 @@ Global definitions among all LSD C++ modules
 #endif
 
 //DEBUGGING MODES?
-// #ifdef CPP11
+#ifdef CPP11
 //   #define DEBUG_RAN_CPP11
-// #endif
-// standard libraries used
+#endif
+
+//standard libraries used
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -340,7 +341,7 @@ struct object
 	object* first_neighbour(char const lab[], double radius, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
 	bool next_neighbour_exists();
 	object* next_neighbour();
-	void sort_objDisSet(bool pointer_sort);
+	void sort_objDisSet();
 	void make_objDisSet_unique(bool sorted);
 	void randomise_objDisSetIntvls(bool sorted);
 	double complete_radius();

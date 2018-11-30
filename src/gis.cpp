@@ -642,10 +642,7 @@ char gismsg[300];
 
   //  sort_objDisSet
   //  sort by distance to caller and also by pointer, if necessary.
-  inline void object::sort_objDisSet(bool pointer_sort){
-    if (pointer_sort)
-      std::sort( position->objDis_inRadius.begin(),  position->objDis_inRadius.end() ); //sort - for unique its important that also second is used.
-    else
+  inline void object::sort_objDisSet(){
       std::sort( position->objDis_inRadius.begin(),  position->objDis_inRadius.end(), [](auto const &A, auto const &B ){return A.first < B.first; } ); //sort only by distance
   }
 
@@ -654,7 +651,7 @@ char gismsg[300];
   void object::make_objDisSet_unique(bool sorted)
   {
     if (sorted == false)
-      sort_objDisSet(true);
+      sort_objDisSet();
 
     for (auto it = position->objDis_inRadius.begin(); it!= position->objDis_inRadius.end(); /*nothing*/)
     {
@@ -676,7 +673,7 @@ char gismsg[300];
   //  if already sorted, do not sort again.
   void object::randomise_objDisSetIntvls(bool sorted){
     if (sorted == false)
-      sort_objDisSet(false); //sort only by distance
+      sort_objDisSet();
 
     int i_start = 0;
     int i_n = position->objDis_inRadius.size();
@@ -723,7 +720,7 @@ char gismsg[300];
         }
       }
     }
-    std::sort( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius) );
+    sort_objDisSet();
     position->it_obj = std::begin(position->objDis_inRadius);
   }
 
@@ -742,7 +739,7 @@ char gismsg[300];
 
     traverse_boundingBox(radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
 
-    sort_objDisSet(true); //pointer_sort = true
+    sort_objDisSet();
     make_objDisSet_unique(true); //sorted = true
     randomise_objDisSetIntvls(true); //sorted = true
 
