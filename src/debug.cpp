@@ -1090,8 +1090,9 @@ void deb_show( object *r )
 	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
 
 	// adjust spacing to align labels with data and increase columns width to better fill window
-	cmd( "if [ string equal $tcl_platform(platform) windows ] { set w1 20; set w2 25; set w3 10 } { set w1 15; set w2 18; set w3 9 }" );
-	cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wwidth 115 } { set wwidth 100 }" );
+	cmd( "if [ string equal $tcl_platform(platform) windows ] { set w1 20; set w2 25; set w3 10; set wwidth 100 }" );
+	cmd( "if [ string equal $tcl_platform(platform) unix ] { set w1 20; set w2 24; set w3 10; set wwidth 100 }" );
+	cmd( "if [ string equal $tcl_platform(os) Darwin ] { set w1 15; set w2 18; set w3 9; set wwidth 115 }" );
 
 	cmd( "if { ! [ winfo exists .deb.tit ] } { \
 			frame .deb.tit; \
