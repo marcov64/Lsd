@@ -72,7 +72,7 @@ int natBat = true;					// native (Windows/Linux) batch format flag (bool)
 int next_lag;						// new variable initial setting next lag to set
 int result_loaded;
 int lcount;
-object *currObj;
+
 
 // list of choices that are bad with existing run data
 int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95 };
@@ -163,7 +163,7 @@ void create( void )
 		if ( choice < 0 )
 		{
 			choice = - choice;
-			cur = restore_pos( root );	// restore pointed object and variable
+			cur = currObj;				// restore pointed object
 		}
 
 		cur = operate( cur, &choice );
@@ -6595,9 +6595,10 @@ bool open_configuration( object *&r, bool reload )
 		
 		cmd( "set listfocus 1; set itemfocus 0" ); 	// point for first var in listbox
 		strcpy( lastObj, "" );					// disable last object for reload
-		redrawRoot = true;						// force browser redraw
 	}
 
+	redrawRoot = true;							// force browser redraw
+		
 	switch ( load_configuration( reload ) )		// try to load the configuration
 	{
 		case 1:									// file/path not found
@@ -6628,9 +6629,9 @@ bool open_configuration( object *&r, bool reload )
 	}
 
 	if ( reload )
-		r = restore_pos( root );				// restore pointed object and variable
+		currObj = r = restore_pos( root );		// restore pointed object and variable
 	else
-		r = root;								// new structure
+		currObj = r = root;						// new structure
 	
 	iniShowOnce = false;						// show warning on # of columns in .ini
 	redrawRoot = true;							// force browser redraw
@@ -6790,7 +6791,8 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 	if ( argc != 3 )					// require 2 parameters: variable name and property
 		return TCL_ERROR;
 		
-	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
+	if ( currObj == NULL || argv[ 1 ] == NULL || argv[ 2 ] == NULL || 
+		 ! strcmp( argv[ 1 ], "(none)" ) )
 		return TCL_ERROR;
 	
 	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
@@ -6833,7 +6835,7 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 	if ( argc != 4 )					// require 3 parameters: variable name, property and value
 		return TCL_ERROR;
 		
-	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL || 
+	if ( currObj == NULL || argv[ 1 ] == NULL || argv[ 2 ] == NULL || 
 		 argv[ 3 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
 		return TCL_ERROR;
 	

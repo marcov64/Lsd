@@ -864,6 +864,7 @@ extern long nodesSerial;		// network node serial number global counter
 extern lsdstack *stacklog;		// LSD stack
 extern map< string, profile > prof;// set of saved profiling times
 extern object *blueprint;   	// LSD blueprint (effective model in use )
+extern object *currObj;			// pointer to current object in browser
 extern object *wait_delete;		// LSD object waiting for deletion
 extern o_setT obj_list;			// list with all existing LSD objects
 extern sense *rsense;       	// LSD sensitivity analysis structure

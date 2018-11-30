@@ -785,6 +785,7 @@ void unload_configuration ( bool full )
 	nodesSerial = 0;							// reset network node serial number
 	
 #ifndef NO_WINDOW
+	currObj = NULL;								// no current object pointer
 	unsaved_change( false );					// signal no unsaved change
 	cmd( "destroytop .lat" );					// remove lattice window
 	cmd( "unset -nocomplain modElem" );			// no elements in model structure

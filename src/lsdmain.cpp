@@ -113,6 +113,7 @@ long nodesSerial = 1;		// network node's serial number global counter
 lsdstack *stacklog = NULL;	// LSD stack
 map < string, profile > prof;	// set of saved profiling times
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
+object *currObj = NULL;		// pointer to current object in browser
 object *root = NULL;		// LSD root object
 object *wait_delete = NULL;	// LSD object waiting for deletion
 o_setT obj_list;			// set with all existing LSD objects
