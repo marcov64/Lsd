@@ -1641,7 +1641,6 @@ of the time of last update if t_update is positive or zero. If
 t_update is negative (<0) it takes the time of last update from
 the example object (if >0) or current t (if =0)
 ****************************************************/
-
 object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update )
 {
 	bool net;
@@ -1718,19 +1717,20 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 				if ( t_update < 0 && cv->last_update == 0 )
 					cv->last_update = t;
 				else
-					if ( t_update >= 0 )
+				{
+					if ( t_update < 0 || ( t_update < cv->last_update && t > 1 ) )
 					{
-						if ( t_update < cv->last_update && t > 1 )
-						{
-							if ( wr_warn_cnt <= ERR_LIM )
-								plog( "\n\nWarning: while creating the object named '%s' in equation for '%s' \nthe time set for the last update (%d) is invalid in time t=%d. This may\nundermine the correct updating of variables in '%s', which will be\nrecalculated in the current period (%d)\n", "", lab, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, time, t, lab, t );
-							if ( wr_warn_cnt == ERR_LIM )
-								plog( "\nWarning: too many invalid update times, stop reporting...\n" );
-							++wr_warn_cnt;
-						}
-						cv->last_update = t_update;
+						sprintf( msg, "invalid update time (%d) to set object '%s'", t_update, lab );
+						error_hard( msg, "cannot add object", 
+									"check your equation code to prevent this situation",
+									true );
+						return NULL;
 					}
+					
+					cv->last_update = t_update;
+				}
 			}
+			
 			if ( cv->save || cv->savei )
 			{
 				if ( running )
@@ -2083,7 +2083,6 @@ the function variable->cal(caller, lag )
 ***************************************************/
 double object::cal( object *caller, char const *lab, int lag )
 {
-	object *cur = this;
 	variable *cv;
 
 	if ( quit == 2 )
@@ -2879,6 +2878,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 
 
 /*********************
+DRAW_RND (*)
 Draw randomly an object with label lo with identical probabilities 
 *********************/
 object *object::draw_rnd( char const *lo )
@@ -2928,6 +2928,7 @@ object *object::draw_rnd( char const *lo )
 
 
 /*************
+DRAW_RND (*)
 Same as draw_rnd but faster, assuming the sum of the probabilities to be tot
 ***************/
 object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
@@ -2988,7 +2989,8 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
  ***************************************************/
 double object::write( char const *lab, double value, int time, int lag )
 {
-    variable *cv;
+    int i, eff_lag, eff_time;
+	variable *cv;
 	
     if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
@@ -2999,95 +3001,114 @@ double object::write( char const *lab, double value, int time, int lag )
         return NAN;
     }
     
-    for ( cv = v; cv != NULL; cv = cv->next)
-    {
-		if ( ! strcmp( cv->label, lab ) )
-		{
-			if ( cv->under_computation )
-			{
-				if ( ! cv->dummy )
-				{
-					sprintf( msg, "variable '%s' is under computation and cannot be written", lab );
-					error_hard( msg, "invalid write operation", 
-								"check your equation code to prevent this situation",
-								true );
-					return NAN;
-				}
-
-#ifdef PARALLEL_MODE
-				if ( cv->parallel_comp.try_lock( ) )
-					cv->parallel_comp.unlock( );
-				else
-				{
-					sprintf( msg, "variable '%s' is under dummy computation and cannot be written", lab );
-					error_hard( msg, "deadlock during parallel computation", 
-								"check your equation code to prevent this situation",
-								true );
-					return NAN;
-				}
-#endif
-			}
-
-#ifdef PARALLEL_MODE
-			// prevent concurrent use by more than one thread
-			lock_guard < mutex > lock( cv->parallel_comp );
-#endif	
-			if ( cv->param != 1 && time < t && t > 1 )
-			{
-				if ( wr_warn_cnt <= ERR_LIM )
-					plog( "\n\nWarning: while writing variable '%s' in equation for '%s' \nthe time set for the last update (%d) is invalid in time t=%d. This would \nundermine the correct updating of variable '%s', which will be\nrecalculated in the current period (%d)\n", "", lab, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, time, t, lab, t );
-				if ( wr_warn_cnt == ERR_LIM )
-					plog( "\nWarning: too many invalid update times, stop reporting...\n" );
-				++wr_warn_cnt;
-				cv->val[ 0 ] = value;
-				cv->last_update = t - 1;
-			}
-			else
-			{	// allow for change of initial lagged values when starting simulation (t=1)
-				if ( cv->param != 1 && time < 0 && t == 1 )
-				{
-					if ( - time > cv->num_lag )		// check for invalid lag
-					{
-						plog( "\n\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) or time (%d) is invalid, \n write command ignored\n", "", lab, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lag, time );
-					}
-					else
-					{
-						cv->val[ - time - 1 ] = value;
-						cv->last_update = 0;	// force new updating
-						if ( time == -1 && ( cv->save || cv->savei ) )
-							cv->data[ 0 ] = value;
-					}
-				}
-				else
-				{
-					if ( lag < 0 || lag > cv->num_lag )
-					{
-						plog( "\n\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) is invalid, \n write command ignored\n", "", lab, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lag );
-					}
-					else
-					{
-						// if not yet calculated this time step, adjust lagged values
-						if ( time >= t && lag == 0 && cv->last_update < t )	
-							for ( int i = 0; i < cv->num_lag; ++i )
-								cv->val[ cv->num_lag - i ] = cv->val[ cv->num_lag - i - 1 ];
-						
-						cv->val[ lag ] = value;
-						cv->last_update = time;
-						int eff_time = time - lag;
-						if ( eff_time >= 0 && eff_time <= max_step && ( cv->save || cv->savei ) )
-							cv->data[ eff_time ] = value;
-					}
-				}
-			}
-			
-			return value;
-		}
-    }
+	cv = search_var( this, lab, true, no_search );
+	if ( cv == NULL )
+	{
+		sprintf( msg, "element '%s' is missing for writing", lab );
+		error_hard( msg, "variable or parameter not found", 
+					"create variable or parameter in model structure" );
+		return NAN;
+	}
 	
-    sprintf( msg, "element '%s' is missing for writing", lab );
-	error_hard( msg, "variable or parameter not found", 
-				"create variable or parameter in model structure" );
-	return NAN;
+	if ( cv->under_computation )
+	{
+		if ( ! cv->dummy )
+		{
+			sprintf( msg, "variable '%s' is under computation and cannot be written", lab );
+			error_hard( msg, "invalid write operation", 
+						"check your equation code to prevent this situation",
+						true );
+			return NAN;
+		}
+
+#ifdef PARALLEL_MODE
+		if ( cv->parallel_comp.try_lock( ) )
+			cv->parallel_comp.unlock( );
+		else
+		{
+			sprintf( msg, "variable '%s' is under dummy computation and cannot be written", lab );
+			error_hard( msg, "deadlock during parallel computation", 
+						"check your equation code to prevent this situation",
+						true );
+			return NAN;
+		}
+#endif
+	}
+
+#ifdef PARALLEL_MODE
+	// prevent concurrent use by more than one thread
+	lock_guard < mutex > lock( cv->parallel_comp );
+#endif	
+	if ( cv->param != 1 && time < t && t > 1 )
+	{
+		sprintf( msg, "invalid update time (%d) for variable '%s'", time, lab );
+		error_hard( msg, "invalid write operation", 
+					"check your equation code to prevent this situation",
+					true );
+		return NAN;
+	}
+
+	// allow for change of initial lagged values when starting simulation (t=1)
+	if ( cv->param != 1 && time < 0 && t == 1 )
+	{
+		if ( - time > cv->num_lag )		// check for invalid lag
+		{
+			sprintf( msg, "invalid initial lag (%d) for variable '%s'", time, lab );
+			error_hard( msg, "invalid write operation", 
+						"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
+						false );
+			return NAN;
+		}
+
+		cv->val[ - time - 1 ] = value;
+		cv->last_update = 0;	// force new updating
+		
+		if ( time == -1 && ( cv->save || cv->savei ) )
+				cv->data[ 0 ] = value;
+	}
+	else
+	{
+		if ( lag < 0 || lag > cv->num_lag )
+		{
+			sprintf( msg, "invalid lag (%d) for variable '%s'", lag, lab );
+			error_hard( msg, "invalid write operation", 
+						"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
+						false );
+			return NAN;
+		}
+
+		// if not yet calculated this time step, adjust lagged values
+		if ( time >= t && lag == 0 && cv->last_update < t )
+			for ( i = 0; i < cv->num_lag; ++i )
+				cv->val[ cv->num_lag - i ] = cv->val[ cv->num_lag - i - 1 ];
+		
+		if ( lag == 0 )
+		{
+			cv->val[ 0 ] = value;
+			cv->last_update = time;
+		}
+		else
+		{
+			eff_lag = lag - ( t - cv->last_update );
+			
+			if ( eff_lag < 0 || eff_lag > cv->num_lag )
+			{
+				sprintf( msg, "invalid update time (%d) and lag (%d) for variable '%s'", time, lag, lab );
+				error_hard( msg, "invalid write operation", 
+							"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
+							true );
+				return NAN;
+			}
+
+			cv->val[ eff_lag ] = value;
+		}		
+		
+		eff_time = time - lag;
+		if ( eff_time >= 0 && eff_time <= max_step && ( cv->save || cv->savei ) )
+			cv->data[ eff_time ] = value;
+	}
+	
+	return value;
 }
 
 double object::write( char const *lab, double value, int time )
