@@ -69,10 +69,6 @@ mutex error;
 
 
 #ifdef CPP11
-#ifdef DEBUG_RAN_CPP11
-  int ran_callntimes;      //DEBUG_RAN_CPP11
-  char ran_callntimes_name[300];
-#endif
 minstd_rand lc;						// linear congruential generator
 mt19937 mt32;						// Mersenne-Twister 32 bits generator
 mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
@@ -2418,9 +2414,6 @@ int ran_gen = 2;					// default pseudo-random number generator
 
 void init_random( int seed )
 {
-  #ifdef DEBUG_RAN_CPP11
-	 ran_callntimes=0;
-  #endif
 	if ( seed < 0 )
 		seed = - seed;
 	
@@ -2438,79 +2431,23 @@ Generate the draw using current generator object
 template< class distr >
 double cur_gen( distr &d )
 {
-  #ifdef DEBUG_RAN_CPP11
-    char msg[300];
-    double val;
-    sprintf(msg,"\n\cur_gen called for %ith time by functions %s return value ",++ran_callntimes,ran_callntimes_name);
-    plog(msg);
-  #endif
  switch ( ran_gen )
 	{
 		case 1:						// linear congruential in (0,1)
 		case 3:						// linear congruential in [0,1)
 		default:
-      #ifdef DEBUG_RAN_CPP11
-        val = d( lc );
-        sprintf(msg,"%g",val);
-        plog(msg);
-        return val;
-      #else
 			return d( lc );
-      #endif
 		case 2:						// Mersenne-Twister 32 bits in (0,1)
 		case 4:						// Mersenne-Twister 32 bits in [0,1)
-      #ifdef DEBUG_RAN_CPP11
-        val = d( mt32 );
-        sprintf(msg,"%g",val);
-        plog(msg);
-        return val;
-      #else
 			return d( mt32 );
-      #endif
 		case 5:						// Mersenne-Twister 64 bits in [0,1)
-      #ifdef DEBUG_RAN_CPP11
-        val = d( mt64 );
-        sprintf(msg,"%g",val);
-        plog(msg);
-        return val;
-      #else
 			return d( mt64 );
-      #endif
 		case 6:						// lagged fibonacci 24 bits in [0,1)
-      #ifdef DEBUG_RAN_CPP11
-        val = d( lf24 );
-        sprintf(msg,"%g",val);
-        plog(msg);
-        return val;
-      #else
 			return d( lf24 );
-      #endif
 		case 7:						// lagged fibonacci 48 bits in [0,1)
-      #ifdef DEBUG_RAN_CPP11
-        val = d( lf48 );
-        sprintf(msg,"%g",val);
-        plog(msg);
-        return val;
-      #else
 			return d( lf48 );
-      #endif
 	}
 }
-
-#ifdef DEBUG_RAN_CPP11
-/***************************************************
-RAN1_COUNT
-Call the preset pseudo-random number generator
-For debuging, print number of time called and caller function
-***************************************************/
-double ran1_count(const char fname[])
-{
-	char msg[300];
-	sprintf(msg,"\nran1 called by %s ...",fname);
-	plog(msg);
-	return ran1( ) ;
-}
-#endif
 
 /***************************************************
 RAN1
@@ -2518,9 +2455,6 @@ Call the preset pseudo-random number generator
 ***************************************************/
 double ran1( long *unused )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	double ran;
 	uniform_real_distribution< double > distr( 0, 1 );
 
@@ -2537,9 +2471,6 @@ UNIFORM
 ****************************************************/
 double uniform( double min, double max )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	uniform_real_distribution< double > distr( min, max );
 	return cur_gen( distr );
 }
@@ -2550,9 +2481,6 @@ UNIFORM_INT
 ****************************************************/
 double uniform_int( double min, double max )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	uniform_int_distribution< int > distr( ( long ) min, ( long ) max );
 	return cur_gen( distr );
 }
@@ -2562,9 +2490,6 @@ NORM
 ***************************************************/
 double norm( double mean, double dev )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool normStopErr;
 	
 	if ( dev < 0 )	
@@ -2595,9 +2520,6 @@ Return a draw from a lognormal distribution
 ***************************************************/
 double lnorm( double mean, double dev )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool lnormStopErr;
 	
 	if ( dev < 0 )
@@ -2627,9 +2549,6 @@ GAMMA
 ****************************************************/
 double gamma( double alpha, double beta )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool gammaStopErr;
 	
 	if ( alpha <= 0 || beta <= 0 )
@@ -2659,9 +2578,6 @@ BERNOULLI
 ****************************************************/
 double bernoulli( double p )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool bernoStopErr;
 	
 	if ( p < 0 || p > 1 )
@@ -2694,9 +2610,6 @@ POISSON
 ****************************************************/
 double poisson( double mean )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool poissStopErr;
 	
 	if ( mean < 0 )
@@ -2726,9 +2639,6 @@ GEOMETRIC
 ****************************************************/
 double geometric( double p )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool geomStopErr;
 	
 	if ( p < 0 || p > 1 )
@@ -2761,9 +2671,6 @@ BINOMIAL
 ****************************************************/
 double binomial( double p, double t )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool binomStopErr;
 	
 	if ( p < 0 || p > 1 || t <= 0 )
@@ -2796,9 +2703,6 @@ CAUCHY
 ***************************************************/
 double cauchy( double a, double b )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool cauchStopErr;
 	
 	if ( b <= 0 )
@@ -2828,9 +2732,6 @@ CHI_SQUARED
 ***************************************************/
 double chi_squared( double n )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool chisqStopErr;
 	
 	if ( n <= 0 )
@@ -2860,9 +2761,6 @@ EXPONENTIAL
 ***************************************************/
 double exponential( double lambda )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool expStopErr;
 	
 	if ( lambda <= 0 )
@@ -2892,9 +2790,6 @@ FISHER
 ***************************************************/
 double fisher( double m, double n )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool fishStopErr;
 	
 	if ( m <= 0 || n <= 0 )
@@ -2924,9 +2819,6 @@ STUDENT
 ***************************************************/
 double student( double n )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool studStopErr;
 	
 	if ( n <= 0 )
@@ -2956,9 +2848,6 @@ WEIBULL
 ***************************************************/
 double weibull( double a, double b )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool weibStopErr;
 	
 	if ( a <= 0 || b <= 0 )
@@ -2989,9 +2878,6 @@ Return a draw from a Beta(alfa,beta) distribution
 ***************************************************/
 double beta( double alpha, double beta )
 {
-  #ifdef DEBUG_RAN_CPP11
-      sprintf(ran_callntimes_name, __FUNCTION__ );
-  #endif
 	static bool betaStopErr;
 	
 	if ( alpha <= 0 || beta <= 0 )
