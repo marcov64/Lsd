@@ -239,7 +239,7 @@ Standard version (non parallel computation)
 double variable::cal( object *caller, int lag )
 {
 	int i, eff_lag, time;
-	clock_t pstart, pend;
+	clock_t pstart = 0, pend = 0;
 	double app;
 
 	if ( param == 1 )
@@ -757,10 +757,10 @@ void parallel_update( variable *v, object* p, object *caller )
 {
 	bool ready[ max_threads ], wait = false;
 	int i, nt, wait_time;
-	clock_t pstart;
+	clock_t pstart = 0;
 	bridge *cb;
 	object *co;
-	variable *cv;
+	variable *cv = NULL;
 	
 	// prevent concurrent parallel update and multi-threading in a single core
 	if ( parallel_ready && max_threads > 1 )
@@ -889,7 +889,7 @@ void parallel_update( variable *v, object* p, object *caller )
 			wait_time = ( clock( ) - pstart ) / CLOCKS_PER_SEC;
 			if ( wait_time > MAX_WAIT_TIME )
 			{
-				sprintf( msg, "variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->up->label, cv->label, MAX_WAIT_TIME, t );
+				sprintf( msg, "variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv != NULL ? cv->up->label : "", cv != NULL ? cv->label : "", MAX_WAIT_TIME, t );
 				error_hard( msg, "deadlock during parallel computation", 
 							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 				return;

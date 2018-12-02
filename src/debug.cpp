@@ -1197,7 +1197,7 @@ void show_tmp_vars( object *r, bool update )
 	bool valid;
 	char i_names[ ] = { 'i', 'j', 'h', 'k' };
 	int i, j, m, n;
-	netLink *curLnk;
+	netLink *curLnk = NULL;
 	object *cur;
 	
 	cmd( "set in .deb.val" );
@@ -1375,7 +1375,7 @@ void show_tmp_vars( object *r, bool update )
 		
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 		
-		if ( valid )
+		if ( valid && curLnk != NULL )
 		{
 			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, curLnk->ptrTo->label );
 			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, curLnk->ptrTo->label );
@@ -1572,7 +1572,7 @@ int depth;
 void attach_instance_number( char *ch, object *r )
 {
 	object *cur;
-	int i, j = 1;
+	int i = 1, j = 1;
 
 	if ( r == NULL )
 		return;
@@ -1580,7 +1580,7 @@ void attach_instance_number( char *ch, object *r )
 	attach_instance_number( ch, r->up );
 
 	if ( r->up != NULL )
-		for ( i = 1, cur = r->up->search( r->label ); cur != NULL; cur = go_brother( cur ) )
+		for ( cur = r->up->search( r->label ); cur != NULL; cur = go_brother( cur ) )
 		{
 			if ( cur == r )
 			j = i;

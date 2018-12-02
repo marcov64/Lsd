@@ -923,7 +923,8 @@ INIT_UNIFORM_NET
 ****************************************************/
 long object::init_uniform_net( char const *lab, long numNodes, long outDeg )
 {
-	long link, idNode, numLinks, newNode, tryNode;
+	bool newNode;
+	long link, idNode, numLinks, tryNode;
 	object *firstNode, *cur, *cur1;
 	
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || lab == NULL )
@@ -953,16 +954,17 @@ long object::init_uniform_net( char const *lab, long numNodes, long outDeg )
 		idNode = cur->node->id;										// current node id
 		for ( link = 1; link <= outDeg; link++ )
 		{															// run through all node's links
-			newNode = 0;
-			while ( ! newNode || tryNode == idNode )					// while no new link found
+			newNode = false;
+			tryNode = idNode;
+			while ( ! newNode || tryNode == idNode )				// while no new link found
 			{
 				tryNode = (long) uniform_int( 1, numNodes );		// draw link (other node ID)
 				if ( cur->search_link_net( tryNode ) )				// link already exists?
-					newNode = 0;									// yes
+					newNode = false;								// yes
 				else
-					newNode = 1;									// no, flag new link
+					newNode = true;									// no, flag new link
 			}
-			cur1 = turbosearch( lab, 0, (double) tryNode);			// get target node object
+			cur1 = turbosearch( lab, 0, (double) tryNode );			// get target node object
 			cur->add_link_net( cur1 );								// set link to found new link node ID
 			numLinks++;												// one more link
 		}

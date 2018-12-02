@@ -7991,6 +7991,8 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			nLine = *end;
 			bbordsize = nLine < 10 ? 4 * lheight : bbordsize;
 			y2on = false;
+			cminy2 = miny2;
+			cmaxy2 = maxy2;
 			break;
 			
 		case HISTOGR:
