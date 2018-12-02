@@ -1500,16 +1500,6 @@ void copy_descendant( object *from, object *to )
 /****************************************************
 ADD_N_OBJECTS2 (*)
 As the type with the example, but the example is taken from the blueprint
-****************************************************/
-object *object::add_n_objects2( char const *lab, int n )
-{
-	return  add_n_objects2( lab, n, blueprint->search( lab ), -1 );
-}
-
-
-/****************************************************
-ADD_N_OBJECTS2 (*)
-As the type with the example, but the example is taken from the blueprint
 In respect of the original version, it allows for the specification
 of the time of last update if t_update is positive or zero. If
 t_update is negative (<0) it takes the time of last update from
@@ -1518,18 +1508,6 @@ the example object (if >0) or current t (if =0)
 object *object::add_n_objects2( char const *lab, int n, int t_update )
 {
 	return add_n_objects2( lab, n, blueprint->search( lab ), t_update );
-}
-
-
-/****************************************************
-ADD_N_OBJECTS2 (*)
-Add N objects to the model making a copies of the example object ex
-In respect of the original version, it leaves time of last update
-as in the example object
-****************************************************/
-object *object::add_n_objects2( char const *lab, int n, object *ex )
-{
-	return add_n_objects2( lab, n, ex, -1 );
 }
 
 
@@ -1557,6 +1535,15 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 		sprintf( msg, "object '%s' contains no son object '%s' for adding instance(s)", label, lab );
 		error_hard( msg, "object not found", 
 					"create son object in model structure" );
+		return NULL;
+	}
+	
+	if ( ex == NULL || strcmp( ex->label, lab ) )
+	{
+		sprintf( msg, "bad example pointer when adding object '%s'", lab );
+		error_hard( msg, "invalid example object", 
+					"check your equation code to prevent this situation",
+					true );
 		return NULL;
 	}
 	
@@ -1612,22 +1599,23 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 			// prevent concurrent use by more than one thread
 			lock_guard < mutex > lock( cv->parallel_comp );
 #endif		
-			if ( running && cv->param == 0 )
+			if ( running && cv->param != 1 )
 			{
 				if ( t_update < 0 && cv->last_update == 0 )
 					cv->last_update = t;
 				else
 				{
-					if ( t_update < 0 || ( t_update < cv->last_update && t > 1 ) )
+					if ( t_update >= 0 && t_update < cv->last_update && t > 1 )
 					{
-						sprintf( msg, "invalid update time (%d) to set object '%s'", t_update, lab );
+						sprintf( msg, "invalid update time (%d) to set object '%s'\nvariable '%s' was updated later (%d)", t_update, lab, cv->label, cv->last_update );
 						error_hard( msg, "cannot add object", 
 									"check your equation code to prevent this situation",
 									true );
 						return NULL;
 					}
 					
-					cv->last_update = t_update;
+					if ( t_update >= 0 )
+						cv->last_update = t_update;
 				}
 			}
 			
@@ -3082,7 +3070,7 @@ double object::write( char const *lab, double value, int time, int lag )
 	// prevent concurrent use by more than one thread
 	lock_guard < mutex > lock( cv->parallel_comp );
 #endif	
-	if ( cv->param != 1 && time < t && t > 1 )
+	if ( cv->param != 1 && time <= 0 && t > 1 )
 	{
 		sprintf( msg, "invalid update time (%d) for variable '%s'", time, lab );
 		error_hard( msg, "invalid write operation", 
@@ -3152,11 +3140,6 @@ double object::write( char const *lab, double value, int time, int lag )
 	}
 	
 	return value;
-}
-
-double object::write( char const *lab, double value, int time )
-{
-	return this->write( lab, value, time, 0 );
 }
 
 

@@ -385,7 +385,7 @@ bool no_ptr_chk = true;
 #define ADDNOBJ_EX( X, Y, Z ) ( p->add_n_objects2( ( char * ) X, Y, Z ) )
 #define ADDNOBJ_EXL( X, Y, Z, W ) ( p->add_n_objects2( ( char * ) X, Y, Z, W ) )
 #define ADDNOBJ_EXS( O, X, Y, Z ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( ( char * ) X, Y, Z ) )
-#define ADDNOBJ_EXLS( O, X, Y, Z, W ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( ( char * ) X, ( int ) Y, Z, W ) )
+#define ADDNOBJ_EXLS( O, X, Y, Z, W ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( ( char * ) X, Y, Z, W ) )
 #define DELETE( O ) ( CHK_PTR_VOID( O ) O->delete_obj( ) )
 #define SORT( X, Y, Z ) ( p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z ) )
 #define SORTS( O, X, Y, Z ) ( CHK_PTR_OBJ( O ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z ) )

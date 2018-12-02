@@ -382,18 +382,24 @@ other can be requested and selected with the LSD functions. </p>
 
 <p class=MsoNormal><a name=equation></a><b>FOR NEW MODELS:</b> The preferred
 way too write LSD Equations for new models is using the <a
-href="LSD_macros.html">LSD macro language</a> which simplifies the
-Equations' coding and offer new capabilities for modelers. If you are not
-locked-in older model versions you may prefer to learn the macro language. For
-the basic functions, the two ways for writing LSD Equations are equivalent. A
-model may even contain Equations in both formats if the basic command subset is
-used.</p>
+href="LSD_macros.html">LSD macro language</a> which simplifies the Equations'
+coding and offer new capabilities for modelers. If you are not locked-in older
+model versions you may prefer to learn the macro language. For the basic
+functions, the two ways for writing LSD Equations are equivalent. A model may
+even contain Equations in both formats if the basic command subset is used.</p>
 
 <p class=MsoNormal><b>WARNING:</b> In case of the usage of pure or mixed
 old-style function-based Equations, the modeler should include only ‘<span
 class=Cdigo>#include fun_head.h</span>’ (instead of ‘<span class=Cdigo>#include
 fun_head_fast.h</span>’) in the <a href="LSD_faqs.html#equationfile">equation
 file</a>. Failure to do so will trigger compilation errors.</p>
+
+<p class=MsoNormal><b>WARNING</b>: LSD no longer allows an element defined as a
+<a href="LSD_faqs.html#variable">Variable</a> in the LSD Browser to operate as
+a <a href="LSD_faqs.html#function">Function</a>, irrespective of the code in
+the equation file (like <span class=Cdigo>--last_update</span>). Model
+configurations created for old versions of LSD depending on this behavior must
+be updated to properly set Functions as such in the LSD Browser.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -408,10 +414,10 @@ file</a>. Failure to do so will trigger compilation errors.</p>
 
 <h1><span class=Ttulo1Char>LSD Equations </span></h1>
 
-<p class=MsoNormal>The LSD Equations are written as pieces of C++ code, to be included
-in a specific C++ source file. Model writers must compile such file and link it
-to the rest of C++ source code. Each model has one specific equation file,
-containing the Equations for that model. </p>
+<p class=MsoNormal>The LSD Equations are written as pieces of C++ code, to be
+included in a specific C++ source file. Model writers must compile such file
+and link it to the rest of C++ source code. Each model has one specific
+equation file, containing the Equations for that model. </p>
 
 <p class=MsoNormal>Each Equation must be thought of as a difference equation,
 written independently from one another, and computed at the generic time t: </p>
@@ -493,12 +499,12 @@ v[1]=p-&gt;cal(&quot;Z&quot;,0); </span></span></p>
 goto end; <br>
 } </span></p>
 
-<p class=MsoNormal>Therefore, writing the Equations for LSD models is reduced
-to implement some C++ code for each Variable independently. The modeler must
-just write the Equations keeping in mind that many copies of the same Variable
-will make use of the same code. To differentiate between the different copies
-of the Variables the code uses the Objects referred to the Variable, much like
-the indexes are used in models using vectors. </p>
+<p class=MsoNormal>Therefore, writing the Equations for LSD models is reduced to
+implement some C++ code for each Variable independently. The modeler must just
+write the Equations keeping in mind that many copies of the same Variable will
+make use of the same code. To differentiate between the different copies of the
+Variables the code uses the Objects referred to the Variable, much like the
+indexes are used in models using vectors. </p>
 
 <h2><a name=objeq></a><span class=Ttulo1Char><span style='color:windowtext'>Objects
 in the Equations' code </span></span></h2>
@@ -573,8 +579,8 @@ class=Ttulo2Char>, </span><span class=Cdigo>cur2</span><span class=Ttulo2Char>,
 ... </span></h3>
 
 <p class=MsoNormal>These elements are pointers to Objects, used to store
-temporary required Object (like&nbsp; <a href="#v">v[n]</a> is used to stored temporary
-numerical values). Typically, the user applies to <span class=Cdigo>p-&gt;</span>,
+temporary required Object (like&nbsp; <a href="#v">v[n]</a> is used to stored
+temporary numerical values). Typically, the user applies to <span class=Cdigo>p-&gt;</span>,
 or <span class=Cdigo>c-&gt;</span> a LSD function returning Objects, assigning
 the result to cur. Then, use cur to apply a function returning values, or
 modifying values. See any example of a <a href="#top">LSD function</a>
@@ -619,9 +625,9 @@ relevant for writing LSD models. But it explains the technical implementation
 of a LSD model that can be used to optimize a model's code.</p>
 
 <p class=MsoNormal>Every Object (for example, <span class=Cdigo>p-&gt;</span>, <span
-class=Cdigo>c-&gt;</span> etc.) is related to its neighbors in the model hierarchy.
-Every Object can therefore bring to its neighbors using the links to them. The
-links are determined with the following components of each Object: </p>
+class=Cdigo>c-&gt;</span> etc.) is related to its neighbors in the model
+hierarchy. Every Object can therefore bring to its neighbors using the links to
+them. The links are determined with the following components of each Object: </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:53.85pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
@@ -694,8 +700,8 @@ refers to the Object copy whose Variable is computed; <span class=Cdigo>c-&gt;</
 to the Object that caused the Variable to be computed; <span class=Cdigo>cur-&gt;</span>
 and the others are assigned within the Equations code. </p>
 
-<p>However, the modeler can create and use a “global” Object pointer, that is, an
-Object that never change the content throughout a simulation run. This is
+<p>However, the modeler can create and use a “global” Object pointer, that is,
+an Object that never change the content throughout a simulation run. This is
 mainly done for optimization purposes, when a very large model (many Objects)
 contains Variables that refer frequently to one specific Object copy. The use
 of global Object should be avoided by unexperienced modelers, because it risks
@@ -845,9 +851,9 @@ class=Cdigo>v[0]</span> and <span class=Cdigo>v[1]</span>. The modelers can use
 as many temporary variables as necessary (from 0 to 999). </p>
 
 <p class=MsoNormal>Besides the Object <span class=Cdigo>p</span>, by default
-the function for the Equations has also another Object that can be used to activate
-a function. In fact, the computation of the Equations for the Variables can be
-activated because of two reasons: </p>
+the function for the Equations has also another Object that can be used to
+activate a function. In fact, the computation of the Equations for the
+Variables can be activated because of two reasons: </p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'>1)<span style='font-size:
 7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp; </span>The
@@ -860,16 +866,16 @@ value can be requested by the Equation of another Variable. </p>
 
 <p class=MsoNormal>The second case is due to the fact that the system cannot
 know in advance the exact order it should update the Variables. In order to
-avoid that, the value of a Variable is used in an Equation before its own Equation
-(that is, if the requested value is the most recent one), each Variable stores
-the number of the time step it has been lastly updated. If, say, the Equation
-for a Variable X requests the most updated value of a Variable Y, but this has
-not been computed yet, the system stops the execution of the Equation for X,
-computes the Equation for Y, and then continues the remaining code of the
-Equation for X, using the just computed value for Y. In technical terms, the
-procedure for the Equation for X is said to be placed on the stack, while the
-Equation for Y is computed. Of course, the Equation for Y can trigger the
-Equation for other Variable Z etc.</p>
+avoid that, the value of a Variable is used in an Equation before its own
+Equation (that is, if the requested value is the most recent one), each
+Variable stores the number of the time step it has been lastly updated. If,
+say, the Equation for a Variable X requests the most updated value of a
+Variable Y, but this has not been computed yet, the system stops the execution
+of the Equation for X, computes the Equation for Y, and then continues the
+remaining code of the Equation for X, using the just computed value for Y. In
+technical terms, the procedure for the Equation for X is said to be placed on
+the stack, while the Equation for Y is computed. Of course, the Equation for Y
+can trigger the Equation for other Variable Z etc.</p>
 
 <p class=MsoNormal>The Equation for a Variable is never computed twice in the
 same time step, by default. In fact, in our example, when the system will try
@@ -888,8 +894,8 @@ because it makes a computation common to every firm but does not provide a
 value that is worth on its own to be stored in <span class=Cdigo>Firm</span>.
 Therefore, there is one single Variable <span class=Cdigo>A_IM</span> which
 needs to be computed more than once every time (i.e., once for every <span
-class=Cdigo>Firm</span>) and that needs to read the Variables of the instance of
-<span class=Cdigo>Firm</span> that requested its computation. </p>
+class=Cdigo>Firm</span>) and that needs to read the Variables of the instance
+of <span class=Cdigo>Firm</span> that requested its computation. </p>
 
 <p class=MsoNormal>The Equation is the following: </p>
 
@@ -946,17 +952,17 @@ like </p>
 <p class=MsoNormal>in the Equation for <span class=Cdigo>A_IM</span> would
 return always the same instance of <span class=Cdigo>K</span>, notably the one
 contained in the first instance of Object <span class=Cdigo>Firm</span>
-descending from <span class=Cdigo>Market</span>, which is not what the modeler wants.
-The Object <span class=Cdigo>c</span> instead reports the Object which
+descending from <span class=Cdigo>Market</span>, which is not what the modeler
+wants. The Object <span class=Cdigo>c</span> instead reports the Object which
 originated the computation for <span class=Cdigo>A_IM</span>, that is, the
 instance of Firm which is computing its instance of Variable <span class=Cdigo>A</span>
 necessitating the value for <span class=Cdigo>A_IM</span>. </p>
 
-<p class=MsoNormal>It is crucial to use the proper Object to activate the function.
-In the large majority of cases <span class=Cdigo>p</span><span
-style='font-family:"Courier New"'> </span>is the right choice. A good rule of
-thumb to solve the dubious cases is to use the Object <span class=Cdigo>c</span>
-only if: </p>
+<p class=MsoNormal>It is crucial to use the proper Object to activate the
+function. In the large majority of cases <span class=Cdigo>p</span><span
+style='font-family:"Courier New"'> </span>is the right choice. A good rule of thumb
+to solve the dubious cases is to use the Object <span class=Cdigo>c</span> only
+if: </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
@@ -985,13 +991,12 @@ Objects. </p>
 
 <p><span class=Cdigo>object-&gt;cal(caller, &quot;Var&quot;, lag) </span></p>
 
-<p class=MsoNormal>is identical to the previous one, but it gives you more
-flexibility. It says to the Object <span class=Cdigo>object</span><span
-style='font-family:"Courier New"'> </span>to search for the element <span
-class=Cdigo>Var</span>. If <span class=Cdigo>Var</span> is an Equation computed
-because of this very call, then the &quot;caller&quot; object appearing to <span
-class=Cdigo>Var</span> is <span class=Cdigo>caller</span> instead of <span
-class=Cdigo>object</span>. </p>
+<p class=MsoNormal>is identical to the previous one, but it gives you more flexibility.
+It says to the Object <span class=Cdigo>object</span><span style='font-family:
+"Courier New"'> </span>to search for the element <span class=Cdigo>Var</span>.
+If <span class=Cdigo>Var</span> is an Equation computed because of this very
+call, then the &quot;caller&quot; object appearing to <span class=Cdigo>Var</span>
+is <span class=Cdigo>caller</span> instead of <span class=Cdigo>object</span>. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -1014,8 +1019,8 @@ the lag <span class=Cdigo>lag</span>) found in the set of Objects contiguous to
 the one found. Normally, it should be used to sum up the values of descending
 Objects. For example, if <span class=Cdigo>Q_TOT</span> is contained in an
 Object <span class=Cdigo>Market</span>, from which descend a set of Objects <span
-class=Cdigo>Firm</span> containing Variables <span class=Cdigo>Q</span>, its Equation
-can be: </p>
+class=Cdigo>Firm</span> containing Variables <span class=Cdigo>Q</span>, its
+Equation can be: </p>
 
 <p><span class=Cdigo>if(!strcmp(label, &quot;Q_TOT&quot;)) <br>
 { <br>
@@ -1166,10 +1171,11 @@ in <span class=Cdigo>v[0]</span>. Now you can use lines like: </p>
 <p><span class=Cdigo>v[1]=cur-cal(&quot;Q&quot;,0); <br>
 v[2]=cur-cal(&quot;K&quot;,0); </span></p>
 
-<p class=MsoNormal>to obtain information from this Object. This method allows overcoming
-the default system in LSD, which would return the values of Variables which
-have a special relation with the Object containing the Variable whose Equation
-is computed (same Object, &quot;nearby&quot; Object, calling Object). </p>
+<p class=MsoNormal>to obtain information from this Object. This method allows
+overcoming the default system in LSD, which would return the values of
+Variables which have a special relation with the Object containing the Variable
+whose Equation is computed (same Object, &quot;nearby&quot; Object, calling
+Object). </p>
 
 <p class=MsoNormal>Note that the temporary variable to store the Object cur may
 or may not be present in the file containing the code for the Equation of your
@@ -1221,11 +1227,11 @@ from which descend many Object labelled <span class=Cdigo>Firm</span>, it sorts
 these descendants according to decreasing values of their Variable <span
 class=Cdigo>Q</span>. </p>
 
-<p class=MsoNormal>The function is also available for ranking on two
-dimensions: </p>
+<p class=MsoNormal>The function is also available for ranking on two dimensions:
+</p>
 
-<p class=MsoNormal><span class=Cdigo>p-&gt;lsdqsort(&quot;AnObject&quot;, &quot;X&quot;,
-&quot;Y&quot;, &quot;UP&quot;); </span></p>
+<p class=MsoNormal><span class=Cdigo>p-&gt;lsdqsort(&quot;AnObject&quot;,
+&quot;X&quot;, &quot;Y&quot;, &quot;UP&quot;); </span></p>
 
 <p class=MsoNormal>In this second case the Objects are sorted according to
 their increasing values of <span class=Cdigo>X</span>. If two or more Objects
@@ -1337,8 +1343,8 @@ color:#254061'>object-&gt;delete_obj() </span></span></h1>
 
 <p class=MsoNormal>This function deletes the Object <span class=Cdigo>object</span>
 from the model, removing it from the model and freeing the memory it was
-allocated for it. While its use is very simple, it should be used with care to
-avoid the elimination of data structure used in other parts of the model. For
+allocated for it. While its use is very simple, it should be used with care to avoid
+the elimination of data structure used in other parts of the model. For
 example, an Equation must never use a line like the following: </p>
 
 <p class=MsoNormal><span class=Cdigo><span lang=ES>p-&gt;delete_obj(); </span></span><span
@@ -1444,9 +1450,9 @@ found. </p>
 color:#254061'>go_brother(object) </span></span></h1>
 
 <p class=MsoNormal>This function is not defined as a member of class object. It
-considers the type of the Object <span class=Cdigo>object</span> passed as
-parameter and returns the following element in the list whose object is part
-of, only if this following element is of the same type of object. It returns <span
+considers the type of the Object <span class=Cdigo>object</span> passed as parameter
+and returns the following element in the list whose object is part of, only if
+this following element is of the same type of object. It returns <span
 class=Cdigo>NULL</span> in case a different object follows object or in case
 object is the last of the list. </p>
 
@@ -1565,12 +1571,12 @@ value after the product. </p>
 <h1><a name=lastupdate></a><span class=Cdigo><span style='font-family:"Arial","sans-serif";
 color:#254061'>lastupdate </span></span></h1>
 
-<p>This is a field of Variable. It contains the simulation data about the latest
-time the Variable has executed its Equation to update its value. Normally
-modelers should not fiddle with this value, since they risk disrupting the
-automatic scheduling system implemented in LSD. However, there is one case when
-this is necessary. In fact, by default in LSD a Variable computes its value
-(and therefore executes its Equation code) only once at each time step. </p>
+<p>This is a field of Variable. It contains the simulation data about the
+latest time the Variable has executed its Equation to update its value.
+Normally modelers should not fiddle with this value, since they risk disrupting
+the automatic scheduling system implemented in LSD. However, there is one case
+when this is necessary. In fact, by default in LSD a Variable computes its
+value (and therefore executes its Equation code) only once at each time step. </p>
 
 <p>But in some cases the modeler needs to have one Equation repeated many times
 during the same time step. This is the case, for example, when a Variable

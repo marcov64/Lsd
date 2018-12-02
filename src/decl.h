@@ -219,8 +219,7 @@ struct object
 	double stats_net( char const *lab, double *r );
 	double sum( char const *lab, int lag );
 	double whg_av( char const *weight, char const *lab, int lag );
-	double write( char const *lab, double value, int time );	// write value as if computed at time
-	double write( char const *lab, double value, int time, int lag );	// write value in the lag field
+	double write( char const *lab, double value, int time, int lag = 0 );
 	double write_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, bool append = false );
 	int init( object *_up, char const *_label );
 	long init_circle_net( char const *lab, long numNodes, long outDeg );
@@ -238,10 +237,8 @@ struct object
 	netLink *draw_link_net( void ); 
 	netLink *search_link_net( long id ); 
 	netNode *add_node_net( long id = -1, char const *nodeName = "", bool silent = false );
-	object *add_n_objects2( char const *lab, int n );
-	object *add_n_objects2( char const *lab, int n, int t_update );
-	object *add_n_objects2( char const *lab, int n, object *ex );
-	object *add_n_objects2( char const *lab, int n, object *ex, int t_update );
+	object *add_n_objects2( char const *lab, int n, int t_update = -1 );
+	object *add_n_objects2( char const *lab, int n, object *ex, int t_update = -1 );
 	object *draw_node_net( char const *lab ); 
 	object *draw_rnd( char const *lo );
 	object *draw_rnd( char const *lo, char const *lv, int lag );
