@@ -950,7 +950,7 @@ for(cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
     cur1->write("IdTecUsed",MP, 0);
     
     cur2=cur1->search("Mix");
-    cur2->write("randomMix",-1, t-1);
+    cur2->write("randomMix",-1, t);
     cur2->cal("randomMix",0);
     
     cur1->write("alive",1, 0);
@@ -1028,7 +1028,7 @@ for(v[13]=1; v[13]<=v[1]; v[13]++ )
   cur->write("generation",2, 0);
   cur->write("IdTecUsed",MP, 0);
   cur2=cur->search("Mix");
-  cur2->write("randomMix",-1, t-1);  
+  cur2->write("randomMix",-1, t);  
   cur2->cal("randomMix",0);
   cur->write("alive",1, 0); 
   cur->write("entered",0, 0);

@@ -302,8 +302,8 @@ Param: tdebug 0 n + n n	0
 Var: ALAKT 0 n + n n
 Var: ALAKTentr 0 n + n n
 Var: ALAKTinc 0 n + n n
-Var: HHIK 0 s + n n
-Var: HHIs 0 s + n n
+Var: HHIK 0 s + n p
+Var: HHIs 0 s + n p
 Var: LKTavg 0 n + n n
 Var: LKTavgentr 0 s + n n
 Var: LKTavginc 0 s + n n
@@ -325,7 +325,7 @@ Var: toptech 1 n + n n	1
 Var: G 0 n + n n
 Var: GM 0 n + n n
 Var: pop 1 n + n n	0
-Var: popcov 0 s + n n
+Var: popcov 0 s + n p
 Var: VMRM 0 s + n n
 Var: VMRP 0 s + n n
 Var: ageavg 0 s + n n
@@ -458,7 +458,7 @@ Param: b2 0 n + n n	0
 Param: b3 0 n + n n	0
 
 SIM_NUM 1
-SEED 1
+SEED 2
 MAX_STEP 250
 EQUATION fun_INTERNET.cpp
 MODELREPORT modelreport.html

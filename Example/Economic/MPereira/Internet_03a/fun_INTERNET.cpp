@@ -215,7 +215,7 @@ NEW OBJECTS EQUATIONS NOT INCLUDED HERE ARE NOT CALCULATED IN T=1!!!
 		WRITES(cur4,"es",uniform(v[31],v[32]));	// user loyalty threshold
 	}
 
-	plog("Simulation initialization complete...\n");
+	plog("\n Simulation initialization complete...\n");
 
 	PARAMETER;									// transform "init" in a parameter  
 												// so to not compute again
@@ -1794,7 +1794,7 @@ Remove failing providers from market
 			if(v[0]==(v[2]-1))					// checks if all but last firm
 			{									// were already deleted
 				quit=1;							// if so, simply finish simulation
-				plog("\nSimulation early finish: no more firms.\n");
+				plog("\n Simulation early finish: no more firms.\n");
 			}
 			else
 			{

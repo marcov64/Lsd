@@ -20,11 +20,11 @@ Label Root
 		Param: DeadStarved
 		Param: Fed
 		Var: Stock
-		Var: Eat
+		Func: Eat
 		Var: NumBugs
 		Param: IncrStock
 		Param: NewStock
-		Var: ProbMate
+		Func: ProbMate
 		Param: StepAge
 
 	}
@@ -45,11 +45,11 @@ Param: DeadAge 0 s + n n	0
 Param: DeadStarved 0 s + n n	0
 Param: Fed 0 s + n n	0
 Var: Stock 1 s + n n	100
-Var: Eat 0 n + n n
+Func: Eat 0 n + n n
 Var: NumBugs 0 s + d n
 Param: IncrStock 0 n + n n	0.95
 Param: NewStock 0 n + n n	5000
-Var: ProbMate 0 n + n n
+Func: ProbMate 0 n + n n
 Param: StepAge 0 n + n n	0.8
 
 Object: Bug C	100
@@ -61,7 +61,7 @@ SIM_NUM 1
 SEED 0
 MAX_STEP 10000
 EQUATION fun_anitbiotics.cpp
- MODELREPORT modelreport.html
+MODELREPORT modelreport.html
 
 DESCRIPTION
 
@@ -117,7 +117,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_Eat
+Function_Eat
 (no description available)
 _INIT_
 
@@ -141,7 +141,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_ProbMate
+Function_ProbMate
 (no description available)
 _INIT_
 

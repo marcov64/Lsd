@@ -21,10 +21,10 @@ Label Root
 
 			}
 
-			Var: Purchase
+			Func: Purchase
 			Param: alpha
 			Var: TotalUsers
-			Var: IsBroken
+			Func: IsBroken
 			Var: TotalSales
 
 		}
@@ -63,10 +63,10 @@ Var: EndTrade 0 n + n n
 Var: Init 0 n + d n
 
 Object: Supply C	1
-Var: Purchase 0 n + d n
+Func: Purchase 0 n + n n
 Param: alpha 0 n + n n	0
-Var: TotalUsers 0 s + d n
-Var: IsBroken 0 n + n n
+Var: TotalUsers 0 s + n n
+Func: IsBroken 0 n + n n
 Var: TotalSales 0 n + n n
 
 Object: Firm C	10
@@ -89,7 +89,7 @@ SIM_NUM 1
 SEED 1
 MAX_STEP 1000
 EQUATION fun_sd.cpp
- MODELREPORT modelreport.html
+MODELREPORT modelreport.html
 
 DESCRIPTION
 
@@ -127,7 +127,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_Purchase
+Function_Purchase
 (no description available)
 _INIT_
 
@@ -145,7 +145,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_IsBroken
+Function_IsBroken
 (no description available)
 _INIT_
 
@@ -237,6 +237,7 @@ END_DESCRIPTION
 
 
 DOCUOBSERVE
+Root
 
 END_DOCUOBSERVE
 

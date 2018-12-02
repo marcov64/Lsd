@@ -209,7 +209,7 @@ NEW OBJECTS EQUATIONS NOT INCLUDED HERE ARE NOT CALCULATED IN T=1!!!
 	cur3=usernet=SEARCH("EndUsers");	// get network container object
 	if(!init_net(cur3,"User",IN_DIR,BASE_NAME))	// create network (accord. typeNet)
 	{
-		plog("Error reading network file! Aborting.");	// notify and stop simulation
+		plog("\n Error reading network file! Aborting.");	// notify and stop simulation
 		ABORT;
 	}
 		

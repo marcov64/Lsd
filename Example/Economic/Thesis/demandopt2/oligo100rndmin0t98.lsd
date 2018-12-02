@@ -87,14 +87,14 @@ Label Root
 
 		}
 
-		Var: Choose
+		Func: Choose
 		Param: MinProb
 		Var: InvHerfindal
 		Func: SetARank
-		Var: ChooseTTB
+		Func: ChooseTTB
 		Param: RangeRank
 		Var: TotNum
-		Var: Adopt
+		Func: Adopt
 		Param: CounterChUsed
 		Var: AvChUsed
 		Func: TTB
@@ -152,14 +152,14 @@ Param: QualityType 0 n + n n	1	1	1	1	1	1	1	1	1	1
 Param: tau 0 n + n n	0.98	0.98	0.98	0.98	0.98	0.98	0.98	0.98	0.98	0.98
 
 Object: Supply C	1
-Var: Choose 0 n + n n
+Func: Choose 0 n + n n
 Param: MinProb 0 n + n n	0.0001
 Var: InvHerfindal 0 s + n n
 Func: SetARank 0 n + d n
-Var: ChooseTTB 0 n + n n
+Func: ChooseTTB 0 n + n n
 Param: RangeRank 0 n + n n	0
 Var: TotNum 0 s + n n
-Var: Adopt 0 n + n n
+Func: Adopt 0 n + n n
 Param: CounterChUsed 0 n + n n	0
 Var: AvChUsed 0 s + n n
 Func: TTB 0 n + d n
@@ -419,7 +419,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_Choose
+Function_Choose
 'Choose' appears in the equation for: .
 _INIT_
 
@@ -443,7 +443,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_ChooseTTB
+Function_ChooseTTB
 'ChooseTTB' appears in the equation for: .
 _INIT_
 
@@ -461,7 +461,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_Adopt
+Function_Adopt
 'Adopt' appears in the equation for: .
 _INIT_
 

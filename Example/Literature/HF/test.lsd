@@ -24,7 +24,7 @@ Label Root
 				{
 					Param: cheapMix
 					Param: perfMix
-					Var: randomMix
+					Func: randomMix
 
 				}
 
@@ -153,7 +153,7 @@ Label Root
 			Var: gammaDxCheap
 			Var: gammaDxPerf
 			Var: findBestMPDistance
-			Var: failFirm
+			Func: failFirm
 			Param: percCostOfDiversification
 			Param: fixedCostOfDiversification
 			Param: percEbwDiversification
@@ -200,7 +200,7 @@ Label Root
 				Param: MPshare
 				Param: TRshare
 				Param: DIVshare
-				Var: utility
+				Func: utility
 
 			}
 
@@ -277,7 +277,7 @@ Var: MedPerfPCFirm 0 n + n n
 Var: gammaDxCheap 0 n + n n
 Var: gammaDxPerf 0 n + n n
 Var: findBestMPDistance 0 n + n n
-Var: failFirm 0 n + n n
+Func: failFirm 0 n + n n
 Param: percCostOfDiversification 0 n + n n	0.5
 Param: fixedCostOfDiversification 0 n + n n	0
 Param: percEbwDiversification 0 n + n n	0.8
@@ -327,7 +327,7 @@ Param: RTAverageExperience 0 n + n n	0	0	0	0	0	0
 Object: Mix C	1	1	1	1	1	1
 Param: cheapMix 0 n + n n	0	0	0	0	0	0
 Param: perfMix 0 n + n n	0	0	0	0	0	0
-Var: randomMix 0 n + n n
+Func: randomMix 1 n + n n	0	0	0	0	0	0
 
 Object: Product C	1	1	1	1	1	1
 Param: cheap 0 s + n n	0	0	0	0	0	0
@@ -389,13 +389,13 @@ Param: techlevelPerf 0 n + n n	0	0
 Param: MPshare 0 n + n n	0	0
 Param: TRshare 0 n + n n	0	0
 Param: DIVshare 0 n + n n	0	0
-Var: utility 0 n + n n
+Func: utility 0 n + n n
 
 SIM_NUM 1
 SEED 3
 MAX_STEP 150
 EQUATION fun_HF.cpp
- MODELREPORT modelreport.html
+MODELREPORT modelreport.html
 
 DESCRIPTION
 
@@ -851,7 +851,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_failFirm
+Function_failFirm
 function killing firms 
 
 'failFirm' appears in the equation for: bookKeeping, RDInvest.
@@ -1159,14 +1159,14 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_randomMix
+Function_randomMix
 Set cheapMix and perfMix to new random values in between 0 and 1 such that their sum is 1.
 
 It is computed only when requested
 
 'randomMix' appears in the equation for: diversification, secondGenerationCreation, init.
 _INIT_
-
+All 6 instances equal to 0.
 END_DESCRIPTION
 
 Object_Product
@@ -1507,7 +1507,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_utility
+Function_utility
 Function contained in UserClass called by Firm. Therefore:
 p-> refers to the userclass 
 c-> refers to the firm
@@ -1529,7 +1529,6 @@ END_DOCUINITIAL
 
 
 EQ_FILE
-
 /***************************************************
 ****************************************************
 LSD 2.0 - April 2000

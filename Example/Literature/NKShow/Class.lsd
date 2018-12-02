@@ -61,10 +61,10 @@ Label Root
 			Param: BlckChs
 			Param: Age
 			Param: RewardType
-			Var: MutationIndividual
-			Var: MutationTeam
+			Func: MutationIndividual
+			Func: MutationTeam
 			Param: AgentType
-			Var: MutationGlobal
+			Func: MutationGlobal
 			Var: TestDinner
 			Param: BitChs
 			Var: TestDinnerTeam
@@ -72,7 +72,7 @@ Label Root
 			Var: TestDinnerIndividual
 			Var: BackDoor
 			Param: CounterMutation
-			Var: MutationTeamParallel
+			Func: MutationTeamParallel
 			Param: ProbDie
 			Param: ProbReplicate
 
@@ -128,7 +128,7 @@ Label Root
 		Var: InitEvenK
 		Param: EvenK
 		Var: CreateFitContrib
-		Var: FitFun
+		Func: FitFun
 		Param: N
 		Param: ForeOverlap
 		Param: AftOverlap
@@ -207,10 +207,10 @@ Param: NumCopies 0 n + n n	0
 Param: BlckChs 0 n + n n	0
 Param: Age 0 n + n n	0
 Param: RewardType 0 n + n n	2
-Var: MutationIndividual 0 n + n n
-Var: MutationTeam 0 n + n n
+Func: MutationIndividual 0 n + n n
+Func: MutationTeam 0 n + n n
 Param: AgentType 0 n + n n	0
-Var: MutationGlobal 0 n + n n
+Func: MutationGlobal 0 n + n n
 Var: TestDinner 0 n + n n
 Param: BitChs 0 n + n n	0
 Var: TestDinnerTeam 0 n + n n
@@ -218,7 +218,7 @@ Var: TestDinnerGlobal 0 n + n n
 Var: TestDinnerIndividual 0 n + n n
 Var: BackDoor 1 n + n n	0
 Param: CounterMutation 0 n + n n	0
-Var: MutationTeamParallel 0 n + n n
+Func: MutationTeamParallel 0 n + n n
 Param: ProbDie 0 n + n n	0
 Param: ProbReplicate 0 n + n n	0
 
@@ -237,7 +237,7 @@ Object: Landscape C	1
 Var: InitEvenK 0 n + d n
 Param: EvenK 0 n + n n	4
 Var: CreateFitContrib 0 n + n n
-Var: FitFun 0 n + n n
+Func: FitFun 0 n + n n
 Param: N 0 n + n n	50
 Param: ForeOverlap 0 n + n n	0
 Param: AftOverlap 0 n + n n	0
@@ -255,7 +255,7 @@ SIM_NUM 1
 SEED 1
 MAX_STEP 10000
 EQUATION fun_nkun.cpp
- MODELREPORT modelreport.html
+MODELREPORT modelreport.html
 
 DESCRIPTION
 
@@ -617,13 +617,13 @@ _INIT_
 
 END_DESCRIPTION
 
-Parameter_MutationIndividual
+Function_MutationIndividual
 (no description available)
 _INIT_
 
 END_DESCRIPTION
 
-Parameter_MutationTeam
+Function_MutationTeam
 (no description available)
 _INIT_
 
@@ -635,7 +635,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Parameter_MutationGlobal
+Function_MutationGlobal
 (no description available)
 _INIT_
 
@@ -683,7 +683,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Parameter_MutationTeamParallel
+Function_MutationTeamParallel
 (no description available)
 _INIT_
 
@@ -779,7 +779,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Parameter_FitFun
+Function_FitFun
 (no description available)
 _INIT_
 

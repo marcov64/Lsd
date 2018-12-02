@@ -30,9 +30,9 @@ Label Root
 		Param: MaxSheepHunting
 		Param: MaxSHunger
 		Param: MaxHunger
-		Var: Hunt
-		Var: NewSheep
-		Var: NewWolf
+		Func: Hunt
+		Func: NewSheep
+		Func: NewWolf
 		Param: MaxAgeSheep
 		Param: MaxAgeWolf
 		Param: MaxSheepFood
@@ -61,9 +61,9 @@ Param: ProbSReproduce 0 n + n n	0.1
 Param: MaxSheepHunting 0 n + n n	1000
 Param: MaxSHunger 0 n + n n	5
 Param: MaxHunger 0 n + n n	10
-Var: Hunt 0 n + n n
-Var: NewSheep 0 n + n n
-Var: NewWolf 0 n + d n
+Func: Hunt 0 n + n n
+Func: NewSheep 0 n + n n
+Func: NewWolf 0 n + d n
 Param: MaxAgeSheep 0 n + n n	100
 Param: MaxAgeWolf 0 n + n n	400
 Param: MaxSheepFood 0 n + n n	1000
@@ -87,7 +87,7 @@ SIM_NUM 1
 SEED 0
 MAX_STEP 10000
 EQUATION fun_Lotka.cpp
- MODELREPORT report_SheepAndWolfs.html
+MODELREPORT report_SheepAndWolfs.html
 
 DESCRIPTION
 
@@ -152,7 +152,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_Hunt
+Function_Hunt
 Hunting. It is a function activated only if a wolf requests it.
 With a probability proportional to the density of sheep the wolf gets a dinner.
 
@@ -162,7 +162,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_NewSheep
+Function_NewSheep
 Add a new sheep. It is a function activated only if it is requested by a sheep
 
 'NewSheep' appears in the equation for: ActionSheep.
@@ -170,7 +170,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_NewWolf
+Function_NewWolf
 Entry of a new wolf. It is a function activated only if it is requested by a wolf.
 
 'NewWolf' appears in the equation for: ActionWolf.
@@ -291,7 +291,6 @@ END_DOCUINITIAL
 
 
 EQ_FILE
-
 /***************************************************
 ****************************************************
 LSD 2.0 - April 2000

@@ -82,7 +82,7 @@ void rank_prov_global::update( object *firstProv, unsigned int window )
 
 	rank.clear( );										// clear previous items
 	
-	for ( cur = firstProv; cur != NULL; cur = go_brother( cur ) )
+	for ( cur = firstProv; cur != NULL; cur = brother( cur ) )
 	{													// scan all providers
 		prov.p = cur;									// get pointer to provider
 		prov.ID = ( ulong ) _VLS( cur, "provID", 1 );	// get provider ID

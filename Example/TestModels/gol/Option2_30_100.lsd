@@ -29,16 +29,16 @@ Label Root
 
 		}
 
-		Var: up
-		Var: down
-		Var: left
-		Var: right
+		Func: up
+		Func: down
+		Func: left
+		Func: right
 		Var: Init
 		Param: NCol
 		Param: NLine
 		Param: NState
 		Param: Elas
-		Var: Choose
+		Func: Choose
 		Param: minprob
 		Param: UnitProb
 		Param: width
@@ -54,16 +54,16 @@ DATA
 Object: Root C	1
 
 Object: Lattice C	1
-Var: up 0 n + n n
-Var: down 0 n + n n
-Var: left 0 n + n n
-Var: right 0 n + n n
+Func: up 0 n + n n
+Func: down 0 n + n n
+Func: left 0 n + n n
+Func: right 0 n + n n
 Var: Init 0 n + d n
 Param: NCol 0 n + n n	100
 Param: NLine 0 n + n n	30
 Param: NState 0 n + n n	2
 Param: Elas 0 n + n n	2
-Var: Choose 0 n + d n
+Func: Choose 0 n + d n
 Param: minprob 0 n + n n	0
 Param: UnitProb 0 n + n n	10
 Param: width 0 n + n n	0
@@ -99,25 +99,25 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_up
+Function_up
 (no description available)
 _INIT_
 
 END_DESCRIPTION
 
-Variable_down
+Function_down
 (no description available)
 _INIT_
 
 END_DESCRIPTION
 
-Variable_left
+Function_left
 (no description available)
 _INIT_
 
 END_DESCRIPTION
 
-Variable_right
+Function_right
 (no description available)
 _INIT_
 
@@ -153,7 +153,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_Choose
+Function_Choose
 (no description available)
 _INIT_
 

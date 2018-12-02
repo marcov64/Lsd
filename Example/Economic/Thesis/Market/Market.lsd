@@ -35,7 +35,7 @@ Label Root
 			Param: TimeActive
 			Param: NumContagion
 			Param: RadioReduction
-			Var: IssuerId
+			Func: IssuerId
 			Param: TimeRepl
 			Param: NoNewAgent
 			Param: IncrExpChoose
@@ -87,7 +87,7 @@ Label Root
 			Param: PercCan
 			Var: MSInstall
 			Param: PApp
-			Var: UpdatePref
+			Func: UpdatePref
 			Var: RD
 			Param: Birth
 			Param: RDConc
@@ -96,22 +96,22 @@ Label Root
 
 		}
 
-		Var: Choose
+		Func: Choose
 		Param: MinProb
-		Var: IssuerIdProd
+		Func: IssuerIdProd
 		Var: Entry
 		Param: ProbEntry
 		Var: Exit
 		Param: MaxLosses
 		Var: InvHerfindal
 		Param: Tolerance
-		Var: SetARank
-		Var: ChooseTTB
+		Func: SetARank
+		Func: ChooseTTB
 		Param: RangeRank
 		Var: TotNum
-		Var: Adopt
+		Func: Adopt
 		Var: NumProd
-		Var: InitializeCh
+		Func: InitializeCh
 		Param: MinimumSales
 		Var: SumInstallBase
 		Param: IndexChUsed
@@ -127,7 +127,7 @@ Label Root
 		Var: UpdateRDIndex
 		Param: SpeedRDIndex
 		Param: SharePosNeg
-		Var: TieBreak
+		Func: TieBreak
 		Param: ExpTieBreak
 		Param: AvAge
 		Var: AvRDConc
@@ -195,7 +195,7 @@ Object: Group N	1
 Param: TimeActive 0 n + n n	-10
 Param: NumContagion 0 n + n n	6
 Param: RadioReduction 0 n + n n	1
-Var: IssuerId 1 n + n n	0
+Func: IssuerId 1 n + n n	0
 Param: TimeRepl 0 n + n n	20
 Param: NoNewAgent 0 n + n n	0
 Param: IncrExpChoose 0 n + n n	0
@@ -223,22 +223,22 @@ Param: AProb 0 n + n n	0	0	0	0	0	0	0	0	0	0
 Param: AValue 0 n + n n	0	0	0	0	0	0	0	0	0	0
 
 Object: Supply C	1
-Var: Choose 0 n + n n
+Func: Choose 0 n + n n
 Param: MinProb 0 n + n n	0.0001
-Var: IssuerIdProd 1 n + n n	10
+Func: IssuerIdProd 1 n + n n	0
 Var: Entry 0 n + n n
 Param: ProbEntry 0 n + n n	0.3
 Var: Exit 0 n + n n
 Param: MaxLosses 0 n + n n	4
 Var: InvHerfindal 0 s + n p
 Param: Tolerance 0 n + n n	1
-Var: SetARank 0 n + n n
-Var: ChooseTTB 0 n + n n
+Func: SetARank 0 n + n n
+Func: ChooseTTB 0 n + n n
 Param: RangeRank 0 n + n n	0
 Var: TotNum 0 s + n n
-Var: Adopt 0 n + n n
+Func: Adopt 0 n + n n
 Var: NumProd 0 s + n p
-Var: InitializeCh 0 n + n n
+Func: InitializeCh 0 n + n n
 Param: MinimumSales 0 n + n n	1
 Var: SumInstallBase 0 n + d n
 Param: IndexChUsed 0 n + n n	1
@@ -254,7 +254,7 @@ Param: RangeInn 0 n + n n	2
 Var: UpdateRDIndex 0 n + n n
 Param: SpeedRDIndex 0 n + n n	0.3
 Param: SharePosNeg 0 n + n n	0.9999
-Var: TieBreak 0 n + n n
+Func: TieBreak 0 n + n n
 Param: ExpTieBreak 0 n + n n	5
 Param: AvAge 0 s + n n	0
 Var: AvRDConc 0 s + n n
@@ -274,7 +274,7 @@ Param: PercNew 0 n + n n	0	0	0	0	0	0	0	0	0	0
 Param: PercCan 0 n + n n	0	0	0	0	0	0	0	0	0	0
 Var: MSInstall 1 n + n n	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1
 Param: PApp 0 n + n n	0	0	0	0	0	0	0	0	0	0
-Var: UpdatePref 0 n + n n
+Func: UpdatePref 0 n + n n
 Var: RD 0 n + n n
 Param: Birth 0 n + n n	1	1	1	1	1	1	1	1	1	1
 Param: RDConc 0 s + n n	0	0	0	0	0	0	0	0	0	0
@@ -321,7 +321,7 @@ SIM_NUM 1
 SEED 1
 MAX_STEP 10000
 EQUATION fun_market.cpp
- MODELREPORT report_Market.html
+MODELREPORT report_Market.html
 
 DESCRIPTION
 
@@ -456,12 +456,13 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_IssuerId
+Function_IssuerId
 Provides identification numbers for new entering buyers
 
 'IssuerId' appears in the equation for: Action.
-_INIT_
 
+_INIT_
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_TimeRepl
@@ -617,7 +618,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_Choose
+Function_Choose
 This function is used when a new agent makes the first purchase, since they
 need to set up their preferences. Subsequently, agents use directly ChooseTTB.
 
@@ -632,12 +633,12 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_IssuerIdProd
+Function_IssuerIdProd
 Provides identification numbers for new entering producers
 
 'IssuerIdProd' appears in the equation for: Entry.
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_Entry
@@ -690,7 +691,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_SetARank
+Function_SetARank
 Assign the rankings to the newly entered agents.
 The function builds indexes for each characteristic as the sum of the Rank's
 from each producer for each characteristic. These values are weighted with the
@@ -712,7 +713,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_ChooseTTB
+Function_ChooseTTB
 'ChooseTTB' appears in the equation for: Choose, ActionReplace.
 _INIT_
 
@@ -730,7 +731,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_Adopt
+Function_Adopt
 Install the ch's values in the agent's place. Technical stuff used immediately
 after an Agent makes a purchase.
 
@@ -747,7 +748,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_InitializeCh
+Function_InitializeCh
 'InitializeCh' appears in the equation for: Entry.
 _INIT_
 
@@ -861,7 +862,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_TieBreak
+Function_TieBreak
 This function makes the choice for buyers who used all the characteristics
 and still couldn't make their choice.
 The function chooses randomly a characteristics with probability equal
@@ -1004,7 +1005,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_UpdatePref
+Function_UpdatePref
 'UpdatePref' appears in the equation for: ActionReplace.
 _INIT_
 
