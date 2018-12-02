@@ -87,10 +87,12 @@ inline void cycle_error( const char *label )
 
 inline object *cycle_obj( object *parent, char const *label, char const *command )
 {
+	extern object *blueprint;   		// LSD blueprint (effective model in use )
 	object *cur = parent->search( label );
 
 	if ( cur == NULL )
-		cycle_error( label );
+		if ( blueprint->search( label ) == NULL )	// not zero-instance object?
+			cycle_error( label );
 	
 	return cur;
 }

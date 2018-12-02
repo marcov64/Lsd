@@ -267,6 +267,8 @@ bool no_ptr_chk = true;
 #define USE_POINTER_CHECK build_obj_list( true )
 #define NO_SEARCH { no_search = true; }
 #define USE_SEARCH { no_search = false; }
+#define NO_ZERO_INSTANCE { no_zero_instance = true; }
+#define USE_ZERO_INSTANCE { no_zero_instance = false; }
 #define PARAMETER { var->param = 1; }
 #define RND_GENERATOR( X ) { ran_gen = X; }
 #define RND_SETSEED( X ) { seed = ( unsigned ) X; init_random( seed ); }

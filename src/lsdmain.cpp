@@ -41,7 +41,7 @@ int saveConf = false;		// save configuration on results saving (bool)
 int strWindowOn = true;		// control the presentation of the model structure window (bool)
 unsigned seed = 1;			// random number generator initial seed
 
-bool batch_sequential = false;	// no-window multi configuration job running
+bool batch_sequential = false;// no-window multi configuration job running
 bool brCovered = false;		// browser cover currently covered
 bool eq_dum = false;		// current equation is dummy
 bool fast;					// safe copy of fast_mode flag
@@ -50,6 +50,7 @@ bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
 bool no_search;				// disable the standard variable search mechanism
 bool no_window = false;		// no-window command line job
+bool no_zero_instance = false;// flag to allow deleting last object instance
 bool non_var = false;		// flag to indicate INTERACT macro condition
 bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status

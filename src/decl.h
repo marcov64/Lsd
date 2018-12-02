@@ -565,6 +565,7 @@ extern bool fast;						// flag to hide LOG messages & runtime (read-only)
 extern bool fast_lookup;				// flag for fast equation look-up mode
 extern bool no_ptr_chk;					// disable user pointer checking
 extern bool no_search;					// disable the standard variable search mechanism
+extern bool no_zero_instance;			// flag to allow deleting last object instance
 extern bool use_nan;					// flag to allow using Not a Number value
 extern char *path;						// folder where the configuration is
 extern char *simul_name;				// configuration name being run (for saving networks)

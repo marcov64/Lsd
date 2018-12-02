@@ -35,6 +35,7 @@ sense *rsense = NULL;		// LSD sensitivity analysis structure
 
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
 bool message_logged = false;// new message posted in log window
+bool no_zero_instance = false;// flag to allow deleting last object instance
 bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool running = false;		// simulation is running

@@ -180,6 +180,7 @@ BROWSE
 ****************************************************/
 int browse( object *r, int *choice )
 {
+	bool done;
 	int num;
 	bridge *cb;
 	variable *ap_v;
@@ -504,8 +505,18 @@ int browse( object *r, int *choice )
 			cmd( "set app 0" );
 			for ( cb = r->b; cb != NULL; cb = cb->next )
 			{
-				skip_next_obj( cb->head, &num );
-				cmd( ".l.s.c.son_name insert end \"%s (#%d%s)\"", cb->blabel, num, cb->head->to_compute ? "" : "-" );
+				if ( cb->head != NULL )
+				{
+					skip_next_obj( cb->head, &num );
+					done = cb->head->to_compute;
+				}
+				else
+				{
+					num = 0;
+					done = true;
+				}
+				
+				cmd( ".l.s.c.son_name insert end \"%s (#%d%s)\"", cb->blabel, num, done ? "" : "-" );
 				cmd( ".l.s.c.son_name itemconf $app -fg red" );
 				cmd( "incr app" );
 			}
