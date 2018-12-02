@@ -1196,6 +1196,7 @@ if ( choice == 11 )
 
 	cmd( "set docase 0" );
 	cmd( "set dirsearch \"-forwards\"" );
+	cmd( "set endsearch end" );
 	cmd( "set curcounter $lfindsize" );
 	cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
 
@@ -1317,6 +1318,7 @@ if ( choice == 21 )
 
 	cmd( "set docase 1" );
 	cmd( "set dirsearch \"-forwards\"" );
+	cmd( "set endsearch end" );
 	cmd( "set curcounter $lfindsize" );
 	cmd( "set cur \"\"" );
 	cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );

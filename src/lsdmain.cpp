@@ -936,8 +936,11 @@ void run( void )
 		cmd( "update" );
 		reset_plot( i );
 #endif
-
+		// run user closing function, reporting error appropriately
+		user_exception = true;
 		close_sim( );
+		user_exception = false;
+		
 		reset_end( root );
 		root->emptyturbo( );
 		

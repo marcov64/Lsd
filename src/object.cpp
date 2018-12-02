@@ -472,7 +472,7 @@ object *skip_next_obj( object *tr )
 
 	cb = tr->up->search_bridge( tr->label );
 
-	if ( cb->next == NULL )
+	if ( cb == NULL || cb->next == NULL )
 		return NULL;
 	else
 		return cb->next->head; 
@@ -817,7 +817,8 @@ double object::search_inst( object *obj )
 		cur = up->search_bridge( label )->head;
 	
 	pos = 0;
-	cur->search_inst( obj, &pos );		// check for instance recursively
+	if ( cur != NULL)
+		cur->search_inst( obj, &pos );	// check for instance recursively
 	
 	return pos;
 }
@@ -1318,8 +1319,9 @@ void object::insert_parent_obj( char const *lab )
 		v = NULL;
 		
 		// adjust old sons of root to sons of the new object
-		for ( cur = newo->b->head; cur != NULL; cur = cur->next )
-			cur->up = newo;
+		for ( cb = newo->b; cb != NULL; cb = cb->next )
+			for ( cur = cb->head; cur != NULL; cur = cur->next )
+				cur->up = newo;
 		
 		// clear bridge of root and add single added new object
 		b_map.clear( );
@@ -1778,6 +1780,10 @@ void object::delete_obj( void )
 								true );
 					return;
 				}
+				
+				cb->head = NULL;
+			}
+		}
 		else
 		{
 			for ( cur = cb->head; cur->next != this; cur = cur->next );
@@ -2567,7 +2573,7 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 		}
 		
 		cur = cv->up;
-		if ( strcmp( obj, cur->label ) )
+		if ( cur == NULL || strcmp( obj, cur->label ) )
 		{
 			sprintf( msg, "element '%s' is missing (object '%s') for sorting", var, obj );
 			error_hard( msg, "variable or parameter not found", 
@@ -2603,9 +2609,9 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 			cb = NULL;
 	}
 
-	if ( cb == NULL || cb->head == NULL )
+	if ( cb == NULL )
 	{
-		sprintf( msg, "object '%s' is missing for sorting", label);
+		sprintf( msg, "object '%s' is missing for sorting", obj);
 		error_hard( msg, "object not found", 
 					"create object in model structure" );
 		return NULL;
@@ -2711,7 +2717,7 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 
 	cb = search_bridge( obj, true );			// try to find the bridge
 	   
-	if ( cb == NULL || cb->head == NULL )
+	if ( cb == NULL )
 	{
 		sprintf( msg, "object '%s' is missing for sorting", obj );
 		error_hard( msg, "object not found", 
@@ -2750,7 +2756,7 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 	}
 	 
 	cur = cv->up;
-	if ( strcmp( obj, cur->label ) )
+	if ( cur == NULL || strcmp( obj, cur->label ) )
 	{
 		sprintf( msg, "element '%s' is missing (object '%s') for sorting", var1, obj );
 		error_hard( msg, "variable or parameter not found", 
@@ -2917,7 +2923,7 @@ object *object::draw_rnd( char const *lab )
 
 	if ( a == 0 )
 	{
-		sprintf( msg, "object '%s' is missing for random drawing", lo );
+		sprintf( msg, "object '%s' is missing for random drawing", lab );
 		error_hard( msg, "object not found", 
 					"create object in model structure" );
 		return NULL;

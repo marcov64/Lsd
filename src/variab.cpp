@@ -130,7 +130,8 @@ mutex crash_lock;
 
 
 /****************************************************
-VARIABLE constructor
+VARIABLE 
+constructor
 ****************************************************/
 variable::variable( void )
 {
@@ -164,7 +165,8 @@ variable::variable( void )
 
 
 /****************************************************
-VARIABLE copy constructor
+VARIABLE 
+copy constructor
 ****************************************************/
 variable::variable( const variable &v )
 {

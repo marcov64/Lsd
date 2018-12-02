@@ -357,7 +357,12 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 		actual_steps = t;
 		unsavedData = true;				// flag unsaved simulation results
 		running = false;
+		
+		// run user closing function, reporting error appropriately
+		user_exception = true;
 		close_sim( );
+		user_exception = false;
+		
 		reset_end( root );
 		root->emptyturbo( );
 		uncover_browser( );

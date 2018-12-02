@@ -2244,9 +2244,9 @@ case 76:
 		cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#change_nature } { set choice 2 }" );
 		
 		cmd( "bind $T.n.e <KeyPress-Return> { set choice 1 }" );
-		cmd( "bind $T <Control-v> \"$T.v.o.var invoke\"; bind $T <Control-V> \"$T.v.o.var invoke\"" );
-		cmd( "bind $T <Control-p> \"$T.v.o.var invoke\"; bind $T <Control-P> \"$T.v.o.var invoke\"" );
-		cmd( "bind $T <Control-f> \"$T.v.o.var invoke\"; bind $T <Control-F> \"$T.v.o.var invoke\"" );
+		cmd( "bind $T <Control-v> { .prop.v.o.var invoke }; bind $T <Control-V> { .prop.v.o.var invoke }" );
+		cmd( "bind $T <Control-p> { .prop.v.o.par invoke }; bind $T <Control-P> { .prop.v.o.par invoke }" );
+		cmd( "bind $T <Control-f> { .prop.v.o.fun invoke }; bind $T <Control-F> { .prop.v.o.fun invoke }" );
 		
 		cmd( "showtop $T" );
 		cmd( "focus $T.n.e" );
@@ -3703,6 +3703,12 @@ break;
 
 // Find an element of the model
 case 50: 
+
+	if ( ! struct_loaded )
+	{
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to find elements.\"" );
+		break;
+	}
 
 	cmd( "set bidi \"\"" );
 
