@@ -985,7 +985,7 @@ void auto_document( int *choice, char const *lab, char const *which, bool append
 			else
 				var = false;
 	  
-			app[ j ]='\0'; //close the string
+			app[ j ]='\0'; // close the string
 			return_where_used( cd->label, str1 ); 
 			if ( ( append || ! var ) && ! strstr( cd->text, "(no description available)" ) )
 				if ( strlen( cd->text ) == 0 || ! strcmp( cd->text, "\n" ) )

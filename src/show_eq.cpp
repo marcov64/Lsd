@@ -363,6 +363,8 @@ void scan_used_lab( char *lab, int *choice )
 	cmd( "set res [ llength $source_files ]" );
 	get_int( "res", & nfiles );
 	
+	cmd( "unset -nocomplain list_used" );
+
 	for ( exist = false, k = 0; k < nfiles; ++k )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", k );
@@ -418,7 +420,7 @@ void scan_used_lab( char *lab, int *choice )
 	if ( exist )
 	{
 		if ( caller != 1 )
-			cmd( "bind $list <Double-Button-1> {set bidi [selection get]; set done 8; set choice 55}" );
+			cmd( "bind $list <Double-Button-1> {set bidi [ selection get ]; set done 8; set choice 55}" );
 	}
 	else
 		cmd( "$list.l.l insert end \"(never used)\"" );
