@@ -498,11 +498,22 @@ int browse( object *r, int *choice )
 		cmd( "mouse_wheel .l.s.c.son_name" );
 
 		// populate the objects panel
-		if ( r->b == NULL )
-			cmd( ".l.s.c.son_name insert end \"(none)\"; set nDesc 0" );
+		if ( r->up != NULL )
+		{
+			cmd( ".l.s.c.son_name insert end \"\u21E7..\"" );
+			cmd( "set upObjItem 1" );
+			cmd( "set app 1" );
+		}
 		else
 		{
+			cmd( "set upObjItem 0" );
 			cmd( "set app 0" );
+		}
+		
+		if ( r->up == NULL && r->b == NULL )
+			cmd( ".l.s.c.son_name insert end \"(none)\"" );
+		else
+		{
 			for ( cb = r->b; cb != NULL; cb = cb->next )
 			{
 				if ( cb->head != NULL )
@@ -520,10 +531,9 @@ int browse( object *r, int *choice )
 				cmd( ".l.s.c.son_name itemconf $app -fg red" );
 				cmd( "incr app" );
 			}
-			cmd( "set nDesc [ .l.s.c.son_name size ]" );
 		}	
 
-		cmd( "label .l.s.lab -text \"Descending Objects ($nDesc)\"" );
+		cmd( "label .l.s.lab -text \"Descending Objects ([ expr $app - $upObjItem ])\"" );
 
 		// objects panel context menu (right mouse button)
 		cmd( "menu .l.s.c.son_name.v -tearoff 0" );
@@ -552,19 +562,23 @@ int browse( object *r, int *choice )
 		cmd( ".l.s.c.son_name.v.a add command -label Object -command { set choice 3 }" );
 
 		// objects panel bindings
-		if ( r->b != NULL )
+		if ( r->up != NULL || r->b != NULL )
 		{
 			cmd( "bind .l.s.c.son_name <Return> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-						set choice 4 \
+					if { $upObjItem && $itemfocus == 0 } { \
+						set choice 5 \
+					} { \
+						if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+							set choice 4 \
+						} \
 					} \
 				}" );
 			cmd( "bind .l.s.c.son_name <Control-Return> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set useCurrObj no; \
 						set choice 6 \
 					} \
@@ -572,8 +586,12 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.s.c.son_name <Double-Button-1> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-						after idle { set choice 4 } \
+					if { $upObjItem && $itemfocus == 0 } { \
+						set choice 5 \
+					} { \
+						if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+							after idle { set choice 4 } \
+						} \
 					} \
 				}" );
 			cmd( "bind .l.s.c.son_name <Button-2> { \
@@ -581,7 +599,7 @@ int browse( object *r, int *choice )
 					.l.s.c.son_name selection set @%%x,%%y; \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set useCurrObj no; \
 						set nocomp [ expr ! [ get_obj_conf $vname comp ] ]; \
 						if { $itemfocus == 0 } { \
@@ -603,34 +621,38 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.s.c.son_name <Control-Up> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
-					if { $itemfocus > 0 } { \
-						incr itemfocus -1 \
-					}; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-						set choice 60 \
+					if { ! ( $upObjItem && $itemfocus == 0 ) } { \
+						if { $itemfocus > 0 } { \
+							incr itemfocus -1 \
+						}; \
+						if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+							set choice 60 \
+						} \
 					} \
 				}" );
 			cmd( "bind .l.s.c.son_name <Control-Down> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
-					if { $itemfocus < [ expr [ .l.s.c.son_name size ] - 1 ] } { \
-						incr itemfocus \
-					}; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-						set choice 61 \
+					if { ! ( $upObjItem && $itemfocus == 0 ) } { \
+						if { $itemfocus < [ expr [ .l.s.c.son_name size ] - 1 ] } { \
+							incr itemfocus \
+						}; \
+						if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+							set choice 61 \
+						} \
 					} \
 				}" );
 			cmd( "bind .l.s.c.son_name <Delete> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set choice 74 \
 					} \
 				}" );
 			cmd( "bind .l.s.c.son_name <F2> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set choice 83 \
 					} \
 				}" );
@@ -647,7 +669,7 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.s.c.son_name <F5> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
+					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
 						set nocomp [ expr ! [ get_obj_conf $vname comp ] ]; \
 						set ctxMenuCmd \"set_obj_conf $vname comp $nocomp\"; \
 						set choice 95 \
@@ -681,20 +703,18 @@ int browse( object *r, int *choice )
 		cmd( "label .l.p.up_name.d -text \"Parent Object:\" -width 12 -anchor w" );
 		if ( r->up != NULL )
 		{
-			cmd( "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" -command { set ttip \"\"; set itemfocus 0; set choice 5 } -foreground red", r->up->label );
-			cmd( "bind .l.p.up_name.n <Enter> { set ttip \"Make current\" }" );
-			cmd( "bind .l.p.up_name.n <Leave> { set ttip \"\" }" );
-			cmd( "bind . <KeyPress-u> { catch { .l.p.up_name.n invoke } }; bind . <KeyPress-U> { catch { .l.p.up_name.n invoke } }" );
+			cmd( "label .l.p.up_name.n -anchor e -text \"  %s\" -foreground red", r->up->label );
+			cmd( "bind . <KeyPress-u> { set itemfocus 0; set choice 5 }; bind . <KeyPress-U> { set itemfocus 0; set choice 5 }" );
 		}
 		else
-			cmd( "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \"\" -state disabled" );
+			cmd( "label .l.p.up_name.n -anchor e -text \"\"" );
 
 		cmd( "pack .l.p.up_name.d .l.p.up_name.n -side left" );
 		cmd( "pack .l.p.up_name -padx 9 -anchor w" );
 
 		cmd( "frame .l.p.tit" );
 		cmd( "label .l.p.tit.lab -text \"Current Object:\" -width 12 -anchor w" );
-		cmd( "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" %s", r->label, r->up == NULL ? "" : "-command { set ttip \"\"; set choice 6 }" );
+		cmd( "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" %s -font [ font create -family TkDefaultFont -size $small_character -weight bold ]", r->label, r->up == NULL ? "" : "-command { set ttip \"\"; set choice 6 }" );
 
 		if ( r->up != NULL ) 
 		{
@@ -2072,7 +2092,7 @@ case 7:
 
 	if ( done == 9 ) 
 	{
-		cmd( "set text_description \"[.chgelem.desc.f.text get 1.0 end]\"" );
+		cmd( "set text_description \"[ .chgelem.desc.f.text get 1.0 end ]\"" );
 		change_descr_text( lab_old );
 	  
 		auto_document( choice, lab_old, "ALL", true );
