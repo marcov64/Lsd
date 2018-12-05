@@ -236,9 +236,9 @@ struct object
 	netLink *add_link_net( object *destPtr, double weight = 0, double probTo = 1 );
 	netLink *draw_link_net( void ); 
 	netLink *search_link_net( long id ); 
-	netNode *add_node_net( long id = -1, char const *nodeName = "", bool silent = false );
 	object *add_n_objects2( char const *lab, int n, int t_update = -1 );
 	object *add_n_objects2( char const *lab, int n, object *ex, int t_update = -1 );
+	object *add_node_net( long id = -1, char const *nodeName = "", bool silent = false );
 	object *draw_node_net( char const *lab ); 
 	object *draw_rnd( char const *lo );
 	object *draw_rnd( char const *lo, char const *lv, int lag );

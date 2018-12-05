@@ -373,8 +373,8 @@ netNode::~netNode( void )
 ADD_NODE_NET (*)
 	Add netNode data structure to LSD object
 ****************************************************/
-netNode *object::add_node_net( long id, char const nodeName[ ], 
-							   bool silent )
+object *object::add_node_net( long id, char const nodeName[ ], 
+							  bool silent )
 {
 	long serNumOld = -1;
 	
@@ -405,7 +405,7 @@ netNode *object::add_node_net( long id, char const nodeName[ ],
 		nodesSerial--;
 	}
 
-	return node;
+	return this;
 }
 
 
