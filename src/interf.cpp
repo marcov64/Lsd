@@ -264,7 +264,7 @@ int browse( object *r, int *choice )
 			cmd( "set nVar [ .l.v.c.var_name size ]" );
 		}
 
-		cmd( "label .l.v.lab -text \"Variables & Parameters ($nVar)\"" );
+		cmd( "label .l.v.lab -text \"Variables & parameters ($nVar)\"" );
 
 		// variables panel context menu (right mouse button)
 		cmd( "menu .l.v.c.var_name.v -tearoff 0" );
@@ -533,7 +533,7 @@ int browse( object *r, int *choice )
 			}
 		}	
 
-		cmd( "label .l.s.lab -text \"Descending Objects ([ expr $app - $upObjItem ])\"" );
+		cmd( "label .l.s.lab -text \"Descending objects ([ expr $app - $upObjItem ])\"" );
 
 		// objects panel context menu (right mouse button)
 		cmd( "menu .l.s.c.son_name.v -tearoff 0" );
@@ -700,10 +700,10 @@ int browse( object *r, int *choice )
 		cmd( "frame .l.p -relief groove -bd 2" );
 
 		cmd( "frame .l.p.up_name" );
-		cmd( "label .l.p.up_name.d -text \"Parent Object:\" -width 12 -anchor w" );
+		cmd( "label .l.p.up_name.d -text \"Parent object:\" -width 12 -anchor w" );
 		if ( r->up != NULL )
 		{
-			cmd( "label .l.p.up_name.n -anchor e -text \"  %s\" -foreground red", r->up->label );
+			cmd( "label .l.p.up_name.n -anchor e -text \" %s \" -foreground red", r->up->label );
 			cmd( "bind . <KeyPress-u> { set itemfocus 0; set choice 5 }; bind . <KeyPress-U> { set itemfocus 0; set choice 5 }" );
 		}
 		else
@@ -713,8 +713,8 @@ int browse( object *r, int *choice )
 		cmd( "pack .l.p.up_name -padx 9 -anchor w" );
 
 		cmd( "frame .l.p.tit" );
-		cmd( "label .l.p.tit.lab -text \"Current Object:\" -width 12 -anchor w" );
-		cmd( "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" %s -font [ font create -family TkDefaultFont -size $small_character -weight bold ]", r->label, r->up == NULL ? "" : "-command { set ttip \"\"; set choice 6 }" );
+		cmd( "label .l.p.tit.lab -text \"Current object:\" -width 12 -anchor w" );
+		cmd( "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" %s -font [ font create -size $small_character -weight bold ]", r->label, r->up == NULL ? "" : "-command { set ttip \"\"; set choice 6 }" );
 
 		if ( r->up != NULL ) 
 		{
@@ -4607,7 +4607,7 @@ case 81:
 		}
 	}
 	else
-		sensitivity_undefined( );				// throw error
+		sensitivity_undefined( );			// throw error
 
 break;
 
@@ -4621,6 +4621,7 @@ case 64:
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load one before trying to load a sensitivity analysis configuration.\"" );
 		break;
     } 
+	
 	// check for existing sensitivity data loaded
 	if ( rsense != NULL ) 
 	{
@@ -4634,6 +4635,7 @@ case 64:
 		unsavedSense = false;					// nothing to save
 		findexSens = 0;
 	}
+	
 	// set default name and path to conf. file folder
 	cmd( "set res \"%s\"", simul_name );
 	cmd( "set path \"%s\"", path );
@@ -6555,11 +6557,12 @@ void sensitivity_undefined( void )
 
 /****************************************************
 LOAD_PREV_CONFIGURATION
-Also restore sensitivity configuration 
+Restore sensitivity configuration 
 ****************************************************/
 bool load_prev_configuration( void )
 {
 	char *saFile = NULL;
+	int lstFidx = findexSens;
 	FILE *f;
 	
 	if ( sens_file != NULL )					// save SA file name if one is loaded
@@ -6590,6 +6593,8 @@ bool load_prev_configuration( void )
 		
 		delete [ ] saFile;
 	}
+	
+	findexSens = lstFidx;
 	
 	return true;
 }

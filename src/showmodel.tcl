@@ -147,7 +147,7 @@ proc showmodel pippo {
 		frame .l.l -relief groove -bd 2
 
 		frame .l.l.tit
-		label .l.l.tit.g -text "Current Group:"
+		label .l.l.tit.g -text "Current group:"
 		label .l.l.tit.n -fg red
 		pack .l.l.tit.g .l.l.tit.n -side left
 
