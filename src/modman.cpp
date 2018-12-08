@@ -869,9 +869,11 @@ if ( argn > 1 )
 else
 	choice = 33; 				// open model browser
   
-cmd( "wm deiconify .; raise .; focus .f.t.t; update" );
+cmd( "wm deiconify .; raise ." );
 
 loop:
+
+cmd( "focus .f.t.t; update" );
 
 // update file save status in titlebar
 cmd( "update_title_bar" );
