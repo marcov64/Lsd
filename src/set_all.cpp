@@ -1057,7 +1057,7 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 	if ( nval > 0)								// number of values defined (0=no)?
 		cmd( "label .sens.lab.l1 -text \"Enter n=%d values for:\"", s->nvalues );
 	else
-		cmd( "label .sens.lab.l1 -text \"Enter the desired values (at least 2 ) for:\"" );
+		cmd( "label .sens.lab.l1 -text \"Enter the desired values (at least 2) for:\"" );
 
 	cmd( "label .sens.lab.l2 -fg red -text \"%s\"", s->label );
 	cmd( "pack .sens.lab.l1 .sens.lab.l2 -side left -padx 2" );
@@ -1065,20 +1065,22 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 	cmd( "label .sens.obs -text \"Paste of clipboard data is allowed, most separators are accepted\n\nUse a \'=BEGIN:END@SAMPLES%%TYPE\' clause to specify a number of samples within a range.\nSpaces are not allowed within clauses. TYPE values are \'L\' for linear and \'R\' for random samples.\"" );
 	cmd( "pack .sens.lab .sens.obs -pady 5" );
 
-	cmd( "text .sens.t -undo 1 -height 12 -width 60 -font \"$font_normal\"" ); 
-	cmd( "pack .sens.t" ); 
+	cmd( "frame .sens.t" );
+	cmd( "scrollbar .sens.t.v_scroll -command \".sens.t.t yview\"" );
+	cmd( "text .sens.t.t -undo 1 -height 10 -width 60 -font \"$font_normal\" -yscroll \".sens.t.v_scroll set\"" ); 
+	cmd( "mouse_wheel .sens.t.t" );
+	cmd( "pack .sens.t.t .sens.t.v_scroll -side left -fill y" ); 
 
 	cmd( "frame .sens.fb" );
-	cmd( "button .sens.fb.paste -width [ expr $butWid + 3 ] -text \"Paste Clipboard\" -command {tk_textPaste .sens.t}" );
-	cmd( "button .sens.fb.del -width [ expr $butWid + 3 ] -text \"Delete Values\" -command {.sens.t delete 0.0 end}" );
-	cmd( "button .sens.fb.rem -width [ expr $butWid + 3 ] -text \"Remove\" -command {set choice 3}" );
+	cmd( "button .sens.fb.paste -width [ expr $butWid + 3 ] -text \"Paste Clipboard\" -command { tk_textPaste .sens.t.t }" );
+	cmd( "button .sens.fb.del -width [ expr $butWid + 3 ] -text \"Delete Values\" -command { .sens.t.t delete 0.0 end }" );
+	cmd( "button .sens.fb.rem -width [ expr $butWid + 3 ] -text \"Remove\" -command { set choice 3 }" );
 	cmd( "checkbutton .sens.fb.int -variable integerV -text \"Round to integer\"" );
 	cmd( "pack .sens.fb.paste .sens.fb.del .sens.fb.rem .sens.fb.int -padx 10 -pady 10 -side left" );
-	cmd( "pack .sens.fb" );
+	cmd( "pack .sens.t .sens.fb" );
 
 	cmd( "okhelpcancel .sens fb2 { set choice 1 } { LsdHelp menudata_sa.html#entry } { set choice 2 }" );
 	cmd( "bind .sens.fb2.ok <KeyPress-Return> { set choice 1 }" );
-	cmd( "focus .sens.t" );
 
 	if ( s->entryOk )	// is there valid data from a previous data entry?
 	{
@@ -1091,12 +1093,13 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 			strcat( sss, tok );					// to the string
 		}
 		Tcl_SetVar( inter, "sss", sss, 0 ); 	// pass string to Tk window
-		cmd( ".sens.t insert 0.0 $sss" );		// insert string in entry window
+		cmd( ".sens.t.t insert 0.0 $sss" );		// insert string in entry window
 		delete [ ] tok; 
 		delete [ ] sss;
 	}
 
 	cmd( "showtop .sens topleftW" );
+	cmd( "focus .sens.t.t" );
 
 	*choice = 0;
 
@@ -1114,7 +1117,7 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 		if ( *choice == 2 )
 			goto end;
 	
-		cmd( "set sss [ .sens.t get 0.0 end ]" );
+		cmd( "set sss [ .sens.t.t get 0.0 end ]" );
 		sss=( char* ) Tcl_GetVar( inter,"sss", 0 );
 	
 		if ( nval == 0 )					// undefined number of values?
@@ -1161,7 +1164,7 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 			{
 				cmd( "tk_messageBox -parent . -title \"Sensitivity Analysis\" -icon error -type ok -message \"Less values than required\" -detail \"Please insert the correct number of values.\"" );
 				*choice = 0;
-				cmd( "focus .sens.t" );
+				cmd( "focus .sens.t.t" );
 				break;
 			}
 			
