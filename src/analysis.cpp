@@ -1061,7 +1061,7 @@ while ( true )
 
 				for ( i = 0; i < j; ++i )
 				{
-					cmd( "set res [lindex $tot %d]", i );
+					cmd( "set res [ lindex $tot %d ]", i );
 					app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 					strcpy( msg, app );
 					sscanf( msg, "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
@@ -1293,7 +1293,7 @@ while ( true )
 
 				for ( i = 0; i < j; ++i )
 				{
-					cmd( "set res [lindex $tot %d]", i );
+					cmd( "set res [ lindex $tot %d ]", i );
 					app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 					strcpy( msg, app );
 					sscanf( msg, "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
@@ -2636,10 +2636,9 @@ void plot_cross( int *choice )
 	double temp, **val, **data, **logdata;
 	int i, j, k, nt, new_nv, *list_times, *pos, *start, *end, *id, *erase, logErrCnt = 0;
 
-	Tcl_LinkVar( inter, "nt", ( char * ) &nt, TCL_LINK_INT );
 	cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
-	Tcl_UnlinkVar( inter, "nt" );
-
+	get_int( "nt", & nt );
+	
 	if ( nv < 2 || nt <= 0 )
 	{
 		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series/time steps selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one time step (case ).\"" );
@@ -2647,17 +2646,7 @@ void plot_cross( int *choice )
 		return;
 	}
 
-	// Sets the list of cases to plot
 	list_times = new int [ nt ];
-	Tcl_LinkVar( inter, "k", ( char * ) &k, TCL_LINK_INT );
-
-	for ( i = 0; i < nt; ++i )
-	{
-		cmd( "set k [ lindex $list_times %d ]", i );
-		list_times[ i ] = k;
-	}
-	Tcl_UnlinkVar( inter, "k" );
-
 	pos = new int [ nv ];
 	val = new double *[ nv ];
 	start = new int [ nv ];
@@ -2669,6 +2658,13 @@ void plot_cross( int *choice )
 	data = new double *[ nv ];
 	logdata = new double *[ nv ];
 
+	for ( i = 0; i < nt; ++i )
+	{
+		cmd( "set k [ lindex $list_times %d ]", i );
+		get_int( "k", & k );
+		list_times[ i ] = k;
+	}
+	
 	if ( autom_x )
 	{
 		min_c = 1;
@@ -7388,7 +7384,11 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	step = hsize / ( double ) ( endCase - iniCase );
 	if ( avgSmpl && ! avgSmplMsg && step < 1 )
 	{
-		cmd( "set answer [ tk_messageBox -parent .da -title Warning -icon warning -type yesno -default yes -message \"Disable Y values averaging?\" -detail \"The number of time steps to plot is larger than the physical plot width. To compute the Y values, LSD averages data from multiple time steps.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
+		if ( type == TSERIES )
+			cmd( "set answer [ tk_messageBox -parent .da -title Warning -icon warning -type yesno -default yes -message \"Disable Y values averaging?\" -detail \"The number of time steps to plot is larger than the physical plot width. To compute the Y values, LSD averages data from multiple time steps.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
+		else
+			cmd( "set answer [ tk_messageBox -parent .da -title Warning -icon warning -type yesno -default yes -message \"Disable series values averaging?\" -detail \"The number of series to plot is larger than the physical plot width. To compute the presented values, LSD averages data from multiple series.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
+			
 		cmd( "switch $answer { yes { set avgSmpl 0 } no { } }" );
 		avgSmplMsg = true;
 	}
@@ -7461,9 +7461,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 					if ( data[ i ] == NULL )
 						continue;
 					
-					if ( start[ i ] <= k && end[ i ] >= k )
-						yVal = data[ i ][ k ];
-					
+					yVal = data[ i ][ k ];
 					tOk = true;
 					
 					break;
