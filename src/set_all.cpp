@@ -1037,9 +1037,8 @@ int num_sensitivity_variables( sense *rsens )
 
 			
 /*****************************************************************************
-NUM_SENSITIVITY_POINTS
+DATAENTRY_SENSITIVITY
 Try to get values for sensitivity analysis
-true: values are ok
 ******************************************************************************/
 void dataentry_sensitivity( int *choice, sense *s, int nval )
 {
@@ -1159,7 +1158,7 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 	
 		for ( i = 0; i < s->nvalues; )
 		{
-			tok=strtok( sss, SENS_SEP );	// accepts several separators
+			tok = strtok( sss, SENS_SEP );	// accepts several separators
 			if ( tok == NULL )				// finished too early?
 			{
 				cmd( "tk_messageBox -parent . -title \"Sensitivity Analysis\" -icon error -type ok -message \"Less values than required\" -detail \"Please insert the correct number of values.\"" );
@@ -1394,9 +1393,6 @@ end:
 MAT_*
 Matrix operations support functions for morris_oat() and enhancements
 ******************************************************************************/
-
-// Integer random in [min,max]
-#define RND_RANGE( min, max ) ( min + ( rand( ) % ( int )( max - min + 1 ) ) )
 // Random choice between two numbers
 #define RND_CHOICE( o1, o2 ) ( RND < 0.5 ? o1 : o2 )
 
@@ -1576,7 +1572,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
         // starting point for this trajectory
 		for ( j = 0; j < k; ++j )
 		{
-			double start = ( double ) RND_RANGE( 0, p - delta * ( p - 1 ) - 1 ) / ( p - 1 );
+			double start = uniform_int( 0, p - delta * ( p - 1 ) - 1 ) / ( p - 1 );
 			for ( i = 0; i < k + 1; ++i )
 				X_base[ i ][ j ] = start;
 		}
@@ -1604,7 +1600,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 	mat_del( delta_diag, k, k );
 	mat_del( temp_1, k + 1, k );
 	mat_del( temp_2, k + 1, k );
-
+	
     return X;
 }
 
@@ -1814,7 +1810,7 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 		// Find the indices belonging to the maximum distance
 		i_max_ind = get_max_sum_ind( indices_list, row_maxima_i );
 
-		//#########Loop 'm' ( called loop 'k' in Ruano)############
+		// ######### Loop 'm' ( called loop 'k' in Ruano) ############
 		m_max_ind = i_max_ind;
 		// m starts at 1
         for ( int m = 1; m <= r - i - 1; ++m )
@@ -1893,6 +1889,9 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 	FILE *f;
 	sense *cs;
 	
+	// reset random number generator 
+	init_random( seed );
+
 	if ( rsens == NULL )					// valid pointer?
 		typ = 0;							// trigger invalid design
 	
