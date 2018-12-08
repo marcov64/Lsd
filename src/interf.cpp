@@ -500,7 +500,7 @@ int browse( object *r, int *choice )
 		// populate the objects panel
 		if ( r->up != NULL )
 		{
-			cmd( ".l.s.c.son_name insert end \"\u21E7..\"" );
+			cmd( ".l.s.c.son_name insert end \"$upSymbol\"" );
 			cmd( "set upObjItem 1" );
 			cmd( "set app 1" );
 		}

@@ -25,8 +25,6 @@
 
 set rootname "Root"
 set modelgroup "$rootname"
-set upsym "\u21E7.."
-set grpsym "GROUP: "
 set result 0
 set memory 0
 set ltip ""
@@ -36,7 +34,7 @@ set ltip ""
 # SHOWMODEL
 #************************************************
 proc showmodel pippo {
-	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelgroup upsym grpsym RootLsd memory ltip fonttype small_character bRlf ovBrlf
+	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelgroup upSymbol groupSymbol RootLsd memory ltip fonttype small_character bRlf ovBrlf
 
 	unset -nocomplain lmn lver lmd ldn lrn lbn group
 	lappend lmn
@@ -65,10 +63,10 @@ proc showmodel pippo {
 		menu $m -tearoff 0
 		.l.m add cascade -label File -menu $m -underline 0
 		$m add command -label "Select Model/Group" -underline 0 -accelerator Enter -command {
-			set result [.l.l.l curselection]
-			if { [lindex $group $result] == 1 } { 
-				set modelgroup "[lindex $lmn $result]"
-				showmodel [lindex $ldn $result]
+			set result [ .l.l.l curselection ]
+			if { [ lindex $group $result ] == 1 } { 
+				set modelgroup "[ lindex $lmn $result ]"
+				showmodel [ lindex $ldn $result ]
 			} else { 
 				set choiceSM 1
 				destroytop .l
@@ -90,22 +88,22 @@ proc showmodel pippo {
 		menu $m -tearoff 0 -relief groove -bd 2
 		.l.m add cascade -label Edit -menu $m -underline 0
 		$m add command -label "Edit Name/Description..." -underline 0 -accelerator Ctrl+E -command {
-			medit [.l.l.l curselection] 
+			medit [ .l.l.l curselection ] 
 		}
 		$m add command -label "Copy" -underline 0 -accelerator Ctrl+C -command {
-			mcopy [.l.l.l curselection] 
+			mcopy [ .l.l.l curselection ] 
 		}
 		if { $memory == 0 } {
 			$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -state disabled -command {
-				mpaste [.l.l.l curselection] 
+				mpaste [ .l.l.l curselection ] 
 			} 
 		} else {
 			$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -command {
-				mpaste [.l.l.l curselection] 
+				mpaste [ .l.l.l curselection ] 
 			} 
 		}
 		$m add command -label "Delete..." -underline 0 -accelerator Delete -command {
-			mdelete [.l.l.l curselection] 
+			mdelete [ .l.l.l curselection ] 
 		}
 
 		set m .l.m.help 
@@ -130,7 +128,7 @@ proc showmodel pippo {
 		button .l.bbar.paste -image pasteImg -relief $bRlf -overrelief $ovBrlf -command { .l.m.edit invoke 2 }
 		button .l.bbar.delete -image deleteImg -relief $bRlf -overrelief $ovBrlf -command { .l.m.edit invoke 3 }
 		button .l.bbar.help -image helpImg -relief $bRlf -overrelief $ovBrlf -command { .l.m.help invoke 0 }
-		label .l.bbar.tip -textvariable ltip -font {Arial 8} -fg gray -width 30 -anchor w
+		label .l.bbar.tip -textvariable ltip -font { Arial 8 } -fg gray -width 30 -anchor w
 		bind .l.bbar.new <Enter> { set ltip "New model/group..." }
 		bind .l.bbar.new <Leave> { set ltip "" }
 		bind .l.bbar.edit <Enter> { set ltip "Edit name/description..." }
@@ -149,11 +147,11 @@ proc showmodel pippo {
 		frame .l.l -relief groove -bd 2
 
 		frame .l.l.tit
-		label .l.l.tit.g -text "Group:"
+		label .l.l.tit.g -text "Current Group:"
 		label .l.l.tit.n -fg red
 		pack .l.l.tit.g .l.l.tit.n -side left
 
-		pack .l.l.tit
+		pack .l.l.tit -anchor w
 
 		scrollbar .l.l.vs -command ".l.l.l yview"
 		listbox .l.l.l -height 15 -width 30 -yscroll ".l.l.vs set" -selectmode single
@@ -174,40 +172,41 @@ proc showmodel pippo {
 		label .l.t.tit -text Description
 		pack .l.t.tit -expand yes -fill x
 		scrollbar .l.t.yscroll -command ".l.t.text yview"
-		set a [list "$fonttype" $small_character]
+		set a [ list "$fonttype" $small_character ]
 		text .l.t.text -wrap word -font "$a" -width 60 -relief sunken -yscrollcommand ".l.t.yscroll set"
 		pack .l.t.yscroll -side right -fill y
 		pack .l.t.text -expand yes -fill both
 
 		pack .l.l .l.t -expand yes -fill both -side left
 		
-		bind .l <F1> {.l.m.help invoke 0}
-		bind .l <Control-e> {.l.m.edit invoke 0}
-		bind .l <Control-E> {.l.m.edit invoke 0}
-		bind .l <Control-c> {.l.m.edit invoke 1}
-		bind .l <Control-C> {.l.m.edit invoke 1}
-		bind .l <Control-v> {.l.m.edit invoke 2}
-		bind .l <Control-V> {.l.m.edit invoke 2}
-		bind .l <Delete> {.l.m.edit invoke 3}
-		bind .l <Escape> {.l.m.file invoke 2}
-		bind .l <Insert> {.l.m.file invoke 1}
-		bind .l <Return> {.l.m.file invoke 0}
-		bind .l.l.l <Double-1> {.l.m.file invoke 0} 
+		bind .l <F1> { .l.m.help invoke 0 }
+		bind .l <Control-e> { .l.m.edit invoke 0 }
+		bind .l <Control-E> { .l.m.edit invoke 0 }
+		bind .l <Control-c> { .l.m.edit invoke 1 }
+		bind .l <Control-C> { .l.m.edit invoke 1 }
+		bind .l <Control-v> { .l.m.edit invoke 2 }
+		bind .l <Control-V> { .l.m.edit invoke 2 }
+		bind .l <Delete> { .l.m.edit invoke 3 }
+		bind .l <Escape> { .l.m.file invoke 2 }
+		bind .l <Insert> { .l.m.file invoke 1 }
+		bind .l <Return> { .l.m.file invoke 0 }
+		bind .l.l.l <Double-1> { .l.m.file invoke 0 } 
 
 		bind .l.l.l <1> {
 			.l.l.l selection clear 0 end
-			.l.l.l selection set [.l.l.l nearest %y]
-			set app [.l.l.l curselection]
+			.l.l.l selection set [ .l.l.l nearest %y ]
+			set app [ .l.l.l curselection ]
 			.l.t.text conf -state normal
 			.l.t.text delete 0.0 end
-			.l.t.text insert end "[lindex $lmd $app ]"
+			.l.t.text insert end "[ lindex $lmd $app ]"
 			.l.t.text conf -state disable
 		}
+		
 		bind .l.l.l <2> {
 			.l.l.l selection clear 0 end
 			.l.l.l selection set [ .l.l.l nearest %y ]
 			if { ! [ catch { set name [ selection get ] } ] } {
-				if { [ string equal -length [ string length "$grpsym" ] $name "$grpsym" ] || [ string equal -length [ string length "$upsym" ] $name "$upsym" ] } {
+				if { [ string equal -length [ string length "$groupSymbol" ] $name "$groupSymbol" ] || [ string equal -length [ string length "$upSymbol" ] $name "$upSymbol" ] } {
 					.l.l.l.m entryconf 4 -state disabled
 				} else {
 					.l.l.l.m entryconf 4 -state normal
@@ -222,29 +221,31 @@ proc showmodel pippo {
 			}
 			tk_popup .l.l.l.m %X %Y
 		}
+		
 		bind .l.l.l <3> {
 			event generate .l.l.l <2> -x %x -y %y 
 		}
+		
 		bind .l <Up> {
-			if { [.l.l.l curselection] > 0 } {
-				set app [expr [.l.l.l curselection] - 1]
+			if { [ .l.l.l curselection ] > 0 } {
+				set app [expr [ .l.l.l curselection ] - 1]
 				.l.l.l selection clear 0 end
 				.l.l.l selection set $app
 				.l.t.text conf -state normal
 				.l.t.text delete 0.0 end
-				.l.t.text insert end "[lindex $lmd $app ]"
+				.l.t.text insert end "[ lindex $lmd $app ]"
 				.l.t.text conf -state disable 
 			} 
 		}
 
 		bind .l <Down> {
-			if { [.l.l.l curselection] < [expr [.l.l.l size] - 1] } {
-				set app [expr [.l.l.l curselection] + 1]
+			if { [ .l.l.l curselection ] < [ expr [ .l.l.l size ] - 1 ] } {
+				set app [expr [ .l.l.l curselection ] + 1 ]
 				.l.l.l selection clear 0 end
 				.l.l.l selection set $app
 				.l.t.text conf -state normal
 				.l.t.text delete 0.0 end
-				.l.t.text insert end "[lindex $lmd $app ]"
+				.l.t.text insert end "[ lindex $lmd $app ]"
 				.l.t.text conf -state disable
 			} 
 		}
@@ -253,9 +254,9 @@ proc showmodel pippo {
 		showtop .l centerS
 	}
 
-	.l.l.tit.n conf -text "$modelgroup"
+	.l.l.tit.n conf -text [ lindex [ split "$modelgroup" "/" ] end ]
 
-	set curdir [pwd]
+	set curdir [ pwd ]
 	if { ! [ file isdirectory "$pippo" ] } {
 		# recover from invalid folders
 		set pippo $RootLsd
@@ -263,74 +264,78 @@ proc showmodel pippo {
 
 	cd "$pippo"
 	if [ string compare -nocase "$pippo" "$RootLsd" ] {
-		.l.l.l insert end $upsym
-		set upgroup "[file dirname "$modelgroup"]"
+		.l.l.l insert end "$upSymbol"
+		set upgroup "[ file dirname "$modelgroup" ]"
 		if [ string equal "$upgroup" "." ] {
 			set upgroup "$rootname"
 		}
 		lappend lver -1
 		lappend group 1
 		lappend lmd "Return to group: $upgroup"
-		lappend lrn "[pwd]"
+		lappend lrn "[ pwd ]"
 		lappend lbn "$modelgroup"
-		lappend ldn "[file dirname "$pippo"]"
+		lappend ldn "[ file dirname "$pippo" ]"
 		lappend lmn "$upgroup"
 	}
 
-	set dir [glob -nocomplain *]
+	set dir [ lsort -dictionary [ glob -nocomplain -type d * ] ]
 
+	# list groups
 	foreach i $dir {
-		if [ file isdirectory "$i" ] {
-			if [ file exists "$i/modelinfo.txt" ] {
-				set f [open "$i/modelinfo.txt" r]
-				set app1 "[gets $f]"
-				set app2 "[gets $f]"
-				set app3 "[gets $f]"
-				close $f
-				fix_info $i $app1 $app2 $app3
-				lappend lmn "$app1"
-				lappend lver "$app2"
-				lappend ldn "$pippo/$i"
-				lappend lrn "[pwd]"
-				lappend lbn "$modelgroup"
-				if [ file exists "$i/description.txt" ] {
-					set f [open "$i/description.txt"]
-					lappend lmd "[read -nonewline $f]"
-					close $f
-				} else {
-					lappend lmd "Model: $app1\nin directory: $pippo/$i\n(description not available)"
-				}
-				lappend group 0
-				.l.l.l insert end "$app1 (ver. $app2)"				 
-			} else { 
-				if [ file exists "$i/groupinfo.txt" ] {
-					set f [open "$i/groupinfo.txt" r]
-					set app "[gets $f]"
-					close $f
-					if [ string equal "$modelgroup" "$rootname" ] {
-						lappend lmn "$app"
-					} else {
-						lappend lmn "$modelgroup/$app"
-					}
-					lappend lver -1
-					lappend ldn "$pippo/$i"
-					lappend lrn "[pwd]"
-					lappend lbn "$modelgroup"
-					if [ file exists "$i/description.txt" ] {
-						set f [open "$i/description.txt"]
-						lappend lmd "[read -nonewline $f]"
-						close $f
-					} else {
-						lappend lmd "Group directory: $app\n(description not available)"
-					}
-					lappend group 1
-					.l.l.l insert end "$grpsym$app"
-				}
+		if { ! [ file exists "$i/modelinfo.txt" ] && [ file exists "$i/groupinfo.txt" ] } {
+			set f [ open "$i/groupinfo.txt" r ]
+			set app "[ gets $f ]"
+			close $f
+			if [ string equal "$modelgroup" "$rootname" ] {
+				lappend lmn "$app"
+			} else {
+				lappend lmn "$modelgroup/$app"
 			}
+			lappend lver -1
+			lappend ldn "$pippo/$i"
+			lappend lrn "[ pwd ]"
+			lappend lbn "$modelgroup"
+			if [ file exists "$i/description.txt" ] {
+				set f [ open "$i/description.txt" ]
+				lappend lmd "[ read -nonewline $f ]"
+				close $f
+			} else {
+				lappend lmd "Group directory: $app\n(description not available)"
+			}
+			lappend group 1
+			.l.l.l insert end "$groupSymbol$app"
+			.l.l.l itemconf end -fg red
 		}
 	}
 
-	.l.t.text insert end "[lindex $lmd 0]"
+	# list files
+	foreach i $dir {
+		if [ file exists "$i/modelinfo.txt" ] {
+			set f [ open "$i/modelinfo.txt" r ]
+			set app1 "[ gets $f ]"
+			set app2 "[ gets $f ]"
+			set app3 "[ gets $f ]"
+			close $f
+			fix_info $i $app1 $app2 $app3
+			lappend lmn "$app1"
+			lappend lver "$app2"
+			lappend ldn "$pippo/$i"
+			lappend lrn "[ pwd ]"
+			lappend lbn "$modelgroup"
+			if [ file exists "$i/description.txt" ] {
+				set f [ open "$i/description.txt" ]
+				lappend lmd "[ read -nonewline $f ]"
+				close $f
+			} else {
+				lappend lmd "Model: $app1\nin directory: $pippo/$i\n(description not available)"
+			}
+			lappend group 0
+			.l.l.l insert end "$app1 (ver. $app2)"				 
+			.l.l.l itemconf end -fg blue
+		}
+	}
+
+	.l.t.text insert end "[ lindex $lmd 0 ]"
 	.l.t.text conf -state disable
 	.l.l.l selection set 0
 
@@ -347,16 +352,16 @@ proc showmodel pippo {
 proc mcopy i {
 	global copylabel copyver copydir copydscr group ldn memory lmn lver lmd
 	
-	if { [lindex $group $i] == 1  } {
+	if { [ lindex $group $i ] == 1 } {
 		tk_messageBox -parent .l -title Error -type ok -icon error -message "Cannot copy groups" -detail "Check for existing names and try again." 
 	} else {
 		set memory 1
 		.l.m.edit entryconf 2 -state normal
 
-		set copylabel [lindex $lmn $i]
-		set copyver [lindex $lver $i]
-		set copydir [lindex $ldn $i]
-		set copydscr [lindex $lmd $i]
+		set copylabel [ lindex $lmn $i ]
+		set copyver [ lindex $lver $i ]
+		set copydir [ lindex $ldn $i ]
+		set copydscr [ lindex $lmd $i ]
 	}
 }
 
@@ -371,36 +376,36 @@ proc mdelete i {
 	set memory 0
 	.l.m.edit entryconf 2 -state disabled
 
-	if { [lindex $lmn $i] == "<UP>" } { return }
+	if { [ lindex $lmn $i ] == "<UP>" } { return }
 
-	if { [lindex $group $i] == 1} {
+	if { [ lindex $group $i ] == 1 } {
 		set item group
 	} else {
 		set item model
 	}
 
 	if { [ string match -nocase $RootLsd/trashbin* [ lindex $ldn $i ] ] } {
-		set answer [tk_messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[lindex $lmn $i]\n(dir [lindex $ldn $i])?"]
+		set answer [ tk_messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n(dir [ lindex $ldn $i ])?" ]
 		file delete -force [ lindex $ldn $i ]
-		showmodel [lindex $lrn $i]
+		showmodel [ lindex $lrn $i ]
 	} else {
-		set answer [tk_messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[lindex $lmn $i]\n(dir [lindex $ldn $i])?"]
+		set answer [ tk_messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n(dir [ lindex $ldn $i ])?" ]
 
 		if { $answer == "yes" } {
 			set modelDir [ string range [ lindex $ldn $i ] 0 [ expr [ string last / [ lindex $ldn $i ] ] - 1 ] ] 
 			file mkdir $RootLsd/trashbin
-			set f [open $RootLsd/trashbin/groupinfo.txt w]
+			set f [ open $RootLsd/trashbin/groupinfo.txt w ]
 			puts $f "Deleted Models"
 			close $f
-			set f [open $RootLsd/trashbin/description.txt w]
+			set f [ open $RootLsd/trashbin/description.txt w ]
 			puts $f "Folder containing deleted models.\n"
 			close $f
 			set modelName [ string range [ lindex $ldn $i ] [ expr [ string last / [ lindex $ldn $i ] ] + 1 ] end ]
 			if { [ file exists $RootLsd/trashbin/$modelName ] } {
 				file delete -force $RootLsd/trashbin/$modelName
 			}
-			file rename -force [lindex $ldn $i] $RootLsd/trashbin/$modelName
-			showmodel [lindex $lrn $i]
+			file rename -force [ lindex $ldn $i ] $RootLsd/trashbin/$modelName
+			showmodel [ lindex $lrn $i ]
 		}
 	}
 }
@@ -417,8 +422,8 @@ proc medit i {
 	.l.m.edit entryconf 2 -state disabled
 	
 	set result $i
-	set app "[lindex $lmn $i]"
-	if { [lindex $group $i] == 1} {
+	set app "[ lindex $lmn $i ]"
+	if { [ lindex $group $i ] == 1 } {
 		set item group
 	} else {
 		set item model
@@ -428,22 +433,22 @@ proc medit i {
 
 	frame .l.e.tit
 	label .l.e.tit.l -text "Current $item:"
-	label .l.e.tit.n -fg red -text "[lindex $lmn $i]"
+	label .l.e.tit.n -fg red -text "[ lindex $lmn $i ]"
 	pack .l.e.tit.l  .l.e.tit.n -side left -padx 2
 
 	frame .l.e.n
 	label .l.e.n.l -text "Name"
 	entry .l.e.n.n -width 25 -justify center
-	.l.e.n.n insert 1 "[file tail [lindex $lmn $i]]"
+	.l.e.n.n insert 1 "[ file tail [ lindex $lmn $i ] ]"
 	pack .l.e.n.l  .l.e.n.n
 
 	frame .l.e.t
 	label .l.e.t.l -text "Description"
 	frame .l.e.t.t
 	scrollbar .l.e.t.t.yscroll -command ".l.e.t.t.text yview"
-	set a [list "$fonttype" $small_character]
+	set a [ list "$fonttype" $small_character ]
 	text .l.e.t.t.text -wrap word -width 60 -height 20 -font "$a" -yscrollcommand ".l.e.t.t.yscroll set"
-	.l.e.t.t.text insert end "[lindex $lmd $i]"
+	.l.e.t.t.text insert end "[ lindex $lmd $i ]"
 	pack .l.e.t.t.yscroll -side right -fill y
 	pack .l.e.t.t.text
 	pack .l.e.t.l .l.e.t.t
@@ -451,22 +456,22 @@ proc medit i {
 	pack .l.e.tit .l.e.n .l.e.t -padx 5 -pady 5
 
 	okcancel .l.e b { 
-		set app "[.l.e.n.n get]"
-		if { [lindex $group $result] == 1} {
-			set f [open [lindex $ldn $result]/groupinfo.txt w]
+		set app "[ .l.e.n.n get ]"
+		if { [ lindex $group $result ] == 1 } {
+			set f [ open "[ lindex $ldn $result ]/groupinfo.txt" w ]
 		} else {
-			set f [open [lindex $ldn $result]/modelinfo.txt w]
+			set f [ open "[ lindex $ldn $result ]/modelinfo.txt" w ]
 		}
 		puts -nonewline $f "$app"
 		close $f
-		set f [open [lindex $ldn $result]/description.txt w]
-		puts -nonewline $f [.l.e.t.t.text get 0.0 end]
+		set f [ open "[ lindex $ldn $result ]/description.txt" w]
+		puts -nonewline $f [ .l.e.t.t.text get 0.0 end ]
 		close $f
 		destroytop .l.e
-		showmodel [lindex $lrn $result] 
+		showmodel [ lindex $lrn $result ] 
 	} { 
 		destroytop .l.e
-		showmodel [lindex $lrn $result] 
+		showmodel [ lindex $lrn $result ] 
 	}
 
 	bind .l.e.n.n <Return> {
@@ -487,7 +492,7 @@ proc medit i {
 proc mpaste i {
 	global copydir copyver copylabel copydscr lrn modelgroup lmn lver lmd choiceSM fonttype small_character
 
-	set pastedir [lindex $lrn $i]
+	set pastedir [ lindex $lrn $i ]
 
 	newtop .l.p "Paste Model" { set choiceSM 2 }
 
@@ -500,7 +505,7 @@ proc mpaste i {
 
 	frame .l.p.tit.t2
 	label .l.p.tit.t2.l -text "Current group:"
-	label .l.p.tit.t2.n -fg red -text "[lindex $lrn $i]"
+	label .l.p.tit.t2.n -fg red -text "[ lindex $lrn $i ]"
 	pack .l.p.tit.t2.l  .l.p.tit.t2.n -side left -padx 2
 
 	pack .l.p.tit.t1  .l.p.tit.t2
@@ -520,7 +525,7 @@ proc mpaste i {
 	frame .l.p.d
 	label .l.p.d.l -text "New (non-existing) home directory name"
 	entry .l.p.d.d -width 35 -justify center
-	.l.p.d.d insert 0 "[file tail $copydir]"
+	.l.p.d.d insert 0 "[ file tail $copydir ]"
 	pack .l.p.d.l  .l.p.d.d
 
 	frame .l.p.t
@@ -528,7 +533,7 @@ proc mpaste i {
 
 	frame .l.p.t.t
 	scrollbar .l.p.t.t.yscroll -command ".l.p.t.t.text yview"
-	set a [list "$fonttype" $small_character]
+	set a [ list "$fonttype" $small_character ]
 	text .l.p.t.t.text -wrap word -width 60 -height 20 -font "$a" -yscrollcommand ".l.p.t.t.yscroll set"
 	.l.p.t.t.text insert end "$copydscr"
 	pack .l.p.t.t.yscroll -side right -fill y
@@ -551,29 +556,29 @@ proc mpaste i {
 	tkwait variable choiceSM
 	
 	if { $choiceSM == 1 } {
-		set appd [.l.p.d.d get]
-		set appv [.l.p.v.v get]
-		set appl [.l.p.n.n get]
-		set appdsc "[.l.p.t.t.text get 1.0 end]"
+		set appd [ .l.p.d.d get ]
+		set appv [ .l.p.v.v get ]
+		set appl [ .l.p.n.n get ]
+		set appdsc "[ .l.p.t.t.text get 1.0 end ]"
 
-		set confirm [tk_messageBox -parent .l.p -type okcancel -icon question -title Confirmation -default ok -message "Confirm copy?" -detail "Every file in dir.:\n$copydir\n is going to be copied in dir.:\n$pastedir/$appd"]
+		set confirm [ tk_messageBox -parent .l.p -type okcancel -icon question -title Confirmation -default ok -message "Confirm copy?" -detail "Every file in dir.:\n$copydir\n is going to be copied in dir.:\n$pastedir/$appd" ]
 		if { $confirm == "ok" } {
-			set app [file exists $pastedir/$appd]
-			if { $app == 1} {
+			set app [ file exists $pastedir/$appd ]
+			if { $app == 1 } {
 				tk_messageBox -parent .l.p -title Error -icon error -type ok -message "Copy error" -detail "Directory $pastedir/$appd already exists.\nSpecify a different directory." 
 			} else {
 				#viable directory name 
 				file mkdir $pastedir/$appd
-				set copylist [glob -nocomplain $copydir/*]
-				foreach a $copylist {catch [file copy -force $a $pastedir/$appd]}
-				set f [open $pastedir/$appd/description.txt w]
+				set copylist [ glob -nocomplain $copydir/* ]
+				foreach a $copylist { catch [ file copy -force "$a" "$pastedir/$appd" ] }
+				set f [ open "$pastedir/$appd/description.txt" w ]
 				puts -nonewline $f "$appdsc"
 				close $f
-				set f [open $pastedir/$appd/modelinfo.txt w]
+				set f [ open "$pastedir/$appd/modelinfo.txt" w ]
 				puts $f "$appl"
 				puts $f "$appv"
 				set frmt "%d %B, %Y"
-				puts $f "[clock format [clock seconds] -format "$frmt"]"
+				puts $f "[ clock format [ clock seconds ] -format "$frmt" ]"
 				close $f
 			} 
 		}
@@ -581,7 +586,7 @@ proc mpaste i {
 
 	destroytop .l.p
 	set choiceSM 0
-	showmodel [lindex $lrn $i]
+	showmodel [ lindex $lrn $i ]
 }
 
 
