@@ -413,7 +413,7 @@ void scan_used_lab( char *lab, int *choice )
 	
 	if ( no_window )
 	{
-		cmd( "set list_used [ join $list_used \", \" ]" );
+		cmd( "if [ info exists list_used ] { set list_used [ join $list_used \", \" ] } { set list_used \"(never used)\" }" );
 		return;
 	}
 
