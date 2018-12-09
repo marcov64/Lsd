@@ -1,0 +1,40 @@
+Price Competition (work in progress)
+by Marco Valente
+
+The model represents a group of Consumer's that, at each step, decide whether to make their purchase from the same seller as before, or to switch seller. The decision is taken on the base of price: Consumers observe the true price of the former supplier and a noised price (normal centered on the true price) for the new tentative supplier. The new tentative supplier is chosen randomly. Comparing the prices they choose whether to stick or to switch. In case of switch, the price paid by Consumers is the true price, not the biased observed one.
+The sellers decide the price on the base of observed sales (actually, observed market shares) as compared to a given target level.
+
+The main cycle of a simulation time step is the following:
+
+- ActionSupply: computes the price on the base of the previous period results (and reinitialize the statics)
+- ActionDemand: each consumer makes its choice, collecting statistics.
+
+The very initial time step includes also the equation Init that assigns randomly a seller to consumer, and does some other technical initialization.
+
+Parameters relevant to be set:
+Demand:
+NoiseReading = Variance of the normal random function when observing new price
+
+Supply (these parameter may be deleted from Supply and placed in Seller to use differentiated values for the different sellers)
+TargetMs = Target market share triggering different price changes
+Epsilon= absolute price variation;
+
+Seller (some parameter may be placed in Supply if they are identical for all Sellers)
+TargetMs = Target market share triggering different price changes
+Epsilon= absolute price variation;
+Price(-1) = Initial price level to be used at the very first time step
+
+Results relevant to observe (beside micro-values for Sellers and Consumers)
+Demand:
+AvPrice = Average price
+VarPrice = Variance of prices
+
+Supply:
+NumStay= number of consumer who do not change supplier
+NumSwitch = number of consumer who do change supplier
+
+
+
+
+
+

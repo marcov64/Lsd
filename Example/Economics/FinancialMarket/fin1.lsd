@@ -1,0 +1,715 @@
+	
+Label Root
+{
+	Son: Group
+	Label Group
+	{
+		Son: Agent
+		Label Agent
+		{
+			Var: Action
+			Param: PropPrice
+			Param: Id
+			Param: Order
+			Param: TimeProposal
+
+		}
+
+		Param: Range
+		Param: ProbAction
+		Param: MaxTime
+
+	}
+
+	Son: Market
+	Label Market
+	{
+		Son: Sell
+		Label Sell
+		{
+			Param: SPrice
+			Param: SId
+
+		}
+
+		Son: Buy
+		Label Buy
+		{
+			Param: BPrice
+			Param: BId
+
+		}
+
+		Param: CoeffQPrice
+		Param: CoeffSPrice
+		Var: SumTransactions
+		Param: PeriodSumTrans
+		Var: QuickPrice
+		Var: SlowPrice
+		Var: Price
+		Var: MarketAction
+
+	}
+
+	Var: Init
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: Init 0 n + n n
+
+Object: Group C	1
+Param: Range 0 n + n n	0.1
+Param: ProbAction 0 n + n n	0.1
+Param: MaxTime 0 n + n n	10
+
+Object: Agent C	1000
+Var: Action 0 n + n n
+Param: PropPrice 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: Id 0 n + n n	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	35	36	37	38	39	40	41	42	43	44	45	46	47	48	49	50	51	52	53	54	55	56	57	58	59	60	61	62	63	64	65	66	67	68	69	70	71	72	73	74	75	76	77	78	79	80	81	82	83	84	85	86	87	88	89	90	91	92	93	94	95	96	97	98	99	100	101	102	103	104	105	106	107	108	109	110	111	112	113	114	115	116	117	118	119	120	121	122	123	124	125	126	127	128	129	130	131	132	133	134	135	136	137	138	139	140	141	142	143	144	145	146	147	148	149	150	151	152	153	154	155	156	157	158	159	160	161	162	163	164	165	166	167	168	169	170	171	172	173	174	175	176	177	178	179	180	181	182	183	184	185	186	187	188	189	190	191	192	193	194	195	196	197	198	199	200	201	202	203	204	205	206	207	208	209	210	211	212	213	214	215	216	217	218	219	220	221	222	223	224	225	226	227	228	229	230	231	232	233	234	235	236	237	238	239	240	241	242	243	244	245	246	247	248	249	250	251	252	253	254	255	256	257	258	259	260	261	262	263	264	265	266	267	268	269	270	271	272	273	274	275	276	277	278	279	280	281	282	283	284	285	286	287	288	289	290	291	292	293	294	295	296	297	298	299	300	301	302	303	304	305	306	307	308	309	310	311	312	313	314	315	316	317	318	319	320	321	322	323	324	325	326	327	328	329	330	331	332	333	334	335	336	337	338	339	340	341	342	343	344	345	346	347	348	349	350	351	352	353	354	355	356	357	358	359	360	361	362	363	364	365	366	367	368	369	370	371	372	373	374	375	376	377	378	379	380	381	382	383	384	385	386	387	388	389	390	391	392	393	394	395	396	397	398	399	400	401	402	403	404	405	406	407	408	409	410	411	412	413	414	415	416	417	418	419	420	421	422	423	424	425	426	427	428	429	430	431	432	433	434	435	436	437	438	439	440	441	442	443	444	445	446	447	448	449	450	451	452	453	454	455	456	457	458	459	460	461	462	463	464	465	466	467	468	469	470	471	472	473	474	475	476	477	478	479	480	481	482	483	484	485	486	487	488	489	490	491	492	493	494	495	496	497	498	499	500	501	502	503	504	505	506	507	508	509	510	511	512	513	514	515	516	517	518	519	520	521	522	523	524	525	526	527	528	529	530	531	532	533	534	535	536	537	538	539	540	541	542	543	544	545	546	547	548	549	550	551	552	553	554	555	556	557	558	559	560	561	562	563	564	565	566	567	568	569	570	571	572	573	574	575	576	577	578	579	580	581	582	583	584	585	586	587	588	589	590	591	592	593	594	595	596	597	598	599	600	601	602	603	604	605	606	607	608	609	610	611	612	613	614	615	616	617	618	619	620	621	622	623	624	625	626	627	628	629	630	631	632	633	634	635	636	637	638	639	640	641	642	643	644	645	646	647	648	649	650	651	652	653	654	655	656	657	658	659	660	661	662	663	664	665	666	667	668	669	670	671	672	673	674	675	676	677	678	679	680	681	682	683	684	685	686	687	688	689	690	691	692	693	694	695	696	697	698	699	700	701	702	703	704	705	706	707	708	709	710	711	712	713	714	715	716	717	718	719	720	721	722	723	724	725	726	727	728	729	730	731	732	733	734	735	736	737	738	739	740	741	742	743	744	745	746	747	748	749	750	751	752	753	754	755	756	757	758	759	760	761	762	763	764	765	766	767	768	769	770	771	772	773	774	775	776	777	778	779	780	781	782	783	784	785	786	787	788	789	790	791	792	793	794	795	796	797	798	799	800	801	802	803	804	805	806	807	808	809	810	811	812	813	814	815	816	817	818	819	820	821	822	823	824	825	826	827	828	829	830	831	832	833	834	835	836	837	838	839	840	841	842	843	844	845	846	847	848	849	850	851	852	853	854	855	856	857	858	859	860	861	862	863	864	865	866	867	868	869	870	871	872	873	874	875	876	877	878	879	880	881	882	883	884	885	886	887	888	889	890	891	892	893	894	895	896	897	898	899	900	901	902	903	904	905	906	907	908	909	910	911	912	913	914	915	916	917	918	919	920	921	922	923	924	925	926	927	928	929	930	931	932	933	934	935	936	937	938	939	940	941	942	943	944	945	946	947	948	949	950	951	952	953	954	955	956	957	958	959	960	961	962	963	964	965	966	967	968	969	970	971	972	973	974	975	976	977	978	979	980	981	982	983	984	985	986	987	988	989	990	991	992	993	994	995	996	997	998	999	1000
+Param: Order 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: TimeProposal 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+
+Object: Market C	1
+Param: CoeffQPrice 0 n + n n	0.1
+Param: CoeffSPrice 0 n + n n	0.01
+Var: SumTransactions 1 s + n n	0
+Param: PeriodSumTrans 0 n + n n	10
+Var: QuickPrice 1 s + n p	1000
+Var: SlowPrice 1 s + n p	1000
+Var: Price 1 s + n p	1000
+Var: MarketAction 10 s + d n	0	0	0	0	0	0	0	0	0	0
+
+Object: Sell C	1
+Param: SPrice 0 n + n n	1e+007
+Param: SId 0 n + n n	0
+
+Object: Buy C	1
+Param: BPrice 0 n + n n	-1
+Param: BId 0 n + n n	0
+
+SIM_NUM 1
+SEED 2
+MAX_STEP 10000
+EQUATION fun_fin.cpp
+ MODELREPORT report_fin1.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Variable_Init
+'Init' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Object_Group
+'Group' appears in the equation for: Init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Range
+'Range' appears in the equation for: Action.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ProbAction
+'ProbAction' appears in the equation for: Action.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_MaxTime
+'MaxTime' appears in the equation for: Action.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Agent
+'Agent' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Action
+Action of agents. It can perform three different type activities, depending
+on the state of the agent and on random values:
+
+1) Maintain or remove a previously posted proposal
+If a proposal has already been posted, the agent checks the time. In case
+the proposal lasted for more than TimeProposal time steps, the agent removes
+it from the list. If this is not the case, the agent waits and the function returns.
+
+2) Wait
+Even in case there is not a standing proposal, with probability 1-ProbAction
+the agent does nothing, waiting for the next turn.
+
+3)
+With probability ProbAction, the agent submits a proposal. The current implementation
+allows agents to choose randomly (50%) between a selling or buying proposal.
+The price of the proposal is determined with a uniform random function centered
+on the previous period's Price (see its function computed in MarketAction):
+Price(t-1) * (1+(Uniform[0,1] - 0.5) * Range)
+The proposal is eventually stored creating a new Object descending from Market
+(Sell or Buy for selling or buying proposal respectively). The new Object
+stores the ID of the agent and the proposed price.
+
+
+'Action' appears in the equation for: MarketAction.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_PropPrice
+'PropPrice' appears in the equation for: Action.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Id
+'Id' appears in the equation for: Action, MarketAction.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Order
+'Order' appears in the equation for: Action.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_TimeProposal
+'TimeProposal' appears in the equation for: Action.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Market
+'Market' appears in the equation for: Init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_CoeffQPrice
+'CoeffQPrice' appears in the equation for: QuickPrice.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_CoeffSPrice
+'CoeffSPrice' appears in the equation for: SlowPrice.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_SumTransactions
+Sum of the transactions that took place in the latest PeriodSumTrans-1 periods.
+It is computed by removing from the previous value of SumTransaction the oldest
+component (MarketActions[t - PeriodSumTrans]) and adding the current one
+(MarketAction[t]).
+
+
+'SumTransactions' appears in the equation for: SumTransactions.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_PeriodSumTrans
+'PeriodSumTrans' appears in the equation for: SumTransactions.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_QuickPrice
+Compute a "quick" smoothed indicator of Price with the function
+QuickPrice(t) = QuickPrice(t-1) * (1-CoeffQPrice) + Price(t) * CoeffQPrice
+
+The higher QuickPrice, the more rapid is the response of the indicator to
+the changes in Price. Note that an identical indicator is computed in SlowPrice,
+the only difference being the value of the coefficients:
+CoeffQPrice > CoeffSPrice
+
+'QuickPrice' appears in the equation for: QuickPrice.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_SlowPrice
+'SlowPrice' appears in the equation for: SlowPrice.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Price
+Price at each time step, computed as the average of prices in all the transactions
+in the time step.
+Technically, the value is computed in MarketAction, so that the equation simply
+calls that Variable, and returns its own value. It may well be possible that this
+equation is never executed at all, because the system finds Price always updated
+when MarketAction
+
+'Price' appears in the equation for: Action, MarketAction, QuickPrice, SlowPrice.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_MarketAction
+MarketAction
+Computed after each and every agent has stored its proposal, this function
+completes as many transactions as possible, coupling the best offers (lowest prices)
+with the best requests (highest prices). This is the mechanism used in Italian
+exchange.
+In the model's structure, Market contains two sets of entities for the selling
+and buying proposals. The function sorts them placing in the initial places the
+most attractive ones, and proceeds matching the best elements until the best
+Buy (highest proposed price) is higher than the best Sell (lowest proposed price).
+This function returns the number of transactions that actually took place. It also
+computes the average price of the transactions, stored in Price. 
+
+'MarketAction' appears in the equation for: Price, SumTransactions.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Sell
+'Sell' appears in the equation for: Action, MarketAction.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_SPrice
+'SPrice' appears in the equation for: Action, MarketAction.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_SId
+'SId' appears in the equation for: Action, MarketAction.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Buy
+'Buy' appears in the equation for: Action, MarketAction.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_BPrice
+'BPrice' appears in the equation for: Action, MarketAction.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_BId
+'BId' appears in the equation for: Action, MarketAction.
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+/****************************************************
+****************************************************
+LSD-2.0 25 Gennaio 2000
+Copyright Marco Valente - Aalborg University
+
+Send comments and bug reports to mv@business.auc.dk
+****************************************************
+****************************************************/
+
+
+#include "../src/fun_head.h"
+
+//Model specific Objects, initialized by function "Init"
+object *group, *market;
+
+
+
+/***************************************
+VARIABLE::FUN
+***************************************/
+double variable::fun(object *caller)
+{
+double v[40], res;
+int i;
+object *p, *c, *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9;
+
+variable *cur_v;
+
+p=up;
+c=caller;
+
+
+/**
+FILE *f;
+
+{f=fopen("log.log","w");
+ fprintf(f,"%s\n",label);
+ fclose(f);
+}
+
+**/
+
+if(!strcmp(label, "Action") )
+{
+/*
+Action of agents. It can perform three different type activities, depending
+on the state of the agent and on random values:
+
+1) Maintain or remove a previously posted proposal
+If a proposal has already been posted, the agent checks the time. In case
+the proposal lasted for more than TimeProposal time steps, the agent removes
+it from the list. If this is not the case, the agent waits and the function returns.
+
+2) Wait
+Even in case there is not a standing proposal, with probability 1-ProbAction
+the agent does nothing, waiting for the next turn.
+
+3)
+With probability ProbAction, the agent submits a proposal. The current implementation
+allows agents to choose randomly (50%) between a selling or buying proposal.
+The price of the proposal is determined with a uniform random function centered
+on the previous period's Price (see its function computed in MarketAction):
+Price(t-1) * (1+(Uniform[0,1] - 0.5) * Range)
+The proposal is eventually stored creating a new Object descending from Market
+(Sell or Buy for selling or buying proposal respectively). The new Object
+stores the ID of the agent and the proposed price.
+
+*/
+
+if(val[0]!=0) //if the current value if not 0, then it means that
+ {            // there exists a standing proposal
+  v[1]=p->cal("TimeProposal",0);
+  v[2]=group->cal("MaxTime",0);
+  if((double)t - v[1] <v[2]) //if the time is not expired
+    {
+     res=val[0];           //Maintain the proposal
+     goto end;             //End of the function
+     
+    }
+
+  //otherwise remove the proposal
+  if(val[0]==-1)
+    cur=market->search_var_cond("SId",p->cal("Id",0),0); //it was a sell
+  else
+    cur=market->search_var_cond("BId",p->cal("Id",0),0); //it was a buy
+  cur->delete_obj();
+  res=0; //mark the agent as not having a standing proposal
+  goto end; // end the function
+ }
+
+//The function arrives here only if the agent does not have a standing proposal
+
+
+v[0]=group->cal("ProbAction",0); //probability of submitting a proposal
+
+if(RND>v[0])
+{ res=val[0]; //do not submit any proposal
+  goto end;   //end the function
+}
+
+//else, submit a proposal (prob = ProbAction)
+
+if(RND>0.5) //choose whether to submit a sale or a purchase
+ v[1]=-1;   //probably, you may want to write a more sophisticated
+else        //choice function
+ v[1]=1;
+
+
+//Draw the price for the proposal randomly, using a uniform of range Range centered
+//on the previous period's price. Here again, we may think some better way to
+//obtain the agents' proposed price. See, for example, QuickPrice and SlowPrice.
+
+//Previous period's price.
+v[2]=market->cal("Price",1);
+
+//Maximum distance from the previous period's price and the proposed one
+v[3]=group->cal("Range",0);
+
+
+v[4]=v[2]*(1+(RND-0.5)*v[3]);
+
+if(v[1]==-1) //if it is a sale
+ {
+  //create and set a new Object Sell with the proponent's ID
+  cur=market->add_an_object("Sell",market->search("Sell"));
+  //Technicality on Lsd internal mechanism:
+  //the second argument of the function add_an_object can be
+  //an example, so that the newly created object is totally identical to the
+  //example. In this case, the example is whatever is the first object Sell
+  //descending from Market. It does not matter, since its data are going to be
+  //overwritten. add_an_object without the second parameter uses the model's file
+  //to read the structure of the object to be created, but it takes far more time...
+  cur->write("SId",p->cal("Id",0),0);
+  cur->write("SPrice",v[4],0);
+ }
+else
+ {
+  //create and set a new Object Buy with the proponent's data
+  cur=market->add_an_object("Buy",market->search("Buy"));
+  cur->write("BId",p->cal("Id",0),0);
+  cur->write("BPrice",v[4],0);
+ }
+
+p->write("PropPrice", v[4],0); //store the price in the Agent too. Currently useless
+
+p->write("Order",RND,0); //ranking for next round. Currently useless, but you
+//may think of an implementation where the order of submission matters, and therefore
+//agents draw randomly their turn of activation at each time step (somewhere you should
+//call for a sorting of Agent's along Order
+
+//Store this time step, for future decisions on whether to withdraw the proposal
+p->write("TimeProposal",(double)t,0);
+
+
+res=v[1]; //return the value of the action chosen (-1 for sale, 1 for purchase)
+goto end;
+}
+
+/********************************
+MarketAction
+********************************/
+if(!strcmp(label, "MarketAction") )
+{
+/*
+MarketAction
+Computed after each and every agent has stored its proposal, this function
+completes as many transactions as possible, coupling the best offers (lowest prices)
+with the best requests (highest prices). This is the mechanism used in Italian
+exchange.
+In the model's structure, Market contains two sets of entities for the selling
+and buying proposals. The function sorts them placing in the initial places the
+most attractive ones, and proceeds matching the best elements until the best
+Buy (highest proposed price) is higher than the best Sell (lowest proposed price).
+This function returns the number of transactions that actually took place. It also
+computes the average price of the transactions, stored in Price. 
+*/
+
+//Sort the existing entities Buy so that the first contains the highest BPrice
+p->lsdqsort("Buy","BPrice","DOWN");
+
+//Sort the existing entities SPrice so that the first contains the lowest SPrice
+p->lsdqsort("Sell","SPrice","UP");
+
+//Store in the pointers cur and cur1 respectively the best Buy and Sell
+cur=p->search("Buy");
+cur1=p->search("Sell");
+
+//Initialize the local variables used to store BPrice and SPrice
+v[2]=v[3]=1;
+
+//Cycle through every entities Sell and Buy as long as prices allow a viable transaction
+//Note that there are two "artificial" entities Sell and BPrice with absurd SPrice (100000000)
+//and BPrice (-1) so that the cycle will always stop, even though there may be different
+//number of entities Sell and Buy
+for(v[5]=v[4]=0, v[0]=0; v[2]>=v[3] ; )
+ {
+  //Prices of the current best proposals
+  v[2]=cur->cal("BPrice",0);
+  v[3]=cur1->cal("SPrice",0);
+
+  //Pointers to the subsequent entities, stored to continue the cycle
+  cur2=go_brother(cur);
+  cur3=go_brother(cur1);
+  if(v[2]>v[3]) //If the Buy price is higher than the Sell price...
+   {             //the transaction takes place, notifying the fact to the two involved agents
+    cur4=group->search_var_cond("Id",cur->cal("BId",0),0);
+    cur5=group->search_var_cond("Id",cur1->cal("SId",0),0);
+    cur4->write("Action",0,t);
+    cur5->write("Action",0,t);
+
+//here may be placed some other activity for the agents involved in the transaction,
+//like profits, accounting etc.
+
+    v[5]+=(v[2]+v[3])/2; //Storing variable for the computation of price
+    v[4]++;              //storing variable for teh computation of number of transaction
+
+   cur->delete_obj();    //remove the proposals involved in the transaction
+   cur1->delete_obj();
+   }
+  cur=cur2; //move to the new "best" proposals
+  cur1=cur3;
+ }
+
+
+ if(v[4]!=0) //if at least one transaction took place
+  p->write("Price",v[5]/v[4],t); //compute the average price of the time step
+  //Note that the Price is tagged as if it were computed at time t, the current
+  //time step, overruling the standard Lsd default. If the equation for Price
+  //were not already computed at this period of the simulation cycle, it will
+  //never be
+
+res=v[4]; //return the number of transactions, useless
+goto end;
+
+}
+
+
+if(!strcmp(label, "Init") )
+{
+
+/*
+Initialization function.
+Set two Objects of frequent use as global variable, so that they can be used
+to speed up the operations in which they are used.
+*/
+market=p->search("Market");
+group=p->search("Group");
+res=0;
+param=1;
+goto end;
+}
+
+
+/*******************************
+QuickPrice
+*******************************/
+if(!strcmp(label, "QuickPrice") )
+{
+/*
+Compute a "quick" smoothed indicator of Price with the function
+QuickPrice(t) = QuickPrice(t-1) * (1-CoeffQPrice) + Price(t) * CoeffQPrice
+
+The higher QuickPrice, the more rapid is the response of the indicator to
+the changes in Price. Note that an identical indicator is computed in SlowPrice,
+the only difference being the value of the coefficients:
+CoeffQPrice > CoeffSPrice
+*/
+
+v[0]=p->cal("Price",0);
+v[1]=p->cal("QuickPrice",1);
+v[2]=p->cal("CoeffQPrice",0);
+
+res=v[1]*(1-v[2])+v[0]*v[2];
+goto end;
+}
+
+/*******************************
+SlowPrice
+*******************************/
+if(!strcmp(label, "SlowPrice") )
+{
+
+/*
+Compute a "slow" smoothed indicator of Price with the function
+SlowPrice(t) = SlowPrice(t-1) * (1-CoeffSPrice) + Price(t) * CoeffSPrice
+
+The lower CoeffSPrice, the slower is the response of the indicator to
+the changes in Price. Note that an identical indicator is computed in QuickPrice,
+the only difference being the value of the coefficients:
+CoeffQPrice > CoeffSPrice
+*/
+
+
+v[0]=p->cal("Price",0);
+v[1]=p->cal("SlowPrice",1);
+v[2]=p->cal("CoeffSPrice",0);
+res=v[1]*(1-v[2])+v[0]*v[2];
+goto end;
+}
+
+/*******************************
+Price
+*******************************/
+if(!strcmp(label, "Price") )
+{
+/*
+Price at each time step, computed as the average of prices in all the transactions
+in the time step.
+Technically, the value is computed in MarketAction, so that the equation simply
+calls that Variable, and returns its own value. It may well be possible that this
+equation is never executed at all, because the system finds Price always updated
+when MarketAction
+*/
+p->cal("MarketAction",0);
+res=val[0];
+goto end;
+}
+
+
+/*******************************
+SumTransactions
+*******************************/
+if(!strcmp(label, "SumTransactions") )
+{
+/*
+Sum of the transactions that took place in the latest PeriodSumTrans-1 periods.
+It is computed by removing from the previous value of SumTransaction the oldest
+component (MarketActions[t - PeriodSumTrans]) and adding the current one
+(MarketAction[t]).
+
+*/
+
+v[0]=p->cal("PeriodSumTrans",0);
+v[1]=p->cal("MarketAction",(int)v[0]);
+v[2]=p->cal("MarketAction",0);
+v[3]=p->cal("SumTransactions",1);
+res=v[3]-v[1]+v[2];
+goto end;
+}
+
+//The program flow reach here iff the variable's label does not match any
+//block of code
+sprintf(msg, "\nError 04: Function for %s not found", label);
+plog(msg);
+quit=2;
+return -1;
+
+
+end :
+if( (isnan(res)==1 || isinf(res)==1) && quit!=1)
+ { 
+  sprintf(msg, "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res );
+  error(msg);
+
+  debug_flag=1;
+  debug='d';
+ } 
+
+if(debug_flag==1)
+ {
+ for(i=0; i<40; i++)
+  i_values[i]=v[i];
+ }
+
+return(res);
+
+}
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+END_EQ_FILE

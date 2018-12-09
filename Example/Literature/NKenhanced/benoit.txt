@@ -1,0 +1,26 @@
+- Changed the InitAgent variable in a parameter
+
+- Set the parameters AgentType to the IdClass where you want to collect statistics. I used only one class with IdClass=1
+
+- set the parameter NumBlocks in Agent to 10
+
+- set the RewardType to the desired type of mutation
+
+- Set MaxBitLength in Agent to the number of bits you want in each Block. I set 3.
+
+- Set the number of objects BitBlock to 3 for each block
+
+- Set the parameters IdBitBlock to increasing (group) values. In the end each bitblock will have 1, 2, 3, 1, 2, 3, 1 ... values for this parameter
+
+- Set the number of objects Agent to 35. This will replicate the agent as you initialize it, including the number of blocks, bitblocks etc.
+
+- Assigned to the parameter IdAgent increasing values from 1 to 35
+
+- Set parameter NumClass in Class to 35, indicating that there are 35 agents
+
+- set N in Landscape equal to 30, since we defined 10 blocks with 3 bits each.
+
+
+
+
+

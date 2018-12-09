@@ -1,21 +1,20 @@
 /*************************************************************
 
-	LSD 7.0 - January 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-GETSAVED.CPP contains:
-- execute the lsd_getsaved command line utility.
+/*************************************************************
+GETSAVED.CPP 
+Execute the lsd_getsaved command line utility.
 
-	Lists all variables being saved in a configuration
-
-****************************************************/
+Lists all variables being saved in a configuration.
+*************************************************************/
 
 #include <set>
 #include "decl.h"
@@ -36,6 +35,7 @@ sense *rsense = NULL;		// LSD sensitivity analysis structure
 
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
 bool message_logged = false;// new message posted in log window
+bool no_zero_instance = false;// flag to allow deleting last object instance
 bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool running = false;		// simulation is running
@@ -57,14 +57,12 @@ int prof_min_msecs = 0;		// profile only variables taking more than X msecs.
 int prof_obs_only = false;	// profile only observed variables
 int quit = 0;				// simulation interruption mode (0=none)
 int t;						// current time step
-int seed = 1;				// random number generator initial seed
 int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
-int total_obj = 0;			// total objects in model
-int total_var = 0;			// total variables/parameters in model
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
+unsigned seed = 1;			// random number generator initial seed
 description *descr = NULL;	// model description structure
 lsdstack *stacklog = NULL;	// LSD stack
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
@@ -79,15 +77,16 @@ int lsdmain( int argn, char **argv )
 	int i, confs;
 	char *sep;
 	FILE *f;
+	bool all_var = false;
 
 	path = new char[ strlen( "" ) + 1 ];
 	strcpy( path, "" );
 
 	findex = 1;
 
-	if ( argn < 2 )
+	if ( argn < 3 )
 	{
-		fprintf( stderr, "\nThis is LSD Saved Variable Reader.\nIt reads a LSD configuration file (.lsd) and shows the variables/parameters\nbeing saved, optionally saving them in a comma separated text file (.csv).\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n" );
+		fprintf( stderr, "\nThis is LSD Saved Variable Reader.\nIt reads a LSD configuration file (.lsd) and shows the variables/parameters\nbeing saved, optionally saving them in a comma separated text file (.csv).\n\nCommand line options:\n'-a' show all variables/parameters\n'-f FILENAME.lsd' the configuration file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n" );
 		myexit( 1 );
 	}
 	else
@@ -95,21 +94,28 @@ int lsdmain( int argn, char **argv )
 		for ( i = 1; i < argn; i += 2 )
 		{
 			// read -f parameter : original configuration file
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				struct_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( struct_file, argv[ 1 + i ] );
 				continue;
 			}
 			// read -o parameter : output file name
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				out_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( out_file, argv[ 1 + i ] );
 				continue;
 			}
+			// read -a parameter : show all variables/parameters
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'a' )
+			{
+				i--; 					// no parameter for this option
+				all_var = true;
+				continue;
+			}
 
-			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is LSD Saved Variable Reader.\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n", argv[ i ][ 0 ], argv[ i ][ 1 ] );
+			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is LSD Saved Variable Reader.\n\nCommand line options:\n'-a' show all variables/parameters\n'-f FILENAME.lsd' the configuration file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n", argv[ i ][ 0 ], argv[ i ][ 1 ] );
 			myexit( 2 );
 		}
 	} 
@@ -127,7 +133,6 @@ int lsdmain( int argn, char **argv )
 		myexit( 4 );
 	}
 	fclose( f );
-	struct_loaded = true;
 	
 	root = new object;
 	root->init( NULL, "Root" );
@@ -142,14 +147,14 @@ int lsdmain( int argn, char **argv )
 	strcpy( stacklog->label, "LSD Simulation Manager" );
 	stack = 0;
 	
-	if ( load_configuration( root, false ) != 0 )
+	if ( load_configuration( true ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Saved Variable Reader.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
 		myexit( 5 );
 	}
 
 	count_save( root, & i );
-	if ( i == 0 )
+	if ( ! all_var && i == 0 )
 	{
 		printf( "\n(no variable being saved)\n" );
 		return 0;
@@ -169,11 +174,11 @@ int lsdmain( int argn, char **argv )
 		
 		// write .csv header
 		fprintf( f, "Name%sType%sObject%sDescription\n", sep, sep, sep );
-		get_saved( root, f, sep );
+		get_saved( root, f, sep, all_var );
 		fclose( f );
 	}	
 	else	// send to stdout
-		get_saved( root, stdout, "\t" );
+		get_saved( root, stdout, "\t", all_var );
 	
 	empty_cemetery( );
 	blueprint->empty( );

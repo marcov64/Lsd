@@ -1,101 +1,57 @@
 /*************************************************************
 
-	LSD 7.0 - January 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-LSD_MAIN.CPP contains:
+/*************************************************************
+LSD_MAIN.CPP 
+Contains:
 - early initialization (namely, of the Log windows)
 - the main cycle: browse a model, run simulation, return to the browser.
 
+The main functions contained here are:
 
-The functions contained here are:
-
-- void run(object *r)
+- void run( )
 Run the simulation model whose root is r. Running is not only the actual
 simulation run, but also the initialization of result files. Of course, it has
 also to manage the messages from user and from the model at run time.
 
-- bool alloc_save_mem( object *root );
+- bool alloc_save_mem( );
 Prepare variables to store saved data.
-
-- Tcl_Interp *InterpInitWin(char *tcl_dir);
-A function that manages to initialize the tcl interpreter. Guess the standard
-functions are actually bugged, because of the difficulty to retrive the directory
-for the tk library. Why is difficult only for tk and not for tcl, don't know.
-But is a good thing, so that I can actually copy the tcl directory and make
-the modifications
-
-- void plog(char *m);
-print  message string m in the Log screen.
-
-Other functions used here, and the source files where are contained:
-
-- object *create( object *r);
-manage the browser. Its code is in INTERF.CPP
-
-- object *skip_next_obj(object *t, int *count);
-Contained in UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- object *go_brother(object *c);
-Contained in UTIL.CPP. returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-
-- void cmd(char *cc);
-Contained in UTIL.CPP. Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-- void myexit(int v);
-Exit function, which is customized on the operative system.
-
-- FILE *search_str(char *name, char *str);
-UTIL.CPP given a string name, returns the file corresponding to name, and the current
-position of the file is just after str.
-
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
-
-#ifndef NO_WINDOW			// global Tcl interpreter in LSD
-Tcl_Interp *inter = NULL;
-#endif
-
-#ifdef LIBZ
-int dozip = true;			// compressed results file flag (bool)
-#else
-int dozip = false;
-#endif
 
 // some program defaults
 bool grandTotal = false;	// flag to produce or not grand total in batch processing
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
 char nonavail[ ] = "NA";	// string for unavailable values (use R default)
 char tabs[ ] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";	// Log window tabs
+double def_res = 0;			// default equation result
 int add_to_tot = false;		// flag to append results to existing totals file (bool)
-int lattice_type = 1;		// default lattice type (frequent cells changes)
 int max_step = 100;			// default number of simulation runs
 int overwConf = true;		// overwrite configuration on run flag (bool)
 int saveConf = false;		// save configuration on results saving (bool)
-int seed = 1;				// random number generator initial seed
 int strWindowOn = true;		// control the presentation of the model structure window (bool)
+unsigned seed = 1;			// random number generator initial seed
 
-bool batch_sequential = false;	// no-window multi configuration job running
+bool batch_sequential = false;// no-window multi configuration job running
+bool brCovered = false;		// browser cover currently covered
+bool eq_dum = false;		// current equation is dummy
 bool fast;					// safe copy of fast_mode flag
 bool log_ok = false;		// control for log window available
 bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
+bool no_search;				// disable the standard variable search mechanism
 bool no_window = false;		// no-window command line job
+bool no_zero_instance = false;// flag to allow deleting last object instance
+bool non_var = false;		// flag to indicate INTERACT macro condition
 bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool pause_run;				// pause running simulation
@@ -119,6 +75,7 @@ char *sens_file = NULL;		// current sensitivity analysis file
 char *simul_name = NULL;	// name of current simulation configuration
 char *struct_file = NULL;	// name of current configuration file
 char equation_name[ MAX_PATH_LENGTH ] = "";	// equation file name
+char lastObj[ MAX_ELEM_LENGTH ] = "";		// last shown object for quick reload
 char lsd_eq_file[ MAX_FILE_SIZE + 1 ] = "";	// equations saved in configuration file
 char msg[ TCL_BUFF_STR ] = "";				// auxiliary Tcl buffer
 char name_rep[ MAX_PATH_LENGTH ] = "";		// documentation report file name
@@ -136,6 +93,8 @@ int fast_mode;				// level of LOG messages & runtime plot
 int fend;					// last multi configuration job to run
 int findex;					// current multi configuration job
 int findexSens = 0;			// index to sequential sensitivity configuration filenames
+int log_start;				// first period to start logging to file
+int log_stop;				// last period to log to file, if any
 int macro;					// equations style (macros or C++) (bool)
 int max_threads = 1;		// suggested maximum number of parallel threads 
 int no_res = false;			// do not produce .res results files (bool)
@@ -149,26 +108,42 @@ int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
 int stack_info = 0;			// LSD stack control
 int t;						// current time step
-int total_obj = 0;			// total objects in model
-int total_var = 0;			// total variables/parameters in model
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
 lsdstack *stacklog = NULL;	// LSD stack
+map < string, profile > prof;	// set of saved profiling times
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
+object *currObj = NULL;		// pointer to current object in browser
 object *root = NULL;		// LSD root object
+object *wait_delete = NULL;	// LSD object waiting for deletion
+o_setT obj_list;			// set with all existing LSD objects
 sense *rsense = NULL;		// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
-map < string, profile > prof;	// set of saved profiling times
+FILE *log_file = NULL;		// log file, if any
+
+#ifdef CPP11
+eq_mapT eq_map;				// fast equation look-up map
+#endif
+
+#ifdef LIBZ
+int dozip = true;			// compressed results file flag (bool)
+#else
+int dozip = false;
+#endif
+
+#ifndef NO_WINDOW
+int i_values[ 4 ];			// user temporary variables copy
+double d_values[ USER_D_VARS ];
+object *o_values[ 10 ];
+netLink *n_values[ 10 ];
+Tcl_Interp *inter = NULL;	// global Tcl interpreter in LSD
+#endif
 
 #ifdef PARALLEL_MODE
 map< thread::id, worker * > thr_ptr;	// worker thread pointers
 thread::id main_thread;		// LSD main thread ID
 worker *workers = NULL;		// multi-thread parallel worker data
-#endif
-
-#ifdef CPP11
-eq_mapT eq_map;				// fast equation look-up map
 #endif
 
 
@@ -179,13 +154,12 @@ int lsdmain( int argn, char **argv )
 {
 	char *str;
 	int i, j = 0, len, done;
-	FILE *f;
 
 	path = new char[ strlen( "" ) + 1 ];
-	simul_name = new char[ strlen( "Sim1" ) + 1 ];
+	simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
 	strcpy( path, "" );
 	strcpy( tcl_dir, "" );
-	strcpy( simul_name, "Sim1" );
+	strcpy( simul_name, DEF_CONF_FILE );
 	exec_file = clean_file( argv[ 0 ] );	// global pointer to the name of executable file
 	exec_path = clean_path( getcwd( NULL, 0 ) );	// global pointer to path of executable file
 
@@ -218,7 +192,7 @@ int lsdmain( int argn, char **argv )
 		for ( i = 1; i < argn; i += 2 )
 		{
 			// read -f parameter : file name or base name
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				delete [ ] simul_name;
 				simul_name = new char[ strlen( argv[ 1 + i ] ) + 1 ];
@@ -226,14 +200,14 @@ int lsdmain( int argn, char **argv )
 				continue;
 			}
 			// read -s parameter : first sequential file to process
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 's' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 's' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				findex = atoi( argv[ i + 1 ] );
 				batch_sequential = true;   
 				continue;
 			}
 			// read -e parameter : last sequential file to process
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'e' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'e' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				fend = atoi( argv[ i + 1 ] );
 				continue;
@@ -268,13 +242,13 @@ int lsdmain( int argn, char **argv )
 				continue;
 			}
 			// change the path for the output of result files
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				results_alt_path( argv[ 1 + i ] );
 				continue;
 			}
 			// read -c parameter : max number of cores
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'c' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'c' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				j = atoi( argv[ i + 1 ] );
 				continue;
@@ -298,16 +272,15 @@ int lsdmain( int argn, char **argv )
 		strcpy( struct_file, msg );
 	}
 	 
-	f = fopen( struct_file, "r" );
+	FILE *f = fopen( struct_file, "r" );
 	if ( f == NULL )
 	{
 		fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n", struct_file );
 		myexit( 3 );
 	}
 	fclose( f );
-	struct_loaded = true;
 
-	if ( load_configuration( root, false ) != 0 )
+	if ( load_configuration( true ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is the no window version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n", struct_file );
 		myexit( 4 );
@@ -392,6 +365,9 @@ int lsdmain( int argn, char **argv )
 	tk_ok = true;
 	cmd( "tk appname lsd" );
 
+	// disable Carbon compatibility in Mac
+	cmd( "if [ string equal $tcl_platform(os) Darwin ] { set ::tk::mac::useCompatibilityMetrics 0 }" );
+
 	// close console if open (usually only in Mac)
 	cmd( "if [ string equal $tcl_platform(os) Darwin ] { foreach i [ winfo interps ] { if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { send $i \"wm iconify .; wm withdraw .; destroy .\" } } }" );
 
@@ -417,6 +393,7 @@ int lsdmain( int argn, char **argv )
 	}
 	choice = 0;
 	cmd( "set path [ file normalize \"%s\" ]", exec_path );
+	
 	// check if directory is ok and if executable is inside a macOS package
 	cmd( "if [ file exists \"$path/modelinfo.txt\" ] { \
 			cd \"$path\" \
@@ -477,10 +454,10 @@ int lsdmain( int argn, char **argv )
 	cmd( "set RootLsd \"%s\"", lsdroot );
 
 	cmd( "set choice [ file exist \"$RootLsd/lmm_options.txt\" ]" );
-	if ( choice )
+	if ( choice == 1 )
 	{
 		cmd( "set f [open \"$RootLsd/lmm_options.txt\" r]" );
-		cmd( "gets $f Terminal" );
+		cmd( "gets $f sysTerm" );
 		cmd( "gets $f HtmlBrowser" );
 		cmd( "gets $f fonttype" );
 		cmd( "gets $f wish" );
@@ -492,40 +469,44 @@ int lsdmain( int argn, char **argv )
 	else
 	{
 		cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the 'Options' in menu 'File'.\"" );
-		// set platform-specific variables
-		cmd( "if [ string equal $tcl_platform(platform) unix ] { set wish wish; set Terminal xterm; set HtmlBrowser firefox; set fonttype Courier; set dim_character 12 }" );
-		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish wish8.5; set Terminal Terminal; set HtmlBrowser open; set fonttype Monaco; set dim_character 14 }" );
-		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set wish wish85.exe; set Terminal cmd; set HtmlBrowser open; set fonttype Consolas; set dim_character 11 }" );
-		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set wish wish86.exe; set Terminal cmd; set HtmlBrowser open; set fonttype Consolas; set dim_character 11 }" );
+		
 		cmd( "set LsdSrc src" );
 		cmd( "set tabsize 2" );
 	}
-
-	cmd( "set small_character [ expr $dim_character - 2 ]" );
-	cmd( "set font_normal [ list \"$fonttype\" $dim_character ]" );
-	cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
-
+		
+	i = choice;
+	
+	// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 	choice = 0;
+
 	// load native Tk windows defaults
-	cmd( "if [ file exists $RootLsd/$LsdSrc/defaults.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/defaults.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/defaults.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/defaults.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0100, 0x01 );
 
 	// load native Tk procedures for windows management
-	cmd( "if [ file exists $RootLsd/$LsdSrc/window.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/window.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0200, 0x02 );
 
 	// load native Tcl procedures for external files handling
-	cmd( "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/ls2html.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0400, 0x04 );
+
+	// load additional native Tcl procedures for external files handling
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0800, 0x08 );
+
+	// load module to improve to improve mouse selection
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/dblclick.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/dblclick.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x1000, 0x10 );
 
 	if ( choice != 0 )
 	{
-		log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+		log_tcl_error( "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
 		myexit( 200 + choice );
 	}
 
 	// create a Tcl command that calls the C discard_change function before killing LSD
 	Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 
-	// create Tcl commands that get and set LSD variable properties
+	// create Tcl commands that get and set LSD object/variable properties
+	Tcl_CreateCommand( inter, "get_obj_conf", Tcl_get_obj_conf, NULL, NULL );
+	Tcl_CreateCommand( inter, "set_obj_conf", Tcl_set_obj_conf, NULL, NULL );
 	Tcl_CreateCommand( inter, "get_var_conf", Tcl_get_var_conf, NULL, NULL );
 	Tcl_CreateCommand( inter, "set_var_conf", Tcl_set_var_conf, NULL, NULL );
 
@@ -534,6 +515,24 @@ int lsdmain( int argn, char **argv )
 
 	// create Tcl command to upload series data
 	Tcl_CreateObjCommand( inter, "upload_series", Tcl_upload_series, NULL, NULL );
+
+	// set platform-specific variables 
+	if ( i == 0 )
+	{
+		cmd( "if [ string equal $tcl_platform(platform) unix ] { set wish $wishLinux; set sysTerm $sysTermLinux; set HtmlBrowser $browserLinux; set fonttype $fontLinux; set dim_character $fontSizeLinux }" );
+#ifdef MAC_PKG
+		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish $wishMacTk86; set sysTerm $sysTermMac; set HtmlBrowser $browserMac; set fonttype $fontMac; set dim_character $fontSizeMac }" );
+#else
+		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish $wishMacTk85; set sysTerm $sysTermMac; set HtmlBrowser $browserMac; set fonttype $fontMac; set dim_character $fontSizeMac }" );
+#endif
+		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set wish $wishWinTk85; set sysTerm $sysTermWindows; set HtmlBrowser $browserWindows; set fonttype $fontWindows; set dim_character $fontSizeWindows }" );
+		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set wish $wishWinTk86; set sysTerm $sysTermWindows; set HtmlBrowser $browserWindows; set fonttype $fontWindows; set dim_character $fontSizeWindows }" );
+	}
+
+	cmd( "if [ string equal $tcl_platform(platform) windows ] { set small_character [ expr $dim_character - $deltaSizeWindows ] } { if [ string equal $tcl_platform(os) Darwin ] { set small_character [ expr $dim_character - $deltaSizeMac ] } { set small_character [ expr $dim_character - $deltaSizeLinux ] } }" );
+	cmd( "set font_normal [ list \"$fonttype\" $dim_character ]" );
+	cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
+	cmd( "set gpterm $gnuplotTerm" );
 
 	// set main window
 	cmd( "wm withdraw ." );
@@ -575,11 +574,11 @@ int lsdmain( int argn, char **argv )
 
 	while ( 1 )
 	{
-		root = create( root );
+		create( );
 		
 		try 
 		{
-			run( root );
+			run( );
 		}
 		catch( int p )           	// return point from error_hard() (in object.cpp)
 		{		
@@ -595,10 +594,11 @@ int lsdmain( int argn, char **argv )
 
 #else
 
-	run( root );
+	run( );
 
 #endif 
 
+	empty_lattice( );
 	empty_description( );
 	empty_cemetery( );
 	blueprint->empty( );
@@ -618,14 +618,14 @@ int lsdmain( int argn, char **argv )
 /*********************************
 RUN
 *********************************/
-void run( object *root )
+void run( void )
 {
-	int i, j, perc_done, last_done;
-	bool batch_sequential_loop = false;
 	char bar_done[ 2 * BAR_DONE_SIZE ];
+	int i, perc_done, last_done;
+	bool batch_sequential_loop = false;
 	FILE *f;
-	result *rf;					// pointer for results files (may be zipped or not)
 	clock_t start, end;
+	result *rf;					// pointer for results files (may be zipped or not)
 
 #ifdef PARALLEL_MODE
 	// check if there are parallel computing variables
@@ -661,6 +661,7 @@ void run( object *root )
 
 	for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
 	{
+		running = true;		// signal simulation is running
 		cur_sim = i;	 	// Update the global variable holding information on the current run in the set of runs
 		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed (sorry Nadia!)
 
@@ -678,7 +679,7 @@ void run( object *root )
 		// if new batch configuration file, reload all
 		if ( batch_sequential_loop )
 		{
-			if ( load_configuration( root, false ) != 0 )
+			if ( load_configuration( true ) != 0 )
 			{
 #ifndef NO_WINDOW 
 				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
@@ -693,7 +694,7 @@ void run( object *root )
 
 		// if just another run seed, reload just structure & parameters
 		if ( i > 1 )
-			if ( load_configuration( root, true ) != 0 )
+			if ( load_configuration( true, true ) != 0 )
 			{
 #ifndef NO_WINDOW 
 				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
@@ -703,6 +704,10 @@ void run( object *root )
 #endif
 				myexit( 10 );
 			}
+			
+		// build initial object list for user pointer checking
+		if ( ! no_ptr_chk )
+			build_obj_list( true );
 
 		series_saved = 0;
 
@@ -720,16 +725,20 @@ void run( object *root )
 		// reset trace stack
 		unwind_stack( );
 
-		//new random routine' initialization
-		init_random(seed);
+		// new random routine' initialization
+		init_random( seed );
+		
+		// reset math error counters
+		init_math_error( );
 
 		seed++;
 		scroll = false;
 		pause_run = false;
-		running = true;
 		debug_flag = false;
+		wait_delete = NULL;
 		stack_info = 0;
 		use_nan = false;
+		no_search = false;
 		on_bar = false;
 		done_in = 0;
 		actual_steps = 0;
@@ -908,31 +917,34 @@ void run( object *root )
 #endif
 		}	// end of for t
 
-		actual_steps = t - 1;
+		actual_steps = max( t - 1, 1 );
 		unsavedData = true;			// flag unsaved simulation results
 		running = false;
-		end = clock();
+		deb_log( false );			// close debug log file, if any
+		end = clock( );
 
-		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
-			quit=0;
-		
 		if ( fast_mode == 1 && on_bar )
 			plog( "100%%", "bar" );
 		if ( fast_mode < 2 )
-			plog( "\nSimulation %d finished (%.2f sec.)\n", "", i, ( float ) ( end - start ) / CLOCKS_PER_SEC );
+			plog( "\nSimulation %d %s (%.2f sec.)\n", "", i, quit == 2 ? "aborted" : "finished", ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
+		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
+			quit = 0;
+		
 #ifndef NO_WINDOW 
 		cmd( "destroytop .deb" );
 		cmd( "update" );
-		// allow for run-time plot window destruction
-		cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.fond.go conf -state disabled; .plt%d.fond.shift conf -state disabled }", i, i, i, i  );
+		reset_plot( i );
 #endif
-
+		// run user closing function, reporting error appropriately
+		user_exception = true;
 		close_sim( );
+		user_exception = false;
+		
 		reset_end( root );
 		root->emptyturbo( );
 		
-		if ( sim_num > 1 || no_window )
+		if ( quit != 2 && ( sim_num > 1 || no_window ) )
 		{
 			// save results for multiple simulation runs, if any
 			if ( series_saved > 0 )
@@ -1012,7 +1024,7 @@ void run( object *root )
 				if ( fast_mode < 2 )
 					plog( "\nProcessing configuration file %s ...\n", "", struct_file );
 				fclose( f );  								// process next file
-				struct_loaded = true;
+
 				i = 0;   									// force restarting run count
 				batch_sequential_loop = true;				// force reloading configuration
 			} 
@@ -1087,16 +1099,14 @@ void set_fast( int level )
 	// remove the variables stack when switching to any fast mode
 	if ( fast_mode == 0 && level > 0 )
 	{
-		if ( stack_info > 0 || prof_aggr_time )
+		if ( when_debug > 0 || stack_info > 0 || prof_aggr_time )
 		{
-#ifndef NO_WINDOW   
-			cmd( "tk_messageBox -parent .log -title Warning -icon warning -type ok -message \"Fast mode not available\" -detail \"Fast mode is not supported when stack profiling is activated.\nTo enable fast mode, please disable stack profiling using menu 'Run', option 'Simulation Settings'.\"" );
-#else
-			fprintf( stderr, "\nFast mode is not supported.\n" );	
-#endif
+			plog( "\nWarning: %s is active, fast mode command ignored", "", 
+				  when_debug > 0 ? "debugging" : "profiling" );
 			return;
 		}
 		unwind_stack( );
+		deb_log( false );
 	}
 	
 	fast_mode = level;
@@ -1140,15 +1150,15 @@ void unwind_stack( void )
 /*********************************
 ALLOC_SAVE_MEM
 *********************************/
-bool alloc_save_mem( object *root )
+bool alloc_save_mem( object *r )
 {
 	int toquit = quit;
+	bridge *cb;
 	object *cur;
 	variable *var;
-	bridge *cb;
 
 	//for each variable set the data saving support
-	for ( var = root->v; var != NULL; var = var->next )
+	for ( var = r->v; var != NULL; var = var->next )
 	{ 
 		var->last_update = 0;
 
@@ -1184,28 +1194,23 @@ bool alloc_save_mem( object *root )
 				var->save = var->savei = 0;
 		}
 		
-		if ( ( var->num_lag > 0 || var->param == 1 ) && var->data_loaded=='-')
+		if ( ( var->num_lag > 0 || var->param == 1 ) && var->data_loaded == '-' )
 		{
-			plog( "\nIntialization data for %s in object %s not set\n", "", var->label, root->label );
-#ifndef NO_WINDOW   
-			plog( "Use the Initial Values editor to set its values\n" );
-			if ( var->param == 1 )
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label );
-			else
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label );  
-#endif
+			sprintf( msg, "%s '%s' in object '%s' has not been initialized", var->param == 1 ? "parameter" : "variable", var->label, r->label );
+			error_hard( msg, "required initialization values missing", "select the object and choose menu 'Data'/'Initial Values'" );
+			
 			toquit = 2;
 		}
 	}
 
-	for ( cb = root->b; cb != NULL; cb = cb->next )
+	for ( cb = r->b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL && quit != 2; cur = go_brother( cur ) )
 			alloc_save_mem( cur );
 
 	if ( quit != 2 )
 		quit = toquit;
 	
-	return ( ! no_more_memory );
+	return ! no_more_memory;
 }
 
 
@@ -1272,9 +1277,9 @@ RESET_END
 *********************************/
 void reset_end( object *r )
 {
+	bridge *cb;
 	object *cur;
 	variable *cv;
-	bridge *cb;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{ 
@@ -1287,7 +1292,7 @@ void reset_end( object *r )
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
 		cur = cb->head;
-		if ( cur != NULL && cur->to_compute == 1 )
+		if ( cur != NULL && cur->to_compute )
 			for ( ; cur != NULL; cur = go_brother( cur ) )
 				reset_end( cur );
 	}
@@ -1332,8 +1337,6 @@ void set_buttons_log( bool on )
 /*********************************
 COVER_BROWSER
 *********************************/
-bool brCovered = false;
-
 void cover_browser( const char *text1, const char *text2, const char *text3 )
 {
 	if ( brCovered )		// ignore if already covered
@@ -1516,9 +1519,8 @@ SEARCH_PARALLEL
 ***************************************/
 bool search_parallel( object *r )
 {
-	variable *cv;
-	object *co;
 	bridge *cb; 
+	variable *cv;
 
 	// search among the variables 
 	for ( cv = r->v; cv != NULL; cv=cv->next )
@@ -1532,4 +1534,69 @@ bool search_parallel( object *r )
 				return true;
 
 	return false;
+}
+
+
+/*******************************************
+DEB_LOG
+Creates/saves the file "log.txt" and 
+enable/disable logging the variables 
+computation order and enable/disable the 
+debugger 
+********************************************/
+void deb_log( bool on, int time )
+{ 
+#ifndef NO_WINDOW  
+	// check if should turn off
+	if ( ! on || parallel_mode || fast_mode != 0 )
+	{
+		// disable debugging
+		if ( time > t && when_debug >= time )
+			when_debug = 0;
+		else
+			if ( ( time == 0 && when_debug == t ) || time == t )
+				debug_flag = false;
+			
+		// act now?
+		if ( time == 0 || t > time )
+		{
+			// close file if open
+			if ( log_file != NULL )
+			{
+				fclose( log_file );
+				log_file = NULL;
+			}
+		}
+		else
+			log_stop = time;
+	}
+
+	// check if should turn on
+	if ( on && ! parallel_mode && fast_mode == 0 )
+	{
+		// enable debugging
+		if ( time > t )
+			when_debug = time;
+		else
+			if ( time == 0 || time == t )
+			{
+				when_debug = t;
+				debug_flag = true;
+				cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
+			}
+		
+		// ignore if log already open
+		if ( log_file == NULL )
+		{
+			log_file = fopen( "log.txt", "a" );
+			log_start = time;
+			log_stop = max_step;
+		}
+	}
+	
+	if ( on && ( parallel_mode || fast_mode > 0 ) )
+		plog( "\nWarning: %s is active, debug command ignored", "", 
+			  parallel_mode ? "parallel processing" : "fast mode" );
+			
+#endif
 }

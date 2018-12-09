@@ -1,6 +1,22 @@
 @echo off
+rem *************************************************************
+rem
+rem	 LSD 7.1 - December 2018
+rem	 written by Marco Valente, Universita' dell'Aquila
+rem	 and by Marcelo Pereira, University of Campinas
+rem
+rem	 Copyright Marco Valente and Marcelo Pereira
+rem	 LSD is distributed under the GNU General Public License
+rem	
+rem *************************************************************
+
+rem *************************************************************
+rem  ADD-SHORTCUT64.BAT
+rem  Add a shortcut to LSD LMM in the Windows 64-bit desktop.
+rem *************************************************************
+
 if "%1"=="/?" (
-	echo Add a shortcut to Lsd LMM in the desktop
+	echo Add a shortcut to LSD LMM in the desktop
 	echo Usage: add-shortcut [32]
 	goto end
 )

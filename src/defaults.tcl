@@ -1,17 +1,18 @@
 #*************************************************************
 #
-#	LSD 7.0 - January 2018
+#	LSD 7.1 - December 2018
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
-#	Copyright Marco Valente
+#	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
 #	
 #*************************************************************
 
-#****************************************************
+#*************************************************************
+# DEFAULTS.TCL
 # Default values for the Tk windowing system. 
-#****************************************************
+#*************************************************************
 
 package require Tk
 
@@ -36,8 +37,8 @@ set smoothP		no	; # options are no, yes or raw
 set splstepsP 	3	; # number of spline segments when smoothP is raw
 
 # lattice options (maximum & default, color scale)
-set hsizeLatMax	600	; # maximum lattice horizontal size in pixels
-set vsizeLatMax	600	; # maximum lattice vertical size in pixels
+set hsizeLatMax	1024; # maximum lattice horizontal size in pixels
+set vsizeLatMax	1024; # maximum lattice vertical size in pixels
 set hsizeLat	400	; # default lattice horizontal size in pixels
 set vsizeLat	400	; # default lattice vertical size in pixels
 set cscaleLat	1.0	; # default color scale (1:1.0)
@@ -46,7 +47,7 @@ set cscaleLat	1.0	; # default color scale (1:1.0)
 set grayscaleP	0	; # default color mode for plots (0=color)
 set gridP		0	; # defaut grid mode (0=no grid)
 set linemodeP	1	; # default line mode (1:lines/2:points)
-set pdigitsP	4	; # default precision digits
+set pdigitsP	3	; # default precision digits
 set pointsizeP	1.0	; # default size of points (<1:./<2:x/<3:+/>=3:round)
 set maxzoomP	4.0	; # maximum zoom magnification factor in plots
 set minzoomP	0.5	; # minimum zoom shrinking factor in plots
@@ -83,6 +84,25 @@ set daCwidWindows	36	; # Windows
 set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down
 set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Windows
 
+# folder/group/object symbols
+set upSymbol 	"\u25B2 .."	; # up in tree structure symbol
+set groupSymbol	"\u25B6 "	; # group symbol
+
+# OS specific monospaced font name
+set fontMac		"Monaco"			; # "Courier"
+set fontLinux	"DejaVu Sans Mono"	; # "Courier"
+set fontWindows	"Consolas"			; # "Courier"
+
+# OS specific monospaced font size
+set fontSizeMac		14
+set fontSizeLinux	11
+set fontSizeWindows	11
+
+# OS specific monospaced small font size delta (negative)
+set deltaSizeMac		1
+set deltaSizeLinux		1
+set deltaSizeWindows	2
+
 # OS specific default window buttons widths
 set butLinux	7
 set butMacTk85	7
@@ -97,4 +117,47 @@ set corrYlinux	-55
 set corrXwindows 0
 set corrYwindows 0
 
+# OS specific default system terminal
+set sysTermMac		"Terminal"	; # "Terminal", "xterm"
+set sysTermLinux	"xterm"		; # "gnome-terminal", "xterm", "uxterm"
+set sysTermWindows	"cmd"		;
+
+# OS specific default debugger command
+set dbgMac			"lldb"		; # "gdb"
+set dbgLinux		"gdb"		;
+set dbgWindows		"gdb"		;
+
+# OS specific default browser (open=system default)
+set browserMac		"open"		; # "open", "firefox", "safari"
+set browserLinux	"firefox"	; # "open", "firefox", "chrome"
+set browserWindows	"open"		; # "open", "firefox", "chrome"
+
+# OS specific default wish utility
+set wishMacTk85		"wish8.5"
+set wishMacTk86		"wish8.6"
+set wishLinux		"wish"
+set wishWinTk85		"wish85.exe"
+set wishWinTk86		"wish86.exe"
+
+# OS specific make utility
+set makeMac			"make"
+set makeLinux		"make"
+set makeWin32		"make.exe"
+set makeWin64cyg	"make.exe"
+set makeWin64mgw	"mingw32-make.exe"
+
+# OS specific default gnuplot terminal (empty string=gnuplot default)
+set gnuplotTermMac		""	; # "qt", "x11"
+set gnuplotTermLinux	""	; # "qt", "wxt", "x11"
+set gnuplotTermWindows	""	; # "wxt", "qt" , "windows"
+
+# default gnuplot options
+set gnuplotGrid3D	"60,60,3"				;
+set gnuplotOptions	"set ticslevel 0.0"		;
+
+
+#************************************************
+# DEFAULTS_LOADED
+# Indicate defaults are loaded
+#************************************************
 proc defaults_loaded { } { }

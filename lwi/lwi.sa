@@ -1,0 +1,11 @@
+Regime_imi 0 2 i: 0 2
+Regime_inno 0 2 i: 0 3
+Regime_restraint 0 2 i: 0 1
+Regime_fission 0 2 i: 0 1
+Bank 0 2 f: 0 5
+Dem_Coeff 0 2 i: 10 100
+Dem_elast 0 2 f: 0.5 2
+Inn_stddev 0 2 f: 0.001 0.1
+Dep_rate 0 2 f: 0.01 0.1
+Fiss 0 2 f: 0.001 0.1
+

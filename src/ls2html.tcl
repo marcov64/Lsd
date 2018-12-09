@@ -1,18 +1,23 @@
 #*************************************************************
 #
-#	LSD 7.0 - January 2018
+#	LSD 7.1 - December 2018
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
-#	Copyright Marco Valente
+#	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
 #	
 #*************************************************************
 
-# Collection of procedures to manage HTML and other external files
+#*************************************************************
+# LS2HTML.TCL
+# Collection of procedures to manage HTML and other external files.
+#*************************************************************
 
-
+#************************************************
+# LSDABOUT
 # Show LSD About dialog box
+#************************************************
 proc LsdAbout { ver dat { parWnd "." } } {
 	global tcl_platform
 
@@ -22,14 +27,16 @@ proc LsdAbout { ver dat { parWnd "." } } {
 	set os $tcl_platform(os)
 	set osV $tcl_platform(osVersion)
 	set tclV [ info patch ]
-	set copyr "written by Marco Valente, Universita' dell'Aquila\nand by Marcelo Pereira, University of Campinas\n\nCopyright Marco Valente\nLSD is distributed under the GNU General Public License"
+	set copyr "written by Marco Valente, Universita' dell'Aquila\nand by Marcelo Pereira, University of Campinas\n\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License"
 	
 	tk_messageBox -parent $parWnd -type ok -icon info -title $tit -message "Version $ver ($dat)" -detail "Platform: $plat ($mach)\nOS: $os ($osV)\nTcl/Tk: $tclV\n\n$copyr"
 }
 
 
-
+#************************************************
+# LSDEXIT
 # Remove existing LSD temporary files
+#************************************************
 proc LsdExit { } {
 	global RootLsd
 	if { [ file exists $RootLsd/Manual/temp.html ] } { 
@@ -42,6 +49,9 @@ proc LsdExit { } {
 }
 
 
+#************************************************
+# LSDHELP
+#************************************************
 proc LsdHelp a {
 	global HtmlBrowser tcl_platform RootLsd
 	set here [ pwd ]
@@ -57,6 +67,9 @@ proc LsdHelp a {
 }
 
 
+#************************************************
+# LSDHTML
+#************************************************
 proc LsdHtml a {
 	global HtmlBrowser tcl_platform
 	set f [ open temp.html w ]
@@ -71,6 +84,9 @@ proc LsdHtml a {
 }
 
 
+#************************************************
+# LSDTKDIFF
+#************************************************
 proc LsdTkDiff { a b { c "" } { d "" } } {
 	global tcl_platform RootLsd wish LsdSrc
 	if { $tcl_platform(platform) == "unix" } {
@@ -81,12 +97,14 @@ proc LsdTkDiff { a b { c "" } { d "" } } {
 }
 
 
+#************************************************
+# LS2HTML
 # Procedure used to allocate a file 'index.html' in each directory
 # containing links to each file
 # the "from" parameter is the directory root where to start inserting the index.html files
 # the "chop" parameter is the number of characters to chop from the beginning of the directory.
 # For example, if the directory is C:/Lsd5.1, setting chop=3 will make appear the directory names as Lsd5.1
-
+#************************************************
 proc ls2html {from chop} {
 
 	catch [set list [glob *]]
@@ -153,24 +171,29 @@ proc ls2html {from chop} {
 }
 
 
+#************************************************
 # FN_SPACES
-# 	Checks is a filename has spaces
-#
-
+# Checks is a filename has spaces
+# Set 'mult' to one if multiple file names are allowed
+#************************************************
 proc fn_spaces { fn { par . } { mult 0 } } {
 	if $mult {
 		set count [ llength $fn ]
 	} else {
-		set count 0
+		set count 1
 	}
 
 	for { set i 0 } { $i < $count } { incr i } {
-		set file "[ lindex $fn $i ]"
-		if { [ string first " " $file ] == -1 } {
-			return false
+		if $mult {
+			set file "[ lindex $fn $i ]"
 		} else {
+			set file "$fn"
+		}
+		if { [ string first " " "$file" ] != -1 } {
 			tk_messageBox -parent $par -type ok -title Error -icon error -message "Invalid file name or path" -detail "Invalid file name/path:\n\n'$fn'\n\nLSD files must have no spaces in the file names nor in their directory path. Please rename the file and/or move it to a different directory."
 			return true
+		} else {
+			return false
 		}
 	}
 	return false

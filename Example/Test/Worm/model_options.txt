@@ -1,0 +1,4 @@
+TARGET=lsd_gnu
+FUN=fun_Worm
+SWITCH_CC=-g
+

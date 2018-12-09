@@ -1,0 +1,556 @@
+	
+Label Root
+{
+	Son: Sea
+	Label Sea
+	{
+		Son: Island
+		Label Island
+		{
+			Param: _idIsland
+			Param: _xIsland
+			Param: _yIsland
+			Param: _known
+
+		}
+
+		Son: KnownIsland
+		Label KnownIsland
+		{
+			Son: Miner
+			Label Miner
+			{
+				Param: _active
+				Param: _agentId
+				Param: _xBest
+				Param: _yBest
+				Var: _cBest
+				Var: _Qminer
+
+			}
+
+			Param: _idKnown
+			Param: _s
+			Var: _c
+			Var: _m
+			Var: _Qisland
+
+		}
+
+		Son: Agent
+		Label Agent
+		{
+			Param: _idAgent
+			Param: _knownId
+			Param: _xAgent
+			Param: _yAgent
+			Param: _xTarget
+			Param: _yTarget
+			Param: _Qlast
+			Var: _a
+
+		}
+
+		Param: N
+		Param: alpha
+		Param: epsilon
+		Param: phi
+		Param: lambda
+		Param: pi
+		Param: rho
+		Param: l0radius
+		Param: minSgnPrb
+		Param: seaShown
+		Param: eastFrontier
+		Param: northFrontier
+		Param: southFrontier
+		Param: westFrontier
+		Var: Init
+		Var: Step
+		Var: g
+		Var: l
+		Var: m
+		Var: J
+		Var: Q
+
+	}
+
+	Param: latticeOpen
+	Param: simSpeed
+	Param: sizeLattice
+
+}
+
+
+DATA
+
+Object: Root C	1
+Param: latticeOpen 0 n + n n	0
+Param: simSpeed 0 n + n n	0
+Param: sizeLattice 0 n + n n	0
+
+Object: Sea C	1
+Param: N 0 n + n n	100
+Param: alpha 0 n + n n	1.5
+Param: epsilon 0 n + n n	0.1
+Param: phi 0 n + n n	0.5
+Param: lambda 0 n + n n	1
+Param: pi 0 n + n n	0.1
+Param: rho 0 n + n n	0.1
+Param: l0radius 0 n + n n	0
+Param: minSgnPrb 0 n + n n	0.01
+Param: seaShown 0 n + n n	0
+Param: eastFrontier 0 n + n n	0
+Param: northFrontier 0 n + n n	0
+Param: southFrontier 0 n + n n	0
+Param: westFrontier 0 n + n n	0
+Var: Init 0 n + n n
+Var: Step 0 n + n n
+Var: g 0 s + n n
+Var: l 1 s + n n	1
+Var: m 1 s + n n	0
+Var: J 0 s + n n
+Var: Q 1 s + n n	0
+
+Object: Island N	1
+Param: _idIsland 0 n + n n	0
+Param: _xIsland 0 n + n n	0
+Param: _yIsland 0 n + n n	0
+Param: _known 0 n + n n	0
+
+Object: KnownIsland C	1
+Param: _idKnown 0 n + n n	0
+Param: _s 0 n + n n	0
+Var: _c 1 n + n n	0
+Var: _m 1 n + n n	0
+Var: _Qisland 0 n + n n
+
+Object: Miner C	1
+Param: _active 0 n + n n	0
+Param: _agentId 0 n + n n	0
+Param: _xBest 0 n + n n	0
+Param: _yBest 0 n + n n	0
+Var: _cBest 0 n + n N
+Var: _Qminer 1 n + n n	0
+
+Object: Agent C	1
+Param: _idAgent 0 n + n n	0
+Param: _knownId 0 n + n n	0
+Param: _xAgent 0 n + n n	0
+Param: _yAgent 0 n + n n	0
+Param: _xTarget 0 n + n n	0
+Param: _yTarget 0 n + n n	0
+Param: _Qlast 0 n + n n	0
+Var: _a 1 n + n n	0
+
+SIM_NUM 100
+SEED 1
+MAX_STEP 1000
+EQUATION fun_Island.cpp
+MODELREPORT report_Sim1.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Parameter_latticeOpen
+Indicate if the lattice window was already created by any Sea instance.
+Auto updated by Init equation, please don't change.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_simSpeed
+Slow-down factor in milliseconds to delay the simulation after each time step (>= 0). Zero sets no delay.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_sizeLattice
+Size of the lattice, must be even (>= 0).
+Set to zero to disable lattice.
+The size is measured in model's measure units.
+The lattice is always centered around the origin (0, 0) and the shown lattice size will be one unit larger. 
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Object_Sea
+The regular lattice representing the technological space.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_N
+The number of agents in the sea (producers and explorers).
+_INIT_
+All 1 instances equal to 100.
+END_DESCRIPTION
+
+Parameter_alpha
+Returns to scale parameter (alpha >= 1). 
+_INIT_
+All 1 instances equal to 1.5.
+END_DESCRIPTION
+
+Parameter_epsilon
+The willingness of an agent to become an explorer (0 <= epsilon <= 1).
+_INIT_
+All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_phi
+The weight of the past skills of the dicoverer of an island (0 <= phi <= 1).
+_INIT_
+All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_lambda
+The mean of the poisson distribution governing the probability of high changes in productivity (lambda > 0).
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_pi
+The probability that a point in the se is an island (0 < pi < 1).
+If pi = 0, the number of knowable islands is fixed and equal to l0 (bounded economy).
+_INIT_
+All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_rho
+Degree of locality of the imitation interactions (rho >= 0).
+0 - global interactions
+infinity - no interactions
+_INIT_
+All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_l0radius
+Radius from sea lattice origin (0, 0) where initial islands can be located.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_minSgnPrb
+Minimum signal probability to be considered on imitation interactions (0 <= minSgnPrb <= 1).
+This parameter eliminates from the imitation signals diffusion far islands which the probability for a signal spreading is less than minSgnPrb even for a very populated island. This speeds up simulation and reduce the memory requirements significantly. Set to 0 do always have global spreading. 
+_INIT_
+All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_seaShown
+Indicate if the lattice window was already created by this Sea instance.
+Auto updated by Init equation, please don't change.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_eastFrontier
+Right sea frontier longitude.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_northFrontier
+Upper sea frontier latitude.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_southFrontier
+Lower sea frontier latitude.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_westFrontier
+Left sea frontier longitude.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_Init
+Technical variable to create the sea lattice and initialize it with the islands and agents.
+It is computed only once in the beginning of the simulation.
+Must be the first variable in the list.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Step
+Technical variable to force the calculation of any Variable that has to be calculated early in the time step.
+Must be the second variable in the list, after 'Init'.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_g
+Total output (GDP) growth rate.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_l
+Number of known islands (technologies).
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Variable_m
+Number of agents currently mining on all islands.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_J
+The number of existing islands.
+Expands the size of the sea as agents get closer to the borders.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Q
+Total output (GDP).
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Object_Island
+The known and unknown islands where production can be done.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter__idIsland
+Island id number, formed by its rebased (positive only) coordinates:
+ IIIIIIJJJJJJ.0000
+Where X = IIIIII - LAST_T and Y = JJJJJJ - LAST_T. LAST_T is the total number of simulation timesteps.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__xIsland
+The island x coordinate in the ocean lattice.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__yIsland
+The island y coordinate in the ocean lattice.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__known
+Flag to indicate if the island is known:
+0 - not known
+1 - known (already produced good)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Object_KnownIsland
+The known islands where production can be done.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter__idKnown
+Known island sequential id number, starting from 1.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__s
+The island productivity coefficient.
+The amount of good which can be extracted if there is only one agent on the island.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__c
+The productivity of the island.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__m
+Number of agents currently mining on island.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__Qisland
+Total output of island.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Miner
+A miner in the island.
+This object is always linked to an Agent object. 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter__active
+Flag to indicate if it is an active miner (0 or 1).
+At least one Miner object must exist in each KnownIsland object, even if no agent is mining on the island. This is a LSD technical requirement. This flag is useful to indicate such unused Miner objects, unconnected to any Agent object.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__agentId
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__xBest
+The best known island (in productivity terms) x coordinate.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__yBest
+The best known island (in productivity terms) y coordinate.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__cBest
+The productivity of the best known island with a signal received.
+_INIT_
+
+END_DESCRIPTION
+
+Variable__Qminer
+Output of miner.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Object_Agent
+The agents who perform the production and the sea exploration.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter__idAgent
+Agent sequential id number, starting from 1.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__knownId
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__xAgent
+The agent x coordinate in the ocean lattice.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__yAgent
+The agent y coordinate in the ocean lattice.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__xTarget
+The target island (imitated technology) x coordinate.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__yTarget
+The target island (imitated technology) y coordinate.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__Qlast
+Last output of agent when was a miner in an island.
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__a
+The agent state. 
+Can be:
+1 - miner
+2 - explorer
+3 - imitator
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head_fast.h"
+
+// define special types used in equations (no allocation is made here)
+
+typedef Matrix< double, Dynamic, Dynamic > lattice;
+
+// insert your equations between MODELBEGIN and MODELEND
+
+MODELBEGIN
+
+EQUATION("Init")
+/*
+Comment
+*/
+
+ADDEXT( lattice );
+DO_EXT( lattice, resize, 2 * LAST_T, 2 * LAST_T );
+*P_EXT( lattice ) << 1, 2, 3, 4;  
+
+v[1] = ( *P_EXT( lattice ) )( 0, 0 );
+v[2] = ( *P_EXT( lattice ) )( 0, 1 );
+v[3] = ( *P_EXT( lattice ) )( 1, 0 );
+v[4] = ( *P_EXT( lattice ) )( 0, 1 );
+
+i = DO_EXT( lattice, rows );
+j = DO_EXT( lattice, cols );
+
+PARAMETER;
+
+RESULT( 1 )
+
+
+
+
+
+
+
+
+
+
+MODELEND
+
+// do not add Equations in this area
+
+// close simulation special commands
+void close_sim( void )
+{
+
+}
+
+END_EQ_FILE

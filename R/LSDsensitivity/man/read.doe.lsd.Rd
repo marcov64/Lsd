@@ -9,9 +9,9 @@ This function reads the sampling data produced by a LSD model design of experime
 \usage{
 read.doe.lsd(folder, baseName, outVar, does = 1, doeFile = NULL, respFile = NULL,
              validFile = NULL, valRespFile = NULL, confFile = NULL, limFile = NULL,
-             iniDrop = 0, nKeep = -1, saveVars = c(), addVars = c(),
-             eval.vars = NULL, eval.run = NULL, pool = TRUE, rm.temp = TRUE,
-             rm.outl = FALSE, lim.outl = 10)
+             iniDrop = 0, nKeep = -1, saveVars = c(), addVars = c(), eval.vars = NULL,
+             eval.run = NULL, pool = TRUE, na.rm = FALSE, rm.temp = TRUE,
+             rm.outl = FALSE, lim.outl = 10, nnodes = 1)
 }
 \arguments{
   \item{folder}{
@@ -60,10 +60,13 @@ a vector of new LSD variable names to be added to the data set. The default (\co
 a function to recalculate any item of the imported data set, including added variables. The default (NULL) is to have no function (just use selected existing variables as is). If defined, function must take two arguments: the data set for a specific DoE point (time steps in the rows) and the list of variables (columns) in the data set. The function may change any value within the data set but \emph{should not} add or remove rows or columns.
 }
   \item{eval.run}{
-a function to evaluate the DoE response for each experimental point, attributing an optional value to it. The default (NULL) is to have no function (use the selected variable Monte Carlo mean and standard deviation to value the point). If defined, function must take four arguments: (a) the data set for a specific DoE point (time steps in the rows and variables in columns), (b) the number of the Monte Carlo run, (c) the index to the analysis variable in the data set, and (d) the applicable confidence interval. The function must return a R list containing four values: (a) the average value for the response in the point, (b) the response standard deviation, (c) the the number of observations used, and (d) the number of observations discarded.
+a function to evaluate the DoE response for each experimental sampling point, attributing an optional value to it. The default (NULL) is to have no function (use the selected variable Monte Carlo mean and standard deviation to value the point). If defined, function must take four arguments: (a) the data set (a 3-dimensional array of lists, the numbers of the DoE sampling points in the first dimension, variables in the second, and Monte Carlo runs in the in the third, being each list element a vector with all time-step values for that sample/variable/MC run), (b) the number of the DoE sampling point to evaluate, (c) the index to the analysis variable in the data set, and (d) the applicable confidence interval. The function must return a R list containing four values for the selected sampling point/variable pair: (a) the average value for the response, (b) the response standard deviation, (c) the the number of observations used, and (d) the number of observations discarded.
 }
   \item{pool}{
 logical: if TRUE then create a simpler data array, pooling together all non-NA Monte Carlo values from a single run for each variable. If FALSE (default) keep each Monte Carlo instance separated.
+}
+  \item{na.rm}{
+logical: if TRUE NA values are stripped before the computation proceeds.
 }
   \item{rm.temp}{
 logical: if TRUE then remove temporary speed up files. If FALSE (default), do not remove temporary speed up files, allowing fast execution of subsequent call to this function. Please note that the user \emph{must} remove temporary files (extension \code{.Rdata}) manually whenever LSD data files are updated.
@@ -73,6 +76,9 @@ logical: if TRUE, remove outliers from dataset. Default is FALSE, no outliers re
 }
   \item{lim.outl}{
 numeric: if \code{rm.outl = TRUE}, defines the limit for non-outliers deviation in number of standard deviations.
+}
+  \item{nnodes}{
+integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, nnodes = 1, means single thread processing (no parallelization). If equal to zero, creates up to one node per CPU core. Only "PSOCK" clusters are used, to ensure compatibility with any platform. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
 }
 }
 \details{

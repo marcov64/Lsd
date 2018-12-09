@@ -1,3 +1,0 @@
-Model: Bugs' Life
-
-A swarm of bugs grows and shrinks under the forces of reproduction, food and age.

@@ -1,21 +1,20 @@
 /*************************************************************
 
-	LSD 7.0 - January 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-GETLIMITS.CPP contains:
-- execute the lsd_getlimits command line utility.
+/*************************************************************
+GETLIMITS.CPP
+Executes the lsd_getlimits command line utility.
 
-	Lists all initial values ranges and configuration
-
-****************************************************/
+Lists all initial values ranges and configuration.
+*************************************************************/
 
 #include <set>
 #include "decl.h"
@@ -37,6 +36,7 @@ sense *rsense = NULL;		// LSD sensitivity analysis structure
 
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
 bool message_logged = false;// new message posted in log window
+bool no_zero_instance = false;// flag to allow deleting last object instance
 bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool running = false;		// simulation is running
@@ -58,14 +58,12 @@ int prof_min_msecs = 0;		// profile only variables taking more than X msecs.
 int prof_obs_only = false;	// profile only observed variables
 int quit = 0;				// simulation interruption mode (0=none)
 int t;						// current time step
-int seed = 1;				// random number generator initial seed
 int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
-int total_obj = 0;			// total objects in model
-int total_var = 0;			// total variables/parameters in model
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
+unsigned seed = 1;			// random number generator initial seed
 description *descr = NULL;	// model description structure
 lsdstack *stacklog = NULL;	// LSD stack
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
@@ -86,7 +84,7 @@ int lsdmain( int argn, char **argv )
 
 	findex = 1;
 
-	if ( argn < 3 )
+	if ( argn < 5 )
 	{
 		fprintf( stderr, "\nThis is LSD Initial Values Range Reader.\nIt reads a LSD configuration file (.lsd) and a LSD sensitivity analysis file\n(.sa) and shows the ranges used for variables/parameters being analyzed,\noptionally saving them in a comma separated text file (.csv).\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-s FILENAME.sa' the sensitivity analysis file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n" );
 		myexit( 1 );
@@ -96,21 +94,21 @@ int lsdmain( int argn, char **argv )
 		for ( i = 1; i < argn; i += 2 )
 		{
 			// read -f parameter : original configuration file
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				struct_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( struct_file, argv[ 1 + i ] );
 				continue;
 			}
 			// read -s parameter : sensitivity file name
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 's' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 's' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				sens_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( sens_file, argv[ 1 + i ] );
 				continue;
 			}
 			// read -o parameter : output file name
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				out_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( out_file, argv[ 1 + i ] );
@@ -135,7 +133,6 @@ int lsdmain( int argn, char **argv )
 		myexit( 4 );
 	}
 	fclose( f );
-	struct_loaded = true;
 	
 	root = new object;
 	root->init( NULL, "Root" );
@@ -150,7 +147,7 @@ int lsdmain( int argn, char **argv )
 	strcpy( stacklog->label, "LSD Simulation Manager" );
 	stack = 0;
 	
-	if ( load_configuration( root, false ) != 0 )
+	if ( load_configuration( true ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Initial Values Range Reader.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
 		myexit( 5 );
@@ -170,7 +167,7 @@ int lsdmain( int argn, char **argv )
 		myexit( 7 );
 	}
 	
-	if ( load_sensitivity( root, f ) != 0 )
+	if ( load_sensitivity( f ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Initial Values Range Reader.\nCheck if the file is a valid LSD sensitivity analysis or regenerate it using the LSD Browser.\n", sens_file  );
 		fclose( f );

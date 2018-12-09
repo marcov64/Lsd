@@ -105,7 +105,6 @@ maxMin <- model.limits.lsd( dataSet,             # LSD experimental data set
 #*******************************************************************************
 
 library( gplots )           # package for plotting tables
-library( rgl )              # package for 3D GL model
 
 
 # ====== Present meta-model selection details ======

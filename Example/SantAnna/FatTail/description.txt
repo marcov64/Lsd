@@ -1,0 +1,113 @@
+Industry Model (ver. 2)
+=======================
+
+
+Based on Dosi, Pereira and Virgilito 2016, The footprint of evolutionary processes of learning and selection upon the statistical properties of industrial dynamics,
+
+
+Timeline and model organization
+===============================
+
+a) At time 0= There are N initial incumbent firms. They have at time 0 equal productivity and equal market shares. 
+
+b) At time 1= During the first period, if not under regime Mk I, they learn according to the dynamic of the specified process on competitiveness. Hence they acquire or loose market share according to the quasi replicator. The replicator is applied BEFORE firms die.
+
+c) Moroever they may die according to the "two" rules of death: too small market shares and/or very very low competitiveness. 
+
+d) At the end of the period the number of entrants is drawn as a function of the TOTAL number of firms at the beggining of the period (survived or in the process of dying) or in a way to keep the initial number of firms constant (according to the configuration). 
+
+e) The competitiveness of the entrants is chosen according to the selected arrival regime. 
+
+f) Attribute an initial small share to the entrants and recalculate accordingly the share of surviving incumbents. The initial small share is transfered from the incumbents proportionally to their market share (if possible).  
+
+g) At time 2= repeat the process starting from the new initial conditions and the level of competitiveness inherited from period 1. Entrants older than 1 period (or as set in the AgeEntrant parameter) become incumbents. During the entrant phase of life, firms don't learn.
+
+h) The three market regimes are mutually exclusive (may be analyzed in independent markets). 
+
+i) There are three entry regimes.
+
+j) There are two arrival regimes, independently from the market regime.
+
+k) Productivity advances (theta) follow six alternative innovation shock profiles, according to the selected distribution. 
+
+l) Firm level statistics: market share, productivity, normalized productivity, growth (log), age.
+
+
+Ready to use configurations
+===========================
+
+In the model home directory (usually in ~/Lsd/Example/SantAnna/Fat-Tail) there are three LSD configuration files pre-configured for each of the regimes using beta innovation shocks: Baseline-Beta.lsd, MarkI-Beta.lsd and MarkII-Beta.lsd. Just load them in LSD, choose menu Run>Run (or click on the blue triangle icon), wait for the simulation to finish, and analyze the results using menu Data>Analysis of Results (or click on the chart icon).
+
+
+Sensitivity analysis
+====================
+
+There are several .sa files in the model home directory pre-configured for sensitivity analysis of the different regimes and innovation shock profile. Baseline and Mark I regimes share the per-shock files (Beta.sa, Laplace.sa, Normal.sa). Mark II regime has a specific set of files (MarkII-*.sa) because it has one more parameter (gamma).
+
+
+Analysis of results in R
+========================
+
+There are .R scripts for doing the model analysis in the subdirectory R. When using these scripts, the best approach is to generate the LSD results files in a subdirectory inside the R one. 
+
+As an example, the R/MarkII/Beta subdirectory contains an example configuration (MarkII-Beta.lsd) which can be loaded in LSD and executed (it will produce 10 runs of data, as an short MC sample). The generated data can be analyzed using the scripts in the R subdirectory (except for the SA ones, see below). Set the R subdirectory as the working directory for R and run the scripts using the 'Rscript' terminal command or open the desired script in RStudio and click on the 'Source' button. The results (.csv and .pdf files) are generated in the same subdirectory.
+
+There are also two full examples for sensitivity analysis in the subdirectories R/MarkII/Beta/EE and R/MarkII/Beta/Sobol. To generate the simulation data and do the analysis in R, follow these steps:
+
+1. In LMM, generate a 'No Window' version of the simulation model (menu Model>Create 'No Window' Version).
+2. Load the desired configuration file in LSD (R/MarkII/Beta/EE/MarkII-Beta.lsd, for an Elementary Effects analysis, or R/MarkII/Beta/Sobol/MarkII-Beta.lsd for Sobol analysis).
+3. Load the sensitivity data file in LSD (MarkII-Beta.sa).
+4. Generate the sensitivity analysis configuration files (menu Data>Sensitivity Analysis>EE Sampling, for Elementary Effects, or Data>Sensitivity Analysis>NOLH Sampling, for Sobol). Accept the defaults.
+5. Only if performing a Sobol analysis, create configuration files for an external data sample (menu Data>Sensitivity Analysis>MC Range Sampling). Accept the defaults.
+6. Execute the created analysis configurations (menu Run>Create/Start Parallel Batch) and wait for the processing to finish (it may take several minutes). Check the created .log files to know when all configurations were run (or use the computer task manager).
+7. Set the R subdirectory (inside the model home directory) as the working directory for R and run the desired script (ElemEffectsSA.R or SobolSA.R) using the 'Rscript' terminal command or open the script in RStudio and click on the 'Source' button. The results (.csv and .pdf files) are generated in the same subdirectory.
+
+
+Available simulation configuration options
+==========================================
+
+Market regime options (parameter MktReg)
+----------------------------------------
+1) Mk I (no productivity growth)
+2) intermediate/baseline (productivity growth without cummulativity)
+3) Mk II  (productivity growth with cummulativity)
+
+Arrival regime options (parameter ArrivReg)
+-------------------------------------------
+0) Innovation shock around market productivity average (M+M)
+1) Innovation shock (plus EntrLead) over market technological frontier (best incumbent)
+2) Innovation shock around market technological frontier (best incumbent) (K+S 2010)
+
+Entry regime options (parameter EntrReg)
+----------------------------------------
+0) No entry
+1) Free entry
+2) N fixed firms (entrants replace failed incumbents)
+
+Innovation shock profile (distribution) options (parameter InnoProf)
+--------------------------------------------------------------------
+1) Uniform (UniformMinInc, UniformMaxInc)
+2) Poisson (InnoAvg)
+3) Normal (InnoAvg, NormalSigma)
+4) Lognormal (LognormLoc, LognormScale)
+5) asymmetric Laplace (LaplaceAlpha1, LaplaceAlpha2)
+6) Beta rescaled to a support (BetaAlpha, BetaBeta, BetaMin, BetaMax)
+
+Overlap exits and entries data (parameter OverlapExit)
+------------------------------------------------------
+0) No overlap (exiting incumbent data marked as invalid/outlier)
+1) Normal overlap
+
+Limit maximum innovation shock (theta) (parameter InnoDrawMax)
+--------------------------------------------------------------
+0) No limit
+X) Limit maximum theta to X (before rescaling)
+
+Key parameters
+--------------
+InnoAvg - average expected innovation shock (baseline = 0.05)
+InnoDrawMax - cap for the maximum innovation shock (baseline = 0.2)
+ExitShare - minimum share to firm stay in market (baseline = 0.001)
+InitShare - initial market share of entrants (baseline = 0.003636)
+gamma - cummulative learning effect parametes (baseline = 1)
+

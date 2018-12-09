@@ -1,0 +1,10 @@
+Percolation Model
+by WG1 - Thematic Institute - Vienna '04
+
+Standard percolation model
+
+These model is derived from a more advanced one, and several additions have been removed.
+
+
+
+

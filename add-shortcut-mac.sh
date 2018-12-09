@@ -1,6 +1,23 @@
 #!/bin/bash
+#**************************************************************
+#
+#	LSD 7.1 - December 2018
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#	
+#**************************************************************
+
+#**************************************************************
+# ADD-SHORTCUT-MAC.SH
+# Add a shortcut to LSD LMM in the macOS desktop.
+# Also fixes some macOS security issues.
+#**************************************************************
+
 if [ "$1" = "-h" ]; then
-	echo "Add a shortcut to Lsd LMM in the desktop"
+	echo "Add a shortcut to LSD LMM in the desktop"
 	echo "Usage: ./add-shortcut-mac.sh"
 	exit 0
 fi
@@ -11,8 +28,8 @@ rm -f ~/Desktop/"$TARGET" ~/Desktop/"$TARGET.app"
 	
 # disable macOS quarantine of LSD executables
 LSDROOT="$( cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
-xattr -rd com.apple.quarantine "$LSDROOT/$TARGET.app"
-xattr -rd com.apple.quarantine "$LSDROOT/src/LSD.app"
+sudo xattr -rd com.apple.quarantine "$LSDROOT/$TARGET.app"
+sudo xattr -rd com.apple.quarantine "$LSDROOT/src/LSD.app"
 
 # create alias on desktop
 osascript >/dev/null <<END_SCRIPT

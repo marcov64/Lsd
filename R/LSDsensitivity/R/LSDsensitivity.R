@@ -804,7 +804,7 @@ fit.poly <- function( response, doe, resp.noise = NULL,
     form <- paste( form, "+" )
   }
 
-  if( is.null( resp.noise ) || min( abs( resp.noise ) ) == 0 ) {
+  if( is.null( resp.noise ) || min( abs( resp.noise ), na.rm = TRUE ) == 0 ) {
     weigths <- rep( 1, nrow( doe ) )
   } else {
     weigths <- 1 / resp.noise
@@ -1097,6 +1097,8 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
                                      along = 2, use.first.dimnames = TRUE )
             colnames( dataSet ) <- append( LSDinterface::name.var.lsd( oldNameVar ),
                                            addVars )
+          } else {
+            colnames( dataSet ) <- LSDinterface::name.var.lsd( colnames( dataSet ) )
           }
 
           # Call function to fill new variables with data or reevaluate old ones

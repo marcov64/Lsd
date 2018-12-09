@@ -1,0 +1,10 @@
+A 0 2 f: 0.2 5
+N -1 2 f: 50 350
+sMin 0 2 f: 0.0001 0.0015
+gamma 0 2 f: 0.2 5
+Mu 0 2 f: 0.015 0.15
+MuMax 0 2 f: 0.2 1
+BetaAlpha 0 2 f: 1 3
+BetaBeta 0 2 f: 3 10
+BetaMin 0 2 f: 0 0.1
+BetaMax 0 2 f: 0.2 1

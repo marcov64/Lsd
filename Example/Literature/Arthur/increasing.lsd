@@ -1,0 +1,300 @@
+	
+Label Root
+{
+	Son: Market
+	Label Market
+	{
+		Var: NewAgent
+		Var: UtilityMS
+		Var: UtilityApple
+		Var: NumMS
+		Var: NumApple
+		Param: User0Net
+		Param: User1Net
+		Param: User0MS
+		Param: User0Apple
+		Param: User1MS
+		Param: User1Apple
+		Var: ShareMS
+		Var: ShareApple
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Market C	100
+Var: NewAgent 0 n + n n
+Var: UtilityMS 0 s + n n
+Var: UtilityApple 0 s + n n
+Var: NumMS 1 s + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Var: NumApple 1 s + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: User0Net 0 n + n n	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2
+Param: User1Net 0 n + n n	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2	0.2
+Param: User0MS 0 n + n n	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10
+Param: User0Apple 0 n + n n	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5
+Param: User1MS 0 n + n n	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5	5
+Param: User1Apple 0 n + n n	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10
+Var: ShareMS 0 s + n p
+Var: ShareApple 0 s + n n
+
+SIM_NUM 1
+SEED 3
+MAX_STEP 1000
+EQUATION fun_ba.cpp
+ MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Market
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Variable_NewAgent
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_UtilityMS
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_UtilityApple
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_NumMS
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_NumApple
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_User0Net
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_User1Net
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_User0MS
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_User0Apple
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_User1MS
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_User1Apple
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_ShareMS
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_ShareApple
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+
+MODELBEGIN
+
+
+
+EQUATION("NewAgent")
+/*
+Create a new agent
+*/
+
+if(RND<0.5)
+ v[1]=0;
+else
+ v[1]=1; 
+RESULT(v[1] )
+
+EQUATION("NumAgent0")
+/*
+Count the number of agents 0
+*/
+v[0]=V("NewAgent");
+v[1]=VL("NumAgent0",1);
+
+if(v[0]==0)
+  v[1]++; 
+RESULT(v[1] )
+
+EQUATION("NumAgent1")
+/*
+Count the number of agents 1
+*/
+v[0]=V("NewAgent");
+v[1]=VL("NumAgent1",1);
+
+if(v[0]==1)
+  v[1]++; 
+RESULT(v[1] )
+
+
+EQUATION("UtilityMS")
+/* Utility in using Microsoft */
+v[0]=V("NewAgent"); //type of new agent
+if(v[0]==0)
+ {v[1]=V("User0MS"); //value for 0 in using MS
+  v[2]=V("User0Net"); //net. ext. coefficient for 0
+ }
+else
+ {v[1]=V("User1MS"); //value for 1 in using MS
+  v[2]=V("User1Net"); //net. ext. coefficient for 1
+ }
+v[3]=VL("NumMS",1); //number of existing consumers using MS
+v[4]=v[1]+v[2]*v[3]; 
+RESULT(v[4] )
+
+
+EQUATION("UtilityApple")
+/* Utility in using Apple */
+v[0]=V("NewAgent"); //type of new agent
+if(v[0]==0)
+ {v[1]=V("User0Apple"); //value for 0 in using Apple
+  v[2]=V("User0Net"); //net. ext. coefficient for 0
+ }
+else
+ {v[1]=V("User1Apple"); //value for 1 in using Apple
+  v[2]=V("User1Net"); //net. ext. coefficient for 1
+ }
+v[3]=VL("NumApple",1); //number of existing consumers using Apple
+v[4]=v[1]+v[2]*v[3]; 
+RESULT(v[4] )
+
+
+EQUATION("NumMS")
+/*
+Number of MS users
+*/
+v[0]=VL("NumMS",1);
+v[1]=V("UtilityApple");
+v[2]=V("UtilityMS");
+
+if(v[2]>v[1])
+ v[3]=v[0]+1;
+else
+ v[3]=v[0]; 
+RESULT(v[3] )
+
+
+EQUATION("NumApple")
+/*
+Number of Apple users
+*/
+v[0]=VL("NumApple",1);
+v[1]=V("UtilityApple");
+v[2]=V("UtilityMS");
+
+if(v[1]>v[2])
+ v[3]=v[0]+1;
+else
+ v[3]=v[0]; 
+RESULT(v[3] )
+
+
+EQUATION("ShareMS")
+/* Share of MS users */
+v[0]=V("NumMS");
+v[1]=V("NumApple");
+RESULT(v[0]/(v[0]+v[1]) )
+
+EQUATION("ShareApple")
+/* Share of Apple users */
+v[0]=V("NumMS");
+v[1]=V("NumApple");
+RESULT(v[1]/(v[0]+v[1]) )
+
+
+EQUATION("Statistics")
+/*
+Compute the shares of markets for the two brands
+*/
+v[0]=v[1]=0;
+CYCLE(cur, "Market")
+ {
+  v[2]=VS(cur,"NumApple");
+  v[3]=VS(cur,"NumMicrosoft");
+  if(v[2]>v[3])
+   v[0]++;
+  else
+   v[1]++; 
+ }
+
+WRITE("NumMarketApple",v[0]/(v[0]+v[1]));
+WRITE("NumMarketMS",v[1]/(v[0]+v[1]));
+RESULT( 1)
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE

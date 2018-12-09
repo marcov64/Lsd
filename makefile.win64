@@ -1,0 +1,59 @@
+#**************************************************************
+#
+#	LSD 7.1 - December 2018
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#	
+#**************************************************************
+
+#**************************************************************
+# MAKEFILE.WIN64
+# Makefile to compile LMM under MS Windows 64-bit system.
+# Please follow these steps:
+# 1. Make sure you have Cygwin64 installed with the 
+#    mingw64-x86_64-gcc-g++ package.
+# 2. If Cygwin64/mingw64 compiler is not available, it is 
+#    possible to compile with the default Cygwin compiler 
+#    by changing the "CC" variable below to "g++". 
+# 3. Type make -f makefile.win64 in Lsd root directory. 
+#    This will create a new LMM program using the source 
+#    "modman.cpp" in directory "src".
+#**************************************************************
+
+CC=x86_64-w64-mingw32-g++
+TARGET=lmm64
+EXT=.exe
+SWITCH_CC=-mthreads -mwindows -O3
+
+# For MS Windows 64-bit systems, using Cygwin-minGW GCC and Tcl/Tk in the Lsd installation.
+LSDROOT=.
+TCL_VERSION=86
+PATH_TCL_HEADER=$(LSDROOT)/gnu64/include
+PATH_TK_HEADER=$(LSDROOT)/gnu64/include
+PATH_HEADER=$(LSDROOT)/gnu64/include
+PATH_TCL_LIB=$(LSDROOT)/gnu64/lib
+PATH_TK_LIB=$(LSDROOT)/gnu64/lib
+PATH_LIB=$(LSDROOT)/gnu64/lib
+LIBS=
+
+# from here you should not need to modify anything
+RM=rm -f
+SRC=src
+SRC_DIR=$(LSDROOT)/$(SRC)/
+
+# Variable used to prepare the options to search for the tcl and tk headers
+# Do not modify
+INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(PATH_HEADER) -I$(LSDROOT)/src
+
+$(TARGET)$(EXT): $(SRC_DIR)modman.o
+	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o -L$(PATH_TCL_LIB) -ltcl$(TCL_VERSION) -L$(PATH_TK_LIB) -ltk$(TCL_VERSION) -L$(PATH_LIB) $(LIBS) -o $(TARGET)
+
+$(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp 
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLUDE)
+
+# Clean object files for building for another distribution
+clean:
+	$(RM) $(SRC_DIR)modman.o

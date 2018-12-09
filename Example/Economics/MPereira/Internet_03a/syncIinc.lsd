@@ -1,0 +1,1983 @@
+	
+Label Root
+{
+	Son: Internet
+	Label Internet
+	{
+		Son: NetEqTechnologies
+		Label NetEqTechnologies
+		{
+			Son: Technology
+			Label Technology
+			{
+				Param: techID
+				Param: Qmin
+				Var: a
+				Var: Ptech
+				Var: cmtech
+				Param: techt0
+				Param: techt0incr
+				Param: tnextincr
+
+			}
+
+			Param: cm0
+			Param: pincr
+			Param: prad
+			Param: vincr
+			Param: vrad
+			Param: tnextrad
+			Param: Ttechdepr
+
+		}
+
+		Son: AccProviders
+		Label AccProviders
+		{
+			Son: Provider
+			Label Provider
+			{
+				Son: Network
+				Label Network
+				{
+					Param: tech
+					Param: QMtech
+					Param: Ktech
+					Param: depr
+					Param: t0tech
+					Param: atech
+
+				}
+
+				Param: provID
+				Var: QM
+				Var: Q
+				Var: M
+				Var: Pprov
+				Var: s
+				Var: QP
+				Param: mQ
+				Var: I
+				Var: D
+				Var: r
+				Param: Kdepr
+				Var: K
+				Var: F
+				Var: NF
+				Var: L
+				Var: C
+				Var: R
+				Var: CM
+				Var: AF
+				Var: AL
+				Param: mL
+				Var: ce
+				Var: Pd
+				Var: gs
+				Param: mM
+				Var: ke
+				Param: groupoutper
+				Var: group
+				Var: strat
+				Var: techage
+				Param: laststratt0
+				Var: Lmavg
+				Var: Kmavg
+				Var: smavg
+				Var: Qmavg
+				Var: LKmavg
+				Var: negcashper
+				Var: zeroshareper
+				Var: LK
+				Param: tentr
+				Var: ALAK
+				Var: age
+				Var: paavg
+
+			}
+
+			Var: QMT
+			Var: LT
+			Var: KT
+			Func: genprovID
+			Var: entry
+			Var: exit
+			Var: LTmavg
+			Var: KTmavg
+			Var: firstKeT
+			Func: KeT
+			Var: strat1
+			Var: strat2
+			Var: strat3
+			Var: strat4
+			Var: strat11
+			Var: strat12
+			Var: strat13
+			Var: strat14
+			Var: strat15
+			Var: perIinc
+			Var: strat5
+			Var: strat6
+			Var: strat7
+			Var: strat8
+			Var: strat9
+			Var: strat16
+			Var: strat17
+			Var: strat18
+			Var: strat19
+			Var: cTavg
+			Param: tlastentr
+			Var: printRankMatrix
+			Var: topstrat
+			Var: aavg
+
+		}
+
+		Son: EndUsers
+		Label EndUsers
+		{
+			Son: User
+			Label User
+			{
+				Var: B
+				Var: prov
+				Param: ed
+				Param: es
+				Param: t0
+				Param: Puser
+				Param: T
+				Param: b1
+				Param: b2
+				Param: b3
+
+			}
+
+
+		}
+
+		Var: init
+		Param: Baver
+		Param: Bvar
+		Param: b1min
+		Param: b1max
+		Param: b3min
+		Param: b3max
+		Param: edmin
+		Param: edmax
+		Param: esmin
+		Param: esmax
+		Param: gB
+		Param: gusers
+		Param: pop0
+		Param: popmax
+		Param: Tavg
+		Param: Tvar
+		Param: cf
+		Param: cs
+		Param: emax
+		Param: gssens
+		Param: k0
+		Param: mLmin
+		Param: mLmax
+		Param: mMmin
+		Param: mMmax
+		Param: mQmin
+		Param: mQmax
+		Param: nexit
+		Param: nstratmin
+		Param: Nprovinit
+		Param: QMavginit
+		Param: QMvarinit
+		Param: q
+		Param: r0
+		Param: rinc
+		Param: rlev
+		Param: rsize
+		Param: se
+		Param: sinc
+		Param: smin
+		Param: syncIinc
+		Param: Pmax
+		Param: Pstep
+		Param: Ptechinc
+		Param: Temin
+		Param: Tinc
+		Param: Tplan
+		Param: tdebug
+		Var: ALAKT
+		Var: ALAKTentr
+		Var: ALAKTinc
+		Var: HHIK
+		Var: HHIs
+		Var: LKTavg
+		Var: LKTavgentr
+		Var: LKTavginc
+		Var: Mavg
+		Var: Mavgentr
+		Var: Mavginc
+		Var: Ninc
+		Var: Nmavg
+		Var: Nprov
+		Var: Nuser
+		Var: Pavg
+		Var: Pavgentr
+		Var: Pavginc
+		Var: sTentr
+		Var: sTinc
+		Var: techageentr
+		Var: techageinc
+		Var: toptech
+		Var: G
+		Var: GM
+		Var: pop
+		Var: popcov
+		Var: VMRM
+		Var: VMRP
+		Var: ageavg
+		Var: ageavgentr
+		Var: ageavginc
+		Param: Bmin
+		Var: atoptech
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Internet C	1
+Var: init 0 n + n n
+Param: Baver 0 n + n n	84
+Param: Bvar 0 n + n n	180
+Param: b1min 0 n + n n	0.3
+Param: b1max 0 n + n n	0.6
+Param: b3min 0 n + n n	0.1
+Param: b3max 0 n + n n	0.3
+Param: edmin 0 n + n n	0
+Param: edmax 0 n + n n	0.5
+Param: esmin 0 n + n n	1
+Param: esmax 0 n + n n	1.5
+Param: gB 0 n + n n	0
+Param: gusers 0 n + n n	0.048
+Param: pop0 0 n + n n	180
+Param: popmax 0 n + n n	11700
+Param: Tavg 0 n + n n	4
+Param: Tvar 0 n + n n	2
+Param: cf 0 n + n n	102
+Param: cs 0 n + n n	0.9
+Param: emax 0 n + n n	1
+Param: gssens 0 n + n n	0.05
+Param: k0 0 n + n n	0.055
+Param: mLmin 0 n + n n	0.17
+Param: mLmax 0 n + n n	0.17
+Param: mMmin 0 n + n n	0.5
+Param: mMmax 0 n + n n	1.5
+Param: mQmin 0 n + n n	0.5
+Param: mQmax 0 n + n n	0.5
+Param: nexit 0 n + n n	20
+Param: nstratmin 0 n + n n	12
+Param: Nprovinit 0 n + n n	4
+Param: QMavginit 0 n + n n	25
+Param: QMvarinit 0 n + n n	25
+Param: q 0 n + n n	0.5
+Param: r0 0 n + n n	0.042
+Param: rinc 0 n + n n	0.83
+Param: rlev 0 n + n n	0.1
+Param: rsize 0 n + n n	0.01
+Param: se 0 n + n n	0.05
+Param: sinc 0 n + n n	0.2
+Param: smin 0 n + n n	0.01
+Param: syncIinc 0 n + n n	1
+Param: Pmax 0 n + n n	600
+Param: Pstep 0 n + n n	0.05
+Param: Ptechinc 0 n + n n	0.3
+Param: Temin 0 n + n n	4
+Param: Tinc 0 n + n n	20
+Param: Tplan 0 n + n n	4
+Param: tdebug 0 n + n n	0
+Var: ALAKT 0 n + n n
+Var: ALAKTentr 0 n + n n
+Var: ALAKTinc 0 n + n n
+Var: HHIK 0 s + n n
+Var: HHIs 0 s + n n
+Var: LKTavg 0 n + n n
+Var: LKTavgentr 0 s + n n
+Var: LKTavginc 0 s + n n
+Var: Mavg 4 s + n n	0	0	0	0
+Var: Mavgentr 1 n + n n	0
+Var: Mavginc 1 n + n n	0
+Var: Ninc 0 s + n n
+Var: Nmavg 0 n + n n
+Var: Nprov 0 s + n n
+Var: Nuser 5 n + n n	0	0	0	0	0
+Var: Pavg 1 s + n n	0
+Var: Pavgentr 1 n + n n	0
+Var: Pavginc 1 n + n n	0
+Var: sTentr 0 s + n n
+Var: sTinc 0 n + n n
+Var: techageentr 0 s + n n
+Var: techageinc 2 s + n n	0	0
+Var: toptech 1 n + n n	1
+Var: G 0 n + n n
+Var: GM 0 n + n n
+Var: pop 1 n + n n	0
+Var: popcov 0 s + n n
+Var: VMRM 0 s + n n
+Var: VMRP 0 s + n n
+Var: ageavg 0 s + n n
+Var: ageavgentr 0 s + n n
+Var: ageavginc 0 s + n n
+Param: Bmin 0 n + n n	30
+Var: atoptech 0 s + n n
+
+Object: NetEqTechnologies C	1
+Param: cm0 0 n + n n	0.0053
+Param: pincr 0 n + n n	8
+Param: prad 0 n + n n	28
+Param: vincr 0 n + n n	0.049
+Param: vrad 0 n + n n	1.7
+Param: tnextrad 0 n + n n	0
+Param: Ttechdepr 0 n + n n	40
+
+Object: Technology C	1
+Param: techID 0 n + n n	1
+Param: Qmin 0 n + n n	10
+Var: a 1 n + n n	0.00093
+Var: Ptech 0 n + n n
+Var: cmtech 0 n + n n
+Param: techt0 0 n + n n	0
+Param: techt0incr 0 n + n n	0
+Param: tnextincr 0 n + n n	0
+
+Object: AccProviders C	1
+Var: QMT 4 n + n n	0	0	0	0
+Var: LT 4 n + n n	0	0	0	0
+Var: KT 4 n + n n	0	0	0	0
+Func: genprovID 0 n + n n
+Var: entry 3 n + n n	0	0	0
+Var: exit 0 n + n n
+Var: LTmavg 0 n + n n
+Var: KTmavg 0 n + n n
+Var: firstKeT 0 n + n n
+Func: KeT 1 n + n n	0
+Var: strat1 0 s + n n
+Var: strat2 0 s + n n
+Var: strat3 0 s + n n
+Var: strat4 0 s + n n
+Var: strat11 0 s + n n
+Var: strat12 0 s + n n
+Var: strat13 0 s + n n
+Var: strat14 0 s + n n
+Var: strat15 0 s + n n
+Var: perIinc 1 n + n n	0
+Var: strat5 0 s + n n
+Var: strat6 0 s + n n
+Var: strat7 0 s + n n
+Var: strat8 0 s + n n
+Var: strat9 0 s + n n
+Var: strat16 0 s + n n
+Var: strat17 0 s + n n
+Var: strat18 0 s + n n
+Var: strat19 0 s + n n
+Var: cTavg 1 s + n n	0
+Param: tlastentr 0 n + n n	0
+Var: printRankMatrix 0 n + n n
+Var: topstrat 0 n + n n
+Var: aavg 0 s + n n
+
+Object: Provider C	1
+Param: provID 0 n + n n	1
+Var: QM 4 n + n n	0	0	0	0
+Var: Q 4 n + n n	0	0	0	0
+Var: M 1 n + n n	0
+Var: Pprov 1 n + n n	0
+Var: s 4 n + n n	0	0	0	0
+Var: QP 0 n + n n
+Param: mQ 0 n + n n	0
+Var: I 0 n + n n
+Var: D 0 n + n n
+Var: r 1 n + n n	0
+Param: Kdepr 0 n + n n	0
+Var: K 4 n + n n	0	0	0	0
+Var: F 1 n + n n	0
+Var: NF 0 n + n n
+Var: L 4 n + n n	0	0	0	0
+Var: C 1 n + n n	0
+Var: R 1 n + n n	0
+Var: CM 0 n + n n
+Var: AF 1 n + n n	0
+Var: AL 1 n + n n	0
+Param: mL 0 n + n n	0
+Var: ce 0 n + n n
+Var: Pd 0 n + n n
+Var: gs 2 n + n n	0	0
+Param: mM 0 n + n n	0
+Var: ke 0 n + n n
+Param: groupoutper 0 n + n n	0
+Var: group 1 n + n n	0
+Var: strat 1 n + n n	0
+Var: techage 1 n + n n	0
+Param: laststratt0 0 n + n n	0
+Var: Lmavg 0 n + n n
+Var: Kmavg 0 n + n n
+Var: smavg 0 n + n n
+Var: Qmavg 0 n + n n
+Var: LKmavg 0 n + n n
+Var: negcashper 1 n + n n	0
+Var: zeroshareper 1 n + n n	0
+Var: LK 0 n + n n
+Param: tentr 0 n + n n	0
+Var: ALAK 0 n + n n
+Var: age 0 n + n n
+Var: paavg 0 n + n n
+
+Object: Network C	1
+Param: tech 0 n + n n	1
+Param: QMtech 0 n + n n	0
+Param: Ktech 0 n + n n	0
+Param: depr 0 n + n n	0
+Param: t0tech 0 n + n n	0
+Param: atech 0 n + n n	0
+
+Object: EndUsers C	1
+
+Object: User C	1
+Var: B 1 n + n n	0
+Var: prov 1 n + n n	0
+Param: ed 0 n + n n	0
+Param: es 0 n + n n	0
+Param: t0 0 n + n n	0
+Param: Puser 0 n + n n	0
+Param: T 0 n + n n	0
+Param: b1 0 n + n n	0
+Param: b2 0 n + n n	0
+Param: b3 0 n + n n	0
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 250
+EQUATION fun_INTERNET.cpp
+MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Internet
+Internet sector object container
+_INIT_
+
+END_DESCRIPTION
+
+Variable_init
+Initializate simulation (run only once)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Baver
+Initial minimum budget
+_INIT_
+ All 1 instances equal to 84.
+END_DESCRIPTION
+
+Parameter_Bvar
+Initial maximum budget
+_INIT_
+ All 1 instances equal to 180.
+END_DESCRIPTION
+
+Parameter_b1min
+Minimum user price sensitivity (0 to b3)
+_INIT_
+ All 1 instances equal to 0.3.
+END_DESCRIPTION
+
+Parameter_b1max
+Maximum user price sensitivity (0 to b3)
+_INIT_
+ All 1 instances equal to 0.6.
+END_DESCRIPTION
+
+Parameter_b3min
+Minimum user market share sensitivity (0 to b1)
+_INIT_
+ All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_b3max
+Maximum user market share sensitivity (0 to b3)
+_INIT_
+ All 1 instances equal to 0.3.
+END_DESCRIPTION
+
+Parameter_edmin
+Minimum user quality perception error (standard deviation)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_edmax
+Maximum user quality perception error (standard deviation)
+_INIT_
+ All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_esmin
+Minimum user preference for current provider threshold
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_esmax
+Maximum user preference for current provider threshold
+_INIT_
+ All 1 instances equal to 1.5.
+END_DESCRIPTION
+
+Parameter_gB
+Growth rate of users' budget per period
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_gusers
+User growth rate (logistic)
+_INIT_
+ All 1 instances equal to 0.048.
+END_DESCRIPTION
+
+Parameter_pop0
+Initial number of user
+_INIT_
+ All 1 instances equal to 180.
+END_DESCRIPTION
+
+Parameter_popmax
+Maximum number of users
+(logistic stable population)
+_INIT_
+ All 1 instances equal to 11700.
+END_DESCRIPTION
+
+Parameter_Tavg
+New contract duration (in periods)
+_INIT_
+ All 1 instances equal to 4.
+END_DESCRIPTION
+
+Parameter_Tvar
+New contract duration standard deviation
+_INIT_
+ All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_cf
+Fixed per user costs
+(before scale gains)
+_INIT_
+ All 1 instances equal to 102.
+END_DESCRIPTION
+
+Parameter_cs
+Scale factor (0<cs<=1)
+(cs=1 - no scale gains)
+_INIT_
+ All 1 instances equal to 0.9.
+END_DESCRIPTION
+
+Parameter_emax
+Maximum number of entrant providers in a single period
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_gssens
+Market share growth sensitivity
+(levels below this are not considered different from zero)
+_INIT_
+ All 1 instances equal to 0.05.
+END_DESCRIPTION
+
+Parameter_k0
+Average entry network capacity size
+(compared to industry total capacity)
+_INIT_
+ All 1 instances equal to 0.055.
+END_DESCRIPTION
+
+Parameter_mLmin
+Minimum per user profitability target
+_INIT_
+ All 1 instances equal to 0.17.
+END_DESCRIPTION
+
+Parameter_mLmax
+Maximum per user profitability target
+_INIT_
+ All 1 instances equal to 0.17.
+END_DESCRIPTION
+
+Parameter_mMmin
+Maximum network quality target minimum
+_INIT_
+ All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_mMmax
+Maximum network quality target maximum
+_INIT_
+ All 1 instances equal to 1.5.
+END_DESCRIPTION
+
+Parameter_mQmin
+Minimum init value for response profile to past growth
+_INIT_
+ All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_mQmax
+Maximum init value for response profile to past growth
+_INIT_
+ All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_nexit
+Number of periods before a provider leaves the market or the current strategy after bad results
+_INIT_
+ All 1 instances equal to 20.
+END_DESCRIPTION
+
+Parameter_nstratmin
+Minimum number of periods to stay with a new strategy
+_INIT_
+ All 1 instances equal to 12.
+END_DESCRIPTION
+
+Parameter_Nprovinit
+Initial number of providers
+_INIT_
+ All 1 instances equal to 4.
+END_DESCRIPTION
+
+Parameter_QMavginit
+Initial average network capacity
+_INIT_
+ All 1 instances equal to 25.
+END_DESCRIPTION
+
+Parameter_QMvarinit
+Initial network capacity variance
+_INIT_
+ All 1 instances equal to 25.
+END_DESCRIPTION
+
+Parameter_q
+Network quality parameter
+_INIT_
+ All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_r0
+Base interest rate
+_INIT_
+ All 1 instances equal to 0.042.
+END_DESCRIPTION
+
+Parameter_rinc
+Interest rate reduction available to incumbents (0 to 1)
+_INIT_
+ All 1 instances equal to 0.83.
+END_DESCRIPTION
+
+Parameter_rlev
+Interest rate sensitivity to leverage
+_INIT_
+ All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_rsize
+Interest rate sensitivity to firm profits size
+_INIT_
+ All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_se
+Minimum free available share to allow for entry
+_INIT_
+ All 1 instances equal to 0.05.
+END_DESCRIPTION
+
+Parameter_sinc
+Mininum market share for an incumbent (large) provider
+_INIT_
+ All 1 instances equal to 0.2.
+END_DESCRIPTION
+
+Parameter_smin
+Minimum market share required to stay in market
+(applicable only after nexit consecutive periods)
+_INIT_
+ All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_syncIinc
+Incumbent investment synchronization with new technology toggle (0: no sync / 1: sync)
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_Pmax
+Maximum acceptable price
+_INIT_
+ All 1 instances equal to 600.
+END_DESCRIPTION
+
+Parameter_Pstep
+Price step on provider price changes (entrants usually uses this step X2)
+_INIT_
+ All 1 instances equal to 0.05.
+END_DESCRIPTION
+
+Parameter_Ptechinc
+Technology price discount get by incumbents (0 to 1)
+_INIT_
+ All 1 instances equal to 0.3.
+END_DESCRIPTION
+
+Parameter_Temin
+Minimum period between market entries
+(profitability or unserved customers still required)
+_INIT_
+ All 1 instances equal to 4.
+END_DESCRIPTION
+
+Parameter_Tinc
+Minimum time in market before a firm may become a incumbent (depends also on market share)
+_INIT_
+ All 1 instances equal to 20.
+END_DESCRIPTION
+
+Parameter_Tplan
+Time (in periods) between network planning
+_INIT_
+ All 1 instances equal to 4.
+END_DESCRIPTION
+
+Parameter_tdebug
+Debug print frequency (in periods)
+0: no debug output
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_ALAKT
+Industry total return (accumulated profits) on total investment (incl. deprec.)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_ALAKTentr
+Entrant's total return (accumulated profits) on total investment (incl. deprec.)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_ALAKTinc
+Incumbents' total return (accumulated profits) on total investment (incl. deprec.)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_HHIK
+Herfindahl-Hirschman index of capital in use by providers
+_INIT_
+
+END_DESCRIPTION
+
+Variable_HHIs
+Herfindahl-Hirschman index
+(measure of market concentration)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_LKTavg
+Industry weighted average return on investment (RoI)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_LKTavgentr
+Weighted average return on investment (RoI) of entrants
+_INIT_
+
+END_DESCRIPTION
+
+Variable_LKTavginc
+Weighted average return on investment (RoI) of incumbents
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Mavg
+Market's network quality index weighted average
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Mavgentr
+Entrants' networks quality index weighted average in period
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Mavginc
+Incumbents' networks quality index weighted average in period
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_Ninc
+Number of incumbent firms
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Nmavg
+Industry total users moving average (4 period)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Nprov
+Number of service providers
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Nuser
+Number of users (active)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_Pavg
+Average market price weighted by market share
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_Pavgentr
+Average entrants' market price weighted by market share
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_Pavginc
+Average incumbents' market price weighted by market share
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_sTentr
+Market share of entrants
+_INIT_
+
+END_DESCRIPTION
+
+Variable_sTinc
+Market share of incumbents
+_INIT_
+
+END_DESCRIPTION
+
+Variable_techageentr
+Weighted average age of network technology(ies) employed by entrants
+_INIT_
+
+END_DESCRIPTION
+
+Variable_techageinc
+Incumbent`s networks technology(ies) employed average weighted age (market level)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_toptech
+Current technology ID number
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Variable_G
+Current demand in period
+_INIT_
+
+END_DESCRIPTION
+
+Variable_GM
+Maximum expenditure from end users (all budget used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_pop
+Total population
+(users and wanna be)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_popcov
+% of potential user population covered by access service
+_INIT_
+
+END_DESCRIPTION
+
+Variable_VMRM
+Variance-to-mean ratio of network quality (unweighted)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_VMRP
+Variance-to-mean ratio of available prices (unweighted)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_ageavg
+Average age of providers in market (periods)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_ageavgentr
+Average age of entrant providers in market (periods)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_ageavginc
+Average age of incumbent providers in market (periods)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Bmin
+minimum initial user budget
+_INIT_
+ All 1 instances equal to 30.
+END_DESCRIPTION
+
+Variable_atoptech
+Current productivity of most productive technology
+_INIT_
+
+END_DESCRIPTION
+
+Object_NetEqTechnologies
+Network equipment technology object container
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_cm0
+Periodic maintenance cost to initial equipment price ratio
+_INIT_
+ All 1 instances equal to 0.0053.
+END_DESCRIPTION
+
+Parameter_pincr
+Probability of incremental innovation in a period
+_INIT_
+ All 1 instances equal to 8.
+END_DESCRIPTION
+
+Parameter_prad
+Probability of radical innovation in a period
+_INIT_
+ All 1 instances equal to 28.
+END_DESCRIPTION
+
+Parameter_vincr
+Standard deviation of productivity in an incremental innovation
+_INIT_
+ All 1 instances equal to 0.049.
+END_DESCRIPTION
+
+Parameter_vrad
+Standard deviation of productivity in a radical innovation
+_INIT_
+ All 1 instances equal to 1.7.
+END_DESCRIPTION
+
+Parameter_tnextrad
+Period which the next radical innovation will occur
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Parameter_Ttechdepr
+Maximum technology lifespan before deprecation
+_INIT_
+ All 1 instances equal to 40.
+END_DESCRIPTION
+
+Object_Technology
+Equipment technology alternative instance
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_techID
+Technology ID number
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Qmin
+Minimum capacity installation/upgrade
+_INIT_
+ All 1 instances equal to 10.
+END_DESCRIPTION
+
+Variable_a
+Capital productivity
+_INIT_
+ All 1 instances equal to 0.00093.
+END_DESCRIPTION
+
+Variable_Ptech
+Equipment price (per capacity unit)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_cmtech
+Maintenance cost per period and per capacity unit
+_INIT_
+ All 1 instances equal to 25.
+END_DESCRIPTION
+
+Parameter_techt0
+Technology launch period
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_techt0incr
+Time of last incremental innovation
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_tnextincr
+Period which the next incremental innovation will occur
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Object_AccProviders
+Access providers objects container
+_INIT_
+
+END_DESCRIPTION
+
+Variable_QMT
+Total capacity installed in industry
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_LT
+Total industry profits
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_KT
+Total industry capital employed
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Function_genprovID
+Generates a unique provider ID each request
+_INIT_
+
+END_DESCRIPTION
+
+Variable_entry
+Insert new entrants in the market
+_INIT_
+
+END_DESCRIPTION
+
+Variable_exit
+Remove failing providers from the market
+_INIT_
+
+END_DESCRIPTION
+
+Variable_LTmavg
+Industry profits moving average (4 period)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_KTmavg
+Industry employed capital moving average (4 period)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_firstKeT
+Flag variable indicating that no first entrant commited capital in period (=0). Overwritten to 1 after the first firm commits capital.
+_INIT_
+
+END_DESCRIPTION
+
+Function_KeT
+Records total capital committed by entrants in period. Can be updated several times in a single period, if more than a company decides to enter the market.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat1
+Number of players using price strategy #1
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat2
+Number of players using price strategy #2
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat3
+Number of players using price strategy #3
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat4
+Number of players using price strategy #4
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat11
+Number of players using price strategy #11
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat12
+Number of players using price strategy #12
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat13
+Number of players using price strategy #13
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat14
+Number of players using price strategy #14
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat15
+Number of players using price strategy #15
+_INIT_
+
+END_DESCRIPTION
+
+Variable_perIinc
+Number of periods from last incumbent major investment cycle
+(> 50% renewal of networks in 2 periods)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat5
+Number of players using price strategy #5
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat6
+Number of players using price strategy #6
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat7
+Number of players using price strategy #7
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat8
+Number of players using price strategy #8
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat9
+Number of players using price strategy #9
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat16
+Number of players using price strategy #16
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat17
+Number of players using price strategy #17
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat18
+Number of players using price strategy #18
+_INIT_
+
+END_DESCRIPTION
+
+Variable_strat19
+Number of players using price strategy #19
+_INIT_
+
+END_DESCRIPTION
+
+Variable_cTavg
+Total market average cost per active user
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_tlastentr
+Time of last market entry
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_printRankMatrix
+Print Rank Matrix in log window if tdebug is different from 0
+_INIT_
+
+END_DESCRIPTION
+
+Variable_topstrat
+Top strategy for period in number of adopters (providers)
+(0-9: incumbent's strategies / 11-19: entrant's strategies)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_aavg
+Industry average productivity (weighted)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Provider
+Access provider firm object instance
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_provID
+Provider identification number
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_QM
+Maximum network capacity (# of average users)
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_Q
+Number of users in the provider's network
+_INIT_
+
+END_DESCRIPTION
+
+Variable_M
+Provider quality (real)
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_Pprov
+Provider service price
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_s
+Market share (quantity)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_QP
+Expected number of users
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_mQ
+Response profile to past growth
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_I
+Gross investment (expansion + depreciation)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_D
+Depreciation (optimized for period)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_r
+Interest rate available to provider
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Parameter_Kdepr
+Capital already depreciated 
+(capacity out of service)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_K
+Capital in use
+(capacity in service)
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_F
+Debt stock
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_NF
+New finance needs in the period
+_INIT_
+
+END_DESCRIPTION
+
+Variable_L
+Profit in period
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_C
+Running costs for period
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_R
+Revenues in period
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_CM
+Maintenance total costs for period
+_INIT_
+
+END_DESCRIPTION
+
+Variable_AF
+Debt amortization in period 
+(amortization preferred to accumulated profits)
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_AL
+Accumulated profits from previous periods
+(excludes current period profit)
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Parameter_mL
+Target average rentability for provider
+(profit per user versus average capita employed)
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_ce
+Expected unit costs
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Pd
+Desired price
+_INIT_
+
+END_DESCRIPTION
+
+Variable_gs
+Market share growth rate
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_mM
+Maximum quality accepted for network expansion
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_ke
+Expected average per user capital requirements
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_groupoutper
+Time in "out of group" conditions (under or overperformance)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_group
+Group to which provider belongs (0: entrant, 1: incumbent)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_strat
+Pricing strategy used by provider
+May also reflect on quality strategy
+(0X: entrant strategies, 1X: incumbent strategies)
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_techage
+Network technology(ies) employed average weighted age
+(firm level)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_laststratt0
+Last period when strategy was changed
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Lmavg
+Provider profits moving average (4 period)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Kmavg
+Provider employed capital moving average (4 period)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_smavg
+Average market share (moving average)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Qmavg
+Provider user base moving average (4 period)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_LKmavg
+Provider average return on investment (RoI)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_negcashper
+Number of negative sequential negative cash periods
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_zeroshareper
+Number of consecutive irrelevant market share periods
+_INIT_
+
+END_DESCRIPTION
+
+Variable_LK
+Provider return on investment (RoI)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_tentr
+Time of entry in market
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_ALAK
+Provider total return (accumulated profits) on total investment (incl. deprec.)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_age
+Provider age in market (periods)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_paavg
+Provider average productivity (weighted)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Network
+Network generation instance
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_tech
+Technology ID number
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_QMtech
+Total capacity in technology
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Ktech
+Capital invested in technology
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_depr
+Depreciated equipment flag
+(capacity under replacement - to be deleted)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_t0tech
+Technology initial adoption period in provider
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_atech
+Technology average productivity (weighted)
+_INIT_
+
+END_DESCRIPTION
+
+Object_EndUsers
+End user objects container
+_INIT_
+
+END_DESCRIPTION
+
+Object_User
+Internet end-user object instance
+_INIT_
+
+END_DESCRIPTION
+
+Variable_B
+User budget per period
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Variable_prov
+Current access service provider ID (0 if none)
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Parameter_ed
+Standard deviation of network quality judgement
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Parameter_es
+Sensitivity of current provider preference
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Parameter_t0
+Period when current access provider was contracted (0 if none)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Puser
+Price contracted from current access provider (0 if none)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_T
+Current contract duration
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_b1
+Price sensitivity in utility
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Parameter_b2
+Quality sensitivity in utility
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+Parameter_b3
+Market share sensitivity in utility
+_INIT_
+Auto-initialized on INIT
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+
+/********************************************************************************
+
+	Internet access service market
+
+		Simulation of a provider and consumer market of recurring services.
+
+		Assumed object structures:
+
+																	ROOT
+																		|
+																Internet
+																 /		|  \
+										+-----------+			|		 +-----------+
+										|								|								|
+						NetEqTechnologies		AccProviders						EndUsers
+										|								|								|
+								Technology							Provider										User
+								<multiple								<multiple						<multiple
+								instances>							instances>					instances>
+	
+
+ ********************************************************************************/
+
+MODELBEGIN
+
+DEBUG
+
+EQUATION("B")
+/*
+Updade user budget for period
+*/
+
+	v[0]=VL("B",1);																					// get last period budget
+	v[1]=V("gB");																					// and demand periodic growth
+  
+RESULT((1+v[1])*v[0])
+
+
+EQUATION("GM")
+/*
+Maximum demand for period
+*/
+
+	v[0]=SUM("B");																					// adds all available user budgets
+
+
+RESULT(v[0])
+
+
+EQUATION("G")
+/*
+Current demand in period
+*/
+
+	v[0]=SUM("Puser");																					// adds all users with contracted access
+ 
+
+RESULT(v[0])
+
+
+EQUATION("Prov")
+/*
+Defines user provider for period
+If current contract not expired, keep current provider
+*/
+
+	v[0]=0;																					// assumes change is not needed
+	v[1]=VL("Prov",1);																					// gets current provider
+	v[2]=V("t0");																					// last contract start period
+	v[3]=V("Tcont");																					// contract period
+	v[4]=V("B");																					// current budget
+	v[5]=VL("Paver",1);																					// average market price (weighted)
+	v[6]=V("b1");																					// low price sensitivity
+	v[7]=V("b2");																					// quality sensitivity
+	v[8]=V("ed");																					// quality error standard deviation
+	v[9]=V("es");																					// utility tolerance to keep provider
+
+	if(v[1]==0)																					// if no provider, try change
+	{
+		v[0]=1;																				// 0 - no change / 1 - try change
+		v[10]=0;																				// no quality
+		v[11]=0;																				// no price
+		v[12]=0;																				// best utility so far is zero
+		v[13]=0;																				// no provider ID
+		cur1=NULL;																				// no firm object
+	}
+	else
+		if(t-v[2]>=v[3])																				// if contract expired, try change
+		{
+			v[0]=1;
+			v[10]=VLS(p->hook,"M",1);																			// gets last quality available
+			v[11]=VS(p->hook,"Pprov");																			// current price for existing provider
+			
+			if(v[11]<=v[4])																			// check if current provider is affordable
+			{
+				v[12]=v[9]*pow(v[5]/v[11],v[6])*pow(v[10],v[7]);// required mininum new utility to change
+				v[13]=v[1];																		// start with current provider
+				cur1=p->hook;
+			}
+			else																			// has to find a cheaper provider
+			{
+				v[10]=0;																		// same as no provider
+				v[11]=0;
+				v[12]=0;	
+				v[13]=0;
+				cur1=NULL;
+			}
+		}																				// best utility so far is current provider
+		else
+			v[13]=v[1];																			// just keep current provider
+
+	if(v[0]==1)																					// if change requested
+	{
+		cur2=SEARCHS(p->up->up,"Supply");																	// gets the Supply container
+
+		if(cur2==NULL) INTERACT("Supply object problem",v[1]);
+
+		CYCLES(cur2,cur,"Provider")																				// scan all providers in Supply
+		{
+			v[14]=VS(cur,"ProvID");																			// gets provider ID
+			v[15]=VS(cur,"Pprov");																			// provider current price
+			v[16]=VLS(cur,"M",1);																			// last known quality (precise)
+			
+			if(v[14]!=v[1])																			// it is not the current provider
+				v[16]=norm(v[16],v[8]);																		// so introduce error in quality measure
+
+			v[17]=pow(v[5]/v[15],v[6])*pow(v[16],v[7]);				// calculates utility of provider
+			
+			if(v[17]>v[12]&&v[15]<=v[4])																			// if better enough than current and under budget
+			{
+				v[11]=v[15];																		// new price
+				v[12]=v[17];																		// new best utility
+				v[13]=v[14];																		// new provider ID
+				cur1=cur;																		// new provider object
+			}
+		}
+
+		WRITE("Puser",v[11]);																				// updates user info even if same provider
+		p->hook=cur1;																				// because price may have changed
+
+		if(cur1!=NULL)																				// if a provider was found
+			WRITE("t0",t);																			// set new contract start
+		else
+			WRITE("t0",0);																			// clear old provider if none found
+	}
+
+RESULT(v[13])
+
+
+EQUATION("Q")
+/*
+Calculates provider's number of users for the period
+*/
+
+	v[0]=0;																					// reset found users for provider
+	v[1]=V("ProvID");																					// provider ID to search for
+
+	cur1=SEARCHS(p->up->up,"Demand");
+
+	if(cur1==NULL) INTERACT("Demand object problem", v[1]);
+
+	CYCLES(cur1,cur,"User")
+	{
+		v[2]=VS(cur,"Prov");																				// gets user provider
+		
+		if(v[2]==v[1])																				// counts if same provider
+			v[0]++;
+	}
+	
+RESULT(v[0])
+
+
+EQUATION("M")
+/*
+Calculates provider real quality index in the period
+*/
+
+	v[1]=V("Q");																					// number of user in the period
+	v[2]=V("QM");																					// network capacity for the period
+	v[3]=V("q");																					// quality fixed parameter
+
+	if(v[1]==0)
+		v[0]=1;																				// conventional quality (=1) if no user
+	else
+		v[0]=pow(v[2]/v[1],v[3]);																				// calculates quality
+
+RESULT(v[0])
+
+
+EQUATION("QM")
+/*
+Calculates provider maximum network capacity in number of users
+*/
+
+	v[1]=VL("QM",1);																						// previous network capacity
+	v[2]=VL("Q",1);																						// previous user numbers
+	v[3]=VL("Q",2);
+
+	v[0]=v[1];																						// keeps capacity
+
+	if(v[3]!=0&&v[2]/v[3]>1)																						// treats no user or no growth
+		v[0]=v[1]*(v[2]/v[3]);																					// keeps existing lack
+
+RESULT(v[0])
+
+
+EQUATION("Pprov")
+/*
+Defines current period pricing for provider
+*/
+
+#define PINCR 0.005
+
+	v[0]=VL("Pprov",1);																						// last period price
+	v[1]=V("Pmax");
+
+	if(v[0]*(1+PINCR)>v[1])																						// cap price at maximum price
+		v[2]=v[1];
+	else
+		v[2]=v[0]*(1+PINCR);
+
+RESULT(v[2])
+
+
+EQUATION("Paver")
+/*
+Calculate the average weighted price for period
+*/
+
+	v[0]=WHTAVE("Pprov","Q");																						// price * number of users
+	v[1]=V("Nuser");																						// total users
+	v[2]=SUM("Pprov");																						// sum of prices
+	v[3]=V("Nprov");																						// current number of providers
+	
+
+	if(v[1]==0)																						// no users yet
+		v[4]=v[2]/v[3];																					// non weighted average
+	else
+		v[4]=v[0]/v[1];																					// weighted average
+
+RESULT(v[4])
+
+
+EQUATION("Nuser")
+/*
+Total users in period
+*/
+
+	v[0]=SUM("Q");																						// sum Q for all provider objects
+
+RESULT(v[0])
+
+
+EQUATION("Nprov")
+/*
+Total providers in period
+*/
+
+	v[0]=0;
+	
+	CYCLE(cur,"Provider")																						// scans all providers
+		v[0]++;																					// counting them
+
+
+RESULT(v[0])
+
+
+MODELEND
+
+
+void close_sim(void)
+{
+}
+
+
+
+END_EQ_FILE

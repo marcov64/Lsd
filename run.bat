@@ -1,6 +1,22 @@
 @echo off
+rem *************************************************************
+rem
+rem	 LSD 7.1 - December 2018
+rem	 written by Marco Valente, Universita' dell'Aquila
+rem	 and by Marcelo Pereira, University of Campinas
+rem
+rem	 Copyright Marco Valente and Marcelo Pereira
+rem	 LSD is distributed under the GNU General Public License
+rem	
+rem *************************************************************
+
+rem *************************************************************
+rem  RUN.BAT
+rem  LMM startup command in Windows 32-bit.
+rem *************************************************************
+
 if "%1"=="/?" (
-	echo Open Lsd LMM, 32-bit version
+	echo Open LSD LMM, 32-bit version
 	echo Usage: run [LSDROOT] [FILE]
 	goto end
 )

@@ -1,13 +1,20 @@
 /*************************************************************
 
-	LSD 7.0 - January 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
+
+/*************************************************************
+MAIN_GNUWIN.CPP 
+LSD C++ system entry/exit point.
+
+Sets all OS signal handlers.
+*************************************************************/
 
 #include "decl.h"
 
@@ -16,14 +23,19 @@
  *************************************/
 int main( int argn, char **argv )
 {
-	int res;
+	int res = 0;
 
+#ifndef NO_ERROR_TRAP
 	// register all signal handlers
 	handle_signals( signal_handler );
 
 	try
 	{
+#endif
+
 		res = lsdmain( argn, argv );
+		
+#ifndef NO_ERROR_TRAP
 	}
 	catch ( bad_alloc& )	// out of memory conditions
 	{
@@ -47,6 +59,8 @@ int main( int argn, char **argv )
 		Tcl_Finalize( );
 	}
 #endif
+#endif
+
 	return res;
 }
 
@@ -190,17 +204,22 @@ void signal_handler( int signum )
 	}
 	else
 	{
-		strcpy( msg3, "Additional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option" );
+		strcpy( msg3, "Additional information may be obtained running the simulation using the 'Model'/'GDB Debugger' menu option" );
 		if ( quit != 2 )
 		{
-			if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
+			if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL && 
+				 stacklog->vs != NULL && stacklog->vs->label != NULL )
 			{
-				strcat( msg3, "\n\nAttempting to open the LSD Debugger (LSD will close immediately after exiting the Debugger)..." );
+				strcat( msg3, "\n\nAttempting to open the LSD Debugger.\n\nLSD will close immediately after exiting the Debugger." );
 				plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", "", stacklog->vs->label );
 				print_stack( );				
 			}
 			else
+			{
+				strcat( msg3, "\n\nPlease disable fast mode and parallel processing to get more information about the error.\n\nLSD will close now." );
 				plog( "\n\nAn unknown problem was detected while executing user's equations code" );
+				plog( "\n\nWarning: %s active, cannot open LSD Debugger", "", parallel_mode ? "parallel preocessing" : "fast mode" );
+			}
 				
 			quit = 2;
 		}
@@ -210,10 +229,11 @@ void signal_handler( int signum )
 	
 	if ( user_exception )
 	{
-		if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
+		if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL && 
+			 stacklog->vs != NULL && stacklog->vs->label != NULL )
 		{
-			sprintf( msg3, "%s (equation error)", stacklog->vs->label );
-			deb( stacklog->vs == NULL ? root : stacklog->vs->up, NULL, msg3, &useless );
+			sprintf( msg3, "%s (ERROR)", stacklog->vs->label );
+			deb( stacklog->vs->up, NULL, msg3, &useless );
 		}
 	}
 	else

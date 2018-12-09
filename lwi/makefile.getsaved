@@ -1,0 +1,49 @@
+# Makefile for lsd_getsaved in Linux/Cygwin
+
+CC=g++	
+TARGET=lsd_getsaved
+EXT=
+SWITCH_CC=-DNO_WINDOW -DCPP_DEFAULT -Wno-unused-result -O3
+
+# For Unix systems, using OS native compiler and Tcl/Tk.
+LSDROOT=..
+PATH_HEADER=. #path to general headers
+PATH_LIB=. #path to general libraries
+LIBS= #additional libraries
+
+# from here you should not need to modify anything
+RM=rm -f
+SRC=src
+SRC_DIR=$(LSDROOT)/$(SRC)/
+
+# Variable used to prepare the options to search for the tcl and tk headers
+# Do not modify
+INCLUDE=-I$(PATH_HEADER) -I$(LSDROOT)/src
+
+$(TARGET)$(EXT): $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)getsaved.obj $(SRC_DIR)file.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)nets.obj $(SRC_DIR)util.obj 
+	$(CC) $(SWITCH_CC) $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)getsaved.obj $(SRC_DIR)file.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)nets.obj $(SRC_DIR)util.obj -L$(PATH_LIB) $(LIBS) -o $(TARGET)
+
+$(SRC_DIR)main_gnuwin.obj: $(SRC_DIR)main_gnuwin.cpp 
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)main_gnuwin.cpp -o $(SRC_DIR)main_gnuwin.obj $(INCLUDE)
+
+$(SRC_DIR)getsaved.obj: $(SRC_DIR)getsaved.cpp 
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)getsaved.cpp -o $(SRC_DIR)getsaved.obj $(INCLUDE)
+
+$(SRC_DIR)file.obj: $(SRC_DIR)file.cpp 
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)file.cpp -o $(SRC_DIR)file.obj $(INCLUDE)
+
+$(SRC_DIR)object.obj: $(SRC_DIR)object.cpp 
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)object.cpp -o $(SRC_DIR)object.obj $(INCLUDE)
+
+$(SRC_DIR)variab.obj: $(SRC_DIR)variab.cpp 
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.obj $(INCLUDE)
+
+$(SRC_DIR)nets.obj: $(SRC_DIR)nets.cpp 
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.obj $(INCLUDE)
+
+$(SRC_DIR)util.obj: $(SRC_DIR)util.cpp 
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)util.cpp -o $(SRC_DIR)util.obj $(INCLUDE)
+
+# Clean object files for building for another distribution
+clean:
+	$(RM) $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)getsaved.obj $(SRC_DIR)file.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)nets.obj $(SRC_DIR)util.obj

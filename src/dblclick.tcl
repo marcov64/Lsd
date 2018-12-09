@@ -1,3 +1,6 @@
+#*************************************************************
+# DBLCLICK.TCL
+# Enhancements to double-click behavior in text widgets.
 #
 # package doubleclick
 #
@@ -17,7 +20,7 @@
 # changed procedure: ::tk::TextNextPos
 # new procedure: ::tk::TextCharAtXYescaped
 # new procedure: tcl_findClosingBrace
-#
+#*************************************************************
 
 package require Tk 8.5
 

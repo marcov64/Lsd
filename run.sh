@@ -1,6 +1,22 @@
 #!/bin/bash
+#**************************************************************
+#
+#	LSD 7.1 - December 2018
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#	
+#**************************************************************
+
+#**************************************************************
+# RUN.SH
+# LMM terminal startup command in Linux and macOS.
+#**************************************************************
+
 if [ "$1" = "-h" ]; then
-	echo "Open Lsd LMM, 64-bit version"
+	echo "Open LSD LMM, 64-bit version"
 	echo "Usage: ./run.sh [LSDROOT] [FILE]"
 else
 	if [ -n "$1" ]; then

@@ -1,0 +1,8 @@
+Sets of models based on the model by Smallwood and Conlisk (1979)
+"Product Quality in Markets where Consumers are Imperfectly Informed", Quarterly Journal of Economics, 93-1
+
+These models include all the Lsd functions. Understanding these models should allow users to implement any kind of equation.
+
+There are four versions of the model. The first two versions implement the model as described in the original paper. The computational version provides a much better understanding of the results as compared to the analytical solutions proposed in the paper.
+
+The further two versions extend the model to include entry and exit, and a possible role of marketing. Such extensions are proposed as example of how a model should be implemented, starting from a robust version and testing more complicated extensions. They are also an excuse to show how to use advanced Lsd features, like the desctrution and creation of objects.

@@ -1,64 +1,57 @@
 /*************************************************************
 
-	LSD 7.0 - January 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
+/*************************************************************
 EDIT.CPP
 This functions manage the computation, display and modification of
 objects' number. Any call to these module starts by scanning the whole
 model tree, counts the number of each type of objects and displays orderly
 the information.
+
 On request, it is possible to change these values, either for single "branches"
 of the model or for the whole set of one type of Objects.
 It can exit to return to the calling function (either the browser in INTERF.CPP
 or the set initial values in EDIT.CPP) or going in setting initial values.
 
-The functions contained in this file are:
+The main functions contained in this file are:
 
-- void set_obj_number(object *r, int *choice)
+- void set_obj_number( object *r, int *choice )
 The main function, called from the browser. Initialize the text widget and wait
 the actions of the users to take place.
 
-- void insert_obj_num(object *root, char *tag, char *indent, int counter, int *i, int *value);
+- void insert_obj_num( object *root, char *tag, char *indent, int counter, int *i, int *value );
 Does the real job. Scan the model from root recursively and for each Object found
 counts the number, prepare its index if the parent has multiple instances,
 and set the indentation. Each label is bound to return a unique integer number
 in case it is clicked. Such number is used as guide for the following function
 
-- void edit_str(object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done);
+- void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done );
 Explore recursively the model tree giving a unique number for every group of
 objects encountered. When it finds the one clicked by user prepare the
 window to accept a new value for the number of instances. Passes thie value
 to the next function
 
-- void chg_obj_num(object *c, int value, int all, int *choice);
+- void chg_obj_num( object *c, int value, int all, int *choice );
 Depending on all (the flag to modify all the values of that type in the model)
 changes only the number of instances following c, or otherwise, every group of
 intences of the type of c. If it has to increase the number of instances,
 it does it directly. If it has to decrease, checks again all. If all is false,
 it activate the routine below, otherwise, it eliminates directly the surplus
 
-- void eliminate_obj(object *r, int actual, int desired , int *choice);
+- void eliminate_obj( object *r, int actual, int desired , int *choice );
 Ask the user whether he wants to eliminate the last object or to choose
 individually the ones to eliminate. In this second case, it asks for a list
 numbers. The list is as long as are the instances to eliminate. Each element
 is the ordinal number of one instance to eliminate
-
-
-void search_title(object *root, char *tag, int *i, char *lab, int *incr);
-void clean_cell(object *root, char *tag, char *lab);
-void edit_data(object *root, int *choice, char *obj_name);
-void set_title(object *c, char *lab, char *tag, int *incr);
-void link_data(object *root, char *lab);
-
-************************************/
+*************************************************************/
 
 #include "decl.h"
 
@@ -74,12 +67,11 @@ int max_depth;
 /***************************************************
 SET_OBJ_NUMBER
 ****************************************************/
-
 void set_obj_number( object *r, int *choice )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ], *l;
 	int i, num, res, count, done;
-	object *cur, *first;
+
 	Tcl_LinkVar( inter, "val", ( char * ) &count, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
@@ -224,8 +216,7 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ], indent[ 30 ];
 	object *c, *cur;
-	variable *var;
-	int num = 0, multi = 0;
+	int num = 0;
 	bridge *cb; 
 
 	strcpy( ch, tag );
@@ -236,6 +227,9 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 
 	for ( cb = root->b, counter = 1; cb != NULL; cb = cb->next, counter = 1 )
 	{  
+		if ( cb->head == NULL )
+			continue;
+		
 		*i += 1;
 		c = cb->head;
 		for ( cur = c, num = 0; cur != NULL; cur = cur->next, ++num );
@@ -287,11 +281,6 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 		
 		Tcl_DoOneEvent( 0 );
 
-		if ( go_brother( c ) != NULL )
-			multi = 1;
-		else
-			multi = 0;
-		
 		if ( max_depth < 1 || level < max_depth )
 		{
 			for ( cur = c; cur != NULL; ++counter, cur=go_brother( cur ) )
@@ -316,13 +305,12 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 /***************************************************
 COMPUTE_COPYFROM
 ****************************************************/
-
 int compute_copyfrom( object *c, int *choice )
 {
 	object *cur, *cur1, *cur2, *cur3;
 	int i, j, k, h, res;
 
-	if ( c->up == NULL )
+	if ( c == NULL || c->up == NULL )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Element in Root object\" -detail \"The Root object is always single-instanced, so any element contained in it has only one instance.\"" );
 		return 1;
@@ -339,7 +327,7 @@ int compute_copyfrom( object *c, int *choice )
 
 	cmd( "frame $cc.f" );
 
-	for ( j = 1, cur = c; cur->up != NULL; cur = cur->up, ++j ) 
+	for ( i = 1, j = 1, cur = c; cur->up != NULL; cur = cur->up, ++j ) 
 	{
 		cmd( "frame $cc.f.f%d", j );
 		cmd( "label $cc.f.f%d.l -text \"Instance number of '%s'\"", j, cur->label );
@@ -379,12 +367,12 @@ int compute_copyfrom( object *c, int *choice )
 	for ( cur = c->up; cur->up != NULL; cur = cur->up ); //cur is root
 	cur = cur->search( c->label ); //find the first
 
-	for ( i = 0, k = 0; k == 0 && cur != NULL ; cur3 = cur, cur = cur->hyper_next( c->label ), ++i )
+	for ( i = 0, k = 0, cur3 = NULL; k == 0 && cur != NULL ; cur3 = cur, cur = cur->hyper_next( c->label ), ++i )
 	{
 		k = 1;
 		for ( j = 1, cur1 = cur; cur1->up != NULL; cur1 = cur1->up, ++j )
 		{
-			cmd( "if [ string is integer $num%d ] { set choice $num%d } { set choice -1 }", j, j );
+			cmd( "if [ string is integer -strict $num%d ] { set choice $num%d } { set choice -1 }", j, j );
 			if ( *choice < 0 )
 				break;
 
@@ -402,7 +390,7 @@ int compute_copyfrom( object *c, int *choice )
 	res = i;
 	
 	// reset possibly erroneous values
-	for ( j = 1, cur2 = cur3; cur2->up != NULL; cur2 = cur2->up, ++j ) 
+	for ( j = 1, cur2 = cur3; cur2 != NULL && cur2->up != NULL; cur2 = cur2->up, ++j ) 
 	{
 		for ( i = 1, cur1 = cur2->up->search( cur2->label ); cur1 != cur2; cur1 = cur1->next, ++i );
 
@@ -437,7 +425,6 @@ int compute_copyfrom( object *c, int *choice )
 /***************************************************
 ENTRY_NEW_OBJNUM
 ****************************************************/
-
 void entry_new_objnum( object *c, int *choice, char const *tag )
 {  
 	object *cur, *first;
@@ -471,12 +458,12 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 
 	cmd( "frame $n.e" );
 	cmd( "label $n.e.l -text \"Number of instances\"" );
-	cmd( "entry $n.e.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $n.e.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center } { entry $n.e.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center }" );
 	cmd( "pack $n.e.l $n.e.e -side left -padx 2" );
 
 	cmd( "frame $n.cp" );
 	cmd( "label $n.cp.l -text \"Copy from instance\"" );
-	cmd( "entry $n.cp.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $n.cp.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invalidcommand { bell } -justify center } { entry $n.cp.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center }" );
 	cmd( "button $n.cp.compute -width 7 -text Compute -command { set conf 1; set choice 3; .numobj.cp.e selection range 0 end; focus .numobj.cp.e }" );
 	cmd( "pack $n.cp.l $n.cp.e $n.cp.compute -side left -padx 2" );
 
@@ -587,19 +574,19 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 /***************************************************
 EDIT_STR
 ****************************************************/
-
 void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ];
-	object *c, *cur, *first;
-	variable *var;
-	int multi = 0, cazzo, param, cfrom, j, affect, k;
+	object *c, *cur;
+	int multi = 0;
 	bridge *cb;
 
-	param = 0;
 	strcpy( ch, tag );
 	for ( cb = root->b, counter = 1; cb != NULL && *done == 0; cb = cb->next, counter = 1 )
 	{ 
+		if ( cb->head == NULL )
+			continue;
+		
 		c = cb->head; 
 		*i += 1;
 		if ( *i == res )
@@ -636,13 +623,10 @@ void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, 
 /***************************************************
 ELIMINATE_OBJ
 ****************************************************/
-
 void eliminate_obj( object **r, int actual, int desired , int *choice )
 {
-	char ch[ 2 * MAX_ELEM_LENGTH ];
 	int i, j, *del, value, last;
-	object *cur, *app, *prev;
-	bridge *cb, *first;
+	object *cur, *app;
 
 	cmd( "set d .delobj" );
 	cmd( "newtop $d \"Delete Instances\" { set choice 3 }" );
@@ -702,7 +686,7 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 
 		cmd( "frame $d.t" );
 		cmd( "label $d.t.tit -text \"Instance to delete\"", (*r)->label );
-		cmd( "entry $d.t.e -width 6 -validate focusout -vcmd { if [ string is integer %%P ] { set value %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $d.t.e -width 6 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set value %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value; return 0 } } -invalidcommand { bell } -justify center } { entry $d.t.e -width 6 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set value %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value; return 0 } } -invcmd { bell } -justify center }" );
 		cmd( "label $d.t.tit1 -text \"\"" );
 		cmd( "pack $d.t.tit $d.t.e $d.t.tit1" );
 		cmd( "pack $d.l $d.t -padx 5 -pady 5" );
@@ -755,14 +739,13 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 		Tcl_UnlinkVar( inter, "value" );
 		Tcl_UnlinkVar( inter, "j" );
 		*choice = 0;
-	}//choice==2
+	}
 }
 
 
 /***************************************************
 CHECK_PIPPO
 ****************************************************/
-
 int check_pippo( object *c, object *pivot, int level, int pippo[ ] )
 {
 	int res = 1, i, j;
@@ -787,7 +770,6 @@ int check_pippo( object *c, object *pivot, int level, int pippo[ ] )
 /***************************************************
 CHG_OBJ_NUM
 ****************************************************/
-
 void chg_obj_num( object **c, int value, int level, int pippo[ ], int *choice, int cfrom )
 {
 	object *cur, *cur1, *last, *app, *first, *pivot;
@@ -840,20 +822,25 @@ void chg_obj_num( object **c, int value, int level, int pippo[ ], int *choice, i
 			}
 		}// end check_pippo
 		
-		for ( cur1 = cur; cur1 != NULL; cur1 = go_brother( cur1 ) )
+		for ( last = NULL, cur1 = cur; cur1 != NULL; cur1 = go_brother( cur1 ) )
 			last = cur1 ; 	// skip the just updated group of objects
 		
-		cur = last->hyper_next( cur->label );	// first copy of the object to change after the just adjusted bunch
+		if ( last == NULL )
+			cur = NULL;
+		else
+		{
+			cur = last->hyper_next( cur->label );	// first copy of the object to change after the just adjusted bunch
 
-		if ( level > 0 && cur != NULL )
-		{	//search the next pivot
-			for ( cur1 = cur->up, i = 1; i < level; ++i, cur1 = cur1->up );	// hopefully, cur1 is of type pivot
-			
-			// a new set of objects to change has been found, but descends from another pivo
-			if ( cur1 != pivot )
+			if ( level > 0 && cur != NULL )
+			{	//search the next pivot
+				for ( cur1 = cur->up, i = 1; i < level; ++i, cur1 = cur1->up );	// hopefully, cur1 is of type pivot
+				
+				// a new set of objects to change has been found, but descends from another pivo
+				if ( cur1 != pivot )
+					cur = NULL;
+			}
+			else
 				cur = NULL;
 		}
-		else
-			cur = NULL;
 	}
 }

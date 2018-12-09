@@ -1,21 +1,20 @@
 /*************************************************************
 
-	LSD 7.0 - January 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-CONFGEN.CPP contains:
-- execute the lsd_confgen command line utility.
+/*************************************************************
+CONFGEN.CPP 
+Execute the lsd_confgen command line utility.
 
-	Generates new configurations from a base one
-
-****************************************************/
+Generates new configurations from a base one.
+*************************************************************/
 
 #include <set>
 #include "decl.h"
@@ -40,6 +39,7 @@ sense *rsense = NULL;		// LSD sensitivity analysis structure
 
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
 bool message_logged = false;// new message posted in log window
+bool no_zero_instance = false;// flag to allow deleting last object instance
 bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool running = false;		// simulation is running
@@ -61,14 +61,12 @@ int prof_min_msecs = 0;		// profile only variables taking more than X msecs.
 int prof_obs_only = false;	// profile only observed variables
 int quit = 0;				// simulation interruption mode (0=none)
 int t;						// current time step
-int seed = 1;				// random number generator initial seed
 int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
-int total_obj = 0;			// total objects in model
-int total_var = 0;			// total variables/parameters in model
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
+unsigned seed = 1;			// random number generator initial seed
 description *descr = NULL;	// model description structure
 lsdstack *stacklog = NULL;	// LSD stack
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
@@ -92,7 +90,7 @@ int lsdmain( int argn, char **argv )
 
 	findex = 1;
 
-	if ( argn < 3 )
+	if ( argn < 7 )
 	{
 		fprintf( stderr, "\nThis is LSD Configuration Generator.\nIt creates new LSD configuration file(s) (.lsd) based on changed parameters\nor variables initial values described in a comma separated text file (.csv).\nEach changed element should take one line. First column must contain the\nparameter or variable name. Second (and additional) column(s) must contain\nthe values to apply in the new configuration. First line (header) is required\nand considered for the number of columns only. One configuration is generated\nfor each column with values, sequentially numbered.\n\nCommand line options:\n'-f FILENAME.lsd' the original configuration file to use as base\n'-c CONFIG.csv' comma separated text file with new configuration values\n'-o FILE_BASE_NAME' base name (no extension) to save new configuration file(s)\n" );
 		myexit( 1 );
@@ -102,21 +100,21 @@ int lsdmain( int argn, char **argv )
 		for ( i = 1; i < argn; i += 2 )
 		{
 			// read -f parameter : original configuration file
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				struct_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( struct_file, argv[ 1 + i ] );
 				continue;
 			}
 			// read -c parameter : text configuration file name
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'c' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'c' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				config_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( config_file, argv[ 1 + i ] );
 				continue;
 			}
 			// read -o parameter : output base name
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				simul_name = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( simul_name, argv[ 1 + i ] );
@@ -141,7 +139,6 @@ int lsdmain( int argn, char **argv )
 		myexit( 4 );
 	}
 	fclose( f );
-	struct_loaded = true;
 	
 	// default config file name
 	if ( config_file == NULL )
@@ -180,7 +177,7 @@ int lsdmain( int argn, char **argv )
 	strcpy( stacklog->label, "LSD Simulation Manager" );
 	stack = 0;
 	
-	if ( load_configuration( root, false ) != 0 )
+	if ( load_configuration( true ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Configuration Generator.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
 		myexit( 5 );
@@ -201,7 +198,7 @@ int lsdmain( int argn, char **argv )
 			myexit( 7 );
 		}
 	
-		if ( ! save_configuration( root, ( confs == 1 ? 0 : i ) ) )
+		if ( ! save_configuration( confs == 1 ? 0 : i ) )
 		{
 			fprintf( stderr, "\nFile '%s.lsd' cannot be saved.\nThis is LSD Configuration Generator.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n", simul_name  );
 			myexit( 8 );

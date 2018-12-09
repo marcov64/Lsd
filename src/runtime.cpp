@@ -1,60 +1,39 @@
 /*************************************************************
 
-	LSD 7.0 - January 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-RUN_TIME.CPP contains initialization and management of run-time plotting
+/*************************************************************
+RUN_TIME.CPP 
+Contains initialization and management of run-time plotting
 
+The main functions contained here are:
 
-The functions contained here are:
-
-- void prepare_plot(object *r, int id_sim)
+- void prepare_plot( object *r, int id_sim )
 Checks is there are LSD variables to plot. If not, returns immediately. Otherwise
 initiliaze the run time globale variables. Namely, the vector of the labels for
 the variables of plot. The plot window is initialized according to the id_sim name
 
-- void count(object *r, int *i);
+- void count( object *r, int *i );
 Recursive function that increments i of one for any variable to plot.
 
-- void assign(object *r, int *i, char *lab);
+- void assign( object *r, int *i, char *lab );
 Create a list of Variables to plot and create the list of labels (adding
 the indexes if necessary) to be used in the plot.
 
 
-- void init_plot(int i, int id_sim);
+- void init_plot( int i, int id_sim );
 create the canvas for the plot, the lines, button, labels, etc.
 
-- void plot_rt(variable *v)
+- void plot_rt( variable *v )
 the function used run time to plot the value of variable v
-
-Other functions used here:
-- object *skip_next_obj(object *t, int *count);
-Contained in UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- object *go_brother(object *c);
-Contained in UTIL.CPP. returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-
-- void cmd(char *cc);
-Contained in UTIL.CPP. Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-
-- void plog(char *m);
-print  message string m in the Log screen. It is in LSDMAIN.CPP
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 
@@ -71,11 +50,12 @@ int tick = 5;
 int lab_lin = 5;				// labels per line
 int lin_lab = 3;				// lines of label
 int lin_height = 18;
-
+int p_digits = 3;				// precision digits
 char intval[ 100 ];				// string buffer
 char **tp;						// labels of variables to plot in runtime
-double ymin;
 double ymax;
+double ymed;
+double ymin;
 double *old_val;
 double plot_step;
 int shift = 20;					// new window shift
@@ -110,9 +90,9 @@ COUNT
 **************************************/
 void count( object *r, int *i )
 {
-	variable *a;
-	object *c;
 	bridge *cb;
+	object *c;
+	variable *a;
 
 	for ( a = r->v; a != NULL; a = a->next)
 		if ( a->plot == 1 )
@@ -129,11 +109,11 @@ ASSIGN
 **************************************/
 void assign( object *r, int *i, char *lab )
 {
-	variable *a;
-	object *c, *c1;
 	char cur_lab[ MAX_ELEM_LENGTH ];
 	int j;
 	bridge *cb;
+	object *c, *c1;
+	variable *a;
 
 	for ( a = r->v; a != NULL; a = a->next )
 		if ( a->plot == 1 )
@@ -147,6 +127,9 @@ void assign( object *r, int *i, char *lab )
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
+		if ( cb->head == NULL )
+			continue;
+		
 		c = cb->head;
 		if ( c->next != NULL ) 		// multiple instances
 			for ( j = 1, c1 = c; c1 != NULL; c1 = go_brother( c1 ), ++j )
@@ -167,7 +150,7 @@ void init_plot( int num, int id_sim )
 {
 	int i, j, k, l;
 	
-	plot_step = ( max_step > width ) ? 1 : plot_step = width / ( double ) max_step;
+	plot_step = ( max_step > width ) ? 1 : width / ( double ) max_step;
 	cmd( "set scrollB 0" );
 
 	cmd( "set activeplot .plt%d", id_sim );
@@ -269,8 +252,9 @@ PLOT_RT
 **************************************/
 void plot_rt( variable *v )
 {
+	bool relabel = false;
 	int x1, x2, y1, y2;
-	double step, value;
+	double value, scale, zero_lim;
 	
 	// limit the number of run-time plot variables
 	if ( cur_plt > 100 )
@@ -279,54 +263,55 @@ void plot_rt( variable *v )
 	if ( ymax == ymin ) 		// very initial setting
 	{ 
 		if ( v->val[ 0 ] > 0 )
-		{
-			ymax = v->val[ 0 ] * 1.001;
-			ymin = v->val[ 0 ];
-		}
+			ymax = round_digits( v->val[ 0 ] * ( 1 + MARG ), p_digits );
 		else
-		{
-			ymax = v->val[ 0 ] * 0.009;
-			ymin = v->val[ 0 ];
-		}
+			ymax = round_digits( v->val[ 0 ] * ( 1 - MARG ), p_digits );
+		
+		ymin = round_digits( v->val[ 0 ], p_digits );
 		
 		if ( ymax == ymin )
-			ymax += 0.0001;
-
-		cmd( "$activeplot.c.yscale itemconf ymax -text %.4g", ymax );
-		cmd( "$activeplot.c.yscale itemconf ymin -text %.4g", ymin );
-		cmd( "$activeplot.c.yscale itemconf medy -text %.4g", ( ymax - ymin ) / 2 + ymin );
+			ymax += MARG;
+		
+		relabel = true;
 	}
 	
 	if ( v->val[ 0 ] >= ymax )
 	{
-		if ( v->val[ 0 ] >= 0 )
-			step = 1.1;
-		else
-			step = 0.9;
+		value = v->val[ 0 ] * ( v->val[ 0 ] > 0 ? 1 + MARG_CONST : 1 - MARG_CONST );
+		value = round_digits( value, p_digits );
 	  
-		double scale = ( ymax - ymin ) / ( v->val[ 0 ] * step - ymin );
+		scale = ( ymax - ymin ) / ( value - ymin );
+		ymax = value;	
+		
+		relabel = true;
+		
 		cmd( "$activeplot.c.c.cn scale punto 0 %d 1 %lf", height, scale  < 0.01 ? 0.01 : scale  );
-		ymax = v->val[ 0 ] * step;
-		cmd( "$activeplot.c.yscale itemconf ymax -text %.4g", ymax );
-		cmd( "$activeplot.c.yscale itemconf medy -text %.4g", ( ymax - ymin ) / 2 + ymin );
 	}
 
 	if ( v->val[ 0 ] <= ymin )
 	{
-		if ( v->val[ 0 ] > 0 )
-			step = 0.9;
-		else
-			step = 1.1;
-		
-		value = min( v->val[ 0 ] * step, ymin - ( ymax - ymin ) / height );
+		value = v->val[ 0 ] * ( v->val[ 0 ] > 0 ? 1 - MARG_CONST : 1 + MARG_CONST );
+		value = min( value, ymin - ( ymax - ymin ) / height );
+		value = round_digits( value, p_digits );
 
-		double scale = ( ymax - ymin ) / ( ymax - value );
-		cmd( "$activeplot.c.c.cn scale punto 0 0 1 %lf", scale < 0.01 ? 0.01 : scale  );
+		scale = ( ymax - ymin ) / ( ymax - value );
 		ymin = value;
-		cmd( "$activeplot.c.yscale itemconf ymin -text %.4g", ymin );
-		cmd( "$activeplot.c.yscale itemconf medy -text %.4g", ( ymax - ymin ) / 2 + ymin );
+		
+		relabel = true;
+		
+		cmd( "$activeplot.c.c.cn scale punto 0 0 1 %lf", scale < 0.01 ? 0.01 : scale  );
 	}
 
+	if ( relabel )
+	{
+		ymed = round_digits( ( ymax - ymin ) / 2 + ymin, p_digits );
+		zero_lim = ( ymax - ymin ) * MARG;
+		
+		cmd( "$activeplot.c.yscale itemconf ymax -text %.*g", p_digits, fabs( ymax ) < zero_lim ? 0 : ymax );
+		cmd( "$activeplot.c.yscale itemconf medy -text %.*g", p_digits, fabs( ymed ) < zero_lim ? 0 : ymed );
+		cmd( "$activeplot.c.yscale itemconf ymin -text %.*g", p_digits, fabs( ymin ) < zero_lim ? 0 : ymin );
+	}
+		
 	if ( t == 1 )
 	{
 		old_val[ cur_plt ] = v->val[ 0 ];
@@ -334,12 +319,23 @@ void plot_rt( variable *v )
 		return;
 	}
 
-	x1 = h_margin + t * plot_step;
-	x2 = h_margin + ( t - 1 ) * plot_step;
-	y1 = t_margin + ( height - ( ( v->val[ 0 ] - ymin ) / ( ymax - ymin ) ) * height );
-	y2 = t_margin + ( height - ( ( old_val[ cur_plt ] - ymin ) / ( ymax - ymin ) ) * height );
+	x1 = ( int ) floor( h_margin + t * plot_step );
+	x2 = ( int ) floor( h_margin + ( t - 1 ) * plot_step );
+	y1 = ( int ) floor( t_margin + ( height - ( ( v->val[ 0 ] - ymin ) / ( ymax - ymin ) ) * height ) );
+	y2 = ( int ) floor( t_margin + ( height - ( ( old_val[ cur_plt ] - ymin ) / ( ymax - ymin ) ) * height ) );
 	old_val[ cur_plt ] = v->val[ 0 ];
 
 	cmd( "$activeplot.c.c.cn create line %d %d %d %d -tag punto -fill $c%d", x2, y2, x1, y1, cur_plt );
 	++cur_plt;
+}
+
+
+/**************************************
+RESET_PLOT
+**************************************/
+void reset_plot( int run )
+{
+	// allow for run-time plot window destruction
+	cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.fond.go conf -state disabled; .plt%d.fond.shift conf -state disabled }", 
+		 run, run, run, run );
 }

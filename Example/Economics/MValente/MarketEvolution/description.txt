@@ -1,0 +1,39 @@
+Market Evolution
+(Very complex model)
+
+This model, developed by Marco Valente, represents the evolution of a whole market
+from the earliest beginning onwards. It is a sort of test to whether the 
+computational representation of very complex phenomena can be of some help
+to identify the causes of some real world events.
+The model does not aim at replicate any specific real world case, but
+only provide an environment to test hypothesis.
+
+The model considers the following processes:
+- entry of new buyers, who shape their preferences depending on the state of 
+the system at the time of their entry;
+- entry of new producers offering an innovative product (the entry rate is exogenous, while the new producers' characteristics are set to an average value over the best product);
+- learning for buyers, a function of the time spent using of the innovative 
+product, and affecting the capacity to correctly judge alternative products 
+in future purchases;
+- bounded rational choice algorithm for buyers, meaning that buyers apply 
+a choice function minimizing the information to elaborate to reach 
+a "satisfycing" solution;
+- revision of preferences for buyers, a function of the modified conditions of 
+the market, of the marketing from producers and experience of the 
+buyers, affecting future purchases;
+- innovation for producers, who develop improvements on their products following 
+a R&D strategy endogenously determined to have the largest competing advantages. 
+The R&D efforts provide results that are subject to the technological 
+experience cumulated in the past by the firm and the technological constraints 
+posed by a set of exogenous technological complementarities.
+- revision of the marketing strategy for producers, who modify the marketing 
+goals depending on the changing competitive conditions on the market and 
+their technological level relative to their competitors.
+
+See the Lsd report for details on the model implementation, or the 
+PhD thesis by Marco Valente:
+Evolutionary Economics and Computer Simulations - A Model for the Evolution 
+of Markets, 2000, University of Allborg.
+
+
+

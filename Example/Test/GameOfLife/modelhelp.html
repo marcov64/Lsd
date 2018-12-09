@@ -1,0 +1,406 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+   <title>Model Help</title>
+</head>
+<body>
+&nbsp;
+<center>
+<p><b><u><font size=+2>Model Help</font></u></b></center>
+
+<p><br>
+<p>This model represents a set of agents in a lattice that can choose one
+over a set of available options. Each agent is initially assingned a random
+option, and then it can switch it at each time step.
+<br>The procedure to decide which option to choose is based on the previous
+step states of the same agent and of its four neighbours (up, down, left
+and right). The agent assigns a minimum probability to be chosen to each
+of the available options. Moreover, each option increases its probability
+depending on how many neighbours had that state in the previous time step.
+<br>The random choice is biased by a coefficient that concentrates, or
+flatten, the probability curve.
+<p>The model is highly automaticised. It creates automatically the lattice
+structure in Lsd and assigns the initial random states to the agents.
+<p>The parameters to set are:
+<ul>
+<li>
+Object <b>Lattice</b></li>
+
+<ul>
+<li>
+<b>NCol, NLine</b>: number of columns and lines in the lattice</li>
+
+<li>
+<b>NState</b>: number of available choices, to be less or equal the number
+of Objects "Option".</li>
+
+<li>
+<b>minprob</b>: minimum "raw" probability assigned to each option</li>
+
+<li>
+<b>UniProb</b>: unit of "raw" probability assigned for each neighbour having
+that option</li>
+
+<li>
+<b>Elas</b>: exponent used to transform the raw probalities such that true_prob=power(raw_prob,
+Elas)</li>
+</ul>
+
+<li>
+Object <b>Option</b></li>
+
+<ul>
+<li>
+<b>Id</b>: an identifying number different for each Option.</li>
+</ul>
+</ul>
+
+<p><br>The results to observe are:
+<ul>
+<li>
+Object <b>Option</b></li>
+
+<ul>
+<li>
+<b>glob</b> (in Object <b>Option</b>): number of agents that currently
+assume an option</li>
+
+<li>
+<b>State</b> (in Object <b>Cell</b>): current state of the agent</li>
+</ul>
+</ul>
+Consider that the model generates automatically a run time lattice even
+if the values of State are not saved.
+<br>&nbsp;
+<p><a NAME="_MODEL_STRUCTURE_"></a><i><u>Model Structure</u></i>
+<br><tt><a href="#Root">Root</a>-><a href="#Lattice">Lattice</a>-><a href="#Option">Option</a></tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|&nbsp;&nbsp;&nbsp;&nbsp;</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-><a href="#Row">Row</a>-><a href="#Cell">Cell</a></tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>
+<br><i><u>List of Variables</u></i>:
+<br><a href="#Choose">Choose</a>(0), <a href="#down">down</a>(0), <a href="#Init">Init</a>(0),
+<a href="#InitCanvas">InitCanvas</a>(0), <a href="#left">left</a>(0), <a href="#right">right</a>(0),
+<a href="#State">State</a>(1), <a href="#up">up</a>(0)
+<p><i><u>List of Parameters</u></i>:
+<br><a href="#Col">Col</a>, <a href="#Elas">Elas</a>, <a href="#glob">glob</a>,
+<a href="#Id">Id</a>, <a href="#Line">Line</a>, <a href="#minprob">minprob</a>,
+<a href="#NCol">NCol</a>, <a href="#NLine">NLine</a>, <a href="#NState">NState</a>,
+<a href="#num">num</a>, <a href="#prob">prob</a>, <a href="#UnitProb">UnitProb</a>,
+<a href="#width">width</a>
+<p><a NAME="Root"></a><b><font size=+2>Root</font></b>
+<table BORDER >
+<tr>
+<td>
+<center><b>Object</b></center>
+</td>
+
+<td>
+<center><b>Label</b></center>
+</td>
+
+<td>
+<center><b>Initialize</b></center>
+</td>
+
+<td>
+<center><b>Comment</b></center>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Lattice"></a><b><font size=+2>Lattice</font></b>
+<table BORDER >
+<tr>
+<td>
+<center><b>Object</b></center>
+</td>
+
+<td>
+<center><b>Label</b></center>
+</td>
+
+<td>
+<center><b>Initialize</b></center>
+</td>
+
+<td>
+<center><b>Comment</b></center>
+</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="up"></a><a href="modelreport.html#up">up</a> (0)&nbsp;</td>
+
+<td>&nbsp;</td>
+
+<td>see <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="down"></a><a href="modelreport.html#down">down</a> (0)&nbsp;</td>
+
+<td>&nbsp;</td>
+
+<td>see <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="left"></a><a href="modelreport.html#left">left</a> (0)&nbsp;</td>
+
+<td>&nbsp;</td>
+
+<td>see <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="right"></a><a href="modelreport.html#right">right</a> (0)&nbsp;</td>
+
+<td>&nbsp;</td>
+
+<td>see <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="Init"></a><a href="modelreport.html#Init">Init</a> (0)&nbsp;</td>
+
+<td>&nbsp;</td>
+
+<td>see <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="NCol"></a><a href="modelreport.html#NCol">NCol</a> (P)&nbsp;</td>
+
+<td>Yes</td>
+
+<td>see <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="NLine"></a><a href="modelreport.html#NLine">NLine</a> (P)&nbsp;</td>
+
+<td>Yes</td>
+
+<td>see <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="NState"></a><a href="modelreport.html#NState">NState</a> (P)&nbsp;</td>
+
+<td>Yes</td>
+
+<td>see <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="Elas"></a><a href="modelreport.html#Elas">Elas</a> (P)&nbsp;</td>
+
+<td>Yes</td>
+
+<td>see <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="Choose"></a><a href="modelreport.html#Choose">Choose</a> (0)&nbsp;</td>
+
+<td>&nbsp;</td>
+
+<td>see <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="minprob"></a><a href="modelreport.html#minprob">minprob</a>
+(P)&nbsp;</td>
+
+<td>Yes</td>
+
+<td>see <a href="#top">introduction</a>&nbsp;</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="UnitProb"></a><a href="modelreport.html#UnitProb">UnitProb</a>
+(P)&nbsp;</td>
+
+<td>Yes</td>
+
+<td>see <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Lattice">Lattice</a></td>
+
+<td><a NAME="InitCanvas"></a><a href="modelreport.html#InitCanvas">InitCanvas</a>
+(0)&nbsp;</td>
+
+<td>&nbsp;</td>
+
+<td>see <a href="#top">introduction</a></td>
+</tr>
+</table>
+
+<p><a NAME="Option"></a><b><font size=+2>Option</font></b>
+<table BORDER >
+<tr>
+<td>
+<center><b>Object</b></center>
+</td>
+
+<td>
+<center><b>Label</b></center>
+</td>
+
+<td>
+<center><b>Initialize</b></center>
+</td>
+
+<td>
+<center><b>Comment</b></center>
+</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Option">Option</a></td>
+
+<td><a NAME="Id"></a><a href="modelreport.html#Id">Id</a> (P)&nbsp;</td>
+
+<td>Yes</td>
+
+<td>Id marking the option. It must be an integer number different for each
+Option. See <a href="#top">introduction</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Option">Option</a></td>
+
+<td><a NAME="num"></a><a href="modelreport.html#num">num</a> (P)&nbsp;</td>
+
+<td></td>
+
+<td>Parameter used to store the cumulated "raw" probability summing the
+number of agents assuming this Option. See <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Option">Option</a></td>
+
+<td><a NAME="prob"></a><a href="modelreport.html#prob">prob</a> (P)&nbsp;</td>
+
+<td></td>
+
+<td>Parameter used to store the probabilities of being chosen by agents.
+See <a href="#top">introduction</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Option">Option</a></td>
+
+<td><a NAME="glob"></a><a href="modelreport.html#glob">glob</a> (P)&nbsp;</td>
+
+<td></td>
+
+<td>Total number of agent currently assuming this state. See <a href="#top">introduction</a></td>
+</tr>
+</table>
+
+<p><a NAME="Row"></a><b><font size=+2>Row</font></b>
+<table BORDER >
+<tr>
+<td>
+<center><b>Object</b></center>
+</td>
+
+<td>
+<center><b>Label</b></center>
+</td>
+
+<td>
+<center><b>Initialize</b></center>
+</td>
+
+<td>
+<center><b>Comment</b></center>
+</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Row">Row</a></td>
+
+<td><a NAME="Line"></a><a href="modelreport.html#Line">Line</a> (P)&nbsp;</td>
+
+<td></td>
+
+<td>Line number of the cells contained below the Object&nbsp;</td>
+</tr>
+</table>
+
+<p><a NAME="Cell"></a><b><font size=+2>Cell</font></b>
+<table BORDER >
+<tr>
+<td>
+<center><b>Object</b></center>
+</td>
+
+<td>
+<center><b>Label</b></center>
+</td>
+
+<td>
+<center><b>Initialize</b></center>
+</td>
+
+<td>
+<center><b>Comment</b></center>
+</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Cell">Cell</a></td>
+
+<td><a NAME="State"></a><a href="modelreport.html#State">State</a> (1)&nbsp;</td>
+
+<td></td>
+
+<td>State of the agent (i.e. one of the options' Id&nbsp;</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="modelreport.html#Cell">Cell</a></td>
+
+<td><a NAME="Col"></a><a href="modelreport.html#Col">Col</a> (P)&nbsp;</td>
+
+<td></td>
+
+<td>Column of the cell</td>
+</tr>
+</table>
+
+</body>
+</html>

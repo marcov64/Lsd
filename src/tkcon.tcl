@@ -2,23 +2,22 @@
 # \
 exec wish "$0" ${1+"$@"}
 
+#*************************************************************
+# TKCON.TCL
+# Enhanced Tk Console, part of the VerTcl system.
 #
-## tkcon.tcl
-## Enhanced Tk Console, part of the VerTcl system
-##
-## Originally based off Brent Welch's Tcl Shell Widget
-## (from "Practical Programming in Tcl and Tk")
-##
-## Thanks to the following (among many) for early bug reports & code ideas:
-## Steven Wahl, Jan Nijtmans, Mark Crimmins, Wart
-##
-## Copyright (c) 1995-2004 Jeffrey Hobbs, jeff(a)hobbs(.)org
-## Initiated: Thu Aug 17 15:36:47 PDT 1995
-##
-## source standard_disclaimer.tcl
-## source bourbon_ware.tcl
-##
-
+# Originally based off Brent Welch's Tcl Shell Widget
+# (from "Practical Programming in Tcl and Tk")
+#
+# Thanks to the following (among many) for early bug reports & code ideas:
+# Steven Wahl, Jan Nijtmans, Mark Crimmins, Wart
+#
+# Copyright (c) 1995-2004 Jeffrey Hobbs, jeff(a)hobbs(.)org
+# Initiated: Thu Aug 17 15:36:47 PDT 1995
+#
+# source standard_disclaimer.tcl
+# source bourbon_ware.tcl
+#
 # Proxy support for retrieving the current version of Tkcon.
 #
 # Mon Jun 25 12:19:56 2001 - Pat Thoyts
@@ -36,7 +35,7 @@ exec wish "$0" ${1+"$@"}
 # Or you can set the above variable from within tkcon by calling 
 #
 #    tkcon master set ::tkcon:PRIV(proxy) wwwproxy:8080
-#
+#*************************************************************
 
 if {$tcl_version < 8.0} {
     return -code error "tkcon requires at least Tcl/Tk8"

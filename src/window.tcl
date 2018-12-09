@@ -1,31 +1,31 @@
 #*************************************************************
 #
-#	LSD 7.0 - January 2018
+#	LSD 7.1 - December 2018
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
-#	Copyright Marco Valente
+#	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
 #	
 #*************************************************************
 
-#****************************************************
+#*************************************************************
+# WINDOW.TCL
 # Procedures to adjust window positioning & startup code. 
 #
-#	Types of window positioning:
+# Types of window positioning:
 #
-#	centerS: center over the primary display, only available if the parent window
-#		center is also in the primary display (if not, falback to centerW)
-#	centerW: center over the parent window (in any display)
-#	topleftS: put over the top left corner of screen of primary display, only 
-#		available if the parent window center is also in the primary display (if not,
-#		falback to topleftW)
-#	topleftW: put over the top left corner of parent window (around menu bar)
-#	coverW: cover the parent window (same size & position)
-#	overM: over the main window (same top-left position)
-#	current: keep current position
-#
-#****************************************************
+# centerS: center over the primary display, only available if the parent window
+#	center is also in the primary display (if not, falback to centerW)
+# centerW: center over the parent window (in any display)
+# topleftS: put over the top left corner of screen of primary display, only 
+#	available if the parent window center is also in the primary display (if not,
+#	falback to topleftW)
+# topleftW: put over the top left corner of parent window (around menu bar)
+# coverW: cover the parent window (same size & position)
+# overM: over the main window (same top-left position)
+# current: keep current position
+#*************************************************************
 
 package require Tk 8.5
 
@@ -37,6 +37,13 @@ set logWndFn	false
 
 # Enable coordinates test window
 set testWnd		false
+
+# Warn old Tcl/Tk in macOS
+if { [ string equal [ tk windowingsystem ] aqua ] && [ string equal [ info tclversion ] 8.5 ] } {
+	tk_messageBox -type ok -icon warning -title Warning \
+	-message "Old Tcl/Tk version" \
+	-detail "Please update your Tcl/Tk version to version 8.6 or higher.\nSome problems may appear when using an old version."
+}
 
 # Variable 'alignMode' configure special, per module (LMM, LSD), settings
 unset -nocomplain defaultPos defaultFocus
@@ -63,17 +70,26 @@ if [ string equal $tcl_platform(platform) unix ] {
 		set daCwid $daCwidMac
 		set corrX $corrXmac
 		set corrY $corrYmac
+		
+		set systemTerm $sysTermMac
+		set gnuplotTerm $gnuplotTermMac
 	} {
 		set butWid $butLinux
 		set daCwid $daCwidLinux
 		set corrX $corrXlinux
 		set corrY $corrYlinux
+		
+		set systemTerm $sysTermLinux
+		set gnuplotTerm $gnuplotTermLinux
 	}
 } {
 	set butWid $butWindows
 	set daCwid $daCwidWindows
 	set corrX $corrXwindows
 	set corrY $corrYwindows
+	
+	set systemTerm $sysTermWindows
+	set gnuplotTerm $gnuplotTermWindows
 }
 
 # text line default canvas height & minimum horizontal border width
@@ -83,6 +99,11 @@ set hbordsizeP	$hmbordsizeP
 # current position of structure window
 set posXstr 0
 set posYstr 0
+
+# lists to hold the windows parents stacks and exceptions to the parent mgmt.
+set parWndLst [ list ]
+set grabLst [ list ]
+set noParLst [ list .log .str .plt .lat .tst ]
 
 # toolbar buttons style
 if [ string equal [ tk windowingsystem ] aqua ] { 
@@ -100,7 +121,9 @@ if [ string equal [ info tclversion ] 8.6 ] {
 	set iconExt gif 
 }
 
-# load images
+#************************************************
+# Load icon images
+#************************************************
 image create photo lsdImg -file "$RootLsd/$LsdSrc/icons/lsd.$iconExt"
 image create photo lmmImg -file "$RootLsd/$LsdSrc/icons/lmm.$iconExt"
 image create photo newImg -file "$RootLsd/$LsdSrc/icons/new.$iconExt"
@@ -136,12 +159,11 @@ image create photo runImg -file "$RootLsd/$LsdSrc/icons/run.$iconExt"
 image create photo dataImg -file "$RootLsd/$LsdSrc/icons/data.$iconExt"
 image create photo resultImg -file "$RootLsd/$LsdSrc/icons/result.$iconExt"
 
-# lists to hold the windows parents stacks and exceptions to the parent mgmt.
-set parWndLst [ list ]
-set grabLst [ list ]
-set noParLst [ list .log .str .plt .lat ]
 
-# set global key mappings
+#************************************************
+# SETGLOBKEYS
+# Set global key mappings
+#************************************************
 proc setglobkeys { w { chkChg 1 } } {
 	global conWnd grabLst
 	global parWndLst logWndFn
@@ -171,7 +193,11 @@ proc setglobkeys { w { chkChg 1 } } {
 	}
 }
 
-# procedures for create, update and destroy top level new windows
+
+#************************************************
+# NEWTOP
+# Procedure to create top level new windows
+#************************************************
 proc newtop { w { name "" } { destroy { } } { par "." } } {
 	global tcl_platform RootLsd LsdSrc parWndLst grabLst noParLst logWndFn
 
@@ -186,11 +212,15 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 				wm transient $w $par 
 			}
 		} {
+			# attribute transient only if not in the no parent list and window is visible
 			if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
+				# remove non-existing windows in the beginning of the parents list
 				while { [ llength $parWndLst ] > 0 && ! [ winfo exists [ lindex $parWndLst 0 ] ] } {
-						set parWndLst [ lreplace $parWndLst 0 0 ]
-					}
+					set parWndLst [ lreplace $parWndLst 0 0 ]
+				}
+				# avoid setting the window transient to itself
 				if { [ llength $parWndLst ] > 0 && ! [ string equal [ lindex $parWndLst 0 ] $w ] } {
+					# set transient only if parent's parent is visible
 					if { [ winfo viewable [ winfo toplevel [ lindex $parWndLst 0 ] ] ] } {
 						wm transient $w [ lindex $parWndLst 0 ] 
 					}
@@ -210,7 +240,11 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
-# show the window
+
+#************************************************
+# SETTOP
+# Show the window
+#************************************************
 proc settop { w { name no } { destroy no } { par no } } {
 	global parWndLst grabLst logWndFn
 
@@ -240,9 +274,18 @@ proc settop { w { name no } { destroy no } { par no } } {
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsettop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
-# configure the window
+
+#************************************************
+# SHOWTOP
+# Configure the window
+#************************************************
 proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } { buttonF b } { noMinSize no } } {
 	global defaultPos wndLst parWndLst grabLst noParLst logWndFn
+	
+	# copy of applied geometry, if any
+	set gm ""
+	
+	set doGrab 0
 	
 	#handle main windows differently
 	if { [ lsearch $wndLst $w ] < 0 } {
@@ -291,14 +334,16 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 					set sizeY [ expr [ winfo height [ winfo parent $w ] ] + 30 ]
 				}
 				if { ! [ string equal $pos xy ]	&& $sizeX != 0 && $sizeY != 0 } {
-					wm geom $w ${sizeX}x${sizeY}+$x+$y 
+					set gm ${sizeX}x${sizeY}+$x+$y
 				} {
-					wm geom $w +$x+$y
+					set gm +$x+$y
 				}
+				wm geometry $w $gm 
 			}
 		} {
 			if { $sizeX != 0 && $sizeY != 0 } {
-				wm geom $w ${sizeX}x${sizeY} 
+				set gm ${sizeX}x${sizeY} 
+				wm geometry $w $gm 
 			}
 		}
 		
@@ -308,16 +353,16 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 		
 		wm resizable $w $resizeX $resizeY
+		
 		if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
+		
 			set parWndLst [ linsert $parWndLst 0 $w ]
 			
-			if $grab {
-				if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
-					lappend grabLst "$w [ grab current $w ]"
-				}
-				grab set $w
+			# postpone grab to make sure window is visible
+			if { $grab } {
+				set doGrab 1
 			}
-		}
+		}	
 	} {
 		#known windows - simply apply defaults if not done before
 		if { ! [ string equal $pos current ] } {
@@ -328,7 +373,29 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	if { ! [ winfo viewable [ winfo toplevel $w ] ] } {
 		wm deiconify $w
 	}
+
 	raise $w
+	focus $w
+	
+	update
+	
+	# grab focus, if required, updating the grabbing list
+	if { $doGrab } {
+	
+		if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
+			lappend grabLst "$w [ grab current $w ]"
+		}
+		
+		grab set $w
+		
+		# reposition window because of macOS bug when grabbing
+		if { [ string equal [ tk windowingsystem ] aqua ] && $gm != "" } { 
+			wm geometry $w $gm
+		}
+		
+		raise $w
+	}
+	
 	if { [ info exists buttonF ] && [ winfo exists $w.$buttonF.ok ] } {
 		$w.$buttonF.ok configure -default active -state active
 		focus $w.$buttonF.ok
@@ -338,11 +405,14 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	} {
 		focus $w
 	}
-	update
 	
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], minsize:[wm minsize $w], parWndLst:$parWndLst, grab:$grabLst)" } 
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], minsize:[wm minsize $w], primdisp:[ primdisp [ winfo parent $w ] ], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
+
+#************************************************
+# DESTROYTOP
+#************************************************
 proc destroytop w {
 	global defaultFocus parWndLst grabLst noParLst logWndFn
 
@@ -355,6 +425,11 @@ proc destroytop w {
 				grab release $w
 				set grabPar [ string range [ lindex $grabLst $igrab ] [ expr [ string first " " [ lindex $grabLst $igrab ] ] + 1 ] end ]
 				if { $grabPar != "" } {
+					if { ! [ winfo viewable $grabPar ] } {
+						wm deiconify $grabPar
+					}
+					raise $grabPar
+					focus $grabPar
 					grab set $grabPar 
 				}
 				set grabLst [ lreplace $grabLst $igrab $igrab ]
@@ -376,7 +451,11 @@ proc destroytop w {
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\ndestroytop (w:$w, parWndLst:$parWndLst, grab:$grabLst)" }
 }
 
-# adjust main windows to default size & positions
+
+#************************************************
+# SIZETOP
+# Adjust main windows to default size & positions
+#************************************************
 proc sizetop { { w all } } {
 	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn
 
@@ -430,7 +509,11 @@ proc sizetop { { w all } } {
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
-# resize the window
+
+#************************************************
+# RESIZETOP
+# Resize the window
+#************************************************
 proc resizetop { w sizeX { sizeY 0 } } {
 	global parWndLst grabLst logWndFn
 
@@ -461,7 +544,11 @@ proc resizetop { w sizeX { sizeY 0 } } {
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nresizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
-# set window icon
+
+#************************************************
+# ICONTOP
+# Set window icon
+#************************************************
 proc icontop { w { type lsd } } {
 	global tcl_platform RootLsd LsdSrc lmmImg lsdImg iconExt
 	
@@ -488,7 +575,11 @@ proc icontop { w { type lsd } } {
 	}
 }
 
-# alignment of window w1 to the to right side of w2
+
+#************************************************
+# ALIGN
+# Alignment of window w1 to the to right side of w2
+#************************************************
 proc align { w1 w2 { side R } } {
 	global hmargin corrX corrY logWndFn
 	
@@ -510,7 +601,11 @@ proc align { w1 w2 { side R } } {
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nalign w1:$w1 w2:$w2 (w1 width:$a, w1 height:$b, w2 x:$c, w2 y:$d, w2 width:$e)" }
 }
 
+
+#************************************************
+# PRIMDISP
 # check if window center is in primary display
+#************************************************
 proc primdisp w {
 	if { [ winfo rootx $w ] > 0 && [ winfo rootx $w ] < [ winfo screenwidth $w ] && [ winfo rooty $w ] > 0 && [ winfo rooty $w ] < [ winfo screenheight $w ] } {
 		return true
@@ -519,80 +614,107 @@ proc primdisp w {
 	}
 } 
 
-# compute x and y coordinates of new window according to the types
+
+#************************************************
+# GETX
+# compute x coordinate of new window according to the types
+#************************************************
 proc getx { w pos } {
 	global corrX hmargin bordsize
 	
 	switch $pos {
 		centerS { 
-			return [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
+			set hpos [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
 		}
 		centerW { 
-			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ]
+			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ]
 		}
 		topleftS { 
-			return [ expr $hmargin + $corrX ]
+			set hpos [ expr $hmargin + $corrX ]
 		}
 		topleftW { 
-			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX + 10 ]
+			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX + 10 ]
 		}
 		overM { 
-			return [ expr [ winfo x . ] + $corrX ]
+			set hpos [ expr [ winfo x . ] + $corrX ]
 		}
 		coverW { 
-			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX ]
+			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX ]
 		}
 		bottomrightS {
-			return [ expr [ winfo screenwidth $w ] - $hmargin - [ winfo reqwidth $w ] ]
+			set hpos [ expr [ winfo screenwidth $w ] - $hmargin - [ winfo reqwidth $w ] ]
 		}
 		righttoW {
-			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX + $hmargin + [ winfo reqwidth [ winfo parent $w ] ] - 2 * $bordsize ]
+			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX + $hmargin + [ winfo reqwidth [ winfo parent $w ] ] - 2 * $bordsize ]
 		}
 		lefttoW {
 			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX - $hmargin - [ winfo reqwidth $w ] + 2 * $bordsize ]
-			if { $hpos < 0 && [ primdisp [ winfo parent $w ] ] } {
-				return 0
-			} else {
-				return $hpos
-			}
 		}
+		default { 
+			set hpos [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
+		}
+	}
+		
+	if { $hpos < $corrX && [ primdisp [ winfo parent $w ] ] } {
+		return $corrX
+	} else {
+		return $hpos
 	}
 }
 
+
+#************************************************
+# GETY
+# compute y coordinate of new window according to the types
+#************************************************
 proc gety { w pos } {
 	global corrY vmargin tbarsize
 	
 	switch $pos {
 		centerS { 
-			return [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
+			set vpos [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
 		}
 		centerW { 
-			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ]
+			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ]
 		}
 		topleftS { 
-			return [ expr $vmargin + $corrY ]
+			set vpos [ expr $vmargin + $corrY ]
 		}
 		topleftW { 
-			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY + 30 ]
+			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY + 30 ]
 		}
 		overM { 
-			return [ expr [ winfo y . ] + $corrY ]
+			set vpos [ expr [ winfo y . ] + $corrY ]
 		}
 		coverW { 
-			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
 		}
 		bottomrightS {
-			return [ expr [ winfo screenheight $w ] - $vmargin - $tbarsize - [ winfo reqheight $w ] ]
+			set vpos [ expr [ winfo screenheight $w ] - $vmargin - $tbarsize - [ winfo reqheight $w ] ]
 		}
 		righttoW {
-			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
 		}
 		lefttoW {
-			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+		}
+		default { 
+			set vpos [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
 		}
 	} 
+		
+	if { $vpos < $corrY && [ primdisp [ winfo parent $w ] ] } {
+		return $corrY
+	} else {
+		return $vpos
+	}
 }
 
+
+#************************************************
+# OKHELPCANCEL
+# Procedure to create standard button set
+#************************************************
 # procedures to create standard button sets
 proc okhelpcancel { w fr comOk comHelp comCancel } {
 	global butWid
@@ -609,6 +731,11 @@ proc okhelpcancel { w fr comOk comHelp comCancel } {
 	pack $w.$fr -side right 
 }
 
+
+#************************************************
+# OKHELP
+# Procedure to create standard button set
+#************************************************
 proc okhelp { w fr comOk comHelp } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -622,6 +749,11 @@ proc okhelp { w fr comOk comHelp } {
 	pack $w.$fr -side right 
 }
 
+
+#************************************************
+# OKCANCEL
+# Procedure to create standard button set
+#************************************************
 proc okcancel { w fr comOk comCancel } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -634,6 +766,11 @@ proc okcancel { w fr comOk comCancel } {
 	pack $w.$fr -side right 
 }
 
+
+#************************************************
+# HELPCANCEL
+# Procedure to create standard button set
+#************************************************
 proc helpcancel { w fr comHelp comCancel } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -647,6 +784,11 @@ proc helpcancel { w fr comHelp comCancel } {
 	pack $w.$fr -side right 
 }
 
+
+#************************************************
+# OK
+# Procedure to create standard button set
+#************************************************
 proc ok { w fr comOk } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -657,6 +799,11 @@ proc ok { w fr comOk } {
 	pack $w.$fr -side right 
 }
 
+
+#************************************************
+# XCANCEL
+# Procedure to create standard button set
+#************************************************
 proc Xcancel { w fr nameX comX comCancel } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -674,6 +821,11 @@ proc Xcancel { w fr nameX comX comCancel } {
 	pack $w.$fr -side right 
 }
 
+
+#************************************************
+# OKXHELPCANCEL
+# Procedure to create standard button set
+#************************************************
 proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -696,6 +848,11 @@ proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 	pack $w.$fr -side right 
 }
 
+
+#************************************************
+# XYOKHELPCANCEL
+# Procedure to create standard button set
+#************************************************
 proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -730,6 +887,52 @@ proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
 	pack $w.$fr -side right 
 }
 
+
+#************************************************
+# XYZOKHELPCANCEL
+# Procedure to create standard button set
+#************************************************
+proc XYZokhelpcancel { w fr nameX nameY nameZ comX comY comZ comOk comHelp comCancel } {
+	global butWid
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
+	if { [ string length "$nameX" ] > $butWid } { 
+		set Xwid [ string length "$nameX" ] 
+	} else {
+		set Xwid $butWid 
+	}
+	if { [ string length "$nameY" ] > $butWid } { 
+		set Ywid [ string length "$nameY" ] 
+	} else {
+		set Ywid $butWid 
+	}
+	frame $w.$fr.r1
+	button $w.$fr.r1.x -width $Xwid -text $nameX -command $comX
+	button $w.$fr.r1.y -width $Ywid -text $nameY -command $comY
+	button $w.$fr.r1.z -width $Ywid -text $nameZ -command $comZ
+	frame $w.$fr.r2
+	button $w.$fr.r2.ok -width $butWid -text OK -command $comOk
+	button $w.$fr.r2.help -width $butWid -text Help -command $comHelp
+	button $w.$fr.r2.can -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.r1.x <KeyPress-Return> "$w.$fr.r1.x invoke"
+	bind $w.$fr.r1.y <KeyPress-Return> "$w.$fr.r1.y invoke"
+	bind $w.$fr.r1.z <KeyPress-Return> "$w.$fr.r1.z invoke"
+	bind $w.$fr.r2.ok <KeyPress-Return> "$w.$fr.r2.ok invoke"
+	bind $w.$fr.r2.help <KeyPress-Return> "$w.$fr.r2.help invoke"
+	bind $w.$fr.r2.can <KeyPress-Return> "$w.$fr.r2.can invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.r2.can invoke"
+	bind $w <F1> "$w.$fr.r2.help invoke"
+	pack $w.$fr.r1.x $w.$fr.r1.y $w.$fr.r1.z -padx 10 -side left
+	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.can -padx 10 -side left
+	pack $w.$fr.r1 -anchor w
+	pack $w.$fr.r2  -pady 10
+	pack $w.$fr -side right 
+}
+
+
+#************************************************
+# DONEHELP
+# Procedure to create standard button set
+#************************************************
 proc donehelp { w fr comDone comHelp } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -743,6 +946,11 @@ proc donehelp { w fr comDone comHelp } {
 	pack $w.$fr -side right 
 }
 
+
+#************************************************
+# DONE
+# Procedure to create standard button set
+#************************************************
 proc done { w fr comDone } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -753,6 +961,11 @@ proc done { w fr comDone } {
 	pack $w.$fr -side right 
 }
 
+
+#************************************************
+# COMPHELPDONE
+# Procedure to create standard button set
+#************************************************
 proc comphelpdone { w fr comComp comHelp comDone } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -768,6 +981,11 @@ proc comphelpdone { w fr comComp comHelp comDone } {
 	pack $w.$fr -side right 
 }
 
+
+#************************************************
+# FINDHELPDONE
+# Procedure to create standard button set
+#************************************************
 proc findhelpdone { w fr comFind comHelp comDone } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -783,6 +1001,11 @@ proc findhelpdone { w fr comFind comHelp comDone } {
 	pack $w.$fr -side right 
 }
 
+
+#************************************************
+# SAVE
+# Procedure to create standard button set
+#************************************************
 proc save { w fr comSave } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -792,8 +1015,12 @@ proc save { w fr comSave } {
 	pack $w.$fr -side right 
 }
 
-# commands to disable/enable windows in cases where grab is inappropriate (only menus if not TK8.6)
+
+#************************************************
+# DISABLE_WINDOW
+# Command to disable windows in cases where grab is inappropriate (only menus if not TK8.6)
 # call parameters are: container window, menu name, widgets names
+#************************************************
 proc disable_window { w m { args "" } } {
 	if [ winfo exist $w.$m ] {
 		for { set i 0 } { $i <= [ $w.$m index last ] } { incr i } {
@@ -810,6 +1037,12 @@ proc disable_window { w m { args "" } } {
 	update 
 }
 	
+
+#************************************************
+# ENABLE_WINDOW
+# Command to enable windows in cases where grab is inappropriate (only menus if not TK8.6)
+# call parameters are: container window, menu name, widgets names
+#************************************************
 proc enable_window { w m { args "" } } {
 	if [ winfo exist $w.$m ] {
 		for { set i 0 } { $i <= [ $w.$m index last ] } { incr i } {
@@ -826,8 +1059,11 @@ proc enable_window { w m { args "" } } {
 	update
 }
 	
-	
-# read any entry widget (normal or disabled)
+
+#************************************************
+# WRITE_ANY
+# Read any entry widget (normal or disabled)
+#************************************************
 proc write_any { w val } {
 	if [ string equal [ $w cget -state ] disabled ] {
 		write_disabled $w $val
@@ -838,7 +1074,10 @@ proc write_any { w val } {
 }
 
 
-# update a disabled entry widget (do nothing if normal state)
+#************************************************
+# WRITE_DISABLED
+# Update a disabled entry widget (do nothing if normal state)
+#************************************************
 proc write_disabled { w val } {
 	if [ string equal [ $w cget -state ] disabled ] {
 		$w conf -state normal
@@ -848,12 +1087,20 @@ proc write_disabled { w val } {
 }
 
 
-# procedures to adjust tab size according to font type and size and text wrapping
+#************************************************
+# SETTAB
+# Procedure to adjust tab size according to font type and size
+#************************************************
 proc settab { w size font } { 
 	set tabwidth "[ expr { $size * [ font measure "$font" 0 ] } ] left"
 	$w conf -font "$font" -tabs $tabwidth -tabstyle wordprocessor 
 }
 
+
+#************************************************
+# SETWRAP
+# Procedure to adjust text wrapping
+#************************************************
 proc setwrap { w wrap } { 
 	if { $wrap == 1 } { 
 		$w conf -wrap word 
@@ -862,7 +1109,10 @@ proc setwrap { w wrap } {
 }
 
 
+#************************************************
+# MOUSE_WHEEL
 # bind the mouse wheel to the y scrollbar
+#************************************************
 proc mouse_wheel { w } {
 	global tcl_platform sfmwheel winmwscale
 	
@@ -887,7 +1137,11 @@ proc mouse_wheel { w } {
 	}
 }
 
-# move all items in canvas to point (x,y) (from (x0,y0))
+
+#************************************************
+# MOVE_CANVAS
+# Move all items in canvas to point (x,y) (from (x0,y0))
+#************************************************
 proc move_canvas { c x y { x0 -1 } { y0 -1 } } {
 	global hereX hereY
 	
@@ -901,7 +1155,11 @@ proc move_canvas { c x y { x0 -1 } { y0 -1 } } {
     set hereY $y
 }
 
-# scale all items in canvas around point (0,0), including the scroll region
+
+#************************************************
+# SCALE_CANVAS
+# Scale all items in canvas around point (0,0), including the scroll region
+#************************************************
 proc scale_canvas { c type ratio } {
 	global vsizeP tbordsizeP bbordsizeP maxzoomP minzoomP
 	upvar $ratio finalRatio
@@ -929,7 +1187,11 @@ proc scale_canvas { c type ratio } {
 	}
 }
 
-# create the canvas plotting axes and the optional grid
+
+#************************************************
+# CANVAS_AXIS
+# Create the canvas plotting axes and the optional grid
+#************************************************
 proc canvas_axis { c type grid { y2 0 } } {
 	global hsizeP vsizeP hbordsizeP tbordsizeP hticksP vticksP axcolorP grcolorP 
 	
@@ -961,7 +1223,11 @@ proc canvas_axis { c type grid { y2 0 } } {
 	}
 }
 
+
+#************************************************
+# PLOT_BARS
 # plot color filled bars
+#************************************************
 proc plot_bars { c x1 y1 x2 y2 { tags "" } { fill white } { width 1 } } {
 
 	set size [ expr min( [ llength $x1 ], [ llength $y1 ], [ llength $x2 ], [ llength $y2 ]  ) ]
@@ -980,7 +1246,11 @@ proc plot_bars { c x1 y1 x2 y2 { tags "" } { fill white } { width 1 } } {
 	}
 }
 
+
+#************************************************
+# PLOT_LINE
 # plot one series as a line on canvas (may be discontinuous)
+#************************************************
 proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
 	global smoothP splstepsP
 
@@ -1034,7 +1304,11 @@ proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
 	}
 }
 
+
+#************************************************
+# PLOT_POINTS
 # plot one series as a set of points on canvas
+#************************************************
 proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 	lappend tagsdots dots series
 
@@ -1073,8 +1347,12 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 	}
 }
 
-# set a byte array to hold data series that can be accessed from C
-# based on code by Arjen Markus (http://wiki.tcl.tk/4179) 
+
+#************************************************
+# GET_SERIES
+# Set a byte array to hold data series that can be accessed from C
+# Based on code by Arjen Markus (http://wiki.tcl.tk/4179) 
+#************************************************
 proc get_series { size data } {
 	upvar $data _data
 
@@ -1094,7 +1372,11 @@ proc get_series { size data } {
 	set _data [ byteArrayToInts $c_data ]
 }
 
+
+#************************************************
+# LISTTOBYTEARRAY
 # Generic routine to convert a list into a bytearray
+#************************************************
 proc listToByteArray { valuetype list { elemsize 0 } } {
 	if { $valuetype == "i" || $valuetype == "I" } {
 		if { $::tcl_platform(byteOrder) == "littleEndian" } {
@@ -1122,12 +1404,16 @@ proc listToByteArray { valuetype list { elemsize 0 } } {
 	return $result
 }
 
+
+#************************************************
+# BYTEARRAYTOLIST
+# Generic routine to convert a bytearray into a list
+#************************************************
 interp alias {} stringsToByteArray {} listToByteArray s
 interp alias {} intsToByteArray    {} listToByteArray i
 interp alias {} floatsToByteArray  {} listToByteArray f
 interp alias {} doublesToByteArray {} listToByteArray d
 
-# Generic routine to convert a bytearray into a list
 proc byteArrayToList { valuetype bytearray { elemsize 0 } } {
 	if { $valuetype == "i" || $valuetype == "I" } {
 	   if { $::tcl_platform(byteOrder) == "littleEndian" } {
@@ -1170,6 +1456,10 @@ interp alias {} byteArrayToFloats  {} byteArrayToList f
 interp alias {} byteArrayToDoubles {} byteArrayToList d
 
 
+#************************************************
+# INIT_CANVAS_COLORS
+# Initialize Tk canvas colors
+#************************************************
 # list of all Tk named colors
 set allcolors { 
 	snow {ghost white} {white smoke} gainsboro {floral white}
@@ -1245,7 +1535,6 @@ set allcolors {
 	MediumPurple3 MediumPurple4 thistle1 thistle2 thistle3 thistle4 
 }
 
-# initialize canvas colors
 proc init_canvas_colors { } {
 	global defcolors allcolors
 	set unusedcolors [ lsort $allcolors ]
@@ -1296,7 +1585,11 @@ proc init_canvas_colors { } {
 	}
 }
 
+
+#************************************************
+# UPDATE_TITLE_BAR
 # Update LMM main window title bar according to file save status
+#************************************************
 proc update_title_bar { } {
 	global tosave before filename
 	
@@ -1314,7 +1607,62 @@ proc update_title_bar { } {
 	}
 }
 
+
+#************************************************
+# OPEN_GNUPLOT
+# Open gnuplot window
+#************************************************
+proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
+	global tcl_platform sysTerm
+	
+	if [ string equal $script "" ] { 
+		set args "" 
+	} else {
+		set args "-p $script"
+	}
+	
+	if [ string equal $tcl_platform(platform) unix ] {
+		if [ string equal $tcl_platform(os) Darwin ] {
+			if { $wait } {
+				set ret [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $script; exit\"" } ]
+			} else {
+				set ret [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $args; exit\"" & } ]
+			}
+		} else {
+			if { $wait } {
+				set ret [ catch { exec $sysTerm -e "gnuplot $script; exit" } ]
+			} else {
+				set ret [ catch { exec $sysTerm -e "gnuplot $args; exit" & } ]
+			}
+		}
+	} else {
+		if [ string equal $script "" ] { 
+			set ret [ catch { exec wgnuplot.exe & } ]
+		} else {
+			if { $wait } {
+				set ret [ catch { exec wgnuplot.exe $script } ]
+			} else {
+				set ret [ catch { exec wgnuplot.exe -p $script & } ]
+			}
+		}
+	}
+
+	if { $ret != 0 } {
+		if [ string equal $errmsg "" ] { 
+			set errmsg "Please check if Gnuplot is installed and set up properly." 
+		}
+		
+		tk_messageBox -parent $par -type ok -icon error -title Error -message "Gnuplot failed to launch" -detail "Gnuplot returned error '$ret'.\n$errmsg" 
+	}			
+
+	return $ret
+}
+
+
+#************************************************
+# TK_CONSOLE
 # Open Tk console window
+#************************************************
 proc tk_console { } {
 	global conWnd
 	
@@ -1330,7 +1678,11 @@ proc tk_console { } {
 	tkcon show 
 }
 
+
+#************************************************
+# CONWND
 # load and set console configuration
+#************************************************
 if { $conWnd } {
 	set msg "File(s) missing or corrupted"
 	set det "Tcl/Tk console file 'tkcon.tcl' is missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is continuing without console support."
@@ -1350,69 +1702,72 @@ if { $conWnd } {
 	}
 }
 
+
+#************************************************
+# TESTWND
 # Open test window if enabled
+#************************************************
 if $testWnd {
-	newtop .test "LSD Coordinates Test Window" { destroytop .test } ""
+	newtop .tst "LSD Coordinates Test Window" { destroytop .tst } ""
 	
-	frame .test.xy
-	label .test.xy.l1 -anchor e -text "X:"
-	label .test.xy.v1 -anchor w -fg red
-	label .test.xy.l2 -anchor e -text "   Y:"
-	label .test.xy.v2 -anchor w -fg red
-	pack .test.xy.l1 .test.xy.v1 .test.xy.l2 .test.xy.v2 -side left -padx 2 -pady 2
+	frame .tst.xy
+	label .tst.xy.l1 -anchor e -text "X:"
+	label .tst.xy.v1 -anchor w -fg red
+	label .tst.xy.l2 -anchor e -text "   Y:"
+	label .tst.xy.v2 -anchor w -fg red
+	pack .tst.xy.l1 .tst.xy.v1 .tst.xy.l2 .tst.xy.v2 -side left -padx 2 -pady 2
 	
-	frame .test.r
-	label .test.r.l1 -anchor e -text "rootx:"
-	label .test.r.v1 -anchor w -fg red
-	label .test.r.l2 -anchor e -text "   rooty:"
-	label .test.r.v2 -anchor w -fg red
-	pack .test.r.l1 .test.r.v1 .test.r.l2 .test.r.v2 -side left -padx 2 -pady 2
+	frame .tst.r
+	label .tst.r.l1 -anchor e -text "rootx:"
+	label .tst.r.v1 -anchor w -fg red
+	label .tst.r.l2 -anchor e -text "   rooty:"
+	label .tst.r.v2 -anchor w -fg red
+	pack .tst.r.l1 .tst.r.v1 .tst.r.l2 .tst.r.v2 -side left -padx 2 -pady 2
 	
-	frame .test.v
-	label .test.v.l1 -anchor e -text "vrootx:"
-	label .test.v.v1 -anchor w -fg red
-	label .test.v.l2 -anchor e -text "   vrooty:"
-	label .test.v.v2 -anchor w -fg red
-	pack .test.v.l1 .test.v.v1 .test.v.l2 .test.v.v2 -side left -padx 2 -pady 2
+	frame .tst.v
+	label .tst.v.l1 -anchor e -text "vrootx:"
+	label .tst.v.v1 -anchor w -fg red
+	label .tst.v.l2 -anchor e -text "   vrooty:"
+	label .tst.v.v2 -anchor w -fg red
+	pack .tst.v.l1 .tst.v.v1 .tst.v.l2 .tst.v.v2 -side left -padx 2 -pady 2
 	
-	frame .test.s
-	label .test.s.l1 -anchor e -text "screenwidth:"
-	label .test.s.v1 -anchor w -fg red
-	label .test.s.l2 -anchor e -text "   screenheight:"
-	label .test.s.v2 -anchor w -fg red
-	pack .test.s.l1 .test.s.v1 .test.s.l2 .test.s.v2 -side left -padx 2 -pady 2
+	frame .tst.s
+	label .tst.s.l1 -anchor e -text "screenwidth:"
+	label .tst.s.v1 -anchor w -fg red
+	label .tst.s.l2 -anchor e -text "   screenheight:"
+	label .tst.s.v2 -anchor w -fg red
+	pack .tst.s.l1 .tst.s.v1 .tst.s.l2 .tst.s.v2 -side left -padx 2 -pady 2
 	
-	frame .test.t
-	label .test.t.l1 -anchor e -text "vrootwidth:"
-	label .test.t.v1 -anchor w -fg red
-	label .test.t.l2 -anchor e -text "   vrootheight:"
-	label .test.t.v2 -anchor w -fg red
-	pack .test.t.l1 .test.t.v1 .test.t.l2 .test.t.v2 -side left -padx 2 -pady 2
+	frame .tst.t
+	label .tst.t.l1 -anchor e -text "vrootwidth:"
+	label .tst.t.v1 -anchor w -fg red
+	label .tst.t.l2 -anchor e -text "   vrootheight:"
+	label .tst.t.v2 -anchor w -fg red
+	pack .tst.t.l1 .tst.t.v1 .tst.t.l2 .tst.t.v2 -side left -padx 2 -pady 2
 	
-	frame .test.m
-	label .test.m.l1 -anchor e -text "maxwidth:"
-	label .test.m.v1 -anchor w -fg red
-	label .test.m.l2 -anchor e -text "   maxheight:"
-	label .test.m.v2 -anchor w -fg red
-	pack .test.m.l1 .test.m.v1 .test.m.l2 .test.m.v2 -side left -padx 2 -pady 2
+	frame .tst.m
+	label .tst.m.l1 -anchor e -text "maxwidth:"
+	label .tst.m.v1 -anchor w -fg red
+	label .tst.m.l2 -anchor e -text "   maxheight:"
+	label .tst.m.v2 -anchor w -fg red
+	pack .tst.m.l1 .tst.m.v1 .tst.m.l2 .tst.m.v2 -side left -padx 2 -pady 2
 	
-	pack .test.xy .test.r .test.v .test.s .test.t .test.m
+	pack .tst.xy .tst.r .tst.v .tst.s .tst.t .tst.m
 	
-	bind .test <Motion> { 
-		.test.xy.v1 configure -text %X
-		.test.xy.v2 configure -text %Y
-		.test.r.v1 configure -text [ winfo rootx .test ]
-		.test.r.v2 configure -text [ winfo rooty .test ]
-		.test.v.v1 configure -text [ winfo vrootx .test ]
-		.test.v.v2 configure -text [ winfo vrooty .test ]
-		.test.s.v1 configure -text [ winfo screenwidth .test ]
-		.test.s.v2 configure -text [ winfo screenheight .test ]
-		.test.t.v1 configure -text [ winfo vrootwidth .test ]
-		.test.t.v2 configure -text [ winfo vrootheight .test ]
-		.test.m.v1 configure -text [ lindex [ wm maxsize .test ] 0 ]
-		.test.m.v2 configure -text [ lindex [ wm maxsize .test ] 1 ]
+	bind .tst <Motion> { 
+		.tst.xy.v1 configure -text %X
+		.tst.xy.v2 configure -text %Y
+		.tst.r.v1 configure -text [ winfo rootx .tst ]
+		.tst.r.v2 configure -text [ winfo rooty .tst ]
+		.tst.v.v1 configure -text [ winfo vrootx .tst ]
+		.tst.v.v2 configure -text [ winfo vrooty .tst ]
+		.tst.s.v1 configure -text [ winfo screenwidth .tst ]
+		.tst.s.v2 configure -text [ winfo screenheight .tst ]
+		.tst.t.v1 configure -text [ winfo vrootwidth .tst ]
+		.tst.t.v2 configure -text [ winfo vrootheight .tst ]
+		.tst.m.v1 configure -text [ lindex [ wm maxsize .tst ] 0 ]
+		.tst.m.v2 configure -text [ lindex [ wm maxsize .tst ] 1 ]
 	}
 	
-	showtop .test current yes yes no
+	showtop .tst current yes yes no
 }
-

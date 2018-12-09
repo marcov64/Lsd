@@ -15,5 +15,5 @@ LIBS=-lz -lpthread
 
 # Compiler options
 CC=g++
-GLOBAL_CC=-DMAC_PKG -march=native -std=gnu++14
+GLOBAL_CC=-DMAC_PKG -march=native -std=gnu++14 -w
 SSWITCH_CC=-fnon-call-exceptions -O3

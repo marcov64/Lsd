@@ -1,56 +1,39 @@
 /*************************************************************
 
-	LSD 7.0 - January 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
+/*************************************************************
 DRAW.CPP
-Draw the graphical representation of the model. It is activated by
+Draws the graphical representation of the model. It is activated by
 INTERF.CPP only in case a model is loaded.
 
-The functions contained in this file are:
+The main functions contained in this file are:
 
-- void show_graph(object *t)
+- void show_graph( object *t )
 initialize the canvas and calls show_obj for the root
 
-- void draw_obj(object *blk, object *t, int level, int center, int from)
+- void draw_obj( object *top, object *sel, int level, int center, int from )
 recursive function that according to the level of the object type sets the
 distances among the objects. Rather rigid, but it should work nicely
 for most of the model structures. It assigns all the labels (above and below the
 symbols) and the writing bound to the mouse.
 
-- void put_node(int x1, int y1, int x2, int y2, char *str)
+- void put_node( int x1, int y1, int x2, int y2, char *str, bool sel )
 Draw the circle.
 
-- void put_line(int x1, int y1, int x2, int y2)
+- void put_line( int x1, int y1, int x2, int y2 )
 draw the line
 
-- void put_text(char *str, char *num, int x, int y, char *str2);
+- void put_text( char *str, char *num, int x, int y, char *str2 );
 Draw the different texts and sets the bindings
-
-Functions used here from other files are:
-
-- object *skip_next_obj(object *t, int *i);
-UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- void cmd(char *cc);
-UTIL.CPP Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-- object *go_brother(object *cur);
-UTIL.CPP returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 
@@ -62,7 +45,7 @@ int hcvsz = 1280;				// horizontal canvas size
 int vcvsz = 800;				// vertical canvas size
 int h0 = 170;					// initial horizontal position
 int v0 = 10;					// initial vertical position
-int range_init = 150;			// horizontal initial width (4 root sons)
+int range_init = 190;			// horizontal initial width (4 root sons)
 int range_incr = 20;			// horizontal width increase step
 int step_level = 20;			// vertical step
 int n_size = 4;					// node size (diameter)
@@ -75,21 +58,21 @@ int range_type;
 
 /****************************************************
 SHOW_GRAPH
-
 ****************************************************/
-void show_graph( object *t)
+void show_graph( object *t )
 {
 	object *top;
 
-	if ( ! strWindowOn )	// model structure window is deactivated?
+	if ( ! struct_loaded || ! strWindowOn )		// model structure window is deactivated?
 	{
 		cmd( "destroytop .str" );
 		return;
 	}
 
-	cmd( "set n_color white" );	// node color
-	cmd( "set t_color red" );	// node name color
-	cmd( "set l_color gray" );	// line color
+	cmd( "set n_color white" );		// node color
+	cmd( "set n_color_sel blue" );	// selected node color
+	cmd( "set t_color red" );		// node name color
+	cmd( "set l_color gray" );		// line color
 	
 	cmd( "set g .str" );
 	for ( top = t; top->up != NULL; top = top->up );
@@ -122,7 +105,7 @@ void show_graph( object *t)
 					} \
 				}" );
 
-		draw_obj( t, top, v0, h0, 0 );
+		draw_obj( top, t, v0, h0, 0 );
 
 		cmd( "bind $g.f.c <Button-1> { if [ info exists res_g ] { set choice_g 24 } }" );
 		cmd( "bind $g.f.c <Button-2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $g.f.c.v %%X %%Y } }" );
@@ -154,7 +137,7 @@ void show_graph( object *t)
 	else	// or just update canvas
 	{
 		cmd( "$g.f.c delete all" );
-		draw_obj( t, top, v0, h0, 0 );
+		draw_obj( top, t, v0, h0, 0 );
 	}
 
 	cmd( "wm title $g \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
@@ -163,13 +146,12 @@ void show_graph( object *t)
 
 /****************************************************
 DRAW_OBJ
-
 ****************************************************/
-void draw_obj( object *blk, object *t, int level, int center, int from )
+void draw_obj( object *t, object *sel, int level, int center, int from )
 {
 	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_ELEM_LENGTH ];
-	int i, j, k, step_type, begin, count, num_groups;
-	object *cur, *cur1;
+	int i, j, k, step_type, begin, count;
+	object *cur;
 	variable *cv;
 	bridge *cb;
 
@@ -196,28 +178,30 @@ void draw_obj( object *blk, object *t, int level, int center, int from )
 		cmd( ch );
 	}
 
-	// drawn node only if it is not the root
+	// draw node only if it is not the root
 	if ( t->up != NULL )
-	{ 	// computes number of groups of this type
+	{ 	// compute number of groups of this type
 		sprintf( ch, "%s", t->label );
 		strcpy( ch1, "" );
 		
-		for ( cur = t, num_groups = 0; cur != NULL ; ++num_groups, cur = cur->hyper_next( cur->label ) )
+		for ( cur = t; cur != NULL ; cur = cur->hyper_next( ) )
 		{
-			if ( num_groups > 5 )
+			if ( strlen( ch1 ) >= 9 )
 			{
-				strcat( ch1, "." );
+				strcat( ch1, "\u2026" );
 				break;
 			}
-			cur1 = skip_next_obj( cur, &count );
-			sprintf( str, "%d ", count );
+			
+			skip_next_obj( cur, &count );
+			sprintf( str, "%s%d", strlen( ch1 ) ? " " : "", count );
 			strcat( ch1, str );
+			
 			for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group
 		}
 		
 		if ( t->up->up != NULL )
 			put_line( from, level - step_level + v_margin + n_size / 2, center, level + n_size / 2 );
-		put_node( center - n_size / 2, level + v_margin - n_size / 2, center + n_size / 2, level + v_margin + n_size / 2, t->label );
+		put_node( center - n_size / 2, level + v_margin - n_size / 2, center + n_size / 2, level + v_margin + n_size / 2, t->label, t == sel ? true : false );
 		put_text( ch, ch1, center, level, t->label );
 	}
 
@@ -245,39 +229,48 @@ void draw_obj( object *blk, object *t, int level, int center, int from )
 		{
 			case 0:
 			case 1:
-				level_factor[ 0 ] = 0.3;
+				level_factor[ 0 ] = 0.4;
 				level_factor[ 1 ] = 0.1;
 				level_factor[ 2 ] = 0.5;
-				level_factor[ 3 ] = 0.3;
+				level_factor[ 3 ] = 1.0;
 				break;
 			case 2:
 				level_factor[ 0 ] = 0.5;
-				level_factor[ 1 ] = 0.6;
-				level_factor[ 2 ] = 0.3;
-				level_factor[ 3 ] = 0.2;
+				level_factor[ 1 ] = 0.8;
+				level_factor[ 2 ] = 0.6;
+				level_factor[ 3 ] = 0.5;
 				break;
 			case 3:
-				level_factor[ 0 ] = 0.8;
-				level_factor[ 1 ] = 0.8;
-				level_factor[ 2 ] = 0.2;
-				level_factor[ 3 ] = 0.1;
+				level_factor[ 0 ] = 0.6;
+				level_factor[ 1 ] = 1.1;
+				level_factor[ 2 ] = 0.4;
+				level_factor[ 3 ] = 0.5;
 				break;
 			case 4:
-				level_factor[ 0 ] = 1.0;
-				level_factor[ 1 ] = 0.95;
+				level_factor[ 0 ] = 0.7;
+				level_factor[ 1 ] = 1.2;
+				level_factor[ 2 ] = 0.3;
+				level_factor[ 3 ] = 0.4;
+				break;
+			case 5:
+				level_factor[ 0 ] = 0.7;
+				level_factor[ 1 ] = 1.3;
 				level_factor[ 2 ] = 0.2;
-				level_factor[ 3 ] = 0.1;
+				level_factor[ 3 ] = 0.4;
 				break;
 			default:
-				level_factor[ 0 ] = 1 + ( i - 4.0 ) / 3;
+				level_factor[ 0 ] = 0.9 + ( i - 5.0 ) / 10;
+				level_factor[ 1 ] = 1.2 + ( i - 5.0 ) / 20;
+				level_factor[ 2 ] = 0.3 + ( i - 5.0 ) / 30;
+				level_factor[ 3 ] = 0.5 + ( i - 5.0 ) / 40;
 		}
 		
-		range_type = level_factor[ 0 ] * range_init;
+		range_type = ( int ) floor( level_factor[ 0 ] * range_init );
 	}
 	else
 	{
 		// reduce object type width at each level
-		range_type = fabs( level_factor[ j ] * range_init / pow( 2, j + range_fact ) - pow( range_init * 2 / 3, 1 / j ) + 1 );
+		range_type = ( int ) floor( fabs( level_factor[ j ] * range_init / pow( 2, j + range_fact ) - pow( range_init * 2 / 3, 1 / j ) + 1 ) );
 	}
 	
 	if ( i <= 1 )					// single object type son?
@@ -294,23 +287,21 @@ void draw_obj( object *blk, object *t, int level, int center, int from )
 	// draw sons
 	for ( i = begin, cb = t->b; cb != NULL; i += step_type, cb = cb->next )
 		if ( cb->head != NULL )
-			draw_obj( blk, cb->head, level + step_level, i, center );
+			draw_obj( cb->head, sel, level + step_level, i, center );
 }
 
 
 /****************************************************
 PUT_NODE
-
 ****************************************************/
-void put_node( int x1, int y1, int x2, int y2, char *str )
+void put_node( int x1, int y1, int x2, int y2, char *str, bool sel )
 {
-	cmd( "$g.f.c create oval %d.m %d.m %d.m %d.m -fill $n_color -outline $l_color -tags node -tags %s", x1, y1, x2, y2, str );
+	cmd( "$g.f.c create oval %d.m %d.m %d.m %d.m -fill $%s -outline $l_color -tags node -tags %s", x1, y1, x2, y2, sel ? "n_color_sel" : "n_color", str );
 }
 
 
 /****************************************************
 PUT_LINE
-
 ****************************************************/
 void put_line( int x1, int y1, int x2, int y2 )
 {
@@ -320,14 +311,16 @@ void put_line( int x1, int y1, int x2, int y2 )
 
 /****************************************************
 PUT_TEXT
-
 ****************************************************/
 void put_text( char *str, char *n, int x, int y, char *str2 )
 {
 	cmd( "$g.f.c create text %d.m %d.m -text \"%s\" -fill $t_color -tags node -tags %s", x, y - 1, str, str2 );
 
-	//text for node numerosity
-	cmd( "$g.f.c create text %d.m %d.m -text \"%s\" -tags node -tags %s", x, y + 2 * v_margin + 1, n, str2 );
+	// text for node numerosity (handle single "1" differently to displace from line)
+	if ( ! strcmp( n, "1" ) )
+		cmd( "$g.f.c create text %.1lfm %d.m -text \"%s\" -tags node -tags %s", x - 0.5, y + 2 * v_margin + 1, n, str2 );
+	else
+		cmd( "$g.f.c create text %d.m %d.m -text \"%s\" -tags node -tags %s", x, y + 2 * v_margin + 1, n, str2 );
 
 	cmd( "$g.f.c bind %s <Enter> { set res_g %s; if [winfo exists .list] { destroy .list }; toplevel .list; wm transient .list $g; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; frame .list.h; label .list.h.l -text \"Object:\"; label .list.h.n -fg red -text \"%s\"; pack .list.h.l .list.h.n -side left -padx 2; label .list.l -text \"$list_%s\" -justify left; pack .list.h .list.l; align .list $g }", str2, str2, str2, str2 );
 

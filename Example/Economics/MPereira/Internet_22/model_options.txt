@@ -1,0 +1,6 @@
+TARGET=lsd_gnu
+FUN=fun_INTERNET
+FUN_EXTRA= fun_internet.h
+SWITCH_CC=-O3
+SWITCH_CC_LNK=
+

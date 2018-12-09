@@ -1,13 +1,33 @@
 **************************************************************
 
-	LSD 7.0 - January 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
 **************************************************************
+
+***********
+Legal stuff
+***********
+
+LSD is copyrighted by Marco Valente and Marcelo C. Pereira (version 7.x additions) and is distributed according to the GNU General Public License. That is, as I understand it, you can use, modify and redistribute this code for free, as long as you maintain the same conditions. For legal conditions on gnuplot and the other software used see their legal notices.
+
+LSD includes third party software under the license of the copyright owners:
+
+Eigen 3.3.4 is copyrighted by Benoit Jacob and others under a MPL2 license, http://eigen.tuxfamily.org
+NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under a GPL 2.1 license, http://harvest.nps.edu
+NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under a GPL 2.1 license, http://harvest.nps.edu
+SetFileIcon 0.1 is copyrighted by HAMSoft Engineering, http://hamsoftengineering.com
+Shortcut.exe 1.11 is copyrighted by Marty List, http://www.OptimumX.com
+Silk icon set 1.3 is copyrighted by Mark James under a CCA 2.5 license, http://www.famfamfam.com/lab/icons/silk
+
+
+********
+Contents
+********
 
 This Readme.txt file contains:
 - Brief introduction on LSD
@@ -67,7 +87,7 @@ Optionally, Windows x64 users may use LMM/LSD under native 64-bit support. This 
 ***********************************
 MS Windows Installation (32/64-bit)
 ***********************************
-To unpack the LSD distribution file, e.g., Lsd-7.0.zip, simply unzip it in the chosen directory (in most cases  "C:\" is the best option) using Windows Explorer. This will create the whole directory structure. The distribution file may be deleted after installation.
+To unpack the LSD distribution file, e.g., Lsd-7.1-master.zip, simply unzip it in the chosen directory (in most cases  "C:\" is the best option) using Windows Explorer. This will create the whole directory structure. The distribution file may be deleted after installation.
 
 
 *** IMPORTANT ***
@@ -93,6 +113,12 @@ run.bat
 If you have the full Cygwin or MinGW 32-bit distribution installed and want to use it instead of the minimum version installed with LSD, please make sure you have it minimally configured with the packages "gcc-core", "gcc-g++" (C++ compiler), "zlib-devel" (library), "make" (make tool) and "gdb". Then execute "config-cygwin32.bat" to remove the version of these tools that comes with LSD. Please use the guide below (for 64-bit) as a reference to the process of setting up Cygwin 32-bit. Don't forget to have your preferred tools included in your PATH environment variable.
 
 In some rare cases, the included minimum tool set may not work properly with your particular Windows configuration (double-clicking not working, graphical glitches, compiler errors). In this case, you may need to perform a full installation of Cygwin 32-bits. Please use the guide below (for 64-bit) as a reference to the process of setting it up.
+
+You may have to install Gnuplot if you want to produce more elaborated plots in LSD. The required installer (64-bit preferred, even for LSD 32-bit installation) can be downloaded from:
+
+http://www.gnuplot.info
+
+When download finishes, simply run the downloaded installer, accept defaults EXCEPT the option "Add application directory to your PATH environment variable" which MUST be checked.
 
 
 *************************************
@@ -126,11 +152,11 @@ Please note that you need a FULLY installed Cygwin64 to use LSD 64-bit. Just cop
 Linux Installation
 ******************
 
-To use the LSD system it is necessary to have the GNU gcc/g++ compiler (version 4.9+) with the standard libraries, including zlib and Tcl/Tk 8.6 packages; you likely have zlib/Tcl/Tk already installed on your system but you may need the development packages. Use your preferred package manager to get the 'dev' package versions and beware of 32/64-bit variants according to your architecture. Though not strictly necessary, it is also suggested to have the gdb debugger (for low-level inspection of a simulation) and the gnuplot graphical package (for advanced graphics). 
+To use the LSD system it is necessary to have the GNU gcc/g++ compiler (version 4.9+) with the standard libraries, including zlib and Tcl/Tk 8.6 packages; you likely have zlib/Tcl/Tk already installed on your system but you may need the development packages. Use your preferred package manager to get the 'dev' package versions and beware of 32/64-bit variants according to your architecture. Though not strictly necessary, it is also suggested to have the gdb debugger (for low-level inspection of a simulation) and the gnuplot graphical package (for advanced graphics), preferably using Qt. 
 
 In Debian or Ubuntu, to make sure you have the correct libraries you can use:
 
-sudo apt-get install build-essential gdb gnuplot zlib1g-dev tcl8.6-dev tk8.6-dev
+sudo apt-get install build-essential gdb gnuplot-qt zlib1g-dev tcl8.6-dev tk8.6-dev
 
 In Fedora or CentOS, the equivalent command is:
 
@@ -140,9 +166,9 @@ Please check your configuration has at least g++ version 4.9 installed (you may 
 
 Also check if Tcl/Tk version 8.6 is present (use the command "echo 'puts $tcl_version;exit 0' | tclsh" to get the installed version). If a different version is present, but at least version 8.5, the user must change the TCL_VERSION parameter in LMM menu "Model>System Options" to the appropriate value.
 
-To unpack the LSD distribution file, e.g., Lsd-7.0.tar.gz, simply copy it to the chosen directory (in most cases  "~/", the user home directory, is the best option) and unpack using your file manager. This will create the whole directory structure. Alternatively, to unpack the distribution file using the terminal can be done using ( for ".tar.gz" extension files only):
+To unpack the LSD distribution file, e.g., Lsd-7.1-master.tar.gz, simply copy it to the chosen directory (in most cases  "~/", the user home directory, is the best option) and unpack using your file manager. This will create the whole directory structure. Alternatively, to unpack the distribution file using the terminal can be done using (for ".tar.gz" extension files only):
 
-tar -xzf Lsd-7.0.tar.gz
+tar -xzf Lsd-7.1-master.tar.gz
 
 The distribution file may be deleted after installation.
 
@@ -150,23 +176,15 @@ If you want to create a desktop link (icon) to run LSD/LMM, you can use the scri
 
 ./add-shortcut-linux.sh
 
-or (for 32-bit machines)
-
-./add-shortcut-linux.sh 32
-
 To run LMM from a system shell, please open a terminal in the installation directory (or use your graphical file browser) and execute:
 
 ./lmm
 
-or (for 32-bit machines)
-
-./lmm32
-
 If you get an error when trying to execute any of the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x FILENAME" in the installation directory, replacing FILENAME by the name of the corresponding file).
 
-You may need to recompile LMM if the included pre-compiled versions have problems with your Linux setup. Move in the new LSD directory and use the makefile "makefile.ln" (64/32-bit, native) ("makefile32.ln" is used ONLY for creating a 32-bit version in a 64-bit machine):
+You may need to recompile LMM if the included pre-compiled versions have problems with your Linux setup (32-bit distribution, for instance). Move in the new LSD directory and use the makefile "makefile.linux":
 
-make -f makefile.ln
+make -f makefile.linux
 
 If the compilation fails, the most likely reason is the mis-specification of the locations of the files required for the compilation. The major problem is that Tcl/Tk may be installed in your systems in several different locations. The makefile contains a list of variables for the directory needed for the Tcl/Tk libraries and include files. For example, on some systems you have the Tcl/Tk library located in /usr/lib, or /usr/local/lib, or usr/share/lib, etc. Similary, the include files may be located in different directories. The makefile lists the files you need to identify; check the location for those files and edit the makefile as appropriate for your system. 
 
@@ -180,50 +198,58 @@ If the system lists further libraries, add the appropriate option to the linker 
 If you modified the makefile to compile LMM, the same changes need to be made to the makefiles used to generate the LSD Model Programs. You need to make these changes only once using a command in LMM. Use the menu item System Compilation Options in menu Model. You will have the same variables as in the makefile used to compile LMM that must be set to the same values.
 
 
-***********************************
+***************************
 macOS (10.10+) Installation
-***********************************
+***************************
 
-Mac users have two options. Either use the native application for macOS (Aqua), or compile LSD as a Unix system (usually not required). In the second case ONLY you need to install the X11/XQuartz package (see the help on your Mac documentation or http://xquartz.macosforge.org). 
+Mac users have two installation options. Most users should use the recommended native application for macOS (Aqua), as presented here. 
 
-To unpack the LSD distribution file, e.g., Lsd-7.0.zip, simply extract it to the chosen directory (in most cases  "~/", the user home directory, is the best option) using Finder. This will create the whole directory structure. Alternatively, to unpack the distribution file using the terminal can be done using (for ".tar.gz" extension files only):
+To unpack the LSD distribution file, e.g., Lsd-7.1-master.zip, simply extract it to the chosen directory (in most cases  "~/", the user home directory, is the best option) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
 
-unzip Lsd-7.0.zip
+Next, open the Terminal application (located inside the app folder Utilities), go to the main folder where LSD was extracted (replace "Lsd-7.1-master" with the correct name), and execute the installation script available there:
 
-The distribution file may be deleted after installation. After unpacking is completed, run the Mac App named LMM located inside the LSD directory (double click it in Finder).
-
-If you want to create a desktop link (icon) to run LSD/LMM, you can use the script available in the installation directory executing the command in terminal:
-
+cd ~/Lsd-7.1-master
 ./add-shortcut-mac.sh
 
-If you use macOS 10.12 (Sierra) or newer, you MUST use the command above to remove LMM and LSD from the system quarantine (or manually remove LMM.app and LSD.app from the quarantine). Failing to do so will prevent the usage of LSD as a native Mac App (you can stil run lmmOSX from the terminal).
+If using macOS 10.12 (Sierra) or newer, you MUST use the command above to remove LMM and LSD from the system quarantine. Failing to do so will prevent the usage of LSD as a native application. After the initial configuration, a desktop shortcut (icon) will be available for using LMM/LSD. If you delete the created shortcut, you can still run the app named LMM located inside the LSD installation directory (double click it in Finder) to open LMM/LSD, or rerun the add-shortcut-mac.sh script to recreate the shortcut.
 
-Alternatively, you can run LMM from the terminal (usually not required). Please open a terminal in the chosen installation directory and execute:
-
-./lmmOSX
-
-If you get an error when trying to execute any of the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x LMM.app/Contents/MacOS/LMM" or "chmod +x lmmOSX"  in the installation directory).
-
-Optionally, you can recompile LMM, required only if the included pre-compiled version has problems with your Mac setup. Open a terminal and go to the directory of LSD installation. Then use one of the commands:
-
-make -f makefile.mac
-make -f makefile.osx
-
-The first command produces the native macOS package (LMM), while the second creates the terminal executable (lmmOSX). The package version (LMM) should be preferred as it embeds a newer version of Tcl/Tk. The terminal version (lmmOSX) uses the macOS pre-installed Tcl/Tk bundle which has some bugs.
-
-Users of macOS Sierra (10.12) or newer MUST manually install the Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required line tools available in macOS. To install it, open the Terminal (located inside /Applications/Utilities) and enter the following command:
+Users of macOS Sierra (10.12) or newer MUST yet manually install the Apple Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required command line tools available in macOS. To install it, open the Terminal  and enter the following command:
 
 xcode-select --install
 
-Then, in the just opened window, click on the Install button (do NOT click on the Get Xcode button), accept the license and wait installation completion (you may have to reboot to finish the installation).
+Then, in the opened window, click on the Install button (do NOT click on the Get Xcode button), accept the license and wait the installation to complete (you may have to reboot to finish the installation).
 
-You may have to install Gnuplot if you want to produce more elaborated plots in LSD. If you have a standard installation of macOS (Aqua), the easiest way is to use Homebrew for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
+You may have to install Gnuplot if you want to produce more elaborated plots in LSD. The easiest way is to use the Homebrew application for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
 
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-When Homebrew installation finishes (details at http://brew.sh), you can install Gnuplot using the command:
+When Homebrew installation finishes (details at http://brew.sh), you can install Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
 
-brew install gnuplot
+brew install gnuplot --with-qt
+
+
+*************************
+macOS Legacy Installation
+*************************
+
+It is possible, but not required or recommended in most cases, to compile LSD as a Unix system. To do so you need to install the X11/XQuartz package (see the help on your Mac documentation or http://xquartz.macosforge.org), update your Tcl/Tk package to version 8.6+ (the embedded version 8.5 in macOS is not adequate) (see instructions on https://www.tcl.tk), and make sure the Apple Command Line Tools package (or Xcode) is installed (see the instructions above).
+
+When all prerequisites are installed, download the LSD distribution file, e.g., Lsd-7.1-master.zip, to your home folder ("~/") and extract it in Terminal:
+
+unzip Lsd-7.1-master.zip
+
+Next, still in Terminal, change to the folder where LSD was installed (replace "Lsd-7.1-master" with the correct name), and compile LMM:
+
+cd Lsd-7.1-master
+make -f makefile.mac-legacy
+
+Now, you can run LMM from the terminal executing (you must be in LSD installation folder):
+
+./lmmOSX
+
+You still have to install Gnuplot if you want to produce more elaborated plots in LSD. See http://www.gnuplot.info for the details or use Homebrew to do it in a simpler way (see the instructions above).
+
+Please note that models created with lmmOSX have slightly different configurations than models produced with the LMM native macOS application (see above). So, if changing from one version to the other, the user MUST manually update both the LSD system and model options. Reapplying the defaults for each case is susally fine.
 
 
 ******************
@@ -246,14 +272,3 @@ When a model program is successfully compiled and run by LMM, then the user can 
 Please check LSD documentation using the menu Help at any time. The documentation includes from tutorials and a course on LSD to a complete manual covering all LSD details.
 
 For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
-
-
-***********
-Legal stuff
-***********
-
-LSD is copyrighted by Marco Valente and is distributed according to the GNU General Public License. That is, as I understand it, you can use, modify and redistribute this code for free, as long as you maintain the same conditions. For legal conditions on gnuplot and the other software used see their legal notices
-
-Shortcut.exe 1.11 is copyrighted by Marty List, http://www.OptimumX.com
-SetFileIcon 0.1 is copyrighted by HAMSoft Engineering, http://hamsoftengineering.com
-Silk icon set 1.3 is copyrighted by Mark James, http://www.famfamfam.com/lab/icons/silk

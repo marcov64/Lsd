@@ -1,19 +1,34 @@
-# Makefile for LMM in a MacOS Acqua .app package (tested up to 10.12)
+#**************************************************************
+#
+#	LSD 7.1 - December 2018
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#	
+#**************************************************************
+
+#**************************************************************
+# MAKEFILE.MAC
+# Makefile for LMM in a MacOS Acqua .app package (tested up to 10.13)
+#**************************************************************
 
 CC=g++
 TARGET=LMM
-SWITCH_CC=-DMAC_PKG -Wno-unused-result -mmacosx-version-min=10.9 -O3
-
-# For MacOS, using native compiler and Lsd supplied Tcl/Tk frameworks.
-LSDROOT=.
-PATH_TCL_HEADER=$(LSDROOT)/$(TARGET).app/Contents/Frameworks/Tcl.framework/Headers
-PATH_TK_HEADER=$(LSDROOT)/$(TARGET).app/Contents/Frameworks/Tk.framework/Headers
-PATH_LIB=$(LSDROOT)/$(TARGET).app/Contents/Frameworks
+SWITCH_CC=-DMAC_PKG -Wno-unused-result -mmacosx-version-min=10.10 -O3
 
 # from here you should not need to modify anything
-RM=rm -f
+LSDROOT=.
 SRC=src
 SRC_DIR=$(LSDROOT)/$(SRC)/
+
+# For MacOS, using native compiler and Lsd supplied Tcl/Tk frameworks.
+PATH_TCL_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/Headers
+PATH_TK_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/Headers
+PATH_LIB=$(SRC_DIR)LSD.app/Contents/Frameworks
+
+RM=rm -f
 TARGET_PKG=$(TARGET).app/Contents/MacOS/$(TARGET)
 
 # Variable used to prepare the options to search for the tcl and tk headers
