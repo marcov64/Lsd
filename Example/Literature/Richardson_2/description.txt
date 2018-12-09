@@ -1,0 +1,83 @@
+Competition, innovation and increasing returns (ver. 2.0)
+=========================================================
+
+Based on Richardson, G. B. (1996) Competition, innovation and increasing returns. Danish Research Unit for Industrial Dynamics (DRUID) Working Paper No. 96-10.
+
+Recoded in LSD by Marco Valente and Marcelo Pereira
+
+
+Objective
+---------
+
+This model shows that competition may co-exist even in the presence of a high rate of innovation and increasing returns. 
+
+This version explicitly models the consumers and the product is durable.
+
+
+Model design
+------------
+
+A set of N firms offers a durable product defined by its quality 'Q' and convenience 'C' at each time step 't'. Convenience is the inverse of the product price (price = 1/C).
+
+There is a set of 'M' consumers. When current product broke at time 't', with probability 'beta', consumer 'j' chooses a new product with probability proportional to a linear combination of the two characteristics:
+
+P(j,t) ~ alpha * Q(i,t) + (1 - alpha) * C(i,t)
+
+where 'P' is the probability of choosing the product offered by firm 'i' and 'alpha' is a parameter (0 <= alpha <= 1).
+
+The convenience increases (and the price decreases) over time at a decreasing rate, asymptotically approaching a maximum level 'Cmax' (or minimum price 1/Cmax):
+
+C(i,t) = C(i,t-1) * (1 - tau * ms(i,t-1)) + Cmax * tau * ms(i,t-1)
+
+where 'ms' is the market share of firm 'i' in the previous period 't-1' and 'tau' is a parameter.
+
+Quality 'Q' is constant though time unless an innovation which increases its value is adopted by the firm. If a firm innovates, the convenience 'C' returns to the minimum level 'Cmin' (or maximum price 1/Cmin).
+
+Hence, an innovation is adopted only if it increases the probability of the firm's product being selected by consumers, which depends on both quality and convenience/price. Indicating the potential values after an innovation by an *, this means adopting an innovation only if:
+
+alpha * Q(i,t-1) + (1 - alpha) * C(i,t-1) < alpha * Q*(i,t) + (1 - alpha) * Cmin
+
+If the innovation is adopted (the above expression is true), the firm accumulated knowledge 'sigma' (see below), the new quality and the convenience are set as:
+
+sigma(i,t) = 0
+Q(i,t) = Q*(i,t)
+C(i,t) = Cmin
+
+Otherwise, the quality does not change and the firm accumulated knowledge 'sigma' increases as:
+
+sigma(i,t) = sigma(i,t-1) + delta
+Q(i,t) = Q(i,t-1)
+
+where 'delta' is a constant parameter.
+
+The potential quality of a new product by the adoption of an innovation is drawn from a normal distribution with mean equal to the existing quality and the accumulated knowledge from the last successful innovation:
+
+Q*(i,t) ~ N(Q(i,t-1), sigma(i, t-1))
+
+The market share of a firm is defined as the ratio:
+
+ms(i,t) = P(i,t) / sum(P(i,t))
+
+where 'sum' is the sum of all firms probabilities.
+
+
+Model parameters
+----------------
+
+alpha = relative weight of quality on consumer preference in [0, 1]
+delta = knowledge accumulation factor over time >= 0
+tau = convenience increase / price decrease rate in [0, 1]
+beta = probability of product to break in one period in [0, 1]
+Cmin = minimum convenience (inverse of maximum price) > 0
+Cmax = maximum convenience (inverse of minimum price) > 0
+M = number of consumers > 0
+N = number of firms > 0
+Q0 = initial quality of all firms > 0
+C0 = initial convenience of all firms > 0
+
+
+Sensitivity analysis
+--------------------
+
+There are scripts, .lsd and .sa files in the R subfolder of the model home directory pre-configured for sensitivity analysis using different techniques. There are two output variables available for SA (HHI and HPI). The generation of SA data for this model is relatively time consuming, using a multi-core server is recomended. Please check the workflow described in LSD documentation to perform the sensitivity analysis of the model.
+
