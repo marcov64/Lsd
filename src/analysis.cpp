@@ -490,10 +490,7 @@ while ( true )
 	cmd( "if { ! $y2 } { set num_y2 2 }" );
 
 	// update entry boxes with linked variables
-	cmd( "write_disabled .da.f.h.v.ft.from.mnc $minc" );
-	cmd( "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
-	cmd( "write_disabled .da.f.h.v.sc.min.min [ format \"%%.[ expr $pdigits ]g\" $miny ]" );
-	cmd( "write_disabled .da.f.h.v.sc.max.max [ format \"%%.[ expr $pdigits ]g\" $maxy ]" );
+	update_bounds( );
 	cmd( "write_disabled .da.f.h.v.y2.f.e $num_y2" );
 	cmd( "write_any .da.f.tit.ps.e $point_size" ); 
 	cmd( "write_any .da.f.tit.pr.e $pdigits" ); 
@@ -2419,6 +2416,57 @@ while ( true )
 }
 }
 
+
+/***************************************************
+ UPDATE_BOUNDS
+ ****************************************************/
+void update_bounds( void )
+{
+	if ( isfinite( miny ) )
+		cmd( "write_disabled .da.f.h.v.sc.min.min [ format \"%%.[ expr $pdigits ]g\" $miny ]" );
+	else
+	{
+		cmd( "write_disabled .da.f.h.v.sc.min.min -Infinity" );
+		miny = 0;
+	}
+	
+	if ( isfinite( maxy ) )
+		cmd( "write_disabled .da.f.h.v.sc.max.max [ format \"%%.[ expr $pdigits ]g\" $maxy ]" );
+	else
+	{
+		cmd( "write_disabled .da.f.h.v.sc.max.max Infinity" );
+		maxy = 0;
+	}
+	
+	if ( miny == 0 && maxy == 0 )
+	{
+		miny = -1;
+		maxy = 1;
+	}
+	
+	if ( ! isfinite( miny2 ) )
+		miny2 = 0;
+	
+	if ( ! isfinite( maxy2 ) )
+		maxy2 = 0;		
+	
+	if ( miny2 == 0 && maxy2 == 0 )
+	{
+		miny2 = -1;
+		maxy2 = 1;
+	}
+	
+	if ( min_c < 1 )
+		min_c = 1;
+	
+	if ( max_c <= min_c )
+		max_c = min_c + 1;
+	
+	cmd( "write_disabled .da.f.h.v.ft.from.mnc $minc" );
+	cmd( "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
+}
+	
+
 /***************************************************
  PLOT_TSERIES
  ****************************************************/
@@ -2599,11 +2647,8 @@ void plot_tseries( int *choice )
 		miny2 = temp;
 	}
 		
-	cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
-	cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
-	cmd( "write_disabled .da.f.h.v.ft.from.mnc $minc" );
-	cmd( "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
-
+	update_bounds( );
+	
 	// plot all series
 	plot( TSERIES, nv, data, start, end, id, str, tag, choice );
 
@@ -2780,9 +2825,8 @@ void plot_cross( int *choice )
 		miny = temp;
 	}
 		
-	cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
-	cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
-
+	update_bounds( );
+	
 	// sort series if required
 	for ( k = 0; k < nt; ++k )		// find index to time reference
 		if ( list_times[ k ] == res )
@@ -5147,6 +5191,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "catch { set lim [ gnuplot_plotarea ] }" );
 	cmd( "catch { set rang [ gnuplot_axisranges ] }" );
 	cmd( "if { [ info exists lim ] && [ info exists rang ] } { set choice 1 } { set choice 0 }" );
+	
 	if ( *choice == 1 )
 	{
 		cmd( "set res [ expr int( $cmx * [ lindex $lim 0 ] / 1000.0 ) ]" );
@@ -5157,10 +5202,14 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 		get_int( "res", &lim[ 2 ] );
 		cmd( "set res [ expr int( $cmy * [ lindex $lim 3 ] / 1000.0 ) ]" );
 		get_int( "res", &lim[ 3 ] );
+		
 		for ( i = 0; i < 4; ++i )
 		{	
 			cmd( "set res [ lindex $rang %d ]", i );
 			get_double( "res", &rang[ i ] );
+
+			if ( is_inf( lim[ i ] ) || is_nan( lim[ i ] ) || is_inf( rang[ i ] ) || is_nan( rang[ i ] ) )
+				rang[ i ] = lim[ i ] = 0;
 		}
 	}
 	else
@@ -5843,9 +5892,7 @@ void histograms( int *choice )
 	{
 		maxy = lmaxy / cases;
 		miny = lminy > 0 ? ( lminy - 1 ) / cases : 0;
-		
-		cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
-		cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
+		update_bounds( );
 	}
 
 	cmd( "set choice $norm" );
@@ -6097,9 +6144,7 @@ void histograms_cs( int *choice )
 	{
 		maxy = lmaxy / cases;
 		miny = lminy > 0 ? ( lminy - 1 ) / cases : 0;
-		
-		cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
-		cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
+		update_bounds( );
 	}
 
 	cmd( "set choice $norm" );

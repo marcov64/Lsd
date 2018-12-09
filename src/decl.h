@@ -788,6 +788,7 @@ void tex_report_struct( object *r, FILE *f, bool table = true );
 void uncover_browser( void );
 void unload_configuration ( bool full );
 void unwind_stack( void );
+void update_bounds( void );
 void wipe_out( object *d );
 void write_list( FILE *frep, object *root, int flag_all, char const *prefix );
 void write_obj( object *r, FILE *frep );
