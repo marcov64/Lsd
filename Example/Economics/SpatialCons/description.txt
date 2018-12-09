@@ -1,0 +1,31 @@
+Spatial model of consumption
+
+This model shows how spatial location can interact with consumption. The model is very simple: a set of consumers and a set of firms are located in a one dimensional space, and each of them is assigned a location between 0 and 1.
+
+At each period consumers attemp to make a purchase, in a two steps procedure:
+1) firstly they select the firms close enough to be considered
+2) then, among the selected ones, they choose the product to buy
+
+Both steps have a stochastic component. 
+
+Step 1):  select the firms on the basis of geographic distance
+This step computes the geographic distance D between the consumer and the firms. This distance (0<D<1) is raised to the power of a, a parameter, to allow for larger or smaller sensitivity to distance. Then each firm is selected with probability (1-D^a) and discarded with the complementary probability D^a. 
+
+Step 2): choose one firm among the selected
+This step chooses randomly one of the selected firms (i.e. not discared in Step 1)) with probabilities equal to a firms' parameter Quality. If no firm have been selected, the consumer chooses the same product purchased in the previous time step.
+
+At each step, all consumers attempt to make a purchase. The system record the sales level for each firm.
+
+Settings:
+
+- Number of objects Consumer and Firm
+- LocationC, geographic position of consumers, a value between [0,1]
+- LocationF, geographic position of firms, a value between [0,1]
+- Quality, probability of choosing a firm, if located.
+- alpha, the a parameter in [0,1]. The larger alpha the larger the number of firms selected, the closer, the smaller the number of firms selected.
+
+Available configurations:
+- Sim3: uses 1000 consumers and 100 firms. The consumers are distributed uniformly in the space from 0.0 to 1.0. The firms are located uniformly from 0.005 to 0.995. The quality of marginal firms (closer to 0 and to 1) is higher in respect of more central firms.
+
+- Sim2 and Sim1: smaller configurations for trials.
+

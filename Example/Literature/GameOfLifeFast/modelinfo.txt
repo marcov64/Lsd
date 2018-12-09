@@ -1,0 +1,3 @@
+Game of Life (fast)
+0.1
+17 November, 2007

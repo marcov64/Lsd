@@ -1,6 +1,0 @@
-Percolation Model
-by WG1 - Thematic Institute - Vienna '04
-
-Standard percolation model
-
-Vector based

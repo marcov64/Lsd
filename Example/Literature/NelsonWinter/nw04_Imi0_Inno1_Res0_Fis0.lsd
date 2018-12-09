@@ -1,0 +1,374 @@
+	
+Label Root
+{
+	Son: Statistics
+	Label Statistics
+	{
+		Son: Industry
+		Label Industry
+		{
+			Son: Firm
+			Label Firm
+			{
+				Param: RIM
+				Param: RIN
+				Param: Inn
+				Param: C
+				Param: AM
+				Param: AN
+				Var: Q
+				Var: A
+				Var: K
+				Var: PROF
+				Var: A_IN
+				Var: A_IM
+				Var: ch_ms
+				Var: ms
+				Var: I_rate
+				Var: MU_target
+				Var: MU_actual
+				Var: Krepro
+				Var: Fission
+				Var: s
+				Var: Inn_mean
+
+			}
+
+			Param: Regime_imi
+			Param: Regime_inno
+			Param: Regime_restraint
+			Param: Regime_fission
+			Param: Fiss
+			Param: Bank
+			Param: Dem_Coeff
+			Param: Dem_elast
+			Param: Inn_stddev
+			Param: Dep_rate
+			Var: Supply
+			Var: Price
+			Var: A_Max
+			Var: A_average
+			Var: K_total
+			Var: A_mean
+
+		}
+
+		Param: Stats
+		Var: InvHerf
+		Var: HP_index
+		Var: A_Mean
+		Var: A_Var
+		Var: Krepro_Mean
+		Var: Covar_Krepro_A
+		Var: Regres_Krepro_A
+		Var: A_Mean_Delta
+		Var: Innovation_effect
+		Var: Selection_effect
+
+	}
+
+	Var: T
+	Var: Startup
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: T 0 s + n n
+Var: Startup 0 n + n n
+
+Object: Statistics C	1
+Param: Stats 0 n + n n	1
+Var: InvHerf 0 s + n n
+Var: HP_index 0 s + n n
+Var: A_Mean 1 s + n n	0.16
+Var: A_Var 0 s + n n
+Var: Krepro_Mean 0 s + n n
+Var: Covar_Krepro_A 0 s + n n
+Var: Regres_Krepro_A 0 s + n n
+Var: A_Mean_Delta 0 s + n n
+Var: Innovation_effect 0 s + n n
+Var: Selection_effect 0 s + n n
+
+Object: Industry C	1
+Param: Regime_imi 0 n + n n	0
+Param: Regime_inno 0 n + n n	1
+Param: Regime_restraint 0 n + n n	1
+Param: Regime_fission 0 n + n n	0
+Param: Fiss 0 n + n n	0.01
+Param: Bank 0 n + n n	0
+Param: Dem_Coeff 0 n + n n	67
+Param: Dem_elast 0 n + n n	1
+Param: Inn_stddev 0 n + n n	0.01
+Param: Dep_rate 0 n + n n	0.03
+Var: Supply 0 s + n n
+Var: Price 0 s + d n
+Var: A_Max 0 s + n n
+Var: A_average 1 s + n n	0.16
+Var: K_total 1 n + n n	358.8
+Var: A_mean 1 s + n n	0.16
+
+Object: Firm C	16
+Param: RIM 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: RIN 0 n + n n	0.0223	0.0223	0.0223	0.0223	0.0223	0.0223	0.0223	0.0223	0.0223	0.0223	0.0223	0.0223	0.0223	0.0223	0.0223	0.0223
+Param: Inn 0 n + n n	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+Param: C 0 n + n n	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16
+Param: AM 0 n + n n	0.125	0.125	0.125	0.125	0.125	0.125	0.125	0.125	0.125	0.125	0.125	0.125	0.125	0.125	0.125	0.125
+Param: AN 0 n + n n	1.25	1.25	1.25	1.25	1.25	1.25	1.25	1.25	1.25	1.25	1.25	1.25	1.25	1.25	1.25	1.25
+Var: Q 1 s + n n	4	4	4	4	4	4	4	4	4	4	4	4	4	4	4	4
+Var: A 1 s + n n	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16	0.16
+Var: K 1 s + n n	22.425	22.425	22.425	22.425	22.425	22.425	22.425	22.425	22.425	22.425	22.425	22.425	22.425	22.425	22.425	22.425
+Var: PROF 0 s + n n
+Var: A_IN 0 s + n n
+Var: A_IM 0 s + n n
+Var: ch_ms 0 n + n n
+Var: ms 1 s + n n	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625
+Var: I_rate 0 n + n n
+Var: MU_target 0 n + n n
+Var: MU_actual 0 n + n n
+Var: Krepro 0 s + n n
+Var: Fission 0 n + n n
+Var: s 1 s + n p	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625
+Var: Inn_mean 0 n + n n
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 1000
+EQUATION fun_nw04.cpp
+ MODELREPORT         report_nw04_Imi0_Inno0_Res0_Fis0.html
+
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Root
+
+END_DESCRIPTION
+
+Object_Statistics
+(no description available)
+END_DESCRIPTION
+
+Object_Industry
+(no description available)
+END_DESCRIPTION
+
+Object_Firm
+(no description available)
+END_DESCRIPTION
+
+Variable_RIM
+(no description available)
+END_DESCRIPTION
+
+Variable_RIN
+(no description available)
+END_DESCRIPTION
+
+Variable_Inn
+(no description available)
+END_DESCRIPTION
+
+Variable_C
+(no description available)
+END_DESCRIPTION
+
+Variable_AM
+(no description available)
+END_DESCRIPTION
+
+Variable_AN
+(no description available)
+END_DESCRIPTION
+
+Parameter_Q
+(no description available)
+END_DESCRIPTION
+
+Parameter_A
+(no description available)
+END_DESCRIPTION
+
+Parameter_K
+(no description available)
+END_DESCRIPTION
+
+Parameter_PROF
+(no description available)
+END_DESCRIPTION
+
+Parameter_A_IN
+(no description available)
+END_DESCRIPTION
+
+Parameter_A_IM
+(no description available)
+END_DESCRIPTION
+
+Parameter_ch_ms
+(no description available)
+END_DESCRIPTION
+
+Parameter_ms
+(no description available)
+END_DESCRIPTION
+
+Parameter_I_rate
+(no description available)
+END_DESCRIPTION
+
+Parameter_MU_target
+(no description available)
+END_DESCRIPTION
+
+Parameter_MU_actual
+(no description available)
+END_DESCRIPTION
+
+Parameter_Krepro
+(no description available)
+END_DESCRIPTION
+
+Parameter_Fission
+(no description available)
+END_DESCRIPTION
+
+Parameter_s
+(no description available)
+END_DESCRIPTION
+
+Parameter_Inn_mean
+(no description available)
+END_DESCRIPTION
+
+Variable_Regime_imi
+(no description available)
+END_DESCRIPTION
+
+Variable_Regime_inno
+(no description available)
+END_DESCRIPTION
+
+Variable_Regime_restraint
+(no description available)
+END_DESCRIPTION
+
+Variable_Regime_fission
+(no description available)
+END_DESCRIPTION
+
+Variable_Fiss
+(no description available)
+END_DESCRIPTION
+
+Variable_Bank
+(no description available)
+END_DESCRIPTION
+
+Variable_Dem_Coeff
+(no description available)
+END_DESCRIPTION
+
+Variable_Dem_elast
+(no description available)
+END_DESCRIPTION
+
+Variable_Inn_stddev
+(no description available)
+END_DESCRIPTION
+
+Variable_Dep_rate
+(no description available)
+END_DESCRIPTION
+
+Parameter_Supply
+(no description available)
+END_DESCRIPTION
+
+Parameter_Price
+(no description available)
+END_DESCRIPTION
+
+Parameter_A_Max
+(no description available)
+END_DESCRIPTION
+
+Parameter_A_average
+(no description available)
+END_DESCRIPTION
+
+Parameter_K_total
+(no description available)
+END_DESCRIPTION
+
+Parameter_A_mean
+(no description available)
+END_DESCRIPTION
+
+Variable_Stats
+(no description available)
+END_DESCRIPTION
+
+Parameter_InvHerf
+(no description available)
+END_DESCRIPTION
+
+Parameter_HP_index
+(no description available)
+END_DESCRIPTION
+
+Parameter_A_Mean
+(no description available)
+END_DESCRIPTION
+
+Parameter_A_Var
+(no description available)
+END_DESCRIPTION
+
+Parameter_Krepro_Mean
+(no description available)
+END_DESCRIPTION
+
+Parameter_Covar_Krepro_A
+(no description available)
+END_DESCRIPTION
+
+Parameter_Regres_Krepro_A
+(no description available)
+END_DESCRIPTION
+
+Parameter_A_Mean_Delta
+(no description available)
+END_DESCRIPTION
+
+Parameter_Innovation_effect
+(no description available)
+END_DESCRIPTION
+
+Parameter_Selection_effect
+(no description available)
+END_DESCRIPTION
+
+Parameter_T
+(no description available)
+END_DESCRIPTION
+
+Parameter_Startup
+(no description available)
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+

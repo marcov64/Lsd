@@ -1,0 +1,30 @@
+NK Fitness Landscape (2001)
+by Marco Valente
+
+(Very complex model. Use old C++ equation grammar)
+
+Fitness lanscape model with agents aiming at improving their fitness.
+The simulation model is very flexible, allowing a great variety of settings, both for the landscape and for the exploring agents.
+
+Fitness Landscape
+The FL is represented by a set of Objects LLocus for each locus, each containing a set of Objects Link for the epistatic links of the locus. Normally, the configurations include one single Object LLocus with one Link. The Variable InitEvenK reads the values of Parameters N, EvenK, AftOverlap and ForeOverlap in order to create a landascape of length N with the following properties:
+- each locus is linked to other EvenK loci, so that to form N/EvenK groups of loci reciprocally interdependent
+- each element of the groups is linked unilaterally with AftOverlap loci in the next group (last group is linked with elements in the first group)
+- each element of the groups is linked unilaterally with ForeOverlap loci in the previous group (first group is linked with elements in the last group) 
+- fitness contributions for each locus, that vary with the values of the linked loci, are created dynamically in a data structure created on-the-fly while new points are explored. Therefore, the model can virtually represent landscapes whose number of fitness values is too big to be stored in the computer memory; in these cases the simulation crashes when the memory limitations are reached
+
+Agents
+The model represents a population of agents exploring the landscapes. They are initially located in a point of the landscape and test different points using a research strategy to obtain a new point from the previous one, and measuring the increment in fitness using one of many available reward systems. 
+Agents with same strategies and rewards are grouped in classes so that it is possible to measure average results over many explorations so to limit the effects of randomness.
+Users needs to decide the number of Objects Class in the model, and in each of them to set the following parameters, that will be used to initialize the groups of Agents in the model:
+- IdClass: a unique identification code;
+- NumClass: the number of agents in the class;
+- TypeNumBits: number of bits located in the groups that can potentially be mutated at the same time to reach a new point; this Parameter basically defines the mutation strategy;
+- TypeRewardClass: the type of mutation to use. See description for Mutation for the available options.
+
+
+
+
+
+
+

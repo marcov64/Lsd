@@ -1,0 +1,519 @@
+	
+Label Root
+{
+	Son: Obj
+	Label Obj
+	{
+		Param: a
+		Param: k
+		Param: b
+		Param: init_a
+		Param: limit_a
+		Param: init_b
+		Param: limit_b
+		Param: init_k
+		Param: limit_k
+		Param: step_a
+		Param: step_b
+		Param: step_k
+		Param: best_a
+		Param: best_b
+		Param: best_k
+		Var: cum_error
+		Param: min_error
+		Var: set_param
+		Var: store
+
+	}
+
+	Son: Database
+	Label Database
+	{
+		Son: Years
+		Label Years
+		{
+			Param: time
+			Param: true_value
+			Param: best_value
+			Param: err_best-true
+
+		}
+
+		Param: num_years
+
+	}
+
+	Var: init
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: init 0 n + d n
+
+Object: Obj C	1
+Param: a 0 n + n n	0
+Param: k 0 n + n n	0
+Param: b 0 n + n n	0
+Param: init_a 0 n + n n	0.4
+Param: limit_a 0 n + n n	0.8
+Param: init_b 0 n + n n	100
+Param: limit_b 0 n + n n	500
+Param: init_k 0 n + n n	500
+Param: limit_k 0 n + n n	1500
+Param: step_a 0 n + n n	-0.01
+Param: step_b 0 n + n n	-1
+Param: step_k 0 n + n n	10
+Param: best_a 0 n + n n	0
+Param: best_b 0 n + n n	0
+Param: best_k 0 n + n n	0
+Var: cum_error 0 n + d n
+Param: min_error 0 n + n n	1e+022
+Var: set_param 0 n + n n
+Var: store 0 n + n n
+
+Object: Database C	1
+Param: num_years 0 n + n n	0
+
+Object: Years C	9
+Param: time 0 n + n n	1	2	3	4	5	6	7	8	9
+Param: true_value 0 n + n n	9.02834	16.3295	29.3601	52.2368	91.2624	154.685	250.055	377.936	525.399
+Param: best_value 0 n + n n	0	0	0	0	0	0	0	0	0
+Param: err_best-true 0 n + n n	0	0	0	0	0	0	0	0	0
+
+SIM_NUM 1
+SEED 0
+MAX_STEP 1000000
+EQUATION C:/Lsd/extrapolation/fun_extra.cpp
+MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Variable_init
+(no description available)
+END_DESCRIPTION
+
+Object_Obj
+(no description available)
+END_DESCRIPTION
+
+Parameter_a
+(no description available)
+END_DESCRIPTION
+
+Parameter_k
+(no description available)
+END_DESCRIPTION
+
+Parameter_b
+(no description available)
+END_DESCRIPTION
+
+Parameter_init_a
+(no description available)
+END_DESCRIPTION
+
+Parameter_limit_a
+(no description available)
+END_DESCRIPTION
+
+Parameter_init_b
+(no description available)
+END_DESCRIPTION
+
+Parameter_limit_b
+(no description available)
+END_DESCRIPTION
+
+Parameter_init_k
+(no description available)
+END_DESCRIPTION
+
+Parameter_limit_k
+(no description available)
+END_DESCRIPTION
+
+Parameter_step_a
+(no description available)
+END_DESCRIPTION
+
+Parameter_step_b
+(no description available)
+END_DESCRIPTION
+
+Parameter_step_k
+(no description available)
+END_DESCRIPTION
+
+Parameter_best_a
+(no description available)
+END_DESCRIPTION
+
+Parameter_best_b
+(no description available)
+END_DESCRIPTION
+
+Parameter_best_k
+(no description available)
+END_DESCRIPTION
+
+Variable_cum_error
+(no description available)
+END_DESCRIPTION
+
+Parameter_min_error
+(no description available)
+END_DESCRIPTION
+
+Variable_set_param
+(no description available)
+END_DESCRIPTION
+
+Variable_store
+(no description available)
+END_DESCRIPTION
+
+Object_Database
+(no description available)
+END_DESCRIPTION
+
+Parameter_num_years
+(no description available)
+END_DESCRIPTION
+
+Object_Years
+(no description available)
+END_DESCRIPTION
+
+Parameter_time
+(no description available)
+END_DESCRIPTION
+
+Parameter_true_value
+(no description available)
+END_DESCRIPTION
+
+Parameter_best_value
+(no description available)
+END_DESCRIPTION
+
+Parameter_err_best-true
+(no description available)
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+/***************************************************
+****************************************************
+LSD 2.0 - April 2000
+written by Marco Valente
+Aalborg University
+
+Example for an equation file. Users should include in this header a
+brief description of the model.
+
+Include the equations in the space indicated below, after the line:
+
+Place here your equations
+
+
+****************************************************
+****************************************************/
+
+#include "../src/fun_head.h"
+
+object *database;
+double *values;
+
+double variable::fun(object *caller)
+{
+//These are the local variables used by default
+double v[40], res;
+object *p, *c, *cur1, *cur2, *cur3, *cur4, *cur5;
+
+//Declare here any other local variable to be used in your equations
+//You may need an integer to be used as a counter
+int i, j;
+//and an object (a pointer to)
+register object *cur;
+
+
+if(quit==2)
+ return -1;
+
+p=up;
+c=caller;
+FILE *f;
+
+
+//Uncommenting the following lines the file "log.log" will
+//contain the name of the variable just computed.
+//To be used in case of unexpected crashes. It slows down sensibly the simulation
+/**
+f=fopen("log.log","a");
+ fprintf(f,"t=%d %s\n",t,label);
+ fclose(f);
+**/
+
+//Place here your equations. They must be blocks of the following type
+
+
+if(!strcmp(label,"set_param"))
+{
+/*
+Update the parameter's values.
+Sequentially, each parameter is added its step. If this cause to reach the limit
+of the parameter, then it is set to its initial value, and the next parameter is
+increased.
+
+*/
+
+v[0]=p->cal("a",0);
+v[1]=p->cal("limit_a",0);
+
+v[2]=p->cal("step_a",0);
+v[4]=p->increment("a",v[2]);
+
+//continue if the par continue to 
+// stay larger/smaller than the limit 
+if( (v[0]>v[1] && v[4]>=v[1]) || (v[0]<v[1] && v[4]<=v[1]) ) 
+ { //continue varying a
+  res=1;
+  goto end;
+ }
+
+//'a' must be re-initialized
+
+p->write("a",p->cal("init_a",0), 0);
+
+
+v[10]=p->cal("b",0);
+v[11]=p->cal("limit_b",0);
+
+v[12]=p->cal("step_b",0);
+v[14]=p->increment("b",v[12]);
+
+//continue if the par continue to 
+// stay larger/smaller than the limit 
+if((v[10]>v[11] && v[14]>=v[11]) || (v[10]<v[11] && v[14]<=v[11]) ) 
+ { //continue varying b
+  res=2;
+  goto end;
+ }
+
+p->write("b",p->cal("init_b",0), 0);
+
+
+
+v[20]=p->cal("k",0);
+v[21]=p->cal("limit_k",0);
+v[22]=p->cal("step_k",0);
+v[24]=p->increment("k",v[22]);
+
+//continue if the par continue to 
+// stay larger/smaller than the limit 
+if((v[20]>v[21] && v[24]>=v[21]) || (v[20]<v[21] && v[24]<=v[21]) ) 
+ { //continue varying k
+  res=3;
+  goto end;
+ }
+
+res=4;
+goto end;
+}
+
+
+if(!strcmp(label,"cum_error"))
+{
+/*
+Compute the fitness error with the current parameter settings.
+
+Here the function must be placed, in this case it is:
+f(t)=k*exp(t*a)/[b+exp(t*a)]
+
+Note that it is possible to apply different error methods
+*/
+p->cal("set_param",0);
+v[10]=p->cal("a",0);
+v[11]=p->cal("k",0);
+v[12]=p->cal("b",0);
+v[13]=database->cal("num_years",0);
+for(v[5]=0,v[0]=1; v[0]<=v[13]; v[0]++)
+ {
+ v[4]=exp(v[10]*v[0]);
+ v[2]=v[11]*(v[4]/(v[12]+v[4])); //here is the function. Change here for a different fitting function
+ v[1]=values[(int)v[0]-1]; //this is the equivalent true value for year v[0]. See init
+// v[5]+=(v[1]-v[2])*(v[1]-v[2]);  //absolute error
+ v[5]+=(v[1]-v[2])*(v[1]-v[2])/v[1]; //relative error
+
+ } 
+res=v[5]; 
+goto end;
+}
+
+
+if(!strcmp(label,"store"))
+{
+/*
+If the cumulated error is the minimum found so far, then record the relevant data:
+- parameters' values
+- estimations
+
+Of course, the value for the minimum error is replaced if necessary.
+*/
+
+
+v[0]=p->cal("min_error",0);
+v[1]=p->cal("cum_error",0);
+if(v[0]>v[1] || t==1)
+ {
+  v[2]=p->cal("a",0);
+  v[3]=p->cal("k",0);
+  v[4]=p->cal("b",0);
+  p->write("best_a",v[2], 0);
+  p->write("best_k",v[3], 0);
+  p->write("best_b",v[4], 0);
+  p->write("min_error",v[1], 0);
+  
+   //cur=database->son;
+   v[14]=database->cal("num_years",0);
+  for(v[5]=1; v[5]<=v[14]; v[5]++)
+   {
+   v[8]=exp(v[2]*v[5]);
+   v[9]=v[3]*(v[8]/(v[4]+v[8]));
+   
+   cur->write("best_value",v[9],0);
+   cur->write("err_best-true",v[9]-values[(int)v[5]-1],0);
+   cur=cur->next;
+   } 
+  res=1;
+ }
+else 
+  res=0;
+goto end;
+}
+
+if(!strcmp(label,"init"))
+{
+/*
+This equation is computed only at the very beginning of the simulation and never again.
+Since the simulation speed and the initialization consistency is crucial, then this equation
+perform the necessary actions.
+
+- set the value for num_years equal to the actual number of Objects "Years". 
+- Store the true values in a global vector to speed up their retrieval
+- allocate the number of attempts for each parameter. The same number of attempts is 
+assigned to each parameter, computing the steps by equally dividing the research area from init_x
+up to limit_x.
+
+*/
+database=p->search("Database");
+for(v[0]=0,cur=database->search("Years"); cur!=NULL; cur=go_brother(cur),v[0]++ );
+database->write("num_years",v[0], 0);
+values=new double[(int)v[0]]; //assign memory to 'values', deleted in close_sim()
+for(v[0]=0,cur=database->search("Years"); cur!=NULL; cur=go_brother(cur),v[0]++ )
+ {
+  v[1]=cur->cal("true_value",0);
+  values[(int)v[0]]=v[1];
+ }
+
+v[0]=(double)max_step; //hack. This is the Lsd private variable to store the number of steps for the simulation.
+
+cur=p->search("Obj");
+
+v[3]=cur->cal("init_a",0);
+v[4]=cur->cal("limit_a",0);
+v[5]=cur->cal("init_b",0);
+v[6]=cur->cal("limit_b",0);
+v[7]=cur->cal("init_k",0);
+v[8]=cur->cal("limit_k",0);
+
+v[9]=(double)((v[3]!=v[4])+(v[5]!=v[6])+(v[7]!=v[8])); //# of par's to vary
+v[10]=1/v[9];
+v[1]=pow(v[0],v[10]); //the number of steps for each parameter is the cube root of max_step
+
+
+cur->write("a",v[3], 0);
+v[11]=(v[4]-v[3])/v[1];
+cur->write("step_a",v[11], 0);
+
+cur->write("b",v[5], 0);
+v[12]=(v[6]-v[5])/v[1];
+cur->write("step_b",v[12], 0);
+
+cur->write("k",v[7], 0);
+v[13]=(v[8]-v[7])/v[1];
+cur->write("step_k",v[13], 0);
+
+res=1; //whatever
+param=1; //never compute again this equation
+goto end;
+}
+
+/*********************
+
+Do not place equations beyond this point.
+
+*********************/
+
+PLOG("\nEquation for %s not found", label);
+quit=2;
+return -1;
+
+
+end :
+if( (isnan(res)==1 || isinf(res)==1) && quit!=1)
+ { 
+  PLOG("At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res );
+
+  debug_flag=1;
+  debug='d';
+ } 
+
+if(debug_flag==1)
+ {
+ for(i=0; i<40; i++)
+  i_values[i]=v[i];
+ }
+
+return(res);
+}
+
+/*
+This function is executed once at the end of a simulation run. It may be used
+to perform some cleanup, in case the model allocated memory during the simulation.
+*/
+void close_sim(void)
+{
+delete values;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+END_EQ_FILE

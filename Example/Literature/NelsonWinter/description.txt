@@ -1,0 +1,21 @@
+nw2004 - Revisiting the Nelson-Winter model of industrial dynamics
+
+Esben Sloth Andersen, esa@business.auc.dk
+Version: 23 Mar 2004
+
+This Lsd program builds on previous and simplified Lsd versions of the
+standard Nelson-Winter model by Murat Yildizoglu, Marco Valente and 
+Toke Reichstein.
+
+The Nelson-Winter model is largely derived from chapter 12 of their book
+"Evolutionary Theory of Economic Change". Compered with previous nw
+versions distributed with Lsd, nw2004 emphasises
+- good design of models and simulation experiments
+- the explicit treatment of technological regimes (Winter, 1984)
+- the possibility of switching off monopolistic restraint of investment
+- the fission of large firms
+- statistics for decomposing evolutionary change
+
+See the model report for details and history.txt file for description
+of changes made compared with older nw2004 versions. 
+

@@ -1,0 +1,9 @@
+Model for Business Planning
+
+The model represents a firm facing a highly uncertain environment. Both the demand and the production costs varies according to (independent) random function. The model replicates many copies of the firm initialized with identical values, so to observe the frequency and range of the relevant performance measures. 
+
+The model is implemented using three different Objects to represent a firm (Firm, containing Market and Produce Object), to facilitate the parameters' settings. However, users should never use more than one Market and Produce descending Object from each Firm. 
+
+The equation used are not necessarily realistic. They play just the role of introducing (many) random events. 
+
+
