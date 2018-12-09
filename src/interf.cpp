@@ -79,7 +79,7 @@ int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36,
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
-int redoChoices[ ] = { 33, 55, 74, 75, 76, 77, 78, 79, 83 };
+int redoChoices[ ] = { 33, 55, 74, 75, 76, 77, 78, 79, 80, 83 };
 #define NUM_REDO_CHOICES ( sizeof( redoChoices ) / sizeof( redoChoices[ 0 ] ) )
 
 // comparison function for bsearch and qsort
@@ -1783,8 +1783,8 @@ case 83:
 		
 	if ( nature == 74 )		// delete
 	{
-		cmd( "set answer [tk_messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete object?\" -detail \"Press 'Yes' to confirm deleting '$vname'\n\nNote that all descendants will be also deleted!\"]" );
-		cmd( "switch $answer {yes {set choice 1} no {set choice 2}}" );
+		cmd( "set answer [ tk_messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete object?\" -detail \"Press 'Yes' to confirm deleting '$vname'\n\nNote that all descendants will be also deleted!\" ]" );
+		cmd( "switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 		if ( *choice == 2 )
 			break;
 
@@ -4369,6 +4369,12 @@ case 72:
 			*choice = 0;
 			return n;
 		}
+		
+		cmd( "set answer [ tk_messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Create out-of-main-sample set of samples?\" -detail \"An out-of-sample set allows for better meta-model selection and fit-quality evaluation.\n\nPress 'Yes' to create a Monte Carlo sample now or 'No' otherwise.\" ]" );
+		cmd( "switch $answer { yes { set choice 80 } no { set choice 0 } }" );
+		
+		if ( *choice != 0 )
+			return r;
 	}
 	else
 		sensitivity_undefined( );			// throw error
