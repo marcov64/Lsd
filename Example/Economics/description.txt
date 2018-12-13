@@ -1,0 +1,10 @@
+Market Models
+
+These models implement few implementations of markets
+
+The group of Market models include:
+- Business Plan Assessment;
+- Financial Market (two versions);
+- Price Competition;
+- Spatial, a market where location matters;
+

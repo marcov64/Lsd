@@ -1,0 +1,307 @@
+#include "../src/fun_head.h"
+
+
+
+MODELBEGIN 
+
+FUNCTION("Choose")
+/*
+Function called by agents (i.e. each cell) choosing the option. The choice is made randomly with probabilities proportional to the past choices of the four neighbours.
+
+Each time the function is called it executed the following steps:
+- reset the parameter "num" for each option to the value given by "minprob"
+- increase the value of "num" (by UnitProb) for the options chosen in the previous time step by 	the same agent and	the 4 agents above, below, right and left
+- re-proportion the values of "num" replacing them with power(num, Elas)
+
+*/
+
+/*
+Reset the values of num for each option settig them to a minimum value
+*/
+v[10]=V("minprob");
+
+CYCLE(cur, "Option")
+  WRITES(cur,"num",v[10]);
+
+
+/*
+Record the previous state of the agent
+*/
+v[11]=V("UnitProb");
+v[6]=VLS(c,"State",1);
+cur=SEARCH_CND("Id",v[6]);
+INCRS(cur,"num",v[11]);
+
+
+
+/*
+Record the previous state of the agent on the right
+*/
+v[0]=V_CHEAT("right",c); //compute the equation for right in p-> object as if it were requested by c->
+cur=SEARCH_CND("Id",v[0]);
+INCRS(cur,"num",v[11]);
+
+/*
+Record the previous state of the agent on the left
+*/
+
+v[1]=V_CHEAT("left",c); //compute the equation for left in p-> object as if it were requested by c->
+cur=SEARCH_CND("Id",v[1]);
+INCRS(cur,"num",v[11]);
+
+/*
+Record the previous state of the agent above
+*/
+
+v[2]=V_CHEAT("up",c); //compute the equation for up in p-> object as if it were requested by c->
+cur=SEARCH_CND("Id",v[2]);
+INCRS(cur,"num",v[11]);
+
+/*
+Record the previous state of the agent on the down
+*/
+
+
+v[3]=V_CHEAT("down",c); //compute the equation for down in p-> object as if it were requested by c->
+cur=SEARCH_CND("Id",v[3]);
+INCRS(cur,"num",v[11]);
+
+v[4]=V("Elas");
+
+CYCLE(cur, "Option")
+ {//re-proportion the probabilities
+  v[5]=VS(cur,"num");
+  WRITES(cur,"prob",pow(v[5],v[4]));
+ } 
+
+//draw randomly the option chosen
+cur=RNDDRAW("Option","prob");
+
+v[7]=VS(cur,"Id");
+if(v[7]!=v[6])
+ {// the new state is different from the previous one
+  INCRS(cur,"glob",1); //increment the counter for the option chosen
+  cur2=SEARCH_CND("Id",v[6]); //decrement the counter for the previous option
+  INCRS(cur2,"glob",-1);
+
+ }
+
+
+
+//return the Id of the option chosen
+RESULT(v[7])
+
+EQUATION("State")
+/*
+State of the agent, determined by the function Choose.
+The equation for State updates also the graphical representation of the lattice
+*/
+
+
+//All the job is done by Choose
+
+v[0]=V("Choose");
+
+v[3]=VL("State",1);
+
+if(v[0]!=v[3])
+ {
+  //register the new color, if the option changed
+  v[1]=V("Line");
+  v[2]=V("Col");
+  update_lattice(v[1],v[2],v[0]);
+ }
+
+//record the state
+RESULT(v[0])
+
+FUNCTION("down")
+/*
+Function returning the previous time step state of the agent in the same column
+and one line more than the agent requesting this function. Agents in the last line observe the
+agents in the first line.
+
+Technically the implementation exploit the matrix of Objects initialized in Init
+*/
+
+v[0]=VS(c,"Col");
+v[1]=VS(c,"Line");
+v[2]=V("NLine");
+if(v[1]==v[2])
+ {
+  cur=SEARCH_CND("Line",1);
+  cur1=SEARCH_CNDS(cur,"Col",v[0]);
+  v[3]=VLS(cur1,"State",1);
+
+ }
+else
+ {
+  cur=SEARCH_CND("Line",v[1]+1);
+  cur1=SEARCH_CNDS(cur,"Col",v[0]);
+  v[3]=VLS(cur1,"State",1);
+ 
+ } 
+
+RESULT(v[3])
+
+FUNCTION("up")
+
+/*
+Function returning the previous time step state of the agent in the same column
+and one line less than the agent requesting this function. Agents in the first line observe the
+agents in the last line.
+
+Technically the implementation exploit the matrix of Objects initialized in Init
+*/
+v[0]=VS(c,"Col");
+v[1]=VS(c,"Line");
+v[2]=V("NLine");
+
+if(v[1]==1)
+ {
+  cur=SEARCH_CND("Line",v[2]);
+  cur1=SEARCH_CNDS(cur,"Col",v[0]);
+  v[3]=VLS(cur1,"State",1);
+ 
+ }
+else
+ {
+  cur=SEARCH_CND("Line",v[1]-1);
+  cur1=SEARCH_CNDS(cur,"Col",v[0]);
+  v[3]=VLS(cur1,"State",1);
+ 
+ } 
+RESULT(v[3])
+
+FUNCTION("left")
+/*
+Function returning the previous time step state of the agent in the same line
+and one column more than the agent requesting this function. Agents in the last column observe the
+agents in the first column.
+
+Technically the implementation exploit the matrix of Objects initialized in Init
+*/
+
+v[0]=VS(c,"Col");
+v[1]=VS(c,"Line");
+
+v[5]=V("NCol");
+
+if(v[0]==1)
+ {
+  cur=SEARCH_CNDS(c->up,"Col",v[5]); //search from c->up to avoid missing previous 'Col's
+  v[3]=VLS(cur,"State",1);
+ }
+else
+ {
+  cur=SEARCH_CNDS(c->up,"Col",v[0]-1); //search from c->up to avoid missing previous 'Col's
+  v[3]=VLS(cur,"State",1);
+ }
+
+RESULT(v[3])
+
+FUNCTION("right")
+
+/*
+Function returning the previous time step state of the agent in the same line
+and one column more than the agent requesting this function. Agents in the first column observe the agents in the last column.
+
+Technically the implementation exploit the matrix of Objects initialized in Init
+*/
+
+v[0]=VS(c,"Col");
+v[1]=VS(c,"Line");
+v[2]=V("NCol");
+
+if(v[0]==v[2])
+ {
+  cur=SEARCH_CNDS(c->up,"Col",1); //search from c->up to avoid missing previous 'Col's
+  v[3]=VLS(cur,"State",1);
+ }
+else
+ {
+  cur=SEARCH_CNDS(c->up,"Col",v[0]+1); //search from c->up to avoid missing previous 'Col's
+  v[3]=VLS(cur,"State",1);
+ }
+ 
+RESULT(v[3])
+
+EQUATION("Init")
+
+/*
+This equation is executed only once at the beginning of the simulation run and then it is transformed in a parameter, to be not executed again.
+
+The equation execute the following operations:
+- create a group of NLine Objects "Row" (only one is present in the beginning)
+- in each Object Row create a group of NCol Objects Cell;
+- in each Cell assigns randomly an integer between 0 and NState-1
+- create a matrix recording the Objects for the cells (i.e. agents) of the lattice. This speeds up the procedures requesting values in different cells;
+
+
+*/
+
+
+v[0]=V("NCol");
+v[1]=V("NLine");
+v[2]=V("NState");
+
+
+v[3]=rnd_integer(0,v[2]-1);
+
+cur=SEARCH("Cell");
+
+WRITELS(cur,"State",v[3], 1);
+
+cur4=SEARCH_CND("Id",v[3]);
+INCRS(cur4,"glob",1);
+
+cur3=SEARCH("Row");
+for(j=1; j<(int)v[0]; j++)
+ {
+
+  cur2=ADDOBJS_EX(cur3,"Cell",cur);
+  WRITES(cur2,"Col",(double)(j+1));
+  v[5]=rnd_integer(0,v[2]-1);
+  WRITELS(cur2,"State",v[5], 1);  
+  cur4=SEARCH_CND("Id",v[5]);
+  INCRS(cur4,"glob",1);
+
+ }
+
+cur=SEARCH("Row");
+for(i=1; i<(int)v[1]; i++)
+ {
+
+  cur1=ADDOBJ_EX("Row",cur);
+  WRITES(cur1,"Line",(double)(i+1));
+
+  CYCLES(cur1, cur2, "Cell")
+   {
+    v[5]=rnd_integer(0,v[2]-1);
+    WRITELS(cur2,"State",v[5], 1);
+    cur4=SEARCH_CND("Id",v[5]);
+    INCRS(cur4,"glob",1);
+    
+
+   }
+ }  
+
+init_lattice(600, 600, v[1], v[0], "Line", "Col", "State",  p, 0);
+PARAMETER
+RESULT(1)
+
+
+MODELEND
+
+/*
+This function is executed once at the end of a simulation run. It may be used
+to perform some cleanup, in case the model allocated memory during the simulation.
+*/
+void close_sim(void)
+{
+
+}
+
+
+
+

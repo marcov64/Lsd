@@ -158,7 +158,7 @@ int main( int argn, char **argv )
 int ModManMain( int argn, char **argv )
 {
 int i, num, sourcefile = 0, macro = 1;
-char *s, str[ MAX_LINE_SIZE + 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], str2[ 2 * MAX_PATH_LENGTH ];
+char *s, str[ MAX_LINE_SIZE + 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], str2[ 5 * MAX_PATH_LENGTH ];
 FILE *f;
 
 // initialize the tcl interpreter
@@ -869,9 +869,11 @@ if ( argn > 1 )
 else
 	choice = 33; 				// open model browser
   
-cmd( "wm deiconify .; raise .; focus .f.t.t; update" );
+cmd( "wm deiconify .; raise ." );
 
 loop:
+
+cmd( "focus .f.t.t; update" );
 
 // update file save status in titlebar
 cmd( "update_title_bar" );
@@ -1196,6 +1198,7 @@ if ( choice == 11 )
 
 	cmd( "set docase 0" );
 	cmd( "set dirsearch \"-forwards\"" );
+	cmd( "set endsearch end" );
 	cmd( "set curcounter $lfindsize" );
 	cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
 
@@ -1317,6 +1320,7 @@ if ( choice == 21 )
 
 	cmd( "set docase 1" );
 	cmd( "set dirsearch \"-forwards\"" );
+	cmd( "set endsearch end" );
 	cmd( "set curcounter $lfindsize" );
 	cmd( "set cur \"\"" );
 	cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
@@ -2493,7 +2497,7 @@ if ( choice == 26 )
 		cmd( "if {$v_num==\"\" && [string is integer -strict $v_num] && [string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj->cal(\\\"$v_label\\\", $v_lag)\"} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->cal(\\\"$v_label\\\", $v_lag)\"; incr v_num}" );
 	}
 
-	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"}" );
+	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\"}" );
 
 	cmd( "if {$v_num==\"\"} { set num -1} {set num $v_num}" );
 	if (num!=-1)
@@ -2677,7 +2681,7 @@ if ( choice == 40 )
 		cmd( "if {$v_num==\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"$v_obj->increment(\\\"$v_label\\\", $v_val)\"} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->increment(\\\"$v_label\\\", $v_val)\";incr v_num}" );
 	}
 
-	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"}" );
+	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\"}" );
 
 	cmd( "if {$v_num==\"\" } {set num -1} {set num $v_num}" );
 	if (num!=-1)
@@ -2762,7 +2766,7 @@ if ( choice == 45 )
 		cmd( "if {$v_num==\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"$v_obj->multiply(\\\"$v_label\\\", $v_val)\"} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->multiply(\\\"$v_label\\\", $v_val)\";incr v_num}" );
 	}
 
-	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"}" );
+	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\"}" );
 
 	cmd( "if {$v_num==\"\" } {set num -1} {set num $v_num}" );
 	if (num!=-1)
@@ -2839,14 +2843,14 @@ if ( choice == 29 )
 
 	if ( macro )
 	{
-		cmd( "if {$v_obj == \"p\" && $v_lag == 0} { .f.t.t insert insert \"WRITE(\\\"$v_label\\\", $v_num);\\n\"}" );
-		cmd( "if {$v_obj == \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
-		cmd( "if {$v_obj != \"p\" && $v_lag == 0} { .f.t.t insert insert \"WRITES($v_obj, \\\"$v_label\\\", $v_num);\\n\"}" );
-		cmd( "if {$v_obj != \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"WRITELS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
+		cmd( "if {$v_obj == \"p\" && $v_lag == 0} { .f.t.t insert insert \"WRITE(\\\"$v_label\\\", $v_num);\"}" );
+		cmd( "if {$v_obj == \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\", $v_num, $v_lag);\"}" );
+		cmd( "if {$v_obj != \"p\" && $v_lag == 0} { .f.t.t insert insert \"WRITES($v_obj, \\\"$v_label\\\", $v_num);\"}" );
+		cmd( "if {$v_obj != \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"WRITELS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\"}" );
 	}
 	else
 	{
-		cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
+		cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\", $v_num, $v_lag);\"}" );
 	}
 	cmd( ".f.t.t see insert" );
 
@@ -2926,14 +2930,14 @@ if ( choice == 30 )
 
 	if ( macro )
 	{
-		cmd( "if {$v_obj == \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CND(\\\"$v_label\\\", $v_num);\\n\"}" );
-		cmd( "if {$v_obj == \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDL(\\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
-		cmd( "if {$v_obj != \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDS($v_obj, \\\"$v_label\\\", $v_num);\\n\"}" );
-		cmd( "if {$v_obj != \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDLS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
+		cmd( "if {$v_obj == \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CND(\\\"$v_label\\\", $v_num);\"}" );
+		cmd( "if {$v_obj == \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDL(\\\"$v_label\\\", $v_num, $v_lag);\"}" );
+		cmd( "if {$v_obj != \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDS($v_obj, \\\"$v_label\\\", $v_num);\"}" );
+		cmd( "if {$v_obj != \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDLS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\"}" );
 	}
 	else
 	{
-		cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->search_var_cond(\\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
+		cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->search_var_cond(\\\"$v_label\\\", $v_num, $v_lag);\"}" );
 	}
 	cmd( ".f.t.t see insert" );
 
@@ -3013,15 +3017,15 @@ if ( choice == 31 )
 		else
 		  cmd( "set direction \"DOWN\"" );
 
-		cmd( "if {$v_obj == \"p\"} {.f.t.t insert insert \"SORT(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\");\\n\"}" );
-		cmd( "if {$v_obj != \"p\"} {.f.t.t insert insert \"SORTS($v_obj, \\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\");\\n\"}" );
+		cmd( "if {$v_obj == \"p\"} {.f.t.t insert insert \"SORT(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\");\"}" );
+		cmd( "if {$v_obj != \"p\"} {.f.t.t insert insert \"SORTS($v_obj, \\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\");\"}" );
 	}
 	else
 	{
 		if ( choice == 1 )
-		  cmd( ".f.t.t insert insert \"$v_obj->lsdqsort(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"UP\\\");\\n\"" );
+		  cmd( ".f.t.t insert insert \"$v_obj->lsdqsort(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"UP\\\");\"" );
 		else
-		  cmd( ".f.t.t insert insert \"$v_obj->lsdqsort(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"DOWN\\\");\\n\"" );
+		  cmd( ".f.t.t insert insert \"$v_obj->lsdqsort(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"DOWN\\\");\"" );
 	}
 	cmd( ".f.t.t see insert" );
 
@@ -3106,23 +3110,23 @@ if ( choice == 52 )
 
 		if ( choice  == 1 )
 		{
-		cmd( "if {$v_obj == \"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\\n\"}" );
-		cmd( "if {$v_obj == \"p\" && $v_num!=\"\"} { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\\n\"}" );
-		cmd( "if {$v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj, \\\"$v_label\\\");\\n\"}" );
-		cmd( "if {$v_obj != \"p\" && $v_num != \"\"} { .f.t.t insert insert \"ADDOBJ_EXS($v_obj, \\\"$v_label\\\", $v_num);\\n\"}" );
+		cmd( "if {$v_obj == \"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\"}" );
+		cmd( "if {$v_obj == \"p\" && $v_num!=\"\"} { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\"}" );
+		cmd( "if {$v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj, \\\"$v_label\\\");\"}" );
+		cmd( "if {$v_obj != \"p\" && $v_num != \"\"} { .f.t.t insert insert \"ADDOBJ_EXS($v_obj, \\\"$v_label\\\", $v_num);\"}" );
 		}
 		else
 		{
-		cmd( "if {$v_obj == \"p\" && $v_num!=\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\\n\"; set choice -3}" );
-		cmd( "if {$v_obj != \"p\" && $v_num!= \"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\\n\"; set choice -3}" );
-		cmd( "if {$v_obj == \"p\" && $v_num==\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\\n\"; set choice -3}" );
-		cmd( "if {$v_obj != \"p\" && $v_num== \"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\\n\"; set choice -3}" );
+		cmd( "if {$v_obj == \"p\" && $v_num!=\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\"; set choice -3}" );
+		cmd( "if {$v_obj != \"p\" && $v_num!= \"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\"; set choice -3}" );
+		cmd( "if {$v_obj == \"p\" && $v_num==\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\"; set choice -3}" );
+		cmd( "if {$v_obj != \"p\" && $v_num== \"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\"; set choice -3}" );
 		}
 	}
 	else
 	{
-		cmd( "if {$v_num==\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj);\\n\"}" );
-		cmd( "if {$v_num!=\"\" && [string is integer -strict $numobj]} {.f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj, $v_num);\\n\"}" );
+		cmd( "if {$v_num==\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj);\"}" );
+		cmd( "if {$v_num!=\"\" && [string is integer -strict $numobj]} {.f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj, $v_num);\"}" );
 	}
 	cmd( ".f.t.t see insert" );
 
@@ -3173,9 +3177,9 @@ if ( choice == 53 )
 	cmd( "set a [.f.t.t index insert]" );
 
 	if ( macro )
-		cmd( ".f.t.t insert insert \"DELETE($v_obj0);\\n\"" );
+		cmd( ".f.t.t insert insert \"DELETE($v_obj0);\"" );
 	else
-		cmd( ".f.t.t insert insert \"$v_obj0->delete_obj();\\n\"" );
+		cmd( ".f.t.t insert insert \"$v_obj0->delete_obj();\"" );
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -3264,27 +3268,27 @@ if ( choice == 54 )
 	{
 		if ( choice == 1 )
 		 {
-		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label != \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW(\\\"$v_num\\\", \\\"$v_label\\\");\\n\"}" );
-		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label == \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIR(\\\"$v_num\\\");\\n\"}" );  
-		  cmd( "if {$v_obj == \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAWL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\\n\"}" );
-		  cmd( "if {$v_obj != \"p\" && $v_lag == 0 && $v_label != \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAWS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\");\\n\"}" );
-		  cmd( "if {$v_obj != \"p\" && $v_lag == 0 && $v_label == \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIRS($v_obj, \\\"$v_num\\\");\\n\"}" );  
-		  cmd( "if {$v_obj != \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAWLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\\n\"}" );
+		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label != \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW(\\\"$v_num\\\", \\\"$v_label\\\");\"}" );
+		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label == \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIR(\\\"$v_num\\\");\"}" );  
+		  cmd( "if {$v_obj == \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAWL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\"}" );
+		  cmd( "if {$v_obj != \"p\" && $v_lag == 0 && $v_label != \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAWS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\");\"}" );
+		  cmd( "if {$v_obj != \"p\" && $v_lag == 0 && $v_label == \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIRS($v_obj, \\\"$v_num\\\");\"}" );  
+		  cmd( "if {$v_obj != \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAWLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\"}" );
 		 }
 		else
 		 {
-		  cmd( "if {$v_obj == \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOT(\\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\\n\"}" );
-		  cmd( "if {$v_obj == \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\\n\"}" );
-		  cmd( "if {$v_obj != \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOTS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\\n\"}" );
-		  cmd( "if {$v_obj != \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\\n\"}" );
+		  cmd( "if {$v_obj == \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOT(\\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\"}" );
+		  cmd( "if {$v_obj == \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\"}" );
+		  cmd( "if {$v_obj != \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOTS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\"}" );
+		  cmd( "if {$v_obj != \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\"}" );
 		 }
 	}
 	else
 	{
 		if ( choice == 1 )
-		  cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\\n\"}" );
+		  cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\"}" );
 		else
-		  cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\\n\"}" );
+		  cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\"}" );
 	}
 	cmd( ".f.t.t see insert" );
 
@@ -3349,9 +3353,9 @@ if ( choice == 55 )
 	cmd( "set a [.f.t.t index insert]" );
 
 	if ( macro )
-		cmd( "if { $v_obj == \"p\" } {.f.t.t insert insert \"$v_obj0 = SEARCH(\\\"$v_label\\\");\\n\"} {.f.t.t insert insert \"$v_obj0 = SEARCHS($v_obj, \\\"$v_label\\\");\\n\"}" );
+		cmd( "if { $v_obj == \"p\" } {.f.t.t insert insert \"$v_obj0 = SEARCH(\\\"$v_label\\\");\"} {.f.t.t insert insert \"$v_obj0 = SEARCHS($v_obj, \\\"$v_label\\\");\"}" );
 	else
-		cmd( ".f.t.t insert insert \"$v_obj0 = $v_obj->search(\\\"$v_label\\\");\\n\"" );
+		cmd( ".f.t.t insert insert \"$v_obj0 = $v_obj->search(\\\"$v_label\\\");\"" );
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -3435,7 +3439,7 @@ if ( choice == 56 )
 		cmd( "if {$v_num!=\"\" && [string is integer -strict $v_num] && [string is integer -strict $v_lag]} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->sum(\\\"$v_label\\\", $v_lag)\"} {.f.t.t insert insert \"$v_obj->sum(\\\"$v_label\\\", $v_lag)\"}" );
 	}
 
-	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"}" );
+	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\"}" );
 
 	cmd( "if {$v_num==\"\"} { set num -1} {set num $v_num}" );
 	if ( num != -1 )
@@ -3601,13 +3605,13 @@ if ( choice == 73 )
 	cmd( "if { $v_par1 == \"\"} { set v_par1 0 }" );
 	cmd( "if { $v_par2 == \"\"} { set v_par2 0 }" );
 	
-	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\\n\"}" );
-	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\\n\"}" );
-	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\\n\"}" );
+	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\"}" );
+	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\"}" );
+	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\"}" );
 	
-	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\\n\"}" );
-	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\\n\"}" );
-	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\\n\"}" );
+	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\"}" );
+	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\"}" );
+	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\"}" );
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -3667,8 +3671,8 @@ if ( choice == 74 )
 	cmd( "savCurIni" );				// save data for recolor
 	cmd( "set a [.f.t.t index insert]" );
 
-	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"LOAD_NET(\\\"$v_label\\\", \\\"$v_net\\\");\\n\"}" );
-	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"LOAD_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\\n\"}" );
+	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"LOAD_NET(\\\"$v_label\\\", \\\"$v_net\\\");\"}" );
+	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"LOAD_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\"}" );
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -3728,8 +3732,8 @@ if ( choice == 75 )
 	cmd( "savCurIni" );				// save data for recolor
 	cmd( "set a [.f.t.t index insert]" );
 
-	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SAVE_NET(\\\"$v_label\\\", \\\"$v_net\\\");\\n\"}" );
-	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SAVE_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\\n\"}" );
+	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SAVE_NET(\\\"$v_label\\\", \\\"$v_net\\\");\"}" );
+	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SAVE_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\"}" );
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -3789,8 +3793,8 @@ if ( choice == 76 )
 	cmd( "savCurIni" );				// save data for recolor
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SNAP_NET(\\\"$v_label\\\", \\\"$v_net\\\");\\n\"}" );
-	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SNAP_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\\n\"}" );
+	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SNAP_NET(\\\"$v_label\\\", \\\"$v_net\\\");\"}" );
+	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SNAP_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\"}" );
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -3876,18 +3880,18 @@ if ( choice == 77 )
 	
 	if ( choice == 0 )
 	{
-		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODE($v_num, \\\"$v_label\\\");\\n\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODES($v_obj, $v_num, \\\"$v_label\\\");\\n\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODE($v_num, \\\"$v_label\\\")\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODES($v_obj, $v_num, \\\"$v_label\\\")\" }" );
 	}
 	else
 	{
-		cmd( "if { $v_obj == \"p\" && $v_num ==\"\" } { .f.t.t insert insert \"ADDLINK($v_label);\\n\" }" );
-		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKW($v_label, $v_num);\\n\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num ==\"\" } { .f.t.t insert insert \"ADDLINKS($v_obj, $v_label);\\n\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKWS($v_obj, $v_label, $v_num);\\n\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num ==\"\" } { .f.t.t insert insert \"ADDLINK($v_label)\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKW($v_label, $v_num)\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num ==\"\" } { .f.t.t insert insert \"ADDLINKS($v_obj, $v_label)\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKWS($v_obj, $v_label, $v_num)\" }" );
 	}
 	
-	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\\n\" }" );
+	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
 	
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -3989,7 +3993,7 @@ if ( choice == 78 )
 			break;
 	}
 	
-	cmd( "if { $v_num!=\"\" } { .f.t.t insert insert \";\\n\" }" );
+	cmd( "if { $v_num!=\"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
 	
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -4063,17 +4067,17 @@ if ( choice == 79 )
 	switch ( choice )
 	{
 		case 0:
-			cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEID($v_num);\\n\" }" );
-			cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEIDS($v_obj, $v_num);\\n\" }" );
+			cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEID($v_num);\" }" );
+			cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEIDS($v_obj, $v_num);\" }" );
 			break;
 			
 		case 1:
-			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"WRITE_NODENAME(\\\"$v_num\\\");\\n\"}" );
-			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"WRITE_NODENAMES($v_obj, \\\"$v_num\\\");\\n\" }" );
+			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"WRITE_NODENAME(\\\"$v_num\\\");\"}" );
+			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"WRITE_NODENAMES($v_obj, \\\"$v_num\\\");\" }" );
 			break;
 
 		case 2:
-			cmd( "if { $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"WRITE_LINK($v_obj, $v_num);\\n\" }" );
+			cmd( "if { $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"WRITE_LINK($v_obj, $v_num);\" }" );
 			break;
 
 		default:
@@ -4253,7 +4257,7 @@ if ( choice == 81 )
 		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_LINKS($v_obj, $v_num)\" }" );
 	}
 	
-	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\\n\" }" );
+	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -4327,7 +4331,7 @@ if ( choice == 82 )
 	else
 		cmd( ".f.t.t insert insert \"LINKFROM($v_obj)\" }" );
 
-	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\\n\" }" );
+	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
 	
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -4380,8 +4384,8 @@ if ( choice == 83 )
 	cmd( "savCurIni" );				// save data for recolor
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SHUFFLE_NET(\\\"$v_label\\\");\\n\"}" );
-	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SHUFFLE_NETS($v_obj, \\\"$v_label\\\");\\n\"}" );
+	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SHUFFLE_NET(\\\"$v_label\\\");\"}" );
+	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SHUFFLE_NETS($v_obj, \\\"$v_label\\\");\"}" );
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -4469,7 +4473,7 @@ if ( choice == 84 )
 		cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"RNDDRAW_LINKS($v_obj)\" }" );
 	}
 
-	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\\n\" }" );
+	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -4543,17 +4547,17 @@ if ( choice == 85 )
 	switch ( choice )
 	{
 		case 0:
-			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"DELETE_NET(\\\"$v_label\\\");\\n\" }" );
-			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"DELETE_NETS($v_obj, \\\"$v_label\\\");\\n\" }" );
+			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"DELETE_NET(\\\"$v_label\\\");\" }" );
+			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"DELETE_NETS($v_obj, \\\"$v_label\\\");\" }" );
 			break;
 			
 		case 1:
-			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"DELETE_NODE();\\n\"}" );
-			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"DELETE_NODES($v_obj);\\n\" }" );
+			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"DELETE_NODE();\"}" );
+			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"DELETE_NODES($v_obj);\" }" );
 			break;
 
 		case 2:
-			cmd( ".f.t.t insert insert \"DELETE_LINK($v_obj);\\n\"" );
+			cmd( ".f.t.t insert insert \"DELETE_LINK($v_obj);\"" );
 			break;
 
 		default:
@@ -4629,13 +4633,13 @@ if ( choice == 86 )
 	
 	if ( choice == 0 )
 	{
-		cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"STAT_NET(\\\"$v_label\\\");\\n\" }" );
-		cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"STAT_NETS($v_obj, \\\"$v_label\\\");\\n\" }" );
+		cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"STAT_NET(\\\"$v_label\\\");\" }" );
+		cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"STAT_NETS($v_obj, \\\"$v_label\\\");\" }" );
 	}
 	else
 	{
-			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"STAT_NODE();\\n\"}" );
-			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"STAT_NODES($v_obj);\\n\" }" );
+			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"STAT_NODE();\"}" );
+			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"STAT_NODES($v_obj);\" }" );
 	}
 	cmd( ".f.t.t see insert" );
 
@@ -5621,7 +5625,8 @@ if ( choice == 62 )
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/report.cpp\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/util.cpp\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/nets.cpp\" \"$modeldir/src\"" );
-  cmd( "file copy -force \"$RootLsd/$LsdSrc/gis.cpp\" \"$modeldir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/gis.cpp\" \"$modeldir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/check.h\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head.h\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head_fast.h\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/decl.h\" \"$modeldir/src\"" );
@@ -6056,7 +6061,7 @@ void cmd( const char *cm, ... )
 void log_tcl_error( const char *cm, const char *message )
 {
 	FILE *f;
-	char fname[ MAX_PATH_LENGTH ];
+	char fname[ 2 * MAX_PATH_LENGTH ];
 	time_t rawtime;
 	struct tm *timeinfo;
 	char ftime[ 80 ];
@@ -6106,7 +6111,7 @@ const char *cTypes[ ] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdm
 	"^(\\s)*#\[^/]*",
 	"\\\"\[^\\\"]*\\\"",
 	"v\\[\[0-9]{1,3}]|curl?\[1-9]?|root|up|next|hook",
-	"MODEL(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|FUNCTION|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM|SUML?S?|COUNTS?(_ALLS?)?|STATS?|STAT_(NETS?|NODES?)|(WHT)?AVEL?S?|SDL?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAXL?S?|MINL?S?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|LAT)|SEARCH(_CNDL?|_INST|_NODE|_LINK)?S?|SEARCHS?|TSEARCH(_CND)?S?|SORT2?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?)|DELETE|DELETE_(EXTS?|NETS?|NODES?|LINKS?)|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?T?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_SEARCH|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|RECALCS?|DEFAULT_RESULT|abs|min|max|round|(sq|cb)rt|pow|exp|log(10)?|fact|(t|l)?gamma|a?sin|a?cos|a?tan|pi|is_(finite|inf|nan)|uniform(_int)?|l?norm(cdf)?|poisson(cdf)?|beta(cdf)?|alapl(cdf)?|unifcdf|gammacdf|close_sim",
+	"MODEL(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|FUNCTION|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM|SUML?S?|COUNTS?(_ALLS?|_HOOKS?)?|STATS?|STAT_(NETS?|NODES?)|(WHT)?AVEL?S?|SDL?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAXL?S?|MINL?S?|HOOKS?|SHOOKS?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|ARG_EXTS?|LAT|HOOKS?|SHOOKS?)|SEARCH(_CNDL?|_INST|_NODE|_LINK)?S?|SEARCHS?|TSEARCH(_CND)?S?|SORT2?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?|EXT_INITS?|HOOKS?)|DELETE|DELETE_(EXTS?|NETS?|NODES?|LINKS?)|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?T?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_POINTER_CHECK|(USE|NO)_SEARCH|(USE|NO)_ZERO_INSTANCE|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|RECALCS?|DEFAULT_RESULT|(GRAND)?PARENT|abs|min|max|round|(sq|cb)rt|pow|exp|log(10)?|fact|(t|l)?gamma|a?sin|a?cos|a?tan|pi|is_(finite|inf|nan)|uniform(_int)?|l?norm(cdf)?|poisson(cdf)?|beta(cdf)?|alapl(cdf)?|unifcdf|gammacdf|close_sim",
 	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
 	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 };
@@ -6807,7 +6812,7 @@ void handle_signals( void )
 // handle critical system signals
 void signal_handler( int signum )
 {
-	char msg2[ MAX_LINE_SIZE ];
+	char msg2[ MAX_LINE_SIZE + 1 ];
 
 	switch ( signum )
 	{
@@ -6845,7 +6850,7 @@ void signal_handler( int signum )
 			break;			
 	}
 	
-	sprintf( msg2, "System Signal received: %s", msg );
+	snprintf( msg2, MAX_LINE_SIZE, "System Signal received: %s", msg );
 	log_tcl_error( "FATAL ERROR", msg2 );
 	if ( tk_ok )
 		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nLMM will close now.\"", msg );

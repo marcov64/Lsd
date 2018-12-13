@@ -1,4 +1,5 @@
 //#define EIGENLIB			// uncomment to use Eigen linear algebra library
+//#define NO_POINTER_INIT	// uncomment to disable pointer checking
 
 #include "fun_head_fast.h"
 
@@ -21,9 +22,7 @@ MODELBEGIN
 
 MODELEND
 
-
 // do not add Equations in this area
-
 
 void close_sim( void )
 {

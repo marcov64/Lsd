@@ -174,7 +174,7 @@ div.WordSection1
  style='width:71.96%'>
  <tr>
   <td width=386 style='width:289.75pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
-  <p class=MsoNormal><img width=322 height=522 src="image/browser.png"
+  <p class=MsoNormal><img width=322 height=435 src="image/browser.png"
   align=left hspace=30></p>
   </td>
   <td width=242 valign=top style='width:181.4pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
@@ -287,15 +287,13 @@ href="LSD_faqs.html#object">instances</a> of this Object in the model.</p>
 
 <p class=MsoNormal>The information bar also reports the name of the Object from
 which the current Object descends (<span class=Cdigo>Parent Object</span>), if
-any. The parent Object name can be clicked to move the Browser to this Object,
-that is, move up in the <a href="LSD_faqs.html#modelstructure">model structure
-hierarchy</a>. Alternatively, the <span class=Cdigo>U</span> key can be also
-used to move up in the model structure.</p>
+any. The <span class=Cdigo>U</span> key can be used to move up to the parent
+Object in the model structure.</p>
 
 <h2><a name=objects></a><a name=descendants></a>Descending Objects list box</h2>
 
-<p class=MsoNormal>The <span class=Cdigo>Descending Objects</span> list box
-shows the set of direct descendants (sons) <a href="LSD_faqs.html#object">Object
+<p class=MsoNormal>The <span class=Cdigo>Descending Objects</span> list box shows
+the set of direct descendants (sons) <a href="LSD_faqs.html#object">Object
 types</a> from the <a href="#_Current_Object_information">current Object</a> in
 the Browser. A model in LSD is composed by a <a
 href="LSD_faqs.html#modelstructure">hierarchical structure of Objects</a> and
@@ -307,6 +305,12 @@ move the current Browser Object to the selected son Object. Therefore,
 exploring the model using the Browser can be done by clicking on the
 descendants' names to go down the hierarchy and clicking on the name of the
 parent Object to go up in the hierarchy.</p>
+
+<p class=MsoNormal>All Objects other than <span class=Cdigo>Root</span> have as
+the first element in the list box the “<span class=Cdigo>&#8593;..</span><span
+class=Cdigo><span style='font-family:"Arial","sans-serif";color:windowtext'>”</span></span>
+item. It represents the parent Object. Pressing Enter on it, double-clicking
+it, or keying Backspace or U move the current Object to its parent. </p>
 
 <p class=MsoNormal>The Objects in the list can also be right-clicked to open
 the associated context menu. This menu offers shortcuts to the most common
@@ -322,19 +326,19 @@ Object <span class=Cdigo>XXXX</span>. Also, Objects set not to be computed (see
 (minus) appended to <span class=Cdigo>n</span>. The state of the computation
 flag can be toggled using the <span class=Cdigo>F5</span> key.</p>
 
-<p class=MsoNormal>The order in which the Objects are listed depends on the
-order in which they have been created during the <a
-href="LSD_faqs.html#modelsetting">model configuration</a>. In some cases, the
-order of the <a href="LSD_faqs.html#object">Objects</a> in the list box may be
-important for helping LSD to disambiguate the sequence of evaluation of the <a
+<p class=MsoNormal>The order in which the Objects are listed depends on the order
+in which they have been created during the <a href="LSD_faqs.html#modelsetting">model
+configuration</a>. In some cases, the order of the <a
+href="LSD_faqs.html#object">Objects</a> in the list box may be important for
+helping LSD to disambiguate the sequence of evaluation of the <a
 href="LSD_faqs.html#variable">Variables</a> during a <a
 href="LSD_faqs.html#simulationrun">simulation run</a> (see more details <a
 href="LSD_faqs.html#scheduling">here</a>).  The order of Objects can be changed
 individually or as a whole (see menu <span class=Cdigo><a
 href="menumodel.html#sort">Model&gt;Sort Elements</a></span>). To move
 individual Objects, select the one to be moved, press and hold the <span
-class=Cdigo>Ctrl</span> key and use the arrow up and down keys to relocate it
-along the list box. Alternatively, the <span class=Cdigo>Move Up</span> and <span
+class=Cdigo>Ctrl</span> key and use the arrow up and down keys to relocate it along
+the list box. Alternatively, the <span class=Cdigo>Move Up</span> and <span
 class=Cdigo>Move Down</span> (right-click) context menu provide the same
 functionality.</p>
 
@@ -559,8 +563,8 @@ class=Cdigo>Ctrl+L</span>) After confirmation, deletes the element from the <a
 href="LSD_faqs.html#modelsetting">model configuration</a>. See <a
 href="#_Delete_the_element">below</a></p>
 
-<p class=MsoNormal>Below the action buttons there are many options, according to
-the type of the current element: </p>
+<p class=MsoNormal>Below the action buttons there are many options, according
+to the type of the current element: </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
@@ -730,8 +734,8 @@ the Change Element window or select <span class=Cdigo>Properties</span> in the
 (right-click) context menu of the target <a href="LSD_faqs.html#variable">Variable</a>
 or <a href="LSD_faqs.html#parameter">Parameter</a> or press <span class=Cdigo>F2</span>
 on the element to change its properties. After having inserted a Variable or a
-Parameter, it is possible to change the properties of any element by modifying its
-name, transforming a Parameter into a Variable (of <a
+Parameter, it is possible to change the properties of any element by modifying
+its name, transforming a Parameter into a Variable (of <a
 href="LSD_faqs.html#function">Function</a>), a Variable into a Parameter or
 changing the maximum <a href="LSD_faqs.html#variable">number of lags</a> to use
 (Variables only). </p>
@@ -790,11 +794,10 @@ Object, the element is removed from the current Object. All initialization data
 and options associated with the element is moved together. </p>
 
 <p class=MsoNormal><i>WARNING: </i>changing the location of an element in the <a
-href="LSD_faqs.html#modelstructure">model structure hierarchy</a> can severely
-compromise the model. Use this option only to fix errors. If the model is
-running fine, the only reason for such change is when the data structure of the
-model is being redefined, together with the associated <a
-href="LSD_faqs.html#equation">Equations</a>.</p>
+href="LSD_faqs.html#modelstructure">model structure hierarchy</a> can severely compromise
+the model. Use this option only to fix errors. If the model is running fine,
+the only reason for such change is when the data structure of the model is
+being redefined, together with the associated <a href="LSD_faqs.html#equation">Equations</a>.</p>
 
 <p class=MsoNormal>When changing the Object in which an element is contained,
 the Move dialog window is shown, listing all the <a href="LSD_faqs.html#object">Object

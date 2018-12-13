@@ -227,6 +227,9 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 
 	for ( cb = root->b, counter = 1; cb != NULL; cb = cb->next, counter = 1 )
 	{  
+		if ( cb->head == NULL )
+			continue;
+		
 		*i += 1;
 		c = cb->head;
 		for ( cur = c, num = 0; cur != NULL; cur = cur->next, ++num );

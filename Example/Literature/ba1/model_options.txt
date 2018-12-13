@@ -1,4 +1,0 @@
-TARGET=lsd_gnu
-FUN=fun_ba
-SWITCH_CC=-g
-

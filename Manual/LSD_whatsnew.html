@@ -1261,17 +1261,21 @@ version maintains the compatibility with all the models built with previous
 versions of. Main changes:<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
-5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol;mso-ansi-language:EN-US'>·</span><span lang=EN-US
-style='font-size:7.0pt;font-family:"Times New Roman",serif;mso-ansi-language:
-EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b><span
-lang=EN-US style='mso-ansi-language:EN-US'><a href="LSD_web.html">Web interface</a>.</span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'> A full HTML/PHP engine and
-associated tools to make any LSD model available to be used on the web by
-unexperienced users. Full modeler control of which configuration values are
-exposed. Complete validation of user settings. On-server simulation running.
-Extensive web-based analysis of results support, including time series plots.
-User configurations up and download. Results CSV data download.<o:p></o:p></span></p>
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Pointer checking</b>. By default, LSD now checks all pointers
+used in Macros for validity. As this may have performance impact for some
+models, new Macros (<span class=Cdigo>USE_POINTER_CHECK</span> and <span
+class=Cdigo>NO_POINTER_CHECK</span>) are available for the modeler control <a
+href="LSD_macros.html#POINTER_CHECK">pointer checking</a>.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><a href="LSD_macros.html#eigen">Eigen library</a>.</b> A
+powerful library for executing linear algebra in Equations code, including
+native C++ support to matrix and vector containers, numerical solvers, and
+related algorithms.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·</span><span
@@ -1357,16 +1361,21 @@ creation. Please refer to the <a href="LSD_macros.html">LSD Macros</a>
 documentation.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
-5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol;mso-ansi-language:EN-US'>·</span><span lang=EN-US
-style='font-size:7.0pt;font-family:"Times New Roman",serif;mso-ansi-language:
-EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b><span
-lang=EN-US style='mso-ansi-language:EN-US'>No-instance Objects handling</span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'>. Some Macros now deal with Objects
-which have all instances deleted (only during run-time), when meaningful (e.g.,
-when counting instances). The modeler has to handle the results coming from
-those situations to avoid potentially serious errors. See the <a
-href="LSD_macros.html#noinstance">Macros</a> documentation.<o:p></o:p></span></p>
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Unlimited hook pointers.</b> A modeler-defined number of <a
+href="LSD_macros.html#hook">hook pointers</a> can now be associated to any
+Object, allowing for the fast processing of multi-connected Objects.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>No-</b><b>instance Objects handling</b>. Some Macros now deal
+with Objects which have all instances deleted (only during run-time), when
+meaningful (e.g., when counting instances). The modeler has to handle the
+results coming from those situations to avoid potentially serious errors. See <span
+class=Cdigo><a href="LSD_macros.html#noinstance">USE_ZERO_INSTANCE</a></span>
+Macro documentation.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -1377,10 +1386,9 @@ lang=EN-US style='mso-ansi-language:EN-US'>Improved Gnuplot support</span></b><s
 lang=EN-US style='mso-ansi-language:EN-US'>. Automatic usage of default
 plotting terminals, supporting contemporaneous options like Qt and wxt. Updated
 system terminal options, shared with LMM. WARNING: the old Windows 32-bit
-version of Gnuplot was removed from LSD, now users in all platforms must
-install Gnuplot, please refer to </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'><a href="../Readme.txt">Readme.txt</a></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> for details.<o:p></o:p></span></p>
+version of Gnuplot was removed from LSD, now users in all platforms must install
+Gnuplot, please refer to <span class=Cdigo><a href="../Readme.txt">Readme.txt</a></span>
+for details.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
@@ -1521,13 +1529,11 @@ eliminated. Much improved graphical user interface (now on par with Windows/Linu
 LLDB debugger support.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·</span><span
-lang=EN-GB style='font-size:7.0pt;font-family:"Times New Roman",serif;
-mso-ansi-language:EN-GB'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b><span
-lang=EN-GB style='mso-ansi-language:EN-GB'>Improved analysis of results tools.</span></b><span
-lang=EN-GB style='mso-ansi-language:EN-GB'> New, native Tk plotting engine
-(faster and better looking). Fully editable plots. Improved plot windows,
-including zoom. Many more configuration options for plots. <o:p></o:p></span></p>
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Improved analysis of results tools.</b> New, native Tk
+plotting engine (faster and better looking). Fully editable plots. Improved plot
+windows, including zoom. Many more configuration options for plots. </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US

@@ -1,3 +1,0 @@
-Worm Model (2003)
-
-Test model representing one or more worms running randomly on a space.

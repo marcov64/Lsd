@@ -1,0 +1,687 @@
+	
+Label Root
+{
+	Son: World
+	Label World
+	{
+		Son: Job
+		Label Job
+		{
+			Param: T
+			Param: JState
+			Param: JRow
+			Param: JCol
+
+		}
+
+		Son: Lattice
+		Label Lattice
+		{
+			Son: Row
+			Label Row
+			{
+				Son: Col
+				Label Col
+				{
+					Son: Nei
+					Label Nei
+					{
+
+					}
+
+					Param: IdCol
+					Param: State
+					Param: CopyRow
+					Param: Evaluated
+
+				}
+
+				Param: IdRow
+
+			}
+
+
+		}
+
+		Var: Init
+		Param: NCol
+		Param: NRow
+		Param: PlotLattice
+		Param: p
+		Param: PixHeight
+		Param: PixWidth
+		Func: EvalCell
+		Var: Action
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: World C	1
+Var: Init 0 n + d n
+Param: NCol 0 n + n n	60
+Param: NRow 0 n + n n	60
+Param: PlotLattice 0 n + n n	1
+Param: p 0 n + n n	0.65
+Param: PixHeight 0 n + n n	600
+Param: PixWidth 0 n + n n	600
+Func: EvalCell 0 n + n n
+Var: Action 0 n + d n
+
+Object: Job C	500
+Param: T 0 n + n n	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+Param: JState 0 n + n n	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+Param: JRow 0 n + n n	42	56	47	37	11	47	21	53	17	58	16	34	24	34	60	33	20	27	9	37	60	60	52	31	16	57	52	44	29	42	47	9	56	14	48	22	26	9	6	14	19	18	44	19	25	17	2	57	60	41	52	27	11	60	32	42	24	38	48	18	57	10	30	6	10	27	33	1	59	15	41	47	6	20	6	11	57	54	50	33	36	3	50	31	50	4	55	54	55	46	33	21	43	4	4	13	29	37	7	32	33	37	57	32	10	6	47	18	3	60	23	6	44	11	53	60	29	27	6	50	18	17	5	41	23	59	36	55	13	57	15	41	45	60	52	12	18	38	31	28	36	19	52	8	51	7	55	45	38	20	35	9	49	38	28	23	43	15	40	22	51	48	35	31	18	39	29	29	43	33	27	19	7	25	6	19	11	57	17	42	14	22	25	37	40	4	15	45	16	32	53	60	2	32	23	41	54	26	31	26	28	49	36	6	53	17	31	8	5	48	47	31	15	28	30	9	39	50	52	8	55	45	57	4	46	21	43	25	58	1	55	49	35	38	11	35	30	31	1	6	13	30	36	22	7	20	40	3	1	30	59	26	7	52	38	43	32	21	14	45	44	15	26	46	11	30	46	16	32	20	60	21	29	38	34	48	4	20	11	17	29	55	57	21	9	29	14	35	2	19	6	42	24	14	46	12	18	37	12	34	60	55	8	39	43	48	35	58	52	33	37	15	41	33	3	49	57	37	14	49	30	21	50	52	56	9	4	11	47	51	8	44	32	57	59	36	23	52	11	60	54	58	17	24	12	46	54	11	11	58	23	54	35	6	31	12	1	52	54	37	16	24	51	43	32	46	44	60	7	60	10	20	19	29	25	18	42	14	31	1	47	25	43	8	49	17	22	24	53	7	7	45	23	47	12	54	24	47	22	40	31	19	18	32	23	18	60	27	3	24	26	31	18	15	7	13	17	11	1	12	55	7	19	28	37	35	14	57	50	4	1	12	52	25	37	26	44	29	11	50	20	13	18	13	37	50	55	49	8	43	43	57	14	5	57	43	35	23	32	33	43	18	27	37	48	30	6	5	47	7	50	28	1	21	36	33	41	12	2	29	10	55	48	56	31	57	22	54	18	21	40	40	9	39	23	5	47	20	38	33
+Param: JCol 0 n + n n	17	27	1	28	10	20	19	42	2	5	35	27	26	19	45	23	4	45	9	28	35	45	26	16	36	10	16	16	2	35	50	41	27	48	30	58	52	12	46	30	23	58	15	31	34	24	36	5	38	44	13	60	45	34	44	5	29	23	59	40	60	40	32	56	49	7	22	11	49	31	43	51	55	22	51	57	13	34	10	30	51	48	57	43	1	37	32	10	15	59	22	57	2	50	9	7	13	50	55	6	60	59	10	49	27	25	60	25	28	8	48	60	39	47	10	53	11	17	24	4	20	43	6	53	33	2	25	13	3	30	44	6	18	57	23	49	9	25	14	6	49	24	8	14	9	6	52	30	11	8	56	53	24	57	47	23	44	23	34	33	45	44	14	38	16	60	49	9	25	23	59	41	45	15	10	46	50	34	14	15	4	17	39	48	39	31	38	58	8	46	30	6	9	40	17	55	32	47	55	45	12	36	7	8	15	26	48	45	43	11	33	9	36	30	14	30	50	5	3	48	34	23	21	25	7	31	60	44	19	21	9	37	10	37	56	40	4	54	38	6	41	18	30	13	33	46	48	22	13	42	5	59	57	29	19	42	35	36	14	4	29	59	37	4	44	22	26	27	6	50	20	6	29	3	45	30	49	31	43	24	5	56	21	28	21	10	17	30	33	45	12	48	17	56	44	43	39	18	31	35	13	4	24	33	23	37	10	6	57	16	37	4	60	7	18	42	56	43	49	15	20	32	51	47	14	52	41	21	40	54	5	58	28	34	40	23	21	4	27	53	33	20	4	4	53	24	25	24	7	28	25	53	8	20	48	39	50	2	29	17	9	28	18	40	57	53	23	49	44	53	49	42	36	6	35	52	51	52	50	51	49	13	59	2	18	55	33	13	11	29	26	26	14	23	19	31	35	1	53	6	50	29	45	18	18	36	42	41	44	26	52	12	21	2	49	60	39	6	34	27	7	55	20	37	39	9	29	8	46	24	4	27	41	46	31	45	43	23	43	51	43	36	15	1	46	2	1	34	21	11	59	48	5	5	3	7	40	39	54	6	40	50	13	51	41	20	4	47	16	60	30	36	32	3	4	29	21	8	13	20	7	17	29	47	13	13	21	35	59	27	4	34	53	39	35	22	53	26	8	32
+
+Object: Lattice N	1
+
+Object: Row C	1
+Param: IdRow 0 n + n n	1
+
+Object: Col C	1
+Param: IdCol 0 n + n n	1
+Param: State 1 n + d n	0
+Param: CopyRow 0 n + n n	0
+Param: Evaluated 0 n + n n	0
+
+Object: Nei C	1
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 100
+EQUATION fun_per.cpp
+ MODELREPORT report_NewSim100_08.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_World
+'World' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Init
+Initialize the lattice:
+
+- If PlotLattice !=0 then generate the lattice window
+
+- Set the pointers to the neighbours of each cell
+
+- If the cells have been assigned some product (generally this is not the case), store the sum for each product in "tempSales".
+
+'Init' appears in the equation for: ActionDemand.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_NCol
+'NCol' appears in the equation for: Init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_NRow
+'NRow' appears in the equation for: Init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_PlotLattice
+'PlotLattice' appears in the equation for: Init, State.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_p
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_PixHeight
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_PixWidth
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_EvalCell
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Action
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Job
+'Supply' appears in the equation for: Init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_T
+(no description available)
+_INIT_
+ All 6 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_JState
+(no description available)
+_INIT_
+ All 6 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_JRow
+(no description available)
+_INIT_
+ All 500 instances set to integer random values drawn from a uniform in the range [1,60].
+END_DESCRIPTION
+
+Parameter_JCol
+(no description available)
+_INIT_
+ All 500 instances set to integer random values drawn from a uniform in the range [1,60].
+END_DESCRIPTION
+
+Object_Lattice
+'Lattice' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Object_Row
+'Row' appears in the equation for: Init, ActionDemand.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_IdRow
+'IdRow' appears in the equation for: Init, State, CopyRow.
+_INIT_
+ All 100 instances increasing from 1 with steps 1. The value is increased every 1 instances.
+END_DESCRIPTION
+
+Object_Col
+'Col' appears in the equation for: Init, ActionDemand.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_IdCol
+'IdCol' appears in the equation for: Init, State.
+_INIT_
+ All 10000 instances increasing from 1 with steps 1 re-starting for each group of Objects.
+END_DESCRIPTION
+
+Parameter_State
+State can assume three different values: 0, 1 and 2.
+
+If it is 0 it does nothing. State=0 means that the cell never used a product, nor it has been triggered to act (i.e. no neighbour uses a product.
+
+State=1 means that the agent did not have a product, but the previous period a neighbour bought a product. Therefore, chooses a product (which one is decided by "Choose") and triggers the state of neighbours to be 1, subject to the neighbour has the "Flag" value of 0. Flag is 0 if you did never bought a product, or more than TimeReActivate steps have passed since last purchase.
+
+State=2 means that the agent is currently using a product, and no neighbours had triggered it to make a new purchase.
+
+'State' appears in the equation for: Init, ActionDemand, State, Choose.
+_INIT_
+Instances from 9901 to 10000 equal to 2. Instances from 9901 to 10000 equal to 1.
+END_DESCRIPTION
+
+Parameter_CopyRow
+Copy of the IdRow placed in Cell, to improve speed.
+
+'CopyRow' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Evaluated
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Nei
+'Nei' appears in the equation for: Init, State, Choose.
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+Lattice
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+
+
+object *supply;
+MODELBEGIN
+
+
+
+
+
+
+
+EQUATION("Init")
+/*
+Initialize the lattice:
+
+- If PlotLattice !=0 then generate the lattice window
+
+- Set the pointers to the neighbours of each cell
+
+- If the cells have been assigned some product (generally this is not the case), store the sum for each product in "tempSales".
+*/
+
+v[10]=V("PlotLattice");
+
+v[2]=V("NCol");
+v[3]=V("NRow");
+supply=SEARCHS(p->up,"Supply");
+
+if(v[10]==1)
+ init_lattice(600, v[3], v[2], "IdRow", "IdCol", "State", NULL, 0);
+if(v[10]==2)
+ init_lattice(300, v[3], v[2], "IdRow", "IdCol", "IdUsed", NULL, 0);
+
+CYCLE(cur, "Row")
+ {
+  v[0]=VS(cur,"IdRow");
+
+  CYCLES(cur, cur1, "Col")
+  { 
+   v[11]=VS(cur1,"IdUsed");
+   if(v[11]>0)
+    {
+    cur2=SEARCH_CNDS(supply,"IdProd",v[11]);
+    INCRS(cur2,"tempSales",1);
+    }
+   v[1]=VS(cur1,"IdCol");
+   cur1->hook=supply;
+   cur2=SEARCHS(cur1,"Nei"); //first neigh, E
+
+   if(v[1]==v[2])
+     {
+     cur3=SEARCH_CNDS(cur,"IdCol",1); 
+     }
+   else
+     {
+     cur3=SEARCH_CNDS(cur,"IdCol",v[1]+1); 
+     }
+    cur2->hook=cur3;
+    
+   cur2=cur2->next; //second neigh, S
+
+   if(v[0]==v[3])
+     {
+     cur3=SEARCH_CND("IdRow",1); 
+     cur4=SEARCH_CNDS(cur3,"IdCol",v[1]);
+     }
+   else
+     {
+     cur3=SEARCH_CND("IdRow",v[0]+1); 
+     cur4=SEARCH_CNDS(cur3,"IdCol",v[1]);
+
+     }
+    cur2->hook=cur4;
+    
+   cur2=cur2->next; //third neigh, W
+
+   if(v[1]==1)
+     {
+     cur3=SEARCH_CNDS(cur,"IdCol",v[2]); 
+     }
+   else
+     {
+     cur3=SEARCH_CNDS(cur,"IdCol",v[1]-1); 
+     }
+    cur2->hook=cur3;
+
+
+   cur2=cur2->next; //fourth neigh, N
+
+   if(v[0]==1)
+     {
+     cur3=SEARCH_CND("IdRow",v[3]); 
+     cur4=SEARCH_CNDS(cur3,"IdCol",v[1]);
+     }
+   else
+     {
+     cur3=SEARCH_CND("IdRow",v[0]-1); 
+     cur4=SEARCH_CNDS(cur3,"IdCol",v[1]);
+
+     }
+    cur2->hook=cur4;
+
+   }
+
+      
+  }
+
+ 
+PARAMETER
+RESULT( 1)
+
+EQUATION("ActionDemand")
+/*
+Ensure that all cells computed their own "State" variable
+*/
+V("Init");
+CYCLE(cur, "Row")
+ {
+  CYCLES(cur, cur1, "Col")
+   {
+    VS(cur1,"State");
+   }
+
+ }
+
+RESULT(1 )
+
+
+EQUATION("State")
+/*
+State can assume three different values: 0, 1 and 2.
+
+If it is 0 it does nothing. State=0 means that the cell never used a product, nor it has been triggered to act (i.e. no neighbour uses a product.
+
+State=1 means that the agent did not have a product, but the previous period a neighbour bought a product. Therefore, chooses a product (which one is decided by "Choose") and triggers the state of neighbours to be 1, subject to the neighbour has the "Flag" value of 0. Flag is 0 if you did never bought a product, or more than TimeReActivate steps have passed since last purchase.
+
+State=2 means that the agent is currently using a product, and no neighbours had triggered it to make a new purchase.
+*/
+v[1]=0;
+v[0]=VL("State",1);
+
+if(v[0]==1)
+ {
+  //Triggered to act
+  v[1]=VS(p->hook,"Choose");
+  if(v[1]>0)
+   {
+   CYCLE(cur, "Nei")
+    {
+     v[5]=VS(cur->hook,"Flag");
+     if(v[5]==0)
+      {WRITES(cur->hook,"Flag",1); 
+       WRITELS(cur->hook,"State",1, t);
+      } 
+    }
+    WRITEL("IdUsed",v[1], 1);
+    v[6]=V("IdRow");
+    v[7]=V("IdCol");
+   if(V("PlotLattice")==2)
+    update_lattice(v[6], v[7], v[1]);
+   if(V("PlotLattice")==1)
+    update_lattice(v[6], v[7], 2);
+    
+   v[12]=V("TimeReActivate");
+   WRITE("Flag",v[12]);
+   v[1]=2;
+   }
+  else
+   {WRITE("Flag",0);
+    if(V("IdUsed")>0)
+     v[1]=2;
+    else 
+     v[1]=0;
+   } 
+
+ 
+ }
+else
+ {
+  if(v[0]==2 )
+   {
+    v[10]=V("Flag");
+    if(v[10]<0)
+     v[10]=INCR("Flag",1);
+    v[13]=V("ProbReActivate");
+ 
+    if(v[10]==0 && RND<v[13])
+     v[1]=1;
+    else
+     v[1]=2; 
+    
+   }
+  else
+   v[1]=v[0];  
+  } 
+ if(v[1]==0 && V("IdUsed")>0)
+  v[1]=INTERACT("BAH", v[1]); 
+RESULT( v[1])
+
+
+FUNCTION("Choose")
+/*
+Choose the product to buy for the calling cell.
+
+The function scans all neighbours of the calling cell. When it finds the nei. that has chosen its product the previous period, then stores within the "Prod" objects (parameter "app") some probabilities.
+
+The objects assigned positive probabilities are: the one chosen by the triggering nei.; and those around it for a lenght of "NumTail" (the total is always an odd number). Boundaries conditions are accounted for, so to keep the number of total objects with positive probabilities positive.
+
+The concerned "Prod" are discarded if their PP is lesser than the q of the choosing agent. That is, a product to be considered needs to have a quality above the consumer's threshold.
+
+Notice that if the consumer has two triggering neighbours, then it can choose among a double-size option set.
+
+The probabioities assigned to each producer to be chosen are proportional to the PP of the producer raised to the power of alpha. Setting alpha to 0 assigns identical probabilities.
+
+For statistical purposes the parameter "tempSales" of the newly chosen firm is increased, and that of the discarded product, if exist, is decreased.
+
+*/
+
+v[0]=VS(c,"q");
+
+
+CYCLE(cur, "Prod")
+ {
+  WRITES(cur,"app",0);
+  v[1]++;
+ }
+
+
+v[13]=V("alpha");
+v[7]=0;
+v[1]=V("NumProducers");
+v[8]=V("NumTail");
+i=(int)v[8]*2+1;
+CYCLES(c,cur, "Nei")
+ {
+  v[2]=VLS(cur->hook,"State",2);
+  v[3]=VLS(cur->hook,"State",1);
+  if( v[2]==1 && v[3]==2)
+   {
+    v[4]=VS(cur->hook,"IdUsed");
+    v[10]=v[4]-v[8];
+    v[11]=v[4]+v[8];
+    if(v[10]<1)
+     {
+      v[11]-=v[10]+1;
+      v[10]=1;
+     }    
+    if(v[11]>v[1])
+     {
+      v[10]-=(v[11]-v[1]);
+      v[11]-=(v[11]-v[1]);
+     }
+    cur1=SEARCH_CND("IdProd",v[10]);
+    
+    for( j=0; j<i; j++)
+     {
+      v[5]=VS(cur1,"PP");
+      if(v[5]>v[0])
+      {
+       v[6]=pow(v[5],v[13]);
+       INCRS(cur1,"app",v[6]);
+       v[7]++;
+      }
+      cur1=go_brother(cur1);
+     } 
+
+   }//end of triggering neighours
+  }//end of the scanning of neighborus
+
+if(v[7]>0)
+ {
+
+ cur=RNDDRAW("Prod","app");
+ v[4]=VS(cur,"IdProd");
+ INCRS(cur,"tempSales",1);
+ v[8]=VS(c,"IdUsed");
+ if(v[8]>0)
+  {
+  cur1=SEARCH_CND("IdProd",v[8]);
+  INCRS(cur1,"tempSales",-1);
+  
+  }
+
+ }
+else
+ v[4]=0; 
+RESULT(v[4] )
+
+//5809250 I-A
+
+EQUATION("NumProducers")
+/*
+Compute the number of producers currently in the model.
+*/
+v[0]=0;
+CYCLE(cur, "Prod")
+ v[0]++;
+RESULT(v[0] )
+
+
+
+EQUATION("PP")
+/*
+Quality of the product, increasing with the number of consumers.
+
+The function is:
+              [1-PP(0)]
+PP(t)= 1 - ----------------
+            [1+k*N(t-1)]^a
+            
+The function increases (with decreasing steps) from PP(0) (initial PP at time 0) up to 1 for N going to infinite. K and a influence the speed.
+*/
+
+v[0]=VL("Users",1);
+v[1]=V("pp0");
+v[2]=V("a");
+v[3]=V("k");
+
+v[4]=1+v[3]*v[0];
+
+v[5]=1-(1-v[1])*1/pow(v[4],v[2]);
+
+RESULT(v[5])
+
+EQUATION("Users")
+/*
+UPdate the statistics of the number of users.
+
+To speed things up, the computation is indirect. Previous period users are increased of the parameter "tempSales", which is the reset for the next period computation. Current net sales (new consumers minus abandoning ones) are stored in Sales.
+*/
+VS(p->up->next,"ActionDemand");
+v[0]=VL("Users",1);
+v[1]=V("tempSales");
+
+WRITE("Sales",v[1]);
+WRITE("tempSales",0);
+RESULT(v[0]+v[1] )
+
+
+EQUATION("CopyRow")
+/*
+Copy of the IdRow placed in Cell, to improve speed.
+*/
+v[0]=V("IdRow");
+PARAMETER
+RESULT(v[0] )
+
+
+EQUATION("Entry")
+/*
+Entry of new producers, allowed in every PeriodEntry time steps
+*/
+
+v[0]=VL("Entry",1);
+
+if(v[0]<0)
+ END_EQUATION(v[0]+1)
+/*
+CYCLE_SAFE(cur, "Prod")
+ {
+ v[5]=VS(cur,"Users");
+ if(v[5]==0)
+  DELETE(cur);
+ }
+*/  
+ 
+cur=SEARCH("Prod");
+v[3]=VS(cur,"pp0");//pp0 of the very first product
+cur=ADDOBJ_EX("Prod",cur);
+v[2]=V("IssueIdProd");
+WRITES(cur,"IdProd",v[2]);  
+
+
+WRITELS(cur,"PP",v[3],t);
+WRITES(cur,"pp0",v[3]);
+WRITELS(cur,"Users",0,t);
+WRITES(cur,"Sales",0);
+
+v[4]=V("PeriodEntry");
+
+RESULT(v[4] )
+
+FUNCTION("IssueIdProd")
+/*
+Deliver the IdProd for entrants
+*/
+
+RESULT(val[0]+1 )
+
+
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE

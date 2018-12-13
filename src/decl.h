@@ -39,10 +39,13 @@ Global definitions among all LSD C++ modules
 #include <unistd.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <algorithm>
 #include <string>
+#include <vector>
 #include <list>
 #include <new>
 #include <map>
+#include <set>
 
 #ifdef CPP11
 #include <vector>
@@ -65,6 +68,7 @@ Global definitions among all LSD C++ modules
 #include <condition_variable>
 #include <functional>
 #include <unordered_map>
+#include <unordered_set>
 #include <chrono>
 #endif //#ifdef CPP11
 
@@ -113,6 +117,7 @@ Global definitions among all LSD C++ modules
 #define MARG_CONST 0.1					// y-axis % plot clearance margin for constant series
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define SIG_DIG 10						// number of significant digits in data files
+#define SIG_MIN 1e-100					// Minimum significant value (different than zero)
 #define CSV_SEP ","						// single char string with the .csv format separator
 #define SENS_SEP " ,;|/#\t\n"			// sensitivity data valid separators
 #define USER_D_VARS 1000				// number of user double variables
@@ -170,17 +175,20 @@ struct Wrap;
 typedef pair< string, bridge * > b_pairT;
 typedef pair < double, object * > o_pairT;
 typedef pair< string, variable * > v_pairT;
+typedef vector < object * > o_vecT;
 #ifndef CPP11
 typedef map< string, bridge * > b_mapT;
 typedef map < double, object * > o_mapT;
 typedef map< string, variable * > v_mapT;
+typedef set < object * > o_setT;
 #else
 typedef function< double( object *caller, variable *var ) > eq_funcT;
 typedef unordered_map< string, eq_funcT > eq_mapT;
 typedef unordered_map< string, bridge * > b_mapT;
 typedef unordered_map < double, object * > o_mapT;
-typedef unordered_map< string, variable * > v_mapT;
-#endif //#ifdef CPP11
+typedef unordered_map < string, variable * > v_mapT;
+typedef unordered_set < object * > o_setT;
+#endif
 
 struct object
 {
@@ -203,12 +211,9 @@ struct object
 	gisPosition *position; //Pointer to gis data structure
 	#endif //#ifdef CPP11
 
+	o_vecT hooks;
 	b_mapT b_map;						// fast lookup map to object bridges
 	v_mapT v_map;						// fast lookup map to variables
-
-  #ifdef PARALLEL_MODE
-	mutex parallel_delete;				// mutex lock for parallel deletion
-  #endif
 
 	bool load_param( char *file_name, int repl, FILE *f );
 	bool load_struct( FILE *f );
@@ -231,11 +236,16 @@ struct object
 	double multiply( char const *lab, double value );
 	double overall_max( char const *lab, int lag );
 	double overall_min( char const *lab, int lag );
+	double read_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, char const *ext = "net" );
+	double recal( char const *l );
 	double sd( char const *lab, int lag );
 	double search_inst( object *obj = NULL );
 	double stat( char const *lab, double *v = NULL );
+	double stats_net( char const *lab, double *r );
 	double sum( char const *lab, int lag );
-	double whg_av( char const *lab, char const *lab2, int lag );
+	double whg_av( char const *weight, char const *lab, int lag );
+	double write( char const *lab, double value, int time, int lag = 0 );
+	double write_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, bool append = false );
 	int init( object *_up, char const *_label );
 	long init_circle_net( char const *lab, long numNodes, long outDeg );
 	long init_connect_net( char const *lab, long numNodes );
@@ -248,16 +258,12 @@ struct object
 	long init_small_world_net( char const *lab, long numNodes, long outDeg, double rho );
 	long init_star_net( char const *lab, long numNodes );
 	long init_uniform_net( char const *lab, long numNodes, long outDeg );
-	long read_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, char const *ext = "net" );
-	long write_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, bool append = false );
 	netLink *add_link_net( object *destPtr, double weight = 0, double probTo = 1 );
 	netLink *draw_link_net( void );
 	netLink *search_link_net( long id );
-	netNode *add_node_net( long id = -1, char const *nodeName = "", bool silent = false );
-	object *add_n_objects2( char const *lab, int n );
-	object *add_n_objects2( char const *lab, int n, int t_update );
-	object *add_n_objects2( char const *lab, int n, object *ex );
-	object *add_n_objects2( char const *lab, int n, object *ex, int t_update );
+	object *add_n_objects2( char const *lab, int n, int t_update = -1 );
+	object *add_n_objects2( char const *lab, int n, object *ex, int t_update = -1 );
+	object *add_node_net( long id = -1, char const *nodeName = "", bool silent = false );
 	object *draw_node_net( char const *lab );
 	object *draw_rnd( char const *lo );
 	object *draw_rnd( char const *lo, char const *lv, int lag );
@@ -268,6 +274,8 @@ struct object
 	object *lat_left( void );
 	object *lat_right( void );
 	object *lat_up( void );
+	object *lsdqsort( char const *obj, char const *var, char const *direction );
+	object *lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
 	object *search( char const *lab );
 	object *search_node_net( char const *lab, long id );
 	object *search_var_cond( char const *lab, double value, int lag );
@@ -289,25 +297,18 @@ struct object
 	void empty( void );
 	void emptyturbo( void );			// remove turbo search structure
 	void insert_parent_obj( char const *lab );
-	void lsdqsort( char const *obj, char const *var, char const *direction );
-	void lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
 	void name_node_net( char const *nodeName );
-	void recal( char const *l );
 	void recreate_maps( void );
 	void replicate( int num, int propagate );
 	void save_param( FILE *f );
 	void save_struct( FILE *f, char const *tab );
 	void search_inst( object *obj, int *pos );
-	void sort( char const *obj, char const *var, char *direction );
 	void sort_asc( object *from, char *l_var );
 	void sort_desc( object *from, char *l_var );
-	void stats_net( char const *lab, double *r );
 	void update( void );
-	void write( char const *lab, double value, int time );	// write value as if computed at time
-	void write( char const *lab, double value, int time, int lag );	// write value in the lag field
 	#ifdef CPP11
 	// Fast look-up of agents via individual, unique IDs
-  bool is_unique();
+	bool is_unique();
 	void declare_as_unique(char const *uLab); //this object and all of its kind will become "unique", allowing for fast access by the new unique id.
 	object* obj_by_unique_id(double id); //when the object is deleted, clean up and update info.
 	void declare_as_nonUnique(); //function to retreave object by unique id.
@@ -410,7 +411,7 @@ struct variable
 
 #ifdef CPP11
 	eq_funcT eq_func;					// pointer to equation function for fast look-up
-#endif //#ifdef CPP11
+#endif
 
 	variable( void );					// empty constructor
 	variable( const variable &v );		// copy constructor
@@ -730,6 +731,7 @@ double bernoulli( double p );							// draw from a Bernoulli distribution
 double beta( double alpha, double beta );				// draw from a beta distribution
 double betacdf( double alpha, double beta, double x );	// beta cumulative distribution function
 double betacf( double a, double b, double x );			// beta distribution function
+double build_obj_list( bool set_list );					// build the object list for pointer checking
 double fact( double x );								// Factorial function
 double gamma( double alpha, double beta = 1 );			// draw from a gamma distribution
 double init_lattice( int init_color = -0xffffff, double nrow = 100, double ncol = 100, double pixW = 0, double pixH = 0 );
@@ -751,14 +753,11 @@ double unifcdf( double a, double b, double x );			// uniform cumulative distribu
 double uniform( double min, double max );
 double uniform_int( double min, double max );
 double update_lattice( double line, double col, double val = 1 );
-object *get_cycle_obj( object *c, char const *label, char const *command );
-object *go_brother( object *c );
 void close_lattice( void );
 void deb_log( bool on, int time = 0 );					// control debug mode
 void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "", bool defQuit = false );
-void init_random( int seed );							// reset the random number generator seed
+void init_random( unsigned seed );						// reset the random number generator seed
 void msleep( unsigned msec = 1000 );					// sleep process for milliseconds
-void nop( void );										// no operation
 void plog( char const *msg, char const *tag = "", ... );
 void results_alt_path( const char * );  				// change where results are saved.
 void set_fast( int level );								// enable fast mode
@@ -773,12 +772,15 @@ double fisher( double m, double n );					// draw from a Fisher-F distribution
 double geometric( double p );							// draw from a geometric distribution
 double student( double n );								// draw from a Student-T distribution
 double weibull( double a, double b );					// draw from a Weibull distribution
-#endif //#ifdef CPP11
+#endif
 
 
 // global variables (visible to the users)
 extern bool fast;				// flag to hide LOG messages & runtime (read-only)
+extern bool fast_lookup;				// flag for fast equation look-up mode
+extern bool no_ptr_chk;					// disable user pointer checking
 extern bool no_search;					// disable the standard variable search mechanism
+extern bool no_zero_instance;			// flag to allow deleting last object instance
 extern bool use_nan;			// flag to allow using Not a Number value
 extern char *path;				// folder where the configuration is
 extern char *simul_name;		// configuration name being run (for saving networks)
@@ -796,14 +798,14 @@ extern mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
 extern ranlux24 lf24;						// lagged fibonacci 24 bits generator
 extern ranlux48 lf48;						// lagged fibonacci 48 bits generator
 #endif //#ifdef CPP11
-extern int seed;
 extern int sim_num;
 extern int t;
+extern unsigned seed;
 extern object *root;
 
 #ifdef CPP11
-extern eq_mapT eq_map;			// map to fast equation look-up
-#endif //#ifdef CPP11
+extern eq_mapT eq_map;					// map to fast equation look-up
+#endif
 
 #ifndef NO_WINDOW
 extern int i_values[ ];					// user temporary variables copy
@@ -859,6 +861,7 @@ int shrink_gnufile( void );
 long get_long( const char *tcl_var, long *var = NULL );
 long num_sensitivity_points( sense *rsens );
 object *check_net_struct( object *caller, char const *nodeLab, bool noErr = false );
+object *go_brother( object *c );              //is also used by older other models
 object *operate( object *r, int *choice );
 object *restore_pos( object * );
 object *sensitivity_parallel( object *o, sense *s );
@@ -887,6 +890,7 @@ void clean_spaces( char *s );
 void close_sim( void );
 void cmd( const char *cc, ... );
 void collect_cemetery( object *o );
+void collect_inst( object *r, o_setT &list );
 void control_tocompute(object *r, char *ch);
 void copy_descendant( object *from, object *to );
 void count( object *r, int *i );
@@ -1009,6 +1013,7 @@ void tex_report_struct( object *r, FILE *f, bool table = true );
 void uncover_browser( void );
 void unload_configuration ( bool full );
 void unwind_stack( void );
+void update_bounds( void );
 void wipe_out( object *d );
 void write_list( FILE *frep, object *root, int flag_all, char const *prefix );
 void write_obj( object *r, FILE *frep );
@@ -1023,7 +1028,6 @@ void parallel_update( variable *v, object* p, object *caller = NULL );
 extern FILE *log_file;			// log file, if any
 extern bool brCovered;			// browser cover currently covered
 extern bool eq_dum;				// current equation is dummy
-extern bool fast_lookup;		// flag for fast look-up mode
 extern bool ignore_eq_file;		// control of configuration files equation updating
 extern bool in_edit_data;		// in initial settings mode
 extern bool in_set_obj;			// in setting number of objects mode
@@ -1084,7 +1088,9 @@ extern long nodesSerial;		// network node serial number global counter
 extern lsdstack *stacklog;		// LSD stack
 extern map< string, profile > prof;// set of saved profiling times
 extern object *blueprint;   	// LSD blueprint (effective model in use )
+extern object *currObj;			// pointer to current object in browser
 extern object *wait_delete;		// LSD object waiting for deletion
+extern o_setT obj_list;			// list with all existing LSD objects
 extern sense *rsense;       	// LSD sensitivity analysis structure
 extern variable *cemetery;  	// LSD saved data series (from last simulation run )
 

@@ -1,0 +1,12 @@
+#Type here the name of the program to build. You can modify this freely
+TARGET=lsd_gnu
+
+#Type here the name of the source file containing the functions of the model. Do not
+# type the .cpp extension. 
+FUN=fun_HF
+
+# Define the switch(es) for the compiler. The most usual ones are: -g for debugging, 
+# -O to optimize the code. Note that you can use the debugger only if you compile all
+# the code with the -g switch
+SWITCH_CC=-g
+

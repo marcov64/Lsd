@@ -44,10 +44,11 @@ library( gplots )           # package for plotting tables
 # ====== Present meta-model selection details ======
 
   mClass <- class( mModel )   
-  if ( mClass == "polynomial-model" )     # adjust the table header
+  if ( mClass == "polynomial-model" ) {   # adjust the table header
     colNames <- TRUE
-  else
+  } else {
     colNames <- FALSE
+  }
 
 # ------ Model comparison table ------
 

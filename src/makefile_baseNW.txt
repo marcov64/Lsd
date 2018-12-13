@@ -43,7 +43,7 @@ $(SRC_DIR)gis.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
 $(SRC_DIR)gis.cpp $(SRC_DIR)decl.h
 	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)gis.cpp -o $(SRC_DIR)gis.obj $(INCLUDE)
 $(FUN).obj: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)choose.h \
-$(SRC_DIR)decl.h $(SRC_DIR)fun_head.h
+$(SRC_DIR)decl.h $(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(SRC_DIR)fun_head_fast.h
 	$(CC_NW) $(SWITCH_CC_NW) -c $(FUN).cpp -o $(FUN).obj $(INCLUDE)
 
 clean:

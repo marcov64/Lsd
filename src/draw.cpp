@@ -229,31 +229,40 @@ void draw_obj( object *t, object *sel, int level, int center, int from )
 		{
 			case 0:
 			case 1:
-				level_factor[ 0 ] = 0.3;
+				level_factor[ 0 ] = 0.4;
 				level_factor[ 1 ] = 0.1;
 				level_factor[ 2 ] = 0.5;
 				level_factor[ 3 ] = 1.0;
 				break;
 			case 2:
 				level_factor[ 0 ] = 0.5;
-				level_factor[ 1 ] = 0.6;
-				level_factor[ 2 ] = 0.3;
-				level_factor[ 3 ] = 0.6;
+				level_factor[ 1 ] = 0.8;
+				level_factor[ 2 ] = 0.6;
+				level_factor[ 3 ] = 0.5;
 				break;
 			case 3:
-				level_factor[ 0 ] = 0.8;
-				level_factor[ 1 ] = 0.8;
+				level_factor[ 0 ] = 0.6;
+				level_factor[ 1 ] = 1.1;
+				level_factor[ 2 ] = 0.4;
+				level_factor[ 3 ] = 0.5;
+				break;
+			case 4:
+				level_factor[ 0 ] = 0.7;
+				level_factor[ 1 ] = 1.2;
+				level_factor[ 2 ] = 0.3;
+				level_factor[ 3 ] = 0.4;
+				break;
+			case 5:
+				level_factor[ 0 ] = 0.7;
+				level_factor[ 1 ] = 1.3;
 				level_factor[ 2 ] = 0.2;
 				level_factor[ 3 ] = 0.4;
 				break;
-			case 4:
-				level_factor[ 0 ] = 1.0;
-				level_factor[ 1 ] = 0.95;
-				level_factor[ 2 ] = 0.2;
-				level_factor[ 3 ] = 0.3;
-				break;
 			default:
-				level_factor[ 0 ] = 1 + ( i - 4.0 ) / 3;
+				level_factor[ 0 ] = 0.9 + ( i - 5.0 ) / 10;
+				level_factor[ 1 ] = 1.2 + ( i - 5.0 ) / 20;
+				level_factor[ 2 ] = 0.3 + ( i - 5.0 ) / 30;
+				level_factor[ 3 ] = 0.5 + ( i - 5.0 ) / 40;
 		}
 		
 		range_type = ( int ) floor( level_factor[ 0 ] * range_init );

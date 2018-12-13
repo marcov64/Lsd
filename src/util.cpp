@@ -52,6 +52,10 @@ given the file name name, the routine searches for the data line for the variabl
 
 #include "decl.h"
 
+#ifdef CPP11
+#include <random>						// use new random libraries if possible
+#endif
+
 
 int **lattice = NULL;					// lattice data colors array
 int rows = 0;							// lattice size
@@ -67,14 +71,6 @@ double dimH = 0;
 mutex error;
 #endif	
 
-
-#ifdef CPP11
-minstd_rand lc;						// linear congruential generator
-mt19937 mt32;						// Mersenne-Twister 32 bits generator
-mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
-ranlux24 lf24;						// lagged fibonacci 24 bits generator
-ranlux48 lf48;						// lagged fibonacci 48 bits generator
-#endif //#ifdef CPP11
 
 #ifndef NO_WINDOW
 
@@ -219,7 +215,7 @@ void plog( char const *cm, char const *tag, ... )
 	
 	// remove invalid charaters and Tk control characters
 	message = new char[ strlen( buffer ) + 1 ];
-	for ( i = 0, j = 0; buffer[ i ] != '\0'; ++i )    //added check to not read past string AND not write past string
+	for ( i = 0, j = 0; buffer[ i ] != '\0' ; ++i )
 		if ( ( isprint( buffer[ i ] ) || buffer[ i ] == '\n' || 
 			   buffer[ i ] == '\r' || buffer[ i ] == '\t' ) &&
 			 ! ( buffer[ i ] == '\"' || 
@@ -361,7 +357,12 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 		actual_steps = t;
 		unsavedData = true;				// flag unsaved simulation results
 		running = false;
+		
+		// run user closing function, reporting error appropriately
+		user_exception = true;
 		close_sim( );
+		user_exception = false;
+		
 		reset_end( root );
 		root->emptyturbo( );
 		uncover_browser( );
@@ -379,18 +380,6 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 #endif
 
 	myexit( 13 );
-}
-
-
-/****************************
-NOP
-No operation.
-Escape function for invalid pointers
-in macros.
-*****************************/
-void nop( void )
-{
-	
 }
 
 
@@ -604,7 +593,7 @@ lab_tit indicates the position of the object containing the variables in the mod
 void set_lab_tit( variable *var )
 {
 	bool first = true;
-	char app[ 20 * MAX_ELEM_LENGTH ], app1[ 20 * MAX_ELEM_LENGTH ];
+	char app[ 4 * MAX_PATH_LENGTH ], app1[ TCL_BUFF_STR ];
 	object *cur;
 
 	if ( var->up->up == NULL )
@@ -1998,7 +1987,7 @@ double _abs( double a )
 		return a;
 	else
 		return ( -1 * a );
-}
+};
 
 
 /****************************************************
@@ -2412,11 +2401,14 @@ ran_gen =	7 : Lagged fibonacci with 48 bits resolution in [0,1)
 ****************************************************/
 int ran_gen = 2;					// default pseudo-random number generator
 
-void init_random( int seed )
+minstd_rand lc;						// linear congruential generator
+mt19937 mt32;						// Mersenne-Twister 32 bits generator
+mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
+ranlux24 lf24;						// lagged fibonacci 24 bits generator
+ranlux48 lf48;						// lagged fibonacci 48 bits generator
+
+void init_random( unsigned seed )
 {
-	if ( seed < 0 )
-		seed = - seed;
-	
 	lc.seed( seed );				// linear congruential
 	mt32.seed( seed );				// Mersenne-Twister 32 bits
 	mt64.seed( seed );				// Mersenne-Twister 64 bits
@@ -3170,7 +3162,7 @@ MTRand mt4; 		// Mersenne-Twister object in [0,1)
 MTRand53 mt5;		// Mersenne-Twister object with 53 bits resolution in [0,1)
 
 // Set seed to all random generators
-void init_random( int seed )
+void init_random( unsigned seed )
 {
 	dum = 0;
 	idum = -seed;

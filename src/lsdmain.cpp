@@ -38,10 +38,10 @@ int add_to_tot = false;		// flag to append results to existing totals file (bool
 int max_step = 100;			// default number of simulation runs
 int overwConf = true;		// overwrite configuration on run flag (bool)
 int saveConf = false;		// save configuration on results saving (bool)
-int seed = 1;				// random number generator initial seed
 int strWindowOn = true;		// control the presentation of the model structure window (bool)
+unsigned seed = 1;			// random number generator initial seed
 
-bool batch_sequential = false;	// no-window multi configuration job running
+bool batch_sequential = false;// no-window multi configuration job running
 bool brCovered = false;		// browser cover currently covered
 bool eq_dum = false;		// current equation is dummy
 bool fast;					// safe copy of fast_mode flag
@@ -50,6 +50,7 @@ bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
 bool no_search;				// disable the standard variable search mechanism
 bool no_window = false;		// no-window command line job
+bool no_zero_instance = false;// flag to allow deleting last object instance
 bool non_var = false;		// flag to indicate INTERACT macro condition
 bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
@@ -111,12 +112,14 @@ int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
 lsdstack *stacklog = NULL;	// LSD stack
+map < string, profile > prof;	// set of saved profiling times
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
+object *currObj = NULL;		// pointer to current object in browser
 object *root = NULL;		// LSD root object
 object *wait_delete = NULL;	// LSD object waiting for deletion
+o_setT obj_list;			// set with all existing LSD objects
 sense *rsense = NULL;		// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
-map < string, profile > prof;	// set of saved profiling times
 FILE *log_file = NULL;		// log file, if any
 
 #ifdef CPP11
@@ -701,6 +704,10 @@ void run( void )
 #endif
 				myexit( 10 );
 			}
+			
+		// build initial object list for user pointer checking
+		if ( ! no_ptr_chk )
+			build_obj_list( true );
 
 		series_saved = 0;
 
@@ -929,8 +936,11 @@ void run( void )
 		cmd( "update" );
 		reset_plot( i );
 #endif
-
+		// run user closing function, reporting error appropriately
+		user_exception = true;
 		close_sim( );
+		user_exception = false;
+		
 		reset_end( root );
 		root->emptyturbo( );
 		
@@ -1524,64 +1534,6 @@ bool search_parallel( object *r )
 				return true;
 
 	return false;
-}
-
-
-/*******************************************
-INTERACT
-Interrupt the simulation, as for the debugger, allowing the insertion of a value.
-Note that the debugging window, in this model, accept the entry key stroke as a run.
-********************************************/
-double object::interact( char const *text, double v, double *tv, int i, int j, 
-						 int h, int k, object *cur, object *cur1, object *cur2, 
-						 object *cur3, object *cur4, object *cur5, object *cur6, 
-						 object *cur7, object *cur8, object *cur9, netLink *curl, 
-						 netLink *curl1, netLink *curl2, netLink *curl3, 
-						 netLink *curl4, netLink *curl5, netLink *curl6, 
-						 netLink *curl7, netLink *curl8, netLink *curl9 )
-{
-#ifndef NO_WINDOW
-	int n;
-	double app = v;
-
-	if ( quit == 0 )
-	{
-		for ( n = 0; n < USER_D_VARS; ++n )
-			d_values[ n ] = tv[ n ];
-		
-		i_values[ 0 ] = i;
-		i_values[ 1 ] = j;
-		i_values[ 2 ] = h;
-		i_values[ 3 ] = k;
-		o_values[ 0 ] = cur;
-		o_values[ 1 ] = cur1;
-		o_values[ 2 ] = cur2;
-		o_values[ 3 ] = cur3;
-		o_values[ 4 ] = cur4;
-		o_values[ 5 ] = cur5;
-		o_values[ 6 ] = cur6;
-		o_values[ 7 ] = cur7;
-		o_values[ 8 ] = cur8;
-		o_values[ 9 ] = cur9;
-		n_values[ 0 ] = curl;
-		n_values[ 1 ] = curl1;
-		n_values[ 2 ] = curl2;
-		n_values[ 3 ] = curl3;
-		n_values[ 4 ] = curl4;
-		n_values[ 5 ] = curl5;
-		n_values[ 6 ] = curl6;
-		n_values[ 7 ] = curl7;
-		n_values[ 8 ] = curl8;
-		n_values[ 9 ] = curl9;
-		
-		non_var = true;					// signals INTERACT macro
-		deb( this, NULL, text, &app, true );
-	}
-	
-	return app;
-#else
-	return v;
-#endif
 }
 
 

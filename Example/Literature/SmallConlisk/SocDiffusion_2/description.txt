@@ -1,0 +1,8 @@
+Social Diffusion Model 0.2
+(by Smallwood and Conlisk, 1979, "Product Quality in Markets where Consumers are Imperfectly Informed", Quarterly Journal of Economics, 93-1.)
+implemented by Marco Valente
+
+This version of the model implement the also the "strongly dissatisfied" consumers, refusing to buy the product from the same firms that sold the broken product.
+
+Technically, only the equation for Purchase is changed, and a new parameter, IncludeBroken is added. If IncludeBroken is 0, then a consumer cannot choose the product that it was using. Compare the results with two identical markets but for IncludeBroken.
+

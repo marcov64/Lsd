@@ -84,6 +84,10 @@ set daCwidWindows	36	; # Windows
 set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down
 set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Windows
 
+# folder/group/object symbols
+set upSymbol 	"\u25B2 .."	; # up in tree structure symbol
+set groupSymbol	"\u25B6 "	; # group symbol
+
 # OS specific monospaced font name
 set fontMac		"Monaco"			; # "Courier"
 set fontLinux	"DejaVu Sans Mono"	; # "Courier"

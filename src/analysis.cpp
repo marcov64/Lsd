@@ -490,10 +490,7 @@ while ( true )
 	cmd( "if { ! $y2 } { set num_y2 2 }" );
 
 	// update entry boxes with linked variables
-	cmd( "write_disabled .da.f.h.v.ft.from.mnc $minc" );
-	cmd( "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
-	cmd( "write_disabled .da.f.h.v.sc.min.min [ format \"%%.[ expr $pdigits ]g\" $miny ]" );
-	cmd( "write_disabled .da.f.h.v.sc.max.max [ format \"%%.[ expr $pdigits ]g\" $maxy ]" );
+	update_bounds( );
 	cmd( "write_disabled .da.f.h.v.y2.f.e $num_y2" );
 	cmd( "write_any .da.f.tit.ps.e $point_size" ); 
 	cmd( "write_any .da.f.tit.pr.e $pdigits" ); 
@@ -1061,7 +1058,7 @@ while ( true )
 
 				for ( i = 0; i < j; ++i )
 				{
-					cmd( "set res [lindex $tot %d]", i );
+					cmd( "set res [ lindex $tot %d ]", i );
 					app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 					strcpy( msg, app );
 					sscanf( msg, "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
@@ -1293,7 +1290,7 @@ while ( true )
 
 				for ( i = 0; i < j; ++i )
 				{
-					cmd( "set res [lindex $tot %d]", i );
+					cmd( "set res [ lindex $tot %d ]", i );
 					app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 					strcpy( msg, app );
 					sscanf( msg, "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
@@ -2419,6 +2416,57 @@ while ( true )
 }
 }
 
+
+/***************************************************
+ UPDATE_BOUNDS
+ ****************************************************/
+void update_bounds( void )
+{
+	if ( isfinite( miny ) )
+		cmd( "write_disabled .da.f.h.v.sc.min.min [ format \"%%.[ expr $pdigits ]g\" $miny ]" );
+	else
+	{
+		cmd( "write_disabled .da.f.h.v.sc.min.min -Infinity" );
+		miny = 0;
+	}
+	
+	if ( isfinite( maxy ) )
+		cmd( "write_disabled .da.f.h.v.sc.max.max [ format \"%%.[ expr $pdigits ]g\" $maxy ]" );
+	else
+	{
+		cmd( "write_disabled .da.f.h.v.sc.max.max Infinity" );
+		maxy = 0;
+	}
+	
+	if ( miny == 0 && maxy == 0 )
+	{
+		miny = -1;
+		maxy = 1;
+	}
+	
+	if ( ! isfinite( miny2 ) )
+		miny2 = 0;
+	
+	if ( ! isfinite( maxy2 ) )
+		maxy2 = 0;		
+	
+	if ( miny2 == 0 && maxy2 == 0 )
+	{
+		miny2 = -1;
+		maxy2 = 1;
+	}
+	
+	if ( min_c < 1 )
+		min_c = 1;
+	
+	if ( max_c <= min_c )
+		max_c = min_c + 1;
+	
+	cmd( "write_disabled .da.f.h.v.ft.from.mnc $minc" );
+	cmd( "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
+}
+	
+
 /***************************************************
  PLOT_TSERIES
  ****************************************************/
@@ -2599,11 +2647,8 @@ void plot_tseries( int *choice )
 		miny2 = temp;
 	}
 		
-	cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
-	cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
-	cmd( "write_disabled .da.f.h.v.ft.from.mnc $minc" );
-	cmd( "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
-
+	update_bounds( );
+	
 	// plot all series
 	plot( TSERIES, nv, data, start, end, id, str, tag, choice );
 
@@ -2636,10 +2681,9 @@ void plot_cross( int *choice )
 	double temp, **val, **data, **logdata;
 	int i, j, k, nt, new_nv, *list_times, *pos, *start, *end, *id, *erase, logErrCnt = 0;
 
-	Tcl_LinkVar( inter, "nt", ( char * ) &nt, TCL_LINK_INT );
 	cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
-	Tcl_UnlinkVar( inter, "nt" );
-
+	get_int( "nt", & nt );
+	
 	if ( nv < 2 || nt <= 0 )
 	{
 		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series/time steps selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one time step (case ).\"" );
@@ -2647,17 +2691,7 @@ void plot_cross( int *choice )
 		return;
 	}
 
-	// Sets the list of cases to plot
 	list_times = new int [ nt ];
-	Tcl_LinkVar( inter, "k", ( char * ) &k, TCL_LINK_INT );
-
-	for ( i = 0; i < nt; ++i )
-	{
-		cmd( "set k [ lindex $list_times %d ]", i );
-		list_times[ i ] = k;
-	}
-	Tcl_UnlinkVar( inter, "k" );
-
 	pos = new int [ nv ];
 	val = new double *[ nv ];
 	start = new int [ nv ];
@@ -2669,6 +2703,13 @@ void plot_cross( int *choice )
 	data = new double *[ nv ];
 	logdata = new double *[ nv ];
 
+	for ( i = 0; i < nt; ++i )
+	{
+		cmd( "set k [ lindex $list_times %d ]", i );
+		get_int( "k", & k );
+		list_times[ i ] = k;
+	}
+	
 	if ( autom_x )
 	{
 		min_c = 1;
@@ -2784,9 +2825,8 @@ void plot_cross( int *choice )
 		miny = temp;
 	}
 		
-	cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
-	cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
-
+	update_bounds( );
+	
 	// sort series if required
 	for ( k = 0; k < nt; ++k )		// find index to time reference
 		if ( list_times[ k ] == res )
@@ -3495,7 +3535,7 @@ void statistics( int *choice )
 							}
 					}
 					
-					data[ i ] = logdata[ i ];			// replace the data series
+				data[ i ] = logdata[ i ];				// replace the data series
 			}
 		}
 	}
@@ -4324,7 +4364,7 @@ PLOT_CS_XY
 void plot_cs_xy( int *choice )
 {
 	bool done, stopErr = false;
-	char *app, **str, **tag, str1[ 5 * MAX_ELEM_LENGTH ], str2[ 5 * MAX_ELEM_LENGTH ], str3[ 10 ], dirname[ MAX_PATH_LENGTH ];
+	char *app, **str, **tag, str1[ TCL_BUFF_STR ], str2[ 5 * MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
 	double **data, **logdata, previous_row;
 	int i, j, time_sel, block_length, ndim, *start, *end, *id, logErrCnt = 0;
 	FILE *f, *f2;
@@ -5151,6 +5191,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "catch { set lim [ gnuplot_plotarea ] }" );
 	cmd( "catch { set rang [ gnuplot_axisranges ] }" );
 	cmd( "if { [ info exists lim ] && [ info exists rang ] } { set choice 1 } { set choice 0 }" );
+	
 	if ( *choice == 1 )
 	{
 		cmd( "set res [ expr int( $cmx * [ lindex $lim 0 ] / 1000.0 ) ]" );
@@ -5161,10 +5202,14 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 		get_int( "res", &lim[ 2 ] );
 		cmd( "set res [ expr int( $cmy * [ lindex $lim 3 ] / 1000.0 ) ]" );
 		get_int( "res", &lim[ 3 ] );
+		
 		for ( i = 0; i < 4; ++i )
 		{	
 			cmd( "set res [ lindex $rang %d ]", i );
 			get_double( "res", &rang[ i ] );
+
+			if ( is_inf( lim[ i ] ) || is_nan( lim[ i ] ) || is_inf( rang[ i ] ) || is_nan( rang[ i ] ) )
+				rang[ i ] = lim[ i ] = 0;
 		}
 	}
 	else
@@ -5847,9 +5892,7 @@ void histograms( int *choice )
 	{
 		maxy = lmaxy / cases;
 		miny = lminy > 0 ? ( lminy - 1 ) / cases : 0;
-		
-		cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
-		cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
+		update_bounds( );
 	}
 
 	cmd( "set choice $norm" );
@@ -6101,9 +6144,7 @@ void histograms_cs( int *choice )
 	{
 		maxy = lmaxy / cases;
 		miny = lminy > 0 ? ( lminy - 1 ) / cases : 0;
-		
-		cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
-		cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
+		update_bounds( );
 	}
 
 	cmd( "set choice $norm" );
@@ -7388,7 +7429,11 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	step = hsize / ( double ) ( endCase - iniCase );
 	if ( avgSmpl && ! avgSmplMsg && step < 1 )
 	{
-		cmd( "set answer [ tk_messageBox -parent .da -title Warning -icon warning -type yesno -default yes -message \"Disable Y values averaging?\" -detail \"The number of time steps to plot is larger than the physical plot width. To compute the Y values, LSD averages data from multiple time steps.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
+		if ( type == TSERIES )
+			cmd( "set answer [ tk_messageBox -parent .da -title Warning -icon warning -type yesno -default yes -message \"Disable Y values averaging?\" -detail \"The number of time steps to plot is larger than the physical plot width. To compute the Y values, LSD averages data from multiple time steps.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
+		else
+			cmd( "set answer [ tk_messageBox -parent .da -title Warning -icon warning -type yesno -default yes -message \"Disable series values averaging?\" -detail \"The number of series to plot is larger than the physical plot width. To compute the presented values, LSD averages data from multiple series.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
+			
 		cmd( "switch $answer { yes { set avgSmpl 0 } no { } }" );
 		avgSmplMsg = true;
 	}
@@ -7461,9 +7506,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 					if ( data[ i ] == NULL )
 						continue;
 					
-					if ( start[ i ] <= k && end[ i ] >= k )
-						yVal = data[ i ][ k ];
-					
+					yVal = data[ i ][ k ];
 					tOk = true;
 					
 					break;
@@ -7991,6 +8034,8 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			nLine = *end;
 			bbordsize = nLine < 10 ? 4 * lheight : bbordsize;
 			y2on = false;
+			cminy2 = miny2;
+			cmaxy2 = maxy2;
 			break;
 			
 		case HISTOGR:

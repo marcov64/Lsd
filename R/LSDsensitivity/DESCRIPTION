@@ -1,8 +1,8 @@
 Package: LSDsensitivity
 Type: Package
 Title: Sensitivity Analysis Tools for LSD
-Version: 0.3.1
-Date: 2018-07-15
+Version: 0.3.2
+Date: 2018-12-7
 Author: Marcelo C. Pereira
 Maintainer: Marcelo C. Pereira <marcelocpereira@uol.com.br>
 Description: Tools for sensitivity analysis of LSD simulation models. Reads object-oriented data produced by LSD simulation models and performs screening and global sensitivity analysis (Sobol decomposition method, Saltelli et al. (2008) ISBN:9780470725177). A Kriging or polynomial meta-model (Kleijnen (2009) <doi:10.1016/j.ejor.2007.10.013>) is estimated using the simulation data to provide the data required by the Sobol decomposition. LSD (Laboratory for Simulation Development) is free software developed by Marco Valente (documentation and downloads available at <http://labsimdev.org>).

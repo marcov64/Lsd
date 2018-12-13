@@ -1,0 +1,128 @@
+	
+Label Root
+{
+	Son: Market
+	Label Market
+	{
+		Var: NewAgent
+		Var: UtilityMS
+		Var: UtilityApple
+		Var: NumMS
+		Var: NumApple
+		Param: User0Net
+		Param: User1Net
+		Param: User0MS
+		Param: User0Apple
+		Param: User1MS
+		Param: User1Apple
+		Var: ShareMS
+		Var: ShareApple
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Market C	1
+Var: NewAgent 0 n + n n
+Var: UtilityMS 0 s + n n
+Var: UtilityApple 0 s + n n
+Var: NumMS 1 s + n n	0
+Var: NumApple 1 s + n n	0
+Param: User0Net 0 n + n n	-0.2
+Param: User1Net 0 n + n n	-0.2
+Param: User0MS 0 n + n n	10
+Param: User0Apple 0 n + n n	5
+Param: User1MS 0 n + n n	5
+Param: User1Apple 0 n + n n	10
+Var: ShareMS 0 s + n n
+Var: ShareApple 0 s + n n
+
+SIM_NUM 1
+SEED 3
+MAX_STEP 1000
+EQUATION fun_ba.cpp
+ MODELREPORT                    modelreport.html
+
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Market
+(no description available )
+END_DESCRIPTION
+
+Variable_NewAgent
+(no description available)
+END_DESCRIPTION
+
+Variable_UtilityMS
+(no description available)
+END_DESCRIPTION
+
+Variable_UtilityApple
+(no description available)
+END_DESCRIPTION
+
+Variable_NumMS
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_NumApple
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_User0Net
+(no description available)
+END_DESCRIPTION
+
+Parameter_User1Net
+(no description available)
+END_DESCRIPTION
+
+Parameter_User0MS
+(no description available)
+END_DESCRIPTION
+
+Parameter_User0Apple
+(no description available)
+END_DESCRIPTION
+
+Parameter_User1MS
+(no description available)
+END_DESCRIPTION
+
+Parameter_User1Apple
+(no description available)
+END_DESCRIPTION
+
+Variable_ShareMS
+(no description available)
+END_DESCRIPTION
+
+Variable_ShareApple
+(no description available)
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+

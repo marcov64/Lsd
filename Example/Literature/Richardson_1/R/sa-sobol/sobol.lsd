@@ -1,0 +1,330 @@
+	
+Label Root
+{
+	Son: Market
+	Label Market
+	{
+		Son: Firm
+		Label Firm
+		{
+			Var: Prob
+			Var: Quality
+			Var: Convenience
+			Var: sigma
+			Var: ms
+
+		}
+
+		Var: Init
+		Param: alpha
+		Param: delta
+		Param: tau
+		Param: Cmin
+		Param: Cmax
+		Param: C0
+		Param: Q0
+		Param: N
+		Var: HHI
+		Var: HPI
+		Var: TotProb
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Market C	1
+Var: Init 0 n + n n
+Param: alpha 0 n + n n	0.5
+Param: delta 0 n + n n	0.005
+Param: tau 0 n + n n	0.005
+Param: Cmin 0 n + n n	1
+Param: Cmax 0 n + n n	10
+Param: C0 0 n + n n	1
+Param: Q0 0 n + n n	0
+Param: N 0 n + n n	3
+Var: HHI 0 s + n n
+Var: HPI 0 s + n p
+Var: TotProb 0 n + n n
+
+Object: Firm C	1
+Var: Prob 0 n + n n
+Var: Quality 1 n + n n	0
+Var: Convenience 1 n + n n	0
+Var: sigma 1 n + n n	0
+Var: ms 1 n + n n	0
+
+SIM_NUM 10
+SEED 1
+MAX_STEP 10000
+EQUATION fun_richardson.cpp
+MODELREPORT report_Sim1.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Market
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Init
+Model initialization
+
+'Init' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alpha
+relative weight of quality on consumer preference in [0, 1]
+
+
+'alpha' appears in the equation for: Prob, Quality
+_INIT_
+All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_delta
+knowledge accumulation factor over time >= 0
+
+
+'delta' appears in the equation for: sigma
+_INIT_
+All 1 instances equal to 0.001.
+END_DESCRIPTION
+
+Parameter_tau
+convenience increase / price decrease rate in [0, 1]
+
+
+'tau' appears in the equation for: sigma, Convenience
+_INIT_
+All 1 instances equal to 0.001.
+END_DESCRIPTION
+
+Parameter_Cmin
+minimum convenience (inverse of maximum price) > 0
+
+
+'Cmin' appears in the equation for: Convenience
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_Cmax
+maximum convenience (inverse of minimum price) > 0
+
+
+'Cmax' appears in the equation for: Convenience
+_INIT_
+All 1 instances equal to 10.
+END_DESCRIPTION
+
+Parameter_C0
+initial convenience of all firms > 0
+
+
+'C0' appears in the equation for: Init
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_Q0
+initial quality of all firms > 0
+
+
+'Q0' appears in the equation for: Init
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_N
+number of firms > 0
+
+
+'N' appears in the equation for: Init
+_INIT_
+All 1 instances equal to 3.
+END_DESCRIPTION
+
+Variable_HHI
+Herfindhal-Hirschman Index
+
+'HHI' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_HPI
+Hymer & Pashigian Instability Index
+Sum of the absolute changes in firm market shares
+
+'HPI' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_TotProb
+Sum of probabilities of all firms
+
+'TotProb' appears in the equation for: ms
+_INIT_
+
+END_DESCRIPTION
+
+Object_Firm
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Prob
+Probability of firm being chosen
+
+'Prob' appears in the equation for: ms, TotProb
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Quality
+New product quality, possibly obtained by innovation
+
+'Quality' appears in the equation for: Prob, Quality, sigma, Convenience
+_INIT_
+All 3 instances equal to 0.
+END_DESCRIPTION
+
+Variable_Convenience
+Product convenience (inverse of price)
+
+'Convenience' appears in the equation for: Prob, Quality, Convenience
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_sigma
+Accumulated knowledge
+
+'sigma' appears in the equation for: Quality
+_INIT_
+All 3 instances equal to 0.
+END_DESCRIPTION
+
+Variable_ms
+Market share of a firm
+
+'ms' appears in the equation for: Convenience
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+//#define EIGENLIB			// uncomment to use Eigen linear algebra library
+//#define NO_POINTER_INIT	// uncomment to disable pointer checking
+
+#include "fun_head_fast.h"
+
+// do not add Equations in this area
+
+MODELBEGIN
+
+// insert your equations here, between the MODELBEGIN and MODELEND words
+
+
+EQUATION("Prob")
+/*
+Probability of being chosen
+*/
+
+v[0] = V("Quality");
+v[1] = V("aq");
+v[2] = V("Convenience");
+v[3] = V("ac");
+
+v[4]=v[0]*v[1]+v[2]*v[3];
+RESULT(v[4] )
+
+EQUATION("Innovation")
+/*
+New quality obtained by innovation
+*/
+v[0] = VL("Quality",1);
+v[1] = VL("Sigma",1);
+v[2] = norm(v[0],v[1]);
+v[3] = VL("Convenience", 1);
+v[4] = V("aq");
+v[5] = V("ac");
+v[8] = V("minConvenience");
+
+v[6]=v[0]*v[4]+v[3]*v[5];
+v[7]=v[2]*v[4]+v[8]*v[5];
+
+if(v[6]<v[7])
+ v[8]=v[2];
+else
+ v[8]=v[0]; 
+RESULT(v[8] )
+
+
+EQUATION("Quality")
+/*
+Quality
+*/
+
+RESULT(V("Innovation") )
+
+EQUATION("Sigma")
+/*
+Variance
+*/
+v[0] = VL("Quality", 1);
+v[1] = V("Quality");
+v[3] = VL("Sigma", 1);
+if(v[1]==v[0])
+ {
+  v[2] = V("tau");
+  v[4] = v[3]+v[2];
+ }
+else
+ v[4]=0; 
+RESULT(v[4] )
+
+
+
+
+
+
+
+
+
+MODELEND
+
+// do not add Equations in this area
+
+void close_sim( void )
+{
+	// close simulation special commands go here
+}
+
+END_EQ_FILE

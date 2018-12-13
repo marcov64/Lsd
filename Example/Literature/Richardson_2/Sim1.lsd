@@ -1,0 +1,605 @@
+	
+Label Root
+{
+	Son: Market
+	Label Market
+	{
+		Son: Firm
+		Label Firm
+		{
+			Param: Id
+			Var: Prob
+			Var: Quality
+			Var: Convenience
+			Var: sigma
+			Var: ms
+			Var: Clients
+			Var: Sales
+
+		}
+
+		Son: Consumer
+		Label Consumer
+		{
+			Var: Product
+
+		}
+
+		Var: Init
+		Param: alpha
+		Param: beta
+		Param: delta
+		Param: tau
+		Param: Cmin
+		Param: Cmax
+		Param: C0
+		Param: Q0
+		Param: M
+		Param: N
+		Func: Buy
+		Var: Account
+		Var: HHI
+		Var: HPI
+		Var: TotSales
+		Var: TotProb
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Market C	1
+Var: Init 0 n + n n
+Param: alpha 0 n + n n	0.5
+Param: beta 0 n + n n	0.01
+Param: delta 0 n + n n	0.005
+Param: tau 0 n + n n	0.005
+Param: Cmin 0 n + n n	1
+Param: Cmax 0 n + n n	10
+Param: C0 0 n + n n	1
+Param: Q0 0 n + n n	0
+Param: M 0 n + n n	1000
+Param: N 0 n + n n	3
+Func: Buy 0 n + n n
+Var: Account 0 n + n n
+Var: HHI 0 s + n n
+Var: HPI 0 s + n p
+Var: TotSales 0 s + n n
+Var: TotProb 0 s + n n
+
+Object: Firm C	1
+Param: Id 0 n + n n	0
+Var: Prob 0 s + n n
+Var: Quality 1 s + n n	0
+Var: Convenience 1 s + n n	1
+Var: sigma 1 s + n n	1
+Var: ms 1 s + n n	0.333
+Var: Clients 0 s + n n
+Var: Sales 0 s + n n
+
+Object: Consumer N	1000
+Var: Product 1 n + n n	2	3	3	1	2	2	2	3	3	2	1	3	1	3	1	2	3	3	2	1	1	3	1	3	2	2	3	2	2	1	3	1	3	2	2	2	3	1	1	3	2	2	1	2	1	1	1	1	1	3	2	1	2	2	2	1	1	1	2	2	1	3	2	3	3	3	3	3	3	3	3	1	2	3	2	1	1	2	1	3	1	2	2	1	1	1	2	2	2	2	1	1	3	1	3	3	1	2	3	2	2	2	3	2	3	3	1	1	3	3	1	1	2	3	2	1	1	1	3	2	3	2	2	1	3	2	3	3	3	3	2	1	2	3	1	3	1	3	3	3	1	2	3	2	3	2	1	2	3	2	1	3	1	3	2	2	3	2	2	2	2	1	3	1	2	1	2	2	1	3	2	3	1	3	1	1	1	2	3	3	3	1	1	2	2	1	3	1	3	3	1	3	1	3	3	1	2	1	3	2	1	3	2	2	1	2	1	1	3	3	1	1	1	1	2	2	3	1	1	2	3	1	2	1	1	3	2	1	3	3	3	1	1	3	1	1	2	2	1	3	1	2	2	3	1	3	2	2	3	3	1	3	1	1	3	1	1	2	1	3	1	3	2	1	1	1	2	2	3	1	1	3	1	1	2	2	1	1	1	3	1	1	2	1	2	2	2	2	1	3	3	2	1	3	3	3	1	2	2	2	1	1	1	2	1	1	3	2	2	3	3	1	2	1	2	3	3	1	3	3	1	3	3	2	2	3	2	1	3	3	3	1	2	1	2	3	3	1	3	1	3	2	1	3	3	2	3	2	2	2	1	3	2	3	2	2	2	1	3	2	1	3	1	1	2	2	1	1	2	3	3	3	2	2	3	2	3	2	2	1	2	3	3	3	2	3	2	3	2	1	3	1	2	1	3	3	1	1	1	2	3	1	1	1	2	2	3	3	3	1	1	1	1	1	1	3	2	3	3	1	3	1	3	1	2	2	3	2	3	1	1	1	1	1	2	1	1	1	3	3	2	2	3	2	2	3	1	1	3	2	1	3	2	3	1	2	3	3	2	2	3	3	3	3	2	2	2	2	3	2	2	3	2	1	1	3	1	2	3	2	1	3	1	1	2	1	1	2	1	1	3	1	1	3	2	2	3	1	2	1	2	2	3	3	3	2	2	1	3	2	3	1	3	3	2	2	1	2	2	3	3	1	1	2	1	3	3	3	2	3	2	3	3	2	3	3	1	1	1	1	1	2	2	1	1	1	1	2	3	1	2	3	3	2	3	3	2	2	2	2	3	3	2	2	1	1	1	1	2	3	1	2	2	1	3	3	3	3	2	1	1	1	3	2	3	2	1	2	2	3	2	2	2	2	2	1	3	2	1	2	3	3	1	2	1	2	2	1	3	1	2	2	1	1	3	3	1	3	1	2	3	3	1	1	1	2	1	2	3	1	2	1	1	1	2	1	2	2	2	3	1	2	1	3	2	2	3	3	1	3	1	1	3	1	2	3	2	1	3	2	2	3	1	2	1	3	2	2	1	2	3	1	2	2	2	2	2	3	1	3	3	3	3	1	3	2	1	3	3	2	1	1	3	1	2	3	3	2	2	1	3	1	1	2	1	1	2	3	3	2	1	2	3	2	2	2	2	3	1	1	2	1	1	1	3	1	2	2	2	3	3	3	1	3	2	1	3	3	1	2	1	2	1	2	3	2	1	1	2	1	3	3	2	3	1	3	2	2	3	3	3	3	2	2	2	1	1	1	2	1	2	1	1	2	1	2	2	2	1	1	1	3	1	3	2	1	3	1	3	3	1	2	2	1	2	1	2	2	1	1	3	3	1	2	2	3	1	1	3	3	2	1	1	1	2	2	3	3	1	3	2	1	2	1	1	3	2	3	1	2	2	2	2	3	2	1	2	3	3	3	2	1	3	2	3	1	1	3	3	3	2	1	3	1	3	1	3	1	1	2	1	2	3	3	3	2	3	3	1	3	2	3	2	1	2	1	3	1	1	1	2	1	2	3	3	3	1	1	3	2	3	3	2	2	3	2	2	3	2	1	2	3	1	2	2	1	2	1	3	3	1	2	1	2	2	1	1	3	3	3	3	2	1	3	1	3	1	3	1	1	3	1	2	1	3	2	3	2	1	1	3	1	3	1	2	1	3	2	3	3	3	1	1	3	1	1	3	1	1	1	1	3	3	1	1	2	1	3	3	1	2	2	2	2	3	1	2	1	2	2	2	1	3	3	3	3	1	2	2	1	1	1	2	1	3	2	2	3	3	1
+
+SIM_NUM 1
+SEED 0
+MAX_STEP 10000
+EQUATION fun_richardson.cpp
+MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Market
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Init
+Model initialization
+
+'Init' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alpha
+relative weight of quality on consumer preference in [0, 1]
+
+
+'alpha' appears in the equation for: Prob, Quality
+_INIT_
+All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_beta
+probability of product to break in one period in [0, 1]
+
+
+'beta' appears in the equation for: Product
+_INIT_
+ All 3 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_delta
+knowledge accumulation factor over time >= 0
+
+
+'delta' appears in the equation for: sigma
+_INIT_
+All 1 instances equal to 0.005.
+END_DESCRIPTION
+
+Parameter_tau
+delta = knowledge accumulation factor over time >= 0
+
+
+'tau' appears in the equation for: Convenience
+_INIT_
+All 1 instances equal to 0.005.
+END_DESCRIPTION
+
+Parameter_Cmin
+minimum convenience (inverse of maximum price) > 0
+
+
+'Cmin' appears in the equation for: Quality
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_Cmax
+maximum convenience (inverse of minimum price) > 0
+
+
+'Cmax' appears in the equation for: Convenience
+_INIT_
+All 1 instances equal to 10.
+END_DESCRIPTION
+
+Parameter_C0
+initial convenience of all firms > 0
+
+
+'C0' appears in the equation for: Init
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_Q0
+initial quality of all firms > 0
+
+
+'Q0' appears in the equation for: Init
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_M
+number of consumers > 0
+
+
+'M' appears in the equation for: Init, ms
+_INIT_
+All 1 instances equal to 1000.
+END_DESCRIPTION
+
+Parameter_N
+number of firms > 0
+
+
+'N' appears in the equation for: Init
+_INIT_
+All 1 instances equal to 3.
+END_DESCRIPTION
+
+Function_Buy
+Function in returning a random product
+
+'Buy' appears in the equation for: Product
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Account
+Compute the number of customers
+Also clear the period sales
+
+'Accounting' appears in the equation for: ms
+_INIT_
+
+END_DESCRIPTION
+
+Variable_HHI
+Herfindhal-Hirschman Index
+
+'HHI' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_HPI
+Hymer & Pashigian Instability Index
+Sum of the absolute changes in firm market shares
+
+'HPI' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_TotSales
+Total market sales
+
+'TotalSales' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_TotProb
+Sum of probabilities of all firms
+
+'TotProb' appears in the equation for: Clients
+_INIT_
+
+END_DESCRIPTION
+
+Object_Firm
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Id
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_Prob
+Probability of firm being chosen
+
+'Prob' appears in the equation for: Buy
+_INIT_
+ All 10 instances equal to 1.
+END_DESCRIPTION
+
+Variable_Quality
+(no description available)
+_INIT_
+All 3 instances equal to 0.
+END_DESCRIPTION
+
+Variable_Convenience
+Product convenience (inverse of price)
+
+'Convenience' appears in the equation for: Prob, Quality, Convenience
+_INIT_
+All 3 instances equal to 1.
+END_DESCRIPTION
+
+Variable_sigma
+Accumulated knowledge
+
+'sigma' appears in the equation for: Quality, sigma
+_INIT_
+ All 3 instances equal to 1.
+END_DESCRIPTION
+
+Variable_ms
+Market share of a firm
+
+'ms' appears in the equation for: Convenience, HHI
+_INIT_
+ All 3 instances equal to 0.333.
+END_DESCRIPTION
+
+Variable_Clients
+Number os consumers with products from firm in use
+Updated in 'Accounting"
+
+'Clients' appears in the equation for: ms, Accounting
+_INIT_
+ All 3 instances equal to 300.
+END_DESCRIPTION
+
+Variable_Sales
+Firm sales in period
+Updated in 'Accounting' and 'Buy'
+
+'Sales' appears in the equation for: TotalSales, Accounting, Buy
+_INIT_
+
+END_DESCRIPTION
+
+Object_Consumer
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Product
+Identification number of product used in period, either buying it if broken or using the previously used one otherwise
+
+'Product' appears in the equation for: Accounting, Sales
+_INIT_
+ All 100000 instances set to integer random values drawn from a uniform in the range [1,3].
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#define NO_POINTER_INIT			// comment to enable pointer checking
+
+#include "fun_head_fast.h"
+
+
+MODELBEGIN
+
+
+EQUATION("Init")
+/*
+Model initialization
+*/
+
+v[0] = V("N");
+v[1] = V("C0");
+v[2] = V("Q0");
+v[3] = COUNT("Firm");
+
+for (i = v[3] + 1; i <= v[0]; ++i)
+	ADDOBJ("Firm");				// add missing firm objects
+
+i = 1;
+CYCLE(cur, "Firm")				// set initial conditions (t=0)
+{
+	WRITES(cur, "Id", i++);
+	WRITELS(cur, "Convenience", v[1], 0);
+	WRITELS(cur, "Quality", v[2], 0);
+	WRITELS(cur, "Sales", 0, 0);
+	WRITELS(cur, "Prob", 0, 0);
+	WRITELS(cur, "Clients", 0, 0);
+	WRITELS(cur, "sigma", 0, 0);
+	WRITELS(cur, "ms", 1 / v[0], 0);
+}
+
+v[4] = V("M");
+v[5] = COUNT("Consumer");
+
+for (j = v[5] + 1; j <= v[4]; ++j)
+	ADDOBJ("Consumer");			// add missing consumer objects
+	
+CYCLE(cur, "Consumer")			// asign current product used
+	WRITELS(cur, "Product", uniform_int(1, v[0]), 0);
+
+PARAMETER;
+
+RESULT(1)
+
+
+EQUATION("Prob")
+/*
+Probability of firm being chosen
+*/
+
+v[0] = V("alpha");
+v[1] = V("Quality");
+v[2] = V("Convenience");
+
+v[3] = v[0] * v[1] + (1 - v[0]) * v[2];
+
+RESULT(v[3])
+
+
+EQUATION("Quality")
+/*
+New product quality, possibly obtained by innovation
+*/
+
+v[0] = V("alpha");
+v[1] = V("Cmin");
+v[2] = VL("Quality", 1);
+v[3] = VL("Convenience", 1);
+v[4] = V("sigma");
+
+v[5] = norm(v[1], v[4]);				// innovation potential
+
+v[6] = v[0] * v[2] + (1 - v[0]) * v[3];	// current probability
+v[7] = v[0] * v[5] + (1 - v[0]) * v[1];	// innovation probability
+
+if (v[6] < v[7])		// does innovation increase probability?
+{						// yes - adopt innovation
+	WRITE("Convenience", v[1]);
+	WRITE("sigma", 0);
+	v[8] = v[5];
+}
+else
+	v[8] = v[2];		// no - keep current product quality
+
+RESULT(v[8])
+
+
+EQUATION("sigma")
+/*
+Accumulated knowledge
+*/
+
+v[0] = V("delta");
+v[1] = VL("sigma", 1);
+
+v[2] = v[1] + v[0];
+
+RESULT(v[2])
+
+
+EQUATION("Convenience")
+/*
+Product convenience (inverse of price)
+*/
+
+v[0] = V("tau");
+v[1] = V("Cmax");
+v[2] = VL("Convenience", 1);
+v[3] = VL("ms", 1);
+
+v[4] = v[2] * (1 - v[0] * v[3]) + v[1] * v[0] * v[3];
+
+RESULT(v[4])
+
+
+EQUATION("ms")
+/*
+Market share of a firm
+*/
+
+V("Account");					// make sure accounting is done
+
+v[0] = V("M"); 					// number of consumers
+v[1] = V("Clients");			// own customers
+
+v[2] = v[1] / v[0];
+
+RESULT(v[2])
+
+
+EQUATION("TotSales")
+/*
+Total market sales
+*/
+
+RESULT(SUM("Sales"))
+
+
+EQUATION("Account")
+/*
+Compute the number of customers
+Also clear the period sales
+*/
+
+CYCLE(cur, "Firm")				// reset firm data
+{
+	WRITES(cur, "Clients", 0);
+	WRITES(cur, "Sales", 0);
+}
+
+CYCLE(cur, "Consumer")			// count sales and clients
+{
+	v[0] = VS(cur, "Product");
+	cur1 = SEARCH_CND("Id", v[0]);
+	INCRS(cur1, "Clients", 1);
+}
+
+RESULT(1)
+
+
+EQUATION_DUMMY("Clients", "Account")
+/*
+Number os consumers with products from firm in use
+Updated in 'Accounting"
+*/
+
+
+EQUATION("Buy")
+/*
+Function in returning a random product
+*/
+
+v[0] = V("TotProb");
+
+cur = RNDDRAW_TOT("Firm", "Prob", v[0]);// choose randomly one firm
+v[1] = VS(cur, "Id");			// record the id. number of the firm
+INCRS(cur, "Sales", 1);			// increment firm sales
+
+RESULT(v[1])
+
+
+EQUATION_DUMMY("Sales", "")
+/*
+Firm sales in period
+Updated in 'Accounting' and 'Buy'
+*/
+
+
+EQUATION("Product")
+/*
+Identification number of product used in period, either buying it 
+if broken or using the previously used one otherwise
+*/
+
+v[0] = VL("Product", 1);		// look at the product used
+cur = SEARCH_CND("Id", v[0]);	// pointer to current firm
+v[1] = VS(cur, "beta");			// probability of product failure
+
+if (RND < v[1])					// Does product broke down?
+	v[2] = V("Buy");			// yes - a new one must be bought
+else
+	v[2] = v[0];				// no - the product is still working
+ 
+RESULT(v[2])
+
+
+EQUATION("TotProb")
+/*
+Sum of probabilities of all firms
+*/
+
+RESULT(SUM("Prob"))
+
+
+EQUATION("HHI")
+/*
+Herfindhal-Hirschman Index
+*/
+
+v[0] = 0;
+CYCLE(cur, "Firm")
+{
+	v[1] = VS(cur, "ms");
+	v[0] += v[1] * v[1];
+}
+
+RESULT(v[0])
+
+
+EQUATION("HPI")
+/*
+Hymer & Pashigian Instability Index
+Sum of the absolute changes in firm market shares
+*/
+
+v[0] = 0;
+CYCLE(cur, "Firm")
+{
+	v[1] = VLS(cur, "ms", 1);
+	v[2] = VS(cur, "ms");
+	v[0] += abs(v[2] - v[1]);
+}
+
+RESULT(v[0])
+
+
+MODELEND
+
+
+void close_sim(void)
+{
+}
+
+
+END_EQ_FILE
