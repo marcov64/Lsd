@@ -5,9 +5,8 @@
 
 #define latt2d true //to switch between 1d (false) and 2d (true) lat.
 
-#include "PajekFromCppFixVer/PajekFromCpp_head.h"
-#define NO_WINDOW_TRACKING
-#include "tools/debug.h"  //TEQUATION command
+#include "PajekFromCppFixVer/PajekFromCpp_head.h" //export to .net and .paj format
+
 #define PAJEK
 
 MODELBEGIN
@@ -17,7 +16,7 @@ MODELBEGIN
 /*****************
   Global Equations ( Scheduler , Initialise )
 ****************/
-TEQUATION("Scheduler")
+EQUATION("Scheduler")
 /*
 The Scheduler controls the updating scheme (that part which is not endogeneously defined 
 */
@@ -47,7 +46,7 @@ The Scheduler controls the updating scheme (that part which is not endogeneously
     cur1 = SEARCH_POSITIONS(cur,"Patch");
     bool has_moved = ( VS(cur,"Move") > 0.0 );
     #ifdef PAJEK
-      PAJ_ADD_V_C(t,UIDS(cur),"Agent",1.0,POSITION_XS(cur)+.25,POSITION_YS(cur)+.25,(VS(cur,"Content")==1.0?"ellipse":"triangle"),1.0,1.0,(VS(cur,"Colour")==5?"Blue":"Red"));
+      PAJ_ADD_V_C(t,UIDS(cur),"Agent",1.0,POSITION_XS(cur),POSITION_YS(cur),(VS(cur,"Content")==1.0?"ellipse":"triangle"),1.0,1.0,(VS(cur,"Colour")==5?"Blue":"Red"));
     #endif
     if (has_moved) {
       steps++;
@@ -77,7 +76,7 @@ The Scheduler controls the updating scheme (that part which is not endogeneously
   PLOG("\tEnd Scheduler: %g",RND);
 RESULT( steps )
 
-TEQUATION("Initialise")
+EQUATION("Initialise")
 /*
 Initialise the model
 */
@@ -166,7 +165,7 @@ Initialise the model
   }
   CYCLE(cur,"Agent"){
     //(TIME,ID,KIND,VALUE,X,Y,SYMBOL,X_FACT,Y_FACT,COLOR)
-    PAJ_ADD_V_C(0,UIDS(cur),"Agent",1.0,POSITION_XS(cur)+.25,POSITION_YS(cur)+.25,(VS(cur,"Content")==1.0?"ellipse":"triangle"),1.0,1.0,(VS(cur,"Colour")==5?"Blue":"Red"));
+    PAJ_ADD_V_C(0,UIDS(cur),"Agent",1.0,POSITION_XS(cur),POSITION_YS(cur),(VS(cur,"Content")==1.0?"ellipse":"triangle"),1.0,1.0,(VS(cur,"Colour")==5?"Blue":"Red"));
   }
   #endif
 
@@ -178,7 +177,7 @@ RESULT( 0.0 )
   Patch Equations ( isOption )
 ****************/
 
-TEQUATION("isOption")
+EQUATION("isOption")
 /* Check if the place would be an option for the calling agent
    check 1: is empty? else it is not an option
    if empty, then, without RationalExpectations take true, else check 2.
@@ -222,7 +221,7 @@ RESULT(isOption)
   Agent Equations ( Move ,Content, locSegregation )
 ****************/
 
-TEQUATION("Move")
+EQUATION("Move")
 /*
 The agent moves if it is not content with its situation.
 */
@@ -270,7 +269,7 @@ RESULT( move )
 
 
 
-TEQUATION("locFracOther")
+EQUATION("locFracOther")
 /*
 Measures the fraction of people in the neighbourhood that differ from ones own color.
 */
@@ -289,7 +288,7 @@ Measures the fraction of people in the neighbourhood that differ from ones own c
   }
 RESULT( fracOther )
 
-TEQUATION("Content")
+EQUATION("Content")
 /*
 Function that at the point in time measures if the agent is content with its situation.
 */
@@ -303,7 +302,7 @@ RESULT ( content )
   Monitor Equations ( fracMove , fracContent , dissimilarity)
 ****************/
 
-TEQUATION("fracMove")
+EQUATION("fracMove")
 /*
 Monitor the fraction of agents that decided to move.
 */
@@ -311,7 +310,7 @@ Monitor the fraction of agents that decided to move.
   STAT("Move");
 RESULT( v[1] /*Average*/ )
 
-TEQUATION("EndOfSim")
+EQUATION("EndOfSim")
 /* Stop the simulation if no model changes any more. */
   STAT("fracMove");
     //not first step, no movement now, no movement the time before.
@@ -322,7 +321,7 @@ TEQUATION("EndOfSim")
   }
 RESULT( v[3] ) //save maximum fraction that moved for automatic stop condition
 
-TEQUATION("fracContent")
+EQUATION("fracContent")
 /*
 Monitor the fraction of agents that are content.
 */
@@ -330,7 +329,7 @@ Monitor the fraction of agents that are content.
   STAT("Content");
 RESULT( v[1] /* Average */ )
 
-TEQUATION("dissimilarity")
+EQUATION("dissimilarity")
 /*
 Monitor the aggregate level of segregation with the dissimilarity index for the
 moore neighbourhood.

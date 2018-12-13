@@ -4,6 +4,8 @@
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
+	This file also:  Frederik Schaff, Ruhr-Universität Bochum
+
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
