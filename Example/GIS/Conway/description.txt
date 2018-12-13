@@ -1,0 +1,32 @@
+Game of Life 
+Conway's model
+
+The model consists on a lattice where cells can be "alive" or "dead". Each cell depends on its eight neighbours and at each time step determine their state according to the following rules:
+- Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
+- Any live cell with two or three live neighbours lives on to the next generation.
+- Any live cell with more than three live neighbours dies, as if by overpopulation.
+- Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+
+Depending on the initial conditions the configuration can reach a stable state or enter one among severl cyclical patterns.
+
+The model is configurated so that the user can impose a random number of living
+cells (par. PercActive), defined as the share of existing cells being alive. If
+this parameter is negative the model asks for a file containing the initially
+living cells. These are contained into text files storing at each line a couple
+of positive integers, indicating the row and column of the active cell.
+
+The model is endowed with a "brake" slowing down the speed of execution, useful
+to appreciate the dynamics. Parameter TimeSleep expresses the milliseconds to
+wait before moving to compute the next step.
+
+This Version:
+Ported to GIS representation, December 2018
+
+- added option to choose wrapping:
+
+there are 2^4 options. We use a bit-code (0=off):
+0-bit: left     : 0=0 1=1
+1-bit: right    : 0=0 1=2
+2-bit: top      : 0=0 1=4
+3-bit: bottom   : 0=0 1=8
+sum the values to generate desired wrapping (e.g. 15 - torus world, default)

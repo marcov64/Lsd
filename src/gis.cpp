@@ -1203,4 +1203,52 @@ char gismsg[300];
     double line = position->map->yn - y;
     return read_lattice( line, col );
   }
+
+  int object::load_data_gis( const char *inputfile, const char *obj_lab, const char *var_lab, int lag )
+  {
+    /* Read data points x,y with associated data values val from the inputfile
+       and store it at the gis_obj with label obj_lab into variable var_lab
+       with lag lag.
+
+       If the object of type obj_lab does not yet exist at this position, it is
+       created (from the blueprint) and registered.
+    */
+    if (ptr_map()==NULL){
+        sprintf( gismsg, "failure in load_data_gis() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return -1;
+    }
+    int elements_added = 0;
+    rapidcsv::Document f_in(inputfile, rapidcsv::LabelParams(-1, -1));
+    if(f_in.GetColumnCount() < 3 || f_in.GetRowCount() < 1 )
+    {
+      sprintf( gismsg, "failure in load_data_gis() for file '%s'", inputfile );
+		      error_hard( gismsg, "most likely the file does not exist",
+					"check your code to prevent this situation" );
+      return -1;
+    }
+    object *obj_parent = root -> search(obj_lab);
+
+    double x_pos,y_pos,val;
+    for (int row = 0; row< f_in.GetRowCount(); ++row)
+    {
+      x_pos = f_in.GetCell<double>(0,row);
+      y_pos = f_in.GetCell<double>(1,row);
+      val = f_in.GetCell<double>(2,row);
+      object *cur = search_at_position(obj_lab, x_pos, y_pos, true); //error if more than one option exists.
+
+      if (cur == NULL) { //if necessary, create the object
+        cur = obj_parent->add_n_objects2( obj_lab, 1 ); //create new object in object parent
+        cur->register_at_map(ptr_map(), x_pos, y_pos);//register it in space at given position
+        elements_added++;
+      }
+      cur->write( var_lab, val,  lag); //write value
+      sprintf(gismsg,"\nAdded live cell at pos %g, %g",x_pos,y_pos);
+      plog(gismsg);
+    }
+    return elements_added;
+  }
+
+
 #endif //#ifdef CPP11

@@ -370,7 +370,7 @@ bool no_ptr_chk = true;
 #define WRITE( X, Y ) ( p->write( ( char * ) X, Y, t ) )
 #define WRITEL( X, Y, Z ) ( p->write( ( char * ) X, Y, Z ) )
 #define WRITELL( X, Y, Z, W ) ( p->write( ( char * ) X, Y, Z, W ) )
-#define WRITES( O, X, Y ) ( CHK_PTR_DBL( O ) O->write( ( char * ) X, Y, t ) )
+#define WRITES( O, X, Y ) ( CHK_PTR_DBL( O ) O->write( ( char * ) X, Y, 0 ) )
 #define WRITELS( O, X, Y, Z ) ( CHK_PTR_DBL( O ) O->write( ( char * ) X, Y, Z ) )
 #define WRITELLS( O, X, Y, Z, W ) ( CHK_PTR_DBL( O ) O->write( ( char * ) X, Y, Z, W ) )
 #define INCR( X, Y ) ( p->increment( ( char * ) X, Y ) )
@@ -791,6 +791,14 @@ bool no_ptr_chk = true;
 #define V_LAT_GIS_ADJUST_XYS( PTR, X, Y ) PTR->read_lattice_gis( X, Y, false )
 #define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL ) p->update_lattice_gis( X, Y, VAL, false )
 #define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL ) PTR->update_lattice_gis( X, Y, VAL, false )
+
+//And some new macros to load data from txt files.
+//The txt file is in the format x y value NEWLINE
+#define LOAD_DATA_GIS(inputfile, obj_lab, var_lab ) p->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
+#define LOAD_DATA_GISL(inputfile, obj_lab, var_lab, time ) p->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, time )
+#define LOAD_DATA_GISS(PTR, inputfile, obj_lab, var_lab ) PTR->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
+#define LOAD_DATA_GISSL(PTR, inputfile, obj_lab, var_lab, time ) PTR->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, time )
+
 
 #endif //#ifdef CPP11
 	

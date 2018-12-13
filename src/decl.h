@@ -54,6 +54,7 @@ Global definitions among all LSD C++ modules
 #include <functional>
 #include <algorithm>
 #include <random>						// use new random libraries if possible
+#include <rapidcsv/rapidcsv.h> //easy acces of csvs
 #endif //#ifdef CPP11
 
 #ifdef CPP11
@@ -376,6 +377,8 @@ struct object
 	double update_lattice_gis(double x, double y, double colour, bool noChange);
 	double read_lattice_gis( );
 	double read_lattice_gis( double x, double y, bool noChange);
+
+  int load_data_gis( const char *inputfile, const char *obj_lab, const char *var_lab, int lag );
 
 	#endif //#ifdef CPP11
 };
@@ -1114,3 +1117,8 @@ int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST 
 #endif						// NO_WINDOW
 
 #endif						// FUN
+
+#ifdef CPP11 //util.cpp
+std::istream& safeGetline(std::istream& is, std::string& t);
+std::istream& safeGetline(std::istream& is, std::string& t, char delim);
+#endif

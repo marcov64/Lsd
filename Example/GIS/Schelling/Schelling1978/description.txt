@@ -35,7 +35,15 @@ Control:
 Global (Sensitivity) Parameters :
 [P] xn  			  : x-dimension of the space (integer>>3)
 [P] yn  			  : y-dimension of the space (integer>>3)
-[P] wrapping  	: Wrapping 		(0: off, 1: left, 2: right, >=3: left & right)
+[P] wrapping  	:
+
+    there are 2^4 options. We use a bit-code (0=off):
+    0-bit: left     : 0=0 1=1
+    1-bit: right    : 0=0 1=2
+    2-bit: top      : 0=0 1=4
+    3-bit: bottom   : 0=0 1=8
+    sum the values to generate desired wrapping (e.g. 15 - torus world, default)
+
 [P] fracAgents	: relative number of agents compared to xn (0..1)
 [P] fracBlue		: relative number of blue agents from total (0..1)
 [P] tolerance		: the tolerance level (homogeneous, 0..1)
