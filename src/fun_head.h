@@ -888,3 +888,8 @@ void cmd( const char *cm, ... );
 	};
 
 #endif
+
+#ifndef NO_WINDOW //these macros only exist in windowed mode.
+  //A helper macro that can be used together with others to pass a file-name
+  #define SELECT_FILE( _message ) p->grab_filename_interactive( _message )
+#endif

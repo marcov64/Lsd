@@ -430,24 +430,29 @@ char gismsg[300];
   }
 
   bool object::boundingBox(int &left_io, int &right_io, int &top_io, int &bottom_io, double radius){
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in boundingBox() for object '%s'", label );
   	      error_hard( gismsg, "the object is not registered in any map",
   				"check your code to prevent this situation" );
       return false;
     }
+    #endif
     return boundingBox(position->x, position->y, left_io, right_io, top_io, bottom_io, radius);
   }
 
     //Calculate the bounding box points.
     //Takes care of wrapping
-  bool object::boundingBox(double x, double y, int &left_io, int &right_io, int &top_io, int &bottom_io, double radius){
+  bool object::boundingBox(double x, double y, int &left_io, int &right_io, int &top_io, int &bottom_io, double radius)
+  {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in boundingBox() for object '%s'", label );
   	      error_hard( gismsg, "the object is not registered in any map",
   				"check your code to prevent this situation" );
       return false;
     }
+    #endif
     if (radius < 0){
       left_io = 0;
       right_io = position->map->xn - 1;
@@ -774,12 +779,14 @@ char gismsg[300];
   //  Initialise the gis neighbour search using the full landscape and a random order
   object* object::first_neighbour_rnd_full(char const lab[])
   {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in first_neighbour_rnd_full() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return NULL;
     }
+    #endif
     it_rnd_full(lab);
     return next_neighbour();
   }
@@ -788,12 +795,14 @@ char gismsg[300];
   //  Initialise the nearest neighbour search and return nearest neighbours
   object* object::first_neighbour(char const lab[], double radius, object* caller, int lag, char const varLab[], char const condition[], double condVal)
   {
+      #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in next_neighbour() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return NULL;
     }
+    #endif
     it_in_radius(lab, radius, caller, lag, varLab, condition, condVal);
     return next_neighbour();
   }
@@ -868,12 +877,14 @@ char gismsg[300];
   //    and if not throw exception. Use exact position.
   //  if not single, randomise order of potential candidates.
   object* object::search_at_position(char const lab[], double x, double y, bool single) {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in search_at_position() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return NULL;
     }
+    #endif
     if (check_positions(x,y) == false ){
         sprintf( gismsg, "failure in search_at_position() searching at position (%g,%g) for '%s'", x,y, lab );
 		      error_hard( gismsg, "the position is not on the map",
@@ -912,12 +923,14 @@ char gismsg[300];
   //  object.
   object* object::search_at_position(char const lab[], bool single, bool grid)
   {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in search_at_position() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return NULL;
     }
+    #endif
     if (grid == false)
       return search_at_position(lab, position->x, position->y, single);
     else
@@ -925,12 +938,14 @@ char gismsg[300];
   }
     double object::elements_at_position(char const lab[], double x, double y)
     {
+      #ifndef NO_POINTER_CHECK
       if (ptr_map()==NULL){
         sprintf( gismsg, "failure in search_at_position() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
         return 0;
       }
+      #endif
       int n = 0;
       for (auto const &item : position->map->elements.at(int(x)).at(int(y)) ){
         if (item->position->x == x && item->position->y == y){
@@ -944,13 +959,14 @@ char gismsg[300];
 
   double object::elements_at_position(char const lab[], bool grid)
   {
-
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
           sprintf( gismsg, "failure in elements_at_position() for object '%s'", label );
   		      error_hard( gismsg, "the object is not registered in any map",
   					"check your code to prevent this situation" );
         return 0;
       }
+      #endif
       if (grid == false)
         return elements_at_position(lab, position->x, position->y);
       else
@@ -961,12 +977,14 @@ char gismsg[300];
   //  Produce a random x or y position, only ensuring that it is inside the map
   double object::random_pos(const char xy)
   {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in random_pos() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return -1;
     }
+    #endif
     switch (xy) {
 
       case 'x':
@@ -985,12 +1003,14 @@ char gismsg[300];
   //  get the position of the object and return it.
   double object::get_pos(char xyz)
   {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in pos() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return -1;
     }
+    #endif
     switch (xyz) {
       case 'x' :
       case 'X' : return position->x;
@@ -1046,12 +1066,14 @@ char gismsg[300];
   //  see above.
   bool object::move(int direction)
   {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in move() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return false;
     }
+    #endif
     double x_out = position->x;
     double y_out = position->y;
     switch (direction) {
@@ -1075,12 +1097,14 @@ char gismsg[300];
   //  in case change of positions is not allowed, only check and do not adjust
   bool object::check_positions(double& _xOut, double& _yOut, bool noChange)
   {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in check_positions() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return false;
     }
+    #endif
     if (   (_xOut >= 0.0 && _xOut < double(position->map->xn) )
         && (_yOut >= 0.0 && _yOut < double(position->map->yn) ) ) {
       return true; //all fine, nothing to change.
@@ -1135,12 +1159,14 @@ char gismsg[300];
     //Initialise a lattice for the gis.
   double object::init_lattice_gis(int init_color, double pixW, double pixH)
   {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in gis_init_lattice() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return -1;
     }
+    #endif
     //double init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
     return init_lattice( init_color, position->map->yn, position->map->xn, pixW, pixH  );
   }
@@ -1149,23 +1175,27 @@ char gismsg[300];
 
   double object::update_lattice_gis(double colour)
   {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in update_lattice_gis() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return -1;
     }
+    #endif
     return update_lattice_gis(position->x,position->y,colour, true);
   }
 
   double object::update_lattice_gis(double x, double y, double colour, bool noChange)
   {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in write_lattice_gis() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return -1;
     }
+    #endif
     if (check_positions(x, y, noChange) == false){
       return -1; //error
     }
@@ -1177,23 +1207,27 @@ char gismsg[300];
   }
   double object::read_lattice_gis( )
   {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in write_lattice_gis() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return -1;
     }
+    #endif
     return read_lattice_gis(position->x,position->y,true);
   }
 
   double object::read_lattice_gis( double x, double y, bool noChange)
   {
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in read_lattice_gis() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return -1;
     }
+    #endif
     if (check_positions(x, y, noChange) == false){
       return -1; //error
     }
@@ -1213,12 +1247,14 @@ char gismsg[300];
        If the object of type obj_lab does not yet exist at this position, it is
        created (from the blueprint) and registered.
     */
+    #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in load_data_gis() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return -1;
     }
+    #endif
     int elements_added = 0;
     rapidcsv::Document f_in(inputfile, rapidcsv::LabelParams(-1, -1));
     if(f_in.GetColumnCount() < 3 || f_in.GetRowCount() < 1 )

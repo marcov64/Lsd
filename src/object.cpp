@@ -281,7 +281,6 @@ mutex parallel_collect;			// mutex lock for parallel object list update
 mutex parallel_delete;			// mutex lock for parallel deletion
 #endif
 
-
 /****************************************************
 BRIDGE
 Constructor, copy constructor and destructor
@@ -3628,3 +3627,16 @@ double object::interact( char const *text, double v, double *tv, int i, int j,
 	return v;
 #endif
 }
+
+/****************************************************
+GRAB_FILENAME_INTERACTIVE
+Allow to grab the name of a file in interactive mode,
+calling tcl as helper.
+****************************************************/
+#ifndef NO_WINDOW      //function to grab a filename interactively
+const char * object::grab_filename_interactive ( const char[] )
+{
+  cmd("set fname [tk_getOpenFile -title \"_message\"]");
+  return (const char *) Tcl_GetVar(inter, "fname",0);
+}
+#endif

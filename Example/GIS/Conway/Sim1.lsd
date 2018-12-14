@@ -26,7 +26,7 @@ Object: Root C	1
 Var: Init 0 n + n n
 Var: SlowDown 0 n + d n
 Param: TimeSleep 0 n + n n	50
-Param: PercActive 0 n + n n	0.2
+Param: PercActive 0 n + n n	-5
 Param: nrow 0 n + n n	50
 Param: ncol 0 n + n n	100
 Param: wrapping 0 n + n n	15

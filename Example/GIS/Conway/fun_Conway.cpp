@@ -1,3 +1,5 @@
+#define NO_POINTER_INIT							// disable pointer checking
+
 #include "fun_head.h"
 
 MODELBEGIN
@@ -34,9 +36,11 @@ if (active_cells > 0) {
 
   //otherwise load data from file
 } else {
-  cmd("set fname [tk_getOpenFile -title \"Select file with initial active cells and values\"]");
-  chstr= (char *) Tcl_GetVar(inter, "fname",0);
-  LOAD_DATA_GIS(chstr, "Cell", "State"); //Create if necessary  (here not) and activate them
+//   cmd("set fname [tk_getOpenFile -title \"Select file with initial active cells and values\"]");
+//   chstr= (char *) Tcl_GetVar(inter, "fname",0);
+//   LOAD_DATA_GIS(chstr, "Cell", "State"); //Create if necessary  (here not) and activate them
+
+LOAD_DATA_GIS(SELECT_FILE("Select file with initial active cells and values"),"Cell","State");
 
   //in this case we need to manually update the lattice.
   CYCLE(cur,"Cell"){
@@ -87,10 +91,11 @@ RESULT( state )
 
 EQUATION("SlowDown")
 /*
-Equation wasting time to slow down the graph
+Equation wasting time to slow down the graph, if not in fast mode
 */
-v[0]=V("TimeSleep");
-SLEEP((int)v[0]);
+if (false == fast)
+  SLEEP((int) V("TimeSleep") );
+
 RESULT(1)
 
 

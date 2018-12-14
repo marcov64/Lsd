@@ -207,10 +207,10 @@ struct object
 	void *cext;							// pointer to a C++ object extension to the LSD object
 	bool *del_flag;						// address of flag to signal deletion
 	double v_rndsort;   //value for random sorting
-	#ifdef CPP11
+#ifdef CPP11
 	uniqueId *uID; //unique identifier - double due to LSD data structure.
 	gisPosition *position; //Pointer to gis data structure
-	#endif //#ifdef CPP11
+#endif //#ifdef CPP11
 
 	o_vecT hooks;
 	b_mapT b_map;						// fast lookup map to object bridges
@@ -307,16 +307,16 @@ struct object
 	void sort_asc( object *from, char *l_var );
 	void sort_desc( object *from, char *l_var );
 	void update( void );
-	#ifdef CPP11
+#ifdef CPP11
 	// Fast look-up of agents via individual, unique IDs
 	bool is_unique();
 	void declare_as_unique(char const *uLab); //this object and all of its kind will become "unique", allowing for fast access by the new unique id.
 	object* obj_by_unique_id(double id); //when the object is deleted, clean up and update info.
 	void declare_as_nonUnique(); //function to retreave object by unique id.
 	double unique_id();  //retrieve unique id, if any.
-	#endif //#ifdef CPP11
+#endif //#ifdef CPP11
 
-	#ifdef CPP11
+#ifdef CPP11
 	//set the new GIS handling methods
 	double distance(object* other); //distance to other object
 	double distance(double x, double y); //distance to point in plain
@@ -380,7 +380,13 @@ struct object
 
   int load_data_gis( const char *inputfile, const char *obj_lab, const char *var_lab, int lag );
 
-	#endif //#ifdef CPP11
+#endif //#ifdef CPP11
+
+#ifndef NO_WINDOW
+  //Helper function to grap a filename
+  const char * grab_filename_interactive ( const char[] );
+#endif
+
 };
 
 struct variable
@@ -423,6 +429,7 @@ struct variable
 	double fun( object *caller );
 	int init( object *_up, char const *_label, int _num_lag, double *val, int _save );
 	void empty( void );
+
 };
 
 struct bridge

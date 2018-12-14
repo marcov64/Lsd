@@ -1,6 +1,8 @@
 Game of Life - GIS
 Conway's model
 This Version: Ported to GIS representation, December 2018
+- naive port (each cell is an active entity)
+- performant alternative: Only create living cells (sparce space)
 
 The model consists on a lattice where cells can be "alive" or "dead". Each cell depends on its eight neighbours and at each time step determine their state according to the following rules:
 - Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
