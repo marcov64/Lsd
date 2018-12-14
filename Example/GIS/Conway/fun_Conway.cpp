@@ -9,7 +9,16 @@ EQUATION("Init")
 
 INIT_SPACE_GRID_WRAP("Cell", V("ncol"), V("nrow"), V("wrapping") ); //Initialise the space
 ADD_ROOT_TO_SPACE(SEARCH("Cell")); //Ease access.
-INIT_LAT_GISS ( SEARCH("Cell"), 0 ); //Initialise the graphical lattice (black)
+// The window is sized at most pixel * pixel
+int pcol,prow;
+pcol=prow=(int)V("WPixel");
+if (V("ncol")>V("nrow")) {
+  prow = V("nrow")/V("ncol") * prow; //scale down
+} if (V("ncol")<V("nrow")) {
+  pcol = V("ncol")/V("nrow") * pcol; //scale down
+}
+INIT_LAT_GISS ( SEARCH("Cell"), 0, pcol, prow ); //Initialise the graphical lattice (black)
+
 int active_cells = V("PercActive") *  V("ncol") * V("nrow") ;
 
 if (active_cells > 0) {

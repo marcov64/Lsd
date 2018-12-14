@@ -1,136 +1,8 @@
-	
-Label Root
-{
-	Son: Cell
-	Label Cell
-	{
-		Var: State
-
-	}
-
-	Var: Init
-	Var: SlowDown
-	Param: TimeSleep
-	Param: PercActive
-	Param: nrow
-	Param: ncol
-	Param: wrapping
-	Param: WPixel
-
-}
-
-
-DATA
-
-Object: Root C	1
-Var: Init 0 n + n n
-Var: SlowDown 0 n + d n
-Param: TimeSleep 0 n + n n	50
-Param: PercActive 0 n + n n	0.2
-Param: nrow 0 n + n n	50
-Param: ncol 0 n + n n	100
-Param: wrapping 0 n + n n	15
-Param: WPixel 0 n + n n	800
-
-Object: Cell C	1
-Var: State 1 n + n n	0
-
-SIM_NUM 1
-SEED 1
-MAX_STEP 1000000
-EQUATION fun_Conway.cpp
-MODELREPORT modelreport.html
-
-DESCRIPTION
-
-Object_Root
-(no description available)
-END_DESCRIPTION
-
-Variable_Init
-(no description available)
-_INIT_
-
-END_DESCRIPTION
-
-Variable_SlowDown
-(no description available)
-_INIT_
-
-END_DESCRIPTION
-
-Parameter_TimeSleep
-(no description available)
-_INIT_
-All 1 instances equal to 50.
-END_DESCRIPTION
-
-Parameter_PercActive
-(no description available)
-_INIT_
-
-END_DESCRIPTION
-
-Parameter_nrow
-(no description available)
-_INIT_
-
-END_DESCRIPTION
-
-Parameter_ncol
-(no description available)
-_INIT_
-
-END_DESCRIPTION
-
-Parameter_wrapping
-Define how the world "wraps" around.
-
-    there are 2^4 options. We use a bit-code (0=off):
-    0-bit: left     : 0=0 1=1
-    1-bit: right    : 0=0 1=2
-    2-bit: top      : 0=0 1=4
-    3-bit: bottom   : 0=0 1=8
-    sum the values to generate desired wrapping (e.g. 15 - torus world, default)
-_INIT_
-
-END_DESCRIPTION
-
-Parameter_WPixel
-Maximum Size of the lattice window in pixel. The window is automatically resized to fit the layout of the lattice.
-_INIT_
-
-END_DESCRIPTION
-
-Parameter_Cell
-A cell - alive or dead
-_INIT_
-
-END_DESCRIPTION
-
-Variable_State
-(no description available)
-_INIT_
-
-END_DESCRIPTION
-
-
-DOCUOBSERVE
-
-END_DOCUOBSERVE
-
-
-DOCUINITIAL
-
-END_DOCUINITIAL
-
-
-EQ_FILE
 #include "fun_head.h"
 
 MODELBEGIN
 
-
+const char *chstr;
 
 
 EQUATION("State")
@@ -148,11 +20,30 @@ CYCLE_LINK(curl)
   cur=LINKTO(curl);
   v[0]+=VLS(cur,"State",1);
  }
+v[1]=0; 
 if(v[0]==3)
- END_EQUATION(1);
+ v[1]=1;
+ 
 if(CURRENT==1 && v[0]==2)
- END_EQUATION(1); 
-RESULT(0 )
+ v[1]=1;
+if(CURRENT!=v[1])
+ {
+  v[10]=V("row");
+  v[20]=V("col");
+  update_lattice(v[10],v[20],v[1]);
+ }  
+ 
+RESULT(v[1] )
+
+EQUATION("SlowDown")
+/*
+Equation wasting time to slow down the graph
+*/
+v[0]=V("TimeSleep");
+SLEEP((int)v[0]);
+RESULT(1
+ )
+
 
 
 EQUATION("InitLattice")
@@ -164,7 +55,10 @@ v[1]= V("ncol"); //n.columns in the lattice
 p->init_lattice_net(v[0],v[1],"node", 1);
 
 p->initturbo("node", v[0]*v[1] );
-   
+v[4]=V("PixWidth");
+v[5]=V("PixHeight"); 
+init_lattice(v[4],v[5], v[0], v[1], "", "", "", NULL, 0);
+
 v[3]=V("PercActive");
 CYCLE(cur, "node")
  { k=VS_NODEID(cur)-1;
@@ -172,12 +66,35 @@ CYCLE(cur, "node")
    j=k-i*(int)v[1];
    WRITES(cur,"row",(double)i+1);
    WRITES(cur,"col",(double)j+1);
-   if(RND<v[3])
+   if(v[3]>0 && RND<v[3])
     WRITELS(cur,"State",1, t-1);
    else
     WRITELS(cur,"State",0, t-1); 
- 
+   update_lattice( VS(cur,"row"), VS(cur,"col"), VLS(cur,"State",1));  
  }
+if(v[3]<0)
+ {
+  cmd("set fname [tk_getOpenFile -title \"Select file with initial active cells\"]");
+  chstr=(char *)Tcl_GetVar(inter, "fname",0);
+  
+  f=fopen(chstr, "r");
+  if(f==NULL)
+   {quit=2;
+    plog("\nWrong file name\n\n");
+    END_EQUATION(0);
+   } 
+  while(  fscanf(f, "%d %d", &i, &j)>0)
+   {
+    
+    v[2]=(double)i*v[1]+(double)j;
+    //cur=p->turbosearch("node",v[0]*v[1],v[2]);
+    cur=TSEARCHT("node", v[0]*v[1],v[2]);
+    WRITELS(cur,"State",1, t-1);
+   
+   }
+  fclose(f);
+ }
+cmd("update");
 PARAMETER 
 END_EQUATION(0);
 /***
@@ -219,7 +136,8 @@ v[99]=0;
 CYCLE(cur, "Agent")
  {v[99]++;
   v[13]=rnd_integer(1, v[12]);
-  cur1=p->turbosearch("node", v[12],v[13]);
+  cur1=TSEARCHT("node", v[12]
+,v[13]);
   while(cur1!=NULL && cur1->hook!=NULL)    cur1=go_brother(cur1);
   if(cur1==NULL)
      {
@@ -262,5 +180,3 @@ void close_sim(void)
 }
 
 
-
-END_EQ_FILE

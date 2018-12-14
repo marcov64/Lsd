@@ -1,5 +1,6 @@
-Game of Life 
+Game of Life - GIS
 Conway's model
+This Version: Ported to GIS representation, December 2018
 
 The model consists on a lattice where cells can be "alive" or "dead". Each cell depends on its eight neighbours and at each time step determine their state according to the following rules:
 - Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
@@ -19,14 +20,14 @@ The model is endowed with a "brake" slowing down the speed of execution, useful
 to appreciate the dynamics. Parameter TimeSleep expresses the milliseconds to
 wait before moving to compute the next step.
 
-This Version:
-Ported to GIS representation, December 2018
+New options in GIS ported version:
 
 - added option to choose wrapping:
+  there are 2^4 options. We use a bit-code (0=off):
+  0-bit: left     : 0=0 1=1
+  1-bit: right    : 0=0 1=2
+  2-bit: top      : 0=0 1=4
+  3-bit: bottom   : 0=0 1=8
+  sum the values to generate desired wrapping (e.g. 15 - torus world, default)
 
-there are 2^4 options. We use a bit-code (0=off):
-0-bit: left     : 0=0 1=1
-1-bit: right    : 0=0 1=2
-2-bit: top      : 0=0 1=4
-3-bit: bottom   : 0=0 1=8
-sum the values to generate desired wrapping (e.g. 15 - torus world, default)
+- added option to choose continuous vs parallel (default) update.

@@ -1,21 +1,29 @@
 	
 Label Root
 {
-	Son: Cell
-	Label Cell
+	Son: Lattice
+	Label Lattice
 	{
-		Var: State
+		Son: node
+		Label node
+		{
+			Param: row
+			Param: col
+			Var: State
+
+		}
+
+		Var: InitLattice
+		Param: nrow
+		Param: ncol
+		Param: PixWidth
+		Param: PixHeight
+		Param: PercActive
+		Var: SlowDown
+		Param: TimeSleep
 
 	}
 
-	Var: Init
-	Var: SlowDown
-	Param: TimeSleep
-	Param: PercActive
-	Param: nrow
-	Param: ncol
-	Param: wrapping
-	Param: WPixel
 
 }
 
@@ -23,22 +31,26 @@ Label Root
 DATA
 
 Object: Root C	1
-Var: Init 0 n + n n
-Var: SlowDown 0 n + d n
-Param: TimeSleep 0 n + n n	50
-Param: PercActive 0 n + n n	0.2
+
+Object: Lattice C	1
+Var: InitLattice 0 n + d n
 Param: nrow 0 n + n n	50
 Param: ncol 0 n + n n	100
-Param: wrapping 0 n + n n	15
-Param: WPixel 0 n + n n	800
+Param: PixWidth 0 n + n n	1200
+Param: PixHeight 0 n + n n	600
+Param: PercActive 0 n + n n	0.3
+Var: SlowDown 0 n + d n
+Param: TimeSleep 0 n + n n	50
 
-Object: Cell C	1
+Object: node C	1
+Param: row 0 n + n n	0
+Param: col 0 n + n n	0
 Var: State 1 n + n n	0
 
 SIM_NUM 1
 SEED 1
 MAX_STEP 1000000
-EQUATION fun_Conway.cpp
+EQUATION fun_Comway.cpp
 MODELREPORT modelreport.html
 
 DESCRIPTION
@@ -47,25 +59,13 @@ Object_Root
 (no description available)
 END_DESCRIPTION
 
-Variable_Init
-(no description available)
+Object_Lattice
+(no description available )
 _INIT_
 
 END_DESCRIPTION
 
-Variable_SlowDown
-(no description available)
-_INIT_
-
-END_DESCRIPTION
-
-Parameter_TimeSleep
-(no description available)
-_INIT_
-All 1 instances equal to 50.
-END_DESCRIPTION
-
-Parameter_PercActive
+Variable_InitLattice
 (no description available)
 _INIT_
 
@@ -83,27 +83,51 @@ _INIT_
 
 END_DESCRIPTION
 
-Parameter_wrapping
-Define how the world "wraps" around.
-
-    there are 2^4 options. We use a bit-code (0=off):
-    0-bit: left     : 0=0 1=1
-    1-bit: right    : 0=0 1=2
-    2-bit: top      : 0=0 1=4
-    3-bit: bottom   : 0=0 1=8
-    sum the values to generate desired wrapping (e.g. 15 - torus world, default)
+Parameter_PixWidth
+(no description available)
 _INIT_
 
 END_DESCRIPTION
 
-Parameter_WPixel
-Maximum Size of the lattice window in pixel. The window is automatically resized to fit the layout of the lattice.
+Parameter_PixHeight
+(no description available)
 _INIT_
 
 END_DESCRIPTION
 
-Parameter_Cell
-A cell - alive or dead
+Parameter_PercActive
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_SlowDown
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_TimeSleep
+(no description available)
+
+_INIT_
+All 1 instances equal to 50.
+END_DESCRIPTION
+
+Object_node
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_row
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_col
+(no description available)
 _INIT_
 
 END_DESCRIPTION
