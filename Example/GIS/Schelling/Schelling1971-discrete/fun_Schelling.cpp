@@ -90,7 +90,7 @@ Initialise the model
     CYCLE_GIS_RNDS(SEARCH("Patch"),cur,"Patch"){
       ADD_TO_SPACE_SHARES(cAgent,cur); //Register cAgent at pos of cur Patch
       //prepare next
-      cAgent = go_brother(cAgent);
+      cAgent = cAgent->next;
       if (cAgent == NULL){
         break;
       }
