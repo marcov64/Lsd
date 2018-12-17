@@ -352,7 +352,7 @@ struct object
 	bool change_position(double _x, double _y, bool noAdjust = false);
 	bool change_position(object *shareObj );
 
-	bool register_at_map_rnd(object *gisObj);
+	bool register_at_map_rnd(object *gisObj, bool snap_grid = false);
 	bool register_at_map(gisMap* map, double _x, double _y);
 	bool register_at_map(object *shareObj ); //register at same position as gisObj
 	bool unregister_from_gis();
@@ -362,7 +362,7 @@ struct object
 	bool delete_map(); //delete the map, unregistering all gis-objects but leaving them otherwise untouched.
 
 	bool init_gis_singleObj(double _x, double _y, int xn, int yn, int _wrap=0); //Create a gis and add the object to it
-	bool init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap = 0, int _lag=-1); //Create a gis and add the objects to it, creating new ones if necessary.
+	bool init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap, int t_update, int n = 0); //Create a gis and add the objects to it, creating new ones if necessary. the "n" option allows to define a sparse grid.
 
 	double get_pos(char xyz);
 	double random_pos(const char xy);
@@ -378,7 +378,7 @@ struct object
 	double read_lattice_gis( );
 	double read_lattice_gis( double x, double y, bool noChange);
 
-  int load_data_gis( const char *inputfile, const char *obj_lab, const char *var_lab, int lag );
+  int load_data_gis( const char *inputfile, const char *obj_lab, const char *var_lab, int t_update );
 
 #endif //#ifdef CPP11
 

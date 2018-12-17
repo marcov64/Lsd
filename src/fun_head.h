@@ -370,7 +370,7 @@ bool no_ptr_chk = true;
 #define WRITE( X, Y ) ( p->write( ( char * ) X, Y, t ) )
 #define WRITEL( X, Y, Z ) ( p->write( ( char * ) X, Y, Z ) )
 #define WRITELL( X, Y, Z, W ) ( p->write( ( char * ) X, Y, Z, W ) )
-#define WRITES( O, X, Y ) ( CHK_PTR_DBL( O ) O->write( ( char * ) X, Y, 0 ) )
+#define WRITES( O, X, Y ) ( CHK_PTR_DBL( O ) O->write( ( char * ) X, Y, t ) )
 #define WRITELS( O, X, Y, Z ) ( CHK_PTR_DBL( O ) O->write( ( char * ) X, Y, Z ) )
 #define WRITELLS( O, X, Y, Z, W ) ( CHK_PTR_DBL( O ) O->write( ( char * ) X, Y, Z, W ) )
 #define INCR( X, Y ) ( p->increment( ( char * ) X, Y ) )
@@ -609,19 +609,33 @@ bool no_ptr_chk = true;
 #define INIT_SPACE_SINGLE_WRAPS( GISOBJ, X, Y, XN, YN, WRAP )  { GISOBJ->init_gis_singleObj( X, Y, XN, YN, WRAP ); }
 
 // INIT_SPACE_GRID
+//  bool object::init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap, int _lag, int n){
 // Initialise the regular space and use the object LAB contained in p as "Patches"
 // Using Column Major (change?) the objects are added to a 2d grid and get xy coords respectively
-#define INIT_SPACE_GRID( LAB, XN, YN )             { p->init_gis_regularGrid( LAB, XN, YN ); }
-#define INIT_SPACE_GRIDS(PTR, LAB, XN, YN )             { PTR->init_gis_regularGrid( LAB, XN, YN ); }
+#define INIT_SPACE_GRID( LAB, XN, YN )             { p->init_gis_regularGrid( LAB, XN, YN, 0, 0 ); }
+#define INIT_SPACE_GRIDS(PTR, LAB, XN, YN )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, 0 ); }
 
-#define INIT_SPACE_GRIDL( LAB, XN, YN, LAG )             { p->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
-#define INIT_SPACE_GRIDLS(PTR, LAB, XN, YN, LAG )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
+#define INIT_SPACE_GRIDL( LAB, XN, YN, TIME )             { p->init_gis_regularGrid( LAB, XN, YN, 0, TIME ); }
+#define INIT_SPACE_GRIDLS(PTR, LAB, XN, YN, TIME )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, TIME ); }
 
-#define INIT_SPACE_GRID_WRAP( LAB, XN, YN, WRAP )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
-#define INIT_SPACE_GRID_WRAPS( PTR, LAB, XN, YN, WRAP )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
+#define INIT_SPACE_GRID_WRAP( LAB, XN, YN, WRAP )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, 0 ); }
+#define INIT_SPACE_GRID_WRAPS( PTR, LAB, XN, YN, WRAP )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, 0 ); }
 
-#define INIT_SPACE_GRID_WRAPL( LAB, XN, YN, WRAP, LAG )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, LAG ); }
-#define INIT_SPACE_GRID_WRAPLS( PTR, LAB, XN, YN, WRAP, LAG )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, LAG ); }
+#define INIT_SPACE_GRID_WRAPL( LAB, XN, YN, WRAP, TIME )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME ); }
+#define INIT_SPACE_GRID_WRAPLS( PTR, LAB, XN, YN, WRAP, TIME )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME ); }
+
+  //n versions with sparce space
+#define INIT_SPACE_GRIDN( LAB, XN, YN, N )             { p->init_gis_regularGrid( LAB, XN, YN, 0, 0, N ); }
+#define INIT_SPACE_GRIDNS(PTR, LAB, XN, YN, N )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, 0, N ); }
+
+#define INIT_SPACE_GRIDNL( LAB, XN, YN, N, TIME )             { p->init_gis_regularGrid( LAB, XN, YN, 0, TIME, N ); }
+#define INIT_SPACE_GRIDNLS(PTR, LAB, XN, YN, N, TIME )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, TIME, N ); }
+
+#define INIT_SPACE_GRID_WRAPN( LAB, XN, YN, WRAP, N )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, 0, N ); }
+#define INIT_SPACE_GRID_WRAPNS( PTR, LAB, XN, YN, WRAP, N )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, 0, N ); }
+
+#define INIT_SPACE_GRID_WRAPNL( LAB, XN, YN, WRAP, N , TIME )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME, N ); }
+#define INIT_SPACE_GRID_WRAPNLS( PTR, LAB, XN, YN, WRAP, N, TIME )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME, N ); }
 
 // DELETE_SPACE / DELETE_FROM_SPACE
 // Delete the map and unregister all object-registrations in the map. Do not delte the LSD objects.
@@ -638,6 +652,8 @@ bool no_ptr_chk = true;
 #define ADD_TO_SPACE_SHARES(PTR, TARGET) { PTR->register_at_map(TARGET); }
 #define ADD_TO_SPACE_RND(TARGET) { p->register_at_map_rnd(TARGET); }
 #define ADD_TO_SPACE_RNDS(PTR, TARGET) { PTR->register_at_map_rnd(TARGET); }
+#define ADD_TO_SPACE_RND_GRID(TARGET) { p->register_at_map_rnd(TARGET,true); }
+#define ADD_TO_SPACE_RND_GRIDS(TARGET) { PTR->register_at_map_rnd(TARGET,true); }
 
 // POSITION
 // Macros to get x or y position or produce random position
@@ -759,6 +775,9 @@ bool no_ptr_chk = true;
 #define COUNT_POSITION(LAB)  ( p->elements_at_position( LAB, false ) )
 #define COUNT_POSITIONS(PTR, LAB) ( PTR->elements_at_position( LAB, false ) )
 
+#define COUNT_POSITION_XY(LAB, X, Y)  ( p->elements_at_position( LAB, X, Y ) )
+#define COUNT_POSITION_XYS(PTR, LAB, X, Y) ( PTR->elements_at_position( LAB, X, Y ) )
+
 #define COUNT_POSITION_GRID(LAB)  ( p->elements_at_position( LAB, true ) )
 #define COUNT_POSITION_GRIDS(PTR, LAB) ( PTR->elements_at_position( LAB, true ) )
 
@@ -795,9 +814,25 @@ bool no_ptr_chk = true;
 //And some new macros to load data from txt files.
 //The txt file is in the format x y value NEWLINE
 #define LOAD_DATA_GIS(inputfile, obj_lab, var_lab ) p->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
-#define LOAD_DATA_GISL(inputfile, obj_lab, var_lab, time ) p->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, time )
+#define LOAD_DATA_GISL(inputfile, obj_lab, var_lab, t_update ) p->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t_update )
 #define LOAD_DATA_GISS(PTR, inputfile, obj_lab, var_lab ) PTR->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
-#define LOAD_DATA_GISSL(PTR, inputfile, obj_lab, var_lab, time ) PTR->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, time )
+#define LOAD_DATA_GISSL(PTR, inputfile, obj_lab, var_lab, t_update ) PTR->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t_update )
+
+// Some simple functions to load data to rapidscv::Document type
+// #define LOAD_DATA_CSV(doc_name, inputfile) rapidcsv::Document doc_name(inputfile, rapidcsv::LabelParams( -1, -1), ',' );
+// #define LOAD_DATA_S(doc_name, inputfile, separator) rapidcsv::Document doc_name(inputfile, rapidcsv::LabelParams( -1, -1), rapidcsv::SeparatorParams(separator) );
+// #define LOAD_DATA_SC(doc_name, inputfile, separator) rapidcsv::Document doc_name(inputfile, rapidcsv::LabelParams( 0, -1), rapidcsv::SeparatorParams(separator) );
+// #define LOAD_DATA_SR(doc_name, inputfile, separator) rapidcsv::Document doc_name(inputfile, rapidcsv::LabelParams( -1, 0), rapidcsv::SeparatorParams(separator) );
+// #define LOAD_DATA_SCR(doc_name, inputfile, separator) rapidcsv::Document doc_name(inputfile, rapidcsv::LabelParams( 0, 0), rapidcsv::SeparatorParams(separator) );
+
+//Simple function to cycle through x,y from csv loadet before.
+// #define CYCLE_DATA_ROWS(doc_name,)
+// for (int row = 0; row< f_in.GetRowCount(); ++row) {
+//   for (int col = 0; col< f_in.GetColumnCount(); ++col) {
+//
+//   }
+// }
+
 
 
 #endif //#ifdef CPP11

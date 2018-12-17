@@ -76,7 +76,7 @@ char gismsg[300];
   //  init_gis_regularGrid
   //  Initialise a regular Grid GIS and link the objects of the same type to it.
   //  The gis objects need to be contained in the calling object
-  bool object::init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap, int _lag){
+  bool object::init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap, int t_update, int n){
     object *firstNode;
     object *cur;
     if (strcmp(label,lab)==0){
@@ -99,28 +99,51 @@ char gismsg[300];
     gisMap* map = init_map(xn, yn, _wrap); //create gis
 
     int numNodes = xn*yn;
-    add_n_objects2( lab , nodes2create( this, lab, numNodes ), _lag );	// creates the missing node objects,
-																	// cloning the first one
-    int _x = 0;
-    int _y = 0;
-    firstNode = search( lab );
-  	for ( cur = firstNode; cur != NULL; cur = go_brother( cur ) ){
-  		  if (cur->register_at_map(map, _x, _y) == false){							// scan all nodes aplying ID numbers
-          return false; //error!
+    if (n>0) //otherwise we create a complete lattice, the default
+      numNodes = min(n,numNodes);
+    add_n_objects2( lab , nodes2create( this, lab, numNodes ), t_update );	// creates the missing node objects,
+
+    //switch between sparse and complete space
+    if (numNodes < xn*yn) {
+      std::vector< std::pair< double, std::pair< int,int > > > random_pos;
+      random_pos.reserve(xn*yn);
+      for (int x = 0; x < xn; ++x){
+        for (int y = 0; y < yn; ++y){
+          random_pos.emplace_back(RND,std::make_pair(x,y));
         }
-      _y++;
-      if (_y == yn){
-        _y = 0;
-        _x++;
       }
-    }
-    if (_x != xn || _y != 0){
-      sprintf( gismsg, "failure in init_gis_regularGrid() for object '%s'", label );
-		      error_hard( gismsg, "check the implementation",
-					"please contact the developer" );
-      return false; //error!
-    } else {
-      return true;
+      std::sort( random_pos.begin(),  random_pos.end(), [](auto const &A, auto const &B ){return A.first < B.first; } ); //sort only by RND
+      //add to positions
+      firstNode = search( lab );
+      int i = 0;
+    	for ( cur = firstNode; cur != NULL && i < numNodes; cur = go_brother( cur ), ++i ){
+        if (cur->register_at_map(map, random_pos.at(i).second.first, random_pos.at(i).second.second) == false){							// scan all nodes aplying ID numbers
+            return false; //error!
+          }
+      }
+
+    } else { //complete map
+      int _x = 0;
+      int _y = 0;
+      firstNode = search( lab );
+    	for ( cur = firstNode; cur != NULL; cur = go_brother( cur ) ){
+    		  if (cur->register_at_map(map, _x, _y) == false){							// scan all nodes aplying ID numbers
+            return false; //error!
+          }
+        ++_y;
+        if (_y == yn){
+          _y = 0;
+          ++_x;
+        }
+      }
+      if (_x != xn || _y != 0){
+        sprintf( gismsg, "failure in init_gis_regularGrid() for object '%s'", label );
+    	      error_hard( gismsg, "check the implementation",
+    				"please contact the developer" );
+        return false; //error!
+      } else {
+        return true;
+      }
     }
 
   }
@@ -211,7 +234,8 @@ char gismsg[300];
 
   //  register_at_map_rnd
   //  register the object at the map, using random positions.
-  bool object::register_at_map_rnd(object *gisObj)
+  //  flag if only gridded
+  bool object::register_at_map_rnd(object *gisObj, bool snap_grid)
   {
     if (gisObj -> ptr_map() == NULL ) {
       sprintf( gismsg, "failure in register_at_map_rnd() for object '%s' at position of object %s", label, gisObj->label );
@@ -220,11 +244,16 @@ char gismsg[300];
       return false; //re-registering not allowed. derigster at gis first."
     }
     double x = 0;
-    do {x = uniform (0, gisObj -> position -> map->xn); }
-      while (x == gisObj -> position -> map->xn);  //prevent boarder case
     double y = 0;
-    do {y = uniform (0, gisObj -> position -> map->yn); }
-      while (x == gisObj -> position -> map->yn); //prevent boarder case
+    if (false == snap_grid) {
+      do {x = uniform (0, gisObj -> position -> map->xn); }
+        while (x == gisObj -> position -> map->xn);  //prevent boarder case
+      do {y = uniform (0, gisObj -> position -> map->yn); }
+        while (x == gisObj -> position -> map->yn); //prevent boarder case
+    } else {
+        x = uniform_int (0, gisObj -> position -> map->xn-1);
+        y = uniform_int (0, gisObj -> position -> map->yn-1);
+    }
     return register_at_map(gisObj -> position -> map , x, y );
   }
 
@@ -1238,7 +1267,7 @@ char gismsg[300];
     return read_lattice( line, col );
   }
 
-  int object::load_data_gis( const char *inputfile, const char *obj_lab, const char *var_lab, int lag )
+  int object::load_data_gis( const char *inputfile, const char *obj_lab, const char *var_lab, int t_update )
   {
     /* Read data points x,y with associated data values val from the inputfile
        and store it at the gis_obj with label obj_lab into variable var_lab
@@ -1264,7 +1293,7 @@ char gismsg[300];
 					"check your code to prevent this situation" );
       return -1;
     }
-    object *obj_parent = root -> search(obj_lab);
+    object *obj_parent = root -> search(obj_lab) -> up;
 
     double x_pos,y_pos,val;
     for (int row = 0; row< f_in.GetRowCount(); ++row)
@@ -1279,7 +1308,7 @@ char gismsg[300];
         cur->register_at_map(ptr_map(), x_pos, y_pos);//register it in space at given position
         elements_added++;
       }
-      cur->write( var_lab, val,  lag); //write value
+      cur->write( var_lab, val,  t_update); //write value
       sprintf(gismsg,"\nAdded live cell at pos %g, %g",x_pos,y_pos);
       plog(gismsg);
     }
