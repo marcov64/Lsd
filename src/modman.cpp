@@ -873,7 +873,7 @@ cmd( "wm deiconify .; raise ." );
 
 loop:
 
-cmd( "focus .f.t.t; update" );
+cmd( "if { ! [ winfo exists .mm ] } { focus .f.t.t; update }" );
 
 // update file save status in titlebar
 cmd( "update_title_bar" );
