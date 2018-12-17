@@ -4,6 +4,7 @@
 
 #include "multidim.hpp" //to allow easy excess of multi dim containers used for debugging only
 // see https://github.com/AlbertoMarnetto/multidim for details
+#include "validate.h" //allow inspection of forward stack, etc.
 #include <set>
 
 

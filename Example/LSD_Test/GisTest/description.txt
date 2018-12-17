@@ -2,6 +2,11 @@ Model GisTest (ver. 1.0)
 
 Just a simple test-model for debugging / checking if the GIS module works as it should.
 
+
+External Things used:
+https://github.com/AlbertoMarnetto/multidim (version 0.9.0, MIT Licence)
+https://github.com/FrederikSchaff/lsd_debug-tools (version 1.1, MIT Licence)
+
 (Enter the Model description text here)
 
 (PRESS CTRL+E TO EDIT EQUATIONS)
