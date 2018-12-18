@@ -429,7 +429,7 @@ provided
 ****************************************************/
 
 //retrieve object by unique id.
-object* object::obj_by_unique_id(double id)
+object* object::obj_by_unique_id(int id)
 {
   if (root->uID == NULL){
   	sprintf( msg, "cannot retrieve unique object '%g'", id );
@@ -439,8 +439,8 @@ object* object::obj_by_unique_id(double id)
     return NULL;
   }
 
-  if (id >= 0.0 && id < root->uID->uidMap->nelements ){
-    return root->uID->uidMap->elements[(int)id];
+  if (id >= 0 && id < root->uID->uidMap->nelements ){
+    return root->uID->uidMap->elements[id];
   } else {
   	sprintf( msg, "cannot retrieve unique object '%g'", id );
 		error_hard( msg, "bounding error!",

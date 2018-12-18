@@ -5,7 +5,7 @@
 	and by Marcelo Pereira, University of Campinas
 
 	This file: Frederik Schaff, Ruhr-Universität Bochum
-
+  version 0.3 (December 2018)
 
 	Copyright Marco Valente
 	LSD is distributed under the GNU General Public License
@@ -17,10 +17,6 @@ GIS.CPP
 	GIS tools: Advancing LSD to represent a GIS structure, where objects can be
 	located in 2d continuous space defined by the matrix [0,xn)*[0,yn).
 
-	
-	v1: initial compilation by Frederik Schaff
-	v2: full integration with LSD (tested with windows and cygwin)
-	
 	All functions work on specially defined LSD object's data structures (named here as 
     "gisPosition" and "gisMap"), with the following organization:
 
@@ -51,10 +47,12 @@ GIS.CPP
   For explanations of the single methods, please refer to the comments that
   precede the method.
 ****************************************************************************************/
-
 #include "decl.h"
 
-#ifdef CPP11
+#if defined( CPP11 )
+  #define LSD_GIS
+  #define LSD_GIS_VERSION 0.3
+
 char gismsg[300];
 
 //NEW gis creation stuff below

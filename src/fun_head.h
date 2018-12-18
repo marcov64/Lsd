@@ -282,9 +282,9 @@ bool no_ptr_chk = true;
 // some macros to define unique ids for some objects
 #ifdef CPP11
   #define MAKE_UNIQUE( LAB ) p->declare_as_unique( ( char * ) LAB )
-  #define UID  p->unique_id( )
-  #define UIDS( PTR ) PTR->unique_id( )
-  #define SEARCH_UID( ID ) p->obj_by_unique_id( ID )
+  #define UID  ( double (p->unique_id( ) ) )
+  #define UIDS( PTR ) (double ( PTR->unique_id( ) ) )
+  #define SEARCH_UID( ID ) ( p->obj_by_unique_id( int ( ID ) ) )
 #endif //#ifdef CPP11
 #define RND_SEED ( ( double ) seed - 1 )
 #define T ( ( double ) t )

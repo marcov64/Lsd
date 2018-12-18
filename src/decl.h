@@ -311,7 +311,7 @@ struct object
 	// Fast look-up of agents via individual, unique IDs
 	bool is_unique();
 	void declare_as_unique(char const *uLab); //this object and all of its kind will become "unique", allowing for fast access by the new unique id.
-	object* obj_by_unique_id(double id); //when the object is deleted, clean up and update info.
+	object* obj_by_unique_id(int id); //when the object is deleted, clean up and update info.
 	void declare_as_nonUnique(); //function to retreave object by unique id.
 	double unique_id();  //retrieve unique id, if any.
 #endif //#ifdef CPP11
@@ -511,14 +511,14 @@ struct uniqueIdMap
 struct uniqueId
 {
 	uniqueIdMap* uidMap;
-	double id;
+	int id;
 	uniqueId(object* addObj, uniqueIdMap* uidMap, bool blueprint=false) : uidMap(uidMap)
 	{
 		if ( blueprint == true){
 			uidMap->blueprints.push_back(addObj);
-			id = - (double) uidMap->blueprints.size();
+			id = - uidMap->blueprints.size();
 		} else {
-			id = (double) uidMap->elements.size();
+			id = uidMap->elements.size();
 			uidMap->elements.push_back(addObj);
 			uidMap->nelements++;
 			uidMap->nelementsAlive++;
