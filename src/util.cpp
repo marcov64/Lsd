@@ -2416,7 +2416,17 @@ ran_gen =	7 : Lagged fibonacci with 48 bits resolution in [0,1)
 ****************************************************/
 int ran_gen = 2;					// default pseudo-random number generator
 
-minstd_rand lc;						// linear congruential generator
+#ifdef PARALLEL_MODE
+mutex parallel_lc1;					// mutex locks for random generator operations
+mutex parallel_lc2;
+mutex parallel_mt32;
+mutex parallel_mt64;
+mutex parallel_lf24;
+mutex parallel_lf48;
+#endif	
+
+minstd_rand lc1;					// linear congruential generator (internal)
+minstd_rand lc2;					// linear congruential generator (user)
 mt19937 mt32;						// Mersenne-Twister 32 bits generator
 mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
 ranlux24 lf24;						// lagged fibonacci 24 bits generator
@@ -2424,11 +2434,66 @@ ranlux48 lf48;						// lagged fibonacci 48 bits generator
 
 void init_random( unsigned seed )
 {
-	lc.seed( seed );				// linear congruential
+	lc1.seed( seed );				// linear congruential (internal)
+	lc2.seed( seed );				// linear congruential (user)
 	mt32.seed( seed );				// Mersenne-Twister 32 bits
 	mt64.seed( seed );				// Mersenne-Twister 64 bits
 	lf24.seed( seed );				// lagged fibonacci 24 bits
 	lf48.seed( seed );				// lagged fibonacci 48 bits
+}
+
+template < class distr > double draw_lc1( distr &d )
+{
+#ifdef PARALLEL_MODE
+	// prevent concurrent draw by more than one thread
+	lock_guard < mutex > lock( parallel_lc1 );
+#endif	
+	return d( lc1 );
+}
+
+template < class distr > double draw_lc2( distr &d )
+{
+#ifdef PARALLEL_MODE
+	// prevent concurrent draw by more than one thread
+	lock_guard < mutex > lock( parallel_lc2 );
+#endif	
+	return d( lc2 );
+}
+
+template < class distr > double draw_mt32( distr &d )
+{
+#ifdef PARALLEL_MODE
+	// prevent concurrent draw by more than one thread
+	lock_guard < mutex > lock( parallel_mt32 );
+#endif	
+	return d( mt32 );
+}
+
+template < class distr > double draw_mt64( distr &d )
+{
+#ifdef PARALLEL_MODE
+	// prevent concurrent draw by more than one thread
+	lock_guard < mutex > lock( parallel_mt64 );
+#endif	
+	return d( mt64 );
+}
+
+template < class distr > double draw_lf24( distr &d )
+{
+#ifdef PARALLEL_MODE
+	// prevent concurrent draw by more than one thread
+	lock_guard < mutex > lock( parallel_lf24 );
+#endif	
+	return d( lf24 );
+}
+
+template < class distr > double draw_lf48( distr &d )
+{
+#ifdef PARALLEL_MODE
+	// prevent concurrent draw by more than one thread
+	lock_guard < mutex > lock( parallel_lf48 );
+#endif	
+	return d( lf48 );
 }
 
 
@@ -2436,24 +2501,27 @@ void init_random( unsigned seed )
 CUR_GEN
 Generate the draw using current generator object
 ***************************************************/
-template< class distr >
-double cur_gen( distr &d )
+template < class distr > double cur_gen( distr &d )
 {
 	switch ( ran_gen )
 	{
 		case 1:						// linear congruential in (0,1)
 		case 3:						// linear congruential in [0,1)
 		default:
-			return d( lc );
+			return draw_lc2( d );
+			
 		case 2:						// Mersenne-Twister 32 bits in (0,1)
 		case 4:						// Mersenne-Twister 32 bits in [0,1)
-			return d( mt32 );
+			return draw_mt32( d );
+
 		case 5:						// Mersenne-Twister 64 bits in [0,1)
-			return d( mt64 );
+			return draw_mt64( d );
+			
 		case 6:						// lagged fibonacci 24 bits in [0,1)
-			return d( lf24 );
+			return draw_lf24( d );
+			
 		case 7:						// lagged fibonacci 48 bits in [0,1)
-			return d( lf48 );
+			return draw_lf48( d );
 	}
 }
 
