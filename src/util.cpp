@@ -2497,6 +2497,16 @@ template < class distr > double draw_lf48( distr &d )
 }
 
 
+/****************************************************
+RND_INT
+****************************************************/
+int rnd_int( int min, int max )
+{
+	uniform_int_distribution< int > distr( min, max );
+	return draw_lc1( distr );
+}
+
+
 /***************************************************
 CUR_GEN
 Generate the draw using current generator object
@@ -3289,6 +3299,15 @@ double ran1( long *idum_loc )
 		default:
 			return PMRand_open( idum_loc );
 	}
+}
+
+
+/****************************************************
+RND_INT
+****************************************************/
+int rnd_int( int min, int max )
+{
+	return ( floor( min + ran1( ) * ( max + 1 - min ) ) );
 }
 
 

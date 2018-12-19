@@ -168,6 +168,39 @@ div.WordSection1
 
 <p class=MsoTitle>What’s new in LSD</p>
 
+<h1>Version 7.1.1 (Feb 2019)</h1>
+
+<p class=MsoNormal>The sub-version just introduces a few changes:</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><a href="browser.html#updating">Variable update</a> time
+control.</b> LSD Variables can now be updated/recomputed under arbitrary time
+schemes, deterministic or random. The modeler can now configure update periods
+larger than 1, including an initial “sleep” for any Variable. Both period and
+initial times can be set as a fixed number or a uniform random draw from a modeler-defined
+range.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Bug fixes, mainly for macOS users (lattices work again in new
+Tcl/Tk versions, required for Mojave).</p>
+
+<p class=MsoListParagraph style='margin-left:35.85pt'>&nbsp;</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
 <h1>Version 7.1 (Dec 2018)</h1>
 
 <p class=MsoNormal>The new version maintains the compatibility with all the
@@ -255,8 +288,7 @@ number (<span class=Cdigo>SEARCH_INST(…)</span>). Option to disable/enable the
 automatic search of Variables and Parameters (<span class=Cdigo>NO_SEARCH</span>/<span
 class=Cdigo>USE_SEARCH</span>). New <a href="LSD_macros.html#DEBUG">debug-control
 macros</a> allow finer control of the LSD Debugger activation and log file
-creation. Please refer to the <a href="LSD_macros.html">LSD Macros</a>
-documentation.</p>
+creation. Please refer to the <a href="LSD_macros.html">LSD Macros</a> documentation.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
@@ -281,8 +313,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span><b>Improved Gnuplot support</b>. Automatic usage of default
 plotting terminals, supporting contemporaneous options like Qt and wxt. Updated
 system terminal options, shared with LMM. WARNING: the old Windows 32-bit
-version of Gnuplot was removed from LSD, now users in all platforms must install
-Gnuplot, please refer to <span class=Cdigo><a href="../Readme.txt">Readme.txt</a></span>
+version of Gnuplot was removed from LSD, now users in all platforms must
+install Gnuplot, please refer to <span class=Cdigo><a href="../Readme.txt">Readme.txt</a></span>
 for details.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
@@ -312,9 +344,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 
 <h1>Version 7.0 (Apr 2018)</h1>
 
-<p class=MsoNormal>The new version maintains the compatibility with all the models
-built with previous versions of LSD (some optimizations require C++11 and <span
-class=Cdigo>fun_head_fast.h</span>). Main changes:</p>
+<p class=MsoNormal>The new version maintains the compatibility with all the
+models built with previous versions of LSD (some optimizations require C++11
+and <span class=Cdigo>fun_head_fast.h</span>). Main changes:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -356,9 +388,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 CRAN (LSDinterface and LSDsensitivity). Transparent use of LSD Object-oriented
 hierarchical data in R (multidimensional arrays). Parallel multi-core reading
 of multiple results files. Automatic handling of compressed results files.
-Advanced tools for sensitivity analysis and the study of response surfaces of simulation
-models (Morris Elementary Effects, Sobol Decomposition, Kriging Meta-modelling
-etc.).</p>
+Advanced tools for sensitivity analysis and the study of response surfaces of
+simulation models (Morris Elementary Effects, Sobol Decomposition, Kriging
+Meta-modelling etc.).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -397,8 +429,8 @@ Windows/Linux). LLDB debugger support.</p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Improved analysis of results tools.</b> New, native Tk
-plotting engine (faster and better looking). Fully editable plots. Improved plot
-windows, including zoom. Many more configuration options for plots. </p>
+plotting engine (faster and better looking). Fully editable plots. Improved
+plot windows, including zoom. Many more configuration options for plots. </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -425,8 +457,8 @@ and exceptions in all modules. Tcl/Tk buffer overrun control.</p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>New persistent configuration options. </b>Choose the default
-external debugger. Define arbitrary directory for new models. Predefine the
-font type and size (smart defaults by platform) all over LSD. Save other LMM
+external debugger. Define arbitrary directory for new models. Predefine the font
+type and size (smart defaults by platform) all over LSD. Save other LMM
 interface options (syntax highlighting, text wrapping, tab size, LMM auto
 hide).</p>
 
@@ -477,8 +509,8 @@ option).</p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>New statistical functions.</b> Random draws from lognormal,
-beta and asymmetric Laplace distributions. Cumulative distribution functions
-for the uniform, normal, lognormal, Poisson, gamma, beta and asymmetric Laplace
+beta and asymmetric Laplace distributions. Cumulative distribution functions for
+the uniform, normal, lognormal, Poisson, gamma, beta and asymmetric Laplace
 distributions.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -588,8 +620,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 
 <h1>Version 5.2</h1>
 
-<p class=MsoNormal>The new version maintains the compatibility with all the models
-built with previous versions of LSD. There are several improvements:</p>
+<p class=MsoNormal>The new version maintains the compatibility with all the
+models built with previous versions of LSD. There are several improvements:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span

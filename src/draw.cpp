@@ -149,6 +149,7 @@ DRAW_OBJ
 ****************************************************/
 void draw_obj( object *t, object *sel, int level, int center, int from )
 {
+	bool sp_upd;
 	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_ELEM_LENGTH ];
 	int i, j, k, step_type, begin, count;
 	object *cur;
@@ -165,15 +166,26 @@ void draw_obj( object *t, object *sel, int level, int center, int from )
 	for ( cv = t->v; cv != NULL; cv = cv->next )
 	{
 		sprintf( ch,"append list_%s \"%s", t->label, cv->label );
+		
+		// special updating scheme?
+		if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 ) )
+			sp_upd = true;
+		else
+			sp_upd = false;
+
+		// set flags string
+		cmd( "set varFlags \"%s%s%s%s%s\"", ( cv->save || cv->savei ) ? "+" : "", cv->plot ? "*" : "", cv->debug == 'd' ? "!" : "", cv->parallel ? "&" : "", sp_upd ? "§" : "" );
+				
 		if ( cv->param == 1 )
-			sprintf( str," (P%s)\n\"", ( cv->save || cv->savei ) ? "+" : "" );
+			sprintf( str," (P$varFlags)\n\"" );
 		else
 		{
 			if ( cv->num_lag == 0 )
-				sprintf( str, " (%s%s)\n\"", ( cv->param == 0 ) ? "V" : "F", ( cv->save || cv->savei ) ? "+" : "" );
+				sprintf( str, " (%s$varFlags)\n\"", ( cv->param == 0 ) ? "V" : "F" );
 			else
-				sprintf( str, " (%s_%d%s)\n\"", ( cv->param == 0 ) ? "V" : "F", cv->num_lag, ( cv->save || cv->savei ) ? "+" : "" );
+				sprintf( str, " (%s_%d$varFlags)\n\"", ( cv->param == 0 ) ? "V" : "F", cv->num_lag );
 		}
+		
 		strcat( ch, str );
 		cmd( ch );
 	}

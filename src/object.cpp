@@ -400,7 +400,7 @@ void object::update( void )
 
 	for ( cv = v; ! deleted && cv != NULL && quit != 2; cv = cv->next )
 	{ 
-		if ( cv->last_update < t && cv->param == 0 )
+		if ( cv->param == 0 && cv->last_update < t )
 		{
 #ifdef PARALLEL_MODE
 			if ( parallel_ready && cv->parallel && ! cv->dummy )
@@ -1194,6 +1194,10 @@ void object::add_var_from_example( variable *example )
 	cv->init( this, example->label, example->num_lag, example->val, example->save );
 	cv->savei = example->savei;
 	cv->last_update = example->last_update;
+	cv->delay = example->delay;
+	cv->delay_range = example->delay_range;
+	cv->period = example->period;
+	cv->period_range = example->period_range;
 	cv->plot = ( ! running ) ? example->plot : false;
 	cv->parallel = example->parallel;
 	cv->observe = example->observe;
@@ -1619,6 +1623,14 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 					if ( t_update >= 0 )
 						cv->last_update = t_update;
 				}
+				
+				// choose next update step for special updating variables
+				if ( cv->delay > 0 || cv->delay_range > 0 )
+				{
+					cv->next_update = cv->last_update + cv->delay;
+					if ( cv->delay_range > 0 )
+						cv->next_update += rnd_int( 0, cv->delay_range );
+				}
 			}
 			
 			if ( cv->save || cv->savei )
@@ -2005,7 +2017,7 @@ double object::cal( object *caller, char const *lab, int lag )
 	}
 
 #ifdef PARALLEL_MODE
-	if ( parallel_ready && cv->parallel && cv->last_update < t && lag == 0 && ! cv->dummy )
+	if ( lag == 0 && parallel_ready && cv->parallel && cv->last_update < t && ! cv->dummy )
 		parallel_update( cv, this, caller );
 #endif
 	return cv->cal( caller, lag );
@@ -2049,6 +2061,7 @@ double object::recal( char const *lab )
 	}
 	
 	cv->last_update = t - 1;
+	cv->next_update = t;
 	
 	return cv->val[ 0 ];
 }
@@ -3102,6 +3115,14 @@ double object::write( char const *lab, double value, int time, int lag )
 		
 		if ( time == -1 && ( cv->save || cv->savei ) )
 				cv->data[ 0 ] = value;
+		
+		// choose next update step for special updating variables
+		if ( cv->delay > 0 || cv->delay_range > 0 )
+		{
+			cv->next_update = 1 + cv->delay;
+			if ( cv->delay_range > 0 )
+				cv->next_update += rnd_int( 0, cv->delay_range );
+		}
 	}
 	else
 	{
@@ -3122,6 +3143,14 @@ double object::write( char const *lab, double value, int time, int lag )
 		if ( lag == 0 )
 		{
 			cv->val[ 0 ] = value;
+	
+			// choose next update step for special updating variables
+			if ( cv->period > 1 || cv->period_range > 0 )
+			{
+				cv->next_update = t + cv->period;
+				if ( cv->period_range > 0 )
+					cv->next_update += rnd_int( 0, cv->period_range );
+			}
 		}
 		else
 		{

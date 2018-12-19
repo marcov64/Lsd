@@ -163,6 +163,11 @@ void object::save_param( FILE *f )
 					else
 						fprintf( f, "\t%c", '0' );
 		}
+		
+		// add optional special updating data
+		if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 ) )
+			fprintf( f, "\t<upd: %d %d %d %d>", cv->delay, cv->delay_range, cv->period, cv->period_range );
+		
 		fprintf( f, "\n" );
 	}
 	
@@ -180,10 +185,11 @@ bool object::load_param( char *file_name, int repl, FILE *f )
 	char str[ MAX_ELEM_LENGTH ], ch, ch1, ch2;
 	int num, i;
 	double app;
+	fpos_t pos;
 	bridge *cb;
 	object *cur;
 	variable *cv, *cv1;
-
+	
 	if ( f == NULL )
 		f = search_data_str( file_name, "DATA", label ); 
 	else
@@ -251,7 +257,7 @@ bool object::load_param( char *file_name, int repl, FILE *f )
 			else
 			{
 				for ( i = 0; i < cv->num_lag; ++i )
-					if ( ( num = fscanf( f, "\t%lf", &app ) ) != 1 )
+					if ( fscanf( f, "\t%lf", &app ) != 1 )
 						return false;
 					else	
 						// place values shifted one position, since they are "time 0" values
@@ -259,6 +265,28 @@ bool object::load_param( char *file_name, int repl, FILE *f )
 						
 				cv1->val[ cv->num_lag ] = 0;
 			}
+		}
+		
+		// check for non-default updating scheme
+		if ( cv->param == 0 )
+		{
+			fgetpos( f, & pos );
+			num = fscanf( f, "\t<upd: %d %d %d %d>", & cv->delay, & cv->delay_range, & cv->period, & cv->period_range );
+			
+			if ( num > 0 && num < 4 )
+				return false;
+			
+			if ( num > 0 )
+				for ( cur = this; cur != NULL; repl == 1 ? cur = cur->hyper_next( label ) : cur = NULL )
+				{
+					cv1 = cur->search_var( NULL, cv->label );
+					cv1->delay = cv->delay;
+					cv1->delay_range = cv->delay_range;
+					cv1->period = cv->period;
+					cv1->period_range = cv->period_range;
+				}
+			else
+				fsetpos( f, & pos );
 		}
 	}
 

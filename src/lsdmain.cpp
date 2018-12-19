@@ -1164,48 +1164,56 @@ bool alloc_save_mem( object *r )
 	int toquit = quit;
 	bridge *cb;
 	object *cur;
-	variable *var;
+	variable *cv;
 
-	//for each variable set the data saving support
-	for ( var = r->v; var != NULL; var = var->next )
+	// for each variable set the data saving support
+	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{ 
-		var->last_update = 0;
+		cv->last_update = 0;
 
-		if ( ( var->save || var->savei ) && ! no_more_memory )
+		// choose next update step for special updating variables
+		if ( cv->delay > 0 || cv->delay_range > 0 )
 		{
-			if ( var->num_lag > 0 || var->param == 1 )
-				var->start = 0;
+			cv->next_update = 1 + cv->delay;
+			if ( cv->delay_range > 0 )
+				cv->next_update += rnd_int( 0, cv->delay_range );
+		}
+		
+		if ( ( cv->save || cv->savei ) && ! no_more_memory )
+		{
+			if ( cv->num_lag > 0 || cv->param == 1 )
+				cv->start = 0;
 			else
-				var->start = 1;
-			var->end = max_step;
+				cv->start = 1;
+			cv->end = max_step;
 
-			delete [ ] var->data;
+			delete [ ] cv->data;
 
 			try 
 			{
-				var->data = new double[ max_step + 1 ];
+				cv->data = new double[ max_step + 1 ];
 			}
 			catch( bad_alloc& ) 
 			{
-				set_lab_tit( var );
-				plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", var->lab_tit );
-				var->save = var->savei = 0;
+				set_lab_tit( cv );
+				plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", cv->lab_tit );
+				cv->save = cv->savei = 0;
 				no_more_memory = true;
 			}
 
 			++series_saved;
-			if ( var->num_lag > 0  || var->param == 1 )
-				var->data[ 0 ] = var->val[ 0 ];
+			if ( cv->num_lag > 0  || cv->param == 1 )
+				cv->data[ 0 ] = cv->val[ 0 ];
 		}
 		else
 		{
 			if ( no_more_memory )
-				var->save = var->savei = 0;
+				cv->save = cv->savei = 0;
 		}
 		
-		if ( ( var->num_lag > 0 || var->param == 1 ) && var->data_loaded == '-' )
+		if ( ( cv->num_lag > 0 || cv->param == 1 ) && cv->data_loaded == '-' )
 		{
-			sprintf( msg, "%s '%s' in object '%s' has not been initialized", var->param == 1 ? "parameter" : "variable", var->label, r->label );
+			sprintf( msg, "%s '%s' in object '%s' has not been initialized", cv->param == 1 ? "parameter" : "variable", cv->label, r->label );
 			error_hard( msg, "required initialization values missing", "select the object and choose menu 'Data'/'Initial Values'" );
 			
 			toquit = 2;

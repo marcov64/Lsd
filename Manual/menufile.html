@@ -230,8 +230,8 @@ model home directory</a>.</p>
 
 <h1><a name="_Model_configuration_files"></a>Model configuration files</h1>
 
-<p class=MsoNormal>Operations involving <a
-href="LSD_faqs.html#modelsetting">LSD model configuration files</a>:</p>
+<p class=MsoNormal>Operations involving <a href="LSD_faqs.html#modelsetting">LSD
+model configuration files</a>:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:42.6pt;text-indent:-24.75pt'><span style='font-family:Symbol'>·<span
@@ -274,8 +274,8 @@ currently loaded configuration, the user must confirm the operation or save the
 current configuration before trying to reload a new one.</p>
 
 <p class=MsoNormal>The currently loaded configuration file name shows in the
-title bar of all open <a href="LSD_faqs.html#modelprogram">LSD model
-program</a> windows.</p>
+title bar of all open <a href="LSD_faqs.html#modelprogram">LSD model program</a>
+windows.</p>
 
 <h2><a name=reload></a><a name="_Reload"></a>Reload </h2>
 
@@ -288,9 +288,9 @@ the operation or save the current configuration before trying to reload it
 again.</p>
 
 <p class=MsoNormal>This command is normally used after a <a
-href="LSD_faqs.html#simulationrun">simulation run</a> and before
-running the same configuration again. This is handful because LSD does not
-allow running a simulation immediately after finishing another one. </p>
+href="LSD_faqs.html#simulationrun">simulation run</a> and before running the
+same configuration again. This is handful because LSD does not allow running a
+simulation immediately after finishing another one. </p>
 
 <h2><a name=save></a><a name="_Save"></a>Save</h2>
 
@@ -310,6 +310,9 @@ command is still useful when doing larger changes in the model configuration,
 to prevent losing the modifications in case of closing the LSD Browser before
 running the simulation.</p>
 
+<p class=MsoNormal>A copy of the previous content of the configuration file is
+saved under the <span class=Cdigo>.bak</span> extension.</p>
+
 <h2><a name="_Save_As"></a>Save As</h2>
 
 <p class=MsoNormal>Save the current model configuration to the file and the
@@ -321,12 +324,12 @@ type the new name.</p>
 <p class=MsoNormal>This command is frequently used to create a copy of an
 existing configuration before experimenting with some changes. Note that the
 configuration files do not have to be stored in the <a
-href="LSD_faqs.html#modelhome">model home directory</a>. In fact, they
-can be stored anywhere in the file system, including in subdirectories of the
-home directory. This is useful because LSD automatically saves <a
-href="LSD_faqs.html#results">simulation run results data</a> to the
-same location where the configuration file is, allowing the easy organization
-of the results of different model configurations.</p>
+href="LSD_faqs.html#modelhome">model home directory</a>. In fact, they can be
+stored anywhere in the file system, including in subdirectories of the home
+directory. This is useful because LSD automatically saves <a
+href="LSD_faqs.html#results">simulation run results data</a> to the same
+location where the configuration file is, allowing the easy organization of the
+results of different model configurations.</p>
 
 <p class=MsoNormal>Another situation in which this command may be used is after
 a simulation run. As in this case the model configuration contains the values
@@ -336,13 +339,17 @@ with the loaded data. However, users can save the last step configuration with
 a different name and then load it as a new configuration, virtually “extending”
 a simulation time span beyond the time steps originally planned. </p>
 
+<p class=MsoNormal>If the chosen configuration file already exists, a copy of
+its previous content is saved under the <span class=Cdigo>.bak</span>
+extension.</p>
+
 <h2><a name=empty></a><a name="_Unload"></a>Unload </h2>
 
 <p class=MsoNormal><i>Shortcut</i>: <span class=Cdigo>Ctrl+E</span>.</p>
 
 <p class=MsoNormal>Remove the model configuration currently loaded, restoring
-the initial LSD Browser state. If there are unsaved changes to the currently
-loaded configuration, the user must confirm the operation or save the current
+the initial LSD Browser state. If there are unsaved changes to the currently loaded
+configuration, the user must confirm the operation or save the current
 configuration before trying to unload it. </p>
 
 <p class=MsoNormal>This command may be useful when one wants to (re) create the
@@ -353,9 +360,9 @@ model configuration from the scratch.</p>
 <p class=MsoNormal>Compare the currently loaded model configuration file with
 any other LSD model configuration file (<span class=Cdigo>.lsd</span>
 extension). After the user supplies the file to compare with, the text-file
-comparison utility (TkDiff) is launched with both files loaded. Differences between
-the configuration files are shown in color. Please refer to the TkDiff help
-pages for details.</p>
+comparison utility (TkDiff) is launched with both files loaded. Differences
+between the configuration files are shown in color. Please refer to the TkDiff
+help pages for details.</p>
 
 <p class=MsoNormal>Please note that model configuration files<i> should not </i>be
 directly edited, at the risk of corrupting them.</p>
@@ -377,12 +384,12 @@ name=saveresults></a>Save Results</h1>
 <p class=MsoNormal><i>Shortcut</i>: <span class=Cdigo>Ctrl+Z</span>.</p>
 
 <p class=MsoNormal>Saves the all the data of a previous <a
-href="LSD_faqs.html#simulationrun">simulation run</a>, if any. A
-results file base name is requested (a default name is proposed). The extension
-is automatically provided according to the compressed file checkbox (<span
+href="LSD_faqs.html#simulationrun">simulation run</a>, if any. A results file
+base name is requested (a default name is proposed). The extension is
+automatically provided according to the compressed file checkbox (<span
 class=Cdigo>.res.gz</span> or <span class=Cdigo>.res</span>). Saved results
-files can be later loaded in the <a href="menudata_res.html">Analysis
-of Result</a> module.</p>
+files can be later loaded in the <a href="menudata_res.html">Analysis of Result</a>
+module.</p>
 
 <p class=MsoNormal>There is an option to save the data as plain comma-separated
 values (CSV) format, for easy usage in other applications (this is not required
@@ -425,11 +432,11 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 
 <h2><a name="_Load_Network"></a>Load Network</h2>
 
-<p class=MsoNormal>Load a <a href="LSD_faqs.html#network">network
-structure</a> from a file (Pajek format, <span class=Cdigo>.net</span>
-extension) into a set of (brother) <a href="LSD_faqs.html#object">Object
-instances</a>. The user is requested to select the existing network file and
-the Object type associated with the network nodes.</p>
+<p class=MsoNormal>Load a <a href="LSD_faqs.html#network">network structure</a>
+from a file (Pajek format, <span class=Cdigo>.net</span> extension) into a set
+of (brother) <a href="LSD_faqs.html#object">Object instances</a>. The user is
+requested to select the existing network file and the Object type associated
+with the network nodes.</p>
 
 <p class=MsoNormal>Each set of instances of a single Object type can
 participate in a single network. If the selected Object type already has a
@@ -441,20 +448,19 @@ nodes, the additional required instances will be automatically created.</p>
 <h2><a name="_Save_Network"></a>Save Network</h2>
 
 <p class=MsoNormal>Save an existing <a href="LSD_faqs.html#network">network
-structure</a> associated to a set of (brother) <a
-href="LSD_faqs.html#object">Object instances</a> to a file (Pajek
-format, <span class=Cdigo>.net</span> extension). The user is requested to
-select the Object type associated with the existing network nodes in LSD and
-the name (and location) of the output file (if it already exists, it will be
-overwritten).</p>
+structure</a> associated to a set of (brother) <a href="LSD_faqs.html#object">Object
+instances</a> to a file (Pajek format, <span class=Cdigo>.net</span>
+extension). The user is requested to select the Object type associated with the
+existing network nodes in LSD and the name (and location) of the output file
+(if it already exists, it will be overwritten).</p>
 
 <h2><a name="_Unload_Network"></a>Unload Network</h2>
 
-<p class=MsoNormal>Remove an existing <a href="LSD_faqs.html#network">network
-structure</a> associated to a set of (brother) <a
-href="LSD_faqs.html#object">Object instances</a>. The user is requested
-to select the Object type associated with the existing network nodes in LSD.
-The respective Object instances <i>are not</i> deleted.</p>
+<p class=MsoNormal>Remove an existing <a href="LSD_faqs.html#network">network structure</a>
+associated to a set of (brother) <a href="LSD_faqs.html#object">Object
+instances</a>. The user is requested to select the Object type associated with
+the existing network nodes in LSD. The respective Object instances <i>are not</i>
+deleted.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -489,11 +495,10 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 
 <h2><a name="_Load_Sensitivity"></a>Load Sensitivity</h2>
 
-<p class=MsoNormal>Load a previously saved LSD <a
-href="LSD_faqs.html#sa">sensitivity analysis (SA) test set file</a> (<span
-class=Cdigo>.sa</span> extension). The user is requested to select the existing
-SA test set file .The SA test data in the file is added to any already loaded
-SA test set.</p>
+<p class=MsoNormal>Load a previously saved LSD <a href="LSD_faqs.html#sa">sensitivity
+analysis (SA) test set file</a> (<span class=Cdigo>.sa</span> extension). The
+user is requested to select the existing SA test set file .The SA test data in
+the file is added to any already loaded SA test set.</p>
 
 <p class=MsoNormal>SA test set files may be created using <a
 href="menudata_sa.html">LSD SA tools</a> and the <span class=Cdigo>File&gt;Save
@@ -506,30 +511,30 @@ The format of the lines is:</p>
 <p class=MsoNormal><span class=Cdigo>name lag number type: val1 val2 …</span></p>
 
 <p class=MsoNormal><span class=Cdigo>name</span> is the name of the <a
-href="LSD_faqs.html#parameter">Parameter </a>or <a
-href="LSD_faqs.html#variable">lagged Variable</a>, <span class=Cdigo>lag</span>
-is the lag of lagged Variables (1, 2, …) or <span class=Cdigo>0</span> for
-Parameters, <span class=Cdigo>number</span> is the number of test values (equal
-to 2 for a max/min range or at least 2 for a set of values), <span class=Cdigo>type</span>
-is a character flag indicating if the Parameter or Variable shall be explored
-as an integer (<span class=Cdigo>i</span>) or a floating-point (<span
-class=Cdigo>f</span>) value, and <span class=Cdigo>val1</span>, <span
-class=Cdigo>val2</span>, … are the values to be explored (only the first <span
-class=Cdigo>number</span> will be considered).</p>
+href="LSD_faqs.html#parameter">Parameter </a>or <a href="LSD_faqs.html#variable">lagged
+Variable</a>, <span class=Cdigo>lag</span> is the lag of lagged Variables (1,
+2, …) or <span class=Cdigo>0</span> for Parameters, <span class=Cdigo>number</span>
+is the number of test values (equal to 2 for a max/min range or at least 2 for
+a set of values), <span class=Cdigo>type</span> is a character flag indicating
+if the Parameter or Variable shall be explored as an integer (<span
+class=Cdigo>i</span>) or a floating-point (<span class=Cdigo>f</span>) value,
+and <span class=Cdigo>val1</span>, <span class=Cdigo>val2</span>, … are the
+values to be explored (only the first <span class=Cdigo>number</span> will be
+considered).</p>
 
 <h2><a name="_Save_Sensitivity"></a>Save Sensitivity</h2>
 
-<p class=MsoNormal>Save the <a href="LSD_faqs.html#sa">sensitivity
-analysis (SA) test set</a> currently loaded to a SA file (<span class=Cdigo>.sa</span>
+<p class=MsoNormal>Save the <a href="LSD_faqs.html#sa">sensitivity analysis
+(SA) test set</a> currently loaded to a SA file (<span class=Cdigo>.sa</span>
 extension). The user is requested to select the name (and location) of the
 output file (if it already exists, it will be overwritten). By default, SA test
 set files are saved under the same name and directory as the current <a
 href="LSD_faqs.html#modelsetting">model configuration</a>.</p>
 
 <p class=MsoNormal>The SA test set data is not saved to the <a
-href="LSD_faqs.html#modelsetting">LSD model configuration file</a>, so
-the user must use this option to save the created SA test sets. Also, a single
-model configuration may have more than one SA test set files associated to it.</p>
+href="LSD_faqs.html#modelsetting">LSD model configuration file</a>, so the user
+must use this option to save the created SA test sets. Also, a single model
+configuration may have more than one SA test set files associated to it.</p>
 
 <h2><a name="_Unload_Sensitivity"></a>Unload Sensitivity</h2>
 
@@ -567,18 +572,18 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 <h2><a name="_Export_Saved_Elements"></a>Export Saved Elements</h2>
 
 <p class=MsoNormal>Saves to a file the list of elements of a LSD <a
-href="LSD_faqs.html#modelsetting">model configuration</a> marked to
-have the time series saved during the simulation run (as set in the <a
-href="browser.html#changeelement">element settings</a>). The user may
-choose the directory and the text file to be produced.</p>
+href="LSD_faqs.html#modelsetting">model configuration</a> marked to have the
+time series saved during the simulation run (as set in the <a
+href="browser.html#changeelement">element settings</a>). The user may choose
+the directory and the text file to be produced.</p>
 
 <h2><a name="_Export_Sensitivity_Limits"></a>Export Sensitivity Limits</h2>
 
 <p class=MsoNormal>Saves to a file the list of minimum and maximum <a
-href="LSD_faqs.html#sa">sensitivity analysis (SA) test values</a> for
-each the SA <a href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a> currently loaded.
-The user may choose the directory and the text file to be produced.</p>
+href="LSD_faqs.html#sa">sensitivity analysis (SA) test values</a> for each the
+SA <a href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a> currently loaded. The user
+may choose the directory and the text file to be produced.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -593,8 +598,8 @@ The user may choose the directory and the text file to be produced.</p>
 
 <h1><a name="_Equation_file_operations"></a>Equation file operations</h1>
 
-<p class=MsoNormal>Operations involving <a
-href="LSD_faqs.html#equationfile">LSD equation file</a>:</p>
+<p class=MsoNormal>Operations involving <a href="LSD_faqs.html#equationfile">LSD
+equation file</a>:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:42.6pt;text-indent:-24.75pt'><span style='font-family:Symbol'>·<span
@@ -620,18 +625,18 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 
 <p class=MsoNormal><i>Shortcut</i>: <span class=Cdigo>Ctrl+U</span>.</p>
 
-<p class=MsoNormal>Assign an <a href="LSD_faqs.html#equationfile">equation
-file</a> to the model. In general LSD should be able to identify the equation
-file automatically. However, in some cases the modeler may want to modify the
-file associated to it.</p>
+<p class=MsoNormal>Assign an <a href="LSD_faqs.html#equationfile">equation file</a>
+to the model. In general LSD should be able to identify the equation file
+automatically. However, in some cases the modeler may want to modify the file
+associated to it.</p>
 
 <h2><a name="_Upload_Equation_File"></a>Upload Equation File</h2>
 
 <p class=MsoNormal>Store into the <a href="LSD_faqs.html#modelsetting">model
 configuration file</a> a snapshot of the current <a
-href="LSD_faqs.html#equationfile">equation file</a> used to generate
-the <a href="LSD_faqs.html#modelprogram">LSD model program</a>. This
-command does not support multi-file equation sources.</p>
+href="LSD_faqs.html#equationfile">equation file</a> used to generate the <a
+href="LSD_faqs.html#modelprogram">LSD model program</a>. This command does not
+support multi-file equation sources.</p>
 
 <p class=MsoNormal>Please note that the equation file is stored into the
 configuration for documentation and backup purposes only. These <a
@@ -641,8 +646,8 @@ creation of the LSD model program.</p>
 <h2><a name="_Offload_Equation_File"></a>Offload Equation File</h2>
 
 <p class=MsoNormal>Generate an <a href="LSD_faqs.html#equationfile">equation
-file</a> from the copy stored in the <a
-href="LSD_faqs.html#modelsetting">model configuration file</a>.</p>
+file</a> from the copy stored in the <a href="LSD_faqs.html#modelsetting">model
+configuration file</a>.</p>
 
 <p class=MsoNormal>Please note that the equation file stored in the model
 configuration file is likely an <i>older version</i> than the current one. Use
@@ -651,15 +656,15 @@ the equation file under a different name, to avoid overwriting the current one.<
 
 <h2><a name="_Compare_Equation_Files"></a>Compare Equation Files</h2>
 
-<p class=MsoNormal>Compare the current <a
-href="LSD_faqs.html#equationfile">equation file</a> (used to generate
-the <a href="LSD_faqs.html#modelprogram">LSD model program</a>) with
-the snapshot stored in the <a href="LSD_faqs.html#modelsetting">model
-configuration file</a>, if any, using TkDiff text-file comparison utility.</p>
+<p class=MsoNormal>Compare the current <a href="LSD_faqs.html#equationfile">equation
+file</a> (used to generate the <a href="LSD_faqs.html#modelprogram">LSD model
+program</a>) with the snapshot stored in the <a
+href="LSD_faqs.html#modelsetting">model configuration file</a>, if any, using
+TkDiff text-file comparison utility.</p>
 
-<p class=MsoNormal>This command is useful to track the changes made to the equation
-file since the last snapshot with the <span class=Cdigo>File&gt;Upload Equation
-File</span> command (<a href="#_Upload_Equation_File">above</a>).</p>
+<p class=MsoNormal>This command is useful to track the changes made to the
+equation file since the last snapshot with the <span class=Cdigo>File&gt;Upload
+Equation File</span> command (<a href="#_Upload_Equation_File">above</a>).</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

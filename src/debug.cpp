@@ -492,6 +492,11 @@ while ( choice == 0 )
 			cmd( "label $e.u.v -fg red -text %d", cv->last_update );
 			cmd( "pack $e.u.l $e.u.v -side left -padx 2" );
 
+			cmd( "frame $e.x" );
+			cmd( "label $e.x.l -text \"Next update time:\"" );
+			cmd( "label $e.x.v -fg red -text %d", cv->next_update > 0 ? cv->next_update : cv->last_update < t ? t : t + 1 );
+			cmd( "pack $e.x.l $e.x.v -side left -padx 2" );
+
 			cmd( "frame $e.v" );
 			for ( i = 0; i <= eff_lags; ++i )
 			{
@@ -522,7 +527,10 @@ while ( choice == 0 )
 			}
 			else
 			{
-				cmd( "pack $e.n $e.t $e.u" );	
+				if ( cv->param == 0 )
+					cmd( "pack $e.n $e.t $e.u $e.x" );
+				else
+					cmd( "pack $e.n $e.t $e.u" );
 				
 				cmd( "frame $e.d" );
 				cmd( "checkbutton $e.d.deb -text \"Debug this instance only\" -variable debug" );

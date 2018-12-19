@@ -83,8 +83,8 @@ Global definitions among all LSD C++ modules
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 1
-#define _LSD_VERSION_ "7.1"
-#define _LSD_DATE_ "Dec 1 2018"        // __DATE__
+#define _LSD_VERSION_ "7.1.1"
+#define _LSD_DATE_ "Feb 22 2019"        // __DATE__
 
 // global constants
 #define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)
@@ -298,10 +298,15 @@ struct variable
 	bool savei;
 	bool under_computation;
 	int deb_cond;
+	int delay;
+	int delay_range;
 	int end;
 	int last_update;
+	int next_update;
 	int num_lag;
 	int param;
+	int period;
+	int period_range;
 	int start;
 	double *data;
 	double *val;
@@ -634,6 +639,7 @@ int lsdmain( int argn, char **argv );
 int min_hborder( int *choice, int pdigits, double miny, double maxy );
 int my_strcmp( char *a, char *b );
 int num_sensitivity_variables( sense *rsens );
+int rnd_int( int min, int max );
 int shrink_gnufile( void );
 long get_long( const char *tcl_var, long *var = NULL );
 long num_sensitivity_points( sense *rsens );
@@ -774,6 +780,7 @@ void show_prof_aggr( void );
 void show_rep_initial( FILE *f, object *n, int *begin );
 void show_rep_observe( FILE *f, object *n, int *begin );
 void show_save( object *n );
+void show_special_updat( object *n );
 void show_tmp_vars( object *r, bool update );
 void signal_handler( int );
 void sort_cs_asc( char **s,char **t, double **v, int nv, int nt, int c );

@@ -3323,6 +3323,12 @@ class=Cdigo>WRITE(…)</span> to change Parameter values during the simulation.
 Another frequent use of <span class=Cdigo>WRITE(…)</span>, when used with
 Variables, concerns the initialization of newly added Objects. </p>
 
+<p>If <span class=Cdigo>WRITE(…)</span> Macros are used to update the current (<span
+class=Cdigo>t</span>) value of a Variable configured with a non-default updating
+scheme, any initial update delay is cancelled and a new update period is
+immediately started, according to the <a href="browser.html#updating">Variable
+updating options</a> used.</p>
+
 <p>See <span class=Cdigo><a href="#_RECALC(_&quot;Lab&quot;_),">RECALC(…)</a></span>
 for another, less invasive Macro to force the reevaluation of already
 calculated (or just created) Variables.</p>
@@ -3411,12 +3417,12 @@ style='color:blue'>p</span></span></a> or from the specified Object <tt><i><span
 style='font-size:10.0pt;font-family:"Arial","sans-serif"'>obj</span></i></tt><tt><span
 style='font-size:10.0pt;font-family:"Arial","sans-serif"'>_<i>from</i></span></tt><tt><span
 style='font-size:13.5pt;font-family:"Arial","sans-serif"'>,</span></tt>
-assigning cyclically the pointer <i>cur</i> specified to the address of each target
-Object. Nested <span class=Cdigo>CYCLE(…)</span>’s can be used, provided that
-the pointers (<span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur</a></span>,
+assigning cyclically the pointer <i>cur</i> specified to the address of each
+target Object. Nested <span class=Cdigo>CYCLE(…)</span>’s can be used, provided
+that the pointers (<span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur</a></span>,
 <span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur1</a></span>, <span
-class=Cdigo><a href="#_Temporary_Object's_pointers:">cur2</a></span>,…) differ for
-the different levels.</p>
+class=Cdigo><a href="#_Temporary_Object's_pointers:">cur2</a></span>,…) differ
+for the different levels.</p>
 
 <h2>Example </h2>
 
@@ -3445,8 +3451,8 @@ than one). In turn, for each <i>Market</i> the pointer <span class=Cdigo><a
 href="#_Temporary_Object's_pointers:">cur1</a></span> cycles through each
 Object labelled <i>Firm</i> that is contained in this specific <i>Market</i>.
 For each <i>Firm</i>, <span class=Cdigo><a href="#_CURRENT">v[1]</a></span>
-receives the value of the Variable named <i>Profit</i> related to that
-particular <i>Firm</i>, which is subsequently accumulated in <span class=Cdigo><a
+receives the value of the Variable named <i>Profit</i> related to that particular
+<i>Firm</i>, which is subsequently accumulated in <span class=Cdigo><a
 href="#_CURRENT">v[0]</a></span>. </p>
 
 <p class=MsoNormal>See also the example for <span class=Cdigo><a href="#RNDDRAW">RNDDRAW(…)</a></span>.</p>
@@ -3541,15 +3547,15 @@ class=Cdigo><a href="#_Object’s_relatives:_up,">next</a></span> construct over
 the first instance (i.e., by using <span class=Cdigo>cur-&gt;next</span>, <span
 class=Cdigo>cur-&gt;next-&gt;next</span> etc.). </p>
 
-<p class=MsoNormal>The <span class=Cdigo>ADDOBJ(…)</span> versions initializes the
-newly created Object instance(s), that is, sets the values for its Parameters
-and lagged Variables, according to the values defined in the model
+<p class=MsoNormal>The <span class=Cdigo>ADDOBJ(…)</span> versions initializes
+the newly created Object instance(s), that is, sets the values for its
+Parameters and lagged Variables, according to the values defined in the model
 configuration (and modified by the simulation until the current time step).</p>
 
-<p class=MsoNoSpacing>The Macros without the “<span class=Cdigo>L</span>” suffix
-set the new Object instance(s) as modified by the simulation during the current
-time step, that is, its (their) Variables are going to be updated only in the
-next time step. Instead, the Macros with the “<span class=Cdigo>L</span>”
+<p class=MsoNoSpacing>The Macros without the “<span class=Cdigo>L</span>”
+suffix set the new Object instance(s) as modified by the simulation during the
+current time step, that is, its (their) Variables are going to be updated only
+in the next time step. Instead, the Macros with the “<span class=Cdigo>L</span>”
 suffix allow for the definition of the time of the last update <i>t_upd</i> for
 all of the Object’s Variables, if <i>t_upd</i> is positive or zero. If <i>t_upd</i>
 is negative, the effective time of last update from each Variable of the
@@ -3989,9 +3995,9 @@ by informing the desired number <i>num</i> in <span class=Cdigo>ADDHOOK(…)</span
 Dynamic hooks are numbered stating from zero so <i>num</i> must be an integer
 equal or larger than zero. The allocated dynamic hooks will be numbered from
 zero to <i>num</i> – 1. Hooks may be added to the current Object instance <span
-class=Cdigo><a href="#_Parent_Object:_p">p</a></span> (the one containing the
-Variable/Function being computed) or to the one <a
-href="#_Temporary_Object's_pointers:">pointed by <i>obj</i></a>.</p>
+class=Cdigo><a href="#_Parent_Object:_p">p</a></span> (the one containing the Variable/Function
+being computed) or to the one <a href="#_Temporary_Object's_pointers:">pointed
+by <i>obj</i></a>.</p>
 
 <p class=MsoNormal>The always available single, un-numbered static hook does
 not need to and cannot be allocated using <span class=Cdigo>ADDHOOK(…)</span>.</p>
@@ -4001,11 +4007,11 @@ not need to and cannot be allocated using <span class=Cdigo>ADDHOOK(…)</span>.</
 using <span class=Cdigo><a href="#_WRITE_HOOK(_num,_obj_dest">WRITE_HOOK(…)/WRITE_SHOOK(…)</a></span>
 before usage. </p>
 
-<p class=MsoNormal>Increasing of the number of allocated dynamic hooks is
-possible at any time, by using the <span class=Cdigo>ADDHOOK(…)</span> Macros
-again, with a larger <i>num</i>. The existing hooks are not affected by the
-increase. The number of dynamic hooks may be also reduced using a smaller <i>num</i>
-than the last used value. The excess higher-numbered hooks will be destroyed. <i>num</i>
+<p class=MsoNormal>Increasing of the number of allocated dynamic hooks is possible
+at any time, by using the <span class=Cdigo>ADDHOOK(…)</span> Macros again,
+with a larger <i>num</i>. The existing hooks are not affected by the increase.
+The number of dynamic hooks may be also reduced using a smaller <i>num</i> than
+the last used value. The excess higher-numbered hooks will be destroyed. <i>num</i>
 equal to zero deallocates all dynamic hooks, preserving just the un-numbered
 static hook. </p>
 
@@ -4069,14 +4075,15 @@ UP_LAT, UP_LATS( <i>obj</i> )</h1>
 
 <p class=MsoNormal>These Macros simplify moving in an <a
 href="#_Object’s_relatives:_up,">Object structure</a> created in lattice format
-(<i>n</i> instances of a top Object type, each one composed by a single descending
-Object which also has a single descending and so on, up to <i>m</i> levels). If
-an Object instance <i>obj</i> is specified, or the current Object instance <span
-class=Cdigo><a href="#_Parent_Object:_p">p</a></span> otherwise, a pointer to
-the corresponding down, left, right, or up neighbor instance in the lattice is
-returned. If <i>obj</i> or <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span>
-are on the lattice border, and the requested neighbor does not exist, a <span
-class=Cdigo>NULL</span> pointer is returned.</p>
+(<i>n</i> instances of a top Object type, each one composed by a single
+descending Object which also has a single descending and so on, up to <i>m</i>
+levels). If an Object instance <i>obj</i> is specified, or the current Object
+instance <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span> otherwise,
+a pointer to the corresponding down, left, right, or up neighbor instance in
+the lattice is returned. If <i>obj</i> or <span class=Cdigo><a
+href="#_Parent_Object:_p">p</a></span> are on the lattice border, and the
+requested neighbor does not exist, a <span class=Cdigo>NULL</span> pointer is
+returned.</p>
 
 <p class=MsoNormal>Despite the Macros are designed to be used in a lattice
 organized Object structure, they can be used at any time to navigate across the
@@ -4118,8 +4125,8 @@ INIT_LAT( <i>color</i>, <i>rows</i>, <i>cols</i>, <i>width</i>, <i>height</i> )<
 window available for simulation run time updating. The lattice is formed by <i>rows</i>
 lines and <i>cols</i> columns, set to 100 × 100 by default. The user can also
 set the physical window size as <i>width</i> × <i>height</i> pixels, set to 400
-× 400 by default, and the background <i>color</i>, set to white if not
-explicitly defined (see the available colors in <span class=Cdigo><a
+× 400 by default, and the background <i>color</i>, set to white if not explicitly
+defined (see the available colors in <span class=Cdigo><a
 href="#_WRITE_LAT(_row,_col">WRITE_LAT(…)</a></span>).</p>
 
 <p class=MsoNormal>Just one lattice window may be active in each simulation
@@ -4290,13 +4297,13 @@ explicitly called once, if not the command is ignored.</p>
 <h1><a name="_SAVE_LAT(_&quot;filename&quot;_)"></a><a name="SAVE_LAT"></a>SAVE_LAT(
 &quot;<i>filename</i>&quot; ) </h1>
 
-<p class=MsoNormal>This Macro saves a graphical snapshot of the lattice to the
-disk as an .eps (encapsulated PostScript) file, in the LSD model directory,
-named as <span class=Cdigo>filename.eps</span>. If <i>filename</i> is not
-provided, the default name is <span class=Cdigo>lattice.eps</span>. The <i>filename</i>
-may contain a path if saving to a particular directory is required. If no
-directory is included in <i>filename</i>, the file is saved to the current LSD
-model configuration directory.</p>
+<p class=MsoNormal>This Macro saves a graphical snapshot of the lattice to the disk
+as an .eps (encapsulated PostScript) file, in the LSD model directory, named as
+<span class=Cdigo>filename.eps</span>. If <i>filename</i> is not provided, the
+default name is <span class=Cdigo>lattice.eps</span>. The <i>filename</i> may
+contain a path if saving to a particular directory is required. If no directory
+is included in <i>filename</i>, the file is saved to the current LSD model
+configuration directory.</p>
 
 <p class=MsoNormal>Before <span class=Cdigo>SAVE_LAT(…)</span> is used, <span
 class=Cdigo><a href="#_WRITE_LAT(_row,_col,">INIT_LAT(…)</a></span> has to be
@@ -4630,8 +4637,8 @@ WRITE_NODENAMES( <i>node_obj</i>, &quot;<i>name</i>&quot; )</h1>
 
 <p>These Macros reset the ID (to an integer value) or the name (to a
 null-terminated character array) of the Node indicated by <a
-href="#_Temporary_Object's_pointers:">Object pointer</a> <i>node_obj</i>, or
-the current Node <span class=Cdigo>p</span> otherwise, to <i>id</i> or <i>name</i>,
+href="#_Temporary_Object's_pointers:">Object pointer</a> <i>node_obj</i>, or the
+current Node <span class=Cdigo>p</span> otherwise, to <i>id</i> or <i>name</i>,
 respectively. <i>name</i> can be set to <span class=Cdigo>&quot;&quot;</span>
 (null string). <i>id</i> must be provided but it is not required to be unique
 in the Network. If the selected Object is not a Node, the Macros do nothing.</p>
@@ -4844,9 +4851,9 @@ class=Cdigo><a href="#_LOAD_NET(_&quot;node_Lab&quot;,_&quot;filename&quot;">LOA
 using as Nodes the Objects with label <i>node_Lab</i> that are descendants from
 current Object <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span>, or
 from Object <i>obj</i>, if supplied. The Network is not affected by these
-Macros. The <i>filename</i> may contain a path if saving to a particular directory
-is required. If no directory is included in filename, the file is saved to the
-current LSD model configuration directory.</p>
+Macros. The <i>filename</i> may contain a path if saving to a particular
+directory is required. If no directory is included in filename, the file is
+saved to the current LSD model configuration directory.</p>
 
 <p>Multi-network files allow the analysis of the network dynamics in Pajek (or
 other software). If multiple simulation runs are going on xx (the seed) is
@@ -5439,10 +5446,10 @@ NO_POINTER_INIT</h2>
 class=Cdigo><a href="#_Temporary_Object's_pointers:">cur</a></span>, <span
 class=Cdigo><a href="#_Model_specific_objects">curl</a></span> etc.) to the
 NULL value, to make detection of mistakes simpler. This is a recommended
-practice in C++ programing, considering the language does not check for
-pointers validity before they are used. Usage of non-initialized pointers is a
-common cause of models crashing LSD. However, pointer initialization adds
-overhead to the simulation execution. The definition of <span class=Cdigo>NO_POINTER_INIT</span>
+practice in C++ programing, considering the language does not check for pointers
+validity before they are used. Usage of non-initialized pointers is a common
+cause of models crashing LSD. However, pointer initialization adds overhead to
+the simulation execution. The definition of <span class=Cdigo>NO_POINTER_INIT</span>
 disables the default LSD pointer initialization behavior and eliminates the
 associated performance penalty.</p>
 
@@ -5578,10 +5585,10 @@ DEBUG_STOP<br>
 DEBUG_STOP_AT( step )</h2>
 
 <p>When Macro <span class=Cdigo>DEBUG_START</span> is invoked within an
-Equation, from that moment on LSD will enable the <a href="debug.html">LSD
-Debugger</a> and will save all the names of the Variables computed in a file
-named <span class=Cdigo>log.txt</span> in the <a href="LSD_faqs.html#modelhome">model
-home directory</a>, together with some additional information. Macro <span
+Equation, from that moment on LSD will enable the <a href="debug.html">LSD Debugger</a>
+and will save all the names of the Variables computed in a file named <span
+class=Cdigo>log.txt</span> in the <a href="LSD_faqs.html#modelhome">model home
+directory</a>, together with some additional information. Macro <span
 class=Cdigo>DEBUG_STOP</span> reverses that action, disabling the LSD Debugger
 and stop recording to <span class=Cdigo>log.txt</span>. This file may help
 spotting problems in the simulation due to the order in which the Variables are
@@ -5666,10 +5673,11 @@ simulation is running. <span class=Cdigo>OBSERVE</span> mode is the default
 when one simulation starts to run and it creates a run-time plot window (if
 there is at least one Variable set to show during run time) and show extra
 (verbose) information in LSD Log window during the run. <span class=Cdigo>FAST</span>
-mode prevents the update of the run-time plot window (and hide it) as well discards
-the presentation of most of the non-critical information in LSD Log window (or
-log file), effectively speeding up the simulation execution. <span class=Cdigo>FAST_FULL</span>
-further prevents the presentation of any non-error message.</p>
+mode prevents the update of the run-time plot window (and hide it) as well
+discards the presentation of most of the non-critical information in LSD Log
+window (or log file), effectively speeding up the simulation execution. <span
+class=Cdigo>FAST_FULL</span> further prevents the presentation of any non-error
+message.</p>
 
 <p class=MsoNormal>The <span class=Cdigo>FAST</span> and <span class=Cdigo>FAST_FULL</span>
 modes reduce the information available to LSD when an error occurs. It is
@@ -5840,11 +5848,16 @@ name=RECALC></a>RECALC( &quot;<i>Lab</i>&quot; ), RECALCS( <i>obj</i>, &quot;<i>
 )</h2>
 
 <p>Mark the Variable named <i>Lab</i> contained in the Object currently under
-computation as not calculated in the current time, forcing recalculation if it
-has been already calculated. If the Variable has not been calculated yet or if <i>Lab</i>
+computation as not calculated in the current time, forcing recalculation if it has
+been already calculated. If the Variable has not been calculated yet or if <i>Lab</i>
 is a Parameter, <span class=Cdigo>RECALC(…)</span> does nothing. If <a
 href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is
 supplied, Variable labelled <i>Lab</i> is supposed to be located in it.</p>
+
+<p>If Variable has a non-default updating scheme defined, <span class=Cdigo>RECALC(…)</span>
+also sets the Variable to be recomputed in the current time step irrespective
+of the configured <a href="browser.html#updating">updating options</a>.
+Subsequent updates are handled as initially configured.</p>
 
 <h2><a name="_RND"></a>RND</h2>
 
@@ -5991,10 +6004,10 @@ under such conditions will produce undefined behavior.</p>
 Object instances found for initialization.</p>
 
 <p>Each set of Object instances under a common parent (a brotherhood) can have
-a single Variable or Parameter initialized for conditional turbo searching. Every
-time <span class=Cdigo>INIT_TSEARCH_CND(…)</span> is called, it resets any
-existing initialization for the brotherhood containing the chosen Variable or
-Parameter <i>Lab</i>. However, multiple active initializations can be
+a single Variable or Parameter initialized for conditional turbo searching.
+Every time <span class=Cdigo>INIT_TSEARCH_CND(…)</span> is called, it resets
+any existing initialization for the brotherhood containing the chosen Variable
+or Parameter <i>Lab</i>. However, multiple active initializations can be
 maintained in different brotherhoods.</p>
 
 <h2><a name="_NO_NAN_USE_NAN"></a><a name="_V_CHEAT(_&quot;Lab&quot;,_fake_caller_2"></a><a
@@ -6040,8 +6053,8 @@ name="_EXEC_EXT(_class,_c_obj,"></a><a name="_CYCLE_EXT(_iter,_class,"></a><a
 name="_V_EXT(_class,_ext"></a><a name="_P_EXT(_class_),"></a><a
 name="_V_EXT(_class,_var"></a><a name="_DELETE_EXT(_class_),"></a><a
 name="_V_HOOK(_num_),"></a><a name=hook></a><a name="_ADDEXT(_class_),_1"></a>Data
-extensions allow adding to LSD Objects unrestricted data storage capabilities, beyond
-the usual sets of Variables and Parameters. Indeed, data extensions are
+extensions allow adding to LSD Objects unrestricted data storage capabilities,
+beyond the usual sets of Variables and Parameters. Indeed, data extensions are
 conceptually closer to Parameters, as LSD does not try to update its values
 along the simulation. The modeler is entirely responsible for the
 initialization and the update of data in the data extension. However, data in
@@ -6066,14 +6079,14 @@ href="#_EXEC_EXT(_class,_c_obj,_1">EXEC_EXT(…)</a></span></u></span>.</p>
 ADDEXT_INIT( <i>class</i>, <i>initializer</i> ), ADDEXT_INITS( <i>obj</i>, <i>class</i>,
 <i>initializer </i>)</h2>
 
-<p>These Macros adds an arbitrary C++ data extension of type <i>class</i> to the
-current LSD Object under computation, allocating memory space for it. If an <a
-href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is
-supplied, the data extension is added to this specific Object. The data
-extension can be from a simple scalar variable to a fully defined C++ object
-like a <span class=Cdigo>class</span> or a <span class=Cdigo>struct</span>.
-Data extension allocation is automatically handled by LSD, being destroyed when
-the host Object is deleted (C++ object constructor and destructor are called
+<p>These Macros adds an arbitrary C++ data extension of type <i>class</i> to
+the current LSD Object under computation, allocating memory space for it. If an
+<a href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is
+supplied, the data extension is added to this specific Object. The data extension
+can be from a simple scalar variable to a fully defined C++ object like a <span
+class=Cdigo>class</span> or a <span class=Cdigo>struct</span>. Data extension
+allocation is automatically handled by LSD, being destroyed when the host
+Object is deleted (C++ object constructor and destructor are called
 accordingly). Each LSD Object instance can have a single data extension; adding
 an extension (of the same <i>class</i>) when one already exists automatically
 destroys the previous one.</p>
@@ -6108,9 +6121,9 @@ style='color:#00B050'>// define an initially zero-length vector</span><br>
 <p>In this case, our data extension is a C++ class named <i>ext_fin</i> which
 contains two elements, an integer variable (<i>num_params</i>) and a C++
 dynamic integer vector named <i>tech_params</i> (defined in C++ standard
-library<b> </b><span class=Cdigo>&lt;vector&gt;</span>). Next, we add this
-extension to all <i>Firm</i> LSD Objects by means of a LSD startup-type
-Variable and reset the variable holding the size of the vector, run just once:</p>
+library<b> </b><span class=Cdigo>&lt;vector&gt;</span>). Next, we add this extension
+to all <i>Firm</i> LSD Objects by means of a LSD startup-type Variable and
+reset the variable holding the size of the vector, run just once:</p>
 
 <p><span class=Cdigo>EQUATION( &quot;Init&quot; )<br>
 /*</span><span class=Cdigo><span style='color:#00B050'><br>
@@ -6451,8 +6464,8 @@ assign a value to it with the command “<span class=Cdigo>=</span>”:</p>
 <p class=MsoNormal>Any assignment (and most C++ commands) must be terminated
 with a semi-colon “<span class=Cdigo>;</span>”.</p>
 
-<p class=MsoNormal>It is also possible to assign values from other variables, and
-use the standard mathematical operations, using the parentheses to group
+<p class=MsoNormal>It is also possible to assign values from other variables,
+and use the standard mathematical operations, using the parentheses to group
 relevant priorities:</p>
 
 <p class=MsoNormal><span class=Cdigo>a = b + 3 – d / (e + g) * (h + i);</span></p>
@@ -6683,9 +6696,9 @@ here, than one of the two conditions above is not true</span><br>
 
 <h2>Cycles: <span class=Cdigo>for(…)</span></h2>
 
-<p class=MsoNormal>A frequently used command allows the repetition of a block of
-code again and again, until a specific condition is satisfied. The grammar for
-the cycle keyword <span class=Cdigo>for(…)</span> is:</p>
+<p class=MsoNormal>A frequently used command allows the repetition of a block
+of code again and again, until a specific condition is satisfied. The grammar
+for the cycle keyword <span class=Cdigo>for(…)</span> is:</p>
 
 <p class=MsoNormal><span class=Cdigo>for ( INIT ; CONDITION ; ENDCYCLE )<br>
 {<br>
@@ -6733,8 +6746,8 @@ can be placed here separated by commas &quot;<span class=Cdigo>,</span>&quot;</p
 
 <p class=MsoNormal style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;
 margin-left:35.7pt;text-indent:-17.85pt'>6.<span style='font-size:7.0pt;
-font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp; </span>Restart from operation
-2 above.</p>
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp; </span>Restart from
+operation 2 above.</p>
 
 <p class=MsoNormal>Example: a cycle <span class=Cdigo>for(…)</span> to repeat a
 block of code 5 times, setting an array variable from -2 to 2:</p>

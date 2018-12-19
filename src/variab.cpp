@@ -150,9 +150,14 @@ variable::variable( void )
 	deb_cond = 0;
 	end = 0;
 	last_update = 0;
+	next_update = 0;
 	num_lag = 0;
 	param = 0;
 	start = 0;
+	delay = 0;
+	delay_range = 0;
+	period = 1;
+	period_range = 0;
 	up = NULL;
 	next = NULL;
 	
@@ -185,9 +190,14 @@ variable::variable( const variable &v )
 	deb_cond = v.deb_cond;
 	end = v.end;
 	last_update = v.last_update;
+	next_update = v.next_update;
 	num_lag = v.num_lag;
 	param = v.param;
 	start = v.start;
+	delay = v.delay;
+	delay_range = v.delay_range;
+	period = v.period;
+	period_range = v.period_range;
 	up = v.up;
 	next = v.next;
 	
@@ -273,14 +283,15 @@ double variable::cal( object *caller, int lag )
 				return val[ eff_lag ];	// use regular past value
 		}
 		else
-		{
-			if ( last_update >= t )		// already calculated this time step
+		{	
+			// already calculated this time step or not to be calculated this time step
+			if ( last_update >= t || t < next_update )
 				return( val[ 0 ] );		
 #ifdef PARALLEL_MODE
 			// prevent parallel computation of the same variable (except dummy equations)
 			if ( parallel_mode && ! dummy )
 				 guard.lock( );
-			if ( last_update >= t )			// recheck if not computed during lock
+			if ( last_update >= t )		// recheck if not computed during lock
 				return( val[ 0 ] );		
 #endif	
 		}
@@ -394,6 +405,14 @@ double variable::cal( object *caller, int lag )
 	val[ 0 ] = app;
 
 	last_update = t;
+	
+	// choose next update step for special updating variables
+	if ( period > 1 || period_range > 0 )
+	{
+		next_update = t + period;
+		if ( period_range > 0 )
+			next_update += rnd_int( 0, period_range );
+	}
 
 #ifdef PARALLEL_MODE
 	if ( fast_mode == 0 && ! parallel_mode )
@@ -586,6 +605,15 @@ void worker::cal_worker( void )
 				var->val[ 0 ] = app;
 
 				var->last_update = t;
+				
+				// choose next update step for special updating variables
+				if ( var->period > 1 || var->period_range > 0 )
+				{
+					var->next_update = t + var->period;
+					if ( var->period_range > 0 )
+						var->next_update += rnd_int( 0, var->period_range );
+				}			
+				
 				var->under_computation = false;
 				
 				// if there is a pending object deletion, try to do it now
@@ -846,7 +874,7 @@ void parallel_update( variable *v, object* p, object *caller )
 		cv = co->search_var( co, v->label );
 		
 		// compute only if not updated
-		if ( cv != NULL && cv->last_update < t )
+		if ( cv != NULL && cv->last_update < t && t >= cv->next_update )
 		{
 			// if no worker available, wait to free existing ones
 			while ( nt >= max_threads )
