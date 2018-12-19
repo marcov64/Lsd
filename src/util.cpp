@@ -262,6 +262,21 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 #ifdef PARALLEL_MODE
 	// prevent concurrent use by more than one thread
 	lock_guard < mutex > lock( error );
+	
+	// abort worker and park message if not running in main LSD thread
+	if ( this_thread::get_id( ) != main_thread )
+	{
+		if ( ! error_hard_thread )	// handle just first error
+		{
+			error_hard_thread = true;
+			strcpy( error_hard_msg1, boxTitle );
+			strcpy( error_hard_msg2, logText );
+			strcpy( error_hard_msg3, boxText );
+			throw 1;
+		}
+		else
+			return;
+	}
 #endif	
 		
 #ifndef NO_WINDOW

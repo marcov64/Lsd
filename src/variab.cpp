@@ -120,8 +120,6 @@ clock_t start_profile[ 100 ], end_profile[ 100 ];
 #ifdef PARALLEL_MODE
 // semaphore to enable just a single parallel call at a time
 atomic < bool > parallel_ready( true );
-bool worker_ready = true;
-bool worker_crashed = false;
 condition_variable update;
 mutex thr_ptr_lock;
 mutex update_lock;
@@ -548,7 +546,7 @@ void worker::cal_worker( void )
 				{
 					sprintf( err_msg1, "deadlock during parallel computation" );
 					sprintf( err_msg2, "the equation for '%s' in object '%s' requested its own value\nwhile parallel-computing its current value", var->label, var->up->label );
-					sprintf( err_msg3, "check your code to prevent this situation." );
+					sprintf( err_msg3, "check your code to prevent this situation" );
 					user_excpt = true;
 					throw;
 				}
@@ -557,16 +555,27 @@ void worker::cal_worker( void )
 
 				// compute the Variable's equation
 				user_excpt = true;			// allow distinguishing among internal & user exceptions
+
+#ifndef NO_WINDOW 
+				if ( setjmp( env ) )		// allow recovering from signals
+					return;
+#endif			
 				try 						// do it while catching exceptions to avoid obscure aborts
 				{
 					app = var->fun( NULL );
 				}
 				catch ( ... )
 				{
-					pexcpt = current_exception( );
-					sprintf( err_msg1, "equation error" );
-					sprintf( err_msg2, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", var->label, var->up->label );
-					sprintf( err_msg3, "check your code to prevent this situation." );
+					if ( error_hard_thread )
+						pexcpt = nullptr;
+					else
+					{
+						pexcpt = current_exception( );
+						sprintf( err_msg1, "equation error" );
+						sprintf( err_msg2, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", var->label, var->up->label );
+						sprintf( err_msg3, "check your code to prevent this situation" );
+					}
+					
 					throw;
 				}
 				user_excpt = false;
@@ -603,12 +612,12 @@ void worker::cal_worker( void )
 	catch ( ... )
 	{
 		// only capture exception if not already done
-		if ( pexcpt != nullptr )
+		if ( ! error_hard_thread && pexcpt != nullptr )
 		{
 			pexcpt = current_exception( );
 			sprintf( err_msg1, "parallel computation problem" );
 			sprintf( err_msg2, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", var->label, var->up->label );
-			sprintf( err_msg3, "disable parallel computation for this variable\nor check your code to prevent this situation." );
+			sprintf( err_msg3, "disable parallel computation for this variable\nor check your code to prevent this situation" );
 		}
 	}
 	
@@ -664,15 +673,45 @@ Handle system signals in worker
 ****************************************************/
 void worker::signal( int sig )
 {
+	switch ( sig )
+	{
+		case SIGMEM:
+			strcpy( err_msg2, "SIGMEM" );
+			break;
+			
+		case SIGABRT:
+			strcpy( err_msg2, "SIGABRT" );
+			break;
+
+		case SIGFPE:
+			strcpy( err_msg2, "SIGFPE" );
+		break;
+		
+		case SIGILL:
+			strcpy( err_msg2, "SIGILL" );
+		break;
+		
+		case SIGSEGV:
+			strcpy( err_msg2, "SIGSEGV" );
+		break;
+		
+		default:
+			strcpy( err_msg2, "Unknown signal" );
+	}
+	
 	if ( var != NULL && var->label != NULL  )
-		sprintf( err_msg1, "\n\nUnknown error: signal received while parallel-computing the equation\nfor '%s' in object '%s'. Disable parallel computation for this variable\nor check your code to prevent this situation.", var->label, var->up->label != NULL ? var->up->label : "(none)" );
+		sprintf( err_msg1, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'. Disable parallel computation for this variable\nor check your code to prevent this situation.", err_msg2, var->label, var->up->label != NULL ? var->up->label : "(none)" );
 	else
-		sprintf( err_msg1, "\n\nUnknown error: signal received by a parallel worker thread.\nDisable parallel computation to prevent this situation." );
+		sprintf( err_msg1, "\n\n%s: signal received by a parallel worker thread.\nDisable parallel computation to prevent this situation.", err_msg2 );
 
 	// signal & kill thread
-	signum = sig;
+	signum = sig;	
 	free = false;
 	running = false;
+	
+#ifndef NO_WINDOW 
+	longjmp( env, 1 );				// recover from crash on user code
+#endif
 }
 
 
@@ -717,30 +756,34 @@ bool worker::check( void )
 	if ( ! worker_crashed )
 	{		
 		worker_crashed = true;
+		user_exception = user_excpt;
 		
 		if ( signum >= 0 )
 		{
 			plog( err_msg1 );
-			user_exception = user_excpt;
 			signal_handler( signum );
 		}
 		else
 		{
-			if ( pexcpt != nullptr )
-			{
-				user_exception = user_excpt;
-				error_hard( err_msg2, err_msg1, err_msg3, true );
-				rethrow_exception( pexcpt );
-			}
+			if ( error_hard_thread )
+				error_hard( error_hard_msg2, error_hard_msg1, error_hard_msg3, true );
 			else
 			{
-				if ( var != NULL && var->label != NULL )
-					sprintf( msg, "while computing variable '%s' (object '%s') a multi-threading worker crashed", var->label, var->up->label != NULL ? var->up->label : "(none)" );
+				if ( pexcpt != nullptr )
+				{
+					error_hard( err_msg2, err_msg1, err_msg3, true );
+					rethrow_exception( pexcpt );
+				}
 				else
-					sprintf( msg, "multi-threading worker crashed" );
-				
-				error_hard( msg, "parallel computation problem", 
-							"disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
+				{
+					if ( var != NULL && var->label != NULL )
+						sprintf( msg, "while computing variable '%s' (object '%s') a multi-threading worker crashed", var->label, var->up->label != NULL ? var->up->label : "(none)" );
+					else
+						sprintf( msg, "multi-threading worker crashed" );
+					
+					error_hard( msg, "parallel computation problem", 
+								"disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
+				}
 			}
 		}
 	}
