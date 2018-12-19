@@ -2510,7 +2510,7 @@ int sort_function_up( const void *a, const void *b )
 {
 	if ( qsort_lab != NULL )		// variable defined?
 	{
-		if ( (*( object ** ) a )->cal( qsort_lab, 0 ) < ( *( object ** ) b )->cal(qsort_lab, 0 ) )
+		if ( ( *( object ** ) a )->cal( qsort_lab, 0 ) < ( *( object ** ) b )->cal(qsort_lab, 0 ) )
 			return -1;
 		else
 			return 1;
@@ -3122,7 +3122,6 @@ double object::write( char const *lab, double value, int time, int lag )
 		if ( lag == 0 )
 		{
 			cv->val[ 0 ] = value;
-			cv->last_update = time;
 		}
 		else
 		{
@@ -3140,6 +3139,7 @@ double object::write( char const *lab, double value, int time, int lag )
 			cv->val[ eff_lag ] = value;
 		}		
 		
+		cv->last_update = time;
 		eff_time = time - lag;
 		if ( eff_time >= 0 && eff_time <= max_step && ( cv->save || cv->savei ) )
 			cv->data[ eff_time ] = value;
@@ -3188,7 +3188,7 @@ double object::increment( char const *lab, double value )
 		return NAN;
 	}
 	
-	new_value = cv->cal( this, 0 ) + value;
+	new_value = cv->val[ 0 ] + value;
 	this->write( lab, new_value, t );
 	
 	return new_value;
@@ -3234,7 +3234,7 @@ double object::multiply( char const *lab, double value )
 		return NAN;
 	}
 	
-	new_value = cv->cal( this, 0 ) * value;
+	new_value = cv->val[ 0 ] * value;
 	this->write( lab, new_value, t );
 	
 	return new_value;
