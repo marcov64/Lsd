@@ -174,7 +174,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from )
 			sp_upd = false;
 
 		// set flags string
-		cmd( "set varFlags \"%s%s%s%s%s\"", ( cv->save || cv->savei ) ? "+" : "", cv->plot ? "*" : "", cv->debug == 'd' ? "!" : "", cv->parallel ? "&" : "", sp_upd ? "§" : "" );
+		cmd( "set varFlags \"%s%s%s%s%s\"", ( cv->save || cv->savei ) ? "+" : "", cv->plot ? "*" : "", cv->debug == 'd' ? "!" : "", cv->parallel ? "&" : "", sp_upd ? "\u00A7" : "" );
 				
 		if ( cv->param == 1 )
 			sprintf( str," (P$varFlags)\n\"" );

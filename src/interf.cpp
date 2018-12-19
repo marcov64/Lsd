@@ -216,7 +216,7 @@ int browse( object *r, int *choice )
 					sp_upd = false;
 				
 				// set flags string
-				cmd( "set varFlags \"%s%s%s%s%s\"", ( cv->save || cv->savei ) ? "+" : "", cv->plot ? "*" : "", cv->debug == 'd' ? "!" : "", cv->parallel ? "&" : "", sp_upd ? "§" : "" );
+				cmd( "set varFlags \"%s%s%s%s%s\"", ( cv->save || cv->savei ) ? "+" : "", cv->plot ? "*" : "", cv->debug == 'd' ? "!" : "", cv->parallel ? "&" : "", sp_upd ? "\u00A7" : "" );
 				
 				// add elements to the listbox 
 				if ( cv->param == 0 )
@@ -277,7 +277,7 @@ int browse( object *r, int *choice )
 		cmd( "menu .l.v.c.var_name.v -tearoff 0" );
 		cmd( ".l.v.c.var_name.v add command -label Change -command { set choice 7 }" );	// entryconfig 0
 		cmd( ".l.v.c.var_name.v add command -label Properties -command { set choice 75 }" );	// entryconfig 1
-		cmd( ".l.v.c.var_name.v add command -label \"Updating (§)\" -state disabled -command { set choice 96 }" );	// entryconfig 2
+		cmd( ".l.v.c.var_name.v add command -label \"Updating (\u00A7)\" -state disabled -command { set choice 96 }" );	// entryconfig 2
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 3
 		cmd( ".l.v.c.var_name.v add checkbutton -label \"Save (+)\" -variable save -command { set ctxMenuCmd \"set_var_conf $vname save $save\"; set choice 95 }" );	// entryconfig 4
 		cmd( ".l.v.c.var_name.v add checkbutton -label \"Run Plot (*)\" -variable plot -command { set ctxMenuCmd \"set_var_conf $vname plot $plot\"; set choice 95 }" );	// entryconfig 5
