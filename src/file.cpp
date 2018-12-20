@@ -612,7 +612,7 @@ int load_configuration( bool reload, bool quick )
 		}
 	}
 	
-	f = fopen( struct_file, "rt" );
+	f = fopen( struct_file, "rb" );
 	if ( f == NULL )
 		return 1;
 
@@ -948,7 +948,7 @@ bool save_configuration( int findex )
 		}
 	}
 	
-	f = fopen( save_file, "w" );
+	f = fopen( save_file, "wb" );
 	if ( f == NULL )
 		goto error;
 
