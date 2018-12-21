@@ -981,7 +981,7 @@ int browse( object *r, int *choice )
 	// restore correct selection on list boxes
 	cmd( "if { $listfocus == 1 } { \
 			focus .l.v.c.var_name; \
-			if { [ .l.v.c.var_name size ] == 0 } { \
+			if { [ .l.v.c.var_name size ] == 0 || ! [ string is integer -strict $itemfocus ] } { \
 				set itemfocus 0 \
 			} { \
 				if { $itemfocus >= [ .l.v.c.var_name size ] } { \
@@ -995,7 +995,7 @@ int browse( object *r, int *choice )
 		}" );
 	cmd( "if { $listfocus == 2 } { \
 			focus .l.s.c.son_name; \
-			if { [ .l.s.c.son_name size ] == 0 } { \
+			if { [ .l.s.c.son_name size ] == 0 || ! [ string is integer -strict $itemfocus ] } { \
 				set itemfocus 0 \
 			} { \
 				if { $itemfocus >= [ .l.s.c.son_name size ] } { \
