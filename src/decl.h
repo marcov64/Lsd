@@ -111,6 +111,7 @@ Global definitions among all LSD C++ modules
 #define CSV_SEP ","						// single char string with the .csv format separator
 #define SENS_SEP " ,;|/#\t\n"			// sensitivity data valid separators
 #define USER_D_VARS 1000				// number of user double variables
+#define UPD_PER 0.2						// update period during simulation run in s
 
 // user defined signals
 #define SIGMEM NSIG + 1					// out of memory signal

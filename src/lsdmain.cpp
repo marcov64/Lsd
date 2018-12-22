@@ -626,11 +626,11 @@ RUN
 *********************************/
 void run( void )
 {
+	bool batch_sequential_loop = false;
 	char bar_done[ 2 * BAR_DONE_SIZE ];
 	int i, perc_done, last_done;
-	bool batch_sequential_loop = false;
 	FILE *f;
-	clock_t start, end;
+	clock_t start, end, last_update;
 	result *rf;					// pointer for results files (may be zipped or not)
 
 #ifdef PARALLEL_MODE
@@ -755,7 +755,7 @@ void run( void )
 		last_done = -1;
 		strcpy( bar_done, "" );
 		wr_warn_cnt = 0;
-		start = clock( );
+		start = last_update = clock( );
 
 		for ( t = 1; quit == 0 && t <= max_step; ++t )
 		{
@@ -922,7 +922,11 @@ void run( void )
 			if ( ! pause_run && scroll )
 				cmd( "if [ winfo exist .plt%d ] { $activeplot.c.c.cn xview scroll 1 units }", i );
 
-			cmd( "update" );
+			if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER )
+			{
+				cmd( "update" );
+				last_update = clock( );
+			}
 #endif
 		}	// end of for t
 
