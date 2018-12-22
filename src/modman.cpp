@@ -1090,7 +1090,7 @@ if ( choice == 8 )
 	{
 		cmd( "set filename \"\"" );
 		cmd( "set dirname \"\"" );
-		cmd( "set before [.f.t.t get 1.0 end]" );  
+		cmd( "set before [ .f.t.t get 1.0 end ]" );  
 		cmd( "update" );
 		choice = 0;
 		goto loop;
@@ -6825,7 +6825,7 @@ void signal_handler( int signum )
 #ifdef SIGWINCH
 		case SIGWINCH:
 			cmd( "sizetop all" );	// readjust windows size/positions
-			cmd( "update idletasks" );
+			cmd( "update" );
 			return;
 #endif
 		case SIGMEM:

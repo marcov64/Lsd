@@ -1474,7 +1474,7 @@ while ( true )
 			cmd( "label .da.a.l -text \"Series name (or part)\"" );
 			cmd( "entry .da.a.e -textvariable srchTxt -width 20 -justify center" );
 			cmd( "bind .da.a.e <KeyRelease> {if { %%N < 256 && [ info exists DaModElem] } { set bb1 [.da.a.e index insert]; set bc1 [.da.a.e get]; set bf1 [lsearch -glob $DaModElem $bc1*]; if { $bf1  != -1 } { set bd1 [lindex $DaModElem $bf1 ]; .da.a.e delete 0 end; .da.a.e insert 0 $bd1; .da.a.e index $bb1; .da.a.e selection range $bb1 end } } }" );
-			cmd( "label .da.a.n -text \"( finds first instance only,\nuse 'F3' or 'Ctrl+N' to find others)\"" );
+			cmd( "label .da.a.n -text \"(finds first instance only,\nuse 'F3' or 'Ctrl+N' to find others)\"" );
 			cmd( "pack .da.a.l .da.a.e .da.a.n -pady 5 -padx 5" );
 			cmd( "okhelpcancel .da.a b  { set choice 1 } { LsdHelp menudata_res.html#find } { set choice 2 }" );
 			cmd( "bind .da.a.e <Return> { set choice 1 }" );

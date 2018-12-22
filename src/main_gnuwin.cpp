@@ -145,7 +145,7 @@ void signal_handler( int signum )
 		case SIGWINCH:
 #ifndef NO_WINDOW
 			cmd( "sizetop all" );	// readjust windows size/positions
-			cmd( "update idletasks" );
+			cmd( "update" );
 #endif
 			return;
 #endif

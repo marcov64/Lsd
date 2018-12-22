@@ -236,7 +236,6 @@ void plog( char const *cm, char const *tag, ... )
 		cmd( "if $log_ok { .log.text.text.internal see [ .log.text.text.internal index insert ] }" );
 		cmd( "if $log_ok { .log.text.text.internal insert end \"%s\" %s }", message, tag );
 		cmd( "if $log_ok { .log.text.text.internal see end }" );
-		cmd( "update idletasks" );
 	}
 	else
 		plog( "\nError: invalid tag, message ignored:\n%s\n", "", message );

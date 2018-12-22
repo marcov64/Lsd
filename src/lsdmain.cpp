@@ -812,7 +812,7 @@ void run( void )
 			if ( when_debug == t )
 			{
 				debug_flag = true;
-				cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
+				cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update }" );
 			}
 
 			// only update if simulation not paused
@@ -1599,7 +1599,7 @@ void deb_log( bool on, int time )
 			{
 				when_debug = t;
 				debug_flag = true;
-				cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
+				cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update }" );
 			}
 		
 		// ignore if log already open

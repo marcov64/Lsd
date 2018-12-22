@@ -151,7 +151,7 @@ void create( void )
 		
 		if ( message_logged )
 		{
-			cmd( "wm deiconify .log; raise .log; focus .log; update idletasks" );
+			cmd( "wm deiconify .log; raise .log; focus .log; update" );
 			message_logged = false;
 		}    
 
