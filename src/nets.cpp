@@ -1252,7 +1252,7 @@ long object::init_scale_free_net( char const *lab, long numNodes, long outDeg, d
 		}
 
 	for ( cur = firstNode, cur1 = go_brother( cur ); cur != NULL; 
-		  cur = cur1, cur1 != NULL ? cur1 = go_brother( cur1 ) : cur1 = cur1 )
+		  cur = cur1, cur1 != NULL ? cur1 = go_brother( cur1 ) : cur = cur1 )
 																	// then safely remove isolated nodes
 		if ( cur->node->nLinks == 0 )								// no links?
 			cur->delete_obj( );										// remove node

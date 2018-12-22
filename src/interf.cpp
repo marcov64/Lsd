@@ -6566,7 +6566,6 @@ bool descending_variables( const variable &a, const variable &b )
 bool sort_listbox( int box, int order, object *r )
 {
 	bool first;
-	int i;
 	
 	// handle variable/parameter list
 	if ( box == 1 )
@@ -6579,7 +6578,7 @@ bool sort_listbox( int box, int order, object *r )
 		list < variable > :: iterator it;
 		
 		// move LSD linked list of variables to a C++ linked list
-		for ( cv = r->v; cv != NULL; ++i, cv = cv1 )
+		for ( cv = r->v; cv != NULL; cv = cv1 )
 		{
 			cv1 = cv->next;
 			
@@ -6679,7 +6678,7 @@ bool sort_listbox( int box, int order, object *r )
 		list < bridge > :: iterator it;
 		
 		// move LSD linked list of objects to a C++ linked list
-		for ( cb = r->b; cb != NULL; ++i, cb = cb1 )
+		for ( cb = r->b; cb != NULL; cb = cb1 )
 		{
 			cb1 = cb->next;
 			newb.push_back( *cb );

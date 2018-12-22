@@ -146,8 +146,8 @@ double ran1( long *idum_loc = NULL );
 using namespace std;
 
 // classes definitions
-class object; 
-class variable;
+struct object; 
+struct variable;
 struct bridge;
 struct mnode;
 struct netNode;
