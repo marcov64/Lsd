@@ -1498,7 +1498,7 @@ while ( true )
 				cmd( "set a [ .da.vars.lb.v get 0 end ]; set i 0" );
 				cmd( "foreach b $a { set choice [ string first $srchTxt [ string tolower [ lindex [ split $b ] 0 ] ] ]; if { $choice != -1 } { break } { set i [ expr $i + 1 ] } }" );
 				if ( *choice != -1 )
-					cmd( ".da.vars.lb.v selection clear 0 end; .da.vars.lb.v selection set $i; .da.vars.lb.v see $i" );
+					cmd( "focus .da.vars.lb.v; .da.vars.lb.v selection clear 0 end; .da.vars.lb.v selection set $i; .da.vars.lb.v activate $i; .da.vars.lb.v see $i" );
 				else
 					cmd( "tk_messageBox -parent .da -type ok -title \"Error\" -icon error -default ok -message \"Series not found\" -detail \"Check if the name was spelled correctly or use just part of the name. This command is case insensitive.\"" );
 			}
