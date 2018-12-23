@@ -5127,18 +5127,16 @@ if ( choice == 47 )
 			.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
 			.l.t.text insert end \"$a\"; \
 			.l.d.msg configure -text \"\"; \
-			if { [ catch { glob \"$RootLsd/$LsdSrc/*.o\" } objs ] == 0 } { \
-				foreach i $objs { \
-					catch { \
-						file delete -force \"$i\" \
-					} \
+			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.obj *.gch ]; \
+			foreach i $objs { \
+				catch { \
+					file delete -force \"$i\" \
 				} \
 			}; \
-			if { [ catch { glob \"$modeldir/*.o\" } objs ] == 0 } { \
-				foreach i $objs { \
-					catch { \
-						file delete -force \"$i\" \
-					} \
+			set objs [ glob -nocomplain -directory \"$modeldir\" *.o *.obj src makefile* makemessage.txt lsd_gnu* *.exe *.app ]; \
+			foreach i $objs { \
+				catch { \
+					file delete -force \"$i\" \
 				} \
 			} \
 		} { set choice 1 } { LsdHelp LMM.html#compilation_options } { set choice 2 }" );
@@ -5297,13 +5295,13 @@ if ( choice == 48 )
 			.l.t.text insert end \"$default\" \
 		}" );
 	cmd( "button .l.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
-			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.obj ]; \
+			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.obj *.gch ]; \
 			foreach i $objs { \
 				catch { \
 					file delete -force \"$i\" \
 				} \
 			}; \
-			set objs [ glob -nocomplain -directory \"$modeldir\" *.o *.obj src break.gdb makefile* makemessage.txt elements.txt lsd_gnu* *.exe *.app ]; \
+			set objs [ glob -nocomplain -directory \"$modeldir\" *.o *.obj src break.gdb makefile* makemessage.txt elements.txt lsd_gnu* *.exe *.app *.bak ]; \
 			foreach i $objs { \
 				catch { \
 					file delete -force \"$i\" \

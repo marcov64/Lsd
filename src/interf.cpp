@@ -3298,8 +3298,7 @@ case 28:
 	lab1 = ( char * ) Tcl_GetVar( inter, "res1", 0 );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
-	sscanf( lab1, "%499s", lab );
-	strncpy( equation_name, lab, MAX_PATH_LENGTH - 1 );
+	sscanf( lab1, "%499s", equation_name );
 	
 	unsaved_change( true );		// signal unsaved change
 

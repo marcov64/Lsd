@@ -25,3 +25,4 @@ lsd_gnu*.exe
 elements.txt
 makefileNW
 lsd_gnu*
+*.gch

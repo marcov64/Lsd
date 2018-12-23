@@ -701,36 +701,38 @@ Handle system signals in worker
 ****************************************************/
 void worker::signal( int sig )
 {
+	char signame[ 16 ];
+	
 	switch ( sig )
 	{
 		case SIGMEM:
-			strcpy( err_msg2, "SIGMEM" );
+			strcpy( signame, "SIGMEM" );
 			break;
 			
 		case SIGABRT:
-			strcpy( err_msg2, "SIGABRT" );
+			strcpy( signame, "SIGABRT" );
 			break;
 
 		case SIGFPE:
-			strcpy( err_msg2, "SIGFPE" );
-		break;
+			strcpy( signame, "SIGFPE" );
+			break;
 		
 		case SIGILL:
-			strcpy( err_msg2, "SIGILL" );
-		break;
+			strcpy( signame, "SIGILL" );
+			break;
 		
 		case SIGSEGV:
-			strcpy( err_msg2, "SIGSEGV" );
-		break;
+			strcpy( signame, "SIGSEGV" );
+			break;
 		
 		default:
-			strcpy( err_msg2, "Unknown signal" );
+			strcpy( signame, "Unknown signal" );
 	}
 	
 	if ( var != NULL && var->label != NULL  )
-		sprintf( err_msg1, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'. Disable parallel computation for this variable\nor check your code to prevent this situation.", err_msg2, var->label, var->up->label != NULL ? var->up->label : "(none)" );
+		sprintf( err_msg1, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'. Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, var->label, var->up->label != NULL ? var->up->label : "(none)" );
 	else
-		sprintf( err_msg1, "\n\n%s: signal received by a parallel worker thread.\nDisable parallel computation to prevent this situation.", err_msg2 );
+		sprintf( err_msg1, "\n\n%s: signal received by a parallel worker thread.\nDisable parallel computation to prevent this situation.", signame );
 
 	// signal & kill thread
 	signum = sig;	
