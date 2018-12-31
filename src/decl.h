@@ -690,7 +690,7 @@ void create_table_init( object *r );
 void dataentry_sensitivity( int *choice, sense *s, int nval = 0 );
 void deb_show( object *r );
 void delete_bridge( object *d );
-void draw_obj( object *t, object *sel, int level, int center, int from );
+void draw_obj( object *t, object *sel, int level, int center, int from, bool zeroinst );
 void edit_data( object *root, int *choice, char *obj_name );
 void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done );
 void eliminate_obj( object **r, int actual, int desired , int *choice );

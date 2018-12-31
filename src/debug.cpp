@@ -410,10 +410,17 @@ while ( choice == 0 )
 			
 		// Down
 		case 6:
-			if ( r->b != NULL && r->b->head != NULL )
-				choice = deb( r->b->head, c, lab, res, interact );
-			else
+			// handle zero instanced objects
+			for ( cb = r->b; cb != NULL; cb = cb->next )
+				if ( cb->head != NULL )
+				{
+					choice = deb( cb->head, c, lab, res, interact );
+					break;
+				}
+				
+			if ( cb == NULL )
 				choice = 0;
+			
 			break;
 			
 		// Quit

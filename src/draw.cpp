@@ -105,7 +105,7 @@ void show_graph( object *t )
 					} \
 				}" );
 
-		draw_obj( top, t, v0, h0, 0 );
+		draw_obj( top, t, v0, h0, 0, false );
 
 		cmd( "bind $g.f.c <Button-1> { if [ info exists res_g ] { set choice_g 24 } }" );
 		cmd( "bind $g.f.c <Button-2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $g.f.c.v %%X %%Y } }" );
@@ -137,7 +137,7 @@ void show_graph( object *t )
 	else	// or just update canvas
 	{
 		cmd( "$g.f.c delete all" );
-		draw_obj( top, t, v0, h0, 0 );
+		draw_obj( top, t, v0, h0, 0, false );
 	}
 
 	cmd( "wm title $g \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
@@ -147,7 +147,7 @@ void show_graph( object *t )
 /****************************************************
 DRAW_OBJ
 ****************************************************/
-void draw_obj( object *t, object *sel, int level, int center, int from )
+void draw_obj( object *t, object *sel, int level, int center, int from, bool zeroinst )
 {
 	bool sp_upd;
 	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_ELEM_LENGTH ];
@@ -196,20 +196,23 @@ void draw_obj( object *t, object *sel, int level, int center, int from )
 		sprintf( ch, "%s", t->label );
 		strcpy( ch1, "" );
 		
-		for ( cur = t; cur != NULL ; cur = cur->hyper_next( ) )
-		{
-			if ( strlen( ch1 ) >= 9 )
+		if ( zeroinst )
+			strcpy( ch1, "\u2026" );
+		else
+			for ( cur = t; cur != NULL ; cur = cur->hyper_next( ) )
 			{
-				strcat( ch1, "\u2026" );
-				break;
+				if ( strlen( ch1 ) >= 9 )
+				{
+					strcat( ch1, "\u2026" );
+					break;
+				}
+				
+				skip_next_obj( cur, &count );
+				sprintf( str, "%s%d", strlen( ch1 ) ? " " : "", count );
+				strcat( ch1, str );
+				
+				for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group
 			}
-			
-			skip_next_obj( cur, &count );
-			sprintf( str, "%s%d", strlen( ch1 ) ? " " : "", count );
-			strcat( ch1, str );
-			
-			for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group
-		}
 		
 		if ( t->up->up != NULL )
 			put_line( from, level - step_level + v_margin + n_size / 2, center, level + n_size / 2 );
@@ -299,7 +302,13 @@ void draw_obj( object *t, object *sel, int level, int center, int from )
 	// draw sons
 	for ( i = begin, cb = t->b; cb != NULL; i += step_type, cb = cb->next )
 		if ( cb->head != NULL )
-			draw_obj( cb->head, sel, level + step_level, i, center );
+			draw_obj( cb->head, sel, level + step_level, i, center, zeroinst );
+		else
+		{	// try to draw zero instance objects
+			cur = blueprint->search( cb->blabel );
+			if ( cur != NULL )
+				draw_obj( cur, sel, level + step_level, i, center, true );
+		}
 }
 
 
