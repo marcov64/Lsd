@@ -47,7 +47,7 @@ The widget of importance are:
 *************************************************************/
 
 /*****
-used up to 87 options
+used up to 88 options
 *******/
 
 #include <tk.h>
@@ -542,6 +542,7 @@ cmd( "$w add command -label Delete -command { \
 cmd( "$w add separator" );
 cmd( "$w add command -label \"Find...\" -command { set choice 11 } -underline 0 -accelerator Ctrl+f" );
 cmd( "$w add command -label \"Find Again\" -command { set choice 12 } -underline 5 -accelerator F3" );
+cmd( "$w add command -label \"Find Backwards\" -command { set choice 88 } -underline 5 -accelerator Ctrl+F3" );
 cmd( "$w add command -label \"Replace...\" -command { set choice 21 } -underline 0" );
 cmd( "$w add command -label \"Go to Line...\" -command { set choice 10 } -underline 6 -accelerator Ctrl+l" );
 cmd( "$w add separator" );
@@ -1445,8 +1446,13 @@ if ( choice == 11 )
 
 /* Search again the same pattern in the text */
 
-if ( choice == 12 )
+if ( choice == 12 || choice == 88 )
 {
+	if ( choice == 12 )
+		cmd( "set dirsearch \"-forwards\"; set endsearch end" );
+	else
+		cmd( "set dirsearch \"-backwards\"; set endsearch 1.0" );
+
 	cmd( "if { $textsearch != \"\" } { \
 			.f.t.t tag remove sel 1.0 end; \
 			set cur [ .f.t.t index insert ]; \
