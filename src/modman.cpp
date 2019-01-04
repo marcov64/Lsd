@@ -6690,7 +6690,6 @@ end:
  *********************************/
 void create_compresult_window( bool nw )
 {
-	cmd( "destroytop .mm" );
 	cmd( "set cerr 1.0" );						// search start position in file
 	cmd( "set error \" error:\"" );				// error string to be searched
 	cmd( "set errfil \"\"" );
@@ -6806,7 +6805,7 @@ void create_compresult_window( bool nw )
 				.mm.i.c.n configure -text $errcol; \
 			} \
 		}" );
-	cmd( "button .mm.b.close -width [ expr $butWid + 4 ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; wm deiconify .; raise .; set keepfocus 0 }" );
+	cmd( "button .mm.b.close -width [ expr $butWid + 4 ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; wm deiconify .; raise .; focus .f.t.t; set keepfocus 0 }" );
 	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx 10 -pady 10 -expand yes -fill x -side left" );
 	cmd( "pack .mm.b -side right" );
 	
