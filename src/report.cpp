@@ -40,11 +40,11 @@ and also the whole set of variables and parameters used in the its own equation.
 #define TEX_BOTTOM 2.5
 
 bool table;
-FILE *frep;
 int code;
 int desc;
 int extra;
 int fatto;
+int file_error;
 int init;
 int lmenu;
 int obs;
@@ -58,7 +58,9 @@ REPORT
 void report( int *choice, object *r )
 {
 	char *app, ch;
-	FILE *ffun, *f;
+	FILE *f, *frep;
+	
+	file_error = 0;
 
 	if ( ! struct_loaded )
 	{
@@ -174,21 +176,22 @@ void report( int *choice, object *r )
 		
 	cmd( "destroytop .w" );
 
-	while ( strlen( equation_name ) == 0 || ( ffun = fopen( equation_name, "r" ) ) == NULL )
+	while ( strlen( equation_name ) == 0 || ( f = fopen( equation_name, "r" ) ) == NULL )
 	{
-	  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'OK' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ] ]; if [ fn_spaces \"$res\" . ] { set res \"\" }; set choice 1 } { set choice 2 }", equation_name );
+		cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'OK' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ] ]; if [ fn_spaces \"$res\" . ] { set res \"\" }; set choice 1 } { set choice 2 }", equation_name );
 
-	if ( *choice == 1 )
-	{
-		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		if ( app != NULL && strlen( app ) > 0 )
-			strncpy( equation_name, app, MAX_PATH_LENGTH - 1 );
+		if ( *choice == 1 )
+		{
+			app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+			if ( app != NULL && strlen( app ) > 0 )
+				strncpy( equation_name, app, MAX_PATH_LENGTH - 1 );
+		}
+
+		if ( *choice == 2 )
+			goto end;
 	}
 
-	if ( *choice == 2 )
-		goto end;
-	}
-
+	fclose( f );
 	cmd( "set choice $lmenu" );
 	lmenu = *choice;
 
@@ -263,7 +266,7 @@ void report( int *choice, object *r )
 				fprintf( frep, "<H3>%s</H3>", app );
 			
 				cmd( "set choice $html2" );
-				for (ch=fgetc(f); ch!=EOF; ch=fgetc(f) )
+				for ( ch = fgetc( f ); ch != EOF; ch = fgetc( f ) )
 				{
 					if ( *choice == 0 )
 					{
@@ -301,10 +304,10 @@ void report( int *choice, object *r )
 	if ( obs )
 	{
 		int begin = 1;
-		show_rep_initial( frep, r, &begin );
+		show_rep_initial( frep, r, &begin, frep );
 		
 		begin = 1;
-		show_rep_observe( frep, r, &begin );
+		show_rep_observe( frep, r, &begin, frep );
 	}
 
 	fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
@@ -314,7 +317,7 @@ void report( int *choice, object *r )
 
 	write_str( r, frep, 0, "" );
 	write_list( frep, r, 1, "" );
-	create_table_init(r);
+	create_table_init( r, frep );
 
 	if ( init )
 	{
@@ -326,7 +329,7 @@ void report( int *choice, object *r )
 		write_str( r, frep, 0, "_i_" );
 		write_list( frep, r, 1, "_i_" );
 
-		create_initial_values( r );
+		create_initial_values( r, frep );
 	}
 
 	if ( code )
@@ -339,7 +342,7 @@ void report( int *choice, object *r )
 		write_str( r, frep, 0, "_d_" );
 		write_list( frep, r, 1, "_d_" );
 
-		cmd( "set app [file tail \"%s\"]", equation_name );
+		cmd( "set app [ file tail \"%s\" ]", equation_name );
 		app = ( char * ) Tcl_GetVar( inter, "app", 0 );
 		fprintf( frep, "<BR><i>Equation file:</i> &nbsp;<TT><u>%s</u></TT><BR><BR>", app );
 
@@ -455,7 +458,11 @@ void write_var( variable *v, FILE *frep )
 		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
 
 		if ( ( ffun = fopen( fname, "r" ) ) == NULL )
+		{
+			if ( ++file_error < ERR_LIM )
+				plog( "\nError opening file '%s': %s", "", fname, strerror( errno ) );
 			continue;
+		}
 
 		while ( fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL )
 		{
@@ -463,7 +470,7 @@ void write_var( variable *v, FILE *frep )
 			{
 				done = contains( ffun, v->label, strlen( v->label ) );
 		
-				if ( done == 1 )
+				if ( done )
 				{
 					fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one ? ", " : "", c2_lab,  c2_lab );
 					one = true;
@@ -501,7 +508,11 @@ void write_var( variable *v, FILE *frep )
 		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
 
 		if ( ( ffun = fopen( fname, "r" ) ) == NULL )
+		{
+			if ( ++file_error < ERR_LIM )
+				plog( "\nError opening file '%s': %s", "", fname, strerror( errno ) );
 			continue;
+		}
 
 		flag_comm = 0;
 
@@ -550,7 +561,7 @@ void write_var( variable *v, FILE *frep )
 						app = strstr( c1_lab, "}" );
 						if ( app != NULL )
 							done--;
-						flag_string=flag_var = 0;
+						flag_string = flag_var = 0;
 						fprintf( frep, "<BR><TT>" );
 						
 						if ( flag_comm == 1 )
@@ -647,7 +658,7 @@ void write_var( variable *v, FILE *frep )
 			}
 		}
 
-		fclose(ffun );
+		fclose( ffun );
 	}
 
 	if ( ! one )
@@ -681,12 +692,21 @@ void find_using( object *r, variable *v, FILE *frep )
 		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
 		
 		if ( ( ffun = fopen( fname, "r" ) ) == NULL )
+		{
+			if ( ++file_error < ERR_LIM )
+				plog( "\nError opening file '%s': %s", "", fname, strerror( errno ) );
 			continue;
+		}
 		
 		while ( fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL )
 			if ( is_equation_header( c1_lab, c2_lab, updt_in ) )
 				if ( eq_dum && ! strcmp( c2_lab, v->label ) )
+				{
+					fclose( ffun );
 					return;
+				}
+				
+		fclose( ffun );
 	}
 	
 	// now search for all elements in all objects in all files
@@ -701,7 +721,11 @@ void find_using( object *r, variable *v, FILE *frep )
 				fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
 
 				if ( ( ffun = fopen( fname, "r" ) ) == NULL )
+				{
+					if ( ++file_error < ERR_LIM )
+						plog( "\nError opening file '%s': %s", "", fname, strerror( errno ) );
 					continue;
+				}
 
 				while ( fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL )
 				{
@@ -710,7 +734,7 @@ void find_using( object *r, variable *v, FILE *frep )
 						done = 0;
 						if ( ! strcmp( c2_lab, v->label ) )
 							done = contains( ffun, cv->label, strlen( cv->label ) );
-						if ( done == 1 )
+						if ( done )
 						{
 							if ( frep != NULL )
 							{
@@ -772,13 +796,13 @@ bool contains( FILE *f, char *lab, int len )
 		
 		for ( i = 0; c1_lab[ i ] != 0; ++i ) // scans each character
 		{
-			if ( c1_lab[ i ] == '{' ) 		// if it is an open braket
+			if ( c1_lab[ i ] == '{' ) 		// if it is an open bracket
 			{
 				bra++;
 				start = 0;
 			}
 			else
-				if ( c1_lab[ i ] == '}' ) 	// if it is a closed braket
+				if ( c1_lab[ i ] == '}' ) 	// if it is a closed bracket
 					bra--;
 				else
 				{
@@ -801,10 +825,10 @@ bool contains( FILE *f, char *lab, int len )
 						// scan the whole word, until a different char is not found
 						got = 1;
 						if ( pot[ 0 ] != '\"' ) 			// in case the eq. contains "" it gets fucked up..
-							for ( j = 0; got == 1 && pot[ j ] != '\"' && lab+j != NULL; ++j )
+							for ( j = 0; got == 1 && pot[ j ] != '\"' && lab + j != NULL; ++j )
 								if ( pot[ j ] != lab[ j ])
 									got = 0;
-						for ( ; pot[ j ] != '\"'; ++j ); 	//finishes the word, until the closed quotes
+						for ( ; pot[ j ] != '\"'; ++j ); 	// finishes the word, until the closed quotes
 						
 						i = i + j + 1;
 						
@@ -881,99 +905,105 @@ void write_str( object *r, FILE *frep, int dep, char const *prefix )
 /********************************
 WRITE_LIST
 *********************************/
-void write_list(FILE *frep, object *root, int flag_all, char const *prefix)
+void write_list( FILE *frep, object *root, int flag_all, char const *prefix )
 {
 	int num, i;
-	char *app, s1[2 * MAX_ELEM_LENGTH], s2[MAX_ELEM_LENGTH];
+	char *app, s1[ 2 * MAX_ELEM_LENGTH ], s2[ MAX_ELEM_LENGTH ];
 
 	Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
 
-	if ( flag_all == 1 ) //initial listing
-	  fprintf( frep, "<H3>Variables</H3>\n" );
+	if ( flag_all == 1 ) 					// initial listing
+		fprintf( frep, "<H3>Variables</H3>\n" );
 	else
-	  fprintf( frep, "<i>Variables: &nbsp;</i>" );
+		fprintf( frep, "<i>Variables: &nbsp;</i>" );
 
-	cmd( "lappend rawlist" ); //create the list if not existed
-	cmd( "unset rawlist" ); //empty the list
-	cmd( "lappend rawlist" ); //create a surely empty list
+	cmd( "lappend rawlist" ); 				// create the list if not existed
+	cmd( "unset rawlist" ); 				// empty the list
+	cmd( "lappend rawlist" ); 				// create a surely empty list
 
-	if ( ! strcmp(prefix, "_i_") )
-	 fill_list_var(root, flag_all, 1); //insert only lagged variables
+	if ( ! strcmp( prefix, "_i_" ) )
+		fill_list_var( root, flag_all, 1 ); // insert only lagged variables
 	else
-	 fill_list_var(root, flag_all, 0 ); //insert all the variables
+		fill_list_var( root, flag_all, 0 );	// insert all the variables
 
 	cmd( "set alphalist [lsort -dictionary $rawlist]" );
 	cmd( "set num [llength $alphalist]" );
-
-	if ( flag_all == 0 ) //distinguish the case you are compiling the initial list of element (all) or for a single Object)
-	  sprintf(s1, "form_v_%s_%s",root->label, prefix);
+	
+	// distinguish the case you are compiling the initial list of element (all) or for a single Object)
+	if ( flag_all == 0 ) 
+		sprintf( s1, "form_v_%s_%s", root->label, prefix );
 	else
-	  sprintf(s1, "form_v_all_%s_%s",root->label, prefix);  
+		sprintf( s1, "form_v_all_%s_%s", root->label, prefix );  
 
 	if ( lmenu )
 	{
-	  create_form(num, s1, prefix); 
-	  if ( num == 0 )
-		fprintf( frep, "(none)<BR>\n" );
+		create_form( num, s1, prefix, frep ); 
+		if ( num == 0 )
+			fprintf( frep, "(none)<BR>\n" );
 	}
 	else
 	{
-	 for ( i = 0; i < num; ++i )
-	 {cmd( "set app [lindex $alphalist %d]", i );
-	  app = ( char * ) Tcl_GetVar( inter, "app", 0 );
-	  strcpy( msg, app);
-	  sscanf( msg, "%s %s", s1, s2);
-	  fprintf( frep, "<TT><A HREF=\"#%s%s\">%s</A></TT>", prefix, s1, s1 );
-	  if (i < num-1)
-	   fprintf( frep, "<TT>, </TT>" );
-	 }
+		for ( i = 0; i < num; ++i )
+		{
+			cmd( "set app [ lindex $alphalist %d ]", i );
+			app = ( char * ) Tcl_GetVar( inter, "app", 0 );
+			strcpy( msg, app );
+			sscanf( msg, "%s %s", s1, s2);
+			fprintf( frep, "<TT><A HREF=\"#%s%s\">%s</A></TT>", prefix, s1, s1 );
+			
+			if ( i < num - 1 )
+				fprintf( frep, "<TT>, </TT>" );
+		}
 
-	 if ( num > 0 )
-	   fprintf( frep, "<BR>\n" );
-	 else
-	   fprintf( frep, "(none)<BR>\n" );
+		if ( num > 0 )
+			fprintf( frep, "<BR>\n" );
+		else
+			fprintf( frep, "(none)<BR>\n" );
 	}
 	 
-	if ( flag_all == 1 ) //initial listing
-	 fprintf( frep, "<H3>Parameters</H3>\n" );
+	if ( flag_all == 1 ) 					// initial listing
+		fprintf( frep, "<H3>Parameters</H3>\n" );
 	else
-	 fprintf( frep, "<i>Parameters: &nbsp;</i>" );
+		fprintf( frep, "<i>Parameters: &nbsp;</i>" );
 
-	cmd( "lappend rawlist" ); //create the list if not existed
-	cmd( "unset rawlist" ); //empty the list
-	cmd( "lappend rawlist" ); //create a surely empty list
+	cmd( "lappend rawlist" ); 				// create the list if not existed
+	cmd( "unset rawlist" ); 				// empty the list
+	cmd( "lappend rawlist" ); 				// create a surely empty list
 
-	fill_list_par(root, flag_all);
+	fill_list_par( root, flag_all );
 
 	cmd( "set alphalist [lsort -dictionary $rawlist]" );
 	cmd( "set num [llength $alphalist]" );
-
-	if ( flag_all == 0 ) //distinguish the case you are compiling the initial list of element (all) or for a single Object)
-	 sprintf(s1, "form_p_%s_%s",root->label, prefix);
+	
+	//distinguish the case you are compiling the initial list of element (all) or for a single Object)
+	if ( flag_all == 0 )
+		sprintf( s1, "form_p_%s_%s", root->label, prefix );
 	else
-	 sprintf(s1, "form_p_all_%s_%s",root->label, prefix); 
+		sprintf( s1, "form_p_all_%s_%s", root->label, prefix ); 
 
 	if ( lmenu )
 	{
-	  create_form(num, s1, prefix); 
-	  if ( num == 0 )
-		fprintf( frep, "(none)<BR>\n" );
+		create_form( num, s1, prefix, frep ); 
+		if ( num == 0 )
+			fprintf( frep, "(none)<BR>\n" );
 	}
 	else
 	{
-	 for ( i = 0; i < num; ++i )
-	 {cmd( "set app [lindex $alphalist %d]", i );
-	  app = ( char * ) Tcl_GetVar( inter, "app", 0 );
-	  strcpy( msg, app);
-	  fprintf( frep, "<TT><A HREF=\"#%s%s\">%s</A></TT>",prefix, msg, msg);
-	  if (i < num-1)
-	   fprintf( frep, "<TT>, </TT>" );
-	 }
+		for ( i = 0; i < num; ++i )
+		{
+			cmd( "set app [ lindex $alphalist %d ]", i );
+			app = ( char * ) Tcl_GetVar( inter, "app", 0 );
+			strcpy( msg, app );
+			fprintf( frep, "<TT><A HREF=\"#%s%s\">%s</A></TT>",prefix, msg, msg );
+			
+			if ( i < num - 1 )
+				fprintf( frep, "<TT>, </TT>" );
+		}
 	 
-	 if ( num > 0 )
-	   fprintf( frep, "<BR>\n" );
-	 else
-	   fprintf( frep, "(none)<BR>\n" );
+		if ( num > 0 )
+			fprintf( frep, "<BR>\n" );
+		else
+			fprintf( frep, "(none)<BR>\n" );
 	}
 
 	Tcl_UnlinkVar( inter, "num" );
@@ -1027,167 +1057,168 @@ void fill_list_par( object *r, int flag_all )
 CREATE_TABLE_INIT
 Create recursively the help table for an Object
 *********************************/
-void create_table_init(object *r)
+void create_table_init( object *r, FILE *frep )
 {
 	int i;
 	bridge *cb;
-	description *cur_descr;
-	variable *curv;
+	description *cd;
+	variable *cv;
 
 	fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
 	 
 	fprintf( frep, "<H3><A NAME=\"%s\">Object: &nbsp;<TT><U>%s</U></TT></A></H3>", r->label, r->label );
 
-	if (r->up != NULL )
+	if ( r->up != NULL )
 	{
-	  fprintf( frep, "<i>Contained in: &nbsp;</i>" ); 
-	  ancestors( r, frep );
-	  fprintf( frep, "<BR>\n" );
+		fprintf( frep, "<i>Contained in: &nbsp;</i>" ); 
+		ancestors( r, frep );
+		fprintf( frep, "<BR>\n" );
 	}
 
-	if (r->b != NULL )
+	if ( r->b != NULL )
 	{
-	   fprintf( frep, "<i>Containing: &nbsp;</i>" );
-	   fprintf( frep, "<TT><a HREF=\"#%s\">%s</a></TT>", r->b->blabel, r->b->blabel );
-	   for ( cb = r->b->next ; cb != NULL; cb = cb->next )
-		 fprintf( frep, "<TT>,  <a HREF=\"#%s\">%s</a></TT>", cb->blabel, cb->blabel );
-	   fprintf( frep, "<BR>\n" );
+		fprintf( frep, "<i>Containing: &nbsp;</i>" );
+		fprintf( frep, "<TT><a HREF=\"#%s\">%s</a></TT>", r->b->blabel, r->b->blabel );
+		for ( cb = r->b->next ; cb != NULL; cb = cb->next )
+			fprintf( frep, "<TT>,  <a HREF=\"#%s\">%s</a></TT>", cb->blabel, cb->blabel );
+		fprintf( frep, "<BR>\n" );
 	}
 
 	fprintf( frep, "<BR>\n" );
 	write_list( frep, r, 0, "" );
 
-	cur_descr=search_description(r->label );
-	if ( cur_descr == NULL )
+	cd = search_description( r->label );
+	if ( cd == NULL )
 	{
-	   add_description(r->label, "Object", "(no description available)" );
-	   plog( "\nWarning: description for '%s' not found. New one created.", "", r->label );
-	   cur_descr=search_description(r->label );
+		add_description( r->label, "Object", "(no description available)" );
+		plog( "\nWarning: description for '%s' not found. New one created.", "", r->label );
+		cd = search_description( r->label );
 	} 
 
-	if ( cur_descr != NULL && cur_descr->text != NULL && ! strstr( cur_descr->text, "(no description available)" ) )
-	 {
-	   fprintf( frep, "<i>Description:</i><BR>\n" );
-	   for ( i = 0; cur_descr->text[ i ] != '\0'; ++i )
+	if ( cd != NULL && cd->text != NULL && ! strstr( cd->text, "(no description available)" ) )
+	{
+		fprintf( frep, "<i>Description:</i><BR>\n" );
+		
+		for ( i = 0; cd->text[ i ] != '\0'; ++i )
 		{
-		switch ( cur_descr->text[ i ])
-		 {
-		  case '\n':
-			 fprintf( frep, "<br>\n" );
-			 break;
-		  case '<':
-			 fprintf( frep, "&lt;" );
-			 break;
-		  case '>':
-			 fprintf( frep, "&gt;" );
-			 break;
-		  default:
-			 fprintf( frep, "%c", cur_descr->text[ i ] );
-			 break;
-		 }
+			switch ( cd->text[ i ])
+			{
+				case '\n':
+					fprintf( frep, "<br>\n" );
+					break;
+				case '<':
+					fprintf( frep, "&lt;" );
+					break;
+				case '>':
+					fprintf( frep, "&gt;" );
+					break;
+				default:
+					fprintf( frep, "%c", cd->text[ i ] );
+					break;
+			}
 		}
-	   fprintf( frep, "<BR>\n" );
-	 }
+		
+		fprintf( frep, "<BR>\n" );
+	}
 
 	fprintf( frep, "<BR>\n" );
 
-	if (r->v != NULL )
+	if ( r->v != NULL )
 	{
-	 fprintf( frep, "<table BORDER>" );
-	 fprintf( frep, "<tr>" );
-	 fprintf( frep, "<td><center><i>Element</i></center></td>" );
-	 fprintf( frep, "<td><center><i>Lags</i></center></td>\n" );
-	 fprintf( frep, "<td><center><i>Description and initial values comments</i></center></td>\n" );
-	 fprintf( frep, "</tr>" );
+		fprintf( frep, "<table BORDER>" );
+		fprintf( frep, "<tr>" );
+		fprintf( frep, "<td><center><i>Element</i></center></td>" );
+		fprintf( frep, "<td><center><i>Lags</i></center></td>\n" );
+		fprintf( frep, "<td><center><i>Description and initial values comments</i></center></td>\n" );
+		fprintf( frep, "</tr>" );
+	
+		for ( cv = r->v; cv != NULL; cv = cv->next )
+		{
+			fprintf( frep, "<tr VALIGN=TOP>" );
 
-	 for ( curv=r->v; curv!=NULL; curv=curv->next )
-	 {
-	   fprintf( frep, "<tr VALIGN=TOP>" );
-
-	   if ( curv->param == 1 )
-	   {
-		 fprintf( frep, "<td><a NAME=\"%s\"><A HREF=\"#_d_%s\"><TT>%s</TT></A></a></td>\n", curv->label, curv->label, curv->label );
-		 fprintf( frep, "<td><A HREF=\"#_i_%s\">Par.</A></td>\n", curv->label );
-	   }
-	   else
-	   {
-		 fprintf( frep, "<td><a NAME=\"%s\"><A HREF=\"#_d_%s\"><TT>%s</TT></A></a></td>\n", curv->label, curv->label, curv->label );
-		 if ( curv->num_lag > 0 )
-			fprintf( frep, "<td><A HREF=\"#_i_%s\">%d</A></td>\n", curv->label, curv->num_lag );
-		 else
-			fprintf( frep, "<td></td>\n" );
-	   }
+			if ( cv->param == 1 )
+			{
+				fprintf( frep, "<td><a NAME=\"%s\"><A HREF=\"#_d_%s\"><TT>%s</TT></A></a></td>\n", cv->label, cv->label, cv->label );
+				fprintf( frep, "<td><A HREF=\"#_i_%s\">Par.</A></td>\n", cv->label );
+			}
+			else
+			{
+				fprintf( frep, "<td><a NAME=\"%s\"><A HREF=\"#_d_%s\"><TT>%s</TT></A></a></td>\n", cv->label, cv->label, cv->label );
+				if ( cv->num_lag > 0 )
+					fprintf( frep, "<td><A HREF=\"#_i_%s\">%d</A></td>\n", cv->label, cv->num_lag );
+				else
+					fprintf( frep, "<td></td>\n" );
+			}
 	   
-	   cur_descr=search_description( curv->label );
-	   if ( cur_descr == NULL )
-	  {
-	   if ( curv->param == 0 )
-		 add_description( curv->label, "Variable", "(no description available)" );
-	   if ( curv->param == 1 )
-		 add_description( curv->label, "Parameter", "(no description available)" );  
-	   if ( curv->param == 2 )
-		 add_description( curv->label, "Function", "(no description available)" );  
-	   plog( "\nWarning: description for '%s' not found. New one created.", "", curv->label );
-	   cur_descr=search_description( curv->label );
-	  } 
+			cd = search_description( cv->label );
+			if ( cd == NULL )
+			{
+				if ( cv->param == 0 )
+					add_description( cv->label, "Variable", "(no description available)" );
+				if ( cv->param == 1 )
+					add_description( cv->label, "Parameter", "(no description available)" );  
+				if ( cv->param == 2 )
+					add_description( cv->label, "Function", "(no description available)" );  
+				plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
+				cd = search_description( cv->label );
+			} 
 
-	   fprintf( frep, "<td> " );
-	   bool desc_text = false;
-	   if ( cur_descr->text != NULL && strlen( cur_descr->text ) > 0 && ! strstr( cur_descr->text, "(no description available)" ) )
-	  {   
-	   for ( i = 0; cur_descr->text[ i ] != '\0'; ++i )
-		{
-		 desc_text = true;
-		 switch ( cur_descr->text[ i ])
-		 {
-		  case '\n':
-			 fprintf( frep, "<br>\n" );
-			 desc_text = false;
-			 break;
-		  case '<':
-			 fprintf( frep, "&lt;" );
-			 break;
-		  case '>':
-			 fprintf( frep, "&gt;" );
-			 break;
-		  default:
-			 fprintf( frep, "%c", cur_descr->text[ i ] );
-			 break;
-		 }
-		}
-	  }
+			fprintf( frep, "<td> " );
+			bool desc_text = false;
+			if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+				for ( i = 0; cd->text[ i ] != '\0'; ++i )
+				{
+					desc_text = true;
+					switch ( cd->text[ i ])
+					{
+						case '\n':
+							fprintf( frep, "<br>\n" );
+							desc_text = false;
+							break;
+						case '<':
+							fprintf( frep, "&lt;" );
+							break;
+						case '>':
+							fprintf( frep, "&gt;" );
+							break;
+						default:
+							fprintf( frep, "%c", cd->text[ i ] );
+							break;
+					}
+				}
 	  
-	   if ( curv->param == 1 || curv->num_lag > 0)
-		if ( cur_descr->init!=NULL && strlen( cur_descr->init) > 0)
-		{
-		 if ( desc_text )
-			fprintf( frep, "<br>\n" );
+			if ( cv->param == 1 || cv->num_lag > 0 )
+				if ( cd->init != NULL && strlen( cd->init ) > 0 )
+				{
+					if ( desc_text )
+						fprintf( frep, "<br>\n" );
 		
-		 for ( i = 0; cur_descr->init[ i ] != '\0'; ++i )
-		  switch ( cur_descr->init[ i ])
-		   {
-			case '\n':
-			   fprintf( frep, "<br>\n" );
-			   break;
-			case '<':
-			   fprintf( frep, "&lt;" );
-			   break;
-			case '>':
-			   fprintf( frep, "&gt;" );
-			   break;
-			default:
-			   fprintf( frep, "%c", cur_descr->init[ i ] );
-			   break;
-		   }
-		}
+					for ( i = 0; cd->init[ i ] != '\0'; ++i )
+						switch ( cd->init[ i ])
+						{
+							case '\n':
+								fprintf( frep, "<br>\n" );
+								break;
+							case '<':
+								fprintf( frep, "&lt;" );
+								break;
+							case '>':
+								fprintf( frep, "&gt;" );
+								break;
+							default:
+								fprintf( frep, "%c", cd->init[ i ] );
+								break;
+						}
+				}
 	 
-	   fprintf( frep, "</td></tr>\n" );
-	 }
-	 fprintf( frep, "</table><br>\n" );
-	}//end if exist a var
+			fprintf( frep, "</td></tr>\n" );
+		}
+		
+		fprintf( frep, "</table><br>\n" );
+	}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
-	   create_table_init( cb->head);
+		create_table_init( cb->head, frep );
 }
 
 
@@ -1195,54 +1226,53 @@ void create_table_init(object *r)
 CREATE_INITIAL_VALUES
 Create recursively the help table for the initial values of an Object
 *********************************/
-void create_initial_values(object *r)
+void create_initial_values( object *r, FILE *frep )
 {
 	int count = 0, i, j;
 	bridge *cb;
 	object *cur;
-	variable *curv, *cv;
+	variable *cv, *cv1;
 
-	for ( curv=r->v; curv!=NULL; curv=curv->next )
-	  if ( curv->param == 1 || curv->num_lag > 0)
-		count = 1;
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+		if ( cv->param == 1 || cv->num_lag > 0 )
+			count = 1;
 
-	if (count == 0 )
-	 {//no need for initialization, typically root
-	  for ( cb = r->b; cb != NULL; cb = cb->next )
-	   create_initial_values( cb->head);
-	  return;
-	 }  
+	if ( count == 0 )
+	{	// no need for initialization, typically root
+		for ( cb = r->b; cb != NULL; cb = cb->next )
+			create_initial_values( cb->head, frep );
+		return;
+	}  
 	 
-	for (count = 0,cur = r; cur != NULL;cur = cur->hyper_next( cur->label) )
-	  count++;
+	for ( count = 0, cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
+		count++;
 
 	fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
-
 	fprintf( frep, "<H3><A NAME=\"%s\">Object: &nbsp;<TT><U>%s</U></TT></A></H3>", r->label, r->label );
-
 	fprintf( frep, "<i>Instances number: &nbsp</i>%d<BR>", count );
-	 
 	fprintf( frep, "<i>Instances group(s): &nbsp;</i>" ); 
 
 	for ( i = 0, cur = r; cur != NULL; )
 	{ 
-	  count = 1;
-	  while ( cur->next != NULL && ! strcmp( cur->label, ( cur->next )->label ) )
-	  {
-		 count++;
-		 cur = cur->next;
-	  }
-	  fprintf( frep, "%d ", count );
-	  cur =cur->hyper_next( cur->label );
-	  i++;
-	  if ( i > MAX_INIT )
-	  {
-		fprintf( frep, "..." );
-		cur=NULL;
-	  }
+		count = 1;
+		while ( cur->next != NULL && ! strcmp( cur->label, ( cur->next )->label ) )
+		{
+			++count;
+			cur = cur->next;
+		}
+		
+		fprintf( frep, "%d ", count );
+		cur = cur->hyper_next( cur->label );
+		++i;
+		
+		if ( i > MAX_INIT )
+		{
+			fprintf( frep, "..." );
+			cur = NULL;
+		}
 	}
+	
 	fprintf( frep, "<BR><BR>\n" ); 
-	  
 	fprintf( frep, "<table BORDER>" );
 	fprintf( frep, "<tr>" );
 	fprintf( frep, "<td><center><i>Element</i></center></td>\n" );
@@ -1250,48 +1280,53 @@ void create_initial_values(object *r)
 	fprintf( frep, "<td><center><i>Initial values (by instance)</i></center></td>\n" );
 	fprintf( frep, "</tr>" );
 
-	for ( curv=r->v; curv!=NULL; curv=curv->next )
+	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
-	   if ( curv->param == 1 )
-	   {
-		 fprintf( frep, "<tr VALIGN=TOP>" );
-		 fprintf( frep, "<td><a NAME=\"_i_%s\"><A HREF=\"#%s\"><TT>%s</TT></A></a></td>\n", curv->label, curv->label, curv->label );
-		  fprintf( frep, "<td>Par.</td>\n" );
-		  fprintf( frep, "<td>%g", curv->val[ 0 ] );
-		  for ( j = 1, cur = r->hyper_next( r->label ); cur !=NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
-		  {
-			cv = cur->search_var( cur, curv->label );
-			fprintf( frep, ", %g", cv->val[ 0 ] );
-		  }
-		  if ( j == MAX_INIT && cur != NULL )
-			 fprintf( frep, ", ..." );
+		if ( cv->param == 1 )
+		{
+			fprintf( frep, "<tr VALIGN=TOP>" );
+			fprintf( frep, "<td><a NAME=\"_i_%s\"><A HREF=\"#%s\"><TT>%s</TT></A></a></td>\n", cv->label, cv->label, cv->label );
+			fprintf( frep, "<td>Par.</td>\n" );
+			fprintf( frep, "<td>%g", cv->val[ 0 ] );
+			
+			for ( j = 1, cur = r->hyper_next( r->label ); cur !=NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+			{
+				cv1 = cur->search_var( cur, cv->label );
+				fprintf( frep, ", %g", cv1->val[ 0 ] );
+			}
+			
+			if ( j == MAX_INIT && cur != NULL )
+				fprintf( frep, ", ..." );
 
-		  fprintf( frep, "</td></tr>\n" );
-	   }   
-	   else
-	   {
-		  for ( i = 0; i < curv->num_lag; ++i )
-		  {
-		   fprintf( frep, "<tr VALIGN=TOP>" );
-		   fprintf( frep, "<td><a NAME=\"_i_%s\"><A HREF=\"#%s\"><TT>%s</TT></A></a></td>\n", curv->label, curv->label, curv->label );
-		   fprintf( frep, "<td>%d</td>\n", i + 1 );
-		   fprintf( frep, "<td>%g", curv->val[ i ] );
-		   for ( j = 1, cur = r->hyper_next( r->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
-		   {
-			 cv = cur->search_var( cur, curv->label );
-			 fprintf( frep, ", %g", cv->val[ i ] );
-		   }
-		   if ( j == MAX_INIT && cur != NULL )
-			 fprintf( frep, ", ..." );
+			fprintf( frep, "</td></tr>\n" );
+		}   
+		else
+		{
+			for ( i = 0; i < cv->num_lag; ++i )
+			{
+				fprintf( frep, "<tr VALIGN=TOP>" );
+				fprintf( frep, "<td><a NAME=\"_i_%s\"><A HREF=\"#%s\"><TT>%s</TT></A></a></td>\n", cv->label, cv->label, cv->label );
+				fprintf( frep, "<td>%d</td>\n", i + 1 );
+				fprintf( frep, "<td>%g", cv->val[ i ] );
+				
+				for ( j = 1, cur = r->hyper_next( r->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+				{
+					cv1 = cur->search_var( cur, cv->label );
+					fprintf( frep, ", %g", cv1->val[ i ] );
+				}
+				
+				if ( j == MAX_INIT && cur != NULL )
+					fprintf( frep, ", ..." );
 			  
-		   fprintf( frep, "</td></tr>\n" );
-		  }
-	   }
+				fprintf( frep, "</td></tr>\n" );
+			}
+		}
 	}
+	
 	fprintf( frep, "</table><BR>\n" );
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
-	  create_initial_values( cb->head);
+		create_initial_values( cb->head, frep );
 }
 
 
@@ -1358,10 +1393,10 @@ bool is_equation_header( char *raw_line, char *var, char *updt_in )
  ************/
 void ancestors( object *r, FILE *f, bool html )
 {
-	if (r->up != NULL )
+	if ( r->up != NULL )
 	{
 	  ancestors( r->up, f, html );
-	  if (r->up->up == NULL )
+	  if ( r->up->up == NULL )
 		if ( html )
 		  fprintf( f, "<TT><A HREF=\"#%s\">%s</A></TT>", r->up->label, r->up->label );
 		else
@@ -1413,39 +1448,37 @@ FILE *create_frames( char *t )
 
 	sprintf( msg, "body_%s", t );
 	f = fopen( msg, "w" );
-	if ( f == NULL )
-		return NULL;
-	else
-		return f;
+	return f;
 }
 
 
 /************
 CREATE LIST FORMS FOR LABELS. 
 **********/
-void create_form(int num, char const *title, char const *prefix)
+void create_form( int num, char const *title, char const *prefix, FILE *frep )
 {
 	int i;
-	char s1[2 * MAX_ELEM_LENGTH],s2[2 * MAX_ELEM_LENGTH], *app;
+	char s1[ 2 * MAX_ELEM_LENGTH ], s2[ 2 * MAX_ELEM_LENGTH ], *app;
 
-	if (num == 0 )
-	 return;
+	if ( num == 0 )
+		return;
 
-	sprintf( msg, "<form name=\"%s\" method=\"POST\">\n",title);
-	fprintf( frep,"%s",msg);
-	  
+	sprintf( msg, "<form name=\"%s\" method=\"POST\">\n", title );
+	fprintf( frep,"%s",msg );
 	sprintf( msg, "<select name=\"entry\" class=\"form\">\n" );
-	fprintf( frep,"%s", msg);
+	fprintf( frep,"%s", msg );
 
 	for ( i = 0; i < num; ++i )
-	 {cmd( "set app [lindex $alphalist %d]", i );
-	  app = ( char * ) Tcl_GetVar( inter, "app", 0 );
-	  strcpy( msg, app);
-	  sscanf( msg, "%s %s", s1, s2);
-	  fprintf( frep, "<option value=\"#%s%s\">%s</option>\n",prefix,s1,s1);
-	 }
+	{
+		cmd( "set app [ lindex $alphalist %d ]", i );
+		app = ( char * ) Tcl_GetVar( inter, "app", 0 );
+		strcpy( msg, app );
+		sscanf( msg, "%s %s", s1, s2 );
+		fprintf( frep, "<option value=\"#%s%s\">%s</option>\n", prefix, s1, s1 );
+	}
+	
 	fprintf( frep, "</select>\n" );
-	fprintf( frep, "<INPUT TYPE=button VALUE=\"Show\" onClick=\"location.href = document.%s.entry.options[document.%s.entry.selectedIndex].value\">\n",title,title);
+	fprintf( frep, "<INPUT TYPE=button VALUE=\"Show\" onClick=\"location.href = document.%s.entry.options[document.%s.entry.selectedIndex].value\">\n", title, title );
 	fprintf( frep, "</form>" );
 }
 
@@ -1453,16 +1486,16 @@ void create_form(int num, char const *title, char const *prefix)
 /****************************************************
 SHOW_REP_OBSERVE
 ****************************************************/
-void show_rep_observe(FILE *f, object *n, int *begin)
+void show_rep_observe( FILE *f, object *n, int *begin, FILE *frep )
 {
 	int i;
 	bridge *cb;
 	description *cd;
 	variable *cv;
 
-	for ( cv=n->v; cv != NULL; cv = cv->next )
+	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
-		cd=search_description( cv->label );
+		cd = search_description( cv->label );
 		if (cd == NULL )
 		{
 			if ( cv->param == 0 )
@@ -1472,65 +1505,66 @@ void show_rep_observe(FILE *f, object *n, int *begin)
 			if ( cv->param == 2 )
 				add_description( cv->label, "Function", "(no description available)" );  
 			plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
-			cd=search_description( cv->label );
+			cd = search_description( cv->label );
 		} 
 
-	if (cd->observe=='y' )
-	{
-	 if (*begin == 1 )
-	  {
-		*begin = 0;
-		table = true;
-		fprintf( f,"<H3>Relevant elements to observe</H3>\n" );
-		
-		fprintf( f, "<table BORDER>" );
-		fprintf( f, "<tr>" );
-		fprintf( f, "<td><center><i>Element</i></center></td>\n" );
-		fprintf( f, "<td><center><i>Object</i></center></td>" );
-		fprintf( f, "<td><center><i>Type</i></center></td>\n" );
-		fprintf( f, "<td><center><i>Description</i></center></td>\n" );    
-		fprintf( f, "</tr>" );
-	  }
-	 fprintf( f, "<tr VALIGN=TOP>" );
-	 
-	 fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->label, cv->label );
-	 fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", n->label, n->label );
-	 if ( cv->param == 1 )
-	  fprintf( f, "<td>Parameter</td>" );
-	 if ( cv->param == 0 )
-	  fprintf( f, "<td>Variable</td>" );
-	 if ( cv->param == 2 )
-	  fprintf( f, "<td>Function</td>" );
-		
-	 fprintf( f, "<td>" ); 
-	 if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
-	 {   
-		for ( i = 0; cd->text[ i ] != '\0'; ++i )
+		if ( cd->observe == 'y' )
 		{
-		switch (cd->text[ i ])
-		 {
-		  case '\n':
-			 fprintf( f, "<br>\n" );
-			 break;
-		  case '<':
-			 fprintf( f, "&lt;" );
-			 break;
-		  case '>':
-			 fprintf( f, "&gt;" );
-			 break;
-		  default:
-			 fprintf( f, "%c", cd->text[ i ] );
-			 break;
-		 }
+			if ( *begin == 1 )
+			{
+				*begin = 0;
+				table = true;
+				fprintf( f,"<H3>Relevant elements to observe</H3>\n" );
+				
+				fprintf( f, "<table BORDER>" );
+				fprintf( f, "<tr>" );
+				fprintf( f, "<td><center><i>Element</i></center></td>\n" );
+				fprintf( f, "<td><center><i>Object</i></center></td>" );
+				fprintf( f, "<td><center><i>Type</i></center></td>\n" );
+				fprintf( f, "<td><center><i>Description</i></center></td>\n" );    
+				fprintf( f, "</tr>" );
+			}
+			
+			fprintf( f, "<tr VALIGN=TOP>" );
+		 
+			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->label, cv->label );
+			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", n->label, n->label );
+			
+			if ( cv->param == 1 )
+				fprintf( f, "<td>Parameter</td>" );
+			if ( cv->param == 0 )
+				fprintf( f, "<td>Variable</td>" );
+			if ( cv->param == 2 )
+				fprintf( f, "<td>Function</td>" );
+			
+			fprintf( f, "<td>" ); 
+			
+			if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+				for ( i = 0; cd->text[ i ] != '\0'; ++i )
+				{
+					switch ( cd->text[ i ] )
+					{
+						case '\n':
+							fprintf( f, "<br>\n" );
+							break;
+						case '<':
+							fprintf( f, "&lt;" );
+							break;
+						case '>':
+							fprintf( f, "&gt;" );
+							break;
+						default:
+							fprintf( f, "%c", cd->text[ i ] );
+							break;
+					}
+				}
+		 
+			fprintf( f, "</td></tr>\n" );    
 		}
-	 }
-	 
-	 fprintf( f, "</td></tr>\n" );    
 	}
-}
 
 for ( cb = n->b; cb != NULL; cb = cb->next )
-	show_rep_observe( f, cb->head, begin);
+	show_rep_observe( f, cb->head, begin, frep );
 
 if ( n->up == NULL && table )
 	fprintf( f, "</table><BR>\n" );
@@ -1540,112 +1574,115 @@ if ( n->up == NULL && table )
 /****************************************************
  SHOW_REP_INITIAL
  ****************************************************/
-void show_rep_initial( FILE *f, object *n, int *begin )
+void show_rep_initial( FILE *f, object *n, int *begin, FILE *frep )
 {
 	int i;
 	bridge *cb;
 	description *cd;
 	variable *cv;
 
-	for ( cv=n->v; cv != NULL; cv = cv->next )
+	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
-	 cd=search_description( cv->label );
-	 if (cd == NULL )
-	  {if ( cv->param == 0 )
-		 add_description( cv->label, "Variable", "(no description available)" );
-	   if ( cv->param == 1 )
-		 add_description( cv->label, "Parameter", "(no description available)" );  
-	   if ( cv->param == 2 )
-		 add_description( cv->label, "Function", "(no description available)" );  
-	   plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
-	   cd=search_description( cv->label );
-	  } 
+		cd = search_description( cv->label );
+		if ( cd == NULL )
+		{
+			if ( cv->param == 0 )
+				add_description( cv->label, "Variable", "(no description available)" );
+			if ( cv->param == 1 )
+				add_description( cv->label, "Parameter", "(no description available)" );  
+			if ( cv->param == 2 )
+				add_description( cv->label, "Function", "(no description available)" );  
+			
+			plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
+			
+			cd = search_description( cv->label );
+		} 
 
-	 if (cd->initial=='y' )
-	 {
-	  if (*begin == 1 )
-	   {
-		*begin = 0;
-		table = true;
-		fprintf( f,"<H3>Relevant elements to initialize</H3>\n" );
-		
-		fprintf( f, "<table BORDER>" );
-		fprintf( f, "<tr>" );
-		fprintf( f, "<td><center><i>Element</i></center></td>\n" );
-		fprintf( f, "<td><center><i>Object</i></center></td>" );
-		fprintf( f, "<td><center><i>Type</i></center></td>\n" );
-		fprintf( f, "<td><center><i>Description and initial values comments</i></center></td>\n" );    
-		fprintf( f, "</tr>" );
-	   }
-	  fprintf( f, "<tr VALIGN=TOP>" );
-	  
-	  fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->label, cv->label );
-	  fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", n->label, n->label );
-	  if ( cv->param == 1 )
-	   fprintf( f, "<td>Parameter</td>" );
-	  if ( cv->param == 0 )
-	   fprintf( f, "<td>Variable</td>" );
-	  if ( cv->param == 2 )
-	   fprintf( f, "<td>Function</td>" );
-		
-	  fprintf( f, "<td>" ); 
-	  bool desc_text = false;
-	  if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
-	  {   
-		for ( i = 0; cd->text[ i ] != '\0'; ++i )
+		if ( cd->initial == 'y' )
 		{
-		 desc_text = true;
-		 switch (cd->text[ i ])
-		 {
-		  case '\n':
-			 fprintf( f, "<br>\n" );
-			 desc_text = false;
-			 break;
-		  case '<':
-			 fprintf( f, "&lt;" );
-			 break;
-		  case '>':
-			 fprintf( f, "&gt;" );
-			 break;
-		  default:
-			 fprintf( f, "%c", cd->text[ i ] );
-			 break;
-		 }
+			if ( *begin == 1 )
+			{
+				*begin = 0;
+				table = true;
+				fprintf( f,"<H3>Relevant elements to initialize</H3>\n" );
+				
+				fprintf( f, "<table BORDER>" );
+				fprintf( f, "<tr>" );
+				fprintf( f, "<td><center><i>Element</i></center></td>\n" );
+				fprintf( f, "<td><center><i>Object</i></center></td>" );
+				fprintf( f, "<td><center><i>Type</i></center></td>\n" );
+				fprintf( f, "<td><center><i>Description and initial values comments</i></center></td>\n" );    
+				fprintf( f, "</tr>" );
+			}
+			
+			fprintf( f, "<tr VALIGN=TOP>" );
+			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->label, cv->label );
+			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", n->label, n->label );
+			
+			if ( cv->param == 1 )
+				fprintf( f, "<td>Parameter</td>" );
+			if ( cv->param == 0 )
+				fprintf( f, "<td>Variable</td>" );
+			if ( cv->param == 2 )
+				fprintf( f, "<td>Function</td>" );
+				
+			fprintf( f, "<td>" ); 
+			
+			bool desc_text = false;
+			if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+				for ( i = 0; cd->text[ i ] != '\0'; ++i )
+				{
+					desc_text = true;
+					switch ( cd->text[ i ] )
+					{
+						case '\n':
+							fprintf( f, "<br>\n" );
+							desc_text = false;
+							break;
+						case '<':
+							fprintf( f, "&lt;" );
+							break;
+						case '>':
+							fprintf( f, "&gt;" );
+							break;
+						default:
+							fprintf( f, "%c", cd->text[ i ] );
+							break;
+					}
+				}
+				
+			if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
+			{
+				if ( desc_text )
+					fprintf( frep, "<br>\n" );
+				 
+				for ( i = 0; cd->init[ i ] != '\0'; ++i )
+				{
+					switch ( cd->init[ i ] )
+					{
+						case '\n':
+							fprintf( f, "<br>\n" );
+							break;
+						case '<':
+							fprintf( f, "&lt;" );
+							break;
+						case '>':
+							fprintf( f, "&gt;" );
+							break;
+						default:
+							fprintf( f, "%c", cd->init[ i ] );
+							break;
+					}
+				}
+			}
+			  
+			fprintf( f, " <A HREF=\"#_i_%s\">(Show initial values)</A>",  cv->label );
+			fprintf( f, "</td></tr>\n" );    
 		}
-	  }
-		
-	  if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
-	  {
-		if ( desc_text )
-		 fprintf( frep, "<br>\n" );
-	  
-		for ( i = 0; cd->init[ i ] != '\0'; ++i )
-		{
-		 switch (cd->init[ i ])
-		 {
-		  case '\n':
-			 fprintf( f, "<br>\n" );
-			 break;
-		  case '<':
-			 fprintf( f, "&lt;" );
-			 break;
-		  case '>':
-			 fprintf( f, "&gt;" );
-			 break;
-		  default:
-			 fprintf( f, "%c", cd->init[ i ] );
-			 break;
-		 }
-		}
-	  }
-	  
-	  fprintf( f, " <A HREF=\"#_i_%s\">(Show initial values)</A>",  cv->label );
-	  fprintf( f, "</td></tr>\n" );    
-	 }
 	}
 
 	for ( cb = n->b; cb != NULL; cb = cb->next )
-		show_rep_initial( f, cb->head, begin);
+		show_rep_initial( f, cb->head, begin, frep );
 
 	if ( n->up == NULL && table )
 		fprintf( f, "</table><BR>\n" );
