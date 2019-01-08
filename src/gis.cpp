@@ -77,7 +77,7 @@ char gismsg[300];
   bool object::init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap, int t_update, int n){
     object *firstNode;
     object *cur;
-    if (strcmp(label,lab)==0){
+    if ( 0 == strcmp(label,lab) ){
       firstNode = up->search( lab );
     } else {
       firstNode = search( lab );
@@ -592,7 +592,7 @@ char gismsg[300];
   variable* object::search_var_local(char const l[])
   {
     for ( variable* cv = v; cv != NULL; cv = cv->next ){
-      if ( ! strcmp( l, cv->label ) ){
+      if ( 0 == strcmp( l, cv->label ) ){
         return cv;
       }
     }
@@ -633,7 +633,7 @@ char gismsg[300];
         if (candidate == this_obj)
           return false; //do not collect self
 
-        if ( strcmp(candidate->label,lab) == 0){
+        if ( 0 == strcmp(candidate->label,lab) ){
           double ps_dst = this_obj->pseudo_distance(candidate);
           if (pseudo_radius<0 || ps_dst <= pseudo_radius) {
             bool isCandidate = true;
@@ -750,7 +750,7 @@ char gismsg[300];
     for (int x = 0; x < position->map->xn; x++){
       for (int y = 0; y < position->map->yn; y++){
         for (object* candidate : position->map->elements.at(x).at(y)){
-          if ( strcmp(candidate->label,lab) == 0)
+          if ( 0 == strcmp(candidate->label,lab) )
             position->objDis_inRadius.push_back(std::make_pair(RND,candidate));   //use rnd value as pseudo distance for sorting
         }
       }
@@ -922,7 +922,7 @@ char gismsg[300];
     for (object* candidate : position->map->elements.at(int(x)).at(int(y)) ) {
       //return first element with label
       if (x == candidate->position->x && y == candidate->position->y) {
-        if (strcmp(lab,candidate->label) == 0 ){
+        if ( 0 == strcmp(lab,candidate->label) ){
           if (single == true && singleCandidates.empty() == false){
             sprintf( gismsg, "failure in search_at_position() searching at position (%g,%g) for '%s'", x,y, lab );
   		        error_hard( gismsg, "there are several (at least two) items of this type present at the map.",
@@ -976,7 +976,7 @@ char gismsg[300];
       int n = 0;
       for (auto const &item : position->map->elements.at(int(x)).at(int(y)) ){
         if (item->position->x == x && item->position->y == y){
-          if (strcmp(item->label,lab )==0){
+          if ( 0 == strcmp(item->label,lab ) ){
             n++;
           }
         }
