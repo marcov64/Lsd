@@ -50,8 +50,6 @@ GIS.CPP
 #include "decl.h"
 
 #if defined( CPP11 )
-  #define LSD_GIS
-  #define LSD_GIS_VERSION 0.3
 
 char gismsg[300];
 

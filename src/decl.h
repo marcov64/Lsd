@@ -26,6 +26,11 @@ Global definitions among all LSD C++ modules
 #endif
 #endif
 
+#if defined( CPP11 )
+  #define LSD_GIS
+  #define LSD_GIS_VERSION 0.3
+#endif
+
 //standard libraries used
 #include <stdio.h>
 #include <string.h>
