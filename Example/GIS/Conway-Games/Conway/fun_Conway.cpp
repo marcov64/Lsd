@@ -10,7 +10,7 @@ EQUATION("Init")
 /* Initialise the model. Generate the cells and mark alive ones randomly. */
 
 INIT_SPACE_GRID_WRAP("Cell", V("ncol"), V("nrow"), V("wrapping") ); //Initialise the space
-ADD_ROOT_TO_SPACE(SEARCH("Cell")); //Ease access.
+ADD_TO_SPACE_XY(SEARCH("Cell"),0,0); //Ease access, adding Lattice to space.
 // The window is sized at most pixel * pixel
 int pcol,prow;
 pcol=prow=(int)V("WPixel");
@@ -19,6 +19,7 @@ if (V("ncol")>V("nrow")) {
 } if (V("ncol")<V("nrow")) {
   pcol = V("ncol")/V("nrow") * pcol; //scale down
 }
+
 INIT_LAT_GISS ( SEARCH("Cell"), 0, pcol, prow ); //Initialise the graphical lattice (black)
 
 int active_cells = V("PercActive") *  V("ncol") * V("nrow") ;
