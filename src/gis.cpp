@@ -53,7 +53,46 @@ GIS.CPP
 
 char gismsg[300];
 
-//NEW gis creation stuff below
+  void object::set_distance_type( double type ){
+    return set_distance_type(int(type));
+  }
+
+  void object::set_distance_type( int type )
+  {
+    if (type != 0 && type != 1 && type != 2 ){
+      sprintf( gismsg, "failure in set_distance_type() for distance type '%c'", type );
+  	      error_hard( gismsg, "this is not a valid type",
+  				"Change to a valid type (0 / e, 1 / m or 2 / c)" );
+      return;
+    }
+    if (type == 0)
+      return set_distance_type('e');
+    else if (type == 1)
+      return set_distance_type('m');
+    else if (type == 2)
+      return set_distance_type('c');
+  }
+
+
+  void object::set_distance_type( char type )
+  {
+    if (ptr_map() == NULL){
+        sprintf( gismsg, "failure in set_distance_type() for object '%s'", label );
+  		      error_hard( gismsg, "the object is not yet connected to a map",
+  					"check your code to prevent this situation" );
+        return;
+    }
+    if (type != 'e' && type != 'm' && type != 'c' ){
+        sprintf( gismsg, "failure in set_distance_type() for distance type '%c'", type );
+  		      error_hard( gismsg, "this is not a valid type",
+  					"Change to a valid type (c, e or m)" );
+        return;
+    }
+    position->map->distance_type=type;
+    sprintf( gismsg, "\nSwitched distance to type '%c' (c: Chebyshev, e: Euclidean, m: Manhatten",type);
+    plog(gismsg);
+    return;
+  }
 
   //  init_gis_singleObj
   //  Initialise the gis and add the single object to it
@@ -380,26 +419,7 @@ char gismsg[300];
     //  pseudo_distance
     //  Calculate the pseudo (squared) distance between an object p and another object b.
   double object::pseudo_distance(object *b){
-    if (ptr_map() == NULL){
-        sprintf( gismsg, "failure in pseudo_distance() for object '%s'", label );
-  		      error_hard( gismsg, "the object is not yet connected to a map",
-  					"check your code to prevent this situation" );
-        return NaN;
-    }
-    if (b->ptr_map() == NULL){
-        sprintf( gismsg, "failure in pseudo_distance() for second object '%s'", b->label );
-  		      error_hard( gismsg, "the object is not yet connected to a map",
-  					"check your code to prevent this situation" );
-        return NaN;
-    }
-    if (b->ptr_map() != ptr_map()){
-      //both elements need to be part of the same gis
-      sprintf( gismsg, "failure in pseudo_distance() for objects '%s' and '%s'", label, b->label );
-  		      error_hard( gismsg, "the objects are not on the same map",
-  					"check your code to prevent this situation" );
-        return NaN;
-    }
-
+    //all checks in distance()
     return pseudo_distance( b->position->x , b->position->y );
   }
 
@@ -407,51 +427,55 @@ char gismsg[300];
     //  pseudo_distance
     //  Calculate the pseudo (squared) distance between an object p and another object b.
   double object::pseudo_distance(double x_2, double y_2){
-    if (ptr_map() == NULL){
-        sprintf( gismsg, "failure in pseudo_distance() for object '%s'", label );
-  		      error_hard( gismsg, "the object is not yet connected to a map",
-  					"check your code to prevent this situation" );
-        return NaN;
-    }
-
+    //all checks in distance()
     double x_1 = position->x;
     double y_1 = position->y;
 
     double xn = position->map->xn;
     double yn = position->map->yn;
 
-    double a_sq = x_1-x_2;
-    double b_sq = y_1-y_2;
+    char distance_type = position->map->distance_type;
+
+    double x_dist = x_1-x_2;
+    double y_dist = y_1-y_2;
 
     if (position->map->wrap.noWrap == false) {
       if (position->map->wrap.right && x_1>x_2){
-        double alt_a = xn - x_1 + x_2;
-        if (alt_a < a_sq){
-          a_sq=alt_a;
+        double alt_x_dist = xn - x_1 + x_2;
+        if (alt_x_dist < x_dist){
+          x_dist=alt_x_dist;
         }
       } else if (position->map->wrap.left) {
-        double alt_a = xn - x_2 + x_1;
-        if (alt_a < -a_sq){
-          a_sq=alt_a;
+        double alt_x_dist = xn - x_2 + x_1;
+        if (alt_x_dist < -x_dist){
+          x_dist=alt_x_dist;
         }
       }
 
       if (position->map->wrap.top && y_1 > y_2){
-        double alt_b = yn - y_1 + y_2;
-        if (alt_b < b_sq){
-          b_sq=alt_b;
+        double alt_y_dist = yn - y_1 + y_2;
+        if (alt_y_dist < y_dist){
+          y_dist=alt_y_dist;
         }
       } else if (position->map->wrap.bottom){
-        double alt_b = yn - y_2 + y_1;
-        if (alt_b < -b_sq){
-          b_sq=alt_b;
+        double alt_y_dist = yn - y_2 + y_1;
+        if (alt_y_dist < -y_dist){
+          y_dist=alt_y_dist;
         }
       }
     }
 
-    a_sq *= a_sq;
-    b_sq *= b_sq;
-    return a_sq + b_sq;
+    switch (distance_type)
+    {
+      case 'e' : //Euclidean
+                  return x_dist*x_dist + y_dist*y_dist;
+
+      case 'm' : //Manhattan
+                  return x_dist+y_dist;
+
+      case 'c' : //Chebyshev
+                  return min(x_dist,y_dist);
+    }
   }
 
   bool object::boundingBox(int &left_io, int &right_io, int &top_io, int &bottom_io, double radius){
@@ -577,11 +601,55 @@ char gismsg[300];
   // distance
   // Calculate the distance between to objects in the same gis.
   double object::distance(object* b){
-    return sqrt( pseudo_distance(b) );
+    if (ptr_map() == NULL){
+        sprintf( gismsg, "failure in distance() for object '%s'", label );
+  		      error_hard( gismsg, "the object is not yet connected to a map",
+  					"check your code to prevent this situation" );
+        return NaN;
+    }
+    if (b->ptr_map() == NULL){
+        sprintf( gismsg, "failure in distance() for second object '%s'", b->label );
+  		      error_hard( gismsg, "the object is not yet connected to a map",
+  					"check your code to prevent this situation" );
+        return NaN;
+    }
+    if (b->ptr_map() != ptr_map()){
+      //both elements need to be part of the same gis
+      sprintf( gismsg, "failure in distance() for objects '%s' and '%s'", label, b->label );
+  		      error_hard( gismsg, "the objects are not on the same map",
+  					"check your code to prevent this situation" );
+        return NaN;
+    }
+
+    char distance_type = position->map->distance_type;
+    switch (distance_type)
+    {
+      case 'e' : //Euclidean
+        return sqrt( pseudo_distance(b) );
+
+      case 'm' : //Manhattan
+      case 'c' : //Chebyshev
+        return pseudo_distance(b);  //pseudo and distance are equivalent
+    }
   }
 
   double object::distance(double x, double y){
-    return sqrt( pseudo_distance(x, y) );
+    if (ptr_map() == NULL){
+        sprintf( gismsg, "failure in distance() (x,y) for object '%s'", label );
+  		      error_hard( gismsg, "the object is not yet connected to a map",
+  					"check your code to prevent this situation" );
+        return NaN;
+    }
+    char distance_type = position->map->distance_type;
+    switch (distance_type)
+    {
+      case 'e' : //Euclidean
+        return sqrt( pseudo_distance( x, y ) );
+
+      case 'm' : //Manhattan
+      case 'c' : //Chebyshev
+        return pseudo_distance( x, y );  //pseudo and distance are equivalent
+    }
   }
 
   //  search_var_local

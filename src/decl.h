@@ -323,6 +323,9 @@ struct object
 
 #ifdef CPP11
 	//set the new GIS handling methods
+  void set_distance_type( char type ); //switch distance type
+  void set_distance_type( int type ); //using integers
+  void set_distance_type( double type ); //using double as in LSD Variables
 	double distance(object* other); //distance to other object
 	double distance(double x, double y); //distance to point in plain
 	double pseudo_distance(object* other); //pseudo distance to other object
@@ -589,6 +592,7 @@ struct gisMap
 	int xn;
 	int yn;
 	Wrap wrap;
+  char distance_type; //The kind of distance used.
 	/*
 		there are 2^4 options. We use a bit-code (0=off):
 		0-bit: left     : 0=0 1=1
@@ -602,7 +606,7 @@ struct gisMap
 	std::vector<std::vector <std::deque<object*> >> elements;
 	int nelements; //count number of elements
 
-	gisMap(int xn, int yn, int _wrap=0) : xn(xn), yn(yn),wrap(_wrap) //constructor
+	gisMap(int xn, int yn, int _wrap=0, char distance_type='e') : xn(xn), yn(yn),wrap(_wrap),distance_type(distance_type) //constructor
 	{
 		nelements = 0;
 		elements.resize(xn);

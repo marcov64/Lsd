@@ -68,6 +68,9 @@ Initialise the model
     INIT_SPACE_GRID_WRAP("Patch",V("xn"),1,V("wrapping") );
   #endif
 
+    //set distance type
+  SET_GIS_DISTANCE_TYPES(SEARCH("Patch"),V("distance_type"));
+
   //Initialise the lattice, but only for first Model and only if just one Model
   #ifndef NO_WINDOW
   if (V("lattice")>0){
@@ -308,7 +311,7 @@ Note: The distance for the measurement is different from that of the agents
   double dissimilarity = 0.0;
   double loc_diss;
   #if latt2d
-    double const neighbDist = 1.5; //sufficiently big geometric distance to have the moore (8) neighbourhood
+    double const neighbDist = 1; //select neighbourhood based on geometry
   #else
     double const neighbDist = 4; //sufficiently big geometric distance to have the moore (8) neighbourhood
   #endif

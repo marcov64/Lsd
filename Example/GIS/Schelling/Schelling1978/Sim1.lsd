@@ -37,6 +37,7 @@ Label Root
 		Param: SequentialUpdating
 		Param: RationalExpectations
 		Param: lattice
+		Param: distance_type
 
 	}
 
@@ -52,13 +53,13 @@ Var: EndOfSim 0 n + n n
 
 Object: Model C	1
 Var: Scheduler 0 s + n n
-Param: xn 0 s + n n	50
-Param: yn 0 s + n n	50
+Param: xn 0 s + n n	20
+Param: yn 0 s + n n	20
 Param: fracAgents 0 s + n n	0.9
 Param: fracBlue 0 s + n n	0.5
 Param: wrapping 0 s + n n	0
 Param: tolerance 0 s + n n	0.3
-Param: distance 0 s + n n	1.5
+Param: distance 0 s + n n	1
 Var: fracMove 0 s + n n
 Var: fracContent 0 s + n n
 Var: Initialise 0 n + n n
@@ -67,6 +68,7 @@ Var: dissimilarity 0 s + n p
 Param: SequentialUpdating 0 s + n n	0
 Param: RationalExpectations 0 s + n n	1
 Param: lattice 0 n + n n	1
+Param: distance_type 0 n + n n	2
 
 Object: Agent C	1
 Param: Colour 0 n + n n	0
@@ -232,6 +234,15 @@ Options:
 1 - show 
 2- show & save every timestep 
 3 - show & save every movement (careful!)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_distance_type
+Switch the distance metric.
+0 : Euclidean distance (implies circle neighbourhood)
+1 : Manhatten distance (no diagonal movement)
+2 : Chebyshev (diagonal movement costs 1 unit)
 _INIT_
 
 END_DESCRIPTION

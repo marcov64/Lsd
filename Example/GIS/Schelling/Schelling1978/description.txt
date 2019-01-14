@@ -26,6 +26,8 @@ There are some things that are most important for the "working" of the model, wh
 
 This can be controlled by the parameters "SequentialUpdating" and "RationalExpectations". In the original description in the 1978 Article both are activated.
 
+The parameter distance_type controls the shape of the neighbourhood. One may use the euclidean distance (0) to get a circular (Euclidean), (1) to get a traditional von Neumann neighbourhood (Manhatten) and (2) to get the Moore neighbourhood (Chebyshev).
+
 ##Parameters and Variables
 
 Control:
@@ -48,6 +50,7 @@ Global (Sensitivity) Parameters :
 [P] fracBlue		: relative number of blue agents from total (0..1)
 [P] tolerance		: the tolerance level (homogeneous, 0..1)
 [P] distance		: size of the neighbourhood, to left and right (1, ... xn)
+[P] distance_type : Kind of distance. (0) Euclidean, (1) Manhatten and (2) Chebyshev
 
 [P] SequentialUpdating		: if on (1) agents decide on movement based on the current state. 
 													.. if off (0) agents decide in parallel, i.e. with the same 

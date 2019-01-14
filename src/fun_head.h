@@ -637,6 +637,9 @@ bool no_ptr_chk = true;
 #define INIT_SPACE_GRID_WRAPNL( LAB, XN, YN, WRAP, N , TIME )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME, N ); }
 #define INIT_SPACE_GRID_WRAPNLS( PTR, LAB, XN, YN, WRAP, N, TIME )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME, N ); }
 
+#define SET_GIS_DISTANCE_TYPE( TYPE ) { p->set_distance_type( TYPE ) ; }
+#define SET_GIS_DISTANCE_TYPES( PTR, TYPE ) { PTR->set_distance_type( TYPE ) ; }
+
 // DELETE_SPACE / DELETE_FROM_SPACE
 // Delete the map and unregister all object-registrations in the map. Do not delte the LSD objects.
 #define DELETE_SPACE( OBJ ) { OBJ->delete_map(); }
