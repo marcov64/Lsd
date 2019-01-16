@@ -766,6 +766,9 @@ bool no_ptr_chk = true;
 //  And another one, like "land patches", in discrete space. Then, the modeller
 //  Can safely get information on the associated "land patch" of an "agent" with
 //  this command.
+
+#define SEARCH_POSITION__GRID_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, true) )
+#define SEARCH_POSITION_GRID_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, trunc(X), trunc(Y), true) )
 #define SEARCH_POSITION_GRID(LAB)  ( p->search_at_position(LAB, true, true) )
 #define SEARCH_POSITION_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, true, true) )
 #define SEARCH_POSITION_RND_GRID(LAB)  ( p->search_at_position(LAB, false, true) )
