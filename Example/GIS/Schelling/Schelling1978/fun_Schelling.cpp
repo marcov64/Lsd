@@ -36,9 +36,9 @@ The Scheduler controls the updating scheme (that part which is not endogeneously
     if (VS(cur,"Move") > 0.0) {
       steps++;
       #ifndef NO_WINDOW
-      if (V("lattice")>1){
+      if (V("lattice")==4){
         if (COUNTS(p->up,"Model")==1){
-          sprintf(filename,"Schelling_%g_t%i_step%g",RND_SEED,t,steps);
+          sprintf(filename,"%s_%g_t%i_step%g",CONFIG,RND_SEED,t,steps);
           SAVE_LAT(filename);
         }
       }
@@ -47,9 +47,9 @@ The Scheduler controls the updating scheme (that part which is not endogeneously
   }
 
       #ifndef NO_WINDOW
-      if (V("lattice")==2){
+      if (V("lattice")==3){
         if (COUNTS(p->up,"Model")==1){
-          sprintf(filename,"Schelling_%g_t%i_step%g",RND_SEED,t,steps);
+          sprintf(filename,"%s_%g_t%i_step%g",CONFIG,RND_SEED,t,steps);
           SAVE_LAT(filename);
         }
       }
@@ -121,7 +121,7 @@ Initialise the model
     if (V("lattice")>0){
       if (COUNTS(p->up,"Model")==1){
         char filename[300];
-        sprintf(filename,"Schelling_%g_t%i_step0",RND_SEED,t);
+        sprintf(filename,"%s_%g_init",CONFIG,RND_SEED);
         SAVE_LAT(filename);
       }
     }
@@ -205,7 +205,7 @@ The agent moves if it is not content with its situation.
       move = 1; 	//move
     	/* For now: Manual approach */
       #ifndef NO_WINDOW
-      if (V("lattice")>0){
+      if (V("lattice")>1){
         if (COUNTS(p->up,"Model")==1){
           WRITE_LAT_GIS(1000); //free white
         }
@@ -213,7 +213,7 @@ The agent moves if it is not content with its situation.
       #endif
       TELEPORT_SHARE(freePatch);
       #ifndef NO_WINDOW
-      if (V("lattice")>0){
+      if (V("lattice")>1){
         if (COUNTS(p->up,"Model")==1){
           WRITE_LAT_GIS(V("Colour"));
         }
@@ -270,8 +270,24 @@ EQUATION("EndOfSim")
 /* Stop the simulation if no model changes any more. */
   STAT("fracMove");
     //not first step, no movement now, no movement the time before.
-  if ( t>1 && v[3] == 0.0 && CURRENT == 0.0) {
+  if ( ( t>1 && v[3] == 0.0 && CURRENT == 0.0) || T == LAST_T ) {
     PLOG("\nSimulation of %g models at end after %g steps.",v[0],T);
+    #ifndef NO_WINDOW
+    if (V("lattice")>0){
+      if (COUNT("Model")==1){
+        CYCLE_GIS_RNDS(SEARCH("Patch"),cur,"Patch"){ //Update whole lattice
+          cur1 = SEARCH_POSITIONS(cur,"Agent");
+          if (cur1 == NULL)
+            WRITE_LAT_GISS(cur,1000); //free
+          else
+            WRITE_LAT_GISS(cur,VS(cur1,"Colour"));
+        }
+        char filename[300];
+        sprintf(filename,"%s_%g_final",CONFIG,RND_SEED);
+        SAVE_LAT(filename);
+      }
+    }
+    #endif
     ABORT; //finish simulation
     END_EQUATION( T ) //save current time.
   }

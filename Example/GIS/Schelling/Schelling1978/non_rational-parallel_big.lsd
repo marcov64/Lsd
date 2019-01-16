@@ -53,8 +53,8 @@ Var: EndOfSim 0 n + n n
 
 Object: Model C	1
 Var: Scheduler 0 s + n n
-Param: xn 0 s + n n	30
-Param: yn 0 s + n n	30
+Param: xn 0 s + n n	100
+Param: yn 0 s + n n	100
 Param: fracAgents 0 s + n n	0.9
 Param: fracBlue 0 s + n n	0.5
 Param: wrapping 0 s + n n	0

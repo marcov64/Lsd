@@ -24,7 +24,9 @@ content or because they do not find a new position that would make them content.
 ##Specific Sub-Verisons:
 There are some things that are most important for the "working" of the model, which are treated different in the literature. 1.) The Updating: parallel or sequential updating of "Content"ness and 2.) Movement: Move only if a new situation improves the "Content"ness or more randomly whenever one is not "Content".
 
-This can be controlled by the parameters "SequentialUpdating" and "RationalExpectations". In the original description in the 1978 Article both are activated.
+This can be controlled by the parameters "SequentialUpdating" and "RationalExpectations". In the original description in the 1978 Article both are described as activated.
+
+In order to get high fragmentation (i.e., segregation), the agents need to switch irespective of their anticipated result.
 
 The parameter distance_type controls the shape of the neighbourhood. One may use the euclidean distance (0) to get a circular (Euclidean), (1) to get a traditional von Neumann neighbourhood (Manhatten) and (2) to get the Moore neighbourhood (Chebyshev).
 
@@ -57,6 +59,15 @@ Global (Sensitivity) Parameters :
 													   information set for all agents.
 [P] RationalExpectations	: if on (1) agents only move if movement makes them content. 
 													.. if off (0), they move randomly and when not content.
+													
+Lattice:
+[p] lattice			:	graphical representation, only windowed, singular modus. 
+    Options:
+    0 - off
+    1 - show & save start and final
+    2 - show every timestep & save start and final
+    3- show & save every timestep 
+    4 - show & save every movement (careful!)													
 																										
 
 Agent:
