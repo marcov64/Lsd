@@ -1,3 +1,0 @@
-Schelling Segregation Model (1 & 2d, with Pajek Export)
-1.0
-05 November, 2018

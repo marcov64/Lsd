@@ -332,14 +332,15 @@ struct object
 	double pseudo_distance(double x, double y); //pseudo distance to point in plain
 	variable* search_var_local(char const l[]); //search only in object
 	void it_rnd_full(char const lab[]);
-	void it_in_radius(char const lab[], double radius, object* caller=NULL, int lag=-1, char const varLab[]="0", char const condition[]="", double condVal=0.0);
+	void it_in_radius(char const lab[], double radius, char random, object* caller, int lag, char const varLab[], char const condition[], double condVal);
 	object* first_neighbour_rnd_full(char const lab[]);
-	object* first_neighbour(char const lab[], double radius, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
+	object* first_neighbour(char const lab[], double radius, char random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
 	bool next_neighbour_exists();
 	object* next_neighbour();
 	void sort_objDisSet();
 	void make_objDisSet_unique(bool sorted);
 	void randomise_objDisSetIntvls(bool sorted);
+  void randomise_objDisSetFull();
 	double complete_radius();
 	bool boundingBox(int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);
 	bool boundingBox(double x, double y, int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);

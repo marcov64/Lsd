@@ -805,7 +805,32 @@ char gismsg[300];
         i_start = i;
       }
     }
+  }
 
+  //  randomise_objDisSetFull
+  //  randomise the objects.
+  // this may not be the fastest approach!
+  void object::randomise_objDisSetFull(){
+
+    //create temporary container with randomised indices for target container
+    size_t i_n = position->objDis_inRadius.size();
+    std::vector< std::pair<double, size_t > > rnd_vals;   //randomised index container
+    rnd_vals.reserve(i_n);
+    size_t i = 0;
+    for (auto &item : rnd_vals){
+      rnd_vals.emplace_back(std::make_pair(RND,i++) );
+    }
+    std::sort( rnd_vals.begin(),rnd_vals.end(), [](auto const &A, auto const &B ){return A.first < B.first; } ); //sort only by RND
+
+    //fill temporary container with new sorting
+    std::deque<std::pair <double,object *> > objDis_inRadius_sorted;
+//     objDis_inRadius_sorted.resize(i_n);
+    for (size_t index = 0; index < i_n; ++index)
+    {
+      objDis_inRadius_sorted.emplace_back(position->objDis_inRadius.at( rnd_vals.at(index).second  ));
+    }
+    //move container
+    position->objDis_inRadius = std::move(objDis_inRadius_sorted); //move elements
   }
 
   // it_rnd_full
@@ -829,7 +854,8 @@ char gismsg[300];
   // produce iterable list of objects with label inside of radius around origin.
   // the list is stored with the asking object. This allows parallelisation AND easy iterating with a macro.
   // give back first element in list
-  void object::it_in_radius(char const lab[], double radius, object* caller, int lag, char const varLab[], char const condition[], double condVal)
+  //random = 'f': Do not randomise. random = 'd': randomise if equal distance. random = 'r': randomise completely
+  void object::it_in_radius(char const lab[], double radius, char random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
   {
 
     position->objDis_inRadius.clear();//reset vector
@@ -842,8 +868,11 @@ char gismsg[300];
 
     sort_objDisSet();
     make_objDisSet_unique(true); //sorted = true
-    randomise_objDisSetIntvls(true); //sorted = true
-
+    if (random == 'd'){
+      randomise_objDisSetIntvls(true); //sorted = true
+    } else if (random == 'r'){
+      randomise_objDisSetFull(); //randomise completely
+    }
 	  position->it_obj = std::begin(position->objDis_inRadius);
   }
 
@@ -886,7 +915,7 @@ char gismsg[300];
 
   //  first_neighbour
   //  Initialise the nearest neighbour search and return nearest neighbours
-  object* object::first_neighbour(char const lab[], double radius, object* caller, int lag, char const varLab[], char const condition[], double condVal)
+  object* object::first_neighbour(char const lab[], double radius, char random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
   {
       #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
@@ -896,7 +925,7 @@ char gismsg[300];
       return NULL;
     }
     #endif
-    it_in_radius(lab, radius, caller, lag, varLab, condition, condVal);
+    it_in_radius(lab, radius, random, caller, lag, varLab, condition, condVal);
     return next_neighbour();
   }
 

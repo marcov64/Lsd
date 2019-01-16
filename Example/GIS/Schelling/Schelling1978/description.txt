@@ -1,4 +1,4 @@
-#Model Schelling Segregation Model (2d-a)
+#Model Schelling Segregation Model (2d)
 
 ##Description
 This is a simple implementation of the Schelling Segregation Model in it's two

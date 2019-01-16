@@ -704,17 +704,44 @@ bool no_ptr_chk = true;
 // either the candidate or CHEAT_C is  COND (<,>,==,!=) CONDVAL
 // Note that CHEAT does not work with NULL.
 
-#define CYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD); O != NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD); O != NULL; O = C->next_neighbour() )
+//The RCYCLE options randomise the order.
+#define RCYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD, 'r'); O != NULL; O = p->next_neighbour() )
+#define RCYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD, 'r'); O != NULL; O = C->next_neighbour() )
 
-#define CYCLE_NEIGHBOUR_CND(O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = p->first_neighbour(LAB, RAD, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOUR_CNDS(C, O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = C->first_neighbour(LAB, RAD, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+#define RCYCLE_NEIGHBOUR_CND(O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = p->first_neighbour(LAB, RAD, 'r', NULL,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define RCYCLE_NEIGHBOUR_CNDS(C, O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = C->first_neighbour(LAB, RAD, 'r', NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
-#define CYCLE_NEIGHBOUR_CNDL(O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = p->first_neighbour(LAB, RAD, NULL,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOUR_CNDLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = C->first_neighbour(LAB, RAD, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+#define RCYCLE_NEIGHBOUR_CNDL(O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = p->first_neighbour(LAB, RAD, 'r', NULL,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define RCYCLE_NEIGHBOUR_CNDLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = C->first_neighbour(LAB, RAD, 'r', NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
-#define CYCLE_NEIGHBOUR_CND_CHEAT(O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD,CHEAT_C,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOUR_CND_CHEATS(C, O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD,CHEAT_C,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+#define RCYCLE_NEIGHBOUR_CND_CHEAT(O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, 'r',CHEAT_C,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define RCYCLE_NEIGHBOUR_CND_CHEATS(C, O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, 'r',CHEAT_C,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+//The DCYCLE options cycle in increasing distance, randomising agents with same distances.
+#define DCYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD, 'd'); O != NULL; O = p->next_neighbour() )
+#define DCYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD, 'd'); O != NULL; O = C->next_neighbour() )
+
+#define DCYCLE_NEIGHBOUR_CND(O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = p->first_neighbour(LAB, RAD, 'd', NULL,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define DCYCLE_NEIGHBOUR_CNDS(C, O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = C->first_neighbour(LAB, RAD, 'd', NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+
+#define DCYCLE_NEIGHBOUR_CNDL(O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = p->first_neighbour(LAB, RAD, 'd', NULL,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define DCYCLE_NEIGHBOUR_CNDLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = C->first_neighbour(LAB, RAD, 'd', NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+
+#define DCYCLE_NEIGHBOUR_CND_CHEAT(O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, 'd',CHEAT_C,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define DCYCLE_NEIGHBOUR_CND_CHEATS(C, O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, 'd',CHEAT_C,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+//The FCYCLE options cycles through the elements without controlling distance or randomisation.
+#define FCYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD, 'f'); O != NULL; O = p->next_neighbour() )
+#define FCYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD, 'f'); O != NULL; O = C->next_neighbour() )
+
+#define FCYCLE_NEIGHBOUR_CND(O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = p->first_neighbour(LAB, RAD, 'f', NULL,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define FCYCLE_NEIGHBOUR_CNDS(C, O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = C->first_neighbour(LAB, RAD, 'f', NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+
+#define FCYCLE_NEIGHBOUR_CNDL(O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = p->first_neighbour(LAB, RAD, 'f', NULL,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define FCYCLE_NEIGHBOUR_CNDLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = C->first_neighbour(LAB, RAD, 'f', NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+
+#define FCYCLE_NEIGHBOUR_CND_CHEAT(O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, 'f',CHEAT_C,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define FCYCLE_NEIGHBOUR_CND_CHEATS(C, O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, 'f',CHEAT_C,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+
+
 
 
 // NEAREST_IN_DISTANCE

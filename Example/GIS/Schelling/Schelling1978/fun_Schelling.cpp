@@ -152,7 +152,7 @@ EQUATION("isOption")
       double callerColour = VS(c,"Colour");
       double fracOther = 0.0;
       double nNeighbours = 0.0; //A function for neighbourhood statistics would be good
-      CYCLE_NEIGHBOUR(cur,"Agent",VS(p->up,"distance")){
+      FCYCLE_NEIGHBOUR(cur,"Agent",VS(p->up,"distance")){
         if (cur == c){
           continue; //skip self
         }
@@ -232,7 +232,7 @@ Measures the fraction of people in the neighbourhood that differ from ones own c
   double ownColour = V("Colour");
   double fracOther = 0.0;
   double nNeighbours = 0.0; //A function for neighbourhood statistics would be good
-  CYCLE_NEIGHBOUR(cur,"Agent",VS(p->up,"distance")){
+  FCYCLE_NEIGHBOUR(cur,"Agent",VS(p->up,"distance")){
   	if (VS(cur,"Colour")!=ownColour){
   		fracOther++;
   	}
@@ -354,7 +354,7 @@ Note: The distance for the measurement is different from that of the agents
     }
     loc_diss = 0.0;
     //for each agent, calculate the local dissimilarity index
-    CYCLE_NEIGHBOURS(cur, cur1, "Agent", neighbDist ) {
+    FCYCLE_NEIGHBOURS(cur, cur1, "Agent", neighbDist ) {
       loc_n++;
       if ( VS(cur1,"Colour") == 5.0 ){
         loc_b++;
