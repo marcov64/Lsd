@@ -331,9 +331,9 @@ struct object
 	double pseudo_distance(object* other); //pseudo distance to other object
 	double pseudo_distance(double x, double y); //pseudo distance to point in plain
 	variable* search_var_local(char const l[]); //search only in object
-	void it_rnd_full(char const lab[]);
+	void it_full(char const lab[], bool random);
 	void it_in_radius(char const lab[], double radius, char random, object* caller, int lag, char const varLab[], char const condition[], double condVal);
-	object* first_neighbour_rnd_full(char const lab[]);
+	object* first_neighbour_full(char const lab[], bool random);
 	object* first_neighbour(char const lab[], double radius, char random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
 	bool next_neighbour_exists();
 	object* next_neighbour();

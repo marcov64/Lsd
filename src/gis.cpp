@@ -833,20 +833,26 @@ char gismsg[300];
     position->objDis_inRadius = std::move(objDis_inRadius_sorted); //move elements
   }
 
-  // it_rnd_full
+  // it_full
   // Grab all objects with label for cycle in random order
-  void object::it_rnd_full(char const lab[])
+  void object::it_full(char const lab[], bool random)
   {
     position->objDis_inRadius.clear();//reset vector
     for (int x = 0; x < position->map->xn; x++){
       for (int y = 0; y < position->map->yn; y++){
         for (object* candidate : position->map->elements.at(x).at(y)){
           if ( 0 == strcmp(candidate->label,lab) )
-            position->objDis_inRadius.push_back(std::make_pair(RND,candidate));   //use rnd value as pseudo distance for sorting
+            if (true == random) {
+              position->objDis_inRadius.push_back(std::make_pair(RND,candidate));   //use rnd value as pseudo distance for sorting
+            } else {
+              position->objDis_inRadius.push_back(std::make_pair(0.0,candidate));   //no sorting
+            }
         }
       }
     }
-    sort_objDisSet();
+    if (true == random) {
+      sort_objDisSet();
+    }
     position->it_obj = std::begin(position->objDis_inRadius);
   }
 
@@ -899,17 +905,17 @@ char gismsg[300];
 
   //  first_neighbour_rnd_full
   //  Initialise the gis neighbour search using the full landscape and a random order
-  object* object::first_neighbour_rnd_full(char const lab[])
+  object* object::first_neighbour_full(char const lab[], bool random)
   {
     #ifndef NO_POINTER_CHECK
     if (ptr_map()==NULL){
-        sprintf( gismsg, "failure in first_neighbour_rnd_full() for object '%s'", label );
+        sprintf( gismsg, "failure in first_neighbour_full() for object '%s'", label );
 		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return NULL;
     }
     #endif
-    it_rnd_full(lab);
+    it_full(lab, random);
     return next_neighbour();
   }
 

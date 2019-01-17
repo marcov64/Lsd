@@ -10,7 +10,10 @@ EQUATION("Init")
 /* Initialise the model. Generate the cells and mark alive ones randomly. */
 
 INIT_SPACE_GRID_WRAP("Cell", V("ncol"), V("nrow"), V("wrapping") ); //Initialise the space
-ADD_TO_SPACE_XY(SEARCH("Cell"),0,0); //Ease access, adding Lattice to space.
+ADD_TO_SPACE_XY(SEARCH("Cell"),0,0); //Ease access, adding Lattice object to space.
+
+SET_GIS_DISTANCE_TYPE('c'); //Chebyshev metric aka moore neighbourhood
+
 // The window is sized at most pixel * pixel
 int pcol,prow;
 pcol=prow=(int)V("WPixel");
@@ -26,7 +29,7 @@ int active_cells = V("PercActive") *  V("ncol") * V("nrow") ;
 
 if (active_cells > 0) {
   //Cycle randomly through cells and active the first active_cells cells.
-  CYCLE_GIS_RND(cur,"Cell"){
+  RCYCLE_GIS(cur,"Cell"){
     WRITELS(cur,"State",1, t-1);
     WRITE_LAT_GISS(cur,VLS(cur,"State",1));
     active_cells--;
@@ -68,7 +71,7 @@ In this version the updating is "simultaneous"
 */
 
 int neighbours_alive = 0;
-CYCLE_NEIGHBOUR( cur, "Cell", 1.5 ){ //1.5 is the moore neighbourhood, sqrt(2)<1.5<2
+FCYCLE_NEIGHBOUR( cur, "Cell", 1.0 ){
   neighbours_alive += VLS(cur,"State",1); //0 or 1 dead or alive
 }
 

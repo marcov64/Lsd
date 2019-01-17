@@ -35,7 +35,7 @@ Var: Init 0 n + n n
 Param: nrow 0 n + n n	100
 Param: ncol 0 n + n n	100
 Param: WPixel 0 n + n n	800
-Param: PercActive 0 n + n n	-1
+Param: PercActive 0 n + n n	0.5
 Var: SlowDown 0 n + n n
 Param: TimeSleep 0 n + n n	50
 Param: wrapping 0 n + n n	15
@@ -87,9 +87,7 @@ END_DESCRIPTION
 
 Parameter_PercActive
 Either select a positive value in (>>0.0,<<1.0) or a negative value to select a file.
-
 _INIT_
-
 
 END_DESCRIPTION
 

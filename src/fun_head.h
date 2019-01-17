@@ -693,9 +693,11 @@ bool no_ptr_chk = true;
 #define TELEPORT_SHARE(TARGET) { p->change_position(TARGET); }
 #define TELEPORT_SHARES(PTR, TARGET) { PTR->change_position(TARGET); }
 
-//Cycle through all the objects LAB anywhere in random order
-#define CYCLE_GIS_RND( O, LAB ) for ( O = p->first_neighbour_rnd_full(LAB); O != NULL; O = p->next_neighbour() )
-#define CYCLE_GIS_RNDS( C, O, LAB ) for ( O = C->first_neighbour_rnd_full(LAB); O != NULL; O = C->next_neighbour() )
+//Cycle through all the objects LAB anywhere in random order (RCYCLE) or unsorted fast (FCYCLE)
+#define RCYCLE_GIS( O, LAB ) for ( O = p->first_neighbour_full(LAB, true); O != NULL; O = p->next_neighbour() )
+#define RCYCLE_GISS( C, O, LAB ) for ( O = C->first_neighbour_full(LAB, true); O != NULL; O = C->next_neighbour() )
+#define FCYCLE_GIS( O, LAB ) for ( O = p->first_neighbour_full(LAB, false); O != NULL; O = p->next_neighbour() )
+#define FCYCLE_GISS( C, O, LAB ) for ( O = C->first_neighbour_full(LAB, false); O != NULL; O = C->next_neighbour() )
 
 // CYCLE_NEIGHBOUR
 // Cycle through all the objects LAB within radius RAD by increasing radius
@@ -776,16 +778,17 @@ bool no_ptr_chk = true;
 //  If it exists it is reported. The RND version works if there can be more
 //  than one object at the same place (returning one randomly)
 //  The standard version will yield an error if more than one option exist.
+//  Change style
 
 #define SEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, true) )
 #define SEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, true) )
 #define SEARCH_POSITION(LAB)  ( p->search_at_position(LAB, true) )
 #define SEARCH_POSITIONS(PTR, LAB)  ( PTR->search_at_position(LAB, true) )
 
-#define SEARCH_POSITION_RND_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, false) )
-#define SEARCH_POSITION_RND_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, false) )
-#define SEARCH_POSITION_RND(LAB)  ( p->search_at_position(LAB, false) )
-#define SEARCH_POSITION_RNDS(PTR, LAB)  ( PTR->search_at_position(LAB, false) )
+#define RSEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, false) )
+#define RSEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, false) )
+#define RSEARCH_POSITION_(LAB)  ( p->search_at_position(LAB, false) )
+#define RSEARCH_POSITIONS(PTR, LAB)  ( PTR->search_at_position(LAB, false) )
 
 //  SEARCH_POSITION_GRID and SEARCH_POSITION_RND_GRID
 //  Similar to above, but it searches at the truncated position.
@@ -794,12 +797,15 @@ bool no_ptr_chk = true;
 //  Can safely get information on the associated "land patch" of an "agent" with
 //  this command.
 
-#define SEARCH_POSITION__GRID_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, true) )
+#define SEARCH_POSITION_GRID_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, true) )
 #define SEARCH_POSITION_GRID_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, trunc(X), trunc(Y), true) )
 #define SEARCH_POSITION_GRID(LAB)  ( p->search_at_position(LAB, true, true) )
 #define SEARCH_POSITION_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, true, true) )
-#define SEARCH_POSITION_RND_GRID(LAB)  ( p->search_at_position(LAB, false, true) )
-#define SEARCH_POSITION_RND_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, false, true) )
+
+#define RSEARCH_POSITION_GRID_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, false) )
+#define RSEARCH_POSITION_GRID_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, trunc(X), trunc(Y), false) )
+#define RSEARCH_POSITION_GRID(LAB)  ( p->search_at_position(LAB, false, true) )
+#define RSEARCH_POSITION_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, false, true) )
 
 //  COUNT_POSITION(S)(_GRID(S))
 //  Similar to the search, you can use these macros to count the number of
