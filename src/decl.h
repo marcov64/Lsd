@@ -323,13 +323,16 @@ struct object
 
 #ifdef CPP11
 	//set the new GIS handling methods
-  void set_distance_type( char type ); //switch distance type
-  void set_distance_type( int type ); //using integers
-  void set_distance_type( double type ); //using double as in LSD Variables
+	void set_distance_type( char type ); //switch distance type
+	void set_distance_type( int type ); //using integers
+	void set_distance_type( double type ); //using double as in LSD Variables
 	double distance(object* other); //distance to other object
 	double distance(double x, double y); //distance to point in plain
+	double distance(double x_1, double y_1, double x_2, double y_2); //pseudo distance between two points in plain
 	double pseudo_distance(object* other); //pseudo distance to other object
 	double pseudo_distance(double x, double y); //pseudo distance to point in plain
+	double pseudo_distance(double x_1, double y_1, double x_2, double y_2); //pseudo distance between two points in plain
+	void position_between(gisMap* map, double &x_out, double &y_out, double x1, double y1, double x2, double y2); //find position at half distance
 	variable* search_var_local(char const l[]); //search only in object
 	void it_full(char const lab[], bool random);
 	void it_in_radius(char const lab[], double radius, char random, object* caller, int lag, char const varLab[], char const condition[], double condVal);
@@ -340,7 +343,7 @@ struct object
 	void sort_objDisSet();
 	void make_objDisSet_unique(bool sorted);
 	void randomise_objDisSetIntvls(bool sorted);
-  void randomise_objDisSetFull();
+	void randomise_objDisSetFull();
 	double complete_radius();
 	bool boundingBox(int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);
 	bool boundingBox(double x, double y, int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);
@@ -364,6 +367,11 @@ struct object
 	bool register_at_map_rnd(object *gisObj, bool snap_grid = false);
 	bool register_at_map(gisMap* map, double _x, double _y);
 	bool register_at_map(object *shareObj ); //register at same position as gisObj
+	
+	bool register_at_map_between(gisMap* map, double _x, double _y, double _x2, double _y2);
+	bool register_at_map_between(object *shareObj, object *shareObj2);
+
+	
 	bool unregister_from_gis();
 
 	gisMap* ptr_map(); //get ptr to map, if gis object

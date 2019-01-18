@@ -653,6 +653,12 @@ bool no_ptr_chk = true;
 #define ADD_TO_SPACE_XYS( PTR, GISOBJ, X, Y)  { ( PTR==GISOBJ ? false : PTR->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
 #define ADD_TO_SPACE_SHARE(TARGET) { p->register_at_map(TARGET); }
 #define ADD_TO_SPACE_SHARES(PTR, TARGET) { PTR->register_at_map(TARGET); }
+
+#define ADD_TO_SPACE_CENTER_XY( GISOBJ, X, Y, X2, Y2)  { ( p==GISOBJ ? false : p->register_at_map_between(GISOBJ->ptr_map(), X, Y, X2, Y2) ); }
+#define ADD_TO_SPACE_CENTER_XYS( PTR, GISOBJ, X, Y, X2, Y2)  { ( PTR==GISOBJ ? false : PTR->register_at_map_between(GISOBJ->ptr_map(), X, Y, X2, Y2) ); }
+#define ADD_TO_SPACE_CENTER_SHARE(TARGET, TARGET2) { p->register_at_map_between(TARGET, TARGET2); }
+#define ADD_TO_SPACE_CENTER_SHARES(PTR, TARGET, TARGET2) { PTR->register_at_map_between(TARGET, TARGET2); }
+
 #define ADD_TO_SPACE_RND(TARGET) { p->register_at_map_rnd(TARGET); }
 #define ADD_TO_SPACE_RNDS(PTR, TARGET) { PTR->register_at_map_rnd(TARGET); }
 #define ADD_TO_SPACE_RND_GRID(TARGET) { p->register_at_map_rnd(TARGET,true); }
@@ -767,11 +773,15 @@ bool no_ptr_chk = true;
 #define NEAREST_IN_DISTANCE_CND_CHEATS(PTR, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
 
 // DISTANCE
-// measures the distance to a TARGET or a position
+// measures the distance from self to a TARGET or a position
 #define DISTANCE(TARGET) ( p -> distance (TARGET) )
-#define DISTANCES(PTR, TARGET) ( PTR -> distance (TARGET) )
 #define DISTANCE_XY(X, Y) ( p-> distance (X,Y) )
 #define DISTANCE_XYS(PTR, X, Y) ( PTR-> distance (X,Y) )
+
+//DISTANCE2 - Distance between different items / points in space
+#define DISTANCE2(TARGET1, TARGET2) ( TARGET1 -> distance (TARGET2) )
+#define DISTANCE2_XY(X1, Y1, X2, Y2) ( p-> distance (X1, Y1, X2, Y2) )
+#define DISTANCE2_XYS(PTR, X1, Y1, X2, Y2) ( PTR-> distance (X1, Y1, X2, Y2) )
 
 //  SEARCH_POSITION, SEARCH_POSITION_RND
 //  Searches at an exact position for an object with label LAB

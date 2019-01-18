@@ -252,7 +252,115 @@ char gismsg[300];
     position = NULL;
     return true;
   }
+  
+  //  register_at_map_between
+  bool object::register_at_map_between(object *shareObj, object *shareObj2)
+  {
+    if (shareObj -> ptr_map() == NULL ) {
+      sprintf( gismsg, "failure in register_at_map_between() for object '%s' to be positioned between object %s and %s", label, shareObj->label,shareObj2->label );
+		      error_hard( gismsg, "the destination object (1) is not registered in any space" ,
+					"likely, the shareObj provided is not registered in any space. Check your code to prevent this situation" );
+      return false;
+    }
+	if (shareObj2 -> ptr_map() == NULL ) {
+      sprintf( gismsg, "failure in register_at_map_between() for object '%s' to be positioned between object %s and %s", label, shareObj->label,shareObj2->label );
+		      error_hard( gismsg, "the destination object (2) is not registered in any space" ,
+					"likely, the shareObj provided is not registered in any space. Check your code to prevent this situation" );
+      return false;
+    }
+    return register_at_map_between(shareObj -> position -> map , shareObj -> position -> x, shareObj -> position -> y, shareObj2 -> position -> x, shareObj2 -> position -> y );
+  }
+  //  register_at_map_between
+  //  register the object at the map, using x and y positions
+  bool object::register_at_map_between(gisMap* map, double _x, double _y, double _x2, double _y2)
+  {
+    if (map == NULL) {
+      sprintf( gismsg, "failure in register_at_map() for object '%s'", label );
+		      error_hard( gismsg, "no map to connect to provided",
+					"check your code to prevent this situation" );
+      return false; //re-registering not allowed. derigster at gis first."
+    }
+    if ( ptr_map() != NULL ){  //already registered?!
+      if ( ptr_map() != map ) {
+          sprintf( gismsg, "failure in register_at_map() for object '%s'", label );
+  		      error_hard( gismsg, "already registered in a space different from the one provided",
+  					"check your code to prevent this situation. If you want to change the space, deregister elemet from old one first." );
+        return false; //re-registering not allowed. derigster at gis first."
+      }
+	}
+	double x_new, y_new;
+	position_between(map, x_new,y_new,_x,_y,_x2,_y2); //Check for wrapping	
+    
+	if ( ptr_map() == map ) {
+        plog("\nInfo (t=%i): In register_at_map() the item %s is already part of the space.","",t,label);
+        plog("It will be moved from pos (%g,%g) to pos (%g,%g) instead.","",position->x,position->y,x_new,y_new);
+        return change_position(x_new,y_new);
+	}
+    
+    position = new gisPosition(map, x_new, y_new);
+    if ( position == NULL )
+	{
+		error_hard( "cannot allocate memory for register_at_map()",
+					"out of memory");
+		return false;
+	}
+    register_position(y_new,y_new);
+    return true;
+  }
+  
+  //position_between
+  //find position at half distance  
+  void object::position_between(gisMap* map, double& x_out, double& y_out, double x_1, double y_1, double x_2, double y_2)
+  {
+	//similat to pseudo_distance
+    double x_n = map->xn;
+    double y_n = map->yn;
 
+    //make sure that x1 is the smaller one. Direction is not important here.
+	if (x_1 > x_2)
+		std::swap(x_1,x_2);
+	if (y_1 > y_2)
+		std::swap(y_1,y_2);
+
+    double x_dist = x_2-x_1;
+    double y_dist = y_2-y_1;
+	
+	//we need to take care of wrapping. Only if wrapping on both sides of a 
+	//direction (left & right, up & down) is allowed, we consider an option in between.
+	//otherwise between will always be inside the two original positions.
+	
+	// no wrapping default.
+	x_out = x_1 + x_dist/2;
+	y_out = y_1 + x_dist/2; 
+
+    if (map->wrap.noWrap == false) {
+		if (map->wrap.right != map->wrap.left){
+			error_hard( "failure in position_between()", "the wrapping on the x axis is mixed" ,
+				"Usage of position_between() is not allowed in this case." );
+			return;	
+		} else if (	true == map->wrap.right) {
+				double x_alt_dist = x_1 + (x_n-x_2);
+				if ( x_alt_dist < x_dist )
+					if (x_1 >= x_alt_dist/2 )
+						x_out = x_1 - x_alt_dist/2;
+					else
+						x_out = x_2 + x_alt_dist/2;			
+		}	
+		if (map->wrap.top != map->wrap.bottom){
+			error_hard( "failure in position_between()", "the wrapping on the y axis is mixed" ,
+				"Usage of position_between() is not allowed in this case." );
+			return;	
+		} else if (	true == map->wrap.top) {
+				double y_alt_dist = y_1 + (y_n-y_2);
+				if ( y_alt_dist < y_dist )
+					if (y_1 >= y_alt_dist/2 )
+						y_out = y_1 - y_alt_dist/2;
+					else
+						y_out = y_2 + y_alt_dist/2;			
+		}
+	}	  	
+  }
+	
   //  register_at_map
   //  register the object at the map, using the same position as share_obj
   bool object::register_at_map(object *shareObj)
@@ -260,7 +368,7 @@ char gismsg[300];
     if (shareObj -> ptr_map() == NULL ) {
       sprintf( gismsg, "failure in register_at_map() for object '%s' at position of object %s", label, shareObj->label );
 		      error_hard( gismsg, "the destination object is not registered in any space" ,
-					"likely, the shareObj provided is not registered in any space. Check your code to prevent this situation" );
+					"likely, the shareObj provided is not registered in any space. Perhaps switch target obj and gis obj? Check your code to prevent this situation" );
       return false; //re-registering not allowed. derigster at gis first."
     }
 
@@ -275,7 +383,7 @@ char gismsg[300];
     if (gisObj -> ptr_map() == NULL ) {
       sprintf( gismsg, "failure in register_at_map_rnd() for object '%s' at position of object %s", label, gisObj->label );
 		      error_hard( gismsg, "the gisObj object is not registered in any space" ,
-					"likely, the gisObj provided is not registered in any space. Check your code to prevent this situation" );
+					"likely, the gisObj provided is not registered in any space. Perhaps switch target obj and gis obj? Check your code to prevent this situation" );
       return false; //re-registering not allowed. derigster at gis first."
     }
     double x = 0;
@@ -426,11 +534,13 @@ char gismsg[300];
 
     //  pseudo_distance
     //  Calculate the pseudo (squared) distance between an object p and another object b.
-  double object::pseudo_distance(double x_2, double y_2){
-    //all checks in distance()
-    double x_1 = position->x;
-    double y_1 = position->y;
-
+  double object::pseudo_distance(double x_2, double y_2){    
+    return pseudo_distance(position->x,position->y,x_2,y_2);    
+  }
+  
+  //  pseudo_distance
+  //pseudo distance between to point in plain
+  double object::pseudo_distance(double x_1, double y_1, double x_2, double y_2){ 
     double xn = position->map->xn;
     double yn = position->map->yn;
 
@@ -471,10 +581,10 @@ char gismsg[300];
                   return x_dist*x_dist + y_dist*y_dist;
 
       case 'm' : //Manhattan
-                  return x_dist+y_dist;
+                  return abs(x_dist)+abs(y_dist);
 
       case 'c' : //Chebyshev
-                  return min(x_dist,y_dist);
+                  return min(abs(x_dist),abs(y_dist));
     }
   }
 
@@ -600,7 +710,8 @@ char gismsg[300];
 
   // distance
   // Calculate the distance between to objects in the same gis.
-  double object::distance(object* b){
+  double object::distance(object* b)
+  {
     if (ptr_map() == NULL){
         sprintf( gismsg, "failure in distance() for object '%s'", label );
   		      error_hard( gismsg, "the object is not yet connected to a map",
@@ -633,7 +744,8 @@ char gismsg[300];
     }
   }
 
-  double object::distance(double x, double y){
+  double object::distance(double x, double y)
+  {
     if (ptr_map() == NULL){
         sprintf( gismsg, "failure in distance() (x,y) for object '%s'", label );
   		      error_hard( gismsg, "the object is not yet connected to a map",
@@ -651,6 +763,26 @@ char gismsg[300];
         return pseudo_distance( x, y );  //pseudo and distance are equivalent
     }
   }
+  
+  double object::distance(double x_1, double y_1, double x_2, double y_2)
+  {
+    if (ptr_map() == NULL){
+        sprintf( gismsg, "failure in distance() (x,y) for object '%s'", label );
+  		      error_hard( gismsg, "the object is not yet connected to a map",
+  					"check your code to prevent this situation" );
+        return NaN;
+    }
+    char distance_type = position->map->distance_type;
+    switch (distance_type)
+    {
+      case 'e' : //Euclidean
+        return sqrt( pseudo_distance( x_1, y_1, x_2, y_2 ) );
+
+      case 'm' : //Manhattan
+      case 'c' : //Chebyshev
+        return pseudo_distance( x_1, y_1, x_2, y_2 );  //pseudo and distance are equivalent
+    }
+  }  
 
   //  search_var_local
   //  A localised version of the search_var method.
