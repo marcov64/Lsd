@@ -987,9 +987,9 @@ void object::randomise_objDisSetFull()
     size_t i_n = position->objDis_inRadius.size();
     std::vector< std::pair<double, size_t > > rnd_vals;   //randomised index container
     rnd_vals.reserve(i_n);
-    size_t i = 0;
-    for (auto& item : rnd_vals) {
-        rnd_vals.emplace_back(std::make_pair(RND, i++) );
+
+    for (size_t i = 0; i < i_n; ++i) {
+        rnd_vals.emplace_back(std::make_pair(RND, i) );
     }
     std::sort( rnd_vals.begin(), rnd_vals.end(), [](auto const & A, auto const & B ) {
         return A.first < B.first;
