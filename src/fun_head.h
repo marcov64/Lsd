@@ -839,6 +839,9 @@ bool no_ptr_chk = true;
 #define SAME_GIS(TARGET) ( p->ptr_map() == TARGET->ptr_map() )
 #define SAME_GISS(PTR,TARGET) ( PTR->ptr_map() == TARGET->ptr_map() )
 
+#define GIS_INFOS( obj ) ( (obj->gis_info().c_str) )
+#define GIS_INFO ( (p->gis_info().c_str) )
+
 // GIS Lattice utilities
 #define INIT_LAT_GIS( ... ) p->init_lattice_gis( __VA_ARGS__ )
 #define INIT_LAT_GISS( PTR, ... ) PTR->init_lattice_gis( __VA_ARGS__ )

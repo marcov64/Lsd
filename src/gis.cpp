@@ -1633,11 +1633,21 @@ int object::load_data_gis( const char* inputfile, const char* obj_lab, const cha
             elements_added++;
         }
         cur->write( var_lab, val,  t_update); //write value
-        sprintf(gismsg, "\nAdded live cell at pos %g, %g", x_pos, y_pos);
-        plog(gismsg);
+        // sprintf(gismsg, "\nAdded live cell at pos %g, %g", x_pos, y_pos);
+        // plog(gismsg);
     }
     return elements_added;
 }
+
+    std::string object::gis_info()
+    {
+        if (ptr_map() == NULL) {
+            return "\nGIS-INFO: object is not part of gis";
+        }
+        char buffer[300];
+        sprintf(buffer,"\nGIS OBJECT INFO: UID %g position (%g,%g) at map %p", unique_id(),position->x, position->y, position->map);
+        return std::string(buffer);
+    }
 
 
 #endif //#ifdef CPP11
