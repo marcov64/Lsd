@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="61cm" height="37cm" viewBox="5 41 1218 726" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="456.6,311 635,311 635,333 461.072,333 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="474.836,325 458.836,333 474.836,341 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="637" y="318">object *next</text>
+    <polygon style="fill: #000000" points="731.4,318 731.4,310 739.4,314 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="460.6" y="307"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="476.6" y="329"></text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="261.9" y="109" width="54.6" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="261.9" y="109" width="54.6" height="36"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="289.2" y="131.8">
+      <tspan x="289.2" y="131.8">object</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="271.9" y1="134.45" x2="306.5" y2="134.45"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="394,311 394,211 289.2,211 289.2,149.472 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="297.2,163.236 289.2,147.236 281.2,163.236 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="341.6" y="207">object *up</text>
+    <polygon style="fill: #000000" points="382.1,207 382.1,199 390.1,203 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="398" y="307">*</text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="300.2" y="157">1</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="402" y="311" width="54.6" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="402" y="311" width="54.6" height="36"/>
+    <rect style="fill: #ffffff" x="394" y="319" width="54.6" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="394" y="319" width="54.6" height="36"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="421.3" y="341.8">
+      <tspan x="421.3" y="341.8">object</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="408" y1="344.45" x2="442.6" y2="344.45"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="506" y="134" width="55.6" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="506" y="134" width="55.6" height="36"/>
+    <rect style="fill: #ffffff" x="498" y="142" width="55.6" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="498" y="142" width="55.6" height="36"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="525.8" y="164.8">
+      <tspan x="525.8" y="164.8">bridge</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="512" y1="167.45" x2="547.6" y2="167.45"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="529.8,178 529.8,254 425.3,254 425.3,306.528 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="417.3,292.764 425.3,308.764 433.3,292.764 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="477.55" y="250">object *head</text>
+    <polygon style="fill: #000000" points="525.75,250 525.75,242 533.75,246 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="533.8" y="190"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="436.3" y="307"></text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="561.6,134 709,134 709,178 566.072,178 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="579.836,170 563.836,178 579.836,186 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="711" y="152">bridge *next</text>
+    <polygon style="fill: #000000" points="805.4,152 805.4,144 813.4,148 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="565.6" y="130"> prec brother</text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="565.6" y="146">1</text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="581.6" y="174"> succ brother</text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="581.6" y="190">1</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="316.5,127 399.75,127 399.75,156 493.528,156 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="479.764,164 495.764,156 479.764,148 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="401.75" y="137.5">bridge *b</text>
+    <polygon style="fill: #000000" points="473.05,137.5 473.05,129.5 481.05,133.5 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="320.5" y="123"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="478" y="152"></text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="40" y="369" width="64.15" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="40" y="369" width="64.15" height="36"/>
+    <rect style="fill: #ffffff" x="32" y="377" width="64.15" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="32" y="377" width="64.15" height="36"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="64.075" y="399.8">
+      <tspan x="64.075" y="399.8">variable</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="46" y1="402.45" x2="90.15" y2="402.45"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="394,333 256.575,333 256.575,369 108.622,369 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="122.386,361 106.386,369 122.386,377 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="258.575" y="347">variable *v</text>
+    <polygon style="fill: #000000" points="345.275,347 345.275,339 353.275,343 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="390" y="329"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="124.15" y="365"></text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="32,369 32,311 389.528,311 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="375.764,319 391.764,311 375.764,303 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="213" y="307">object *up</text>
+    <polygon style="fill: #000000" points="253.5,307 253.5,299 261.5,303 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="36" y="365">*</text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="374" y="307">1</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="104.15,391 216,391 216,413 108.622,413 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="122.386,405 106.386,413 122.386,421 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="218" y="398">variable *next</text>
+    <polygon style="fill: #000000" points="327.8,398 327.8,390 335.8,394 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="108.15" y="387"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="124.15" y="409"></text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="456.6,311 607.8,311 607.8,272 769.528,272 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="755.764,280 771.764,272 755.764,264 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="609.8" y="287.5">object *hook</text>
+    <polygon style="fill: #000000" points="704.2,287.5 704.2,279.5 712.2,283.5 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="460.6" y="307"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="754" y="268"></text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="774" y="254" width="54.6" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="774" y="254" width="54.6" height="36"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="801.3" y="276.8">
+      <tspan x="801.3" y="276.8">object</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="784" y1="279.45" x2="818.6" y2="279.45"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="642" y="370" width="67.55" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="642" y="370" width="67.55" height="36"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="675.775" y="392.8">
+      <tspan x="675.775" y="392.8">netNode</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="652" y1="395.45" x2="699.55" y2="395.45"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="456.6,355 541.8,355 541.8,388 637.528,388 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="623.764,396 639.764,388 623.764,380 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="543.8" y="367.5">netNode *node</text>
+    <polygon style="fill: #000000" points="645.9,367.5 645.9,359.5 653.9,363.5 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="460.6" y="351"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="622" y="384"></text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="726" y="208" width="43.3" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="726" y="208" width="43.3" height="36"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="747.65" y="230.8">
+      <tspan x="747.65" y="230.8">cext</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="736" y1="233.45" x2="759.3" y2="233.45"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="456.6,311 583.8,311 583.8,226 721.528,226 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="707.764,234 723.764,226 707.764,218 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="585.8" y="264.5">void *cext</text>
+    <polygon style="fill: #000000" points="664.8,264.5 664.8,256.5 672.8,260.5 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="460.6" y="307"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="706" y="222"></text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="850" y="415" width="61.05" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="850" y="415" width="61.05" height="36"/>
+    <rect style="fill: #ffffff" x="842" y="423" width="61.05" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="842" y="423" width="61.05" height="36"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="872.525" y="445.8">
+      <tspan x="872.525" y="445.8">netLink</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="856" y1="448.45" x2="897.05" y2="448.45"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="675.775,370 675.775,349 842,349 842,410.528 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="834,396.764 842,412.764 850,396.764 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="758.887" y="345">netLink *first</text>
+    <polygon style="fill: #000000" points="814.787,345 814.787,337 822.787,341 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="679.775" y="366"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="853" y="411"></text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="675.775,406 675.775,437 837.528,437 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="823.764,445 839.764,437 823.764,429 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="758.887" y="433">netLink *last</text>
+    <polygon style="fill: #000000" points="810.937,433 810.937,425 818.937,429 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="679.775" y="418"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="822" y="433"></text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="876.525,415 876.525,331 911.05,331 911.05,410.528 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="903.05,396.764 911.05,412.764 919.05,396.764 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="893.787" y="327">netLink *prev</text>
+    <polygon style="fill: #000000" points="945.837,327 945.837,319 953.837,323 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="880.525" y="411"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="922.05" y="411"></text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="911.05,415 942,415 942,437 915.522,437 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="929.286,429 913.286,437 929.286,445 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="944" y="422">netLink *next</text>
+    <polygon style="fill: #000000" points="1046.1,422 1046.1,414 1054.1,418 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="915.05" y="411"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="931.05" y="433"></text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1168" y="468" width="54.6" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1168" y="468" width="54.6" height="36"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1195.3" y="490.8">
+      <tspan x="1195.3" y="490.8">object</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="1178" y1="493.45" x2="1212.6" y2="493.45"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1092.9" y="534" width="54.6" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1092.9" y="534" width="54.6" height="36"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1120.2" y="556.8">
+      <tspan x="1120.2" y="556.8">object</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="1102.9" y1="559.45" x2="1137.5" y2="559.45"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="911.05,459 994.475,459 994.475,552 1088.43,552 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1074.66,560 1090.66,552 1074.66,544 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="996.475" y="501.5">object *ptrFrom</text>
+    <polygon style="fill: #000000" points="1113.97,501.5 1113.97,493.5 1121.97,497.5 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="911.05,459 1032.02,459 1032.02,486 1163.53,486 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1149.76,494 1165.76,486 1149.76,478 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1034.02" y="468.5">object *ptrTo</text>
+    <polygon style="fill: #000000" points="1136.12,468.5 1136.12,460.5 1144.12,464.5 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="915.05" y="455"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="1148" y="482"></text>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="289,43 556.8,43 568.8,55 568.8,93 289,93 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="289,43 556.8,43 568.8,55 568.8,93 289,93 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="556.8,43 556.8,55 568.8,55 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="296" y="66.65">
+      <tspan x="296" y="66.65">object is linked to first bridge, </tspan>
+      <tspan x="296" y="82.65">first object-child, first variable</tspan>
+    </text>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="956,317 1185.3,317 1197.3,329 1197.3,367 956,367 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="956,317 1185.3,317 1197.3,329 1197.3,367 956,367 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="1185.3,317 1185.3,329 1197.3,329 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="963" y="340.65">
+      <tspan x="963" y="340.65">netLinks are two-way lists,</tspan>
+      <tspan x="963" y="356.65">only outgoing links are known</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="708" y="538" width="102.8" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" x="708" y="538" width="102.8" height="36"/>
+    <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="759.4" y="560.8">
+      <tspan x="759.4" y="560.8">nodeAttributes</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #0000ff" x1="718" y1="563.45" x2="800.8" y2="563.45"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="642,406 642,495 708,495 708,533.528 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="700,519.764 708,535.764 716,519.764 "/>
+    <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="675" y="491">nodeAttributes *attributes</text>
+    <polygon style="fill: #0000ff" points="777.1,491 777.1,483 785.1,487 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="810.8,538 810.8,480.005 675.775,480.005 675.775,411.481 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="683.775,425.245 675.775,409.245 667.775,425.245 "/>
+    <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="743.287" y="476.005">netNode *node</text>
+    <polygon style="fill: #0000ff" points="795.337,476.005 795.337,468.005 803.337,472.005 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="708,574 425.3,574 425.3,359.472 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="433.3,373.236 425.3,357.236 417.3,373.236 "/>
+    <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="566.65" y="570">object *nodeObj</text>
+    <polygon style="fill: #0000ff" points="626.4,570 626.4,562 634.4,566 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="554.9" y="714" width="54.6" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="554.9" y="714" width="54.6" height="36"/>
+    <rect style="fill: #ffffff" x="546.9" y="722" width="54.6" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="546.9" y="722" width="54.6" height="36"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="574.2" y="744.8">
+      <tspan x="574.2" y="744.8">object</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="560.9" y1="747.45" x2="595.5" y2="747.45"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="928.9" y="684" width="94.3" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" x="928.9" y="684" width="94.3" height="36"/>
+    <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="976.05" y="706.8">
+      <tspan x="976.05" y="706.8">linkAttributes</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #0000ff" x1="938.9" y1="709.45" x2="1013.2" y2="709.45"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="1023.2,684 1023.2,579 876.525,579 876.525,463.472 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="884.525,477.236 876.525,461.236 868.525,477.236 "/>
+    <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="949.862" y="575">netLink *link</text>
+    <polygon style="fill: #0000ff" points="1001.91,575 1001.91,567 1009.91,571 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="928.9,702 776.7,702 776.7,736 613.972,736 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="627.736,728 611.736,736 627.736,744 "/>
+    <text font-size="12.7998" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="778.7" y="715">object *linkObj</text>
+    <polygon style="fill: #0000ff" points="896.2,715 896.2,707 904.2,711 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="842,459 842,633 928.9,633 928.9,679.528 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="920.9,665.764 928.9,681.764 936.9,665.764 "/>
+    <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="885.45" y="629">linkAttributes *attributes</text>
+    <polygon style="fill: #0000ff" points="987.55,629 987.55,621 995.55,625 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="546.9,736 425.3,736 425.3,359.472 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000ff" points="433.3,373.236 425.3,357.236 417.3,373.236 "/>
+    <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="486.1" y="732">object *up</text>
+    <polygon style="fill: #0000ff" points="526.6,732 526.6,724 534.6,728 "/>
+    <text font-size="12.7998" style="fill: #0000ff;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="542.9" y="732">*</text>
+    <text font-size="12.7998" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="436.3" y="367">1</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="30" y="591.5" width="79.75" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #ff0000" x="30" y="591.5" width="79.75" height="36"/>
+    <rect style="fill: #ffffff" x="22" y="599.5" width="79.75" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #ff0000" x="22" y="599.5" width="79.75" height="36"/>
+    <text font-size="12.7998" style="fill: #ff0000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="61.875" y="622.3">
+      <tspan x="61.875" y="622.3">gisPosition</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff0000" x1="36" y1="624.95" x2="95.75" y2="624.95"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #ff0000" points="390,357.5 390,467 22,467 22,587.028 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #ff0000" points="14,573.264 22,589.264 30,573.264 "/>
+    <text font-size="12.7998" style="fill: #ff0000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="206" y="463">gisPosition *position</text>
+    <polygon style="fill: #ff0000" points="288.85,463 288.85,455 296.85,459 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="180" y="639.5" width="59.4" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #ff0000" x="180" y="639.5" width="59.4" height="36"/>
+    <text font-size="12.7998" style="fill: #ff0000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="209.7" y="662.3">
+      <tspan x="209.7" y="662.3">gisMap</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff0000" x1="190" y1="664.95" x2="229.4" y2="664.95"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #ff0000" points="109.75,635.5 109.75,711.5 209.7,711.5 209.7,679.972 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #ff0000" points="217.7,693.736 209.7,677.736 201.7,693.736 "/>
+    <text font-size="12.7998" style="fill: #ff0000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="159.725" y="707.5">gisMap *map</text>
+    <polygon style="fill: #ff0000" points="204.075,707.5 204.075,699.5 212.075,703.5 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #ff0000" points="180,657.5 159,657.5 159,514.25 425.3,514.25 425.3,359.472 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #ff0000" points="433.3,373.236 425.3,357.236 417.3,373.236 "/>
+    <text font-size="12.7998" style="fill: #ff0000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="292.15" y="510.25">2dvect&lt;list&lt;object*&gt;&gt; elements</text>
+    <polygon style="fill: #ff0000" points="409.65,510.25 409.65,502.25 417.65,506.25 "/>
+    <text font-size="12.7998" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="176" y="653.5">1</text>
+    <text font-size="12.7998" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="436.3" y="367">*</text>
+  </g>
+</svg>
