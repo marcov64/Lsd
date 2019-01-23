@@ -783,6 +783,17 @@ bool no_ptr_chk = true;
 #define DISTANCE2_XY(X1, Y1, X2, Y2) ( p-> distance (X1, Y1, X2, Y2) )
 #define DISTANCE2_XYS(PTR, X1, Y1, X2, Y2) ( PTR-> distance (X1, Y1, X2, Y2) )
 
+#define RELATIVE_DISTANCE( dist ) ( p->relative_distance(dist) )
+#define RELATIVE_DISTANCES( PTR, dist ) ( PTR->relative_distance(dist) )
+
+#define ABSOLUTE_DISTANCE( dist ) ( p->absolute_distance(dist) )
+#define ABSOLUTE_DISTANCE( PTR, dist ) ( PTR->absolute_distance(dist) )
+
+#define CENTER_POSITIONX ( p->center_position('x') )
+#define CENTER_POSITIONY ( p->center_position('y') )
+#define CENTER_POSITIONXS( PTR ) ( PTR->center_position('x') )
+#define CENTER_POSITIONYS( PTR ) ( PTR->center_position('y') )
+
 //  SEARCH_POSITION, SEARCH_POSITION_RND
 //  Searches at an exact position for an object with label LAB
 //  If it exists it is reported. The RND version works if there can be more

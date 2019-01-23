@@ -813,6 +813,72 @@ double object::distance(double x_1, double y_1, double x_2, double y_2)
     }
 }
 
+//calulate the center positions.
+double object::center_position(char xy)
+{
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in center('%c') for object '%s'",xy, label );
+        error_hard( gismsg, "the object is not yet connected to a map",
+                    "check your code to prevent this situation" );
+        return NaN;
+    }
+    switch (xy){
+        case 'x':
+        case 'X': return position->map->center_x;
+        case 'y':
+        case 'Y': return position->map->center_y;
+    }
+}
+
+double object::max_distance()
+{
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in max_distance() for object '%s'", label );
+        error_hard( gismsg, "the object is not yet connected to a map",
+                    "check your code to prevent this situation" );
+        return NaN;
+    }
+    double max_distance = position->map->max_distance; //reference - change in map
+    if ( max_distance < 0){
+        //initialise        
+        if (true == position->map->wrap.noWrap){
+            max_distance = distance(0,0,position->map->xn,position->map->yn);
+        } else {
+            double op0 = distance(position->map->center_x,position->map->center_y,position->map->xn,position->map->yn); //default for full wrapping
+            double opA = distance(0,0,position->map->xn,position->map->yn); //left bottom
+            double opB = distance(position->map->xn,position->map->yn,0,0); //right top            
+            double opC = distance(0,position->map->yn,position->map->xn,0); //left top
+            double opD = distance(position->map->xn,0,0,position->map->yn); //right bottom
+            
+            max_distance = max(op0,max(opA,max(opB,max(opC,opD))));
+        }
+        position->map->max_distance = max_distance;
+    }
+    return max_distance;
+}
+
+double object::relative_distance(double abs_distance)
+{
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in relative_distance() for object '%s'", label );
+        error_hard( gismsg, "the object is not yet connected to a map",
+                    "check your code to prevent this situation" );
+        return NaN;
+    }
+    return abs_distance/max_distance();
+}
+
+double object::absolute_distance(double rel_distance)
+{
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in absolute_distance() for object '%s'", label );
+        error_hard( gismsg, "the object is not yet connected to a map",
+                    "check your code to prevent this situation" );
+        return NaN;
+    }
+    return rel_distance*max_distance();
+}
+
 //  search_var_local
 //  A localised version of the search_var method.
 //  needed for the conditional search.
