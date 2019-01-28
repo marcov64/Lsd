@@ -903,7 +903,7 @@ if (ptr_map() == NULL) {
                     "check your code to prevent this situation" );
         return '0';
     }
-    return map->distance_type;
+    return ptr_map()->distance_type;
 }
 
 //  add_if_dist_lab_cond
