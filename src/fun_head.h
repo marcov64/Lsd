@@ -787,7 +787,7 @@ bool no_ptr_chk = true;
 #define RELATIVE_DISTANCES( PTR, dist ) ( PTR->relative_distance(dist) )
 
 #define ABSOLUTE_DISTANCE( dist ) ( p->absolute_distance(dist) )
-#define ABSOLUTE_DISTANCE( PTR, dist ) ( PTR->absolute_distance(dist) )
+#define ABSOLUTE_DISTANCES( PTR, dist ) ( PTR->absolute_distance(dist) )
 
 #define CENTER_POSITIONX ( p->center_position('x') )
 #define CENTER_POSITIONY ( p->center_position('y') )

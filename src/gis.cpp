@@ -895,26 +895,47 @@ variable* object::search_var_local(char const l[])
     return NULL;
 }
 
+char object::read_distance_type()
+{
+if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in read_distance_type() for object '%s'", label );
+        error_hard( gismsg, "the object is not yet connected to a map",
+                    "check your code to prevent this situation" );
+        return '0';
+    }
+    return map->distance_type;
+}
+
 //  add_if_dist_lab_cond
 //  in addition to add_if_dist_lab checks if VAR CONDITION condVAL is true
 //  VAR is a variable contained in the object lab.
 //  if operator() is called with negative pseudo_radius, it will ignore the distance check
 struct add_if_dist_lab_cond {
     object* this_obj; //object for which the search is conducted
-    double pseudo_radius;
+    double radius;
     char lab[ MAX_ELEM_LENGTH ];
     object* fake_caller; //can be a fake-caller if not NULL.
     int lag;
     char varLab[ MAX_ELEM_LENGTH ];
     char condition; // 1 : == ; 2 : > ; 3 : < ; 4: !=; that's it
     double condVal;
+    double pseudo_radius;
 
     //constructor
-    add_if_dist_lab_cond(object* this_obj, double pseudo_radius, char const _lab[], object* fake_caller, int lag, char const _varLab[], char const _condition[], double condVal)
-        : this_obj(this_obj), pseudo_radius(pseudo_radius), fake_caller(fake_caller), lag(lag), condition(_condition[0]), condVal(condVal)
+    add_if_dist_lab_cond(object* this_obj, double radius, char const _lab[], object* fake_caller, int lag, char const _varLab[], char const _condition[], double condVal)
+        : this_obj(this_obj), radius(radius), fake_caller(fake_caller), lag(lag), condition(_condition[0]), condVal(condVal)
     {
         strcpy(lab, _lab);
         strcpy(varLab, _varLab);
+        char distance_type = this_obj->read_distance_type();
+        switch (distance_type) {
+            case 'e' : //Euclidean
+                pseudo_radius =  radius*radius;
+
+            case 'm' : //Manhattan
+            case 'c' : //Chebyshev
+                pseudo_radius = radius;  //pseudo and real distance are equivalent
+        }
     };
 
     //  defaults for the unconditional call are set in the decl.h for the COND
@@ -925,8 +946,12 @@ struct add_if_dist_lab_cond {
         if (candidate == this_obj)
             return false; //do not collect self
 
-        if ( 0 == strcmp(candidate->label, lab) ) {
-            double ps_dst = this_obj->pseudo_distance(candidate);
+        if ( 0 == strcmp(candidate->label, lab) ) {            
+            double ps_dst = this_obj->pseudo_distance(candidate); 
+            // double ps_dst = -1;
+            // if ( pseudo_radius >= 0 ){
+                // ps_dst = this_obj->pseudo_distance(candidate);
+            // }
             if (pseudo_radius < 0 || ps_dst <= pseudo_radius) {
                 bool isCandidate = true;
                 if (condition == '>' || condition == '<' || condition == '=' || condition == '!' ) {
@@ -1104,10 +1129,9 @@ void object::it_in_radius(char const lab[], double radius, char random, object* 
 {
 
     position->objDis_inRadius.clear();//reset vector
-    double pseudo_radius = (radius < 0 ? -1 : radius * radius);
 
     //depending on the call of this function, the conditions are initialised meaningfully or not.
-    add_if_dist_lab_cond functor_add(this, pseudo_radius, lab, caller, lag, varLab, condition, condVal); //define conditions for adding
+    add_if_dist_lab_cond functor_add(this, radius, lab, caller, lag, varLab, condition, condVal); //define conditions for adding
 
     traverse_boundingBox(radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
 
@@ -1198,8 +1222,7 @@ object* object::closest_in_distance(char const lab[], double radius, bool random
     position->objDis_inRadius.clear();//reset vector
 
     //depending on the call of this function, the conditions are initialised meaningfully or not.
-    double pseudo_radius = radius * radius;
-    add_if_dist_lab_cond functor_add(this, pseudo_radius, lab, fake_caller, lag, varLab, condition, condVal); //define conditions for adding
+    add_if_dist_lab_cond functor_add(this, radius, lab, fake_caller, lag, varLab, condition, condVal); //define conditions for adding
 
     //In a first initial step, we identify the items in the boundary box.
     traverse_boundingBox(cur_radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
