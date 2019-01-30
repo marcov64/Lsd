@@ -662,7 +662,10 @@ bool no_ptr_chk = true;
 #define ADD_TO_SPACE_RND(TARGET) { p->register_at_map_rnd(TARGET); }
 #define ADD_TO_SPACE_RNDS(PTR, TARGET) { PTR->register_at_map_rnd(TARGET); }
 #define ADD_TO_SPACE_RND_GRID(TARGET) { p->register_at_map_rnd(TARGET,true); }
-#define ADD_TO_SPACE_RND_GRIDS(TARGET) { PTR->register_at_map_rnd(TARGET,true); }
+#define ADD_TO_SPACE_RND_GRIDS(PTR, TARGET) { PTR->register_at_map_rnd(TARGET,true); }
+
+#define ADD_N_TO_SPACE( obj ) { p->register_allOfKind_at_grid_rnd( obj); }
+#define ADD_N_TO_SPACES( GISOBJ, obj ) { GISOBJ->register_allOfKind_at_grid_rnd( obj); }
 
 // POSITION
 // Macros to get x or y position or produce random position
@@ -850,8 +853,8 @@ bool no_ptr_chk = true;
 #define SAME_GIS(TARGET) ( p->ptr_map() == TARGET->ptr_map() )
 #define SAME_GISS(PTR,TARGET) ( PTR->ptr_map() == TARGET->ptr_map() )
 
-#define GIS_INFOS( obj ) ( (obj->gis_info().c_str) )
-#define GIS_INFO ( (p->gis_info().c_str) )
+#define GIS_INFOS( obj ) ( (obj->gis_info().c_str()) )
+#define GIS_INFO ( (p->gis_info().c_str()) )
 
 // GIS Lattice utilities
 #define INIT_LAT_GIS( ... ) p->init_lattice_gis( __VA_ARGS__ )

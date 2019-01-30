@@ -389,8 +389,8 @@ void object::declare_as_unique(char const *uLab)
   //if not create it.
 
   if (root->uID == NULL){
-    uniqueIdMap* new_uidMap = new uniqueIdMap;
-    root->uID = new uniqueId(root,new_uidMap);
+    uniqueIdMap* new_uidMap = new uniqueIdMap; //create map
+    root->uID = new uniqueId(root,new_uidMap); //link to root.
   }
 
   //set blueprint as unique but without any id

@@ -370,6 +370,7 @@ struct object {
     bool change_position(double _x, double _y, bool noAdjust = false);
     bool change_position(object* shareObj );
 
+    void register_allOfKind_at_grid_rnd(object* obj);
     bool register_at_map_rnd(object* gisObj, bool snap_grid = false);
     bool register_at_map(gisMap* map, double _x, double _y);
     bool register_at_map(object* shareObj ); //register at same position as gisObj
@@ -516,13 +517,15 @@ struct netLink {						// individual outgoing link
 
 
 #ifdef CPP11
-/*	 The uniqueMap holds pointers to objects with uIDs. Once the last element
+/*	 The uniqueIdMap holds pointers to objects with uIDs. Once the last element
 	is deleted, it is deleted as well. There is only one such uniqueMap per
 	model, residing in root.
 */
 struct uniqueIdMap {
-    std::deque<object*> elements;
-    std::deque<object*> blueprints;
+    // std::deque<object*> elements;
+    // std::deque<object*> blueprints;
+    std::vector<object*> elements;
+    std::vector<object*> blueprints;
     int nelements = 0;
     int nelementsAlive = 0;
 };

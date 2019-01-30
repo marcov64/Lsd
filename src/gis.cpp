@@ -395,6 +395,41 @@ bool object::register_at_map(object* shareObj)
     return register_at_map(shareObj -> position -> map, shareObj -> position -> x, shareObj -> position -> y );
 }
 
+//  register_allOfKind_at_grid_rnd
+//  Register a number of objects at the map, using random positions
+//  at the grid, but not two at the same position.
+void object::register_allOfKind_at_grid_rnd(object* obj)
+{
+    if (ptr_map() == NULL ) {
+        sprintf( gismsg, "failure in register_allOfKind_at_grid_rnd() for objects '%s' at space shared with gis object %s", obj->label, label );
+        error_hard( gismsg, "the gisObj object is not registered in any space",
+                    "likely, the gisObj provided is not registered in any space. Perhaps switch target obj and gis obj? Check your code to prevent this situation" );
+        return;
+    }
+
+    //Create random sorted list of all grid points
+    int xn = position -> map->xn;
+    int yn = position -> map->yn;
+    std::vector< std::tuple< double, int, int > > positions;
+    positions.reserve(xn * yn);
+    for (int x = 0; x < xn; ++x) {
+        for (int y = 0; y < yn; ++y) {
+            positions.emplace_back(RND, x, y);
+        }
+    }
+    std::sort(positions.begin(),positions.end());
+
+    //Cycle through all objects in the linked list and at them to random places
+    object* cur = obj->up->search(obj->label);
+    for (auto const& pos : positions) {
+        if (cur == NULL)
+            break;
+        cur->register_at_map(position -> map, std::get<1>(pos), std::get<2>(pos) );
+        cur = cur->next;
+    }
+}
+
+
 //  register_at_map_rnd
 //  register the object at the map, using random positions.
 //  flag if only gridded
@@ -817,16 +852,18 @@ double object::distance(double x_1, double y_1, double x_2, double y_2)
 double object::center_position(char xy)
 {
     if (ptr_map() == NULL) {
-        sprintf( gismsg, "failure in center('%c') for object '%s'",xy, label );
+        sprintf( gismsg, "failure in center('%c') for object '%s'", xy, label );
         error_hard( gismsg, "the object is not yet connected to a map",
                     "check your code to prevent this situation" );
         return NaN;
     }
-    switch (xy){
+    switch (xy) {
         case 'x':
-        case 'X': return position->map->center_x;
+        case 'X':
+            return position->map->center_x;
         case 'y':
-        case 'Y': return position->map->center_y;
+        case 'Y':
+            return position->map->center_y;
     }
 }
 
@@ -839,18 +876,19 @@ double object::max_distance()
         return NaN;
     }
     double max_distance = position->map->max_distance; //reference - change in map
-    if ( max_distance < 0){
-        //initialise        
-        if (true == position->map->wrap.noWrap){
-            max_distance = distance(0,0,position->map->xn,position->map->yn);
-        } else {
-            double op0 = distance(position->map->center_x,position->map->center_y,position->map->xn,position->map->yn); //default for full wrapping
-            double opA = distance(0,0,position->map->xn,position->map->yn); //left bottom
-            double opB = distance(position->map->xn,position->map->yn,0,0); //right top            
-            double opC = distance(0,position->map->yn,position->map->xn,0); //left top
-            double opD = distance(position->map->xn,0,0,position->map->yn); //right bottom
-            
-            max_distance = max(op0,max(opA,max(opB,max(opC,opD))));
+    if ( max_distance < 0) {
+        //initialise
+        if (true == position->map->wrap.noWrap) {
+            max_distance = distance(0, 0, position->map->xn, position->map->yn);
+        }
+        else {
+            double op0 = distance(position->map->center_x, position->map->center_y, position->map->xn, position->map->yn); //default for full wrapping
+            double opA = distance(0, 0, position->map->xn, position->map->yn); //left bottom
+            double opB = distance(position->map->xn, position->map->yn, 0, 0); //right top
+            double opC = distance(0, position->map->yn, position->map->xn, 0); //left top
+            double opD = distance(position->map->xn, 0, 0, position->map->yn); //right bottom
+
+            max_distance = max(op0, max(opA, max(opB, max(opC, opD))));
         }
         position->map->max_distance = max_distance;
     }
@@ -865,7 +903,7 @@ double object::relative_distance(double abs_distance)
                     "check your code to prevent this situation" );
         return NaN;
     }
-    return abs_distance/max_distance();
+    return abs_distance / max_distance();
 }
 
 double object::absolute_distance(double rel_distance)
@@ -876,7 +914,7 @@ double object::absolute_distance(double rel_distance)
                     "check your code to prevent this situation" );
         return NaN;
     }
-    return rel_distance*max_distance();
+    return rel_distance * max_distance();
 }
 
 //  search_var_local
@@ -897,7 +935,7 @@ variable* object::search_var_local(char const l[])
 
 char object::read_distance_type()
 {
-if (ptr_map() == NULL) {
+    if (ptr_map() == NULL) {
         sprintf( gismsg, "failure in read_distance_type() for object '%s'", label );
         error_hard( gismsg, "the object is not yet connected to a map",
                     "check your code to prevent this situation" );
@@ -930,7 +968,7 @@ struct add_if_dist_lab_cond {
         char distance_type = this_obj->read_distance_type();
         switch (distance_type) {
             case 'e' : //Euclidean
-                pseudo_radius =  radius*radius;
+                pseudo_radius =  radius * radius;
 
             case 'm' : //Manhattan
             case 'c' : //Chebyshev
@@ -946,11 +984,11 @@ struct add_if_dist_lab_cond {
         if (candidate == this_obj)
             return false; //do not collect self
 
-        if ( 0 == strcmp(candidate->label, lab) ) {            
-            double ps_dst = this_obj->pseudo_distance(candidate); 
+        if ( 0 == strcmp(candidate->label, lab) ) {
+            double ps_dst = this_obj->pseudo_distance(candidate);
             // double ps_dst = -1;
             // if ( pseudo_radius >= 0 ){
-                // ps_dst = this_obj->pseudo_distance(candidate);
+            // ps_dst = this_obj->pseudo_distance(candidate);
             // }
             if (pseudo_radius < 0 || ps_dst <= pseudo_radius) {
                 bool isCandidate = true;
@@ -1646,7 +1684,7 @@ double object::update_lattice_gis(double x, double y, double colour, bool noChan
     //transform coordinates for lattice. lattice starts with (1,1) top left.
     //gis starts with (0,0) top down.
     double col = x + 1;
-    double line = position->map->yn - y;
+    double line = position->map->yn - y + 1; //int (50-49.99) = 0 -> error
     return update_lattice( line, col, colour );
 }
 double object::read_lattice_gis( )
@@ -1728,15 +1766,18 @@ int object::load_data_gis( const char* inputfile, const char* obj_lab, const cha
     return elements_added;
 }
 
-    std::string object::gis_info()
-    {
-        if (ptr_map() == NULL) {
-            return "\nGIS-INFO: object is not part of gis";
-        }
-        char buffer[300];
-        sprintf(buffer,"\nGIS OBJECT INFO: UID %g position (%g,%g) at map %p", unique_id(),position->x, position->y, position->map);
-        return std::string(buffer);
+std::string object::gis_info()
+{
+    if (ptr_map() == NULL) {
+        return "\nGIS-INFO: object is not part of gis";
     }
+    char buffer[300];
+    if (true == is_unique() )
+        sprintf(buffer, "\nGIS OBJECT INFO: '%s' UID %g position (%g,%g) at map %p", label, unique_id(), position->x, position->y, position->map);
+    else
+        sprintf(buffer, "\nGIS OBJECT INFO: '%s' (no uID) position (%g,%g) at map %p", label, position->x, position->y, position->map);
+    return std::string(buffer);
+}
 
 
 #endif //#ifdef CPP11
