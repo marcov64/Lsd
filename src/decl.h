@@ -323,8 +323,9 @@ struct object {
 #ifdef CPP11
     //set the new GIS handling methods
     void set_distance_type( char type ); //switch distance type
-    void set_distance_type( int type ); //using integers
-    void set_distance_type( double type ); //using double as in LSD Variables
+    // void set_distance_type( int type ); //using integers
+    // void set_distance_type( double type ); //using double as in LSD Variables
+    void set_distance_type( char const type[] );
     char read_distance_type();
     double distance(object* other); //distance to other object
     double distance(double x, double y); //distance to point in plain

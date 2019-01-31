@@ -1897,8 +1897,16 @@ double update_lattice( double line, double col, double val )
 	}
 	
 	// save lattice color data
-	if ( lattice != NULL && rows > 0 && columns > 0 )
-		lattice[ ( int ) line - 1 ][ ( int ) col - 1 ] = ( int ) max( 0, floor( val ) );
+	if ( lattice != NULL && rows > 0 && columns > 0 ){
+        int y = (int) line - 1;
+        int x = (int) col - 1;
+        int color = max (0, floor (val) );
+        if (color == lattice[y][x])
+            return 0; //nothing needs doing
+        else
+            lattice[y][x] = color;
+		//lattice[ ( int ) line - 1 ][ ( int ) col - 1 ] = ( int ) max( 0, floor( val ) );
+    }
 	
 #ifndef NO_WINDOW
 

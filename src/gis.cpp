@@ -53,26 +53,32 @@
 
 char gismsg[300];
 
-void object::set_distance_type( double type )
-{
-    return set_distance_type(int(type));
-}
+// void object::set_distance_type( double type )
+// {
+    // return set_distance_type(int(type));
+// }
 
-void object::set_distance_type( int type )
+// void object::set_distance_type( int type )
+// {
+    // if (type != 0 && type != 1 && type != 2 ) {
+        // sprintf( gismsg, "failure in set_distance_type() for distance type '%c'", type );
+        // error_hard( gismsg, "this is not a valid type",
+                    // "Change to a valid type (0 / e, 1 / m or 2 / c)" );
+        // return;
+    // }
+    // if (type == 0)
+        // return set_distance_type('e');
+    // else if (type == 1)
+        // return set_distance_type('m');
+    // else if (type == 2)
+        // return set_distance_type('c');
+// }
+
+void object::set_distance_type( char const type[] )
 {
-    if (type != 0 && type != 1 && type != 2 ) {
-        sprintf( gismsg, "failure in set_distance_type() for distance type '%c'", type );
-        error_hard( gismsg, "this is not a valid type",
-                    "Change to a valid type (0 / e, 1 / m or 2 / c)" );
-        return;
-    }
-    if (type == 0)
-        return set_distance_type('e');
-    else if (type == 1)
-        return set_distance_type('m');
-    else if (type == 2)
-        return set_distance_type('c');
+    return set_distance_type(type[0]);
 }
+    
 
 
 void object::set_distance_type( char type )
@@ -83,14 +89,15 @@ void object::set_distance_type( char type )
                     "check your code to prevent this situation" );
         return;
     }
-    if (type != 'e' && type != 'm' && type != 'c' ) {
+    if (type != 'e' && type != 'm' && type != 'c' &&
+        type != 'E' && type != 'M' && type != 'C') {
         sprintf( gismsg, "failure in set_distance_type() for distance type '%c'", type );
         error_hard( gismsg, "this is not a valid type",
-                    "Change to a valid type (c, e or m)" );
+                    "Change to a valid type (Chebyshev, Euclidean or Manhattan)" );
         return;
     }
     position->map->distance_type = type;
-    sprintf( gismsg, "\nSwitched distance to type '%c' (c: Chebyshev, e: Euclidean, m: Manhatten", type);
+    sprintf( gismsg, "\nSwitched distance to type '%c' (c: Chebyshev, e: Euclidean, m: Manhattan", type);
     plog(gismsg);
     return;
 }
@@ -644,12 +651,15 @@ double object::pseudo_distance(double x_1, double y_1, double x_2, double y_2)
 
     switch (distance_type) {
         case 'e' : //Euclidean
+        case 'E' :
             return x_dist * x_dist + y_dist * y_dist;
 
         case 'm' : //Manhattan
+        case 'M' :
             return abs(x_dist) + abs(y_dist);
 
         case 'c' : //Chebyshev
+        case 'C' :
             return min(abs(x_dist), abs(y_dist));
     }
 }
@@ -802,10 +812,13 @@ double object::distance(object* b)
     char distance_type = position->map->distance_type;
     switch (distance_type) {
         case 'e' : //Euclidean
+        case 'E' :        
             return sqrt( pseudo_distance(b) );
 
         case 'm' : //Manhattan
+        case 'M' :        
         case 'c' : //Chebyshev
+        case 'C' :
             return pseudo_distance(b);  //pseudo and distance are equivalent
     }
 }
@@ -821,10 +834,13 @@ double object::distance(double x, double y)
     char distance_type = position->map->distance_type;
     switch (distance_type) {
         case 'e' : //Euclidean
+        case 'E' :        
             return sqrt( pseudo_distance( x, y ) );
 
         case 'm' : //Manhattan
+        case 'M' :        
         case 'c' : //Chebyshev
+        case 'C' :        
             return pseudo_distance( x, y );  //pseudo and distance are equivalent
     }
 }
@@ -840,10 +856,13 @@ double object::distance(double x_1, double y_1, double x_2, double y_2)
     char distance_type = position->map->distance_type;
     switch (distance_type) {
         case 'e' : //Euclidean
+        case 'E' :        
             return sqrt( pseudo_distance( x_1, y_1, x_2, y_2 ) );
 
         case 'm' : //Manhattan
+        case 'M' :        
         case 'c' : //Chebyshev
+        case 'C' :        
             return pseudo_distance( x_1, y_1, x_2, y_2 );  //pseudo and distance are equivalent
     }
 }
@@ -968,10 +987,13 @@ struct add_if_dist_lab_cond {
         char distance_type = this_obj->read_distance_type();
         switch (distance_type) {
             case 'e' : //Euclidean
+            case 'E' :            
                 pseudo_radius =  radius * radius;
 
             case 'm' : //Manhattan
+            case 'M' :
             case 'c' : //Chebyshev
+            case 'C' :
                 pseudo_radius = radius;  //pseudo and real distance are equivalent
         }
     };
