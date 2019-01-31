@@ -1883,7 +1883,7 @@ double update_lattice( double line, double col, double val )
 	char *latcanv, val_string[ 32 ];		// the final string to be used to define tk color to use
 	
 	// ignore invalid values
-	if ( line <= 0 || col <= 0 || line > rows || col > columns || fabs( val ) > INT_MAX )
+	if ( line <= 0 || col <= 0 || (int) line > rows || (int) col > columns || fabs( val ) > INT_MAX )
 	{
 		if ( error_count == ERR_LIM )
 			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");

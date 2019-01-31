@@ -664,8 +664,8 @@ bool no_ptr_chk = true;
 #define ADD_TO_SPACE_RND_GRID(TARGET) { p->register_at_map_rnd(TARGET,true); }
 #define ADD_TO_SPACE_RND_GRIDS(PTR, TARGET) { PTR->register_at_map_rnd(TARGET,true); }
 
-#define ADD_N_TO_SPACE( obj ) { p->register_allOfKind_at_grid_rnd( obj); }
-#define ADD_N_TO_SPACES( GISOBJ, obj ) { GISOBJ->register_allOfKind_at_grid_rnd( obj); }
+#define ADD_ALL_TO_SPACE( obj ) { p->register_allOfKind_at_grid_rnd( obj); }
+#define ADD_ALL_TO_SPACES( GISOBJ, obj ) { GISOBJ->register_allOfKind_at_grid_rnd( obj); }
 
 // POSITION
 // Macros to get x or y position or produce random position

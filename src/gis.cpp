@@ -575,7 +575,7 @@ bool object::change_position(object* shareObj)
 
 //  change_position
 //  change_position to the new position x y
-bool object::change_position(double _x, double _y, bool noAdjust)
+bool object::change_position(double _x, double _y, bool noAdjust) //def: noAdjust=false / do adjust
 {
     if (check_positions(_x, _y, noAdjust) == false) {
         return false; //Out of range
@@ -1668,6 +1668,8 @@ double object::update_lattice_gis(double colour)
     return update_lattice_gis(position->x, position->y, colour, true);
 }
 
+
+
 double object::update_lattice_gis(double x, double y, double colour, bool noChange)
 {
 #ifndef NO_POINTER_CHECK
@@ -1681,11 +1683,10 @@ double object::update_lattice_gis(double x, double y, double colour, bool noChan
     if (check_positions(x, y, noChange) == false) {
         return -1; //error
     }
-    //transform coordinates for lattice. lattice starts with (1,1) top left.
-    //gis starts with (0,0) top down.
-    double col = x + 1;
-    double line = position->map->yn - y + 1; //int (50-49.99) = 0 -> error
-    return update_lattice( line, col, colour );
+    //transform coordinates for lattice. internally lattice starts with (0,0) top left. (in update_lattice/externally with (1,1) )
+    //gis starts with (0,0) top down.   
+    double line = position->map->yn - ( y == 0 ? 1 : y ); //special case where y == 0 -> yn-1 . For each y>0.0 int truncs accordingly
+    return update_lattice( line + 1, x + 1, colour );
 }
 double object::read_lattice_gis( )
 {
@@ -1711,13 +1712,15 @@ double object::read_lattice_gis( double x, double y, bool noChange)
     }
 #endif
     if (check_positions(x, y, noChange) == false) {
+        sprintf( gismsg, "failure in read_lattice_gis() for object '%s'", label );
+        error_hard( gismsg, "reading from xy outside of canvas",
+                    "check your code to prevent this situation" );
         return -1; //error
     }
-    //transform coordinates for lattice. lattice starts with (1,1) top left.
+    //transform coordinates for lattice. lattice starts with (0,0) top left.
     //gis starts with (0,0) top down.
-    double col = x + 1;
-    double line = position->map->yn - y;
-    return read_lattice( line, col );
+    double line = position->map->yn - ( y == 0 ? 1 : y ); //special case where y == 0 -> yn-1 . For each y>0.0 int truncs accordingly
+    return read_lattice( line + 1, x + 1 );
 }
 
 int object::load_data_gis( const char* inputfile, const char* obj_lab, const char* var_lab, int t_update )
