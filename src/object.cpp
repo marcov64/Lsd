@@ -2642,9 +2642,16 @@ double object::stat( char const *lab, double *r )
 	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = 0;
 	
 	cv = search_var( this, lab, true, no_search );
+    
+    if (cv != NULL){
+        for ( cur = cv->up; cur != NULL; cur = go_brother( cur ) ) { cur->cal (lab, 0); } //update first.
+        cv = search_var( this, lab, true, no_search ); //search again, the original one may be dead.
+    }
+    
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+		//cv = blueprint->search_var( this, lab, true, no_search );
+        cv = blueprint->search( this->label )->search_var( this, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for calculating statistics", lab );
