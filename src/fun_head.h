@@ -857,25 +857,51 @@ bool no_ptr_chk = true;
 #define GIS_INFO ( (p->gis_info().c_str()) )
 
 // GIS Lattice utilities
-#define INIT_LAT_GIS( ... ) p->init_lattice_gis( __VA_ARGS__ )
-#define INIT_LAT_GISS( PTR, ... ) PTR->init_lattice_gis( __VA_ARGS__ )
-#define DELETE_LAT_GIS close_lattice( ) // convenient
-#define SAVE_LAT_GIS( ... ) save_lattice( __VA_ARGS__ ) //convenient
 
-#define V_LAT_GIS p->read_lattice_gis( )
-#define V_LAT_GISS( PTR ) PTR->read_lattice_gis( )
-#define WRITE_LAT_GIS( VAL ) p->update_lattice_gis( VAL )
-#define WRITE_LAT_GISS( PTR, VAL ) PTR->update_lattice_gis( VAL )
 
-#define V_LAT_GIS_XY( X, Y ) p->read_lattice_gis( X, Y, true )
-#define V_LAT_GIS_XYS( PTR, X, Y ) PTR->read_lattice_gis( X, Y, true )
-#define WRITE_LAT_GIS_XY( X, Y, VAL ) p->update_lattice_gis( X, Y, VAL, true )
-#define WRITE_LAT_GIS_XYS( PTR, X, Y, VAL ) PTR->update_lattice_gis( X, Y, VAL, true )
+#ifndef NO_WINDOW
 
-#define V_LAT_GIS_ADJUST_XY( X, Y ) p->read_lattice_gis( X, Y, false )
-#define V_LAT_GIS_ADJUST_XYS( PTR, X, Y ) PTR->read_lattice_gis( X, Y, false )
-#define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL ) p->update_lattice_gis( X, Y, VAL, false )
-#define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL ) PTR->update_lattice_gis( X, Y, VAL, false )
+    #define INIT_LAT_GIS( ... )         ( p->init_lattice_gis( __VA_ARGS__ ) )
+    #define INIT_LAT_GISS( PTR, ... )   ( PTR->init_lattice_gis( __VA_ARGS__ ) )
+    #define DELETE_LAT_GIS              ( close_lattice( ) ) // convenient
+    #define SAVE_LAT_GIS( ... )         ( save_lattice( __VA_ARGS__ ) ) //convenient
+
+    #define V_LAT_GIS                   ( p->read_lattice_gis( ) )
+    #define V_LAT_GISS( PTR )           ( PTR->read_lattice_gis( ) )
+    #define WRITE_LAT_GIS( VAL )        ( p->update_lattice_gis( VAL ) )
+    #define WRITE_LAT_GISS( PTR, VAL )  ( PTR->update_lattice_gis( VAL ) )
+
+    #define V_LAT_GIS_XY( X, Y )                    ( p->read_lattice_gis( X, Y, true ) )
+    #define V_LAT_GIS_XYS( PTR, X, Y )              ( PTR->read_lattice_gis( X, Y, true ) )
+    #define WRITE_LAT_GIS_XY( X, Y, VAL )           ( p->update_lattice_gis( X, Y, VAL, true ) )
+    #define WRITE_LAT_GIS_XYS( PTR, X, Y, VAL )     ( PTR->update_lattice_gis( X, Y, VAL, true ) )
+
+    #define V_LAT_GIS_ADJUST_XY( X, Y )                 ( p->read_lattice_gis( X, Y, false ) )
+    #define V_LAT_GIS_ADJUST_XYS( PTR, X, Y )           ( PTR->read_lattice_gis( X, Y, false ) )
+    #define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL )        ( p->update_lattice_gis( X, Y, VAL, false ) )
+    #define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL )  ( PTR->update_lattice_gis( X, Y, VAL, false ) )
+#else
+
+    #define INIT_LAT_GIS( ... )         ( void( ) )
+    #define INIT_LAT_GISS( PTR, ... )   ( void( ) )
+    #define DELETE_LAT_GIS              ( void( ) ) // convenient
+    #define SAVE_LAT_GIS( ... )         ( void( ) ) //convenient
+
+    #define V_LAT_GIS                   ( void( ) )
+    #define V_LAT_GISS( PTR )           ( void( ) )
+    #define WRITE_LAT_GIS( VAL )        ( void( ) )
+    #define WRITE_LAT_GISS( PTR, VAL )  ( void( ) )
+
+    #define V_LAT_GIS_XY( X, Y )                    ( void( ) )
+    #define V_LAT_GIS_XYS( PTR, X, Y )              ( void( ) )
+    #define WRITE_LAT_GIS_XY( X, Y, VAL )           ( void( ) )
+    #define WRITE_LAT_GIS_XYS( PTR, X, Y, VAL )     ( void( ) )
+
+    #define V_LAT_GIS_ADJUST_XY( X, Y )                 ( void( ) )
+    #define V_LAT_GIS_ADJUST_XYS( PTR, X, Y )           ( void( ) )
+    #define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL )        ( void( ) )
+    #define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL )  ( void( ) )
+#endif
 
 //And some new macros to load data from txt files.
 //The txt file is in the format x y value NEWLINE
