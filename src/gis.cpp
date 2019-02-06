@@ -989,12 +989,14 @@ struct add_if_dist_lab_cond {
             case 'e' : //Euclidean
             case 'E' :            
                 pseudo_radius =  radius * radius;
+                break;
 
             case 'm' : //Manhattan
             case 'M' :
             case 'c' : //Chebyshev
             case 'C' :
                 pseudo_radius = radius;  //pseudo and real distance are equivalent
+                break;
         }
     };
 
@@ -1288,13 +1290,13 @@ object* object::closest_in_distance(char const lab[], double radius, bool random
     traverse_boundingBox(cur_radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
     make_objDisSet_unique(false); //sort and make unique
 
-    for (/*is init*/; (cur_radius < radius && cur_radius < max_radius); cur_radius++ ) {
+    for (/*is init*/; (cur_radius < radius && cur_radius < max_radius); ++cur_radius ) {
         if (position->objDis_inRadius.empty() == false) {
 
             //check if there is a closed interval OR the radius is at least 1 level beyond the element
-            if (position->objDis_inRadius.front().first < position->objDis_inRadius.back().first
+            if (position->objDis_inRadius.front().first < position->objDis_inRadius.back().first //the element in the back is further away then one in the front.
                     || ceil(position->objDis_inRadius.back().first) < cur_radius ) {
-                break; //we found a solution set
+                break; //we found a solution set (can be empty)
             }
         }
 
@@ -1303,17 +1305,17 @@ object* object::closest_in_distance(char const lab[], double radius, bool random
     }
 
 
-    if (position->objDis_inRadius.empty() == true) {
+    if (position->objDis_inRadius.empty() == true) {        
         return NULL; //no option found;
     }
     else {
-        if (random == false)
+        if ( random == false )
             return position->objDis_inRadius.front().second;
 
         int n = -1;  //select randomly amongst set of candidates with minimum distance
         for (auto const& item : position->objDis_inRadius) {
-            if (item.first == position->objDis_inRadius.front().first) {
-                n++;
+            if (item.first == position->objDis_inRadius.front().first) { //compare element distance with distance of first element
+                ++n;
             }
         }
         if (n > 0) {
