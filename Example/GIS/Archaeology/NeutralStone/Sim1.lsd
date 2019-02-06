@@ -1,0 +1,407 @@
+	
+Label Root
+{
+	Son: Resource
+	Label Resource
+	{
+		Param: Extracted
+		Var: ColourResource
+		Param: DistNearNeigh
+
+	}
+
+	Son: Forager
+	Label Forager
+	{
+		Son: Tool
+		Label Tool
+		{
+			Param: ID
+			Var: DistanceToSource
+
+		}
+
+		Var: Action
+		Param: toolkit_size
+		Var: Statistics
+		Param: Avg_Distance
+		Param: Max_Distance
+		Param: Min_Distance
+		Param: SD_Distance
+		Var: MaxDistance
+		Param: toolkit_richnes
+		Func: Kill_Self
+		Param: x_init
+		Param: y_init
+
+	}
+
+	Var: Scheduler
+	Param: xn
+	Param: yn
+	Param: n_resources
+	Var: Init
+	Param: n_toolkit
+	Param: GraphLat
+	Param: wrap
+	Var: End_Sim
+	Param: UniqueResourcesFound
+	Param: n_Forangers
+	Param: xh
+	Param: xl
+	Param: yh
+	Param: yl
+	Param: UsePajek
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: Scheduler 0 n + n n
+Param: xn 0 n + n n	200
+Param: yn 0 n + n n	200
+Param: n_resources 0 n + n n	500
+Var: Init 0 n + n n
+Param: n_toolkit 0 n + n n	100
+Param: GraphLat 0 n + n n	1
+Param: wrap 0 n + n n	0
+Var: End_Sim 0 s + n n
+Param: UniqueResourcesFound 0 s + n n	0
+Param: n_Forangers 0 n + n n	1
+Param: xh 0 n + n n	0
+Param: xl 0 n + n n	0
+Param: yh 0 n + n n	0
+Param: yl 0 n + n n	0
+Param: UsePajek 0 n + n n	0
+
+Object: Resource C	1
+Param: Extracted 0 n + n n	0
+Var: ColourResource 0 n + n n
+Param: DistNearNeigh 0 n + n n	0
+
+Object: Forager C	1
+Var: Action 0 n + n n
+Param: toolkit_size 0 s + n n	0
+Var: Statistics 0 n + n n
+Param: Avg_Distance 0 s + n n	0
+Param: Max_Distance 0 s + n n	0
+Param: Min_Distance 0 s + n n	0
+Param: SD_Distance 0 s + n n	0
+Var: MaxDistance 0 n + n n
+Param: toolkit_richnes 0 s + n n	0
+Func: Kill_Self 0 s + n n
+Param: x_init 0 n + n n	0
+Param: y_init 0 n + n n	0
+
+Object: Tool C	1
+Param: ID 0 n + n n	0
+Var: DistanceToSource 0 n + n n
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 1000
+EQUATION fun_NeutralStone.cpp
+MODELREPORT report_Sim1.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Variable_Scheduler
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_xn
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_yn
+(no description available)
+_INIT_
+All 1 instances equal to 500.
+END_DESCRIPTION
+
+Parameter_n_resources
+(no description available)
+_INIT_
+All 1 instances equal to 1000.
+END_DESCRIPTION
+
+Variable_Init
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_n_toolkit
+(no description available)
+_INIT_
+All 1 instances equal to 100.
+END_DESCRIPTION
+
+Parameter_GraphLat
+Switch using the graphical lattice on (1) or off (else)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_wrap
+there are 2^4 options. We use a bit-code (0=off):
+   0-bit: left     : 0=0 1=1
+   1-bit: right    : 0=0 1=2
+   2-bit: top      : 0=0 1=4
+   3-bit: bottom   : 0=0 1=8
+   sum the values to generate desired wrapping (e.g. 15 - torus world)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_End_Sim
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_UniqueResourcesFound
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_n_Forangers
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_xh
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_xl
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_yh
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_yl
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_UsePajek
+Set usage of pajek on or of.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Resource
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Extracted
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_ColourResource
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_DistNearNeigh
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Object_Forager
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Action
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_toolkit_size
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Statistics
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Avg_Distance
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Max_Distance
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_Min_Distance
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_SD_Distance
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_MaxDistance
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_toolkit_richnes
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Function_Kill_Self
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_x_init
+(no description available)
+_INIT_
+All 200 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_y_init
+(no description available)
+_INIT_
+All 200 instances equal to 0.
+END_DESCRIPTION
+
+Object_Tool
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ID
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_DistanceToSource
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+//#define EIGENLIB			// uncomment to use Eigen linear algebra library
+//#define NO_POINTER_INIT	// uncomment to disable pointer checking
+
+#include "fun_head_fast.h"
+
+// do not add Equations in this area
+
+MODELBEGIN
+
+// insert your equations here, between the MODELBEGIN and MODELEND words
+
+
+EQUATION("Init")
+/* Initialise the model */
+
+//Create the geography - no wrapping
+double xn = V("xn");
+double yn = V("yn");
+INIT_SPACE_ROOT(xn,yn);
+
+//Create a visualisation
+INIT_LAT_GIS(0); //all black
+
+//Create the missing resources
+double n_resources = V("n_resources");
+ADDNOBJ("Resource",n_resources-1); //one exists already
+
+//add them to space
+ADD_N_TO_SPACE(SEARCH("Resource"));
+
+//check
+CYCLE(cur,"Resource"){
+	LOG(GIS_INFOS(cur));
+}
+
+
+//Add the Forager to a random position
+ADD_TO_SPACE_RND_GRIDS(SEARCH("Forager"),root);
+LOG(GIS_INFOS(SEARCH("Forager")));
+
+
+RESULT(0.0)
+
+
+
+
+
+
+
+
+
+MODELEND
+
+// do not add Equations in this area
+
+void close_sim( void )
+{
+	// close simulation special commands go here
+}
+
+END_EQ_FILE

@@ -1,0 +1,5 @@
+TARGET=lsd_gnu
+FUN=fun_NeutralStone
+FUN_EXTRA=
+SWITCH_CC=-O3 -ggdb3
+SWITCH_CC_LNK=
