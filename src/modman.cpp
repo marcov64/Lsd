@@ -3247,28 +3247,28 @@ if ( choice == 52 )
 
 	if ( macro )
 	{
-		cmd( "if { $numobj == \"1\"} {set choice 1} {set choice 0}" );
-		cmd( "if {$v_obj0 != \"\"} {.f.t.t insert insert \"$v_obj0 = \"}" );
+		cmd( "if { $numobj == \"1\" } { set choice 1 } { set choice 0 }" );
+		cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
 		if ( choice  == 1 )
 		{
-		cmd( "if {$v_obj == \"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\"}" );
-		cmd( "if {$v_obj == \"p\" && $v_num!=\"\"} { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\"}" );
-		cmd( "if {$v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj, \\\"$v_label\\\");\"}" );
-		cmd( "if {$v_obj != \"p\" && $v_num != \"\"} { .f.t.t insert insert \"ADDOBJ_EXS($v_obj, \\\"$v_label\\\", $v_num);\"}" );
+		cmd( "if { $v_obj == \"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num!=\"\" } { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj, \\\"$v_label\\\");\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num != \"\" } { .f.t.t insert insert \"ADDOBJ_EXS($v_obj, \\\"$v_label\\\", $v_num);\" }" );
 		}
 		else
 		{
-		cmd( "if {$v_obj == \"p\" && $v_num!=\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\"; set choice -3}" );
-		cmd( "if {$v_obj != \"p\" && $v_num!= \"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\"; set choice -3}" );
-		cmd( "if {$v_obj == \"p\" && $v_num==\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\"; set choice -3}" );
-		cmd( "if {$v_obj != \"p\" && $v_num== \"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\"; set choice -3}" );
+		cmd( "if { $v_obj == \"p\" && $v_num!=\"\" } { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
+		cmd( "if { $v_obj != \"p\" && $v_num!= \"\" } { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
+		cmd( "if { $v_obj == \"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\"; set choice -3 }" );
+		cmd( "if { $v_obj != \"p\" && $v_num== \"\" } { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\"; set choice -3 }" );
 		}
 	}
 	else
 	{
-		cmd( "if {$v_num==\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj);\"}" );
-		cmd( "if {$v_num!=\"\" && [string is integer -strict $numobj]} {.f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj, $v_num);\"}" );
+		cmd( "if { $v_num==\"\" } { .f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj);\" }" );
+		cmd( "if { $v_num!=\"\" } { .f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj, $v_num);\" }" );
 	}
 	cmd( ".f.t.t see insert" );
 
