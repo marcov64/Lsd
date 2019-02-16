@@ -1937,12 +1937,12 @@ double update_lattice( double line, double col, double val )
 		sprintf( val_string, "#%06x", - ( int ) val );	// yes: just use the positive RGB value
 	else
 	{
-		sprintf( val_string, "$c%d", ( unsigned int ) val );		// no: use the positive RGB value
+		sprintf( val_string, "$c%d", val_int );			// no: use the predefined Tk color
 		// create (white) pallete entry if invalid palette in val
-		cmd( "if { ! [ info exist c%d ] } { set c%d white }", ( unsigned int ) val, ( unsigned int ) val  );
+		cmd( "if { ! [ info exist c%d ] } { set c%d white }", val_int, val_int  );
 	}
 		
-	cmd( ".lat.c itemconfigure c%d_%d -fill %s", ( unsigned int ) line, ( unsigned int ) col, val_string );
+	cmd( ".lat.c itemconfigure c%d_%d -fill %s", line_int + 1, col_int + 1, val_string );
 		
 #endif
 
