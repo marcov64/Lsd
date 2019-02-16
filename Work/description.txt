@@ -1,1 +1,5 @@
-Folder containing models under development
+Models under development.
+
+You can store your new models here or create new group(s) to better organize your models.
+
+If you keep all your models inside this group, you can easily backup all of them by simply saving the subdirectory/folder "Work" inside the LSD installation directory.
