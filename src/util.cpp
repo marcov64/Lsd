@@ -1770,7 +1770,7 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 	int i, j, hsize, vsize, hsizeMax, vsizeMax;
 
 	// ignore invalid values
-	if ( nrow < 1 || ncol < 1 || nrow > INT_MAX || ncol > INT_MAX )
+	if ( ( int ) nrow < 1 || ( int ) ncol < 1 || ( int ) nrow > INT_MAX || ( int ) ncol > INT_MAX )
 	{
 		plog( "\nError: invalid lattice initialization values, ignoring.\n");
 		return -1;
@@ -1895,9 +1895,15 @@ negative values of val prompt for the use of the (positive) RGB equivalent
 double update_lattice( double line, double col, double val )
 {
 	char *latcanv, val_string[ 32 ];		// the final string to be used to define tk color to use
+	int line_int, col_int, val_int;
+	
+	line_int = line - 1;
+	col_int = col - 1;
+	val_int = max( 0, floor( val ) );
 	
 	// ignore invalid values
-	if ( line <= 0 || col <= 0 || line > rows || col > columns || fabs( val ) > INT_MAX )
+	if ( line_int < 0 || col_int < 0 || line_int >= rows || 
+		 col_int >= columns || ( int ) fabs( val ) > INT_MAX )
 	{
 		if ( error_count == ERR_LIM )
 			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
@@ -1911,9 +1917,14 @@ double update_lattice( double line, double col, double val )
 	}
 	
 	// save lattice color data
-	if ( lattice != NULL && rows > 0 && columns > 0 )
-		lattice[ ( int ) line - 1 ][ ( int ) col - 1 ] = ( int ) max( 0, floor( val ) );
 	
+	if ( lattice != NULL && rows > 0 && columns > 0 )
+	{
+		if ( val >= 0 && lattice[ line_int ][ col_int ] == val_int )
+			return 0;
+		else
+			lattice[ line_int ][ col_int ] = val_int;
+	}
 #ifndef NO_WINDOW
 
 	// avoid operation if canvas was closed
@@ -1947,7 +1958,7 @@ negative values of val mean the use of the (positive) RGB equivalent
 double read_lattice( double line, double col )
 {
 	// ignore invalid values
-	if ( line <= 0 || col <= 0 || line > rows || col > columns )
+	if ( ( int ) line <= 0 || ( int ) col <= 0 || ( int ) line > rows || ( int ) col > columns )
 	{
 		if ( error_count == ERR_LIM )
 			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
