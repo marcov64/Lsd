@@ -120,8 +120,6 @@ clock_t start_profile[ 100 ], end_profile[ 100 ];
 #ifdef PARALLEL_MODE
 // semaphore to enable just a single parallel call at a time
 atomic < bool > parallel_ready( true );
-bool worker_ready = true;
-bool worker_crashed = false;
 condition_variable update;
 mutex thr_ptr_lock;
 mutex update_lock;
@@ -152,9 +150,14 @@ variable::variable( void )
 	deb_cond = 0;
 	end = 0;
 	last_update = 0;
+	next_update = 0;
 	num_lag = 0;
 	param = 0;
 	start = 0;
+	delay = 0;
+	delay_range = 0;
+	period = 1;
+	period_range = 0;
 	up = NULL;
 	next = NULL;
 	
@@ -187,9 +190,14 @@ variable::variable( const variable &v )
 	deb_cond = v.deb_cond;
 	end = v.end;
 	last_update = v.last_update;
+	next_update = v.next_update;
 	num_lag = v.num_lag;
 	param = v.param;
 	start = v.start;
+	delay = v.delay;
+	delay_range = v.delay_range;
+	period = v.period;
+	period_range = v.period_range;
 	up = v.up;
 	next = v.next;
 	
@@ -275,14 +283,15 @@ double variable::cal( object *caller, int lag )
 				return val[ eff_lag ];	// use regular past value
 		}
 		else
-		{
-			if ( last_update >= t )		// already calculated this time step
+		{	
+			// already calculated this time step or not to be calculated this time step
+			if ( last_update >= t || t < next_update )
 				return( val[ 0 ] );		
 #ifdef PARALLEL_MODE
 			// prevent parallel computation of the same variable (except dummy equations)
 			if ( parallel_mode && ! dummy )
 				 guard.lock( );
-			if ( last_update >= t )			// recheck if not computed during lock
+			if ( last_update >= t )		// recheck if not computed during lock
 				return( val[ 0 ] );		
 #endif	
 		}
@@ -396,6 +405,14 @@ double variable::cal( object *caller, int lag )
 	val[ 0 ] = app;
 
 	last_update = t;
+	
+	// choose next update step for special updating variables
+	if ( period > 1 || period_range > 0 )
+	{
+		next_update = t + period;
+		if ( period_range > 0 )
+			next_update += rnd_int( 0, period_range );
+	}
 
 #ifdef PARALLEL_MODE
 	if ( fast_mode == 0 && ! parallel_mode )
@@ -548,7 +565,7 @@ void worker::cal_worker( void )
 				{
 					sprintf( err_msg1, "deadlock during parallel computation" );
 					sprintf( err_msg2, "the equation for '%s' in object '%s' requested its own value\nwhile parallel-computing its current value", var->label, var->up->label );
-					sprintf( err_msg3, "check your code to prevent this situation." );
+					sprintf( err_msg3, "check your code to prevent this situation" );
 					user_excpt = true;
 					throw;
 				}
@@ -557,16 +574,27 @@ void worker::cal_worker( void )
 
 				// compute the Variable's equation
 				user_excpt = true;			// allow distinguishing among internal & user exceptions
+
+#ifndef NO_WINDOW 
+				if ( setjmp( env ) )		// allow recovering from signals
+					return;
+#endif			
 				try 						// do it while catching exceptions to avoid obscure aborts
 				{
 					app = var->fun( NULL );
 				}
 				catch ( ... )
 				{
-					pexcpt = current_exception( );
-					sprintf( err_msg1, "equation error" );
-					sprintf( err_msg2, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", var->label, var->up->label );
-					sprintf( err_msg3, "check your code to prevent this situation." );
+					if ( error_hard_thread )
+						pexcpt = nullptr;
+					else
+					{
+						pexcpt = current_exception( );
+						sprintf( err_msg1, "equation error" );
+						sprintf( err_msg2, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", var->label, var->up->label );
+						sprintf( err_msg3, "check your code to prevent this situation" );
+					}
+					
 					throw;
 				}
 				user_excpt = false;
@@ -577,6 +605,15 @@ void worker::cal_worker( void )
 				var->val[ 0 ] = app;
 
 				var->last_update = t;
+				
+				// choose next update step for special updating variables
+				if ( var->period > 1 || var->period_range > 0 )
+				{
+					var->next_update = t + var->period;
+					if ( var->period_range > 0 )
+						var->next_update += rnd_int( 0, var->period_range );
+				}			
+				
 				var->under_computation = false;
 				
 				// if there is a pending object deletion, try to do it now
@@ -603,12 +640,12 @@ void worker::cal_worker( void )
 	catch ( ... )
 	{
 		// only capture exception if not already done
-		if ( pexcpt != nullptr )
+		if ( ! error_hard_thread && pexcpt != nullptr )
 		{
 			pexcpt = current_exception( );
 			sprintf( err_msg1, "parallel computation problem" );
 			sprintf( err_msg2, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", var->label, var->up->label );
-			sprintf( err_msg3, "disable parallel computation for this variable\nor check your code to prevent this situation." );
+			sprintf( err_msg3, "disable parallel computation for this variable\nor check your code to prevent this situation" );
 		}
 	}
 	
@@ -664,15 +701,47 @@ Handle system signals in worker
 ****************************************************/
 void worker::signal( int sig )
 {
+	char signame[ 16 ];
+	
+	switch ( sig )
+	{
+		case SIGMEM:
+			strcpy( signame, "SIGMEM" );
+			break;
+			
+		case SIGABRT:
+			strcpy( signame, "SIGABRT" );
+			break;
+
+		case SIGFPE:
+			strcpy( signame, "SIGFPE" );
+			break;
+		
+		case SIGILL:
+			strcpy( signame, "SIGILL" );
+			break;
+		
+		case SIGSEGV:
+			strcpy( signame, "SIGSEGV" );
+			break;
+		
+		default:
+			strcpy( signame, "Unknown signal" );
+	}
+	
 	if ( var != NULL && var->label != NULL  )
-		sprintf( err_msg1, "\n\nUnknown error: signal received while parallel-computing the equation\nfor '%s' in object '%s'. Disable parallel computation for this variable\nor check your code to prevent this situation.", var->label, var->up->label != NULL ? var->up->label : "(none)" );
+		sprintf( err_msg1, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'. Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, var->label, var->up->label != NULL ? var->up->label : "(none)" );
 	else
-		sprintf( err_msg1, "\n\nUnknown error: signal received by a parallel worker thread.\nDisable parallel computation to prevent this situation." );
+		sprintf( err_msg1, "\n\n%s: signal received by a parallel worker thread.\nDisable parallel computation to prevent this situation.", signame );
 
 	// signal & kill thread
-	signum = sig;
+	signum = sig;	
 	free = false;
 	running = false;
+	
+#ifndef NO_WINDOW 
+	longjmp( env, 1 );				// recover from crash on user code
+#endif
 }
 
 
@@ -717,30 +786,34 @@ bool worker::check( void )
 	if ( ! worker_crashed )
 	{		
 		worker_crashed = true;
+		user_exception = user_excpt;
 		
 		if ( signum >= 0 )
 		{
 			plog( err_msg1 );
-			user_exception = user_excpt;
 			signal_handler( signum );
 		}
 		else
 		{
-			if ( pexcpt != nullptr )
-			{
-				user_exception = user_excpt;
-				error_hard( err_msg2, err_msg1, err_msg3, true );
-				rethrow_exception( pexcpt );
-			}
+			if ( error_hard_thread )
+				error_hard( error_hard_msg2, error_hard_msg1, error_hard_msg3, true );
 			else
 			{
-				if ( var != NULL && var->label != NULL )
-					sprintf( msg, "while computing variable '%s' (object '%s') a multi-threading worker crashed", var->label, var->up->label != NULL ? var->up->label : "(none)" );
+				if ( pexcpt != nullptr )
+				{
+					error_hard( err_msg2, err_msg1, err_msg3, true );
+					rethrow_exception( pexcpt );
+				}
 				else
-					sprintf( msg, "multi-threading worker crashed" );
-				
-				error_hard( msg, "parallel computation problem", 
-							"disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
+				{
+					if ( var != NULL && var->label != NULL )
+						sprintf( msg, "while computing variable '%s' (object '%s') a multi-threading worker crashed", var->label, var->up->label != NULL ? var->up->label : "(none)" );
+					else
+						sprintf( msg, "multi-threading worker crashed" );
+					
+					error_hard( msg, "parallel computation problem", 
+								"disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
+				}
 			}
 		}
 	}
@@ -803,7 +876,7 @@ void parallel_update( variable *v, object* p, object *caller )
 		cv = co->search_var( co, v->label );
 		
 		// compute only if not updated
-		if ( cv != NULL && cv->last_update < t )
+		if ( cv != NULL && cv->last_update < t && t >= cv->next_update )
 		{
 			// if no worker available, wait to free existing ones
 			while ( nt >= max_threads )

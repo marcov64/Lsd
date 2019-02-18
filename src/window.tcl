@@ -298,7 +298,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 			$w configure -height $sizeY 
 		}
 		
-		update idletasks
+		update
 		
 		if { ! [ string equal $pos current ] } {
 		
@@ -459,7 +459,7 @@ proc destroytop w {
 proc sizetop { { w all } } {
 	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn
 
-	update idletasks
+	update
 	
 	foreach wnd $wndLst {
 		if { ! [ string compare $w all ] || ! [ string compare $w $wnd ] } {

@@ -100,6 +100,7 @@ int signals[ NUM_SIG ] = { SIGINT, SIGQUIT, SIGTERM, SIGWINCH, SIGABRT, SIGFPE, 
 #define NUM_SIG 6
 int signals[ NUM_SIG ] = { SIGINT, SIGTERM, SIGABRT, SIGFPE, SIGILL, SIGSEGV };
 const char *signal_names[ NUM_SIG ] = { "", "", "", "Floating-point exception", "Illegal instruction", "Segmentation violation", };
+
 const char *strsignal( int signum ) 
 { 
 	int i;
@@ -126,7 +127,7 @@ void signal_handler( int signum )
 	char msg2[ MAX_LINE_SIZE ], msg3[ MAX_LINE_SIZE ];
 	double useless = -1;
 	
-	switch (signum )
+	switch ( signum )
 	{
 #ifdef SIGQUIT
 		case SIGQUIT:
@@ -144,7 +145,7 @@ void signal_handler( int signum )
 		case SIGWINCH:
 #ifndef NO_WINDOW
 			cmd( "sizetop all" );	// readjust windows size/positions
-			cmd( "update idletasks" );
+			cmd( "update" );
 #endif
 			return;
 #endif

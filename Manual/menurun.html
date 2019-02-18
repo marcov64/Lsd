@@ -174,8 +174,8 @@ div.WordSection1
  style='width:69.48%'>
  <tr>
   <td width=343 style='width:257.1pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
-  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><img width=397
-  height=526 src="image/menurun.png"></p>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><img width=321
+  height=397 src="image/menurun.png"></p>
   </td>
   <td width=206 valign=top style='width:154.85pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
@@ -843,7 +843,8 @@ session only.</p>
  </tr>
 </table>
 
-<h1><a name="_Show_elements_run-time"></a>Show elements run-time properties</h1>
+<h1><a name="_Show_elements_run-time"></a><a name=showprop></a>Show elements
+run-time properties</h1>
 
 <p class=MsoNormal>Commands to show the model’s elements which have certain
 flag-properties enabled:</p>
@@ -871,6 +872,15 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><a href="#_Show_Elements_to_4">Show Elements to Parallelize</a></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Show_Elements_to_5">Show Elements to Special Updating</a></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Show_Elements_to_6">Show Elements to Sensitivity
+Analysis</a></p>
 
 <h2><a name=showsave></a><a name=sobs></a><a name="_Show_Elements_to"></a><a
 name=sinit></a>Show Elements to Save</h2>
@@ -904,8 +914,8 @@ set on.</p>
 
 <p class=MsoNormal>Print in the <a href="LSD_windows.html#log">LSD Log</a> the
 list of <a href="LSD_faqs.html#variable">lagged Variables</a> and <a
-href="LSD_faqs.html#parameter">Parameters</a> whose initial values deserve special
-attention, as marked by the modeler. These are the elements with the <a
+href="LSD_faqs.html#parameter">Parameters</a> whose initial values deserve
+special attention, as marked by the modeler. These are the elements with the <a
 href="browser.html#variables">option</a> <span class=Cdigo>Initialized</span>
 set on. The modeler indicates with this option that these elements affect the
 results in a relevant manner. In fact, there are usually Parameters and lagged
@@ -930,7 +940,16 @@ href="LSD_faqs.html#simulationrun">simulation run</a>. These are the elements
 with the <a href="browser.html#variables">option</a> <span class=Cdigo>Parallel</span>
 set on.</p>
 
-<h2>Show Elements to Sensitivity Analysis</h2>
+<h2><a name="_Show_Elements_to_5"></a>Show Elements to Special Updating</h2>
+
+<p class=MsoNormal>Print in the <a href="LSD_windows.html#log">LSD Log</a> the
+list of the <a href="LSD_faqs.html#variable">Variables</a> set with a
+special/non-default updating scheme, which are not computed in every time step
+of a <a href="LSD_faqs.html#simulationrun">simulation run</a>. These are the
+Variables configured using the <span class=Cdigo><a href="browser.html#updating">Updating</a></span>
+option.</p>
+
+<h2><a name="_Show_Elements_to_6"></a>Show Elements to Sensitivity Analysis</h2>
 
 <p class=MsoNormal>Print in the <a href="LSD_windows.html#log">LSD Log</a> the
 list of the <a href="LSD_faqs.html#variable">Variables</a> and <a

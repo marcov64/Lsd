@@ -47,7 +47,7 @@ The widget of importance are:
 *************************************************************/
 
 /*****
-used up to 87 options
+used up to 88 options
 *******/
 
 #include <tk.h>
@@ -254,7 +254,7 @@ if ( choice )
 				cd \"$RootLsd/../../..\"; \
 				set RootLsd \"[ pwd ]\" \
 			} { \
-				unset RootLsd; \
+				unset -nocomplain RootLsd; \
 				set choice 1 \
 			} \
 		}" );
@@ -433,90 +433,178 @@ cmd( "menu .m -tearoff 0" );
 cmd( "set w .m.file" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label File -menu $w -underline 0" );
-cmd( "$w add command -label \"New Model/Group...\" -underline 0 -command { set choice 14}" );	// entryconfig 0
-cmd( "$w add command -label \"Browse Models...\" -underline 0 -command {set choice 33} -accelerator Ctrl+b" );	// entryconfig 1
-cmd( "$w add command -label \"Save Model\" -underline 0 -state disabled -command { if {[string length \"$filename\"] > 0} {if { [file exist \"$dirname/$filename\"] == 1} {catch {file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\"}}; set f [open \"$dirname/$filename\" w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} } -underline 0 -accelerator Ctrl+s" );	// entryconfig 2
-cmd( "$w add command -label \"Save Model As...\" -state disabled -underline 0 -command { set choice 41} -underline 11 -accelerator Ctrl+a" );	// entryconfig 3
+cmd( "$w add command -label \"New Model/Group...\" -underline 0 -command { set choice 14 }" );	// entryconfig 0
+cmd( "$w add command -label \"Browse Models...\" -underline 0 -command { set choice 33 } -accelerator Ctrl+b" );	// entryconfig 1
+cmd( "$w add command -label \"Save Model\" -underline 0 -state disabled -command { \
+		if { [ string length \"$filename\" ] > 0 } { \
+			if [ file exist \"$dirname/$filename\" ] { \
+				catch { \
+					file copy -force \"$dirname/$filename\" \"$dirname/[ file rootname \"$filename\" ].bak\" \
+				} \
+			}; \
+			set f [ open \"$dirname/$filename\" w ]; \
+			puts -nonewline $f [ .f.t.t get 0.0 end ]; \
+			close $f; \
+			set before [ .f.t.t get 0.0 end ]; \
+			set choice 999 \
+		} \
+	} -underline 0 -accelerator Ctrl+s" );	// entryconfig 2
+cmd( "$w add command -label \"Save Model As...\" -state disabled -underline 0 -command { set choice 41 } -underline 11 -accelerator Ctrl+a" );	// entryconfig 3
 cmd( "$w add separator" );	// entryconfig 4
-cmd( "$w add command -label \"Compare Models...\" -underline 3 -command {set choice 61} -underline 0" );
-cmd( "$w add command -label \"TkDiff...\" -command {set choice 57} -underline 0" );
+cmd( "$w add command -label \"Compare Models...\" -underline 3 -command { set choice 61 } -underline 0" );
+cmd( "$w add command -label \"TkDiff...\" -command { set choice 57 } -underline 0" );
 cmd( "$w add separator" );
 
-cmd( "if { $showFileCmds == 1 } { $w add command -label \"New Text File\" -command { set choice 39} -underline 4 }" );
-cmd( "if { $showFileCmds == 1 } { $w add command -label \"Open Text File...\" -command { set choice 15} -underline 0 -accelerator Ctrl+o }" );
-cmd( "if { $showFileCmds == 1 } { $w add command -label \"Save Text File\" -command { if {[string length \"$filename\"] > 0} {if { [file exist \"$dirname/$filename\"] == 1} {catch {file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\"}} {}; set f [open \"$dirname/$filename\" w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} {}} -underline 2 }" );
-cmd( "if { $showFileCmds == 1 } { $w add command -label \"Save Text File As...\" -command {set choice 4} -underline 3 }" );
+cmd( "if { $showFileCmds == 1 } { $w add command -label \"New Text File\" -command { set choice 39 } -underline 4 }" );
+cmd( "if { $showFileCmds == 1 } { $w add command -label \"Open Text File...\" -command { set choice 15 } -underline 0 -accelerator Ctrl+o }" );
+cmd( "if { $showFileCmds == 1 } { \
+		$w add command -label \"Save Text File\" -command { \
+			if { [ string length \"$filename\" ] > 0 } { \
+				if [ file exist \"$dirname/$filename\" ] { \
+					catch { \
+						file copy -force \"$dirname/$filename\" \"$dirname/[ file rootname \"$filename\" ].bak\" \
+					} \
+				}; \
+				set f [ open \"$dirname/$filename\" w ]; \
+				puts -nonewline $f [ .f.t.t get 0.0 end ]; \
+				close $f; \
+				set before [ .f.t.t get 0.0 end ]; \
+				set choice 999 \
+			} \
+		} -underline 2 }" );
+cmd( "if { $showFileCmds == 1 } { $w add command -label \"Save Text File As...\" -command { set choice 4 } -underline 3 }" );
 cmd( "if { $showFileCmds == 1 } { $w add separator }" );
 
 cmd( "$w add command -label \"Options...\" -command { set choice 60 } -underline 1" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"Quit\" -command {set choice 1} -underline 0 -accelerator Ctrl+q" );
+cmd( "$w add command -label \"Quit\" -command { set choice 1 } -underline 0 -accelerator Ctrl+q" );
 
 cmd( "set w .m.edit" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label Edit -menu $w -underline 0" );
 // make menu the same as ctrl-z/y (more color friendly)
-cmd( "$w add command -label Undo -command { catch { savCurIni; .f.t.t edit undo; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } } -underline 0 -accelerator Ctrl+z" );	// entryconfig 0
-cmd( "$w add command -label Redo -command { catch { savCurIni; .f.t.t edit redo; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } } -underline 2 -accelerator Ctrl+y" );	// entryconfig 1
+cmd( "$w add command -label Undo -command { \
+		catch { \
+			savCurIni; \
+			.f.t.t edit undo; \
+			if [ .f.t.t edit modified ] { \
+				savCurFin; \
+				set choice 23 \
+			}; \
+			updCurWnd \
+		} \
+	} -underline 0 -accelerator Ctrl+z" );	// entryconfig 0
+cmd( "$w add command -label Redo -command { \
+		catch { \
+			savCurIni; \
+			.f.t.t edit redo; \
+			if [ .f.t.t edit modified ] { \
+				savCurFin; \
+				set choice 23 \
+			}; \
+			updCurWnd \
+		} \
+	} -underline 2 -accelerator Ctrl+y" );	// entryconfig 1
 cmd( "$w add separator" );	// entryconfig 2
 // collect information to focus recoloring
-cmd( "$w add command -label Cut -command { savCurIni; tk_textCut .f.t.t; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } -underline 1 -accelerator Ctrl+x" );	// entryconfig 3
+cmd( "$w add command -label Cut -command { \
+		savCurIni; \
+		tk_textCut .f.t.t; \
+		if [ .f.t.t edit modified ] { \
+			savCurFin; \
+			set choice 23 \
+		}; \
+		updCurWnd \
+	} -underline 1 -accelerator Ctrl+x" );	// entryconfig 3
 cmd( "$w add command -label Copy -command { tk_textCopy .f.t.t } -underline 0 -accelerator Ctrl+c" );	// entryconfig 4
-cmd( "$w add command -label Paste -command { savCurIni; tk_textPaste .f.t.t; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } -underline 0 -accelerator Ctrl+v" );	// entryconfig 5
-cmd( "$w add command -label Delete -command { savCurIni; if { [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { .f.t.t delete insert } { .f.t.t delete sel.first sel.last }; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } -accelerator Del" );	// entryconfig 6
+cmd( "$w add command -label Paste -command { \
+		savCurIni; \
+		tk_textPaste .f.t.t; \
+		if [ .f.t.t edit modified ] { \
+			savCurFin; \
+			set choice 23 \
+		}; \
+		updCurWnd \
+	} -underline 0 -accelerator Ctrl+v" );	// entryconfig 5
+cmd( "$w add command -label Delete -command { \
+		savCurIni; \
+		if [ string equal [ .f.t.t tag ranges sel ] \"\" ] { \
+			.f.t.t delete insert \
+		} { \
+			.f.t.t delete sel.first sel.last \
+		}; \
+		if [ .f.t.t edit modified ] { \
+			savCurFin; \
+			set choice 23 \
+		}; \
+		updCurWnd \
+	} -accelerator Del" );	// entryconfig 6
 cmd( "$w add separator" );
-cmd( "$w add command -label \"Find...\" -command {set choice 11} -underline 0 -accelerator Ctrl+f" );
-cmd( "$w add command -label \"Find Again\" -command {set choice 12} -underline 5 -accelerator F3" );
-cmd( "$w add command -label \"Replace...\" -command {set choice 21} -underline 0" );
-cmd( "$w add command -label \"Go to Line...\" -command {set choice 10} -underline 5 -accelerator Ctrl+l" );
+cmd( "$w add command -label \"Find...\" -command { set choice 11 } -underline 0 -accelerator Ctrl+f" );
+cmd( "$w add command -label \"Find Again\" -command { set choice 12 } -underline 5 -accelerator F3" );
+cmd( "$w add command -label \"Find Backwards\" -command { set choice 88 } -underline 5 -accelerator Ctrl+F3" );
+cmd( "$w add command -label \"Replace...\" -command { set choice 21 } -underline 0" );
+cmd( "$w add command -label \"Go to Line...\" -command { set choice 10 } -underline 6 -accelerator Ctrl+l" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"Match \\\{ \\}\" -command {set choice 17} -accelerator Ctrl+m" );
-cmd( "$w add command -label \"Match \\\( \\)\" -command {set choice 32} -accelerator Ctrl+u" );
-cmd( "$w add command -label \"Insert \\\{\" -command {.f.t.t insert insert \\\{} -accelerator Ctrl+\\\(" );
-cmd( "$w add command -label \"Insert \\}\" -command {.f.t.t insert insert \\}} -accelerator Ctrl+\\)" );
+cmd( "$w add command -label \"Match \\\{ \\}\" -command { set choice 17 } -accelerator Ctrl+m" );
+cmd( "$w add command -label \"Match \\\( \\)\" -command { set choice 32 } -accelerator Ctrl+u" );
+cmd( "$w add command -label \"Insert \\\{\" -command { .f.t.t insert insert \\\{ } -accelerator Ctrl+\\\(" );
+cmd( "$w add command -label \"Insert \\}\" -command { .f.t.t insert insert \\} } -accelerator Ctrl+\\)" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"Indent\" -command {set choice 42} -accelerator Ctrl+>" );
-cmd( "$w add command -label \"De-indent\" -command {set choice 43} -accelerator Ctrl+<" );
+cmd( "$w add command -label \"Indent\" -command { set choice 42 } -accelerator Ctrl+>" );
+cmd( "$w add command -label \"De-indent\" -command { set choice 43 } -accelerator Ctrl+<" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"Larger Font\" -command {incr dim_character 1; set a [list \"$fonttype\" $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'+'" );
-cmd( "$w add command -label \"Smaller Font\" -command {incr dim_character -1; set a [list \"$fonttype\" $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'-'" );
-cmd( "$w add command -label \"Font...\" -command {set choice 59} -underline 8" );
+cmd( "$w add command -label \"Larger Font\" -command { \
+		incr dim_character 1; \
+		set a [ list \"$fonttype\" $dim_character ]; \
+		.f.t.t conf -font \"$a\"; \
+		settab .f.t.t $tabsize \"$a\" \
+	} -accelerator Ctrl+'+'" );
+cmd( "$w add command -label \"Smaller Font\" -command { \
+		incr dim_character -1; \
+		set a [ list \"$fonttype\" $dim_character ]; \
+		.f.t.t conf -font \"$a\"; \
+		settab .f.t.t $tabsize \"$a\" \
+	} -accelerator Ctrl+'-'" );
+cmd( "$w add command -label \"Font...\" -command { set choice 59 } -underline 8" );
 cmd( "$w add separator" );
 // add option to ajust syntax highlighting (word coloring)
 cmd( "$w add cascade -label \"Syntax Highlighting\" -menu $w.color -underline 0" );
 cmd( "$w add check -label \"Wrap/Unwrap\" -variable wrap -command { setwrap .f.t.t $wrap } -underline 1 -accelerator Ctrl+w " );
-cmd( "$w add command -label \"Tab Size...\" -command {set choice 67} -underline 7" );
-cmd( "$w add command -label \"Insert LSD Macro...\" -command {set choice 28} -underline 0 -accelerator Ctrl+i" );
+cmd( "$w add command -label \"Tab Size...\" -command { set choice 67 } -underline 7" );
+cmd( "$w add command -label \"Insert LSD Macro...\" -command { set choice 28 } -underline 0 -accelerator Ctrl+i" );
 
 cmd( "menu $w.color -tearoff 0" );
-cmd( "$w.color add radio -label \" Full\" -variable shigh -value 2 -command {set choice 64} -underline 1 -accelerator \"Ctrl+;\"" );
-cmd( "$w.color add radio -label \" Partial\" -variable shigh -value 1 -command {set choice 65} -underline 1 -accelerator Ctrl+," );
-cmd( "$w.color add radio -label \" None\" -variable shigh -value 0 -command {set choice 66} -underline 1 -accelerator Ctrl+." );
+cmd( "$w.color add radio -label \" Full\" -variable shigh -value 2 -command { set choice 64 } -underline 1 -accelerator \"Ctrl+;\"" );
+cmd( "$w.color add radio -label \" Partial\" -variable shigh -value 1 -command { set choice 65 } -underline 1 -accelerator Ctrl+," );
+cmd( "$w.color add radio -label \" None\" -variable shigh -value 0 -command { set choice 66 } -underline 1 -accelerator Ctrl+." );
 
 cmd( "set w .m.model" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label Model -menu $w -underline 0" );
-cmd( "$w add command -label \"Compile and Run...\" -state disabled -underline 0 -command {set choice 2} -accelerator Ctrl+r" );	// entryconfig 0
+cmd( "$w add command -label \"Compile and Run...\" -state disabled -underline 0 -command { set choice 2 } -accelerator Ctrl+r" );	// entryconfig 0
 cmd( "$w add command -label \"Recompile\" -state disabled -underline 0 -command {set choice 6} -accelerator Ctrl+p" );	// entryconfig 1
-cmd( "$w add command -label \"[ string toupper $DbgExe ] Debugger\" -state disabled -underline 0 -command {set choice 13} -accelerator Ctrl+g" );	// entryconfig 2
-cmd( "$w add command -label \"Create 'No Window' Version\" -underline 8 -state disabled -command {set choice 62}" );	// entryconfig 3
-cmd( "$w add command -label \"Model Info...\" -underline 6 -state disabled -command {set choice 44}" );	// entryconfig 4
+cmd( "$w add command -label \"[ string toupper $DbgExe ] Debugger\" -state disabled -underline 0 -command { set choice 13 } -accelerator Ctrl+g" );	// entryconfig 2
+cmd( "$w add command -label \"Create 'No Window' Version\" -underline 8 -state disabled -command { set choice 62 }" );	// entryconfig 3
+cmd( "$w add command -label \"Model Info...\" -underline 6 -state disabled -command { set choice 44 }" );	// entryconfig 4
 cmd( "$w add separator" );	// entryconfig 5
-cmd( "$w add command -label \"Show Description\" -underline 5 -state disabled -command {set choice 5} -accelerator Ctrl+d" );	// entryconfig 6
-cmd( "$w add command -label \"Show Equations\" -state disabled -underline 5 -command {set choice 8} -accelerator Ctrl+e" );	// entryconfig 7
-cmd( "$w add command -label \"Show Extra Files...\" -state disabled -underline 6 -command {set choice 70} -accelerator Ctrl+j" );	// entryconfig 8
-cmd( "$w add command -label \"Show Make File\" -state disabled -underline 7 -command { set choice 3}" );	// entryconfig 9
-cmd( "$w add command -label \"Show Compilation Errors\" -underline 6 -state disabled -command {set choice 7}" );	// entryconfig 10
+cmd( "$w add command -label \"Show Description\" -underline 5 -state disabled -command { set choice 5 } -accelerator Ctrl+d" );	// entryconfig 6
+cmd( "$w add command -label \"Show Equations\" -state disabled -underline 5 -command { set choice 8 } -accelerator Ctrl+e" );	// entryconfig 7
+cmd( "$w add command -label \"Show Extra Files...\" -state disabled -underline 6 -command { set choice 70 } -accelerator Ctrl+j" );	// entryconfig 8
+cmd( "$w add command -label \"Show Make File\" -state disabled -underline 7 -command { set choice 3 }" );	// entryconfig 9
+cmd( "$w add command -label \"Show Compilation Errors\" -underline 6 -state disabled -command { set choice 7 }" );	// entryconfig 10
 cmd( "$w add separator" );	// entryconfig 11
-cmd( "$w add command -label \"Model Options...\" -underline 4 -state disabled -command {set choice 48}" );	// entryconfig 12
-cmd( "$w add command -label \"System Options...\" -underline 0 -command {set choice 47}" );	// entryconfig 13
+cmd( "$w add command -label \"Model Options...\" -underline 4 -state disabled -command { set choice 48 }" );	// entryconfig 12
+cmd( "$w add command -label \"System Options...\" -underline 0 -command { set choice 47 }" );	// entryconfig 13
 cmd( "$w add separator" );	// entryconfig 14
 cmd( "$w add check -label \"Auto-hide LMM\" -variable autoHide -underline 0" );	// entryconfig 15
 cmd( "$w add cascade -label \"Equation Code Style\" -underline 1 -menu $w.macro" );	// entryconfig 16
 
 cmd( "menu $w.macro -tearoff 0" );
-cmd( "$w.macro add radio -label \"Use LSD Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for LSD Equations\" -underline 6 -command {LsdHelp LSD_macros.html}; set choice 68}" );
-cmd( "$w.macro add radio -label \"Use LSD C++ functions\" -variable macro -value 0 -command {.m.help entryconf 1 -label \"Help on C++ for LSD Equations\" -underline 8 -command {LsdHelp LSD_functions.html}; set choice 69}" );
+cmd( "$w.macro add radio -label \"Use LSD Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for LSD Equations\" -underline 6 -command { LsdHelp LSD_macros.html }; set choice 68}" );
+cmd( "$w.macro add radio -label \"Use LSD C++ functions\" -variable macro -value 0 -command { \
+		.m.help entryconf 1 -label \"Help on C++ for LSD Equations\" -underline 8 -command { LsdHelp LSD_functions.html }; set choice 69 \
+	}" );
 
 cmd( "set w .m.help" );
 cmd( "menu $w -tearoff 0" );
@@ -546,67 +634,73 @@ cmd( "button .bbar.redo -image redoImg -relief $bRlf -overrelief $ovBrlf -comman
 cmd( "button .bbar.cut -image cutImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 3 }" );
 cmd( "button .bbar.copy -image copyImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 4 }" );
 cmd( "button .bbar.paste -image pasteImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 5 }" );
-cmd( "button .bbar.find -image findImg -relief $bRlf -overrelief $ovBrlf -command {set choice 11}" );
-cmd( "button .bbar.replace -image replaceImg -relief $bRlf -overrelief $ovBrlf -command {set choice 21}" );
-cmd( "button .bbar.indent -image indentImg -relief $bRlf -overrelief $ovBrlf -command {set choice 42}" );
-cmd( "button .bbar.deindent -image deindentImg -relief $bRlf -overrelief $ovBrlf -command {set choice 43}" );
+cmd( "button .bbar.find -image findImg -relief $bRlf -overrelief $ovBrlf -command { set choice 11 }" );
+cmd( "button .bbar.replace -image replaceImg -relief $bRlf -overrelief $ovBrlf -command { set choice 21 }" );
+cmd( "button .bbar.indent -image indentImg -relief $bRlf -overrelief $ovBrlf -command { set choice 42 }" );
+cmd( "button .bbar.deindent -image deindentImg -relief $bRlf -overrelief $ovBrlf -command { set choice 43 }" );
 cmd( "button .bbar.wrap -image wrapImg -relief $bRlf -overrelief $ovBrlf -command { if { $wrap == 0 } { set wrap 1 } { set wrap 0 }; setwrap .f.t.t $wrap }" );
-cmd( "button .bbar.compile -image compileImg -relief $bRlf -overrelief $ovBrlf -command {set choice 6}" );
-cmd( "button .bbar.comprun -image comprunImg -relief $bRlf -overrelief $ovBrlf -command {set choice 2}" );
-cmd( "button .bbar.gdb -image gdbImg -relief $bRlf -overrelief $ovBrlf -command {set choice 13}" );
-cmd( "button .bbar.info -image infoImg -relief $bRlf -overrelief $ovBrlf -command {set choice 44}" );
-cmd( "button .bbar.descr -image descrImg -relief $bRlf -overrelief $ovBrlf -command {set choice 5}" );
-cmd( "button .bbar.equation -image equationImg -relief $bRlf -overrelief $ovBrlf -command {set choice 8}" );
-cmd( "button .bbar.extra -image extraImg -relief $bRlf -overrelief $ovBrlf -command {set choice 70}" );
-cmd( "button .bbar.set -image setImg -relief $bRlf -overrelief $ovBrlf -command {set choice 48}" );
-cmd( "button .bbar.hide -image hideImg -relief $bRlf -overrelief $ovBrlf -command {set autoHide [ expr ! $autoHide ]}" );
-cmd( "button .bbar.help -image helpImg -relief $bRlf -overrelief $ovBrlf -command {LsdHelp LSD_macros.html}" );
-cmd( "label .bbar.tip -textvariable ttip -font {Arial 8} -fg gray -width 30 -anchor w" );
+cmd( "button .bbar.compile -image compileImg -relief $bRlf -overrelief $ovBrlf -command { set choice 6 }" );
+cmd( "button .bbar.comprun -image comprunImg -relief $bRlf -overrelief $ovBrlf -command { set choice 2 }" );
+cmd( "button .bbar.gdb -image gdbImg -relief $bRlf -overrelief $ovBrlf -command { set choice 13 }" );
+cmd( "button .bbar.info -image infoImg -relief $bRlf -overrelief $ovBrlf -command { set choice 44 }" );
+cmd( "button .bbar.descr -image descrImg -relief $bRlf -overrelief $ovBrlf -command { set choice 5 }" );
+cmd( "button .bbar.equation -image equationImg -relief $bRlf -overrelief $ovBrlf -command { set choice 8 }" );
+cmd( "button .bbar.extra -image extraImg -relief $bRlf -overrelief $ovBrlf -command { set choice 70 }" );
+cmd( "button .bbar.set -image setImg -relief $bRlf -overrelief $ovBrlf -command { set choice 48 }" );
+cmd( "button .bbar.hide -image hideImg -relief $bRlf -overrelief $ovBrlf -command { set autoHide [ expr ! $autoHide ] }" );
+cmd( "button .bbar.help -image helpImg -relief $bRlf -overrelief $ovBrlf -command { LsdHelp LSD_macros.html }" );
+cmd( "label .bbar.tip -textvariable ttip -font { Arial 8 } -fg gray -width 30 -anchor w" );
 
-cmd( "bind .bbar.open <Enter> {set ttip \"Browse models...\"}" );
-cmd( "bind .bbar.open <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.save <Enter> {set ttip \"Save model\"}" );
-cmd( "bind .bbar.save <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.undo <Enter> {set ttip \"Undo\"}" );
-cmd( "bind .bbar.undo <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.redo <Enter> {set ttip \"Redo\"}" );
-cmd( "bind .bbar.redo <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.cut <Enter> {set ttip \"Cut\"}" );
-cmd( "bind .bbar.cut <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.copy <Enter> {set ttip \"Copy\"}" );
-cmd( "bind .bbar.copy <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.paste <Enter> {set ttip \"Paste\"}" );
-cmd( "bind .bbar.paste <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.find <Enter> {set ttip \"Find...\"}" );
-cmd( "bind .bbar.find <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.replace <Enter> {set ttip \"Replace...\"}" );
-cmd( "bind .bbar.replace <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.indent <Enter> {set ttip \"Indent selection\"}" );
-cmd( "bind .bbar.indent <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.deindent <Enter> {set ttip \"De-indent selection\"}" );
-cmd( "bind .bbar.deindent <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.wrap <Enter> {set ttip \"Wrap lines\"}" );
-cmd( "bind .bbar.wrap <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.compile <Enter> {set ttip \"Recompile model\"}" );
-cmd( "bind .bbar.compile <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.comprun <Enter> {set ttip \"Compile and run model...\"}" );
-cmd( "bind .bbar.comprun <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.gdb <Enter> {set ttip \"Run in [ string toupper $DbgExe ] debugger\"}" );
-cmd( "bind .bbar.gdb <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.info <Enter> {set ttip \"Model information...\"}" );
-cmd( "bind .bbar.info <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.descr <Enter> {set ttip \"Show description\"}" );
-cmd( "bind .bbar.descr <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.equation <Enter> {set ttip \"Show equations\"}" );
-cmd( "bind .bbar.equation <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.extra <Enter> {set ttip \"Show extra files...\"}" );
-cmd( "bind .bbar.extra <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.set <Enter> {set ttip \"Model compilation options...\"}" );
-cmd( "bind .bbar.set <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.hide <Enter> {if $autoHide {set ttip \"Not auto-hide LMM\"} {set ttip \"Auto-hide LMM\"}}" );
-cmd( "bind .bbar.hide <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.help <Enter> {set ttip \"Help on macros for LSD equations\"}" );
-cmd( "bind .bbar.help <Leave> {set ttip \"\"}" );
+cmd( "bind .bbar.open <Enter> { set ttip \"Browse models...\" }" );
+cmd( "bind .bbar.open <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.save <Enter> { set ttip \"Save model\" }" );
+cmd( "bind .bbar.save <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.undo <Enter> { set ttip \"Undo\" }" );
+cmd( "bind .bbar.undo <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.redo <Enter> { set ttip \"Redo\" }" );
+cmd( "bind .bbar.redo <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.cut <Enter> { set ttip \"Cut\" }" );
+cmd( "bind .bbar.cut <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.copy <Enter> { set ttip \"Copy\" }" );
+cmd( "bind .bbar.copy <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.paste <Enter> { set ttip \"Paste\" }" );
+cmd( "bind .bbar.paste <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.find <Enter> { set ttip \"Find...\" }" );
+cmd( "bind .bbar.find <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.replace <Enter> { set ttip \"Replace...\" }" );
+cmd( "bind .bbar.replace <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.indent <Enter> { set ttip \"Indent selection\" }" );
+cmd( "bind .bbar.indent <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.deindent <Enter> { set ttip \"De-indent selection\" }" );
+cmd( "bind .bbar.deindent <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.wrap <Enter> { set ttip \"Wrap lines\" }" );
+cmd( "bind .bbar.wrap <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.compile <Enter> { set ttip \"Recompile model\" }" );
+cmd( "bind .bbar.compile <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.comprun <Enter> { set ttip \"Compile and run model...\" }" );
+cmd( "bind .bbar.comprun <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.gdb <Enter> { set ttip \"Run in [ string toupper $DbgExe ] debugger\" }" );
+cmd( "bind .bbar.gdb <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.info <Enter> { set ttip \"Model information...\" }" );
+cmd( "bind .bbar.info <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.descr <Enter> { set ttip \"Show description\" }" );
+cmd( "bind .bbar.descr <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.equation <Enter> { set ttip \"Show equations\" }" );
+cmd( "bind .bbar.equation <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.extra <Enter> { set ttip \"Show extra files...\" }" );
+cmd( "bind .bbar.extra <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.set <Enter> { set ttip \"Model compilation options...\" }" );
+cmd( "bind .bbar.set <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.hide <Enter> { \
+		if $autoHide { \
+			set ttip \"Not auto-hide LMM\" \
+		} { \
+			set ttip \"Auto-hide LMM\" \
+		} \
+	}" );
+cmd( "bind .bbar.hide <Leave> { set ttip \"\" }" );
+cmd( "bind .bbar.help <Enter> { set ttip \"Help on macros for LSD equations\" }" );
+cmd( "bind .bbar.help <Leave> { set ttip \"\" }" );
 
 cmd( "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.wrap .bbar.compile .bbar.comprun .bbar.gdb .bbar.info .bbar.descr .bbar.equation .bbar.extra .bbar.set .bbar.hide .bbar.help .bbar.tip -padx 3 -side left" );
 cmd( "pack .bbar -anchor w -fill x" );
@@ -616,10 +710,10 @@ cmd( "frame .f.t" );
 cmd( "scrollbar .f.t.vs -command \".f.t.t yview\"" );
 cmd( "scrollbar .f.t.hs -orient horiz -command \".f.t.t xview\"" );
 cmd( "text .f.t.t -undo 1 -height 2 -autoseparators 1 -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\"" );
-cmd( "set a [.f.t.t conf -font]" );
-cmd( "set b [lindex $a 3]" );
-cmd( "if {$dim_character == 0} {set dim_character [lindex $b 1]}" );
-cmd( "if {$dim_character == \"\"} {set dim_character $DefaultFontSize}" );
+cmd( "set a [ .f.t.t conf -font ]" );
+cmd( "set b [ lindex $a 3 ]" );
+cmd( "if { $dim_character == 0 } { set dim_character [ lindex $b 1 ] }" );
+cmd( "if { $dim_character == \"\" } { set dim_character $DefaultFontSiz e }" );
 cmd( "set a [ list \"$fonttype\" $dim_character ]" );
 // set preferred tab size and wrap option
 cmd( "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
@@ -660,13 +754,13 @@ cmd( "label .f.hea.file.dat -text \"(no file)\" -fg red" );
 cmd( "pack .f.hea.file.tit .f.hea.file.dat -side left" );
 
 cmd( "frame .f.hea.line" );
-cmd( "label .f.hea.line.line -relief sunk -width 12 -text \"[.f.t.t index insert]\"" );
+cmd( "label .f.hea.line.line -relief sunk -width 12 -text \"[ .f.t.t index insert ]\"" );
 cmd( "pack .f.hea.line.line -anchor e -expand no" );
 cmd( "pack .f.hea.grp .f.hea.mod .f.hea.ver .f.hea.file .f.hea.line -side left -expand yes -fill x" );
 
-cmd( "bind .f.hea.line.line <Button-1> {set choice 10}" );
-cmd( "bind .f.hea.line.line <Button-2> {set choice 10}" );
-cmd( "bind .f.hea.line.line <Button-3> {set choice 10}" );
+cmd( "bind .f.hea.line.line <Button-1> { set choice 10 }" );
+cmd( "bind .f.hea.line.line <Button-2> { set choice 10 }" );
+cmd( "bind .f.hea.line.line <Button-3> { set choice 10 }" );
 
 cmd( "pack .f.hea -fill x" );
 cmd( "pack .f.t -expand yes -fill both" );
@@ -675,47 +769,94 @@ cmd( "pack .f.t.t -expand yes -fill both" );
 cmd( "pack .f.t.hs -fill x" );
 
 cmd( "bind . <F1> { .m.help invoke 0; break }" );
-cmd( "bind . <Control-n> {tk_menuSetFocus .m.file}; bind . <Control-N> {tk_menuSetFocus .m.file}" );
+cmd( "bind . <Control-n> { tk_menuSetFocus .m.file}; bind . <Control-N> { tk_menuSetFocus .m.file }" );
 
 // procedures to save cursor environment before and after changes in text window for syntax coloring
-cmd( "proc savCurIni {} {global curSelIni curPosIni; set curSelIni [.f.t.t tag nextrange sel 1.0]; set curPosIni [.f.t.t index insert]; .f.t.t edit modified false}" );
-cmd( "proc savCurFin {} {global curSelFin curPosFin; set curSelFin [.f.t.t tag nextrange sel 1.0]; set curPosFin [.f.t.t index insert]; .f.t.t edit modified false}" );
-cmd( "proc updCurWnd {} {.f.hea.line.line conf -text [.f.t.t index insert]}" );
+cmd( "proc savCurIni { } { \
+		global curSelIni curPosIni; \
+		set curSelIni [ .f.t.t tag nextrange sel 1.0 ]; \
+		set curPosIni [ .f.t.t index insert ]; \
+		.f.t.t edit modified false \
+	}" );
+cmd( "proc savCurFin { } { \
+		global curSelFin curPosFin; \
+		set curSelFin [ .f.t.t tag nextrange sel 1.0 ]; \
+		set curPosFin [.f.t.t index insert]; \
+		.f.t.t edit modified false \
+	}" );
+cmd( "proc updCurWnd { } { .f.hea.line.line conf -text [ .f.t.t index insert ] }" );
 
 // redefine bindings to better support new syntax highlight routine
-cmd( "bind .f.t.t <KeyPress> {savCurIni}" );
-cmd( "bind .f.t.t <KeyRelease> {if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
-cmd( "bind .f.t.t <ButtonPress> {savCurIni}" );
-cmd( "bind .f.t.t <ButtonRelease> {if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
+cmd( "bind .f.t.t <KeyPress> { savCurIni }" );
+cmd( "bind .f.t.t <KeyRelease> { \
+		if [ .f.t.t edit modified ] { \
+			savCurFin; \
+			set choice 23 \
+		}; \
+		updCurWnd \
+	}" );
+cmd( "bind .f.t.t <ButtonPress> { savCurIni }" );
+cmd( "bind .f.t.t <ButtonRelease> { \
+		if [ .f.t.t edit modified ] { \
+			savCurFin; \
+			set choice 23 \
+		}; \
+		updCurWnd \
+	}" );
 
-cmd( "bind .f.t.t <Control-l> {set choice 10}; bind .f.t.t <Control-L> {set choice 10}" );
-cmd( "bind .f.t.t <Control-w> { if { $wrap == 0 } { set wrap 1 } { set wrap 0 }; setwrap .f.t.t $wrap }" );
+cmd( "bind .f.t.t <Control-l> { set choice 10 }; bind .f.t.t <Control-L> { set choice 10 }" );
+cmd( "bind .f.t.t <Control-w> { \
+		if { $wrap == 0 } { \
+			set wrap 1 \
+		} { \
+			set wrap 0 \
+		}; \
+		setwrap .f.t.t $wrap \
+	}" );
 
-cmd( "bind .f.t.t <Control-f> {set choice 11}; bind .f.t.t <Control-F> {set choice 11}" );
-cmd( "bind .f.t.t <F3> {set choice 12}" );
+cmd( "bind .f.t.t <Control-f> { set choice 11 }; bind .f.t.t <Control-F> { set choice 11 }" );
+cmd( "bind .f.t.t <F3> { set choice 12 }" );
+cmd( "bind .f.t.t <Control-F3> { set choice 88 }" );
 cmd( "bind .f.t.t <Control-s> { .m.file invoke 2 }" ); 
 cmd( "bind .f.t.t <Control-a> { set choice 4 }" );
-cmd( "bind .f.t.t <Control-r> {set choice 2}; bind .f.t.t <Control-R> {set choice 2}" );
-cmd( "bind .f.t.t <Control-e> {set choice 8}" );
-cmd( "bind .f.t.t <Control-j> {set choice 70}" );
-cmd( "bind .f.t.t <Control-KeyRelease-o> { if { $tk_strictMotif == 0 } { set a [ .f.t.t index insert ]; .f.t.t delete \"$a lineend\"} {}; if { $showFileCmds == 1 } { set choice 15 }; break }" );
-cmd( "bind .f.t.t <Control-q> {set choice 1}; bind .f.t.t <Control-Q> {set choice 1}" );
-cmd( "bind .f.t.t <Control-p> {set choice 6; break}; bind .f.t.t <Control-P> {set choice 6; break}" );
-cmd( "bind .f.t.t <Control-u> {set choice 32}" );
-cmd( "bind .f.t.t <Control-m> {set choice 17}" );
-cmd( "bind .f.t.t <Control-g> {set choice 13}; bind .f.t.t <Control-G> {set choice 13}" );
-cmd( "bind .f.t.t <Control-d> {set choice 5; break}" );
-cmd( "bind .f.t.t <Control-b> {set choice 33; break}; bind .f.t.t <Control-B> {set choice 33; break}" );
-cmd( "bind .f.t.t <Control-minus> {incr dim_character -2; set a [ list \"$fonttype\" $dim_character ]; .f.t.t conf -font \"$a\"}" );
-cmd( "bind .f.t.t <Control-plus> {incr dim_character 2; set a [ list \"$fonttype\" $dim_character ]; .f.t.t conf -font \"$a\"}" );
-cmd( "bind .f.t.t <Control-parenleft> {.f.t.t insert insert \\{}" );
-cmd( "bind .f.t.t <Control-parenright> {.f.t.t insert insert \\}}" );
-cmd( "bind .f.t.t <Control-greater> {set choice 42}" );
-cmd( "bind .f.t.t <Control-less> {set choice 43}" );
-cmd( "bind .f.t.t <Control-semicolon> {set choice 64}" );
-cmd( "bind .f.t.t <Control-comma> {set choice 65}" );
-cmd( "bind .f.t.t <Control-period> {set choice 66}" );
-cmd( "bind .f.t.t <Alt-q> {.m postcascade 0}; bind .f.t.t <Alt-Q> {.m postcascade 0}" );
+cmd( "bind .f.t.t <Control-r> { set choice 2 }; bind .f.t.t <Control-R> { set choice 2 }" );
+cmd( "bind .f.t.t <Control-e> { set choice 8 }" );
+cmd( "bind .f.t.t <Control-j> { set choice 70 }" );
+cmd( "bind .f.t.t <Control-KeyRelease-o> { \
+		if { $tk_strictMotif == 0 } { \
+			set a [ .f.t.t index insert ]; \
+			.f.t.t delete \"$a lineend\" \
+		}; \
+		if { $showFileCmds == 1 } { \
+			set choice 15 \
+		}; \
+		break \
+	}" );
+cmd( "bind .f.t.t <Control-q> { set choice 1 }; bind .f.t.t <Control-Q> { set choice 1 }" );
+cmd( "bind .f.t.t <Control-p> { set choice 6; break }; bind .f.t.t <Control-P> { set choice 6; break }" );
+cmd( "bind .f.t.t <Control-u> { set choice 32 }" );
+cmd( "bind .f.t.t <Control-m> { set choice 17 }" );
+cmd( "bind .f.t.t <Control-g> { set choice 13 }; bind .f.t.t <Control-G> { set choice 13 }" );
+cmd( "bind .f.t.t <Control-d> { set choice 5; break }" );
+cmd( "bind .f.t.t <Control-b> { set choice 33; break }; bind .f.t.t <Control-B> { set choice 33; break }" );
+cmd( "bind .f.t.t <Control-minus> { \
+		incr dim_character -2; \
+		set a [ list \"$fonttype\" $dim_character ]; \
+		.f.t.t conf -font \"$a\" \
+	}" );
+cmd( "bind .f.t.t <Control-plus> { \
+		incr dim_character 2; \
+		set a [ list \"$fonttype\" $dim_character ]; \
+		.f.t.t conf -font \"$a\" \
+	}" );
+cmd( "bind .f.t.t <Control-parenleft> { .f.t.t insert insert \\{ }" );
+cmd( "bind .f.t.t <Control-parenright> { .f.t.t insert insert \\} }" );
+cmd( "bind .f.t.t <Control-greater> { set choice 42 }" );
+cmd( "bind .f.t.t <Control-less> { set choice 43 }" );
+cmd( "bind .f.t.t <Control-semicolon> { set choice 64 }" );
+cmd( "bind .f.t.t <Control-comma> { set choice 65 }" );
+cmd( "bind .f.t.t <Control-period> { set choice 66 }" );
+cmd( "bind .f.t.t <Alt-q> { .m postcascade 0 }; bind .f.t.t <Alt-Q> { .m postcascade 0 }" );
 
 // redefine the default Tk bindings adding "break" to avoid further event processing
 cmd( "bind .f.t.t <Control-z> { .m.edit invoke 0; break }; bind .f.t.t <Control-Z> { event generate .f.t.t <Control-z> }" );
@@ -724,11 +865,25 @@ cmd( "bind .f.t.t <Control-x> { .m.edit invoke 3; break }; bind .f.t.t <Control-
 cmd( "bind .f.t.t <Control-c> { .m.edit invoke 4; break }" );
 cmd( "bind .f.t.t <Control-v> { .m.edit invoke 5; break }" );
 cmd( "bind .f.t.t <Delete> { .m.edit invoke 6; break }" );
-cmd( "bind .f.t.t <BackSpace> { savCurIni; if { [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { if { ! [ string equal [ .f.t.t index insert ] 1.0 ] } { .f.t.t delete insert-1c } } { .f.t.t delete sel.first sel.last }; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd; break }" );
+cmd( "bind .f.t.t <BackSpace> { \
+		savCurIni; \
+		if [ string equal [ .f.t.t tag ranges sel ] \"\" ] { \
+			if { ! [ string equal [ .f.t.t index insert ] 1.0 ] } { \
+				.f.t.t delete insert-1c \
+			} \
+		} { \
+			.f.t.t delete sel.first sel.last \
+		}; \
+		if [ .f.t.t edit modified ] { \
+			savCurFin; set choice 23 \
+		}; \
+		updCurWnd; \
+		break \
+	}" );
 cmd( "if [ string equal $tcl_platform(platform) unix ] { bind .f.t.t <Control-Insert> { .m.edit invoke 4; break } }" );
 cmd( "if [ string equal $tcl_platform(platform) unix ] { bind .f.t.t <Shift-Insert> { .m.edit invoke 5; break } }" );
 
-cmd( "bind . <KeyPress-Insert> {# nothing}" );
+cmd( "bind . <KeyPress-Insert> { # nothing }" );
 cmd( "bind .f.t.t <KeyPress-Return> {+set choice 16}" );
 cmd( "bind .f.t.t <KeyRelease-space> {+.f.t.t edit separator}" );
 
@@ -737,22 +892,30 @@ POPUP menu
 */
 cmd( "menu .v -tearoff 0" );
 
-cmd( "bind .f.t.t  <3> {%%W mark set insert [.f.t.t index @%%x,%%y]; set vmenuInsert [.f.t.t index insert]; tk_popup .v %%X %%Y}" );
-cmd( "bind .f.t.t  <2> {%%W mark set insert [.f.t.t index @%%x,%%y]; set vmenuInsert [.f.t.t index insert]; tk_popup .v %%X %%Y}" );
-cmd( ".v add command -label \"Copy\" -command {tk_textCopy .f.t.t}" );
-cmd( ".v add command -label \"Cut\" -command {tk_textCut .f.t.t}" );
-cmd( ".v add command -label \"Paste\" -command {tk_textPaste .f.t.t}" );
+cmd( "bind .f.t.t <3> { \
+		%%W mark set insert [ .f.t.t index @%%x,%%y ]; \
+		set vmenuInsert [ .f.t.t index insert ]; \
+		tk_popup .v %%X %%Y \
+	}" );
+cmd( "bind .f.t.t <2> { \
+		%%W mark set insert [ .f.t.t index @%%x,%%y ]; \
+		set vmenuInsert [ .f.t.t index insert ]; \
+		tk_popup .v %%X %%Y \
+	}" );
+cmd( ".v add command -label \"Copy\" -command { tk_textCopy .f.t.t }" );
+cmd( ".v add command -label \"Cut\" -command { tk_textCut .f.t.t }" );
+cmd( ".v add command -label \"Paste\" -command { tk_textPaste .f.t.t }" );
 
 cmd( ".v add separator" );
 cmd( ".v add cascade -label \"LSD Macro\" -menu .v.i" );
-cmd( ".v add command -label \"Indent Selection\" -command {set choice 42}" );
-cmd( ".v add command -label \"De-indent Selection\" -command {set choice 43}" );
-cmd( ".v add command -label \"Place Break & Run [ string toupper $DbgExe ]\" -command {set choice 58}" );
+cmd( ".v add command -label \"Indent Selection\" -command { set choice 42 }" );
+cmd( ".v add command -label \"De-indent Selection\" -command { set choice 43 }" );
+cmd( ".v add command -label \"Place Break & Run [ string toupper $DbgExe ]\" -command { set choice 58 }" );
 
 cmd( ".v add separator" );
-cmd( ".v add command -label \"Find...\" -command {set choice 11}" );
-cmd( ".v add command -label \"Match \\\{ \\}\" -command {set choice 17}" );
-cmd( ".v add command -label \"Match \\\( \\)\" -command {set choice 32}" );
+cmd( ".v add command -label \"Find...\" -command { set choice 11 }" );
+cmd( ".v add command -label \"Match \\\{ \\}\" -command { set choice 17 }" );
+cmd( ".v add command -label \"Match \\\( \\)\" -command { set choice 32 }" );
 
 if ( ! macro )
 {
@@ -792,24 +955,24 @@ else
 	cmd( ".v.i add command -label \"Math functions\" -command {set choice 51} -accelerator Ctrl+H" );
 }
 
-cmd( "bind .f.t.t <Control-E> {set choice 25}" );
-cmd( "bind .f.t.t <Control-V> {set choice 26; break}" );
-cmd( "bind .f.t.t <Control-U> {set choice 56}" );
-cmd( "bind .f.t.t <Control-A> {set choice 55}" );
-cmd( "bind .f.t.t <Control-C> {set choice 27; break}" );
-cmd( "bind .f.t.t <Control-i> {set choice 28; break}" );
-cmd( "bind .f.t.t <Control-T> {set choice 31}" );
-cmd( "bind .f.t.t <Control-I> {set choice 40}" );
-cmd( "bind .f.t.t <Control-M> {set choice 45}" );
-cmd( "bind .f.t.t <Control-S> {set choice 30}" );
-cmd( "bind .f.t.t <Control-W> {set choice 29}" );
-cmd( "bind .f.t.t <Control-O> {set choice 52}" );
-cmd( "bind .f.t.t <Control-D> {set choice 53}" );
-cmd( "bind .f.t.t <Control-N> {set choice 54}" );
-cmd( "bind .f.t.t <Control-H> {set choice 51}" );
+cmd( "bind .f.t.t <Control-E> { set choice 25 }" );
+cmd( "bind .f.t.t <Control-V> { set choice 26; break }" );
+cmd( "bind .f.t.t <Control-U> { set choice 56 }" );
+cmd( "bind .f.t.t <Control-A> { set choice 55 }" );
+cmd( "bind .f.t.t <Control-C> { set choice 27; break }" );
+cmd( "bind .f.t.t <Control-i> { set choice 28; break }" );
+cmd( "bind .f.t.t <Control-T> { set choice 31 }" );
+cmd( "bind .f.t.t <Control-I> { set choice 40 }" );
+cmd( "bind .f.t.t <Control-M> { set choice 45 }" );
+cmd( "bind .f.t.t <Control-S> { set choice 30 }" );
+cmd( "bind .f.t.t <Control-W> { set choice 29 }" );
+cmd( "bind .f.t.t <Control-O> { set choice 52 }" );
+cmd( "bind .f.t.t <Control-D> { set choice 53 }" );
+cmd( "bind .f.t.t <Control-N> { set choice 54 }" );
+cmd( "bind .f.t.t <Control-H> { set choice 51 }" );
 cmd( "bind .f.t.t <Control-K> { set choice 72 }" );
 
-cmd( "bind .f.t.t <F1> {set choice 34}" );
+cmd( "bind .f.t.t <F1> { set choice 34 }" );
 
 // set advanced double-click behavior (dblclick.tcl) and also
 // reset the word boundaries to fix weird double-click behavior on Windows
@@ -826,32 +989,32 @@ cmd( "pack .f.t.t -expand yes -fill both" );
 cmd( "pack .f.t.hs -fill x" );
 
 cmd( "set filename \"noname.txt\"" );
-cmd( "set dirname \"[pwd]\"" );
-cmd( "set modeldir \"[pwd]\"" );
-cmd( "set groupdir \"[pwd]\"" );
+cmd( "set dirname \"[ pwd ]\"" );
+cmd( "set modeldir \"[ pwd ]\"" );
+cmd( "set groupdir \"[ pwd ]\"" );
 
 cmd( ".f.t.t tag remove sel 1.0 end" );
 cmd( ".f.t.t mark set insert 1.0" );
-cmd( "set before [.f.t.t get 1.0 end]" );
+cmd( "set before [ .f.t.t get 1.0 end ]" );
 
 if ( argn > 1 )
 {
 	cmd( "if [ file exists \"$filetoload\" ] { set choice 0 } { set choice -2 }" );
 	if ( choice == 0 )
 	{	
-		cmd( "set file [open \"$filetoload\"]" );
-		cmd( ".f.t.t insert end [read $file]" );
+		cmd( "set file [ open \"$filetoload\" ]" );
+		cmd( ".f.t.t insert end [ read $file ]" );
 		cmd( ".f.t.t edit reset" );
 		cmd( "close $file" );
 		cmd( ".f.t.t mark set insert 1.0" );
-		cmd( "set filename \"[file tail \"$filetoload\"]\"" );
-		cmd( "set dirname [file dirname \"$filetoload\"]" );
-		cmd( "set before [.f.t.t get 1.0 end]; .f.hea.file.dat conf -text \"$filename\"" );
+		cmd( "set filename \"[ file tail \"$filetoload\" ]\"" );
+		cmd( "set dirname [ file dirname \"$filetoload\" ]" );
+		cmd( "set before [ .f.t.t get 1.0 end ]; .f.hea.file.dat conf -text \"$filename\"" );
 
-		cmd( "set s [file extension \"$filetoload\"]" );
+		cmd( "set s [ file extension \"$filetoload\" ]" );
 		s = ( char * ) Tcl_GetVar( inter, "s", 0 );
 		choice = 0;
-		if ( s[0] != '\0' )
+		if ( s[ 0 ] != '\0' )
 		{
 			strncpy( str, s, 999 );
 			if ( ! strcmp( str, ".cpp" ) || ! strcmp( str, ".c" ) || ! strcmp( str, ".C" ) || ! strcmp( str, ".CPP" ) || ! strcmp( str, ".Cpp" ) || ! strcmp( str, ".c++" ) || ! strcmp( str, ".C++" ) || ! strcmp( str, ".h" ) || ! strcmp( str, ".H" ) || ! strcmp( str, ".hpp" ) || ! strcmp( str, ".HPP" ) || ! strcmp( str, ".Hpp" ) )
@@ -870,10 +1033,11 @@ else
 	choice = 33; 				// open model browser
   
 cmd( "wm deiconify .; raise ." );
+cmd( "set keepfocus 0" );
 
 loop:
 
-cmd( "focus .f.t.t; update" );
+cmd( "if { ! $keepfocus } { focus .f.t.t; update } { set keepfocus 0 }" );
 
 // update file save status in titlebar
 cmd( "update_title_bar" );
@@ -991,7 +1155,7 @@ if ( choice == 4 )
 }
 
 
-/*Load the description file*/
+/* Load the description file */
 
 if ( choice == 5 || choice == 50 )
 {
@@ -1011,10 +1175,10 @@ if ( choice == 5 || choice == 50 )
 	cmd( "set choice 0; if { [ file exists \"$dirname/$filename\" ] } { set choice 1; if { [ file size \"$dirname/$filename\" ] <= 2 } { set choice 0; file delete \"$dirname/$filename\" } }" );
 	if ( choice == 1 )
 	{
-		cmd( "set file [open \"$dirname/description.txt\" r]" );
-		cmd( ".f.t.t insert end [read -nonewline $file]" );
+		cmd( "set file [ open \"$dirname/description.txt\" r ]" );
+		cmd( ".f.t.t insert end [ read -nonewline $file ]" );
 		cmd( "close $file" );
-		cmd( "set before [.f.t.t get 1.0 end]" );
+		cmd( "set before [ .f.t.t get 1.0 end ]" );
 	}
 	else		// if no description, ask if the user wants to create it or not
 	{
@@ -1023,37 +1187,32 @@ if ( choice == 5 || choice == 50 )
 		if ( choice == 2 )
 		{
 			cmd( " set filename \"\" " );
-			cmd( "set before [.f.t.t get 0.0 end]" );
+			cmd( "set before [ .f.t.t get 0.0 end ]" );
 			choice = 8;		// load equations file
 			goto loop;
 		}
 		cmd( ".f.t.t insert end \"Model $modelname (ver. $version)\n\n(Enter the Model description text here)\n\n(PRESS CTRL+E TO EDIT EQUATIONS)\n\"" );
 	}
 
-	cmd( ".f.t.t edit reset" );
 	sourcefile = 0;
+	cmd( ".f.t.t edit reset" );
 	cmd( ".f.t.t mark set insert 1.0" );
-	cmd( "focus -force .f.t.t" );
-
 	cmd( ".f.hea.file.dat conf -text \"$filename\"" );
 	  
-	cmd( "unset -nocomplain ud" );
-	cmd( "unset -nocomplain udi" );
-	cmd( "unset -nocomplain rd" );
-	cmd( "unset -nocomplain rdi" );
-	cmd( "lappend ud [.f.t.t get 0.0 end]" );
-	cmd( "lappend udi [.f.t.t index insert]" );
+	cmd( "unset -nocomplain ud udi rd rdi" );
+	cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
+	cmd( "lappend udi [ .f.t.t index insert ]" );
 	  
 	if ( choice == 50 )
 		choice = 46; 			// go to create makefile, after the model selection
 	else
-		choice = 0;  			// just relax
+		choice = 0;
 	
 	goto loop;
 }
  
  
-/*Show compilation result*/
+/* Show compilation result */
 
 if ( choice == 7 )
 {
@@ -1075,7 +1234,6 @@ if ( choice == 7 )
 
 if ( choice == 8 )
 {
-	cmd( ".f.t.t delete 1.0 end" );
 	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
 
 	if ( s == NULL || ! strcmp( s, "" ) )
@@ -1088,23 +1246,33 @@ if ( choice == 8 )
 	s = get_fun_name( str );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( "set filename \"\"" );
-		cmd( "set dirname \"\"" );
-		cmd( "set before [.f.t.t get 1.0 end]" );  
-		cmd( "update" );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Invalid equation file name\" -detail \"Check the 'FUN' field in menu 'Model', 'Model Options' for a valid equation file name.\"" );
 		choice = 0;
 		goto loop;
 	}
-	else
-		cmd( "set filename \"%s\"", s );
-	
+
+	cmd( "set oldfile \"$filename\"" );
+	cmd( "set olddir \"$dirname\"" );
+	cmd( "set filename \"%s\"", s );
 	cmd( "set dirname \"$modeldir\"" );
-	cmd( "set file [open \"$dirname/$filename\" r]" );
-	cmd( ".f.t.t insert end [read -nonewline $file]" );
-	cmd( "close $file" );
-	cmd( ".f.t.t edit reset" );
-	cmd( ".f.t.t tag remove sel 1.0 end" ); 
-	cmd( "focus -force .f.t.t" );
+	cmd( "if [ file exist \"$dirname/$filename\" ] { \
+			set file [ open \"$dirname/$filename\" r ]; \
+			.f.t.t delete 1.0 end; \
+			.f.t.t insert end [ read -nonewline $file ]; \
+			close $file; \
+			.f.t.t edit reset; \
+			.f.t.t tag remove sel 1.0 end; \
+			set choice 1 \
+		} { \
+			set filename \"$oldfile\"; \
+			set dirname \"$olddir\"; \
+			tk_messageBox -parent . -title Error -icon error -type ok -message \"Equation file not found\" -detail \"If equation file has been renamed, update the 'FUN' field in menu 'Model', 'Model Options'.\"; \
+			set choice 0 \
+		}" );
+	cmd( "unset -nocomplain oldfile olddir" );
+		
+	if ( ! choice )
+		goto loop;
 
 	// handle the opening of files from the compilation error window
 	cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$modeldir/$filename\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
@@ -1120,7 +1288,7 @@ if ( choice == 8 )
 			.f.t.t mark set insert 1.0 \
 		}" );
 
-	cmd( "set before [.f.t.t get 1.0 end]" );
+	cmd( "set before [ .f.t.t get 1.0 end ]" );
 	cmd( ".f.hea.file.dat conf -text \"$filename\"" );
 
 	cmd( ".f.t.t tag add bc \"1.0\"" );
@@ -1130,12 +1298,9 @@ if ( choice == 8 )
 	cmd( "savCurIni; savCurFin; updCurWnd" );	// save data for recolor
 	color( shigh, 0, 0 );			// set color types (all text)
 	  
-	cmd( "catch [unset -nocomplain ud]" );
-	cmd( "catch [unset -nocomplain udi]" );
-	cmd( "catch [unset -nocomplain rd]" );
-	cmd( "catch [unset -nocomplain rdi]" );
-	cmd( "lappend ud [.f.t.t get 0.0 end]" );
-	cmd( "lappend udi [.f.t.t index insert]" );
+	cmd( "unset -nocomplain ud udi rd rdi" );
+	cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
+	cmd( "lappend udi [ .f.t.t index insert ]" );
 
 	choice = 0;
 	goto loop;
@@ -1146,11 +1311,8 @@ if ( choice == 8 )
 
 if ( choice == 10 )
 {
-	cmd( "if [ winfo exists .search_line ] { set choice 0; focus .search_line.e }" );
-	if ( choice == 0 )
-		goto loop;
-
 	cmd( "set line \"\"" );
+
 	cmd( "newtop .search_line \"Go To\" { .search_line.b.can invoke }" );
 
 	cmd( "frame .search_line.l" );
@@ -1172,16 +1334,19 @@ if ( choice == 10 )
 				bell \
 			}; \
 			destroytop .search_line; \
-			focus .f.t.t \
+			focus .f.t.t; \
+			set keepfocus 0 \
 		} { \
 			destroytop .search_line; \
-			focus .f.t.t \
+			focus .f.t.t; \
+			set keepfocus 0 \
 		}" );
 
 	cmd( "bind .search_line.l.e <KeyPress-Return> { .search_line.b.ok invoke }" );
 
 	cmd( "showtop .search_line" );
 	cmd( "focus .search_line.l.e" );
+	cmd( "set keepfocus 1" );
 
 	choice = 0;
 	goto loop;
@@ -1192,10 +1357,6 @@ if ( choice == 10 )
 
 if ( choice == 11 )
 {
-	cmd( "if [ winfo exists .find ] { set choice 0; focus .find. e}" );
-	if ( choice == 0 )
-		goto loop;
-
 	cmd( "set docase 0" );
 	cmd( "set dirsearch \"-forwards\"" );
 	cmd( "set endsearch end" );
@@ -1236,10 +1397,11 @@ if ( choice == 11 )
 						set length 0 \
 					}; \
 					.f.t.t mark set insert \"$cur + $length char\" ; \
-					update; \
 					.f.t.t see $cur; \
 					destroytop .find; \
-					focus .f.t.t \
+					focus .f.t.t; \
+					set keepfocus 0; \
+					update \
 				} else { \
 					.find.l.e selection range 0 end; \
 					bell \
@@ -1249,7 +1411,8 @@ if ( choice == 11 )
 			} \
 		} { \
 			destroytop .find; \
-			focus .f.t.t \
+			focus .f.t.t; \
+			set keepfocus 0 \
 		}" );
 
 	cmd( "bind .find.l.e <Up> { \
@@ -1274,16 +1437,22 @@ if ( choice == 11 )
 	cmd( "showtop .find" );
 	cmd( ".find.l.e selection range 0 end" );
 	cmd( "focus .find.l.e" );
+	cmd( "set keepfocus 1" );
 
 	choice = 0;
 	goto loop;
 }
 
 
-/* Search again the same pattern in the text*/
+/* Search again the same pattern in the text */
 
-if ( choice == 12 )
+if ( choice == 12 || choice == 88 )
 {
+	if ( choice == 12 )
+		cmd( "set dirsearch \"-forwards\"; set endsearch end" );
+	else
+		cmd( "set dirsearch \"-backwards\"; set endsearch 1.0" );
+
 	cmd( "if { $textsearch != \"\" } { \
 			.f.t.t tag remove sel 1.0 end; \
 			set cur [ .f.t.t index insert ]; \
@@ -1298,8 +1467,8 @@ if ( choice == 12 )
 					set length 0 \
 				}; \
 				.f.t.t mark set insert \"$cur + $length char\"; \
-				update; \
-				.f.t.t see $cur \
+				.f.t.t see $cur; \
+				update \
 			} else { \
 				bell \
 			} \
@@ -1314,10 +1483,6 @@ if ( choice == 12 )
 
 if ( choice == 21 )
 {
-	cmd( "if [ winfo exists .l ] { set choice 0; focus .l.e }" );
-	if ( choice == 0 )
-		goto loop;
-
 	cmd( "set docase 1" );
 	cmd( "set dirsearch \"-forwards\"" );
 	cmd( "set endsearch end" );
@@ -1394,7 +1559,6 @@ if ( choice == 21 )
 				bell \
 			} \
 		} { \
-			focus -force .f.t.t; \
 			set choice 5 \
 		}" );
 		
@@ -1422,8 +1586,8 @@ if ( choice == 21 )
 
 	cmd( "showtop .l" );
 	cmd( ".l.l.e selection range 0 end" );
-	cmd( "focus .l.l.e" );
 	cmd( ".f.t.t tag conf found -background red -foreground white" );
+	cmd( "focus .l.l.e" );
 
 	choice = 0;
 	
@@ -1464,7 +1628,6 @@ if ( choice == 21 )
 	}
 
 	cmd( "destroytop .l" );
-	cmd( "focus .f.t.t" );
 	cmd( ".f.t.t tag remove found 1.0 end" );
 	color( shigh, 0, 0 );				// reevaluate colors
 	choice = 0;
@@ -1648,7 +1811,6 @@ if ( choice == 14 )
 	if ( choice == 2 )
 	{
 		choice = 0;
-		cmd( "focus .f.t.t" );
 		goto loop;
 	}
 
@@ -1703,7 +1865,6 @@ if ( choice == 14 )
 		if ( choice == 2 )
 		{
 			cmd( "destroytop .a" );
-			cmd( "focus .f.t.t" );
 			choice = 0;
 			goto loop;
 		}
@@ -1789,7 +1950,6 @@ if ( choice == 14 )
 	if ( choice == 2 )
 	{
 		cmd( "destroytop .a" );
-		cmd( "focus .f.t.t" );
 		choice = 0;
 		goto loop;
 	}
@@ -1860,13 +2020,11 @@ if ( choice == 14 )
 		if ( choice == 0 )
 		{
 			cmd( "destroytop .a" );
-			cmd( "focus .f.t.t" );
 			goto loop;
 		} 
 	} 
 	 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	// create a new empty model
 
@@ -1927,7 +2085,7 @@ if ( choice == 14 )
 }
 
 
-/* open a text file*/
+/* open a text file */
 
 if ( choice == 15 || choice == 71 )
 {
@@ -1944,11 +2102,10 @@ if ( choice == 15 || choice == 71 )
 		goto loop; 
 
 	cmd( ".f.t.t delete 1.0 end" ); 
-	cmd( "focus -force .f.t.t" );
-	cmd( "set dirname [file dirname \"$brr\"]" ); 
-	cmd( "set filename [file tail \"$brr\"]" ); 
-	cmd( "set file [open \"$brr\" r]" ); 
-	cmd( ".f.t.t insert end [read -nonewline $file]" ); 
+	cmd( "set dirname [ file dirname \"$brr\" ]" ); 
+	cmd( "set filename [ file tail \"$brr\" ]" ); 
+	cmd( "set file [ open \"$brr\" r ]" ); 
+	cmd( ".f.t.t insert end [ read -nonewline $file ]" ); 
 	cmd( "close $file" ); 
 	cmd( ".f.t.t edit reset" ); 
 	cmd( ".f.t.t tag remove sel 1.0 end" ); 
@@ -1967,12 +2124,12 @@ if ( choice == 15 || choice == 71 )
 			.f.t.t mark set insert 1.0 \
 		}" );
 
-	cmd( "set before [.f.t.t get 1.0 end]" ); 
+	cmd( "set before [ .f.t.t get 1.0 end ]" ); 
 	cmd( ".f.hea.file.dat conf -text \"$filename\"" );
 
-	cmd( "set s [file extension \"$filename\"]" );
+	cmd( "set s [ file extension \"$filename\" ]" );
 	s = ( char * ) Tcl_GetVar( inter, "s", 0 );
-	if ( s[0] != '\0' )
+	if ( s[ 0 ] != '\0' )
 	{
 	  strncpy( str, s, 499 );
 	  if ( ! strcmp( str, ".cpp" ) || ! strcmp( str, ".c" ) || ! strcmp( str, ".C" ) || ! strcmp( str, ".CPP" ) || ! strcmp( str, ".Cpp" ) || ! strcmp( str, ".c++" ) || ! strcmp( str, ".C++" ) || ! strcmp( str, ".h" ) || ! strcmp( str, ".H" ) || ! strcmp( str, ".hpp" ) || ! strcmp( str, ".Hpp" ) || ! strcmp( str, ".h++" ) || ! strcmp( str, ".H++" ) )
@@ -1988,19 +2145,16 @@ if ( choice == 15 || choice == 71 )
 		sourcefile = 0;
 	}
 
-	cmd( "catch [unset -nocomplain ud]" );
-	cmd( "catch [unset -nocomplain udi]" );
-	cmd( "catch [unset -nocomplain rd]" );
-	cmd( "catch [unset -nocomplain rdi]" );
-	cmd( "lappend ud [.f.t.t get 0.0 end]" );
-	cmd( "lappend udi [.f.t.t index insert]" );
+	cmd( "unset -nocomplain ud udi rd rdi" );
+	cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
+	cmd( "lappend udi [ .f.t.t index insert ]" );
 
 	choice = 0;
 	goto loop;
 }
 
 
-/*insert automatic tabs */
+/* insert automatic tabs */
 
 if ( choice == 16 )
 {
@@ -2190,7 +2344,6 @@ if ( choice == 28 && macro )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{ 
@@ -2258,7 +2411,6 @@ if ( choice == 28 && ! macro )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2338,7 +2490,6 @@ if ( choice == 51 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{ 
@@ -2382,7 +2533,6 @@ if ( choice == 25 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2438,25 +2588,25 @@ if ( choice == 26 )
 	cmd( "frame .a.v" );
 	cmd( "label .a.v.l -text \"Number v\\\[x\\] to assign to\"" );
 	cmd( "entry .a.v.e -width 2 -textvariable v_num -justify center" );
-	cmd( "bind .a.v.e <Return> {focus .a.n.e; .a.n.e selection range 0 end}" );
+	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
 	cmd( "frame .a.n" );
 	cmd( "label .a.n.l -text \"Variable or parameter to retrieve\"" );
 	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
-	cmd( "bind .a.n.e <Return> {focus .a.l.e; .a.l.e selection range 0 end}" );
+	cmd( "bind .a.n.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
 	cmd( "frame .a.l" );
 	cmd( "label .a.l.l -text \"Lag to use\"" );
 	cmd( "entry .a.l.e -width 2 -textvariable v_lag -justify center" );
-	cmd( "bind .a.l.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
+	cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.l.l .a.l.e" );
 
 	cmd( "frame .a.o" );
 	cmd( "label .a.o.l -text \"Parent object\"" );
 	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
-	cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
+	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
 	cmd( "pack .a.v .a.n .a.l .a.o -padx 5 -pady 5" );
@@ -2472,7 +2622,6 @@ if ( choice == 26 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2526,19 +2675,19 @@ if ( choice == 27 )
 	cmd( "frame .a.o" );
 	cmd( "label .a.o.l -text \"Object to cycle through\"" );
 	cmd( "entry .a.o.e -width 25 -textvariable v_label -justify center" );
-	cmd( "bind .a.o.e <Return> {focus .a.c.e; .a.c.e selection range 0 end}" );
+	cmd( "bind .a.o.e <Return> { focus .a.c.e; .a.c.e selection range 0 end }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
 	cmd( "frame .a.c" );
 	cmd( "label .a.c.l -text \"Cycling pointer\"" );
 	cmd( "entry .a.c.e -width 6 -textvariable v_obj -justify center" );
-	cmd( "bind .a.c.e <Return> {focus .a.p.e; .a.p.e selection range 0 end}" );
+	cmd( "bind .a.c.e <Return> { focus .a.p.e; .a.p.e selection range 0 end }" );
 	cmd( "pack .a.c.l .a.c.e" );
 
 	cmd( "frame .a.p" );
 	cmd( "label .a.p.l -text \"Parent object\"" );
 	cmd( "entry .a.p.e -width 25 -textvariable v_par -justify center" );
-	cmd( "bind .a.p.e <Return> {focus .a.f.ok}" );
+	cmd( "bind .a.p.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.p.l .a.p.e" );
 
 	cmd( "pack .a.o .a.c .a.p -padx 5 -pady 5" );
@@ -2554,7 +2703,6 @@ if ( choice == 27 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2626,25 +2774,25 @@ if ( choice == 40 )
 	cmd( "frame .a.v" );
 	cmd( "label .a.v.l -text \"Number v\\\[x\\] to assign the result after increment\"" );
 	cmd( "entry .a.v.e -width 2 -textvariable v_num -justify center" );
-	cmd( "bind .a.v.e <Return> {focus .a.n.e; .a.n.e selection range 0 end}" );
+	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
 	cmd( "frame .a.n" );
 	cmd( "label .a.n.l -text \"Variable to increase\"" );
 	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
-	cmd( "bind .a.n.e <Return> {focus .a.a.e; .a.a.e selection range 0 end}" );
+	cmd( "bind .a.n.e <Return> { focus .a.a.e; .a.a.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
 	cmd( "frame .a.a" );
 	cmd( "label .a.a.l -text \"Value to add\"" );
 	cmd( "entry .a.a.e -width 15 -textvariable v_val -justify center" );
-	cmd( "bind .a.a.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
+	cmd( "bind .a.a.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.a.l .a.a.e" );
 
 	cmd( "frame .a.o" );
 	cmd( "label .a.o.l -text \"Parent object\"" );
 	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
-	cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
+	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
 	cmd( "pack .a.v .a.n .a.a .a.o -padx 5 -pady 5" );
@@ -2660,7 +2808,6 @@ if ( choice == 40 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2711,25 +2858,25 @@ if ( choice == 45 )
 	cmd( "frame .a.v" );
 	cmd( "label .a.v.l -text \"Number v\\\[x\\] to assign the result after multiplication\"" );
 	cmd( "entry .a.v.e -width 2 -textvariable v_num -justify center" );
-	cmd( "bind .a.v.e <Return> {focus .a.n.e; .a.n.e selection range 0 end}" );
+	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
 	cmd( "frame .a.n" );
 	cmd( "label .a.n.l -text \"Variable to multiply\"" );
 	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
-	cmd( "bind .a.n.e <Return> {focus .a.a.e; .a.a.e selection range 0 end}" );
+	cmd( "bind .a.n.e <Return> { focus .a.a.e; .a.a.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
 	cmd( "frame .a.a" );
 	cmd( "label .a.a.l -text \"Value to multiply\"" );
 	cmd( "entry .a.a.e -width 15 -textvariable v_val -justify center" );
-	cmd( "bind .a.a.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
+	cmd( "bind .a.a.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.a.l .a.a.e" );
 
 	cmd( "frame .a.o" );
 	cmd( "label .a.o.l -text \"Parent object\"" );
 	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
-	cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
+	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
 	cmd( "pack .a.v .a.n .a.a .a.o -padx 5 -pady 5" );
@@ -2745,7 +2892,6 @@ if ( choice == 45 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2796,25 +2942,25 @@ if ( choice == 29 )
 	cmd( "frame .a.v" );
 	cmd( "label .a.v.l -text \"Value to write\"" );
 	cmd( "entry .a.v.e -width 15 -textvariable v_num -justify center" );
-	cmd( "bind .a.v.e <Return> {focus .a.n.e; .a.n.e selection range 0 end}" );
+	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
 	cmd( "frame .a.n" );
 	cmd( "label .a.n.l -text \"Variable or parameter to write\"" );
 	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
-	cmd( "bind .a.n.e <Return> {focus .a.l.e; .a.l.e selection range 0 end}" );
+	cmd( "bind .a.n.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
 	cmd( "frame .a.l" );
 	cmd( "label .a.l.l -text \"Time step appearing as latest computation\"" );
 	cmd( "entry .a.l.e -width 3 -textvariable v_lag -justify center" );
-	cmd( "bind .a.l.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
+	cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.l.l .a.l.e" );
 
 	cmd( "frame .a.o" );
 	cmd( "label .a.o.l -text \"Parent object\"" );
 	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
-	cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
+	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
 	cmd( "pack .a.v .a.n .a.l .a.o -padx 5 -pady 5" );
@@ -2830,7 +2976,6 @@ if ( choice == 29 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2877,31 +3022,31 @@ if ( choice == 30 )
 	cmd( "frame .a.d" );
 	cmd( "label .a.d.l -text \"Pointer to return the object found\"" );
 	cmd( "entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
-	cmd( "bind .a.d.e <Return> {focus .a.v.e; .a.v.e selection range 0 end}" );
+	cmd( "bind .a.d.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
 	cmd( "frame .a.v" );
 	cmd( "label .a.v.l -text \"Value to search for\"" );
 	cmd( "entry .a.v.e -width 15 -textvariable v_num -justify center" );
-	cmd( "bind .a.v.e <Return> {focus .a.n.e; .a.n.e selection range 0 end}" );
-	cmd( "pack .a.v.l .a.v.e" );
+	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
+	cmd( "pack .a.v.l .a.v.e" ); 
 
 	cmd( "frame .a.n" );
 	cmd( "label .a.n.l -text \"Variable or parameter to search\"" );
 	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
-	cmd( "bind .a.n.e <Return> {focus .a.l.e; .a.l.e selection range 0 end}" );
+	cmd( "bind .a.n.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
 	cmd( "frame .a.l" );
 	cmd( "label .a.l.l -text \"Lag to use\"" );
 	cmd( "entry .a.l.e -width 2 -textvariable v_lag -justify center" );
-	cmd( "bind .a.l.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
+	cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.l.l .a.l.e" );
 
 	cmd( "frame .a.o" );
 	cmd( "label .a.o.l -text \"Object from which to search\"" );
 	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
-	cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
+	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
 	cmd( "pack .a.d .a.v .a.n .a.l .a.o -padx 5 -pady 5" );
@@ -2917,7 +3062,6 @@ if ( choice == 30 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2963,26 +3107,26 @@ if ( choice == 31 )
 	cmd( "frame .a.d" );
 	cmd( "label .a.d.l -text \"Object to be sorted\"" );
 	cmd( "entry .a.d.e -width 25 -textvariable v_obj0 -justify center" );
-	cmd( "bind .a.d.e <Return> {focus .a.n.e; .a.n.e selection range 0 end}" );
+	cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
 	cmd( "frame .a.n" );
 	cmd( "label .a.n.l -text \"Variable or parameter for sorting\"" );
 	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
-	cmd( "bind .a.n.e <Return> {focus .a.s.u}" );
+	cmd( "bind .a.n.e <Return> { focus .a.s.u }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
 	cmd( "frame .a.s" );
 	cmd( "label .a.s.l -text \"Sorting direction\"" );
 	cmd( "radiobutton .a.s.u -text Increasing -variable v_direction -value 1" );
 	cmd( "radiobutton .a.s.d -text Decreasing -variable v_direction -value 2" );
-	cmd( "bind .a.s <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
+	cmd( "bind .a.s <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.s.l .a.s.u .a.s.d" );
 
 	cmd( "frame .a.o" );
 	cmd( "label .a.o.l -text \"Parent object\"" );
 	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
-	cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
+	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
 	cmd( "pack .a.d .a.n .a.s .a.o -padx 5 -pady 5" );
@@ -2998,7 +3142,6 @@ if ( choice == 31 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -3052,31 +3195,31 @@ if ( choice == 52 )
 	cmd( "frame .a.d" );
 	cmd( "label .a.d.l -text \"Pointer to return the object created\"" );
 	cmd( "entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
-	cmd( "bind .a.d.e <Return> {focus .a.n.e; .a.n.e selection range 0 end}" );
+	cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
 	cmd( "frame .a.n" );
 	cmd( "label .a.n.l -text \"Object to create\"" );
 	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
-	cmd( "bind .a.n.e <Return> {focus .a.x.e; .a.x.e selection range 0 end}" );
+	cmd( "bind .a.n.e <Return> { focus .a.x.e; .a.x.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
 	cmd( "frame .a.x" );
 	cmd( "label .a.x.l -text \"Number of objects to create\"" );
 	cmd( "entry .a.x.e -width 6 -textvariable numobj -justify center" );
-	cmd( "bind .a.x.e <Return> {focus .a.v.e; .a.v.e selection range 0 end}" );
+	cmd( "bind .a.x.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "pack .a.x.l .a.x.e" );
 
 	cmd( "frame .a.v" );
 	cmd( "label .a.v.l -text \"Example object (if available)\"" );
 	cmd( "entry .a.v.e -width 25 -textvariable v_num -justify center" );
-	cmd( "bind .a.v.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
+	cmd( "bind .a.v.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
 	cmd( "frame .a.o" );
 	cmd( "label .a.o.l -text \"Parent object for new object(s)\"" );
 	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
-	cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
+	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
 	cmd( "pack .a.d .a.n .a.x .a.v .a.o -padx 5 -pady 5" );
@@ -3092,7 +3235,6 @@ if ( choice == 52 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -3105,28 +3247,28 @@ if ( choice == 52 )
 
 	if ( macro )
 	{
-		cmd( "if { $numobj == \"1\"} {set choice 1} {set choice 0}" );
-		cmd( "if {$v_obj0 != \"\"} {.f.t.t insert insert \"$v_obj0 = \"}" );
+		cmd( "if { $numobj == \"1\" } { set choice 1 } { set choice 0 }" );
+		cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
 		if ( choice  == 1 )
 		{
-		cmd( "if {$v_obj == \"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\"}" );
-		cmd( "if {$v_obj == \"p\" && $v_num!=\"\"} { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\"}" );
-		cmd( "if {$v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj, \\\"$v_label\\\");\"}" );
-		cmd( "if {$v_obj != \"p\" && $v_num != \"\"} { .f.t.t insert insert \"ADDOBJ_EXS($v_obj, \\\"$v_label\\\", $v_num);\"}" );
+		cmd( "if { $v_obj == \"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num!=\"\" } { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj, \\\"$v_label\\\");\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num != \"\" } { .f.t.t insert insert \"ADDOBJ_EXS($v_obj, \\\"$v_label\\\", $v_num);\" }" );
 		}
 		else
 		{
-		cmd( "if {$v_obj == \"p\" && $v_num!=\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\"; set choice -3}" );
-		cmd( "if {$v_obj != \"p\" && $v_num!= \"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\"; set choice -3}" );
-		cmd( "if {$v_obj == \"p\" && $v_num==\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\"; set choice -3}" );
-		cmd( "if {$v_obj != \"p\" && $v_num== \"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\"; set choice -3}" );
+		cmd( "if { $v_obj == \"p\" && $v_num!=\"\" } { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
+		cmd( "if { $v_obj != \"p\" && $v_num!= \"\" } { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
+		cmd( "if { $v_obj == \"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\"; set choice -3 }" );
+		cmd( "if { $v_obj != \"p\" && $v_num== \"\" } { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\"; set choice -3 }" );
 		}
 	}
 	else
 	{
-		cmd( "if {$v_num==\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj);\"}" );
-		cmd( "if {$v_num!=\"\" && [string is integer -strict $numobj]} {.f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj, $v_num);\"}" );
+		cmd( "if { $v_num==\"\" } { .f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj);\" }" );
+		cmd( "if { $v_num!=\"\" } { .f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj, $v_num);\" }" );
 	}
 	cmd( ".f.t.t see insert" );
 
@@ -3149,7 +3291,7 @@ if ( choice == 53 )
 	cmd( "frame .a.d" );
 	cmd( "label .a.d.l -text \"Object to delete\"" );
 	cmd( "entry .a.d.e -width 25 -textvariable v_obj0 -justify center" );
-	cmd( "bind .a.d.e <Return> {focus .a.f.ok}" );
+	cmd( "bind .a.d.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
 	cmd( "pack .a.d -padx 5 -pady 5" );
@@ -3165,7 +3307,6 @@ if ( choice == 53 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -3206,37 +3347,37 @@ if ( choice == 54 )
 	cmd( "frame .a.d" );
 	cmd( "label .a.d.l -text \"Pointer to return the object found\"" );
 	cmd( "entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
-	cmd( "bind .a.d.e <Return> {focus .a.v.e; .a.v.e selection range 0 end}" );
+	cmd( "bind .a.d.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
 	cmd( "frame .a.v" );
 	cmd( "label .a.v.l -text \"Object to draw\"" );
 	cmd( "entry .a.v.e -width 25 -textvariable v_num -justify center" );
-	cmd( "bind .a.v.e <Return> {focus .a.n.e; .a.n.e selection range 0 end}" );
+	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
 	cmd( "frame .a.n" );
 	cmd( "label .a.n.l -text \"Variable or parameter defining probabilities\"" );
 	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
-	cmd( "bind .a.n.e <Return> {focus .a.l.e; .a.l.e selection range 0 end}" );
+	cmd( "bind .a.n.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
 	cmd( "frame .a.l" );
 	cmd( "label .a.l.l -text \"Lag to use\"" );
 	cmd( "entry .a.l.e -width 2 -textvariable v_lag -justify center" );
-	cmd( "bind .a.l.e <Return> {focus .a.t.e; .a.t.e selection range 0 end}" );
+	cmd( "bind .a.l.e <Return> { focus .a.t.e; .a.t.e selection range 0 end }" );
 	cmd( "pack .a.l.l .a.l.e" );
 
 	cmd( "frame .a.t" );
 	cmd( "label .a.t.l -text \"Sum over all values (if available)\"" );
 	cmd( "entry .a.t.e -width 15 -textvariable v_tot -justify center" );
-	cmd( "bind .a.t.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
+	cmd( "bind .a.t.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.t.l .a.t.e" );
 
 	cmd( "frame .a.o" );
 	cmd( "label .a.o.l -text \"Object from which to search\"" );
 	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
-	cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
+	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
 	cmd( "pack .a.d .a.v .a.n .a.l .a.t .a.o -padx 5 -pady 5" );
@@ -3252,7 +3393,6 @@ if ( choice == 54 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -3313,19 +3453,19 @@ if ( choice == 55 )
 	cmd( "frame .a.d" );
 	cmd( "label .a.d.l -text \"Pointer to return the object found\"" );
 	cmd( "entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
-	cmd( "bind .a.d.e <Return> {focus .a.n.e; .a.n.e selection range 0 end}" );
+	cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
 	cmd( "frame .a.n" );
 	cmd( "label .a.n.l -text \"Object to search\"" );
 	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
-	cmd( "bind .a.n.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
+	cmd( "bind .a.n.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
 	cmd( "frame .a.o" );
 	cmd( "label .a.o.l -text \"Object from which to search\"" );
 	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
-	cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
+	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
 	cmd( "pack .a.d .a.n .a.o -padx 5 -pady 5" );
@@ -3341,7 +3481,6 @@ if ( choice == 55 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -3380,25 +3519,25 @@ if ( choice == 56 )
 	cmd( "frame .a.v" );
 	cmd( "label .a.v.l -text \"Number v\\\[x\\] to assign the result\"" );
 	cmd( "entry .a.v.e -width 2 -textvariable v_num -justify center" );
-	cmd( "bind .a.v.e <Return> {focus .a.n.e; .a.n.e selection range 0 end}" );
+	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
 	cmd( "frame .a.n" );
 	cmd( "label .a.n.l -text \"Variable or parameter to sum\"" );
 	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
-	cmd( "bind .a.n.e <Return> {focus .a.l.e; .a.l.e selection range 0 end}" );
+	cmd( "bind .a.n.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
 	cmd( "frame .a.l" );
 	cmd( "label .a.l.l -text \"Lag to use\"" );
 	cmd( "entry .a.l.e -width 2 -textvariable v_lag -justify center" );
-	cmd( "bind .a.l.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
+	cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.l.l .a.l.e" );
 
 	cmd( "frame .a.o" );
 	cmd( "label .a.o.l -text \"Parent object\"" );
 	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
-	cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
+	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
 	cmd( "pack .a.v .a.n .a.l .a.o -padx 5 -pady 5" );
@@ -3414,7 +3553,6 @@ if ( choice == 56 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -3510,7 +3648,6 @@ if ( choice == 72 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{ 
@@ -3591,7 +3728,6 @@ if ( choice == 73 )
 
 	cmd( "set res [ .a.d.e current ]" );
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -3660,7 +3796,6 @@ if ( choice == 74 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -3721,7 +3856,6 @@ if ( choice == 75 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -3782,7 +3916,6 @@ if ( choice == 76 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -3864,7 +3997,6 @@ if ( choice == 77 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -3949,7 +4081,6 @@ if ( choice == 78 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4051,7 +4182,6 @@ if ( choice == 79 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4124,7 +4254,6 @@ if ( choice == 80 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4232,7 +4361,6 @@ if ( choice == 81 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4312,7 +4440,6 @@ if ( choice == 82 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4373,7 +4500,6 @@ if ( choice == 83 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4448,7 +4574,6 @@ if ( choice == 84 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4531,7 +4656,6 @@ if ( choice == 85 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4618,7 +4742,6 @@ if ( choice == 86 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4717,7 +4840,7 @@ if ( choice == 33 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .l; bind .f.t.t <Enter> { }" );
-	cmd( "wm deiconify .; raise .; focus .f.t.t" );
+	cmd( "wm deiconify .; raise ." );
 
 	choice = num;
 	Tcl_UnlinkVar( inter, "choiceSM" );
@@ -4799,9 +4922,9 @@ if ( choice == 41 )
 	cmd( "pack .a.tit .a.mname .a.mver .a.mdir -padx 5 -pady 5" );
 
 	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LMM.html#copy } { set choice 2 }" );
-	cmd( "bind .a.mname.e <Return> {focus .a.mver.e; .a.mver.e selection range 0 end}" );
-	cmd( "bind .a.mver.e <Return> {focus .a.mdir.e; .a.mdir.e selection range 0 end}" );
-	cmd( "bind .a.mdir.e <Return> {focus .a.b.ok}" );
+	cmd( "bind .a.mname.e <Return> { focus .a.mver.e; .a.mver.e selection range 0 end }" );
+	cmd( "bind .a.mver.e <Return> { focus .a.mdir.e; .a.mdir.e selection range 0 end }" );
+	cmd( "bind .a.mdir.e <Return> { focus .a.b.ok }" );
 
 	cmd( "showtop .a" );
 	cmd( ".a.mname.e selection range 0 end" );
@@ -4816,7 +4939,6 @@ if ( choice == 41 )
 	if ( choice == 2 )
 	{
 		cmd( "destroytop .a" );  
-		cmd( "focus .f.t.t" );
 		choice = 0;
 		goto loop;
 	}
@@ -4875,7 +4997,6 @@ if ( choice == 41 )
 	} 
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	// create a new copycat model
 	cmd( "file copy \"$dirname\" \"$mdir\"" );
@@ -4890,11 +5011,11 @@ if ( choice == 41 )
 	if ( choice == 1 )
 		cmd( "file delete \"$dirname/modelinfo.txt\"" );
 	
-	cmd( "set f [open \"$dirname/modelinfo.txt\" w]" );
+	cmd( "set f [ open \"$dirname/modelinfo.txt\" w ]" );
 	cmd( "puts $f \"$modelname\"" );
 	cmd( "puts $f \"$version\"" );
 	cmd( "set frmt \"%%d %%B, %%Y\"" );
-	cmd( "puts $f \"[ clock format [clock seconds] -format \"$frmt\" ]\"" );
+	cmd( "puts $f \"[ clock format [ clock seconds ] -format \"$frmt\" ]\"" );
 	cmd( "close $f" );
 	cmd( "tk_messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$mname' created\" -detail \"Version: $mver\nDirectory: $dirname\"" );
 
@@ -5031,7 +5152,6 @@ if ( choice == 44 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 1 )
 	{
@@ -5055,17 +5175,14 @@ if ( choice == 44 )
 if ( choice == 39 )
 {
 	cmd( ".f.t.t delete 1.0 end" );
-	cmd( "set before [.f.t.t get 1.0 end]" );
+	cmd( "set before [ .f.t.t get 1.0 end ]" );
 	cmd( "set filename noname.txt" );
-	cmd( "set dirname [pwd]" );
+	cmd( "set dirname [ pwd ]" );
 	cmd( ".f.t.t mark set insert 1.0" );
 	cmd( ".f.hea.file.dat conf -text \"noname.txt\"" );
-	cmd( "catch [unset -nocomplain ud]" );
-	cmd( "catch [unset -nocomplain udi]" );
-	cmd( "catch [unset -nocomplain rd]" );
-	cmd( "catch [unset -nocomplain rdi]" );
-	cmd( "lappend ud [.f.t.t get 0.0 end]" );
-	cmd( "lappend udi [.f.t.t index insert]" );
+	cmd( "unset -nocomplain ud udi rd rdi" );
+	cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
+	cmd( "lappend udi [ .f.t.t index insert ]" );
 
 	choice = 0;
 	goto loop;
@@ -5127,18 +5244,16 @@ if ( choice == 47 )
 			.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
 			.l.t.text insert end \"$a\"; \
 			.l.d.msg configure -text \"\"; \
-			if { [ catch { glob \"$RootLsd/$LsdSrc/*.o\" } objs ] == 0 } { \
-				foreach i $objs { \
-					catch { \
-						file delete -force \"$i\" \
-					} \
+			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.obj *.gch ]; \
+			foreach i $objs { \
+				catch { \
+					file delete -force \"$i\" \
 				} \
 			}; \
-			if { [ catch { glob \"$modeldir/*.o\" } objs ] == 0 } { \
-				foreach i $objs { \
-					catch { \
-						file delete -force \"$i\" \
-					} \
+			set objs [ glob -nocomplain -directory \"$modeldir\" *.o *.obj src makefile* makemessage.txt lsd_gnu* *.exe *.app ]; \
+			foreach i $objs { \
+				catch { \
+					file delete -force \"$i\" \
 				} \
 			} \
 		} { set choice 1 } { LsdHelp LMM.html#compilation_options } { set choice 2 }" );
@@ -5161,7 +5276,6 @@ if ( choice == 47 )
 		choice = 0; 
 
 	cmd( "destroytop .l" );
-	cmd( "focus .f.t.t" );
 
 	goto loop;
 } 
@@ -5297,13 +5411,13 @@ if ( choice == 48 )
 			.l.t.text insert end \"$default\" \
 		}" );
 	cmd( "button .l.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
-			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.obj ]; \
+			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.obj *.gch ]; \
 			foreach i $objs { \
 				catch { \
 					file delete -force \"$i\" \
 				} \
 			}; \
-			set objs [ glob -nocomplain -directory \"$modeldir\" *.o *.obj src break.gdb makefile* makemessage.txt elements.txt lsd_gnu* *.exe *.app ]; \
+			set objs [ glob -nocomplain -directory \"$modeldir\" *.o *.obj src break.gdb makefile* makemessage.txt elements.txt lsd_gnu* *.exe *.app *.bak ]; \
 			foreach i $objs { \
 				catch { \
 					file delete -force \"$i\" \
@@ -5343,7 +5457,6 @@ if ( choice == 48 )
 	cmd( "cd \"$RootLsd\"" );
 
 	cmd( "destroytop .l" );
-	cmd( "focus .f.t.t" );
 
 	goto loop;
 } 
@@ -5424,7 +5537,6 @@ if ( choice == 59 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -5464,37 +5576,37 @@ if ( choice == 60 )
 	cmd( "label .a.num.l -text \"System terminal\"" );
 	cmd( "entry .a.num.v -width 25 -textvariable temp_var1 -justify center" );
 	cmd( "pack .a.num.l .a.num.v" );
-	cmd( "bind .a.num.v <Return> {focus .a.num13.v; .a.num13.v selection range 0 end}" );
+	cmd( "bind .a.num.v <Return> { focus .a.num13.v; .a.num13.v selection range 0 end }" );
 
 	cmd( "frame .a.num13" );
 	cmd( "label .a.num13.l -text \"Debugger\"" );
 	cmd( "entry .a.num13.v -width 25 -textvariable temp_var13 -justify center" );
 	cmd( "pack .a.num13.l .a.num13.v" );
-	cmd( "bind .a.num13.v <Return> {focus .a.num2.v; .a.num2.v selection range 0 end}" );
+	cmd( "bind .a.num13.v <Return> { focus .a.num2.v; .a.num2.v selection range 0 end }" );
 
 	cmd( "frame .a.num2" );
 	cmd( "label .a.num2.l -text \"HTML browser\"" );
 	cmd( "entry .a.num2.v -width 25 -textvariable temp_var2 -justify center" );
 	cmd( "pack .a.num2.l .a.num2.v" );
-	cmd( "bind .a.num2.v <Return> {focus .a.num4.v; .a.num4.v selection range 0 end}" );
+	cmd( "bind .a.num2.v <Return> { focus .a.num4.v; .a.num4.v selection range 0 end }" );
 
 	cmd( "frame .a.num4" );
 	cmd( "label .a.num4.l -text \"Tcl/Tk Wish\"" );
 	cmd( "entry .a.num4.v -width 25 -textvariable temp_var4 -justify center" );
 	cmd( "pack .a.num4.l .a.num4.v" );
-	cmd( "bind .a.num4.v <Return> {focus .a.num12.v; .a.num12.v selection range 0 end}" );
+	cmd( "bind .a.num4.v <Return> { focus .a.num12.v; .a.num12.v selection range 0 end }" );
 
 	cmd( "frame .a.num12" );
 	cmd( "label .a.num12.l -text \"New models subdirectory\"" );
 	cmd( "entry .a.num12.v -width 25 -textvariable temp_var12 -justify center" );
 	cmd( "pack .a.num12.l .a.num12.v" );
-	cmd( "bind .a.num12.v <Return> {focus .a.num5.v; .a.num5.v selection range 0 end}" );
+	cmd( "bind .a.num12.v <Return> { focus .a.num5.v; .a.num5.v selection range 0 end }" );
 
 	cmd( "frame .a.num5" );
 	cmd( "label .a.num5.l -text \"Source code subdirectory\"" );
 	cmd( "entry .a.num5.v -width 25 -textvariable temp_var5 -justify center" );
 	cmd( "pack .a.num5.l .a.num5.v" );
-	cmd( "bind .a.num5.v <Return> {focus .a.num3.fv}" );
+	cmd( "bind .a.num5.v <Return> { focus .a.num3.fv }" );
 
 	cmd( "frame .a.num3" );
 	cmd( "label .a.num3.l -text \"Font family and size\"" );
@@ -5503,14 +5615,14 @@ if ( choice == 60 )
 	cmd( "ttk::combobox .a.num3.f.s -justify center -textvariable temp_var6 -values [ list 4 6 8 9 10 11 12 14 18 24 32 48 60 ] -width 3" );
 	cmd( "pack .a.num3.f.v .a.num3.f.s -side left" );
 	cmd( "pack .a.num3.l .a.num3.f" );
-	cmd( "bind .a.num3.f.v <Return> {focus .a.num7.v; .a.num7.v selection range 0 end}" );
+	cmd( "bind .a.num3.f.v <Return> { focus .a.num7.v; .a.num7.v selection range 0 end }" );
 
 	cmd( "frame .a.num7" );
 	cmd( "label .a.num7.l -text \"Tab size (characters)\"" );
 	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .a.num7.v -width 3 -from 1 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set temp_var7 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var7; return 0 } } -invalidcommand { bell } -justify center } { entry .a.num7.v -width 2 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set temp_var7 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var7; return 0 } } -invalidcommand { bell } -justify center }" );
 	cmd( "write_any .a.num7.v $temp_var7" );
 	cmd( "pack .a.num7.l .a.num7.v" );
-	cmd( "bind .a.num7.v <Return> {focus .a.num9.r.v3}" );
+	cmd( "bind .a.num7.v <Return> { focus .a.num9.r.v3 }" );
 
 	cmd( "frame .a.num9" );
 	cmd( "label .a.num9.l -text \"Syntax highlights\"" );
@@ -5559,7 +5671,6 @@ if ( choice == 60 )
 	cmd( "set temp_var7 [ .a.num7.v get ]" );
 
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 1 )
 	{
@@ -5715,7 +5826,6 @@ if ( choice == 67 )
 	cmd( "if [ string is integer -strict [ .a.l.v_num get ] ] { set tabsize [ .a.l.v_num get ] } { set choice 2 }" );
 	
 	cmd( "destroytop .a" );
-	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -5856,7 +5966,6 @@ if ( choice == 70 )
 	
 	cmd( "set i [ $e.l.l curselection ]" );
 	cmd( "destroytop $e" );
-	cmd( "focus .f.t.t" );
 	
 	cmd( "if { $i == \"\" } { set brr \"\" } { set brr [ lindex $extra_files $i ] }" );
 	s = ( char * ) Tcl_GetVar( inter, "brr", 0 );
@@ -6583,7 +6692,6 @@ end:
  *********************************/
 void create_compresult_window( bool nw )
 {
-	cmd( "destroytop .mm" );
 	cmd( "set cerr 1.0" );						// search start position in file
 	cmd( "set error \" error:\"" );				// error string to be searched
 	cmd( "set errfil \"\"" );
@@ -6699,7 +6807,7 @@ void create_compresult_window( bool nw )
 				.mm.i.c.n configure -text $errcol; \
 			} \
 		}" );
-	cmd( "button .mm.b.close -width [ expr $butWid + 4 ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; wm deiconify .; raise .; focus . }" );
+	cmd( "button .mm.b.close -width [ expr $butWid + 4 ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; wm deiconify .; raise .; focus .f.t.t; set keepfocus 0 }" );
 	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx 10 -pady 10 -expand yes -fill x -side left" );
 	cmd( "pack .mm.b -side right" );
 	
@@ -6726,6 +6834,7 @@ void create_compresult_window( bool nw )
 	
 	cmd( ".mm.t.t configure -state disabled" );
 	cmd( "wm deiconify .mm; raise .mm; focus .mm.t.t" );
+	cmd( "set keepfocus 1" );
 	cmd( "update" );
 }
 
@@ -6827,7 +6936,7 @@ void signal_handler( int signum )
 #ifdef SIGWINCH
 		case SIGWINCH:
 			cmd( "sizetop all" );	// readjust windows size/positions
-			cmd( "update idletasks" );
+			cmd( "update" );
 			return;
 #endif
 		case SIGMEM:

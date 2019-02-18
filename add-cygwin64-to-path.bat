@@ -17,18 +17,43 @@ rem *************************************************************
 
 if "%1"=="/?" (
 	echo Add a folder to the user PATH environment variable
-	echo Usage: add-to-path FOLDER
+	echo Usage: add-to-path [FOLDER]
 	goto end
 )
+
+where cygwin1.dll >nul 2>&1
 
 if "%1"=="" (
-	echo No FOLDER provided, aborting
+	if "%ERRORLEVEL%"=="0" (
+		echo Cygwin seems to be already in PATH, aborting
+		pause
+		goto end
+	) else (
+		if exist C:\cygwin64\bin\ (
+			set CYGWIN_DIR=C:\cygwin64
+			goto install
+		)
+		if exist C:\Windows\cygwin64\bin\ (
+			set CYGWIN_DIR=C:\Windows\cygwin64
+			goto install
+		)
+		if exist C:\cygwin\bin\ (
+			set CYGWIN_DIR=C:\cygwin
+			goto install
+		)
+	)
+	echo No FOLDER provided or found, aborting
+	pause
 	goto end
+) else (
+	set CYGWIN_DIR="%1"
 )
 
-set CYGWIN_DIR=%1\bin
-if not exist "%CYGWIN_DIR%" (
+:install
+set CYGWIN_DIR="%CYGWIN_DIR%\bin"
+if not exist "%CYGWIN_DIR%\" (
 	echo Invalid FOLDER selected, aborting
+	pause
 	goto end
 )
 

@@ -62,7 +62,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact )
 {
 bool pre_running;
 char ch[ 4 * MAX_ELEM_LENGTH ], *ch1;
-int count, i, j, cond;
+int i, j, count, cond, eff_lags;
 double value_search, app_res, *app_values;
 long node;
 object *cur, *cur1, *cur2;
@@ -410,10 +410,17 @@ while ( choice == 0 )
 			
 		// Down
 		case 6:
-			if ( r->b != NULL && r->b->head != NULL )
-				choice = deb( r->b->head, c, lab, res, interact );
-			else
+			// handle zero instanced objects
+			for ( cb = r->b; cb != NULL; cb = cb->next )
+				if ( cb->head != NULL )
+				{
+					choice = deb( cb->head, c, lab, res, interact );
+					break;
+				}
+				
+			if ( cb == NULL )
 				choice = 0;
+			
 			break;
 			
 		// Quit
@@ -456,7 +463,8 @@ while ( choice == 0 )
 			cv = r->search_var( NULL, ch1 );
 			i = cv->last_update;
 			count = ( cv->debug == 'd' ) ? 1 : 0;
-			app_values = new double[ cv->num_lag + 1 ];
+			eff_lags = ( cv->last_update >= cv->num_lag ) ? cv->num_lag : cv->num_lag - 1;
+			app_values = new double[ eff_lags + 1 ];
 			cmd( "set debugall 0" );
 			cmd( "set undebugall 0" );
 
@@ -491,8 +499,13 @@ while ( choice == 0 )
 			cmd( "label $e.u.v -fg red -text %d", cv->last_update );
 			cmd( "pack $e.u.l $e.u.v -side left -padx 2" );
 
+			cmd( "frame $e.x" );
+			cmd( "label $e.x.l -text \"Next update time:\"" );
+			cmd( "label $e.x.v -fg red -text %d", cv->next_update > 0 ? cv->next_update : cv->last_update < t ? t : t + 1 );
+			cmd( "pack $e.x.l $e.x.v -side left -padx 2" );
+
 			cmd( "frame $e.v" );
-			for ( i = 0; i <= cv->num_lag; ++i )
+			for ( i = 0; i <= eff_lags; ++i )
 			{
 				cmd( "set val%d %g", i, cv->val[ i ] );
 				app_values[ i ] = cv->val[ i ];
@@ -501,7 +514,7 @@ while ( choice == 0 )
 
 				cmd( "frame $e.v.l$i" );
 
-				if ( cv->param == 1 || cv->num_lag == 0 )
+				if ( i == 0 )
 					cmd( "label $e.v.l$i.l -text \"Value:\"" );
 				else
 					cmd( "label $e.v.l$i.l -text \"Lag $i:\"" );
@@ -521,19 +534,22 @@ while ( choice == 0 )
 			}
 			else
 			{
-				cmd( "pack $e.n $e.t $e.u" );	
+				if ( cv->param == 0 )
+					cmd( "pack $e.n $e.t $e.u $e.x" );
+				else
+					cmd( "pack $e.n $e.t $e.u" );
 				
 				cmd( "frame $e.d" );
-				cmd( "checkbutton $e.d.deb -text \"Debug (this instance only)\" -variable debug" );
+				cmd( "checkbutton $e.d.deb -text \"Debug this instance only\" -variable debug" );
 				cmd( "checkbutton $e.d.deball -text \"Debug all instances\" -variable debugall -command { if { $debugall == 1 } { set debug 1; set undebugall 0; .deb.stat.d.deb configure -state disabled } { set debug 0; set undebugall 1; .deb.stat.d.deb configure -state normal } }" );
 				cmd( "pack $e.d.deb $e.d.deball" );
 
 				cmd( "pack $e.v $e.d -pady 5 -padx 5" );	
 
 				cmd( "frame $e.b1" );
-				cmd( "button $e.b1.eq -width $butWid -text Equation -command {set choice 8}" );
-				cmd( "button $e.b1.cond -width $butWid -text \"Set Break\" -command {set choice 7}" );
-				cmd( "button $e.b1.exec -width $butWid -text Update -command {set choice 9}" );
+				cmd( "button $e.b1.eq -width $butWid -text Equation -command { set choice 8 }" );
+				cmd( "button $e.b1.cond -width $butWid -text \"Set Break\" -command { set choice 7 }" );
+				cmd( "button $e.b1.exec -width $butWid -text Update -command { set choice 9 }" );
 				cmd( "pack $e.b1.eq $e.b1.cond $e.b1.exec -padx 10 -side left" );
 				cmd( "pack $e.b1" );	
 			}
@@ -545,13 +561,13 @@ while ( choice == 0 )
 			cmd( "focus $e.v.l0.e" );
 			cmd( "$e.v.l0.e selection range 0 end" );
 
-			choice=0;
+			choice = 0;
 			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
 			cv->data_loaded='+';
 
-			for ( i = 0; i <= cv->num_lag; ++i )
+			for ( i = 0; i <= eff_lags; ++i )
 			{
 				cmd( "set val%d [ $e.v.l%d.e get ]", i, i ); 
 
@@ -642,7 +658,10 @@ while ( choice == 0 )
 			}
 
 			if ( choice == 9 )
-				cv->cal( cv->up, 0 );
+			{
+				cur = cv->up;
+				cur->cal( cv->label, 0 );
+			}
 
 			if ( choice == 10 )
 			{

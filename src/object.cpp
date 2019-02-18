@@ -547,7 +547,7 @@ void object::update( void )
 
 	for ( cv = v; ! deleted && cv != NULL && quit != 2; cv = cv->next )
 	{ 
-		if ( cv->last_update < t && cv->param == 0 )
+		if ( cv->param == 0 && cv->last_update < t )
 		{
 #ifdef PARALLEL_MODE
 			if ( parallel_ready && cv->parallel && ! cv->dummy )
@@ -662,10 +662,10 @@ Uses the fast bridge look-up map.
 ***************************************************/
 bridge *object::search_bridge( char const *lab, bool no_error )
 {
-	b_mapT::iterator bit = b_map.find( lab );
+	b_mapT::iterator bit;
 
 	// find the bridge which contains the object
-	if ( bit != b_map.end( ) )
+	if ( ( bit = b_map.find( lab ) ) != b_map.end( ) )
 		return bit->second;
 
 	if ( ! no_error )
@@ -673,10 +673,9 @@ bridge *object::search_bridge( char const *lab, bool no_error )
 					"internal problem in LSD", 
 					"if error persists, please contact developers",
 					true );
-
 	return NULL;
 }
-	
+
 
 /****************************************************
 SEARCH (*)
@@ -1342,6 +1341,10 @@ void object::add_var_from_example( variable *example )
 	cv->init( this, example->label, example->num_lag, example->val, example->save );
 	cv->savei = example->savei;
 	cv->last_update = example->last_update;
+	cv->delay = example->delay;
+	cv->delay_range = example->delay_range;
+	cv->period = example->period;
+	cv->period_range = example->period_range;
 	cv->plot = ( ! running ) ? example->plot : false;
 	cv->parallel = example->parallel;
 	cv->observe = example->observe;
@@ -1802,6 +1805,14 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 					if ( t_update >= 0 )
 						cv->last_update = t_update;
 					}
+				
+				// choose next update step for special updating variables
+				if ( cv->delay > 0 || cv->delay_range > 0 )
+				{
+					cv->next_update = cv->last_update + cv->delay;
+					if ( cv->delay_range > 0 )
+						cv->next_update += rnd_int( 0, cv->delay_range );
+			}
 			}
 			
 			if ( cv->save || cv->savei )
@@ -2199,7 +2210,7 @@ double object::cal( object *caller, char const *lab, int lag )
 	}
 
 #ifdef PARALLEL_MODE
-	if ( parallel_ready && cv->parallel && cv->last_update < t && lag == 0 && ! cv->dummy )
+	if ( lag == 0 && parallel_ready && cv->parallel && cv->last_update < t && ! cv->dummy )
 		parallel_update( cv, this, caller );
 #endif
 	return cv->cal( caller, lag );
@@ -2243,6 +2254,7 @@ double object::recal( char const *lab )
 	}
 	
 	cv->last_update = t - 1;
+	cv->next_update = t;
 	
 	return cv->val[ 0 ];
 }
@@ -2642,11 +2654,11 @@ double object::stat( char const *lab, double *r )
 	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = 0;
 	
 	cv = search_var( this, lab, true, no_search );
-    
-    if (cv != NULL){
-        for ( cur = cv->up; cur != NULL; cur = go_brother( cur ) ) { cur->cal (lab, 0); } //update first.
-        cv = search_var( this, lab, true, no_search ); //search again, the original one may be dead.
-    }
+//See https://github.com/marcov64/Lsd/issues/36 for a discussion.
+//    if (cv != NULL){
+//        for ( cur = cv->up; cur != NULL; cur = go_brother( cur ) ) { cur->cal (lab, 0); } //update first.
+//        cv = search_var( this, lab, true, no_search ); //search again, the original one may be dead.
+//    }
     
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
@@ -3317,6 +3329,14 @@ double object::write( char const *lab, double value, int time, int lag )
 		
 		if ( time == -1 && ( cv->save || cv->savei ) )
 				cv->data[ 0 ] = value;
+		
+		// choose next update step for special updating variables
+		if ( cv->delay > 0 || cv->delay_range > 0 )
+		{
+			cv->next_update = 1 + cv->delay;
+			if ( cv->delay_range > 0 )
+				cv->next_update += rnd_int( 0, cv->delay_range );
+	}
 	}
 	else
 	{
@@ -3337,7 +3357,14 @@ double object::write( char const *lab, double value, int time, int lag )
 		if ( lag == 0 )
 		{
 			cv->val[ 0 ] = value;
-			cv->last_update = time;
+	
+			// choose next update step for special updating variables
+			if ( cv->period > 1 || cv->period_range > 0 )
+			{
+				cv->next_update = t + cv->period;
+				if ( cv->period_range > 0 )
+					cv->next_update += rnd_int( 0, cv->period_range );
+		}
 		}
 		else
 		{
@@ -3355,6 +3382,7 @@ double object::write( char const *lab, double value, int time, int lag )
 			cv->val[ eff_lag ] = value;
 		}		
 		
+		cv->last_update = time;
 		eff_time = time - lag;
 		if ( eff_time >= 0 && eff_time <= max_step && ( cv->save || cv->savei ) )
 			cv->data[ eff_time ] = value;
@@ -3403,7 +3431,7 @@ double object::increment( char const *lab, double value )
 		return NAN;
 	}
 	
-	new_value = cv->cal( this, 0 ) + value;
+	new_value = cv->val[ 0 ] + value;
 	this->write( lab, new_value, t );
 	
 	return new_value;
@@ -3449,7 +3477,7 @@ double object::multiply(char const *lab, double value)
         return NAN;
 	}
 	
-	new_value = cv->cal( this, 0 ) * value;
+	new_value = cv->val[ 0 ] * value;
 	this->write( lab, new_value, t );
 	
 	return new_value;

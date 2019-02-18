@@ -59,7 +59,7 @@ Eliminate all the Object like d from the model. Cancel also the their descendant
 *************************************************************/
 
 /*
-USED CASE 95
+USED CASE 97
 */
 
 #include "decl.h"
@@ -75,11 +75,11 @@ int lcount;
 
 
 // list of choices that are bad with existing run data
-int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95 };
+int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
-int redoChoices[ ] = { 33, 55, 74, 75, 76, 77, 78, 79, 80, 83 };
+int redoChoices[ ] = { 33, 55, 74, 75, 76, 77, 78, 79, 80, 83, 96 };
 #define NUM_REDO_CHOICES ( sizeof( redoChoices ) / sizeof( redoChoices[ 0 ] ) )
 
 // comparison function for bsearch and qsort
@@ -151,7 +151,7 @@ void create( void )
 		
 		if ( message_logged )
 		{
-			cmd( "wm deiconify .log; raise .log; focus .log; update idletasks" );
+			cmd( "wm deiconify .log; raise .log; focus .log; update" );
 			message_logged = false;
 		}    
 
@@ -180,10 +180,10 @@ BROWSE
 ****************************************************/
 int browse( object *r, int *choice )
 {
-	bool done;
+	bool done, sp_upd;
 	int num;
 	bridge *cb;
-	variable *ap_v;
+	variable *cv;
 
 	currObj = r;			// global pointer to C Tcl routines
 
@@ -206,49 +206,56 @@ int browse( object *r, int *choice )
 		else
 		{
 			cmd( "set app 0" );
-			for ( ap_v = r->v; ap_v != NULL; ap_v = ap_v->next )
+			
+			for ( cv = r->v; cv != NULL; cv = cv->next )
 			{
+				// special updating scheme?
+				if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 ) )
+					sp_upd = true;
+				else
+					sp_upd = false;
+				
 				// set flags string
-				cmd( "set varFlags \"%s%s%s%s\"", ( ap_v->save || ap_v->savei ) ? "+" : "", ap_v->plot ? "*" : "", ap_v->debug == 'd' ? "!" : "", ap_v->parallel ? "&" : "" );
+				cmd( "set varFlags \"%s%s%s%s%s\"", ( cv->save || cv->savei ) ? "+" : "", cv->plot ? "*" : "", cv->debug == 'd' ? "!" : "", cv->parallel ? "&" : "", sp_upd ? "\u00A7" : "" );
 				
 				// add elements to the listbox 
-				if ( ap_v->param == 0 )
+				if ( cv->param == 0 )
 				{
-					if ( ap_v->num_lag == 0 )
+					if ( cv->num_lag == 0 )
 					{
-						cmd( ".l.v.c.var_name insert end \"%s (V$varFlags)\"", ap_v->label );
+						cmd( ".l.v.c.var_name insert end \"%s (V$varFlags)\"", cv->label );
 						cmd( ".l.v.c.var_name itemconf $app -fg blue" );
 					}
 					else
 					{
-						cmd( ".l.v.c.var_name insert end \"%s (V_%d$varFlags)\"", ap_v->label, ap_v->num_lag );
+						cmd( ".l.v.c.var_name insert end \"%s (V_%d$varFlags)\"", cv->label, cv->num_lag );
 						cmd( ".l.v.c.var_name itemconf $app -fg purple" );
 					}
 				}
 				
-				if ( ap_v->param == 1 )
+				if ( cv->param == 1 )
 				{
-					cmd( ".l.v.c.var_name insert end \"%s (P$varFlags)\"", ap_v->label );
+					cmd( ".l.v.c.var_name insert end \"%s (P$varFlags)\"", cv->label );
 					cmd( ".l.v.c.var_name itemconf $app -fg black" );
 				}
 				
-				if ( ap_v->param == 2 )
+				if ( cv->param == 2 )
 				{
-					if ( ap_v->num_lag == 0 )
+					if ( cv->num_lag == 0 )
 					{
-						cmd( " .l.v.c.var_name insert end \"%s (F$varFlags)\"", ap_v->label );
+						cmd( " .l.v.c.var_name insert end \"%s (F$varFlags)\"", cv->label );
 						cmd( ".l.v.c.var_name itemconf $app -fg firebrick" );
 					}
 					else
 					{
-						cmd( ".l.v.c.var_name insert end \"%s (F_%d$varFlags)\"", ap_v->label, ap_v->num_lag );
+						cmd( ".l.v.c.var_name insert end \"%s (F_%d$varFlags)\"", cv->label, cv->num_lag );
 						cmd( ".l.v.c.var_name itemconf $app -fg tomato" );
 					}
 				}
 
 				cmd( "incr app" );
 
-				if ( ap_v->next == NULL && justAddedVar )	// last variable & just added a new variable?
+				if ( cv->next == NULL && justAddedVar )	// last variable & just added a new variable?
 				{
 					justAddedVar = false;
 					cmd( ".l.v.c.var_name selection clear 0 end; \
@@ -270,24 +277,25 @@ int browse( object *r, int *choice )
 		cmd( "menu .l.v.c.var_name.v -tearoff 0" );
 		cmd( ".l.v.c.var_name.v add command -label Change -command { set choice 7 }" );	// entryconfig 0
 		cmd( ".l.v.c.var_name.v add command -label Properties -command { set choice 75 }" );	// entryconfig 1
-		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 2
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Save (+)\" -variable save -command { set ctxMenuCmd \"set_var_conf $vname save $save\"; set choice 95 }" );	// entryconfig 3
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Run Plot (*)\" -variable plot -command { set ctxMenuCmd \"set_var_conf $vname plot $plot\"; set choice 95 }" );	// entryconfig 4
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Debug (!)\" -state disabled -variable num -command { set ctxMenuCmd \"set_var_conf $vname debug $num\"; set choice 95 }" );	// entryconfig 5
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Parallel (&)\" -state disabled -variable parallel -command { set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; set choice 95 }" );	// entryconfig 6
-		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 7
-		cmd( ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 8
-		cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 9
-		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 10
-		cmd( ".l.v.c.var_name.v add command -label Move -command { set choice 79 }" );	// entryconfig 11
-		cmd( ".l.v.c.var_name.v add command -label Delete -command { set choice 76 }" );	// entryconfig 12
-		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 13
-		cmd( ".l.v.c.var_name.v add command -label Equation -state disabled -command { set choice 29 }" );	// entryconfig 14
-		cmd( ".l.v.c.var_name.v add command -label Using -state disabled -command { set choice 46 }" );	// entryconfig 15
-		cmd( ".l.v.c.var_name.v add command -label \"Used In\" -state disabled -command { set choice 47 }" );	// entryconfig 16
-		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 17
-		cmd( ".l.v.c.var_name.v add command -label \"Initial Values\" -state disabled -command { set choice 77 }" );	// entryconfig 18
-		cmd( ".l.v.c.var_name.v add command -label Sensitivity -state disabled -command { set choice 78 }" );	// entryconfig 19
+		cmd( ".l.v.c.var_name.v add command -label \"Updating (\u00A7)\" -state disabled -command { set choice 96 }" );	// entryconfig 2
+		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 3
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Save (+)\" -variable save -command { set ctxMenuCmd \"set_var_conf $vname save $save\"; set choice 95 }" );	// entryconfig 4
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Run Plot (*)\" -variable plot -command { set ctxMenuCmd \"set_var_conf $vname plot $plot\"; set choice 95 }" );	// entryconfig 5
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Debug (!)\" -state disabled -variable num -command { set ctxMenuCmd \"set_var_conf $vname debug $num\"; set choice 95 }" );	// entryconfig 6
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Parallel (&)\" -state disabled -variable parallel -command { set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; set choice 95 }" );	// entryconfig 7
+		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 8
+		cmd( ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 9
+		cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 10
+		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 11
+		cmd( ".l.v.c.var_name.v add command -label Move -command { set choice 79 }" );	// entryconfig 12
+		cmd( ".l.v.c.var_name.v add command -label Delete -command { set choice 76 }" );	// entryconfig 13
+		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 14
+		cmd( ".l.v.c.var_name.v add command -label Equation -state disabled -command { set choice 29 }" );	// entryconfig 15
+		cmd( ".l.v.c.var_name.v add command -label Using -state disabled -command { set choice 46 }" );	// entryconfig 16
+		cmd( ".l.v.c.var_name.v add command -label \"Used In\" -state disabled -command { set choice 47 }" );	// entryconfig 17
+		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 18
+		cmd( ".l.v.c.var_name.v add command -label \"Initial Values\" -state disabled -command { set choice 77 }" );	// entryconfig 19
+		cmd( ".l.v.c.var_name.v add command -label Sensitivity -state disabled -command { set choice 78 }" );	// entryconfig 20
 
 		// variables panel bindings
 		if ( r->v != NULL )
@@ -313,15 +321,16 @@ int browse( object *r, int *choice )
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-						.l.v.c.var_name.v entryconfig 5 -state normal; \
+						.l.v.c.var_name.v entryconfig 2 -state normal; \
 						.l.v.c.var_name.v entryconfig 6 -state normal; \
-						.l.v.c.var_name.v entryconfig 8 -state normal; \
+						.l.v.c.var_name.v entryconfig 7 -state normal; \
 						.l.v.c.var_name.v entryconfig 9 -state normal; \
-						.l.v.c.var_name.v entryconfig 14 -state normal; \
+						.l.v.c.var_name.v entryconfig 10 -state normal; \
 						.l.v.c.var_name.v entryconfig 15 -state normal; \
 						.l.v.c.var_name.v entryconfig 16 -state normal; \
-						.l.v.c.var_name.v entryconfig 18 -state normal; \
+						.l.v.c.var_name.v entryconfig 17 -state normal; \
 						.l.v.c.var_name.v entryconfig 19 -state normal; \
+						.l.v.c.var_name.v entryconfig 20 -state normal; \
 						set save [ get_var_conf $vname save ]; \
 						set plot [ get_var_conf $vname plot ]; \
 						set num [ get_var_conf $vname debug ]; \
@@ -329,29 +338,32 @@ int browse( object *r, int *choice )
 						switch $color { \
 							purple { } \
 							blue { \
-								.l.v.c.var_name.v entryconfig 18 -state disabled; \
 								.l.v.c.var_name.v entryconfig 19 -state disabled; \
+								.l.v.c.var_name.v entryconfig 20 -state disabled; \
 							} \
 							black { \
-								.l.v.c.var_name.v entryconfig 5 -state disabled; \
+								.l.v.c.var_name.v entryconfig 2 -state disabled; \
 								.l.v.c.var_name.v entryconfig 6 -state disabled; \
-								.l.v.c.var_name.v entryconfig 14 -state disabled; \
-								.l.v.c.var_name.v entryconfig 15 -state disabled \
+								.l.v.c.var_name.v entryconfig 7 -state disabled; \
+								.l.v.c.var_name.v entryconfig 15 -state disabled; \
+								.l.v.c.var_name.v entryconfig 16 -state disabled \
 							} \
 							tomato { \
-								.l.v.c.var_name.v entryconfig 6 -state disabled; \
+								.l.v.c.var_name.v entryconfig 2 -state disabled; \
+								.l.v.c.var_name.v entryconfig 7 -state disabled \
 							} \
 							firebrick { \
-								.l.v.c.var_name.v entryconfig 6 -state disabled; \
-								.l.v.c.var_name.v entryconfig 18 -state disabled; \
+								.l.v.c.var_name.v entryconfig 2 -state disabled; \
+								.l.v.c.var_name.v entryconfig 7 -state disabled; \
 								.l.v.c.var_name.v entryconfig 19 -state disabled; \
+								.l.v.c.var_name.v entryconfig 20 -state disabled; \
 							} \
 						}; \
 						if { $itemfocus == 0 } { \
-							.l.v.c.var_name.v entryconfig 8 -state disabled \
+							.l.v.c.var_name.v entryconfig 9 -state disabled \
 						}; \
 						if { $itemfocus == [ expr [ .l.v.c.var_name size ] - 1 ] } { \
-							.l.v.c.var_name.v entryconfig 9 -state disabled \
+							.l.v.c.var_name.v entryconfig 10 -state disabled \
 						}; \
 						tk_popup .l.v.c.var_name.v %%X %%Y \
 					} \
@@ -553,8 +565,8 @@ int browse( object *r, int *choice )
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 13
 		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -command { set ctxMenuCmd \"set_obj_conf $vname comp [ expr ! $nocomp ]\"; set choice 95 }" );	// entryconfig 14
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 15
-		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );	// entryconfig 14=16
-		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );	// entryconfig 15=17
+		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );	// entryconfig 16
+		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );	// entryconfig 17
 		cmd( "menu .l.s.c.son_name.v.a -tearoff 0" );
 		cmd( ".l.s.c.son_name.v.a add command -label Variable -command { set choice 2; set param 0 }" );
 		cmd( ".l.s.c.son_name.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
@@ -866,6 +878,7 @@ int browse( object *r, int *choice )
 			cmd( "$w add command -label Initialize -underline 0 -command { set choice 49 }" );
 			cmd( "$w add command -label Observe -underline 0 -command { set choice 42 }" );
 			cmd( "$w add command -label Parallelize -underline 0 -command { set choice 86 }" );
+			cmd( "$w add command -label \"Special Updating\" -underline 8 -command { set choice 97 }" );
 			cmd( "$w add command -label \"Sensitivity Analysis\" -underline 1 -command { set choice 66 }" );
 			
 			cmd( "set w .m.run.rem" );
@@ -968,7 +981,7 @@ int browse( object *r, int *choice )
 	// restore correct selection on list boxes
 	cmd( "if { $listfocus == 1 } { \
 			focus .l.v.c.var_name; \
-			if { [ .l.v.c.var_name size ] == 0 } { \
+			if { [ .l.v.c.var_name size ] == 0 || ! [ string is integer -strict $itemfocus ] } { \
 				set itemfocus 0 \
 			} { \
 				if { $itemfocus >= [ .l.v.c.var_name size ] } { \
@@ -982,7 +995,7 @@ int browse( object *r, int *choice )
 		}" );
 	cmd( "if { $listfocus == 2 } { \
 			focus .l.s.c.son_name; \
-			if { [ .l.s.c.son_name size ] == 0 } { \
+			if { [ .l.s.c.son_name size ] == 0 || ! [ string is integer -strict $itemfocus ] } { \
 				set itemfocus 0 \
 			} { \
 				if { $itemfocus >= [ .l.s.c.son_name size ] } { \
@@ -1073,7 +1086,7 @@ double fake = 0;
 FILE *f;
 bridge *cb;
 object *n, *cur, *cur1, *cur2;
-variable *cv, *cur_v;
+variable *cv, *cv1;
 result *rf;					// pointer for results files (may be zipped or not)
 sense *cs;
 description *cur_descr;
@@ -1945,10 +1958,19 @@ case 7:
 	cmd( "pack $T.h.l $T.h.o" );
 
 	cmd( "frame $T.b0" );
-	cmd( "button $T.b0.prop -width $butWid -text Properties -command {set done 5} -underline 1" );
-	cmd( "button $T.b0.mov -width $butWid -text Move -command {set done 13} -underline 0" );
-	cmd( "button $T.b0.del -width $butWid -text Delete -command {set done 10} -underline 2" );
-	cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx 10 -side left" );
+	cmd( "button $T.b0.prop -width $butWid -text Properties -command { set done 5 } -underline 1" );
+	cmd( "button $T.b0.upd -width $butWid -text Updating -command { set done 14 } -underline 7" );
+	cmd( "button $T.b0.mov -width $butWid -text Move -command { set done 13 } -underline 0" );
+	cmd( "button $T.b0.del -width $butWid -text Delete -command { set done 10 } -underline 2" );
+	
+	if ( cv->param == 0 )
+	{
+		cmd( "bind $T <Control-g> \"$T.b0.upd invoke\"; bind $T <Control-G> \"$T.b0.upd invoke\"" );
+		
+		cmd( "pack $T.b0.prop $T.b0.upd $T.b0.mov $T.b0.del -padx 10 -side left" );
+	}
+	else
+		cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx 10 -side left" );
 
 	cmd( "frame $T.b1" );
 
@@ -2046,8 +2068,8 @@ case 7:
 		cmd( "pack $Td.i.int $Td.i.text -anchor w -expand yes -fill both" );
 	  
 		cmd( "frame $Td.b2" );
-		cmd( "button $Td.b2.setall -width [ expr $butWid + 3 ] -text \"Initial Values\" -command {set done 11} -underline 1" );
-		cmd( "button $Td.b2.sens -width [ expr $butWid + 3 ] -text \"Sensitivity\" -command {set done 12} -underline 5" );
+		cmd( "button $Td.b2.setall -width [ expr $butWid + 3 ] -text \"Initial Values\" -command { set done 11 } -underline 1" );
+		cmd( "button $Td.b2.sens -width [ expr $butWid + 3 ] -text \"Sensitivity\" -command { set done 12 } -underline 5" );
 		cmd( "pack $Td.b2.setall $Td.b2.sens -padx 10 -side left" );
 		
 		cmd( "pack $Td.opt $Td.f $Td.b $Td.i $Td.b2 -pady 5" );
@@ -2186,9 +2208,11 @@ case 7:
 		case 13:
 			*choice = 79;			// move element in $vname
 			break;
+		case 14:
+			*choice = 96;			// change updating scheme
+			break;
 		default:
 			*choice = 0;
-			break;
 	}
 
 	if ( *choice != 0 )
@@ -2310,7 +2334,11 @@ case 76:
 			if ( cv->param == 1 || cv->num_lag > 0 )
 				cv->data_loaded = '-';
 			if ( cv->param != 0 )
+			{
 				cv->parallel = false;
+				cv->period = 1;
+				cv->delay = cv->delay_range = cv->period_range = 0;	
+			}
 		}
 	}
 
@@ -2599,6 +2627,120 @@ case 78:
 break;
 
 
+// Change variable (defined by tcl $vname) updating scheme
+case 96:
+
+	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
+		break;
+	sscanf( lab1, "%99s", lab_old );	// get var/par name in lab_old
+	cv = r->search_var( NULL, lab_old );// get var/par pointer
+	if ( cv == NULL )
+		break;
+
+	// save previous values to allow canceling operation
+	temp[ 1 ] = cv->delay; 
+	temp[ 2 ] = cv->delay_range; 
+	temp[ 3 ] = cv->period; 
+	temp[ 4 ] = cv->period_range;
+
+	Tcl_LinkVar( inter, "delay", ( char * ) & cv->delay, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "delay_range", ( char * ) & cv->delay_range, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "period", ( char * ) & cv->period, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "period_range", ( char * ) & cv->period_range, TCL_LINK_INT );
+	
+	cmd( "set T .updating" );
+	cmd( "newtop $T \"Variable Updating\" { set choice 2 }" );
+
+	cmd( "frame $T.h" );
+	cmd( "label $T.h.l1 -text \"Variable:\"" );
+	cmd( "label $T.h.l2 -text \"%s\" -fg red", cv->label );
+	cmd( "pack $T.h.l1 $T.h.l2 -side left -padx 2" );
+		
+	cmd( "frame $T.f" );
+
+	cmd( "frame $T.f.c" );
+	cmd( "label $T.f.c.l2 -width 16 -anchor e -text \"Initial delay\"" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.c.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { if { [ string is integer -strict %%P ] && %%P >= 0 } { set delay %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.c.e2 -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P >= 0 } { set delay %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "$T.f.c.e2 insert 0 $delay" ); 
+	cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx 2 -pady 2" );
+
+	cmd( "frame $T.f.a" );
+	cmd( "label $T.f.a.l -width 16 -anchor e -text \"Random delay range\"" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.a.e -width 7 -from 0 -to 99999 -validate focusout -validatecommand { if { [ string is integer -strict %%P ] && %%P >= 0 } { set delay_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay_range; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.a.e -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P >= 0 } { set delay_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay_range; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "$T.f.a.e insert 0 $delay_range" ); 
+	cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx 2 -pady 2" );
+
+	cmd( "frame $T.f.b" );
+	cmd( "label $T.f.b.l1 -width 16 -anchor e -text \"Period\"" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.b.e1 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { if { [ string is integer -strict %%P ] && %%P > 0 } { set period %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.b.e1 -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 } { set period %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "$T.f.b.e1 insert 0 $period" ); 
+	cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
+
+	cmd( "frame $T.f.d" );
+	cmd( "label $T.f.d.l2 -width 16 -anchor e -text \"Random period range\"" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.d.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { if { [ string is integer -strict %%P ] && %%P >= 0 } { set period_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period_range; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.d.e2 -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P >= 0 } { set period_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period_range; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "$T.f.d.e2 insert 0 $period_range" ); 
+	cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx 2 -pady 2" );
+
+	cmd( "pack $T.f.c $T.f.a $T.f.b $T.f.d -anchor w" );
+
+	cmd( "pack $T.h $T.f -padx 5 -pady 5" );
+
+	cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp browser.html#updating } { set choice 2 }" );
+
+	cmd( "bind $T.f.c.e2 <KeyPress-Return> {focus $T.f.a.e; $T.f.a.e selection range 0 end}" );
+	cmd( "bind $T.f.a.e <KeyPress-Return> {focus $T.f.b.e1; $T.f.b.e1 selection range 0 end}" );
+	cmd( "bind $T.f.b.e1 <KeyPress-Return> {focus $T.f.d.e2; $T.f.d.e2 selection range 0 end}" );
+	cmd( "bind $T.f.d.e2 <KeyPress-Return> {focus $T.f.e.e2; $T.f.e.e2 selection range 0 end}" );
+	
+	cmd( "showtop $T" );
+	cmd( "$T.f.c.e2 selection range 0 end" );
+	cmd( "focus $T.f.c.e2" );
+
+	*choice = 0;
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	cmd( "set delay [ $T.f.c.e2 get ]" ); 
+	cmd( "set delay_range [ $T.f.a.e get ]" ); 
+	cmd( "set period [ $T.f.b.e1 get ]" ); 
+	cmd( "set period_range [ $T.f.d.e2 get ]" ); 
+	
+	cmd( "destroytop $T" );
+
+	if ( *choice == 2 )	// Escape - revert previous values
+	{
+		cv->delay = temp[ 1 ];
+		cv->delay_range = temp[ 2 ];
+		cv->period = temp[ 3 ];
+		cv->period_range = temp[ 4 ];
+	}
+	else
+	// signal unsaved change if anything to be saved
+		if ( temp[ 1 ] != cv->delay || temp[ 2 ] != cv->delay_range || temp[ 3 ] != cv->period || temp[ 4 ] != cv->period_range ) 
+		{
+			for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
+			{
+				cv1 = cur->search_var( NULL, lab_old );
+				cv1->delay = cv->delay;
+				cv1->delay_range = cv->delay_range;
+				cv1->period = cv->period;
+				cv1->period_range = cv->period_range;
+			}
+			
+			unsaved_change( true );
+			redrawRoot = true;
+		}
+		
+	Tcl_UnlinkVar( inter, "delay" );
+	Tcl_UnlinkVar( inter, "delay_range" );
+	Tcl_UnlinkVar( inter, "period" );
+	Tcl_UnlinkVar( inter, "period_range" );
+	
+break;
+
+
 // Exit the browser and run the simulation
 case 1:
 
@@ -2623,7 +2765,7 @@ case 1:
 	}
 
 	// warn missing debugger
-	if ( search_parallel( root ) && ( when_debug > 0 || stack_info > 0 || prof_aggr_time ) )
+	if ( ! parallel_disable && search_parallel( root ) && ( when_debug > 0 || stack_info > 0 || prof_aggr_time ) )
 	{
 		cmd( "set answer [ tk_messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\n\nPress 'OK' to proceed and disable parallel processing settings or 'Cancel' to return to LSD Browser.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }" );
 		if ( *choice == 2 )
@@ -3052,12 +3194,12 @@ case 22:
 	cmd( "set stack_info [ .simset.f.e.e2 get ]" ); 
 	cmd( "set prof_min_msecs [ .simset.f.f.e2 get ]" ); 
 
-	cmd( "destroytop .simset" );
+	cmd( "destroytop $T" );
 
 	if ( *choice == 2 )	// Escape - revert previous values
 	{
 		sim_num = temp[ 1 ];
-		seed = ( unsigned) temp[ 2 ];
+		seed = ( unsigned ) temp[ 2 ];
 		max_step = temp[ 3 ];
 		when_debug = temp[ 4 ];
 		stack_info = temp[ 5 ];
@@ -3156,8 +3298,7 @@ case 28:
 	lab1 = ( char * ) Tcl_GetVar( inter, "res1", 0 );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
-	sscanf( lab1, "%499s", lab );
-	strncpy( equation_name, lab, MAX_PATH_LENGTH - 1 );
+	sscanf( lab1, "%499s", equation_name );
 	
 	unsaved_change( true );		// signal unsaved change
 
@@ -3262,6 +3403,18 @@ case 86:
 	plog( "\n\nMulti-object variables to run in parallel:\n" );
 	lcount = 0;
 	show_parallel( root );
+	if ( lcount == 0 )
+		plog( "(none)\n" );
+
+break;
+
+
+// Show variables with special updating
+case 97:
+
+	plog( "\n\nVariables with special updating scheme:\n" );
+	lcount = 0;
+	show_special_updat( root );
 	if ( lcount == 0 )
 		plog( "(none)\n" );
 
@@ -3783,7 +3936,7 @@ case 55:
 	cv = r->search_var( r, msg, true );
 	if ( cv != NULL )
 	{
-		for ( i = 0, cur_v = cv->up->v; cur_v != cv; cur_v = cur_v->next, ++i );
+		for ( i = 0, cv1 = cv->up->v; cv1 != cv; cv1 = cv1->next, ++i );
 		cmd( "set listfocus 1; set itemfocus %d", i );
 		redrawRoot = true;			// request browser redraw
 		return cv->up;
@@ -5951,9 +6104,9 @@ void show_debug( object *n )
 		if ( cv->debug == 'd' )
 		{
 			if ( cv->param == 0 )
-				plog( "Object: %s \tVariable :\t", "", n->label );
+				plog( "Object: %s \tVariable:\t", "", n->label );
 			if ( cv->param == 2 )
-				plog( "Object: %s \tFunction :\t", "", n->label );
+				plog( "Object: %s \tFunction:\t", "", n->label );
 			plog( "%s\n", "highlight", cv->label );
 			lcount++;
 		}
@@ -5981,7 +6134,7 @@ void show_parallel( object *n )
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		if ( cv->parallel )
 		{
-			plog( "Object: %s \tVariable :\t", "", n->label );
+			plog( "Object: %s \tVariable:\t", "", n->label );
 			plog( "%s\n", "highlight", cv->label );
 			lcount++;
 		}
@@ -5993,6 +6146,34 @@ void show_parallel( object *n )
 		else
 			co = cb->head; 
 		show_parallel( co );
+	}
+}
+
+
+/****************************************************
+SHOW_SPECIAL_UPDAT
+****************************************************/
+void show_special_updat( object *n )
+{
+	bridge *cb;
+	object *co;
+	variable *cv;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		if ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 )
+		{
+			plog( "Object: %s \tVariable:\t", "", n->label );
+			plog( "%s\n", "highlight", cv->label );
+			lcount++;
+		}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head; 
+		show_special_updat( co );
 	}
 }
 
@@ -6384,7 +6565,6 @@ bool descending_variables( const variable &a, const variable &b )
 bool sort_listbox( int box, int order, object *r )
 {
 	bool first;
-	int i;
 	
 	// handle variable/parameter list
 	if ( box == 1 )
@@ -6397,7 +6577,7 @@ bool sort_listbox( int box, int order, object *r )
 		list < variable > :: iterator it;
 		
 		// move LSD linked list of variables to a C++ linked list
-		for ( cv = r->v; cv != NULL; ++i, cv = cv1 )
+		for ( cv = r->v; cv != NULL; cv = cv1 )
 		{
 			cv1 = cv->next;
 			
@@ -6497,7 +6677,7 @@ bool sort_listbox( int box, int order, object *r )
 		list < bridge > :: iterator it;
 		
 		// move LSD linked list of objects to a C++ linked list
-		for ( cb = r->b; cb != NULL; ++i, cb = cb1 )
+		for ( cb = r->b; cb != NULL; cb = cb1 )
 		{
 			cb1 = cb->next;
 			newb.push_back( *cb );
