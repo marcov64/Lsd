@@ -2274,7 +2274,8 @@ double object::sum( char const *lab, int lag )
 	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+        // cv = blueprint->search_var( this, lab, true, no_search );        
+        cv = blueprint->search( this->label )->search_var( this, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for summing", lab );
@@ -2513,7 +2514,8 @@ double object::sd( char const *lab, int lag )
 	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+        // cv = blueprint->search_var( this, lab, true, no_search );        
+        cv = blueprint->search( this->label )->search_var( this, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for calculating s.d.", lab );
@@ -2663,6 +2665,7 @@ double object::stat( char const *lab, double *r )
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
 		cv = blueprint->search_var( this, lab, true, no_search );        
+        // cv = blueprint->search( this->label )->search_var( this, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for calculating statistics", lab );
