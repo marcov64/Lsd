@@ -76,7 +76,7 @@ Initialise the model
   if (V("lattice")>0){
     if (COUNTS(p->up,"Model")==1){
       cur = SEARCH("Patch");
-      INIT_LAT_GISS(cur);
+      INIT_LAT_GISS(cur,1000); //free patches are white
     }
   }
   #endif
@@ -103,7 +103,7 @@ Initialise the model
   	double nAgentsBlue = nAgents * V("fracBlue");
   	i = 0;
   	RCYCLE_GISS(SEARCH("Agent"),cur,"Agent"){
-  		i++; //increase by 1
+  		++i; //increase by 1
   		if (i <= nAgentsBlue) {
   			WRITES(cur,"Colour",5); //blue
   		} else {
@@ -112,7 +112,8 @@ Initialise the model
       #ifndef NO_WINDOW
       if (V("lattice")>0){
         if (COUNTS(p->up,"Model")==1){
-          WRITE_LAT_GISS(cur,VS(cur,"Colour"));
+          SET_LAT_COLORS(cur,VS(cur,"Colour"));
+          SET_LAT_PRIORITYS(cur,0);
         }
       }
       #endif
@@ -204,21 +205,7 @@ The agent moves if it is not content with its situation.
     if (freePatch != NULL){
       move = 1; 	//move
     	/* For now: Manual approach */
-      #ifndef NO_WINDOW
-      if (V("lattice")>1){
-        if (COUNTS(p->up,"Model")==1){
-          WRITE_LAT_GIS(1000); //free white
-        }
-      }
-      #endif
       TELEPORT_SHARE(freePatch);
-      #ifndef NO_WINDOW
-      if (V("lattice")>1){
-        if (COUNTS(p->up,"Model")==1){
-          WRITE_LAT_GIS(V("Colour"));
-        }
-      }
-      #endif
     }
   }
 RESULT( move )
@@ -275,13 +262,6 @@ EQUATION("EndOfSim")
     #ifndef NO_WINDOW
     if (V("lattice")>0){
       if (COUNT("Model")==1){
-        FCYCLE_GISS(SEARCH("Patch"),cur,"Patch"){ //Update whole lattice
-          cur1 = SEARCH_POSITIONS(cur,"Agent");
-          if (cur1 == NULL)
-            WRITE_LAT_GISS(cur,1000); //free
-          else
-            WRITE_LAT_GISS(cur,VS(cur1,"Colour"));
-        }
         char filename[300];
         sprintf(filename,"%s_%g_final",CONFIG,RND_SEED);
         SAVE_LAT(filename);

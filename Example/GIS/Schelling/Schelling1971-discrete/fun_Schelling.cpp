@@ -73,7 +73,7 @@ Initialise the model
   if (V("lattice")>0){
     if (COUNTS(p->up,"Model")==1){
       cur = SEARCH("Patch");
-      INIT_LAT_GISS(cur);
+      INIT_LAT_GISS(cur,1000); //white for free patches
     }
   }
   #endif
@@ -109,7 +109,8 @@ Initialise the model
       #ifndef NO_WINDOW
       if (V("lattice")>0){
         if (COUNTS(p->up,"Model")==1){
-          WRITE_LAT_GISS(cur,VS(cur,"Colour"));
+          SET_LAT_COLORS(cur,VS(cur,"Colour"));
+          SET_LAT_PRIORITYS(cur,0);
         }
       }
       #endif
@@ -201,21 +202,7 @@ The agent moves if it is not content with its situation.
     if (freePatch != NULL){
       move = 1; 	//move
     	/* For now: Manual approach */
-      #ifndef NO_WINDOW
-      if (V("lattice")>0){
-        if (COUNTS(p->up,"Model")==1){
-          WRITE_LAT_GIS(1000); //free white
-        }
-      }
-      #endif
       TELEPORT_SHARE(freePatch);
-      #ifndef NO_WINDOW
-      if (V("lattice")>0){
-        if (COUNTS(p->up,"Model")==1){
-          WRITE_LAT_GIS(V("Colour"));
-        }
-      }
-      #endif
     }
   }
 RESULT( move )

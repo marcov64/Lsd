@@ -326,8 +326,8 @@ struct object
 #ifdef CPP11
     //set the new GIS handling methods
     void set_distance_type( char type ); //switch distance type
-    // void set_distance_type( int type ); //using integers
-    // void set_distance_type( double type ); //using double as in LSD Variables
+    void set_distance_type( int type ); //using integers
+    void set_distance_type( double type ); //using double as in LSD Variables
     void set_distance_type( char const type[] );
     char read_distance_type();
     double distance(object* other); //distance to other object
@@ -376,7 +376,7 @@ struct object
 
     void register_allOfKind_at_grid_rnd(object* obj);
     bool register_at_map_rnd(object* gisObj, bool snap_grid = false);
-    bool register_at_map(gisMap* map, double _x, double _y);
+    bool register_at_map(gisMap* map, double _x, double _y, int lattice_color=0, int lattice_priority=-1);
     bool register_at_map(object* shareObj ); //register at same position as gisObj
 
     bool register_at_map_between(gisMap* map, double _x, double _y, double _x2, double _y2);
@@ -403,10 +403,13 @@ struct object
     std::string gis_info();
 
     double init_lattice_gis(int init_color = 1000, double pixW = 400, double pixH = 400);
-    double update_lattice_gis(double colour);
-    double update_lattice_gis(double x, double y, double colour, bool noChange);
+    double write_lattice_gis(double colour);
+    double write_lattice_gis(double x, double y, double colour, bool noChange);
+    double update_lattice_gis(int x, int y);
     double read_lattice_gis( );
     double read_lattice_gis( double x, double y, bool noChange);
+    void set_lattice_priority(int priority);
+    void set_lattice_color(int color);
 
     int load_data_gis( const char* inputfile, const char* obj_lab, const char* var_lab, int t_update );
 
@@ -563,11 +566,13 @@ struct gisPosition {
     gisMap* map;  //link to shared map
     double x;     //x position
     double y;     //y position
-    double z;     //z position, if any (default 0, not used in map!
+    double z;     //z position, if any (default 0, not used in map!)
+    int lattice_color; //only used if the lattice is used.
+    int lattice_priority; //negative: does not count
     std::deque<std::pair <double, object*> > objDis_inRadius; //list of objects in range, used by search
     std::deque<std::pair <double, object*> >::iterator it_obj; //iterator for the CYCLES
 
-    gisPosition (gisMap* map, double x, double y, double z = 0) : map(map), x(x), y(y), z(z) //constructor.
+    gisPosition (gisMap* map, double x, double y, double z = 0, int lattice_color = 0, int lattice_priority = -1) : map(map), x(x), y(y), z(z), lattice_color(lattice_color),lattice_priority(lattice_priority)  //constructor.
     {
     };
 };
@@ -648,14 +653,17 @@ struct gisMap {
     	Examples: 0 = None, 1 = left, 2 = right, 3 (1+2) left-right,
     	5 up, 7 down, 12 (5+7) up-down, 15 (1+2+5+7) torus.
     */
+    bool has_lattice;   
     double center_x;
     double center_y;    
     double max_distance;
-    std::vector<std::vector <std::deque<object*> >> elements;
+    std::vector<std::vector <std::deque<object*> >> elements;    
+    std::vector<std::vector <int> > local_lattice; //Buffer colours from WRITE command outside of priority list.
     int nelements; //count number of elements
 
     gisMap(int xn, int yn, int _wrap = 0, char distance_type = 'e') : xn(xn), yn(yn), wrap(_wrap), distance_type(distance_type) //constructor
     {
+        has_lattice = false;             
         nelements = 0;
         elements.resize(xn);
         for (auto& x : elements) {
@@ -864,6 +872,7 @@ extern mt19937 mt32;						// Mersenne-Twister 32 bits generator
 extern mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
 extern ranlux24 lf24;						// lagged fibonacci 24 bits generator
 extern ranlux48 lf48;						// lagged fibonacci 48 bits generator
+extern int **lattice; //for usage with GIS
 #endif //#ifdef CPP11
 extern int sim_num;
 extern int t;

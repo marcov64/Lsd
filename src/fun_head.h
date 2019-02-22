@@ -868,18 +868,24 @@ bool no_ptr_chk = true;
 
     #define V_LAT_GIS                   ( p->read_lattice_gis( ) )
     #define V_LAT_GISS( PTR )           ( PTR->read_lattice_gis( ) )
-    #define WRITE_LAT_GIS( VAL )        ( p->update_lattice_gis( VAL ) )
-    #define WRITE_LAT_GISS( PTR, VAL )  ( PTR->update_lattice_gis( VAL ) )
+    #define WRITE_LAT_GIS( VAL )        ( p->write_lattice_gis( VAL ) )
+    #define WRITE_LAT_GISS( PTR, VAL )  ( PTR->write_lattice_gis( VAL ) )
 
     #define V_LAT_GIS_XY( X, Y )                    ( p->read_lattice_gis( X, Y, true ) )
     #define V_LAT_GIS_XYS( PTR, X, Y )              ( PTR->read_lattice_gis( X, Y, true ) )
-    #define WRITE_LAT_GIS_XY( X, Y, VAL )           ( p->update_lattice_gis( X, Y, VAL, true ) )
-    #define WRITE_LAT_GIS_XYS( PTR, X, Y, VAL )     ( PTR->update_lattice_gis( X, Y, VAL, true ) )
+    #define WRITE_LAT_GIS_XY( X, Y, VAL )           ( p->write_lattice_gis( X, Y, VAL, true ) )
+    #define WRITE_LAT_GIS_XYS( PTR, X, Y, VAL )     ( PTR->write_lattice_gis( X, Y, VAL, true ) )
 
     #define V_LAT_GIS_ADJUST_XY( X, Y )                 ( p->read_lattice_gis( X, Y, false ) )
     #define V_LAT_GIS_ADJUST_XYS( PTR, X, Y )           ( PTR->read_lattice_gis( X, Y, false ) )
-    #define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL )        ( p->update_lattice_gis( X, Y, VAL, false ) )
-    #define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL )  ( PTR->update_lattice_gis( X, Y, VAL, false ) )
+    #define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL )        ( p->write_lattice_gis( X, Y, VAL, false ) )
+    #define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL )  ( PTR->write_lattice_gis( X, Y, VAL, false ) )
+    
+    #define SET_LAT_PRIORITY( VAL ) ( p->set_lattice_priority( (VAL) ) )
+    #define SET_LAT_PRIORITYS( PTR, VAL ) ( PTR->set_lattice_priority( (VAL) ) )
+    #define SET_LAT_COLOR( VAL ) ( p->set_lattice_color( (VAL) ) )
+    #define SET_LAT_COLORS( PTR, VAL ) ( PTR->set_lattice_color( (VAL) ) )    
+    
 #else
 
     #define INIT_LAT_GIS( ... )         ( void( ) )
@@ -901,6 +907,11 @@ bool no_ptr_chk = true;
     #define V_LAT_GIS_ADJUST_XYS( PTR, X, Y )           ( void( ) )
     #define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL )        ( void( ) )
     #define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL )  ( void( ) )
+    
+    #define SET_LAT_PRIORITY( VAL )         ( void( ) )
+    #define SET_LAT_PRIORITYS( PTR, VAL )   ( void( ) )
+    #define SET_LAT_COLOR( VAL )            ( void( ) )
+    #define SET_LAT_COLORS( PTR, VAL )      ( void( ) )
 #endif
 
 //And some new macros to load data from txt files.

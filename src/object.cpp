@@ -1770,7 +1770,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 	if (gis)              // if object is part of a gis/map
 	{
 		cur->position = NULL; //reset, to not take position from ext
-		if (cur->register_at_map(ex->ptr_map(), ex->position->x, ex->position->y) == false) //register at map
+		if (cur->register_at_map(ex->ptr_map(), ex->position->x, ex->position->y, ex->position->lattice_color, ex->position->lattice_priority) == false) //register at map
 		{
 			return NULL; //error, msgs contained in register_at_map
 		}
@@ -2664,8 +2664,8 @@ double object::stat( char const *lab, double *r )
     
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );        
-        // cv = blueprint->search( this->label )->search_var( this, lab, true, no_search );
+		// cv = blueprint->search_var( this, lab, true, no_search );        
+        cv = blueprint->search( this->label )->search_var( this, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for calculating statistics", lab );

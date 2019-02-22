@@ -53,32 +53,32 @@
 
 char gismsg[300];
 
-// void object::set_distance_type( double type )
-// {
-    // return set_distance_type(int(type));
-// }
+void object::set_distance_type( double type )
+{
+    return set_distance_type(int(type));
+}
 
-// void object::set_distance_type( int type )
-// {
-    // if (type != 0 && type != 1 && type != 2 ) {
-        // sprintf( gismsg, "failure in set_distance_type() for distance type '%c'", type );
-        // error_hard( gismsg, "this is not a valid type",
-                    // "Change to a valid type (0 / e, 1 / m or 2 / c)" );
-        // return;
-    // }
-    // if (type == 0)
-        // return set_distance_type('e');
-    // else if (type == 1)
-        // return set_distance_type('m');
-    // else if (type == 2)
-        // return set_distance_type('c');
-// }
+void object::set_distance_type( int type )
+{
+    if (type != 0 && type != 1 && type != 2 ) {
+        sprintf( gismsg, "failure in set_distance_type() for distance type '%c'", type );
+        error_hard( gismsg, "this is not a valid type",
+                    "Change to a valid type (0 / e, 1 / m or 2 / c)" );
+        return;
+    }
+    if (type == 0)
+        return set_distance_type('e');
+    else if (type == 1)
+        return set_distance_type('m');
+    else if (type == 2)
+        return set_distance_type('c');
+}
 
 void object::set_distance_type( char const type[] )
 {
     return set_distance_type(type[0]);
 }
-    
+
 
 
 void object::set_distance_type( char type )
@@ -90,7 +90,7 @@ void object::set_distance_type( char type )
         return;
     }
     if (type != 'e' && type != 'm' && type != 'c' &&
-        type != 'E' && type != 'M' && type != 'C') {
+            type != 'E' && type != 'M' && type != 'C') {
         sprintf( gismsg, "failure in set_distance_type() for distance type '%c'", type );
         error_hard( gismsg, "this is not a valid type",
                     "Change to a valid type (Chebyshev, Euclidean or Manhattan)" );
@@ -424,7 +424,7 @@ void object::register_allOfKind_at_grid_rnd(object* obj)
             positions.emplace_back(RND, x, y);
         }
     }
-    std::sort(positions.begin(),positions.end());
+    std::sort(positions.begin(), positions.end());
 
     //Cycle through all objects in the linked list and at them to random places
     object* cur = obj->up->search(obj->label);
@@ -469,7 +469,7 @@ bool object::register_at_map_rnd(object* gisObj, bool snap_grid)
 
 //  register_at_map
 //  register the object at the map, using x and y positions
-bool object::register_at_map(gisMap* map, double _x, double _y)
+bool object::register_at_map(gisMap* map, double _x, double _y, int lattice_color, int lattice_priority)
 {
     if (map == NULL) {
         sprintf( gismsg, "failure in register_at_map() for object '%s'", label );
@@ -490,7 +490,7 @@ bool object::register_at_map(gisMap* map, double _x, double _y)
             return change_position(_x, _y);
         }
     }
-    position = new gisPosition(map, _x, _y);
+    position = new gisPosition(map, _x, _y, lattice_color, lattice_priority);
     if ( position == NULL ) {
         error_hard( "cannot allocate memory for register_at_map()",
                     "out of memory");
@@ -518,14 +518,22 @@ bool object::register_position(double _x, double _y)
     }
     position->x = _x;
     position->y = _y;
-    position->map->elements.at(int(_x)).at(int(_y)).push_back( this );
+    int x = position->x;
+    int y = position->y;
+    position->map->elements.at(x).at(y).push_back( this );
     position->map->nelements++;
+#ifndef NO_WINDOW
+    if (position->map->has_lattice) {
+        update_lattice_gis(x, y);
+    }
+#endif
     return true;
 }
 
 // unregister_position
 // unregister the object at the position.
 // when move is false, the map is deleted if it is the last element in the map.
+// when has_lattice, the lattice is updated to the colour of the last element alive or the init default.
 bool object::unregister_position(bool move)
 {
     if (ptr_map() == NULL) {
@@ -535,20 +543,34 @@ bool object::unregister_position(bool move)
         return false;
     }
     //https://stackoverflow.com/a/31329841/3895476
-    auto begin = position->map->elements.at(int(position->x)).at(int(position->y)).begin();
-    auto end   = position->map->elements.at(int(position->x)).at(int(position->y)).end();
+    int x = (int) position->x;
+    int y = (int) position->y;
+    auto begin = position->map->elements.at(x).at(y).begin();
+    auto end   = position->map->elements.at(x).at(y).end();
+    bool is_removed = false;
     for (auto it_item =  begin;  it_item != end; it_item++) {
         if (*it_item == this ) {
-            position->map->elements.at(int(position->x)).at(int(position->y)).erase(it_item);
+            position->map->elements.at(x).at(y).erase(it_item);
             position->map->nelements--;
+#ifndef NO_WINDOW
+            if (position->map->has_lattice) {
+                update_lattice_gis(x, y);
+            }
+#endif
             if (move == false && position->map->nelements == 0) { //important: If unregistering before move, do not delete gis map
                 //Last element removed
+#ifndef NO_WINDOW
+                if (position->map->has_lattice) {
+                    empty_lattice();
+                }
+#endif
                 delete position->map;
                 position->map = NULL;
             }
             return true;
         }
     }
+    //Default
     sprintf( gismsg, "failure in unregister_position() for object '%s'", label );
     error_hard( gismsg, "the object is not registered in the map connected to",
                 "check your code to prevent this situation" );
@@ -812,11 +834,11 @@ double object::distance(object* b)
     char distance_type = position->map->distance_type;
     switch (distance_type) {
         case 'e' : //Euclidean
-        case 'E' :        
+        case 'E' :
             return sqrt( pseudo_distance(b) );
 
         case 'm' : //Manhattan
-        case 'M' :        
+        case 'M' :
         case 'c' : //Chebyshev
         case 'C' :
             return pseudo_distance(b);  //pseudo and distance are equivalent
@@ -834,13 +856,13 @@ double object::distance(double x, double y)
     char distance_type = position->map->distance_type;
     switch (distance_type) {
         case 'e' : //Euclidean
-        case 'E' :        
+        case 'E' :
             return sqrt( pseudo_distance( x, y ) );
 
         case 'm' : //Manhattan
-        case 'M' :        
+        case 'M' :
         case 'c' : //Chebyshev
-        case 'C' :        
+        case 'C' :
             return pseudo_distance( x, y );  //pseudo and distance are equivalent
     }
 }
@@ -856,13 +878,13 @@ double object::distance(double x_1, double y_1, double x_2, double y_2)
     char distance_type = position->map->distance_type;
     switch (distance_type) {
         case 'e' : //Euclidean
-        case 'E' :        
+        case 'E' :
             return sqrt( pseudo_distance( x_1, y_1, x_2, y_2 ) );
 
         case 'm' : //Manhattan
-        case 'M' :        
+        case 'M' :
         case 'c' : //Chebyshev
-        case 'C' :        
+        case 'C' :
             return pseudo_distance( x_1, y_1, x_2, y_2 );  //pseudo and distance are equivalent
     }
 }
@@ -987,7 +1009,7 @@ struct add_if_dist_lab_cond {
         char distance_type = this_obj->read_distance_type();
         switch (distance_type) {
             case 'e' : //Euclidean
-            case 'E' :            
+            case 'E' :
                 pseudo_radius =  radius * radius;
                 break;
 
@@ -1305,7 +1327,7 @@ object* object::closest_in_distance(char const lab[], double radius, bool random
     }
 
 
-    if (position->objDis_inRadius.empty() == true) {        
+    if (position->objDis_inRadius.empty() == true) {
         return NULL; //no option found;
     }
     else {
@@ -1674,12 +1696,67 @@ double object::init_lattice_gis(int init_color, double pixW, double pixH)
     }
 #endif
     //double init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
+    //check if lattice has been initialised before.
+    if (lattice != NULL) {
+        sprintf( gismsg, "failure in gis_init_lattice() for object '%s'", label );
+        error_hard( gismsg, "the lattice has already been initialised. Re-initialising is not allowed.",
+                    "check your code to prevent this situation" );
+        return -1;
+    }
+    position->map->has_lattice = true;
+    position->map->local_lattice.resize(position->map->xn);
+    for (auto& x : position->map->local_lattice) {
+        x.resize(position->map->yn); //number of rows, copy
+        for (auto& item : x) {
+            item = init_color;
+        }
+    }
     return init_lattice( init_color, position->map->yn, position->map->xn, pixW, pixH  );
 }
 
 //Lattice commands adjusted for GIS
 
-double object::update_lattice_gis(double colour)
+double object::write_lattice_gis(double colour)
+{
+#ifndef NO_POINTER_CHECK
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in write_lattice_gis() for object '%s'", label );
+        error_hard( gismsg, "the object is not registered in any map",
+                    "check your code to prevent this situation" );
+        return -1;
+    }
+#endif
+    return write_lattice_gis(position->x, position->y, colour, true);
+}
+
+double object::write_lattice_gis(double x, double y, double colour, bool noChange)
+{
+#ifndef NO_POINTER_CHECK
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in write_lattice_gis() for object '%s'", label );
+        error_hard( gismsg, "the object is not registered in any map",
+                    "check your code to prevent this situation" );
+        return -1;
+    }
+#endif
+    if (false == position->map->has_lattice) {
+        sprintf( gismsg, "failure in write_lattice_gis() for object '%s'", label );
+        error_hard( gismsg, "the map is not connected to a graphical lattice",
+                    "check your code to prevent this situation" );
+        return -1;
+    }
+    if (check_positions(x, y, noChange) == false) {
+        return -1; //error
+    }
+
+    //save to static gis lattice
+    position->map->local_lattice.at( (int)x ).at( (int)y ) = (int) colour;
+    return update_lattice_gis( (int)x, (int)y ); //send to graphical lattice
+}
+
+
+
+double object::update_lattice_gis(int x, int y) //we know that x y are correct by here
 {
 #ifndef NO_POINTER_CHECK
     if (ptr_map() == NULL) {
@@ -1689,34 +1766,36 @@ double object::update_lattice_gis(double colour)
         return -1;
     }
 #endif
-    return update_lattice_gis(position->x, position->y, colour, true);
-}
-
-
-
-double object::update_lattice_gis(double x, double y, double colour, bool noChange)
-{
-#ifndef NO_POINTER_CHECK
-    if (ptr_map() == NULL) {
-        sprintf( gismsg, "failure in write_lattice_gis() for object '%s'", label );
-        error_hard( gismsg, "the object is not registered in any map",
+    if (false == position->map->has_lattice) {
+        sprintf( gismsg, "failure in update_lattice_gis() for object '%s'", label );
+        error_hard( gismsg, "the map is not connected to a graphical lattice",
                     "check your code to prevent this situation" );
         return -1;
     }
-#endif
-    if (check_positions(x, y, noChange) == false) {
-        return -1; //error
+
+
+    //Cycle through all elements at position and select colour from the one with the highest priority.
+    //If none is present, default to the static / non-object lattice
+    int highest_lat_priority = -1;
+    int lat_color = position->map->local_lattice.at(x).at(y); //default with minimum priority (<0)
+    for ( const auto& item : position->map->elements.at(x).at(y) ) {
+        if (item->position->lattice_priority > highest_lat_priority) {
+            highest_lat_priority = item->position->lattice_priority;
+            lat_color = item->position->lattice_color;
+        }
     }
+
     //transform coordinates for lattice. internally lattice starts with (0,0) top left. (in update_lattice/externally with (1,1) )
-    //gis starts with (0,0) top down.   
-    double line = position->map->yn - ( y == 0 ? 1 : y ); //special case where y == 0 -> yn-1 . For each y>0.0 int truncs accordingly
-    return update_lattice( line + 1, x + 1, colour );
+    //gis starts with (0,0) top down.
+
+    return update_lattice( position->map->yn - y,   x + 1, lat_color ); //send to graphical lattice
 }
+
 double object::read_lattice_gis( )
 {
 #ifndef NO_POINTER_CHECK
     if (ptr_map() == NULL) {
-        sprintf( gismsg, "failure in write_lattice_gis() for object '%s'", label );
+        sprintf( gismsg, "failure in read_lattice_gis() for object '%s'", label );
         error_hard( gismsg, "the object is not registered in any map",
                     "check your code to prevent this situation" );
         return -1;
@@ -1735,6 +1814,12 @@ double object::read_lattice_gis( double x, double y, bool noChange)
         return -1;
     }
 #endif
+    if (false == position->map->has_lattice) {
+        sprintf( gismsg, "failure in read_lattice_gis() for object '%s'", label );
+        error_hard( gismsg, "the map is not connected to a graphical lattice",
+                    "check your code to prevent this situation" );
+        return -1;
+    }
     if (check_positions(x, y, noChange) == false) {
         sprintf( gismsg, "failure in read_lattice_gis() for object '%s'", label );
         error_hard( gismsg, "reading from xy outside of canvas",
@@ -1742,9 +1827,31 @@ double object::read_lattice_gis( double x, double y, bool noChange)
         return -1; //error
     }
     //transform coordinates for lattice. lattice starts with (0,0) top left.
-    //gis starts with (0,0) top down.
-    double line = position->map->yn - ( y == 0 ? 1 : y ); //special case where y == 0 -> yn-1 . For each y>0.0 int truncs accordingly
-    return read_lattice( line + 1, x + 1 );
+    //gis starts with (0,0) top down.    
+    return read_lattice( position->map->yn - y, x + 1 );
+}
+
+void object::set_lattice_priority(int priority)
+{
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in set_lattice_priority() for object '%s'", label );
+        error_hard( gismsg, "the object is not registered in any map",
+                    "check your code to prevent this situation" );
+        return;
+    }
+    position->lattice_priority = priority;
+    update_lattice_gis( (int) position->x, (int) position->y );
+}
+void object::set_lattice_color(int color)
+{
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in set_lattice_color() for object '%s'", label );
+        error_hard( gismsg, "the object is not registered in any map",
+                    "check your code to prevent this situation" );
+        return;
+    }
+    position->lattice_color = color;
+    update_lattice_gis( (int) position->x, (int) position->y );
 }
 
 int object::load_data_gis( const char* inputfile, const char* obj_lab, const char* var_lab, int t_update )
@@ -1803,6 +1910,7 @@ std::string object::gis_info()
         sprintf(buffer, "\nGIS OBJECT INFO: '%s' UID %g position (%g,%g) at map %p", label, unique_id(), position->x, position->y, position->map);
     else
         sprintf(buffer, "\nGIS OBJECT INFO: '%s' (no uID) position (%g,%g) at map %p", label, position->x, position->y, position->map);
+
     return std::string(buffer);
 }
 

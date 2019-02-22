@@ -30,8 +30,7 @@ int active_cells = V("PercActive") *  V("ncol") * V("nrow") ;
 if (active_cells > 0) {
   //Cycle randomly through cells and active the first active_cells cells.
   RCYCLE_GIS(cur,"Cell"){
-    WRITELS(cur,"State",1, t-1);
-    WRITE_LAT_GISS(cur,VLS(cur,"State",1));
+    WRITELS(cur,"State",1, t-1);        
     active_cells--;
     if (active_cells == 0){
       break; //stop when the specified number of cells have been made alive.
@@ -53,6 +52,10 @@ LOAD_DATA_GIS(SELECT_FILE("Select file with initial active cells and values"),"C
     }
   }
 
+}
+CYCLE(cur,"Cell"){
+    SET_LAT_PRIORITYS(cur,0); //Make them visible
+    SET_LAT_COLORS(cur,VLS(cur,"State",1));
 }
 PARAMETER
 RESULT(0.0)
@@ -88,7 +91,7 @@ if (1.0 == state) {
 }
 
 if (CURRENT != state){
-  WRITE_LAT_GIS(state); //update lattice
+  SET_LAT_COLOR(state); //update lattice
 }
 
 RESULT( state )

@@ -76,7 +76,7 @@ Object: Patch C	1
 Func: isOption 0 n + n n
 
 SIM_NUM 1
-SEED 2
+SEED 1
 MAX_STEP 1000
 EQUATION fun_Schelling.cpp
 MODELREPORT report_Sim1.html

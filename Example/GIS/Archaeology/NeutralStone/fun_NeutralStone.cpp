@@ -23,65 +23,65 @@ RESULT(T)
 
 EQUATION("Init")
 /* Initialise the model */
-
-//Create the geography - no wrapping
-double xn = V("xn");
-double yn = V("yn");
-double wrap = V("wrap");
-INIT_SPACE_ROOT_WRAP(xn, yn, wrap);
-
-if ( 0 < V("UsePajek") )
+double init_ret = 0.0;
 {
-		USE_PAJEK = true;
-    PAJ_INIT_ANIM("Pajek", "Test", RND_SEED, "Neutral-Model");
-}
+    //Create the geography - no wrapping
+    double xn = V("xn");
+    double yn = V("yn");
+    double wrap = V("wrap");
+    INIT_SPACE_ROOT_WRAP(xn, yn, wrap);
 
-
-if (1.0 == V("GraphLat") )
-{
-    INIT_LAT_GIS(0); //Create a visualisation - all black
-}
-
-MAKE_UNIQUE("Resource");//Provide Resources with unique IDs
-
-
-double n_resources = V("n_resources"); //Create the missing resources
-ADDNOBJ("Resource", n_resources - 1); //one exists already
-
-
-ADD_ALL_TO_SPACE(SEARCH("Resource")); //add them to space
-
-CYCLE(cur, "Resource") //Loop over all resources
-{
-    if (1.0 == V("GraphLat") ) {
-        WRITE_LAT_GISS(cur, 1000); //white on the lattice
+    if ( 0 < V("UsePajek") ) {
+        USE_PAJEK = true;
+        PAJ_INIT_ANIM("Pajek", "Test", RND_SEED, "Neutral-Model");
     }
 
-    object* nearestNeighbour = NEAREST_IN_DISTANCES( cur, "Resource", -1 );
-    double dist = DISTANCE2( cur, nearestNeighbour );
-    WRITES(cur, "DistNearNeigh", dist); //Save the minimum nearest neighbour distance.
-}
-
-MAKE_UNIQUE("Forager"); //Provide Forager with unique ID. This is necessary for the visualisation with pajek
-double n_Forangers = V("n_Forangers"); //Create the missing foragers
-ADDNOBJ("Forager", n_Forangers - 1); //one exists already
-
-CYCLE(cur, "Forager") //In differene to the resources, we do not controll if the foranger just happen to use the same space.
-{
-    ADD_TO_SPACE_RND_GRIDS(cur, root);
-    WRITES(cur, "x_init", POSITION_XS(cur) );
-    WRITES(cur, "y_init", POSITION_YS(cur) );
 
     if (1.0 == V("GraphLat") ) {
-        WRITE_LAT_GISS(cur, 1); //mark position.
+        INIT_LAT_GIS(0); //Create a visualisation - all black
     }
+
+    MAKE_UNIQUE("Resource");//Provide Resources with unique IDs
+
+
+    double n_resources = V("n_resources"); //Create the missing resources
+    ADDNOBJ("Resource", n_resources - 1); //one exists already
+
+
+    ADD_ALL_TO_SPACE(SEARCH("Resource")); //add them to space at random grid position.
+
+    CYCLE(cur, "Resource") { //Loop over all resources
+        if (1.0 == V("GraphLat") ) {            
+            SET_LAT_PRIORITYS(cur, 0); //lowest positive priority.
+            SET_LAT_COLORS(cur, 1000); //white colour
+        }
+
+        object* nearestNeighbour = NEAREST_IN_DISTANCES( cur, "Resource", -1 );
+        double dist = DISTANCE2( cur, nearestNeighbour );
+        WRITES(cur, "DistNearNeigh", dist); //Save the minimum nearest neighbour distance.
+    }
+
+    MAKE_UNIQUE("Forager"); //Provide Forager with unique ID. This is necessary for the visualisation with pajek
+    double n_Forangers = V("n_Forangers"); //Create the missing foragers
+    ADDNOBJ("Forager", n_Forangers - 1); //one exists already
+
+    CYCLE(cur, "Forager") { //In differene to the resources, we do not controll if the foranger just happen to use the same space.
+        ADD_TO_SPACE_RND_GRIDS(cur, root);
+        WRITES(cur, "x_init", POSITION_XS(cur) );
+        WRITES(cur, "y_init", POSITION_YS(cur) );
+
+        if (1.0 == V("GraphLat") ) {
+            SET_LAT_PRIORITYS(cur,1); //higher priority.
+            SET_LAT_COLORS(cur, 1); //mark position.
+        }
+    }
+
+
+    USE_ZERO_INSTANCE //Allow there to be zero instances.
+    USE_NAN //Allow not a number numbers.
+    PARAMETER //initialise only once
 }
-
-
-USE_ZERO_INSTANCE //Allow there to be zero instances.
-USE_NAN //Allow not a number numbers.
-PARAMETER //initialise only once
-RESULT(0.0)
+RESULT(init_ret)
 
 
 EQUATION("Action")
@@ -109,10 +109,10 @@ if ( false == didn_hit_border )
     END_EQUATION(0.0); //abort this equation
 }
 
-if (1.0 == V("GraphLat") )
-{
-    WRITE_LAT_GIS(1);//mark new position
-}
+// if (1.0 == V("GraphLat") )
+// {
+    // WRITE_LAT_GIS(1);//mark new position
+// }
 
 
 //Finally, check if you can fill up the toolkit
@@ -124,7 +124,7 @@ if (resource != NULL)
     double id = UIDS(resource);
     for (int i = 0; i < n_items; ++i) { //add a new object for each one
         cur = ADDOBJ("Tool");
-        ADD_TO_SPACE_SHARES(cur,resource); //Add to same position in space - this allows us to analys the distance.
+        ADD_TO_SPACE_SHARES(cur, resource); //Add to same position in space - this allows us to analys the distance.
         WRITES(cur, "ID", id); //Information of the kind of the toolkit
     }
     if (VS(resource, "Extracted") == 0) { //add global info of visited resources
@@ -176,7 +176,7 @@ else
 
 if (1.0 == V("GraphLat") )
 {
-    WRITE_LAT_GIS(colour);
+    SET_LAT_COLOR(colour);
 }
 
 RESULT(0.0)
@@ -218,6 +218,7 @@ if ( 0 < V("UsePajek") )
     PAJ_ADD_V_C(t, UID, "StartPos", 1.0, rel_x, rel_y, "house", 1.0, 1.0, "Red");
     PAJ_ADD_E_C(t, UID, "Forager", UID, "StartPos", 1.0, "Travelled", 1.0, "Red"); //just to allow pajekToSvgAnim to work
 }
+USE_ZERO_INSTANCE
 
 STAT("DistanceToSource");
 WRITE("toolkit_size", v[0]);
@@ -257,18 +258,19 @@ RESULT(0.0)
 
 EQUATION("Kill_Self")
 /* FUNCTION: Kill the forager */
-    if (1.0 == V("GraphLat") )
-        WRITE_LAT_GIS(0); //black
+// if (1.0 == V("GraphLat") )
+    // WRITE_LAT_GIS(0); //black
 
-    PLOG("\nAnother bites the dust.");
-    double spread_x = max(VS(p->up, "xh") - VS(p->up, "xl"), 1.0 );
-    double rel_x = POSITION_X - VS(p->up, "xl") / spread_x ;
-    double spread_y = max(VS(p->up, "yh") - VS(p->up, "yl"), 1.0 );
-    double rel_y = POSITION_Y - VS(p->up, "yl") / spread_y ;
-    if ( 0 < V("UsePajek") ) {
-        PAJ_ADD_V_C(t, UID, "Forager", COUNT("Tool"), rel_x, rel_y, "diamond", 1.0, 1.0, "Black");
-    }
-    DELETE(p);
+PLOG("\nAnother bites the dust.");
+double spread_x = max(VS(p->up, "xh") - VS(p->up, "xl"), 1.0 );
+double rel_x = POSITION_X - VS(p->up, "xl") / spread_x ;
+double spread_y = max(VS(p->up, "yh") - VS(p->up, "yl"), 1.0 );
+double rel_y = POSITION_Y - VS(p->up, "yl") / spread_y ;
+if ( 0 < V("UsePajek") )
+{
+    PAJ_ADD_V_C(t, UID, "Forager", COUNT("Tool"), rel_x, rel_y, "diamond", 1.0, 1.0, "Black");
+}
+DELETE(p);
 
 RESULT(T)
 
@@ -291,5 +293,5 @@ void close_sim( void )
 {
     if (USE_PAJEK) {
         PAJ_SAVE	// close simulation special commands go here
-    }    
+    }
 }
