@@ -403,9 +403,10 @@ struct object
     std::string gis_info();
 
     double init_lattice_gis(int init_color = 1000, double pixW = 400, double pixH = 400);
+    void close_lattice_gis( );
     double write_lattice_gis(double colour);
     double write_lattice_gis(double x, double y, double colour, bool noChange);
-    double update_lattice_gis(int x, int y);
+    double update_lattice_gis(int x, int y);    
     double read_lattice_gis( );
     double read_lattice_gis( double x, double y, bool noChange);
     void set_lattice_priority(int priority);

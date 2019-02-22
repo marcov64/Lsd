@@ -561,7 +561,7 @@ bool object::unregister_position(bool move)
                 //Last element removed
 #ifndef NO_WINDOW
                 if (position->map->has_lattice) {
-                    empty_lattice();
+                    close_lattice_gis();
                 }
 #endif
                 delete position->map;
@@ -1714,6 +1714,34 @@ double object::init_lattice_gis(int init_color, double pixW, double pixH)
     return init_lattice( init_color, position->map->yn, position->map->xn, pixW, pixH  );
 }
 
+void object::close_lattice_gis( ){
+#ifndef NO_POINTER_CHECK
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in close_lattice_gis() for object '%s'", label );
+        error_hard( gismsg, "the object is not registered in any map",
+                    "check your code to prevent this situation" );
+        return;
+    }
+#endif  
+//double init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
+    //check if lattice has been initialised before.
+    if (lattice == NULL) {
+        sprintf( gismsg, "failure in close_lattice_gis() for object '%s'", label );
+        error_hard( gismsg, "the lattice was not initialised.",
+                    "check your code to prevent this situation" );
+        return;
+    }
+    if (false == position->map->has_lattice) {
+        sprintf( gismsg, "failure in close_lattice_gis() for object '%s'", label );
+        error_hard( gismsg, "the lattice was not initialised as visual GIS representation.",
+                    "check your code to prevent this situation" );
+        return;
+    }
+    position->map->has_lattice = false;
+    position->map->local_lattice.clear();
+    close_lattice( ); //close original lattice
+}
+
 //Lattice commands adjusted for GIS
 
 double object::write_lattice_gis(double colour)
@@ -1776,10 +1804,10 @@ double object::update_lattice_gis(int x, int y) //we know that x y are correct b
 
     //Cycle through all elements at position and select colour from the one with the highest priority.
     //If none is present, default to the static / non-object lattice
-    int highest_lat_priority = -1;
+    int highest_lat_priority = 0;
     int lat_color = position->map->local_lattice.at(x).at(y); //default with minimum priority (<0)
     for ( const auto& item : position->map->elements.at(x).at(y) ) {
-        if (item->position->lattice_priority > highest_lat_priority) {
+        if (item->position->lattice_priority >= highest_lat_priority) {
             highest_lat_priority = item->position->lattice_priority;
             lat_color = item->position->lattice_color;
         }

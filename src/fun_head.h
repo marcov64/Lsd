@@ -863,7 +863,7 @@ bool no_ptr_chk = true;
 
     #define INIT_LAT_GIS( ... )         ( p->init_lattice_gis( __VA_ARGS__ ) )
     #define INIT_LAT_GISS( PTR, ... )   ( PTR->init_lattice_gis( __VA_ARGS__ ) )
-    #define DELETE_LAT_GIS              ( close_lattice( ) ) // convenient
+    #define DELETE_LAT_GIS              ( close_lattice_gis( ) ) // convenient
     #define SAVE_LAT_GIS( ... )         ( save_lattice( __VA_ARGS__ ) ) //convenient
 
     #define V_LAT_GIS                   ( p->read_lattice_gis( ) )
