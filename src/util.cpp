@@ -1855,6 +1855,34 @@ double init_lattice( int init_color, double nrow, double ncol, double pixW, doub
 	return init_lattice( pixW, pixH, nrow, ncol, "y", "x", "", NULL, init_color );
 }
 
+/***************************************************
+NAMED_COLOR
+***************************************************/
+int named_color( const char color[] )
+{
+    if (0 == strcmp(color,"Black") ){
+        return 0;
+    } else if (0 == strcmp(color,"Red") ){
+        return 1;
+    } else if (0 == strcmp(color,"Green") ){
+        return 2;
+    } else if (0 == strcmp(color,"Yellow") ){
+        return 3;
+    } else if (0 == strcmp(color,"Pink") ){
+        return 4;
+    } else if (0 == strcmp(color,"Blue") ){
+        return 5;
+    } else if (0 == strcmp(color,"Blue2") ){
+        return 6;
+    } else if (0 == strcmp(color,"Gray") ){
+        return 7;
+    } else if (0 == strcmp(color,"White") ){
+        return 1000;
+    }
+        
+    return 0;
+}
+
 
 /***************************************************
 EMPTY_LATTICE

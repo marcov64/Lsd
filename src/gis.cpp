@@ -1882,6 +1882,23 @@ void object::set_lattice_color(int color)
     update_lattice_gis( (int) position->x, (int) position->y );
 }
 
+double object::read_lattice_color( void )
+{
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in read_lattice_color() for object '%s'", label );
+        error_hard( gismsg, "the object is not registered in any map",
+                    "check your code to prevent this situation" );
+        return -1;
+    }
+    if (position->lattice_priority < 0) {
+        sprintf( gismsg, "failure in read_lattice_color() for object '%s'", label );
+        error_hard( gismsg, "the object is not visualised (priority < 0)",
+                    "check your code to prevent this situation" );
+        return -1;
+    }
+    return position->lattice_color;    
+}
+
 int object::load_data_gis( const char* inputfile, const char* obj_lab, const char* var_lab, int t_update )
 {
     /*  Read data points x,y with associated data values val from the inputfile

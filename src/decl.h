@@ -410,6 +410,7 @@ struct object
     double read_lattice_gis( );
     double read_lattice_gis( double x, double y, bool noChange);
     void set_lattice_priority(int priority);
+    double read_lattice_color( void );
     void set_lattice_color(int color);
 
     int load_data_gis( const char* inputfile, const char* obj_lab, const char* var_lab, int t_update );
@@ -830,6 +831,7 @@ double uniform( double min, double max );
 double uniform_int( double min, double max );
 double update_lattice( double line, double col, double val = 1 );
 void close_lattice( void );
+int named_color( const char color[] );
 void deb_log( bool on, int time = 0 );					// control debug mode
 void error_hard( const char* logText, const char* boxTitle = "", const char* boxText = "", bool defQuit = false );
 void init_random( unsigned seed );						// reset the random number generator seed

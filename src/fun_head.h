@@ -426,6 +426,7 @@ bool no_ptr_chk = true;
 #define V_LAT( X, Y ) read_lattice( X, Y )
 #define WRITE_LAT( X, ... ) update_lattice( X, __VA_ARGS__ )
 #define SAVE_LAT( ... ) save_lattice( __VA_ARGS__ )
+#define COLOR_LAT( NAME ) named_color( ( NAME ) )
 #define V_NODEID ( CHK_NODE_DBL( p ) p->node->id )
 #define V_NODEIDS( O ) ( CHK_PTR_DBL( O ) CHK_NODE_DBL( O ) O->node->id )
 #define V_NODENAME ( CHK_NODE_CHR( p ) p->node->name )
@@ -881,10 +882,13 @@ bool no_ptr_chk = true;
     #define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL )        ( p->write_lattice_gis( X, Y, VAL, false ) )
     #define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL )  ( PTR->write_lattice_gis( X, Y, VAL, false ) )
     
-    #define SET_LAT_PRIORITY( VAL ) ( p->set_lattice_priority( (VAL) ) )
-    #define SET_LAT_PRIORITYS( PTR, VAL ) ( PTR->set_lattice_priority( (VAL) ) )
-    #define SET_LAT_COLOR( VAL ) ( p->set_lattice_color( (VAL) ) )
-    #define SET_LAT_COLORS( PTR, VAL ) ( PTR->set_lattice_color( (VAL) ) )    
+    #define SET_LAT_PRIORITY( VAL ) ( p->set_lattice_priority( ( VAL ) ) )
+    #define SET_LAT_PRIORITYS( PTR, VAL ) ( PTR->set_lattice_priority( ( VAL ) ) )
+    #define SET_LAT_COLOR( VAL ) ( p->set_lattice_color( ( VAL ) ) )
+    #define SET_LAT_COLORS( PTR, VAL ) ( PTR->set_lattice_color( ( VAL ) ) )  
+
+    #define RETRIVE_LAT_COLOR           ( p->read_lattice_color( ) )
+    #define RETRIVE_LAT_COLORS( PTR )   ( PTR->read_lattice_color( ) )
     
 #else
 
