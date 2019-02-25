@@ -1,7 +1,7 @@
 <xml xmlns:o="urn:schemas-microsoft-com:office:office">
  <o:MainFile HRef="../LSD_macros_GIS.html"/>
- <o:File HRef="item0036.xml"/>
- <o:File HRef="props037.xml"/>
+ <o:File HRef="item0034.xml"/>
+ <o:File HRef="props035.xml"/>
  <o:File HRef="themedata.thmx"/>
  <o:File HRef="colorschememapping.xml"/>
  <o:File HRef="image001.png"/>
@@ -32,7 +32,5 @@
  <o:File HRef="image026.gif"/>
  <o:File HRef="image027.png"/>
  <o:File HRef="image028.gif"/>
- <o:File HRef="image029.png"/>
- <o:File HRef="image030.gif"/>
  <o:File HRef="filelist.xml"/>
 </xml>
