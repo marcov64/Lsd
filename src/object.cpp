@@ -914,7 +914,7 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 		{	
 			if ( ! var_exist )
 			{	// check if it is not a zero-instance object
-				cv = blueprint->search_var( this, lab, true, no_search );
+				cv = blueprint->search_var( NULL, lab, true, no_search );
 				if ( cv == NULL )
 				{
 					sprintf( msg, "element '%s' is missing for conditional searching", lab );
@@ -962,7 +962,7 @@ double object::initturbo_cond( char const *lab )
 	cv = search_var( this, lab, true, false );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+		cv = blueprint->search_var( NULL, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for turbo conditional searching", lab );
@@ -1997,7 +1997,7 @@ double object::cal( object *caller, char const *lab, int lag )
 	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+		cv = blueprint->search_var( NULL, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for retrieving", lab );
@@ -2041,7 +2041,7 @@ double object::recal( char const *lab )
 	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+		cv = blueprint->search_var( NULL, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for recalculating", lab );
@@ -2081,7 +2081,7 @@ double object::sum( char const *lab, int lag )
 	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+		cv = blueprint->search_var( NULL, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for summing", lab );
@@ -2124,7 +2124,7 @@ double object::overall_max( char const *lab, int lag )
 	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+		cv = blueprint->search_var( NULL, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for maximizing", lab );
@@ -2168,7 +2168,7 @@ double object::overall_min( char const *lab, int lag )
 	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+		cv = blueprint->search_var( NULL, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for minimizing", lab );
@@ -2213,7 +2213,7 @@ double object::av( char const *lab, int lag )
 	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+		cv = blueprint->search_var( NULL, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for averaging", lab );
@@ -2259,7 +2259,7 @@ double object::whg_av( char const *weight, char const *lab, int lag )
 	cv = search_var( this, weight, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, weight, true, no_search );
+		cv = blueprint->search_var( NULL, weight, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for weighted averaging", weight );
@@ -2320,7 +2320,7 @@ double object::sd( char const *lab, int lag )
 	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+		cv = blueprint->search_var( NULL, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for calculating s.d.", lab );
@@ -2463,7 +2463,7 @@ double object::stat( char const *lab, double *r )
 	cv = search_var( this, lab, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, no_search );
+		cv = blueprint->search_var( NULL, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for calculating statistics", lab );
@@ -2566,7 +2566,7 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 		cv = search_var( this, var, true, no_search );
 		if ( cv == NULL )
 		{	// check if it is not a zero-instance object
-			cv = blueprint->search_var( this, var, true, no_search );
+			cv = blueprint->search_var( NULL, var, true, no_search );
 			if ( cv == NULL )
 			{
 				sprintf( msg, "element '%s' is missing for sorting", var );
@@ -2749,7 +2749,7 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 	cv = search_var( this, var1, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, var1, true, no_search );
+		cv = blueprint->search_var( NULL, var1, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for sorting", var1 );
@@ -2840,7 +2840,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 	cv = search_var( this, lv, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lv, true, no_search );
+		cv = blueprint->search_var( NULL, lv, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for calculating statistics", lv );
@@ -2980,7 +2980,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 	cv = search_var( this, lv, true, no_search );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lv, true, no_search );
+		cv = blueprint->search_var( NULL, lv, true, no_search );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for calculating statistics", lv );
@@ -3044,7 +3044,7 @@ double object::write( char const *lab, double value, int time, int lag )
 	cv = search_var( this, lab, true, true );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, true );
+		cv = blueprint->search_var( NULL, lab, true, true );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for writing", lab );
@@ -3201,7 +3201,7 @@ double object::increment( char const *lab, double value )
 	cv = search_var( this, lab, true, true );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, true );
+		cv = blueprint->search_var( NULL, lab, true, true );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for incrementing", lab );
@@ -3247,7 +3247,7 @@ double object::multiply( char const *lab, double value )
 	cv = search_var( this, lab, true, true );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( this, lab, true, true );
+		cv = blueprint->search_var( NULL, lab, true, true );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for multiplying", lab );
