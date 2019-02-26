@@ -342,7 +342,10 @@ struct object
     double relative_distance(double abs_distance); //calculate the relative (to maximum) distance.
     double absolute_distance(double rel_distance); //other way
 
-    void position_between(gisMap* map, double& x_out, double& y_out, double x1, double y1, double x2, double y2); //find position at half distance
+    void position_between(gisMap* map, double& x_out, double& y_out, double x1, double y1, double x2, double y2, double rel_pos=0.5); //find position at half distance
+    void position_between(double& x_out, double& y_out, object* shareObj, object* shareObj2, double rel_pos=0.5);
+    void position_between(double& x_out, double& y_out, double x_1, double y_1, double x_2, double y_2, double rel_pos=0.5);
+    
     variable* search_var_local(char const l[]); //search only in object
     void it_full(char const lab[], bool random);
     void it_in_radius(char const lab[], double radius, char random, object* caller, int lag, char const varLab[], char const condition[], double condVal);
@@ -399,6 +402,7 @@ struct object
     bool move(int dir); //0 stay put, 1 move north, 2 move north-east , ...
 
     bool check_positions(double& _x, double& _y, bool noChange = false); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
+    bool check_positions(gisMap* map, double& _xOut, double& _yOut, bool noChange = false);
 
     std::string gis_info();
 

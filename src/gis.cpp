@@ -321,19 +321,74 @@ bool object::register_at_map_between(gisMap* map, double _x, double _y, double _
     return true;
 }
 
+//position_between - wrapper
+void object::position_between(double& x_out, double& y_out, object* shareObj, object* shareObj2, double rel_pos)
+{
+    if (shareObj -> ptr_map() == NULL ) {
+        sprintf( gismsg, "failure in position_between() with object %s and %s", shareObj->label, shareObj2->label );
+        error_hard( gismsg, "the destination object (1) is not registered in any space",
+                    "Check your code to prevent this situation" );
+        return;
+    }
+    if (shareObj2 -> ptr_map() == NULL ) {
+        sprintf( gismsg, "failure in position_between() with object %s and %s", shareObj->label, shareObj2->label );
+        error_hard( gismsg, "the destination object (2) is not registered in any space",
+                    "Check your code to prevent this situation" );
+        return;
+    }
+    if (shareObj -> ptr_map() != shareObj2 -> ptr_map() ){
+        sprintf( gismsg, "failure in position_between() with object %s and %s", shareObj->label, shareObj2->label );
+        error_hard( gismsg, "the destination object (1) is not registered in the same space as obj (2)",
+                    "Check your code to prevent this situation" );
+        return;        
+    }
+    position_between(shareObj->ptr_map(),x_out,y_out,shareObj->position->x, shareObj->position->y, shareObj2->position->x, shareObj2->position->y, rel_pos);
+}
+//position_between - wrapper
+void object::position_between(double& x_out, double& y_out, double x_1, double y_1, double x_2, double y_2, double rel_pos)
+{
+    if (this->ptr_map() == NULL ) {
+        sprintf( gismsg, "failure in position_between() with object %s", this->label);
+        error_hard( gismsg, "the object is not registered in any space",
+                    "Check your code to prevent this situation" );
+        return;
+    }
+    position_between(this->ptr_map(),x_out,y_out,x_1, y_1, x_2, y_2, rel_pos);    
+}
+
 //position_between
 //find position at half distance
-void object::position_between(gisMap* map, double& x_out, double& y_out, double x_1, double y_1, double x_2, double y_2)
+//or, at relative distance to x_1,y_1 of 'rel_pos', where a rel_pos of 1 indicates the position is at x_2,y_2 and 1/2 it is at the half distance
+//a negative distance defaults to the half-position
+//as usual, wrapping is taken int o account, direction is not!
+void object::position_between(gisMap* map, double& x_out, double& y_out, double x_1, double y_1, double x_2, double y_2, double rel_pos)
 {
-    //similat to pseudo_distance
+    //similar to pseudo_distance
     double x_n = map->xn;
     double y_n = map->yn;
-
-    //make sure that x1 is the smaller one. Direction is not important here.
-    if (x_1 > x_2)
+    
+    //default behaviour
+    if (rel_pos < 0.0) {
+        rel_pos = 0.5;
+    }
+    else if (rel_pos > 1.0 ) {
+        error_hard( "failure in position_between()", "the rel_pos needs to be in (0,1)",
+                    "Fix your code to prevent this case" );
+        return;
+    }    
+    
+    //we split the movement in movement in x direction and y direction and make sure that it is positive.
+    double rel_pos_x = rel_pos;
+    double rel_pos_y = rel_pos;
+    if (x_1 > x_2) {
         std::swap(x_1, x_2);
-    if (y_1 > y_2)
+        rel_pos_x = 1.0 - rel_pos;
+    }
+    if (y_1 > y_2) {
         std::swap(y_1, y_2);
+        rel_pos_y = 1.0 - rel_pos;
+    }
+
 
     double x_dist = x_2 - x_1;
     double y_dist = y_2 - y_1;
@@ -342,9 +397,8 @@ void object::position_between(gisMap* map, double& x_out, double& y_out, double 
     //direction (left & right, up & down) is allowed, we consider an option in between.
     //otherwise between will always be inside the two original positions.
 
-    // no wrapping default.
-    x_out = x_1 + x_dist / 2;
-    y_out = y_1 + y_dist / 2;
+    // no wrapping is default.
+
 
     if (map->wrap.noWrap == false) {
         if (map->wrap.right != map->wrap.left) {
@@ -354,16 +408,8 @@ void object::position_between(gisMap* map, double& x_out, double& y_out, double 
         }
         else if (	true == map->wrap.right) {
             double x_alt_dist = x_1 + (x_n - x_2);
-            if ( x_alt_dist < x_dist ) {
-                if (x_1 >= x_alt_dist / 2 ) {
-                    x_out = x_1 - x_alt_dist / 2;
-                }
-                else {
-                    x_out = x_2 + x_alt_dist / 2;
-                    // if (x_out >= x_n) {
-                    // x_out -= x_n;
-                    // }
-                }
+            if ( x_alt_dist < x_dist ) { 
+                x_dist = -x_alt_dist; //move in opposite direction, using wrapping
             }
         }
         if (map->wrap.top != map->wrap.bottom) {
@@ -374,18 +420,23 @@ void object::position_between(gisMap* map, double& x_out, double& y_out, double 
         else if (	true == map->wrap.top) {
             double y_alt_dist = y_1 + (y_n - y_2);
             if ( y_alt_dist < y_dist ) {
-                if (y_1 >= y_alt_dist / 2 ) {
-                    y_out = y_1 - y_alt_dist / 2;
-                }
-                else {
-                    y_out = y_2 + y_alt_dist / 2;
-                    // if (y_out >= y_n) {
-                    // y_out -= y_n;
-                    // }
-                }
+                y_dist = -y_alt_dist; //move in opposite direction, using wrapping
             }
         }
     }
+
+    x_out = x_1 + ( x_dist * rel_pos );
+    y_out = y_1 + ( y_dist * rel_pos );
+
+    if (map->wrap.noWrap == false) {
+        check_positions(map, x_out, y_out); //adjust new positions to wrapping, if necessary.
+    }
+    else if (false == check_positions(map, x_out, y_out, true)) { //just check positions
+        sprintf( gismsg, "failure in %s. In p1(%g,%g), p2(%g,%g), ratio %g. Out (%g,%g).", __func__, x_1, y_1, x_2, y_2, rel_pos, x_out, y_out);
+        error_hard( gismsg, "this should not happen",
+                    "contact the developer" );
+    }
+
 }
 
 //  register_at_map
@@ -1604,23 +1655,30 @@ bool object::move(int direction)
     return change_position(x_out, y_out);
 }
 
-//  check_positions
-//  Function to check if the x any y are in the bounds of the map.
-//  If wrapping is possible and allowed, the positions are transformed
-//  accordingly
-//  in case change of positions is not allowed, only check and do not adjust
+//wrapper
 bool object::check_positions(double& _xOut, double& _yOut, bool noChange)
 {
 #ifndef NO_POINTER_CHECK
-    if (ptr_map() == NULL) {
+    if (this->ptr_map() == NULL) {
         sprintf( gismsg, "failure in check_positions() for object '%s'", label );
         error_hard( gismsg, "the object is not registered in any map",
                     "check your code to prevent this situation" );
         return false;
     }
 #endif
-    if (   (_xOut >= 0.0 && _xOut < double(position->map->xn) )
-            && (_yOut >= 0.0 && _yOut < double(position->map->yn) ) ) {
+    return check_positions(ptr_map(), _xOut, _yOut, noChange);
+}
+
+//  check_positions
+//  Function to check if the x any y are in the bounds of the map.
+//  If wrapping is possible and allowed, the positions are transformed
+//  accordingly
+//  in case change of positions is not allowed, only check and do not adjust
+bool object::check_positions(gisMap* map, double& _xOut, double& _yOut, bool noChange)
+{
+
+    if (   (_xOut >= 0.0 && _xOut < double(map->xn) )
+            && (_yOut >= 0.0 && _yOut < double(map->yn) ) ) {
         return true; //all fine, nothing to change.
     }
 
@@ -1631,9 +1689,9 @@ bool object::check_positions(double& _xOut, double& _yOut, bool noChange)
     double _x = _xOut;
     double _y = _yOut;
     if (_x < 0) {
-        if (position->map->wrap.left == true) {
+        if (map->wrap.left == true) {
             while (_x < 0) {
-                _x = double(position->map->xn) + _x;   //_x is neg
+                _x = double(map->xn) + _x;   //_x is neg
             }
         }
         else {
@@ -1641,35 +1699,35 @@ bool object::check_positions(double& _xOut, double& _yOut, bool noChange)
         }
     }
     if (_y < 0) {
-        if (position->map->wrap.bottom == true) {
+        if (map->wrap.bottom == true) {
             while (_y < 0) {
-                _y = double(position->map->yn) + _y;   //_y is neg
+                _y = double(map->yn) + _y;   //_y is neg
             }
         }
         else {
             return false;
         }
     }
-    if (_x >= position->map->xn) {
-        if (position->map->wrap.right == true) {
-            while (_x >= position->map->xn) {
-                _x -= double(position->map->xn);
+    if (_x >= map->xn) {
+        if (map->wrap.right == true) {
+            while (_x >= map->xn) {
+                _x -= double(map->xn);
             }
         }
-        else if (_x == position->map->xn) {
+        else if (_x == map->xn) {
             _x -= 0.00001; //minus small epsilon
         }
         else {
             return false;
         }
     }
-    if (_y >= position->map->yn) {
-        if (position->map->wrap.top == true) {
-            while (_y >= position->map->yn) {
-                _y -= double(position->map->yn);
+    if (_y >= map->yn) {
+        if (map->wrap.top == true) {
+            while (_y >= map->yn) {
+                _y -= double(map->yn);
             }
         }
-        else if (_y == position->map->yn) {
+        else if (_y == map->yn) {
             _y -= 0.00001;
         }
         else {
@@ -1714,7 +1772,8 @@ double object::init_lattice_gis(int init_color, double pixW, double pixH)
     return init_lattice( init_color, position->map->yn, position->map->xn, pixW, pixH  );
 }
 
-void object::close_lattice_gis( ){
+void object::close_lattice_gis( )
+{
 #ifndef NO_POINTER_CHECK
     if (ptr_map() == NULL) {
         sprintf( gismsg, "failure in close_lattice_gis() for object '%s'", label );
@@ -1722,8 +1781,8 @@ void object::close_lattice_gis( ){
                     "check your code to prevent this situation" );
         return;
     }
-#endif  
-//double init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
+#endif
+    //double init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
     //check if lattice has been initialised before.
     if (lattice == NULL) {
         sprintf( gismsg, "failure in close_lattice_gis() for object '%s'", label );
@@ -1855,7 +1914,7 @@ double object::read_lattice_gis( double x, double y, bool noChange)
         return -1; //error
     }
     //transform coordinates for lattice. lattice starts with (0,0) top left.
-    //gis starts with (0,0) top down.    
+    //gis starts with (0,0) top down.
     return read_lattice( position->map->yn - y, x + 1 );
 }
 
@@ -1896,7 +1955,7 @@ double object::read_lattice_color( void )
                     "check your code to prevent this situation" );
         return -1;
     }
-    return position->lattice_color;    
+    return position->lattice_color;
 }
 
 int object::load_data_gis( const char* inputfile, const char* obj_lab, const char* var_lab, int t_update )

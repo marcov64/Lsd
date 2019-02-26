@@ -681,6 +681,10 @@ bool no_ptr_chk = true;
 #define RANDOM_POSITION_XS(GISOBJ) ( GISOBJ->random_pos('x') )
 #define RANDOM_POSITION_YS(GISOBJ) ( GISOBJ->random_pos('y') )
 
+#define POSITION_INTERCEPT(OBJ1, OBJ2, REL_POS) { p->position_between(v[0], v[1], OBJ1, OBJ2, REL_POS); }
+#define POSITION_INTERCEPT_XY(x1, y1, x2, y2, REL_POS) { p->position_between(v[0], v[1], x1, y1, x2, y2, REL_POS); }
+#define POSITION_INTERCEPT_XYS(PTR,x1, y1, x2, y2, REL_POS) { PTR->position_between(v[0], v[1], x1, y1, x2, y2, REL_POS); }
+
 // MOVE
 // move a single step in one of eight directions
 // 0: stay put. 1: north, 2: north-east, 3: east, 4: south-east,
