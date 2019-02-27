@@ -343,6 +343,14 @@ bool no_ptr_chk = true;
 #define COUNT_ALLS( O, X ) ( CHK_PTR_DBL( O ) O->count_all( ( char * ) X ) )
 #define STAT( X ) ( p->stat( ( char * ) X, v ) )
 #define STATS( O, X ) ( CHK_PTR_DBL( O ) O->stat( ( char * ) X, v ) )
+
+#define STAT_CND( LAB, condVarLab, condition, condVal ) ( p->stat( ( char * ) LAB, v, ( char * ) condVarLab, (char * ) condition, condVal  ) );
+#define STAT_CNDS( O, LAB, condVarLab, condition, condVal ) ( O->stat( ( char * ) LAB, v, ( char * ) condVarLab, (char * ) condition, condVal  ) );
+#define STAT_CNDL( LAB, condVarLab, condition, condVal, LAG ) ( p->stat( ( char * ) LAB, v, ( char * ) condVarLab, (char * ) condition, condVal, NULL, LAG  ) );
+#define STAT_CNDLS( O, LAB, condVarLab, condition, condVal, LAG ) ( O->stat( ( char * ) LAB, v, ( char * ) condVarLab, (char * ) condition, condVal, NULL, LAG  ) );
+#define STAT_CND_CHEAT( LAB, condVarLab, condition, condVal, CHEAT_CALLER ) ( p->stat( ( char * ) LAB, v, ( char * ) condVarLab, (char * ) condition, condVal, CHEAT_CALLER ) );
+#define STAT_CND_CHEATS( O, LAB, condVarLab, condition, condVal, CHEAT_CALLER ) ( O->stat( ( char * ) LAB, v, ( char * ) condVarLab, (char * ) condition, condVal, , CHEAT_CALLER ) );
+
 #define INTERACT( X, Y ) ( p->interact( ( char * ) X, Y, v, i, j, h, k, \
 	cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, \
 	curl, curl1, curl2, curl3, curl4, curl5, curl6, curl7, curl8, curl9 ) )

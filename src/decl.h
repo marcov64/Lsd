@@ -248,7 +248,8 @@ struct object
     double recal( char const* l );
     double sd( char const* lab, int lag );
     double search_inst( object* obj = NULL );
-    double stat( char const* lab, double* v = NULL );
+    bool check_condition( char const _varLab[]="", char const _condition[]="", double condVal=0.0, object* fake_caller=NULL, int lag=0 );
+    double stat( char const *lab, double* v = NULL, char const condVarLab[]="", char const condition[]="", double condVal=0.0, object* fake_caller=NULL, int lag=0);
     double stats_net( char const* lab, double* r );
     double sum( char const* lab, int lag );
     double whg_av( char const* weight, char const* lab, int lag );

@@ -992,7 +992,7 @@ The field caller is used to avoid deadlocks when
 from descendants the search goes up again, or from the parent down.
 Uses the fast variable look-up map of the searched variables.
 *************************************************/
-variable *object::search_var( object *caller, char const *lab, bool no_error, bool no_search )
+variable *object::search_var( object *caller, char const *lab, bool no_error, bool no_search)
 {
 	bridge *cb; 
 	variable *cv;
@@ -1019,7 +1019,7 @@ variable *object::search_var( object *caller, char const *lab, bool no_error, bo
 		else
 			cv = NULL; 
 	}
-
+    
 	// Search up in the tree
 	if ( caller != up )
 	{ 
@@ -2627,6 +2627,42 @@ double object::count_all( char const *lab )
 
 	return count;
 }
+/****************************************************
+CHECK_CONDITION (*)
+Check if a variable varLab inside the object returns a value that obeys
+the condition value condition condVal (e.g., 0.0 < 1.0) 
+returns true or false.
+If no such variable exists, an error is thrown.
+****************************************************/
+bool object::check_condition(char const varLab[], char const condition[], double condVal, object* fake_caller, int lag)
+{
+    variable *cv = search_var(this, varLab, true, true);
+    
+    if (cv == NULL ){
+				sprintf( msg, "element '%s' is missing in object '%s' in function '%s'", varLab, this->label, __func__ );
+				error_hard( msg, "variable or parameter not found", 
+							"create variable or parameter in model structure" );
+                return false;
+    }
+    object *caller = NULL == fake_caller ? this : fake_caller;
+    double checkVal = cv->cal(caller, lag);
+    
+    switch (condition[0]) {
+        case '=':
+            return ( checkVal == condVal );
+        case '>':
+            return ( checkVal > condVal );                            
+        case '<':
+            return ( checkVal < condVal );                            
+        case '!':
+            return ( checkVal != condVal );                            
+        default :
+            sprintf( msg, "element '%s' in object '%s' in function '%s' compared with '%s'", varLab, this->label, __func__, condition );
+            error_hard( msg, "the condition is invalid", 
+                    "valid conditions are '==', '!=', '<' and '>' only" );
+            return false;
+    }    
+}
 
 
 /****************************************************
@@ -2641,12 +2677,17 @@ r[ 2 ]=variance
 r[ 3 ]=max
 r[ 4 ]=min
 
+The advanced call may use a conditional variable varLab in combinaton with a condition 
+and a conditional value. Optionally the conditional value is computed with the help of a fake_caller  (NULL disable) 
+or a lagged value is reported.
 ****************************************************/
-double object::stat( char const *lab, double *r )
+double object::stat( char const *lab, double *r, char const condVarLab[], char const condition[], double condVal, object* fake_caller, int lag)
 {
 	double r_temp[ 5 ];
 	object *cur;
-	variable *cv;
+	variable *cv; 
+
+    bool conditional = ! ( strlen(condition) == 0 ); //check if there is a condition. Default is "" which is strlen 0.
 
 	if ( r == NULL )
 		r = r_temp;
@@ -2676,7 +2717,7 @@ double object::stat( char const *lab, double *r )
 			error_hard( msg, "object has no instance", 
 						"check your equation code to ensure at least one instance\nof any object is kept",
 						true );
-	}
+        }
 
 		r[ 0 ] = 0;	
 		r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = NAN;
@@ -2684,11 +2725,23 @@ double object::stat( char const *lab, double *r )
 	}
 
 	cur = cv->up;
-	if ( cur != NULL )
-	{
-		r[ 3 ] = r[ 4 ] = cur->cal( lab, 0 );
+    double temp; //temporary buffer for conditional checking
+	if ( cur != NULL ) //why this check? if up has been deleted? 
+	{   
+        if (conditional)
+            while ( ! (cur->check_condition( condVarLab, condition, condVal, fake_caller, lag) ) ){
+                cur = go_brother( cur );
+                if ( NULL == cur )
+                    return 0; //no items that meet the condition.
+            }
+            
+        r[ 3 ] = r[ 4 ] = cur->cal( lab, 0 );        
+        
 		for ( r[ 2 ] = 0, r[ 0 ] = 0, r[ 1 ] = 0; cur != NULL; cur = go_brother( cur ) )
 		{
+            if ( conditional && ! (cur->check_condition( condVarLab, condition, condVal, fake_caller, lag) ) )
+                continue; //skip
+            
 			++r[ 0 ];
 			r[ 5 ] = cur->cal( lab, 0 );
 			r[ 1 ] += r[ 5 ];

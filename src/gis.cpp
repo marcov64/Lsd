@@ -1010,22 +1010,6 @@ double object::absolute_distance(double rel_distance)
     return rel_distance * max_distance();
 }
 
-//  search_var_local
-//  A localised version of the search_var method.
-//  needed for the conditional search.
-variable* object::search_var_local(char const l[])
-{
-    for ( variable* cv = v; cv != NULL; cv = cv->next ) {
-        if ( 0 == strcmp( l, cv->label ) ) {
-            return cv;
-        }
-    }
-    sprintf( gismsg, "'%s' is missing for conditional searching in search_var_local()", l );
-    error_hard( gismsg, "variable or parameter not found",
-                "check your code to prevent this situation" );
-    return NULL;
-}
-
 char object::read_distance_type()
 {
     if (ptr_map() == NULL) {
@@ -1048,16 +1032,23 @@ struct add_if_dist_lab_cond {
     object* fake_caller; //can be a fake-caller if not NULL.
     int lag;
     char varLab[ MAX_ELEM_LENGTH ];
-    char condition; // 1 : == ; 2 : > ; 3 : < ; 4: !=; that's it
+    bool has_condition;
     double condVal;
     double pseudo_radius;
+    char condition[]; // 1 : == ; 2 : > ; 3 : < ; 4: !=; that's it
 
     //constructor
     add_if_dist_lab_cond(object* this_obj, double radius, char const _lab[], object* fake_caller, int lag, char const _varLab[], char const _condition[], double condVal)
-        : this_obj(this_obj), radius(radius), fake_caller(fake_caller), lag(lag), condition(_condition[0]), condVal(condVal)
+        : this_obj(this_obj), radius(radius), fake_caller(fake_caller), lag(lag), condVal(condVal)
     {
         strcpy(lab, _lab);
         strcpy(varLab, _varLab);
+        if (strlen(_condition)==0)
+            has_condition = false;
+        else {
+            has_condition = true;
+            strcpy(condition, _condition);        
+        }
         char distance_type = this_obj->read_distance_type();
         switch (distance_type) {
             case 'e' : //Euclidean
@@ -1090,38 +1081,9 @@ struct add_if_dist_lab_cond {
             // }
             if (pseudo_radius < 0 || ps_dst <= pseudo_radius) {
                 bool isCandidate = true;
-                if (condition == '>' || condition == '<' || condition == '=' || condition == '!' ) {
-                    variable* condVar = candidate->search_var_local(varLab);
-                    if (condVar == NULL) {
-                        sprintf( gismsg, "'%s' is missing for conditional searching in add_if_dist_lab_cond()", varLab );
-                        error_hard( gismsg, "variable or parameter not found",
-                                    "check your code to prevent this situation" );
-                        return false;
-                    }
-
-                    double val;
-                    if (fake_caller == NULL)
-                        val = condVar->cal(this_obj, lag);
-                    else
-                        val = condVar->cal(fake_caller, lag);
-
-                    switch (condition) {
-                        case '=':
-                            isCandidate = ( val == condVal ? true : false );
-                            break;
-                        case '>':
-                            isCandidate = ( val > condVal ? true : false );
-                            break;
-                        case '<':
-                            isCandidate = ( val < condVal ? true : false );
-                            break;
-                        case '!':
-                            isCandidate = ( val != condVal ? true : false );
-                            break;
-                        default :
-                            isCandidate = false;
-                    }
-                }//end conditional
+                if (has_condition  && ! (candidate->check_condition( varLab, condition, condVal, fake_caller, lag) ) )
+                    isCandidate = false;                
+                
                 if ( isCandidate == true ) {
                     this_obj->position->objDis_inRadius.push_back(make_pair(ps_dst, candidate));
                     return true;
