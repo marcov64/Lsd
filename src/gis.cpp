@@ -541,6 +541,7 @@ bool object::register_at_map(gisMap* map, double _x, double _y, int lattice_colo
             return change_position(_x, _y);
         }
     }
+    check_positions(map, _x, _y, false); //adjust position if possible.
     position = new gisPosition(map, _x, _y, lattice_color, lattice_priority);
     if ( position == NULL ) {
         error_hard( "cannot allocate memory for register_at_map()",
@@ -1734,7 +1735,7 @@ bool object::check_positions(gisMap* map, double& _xOut, double& _yOut, bool noC
             return false;
         }
     }
-    if (check_positions(_x, _y) == false) { //recursively for new corner cases!
+    if (check_positions(map,_x, _y, noChange) == false) { //recursively for new corner cases!
         return false;
     }
     _yOut = _y; //set values
