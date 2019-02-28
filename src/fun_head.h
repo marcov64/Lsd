@@ -3,6 +3,8 @@
 	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
+    
+    This file also: Frederik Schaff, Ruhr-Universität Bochum
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
@@ -16,6 +18,7 @@ model's equation file.
 *************************************************************/
 
 #define FUN												// comment this line to access internal LSD functions
+
 
 #if defined( EIGENLIB ) && __cplusplus >= 201103L		// required C++11
 #include <Eigen/Eigen>									// Eigen linear algebra library
@@ -86,7 +89,7 @@ bool no_ptr_chk = true;
 	netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
 	FILE *f; \
 	INIT_POINTERS \
-	EQ_USER_VARS
+	EQ_USER_VARS    
 
 #define EQ_NOT_FOUND \
 	char msg[ TCL_BUFF_STR ]; \
@@ -289,6 +292,12 @@ bool no_ptr_chk = true;
 #define RND_SEED ( ( double ) seed - 1 )
 #define T ( ( double ) t )
 #define LAST_T ( ( double ) max_step )
+
+//modified from https://pmihaylov.com/macros-in-c/
+#define PLOG_INFO(M, ...) \
+do {fprintf(stderr, "[INFO] (%s:%d) " M "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+char buffer[300]; snprintf(buffer,sizeof(char)*300,"(INFO) (%s:%d) " M "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+plog(buffer);} while(false)
 
 #define LOG( ... ) \
 { \

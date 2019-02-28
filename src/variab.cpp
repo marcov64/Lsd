@@ -507,8 +507,11 @@ double variable::cal( object *caller, int lag )
 	under_computation = false;
 	
 	// if there is a pending deletion, try to do it now
-	if ( wait_delete != NULL )
-		wait_delete->delete_obj( );
+	if ( wait_delete != NULL ) {
+        double buffer = val[ 0 ];
+        wait_delete->delete_obj( );
+        return buffer;
+    }
 
 	return val[ 0 ];	// by default the requested value is the last one, not yet computed
 
