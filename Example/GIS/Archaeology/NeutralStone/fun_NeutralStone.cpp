@@ -51,7 +51,7 @@ double init_ret = 0.0;
     ADD_ALL_TO_SPACE(SEARCH("Resource")); //add them to space at random grid position.
 
     CYCLE(cur, "Resource") { //Loop over all resources
-        if (1.0 == V("GraphLat") ) {            
+        if (1.0 == V("GraphLat") ) {
             SET_LAT_PRIORITYS(cur, 0); //lowest positive priority.
             SET_LAT_COLORS(cur, 1000); //white colour
         }
@@ -71,7 +71,7 @@ double init_ret = 0.0;
         WRITES(cur, "y_init", POSITION_YS(cur) );
 
         if (1.0 == V("GraphLat") ) {
-            SET_LAT_PRIORITYS(cur,1); //higher priority.
+            SET_LAT_PRIORITYS(cur, 1); //higher priority.
             SET_LAT_COLORS(cur, 1); //mark position.
         }
     }
@@ -103,7 +103,8 @@ if (1.0 == V("GraphLat") )
 
 //Move and check if the forager dies because he hits the boarder, as in the paper
 bool didn_hit_border = MOVE(uniform_int(0, 8));
-if ( false == didn_hit_border )
+
+if ( V("NoBorderCrossing") == 1.0 && false == didn_hit_border )
 {
     V("Kill_Self");
     END_EQUATION(0.0); //abort this equation
@@ -111,12 +112,13 @@ if ( false == didn_hit_border )
 
 // if (1.0 == V("GraphLat") )
 // {
-    // WRITE_LAT_GIS(1);//mark new position
+// WRITE_LAT_GIS(1);//mark new position
 // }
 
 
 //Finally, check if you can fill up the toolkit
 object* resource = SEARCH_POSITION("Resource");
+
 if (resource != NULL)
 {
     //Fill up toolkit
@@ -259,15 +261,15 @@ RESULT(0.0)
 EQUATION("Kill_Self")
 /* FUNCTION: Kill the forager */
 // if (1.0 == V("GraphLat") )
-    // WRITE_LAT_GIS(0); //black
+// WRITE_LAT_GIS(0); //black
 
 PLOG("\nAnother bites the dust.");
-double spread_x = max(VS(p->up, "xh") - VS(p->up, "xl"), 1.0 );
-double rel_x = POSITION_X - VS(p->up, "xl") / spread_x ;
-double spread_y = max(VS(p->up, "yh") - VS(p->up, "yl"), 1.0 );
-double rel_y = POSITION_Y - VS(p->up, "yl") / spread_y ;
 if ( 0 < V("UsePajek") )
 {
+    double spread_x = max(VS(p->up, "xh") - VS(p->up, "xl"), 1.0 );
+    double rel_x = POSITION_X - VS(p->up, "xl") / spread_x ;
+    double spread_y = max(VS(p->up, "yh") - VS(p->up, "yl"), 1.0 );
+    double rel_y = POSITION_Y - VS(p->up, "yl") / spread_y ;
     PAJ_ADD_V_C(t, UID, "Forager", COUNT("Tool"), rel_x, rel_y, "diamond", 1.0, 1.0, "Black");
 }
 DELETE(p);
@@ -276,7 +278,9 @@ RESULT(T)
 
 EQUATION("End_Sim")
 /* Check if the Simulation is at end. */
-if ( COUNT("Forager") == 0 || V("UniqueResourcesFound") >= 200 )
+double endCondResourcesFound = V("EndCondResourcesFound");
+bool endUniqueResFound = ( endCondResourcesFound > 0 && endCondResourcesFound <= V("UniqueResourcesFound") ) ? true : false;
+if ( COUNT("Forager") == 0 ||  endUniqueResFound )
 {
     ABORT;
 }

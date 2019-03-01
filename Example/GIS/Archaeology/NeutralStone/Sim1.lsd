@@ -52,6 +52,8 @@ Label Root
 	Param: yh
 	Param: yl
 	Param: UsePajek
+	Param: EndCondResourcesFound
+	Param: NoBorderCrossing
 
 }
 
@@ -66,7 +68,7 @@ Param: n_resources 0 n + n n	500
 Var: Init 0 n + n n
 Param: n_toolkit 0 n + n n	100
 Param: GraphLat 0 n + n n	1
-Param: wrap 0 n + n n	15
+Param: wrap 0 n + n n	0
 Var: End_Sim 0 s + n n
 Param: UniqueResourcesFound 0 s + n n	0
 Param: n_Forangers 0 n + n n	1
@@ -75,6 +77,8 @@ Param: xl 0 n + n n	0
 Param: yh 0 n + n n	0
 Param: yl 0 n + n n	0
 Param: UsePajek 0 n + n n	0
+Param: EndCondResourcesFound 0 n + n n	0
+Param: NoBorderCrossing 0 n + n n	0
 
 Object: Resource C	1
 Param: Extracted 0 n + n n	0
@@ -91,7 +95,7 @@ Param: Min_Distance 0 s + n n	0
 Param: SD_Distance 0 s + n n	0
 Var: MaxDistance 0 n + n n
 Param: toolkit_richnes 0 s + n n	0
-Func: Kill_Self 0 s + n n
+Func: Kill_Self 0 n + n n
 Param: x_init 0 n + n n	0
 Param: y_init 0 n + n n	0
 
@@ -101,7 +105,7 @@ Var: DistanceToSource 0 n + n n
 
 SIM_NUM 1
 SEED 1
-MAX_STEP 1000
+MAX_STEP 100000
 EQUATION fun_NeutralStone.cpp
 MODELREPORT report_Sim1.html
 
@@ -212,6 +216,20 @@ _INIT_
 
 END_DESCRIPTION
 
+Parameter_EndCondResourcesFound
+In the original model the simulation ends when 200 resources are found. This can be reproduced by setting this parameter to 200.
+
+Non-positive values disable the check.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_NoBorderCrossing
+In the original model the forager stops whenever it hits a border. This can be reproduced by disabling wrapping (wrap = 0) and setting this parameter to 1.0. 
+_INIT_
+
+END_DESCRIPTION
+
 Object_Resource
 (no description available)
 _INIT_
@@ -298,6 +316,7 @@ END_DESCRIPTION
 
 Function_Kill_Self
 (no description available)
+
 _INIT_
 
 END_DESCRIPTION

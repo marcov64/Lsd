@@ -1677,9 +1677,6 @@ bool object::check_positions(gisMap* map, double& _xOut, double& _yOut, bool noC
                 _x -= double(map->xn);
             }
         }
-        else if (_x == map->xn) {
-            _x -= 0.00001; //minus small epsilon
-        }
         else {
             return false;
         }
@@ -1689,9 +1686,6 @@ bool object::check_positions(gisMap* map, double& _xOut, double& _yOut, bool noC
             while (_y >= map->yn) {
                 _y -= double(map->yn);
             }
-        }
-        else if (_y == map->yn) {
-            _y -= 0.00001;
         }
         else {
             return false;
@@ -1970,13 +1964,13 @@ int object::load_data_gis( const char* inputfile, const char* obj_lab, const cha
 std::string object::gis_info()
 {
     if (ptr_map() == NULL) {
-        return "\nGIS-INFO: object is not part of gis";
+        return ("\n(GIS-INFO) t=" + std::to_string(t) + ": object is not part of gis");
     }
     char buffer[300];
     if (true == is_unique() )
-        sprintf(buffer, "\nGIS OBJECT INFO: '%s' UID %g position (%g,%g) at map %p", label, unique_id(), position->x, position->y, position->map);
+        sprintf(buffer, "\n(GIS OBJECT INFO) t=%i: '%s' UID %g position (%g,%g) at map %p", t, label, unique_id(), position->x, position->y, position->map);
     else
-        sprintf(buffer, "\nGIS OBJECT INFO: '%s' (no uID) position (%g,%g) at map %p", label, position->x, position->y, position->map);
+        sprintf(buffer, "\n(GIS OBJECT INFO) t=%i: '%s' (no uID) position (%g,%g) at map %p", t, label, position->x, position->y, position->map);
 
     return std::string(buffer);
 }
