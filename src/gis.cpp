@@ -336,13 +336,13 @@ void object::position_between(double& x_out, double& y_out, object* shareObj, ob
                     "Check your code to prevent this situation" );
         return;
     }
-    if (shareObj -> ptr_map() != shareObj2 -> ptr_map() ){
+    if (shareObj -> ptr_map() != shareObj2 -> ptr_map() ) {
         sprintf( gismsg, "failure in position_between() with object %s and %s", shareObj->label, shareObj2->label );
         error_hard( gismsg, "the destination object (1) is not registered in the same space as obj (2)",
                     "Check your code to prevent this situation" );
-        return;        
+        return;
     }
-    position_between(shareObj->ptr_map(),x_out,y_out,shareObj->position->x, shareObj->position->y, shareObj2->position->x, shareObj2->position->y, rel_pos);
+    position_between(shareObj->ptr_map(), x_out, y_out, shareObj->position->x, shareObj->position->y, shareObj2->position->x, shareObj2->position->y, rel_pos);
 }
 //position_between - wrapper
 void object::position_between(double& x_out, double& y_out, double x_1, double y_1, double x_2, double y_2, double rel_pos)
@@ -353,7 +353,7 @@ void object::position_between(double& x_out, double& y_out, double x_1, double y
                     "Check your code to prevent this situation" );
         return;
     }
-    position_between(this->ptr_map(),x_out,y_out,x_1, y_1, x_2, y_2, rel_pos);    
+    position_between(this->ptr_map(), x_out, y_out, x_1, y_1, x_2, y_2, rel_pos);
 }
 
 //position_between
@@ -366,7 +366,7 @@ void object::position_between(gisMap* map, double& x_out, double& y_out, double 
     //similar to pseudo_distance
     double x_n = map->xn;
     double y_n = map->yn;
-    
+
     //default behaviour
     if (rel_pos < 0.0) {
         rel_pos = 0.5;
@@ -375,8 +375,8 @@ void object::position_between(gisMap* map, double& x_out, double& y_out, double 
         error_hard( "failure in position_between()", "the rel_pos needs to be in (0,1)",
                     "Fix your code to prevent this case" );
         return;
-    }    
-    
+    }
+
     //we split the movement in movement in x direction and y direction and make sure that it is positive.
     double rel_pos_x = rel_pos;
     double rel_pos_y = rel_pos;
@@ -408,7 +408,7 @@ void object::position_between(gisMap* map, double& x_out, double& y_out, double 
         }
         else if (	true == map->wrap.right) {
             double x_alt_dist = x_1 + (x_n - x_2);
-            if ( x_alt_dist < x_dist ) { 
+            if ( x_alt_dist < x_dist ) {
                 x_dist = -x_alt_dist; //move in opposite direction, using wrapping
             }
         }
@@ -1043,11 +1043,11 @@ struct add_if_dist_lab_cond {
     {
         strcpy(lab, _lab);
         strcpy(varLab, _varLab);
-        if (strlen(_condition)==0)
+        if (strlen(_condition) == 0)
             has_condition = false;
         else {
             has_condition = true;
-            strcpy(condition, _condition);        
+            strcpy(condition, _condition);
         }
         char distance_type = this_obj->read_distance_type();
         switch (distance_type) {
@@ -1082,8 +1082,8 @@ struct add_if_dist_lab_cond {
             if (pseudo_radius < 0 || ps_dst <= pseudo_radius) {
                 bool isCandidate = true;
                 if (has_condition  && ! (candidate->check_condition( varLab, condition, condVal, fake_caller, lag) ) )
-                    isCandidate = false;                
-                
+                    isCandidate = false;
+
                 if ( isCandidate == true ) {
                     this_obj->position->objDis_inRadius.push_back(make_pair(ps_dst, candidate));
                     return true;
@@ -1218,6 +1218,7 @@ void object::it_full(char const lab[], bool random)
     position->it_obj = std::begin(position->objDis_inRadius);
 }
 
+
 // it_in_radius -- works on position->objDis_inRadius
 // produce iterable list of objects with label inside of radius around origin.
 // the list is stored with the asking object. This allows parallelisation AND easy iterating with a macro.
@@ -1298,6 +1299,36 @@ object* object::first_neighbour(char const lab[], double radius, char random, ob
     return next_neighbour();
 }
 
+//  first_neighbour
+//  Initialise the nearest neighbour search and return nearest neighbours
+//  This version: Recursive search until either n neighbours or outside radius.
+//  In the cycle there might be more than n items. The user needs to control.
+object* object::first_neighbour_n(char const lab[], int nelements, double radius, char random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
+{
+#ifndef NO_POINTER_CHECK
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in first_neighbour_n() for object '%s'", label );
+        error_hard( gismsg, "the object is not registered in any map",
+                    "check your code to prevent this situation" );
+        return NULL;
+    }
+#endif
+    switch_closest_in_distance(nelements, lab, radius, false /* we randomise here */, caller, lag, varLab, condition, condVal);
+    if ('d' == random)
+        randomise_objDisSetIntvls(true /*is sorted*/);
+    else if ('r' == random)
+        randomise_objDisSetFull();
+    else if ('f' != random)
+    {
+        sprintf( gismsg, "failure in first_neighbour_n() for object '%s' with random option '%s'", label,random );
+        error_hard( gismsg, "the random option is not recognised",
+                    "check your code to prevent this situation. Valid options are 'r','d','f'." );
+        return NULL;
+    }
+    position->it_obj = std::begin(position->objDis_inRadius);
+    return next_neighbour();
+}
+
 //  complete_radius
 //  Return the radius that is necessary to include all the potential items
 //  provides a boundary for the spatial search algorithms
@@ -1307,11 +1338,34 @@ double object::complete_radius()
     return max(  max(position->x, position->map->xn - position->x), max(position->y, position->map->yn - position->y) );
 }
 
+
 //  closest_in_distance
 //  find object with label lab closest to caller, if any inside radius fits
 //  efficient implementation with increasing search radius
 object* object::closest_in_distance(char const lab[], double radius, bool random, object* fake_caller, int lag, char const varLab[], char const condition[], double condVal)
 {
+    return switch_closest_in_distance(1, lab, radius, random, fake_caller, lag, varLab, condition, condVal);
+}
+
+//  nclosest_in_distance
+//  find object with label lab closest to caller, if any inside radius fits
+//  efficient implementation with increasing search radius
+object* object::nclosest_in_distance(char const lab[], int nelements, double radius, bool random, object* fake_caller, int lag, char const varLab[], char const condition[], double condVal)
+{
+    return switch_closest_in_distance(nelements, lab, radius, random, fake_caller, lag, varLab, condition, condVal);
+}
+
+//  closest_in_distance
+//  find object with label lab closest to caller, if any inside radius fits
+//  efficient implementation with increasing search radius
+object* object::switch_closest_in_distance(int nelements, char const lab[], double radius, bool random, object* fake_caller, int lag, char const varLab[], char const condition[], double condVal)
+{
+    if (nelements < 1){
+        sprintf( gismsg, "failure in switch_closest_in_distance() for object '%s' with nelements '%i'", label,nelements );
+        error_hard( gismsg, "invalid option.",
+                    "check your code to prevent this situation. Make nelements at least 1" );
+        return NULL;
+    }
     double max_radius = complete_radius(); //we do not need to go beyond this radius
     if (radius < 0) {
         radius = max_radius; //we search everything
@@ -1326,8 +1380,12 @@ object* object::closest_in_distance(char const lab[], double radius, bool random
     traverse_boundingBox(cur_radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
     make_objDisSet_unique(false); //sort and make unique
 
+    //In the single neighbour case, stop when a neighbour in distance is found.
+    //In the n neighbours case, stop whenever the number of elements is >= n.
+    //In both cases stop also when the maximum distance is matched.
+
     for (/*is init*/; (cur_radius < radius && cur_radius < max_radius); ++cur_radius ) {
-        if (position->objDis_inRadius.empty() == false) {
+        if (position->objDis_inRadius.size() >= nelements) {
 
             //check if there is a closed interval OR the radius is at least 1 level beyond the element
             if (position->objDis_inRadius.front().first < position->objDis_inRadius.back().first //the element in the back is further away then one in the front.
@@ -1345,19 +1403,41 @@ object* object::closest_in_distance(char const lab[], double radius, bool random
         return NULL; //no option found;
     }
     else {
-        if ( random == false )
-            return position->objDis_inRadius.front().second;
+        if ( 1 == nelements) {
+            if ( random == false )
+                return position->objDis_inRadius.front().second;
 
-        int n = -1;  //select randomly amongst set of candidates with minimum distance
-        for (auto const& item : position->objDis_inRadius) {
-            if (item.first == position->objDis_inRadius.front().first) { //compare element distance with distance of first element
-                ++n;
+            int n = -1;  //select randomly amongst set of candidates with minimum distance
+            for (auto const& item : position->objDis_inRadius) {
+                if (item.first == position->objDis_inRadius.front().first) { //compare element distance with distance of first element
+                    ++n;
+                }
             }
+            if (n > 0) {
+                n = uniform_int(0, n);
+            }
+            return position->objDis_inRadius.at( n ).second;
         }
-        if (n > 0) {
-            n = uniform_int(0, n);
+        else {
+            //remove elements which are extra AND farther away then the first nelements
+            if (position->objDis_inRadius.size() > nelements) {
+                for (int i = position->objDis_inRadius.size() - 1; i >= nelements; --i) {
+                    if ( position->objDis_inRadius.at(nelements) < position->objDis_inRadius.at(i) ) {
+                        position->objDis_inRadius.pop_back();
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+            //Check: Report the number.
+            // sprintf(gismsg,"\nIn %s called as nperson version with %i elements there are actually %i elements", __func__, nelements, position->objDis_inRadius.size());
+            // plog(gismsg);
+
+            //Randomisation outside.
+
+            return position->objDis_inRadius.front().second; //return
         }
-        return position->objDis_inRadius.at( n ).second;
     }
 }
 
@@ -1691,7 +1771,7 @@ bool object::check_positions(gisMap* map, double& _xOut, double& _yOut, bool noC
             return false;
         }
     }
-    if (check_positions(map,_x, _y, noChange) == false) { //recursively for new corner cases!
+    if (check_positions(map, _x, _y, noChange) == false) { //recursively for new corner cases!
         return false;
     }
     _yOut = _y; //set values
@@ -1961,16 +2041,24 @@ int object::load_data_gis( const char* inputfile, const char* obj_lab, const cha
     return elements_added;
 }
 
-std::string object::gis_info()
+std::string object::gis_info(bool append)
 {
+    char buffer1[300];
+    sprintf(buffer1, "\n(GIS OBJECT INFO) t=%i: '%s'", t, label);
+
     if (ptr_map() == NULL) {
-        return ("\n(GIS-INFO) t=" + std::to_string(t) + ": object is not part of gis");
+        return (std::string(buffer1) + " is not part of gis");
     }
+
     char buffer[300];
-    if (true == is_unique() )
-        sprintf(buffer, "\n(GIS OBJECT INFO) t=%i: '%s' UID %g position (%g,%g) at map %p", t, label, unique_id(), position->x, position->y, position->map);
+    if (!append) {
+        if (true == is_unique() )
+            sprintf(buffer, "%s UID %g position (%g,%g) at map %p", buffer1, unique_id(), position->x, position->y, position->map);
+        else
+            sprintf(buffer, "%s (no UID) position (%g,%g) at map %p", buffer1, position->x, position->y, position->map);
+    }
     else
-        sprintf(buffer, "\n(GIS OBJECT INFO) t=%i: '%s' (no uID) position (%g,%g) at map %p", t, label, position->x, position->y, position->map);
+        sprintf(buffer, " position (%g,%g) at map %p", position->x, position->y, position->map);
 
     return std::string(buffer);
 }

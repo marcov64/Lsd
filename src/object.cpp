@@ -2644,7 +2644,7 @@ bool object::check_condition(char const varLab[], char const condition[], double
 							"create variable or parameter in model structure" );
                 return false;
     }
-    object *caller = NULL == fake_caller ? this : fake_caller;
+    object *caller = (NULL == fake_caller) ? this : fake_caller;
     double checkVal = cv->cal(caller, lag);
     
     switch (condition[0]) {

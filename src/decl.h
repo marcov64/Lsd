@@ -352,6 +352,7 @@ struct object
     void it_in_radius(char const lab[], double radius, char random, object* caller, int lag, char const varLab[], char const condition[], double condVal);
     object* first_neighbour_full(char const lab[], bool random);
     object* first_neighbour(char const lab[], double radius, char random, object* caller = NULL, int lag = -1, char const varLab[] = "", char const condition[] = "", double condVal = 0.0);
+    object* first_neighbour_n(char const lab[], int nelements, double radius, char random, object* caller = NULL, int lag = -1, char const varLab[] = "", char const condition[] = "", double condVal = 0.0);
     bool next_neighbour_exists();
     object* next_neighbour();
     void sort_objDisSet();
@@ -367,8 +368,9 @@ struct object
 
     object* search_at_position(char const lab[], double x, double y, bool single);
     object* search_at_position(char const lab[], bool single, bool grid = false);
+    object* switch_closest_in_distance(int nelements, char const lab[], double radius, bool random, object* fake_caller = NULL, int lag = 0, char const varLab[] = "", char const condition[] = "", double condVal = 0.0);
     object* closest_in_distance(char const lab[], double radius, bool random, object* fake_caller = NULL, int lag = 0, char const varLab[] = "", char const condition[] = "", double condVal = 0.0);
-
+    object* nclosest_in_distance(char const lab[], int nelements, double radius, bool random, object* fake_caller = NULL, int lag = 0, char const varLab[] = "", char const condition[] = "", double condVal = 0.0);
     double elements_at_position(char const lab[], double x, double y);
     double elements_at_position(char const lab[], bool grid);
 
@@ -405,7 +407,7 @@ struct object
     bool check_positions(double& _x, double& _y, bool noChange = false); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
     bool check_positions(gisMap* map, double& _xOut, double& _yOut, bool noChange = false);
 
-    std::string gis_info();
+    std::string gis_info(bool append=false);
 
     double init_lattice_gis(int init_color = 1000, double pixW = 400, double pixH = 400);
     void close_lattice_gis( );
