@@ -64,11 +64,11 @@ Object: Root C	1
 Var: Scheduler 0 n + n n
 Param: xn 0 n + n n	100
 Param: yn 0 n + n n	100
-Param: n_resources 0 n + n n	500
+Param: n_resources 0 n + n n	-0.02
 Var: Init 0 n + n n
 Param: n_toolkit 0 n + n n	100
 Param: GraphLat 0 n + n n	1
-Param: wrap 0 n + n n	0
+Param: wrap 0 n + n n	15
 Var: End_Sim 0 s + n n
 Param: UniqueResourcesFound 0 s + n n	0
 Param: n_Forangers 0 n + n n	1
@@ -134,7 +134,7 @@ All 1 instances equal to 500.
 END_DESCRIPTION
 
 Parameter_n_resources
-(no description available)
+Number of resources. A negative value describes the densitiy. The original paper uses 5,000 Resources in a 500x500 lattice, which is equivalent to a density of 1/50 = 0.02.
 _INIT_
 All 1 instances equal to 1000.
 END_DESCRIPTION

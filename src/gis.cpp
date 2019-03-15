@@ -97,7 +97,7 @@ void object::set_distance_type( char type )
         return;
     }
     position->map->distance_type = type;
-    sprintf( gismsg, "\nSwitched distance to type '%c' (c: Chebyshev, e: Euclidean, m: Manhattan", type);
+    sprintf( gismsg, "\nSwitched distance to type '%c' (c: Chebyshev, e: Euclidean, m: Manhattan)", type);
     plog(gismsg);
     return;
 }
@@ -1035,7 +1035,7 @@ struct add_if_dist_lab_cond {
     bool has_condition;
     double condVal;
     double pseudo_radius;
-    char condition[]; // 1 : == ; 2 : > ; 3 : < ; 4: !=; that's it
+    char condition[2]; // 1 : == ; 2 : > ; 3 : < ; 4: !=; that's it
 
     //constructor
     add_if_dist_lab_cond(object* this_obj, double radius, char const _lab[], object* fake_caller, int lag, char const _varLab[], char const _condition[], double condVal)

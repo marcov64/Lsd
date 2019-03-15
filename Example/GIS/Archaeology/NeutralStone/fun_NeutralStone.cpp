@@ -45,6 +45,12 @@ double init_ret = 0.0;
 
 
     double n_resources = V("n_resources"); //Create the missing resources
+    
+    if (n_resources < 0) {
+    		n_resources = ceil(-n_resources * xn * yn);
+				PLOG("\nChanged relative densitiy of resources (%g) to absolute number of %g", -V("n_resources"),n_resources);
+    }
+    
     ADDNOBJ("Resource", n_resources - 1); //one exists already
 
 
