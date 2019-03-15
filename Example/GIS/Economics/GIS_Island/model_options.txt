@@ -1,0 +1,5 @@
+TARGET=lsd_gnu
+FUN=fun_g
+FUN_EXTRA=
+SWITCH_CC=-Og -ggdb3
+SWITCH_CC_LNK=
