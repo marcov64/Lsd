@@ -1,0 +1,6 @@
+Model Small_island_gis (ver. 1.0)
+
+(Enter the Model description text here)
+
+(PRESS CTRL+E TO EDIT EQUATIONS)
+
