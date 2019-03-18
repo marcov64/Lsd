@@ -1,8 +1,14 @@
 Model Small_island_gis (ver. 1.0)
 
+<<<<<<< HEAD
 based on Fagiolo, G., Dosi, G. (2003) Exploitation, exploration and innovation in a model of endogenous growth with locally interacting agents, Structural Change and Economic Dynamics,
 v. 14, p. 237-273.
 
 
 Reimplemented in LSD with GIS module by Kyaw Lin Oo
+=======
+(Enter the Model description text here)
+
+(PRESS CTRL+E TO EDIT EQUATIONS)
+>>>>>>> a75713c128a7f6baaa5be376a09b25133b36249b
 
