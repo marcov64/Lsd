@@ -103,7 +103,7 @@ Param: AgentCount 0 n + n n	100
 Param: alpha 0 n + n n	1.5
 Param: epsilon 0 n + n n	0.1
 Param: phi 0 n + n n	0.5
-Var: Q 1 s + n n	9316.59
+Var: Q 1 s + n p	9316.59
 Var: m 1 s + n n	53
 Var: g 0 s + n n
 Param: lambda 0 n + n n	0

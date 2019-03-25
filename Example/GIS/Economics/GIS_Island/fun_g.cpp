@@ -233,7 +233,7 @@ EQUATION( "m" )
 Number of agents currently mining on all islands.
 */
 double sum=SUM("_activeMiner");
-PLOG("\n number of agents on all island is  %g",sum);
+// PLOG("\n number of agents on all island is  %g",sum);
 
 RESULT( sum )
 
@@ -242,7 +242,7 @@ EQUATION( "Q" )
 /*
 Total output (GDP).
 */
-PLOG("\n TOTAL GDP is is %g",SUM("_Qisland" ) );
+// PLOG("\n TOTAL GDP is is %g",SUM("_Qisland" ) );
 RESULT( SUM("_Qisland" ) )
 
 
