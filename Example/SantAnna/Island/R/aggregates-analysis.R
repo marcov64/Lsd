@@ -15,8 +15,6 @@ baseName <- "exp"                     # data files base name (same as .lsd file)
 nExp <- 2                             # number of experiments
 iniDrop <- 0                          # initial time steps to drop from analysis (0=none)
 nKeep <- -1                           # number of time steps to keep (-1=all)
-cores <- 0                            # maximum number of cores to allocate (0=all)
-savDat <- TRUE                        # save processed data files and re-use if available?
 
 expVal <- c( "Low oportunity", "High oportunity" )   # case parameter values
 
@@ -25,58 +23,14 @@ logVars <- c( "Q" )
 aggrVars <- append( logVars, c( "g", "l", "m", "J" ) )
 
 # Variables to test for stationarity and ergodicity
-statErgo.vars <- c( "g" )
-
-
-# ==== Log start mark ====
-
-cat( "\nAggregates analysis\n=======================\n" )
-cat( "\n", as.character( Sys.time( ) ), "-> Start processing...\n\n" )
-startTime <- proc.time( )       # register current time
-options( warn = -1 )
-
-
-# ==== Read command line parameters (if any) ====
-
-args <- commandArgs( trailingOnly = TRUE )
-cat( "Command line arguments: ", args, "\n" )
-
-if( length ( args ) > 0 ){  # first parameter has to be the folder
-  folder <- args [1]
-}
-if( length ( args ) > 1 ){  # second parameter has to be the base name
-  baseName <- args [2]
-}
-if( length ( args ) > 2 ){  # third parameter has to be the number of experiments
-  nExp <- as.integer( args [3] )
-}
-if( length ( args ) > 3 ){  # fourth parameter has to be the initial time period ( 0 is all )
-  iniDrop <- as.integer( args [4] )
-}
-if( length ( args ) > 4 ){  # fifth parameter has to be the end periods to remove ( -1 is all )
-  nKeep <- as.integer( args [5] )
-}
-if( length ( args ) > 5 ){  # sixth parameter has to be the number of cores ( 0 is all )
-  cores <- as.integer( args [6] )
-}
-if( length ( args ) > 6 ){  # seventh parameter has to be the intermediate data saving flag
-  savDat <- as.logical( args [7] )
-}
-
-cat( " Folder =", folder, "\n" )
-cat( " Base name =", baseName, "\n" )
-cat( " Number of experiments =", nExp, "\n" )
-cat( " Initial time steps to drop =", iniDrop, "\n" )
-cat( " Time steps to keep =", nKeep, "\n" )
-cat( " Maximum cores to use =", cores, "\n" )
-cat( " Re-use data files =", savDat, "\n" )
+statErgo.vars <- c( "Q", "g", "l", "m", "J" )
 
 
 # ==== Process LSD result files ====
 
 # Package with LSD interface functions
 library( LSDinterface, verbose = FALSE, quietly = TRUE )
-library( parallel, verbose = FALSE, quietly = TRUE )
+options( warn = -1 )
 
 # ---- Read data files ----
 
@@ -120,7 +74,7 @@ readExp <- function( exper ) {
   cat( "\nData files: ", myFiles, "\n\n" )
 
   # Read data from text files and format it as a 3D array with labels
-  mc <- read.3d.lsd( myFiles, aggrVars, skip = iniDrop, nrows = nKeep, nnodes = lsdCores )
+  mc <- read.3d.lsd( myFiles, aggrVars, skip = iniDrop, nrows = nKeep )
 
   # Compute Monte Carlo averages and std. deviation and store in 2D arrrays
   stats <- info.stats.lsd( mc )
@@ -132,16 +86,6 @@ readExp <- function( exper ) {
   M <- as.data.frame( cbind( t, stats$max ) )
   m <- as.data.frame( cbind( t, stats$min ) )
 
-  # Write to the disk as (European) CSV files for Excel
-  write.csv( A, paste0( folder, "/", baseName, "", exper, "_aggr_avg.csv" ),
-             row.names = FALSE, quote = FALSE )
-  write.csv( S, paste0( folder, "/", baseName, "", exper, "_aggr_sd.csv" ),
-             row.names = FALSE, quote = FALSE )
-  write.csv( M, paste0( folder, "/", baseName, "", exper, "_aggr_max.csv" ),
-             row.names = FALSE, quote = FALSE )
-  write.csv( m, paste0( folder, "/", baseName, "", exper, "_aggr_min.csv" ),
-             row.names = FALSE, quote = FALSE )
-
   # Save temporary results to disk to save memory
   tmpFile <- paste0( folder, "/", baseName, "", exper, "_aggr.Rdata" )
   save( mc, A, S, M, m, file = tmpFile )
@@ -149,67 +93,8 @@ readExp <- function( exper ) {
   return( tmpFile )
 }
 
-# only reprocess results file if requested/needed
-if( savDat ) {
-
-  tmpFiles <- list( )
-  noDat <- FALSE
-
-  # check all .dat files exist and are newer than .res files
-  for( i in 1 : nExp ) {
-    tmpFiles[[ i ]] <- paste0( folder, "/", baseName, "", i, "_aggr.Rdata" )
-    if( ! file.exists( tmpFiles[[ i ]] ) )
-      noDat <- TRUE
-    else {
-      myFiles <- list.files( path = folder, pattern = paste0( baseName, i, "_[0-9]+.res" ),
-                             full.names = TRUE )
-      # if any .res file is newer, redo everything
-      if( max( file.mtime( myFiles ) ) > file.mtime( tmpFiles[[ i ]] ) ) {
-        if( ! noDat )
-          cat( "New data files detected, removing previously saved data...\n\n" )
-        unlink( tmpFiles[[ i ]] )
-        noDat <- TRUE
-      }
-    }
-  }
-
-  if( ! noDat )
-    cat( "Re-using previously saved data...\n" )
-}
-
-if( ! savDat || noDat ) {
-
-  cat( "Reading data from files...\n" )
-
-  # configure clusters for 2 level parallel loading
-  if( cores == 0 )
-    cores <- detectCores( )
-  cores <- min( cores, detectCores( ) )
-  lsdCores <- 1
-  if( cores != 1 ) {
-    # fully allocate cores (round up to ensure 100% utilization)
-    if( cores > nExp )
-      lsdCores <- ceiling( cores / nExp )
-
-    # initiate cluster for parallel loading
-    cl <- makeCluster( min( nExp, cores ) )
-
-    # configure cluster: export required variables & packages
-    clusterExport( cl, c( "nExp", "folder", "baseName", "aggrVars", "iniDrop",
-                          "nKeep", "lsdCores" ) )
-    invisible( clusterEvalQ( cl, library( LSDinterface ) ) )
-
-    # load each experiment in parallel
-    tmpFiles <- parLapplyLB( cl, 1 : nExp, readExp )
-
-    stopCluster( cl )
-
-  } else {
-
-    # load each experiment serially
-    tmpFiles <- lapply( 1 : nExp, readExp )
-  }
-}
+# load each experiment serially (can be easily parallelized)
+tmpFiles <- lapply( 1 : nExp, readExp )
 
 # ---- Organize data read from files ----
 
@@ -223,8 +108,7 @@ mdata <- list()  # minimum data
 for( k in 1 : nExp ) {                      # realocate data in separate lists
 
   load( tmpFiles[[ k ]] )                   # pick data from disk
-  if( ! savDat )
-    file.remove( tmpFiles[[ k ]] )          # and delete temporary file, if needed
+  file.remove( tmpFiles[[ k ]] )            # and delete temporary file, if needed
 
   mcData[[ k ]] <- mc
   rm( mc )
@@ -1139,8 +1023,6 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
                                        j, "/ period =", warmUpStat, "-", nTsteps, ")" ) )
   }
 
-  cat( "\nDone...\n" )
-
 #******************************************************************
 #
 # ------------- Exception handling code (tryCatch) -------------
@@ -1157,9 +1039,6 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
   textplot("Report incomplete due to processing error.")
 }, finally = {
   options( warn = 0 )
-  cat( "\n", as.character( Sys.time( ) ), "-> Releasing resources...\n\n" )
-  totalTime <- proc.time( ) - startTime
-  print( totalTime )
   # Close PDF plot file
   dev.off()
 })
