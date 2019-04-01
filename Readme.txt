@@ -117,7 +117,9 @@ ATTENTION: If Gnuplot is not included in the Windows PATH environment variable, 
 Windows installation (64-bit only)
 **********************************
 
-To use the 64-bit mode of LSD, you need the GNU 64-bit C++ compiler installed (cygwin64-mingw or mingw-w64 versions are all fine). The Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64"). If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, four non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make and gdb). Lastly, Cygwin must be added to the PATH environment variable (not done by the installer).
+To use the 64-bit mode of LSD, you need the GNU 64-bit C++ compiler installed (Cygwin or MSYS2 mingw-w64-x86_64 versions are both fine). The Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64"). If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, four non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make and gdb). Lastly, Cygwin must be added to the PATH environment variable (not done by the installer).
+
+If you prefer to use MSYS2 instead of Cygwin (only recommended for advanced users), see instructions at the end of this section.
 
 Step-by-step procedure to enable LSD 64-bit mode (an internet connection is required):
 
@@ -144,6 +146,26 @@ Alternatively, or if you have problems with the command above, you can use Windo
 If you cannot create the LSD icon on your desktop following the steps above, you may still run LSD by double-clicking the file "run64.bat" inside the LSD installation directory.
 
 WARNING: LSD operates by creating and modifying executable (.exe) files for your simulation models. This kind of procedure may be INCORRECTLY detected as suspicious by some antivirus software and incorrect operation of LSD may arise, particularly when you try to compile and/or run your model. In this case, you may try to reconfigure your antivirus to allow LSD operation or try to TEMPORARILY disable it entirely. Microsoft standard antivirus software (included and enabled by default in Windows 10) is known to operate properly with LSD and offers a good level of protection for most users.
+
+MSYS2: Please note that MSYS2 is NOT required if the above instructions for installing Cygwin were already performed. Steps to configure MSYS2:
+
+1. Download and install the MSYS2 64-bit installer from http://www.msys2.org.
+
+2. Open the MSYS2 shell and update MSYS2 using the command:
+
+pacman -Syu
+
+3. When instructed, close and re-open the MSYS2 shell, and update again:
+
+pacman -Su
+
+4. Still in the shell, install the compiler and required tools:
+
+pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb
+
+5. Add the compiler to path, double clicking on "add-msys2-to-path.bat" file (in LSD installation folder) if MSYS2 was installed on the default path (C:\msys64). Otherwise, use the command below in the LSD installation folder (replacing PATH with the chosen installation folder):
+
+add-msys2-to-path PATH
 
 
 ******************
