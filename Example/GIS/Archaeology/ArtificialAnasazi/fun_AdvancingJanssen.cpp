@@ -1,9 +1,12 @@
 #include "fun_head_fast.h"
 
-
+/* Switches for debugging/visually analysing the specific model */
+//#define VALIDATION //checked - everything is as it should!
 //Switches for validation module.
-#define SWITCH_TEST_OFF
+#ifndef VALIDATION
+#define SWITCH_TEST_OFF     //(un)comment to switch on(off)
 #define SWITCH_VERBOSE_OFF  //(un)comment to switch on(off)
+#endif
 #define TRACK_SEQUENCE_MAX_T 0 //number of steps for tracking
 #define DISABLE_LOCAL_CLOCKS
 
@@ -11,16 +14,15 @@
 
 //#define MODULE_PAJEK //uncomment to create Pajek Network Files
 #ifdef MODULE_PAJEK
-    #include "ext_pajek.cpp" //pajek network visualisation, also loads external/Pajek
+#include "ext_pajek.cpp" //pajek network visualisation, also loads external/Pajek
 #endif
 
-#define NOLATTICE   //uncomment to allow lattice
+#define NOLATTICE   //uncomment to allow lattice - not fully working atm
 #ifndef NOLATTICE
-    #include "ext_lattice.cpp" //lattice, also loads external/ColourGradient
+#include "ext_lattice.cpp" //lattice, also loads external/ColourGradient
 #endif
 
-/* Switches for debugging/visually analysing the specific model */
-//  #define VALIDATION //checked - everything is as it should!
+
 
 
 /* Some hard-coded parameters */
@@ -115,34 +117,34 @@ else
 
     //If you like to see individual firing rates and not cumulatives, uncomment:
     /*
-    //Reset assumption trackers
-    if (VS(Settings, "Assumption_resettleDie") > -1) {
+        //Reset assumption trackers
+        if (VS(Settings, "Assumption_resettleDie") > -1) {
         WRITES(Settings, "Assumption_resettleDie", 0);
-    }
-    if (VS(Settings, "Assumption_SettleFloodplain") > -1) {
+        }
+        if (VS(Settings, "Assumption_SettleFloodplain") > -1) {
         WRITES(Settings, "Assumption_SettleFloodplain", 0);
-    }
-    if (VS(Settings, "Assumption_ObserveHydro") > -1) {
+        }
+        if (VS(Settings, "Assumption_ObserveHydro") > -1) {
         WRITES(Settings, "Assumption_ObserveHydro", 0);
-    }
-    if (VS(Settings, "Assumption_ObserveWater") > -1) {
+        }
+        if (VS(Settings, "Assumption_ObserveWater") > -1) {
         WRITES(Settings, "Assumption_ObserveWater", 0);
-    }
-    if (VS(Settings, "Assumption_waterNotNecessarySettle") > -1) {
+        }
+        if (VS(Settings, "Assumption_waterNotNecessarySettle") > -1) {
         WRITES(Settings, "Assumption_waterNotNecessarySettle", 0);
-    }
-    if (VS(Settings, "Assumption_waterNotNecessaryFarm") > -1) {
+        }
+        if (VS(Settings, "Assumption_waterNotNecessaryFarm") > -1) {
         WRITES(Settings, "Assumption_waterNotNecessaryFarm", 0);
-    }
-    if (VS(Settings, "Assumption_negativeHarvest") > -1) {
+        }
+        if (VS(Settings, "Assumption_negativeHarvest") > -1) {
         WRITES(Settings, "Assumption_negativeHarvest", 0);
-    }
-    if (VS(Settings, "Assumption_bugUplands") > -1) {
+        }
+        if (VS(Settings, "Assumption_bugUplands") > -1) {
         WRITES(Settings, "Assumption_bugUplands", 0);
-    }
-    if (VS(Settings, "Assumption_child") > -1) {
+        }
+        if (VS(Settings, "Assumption_child") > -1) {
         WRITES(Settings, "Assumption_child", 0);
-    }
+        }
     */
 
 }
@@ -245,16 +247,16 @@ CYCLE( cur, "Land_Patch" )
 }
 if (val_errs > 0)
 {
-    LOG("\ny=%i,t=%i  - Error: Validation not O.K. in %i of %i cases (%i yield (sum diffs: %g), %i hydro (sum diffs: %g), %i apdsi (sum diffs: %g), %i water (sum diffs: %g)).",
-        int(V("Year")), t, val_errs, t_count * 4,
-        env->errs_yield, env->sum_diffs_yield,
-        env->errs_hydro, env->sum_diffs_hydro,
-        env->errs_apdsi, env->sum_diffs_apdsi,
-        env->errs_water, env->sum_diffs_water );
+    PLOG("\ny=%i,t=%i  - Error: Validation not O.K. in %i of %i cases (%i yield (sum diffs: %g), %i hydro (sum diffs: %g), %i apdsi (sum diffs: %g), %i water (sum diffs: %g)).",
+         int(V("Year")), t, val_errs, t_count * 4,
+         env->errs_yield, env->sum_diffs_yield,
+         env->errs_hydro, env->sum_diffs_hydro,
+         env->errs_apdsi, env->sum_diffs_apdsi,
+         env->errs_water, env->sum_diffs_water );
 }
 else
 {
-    VERBOSE_MODE(false) {
+    VERBOSE_MODE(true) {
         PLOG("\nt=%i  - Validation fine, no errors in %i cases", t, t_count * 4);
     }
 }
@@ -271,13 +273,16 @@ VERBOSE_MODE(t <= TRACK_SEQUENCE_MAX_T)
 {
     PLOG("\n -- -- -- S C H E D U L E R   is due. -- -- --\n");
 }
-V("Update_Lattice");
-V("Pajek");
+
 
 if (t == TOTALSTEPS)
 {
     ABORT
 }
+
+V("Update_Lattice");
+V("Pajek");
+
 RESULT(double (t))
 
 
@@ -1481,7 +1486,7 @@ MODELEND
 
 void close_sim(void)
 {
-    
+
 }
 
 

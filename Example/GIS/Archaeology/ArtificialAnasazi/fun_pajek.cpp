@@ -95,6 +95,8 @@ CYCLE(cur, "Household")
         PAJ_ADD_A_C(t, VS(farm, "Farm_ID"), "Farm", VS(cur, "Waterpoint_ID"), "Waterpoint", VS(farm, "Farm_distWater") > waterSourceDistance ? -1.0 : 1.0, "farmWater", base_svg_lw, "RedOrange")
     }
 }
-
+if (quit != 0){
+    PAJ_SAVE;
+}
 #endif
 RESULT(0.0)
