@@ -3,3 +3,4 @@ Models from/in Archaeology
 A set of models applied in the context of archaeology:
 
 - Neutral Model of Stone Raw Material Procurement
+- Artificial Anasazi

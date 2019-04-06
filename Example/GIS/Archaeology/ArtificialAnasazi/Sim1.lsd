@@ -1,0 +1,1394 @@
+	
+Label Root
+{
+	Son: Model
+	Label Model
+	{
+		Son: Land_Patch
+		Label Land_Patch
+		{
+			Param: land_type
+			Param: watersource
+			Param: apdsi
+			Param: hydro
+			Var: quality
+			Param: maizeZone
+			Var: yield
+			Var: BaseYield
+			Func: ocfarm
+			Func: ochousehold
+			Param: map_colour
+			Func: DistanceToWater
+			Param: Land_Patch_x
+			Param: Land_Patch_y
+			Param: Land_Patch_ID
+			Func: habitable
+
+		}
+
+		Son: Household
+		Label Household
+		{
+			Son: agedCornStock
+			Label agedCornStock
+			{
+				Param: cornStock
+				Param: cornYear
+
+			}
+
+			Son: Farm
+			Label Farm
+			{
+				Param: Farm_ID
+				Var: Farm_distWater
+
+			}
+
+			Param: Household_x
+			Param: Household_y
+			Var: lastharvest
+			Var: estimate
+			Var: hh_NutritionNeed
+			Var: hh_NutritionNeedRemaining
+			Var: resettle
+			Param: Household_ID
+			Param: Household_distFarm
+			Param: Household_distWater
+			Var: age
+			Var: fission
+			Param: Waterpoint_by_ID
+
+		}
+
+		Son: Settlement
+		Label Settlement
+		{
+			Param: Settlement_x
+			Param: Settlement_y
+			Param: Settlement_persons
+			Param: Settlement_households
+			Param: Settlement_ID
+
+		}
+
+		Son: Waterpoint
+		Label Waterpoint
+		{
+			Son: water_period
+			Label water_period
+			{
+				Param: water_start
+				Param: water_end
+				Param: typewater
+
+			}
+
+			Param: Waterpoint_x
+			Param: Waterpoint_y
+			Var: Update_waterSource
+			Param: Waterpoint_ID
+
+		}
+
+		Son: Environment
+		Label Environment
+		{
+			Var: Update_apdsi_hydro
+			Var: Init_geography
+			Var: Init_apdsi_hydro
+			Var: Capacity
+			Var: Init_Waterpoints
+
+		}
+
+		Son: Population
+		Label Population
+		{
+			Var: Update_Population
+			Func: NewPerson
+			Var: Init_population
+			Param: histothouseholds
+			Param: nHouseholds
+			Param: newHouseholds
+			Func: Person_Dies
+			Param: Died_starving
+			Param: Died_ofAge
+
+		}
+
+		Son: Settings
+		Label Settings
+		{
+			Param: harvestAdjustment
+			Param: harvestVariance
+			Param: deathAge
+			Param: fertilityEndAge
+			Param: fertility
+			Param: fertilityStartAge
+			Param: newHouseholdAge
+			Param: typicalHouseholdSize
+			Param: baseNutritionNeed
+			Param: yearsOfStock
+			Param: maizeGiftToChild
+			Param: waterSourceDistance
+			Param: Assumption_child
+			Param: Assumption_bugUplands
+			Param: Assumption_waterLast
+			Param: Assumption_resettleDie
+			Param: Assumption_negativeHarvest
+			Param: Assumption_waterNotNecessaryFarm
+			Param: Assumption_waterNotNecessarySettle
+			Param: Assumption_wrapping
+			Param: Assumption_ObserveWater
+			Param: Assumption_ObserveHydro
+			Var: Seed
+			Param: Assumption_SettleFloodplain
+			Param: Assumption_noUncertainty
+
+		}
+
+		Son: InitSettings
+		Label InitSettings
+		{
+			Param: nHouseholdsInitial
+			Param: householdMaxInitialAge
+			Param: householdMinInitialAge
+			Param: householdMinInitialCorn
+			Param: householdMaxInitialCorn
+
+		}
+
+		Son: GIS_Model
+		Label GIS_Model
+		{
+			Func: GIS_Init
+			Param: GIS_xn
+			Param: GIS_yn
+			Param: GIS_wrap
+
+		}
+
+		Var: Scheduler
+		Param: Year
+		Param: total_Households
+		Param: total_Farms
+		Param: total_Persons
+		Var: Update_Lattice
+		Var: Init_Lattice
+		Param: Mapview
+		Param: Update_Interval
+		Var: Pajek
+		Func: FindFarmAndSettlement
+		Func: Potfarms
+		Param: Settle_A
+		Param: Settle_B
+		Param: Settle_C
+		Param: Settle_D
+		Param: Settle_E
+		Param: Settle_F
+		Param: Settle_G
+		Param: Settle_H
+		Param: age_max
+		Param: age_mean
+		Param: age_min
+		Param: age_sd
+		Param: lastharvest_max
+		Param: lastharvest_mean
+		Param: lastharvest_min
+		Param: lastharvest_sd
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Model C	1
+Var: Scheduler 0 n + d n
+Param: Year 0 n + n n	0
+Param: total_Households 0 s + n n	0
+Param: total_Farms 0 s + n n	0
+Param: total_Persons 0 n + n n	0
+Var: Update_Lattice 0 n + n n
+Var: Init_Lattice 0 n + n n
+Param: Mapview 0 n + n n	0
+Param: Update_Interval 0 n + n n	0
+Var: Pajek 0 n + n n
+Func: FindFarmAndSettlement 0 n + n n
+Func: Potfarms 0 n + n n
+Param: Settle_A 0 s + n n	0
+Param: Settle_B 0 s + n n	0
+Param: Settle_C 0 s + n n	0
+Param: Settle_D 0 s + n n	0
+Param: Settle_E 0 s + n n	0
+Param: Settle_F 0 s + n n	0
+Param: Settle_G 0 s + n n	0
+Param: Settle_H 0 s + n n	0
+Param: age_max 0 s + n n	0
+Param: age_mean 0 s + n n	0
+Param: age_min 0 s + n n	0
+Param: age_sd 0 s + n n	0
+Param: lastharvest_max 0 s + n n	0
+Param: lastharvest_mean 0 s + n n	0
+Param: lastharvest_min 0 s + n n	0
+Param: lastharvest_sd 0 s + n n	0
+
+Object: Land_Patch C	1
+Param: land_type 0 n + n n	0
+Param: watersource 0 n + n n	0
+Param: apdsi 0 n + n n	0
+Param: hydro 0 n + n n	0
+Var: quality 0 n + n n
+Param: maizeZone 0 n + n n	0
+Var: yield 0 n + n n
+Var: BaseYield 0 n + n n
+Func: ocfarm 0 n + n n
+Func: ochousehold 0 n + n n
+Param: map_colour 0 n + n n	0
+Func: DistanceToWater 0 n + n n
+Param: Land_Patch_x 0 n + n n	0
+Param: Land_Patch_y 0 n + n n	0
+Param: Land_Patch_ID 0 n + n n	0
+Func: habitable 0 n + n n
+
+Object: Household C	1
+Param: Household_x 0 n + n n	-1
+Param: Household_y 0 n + n n	-1
+Var: lastharvest 0 n + n n
+Var: estimate 0 n + n n
+Var: hh_NutritionNeed 0 n + n n
+Var: hh_NutritionNeedRemaining 0 n + n n
+Var: resettle 0 n + n n
+Param: Household_ID 0 n + n n	0
+Param: Household_distFarm 0 n + n n	0
+Param: Household_distWater 0 n + n n	0
+Var: age 0 n + n n
+Var: fission 0 n + n n
+Param: Waterpoint_by_ID 0 n + n n	0
+
+Object: agedCornStock C	1
+Param: cornStock 0 n + n n	0
+Param: cornYear 0 n + n n	0
+
+Object: Farm C	1
+Param: Farm_ID 0 n + n n	0
+Var: Farm_distWater 0 n + n n
+
+Object: Settlement C	1
+Param: Settlement_x 0 n + n n	0
+Param: Settlement_y 0 n + n n	0
+Param: Settlement_persons 0 n + n n	0
+Param: Settlement_households 0 n + n n	0
+Param: Settlement_ID 0 n + n n	0
+
+Object: Waterpoint C	1
+Param: Waterpoint_x 0 n + n n	-1
+Param: Waterpoint_y 0 n + n n	-1
+Var: Update_waterSource 0 n + n n
+Param: Waterpoint_ID 0 n + n n	0
+
+Object: water_period C	1
+Param: water_start 0 n + n n	-1
+Param: water_end 0 n + n n	-1
+Param: typewater 0 n + n n	-1
+
+Object: Environment C	1
+Var: Update_apdsi_hydro 0 n + n n
+Var: Init_geography 0 n + n n
+Var: Init_apdsi_hydro 0 n + n n
+Var: Capacity 0 s + n p
+Var: Init_Waterpoints 0 n + n n
+
+Object: Population C	1
+Var: Update_Population 0 s + n p
+Func: NewPerson 0 n + n n
+Var: Init_population 0 n + n n
+Param: histothouseholds 0 n + n p	0
+Param: nHouseholds 0 s + n p	0
+Param: newHouseholds 0 s + n p	0
+Func: Person_Dies 0 n + n n
+Param: Died_starving 0 s + n n	0
+Param: Died_ofAge 0 s + n n	0
+
+Object: Settings C	1
+Param: harvestAdjustment 0 n + n n	0.56
+Param: harvestVariance 0 n + n n	0.4
+Param: deathAge 0 n + n n	38
+Param: fertilityEndAge 0 n + n n	34
+Param: fertility 0 n + n n	0.155
+Param: fertilityStartAge 0 n + n n	16
+Param: newHouseholdAge 0 n + n n	0
+Param: typicalHouseholdSize 0 n + n n	5
+Param: baseNutritionNeed 0 n + n n	160
+Param: yearsOfStock 0 n + n n	2
+Param: maizeGiftToChild 0 n + n n	0.33
+Param: waterSourceDistance 0 n + n n	16
+Param: Assumption_child 0 s + n n	0
+Param: Assumption_bugUplands 0 s + n n	-1
+Param: Assumption_waterLast 0 n + n n	1
+Param: Assumption_resettleDie 0 s + n n	0
+Param: Assumption_negativeHarvest 0 s + n n	-1
+Param: Assumption_waterNotNecessaryFarm 0 s + n n	0
+Param: Assumption_waterNotNecessarySettle 0 s + n n	0
+Param: Assumption_wrapping 0 n + n n	0
+Param: Assumption_ObserveWater 0 s + n n	0
+Param: Assumption_ObserveHydro 0 s + n n	0
+Var: Seed 0 n + n n
+Param: Assumption_SettleFloodplain 0 s + n n	0
+Param: Assumption_noUncertainty 0 s + n n	0
+
+Object: InitSettings C	1
+Param: nHouseholdsInitial 0 n + n n	14
+Param: householdMaxInitialAge 0 n + n n	29
+Param: householdMinInitialAge 0 n + n n	0
+Param: householdMinInitialCorn 0 n + n n	2000
+Param: householdMaxInitialCorn 0 n + n n	2400
+
+Object: GIS_Model C	1
+Func: GIS_Init 0 n + n n
+Param: GIS_xn 0 n + n n	0
+Param: GIS_yn 0 n + n n	0
+Param: GIS_wrap 0 n + n n	0
+
+SIM_NUM 1
+SEED 2
+MAX_STEP 551
+EQUATION fun_AdvancingJanssen.cpp
+MODELREPORT report_Sim1.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Model
+In order to allow an "on the run" exploration of the model, the model is situated within a "model" object that can be multiplied (a copy for each parameter setting)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Scheduler
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Year
+This is the current year.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_total_Households
+Assign unique ID to Household
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_total_Farms
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_total_Persons
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Update_Lattice
+ Updates the lattice according to the current view. 
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Init_Lattice
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Mapview
+0 = Zones (special)
+1 = Watersources (blue/white)
+2 = Hydro (red-white-blue)
+3 = Occupation (blue--green--red) 
+4 = Yield (black,white-yellow)
+5 = apdsi (red-white-blue)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Update_Interval
+x in [1,n] - each x time-steps the view is updated. 
+
+0 disable the lattice.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Pajek
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_FindFarmAndSettlement
+Called via Fake-Caller from the household. It finds a new (optimal) farm and a new (optimal) settlement.
+_INIT_
+
+END_DESCRIPTION
+
+Function_Potfarms
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settle_A
+Die because no sustainable farm exists.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settle_B
+All constrains sattisfied. Found a farm and a nice place to life at.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settle_C
+See UML
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settle_D
+See UML
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settle_E
+See UML
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settle_F
+Die. See UML
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settle_G
+See UML
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settle_H
+See UML
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_age_max
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_age_mean
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_age_min
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_age_sd
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_lastharvest_max
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_lastharvest_mean
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_lastharvest_min
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_lastharvest_sd
+(no description available)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Object_Land_Patch
+A patch of land, representing 100x100m
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_land_type
+Equivalent to janssen parameter "value" - the kind of land, classified as (see ODD_LHV and NetLogo Code):
+
+(0) Black: General Valley Floor  
+(10) Red: North Valley Floor  
+(15,25,60) White: Mid and North Dunes, Empty land
+(20) Gray: Midvalley Floor 
+(30) Yellow: Nonarable Uplands 
+(40) Blue: Arable Uplands 
+(50) Pink: Kinbiko Canyon
+
+The data is provided in Janssen "Map.txt", which will be used here, too. In the NetLogo version there is also a string variable "zone" holding the above information.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_watersource
+A binary variable, 0 if no water source, 1 if it is a water source. Water sources are defined externaly for each cell and for each point in time, based on information in Janssen water.txt and environment.txt.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_apdsi
+The adjusted "Palmer Drought Severity Index" determines the productivity of the land_type (aka zone/value). This is again hard-coded data from Janssen "adjustedPDSI.txt", which holds data for all zones and all years.
+
+Value   Classifications of Palmer Drought Severity Index 
+4.0 or more  extremely wet 
+3.0 to 3.99  Very wet 
+2.0 to 2.99  Moderately wet 
+1.0 to 1.99  Slightly wet 
+0.5 to 0.99  Incipient wet spell 
+0.49 to -0.49  Near normal 
+-0.5 to -0.99  Incipient dry spell 
+-1.0 to -1.99  Mild drought 
+-2.0 to -2.99  Moderate drought 
+-3.0 to -3.99  Severe drought 
+-4.0 or less  Extreme drought 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_hydro
+Using Janssen "environment.txt", which includes the information when each cell is a water source. Documentation is unclear...
+_INIT_
+
+END_DESCRIPTION
+
+Variable_quality
+The quality of the patch (normal 0,1) determines the harvest.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_maizeZone
+Determines the land type in terms of mais yield. In Janssen this is a string variable, we provide a numerical code instead (in paranthesis):
+
+"No_Yield" (0), "Yield_1" (1), "Yield_2" (2), "Yield_3" (3), "Sand_dune" (4). 
+
+Each of these defines a different base yield=f(apdsi). See yield.
+
+
+
+'maizeZone' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_yield
+The actual yield at any given point in time.
+
+From the NetLogo code:
+
+if (maizeZone = "No_Yield" or maizeZone = "Empty") [set yield 0]
+    if (maizeZone = "Yield_1") [
+      if (apdsi >=  3.0) [set yield 1153]
+      if (apdsi >=  1.0 and apdsi < 3.0) [set yield 988]
+      if (apdsi >  -1.0 and apdsi < 1.0) [set yield 821]
+      if (apdsi >  -3.0 and apdsi <= -1.0) [set yield 719]
+      if (apdsi <= -3.0) [set yield 617]]
+
+    if (maizeZone = "Yield_2") [  
+      if (apdsi >=  3.0) [set yield 961]
+      if (apdsi >=  1.0 and apdsi < 3.0) [set yield 824]
+      if (apdsi >  -1.0 and apdsi < 1.0) [set yield 684]
+	    if (apdsi >  -3.0 and apdsi <= -1.0) [set yield 599]
+	    if (apdsi <= -3.0) [set yield 514]]
+       
+    if (maizeZone = "Yield_3") [
+      if (apdsi >=  3.0) [set yield 769]
+	    if (apdsi >=  1.0 and apdsi < 3.0) [set yield 659]
+	    if (apdsi >  -1.0 and apdsi < 1.0) [set yield 547]
+	    if (apdsi > -3.0 and apdsi <= -1.0) [set yield 479]
+	    if (apdsi <= -3.0) [set yield 411]]
+       
+    if (maizeZone = "Sand_dune") [
+      if (apdsi >=  3.0) [set yield 1201]
+	    if (apdsi >=  1.0 and apdsi < 3.0) [set yield 1030]
+	    if (apdsi >  -1.0 and apdsi < 1.0) [set yield 855]
+	    if (apdsi >  -3.0 and apdsi <= -1.0) [set yield 749]
+	    if (apdsi <= -3.0) [set yield 642]]
+_INIT_
+
+END_DESCRIPTION
+
+Variable_BaseYield
+Using the global parameter "Harvestadjustment":
+
+BaseYield = yield * quality * Harvestadjustment
+_INIT_
+
+END_DESCRIPTION
+
+Function_ocfarm
+A binary variable telling whether the spot is already farmed by a household or not. Each spot may only be farmed by a single household.
+_INIT_
+
+END_DESCRIPTION
+
+Function_ochousehold
+The number of households living at this patch. A number greater than 0 implies there is a settlement (of one or more households)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_map_colour
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_DistanceToWater
+If called, produced the distance to the next patch with water, if it is below "waterSourceDistance", or else produces -1.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Land_Patch_x
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Land_Patch_y
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Land_Patch_ID
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_habitable
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Household
+The household (5 persons) is the basic unit in Janssens model.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Household_x
+The x coordinate of the patch where the household lives on the grid.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Household_y
+The y coordinate of the patch where the household lives on the grid.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_lastharvest
+This is the harvest at any point in time.
+
+NetLogo Code: set lastHarvest [BaseYield] of patch farmx farmy * (1 + ((random-normal 0 1) * HarvestVariance))
+
+We also change it to be a variable in LSD.
+
+
+
+'lastharvest' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_estimate
+This is the estimated harvest. NetLogo code:
+
+      let total 0
+      let ys yearsOfStock - 1
+        while [ys > -1] [
+          set total total + item ys agedCornStocks
+          set ys ys - 1
+        ]
+      set estimate total + lastHarvest
+_INIT_
+
+END_DESCRIPTION
+
+Variable_hh_NutritionNeed
+The sum of household agent nutrition need
+_INIT_
+
+END_DESCRIPTION
+
+Variable_hh_NutritionNeedRemaining
+Nutrition need that could not be supplied
+
+
+
+'hh_NutritionNeedRemaining' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_resettle
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Household_ID
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Household_distFarm
+Distance Household to Farm
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Household_distWater
+Distance Household to Water
+_INIT_
+
+END_DESCRIPTION
+
+Variable_age
+Household age in years (here, a household is a single person, again).
+
+Init: Uniform in min,max age
+But: Hatchlings (i.e. new households) start with an age of 0 ....
+_INIT_
+
+END_DESCRIPTION
+
+Variable_fission
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Waterpoint_by_ID
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_agedCornStock
+There can be a number of vintages of corn. In NetLogo this is represented as a list, owned by each household. Here it is instead an object for each vintage.
+
+The number of possible vintages is limited to the last "yearsOfStock" + the current yield,0 i.e. a household can consume the current years stock plus "yearsOfStock" last surplusses.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_cornStock
+This is the actual value of the (old) corn stock. It relates to an item in the list agedCornStocks in Janssen's model.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_cornYear
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Farm
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Farm_ID
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Farm_distWater
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Settlement
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settlement_x
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settlement_y
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settlement_persons
+The number of agents that live in the settlement
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settlement_households
+The number of households that live in the settlement
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Settlement_ID
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Waterpoint
+A waterpoint in the Janssen model defines at which point in time the patch of land, where it is located, is a watersource. 
+
+It is an agent at a fixed position on the grid (several at the same are possible) that has a time of getting "active". Whenever it is "active", it changes the patch of land to become a water source. In this sense, it is an object to continuously calibrate the geosystem to the data.
+
+The agents are initialised with a file "water.txt" that contains for each water source the information as from the following NetLogo code:
+
+foreach water-data [
+    create-waterpoints 1 [
+      set sarg first ?
+      set meterNorth item 1 ?
+      set meterEast item 2 ?
+      set typewater item 3 ?
+      set startdate item 4 ?
+      set enddate item 5 ?]]
+
+The argument "sarg" is not used, however.
+
+In addition, it has an x and y position.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Waterpoint_x
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Waterpoint_y
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Update_waterSource
+Update the info if the associated patch is a water source.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Waterpoint_ID
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_water_period
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_water_start
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_water_end
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_typewater
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Environment
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Update_apdsi_hydro
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Init_geography
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Init_apdsi_hydro
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Capacity
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Init_Waterpoints
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Population
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Update_Population
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_NewPerson
+Add and initialise a new person.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Init_population
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_histothouseholds
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_nHouseholds
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_newHouseholds
+Number of new households (fissions)
+_INIT_
+
+END_DESCRIPTION
+
+Function_Person_Dies
+This function, called via fake_caller, kills a person and if necessary removes households and farmsites. It also keeps track of the total number of times it has been called (i.e. persons died).
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Died_starving
+Cumulative measure of persons starving to death.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Died_ofAge
+Cumulative Number of persons that get so old that they die.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Settings
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_harvestAdjustment
+in [0,1]
+Defines the fraction of corn that can be harvested from the land.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_harvestVariance
+in [0,1]
+Defines the variance of yield for different patches of the same kind of land.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_deathAge
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_fertilityEndAge
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_fertility
+Rate of reproduction
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_fertilityStartAge
+The age when a households may start to reproduce.
+
+Uniform in (minFertilityAge,maxFertilityAge)
+
+with minFertilityAge fixed to 16 and max also (!) fixed to 16. Hence, this is by definition a homogenous global parameter in fact.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_newHouseholdAge
+hard-coded to 0 in Janssen 2009, in procedure fissioning
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_typicalHouseholdSize
+Fixed to 5 in Janssen 2009, important for household consumption
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_baseNutritionNeed
+The corn needed per avg person per year. Fixed to 160 in Janssen 2009
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_yearsOfStock
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_maizeGiftToChild
+The amount of corn a parent household provides its child with (after harvest & consumption)
+In Janssen 2009 hard-coded to 33%. 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_waterSourceDistance
+The maximum distance (in 100m) between a water source and the farm patch.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Assumption_child
+set = 0:
+This assumption allows children (new hh) only to get born if the land has currently enough capacity. The variable tracks how often the assumption fired.
+This assumption is implicitly implemented in Janssen (and therefore, I guess, in the original AA model)
+
+set = -1: Switches the assumption off.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Assumption_bugUplands
+In Janssen there is a small bug, fixing Uplands hydro and apdsi to zero.
+
+-1 : Switch off
+0  : On
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Assumption_waterLast
+In Janssen, the water data is updated at the end of the simulation tick. This can be replicated by setting Assumption_waterLast=1
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Assumption_resettleDie
+In Janssen (2009) households that cannot find a suitable farming spot die (move away from lhv). This can be resembled by Assumption_resettleDie=0. The number of times the assumption fired is storred in the variable.
+
+-1 switches the assumption off.
+Without this assumption, they take the best spot available and hope to survive.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Assumption_negativeHarvest
+In Janssen (2009) it can happen that the household gets a negative amount of yield, due to the harvestVariance. This can be replicated by setting Assumption_negativeHarvest=-1. 
+
+= 0: the harvest will be truncated at 0.
+The variable then tracks the number of times this was necessary.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Assumption_waterNotNecessaryFarm
+set = -1
+Standard is Assumption_waterNotNecessary=-1, meaning the land to be farmed must be within range of water.
+
+However, Janssen 2009 implemented it in a away allowing for farms outside water regions.
+
+set = 0
+In this case, we do not check the range to the watersource (from the farm!). The variable then tracks the number of times where the distance is higher.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Assumption_waterNotNecessarySettle
+Similar to Assumption_waterNotNecessaryFarm.
+
+set = 0: distance from settlement to watersource not tested (as in original model). Variable tracks times distance is higher than waterSourceDistance (16 * 100m in original model)
+
+set = -1: distance to settlement is checked.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Assumption_wrapping
+In Janssen 2009 the world is a torus (donus), i.e. wrapping is allowed on all sites.
+
+0  : Torus World (complete wrapping)
+-1 : No wrapping
+
+This assumptions has severe impact on the geodistance calculations and hence simulation results.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Assumption_ObserveWater
+Observe if the selected watersource is still existent. In the original model, agents only check when they resettle.
+
+-1 : If water no more available, search alternative nearby. If none exists, resettle.
+0  : Do not check. The parameter then tracks the number of violations.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Assumption_ObserveHydro
+Observe if the selected settlement position becomes flooded (Hydro>0) In the original model, agents only check when they resettle.
+
+-1 : If the settlement becomes flooded, move away
+0  : Do not check. The parameter then tracks the number of violations.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Seed
+Control the Seed.
+
+-1 : Use LSD Seed, save it (seed-1) here.
+> -1: Use provided seed.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Assumption_SettleFloodplain
+In Janssen 2009 it is assumed that people can, if necessary, settle in the floodplain.
+
+-1 : Sets this option off.
+0  : Sets this on, the number of triggers is counted.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Assumption_noUncertainty
+In the original model, the agents know not only the potential yield (yield * harvestAdjustment) but also the actual yield (yield * harvestAdjustment*quality + variance). The agents only farm at places that actually yield sufficient nutrition.
+
+-1 : Set inactive
+0  : Set it active
+_INIT_
+
+END_DESCRIPTION
+
+Object_InitSettings
+Some Settings only related to the initialisation of the model
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_nHouseholdsInitial
+Initial number of households, 14 in Janssen 2009
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_householdMaxInitialAge
+maximum initial age of households
+hard-coded in Janssen 2009 to 29
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_householdMinInitialAge
+Minimum initial age of households
+
+hard-coded to 0 in Janssen 2009
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_householdMinInitialCorn
+hard-coded 2000 in Janssen 2009
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_householdMaxInitialCorn
+hard-coded 2400 in Janssen 2009
+_INIT_
+
+END_DESCRIPTION
+
+Object_GIS_Model
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_GIS_Init
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_GIS_xn
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_GIS_yn
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_GIS_wrap
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+Root
+Scheduler
+lastharvest
+estimate
+hh_NutritionNeed
+hh_NutritionNeedRemaining
+resettle
+age
+fission
+Capacity
+Update_Population
+NewPerson
+Init_population
+nHouseholds
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+Root
+Assumption_waterLast
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head_fast.h"
+
+MODELBEGIN
+
+
+
+
+
+
+
+
+
+
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE
