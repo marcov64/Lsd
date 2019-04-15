@@ -1,0 +1,12 @@
+Development Test Models
+
+This is a growing (intention) group of models that test the way LSD works.
+This is not the same as unit-testing, but it serves the same deeds:
+- Validate that LSD does what it should
+- Provide Use-Cases (abstract) that show how the code works.
+
+This group is work-in-progress.
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                

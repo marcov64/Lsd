@@ -1,7 +1,0 @@
-LSD Test Models
-
-These are specific test models for the LSD System. They should be used to check
-if all API macros work as expected.
-
-Currently there is only one model in this group (incomplete)
-- GisTest : Test the GIS extensions.
