@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="41cm" height="23cm" viewBox="281 96 811 451" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="514" y="474" width="202" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="514" y="474" width="202" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="615" y="494">Resource</text>
+    <rect style="fill: #ffffff" x="514" y="502" width="202" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="514" y="502" width="202" height="44"/>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="517" y="518">+ID: unique int</text>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="517" y="538">+Position: pair&lt;x,y&gt;</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="637" y="175" width="259.6" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="637" y="175" width="259.6" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="766.8" y="195">Forager</text>
+    <rect style="fill: #ffffff" x="637" y="203" width="259.6" height="65"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="637" y="203" width="259.6" height="65"/>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="640" y="219">+Position: pair&lt;x,y&gt;</text>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="640" y="239">+maxToolkitSize: int = 100</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="640" y="256.2">Maximum size of the toolkit.</text>
+    <rect style="fill: #ffffff" x="637" y="268" width="259.6" height="155"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="637" y="268" width="259.6" height="155"/>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="640" y="284">+Consume()</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="640" y="301.2">One item in the toolkit breaks.</text>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="640" y="325">+Move()</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="640" y="342.2">Move randomly to adjecent position or</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="640" y="356.2">stay.</text>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="640" y="380">+Collect()</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="640" y="397.2">If the position entails resources,</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="640" y="411.2">refill the toolkit.</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="856" y="474" width="154" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="856" y="474" width="154" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="933" y="494">Tool</text>
+    <rect style="fill: #ffffff" x="856" y="502" width="154" height="24"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="856" y="502" width="154" height="24"/>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="859" y="518">+ID: unique int</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="282" y="97" width="288.4" height="42"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="282" y="97" width="288.4" height="42"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="426.2" y="117">World</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="426.2" y="132.2">Settings</text>
+    <rect style="fill: #ffffff" x="282" y="139" width="288.4" height="224"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="282" y="139" width="288.4" height="224"/>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="285" y="155">+size: pair(xn,yn) = 500, 500</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="285" y="172.2">The (abstract) size of the space</text>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="285" y="196">+d_metric: string = Chebyshev</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="285" y="213.2">Distance metric. Chebyshev = "Magic</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="285" y="227.2">Grid"</text>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="285" y="251">+wrap?: bool = true</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="285" y="268.2">If true, the Forager can exit the space</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="285" y="282.2">at the border just to re-enter at the</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="285" y="296.2">opposite border.</text>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="285" y="320">+n_resources: int = 5,000</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="285" y="337.2"># unique resources to be distributed</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="285" y="351.2">randomly in space</text>
+    <rect style="fill: #ffffff" x="282" y="363" width="288.4" height="59"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="282" y="363" width="288.4" height="59"/>
+    <text font-size="16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="285" y="379">+Initialise()</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="285" y="396.2">Add resources. Add Forager. Execute</text>
+    <text font-size="11.2" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="285" y="410.2">once.</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="595.572,316 615,316 615,474 "/>
+    <polygon style="fill: #ffffff" points="570.4,316 584.4,311.2 598.4,316 584.4,320.8 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="570.4,316 584.4,311.2 598.4,316 584.4,320.8 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="592.7" y="312"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="602.4" y="312">1</text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="619" y="470">n_resources</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="595.572,151 766.8,151 766.8,175 "/>
+    <polygon style="fill: #ffffff" points="570.4,151 584.4,146.2 598.4,151 584.4,155.8 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="570.4,151 584.4,146.2 598.4,151 584.4,155.8 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="668.6" y="147"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="602.4" y="147"> 1</text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="602.4" y="163"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="770.8" y="155"> 1</text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="770.8" y="171"></text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="921.772,235 933,235 933,474 "/>
+    <polygon style="fill: #ffffff" points="896.6,235 910.6,230.2 924.6,235 910.6,239.8 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="896.6,235 910.6,230.2 924.6,235 910.6,239.8 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="914.8" y="231"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="928.6" y="231"> 1</text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="928.6" y="247"></text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="937" y="454"> 0 ... maxToolkitSize</text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="937" y="470"></text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="716,514 717,514 855,514 856,514 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="786" y="510">source</text>
+    <polygon style="fill: #000000" points="811.1,510 811.1,502 819.1,506 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="720" y="510">1</text>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="852" y="510">1</text>
+  </g>
+</svg>
