@@ -1,13 +1,12 @@
 **************************************************************
 
-	LSD 7.1 - December 2018
+	LSD GIS-beta - April 2019
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
-
-  The GIS additions are by Frederik Schaff, Ruhr-Universitaet Bochum
+	and (GIS additions) by Frederik Schaff, Ruhr-Universitaet Bochum
 
 	Copyright Marco Valente and Marcelo Pereira
-  and for the GIS additions Frederik Schaff
+  and (GIS additions) Frederik Schaff
 	LSD is distributed under the GNU General Public License
 	
 **************************************************************
@@ -269,4 +268,4 @@ When a model program is successfully compiled and run by LMM, then the user can 
 
 Please check LSD documentation using the menu Help at any time. The documentation includes from tutorials and a course on LSD to a complete manual covering all LSD details.
 
-For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
+For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br or (especially for GIS) frederik.schaff@rub.de
