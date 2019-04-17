@@ -685,6 +685,9 @@ plog(buffer);} while(false)
 #define ADD_ALL_TO_SPACE( obj ) { p->register_allOfKind_at_grid_rnd( obj); }
 #define ADD_ALL_TO_SPACES( GISOBJ, obj ) { GISOBJ->register_allOfKind_at_grid_rnd( obj); }
 
+#define ADD_ALL_TO_SPACE_CND( obj, condVarLab, condition, condVal ) { p->register_allOfKind_at_grid_rnd_cnd( obj, condVarLab, condition, condVal); }
+#define ADD_ALL_TO_SPACE_CNDS( GISOBJ, obj, condVarLab, condition, condVal ) { GISOBJ->register_allOfKind_at_grid_rnd_cnd( obj, condVarLab, condition, condVal); }
+
 // POSITION
 // Macros to get x or y position or produce random position
 #define POSITION_X ( p->get_pos('x') )
@@ -979,11 +982,18 @@ plog(buffer);} while(false)
 #endif
 
 //And some new macros to load data from txt files.
-//The txt file is in the format x y value NEWLINE
+//The txt file is in the format x \t y \t value \n
 #define LOAD_DATA_GIS(inputfile, obj_lab, var_lab ) p->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
 #define LOAD_DATA_GISL(inputfile, obj_lab, var_lab, t_update ) p->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t_update )
 #define LOAD_DATA_GISS(PTR, inputfile, obj_lab, var_lab ) PTR->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
 #define LOAD_DATA_GISSL(PTR, inputfile, obj_lab, var_lab, t_update ) PTR->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t_update )
+
+//The txt file is in gridded format with row and colum headers. In the grid single values are stored. (0,0) is bottom left.
+#define LOAD_DATA_GIS_MAT(inputfile, obj_lab, var_lab ) p->load_data_gis_mat( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
+#define LOAD_DATA_GIS_MATL(inputfile, obj_lab, var_lab, t_update ) p->load_data_gis_mat( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t_update )
+#define LOAD_DATA_GIS_MATS(PTR, inputfile, obj_lab, var_lab ) PTR->load_data_gis_mat( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
+#define LOAD_DATA_GIS_MATSL(PTR, inputfile, obj_lab, var_lab, t_update ) PTR->load_data_gis_mat( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t_update )
+
 
 // Some simple functions to load data to rapidscv::Document type
 // #define LOAD_DATA_CSV(doc_name, inputfile) rapidcsv::Document doc_name(inputfile, rapidcsv::LabelParams( -1, -1), ',' );

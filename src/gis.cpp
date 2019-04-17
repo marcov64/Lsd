@@ -458,12 +458,58 @@ bool object::register_at_map(object* shareObj)
 //  at the grid, but not two at the same position.
 void object::register_allOfKind_at_grid_rnd(object* obj)
 {
+    register_allOfKind_at_grid_rnd_cnd(obj, "", "", 0.0);
+}
+
+//Conditional Version.
+void object::register_allOfKind_at_grid_rnd_cnd(object* obj, char const varLab[], char const condition[], double condVal)
+{
     if (ptr_map() == NULL ) {
         sprintf( gismsg, "failure in register_allOfKind_at_grid_rnd() for objects '%s' at space shared with gis object %s", obj->label, label );
         error_hard( gismsg, "the gisObj object is not registered in any space",
                     "likely, the gisObj provided is not registered in any space. Perhaps switch target obj and gis obj? Check your code to prevent this situation" );
         return;
     }
+    
+    object* cur = obj->up->search(obj->label); //make sure we start with the first one
+
+    //if we have a condition active, we create a black-list of positions.
+    std::vector<std::pair<int, int> > blacklist;
+    bool is_conditional = !( 0 == strcmp(varLab, "") );
+    if ( is_conditional ) {
+        object* CondOb = cur->search_var(cur, varLab, true, false)->up; //first related object
+        if (CondOb == NULL) {
+            sprintf( gismsg, "failure in register_allOfKind_at_grid_rnd_cnd() for conditional variable %s", varLab );
+            error_hard( gismsg, "the conditional object holding this variable cannot be found.",
+                        "Check your code to prevent this situation" );
+        }
+
+
+
+        if (CondOb->ptr_map() == NULL) {
+            sprintf( gismsg, "failure in register_allOfKind_at_grid_rnd_cnd() for conditional objects '%s' holding conditiona variable %s", CondOb->label, varLab );
+            error_hard( gismsg, "the conditional object is not registered in any space",
+                        "Check your code to prevent this situation" );
+            return;
+        }
+        if (CondOb->ptr_map() != ptr_map()) {
+            sprintf( gismsg, "failure in register_allOfKind_at_grid_rnd_cnd() for conditional objects '%s' holding conditiona variable %s", CondOb->label, varLab );
+            error_hard( gismsg, "the conditional object is not registered in the same space as the target objects",
+                        "Check your code to prevent this situation" );
+            return;
+        }
+
+        //add all for which the condition is not true to the blacklist.
+        while (CondOb != NULL) {
+            if ( false == CondOb->check_condition(varLab, condition, condVal) ) {
+                blacklist.emplace_back(int(CondOb->get_pos('x')), int(CondOb->get_pos('y')));
+                // sprintf( gismsg, "\nAdding pos %i,%i to blacklist",blacklist.back().first,blacklist.back().second);
+                // plog(gismsg);
+            }
+            CondOb = CondOb->next; //only use next, i.e. the objects must have the same parent.
+        }
+    }
+
 
     //Create random sorted list of all grid points
     int xn = position -> map->xn;
@@ -472,16 +518,33 @@ void object::register_allOfKind_at_grid_rnd(object* obj)
     positions.reserve(xn * yn);
     for (int x = 0; x < xn; ++x) {
         for (int y = 0; y < yn; ++y) {
-            positions.emplace_back(RND, x, y);
+            if ( !is_conditional
+                    ||  ( is_conditional
+                          && std::find(blacklist.begin(), blacklist.end(), std::pair<int, int>(x, y) ) == blacklist.end() )
+               ) {
+                positions.emplace_back(RND, x, y);
+            }
+            // else {
+            // sprintf( gismsg, "\nExcluding option %i, %i", x, y);
+            // plog(gismsg);
+            // }
         }
     }
-    std::sort(positions.begin(), positions.end());
 
+    std::sort(positions.begin(), positions.end());
+    int max_elements = positions.size();
     //Cycle through all objects in the linked list and at them to random places
-    object* cur = obj->up->search(obj->label);
+    
     for (auto const& pos : positions) {
         if (cur == NULL)
             break;
+        if (max_elements == 0) {
+            sprintf( gismsg, "failure in register_allOfKind_at_grid_rnd_cnd(): %i is not enough free space to host all elements of type %s", positions.size(), label );
+            error_hard( gismsg, "the conditional object is not registered in any space",
+                        "Check your code to prevent this situation" );
+            return;
+        }
+
         cur->register_at_map(position -> map, std::get<1>(pos), std::get<2>(pos) );
         cur = cur->next;
     }
@@ -1318,9 +1381,8 @@ object* object::first_neighbour_n(char const lab[], int nelements, double radius
         randomise_objDisSetIntvls(true /*is sorted*/);
     else if ('r' == random)
         randomise_objDisSetFull();
-    else if ('f' != random)
-    {
-        sprintf( gismsg, "failure in first_neighbour_n() for object '%s' with random option '%s'", label,random );
+    else if ('f' != random) {
+        sprintf( gismsg, "failure in first_neighbour_n() for object '%s' with random option '%s'", label, random );
         error_hard( gismsg, "the random option is not recognised",
                     "check your code to prevent this situation. Valid options are 'r','d','f'." );
         return NULL;
@@ -1360,8 +1422,8 @@ object* object::nclosest_in_distance(char const lab[], int nelements, double rad
 //  efficient implementation with increasing search radius
 object* object::switch_closest_in_distance(int nelements, char const lab[], double radius, bool random, object* fake_caller, int lag, char const varLab[], char const condition[], double condVal)
 {
-    if (nelements < 1){
-        sprintf( gismsg, "failure in switch_closest_in_distance() for object '%s' with nelements '%i'", label,nelements );
+    if (nelements < 1) {
+        sprintf( gismsg, "failure in switch_closest_in_distance() for object '%s' with nelements '%i'", label, nelements );
         error_hard( gismsg, "invalid option.",
                     "check your code to prevent this situation. Make nelements at least 1" );
         return NULL;
@@ -1995,6 +2057,76 @@ double object::read_lattice_color( void )
     return position->lattice_color;
 }
 
+int object::load_data_gis_mat( const char* inputfile, const char* obj_lab, const char* var_lab, int t_update )
+{
+    /*  Read data points x,y with associated data values val from the inputfile
+        and store it at the gis_obj with label obj_lab into variable var_lab
+        with lag lag.
+
+        The underlying file needs to be in a format cols = x, rows = y with
+        (0,0) being the lower left point and (xn-1,yn-1) being the upper right.
+
+        The First row and colum ar ignored.
+
+        If the object of type obj_lab does not yet exist at this position, it is
+        created (from the blueprint) and registered.
+    */
+#ifndef NO_POINTER_CHECK
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in load_data_gis_mat() for object '%s'", label );
+        error_hard( gismsg, "the object is not registered in any map",
+                    "check your code to prevent this situation" );
+        return -1;
+    }
+#endif
+    int elements_added = 0;
+    rapidcsv::Document f_in;
+    try {
+        f_in = rapidcsv::Document(inputfile, rapidcsv::LabelParams());
+    }
+    catch (const std::out_of_range& e) {
+        sprintf( gismsg, "failure in load_data_gis_mat() for file '%s'. \nOut of range error:", inputfile, e.what() );
+        error_hard( gismsg, " ... ",
+                    "check your code to prevent this situation" );
+        throw;
+    }
+    catch ( ... ) {
+        sprintf( gismsg, "failure in load_data_gis_mat() for file '%s'", inputfile );
+        error_hard( gismsg, "most likely the file cannot be found",
+                    "check your code to prevent this situation" );
+        throw;
+    }
+    if(f_in.GetColumnCount() < 2 || f_in.GetRowCount() < 2 ) {
+        sprintf( gismsg, "failure in load_data_gis_mat() for file '%s'", inputfile );
+        error_hard( gismsg, "most likely the file does not exist",
+                    "check your code to prevent this situation" );
+        return -1;
+    }
+    else {
+        sprintf( gismsg, "\nLoading data from file %s for %i x %i grid to variable %s", inputfile, f_in.GetColumnCount(), f_in.GetRowCount(), var_lab);
+        plog(gismsg);
+    }
+    object* obj_parent = search(obj_lab) -> up;
+
+    double val;
+    for (int x = f_in.GetColumnCount() - 1; x >= 0; --x) {
+        for (int y = 0; y < f_in.GetRowCount(); ++y) {
+            val = f_in.GetCell<double>(x, y);
+            object* cur = search_at_position(obj_lab, x, y, true); //true flag: error if more than one option exists.
+
+            if (cur == NULL) { //if necessary, create the object
+                cur = obj_parent->add_n_objects2( obj_lab, 1 ); //create new object in object parent
+                cur->register_at_map(ptr_map(), x, y);//register it in space at given position
+                elements_added++;
+            }
+            cur->write( var_lab, val,  t_update); //write value
+            // sprintf(gismsg, "\nAdded live cell at pos %g, %g", x_pos, y_pos);
+            // plog(gismsg);
+        }
+    }
+    return elements_added;
+}
+
 int object::load_data_gis( const char* inputfile, const char* obj_lab, const char* var_lab, int t_update )
 {
     /*  Read data points x,y with associated data values val from the inputfile
@@ -2020,7 +2152,7 @@ int object::load_data_gis( const char* inputfile, const char* obj_lab, const cha
                     "check your code to prevent this situation" );
         return -1;
     }
-    object* obj_parent = root -> search(obj_lab) -> up;
+    object* obj_parent = search(obj_lab) -> up;
 
     double x_pos, y_pos, val;
     for (int row = 0; row < f_in.GetRowCount(); ++row) {
