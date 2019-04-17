@@ -470,7 +470,7 @@ void object::register_allOfKind_at_grid_rnd_cnd(object* obj, char const varLab[]
                     "likely, the gisObj provided is not registered in any space. Perhaps switch target obj and gis obj? Check your code to prevent this situation" );
         return;
     }
-    
+
     object* cur = obj->up->search(obj->label); //make sure we start with the first one
 
     //if we have a condition active, we create a black-list of positions.
@@ -534,7 +534,7 @@ void object::register_allOfKind_at_grid_rnd_cnd(object* obj, char const varLab[]
     std::sort(positions.begin(), positions.end());
     int max_elements = positions.size();
     //Cycle through all objects in the linked list and at them to random places
-    
+
     for (auto const& pos : positions) {
         if (cur == NULL)
             break;
@@ -1503,6 +1503,7 @@ object* object::switch_closest_in_distance(int nelements, char const lab[], doub
     }
 }
 
+
 //  search_at_position
 //  find object lab at position xy. If it exists, produce it, else return NULL
 //  if single is true, check that it is the only one
@@ -1570,6 +1571,43 @@ object* object::search_at_position(char const lab[], bool single, bool grid)
     else
         return search_at_position(lab, trunc(position->x), trunc(position->y), single);
 }
+
+//  search_at_neighbour_position
+//  Find an object at a position reachable by moving one step in the direction
+//  if single is true, check that it is the only one
+//    and if not throw exception. Use exact position.
+//  if not single, randomise order of potential candidates.
+//  Note: Only consideres grid-moves.
+object* object::search_at_neighbour_position(char const lab[], int direction, bool single)
+{
+#ifndef NO_POINTER_CHECK    
+    if (ptr_map() == NULL) {
+        sprintf( gismsg, "failure in search_at_neighbour_position() for object '%s'", label );
+        error_hard( gismsg, "the object is not registered in any map",
+                    "check your code to prevent this situation" );
+        return NULL;
+    }    
+#endif
+    double x_inOut = position->x;
+    double y_inOut = position->y;
+    if (get_move_position(ptr_map(), direction, x_inOut, y_inOut) == false){
+        sprintf( gismsg, "failure in search_at_neighbour_position() for object '%s' and direction %i", label, direction );
+        error_hard( gismsg, "the move is not allowed",
+                    "check your code to prevent this situation" );
+        return NULL;    
+    }      
+    return search_at_position(lab, trunc(x_inOut), trunc(y_inOut), single);
+}
+
+object* object::search_at_neighbour_position(char const lab[], char const direction[], bool single)
+{
+    return search_at_neighbour_position(lab, char2int_direction(direction), single);
+}
+
+
+//  elements_at_position
+//  Count the number of elements with label lab at the position
+
 double object::elements_at_position(char const lab[], double x, double y)
 {
 #ifndef NO_POINTER_CHECK
@@ -1666,17 +1704,12 @@ double object::get_pos(char xyz)
     return -1;
 }
 
-//  move
-//  move the object in the direction specified (one step).
-//  return true, if movement was possible, or false, if not.
-//  Currently only boarders may prevent movement.
-//  to do: Add version with COND Check.
-bool object::move(char const direction[])
+//  char2int_direction
+//  helper: Transform character direction format to integer.
+int object::char2int_direction(char const direction[])
 {
     int dir = 0; //stay put
-
     switch (direction[0]) {
-
         case 'n':
             if (direction[1] == 'w') {
                 dir = 8; //north-west
@@ -1707,8 +1740,18 @@ bool object::move(char const direction[])
             break;
         default :
             dir = 0; //stay put.
-    }
-    return move(dir);
+    }    
+}
+
+//  move
+//  move the object in the direction specified (one step).
+//  return true, if movement was possible, or false, if not.
+//  Currently only boarders may prevent movement.
+//  to do: Add version with COND Check.
+bool object::move(char const direction[])
+{
+    
+    return move(char2int_direction(direction));
 }
 
 //  move
@@ -1725,39 +1768,50 @@ bool object::move(int direction)
 #endif
     double x_out = position->x;
     double y_out = position->y;
+    if (get_move_position(ptr_map(), direction, x_out, y_out) == false) {
+        return false;
+    }
+    else {
+        return change_position(x_out, y_out);
+    }
+}
+
+//  Calculate the new position for after the move. Set the inOut position accordingly.
+bool object::get_move_position(gisMap* map, int direction, double& x_inOut, double& y_inOut)
+{
     switch (direction) {
         case 0:
             return true;    //no move
         case 1:
-            y_out++;
+            y_inOut++;
             break; //n
         case 2:
-            y_out++;
-            x_out++;
+            y_inOut++;
+            x_inOut++;
             break; //ne
         case 3:
-            x_out++;
+            x_inOut++;
             break;  //e
         case 4:
-            y_out--;
-            x_out++;
+            y_inOut--;
+            x_inOut++;
             break; //se
         case 5:
-            y_out--;
+            y_inOut--;
             break; //s
         case 6:
-            y_out--;
-            x_out--;
+            y_inOut--;
+            x_inOut--;
             break; //sw
         case 7:
-            x_out--;
+            x_inOut--;
             break; //w
         case 8:
-            y_out++;
-            x_out--;
+            y_inOut++;
+            x_inOut--;
             break; //nw
     }
-    return change_position(x_out, y_out);
+    return check_positions(map, x_inOut, y_inOut); //Adjust if necessary. Control for Wrapping.
 }
 
 //wrapper
@@ -2092,7 +2146,7 @@ int object::load_data_gis_mat( const char* inputfile, const char* obj_lab, const
     }
     catch ( ... ) {
         sprintf( gismsg, "failure in load_data_gis_mat() for file '%s'", inputfile );
-        error_hard( gismsg, "most likely the file cannot be found",
+        error_hard( gismsg, "most likely the file cannot be found or it is not comma separated",
                     "check your code to prevent this situation" );
         throw;
     }

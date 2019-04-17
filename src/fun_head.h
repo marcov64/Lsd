@@ -861,7 +861,7 @@ plog(buffer);} while(false)
 #define CENTER_POSITIONXS( PTR ) ( PTR->center_position('x') )
 #define CENTER_POSITIONYS( PTR ) ( PTR->center_position('y') )
 
-//  SEARCH_POSITION, SEARCH_POSITION_RND
+//  SEARCH_POSITION, RSEARCH_POSITION
 //  Searches at an exact position for an object with label LAB
 //  If it exists it is reported. The RND version works if there can be more
 //  than one object at the same place (returning one randomly)
@@ -872,11 +872,18 @@ plog(buffer);} while(false)
 #define SEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, true) )
 #define SEARCH_POSITION(LAB)  ( p->search_at_position(LAB, true) )
 #define SEARCH_POSITIONS(PTR, LAB)  ( PTR->search_at_position(LAB, true) )
+#define SEARCH_POSITION_NEIGHBOUR(LAB, direction)  ( p->search_at_neighbour_position(LAB, direction, true) )
+#define SEARCH_POSITION_NEIGHBOURS(PTR, LAB, direction)  ( PTR->search_at_neighbour_position(LAB, direction, true) )
+
+
+
 
 #define RSEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, false) )
 #define RSEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, false) )
-#define RSEARCH_POSITION_(LAB)  ( p->search_at_position(LAB, false) )
+#define RSEARCH_POSITION(LAB)  ( p->search_at_position(LAB, false) )
 #define RSEARCH_POSITIONS(PTR, LAB)  ( PTR->search_at_position(LAB, false) )
+#define RSEARCH_POSITION_NEIGHBOUR(LAB, direction)  ( p->search_at_neighbour_position(LAB, direction, false) )
+#define RSEARCH_POSITION_NEIGHBOURS(PTR, LAB, direction)  ( PTR->search_at_neighbour_position(LAB, direction, false) )
 
 //  SEARCH_POSITION_GRID and SEARCH_POSITION_RND_GRID
 //  Similar to above, but it searches at the truncated position.
