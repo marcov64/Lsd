@@ -464,6 +464,8 @@ bool no_ptr_chk = true;
 #define DELETE_LINK( L ) ( CHK_LNK_VOID( L ) L->ptrFrom->delete_link_net( L ) )
 #define SHUFFLE_NET( X ) ( p->shuffle_nodes_net( ( char * ) X ) )
 #define SHUFFLE_NETS( O, X ) ( CHK_PTR_OBJ( O ) O->shuffle_nodes_net( ( char * ) X ) )
+#define LAST_CALC( X ) ( p->last_cal( ( char * ) X ) )
+#define LAST_CALCS( O, X ) ( CHK_PTR_DBL( O ) O->last_cal( ( char * ) X ) )
 #define RECALC( X ) ( p->recal( ( char * ) X ) )
 #define RECALCS( O, X ) ( CHK_PTR_DBL( O ) O->recal( ( char * ) X ) )
 #define INIT_TSEARCH( X ) ( p->initturbo( ( char * ) X, 0 ) )

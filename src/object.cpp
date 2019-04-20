@@ -824,7 +824,7 @@ double object::search_inst( object *obj )
 }
 
 
-/********************************************
+/************************************************
 SEARCH_VAR
 Explore the model starting from this and
 gradually extending till considering the whole model.
@@ -895,6 +895,37 @@ variable *object::search_var( object *caller, char const *lab, bool no_error, bo
 }
 
 
+/************************************************
+SEARCH_VAR_ERR
+*************************************************/
+variable *object::search_var_err( object *caller, char const *lab, bool no_search, char const *errmsg )
+{
+	variable *cv;
+
+	cv = search_var( caller, lab, true, no_search );
+	if ( cv == NULL )
+	{	// check if it is not a zero-instance object
+		cv = blueprint->search_var( NULL, lab, true, no_search );
+		if ( cv == NULL )
+		{
+			sprintf( msg, "element '%s' is missing for %s", lab, errmsg );
+			error_hard( msg, "variable or parameter not found", 
+						"create variable or parameter in model structure" );
+		}
+
+		if ( no_zero_instance )
+		{
+			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab );
+			error_hard( msg, "last object instance deleted", 
+						"check your equation code to ensure at least one instance\nof any object is kept", 
+						true );
+		}
+	}
+
+	return cv;
+}
+
+
 /****************************************************
 SEARCH_VAR_COND (*)
 Search for the Variable or Parameter lab with value value and return it, if found.
@@ -909,32 +940,11 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 
 	for ( cur1 = this; cur1 != NULL; cur1 = cur1->up )
 	{
-		cv = cur1->search_var( this, lab, true, no_search );
+		cv = cur1->search_var_err( this, lab, no_search, "conditional searching" );
 		if ( cv == NULL )
-		{	
-			if ( ! var_exist )
-			{	// check if it is not a zero-instance object
-				cv = blueprint->search_var( NULL, lab, true, no_search );
-				if ( cv == NULL )
-				{
-					sprintf( msg, "element '%s' is missing for conditional searching", lab );
-					error_hard( msg, "variable or parameter not found", 
-								"create variable or parameter in model structure" );
-				}
-				
-				if ( cv != NULL && no_zero_instance )
-				{
-					sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab ); 
-					error_hard( msg, "object has no instance", 
-								"check your equation code to prevent this situation",
-								true );
-				}
-			}
-			
 			return NULL;
-		}
-		else
-			var_exist = true;				// at least one instance was found
+
+		var_exist = true;					// at least one instance was found
 
 		for ( cur = cv->up; cur != NULL; cur = cur->hyper_next(  ) )
 		{
@@ -959,27 +969,9 @@ double object::initturbo_cond( char const *lab )
 	variable *cv;
 	b_mapT::iterator bit;
 
-	cv = search_var( this, lab, true, false );
+	cv = search_var_err( this, lab, false, "turbo conditional searching" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for turbo conditional searching", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
 		return 0;
-	}
 	
 	if ( cv->up->up == NULL )				// variable at root level?
 	{
@@ -1027,14 +1019,9 @@ object *object::turbosearch_cond( char const *lab, double value )
 	b_mapT::iterator bit;
 	o_mapT::iterator oit;
 
-	cv = search_var( this, lab, true, false );
+	cv = search_var_err( this, lab, false, "turbo conditional searching" );
 	if ( cv == NULL )
-	{
-		sprintf( msg, "element '%s' is missing for turbo conditional search", lab );
-		error_hard( msg, "variable or parameter not found", 
-					"create variable or parameter in model structure" );
 		return NULL;
-	}
 	
 	if ( cv->up->up == NULL )				// variable at root level?
 	{
@@ -1994,27 +1981,9 @@ double object::cal( object *caller, char const *lab, int lag )
 	if ( quit == 2 )
 		return NAN;
 
-	cv = search_var( this, lab, true, no_search );
+	cv = search_var_err( this, lab, no_search, "retrieving" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for retrieving", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab );
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept", 
-						true );
-		}
-		
 		return NAN;
-	}
 
 #ifdef PARALLEL_MODE
 	if ( lag == 0 && parallel_ready && cv->parallel && cv->last_update < t && ! cv->dummy )
@@ -2030,6 +1999,22 @@ double object::cal( char const *lab, int lag )
 
 
 /****************************************************
+LAST_CAL (*)
+Return the last time the variable was calculated
+****************************************************/
+double object::last_cal( char const *lab )
+{
+	variable *cv;
+
+	cv = search_var_err( this, lab, no_search, "last updating" );
+	if ( cv == NULL )
+		return NAN;
+	
+	return cv->last_update;
+}
+
+
+/****************************************************
 RECAL (*)
 Mark variable as not calculated in the current time,
 forcing recalculation if already calculated
@@ -2038,27 +2023,9 @@ double object::recal( char const *lab )
 {
 	variable *cv;
 
-	cv = search_var( this, lab, true, no_search );
+	cv = search_var_err( this, lab, no_search, "recalculating" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for recalculating", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab );
-			error_hard( msg, "last object instance deleted", 
-						"check your equation code to ensure at least one instance\nof any object is kept", 
-						true );
-		}
-		
 		return NAN;
-	}
 	
 	cv->last_update = t - 1;
 	cv->next_update = t;
@@ -2078,27 +2045,9 @@ double object::sum( char const *lab, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var( this, lab, true, no_search );
+	cv = search_var_err( this, lab, no_search, "summing" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for summing", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
 		return NAN;
-	}
 
 	cur = cv->up;
 	if ( cur->up != NULL )
@@ -2121,27 +2070,9 @@ double object::overall_max( char const *lab, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var( this, lab, true, no_search );
+	cv = search_var_err( this, lab, no_search, "maximizing" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for maximizing", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
 		return NAN;
-	}
 
 	cur = cv->up;
 	if ( cur->up != NULL )
@@ -2165,27 +2096,9 @@ double object::overall_min( char const *lab, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var( this, lab, true, no_search );
+	cv = search_var_err( this, lab, no_search, "minimizing" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for minimizing", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
 		return NAN;
-	}
 
 	cur = cv->up;
 	if ( cur->up != NULL )
@@ -2210,27 +2123,9 @@ double object::av( char const *lab, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var( this, lab, true, no_search );
+	cv = search_var_err( this, lab, no_search, "averaging" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for averaging", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
 		return NAN;
-	}
 
 	cur = cv->up;
 	if ( cur->up != NULL )
@@ -2256,40 +2151,13 @@ double object::whg_av( char const *weight, char const *lab, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var( this, weight, true, no_search );
+	cv = search_var_err( this, weight, no_search, "weighted averaging" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, weight, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for weighted averaging", weight );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
 		return NAN;
-	}
 
-	cv = search_var( this, lab, true, no_search );
+	cv = search_var_err( this, lab, no_search, "weighted averaging" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for weighted averaging", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-		
 		return NAN;
-	}
 
 	cur = cv->up;
 	if ( cur->up != NULL )
@@ -2317,27 +2185,9 @@ double object::sd( char const *lab, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var( this, lab, true, no_search );
+	cv = search_var_err( this, lab, no_search, "calculating s.d." );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for calculating s.d.", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
 		return NAN;
-	}
 	
 	cur = cv->up;
 	if ( cur->up != NULL )
@@ -2460,25 +2310,9 @@ double object::stat( char const *lab, double *r )
 	
 	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = 0;
 	
-	cv = search_var( this, lab, true, no_search );
+	cv = search_var_err( this, lab, no_search, "calculating statistics" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for calculating statistics", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
+	{
 		r[ 0 ] = 0;	
 		r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = NAN;
 		return 0;
@@ -2563,27 +2397,9 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 
 	if ( ! useNodeId )
 	{
-		cv = search_var( this, var, true, no_search );
+		cv = search_var_err( this, var, no_search, "sorting" );
 		if ( cv == NULL )
-		{	// check if it is not a zero-instance object
-			cv = blueprint->search_var( NULL, var, true, no_search );
-			if ( cv == NULL )
-			{
-				sprintf( msg, "element '%s' is missing for sorting", var );
-				error_hard( msg, "variable or parameter not found", 
-							"create variable or parameter in model structure" );
-			}
-			
-			if ( no_zero_instance )
-			{
-				sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, var );
-				error_hard( msg, "object has no instance", 
-							"check your equation code to ensure at least one instance\nof any object is kept", 
-							true );
-			}
-			
 			return NULL;
-		}
 		
 		cur = cv->up;
 		if ( cur == NULL || strcmp( obj, cur->label ) )
@@ -2746,27 +2562,9 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 					true );
 	}
 	
-	cv = search_var( this, var1, true, no_search );
+	cv = search_var_err( this, var1, no_search, "sorting" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, var1, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for sorting", var1 );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, var1 );
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance of\nany object is kept", 
-						true );
-		}
-		
 		return NULL;
-	}
 	 
 	cur = cv->up;
 	if ( cur == NULL || strcmp( obj, cur->label ) )
@@ -2837,27 +2635,9 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 	object *cur, *cur1;
 	variable *cv;
 
-	cv = search_var( this, lv, true, no_search );
+	cv = search_var_err( this, lv, no_search, "random drawing" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lv, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for calculating statistics", lv );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lv ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
 		return NULL;
-	}
 
 	cur1 = cur = cv->up;
 
@@ -2977,27 +2757,9 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 		return NULL;
 	}  
 
-	cv = search_var( this, lv, true, no_search );
+	cv = search_var_err( this, lv, no_search, "random drawing" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lv, true, no_search );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for calculating statistics", lv );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lv ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
 		return NULL;
-	}
 
 	cur1 = cur = cv->up;
 
@@ -3041,24 +2803,9 @@ double object::write( char const *lab, double value, int time, int lag )
         return NAN;
     }
     
-	cv = search_var( this, lab, true, true );
+	cv = search_var_err( this, lab, true, "writing" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, true );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for writing", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-		
-		sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab ); 
-		error_hard( msg, "object has no instance", 
-					"check your equation code to ensure at least one instance\nof any object is kept",
-					true );
-						
 		return NAN;
-	}
 	
 	if ( cv->under_computation )
 	{
@@ -3181,7 +2928,7 @@ double object::write( char const *lab, double value, int time, int lag )
 /************************************************
 INCREMENT (*)
 Increment the value of the variable lab with value.
-If variable was not updated in the current period, first updates it.
+Mark variable as computed in t.
 Return the new value.
 *************************************************/
 double object::increment( char const *lab, double value )
@@ -3198,24 +2945,9 @@ double object::increment( char const *lab, double value )
         return NAN;
     }
 
-	cv = search_var( this, lab, true, true );
+	cv = search_var_err( this, lab, true, "incrementing" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, true );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for incrementing", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-		
-		sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab ); 
-		error_hard( msg, "object has no instance", 
-					"check your equation code to ensure at least one instance\nof any object is kept",
-					true );
-						
 		return NAN;
-	}
 	
 	new_value = cv->val[ 0 ] + value;
 	this->write( lab, new_value, t );
@@ -3227,7 +2959,7 @@ double object::increment( char const *lab, double value )
 /************************************************
 MULTIPLY (*)
 Multiply the value of the variable lv with value.
-If variable was not updated in the current period, first updates it.
+Mark variable as computed in t.
 Return the new value.
 *************************************************/
 double object::multiply( char const *lab, double value )
@@ -3244,24 +2976,9 @@ double object::multiply( char const *lab, double value )
         return NAN;
     }
 
-	cv = search_var( this, lab, true, true );
+	cv = search_var_err( this, lab, true, "multiplying" );
 	if ( cv == NULL )
-	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, true );
-		if ( cv == NULL )
-		{
-			sprintf( msg, "element '%s' is missing for multiplying", lab );
-			error_hard( msg, "variable or parameter not found", 
-						"create variable or parameter in model structure" );
-		}
-		
-		sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab ); 
-		error_hard( msg, "object has no instance", 
-					"check your equation code to ensure at least one instance\nof any object is kept",
-					true );
-						
 		return NAN;
-	}
 	
 	new_value = cv->val[ 0 ] * value;
 	this->write( lab, new_value, t );
