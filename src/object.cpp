@@ -2389,6 +2389,7 @@ int sort_function_down( const void *a, const void *b )
 
 object *object::lsdqsort( char const *obj, char const *var, char const *direction )
 {
+	char dir[ 5 ];
 	int num, i;
 	bridge *cb;
 	object *cur, **mylist;
@@ -2466,11 +2467,13 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 		cur = cur->next;
 	}
 	
+	strncpy( dir, direction, 4 );
+	strupr( dir );
 	qsort_lab = ( char * ) var;
-	if ( ! strcmp( direction, "UP" ) )
+	if ( ! strcmp( dir, "UP" ) )
 		qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_up );
 	else
-		if ( ! strcmp( direction, "DOWN" ) )
+		if ( ! strcmp( dir, "DOWN" ) )
 			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_down );
 		else
 		{
@@ -2539,6 +2542,7 @@ int sort_function_down_two( const void *a, const void *b )
 
 object *object::lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction )
 {
+	char dir[ 5 ];
 	int num, i;
 	bridge *cb;
 	object *cur, **mylist;
@@ -2593,13 +2597,17 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 		mylist[ i ] = cur;
 		cur = cur->next;
 	}
+	
+	strncpy( dir, direction, 4 );
+	strupr( dir );
+
 	qsort_lab = ( char * ) var1;
 	qsort_lab_secondary = ( char * ) var2;
     
-	if ( ! strcmp( direction, "UP" ) )
+	if ( ! strcmp( dir, "UP" ) )
 		qsort( ( void * )mylist, num, sizeof( mylist[ 0 ] ), sort_function_up_two );
 	else
-		if ( ! strcmp( direction, "DOWN" ) )
+		if ( ! strcmp( dir, "DOWN" ) )
 			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_down_two );
 		else
 		{
