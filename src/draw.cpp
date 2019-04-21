@@ -151,7 +151,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 {
 	bool sp_upd;
 	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_ELEM_LENGTH ];
-	int i, j, k, step_type, begin, count;
+	int i, j, k, step_type, begin, count, max_wid;
 	object *cur;
 	variable *cv;
 	bridge *cb;
@@ -190,18 +190,37 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 		cmd( ch );
 	}
 
+	// find current tree depth
+	for ( j = 0, cur = t; cur->up != NULL; ++j, cur = cur->up );
+	
 	// draw node only if it is not the root
 	if ( t->up != NULL )
 	{ 	// compute number of groups of this type
 		sprintf( ch, "%s", t->label );
 		strcpy( ch1, "" );
 		
+		// count number of brothers and define maximum width for number string
+		for ( k = 0, cb = t->up->b; cb != NULL; ++k, cb = cb->next );
+		
+		switch ( j )
+		{
+			case 1:								// first line objects
+				max_wid = 15;
+				break;
+			case 2:								// second line objects
+				max_wid = min( 15, 80.0 / k );
+				break;
+			default:							// all other lines
+				max_wid = min( 10, 15.0 / k );
+		}
+		
+		// format number string
 		if ( zeroinst )
-			strcpy( ch1, "\u2026" );
+			strcpy( ch1, "0\u2026" );
 		else
 			for ( cur = t; cur != NULL ; cur = cur->hyper_next( ) )
 			{
-				if ( strlen( ch1 ) >= 9 )
+				if ( strlen( ch1 ) >= max_wid )
 				{
 					strcat( ch1, "\u2026" );
 					break;
@@ -216,19 +235,17 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 		
 		if ( t->up->up != NULL )
 			put_line( from, level - step_level + v_margin + n_size / 2, center, level + n_size / 2 );
+		
 		put_node( center - n_size / 2, level + v_margin - n_size / 2, center + n_size / 2, level + v_margin + n_size / 2, t->label, t == sel ? true : false );
 		put_text( ch, ch1, center, level, t->label );
 	}
 
-	// count the number of son object types
-	for ( i = 0, cb = t->b; cb != NULL; ++i, cb = cb->next );
-	
-	// find current tree depth
-	for ( j = 0, cur = t; cur->up != NULL; ++j, cur = cur->up );
-	
 	// limit the maximum depth of plot
 	if ( j >= MAX_LEVEL )
 		return;
+	
+	// count the number of son object types
+	for ( i = 0, cb = t->b; cb != NULL; ++i, cb = cb->next );
 	
 	// root? adjust tree begin
 	if ( j == 0 )		
