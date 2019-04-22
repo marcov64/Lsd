@@ -626,6 +626,7 @@ bool unsaved_change( void );
 char *NOLH_valid_tables( int k, char* ch );
 char *clean_file( char * );
 char *clean_path( char * );
+char *str_upr( char * );
 char *upload_eqfile( void );
 description *search_description( char *lab );
 double get_double( const char *tcl_var, double *var = NULL );

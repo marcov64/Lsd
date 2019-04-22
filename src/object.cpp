@@ -2468,7 +2468,7 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 	}
 	
 	strncpy( dir, direction, 4 );
-	strupr( dir );
+	str_upr( dir );
 	qsort_lab = ( char * ) var;
 	if ( ! strcmp( dir, "UP" ) )
 		qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_up );
@@ -2599,7 +2599,7 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 	}
 	
 	strncpy( dir, direction, 4 );
-	strupr( dir );
+	str_upr( dir );
 
 	qsort_lab = ( char * ) var1;
 	qsort_lab_secondary = ( char * ) var2;

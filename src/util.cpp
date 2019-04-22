@@ -2405,6 +2405,23 @@ bool is_nan( double x )
 
 
 /****************************************************
+STR_UPR
+function may be missing in some compiler libraries
+****************************************************/
+char *str_upr( char *str )
+{
+	unsigned char *p = ( unsigned char * ) str;
+
+	while ( *p )
+	{
+		*p = toupper( *p );
+		++p;
+	}
+
+	return str;
+}
+
+/****************************************************
 C++11 Standard Library <random> functions
 If C++11 or higher is not available, use the old
 LSD functions
