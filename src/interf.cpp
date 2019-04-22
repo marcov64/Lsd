@@ -1690,7 +1690,7 @@ case 6:
 	cmd( "pack $T.b0.prop $T.b0.num $T.b0.del -padx 10 -side left" );
 
 	cmd( "frame $T.b1" );
-	cmd( "checkbutton $T.b1.com -text \"Compute: force the computation of the variables in this object\" -variable to_compute -underline 0" );
+	cmd( "checkbutton $T.b1.com -text \"Compute: force the computation of the variables in this object\" -variable to_compute -underline 1" );
 	cmd( "pack $T.b1.com" );
 
 	cmd( "set w $T.desc" );
@@ -1717,7 +1717,7 @@ case 6:
 	cmd( "bind $T <Control-r> \"$T.b0.prop invoke\"; bind $T <Control-R> \"$T.b0.prop invoke\"" );
 	cmd( "bind $T <Control-n> \"$T.b0.num invoke\"; bind $T <Control-N> \"$T.b0.num invoke\"" );
 	cmd( "bind $T <Control-d> \"$T.b0.del invoke\"; bind $T <Control-D> \"$T.b0.del invoke\"" );
-	cmd( "bind $T <Control-c> \"$T.b1.com invoke\"; bind $T <Control-C> \"$T.b1.com invoke\"" );
+	cmd( "bind $T <Control-o> \"$T.b1.com invoke\"; bind $T <Control-O> \"$T.b1.com invoke\"" );
 
 	cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#ChangeObjName } { set choice 2 }" );
 

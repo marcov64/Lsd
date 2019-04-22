@@ -149,9 +149,9 @@ DRAW_OBJ
 ****************************************************/
 void draw_obj( object *t, object *sel, int level, int center, int from, bool zeroinst )
 {
-	bool sp_upd;
+	bool sp_upd, fit_wid;
 	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_ELEM_LENGTH ];
-	int i, j, k, step_type, begin, count, max_wid;
+	int h, i, j, k, step_type, begin, count, max_wid;
 	object *cur;
 	variable *cv;
 	bridge *cb;
@@ -195,7 +195,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 	
 	// draw node only if it is not the root
 	if ( t->up != NULL )
-	{ 	// compute number of groups of this type
+	{
 		sprintf( ch, "%s", t->label );
 		strcpy( ch1, "" );
 		
@@ -217,21 +217,35 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 		// format number string
 		if ( zeroinst )
 			strcpy( ch1, "0\u2026" );
-		else
-			for ( cur = t; cur != NULL ; cur = cur->hyper_next( ) )
+		else							// compute number of groups of this type
+		{
+			fit_wid = true;
+			for ( h = 0, cur = t; cur != NULL ; ++h, cur = cur->hyper_next( ) )
 			{
 				if ( strlen( ch1 ) >= max_wid )
 				{
 					strcat( ch1, "\u2026" );
+					fit_wid = false;
 					break;
 				}
 				
 				skip_next_obj( cur, &count );
-				sprintf( str, "%s%d", strlen( ch1 ) ? " " : "", count );
+				sprintf( str, "%s%d", strlen( ch1 ) > 0 ? " " : "", count );
 				strcat( ch1, str );
 				
 				for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group
 			}
+			
+			// count number of instances of parent and check for zero instances
+			if ( fit_wid && t->up->up != NULL )	// first level cannot have multiple zero instances
+			{
+				cb = t->up->up->search_bridge( t->up->label );
+				for ( k = 0, cur = cb->head; cur != NULL; ++k, cur = cur->next );
+			
+				if ( h < k )					// found zero instanced object?
+					strcat( ch1, "\u2026" );
+			}
+		}
 		
 		if ( t->up->up != NULL )
 			put_line( from, level - step_level + v_margin + n_size / 2, center, level + n_size / 2 );
@@ -360,7 +374,7 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 	else
 		cmd( "$g.f.c create text %d.m %d.m -text \"%s\" -tags node -tags %s", x, y + 2 * v_margin + 1, n, str2 );
 
-	cmd( "$g.f.c bind %s <Enter> { set res_g %s; if [winfo exists .list] { destroy .list }; toplevel .list; wm transient .list $g; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; frame .list.h; label .list.h.l -text \"Object:\"; label .list.h.n -fg red -text \"%s\"; pack .list.h.l .list.h.n -side left -padx 2; label .list.l -text \"$list_%s\" -justify left; pack .list.h .list.l; align .list $g }", str2, str2, str2, str2 );
+	cmd( "$g.f.c bind %s <Enter> { set res_g %s; if [ winfo exists .list ] { destroy .list }; toplevel .list; wm transient .list $g; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; frame .list.h; label .list.h.l -text \"Object:\"; label .list.h.n -fg red -text \"%s\"; pack .list.h.l .list.h.n -side left -padx 2; label .list.l -text \"$list_%s\" -justify left; pack .list.h .list.l; align .list $g }", str2, str2, str2, str2 );
 
 	cmd( "$g.f.c bind %s <Leave> { if [ info exists res_g ] { unset res_g }; destroy .list}", str2 );
 }
