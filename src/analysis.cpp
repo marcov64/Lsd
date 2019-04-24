@@ -472,6 +472,13 @@ cmd( "if $running { showtop .da overM 0 1 } { showtop .da overM 0 1 0 }" );
 
 if ( num_var == 0 )
   cmd( "tk_messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"There are no series available\" -detail \"Click on button 'Add...' to load series from results files.\n\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"" );  
+else
+{
+	cmd( ".da.vars.lb.v selection set 0" );
+	cmd( ".da.vars.lb.v activate 0" );
+	cmd( ".da.vars.lb.v see 0" );
+	cmd( "focus .da.vars.lb.v" );
+}
 
 // make a copy to allow insertion of new temporary variables
 cmd( "if [ info exists modElem ] { set DaModElem $modElem } { set DaModElem [ list ] }" );
@@ -529,7 +536,9 @@ while ( true )
 	cmd( "set pdigits [ .da.f.tit.pr.e get ]" ); 
 
 	cmd( "set nv [ .da.vars.ch.v size ]" );
-
+	
+	// check options consistency and fix if necessary
+	update_bounds( );
 	if ( point_size <= 0 || point_size > 10 || ( gnu && point_size < 1 ) )
 		point_size = 1.0;
 	if ( pdigits < 1 || pdigits > 8 )
@@ -2423,18 +2432,18 @@ while ( true )
 void update_bounds( void )
 {
 	if ( isfinite( miny ) )
-		cmd( "write_disabled .da.f.h.v.sc.min.min [ format \"%%.[ expr $pdigits ]g\" $miny ]" );
+		cmd( "write_any .da.f.h.v.sc.min.min [ format \"%%.[ expr $pdigits ]g\" $miny ]" );
 	else
 	{
-		cmd( "write_disabled .da.f.h.v.sc.min.min -Infinity" );
+		cmd( "write_any .da.f.h.v.sc.min.min -Infinity" );
 		miny = 0;
 	}
 	
 	if ( isfinite( maxy ) )
-		cmd( "write_disabled .da.f.h.v.sc.max.max [ format \"%%.[ expr $pdigits ]g\" $maxy ]" );
+		cmd( "write_any .da.f.h.v.sc.max.max [ format \"%%.[ expr $pdigits ]g\" $maxy ]" );
 	else
 	{
-		cmd( "write_disabled .da.f.h.v.sc.max.max Infinity" );
+		cmd( "write_any .da.f.h.v.sc.max.max Infinity" );
 		maxy = 0;
 	}
 	
@@ -2442,6 +2451,8 @@ void update_bounds( void )
 	{
 		miny = -1;
 		maxy = 1;
+		cmd( "write_any .da.f.h.v.sc.min.min $miny" );
+		cmd( "write_any .da.f.h.v.sc.max.max $maxy" );
 	}
 	
 	if ( ! isfinite( miny2 ) )
@@ -2461,9 +2472,9 @@ void update_bounds( void )
 	
 	if ( max_c <= min_c )
 		max_c = min_c + 1;
-	
-	cmd( "write_disabled .da.f.h.v.ft.from.mnc $minc" );
-	cmd( "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
+
+	cmd( "write_any .da.f.h.v.ft.from.mnc $minc" );
+	cmd( "write_any .da.f.h.v.ft.to.mxc $maxc" );
 }
 	
 
