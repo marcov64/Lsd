@@ -216,8 +216,26 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 		
 		// format number string
 		if ( zeroinst )
-			strcpy( ch1, "0\u2026" );
-		else							// compute number of groups of this type
+		{
+			strcpy( ch1, "0" );
+			
+			// if parent is multi-instanced, add ellipsis to the zero
+			if ( t->up->up != NULL )
+			{
+				// must search out of the blueprint, where we are now
+				// may get the wrong parent if the parent is replicated somewhere
+				cur = root->search( t->up->up->label );
+				if ( cur != NULL )
+				{
+					cb = cur->search_bridge( t->up->label );
+					for ( k = 0, cur = cb->head; cur != NULL; ++k, cur = cur->next );
+				
+					if ( k > 1 )				// handle multi-instanced parents
+						strcat( ch1, "\u2026" );
+				}
+			}
+		}
+		else									// compute number of groups of this type
 		{
 			fit_wid = true;
 			for ( h = 0, cur = t; cur != NULL ; ++h, cur = cur->hyper_next( ) )
