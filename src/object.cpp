@@ -2419,7 +2419,7 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 			return NULL;
 		}
 	
-		cb = cv->up->up->b;
+		cb = cur->up->search_bridge( obj, true );
 	}
 	else									// pick network object to sort
 	{
@@ -2469,7 +2469,9 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 	
 	strncpy( dir, direction, 4 );
 	str_upr( dir );
+	
 	qsort_lab = ( char * ) var;
+	
 	if ( ! strcmp( dir, "UP" ) )
 		qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_up );
 	else
