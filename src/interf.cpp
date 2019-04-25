@@ -72,6 +72,7 @@ int natBat = true;					// native (Windows/Linux) batch format flag (bool)
 int next_lag;						// new variable initial setting next lag to set
 int result_loaded;
 int lcount;
+object *initParent = NULL;			// parent of new variable initial setting
 
 
 // list of choices that are bad with existing run data
@@ -1308,8 +1309,7 @@ case 2:
 				
 				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				{ 
-					cur->add_empty_var( lab );
-					cv = cur->search_var( NULL, lab );
+					cv = cur->add_empty_var( lab );
 					if ( param != 0 )
 						num = 0;
 					cv->val = new double[ num + 1 ];
@@ -1328,6 +1328,8 @@ case 2:
 					justAddedVar = true;	// flag variable just added (for acquiring focus)
 				}
 				
+				initParent = r;	
+				
 				// update focus memory
 				cmd( "set listfocus 1; set itemfocus [ .l.v.c.var_name index end ]" );
 				cmd( "lappend modElem %s }", lab );
@@ -1337,7 +1339,10 @@ case 2:
 			}
 		}
 		else
+		{
 			initVal = false;
+			initParent = NULL;
+		}
 	}
 
 	err_newelem:
@@ -2481,15 +2486,20 @@ case 78:
 	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
-	sscanf( lab1, "%99s", lab_old );	// get var/par name in lab_old
-	cv = r->search_var( NULL, lab_old );// get var/par pointer
+	sscanf( lab1, "%99s", lab_old );		// get var/par name in lab_old
+	
+	if ( initVal && initParent != NULL )
+		cv = initParent->search_var( NULL, lab_old );// get var/par pointer
+	else
+		cv = r->search_var( NULL, lab_old );// get var/par pointer
+	
 	if ( cv == NULL )
 		break;
 
 	// do lag selection, if necessary, for initialization/sensitivity data entry
-	lag = 0;							// lag option for the next cases (first lag)
+	lag = 0;								// lag option for the next cases (first lag)
 	if ( ! initVal && ( cv->param == 0 || cv->param == 2 ) && cv->num_lag > 1 )
-	{									// more than one lag to choose?
+	{										// more than one lag to choose?
 		cmd( "set lag \"1\"" );
 		
 		// confirm which lag to use
@@ -2544,10 +2554,15 @@ case 78:
 	if ( done == 1 )
 	{
 		if ( initVal )					// running just after element creation?
+		{
 			lag = next_lag;
+			cur = initParent;
+		}
+		else
+			cur = r;
 		
 		*choice = 0;					// set top window as parent
-		set_all( choice, r, cv->label, lag );
+		set_all( choice, cur, cv->label, lag );
 		
 		if ( initVal )
 		{
@@ -2560,6 +2575,7 @@ case 78:
 			else
 			{
 				initVal = false;
+				initParent = NULL;
 				redrawRoot = true;		// redraw is needed to show new element
 			}
 		}
