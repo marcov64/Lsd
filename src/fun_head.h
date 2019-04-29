@@ -3,12 +3,12 @@
 	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
-    
+
     This file also: Frederik Schaff, Ruhr-Universität Bochum
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
  *************************************************************/
 
 /*************************************************************
@@ -89,14 +89,14 @@ bool no_ptr_chk = true;
 	netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
 	FILE *f; \
 	INIT_POINTERS \
-	EQ_USER_VARS    
+	EQ_USER_VARS
 
 #define EQ_NOT_FOUND \
 	char msg[ TCL_BUFF_STR ]; \
 	sprintf( msg, "equation not found for variable '%s'", label ); \
 	error_hard( msg, "equation not found", "check your configuration (variable name) or\ncode (equation name) to prevent this situation\nPossible problems:\n- There is no equation for this variable\n- The equation name is different from the variable name (case matters!)" ); \
 	return res;
-	
+
 #define EQ_TEST_RESULT \
 	if ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) \
 	{ \
@@ -152,7 +152,7 @@ bool no_ptr_chk = true;
 			return def_res; \
 		variable *var = this; \
 		EQ_BEGIN
-		
+
 #define MODELEND \
 		EQ_NOT_FOUND \
 		end: \
@@ -162,7 +162,7 @@ bool no_ptr_chk = true;
 	}
 
 #define EQUATION( X ) \
-	if ( ! strcmp( label, X ) ) { 
+	if ( ! strcmp( label, X ) ) {
 
 #define RESULT( X ) \
 		res = X; \
@@ -216,12 +216,12 @@ bool no_ptr_chk = true;
 #define MODELEND \
 		}; \
 	}
-			
+
 #define EQUATION( X ) \
 	{ string( X ), [ ]( object *caller, variable *var ) \
 		{ \
 			EQ_BEGIN
-		
+
 #define RESULT( X ) \
 			; \
 			res = X; \
@@ -359,6 +359,24 @@ plog(buffer);} while(false)
 #define STAT_CNDLS( O, LAB, condVarLab, condition, condVal, LAG ) ( O->stat( ( char * ) LAB, v, ( char * ) condVarLab, (char * ) condition, condVal, NULL, LAG  ) );
 #define STAT_CND_CHEAT( LAB, condVarLab, condition, condVal, CHEAT_CALLER ) ( p->stat( ( char * ) LAB, v, ( char * ) condVarLab, (char * ) condition, condVal, CHEAT_CALLER ) );
 #define STAT_CND_CHEATS( O, LAB, condVarLab, condition, condVal, CHEAT_CALLER ) ( O->stat( ( char * ) LAB, v, ( char * ) condVarLab, (char * ) condition, condVal, , CHEAT_CALLER ) );
+
+#define X_STAT_ALL( LAB ) ( p->xStats_all(( char * ) LAB, v ))
+#define X_STAT_ALLL( LAB ) ( p->xStats_all(( char * ) LAB, v,LAG ))
+#define X_STAT_ALLS( O,LAB ) ( CHK_PTR_DBL( O ) O->xStats_all(( char * ) LAB, v, LAG ))
+
+#define X_STAT_ALL_CND( LAB,condVarLab, condition, condVal ) ( p->xStats_all_cnd(( char * ) LAB, v , ( char * ) condVarLab, (char * ) condition, condVal));
+#define X_STAT_ALL_CNDS( O, LAB,condVarLab, condition, condVal ) ( CHK_PTR_DBL( O ) O->xStats_all_cnd(( char * ) LAB, v , ( char * ) condVarLab, (char * ) condition, condVal));
+#define X_STAT_ALL_CNDL( LAB,condVarLab, condition, condVal, LAG) ( p->xStats_all_cnd(( char * ) LAB, v , ( char * ) condVarLab, (char * ) condition, condVal, NULL, LAG));
+#define X_STAT_ALL_CNDLS( O, LAB,condVarLab, condition, condVal, LAG ) ( CHK_PTR_DBL( O ) O->xStats_all_cnd(( char * ) LAB, v , ( char * ) condVarLab, (char * ) condition, condVal, NULL, LAG));
+#define X_STAT_ALL_CND_CHEAT( LAB,condVarLab, condition, condVal, CHEAT_CALLER ) ( p->xStats_all_cnd(( char * ) LAB, v , ( char * ) condVarLab, (char * ) condition, condVal,CHEAT_CALLER));
+#define X_STAT_ALL_CND_CHEATS( O, LAB,condVarLab, condition, condVal, CHEAT_CALLER ) ( CHK_PTR_DBL( O ) O->xStats_all_cnd(( char * ) LAB, v , ( char * ) condVarLab, (char * ) condition, condVal,CHEAT_CALLER));
+
+#define T_STAT(LAB)  ( p->tStats(( char * ) LAB, v ));
+#define T_STATS(O,LAB)  ( CHK_PTR_DBL( O ) O->tStats(( char * ) LAB, v ));
+#define T_STATL(LAB,LAG)  ( p->tStats(( char * ) LAB, v,LAG ));
+#define T_STATLS(O,LAB,LAG)  ( CHK_PTR_DBL( O ) O->tStats(( char * ) LAB, v,LAG ));
+#define T_STAT_INTVL(LAB,LAG)  ( p->tStats(( char * ) LAB, v,LAG ));
+#define T_STAT_INTVLS(O,LAB,LAG)  ( CHK_PTR_DBL( O ) O->tStats(( char * ) LAB, v,LAG ));
 
 #define INTERACT( X, Y ) ( p->interact( ( char * ) X, Y, v, i, j, h, k, \
 	cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, \
@@ -777,7 +795,7 @@ plog(buffer);} while(false)
 #define FCYCLE_NEIGHBOUR_CND_CHEAT(O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, 'f',CHEAT_C,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
 #define FCYCLE_NEIGHBOUR_CND_CHEATS(C, O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, 'f',CHEAT_C,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
-// The "N" Options allow to specify the number of elements and the radius searched. They are efficient when it is uncertain how large the search needs to be, but only a small part of the total 
+// The "N" Options allow to specify the number of elements and the radius searched. They are efficient when it is uncertain how large the search needs to be, but only a small part of the total
 // Elements shall be searched.
 
 //The NRCYCLE options randomise the order.
@@ -951,15 +969,15 @@ plog(buffer);} while(false)
     #define V_LAT_GIS_ADJUST_XYS( PTR, X, Y )           ( PTR->read_lattice_gis( X, Y, false ) )
     #define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL )        ( p->write_lattice_gis( X, Y, VAL, false ) )
     #define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL )  ( PTR->write_lattice_gis( X, Y, VAL, false ) )
-    
+
     #define SET_LAT_PRIORITY( VAL ) ( p->set_lattice_priority( ( VAL ) ) )
     #define SET_LAT_PRIORITYS( PTR, VAL ) ( PTR->set_lattice_priority( ( VAL ) ) )
     #define SET_LAT_COLOR( VAL ) ( p->set_lattice_color( ( VAL ) ) )
-    #define SET_LAT_COLORS( PTR, VAL ) ( PTR->set_lattice_color( ( VAL ) ) )  
+    #define SET_LAT_COLORS( PTR, VAL ) ( PTR->set_lattice_color( ( VAL ) ) )
 
     #define RETRIVE_LAT_COLOR           ( p->read_lattice_color( ) )
     #define RETRIVE_LAT_COLORS( PTR )   ( PTR->read_lattice_color( ) )
-    
+
 #else
 
     #define INIT_LAT_GIS( ... )         ( void( ) )
@@ -981,7 +999,7 @@ plog(buffer);} while(false)
     #define V_LAT_GIS_ADJUST_XYS( PTR, X, Y )           ( void( ) )
     #define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL )        ( void( ) )
     #define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL )  ( void( ) )
-    
+
     #define SET_LAT_PRIORITY( VAL )         ( void( ) )
     #define SET_LAT_PRIORITYS( PTR, VAL )   ( void( ) )
     #define SET_LAT_COLOR( VAL )            ( void( ) )
@@ -1020,13 +1038,13 @@ plog(buffer);} while(false)
 
 
 #endif //#ifdef CPP11
-	
+
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
 #ifndef FAST_LOOKUP
 
-double init_lattice( double pixW = 0, double pixH = 0, double nrow = 100, double ncol = 100, 
-					 char const lrow[ ] = "y", char const lcol[ ] = "x", char const lvar[ ] = "", 
+double init_lattice( double pixW = 0, double pixH = 0, double nrow = 100, double ncol = 100,
+					 char const lrow[ ] = "y", char const lcol[ ] = "x", char const lvar[ ] = "",
 					 object *p = NULL, int init_color = -0xffffff );
 double poidev( double xm, long *idum_loc = NULL );
 int deb( object *r, object *c, char const *lab, double *res, bool interact = false );
@@ -1099,7 +1117,7 @@ void cmd( const char *cm, ... );
 	f = fopen( "log.txt", "a" ); \
 	fprintf( f, "t=%d\t%s\t(cur=%g)\n", t, var->label, var->val[0] ); \
 	fclose( f );
- 
+
 #define DEBUG_AT( X ) \
 	if ( t >= X ) \
 	{ \

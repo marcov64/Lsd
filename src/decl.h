@@ -4,7 +4,7 @@
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	This file also:  Frederik Schaff, Ruhr-Universität Bochum
+	This file also:  Frederik Schaff, Ruhr-Universitï¿½t Bochum
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
@@ -37,6 +37,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <math.h>
+#include <cstddef>
+#include <cmath>
 #include <float.h>
 #include <limits.h>
 #include <time.h>
@@ -250,7 +252,14 @@ struct object
     double search_inst( object* obj = NULL );
     bool check_condition( char const _varLab[]="", char const _condition[]="", double condVal=0.0, object* fake_caller=NULL, int lag=0 );
     double stat( char const *lab, double* v = NULL, char const condVarLab[]="", char const condition[]="", double condVal=0.0, object* fake_caller=NULL, int lag=0);
+    void xStats_all( char const *lab, double *r,int lag=0 );
     double stats_net( char const* lab, double* r );
+    void xStats_all_cnd( char const *lab, double *r, char const condVarLab[]="", char const condition[]="", double condVal=0.0, object* fake_caller=NULL, int lag=0 );
+    void eightStats( std::vector<double>&Data,double *r ) ;
+    bool checkParent( object * par,object *son );
+    void gatherData_all_cnd( std::vector<double>&dataVector, char const *lab, char const condVarLab[], char const condition[], double condVal, object* fake_caller, int lag );
+    void tStats( char const* lab, double* r, int lag=0 );
+    void gatherData_Tseries( std::vector<double>& dataVector, char const* lab, int lag );
     double sum( char const* lab, int lag );
     double whg_av( char const* weight, char const* lab, int lag );
     double write( char const* lab, double value, int time, int lag = 0 );
@@ -292,7 +301,7 @@ struct object
     object* turbosearch( char const* label, double tot, double num );
     object* turbosearch_cond( char const* label, double value );
     variable* add_empty_var( char const* str );
-    variable* search_var( object* caller, char const* label, bool no_error = false, bool no_search = false );
+    variable* search_var( object* caller, char const* label, bool no_error = false, bool no_search = false, object* maxLevel=NULL );
     void add_obj( char const* label, int num, int propagate );
     void add_var( char const* label, int lag, double* val, int save );
     void add_var_from_example( variable* example );
@@ -346,7 +355,7 @@ struct object
     void position_between(gisMap* map, double& x_out, double& y_out, double x1, double y1, double x2, double y2, double rel_pos=0.5); //find position at half distance
     void position_between(double& x_out, double& y_out, object* shareObj, object* shareObj2, double rel_pos=0.5);
     void position_between(double& x_out, double& y_out, double x_1, double y_1, double x_2, double y_2, double rel_pos=0.5);
-    
+
     variable* search_var_local(char const l[]); //search only in object
     void it_full(char const lab[], bool random);
     void it_in_radius(char const lab[], double radius, char random, object* caller, int lag, char const varLab[], char const condition[], double condVal);
@@ -418,7 +427,7 @@ struct object
     void close_lattice_gis( );
     double write_lattice_gis(double colour);
     double write_lattice_gis(double x, double y, double colour, bool noChange);
-    double update_lattice_gis(int x, int y);    
+    double update_lattice_gis(int x, int y);
     double read_lattice_gis( );
     double read_lattice_gis( double x, double y, bool noChange);
     void set_lattice_priority(int priority);
@@ -668,17 +677,17 @@ struct gisMap {
     	Examples: 0 = None, 1 = left, 2 = right, 3 (1+2) left-right,
     	5 up, 7 down, 12 (5+7) up-down, 15 (1+2+5+7) torus.
     */
-    bool has_lattice;   
+    bool has_lattice;
     double center_x;
-    double center_y;    
+    double center_y;
     double max_distance;
-    std::vector<std::vector <std::deque<object*> >> elements;    
+    std::vector<std::vector <std::deque<object*> >> elements;
     std::vector<std::vector <int> > local_lattice; //Buffer colours from WRITE command outside of priority list.
     int nelements; //count number of elements
 
     gisMap(int xn, int yn, int _wrap = 0, char distance_type = 'e') : xn(xn), yn(yn), wrap(_wrap), distance_type(distance_type) //constructor
     {
-        has_lattice = false;             
+        has_lattice = false;
         nelements = 0;
         elements.resize(xn);
         for (auto& x : elements) {
@@ -686,7 +695,7 @@ struct gisMap {
         }
         center_x = xn/2.0;
         center_y = yn/2.0;
-        max_distance=-1; //not initialised        
+        max_distance=-1; //not initialised
     };
 
     //	~gisMap( void ) //destructor
