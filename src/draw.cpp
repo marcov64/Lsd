@@ -211,7 +211,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 				max_wid = min( 15, 80.0 / k );
 				break;
 			default:							// all other lines
-				max_wid = min( 10, 15.0 / k );
+				max_wid = min( 7, 10.0 / k );
 		}
 		
 		// format number string

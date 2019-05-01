@@ -62,7 +62,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact )
 {
 bool pre_running;
 char ch[ 4 * MAX_ELEM_LENGTH ], *ch1;
-int i, j, count, cond, eff_lags;
+int i, j, k, count, cond, eff_lags;
 double value_search, app_res, *app_values;
 long node;
 object *cur, *cur1, *cur2;
@@ -127,7 +127,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd( "button .deb.b.move.hypern -width $butWid -text \"Next Type\" -command {set choice 5} -underline 5" );
 	cmd( "button .deb.b.move.last -width $butWid -text Last -command {set choice 14} -underline 0" );
 	cmd( "button .deb.b.move.search -width $butWid -text Find -command {set choice 10} -underline 0" );
-	cmd( "button .deb.b.move.hook -width $butWid -text Hook -command {set choice 21} -underline 0" );
+	cmd( "button .deb.b.move.hook -width $butWid -text Hooks -command {set choice 21} -underline 0" );
 	cmd( "button .deb.b.move.net -width $butWid -text Network -command {set choice 22} -underline 3" );
 	
 	cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.hook .deb.b.move.net -padx 8 -pady 5 -side left -expand no -fill none" );
@@ -278,7 +278,7 @@ while ( choice == 0 )
 	}
 		
 	// disable or enable the hook button
-	if( r->hook == NULL )
+	if( r->hook == NULL && r->hooks.size( ) == 0 )
 		cmd( ".deb.b.move.hook configure -state disabled" );
 	else
 		cmd( ".deb.b.move.hook configure -state normal" );
@@ -960,21 +960,110 @@ while ( choice == 0 )
 			choice = 0;
 			break;
 
-		// Hook
-		case 21: 
-			if ( r->hook != NULL )
+		// Hooks
+		case 21:
+			j = r->hooks.size( );						// number of dynamic hooks
+			
+			if ( j > 0 )
 			{
-				if ( root->search_inst( r->hook ) == 0 )
+				cmd( "set hook 0" );
+				
+				cmd( "set hk .deb.hk" );
+				
+				cmd( "newtop $hk \"Choose Hook\" { set choice 2 } .deb" );
+				
+				cmd( "frame $hk.l" );
+				cmd( "label $hk.l.l -text \"Object:\"" );
+				cmd( "label $hk.l.n -fg red -text %s", r->label );
+				cmd( "pack $hk.l.l $hk.l.n -side left -padx 2" );
+
+				cmd( "frame $hk.t" );
+				cmd( "label $hk.t.l -text \"Available hooks\"" );
+
+				cmd( "frame $hk.t.t -relief groove -bd 2" );
+				
+				strcpy( ch, "pack" );
+				
+				for ( count = i = 0; i < j; ++i )
+					if ( r->hooks[ i ] != NULL )
+					{
+						k = root->search_inst( r->hooks[ i ] );
+						
+						if ( k != 0 )
+						{
+							cmd( "radiobutton $hk.t.t.h%d -text \"Hook %d to %s (%d)\" -variable hook -value %d", i, i, r->hooks[ i ]->label, k, i );
+							sprintf( ch, "%s $hk.t.t.h%d", ch, i );
+							++count;
+						}
+					}
+				
+				if ( r->hook != NULL )
 				{
-					cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to LSD objects or avoid using this option.\"" );
+					k = root->search_inst( r->hook );
+					
+					if ( k != 0 )
+					{
+						cmd( "radiobutton $hk.t.t.h%d -text \"Static Hook to %s (%d)\" -variable hook -value %d", i, r->hook->label, k, i );
+						sprintf( ch, "%s $hk.t.t.h%d", ch, i );
+						++count;
+					}
+				}
+				
+				if ( count == 0 )
+				{
+					cmd( "destroytop $hk" );
+					cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer(s)\" -detail \"Check if your code is using valid (non-NULL) pointers to LSD objects or avoid using this option.\"" );
 					choice = 0;
 					break;
 				}
 				
-				choice = deb( r->hook, c, lab, res, interact );
+				strcat( ch, " -anchor w" );
+				cmd( ch );
+
+				cmd( "pack $hk.t.l $hk.t.t" );
+
+				cmd( "frame $hk.m" );
+				cmd( "label $hk.m.l -text \"(invalid and NULL hooks not shown)\"" );
+				cmd( "pack $hk.m.l" );
+				
+				cmd( "pack $hk.l $hk.t $hk.m -padx 5 -pady 5" );
+
+				cmd( "okhelpcancel $hk b { set choice 1 } { LsdHelp debug.html#hooks } { set choice 2 }" );
+
+				cmd( "showtop $hk" );
+				
+				choice = 0;
+				while ( choice == 0 )
+					Tcl_DoOneEvent( 0 );
+
+				cmd( "destroytop $hk" );
+
+				if ( choice == 1 )
+				{
+					get_int( "hook", &i );
+					
+					if ( i < j )
+						choice = deb( r->hooks[ i ], c, lab, res, interact );
+					else
+						choice = deb( r->hook, c, lab, res, interact );
+				}
+				else
+					choice = 0;
 			}
 			else
-				choice = 0;
+				if ( r->hook != NULL )
+				{
+					if ( root->search_inst( r->hook ) == 0 )
+					{
+						cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to LSD objects or avoid using this option.\"" );
+						choice = 0;
+						break;
+					}
+					
+					choice = deb( r->hook, c, lab, res, interact );
+				}
+				else
+					choice = 0;
 
 			break;
 					
