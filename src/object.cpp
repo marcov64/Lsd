@@ -845,7 +845,8 @@ The field caller is used to avoid deadlocks when
 from descendants the search goes up again, or from the parent down.
 Uses the fast variable look-up map of the searched variables.
 *************************************************/
-variable *object::search_var( object *caller, char const *lab, bool no_error, bool no_search )
+variable *object::search_var( object *caller, char const *lab, bool no_error, 
+							  bool no_search, bool search_sons )
 {
 	bridge *cb; 
 	variable *cv;
@@ -855,8 +856,8 @@ variable *object::search_var( object *caller, char const *lab, bool no_error, bo
 	if ( ( vit = v_map.find( lab ) ) != v_map.end( ) )
 		return vit->second;
 
-	// stop if search is disabled
-	if ( no_search )
+	// stop if search is disabled except if direct sons must still be searched
+	if ( no_search && ! search_sons )
 		return NULL;
 
 	// Search among descendants
@@ -865,13 +866,17 @@ variable *object::search_var( object *caller, char const *lab, bool no_error, bo
 		// search down only if one instance exists and the label is different from caller
 		if ( cb->head != NULL && ( caller == NULL || strcmp( cb->head->label, caller->label ) ) )
 		{
-			cv = cb->head->search_var( this, lab, no_error );
+			cv = cb->head->search_var( this, lab, no_error, false, false );
 			if ( cv != NULL )
 				return cv;
 		}   
 		else
 			cv = NULL; 
 	}
+
+	// stop if search is disabled
+	if ( no_search )
+		return NULL;
 
 	// Search up in the tree
 	if ( caller != up )
@@ -888,7 +893,7 @@ variable *object::search_var( object *caller, char const *lab, bool no_error, bo
 			return NULL;
 		}
 		
-		cv = up->search_var( this, lab, no_error );
+		cv = up->search_var( this, lab, no_error, false, false );
 	}
 
 	return cv;
@@ -898,14 +903,15 @@ variable *object::search_var( object *caller, char const *lab, bool no_error, bo
 /************************************************
 SEARCH_VAR_ERR
 *************************************************/
-variable *object::search_var_err( object *caller, char const *lab, bool no_search, char const *errmsg )
+variable *object::search_var_err( object *caller, char const *lab, bool no_search, 
+								  bool search_sons, char const *errmsg )
 {
 	variable *cv;
 
-	cv = search_var( caller, lab, true, no_search );
+	cv = search_var( caller, lab, true, no_search, search_sons );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, no_search );
+		cv = blueprint->search_var( NULL, lab, true, no_search, search_sons );
 		if ( cv == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for %s", lab, errmsg );
@@ -940,7 +946,7 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 
 	for ( cur1 = this; cur1 != NULL; cur1 = cur1->up )
 	{
-		cv = cur1->search_var_err( this, lab, no_search, "conditional searching" );
+		cv = cur1->search_var_err( this, lab, no_search, false, "conditional searching" );
 		if ( cv == NULL )
 			return NULL;
 
@@ -969,7 +975,7 @@ double object::initturbo_cond( char const *lab )
 	variable *cv;
 	b_mapT::iterator bit;
 
-	cv = search_var_err( this, lab, false, "turbo conditional searching" );
+	cv = search_var_err( this, lab, false, false, "turbo conditional searching" );
 	if ( cv == NULL )
 		return 0;
 	
@@ -1019,7 +1025,7 @@ object *object::turbosearch_cond( char const *lab, double value )
 	b_mapT::iterator bit;
 	o_mapT::iterator oit;
 
-	cv = search_var_err( this, lab, false, "turbo conditional searching" );
+	cv = search_var_err( this, lab, false, false, "turbo conditional searching" );
 	if ( cv == NULL )
 		return NULL;
 	
@@ -1069,7 +1075,7 @@ void object::add_var( char const *lab, int lag, double *val, int save )
 	variable *cv;
 	object *cur;
 	
-	if ( search_var( this, lab, true, true ) != NULL )
+	if ( search_var( this, lab, true, true, false ) != NULL )
 	{
 		sprintf( msg, "element '%s' already exists in object '%s'", lab, label );
 		error_hard( msg, "variable or parameter not added", 
@@ -1111,7 +1117,7 @@ variable *object::add_empty_var( char const *lab )
 {
 	variable *cv;
 
-	if ( search_var( this, lab, true, true ) != NULL )
+	if ( search_var( this, lab, true, true, false ) != NULL )
 	{
 		sprintf( msg, "element '%s' already exists in object '%s'", lab, label );
 		error_hard( msg, "variable or parameter not added", 
@@ -1152,7 +1158,7 @@ void object::add_var_from_example( variable *example )
 {
 	variable *cv;
 
-	if ( search_var( this, example->label, true, true ) != NULL )
+	if ( search_var( this, example->label, true, true, false ) != NULL )
 	{
 		sprintf( msg, "element '%s' already exists in object '%s'", example->label, label );
 		error_hard( msg, "variable or parameter not added", 
@@ -1974,6 +1980,24 @@ Return the value of Variable or Parameter with label lab with lag lag.
 The method search for the Variable starting from this Object and then calls
 the function variable->cal(caller, lag )
 ***************************************************/
+double object::cal( object *caller, char const *lab, int lag, bool force_search )
+{
+	variable *cv;
+
+	if ( quit == 2 )
+		return NAN;
+
+	cv = search_var_err( this, lab, force_search ? false : no_search, false, "retrieving" );
+	if ( cv == NULL )
+		return NAN;
+
+#ifdef PARALLEL_MODE
+	if ( lag == 0 && parallel_ready && cv->parallel && cv->last_update < t && ! cv->dummy )
+		parallel_update( cv, this, caller );
+#endif
+	return cv->cal( caller, lag );
+}
+
 double object::cal( object *caller, char const *lab, int lag )
 {
 	variable *cv;
@@ -1981,7 +2005,7 @@ double object::cal( object *caller, char const *lab, int lag )
 	if ( quit == 2 )
 		return NAN;
 
-	cv = search_var_err( this, lab, no_search, "retrieving" );
+	cv = search_var_err( this, lab, no_search, false, "retrieving" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2006,7 +2030,7 @@ double object::last_cal( char const *lab )
 {
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, "last updating" );
+	cv = search_var_err( this, lab, no_search, false, "last updating" );
 	if ( cv == NULL )
 		return NAN;
 	
@@ -2023,7 +2047,7 @@ double object::recal( char const *lab )
 {
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, "recalculating" );
+	cv = search_var_err( this, lab, no_search, false, "recalculating" );
 	if ( cv == NULL )
 		return NAN;
 	
@@ -2045,7 +2069,7 @@ double object::sum( char const *lab, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, "summing" );
+	cv = search_var_err( this, lab, no_search, true, "summing" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2070,7 +2094,7 @@ double object::overall_max( char const *lab, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, "maximizing" );
+	cv = search_var_err( this, lab, no_search, true, "maximizing" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2096,7 +2120,7 @@ double object::overall_min( char const *lab, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, "minimizing" );
+	cv = search_var_err( this, lab, no_search, true, "minimizing" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2123,7 +2147,7 @@ double object::av( char const *lab, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, "averaging" );
+	cv = search_var_err( this, lab, no_search, true, "averaging" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2151,11 +2175,11 @@ double object::whg_av( char const *weight, char const *lab, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, weight, no_search, "weighted averaging" );
+	cv = search_var_err( this, weight, no_search, true, "weighted averaging" );
 	if ( cv == NULL )
 		return NAN;
 
-	cv = search_var_err( this, lab, no_search, "weighted averaging" );
+	cv = search_var_err( this, lab, no_search, true, "weighted averaging" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2185,7 +2209,7 @@ double object::sd( char const *lab, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, "calculating s.d." );
+	cv = search_var_err( this, lab, no_search, true, "calculating s.d." );
 	if ( cv == NULL )
 		return NAN;
 	
@@ -2310,7 +2334,7 @@ double object::stat( char const *lab, double *r )
 	
 	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = 0;
 	
-	cv = search_var_err( this, lab, no_search, "calculating statistics" );
+	cv = search_var_err( this, lab, no_search, true, "calculating statistics" );
 	if ( cv == NULL )
 	{
 		r[ 0 ] = 0;	
@@ -2398,7 +2422,7 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 
 	if ( ! useNodeId )
 	{
-		cv = search_var_err( this, var, no_search, "sorting" );
+		cv = search_var_err( this, var, no_search, true, "sorting" );
 		if ( cv == NULL )
 			return NULL;
 		
@@ -2568,7 +2592,7 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 					true );
 	}
 	
-	cv = search_var_err( this, var1, no_search, "sorting" );
+	cv = search_var_err( this, var1, no_search, true, "sorting" );
 	if ( cv == NULL )
 		return NULL;
 	 
@@ -2645,7 +2669,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 	object *cur, *cur1;
 	variable *cv;
 
-	cv = search_var_err( this, lv, no_search, "random drawing" );
+	cv = search_var_err( this, lv, no_search, true, "random drawing" );
 	if ( cv == NULL )
 		return NULL;
 
@@ -2767,7 +2791,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 		return NULL;
 	}  
 
-	cv = search_var_err( this, lv, no_search, "random drawing" );
+	cv = search_var_err( this, lv, no_search, true, "random drawing" );
 	if ( cv == NULL )
 		return NULL;
 
@@ -2813,7 +2837,7 @@ double object::write( char const *lab, double value, int time, int lag )
         return NAN;
     }
     
-	cv = search_var_err( this, lab, true, "writing" );
+	cv = search_var_err( this, lab, true, false, "writing" );
 	if ( cv == NULL )
 		return NAN;
 	
@@ -2955,7 +2979,7 @@ double object::increment( char const *lab, double value )
         return NAN;
     }
 
-	cv = search_var_err( this, lab, true, "incrementing" );
+	cv = search_var_err( this, lab, true, false, "incrementing" );
 	if ( cv == NULL )
 		return NAN;
 	
@@ -2986,7 +3010,7 @@ double object::multiply( char const *lab, double value )
         return NAN;
     }
 
-	cv = search_var_err( this, lab, true, "multiplying" );
+	cv = search_var_err( this, lab, true, false, "multiplying" );
 	if ( cv == NULL )
 		return NAN;
 	

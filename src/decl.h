@@ -198,7 +198,8 @@ struct object
 	bridge *search_bridge( char const *lab, bool no_error = false );
 	double av( char const *lab, int lag );
 	double cal( char const *l, int lag );
-	double cal( object *caller,  char const *l, int lag );
+	double cal( object *caller, char const *l, int lag );
+	double cal( object *caller, char const *l, int lag, bool force_search );
 	double count( char const *lab );
 	double count_all( char const *lab );
 	double increment( char const *lab, double value );
@@ -261,8 +262,8 @@ struct object
 	object *turbosearch( char const *label, double tot, double num );
 	object *turbosearch_cond( char const *label, double value );
 	variable *add_empty_var( char const *str );
-	variable *search_var( object *caller, char const *label, bool no_error = false, bool no_search = false );
-	variable *search_var_err( object *caller, char const *label, bool no_search, char const *errmsg );
+	variable *search_var( object *caller, char const *label, bool no_error = false, bool no_search = false, bool search_sons = false );
+	variable *search_var_err( object *caller, char const *label, bool no_search, bool search_sons, char const *errmsg );
 	void add_obj( char const *label, int num, int propagate );
 	void add_var( char const *label, int lag, double *val, int save );
 	void add_var_from_example( variable *example );

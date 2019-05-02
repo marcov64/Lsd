@@ -177,7 +177,7 @@ bool no_ptr_chk = true;
 		if ( strlen( Y ) > 0 ) \
 		{ \
 			var->dummy = true; \
-			p->cal( p, ( char * ) Y, 0 ); \
+			p->cal( p, ( char * ) Y, 0, true ); \
 		} \
 		res = var->val[ 0 ]; \
 		goto end; \
@@ -240,7 +240,7 @@ bool no_ptr_chk = true;
 			if ( strlen( Y ) > 0 ) \
 			{ \
 				var->dummy = true; \
-				var->up->cal( var->up, ( char * ) Y, 0 ); \
+				var->up->cal( var->up, ( char * ) Y, 0, true ); \
 			} \
 			return var->val[ 0 ]; \
 		} \
