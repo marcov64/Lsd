@@ -911,8 +911,7 @@ variable *object::search_var_err( object *caller, char const *lab, bool no_searc
 	cv = search_var( caller, lab, true, no_search, search_sons );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		cv = blueprint->search_var( NULL, lab, true, no_search, search_sons );
-		if ( cv == NULL )
+		if ( blueprint->search_var( NULL, lab, true, no_search, search_sons ) == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for %s", lab, errmsg );
 			error_hard( msg, "variable or parameter not found", 
