@@ -4,10 +4,9 @@
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	This file: Frederik Schaff, Ruhr-Universität Bochum
-    version 0.3 (December 2018)
+	This file: Frederik Schaff, Ruhr-University Bochum
 
-	Copyright Marco Valente
+	This file: Frederik Schaff, Ruhr-University Bochum
 	LSD is distributed under the GNU General Public License
 
  *************************************************************/
@@ -1580,22 +1579,22 @@ object* object::search_at_position(char const lab[], bool single, bool grid)
 //  Note: Only consideres grid-moves.
 object* object::search_at_neighbour_position(char const lab[], int direction, bool single)
 {
-#ifndef NO_POINTER_CHECK    
+#ifndef NO_POINTER_CHECK
     if (ptr_map() == NULL) {
         sprintf( gismsg, "failure in search_at_neighbour_position() for object '%s'", label );
         error_hard( gismsg, "the object is not registered in any map",
                     "check your code to prevent this situation" );
         return NULL;
-    }    
+    }
 #endif
     double x_inOut = position->x;
     double y_inOut = position->y;
-    if (get_move_position(ptr_map(), direction, x_inOut, y_inOut) == false){
+    if (get_move_position(ptr_map(), direction, x_inOut, y_inOut) == false) {
         sprintf( gismsg, "failure in search_at_neighbour_position() for object '%s' and direction %i", label, direction );
         error_hard( gismsg, "the move is not allowed",
                     "check your code to prevent this situation" );
-        return NULL;    
-    }      
+        return NULL;
+    }
     return search_at_position(lab, trunc(x_inOut), trunc(y_inOut), single);
 }
 
@@ -1740,7 +1739,7 @@ int object::char2int_direction(char const direction[])
             break;
         default :
             dir = 0; //stay put.
-    }    
+    }
 }
 
 //  move
@@ -1750,7 +1749,7 @@ int object::char2int_direction(char const direction[])
 //  to do: Add version with COND Check.
 bool object::move(char const direction[])
 {
-    
+
     return move(char2int_direction(direction));
 }
 

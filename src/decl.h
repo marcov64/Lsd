@@ -4,9 +4,11 @@
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	This file also:  Frederik Schaff, Ruhr-Universit�t Bochum
+	This file also:  Frederik Schaff, Ruhr-University Bochum
 
 	Copyright Marco Valente and Marcelo Pereira
+    This file: Frederik Schaff, Ruhr-University Bochum
+
 	LSD is distributed under the GNU General Public License
 
  *************************************************************/
@@ -200,8 +202,7 @@ typedef unordered_map < string, variable* > v_mapT;
 typedef unordered_set < object* > o_setT;
 #endif
 
-struct object
-{
+struct object {
     char* label;
     bool deleting;						// indicate deletion in process
     bool to_compute;
@@ -250,15 +251,15 @@ struct object
     double recal( char const* l );
     double sd( char const* lab, int lag );
     double search_inst( object* obj = NULL );
-    bool check_condition( char const _varLab[]="", char const _condition[]="", double condVal=0.0, object* fake_caller=NULL, int lag=0 );
-    double stat( char const *lab, double* v = NULL, char const condVarLab[]="", char const condition[]="", double condVal=0.0, object* fake_caller=NULL, int lag=0);
-    void xStats_all( char const *lab, double *r,int lag=0 );
+    bool check_condition( char const _varLab[] = "", char const _condition[] = "", double condVal = 0.0, object* fake_caller = NULL, int lag = 0 );
+    double stat( char const* lab, double* v = NULL, char const condVarLab[] = "", char const condition[] = "", double condVal = 0.0, object* fake_caller = NULL, int lag = 0);
+    void xStats_all( char const* lab, double* r, int lag = 0 );
     double stats_net( char const* lab, double* r );
-    void xStats_all_cnd( char const *lab, double *r, char const condVarLab[]="", char const condition[]="", double condVal=0.0, object* fake_caller=NULL, int lag=0 );
-    void eightStats( std::vector<double>&Data,double *r ) ;
-    bool checkParent( object * par,object *son );
-    void gatherData_all_cnd( std::vector<double>&dataVector, char const *lab, char const condVarLab[], char const condition[], double condVal, object* fake_caller, int lag );
-    void tStats( char const* lab, double* r, int lag=0 );
+    void xStats_all_cnd( char const* lab, double* r, char const condVarLab[] = "", char const condition[] = "", double condVal = 0.0, object* fake_caller = NULL, int lag = 0 );
+    void eightStats( std::vector<double>& Data, double* r ) ;
+    bool checkParent( object* par, object* son );
+    void gatherData_all_cnd( std::vector<double>& dataVector, char const* lab, char const condVarLab[], char const condition[], double condVal, object* fake_caller, int lag );
+    void tStats( char const* lab, double* r, int lag = 0 );
     void gatherData_Tseries( std::vector<double>& dataVector, char const* lab, int lag );
     double sum( char const* lab, int lag );
     double whg_av( char const* weight, char const* lab, int lag );
@@ -301,7 +302,7 @@ struct object
     object* turbosearch( char const* label, double tot, double num );
     object* turbosearch_cond( char const* label, double value );
     variable* add_empty_var( char const* str );
-    variable* search_var( object* caller, char const* label, bool no_error = false, bool no_search = false, object* maxLevel=NULL );
+    variable* search_var( object* caller, char const* label, bool no_error = false, bool no_search = false, object* maxLevel = NULL );
     void add_obj( char const* label, int num, int propagate );
     void add_var( char const* label, int lag, double* val, int save );
     void add_var_from_example( variable* example );
@@ -352,9 +353,9 @@ struct object
     double relative_distance(double abs_distance); //calculate the relative (to maximum) distance.
     double absolute_distance(double rel_distance); //other way
 
-    void position_between(gisMap* map, double& x_out, double& y_out, double x1, double y1, double x2, double y2, double rel_pos=0.5); //find position at half distance
-    void position_between(double& x_out, double& y_out, object* shareObj, object* shareObj2, double rel_pos=0.5);
-    void position_between(double& x_out, double& y_out, double x_1, double y_1, double x_2, double y_2, double rel_pos=0.5);
+    void position_between(gisMap* map, double& x_out, double& y_out, double x1, double y1, double x2, double y2, double rel_pos = 0.5); //find position at half distance
+    void position_between(double& x_out, double& y_out, object* shareObj, object* shareObj2, double rel_pos = 0.5);
+    void position_between(double& x_out, double& y_out, double x_1, double y_1, double x_2, double y_2, double rel_pos = 0.5);
 
     variable* search_var_local(char const l[]); //search only in object
     void it_full(char const lab[], bool random);
@@ -394,7 +395,7 @@ struct object
     void register_allOfKind_at_grid_rnd(object* obj);
     void register_allOfKind_at_grid_rnd_cnd(object* obj, char const varLab[], char const condition[], double condVal);
     bool register_at_map_rnd(object* gisObj, bool snap_grid = false);
-    bool register_at_map(gisMap* map, double _x, double _y, int lattice_color=0, int lattice_priority=-1);
+    bool register_at_map(gisMap* map, double _x, double _y, int lattice_color = 0, int lattice_priority = -1);
     bool register_at_map(object* shareObj ); //register at same position as gisObj
 
     bool register_at_map_between(gisMap* map, double _x, double _y, double _x2, double _y2);
@@ -421,7 +422,7 @@ struct object
     bool check_positions(double& _x, double& _y, bool noChange = false); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
     bool check_positions(gisMap* map, double& _xOut, double& _yOut, bool noChange = false);
 
-    std::string gis_info(bool append=false);
+    std::string gis_info(bool append = false);
 
     double init_lattice_gis(int init_color = 1000, double pixW = 400, double pixH = 400);
     void close_lattice_gis( );
@@ -446,8 +447,7 @@ struct object
 
 };
 
-struct variable
-{
+struct variable {
     char* label;
     char* lab_tit;
     char data_loaded;
@@ -460,15 +460,15 @@ struct variable
     bool savei;
     bool under_computation;
     int deb_cond;
-	int delay;
-	int delay_range;
+    int delay;
+    int delay_range;
     int end;
     int last_update;
-	int next_update;
+    int next_update;
     int num_lag;
     int param;
-	int period;
-	int period_range;
+    int period;
+    int period_range;
     int start;
     double* data;
     double* val;
@@ -596,7 +596,7 @@ struct gisPosition {
     std::deque<std::pair <double, object*> > objDis_inRadius; //list of objects in range, used by search
     std::deque<std::pair <double, object*> >::iterator it_obj; //iterator for the CYCLES
 
-    gisPosition (gisMap* map, double x, double y, double z = 0, int lattice_color = 0, int lattice_priority = -1) : map(map), x(x), y(y), z(z), lattice_color(lattice_color),lattice_priority(lattice_priority)  //constructor.
+    gisPosition (gisMap* map, double x, double y, double z = 0, int lattice_color = 0, int lattice_priority = -1) : map(map), x(x), y(y), z(z), lattice_color(lattice_color), lattice_priority(lattice_priority) //constructor.
     {
     };
 };
@@ -693,9 +693,9 @@ struct gisMap {
         for (auto& x : elements) {
             x.resize(yn); //number of rows, copy
         }
-        center_x = xn/2.0;
-        center_y = yn/2.0;
-        max_distance=-1; //not initialised
+        center_x = xn / 2.0;
+        center_y = yn / 2.0;
+        max_distance = -1; //not initialised
     };
 
     //	~gisMap( void ) //destructor
@@ -801,7 +801,7 @@ struct worker {						// multi-thread parallel worker data structure
     condition_variable run;
     exception_ptr pexcpt;
     int signum;
-	jmp_buf env;
+    jmp_buf env;
     mutex lock;
     thread thr;
     thread::id thr_id;
@@ -897,7 +897,7 @@ extern mt19937 mt32;						// Mersenne-Twister 32 bits generator
 extern mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
 extern ranlux24 lf24;						// lagged fibonacci 24 bits generator
 extern ranlux48 lf48;						// lagged fibonacci 48 bits generator
-extern int **lattice; //for usage with GIS
+extern int** lattice; //for usage with GIS
 #endif //#ifdef CPP11
 extern int sim_num;
 extern int t;
@@ -999,16 +999,16 @@ void count( object* r, int* i );
 void count_save( object* n, int* count );
 void cover_browser( const char*, const char*, const char* );
 void create( void );
-void create_form( int num, char const *title, char const *prefix, FILE *frep );
-void create_initial_values( object *r, FILE *frep );
+void create_form( int num, char const* title, char const* prefix, FILE* frep );
+void create_initial_values( object* r, FILE* frep );
 void create_logwindow( void );
 void create_maverag( int* choice );
 void create_series( int* choice );
-void create_table_init( object *r, FILE *frep );
+void create_table_init( object* r, FILE* frep );
 void dataentry_sensitivity( int* choice, sense* s, int nval = 0 );
 void deb_show( object* r );
 void delete_bridge( object* d );
-void draw_obj( object *t, object *sel, int level, int center, int from, bool zeroinst );
+void draw_obj( object* t, object* sel, int level, int center, int from, bool zeroinst );
 void edit_data( object* root, int* choice, char* obj_name );
 void edit_str( object* root, char* tag, int counter, int* i, int res, int* num, int* choice, int* done );
 void eliminate_obj( object** r, int actual, int desired, int* choice );
@@ -1096,10 +1096,10 @@ void show_parallel( object* n );
 void show_plot( object* n );
 void show_plot_gnu( int n, int* choice, int type, char** str, char** tag );
 void show_prof_aggr( void );
-void show_rep_initial( FILE *f, object *n, int *begin, FILE *frep );
-void show_rep_observe( FILE *f, object *n, int *begin, FILE *frep );
+void show_rep_initial( FILE* f, object* n, int* begin, FILE* frep );
+void show_rep_observe( FILE* f, object* n, int* begin, FILE* frep );
 void show_save( object* n );
-void show_special_updat( object *n );
+void show_special_updat( object* n );
 void show_tmp_vars( object* r, bool update );
 void signal_handler( int );
 void sort_cs_asc( char** s, char** t, double** v, int nv, int nt, int c );
