@@ -115,6 +115,8 @@ void object::save_param( FILE *f )
 		for ( ; go_brother( cur ) != NULL; cur = cur->next );
 	}
 	fprintf( f, "\n" );
+    
+    //ToDo : Add ABMAT
 
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
@@ -217,6 +219,8 @@ bool object::load_param( char *file_name, int repl, FILE *f )
 		cur->replicate( num, 0 );
 		for ( ; go_brother( cur ) != NULL; cur = cur->next );
 	}
+    
+    //ToDo : ADD ABMAT
 
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{

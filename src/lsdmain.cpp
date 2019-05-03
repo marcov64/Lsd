@@ -1114,7 +1114,7 @@ bool alloc_save_mem( object* r )
                 cv->next_update += rnd_int( 0, cv->delay_range );
         }
 
-        if ( ( cv->save || cv->savei ) && ! no_more_memory ) {
+        if ( ( cv->save || cv->savei || cv->saveMicro || cv->saveMacro ) && ! no_more_memory ) {
             if ( cv->num_lag > 0 || cv->param == 1 )
                 cv->start = 0;
             else
@@ -1129,7 +1129,7 @@ bool alloc_save_mem( object* r )
             catch( bad_alloc& ) {
                 set_lab_tit( cv );
                 plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", cv->lab_tit );
-                cv->save = cv->savei = 0;
+                cv->save = cv->savei = cv->saveMicro = cv->saveMacro = false;
                 no_more_memory = true;
             }
 
@@ -1139,7 +1139,7 @@ bool alloc_save_mem( object* r )
         }
         else {
             if ( no_more_memory )
-                cv->save = cv->savei = 0;
+                cv->save = cv->savei = cv->saveMicro = cv->saveMacro = false;
         }
 
         if ( ( cv->num_lag > 0 || cv->param == 1 ) && cv->data_loaded == '-' ) {
@@ -1229,7 +1229,7 @@ void reset_end( object* r )
     variable* cv;
 
     for ( cv = r->v; cv != NULL; cv = cv->next ) {
-        if ( cv->save )
+        if ( cv->save || cv->saveMicro || cv->saveMacro )
             cv->end = t - 1;
         if ( cv->savei == 1 )
             save_single( cv );

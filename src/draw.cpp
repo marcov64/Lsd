@@ -173,6 +173,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 		else
 			sp_upd = false;
 
+        //ToDo : Add ABMAT Flags
 		// set flags string
 		cmd( "set varFlags \"%s%s%s%s%s\"", ( cv->save || cv->savei ) ? "+" : "", cv->plot ? "*" : "", cv->debug == 'd' ? "!" : "", cv->parallel ? "&" : "", sp_upd ? "\u00A7" : "" );
 				

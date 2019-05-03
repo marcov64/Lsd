@@ -1235,7 +1235,7 @@ void count_save( object *n, int *count )
 	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
-		if ( cv->save == 1 || cv->savei == 1 )
+		if ( cv->save || cv->savei || cv->saveMicro || cv->saveMacro )
 			( *count )++;
 
 	for ( cb = n->b; cb != NULL; cb = cb->next )
@@ -1251,6 +1251,7 @@ void count_save( object *n, int *count )
 
 /****************************************************
 GET_SAVED
+//ToDo : Add ABMAT Info
 ****************************************************/
 void get_saved( object *n, FILE *out, const char *sep, bool all_var )
 {
@@ -1462,6 +1463,7 @@ char *upload_eqfile( void )
 /***************************************************
 RESULT
 Methods for results file saving (class result)
+//ToDo : Add ABMAT
 ***************************************************/
 
 // saves data to file in the specified period

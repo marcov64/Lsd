@@ -458,6 +458,8 @@ struct variable {
     bool plot;
     bool save;
     bool savei;
+    bool saveMicro; //ABMAT 
+    bool saveMacro; //ABMAT
     bool under_computation;
     int deb_cond;
     int delay;
