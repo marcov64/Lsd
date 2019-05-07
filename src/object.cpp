@@ -6,9 +6,9 @@
 
 	This file also:  Frederik Schaff, Ruhr-University Bochum
 
-	Copyright Marco Valente and Marcelo Pereira    
+	Copyright Marco Valente and Marcelo Pereira
     This file also:  Frederik Schaff, Ruhr-University Bochum
-    
+
 	LSD is distributed under the GNU General Public License
 
  *************************************************************/
@@ -1835,8 +1835,8 @@ void delete_bridge( object* d )
     Remove the object from the model
     Before killing the Variables data to be saved are stored
     in the "cemetery", a linked chain storing data to be analyzed.
-    
-    ABMAT: If a variable is deleted, it is not considered "active" for this 
+
+    ABMAT: If a variable is deleted, it is not considered "active" for this
     time-step. Hence ABMAT does not use the cemetery.
 ****************************************************/
 void object::delete_obj( void )
@@ -1933,11 +1933,11 @@ void object::empty( void )
 {
     bridge* cb, *cb1;
     variable* cv, *cv1;
-    
+
     //ToDo : Check if that ABMAT objects are treated appropriately
     if ( root == this )
         blueprint->empty( );
-    
+
     for ( cv = v; cv != NULL; cv = cv1 )
         if ( running && ( cv->save || cv->savei ) )
             cv1 = cv->next; 	// variable should have been already saved to cemetery!!!

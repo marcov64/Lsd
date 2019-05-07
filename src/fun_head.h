@@ -12,9 +12,9 @@
  *************************************************************/
 
 /*************************************************************
-FUN_HEAD.H
-This file contains all the macros required by the
-model's equation file.
+    FUN_HEAD.H
+    This file contains all the macros required by the
+    model's equation file.
 *************************************************************/
 
 #define FUN												// comment this line to access internal LSD functions
@@ -30,10 +30,10 @@ using namespace Eigen;
 
 // create and set fast lookup flag
 #if ! defined FAST_LOOKUP || ! defined CPP11
-	bool fast_lookup = false;
-	void init_map( ) { };
+bool fast_lookup = false;
+void init_map( ) { };
 #else
-	bool fast_lookup = true;
+bool fast_lookup = true;
 #endif
 
 // set pointers to NULL to protect users (small overhead) if not disabled
@@ -284,10 +284,10 @@ bool no_ptr_chk = true;
 #define GRANDPARENT ( CHK_PTR_OBJ( p->up ) p->up->up )
 // some macros to define unique ids for some objects
 #ifdef CPP11
-  #define MAKE_UNIQUE( LAB ) p->declare_as_unique( ( char * ) LAB )
-  #define UID  ( double (p->unique_id( ) ) )
-  #define UIDS( PTR ) (double ( PTR->unique_id( ) ) )
-  #define SEARCH_UID( ID ) ( p->obj_by_unique_id( int ( ID ) ) )
+#define MAKE_UNIQUE( LAB ) p->declare_as_unique( ( char * ) LAB )
+#define UID  ( double (p->unique_id( ) ) )
+#define UIDS( PTR ) (double ( PTR->unique_id( ) ) )
+#define SEARCH_UID( ID ) ( p->obj_by_unique_id( int ( ID ) ) )
 #endif //#ifdef CPP11
 #define RND_SEED ( ( double ) seed - 1 )
 #define T ( ( double ) t )
@@ -660,7 +660,7 @@ plog(buffer);} while(false)
 #define INIT_SPACE_GRID_WRAPL( LAB, XN, YN, WRAP, TIME )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME ); }
 #define INIT_SPACE_GRID_WRAPLS( PTR, LAB, XN, YN, WRAP, TIME )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME ); }
 
-  //n versions with sparce space
+//n versions with sparce space
 #define INIT_SPACE_GRIDN( LAB, XN, YN, N )             { p->init_gis_regularGrid( LAB, XN, YN, 0, 0, N ); }
 #define INIT_SPACE_GRIDNS(PTR, LAB, XN, YN, N )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, 0, N ); }
 
@@ -950,60 +950,60 @@ plog(buffer);} while(false)
 
 #ifndef NO_WINDOW
 
-    #define INIT_LAT_GIS( ... )         ( p->init_lattice_gis( __VA_ARGS__ ) )
-    #define INIT_LAT_GISS( PTR, ... )   ( PTR->init_lattice_gis( __VA_ARGS__ ) )
-    #define DELETE_LAT_GIS              ( close_lattice_gis( ) ) // convenient
-    #define SAVE_LAT_GIS( ... )         ( save_lattice( __VA_ARGS__ ) ) //convenient
+#define INIT_LAT_GIS( ... )         ( p->init_lattice_gis( __VA_ARGS__ ) )
+#define INIT_LAT_GISS( PTR, ... )   ( PTR->init_lattice_gis( __VA_ARGS__ ) )
+#define DELETE_LAT_GIS              ( close_lattice_gis( ) ) // convenient
+#define SAVE_LAT_GIS( ... )         ( save_lattice( __VA_ARGS__ ) ) //convenient
 
-    #define V_LAT_GIS                   ( p->read_lattice_gis( ) )
-    #define V_LAT_GISS( PTR )           ( PTR->read_lattice_gis( ) )
-    #define WRITE_LAT_GIS( VAL )        ( p->write_lattice_gis( VAL ) )
-    #define WRITE_LAT_GISS( PTR, VAL )  ( PTR->write_lattice_gis( VAL ) )
+#define V_LAT_GIS                   ( p->read_lattice_gis( ) )
+#define V_LAT_GISS( PTR )           ( PTR->read_lattice_gis( ) )
+#define WRITE_LAT_GIS( VAL )        ( p->write_lattice_gis( VAL ) )
+#define WRITE_LAT_GISS( PTR, VAL )  ( PTR->write_lattice_gis( VAL ) )
 
-    #define V_LAT_GIS_XY( X, Y )                    ( p->read_lattice_gis( X, Y, true ) )
-    #define V_LAT_GIS_XYS( PTR, X, Y )              ( PTR->read_lattice_gis( X, Y, true ) )
-    #define WRITE_LAT_GIS_XY( X, Y, VAL )           ( p->write_lattice_gis( X, Y, VAL, true ) )
-    #define WRITE_LAT_GIS_XYS( PTR, X, Y, VAL )     ( PTR->write_lattice_gis( X, Y, VAL, true ) )
+#define V_LAT_GIS_XY( X, Y )                    ( p->read_lattice_gis( X, Y, true ) )
+#define V_LAT_GIS_XYS( PTR, X, Y )              ( PTR->read_lattice_gis( X, Y, true ) )
+#define WRITE_LAT_GIS_XY( X, Y, VAL )           ( p->write_lattice_gis( X, Y, VAL, true ) )
+#define WRITE_LAT_GIS_XYS( PTR, X, Y, VAL )     ( PTR->write_lattice_gis( X, Y, VAL, true ) )
 
-    #define V_LAT_GIS_ADJUST_XY( X, Y )                 ( p->read_lattice_gis( X, Y, false ) )
-    #define V_LAT_GIS_ADJUST_XYS( PTR, X, Y )           ( PTR->read_lattice_gis( X, Y, false ) )
-    #define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL )        ( p->write_lattice_gis( X, Y, VAL, false ) )
-    #define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL )  ( PTR->write_lattice_gis( X, Y, VAL, false ) )
+#define V_LAT_GIS_ADJUST_XY( X, Y )                 ( p->read_lattice_gis( X, Y, false ) )
+#define V_LAT_GIS_ADJUST_XYS( PTR, X, Y )           ( PTR->read_lattice_gis( X, Y, false ) )
+#define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL )        ( p->write_lattice_gis( X, Y, VAL, false ) )
+#define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL )  ( PTR->write_lattice_gis( X, Y, VAL, false ) )
 
-    #define SET_LAT_PRIORITY( VAL ) ( p->set_lattice_priority( ( VAL ) ) )
-    #define SET_LAT_PRIORITYS( PTR, VAL ) ( PTR->set_lattice_priority( ( VAL ) ) )
-    #define SET_LAT_COLOR( VAL ) ( p->set_lattice_color( ( VAL ) ) )
-    #define SET_LAT_COLORS( PTR, VAL ) ( PTR->set_lattice_color( ( VAL ) ) )
+#define SET_LAT_PRIORITY( VAL ) ( p->set_lattice_priority( ( VAL ) ) )
+#define SET_LAT_PRIORITYS( PTR, VAL ) ( PTR->set_lattice_priority( ( VAL ) ) )
+#define SET_LAT_COLOR( VAL ) ( p->set_lattice_color( ( VAL ) ) )
+#define SET_LAT_COLORS( PTR, VAL ) ( PTR->set_lattice_color( ( VAL ) ) )
 
-    #define RETRIVE_LAT_COLOR           ( p->read_lattice_color( ) )
-    #define RETRIVE_LAT_COLORS( PTR )   ( PTR->read_lattice_color( ) )
+#define RETRIVE_LAT_COLOR           ( p->read_lattice_color( ) )
+#define RETRIVE_LAT_COLORS( PTR )   ( PTR->read_lattice_color( ) )
 
 #else
 
-    #define INIT_LAT_GIS( ... )         ( void( ) )
-    #define INIT_LAT_GISS( PTR, ... )   ( void( ) )
-    #define DELETE_LAT_GIS              ( void( ) ) // convenient
-    #define SAVE_LAT_GIS( ... )         ( void( ) ) //convenient
+#define INIT_LAT_GIS( ... )         ( void( ) )
+#define INIT_LAT_GISS( PTR, ... )   ( void( ) )
+#define DELETE_LAT_GIS              ( void( ) ) // convenient
+#define SAVE_LAT_GIS( ... )         ( void( ) ) //convenient
 
-    #define V_LAT_GIS                   ( void( ) )
-    #define V_LAT_GISS( PTR )           ( void( ) )
-    #define WRITE_LAT_GIS( VAL )        ( void( ) )
-    #define WRITE_LAT_GISS( PTR, VAL )  ( void( ) )
+#define V_LAT_GIS                   ( void( ) )
+#define V_LAT_GISS( PTR )           ( void( ) )
+#define WRITE_LAT_GIS( VAL )        ( void( ) )
+#define WRITE_LAT_GISS( PTR, VAL )  ( void( ) )
 
-    #define V_LAT_GIS_XY( X, Y )                    ( void( ) )
-    #define V_LAT_GIS_XYS( PTR, X, Y )              ( void( ) )
-    #define WRITE_LAT_GIS_XY( X, Y, VAL )           ( void( ) )
-    #define WRITE_LAT_GIS_XYS( PTR, X, Y, VAL )     ( void( ) )
+#define V_LAT_GIS_XY( X, Y )                    ( void( ) )
+#define V_LAT_GIS_XYS( PTR, X, Y )              ( void( ) )
+#define WRITE_LAT_GIS_XY( X, Y, VAL )           ( void( ) )
+#define WRITE_LAT_GIS_XYS( PTR, X, Y, VAL )     ( void( ) )
 
-    #define V_LAT_GIS_ADJUST_XY( X, Y )                 ( void( ) )
-    #define V_LAT_GIS_ADJUST_XYS( PTR, X, Y )           ( void( ) )
-    #define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL )        ( void( ) )
-    #define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL )  ( void( ) )
+#define V_LAT_GIS_ADJUST_XY( X, Y )                 ( void( ) )
+#define V_LAT_GIS_ADJUST_XYS( PTR, X, Y )           ( void( ) )
+#define WRITE_LAT_GIS_ADJUST_XY( X, Y, VAL )        ( void( ) )
+#define WRITE_LAT_GIS_ADJUST_XYS( PTR, X, Y, VAL )  ( void( ) )
 
-    #define SET_LAT_PRIORITY( VAL )         ( void( ) )
-    #define SET_LAT_PRIORITYS( PTR, VAL )   ( void( ) )
-    #define SET_LAT_COLOR( VAL )            ( void( ) )
-    #define SET_LAT_COLORS( PTR, VAL )      ( void( ) )
+#define SET_LAT_PRIORITY( VAL )         ( void( ) )
+#define SET_LAT_PRIORITYS( PTR, VAL )   ( void( ) )
+#define SET_LAT_COLOR( VAL )            ( void( ) )
+#define SET_LAT_COLORS( PTR, VAL )      ( void( ) )
 #endif
 
 //And some new macros to load data from txt files.
@@ -1044,12 +1044,12 @@ plog(buffer);} while(false)
 #ifndef FAST_LOOKUP
 
 double init_lattice( double pixW = 0, double pixH = 0, double nrow = 100, double ncol = 100,
-					 char const lrow[ ] = "y", char const lcol[ ] = "x", char const lvar[ ] = "",
-					 object *p = NULL, int init_color = -0xffffff );
-double poidev( double xm, long *idum_loc = NULL );
-int deb( object *r, object *c, char const *lab, double *res, bool interact = false );
-object *go_brother( object *c );
-void cmd( const char *cm, ... );
+                     char const lrow[ ] = "y", char const lcol[ ] = "x", char const lvar[ ] = "",
+                     object* p = NULL, int init_color = -0xffffff );
+double poidev( double xm, long* idum_loc = NULL );
+int deb( object* r, object* c, char const* lab, double* res, bool interact = false );
+object* go_brother( object* c );
+void cmd( const char* cm, ... );
 #define FUNCTION( X ) \
 	if ( ! strcmp( label, X ) ) { \
 		last_update--; \
@@ -1127,6 +1127,6 @@ void cmd( const char *cm, ... );
 #endif
 
 #ifndef NO_WINDOW //these macros only exist in windowed mode.
-  //A helper macro that can be used together with others to pass a file-name
-  #define SELECT_FILE( _message ) p->grab_filename_interactive( _message )
+//A helper macro that can be used together with others to pass a file-name
+#define SELECT_FILE( _message ) p->grab_filename_interactive( _message )
 #endif
