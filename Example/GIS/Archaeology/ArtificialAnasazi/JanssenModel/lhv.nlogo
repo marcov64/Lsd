@@ -509,7 +509,11 @@ to load-map-data
   if first ?1 = 0 [ask patch xx yy [set pcolor black set zone "General" set maizeZone "Yield_2"]]  ; General Valley
   if first ?1 = 10 [ask patch xx yy [set pcolor red set zone "North" set maizeZone "Yield_1"]] ; North Valley
   if first ?1 = 15 [ask patch xx yy [set pcolor white set zone "North Dunes" set maizeZone "Sand_dune"]] ; North Valley ; Dunes
-  if first ?1 = 20 [ask patch xx yy [set pcolor gray set zone "Mid" ifelse (xx <= 74) [set maizeZone "Yield_1"][set maizeZone "Yield_2"]]] ; Mid Valley
+    ifelse MIDLANDS_BUG [
+      if first ?1 = 20 [ask patch xx yy [set pcolor gray set zone "Mid" ifelse (xx <= 74) [set maizeZone "Yield_1"][set maizeZone "Yield_2"]]] ; Mid Valley
+    ][
+      if first ?1 = 20 [ask patch xx yy [set pcolor gray set zone "Mid" ifelse (xx <= 34) [set maizeZone "Yield_1"][set maizeZone "Yield_2"]]] ; Mid Valley
+    ]
   if first ?1 = 25 [ask patch xx yy [set pcolor white set zone "Mid Dunes" set maizeZone "Sand_dune"]] ; Mid Valley ; Dunes
   if first ?1 = 30 [ask patch xx yy [set pcolor yellow set zone "Natural" set maizeZone "No_Yield"]] ; Natural
   if not ZONES_BUG [
@@ -1185,6 +1189,17 @@ subopt_ratio
 17
 1
 11
+
+SWITCH
+5
+435
+147
+468
+MIDLANDS_BUG
+MIDLANDS_BUG
+1
+1
+-1000
 
 @#$#@#$#@
 ## How does this version differ from the 'original'?

@@ -139,14 +139,14 @@ else
         if (VS(Settings, "Assumption_negativeHarvest") > -1) {
         WRITES(Settings, "Assumption_negativeHarvest", 0);
         }
-        if (VS(Settings, "Assumption_bugUplands") > -1) {
-        WRITES(Settings, "Assumption_bugUplands", 0);
-        }
         if (VS(Settings, "Assumption_child") > -1) {
         WRITES(Settings, "Assumption_child", 0);
         }
         if (VS(Settings, "Assumption_coordination") > -1) {
         WRITES(Settings, "Assumption_coordination", 0);
+        }
+        if (VS(Settings, "Assumption_wrapping") > -1) {
+        WRITES(Settings, "Assumption_wrapping", 0);
         }
     */
 
@@ -491,7 +491,7 @@ double naturalhydro = hydro.at(year - 382).at(10);
 double uplandhydro = hydro.at(year - 382).at(10);
 double kinbikohydro = hydro.at(year - 382).at(13);
 
-bool withBug = V("Assumption_bugUplands") == 0;
+bool withBugUplands = V("Assumption_bugUplands") == 0;
 
 CYCLES(p->up, cur, "Land_Patch")
 {
@@ -520,7 +520,7 @@ CYCLES(p->up, cur, "Land_Patch")
             WRITES(cur, "apdsi", naturalapdsi);
             break;
         case 40:
-            if (!withBug) {
+            if (!withBugUplands) {
                 WRITES(cur, "hydro", uplandhydro); /*arable uplands*/
                 WRITES(cur, "apdsi", uplandapdsi);
             }
@@ -685,6 +685,14 @@ if (bestSettlePlace != NULL)
     object* nearestWaterSource = NEAREST_IN_DISTANCE_CNDS(bestSettlePlace, "Land_Patch", -1, "watersource", "=", 1.0);
     nearestWaterSource = SEARCH_POSITION_GRIDS(nearestWaterSource, "Waterpoint");
     WRITES(c, "Waterpoint_by_ID", VS(nearestWaterSource, "Waterpoint_ID"));
+    
+    if (VS(oSettings,"Assumption_wrapping")>-1){
+            if ( DISTANCE2(c,nearestWaterSource) <= VS(oSettings,"waterSourceDistance")
+                && c->distance(nearestWaterSource,true) > VS(oSettings,"waterSourceDistance") ) {
+                INCRS(oSettings,"Assumption_wrapping",1.0); //only in the torus world is the water source within distance.
+            }
+    }
+    
     END_EQUATION(1.0) // B: Optimal option found
 }
 else
@@ -886,6 +894,7 @@ if (!map_data)
     PLOG("\nError: No map data at path: 'data/map.txt'");
     ABORT;
 }
+bool withBugMidlands = V("Assumption_bugMidlands") == 0;
 //       cur = SEARCHS(p->up,"Land_Patch"); //Get first patch of land
 int x = 0, y = y_rows - 1;
 string s;
@@ -919,7 +928,10 @@ while (map_data >> s)  //read entry by entry
 
         case  20:  /*Mid, x<=74?Yield_1:Yield_2, gray*/
             WRITES(cur, "land_type", 20);
-            WRITES(cur, "maizeZone", x <= 74 ? 1 : 2);
+            if (withBugMidlands)
+                WRITES(cur, "maizeZone", x <= 74 ? 1 : 2);
+            else 
+                WRITES(cur, "maizeZone", x <= 34 ? 1 : 2);
             WRITES(cur, "map_colour", 7);
             potential_farms_allTime.push_back(cur);
             break;

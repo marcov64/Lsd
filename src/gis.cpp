@@ -731,23 +731,23 @@ bool object::change_position(double _x, double _y, bool noAdjust) //def: noAdjus
 
 //  pseudo_distance
 //  Calculate the pseudo (squared) distance between an object p and another object b.
-double object::pseudo_distance(object* b)
+double object::pseudo_distance(object* b, bool noWrap)
 {
     //all checks in distance()
-    return pseudo_distance( b->position->x, b->position->y );
+    return pseudo_distance( b->position->x, b->position->y, noWrap );
 }
 
 
 //  pseudo_distance
 //  Calculate the pseudo (squared) distance between an object p and another object b.
-double object::pseudo_distance(double x_2, double y_2)
+double object::pseudo_distance(double x_2, double y_2, bool noWrap)
 {
-    return pseudo_distance(position->x, position->y, x_2, y_2);
+    return pseudo_distance(position->x, position->y, x_2, y_2, noWrap);
 }
 
 //  pseudo_distance
 //pseudo distance between to point in plain
-double object::pseudo_distance(double x_1, double y_1, double x_2, double y_2)
+double object::pseudo_distance(double x_1, double y_1, double x_2, double y_2, bool noWrap)
 {
     double xn = position->map->xn;
     double yn = position->map->yn;
@@ -757,7 +757,7 @@ double object::pseudo_distance(double x_1, double y_1, double x_2, double y_2)
     double x_dist = x_1 - x_2;
     double y_dist = y_1 - y_2;
 
-    if (position->map->wrap.noWrap == false) {
+    if (!noWrap && position->map->wrap.noWrap == false) {
         if (position->map->wrap.right && x_1 > x_2) {
             double alt_x_dist = xn - x_1 + x_2;
             if (alt_x_dist < x_dist) {
@@ -923,7 +923,7 @@ bool object::traverse_boundingBoxBelt(double radius, std::function<bool(object* 
 
 // distance
 // Calculate the distance between to objects in the same gis.
-double object::distance(object* b)
+double object::distance(object* b, bool noWrap)
 {
     if (ptr_map() == NULL) {
         sprintf( gismsg, "failure in distance() for object '%s'", label );
@@ -949,17 +949,17 @@ double object::distance(object* b)
     switch (distance_type) {
         case 'e' : //Euclidean
         case 'E' :
-            return sqrt( pseudo_distance(b) );
+            return sqrt( pseudo_distance(b, noWrap) );
 
         case 'm' : //Manhattan
         case 'M' :
         case 'c' : //Chebyshev
         case 'C' :
-            return pseudo_distance(b);  //pseudo and distance are equivalent
+            return pseudo_distance(b, noWrap);  //pseudo and distance are equivalent
     }
 }
 
-double object::distance(double x, double y)
+double object::distance(double x, double y, bool noWrap)
 {
     if (ptr_map() == NULL) {
         sprintf( gismsg, "failure in distance() (x,y) for object '%s'", label );
@@ -981,7 +981,7 @@ double object::distance(double x, double y)
     }
 }
 
-double object::distance(double x_1, double y_1, double x_2, double y_2)
+double object::distance(double x_1, double y_1, double x_2, double y_2, bool noWrap)
 {
     if (ptr_map() == NULL) {
         sprintf( gismsg, "failure in distance() (x,y) for object '%s'", label );

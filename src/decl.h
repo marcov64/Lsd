@@ -341,12 +341,12 @@ struct object {
     void set_distance_type( double type ); //using double as in LSD Variables
     void set_distance_type( char const type[] );
     char read_distance_type();
-    double distance(object* other); //distance to other object
-    double distance(double x, double y); //distance to point in plain
-    double distance(double x_1, double y_1, double x_2, double y_2); //pseudo distance between two points in plain
-    double pseudo_distance(object* other); //pseudo distance to other object
-    double pseudo_distance(double x, double y); //pseudo distance to point in plain
-    double pseudo_distance(double x_1, double y_1, double x_2, double y_2); //pseudo distance between two points in plain
+    double distance(object* other, bool noWrap = false); //distance to other object
+    double distance(double x, double y, bool noWrap = false); //distance to point in plain
+    double distance(double x_1, double y_1, double x_2, double y_2, bool noWrap = false); //pseudo distance between two points in plain
+    double pseudo_distance(object* other, bool noWrap = false); //pseudo distance to other object
+    double pseudo_distance(double x, double y, bool noWrap = false); //pseudo distance to point in plain
+    double pseudo_distance(double x_1, double y_1, double x_2, double y_2, bool noWrap = false); //pseudo distance between two points in plain
 
     double center_position(char xy); //return the center of x/y dimension.
     double max_distance(); //return maximum absolute distance
