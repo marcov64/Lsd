@@ -180,21 +180,21 @@ int lsdmain( int argn, char** argv )
 #endif
 
     root = new object;
-    root->init( NULL,
-                abmat = new object;
-                abmat->init( NULL, "Root" );
-                add_description( "Root", "Object", "(no description available)" );
-                blueprint = new object;
-                blueprint->init( NULL, "Root" );
+    abmat = new object;
+    root->init( NULL, "Root" );
+    abmat->init( NULL, "Root" );
+    add_description( "Root", "Object", "(no description available)" );
+    blueprint = new object;
+    blueprint->init( NULL, "Root" );
 
 #ifdef NO_WINDOW
 
-                no_window = true;
-                findex = 1;
-                fend = 0;							// no file number limit
+    no_window = true;
+    findex = 1;
+    fend = 0;							// no file number limit
 
     if ( argn < 3 ) {
-    fprintf( stderr, "\nThis is the No Window version of LSD.\nCommand line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n" );
+        fprintf( stderr, "\nThis is the No Window version of LSD.\nCommand line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n" );
         myexit( 1 );
     }
     else {
@@ -259,7 +259,7 @@ int lsdmain( int argn, char** argv )
     }
 
     if ( ! batch_sequential ) {
-    struct_file = new char[ strlen( simul_name ) + 1 ];
+        struct_file = new char[ strlen( simul_name ) + 1 ];
         sprintf( struct_file, "%s", simul_name );
         simul_name[ strlen( simul_name ) - 4 ] = '\0';
     }
@@ -271,24 +271,24 @@ int lsdmain( int argn, char** argv )
 
     FILE* f = fopen( struct_file, "r" );
     if ( f == NULL ) {
-    fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n", struct_file );
+        fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n", struct_file );
         myexit( 3 );
     }
     fclose( f );
 
     if ( load_configuration( true ) != 0 ) {
-    fprintf( stderr, "\nFile '%s' is invalid.\nThis is the no window version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n", struct_file );
+        fprintf( stderr, "\nFile '%s' is invalid.\nThis is the no window version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n", struct_file );
         myexit( 4 );
     }
 
 #ifdef PARALLEL_MODE
     if ( j > 0 && j < max_threads )
-    max_threads = j;
+        max_threads = j;
 #endif
 
 #else
     for ( i = 1; argv[ i ] != NULL; i++ ) {
-    if ( argv[ i ][ 0 ] != '-' || ( argv[ i ][ 1 ] != 'f' && argv[ i ][ 1 ] != 'i' && argv[ i ][ 1 ] != 'c' ) ) {
+        if ( argv[ i ][ 0 ] != '-' || ( argv[ i ][ 1 ] != 'f' && argv[ i ][ 1 ] != 'i' && argv[ i ][ 1 ] != 'c' ) ) {
             log_tcl_error( "Command line parameters", "Invalid option, available options: -i TCL_DIRECTORY / -f MODEL_NAME / -c MAX_CORES" );
             myexit( 1 );
         }
@@ -314,18 +314,18 @@ int lsdmain( int argn, char** argv )
 
 #ifdef PARALLEL_MODE
     if ( j > 0 && j < max_threads )
-    max_threads = j;
+        max_threads = j;
 #endif
 
-                  // initialize the tcl interpreter
-                  Tcl_FindExecutable( argv[ 0 ] );
-                  inter = Tcl_CreateInterp( );
-                  done = Tcl_Init( inter );
+    // initialize the tcl interpreter
+    Tcl_FindExecutable( argv[ 0 ] );
+    inter = Tcl_CreateInterp( );
+    done = Tcl_Init( inter );
     if ( done != TCL_OK ) {
         sprintf( msg, "Tcl initialization directories not found, check the Tcl/Tk installation and configuration or reinstall LSD\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
-            log_tcl_error( "Create Tcl interpreter", msg );
-            myexit( 5 );
-        }
+        log_tcl_error( "Create Tcl interpreter", msg );
+        myexit( 5 );
+    }
 
     // set variables and links in TCL interpreter
     Tcl_LinkVar( inter, "choice", ( char* ) &choice, TCL_LINK_INT );
@@ -335,40 +335,40 @@ int lsdmain( int argn, char** argv )
     // test Tcl interpreter
     cmd( "set choice 1234567890" );
     if ( choice != 1234567890 ) {
-    log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
+        log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
         myexit( 6 );
     }
 
     // initialize & test the tk application
     choice = 1;
-             done = Tk_Init( inter );
-             if ( done == TCL_OK )
-             cmd( "if { ! [ catch { package present Tk 8.5 } ] && [ winfo exists . ] } { set choice 0 } { set choice 1 }" );
+    done = Tk_Init( inter );
+    if ( done == TCL_OK )
+        cmd( "if { ! [ catch { package present Tk 8.5 } ] && [ winfo exists . ] } { set choice 0 } { set choice 1 }" );
     if ( choice ) {
         sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.5+) and configuration or reinstall LSD\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
-            log_tcl_error( "Start Tk", msg );
-            myexit( 7 );
-        }
+        log_tcl_error( "Start Tk", msg );
+        myexit( 7 );
+    }
     tk_ok = true;
-            cmd( "tk appname lsd" );
+    cmd( "tk appname lsd" );
 
-            // disable Carbon compatibility in Mac
-            cmd( "if [ string equal $tcl_platform(os) Darwin ] { set ::tk::mac::useCompatibilityMetrics 0 }" );
+    // disable Carbon compatibility in Mac
+    cmd( "if [ string equal $tcl_platform(os) Darwin ] { set ::tk::mac::useCompatibilityMetrics 0 }" );
 
-            // close console if open (usually only in Mac)
-            cmd( "if [ string equal $tcl_platform(os) Darwin ] { foreach i [ winfo interps ] { if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { send $i \"wm iconify .; wm withdraw .; destroy .\" } } }" );
+    // close console if open (usually only in Mac)
+    cmd( "if [ string equal $tcl_platform(os) Darwin ] { foreach i [ winfo interps ] { if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { send $i \"wm iconify .; wm withdraw .; destroy .\" } } }" );
 
-            cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
+    cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
     if ( choice ) {
-    log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
+        log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
         cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\n\nLSD is aborting now.\"" );
         myexit( 8 );
     }
 
     // try to use exec_path to change to the model directory
     if ( strlen( exec_path ) == 0 || ! strcmp( exec_path, "/" ) ) {
-    // try to get name from Tcl
-    cmd( "if { [ info nameofexecutable ] != \"\" } { set path [ file dirname [ info nameofexecutable ] ] } { set path \"\" }" );
+        // try to get name from Tcl
+        cmd( "if { [ info nameofexecutable ] != \"\" } { set path [ file dirname [ info nameofexecutable ] ] } { set path \"\" }" );
         str = ( char* ) Tcl_GetVar( inter, "path", 0 );
         if ( str != NULL && strlen( str ) > 0 ) {
             delete [ ] exec_path;
@@ -377,10 +377,10 @@ int lsdmain( int argn, char** argv )
         }
     }
     choice = 0;
-             cmd( "set path [ file normalize \"%s\" ]", exec_path );
+    cmd( "set path [ file normalize \"%s\" ]", exec_path );
 
-             // check if directory is ok and if executable is inside a macOS package
-             cmd( "if [ file exists \"$path/modelinfo.txt\" ] { \
+    // check if directory is ok and if executable is inside a macOS package
+    cmd( "if [ file exists \"$path/modelinfo.txt\" ] { \
 			cd \"$path\" \
 		} { \
 			if [ file exists \"$path/../../../modelinfo.txt\" ] { \
@@ -392,24 +392,24 @@ int lsdmain( int argn, char** argv )
 			} \
 		}" );
     if ( choice ) {
-    log_tcl_error( "Model files check", "Required model file(s) missing or corrupted, check the model directory and recreate the model if the problem persists" );
+        log_tcl_error( "Model files check", "Required model file(s) missing or corrupted, check the model directory and recreate the model if the problem persists" );
         cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some model files are missing or corrupted.\nPlease recreate your model if the problem persists.\n\nLSD is aborting now.\"" );
         myexit( 200 );
     }
     str = ( char* ) Tcl_GetVar( inter, "path", 0 );
-          delete [ ] path;
-          path = new char[ strlen( str ) + 1 ];
-          strcpy( path, str );
-          delete [ ] exec_path;
-          exec_path = new char[ strlen( str ) + 1 ];
-          strcpy( exec_path, str );
+    delete [ ] path;
+    path = new char[ strlen( str ) + 1 ];
+    strcpy( path, str );
+    delete [ ] exec_path;
+    exec_path = new char[ strlen( str ) + 1 ];
+    strcpy( exec_path, str );
 
-          // check if LSDROOT already exists and use it if so, if not, search the current directory tree
-          cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
+    // check if LSDROOT already exists and use it if so, if not, search the current directory tree
+    cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
 
-          // do some search for the right path to cope with Mac Acqua package
-          choice = 0;
-          cmd( "if { ! [ info exists RootLsd ] } { \
+    // do some search for the right path to cope with Mac Acqua package
+    choice = 0;
+    cmd( "if { ! [ info exists RootLsd ] } { \
 			set here [ pwd ]; \
 			while { ! [ file exists \"src/interf.cpp\" ] && ! [ string equal [ pwd ] \"/\" ] && [ string length [ pwd ] ] > 3 } { \
 				cd .. \
@@ -422,61 +422,61 @@ int lsdmain( int argn, char** argv )
 			cd $here; \
 		}" );
     if ( choice ) {
-    log_tcl_error( "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where LSD is installed" );
+        log_tcl_error( "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where LSD is installed" );
         cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where LSD is installed.\n\nLSD is aborting now.\"" );
         myexit( 9 );
     }
     cmd( "set env(LSDROOT) $RootLsd" );
     str = ( char* ) Tcl_GetVar( inter, "RootLsd", 0 );
-          lsdroot = new char[ strlen( str ) + 1 ];
-          strcpy( lsdroot, str );
-          len = strlen( lsdroot );
-          for ( i = 0; i < len; ++i )
-          if ( lsdroot[ i ] == '\\' )
-              lsdroot[ i ] = '/';
-              cmd( "set RootLsd \"%s\"", lsdroot );
+    lsdroot = new char[ strlen( str ) + 1 ];
+    strcpy( lsdroot, str );
+    len = strlen( lsdroot );
+    for ( i = 0; i < len; ++i )
+        if ( lsdroot[ i ] == '\\' )
+            lsdroot[ i ] = '/';
+    cmd( "set RootLsd \"%s\"", lsdroot );
 
-              cmd( "set choice [ file exist \"$RootLsd/lmm_options.txt\" ]" );
-        if ( choice == 1 ) {
-            cmd( "set f [open \"$RootLsd/lmm_options.txt\" r]" );
-                cmd( "gets $f sysTerm" );
-                cmd( "gets $f HtmlBrowser" );
-                cmd( "gets $f fonttype" );
-                cmd( "gets $f wish" );
-                cmd( "gets $f LsdSrc" );
-                cmd( "gets $f dim_character" );
-                cmd( "gets $f tabsize" );
-                cmd( "close $f" );
-            }
-            else {
-                cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the 'Options' in menu 'File'.\"" );
+    cmd( "set choice [ file exist \"$RootLsd/lmm_options.txt\" ]" );
+    if ( choice == 1 ) {
+        cmd( "set f [open \"$RootLsd/lmm_options.txt\" r]" );
+        cmd( "gets $f sysTerm" );
+        cmd( "gets $f HtmlBrowser" );
+        cmd( "gets $f fonttype" );
+        cmd( "gets $f wish" );
+        cmd( "gets $f LsdSrc" );
+        cmd( "gets $f dim_character" );
+        cmd( "gets $f tabsize" );
+        cmd( "close $f" );
+    }
+    else {
+        cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the 'Options' in menu 'File'.\"" );
 
-                cmd( "set LsdSrc src" );
-                cmd( "set tabsize 2" );
-            }
+        cmd( "set LsdSrc src" );
+        cmd( "set tabsize 2" );
+    }
 
     i = choice;
 
-        // load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
-        choice = 0;
+    // load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
+    choice = 0;
 
-        // load native Tk windows defaults
-        cmd( "if [ file exists \"$RootLsd/$LsdSrc/defaults.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/defaults.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0100, 0x01 );
+    // load native Tk windows defaults
+    cmd( "if [ file exists \"$RootLsd/$LsdSrc/defaults.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/defaults.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0100, 0x01 );
 
-        // load native Tk procedures for windows management
-        cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0200, 0x02 );
+    // load native Tk procedures for windows management
+    cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0200, 0x02 );
 
-        // load native Tcl procedures for external files handling
-        cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0400, 0x04 );
+    // load native Tcl procedures for external files handling
+    cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0400, 0x04 );
 
-        // load additional native Tcl procedures for external files handling
-        cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0800, 0x08 );
+    // load additional native Tcl procedures for external files handling
+    cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0800, 0x08 );
 
-        // load module to improve to improve mouse selection
-        cmd( "if [ file exists \"$RootLsd/$LsdSrc/dblclick.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/dblclick.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x1000, 0x10 );
+    // load module to improve to improve mouse selection
+    cmd( "if [ file exists \"$RootLsd/$LsdSrc/dblclick.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/dblclick.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x1000, 0x10 );
 
     if ( choice != 0 ) {
-    log_tcl_error( "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
+        log_tcl_error( "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
         cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
         myexit( 200 + choice );
     }
@@ -498,7 +498,7 @@ int lsdmain( int argn, char** argv )
 
     // set platform-specific variables
     if ( i == 0 ) {
-    cmd( "if [ string equal $tcl_platform(platform) unix ] { set wish $wishLinux; set sysTerm $sysTermLinux; set HtmlBrowser $browserLinux; set fonttype $fontLinux; set dim_character $fontSizeLinux }" );
+        cmd( "if [ string equal $tcl_platform(platform) unix ] { set wish $wishLinux; set sysTerm $sysTermLinux; set HtmlBrowser $browserLinux; set fonttype $fontLinux; set dim_character $fontSizeLinux }" );
 #ifdef MAC_PKG
         cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish $wishMacTk86; set sysTerm $sysTermMac; set HtmlBrowser $browserMac; set fonttype $fontMac; set dim_character $fontSizeMac }" );
 #else
@@ -537,39 +537,39 @@ int lsdmain( int argn, char** argv )
     grandTotal = true;				// not in parallel mode: use .tot headers
 #endif
 
-                  // create fast equation look-up map if required
-                  if ( fast_lookup )
-                      init_map( );
+    // create fast equation look-up map if required
+    if ( fast_lookup )
+        init_map( );
 
-                      stacklog = new lsdstack;
-                      stacklog->prev = NULL;
-                      stacklog->next = NULL;
-                      stacklog->ns = 0;
-                      stacklog->vs = NULL;
-                      strcpy( stacklog->label, "LSD Simulation Manager" );
-                      stack = 0;
+    stacklog = new lsdstack;
+    stacklog->prev = NULL;
+    stacklog->next = NULL;
+    stacklog->ns = 0;
+    stacklog->vs = NULL;
+    strcpy( stacklog->label, "LSD Simulation Manager" );
+    stack = 0;
 
 #ifndef NO_WINDOW
 
-        while ( 1 ) {
-            create( );
+    while ( 1 ) {
+        create( );
 
-                try {
-                    run( );
-                }
-                catch( int p ) {         	// return point from error_hard() (in object.cpp)
-                    if ( p != 919293 )		// check throw signature
-                        throw;
-                    quit = 0;
-                }
-                catch ( ... ) {          	// send the rest upward
-                    throw;
-                }
-            }
+        try {
+            run( );
+        }
+        catch( int p ) {         	// return point from error_hard() (in object.cpp)
+            if ( p != 919293 )		// check throw signature
+                throw;
+            quit = 0;
+        }
+        catch ( ... ) {          	// send the rest upward
+            throw;
+        }
+    }
 
 #else
 
-                      run( );
+    run( );
 
 #endif
 
