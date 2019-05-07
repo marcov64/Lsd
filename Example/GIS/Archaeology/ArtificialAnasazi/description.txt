@@ -11,6 +11,8 @@ Version history
 3.0: Simplifying, new GIS usage.
 3.1: Adjust further to new GIS (not complete - lattice still old)
 3.2: Cleaning, first GIT version
+3.21: Minor issues
+ - Added Assumption_coordination
 
 This model is a reimplementation of
 

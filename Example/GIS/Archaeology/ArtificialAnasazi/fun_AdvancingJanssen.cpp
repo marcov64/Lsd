@@ -145,6 +145,9 @@ else
         if (VS(Settings, "Assumption_child") > -1) {
         WRITES(Settings, "Assumption_child", 0);
         }
+        if (VS(Settings, "Assumption_coordination") > -1) {
+        WRITES(Settings, "Assumption_coordination", 0);
+        }
     */
 
 }
@@ -591,13 +594,24 @@ double bestYield = VS(bestFarmPlace, "yield"); //Yield is associated to zone.
 //Try to find a place that is
 //  within watersource distance
 //  not farmed
-//  has yield lower than that of the farm.
+//  has yield lower than that of the farm. (Assumption_coordination)
 //  select closest to farm
 
 object* bestSettlePlace = NULL;
+object* oSettings = SEARCHS(root,"Settings");
+bool Assumption_coordination = VS(oSettings,"Assumption_coordination") < 0 ? false : true ;
+i=0;
+
 DCYCLE_NEIGHBOURS( bestFarmPlace, cur, "Land_Patch", V("waterSourceDistance") )
 {
-    if (VS(cur, "ocfarm") == 0 && VS(cur, "yield") < bestYield && VS(cur, "watersource") == 1.0) {
+    if (VS(cur, "ocfarm") == 0 && VS(cur, "watersource") == 1.0) {
+        if (VS(cur, "yield") >= bestYield){
+            if (Assumption_coordination) {
+                INCRS(oSettings,"Assumption_coordination",1.0);               
+                PLOG("\n%i",++i);
+                continue; //do not consider an option if coordinated behaviour assumed.
+            }
+        }
         bestSettlePlace = cur;
         // Is it outside a floodplain?
 
