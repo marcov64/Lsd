@@ -1042,7 +1042,7 @@ variable* object::search_var(object* caller, char const* lab, bool no_error,
 			return NULL;
 		}
 
-		cv = up->search_var(this, lab, no_error, no_search, this);
+		cv = up->search_var(this, lab, no_error, no_search, (maxLevel != NULL ? this : NULL) );
 	}
 
 	return cv;
