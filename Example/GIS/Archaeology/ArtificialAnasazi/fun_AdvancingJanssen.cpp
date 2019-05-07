@@ -600,15 +600,13 @@ double bestYield = VS(bestFarmPlace, "yield"); //Yield is associated to zone.
 object* bestSettlePlace = NULL;
 object* oSettings = SEARCHS(root,"Settings");
 bool Assumption_coordination = VS(oSettings,"Assumption_coordination") < 0 ? false : true ;
-i=0;
 
 DCYCLE_NEIGHBOURS( bestFarmPlace, cur, "Land_Patch", V("waterSourceDistance") )
 {
     if (VS(cur, "ocfarm") == 0 && VS(cur, "watersource") == 1.0) {
         if (VS(cur, "yield") >= bestYield){
             if (Assumption_coordination) {
-                INCRS(oSettings,"Assumption_coordination",1.0);               
-                PLOG("\n%i",++i);
+                INCRS(oSettings,"Assumption_coordination",1.0);                               
                 continue; //do not consider an option if coordinated behaviour assumed.
             }
         }
