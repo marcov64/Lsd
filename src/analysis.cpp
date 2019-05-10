@@ -7436,7 +7436,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	// select gray scale or color range				
 	color = allblack ? 1001 : 0;
 	
-	// alert once about plotting over more timesteps than plow window pixels
+	// alert once about plotting over more timesteps than plot window pixels
 	step = hsize / ( double ) ( endCase - iniCase );
 	if ( avgSmpl && ! avgSmplMsg && step < 1 )
 	{
@@ -7473,7 +7473,6 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 
 	// calculate screen plot values for all series
 	x1 = hbordsize - 1;
-	yVal = NAN;
 	for ( h = 0, j = 0, i = iniCase; i <= endCase; ++i )
 	{
 		// move the x-axis pointer in discrete steps
@@ -7487,9 +7486,11 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 		// moved to another canvas step?
 		bool xnext = ( floor( x1 ) != floor ( x2 ) );
 
-		// process each curve ( series or cross-section)
+		// process each curve (series or cross-section)
 		for ( k = 0; k < nLine; ++k, ++color )	
-		{
+		{		
+			yVal = NAN;
+			
 			switch ( type )
 			{
 				case TSERIES:
@@ -7561,7 +7562,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 				else
 				{
 					if ( start[ k ] == i )
-					{ 	//series entering after x1
+					{ 	// series entering after x1
 						if ( ! xnext )					// "intra" step?
 							y[ k ] = yVal * h;			// suppose from the beginning of x1
 						else
