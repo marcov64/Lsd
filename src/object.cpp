@@ -782,16 +782,18 @@ void object::search_inst( object *obj, int *pos )
 
 	// search among brothers
 	for ( cur = this, i = 1; cur != NULL; cur = cur->hyper_next( ), ++i )
+	{
 		if ( cur == obj )				// done if found
 		{
 			*pos = i;
 			return;
 		}
 	
-	// search among descendants
-	for ( cb = b; cb != NULL && *pos == 0; cb = cb->next )
-		if ( cb->head != NULL )
-			cb->head->search_inst( obj, pos );
+		// search among descendants
+		for ( cb = cur->b; cb != NULL && *pos == 0; cb = cb->next )
+			if ( cb->head != NULL )
+				cb->head->search_inst( obj, pos );
+	}
 }
 
 double object::search_inst( object *obj )
