@@ -62,8 +62,8 @@
     ABMAT_STATS
     Produce advanced distribution statistics
 
-    We allow only variable names that are short enough, in total max 31 chars
-    Elements are:
+We allow only variable names that are short enough, in total max 31 chars
+Elements are:
     [1..6] variable name
     [4] stat type (cross)
     [4] stat type (time)
@@ -100,7 +100,7 @@ const char* abmat_varname_convert(const char* lab)
         std::string s_short = std::string(lab);
         if (s_short.length() > 6) {
             s_short.resize(3); //drop last chars
-            s_short.append( std::to_string(i_abmat_varnames) );            
+            s_short.append( std::to_string(i_abmat_varnames) );
             if (++i_abmat_varnames > 999) {
                 sprintf( msg, "error in '%s'.", __func__);
                 error_hard( msg, "too many variables to be shortened",
@@ -177,7 +177,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
         //In Water Resour. Res. 32 (12), pp. 3617–3619. DOI: 10.1029/96WR02675.
         //Fortran Routine and article unclear about casting. Here all real.
         //intermediates for the L-Moments
-        double L1, L2, L3, L4, CL1, CL2, CL3, CR1, CR2, CR3, rlen_data;
+        double L1, L2, L3, L4, CL1, CL2, CL3, CR1, CR2, CR3;
         L1 = L2 = L3 = L4 = CL1 = CL2 = CL3 = CR1 = CR2 = CR3 = 0.0;
 
         //L1 == mean
@@ -194,7 +194,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
             L3 += (CL2 - 2.0 * CL1 * CR1 + CR2) * Data[i - 1];
             L4 += (CL3 - 3.0 * CL2 * CR1 + 3.0 * CL1 * CR2 - CR3) * Data[i - 1];
         }
-        const double& C1 = rlen_data; //just for readability
+        const double C1 = rlen_data; //just for readability
         double C2 = C1 * (rlen_data - 1.0) / 2.0;
         double C3 = C2 * (rlen_data - 2.0) / 3.0;
         double C4 = C3 * (rlen_data - 3.0) / 4.0;
@@ -214,7 +214,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
             MAE += std::abs(Data[i] - L1);
             SD += std::pow((Data[i] - L1), 2);
         }
-        stats["mae"] /= rlen_data;
+        stats["mae"] =MAE/ rlen_data;
         SD /= rlen_data;
         stats["sd"] = SD > 0 ? sqrt(SD) : 0.0;
     }
@@ -325,4 +325,3 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
     //Add ,,,
 }
 #endif
-

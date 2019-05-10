@@ -1,0 +1,278 @@
+	
+Label Root
+{
+	Son: P
+	Label P
+	{
+		Son: A
+		Label A
+		{
+			Son: B
+			Label B
+			{
+				Son: D1
+				Label D1
+				{
+					Var: d1
+					Param: id_D1
+
+				}
+
+				Son: D2
+				Label D2
+				{
+					Var: d2
+					Param: id_D2
+
+				}
+
+				Var: b
+				Param: id_B
+
+			}
+
+			Son: C
+			Label C
+			{
+				Param: id_C
+				Var: c
+
+			}
+
+			Param: id_A
+			Var: a
+			Var: StatsA
+
+		}
+
+		Var: allStatsALL_P
+		Param: id_P
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: P C	1
+Var: allStatsALL_P 0 n + n n
+Param: id_P 0 n + n n	999
+
+Object: A C	3
+Param: id_A 0 n + n n	1	2	3
+Var: a 0 s + n n
+Var: StatsA 0 n + n n
+
+Object: B C	4	4	4
+Var: b 0 s + n n
+Param: id_B 0 n + n n	11	12	13	14	21	22	23	24	31	32	33	34
+
+Object: D1 C	2	2	2	2	2	2	2	2	2	2	2	2
+Var: d1 0 n + n n
+Param: id_D1 0 n + n n	111	112	121	122	131	132	141	142	211	212	221	222	231	232	241	242	311	312	321	322	331	332	341	342
+
+Object: D2 C	1	1	1	1	1	1	1	1	1	1	1	1
+Var: d2 0 n + n n
+Param: id_D2 0 n + n n	11	12	13	14	21	22	23	24	31	32	33	34
+
+Object: C C	3	3	3
+Param: id_C 0 n + n n	11	12	13	21	22	23	31	32	33
+Var: c 0 n + n n
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 9
+EQUATION fun_newmodel.cpp
+MODELREPORT report_Sim1.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_P
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_allStatsALL_P
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_id_P
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_A
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_id_A
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_a
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_StatsA
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_B
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_b
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_id_B
+(no description available)
+_INIT_
+All 6 instances equal to 110.
+END_DESCRIPTION
+
+Object_D1
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_d1
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_id_D1
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_D2
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_d2
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_id_D2
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_C
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_id_C
+(no description available)
+_INIT_
+All 9 instances equal to 0.
+END_DESCRIPTION
+
+Variable_c
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+P
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+//#define EIGENLIB			// uncomment to use Eigen linear algebra library
+//#define NO_POINTER_INIT	// uncomment to disable pointer checking
+
+#include "fun_head_fast.h"
+
+// do not add Equations in this area
+
+MODELBEGIN
+
+// insert your equations here, between the MODELBEGIN and MODELEND words
+
+EQUATION("a")
+RESULT(V("id_A")+T)
+
+EQUATION("b")
+RESULT(V("id_B") +T)
+
+EQUATION("c")
+RESULT(V("id_C") +T)
+
+EQUATION("d1")
+RESULT(V("id_D1")  +T)
+
+EQUATION("d2")
+RESULT(V("id_D2")  +T)
+//////////////////////////////////////////////////////////////////////
+EQUATION("allStatsALL_P")
+if (T==3){
+PLOG("\n+++++++++++++++++\"allStatsALL_P at TIME= %g \"+++++++++++++++++",T);
+PLOG("\n++++++++++statsALL A++++++++++\n");
+PLOG("++++++++++%s++++++++++\n",p->label);
+
+      X_STAT_ALL("a");
+
+}
+
+RESULT(0 )
+
+
+
+
+
+
+
+MODELEND
+
+// do not add Equations in this area
+
+void close_sim( void )
+{
+	// close simulation special commands go here
+}
+
+END_EQ_FILE

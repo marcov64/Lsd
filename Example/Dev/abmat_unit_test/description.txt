@@ -1,0 +1,10 @@
+Model Abmat UnitTests (ver. 1.0)
+
+Test Correctness of the Statistical Functions & data gathering of X_stats and T_stats
+ 
+
+
+(Enter the Model description text here)
+
+(PRESS CTRL+E TO EDIT EQUATIONS)
+
