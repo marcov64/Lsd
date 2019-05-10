@@ -923,6 +923,12 @@ extern netLink* n_values[ ];
 extern Tcl_Interp* inter;		// Tcl standard interpreter pointer
 #endif
 
+//new abmat functions
+#ifdef CPP11
+m_statsT abmat_stats(std::vector<double>& Data );
+void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
+const char* abmat_varname_convert(const char* lab);
+#endif
 
 // prevent exposing internals in users' fun_xxx.cpp
 #ifndef FUN
@@ -1130,12 +1136,7 @@ void write_obj( object* r, FILE* frep );
 void write_str( object* r, FILE* frep, int dep, char const* prefix );
 void write_var( variable* v, FILE* frep );
 
-//new abmat functions
-#ifdef CPP11
-m_statsT abmat_stats(std::vector<double>& Data );
-void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab);
-const char* abmat_varname_convert(const char* lab);
-#endif
+
 
 #ifdef PARALLEL_MODE
 void parallel_update( variable* v, object* p, object* caller = NULL );
