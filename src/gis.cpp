@@ -2138,7 +2138,7 @@ int object::load_data_gis_mat( const char* inputfile, const char* obj_lab, const
         f_in = rapidcsv::Document(inputfile, rapidcsv::LabelParams());
     }
     catch (const std::out_of_range& e) {
-        sprintf( gismsg, "failure in load_data_gis_mat() for file '%s'. \nOut of range error:", inputfile, e.what() );
+        sprintf( gismsg, "failure in %s for file '%s'. \nOut of range error: %s", __func__,inputfile, e.what() );
         error_hard( gismsg, " ... ",
                     "check your code to prevent this situation" );
         throw;

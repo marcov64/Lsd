@@ -89,11 +89,17 @@
     to do so, we build a map of the real names for var1 and var2
     and translate them
 
+    Note: Some usual LSD things, like the search, do not work here as there
+    may be more than one object with the same name in one brotherhood chain.
+
 ********************************************/
 
 //global variables
 std::map <const char*, const char*> m_abmat_varnames; //map variable names to shortened ones.
 int i_abmat_varnames; //simple counter for up to 3 digits
+
+const char* lfirst = "first";
+const char* lsecond = "second";
 
 
 const char* abmat_varname_convert(const char* lab)
@@ -150,7 +156,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
     stats["Lku"];
 
     const int len_data = Data.size();
-    const double rlen_data = (double) len_data;
+    const double rlen_data = static_cast<double>( len_data );
 
     if (len_data >= 1) {
 
@@ -159,21 +165,21 @@ m_statsT abmat_stats(std::vector<double>& Data )
         std::sort(Data.begin(), Data.end());
         stats["min"] = Data[0];
         stats["max"] = Data[len_data - 1];
-        int index = (int)(len_data / 4);
+        int index = static_cast<int>( (len_data / 4) );
         stats["p25"] = Data[index];
-        index = (int) std::ceil( rlen_data * 3.0 / 4.0 );
+        index = static_cast<int>( std::ceil( rlen_data * 3.0 / 4.0 ) );
         stats["p75"] = Data[index];
-        index = (int) (len_data * 1 / 20);
+        index = static_cast<int>( (len_data * 1 / 20) );
         stats["p05"] = Data[index];
-        index = (int) std::ceil( rlen_data * 19.0 / 20.0 );
+        index = static_cast<int>( std::ceil( rlen_data * 19.0 / 20.0 ) );
         stats["p95"] = Data[index];
 
         if (len_data % 2 == 0) {
-            index = (int)len_data / 2 - 1;
+            index = static_cast<int>( len_data / 2 - 1 );
             stats["p50"] = (Data[index] + Data[index + 1]) / 2;
         }
         else {
-            stats["p50"] = Data[(int)(len_data - 1) / 2];
+            stats["p50"] = Data[ static_cast<int>( (len_data - 1) / 2 ) ];
         }
 
         //L-Moments and mean
@@ -185,8 +191,8 @@ m_statsT abmat_stats(std::vector<double>& Data )
         L1 = L2 = L3 = L4 = CL1 = CL2 = CL3 = CR1 = CR2 = CR3 = 0.0;
 
         //L1 == mean
-        for (int i = 1; i <= rlen_data; i++) {
-            double ri = (double) i;
+        for (int i = 1; i <= len_data; i++) {
+            double ri = static_cast<double>( i );
             CL1 = ri - 1;
             CL2 = CL1 * (ri - 1.0 - 1.0) / 2.0;
             CL3 = CL2 * (ri - 1.0 - 2.0) / 3.0;
@@ -227,20 +233,45 @@ m_statsT abmat_stats(std::vector<double>& Data )
             elem.second = NAN;
         }
     }
-    stats["n"] = (double)len_data;
+    stats["n"] = rlen_data; //only one never NAN
     return stats;
 }
 
-bool abmat_second_var_exists_already(object* oVar1, const char* lVar2)
+bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char* lVar2)
 {
-    //to do.
-    return false;
+    //search in all existing abmat variables of current category for the link
+    if ( oFirst == NULL ) {
+        sprintf( msg, "error in '%s'. ", __func__ );
+        error_hard( msg, "no oFirst NULL",
+                    "Please contact the developer.",
+                    true );
+    }
+    if (oFirst->b == NULL)
+        return true; //no desc. objects yet.
+
+    object* cur = oFirst->b->head;
+    while (cur != NULL) {
+        if ( cur->hook == NULL ) {
+            sprintf( msg, "error in '%s'. ", __func__ );
+            error_hard( msg, "Hook is null",
+                        "Please contact the developer.",
+                        true );
+        }
+        if ( strcmp(cur->label, lVar1) == 0 && strcmp(cur->hook->label, lVar2) == 0 ) {
+            return false; //link exists
+        }
+        cur = cur->next;
+    }
+
+    return true;
 }
 
 /********************************************
     create_abmat_object
     Add the abmat objects for the variable varlab of type type. if type is
     cond or comp, var2lab is the reference variable (in the same object).
+
+    issue: Map for objects (no more unique labs!)
 
     for macro and comp
 ********************************************/
@@ -310,39 +341,40 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
         //respective subgroups first and second and hook them with each other.
         //We make sure that each unique combination is only created once.
 
+
         //get variable aka "first" and conditional aka "second"
-        object* oFirst = parent->search("first");
+        object* oFirst = parent->search(lfirst);
         if (oFirst == NULL ) {
-            parent->add_obj("first", 1, false );
-            oFirst = parent->search("first");
+            parent->add_obj(lfirst, 1, false );
+            oFirst = parent->search(lfirst);
         }
-
-        oVar = oFirst->search(varlab);
-        if (oVar == NULL || !abmat_second_var_exists_already(oVar, var2lab) ) {
-            oFirst->add_obj(varlab, 1, false);
-            oVar = oFirst->search(varlab);
-        }
-
-        object* oSecond = parent->search("second");
+        object* oSecond = parent->search(lsecond);
         if (oSecond == NULL) {
-            parent->add_obj("second", 1, false );
-            oSecond = parent->search("second");
+            parent->add_obj(lsecond, 1, false );
+            oSecond = parent->search(lsecond);
         }
 
-        oVar2 = oSecond->search(var2lab);
-        if (oVar2 == NULL || !abmat_second_var_exists_already(oVar2, varlab) ) {
+        //check if the unique link exists already
+        //Careful: Search does not work here!
+        if ( oFirst->b != NULL )
+            oVar = oFirst->b->head; //first descending object
+
+        if (oVar == NULL || abmat_linked_vars_exists_not(oFirst, varlab, var2lab) ) {
+            oFirst->add_obj(varlab, 1, false);
+            //move to last variable - search does not work!
+            oVar = oFirst->b->head; //first variable
+            while (oVar->next != NULL)
+                oVar = oVar->next;
+
             oSecond->add_obj(var2lab, 1, false);
-            oVar2 = oSecond->search(var2lab);
+            oVar2 = oSecond->b->head;
+            while (oVar2->next != NULL)
+                oVar2 = oVar2->next;
+
             //link them
             oVar->hook = oVar2;
             oVar2->hook = oVar;
         }
-
-
-
-        object* oVar2 = parent->search(var2lab);
-        oVar->hook = oVar2;
-        oVar2->hook = oVar;
     }
 
     // Add the variables
@@ -379,8 +411,29 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
             break;
 
 
+        case cond: {
+                //the cond variable holds a set of micro stats for each unique 
+                //value that ever existed in the conditioning variable
+                
+                //check conditioning variable: All are implicit integer?!
+                                
+                //create a map of the conditioning values that currently exist
+                
+                //compare with parameter labels of conditioning variable
+                //if it does not yet exist, add the variable with the value
+                //and add all the new parameters to the conditional variable,
+                //initialise the prior data to NAN
+                
+                //gather the stats for each subset and write them to the params
 
-        case comp:
+            }
+            break;
+
+        case comp: {
+
+
+
+            }
             break;
 
     }

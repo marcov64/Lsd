@@ -928,6 +928,7 @@ extern Tcl_Interp* inter;		// Tcl standard interpreter pointer
 m_statsT abmat_stats(std::vector<double>& Data );
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
 const char* abmat_varname_convert(const char* lab);
+bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char* lVar2);
 #endif
 
 // prevent exposing internals in users' fun_xxx.cpp
