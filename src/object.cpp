@@ -2818,131 +2818,33 @@ void object::tStats(char const* lab, double* r, int lag)
     eightStats(Data, r);
 }
 
+//at abmat.cpp see for the stats function
+
 void object::eightStats(std::vector<double>& Data, double* r)
 {
 
-    double r_temp[13];
+    double r_temp[14];
     if (r == NULL)
         r = r_temp;
-    r[0] = r[1] = r[2] = r[3] = r[4] = r[5] = r[6] = r[7] = r[8] = r[9] = r[10] =
-                                           r[11] = r[12] = r[13] = r[14] = 0;
+    
+    //r[0] = r[1] = r[2] = r[3] = r[4] = r[5] = r[6] = r[7] = r[8] = r[9] = r[10] = r[11] = r[12] = r[13] = 0;
 
-    double minV;
-    double lq;
-    double median;
-    double uq;
-    double perc05;
-    double perc95;
-    double maxV;
-    double mean;
-    double RMSE; // std
-    double MAE;
+    auto m_stats = abmat_stats(Data); //pass calculation to abmat
 
-    double L1; // mean
-    double L2;
-    double L3;
-    double L4;
-
-    double L_cv;
-    double L_sk;
-    double L_ku;
-    L1 = 0;
-    L2 = 0;
-    L3 = 0;
-    L4 = 0;
-    double CL1, CL2, CL3, CR1, CR2, CR3;
-    int len_data = Data.size();
-
-    if (len_data >= 1) {
-        std::sort(Data.begin(), Data.end());
-        minV = Data[0];
-        maxV = Data[len_data - 1];
-        int index = (int)(len_data / 4);
-        lq = Data[index];
-        index = std::ceil((len_data * 3 / 4));
-        uq = Data[index];
-        index = (int)(len_data * 1 / 20);
-        perc05 = Data[index];
-        index = std::ceil((len_data * 19 / 20));
-        perc95 = Data[index];
-
-        if (len_data % 2 == 0) {
-            index = (int)len_data / 2 - 1;
-            median = (Data[index] + Data[index + 1]) / 2;
-        }
-        else {
-            median = Data[(int)(len_data - 1) / 2];
-        }
-
-        mean = 0.0;
-        for (int i = 1; i <= len_data; i++) {
-            CL1 = i - 1;
-            CL2 = CL1 * (i - 1 - 1) / 2;
-            CL3 = CL2 * (i - 1 - 2) / 3;
-            CR1 = len_data - i; // buggy!
-            CR2 = CR1 * (len_data - i - 1) / 2;
-            CR3 = CR2 * (len_data - i - 2) / 3;
-            L1 += Data[i - 1];
-            L2 += (CL1 - CR1) * Data[i - 1];
-            L3 += (CL2 - 2 * CL1 * CR1 + CR2) * Data[i - 1];
-            L4 += (CL3 - 3 * CL2 * CR1 + 3 * CL1 * CR2 - CR3) * Data[i - 1];
-        }
-        double C1 = (double)len_data;
-        double C2 = C1 * (len_data - 1) / 2;
-        double C3 = C2 * (len_data - 2) / 3;
-        double C4 = C3 * (len_data - 3) / 4;
-        mean = L1 / C1;
-        L2 = L2 / C2 / 2;
-        L3 = L3 / C3 / 3;
-        L4 = L4 / C4 / 4;
-
-        L_cv = (mean == 0.0) ? 0.0 : L2 / mean; // L-cv
-        L_sk = (L2 == 0.0) ? 0.0 : L3 / L2;     // L-Skewness
-        L_ku = (L2 == 0.0) ? 0.0 : L4 / L2;     // L-Kurtosis
-
-        MAE = 0.0;
-        RMSE = 0.0;
-        for (int i = 0; i < len_data; i++) {
-            MAE += std::abs(Data[i] - mean);
-            RMSE += std::pow((Data[i] - mean), 2);
-        }
-        MAE /= (double)len_data;
-        RMSE /= (double)len_data;
-        RMSE = RMSE > 0 ? sqrt(RMSE) : 0.0;
-    }
-    else {
-
-        minV = NAN;
-        maxV = NAN;
-        lq = NAN;
-        uq = NAN;
-        median = NAN;
-        mean = NAN;
-        MAE = NAN;
-        RMSE = NAN;
-        L_cv = NAN;
-        L2 = NAN;
-        L_sk = NAN;
-        L_ku = NAN;
-        perc05 = NAN;
-        perc95 = NAN;
-    }
-
-    r[0] = len_data;
-    r[1] = minV;
-    r[2] = maxV;
-    r[3] = lq;
-    r[4] = uq;
-    r[5] = perc05;
-    r[6] = perc95;
-    r[7] = median;
-    r[8] = mean;
-    r[9] = MAE;
-    r[10] = RMSE;
-    r[11] = L_cv;
-    r[12] = L2;
-    r[13] = L_sk;
-    r[14] = L_ku;
+    r[0] = m_stats.at("n");
+    r[1] = m_stats.at("min");
+    r[2] = m_stats.at("max");
+    r[3] = m_stats.at("p25");
+    r[4] = m_stats.at("p75");
+    r[5] = m_stats.at("p05");
+    r[6] = m_stats.at("p95");
+    r[7] = m_stats.at("p50");
+    r[8] = m_stats.at("avg");
+    r[9] = m_stats.at("mae");
+    r[10] = m_stats.at("sd");
+    r[11] = m_stats.at("Lcv");    
+    r[12] = m_stats.at("Lsk");;
+    r[13] = m_stats.at("Lku");
 }
 
 /****************************************************

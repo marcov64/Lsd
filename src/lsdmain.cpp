@@ -577,7 +577,7 @@ int lsdmain( int argn, char** argv )
     empty_description( );
     empty_cemetery( );
     blueprint->empty( );
-    abmat->empty();
+    abmat->empty( );
     root->empty( );
     delete blueprint;
     delete abmat;

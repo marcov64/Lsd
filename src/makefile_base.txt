@@ -9,11 +9,11 @@ INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(PATH_HEADER) -I$(LSDROOT)/$
 $(TARGET)$(EXT): $(FUN).o $(SRC_DIR)main_gnuwin.o $(SRC_DIR)file.o $(SRC_DIR)util.o $(SRC_DIR)object.o \
 $(SRC_DIR)variab.o $(SRC_DIR)interf.o $(SRC_DIR)draw.o $(SRC_DIR)runtime.o $(SRC_DIR)debug.o $(SRC_DIR)edit.o \
 $(SRC_DIR)edit_dat.o $(SRC_DIR)set_all.o $(SRC_DIR)analysis.o $(SRC_DIR)show_eq.o $(SRC_DIR)lsdmain.o \
-$(SRC_DIR)report.o $(SRC_DIR)nets.o $(SRC_DIR)gis.o
+$(SRC_DIR)report.o $(SRC_DIR)nets.o $(SRC_DIR)gis.o $(SRC_DIR)abmat.o
 	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(FUN).o $(SRC_DIR)file.o $(SRC_DIR)main_gnuwin.o $(SRC_DIR)util.o \
 	$(SRC_DIR)draw.o $(SRC_DIR)object.o $(SRC_DIR)set_all.o $(SRC_DIR)variab.o $(SRC_DIR)interf.o \
 	$(SRC_DIR)show_eq.o $(SRC_DIR)runtime.o $(SRC_DIR)debug.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o \
-	$(SRC_DIR)analysis.o $(SRC_DIR)lsdmain.o $(SRC_DIR)report.o $(SRC_DIR)nets.o $(SRC_DIR)gis.o \
+	$(SRC_DIR)analysis.o $(SRC_DIR)lsdmain.o $(SRC_DIR)report.o $(SRC_DIR)nets.o $(SRC_DIR)gis.o $(SRC_DIR)abmat.o  \
 	$(SWITCH_CC_LNK) -L$(PATH_TCL_LIB) $(TCL_LIB) -L$(PATH_TK_LIB) $(TK_LIB) -L$(PATH_LIB) $(LIBS) \
 	-o $(TARGET)
 
@@ -70,8 +70,11 @@ $(SRC_DIR)nets.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)nets
 
 $(SRC_DIR)decl.h.gch: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)decl.h
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)decl.h -o $(SRC_DIR)decl.h.gch
-$(SRC_DIR)gis.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)gis.cpp $(SRC_DIR)decl.h
+$(SRC_DIR)gis.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)gis.cpp $(SRC_DIR)abmat.cpp $(SRC_DIR)decl.h
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)gis.cpp -o $(SRC_DIR)gis.o $(INCLUDE)
+$(SRC_DIR)abmat.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)gis.cpp $(SRC_DIR)abmat.cpp $(SRC_DIR)decl.h
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)abmat.cpp -o $(SRC_DIR)abmat.o $(INCLUDE)
+
 
 $(FUN).o: $(FUN).cpp $(FUN_EXTRA) $(SRC_DIR)choose.h model_options.txt $(SRC_DIR)fun_head.h $(SRC_DIR)fun_head_fast.h $(SRC_DIR)decl.h.gch
 	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(INCLUDE) -c $(FUN).cpp

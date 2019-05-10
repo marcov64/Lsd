@@ -5728,7 +5728,7 @@ if ( choice == 62 )
 	
 	// copy the base LSD source files to distribution directory
 	cmd( "if { ! [ file exists \"$modeldir/src\" ] } { file mkdir \"$modeldir/src\" }" );
-  cmd( "if { ! [ file exists \"$modeldir/src/rapidcsv\" ] } { file mkdir \"$modeldir/src/rapidcsv\" }" );
+    cmd( "if { ! [ file exists \"$modeldir/src/rapidcsv\" ] } { file mkdir \"$modeldir/src/rapidcsv\" }" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/lsdmain.cpp\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/main_gnuwin.cpp\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/file.cpp\" \"$modeldir/src\"" );
@@ -5738,6 +5738,7 @@ if ( choice == 62 )
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/util.cpp\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/nets.cpp\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/gis.cpp\" \"$modeldir/src\"" );
+    cmd( "file copy -force \"$RootLsd/$LsdSrc/abmat.cpp\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/rapidcsv/rapidcsv.h\" \"$modeldir/src/rapidcsv/rapidcsv.h\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/check.h\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head.h\" \"$modeldir/src\"" );

@@ -47,10 +47,9 @@ PLOG("min     : %g\n",v[1]);
 PLOG("max     : %g\n",v[2]);
 PLOG("lq      : %g\n",v[3]);
 PLOG("uq      : %g\n",v[4]);
-PLOG("L_cv     : %g\n",v[9]);
-PLOG("L2     : %g\n",v[10]);
-PLOG("L_sk      :%g \n",v[11]);
-PLOG("L_ku      :%g \n",v[12]);
+PLOG("L_cv     : %g\n",v[11]);
+PLOG("L_sk      :%g \n",v[12]);
+PLOG("L_ku      :%g \n",v[13]);
 
 PLOG("++++++++++++++++++++++++++++++++++");
 PLOG("\n++++++++++statsALL D1++++++++++\n");
@@ -67,10 +66,9 @@ PLOG("min     : %g\n",v[1]);
 PLOG("max     : %g\n",v[2]);
 PLOG("lq      : %g\n",v[3]);
 PLOG("uq      : %g\n",v[4]);
-PLOG("L_cv     : %g\n",v[9]);
-PLOG("L2     : %g\n",v[10]);
-PLOG("L_sk      :%g \n",v[11]);
-PLOG("L_ku      :%g \n",v[12]);
+PLOG("L_cv     : %g\n",v[11]);
+PLOG("L_sk      :%g \n",v[12]);
+PLOG("L_ku      :%g \n",v[13]);
 
 PLOG("++++++++++++++++++++++++++++++++++");
 RESULT(0 )

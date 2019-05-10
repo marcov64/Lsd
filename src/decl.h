@@ -181,7 +181,11 @@ struct uniqueId;
 struct gisMap;
 struct gisPosition;
 struct Wrap;
+//ABMAT
+typedef std::map< std::string, double > m_statsT;
 #endif //#ifdef CPP11
+
+
 
 // special types used for fast equation, object and variable lookup
 typedef pair< string, bridge* > b_pairT;
@@ -329,8 +333,8 @@ struct object {
     // Fast look-up of agents via individual, unique IDs
     bool is_unique();
     void declare_as_unique(char const* uLab); //this object and all of its kind will become "unique", allowing for fast access by the new unique id.
-    object* obj_by_unique_id(int id); //when the object is deleted, clean up and update info.
-    void declare_as_nonUnique(); //function to retreave object by unique id.
+    object* obj_by_unique_id(int id); //function to retreave object by unique id.
+    void declare_as_nonUnique(); //when the object is deleted, clean up and update info.
     double unique_id();  //retrieve unique id, if any.
 #endif //#ifdef CPP11
 
@@ -906,6 +910,7 @@ extern int t;
 extern unsigned seed;
 extern object* root;
 
+
 #ifdef CPP11
 extern eq_mapT eq_map;					// map to fast equation look-up
 #endif
@@ -1125,6 +1130,12 @@ void write_obj( object* r, FILE* frep );
 void write_str( object* r, FILE* frep, int dep, char const* prefix );
 void write_var( variable* v, FILE* frep );
 
+//new abmat functions
+#ifdef CPP11
+m_statsT abmat_stats(std::vector<double>& Data);
+void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab);
+#endif
+
 #ifdef PARALLEL_MODE
 void parallel_update( variable* v, object* p, object* caller = NULL );
 #endif
@@ -1199,6 +1210,7 @@ extern long nodesSerial;		// network node serial number global counter
 extern lsdstack* stacklog;		// LSD stack
 extern map< string, profile > prof;// set of saved profiling times
 extern object* blueprint;   	// LSD blueprint (effective model in use )
+extern object* abmat;           // LSD abmat object (for abmat statistics)
 extern object* currObj;			// pointer to current object in browser
 extern object* wait_delete;		// LSD object waiting for deletion
 extern o_setT obj_list;			// list with all existing LSD objects

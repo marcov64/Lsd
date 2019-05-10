@@ -1,6 +1,8 @@
 Model abmatTest (ver. 1.0)
 
 This is a simple model to test functionality of the Abmat module.
+
+Author: Kyaw Lin Oo
 **Model Structure**
    |ROOT| 
      /\ 
