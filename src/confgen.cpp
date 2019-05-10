@@ -166,7 +166,7 @@ int lsdmain( int argn, char** argv )
     blueprint = new object;
     blueprint->init( NULL, "Root" );
     abmat = new object;
-    abmat->init( NULL, "Root" );
+    abmat->init( NULL, "ABMAT" );
     m_abmat_varnames.empty();
     i_abmat_varnames = 0;
     stacklog = new lsdstack;

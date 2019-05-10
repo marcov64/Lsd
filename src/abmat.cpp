@@ -88,6 +88,10 @@
 
 ********************************************/
 
+//global variables
+std::map <const char*, const char*> m_abmat_varnames; //map variable names to shortened ones.
+int i_abmat_varnames; //simple counter for up to 3 digits
+
 const char* abmat_varname_convert(const char* lab)
 {
     //std::string s_lab = std::string(lab);
@@ -96,7 +100,7 @@ const char* abmat_varname_convert(const char* lab)
         std::string s_short = std::string(lab);
         if (s_short.length() > 6) {
             s_short.resize(3); //drop last chars
-            s_short.append( std::to_string(i_abmat_varnames) );
+            s_short.append( std::to_string(i_abmat_varnames) );            
             if (++i_abmat_varnames > 999) {
                 sprintf( msg, "error in '%s'.", __func__);
                 error_hard( msg, "too many variables to be shortened",
@@ -274,7 +278,7 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
     //get the parent for the type, create if it exists not yet
     parent = abmat->search(typeLab);
     if (parent == NULL) {
-        abmat->add_obj(typeLab, 0, false );
+        abmat->add_obj(typeLab, 1, false );
         parent = abmat->search(typeLab);
     }
 
