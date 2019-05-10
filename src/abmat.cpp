@@ -21,10 +21,10 @@
 
       Micro : This implies a variable number of objects with this variable. Distributions statistics are saved for each timestep.
       Macro : This implies a unique (single) object with this variable. Distribution statistics are saved at the end of the timestep. Additionally, time-series statistics are saved.
-      Corr  : A set of two macro variables. The subject and its correspondance. Associative statistics are taken (Distances, Correlation, Association)
+      Comp  : A set of two macro variables. The subject and its correspondance. Associative statistics are taken (Distances, Correlation, Association)
       Cond  : A set of two micro variables. The subject and a factorial indicator (that basically subsets the micro variables). Distribution statistics are saved for each timestep for ich subset.
 
-    Macro and Corr variables need to survive the complete simulation.
+    Macro and Comp variables need to survive the complete simulation.
     Micro and Cond variables may "die"
 
     Technically the following tree structure is given:
@@ -35,7 +35,7 @@
             |-- *macro --|--- macro_var_1
             |            |--- macro_var_*
             |
-            |-- *corr  --|--- subject --|--- corr_sub_1 (hooked to corr_assoc_1)
+            |-- *comp  --|--- subject --|--- corr_sub_1 (hooked to corr_assoc_1)
             |            |              |--- corr_sub_*
             |            |
             |            |--- associate --|-- corr_ass_1 (hooked to corr_sub_1)
@@ -52,7 +52,10 @@
     and also reflection in LSD internal analysis tool.
 
 
-
+    The overhead of adding the macro variables is justified by the fact that
+    the user can in principle (and may have reason to) modify past values of
+    any LSD variable. Thus we completely separate the statistical items from
+    the model itself.
 
 ****************************************************************************************/
 #include "decl.h"
@@ -91,6 +94,7 @@
 //global variables
 std::map <const char*, const char*> m_abmat_varnames; //map variable names to shortened ones.
 int i_abmat_varnames; //simple counter for up to 3 digits
+
 
 const char* abmat_varname_convert(const char* lab)
 {
@@ -227,10 +231,18 @@ m_statsT abmat_stats(std::vector<double>& Data )
     return stats;
 }
 
+bool abmat_second_var_exists_already(object* oVar1, const char* lVar2)
+{
+    //to do.
+    return false;
+}
+
 /********************************************
     create_abmat_object
     Add the abmat objects for the variable varlab of type type. if type is
-    cond or corr, var2lab is the reference variable (in the same object).
+    cond or comp, var2lab is the reference variable (in the same object).
+
+    for macro and comp
 ********************************************/
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab)
 {
@@ -249,7 +261,7 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
     object* parent = NULL;
     const size_t s_typeLab = 10;
     char typeLab[s_typeLab];
-    enum Ttype {micro, macro, cond, corr};
+    enum Ttype {micro, macro, cond, comp};
     Ttype type;
     if (abmat_type.find("micro") != std::string::npos ) {
         snprintf(typeLab, sizeof(char)*s_typeLab, "*micro");
@@ -263,9 +275,9 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
         snprintf(typeLab, sizeof(char)*s_typeLab, "*cond");
         type = cond;
     }
-    else if (abmat_type.find("corr") != std::string::npos ) {
-        snprintf(typeLab, sizeof(char)*s_typeLab, "*corr");
-        type = corr;
+    else if (abmat_type.find("comp") != std::string::npos ) {
+        snprintf(typeLab, sizeof(char)*s_typeLab, "*comp");
+        type = comp;
     }
     else {
         sprintf( msg, "error in '%s'. Type %s is not valid.", __func__, abmat_type.c_str() );
@@ -277,47 +289,98 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
 
     //get the parent for the type, create if it exists not yet
     parent = abmat->search(typeLab);
+    object* oVar = NULL;
+    object* oVar2 = NULL;
+
     if (parent == NULL) {
         abmat->add_obj(typeLab, 1, false );
         parent = abmat->search(typeLab);
     }
 
-    //Add the variable as an object to the category
-    parent->add_obj(varlab, 1, false);
-    object* oVar = parent->search(varlab);
+    if (type == micro || type == macro) {
+        //Add the variable as an object to the category
+        oVar = parent->search(varlab);
+        if (oVar == NULL) {
+            parent->add_obj(varlab, 1, false);
+            oVar = parent->search(varlab);
+        }
+    }
+    else if (type == cond || type == comp) {
+        //In case we have type cond or comp, we add the variables within the
+        //respective subgroups first and second and hook them with each other.
+        //We make sure that each unique combination is only created once.
 
-    //In case we have type cond or corr, add second oVar
-    if (type == cond || type == corr) {
-        parent->add_obj(var2lab, 1, false);
+        //get variable aka "first" and conditional aka "second"
+        object* oFirst = parent->search("first");
+        if (oFirst == NULL ) {
+            parent->add_obj("first", 1, false );
+            oFirst = parent->search("first");
+        }
+
+        oVar = oFirst->search(varlab);
+        if (oVar == NULL || !abmat_second_var_exists_already(oVar, var2lab) ) {
+            oFirst->add_obj(varlab, 1, false);
+            oVar = oFirst->search(varlab);
+        }
+
+        object* oSecond = parent->search("second");
+        if (oSecond == NULL) {
+            parent->add_obj("second", 1, false );
+            oSecond = parent->search("second");
+        }
+
+        oVar2 = oSecond->search(var2lab);
+        if (oVar2 == NULL || !abmat_second_var_exists_already(oVar2, varlab) ) {
+            oSecond->add_obj(var2lab, 1, false);
+            oVar2 = oSecond->search(var2lab);
+            //link them
+            oVar->hook = oVar2;
+            oVar2->hook = oVar;
+        }
+
+
+
         object* oVar2 = parent->search(var2lab);
         oVar->hook = oVar2;
         oVar2->hook = oVar;
     }
 
-
-
-    //Add the variables
+    // Add the variables
     switch (type) {
-        case micro:
-            std::vector<double> dummy;
-            auto stats_template = abmat_stats( dummy ); //retrieve map of stats
-            //create a parameter for each statistic
-            for (auto& elem : stats_template) {
-                std::string varLab = abmat_varname_convert(oVar->label);
-                varLab.append("_");
-                varLab.append(std::to_string(elem.second));
+        case micro: {
+                std::vector<double> dummy;
+                auto stats_template = abmat_stats( dummy ); //retrieve map of stats
+                //create a parameter for each statistic
+                for (auto& elem : stats_template) {
+                    std::string varLab = abmat_varname_convert(oVar->label);
+                    varLab.append("_");
+                    varLab.append(std::to_string(elem.second));
+                    oVar->add_var(varLab.c_str(), -1, NULL, true); //no lags, no values --> only data
+                    variable* var = oVar->search_var(oVar, varLab.c_str(), true, true, oVar);
+                    // if (var == NULL) {
+                    // sprintf( msg, "error in '%s'.", __func__ );
+                    // error_hard( msg, "abmat variable not found",
+                    // "Contact the developer.",
+                    // true );
+                    // return;
+                    // }
+                    var->param = 0; //0 is parameter. Other fields are not used.
+                }
+            }
+            break;
+
+        case macro: {
+                //a macro object holds a variable with the same name, evtl. shortened.
+                std::string varLab = abmat_varname_convert(oVar->label); //name is same as original, shortened
                 oVar->add_var(varLab.c_str(), -1, NULL, true); //no lags, no values --> only data
                 variable* var = oVar->search_var(oVar, varLab.c_str(), true, true, oVar);
-                if (var == NULL) {
-                    sprintf( msg, "error in '%s'.", __func__ );
-                    error_hard( msg, "abmat variable not found",
-                                "Contact the developer.",
-                                true );
-                    return;
-                }
                 var->param = 0; //0 is parameter. Other fields are not used.
             }
+            break;
 
+
+
+        case comp:
             break;
 
     }
