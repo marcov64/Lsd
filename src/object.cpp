@@ -2826,7 +2826,7 @@ void object::eightStats(std::vector<double>& Data, double* r)
     double r_temp[14];
     if (r == NULL)
         r = r_temp;
-    
+
     //r[0] = r[1] = r[2] = r[3] = r[4] = r[5] = r[6] = r[7] = r[8] = r[9] = r[10] = r[11] = r[12] = r[13] = 0;
 
     auto m_stats = abmat_stats(Data); //pass calculation to abmat
@@ -2842,7 +2842,7 @@ void object::eightStats(std::vector<double>& Data, double* r)
     r[8] = m_stats.at("avg");
     r[9] = m_stats.at("mae");
     r[10] = m_stats.at("sd");
-    r[11] = m_stats.at("Lcv");    
+    r[11] = m_stats.at("Lcv");
     r[12] = m_stats.at("Lsk");;
     r[13] = m_stats.at("Lku");
 }

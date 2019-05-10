@@ -62,8 +62,8 @@
     ABMAT_STATS
     Produce advanced distribution statistics
 
-We allow only variable names that are short enough, in total max 31 chars
-Elements are:
+    We allow only variable names that are short enough, in total max 31 chars
+    Elements are:
     [1..6] variable name
     [4] stat type (cross)
     [4] stat type (time)
@@ -214,7 +214,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
             MAE += std::abs(Data[i] - L1);
             SD += std::pow((Data[i] - L1), 2);
         }
-        stats["mae"] =MAE/ rlen_data;
+        stats["mae"] = MAE / rlen_data;
         SD /= rlen_data;
         stats["sd"] = SD > 0 ? sqrt(SD) : 0.0;
     }
@@ -239,8 +239,8 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
     //so we check on category level.
 
     //first check if the variable varLab exists in the model.
-    if (root->search_var(root,varlab) == NULL){
-        sprintf( msg, "error in '%s'. Variable %s is not in the model.", __func__,varlab );
+    if (root->search_var(root, varlab) == NULL) {
+        sprintf( msg, "error in '%s'. Variable %s is not in the model.", __func__, varlab );
         error_hard( msg, "Wrong variable name",
                     "Check your code to prevent this error.",
                     true );
