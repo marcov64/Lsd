@@ -75,6 +75,8 @@ description* descr = NULL;	// model description structure
 lsdstack* stacklog = NULL;	// LSD stack
 object* blueprint = NULL;	// LSD blueprint (effective model in use)
 object* abmat = NULL;       // LSD abmat (hold reduced model data for analysis)
+
+
 variable* cemetery = NULL;	// LSD saved data series (from last simulation run)
 
 
@@ -165,6 +167,8 @@ int lsdmain( int argn, char** argv )
     blueprint->init( NULL, "Root" );
     abmat = new object;
     abmat->init( NULL, "Root" );
+    m_abmat_varnames.empty();
+    i_abmat_varnames = 0;
     stacklog = new lsdstack;
     stacklog->prev = NULL;
     stacklog->next = NULL;

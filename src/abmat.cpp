@@ -56,12 +56,68 @@
     
 ****************************************************************************************/
 #include "decl.h"
+#ifdef CPP11
+
+/********************************************
+ABMAT_STATS
+Produce advanced distribution statistics
+
+We allow only variable names that are short enough, in total max 31 chars
+Elements are: 
+    [1..6] variable name
+    [4] stat type (cross)
+    [4] stat type (time)
+    [3] conditional indicator
+    [1..6] variable 2 name
+    [1] "=" (condition)
+    [3] 3-char number (the value of the conditional variable)
+    [3] "_In" the interval number. The interval info is saved separately.
+    
+Thus there are 18 chars gone for the specifiers, leaving 13 for the variable names.
+Thus, we need to shorten the variables to 6 chars to allow the full potential.
+For simplicity, any variable longer than 6 chars is shortened to 3 chars and 
+ammended with a unique number from 0 to 999, so we allow for maximum 1000 
+variables.
+
+The information of this mapping is later storred in an elements table txt file
+of the format: shortname longname.
+    
+e.g. "var1" + "_min" + "_min" + "_c_" + "var2" + "=" "nnn" + "_In"
+to do so, we build a map of the real names for var1 and var2
+and translate them
+
+********************************************/
+
+const char* abmat_varname_convert(const char* lab)
+{
+    //std::string s_lab = std::string(lab);
+    //check if exists, else create
+    if (m_abmat_varnames.count(lab) == 0 )
+    {
+        std::string s_short = std::string(lab);
+        if (s_short.length() > 6) {
+            s_short.resize(3); //drop last chars
+            s_short.append( std::to_string(i_abmat_varnames) );        
+            if (++i_abmat_varnames > 999){
+                sprintf( msg, "error in '%s'.", __func__);
+                error_hard( msg, "too many variables to be shortened",
+                        "If you need so many, please contact the developer.",
+                        true );    
+                return "";
+            }                
+        }
+        m_abmat_varnames[lab]=s_short.c_str();
+    }
+    return m_abmat_varnames.at(lab);
+}
+
 /********************************************
 ABMAT_STATS
 Produce advanced distribution statistics
 ********************************************/
-#ifdef CPP11
-m_statsT abmat_stats(std::vector<double>& Data)
+
+
+m_statsT abmat_stats(std::vector<double>& Data )
 {
     m_statsT stats;
 
@@ -86,7 +142,8 @@ m_statsT abmat_stats(std::vector<double>& Data)
     stats["Lsk"];
     stats["Lku"];
 
-    int len_data = Data.size();
+    const int len_data = Data.size();
+    const double rlen_data = (double) len_data;
 
     if (len_data >= 1) {
 
@@ -97,11 +154,11 @@ m_statsT abmat_stats(std::vector<double>& Data)
         stats["max"] = Data[len_data - 1];
         int index = (int)(len_data / 4);
         stats["p25"] = Data[index];
-        index = std::ceil( ( (double) len_data ) * 3.0 / 4.0 );
+        index = (int) std::ceil( rlen_data * 3.0 / 4.0 );
         stats["p75"] = Data[index];
-        index = (int)(len_data * 1 / 20);
+        index = (int) (len_data * 1 / 20);
         stats["p05"] = Data[index];
-        index = std::ceil( ( (double) len_data ) * 19.0 / 20.0 );
+        index = (int) std::ceil( rlen_data * 19.0 / 20.0 );
         stats["p95"] = Data[index];
 
         if (len_data % 2 == 0) {
@@ -119,7 +176,7 @@ m_statsT abmat_stats(std::vector<double>& Data)
         //intermediates for the L-Moments
         double L1, L2, L3, L4, CL1, CL2, CL3, CR1, CR2, CR3, rlen_data;
         L1 = L2 = L3 = L4 = CL1 = CL2 = CL3 = CR1 = CR2 = CR3 = 0.0;
-        rlen_data = (double) len_data;
+        
         //L1 == mean        
         for (int i = 1; i <= rlen_data; i++) {
             double ri = (double) i;
@@ -134,7 +191,7 @@ m_statsT abmat_stats(std::vector<double>& Data)
             L3 += (CL2 - 2.0 * CL1 * CR1 + CR2) * Data[i - 1];
             L4 += (CL3 - 3.0 * CL2 * CR1 + 3.0 * CL1 * CR2 - CR3) * Data[i - 1];
         }
-        double C1 = rlen_data;
+        const double& C1 = rlen_data; //just for readability
         double C2 = C1 * (rlen_data - 1.0) / 2.0;
         double C3 = C2 * (rlen_data - 2.0) / 3.0;
         double C4 = C3 * (rlen_data - 3.0) / 4.0;
@@ -226,7 +283,14 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
     
     //Add the variables
     switch (type) {
-        case micro: break;
+        case micro: 
+            std::vector<double> dummy;
+            auto stats_template = abmat_stats(dummy); //retrieve map of stats
+            for (auto &elem : stats_template){
+                char vlab[ MAX_ELEM_LENGTH ];
+                //
+            }
+        break;
         
     }
     

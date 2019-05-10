@@ -104,8 +104,8 @@
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 1
-#define _LSD_VERSION_ "GIS"
-#define _LSD_DATE_ "Feb 22 2019"        // __DATE__
+#define _LSD_VERSION_ "GIS-ABMAT"
+#define _LSD_DATE_ "May 12 2019"        // __DATE__
 
 // global constants
 #define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)
@@ -1132,8 +1132,9 @@ void write_var( variable* v, FILE* frep );
 
 //new abmat functions
 #ifdef CPP11
-m_statsT abmat_stats(std::vector<double>& Data);
+m_statsT abmat_stats(std::vector<double>& Data );
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab);
+const char* abmat_varname_convert(const char* lab);
 #endif
 
 #ifdef PARALLEL_MODE
@@ -1211,6 +1212,10 @@ extern lsdstack* stacklog;		// LSD stack
 extern map< string, profile > prof;// set of saved profiling times
 extern object* blueprint;   	// LSD blueprint (effective model in use )
 extern object* abmat;           // LSD abmat object (for abmat statistics)
+#ifdef CPP11
+extern std::map <const char*, const char*> m_abmat_varnames; //map variable names to shortened ones.
+extern int i_abmat_varnames; //simple counter for up to 3 digits
+#endif
 extern object* currObj;			// pointer to current object in browser
 extern object* wait_delete;		// LSD object waiting for deletion
 extern o_setT obj_list;			// list with all existing LSD objects

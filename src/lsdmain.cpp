@@ -133,6 +133,8 @@ FILE* log_file = NULL;		// log file, if any
 
 #ifdef CPP11
 eq_mapT eq_map;				// fast equation look-up map
+std::map <const char*, const char*> m_abmat_varnames; //map variable names to shortened ones.
+int i_abmat_varnames = 0; //simple counter for up to 3 digits
 #endif //#ifdef CPP11
 
 #ifdef LIBZ
@@ -183,6 +185,8 @@ int lsdmain( int argn, char** argv )
     abmat = new object;
     root->init( NULL, "Root" );
     abmat->init( NULL, "Root" );
+    m_abmat_varnames.empty();
+    i_abmat_varnames = 0;
     add_description( "Root", "Object", "(no description available)" );
     blueprint = new object;
     blueprint->init( NULL, "Root" );
