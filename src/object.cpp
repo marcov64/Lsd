@@ -535,7 +535,7 @@ SEARCH (*)
 Search the first Object lab in the branch of the model below this.
 Uses the fast bridge look-up map.
 ***************************************************/
-object *object::search( char const *lab )
+object *object::search( char const *lab, bool no_search )
 {
 	bridge *cb;
 	object *cur;
@@ -549,6 +549,10 @@ object *object::search( char const *lab )
 	if ( ( bit = b_map.find( lab ) ) != b_map.end( ) )
 		return bit->second->head;
 	
+	// stop if search is disabled
+	if ( no_search )
+		return NULL;
+
 	// Search among descendants' descendants
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
@@ -913,7 +917,7 @@ variable *object::search_var_err( object *caller, char const *lab, bool no_searc
 	cv = search_var( caller, lab, true, no_search, search_sons );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( NULL, lab, true, no_search, search_sons ) == NULL )
+		if ( blueprint->search_var( NULL, lab, true ) == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for %s", lab, errmsg );
 			error_hard( msg, "variable or parameter not found", 
