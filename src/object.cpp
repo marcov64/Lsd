@@ -2707,14 +2707,18 @@ void object::gatherData_Tseries(std::vector<double>& dataVector,
     }
 }
 
-void object::gatherData_all_cnd(std::vector<double>& dataVector,
-                                char const* lab, char const condVarLab[],
+std::vector<double> object::gatherData_all(char const* lab, int lag)
+{
+    return gatherData_all_cnd(lab, "", "", 0, NULL, lag);
+}
+
+std::vector<double> object::gatherData_all_cnd(char const* lab, char const condVarLab[],
                                 char const condition[], double condVal,
                                 object* fake_caller, int lag)
 {
+    std::vector<double> dataVector;
     object* cur, *next_cur;
-    variable* cv;
-    dataVector.clear();
+    variable* cv;    
     bool conditional = !(strlen(condition) == 0);
     cv = search_var(this, lab, true, no_search, this);
     if (cv != NULL) {
@@ -2806,8 +2810,7 @@ void object::xStats_all_cnd(char const* lab, double* r, char const condVarLab[],
                             char const condition[], double condVal,
                             object* fake_caller, int lag)
 {
-    std::vector<double> Data;
-    gatherData_all_cnd(Data, lab, condVarLab, condition, condVal, fake_caller,
+    std::vector<double> Data = gatherData_all_cnd(lab, condVarLab, condition, condVal, fake_caller,
                        lag);
     eightStats(Data, r);
 }

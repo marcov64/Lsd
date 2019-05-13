@@ -263,7 +263,8 @@ struct object {
     void xStats_all_cnd( char const* lab, double* r, char const condVarLab[] = "", char const condition[] = "", double condVal = 0.0, object* fake_caller = NULL, int lag = 0 );
     void eightStats( std::vector<double>& Data, double* r ) ;
     bool checkParent( object* par, object* son );
-    void gatherData_all_cnd( std::vector<double>& dataVector, char const* lab, char const condVarLab[], char const condition[], double condVal, object* fake_caller, int lag );
+    std::vector<double> gatherData_all(char const* lab, int lag = 0);
+    std::vector<double> gatherData_all_cnd(char const* lab, char const condVarLab[], char const condition[], double condVal, object* fake_caller, int lag );
     void tStats( char const* lab, double* r, int lag = 0 );
     void gatherData_Tseries( std::vector<double>& dataVector, char const* lab, int lag );
     double sum( char const* lab, int lag );

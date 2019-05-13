@@ -118,6 +118,11 @@ int i_abmat_varnames; //simple counter for up to 3 digits
 const char* lfirst = "first";
 const char* lsecond = "second";
 
+const char* lmicro = "*micro";
+const char* lmacro = "*macro";
+const char* lcond = "*cond";
+const char* lcomp = "*comp";
+
 const char* abmat_varname_convert(const char* lab)
 {
     //std::string s_lab = std::string(lab);
@@ -409,23 +414,22 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
     }
 
     object* parent = NULL;
-    const size_t s_typeLab = 10;
-    char typeLab[s_typeLab];
+    const char* typeLab = NULL;
     Tabmat type;
     if (abmat_type.find("micro") != std::string::npos ) {
-        snprintf(typeLab, sizeof(char)*s_typeLab, "*micro");
+        typeLab = lmicro;
         type = a_micro;
     }
     else if (abmat_type.find("macro") != std::string::npos ) {
-        snprintf(typeLab, sizeof(char)*s_typeLab, "*macro");
+        typeLab = lmacro;
         type = a_macro;
     }
     else if (abmat_type.find("cond") != std::string::npos ) {
-        snprintf(typeLab, sizeof(char)*s_typeLab, "*cond");
+        typeLab = lcond;
         type = a_cond;
     }
     else if (abmat_type.find("comp") != std::string::npos ) {
-        snprintf(typeLab, sizeof(char)*s_typeLab, "*comp");
+        typeLab = lcomp;
         type = a_comp;
     }
     else {
@@ -502,9 +506,9 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
                 auto stats_template = abmat_stats( dummy ); //retrieve map of stats
                 //create a variable for each statistic
                 for (auto& elem : stats_template) {
-                    const char* varLab = get_abmat_varname ( type, varLab, elem.first);
-                    oVar->add_var(varLab, -1, NULL, true); //no lags, no values, save
-                    variable* var = oVar->search_var(oVar, varLab, true, true, oVar);
+                    const char* nvarLab = get_abmat_varname ( type, varlab, elem.first);
+                    oVar->add_var(nvarLab, -1, NULL, true); //no lags, no values, save
+                    variable* var = oVar->search_var(oVar, nvarLab, true, true, oVar);
                     var->param = 0; //0 is parameter. Other fields are not used.
                 }
             }
@@ -512,9 +516,9 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
 
         case a_macro: {
                 //a macro object holds a variable with the same name, maybe shortened.
-                const char* varLab = get_abmat_varname(type, oVar->label); //name is same as original, shortened
-                oVar->add_var(varLab, -1, NULL, true); //no lags, no values --> only data
-                variable* var = oVar->search_var(oVar, varLab, true, true, oVar);
+                const char* nvarLab = get_abmat_varname(type, oVar->label); //name is same as original, shortened
+                oVar->add_var(nvarLab, -1, NULL, true); //no lags, no values --> only data
+                variable* var = oVar->search_var(oVar, nvarLab, true, true, oVar);
                 var->param = 0; //0 is parameter. Other fields are not used.
             }
             break;
@@ -533,9 +537,9 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
                 auto stats_template = abmat_compare( dummy, dummy ); //retrieve map of stats
                 //create a variable for each statistic
                 for (auto& elem : stats_template) {
-                    const char* varLab = get_abmat_varname ( type, varLab, elem.first, var2lab);
-                    oVar->add_var(varLab, -1, NULL, true); //no lags, no values, save
-                    variable* var = oVar->search_var(oVar, varLab, true, true, oVar);
+                    const char* nvarLab = get_abmat_varname ( type, varlab, elem.first, var2lab);
+                    oVar->add_var(nvarLab, -1, NULL, true); //no lags, no values, save
+                    variable* var = oVar->search_var(oVar, nvarLab, true, true, oVar);
                     var->param = 0; //0 is parameter. Other fields are not used.
                 }
             }
@@ -548,30 +552,124 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
 
 void update_abmat_vars()
 {
+    //cycle through ABMAT objects and update the information.
+    for (bridge* pb = abmat->b; pb != NULL; pb = pb->next) {
+        object* parent = pb->head;
+        if (parent == NULL) {
+            sprintf( msg, "error in '%s'.", __func__);
+            error_hard( msg, "no parent object?",
+                        "Contact the developer.",
+                        true );
+            return;
+        }
 
-    //for type cond:
-    //the cond variable holds a set of micro stats for each unique
-    //value that ever existed in the conditioning variable
-    //initially there are none. This is instead checked each time
-    //data is saved.
+        Tabmat type;
+        if ( strcmp(parent->label, lmicro) == 0 ) {
+            type = a_micro;
+        }
+        else if ( strcmp(parent->label, lmacro) == 0 ) {
+            type = a_macro;
+        }
+        else if ( strcmp(parent->label, lcond) == 0 ) {
+            type = a_cond;
+        }
+        else if ( strcmp(parent->label, lcomp) == 0 ) {
+            type = a_comp;
+        }
+        else {
+            sprintf( msg, "error in '%s' for object %s.", __func__, parent->label);
+            error_hard( msg, "wrong abmat object.",
+                        "Contact the developer.",
+                        true );
+            return;
+        }
+
+        //Cycle through all items of that type.
+        for (bridge* bVar = parent->b; bVar != NULL; bVar = bVar->next ) {
+            object* oVar = bVar->head;
+            if (oVar == NULL) {
+                sprintf( msg, "error in '%s', kind %s.", __func__, parent->label);
+                error_hard( msg, "no head object for abmat kind?",
+                            "Contact the developer.",
+                            true );
+                return;
+            }
+            for ( ; oVar != NULL; oVar = oVar->next) { //in most cases this is a once-loop. But for cond several objects with same label may exist.
+
+                switch (type) {
+                    case a_micro: {
+                            std::vector<double> data = root->gatherData_all(oVar->label);
+                            auto stats_template = abmat_stats( data ); //retrieve map of stats
+                            //create a variable for each statistic
+                            for (auto& elem : stats_template) {
+                                const char* nvarLab = get_abmat_varname ( type, oVar->label, elem.first);
+                                //WRITE!
+                            }
+                        }
+                        break;
+
+                    case a_macro: {
+                            /*  //a macro object holds a variable with the same name, maybe shortened.
+                                const char* varLab = get_abmat_varname(type, oVar->label); //name is same as original, shortened
+                                oVar->add_var(varLab, -1, NULL, true); //no lags, no values --> only data
+                                variable* var = oVar->search_var(oVar, varLab, true, true, oVar);
+                                var->param = 0; //0 is parameter. Other fields are not used.
+                                }*/
+                            break;
 
 
-    //2) create the second,
+                        case a_cond: {
+                                //the top objects for the unique pair variable and conditioning
+                                //variable exist. The rest is dynamically checked/produced.
+                            }
+                            break;
 
-    //check conditioning variable:
-    //a) All are implicit integer?!
-    //b) All are in same object as conditional variable?
+                        case a_comp: {
+                                /*  //the comparative ("versus")
+                                    //to do!
+                                    std::vector<double> dummy;
+                                    auto stats_template = abmat_compare( dummy, dummy ); //retrieve map of stats
+                                    //create a variable for each statistic
+                                    for (auto& elem : stats_template) {
+                                    const char* varLab = get_abmat_varname ( type, varLab, elem.first, var2lab);
+                                    oVar->add_var(varLab, -1, NULL, true); //no lags, no values, save
+                                    variable* var = oVar->search_var(oVar, varLab, true, true, oVar);
+                                    var->param = 0; //0 is parameter. Other fields are not used.
+                                    } */
+                            }
+                            break;
+                        }
+                }
 
 
-    //create a map of the conditioning values that currently exist
 
-    //compare with parameter labels of conditioning variable
-    //if it does not yet exist, add the variable with the value
-    //and add all the new parameters to the conditional variable,
-    //initialise the prior data to NAN
+            }
 
-    //gather the stats for each subset and write them to the params
+            //for type cond:
+            //the cond variable holds a set of micro stats for each unique
+            //value that ever existed in the conditioning variable
+            //initially there are none. This is instead checked each time
+            //data is saved.
 
+
+            //2) create the second,
+
+            //check conditioning variable:
+            //a) All are implicit integer?!
+            //b) All are in same object as conditional variable?
+
+
+            //create a map of the conditioning values that currently exist
+
+            //compare with parameter labels of conditioning variable
+            //if it does not yet exist, add the variable with the value
+            //and add all the new parameters to the conditional variable,
+            //initialise the prior data to NAN
+
+            //gather the stats for each subset and write them to the params
+
+        }
+    }
 }
 
 #endif
