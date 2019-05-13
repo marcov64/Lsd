@@ -110,6 +110,14 @@ if(t == 1)
         PLOG("\nYou chose insufficient steps. Make it at least %i", TOTALSTEPS);
         quit = 1;
     }
+    
+    //ABMAT
+    ABMAT_ADD_VARIABLE("micro","age");
+    // PLOG("\n%s",abmat_varname_convert("oihjqoijoih") );
+    // PLOG("\n%s",abmat_varname_convert("oihjqowjoih") );
+    // PLOG("\n%s",abmat_varname_convert("oihjqowh") );
+    // PLOG("\n%s",abmat_varname_convert("oihjqoijttih") );
+    // //add_abmat_object("micro","age");
 }
 else
 {

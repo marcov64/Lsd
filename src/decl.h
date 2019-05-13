@@ -182,7 +182,8 @@ struct gisMap;
 struct gisPosition;
 struct Wrap;
 //ABMAT
-typedef std::map< std::string, double > m_statsT;
+typedef std::map< const char*, double > m_statsT;
+enum Tabmat {a_micro, a_macro, a_cond, a_comp};
 #endif //#ifdef CPP11
 
 
@@ -926,6 +927,8 @@ extern Tcl_Interp* inter;		// Tcl standard interpreter pointer
 //new abmat functions
 #ifdef CPP11
 m_statsT abmat_stats(std::vector<double>& Data );
+m_statsT abmat_compare(std::vector<double>& Data, std::vector<double>& Data2 );
+const char* get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1);
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
 const char* abmat_varname_convert(const char* lab);
 bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char* lVar2);
