@@ -776,6 +776,8 @@ void run( void )
 #endif
                 root->update( );
 
+            update_abmat_vars();
+
             perc_done = ( 100 * t ) / max_step;
 
 #ifndef NO_WINDOW

@@ -112,7 +112,7 @@
 ********************************************/
 
 //global variables
-std::map <const char*, const char*> m_abmat_varnames; //map variable names to shortened ones.
+std::map <const char*, std::string> m_abmat_varnames; //map variable names to shortened ones.
 int i_abmat_varnames; //simple counter for up to 3 digits
 
 const char* lfirst = "first";
@@ -122,6 +122,12 @@ const char* lmicro = "*micro";
 const char* lmacro = "*macro";
 const char* lcond = "*cond";
 const char* lcomp = "*comp";
+
+/********************************************
+    ABMAT_VARNAME_CONVERT
+    Converts a varname as mentioned above.
+    Applies to base variable names, not linked vars.
+********************************************/
 
 const char* abmat_varname_convert(const char* lab)
 {
@@ -140,9 +146,54 @@ const char* abmat_varname_convert(const char* lab)
                 return "";
             }
         }
-        m_abmat_varnames[lab] = s_short.c_str();
+        m_abmat_varnames[lab] = s_short;
     }
-    return m_abmat_varnames.at(lab);
+    return m_abmat_varnames.at(lab).c_str();
+}
+
+/********************************************
+    GET_ABMAT_VARNAME
+    produce the abmat varname as a function of
+    - stattype
+    - var1lab
+    - stat
+    - var2lab
+    -
+********************************************/
+
+std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname, const char* var2lab, const int condVal)
+{
+    std::string varname( abmat_varname_convert(var1lab) );
+    switch (stattype) {
+        case a_micro: //nothing to add
+        case a_macro: //nothing to add
+            break;
+        case a_cond:
+            varname.append("_c_");
+            varname.append( abmat_varname_convert(var2lab) );
+            varname.append("=");
+            if (condVal < 0 || condVal > 999) {
+                sprintf( msg, "error in '%s'.", __func__);
+                error_hard( msg, "conditional value is wrong",
+                            "Control that it is in 0..999!",
+                            true );
+                return "";
+            }
+            varname.append( std::to_string( condVal ) );
+            break;
+        case a_comp:
+            varname.append("_v_");
+            varname.append( abmat_varname_convert(var2lab) );
+            break;
+        default: //irrelevant
+            sprintf( msg, "error in '%s'.", __func__);
+            error_hard( msg, "defaulting should not happen",
+                        "contact the developer.",
+                        true );
+    }
+    varname.append("_");
+    varname.append(statname);
+    return varname; //.c_str();
 }
 
 
@@ -345,50 +396,7 @@ bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char*
     return true;
 }
 
-/********************************************
-    GET_ABMAT_VARNAME
-    produce the varname as a function of
-    - stattype
-    - var1lab
-    - stat
-    - var2lab
-    -
-********************************************/
 
-const char* get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname, const char* var2lab, const int condVal)
-{
-    std::string varname( abmat_varname_convert(var1lab) );
-    switch (stattype) {
-        case a_micro: //nothing to add
-        case a_macro: //nothing to add
-            break;
-        case a_cond:
-            varname.append("_c_");
-            varname.append( abmat_varname_convert(var2lab) );
-            varname.append("=");
-            if (condVal < 0 || condVal > 999) {
-                sprintf( msg, "error in '%s'.", __func__);
-                error_hard( msg, "conditional value is wrong",
-                            "Control that it is in 0..999!",
-                            true );
-                return "";
-            }
-            varname.append( std::to_string( condVal ) );
-            break;
-        case a_comp:
-            varname.append("_v_");
-            varname.append( abmat_varname_convert(var2lab) );
-            break;
-        default: //irrelevant
-            sprintf( msg, "error in '%s'.", __func__);
-            error_hard( msg, "defaulting should not happen",
-                        "contact the developer.",
-                        true );
-    }
-    varname.append("_");
-    varname.append(statname);
-    return varname.c_str();
-}
 
 /********************************************
     create_abmat_object
@@ -452,6 +460,7 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
 
     if (type == a_micro || type == a_macro) {
         //Add the variable as an object to the category
+        //in this case, standard LSD stuff and check that not exist
         oVar = parent->search(varlab);
         if (oVar == NULL) {
             parent->add_obj(varlab, 1, false);
@@ -482,16 +491,19 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
             oVar = oFirst->b->head; //first descending object
 
         if (oVar == NULL || abmat_linked_vars_exists_not(oFirst, varlab, var2lab) ) {
-            oFirst->add_obj(varlab, 1, false);
+            // oFirst->add_obj(varlab, 1, false);
             //move to last variable - search does not work!
-            oVar = oFirst->b->head; //first variable
-            while (oVar->next != NULL)
-                oVar = oVar->next;
+            // oVar = oFirst->b->head; //first variable
+            // while (oVar->next != NULL)
+            // oVar = oVar->next;
 
-            oSecond->add_obj(var2lab, 1, false);
-            oVar2 = oSecond->b->head;
-            while (oVar2->next != NULL)
-                oVar2 = oVar2->next;
+            // oSecond->add_obj(var2lab, 1, false);
+            // oVar2 = oSecond->b->head;
+            // while (oVar2->next != NULL)
+            // oVar2 = oVar2->next;
+
+            oVar = oFirst->add_obj_basic(varlab);
+            oVar2 = oSecond->add_obj_basic(var2lab);
 
             //link them
             oVar->hook = oVar2;
@@ -506,20 +518,20 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
                 auto stats_template = abmat_stats( dummy ); //retrieve map of stats
                 //create a variable for each statistic
                 for (auto& elem : stats_template) {
-                    const char* nvarLab = get_abmat_varname ( type, varlab, elem.first);
-                    oVar->add_var(nvarLab, -1, NULL, true); //no lags, no values, save
-                    variable* var = oVar->search_var(oVar, nvarLab, true, true, oVar);
-                    var->param = 0; //0 is parameter. Other fields are not used.
+                    plog("\n");
+                    plog(oVar->label);
+                    std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first);
+                    plog(" : ");
+                    plog(nvarLab.c_str());
+                    abmat_add_var(oVar, nvarLab.c_str());
                 }
             }
             break;
 
         case a_macro: {
                 //a macro object holds a variable with the same name, maybe shortened.
-                const char* nvarLab = get_abmat_varname(type, oVar->label); //name is same as original, shortened
-                oVar->add_var(nvarLab, -1, NULL, true); //no lags, no values --> only data
-                variable* var = oVar->search_var(oVar, nvarLab, true, true, oVar);
-                var->param = 0; //0 is parameter. Other fields are not used.
+                std::string nvarLab = get_abmat_varname(type, oVar->label); //name is same as original, shortened
+                abmat_add_var(oVar, nvarLab.c_str());
             }
             break;
 
@@ -537,17 +549,99 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
                 auto stats_template = abmat_compare( dummy, dummy ); //retrieve map of stats
                 //create a variable for each statistic
                 for (auto& elem : stats_template) {
-                    const char* nvarLab = get_abmat_varname ( type, varlab, elem.first, var2lab);
-                    oVar->add_var(nvarLab, -1, NULL, true); //no lags, no values, save
-                    variable* var = oVar->search_var(oVar, nvarLab, true, true, oVar);
-                    var->param = 0; //0 is parameter. Other fields are not used.
+                    std::string nvarLab = get_abmat_varname ( type, varlab, elem.first, var2lab);
+                    abmat_add_var(oVar, nvarLab.c_str());
                 }
             }
             break;
 
     }
 
+    //visualise the added variables.
+    plog("\n---- Added new variables to abmat ---");
+    plog_object_tree_up(oVar);
+    plog("\n--------------------------------------\n");
     //Add ,,,
+}
+
+/********************************************************
+    ABMAT_ADD_VAR
+    Add an abmat variable to an abmat object
+********************************************************/
+void abmat_add_var(object* parent, char const* lab)
+{
+    variable* var = parent->add_var_basic(lab, 0, NULL, true, true); //no lags, no values, save
+    var->param = 1; //1 is parameter. Other fields are not used.
+    abmat_alloc_save_mem_var(var);
+}
+
+/********************************************************
+    ABMAT_ALLOC_SAVE_MEM_VAR
+    Allocate the memory to save a variable.
+********************************************************/
+void abmat_alloc_save_mem_var(variable* cv)
+{
+    if ( cv->data != NULL ) {
+        sprintf( msg, "Error in %s! The variable %s in object %s already has a data field", __func__, cv->up->label, cv->label );
+        error_hard( msg, "Fix code",
+                    "please contact developers",
+                    true );
+        return;
+    }
+
+    cv->data = new double[ max_step + 1 ];
+
+    if (cv->data == NULL) {
+        sprintf( msg, "Error in %s! The variable %s in object %s cannot be saved.", __func__, cv->up->label, cv->label );
+        error_hard( msg, "out of memory",
+                    "if there is memory available and the error persists,\nplease contact developers",
+                    true );
+        return;
+    }
+
+    if ( cv->num_lag > 0  || cv->param == 1 )
+        cv->data[ 0 ] = cv->val[ 0 ];
+
+}
+
+/********************************************************
+    GET_OBJECT_TREE_UP
+    Helper for development issues.
+    provides a formatted string visualising the object tree.
+    Includes direct parents, all contained vars and all children.
+********************************************************/
+void plog_object_tree_up(object* startO, bool plotVars)
+{
+    std::string tree;
+
+    //add parents
+    for(object* parent = startO->up; parent != NULL; parent = parent->up) {
+        tree.insert(0, "'\n|");
+        tree.insert(0, parent->label);
+        tree.insert(0, "\n'");
+    }
+    //add self and variables
+    tree += "\n";
+    tree += startO->label;
+    tree += " :\t";
+    int count = 0;
+    for(variable* cv = startO->v; cv != NULL; cv = cv->next) {
+        tree += " '";
+        tree += cv->label;
+        tree += "'(";
+        if (plotVars) {
+            tree += "t=";
+            tree += std::to_string(t);
+            tree += ",v=";
+            tree += std::to_string(cv->data[t]);
+            tree += ";";
+        }
+        tree += (cv->param == 0 ? "Par)," : cv->param == 1 ? "Var)," : "Fun),");
+        if(++count % 4 == 0) {
+            tree += "\n\t";
+        }
+    }
+    plog(tree.c_str());
 }
 
 void update_abmat_vars()
@@ -597,13 +691,19 @@ void update_abmat_vars()
             for ( ; oVar != NULL; oVar = oVar->next) { //in most cases this is a once-loop. But for cond several objects with same label may exist.
 
                 switch (type) {
-                    case a_micro: {
+                    case a_micro: {                        
                             std::vector<double> data = root->gatherData_all(oVar->label);
                             auto stats_template = abmat_stats( data ); //retrieve map of stats
-                            //create a variable for each statistic
+                            //save data
+
+                            //visualise the added variables.
+                            // plog("\n---- Prep to write data ---");
+                            // plog_object_tree_up(oVar);
+                            // plog("\n---");
+
                             for (auto& elem : stats_template) {
-                                const char* nvarLab = get_abmat_varname ( type, oVar->label, elem.first);
-                                //WRITE!
+                                std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first);
+                                oVar->write( nvarLab.c_str(), elem.second, t );
                             }
                         }
                         break;
@@ -613,33 +713,37 @@ void update_abmat_vars()
                                 const char* varLab = get_abmat_varname(type, oVar->label); //name is same as original, shortened
                                 oVar->add_var(varLab, -1, NULL, true); //no lags, no values --> only data
                                 variable* var = oVar->search_var(oVar, varLab, true, true, oVar);
-                                var->param = 0; //0 is parameter. Other fields are not used.
-                                }*/
-                            break;
-
-
-                        case a_cond: {
-                                //the top objects for the unique pair variable and conditioning
-                                //variable exist. The rest is dynamically checked/produced.
-                            }
-                            break;
-
-                        case a_comp: {
-                                /*  //the comparative ("versus")
-                                    //to do!
-                                    std::vector<double> dummy;
-                                    auto stats_template = abmat_compare( dummy, dummy ); //retrieve map of stats
-                                    //create a variable for each statistic
-                                    for (auto& elem : stats_template) {
-                                    const char* varLab = get_abmat_varname ( type, varLab, elem.first, var2lab);
-                                    oVar->add_var(varLab, -1, NULL, true); //no lags, no values, save
-                                    variable* var = oVar->search_var(oVar, varLab, true, true, oVar);
-                                    var->param = 0; //0 is parameter. Other fields are not used.
-                                    } */
-                            }
-                            break;
+                                var->param = 1; //1 is parameter. Other fields are not used.
+                            */
                         }
+                        break;
+
+
+                    case a_cond: {
+                            //the top objects for the unique pair variable and conditioning
+                            //variable exist. The rest is dynamically checked/produced.
+                        }
+                        break;
+
+                    case a_comp: {
+                            /*  //the comparative ("versus")
+                                //to do!
+                                std::vector<double> dummy;
+                                auto stats_template = abmat_compare( dummy, dummy ); //retrieve map of stats
+                                //create a variable for each statistic
+                                for (auto& elem : stats_template) {
+                                const char* varLab = get_abmat_varname ( type, varLab, elem.first, var2lab);
+                                oVar->add_var(varLab, -1, NULL, true); //no lags, no values, save
+                                variable* var = oVar->search_var(oVar, varLab, true, true, oVar);
+                                var->param = 1; //1 is parameter. Other fields are not used.
+                                } */
+                        }
+                        break;
                 }
+                                        //visualise the added variables.
+                        plog("\n---- Added new variables to abmat ---");
+                        plog_object_tree_up(oVar, true);
+                        plog("\n---");
 
 
 

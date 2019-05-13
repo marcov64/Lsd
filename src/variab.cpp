@@ -213,6 +213,7 @@ variable::variable( const variable& v )
 
 /****************************************************
     INIT
+    If v is null, initialise values with NAN.
 ****************************************************/
 int variable::init( object* _up, char const* _label, int _num_lag, double* v, int _save )
 {
@@ -233,8 +234,12 @@ int variable::init( object* _up, char const* _label, int _num_lag, double* v, in
     num_lag = _num_lag;
     if ( num_lag >= 0 ) {
         val = new double[ num_lag + 1 ];
-        for ( i = 0; i < num_lag + 1; i++ )
-            val[ i ] = v[ i ];
+        if (v != NULL)
+            for ( i = 0; i < num_lag + 1; i++ )
+                val[ i ] = v[ i ];
+        else
+            for ( i = 0; i < num_lag + 1; i++ )
+                val[ i ] = NAN;
     }
     else
         val = NULL;

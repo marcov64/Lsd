@@ -1205,25 +1205,56 @@ void object::add_var( char const* lab, int lag, double* val, int save )
     }
 
     for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) ) {
-        if ( cur->v == NULL )
-            cv = cur->v = new variable;
-        else {
-            for ( cv = cur->v; cv->next != NULL; cv = cv->next );
-            cv->next = new variable;
-            cv = cv->next;
-        }
+        // if ( cur->v == NULL )
+        // cv = cur->v = new variable;
+        // else {
+        // for ( cv = cur->v; cv->next != NULL; cv = cv->next );
+        // cv->next = new variable;
+        // cv = cv->next;
+        // }
 
-        if ( cv == NULL ) {
-            sprintf( msg, "cannot allocate memory for adding element '%s'", lab );
-            error_hard( msg, "out of memory",
-                        "if there is memory available and the error persists,\nplease contact developers",
-                        true );
-            return;
-        }
+        // if ( cv == NULL ) {
+        // sprintf( msg, "cannot allocate memory for adding element '%s'", lab );
+        // error_hard( msg, "out of memory",
+        // "if there is memory available and the error persists,\nplease contact developers",
+        // true );
+        // return;
+        // }
 
-        cv->init( cur, lab, lag, val, save );
-        cur->v_map.insert( v_pairT ( lab, cv ) );
+        // cv->init( cur, lab, lag, val, save );
+        cv = cur->add_var_basic( lab, lag, val, save, true );        
     }
+}
+
+/****************************************************
+    ADD_VAR_BASIC
+    Add a Variable to the current object.
+    Not updating the map.
+****************************************************/
+variable* object::add_var_basic( char const* lab, int lag, double* val, int save, bool adToMap )
+{
+    variable* cv;
+    if ( this->v == NULL ) {
+        cv = this->v = new variable;
+    }
+    else {
+        for ( cv = this->v; cv->next != NULL; cv = cv->next );
+        cv->next = new variable;
+        cv = cv->next;
+    }
+
+    if ( cv == NULL ) {
+        sprintf( msg, "cannot allocate memory for adding element '%s'", lab );
+        error_hard( msg, "out of memory",
+                    "if there is memory available and the error persists,\nplease contact developers",
+                    true );
+        return NULL;
+    }
+
+    cv->init( this, lab, lag, val, save );
+    if (adToMap)
+        this->v_map.insert( v_pairT ( lab, cv ) );
+    return cv;
 }
 
 
@@ -1367,6 +1398,54 @@ void object::add_obj( char const* lab, int num, int propagate )
 
         cur->b_map.insert( b_pairT ( lab, cb ) );
     }
+}
+
+/****************************************************
+    ADD_OBJ_BASIC
+    Add single sons with label lab to given object.
+    No checking.
+    Not added to map.
+****************************************************/
+object* object::add_obj_basic( char const* lab)
+{
+    //int i;
+    bridge* cb;
+    object* cur;
+
+    // for ( cur = this; cur != NULL; propagate == 1 ? cur = cur->hyper_next( label ) : cur = NULL ) {
+
+    // create bridge
+    if ( this->b == NULL )
+        cb = this->b = new bridge( lab );
+    else {
+        for ( cb = this->b; cb->next != NULL; cb = cb->next );
+        cb->next = new bridge( lab );
+        cb = cb->next;
+    }
+
+    if ( cb == NULL ) {
+        sprintf( msg, "cannot allocate memory for adding object '%s'", lab );
+        error_hard( msg, "out of memory",
+                    "if there is memory available and the error persists,\nplease contact developers",
+                    true );
+        return NULL;
+    }
+
+    cur = cb->head = new object;
+
+
+
+    if ( cur == NULL ) {
+        sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", lab );
+        error_hard( msg, "out of memory",
+                    "if there is memory available and the error persists,\nplease contact developers",
+                    true );
+        return NULL;
+    }
+
+    cur->init( this, lab );
+    return cur;
+
 }
 
 
@@ -2713,12 +2792,12 @@ std::vector<double> object::gatherData_all(char const* lab, int lag)
 }
 
 std::vector<double> object::gatherData_all_cnd(char const* lab, char const condVarLab[],
-                                char const condition[], double condVal,
-                                object* fake_caller, int lag)
+        char const condition[], double condVal,
+        object* fake_caller, int lag)
 {
     std::vector<double> dataVector;
     object* cur, *next_cur;
-    variable* cv;    
+    variable* cv;
     bool conditional = !(strlen(condition) == 0);
     cv = search_var(this, lab, true, no_search, this);
     if (cv != NULL) {
@@ -2785,6 +2864,7 @@ std::vector<double> object::gatherData_all_cnd(char const* lab, char const condV
         }
     }
     while (next_cur != NULL);
+    return dataVector;
 }
 
 bool object::checkParent(object* par, object* son)
@@ -2811,7 +2891,7 @@ void object::xStats_all_cnd(char const* lab, double* r, char const condVarLab[],
                             object* fake_caller, int lag)
 {
     std::vector<double> Data = gatherData_all_cnd(lab, condVarLab, condition, condVal, fake_caller,
-                       lag);
+                               lag);
     eightStats(Data, r);
 }
 void object::tStats(char const* lab, double* r, int lag)

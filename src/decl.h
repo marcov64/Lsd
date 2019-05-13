@@ -309,7 +309,9 @@ struct object {
     object* turbosearch_cond( char const* label, double value );
     variable* add_empty_var( char const* str );
     variable* search_var( object* caller, char const* label, bool no_error = false, bool no_search = false, object* maxLevel = NULL );
+    object* add_obj_basic( char const* label);
     void add_obj( char const* label, int num, int propagate );
+    variable* add_var_basic( char const* lab, int lag, double* val, int save, bool adToMap );
     void add_var( char const* label, int lag, double* val, int save );
     void add_var_from_example( variable* example );
     void chg_lab( char const* lab );
@@ -929,8 +931,12 @@ extern Tcl_Interp* inter;		// Tcl standard interpreter pointer
 #ifdef CPP11
 m_statsT abmat_stats(std::vector<double>& Data );
 m_statsT abmat_compare(std::vector<double>& Data, std::vector<double>& Data2 );
-const char* get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1);
+void plog_object_tree_up(object* , bool plotVars=false);
+std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1);
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
+void update_abmat_vars();
+void abmat_add_var(object* parent, char const* lab);
+void abmat_alloc_save_mem_var(variable* cv);
 const char* abmat_varname_convert(const char* lab);
 bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char* lVar2);
 #endif
@@ -1219,7 +1225,7 @@ extern map< string, profile > prof;// set of saved profiling times
 extern object* blueprint;   	// LSD blueprint (effective model in use )
 extern object* abmat;           // LSD abmat object (for abmat statistics)
 #ifdef CPP11
-extern std::map <const char*, const char*> m_abmat_varnames; //map variable names to shortened ones.
+extern std::map <const char*, std::string> m_abmat_varnames; //map variable names to shortened ones.
 extern int i_abmat_varnames; //simple counter for up to 3 digits
 #endif
 extern object* currObj;			// pointer to current object in browser
