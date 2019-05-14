@@ -113,6 +113,7 @@ if(t == 1)
     
     //ABMAT
     ABMAT_ADD_VARIABLE("micro","age");
+    ABMAT_ADD_VARIABLE("macro","nHouseholds");    
     // PLOG("\n%s",abmat_varname_convert("oihjqoijoih") );
     // PLOG("\n%s",abmat_varname_convert("oihjqowjoih") );
     // PLOG("\n%s",abmat_varname_convert("oihjqowh") );

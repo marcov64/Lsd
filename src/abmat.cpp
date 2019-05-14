@@ -164,6 +164,7 @@ const char* abmat_varname_convert(const char* lab)
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname, const char* var2lab, const int condVal)
 {
     std::string varname( abmat_varname_convert(var1lab) );
+    //Add 2nd var
     switch (stattype) {
         case a_micro: //nothing to add
         case a_macro: //nothing to add
@@ -191,8 +192,19 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
                         "contact the developer.",
                         true );
     }
-    varname.append("_");
-    varname.append(statname);
+    //Add stat info
+    switch (stattype) {
+        case a_micro:
+        case a_cond:
+        case a_comp: {
+                varname.append("_");
+                varname.append(statname);
+            }
+            break;
+        case a_macro:
+            //nothing to do.
+            break;
+    }
     return varname; //.c_str();
 }
 
@@ -466,6 +478,10 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
             parent->add_obj(varlab, 1, false);
             oVar = parent->search(varlab);
         }
+        plog("\nAdded object of type ");
+        plog(abmat_type.c_str());
+        plog(" with name ");
+        plog(oVar->label);
     }
     else if (type == a_cond || type == a_comp) {
         //In case we have type cond or comp, we add the variables within the
@@ -518,11 +534,11 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
                 auto stats_template = abmat_stats( dummy ); //retrieve map of stats
                 //create a variable for each statistic
                 for (auto& elem : stats_template) {
-                    plog("\n");
-                    plog(oVar->label);
+                    // plog("\n");
+                    // plog(oVar->label);
                     std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first);
-                    plog(" : ");
-                    plog(nvarLab.c_str());
+                    // plog(" : ");
+                    // plog(nvarLab.c_str());
                     abmat_add_var(oVar, nvarLab.c_str());
                 }
             }
@@ -636,7 +652,7 @@ void plog_object_tree_up(object* startO, bool plotVars)
             tree += std::to_string(cv->data[t]);
             tree += ";";
         }
-        tree += (cv->param == 0 ? "Par)," : cv->param == 1 ? "Var)," : "Fun),");
+        tree += (cv->param == 1 ? "Par)," : cv->param == 0 ? "Var)," : "Fun),");
         if(++count % 4 == 0) {
             tree += "\n\t";
         }
@@ -691,7 +707,7 @@ void update_abmat_vars()
             for ( ; oVar != NULL; oVar = oVar->next) { //in most cases this is a once-loop. But for cond several objects with same label may exist.
 
                 switch (type) {
-                    case a_micro: {                        
+                    case a_micro: {
                             std::vector<double> data = root->gatherData_all(oVar->label);
                             auto stats_template = abmat_stats( data ); //retrieve map of stats
                             //save data
@@ -709,12 +725,10 @@ void update_abmat_vars()
                         break;
 
                     case a_macro: {
-                            /*  //a macro object holds a variable with the same name, maybe shortened.
-                                const char* varLab = get_abmat_varname(type, oVar->label); //name is same as original, shortened
-                                oVar->add_var(varLab, -1, NULL, true); //no lags, no values --> only data
-                                variable* var = oVar->search_var(oVar, varLab, true, true, oVar);
-                                var->param = 1; //1 is parameter. Other fields are not used.
-                            */
+                            //simply copy the current data.
+                            double val = root->cal(root, oVar->label, 0);
+                            std::string varlab = get_abmat_varname(type,oVar->label); 
+                            oVar->write(varlab.c_str(), val, t);
                         }
                         break;
 
@@ -740,10 +754,10 @@ void update_abmat_vars()
                         }
                         break;
                 }
-                                        //visualise the added variables.
-                        plog("\n---- Added new variables to abmat ---");
-                        plog_object_tree_up(oVar, true);
-                        plog("\n---");
+                //visualise the added data.
+                plog("\n---- Added new data to abmat ---");
+                plog_object_tree_up(oVar, true);
+                plog("\n---");
 
 
 
