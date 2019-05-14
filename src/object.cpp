@@ -1222,7 +1222,7 @@ void object::add_var( char const* lab, int lag, double* val, int save )
         // }
 
         // cv->init( cur, lab, lag, val, save );
-        cv = cur->add_var_basic( lab, lag, val, save, true );        
+        cv = cur->add_var_basic( lab, lag, val, save, true );
     }
 }
 
@@ -2014,17 +2014,20 @@ void object::empty( void )
     variable* cv, *cv1;
 
     //ToDo : Check if that ABMAT objects are treated appropriately
-    if ( root == this )
+    if ( root == this ) {
         blueprint->empty( );
+    }
 
-    for ( cv = v; cv != NULL; cv = cv1 )
-        if ( running && ( cv->save || cv->savei ) )
+    for ( cv = v; cv != NULL; cv = cv1 ) {
+        if ( running && ( cv->save || cv->savei ) ) {
             cv1 = cv->next; 	// variable should have been already saved to cemetery!!!
+        }
         else {
             cv1 = cv->next;
             cv->empty( );
             delete cv;
         }
+    }
 
     v = NULL;
     v_map.clear( );

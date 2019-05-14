@@ -179,15 +179,14 @@ int lsdmain( int argn, char** argv )
     max_threads = ( MAX_CORES <= 0 ) ? 4 : MAX_CORES;
 #endif
 
+
     root = new object;
-    abmat = new object;
     root->init( NULL, "Root" );
-    abmat->init( NULL, "ABMAT" );
-    m_abmat_varnames.empty();
-    i_abmat_varnames = 0;
     add_description( "Root", "Object", "(no description available)" );
     blueprint = new object;
     blueprint->init( NULL, "Root" );
+    abmat = new object;
+    abmat->init( NULL, "ABMAT" );
 
 #ifdef NO_WINDOW
 
@@ -579,10 +578,10 @@ int lsdmain( int argn, char** argv )
     empty_description( );
     empty_cemetery( );
     blueprint->empty( );
-    abmat->empty( );
     root->empty( );
-    delete blueprint;
+    abmat->empty();
     delete abmat;
+    delete blueprint;
     delete root;
     delete stacklog;
     delete [ ] struct_file;
@@ -641,6 +640,7 @@ void run( void )
         running = true;		// signal simulation is running
         cur_sim = i;	 	// Update the global variable holding information on the current run in the set of runs
         empty_cemetery( ); 	// ensure that previous data are not erroneously mixed (sorry Nadia!)
+        disconnect_abmat_from_root(); //ensure that abmat is not connected to root.
 
 #ifndef NO_WINDOW
         prepare_plot( root, i );
@@ -774,9 +774,11 @@ void run( void )
             // only update if simulation not paused
             if ( ! pause_run )
 #endif
+            {
                 root->update( );
+                update_abmat_vars( );
+            }
 
-            update_abmat_vars();
 
             perc_done = ( 100 * t ) / max_step;
 
@@ -904,13 +906,13 @@ void run( void )
         user_exception = true;
         close_sim( );
         user_exception = false;
-
+        connect_abmat_to_root(); //before reset_end
         reset_end( root );
         root->emptyturbo( );
 
         if ( quit != 2 && ( sim_num > 1 || no_window ) ) {
             // save results for multiple simulation runs, if any
-            if ( series_saved > 0 ) {
+            if ( series_saved > 0 || abmat_series_saved > 0 ) {
                 // remove existing path, if any, from name in case of alternative output path
                 char* alt_name = clean_file( simul_name );
 

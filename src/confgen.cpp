@@ -20,6 +20,9 @@
     Generates new configurations from a base one.
 *************************************************************/
 
+//ADD ABMAT
+
+
 #include <set>
 #include "decl.h"
 
@@ -74,7 +77,6 @@ unsigned seed = 1;			// random number generator initial seed
 description* descr = NULL;	// model description structure
 lsdstack* stacklog = NULL;	// LSD stack
 object* blueprint = NULL;	// LSD blueprint (effective model in use)
-object* abmat = NULL;       // LSD abmat (hold reduced model data for analysis)
 
 
 variable* cemetery = NULL;	// LSD saved data series (from last simulation run)
@@ -164,11 +166,7 @@ int lsdmain( int argn, char** argv )
     root->init( NULL, "Root" );
     add_description( "Root", "Object", "(no description available)" );
     blueprint = new object;
-    blueprint->init( NULL, "Root" );
-    abmat = new object;
-    abmat->init( NULL, "ABMAT" );
-    m_abmat_varnames.empty();
-    i_abmat_varnames = 0;
+    blueprint->init( NULL, "Root" );    
     stacklog = new lsdstack;
     stacklog->prev = NULL;
     stacklog->next = NULL;
@@ -205,11 +203,9 @@ int lsdmain( int argn, char** argv )
         delete [ ] values[ i ];
     }
     empty_cemetery();
-    blueprint->empty();
-    abmat->empty();
+    blueprint->empty();    
     root->empty();
-    delete blueprint;
-    delete abmat;
+    delete blueprint;    
     delete root;
     delete stacklog;
     delete [ ] struct_file;

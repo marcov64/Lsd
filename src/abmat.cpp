@@ -114,6 +114,7 @@
 //global variables
 std::map <const char*, std::string> m_abmat_varnames; //map variable names to shortened ones.
 int i_abmat_varnames; //simple counter for up to 3 digits
+int abmat_series_saved;
 
 const char* lfirst = "first";
 const char* lsecond = "second";
@@ -122,6 +123,25 @@ const char* lmicro = "*micro";
 const char* lmacro = "*macro";
 const char* lcond = "*cond";
 const char* lcomp = "*comp";
+
+/********************************************
+    GET_ABMAT_VARNAMES_MAP
+    Produces a formated string with the mapping of
+    the variable names
+********************************************/
+
+std::string get_abmat_varnames_map()
+{
+    std::string varname_mapping;
+    for (auto& elem : m_abmat_varnames) {
+        varname_mapping += elem.first;
+        varname_mapping += "\t";
+        varname_mapping += elem.second;
+        varname_mapping += "\n";
+    }
+    return varname_mapping;
+}
+
 
 /********************************************
     ABMAT_VARNAME_CONVERT
@@ -589,6 +609,7 @@ void abmat_add_var(object* parent, char const* lab)
     variable* var = parent->add_var_basic(lab, 0, NULL, true, true); //no lags, no values, save
     var->param = 1; //1 is parameter. Other fields are not used.
     abmat_alloc_save_mem_var(var);
+    abmat_series_saved++;
 }
 
 /********************************************************
@@ -621,9 +642,9 @@ void abmat_alloc_save_mem_var(variable* cv)
 }
 
 /********************************************************
-    GET_OBJECT_TREE_UP
+    PLOG_OBJECT_TREE_UP
     Helper for development issues.
-    provides a formatted string visualising the object tree.
+    Visulises the object tree.
     Includes direct parents, all contained vars and all children.
 ********************************************************/
 void plog_object_tree_up(object* startO, bool plotVars)
@@ -727,7 +748,7 @@ void update_abmat_vars()
                     case a_macro: {
                             //simply copy the current data.
                             double val = root->cal(root, oVar->label, 0);
-                            std::string varlab = get_abmat_varname(type,oVar->label); 
+                            std::string varlab = get_abmat_varname(type, oVar->label);
                             oVar->write(varlab.c_str(), val, t);
                         }
                         break;
@@ -788,6 +809,70 @@ void update_abmat_vars()
 
         }
     }
+}
+
+
+/********************************************
+    CONNECT_ABMAT_TO_ROOT
+    Adds the existing abmat tree as child to root.
+    This allows integration in standard LSD results processing.
+    Also, standard clean-up applies.
+********************************************/
+
+void connect_abmat_to_root()
+{
+    //check add_obj_basic for functionality
+    //set up to root.
+    if (abmat->up != NULL) {
+        sprintf( msg, "Error in method '%s'", __func__ );
+        error_hard( msg, "ABMAT is already connected to something",
+                    "please contact developers",
+                    true );
+        return;
+    }
+    abmat->up = root;
+    bridge* cb;
+
+    // create bridge
+    if ( root->b == NULL )
+        cb = root->b = new bridge(abmat->label);
+    else {
+        for ( cb = root->b; cb->next != NULL; cb = cb->next );
+        cb->next = new bridge(abmat->label);
+        cb = cb->next;
+    }
+
+    if ( cb == NULL ) {
+        sprintf( msg, "Error in method '%s'. Cannot link abmat to root.", __func__ );
+        error_hard( msg, "out of memory",
+                    "if there is memory available and the error persists,\nplease contact developers",
+                    true );
+        return;
+    }
+
+    cb->head = abmat; //link bridge against abmat
+    root->b_map.insert( b_pairT ( abmat->label, cb ) );
+
+    //add bridge to root
+    //link head to abmat
+
+}
+
+/********************************************
+    DISCONNECT_ABMAT_TO_ROOT
+    Reverse connection
+********************************************/
+
+void disconnect_abmat_from_root()
+{
+    //check add_obj_basic for functionality
+    //unset up from root.
+    if (abmat == NULL || abmat->up == NULL) {
+        return;
+    }    
+    //delete bridge for abmat, located in root (up)
+    delete_bridge(abmat);    
+    abmat->up = NULL; //set up NULL
 }
 
 #endif

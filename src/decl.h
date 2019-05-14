@@ -939,6 +939,8 @@ void abmat_add_var(object* parent, char const* lab);
 void abmat_alloc_save_mem_var(variable* cv);
 const char* abmat_varname_convert(const char* lab);
 bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char* lVar2);
+void connect_abmat_to_root();
+void disconnect_abmat_from_root();
 #endif
 
 // prevent exposing internals in users' fun_xxx.cpp
@@ -1227,6 +1229,7 @@ extern object* abmat;           // LSD abmat object (for abmat statistics)
 #ifdef CPP11
 extern std::map <const char*, std::string> m_abmat_varnames; //map variable names to shortened ones.
 extern int i_abmat_varnames; //simple counter for up to 3 digits
+extern int abmat_series_saved; //number of final (output) abmat time-series variables.
 #endif
 extern object* currObj;			// pointer to current object in browser
 extern object* wait_delete;		// LSD object waiting for deletion
