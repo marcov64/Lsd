@@ -271,21 +271,34 @@ m_statsT abmat_stats(std::vector<double>& Data )
         std::sort(Data.begin(), Data.end());
         stats["min"] = Data[0];
         stats["max"] = Data[len_data - 1];
-        int index = static_cast<int>( (len_data / 4) );
-        stats["p25"] = Data[index];
-        index = static_cast<int>( std::ceil( rlen_data * 3.0 / 4.0 ) );
-        stats["p75"] = Data[index];
-        index = static_cast<int>( (len_data * 1 / 20) );
+
+        int index = static_cast<int>( (len_data * 1 / 20) ) - 1;
+        if (index < 0)
+            index = 0;
         stats["p05"] = Data[index];
-        index = static_cast<int>( std::ceil( rlen_data * 19.0 / 20.0 ) );
+        
+        index = static_cast<int>( (len_data / 4.0) ) - 1;
+        if (index < 0)
+            index = 0;
+        stats["p25"] = Data[index];
+
+        index = static_cast<int>( std::ceil( rlen_data * 3.0 / 4.0 ) ) - 1;
+        if (index > len_data-1)
+            index = len_data-1;
+        stats["p75"] = Data[index];
+        
+        index = static_cast<int>( std::ceil( rlen_data * 19.0 / 20.0 ) ) -1;
+        if (index > len_data-1)
+            index = len_data-1;
         stats["p95"] = Data[index];
 
         if (len_data % 2 == 0) {
-            index = static_cast<int>( len_data / 2 - 1 );
-            stats["p50"] = (Data[index] + Data[index + 1]) / 2;
+            index = len_data / 2 - 1;
+            stats["p50"] = (Data[index] + Data[index + 1]) / 2.0;
         }
         else {
-            stats["p50"] = Data[ static_cast<int>( (len_data - 1) / 2 ) ];
+            index = (len_data-1)/2;
+            stats["p50"] = Data[ index ];
         }
 
         //L-Moments and mean
