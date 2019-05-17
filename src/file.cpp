@@ -798,6 +798,10 @@ UNLOAD_CONFIGURATION
 ******************************************************************************/
 void unload_configuration ( bool full )
 {
+    disconnect_abmat_from_root( );
+    abmat->empty( );
+    abmat->init( NULL, "ABMAT" );
+    
 	root->empty( );								// remove current model structure
 	root->init( NULL, "Root" );
 	empty_description( );

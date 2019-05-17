@@ -639,8 +639,7 @@ void run( void )
     for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i ) {
         running = true;		// signal simulation is running
         cur_sim = i;	 	// Update the global variable holding information on the current run in the set of runs
-        empty_cemetery( ); 	// ensure that previous data are not erroneously mixed (sorry Nadia!)
-        disconnect_abmat_from_root(); //ensure that abmat is not connected to root.
+        empty_cemetery( ); 	// ensure that previous data are not erroneously mixed (sorry Nadia!)        
 
 #ifndef NO_WINDOW
         prepare_plot( root, i );
