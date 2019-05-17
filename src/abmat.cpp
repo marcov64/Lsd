@@ -864,6 +864,7 @@ void connect_abmat_to_root()
     }
 
     cb->head = abmat; //link bridge against abmat
+    cb->copy = true; //this is a "copy" bridge, meaning it will not empty the subtree when deleted.
     root->b_map.insert( b_pairT ( abmat->label, cb ) );
 
     //add bridge to root
@@ -882,10 +883,8 @@ void disconnect_abmat_from_root()
     //unset up from root.
     if (abmat == NULL || abmat->up == NULL) {
         return;
-    }    
-    //delete bridge for abmat, located in root (up)
-    delete_bridge(abmat);    
-    abmat->up = NULL; //set up NULL
+    }            
+    delete_bridge(abmat);  //because bridge is copy, abmat stays.    
 }
 
 #endif

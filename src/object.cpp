@@ -1881,6 +1881,7 @@ object* object::add_n_objects2( char const* lab, int n, object* ex, int t_update
 /****************************
     DELETE_BRIDGE
     Remove a bridge, used when an object is removed from the model.
+    Also removes all lower objects (see bridge::~bridge)
 *****************************/
 void delete_bridge( object* d )
 {
