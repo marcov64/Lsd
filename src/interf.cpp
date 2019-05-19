@@ -1670,7 +1670,7 @@ case 5:
 	
 	for ( i = 0, cb = r->up->b; cb->head != r; cb = cb->next, ++i );
 	
-	cmd( "set listfocus 2; set itemfocus %d", i ); 
+	cmd( "set listfocus 2; set itemfocus %d", r->up->up == NULL ? i : i + 1 ); 
 
 	*choice = 0;
 	redrawRoot = true;					// force browser redraw
