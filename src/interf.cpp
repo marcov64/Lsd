@@ -106,6 +106,7 @@ void create( void )
 	cmd( "set listfocus 1" );
 	cmd( "set prevlistfocus 0" );
 	cmd( "set itemfocus 0" );
+	cmd( "set itemfirst 0" );
 	cmd( "set c \"\"" );
 	cmd( "if $strWindowOn { set strWindowB active } { set strWindowB normal }" );
 
@@ -304,6 +305,7 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.v.c.var_name <Return> { \
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set choice 7 \
 					} \
@@ -311,6 +313,7 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.v.c.var_name <Double-Button-1> { \
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						after idle { set choice 7 } \
 					} \
@@ -320,6 +323,7 @@ int browse( object *r, int *choice )
 					.l.v.c.var_name selection set @%%x,%%y; \
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]; \
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						.l.v.c.var_name.v entryconfig 2 -state normal; \
@@ -375,6 +379,7 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.v.c.var_name <Control-Up> { \
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]; \
 					if { $itemfocus > 0 } { \
 						incr itemfocus -1 \
 					}; \
@@ -385,6 +390,7 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.v.c.var_name <Control-Down> { \
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]; \
 					if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { \
 						incr itemfocus \
 					}; \
@@ -487,10 +493,11 @@ int browse( object *r, int *choice )
 					event generate .l.v.c.var_name <F8> \
 				}" );
 		}
-
+		
 		cmd( "bind .l.v.c.var_name <Button-1> { \
 				set listfocus 1; \
 				set itemfocus [ .l.v.c.var_name curselection ]; \
+				set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]; \
 				update_options \
 			}" );
 		cmd( "bind .l.v.c.var_name <Left> { \
@@ -580,6 +587,7 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.s.c.son_name <Return> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
+					set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
 					if { $upObjItem && $itemfocus == 0 } { \
 						set choice 5 \
 					} { \
@@ -591,6 +599,7 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.s.c.son_name <Control-Return> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
+					set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
 					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set useCurrObj no; \
 						set choice 6 \
@@ -599,6 +608,7 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.s.c.son_name <Double-Button-1> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
+					set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
 					if { $upObjItem && $itemfocus == 0 } { \
 						set choice 5 \
 					} { \
@@ -612,6 +622,7 @@ int browse( object *r, int *choice )
 					.l.s.c.son_name selection set @%%x,%%y; \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
+					set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
 					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set useCurrObj no; \
 						set nocomp [ expr ! [ get_obj_conf $vname comp ] ]; \
@@ -634,6 +645,7 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.s.c.son_name <Control-Up> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
+					set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
 					if { ! ( $upObjItem && $itemfocus == 0 ) } { \
 						if { $itemfocus > 0 } { \
 							incr itemfocus -1 \
@@ -646,6 +658,7 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.s.c.son_name <Control-Down> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
+					set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
 					if { ! ( $upObjItem && $itemfocus == 0 ) } { \
 						if { $itemfocus < [ expr [ .l.s.c.son_name size ] - 1 ] } { \
 							incr itemfocus \
@@ -694,9 +707,11 @@ int browse( object *r, int *choice )
 		}
 
 		cmd( "bind .l.s.c.son_name <BackSpace> { set choice 5 }" );
+		
 		cmd( "bind .l.s.c.son_name <Button-1> { \
 				set listfocus 2; \
 				set itemfocus [ .l.s.c.son_name curselection ]; \
+				set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
 				update_options \
 			}" );
 		cmd( "bind .l.s.c.son_name <Right> { \
@@ -981,7 +996,6 @@ int browse( object *r, int *choice )
 
 	// restore correct selection on list boxes
 	cmd( "if { $listfocus == 1 } { \
-			focus .l.v.c.var_name; \
 			if { [ .l.v.c.var_name size ] == 0 || ! [ string is integer -strict $itemfocus ] } { \
 				set itemfocus 0 \
 			} { \
@@ -989,13 +1003,22 @@ int browse( object *r, int *choice )
 					set itemfocus [ expr [ .l.v.c.var_name size ] - 1 ] \
 				} \
 			}; \
-			.l.v.c.var_name selection clear 0 end; \
-			.l.v.c.var_name selection set $itemfocus; \
-			.l.v.c.var_name activate $itemfocus; \
-			.l.v.c.var_name see $itemfocus \
+			if { [ lindex [ .l.s.c.son_name yview ] 0 ] != $itemfirst } { \
+				.l.v.c.var_name yview moveto $itemfirst \
+			}; \
+			if { [ .l.v.c.var_name curselection ] != $itemfocus } { \
+				.l.v.c.var_name selection set $itemfocus; \
+				if { $itemfocus < [ expr [ lindex [ .l.v.c.var_name yview ] 0 ] * [ .l.v.c.var_name size ] ] || $itemfocus >= [ expr [ lindex [ .l.v.c.var_name yview ] 1 ] * [ .l.v.c.var_name size ] ] } { \
+					.l.v.c.var_name see $itemfocus \
+				}; \
+				set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ] \
+			}; \
+			if { [ .l.v.c.var_name index active ] != $itemfocus } { \
+				.l.v.c.var_name activate $itemfocus \
+			}; \
+			focus .l.v.c.var_name; \
 		}" );
 	cmd( "if { $listfocus == 2 } { \
-			focus .l.s.c.son_name; \
 			if { [ .l.s.c.son_name size ] == 0 || ! [ string is integer -strict $itemfocus ] } { \
 				set itemfocus 0 \
 			} { \
@@ -1003,10 +1026,20 @@ int browse( object *r, int *choice )
 					set itemfocus [ expr [ .l.s.c.son_name size ] - 1 ] \
 				} \
 			}; \
-			.l.s.c.son_name selection clear 0 end; \
-			.l.s.c.son_name selection set $itemfocus; \
-			.l.s.c.son_name activate $itemfocus; \
-			.l.s.c.son_name see $itemfocus \
+			if { [ lindex [ .l.s.c.son_name yview ] 0 ] != $itemfirst } { \
+				.l.s.c.son_name yview moveto $itemfirst \
+			}; \
+			if { [ .l.s.c.son_name curselection ] != $itemfocus } { \
+				.l.s.c.son_name selection set $itemfocus; \
+				if { $itemfocus < [ expr [ lindex [ .l.s.c.son_name yview ] 0 ] * [ .l.s.c.son_name size ] ] || $itemfocus >= [ expr [ lindex [ .l.s.c.son_name yview ] 1 ] * [ .l.s.c.son_name size ] ] } { \
+					.l.s.c.son_name see $itemfocus \
+				}; \
+				set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ] \
+			}; \
+			if { [ .l.s.c.son_name index active ] != $itemfocus } { \
+				.l.s.c.son_name activate $itemfocus \
+			}; \
+			focus .l.s.c.son_name; \
 		}" );
 
 	cmd( "update_options" );		// update active menu options
@@ -1044,11 +1077,13 @@ int browse( object *r, int *choice )
 	// update focus memory
 	cmd( "if { [ .l.v.c.var_name curselection ] != \"\" } { \
 			set listfocus 1; \
-			set itemfocus [ .l.v.c.var_name curselection ] \
+			set itemfocus [ .l.v.c.var_name curselection ]; \
+			set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ] \
 		}" );
 	cmd( "if { [ .l.s.c.son_name curselection ] != \"\" } { \
 			set listfocus 2; \
-			set itemfocus [ .l.s.c.son_name curselection ] \
+			set itemfocus [ .l.s.c.son_name curselection ]; \
+			set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ] \
 		}" );
 
 	// if simulation was run, check to see if operation is valid
@@ -1331,7 +1366,7 @@ case 2:
 				initParent = r;	
 				
 				// update focus memory
-				cmd( "set listfocus 1; set itemfocus [ .l.v.c.var_name index end ]" );
+				cmd( "set listfocus 1; set itemfocus [ .l.v.c.var_name index end ]; set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]" );
 				cmd( "lappend modElem %s }", lab );
 				struct_loaded = true;		// some model structure loaded
 				unsaved_change( true );		// signal unsaved change
@@ -1468,7 +1503,7 @@ case 3:
 		add_description( lab, "Object", lab1 );
 		
 		// update focus memory
-		cmd( "set listfocus 2; set itemfocus [ .l.s.c.son_name index end ]" );
+		cmd( "set listfocus 2; set itemfocus [ .l.s.c.son_name index end ]; set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]" );
 		struct_loaded = true;	// some model structure loaded
 		unsaved_change( true );	// signal unsaved change
 		redrawRoot = true;		// force browser redraw
@@ -6894,7 +6929,7 @@ void save_pos( object *r )
 	// save the current object & cursor position for quick reload
 	strcpy( lastObj, r->label );
 	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { set lastList 2 } { set lastList 1 }" );
-	cmd( "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ] } { set lastItem [ .l.s.c.son_name curselection ] }" );
+	cmd( "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ]; set lastFirst [ lindex [ .l.v.c.var_name yview ] 0 ] } { set lastItem [ .l.s.c.son_name curselection ]; set lastFirst [ lindex [ .l.s.c.son_name yview ] 0 ] }" );
 	cmd( "if { $lastItem == \"\" } { set lastItem 0 }" );
 }
 
@@ -6914,6 +6949,7 @@ object *restore_pos( object *r )
 		{
 			cmd( "if [ info exists lastList ] { set listfocus $lastList }" );
 			cmd( "if [ info exists lastItem ] { set itemfocus $lastItem }" );
+			cmd( "if [ info exists lastFirst ] { set itemfirst $lastFirst }" );
 			return cur;
 		}
 	}
