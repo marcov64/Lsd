@@ -870,6 +870,7 @@ void run( void )
                     cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Unexpected termination\" -detail \"Please try again.\"" );
                     myexit( 12 );
                     break;
+
                 default:
                     break;
             }
@@ -1206,7 +1207,7 @@ void create_logwindow( void )
     cmd( "button $w.stop -width $butWid -text Stop -command {set_c_var done_in 1} -underline 0 -state disabled" );
     cmd( "button $w.pause -width $butWid -text Pause -command {set_c_var done_in 9} -underline 0 -state disabled" );
     cmd( "button $w.speed -width $butWid -text Fast -command {set_c_var done_in 2} -underline 0 -state disabled" );
-    cmd( "button $w.obs -width $butWid -text Observed -command {set_c_var done_in 4} -underline 0 -state disabled" );
+    cmd( "button $w.obs -width $butWid -text Observe -command {set_c_var done_in 4} -underline 0 -state disabled" );
     cmd( "button $w.deb -width $butWid -text Debug -command {set_c_var done_in 3} -underline 0 -state disabled" );
     cmd( "button $w.help -width $butWid -text Help -command {LsdHelp log.html} -underline 0" );
     cmd( "button $w.copy -width $butWid -text Copy -command {tk_textCopy .log.text.text} -underline 0" );
@@ -1286,7 +1287,6 @@ void set_buttons_log( bool on )
     cmd( ".log.but.speed configure -state %s", state );
     cmd( ".log.but.obs configure -state %s", state );
     cmd( ".log.but.deb configure -state %s", state );
-
 }
 
 

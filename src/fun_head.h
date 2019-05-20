@@ -1038,7 +1038,7 @@ plog(buffer);} while(false)
 // }
 
 
-#define ABMAT_ADD_VARIABLE( type, name ) add_abmat_object( type, name );
+#define ABMAT_ADD_VARIABLE( type, ... ) add_abmat_object( type, __VA_ARGS__ );
 
 
 #endif //#ifdef CPP11

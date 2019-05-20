@@ -26,6 +26,7 @@
         Additionally, time-series statistics are saved.
       Comp  : A set of two macro variables. The subject and its correspondance.
         Associative statistics are taken (Distances, Correlation, Association)
+        and also distance metrics. Each comparative variable also is a macro v.
       Cond  : A set of two micro variables. The subject and a factorial
         indicator (that basically subsets the micro variables). Distribution
         statistics are saved for each timestep for ich subset.
@@ -41,11 +42,8 @@
             |-- *macro --|--- macro_var_1
             |            |--- macro_var_*
             |
-            |-- *comp  --|--- subject --|--- corr_sub_1 (hooked to corr_assoc_1)
-            |            |              |--- corr_sub_*
-            |            |
-            |            |--- associate --|-- corr_ass_1 (hooked to corr_sub_1)
-            |            |                |-- corr_ass_*
+            |-- *comp  (virtual) : if a *micro variable has a targeted hook, it
+            |                      is also a comparative variable.
             |
             |-- *cond  --|--- subject --|--- cond_sub_1 (hooked to cond_assoc_1)
             |            |              |--- cond_sub_*
@@ -63,6 +61,12 @@
     the user can in principle (and may have reason to) modify past values of
     any LSD variable. Thus we completely separate the statistical items from
     the model itself.
+
+    For the Comparative variables, we add each item that is compared to
+    something else only once and to the macro items. The information about
+    comparisons is saved in form of hooks. If variable a is compared to b and c,
+    than we add hooks from a to b and c. In this sense a comparative variable is
+    just a virtual variable and we do not really represent it by an object.
 
 ****************************************************************************************/
 #include "decl.h"
@@ -127,7 +131,7 @@ const char* lsecond = "second";
 const char* lmicro = "*micro";
 const char* lmacro = "*macro";
 const char* lcond = "*cond";
-const char* lcomp = "*comp";
+const char* lcomp = lmacro;
 
 /********************************************
     GET_ABMAT_VARNAMES_MAP
@@ -288,13 +292,13 @@ m_statsT abmat_stats(std::vector<double>& Data )
         stats["p25"] = Data[index];
 
         index = static_cast<int>( std::ceil( rlen_data * 3.0 / 4.0 ) ) - 1;
-        if (index > len_data-1)
-            index = len_data-1;
+        if (index > len_data - 1)
+            index = len_data - 1;
         stats["p75"] = Data[index];
 
-        index = static_cast<int>( std::ceil( rlen_data * 19.0 / 20.0 ) ) -1;
-        if (index > len_data-1)
-            index = len_data-1;
+        index = static_cast<int>( std::ceil( rlen_data * 19.0 / 20.0 ) ) - 1;
+        if (index > len_data - 1)
+            index = len_data - 1;
         stats["p95"] = Data[index];
 
         if (len_data % 2 == 0) {
@@ -302,7 +306,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
             stats["p50"] = (Data[index] + Data[index + 1]) / 2.0;
         }
         else {
-            index = (len_data-1)/2;
+            index = (len_data - 1) / 2;
             stats["p50"] = Data[ index ];
         }
 
@@ -370,143 +374,142 @@ m_statsT abmat_stats(std::vector<double>& Data )
 
 m_statsT abmat_compare(std::vector<double>& Data1, std::vector<double>& Data2)
 {
-  // checks
-  double gamma;               // discard ties
-  double tau_a, tau_b, tau_c; // correct for ties
-  bool constVector;
-  double concordant = 0.0, discordant = 0.0, tie = 0.0, tie_a = 0.0,
-  tie_b = 0.0, tie_ab = 0.0;
-  if (Data1.size() != Data2.size()) {
-    sprintf(msg, "error in '%s'. ", __func__);
-    error_hard(msg, "Data sizes are different", "Please contact the developer.",
-               true);
-  }
-
-  m_statsT compare;
-
-  compare["n"]; // length of the timeseries
-
-  // association, i.e. direction without magnitude
-  compare["gamma"]; // gamme correlation
-  compare["tauA"];
-  compare["tauB"];
-  compare["tauC"];
-
-  // standard product moment correlation
-  compare["corr"];
-
-  // Differences L-Norms
-  compare["L1"]; // difference in means
-  compare["L2"]; // difference as RMSE
-
-  const int len_data = Data1.size();
-  const double rlen_data = static_cast<double>(len_data);
-
-  if (!is_const_dbl(Data1) || !is_const_dbl(Data2))
-    constVector = false;
-  else
-    {
-      constVector = true;
+    // checks
+    double gamma;               // discard ties
+    double tau_a, tau_b, tau_c; // correct for ties
+    bool constVector;
+    double concordant = 0.0, discordant = 0.0, tie = 0.0, tie_a = 0.0,
+           tie_b = 0.0, tie_ab = 0.0;
+    if (Data1.size() != Data2.size()) {
+        sprintf(msg, "error in '%s'. ", __func__);
+        error_hard(msg, "Data sizes are different", "Please contact the developer.",
+                   true);
     }
 
-  // Norms possible
-  if (len_data >= 1) {
-    double AE;
-    double MAE = 0.0, RMSE = 0.0;
-    for (auto it1 = Data1.begin(), it2 = Data2.begin(); it1 < Data1.end();
-         ++it1, ++it2) {
-      AE = *it1 - *it2;
-      if (AE < 0) {
-        AE = -AE;
-      }
-      MAE += AE;
-      RMSE += AE * AE;
-      if (len_data > 2 && constVector == false) {
-        if (isWithinPrecisionInterval(*it1, *(std::next(it1)),
-                                      FLOAT_PREC_INTVL) ||
-            isWithinPrecisionInterval(*it2, *(std::next(it2)),
-                                      FLOAT_PREC_INTVL)) {
-          continue; // skip this one
-        }
-        else if ((*it1 > *(std::next(it1)) && *it2 > *(std::next(it2))) ||
-                 (*it1 < *(std::next(it1)) && *it2 < *(std::next(it2)))) {
-          concordant++;
+    m_statsT compare;
+
+    compare["n"]; // length of the timeseries
+
+    // association, i.e. direction without magnitude
+    compare["gamma"]; // gamme correlation
+    compare["tauA"];
+    compare["tauB"];
+    compare["tauC"];
+
+    // standard product moment correlation
+    compare["corr"];
+
+    // Differences L-Norms
+    compare["L1"]; // difference in means
+    compare["L2"]; // difference as RMSE
+
+    const int len_data = Data1.size();
+    const double rlen_data = static_cast<double>(len_data);
+
+    if (!is_const_dbl(Data1) || !is_const_dbl(Data2))
+        constVector = false;
+    else {
+        constVector = true;
+    }
+
+    // Norms possible
+    if (len_data >= 1) {
+        double AE;
+        double MAE = 0.0, RMSE = 0.0;
+        for (auto it1 = Data1.begin(), it2 = Data2.begin(); it1 < Data1.end();
+                ++it1, ++it2) {
+            AE = *it1 - *it2;
+            if (AE < 0) {
+                AE = -AE;
+            }
+            MAE += AE;
+            RMSE += AE * AE;
+            if (len_data > 2 && constVector == false) {
+                if (isWithinPrecisionInterval(*it1, *(std::next(it1)),
+                                              FLOAT_PREC_INTVL) ||
+                        isWithinPrecisionInterval(*it2, *(std::next(it2)),
+                                                  FLOAT_PREC_INTVL)) {
+                    continue; // skip this one
+                }
+                else if ((*it1 > *(std::next(it1)) && *it2 > *(std::next(it2))) ||
+                         (*it1 < * (std::next(it1)) && *it2 < * (std::next(it2)))) {
+                    concordant++;
+                }
+
+                else if ((*it1 > *(std::next(it1)) && *it2 < * (std::next(it2))) ||
+                         (*it1 < * (std::next(it1)) && *it2 > *(std::next(it2)))) {
+                    discordant++;
+                }
+                else {
+                    // A tie: within a or b only, or between a and b (can also be within
+                    // a and/or b)
+                    bool t_a = *it1 == *(std::next(it1));
+                    bool t_b = *it2 == *(std::next(it2));
+                    if (t_a) {
+                        tie_a++;
+                    }
+                    if (t_b) {
+                        tie_b++;
+                    }
+                }
+            }
         }
 
-        else if ((*it1 > *(std::next(it1)) && *it2 < *(std::next(it2))) ||
-                 (*it1 < *(std::next(it1)) && *it2 > *(std::next(it2)))) {
-          discordant++;
+        MAE /= (len_data);
+        RMSE /= (len_data);
+
+        if (RMSE > 0) {
+            RMSE = sqrt(RMSE);
+        }
+        if (len_data > 2 && constVector == false) {
+            sprintf(msg, "\nconcordant discordant %g %g", concordant, discordant);
+            plog(msg);
+            if (concordant + discordant != 0) {
+                double S = (concordant - discordant);
+                gamma = S / (concordant + discordant);
+                tau_a = S / ((Data1.size()) * (Data1.size() - 1));
+                tau_b = S / sqrt(double(concordant + discordant + tie_a) *
+                                 double(concordant + discordant + tie_b));
+                // tau_c
+            }
+            else {
+                gamma = 0.0;
+                tau_a = 0.0;
+                tau_b = 0.0;
+            }
+            compare["gamma"] = gamma; // gamme correlation
+            compare["tauA"] = tau_a;
+            compare["tauB"] = tau_b;
+            // compare["tauC"]=0.0;
         }
         else {
-          // A tie: within a or b only, or between a and b (can also be within
-          // a and/or b)
-          bool t_a = *it1 == *(std::next(it1));
-          bool t_b = *it2 == *(std::next(it2));
-          if (t_a) {
-            tie_a++;
-          }
-          if (t_b) {
-            tie_b++;
-          }
+            compare["gamma"] = NADBL; // gamme correlation
+            compare["tauA"] = 0.0;
+            compare["tauB"] = 0.0;
+            //  compare["tauC"]=0.0;
         }
-      }
-    }
-
-    MAE /= (len_data);
-    RMSE /= (len_data);
-
-    if (RMSE > 0) {
-      RMSE = sqrt(RMSE);
-    }
-    if (len_data > 2 && constVector == false) {
-      sprintf(msg, "\nconcordant discordant %g %g", concordant, discordant);
-      plog(msg);
-      if (concordant + discordant != 0) {
-        double S = (concordant - discordant);
-        gamma = S / (concordant + discordant);
-        tau_a = S / ((Data1.size()) * (Data1.size() - 1));
-        tau_b = S / sqrt(double(concordant + discordant + tie_a) *
-                         double(concordant + discordant + tie_b));
-        // tau_c
-      }
-      else {
-        gamma = 0.0;
-        tau_a = 0.0;
-        tau_b = 0.0;
-      }
-      compare["gamma"] = gamma; // gamme correlation
-      compare["tauA"] = tau_a;
-      compare["tauB"] = tau_b;
-      // compare["tauC"]=0.0;
     }
     else {
-      compare["gamma"] = NADBL; // gamme correlation
-      compare["tauA"] = 0.0;
-      compare["tauB"] = 0.0;
-      //  compare["tauC"]=0.0;
+        for (auto& elem : compare) {
+            elem.second = NAN;
+        }
     }
-  }
-  else {
-    for (auto& elem : compare) {
-      elem.second = NAN;
-    }
-  }
 
-  compare["n"] = rlen_data; // only one never NAN
-  return compare;
+    compare["n"] = rlen_data; // only one never NAN
+    return compare;
 }
 
 bool is_const_dbl(std::vector<double>& Data1)
 {
-  for (auto it = Data1.begin(); it != Data1.end(); it++) {
-    if (!isWithinPrecisionInterval(
-            *it, *Data1.end(),
-            FLOAT_PREC_INTVL)) { // always check against last to mitigate
-                                 // problem of trend.
-      return false;
+    for (auto it = Data1.begin(); it != Data1.end(); it++) {
+        if (!isWithinPrecisionInterval(
+                    *it, *Data1.end(),
+                    FLOAT_PREC_INTVL)) { // always check against last to mitigate
+            // problem of trend.
+            return false;
+        }
     }
-  }
-  return true;
+    return true;
 }
 
 bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char* lVar2)
@@ -600,22 +603,52 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
         parent = abmat->search(typeLab);
     }
 
+    bool var1_added = false;
+    bool var2_added = false;
 
-    if (type == a_micro || type == a_macro) {
+    if (type == a_micro || type == a_macro || type == a_comp) {
         //Add the variable as an object to the category
         //in this case, standard LSD stuff and check that not exist
         oVar = parent->search(varlab);
         if (oVar == NULL) {
             parent->add_obj(varlab, 1, false);
             oVar = parent->search(varlab);
+            plog("\nAdded object of type ");
+            plog(abmat_type.c_str());
+            plog(" with name ");
+            plog(oVar->label);
+            var1_added = true;
         }
-        plog("\nAdded object of type ");
-        plog(abmat_type.c_str());
-        plog(" with name ");
-        plog(oVar->label);
+        if (type == a_comp) {
+            var2_added = true;
+            oVar2 = parent->search(var2lab);
+            if (oVar2 == NULL) {
+                parent->add_obj(var2lab, 1, false);
+                oVar2 = parent->search(var2lab);
+                plog("\nAdded object of type ");
+                plog(abmat_type.c_str());
+                plog(" with name ");
+                plog(oVar2->label);
+            }
+            //Add hook from var1 to var2, if not exists.
+            bool hook_exists = false;
+            for (auto& h : oVar->hooks) {
+                if (h == oVar2) {
+                    hook_exists = true;
+                    break;
+                }
+            }
+            if (false == hook_exists) {
+                oVar->hooks.push_back(oVar2); //check for integretiy with o_vecT
+                plog("\nAdded link for comparison of variable ");
+                plog(oVar->label);
+                plog(" with variable ");
+                plog(oVar2->label);
+            }
+        }
     }
-    else if (type == a_cond || type == a_comp) {
-        //In case we have type cond or comp, we add the variables within the
+    else if (type == a_cond) {
+        //In case we have type cond, we add the variables within the
         //respective subgroups first and second and hook them with each other.
         //We make sure that each unique combination is only created once.
 
@@ -631,6 +664,7 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
             parent->add_obj(lsecond, 1, false );
             oSecond = parent->search(lsecond);
         }
+
 
         //check if the unique link exists already
         //Careful: Search does not work here!
@@ -652,15 +686,18 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
             oVar = oFirst->add_obj_basic(varlab);
             oVar2 = oSecond->add_obj_basic(var2lab);
 
-            //link them
+            //link them using the single simple hook
             oVar->hook = oVar2;
             oVar2->hook = oVar;
+
+            var1_added = var2_added = true; //new unique combination            
         }
     }
 
     // Add the variables
     switch (type) {
-        case a_micro: {
+        case a_micro:
+            if (var1_added == true) {
                 std::vector<double> dummy;
                 auto stats_template = abmat_stats( dummy ); //retrieve map of stats
                 //create a variable for each statistic
@@ -675,7 +712,14 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
             }
             break;
 
-        case a_macro: {
+        case a_comp:
+            if (var2_added == true) { //same as a macro variable.
+                std::string nvarLab2 = get_abmat_varname( a_macro, oVar2->label); //name is same as original, shortened
+                abmat_add_var(oVar2, nvarLab2.c_str());
+            }
+        //and pass to macro case for first vase, too!
+        case a_macro:
+            if (var1_added == true) {
                 //a macro object holds a variable with the same name, maybe shortened.
                 std::string nvarLab = get_abmat_varname(type, oVar->label); //name is same as original, shortened
                 abmat_add_var(oVar, nvarLab.c_str());
@@ -685,28 +729,18 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
 
         case a_cond: {
                 //the top objects for the unique pair variable and conditioning
-                //variable exist. The rest is dynamically checked/produced.
+                //variable exist. The rest is dynamically checked/produced
+                //in the update procedure
             }
             break;
-
-        case a_comp: {
-                //the comparative ("versus")
-                //to do!
-                std::vector<double> dummy;
-                auto stats_template = abmat_compare( dummy, dummy ); //retrieve map of stats
-                //create a variable for each statistic
-                for (auto& elem : stats_template) {
-                    std::string nvarLab = get_abmat_varname ( type, varlab, elem.first, var2lab);
-                    abmat_add_var(oVar, nvarLab.c_str());
-                }
-            }
-            break;
-
     }
 
     //visualise the added variables.
     plog("\n---- Added new variables to abmat ---");
-    plog_object_tree_up(oVar);
+    if (var1_added)
+        plog_object_tree_up(oVar);
+    if (var2_added)
+        plog_object_tree_up(oVar2);
     plog("\n--------------------------------------\n");
     //Add ,,,
 }
@@ -853,7 +887,6 @@ void update_abmat_vars()
 
                             for (auto& elem : stats_template) {
                                 std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first);
-                                sprintf(msg,"\n %g ",elem.second);plog(msg);
                                 oVar->write( nvarLab.c_str(), elem.second, t );
                             }
                         }
@@ -867,6 +900,7 @@ void update_abmat_vars()
                         }
                         break;
 
+                    //Cond and Comp are different,because here is a first and second variable, too.
 
                     case a_cond: {
                             //the top objects for the unique pair variable and conditioning
@@ -875,18 +909,46 @@ void update_abmat_vars()
                         break;
 
                     case a_comp: {
-                            /*  //the comparative ("versus")
-                                //to do!
-                                std::vector<double> dummy;
-                                auto stats_template = abmat_compare( dummy, dummy ); //retrieve map of stats
-                                //create a variable for each statistic
-                                for (auto& elem : stats_template) {
-                                const char* varLab = get_abmat_varname ( type, varLab, elem.first, var2lab);
-                                oVar->add_var(varLab, -1, NULL, true); //no lags, no values, save
-                                variable* var = oVar->search_var(oVar, varLab, true, true, oVar);
-                                var->param = 1; //1 is parameter. Other fields are not used.
-                                } */
+                            //the comparative ("versus")
+                            //to do!
+
+                            /*  //get first object, which is first bridge.
+                                if (oVar->b == NULL) {
+                                sprintf( msg, "error in '%s', kind %s.", __func__, parent->label);
+                                error_hard( msg, "no children?",
+                                            "Contact the developer.",
+                                            true );
+                                return;
+                                }
+                                if (oVar != oVar->up->b->head)
+                                continue; //we skip the second object
+
+                                if (strcmp(oVar->label, lfirst) != 0) {
+                                sprintf( msg, "error in '%s', kind %s, child %s.", __func__, parent->label, oFirst->label);
+                                error_hard( msg, "Child is not First?!",
+                                            "Contact the developer.",
+                                            true );
+                                return;
+                                }
+
+                                for (object* oVarComp = oVar->b->head; oVar != NULL; oVarComp = oVarComp->next) {
+                                double val1 = root->cal(root, oVarComp->label, 0);
+                                std::string VarCompLab = get_abmat_varname(type, oVarComp->label);
+                                oVarComp->write(VarCompLab.c_str(), val1, t);
+                                object* oVarComp2 = oVarComp->hook;
+                                if (oVarComp2 == NULL) {
+                                    sprintf( msg, "error in '%s', kind %s.", __func__, parent->label);
+                                    error_hard( msg, "compared var not hooked to partner var?",
+                                                "Contact the developer.",
+                                                true );
+                                    return;
+                                }
+                                double val2 = root->cal(root, oVarComp2->label, 0);
+                                std::string VarCompLab2 = get_abmat_varname(type, oVarComp2->label);
+                                oVarComp2->write(VarCompLab2.c_str(), val2, t);
+                            */
                         }
+                        plog("\nERROR");
                         break;
                 }
                 //visualise the added data.
@@ -975,7 +1037,7 @@ void connect_abmat_to_root()
 
 /********************************************
     DISCONNECT_ABMAT_TO_ROOT
-    Reverse connecsprintf(msg,"dissconnectedddddddddddddddddddddddd");plog(msg);tion
+    Reverse connection
 ********************************************/
 
 void disconnect_abmat_from_root()
@@ -986,7 +1048,7 @@ void disconnect_abmat_from_root()
         return;
     }
     delete_bridge(abmat);  //because bridge is copy, abmat stays.
-    abmat->up=NULL;
+    abmat->up = NULL;
 }
 
 #endif
