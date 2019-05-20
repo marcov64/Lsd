@@ -136,7 +136,7 @@ void edit_data( object *root, int *choice, char *obj_name )
 		cmd( "$w configure -state disabled" );
 
 		if ( set_focus == 1 )
-		  cmd( "focus $initial_focus; $initial_focus selection range 0 end" );
+			cmd( "focus $initial_focus; $initial_focus selection range 0 end" );
 
 		cmd( "bind .ini <KeyPress-Escape> {set choice 1}" );
 		cmd( "bind .ini <F1> { LsdHelp menudata_init.html }" );
@@ -153,6 +153,9 @@ void edit_data( object *root, int *choice, char *obj_name )
 		}
 
 		noredraw:
+		
+		cmd( "if [ info exists lastEditPos ] { $w yview moveto $lastEditPos; unset lastEditPos }" );
+		cmd( "if { [ info exists lastInitialFocus ] && [ winfo exists $lastInitialFocus ] } { focus $lastInitialFocus; $lastInitialFocus selection range 0 end; unset lastInitialFocus }" );
 
 		cmd( "if $autoWidth { resizetop .ini [ expr ( 40 + %d * ( $cwidth + 1 ) ) * [ font measure TkTextFont -displayof .ini 0 ] ] }", counter );
 
@@ -180,8 +183,9 @@ void edit_data( object *root, int *choice, char *obj_name )
 			goto noredraw;
 		}
 
+		cmd( "set lastEditPos [ lindex [ $w yview ] 0 ]" );
+			
 		// clean up
-
 		strcpy( ch, "" );
 		i = 0;
 		clean_cell( root, ch, obj_name );
@@ -189,18 +193,21 @@ void edit_data( object *root, int *choice, char *obj_name )
 
 
 		if ( *choice == 2 )
-		{
+		{	
 			l = ( char * ) Tcl_GetVar( inter, "var-S-A", 0 );
 			strcpy( ch, l );
 			
 			*choice = 2;		// set data editor window parent
 			set_all( choice, first, ch, lag );
 			
+			
 			cmd( "bind .ini <KeyPress-Return> {}" );
 			*choice = 0;
 		}
+		else
+			cmd( "unset -nocomplain lastEditPos lastInitialFocus" );
 		
-		if ( *choice ==4 )
+		if ( *choice == 4 )
 		{ 
 			*choice = 0;
 			set_obj_number( root, choice );
@@ -349,9 +356,9 @@ void link_data( object *root, char *lab )
 			ch1[ MAX_ELEM_LENGTH - 1 ] = '\0';
 			cmd( "label $w.tit_t%s -anchor w -width 25 -text \"Par: %-25s\" -borderwidth 4", cv1->label, ch1 );
 			cmd( "$w window create end -window $w.tit_t%s", cv1->label );
-			cmd( "bind $w.tit_t%s <Enter> {set msg \"Parameter '%s'\"}", cv1->label, cv1->label );
-			cmd( "bind $w.tit_t%s <Leave> {set msg \" \"}", cv1->label );
-			cmd( "button $w.b%s_%d -text \"Set All\" -pady 0m -padx 1m -command {set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s}", cv1->label, j, cv1->label, j, cv1->label );
+			cmd( "bind $w.tit_t%s <Enter> { set msg \"Parameter '%s'\" }", cv1->label, cv1->label );
+			cmd( "bind $w.tit_t%s <Leave> { set msg \" \" }", cv1->label );
+			cmd( "button $w.b%s_%d -text \"Set All\" -pady 0m -padx 1m -command { set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s; set lastInitialFocus $w.c1_v%sp }", cv1->label, j, cv1->label, j, cv1->label, cv1->label );
 			cmd( "$w window create end -window $w.b%s_%d", cv1->label, j );
 		}
 		else
@@ -362,9 +369,9 @@ void link_data( object *root, char *lab )
 				ch1[ MAX_ELEM_LENGTH - 1 ] = '\0';
 				cmd( "label $w.tit_t%s_%d -anchor w -width 25 -text \"Var: %-20s (-%d)\" -borderwidth 4", cv1->label, j, ch1, j + 1 );
 				cmd( "$w window create end -window $w.tit_t%s_%d", cv1->label, j );
-				cmd( "bind $w.tit_t%s_%d <Enter> {set msg \"Variable '%s' with lag %d\" }", cv1->label, j, cv1->label, j + 1 );
-				cmd( "bind $w.tit_t%s_%d <Leave> {set msg \" \" }", cv1->label, j );
-				cmd( "button $w.b%s_%d -text \"Set All\" -pady 0m -padx 1m -command {set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s_%d}", cv1->label, j, cv1->label, j, cv1->label, j );
+				cmd( "bind $w.tit_t%s_%d <Enter> { set msg \"Variable '%s' with lag %d\" }", cv1->label, j, cv1->label, j + 1 );
+				cmd( "bind $w.tit_t%s_%d <Leave> { set msg \" \" }", cv1->label, j );
+				cmd( "button $w.b%s_%d -text \"Set All\" -pady 0m -padx 1m -command { set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s_%d; set lastInitialFocus $w.c1_v%s_0 }", cv1->label, j, cv1->label, j, cv1->label, j, cv1->label );
 				cmd( "$w window create end -window $w.b%s_%d", cv1->label, j );
 			}
 		}
