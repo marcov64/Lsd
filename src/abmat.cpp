@@ -600,6 +600,7 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
         parent = abmat->search(typeLab);
     }
 
+
     if (type == a_micro || type == a_macro) {
         //Add the variable as an object to the category
         //in this case, standard LSD stuff and check that not exist
@@ -787,8 +788,10 @@ void plog_object_tree_up(object* startO, bool plotVars)
         if(++count % 4 == 0) {
             tree += "\n\t";
         }
+        plog(tree.c_str());
+        tree.clear();
     }
-    plog(tree.c_str());
+
 }
 
 void update_abmat_vars()
@@ -850,6 +853,7 @@ void update_abmat_vars()
 
                             for (auto& elem : stats_template) {
                                 std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first);
+                                sprintf(msg,"\n %g ",elem.second);plog(msg);
                                 oVar->write( nvarLab.c_str(), elem.second, t );
                             }
                         }
@@ -971,7 +975,7 @@ void connect_abmat_to_root()
 
 /********************************************
     DISCONNECT_ABMAT_TO_ROOT
-    Reverse connection
+    Reverse connecsprintf(msg,"dissconnectedddddddddddddddddddddddd");plog(msg);tion
 ********************************************/
 
 void disconnect_abmat_from_root()
@@ -982,6 +986,7 @@ void disconnect_abmat_from_root()
         return;
     }
     delete_bridge(abmat);  //because bridge is copy, abmat stays.
+    abmat->up=NULL;
 }
 
 #endif

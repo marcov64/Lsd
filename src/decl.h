@@ -108,7 +108,7 @@
 #define _LSD_DATE_ "May 12 2019"        // __DATE__
 
 // global constants
-#define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)
+#define TCL_BUFF_STR 5000				// standard Tcl buffer size (>1000)
 #define MAX_PATH_LENGTH 500				// maximum path length (>499)
 #define MAX_ELEM_LENGTH 100				// maximum element ( object, variable ) name length (>99)
 #define MAX_FILE_SIZE 1000000			// max number of bytes to read from files
