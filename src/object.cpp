@@ -2905,6 +2905,20 @@ void object::tStats(char const* lab, double* r, int lag)
     eightStats(Data, r);
 }
 
+void object::compareStats(char const* lab1,char const* lab2, double* r,int lag)
+{
+    double r_temp[3];
+    if (r == NULL)
+        r = r_temp;
+    std::vector<double> Data1,Data2;
+    gatherData_Tseries(Data1, lab1, lag);
+    gatherData_Tseries(Data2,lab2,lag);
+    auto m_stats = abmat_compare(Data1,Data2); //pass calculation to abmat
+    r[0] = m_stats.at("gamma");
+    r[1] = m_stats.at("tauA");
+    r[2] = m_stats.at("tauB");
+
+}
 //at abmat.cpp see for the stats function
 
 void object::eightStats(std::vector<double>& Data, double* r)

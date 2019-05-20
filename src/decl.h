@@ -267,6 +267,7 @@ struct object {
     std::vector<double> gatherData_all_cnd(char const* lab, char const condVarLab[], char const condition[], double condVal, object* fake_caller, int lag );
     void tStats( char const* lab, double* r, int lag = 0 );
     void gatherData_Tseries( std::vector<double>& dataVector, char const* lab, int lag );
+    void compareStats(char const* lab1, char const* lab2,double* r, int lag=0);
     double sum( char const* lab, int lag );
     double whg_av( char const* weight, char const* lab, int lag );
     double write( char const* lab, double value, int time, int lag = 0 );
@@ -939,6 +940,15 @@ void abmat_add_var(object* parent, char const* lab);
 void abmat_alloc_save_mem_var(variable* cv);
 const char* abmat_varname_convert(const char* lab);
 bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char* lVar2);
+template<typename TReal>
+static bool isWithinPrecisionInterval(TReal a, TReal b, unsigned int interval_size = 1)
+{
+    TReal min_a = a - (a - std::nextafter(a, std::numeric_limits<TReal>::lowest())) * interval_size;
+    TReal max_a = a + (std::nextafter(a, std::numeric_limits<TReal>::max()) - a) * interval_size;
+
+    return min_a <= b && max_a >= b;
+}
+bool is_const_dbl(std::vector<double> & Data1);
 void connect_abmat_to_root();
 void disconnect_abmat_from_root();
 #endif

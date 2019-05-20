@@ -378,6 +378,8 @@ plog(buffer);} while(false)
 #define T_STAT_INTVL(LAB,LAG)  ( p->tStats(( char * ) LAB, v,LAG ));
 #define T_STAT_INTVLS(O,LAB,LAG)  ( CHK_PTR_DBL( O ) O->tStats(( char * ) LAB, v,LAG ));
 
+#define T_STAT_COMP(LAB1,LAB2) ( p->compareStats(( char *) LAB1, (char *) LAB2,v));
+
 #define INTERACT( X, Y ) ( p->interact( ( char * ) X, Y, v, i, j, h, k, \
 	cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, \
 	curl, curl1, curl2, curl3, curl4, curl5, curl6, curl7, curl8, curl9 ) )

@@ -5,12 +5,17 @@ const string statsName[14] = {"LENGTH", "MINI",   "MAXI",   "LQ",   "UQ",
                               "RMSE",   "L_cv",   "L_SK",   "L_KU"};
 
 const double eps = 0.1;
-const bool verbose = false;
-
+const bool verbose = true;
+/////to check last update in t sereis data collection TODO
 MODELBEGIN
 
+EQUATION("aa")
+RESULT(V("id_A")*T+T)
+
 EQUATION("a")
-RESULT(V("id_A") + T)
+RESULT(V("id_A") +T)
+
+
 
 EQUATION("b")
 RESULT(V("id_B") + T)
@@ -49,6 +54,7 @@ if (T == 1) {
   else {
     PLOG("Number of errors in eightStats is %d\n", error);
   }
+  
 }
 RESULT(0)
 
@@ -64,7 +70,7 @@ if (T == 1 && ID <= 3) {
   for (int i = 0; i < 3; i++) {
     j = ID - 1;
     if (v[i] != expectedValues[j][i]) {
-      PLOG("Input Data Error at %s \n", statsName[i].c_str());
+      PLOG("Input Data Error at %s with calculated value= %g \n", statsName[i].c_str(),v[i]);
       error++;
       // break;
     }
@@ -84,7 +90,7 @@ if (T == 9) {
     j = ID - 1;
     if (v[i] != expectedValues[j][i]) {
       if (verbose == true)
-        PLOG("Input Data Error at %s \n", statsName[i].c_str());
+        PLOG("Input Data Error at %s with calculated value= %g\n", statsName[i].c_str(),v[i]);
       error++;
       // break;
     }
@@ -98,6 +104,11 @@ if (T == 9) {
     else
       PLOG("T_STAT_INTVL ERROR \n");
   }
+  PLOG("COMparing");
+  T_STAT_COMP("a","aa");
+  PLOG("\n gamma is %g ",v[0]);
+  PLOG("\n ta is %g ",v[1]);
+  PLOG("\n tb is %g ",v[2]);
 }
 
 RESULT(0)

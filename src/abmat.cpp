@@ -68,6 +68,11 @@
 #include "decl.h"
 #ifdef CPP11
 
+#define NADBL std::numeric_limits<double>::max() // A double not a number
+#define FLOAT_PREC_INTVL                                                       \
+  5 // the number of "steps" allowed between items to be "equal"
+
+
 /********************************************
     ABMAT_STATS
     Produce advanced distribution statistics
@@ -276,7 +281,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
         if (index < 0)
             index = 0;
         stats["p05"] = Data[index];
-        
+
         index = static_cast<int>( (len_data / 4.0) ) - 1;
         if (index < 0)
             index = 0;
@@ -286,7 +291,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
         if (index > len_data-1)
             index = len_data-1;
         stats["p75"] = Data[index];
-        
+
         index = static_cast<int>( std::ceil( rlen_data * 19.0 / 20.0 ) ) -1;
         if (index > len_data-1)
             index = len_data-1;
@@ -363,53 +368,145 @@ m_statsT abmat_stats(std::vector<double>& Data )
 ********************************************/
 
 
-m_statsT abmat_compare(std::vector<double>& Data, std::vector<double>& Data2 )
+m_statsT abmat_compare(std::vector<double>& Data1, std::vector<double>& Data2)
 {
-    //checks
+  // checks
+  double gamma;               // discard ties
+  double tau_a, tau_b, tau_c; // correct for ties
+  bool constVector;
+  double concordant = 0.0, discordant = 0.0, tie = 0.0, tie_a = 0.0,
+  tie_b = 0.0, tie_ab = 0.0;
+  if (Data1.size() != Data2.size()) {
+    sprintf(msg, "error in '%s'. ", __func__);
+    error_hard(msg, "Data sizes are different", "Please contact the developer.",
+               true);
+  }
 
-    if (Data.size() != Data2.size()) {
-        sprintf( msg, "error in '%s'. ", __func__ );
-        error_hard( msg, "Data sizes are different",
-                    "Please contact the developer.",
-                    true );
+  m_statsT compare;
+
+  compare["n"]; // length of the timeseries
+
+  // association, i.e. direction without magnitude
+  compare["gamma"]; // gamme correlation
+  compare["tauA"];
+  compare["tauB"];
+  compare["tauC"];
+
+  // standard product moment correlation
+  compare["corr"];
+
+  // Differences L-Norms
+  compare["L1"]; // difference in means
+  compare["L2"]; // difference as RMSE
+
+  const int len_data = Data1.size();
+  const double rlen_data = static_cast<double>(len_data);
+
+  if (!is_const_dbl(Data1) || !is_const_dbl(Data2))
+    constVector = false;
+  else
+    {
+      constVector = true;
     }
 
-    m_statsT compare;
-
-    compare["n"]; //length of the timeseries
-
-    //association, i.e. direction without magnitude
-    compare["gamma"]; //gamme correlation
-    compare["tauA"];
-    compare["tauB"];
-    compare["tauC"];
-
-    //standard product moment correlation
-    compare["corr"];
-
-    //Differences L-Norms
-    compare["L1"]; //difference in means
-    compare["L2"]; //difference as RMSE
-
-    const int len_data = Data.size();
-    const double rlen_data = static_cast<double>( len_data );
-
-    if (len_data >= 1) {
-
-        //Norms possible
-
-        if (len_data >= 2) {
-            //other stuff possible
+  // Norms possible
+  if (len_data >= 1) {
+    double AE;
+    double MAE = 0.0, RMSE = 0.0;
+    for (auto it1 = Data1.begin(), it2 = Data2.begin(); it1 < Data1.end();
+         ++it1, ++it2) {
+      AE = *it1 - *it2;
+      if (AE < 0) {
+        AE = -AE;
+      }
+      MAE += AE;
+      RMSE += AE * AE;
+      if (len_data > 2 && constVector == false) {
+        if (isWithinPrecisionInterval(*it1, *(std::next(it1)),
+                                      FLOAT_PREC_INTVL) ||
+            isWithinPrecisionInterval(*it2, *(std::next(it2)),
+                                      FLOAT_PREC_INTVL)) {
+          continue; // skip this one
+        }
+        else if ((*it1 > *(std::next(it1)) && *it2 > *(std::next(it2))) ||
+                 (*it1 < *(std::next(it1)) && *it2 < *(std::next(it2)))) {
+          concordant++;
         }
 
+        else if ((*it1 > *(std::next(it1)) && *it2 < *(std::next(it2))) ||
+                 (*it1 < *(std::next(it1)) && *it2 > *(std::next(it2)))) {
+          discordant++;
+        }
+        else {
+          // A tie: within a or b only, or between a and b (can also be within
+          // a and/or b)
+          bool t_a = *it1 == *(std::next(it1));
+          bool t_b = *it2 == *(std::next(it2));
+          if (t_a) {
+            tie_a++;
+          }
+          if (t_b) {
+            tie_b++;
+          }
+        }
+      }
+    }
+
+    MAE /= (len_data);
+    RMSE /= (len_data);
+
+    if (RMSE > 0) {
+      RMSE = sqrt(RMSE);
+    }
+    if (len_data > 2 && constVector == false) {
+      sprintf(msg, "\nconcordant discordant %g %g", concordant, discordant);
+      plog(msg);
+      if (concordant + discordant != 0) {
+        double S = (concordant - discordant);
+        gamma = S / (concordant + discordant);
+        tau_a = S / ((Data1.size()) * (Data1.size() - 1));
+        tau_b = S / sqrt(double(concordant + discordant + tie_a) *
+                         double(concordant + discordant + tie_b));
+        // tau_c
+      }
+      else {
+        gamma = 0.0;
+        tau_a = 0.0;
+        tau_b = 0.0;
+      }
+      compare["gamma"] = gamma; // gamme correlation
+      compare["tauA"] = tau_a;
+      compare["tauB"] = tau_b;
+      // compare["tauC"]=0.0;
     }
     else {
-        for(auto& elem : compare) {
-            elem.second = NAN;
-        }
+      compare["gamma"] = NADBL; // gamme correlation
+      compare["tauA"] = 0.0;
+      compare["tauB"] = 0.0;
+      //  compare["tauC"]=0.0;
     }
-    compare["n"] = rlen_data; //only one never NAN
-    return compare;
+  }
+  else {
+    for (auto& elem : compare) {
+      elem.second = NAN;
+    }
+  }
+
+  compare["n"] = rlen_data; // only one never NAN
+  return compare;
+}
+
+bool is_const_dbl(std::vector<double>& Data1)
+{
+  for (auto it = Data1.begin(); it != Data1.end(); it++) {
+    if (!isWithinPrecisionInterval(
+            *it, *Data1.end(),
+            FLOAT_PREC_INTVL)) { // always check against last to mitigate
+                                 // problem of trend.
+      return false;
+    }
+  }
+  return true;
 }
 
 bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char* lVar2)
@@ -883,8 +980,8 @@ void disconnect_abmat_from_root()
     //unset up from root.
     if (abmat == NULL || abmat->up == NULL) {
         return;
-    }            
-    delete_bridge(abmat);  //because bridge is copy, abmat stays.    
+    }
+    delete_bridge(abmat);  //because bridge is copy, abmat stays.
 }
 
 #endif

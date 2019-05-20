@@ -41,6 +41,7 @@ Label Root
 
 			Param: id_A
 			Var: a
+			Var: aa
 			Var: StatsA
 
 		}
@@ -65,6 +66,7 @@ Param: id_P 0 n + n n	999
 Object: A C	3
 Param: id_A 0 n + n n	1	2	3
 Var: a 0 s + n n
+Var: aa 0 s + n n
 Var: StatsA 0 n + n n
 
 Object: B C	4	4	4
@@ -126,6 +128,12 @@ _INIT_
 END_DESCRIPTION
 
 Variable_a
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_aa
 (no description available)
 _INIT_
 
