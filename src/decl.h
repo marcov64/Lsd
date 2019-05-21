@@ -184,8 +184,8 @@ struct Wrap;
 //ABMAT
 typedef std::map< const char*, double > m_statsT;
 enum Tabmat {a_micro, a_macro, a_cond, a_comp};
+struct next_var; //functional to cycle through variables
 #endif //#ifdef CPP11
-
 
 
 // special types used for fast equation, object and variable lookup
@@ -240,6 +240,7 @@ struct object {
     double cal( object* caller,  char const* l, int lag );
     double count( char const* lab );
     double count_all( char const* lab );
+    bool has_child( object* child );
     double increment( char const* lab, double value );
     double initturbo( char const* label, double num );
     double initturbo_cond( char const* label );
@@ -261,13 +262,12 @@ struct object {
     void xStats_all( char const* lab, double* r, int lag = 0 );
     double stats_net( char const* lab, double* r );
     void xStats_all_cnd( char const* lab, double* r, char const condVarLab[] = "", char const condition[] = "", double condVal = 0.0, object* fake_caller = NULL, int lag = 0 );
-    void eightStats( std::vector<double>& Data, double* r ) ;
-    bool checkParent( object* par, object* son );
+    void eightStats( std::vector<double>& Data, double* r ) ;    
     std::vector<double> gatherData_all(char const* lab, int lag = 0);
     std::vector<double> gatherData_all_cnd(char const* lab, char const condVarLab[], char const condition[], double condVal, object* fake_caller, int lag );
     void tStats( char const* lab, double* r, int lag = 0 );
     void gatherData_Tseries( std::vector<double>& dataVector, char const* lab, int lag );
-    void compareStats(char const* lab1, char const* lab2,double* r, int lag=0);
+    void compareStats(char const* lab1, char const* lab2, double* r, int lag = 0);
     double sum( char const* lab, int lag );
     double whg_av( char const* weight, char const* lab, int lag );
     double write( char const* lab, double value, int time, int lag = 0 );
@@ -932,7 +932,7 @@ extern Tcl_Interp* inter;		// Tcl standard interpreter pointer
 #ifdef CPP11
 m_statsT abmat_stats(std::vector<double>& Data );
 m_statsT abmat_compare(std::vector<double>& Data, std::vector<double>& Data2 );
-void plog_object_tree_up(object* , bool plotVars=false);
+void plog_object_tree_up(object*, bool plotVars = false);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1);
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
 void update_abmat_vars();
@@ -948,10 +948,65 @@ static bool isWithinPrecisionInterval(TReal a, TReal b, unsigned int interval_si
 
     return min_a <= b && max_a >= b;
 }
-bool is_const_dbl(std::vector<double> & Data1);
+bool is_const_dbl(std::vector<double>& Data1);
 void connect_abmat_to_root();
 void disconnect_abmat_from_root();
 #endif
+/***************************************************************
+    NEXT_VAR
+    A functional that allows to cycle over variables.
+    o_search_start determines where we start and the maximum upper level.
+    only_sub_tree determines if we move beyond the scope determined by
+    the tree below o_search_start.
+***************************************************************/
+struct next_var {
+    object* o_search_start;
+    variable* curv;
+    bool only_sub_tree;
+
+
+    next_var(object* o_search_start, const char* varlab, bool only_sub_tree)
+        : o_search_start(o_search_start), only_sub_tree(only_sub_tree)
+    {
+        curv = NULL;
+        if (o_search_start != NULL)
+            curv = o_search_start->search_var(o_search_start, varlab, false, false, o_search_start);
+        if (only_sub_tree && curv != NULL && curv->up == o_search_start) {
+            char msg[300];
+            sprintf(msg, "Method %s: Cannot search for '%s' contained at same level as search.",
+                    __func__, varlab);
+            error_hard(msg, "Invalid use of method.",
+                       "contact the developer.",
+                       true);
+            curv = NULL;
+        }
+    };
+
+    //check if hyper_next exists and if it is in subtree, if yes take it
+    //else return NULL.
+    variable* operator()( void )
+    {
+        if (curv == NULL)
+            return NULL;
+
+        variable* prev = curv;
+        curv = NULL;
+
+        //check if next exists, if yes take it.
+        object* next_cur = prev->up->next;
+        //if noy check hyper_next
+        if (next_cur == NULL)
+            next_cur = prev->up->hyper_next();
+        //if exists check if its in subtree
+        if (next_cur != NULL
+                && ( false == only_sub_tree
+                     || o_search_start->has_child(next_cur) )
+           ) {
+            curv = next_cur->search_var(next_cur, (prev->label), false, true); //at same level
+        }
+        return prev;
+    };
+};
 
 // prevent exposing internals in users' fun_xxx.cpp
 #ifndef FUN

@@ -286,7 +286,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
             index = 0;
         stats["p05"] = Data[index];
 
-        index = static_cast<int>( (len_data / 4.0) ) - 1;
+        index = static_cast<int>( (len_data / 4) ) - 1;
         if (index < 0)
             index = 0;
         stats["p25"] = Data[index];
@@ -361,7 +361,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
             elem.second = NAN;
         }
     }
-    stats["n"] = rlen_data; //only one never NAN
+    stats["n"] = rlen_data;
     return stats;
 }
 
@@ -690,7 +690,7 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
             oVar->hook = oVar2;
             oVar2->hook = oVar;
 
-            var1_added = var2_added = true; //new unique combination            
+            var1_added = var2_added = true; //new unique combination
         }
     }
 
@@ -891,7 +891,7 @@ void update_abmat_vars()
                             }
                         }
                         break;
-
+                    
                     case a_macro: {
                             //simply copy the current data.
                             double val = root->cal(root, oVar->label, 0);
@@ -905,50 +905,15 @@ void update_abmat_vars()
                     case a_cond: {
                             //the top objects for the unique pair variable and conditioning
                             //variable exist. The rest is dynamically checked/produced.
+                            
+                            // std::map < int, std::vector<double> > cond_vData_map;
+                            
                         }
                         break;
 
                     case a_comp: {
-                            //the comparative ("versus")
-                            //to do!
-
-                            /*  //get first object, which is first bridge.
-                                if (oVar->b == NULL) {
-                                sprintf( msg, "error in '%s', kind %s.", __func__, parent->label);
-                                error_hard( msg, "no children?",
-                                            "Contact the developer.",
-                                            true );
-                                return;
-                                }
-                                if (oVar != oVar->up->b->head)
-                                continue; //we skip the second object
-
-                                if (strcmp(oVar->label, lfirst) != 0) {
-                                sprintf( msg, "error in '%s', kind %s, child %s.", __func__, parent->label, oFirst->label);
-                                error_hard( msg, "Child is not First?!",
-                                            "Contact the developer.",
-                                            true );
-                                return;
-                                }
-
-                                for (object* oVarComp = oVar->b->head; oVar != NULL; oVarComp = oVarComp->next) {
-                                double val1 = root->cal(root, oVarComp->label, 0);
-                                std::string VarCompLab = get_abmat_varname(type, oVarComp->label);
-                                oVarComp->write(VarCompLab.c_str(), val1, t);
-                                object* oVarComp2 = oVarComp->hook;
-                                if (oVarComp2 == NULL) {
-                                    sprintf( msg, "error in '%s', kind %s.", __func__, parent->label);
-                                    error_hard( msg, "compared var not hooked to partner var?",
-                                                "Contact the developer.",
-                                                true );
-                                    return;
-                                }
-                                double val2 = root->cal(root, oVarComp2->label, 0);
-                                std::string VarCompLab2 = get_abmat_varname(type, oVarComp2->label);
-                                oVarComp2->write(VarCompLab2.c_str(), val2, t);
-                            */
+                            plog("\nERROR a_comp case should not exist.");
                         }
-                        plog("\nERROR");
                         break;
                 }
                 //visualise the added data.

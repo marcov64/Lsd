@@ -2831,6 +2831,7 @@ std::vector<double> object::gatherData_all_cnd(char const* lab, char const condV
 
     cur = cv->up;
     try {
+        // if (this == cur) {
         if (strcmp(cur->label, this->label) == 0) {
             sprintf(msg, "%s and %s ", cur->label, this->label);
             plog(msg);
@@ -2841,44 +2842,28 @@ std::vector<double> object::gatherData_all_cnd(char const* lab, char const condV
         plog(str);
     }
 
-    next_cur = cv->up->up;
-    do {
-        cur = next_cur->search_var(this, lab, true, no_search, this)->up;
-
-        while (cur != NULL) {
-            if (conditional && (cur->check_condition(condVarLab, condition, condVal,
-                                fake_caller, lag))) {
-                dataVector.push_back(cur->cal(lab, lag));
-            }
-            else if (conditional == 0)
-                dataVector.push_back(cur->cal(lab, lag));
-            cur = go_brother(cur);
+    //Cycle through the chain of variables in current subtree and gather data
+    auto cycle_var = next_var(this, lab, true);
+    for (cv = cycle_var(); cv != NULL; cv = cycle_var()) {
+        if (conditional && (cv->up->check_condition(condVarLab, condition, condVal,
+                            fake_caller, lag))) {
+            dataVector.push_back(cv->up->cal(lab, lag));
         }
+        else if (conditional == false)
+            dataVector.push_back(cv->up->cal(lab, lag));
+    }    
 
-        if (next_cur->next == NULL) {
-            next_cur = next_cur->hyper_next(next_cur->label);
-        }
-        else
-            next_cur = next_cur->next;
-
-        if (next_cur != NULL) {
-            if (checkParent(this, next_cur) == false) {
-                next_cur = NULL;
-            }
-        }
-    }
-    while (next_cur != NULL);
     return dataVector;
 }
 
-bool object::checkParent(object* par, object* son)
+bool object::has_child(object* child)
 {
-    while (son != root) {
-        son = son->up;
-        if (son == par)
-            return true;
-    }
-    return false;
+    for (; child != NULL && child != this; child = child->up);
+
+    if (child == this)
+        return true;
+    else
+        return false;
 }
 
 void object::xStats_all(char const* lab, double* r, int lag)
@@ -2905,15 +2890,15 @@ void object::tStats(char const* lab, double* r, int lag)
     eightStats(Data, r);
 }
 
-void object::compareStats(char const* lab1,char const* lab2, double* r,int lag)
+void object::compareStats(char const* lab1, char const* lab2, double* r, int lag)
 {
     double r_temp[3];
     if (r == NULL)
         r = r_temp;
-    std::vector<double> Data1,Data2;
+    std::vector<double> Data1, Data2;
     gatherData_Tseries(Data1, lab1, lag);
-    gatherData_Tseries(Data2,lab2,lag);
-    auto m_stats = abmat_compare(Data1,Data2); //pass calculation to abmat
+    gatherData_Tseries(Data2, lab2, lag);
+    auto m_stats = abmat_compare(Data1, Data2); //pass calculation to abmat
     r[0] = m_stats.at("gamma");
     r[1] = m_stats.at("tauA");
     r[2] = m_stats.at("tauB");
