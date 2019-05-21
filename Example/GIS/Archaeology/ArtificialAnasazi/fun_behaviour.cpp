@@ -191,14 +191,17 @@ RESULT(estimate)
 EQUATION("fission")
 /*  Check if a household gets a new child and if yes, create new household
     with farm and initialise all.*/
-if (V("age") >= V("fertilityStartAge") && V("age") <= V("fertilityEndAge"))
+double fission_ret = 0.0;
 {
-    TRACK_SEQUENCE
-    if (uniform(0.0, 1.0) < V("fertility")) {
-        V_CHEAT("NewPerson", p); //Note: There is another assumption that must be met in NewPerson.
+    if (V("age") >= V("fertilityStartAge") && V("age") <= V("fertilityEndAge")) {
+        TRACK_SEQUENCE
+        if (uniform(0.0, 1.0) < V("fertility")) {
+            V_CHEAT("NewPerson", p); //Note: There is another assumption that must be met in NewPerson.
+            fission_ret = 1.0;
+        }
     }
 }
-RESULT(0.0)
+RESULT(fission_ret)
 
 /**************/
 
@@ -225,7 +228,7 @@ else if (V("estimate") < V("hh_NutritionNeed"))    //regular call
     resettle = true;
 }
 
-// In the original model it is not checked if the current place is still O.K. 
+// In the original model it is not checked if the current place is still O.K.
 // according to some criteria, which we will check here:
 
 //However, the household should also resettle if the settlement is flooded
@@ -307,46 +310,49 @@ else
 }
 
 if ( changed_pos > 0)
-{    
+{
     object* myPatch = SEARCH_POSITION_GRID("Land_Patch");
     object* myWP = SEARCH_CNDS(root, "Waterpoint_ID", V("Waterpoint_by_ID"));
-    object* myFarm = SEARCH("Farm");    
-    VERBOSE_MODE(false && verbose_mode) {        
-        PLOG("\nHousehold found a new farm.\n\t New settlement P-ID %g", VS(myPatch, "Land_Patch_ID"));        
+    object* myFarm = SEARCH("Farm");
+    VERBOSE_MODE(false && verbose_mode) {
+        PLOG("\nHousehold found a new farm.\n\t New settlement P-ID %g", VS(myPatch, "Land_Patch_ID"));
         PLOG("\n\t, new Farm P-ID %g", myWP);
         PLOG("\n\t, new Waterpoint ID %g", V("Waterpoint_by_ID"));
     }
     WRITES(myFarm, "Farm_distWater", DISTANCE2(myFarm, myWP) );
     WRITE("Household_distWater", DISTANCE(myWP) );
     WRITE("Household_distFarm", DISTANCE(myFarm) );
-    
-    
-        //in a floodplain
-    if (VS(myPatch,"hydro")>0){
-        if (VS(Settings,"Assumption_SettleFloodplain")>-1) {
-            INCRS(Settings,"Assumption_SettleFloodplain",1.0);
-        } else {
+
+
+    //in a floodplain
+    if (VS(myPatch, "hydro") > 0) {
+        if (VS(Settings, "Assumption_SettleFloodplain") > -1) {
+            INCRS(Settings, "Assumption_SettleFloodplain", 1.0);
+        }
+        else {
             changed_pos = -1; //die!
         }
     }
-        //settlement is to far from water to life.
-    if ( V("Household_distWater")>V("waterSourceDistance") ){
-        if (VS(Settings,"Assumption_waterNotNecessarySettle")>-1) {
-            INCRS(Settings,"Assumption_waterNotNecessarySettle",1.0);
-        } else {
+    //settlement is to far from water to life.
+    if ( V("Household_distWater") > V("waterSourceDistance") ) {
+        if (VS(Settings, "Assumption_waterNotNecessarySettle") > -1) {
+            INCRS(Settings, "Assumption_waterNotNecessarySettle", 1.0);
+        }
+        else {
             changed_pos = -1; //die!
         }
     }
-        //farm is to far from water
-    if ( VS(myFarm, "Farm_distWater")>V("waterSourceDistance") ){
-        if (VS(Settings,"Assumption_waterNotNecessaryFarm")>-1) {
-            INCRS(Settings,"Assumption_waterNotNecessaryFarm",1.0);
-        } else {
+    //farm is to far from water
+    if ( VS(myFarm, "Farm_distWater") > V("waterSourceDistance") ) {
+        if (VS(Settings, "Assumption_waterNotNecessaryFarm") > -1) {
+            INCRS(Settings, "Assumption_waterNotNecessaryFarm", 1.0);
+        }
+        else {
             changed_pos = -1; //die!
         }
     }
-    
-    
+
+
 
     VERBOSE_MODE(verbose_mode) {
         cur = SEARCH_POSITION_GRIDS(myFarm, "Land_Patch");

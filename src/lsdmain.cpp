@@ -187,6 +187,7 @@ int lsdmain( int argn, char** argv )
     blueprint->init( NULL, "Root" );
     abmat = new object;
     abmat->init( NULL, "ABMAT" );
+    abmat_init();
 
 #ifdef NO_WINDOW
 

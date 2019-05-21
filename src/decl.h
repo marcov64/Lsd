@@ -21,6 +21,37 @@
 // LSD compilation options file
 #include "choose.h"
 
+
+//A Debugging macro, see https://codereview.stackexchange.com/q/2484
+#define CatchAll( msg ) \
+    catch( const std::exception &e )    \
+    {   \
+        try { \
+        std::string errmsg;\
+        errmsg += "\n Failure in function "; \
+        errmsg += __func__; \
+        errmsg += " in file "; errmsg+= __FILE__; \
+        errmsg += " in line "; errmsg+= std::to_string(__LINE__); \
+        errmsg+="\n Error:"; errmsg += e.what();\
+        error_hard(msg,errmsg.c_str(),"Contact the developer");\
+        throw; \
+        }\
+        catch(...){assert(0);} \
+    }   \
+    catch(...)  \
+    {   \
+        try { \
+        std::string errmsg;\
+        errmsg += "\n Failure in function "; \
+        errmsg += __func__; \
+        errmsg += " in file "; errmsg+= __FILE__; \
+        errmsg += " in line "; errmsg+= std::to_string(__LINE__); \
+        error_hard(msg,errmsg.c_str(),"Contact the developer");\
+        throw; \
+        }\
+        catch(...){assert(0);} \
+    }  
+
 // check compiler C++ standard support
 #ifndef CPP_DEFAULT
 #if __cplusplus >= 201103L
@@ -183,7 +214,7 @@ struct gisPosition;
 struct Wrap;
 //ABMAT
 typedef std::map< const char*, double > m_statsT;
-enum Tabmat {a_micro, a_macro, a_cond, a_comp};
+enum Tabmat {a_micro, a_macro, a_cond, a_comp, a_fact};
 struct next_var; //functional to cycle through variables
 #endif //#ifdef CPP11
 
@@ -302,6 +333,7 @@ struct object {
     object* lat_up( void );
     object* lsdqsort( char const* obj, char const* var, char const* direction );
     object* lsdqsort( char const* obj, char const* var1, char const* var2, char const* direction );
+    object* search_local( char const* lab );
     object* search( char const* lab );
     object* search_node_net( char const* lab, long id );
     object* search_var_cond( char const* lab, double value, int lag );
@@ -309,8 +341,8 @@ struct object {
     object* turbosearch( char const* label, double tot, double num );
     object* turbosearch_cond( char const* label, double value );
     variable* add_empty_var( char const* str );
-    variable* search_var( object* caller, char const* label, bool no_error = false, bool no_search = false, object* maxLevel = NULL );
-    object* add_obj_basic( char const* label);
+    variable* search_var_local(char const* label); //search only in object    
+    variable* search_var( object* caller, char const* label, bool no_error = false, bool no_search = false, object* maxLevel = NULL );    
     void add_obj( char const* label, int num, int propagate );
     variable* add_var_basic( char const* lab, int lag, double* val, int save, bool adToMap );
     void add_var( char const* label, int lag, double* val, int save );
@@ -365,8 +397,7 @@ struct object {
     void position_between(gisMap* map, double& x_out, double& y_out, double x1, double y1, double x2, double y2, double rel_pos = 0.5); //find position at half distance
     void position_between(double& x_out, double& y_out, object* shareObj, object* shareObj2, double rel_pos = 0.5);
     void position_between(double& x_out, double& y_out, double x_1, double y_1, double x_2, double y_2, double rel_pos = 0.5);
-
-    variable* search_var_local(char const l[]); //search only in object
+    
     void it_full(char const lab[], bool random);
     void it_in_radius(char const lab[], double radius, char random, object* caller, int lag, char const varLab[], char const condition[], double condVal);
     object* first_neighbour_full(char const lab[], bool random);
@@ -930,13 +961,15 @@ extern Tcl_Interp* inter;		// Tcl standard interpreter pointer
 
 //new abmat functions
 #ifdef CPP11
+m_statsT abmat_stats( void );
 m_statsT abmat_stats(std::vector<double>& Data );
 m_statsT abmat_compare(std::vector<double>& Data, std::vector<double>& Data2 );
+void abmat_init( void );
 void plog_object_tree_up(object*, bool plotVars = false);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1);
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
 void update_abmat_vars();
-void abmat_add_var(object* parent, char const* lab);
+variable* abmat_add_var(object* parent, char const* lab);
 void abmat_alloc_save_mem_var(variable* cv);
 const char* abmat_varname_convert(const char* lab);
 bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char* lVar2);

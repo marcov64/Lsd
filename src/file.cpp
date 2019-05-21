@@ -801,6 +801,7 @@ void unload_configuration ( bool full )
     disconnect_abmat_from_root( );
     abmat->empty( );
     abmat->init( NULL, "ABMAT" );
+    abmat_init();
     
 	root->empty( );								// remove current model structure
 	root->init( NULL, "Root" );

@@ -676,19 +676,29 @@ bridge* object::search_bridge( char const* lab, bool no_error )
     Search the first Object lab in the branch of the model below this.
     Uses the fast bridge look-up map.
 ***************************************************/
+object* object::search_local( char const* lab )
+{
+    b_mapT::iterator bit;
+    if ( (bit = b_map.find( lab ) ) != b_map.end( ) )
+        return bit->second->head;
+    else
+        return NULL;
+}
+
+
 object* object::search( char const* lab )
 {
     bridge* cb;
     object* cur;
-    b_mapT::iterator bit;
 
     // the current object?
     if ( ! strcmp( label, lab ) )
         return this;
 
     // Search among the descendants of current object
-    if ( ( bit = b_map.find( lab ) ) != b_map.end( ) )
-        return bit->second->head;
+    cur = search_local(lab);
+    if (cur != NULL)
+        return cur;
 
     // Search among descendants' descendants
     for ( cb = b; cb != NULL; cb = cb->next ) {
@@ -948,7 +958,20 @@ double object::search_inst( object* obj )
 
     return pos;
 }
+/********************************************
+    SEARCH_VAR_LOCAL
+    Search for a variable with lab only in current object.
+********************************************/
 
+variable* object::search_var_local(char const* lab)
+{
+    v_mapT::iterator vit;
+    // Search among the variables of current object
+    if ( ( vit = v_map.find( lab ) ) != v_map.end( ) )
+        return vit->second;
+    else
+        return NULL;
+}
 
 /********************************************
     SEARCH_VAR
@@ -971,22 +994,19 @@ double object::search_inst( object* obj )
     from descendants the search goes up again, or from the parent down.
     Uses the fast variable look-up map of the searched variables.
 *************************************************/
+
 variable* object::search_var(object* caller, char const* lab, bool no_error,
                              bool no_search, object* maxLevel)
 {
-    bridge* cb;
-    variable* cv;
-    v_mapT::iterator vit;
+    variable* cv = search_var_local(lab);
 
-    // Search among the variables of current object
-    if ( ( vit = v_map.find( lab ) ) != v_map.end( ) )
-        return vit->second;
-
-    // stop if search is disabled
-    if ( no_search )
+    if (cv != NULL)
+        return cv;
+    else if ( no_search ) // stop if search is disabled
         return NULL;
 
     // Search among descendants
+    bridge* cb;
     for ( cb = b, cv = NULL; cb != NULL; cb = cb->next ) {
         // search down only if one instance exists and the label is different from caller
         if ( cb->head != NULL && ( caller == NULL || strcmp( cb->head->label, caller->label ) ) ) {
@@ -1398,54 +1418,6 @@ void object::add_obj( char const* lab, int num, int propagate )
 
         cur->b_map.insert( b_pairT ( lab, cb ) );
     }
-}
-
-/****************************************************
-    ADD_OBJ_BASIC
-    Add single sons with label lab to given object.
-    No checking.
-    Not added to map.
-****************************************************/
-object* object::add_obj_basic( char const* lab)
-{
-    //int i;
-    bridge* cb;
-    object* cur;
-
-    // for ( cur = this; cur != NULL; propagate == 1 ? cur = cur->hyper_next( label ) : cur = NULL ) {
-
-    // create bridge
-    if ( this->b == NULL )
-        cb = this->b = new bridge( lab );
-    else {
-        for ( cb = this->b; cb->next != NULL; cb = cb->next );
-        cb->next = new bridge( lab );
-        cb = cb->next;
-    }
-
-    if ( cb == NULL ) {
-        sprintf( msg, "cannot allocate memory for adding object '%s'", lab );
-        error_hard( msg, "out of memory",
-                    "if there is memory available and the error persists,\nplease contact developers",
-                    true );
-        return NULL;
-    }
-
-    cur = cb->head = new object;
-
-
-
-    if ( cur == NULL ) {
-        sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", lab );
-        error_hard( msg, "out of memory",
-                    "if there is memory available and the error persists,\nplease contact developers",
-                    true );
-        return NULL;
-    }
-
-    cur->init( this, lab );
-    return cur;
-
 }
 
 
@@ -1917,7 +1889,7 @@ void delete_bridge( object* d )
     in the "cemetery", a linked chain storing data to be analyzed.
 
     ABMAT: If a variable is deleted, it is not considered "active" for this
-    time-step. Hence ABMAT does not use the cemetery.
+    time-step. Hence ABMAT does not use the cemetery data.
 ****************************************************/
 void object::delete_obj( void )
 {
@@ -1992,7 +1964,7 @@ void object::delete_obj( void )
     if ( del_flag != NULL )
         *del_flag = true;	// flag deletion to caller, if requested
 
-    if ( cb->search_var != NULL )	// indexed objects?
+    if ( cb != NULL && cb->search_var != NULL )	// indexed objects?
         cb->o_map.erase( cal( cb->search_var, 0 ) );	// try to remove map entry
 
     // update object list for user pointer checking
@@ -2851,7 +2823,7 @@ std::vector<double> object::gatherData_all_cnd(char const* lab, char const condV
         }
         else if (conditional == false)
             dataVector.push_back(cv->up->cal(lab, lag));
-    }    
+    }
 
     return dataVector;
 }

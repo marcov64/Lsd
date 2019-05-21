@@ -113,8 +113,13 @@ if(t == 1)
     
     //ABMAT
     ABMAT_ADD_VARIABLE("micro","age");
+    ABMAT_ADD_VARIABLE("micro","lastharvest");
     ABMAT_ADD_VARIABLE("macro","nHouseholds");    
     ABMAT_ADD_VARIABLE("comp","nHouseholds","histothouseholds"); 
+    ABMAT_ADD_VARIABLE("cond","yield","maizeZone");
+    ABMAT_ADD_VARIABLE("cond","age","hh_NutritionNeedRemaining");
+    ABMAT_ADD_VARIABLE("cond","age","fission");
+        
     // PLOG("\n%s",abmat_varname_convert("oihjqoijoih") );
     // PLOG("\n%s",abmat_varname_convert("oihjqowjoih") );
     // PLOG("\n%s",abmat_varname_convert("oihjqowh") );
