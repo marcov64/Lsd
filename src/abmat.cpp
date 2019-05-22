@@ -121,6 +121,9 @@
 ********************************************/
 
 //global variables
+
+std::set <std::pair<int, int> > s_abmat_intervals; //info on abmat intervals
+std::map <const char*, variable*> m_abmat_variables; //fast access to all variables for total files.
 std::map <const char*, std::string> m_abmat_varnames; //map variable names to shortened ones.
 std::map <const char*, std::set<int> > m_abmat_conditions; //save conditioning factors
 int i_abmat_varnames; //simple counter for up to 3 digits
@@ -128,6 +131,8 @@ int abmat_series_saved;
 
 void abmat_init()
 {
+    s_abmat_intervals.clear();
+    m_abmat_variables.clear();
     m_abmat_varnames.clear();
     m_abmat_conditions.clear();
     i_abmat_varnames = 0;
@@ -141,6 +146,30 @@ const char* lmicro = "*micro";
 const char* lmacro = "*macro";
 const char* lcond = "*cond";
 const char* lcomp = lmacro;
+
+
+/********************************************
+    ABMAT_ADD_INTERVAL
+    Add an interval for the analysis for the totals file.
+    Intervals can start with 0 (initial value included) or higher.
+    Intervals can also be open (negative end), implying that the
+    end-point is determined dynamically.
+    Intervals can also be fully dynamic, providing a negative start
+    value and end value. In this case, the interval is set appropriately
+    at the end of the simulation run.
+
+    For each interval, the actual start and end values are saved
+    in the totals file as I_n_start and I_n_end, where "n" is
+    the interval identifier. This is handled elsewhere, however.
+
+    It may make sense to dynamically insert intervals during
+    the simulation and this is possible with the macro.
+********************************************/
+void abmat_add_interval( int start, int end )
+{
+    s_abmat_intervals.emplace(start, end); //add intervall.
+}
+
 
 /********************************************
     GET_ABMAT_VARNAMES_MAP
@@ -791,6 +820,7 @@ variable* abmat_add_var(object* parent, char const* lab)
     var->abmat = true;
     abmat_alloc_save_mem_var(var);
     abmat_series_saved++;
+    m_abmat_variables[lab] = var;
     return var;
 }
 
@@ -1098,6 +1128,31 @@ void disconnect_abmat_from_root()
     }
     delete_bridge(abmat);  //because bridge is copy, abmat stays.
     abmat->up = NULL;
+}
+
+/********************************************
+    ABMAT_TOTAL
+    Do the totals analysis
+********************************************/
+
+void abmat_total()
+{
+    //Cycle through the variables
+    for (auto var : m_abmat_variables ) {
+
+        //get data
+        //auto ts_data =
+
+        //gather time-series stats like runs
+
+        //for comparative variables, gather comp stats
+
+
+        //gather distributional stats
+
+
+    }
+
 }
 
 #endif

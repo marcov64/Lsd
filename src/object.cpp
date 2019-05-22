@@ -2705,12 +2705,16 @@ double object::stat( char const* lab, double* r, char const condVarLab[], char c
     return r[ 0 ];								// return the number of instances
 }
 
-void object::gatherData_Tseries(std::vector<double>& dataVector,
-                                char const* lab, int lag)
+std::vector<double>  object::gatherData_Tseries(char const* lab, int lag)
 {
+    return gatherData_Tseries( lab, -1, t-lag );
+}
+
+std::vector<double> object::gatherData_Tseries( char const* lab, int start, int end )
+{
+    int lag = t-end;
     object* cur, *next_cur, *cur2;
-    variable* cv;
-    dataVector.clear();
+    variable* cv;    
     cv = search_var(this, lab, true, no_search, this);
 
     if (cv != NULL) {
@@ -2752,12 +2756,8 @@ void object::gatherData_Tseries(std::vector<double>& dataVector,
 
     if (cur != NULL) {
 
-        if (cv->last_update != (t - lag)) {
-            cv->cal(this, lag);
-        }
-        for (auto i = cv->start; i <= (t - lag); i++) {
-            dataVector.push_back(cv->data[i]);
-        }
+        return cv->copy_data( this, start, end ); //only valid data.
+
     }
 }
 
@@ -2854,21 +2854,30 @@ void object::xStats_all_cnd(char const* lab, double* r, char const condVarLab[],
                                lag);
     eightStats(Data, r);
 }
+
+void object::tStats(char const* lab, double* r, int start, int end)
+{
+    auto Data = gatherData_Tseries( lab, start, end );
+    eightStats(Data, r);    
+}
+
 void object::tStats(char const* lab, double* r, int lag)
 {
-    std::vector<double> Data;
-    gatherData_Tseries(Data, lab, lag);
+    auto Data = gatherData_Tseries( lab, lag );
     eightStats(Data, r);
 }
 
 void object::compareStats(char const* lab1, char const* lab2, double* r, int lag)
 {
+    compareStats(lab1, lab2, r, 0, t-lag);
+}
+void object::compareStats(char const* lab1, char const* lab2, double* r, int start, int end)
+{
     double r_temp[3];
     if (r == NULL)
         r = r_temp;
-    std::vector<double> Data1, Data2;
-    gatherData_Tseries(Data1, lab1, lag);
-    gatherData_Tseries(Data2, lab2, lag);
+    auto Data1 = gatherData_Tseries( lab1, start, end );
+    auto Data2 = gatherData_Tseries( lab2, start, end );
     auto m_stats = abmat_compare(Data1, Data2); //pass calculation to abmat
     r[0] = m_stats.at("gamma");
     r[1] = m_stats.at("tauA");

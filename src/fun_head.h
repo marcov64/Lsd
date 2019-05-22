@@ -375,10 +375,17 @@ plog(buffer);} while(false)
 #define T_STATS(O,LAB)  ( CHK_PTR_DBL( O ) O->tStats(( char * ) LAB, v ));
 #define T_STATL(LAB,LAG)  ( p->tStats(( char * ) LAB, v,LAG ));
 #define T_STATLS(O,LAB,LAG)  ( CHK_PTR_DBL( O ) O->tStats(( char * ) LAB, v,LAG ));
-#define T_STAT_INTVL(LAB,LAG)  ( p->tStats(( char * ) LAB, v,LAG ));
-#define T_STAT_INTVLS(O,LAB,LAG)  ( CHK_PTR_DBL( O ) O->tStats(( char * ) LAB, v,LAG ));
+#define T_STAT_INTVL(LAB,START,END)  ( p->tStats(( char * ) LAB, v, START, END ));
+#define T_STAT_INTVLS(O,LAB,START,END)  ( CHK_PTR_DBL( O ) O->tStats(( char * ) LAB, v,START,END ));
 
 #define T_STAT_COMP(LAB1,LAB2) ( p->compareStats(( char *) LAB1, (char *) LAB2,v));
+#define T_STAT_COMPL(LAB1,LAB2, LAG) ( p->compareStats(( char *) LAB1, (char *) LAB2,v, LAG));
+#define T_STAT_COMP_INTVL(LAB1,LAB2, START, END) ( p->compareStats(( char *) LAB1, (char *) LAB2,v, START, END));
+
+#define T_STAT_COMPS(O,LAB1,LAB2) ( O->compareStats(( char *) LAB1, (char *) LAB2,v));
+#define T_STAT_COMPLS(O,LAB1,LAB2, LAG) ( O->compareStats(( char *) LAB1, (char *) LAB2,v, LAG));
+#define T_STAT_COMP_INTVLS(O,LAB1,LAB2, START, END) ( O->compareStats(( char *) LAB1, (char *) LAB2,v, START, END));
+
 
 #define INTERACT( X, Y ) ( p->interact( ( char * ) X, Y, v, i, j, h, k, \
 	cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, \
@@ -1039,7 +1046,7 @@ plog(buffer);} while(false)
 
 
 #define ABMAT_ADD_VARIABLE( type, ... ) add_abmat_object( type, __VA_ARGS__ );
-
+#define ABMAT_ADD_INTERVAL( start, end ) add_abmat_interval(start, end);
 
 #endif //#ifdef CPP11
 

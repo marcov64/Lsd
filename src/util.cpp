@@ -3814,3 +3814,18 @@ void init_math_error( void )
 	geomErrCnt = binomErrCnt = cauchErrCnt = chisqErrCnt = expErrCnt = 0;
 	fishErrCnt = studErrCnt = weibErrCnt = betaErrCnt = paretErrCnt = alaplErrCnt = 0;
 }
+
+
+/***************************************************
+DEV_ERR_INFO
+Helper function for same named macro that passes info on where an error fired.
+***************************************************/
+const char* dev_err_info(const char* func, const char* file, int line)
+{
+    std::string errmsg;
+    errmsg += "\n Failure in function "; 
+    errmsg += func; 
+    errmsg += " in file "; errmsg+= file; 
+    errmsg += " in line "; errmsg+= std::to_string(line); 
+    return errmsg.c_str();     
+}

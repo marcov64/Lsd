@@ -21,17 +21,16 @@
 // LSD compilation options file
 #include "choose.h"
 
+const char* dev_err_info(const char* func, const char* file, int line);
+
+#define __DEV_ERR_INFO__ dev_err_info(__func__,__FILE__,__LINE__)
 
 //A Debugging macro, see https://codereview.stackexchange.com/q/2484
 #define CatchAll( msg ) \
     catch( const std::exception &e )    \
     {   \
         try { \
-        std::string errmsg;\
-        errmsg += "\n Failure in function "; \
-        errmsg += __func__; \
-        errmsg += " in file "; errmsg+= __FILE__; \
-        errmsg += " in line "; errmsg+= std::to_string(__LINE__); \
+        std::string errmsg = __DEV_ERR_INFO__; \
         errmsg+="\n Error:"; errmsg += e.what();\
         error_hard(msg,errmsg.c_str(),"Contact the developer");\
         throw; \
@@ -41,16 +40,12 @@
     catch(...)  \
     {   \
         try { \
-        std::string errmsg;\
-        errmsg += "\n Failure in function "; \
-        errmsg += __func__; \
-        errmsg += " in file "; errmsg+= __FILE__; \
-        errmsg += " in line "; errmsg+= std::to_string(__LINE__); \
+        std::string errmsg = __DEV_ERR_INFO__;\
         error_hard(msg,errmsg.c_str(),"Contact the developer");\
         throw; \
         }\
         catch(...){assert(0);} \
-    }  
+    }
 
 // check compiler C++ standard support
 #ifndef CPP_DEFAULT
@@ -293,11 +288,14 @@ struct object {
     void xStats_all( char const* lab, double* r, int lag = 0 );
     double stats_net( char const* lab, double* r );
     void xStats_all_cnd( char const* lab, double* r, char const condVarLab[] = "", char const condition[] = "", double condVal = 0.0, object* fake_caller = NULL, int lag = 0 );
-    void eightStats( std::vector<double>& Data, double* r ) ;    
+    void eightStats( std::vector<double>& Data, double* r ) ;
     std::vector<double> gatherData_all(char const* lab, int lag = 0);
     std::vector<double> gatherData_all_cnd(char const* lab, char const condVarLab[], char const condition[], double condVal, object* fake_caller, int lag );
+    void tStats(char const* lab, double* r, int start, int end);
     void tStats( char const* lab, double* r, int lag = 0 );
-    void gatherData_Tseries( std::vector<double>& dataVector, char const* lab, int lag );
+    std::vector<double> gatherData_Tseries( char const* lab, int lag );
+    std::vector<double> gatherData_Tseries( char const* lab, int start, int end );
+    void compareStats(char const* lab1, char const* lab2, double* r, int start, int end);
     void compareStats(char const* lab1, char const* lab2, double* r, int lag = 0);
     double sum( char const* lab, int lag );
     double whg_av( char const* weight, char const* lab, int lag );
@@ -341,8 +339,8 @@ struct object {
     object* turbosearch( char const* label, double tot, double num );
     object* turbosearch_cond( char const* label, double value );
     variable* add_empty_var( char const* str );
-    variable* search_var_local(char const* label); //search only in object    
-    variable* search_var( object* caller, char const* label, bool no_error = false, bool no_search = false, object* maxLevel = NULL );    
+    variable* search_var_local(char const* label); //search only in object
+    variable* search_var( object* caller, char const* label, bool no_error = false, bool no_search = false, object* maxLevel = NULL );
     void add_obj( char const* label, int num, int propagate );
     variable* add_var_basic( char const* lab, int lag, double* val, int save, bool adToMap );
     void add_var( char const* label, int lag, double* val, int save );
@@ -397,7 +395,7 @@ struct object {
     void position_between(gisMap* map, double& x_out, double& y_out, double x1, double y1, double x2, double y2, double rel_pos = 0.5); //find position at half distance
     void position_between(double& x_out, double& y_out, object* shareObj, object* shareObj2, double rel_pos = 0.5);
     void position_between(double& x_out, double& y_out, double x_1, double y_1, double x_2, double y_2, double rel_pos = 0.5);
-    
+
     void it_full(char const lab[], bool random);
     void it_in_radius(char const lab[], double radius, char random, object* caller, int lag, char const varLab[], char const condition[], double condVal);
     object* first_neighbour_full(char const lab[], bool random);
@@ -498,7 +496,7 @@ struct variable {
     bool plot;
     bool save;
     bool savei;
-    bool abmat; //flag for abmat variables.    
+    bool abmat; //flag for abmat variables.
     bool under_computation;
     int deb_cond;
     int delay;
@@ -527,7 +525,7 @@ struct variable {
 
     variable( void );					// empty constructor
     variable( const variable& v );		// copy constructor
-
+    std::vector<double> copy_data( object* caller, int dstart, int dend );
     double cal( object* caller, int lag );
     double fun( object* caller );
     int init( object* _up, char const* _label, int _num_lag, double* val, int _save );

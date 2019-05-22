@@ -245,6 +245,38 @@ int variable::init( object* _up, char const* _label, int _num_lag, double* v, in
     return 0;
 }
 
+/***************************************************
+    COPY_DATA
+    copy data to vector and return it.
+    Ensures that data is of max length.
+    Always with t=0.
+****************************************************/
+std::vector<double> variable::copy_data( object* caller, int dstart, int dend)
+{
+    if ( !this->save && !this - savei  ) {
+        sprintf(msg, "Trying to copy data from variable %s that is not marked for saving.", label);
+        error_hard(msg, __DEV_ERR_INFO__, "Mark the variable to be saved.");
+    }
+    if (dend > t) {
+        sprintf(msg, "Trying to copy data from variable %s. End is: %i which is in the future.", label, dend);
+        error_hard(msg, __DEV_ERR_INFO__, "Fix your code.");
+    }
+    if (dstart < 0 || dstart >= dend) {
+        sprintf(msg, "Trying to copy data from variable %s. Start is: %i which is in the future or below 0.", label, dstart);
+        error_hard(msg, __DEV_ERR_INFO__, "Fix your code.");
+    }
+
+    std::vector<double> datav( dend - dstart, NAN );
+    if (this->last_update < dend) {
+        this->cal(caller, t - dend);
+    }
+    //Check if data exists!
+    for (auto i = dstart; i <= dend; i++ ) {
+        if (i >= this->start) //other data is NAN
+            datav[i] = this->data[i];
+    }
+    return datav;
+}
 
 /***************************************************
     CAL
