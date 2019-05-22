@@ -627,12 +627,11 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
         parent = abmat->search_local(typeLab);
     }
 
+    //add the objects
     bool var1_added = false;
     bool var2_added = false;
-
     if (type == a_micro || type == a_macro || type == a_comp) {
         //Add the variable as an object to the category
-        //in this case, standard LSD stuff and check that not exist
         oVar = parent->search_local(varlab);
         if (oVar == NULL) {
             parent->add_obj(varlab, 1, false);
@@ -643,6 +642,8 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
             plog(oVar->label);
             var1_added = true;
         }
+
+        //Comparative vars as pair of macro vars, linked via hooks (single direction)
         if (type == a_comp) {
             var2_added = true;
             oVar2 = parent->search_local(var2lab);
@@ -663,13 +664,17 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
                 }
             }
             if (false == hook_exists) {
-                oVar->hooks.push_back(oVar2); //check for integretiy with o_vecT
-                plog("\nAdded link for comparison of variable ");
-                plog(oVar->label);
-                plog(" with variable ");
-                plog(oVar2->label);
+                try {
+                    oVar->hooks.push_back(oVar2); //check for integretiy with o_vecT
+                    plog("\nAdded link for comparison of variable ");
+                    plog(oVar->label);
+                    plog(" with variable ");
+                    plog(oVar2->label);
+                }
+                CatchAll("Check if the type o_vecT changed!");
             }
         }
+
     }
     else if (type == a_cond) {
         //In case we have type cond, we add the variables within the
@@ -716,16 +721,12 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
         //alt: oVar->hooks.count(oVar2)>0
 
         if (false == hook_exists) {
-            oVar->hooks.push_back(oVar2);
-            oVar2->hooks.push_back(oVar);
+            try {
+                oVar->hooks.push_back(oVar2);
+                oVar2->hooks.push_back(oVar);
+            }
+            CatchAll("Check if the type o_vecT changed!");
             var1_added = var2_added = true; //new unique combination
-
-            plog("\nAdded object of type ");
-            plog(abmat_type.c_str());
-            plog(" with name ");
-            plog(oVar->label);
-            plog(" and factorial ");
-            plog(oVar2->label);
         }
     }
 
@@ -857,10 +858,8 @@ void plog_object_tree_up(object* startO, bool plotVars)
         if(++count % 4 == 0) {
             tree += "\n\t";
         }
-        plog(tree.c_str());
-        tree.clear();
     }
-
+    plog(tree.c_str());
 }
 
 void update_abmat_vars()
@@ -876,7 +875,7 @@ void update_abmat_vars()
             return;
         }
 
-        Tabmat type;
+        Tabmat type; //only micro, macro or conditional here
         if ( strcmp(parent->label, lmicro) == 0 ) {
             type = a_micro;
         }
@@ -885,9 +884,6 @@ void update_abmat_vars()
         }
         else if ( strcmp(parent->label, lcond) == 0 ) {
             type = a_cond;
-        }
-        else if ( strcmp(parent->label, lcomp) == 0 ) {
-            type = a_comp;
         }
         else {
             sprintf( msg, "error in '%s' for object %s.", __func__, parent->label);
@@ -937,167 +933,103 @@ void update_abmat_vars()
 
                     //Cond is different,because here is a first and second variable, too.
 
-                    case a_cond: {
+                    case a_cond:
+                        //move down below first
+                        if ( strcmp(oVar->label, lfirst) == 0 ) {
 
-                            //move down below first
-                            if ( strcmp(oVar->label, lfirst) == 0 ) {
+                            for (bridge* bVar1 = oVar->b; bVar1 != NULL; bVar1 = bVar1->next ) {
+                                object* oVar1 = bVar1->head;
+                                if (oVar1 == NULL) {
+                                    sprintf( msg, "error in '%s', kind %s.", __func__, oVar->label);
+                                    error_hard( msg, "no head object for abmat kind?",
+                                                "Contact the developer.",
+                                                true );
+                                    return;
+                                }
+                                for ( ; oVar1 != NULL; oVar1 = oVar1->next) {
 
-                                for (bridge* bVar1 = oVar->b; bVar1 != NULL; bVar1 = bVar1->next ) {
-                                    object* oVar1 = bVar1->head;
-                                    if (oVar1 == NULL) {
-                                        sprintf( msg, "error in '%s', kind %s.", __func__, oVar->label);
-                                        error_hard( msg, "no head object for abmat kind?",
-                                                    "Contact the developer.",
-                                                    true );
-                                        return;
-                                    }
-                                    for ( ; oVar1 != NULL; oVar1 = oVar1->next) {
-                                        plog("\n In ovar1 : ");
-                                        plog(oVar1->label);
+                                    //the top objects for the unique pair variable and conditioning
+                                    //variable exist. The rest is dynamically checked/produced.
+                                    for (object* oVar2 : oVar1->hooks) {
+
+                                        //create set and copy information of previous sets.
+                                        std::map < int, std::vector<double> > cond_vData_map;
+                                        try {
+                                            for (auto& element : m_abmat_conditions.at(oVar2->label) ) {
+                                                cond_vData_map[element]; //create empty set
+                                            }
+                                        }
+                                        CatchAll("Uups")
 
 
-                                        //the top objects for the unique pair variable and conditioning
-                                        //variable exist. The rest is dynamically checked/produced.
-                                        for (object* oVar2 : oVar1->hooks) {
+                                        //gather all data and save in sets per condition/factor
+                                        double total = 0.0;
+                                        auto cycle_var = next_var(root, oVar1->label, true);
+                                        for (variable* curv = cycle_var(); curv != NULL; curv = cycle_var()) {
+                                            variable* curv2 = curv->up->search_var_local(oVar2->label);
+                                            if (curv2 == NULL) {
+                                                sprintf( msg, "variable '%s' is missing in object '%s' in function '%s'", oVar2->label, curv->up->label, __func__ );
+                                                error_hard( msg, "variable or parameter not found",
+                                                            "check model structure for conditional abmat" );
+                                                return;
+                                            }
+                                            total++;
+                                            int condVal = static_cast<int> ( curv2->cal( NULL, 0) ); //same as in object::update()
+                                            double val = curv->cal( NULL, 0);
+                                            cond_vData_map[condVal].push_back(val);
+                                        }
 
-                                            //create set and copy information of previous sets.
-                                            plog("\n Previous factors: ");
-                                            std::map < int, std::vector<double> > cond_vData_map;                                            
+                                        //save data
+                                        for (auto& subset : cond_vData_map) {
+                                            //save information of relative size to conditional variable
+                                            double fraction = static_cast<double>(subset.second.size() ) / total;
+                                            //Save info on factors
                                             try {
-                                                for (auto& element : m_abmat_conditions.at(oVar2->label) ) {
-                                                    cond_vData_map[element]; //create empty set
-                                                    // plog(std::to_string(element).c_str());
-                                                    // plog(", ");
-                                                }
+                                                m_abmat_conditions.at(oVar2->label).insert(subset.first);
                                             }
                                             CatchAll("Uups")
 
+                                            std::string var2lab = get_abmat_varname(a_fact, oVar2->label, subset.first);
+                                            variable* fracVar = oVar2->search_var_local(var2lab.c_str());
 
-                                            //gather all data and save in sets per condition/factor
-                                            double total = 0.0;        
-                                            auto cycle_var = next_var(root, oVar1->label, true);
-                                            for (variable* curv = cycle_var(); curv != NULL; curv = cycle_var()) {
-                                                variable* curv2 = curv->up->search_var_local(oVar2->label);
-                                                if (curv2 == NULL) {
-                                                    sprintf( msg, "variable '%s' is missing in object '%s' in function '%s'", oVar2->label, curv->up->label, __func__ );
-                                                    error_hard( msg, "variable or parameter not found",
-                                                                "check model structure for conditional abmat" );
-                                                    return;
-                                                }
-                                                total++;
-                                                int condVal = static_cast<int> ( curv2->cal( NULL, 0) ); //same as in object::update()
-                                                double val = curv->cal( NULL, 0);
-                                                cond_vData_map[condVal].push_back(val);
-                                            }
-
-                                            //save data
-                                            for (auto& subset : cond_vData_map) {
-                                                //save information of relative size to conditional variable
-                                                double fraction = static_cast<double>(subset.second.size() ) / total;
-                                                //Save info on factors
-                                                try {
-                                                    m_abmat_conditions.at(oVar2->label).insert(subset.first);
-                                                }
-                                                CatchAll("Uups")
-
-                                                std::string var2lab = get_abmat_varname(a_fact, oVar2->label, subset.first);
-                                                plog("\nLooking for: ");
-                                                plog(var2lab.c_str());
-                                                variable* fracVar = oVar2->search_var_local(var2lab.c_str());
-                                                
-                                                //create variables the first time a factor appears
-                                                if (fracVar == NULL) {
-                                                    //conditioning variable for fraction tracking
-                                                    fracVar = abmat_add_var(oVar2, var2lab.c_str());
-                                                    plog("\nAdded fractorial variable: ");
-                                                    plog(fracVar->label);
-
-                                                    //conditional variables
-                                                    auto stats_template = abmat_stats( ); //retrieve map of stats
-                                                    //create a variable for each statistic
-                                                    for (auto& elem : stats_template) {
-                                                        std::string nvarLab = get_abmat_varname ( type, oVar1->label, elem.first, oVar2->label, subset.first);
-                                                        abmat_add_var(oVar1, nvarLab.c_str());
-                                                    }
-                                                }
-                                                
-                                                //update
-                                                oVar2->write(var2lab.c_str(), fraction, t);
-                                                auto stats = abmat_stats(subset.second);
-                                                for (auto& stat : stats) {
-                                                    std::string nvarLab = get_abmat_varname ( type, oVar1->label, stat.first, oVar2->label, subset.first);
-                                                    oVar1->write(nvarLab.c_str(), stat.second, t);
+                                            //create variables the first time a factor appears
+                                            if (fracVar == NULL) {
+                                                //conditioning variable for fraction tracking
+                                                fracVar = abmat_add_var(oVar2, var2lab.c_str());
+                                                //conditional variables
+                                                auto stats_template = abmat_stats( ); //retrieve map of stats
+                                                for (auto& elem : stats_template) {   //create a variable for each statistic
+                                                    std::string nvarLab = get_abmat_varname ( type, oVar1->label, elem.first, oVar2->label, subset.first);
+                                                    abmat_add_var(oVar1, nvarLab.c_str());
                                                 }
                                             }
-                                                                                        
 
-
-                                            // plog("\nData..");
-                                            // plog(oVar1->label);
-                                            // plog(" conditional on ");
-                                            // plog(oVar2->label);
-                                            // for( auto& element : cond_vData_map) {
-                                                // plog("\n ");
-                                                // plog(std::to_string(element.first).c_str());
-                                                // plog(" : ");
-                                                // int count = 5;
-                                                // for (auto& datum : element.second) {
-                                                    // plog(std::to_string(datum).c_str());
-                                                    // if (--count == 0) {
-                                                        // plog( " ... and many more" );
-                                                        // break;
-                                                    // }
-                                                    // else
-                                                        // plog(", ");
-                                                // }
-                                            // }
-                                            // plog("\n");
-
+                                            //update variables
+                                            oVar2->write(var2lab.c_str(), fraction, t);
+                                            auto stats = abmat_stats(subset.second);
+                                            for (auto& stat : stats) {
+                                                std::string nvarLab = get_abmat_varname ( type, oVar1->label, stat.first, oVar2->label, subset.first);
+                                                oVar1->write(nvarLab.c_str(), stat.second, t);
+                                            }
                                         }
                                     }
                                 }
                             }
-
                         }
-
                         break;
 
+                    case a_fact:
                     case a_comp: {
-                            plog("\nERROR a_comp case should not exist.");
+                            plog("\nERROR a_comp / a_fact case should not exist.");
                         }
                         break;
                 }
-                //visualise the added data.
-                plog("\n---- Added new data to abmat ---");
-                plog_object_tree_up(oVar, true);
-                plog("\n---");
-
-
+                // //visualise the added data.
+                // plog("\n---- Added new data to abmat ---");
+                // plog_object_tree_up(oVar, true);
+                // plog("\n---");
 
             }
-
-            //for type cond:
-            //the cond variable holds a set of micro stats for each unique
-            //value that ever existed in the conditioning variable
-            //initially there are none. This is instead checked each time
-            //data is saved.
-
-
-            //2) create the second,
-
-            //check conditioning variable:
-            //a) All are implicit integer?!
-            //b) All are in same object as conditional variable?
-
-
-            //create a map of the conditioning values that currently exist
-
-            //compare with parameter labels of conditioning variable
-            //if it does not yet exist, add the variable with the value
-            //and add all the new parameters to the conditional variable,
-            //initialise the prior data to NAN
-
-            //gather the stats for each subset and write them to the params
 
         }
     }
