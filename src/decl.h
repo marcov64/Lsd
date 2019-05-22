@@ -816,8 +816,10 @@ class result {						// results file object
         // constructor
         ~result( void );					// destructor
 
-        void data( object* root, int initstep, int endtstep = 0 );	// write data
+        void data( object* root, int initstep, int endtstep = 0  );	// write data
+        void data_abmat_tot( ); //abmat stats - wrapper for data
         void title( object* root, int flag );	// write file header
+        void title_abmat_tot( );
 };
 
 struct profile {						// profiled variable object

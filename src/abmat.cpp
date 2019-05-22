@@ -788,6 +788,7 @@ variable* abmat_add_var(object* parent, char const* lab)
 {
     variable* var = parent->add_var_basic(lab, 0, NULL, true, true); //no lags, no values, save
     var->param = 1; //1 is parameter. Other fields are not used.
+    var->abmat = true;
     abmat_alloc_save_mem_var(var);
     abmat_series_saved++;
     return var;

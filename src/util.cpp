@@ -621,6 +621,18 @@ void set_lab_tit( variable *var )
 		
 		return;
 	}
+    
+    if ( var->abmat ) //this is an abmat variable
+	{
+		// this is the Root of the model
+		if ( var->lab_tit != NULL )
+			return; 					// already done in the past
+		
+		var->lab_tit = new char[ strlen( "ABMAT" ) + 1 ];
+		strcpy( var->lab_tit, "ABMAT" );
+		
+		return;
+	}
 
 	for ( cur = var->up; cur->up != NULL; cur = cur->up )
 	{
@@ -1466,6 +1478,14 @@ Methods for results file saving (class result)
 //ToDo : Add ABMAT
 ***************************************************/
 
+void result::title_abmat_tot( ){
+//    NEW   
+}
+
+void result::data_abmat_tot( ){
+//    NEW   
+}
+
 // saves data to file in the specified period
 void result::data( object *root, int initstep, int endtstep )
 {
@@ -1632,7 +1652,7 @@ void result::title_recursive( object *r, int header )
 		if ( cv->save == 1 )
 		{
 			set_lab_tit( cv );
-			if ( ( ! strcmp( cv->lab_tit, "1" ) || ! strcmp( cv->lab_tit, "1_1" ) || ! strcmp( cv->lab_tit, "1_1_1" ) || ! strcmp( cv->lab_tit, "1_1_1_1" ) ) && cv->up->hyper_next( ) == NULL )
+			if ( abmat || ( ! strcmp( cv->lab_tit, "1" ) || ! strcmp( cv->lab_tit, "1_1" ) || ! strcmp( cv->lab_tit, "1_1_1" ) || ! strcmp( cv->lab_tit, "1_1_1_1" ) ) && cv->up->hyper_next( ) == NULL )
 				single = true;					// prevent adding suffix to single objects
 			
 			if ( header )

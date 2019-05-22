@@ -934,7 +934,7 @@ void run( void )
                     rf = new result( msg, "wt", dozip, docsv );	// create results file object
                     rf->title( root, 1 );						// write header
                     rf->data( root, 0, actual_steps );			// write all data
-                    delete rf;									// close file and delete object
+                    delete rf;									// close file and delete object                                      
 
                     if ( fast_mode < 2 )
                         plog( "Done\n" );
@@ -962,6 +962,16 @@ void run( void )
 
                 rf->data( root, actual_steps );				// write current data data
                 delete rf;									// close file and delete object
+                
+                if ( abmat_series_saved > 0 ) {
+                    //create new title if same as above OR IF new conditional values have been added.
+                    
+                    //either create new rf file OR 
+                        //rename old rf file on disk and read data if not in memory
+                        //flag old as to be deleted.
+                        //create new rf file and write data
+                }
+                    
 
                 if ( fast_mode < 2 && i == sim_num )		// print only for last
                     plog( "Done\n" );
