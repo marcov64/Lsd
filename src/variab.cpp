@@ -139,8 +139,7 @@ variable::variable( void )
     plot = false;
     save = false;
     savei = false;
-    saveMicro = false;
-    saveMacro = false;
+    abmat = false;
     under_computation = false;
     lab_tit = NULL;
     label = NULL;
@@ -181,8 +180,7 @@ variable::variable( const variable& v )
     plot = v.plot;
     save = v.save;
     savei = v.savei;
-    saveMicro = v.saveMicro; //ABMAT
-    saveMacro = v.saveMacro; //ABMAT
+    abmat = v.abmat;
     under_computation = v.under_computation;
     lab_tit = v.lab_tit;
     label = v.label;

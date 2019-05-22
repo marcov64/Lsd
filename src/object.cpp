@@ -1349,8 +1349,7 @@ void object::add_var_from_example( variable* example )
 
     cv->init( this, example->label, example->num_lag, example->val, example->save );
     cv->savei = example->savei;
-    cv->saveMicro = example->saveMicro;
-    cv->saveMacro = example->saveMacro;
+    cv->abmat = false;
     cv->last_update = example->last_update;
     cv->delay = example->delay;
     cv->delay_range = example->delay_range;
@@ -1797,7 +1796,7 @@ object* object::add_n_objects2( char const* lab, int n, object* ex, int t_update
                 }
             }
 
-            if ( cv->save || cv->savei || cv->saveMicro || cv->saveMacro ) {
+            if ( cv->save || cv->savei ) {
                 if ( running )
                     cv->data = new double[ max_step + 1 ];
 
@@ -3478,7 +3477,7 @@ double object::write( char const* lab, double value, int time, int lag )
         cv->val[ - time - 1 ] = value;
         cv->last_update = 0;	// force new updating
 
-        if ( time == -1 && ( cv->save || cv->savei || cv->saveMicro || cv->saveMacro ) )
+        if ( time == -1 && ( cv->save || cv->savei ) )
             cv->data[ 0 ] = value;
 
         // choose next update step for special updating variables
@@ -3528,7 +3527,7 @@ double object::write( char const* lab, double value, int time, int lag )
 
         cv->last_update = time;
         eff_time = time - lag;
-        if ( eff_time >= 0 && eff_time <= max_step && ( cv->save || cv->savei || cv->saveMicro || cv->saveMacro ) )
+        if ( eff_time >= 0 && eff_time <= max_step && ( cv->save || cv->savei ) )
             cv->data[ eff_time ] = value; //Basically manipulate the track record.
     }
 

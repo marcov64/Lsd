@@ -1235,7 +1235,7 @@ void count_save( object *n, int *count )
 	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
-		if ( cv->save || cv->savei || cv->saveMicro || cv->saveMacro )
+		if ( cv->save || cv->savei )
 			( *count )++;
 
 	for ( cb = n->b; cb != NULL; cb = cb->next )
