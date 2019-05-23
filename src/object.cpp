@@ -2854,7 +2854,7 @@ void object::xStats_all_cnd(char const* lab, double* r, char const condVarLab[],
                             char const condition[], double condVal,
                             object* fake_caller, int lag)
 {
-    std::vector<double> Data = gatherData_all_cnd(lab, condVarLab, condition, condVal, fake_caller,
+    auto Data = gatherData_all_cnd(lab, condVarLab, condition, condVal, fake_caller,
                                lag);
     eightStats(Data, r);
 }
@@ -2884,9 +2884,9 @@ void object::compareStats(char const* lab1, char const* lab2, double* r, int sta
     auto Data2 = gatherData_Tseries( lab2, start, end );
     auto m_stats = abmat_compare(Data1, Data2); //pass calculation to abmat
     try {
-    r[0] = m_stats.at("gamma");
-    r[1] = m_stats.at("tauA");
-    r[2] = m_stats.at("tauB");
+    r[0] = m_stats.at(astat_gam);
+    r[1] = m_stats.at(astat_ta);
+    r[2] = m_stats.at(astat_tb);
     } CatchAll("Uuuuuups");
 
 }
@@ -2902,22 +2902,25 @@ void object::eightStats(std::vector<double>& Data, double* r)
     //r[0] = r[1] = r[2] = r[3] = r[4] = r[5] = r[6] = r[7] = r[8] = r[9] = r[10] = r[11] = r[12] = r[13] = 0;
 
     auto m_stats = abmat_stats(Data); //pass calculation to abmat
+    for (auto& element : m_stats) {
+        plog("\n");plog(element.first);plog("\t");plog(std::to_string(element.second).c_str());
+    }
     try {
         int i = 0;
-    r[0] = m_stats.at("n");plog(std::to_string(i++).c_str());
-    r[1] = m_stats.at("min");plog(std::to_string(i++).c_str());
-    r[2] = m_stats.at("max");plog(std::to_string(i++).c_str());
-    r[3] = m_stats.at("p25");plog(std::to_string(i++).c_str());
-    r[4] = m_stats.at("p75");plog(std::to_string(i++).c_str());
-    r[5] = m_stats.at("p05");plog(std::to_string(i++).c_str());
-    r[6] = m_stats.at("p95");plog(std::to_string(i++).c_str());
-    r[7] = m_stats.at("p50");plog(std::to_string(i++).c_str());
-    r[8] = m_stats.at("avg");plog(std::to_string(i++).c_str());
-    r[9] = m_stats.at("mae");plog(std::to_string(i++).c_str());
-    r[10] = m_stats.at("sd");plog(std::to_string(i++).c_str());
-    r[11] = m_stats.at("Lcv");plog(std::to_string(i++).c_str());
-    r[12] = m_stats.at("Lsk");plog(std::to_string(i++).c_str());
-    r[13] = m_stats.at("Lku");plog(std::to_string(i++).c_str());
+    r[0] = m_stats.at(astat_n);
+    r[1] = m_stats.at(astat_min);
+    r[2] = m_stats.at(astat_max);
+    r[3] = m_stats.at(astat_p25);
+    r[4] = m_stats.at(astat_p75);
+    r[5] = m_stats.at(astat_p05);
+    r[6] = m_stats.at(astat_p95);
+    r[7] = m_stats.at(astat_p50);
+    r[8] = m_stats.at(astat_avg);
+    r[9] = m_stats.at(astat_mae);
+    r[10] = m_stats.at(astat_sd);
+    r[11] = m_stats.at(astat_Lcv);
+    r[12] = m_stats.at(astat_Lsk);
+    r[13] = m_stats.at(astat_Lku);
     
     } CatchAll("Uuuuuups");
 }

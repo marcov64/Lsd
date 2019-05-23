@@ -147,6 +147,29 @@ const char* lmacro = "*macro";
 const char* lcond = "*cond";
 const char* lcomp = lmacro;
 
+const char* astat_n = "n";
+const char* astat_min = "min";
+const char* astat_p05 = "p05";
+const char* astat_p25 = "p25";
+const char* astat_p50 = "p50";
+const char* astat_p75 = "p75";
+const char* astat_p95 = "p95";
+const char* astat_max = "max";
+const char* astat_avg = "avg";
+const char* astat_sd = "sd";
+const char* astat_mae = "mae";
+const char* astat_Lcv = "Lcv";
+const char* astat_Lsk = "Lsk";
+const char* astat_Lku = "Lku";
+
+const char* astat_gam = "gam";
+const char* astat_ta = "ta";
+const char* astat_tb = "tb";
+const char* astat_tc = "tc";
+const char* astat_xcr = "xcr";
+
+const char* astat_L1 = "L1";
+const char* astat_L2 = "L2";
 
 /********************************************
     ABMAT_ADD_INTERVAL
@@ -302,26 +325,26 @@ m_statsT abmat_stats(std::vector<double>& Data )
 {
     m_statsT stats;
 
-    stats["n"]=0; //number of items
+    stats[astat_n]=0; //number of items
 
     // O-Stats
-    stats["min"];
-    stats["p05"]; //lower
-    stats["p25"]; //lower
-    stats["p50"]; //interpolate
-    stats["p75"]; //higher
-    stats["p95"]; //higher
-    stats["max"];
+    stats[astat_min];
+    stats[astat_p05]; //lower
+    stats[astat_p25]; //lower
+    stats[astat_p50]; //interpolate
+    stats[astat_p75]; //higher
+    stats[astat_p95]; //higher
+    stats[astat_max];
 
     // C-Stats
-    stats["avg"];
-    stats["sd"];
-    stats["mae"];
+    stats[astat_avg];
+    stats[astat_sd];
+    stats[astat_mae];
 
     // L-Moments
-    stats["Lcv"];
-    stats["Lsk"];
-    stats["Lku"];
+    stats[astat_Lcv];
+    stats[astat_Lsk];
+    stats[astat_Lku];
 
     const int len_data = Data.size();
     const double rlen_data = static_cast<double>( len_data );
@@ -331,36 +354,36 @@ m_statsT abmat_stats(std::vector<double>& Data )
         //O-Stats
 
         std::sort(Data.begin(), Data.end());
-        stats["min"] = Data[0];
-        stats["max"] = Data[len_data - 1];
+        stats[astat_min] = Data[0];
+        stats[astat_max] = Data[len_data - 1];
 
         int index = static_cast<int>( (len_data * 1 / 20) ) - 1;
         if (index < 0)
             index = 0;
-        stats["p05"] = Data[index];
+        stats[astat_p05] = Data[index];
 
         index = static_cast<int>( (len_data / 4) ) - 1;
         if (index < 0)
             index = 0;
-        stats["p25"] = Data[index];
+        stats[astat_p25] = Data[index];
 
         index = static_cast<int>( std::ceil( rlen_data * 3.0 / 4.0 ) ) - 1;
         if (index > len_data - 1)
             index = len_data - 1;
-        stats["p75"] = Data[index];
+        stats[astat_p75] = Data[index];
 
         index = static_cast<int>( std::ceil( rlen_data * 19.0 / 20.0 ) ) - 1;
         if (index > len_data - 1)
             index = len_data - 1;
-        stats["p95"] = Data[index];
+        stats[astat_p95] = Data[index];
 
         if (len_data % 2 == 0) {
             index = len_data / 2 - 1;
-            stats["p50"] = (Data[index] + Data[index + 1]) / 2.0;
+            stats[astat_p50] = (Data[index] + Data[index + 1]) / 2.0;
         }
         else {
             index = (len_data - 1) / 2;
-            stats["p50"] = Data[ index ];
+            stats[astat_p50] = Data[ index ];
         }
 
         //L-Moments and mean
@@ -390,14 +413,14 @@ m_statsT abmat_stats(std::vector<double>& Data )
         double C3 = C2 * (rlen_data - 2.0) / 3.0;
         double C4 = C3 * (rlen_data - 3.0) / 4.0;
         L1 = L1 / C1;
-        stats["avg"] = L1;
+        stats[astat_avg] = L1;
         L2 = L2 / C2 / 2.0;
         L3 = L3 / C3 / 3.0;
         L4 = L4 / C4 / 4.0;
 
-        stats["Lcv"] = (L1 == 0.0) ? 0.0 : L2 / L1; // L-cv
-        stats["Lsk"] = (L2 == 0.0) ? 0.0 : L3 / L2;     // L-Skewness
-        stats["Lku"] = (L2 == 0.0) ? 0.0 : L4 / L2;     // L-Kurtosis
+        stats[astat_Lcv] = (L1 == 0.0) ? 0.0 : L2 / L1; // L-cv
+        stats[astat_Lsk] = (L2 == 0.0) ? 0.0 : L3 / L2;     // L-Skewness
+        stats[astat_Lku] = (L2 == 0.0) ? 0.0 : L4 / L2;     // L-Kurtosis
 
         double MAE = 0.0;
         double SD = 0.0;
@@ -405,16 +428,16 @@ m_statsT abmat_stats(std::vector<double>& Data )
             MAE += std::abs(Data[i] - L1);
             SD += std::pow((Data[i] - L1), 2);
         }
-        stats["mae"] = MAE / rlen_data;
+        stats[astat_mae] = MAE / rlen_data;
         SD /= rlen_data;
-        stats["sd"] = SD > 0 ? sqrt(SD) : 0.0;
+        stats[astat_sd] = SD > 0 ? sqrt(SD) : 0.0;
     }
     else {
         for(auto& elem : stats) {
             elem.second = NAN;
         }
     }
-    stats["n"] = rlen_data;
+    stats[astat_n] = rlen_data;
     return stats;
 }
 
@@ -441,20 +464,20 @@ m_statsT abmat_compare(std::vector<double>& Data1, std::vector<double>& Data2)
 
     m_statsT compare;
 
-    compare["n"]; // length of the timeseries
+    compare[astat_n]; // length of the timeseries
 
     // association, i.e. direction without magnitude
-    compare["gamma"]; // gamme correlation
-    compare["tauA"];
-    compare["tauB"];
-    compare["tauC"];
+    compare[astat_gam]; // gamme correlation
+    compare[astat_ta];
+    compare[astat_tb];
+    compare[astat_tc];
 
     // standard product moment correlation
-    compare["corr"];
+    compare[astat_xcr];
 
     // Differences L-Norms
-    compare["L1"]; // difference in means
-    compare["L2"]; // difference as RMSE
+    compare[astat_L1]; // difference in means
+    compare[astat_L2]; // difference as RMSE
 
     const int len_data = Data1.size();
     const double rlen_data = static_cast<double>(len_data);
@@ -530,16 +553,17 @@ m_statsT abmat_compare(std::vector<double>& Data1, std::vector<double>& Data2)
                 tau_a = 0.0;
                 tau_b = 0.0;
             }
-            compare["gamma"] = gamma; // gamme correlation
-            compare["tauA"] = tau_a;
-            compare["tauB"] = tau_b;
+            compare[astat_gam] = gamma; // gamme correlation
+            compare[astat_ta] = tau_a;
+            compare[astat_tb] = tau_b;
+            compare[astat_tc] = NAN;
             // compare["tauC"]=0.0;
         }
         else {
-            compare["gamma"] = NADBL; // gamme correlation
-            compare["tauA"] = 0.0;
-            compare["tauB"] = 0.0;
-            //  compare["tauC"]=0.0;
+            compare[astat_gam] = NAN; // gamme correlation
+            compare[astat_ta] = 0.0;
+            compare[astat_tb] = 0.0;
+            compare[astat_tc] = NAN;
         }
     }
     else {
@@ -548,7 +572,7 @@ m_statsT abmat_compare(std::vector<double>& Data1, std::vector<double>& Data2)
         }
     }
 
-    compare["n"] = rlen_data; // only one never NAN
+    compare[astat_n] = rlen_data; // only one never NAN
     return compare;
 }
 

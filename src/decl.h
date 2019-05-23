@@ -211,6 +211,39 @@ struct Wrap;
 typedef std::map< const char*, double > m_statsT;
 enum Tabmat {a_micro, a_macro, a_cond, a_comp, a_fact};
 struct next_var; //functional to cycle through variables
+
+extern const char* lfirst;
+extern const char* lsecond;
+
+extern const char* lmicro;
+extern const char* lmacro;
+extern const char* lcond;
+extern const char* lcomp;
+
+extern const char* astat_n;
+extern const char* astat_min;
+extern const char* astat_p05;
+extern const char* astat_p25;
+extern const char* astat_p50;
+extern const char* astat_p75;
+extern const char* astat_p95;
+extern const char* astat_max;
+extern const char* astat_avg;
+extern const char* astat_sd;
+extern const char* astat_mae;
+extern const char* astat_Lcv;
+extern const char* astat_Lsk;
+extern const char* astat_Lku;
+
+extern const char* astat_gam;
+extern const char* astat_ta;
+extern const char* astat_tb;
+extern const char* astat_tc;
+extern const char* astat_xcr;
+
+extern const char* astat_L1;
+extern const char* astat_L2;
+
 #endif //#ifdef CPP11
 
 
