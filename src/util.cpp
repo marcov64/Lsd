@@ -1478,66 +1478,33 @@ Methods for results file saving (class result)
 //ToDo : Add ABMAT
 ***************************************************/
 
-void result::title_abmat_tot( ){
-//    NEW   
+void result::title_abmat( int flag ) {
+    title( abmat, flag, true);
 }
 
-void result::data_abmat_tot( ){
-//    NEW   
+void result::data_abmat( void ) {
+    data(abmat,t,0,true); 
 }
 
-// saves data to file in the specified period
-void result::data( object *root, int initstep, int endtstep )
-{
-	// don't include initialization (t=0) in .csv format
-	initstep = ( docsv && initstep < 1 ) ? 1 : initstep;
-	// adjust for 1 time step if needed
-	endtstep = ( endtstep == 0 ) ? initstep : endtstep;
-	
-	for ( int i = initstep; i <= endtstep; i++ )
-	{
-		firstCol = true;
-		
-		data_recursive( root, i );		// output one data line
-		
-		if ( dozip )				// and change line
-		{
-#ifdef LIBZ
-			gzprintf( fz, "\n" );
-#endif
-		}
-		else
-			fprintf( f, "\n" );
-	}
-}
-
-void result::data_recursive( object *r, int i )
-{
-	bridge *cb;
-	object *cur;
-	variable *cv;
-
-	for ( cv = r->v; cv != NULL; cv = cv->next )
-	{
-		if ( cv->save == 1 )
-		{
-			if ( cv->start <= i && cv->end >= i && ! is_nan( cv->data[ i ] ) )
+//Write single datum
+void result::write_datum(double datum) {
+if (  ! is_nan( datum ) )
 			{
 				if ( dozip )
 				{
 #ifdef LIBZ
 					if ( docsv )
-						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i ] );
+						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, datum );
 					else
-						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i ] );
+						gzprintf( fz, "%.*G\t", SIG_DIG, datum );
 #endif
 				}
 				else
 				{
 					if ( docsv )
-						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i ] );
+						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, datum );
 					else
-						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i ] );
+						fprintf( f, "%.*G\t", SIG_DIG, datum );
 				}
 			}
 			else
@@ -1558,12 +1525,105 @@ void result::data_recursive( object *r, int i )
 					else
 						fprintf( f, "%s\t", nonavail );
 				}
+			}    
+}
+
+void result::write_title_abmat(const char* title, const char* lab_tit)
+{
+    write_title(title, lab_tit, true, false, 0, 0); //no info on time.
+}
+
+//write single variable head
+void result::write_title(const char* label, const char* lab_tit, bool single, bool header, int start, int end) 
+{
+if ( header )
+			{
+				if ( dozip )
+				{
+#ifdef LIBZ
+					if ( docsv )
+						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, label, single ? "" : "_", single ? "" : lab_tit );
+					else
+						gzprintf( fz, "%s %s (%d %d)\t", label, lab_tit, start, end );
+#endif
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, label, single ? "" : "_", single ? "" : lab_tit );
+					else
+						fprintf( f, "%s %s (%d %d)\t", label, lab_tit, start, end );
+				}
+			}
+			else
+			{
+				if ( dozip )
+				{
+#ifdef LIBZ
+					if ( docsv )
+						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, label, single ? "" : "_", single ? "" : lab_tit );
+					else
+						gzprintf( fz, "%s %s (-1 -1)\t", label, lab_tit );
+#endif
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, label, single ? "" : "_", single ? "" : lab_tit );
+					else
+						fprintf( f, "%s %s (-1 -1)\t", label, lab_tit );
+				}
+			}    
+}
+
+// saves data to file in the specified period
+void result::data( object *root, int initstep, int endtstep, bool abmat )
+{
+	// don't include initialization (t=0) in .csv format
+	initstep = ( docsv && initstep < 1 ) ? 1 : initstep;
+	// adjust for 1 time step if needed
+	endtstep = ( endtstep == 0 ) ? initstep : endtstep;
+	
+	for ( int i = initstep; i <= endtstep; i++ )
+	{
+		firstCol = true;
+		
+		data_recursive( root, i, abmat );		// output one data line
+		
+		if ( dozip )				// and change line
+		{
+#ifdef LIBZ
+			gzprintf( fz, "\n" );
+#endif
+		}
+		else
+			fprintf( f, "\n" );
+	}
+}
+
+void result::data_recursive( object *r, int i, bool abmat )
+{
+	bridge *cb;
+	object *cur;
+	variable *cv;
+
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+	{
+		if ( cv->save == 1 )
+		{
+			if ( cv->start <= i && cv->end >= i ) 
+			{
+				write_datum( cv->data[ i ] ); //nan check follows again!
+			}
+			else
+			{
+				write_datum( NAN );
 			}
 			
 			firstCol = false;
 		}
-	}
-	 
+	}	 
+     
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
@@ -1572,50 +1632,28 @@ void result::data_recursive( object *r, int i )
 		cur = cb->head;
 		if ( cur->to_compute )
 			for ( ; cur != NULL; cur = cur->next )
-				data_recursive( cur, i );
+				data_recursive( cur, i, abmat );
 	}
+    
+    if (abmat)
+        return; //no cemetery
 
-	if ( r->up == NULL )
+    // The cemetery 
+    // *could* be improved by simply providing a cemetery object that holds 
+    // all cemetery variables and joining it to root. With no-instance objects 
+    // that is straight forward.
+
+	if ( r->up == NULL )  
 	{
 		for ( cv = cemetery; cv != NULL; cv = cv->next )
 		{
-			if ( cv->start <=i && cv->end >= i && ! is_nan( cv->data[ i ] ) )
+			if ( cv->start <= i && cv->end >= i ) 
 			{
-				if ( dozip )
-				{
-#ifdef LIBZ
-					if ( docsv )
-						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i ] );
-					else
-						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i ] );
-#endif
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i ] );
-					else
-						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i ] );
-				}
+				write_datum( cv->data[ i ] ); //nan check follows again!
 			}
-			else					// save NaN as n/a
+			else
 			{
-				if ( dozip )
-				{
-#ifdef LIBZ
-					if ( docsv )
-						gzprintf( fz, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
-					else
-						gzprintf( fz, "%s\t", nonavail );
-#endif
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
-					else
-						fprintf(f, "%s\t", nonavail );
-				}
+				write_datum( NAN );
 			}
 						
 			firstCol = false;
@@ -1624,11 +1662,11 @@ void result::data_recursive( object *r, int i )
 }
 
 // saves header to file
-void result::title( object *root, int flag )
+void result::title( object *root, int flag, bool abmat )
 {
 	firstCol = true;
 	
-	title_recursive( root, flag );		// output header
+	title_recursive( root, flag, abmat );		// output header
 		
 	if ( dozip )						// and change line
 	{
@@ -1640,7 +1678,7 @@ void result::title( object *root, int flag )
 		fprintf( f, "\n" );
 }
 
-void result::title_recursive( object *r, int header )
+void result::title_recursive( object *r, int header, bool abmat )
 {
 	bool single = false;
 	bridge *cb;
@@ -1654,45 +1692,8 @@ void result::title_recursive( object *r, int header )
 			set_lab_tit( cv );
 			if ( abmat || ( ! strcmp( cv->lab_tit, "1" ) || ! strcmp( cv->lab_tit, "1_1" ) || ! strcmp( cv->lab_tit, "1_1_1" ) || ! strcmp( cv->lab_tit, "1_1_1_1" ) ) && cv->up->hyper_next( ) == NULL )
 				single = true;					// prevent adding suffix to single objects
-			
-			if ( header )
-			{
-				if ( dozip )
-				{
-#ifdef LIBZ
-					if ( docsv )
-						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-					else
-						gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-#endif
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-					else
-						fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-				}
-			}
-			else
-			{
-				if ( dozip )
-				{
-#ifdef LIBZ
-					if ( docsv )
-						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-					else
-						gzprintf( fz, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
-#endif
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-					else
-						fprintf( f, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
-				}
-			}
+            
+			write_title(cv->label, cv->lab_tit, single, header,  cv->start,  cv->end);
 			
 			firstCol = false;
 		}
@@ -1715,23 +1716,7 @@ void result::title_recursive( object *r, int header )
 	{
 		for ( cv = cemetery; cv != NULL; cv = cv->next )
 		{
-			if ( dozip )
-			{
-#ifdef LIBZ
-				if ( docsv )
-					gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-				else
-					gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-#endif
-			}
-			else
-			{
-				if ( docsv )
-					fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-				else
-					fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-			}
-			
+			write_title(cv->label, cv->lab_tit, single, header,  cv->start,  cv->end);			
 			firstCol = false;
 		}
 	}

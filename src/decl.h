@@ -796,6 +796,8 @@ struct design {						// design of experiment object
 };
 
 class result {						// results file object
+
+
         FILE* f;							// uncompressed file pointer
         bool docsv;							// comma separated .csv text format
         bool dozip;							// compressed file flag
@@ -805,8 +807,12 @@ class result {						// results file object
         gzFile fz;							// compressed file pointer
 #endif
 
-        void title_recursive( object* r, int i );	// write file header (recursively)
-        void data_recursive( object* r, int i );	// save a single time step (recursively)
+        void title_recursive( object* r, int i, bool abmat = false );	// write file header (recursively)
+        void data_recursive( object* r, int i, bool abmat = false );	// save a single time step (recursively)        
+
+        void write_datum(double datum); //append single data item
+        void write_title_abmat(const char* title, const char* lab_tit); //write single data item head
+        void write_title(const char* label, const char* lab_tit, bool single, bool header, int start, int end);
 
     public:
 
@@ -814,10 +820,10 @@ class result {						// results file object
         // constructor
         ~result( void );					// destructor
 
-        void data( object* root, int initstep, int endtstep = 0  );	// write data
-        void data_abmat_tot( ); //abmat stats - wrapper for data
-        void title( object* root, int flag );	// write file header
-        void title_abmat_tot( );
+        void data( object* root, int initstep, int endtstep = 0, bool abmat = false  );	// write data
+        void data_abmat( void ); //abmat stats - wrapper for data
+        void title( object* root, int flag, bool abmat = false );	// write file header
+        void title_abmat( int flag ); //wrapper
 };
 
 struct profile {						// profiled variable object
