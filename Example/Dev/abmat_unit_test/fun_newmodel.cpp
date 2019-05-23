@@ -97,7 +97,7 @@ if (T == 9) {
   }
   PLOG("ERROR = %d \n", error);
   if (V("id_A") == 1) {
-    T_STAT_INTVL("a", 1);
+    T_STATL("a", 1);
     if (v[2] == 9) {
       PLOG("T_STAT_INTVL OK \n");
     }

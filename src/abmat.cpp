@@ -302,7 +302,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
 {
     m_statsT stats;
 
-    stats["n"]; //number of items
+    stats["n"]=0; //number of items
 
     // O-Stats
     stats["min"];

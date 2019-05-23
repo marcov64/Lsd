@@ -2707,11 +2707,12 @@ double object::stat( char const* lab, double* r, char const condVarLab[], char c
 
 std::vector<double>  object::gatherData_Tseries(char const* lab, int lag)
 {
-    return gatherData_Tseries( lab, -1, t-lag );
+    return gatherData_Tseries( lab, 0, t-lag );
 }
 
 std::vector<double> object::gatherData_Tseries( char const* lab, int start, int end )
-{
+{    
+        
     int lag = t-end;
     object* cur, *next_cur, *cur2;
     variable* cv;    
@@ -2758,7 +2759,10 @@ std::vector<double> object::gatherData_Tseries( char const* lab, int start, int 
 
         return cv->copy_data( this, start, end ); //only valid data.
 
+    } else {
+        error_hard("...",__DEV_ERR_INFO__,"");
     }
+    
 }
 
 std::vector<double> object::gatherData_all(char const* lab, int lag)
@@ -2879,9 +2883,11 @@ void object::compareStats(char const* lab1, char const* lab2, double* r, int sta
     auto Data1 = gatherData_Tseries( lab1, start, end );
     auto Data2 = gatherData_Tseries( lab2, start, end );
     auto m_stats = abmat_compare(Data1, Data2); //pass calculation to abmat
+    try {
     r[0] = m_stats.at("gamma");
     r[1] = m_stats.at("tauA");
     r[2] = m_stats.at("tauB");
+    } CatchAll("Uuuuuups");
 
 }
 //at abmat.cpp see for the stats function
@@ -2896,21 +2902,24 @@ void object::eightStats(std::vector<double>& Data, double* r)
     //r[0] = r[1] = r[2] = r[3] = r[4] = r[5] = r[6] = r[7] = r[8] = r[9] = r[10] = r[11] = r[12] = r[13] = 0;
 
     auto m_stats = abmat_stats(Data); //pass calculation to abmat
-
-    r[0] = m_stats.at("n");
-    r[1] = m_stats.at("min");
-    r[2] = m_stats.at("max");
-    r[3] = m_stats.at("p25");
-    r[4] = m_stats.at("p75");
-    r[5] = m_stats.at("p05");
-    r[6] = m_stats.at("p95");
-    r[7] = m_stats.at("p50");
-    r[8] = m_stats.at("avg");
-    r[9] = m_stats.at("mae");
-    r[10] = m_stats.at("sd");
-    r[11] = m_stats.at("Lcv");
-    r[12] = m_stats.at("Lsk");;
-    r[13] = m_stats.at("Lku");
+    try {
+        int i = 0;
+    r[0] = m_stats.at("n");plog(std::to_string(i++).c_str());
+    r[1] = m_stats.at("min");plog(std::to_string(i++).c_str());
+    r[2] = m_stats.at("max");plog(std::to_string(i++).c_str());
+    r[3] = m_stats.at("p25");plog(std::to_string(i++).c_str());
+    r[4] = m_stats.at("p75");plog(std::to_string(i++).c_str());
+    r[5] = m_stats.at("p05");plog(std::to_string(i++).c_str());
+    r[6] = m_stats.at("p95");plog(std::to_string(i++).c_str());
+    r[7] = m_stats.at("p50");plog(std::to_string(i++).c_str());
+    r[8] = m_stats.at("avg");plog(std::to_string(i++).c_str());
+    r[9] = m_stats.at("mae");plog(std::to_string(i++).c_str());
+    r[10] = m_stats.at("sd");plog(std::to_string(i++).c_str());
+    r[11] = m_stats.at("Lcv");plog(std::to_string(i++).c_str());
+    r[12] = m_stats.at("Lsk");plog(std::to_string(i++).c_str());
+    r[13] = m_stats.at("Lku");plog(std::to_string(i++).c_str());
+    
+    } CatchAll("Uuuuuups");
 }
 
 /****************************************************
