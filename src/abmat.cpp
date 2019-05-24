@@ -259,6 +259,11 @@ std::string get_abmat_varname_fact( const char* condlab, const int condVal)
     return get_abmat_varname(a_fact, condlab, "", "", condVal);
 }
 
+std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab)
+{    
+    return get_abmat_varname(a_comp, var1lab, "", var2lab, 0);    
+}
+
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname, const char* var2lab, const int condVal)
 {
     std::string varname( abmat_varname_convert(var1lab) );
@@ -294,7 +299,11 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
     //Add stat info
     switch (stattype) {
         case a_micro:
-        case a_cond:
+        case a_cond: {
+                varname.append("_");
+                varname.append(statname);
+            }
+            break;
         case a_comp:
         case a_macro:
             break;
@@ -889,7 +898,7 @@ void abmat_alloc_save_mem_var(variable* cv)
     Helper to plog m_statsT object content.
 ******************************************************/
 
-void plog_stats(ms_statsT stats, const char* title)
+void plog_stats(ms_statsT const& stats, const char* title)
 {
     plog("\n");
     if (strlen(title) > 0) {
@@ -1025,9 +1034,9 @@ ms_statsT abmat_scalars(variable* vVar)
                     auto data2 = cVar->copy_data( interval.first, interval.second);
                     auto cstats = abmat_compare(data, data2);
                     for (auto& stat : cstats) {
-                        auto vname = get_abmat_varname(a_comp, vVar->label, cVar->label);
-                        vname = abmat_varname_tot(vname, i, stat.first);
-                        scalars[vname] = stat.second;
+                        auto vname = get_abmat_varname_comp(vVar->label, cVar->label);
+                        auto vname2 = abmat_varname_tot(vname, i, stat.first);
+                        scalars[vname2] = stat.second;
                     }
                 }
                 break;

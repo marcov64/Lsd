@@ -1006,6 +1006,7 @@ void abmat_init( void );
 void plog_stats(m_statsT stats, const char* title = "");
 void plog_object_tree_up(object*, bool plotVars = false);
 std::string get_abmat_varname_fact( const char* condlab, const int condVal);
+std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1);
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
 void abmat_update();
