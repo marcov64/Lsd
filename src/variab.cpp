@@ -251,9 +251,9 @@ int variable::init( object* _up, char const* _label, int _num_lag, double* v, in
     Ensures that data is of max length.
     Always with t=0.
 ****************************************************/
-std::vector<double> variable::copy_data( object* caller, int dstart, int dend)
+std::vector<double> variable::copy_data( int dstart, int dend)
 {
-    if ( !this->save && !this - savei  ) {
+    if ( !this->save && !this->savei  ) {
         sprintf(msg, "Trying to copy data from variable %s that is not marked for saving.", label);
         error_hard(msg, __DEV_ERR_INFO__, "Mark the variable to be saved.");
     }
@@ -266,9 +266,9 @@ std::vector<double> variable::copy_data( object* caller, int dstart, int dend)
         error_hard(msg, __DEV_ERR_INFO__, "Fix your code.");
     }
 
-    std::vector<double> datav( dend - dstart, NAN );
+    std::vector<double> datav( dend - dstart + 1, NAN );
     if (this->last_update < dend) {
-        this->cal(caller, t - dend);
+        this->cal(NULL, t - dend);
     }
     //Check if data exists!
     for (auto i = dstart; i <= dend; i++ ) {

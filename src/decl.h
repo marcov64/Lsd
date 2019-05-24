@@ -31,8 +31,8 @@ const char* dev_err_info(const char* func, const char* file, int line);
     {   \
         try { \
         std::string errmsg = __DEV_ERR_INFO__; \
-        errmsg+="\n Error:"; errmsg += e.what();\
-        error_hard(msg,errmsg.c_str(),"Contact the developer");\
+        errmsg+="\n Error: "; errmsg += e.what();\
+        error_hard(errmsg.c_str(),msg,"Contact the developer");\
         throw; \
         }\
         catch(...){assert(0);} \
@@ -40,8 +40,7 @@ const char* dev_err_info(const char* func, const char* file, int line);
     catch(...)  \
     {   \
         try { \
-        std::string errmsg = __DEV_ERR_INFO__;\
-        error_hard(msg,errmsg.c_str(),"Contact the developer");\
+        error_hard(__DEV_ERR_INFO__,msg,"Contact the developer");\
         throw; \
         }\
         catch(...){assert(0);} \
@@ -209,6 +208,7 @@ struct gisPosition;
 struct Wrap;
 //ABMAT
 typedef std::map< const char*, double > m_statsT;
+typedef std::map< std::string, double > ms_statsT;
 enum Tabmat {a_micro, a_macro, a_cond, a_comp, a_fact};
 struct next_var; //functional to cycle through variables
 
@@ -558,7 +558,7 @@ struct variable {
 
     variable( void );					// empty constructor
     variable( const variable& v );		// copy constructor
-    std::vector<double> copy_data( object* caller, int dstart, int dend );
+    std::vector<double> copy_data( int dstart, int dend );
     double cal( object* caller, int lag );
     double fun( object* caller );
     int init( object* _up, char const* _label, int _num_lag, double* val, int _save );
@@ -1003,12 +1003,13 @@ m_statsT abmat_stats( void );
 m_statsT abmat_stats(std::vector<double>& Data );
 m_statsT abmat_compare(std::vector<double>& Data, std::vector<double>& Data2 );
 void abmat_init( void );
+void plog_stats(m_statsT stats, const char* title = "");
 void plog_object_tree_up(object*, bool plotVars = false);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1);
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
 void abmat_update();
-
 void abmat_update_variable(object* oVar, Tabmat type);
+ms_statsT abmat_scalars(variable* vVar);
 Tabmat abmat_vVar_type(variable* vVar);
 Tabmat abmat_oVar_type(object* oVar);
 Tabmat abmat_toVar_type(object* toVar);

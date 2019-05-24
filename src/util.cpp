@@ -1528,7 +1528,8 @@ void result::data_recursive( object* r, int i, bool abmat )
     for ( cv = r->v; cv != NULL; cv = cv->next ) {
 
         if (abmat) {
-
+            auto scalars = abmat_scalars(cv);
+            
             //special abmat behaviour
             firstCol = false; //to do: consider in abmat tot data..
         }

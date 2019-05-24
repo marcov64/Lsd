@@ -2757,10 +2757,10 @@ std::vector<double> object::gatherData_Tseries( char const* lab, int start, int 
 
     if (cur != NULL) {
 
-        return cv->copy_data( this, start, end ); //only valid data.
+        return cv->copy_data( start, end ); // call with null - no caller
 
     } else {
-        error_hard("...",__DEV_ERR_INFO__,"");
+        error_hard(__DEV_ERR_INFO__,"...","");
     }
     
 }
