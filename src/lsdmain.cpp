@@ -776,7 +776,7 @@ void run( void )
 #endif
             {
                 root->update( );
-                update_abmat_vars( );
+                abmat_update( );
             }
 
 

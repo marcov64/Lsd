@@ -925,39 +925,23 @@ void plog_object_tree_up(object* startO, bool plotVars)
     plog(tree.c_str());
 }
 
-void update_abmat_vars()
+/**************************************************
+ABMAT_UPDATE_VARIABLE
+Update the content of all abmat (time series) variables.
+Cycles through the abmat tree and gathers all the data, writing it to
+the parameters.
+**************************************************/
+
+void abmat_update()
 {
     //cycle through ABMAT objects and update the information.
     for (bridge* pb = abmat->b; pb != NULL; pb = pb->next) {
         object* parent = pb->head;
-        if (strcmp(parent->label, lfact) == 0)
+
+        Tabmat type = abmat_toVar_type(parent);
+
+        if (type == a_fact)
             continue; //is treated with conditionals
-
-        if (parent == NULL) {
-            sprintf( msg, "error in '%s'.", __func__);
-            error_hard( msg, "no parent object?",
-                        "Contact the developer.",
-                        true );
-            return;
-        }
-
-        Tabmat type; //only micro, macro or conditional here
-        if ( strcmp(parent->label, lmicro) == 0 ) {
-            type = a_micro;
-        }
-        else if ( strcmp(parent->label, lmacro) == 0 ) {
-            type = a_macro;
-        }
-        else if ( strcmp(parent->label, lcond) == 0 ) {
-            type = a_cond;
-        }
-        else {
-            sprintf( msg, "error in '%s' for object %s.", __func__, parent->label);
-            error_hard( msg, "wrong abmat object.",
-                        "Contact the developer.",
-                        true );
-            return;
-        }
 
         //Cycle through all items of that type.
         for (bridge* bVar = parent->b; bVar != NULL; bVar = bVar->next ) {
@@ -969,117 +953,173 @@ void update_abmat_vars()
                             true );
                 return;
             }
-            for ( ; oVar != NULL; oVar = oVar->next) { //in most cases this is a once-loop. But for cond several objects with same label may exist.
+            for ( ; oVar != NULL; oVar = oVar->next) //in most cases this is a once-loop. But for cond several objects with same label may exist.
+                abmat_update_variable(oVar, type);
+        }
+    }
+}
 
-                switch (type) {
-                    case a_micro: {
-                            std::vector<double> data = root->gatherData_all(oVar->label); //calls also with NULL
-                            auto stats_template = abmat_stats( data ); //retrieve map of stats
-                            //save data
+/**************************************************
+    ABMAT_VVAR_TYPE
+    ABMAT_OVAR_TYPE
+    ABMAT_TOVAR_TYPE
+    Return the type of the abmat category of the lsd variable, 
+        abmat variable (lsd object) or abmat category object (lsd object)
+**************************************************/
 
-                            //visualise the added variables.
-                            // plog("\n---- Prep to write data ---");
-                            // plog_object_tree_up(oVar);
-                            // plog("\n---");
+Tabmat abmat_vVar_type(variable* vVar)
+{
+    if (vVar == NULL)
+        error_hard("Null Variable passed.", __DEV_ERR_INFO__, "Contact the developer", true );
+    else if (vVar->up == NULL)
+        error_hard("Variable parent is Null.", __DEV_ERR_INFO__, "Contact the developer", true );
 
-                            for (auto& elem : stats_template) {
-                                std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first);
-                                oVar->write( nvarLab.c_str(), elem.second, t );
-                            }
-                        }
-                        break;
+    return abmat_oVar_type(vVar->up);
+}
 
-                    case a_macro: {
-                            //simply copy the current data.
-                            double val = root->cal(NULL, oVar->label, 0);
-                            std::string varlab = get_abmat_varname(type, oVar->label);
-                            oVar->write(varlab.c_str(), val, t);
-                        }
-                        break;
+Tabmat abmat_oVar_type(object* oVar)
+{
+    if (oVar == NULL)
+        error_hard("Null Object passed.", __DEV_ERR_INFO__, "Contact the developer", true );
+    else if (oVar->up == NULL)
+        error_hard("Object parent is Null.", __DEV_ERR_INFO__, "Contact the developer", true );
 
-                    //Cond is different,because here is a first and second variable, too.
+    return abmat_toVar_type(oVar->up);
+}
 
-                    case a_cond:
-                        //Each conditional variable may be linked to several conditions (i.e. factors).
-                        for (object* oVar2 : oVar->hooks) {
+Tabmat abmat_toVar_type(object* toVar)
+{
+    if (toVar->up != abmat)
+        error_hard("object is not an abmat-type object", __DEV_ERR_INFO__, "Contact the developer", true );
 
-                            //create set and copy information of previous sets.
-                            std::map < int, std::vector<double> > cond_vData_map;
-                            try {
-                                for (auto& element : m_abmat_conditions.at(oVar2->label) ) {
-                                    cond_vData_map[element]; //create empty set
-                                }
-                            }
-                            CatchAll("Uups")
+    Tabmat type; //only micro, macro or conditional here
+    if ( strcmp(toVar->label, lmicro) == 0 ) {
+        type = a_micro;
+    }
+    else if ( strcmp(toVar->label, lmacro) == 0 ) {
+        type = a_macro;
+    }
+    else if ( strcmp(toVar->label, lcond) == 0 ) {
+        type = a_cond;
+    }
+    else if ( strcmp(toVar->label, lfact) == 0 ) {
+        type = a_fact;
+    }
+    else {
+        sprintf(msg, "wrong abmat type-object of type %s", toVar->label);
+        error_hard( msg, __DEV_ERR_INFO__, "Contact the developer.", true );
+    }
+    return type;
+}
 
+/**************************************************
+    ABMAT_UPDATE_VARIABLE
+    Update a given abmat variable (storred as lsd object with child variables)
+**************************************************/
+void abmat_update_variable(object* oVar, Tabmat type)
+{
+    if (oVar == NULL)
+        error_hard("Null Object passed.", __DEV_ERR_INFO__, "Contact the developer");
 
-                            //gather all data and save in sets per condition/factor
-                            double total = 0.0;
-                            auto cycle_var = next_var(root, oVar->label, true);
-                            for (variable* curv = cycle_var(); curv != NULL; curv = cycle_var()) {
-                                variable* curv2 = curv->up->search_var_local(oVar2->label);
-                                if (curv2 == NULL) {
-                                    sprintf( msg, "variable '%s' is missing in object '%s' in function '%s'", oVar2->label, curv->up->label, __func__ );
-                                    error_hard( msg, "variable or parameter not found",
-                                                "check model structure for conditional abmat" );
-                                    return;
-                                }
-                                total++;
-                                int condVal = static_cast<int> ( curv2->cal( NULL, 0) ); //same as in object::update()
-                                double val = curv->cal( NULL, 0);
-                                cond_vData_map[condVal].push_back(val);
-                            }
+    switch (type) {
+        case a_micro: {
+                std::vector<double> data = root->gatherData_all(oVar->label); //calls also with NULL
+                auto stats_template = abmat_stats( data ); //retrieve map of stats
+                //save data
 
-                            //save data
-                            for (auto& subset : cond_vData_map) {
-                                //save information of relative size to conditional variable
-                                double fraction = static_cast<double>(subset.second.size() ) / total;
-                                //Save info on factors
-                                try {
-                                    m_abmat_conditions.at(oVar2->label).insert(subset.first);
-                                }
-                                CatchAll("Uups")
-
-                                std::string var2lab = get_abmat_varname(a_fact, oVar2->label, subset.first);
-                                variable* fracVar = oVar2->search_var_local(var2lab.c_str());
-
-                                //create variables the first time a factor appears
-                                if (fracVar == NULL) {
-                                    //conditioning variable for fraction tracking
-                                    fracVar = abmat_add_var(oVar2, var2lab.c_str());
-                                    //conditional variables
-                                    auto stats_template = abmat_stats( ); //retrieve map of stats
-                                    for (auto& elem : stats_template) {   //create a variable for each statistic
-                                        std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first, oVar2->label, subset.first);
-                                        abmat_add_var(oVar, nvarLab.c_str());
-                                    }
-                                }
-
-                                //update variables
-                                oVar2->write(var2lab.c_str(), fraction, t);
-                                auto stats = abmat_stats(subset.second);
-                                for (auto& stat : stats) {
-                                    std::string nvarLab = get_abmat_varname ( type, oVar->label, stat.first, oVar2->label, subset.first);
-                                    oVar->write(nvarLab.c_str(), stat.second, t);
-                                }
-                            }
-                        }
-                        break;
-
-                    case a_fact:
-                    case a_comp: {
-                            plog("\nERROR a_comp / a_fact case should not exist.");
-                        }
-                        break;
-                }
-                // //visualise the added data.
-                // plog("\n---- Added new data to abmat ---");
-                // plog_object_tree_up(oVar, true);
+                //visualise the added variables.
+                // plog("\n---- Prep to write data ---");
+                // plog_object_tree_up(oVar);
                 // plog("\n---");
 
+                for (auto& elem : stats_template) {
+                    std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first);
+                    oVar->write( nvarLab.c_str(), elem.second, t );
+                }
             }
+            break;
 
-        }
+        case a_macro: {
+                //simply copy the current data.
+                double val = root->cal(NULL, oVar->label, 0);
+                std::string varlab = get_abmat_varname(type, oVar->label);
+                oVar->write(varlab.c_str(), val, t);
+            }
+            break;
+
+        //Cond is different,because here is a first and second variable, too.
+
+        case a_cond:
+            //Each conditional variable may be linked to several conditions (i.e. factors).
+            for (object* oVar2 : oVar->hooks) {
+
+                //create set and copy information of previous sets.
+                std::map < int, std::vector<double> > cond_vData_map;
+                try {
+                    for (auto& element : m_abmat_conditions.at(oVar2->label) ) {
+                        cond_vData_map[element]; //create empty set
+                    }
+                }
+                CatchAll("Uups")
+
+
+                //gather all data and save in sets per condition/factor
+                double total = 0.0;
+                auto cycle_var = next_var(root, oVar->label, true);
+                for (variable* curv = cycle_var(); curv != NULL; curv = cycle_var()) {
+                    variable* curv2 = curv->up->search_var_local(oVar2->label);
+                    if (curv2 == NULL) {
+                        sprintf( msg, "variable '%s' is missing in object '%s' in function '%s'", oVar2->label, curv->up->label, __func__ );
+                        error_hard( msg, "variable or parameter not found",
+                                    "check model structure for conditional abmat" );
+                        return;
+                    }
+                    total++;
+                    int condVal = static_cast<int> ( curv2->cal( NULL, 0) ); //same as in object::update()
+                    double val = curv->cal( NULL, 0);
+                    cond_vData_map[condVal].push_back(val);
+                }
+
+                //save data
+                for (auto& subset : cond_vData_map) {
+                    //save information of relative size to conditional variable
+                    double fraction = static_cast<double>(subset.second.size() ) / total;
+                    //Save info on factors
+                    try {
+                        m_abmat_conditions.at(oVar2->label).insert(subset.first);
+                    }
+                    CatchAll("Uups")
+
+                    std::string var2lab = get_abmat_varname(a_fact, oVar2->label, subset.first);
+                    variable* fracVar = oVar2->search_var_local(var2lab.c_str());
+
+                    //create variables the first time a factor appears
+                    if (fracVar == NULL) {
+                        //conditioning variable for fraction tracking
+                        fracVar = abmat_add_var(oVar2, var2lab.c_str());
+                        //conditional variables
+                        auto stats_template = abmat_stats( ); //retrieve map of stats
+                        for (auto& elem : stats_template) {   //create a variable for each statistic
+                            std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first, oVar2->label, subset.first);
+                            abmat_add_var(oVar, nvarLab.c_str());
+                        }
+                    }
+
+                    //update variables
+                    oVar2->write(var2lab.c_str(), fraction, t);
+                    auto stats = abmat_stats(subset.second);
+                    for (auto& stat : stats) {
+                        std::string nvarLab = get_abmat_varname ( type, oVar->label, stat.first, oVar2->label, subset.first);
+                        oVar->write(nvarLab.c_str(), stat.second, t);
+                    }
+                }
+            }
+            break;
+
+        case a_fact:
+        case a_comp:
+            error_hard("a_comp / a_fact case should not exist.", __DEV_ERR_INFO__, "Contact the developer");
+            break;
     }
 }
 

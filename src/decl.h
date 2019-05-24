@@ -1006,7 +1006,13 @@ void abmat_init( void );
 void plog_object_tree_up(object*, bool plotVars = false);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1);
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
-void update_abmat_vars();
+void abmat_update();
+
+void abmat_update_variable(object* oVar, Tabmat type);
+Tabmat abmat_vVar_type(variable* vVar);
+Tabmat abmat_oVar_type(object* oVar);
+Tabmat abmat_toVar_type(object* toVar);
+
 variable* abmat_add_var(object* parent, char const* lab);
 void abmat_alloc_save_mem_var(variable* cv);
 const char* abmat_varname_convert(const char* lab);
