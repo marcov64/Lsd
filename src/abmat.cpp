@@ -962,7 +962,7 @@ void update_abmat_vars()
 
                 switch (type) {
                     case a_micro: {
-                            std::vector<double> data = root->gatherData_all(oVar->label);
+                            std::vector<double> data = root->gatherData_all(oVar->label); //calls also with NULL 
                             auto stats_template = abmat_stats( data ); //retrieve map of stats
                             //save data
 
@@ -980,7 +980,7 @@ void update_abmat_vars()
 
                     case a_macro: {
                             //simply copy the current data.
-                            double val = root->cal(root, oVar->label, 0);
+                            double val = root->cal(NULL, oVar->label, 0);
                             std::string varlab = get_abmat_varname(type, oVar->label);
                             oVar->write(varlab.c_str(), val, t);
                         }
