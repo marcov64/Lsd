@@ -832,7 +832,7 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
             break;
 
         case a_fact:
-            error_hard(__DEV_ERR_INFO__ ,"This should not be reached.", "Contact the developers", true);
+            error_hard(__DEV_ERR_INFO__, "This should not be reached.", "Contact the developers", true);
     }
 
     //visualise the added variables.
@@ -979,10 +979,10 @@ void abmat_update()
                 return;
             }
             for ( ; oVar != NULL; oVar = oVar->next) //in most cases this is a once-loop. But for cond several objects with same label may exist.
-                abmat_update_variable(oVar, type); 
+                abmat_update_variable(oVar, type);
         }
     }
-          
+
 }
 
 /**************************************************
@@ -996,7 +996,7 @@ ms_statsT abmat_scalars(variable* vVar)
     ms_statsT scalars;
     bool defInterval = false;
     if (s_abmat_intervals.size() == 0) {
-        s_abmat_intervals.emplace(0, t); //add interval
+        s_abmat_intervals.emplace(1, t); //add interval
         defInterval = true;
     }
 
@@ -1008,33 +1008,42 @@ ms_statsT abmat_scalars(variable* vVar)
             case a_macro: {
                     //do macro stuff
                     auto data = vVar->copy_data( interval.first, interval.second );
-                    auto stats = abmat_stats( data );                    
+                    auto stats = abmat_stats( data );
                     for (auto& stat : stats) {
                         std::string varname = vVar->label;
                         varname.append("_I");
                         varname.append(std::to_string(i));
                         varname.append("_");
                         varname.append(stat.first);
-                        scalars[varname] = stat.second; //emplace will not work... do not know why.
-                        // scalars.push_back(varname.c_str(),stat.second);
-                        plog("\n");
-                        plog(varname.c_str()); plog(" \t");
-                        plog(std::to_string(scalars.size()).c_str());
+                        scalars[varname] = stat.second;
                     }
                     //if comp, to comp stuff
 
                 }
                 break;
 
-            case a_micro:
+            case a_micro: {
+                    //do macro stuff
+                    auto data = vVar->copy_data( interval.first, interval.second );
+                    auto stats = abmat_stats( data );
+                    for (auto& stat : stats) {
+                        std::string varname = vVar->label;
+                        varname.append("_I");
+                        varname.append(std::to_string(i));
+                        varname.append("_");
+                        varname.append(stat.first);
+                        scalars[varname] = stat.second;
+                    }
+                }
+                break;
 
             case a_cond:
 
             case a_fact:
-               break;
+                break;
 
             case a_comp:
-                error_hard(__DEV_ERR_INFO__ ,"This should not be reached.", "Contact the developers", true);
+                error_hard(__DEV_ERR_INFO__, "This should not be reached.", "Contact the developers", true);
 
         }
     }
@@ -1059,9 +1068,9 @@ ms_statsT abmat_scalars(variable* vVar)
 Tabmat abmat_vVar_type(variable* vVar)
 {
     if (vVar == NULL)
-        error_hard( __DEV_ERR_INFO__,"Null Variable passed.", "Contact the developer", true );
+        error_hard( __DEV_ERR_INFO__, "Null Variable passed.", "Contact the developer", true );
     else if (vVar->up == NULL)
-        error_hard( __DEV_ERR_INFO__,"Variable parent is Null.", "Contact the developer", true );
+        error_hard( __DEV_ERR_INFO__, "Variable parent is Null.", "Contact the developer", true );
 
     return abmat_oVar_type(vVar->up);
 }
@@ -1069,9 +1078,9 @@ Tabmat abmat_vVar_type(variable* vVar)
 Tabmat abmat_oVar_type(object* oVar)
 {
     if (oVar == NULL)
-        error_hard( __DEV_ERR_INFO__,"Null Object passed.", "Contact the developer", true );
+        error_hard( __DEV_ERR_INFO__, "Null Object passed.", "Contact the developer", true );
     else if (oVar->up == NULL)
-        error_hard( __DEV_ERR_INFO__,"Object parent is Null.", "Contact the developer", true );
+        error_hard( __DEV_ERR_INFO__, "Object parent is Null.", "Contact the developer", true );
 
     return abmat_toVar_type(oVar->up);
 }
@@ -1079,7 +1088,7 @@ Tabmat abmat_oVar_type(object* oVar)
 Tabmat abmat_toVar_type(object* toVar)
 {
     if (toVar->up != abmat)
-        error_hard( __DEV_ERR_INFO__,"object is not an abmat-type object", "Contact the developer", true );
+        error_hard( __DEV_ERR_INFO__, "object is not an abmat-type object", "Contact the developer", true );
 
     Tabmat type; //only micro, macro or conditional here
     if ( strcmp(toVar->label, lmicro) == 0 ) {
@@ -1096,7 +1105,7 @@ Tabmat abmat_toVar_type(object* toVar)
     }
     else {
         sprintf(msg, "wrong abmat type-object of type %s", toVar->label);
-        error_hard( __DEV_ERR_INFO__, msg , "Contact the developer.", true );
+        error_hard( __DEV_ERR_INFO__, msg, "Contact the developer.", true );
     }
     return type;
 }
@@ -1108,7 +1117,7 @@ Tabmat abmat_toVar_type(object* toVar)
 void abmat_update_variable(object* oVar, Tabmat type)
 {
     if (oVar == NULL)
-        error_hard( __DEV_ERR_INFO__,"Null Object passed.", "Contact the developer");
+        error_hard( __DEV_ERR_INFO__, "Null Object passed.", "Contact the developer");
 
     switch (type) {
         case a_micro: {
@@ -1207,12 +1216,12 @@ void abmat_update_variable(object* oVar, Tabmat type)
 
         case a_fact:
         case a_comp:
-            error_hard(__DEV_ERR_INFO__,"a_comp / a_fact case should not exist.",  "Contact the developer");
+            error_hard(__DEV_ERR_INFO__, "a_comp / a_fact case should not exist.",  "Contact the developer");
             break;
     }
-    
+
     //Just testing
-    if (oVar->v != NULL)                
+    if (oVar->v != NULL)
         abmat_scalars(oVar->v);
 }
 
@@ -1228,7 +1237,7 @@ void connect_abmat_to_root()
 {
     //check add_obj_basic for functionality
     //set up to root.
-    if (abmat->up != NULL) {        
+    if (abmat->up != NULL) {
         error_hard( __DEV_ERR_INFO__, "ABMAT is already connected to something",
                     "please contact developers",
                     true );

@@ -255,15 +255,15 @@ std::vector<double> variable::copy_data( int dstart, int dend)
 {
     if ( !this->save && !this->savei  ) {
         sprintf(msg, "Trying to copy data from variable %s that is not marked for saving.", label);
-        error_hard(msg, __DEV_ERR_INFO__, "Mark the variable to be saved.");
+        error_hard( __DEV_ERR_INFO__,msg, "Mark the variable to be saved.");
     }
     if (dend > t) {
         sprintf(msg, "Trying to copy data from variable %s. End is: %i which is in the future.", label, dend);
-        error_hard(msg, __DEV_ERR_INFO__, "Fix your code.");
+        error_hard( __DEV_ERR_INFO__,msg, "Fix your code.");
     }
-    if (dstart < 0 || dstart >= dend) {
+    if (dstart < 0 || dstart > dend) {
         sprintf(msg, "Trying to copy data from variable %s. Start is: %i which is in the future or below 0.", label, dstart);
-        error_hard(msg, __DEV_ERR_INFO__, "Fix your code.");
+        error_hard( __DEV_ERR_INFO__,msg, "Fix your code.");
     }
 
     std::vector<double> datav( dend - dstart + 1, NAN );
@@ -271,9 +271,10 @@ std::vector<double> variable::copy_data( int dstart, int dend)
         this->cal(NULL, t - dend);
     }
     //Check if data exists!
-    for (auto i = dstart; i <= dend; i++ ) {
-        if (i >= this->start) //other data is NAN
-            datav[i] = this->data[i];
+    int j = 0;
+    for (int i = dstart; i <= min(this->end,dend); i++ ) {
+        if (i >= this->start ) //other data is NAN
+            datav.at(j++) = this->data[i];        
     }
     return datav;
 }
