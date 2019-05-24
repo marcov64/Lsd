@@ -94,9 +94,9 @@
     [3] comparison indicator "_v_"
     [1..6] variable 2 name
     --
-    [4] stat type (cross-section timeseries)
+    [4] stat type (cross-section point in time)
     [3] "_In" the interval number. The interval info is saved separately.
-    [4] stat type (cross time)
+    [4] stat type (cross time / comparison)
 
     Thus there are 18 chars gone for the specifiers, leaving 13 for the variable names.
     Thus, we need to shorten the variables to 6 chars to allow the full potential.
@@ -254,9 +254,9 @@ const char* abmat_varname_convert(const char* lab)
     - var2lab
     -
 ********************************************/
-std::string get_abmat_varname(Tabmat stattype, const char* condlab, const int condVal)
+std::string get_abmat_varname_fact( const char* condlab, const int condVal)
 {
-    return get_abmat_varname(stattype, condlab, "", "", condVal);
+    return get_abmat_varname(a_fact, condlab, "", "", condVal);
 }
 
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname, const char* var2lab, const int condVal)
@@ -295,13 +295,8 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
     switch (stattype) {
         case a_micro:
         case a_cond:
-        case a_comp: {
-                varname.append("_");
-                varname.append(statname);
-            }
-            break;
+        case a_comp:
         case a_macro:
-            //nothing to do.
             break;
         case a_fact:
             varname.append("_shr"); //share in 0,1
@@ -985,6 +980,16 @@ void abmat_update()
 
 }
 
+
+std::string abmat_varname_tot(std::string base, int interval, std::string stat)
+{
+    base += "_I";
+    base += std::to_string(interval);
+    base += "_";
+    base += stat;
+    return base;
+}
+
 /**************************************************
     ABMAT_SCALARS
     Produce the final stats for the total file for the given variable.
@@ -1003,48 +1008,47 @@ ms_statsT abmat_scalars(variable* vVar)
     int i = -1;
     for (auto interval : s_abmat_intervals) {
         ++i; //increase interval counter
+
+        //for each abmat time-series variable, create this information
+        auto data = vVar->copy_data( interval.first, interval.second );
+
+
+        //additional type specific stats that do not change the data
         switch (type) {
 
-            case a_macro: {
-                    //do macro stuff
-                    auto data = vVar->copy_data( interval.first, interval.second );
-                    auto stats = abmat_stats( data );
-                    for (auto& stat : stats) {
-                        std::string varname = vVar->label;
-                        varname.append("_I");
-                        varname.append(std::to_string(i));
-                        varname.append("_");
-                        varname.append(stat.first);
-                        scalars[varname] = stat.second;
-                    }
-                    //if comp, to comp stuff
-
-                }
-                break;
-
-            case a_micro: {
-                    //do macro stuff
-                    auto data = vVar->copy_data( interval.first, interval.second );
-                    auto stats = abmat_stats( data );
-                    for (auto& stat : stats) {
-                        std::string varname = vVar->label;
-                        varname.append("_I");
-                        varname.append(std::to_string(i));
-                        varname.append("_");
-                        varname.append(stat.first);
-                        scalars[varname] = stat.second;
+            case a_macro:
+                //comparative stuff
+                for (auto oVar : vVar->up->hooks) {
+                    if (oVar->v == NULL)
+                        error_hard(__DEV_ERR_INFO__, "There is no variable in the abmat comparative object.", "Contact the developers");
+                    variable* cVar = oVar->v;//careful! As long as we keep that there is but a single macro (copy) object this is save.
+                    auto data2 = cVar->copy_data( interval.first, interval.second);
+                    auto cstats = abmat_compare(data, data2);
+                    for (auto& stat : cstats) {
+                        auto vname = get_abmat_varname(a_comp, vVar->label, cVar->label);
+                        vname = abmat_varname_tot(vname, i, stat.first);
+                        scalars[vname] = stat.second;
                     }
                 }
                 break;
 
+            case a_micro:
             case a_cond:
-
             case a_fact:
                 break;
 
             case a_comp:
                 error_hard(__DEV_ERR_INFO__, "This should not be reached.", "Contact the developers", true);
 
+
+        }
+
+        //standard stats that change the data
+
+        auto stats = abmat_stats( data );
+        for (auto& stat : stats) {
+            auto vname = abmat_varname_tot(vVar->label, i, stat.first);
+            scalars[vname] = stat.second;
         }
     }
 
@@ -1188,7 +1192,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
                     }
                     CatchAll("Uups")
 
-                    std::string var2lab = get_abmat_varname(a_fact, oVar2->label, subset.first);
+                    std::string var2lab = get_abmat_varname_fact( oVar2->label, subset.first);
                     variable* fracVar = oVar2->search_var_local(var2lab.c_str());
 
                     //create variables the first time a factor appears

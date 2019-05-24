@@ -1005,6 +1005,7 @@ m_statsT abmat_compare(std::vector<double>& Data, std::vector<double>& Data2 );
 void abmat_init( void );
 void plog_stats(m_statsT stats, const char* title = "");
 void plog_object_tree_up(object*, bool plotVars = false);
+std::string get_abmat_varname_fact( const char* condlab, const int condVal);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1);
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
 void abmat_update();
@@ -1017,6 +1018,7 @@ Tabmat abmat_toVar_type(object* toVar);
 variable* abmat_add_var(object* parent, char const* lab);
 void abmat_alloc_save_mem_var(variable* cv);
 const char* abmat_varname_convert(const char* lab);
+std::string abmat_varname_tot(std::string base, int interval, std::string stat);
 bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char* lVar2);
 template<typename TReal>
 static bool isWithinPrecisionInterval(TReal a, TReal b, unsigned int interval_size = 1)
