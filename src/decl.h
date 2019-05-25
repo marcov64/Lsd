@@ -871,7 +871,7 @@ class abmat_total_stats {
     
         ms_statsT total_stats;
 
-        ms_statsT const& operator()();       
+        const ms_statsT& operator()() const;       
 
         void operator()(object* oVar, Tabmat type);
         
@@ -1034,7 +1034,7 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
 void abmat_update();
 void abmat_total();
 template <typename FuncType>
-void for_each_abmat_base_variable( FuncType f );
+void for_each_abmat_base_variable( FuncType& f );
 void abmat_update_variable(object* oVar, Tabmat type);
 ms_statsT abmat_scalars(variable* vVar);
 ms_statsT abmat_scalars(variable* vVar, Tabmat type);

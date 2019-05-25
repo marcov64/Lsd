@@ -912,11 +912,12 @@ void run( void )
         user_exception = true;
         close_sim( );
         user_exception = false;
+        abmat_total(); // TESTING
         connect_abmat_to_root(); //after reset_end()??
         reset_end( root );
         root->emptyturbo( );
         
-        abmat_total(); // TESTING
+        
 
         if ( quit != 2 && ( sim_num > 1 || no_window ) ) {
             // save results for multiple simulation runs, if any

@@ -908,11 +908,16 @@ void plog_stats(ms_statsT const& stats, const char* title)
         plog(title);
         plog("\n-------------------------------\n");
     }   
+    int i = 0;
     for (auto const& item : stats) {
         plog(item.first.c_str());
         plog("\t");
         plog(std::to_string(item.second).c_str());
         plog("\n");        
+        if (i++ > 100){
+            plog("\n ... more than 100.");
+            break;
+        }
     }
 }
 
@@ -965,7 +970,7 @@ void plog_object_tree_up(object* startO, bool plotVars)
 
 void abmat_update()
 {
-    for_each_abmat_base_variable( &abmat_update_variable );
+    for_each_abmat_base_variable( abmat_update_variable );
 }
 
 /*******************************************************************
@@ -974,7 +979,7 @@ void abmat_update()
     on all the abmat variables.
 *******************************************************************/
 template <typename FuncType>
-void for_each_abmat_base_variable(FuncType f )
+void for_each_abmat_base_variable(FuncType& f )
 {
     //cycle through ABMAT objects and update the information.
     int n = 0;
@@ -1000,7 +1005,7 @@ void for_each_abmat_base_variable(FuncType f )
                 f(oVar, type); n++;
         }
     }
-    plog("\n At time '"); plog(std::to_string(t).c_str()); plog("' for_each_abmat_base_variable processed '");  plog(std::to_string(n).c_str()); plog("' items.");
+    // plog("\n At time '"); plog(std::to_string(t).c_str()); plog("' for_each_abmat_base_variable processed '");  plog(std::to_string(n).c_str()); plog("' items.");
     //plog(__DEV_ERR_INFO__);
 }
 
@@ -1009,7 +1014,7 @@ void for_each_abmat_base_variable(FuncType f )
     a functor to collect all the data from the abmat variables and
     calculate the total stats scalars for the (new) totals file.
 *****************************************************************/
-ms_statsT const& abmat_total_stats::operator()()
+ms_statsT const& abmat_total_stats::operator()() const
 {
     return total_stats;
 }
@@ -1017,13 +1022,16 @@ ms_statsT const& abmat_total_stats::operator()()
 void abmat_total_stats::operator()(object* oVar, Tabmat type)
 {
     for (variable* cv = oVar->v ; cv != NULL; cv = cv->next) {
+        // plog("\nAdding ");plog(cv->label);
+        // plog("\nsize before :");plog(std::to_string(total_stats.size()).c_str());
         abmat_scalars(cv, type, total_stats);
+        // plog("\nsize after :");plog(std::to_string(total_stats.size()).c_str());
     }
 }
 
 void abmat_total_stats::emplace(std::string const& text, double const& value)
 {
-    total_stats[text]=value;
+    total_stats.emplace(text,value);
 }
 
 /**************************************************
@@ -1048,12 +1056,14 @@ std::string abmat_varname_tot(std::string base, int interval, std::string stat)
 
 ms_statsT abmat_scalars(variable* vVar)
 {
+    plog("\nCopy Version 1");
     Tabmat type = abmat_vVar_type(vVar);
     return abmat_scalars(vVar, type);
 }
 
 ms_statsT abmat_scalars(variable* vVar, Tabmat type)
 {
+    plog("\nCopy Version 2");
     ms_statsT scalars;
     abmat_scalars(vVar, type, scalars);
     return scalars;
@@ -1062,11 +1072,14 @@ ms_statsT abmat_scalars(variable* vVar, Tabmat type)
 
 void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
 {
+    // plog("\nReference Version");    
     bool defInterval = false;
     if (s_abmat_intervals.size() == 0) {
         s_abmat_intervals.emplace(1, t); //add interval
         defInterval = true;
     }
+    // plog("\nCalled abmat_scalars for variable ");plog(vVar->label);
+    // plog("with ");plog(std::to_string(s_abmat_intervals.size()).c_str());plog(" intervals");
 
     int i = -1;
     for (auto interval : s_abmat_intervals) {
@@ -1082,6 +1095,7 @@ void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
             case a_macro:
                 //comparative stuff
                 for (auto oVar : vVar->up->hooks) {
+                    plog("\nchecking comparative variables");
                     if (oVar->v == NULL)
                         error_hard(__DEV_ERR_INFO__, "There is no variable in the abmat comparative object.", "Contact the developers");
                     variable* cVar = oVar->v;//careful! As long as we keep that there is but a single macro (copy) object this is save.
@@ -1111,8 +1125,10 @@ void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
         auto stats = abmat_stats( data );
         // plog_stats(stats, "Comp var 1");
         for (auto& stat : stats) {
+            if (stat.second == NAN)
+                plog("\ndebug");
             auto vname = abmat_varname_tot(vVar->label, i, stat.first);
-            scalars[vname] = stat.second;
+            scalars.emplace(vname,stat.second);// [vname] = stat.second;
         }
     }
 
@@ -1366,7 +1382,7 @@ void abmat_total()
     //if no intervals are specified, consider whole time
     bool defInterval = false;
     if (s_abmat_intervals.size() == 0) {
-        s_abmat_intervals.emplace(1, t); //add interval
+        s_abmat_intervals.emplace(1, actual_steps); //add interval
         defInterval = true;
     }       
     
