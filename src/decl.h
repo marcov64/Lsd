@@ -1001,15 +1001,19 @@ extern Tcl_Interp* inter;		// Tcl standard interpreter pointer
 #ifdef CPP11
 m_statsT abmat_stats( void );
 m_statsT abmat_stats(std::vector<double>& Data );
-m_statsT abmat_compare(std::vector<double>& Data, std::vector<double>& Data2 );
+m_statsT abmat_compare(std::vector<double> const& Data, std::vector<double> const& Data2 );
 void abmat_init( void );
-void plog_stats(m_statsT stats, const char* title = "");
+const char* plog_helper(const char* inout);
+const char* plog_helper(std::string inout);
+void plog_stats(auto const& stats, const char* title = "");
 void plog_object_tree_up(object*, bool plotVars = false);
 std::string get_abmat_varname_fact( const char* condlab, const int condVal);
 std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1);
+void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab = NULL);
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
 void abmat_update();
+void for_each_abmat_variable(void (*f)(object* oVar, Tabmat type) );
 void abmat_update_variable(object* oVar, Tabmat type);
 ms_statsT abmat_scalars(variable* vVar);
 Tabmat abmat_vVar_type(variable* vVar);
@@ -1029,7 +1033,7 @@ static bool isWithinPrecisionInterval(TReal a, TReal b, unsigned int interval_si
 
     return min_a <= b && max_a >= b;
 }
-bool is_const_dbl(std::vector<double>& Data1);
+bool is_const_dbl(std::vector<double> const& Data1);
 void connect_abmat_to_root();
 void disconnect_abmat_from_root();
 #endif

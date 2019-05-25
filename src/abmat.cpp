@@ -260,8 +260,8 @@ std::string get_abmat_varname_fact( const char* condlab, const int condVal)
 }
 
 std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab)
-{    
-    return get_abmat_varname(a_comp, var1lab, "", var2lab, 0);    
+{
+    return get_abmat_varname(a_comp, var1lab, "", var2lab, 0);
 }
 
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname, const char* var2lab, const int condVal)
@@ -271,6 +271,7 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
     switch (stattype) {
         case a_micro: //nothing to add
         case a_macro: //nothing to add
+        case a_comp:
             break;
         case a_cond:
             varname.append("_c_");
@@ -285,10 +286,6 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
                 return "";
             }
             varname.append( std::to_string( condVal ) );
-            break;
-        case a_comp:
-            varname.append("_v_");
-            varname.append( abmat_varname_convert(var2lab) );
             break;
         default: //irrelevant
             sprintf( msg, "error in '%s'.", __func__);
@@ -453,7 +450,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
 ********************************************/
 
 
-m_statsT abmat_compare(std::vector<double>& Data1, std::vector<double>& Data2)
+m_statsT abmat_compare(std::vector<double> const& Data1, std::vector<double> const& Data2)
 {
     // checks
     double gamma;               // discard ties
@@ -580,7 +577,7 @@ m_statsT abmat_compare(std::vector<double>& Data1, std::vector<double>& Data2)
     return compare;
 }
 
-bool is_const_dbl(std::vector<double>& Data1)
+bool is_const_dbl(std::vector<double> const& Data1)
 {
     for (auto it = Data1.begin(); it != Data1.end(); it++) {
         if (!isWithinPrecisionInterval(
@@ -635,6 +632,32 @@ bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char*
 ********************************************/
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab)
 {
+    Tabmat type;
+    if (abmat_type.find("micro") != std::string::npos ) {
+        type = a_micro;
+    }
+    else if (abmat_type.find("macro") != std::string::npos ) {
+        type = a_macro;
+    }
+    else if (abmat_type.find("cond") != std::string::npos ) {
+        type = a_cond;
+    }
+    else if (abmat_type.find("comp") != std::string::npos ) {
+        type = a_comp;
+    }
+    else {
+        sprintf( msg, "Type %s is not valid.", abmat_type.c_str() );
+        error_hard( __DEV_ERR_INFO__, msg,
+                    "Check your code to prevent this error.",
+                    true );
+        return;
+    }
+    add_abmat_object(type, varlab, var2lab);
+}
+
+
+void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
+{
     //check if the abmat object associated to the variable
     //exists. Note: It may be included in multiple categories
     //so we check on category level.
@@ -650,30 +673,28 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
     object* parent = NULL;
     object* fparent = NULL;
     const char* typeLab = NULL;
-    Tabmat type;
-    if (abmat_type.find("micro") != std::string::npos ) {
-        typeLab = lmicro;
-        type = a_micro;
+    switch (type) {
+        case a_micro:
+            typeLab = lmicro;
+            break;
+
+        case a_macro:
+            typeLab = lmacro;
+            break;
+
+        case a_cond:
+            typeLab = lcond;
+            break;
+
+        case a_comp:
+            typeLab = lmacro; //treat as two linked macro variables
+            break;
+
+        default: //checked already
+        break;
     }
-    else if (abmat_type.find("macro") != std::string::npos ) {
-        typeLab = lmacro;
-        type = a_macro;
-    }
-    else if (abmat_type.find("cond") != std::string::npos ) {
-        typeLab = lcond;
-        type = a_cond;
-    }
-    else if (abmat_type.find("comp") != std::string::npos ) {
-        typeLab = lmacro; //treat as two linked macro variables
-        type = a_comp;
-    }
-    else {
-        sprintf( msg, "error in '%s'. Type %s is not valid.", __func__, abmat_type.c_str() );
-        error_hard( msg, "wrong type",
-                    "Check your code to prevent this error.",
-                    true );
-        return;
-    }
+
+
 
     //get the parent for the type, create if it exists not yet
     parent = abmat->search_local(typeLab);
@@ -702,7 +723,7 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
             parent->add_obj(varlab, 1, false);
             oVar = parent->search_local(varlab);
             plog("\nAdded object of type ");
-            plog(abmat_type.c_str());
+            plog(typeLab);
             plog(" with name ");
             plog(oVar->label);
             var1_added = true;
@@ -711,14 +732,13 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
         //Comparative vars as pair of macro vars, linked via hooks (single direction)
         if (type == a_comp) {
             var2_added = true;
+            //add as macro via recursive call.
+            add_abmat_object(a_macro, var2lab);
+
             oVar2 = parent->search_local(var2lab);
             if (oVar2 == NULL) {
-                parent->add_obj(var2lab, 1, false);
-                oVar2 = parent->search_local(var2lab);
-                plog("\nAdded object of type ");
-                plog(abmat_type.c_str());
-                plog(" with name ");
-                plog(oVar2->label);
+                error_hard(__DEV_ERR_INFO__,"The variable should exist.","Contact the developer",true);
+                return;
             }
             //Add hook from var1 to var2, if not exists.
             bool hook_exists = false;
@@ -743,22 +763,10 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
     }
     else if (type == a_cond) {
         //In case we have type cond, we add the variables within the
-        //respective subgroups first and second and hook the first one
-        //to its conditional, using the hooks (there may be several
-        //conditionals)
-
-
-        // //get variable aka "first" and conditional aka "second"
-        // object* oFirst = parent->search(lfirst);
-        // if (oFirst == NULL ) {
-        // parent->add_obj(lfirst, 1, false );
-        // oFirst = parent->search_local(lfirst);
-        // }
-        // object* oSecond = parent->search(lsecond);
-        // if (oSecond == NULL) {
-        // parent->add_obj(lsecond, 1, false );
-        // oSecond = parent->search_local(lsecond);
-        // }
+        //respective subgroups cond and fact and hook the first one
+        //to its conditioning factor, using the hooks (there may be several
+        //factors for each variable)
+        
 
         //check if the first variable exists or create it
         // oVar = oFirst->search_local(varlab);#
@@ -813,12 +821,7 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
             }
             break;
 
-        case a_comp:
-            if (var2_added == true) { //same as a macro variable.
-                std::string nvarLab2 = get_abmat_varname( a_macro, oVar2->label); //name is same as original, shortened
-                abmat_add_var(oVar2, nvarLab2.c_str());
-            }
-        //and pass to macro case for first vase, too!
+        case a_comp: //done already in the additional recursive call.            
         case a_macro:
             if (var1_added == true) {
                 //a macro object holds a variable with the same name, maybe shortened.
@@ -858,6 +861,8 @@ variable* abmat_add_var(object* parent, char const* lab)
     variable* var = parent->add_var_basic(lab, 0, NULL, true, true); //no lags, no values, save
     var->param = 1; //1 is parameter. Other fields are not used.
     var->abmat = true;
+    var->start = 1; //start at time 1, do not consider initial values.
+    var->end = 1; //temporay.
     abmat_alloc_save_mem_var(var);
     abmat_series_saved++;
     m_abmat_variables[lab] = var;
@@ -898,7 +903,7 @@ void abmat_alloc_save_mem_var(variable* cv)
     Helper to plog m_statsT object content.
 ******************************************************/
 
-void plog_stats(ms_statsT const& stats, const char* title)
+void plog_stats(auto const& stats, const char* title)
 {
     plog("\n");
     if (strlen(title) > 0) {
@@ -907,11 +912,20 @@ void plog_stats(ms_statsT const& stats, const char* title)
         plog("\n-------------------------------\n");
     }
     for (auto const& item : stats) {
-        plog(item.first.c_str());
+        plog(plog_helper(item.first));
         plog("\t");
         plog(std::to_string(item.second).c_str());
         plog("\n");
     }
+}
+
+const char* plog_helper(const char* inout)
+{
+    return inout;
+}
+const char* plog_helper(std::string inout)
+{
+    return inout.c_str();
 }
 
 /********************************************************
@@ -962,8 +976,19 @@ void plog_object_tree_up(object* startO, bool plotVars)
 **************************************************/
 
 void abmat_update()
+{    
+    for_each_abmat_variable( &abmat_update_variable );
+}
+
+/*******************************************************************
+CYCLE_ABMAT_TYPE
+Cycles through the abmat objects and applies the function f on all the
+abmat variables.
+*******************************************************************/
+
+void for_each_abmat_variable(void (*f)(object* oVar, Tabmat type) )
 {
-    //cycle through ABMAT objects and update the information.
+//cycle through ABMAT objects and update the information.
     for (bridge* pb = abmat->b; pb != NULL; pb = pb->next) {
         object* parent = pb->head;
 
@@ -983,10 +1008,9 @@ void abmat_update()
                 return;
             }
             for ( ; oVar != NULL; oVar = oVar->next) //in most cases this is a once-loop. But for cond several objects with same label may exist.
-                abmat_update_variable(oVar, type);
+                f(oVar, type);
         }
-    }
-
+    }    
 }
 
 
@@ -1006,6 +1030,7 @@ std::string abmat_varname_tot(std::string base, int interval, std::string stat)
 
 ms_statsT abmat_scalars(variable* vVar)
 {
+    plog("\nChecking variable ");plog(vVar->label);plog(" start: ");plog(std::to_string(vVar->start).c_str());plog(", end: ");plog(std::to_string(vVar->end).c_str());
     Tabmat type = abmat_vVar_type(vVar);
     ms_statsT scalars;
     bool defInterval = false;
@@ -1039,6 +1064,7 @@ ms_statsT abmat_scalars(variable* vVar)
                         scalars[vname2] = stat.second;
                     }
                 }
+                // plog_stats(scalars, "Comp var 2");
                 break;
 
             case a_micro:
@@ -1053,15 +1079,15 @@ ms_statsT abmat_scalars(variable* vVar)
         }
 
         //standard stats that change the data
-
         auto stats = abmat_stats( data );
+        // plog_stats(stats, "Comp var 1");
         for (auto& stat : stats) {
             auto vname = abmat_varname_tot(vVar->label, i, stat.first);
             scalars[vname] = stat.second;
         }
     }
 
-    plog_stats(scalars, vVar->up->label);
+    // plog_stats(scalars, "Joined ");// vVar->up->label
 
     if (defInterval)
         s_abmat_intervals.clear(); //empty again.
@@ -1132,6 +1158,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
     if (oVar == NULL)
         error_hard( __DEV_ERR_INFO__, "Null Object passed.", "Contact the developer");
 
+    //write data
     switch (type) {
         case a_micro: {
                 std::vector<double> data = root->gatherData_all(oVar->label); //calls also with NULL
@@ -1232,10 +1259,10 @@ void abmat_update_variable(object* oVar, Tabmat type)
             error_hard(__DEV_ERR_INFO__, "a_comp / a_fact case should not exist.",  "Contact the developer");
             break;
     }
-
-    //Just testing
-    if (oVar->v != NULL)
-        abmat_scalars(oVar->v);
+    
+    //update time
+    for (variable* cv = oVar->v; cv != NULL; cv = cv->next)
+        cv->end = t;
 }
 
 
