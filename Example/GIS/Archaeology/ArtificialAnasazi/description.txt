@@ -34,7 +34,7 @@ which is based on (itself a reimplementation of):
 	Dean, Jeffrey; Gumerman, George; Epstein, Joshua; Axtell, Robert; 
 	Swedlund, Alan; Parker, Miles; McCarroll, Steven (2000): 
 	Understanding Anasazi Culture Change Through Agent-Based Modeling. 
-	Chapter 7. In: Tmiothy Kohler und George Gumerman (Hg.): Dynamics in 
+	Chapter 7. In: Timothy Kohler und George Gumerman (Hg.): Dynamics in 
 	Human and Primate Societies. Agent-Based Modeling of Social and Spacial 
 	Processes: Oxford University Press, S. 179–205.
 

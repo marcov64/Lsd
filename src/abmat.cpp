@@ -279,8 +279,7 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
         case a_fact: //factorial share info.
             varname.append("=");
             if (condVal < 0 || condVal > 999) {
-                sprintf( msg, "error in '%s'.", __func__);
-                error_hard( msg, "conditional value is wrong",
+                error_hard( __DEV_ERR_INFO__, "conditional value is wrong",
                             "Control that it is in 0..999!",
                             true );
                 return "";
@@ -288,8 +287,7 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
             varname.append( std::to_string( condVal ) );
             break;
         default: //irrelevant
-            sprintf( msg, "error in '%s'.", __func__);
-            error_hard( msg, "defaulting should not happen",
+            error_hard( __DEV_ERR_INFO__, "defaulting should not happen",
                         "contact the developer.",
                         true );
     }
@@ -317,15 +315,15 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
     Produce advanced distribution statistics
 ********************************************/
 //dumified version for statnames and/or NAN
-m_statsT abmat_stats( void )
+ms_statsT abmat_stats( void )
 {
     std::vector<double> dummy;
     return abmat_stats(dummy);
 }
 
-m_statsT abmat_stats(std::vector<double>& Data )
+ms_statsT abmat_stats(std::vector<double>& Data )
 {
-    m_statsT stats;
+    ms_statsT stats;
 
     stats[astat_n] = 0; //number of items
 
@@ -450,7 +448,7 @@ m_statsT abmat_stats(std::vector<double>& Data )
 ********************************************/
 
 
-m_statsT abmat_compare(std::vector<double> const& Data1, std::vector<double> const& Data2)
+ms_statsT abmat_compare(std::vector<double> const& Data1, std::vector<double> const& Data2)
 {
     // checks
     double gamma;               // discard ties
@@ -463,7 +461,7 @@ m_statsT abmat_compare(std::vector<double> const& Data1, std::vector<double> con
                    true);
     }
 
-    m_statsT compare;
+    ms_statsT compare;
 
     compare[astat_n]; // length of the timeseries
 
@@ -813,7 +811,7 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
                 for (auto& elem : stats_template) {
                     // plog("\n");
                     // plog(oVar->label);
-                    std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first);
+                    std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first.c_str());
                     // plog(" : ");
                     // plog(nvarLab.c_str());
                     abmat_add_var(oVar, nvarLab.c_str());
@@ -900,32 +898,22 @@ void abmat_alloc_save_mem_var(variable* cv)
 
 /*******************************************************
     PLOG_STATS
-    Helper to plog m_statsT object content.
+    Helper to plog ms_statsT object content.
 ******************************************************/
-
-void plog_stats(auto const& stats, const char* title)
+void plog_stats(ms_statsT const& stats, const char* title)
 {
     plog("\n");
     if (strlen(title) > 0) {
         plog("ABMAT Stats for ");
         plog(title);
         plog("\n-------------------------------\n");
-    }
+    }   
     for (auto const& item : stats) {
-        plog(plog_helper(item.first));
+        plog(item.first.c_str());
         plog("\t");
         plog(std::to_string(item.second).c_str());
-        plog("\n");
+        plog("\n");        
     }
-}
-
-const char* plog_helper(const char* inout)
-{
-    return inout;
-}
-const char* plog_helper(std::string inout)
-{
-    return inout.c_str();
 }
 
 /********************************************************
@@ -989,6 +977,7 @@ template <typename FuncType>
 void for_each_abmat_base_variable(FuncType f )
 {
     //cycle through ABMAT objects and update the information.
+    int n = 0;
     for (bridge* pb = abmat->b; pb != NULL; pb = pb->next) {
         object* parent = pb->head;
 
@@ -1008,9 +997,11 @@ void for_each_abmat_base_variable(FuncType f )
                 return;
             }
             for ( ; oVar != NULL; oVar = oVar->next) //in most cases this is a once-loop. But for cond several objects with same label may exist.
-                f(oVar, type);
+                f(oVar, type); n++;
         }
     }
+    plog("\n At time '"); plog(std::to_string(t).c_str()); plog("' for_each_abmat_base_variable processed '");  plog(std::to_string(n).c_str()); plog("' items.");
+    //plog(__DEV_ERR_INFO__);
 }
 
 /*****************************************************************
@@ -1018,16 +1009,21 @@ void for_each_abmat_base_variable(FuncType f )
     a functor to collect all the data from the abmat variables and
     calculate the total stats scalars for the (new) totals file.
 *****************************************************************/
-// ms_statsT const& abmat_total_stats::operator()()
-// {
-    // return total_stats;
-// }
+ms_statsT const& abmat_total_stats::operator()()
+{
+    return total_stats;
+}
 
 void abmat_total_stats::operator()(object* oVar, Tabmat type)
 {
     for (variable* cv = oVar->v ; cv != NULL; cv = cv->next) {
         abmat_scalars(cv, type, total_stats);
     }
+}
+
+void abmat_total_stats::emplace(std::string const& text, double const& value)
+{
+    total_stats[text]=value;
 }
 
 /**************************************************
@@ -1049,6 +1045,7 @@ std::string abmat_varname_tot(std::string base, int interval, std::string stat)
     ABMAT_SCALARS
     Produce the final stats for the total file for the given variable.
 **************************************************/
+
 ms_statsT abmat_scalars(variable* vVar)
 {
     Tabmat type = abmat_vVar_type(vVar);
@@ -1119,7 +1116,7 @@ void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
         }
     }
 
-    // plog_stats(scalars, "Joined ");// vVar->up->label
+    // plog_stats(scalars, "Joined ");// vVar->up->label    
 
     if (defInterval)
         s_abmat_intervals.clear(); //empty again.
@@ -1201,7 +1198,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
                 // plog("\n---");
 
                 for (auto& elem : stats_template) {
-                    std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first);
+                    std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first.c_str());
                     oVar->write( nvarLab.c_str(), elem.second, t );
                 }
             }
@@ -1258,7 +1255,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
                     }
                     CatchAll("Uups")
 
-                    std::string var2lab = get_abmat_varname_fact( oVar2->label, subset.first);
+                    std::string var2lab = get_abmat_varname_fact( oVar2->label, subset.first );
                     variable* fracVar = oVar2->search_var_local(var2lab.c_str());
 
                     //create variables the first time a factor appears
@@ -1268,7 +1265,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
                         //conditional variables
                         auto stats_template = abmat_stats( ); //retrieve map of stats
                         for (auto& elem : stats_template) {   //create a variable for each statistic
-                            std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first, oVar2->label, subset.first);
+                            std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first.c_str(), oVar2->label, subset.first );
                             abmat_add_var(oVar, nvarLab.c_str());
                         }
                     }
@@ -1277,7 +1274,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
                     oVar2->write(var2lab.c_str(), fraction, t);
                     auto stats = abmat_stats(subset.second);
                     for (auto& stat : stats) {
-                        std::string nvarLab = get_abmat_varname ( type, oVar->label, stat.first, oVar2->label, subset.first);
+                        std::string nvarLab = get_abmat_varname ( type, oVar->label, stat.first.c_str(), oVar2->label, subset.first );
                         oVar->write(nvarLab.c_str(), stat.second, t);
                     }
                 }
@@ -1366,12 +1363,36 @@ void disconnect_abmat_from_root()
 void abmat_total()
 {
     
+    //if no intervals are specified, consider whole time
+    bool defInterval = false;
+    if (s_abmat_intervals.size() == 0) {
+        s_abmat_intervals.emplace(1, t); //add interval
+        defInterval = true;
+    }       
+    
     abmat_total_stats total_stats;
+    
+    //Add interval infos
+    int i = 0;
+    for (auto const& intvl : s_abmat_intervals){
+        std::string start = "Interval_I";
+        start += std::to_string(i++);
+        std::string end = start;
+        start += "_start";
+        end +=   "_end";
+        total_stats.emplace(start,intvl.first);
+        total_stats.emplace(end,intvl.second);
+    }
     
     //Cycle through the variables
     for_each_abmat_base_variable( total_stats ); //create and add all the infos
     
-    plog_stats( total_stats.total_stats , "All stats" );
+    
+    
+    plog_stats( total_stats() , "All stats" );
+    
+    if ( defInterval )
+        s_abmat_intervals.clear(); //reset
 
 }
 

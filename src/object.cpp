@@ -2903,7 +2903,7 @@ void object::eightStats(std::vector<double>& Data, double* r)
 
     auto m_stats = abmat_stats(Data); //pass calculation to abmat
     for (auto& element : m_stats) {
-        plog("\n");plog(element.first);plog("\t");plog(std::to_string(element.second).c_str());
+        plog("\n");plog(element.first.c_str());plog("\t");plog(std::to_string(element.second).c_str());
     }
     try {
         int i = 0;

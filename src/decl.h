@@ -207,7 +207,6 @@ struct gisMap;
 struct gisPosition;
 struct Wrap;
 //ABMAT
-typedef std::map< const char*, double > m_statsT;
 typedef std::map< std::string, double > ms_statsT;
 enum Tabmat {a_micro, a_macro, a_cond, a_comp, a_fact};
 struct next_var; //functional to cycle through variables
@@ -865,22 +864,19 @@ class result {						// results file object
     calculate the total stats scalars for the (new) totals file.
 *****************************************************************/
 class abmat_total_stats {
+    
+        
+
     public:
+    
         ms_statsT total_stats;
 
-    
-
-        // ms_statsT const& operator()();
-        // {
-            // return total_stats;
-        // };
+        ms_statsT const& operator()();       
 
         void operator()(object* oVar, Tabmat type);
-        // {
-            // for (variable* cv = oVar->v ; cv != NULL; cv = cv->next) {
-                // abmat_scalars(cv, type, total_stats);
-            // }
-        // };
+        
+        void emplace(std::string const&, double const&);
+        
 };
 
 struct profile {						// profiled variable object
@@ -1023,13 +1019,12 @@ extern Tcl_Interp* inter;		// Tcl standard interpreter pointer
 
 //new abmat functions
 #ifdef CPP11
-m_statsT abmat_stats( void );
-m_statsT abmat_stats(std::vector<double>& Data );
-m_statsT abmat_compare(std::vector<double> const& Data, std::vector<double> const& Data2 );
+ms_statsT abmat_stats( void );
+ms_statsT abmat_stats(std::vector<double>& Data );
+ms_statsT abmat_compare(std::vector<double> const& Data, std::vector<double> const& Data2 );
 void abmat_init( void );
-const char* plog_helper(const char* inout);
-const char* plog_helper(std::string inout);
-void plog_stats(auto const& stats, const char* title = "");
+
+void plog_stats(ms_statsT const& stats, const char* title = "");
 void plog_object_tree_up(object*, bool plotVars = false);
 std::string get_abmat_varname_fact( const char* condlab, const int condVal);
 std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab);
@@ -1037,6 +1032,7 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
 void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab = NULL);
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
 void abmat_update();
+void abmat_total();
 template <typename FuncType>
 void for_each_abmat_base_variable( FuncType f );
 void abmat_update_variable(object* oVar, Tabmat type);

@@ -815,10 +815,10 @@ void run( void )
                         disconnect_abmat_from_root();
                     }
                     else {		// if paused, just call the data browser
-                      connect_abmat_to_root();
+                        connect_abmat_to_root();
                         double useless = 0;
                         deb( root, NULL, "Paused by User", &useless );
-                          disconnect_abmat_from_root();
+                        disconnect_abmat_from_root();
                     }
 
                     break;
@@ -912,9 +912,11 @@ void run( void )
         user_exception = true;
         close_sim( );
         user_exception = false;
-        connect_abmat_to_root(); //before reset_end
+        connect_abmat_to_root(); //after reset_end()??
         reset_end( root );
         root->emptyturbo( );
+        
+        abmat_total(); // TESTING
 
         if ( quit != 2 && ( sim_num > 1 || no_window ) ) {
             // save results for multiple simulation runs, if any
