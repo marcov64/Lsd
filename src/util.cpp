@@ -1402,15 +1402,21 @@ char* upload_eqfile( void )
     //ToDo : Add ABMAT
 ***************************************************/
 
-void result::title_abmat( int flag )
-{
-    title( abmat, flag, true);
-}
+// void result::title_abmat( int flag )
+// {
+    // if ( total_stats.empty() )
+        // total_stats = abmat_total(); //initialise
 
-void result::data_abmat( void )
-{
-    data( abmat, t, 0, true);
-}
+    // title( abmat, flag, true);
+// }
+
+// void result::data_abmat( void )
+// {
+    // if (total_stats.empty())
+        // total_stats = abmat_total(); //initialise
+
+    // data( abmat, t, 0, true);
+// }
 
 //Write single datum
 void result::write_datum(double datum)
@@ -1492,10 +1498,13 @@ void result::write_title(const char* label, const char* lab_tit, bool single, bo
 }
 
 // saves data to file in the specified period
-void result::data( object* root, int initstep, int endtstep, bool abmat )
+void result::data( object* root, int initstep, int endtstep )
 {
+    
+    if (switch_abmat && total_stats.empty())
+        total_stats = abmat_total(); //initialise
 
-    if (abmat)
+    if (switch_abmat)
         initstep = endtstep = 0; //exactly one call. Handle rest in abmat proc.
     else {
         // don't include initialization (t=0) in .csv format
@@ -1507,7 +1516,7 @@ void result::data( object* root, int initstep, int endtstep, bool abmat )
     for ( int i = initstep; i <= endtstep; i++ ) {
         firstCol = true;
 
-        data_recursive( root, i, abmat );		// output one data line
+        data_recursive( root, i );		// output one data line
 
         if ( dozip ) {			// and change line
 #ifdef LIBZ
@@ -1519,34 +1528,34 @@ void result::data( object* root, int initstep, int endtstep, bool abmat )
     }
 }
 
-void result::data_recursive( object* r, int i, bool abmat )
+void result::data_recursive( object* r, int i )
 {
+
+    if (switch_abmat) {
+        for ( auto const&  item : total_stats.total_stats ) {
+            write_datum(item.second);
+            firstCol = false; //to do: consider in abmat tot data..
+        }
+        return; //process only abmat items.
+    }
+
     bridge* cb;
     object* cur;
     variable* cv;
 
-    for ( cv = r->v; cv != NULL; cv = cv->next ) {
+    for ( cv = r->v; cv != NULL; cv = cv->next ) {        
 
-        if (abmat) {
-            auto scalars = abmat_scalars(cv);
-            
-            //special abmat behaviour
-            firstCol = false; //to do: consider in abmat tot data..
-        }
-        else {
-
-            if ( cv->save == 1 ) {
-                if ( cv->start <= i && cv->end >= i ) {
-                    write_datum( cv->data[ i ] ); //nan check follows on write_datum!
-                }
-                else {
-                    write_datum( NAN );
-                }
-
-                firstCol = false;
+        if ( cv->save == 1 ) {
+            if ( cv->start <= i && cv->end >= i ) {
+                write_datum( cv->data[ i ] ); //nan check follows on write_datum!
+            }
+            else {
+                write_datum( NAN );
             }
 
+            firstCol = false;
         }
+
     }
 
     for ( cb = r->b; cb != NULL; cb = cb->next ) {
@@ -1556,16 +1565,8 @@ void result::data_recursive( object* r, int i, bool abmat )
         cur = cb->head;
         if ( cur->to_compute )
             for ( ; cur != NULL; cur = cur->next )
-                data_recursive( cur, i, abmat );
+                data_recursive( cur, i );
     }
-
-    if (abmat)
-        return; //no cemetery
-
-    // The cemetery
-    // *could* be improved by simply providing a cemetery object that holds
-    // all cemetery variables and joining it to root. With no-instance objects
-    // that is straight forward.
 
     if ( r->up == NULL ) {
         for ( cv = cemetery; cv != NULL; cv = cv->next ) {
@@ -1582,11 +1583,16 @@ void result::data_recursive( object* r, int i, bool abmat )
 }
 
 // saves header to file
-void result::title( object* root, int flag, bool abmat )
+void result::title( object* root, int flag )
 {
+    
+    if ( switch_abmat && total_stats.empty() )
+        total_stats = abmat_total(); //initialise
+    
+    
     firstCol = true;
 
-    title_recursive( root, flag, abmat );		// output header
+    title_recursive( root, flag );		// output header
 
     if ( dozip ) {					// and change line
 #ifdef LIBZ
@@ -1597,8 +1603,17 @@ void result::title( object* root, int flag, bool abmat )
         fprintf( f, "\n" );
 }
 
-void result::title_recursive( object* r, int header, bool abmat )
+void result::title_recursive( object* r, int header )
 {
+    if (switch_abmat) {
+        for ( auto const& item : total_stats.total_stats ) {
+            write_title_abmat(item.first.c_str(),"ABMAT");
+            firstCol = false; //to do: consider in abmat tot data..
+        }
+        return; //process only abmat items.
+    }
+
+
     bool single = false;
     bridge* cb;
     object* cur;
@@ -1606,27 +1621,23 @@ void result::title_recursive( object* r, int header, bool abmat )
 
 
     for ( cv = r->v; cv != NULL; cv = cv->next ) {
+
         if ( cv->save == 1 ) {
 
-            if (abmat) {
-                //abmat total file specific
-            }
-            else {
+            set_lab_tit( cv );
+            if ( abmat || ( ! strcmp( cv->lab_tit, "1" ) || ! strcmp( cv->lab_tit, "1_1" ) || ! strcmp( cv->lab_tit, "1_1_1" ) || ! strcmp( cv->lab_tit, "1_1_1_1" ) ) && cv->up->hyper_next( ) == NULL )
+                single = true;					// prevent adding suffix to single objects
 
-                set_lab_tit( cv );
-                if ( abmat || ( ! strcmp( cv->lab_tit, "1" ) || ! strcmp( cv->lab_tit, "1_1" ) || ! strcmp( cv->lab_tit, "1_1_1" ) || ! strcmp( cv->lab_tit, "1_1_1_1" ) ) && cv->up->hyper_next( ) == NULL )
-                    single = true;					// prevent adding suffix to single objects
-
-                if (cv->abmat)
-                    write_title_abmat(cv->label, cv->lab_tit);
-                else
-                    write_title(cv->label, cv->lab_tit, single, header,  cv->start,  cv->end);
+            if (cv->abmat)
+                continue;
+            else
+                write_title(cv->label, cv->lab_tit, single, header,  cv->start,  cv->end);
 
 
-                firstCol = false; //to do: consider in abmat tot file header..
+            firstCol = false; //to do: consider in abmat tot file header..
 
-            }
         }
+
     }
 
     for ( cb = r->b; cb != NULL; cb = cb->next ) {
@@ -1652,13 +1663,14 @@ void result::title_recursive( object* r, int header, bool abmat )
 }
 
 // open the appropriate file for saving the results (constructor)
-result::result( char const* fname, char const* fmode, bool dozip, bool docsv )
+result::result( char const* fname, char const* fmode, bool dozip, bool docsv, bool switch_abmat )
 {
 #ifndef LIBZ
     dozip = false;				// disable zip if libraries not available
 #endif
     this->docsv = docsv;
     this->dozip = dozip;		// save local class flag
+    this->switch_abmat = switch_abmat;
     if ( dozip ) {
 #ifdef LIBZ
         char* fnamez = new char[ strlen( fname ) + 4 ];	// append .gz to the file name

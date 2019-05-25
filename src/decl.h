@@ -207,6 +207,7 @@ struct gisMap;
 struct gisPosition;
 struct Wrap;
 //ABMAT
+class abmat_total_stats;
 typedef std::map< std::string, double > ms_statsT;
 enum Tabmat {a_micro, a_macro, a_cond, a_comp, a_fact};
 struct next_var; //functional to cycle through variables
@@ -827,37 +828,6 @@ struct design {						// design of experiment object
     ~design( void );					// destructor
 };
 
-class result {						// results file object
-
-
-        FILE* f;							// uncompressed file pointer
-        bool docsv;							// comma separated .csv text format
-        bool dozip;							// compressed file flag
-        bool firstCol;						// flag for first column in line
-
-#ifdef LIBZ
-        gzFile fz;							// compressed file pointer
-#endif
-
-        void title_recursive( object* r, int i, bool abmat = false );	// write file header (recursively)
-        void data_recursive( object* r, int i, bool abmat = false );	// save a single time step (recursively)
-
-        void write_datum(double datum); //append single data item
-        void write_title_abmat(const char* title, const char* lab_tit); //write single data item head
-        void write_title(const char* label, const char* lab_tit, bool single, bool header, int start, int end);
-
-    public:
-
-        result( char const* fname, char const* fmode, bool dozip = false, bool docsv = false );
-        // constructor
-        ~result( void );					// destructor
-
-        void data( object* root, int initstep, int endtstep = 0, bool abmat = false  );	// write data
-        void data_abmat( void ); //abmat stats - wrapper for data
-        void title( object* root, int flag, bool abmat = false );	// write file header
-        void title_abmat( int flag ); //wrapper
-};
-
 /*****************************************************************
     ABMAT_TOTAL_STATS
     a functor to collect all the data from the abmat variables and
@@ -870,6 +840,11 @@ class abmat_total_stats {
     public:
     
         ms_statsT total_stats;
+        
+        bool empty()
+        {
+          return (total_stats.size()==0);  
+        };
 
         const ms_statsT& operator()() const;       
 
@@ -878,6 +853,42 @@ class abmat_total_stats {
         void emplace(std::string const&, double const&);
         
 };
+
+class result {						// results file object
+
+
+        FILE* f;							// uncompressed file pointer
+        bool docsv;							// comma separated .csv text format
+        bool dozip;							// compressed file flag
+        bool firstCol;						// flag for first column in line
+        bool switch_abmat;
+        
+        abmat_total_stats total_stats;      //hold abmat results
+
+#ifdef LIBZ
+        gzFile fz;							// compressed file pointer
+#endif
+
+        void title_recursive( object* r, int i );	// write file header (recursively)
+        void data_recursive( object* r, int i );	// save a single time step (recursively)
+
+        void write_datum(double datum); //append single data item
+        void write_title_abmat(const char* title, const char* lab_tit); //write single data item head
+        void write_title(const char* label, const char* lab_tit, bool single, bool header, int start, int end);
+
+    public:
+
+        result( char const* fname, char const* fmode, bool dozip = false, bool docsv = false, bool switch_abmat = false );
+        // constructor
+        ~result( void );					// destructor
+
+        void data( object* root, int initstep, int endtstep = 0  );	// write data
+        // void data_abmat( void ); //abmat stats - wrapper for data
+        void title( object* root, int flag );	// write file header
+        // void title_abmat( int flag ); //wrapper
+};
+
+
 
 struct profile {						// profiled variable object
     unsigned int comp;
@@ -1019,6 +1030,7 @@ extern Tcl_Interp* inter;		// Tcl standard interpreter pointer
 
 //new abmat functions
 #ifdef CPP11
+void abmat_write(object* oVar, char const* lab, double value);
 ms_statsT abmat_stats( void );
 ms_statsT abmat_stats(std::vector<double>& Data );
 ms_statsT abmat_compare(std::vector<double> const& Data, std::vector<double> const& Data2 );
@@ -1032,7 +1044,7 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
 void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab = NULL);
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
 void abmat_update();
-void abmat_total();
+abmat_total_stats abmat_total();
 template <typename FuncType>
 void for_each_abmat_base_variable( FuncType& f );
 void abmat_update_variable(object* oVar, Tabmat type);

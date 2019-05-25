@@ -911,13 +911,12 @@ void run( void )
         // run user closing function, reporting error appropriately
         user_exception = true;
         close_sim( );
-        user_exception = false;
-        abmat_total(); // TESTING
+        user_exception = false;        
         connect_abmat_to_root(); //after reset_end()??
         reset_end( root );
         root->emptyturbo( );
         
-        
+        bool switch_abmat = abmat_series_saved > 0; //in total files only abmat data is considered.
 
         if ( quit != 2 && ( sim_num > 1 || no_window ) ) {
             // save results for multiple simulation runs, if any
@@ -932,8 +931,9 @@ void run( void )
                         sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - 1, docsv ? "csv" : "res" );
 
                     if ( fast_mode < 2 )
-                        plog( "Saving results in file %s%s... ", "", msg, dozip ? ".gz" : "" );
+                        plog( "Saving results in file %s%s... ", "", msg, dozip ? ".gz" : "" );                    
 
+                    //abmat does not intercept here, but abmat variables are considered alongside normal ones.
                     rf = new result( msg, "wt", dozip, docsv );	// create results file object
                     rf->title( root, 1 );						// write header
                     rf->data( root, 0, actual_steps );			// write all data
@@ -957,23 +957,15 @@ void run( void )
                     plog( "\nSaving totals in file %s%s... ", "", msg, dozip ? ".gz" : "" );
 
                 if ( i == 1 && grandTotal && ! add_to_tot ) {
-                    rf = new result( msg, "wt", dozip, docsv );	// create results file object
+                    rf = new result( msg, "wt", dozip, docsv, switch_abmat );	// create results file object
                     rf->title( root, 0 );					// write header
                 }
                 else
-                    rf = new result( msg, "a", dozip, docsv );	// add results object to existing file
+                    rf = new result( msg, "a", dozip, docsv, switch_abmat );	// add results object to existing file
 
                 rf->data( root, actual_steps );				// write current data data
                 delete rf;									// close file and delete object
                 
-                if ( abmat_series_saved > 0 ) {
-                    //create new title if same as above OR IF new conditional values have been added.
-                    
-                    //either create new rf file OR 
-                        //rename old rf file on disk and read data if not in memory
-                        //flag old as to be deleted.
-                        //create new rf file and write data
-                }
                     
 
                 if ( fast_mode < 2 && i == sim_num )		// print only for last

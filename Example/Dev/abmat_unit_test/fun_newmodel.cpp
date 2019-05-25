@@ -9,11 +9,32 @@ const bool verbose = true;
 /////to check last update in t sereis data collection TODO
 MODELBEGIN
 
+EQUATION("INI")
+
+    ABMAT_ADD_VARIABLE("micro","b");
+    ABMAT_ADD_VARIABLE("micro","c");
+    ABMAT_ADD_VARIABLE("micro","d1");
+    ABMAT_ADD_VARIABLE("micro","d2");
+    ABMAT_ADD_VARIABLE("comp","a","aa");
+    ABMAT_ADD_VARIABLE("cond","b","b2");
+
+
+PARAMETER
+RESULT(0)
+
 EQUATION("aa")
 RESULT(V("id_A")*T+T)
 
 EQUATION("a")
 RESULT(V("id_A") +T)
+
+EQUATION("b2")
+/* Position in the instance */
+v[0]=0;
+for( auto cur = p; cur != NULL; cur = cur->next)
+	v[0]++; 
+PARAMETER
+RESULT(v[0])
 
 
 

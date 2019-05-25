@@ -271,7 +271,10 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
     switch (stattype) {
         case a_micro: //nothing to add
         case a_macro: //nothing to add
+            break;
         case a_comp:
+            varname.append("_v_");
+            varname.append( abmat_varname_convert(var2lab) );
             break;
         case a_cond:
             varname.append("_c_");
@@ -730,7 +733,7 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
         //Comparative vars as pair of macro vars, linked via hooks (single direction)
         if (type == a_comp) {
             var2_added = true;
-            //add as macro via recursive call.
+            //add 2nd as macro via recursive call.
             add_abmat_object(a_macro, var2lab);
 
             oVar2 = parent->search_local(var2lab);
@@ -819,11 +822,11 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
             }
             break;
 
-        case a_comp: //done already in the additional recursive call.
+        case a_comp: //borther done already in the additional recursive call.
         case a_macro:
             if (var1_added == true) {
                 //a macro object holds a variable with the same name, maybe shortened.
-                std::string nvarLab = get_abmat_varname(type, oVar->label); //name is same as original, shortened
+                std::string nvarLab = get_abmat_varname(a_macro, oVar->label); //name is same as original, shortened
                 abmat_add_var(oVar, nvarLab.c_str());
             }
             break;
@@ -907,14 +910,14 @@ void plog_stats(ms_statsT const& stats, const char* title)
         plog("ABMAT Stats for ");
         plog(title);
         plog("\n-------------------------------\n");
-    }   
+    }
     int i = 0;
     for (auto const& item : stats) {
         plog(item.first.c_str());
         plog("\t");
         plog(std::to_string(item.second).c_str());
-        plog("\n");        
-        if (i++ > 100){
+        plog("\n");
+        if (i++ > 100) {
             plog("\n ... more than 100.");
             break;
         }
@@ -961,6 +964,38 @@ void plog_object_tree_up(object* startO, bool plotVars)
     plog(tree.c_str());
 }
 
+/****************************************************
+    ABMAT_WRITE (*)
+    Simplified, faster version of the object::write command.
+    No NAN checking. Only for ABMAT.
+ ***************************************************/
+void abmat_write(object* oVar, char const* lab, double value)
+{
+    variable* cv = oVar->search_var_local( lab);
+    if ( cv == NULL ) {
+        error_hard( __DEV_ERR_INFO__, "the ABMAT variable cannot be found",
+                    "contact the developers", true );
+        return;
+    }
+    
+    if (cv->last_update >= t) {
+        error_hard( __DEV_ERR_INFO__, "Called at least twice at the same time!", "Contact the developer", true);
+        return;
+    }
+        
+    
+    if (!(cv->abmat)) {
+        error_hard( __DEV_ERR_INFO__, "Using special abmat procedure on non-abmat variable.", "Contact the developer", true);
+        return;
+    }
+
+
+
+    cv->val[ 0 ] = value; //current value
+    cv->last_update = t;
+    cv->data[ t ] = value; //Basically manipulate the track record.
+}
+
 /**************************************************
     ABMAT_UPDATE
     Update the content of all abmat (time series) variables.
@@ -975,14 +1010,13 @@ void abmat_update()
 
 /*******************************************************************
     FOR_EACH_ABMAT_BASE_VARIABLE
-    Cycles through the abmat objects and applies the function or functor f 
+    Cycles through the abmat objects and applies the function or functor f
     on all the abmat variables.
 *******************************************************************/
 template <typename FuncType>
 void for_each_abmat_base_variable(FuncType& f )
 {
     //cycle through ABMAT objects and update the information.
-    int n = 0;
     for (bridge* pb = abmat->b; pb != NULL; pb = pb->next) {
         object* parent = pb->head;
 
@@ -1002,11 +1036,9 @@ void for_each_abmat_base_variable(FuncType& f )
                 return;
             }
             for ( ; oVar != NULL; oVar = oVar->next) //in most cases this is a once-loop. But for cond several objects with same label may exist.
-                f(oVar, type); n++;
+                f(oVar, type);
         }
     }
-    // plog("\n At time '"); plog(std::to_string(t).c_str()); plog("' for_each_abmat_base_variable processed '");  plog(std::to_string(n).c_str()); plog("' items.");
-    //plog(__DEV_ERR_INFO__);
 }
 
 /*****************************************************************
@@ -1031,7 +1063,7 @@ void abmat_total_stats::operator()(object* oVar, Tabmat type)
 
 void abmat_total_stats::emplace(std::string const& text, double const& value)
 {
-    total_stats.emplace(text,value);
+    total_stats.emplace(text, value);
 }
 
 /**************************************************
@@ -1072,7 +1104,7 @@ ms_statsT abmat_scalars(variable* vVar, Tabmat type)
 
 void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
 {
-    // plog("\nReference Version");    
+    // plog("\nReference Version");
     bool defInterval = false;
     if (s_abmat_intervals.size() == 0) {
         s_abmat_intervals.emplace(1, t); //add interval
@@ -1093,11 +1125,14 @@ void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
         switch (type) {
 
             case a_macro:
+            
                 //comparative stuff
                 for (auto oVar : vVar->up->hooks) {
                     plog("\nchecking comparative variables");
+                    
                     if (oVar->v == NULL)
                         error_hard(__DEV_ERR_INFO__, "There is no variable in the abmat comparative object.", "Contact the developers");
+                    
                     variable* cVar = oVar->v;//careful! As long as we keep that there is but a single macro (copy) object this is save.
                     auto data2 = cVar->copy_data( interval.first, interval.second);
                     auto cstats = abmat_compare(data, data2);
@@ -1128,11 +1163,11 @@ void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
             if (stat.second == NAN)
                 plog("\ndebug");
             auto vname = abmat_varname_tot(vVar->label, i, stat.first);
-            scalars.emplace(vname,stat.second);// [vname] = stat.second;
+            scalars.emplace(vname, stat.second); // [vname] = stat.second;
         }
     }
 
-    // plog_stats(scalars, "Joined ");// vVar->up->label    
+    // plog_stats(scalars, "Joined ");// vVar->up->label
 
     if (defInterval)
         s_abmat_intervals.clear(); //empty again.
@@ -1215,7 +1250,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
 
                 for (auto& elem : stats_template) {
                     std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first.c_str());
-                    oVar->write( nvarLab.c_str(), elem.second, t );
+                    abmat_write( oVar, nvarLab.c_str(), elem.second );
                 }
             }
             break;
@@ -1224,7 +1259,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
                 //simply copy the current data.
                 double val = root->cal(NULL, oVar->label, 0);
                 std::string varlab = get_abmat_varname(type, oVar->label);
-                oVar->write(varlab.c_str(), val, t);
+                abmat_write(oVar, varlab.c_str(), val);                
             }
             break;
 
@@ -1287,11 +1322,11 @@ void abmat_update_variable(object* oVar, Tabmat type)
                     }
 
                     //update variables
-                    oVar2->write(var2lab.c_str(), fraction, t);
+                    abmat_write(oVar2, var2lab.c_str(), fraction);                    
                     auto stats = abmat_stats(subset.second);
                     for (auto& stat : stats) {
                         std::string nvarLab = get_abmat_varname ( type, oVar->label, stat.first.c_str(), oVar2->label, subset.first );
-                        oVar->write(nvarLab.c_str(), stat.second, t);
+                        abmat_write(oVar, nvarLab.c_str(), stat.second);
                     }
                 }
             }
@@ -1376,40 +1411,37 @@ void disconnect_abmat_from_root()
     Do the totals analysis
 ********************************************/
 
-void abmat_total()
+abmat_total_stats abmat_total()
 {
-    
+
     //if no intervals are specified, consider whole time
     bool defInterval = false;
     if (s_abmat_intervals.size() == 0) {
         s_abmat_intervals.emplace(1, actual_steps); //add interval
         defInterval = true;
-    }       
-    
+    }
+
     abmat_total_stats total_stats;
-    
+
     //Add interval infos
     int i = 0;
-    for (auto const& intvl : s_abmat_intervals){
+    for (auto const& intvl : s_abmat_intervals) {
         std::string start = "Interval_I";
         start += std::to_string(i++);
         std::string end = start;
         start += "_start";
         end +=   "_end";
-        total_stats.emplace(start,intvl.first);
-        total_stats.emplace(end,intvl.second);
+        total_stats.emplace(start, intvl.first);
+        total_stats.emplace(end, intvl.second);
     }
-    
+
     //Cycle through the variables
     for_each_abmat_base_variable( total_stats ); //create and add all the infos
-    
-    
-    
-    plog_stats( total_stats() , "All stats" );
-    
+
     if ( defInterval )
         s_abmat_intervals.clear(); //reset
 
+    return total_stats;
 }
 
 #endif
