@@ -841,7 +841,7 @@ class result {						// results file object
 #endif
 
         void title_recursive( object* r, int i, bool abmat = false );	// write file header (recursively)
-        void data_recursive( object* r, int i, bool abmat = false );	// save a single time step (recursively)        
+        void data_recursive( object* r, int i, bool abmat = false );	// save a single time step (recursively)
 
         void write_datum(double datum); //append single data item
         void write_title_abmat(const char* title, const char* lab_tit); //write single data item head
@@ -857,6 +857,30 @@ class result {						// results file object
         void data_abmat( void ); //abmat stats - wrapper for data
         void title( object* root, int flag, bool abmat = false );	// write file header
         void title_abmat( int flag ); //wrapper
+};
+
+/*****************************************************************
+    ABMAT_TOTAL_STATS
+    a functor to collect all the data from the abmat variables and
+    calculate the total stats scalars for the (new) totals file.
+*****************************************************************/
+class abmat_total_stats {
+    public:
+        ms_statsT total_stats;
+
+    
+
+        // ms_statsT const& operator()();
+        // {
+            // return total_stats;
+        // };
+
+        void operator()(object* oVar, Tabmat type);
+        // {
+            // for (variable* cv = oVar->v ; cv != NULL; cv = cv->next) {
+                // abmat_scalars(cv, type, total_stats);
+            // }
+        // };
 };
 
 struct profile {						// profiled variable object
@@ -1013,9 +1037,12 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
 void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab = NULL);
 void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
 void abmat_update();
-void for_each_abmat_variable(void (*f)(object* oVar, Tabmat type) );
+template <typename FuncType>
+void for_each_abmat_base_variable( FuncType f );
 void abmat_update_variable(object* oVar, Tabmat type);
 ms_statsT abmat_scalars(variable* vVar);
+ms_statsT abmat_scalars(variable* vVar, Tabmat type);
+void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars);
 Tabmat abmat_vVar_type(variable* vVar);
 Tabmat abmat_oVar_type(object* oVar);
 Tabmat abmat_toVar_type(object* toVar);

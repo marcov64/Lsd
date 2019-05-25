@@ -691,7 +691,7 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
             break;
 
         default: //checked already
-        break;
+            break;
     }
 
 
@@ -737,7 +737,7 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
 
             oVar2 = parent->search_local(var2lab);
             if (oVar2 == NULL) {
-                error_hard(__DEV_ERR_INFO__,"The variable should exist.","Contact the developer",true);
+                error_hard(__DEV_ERR_INFO__, "The variable should exist.", "Contact the developer", true);
                 return;
             }
             //Add hook from var1 to var2, if not exists.
@@ -766,7 +766,7 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
         //respective subgroups cond and fact and hook the first one
         //to its conditioning factor, using the hooks (there may be several
         //factors for each variable)
-        
+
 
         //check if the first variable exists or create it
         // oVar = oFirst->search_local(varlab);#
@@ -821,7 +821,7 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
             }
             break;
 
-        case a_comp: //done already in the additional recursive call.            
+        case a_comp: //done already in the additional recursive call.
         case a_macro:
             if (var1_added == true) {
                 //a macro object holds a variable with the same name, maybe shortened.
@@ -969,26 +969,26 @@ void plog_object_tree_up(object* startO, bool plotVars)
 }
 
 /**************************************************
-    ABMAT_UPDATE_VARIABLE
+    ABMAT_UPDATE
     Update the content of all abmat (time series) variables.
     Cycles through the abmat tree and gathers all the data, writing it to
     the parameters.
 **************************************************/
 
 void abmat_update()
-{    
-    for_each_abmat_variable( &abmat_update_variable );
+{
+    for_each_abmat_base_variable( &abmat_update_variable );
 }
 
 /*******************************************************************
-CYCLE_ABMAT_TYPE
-Cycles through the abmat objects and applies the function f on all the
-abmat variables.
+    FOR_EACH_ABMAT_BASE_VARIABLE
+    Cycles through the abmat objects and applies the function or functor f 
+    on all the abmat variables.
 *******************************************************************/
-
-void for_each_abmat_variable(void (*f)(object* oVar, Tabmat type) )
+template <typename FuncType>
+void for_each_abmat_base_variable(FuncType f )
 {
-//cycle through ABMAT objects and update the information.
+    //cycle through ABMAT objects and update the information.
     for (bridge* pb = abmat->b; pb != NULL; pb = pb->next) {
         object* parent = pb->head;
 
@@ -1010,8 +1010,30 @@ void for_each_abmat_variable(void (*f)(object* oVar, Tabmat type) )
             for ( ; oVar != NULL; oVar = oVar->next) //in most cases this is a once-loop. But for cond several objects with same label may exist.
                 f(oVar, type);
         }
-    }    
+    }
 }
+
+/*****************************************************************
+    ABMAT_TOTAL_STATS
+    a functor to collect all the data from the abmat variables and
+    calculate the total stats scalars for the (new) totals file.
+*****************************************************************/
+// ms_statsT const& abmat_total_stats::operator()()
+// {
+    // return total_stats;
+// }
+
+void abmat_total_stats::operator()(object* oVar, Tabmat type)
+{
+    for (variable* cv = oVar->v ; cv != NULL; cv = cv->next) {
+        abmat_scalars(cv, type, total_stats);
+    }
+}
+
+/**************************************************
+    abmat_varname_tot
+    Add the Interval info for the totals file
+**************************************************/
 
 
 std::string abmat_varname_tot(std::string base, int interval, std::string stat)
@@ -1027,12 +1049,22 @@ std::string abmat_varname_tot(std::string base, int interval, std::string stat)
     ABMAT_SCALARS
     Produce the final stats for the total file for the given variable.
 **************************************************/
-
 ms_statsT abmat_scalars(variable* vVar)
 {
-    plog("\nChecking variable ");plog(vVar->label);plog(" start: ");plog(std::to_string(vVar->start).c_str());plog(", end: ");plog(std::to_string(vVar->end).c_str());
     Tabmat type = abmat_vVar_type(vVar);
+    return abmat_scalars(vVar, type);
+}
+
+ms_statsT abmat_scalars(variable* vVar, Tabmat type)
+{
     ms_statsT scalars;
+    abmat_scalars(vVar, type, scalars);
+    return scalars;
+}
+
+
+void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
+{
     bool defInterval = false;
     if (s_abmat_intervals.size() == 0) {
         s_abmat_intervals.emplace(1, t); //add interval
@@ -1091,8 +1123,6 @@ ms_statsT abmat_scalars(variable* vVar)
 
     if (defInterval)
         s_abmat_intervals.clear(); //empty again.
-
-    return scalars;
 }
 
 
@@ -1259,7 +1289,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
             error_hard(__DEV_ERR_INFO__, "a_comp / a_fact case should not exist.",  "Contact the developer");
             break;
     }
-    
+
     //update time
     for (variable* cv = oVar->v; cv != NULL; cv = cv->next)
         cv->end = t;
@@ -1335,21 +1365,13 @@ void disconnect_abmat_from_root()
 
 void abmat_total()
 {
+    
+    abmat_total_stats total_stats;
+    
     //Cycle through the variables
-    for (auto var : m_abmat_variables ) {
-
-        //get data
-        //auto ts_data =
-
-        //gather time-series stats like runs
-
-        //for comparative variables, gather comp stats
-
-
-        //gather distributional stats
-
-
-    }
+    for_each_abmat_base_variable( total_stats ); //create and add all the infos
+    
+    plog_stats( total_stats.total_stats , "All stats" );
 
 }
 
