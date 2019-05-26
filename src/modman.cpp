@@ -4829,14 +4829,15 @@ if ( choice == 32 )
 // select a model
 if ( choice == 33 )
 {
+	cmd( "destroytop .mm" );					// close compilation results, if open
+
 	Tcl_LinkVar( inter, "choiceSM", ( char * ) & num, TCL_LINK_INT );
 	num = 0;
 
 	cmd( "showmodel $groupdir" );
 	cmd( "focus .l" );
 
-	choice = 0;
-	while ( choice == 0 && num == 0 )
+	while ( num == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .l; bind .f.t.t <Enter> { }" );

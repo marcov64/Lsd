@@ -45,11 +45,6 @@ proc showmodel pippo {
 	lappend lbn
 	lappend group
 	
-	# close compilation results, if open
-	destroytop .mm
-
-	set choiceSM 0
-
 	if [ winfo exists .l ] {
 		.l.l.l delete 0 end
 		.l.t.text conf -state normal
@@ -69,17 +64,14 @@ proc showmodel pippo {
 				showmodel [ lindex $ldn $result ]
 			} else { 
 				set choiceSM 1
-				destroytop .l
 			} 
 		}
 		$m add command -label "New Model/Group..." -underline 0  -accelerator Insert -command { 
-			destroytop .l
 			set memory 0
 			set choiceSM 14
 		} 
 		$m add command -label Quit -underline 0 -accelerator Escape -command {
 			set result -1
-			destroytop .l
 			set memory 0
 			set choiceSM 2 
 		}
@@ -154,7 +146,7 @@ proc showmodel pippo {
 		pack .l.l.tit -anchor w
 
 		scrollbar .l.l.vs -command ".l.l.l yview"
-		listbox .l.l.l -height 15 -width 30 -yscroll ".l.l.vs set" -selectmode single
+		listbox .l.l.l -height 15 -width 30 -yscroll ".l.l.vs set" -selectmode browse
 		mouse_wheel .l.l.l
 		pack .l.l.vs -side right -fill y
 		pack .l.l.l -expand yes -fill both
@@ -190,19 +182,24 @@ proc showmodel pippo {
 		bind .l <Escape> { .l.m.file invoke 2 }
 		bind .l <Insert> { .l.m.file invoke 1 }
 		bind .l <Return> { .l.m.file invoke 0 }
-		bind .l.l.l <Double-1> { .l.m.file invoke 0 } 
+		
+		bind .l.l.l <Double-Button-1> { set dblclk 1; .l.m.file invoke 0 } 
 
-		bind .l.l.l <1> {
-			.l.l.l selection clear 0 end
-			.l.l.l selection set [ .l.l.l nearest %y ]
-			set app [ .l.l.l curselection ]
-			.l.t.text conf -state normal
-			.l.t.text delete 0.0 end
-			.l.t.text insert end "[ lindex $lmd $app ]"
-			.l.t.text conf -state disable
+		bind .l.l.l <Button-1> {
+			set dblclk 0
+			after 200
+			if { ! $dblclk } {
+				.l.l.l selection clear 0 end
+				.l.l.l selection set [ .l.l.l nearest %y ]
+				set app [ .l.l.l curselection ]
+				.l.t.text conf -state normal
+				.l.t.text delete 0.0 end
+				.l.t.text insert end "[ lindex $lmd $app ]"
+				.l.t.text conf -state disable
+			}
 		}
 		
-		bind .l.l.l <2> {
+		bind .l.l.l <Button-2> {
 			.l.l.l selection clear 0 end
 			.l.l.l selection set [ .l.l.l nearest %y ]
 			if { ! [ catch { set name [ selection get ] } ] } {
@@ -222,7 +219,7 @@ proc showmodel pippo {
 			tk_popup .l.l.l.m %X %Y
 		}
 		
-		bind .l.l.l <3> {
+		bind .l.l.l <Button-3> {
 			event generate .l.l.l <2> -x %x -y %y 
 		}
 		
