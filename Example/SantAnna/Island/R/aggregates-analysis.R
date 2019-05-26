@@ -864,11 +864,11 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
   # remove unused stats space
   numStats <- stat
   stat <- stat + 1
-  statsTb <- statsTb[ - ( stat : 99 ), , ]
-  statsBp <- statsBp[ - ( stat : 99 ), , ]
-  n <- n[ - ( stat : 99 ), ]
-  conf <- conf[ - ( stat : 99 ), , ]
-  out <- out[ - ( stat : 99 ), ]
+  statsTb <- statsTb[ - ( stat : 99 ), , , drop = FALSE ]
+  statsBp <- statsBp[ - ( stat : 99 ), , , drop = FALSE ]
+  n <- n[ - ( stat : 99 ), , drop = FALSE ]
+  conf <- conf[ - ( stat : 99 ), , , drop = FALSE ]
+  out <- out[ - ( stat : 99 ), , drop = FALSE ]
   rm( temp, x )
 
 
