@@ -884,10 +884,10 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
   for( stat in 1 : numStats ) {
 
     # find max/mins for all experiments
-    LowLim <- Inf
+    lowLim <- Inf
     upLim <- -Inf
     for( k in 1 : nExp ) {
-      if( conf[ stat, 1, k ] < LowLim )
+      if( conf[ stat, 1, k ] < lowLim )
         lowLim <- conf[ stat, 1, k ]
       if( conf[ stat, 2, k ] > upLim )
         upLim <- conf[ stat, 2, k ]
@@ -912,8 +912,15 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
       }
     }
 
-    listBp <- list( stats = statsBp[ stat, , ], n = n[ stat, ], conf = conf[ stat, , ],
-                    out = outVal, group = outGrp, names = legends )
+    if ( nExp > 1 )
+      listBp <- list( stats = statsBp[ stat, , ], n = n[ stat, ], conf = conf[ stat, , ],
+                      out = outVal, group = outGrp, names = legends )
+    else
+      listBp <- list( stats = matrix( statsBp[ stat, , ] ),
+                      n = matrix( n[ stat, ] ),
+                      conf = matrix( conf[ stat, , ] ),
+                      out = outVal, group = outGrp, names = legends )
+
     title <- names[[ stat ]]
     subTitle <- as.expression(bquote(paste( "( bar: median / box: 2nd-3rd quartile / whiskers: max-min / points: outliers / MC runs = ",
                                             .(nSize), " / period = ", .(warmUpStat), " - ", .(nTsteps), " )" ) ) )
@@ -929,7 +936,7 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
 
     # Create 2D stats table and performance comparison table
 
-    for(k in 2 : nExp){
+    for( k in 2 : nExp ){
 
       # Stats table
       table.stats <- cbind( table.stats, statsTb[ , , k ] )
