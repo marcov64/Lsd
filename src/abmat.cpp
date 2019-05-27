@@ -30,6 +30,16 @@
       Cond  : A set of two micro variables. The subject and a factorial
         indicator (that basically subsets the micro variables). Distribution
         statistics are saved for each timestep for ich subset.
+      Fact  : Sometimes one might also only be interested in the way a factorial
+              distribution changes. The factorial can thus also be invoked 
+              itself. It is possible to cheat by providing a negative value, 
+              this will endogenise the behaviour with unchecked consequences.
+              Note: In general positive (incl. 0) values from 0 to 999 are ok.
+              
+              
+      Note: For Factorials (also if from Cond) the factors need to be provided
+        from the beginning. The reason is that otherwise a consistent attribution
+        over time is not possible.
 
     Macro and Comp variables need to survive the complete simulation.
     Micro and Cond variables may "die"
@@ -254,17 +264,23 @@ const char* abmat_varname_convert(const char* lab)
     - var2lab
     -
 ********************************************/
+std::string get_abmat_varname_fact( const char* condlab)
+{
+    return get_abmat_varname(a_fact, condlab, "", "", 0, true);
+}
+
+
 std::string get_abmat_varname_fact( const char* condlab, const int condVal)
 {
-    return get_abmat_varname(a_fact, condlab, "", "", condVal);
+    return get_abmat_varname(a_fact, condlab, "", "", condVal, false);
 }
 
 std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab)
 {
-    return get_abmat_varname(a_comp, var1lab, "", var2lab, 0);
+    return get_abmat_varname(a_comp, var1lab, "", var2lab, 0, false);
 }
 
-std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname, const char* var2lab, const int condVal)
+std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname, const char* var2lab, const int condVal, bool flag_fact_n)
 {
     std::string varname( abmat_varname_convert(var1lab) );
     //Add 2nd var
@@ -280,6 +296,7 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
             varname.append("_c_");
             varname.append( abmat_varname_convert(var2lab) );
         case a_fact: //factorial share info.
+            if (!flag_fact_n){
             varname.append("=");
             if (condVal < 0 || condVal > 999) {
                 error_hard( __DEV_ERR_INFO__, "conditional value is wrong",
@@ -288,6 +305,7 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
                 return "";
             }
             varname.append( std::to_string( condVal ) );
+            }
             break;
         default: //irrelevant
             error_hard( __DEV_ERR_INFO__, "defaulting should not happen",
@@ -306,7 +324,10 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
         case a_macro:
             break;
         case a_fact:
-            varname.append("_shr"); //share in 0,1
+            if (flag_fact_n)
+                varname.append("_tot"); //share in 0,1
+            else
+                varname.append("_shr"); //share in 0,1
     }
     return varname; //.c_str();
 }
@@ -627,11 +648,17 @@ bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char*
     Add the abmat objects for the variable varlab of type type. if type is
     cond or comp, var2lab is the reference variable (in the same object).
 
-    issue: Map for objects (no more unique labs!)
+    Base Types: Micro, Macro, Factorials
+    Dependent Types: Conditional (Micro + Factorial) & Comparative (Macro vs Macro)
 
-    for macro and comp
 ********************************************/
-void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab)
+void add_abmat_object(std::string abmat_type, char const* varlab, const std::set<int> factors)
+{
+    add_abmat_object(abmat_type,varlab, "", factors);
+}
+
+
+void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab, const std::set<int> factors)
 {
     Tabmat type;
     if (abmat_type.find("micro") != std::string::npos ) {
@@ -639,6 +666,9 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
     }
     else if (abmat_type.find("macro") != std::string::npos ) {
         type = a_macro;
+    }
+    else if (abmat_type.find("fact") != std::string::npos ) {
+        type = a_fact;
     }
     else if (abmat_type.find("cond") != std::string::npos ) {
         type = a_cond;
@@ -653,15 +683,34 @@ void add_abmat_object(std::string abmat_type, char const* varlab, char const* va
                     true );
         return;
     }
-    add_abmat_object(type, varlab, var2lab);
+    add_abmat_object(type, varlab, var2lab, factors);
 }
 
 
-void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
+void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab, const std::set<int> factors)
 {
     //check if the abmat object associated to the variable
     //exists. Note: It may be included in multiple categories
     //so we check on category level.
+    
+    //a factor needs factors.
+    if (type == a_fact && factors.size()==0 ) {
+        error_hard( __DEV_ERR_INFO__, "A factor needs factors.",
+                    "Check your code to prevent this error.",
+                    true );
+    }
+    
+    if (type == a_cond ) {
+        //Check that factorial is defined!
+        object* oFact = NULL;
+        oFact = abmat->search_local(lfact);
+        if (oFact != NULL)
+            oFact = oFact->search_local(var2lab);
+        if (oFact == NULL){
+            printf(msg,"You need to define the variable %s as factortial variable first");
+            error_hard( __DEV_ERR_INFO__, msg, "Check your code.");
+        }
+    }
 
     //first check if the variable varLab exists in the model.
     if (root->search_var(root, varlab) == NULL) {
@@ -691,6 +740,9 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
             typeLab = lmacro; //treat as two linked macro variables
             break;
 
+        case a_fact:
+            typeLab = lfact;
+
         default: //checked already
             break;
     }
@@ -714,10 +766,10 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
         }
     }
 
-    //add the objects
+    //add the variable objects
     bool var1_added = false;
     bool var2_added = false;
-    if (type == a_micro || type == a_macro || type == a_comp) {
+    if (type == a_micro || type == a_macro || type == a_comp || type == a_fact ) {
         //Add the variable as an object to the category
         oVar = parent->search_local(varlab);
         if (oVar == NULL) {
@@ -729,12 +781,19 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
             plog(oVar->label);
             var1_added = true;
         }
+        
+        if (type == a_fact){
+            m_abmat_conditions[oVar->label]; //create placeholder.
+        }
 
         //Comparative vars as pair of macro vars, linked via hooks (single direction)
-        if (type == a_comp) {
+        if (type == a_comp || type == a_cond) {
             var2_added = true;
             //add 2nd as macro via recursive call.
-            add_abmat_object(a_macro, var2lab);
+            if (type == a_comp)
+                add_abmat_object(a_macro, var2lab);
+            if (type == a_cond)
+                add_abmat_object(a_fact, var2lab);
 
             oVar2 = parent->search_local(var2lab);
             if (oVar2 == NULL) {
@@ -752,7 +811,7 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
             if (false == hook_exists) {
                 try {
                     oVar->hooks.push_back(oVar2); //check for integretiy with o_vecT
-                    plog("\nAdded link for comparison of variable ");
+                    plog("\nAdded link for comparison/factorial of variable ");
                     plog(oVar->label);
                     plog(" with variable ");
                     plog(oVar2->label);
@@ -762,8 +821,12 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
         }
 
     }
-    else if (type == a_cond) {
-        //In case we have type cond, we add the variables within the
+       
+    
+    else if (false && type == a_cond) {
+        //In case we have type cond, we add the variables for each cond value
+        
+        //within the
         //respective subgroups cond and fact and hook the first one
         //to its conditioning factor, using the hooks (there may be several
         //factors for each variable)
@@ -805,16 +868,57 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
         }
     }
 
-    // Add the variables
+    // Add the single variables
     switch (type) {
+        
+        case a_fact: if (var1_added) { 
+            
+                //each factorial is treated as a macro variable, holding the share of items as information, and the total number.
+                std::string var1lab = get_abmat_varname_fact( oVar->label );
+                variable* fracVar = oVar->search_var_local(var1lab.c_str());
+                if (fracVar != NULL) {
+                    error_hard(__DEV_ERR_INFO__,"The factorial exists already.","Check your code...", true);
+                    return;
+                }
+                abmat_add_var(oVar, var1lab.c_str()); //total
+                
+                for (auto factor : factors) {
+                    var1lab = get_abmat_varname_fact( oVar->label, factor );
+                    abmat_add_var(oVar, var1lab.c_str()); //share of each factor
+                    m_abmat_conditions[oVar->label].insert(factor); //add to map
+                }
+                    
+            } break;
+        
+        case a_cond: if (var2_added) {
+                //the top objects for the unique pair variable and conditioning
+                //variable exist. The rest is dynamically checked/produced
+                //in the update procedure
+                try{
+                
+                for (auto factor : m_abmat_conditions.at(oVar2->label) ){
+                
+                        auto stats_template = abmat_stats( ); //retrieve map of stats
+                        for (auto& elem : stats_template) {   //create a variable for each statistic
+                            std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first.c_str(), oVar2->label, factor );
+                            abmat_add_var(oVar, nvarLab.c_str());
+                        }
+                    }
+                }
+                    
+                 CatchAll("Check the creation of factorials");
+                
+            }
+            //each cond is also treated as non-cond micro.    
+        
         case a_micro:
-            if (var1_added == true) {
+            if (var1_added){
                 auto stats_template = abmat_stats( ); //retrieve map of stats
                 //create a variable for each statistic
                 for (auto& elem : stats_template) {
                     // plog("\n");
                     // plog(oVar->label);
-                    std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first.c_str());
+                    std::string nvarLab = get_abmat_varname ( a_micro, oVar->label, elem.first.c_str());
                     // plog(" : ");
                     // plog(nvarLab.c_str());
                     abmat_add_var(oVar, nvarLab.c_str());
@@ -822,25 +926,15 @@ void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab)
             }
             break;
 
-        case a_comp: //borther done already in the additional recursive call.
+        case a_comp: //brother done already in the additional recursive call.
         case a_macro:
-            if (var1_added == true) {
+            if (var1_added){
                 //a macro object holds a variable with the same name, maybe shortened.
                 std::string nvarLab = get_abmat_varname(a_macro, oVar->label); //name is same as original, shortened
                 abmat_add_var(oVar, nvarLab.c_str());
             }
             break;
-
-
-        case a_cond: {
-                //the top objects for the unique pair variable and conditioning
-                //variable exist. The rest is dynamically checked/produced
-                //in the update procedure
-            }
-            break;
-
-        case a_fact:
-            error_hard(__DEV_ERR_INFO__, "This should not be reached.", "Contact the developers", true);
+       
     }
 
     //visualise the added variables.
@@ -977,13 +1071,13 @@ void abmat_write(object* oVar, char const* lab, double value)
                     "contact the developers", true );
         return;
     }
-    
+
     if (cv->last_update >= t) {
         error_hard( __DEV_ERR_INFO__, "Called at least twice at the same time!", "Contact the developer", true);
         return;
     }
-        
-    
+
+
     if (!(cv->abmat)) {
         error_hard( __DEV_ERR_INFO__, "Using special abmat procedure on non-abmat variable.", "Contact the developer", true);
         return;
@@ -1125,14 +1219,14 @@ void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
         switch (type) {
 
             case a_macro:
-            
+
                 //comparative stuff
                 for (auto oVar : vVar->up->hooks) {
                     plog("\nchecking comparative variables");
-                    
+
                     if (oVar->v == NULL)
                         error_hard(__DEV_ERR_INFO__, "There is no variable in the abmat comparative object.", "Contact the developers");
-                    
+
                     variable* cVar = oVar->v;//careful! As long as we keep that there is but a single macro (copy) object this is save.
                     auto data2 = cVar->copy_data( interval.first, interval.second);
                     auto cstats = abmat_compare(data, data2);
@@ -1259,7 +1353,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
                 //simply copy the current data.
                 double val = root->cal(NULL, oVar->label, 0);
                 std::string varlab = get_abmat_varname(type, oVar->label);
-                abmat_write(oVar, varlab.c_str(), val);                
+                abmat_write(oVar, varlab.c_str(), val);
             }
             break;
 
@@ -1322,7 +1416,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
                     }
 
                     //update variables
-                    abmat_write(oVar2, var2lab.c_str(), fraction);                    
+                    abmat_write(oVar2, var2lab.c_str(), fraction);
                     auto stats = abmat_stats(subset.second);
                     for (auto& stat : stats) {
                         std::string nvarLab = get_abmat_varname ( type, oVar->label, stat.first.c_str(), oVar2->label, subset.first );

@@ -15,6 +15,7 @@ EQUATION("INI")
     ABMAT_ADD_VARIABLE("micro","c");
     ABMAT_ADD_VARIABLE("micro","d1");
     ABMAT_ADD_VARIABLE("micro","d2");
+    ABMAT_ADD_VARIABLE("fact","b2",{1,2,3,4,5});
     ABMAT_ADD_VARIABLE("comp","a","aa");
     ABMAT_ADD_VARIABLE("cond","b","b2");
 

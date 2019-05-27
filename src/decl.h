@@ -1038,11 +1038,13 @@ void abmat_init( void );
 
 void plog_stats(ms_statsT const& stats, const char* title = "");
 void plog_object_tree_up(object*, bool plotVars = false);
+std::string get_abmat_varname_fact( const char* condlab);
 std::string get_abmat_varname_fact( const char* condlab, const int condVal);
 std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab);
-std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1);
-void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab = NULL);
-void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL);
+std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1, bool flag_fact_n=false);
+void add_abmat_object(std::string abmat_type, char const* varlab, const std::set<int> factors);
+void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab = NULL, const std::set<int> factors = std::set<int>());
+void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL, const std::set<int> factors = std::set<int>());
 void abmat_update();
 abmat_total_stats abmat_total();
 template <typename FuncType>
