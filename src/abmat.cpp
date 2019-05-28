@@ -158,10 +158,10 @@ void abmat_init()
 
 //Constants for labels and text output
 
-const char* lmicro = "*micro";
-const char* lmacro = "*macro";
-const char* lcond = "*cond"; //conditional on factor
-const char* lfact = "*fact"; //factor
+const char* lmicro = "micro";
+const char* lmacro = "macro";
+const char* lcond = "cond"; //conditional on factor
+const char* lfact = "fact"; //factor
 
 const char* astat_n = "n";
 const char* astat_min = "min";
