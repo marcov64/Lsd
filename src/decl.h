@@ -81,6 +81,7 @@ const char* dev_err_info(const char* func, const char* file, int line);
 #include <new>
 #include <map>
 #include <set>
+#include <cctype>
 
 #ifdef CPP11
 #include <vector>
@@ -1042,9 +1043,8 @@ std::string get_abmat_varname_fact( const char* condlab);
 std::string get_abmat_varname_fact( const char* condlab, const int condVal);
 std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1, bool flag_fact_n=false);
-void add_abmat_object(std::string abmat_type, char const* varlab, const std::set<int> factors);
-void add_abmat_object(Tabmat type, char const* varlab, char const* var2lab = NULL, const std::set<int> factors = std::set<int>());
-void add_abmat_object(std::string abmat_type, char const* varlab, char const* var2lab = NULL, const std::set<int> factors = std::set<int>());
+void add_abmat_object(std::string abmat_type, std::string varlab, std::string varlab2="");
+void add_abmat_object_intern(Tabmat type, char const* varlab, char const* var2lab = "", const std::set<int> factors = std::set<int>());
 void abmat_update();
 abmat_total_stats abmat_total();
 template <typename FuncType>
@@ -1056,6 +1056,7 @@ void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars);
 Tabmat abmat_vVar_type(variable* vVar);
 Tabmat abmat_oVar_type(object* oVar);
 Tabmat abmat_toVar_type(object* toVar);
+std::set<int> stringOfIntsToSet(string str="");
 
 variable* abmat_add_var(object* parent, char const* lab);
 void abmat_alloc_save_mem_var(variable* cv);

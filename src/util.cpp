@@ -1404,18 +1404,18 @@ char* upload_eqfile( void )
 
 // void result::title_abmat( int flag )
 // {
-    // if ( total_stats.empty() )
-        // total_stats = abmat_total(); //initialise
+// if ( total_stats.empty() )
+// total_stats = abmat_total(); //initialise
 
-    // title( abmat, flag, true);
+// title( abmat, flag, true);
 // }
 
 // void result::data_abmat( void )
 // {
-    // if (total_stats.empty())
-        // total_stats = abmat_total(); //initialise
+// if (total_stats.empty())
+// total_stats = abmat_total(); //initialise
 
-    // data( abmat, t, 0, true);
+// data( abmat, t, 0, true);
 // }
 
 //Write single datum
@@ -1500,7 +1500,7 @@ void result::write_title(const char* label, const char* lab_tit, bool single, bo
 // saves data to file in the specified period
 void result::data( object* root, int initstep, int endtstep )
 {
-    
+
     if (switch_abmat && total_stats.empty())
         total_stats = abmat_total(); //initialise
 
@@ -1543,7 +1543,7 @@ void result::data_recursive( object* r, int i )
     object* cur;
     variable* cv;
 
-    for ( cv = r->v; cv != NULL; cv = cv->next ) {        
+    for ( cv = r->v; cv != NULL; cv = cv->next ) {
 
         if ( cv->save == 1 ) {
             if ( cv->start <= i && cv->end >= i ) {
@@ -1585,11 +1585,11 @@ void result::data_recursive( object* r, int i )
 // saves header to file
 void result::title( object* root, int flag )
 {
-    
+
     if ( switch_abmat && total_stats.empty() )
         total_stats = abmat_total(); //initialise
-    
-    
+
+
     firstCol = true;
 
     title_recursive( root, flag );		// output header
@@ -1607,7 +1607,7 @@ void result::title_recursive( object* r, int header )
 {
     if (switch_abmat) {
         for ( auto const& item : total_stats.total_stats ) {
-            write_title_abmat(item.first.c_str(),"ABMAT");
+            write_title_abmat(item.first.c_str(), "ABMAT");
             firstCol = false; //to do: consider in abmat tot data..
         }
         return; //process only abmat items.
@@ -3662,4 +3662,134 @@ const char* dev_err_info(const char* func, const char* file, int line)
     errmsg += " in line ";
     errmsg += std::to_string(line);
     return errmsg.c_str();
+}
+std::set<int> stringOfIntsToSet(std::string str)
+{
+    std::set<int> out;
+    std::string buffer;
+    try {
+        for (auto sub : str) {
+            if (isdigit( static_cast<int> (sub) ) )
+                buffer += sub;
+            else if (buffer.size()>0){
+                out.insert(stoi(buffer.c_str()));
+                buffer.clear();
+            }
+        }
+        if (buffer.size() > 0)
+            out.insert(stoi(buffer.c_str()));
+    }
+    CatchAll("Wrong input in string of strings");
+    return out;
+}
+
+// std::set<int> stringOfIntsToSet(string str)
+// {
+    // plog("\n Items in are: ");
+    // plog(str.c_str());
+    
+    
+    // std::set<int> out;
+    // //by character
+    // std::string buffer;
+    // try {
+        // for (auto sub : str) {
+            // if (isdigit( static_cast<int> (sub) ) )
+                // buffer += sub;
+            // else if (buffer.size()>0){
+                // try {
+                // out.insert(stoi(buffer.c_str()));
+                // buffer.clear();
+                // } CatchAll("Conversion error");
+            // }
+        // }
+        // if (buffer.size() > 0) {
+        // try {    
+            // out.insert(stoi(buffer.c_str()));
+        // } CatchAll("Uups");
+        // }
+
+    // }
+    // CatchAll("Wrong input in string of strings");
+    // plog("\n Items out are: ");
+    // for (auto item : out) {
+        // plog(std::to_string(item).c_str());
+        // plog(",");
+    // }
+    // return out;
+// }
+
+
+
+// from: https://stackoverflow.com/a/6089413/3895476
+// A getstream that works on windows and linux and mac files EOL chars.
+//added deliminator option.
+std::istream& safeGetline(std::istream& is, std::string& t)
+{
+    t.clear();
+
+    // The characters in the stream are read one-by-one using a std::streambuf.
+    // That is faster than reading them one-by-one using the std::istream.
+    // Code that uses streambuf this way must be guarded by a sentry object.
+    // The sentry object performs various tasks,
+    // such as thread synchronization and updating the stream state.
+
+    std::istream::sentry se(is, true);
+    std::streambuf* sb = is.rdbuf();
+
+    for(;;) {
+        int c = sb->sbumpc();
+        switch (c) {
+            case '\n':
+                return is;
+            case '\r':
+                if(sb->sgetc() == '\n')
+                    sb->sbumpc();
+                return is;
+            case EOF:
+                // Also handle the case when the last line has no line ending
+                if(t.empty())
+                    is.setstate(std::ios::eofbit);
+                return is;
+            default:
+                t += (char)c;
+        }
+    }
+}
+
+std::istream& safeGetline(std::istream& is, std::string& t, char delim)
+{
+    t.clear();
+
+    // The characters in the stream are read one-by-one using a std::streambuf.
+    // That is faster than reading them one-by-one using the std::istream.
+    // Code that uses streambuf this way must be guarded by a sentry object.
+    // The sentry object performs various tasks,
+    // such as thread synchronization and updating the stream state.
+
+    std::istream::sentry se(is, true);
+    std::streambuf* sb = is.rdbuf();
+    //       int int_delim = bitset<8>delim; //only a single deliminator allowed.
+    const int delim_ = delim;
+    for(;;) {
+        int c = sb->sbumpc();
+        if (c == delim_)
+            return is;
+        switch (c) {
+
+            case '\n':
+                return is;
+            case '\r':
+                if(sb->sgetc() == '\n')
+                    sb->sbumpc();
+                return is;
+            case EOF:
+                // Also handle the case when the last line has no line ending
+                if(t.empty())
+                    is.setstate(std::ios::eofbit);
+                return is;
+            default:
+                t += (char)c;
+        }
+    }
 }
