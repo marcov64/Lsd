@@ -89,7 +89,7 @@ Object: C C	3	3	3
 Param: id_C 0 n + n n	11	12	13	21	22	23	31	32	33
 Var: c 0 n + n n
 
-SIM_NUM 3
+SIM_NUM 1
 SEED 1
 MAX_STEP 9
 EQUATION fun_newmodel.cpp
@@ -121,6 +121,8 @@ END_DESCRIPTION
 
 Variable_INI
 (no description available)
+_INIT_
+
 END_DESCRIPTION
 
 Object_A

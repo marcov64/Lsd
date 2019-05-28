@@ -11,7 +11,7 @@ MODELBEGIN
 
 EQUATION("INI")
 
-		ABMAT_ADD_VARIABLE("fact","b2","{1,2,3,4,5}erfwgrwg44");
+		ABMAT_ADD_VARIABLE("fact","b2","{1,4,5}erfwgrwg44");
     ABMAT_ADD_VARIABLE("micro","b");
     ABMAT_ADD_VARIABLE("micro","c");
     ABMAT_ADD_VARIABLE("micro","d1");

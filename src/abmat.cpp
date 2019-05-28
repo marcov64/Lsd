@@ -41,6 +41,12 @@
         from the beginning. The reason is that otherwise a consistent attribution
         over time is not possible.
 
+      You can define a switch to allow automatic handling of factors, but this
+        is currently not handled in the totals file. The problem is that each
+        a changing number of variables is associated with this behaviour, which
+        leads to an exception (the file format is static).
+      '#define ABMAT_DYNAMIC_FACTORS'
+
     Macro and Comp variables need to survive the complete simulation.
     Micro and Cond variables may "die"
 
@@ -150,6 +156,7 @@ void abmat_init()
     abmat_series_saved = 0;
 }
 
+//Constants for labels and text output
 
 const char* lmicro = "*micro";
 const char* lmacro = "*macro";
@@ -760,92 +767,44 @@ void add_abmat_object_intern(Tabmat type, char const* varlab, char const* var2la
     //add the variable objects
     bool var1_added = false;
     bool var2_added = false;
-    if ( true || type == a_micro || type == a_macro || type == a_comp || type == a_fact ) {
-        //Add the variable as an object to the category
+
+    //Add the variable as an object to the category
+    oVar = parent->search_local(varlab);
+    if (oVar == NULL) {
+        //a factor needs factors.
+        if (type == a_fact && factors.size() == 0 ) {
+            error_hard( __DEV_ERR_INFO__, "A factor needs factors.",
+                        "Check your code to prevent this error.",
+                        true );
+        }
+        parent->add_obj(varlab, 1, false);
         oVar = parent->search_local(varlab);
-        if (oVar == NULL) {
-            //a factor needs factors.
-            if (type == a_fact && factors.size() == 0 ) {
-                error_hard( __DEV_ERR_INFO__, "A factor needs factors.",
-                            "Check your code to prevent this error.",
-                            true );
-            }
-            parent->add_obj(varlab, 1, false);
-            oVar = parent->search_local(varlab);
-            plog("\nAdded object of type ");
-            plog(typeLab);
-            plog(" with name ");
-            plog(oVar->label);
-            var1_added = true;
-        }
-
-        if (type == a_fact) {
-            m_abmat_conditions[oVar->label]; //create placeholder.
-        }
-
-        //Comparative vars as pair of macro vars, linked via hooks (single direction)
-        if (type == a_comp || type == a_cond) {
-            var2_added = true;
-            //add 2nd as macro via recursive call.
-            if (type == a_comp)
-                add_abmat_object_intern(a_macro, var2lab);
-            if (type == a_cond)
-                add_abmat_object_intern(a_fact, var2lab);
-
-            oVar2 = parent->up->search(var2lab);
-            if (oVar2 == NULL) {
-                error_hard(__DEV_ERR_INFO__, "The variable should exist.", "Contact the developer", true);
-                return;
-            }
-            //Add hook from var1 to var2, if not exists.
-            bool hook_exists = false;
-            for (auto& h : oVar->hooks) {
-                if (h == oVar2) {
-                    hook_exists = true;
-                    break;
-                }
-            }
-            if (false == hook_exists) {
-                try {
-                    oVar->hooks.push_back(oVar2); //check for integretiy with o_vecT
-                    plog("\nAdded link for comparison/factorial of variable ");
-                    plog(oVar->label);
-                    plog(" with variable ");
-                    plog(oVar2->label);
-                }
-                CatchAll("Check if the type o_vecT changed!");
-            }
-        }
-
+        plog("\n(ABMAT) : Added object of type ");
+        plog(typeLab);
+        plog(" with name ");
+        plog(oVar->label);
+        var1_added = true;
     }
 
+    if (type == a_fact) {
+        m_abmat_conditions[oVar->label]; //create placeholder.
+    }
 
-    else if (false && type == a_cond) {
-        //In case we have type cond, we add the variables for each cond value
+    //Comparative vars as pair of macro vars, linked via hooks (single direction)
+    if (type == a_comp || type == a_cond) {
+        var2_added = true;
+        //add 2nd as macro via recursive call.
+        if (type == a_comp)
+            add_abmat_object_intern(a_macro, var2lab);
+        if (type == a_cond)
+            add_abmat_object_intern(a_fact, var2lab);
 
-        //within the
-        //respective subgroups cond and fact and hook the first one
-        //to its conditioning factor, using the hooks (there may be several
-        //factors for each variable)
-
-
-        //check if the first variable exists or create it
-        // oVar = oFirst->search_local(varlab);#
-        oVar = parent->search_local(varlab);
-        if (oVar == NULL) {
-            parent->add_obj(varlab, 1, false);
-            oVar = parent->search_local(varlab);
-        }
-
-        oVar2 = fparent->search_local(var2lab);
+        oVar2 = parent->up->search(var2lab);
         if (oVar2 == NULL) {
-            fparent->add_obj(var2lab, 1, false);
-            oVar2 = fparent->search_local(var2lab);
-            //add set with all past conditions.
-            m_abmat_conditions[oVar2->label]; //create placeholder.
-            //do not use var2lab, \0 missing!
+            error_hard(__DEV_ERR_INFO__, "The variable should exist.", "Contact the developer", true);
+            return;
         }
-
+        //Add hook from var1 to var2, if not exists.
         bool hook_exists = false;
         for (auto& h : oVar->hooks) {
             if (h == oVar2) {
@@ -853,15 +812,15 @@ void add_abmat_object_intern(Tabmat type, char const* varlab, char const* var2la
                 break;
             }
         }
-        //alt: oVar->hooks.count(oVar2)>0
-
         if (false == hook_exists) {
             try {
-                oVar->hooks.push_back(oVar2);
-                oVar2->hooks.push_back(oVar);
+                oVar->hooks.push_back(oVar2); //check for integretiy with o_vecT
+                plog("\n(ABMAT) : Added link for comparison/factorial of variable ");
+                plog(oVar->label);
+                plog(" with variable ");
+                plog(oVar2->label);
             }
             CatchAll("Check if the type o_vecT changed!");
-            var1_added = var2_added = true; //new unique combination
         }
     }
 
@@ -915,7 +874,7 @@ void add_abmat_object_intern(Tabmat type, char const* varlab, char const* var2la
                 auto stats_template = abmat_stats( ); //retrieve map of stats
                 //create a variable for each statistic
                 for (auto& elem : stats_template) {
-                    // plog("\n");
+                    // plog("\n(ABMAT) : ");
                     // plog(oVar->label);
                     std::string nvarLab = get_abmat_varname ( a_micro, oVar->label, elem.first.c_str());
                     // plog(" : ");
@@ -936,14 +895,14 @@ void add_abmat_object_intern(Tabmat type, char const* varlab, char const* var2la
 
     }
 
-    //visualise the added variables.
-    plog("\n---- Added new variables to abmat ---");
-    if (var1_added)
-        plog_object_tree_up(oVar);
-    if (var2_added)
-        plog_object_tree_up(oVar2);
-    plog("\n--------------------------------------\n");
-    //Add ,,,
+    // //visualise the added variables.
+    // plog("\n(ABMAT) : ---- Added new variables to abmat ---");
+    // if (var1_added)
+    // plog_object_tree_up(oVar);
+    // if (var2_added)
+    // plog_object_tree_up(oVar2);
+    // plog("\n(ABMAT) : --------------------------------------\n");
+    // //Add ,,,
 }
 
 /********************************************************
@@ -998,20 +957,20 @@ void abmat_alloc_save_mem_var(variable* cv)
 ******************************************************/
 void plog_stats(ms_statsT const& stats, const char* title)
 {
-    plog("\n");
+    plog("\n(ABMAT) : ");
     if (strlen(title) > 0) {
         plog("ABMAT Stats for ");
         plog(title);
-        plog("\n-------------------------------\n");
+        plog("\n(ABMAT) : -------------------------------\n");
     }
     int i = 0;
     for (auto const& item : stats) {
         plog(item.first.c_str());
         plog("\t");
         plog(std::to_string(item.second).c_str());
-        plog("\n");
+        plog("\n(ABMAT) : ");
         if (i++ > 100) {
-            plog("\n ... more than 100.");
+            plog("\n(ABMAT) :  ... more than 100.");
             break;
         }
     }
@@ -1082,8 +1041,6 @@ void abmat_write(object* oVar, char const* lab, double value)
         return;
     }
 
-
-
     cv->val[ 0 ] = value; //current value
     cv->last_update = t;
     cv->data[ t ] = value; //Basically manipulate the track record.
@@ -1147,10 +1104,10 @@ ms_statsT const& abmat_total_stats::operator()() const
 void abmat_total_stats::operator()(object* oVar, Tabmat type)
 {
     for (variable* cv = oVar->v ; cv != NULL; cv = cv->next) {
-        // plog("\nAdding ");plog(cv->label);
-        // plog("\nsize before :");plog(std::to_string(total_stats.size()).c_str());
+        // plog("\n(ABMAT) : Adding ");plog(cv->label);
+        // plog("\n(ABMAT) : size before :");plog(std::to_string(total_stats.size()).c_str());
         abmat_scalars(cv, type, total_stats);
-        // plog("\nsize after :");plog(std::to_string(total_stats.size()).c_str());
+        // plog("\n(ABMAT) : size after :");plog(std::to_string(total_stats.size()).c_str());
     }
 }
 
@@ -1181,14 +1138,14 @@ std::string abmat_varname_tot(std::string base, int interval, std::string stat)
 
 ms_statsT abmat_scalars(variable* vVar)
 {
-    plog("\nCopy Version 1");
+    plog("\n(ABMAT) : Copy Version 1");
     Tabmat type = abmat_vVar_type(vVar);
     return abmat_scalars(vVar, type);
 }
 
 ms_statsT abmat_scalars(variable* vVar, Tabmat type)
 {
-    plog("\nCopy Version 2");
+    plog("\n(ABMAT) : Copy Version 2");
     ms_statsT scalars;
     abmat_scalars(vVar, type, scalars);
     return scalars;
@@ -1197,13 +1154,13 @@ ms_statsT abmat_scalars(variable* vVar, Tabmat type)
 
 void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
 {
-    // plog("\nReference Version");
+    // plog("\n(ABMAT) : Reference Version");
     bool defInterval = false;
     if (s_abmat_intervals.size() == 0) {
         s_abmat_intervals.emplace(1, t); //add interval
         defInterval = true;
     }
-    // plog("\nCalled abmat_scalars for variable ");plog(vVar->label);
+    // plog("\n(ABMAT) : Called abmat_scalars for variable ");plog(vVar->label);
     // plog("with ");plog(std::to_string(s_abmat_intervals.size()).c_str());plog(" intervals");
 
     int i = -1;
@@ -1221,7 +1178,7 @@ void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
 
                 //comparative stuff
                 for (auto oVar : vVar->up->hooks) {
-                    plog("\nchecking comparative variables");
+                    plog("\n(ABMAT) : checking comparative variables");
 
                     if (oVar->v == NULL)
                         error_hard(__DEV_ERR_INFO__, "There is no variable in the abmat comparative object.", "Contact the developers");
@@ -1254,7 +1211,7 @@ void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
         // plog_stats(stats, "Comp var 1");
         for (auto& stat : stats) {
             if (stat.second == NAN)
-                plog("\ndebug");
+                plog("\n(ABMAT) : debug");
             auto vname = abmat_varname_tot(vVar->label, i, stat.first);
             scalars.emplace(vname, stat.second); // [vname] = stat.second;
         }
@@ -1337,9 +1294,9 @@ void abmat_update_variable(object* oVar, Tabmat type)
                 //save data
 
                 //visualise the added variables.
-                // plog("\n---- Prep to write data ---");
+                // plog("\n(ABMAT) : ---- Prep to write data ---");
                 // plog_object_tree_up(oVar);
-                // plog("\n---");
+                // plog("\n(ABMAT) : ---");
 
                 for (auto& elem : stats_template) {
                     std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first.c_str());
@@ -1364,12 +1321,10 @@ void abmat_update_variable(object* oVar, Tabmat type)
 
                 //create set and copy information of previous sets.
                 std::map < int, std::vector<double> > cond_vData_map;
-                try {
-                    for (auto& element : m_abmat_conditions.at(oVar2->label) ) {
-                        cond_vData_map[element]; //create empty set
-                    }
+                for (auto& element : m_abmat_conditions.at(oVar2->label) ) {
+                    cond_vData_map[element]; //create empty set
                 }
-                CatchAll("Uups")
+
 
 
                 //gather all data and save in sets per condition/factor
@@ -1404,13 +1359,25 @@ void abmat_update_variable(object* oVar, Tabmat type)
 
                     //create variables the first time a factor appears
                     if (fracVar == NULL) {
-                        //conditioning variable for fraction tracking
-                        fracVar = abmat_add_var(oVar2, var2lab.c_str());
-                        //conditional variables
-                        auto stats_template = abmat_stats( ); //retrieve map of stats
-                        for (auto& elem : stats_template) {   //create a variable for each statistic
-                            std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first.c_str(), oVar2->label, subset.first );
-                            abmat_add_var(oVar, nvarLab.c_str());
+                        bool dynamic_mode = sim_num == 1 ? true : false;
+#ifdef ABMAT_DYNAMIC_FACTORS
+                        dynamic_mode = false;
+#endif
+                        if (dynamic_mode) {
+                            plog("\n(ABMAT) :  Encountered new factorial. Creating new variables: ");
+                            plog(var2lab.c_str());
+                            //conditioning variable for fraction tracking
+                            fracVar = abmat_add_var(oVar2, var2lab.c_str());
+                            //conditional variables
+                            auto stats_template = abmat_stats( ); //retrieve map of stats
+                            for (auto& elem : stats_template) {   //create a variable for each statistic
+                                std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first.c_str(), oVar2->label, subset.first );
+                                abmat_add_var(oVar, nvarLab.c_str());
+                            }
+                        }
+                        else {
+                            error_hard(__DEV_ERR_INFO__, "The number of factors changed. This is not allowed.", "Make sure to define the factors ex-ante", true);
+                            return;
                         }
                     }
 
