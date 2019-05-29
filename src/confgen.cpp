@@ -166,7 +166,7 @@ int lsdmain( int argn, char** argv )
     root->init( NULL, "Root" );
     add_description( "Root", "Object", "(no description available)" );
     blueprint = new object;
-    blueprint->init( NULL, "Root" );    
+    blueprint->init( NULL, "Root" );
     stacklog = new lsdstack;
     stacklog->prev = NULL;
     stacklog->next = NULL;
@@ -203,9 +203,9 @@ int lsdmain( int argn, char** argv )
         delete [ ] values[ i ];
     }
     empty_cemetery();
-    blueprint->empty();    
+    blueprint->empty();
     root->empty();
-    delete blueprint;    
+    delete blueprint;
     delete root;
     delete stacklog;
     delete [ ] struct_file;
