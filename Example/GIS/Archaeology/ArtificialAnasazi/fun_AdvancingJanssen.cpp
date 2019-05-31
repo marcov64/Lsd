@@ -112,19 +112,16 @@ if(t == 1)
     }
     
     //ABMAT
-    ABMAT_ADD_VARIABLE("micro","age");
-    ABMAT_ADD_VARIABLE("micro","lastharvest");
-    ABMAT_ADD_VARIABLE("macro","nHouseholds");    
-    ABMAT_ADD_VARIABLE("comp","nHouseholds","histothouseholds"); 
-    ABMAT_ADD_VARIABLE("cond","yield","maizeZone");
-    ABMAT_ADD_VARIABLE("cond","age","hh_NutritionNeedRemaining");
-    ABMAT_ADD_VARIABLE("cond","age","fission");
-        
-    // PLOG("\n%s",abmat_varname_convert("oihjqoijoih") );
-    // PLOG("\n%s",abmat_varname_convert("oihjqowjoih") );
-    // PLOG("\n%s",abmat_varname_convert("oihjqowh") );
-    // PLOG("\n%s",abmat_varname_convert("oihjqoijttih") );
-    // //add_abmat_object("micro","age");
+
+    ABMAT_DYNAMIC_FACTORS
+    ABMAT_ADD_MICRO("age")
+		ABMAT_ADD_MICRO("lastharvest")
+		ABMAT_ADD_MACRO("nHouseholds")    
+    ABMAT_ADD_COMP("nHouseholds","histothouseholds")
+    ABMAT_ADD_COND("yield","maizeZone")
+    ABMAT_ADD_COND("age","hh_NutritionNeedRemaining")
+    ABMAT_ADD_COND("age","fission")
+    
 }
 else
 {

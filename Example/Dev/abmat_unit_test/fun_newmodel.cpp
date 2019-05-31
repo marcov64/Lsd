@@ -11,13 +11,14 @@ MODELBEGIN
 
 EQUATION("INI")
 
-		ABMAT_ADD_VARIABLE("fact","b2","{1,4,5}erfwgrwg44");
-    ABMAT_ADD_VARIABLE("micro","b");
-    ABMAT_ADD_VARIABLE("micro","c");
-    ABMAT_ADD_VARIABLE("micro","d1");
-    ABMAT_ADD_VARIABLE("micro","d2");    
-    ABMAT_ADD_VARIABLE("comp","a","aa");
-    ABMAT_ADD_VARIABLE("cond","b","b2");
+		ABMAT_DYNAMIC_FACTORS
+		ABMAT_ADD_FACT("b","{1,4,5}erfwgrwg44");
+    ABMAT_ADD_MICRO("b");
+    ABMAT_ADD_MICRO("c");
+    ABMAT_ADD_MICRO("d1");
+    ABMAT_ADD_MICRO("d2");    
+    ABMAT_ADD_COMP("a","aa");
+    ABMAT_ADD_COND("b","b2");
 
 
 PARAMETER

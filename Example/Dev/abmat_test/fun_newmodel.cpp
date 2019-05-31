@@ -85,7 +85,7 @@ PLOG("mean      : %g\n",v[6]);
 
 PLOG("\n++++++++++Tseries_INVL of A with lag 1++++++++++\n");
 if (T>=2)
-	T_STAT_INTVL("a",1);
+	T_STATL("a",1);
 PLOG("len_data: %g\n",v[0]);
 PLOG("min     : %g\n",v[1]);
 PLOG("max     : %g\n",v[2]);

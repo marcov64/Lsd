@@ -41,11 +41,11 @@
         from the beginning. The reason is that otherwise a consistent attribution
         over time is not possible.
 
-      You can define a switch to allow automatic handling of factors, but this
+      You can set a switch variable abmat_dynamic_factors_allowed=true 
+        to allow automatic handling of factors, but this
         is currently not handled in the totals file. The problem is that each
         a changing number of variables is associated with this behaviour, which
-        leads to an exception (the file format is static).
-      '#define ABMAT_DYNAMIC_FACTORS'
+        leads to an exception (the file format is static).      
 
     Macro and Comp variables need to survive the complete simulation.
     Micro and Cond variables may "die"
@@ -145,6 +145,7 @@ std::map <const char*, std::string> m_abmat_varnames; //map variable names to sh
 std::map <const char*, std::set<int> > m_abmat_conditions; //save conditioning factors
 int i_abmat_varnames; //simple counter for up to 3 digits
 int abmat_series_saved;
+bool abmat_dynamic_factors_allowed;
 
 void abmat_init()
 {
@@ -154,6 +155,21 @@ void abmat_init()
     m_abmat_conditions.clear();
     i_abmat_varnames = 0;
     abmat_series_saved = 0;
+    abmat_dynamic_factors_allowed = false;    
+}
+
+void abmat_allow_dynamic_factors()
+{
+    if (abmat_dynamic_factors_allowed)
+        return; //done
+    
+    if (sim_num == 1) {
+        abmat_dynamic_factors_allowed = true;
+        plog("\n(ABMAT) : Factors are recognised dynamically.");
+    } else {
+        abmat_dynamic_factors_allowed = false;
+        plog("\n(ABMAT) : ERROR: Cannot allow dynamic factor recognition");
+    }
 }
 
 //Constants for labels and text output
@@ -659,56 +675,87 @@ bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char*
     Dependent Types: Conditional (Micro + Factorial) & Comparative (Macro vs Macro)
 
 ********************************************/
-//entry point function
-void add_abmat_object(std::string abmat_type, std::string varlab, std::string var2lab)
-{
-    Tabmat type;
-    std::set<int> factors;
-    if (abmat_type.find("micro") != std::string::npos ) {
-        type = a_micro;
-    }
-    else if (abmat_type.find("macro") != std::string::npos ) {
-        type = a_macro;
-    }
-    else if (abmat_type.find("fact") != std::string::npos ) {
-        type = a_fact;
-        factors = stringOfIntsToSet(var2lab);
-        var2lab = "";
-    }
-    else if (abmat_type.find("cond") != std::string::npos ) {
-        type = a_cond;
-    }
-    else if (abmat_type.find("comp") != std::string::npos ) {
-        type = a_comp;
-    }
-    else {
-        sprintf( msg, "Type %s is not valid.", abmat_type.c_str() );
-        error_hard( __DEV_ERR_INFO__, msg,
-                    "Check your code to prevent this error.",
-                    true );
-        return;
-    }
-    add_abmat_object_intern(type, varlab.c_str(), var2lab.c_str(), factors);
+//entry point functions
+
+void abmat_add_micro(std::string varlab){
+    abmat_add_object_intern(a_micro, varlab.c_str(), "", std::set<int>());
+}
+
+void abmat_add_macro(std::string varlab){
+    abmat_add_object_intern(a_macro, varlab.c_str(), "", std::set<int>());
+}
+
+void abmat_add_fact(std::string varlab, std::string factList){
+    abmat_add_object_intern(a_fact, varlab.c_str(), "", stringOfIntsToSet(factList));
+}
+
+void abmat_add_comp(std::string varlab, std::string var2lab) {
+    abmat_add_object_intern(a_comp, varlab.c_str(), var2lab.c_str(), std::set<int>());
+}
+
+void abmat_add_cond(std::string varlab, std::string var2lab) {
+    abmat_add_object_intern(a_cond, varlab.c_str(), var2lab.c_str(), std::set<int>());
 }
 
 
-void add_abmat_object_intern(Tabmat type, char const* varlab, char const* var2lab, const std::set<int> factors)
+
+// void add_abmat_object(std::string abmat_type, std::string varlab, std::string var2lab)
+// {
+    // Tabmat type;
+    // std::set<int> factors;
+    // if (abmat_type.find("micro") != std::string::npos ) {
+        // type = a_micro;
+    // }
+    // else if (abmat_type.find("macro") != std::string::npos ) {
+        // type = a_macro;
+    // }
+    // else if (abmat_type.find("fact") != std::string::npos ) {
+        // type = a_fact;
+        // factors = stringOfIntsToSet(var2lab);
+        // var2lab = "";
+    // }
+    // else if (abmat_type.find("cond") != std::string::npos ) {
+        // type = a_cond;
+    // }
+    // else if (abmat_type.find("comp") != std::string::npos ) {
+        // type = a_comp;
+    // }
+    // else {
+        // sprintf( msg, "Type %s is not valid.", abmat_type.c_str() );
+        // error_hard( __DEV_ERR_INFO__, msg,
+                    // "Check your code to prevent this error.",
+                    // true );
+        // return;
+    // }
+    // abmat_add_object_intern(type, varlab.c_str(), var2lab.c_str(), factors);
+// }
+
+
+void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2lab, const std::set<int> factors)
 {
     //check if the abmat object associated to the variable
     //exists. Note: It may be included in multiple categories
     //so we check on category level.
 
-    if (type == a_cond ) {
+
+    if (!abmat_dynamic_factors_allowed && type == a_cond ) {
         //Check that factorial is defined!
         object* oFact = NULL;
         oFact = abmat->search_local(lfact);
         if (oFact != NULL)
             oFact = oFact->search_local(var2lab);
         if (oFact == NULL) {
-            printf(msg, "You need to define the variable %s as factortial variable first");
+            sprintf(msg, "You need to define the variable %s as factortial variable first", var2lab);
             error_hard( __DEV_ERR_INFO__, msg, "Check your code.");
+            return;
         }
-    }
+    }       
+   
+    if ( !abmat_dynamic_factors_allowed && type == a_fact) {
+        if ( factors.size() == 0 ) {            
+            error_hard( __DEV_ERR_INFO__, "A factorial variable needs factors!", "Check your code.");    
+        }
+    }  
 
     //first check if the variable varLab exists in the model.
     if (root->search_var(root, varlab) == NULL) {
@@ -772,7 +819,7 @@ void add_abmat_object_intern(Tabmat type, char const* varlab, char const* var2la
     oVar = parent->search_local(varlab);
     if (oVar == NULL) {
         //a factor needs factors.
-        if (type == a_fact && factors.size() == 0 ) {
+        if (!abmat_dynamic_factors_allowed && type == a_fact && factors.size() == 0 ) {
             error_hard( __DEV_ERR_INFO__, "A factor needs factors.",
                         "Check your code to prevent this error.",
                         true );
@@ -795,9 +842,9 @@ void add_abmat_object_intern(Tabmat type, char const* varlab, char const* var2la
         var2_added = true;
         //add 2nd as macro via recursive call.
         if (type == a_comp)
-            add_abmat_object_intern(a_macro, var2lab);
+            abmat_add_object_intern(a_macro, var2lab);
         if (type == a_cond)
-            add_abmat_object_intern(a_fact, var2lab);
+            abmat_add_object_intern(a_fact, var2lab);
 
         oVar2 = parent->up->search(var2lab);
         if (oVar2 == NULL) {
@@ -1359,10 +1406,8 @@ void abmat_update_variable(object* oVar, Tabmat type)
 
                     //create variables the first time a factor appears
                     if (fracVar == NULL) {
-                        bool dynamic_mode = sim_num == 1 ? true : false;
-#ifdef ABMAT_DYNAMIC_FACTORS
-                        dynamic_mode = false;
-#endif
+                        bool dynamic_mode = sim_num == 1 ? abmat_dynamic_factors_allowed : false;
+                        
                         if (dynamic_mode) {
                             plog("\n(ABMAT) :  Encountered new factorial. Creating new variables: ");
                             plog(var2lab.c_str());

@@ -1042,8 +1042,14 @@ std::string get_abmat_varname_fact( const char* condlab);
 std::string get_abmat_varname_fact( const char* condlab, const int condVal);
 std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1, bool flag_fact_n = false);
-void add_abmat_object(std::string abmat_type, std::string varlab, std::string varlab2 = "");
-void add_abmat_object_intern(Tabmat type, char const* varlab, char const* var2lab = "", const std::set<int> factors = std::set<int>());
+void abmat_allow_dynamic_factors();
+void abmat_add_micro(std::string varlab);
+void abmat_add_macro(std::string varlab);
+void abmat_add_fact(std::string varlab, std::string factList);
+void abmat_add_comp(std::string varlab, std::string var2lab);
+void abmat_add_cond(std::string varlab, std::string var2lab);
+//void add_abmat_object(std::string abmat_type, std::string varlab, std::string varlab2 = "");
+void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2lab = "", const std::set<int> factors = std::set<int>());
 void abmat_update();
 abmat_total_stats abmat_total();
 template <typename FuncType>
