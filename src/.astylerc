@@ -24,6 +24,6 @@
 --attach-return-type-decl
 --convert-tabs #Converts tabs into spaces in the non-indentation part of the line....
 --remove-comment-prefix #Remove the preceding '*' in a multi-line comment that begins a line. ...
---max-code-length=60 #try to break long lines
+#--max-code-length=60 #try to break long lines #no more!
 --lineend=linux
 --formatted #Formatted files display mode. Display only the files that have been formatted. Do not display files that are unchanged.
