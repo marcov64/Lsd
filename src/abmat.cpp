@@ -348,7 +348,7 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
             break;
         case a_fact:
             if (flag_fact_n)
-                varname.append("_tot"); //share in 0,1
+                varname.append("_tot"); //total n
             else
                 varname.append("_shr"); //share in 0,1
     }

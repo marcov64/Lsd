@@ -1050,9 +1050,8 @@ bool no_ptr_chk = true;
   #define ABMAT_ADD_FACT( lab, factList ) { abmat_add_fact( lab, factList ); }
   #define ABMAT_ADD_COMP( lab1, lab2 ) { abmat_add_comp( lab1, lab2 ); }
   #define ABMAT_ADD_COND( lab1, lab2 ) { abmat_add_cond( lab1, lab2 ); }
-  
-  
-  #define ABMAT_ADD_INTERVAL( start, end ) add_abmat_interval(start, end);
+    
+  #define ABMAT_ADD_INTERVAL( start, end ) { add_abmat_interval(start, end); }
   
 #endif //#ifdef CPP11
 
