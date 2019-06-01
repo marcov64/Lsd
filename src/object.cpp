@@ -912,12 +912,14 @@ SEARCH_VAR_ERR
 variable *object::search_var_err( object *caller, char const *lab, bool no_search, 
 								  bool search_sons, char const *errmsg )
 {
+	object *cur;
 	variable *cv;
 
 	cv = search_var( caller, lab, true, no_search, search_sons );
 	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( NULL, lab, true ) == NULL )
+		cur = blueprint->search( label );				// current object in blueprint
+		if ( cur == NULL || cur->search_var( NULL, lab, true, no_search, search_sons ) == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for %s", lab, errmsg );
 			error_hard( msg, "variable or parameter not found", 
