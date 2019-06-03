@@ -240,7 +240,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 			fit_wid = true;
 			for ( h = 0, cur = t; cur != NULL ; ++h, cur = cur->hyper_next( ) )
 			{
-				if ( strlen( ch1 ) >= max_wid )
+				if ( strlen( ch1 ) >= ( unsigned ) max_wid )
 				{
 					strcat( ch1, "\u2026" );
 					fit_wid = false;

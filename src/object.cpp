@@ -946,7 +946,6 @@ Return NULL if not found.
 ****************************************************/
 object *object::search_var_cond( char const *lab, double value, int lag )
 {
-	bool var_exist = false;
 	double res;
 	object *cur, *cur1;
 	variable *cv;
@@ -956,8 +955,6 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 		cv = cur1->search_var_err( this, lab, no_search, false, "conditional searching" );
 		if ( cv == NULL )
 			return NULL;
-
-		var_exist = true;					// at least one instance was found
 
 		for ( cur = cv->up; cur != NULL; cur = cur->hyper_next(  ) )
 		{
