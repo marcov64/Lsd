@@ -187,7 +187,7 @@ int lsdmain( int argn, char** argv )
     blueprint->init( NULL, "Root" );
     abmat = new object;
     abmat->init( NULL, "ABMAT" );
-    abmat_init();
+
 
 #ifdef NO_WINDOW
 
@@ -699,6 +699,9 @@ void run( void )
 
         // new random routine' initialization
         init_random( seed );
+        
+        // Initialise ABMAT        
+        abmat_init( );        
 
         // reset math error counters
         init_math_error( );
@@ -775,6 +778,7 @@ void run( void )
             if ( ! pause_run )
 #endif
             {
+                if (1 == t) { abmat_update_sim_pars( ); } //only happens at t==1
                 root->update( );
                 abmat_update( );
             }

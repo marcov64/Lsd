@@ -1045,11 +1045,15 @@ bool no_ptr_chk = true;
   // }
   
   #define ABMAT_DYNAMIC_FACTORS { abmat_allow_dynamic_factors(); }
-  #define ABMAT_ADD_MICRO( lab ) { abmat_add_micro( lab ); }
-  #define ABMAT_ADD_MACRO( lab ) { abmat_add_macro( lab ); }
-  #define ABMAT_ADD_FACT( lab, factList ) { abmat_add_fact( lab, factList ); }
+  #define ABMAT_ADD_MICRO( lab1 ) { abmat_add_micro( lab1 ); }
+  #define ABMAT_ADD_MACRO( lab1 ) { abmat_add_macro( lab1 ); }
+  #define ABMAT_ADD_FACT( lab1, factList ) { abmat_add_fact( lab1, factList ); }
   #define ABMAT_ADD_COMP( lab1, lab2 ) { abmat_add_comp( lab1, lab2 ); }
   #define ABMAT_ADD_COND( lab1, lab2 ) { abmat_add_cond( lab1, lab2 ); }
+  
+  #define ABMAT_ADD_PSTATIC( lab1 ) { abmat_add_par_static( lab1 ); }
+  #define ABMAT_ADD_PMACRO( lab1 ) { abmat_add_par_macro( lab1 ); }
+  #define ABMAT_ADD_PMICRO( lab1 ) { abmat_add_par_micro( lab1 ); }
     
   #define ABMAT_ADD_INTERVAL( start, end ) { add_abmat_interval(start, end); }
   

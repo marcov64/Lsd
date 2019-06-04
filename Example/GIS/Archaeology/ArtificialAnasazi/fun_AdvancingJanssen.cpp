@@ -115,12 +115,16 @@ if(t == 1)
 
     ABMAT_DYNAMIC_FACTORS
     ABMAT_ADD_MICRO("age")
+    ABMAT_ADD_PMICRO("quality")
+        ABMAT_ADD_PMICRO("maizeZone")
 		ABMAT_ADD_MICRO("lastharvest")
-		ABMAT_ADD_MACRO("nHouseholds")    
+		ABMAT_ADD_MACRO("nHouseholds")
+		ABMAT_ADD_MACRO("nHouseholds")
     ABMAT_ADD_COMP("nHouseholds","histothouseholds")
     ABMAT_ADD_COND("yield","maizeZone")
     ABMAT_ADD_COND("age","hh_NutritionNeedRemaining")
     ABMAT_ADD_COND("age","fission")
+//    ABMAT_ADD_PSTATIC("
     
 }
 else

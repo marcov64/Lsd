@@ -210,7 +210,8 @@ struct Wrap;
 //ABMAT
 class abmat_total_stats;
 typedef std::map< std::string, double > ms_statsT;
-enum Tabmat {a_micro, a_macro, a_cond, a_comp, a_fact};
+enum Tabmat {a_pLSD, a_pstat, a_pmic, a_pmac, a_micro, a_fact, a_macro, a_cond, a_comp };
+static const Tabmat  AllAbmatTypes[] = {a_pLSD, a_pstat, a_pmic, a_pmac, a_micro, a_fact, a_macro, a_cond, a_comp }; //The order defines the order for the file/tree
 struct next_var; //functional to cycle through variables
 
 extern const char* lfirst;
@@ -1043,11 +1044,17 @@ std::string get_abmat_varname_fact( const char* condlab, const int condVal);
 std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1, bool flag_fact_n = false);
 void abmat_allow_dynamic_factors();
+void abmat_update_sim_pars( );
+void abmat_add_sim_par(std::string lab, double value);
 void abmat_add_micro(std::string varlab);
 void abmat_add_macro(std::string varlab);
 void abmat_add_fact(std::string varlab, std::string factList);
 void abmat_add_comp(std::string varlab, std::string var2lab);
 void abmat_add_cond(std::string varlab, std::string var2lab);
+void abmat_add_par_macro(std::string varlab);
+void abmat_add_par_micro(std::string varlab);
+void abmat_add_par_static(std::string varlab);
+void abmat_create_tree();
 //void add_abmat_object(std::string abmat_type, std::string varlab, std::string varlab2 = "");
 void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2lab = "", const std::set<int> factors = std::set<int>());
 void abmat_update();
@@ -1067,6 +1074,7 @@ variable* abmat_add_var(object* parent, char const* lab);
 void abmat_alloc_save_mem_var(variable* cv);
 const char* abmat_varname_convert(const char* lab);
 std::string abmat_varname_tot(std::string base, int interval, std::string stat);
+std::string abmat_varname_tot(std::string base, int interval);
 bool abmat_linked_vars_exists_not(object* oFirst, const char* lVar1, const char* lVar2);
 template<typename TReal>
 static bool isWithinPrecisionInterval(TReal a, TReal b, unsigned int interval_size = 1)
