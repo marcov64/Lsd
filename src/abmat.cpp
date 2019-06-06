@@ -857,7 +857,7 @@ void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2la
          return;
     }
     
-    if ( target1->parameter > 1 ) {
+    if ( target1->param != 1 && target1->param != 0 ) { //1: parameter, 0: variable
         sprintf( msg, "error in '%s'. Variable %s is a function", __func__, varlab );
         error_hard( msg, "You may not select functions as ABMAT variables",
                     "Check your code to prevent this error.",
