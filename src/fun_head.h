@@ -1054,7 +1054,7 @@ bool no_ptr_chk = true;
   #define ABMAT_ADD_PSTATIC( lab1 ) { abmat_add_par_static( lab1 ); }
   #define ABMAT_ADD_PMACRO( lab1 ) { abmat_add_par_macro( lab1 ); }
   #define ABMAT_ADD_PMICRO( lab1 ) { abmat_add_par_micro( lab1 ); }
-    
+  
   #define ABMAT_ADD_INTERVAL( start, end ) { add_abmat_interval(start, end); }
   
 #endif //#ifdef CPP11
