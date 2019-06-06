@@ -96,7 +96,7 @@ const char* dev_err_info(const char* func, const char* file, int line);
 #ifdef CPP11
   // comment the next line to disable parallel mode (multi-threading)
   #define PARALLEL_MODE
-  
+
   // multithreading libraries for C++11
   #include <atomic>
   #include <thread>
@@ -242,6 +242,7 @@ extern const char* astat_ta;
 extern const char* astat_tb;
 extern const char* astat_tc;
 extern const char* astat_xcr;
+extern const char* astat_cval;
 
 extern const char* astat_L1;
 extern const char* astat_L2;
@@ -287,11 +288,11 @@ struct object {
   uniqueId* uID; //unique identifier - double due to LSD data structure.
   gisPosition* position; //Pointer to gis data structure
 #endif //#ifdef CPP11
-  
+
   o_vecT hooks;
   b_mapT b_map;           // fast lookup map to object bridges
   v_mapT v_map;           // fast lookup map to variables
-  
+
   bool load_param( char* file_name, int repl, FILE* f );
   bool load_struct( FILE* f );
   bool under_computation( void );
@@ -407,7 +408,7 @@ struct object {
   void declare_as_nonUnique(); //when the object is deleted, clean up and update info.
   double unique_id();  //retrieve unique id, if any.
 #endif //#ifdef CPP11
-  
+
 #ifdef CPP11
   //set the new GIS handling methods
   void set_distance_type( char type ); //switch distance type
@@ -421,16 +422,16 @@ struct object {
   double pseudo_distance(object* other, bool noWrap = false); //pseudo distance to other object
   double pseudo_distance(double x, double y, bool noWrap = false); //pseudo distance to point in plain
   double pseudo_distance(double x_1, double y_1, double x_2, double y_2, bool noWrap = false); //pseudo distance between two points in plain
-  
+
   double center_position(char xy); //return the center of x/y dimension.
   double max_distance(); //return maximum absolute distance
   double relative_distance(double abs_distance); //calculate the relative (to maximum) distance.
   double absolute_distance(double rel_distance); //other way
-  
+
   void position_between(gisMap* map, double& x_out, double& y_out, double x1, double y1, double x2, double y2, double rel_pos = 0.5); //find position at half distance
   void position_between(double& x_out, double& y_out, object* shareObj, object* shareObj2, double rel_pos = 0.5);
   void position_between(double& x_out, double& y_out, double x_1, double y_1, double x_2, double y_2, double rel_pos = 0.5);
-  
+
   void it_full(char const lab[], bool random);
   void it_in_radius(char const lab[], double radius, char random, object* caller, int lag, char const varLab[], char const condition[], double condVal);
   object* first_neighbour_full(char const lab[], bool random);
@@ -448,7 +449,7 @@ struct object {
   bool traverse_boundingBox(double radius, std::function<bool(object* candidate)> do_stuff );
   bool traverse_boundingBoxBelt(double radius, std::function<bool(object* use_obj)> do_stuff );
   bool access_GridPosElements (int x, int y, std::function<bool(object* use_obj)> do_stuff);
-  
+
   object* search_at_position(char const lab[], double x, double y, bool single);
   object* search_at_position(char const lab[], bool single, bool grid = false);
   object* search_at_neighbour_position(char const lab[], int direction, bool single);
@@ -458,45 +459,45 @@ struct object {
   object* nclosest_in_distance(char const lab[], int nelements, double radius, bool random, object* fake_caller = NULL, int lag = 0, char const varLab[] = "", char const condition[] = "", double condVal = 0.0);
   double elements_at_position(char const lab[], double x, double y);
   double elements_at_position(char const lab[], bool grid);
-  
-  
+
+
   bool register_position(double _x, double _y);
   bool unregister_position(bool move);
   bool change_position(double _x, double _y, bool noAdjust = false);
   bool change_position(object* shareObj );
-  
+
   void register_allOfKind_at_grid_rnd(object* obj);
   void register_allOfKind_at_grid_rnd_cnd(object* obj, char const varLab[], char const condition[], double condVal);
   bool register_at_map_rnd(object* gisObj, bool snap_grid = false);
   bool register_at_map(gisMap* map, double _x, double _y, int lattice_color = 0, int lattice_priority = -1);
   bool register_at_map(object* shareObj ); //register at same position as gisObj
-  
+
   bool register_at_map_between(gisMap* map, double _x, double _y, double _x2, double _y2);
   bool register_at_map_between(object* shareObj, object* shareObj2);
-  
-  
+
+
   bool unregister_from_gis();
-  
+
   gisMap* ptr_map(); //get ptr to map, if gis object
   gisMap* init_map(int xn, int yn, int _wrap = 0); //initialise a new map and register the ob to it.
   bool delete_map(); //delete the map, unregistering all gis-objects but leaving them otherwise untouched.
-  
+
   bool init_gis_singleObj(double _x, double _y, int xn, int yn, int _wrap = 0); //Create a gis and add the object to it
   bool init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap, int t_update, int n = 0); //Create a gis and add the objects to it, creating new ones if necessary. the "n" option allows to define a sparse grid.
-  
+
   double get_pos(char xyz);
   double random_pos(const char xy);
-  
+
   bool get_move_position(gisMap* map, int direction, double& x_inOut, double& y_inOut);
   bool move(char const direction[]);
   bool move(int dir); //0 stay put, 1 move north, 2 move north-east , ...
-  
+
   int char2int_direction(char const direction[]);
   bool check_positions(double& _x, double& _y, bool noChange = false); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
   bool check_positions(gisMap* map, double& _xOut, double& _yOut, bool noChange = false);
-  
+
   std::string gis_info(bool append = false);
-  
+
   double init_lattice_gis(int init_color = 1000, double pixW = 400, double pixH = 400);
   void close_lattice_gis( );
   double write_lattice_gis(double colour);
@@ -507,17 +508,17 @@ struct object {
   void set_lattice_priority(int priority);
   double read_lattice_color( void );
   void set_lattice_color(int color);
-  
+
   int load_data_gis( const char* inputfile, const char* obj_lab, const char* var_lab, int t_update );
   int load_data_gis_mat( const char* inputfile, const char* obj_lab, const char* var_lab, int t_update );
-  
+
 #endif //#ifdef CPP11
-  
+
 #ifndef NO_WINDOW
   //Helper function to grap a filename
   const char* grab_filename_interactive ( const char[] );
 #endif
-  
+
 };
 
 struct variable {
@@ -549,15 +550,15 @@ struct variable {
   double deb_cnd_val;
   object* up;
   variable* next;
-  
+
 #ifdef PARALLEL_MODE
   mutex parallel_comp;    // mutex lock for parallel computation
 #endif
-  
+
 #ifdef CPP11
   eq_funcT eq_func;         // pointer to equation function for fast look-up
 #endif
-  
+
   variable( void );         // empty constructor
   variable( const variable& v );    // copy constructor
   std::vector<double> copy_data( int dstart, int dend );
@@ -565,7 +566,7 @@ struct variable {
   double fun( object* caller );
   int init( object* _up, char const* _label, int _num_lag, double* val, int _save );
   void empty( void );
-  
+
 };
 
 struct bridge {
@@ -576,9 +577,9 @@ struct bridge {
   mnode* mn;
   object* head;
   char* search_var;         // current initialized search variable
-  
+
   o_mapT o_map;           // fast lookup map to objects
-  
+
   bridge( const char* lab );      // constructor
   bridge( const bridge& b );      // copy constructor
   ~bridge( void );          // destructor
@@ -588,7 +589,7 @@ struct mnode {
   long deflev;            // saves the log number objects to allow defaulting
   mnode* son;
   object* pntr;
-  
+
   void create( double level );
   void empty( void );
   object* fetch( double* n, double level = 0 );
@@ -604,7 +605,7 @@ struct netNode {            // network node data
   long serNum;            // node serial number (initial order, fixed )
   netLink* first;           // first link in the linked list of links
   netLink* last;            // last link in the linked list of links
-  
+
   netNode( long nodeId = -1, char const nodeName[ ] = "", double nodeProb = 1 );
   // constructor
   ~netNode( void );         // destructor
@@ -619,7 +620,7 @@ struct netLink {            // individual outgoing link
   netLink* prev;            // pointer to previous link (NULL if first )
   object* ptrFrom;          // network node containing the link
   object* ptrTo;            // pointer to destination number
-  
+
   netLink( object* origNode, object* destNode, double linkWeight = 0, double destProb = 1 );
   // constructor
   ~netLink( void );           // destructor
@@ -668,7 +669,7 @@ struct gisPosition {
   int lattice_priority; //negative: does not count
   std::deque<std::pair <double, object*> > objDis_inRadius; //list of objects in range, used by search
   std::deque<std::pair <double, object*> >::iterator it_obj; //iterator for the CYCLES
-  
+
   gisPosition (gisMap* map, double x, double y, double z = 0, int lattice_color = 0, int lattice_priority = -1) : map(map), x(x), y(y), z(z), lattice_color(lattice_color), lattice_priority(lattice_priority) { //constructor.
   };
 };
@@ -692,7 +693,7 @@ struct Wrap {
     }
     else {
       noWrap = false;
-      
+
       if (wrap > 7) {
         bottom = true;
         wrap -= 8;
@@ -700,7 +701,7 @@ struct Wrap {
       else {
         bottom = false;
       }
-      
+
       if (wrap > 3) {
         top = true;
         wrap -= 4;
@@ -708,7 +709,7 @@ struct Wrap {
       else {
         top = false;
       }
-      
+
       if (wrap > 1) {
         right = true;
         wrap -= 2;
@@ -716,7 +717,7 @@ struct Wrap {
       else {
         right = false;
       }
-      
+
       if (wrap > 0) {
         left = true;
       }
@@ -758,21 +759,21 @@ struct gisMap {
   std::vector<std::vector <std::deque<object*> >> elements;
   std::vector<std::vector <int> > local_lattice; //Buffer colours from WRITE command outside of priority list.
   int nelements; //count number of elements
-  
+
   gisMap(int xn, int yn, int _wrap = 0, char distance_type = 'e') : xn(xn), yn(yn), wrap(_wrap), distance_type(distance_type) { //constructor
     has_lattice = false;
     nelements = 0;
     elements.resize(xn);
-    
+
     for (auto& x : elements) {
       x.resize(yn); //number of rows, copy
     }
-    
+
     center_x = xn / 2.0;
     center_y = yn / 2.0;
     max_distance = -1; //not initialised
   };
-  
+
   //  ~gisMap( void ) //destructor
   //  {
   //  //no need to do any thing, this is done in the objects with gisPosition in map.
@@ -824,7 +825,7 @@ struct design {           // design of experiment object
   double* hi, *lo, ** ptr;
   char** lab;
   bool* intg;
-  
+
   design( sense* rsens, int typ = 1, char const* fname = "", int findex = 1,
           int samples = 0, int factors = 0, int jump = 2, int trajs = 4 );
   // constructor
@@ -841,19 +842,19 @@ class abmat_total_stats {
 
 
   public:
-  
+
     ms_statsT total_stats;
-    
+
     bool empty() {
       return (total_stats.size() == 0);
     };
-    
+
     const ms_statsT& operator()() const;
-    
+
     void operator()(object* oVar, Tabmat type);
-    
+
     void emplace(std::string const&, double const&);
-    
+
 };
 
 class result {            // results file object
@@ -864,26 +865,26 @@ class result {            // results file object
     bool dozip;             // compressed file flag
     bool firstCol;            // flag for first column in line
     bool switch_abmat;
-    
+
     abmat_total_stats total_stats;      //hold abmat results
-    
+
 #ifdef LIBZ
     gzFile fz;              // compressed file pointer
 #endif
-    
+
     void title_recursive( object* r, int i ); // write file header (recursively)
     void data_recursive( object* r, int i );  // save a single time step (recursively)
-    
+
     void write_datum(double datum); //append single data item
     void write_title_abmat(const char* title, const char* lab_tit); //write single data item head
     void write_title(const char* label, const char* lab_tit, bool single, bool header, int start, int end);
-    
+
   public:
-  
+
     result( char const* fname, char const* fmode, bool dozip = false, bool docsv = false, bool switch_abmat = false );
     // constructor
     ~result( void );          // destructor
-    
+
     void data( object* root, int initstep, int endtstep = 0  ); // write data
     // void data_abmat( void ); //abmat stats - wrapper for data
     void title( object* root, int flag ); // write file header
@@ -895,7 +896,7 @@ class result {            // results file object
 struct profile {            // profiled variable object
   unsigned int comp;
   unsigned long long ticks;
-  
+
   profile( ) {
     ticks = 0;
     comp = 0;
@@ -918,10 +919,10 @@ struct worker {           // multi-thread parallel worker data structure
   thread thr;
   thread::id thr_id;
   variable* var;
-  
+
   worker( void );           // constructor
   ~worker( void );          // destructor
-  
+
   bool check( void );         // handle worker problems
   static void signal_wrapper( int signun ); // wrapper for signal_handler
   void cal( variable* var );      // start worker calculation
@@ -1082,7 +1083,7 @@ static bool isWithinPrecisionInterval(TReal a, TReal b, unsigned int interval_si
 {
   TReal min_a = a - (a - std::nextafter(a, std::numeric_limits<TReal>::lowest())) * interval_size;
   TReal max_a = a + (std::nextafter(a, std::numeric_limits<TReal>::max()) - a) * interval_size;
-  
+
   return min_a <= b && max_a >= b;
 }
 bool is_const_dbl(std::vector<double> const& Data1);
@@ -1100,15 +1101,15 @@ struct next_var {
   object* o_search_start;
   variable* curv;
   bool only_sub_tree;
-  
-  
+
+
   next_var(object* o_search_start, const char* varlab, bool only_sub_tree)
     : o_search_start(o_search_start), only_sub_tree(only_sub_tree) {
     curv = NULL;
-    
+
     if (o_search_start != NULL)
     { curv = o_search_start->search_var(o_search_start, varlab, false, false, o_search_start); }
-    
+
     if (only_sub_tree && curv != NULL && curv->up == o_search_start) {
       char msg[300];
       sprintf(msg, "Method %s: Cannot search for '%s' contained at same level as search.",
@@ -1119,23 +1120,23 @@ struct next_var {
       curv = NULL;
     }
   };
-  
+
   //check if hyper_next exists and if it is in subtree, if yes take it
   //else return NULL.
   variable* operator()( void ) {
     if (curv == NULL)
     { return NULL; }
-    
+
     variable* prev = curv;
     curv = NULL;
-    
+
     //check if next exists, if yes take it.
     object* next_cur = prev->up->next;
-    
+
     //if noy check hyper_next
     if (next_cur == NULL)
     { next_cur = prev->up->hyper_next(); }
-    
+
     //if exists check if its in subtree
     if (next_cur != NULL
         && ( false == only_sub_tree
@@ -1143,14 +1144,14 @@ struct next_var {
        ) {
       curv = next_cur->search_var(next_cur, (prev->label), false, true); //at same level
     }
-    
+
     return prev;
   };
 };
 
 // prevent exposing internals in users' fun_xxx.cpp
 #ifndef FUN
-  
+
   // standalone internal C functions/procedures (not visible to the users)
   FILE* create_frames( char* t );
   FILE* search_data_ent( char* name, variable* v );
@@ -1336,7 +1337,7 @@ struct next_var {
   void sort_cs_asc( char** s, char** t, double** v, int nv, int nt, int c );
   void sort_cs_desc( char** s, char** t, double** v, int nv, int nt, int c );
   void sort_on_end( store* app );
-  void statistics( int* choice );
+  void statistics( int* choice, int abmat );
   void statistics_cross( int* choice );
   void tex_report_end( FILE* f );
   void tex_report_head( FILE* f, bool table = true );
@@ -1353,13 +1354,13 @@ struct next_var {
   void write_obj( object* r, FILE* frep );
   void write_str( object* r, FILE* frep, int dep, char const* prefix );
   void write_var( variable* v, FILE* frep );
-  
-  
-  
+
+
+
   #ifdef PARALLEL_MODE
     void parallel_update( variable* v, object* p, object* caller = NULL );
   #endif
-  
+
   // global internal variables (not visible to the users)
   extern FILE* log_file;      // log file, if any
   extern bool brCovered;      // browser cover currently covered
@@ -1441,7 +1442,7 @@ struct next_var {
   extern o_setT obj_list;     // list with all existing LSD objects
   extern sense* rsense;         // LSD sensitivity analysis structure
   extern variable* cemetery;    // LSD saved data series (from last simulation run )
-  
+
   // multi-threading control
   #ifdef PARALLEL_MODE
     extern atomic< bool > parallel_ready; // flag to indicate multitasking is available
@@ -1449,7 +1450,7 @@ struct next_var {
     extern thread::id main_thread;      // LSD main thread ID
     extern worker* workers;         // multi-thread parallel worker data
   #endif
-  
+
   // Tcl/Tk specific definitions (for the windowed version only)
   #ifndef NO_WINDOW
     int Tcl_discard_change( ClientData, Tcl_Interp*, int, const char* [ ] );  // ask before discarding unsaved changes
@@ -1460,7 +1461,7 @@ struct next_var {
     int Tcl_set_c_var( ClientData cdata, Tcl_Interp* inter, int argc, const char* argv[ ] );
     int Tcl_upload_series( ClientData cd, Tcl_Interp* inter, int oc, Tcl_Obj* CONST ov[ ] );
   #endif            // NO_WINDOW
-  
+
 #endif            // FUN
 
 #ifdef CPP11 //util.cpp
