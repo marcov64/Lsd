@@ -1032,6 +1032,7 @@ extern object* root;
 //new abmat functions
 #ifdef CPP11
 void abmat_write(object* oVar, char const* lab, double value);
+void abmat_write(variable* cv, char const* lab, double value);
 ms_statsT abmat_stats( void );
 ms_statsT abmat_stats(std::vector<double>& Data );
 ms_statsT abmat_compare(std::vector<double> const& Data, std::vector<double> const& Data2 );
@@ -1039,7 +1040,7 @@ void abmat_init( void );
 
 void plog_stats(ms_statsT const& stats, const char* title = "");
 void plog_object_tree_up(object*, bool plotVars = false);
-std::string get_abmat_varname_fact( const char* condlab);
+std::string get_abmat_varname_fact_total( const char* condlab);
 std::string get_abmat_varname_fact( const char* condlab, const int condVal);
 std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1, bool flag_fact_n = false);

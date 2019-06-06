@@ -299,7 +299,7 @@ const char* abmat_varname_convert( const char* lab)
     These are the names for the time-series!
     Except for comparatives (there is no time-series).
 ********************************************/
-std::string get_abmat_varname_fact( const char* condlab)
+std::string get_abmat_varname_fact_total( const char* condlab)
 {
     return get_abmat_varname(a_fact, condlab, "", "", 0, true);
 }
@@ -1019,7 +1019,7 @@ void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2la
             if (var1_added) {
 
                 //each factorial is treated as a macro variable, holding the share of items as information, and the total number.
-                std::string var1lab = get_abmat_varname_fact( oVar->label );
+                std::string var1lab = get_abmat_varname_fact_total( oVar->label );
                 variable* fracVar = oVar->search_var_local(var1lab.c_str());
                 if (fracVar != NULL) {
                     error_hard(__DEV_ERR_INFO__, "The factorial exists already.", "Check your code...", true);
@@ -1223,6 +1223,7 @@ void plog_object_tree_up(object* startO, bool plotVars)
     Simplified, faster version of the object::write command.
     No NAN checking. Only for ABMAT.
  ***************************************************/
+ 
 void abmat_write(object* oVar, char const* lab, double value)
 {
     variable* cv = oVar->search_var_local( lab);
@@ -1232,12 +1233,15 @@ void abmat_write(object* oVar, char const* lab, double value)
                     "contact the developers", true );
         return;
     }
-
+    abmat_write( cv, lab, value );    
+}
+ 
+void abmat_write(variable* cv, char const* lab, double value)
+{
     if (cv->last_update >= t) {
         error_hard( __DEV_ERR_INFO__, "Called at least twice at the same time!", "Contact the developer", true);
         return;
     }
-
 
     if (!(cv->abmat)) {
         error_hard( __DEV_ERR_INFO__, "Using special abmat procedure on non-abmat variable.", "Contact the developer", true);
@@ -1281,8 +1285,8 @@ void for_each_abmat_base_variable(FuncType& f )
         }
             
 
-        if (type == a_fact)
-            continue; //is treated with conditionals
+        // if (type == a_fact)
+            // continue; //is treated with conditionals
 
         //Cycle through all items of that type.
         for (bridge* bVar = parent->b; bVar != NULL; bVar = bVar->next ) {
@@ -1582,17 +1586,82 @@ void abmat_update_variable(object* oVar, Tabmat type)
                 abmat_write(oVar, varlab.c_str(), val);
             }
             break;
+            
+        case a_fact: {
+                
+                double total = 0.0; //elements
+                std::map < int, std::vector<double> > fact_vData_map;
+                auto cycle_var = next_var(root, oVar->label, true);
+                for (variable* curv = cycle_var(); curv != NULL; curv = cycle_var()) {
+                    variable* curv2 = curv->up->search_var_local(oVar->label);
+                    if (curv2 == NULL) {
+                        sprintf( msg, "variable '%s' is missing in object '%s' in function '%s'", oVar->label, curv->up->label, __func__ );
+                        error_hard( msg, "variable or parameter not found",
+                                    "check model structure for conditional abmat" );
+                        return;
+                    }
+                    total++;
+                    int factor = static_cast<int> ( curv2->cal( NULL, 0) ); //same as in object::update()
+                    double val = curv->cal( NULL, 0);                    
+                    fact_vData_map[factor].push_back(val);
+                }
+                
+                // save info on number of elements.
+                std::string varlab = get_abmat_varname_fact_total(oVar->label);
+                abmat_write(oVar, varlab.c_str(), total);
+                
+                
+                //write the share info for each factor                
+                for (auto& subset : fact_vData_map) {
+                    //save information of relative size to conditional variable
+                    double fraction = static_cast<double>(subset.second.size() ) / total;
+
+
+                    //create the variable name
+                    std::string varlab = get_abmat_varname_fact( oVar->label, subset.first );
+                    variable* fracVar = oVar->search_var_local(varlab.c_str());
+
+                    //create variables the first time a factor appears
+                    if (fracVar == NULL) {
+                        bool dynamic_mode = sim_num == 1 ? abmat_dynamic_factors_allowed : false;
+                        
+                        if (dynamic_mode) {
+                            plog("\n(ABMAT) :  Encountered new factor for factorial. Creating new variable: ");
+                            plog(varlab.c_str());
+                            //conditioning variable for fraction tracking
+                            fracVar = abmat_add_var(oVar, varlab.c_str());
+                            try {
+                            m_abmat_conditions.at(oVar->label).insert(subset.first);
+                            } CatchAll("Uuups22");
+                        }
+                        else {
+                            sprintf(msg,"The number of factors for factorial '%s' changed. This is not allowed.",oVar->label);
+                            error_hard(__DEV_ERR_INFO__, msg, "Make sure to define the factors ex-ante", true);
+                            return;
+                        }
+                    }
+
+                    //save info
+                    abmat_write(oVar, varlab.c_str(), fraction);                   
+                }
+            
+            }
+            break;
 
         //Cond is different,because here is a first and second variable, too.
 
         case a_cond:
             //Each conditional variable may be linked to several conditions (i.e. factors).
             for (object* oVar2 : oVar->hooks) {
+                
+                if (oVar2->v != NULL && oVar2->v->last_update<t)
+                    abmat_update_variable(oVar2, a_fact); //update, if not yet done.
 
                 //create set and copy information of previous sets.
+                //it is a map of factors and data.
                 std::map < int, std::vector<double> > cond_vData_map;
                 for (auto& element : m_abmat_conditions.at(oVar2->label) ) {
-                    cond_vData_map[element]; //create empty set
+                    cond_vData_map[element]; //create empty set for integer factors
                 }
 
 
@@ -1611,56 +1680,30 @@ void abmat_update_variable(object* oVar, Tabmat type)
                     total++;
                     int condVal = static_cast<int> ( curv2->cal( NULL, 0) ); //same as in object::update()
                     double val = curv->cal( NULL, 0);
-                    cond_vData_map[condVal].push_back(val);
+                    try {
+                    cond_vData_map.at(condVal).push_back(val);
+                    }
+                    CatchAll("Uups");
                 }
 
                 //save data
                 for (auto& subset : cond_vData_map) {
-                    //save information of relative size to conditional variable
-                    double fraction = static_cast<double>(subset.second.size() ) / total;
-                    //Save info on factors
-                    try {
-                        m_abmat_conditions.at(oVar2->label).insert(subset.first);
-                    }
-                    CatchAll("Uups")
-
-                    std::string var2lab = get_abmat_varname_fact( oVar2->label, subset.first );
-                    variable* fracVar = oVar2->search_var_local(var2lab.c_str());
-
-                    //create variables the first time a factor appears
-                    if (fracVar == NULL) {
-                        bool dynamic_mode = sim_num == 1 ? abmat_dynamic_factors_allowed : false;
-                        
-                        if (dynamic_mode) {
-                            plog("\n(ABMAT) :  Encountered new factorial. Creating new variables: ");
-                            plog(var2lab.c_str());
-                            //conditioning variable for fraction tracking
-                            fracVar = abmat_add_var(oVar2, var2lab.c_str());
-                            //conditional variables
-                            auto stats_template = abmat_stats( ); //retrieve map of stats
-                            for (auto& elem : stats_template) {   //create a variable for each statistic
-                                std::string nvarLab = get_abmat_varname ( type, oVar->label, elem.first.c_str(), oVar2->label, subset.first );
-                                abmat_add_var(oVar, nvarLab.c_str());
-                            }
-                        }
-                        else {
-                            error_hard(__DEV_ERR_INFO__, "The number of factors changed. This is not allowed.", "Make sure to define the factors ex-ante", true);
-                            return;
-                        }
-                    }
-
-                    //update variables
-                    abmat_write(oVar2, var2lab.c_str(), fraction);
                     auto stats = abmat_stats(subset.second);
                     for (auto& stat : stats) {
                         std::string nvarLab = get_abmat_varname ( type, oVar->label, stat.first.c_str(), oVar2->label, subset.first );
+                        //create variables the first time a factor appears
+                        //dynamic mode is checked in a_frac 
+                        variable* cv = oVar->search_var_local( nvarLab.c_str() );
+                        if (NULL == cv){
+                            cv=abmat_add_var(oVar, nvarLab.c_str());    
+                        }
                         abmat_write(oVar, nvarLab.c_str(), stat.second);
                     }
                 }
             }
             break;
 
-        case a_fact:
+        
         case a_comp:
             error_hard(__DEV_ERR_INFO__, "a_comp / a_fact case should not exist.",  "Contact the developer");
             break;
