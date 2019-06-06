@@ -454,12 +454,12 @@ ms_statsT abmat_stats(std::vector<double>& Data )
         stats[astat_min] = Data[0];
         stats[astat_max] = Data[len_data - 1];
 
-        int index = static_cast<int>( (len_data * 1 / 20) ) - 1;
+        int index = static_cast<int>( (rlen_data * 1.0 / 20.0) ) - 1;
         if (index < 0)
             index = 0;
         stats[astat_p05] = Data[index];
 
-        index = static_cast<int>( (len_data / 4) ) - 1;
+        index = static_cast<int>( (rlen_data / 4.0) ) - 1;
         if (index < 0)
             index = 0;
         stats[astat_p25] = Data[index];
@@ -845,6 +845,25 @@ void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2la
     //check if the abmat object associated to the variable
     //exists. Note: It may be included in multiple categories
     //so we check on category level.
+    
+    //check that the object added is not a function.
+    variable* target1 = root->search_var(root,varlab);
+    if (target1 == NULL) {
+         //first check if the variable varLab exists in the model.    
+        sprintf( msg, "error in '%s'. Variable %s is not in the model.", __func__, varlab );
+        error_hard( msg, "Wrong variable name",
+                    "Check your code to prevent this error.",
+                    true );
+         return;
+    }
+    
+    if ( target1->parameter > 1 ) {
+        sprintf( msg, "error in '%s'. Variable %s is a function", __func__, varlab );
+        error_hard( msg, "You may not select functions as ABMAT variables",
+                    "Check your code to prevent this error.",
+                    true );
+         return;               
+    }
 
 
     if (!abmat_dynamic_factors_allowed && type == a_cond ) {
@@ -865,14 +884,6 @@ void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2la
             error_hard( __DEV_ERR_INFO__, "A factorial variable needs factors!", "Check your code.",true);
             return;
         }
-    }  
-
-    //first check if the variable varLab exists in the model.
-    if (root->search_var(root, varlab) == NULL) {
-        sprintf( msg, "error in '%s'. Variable %s is not in the model.", __func__, varlab );
-        error_hard( msg, "Wrong variable name",
-                    "Check your code to prevent this error.",
-                    true );
     }
 
     object* parent = NULL;
