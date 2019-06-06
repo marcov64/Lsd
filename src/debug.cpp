@@ -1304,7 +1304,7 @@ void show_tmp_vars( object *r, bool update )
 {
 	bool valid;
 	char i_names[ ] = { 'i', 'j', 'h', 'k' };
-	int i, j, m, n;
+	int i, j, m, n = 0;
 	netLink *curLnk = NULL;
 	object *cur;
 	

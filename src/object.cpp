@@ -271,7 +271,7 @@ char *qsort_lab_secondary;
 object *globalcur;
 
 #ifdef PARALLEL_MODE
-mutex parallel_collect;			// mutex lock for parallel object list update
+mutex parallel_obj_list;		// mutex lock for parallel object list addition
 mutex parallel_delete;			// mutex lock for parallel deletion
 #endif
 
@@ -1577,7 +1577,13 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 
 		// update object list for user pointer checking
 		if ( ! no_ptr_chk )
+		{
+#ifdef PARALLEL_MODE
+			// prevent concurrent update by more than one thread
+			lock_guard < mutex > lock( parallel_obj_list );
+#endif	
 			obj_list.insert( cur );
+		}
 		
 		if ( net )						// if objects are nodes in a network
 		{
@@ -1810,7 +1816,13 @@ void object::delete_obj( void )
 
 	// update object list for user pointer checking
 	if ( ! no_ptr_chk )
+	{
+#ifdef PARALLEL_MODE
+		// prevent concurrent update by more than one thread
+		lock_guard < mutex > lock( parallel_obj_list );
+#endif	
 		obj_list.erase( this );
+	}
 		
 	empty( );
 	
@@ -3110,7 +3122,7 @@ double build_obj_list( bool set_list )
 {
 #ifdef PARALLEL_MODE
 	// prevent concurrent update by more than one thread
-	lock_guard < mutex > lock( parallel_collect );
+	lock_guard < mutex > lock( parallel_obj_list );
 #endif	
 	
 	obj_list.clear( );			// reset list
