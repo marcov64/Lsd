@@ -1,10 +1,9 @@
 #include "fun_head_fast.h"
 
-const string statsName[14] = {"LENGTH", "MINI",   "MAXI",   "LQ",   "UQ",
+const std::string statsName[14] = {"LENGTH", "MINI",   "MAXI",   "LQ",   "UQ",
                               "PERC05", "PERC95", "PERC50", "MEAN", "MAE",
                               "RMSE",   "L_cv",   "L_SK",   "L_KU"};
 
-const double eps = 0.1;
 const bool verbose = true;
 /////to check last update in t sereis data collection TODO
 MODELBEGIN
@@ -62,23 +61,22 @@ double expectedValues[14] = {24,      112,      343,   142,       322,
                              82.4131, 0.213505, 0.0,   -0.0803361};
 if (T == 1) {
   PLOG("\n Calling Stats on d1  from P at TIME= %g ", T);
-  PLOG("\nTesting Correctness of eightStats function on variable D1\n");
+  PLOG("\nTesting Correctness of eightStats function on variable D1");
   int error = 0;
   X_STAT_ALL("d1");
   if (verbose == true) {
 
     for (int i = 0; i < 14; i++) {
-      PLOG("v of %d is == %g\n", i, v[i]);
-      if (fabs(v[i] - expectedValues[i]) > eps) {
+      PLOG("\nv of %d is == %g vs %g (ABMAT)", i, expectedValues[i], v[i]);
+      if ( !isWithinPrecisionInterval( v[i],expectedValues[i] ) ) {
         error++;
-        PLOG("%s ERROR! computed value from abmat is %g  \n ",
-             statsName[i].c_str(), v[i]);
+        PLOG(" %s ERROR! ",statsName[i].c_str() );
       }
     }
-    PLOG("Number of errors in eightStats is %d \n ", error);
+    PLOG("\nNumber of errors in eightStats is %d ", error);
   }
   else {
-    PLOG("Number of errors in eightStats is %d\n", error);
+    PLOG("\nNumber of errors in eightStats is %d", error);
   }
   
 }
@@ -131,10 +129,16 @@ if (T == 9) {
       PLOG("T_STAT_INTVL ERROR \n");
   }
   PLOG("COMparing");
+  auto dummy = abmat_compare();
+  PLOG("\nComparative stat names: ");
+  for (auto& item : dummy) { PLOG(item.first.c_str()); PLOG(", "); }
   T_STAT_COMP("a","aa");
-  PLOG("\n gamma is %g ",v[0]);
-  PLOG("\n ta is %g ",v[1]);
-  PLOG("\n tb is %g ",v[2]);
+  PLOG("\n x-corr is %g ",v[0]);
+  PLOG("\n gamma is %g ",v[1]);
+  PLOG("\n tau-a is %g ",v[2]);
+  PLOG("\n tau-b is %g ",v[3]);
+  PLOG("\n L1 is %g ",v[4]);
+  PLOG("\n L2 is %g ",v[5]);
 }
 
 RESULT(0)

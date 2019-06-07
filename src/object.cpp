@@ -2814,7 +2814,7 @@ double object::stat( char const* lab, double* r, char const condVarLab[], char c
 
 std::vector<double>  object::gatherData_Tseries(char const* lab, int lag)
 {
-  return gatherData_Tseries( lab, 0, t - lag );
+  return gatherData_Tseries( lab, 1, t - lag );
 }
 
 std::vector<double> object::gatherData_Tseries( char const* lab, int start, int end )
@@ -2991,11 +2991,11 @@ void object::tStats(char const* lab, double* r, int lag)
 
 void object::compareStats(char const* lab1, char const* lab2, double* r, int lag)
 {
-  compareStats(lab1, lab2, r, 0, t - lag);
+  compareStats(lab1, lab2, r, 1, t - lag);
 }
 void object::compareStats(char const* lab1, char const* lab2, double* r, int start, int end)
 {
-  double r_temp[3];
+  double r_temp[6];
   
   if (r == NULL)
   { r = r_temp; }
@@ -3005,9 +3005,12 @@ void object::compareStats(char const* lab1, char const* lab2, double* r, int sta
   auto m_stats = abmat_compare(Data1, Data2); //pass calculation to abmat
   
   try {
-    r[0] = m_stats.at(astat_gam);
-    r[1] = m_stats.at(astat_ta);
-    r[2] = m_stats.at(astat_tb);
+    r[0] = m_stats.at(astat_xcr);
+    r[1] = m_stats.at(astat_gam);
+    r[2] = m_stats.at(astat_ta);
+    r[3] = m_stats.at(astat_tb);
+    r[4] = m_stats.at(astat_L1);
+    r[5] = m_stats.at(astat_L2);
   }
   
   CatchAll("Uuuuuups");
