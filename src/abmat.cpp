@@ -212,7 +212,7 @@ const char* astat_ta = "ta";
 const char* astat_tb = "tb";
 const char* astat_tc = "tc";
 const char* astat_xcr = "xcr";
-const char* astat_cval = "cval";
+
 
 const char* astat_L1 = "L1";
 const char* astat_L2 = "L2";
@@ -570,7 +570,12 @@ ms_statsT abmat_stats(std::vector<double>& Data )
 /********************************************
     ABMAT_COMPARE
     Produce advanced comparative statistics
-    between two variables
+    for two variables, denoting as association
+    NOTE: Only the partial case, i.e. looking at changes from t to t+1.
+    and not completely comparing the ranks (other use of gamma and tau)
+    a) Pearson's product moment correlation
+    b) Goodman and Kruskal’s Gamma
+    c) Kendal's Tau a and b 
 ********************************************/
 
 
@@ -580,7 +585,7 @@ ms_statsT abmat_compare(std::vector<double> const& Data1, std::vector<double> co
   double gamma;               // discard ties
   double tau_a, tau_b; //, tau_c; // correct for ties
   bool constVector;
-  double sx, sy, sxx, syy, sxy, den, xbar, ybar, cval;
+  double sx, sy, sxx, syy, sxy, den, xbar, ybar, xcorr;
   double concordant = 0.0, discordant = 0.0, tie_a = 0.0, tie_b = 0.0;
 
   if (Data1.size() != Data2.size()) {
@@ -594,16 +599,15 @@ ms_statsT abmat_compare(std::vector<double> const& Data1, std::vector<double> co
   compare[astat_n]; // length of the timeseries
 
   // association, i.e. direction without magnitude
-  compare[astat_gam]; // gamme correlation
-  compare[astat_ta];
-  compare[astat_tb];
+  compare[astat_gam]; // gamma correlation
+  compare[astat_ta]; //tau_a -- not correcting for ties
+  compare[astat_tb]; //tau_b -- correcting for ties
   // compare[astat_tc];
 
   // standard product moment correlation
   compare[astat_xcr];
 
-  // standard product moment correlation
-  compare[astat_cval];
+
 
   // Differences L-Norms
   compare[astat_L1]; // difference in means
@@ -684,12 +688,12 @@ ms_statsT abmat_compare(std::vector<double> const& Data1, std::vector<double> co
     if (sxy != 0.0) {
       den = sxx * syy;
       if (den > 0.0) {    //should be unnecessary, for the series are not constant.
-       cval = sxy / sqrt(den); //correlated (pos or neg)
+       xcorr = sxy / sqrt(den); //correlated (pos or neg)
       } else {
-       cval = NAN; //ndef
+       xcorr = NAN; //ndef
      }
     } else {
-      cval = 0.0;  //Uncorrelated perfect
+      xcorr = 0.0;  //Uncorrelated perfect
     }
 
     MAE /= (len_data);
@@ -703,7 +707,7 @@ ms_statsT abmat_compare(std::vector<double> const& Data1, std::vector<double> co
       if (concordant + discordant != 0) {
         double S = (concordant - discordant);
         gamma = S / (concordant + discordant);
-        tau_a = S / ((Data1.size()) * (Data1.size() - 1));
+        tau_a = S / sqrt((Data1.size()) * (Data1.size() - 1));
         tau_b = S / sqrt(double(concordant + discordant + tie_a) *
                          double(concordant + discordant + tie_b));
         // tau_c
@@ -719,7 +723,7 @@ ms_statsT abmat_compare(std::vector<double> const& Data1, std::vector<double> co
       compare[astat_tb] = tau_b;
       compare[astat_L1] = MAE;
       compare[astat_L2] = RMSE;
-      compare[astat_cval] = cval;
+      compare[astat_xcr] = xcorr;
       // compare[astat_tc] = NAN;
       // compare["tauC"]=0.0;
     }
@@ -729,7 +733,7 @@ ms_statsT abmat_compare(std::vector<double> const& Data1, std::vector<double> co
       compare[astat_tb] = 0.0;
       compare[astat_L1] = NAN;
       compare[astat_L2] = NAN;
-      compare[astat_cval] = NAN;
+      compare[astat_xcr] = NAN;
       // compare[astat_tc] = NAN;
     }
   }

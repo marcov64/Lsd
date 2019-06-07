@@ -3507,7 +3507,7 @@ void statistics( int* choice, int abmat)
     else
         cmd( ".log.text.text.internal insert end \"\n\nTime series comparison statistics:\n\n\" tabel" );
         sprintf( str1, "%d Cases", max_c - min_c + 1 );
-        sprintf( longmsg, "%-20s\tGamma\tTau_a\tTau_b\tL_1\tL2\tCval\n", str1 );
+        sprintf( longmsg, "%-20s\tGamma\tTau_a\tTau_b\tL_1\tL2\txcorr\n", str1 );
         cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
 
   }
@@ -3652,7 +3652,7 @@ else if ( abmat ==1 ){
   sprintf(longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits,
           compStats[astat_gam], pdigits, compStats[astat_ta], pdigits,
           compStats[astat_tb], pdigits, compStats[astat_L1], pdigits,
-          compStats[astat_L2], pdigits, compStats[astat_cval]);
+          compStats[astat_L2], pdigits, compStats[astat_xcr]);
   cmd(".log.text.text.internal insert end \"%s\" tabel", longmsg);
 }
   plog( "\n" );
