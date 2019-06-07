@@ -271,8 +271,7 @@ char *qsort_lab_secondary;
 object *globalcur;
 
 #ifdef PARALLEL_MODE
-mutex parallel_obj_list;		// mutex lock for parallel object list addition
-mutex parallel_delete;			// mutex lock for parallel deletion
+mutex parallel_obj_list;		// mutex lock for parallel object list manipulation
 #endif
 
 
@@ -706,6 +705,11 @@ double object::initturbo( char const *lab, double tot = 0 )
 	if ( tot <= 0 )				// if size not informed, compute it
 		for ( tot = 0, cur = this->search( lab ); cur != NULL; ++tot, cur = go_brother( cur ) );
 
+#ifdef PARALLEL_MODE
+	// prevent concurrent initialization by more than one thread
+	lock_guard < mutex > lock( parallel_comp );
+#endif	
+
 	if ( cb->mn != NULL )		// remove existing mnode
 	{
 		cb->mn->empty( );
@@ -1001,6 +1005,11 @@ double object::initturbo_cond( char const *lab )
 		return 0;
 	}
 	
+#ifdef PARALLEL_MODE
+	// prevent concurrent initialization by more than one thread
+	lock_guard < mutex > lock( parallel_comp );
+#endif	
+
 	cb = bit->second;
 	cb->o_map.clear( );						// remove any existing mapping
 	
@@ -1550,6 +1559,11 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 		return NULL;
 	}
 	
+#ifdef PARALLEL_MODE
+	// prevent concurrent additions by more than one thread
+	lock_guard < mutex > lock( parallel_comp );
+#endif	
+
 	cb2->counter_updated = false;
 
 	// check if the objects are nodes in a network (avoid using EX from blueprint)
@@ -1575,16 +1589,6 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 		
 		cur->init( this, lab );
 
-		// update object list for user pointer checking
-		if ( ! no_ptr_chk )
-		{
-#ifdef PARALLEL_MODE
-			// prevent concurrent update by more than one thread
-			lock_guard < mutex > lock( parallel_obj_list );
-#endif	
-			obj_list.insert( cur );
-		}
-		
 		if ( net )						// if objects are nodes in a network
 		{
 			cur->node = new netNode( );	// insert new nodes in network (as isolated nodes)
@@ -1687,6 +1691,16 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 			last->next = cur;  
 
 		last = cur;
+		
+		// update object list for user pointer checking
+		if ( ! no_ptr_chk )
+		{
+#ifdef PARALLEL_MODE
+			// prevent concurrent update by more than one thread
+			lock_guard < mutex > lock( parallel_obj_list );
+#endif	
+			obj_list.insert( cur );
+		}
 	}
 
 	return first;
@@ -1742,7 +1756,7 @@ void object::delete_obj( void )
 	{							// create context for lock
 #ifdef PARALLEL_MODE
 		// prevent concurrent deletion by more than one thread
-		lock_guard < mutex > lock( parallel_delete );
+		lock_guard < mutex > lock( parallel_comp );
 #endif	
 
 		if ( deleting )			// ignore if deleting already going on
@@ -1771,6 +1785,16 @@ void object::delete_obj( void )
 			wait_delete = NULL;	// finally deleting pending object
 	}
 
+	// update object list for user pointer checking
+	if ( ! no_ptr_chk )
+	{
+#ifdef PARALLEL_MODE
+		// prevent concurrent update by more than one thread
+		lock_guard < mutex > lock( parallel_obj_list );
+#endif	
+		obj_list.erase( this );
+	}
+		
 	collect_cemetery( this );	// collect required variables BEFORE removing object from linked list
 
 	// find the bridge
@@ -1814,16 +1838,6 @@ void object::delete_obj( void )
 	if ( cb->search_var != NULL )	// indexed objects?
 		cb->o_map.erase( cal( cb->search_var, 0 ) );	// try to remove map entry
 
-	// update object list for user pointer checking
-	if ( ! no_ptr_chk )
-	{
-#ifdef PARALLEL_MODE
-		// prevent concurrent update by more than one thread
-		lock_guard < mutex > lock( parallel_obj_list );
-#endif	
-		obj_list.erase( this );
-	}
-		
 	empty( );
 	
 	delete this;
@@ -2496,6 +2510,11 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 		return NULL;
 	} 
 	
+#ifdef PARALLEL_MODE
+	// prevent concurrent sorting by more than one thread
+	lock_guard < mutex > lock( parallel_comp );
+#endif	
+
 	cb->counter_updated = false;
 	cur = cb->head;
 
@@ -2628,6 +2647,11 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 					"create object in model structure" );
 		return NULL;
 	}
+
+#ifdef PARALLEL_MODE
+	// prevent concurrent sorting by more than one thread
+	lock_guard < mutex > lock( parallel_comp );
+#endif	
 
 	cb->counter_updated = false;
 	cur = cb->head;

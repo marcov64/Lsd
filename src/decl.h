@@ -192,6 +192,10 @@ struct object
 	b_mapT b_map;						// fast lookup map to object bridges
 	v_mapT v_map;						// fast lookup map to variables
 
+#ifdef PARALLEL_MODE
+	mutex parallel_comp;				// mutex lock for parallel computations
+#endif
+
 	bool load_param( char *file_name, int repl, FILE *f );
 	bool load_struct( FILE *f );
 	bool under_computation( void );
