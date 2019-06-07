@@ -3498,6 +3498,10 @@ void statistics( int* choice, int abmat)
   }
 
   if (abmat==1){//abmat compare
+    if ( nv != 2 ) {		// no variables selected
+        cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Less or more than two series selected\" -detail \"Place only two series in the Series Selected listbox.\"" );
+        return;
+    }  
     if ( logs )
         cmd( ".log.text.text.internal insert end \"\n\nTime series comparison statistics (in log):\n\n\" tabel" );
     else
@@ -3508,10 +3512,6 @@ void statistics( int* choice, int abmat)
 
   }
   else if (abmat==2){ //abmat 8 stats
-    if ( nv != 2 ) {		// no variables selected
-        cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Less or more than two series selected\" -detail \"Place only two series in the Series Selected listbox.\"" );
-        return;
-    }
     if ( logs )
         cmd( ".log.text.text.internal insert end \"\n\nTime series Abmat statistics (in log):\n\n\" tabel" );
     else
