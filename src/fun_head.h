@@ -657,63 +657,63 @@ bool no_ptr_chk = true;
   //  bool object::init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap, int _lag, int n){
   // Initialise the regular space and use the object LAB contained in p as "Patches"
   // Using Column Major (change?) the objects are added to a 2d grid and get xy coords respectively
-  #define INIT_SPACE_GRID( LAB, XN, YN )             { p->init_gis_regularGrid( LAB, XN, YN, 0, 0 ); }
-  #define INIT_SPACE_GRIDS(PTR, LAB, XN, YN )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, 0 ); }
+  #define INIT_SPACE_PATCH( LAB, XN, YN )             { p->init_gis_regularGrid( LAB, XN, YN, 0, 0 ); }
+  #define INIT_SPACE_PATCH_WHERE(LAB, XN, YN, WHERE )             { WHERE->init_gis_regularGrid( LAB, XN, YN, 0, 0 ); }
   
-  #define INIT_SPACE_GRIDL( LAB, XN, YN, TIME )             { p->init_gis_regularGrid( LAB, XN, YN, 0, TIME ); }
-  #define INIT_SPACE_GRIDLS(PTR, LAB, XN, YN, TIME )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, TIME ); }
+  #define INIT_SPACE_PATCHL( LAB, XN, YN, TIME )             { p->init_gis_regularGrid( LAB, XN, YN, 0, TIME ); }
+  #define INIT_SPACE_PATCHL_WHERE( LAB, XN, YN, TIME, WHERE )             { WHERE->init_gis_regularGrid( LAB, XN, YN, 0, TIME ); }
   
-  #define INIT_SPACE_GRID_WRAP( LAB, XN, YN, WRAP )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, 0 ); }
-  #define INIT_SPACE_GRID_WRAPS( PTR, LAB, XN, YN, WRAP )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, 0 ); }
+  #define INIT_SPACE_PATCH_WRAP( LAB, XN, YN, WRAP )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, 0 ); }
+  #define INIT_SPACE_PATCH_WRAP_WHERE( LAB, XN, YN, WRAP, WHERE )  { WHERE->init_gis_regularGrid( LAB, XN, YN, WRAP, 0 ); }
   
-  #define INIT_SPACE_GRID_WRAPL( LAB, XN, YN, WRAP, TIME )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME ); }
-  #define INIT_SPACE_GRID_WRAPLS( PTR, LAB, XN, YN, WRAP, TIME )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME ); }
+  #define INIT_SPACE_PATCH_WRAPL( LAB, XN, YN, WRAP, TIME )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME ); }
+  #define INIT_SPACE_PATCH_WRAPL_WHERE( LAB, XN, YN, WRAP, TIME, WHERE )  { WHERE->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME ); }
   
   //n versions with sparce space
-  #define INIT_SPACE_GRIDN( LAB, XN, YN, N )             { p->init_gis_regularGrid( LAB, XN, YN, 0, 0, N ); }
-  #define INIT_SPACE_GRIDNS(PTR, LAB, XN, YN, N )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, 0, N ); }
+  #define INIT_SPACE_PATCHN( LAB, XN, YN, N )             { p->init_gis_regularGrid( LAB, XN, YN, 0, 0, N ); }
+  #define INIT_SPACE_PATCHN_WHERE( LAB, XN, YN, N, WHERE )             { WHERE->init_gis_regularGrid( LAB, XN, YN, 0, 0, N ); }
   
-  #define INIT_SPACE_GRIDNL( LAB, XN, YN, N, TIME )             { p->init_gis_regularGrid( LAB, XN, YN, 0, TIME, N ); }
-  #define INIT_SPACE_GRIDNLS(PTR, LAB, XN, YN, N, TIME )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, TIME, N ); }
+  #define INIT_SPACE_PATCHNL( LAB, XN, YN, N, TIME )             { p->init_gis_regularGrid( LAB, XN, YN, 0, TIME, N ); }
+  #define INIT_SPACE_PATCHNL_WHERE( LAB, XN, YN, N, TIME, WHERE )             { WHERE->init_gis_regularGrid( LAB, XN, YN, 0, TIME, N ); }
   
-  #define INIT_SPACE_GRID_WRAPN( LAB, XN, YN, WRAP, N )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, 0, N ); }
-  #define INIT_SPACE_GRID_WRAPNS( PTR, LAB, XN, YN, WRAP, N )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, 0, N ); }
+  #define INIT_SPACE_PATCH_WRAPN( LAB, XN, YN, WRAP, N )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, 0, N ); }
+  #define INIT_SPACE_PATCH_WRAPN_WHERE(  LAB, XN, YN, WRAP, N, WHERE )  { WHERE->init_gis_regularGrid( LAB, XN, YN, WRAP, 0, N ); }
   
-  #define INIT_SPACE_GRID_WRAPNL( LAB, XN, YN, WRAP, N , TIME )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME, N ); }
-  #define INIT_SPACE_GRID_WRAPNLS( PTR, LAB, XN, YN, WRAP, N, TIME )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME, N ); }
+  #define INIT_SPACE_PATCH_WRAPNL( LAB, XN, YN, WRAP, N , TIME )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME, N ); }
+  #define INIT_SPACE_PATCH_WRAPNL_WHERE(  LAB, XN, YN, WRAP, N, TIME, WHERE )  { WHERE->init_gis_regularGrid( LAB, XN, YN, WRAP, TIME, N ); }
   
   #define SET_GIS_DISTANCE_TYPE( TYPE ) { p->set_distance_type( TYPE ) ; }
-  #define SET_GIS_DISTANCE_TYPES( PTR, TYPE ) { PTR->set_distance_type( TYPE ) ; }
+  #define SET_GIS_DISTANCE_TYPE_WHERE( TYPE, WHERE ) { WHERE->set_distance_type( TYPE ) ; }
   
   // DELETE_SPACE / DELETE_FROM_SPACE
   // Delete the map and unregister all object-registrations in the map. Do not delte the LSD objects.
-  #define DELETE_SPACE( OBJ ) { OBJ->delete_map(); }
+  #define DELETE_SPACE( WHERE ) { WHERE->delete_map(); }
   #define DELETE_FROM_SPACE { p->unregister_from_gis(); }
   #define DELETE_FROM_SPACES( PTR ) { PTR->unregister_from_gis(); }
   
   // ADD_TO_SPACE
   // Register object in space, providing explicit x,y position or sharing object
   // If already registered, move instead and print info.
-  #define ADD_TO_SPACE_XY( GISOBJ, X, Y)  { ( p==GISOBJ ? false : p->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
-  #define ADD_TO_SPACE_XYS( PTR, GISOBJ, X, Y)  { ( PTR==GISOBJ ? false : PTR->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
-  #define ADD_TO_SPACE_SHARE(TARGET) { p->register_at_map(TARGET); }
-  #define ADD_TO_SPACE_SHARES(PTR, TARGET) { PTR->register_at_map(TARGET); }
+  #define ADD_TO_SPACE_XY_WHERE( X, Y, WHERE)  { p->register_at_map(WHERE->ptr_map(), X, Y); }
+  #define ADD_TO_SPACE_XYS_WHERE( PTR, X, Y, WHERE)  { PTR->register_at_map(WHERE, X, Y); }
+  #define ADD_TO_SPACE_SHARE_WHERE( WHERE ) { p->register_at_map(WHERE); }
+  #define ADD_TO_SPACE_SHARES_WHERE(PTR, WHERE) { PTR->register_at_map(WHERE); }
   
-  #define ADD_TO_SPACE_CENTER_XY( GISOBJ, X, Y, X2, Y2)  { ( p==GISOBJ ? false : p->register_at_map_between(GISOBJ->ptr_map(), X, Y, X2, Y2) ); }
-  #define ADD_TO_SPACE_CENTER_XYS( PTR, GISOBJ, X, Y, X2, Y2)  { ( PTR==GISOBJ ? false : PTR->register_at_map_between(GISOBJ->ptr_map(), X, Y, X2, Y2) ); }
-  #define ADD_TO_SPACE_CENTER_SHARE(TARGET, TARGET2) { p->register_at_map_between(TARGET, TARGET2); }
-  #define ADD_TO_SPACE_CENTER_SHARES(PTR, TARGET, TARGET2) { PTR->register_at_map_between(TARGET, TARGET2); }
+  #define ADD_TO_SPACE_CENTER_XY_WHERE( X, Y, X2, Y2, WHERE)  { p->register_at_map_between(WHERE, X, Y, X2, Y2); }
+  #define ADD_TO_SPACE_CENTER_XYS_WHERE( PTR, X, Y, X2, Y2, WHERE)  { PTR->register_at_map_between(WHERE, X, Y, X2, Y2); }
+  #define ADD_TO_SPACE_CENTER_SHARE_WHERE2(WHERE1, WHERE2) { p->register_at_map_between(WHERE1, WHERE2); }
+  #define ADD_TO_SPACE_CENTER_SHARES_WHERE2(PTR, WHERE1, WHERE2) { PTR->register_at_map_between(WHERE1, WHERE2); }
   
-  #define ADD_TO_SPACE_RND(TARGET) { p->register_at_map_rnd(TARGET); }
-  #define ADD_TO_SPACE_RNDS(PTR, TARGET) { PTR->register_at_map_rnd(TARGET); }
-  #define ADD_TO_SPACE_RND_GRID(TARGET) { p->register_at_map_rnd(TARGET,true); }
-  #define ADD_TO_SPACE_RND_GRIDS(PTR, TARGET) { PTR->register_at_map_rnd(TARGET,true); }
+  #define ADD_TO_SPACE_RND_WHERE(WHERE) { p->register_at_map_rnd(WHERE); }
+  #define ADD_TO_SPACE_RNDS_WHERE(PTR, WHERE) { PTR->register_at_map_rnd(WHERE); }
+  #define ADD_TO_SPACE_RND_GRID_WHERE(WHERE) { p->register_at_map_rnd(WHERE,true); }
+  #define ADD_TO_SPACE_RND_GRIDS_WHERE(PTR, WHERE) { PTR->register_at_map_rnd(WHERE,true); }
   
-  #define ADD_ALL_TO_SPACE( obj ) { p->register_allOfKind_at_grid_rnd( obj); }
-  #define ADD_ALL_TO_SPACES( GISOBJ, obj ) { GISOBJ->register_allOfKind_at_grid_rnd( obj); }
+  #define ADD_ALL_TO_SPACE_WHERE( WHERE ) { p->register_allOfKind_at_grid_rnd( WHERE ); }
+  #define ADD_ALL_TO_SPACES_WHERE( PTR, WHERE ) { PTR->register_allOfKind_at_grid_rnd( WHERE); }
   
-  #define ADD_ALL_TO_SPACE_CND( obj, condVarLab, condition, condVal ) { p->register_allOfKind_at_grid_rnd_cnd( obj, condVarLab, condition, condVal); }
-  #define ADD_ALL_TO_SPACE_CNDS( GISOBJ, obj, condVarLab, condition, condVal ) { GISOBJ->register_allOfKind_at_grid_rnd_cnd( obj, condVarLab, condition, condVal); }
+  #define ADD_ALL_TO_SPACE_CND_WHERE( condVarLab, condition, condVal, WHERE ) { p->register_allOfKind_at_grid_rnd_cnd( WHERE, condVarLab, condition, condVal); }
+  #define ADD_ALL_TO_SPACE_CNDS_WHERE( PTR, condVarLab, condition, condVal, WHERE ) { PTR->register_allOfKind_at_grid_rnd_cnd( WHERE, condVarLab, condition, condVal); }
   
   // POSITION
   // Macros to get x or y position or produce random position
@@ -725,12 +725,39 @@ bool no_ptr_chk = true;
   #define POSITION_ZS(PTR) ( PTR->get_pos('z') )
   #define RANDOM_POSITION_X ( p->random_pos('x') )
   #define RANDOM_POSITION_Y ( p->random_pos('y') )
-  #define RANDOM_POSITION_XS(GISOBJ) ( GISOBJ->random_pos('x') )
-  #define RANDOM_POSITION_YS(GISOBJ) ( GISOBJ->random_pos('y') )
+  #define RANDOM_POSITION_X_WHERE(WHERE) ( WHERE->random_pos('x') )
+  #define RANDOM_POSITION_Y_WHERE(WHERE) ( WHERE->random_pos('y') )
   
-  #define POSITION_INTERCEPT(OBJ1, OBJ2, REL_POS) { p->position_between(v[0], v[1], OBJ1, OBJ2, REL_POS); }
+  #define CENTER_POSITIONX ( p->center_position('x') )
+  #define CENTER_POSITIONY ( p->center_position('y') )
+  #define CENTER_POSITIONX_WHERE( WHERE ) ( WHERE->center_position('x') )
+  #define CENTER_POSITIONY_WHERE( WHERE ) ( WHERE->center_position('y') )
+  
+  #define POSITION_INTERCEPT_WHERE2(REL_POS, OBJ1, OBJ2) { p->position_between(v[0], v[1], OBJ1, OBJ2, REL_POS); }
   #define POSITION_INTERCEPT_XY(x1, y1, x2, y2, REL_POS) { p->position_between(v[0], v[1], x1, y1, x2, y2, REL_POS); }
-  #define POSITION_INTERCEPT_XYS(PTR,x1, y1, x2, y2, REL_POS) { PTR->position_between(v[0], v[1], x1, y1, x2, y2, REL_POS); }
+  #define POSITION_INTERCEPT_XY_WHERE(x1, y1, x2, y2, REL_POS, WHERE) { WHERE->position_between(v[0], v[1], x1, y1, x2, y2, REL_POS); }
+  
+  
+  
+  // DISTANCE
+  // measures the distance from self to a TARGET or a position
+  #define DISTANCE_TO(TARGET) ( p -> distance (TARGET) )
+  #define DISTANCE_FROM(SOURCE) ( SOURCE -> distance (p) ) //only relevant for asymmetric wrapping
+  #define DISTANCE_TO_XY(X, Y) ( p-> distance (X,Y) )
+  #define DISTANCE_TO_XYS(PTR, X, Y) ( PTR-> distance (X,Y) )
+  
+  //DISTANCE2 - Distance between different items / points in space
+  #define DISTANCE_BETWEEN(TARGET1, TARGET2) ( TARGET1 -> distance (TARGET2) )
+  #define DISTANCE_BETWEEN_XY(X1, Y1, X2, Y2) ( p-> distance (X1, Y1, X2, Y2) )
+  #define DISTANCE_BETWEEN_WHERE(X1, Y1, X2, Y2, WHERE) ( WHERE-> distance (X1, Y1, X2, Y2) )
+  
+  #define RELATIVE_DISTANCE( dist ) ( p->relative_distance(dist) )
+  #define RELATIVE_DISTANCE_WHERE( dist, WHERE ) ( WHERE->relative_distance(dist) )
+  
+  #define ABSOLUTE_DISTANCE( dist ) ( p->absolute_distance(dist) )
+  #define ABSOLUTE_DISTANCE_WHERE( dist, WHERE ) ( WHERE->absolute_distance(dist) )
+  
+  
   
   // MOVE
   // move a single step in one of eight directions
@@ -756,9 +783,9 @@ bool no_ptr_chk = true;
   
   //Cycle through all the objects LAB anywhere in random order (RCYCLE) or unsorted fast (FCYCLE)
   #define RCYCLE_GIS( O, LAB ) for ( O = p->first_neighbour_full(LAB, true); O != NULL; O = p->next_neighbour() )
-  #define RCYCLE_GISS( C, O, LAB ) for ( O = C->first_neighbour_full(LAB, true); O != NULL; O = C->next_neighbour() )
+  #define RCYCLE_GIS_WHERE( O, LAB, WHERE ) for ( O = WHERE->first_neighbour_full(LAB, true); O != NULL; O = WHERE->next_neighbour() )
   #define FCYCLE_GIS( O, LAB ) for ( O = p->first_neighbour_full(LAB, false); O != NULL; O = p->next_neighbour() )
-  #define FCYCLE_GISS( C, O, LAB ) for ( O = C->first_neighbour_full(LAB, false); O != NULL; O = C->next_neighbour() )
+  #define FCYCLE_GIS_WHERE( O, LAB, WHERE ) for ( O = WHERE->first_neighbour_full(LAB, false); O != NULL; O = WHERE->next_neighbour() )
   
   // CYCLE_NEIGHBOUR
   // Cycle through all the objects LAB within radius RAD by increasing radius
@@ -854,6 +881,21 @@ bool no_ptr_chk = true;
   // For each candidate it is checked if the Variable VAR with lag LAG called by
   // either the candidate or CHEAT_C is  COND (<,>,==,!=) CONDVAL
   // Note that CHEAT does not work with NULL.
+  
+  #define NEAREST(LAB) ( p->closest_in_distance(LAB, -1, true) )
+  #define NEARESTS(PTR, LAB) ( PTR->closest_in_distance(LAB, -1, true) )
+  
+  #define NEAREST_CND(LAB, VAR, COND, CONDVAL ) ( p->closest_in_distance(LAB, -1, true, NULL, 0, VAR, COND, CONDVAL) )
+  #define NEAREST_CNDS(PTR, LAB, VAR, COND, CONDVAL ) ( PTR->closest_in_distance(LAB, -1, true, NULL, 0, VAR, COND, CONDVAL) )
+  
+  #define NEAREST_CNDL(LAB, VAR, COND, CONDVAL, LAG ) ( p->closest_in_distance(LAB, -1, true, NULL, LAG, VAR, COND, CONDVAL) )
+  #define NEAREST_CNDLS(PTR, LAB, VAR, COND, CONDVAL, LAG ) ( PTR->closest_in_distance(LAB, -1, true, NULL, LAG, VAR, COND, CONDVAL) )
+  
+  #define NEAREST_CND_CHEAT(LAB, VAR, COND, CONDVAL, CHEAT_C  ) ( p->closest_in_distance(LAB, -1, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
+  #define NEAREST_CND_CHEATS(PTR, LAB, VAR, COND, CONDVAL, CHEAT_C  ) ( PTR->closest_in_distance(LAB, -1, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
+  
+  
+  
   #define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )
   #define NEAREST_IN_DISTANCES(PTR, LAB, RAD) ( PTR->closest_in_distance(LAB, RAD, true) )
   
@@ -866,27 +908,15 @@ bool no_ptr_chk = true;
   #define NEAREST_IN_DISTANCE_CND_CHEAT(LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
   #define NEAREST_IN_DISTANCE_CND_CHEATS(PTR, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
   
-  // DISTANCE
-  // measures the distance from self to a TARGET or a position
-  #define DISTANCE(TARGET) ( p -> distance (TARGET) )
-  #define DISTANCE_XY(X, Y) ( p-> distance (X,Y) )
-  #define DISTANCE_XYS(PTR, X, Y) ( PTR-> distance (X,Y) )
+  // SEARCH_POSITION_NEIGHBOUR, RSEARCH_POSITION_NEIGHBOUR
+  // Searches at one patch in given direction.
   
-  //DISTANCE2 - Distance between different items / points in space
-  #define DISTANCE2(TARGET1, TARGET2) ( TARGET1 -> distance (TARGET2) )
-  #define DISTANCE2_XY(X1, Y1, X2, Y2) ( p-> distance (X1, Y1, X2, Y2) )
-  #define DISTANCE2_XYS(PTR, X1, Y1, X2, Y2) ( PTR-> distance (X1, Y1, X2, Y2) )
   
-  #define RELATIVE_DISTANCE( dist ) ( p->relative_distance(dist) )
-  #define RELATIVE_DISTANCES( PTR, dist ) ( PTR->relative_distance(dist) )
+  #define SEARCH_POSITION_NEIGHBOUR(LAB, direction)  ( p->search_at_neighbour_position(LAB, direction, true) )
+  #define SEARCH_POSITION_NEIGHBOURS(PTR, LAB, direction)  ( PTR->search_at_neighbour_position(LAB, direction, true) )
+  #define RSEARCH_POSITION_NEIGHBOUR(LAB, direction)  ( p->search_at_neighbour_position(LAB, direction, false) )
+  #define RSEARCH_POSITION_NEIGHBOURS(PTR, LAB, direction)  ( PTR->search_at_neighbour_position(LAB, direction, false) )
   
-  #define ABSOLUTE_DISTANCE( dist ) ( p->absolute_distance(dist) )
-  #define ABSOLUTE_DISTANCES( PTR, dist ) ( PTR->absolute_distance(dist) )
-  
-  #define CENTER_POSITIONX ( p->center_position('x') )
-  #define CENTER_POSITIONY ( p->center_position('y') )
-  #define CENTER_POSITIONXS( PTR ) ( PTR->center_position('x') )
-  #define CENTER_POSITIONYS( PTR ) ( PTR->center_position('y') )
   
   //  SEARCH_POSITION, RSEARCH_POSITION
   //  Searches at an exact position for an object with label LAB
@@ -896,21 +926,15 @@ bool no_ptr_chk = true;
   //  Change style
   
   #define SEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, true) )
-  #define SEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, true) )
+  #define SEARCH_POSITION_XY_WHERE( LAB, X, Y, WHERE )  ( WHERE->search_at_position(LAB, X, Y, true) )
   #define SEARCH_POSITION(LAB)  ( p->search_at_position(LAB, true) )
   #define SEARCH_POSITIONS(PTR, LAB)  ( PTR->search_at_position(LAB, true) )
-  #define SEARCH_POSITION_NEIGHBOUR(LAB, direction)  ( p->search_at_neighbour_position(LAB, direction, true) )
-  #define SEARCH_POSITION_NEIGHBOURS(PTR, LAB, direction)  ( PTR->search_at_neighbour_position(LAB, direction, true) )
-  
-  
   
   
   #define RSEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, false) )
-  #define RSEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, false) )
+  #define RSEARCH_POSITION_XY_WHERE( LAB, X, Y, WHERE)  ( WHERE->search_at_position(LAB, X, Y, false) )
   #define RSEARCH_POSITION(LAB)  ( p->search_at_position(LAB, false) )
   #define RSEARCH_POSITIONS(PTR, LAB)  ( PTR->search_at_position(LAB, false) )
-  #define RSEARCH_POSITION_NEIGHBOUR(LAB, direction)  ( p->search_at_neighbour_position(LAB, direction, false) )
-  #define RSEARCH_POSITION_NEIGHBOURS(PTR, LAB, direction)  ( PTR->search_at_neighbour_position(LAB, direction, false) )
   
   //  SEARCH_POSITION_GRID and SEARCH_POSITION_RND_GRID
   //  Similar to above, but it searches at the truncated position.
@@ -920,12 +944,12 @@ bool no_ptr_chk = true;
   //  this command.
   
   #define SEARCH_POSITION_GRID_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, true) )
-  #define SEARCH_POSITION_GRID_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, trunc(X), trunc(Y), true) )
+  #define SEARCH_POSITION_GRID_XY_WHERE( LAB, X, Y, WHERE)  ( WHERE->search_at_position(LAB, trunc(X), trunc(Y), true) )
   #define SEARCH_POSITION_GRID(LAB)  ( p->search_at_position(LAB, true, true) )
   #define SEARCH_POSITION_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, true, true) )
   
   #define RSEARCH_POSITION_GRID_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, false) )
-  #define RSEARCH_POSITION_GRID_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, trunc(X), trunc(Y), false) )
+  #define RSEARCH_POSITION_GRID_XY_WHERE( LAB, X, Y, WHERE)  ( WHERE->search_at_position(LAB, trunc(X), trunc(Y), false) )
   #define RSEARCH_POSITION_GRID(LAB)  ( p->search_at_position(LAB, false, true) )
   #define RSEARCH_POSITION_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, false, true) )
   
@@ -937,7 +961,7 @@ bool no_ptr_chk = true;
   #define COUNT_POSITIONS(PTR, LAB) ( PTR->elements_at_position( LAB, false ) )
   
   #define COUNT_POSITION_XY(LAB, X, Y)  ( p->elements_at_position( LAB, X, Y ) )
-  #define COUNT_POSITION_XYS(PTR, LAB, X, Y) ( PTR->elements_at_position( LAB, X, Y ) )
+  #define COUNT_POSITION_XY_WHERE( LAB, X, Y, WHERE) ( WHERE->elements_at_position( LAB, X, Y ) )
   
   #define COUNT_POSITION_GRID(LAB)  ( p->elements_at_position( LAB, true ) )
   #define COUNT_POSITION_GRIDS(PTR, LAB) ( PTR->elements_at_position( LAB, true ) )
@@ -1019,14 +1043,14 @@ bool no_ptr_chk = true;
   //The txt file is in the format x \t y \t value \n
   #define LOAD_DATA_GIS(inputfile, obj_lab, var_lab ) p->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
   #define LOAD_DATA_GISL(inputfile, obj_lab, var_lab, t_update ) p->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t_update )
-  #define LOAD_DATA_GISS(PTR, inputfile, obj_lab, var_lab ) PTR->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
-  #define LOAD_DATA_GISSL(PTR, inputfile, obj_lab, var_lab, t_update ) PTR->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t_update )
+  #define LOAD_DATA_GIS_WHERE(inputfile, obj_lab, var_lab, WHERE ) WHERE->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
+  #define LOAD_DATA_GISL_WHERE(inputfile, obj_lab, var_lab, t_update, WHERE ) WHERE->load_data_gis( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t_update )
   
   //The txt file is in gridded format with row and colum headers. In the grid single values are stored. (0,0) is bottom left.
   #define LOAD_DATA_GIS_MAT(inputfile, obj_lab, var_lab ) p->load_data_gis_mat( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
   #define LOAD_DATA_GIS_MATL(inputfile, obj_lab, var_lab, t_update ) p->load_data_gis_mat( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t_update )
-  #define LOAD_DATA_GIS_MATS(PTR, inputfile, obj_lab, var_lab ) PTR->load_data_gis_mat( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
-  #define LOAD_DATA_GIS_MATSL(PTR, inputfile, obj_lab, var_lab, t_update ) PTR->load_data_gis_mat( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t_update )
+  #define LOAD_DATA_GIS_MAT_WHERE(inputfile, obj_lab, var_lab, WHERE ) WHERE->load_data_gis_mat( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t )
+  #define LOAD_DATA_GIS_MATL_WHERE(inputfile, obj_lab, var_lab, t_update, WHERE ) WHERE->load_data_gis_mat( (const char *) inputfile, (const char *) obj_lab, (const char *) var_lab, t_update )
   
   
   // Some simple functions to load data to rapidscv::Document type

@@ -630,6 +630,11 @@ bool object::register_at_map_rnd(object* gisObj, bool snap_grid)
 
 //  register_at_map
 //  register the object at the map, using x and y positions
+bool object::register_at_map(object* where, double _x, double _y, int lattice_color, int lattice_priority)
+{
+  return register_at_map(where->ptr_map(), _x, _y, lattice_color, lattice_priority);
+}
+
 bool object::register_at_map(gisMap* map, double _x, double _y, int lattice_color, int lattice_priority)
 {
   if (map == NULL) {

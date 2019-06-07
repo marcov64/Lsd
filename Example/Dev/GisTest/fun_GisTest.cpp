@@ -29,7 +29,7 @@ cur = SEARCH("Patch"); //Get first object of "Patch" type. This will be our fixe
 
 /***** Some operations just to check if they work **/
 int xn=5;int yn=5;
-INIT_SPACE_GRID("Patch",xn,yn); //Initialise Grid
+INIT_SPACE_PATCH("Patch",xn,yn); //Initialise Grid
 PLOG("\n")
 // Print info on space.
 
@@ -52,7 +52,7 @@ PLOG("\n")
    
     int x=2;int y=2;
     
-object* patch = SEARCH_POSITION_XYS(SEARCH("Patch"),"Patch",x,y);
+object* patch = SEARCH_POSITION_XY_WHERE("Patch",x,y,SEARCH("Patch"));
 
 PLOG("\n Position and RandPosition Test");
 PLOG("\nCurrent Poistion(%g,%g,%g)",POSITION_XS(cur),POSITION_YS(cur),POSITION_ZS(cur));
@@ -78,7 +78,7 @@ MOVES(cur,"sw");
 PLOG("\n After moving to SouthWest dir Agent is at (%g,%g)",POSITION_XS(cur),POSITION_YS(cur));
 
 int dist=1;//radius less than one is error//
-patch = SEARCH_POSITION_XYS(cur,"Patch",1,1);
+patch = SEARCH_POSITION_XY_WHERE("Patch",1,1,cur);
 cur=NEAREST_IN_DISTANCES(patch,"Patch",dist);
  PLOG("\n%s (%g,%g) looks for nearest 'Patch' in distance of %i. Result is %s at (%g,%g)"
  ,patch->label,POSITION_XS(patch),POSITION_YS(patch),dist,cur->label,POSITION_XS(cur),POSITION_YS(cur));
@@ -105,7 +105,7 @@ cur=NEAREST_IN_DISTANCES(patch,"Patch",dist);
 
 
 PLOG("\n Generating Random Position within grid")
-PLOG("\n Rand Post  is (%g,%g)  ",RANDOM_POSITION_XS(cur),RANDOM_POSITION_YS(cur))
+PLOG("\n Rand Post  is (%g,%g)  ",RANDOM_POSITION_X_WHERE(cur),RANDOM_POSITION_Y_WHERE(cur))
 
 PLOG("\n Creating 16 agents")
 ADDNOBJ("Agent",V("n_agents")-1);
@@ -116,7 +116,7 @@ PLOG("\n Adding them to grid from (0,0) to (3,3) and giving random colors")
 
 CYCLE(cur1,"Agent"){ //link to all remaining items manually. Items linked already to the same space are only moved.
  
-  ADD_TO_SPACE_XYS(cur1,cur,x,y);
+  ADD_TO_SPACE_XYS_WHERE(cur1,x,y,cur);
   WRITES(cur1,"Colour",uniform_int(0,20));  
    WRITES(cur1,"Agent_ID",V("Get_ID"));
   x++;
@@ -126,7 +126,7 @@ CYCLE(cur1,"Agent"){ //link to all remaining items manually. Items linked alread
   }
  } 
  
-cur1=SEARCH_POSITION_XYS(cur,"Agent",3,3) ;
+cur1=SEARCH_POSITION_XY_WHERE("Agent",3,3,cur) ;
 PLOG("\nSearched for Agent at position 0,3 and found %s at (%g,%g) with color %g\n",cur1->label,POSITION_XS(cur1),POSITION_YS(cur1),VS(cur1,"Colour") );
 
 cur = SEARCH("Agent"); 
@@ -140,7 +140,7 @@ for (int y =cur->position->map->yn; y >0 ; y--) {
  PLOG("\nLooking for 'Patch' in distance %g to 'Patch' with pos (%g,%g)",rad,POSITION_XS(patch),POSITION_YS(patch));   
  DCYCLE_NEIGHBOURS(patch,cur,"Patch",rad){
     PLOG("\n%i %s at (%g,%g) : distance %g position (%g,%g)", ++i,patch->label,
-    POSITION_XS(patch),POSITION_YS(patch), DISTANCE2(patch,cur),
+    POSITION_XS(patch),POSITION_YS(patch), DISTANCE_BETWEEN(patch,cur),
     POSITION_XS(cur),POSITION_YS(cur)  );
   }
   
@@ -161,7 +161,7 @@ if (V("Manual_Seed")>0){
 cur = SEARCH("Patch"); 
 DELETE_SPACE(cur)
 int xn=8;int yn=8;
-INIT_SPACE_GRID_WRAP("Patch",xn,yn,V("Wrap")); //Initialise Grid
+INIT_SPACE_PATCH_WRAP("Patch",xn,yn,V("Wrap")); //Initialise Grid
 
 // Print info on space.
 
@@ -177,79 +177,79 @@ INIT_SPACE_GRID_WRAP("Patch",xn,yn,V("Wrap")); //Initialise Grid
     }
    PLOG("\nTesting Wraping Left-Right");
     PLOG("\nOn Boundary");
- object* patch = SEARCH_POSITION_XYS(cur,"Patch",0,1);
- object* target = SEARCH_POSITION_XYS(cur,"Patch",7,1);
+ object* patch = SEARCH_POSITION_XY_WHERE("Patch",0,1,cur);
+ object* target = SEARCH_POSITION_XY_WHERE("Patch",7,1,cur);
   PLOG("\n  Distance between two patches at (%g,%g) and at (%g,%g)  respectively is %g "
   				,POSITION_XS(patch),POSITION_YS(patch),POSITION_XS(target),POSITION_YS(target)
-  				,DISTANCE2(patch,target))
+  				,DISTANCE_BETWEEN(patch,target))
   			PLOG("\nInside Grid");	
-    patch = SEARCH_POSITION_XYS(cur,"Patch",7,1);
-  target = SEARCH_POSITION_XYS(cur,"Patch",0,1);
+    patch = SEARCH_POSITION_XY_WHERE("Patch",7,1,cur);
+  target = SEARCH_POSITION_XY_WHERE("Patch",0,1,cur);
   PLOG("\n  Distance between two patches at (%g,%g) and at (%g,%g)  respectively is %g "
   				,POSITION_XS(patch),POSITION_YS(patch),POSITION_XS(target),POSITION_YS(target)
-  				,DISTANCE2(patch,target))
+  				,DISTANCE_BETWEEN(patch,target))
  ////////////////////////////// 
  PLOG("\nTesting Wraping Up-Bottom");
   PLOG("\nOn Boundary");
-    patch = SEARCH_POSITION_XYS(cur,"Patch",1,7);
-  target = SEARCH_POSITION_XYS(cur,"Patch",1,0);
+    patch = SEARCH_POSITION_XY_WHERE("Patch",1,7,cur);
+  target = SEARCH_POSITION_XY_WHERE("Patch",1,0,cur);
   PLOG("\n  Distance between two patches at (%g,%g) and at (%g,%g)  respectively is %g "
   				,POSITION_XS(patch),POSITION_YS(patch),POSITION_XS(target),POSITION_YS(target)
-  				,DISTANCE2(patch,target))
-  				patch = SEARCH_POSITION_XYS(cur,"Patch",1,0);
-  target = SEARCH_POSITION_XYS(cur,"Patch",1,7);
+  				,DISTANCE_BETWEEN(patch,target))
+  				patch = SEARCH_POSITION_XY_WHERE("Patch",1,0,cur);
+  target = SEARCH_POSITION_XY_WHERE("Patch",1,7,cur);
   PLOG("\n  Distance between two patches at (%g,%g) and at (%g,%g)  respectively is %g "
   				,POSITION_XS(patch),POSITION_YS(patch),POSITION_XS(target),POSITION_YS(target)
-  				,DISTANCE2(patch,target))
+  				,DISTANCE_BETWEEN(patch,target))
  	PLOG("\nInside Grid");	
-    patch = SEARCH_POSITION_XYS(cur,"Patch",1,6);
-  target = SEARCH_POSITION_XYS(cur,"Patch",1,1);
+    patch = SEARCH_POSITION_XY_WHERE("Patch",1,6,cur);
+  target = SEARCH_POSITION_XY_WHERE("Patch",1,1,cur);
   PLOG("\n  Distance between two patches at (%g,%g) and at (%g,%g)  respectively is %g "
   				,POSITION_XS(patch),POSITION_YS(patch),POSITION_XS(target),POSITION_YS(target)
-  				,DISTANCE2(patch,target))
-  				patch = SEARCH_POSITION_XYS(cur,"Patch",1,1);
-  target = SEARCH_POSITION_XYS(cur,"Patch",1,6);
+  				,DISTANCE_BETWEEN(patch,target))
+  				patch = SEARCH_POSITION_XY_WHERE("Patch",1,1,cur);
+  target = SEARCH_POSITION_XY_WHERE("Patch",1,6,cur);
   PLOG("\n  Distance between two patches at (%g,%g) and at (%g,%g)  respectively is %g "
   				,POSITION_XS(patch),POSITION_YS(patch),POSITION_XS(target),POSITION_YS(target)
-  				,DISTANCE2(patch,target))
+  				,DISTANCE_BETWEEN(patch,target))
   ////////////////////////////////////////
    PLOG("\nTesting Wraping Diagonal Corners");
-    patch = SEARCH_POSITION_XYS(cur,"Patch",0,0);
-  target = SEARCH_POSITION_XYS(cur,"Patch",7,7);
+    patch = SEARCH_POSITION_XY_WHERE("Patch",0,0,cur);
+  target = SEARCH_POSITION_XY_WHERE("Patch",7,7,cur);
   PLOG("\n  Distance between two patches at (%g,%g) and at (%g,%g)  respectively is %g "
   				,POSITION_XS(patch),POSITION_YS(patch),POSITION_XS(target),POSITION_YS(target)
-  				,DISTANCE2(patch,target))
+  				,DISTANCE_BETWEEN(patch,target))
    
-    patch = SEARCH_POSITION_XYS(cur,"Patch",0,7);
-  target = SEARCH_POSITION_XYS(cur,"Patch",7,0);
+    patch = SEARCH_POSITION_XY_WHERE("Patch",0,7,cur);
+  target = SEARCH_POSITION_XY_WHERE("Patch",7,0,cur);
   PLOG("\n  Distance between two patches at (%g,%g) and at (%g,%g)  respectively is %g "
   				,POSITION_XS(patch),POSITION_YS(patch),POSITION_XS(target),POSITION_YS(target)
-  				,DISTANCE2(patch,target))
+  				,DISTANCE_BETWEEN(patch,target))
   
    PLOG("\nTesting Wraping Diagonal Corners");
-    patch = SEARCH_POSITION_XYS(cur,"Patch",0,0);
-  target = SEARCH_POSITION_XYS(cur,"Patch",0,7);
+    patch = SEARCH_POSITION_XY_WHERE("Patch",0,0,cur);
+  target = SEARCH_POSITION_XY_WHERE("Patch",0,7,cur);
   PLOG("\n  Distance between two patches at (%g,%g) and at (%g,%g)  respectively is %g "
   				,POSITION_XS(patch),POSITION_YS(patch),POSITION_XS(target),POSITION_YS(target)
-  				,DISTANCE2(patch,target))
+  				,DISTANCE_BETWEEN(patch,target))
    
-    patch = SEARCH_POSITION_XYS(cur,"Patch",0,0);
-  target = SEARCH_POSITION_XYS(cur,"Patch",7,7);
+    patch = SEARCH_POSITION_XY_WHERE("Patch",0,0,cur);
+  target = SEARCH_POSITION_XY_WHERE("Patch",7,7,cur);
   PLOG("\n  Distance between two patches at (%g,%g) and at (%g,%g)  respectively is %g "
   				,POSITION_XS(patch),POSITION_YS(patch),POSITION_XS(target),POSITION_YS(target)
-  				,DISTANCE2(patch,target))
-  				patch = SEARCH_POSITION_XYS(cur,"Patch",7,7);
-  target = SEARCH_POSITION_XYS(cur,"Patch",7,0);
+  				,DISTANCE_BETWEEN(patch,target))
+  				patch = SEARCH_POSITION_XY_WHERE("Patch",7,7,cur);
+  target = SEARCH_POSITION_XY_WHERE("Patch",7,0,cur);
   PLOG("\n  Distance between two patches at (%g,%g) and at (%g,%g)  respectively is %g "
   				,POSITION_XS(patch),POSITION_YS(patch),POSITION_XS(target),POSITION_YS(target)
-  				,DISTANCE2(patch,target))
-  	patch = SEARCH_POSITION_XYS(cur,"Patch",0,7);
-  target = SEARCH_POSITION_XYS(cur,"Patch",7,0);
+  				,DISTANCE_BETWEEN(patch,target))
+  	patch = SEARCH_POSITION_XY_WHERE("Patch",0,7,cur);
+  target = SEARCH_POSITION_XY_WHERE("Patch",7,0,cur);
   PLOG("\n  Distance between two patches at (%g,%g) and at (%g,%g)  respectively is %g "
   				,POSITION_XS(patch),POSITION_YS(patch),POSITION_XS(target),POSITION_YS(target)
-  				,DISTANCE2(patch,target))
+  				,DISTANCE_BETWEEN(patch,target))
  int dist=2;//radius less than one is error//
-patch = SEARCH_POSITION_XYS(cur,"Patch",1,1);
+patch = SEARCH_POSITION_XY_WHERE("Patch",1,1,cur);
 cur=NEAREST_IN_DISTANCES(patch,"Patch",dist);
  PLOG("\n%s (%g,%g) looks for nearest 'Patch' in distance of %i. Result is %s at (%g,%g)"
  ,patch->label,POSITION_XS(patch),POSITION_YS(patch),dist,cur->label,POSITION_XS(cur),POSITION_YS(cur));
@@ -307,7 +307,7 @@ PLOG("\nCreating new Agent");
 cur1 = ADDOBJ("Agent");
 PLOG("\nNew agent is not in space: %s",ANY_GISS(cur1)==true?"false":"true");
 PLOG("\nAdding Agent to random position");
-ADD_TO_SPACE_RNDS(cur1,cur); //Add agent to the space of cur, random position.
+ADD_TO_SPACE_RNDS_WHERE(cur1,cur); //Add agent to the space of cur, random position.
 PLOG("\nNew agent now shares the same GIS as the Target: %s",SAME_GISS(cur,cur1)==true?"true":"false");
 PLOG("\nIt is positioned at: %g,%g",POSITION_XS(cur1),POSITION_YS(cur1));
 
@@ -317,7 +317,7 @@ RESULT(0.0)
 
 EQUATION("TEST_LATTICE")
 /* Create a lattice and test it. */
- INIT_SPACE_GRID("lat_obj",20,20);
+ INIT_SPACE_PATCH("lat_obj",20,20);
  cur = SEARCH("lat_obj");
  INIT_LAT_GISS(cur);
  char filename[300];
@@ -325,7 +325,7 @@ EQUATION("TEST_LATTICE")
  sprintf(filename,"TestLattice_step_%i",step);
  SAVE_LAT_GIS(filename);
  PLOG("\nAdded the lattice. Bottom left corner should be black.");
- RCYCLE_GISS(cur,cur1,"lat_obj"){
+ RCYCLE_GIS_WHERE(cur1,"lat_obj",cur){
   if (POSITION_XS(cur1) < 5)
     PLOG("\nChanging colour for position (%g,%g) from %g",POSITION_XS(cur1),POSITION_YS(cur1), V_LAT_GIS_XYS(cur,POSITION_XS(cur1),POSITION_YS(cur1)));
   WRITE_LAT_GISS(cur1,max(POSITION_XS(cur1),POSITION_YS(cur1)));

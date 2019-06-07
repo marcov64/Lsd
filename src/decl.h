@@ -473,6 +473,7 @@ struct object {
   void register_allOfKind_at_grid_rnd(object* obj);
   void register_allOfKind_at_grid_rnd_cnd(object* obj, char const varLab[], char const condition[], double condVal);
   bool register_at_map_rnd(object* gisObj, bool snap_grid = false);
+  bool register_at_map(object* where, double _x, double _y, int lattice_color = 0, int lattice_priority = -1);
   bool register_at_map(gisMap* map, double _x, double _y, int lattice_color = 0, int lattice_priority = -1);
   bool register_at_map(object* shareObj ); //register at same position as gisObj
   
