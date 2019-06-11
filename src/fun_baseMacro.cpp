@@ -1,5 +1,6 @@
 //#define EIGENLIB      // uncomment to use Eigen linear algebra library
 //#define NO_POINTER_INIT // uncomment to disable pointer checking
+//#define USE_TRACK_SEQUENCE //uncomment to report validation information and use validation macros.
 
 #include "fun_head_fast.h"
 

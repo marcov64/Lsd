@@ -5657,6 +5657,7 @@ loop_copy:
     cmd( "file copy -force \"$RootLsd/$LsdSrc/nets.cpp\" \"$modeldir/src\"" );
     cmd( "file copy -force \"$RootLsd/$LsdSrc/gis.cpp\" \"$modeldir/src\"" );
     cmd( "file copy -force \"$RootLsd/$LsdSrc/abmat.cpp\" \"$modeldir/src\"" );
+    cmd( "file copy -force \"$RootLsd/$LsdSrc/validate.h\" \"$modeldir/src\"" );
     cmd( "file copy -force \"$RootLsd/$LsdSrc/rapidcsv/rapidcsv.h\" \"$modeldir/src/rapidcsv/rapidcsv.h\"" );
     cmd( "file copy -force \"$RootLsd/$LsdSrc/check.h\" \"$modeldir/src\"" );
     cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head.h\" \"$modeldir/src\"" );
