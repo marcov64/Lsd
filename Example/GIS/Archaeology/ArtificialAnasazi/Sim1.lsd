@@ -210,10 +210,10 @@ DATA
 Object: Root C	1
 
 Object: Model C	1
-Var: Scheduler 0 n + d n
+Var: Scheduler 0 n + n n
 Param: Year 0 n + n n	0
-Param: total_Households 0 s + n n	0
-Param: total_Farms 0 s + n n	0
+Param: total_Households 0 n + n n	0
+Param: total_Farms 0 n + n n	0
 Param: total_Persons 0 n + n n	0
 Var: Update_Lattice 0 n + n n
 Var: Init_Lattice 0 n + n n
@@ -222,22 +222,22 @@ Param: Update_Interval 0 n + n n	0
 Var: Pajek 0 n + n n
 Func: FindFarmAndSettlement 0 n + n n
 Func: Potfarms 0 n + n n
-Param: Settle_A 0 s + n n	0
-Param: Settle_B 0 s + n n	0
-Param: Settle_C 0 s + n n	0
-Param: Settle_D 0 s + n n	0
-Param: Settle_E 0 s + n n	0
-Param: Settle_F 0 s + n n	0
-Param: Settle_G 0 s + n n	0
-Param: Settle_H 0 s + n n	0
-Param: age_max 0 s + n n	0
-Param: age_mean 0 s + n n	0
-Param: age_min 0 s + n n	0
-Param: age_sd 0 s + n n	0
-Param: lastharvest_max 0 s + n n	0
-Param: lastharvest_mean 0 s + n n	0
-Param: lastharvest_min 0 s + n n	0
-Param: lastharvest_sd 0 s + n n	0
+Param: Settle_A 0 n + n n	0
+Param: Settle_B 0 n + n n	0
+Param: Settle_C 0 n + n n	0
+Param: Settle_D 0 n + n n	0
+Param: Settle_E 0 n + n n	0
+Param: Settle_F 0 n + n n	0
+Param: Settle_G 0 n + n n	0
+Param: Settle_H 0 n + n n	0
+Param: age_max 0 n + n n	0
+Param: age_mean 0 n + n n	0
+Param: age_min 0 n + n n	0
+Param: age_sd 0 n + n n	0
+Param: lastharvest_max 0 n + n n	0
+Param: lastharvest_mean 0 n + n n	0
+Param: lastharvest_min 0 n + n n	0
+Param: lastharvest_sd 0 n + n n	0
 
 Object: Land_Patch C	1
 Param: land_type 0 n + n n	0
@@ -302,19 +302,19 @@ Object: Environment C	1
 Var: Update_apdsi_hydro 0 n + n n
 Var: Init_geography 0 n + n n
 Var: Init_apdsi_hydro 0 n + n n
-Var: Capacity 0 s + n p
+Var: Capacity 0 n + n p
 Var: Init_Waterpoints 0 n + n n
 
 Object: Population C	1
-Var: Update_Population 0 s + n p
+Var: Update_Population 0 n + n p
 Func: NewPerson 0 n + n n
 Var: Init_population 0 n + n n
-Param: histothouseholds 0 s + n p	0
-Param: nHouseholds 0 s + n p	0
-Param: newHouseholds 0 s + n p	0
+Param: histothouseholds 0 n + n p	0
+Param: nHouseholds 0 n + n p	0
+Param: newHouseholds 0 n + n p	0
 Func: Person_Dies 0 n + n n
-Param: Died_starving 0 s + n n	0
-Param: Died_ofAge 0 s + n n	0
+Param: Died_starving 0 n + n n	0
+Param: Died_ofAge 0 n + n n	0
 
 Object: Settings C	1
 Param: harvestAdjustment 0 n + n n	0.56
@@ -329,19 +329,19 @@ Param: baseNutritionNeed 0 n + n n	160
 Param: yearsOfStock 0 n + n n	2
 Param: maizeGiftToChild 0 n + n n	0.33
 Param: waterSourceDistance 0 n + n n	16
-Param: Assumption_child 0 s + n n	0
-Param: Assumption_bugUplands 0 s + n n	-1
+Param: Assumption_child 0 n + n n	0
+Param: Assumption_bugUplands 0 n + n n	-1
 Param: Assumption_waterLast 0 n + n n	1
-Param: Assumption_resettleDie 0 s + n n	0
-Param: Assumption_negativeHarvest 0 s + n n	0
-Param: Assumption_waterNotNecessaryFarm 0 s + n n	0
-Param: Assumption_waterNotNecessarySettle 0 s + n n	0
-Param: Assumption_wrapping 0 s + n n	0
-Param: Assumption_ObserveWater 0 s + n n	0
-Param: Assumption_ObserveHydro 0 s + n n	0
+Param: Assumption_resettleDie 0 n + n n	0
+Param: Assumption_negativeHarvest 0 n + n n	0
+Param: Assumption_waterNotNecessaryFarm 0 n + n n	0
+Param: Assumption_waterNotNecessarySettle 0 n + n n	0
+Param: Assumption_wrapping 0 n + n n	0
+Param: Assumption_ObserveWater 0 n + n n	0
+Param: Assumption_ObserveHydro 0 n + n n	0
 Var: Seed 0 n + n n
-Param: Assumption_SettleFloodplain 0 s + n n	0
-Param: Assumption_coordination 0 s + n n	0
+Param: Assumption_SettleFloodplain 0 n + n n	0
+Param: Assumption_coordination 0 n + n n	0
 Param: Assumption_bugMidlands 0 n + n n	-1
 
 Object: InitSettings C	1
@@ -377,6 +377,7 @@ END_DESCRIPTION
 
 Variable_Scheduler
 (no description available)
+
 _INIT_
 
 END_DESCRIPTION

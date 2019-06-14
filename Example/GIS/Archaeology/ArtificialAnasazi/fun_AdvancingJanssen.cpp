@@ -112,16 +112,59 @@ if(t == 1)
     //ABMAT
 
     ABMAT_DYNAMIC_FACTORS
+    
+    ABMAT_ADD_FACT("maizeZone","0,1,2,3,4");
+    
     ABMAT_ADD_MICRO("age")
-    ABMAT_ADD_PMICRO("quality")
-        ABMAT_ADD_PMICRO("maizeZone")
-		ABMAT_ADD_MICRO("lastharvest")
-		ABMAT_ADD_MACRO("nHouseholds")
-		ABMAT_ADD_MACRO("nHouseholds")
+    ABMAT_ADD_MICRO("lastharvest")
+    
+    ABMAT_ADD_PMACRO("Assumption_wrapping")
+    ABMAT_ADD_PMACRO("Assumption_bugMidlands")
+    ABMAT_ADD_PMACRO("waterSourceDistance")
+    
+    ABMAT_ADD_PMACRO("maizeGiftToChild")
+    ABMAT_ADD_PMACRO("yearsOfStock")
+    ABMAT_ADD_PMACRO("baseNutritionNeed")
+    ABMAT_ADD_PMACRO("typicalHouseholdSize")
+    ABMAT_ADD_PMACRO("newHouseholdAge")
+    ABMAT_ADD_PMACRO("fertilityStartAge")
+    ABMAT_ADD_PMACRO("fertility")
+    ABMAT_ADD_PMACRO("fertilityEndAge")
+    ABMAT_ADD_PMACRO("deathAge")
+    ABMAT_ADD_PMACRO("harvestVariance")
+    ABMAT_ADD_PMACRO("harvestAdjustment")
+    
+    ABMAT_ADD_PMICRO("quality")        
+		
+    ABMAT_ADD_MACRO("nHouseholds")
+    ABMAT_ADD_MACRO("Settle_A")
+    ABMAT_ADD_MACRO("Settle_B")
+    ABMAT_ADD_MACRO("Settle_C")
+    ABMAT_ADD_MACRO("Settle_D")
+    ABMAT_ADD_MACRO("Settle_E")
+    ABMAT_ADD_MACRO("Settle_F")
+    ABMAT_ADD_MACRO("Settle_G")
+    ABMAT_ADD_MACRO("Settle_H")
+    ABMAT_ADD_MACRO("Died_starving")
+    ABMAT_ADD_MACRO("Died_ofAge")
+    
+    ABMAT_ADD_MACRO("Assumption_child")
+    ABMAT_ADD_MACRO("Assumption_bugUplands")
+    ABMAT_ADD_MACRO("Assumption_resettleDie")
+    ABMAT_ADD_MACRO("Assumption_negativeHarvest")
+    ABMAT_ADD_MACRO("Assumption_waterNotNecessaryFarm")
+    ABMAT_ADD_MACRO("Assumption_waterNotNecessarySettle")
+    
+    ABMAT_ADD_MACRO("Assumption_ObserveWater")
+    ABMAT_ADD_MACRO("Assumption_ObserveHydro")
+    ABMAT_ADD_MACRO("Assumption_SettleFloodplain")
+    ABMAT_ADD_MACRO("Assumption_coordination")
+    
+
     ABMAT_ADD_COMP("nHouseholds","histothouseholds")
+    ABMAT_ADD_COMP("Capacity","histothouseholds")
+
     ABMAT_ADD_COND("yield","maizeZone")
-    ABMAT_ADD_COND("age","hh_NutritionNeedRemaining")
-    ABMAT_ADD_COND("age","fission")
 //    ABMAT_ADD_PSTATIC("
     
 }
