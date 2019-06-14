@@ -348,14 +348,14 @@ if ( choice != 0 )
 Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 
 // set platform-specific variables
-cmd( "if [ string equal $tcl_platform(platform) unix ] { set CurPlatform linux; set DefaultExe lsd_gnu; set DefaultMakeExe $makeLinux; set DefaultWish $wishLinux; set DefaultSysTerm $sysTermLinux; set DefaultDbgExe $dbgLinux; set DefaultHtmlBrowser $browserLinux; set DefaultFont $fontLinux; set DefaultFontSize $fontSizeLinux; set small_character [ expr $DefaultFontSize - $deltaSizeLinux ] }" );
+cmd( "if [ string equal $tcl_platform(platform) unix ] { set CurPlatform linux; set DefaultExe lsd; set DefaultMakeExe $makeLinux; set DefaultWish $wishLinux; set DefaultSysTerm $sysTermLinux; set DefaultDbgExe $dbgLinux; set DefaultHtmlBrowser $browserLinux; set DefaultFont $fontLinux; set DefaultFontSize $fontSizeLinux; set small_character [ expr $DefaultFontSize - $deltaSizeLinux ] }" );
 #ifdef MAC_PKG
 cmd( "if [ string equal $tcl_platform(os) Darwin ] { set CurPlatform mac; set DefaultExe LSD; set DefaultMakeExe $makeMac; set DefaultWish $wishMacTk86; set DefaultSysTerm $sysTermMac; set DefaultDbgExe $dbgMac; set DefaultHtmlBrowser $browserMac; set DefaultFont $fontMac; set DefaultFontSize $fontSizeMac; set small_character [ expr $DefaultFontSize - $deltaSizeMac ] }" );
 #else
-cmd( "if [ string equal $tcl_platform(os) Darwin ] { set CurPlatform osx; set DefaultExe lsd_gnu; set DefaultMakeExe $makeMac; set DefaultWish $wishMacTk85; set DefaultSysTerm $sysTermMac; set DefaultDbgExe $dbgMac; set DefaultHtmlBrowser $browserMac; set DefaultFont $fontMac; set DefaultFontSize $fontSizeMac; set small_character [ expr $DefaultFontSize - $deltaSizeMac ] }" );
+cmd( "if [ string equal $tcl_platform(os) Darwin ] { set CurPlatform osx; set DefaultExe lsd; set DefaultMakeExe $makeMac; set DefaultWish $wishMacTk85; set DefaultSysTerm $sysTermMac; set DefaultDbgExe $dbgMac; set DefaultHtmlBrowser $browserMac; set DefaultFont $fontMac; set DefaultFontSize $fontSizeMac; set small_character [ expr $DefaultFontSize - $deltaSizeMac ] }" );
 #endif
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set CurPlatform win32; set DefaultExe lsd_gnu; set DefaultMakeExe $makeWin32; set DefaultWish $wishWinTk85; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu }" );
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set CurPlatform win64; set DefaultExe lsd_gnu; set DefaultWish $wishWinTk86; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu64; if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { set DefaultMakeExe $makeWin64mgw } { set DefaultMakeExe $makeWin64cyg } }" );
+cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set CurPlatform win32; set DefaultExe lsd; set DefaultMakeExe $makeWin32; set DefaultWish $wishWinTk85; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu }" );
+cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set CurPlatform win64; set DefaultExe lsd; set DefaultWish $wishWinTk86; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu64; if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { set DefaultMakeExe $makeWin64mgw } { set DefaultMakeExe $makeWin64cyg } }" );
 
 cmd( "set MakeExe \"$DefaultMakeExe\"" );
 
@@ -5245,13 +5245,13 @@ if ( choice == 47 )
 			.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
 			.l.t.text insert end \"$a\"; \
 			.l.d.msg configure -text \"\"; \
-			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.obj *.gch ]; \
+			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.gch ]; \
 			foreach i $objs { \
 				catch { \
 					file delete -force \"$i\" \
 				} \
 			}; \
-			set objs [ glob -nocomplain -directory \"$modeldir\" *.o *.obj src makefile* makemessage.txt lsd_gnu* *.exe *.app ]; \
+			set objs [ glob -nocomplain -directory \"$modeldir\" *.o src makefile* makemessage.txt lsd* *.exe *.app ]; \
 			foreach i $objs { \
 				catch { \
 					file delete -force \"$i\" \
@@ -5412,13 +5412,13 @@ if ( choice == 48 )
 			.l.t.text insert end \"$default\" \
 		}" );
 	cmd( "button .l.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
-			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.obj *.gch ]; \
+			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.gch ]; \
 			foreach i $objs { \
 				catch { \
 					file delete -force \"$i\" \
 				} \
 			}; \
-			set objs [ glob -nocomplain -directory \"$modeldir\" *.o *.obj src break.gdb makefile* makemessage.txt elements.txt lsd_gnu* *.exe *.app *.bak ]; \
+			set objs [ glob -nocomplain -directory \"$modeldir\" *.o src break.gdb makefile* makemessage.txt elements.txt lsd* *.exe *.app *.bak *.err ]; \
 			foreach i $objs { \
 				catch { \
 					file delete -force \"$i\" \
@@ -5729,18 +5729,17 @@ if ( choice == 62 )
 	
 	// copy the base LSD source files to distribution directory
 	cmd( "if { ! [ file exists \"$modeldir/src\" ] } { file mkdir \"$modeldir/src\" }" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/main.cpp\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/lsdmain.cpp\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/main_gnuwin.cpp\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/file.cpp\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/variab.cpp\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/object.cpp\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/report.cpp\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/util.cpp\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/nets.cpp\" \"$modeldir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/object.cpp\" \"$modeldir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/util.cpp\" \"$modeldir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/variab.cpp\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/check.h\" \"$modeldir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/decl.h\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head.h\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head_fast.h\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/decl.h\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/system_options.txt\" \"$modeldir/src\"" );
 	
 	// copy Eigen library files if in use, just once to save time
@@ -5752,7 +5751,7 @@ if ( choice == 62 )
 	cmd( "puts -nonewline $f \"#define NO_WINDOW\\n\"" );
 	cmd( "close $f" );
 
-	// create makefileNW and compile a local machine version of lsd_gnuNW
+	// create makefileNW and compile a local machine version of lsdNW
 	compile_run( false, true );
 
 	choice = 0;
@@ -6576,7 +6575,7 @@ bool compile_run( bool run, bool nw )
 		goto end;
 	}
 	if ( nw )
-		strcpy( str, "TARGET=lsd_gnuNW" );		// NW version use fixed name because of batches
+		strcpy( str, "TARGET=lsdNW" );		// NW version use fixed name because of batches
 
 	// show compilation banner
 	cmd( "set init_time [clock seconds]" ); 
@@ -6588,7 +6587,7 @@ bool compile_run( bool run, bool nw )
 		cmd( "label .t.l1 -font {-weight bold } -text \"Making model...\"" );
 	if ( run )
 		if ( nw )
-			cmd( "label .t.l2 -text \"The executable 'lsd_gnuNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\n'No Window' version in other systems.\"" );
+			cmd( "label .t.l2 -text \"The executable 'lsdNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\n'No Window' version in other systems.\"" );
 		else
 			cmd( "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched.\nOn failure a text window will show the compiling error messages.\"" );
 	else
@@ -6651,7 +6650,7 @@ bool compile_run( bool run, bool nw )
 	else
 	{
 		if ( nw )
-			cmd( "tk_messageBox -parent . -type ok -icon info -title \"No Window Version\" -message \"Compilation successful\" -detail \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsd_gnuNW$add_exe' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n\\n$modeldir\\n\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'No Window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsd_gnuNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in LSD result files named after the seed generator used.\"" );
+			cmd( "tk_messageBox -parent . -type ok -icon info -title \"No Window Version\" -message \"Compilation successful\" -detail \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsdNW$add_exe' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n\\n$modeldir\\n\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'No Window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsdNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in LSD result files named after the seed generator used.\"" );
 		
 		if ( run )							// no problem - execute
 		{

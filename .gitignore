@@ -21,8 +21,8 @@ n++.wsp
 *.Rdata
 .Rproj.user
 *.Rproj
-lsd_gnu*.exe
 elements.txt
 makefileNW
-lsd_gnu*
 *.gch
+lsd.*
+lsdNW*

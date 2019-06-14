@@ -1,4 +1,4 @@
-TARGET=lsd_gnu
+TARGET=lsd
 FUN=fun_Aix
 SWITCH_CC=-g
 

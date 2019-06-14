@@ -10,7 +10,7 @@
  *************************************************************/
 
 /*************************************************************
-MAIN_GNUWIN.CPP 
+MAIN.CPP 
 LSD C++ system entry/exit point.
 
 Sets all OS signal handlers.

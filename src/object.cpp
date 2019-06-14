@@ -2443,7 +2443,7 @@ int sort_function_down( const void *a, const void *b )
 
 object *object::lsdqsort( char const *obj, char const *var, char const *direction )
 {
-	char dir[ 5 ];
+	char dir[ 6 ];
 	int num, i;
 	bridge *cb;
 	object *cur, **mylist;
@@ -2603,7 +2603,7 @@ int sort_function_down_two( const void *a, const void *b )
 
 object *object::lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction )
 {
-	char dir[ 5 ];
+	char dir[ 6 ];
 	int num, i;
 	bridge *cb;
 	object *cur, **mylist;

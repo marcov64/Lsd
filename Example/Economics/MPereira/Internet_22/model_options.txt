@@ -1,4 +1,4 @@
-TARGET=lsd_gnu
+TARGET=lsd
 FUN=fun_INTERNET
 FUN_EXTRA= fun_internet.h
 SWITCH_CC=-O3

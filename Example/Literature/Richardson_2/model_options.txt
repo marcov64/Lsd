@@ -1,4 +1,4 @@
-TARGET=lsd_gnu
+TARGET=lsd
 FUN=fun_richardson
 FUN_EXTRA=
 SWITCH_CC= -Og -ggdb3

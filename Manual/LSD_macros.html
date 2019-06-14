@@ -2575,14 +2575,14 @@ returned efficiently. Note that the usual line </span></p>
 cost computation time in case the Variable whose Equation containing the line
 for <i>Price</i> is placed “far” away from <i>Market</i>. </span></p>
 
-<p><span lang=EN-US>Modelers using global Objects or other C++ data structures should
-be careful when assigning configurations with many copies. If, for example, the
-model configuration uses many instances of the Object <i>Market</i>, any use of
-the global object <i>market</i></span><tt><span lang=EN-US style='font-size:
-10.0pt;font-family:"Arial",sans-serif'> </span></tt><span lang=EN-US>would
-refer only to the very first copy of the Object <i>Market</i>, certainly
-undermining the model operation. In this case, for instance, a global C++
-vector of object pointers could be used, as in </span><span class=Cdigo><span
+<p><span lang=EN-US>Modelers using global Objects or other C++ data structures
+should be careful when assigning configurations with many copies. If, for example,
+the model configuration uses many instances of the Object <i>Market</i>, any
+use of the global object <i>market</i></span><tt><span lang=EN-US
+style='font-size:10.0pt;font-family:"Arial",sans-serif'> </span></tt><span
+lang=EN-US>would refer only to the very first copy of the Object <i>Market</i>,
+certainly undermining the model operation. In this case, for instance, a global
+C++ vector of object pointers could be used, as in </span><span class=Cdigo><span
 lang=EN-US>vector &lt; object * &gt; market[ 20 ]</span></span><span
 lang=EN-US> for a case using 20 <i>Market</i> instances (and properly
 initialized in <i>Init</i>).</span></p>
@@ -2641,13 +2641,13 @@ lang=EN-US>Postfixes and Macro families</span></h1>
 <p class=MsoNormal><span lang=EN-US>Most of the LSD Macros, like </span><span
 class=Cdigo><span lang=EN-US><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span></span><span
 class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif'> </span></span><span
-lang=EN-US>used in the examples above, come as a family where the name of the Macro
-can be expressed with no postfix, or with “</span><span class=Cdigo><span
+lang=EN-US>used in the examples above, come as a family where the name of the
+Macro can be expressed with no postfix, or with “</span><span class=Cdigo><span
 lang=EN-US>L</span></span><span lang=EN-US>”, “</span><span class=Cdigo><span
 lang=EN-US>S</span></span><span lang=EN-US>”, “</span><span class=Cdigo><span
 lang=EN-US>LS</span></span><span lang=EN-US>” etc. as postfix. The postfix “</span><span
-class=Cdigo><span lang=EN-US>L</span></span><span lang=EN-US>” stands for Lag,
-indicating that the operation refers to past values. The postfix “</span><span
+class=Cdigo><span lang=EN-US>L</span></span><span lang=EN-US>” stands for Lag, indicating
+that the operation refers to past values. The postfix “</span><span
 class=Cdigo><span lang=EN-US>S</span></span><span lang=EN-US>” indicates a
 Specific object copy/instance. Consider that any LSD operation is performed, at
 each time step, in a given Equation. Therefore, the time “now” and the Object
@@ -2722,8 +2722,8 @@ VL( &quot;<i>Lab</i>&quot;, <i>lag</i> ), VLS( <i>obj</i>,<span
 class=Ttulo2Char> </span>&quot;<i>Lab</i>&quot;,<span class=Ttulo2Char> </span><i>lag</i>
 ) </h1>
 
-<p><span lang=EN-US>These are the most used LSD Macros. They return the value
-of the Variable or Parameter with label <i>Lab</i>. The forms </span><span
+<p><span lang=EN-US>These are the most used LSD Macros. They return the value of
+the Variable or Parameter with label <i>Lab</i>. The forms </span><span
 class=Cdigo><span lang=EN-US>VL(…)</span></span><span lang=EN-US> and </span><span
 class=Cdigo><span lang=EN-US>VLS(…)</span></span><span lang=EN-US> permit to
 specify a <i>lag</i>, so that the values returned concern the value of <i>Lab</i>
@@ -2832,9 +2832,10 @@ SUML( &quot;<i>Lab</i>&quot;, <i>lag </i>), SUMLS( <i>obj</i>, &quot;<i>Lab</i>&
 class=Cdigo><span lang=EN-US><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span></span><span
 lang=EN-US> (see also the different forms), an instance of the Variable or
 Parameter <i>Lab</i>. Then, they keep on summing up all the values of instances
-of the Variable or Parameter named <i>Lab</i> (with the lag <i>lag</i>, if specified),
-found in the set of Objects which are brothers to the first found. Normally,
-they are used to sum up the values of a given Variable of descending Objects. </span></p>
+of the Variable or Parameter named <i>Lab</i> (with the lag <i>lag</i>, if
+specified), found in the set of Objects which are brothers to the first found.
+Normally, they are used to sum up the values of a given Variable of descending
+Objects. </span></p>
 
 <h2><span lang=EN-US>Example </span></h2>
 
@@ -2851,8 +2852,8 @@ Compute the sum of all Q's in the market<br>
 &nbsp; </span></span></p>
 
 <p><span lang=EN-US>Note that, if your model contains many Objects Market, this
-Equation will sum up only the Q's contained in the set of descendants of
-Market, and not all the Q's existing in the model. </span></p>
+Equation will sum up only the Q's contained in the set of descendants of Market,
+and not all the Q's existing in the model. </span></p>
 
 <div style='margin-top:5.0pt;margin-bottom:5.0pt'>
 
@@ -3029,8 +3030,8 @@ COUNT_ALL( &quot;<i>obj_Lab</i>&quot; ), COUNT_ALLS( <i>obj</i>, &quot;<i>obj_La
 )</span></h1>
 
 <p><span lang=EN-US>These Macros explore the model counting for the number of
-instances of the Object named <i>obj_Lab</i>. That is, they count only within
-the descendants of <i>obj</i>, if specified in </span><span class=Cdigo><span
+instances of the Object named <i>obj_Lab</i>. That is, they count only within the
+descendants of <i>obj</i>, if specified in </span><span class=Cdigo><span
 lang=EN-US>COUNTS(…)</span></span><span lang=EN-US>, or in <a
 href="#_Parent_Object:_p"><span class=Cdigo><span style='color:blue'>p</span></span></a>
 if <i>obj</i> not specified in </span><span class=Cdigo><span lang=EN-US>COUNT(…)</span></span><span
@@ -3136,17 +3137,18 @@ lang=EN-US>INTERACT( &quot;<i>Comment</i>&quot;, <i>value </i>), INTERACTS( <i>o
 
 <p class=MsoNormal><span lang=EN-US>These Macros interrupt the simulation run
 and open the <a href="debug.html">LSD Debugger</a> window, presenting the
-message <i>Comment</i>. The Object shown in the debugger is the same Object containing
-the Variable under computation (which has the </span><span class=Cdigo><span
-lang=EN-US>INTERACT(…)</span></span><span lang=EN-US> call) or the specified
-Object </span><tt><i><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>obj</span></i></tt><span
-lang=EN-US>. Contrary to the debugger usual behavior, additionally to the name
-of the Variable just computed, the interface presents the <i>value</i> chosen
-(the default to be used) in a numeric data entry field. User can input a new
-value as any C++ numeric constant or variable, typically one of the </span><span
-class=Cdigo><span lang=EN-US><a href="#_CURRENT">v[…]</a></span></span><span
-lang=EN-US> temporary elements. The value typed in by the user will be returned
-by the Macro as its result. </span></p>
+message <i>Comment</i>. The Object shown in the debugger is the same Object
+containing the Variable under computation (which has the </span><span
+class=Cdigo><span lang=EN-US>INTERACT(…)</span></span><span lang=EN-US> call)
+or the specified Object </span><tt><i><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif'>obj</span></i></tt><span lang=EN-US>. Contrary
+to the debugger usual behavior, additionally to the name of the Variable just
+computed, the interface presents the <i>value</i> chosen (the default to be
+used) in a numeric data entry field. User can input a new value as any C++
+numeric constant or variable, typically one of the </span><span class=Cdigo><span
+lang=EN-US><a href="#_CURRENT">v[…]</a></span></span><span lang=EN-US>
+temporary elements. The value typed in by the user will be returned by the
+Macro as its result. </span></p>
 
 <p><span lang=EN-US>This Macro inserted in an Equation allows the run to be
 modified according to the choice of an interacting user. </span></p>
@@ -3214,13 +3216,13 @@ they search only within the descendants of <i>obj</i>, if specified in </span><s
 class=Cdigo><span lang=EN-US>SEARCHS(…)</span></span><span lang=EN-US>, or in <a
 href="#_Parent_Object:_p"><span class=Cdigo><span style='color:blue'>p</span></span></a>
 if <i>obj</i> not specified in </span><span class=Cdigo><span lang=EN-US>SEARCH(…)</span></span><span
-lang=EN-US>, and their descendants. Therefore, the search is not exhaustive over
-the entire model, unless it is started from the </span><span class=Cdigo><span
+lang=EN-US>, and their descendants. Therefore, the search is not exhaustive
+over the entire model, unless it is started from the </span><span class=Cdigo><span
 lang=EN-US><a href="#_Object’s_relatives:_up,">root</a></span></span><span
 lang=EN-US> of the model (as </span><span class=Cdigo><span lang=EN-US><a
 href="#_Object’s_relatives:_up,">root</a></span></span><span lang=EN-US> is a
-pointer and not an Object name, you do not enclose it in quotation marks) or from
-an ascending Object like </span><span class=Cdigo><span lang=EN-US><a
+pointer and not an Object name, you do not enclose it in quotation marks) or
+from an ascending Object like </span><span class=Cdigo><span lang=EN-US><a
 href="#_Object’s_relatives:_up,">p-&gt;up</a></span></span><span lang=EN-US>
 (parent) or </span><span class=Cdigo><span lang=EN-US><a
 href="#_Object’s_relatives:_up,">p-&gt;up-&gt;up</a></span></span><span
@@ -3812,12 +3814,12 @@ ADDOBJL( &quot;<i>obj_Lab</i>&quot;, <i>t_upd</i> ), ADDOBJLS( <i>obj</i>,
 &quot;<i>obj_Lab</i>&quot;, <i>t_upd</i> )<br>
 <a name=ADDNOBJ></a>ADDNOBJ( &quot;<i>obj_Lab</i>&quot;, <i>num </i>),
 ADDNOBJS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;, <i>num</i> )<br>
-ADDNOBJL( &quot;<i>obj_Lab</i>&quot;, <i>num </i>), ADDNOBJLS( <i>obj</i>,
-&quot;<i>obj_Lab</i>&quot;, <i>num</i> )</h1>
+ADDNOBJL( &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>t_upd </i>), ADDNOBJLS( <i>obj</i>,
+&quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>t_upd</i> )</h1>
 
-<p class=MsoNormal><span lang=EN-US>These Macros add one (or more) new instance(s)
-to the Object named <i>obj_Lab</i> descending from <i>obj</i>, or to <a
-href="#_Parent_Object:_p"><span class=Cdigo><span style='color:blue'>p</span></span></a></span></p>
+<p class=MsoNormal><span lang=EN-US>These Macros add one (or more) new
+instance(s) to the Object named <i>obj_Lab</i> descending from <i>obj</i>, or
+to <a href="#_Parent_Object:_p"><span class=Cdigo><span style='color:blue'>p</span></span></a></span></p>
 
 <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span lang=EN-US> if
 <i>obj</i> is not specified. </span><span class=Cdigo><span lang=EN-US>ADDOBJ(…)</span></span><span
@@ -3904,14 +3906,15 @@ Object which already has, at least, one descending Object (son) labelled as <i>o
 <h1><a name="_ADDOBJ_EX(_&quot;obj_Lab&quot;,_obj_ex"></a><a name="ADDOBJ_EX"></a>ADDOBJ_EX(
 &quot;<i>obj_Lab</i>&quot;, <i>obj</i>_ex ), ADDOBJ_EXS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;,
 <i>obj</i>_ex )<br>
-ADDOBJ_EXL( &quot;<i>obj_Lab</i>&quot;, <i>obj</i>_ex ), ADDOBJ_EXLS( <i>obj</i>,
-&quot;<i>obj_Lab</i>&quot;, <i>obj</i>_ex ) <br>
+ADDOBJ_EXL( &quot;<i>obj_Lab</i>&quot;, <i>obj</i>_ex, <i>t_upd</i> ),
+ADDOBJ_EXLS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;, <i>obj</i>_ex, <i>t_upd</i>
+) <br>
 <a name="ADDNOBJ_EX"></a>ADDNOBJ_EX( &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>obj</i>_ex
 ), ADDNOBJ_EXS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>obj</i>_ex
 )<br>
-ADDNOBJ_EXL( &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>obj</i>_ex ),
-ADDNOBJ_EXLS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>obj</i>_ex
-)</h1>
+ADDNOBJ_EXL( &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>obj</i>_ex, <i>t_upd</i>
+), ADDNOBJ_EXLS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>obj</i>_ex,
+<i>t_upd</i> )</h1>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>ADDOBJ_EX(…)</span></span><span lang=EN-US> are special versions of </span><span
@@ -3922,8 +3925,8 @@ initialize the newly created Object instance(s),<b> </b>generating one or <i>num
 new instances, each one a clone of <i>obj_ex</i>. A pointer is returned only to
 the first created Object instance. The additional instances can be easily
 reached by using the </span><span class=Cdigo><span lang=EN-US><a
-href="#_Object’s_relatives:_up,">next</a></span></span><span lang=EN-US>
-construct over the first Object (i.e., by using </span><span class=Cdigo><span
+href="#_Object’s_relatives:_up,">next</a></span></span><span lang=EN-US> construct
+over the first Object (i.e., by using </span><span class=Cdigo><span
 lang=EN-US>cur-&gt;next</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>cur-&gt;next-&gt;next</span></span><span
 lang=EN-US> etc.).</span></p>
@@ -4013,8 +4016,8 @@ which may contain Variables or Parameters which may be in use in a computation
 (i.e., </span><span class=Cdigo><span lang=EN-US><a href="#_SUM(_&quot;Lab&quot;_),">SUM(…)</a></span></span><span
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US><a
 href="#_STAT(_&quot;Lab&quot;_),_1">STAT(…)</a></span></span><span lang=EN-US>)
-at the same time. If an instance with a Variable or Parameter currently in use is
-deleted, the result(s) of the corresponding computation is indefinite. In
+at the same time. If an instance with a Variable or Parameter currently in use
+is deleted, the result(s) of the corresponding computation is indefinite. In
 general, the modeler must ensure this situation does not occur, by adjusting
 the involved Equations’ code.</span></p>
 
@@ -4144,8 +4147,8 @@ product.<br>
 &quot;IdUsed&quot;, 1 ); </span></span><span class=Cdigo><span lang=EN-US
 style='color:#00B050'>// product used by the consumer</span><span lang=EN-US><br>
 cur = SEARCH_CND( &quot;IdFirm&quot;, v[0] ); </span></span><span class=Cdigo><span
-lang=EN-US style='color:#00B050'>// find the object with IdFirm equal to my IdUsed</span><span
-lang=EN-US><br>
+lang=EN-US style='color:#00B050'>// find the object with IdFirm equal to my
+IdUsed</span><span lang=EN-US><br>
 v[2] = VS( cur, &quot;BD&quot; ); </span></span><span class=Cdigo><span
 lang=EN-US style='color:#00B050'>// read the probability of breaking the
 product</span><span lang=EN-US><br>
@@ -4180,8 +4183,8 @@ consumer.<br>
 
 <p class=MsoNormal><span class=Cdigo><span lang=EN-US>v[2] = VS( HOOK( 0 ),
 &quot;BD&quot; ); </span></span><span class=Cdigo><span lang=EN-US
-style='color:#00B050'>// read the probability of breaking the product using
-hook</span><span lang=EN-US><br>
+style='color:#00B050'>// read the probability of breaking the product using hook</span><span
+lang=EN-US><br>
 if ( RND &lt; v[2] )<br>
 { </span></span><span class=Cdigo><span lang=EN-US style='color:#00B050'>//
 product broken</span><span lang=EN-US> <br>
@@ -4200,9 +4203,9 @@ style='color:#00B050'>// product not broken, used the same product as before</sp
 <p class=MsoNormal><span lang=EN-US>The code is faster because the Equation
 does not need to scan all <i>Firm</i>’s to find the desired one.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Beware that the modeler must ensure that
-any hook is always correctly assigned. In the example, you need to consider
-that at the very first time step the hook number 0 (</span><span class=Cdigo><span
+<p class=MsoNormal><span lang=EN-US>Beware that the modeler must ensure that any
+hook is always correctly assigned. In the example, you need to consider that at
+the very first time step the hook number 0 (</span><span class=Cdigo><span
 lang=EN-US>HOOK( 0 )</span></span><span lang=EN-US>) is not created or
 assigned. At the start of a simulation run all the hooks must be created and
 initialized (or they will be set to </span><span class=Cdigo><span lang=EN-US>NULL</span></span><span

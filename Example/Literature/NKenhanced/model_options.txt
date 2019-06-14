@@ -1,4 +1,4 @@
-TARGET=lsd_gnu
+TARGET=lsd
 FUN=fun_nkun
 SWITCH_CC=-g
 
