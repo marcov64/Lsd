@@ -319,9 +319,9 @@ if ( changed_pos > 0)
         PLOG("\n\t, new Farm P-ID %g", myWP);
         PLOG("\n\t, new Waterpoint ID %g", V("Waterpoint_by_ID"));
     }
-    WRITES(myFarm, "Farm_distWater", DISTANCE2(myFarm, myWP) );
-    WRITE("Household_distWater", DISTANCE(myWP) );
-    WRITE("Household_distFarm", DISTANCE(myFarm) );
+    WRITES(myFarm, "Farm_distWater", DISTANCE_BETWEEN(myFarm, myWP) );
+    WRITE("Household_distWater", DISTANCE_TO(myWP) );
+    WRITE("Household_distFarm", DISTANCE_TO(myFarm) );
 
 
     //in a floodplain

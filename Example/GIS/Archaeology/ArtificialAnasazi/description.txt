@@ -3,7 +3,7 @@ Model Artificial Anasazi (JASSS) (ver. 3.2)
 Frederik Schaff, Ruhr-Unviersity Bochum
 frederik.schaff@rub.de
 This version: April 2019 (first GIT version)
-Note: This version needs LSD in GIS-beta or later.
+Note: This version needs LSD in GIS-beta-5 or later.
 
 Version history
 1.1: First implementation
@@ -13,6 +13,7 @@ Version history
 3.2: Cleaning, first GIT version
 3.21: Minor issues
  - Added Assumption_coordination
+3.22: Update to GIS-beta-5
 
 This model is a reimplementation of
 

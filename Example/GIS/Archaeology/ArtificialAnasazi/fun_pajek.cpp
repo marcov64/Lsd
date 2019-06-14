@@ -9,7 +9,6 @@
 EQUATION("Pajek")
 /* Gather descriptive network information and pass it to pajek*/
 #ifdef MODULE_PAJEK
-TRACK_SEQUENCE
 if (t == 1)
 {
     PAJ_INIT("Networks", "ArtificialAnasazi", RND_SEED, "Artificial Anasazi - Replication of Janssen 2009") //Initialise pajek dynamic mode

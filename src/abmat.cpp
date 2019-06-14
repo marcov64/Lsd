@@ -1099,7 +1099,7 @@ void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2la
       oVar2 = parent->up->search_local(lfact)->search_local(var2lab);
       
       if ( oVar2 == NULL) {
-        if ( factors.size() == 0 ) {
+        if ( !abmat_dynamic_factors_allowed && factors.size() == 0 ) {
           error_hard( __DEV_ERR_INFO__, "A factorial variable needs factors!", "Check your code.", true);
           return;
         }

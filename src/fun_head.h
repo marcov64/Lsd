@@ -711,15 +711,15 @@ bool no_ptr_chk = true;
   #define ADD_TO_SPACE_CENTER_SHARES_WHERE2(PTR, WHERE1, WHERE2) { PTR->register_at_map_between(WHERE1, WHERE2); }
   
   #define ADD_TO_SPACE_RND_WHERE(WHERE) { p->register_at_map_rnd(WHERE); }
-  #define ADD_TO_SPACE_RNDS_WHERE(PTR, WHERE) { PTR->register_at_map_rnd(WHERE); }
+  #define ADD_TO_SPACE_RNDS_WHERE(Obj, WHERE) { Obj->register_at_map_rnd(WHERE); }
   #define ADD_TO_SPACE_RND_GRID_WHERE(WHERE) { p->register_at_map_rnd(WHERE,true); }
-  #define ADD_TO_SPACE_RND_GRIDS_WHERE(PTR, WHERE) { PTR->register_at_map_rnd(WHERE,true); }
+  #define ADD_TO_SPACE_RND_GRIDS_WHERE(Obj, WHERE) { Obj->register_at_map_rnd(WHERE,true); }
   
-  #define ADD_ALL_TO_SPACE_WHERE( WHERE ) { p->register_allOfKind_at_grid_rnd( WHERE ); }
-  #define ADD_ALL_TO_SPACES_WHERE( PTR, WHERE ) { PTR->register_allOfKind_at_grid_rnd( WHERE); }
+  #define ADD_ALL_TO_SPACE( OBJ ) { p->register_allOfKind_at_grid_rnd( OBJ ); }
+  #define ADD_ALL_TO_SPACE_WHERE( OBJ, WHERE ) { WHERE->register_allOfKind_at_grid_rnd( OBJ); }
   
-  #define ADD_ALL_TO_SPACE_CND_WHERE( condVarLab, condition, condVal, WHERE ) { p->register_allOfKind_at_grid_rnd_cnd( WHERE, condVarLab, condition, condVal); }
-  #define ADD_ALL_TO_SPACE_CNDS_WHERE( PTR, condVarLab, condition, condVal, WHERE ) { PTR->register_allOfKind_at_grid_rnd_cnd( WHERE, condVarLab, condition, condVal); }
+  #define ADD_ALL_TO_SPACE_CND(obj, condVarLab, condition, condVal, WHERE ) { p->register_allOfKind_at_grid_rnd_cnd( obj, condVarLab, condition, condVal); }
+  #define ADD_ALL_TO_SPACE_CND_WHERE( obj, condVarLab, condition, condVal, WHERE ) { WHERE->register_allOfKind_at_grid_rnd_cnd( obj, condVarLab, condition, condVal); }
   
   // POSITION
   // Macros to get x or y position or produce random position

@@ -1,3 +1,4 @@
+//#define USE_TRACK_SEQUENCE //uncomment to report validation information and use validation macros.
 #include "fun_head_fast.h"
 
 /* Switches for debugging/visually analysing the specific model */
@@ -9,8 +10,6 @@
 #endif
 #define TRACK_SEQUENCE_MAX_T 0 //number of steps for tracking
 #define DISABLE_LOCAL_CLOCKS
-
-#include "external/lsd_debug-tools/validate.h" //some tools for validation
 
 //#define MODULE_PAJEK //uncomment to create Pajek Network Files
 #ifdef MODULE_PAJEK
@@ -71,13 +70,12 @@ cur = NEAREST_IN_DISTANCE_CND("Waterpoint", -1, "Update_waterSource", ">", 0);
 double distance = -1;
 if (cur != NULL)
 {
-    distance = DISTANCE(cur);
+    distance = DISTANCE_TO(cur);
 }
 
 RESULT( distance )
 
 EQUATION("Scheduler")
-TRACK_SEQUENCE
 // TRACK_SEQUENCE_ALWAYS
 
 //Initialise the model
@@ -199,7 +197,7 @@ V("Capacity"); //update yield for each patch
 
 //Update HH decisions wrt harvesting - parallel
 // PLOG("\n +++++ Eating ++++ ");
-RCYCLE_GISS(root, cur, "Household") //Note: A non-random cycle breaks everything!
+RCYCLE_GIS_WHERE(cur, "Household",root) //Note: A non-random cycle breaks everything!
 {
     VS(cur, "hh_NutritionNeedRemaining");
 }
@@ -209,7 +207,7 @@ V("Update_Population"); //Old agents die, as do those without enough food.
 
 
 // PLOG("\n +++++ Resettle ++++ ");
-RCYCLE_GISS(root, cur, "Household")
+RCYCLE_GIS_WHERE(cur, "Household",root)
 {
     bool die = -1.0 == VS(cur, "resettle"); //shall the hh resettle? 1: change pos, 0: keep pos, -1: die if assumption..
     if (V("Assumption_resettleDie") > -1 && die ) {
@@ -223,7 +221,7 @@ RCYCLE_GISS(root, cur, "Household")
 }
 
 // PLOG("\n +++++ Birth ++++ ");
-RCYCLE_GISS(root, cur, "Household")
+RCYCLE_GIS_WHERE(cur, "Household",root)
 {
     VS(cur, "fission"); //get children
 }
@@ -306,7 +304,6 @@ RESULT(double (t))
 
 
 EQUATION("Init_apdsi_hydro")
-TRACK_SEQUENCE
 /*  load APDSI data to c++ vectors. The data is later used to update
     the information.
 */
@@ -370,12 +367,10 @@ PARAMETER
 RESULT(0.0)
 
 EQUATION("age")
-TRACK_SEQUENCE
 RESULT(CURRENT + 1)
 
 
 EQUATION("Update_Population")
-TRACK_SEQUENCE
 
 double living_ps = 0;
 double died_ps = 0;
@@ -448,7 +443,6 @@ RESULT(double(died_ps)) //* typical household size
 
 EQUATION("ochousehold")
 /* Is a function */
-TRACK_SEQUENCE_FIRST_OR_LAST
 double old = CURRENT;
 double now = 0;
 DCYCLE_NEIGHBOUR(cur, "Household", 0.0)
@@ -461,7 +455,6 @@ RESULT( now  )
 
 EQUATION("ocfarm")
 /* Is a function */
-TRACK_SEQUENCE_FIRST_OR_LAST
 double now = 0;
 DCYCLE_NEIGHBOUR(cur, "Farm", 0.0)
 {
@@ -471,7 +464,6 @@ DCYCLE_NEIGHBOUR(cur, "Farm", 0.0)
 RESULT( now )
 
 EQUATION("Update_apdsi_hydro")
-TRACK_SEQUENCE
 /* Update APDSI data and "hydro" - whatever that last is.. */
 int year = V("Year");
 //NetLogo Code below
@@ -571,7 +563,6 @@ EQUATION("FindFarmAndSettlement")
     The algorithm may be a bit of confusing. This is because it follows the
     original one and we decided to not simplify it too much.
 */
-TRACK_SEQUENCE
 const bool verbose_mode = false;
 
 if ( V("Potfarms") < 1.0)  //get list of potential farms other than current owned one also updates the list
@@ -703,7 +694,7 @@ if (bestSettlePlace != NULL)
     WRITES(c, "Waterpoint_by_ID", VS(nearestWaterSource, "Waterpoint_ID"));
     
     if (VS(oSettings,"Assumption_wrapping")>-1){
-            if ( DISTANCE2(c,nearestWaterSource) <= VS(oSettings,"waterSourceDistance")
+            if ( DISTANCE_BETWEEN(c,nearestWaterSource) <= VS(oSettings,"waterSourceDistance")
                 && c->distance(nearestWaterSource,true) > VS(oSettings,"waterSourceDistance") ) {
                 INCRS(oSettings,"Assumption_wrapping",1.0); //only in the torus world is the water source within distance.
             }
@@ -724,7 +715,6 @@ EQUATION("habitable")
 /*  Checks if the land patch is not occupied nor in a floodplain
     Needs to be called by fake_caller!
 */
-TRACK_SEQUENCE
 double is_good = -1.0; //not good
 if (V("ocfarm") == 0.0 && V("hydro") <= 0)
 {
@@ -733,7 +723,6 @@ if (V("ocfarm") == 0.0 && V("hydro") <= 0)
 RESULT(is_good)
 
 EQUATION("NewPerson")
-TRACK_SEQUENCE
 /*  This function is called via fake-caller from a parent to create a new spawn.
     It can also be called from root, indicating that we are in initialisation mode.
     Its value represents the number of times it has created households.
@@ -762,8 +751,8 @@ WRITES(farm, "Farm_ID", UIDS(farm));
 INCRS(p->up, "total_Farms", 1);
 
 
-ADD_TO_SPACE_XYS(hh, root, RANDOM_POSITION_XS(root), RANDOM_POSITION_YS(root));
-ADD_TO_SPACE_XYS(farm, root, RANDOM_POSITION_XS(root), RANDOM_POSITION_YS(root));
+ADD_TO_SPACE_RND_GRIDS_WHERE(hh, root);
+ADD_TO_SPACE_RND_GRIDS_WHERE(farm, root);
 
 //next: find a settlement position
 object* Settings = SEARCHS(root, "Settings");
@@ -825,7 +814,6 @@ else
 RESULT(CURRENT)
 
 EQUATION("Init_population")
-TRACK_SEQUENCE
 /* Initialise the population */
 
 /* Load reference data from Janssen */
@@ -872,11 +860,10 @@ RESULT(double(i))
 
 EQUATION("Init_geography")
 /* This function initialises the geography */
-TRACK_SEQUENCE
 potential_farms_allTime.clear();
 //Initialise the GIS
 int wrapping = (V("Assumption_wrapping") < 0 ? 0 : 15); //turn wrapping on if assumption is set (>=0)
-INIT_SPACE_GRID_WRAPLS(p->up, "Land_Patch", x_cols, y_rows, wrapping, 0);
+INIT_SPACE_PATCH_WRAPL_WHERE("Land_Patch", x_cols, y_rows, wrapping, 0,p->up);
 double id = 0;
 CYCLES(p->up, cur, "Land_Patch")
 {
@@ -916,7 +903,7 @@ int x = 0, y = y_rows - 1;
 string s;
 while (map_data >> s)  //read entry by entry
 {
-    cur = SEARCH_POSITION_XYS(SEARCHS(p->up, "Land_Patch"), "Land_Patch", x, y);
+    cur = SEARCH_POSITION_XY_WHERE("Land_Patch", x, y,SEARCHS(p->up, "Land_Patch"));
     int map_info = std::stoi(s); //convert string to int.
     switch (map_info) {
         /*Land_Type, maizeZone, color for map*/
@@ -1025,7 +1012,7 @@ TEST_MODE(true)  //checked!
     for (int xx = 0; xx < x_cols; xx++) {
         for (int yy = 0; yy < y_rows; yy++) {
             siz++;
-            TEST_MODE(xx != VS( SEARCH_POSITION_XYS(SEARCHS(p->up, "Land_Patch"), "Land_Patch", xx, yy), "Land_Patch_x") || yy != VS( SEARCH_POSITION_XYS(SEARCHS(p->up, "Land_Patch"), "Land_Patch", xx, yy), "Land_Patch_y")) {
+            TEST_MODE(xx != VS( SEARCH_POSITION_XY_WHERE("Land_Patch", xx, yy, SEARCHS(p->up, "Land_Patch")), "Land_Patch_x") || yy != VS( SEARCH_POSITION_XY_WHERE( "Land_Patch", xx, yy, SEARCHS(p->up, "Land_Patch")), "Land_Patch_y")) {
                 errs++;
             }
         }
@@ -1037,7 +1024,6 @@ PARAMETER
 RESULT(0.0)
 
 EQUATION("Init_Waterpoints")
-TRACK_SEQUENCE
 /*  Next, we add the waterpoints that update Land_Patch->watersource
 
     We use the data in water.txt and also the hardcoded data in Janssen.2009
@@ -1234,7 +1220,7 @@ for (auto& item : waterpoints)
             WRITES(cur, "Waterpoint_y", item.y);
             WRITES(cur, "Waterpoint_ID", wps_count++);
             //Add external object
-            ADD_TO_SPACE_XYS(cur, exmplGisObj, item.x, item.y); //Add to GIS
+            ADD_TO_SPACE_XYS_WHERE(cur, item.x, item.y, exmplGisObj); //Add to GIS
             cur1 = SEARCHS(cur, "water_period"); //select existing blueprint
         }
         else {
@@ -1273,8 +1259,6 @@ RESULT(wps_count)
 
 EQUATION("Update_waterSource")
 /* Update the watersource information of the associated patch of land. */
-TRACK_SEQUENCE_FIRST_OR_LAST
-// TRACK_SEQUENCE_FIRST_OR_LAST_ALWAYS
 
 auto associated_patch = SEARCH_POSITION_GRID("Land_Patch");
 double is_source = 0.0;
@@ -1339,7 +1323,6 @@ EQUATION("yield")
 	    if (apdsi >  -3.0 and apdsi <= -1.0) [set yield 749]
 	    if (apdsi <= -3.0) [set yield 642]]
 */
-TRACK_SEQUENCE_FIRST_OR_LAST
 double yield = 0.0;
 int maizeZone = V("maizeZone");
 double apdsi = V("apdsi");
@@ -1440,13 +1423,11 @@ EQUATION("BaseYield")
 
     Deterministic.
 */
-TRACK_SEQUENCE_FIRST_OR_LAST
 RESULT(V("yield")*V("quality")*V("harvestAdjustment"))
 
 
 
 EQUATION("quality")
-TRACK_SEQUENCE_FIRST_OR_LAST
 double quality = max(0, norm(0.0, 1.0) * V("harvestVariance") + 1);
 PARAMETER
 RESULT(quality)
@@ -1457,7 +1438,6 @@ EQUATION("Seed")
 /*  Save the current seed as parameter
     Or, if a parameter, provide it.
 */
-TRACK_SEQUENCE
 PARAMETER
 //PLOG("\nUsing LSD automatic seed: %i", seed - 1);
 RESULT(RND_SEED)
@@ -1466,7 +1446,6 @@ RESULT(RND_SEED)
 EQUATION("Capacity")
 /*  Theoratical capacity of the land
 */
-TRACK_SEQUENCE
 
 double BaseYield;
 double Capacity = 0; //the capacity indicates how many households can be sustained. It is a crude measure!
@@ -1501,7 +1480,6 @@ RESULT(Capacity)
 
 EQUATION("Potfarms")
 /* Is a functionDetermine number of farms available */
-TRACK_SEQUENCE
 V("Capacity"); //make sure it is up to date
 double farmSitesAvailable = 0;
 

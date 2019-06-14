@@ -63,7 +63,7 @@ double init_ret = 0.0;
         }
 
         object* nearestNeighbour = NEAREST_IN_DISTANCES( cur, "Resource", -1 );
-        double dist = DISTANCE2( cur, nearestNeighbour );
+        double dist = DISTANCE_BETWEEN( cur, nearestNeighbour );
         WRITES(cur, "DistNearNeigh", dist); //Save the minimum nearest neighbour distance.
     }
 
@@ -72,7 +72,7 @@ double init_ret = 0.0;
     ADDNOBJ("Forager", n_Forangers - 1); //one exists already
 
     CYCLE(cur, "Forager") { //In differene to the resources, we do not controll if the foranger just happen to use the same space.
-        ADD_TO_SPACE_RND_GRIDS(cur, root);
+        ADD_TO_SPACE_RND_GRIDS_WHERE(cur, root);
         WRITES(cur, "x_init", POSITION_XS(cur) );
         WRITES(cur, "y_init", POSITION_YS(cur) );
 
@@ -132,7 +132,7 @@ if (resource != NULL)
     double id = UIDS(resource);
     for (int i = 0; i < n_items; ++i) { //add a new object for each one
         cur = ADDOBJ("Tool");
-        ADD_TO_SPACE_SHARES(cur, resource); //Add to same position in space - this allows us to analys the distance.
+        ADD_TO_SPACE_SHARES_WHERE(cur, resource); //Add to same position in space - this allows us to analys the distance.
         WRITES(cur, "ID", id); //Information of the kind of the toolkit
     }
     if (VS(resource, "Extracted") == 0) { //add global info of visited resources
@@ -151,7 +151,7 @@ RESULT(0.0)
 
 EQUATION("MaxDistance")
 /* Keep track of the maximum foraging radius. */
-double distance = DISTANCE_XY(V("x_init"), V("y_init")); //root is at start
+double distance = DISTANCE_TO_XY(V("x_init"), V("y_init")); //root is at start
 distance = max(distance, CURRENT);
 RESULT(distance)
 
@@ -193,7 +193,7 @@ EQUATION("DistanceToSource")
 /*  Calculate the distance to the source.
     Use fact that the tool is registered at the position of its
     resource */
-RESULT(DISTANCE(p->up))
+RESULT(DISTANCE_TO(p->up))
 
 EQUATION("Statistics")
 /*  Take the statistics

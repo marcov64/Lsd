@@ -1,5 +1,6 @@
 TARGET=lsd_gnu
 FUN=fun_AdvancingJanssen
-FUN_EXTRA=
+FUN_EXTRA= ext_data.cpp ext_lattice.cpp ext_pajek.cpp fun_behaviour.cpp fun_lattice.cpp fun_pajek.cpp
 SWITCH_CC=-Og -ggdb3
 SWITCH_CC_LNK=
+

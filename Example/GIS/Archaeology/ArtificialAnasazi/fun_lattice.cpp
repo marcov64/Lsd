@@ -11,7 +11,7 @@ EQUATION("Update_Lattice")
 V("Init_Lattice");
 
   #ifndef NOLATTICE
-  TRACK_SEQUENCE
+ 
   int Update_Interval = V("Update_Interval");
 
   //If the updating is deselected, no lattice is printed.
@@ -152,7 +152,6 @@ RESULT(0)
 
 EQUATION("Init_Lattice")
 #ifndef NOLATTICE
-TRACK_SEQUENCE
 if (V("Update_Interval") == 0){
   PARAMETER;
   END_EQUATION(0);
