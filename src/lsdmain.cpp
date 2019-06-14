@@ -519,6 +519,9 @@ int lsdmain( int argn, char **argv )
 	// create a Tcl command to set a c variable when not in a Tcl idle loop
 	Tcl_CreateCommand( inter, "set_c_var", Tcl_set_c_var, NULL, NULL );
 
+	// create a Tcl command to get LSD variable description from equation file(s)
+	Tcl_CreateCommand( inter, "get_var_descr", Tcl_get_var_descr, NULL, NULL );
+
 	// create Tcl command to upload series data
 	Tcl_CreateObjCommand( inter, "upload_series", Tcl_upload_series, NULL, NULL );
 

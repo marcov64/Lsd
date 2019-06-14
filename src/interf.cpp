@@ -1204,6 +1204,10 @@ case 2:
 						} \
 					} \
 				}" );
+			cmd( "bind $T.f.ent_var <<ComboboxSelected>> { \
+					set s [ .addelem.f.ent_var get ]; \
+					.addelem.d.f.text insert end \"[ get_var_descr $s ]\"; \
+				}" );
 			cmd( "bind $T.f.ent_var <KeyPress-Return> { if { [ .addelem.f.ent_num get ] > 0 } { focus $T.b.x } { focus $T.b.ok } }" );
 			cmd( "bind $T.f.ent_num <KeyPress-Return> { if { [ .addelem.f.ent_num get ] > 0 } { focus $T.b.x } { focus $T.b.ok } }" );
 			cmd( "set help menumodel.html#AddAVar");
@@ -1232,6 +1236,10 @@ case 2:
 							.addelem.f.ent_var selection range $b end \
 						} \
 					} \
+				}" );
+			cmd( "bind $T.f.ent_var <<ComboboxSelected>> { \
+					set s [ .addelem.f.ent_var get ]; \
+					.addelem.d.f.text insert end \"[ get_var_descr $s ]\"; \
 				}" );
 			cmd( "set help menumodel.html");
 			cmd( "bind $T.f.ent_var <KeyPress-Return> { focus $T.b.ok }" );
@@ -7057,6 +7065,30 @@ int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const cha
 	else
 		Tcl_SetResult( inter, ( char * ) "cancel", TCL_VOLATILE );
 	return TCL_OK;
+}
+
+
+/****************************************************
+TCL_GET_VAR_DESCR
+Function to get variable description on
+equation file(s) from Tcl
+****************************************************/
+int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+{
+	char vname[ MAX_ELEM_LENGTH ], descr[ 10 * MAX_LINE_SIZE ];
+	
+	if ( argc != 2 )					// require 1 parameter: variable name
+		return TCL_ERROR;
+	
+	if ( argv[ 1 ] == NULL || strlen( argv[ 1 ] ) == 0 )
+		return TCL_ERROR;
+	
+	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
+	
+	get_var_descr( vname, descr, 10 * MAX_LINE_SIZE );
+	
+	Tcl_SetResult( inter, descr, TCL_VOLATILE );
+	return TCL_OK;		
 }
 
 

@@ -908,14 +908,95 @@ void change_init_text( char *lab )
 
 
 /***************************************************
+GET_VAR_DESCR
+***************************************************/
+void get_var_descr( char const *lab, char *descr, int descr_len )
+{
+	char str[ 2 * MAX_ELEM_LENGTH ], str1[ MAX_LINE_SIZE ];
+	int i, j = 0, done = -1;
+	FILE *f;
+	
+	sprintf( str, "EQUATION(\"%s\")", lab );
+	f = search_all_sources( str );
+	
+	if ( f == NULL )
+	{
+		sprintf( str, "EQUATION_DUMMY(\"%s\",", lab );
+		f = search_all_sources( str );
+	}
+	
+	if ( f == NULL )
+	{
+		sprintf( str, "FUNCTION(\"%s\")", lab );
+		f = search_all_sources( str );
+	}
+	
+	if ( f == NULL )
+	{
+		sprintf( str, "if (!strcmp(label,\"%s\"))", lab );
+		f = search_all_sources( str );
+	}
+	
+	if ( f != NULL )
+		while ( done != 1 )
+		{
+			fgets( str1, MAX_LINE_SIZE, f );
+			
+			for ( i = 0; str1[ i ] != '\0' && done != 1; ++i )
+			{
+				if ( done == -1 ) 		// no comment found yet
+				{
+					if ( isalpha( str1[ i ]) != 0 ) 	// no comment exists
+						done = 1;
+					  
+					if ( str1[ i ] == '/' && str1[ i + 1 ] == '*' )
+					{ 
+						done = 0; 		// beginning of a multiline comment
+						i += 2;
+						
+						// discard initial empty line
+						while ( str1[ i ] == '\r' && str1[ i + 1 ] == '\n' )
+							i += 2;
+						while ( str1[ i ] == '\n' )
+							++i;
+						if ( str1[ i ] == '\0' )
+							break;
+					}
+					
+					if ( str1[ i ] == '/' && str1[ i + 1 ] == '/' )
+					{ 
+						done = 2; 		// beginning of a single line comment
+						i += 2;
+					} 
+				}
+				
+				if ( done == 0 ) 		// we are in a comment
+					if ( str1[ i ] == '*' && str1[ i + 1 ] == '/' )
+						done = 1;
+
+				if ( done == 0 || done == 2 )
+					if ( str1[ i ] != '\r' )
+						descr[ j++ ] = str1[ i ];
+
+				if ( done == 2 && str1[ i ] == '\n' )
+					done = -1; 
+			 
+				if ( j >= descr_len - 2 )
+					done = 1;
+			}
+		}
+
+	descr[ j ] = '\0';
+}
+
+
+/***************************************************
 AUTO_DOCUMENT
 ***************************************************/
 void auto_document( int *choice, char const *lab, char const *which, bool append )
 {
 	bool var;
 	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ];
-	int i, j = 0, done;
-	FILE *f;
 	description *cd;
 
 	for ( cd = descr; cd != NULL; cd = cd->next )
@@ -926,80 +1007,11 @@ void auto_document( int *choice, char const *lab, char const *which, bool append
 			if ( ( ! strcmp( cd->type, "Variable") ) == 1 || ( ! strcmp( cd->type, "Function" ) ) == 1 )
 			{ 	// if it is a Variable
 				var = true;
-				sprintf( msg, "EQUATION(\"%s\")", cd->label ); //search its equation
-				f = search_all_sources( msg );
-				if ( f == NULL )
-				{
-					sprintf( msg, "EQUATION_DUMMY(\"%s\",", cd->label );
-					f = search_all_sources( msg );
-				}
-				if ( f == NULL )
-				{
-					sprintf( msg, "FUNCTION(\"%s\")", cd->label );
-					f = search_all_sources( msg );
-				}
-				if ( f == NULL )
-				{
-					sprintf( msg, "if (!strcmp(label,\"%s\"))", cd->label );
-					f = search_all_sources( msg );
-				}
-				if ( f != NULL )
-				{
-					done = -1;
-					j = 0;
-					while ( done != 1 )
-					{
-						fgets( str1, MAX_LINE_SIZE, f );
-						for ( i = 0; str1[ i ] != '\0' && done != 1; ++i )
-						{
-							if ( done==-1 ) 		// no comment found yet
-							{
-								if ( isalpha( str1[ i ]) != 0 ) 	// no comment exists
-									done = 1;
-								  
-								if ( str1[ i ] == '/' && str1[ i + 1 ] == '*' )
-								{ 
-									done = 0; 		// beginning of a multiline comment
-									i += 2;
-									
-									// discard initial empty line
-									while ( str1[ i ] == '\r' && str1[ i + 1 ] == '\n' )
-										i += 2;
-									while ( str1[ i ] == '\n' )
-										++i;
-									if ( str1[ i ] == '\0' )
-										break;
-								}
-								
-								if ( str1[ i ] == '/' && str1[ i + 1 ] == '/' )
-								{ 
-									done = 2; 		// beginning of a single line comment
-									i += 2;
-								} 
-							}
-							
-							if ( done == 0 ) 		// we are in a comment
-								if ( str1[ i ] == '*' && str1[ i + 1 ] == '/' )
-									done = 1;
-
-							if ( done == 0 || done == 2 )
-								if ( str1[ i ] != '\r' )
-									app[ j++ ] = str1[ i ];
-
-							if ( done==2 && str1[ i ] == '\n' )
-								done = -1; 
-						 
-							if ( j >= 10 * MAX_LINE_SIZE )
-								done = 1;
-						}
-					}
-					strcat( app, "\n" );
-				} 			// end of the if (found equation)
-			} 				// end of the if (cd == Variable)
+				get_var_descr( cd->label, app, 10 * MAX_LINE_SIZE );
+			}
 			else
 				var = false;
 	  
-			app[ j ]='\0'; // close the string
 			return_where_used( cd->label, str1 ); 
 			if ( ( append || ! var ) && ! strstr( cd->text, "(no description available)" ) )
 				if ( strlen( cd->text ) == 0 || ! strcmp( cd->text, "\n" ) )
