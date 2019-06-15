@@ -236,19 +236,30 @@ div.WordSection1
 
 <p class=MsoTitle><span lang=EN-US>What’s new in LSD</span></p>
 
-<h1><span lang=EN-US>Version 7.2 (May 2019)</span></h1>
+<h1><span lang=EN-US>Version 7.2 (July 2019)</span></h1>
 
-<p class=MsoNormal><span lang=EN-US>The version just introduces a few changes:</span></p>
+<p class=MsoNormal><span lang=EN-US>The version just introduces a few
+improvements and changes:</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US><a href="browser.html#updating">Variable
-update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be
-updated/recomputed under arbitrary time schemes, deterministic or random. The
-modeler can now configure update periods larger than 1, including an initial
-“sleep” for any Variable. Both period and initial times can be set as a fixed
-number or a uniform random draw from a modeler-defined range.</span></p>
+update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be updated/recomputed
+under arbitrary time schemes, deterministic or random. The modeler can now
+configure update periods larger than 1, including an initial “sleep” for any
+Variable. Both period and initial times can be set as a fixed number or a
+uniform random draw from a modeler-defined range.</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Automatic description for new
+Variable/Function</span></b><span lang=EN-US>. When <a
+href="menumodel.html#AddAVar">adding new Variables and Functions</a> using the
+name list, <a name="_Hlk11434818">any existing description text (comments)
+existing in the equation file(s) is used to fill the Description field
+automatically</a>.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -261,16 +272,20 @@ in-depth sensitivity analysis.</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>New </span></b><span class=Cdigo><b>Hooks</b></span><b><span
-lang=EN-US> button in LSD Debugger.</span></b><span lang=EN-US> Dynamic hooks
-in Objects can now be listed and inspected, as well as the static hook. </span></p>
+</span></span><b><span lang=EN-US>New </span></b><span class=Cdigo><b><span
+lang=EN-US>Hooks</span></b></span><b><span lang=EN-US> button in LSD Debugger.</span></b><span
+lang=EN-US> Dynamic hooks in Objects can now be listed and inspected, as well
+as the static hook. </span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New Macros.</span></b><span lang=EN-US> </span><span
-class=Cdigo><span lang=EN-US>LAST_CALC(…)</span></span><span lang=EN-US> allows
-reading the last time a Variable or Parameter was calculated or updated.</span></p>
+class=Cdigo><span lang=EN-US><a href="LSD_macros.html#LAST_CALC">LAST_CALC(…)</a></span></span><span
+lang=EN-US> allows reading the last time a Variable or Parameter was calculated
+or updated. </span><span class=Cdigo><a href="LSD_macros.html#MED">MED(…)</a></span><span
+lang=EN-US> computes the median of a Variable contained in a brotherhood of
+Objects.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -303,9 +318,9 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US> A full HTML/PHP engine and associated tools to make any LSD model
 available to be used on the web by unexperienced users. Full modeler control of
 which configuration values are exposed. Complete validation of user settings.
-On-server simulation running. Extensive web-based analysis of results support, including
-time series plots. User configurations up and download. Results CSV data
-download.</span></p>
+On-server simulation running. Extensive web-based analysis of results support,
+including time series plots. User configurations up and download. Results CSV
+data download.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -420,9 +435,9 @@ lang=EN-US> Macro documentation.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Improved Gnuplot support</span></b><span
 lang=EN-US>. Automatic usage of default plotting terminals, supporting
-contemporaneous options like Qt and wxt. Updated system terminal options, shared
-with LMM. WARNING: the old Windows 32-bit version of Gnuplot was removed from
-LSD, now users in all platforms must install Gnuplot, please refer to </span><span
+contemporaneous options like Qt and wxt. Updated system terminal options,
+shared with LMM. WARNING: the old Windows 32-bit version of Gnuplot was removed
+from LSD, now users in all platforms must install Gnuplot, please refer to </span><span
 class=Cdigo><span lang=EN-US><a href="../Readme.txt">Readme.txt</a></span></span><span
 lang=EN-US> for details.</span></p>
 
@@ -492,10 +507,9 @@ templates in LMM.</span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Advanced sensitivity analysis.</span></b><span
-lang=EN-US> Monte Carlo (by range or points), Elementary Effects and
-Near-orthogonal Latin Hypercube sampling tools (Design of Experiments).
-External DoE file import. Full integration with R advanced sensitivity analysis
-package.</span></p>
+lang=EN-US> Monte Carlo (by range or points), Elementary Effects and Near-orthogonal
+Latin Hypercube sampling tools (Design of Experiments). External DoE file
+import. Full integration with R advanced sensitivity analysis package.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -555,8 +569,8 @@ options for plots. </span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Pause/resume run controls.</span></b><span
-lang=EN-US> Simulation runs can be paused resumed asynchronously at any time
-(no preset breakpoint required), including full debugger support.</span></p>
+lang=EN-US> Simulation runs can be paused resumed asynchronously at any time (no
+preset breakpoint required), including full debugger support.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -564,8 +578,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>New unsaved configuration indicator.</span></b><span
 lang=EN-US> All LSD windows now show configuration name and save status (‘</span><span
 class=Cdigo><span lang=EN-US>*</span></span><span lang=EN-US>’ in title bar
-when unsaved changes are present). Unsaved changes warning dialog in all
-potential data loss situations.</span></p>
+when unsaved changes are present). Unsaved changes warning dialog in all potential
+data loss situations.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -776,8 +790,8 @@ their code when running large models.</span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New interfaces to assign initial values and
-number of objects. </span></b><span lang=EN-US>It is possible to easily initialize
-large models with sophisticated data structures.</span></p>
+number of objects. </span></b><span lang=EN-US>It is possible to easily
+initialize large models with sophisticated data structures.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US

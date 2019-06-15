@@ -2229,6 +2229,42 @@ double object::whg_av( char const *weight, char const *lab, int lag )
 
 
 /****************************************************
+MED (*)
+Compute the median of lab
+****************************************************/
+double object::med( char const *lab, int lag )
+{
+	int n;
+	object *cur;
+	variable *cv;
+	vector < double > vals;
+
+	cv = search_var_err( this, lab, no_search, true, "calculating median" );
+	if ( cv == NULL )
+		return NAN;
+
+	cur = cv->up;
+	if ( cur->up != NULL )
+		cur = ( cur->up )->search( cur->label );
+
+	for ( n = 0; cur != NULL; cur = go_brother( cur ), ++n )
+		vals.push_back( cur->cal( this, lab, lag ) );
+
+	if ( n > 0 )
+	{
+		sort( vals.begin( ), vals.end( ) );
+		
+		if ( n % 2 == 0 )
+			return ( vals[ n / 2 - 1 ] + vals[ n / 2 ] ) / 2;
+		else
+			return vals[ n / 2 ];
+	}
+	else
+		return NAN;
+}
+
+
+/****************************************************
 SD (*)
 Compute the (population) standard deviation of lab
 ****************************************************/
@@ -2351,53 +2387,68 @@ r[ 1 ]=average
 r[ 2 ]=variance
 r[ 3 ]=max
 r[ 4 ]=min
+r[ 5 ]=median
+r[ 6 ]=standard deviation
 
 ****************************************************/
 double object::stat( char const *lab, double *r )
 {
-	double r_temp[ 5 ];
+	int n;
+	double val, r_temp[ 7 ];
 	object *cur;
 	variable *cv;
+	vector < double > vals;
 
 	if ( r == NULL )
 		r = r_temp;
 	
-	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = 0;
-	
 	cv = search_var_err( this, lab, no_search, true, "calculating statistics" );
-	if ( cv == NULL )
+	if ( cv == NULL || cv->up == NULL )
 	{
 		r[ 0 ] = 0;	
-		r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = NAN;
+		r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = r[ 5 ] = r[ 6 ] = NAN;
 		return 0;
 	}
 
 	cur = cv->up;
-	if ( cur != NULL )
+	r[ 1 ] =  r[ 2 ] = 0;
+	r[ 3 ] = DBL_MIN;
+	r[ 4 ] = DBL_MAX;
+	
+	for ( n = 0; cur != NULL; cur = go_brother( cur ), ++n )
 	{
-		r[ 3 ] = r[ 4 ] = cur->cal( lab, 0 );
-		for ( r[ 2 ] = 0, r[ 0 ] = 0, r[ 1 ] = 0; cur != NULL; cur = go_brother( cur ) )
-		{
-			++r[ 0 ];
-			r[ 5 ] = cur->cal( lab, 0 );
-			r[ 1 ] += r[ 5 ];
-			r[ 2 ] += r[ 5 ] * r[ 5 ];
-			if ( r[ 5 ] > r[ 3 ] )
-				r[ 3 ] = r[ 5 ];
-			if ( r[ 5 ] < r[ 4 ] )
-				r[ 4 ] = r[ 5 ];
-		}
+		val = cur->cal( lab, 0 );
+		r[ 1 ] += val;
+		r[ 2 ] += val * val;
 		
-		if ( r[ 0 ] > 0 )
-		{
-			r[ 1 ] /= r[ 0 ];
-			r[ 2 ] = r[ 2 ] / r[ 0 ] - r[ 1 ] * r[ 1 ];
-		}
-		else
-			r[ 1 ] = r[ 2 ] = 0;
+		if ( val > r[ 3 ] )
+			r[ 3 ] = val;
+		
+		if ( val < r[ 4 ] )
+			r[ 4 ] = val;
+		
+		vals.push_back( val );
 	}
 	
-	return r[ 0 ];								// return the number of instances
+	r[ 0 ] = n;
+	
+	if ( n > 0 )
+	{
+		r[ 1 ] /= n;
+		r[ 2 ] = r[ 2 ] / n - r[ 1 ] * r[ 1 ];
+		r[ 6 ] = r[ 2 ] >= 0 ? sqrt( r[ 2 ] ) : NAN;
+		
+		sort( vals.begin( ), vals.end( ) );
+		
+		if ( n % 2 == 0 )
+			r[ 5 ] = ( vals[ n / 2 - 1 ] + vals[ n / 2 ] ) / 2;
+		else
+			r[ 5 ] = vals[ n / 2 ];
+	}
+	else
+		r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = r[ 5 ] = r[ 6 ] = NAN;
+	
+	return r[ 0 ];
 }
 
 

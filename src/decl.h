@@ -84,7 +84,7 @@ Global definitions among all LSD C++ modules
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 2
 #define _LSD_VERSION_ "7.2"
-#define _LSD_DATE_ "May 31 2019"        // __DATE__
+#define _LSD_DATE_ "July 31 2019"        // __DATE__
 
 // global constants
 #define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)
@@ -216,6 +216,7 @@ struct object
 		netLink *curl2, netLink *curl3, netLink *curl4, netLink *curl5, netLink *curl6, 
 		netLink *curl7, netLink *curl8, netLink *curl9 );
 	double last_cal( char const *lab );
+	double med( char const *lab, int lag );
 	double multiply( char const *lab, double value );
 	double overall_max( char const *lab, int lag );
 	double overall_min( char const *lab, int lag );
