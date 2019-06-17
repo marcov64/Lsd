@@ -355,7 +355,7 @@ cmd( "if [ string equal $tcl_platform(os) Darwin ] { set CurPlatform mac; set De
 cmd( "if [ string equal $tcl_platform(os) Darwin ] { set CurPlatform osx; set DefaultExe lsd; set DefaultMakeExe $makeMac; set DefaultWish $wishMacTk85; set DefaultSysTerm $sysTermMac; set DefaultDbgExe $dbgMac; set DefaultHtmlBrowser $browserMac; set DefaultFont $fontMac; set DefaultFontSize $fontSizeMac; set small_character [ expr $DefaultFontSize - $deltaSizeMac ] }" );
 #endif
 cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set CurPlatform win32; set DefaultExe lsd; set DefaultMakeExe $makeWin32; set DefaultWish $wishWinTk85; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu }" );
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set CurPlatform win64; set DefaultExe lsd; set DefaultWish $wishWinTk86; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu64; if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { set DefaultMakeExe $makeWin64mgw } { set DefaultMakeExe $makeWin64cyg } }" );
+cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set CurPlatform win64; set DefaultExe lsd; set DefaultMakeExe $makeWin64; set DefaultWish $wishWinTk86; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu64 }" );
 
 cmd( "set MakeExe \"$DefaultMakeExe\"" );
 
@@ -419,10 +419,9 @@ cmd( "set shigh $shigh_temp" );	// restore correct value
 
 // set main window
 cmd( "wm withdraw ." );
-cmd( "wm title . \"LSD Model Manager - LMM\"" );
+cmd( "wm title . \"LSD Model Manager\"" );
 cmd( "wm protocol . WM_DELETE_WINDOW { set choice 1 }" );
 cmd( ". configure -menu .m" );		// define here to avoid redimensining the window
-cmd( "bind . <Destroy> { set choice 1 }" );
 cmd( "icontop . lmm" );
 cmd( "sizetop .lmm" );
 cmd( "setglobkeys ." );				// set global keys for main window
@@ -5418,7 +5417,7 @@ if ( choice == 48 )
 					file delete -force \"$i\" \
 				} \
 			}; \
-			set objs [ glob -nocomplain -directory \"$modeldir\" *.o src break.gdb makefile* makemessage.txt elements.txt lsd* *.exe *.app *.bak *.err ]; \
+			set objs [ glob -nocomplain -directory \"$modeldir\" *.o src break.gdb makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.app *.bak *.err ]; \
 			foreach i $objs { \
 				catch { \
 					file delete -force \"$i\" \
@@ -6578,13 +6577,12 @@ bool compile_run( bool run, bool nw )
 		strcpy( str, "TARGET=lsdNW" );		// NW version use fixed name because of batches
 
 	// show compilation banner
-	cmd( "set init_time [clock seconds]" ); 
 	cmd( "if { ! $autoHide || ! %d } { set parWnd .; set posWnd centerW } { set parWnd \"\"; set posWnd centerS }", run );
 	cmd( "newtop .t \"Please Wait\" \"\" $parWnd" );
 	if ( nw )
-		cmd( "label .t.l1 -font {-weight bold } -text \"Making 'No Window' version of model...\"" );
+		cmd( "label .t.l1 -font {-weight bold } -text \"Compiling 'No Window' executable...\"" );
 	else
-		cmd( "label .t.l1 -font {-weight bold } -text \"Making model...\"" );
+		cmd( "label .t.l1 -font {-weight bold } -text \"Compiling model...\"" );
 	if ( run )
 		if ( nw )
 			cmd( "label .t.l2 -text \"The executable 'lsdNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\n'No Window' version in other systems.\"" );
@@ -6593,6 +6591,7 @@ bool compile_run( bool run, bool nw )
 	else
 		cmd( "label .t.l2 -text \"The system is recompiling the model.\nOn failure a text window will show the compiling error messages.\"" );
 	cmd( "pack .t.l1 .t.l2 -padx 5 -pady 5" );
+	cmd( "cancel .t b { set res 2 }");
 	cmd( "showtop .t $posWnd" );
   
 	// minimize LMM if required
@@ -6605,43 +6604,31 @@ bool compile_run( bool run, bool nw )
 	max_threads = thread::hardware_concurrency( );
 #endif
 
-	// start compilation
-	cmd( "if [ string equal $tcl_platform(platform) windows ] { set add_exe \".exe\" } { set add_exe \"\" }" );  
-	cmd( "if { [ string equal $tcl_platform(platform) windows ] && ! [ string equal $tcl_platform(machine) amd64 ] } { set res 1 } { set res 0 }" );
-	if ( res == 0 )
-		cmd( "catch { exec $MakeExe -j %d -f makefile%s 2> makemessage.txt } result", max_threads, nw ? "NW" : "" ); 
-	else
-	{   // handle Windows 32-bit old compiler
-		cmd( "set file [ open make.bat w ]" );
-		cmd( "puts -nonewline $file \"$MakeExe -f makefile%s 2> makemessage.txt\\n\"", nw ? "NW" : "" );
-		cmd( "close  $file" );
-		cmd( "if [ file exists \"$RootLsd/$LsdSrc/system_options.txt\" ] { set res 0 } {set res 1 }" );
-		cmd( "if [ file exists \"%s.exe\" ] { file rename -force \"%s.exe\" \"%sOld.exe\" }", str + 7, str + 7, str + 7 );
-		cmd( "if [ file exists \"$RootLsd/$LsdGnu/bin/crtend.o\" ] { file copy -force \"$RootLsd/$LsdGnu/bin/crtend.o\" .; file copy -force \"$RootLsd/$LsdGnu/bin/crtbegin.o\" .; file copy -force \"$RootLsd/$LsdGnu/bin/crt2.o\" . }" );
-		cmd( "catch { exec make.bat } result" );
-		cmd( "file delete make.bat" );
-		cmd( "if [ file exists crtend.o] { file delete crtend.o; file delete crtbegin.o; file delete crt2.o }" );
-	}
-   
+	// start compilation as a background task
+	res = -1;
+#ifdef MAC_PKG
+	cmd( "make_background %s %d %d %d", str + 7, max_threads, nw, true );
+#else
+	cmd( "make_background %s %d %d %d", str + 7, max_threads, nw, false );
+#endif	
+
+	// loop to wait compilation to finish or be aborted
+	while ( res < 0 )
+		Tcl_DoOneEvent( 0 );
+
 	// close banner
 	cmd( "destroytop .t" );
 	
-	// check compilation error
-	cmd( "if { [ file size makemessage.txt] == 0 } { file delete makemessage.txt; set res 0 } { set res 1 }" );
-	if ( res == 1 )
-	{	// Check if the executable is newer than the compilation command, implying just warnings
-#ifdef MAC_PKG
-		if ( ! nw )
-			cmd( "if [ string equal $tcl_platform(os) Darwin ] { set pkgPath \"%s.app/Contents/MacOS/\" } { set pkgPath \"\" }", str + 7 );
-		else
-#endif
-			cmd( "set pkgPath \"\"" );
-			
-		cmd( "if [ file exist \"${pkgPath}%s$add_exe\" ] { set exectime [ file mtime \"${pkgPath}%s$add_exe\" ] } { set exectime $init_time }", str + 7 , str + 7 );
-		cmd( "if { $init_time < $exectime } { set res 0 }" );
+	if ( res == 2 )
+	{
+		cmd( "catch { close $makePipe }" );
+		cmd( "if [ file exists make.bat ] { file delete make.bat }" );
+		cmd( "wm deiconify ." );
+		goto end;
 	}
-	if ( res == 1 )
-	{ 	// real problem
+	
+	if ( res == 0 )							// compilation failure?
+	{
 		cmd( "set res $autoHide" );			// get auto hide status
 		if ( run && res )					// auto unhide LMM if necessary
 			cmd( "wm deiconify ." );  		// only reopen if error
@@ -6650,12 +6637,12 @@ bool compile_run( bool run, bool nw )
 	else
 	{
 		if ( nw )
-			cmd( "tk_messageBox -parent . -type ok -icon info -title \"No Window Version\" -message \"Compilation successful\" -detail \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsdNW$add_exe' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n\\n$modeldir\\n\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'No Window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsdNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in LSD result files named after the seed generator used.\"" );
+			cmd( "tk_messageBox -parent . -type ok -icon info -title \"No Window Version\" -message \"Compilation successful\" -detail \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsdNW\\[.exe\\]' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n\\n$modeldir\\n\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'No Window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsdNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in LSD result files named after the seed generator used.\"" );
 		
 		if ( run )							// no problem - execute
 		{
 			// create the element list file in background
-			cmd( "after 0 { create_elem_file $modeldir }" );
+			cmd( "after 0 { create_elem_file $modeldir }; update" );
 
 #ifdef MAC_PKG
 			cmd( "if [ string equal $tcl_platform(platform) windows ] { set res 3 } { if [ string equal $tcl_platform(os) Darwin ] { set res 2 } { set res 1 } }" );

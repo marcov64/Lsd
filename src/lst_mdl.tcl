@@ -243,10 +243,6 @@ proc check_sys_opt { } {
 		}
 	}
 	
-#	if { $noCount > 0 || $yesCount < [ llength $yes ] } {
-#		tk_messageBox -message "Missing configuration items: $missingItems\nInvalid configuration items: $invalidItems"
-#	}
-	
 	if { $noCount > 0 } {
 		return "Invalid option(s) detected (click 'Default' button to recreate options)"
 	}
@@ -256,6 +252,105 @@ proc check_sys_opt { } {
 	}
 	
 	return ""
+}
+
+
+#************************************************
+# MAKE_WAIT
+# Waits for a makefile background task to finish
+# Set 'res' to 1 if compilation succeeds and 0 otherwise
+#************************************************
+proc make_wait { } {
+	global targetExe iniTime makePipe res
+	
+	if { [ eof $makePipe ] } {
+		fileevent $makePipe readable ""
+
+		if [ file exists make.bat ] {
+			file delete make.bat
+		}
+		
+		if { [ file exists makemessage.txt ] && [ file size makemessage.txt ] == 0 } {
+			file delete makemessage.txt
+			set res 1
+		} else {
+			# check if the executable is newer than the compilation command, implying just warnings
+			if [ file exist "$targetExe" ] { 
+				set exeTime [ file mtime "$targetExe" ] 
+			} else { 
+				set exeTime 0 
+			};
+
+			if { $iniTime <= $exeTime } { 
+				set res 1 
+			} else {
+				set res 0
+			}
+		}
+		
+		return
+	}
+	
+	set data [ read $makePipe ]
+}
+
+
+#************************************************
+# MAKE_BACKGROUND
+# Start a makefile as a background task
+#************************************************
+proc make_background { target threads nw macPkg } {
+	global tcl_platform MakeExe RootLsd LsdGnu targetExe iniTime makePipe
+	
+	if { $nw } {
+		set makeSuffix "NW"
+	} else {
+		set makeSuffix ""
+	};
+	
+	if [ string equal $tcl_platform(platform) windows ] {
+		set exeSuffix ".exe"
+	} else {
+		set exeSuffix ""
+	}
+	
+	if { ! $nw && $macPkg && [ string equal $tcl_platform(os) Darwin ] } {
+		set targetExe "$target.app/Contents/MacOS/$target"
+	} else {
+		set targetExe "$target$exeSuffix"
+	};
+	
+	set iniTime [ clock seconds ]
+	
+	# handle Windows access to open executable and empty compilation windows
+	if [ string equal $tcl_platform(platform) windows ] {
+	
+		if [ file exists "$target$exeSuffix" ] { 
+			catch { file delete "$target$exeSuffix" }
+			
+			if [ file exists "$target$exeSuffix" ] {
+				if [ string equal [ info tclversion ] 8.6 ] {
+					close [ file tempfile targetTemp ]
+					file delete $targetTemp
+					file mkdir [ file dirname $targetTemp ]
+				} else {
+					set targetTemp "$target.bak"
+				}
+				file rename -force "$target$exeSuffix" "$targetTemp"
+			}
+		}
+		
+		set file [ open make.bat w ]
+		puts -nonewline $file "$MakeExe -j $threads -f makefile$makeSuffix 2> makemessage.txt\n"
+		close  $file
+
+		set makePipe [ open "| make.bat" r ]
+	} else {
+		set makePipe [ open "| $MakeExe -j $threads -f makefile$makeSuffix 2> makemessage.txt" r ]
+	}
+	
+	fconfigure $makePipe -blocking 0
+	fileevent $makePipe readable make_wait
 }
 
 

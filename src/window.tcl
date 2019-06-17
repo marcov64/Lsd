@@ -549,8 +549,13 @@ proc resizetop { w sizeX { sizeY 0 } } {
 # ICONTOP
 # Set window icon
 #************************************************
-proc icontop { w { type lsd } } {
+proc icontop { w type } {
 	global tcl_platform RootLsd LsdSrc lmmImg lsdImg iconExt
+	
+	if { $type == "" } {
+		wm iconbitmap $w ""
+		return
+	}
 	
 	if { $tcl_platform(platform) == "windows" } {
 		if [ string equal $w . ] {
@@ -796,6 +801,21 @@ proc ok { w fr comOk } {
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
 	pack $w.$fr.ok -padx 10 -pady 10 -side left
+	pack $w.$fr -side right 
+}
+
+
+#************************************************
+# CANCEL
+# Procedure to create standard button set
+#************************************************
+proc cancel { w fr comCancel } {
+	global butWid
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
+	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
+	pack $w.$fr.can -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
 }
 
