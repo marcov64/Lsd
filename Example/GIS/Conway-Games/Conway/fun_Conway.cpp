@@ -9,8 +9,8 @@ const char *chstr;
 EQUATION("Init")
 /* Initialise the model. Generate the cells and mark alive ones randomly. */
 
-INIT_SPACE_GRID_WRAP("Cell", V("ncol"), V("nrow"), V("wrapping") ); //Initialise the space
-ADD_TO_SPACE_XY(SEARCH("Cell"),0,0); //Ease access, adding Lattice object to space.
+INIT_SPACE_PATCH_WRAP("Cell", V("ncol"), V("nrow"), V("wrapping") ); //Initialise the space
+ADD_TO_SPACE_XY_WHERE(0,0,SEARCH("Cell")); //Ease access, adding Lattice object to space.
 
 SET_GIS_DISTANCE_TYPE('c'); //Chebyshev metric aka moore neighbourhood
 
@@ -30,7 +30,7 @@ int active_cells = V("PercActive") *  V("ncol") * V("nrow") ;
 if (active_cells > 0) {
   //Cycle randomly through cells and active the first active_cells cells.
   RCYCLE_GIS(cur,"Cell"){
-    WRITELS(cur,"State",1, t-1);        
+    WRITELS(cur,"State",1, t-1);
     active_cells--;
     if (active_cells == 0){
       break; //stop when the specified number of cells have been made alive.
@@ -116,5 +116,3 @@ void close_sim(void)
 {
 
 }
-
-
