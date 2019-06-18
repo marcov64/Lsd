@@ -279,6 +279,7 @@ bool no_ptr_chk = true;
 #define NO_ZERO_INSTANCE { no_zero_instance = true; }
 #define USE_ZERO_INSTANCE { no_zero_instance = false; }
 #define PARAMETER { var->param = 1; }
+#define PARAMETERS(OBJ, LAB) { OBJ->search_var_local(LAB)->param = 1; }
 #define RND_GENERATOR( X ) { ran_gen = X; }
 #define RND_SETSEED( X ) { seed = ( unsigned ) X; init_random( seed ); }
 #define SLEEP( X ) msleep( ( unsigned ) X )

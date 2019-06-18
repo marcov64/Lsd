@@ -18,7 +18,7 @@
     online mode. In specific, it allows to print the sequence of actions
     and some information of who called whom.
     It makes use of the opportunity of LSD-GIS to provide unique IDs
-    to LSD objects, faciliating the validation / debuging.      
+    to LSD objects, faciliating the validation / debuging.
 
     TEQUATION
      For a fast testing/logging, exchange all EQUATION with TEQUATION.
@@ -37,9 +37,9 @@
       to see what exactly happens,especially together with user defined printing
       of information.TRACK_SEQUENCE will only trigger in the first
       TRACK_SEQUENCE_MAX_T times.
-      
-     SWITCH_TRACK_SEQUENCE_ALL : If defined before MODELLBEGIN information for all 
-      variables will be printed whenever they are updated, as long as t <= TRACK_SINGLE_TEQUATION_MAX_T     
+
+     SWITCH_TRACK_SEQUENCE_ALL : If defined before MODELLBEGIN information for all
+      variables will be printed whenever they are updated, as long as t <= TRACK_SINGLE_TEQUATION_MAX_T
      .
      TRACK_SEQUENCE_FIRST_OR_LAST : It will only trigger for the first and last
       element of a brotherhood of objects.
@@ -120,6 +120,10 @@
 #define TRACK_SEQUENCE_MAX_T max_step
 #endif
 
+#ifndef TRACK_SEQUENCE_MAX_SAME
+#define TRACK_SEQUENCE_MAX_SAME 5
+#endif
+
 #ifndef TRACK_SINGLE_TEQUATION_MAX_T
 #define TRACK_SINGLE_TEQUATION_MAX_T 5
 #endif
@@ -127,10 +131,13 @@
 #define USE_OLD_ID_LABEL_PATTERN false //a switch to allow the name pattern ID_Label instead of default Label_ID
 
 namespace LSD_VALIDATE {
-    
-    int indent_level=-1; //indentation, increase with each call of track sequence
-    void end_equation_reduce_indent(){ indent_level--; };
-    
+
+    int indent_level = -1; //indentation, increase with each call of track sequence
+    void end_equation_reduce_indent()
+    {
+        indent_level--;
+    };
+
     struct s_assert_time;
 
     struct s_assert_time {
@@ -147,7 +154,7 @@ namespace LSD_VALIDATE {
         {
             clock_gettime(CLOCK_MONOTONIC, &t_end);
             double elapsed = ( (double) (t_end.tv_sec - t_start.tv_sec) ) + ( (double) (t_end.tv_nsec - t_start.tv_nsec) ) / 10.0e9;
-            if (elapsed > time){
+            if (elapsed > time) {
                 plog("\nError in s_assert_time()");
                 return false;
             }
@@ -249,8 +256,8 @@ namespace LSD_VALIDATE {
                 ss << "\n" << std::setw(5) << t;
                 ss << " : ";
                 if (indent_level > 0)
-                    ss << "(" << std::setw(2) << indent_level << ")"; 
-                for (int i =0; i < indent_level; i++)
+                    ss << "(" << std::setw(2) << indent_level << ")";
+                for (int i = 0; i < indent_level; i++)
                     ss << "  ";
                 ss << std::setw(40) << label_id_of_o(p);
                 ss << " -> " << std::setw(32) << label_of_var_of_o(var);
@@ -271,18 +278,71 @@ namespace LSD_VALIDATE {
     }
 
     int time_call = -1;
+
+    std::string callType(object* p, object* c, variable* var)
+    {
+        std::string identifier = "total calls of '";
+        identifier += var == NULL ? "NULL" : var->label;
+        identifier += "->";
+        identifier += p == NULL ? "NULL" : p->label;
+        identifier += "' called by Object '";
+        identifier += c == NULL ? "NULL" : c->label;
+        return identifier;
+    }
+
+    std::string skip_print(object* p, variable* var)
+    {
+        int i = 0;
+        for (object* cur = root->search(p->label); cur != p; cur = cur->hyper_next()) {
+            if (++i > TRACK_SEQUENCE_MAX_SAME)
+                return "";
+        }
+        if (i == TRACK_SEQUENCE_MAX_SAME) {
+            std::string buffer = "\n Skipping info for next elements of type '";
+            buffer += p==NULL?"NULL":p->label;
+            buffer += "->";
+            buffer += var==NULL?"NULL":var->label;
+            buffer += "'";
+            return buffer;
+        }
+        return "false";
+    }
+
+    std::string check_if_same;
+    int same_count;
     std::string track_sequence(int time, object* p, object* c = NULL, variable* var = NULL, bool has_id = true, bool is_dummy = false)
     {
         stringstream ss;
         ss << "";
         if (time != time_call) {
+            check_if_same.clear();
+            same_count = 0;
             time_call = time;
             ss << "\n" << setw(80) << " -- -- -- -- -- -- -- -- ";
             ss << "\n" << setw(5) << "" << "Time is now:" << time;
             ss << "\n" << setw(5) << "'t'" << ":" << setw(40) << "'Object'" << "->" << setw(32) << "'Variable'" << " called by " << "'Calling Object'";
         }
+        auto skip_buff = skip_print(p,var);
+        if (skip_buff.compare("false") != 0){
+            ss << skip_buff;
+            return ss.str();
+        }
+        std::string buffer = callType(p, c, var);
+        if (buffer.compare(check_if_same) == 0) {
+            same_count++;
+            return "";
+        }
+        else if (check_if_same.size() > 0) {
+            ss << "\n " << check_if_same << " : " << same_count;
+            same_count = 0;
+            check_if_same.clear();
+        }
+
+
+
         ss << track_source(p, c, var, has_id, is_dummy);
         return ss.str();
+
     }
 
     // returns: -2 -error, -1: is root, 0: not head not last, 1: head, 2: last
@@ -458,13 +518,13 @@ namespace LSD_VALIDATE {
 #define TRACK_SEQUENCE \
   if ( !fast && t <= TRACK_SEQUENCE_MAX_T)  { LOG(LSD_VALIDATE::track_sequence(t,p,c,var,true).c_str()); };
 #define TRACK_SEQUENCE_DUMMY \
-  if ( !fast && t <= TRACK_SEQUENCE_MAX_T)  { LOG(LSD_VALIDATE::track_sequence(t,p,c,var,true,true).c_str()); };  
+  if ( !fast && t <= TRACK_SEQUENCE_MAX_T)  { LOG(LSD_VALIDATE::track_sequence(t,p,c,var,true,true).c_str()); };
 #define END_EQ_TRACK_SEQUENCE LSD_VALIDATE::end_equation_reduce_indent();
 //   #undef TRACK_SEQUENCE_FIRST_OR_LAST
 // #define TRACK_SEQUENCE_FIRST_OR_LAST \
-    // if ( !fast && t <= TRACK_SEQUENCE_MAX_T )  { LOG(LSD_VALIDATE::track_sequence(t,p,c,var,false).c_str()); };
+// if ( !fast && t <= TRACK_SEQUENCE_MAX_T )  { LOG(LSD_VALIDATE::track_sequence(t,p,c,var,false).c_str()); };
 // #define TRACK_SEQUENCE_FIRST_OR_LAST_ALWAYS \
-    // LOG(LSD_VALIDATE::track_sequence(t,p,c,var,false).c_str());
+// LOG(LSD_VALIDATE::track_sequence(t,p,c,var,false).c_str());
 // #define TRACK_SEQUENCE_ALWAYS { LOG(LSD_VALIDATE::track_sequence(t,p,c,var).c_str()); };
 #define TRACK_SEQUENCE_INFO  LSD_VALIDATE::track_sequence(t,p,c,var).c_str()
 #else
@@ -479,12 +539,12 @@ namespace LSD_VALIDATE {
 
 // #ifdef SWITCH_TRACK_SEQUENCE_ALL
 // #define TEQUATION( X ) \
-    // EQUATION( X ) \
-    // if ( COUNT(p->label) > TRACK_SINGLE_TEQUATION_MAX_T) { \
-      // TRACK_SEQUENCE_FIRST_OR_LAST  \
-    // } else {           \
-      // TRACK_SEQUENCE \
-    // }
+// EQUATION( X ) \
+// if ( COUNT(p->label) > TRACK_SINGLE_TEQUATION_MAX_T) { \
+// TRACK_SEQUENCE_FIRST_OR_LAST  \
+// } else {           \
+// TRACK_SEQUENCE \
+// }
 // #else
 // #define TEQUATION EQUATION( X )
 // #endif
