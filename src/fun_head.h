@@ -289,6 +289,8 @@ bool no_ptr_chk = true;
 #define CURRENT ( var->val[ 0 ] )
 #define PARENT ( p->up )
 #define GRANDPARENT ( CHK_PTR_OBJ( p->up ) p->up->up )
+#define PARENTS(OBJ) ( OBJ->up )
+#define GRANDPARENTS(OBJ) ( CHK_PTR_OBJ( OBJ->up ) OBJ->up->up )
 // some macros to define unique ids for some objects
 #ifdef CPP11
   #define MAKE_UNIQUE( LAB ) p->declare_as_unique( ( char * ) LAB )

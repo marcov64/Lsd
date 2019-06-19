@@ -2679,7 +2679,7 @@ double object::count_all( char const* lab )
 ****************************************************/
 bool object::check_condition(char const varLab[], char const condition[], double condVal, object* fake_caller, int lag)
 {
-  variable* cv = search_var(this, varLab, true, true);
+  variable* cv = search_var_local(varLab);
   
   if (cv == NULL ) {
     sprintf( msg, "element '%s' is missing in object '%s' in function '%s'", varLab, this->label, __func__ );
