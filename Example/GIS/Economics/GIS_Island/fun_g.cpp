@@ -60,6 +60,7 @@ for ( i = 0; i <= LatticeSize ;++i )
 		if ( RND < island_prob && ! ( i == LatticeSize/2 && j == LatticeSize/2 ) )
 
 	{
+
 				WRITE("addATx",i);
 				WRITE("addATy",j);
 				V( "addIsland" );
@@ -128,7 +129,7 @@ i=V("addATx");
 j=V("addATy");
 
 cur = ADDOBJ( "Island" );			// add new object instance
-ADD_TO_SPACE_XYS(cur,c,i, j);
+ADD_TO_SPACE_XYS_WHERE(cur,i, j,c);
 // INCR("Total_island_count",1);
 WRITES( cur, "_xIsland", i );				// save island x coordinate
 WRITES( cur, "_yIsland", j );
@@ -143,7 +144,7 @@ EQUATION( "makeKnown" )
 
 i=V("addATx");
 j=V("addATy");
-cur= SEARCH_POSITION_XYS(c,"Island",i,j);
+cur= SEARCH_POSITION_XY_WHERE("Island",i,j,c);
 if (cur == NULL){
 	//PLOG("not found");
 	END_EQUATION( 0 );
@@ -169,13 +170,13 @@ j=V("addATy");
 
 cur = ADDOBJ( "Agent" );			// add new object instance
 INCR("AgentCount",1);
-cur1= SEARCH_POSITION_XYS(c,"Island",i,j);
+cur1= SEARCH_POSITION_XY_WHERE("Island",i,j,c);
 if (cur1 == NULL){
 	//PLOG("not found");
 	END_EQUATION( 0 );
 }
 //PLOG("\n found to add agent");
-ADD_TO_SPACE_XYS(cur,c,i, j);
+ADD_TO_SPACE_XYS_WHERE(cur,i, j,c);
 auto IDisland=UIDS(cur1);
 WRITES(cur,"_OnIslandID",IDisland);
 auto ID=UIDS(cur);
@@ -372,7 +373,7 @@ if ( CURRENT == 3 )							// it is an imitator?
 		j += copysign( 1, k - j );			// get closer by the y direction
 
 		if ( i == h && j == k )
-			cur = SEARCH_POSITION_XYS( c, "Island", i,j );
+			cur = SEARCH_POSITION_XY_WHERE("Island", i,j, c);
 		else
 			cur = NULL;
 
@@ -515,11 +516,11 @@ DCYCLE_NEIGHBOURS( cur1,cur, "Island", maxDis ){
 
 if (VS(cur,"_known")!=0 && SEARCH_LINKS( cur1, V_NODEIDS( cur ) ) == NULL)
 {
-	double dis=DISTANCE2(cur1,cur);
+	double dis=DISTANCE_BETWEEN(cur1,cur);
 	if (dis==0)
 			continue;
 
-	double maxSgnPrb = exp( - rho * DISTANCE2(cur1,cur) );
+	double maxSgnPrb = exp( - rho * DISTANCE_BETWEEN(cur1,cur) );
 	if (maxSgnPrb<minSgnPrb)
 			continue;
 

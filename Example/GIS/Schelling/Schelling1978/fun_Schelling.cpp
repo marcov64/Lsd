@@ -63,13 +63,13 @@ Initialise the model
 
   //Initialise the space
   #if latt2d
-    INIT_SPACE_GRID_WRAP("Patch",V("xn"),V("yn"),V("wrapping") );
+    INIT_SPACE_PATCH_WRAP("Patch",V("xn"),V("yn"),V("wrapping") );
   #else
-    INIT_SPACE_GRID_WRAP("Patch",V("xn"),1,V("wrapping") );
+    INIT_SPACE_PATCH_WRAP("Patch",V("xn"),1,V("wrapping") );
   #endif
 
     //set distance type
-  SET_GIS_DISTANCE_TYPES(SEARCH("Patch"),V("distance_type"));
+  SET_GIS_DISTANCE_TYPE_WHERE(V("distance_type"),SEARCH("Patch"));
 
   //Initialise the lattice, but only for first Model and only if just one Model
   #ifndef NO_WINDOW
@@ -90,8 +90,8 @@ Initialise the model
   //Add agents to random position
 
     object *cAgent = SEARCH("Agent");
-    RCYCLE_GISS(SEARCH("Patch"),cur,"Patch"){
-      ADD_TO_SPACE_SHARES(cAgent,cur); //Register cAgent at pos of cur Patch
+    RCYCLE_GIS_WHERE(cur,"Patch",SEARCH("Patch")){
+      ADD_TO_SPACE_SHARES_WHERE(cAgent,cur); //Register cAgent at pos of cur Patch
       //prepare next
       cAgent = cAgent->next;
       if (cAgent == NULL){
@@ -102,7 +102,7 @@ Initialise the model
   	//colour the agents in random order
   	double nAgentsBlue = nAgents * V("fracBlue");
   	i = 0;
-  	RCYCLE_GISS(SEARCH("Agent"),cur,"Agent"){
+  	RCYCLE_GIS_WHERE(cur,"Agent",SEARCH("Agent")){
   		++i; //increase by 1
   		if (i <= nAgentsBlue) {
   			WRITES(cur,"Colour",5); //blue
