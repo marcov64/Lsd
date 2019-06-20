@@ -23,7 +23,7 @@
 
 const char* dev_err_info(const char* func, const char* file, int line);
 
-#define __DEV_ERR_INFO__ dev_err_info(__func__,__FILE__,__LINE__)
+#define __DEV_ERR_INFO__ (dev_err_info(__func__,__FILE__,__LINE__))
 
 //A Debugging macro, see https://codereview.stackexchange.com/q/2484
 #define CatchAll( msg ) \
