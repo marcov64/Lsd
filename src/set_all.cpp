@@ -364,15 +364,15 @@ void set_all( int *choice, object *original, char *lab, int lag )
 					
 					if ( to_all == 1 )
 					{
-						sprintf( msg, "All %d instances equal to %g.", i - 1, value1 );
+						sprintf( msg, "All %d instances equal to %.15g.", i - 1, value1 );
 						change_descr_lab( lab, "", "", "", msg );      
 					} 
 					else
 					{
 						if ( cd->init != NULL )
-							sprintf( msg, "%s Instances from %d to %d equal to %g.", cd->init, cases_from, cases_to, value1 );
+							sprintf( msg, "%s Instances from %d to %d equal to %.15g.", cd->init, cases_from, cases_to, value1 );
 						else
-							sprintf( msg, "Instances from %d to %d equal to %g.", cases_from, cases_to, value1 );  
+							sprintf( msg, "Instances from %d to %d equal to %.15g.", cases_from, cases_to, value1 );  
 						
 						change_descr_lab( lab, "", "", "", msg );
 					}  
