@@ -153,13 +153,13 @@ void object::save_param( FILE *f )
 			cv1 = cur->search_var( NULL, cv->label );
 			if ( cv1->param == 1 )
 				if ( cv1->data_loaded == '+' )
-					fprintf( f, "\t%g", cv1->val[ 0 ] );
+					fprintf( f, "\t%.15g", cv1->val[ 0 ] );
 				else
 					fprintf( f, "\t%c", '0' );
 			else
 				for ( i = 0; i < cv->num_lag; ++i )
 					if ( cv1->data_loaded == '+' )
-						fprintf( f, "\t%g", cv1->val[ i ] );
+						fprintf( f, "\t%.15g", cv1->val[ i ] );
 					else
 						fprintf( f, "\t%c", '0' );
 		}
