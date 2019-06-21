@@ -1805,20 +1805,18 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 		
 #ifndef NO_WINDOW
 
-	cmd( "destroytop .lat" );
-	
 	get_int( "hsizeLat", & hsize );			// 400
 	get_int( "vsizeLat", & vsize );			// 400
 	get_int( "hsizeLatMax", & hsizeMax );	// 1024
 	get_int( "vsizeLatMax", & vsizeMax );	// 1024
 
-	pixW = pixW > 0 ? pixW : hsize;
-	pixH = pixH > 0 ? pixH : vsize;
+	pixW = floor( pixW ) > 0 ? floor( pixW ) : hsize;
+	pixH = floor( pixH ) > 0 ? floor( pixH ) : vsize;
 	pixW = min( pixW, hsizeMax );
 	pixH = min( pixH, vsizeMax );
 
-	dimH = pixH / nrow;
-	dimW = pixW / ncol;
+	dimH = pixH / rows;
+	dimW = pixW / columns;
 
 	// create the window with the lattice, roughly 600 pixels as maximum dimension
 	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
@@ -1846,12 +1844,20 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 
 	cmd( "save .lat b { set b \"%s.eps\"; set a [ tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -initialdir \"%s\" -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } } ]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name, path );
 
-	cmd( "set dimH %lf", dimH );
-	cmd( "set dimW %lf", dimW );
-
-	for ( i = 1; i <= nrow; ++i )
-		for ( j = 1; j <= ncol; ++j )
-			cmd( ".lat.c addtag c%d_%d withtag [ .lat.c create rectangle %d %d %d %d -fill %s -outline \"\" ]", ( unsigned int ) i, ( unsigned int ) j, ( unsigned int ) ( ( j - 1 ) * dimW ), ( unsigned int ) ( ( i - 1 ) * dimH ), ( unsigned int ) ( j * dimW ), ( unsigned int ) ( i * dimH ), init_color_string );
+	cmd( "set rows %d", rows );
+	cmd( "set columns %d", columns );
+	cmd( "set dimH %.6g", dimH );
+	cmd( "set dimW %.6g", dimW );
+	
+	cmd( "for { set i 1 } { $i <= $rows } { incr i } { \
+			for { set j 1 } { $j <= $columns } { incr j } { \
+				set x1 [ expr ( $j - 1 ) * $dimW ]; \
+				set y1 [ expr ( $i - 1 ) * $dimH ]; \
+				set x2 [ expr $j * $dimW ]; \
+				set y2 [ expr $i * $dimH ]; \
+				.lat.c create rectangle $x1 $y1 $x2 $y2 -outline \"\" -tags c${i}_${j} \
+			} \
+		}" );
 
 	cmd( "showtop .lat centerS no no no" );
 	set_shortcuts_log( ".lat", "lattice.html" );
