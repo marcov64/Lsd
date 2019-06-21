@@ -261,7 +261,7 @@ proc check_sys_opt { } {
 # Set 'res' to 1 if compilation succeeds and 0 otherwise
 #************************************************
 proc make_wait { } {
-	global targetExe iniTime makePipe res
+	global targetExe iniTime makePipe exeTime res
 	
 	if { [ eof $makePipe ] } {
 		fileevent $makePipe readable ""
@@ -270,22 +270,20 @@ proc make_wait { } {
 			file delete make.bat
 		}
 		
+		# check if the executable is newer than the compilation command, implying just warnings
+		if [ file exist "$targetExe" ] { 
+			set exeTime [ file mtime "$targetExe" ] 
+		} else { 
+			set exeTime 0 
+		};
+
 		if { [ file exists makemessage.txt ] && [ file size makemessage.txt ] == 0 } {
 			file delete makemessage.txt
 			set res 1
+		} elseif { $iniTime <= $exeTime } { 
+			set res 1 
 		} else {
-			# check if the executable is newer than the compilation command, implying just warnings
-			if [ file exist "$targetExe" ] { 
-				set exeTime [ file mtime "$targetExe" ] 
-			} else { 
-				set exeTime 0 
-			};
-
-			if { $iniTime <= $exeTime } { 
-				set res 1 
-			} else {
-				set res 0
-			}
+			set res 0
 		}
 		
 		return
@@ -325,24 +323,24 @@ proc make_background { target threads nw macPkg } {
 	# handle Windows access to open executable and empty compilation windows
 	if [ string equal $tcl_platform(platform) windows ] {
 	
-		if [ file exists "$target$exeSuffix" ] { 
-			catch { file delete "$target$exeSuffix" }
-			
-			if [ file exists "$target$exeSuffix" ] {
-				if [ string equal [ info tclversion ] 8.6 ] {
-					close [ file tempfile targetTemp ]
-					file delete $targetTemp
-					file mkdir [ file dirname $targetTemp ]
-				} else {
-					set targetTemp "$target.bak"
-				}
-				file rename -force "$target$exeSuffix" "$targetTemp"
+		if [ file exists "$target$exeSuffix" ] {
+			if [ string equal [ info tclversion ] 8.6 ] {
+				close [ file tempfile targetTemp ]
+				file delete $targetTemp
+				set targetDir [ file dirname $targetTemp ]
+				file mkdir "$targetDir"
+				set targetTemp "$targetDir/$target.bak"
+			} else {
+				set targetTemp "$target.bak"
 			}
+			
+			file rename -force "$target$exeSuffix" "$targetTemp"
+			file copy -force "$targetTemp" "$target$exeSuffix"
 		}
 		
 		set file [ open make.bat w ]
 		puts -nonewline $file "$MakeExe -j $threads -f makefile$makeSuffix 2> makemessage.txt\n"
-		close  $file
+		close $file
 
 		set makePipe [ open "| make.bat" r ]
 	} else {
@@ -411,7 +409,14 @@ set cmds_5_3 [ list SORT2S ]
 set cmds_5_4 [ list SORT2S ]
 
 proc create_elem_file { path } {
-	global cmds_1_1 cmds_2_1 cmds_2_2 cmds_3_1 cmds_3_2 cmds_3_3 cmds_4_2 cmds_4_3 cmds_5_3 cmds_5_4
+	global exeTime cmds_1_1 cmds_2_1 cmds_2_2 cmds_3_1 cmds_3_2 cmds_3_3 cmds_4_2 cmds_4_3 cmds_5_3 cmds_5_4
+	
+	# don't recreate if executable file was not changed
+	if { [ file exists "$path/elements.txt" ] && [ info exists exeTime ] } {
+		if { [ file mtime "$path/elements.txt" ] >= $exeTime } {
+			return
+		}
+	} 
 	
 	set files [ get_source_files $path ]
 	
