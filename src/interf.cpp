@@ -1086,8 +1086,8 @@ int browse( object *r, int *choice )
 			set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ] \
 		}" );
 
-	// if simulation was run, check to see if operation is valid
-	if ( actual_steps > 0 )
+	// if simulation was started, check to see if operation is valid
+	if ( running || actual_steps > 0 )
 	 	// search the sorted list of choices that are bad with existing run data
 		if ( bsearch( choice, badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints ) != NULL )
 		{
