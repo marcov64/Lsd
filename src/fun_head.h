@@ -100,8 +100,6 @@ bool no_ptr_chk = true;
 		char msg[ TCL_BUFF_STR ]; \
 		sprintf( msg, "equation for '%s' produces the invalid value '%lf' at time %d", label, res, t ); \
 		error_hard( msg, "invalid equation result", "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation", true ); \
-		debug_flag = true; \
-		debug = 'd'; \
 	}
 
 #ifndef NO_WINDOW

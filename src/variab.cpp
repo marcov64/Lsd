@@ -58,7 +58,7 @@ simulation is run in debug mode it stops immediately after the computation of
 its value.
 
 - int deb_cond;
-Like the flag debug, but it stops the simulation if the attached coondition is
+Like the flag debug, but it stops the simulation if the attached condition is
 satisfied. It does not require that the simulation is run in debug mode.
 Its different values represent the different conditions for stopping: <, > or ==
 
@@ -104,9 +104,8 @@ has not been still updated in the time step, the value requested is a lagged one
 and therefore can be retrived from the vector of the past values.
 
 Only in case the lag requested is zero and the variable has not been computed
-at the present time step, the method shifts its lagged values and calls the method
-fun
-that perform the equation computation.
+at the present time step, the method shifts its lagged values and calls the 
+method fun that perform the equation computation.
 
 - void empty( void ) ;
 It is used to free all the memory assigned to the variable. Used by
@@ -459,6 +458,7 @@ double variable::cal( object *caller, int lag )
 		if ( log_file != NULL && t >= log_start && t <= log_stop )
 			fprintf( log_file, "%s\t= %g\t(t=%d)\n", label, val[ 0 ], t );
 
+		// open the debugger if required
 		if ( debug_flag && t == when_debug && debug == 'd' && deb_cond == 0 )
 			deb( ( object * ) up, caller, label, &val[ 0 ], true );
 		else
