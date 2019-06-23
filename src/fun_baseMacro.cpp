@@ -1,4 +1,6 @@
 //#define EIGENLIB      // uncomment to use Eigen linear algebra library
+//#define EIGEN_DONT_VECTORIZE  //prevent strange errors
+//#define EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT //prevent strange errors
 //#define NO_POINTER_INIT // uncomment to disable pointer checking
 //#define USE_TRACK_SEQUENCE //uncomment to report validation information and use validation macros.
 

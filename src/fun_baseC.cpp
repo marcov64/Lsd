@@ -7,6 +7,8 @@
 ****************************************************/
 
 //#define EIGENLIB        // uncomment to use Eigen linear algebra library
+#define EIGEN_DONT_VECTORIZE  //prevent strange errors
+#define EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT //prevent strange errors
 
 #include "fun_head.h"
 
