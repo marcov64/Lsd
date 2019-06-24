@@ -320,6 +320,7 @@ namespace LSD_VALIDATE {
             time_call = time;
             ss << "\n" << setw(80) << " -- -- -- -- -- -- -- -- ";
             ss << "\n" << setw(5) << "" << "Time is now:" << time;
+            cout << "\n" << setw(5) << "" << "Time is now:" << time;
             ss << "\n" << setw(5) << "'t'" << ":" << setw(40) << "'Object'" << "->" << setw(32) << "'Variable'" << " called by " << "'Calling Object'";
         }
         auto skip_buff = skip_print(p,var);
