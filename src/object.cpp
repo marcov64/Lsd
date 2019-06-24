@@ -423,14 +423,14 @@ void object::declare_as_unique(char const* uLab)
 /****************************************************
     OBJ_BY_UNIQUE_ID
     retrieve the object associated with the unique ID
-    provided
+    provided.    
 ****************************************************/
 
 //retrieve object by unique id.
 object* object::obj_by_unique_id(int id)
 {
   if (root->uID == NULL) {
-    sprintf( msg, "cannot retrieve unique object '%g'", id );
+    sprintf( msg, "cannot retrieve unique object '%i'", id );
     error_hard( msg, "no unique objects initialised!",
                 "declare the object type as unique first",
                 true );
@@ -441,7 +441,7 @@ object* object::obj_by_unique_id(int id)
     return root->uID->uidMap->elements[id];
   }
   else {
-    sprintf( msg, "cannot retrieve unique object '%g'", id );
+    sprintf( msg, "cannot retrieve unique object '%i'", id );
     error_hard( msg, "bounding error!",
                 "please make sure that an object with the id exists",
                 true );

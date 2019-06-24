@@ -273,6 +273,28 @@ typedef vector < object* > o_vecT;
   typedef unordered_set < object* > o_setT;
 #endif
 
+/****************************************************
+    eigen_sorted_rows_by_head
+    Enable sorting of Eigen matrices (by rows, lexicographical 
+    check of column items)
+    Taken from https://stackoverflow.com/a/47871204/3895476
+****************************************************/
+#ifdef EIGENLIB
+// see https://stackoverflow.com/a/56732127/3895476
+void eigen_sort_rows_by_head(Eigen::MatrixXd& A_nx3)
+{
+    std::vector<Eigen::VectorXd> vec;
+    for (int64_t i = 0; i < A_nx3.rows(); ++i)
+        vec.push_back(A_nx3.row(i));
+
+    std::sort(vec.begin(), vec.end(), 
+      [](auto const& t1, auto const&  t2){ return t1(0) < t2(0); } );
+
+    for (int64_t i = 0; i < A_nx3.rows(); ++i)
+        A_nx3.row(i) = vec[i];
+};
+#endif
+
 struct object {
   char* label;
   bool deleting;            // indicate deletion in process
@@ -1479,3 +1501,4 @@ struct next_var {
   std::istream& safeGetline(std::istream& is, std::string& t);
   std::istream& safeGetline(std::istream& is, std::string& t, char delim);
 #endif
+
