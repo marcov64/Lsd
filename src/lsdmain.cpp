@@ -680,9 +680,9 @@ void run( void )
 		if ( fast_mode < 2 )
 		{
 			if ( parallel_mode )
-				plog( "\nSimulation %d running (up to %d cores)...", "", i, max_threads );
+				plog( "\nSimulation %d of %d running (up to %d parallel threads)...", "", i, sim_num, max_threads );
 			else
-				plog( "\nSimulation %d running...", "", i );
+				plog( "\nSimulation %d of %d running...", "", i, sim_num );
 		}
 		
 		// if new batch configuration file, reload all
@@ -827,7 +827,7 @@ void run( void )
 			
 #ifndef NO_WINDOW
 			if ( fast_mode == 0 && ! cur_plt && ! pause_run )
-				plog( "\nSimulation %d step %d done (%d%%)", "", i, t, perc_done );
+				plog( "\nSimulation %d of %d time step t = %d done (%d%%)", "", i, sim_num, t, perc_done );
 				
 			switch ( done_in )
 			{
@@ -837,7 +837,6 @@ void run( void )
 						cmd( "wm title .log \"$origLogTit\"" );
 						cmd( ".log.but.pause conf -text Pause" );
 					}
-					plog( "\nSimulation stopped at t = %d", "", t );
 					quit = 2;
 				break;
 
@@ -877,7 +876,6 @@ void run( void )
 					if ( pause_run )
 						cmd( "wm title .log \"$origLogTit\"" );
 					cmd( "destroytop .plt%d", i );
-					plog( "\nSimulation stopped at t = %d", "", t );
 					quit = 2;
 					break;
 
@@ -898,13 +896,13 @@ void run( void )
 					if ( pause_run )
 					{
 						cmd( "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
-						plog( "\nSimulation paused at t = %d", "", t );
+						plog( "\nSimulation %d of %d paused at t = %d", "", i, sim_num, t );
 						cmd( ".log.but.pause conf -text Resume" );
 					}
 					else
 					{
 						cmd( "wm title .log \"$origLogTit\"" );
-						plog( "\nSimulation resumed" );
+						plog( "\nSimulation %d of %d resumed at t = %d", "", i, sim_num, t );
 						cmd( ".log.but.pause conf -text Pause" );
 					}
 					break;
@@ -942,7 +940,7 @@ void run( void )
 		if ( fast_mode == 1 && on_bar )
 			plog( "100%%", "bar" );
 		if ( fast_mode < 2 )
-			plog( "\nSimulation %d %s (%.2f sec.)\n", "", i, quit == 2 ? "aborted" : "finished", ( float ) ( end - start ) / CLOCKS_PER_SEC );
+			plog( "\nSimulation %d of %d %s at t = %d (%.2f sec.)\n", "", i, sim_num, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
 		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
 			quit = 0;
@@ -1048,7 +1046,7 @@ void run( void )
 	}
 
 	if ( fast_mode == 2 )
-		plog( "\nSimulation %d finished\n", "", i - 1 );
+		plog( "\nSimulation %d of %d finished at t = %d\n", "", i - 1, sim_num, t - 1 );
 
 #ifndef NO_WINDOW 
 	uncover_browser( );
