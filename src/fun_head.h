@@ -395,6 +395,10 @@ bool no_ptr_chk = true;
 #define T_STAT_COMPLS(O,LAB1,LAB2, LAG) ( O->compareStats(( char *) LAB1, (char *) LAB2,v, LAG));
 #define T_STAT_COMP_INTVLS(O,LAB1,LAB2, START, END) ( O->compareStats(( char *) LAB1, (char *) LAB2,v, START, END));
 
+//Produces a vector with the time-series data in increasing time.
+#define TS_DATA(LAB, START, END) ( p->gatherData_Tseries( LAB, START, END ) )
+#define TS_DATAS(OBJ, LAB, START, END) ( OBJ->gatherData_Tseries( LAB, START, END ) )
+
 
 #define INTERACT( X, Y ) ( p->interact( ( char * ) X, Y, v, i, j, h, k, \
                                         cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, \

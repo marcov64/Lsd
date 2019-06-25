@@ -2823,57 +2823,30 @@ std::vector<double> object::gatherData_Tseries( char const* lab, int start, int 
   int lag = t - end;
   object* cur, *next_cur, *cur2;
   variable* cv;
-  cv = search_var(this, lab, true, no_search, this);
-  
-  if (cv != NULL) {
-    for (cur = cv->up; cur != NULL; cur = go_brother(cur)) {
-      cur->cal(lab, lag);
-    } // update first.
-    
-    cv = search_var(this, lab, true, no_search,
-                    this); // search again, the original one may be dead.
-  }
-  
+  //cv = search_var_local(lab, true, no_search, this);
+  cv = search_var_local(lab); //only (!) search locally
+   
   if (cv == NULL) {
-    cv = blueprint->search(this->label)->search_var(this, lab, true, no_search);
+    cv = blueprint->search(this->label)->search_var_local(lab);
     
     if (cv == NULL) {
-      sprintf(msg, "element '%s' is missing for calculating statistics", lab);
+      sprintf(msg, "element '%s' is missing in %s for calculating statistics", lab, this->label);
       error_hard(msg, "variable or parameter not found",
-                 "create variable or parameter in model structure");
+                 "create variable or parameter in model structure and make sure that it resides in the correct object");
+      return std::vector<double>();
     }
     
     if (no_zero_instance) {
       sprintf(msg, "all instances of '%s' (containing '%s') were deleted",
-              cv->up->label, lab);
+              this->label, lab);
       error_hard(msg, "object has no instance",
                  "check your equation code to ensure at least one instance\nof "
                  "any object is kept",
                  true);
     }
   }
-  
-  cur = cv->up;
-  
-  try {
-    if (strcmp(cur->label, this->label) != 0) {
-      sprintf(msg, "%s and %s :", cur->label, this->label);
-      plog(msg);
-      throw "the variable does not belongs to the current object";
-    }
-  }
-  catch (const char* str) {
-    plog(str);
-  }
-  
-  if (cur != NULL) {
-  
-    return cv->copy_data( start, end ); // call with null - no caller
-    
-  }
-  else {
-    error_hard(__DEV_ERR_INFO__, "...", "");
-  }
+   
+  return cv->copy_data( start, end ); // call with null - no caller
   
 }
 
