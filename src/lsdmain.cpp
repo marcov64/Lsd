@@ -237,7 +237,7 @@ int lsdmain( int argn, char **argv )
 			{
 				i--; 					// no parameter for this option
 				grandTotal = true;
-				printf( "Grand total file requested ('-g'), please don't run another instance of 'lsd_gnuNW' in this folder!\n" );
+				printf( "Grand total file requested ('-g'), please don't run another instance of 'lsdNW' in this folder!\n" );
 				continue;
 			}
 			// read -g parameter : don't create compressed result files

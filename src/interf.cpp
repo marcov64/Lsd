@@ -4294,8 +4294,8 @@ case 62:
 		cur = root->b->head;
 		root->add_n_objects2( cur->label, i - 1, cur );
 		
-		cmd( "wm deiconify .log; raise .log; focus .log" );
 		plog( "\nUpdating configuration, it may take a while, please wait..." );
+		cmd( "wm deiconify .log; raise .log; focus .log; update" );
 		sensitivity_parallel( cur, rsense );
 		plog( " Done" );
 	
@@ -4337,8 +4337,8 @@ case 63:
 		findexSens = 1;
 		
 		// create a design of experiment (DoE) for the sensitivity data
-		cmd( "wm deiconify .log; raise .log; focus .log" );
 		plog( "\nCreating design of experiments configuration files.\nIt may take a while, please wait... " );
+		cmd( "wm deiconify .log; raise .log; focus .log; update" );
 		sensitivity_sequential( &findexSens, rsense );
 		plog( " Done\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );	
 		sensitivity_created( );				// explain user how to proceed
@@ -4435,8 +4435,8 @@ case 71:
 		findexSens = 1;
 		
 		// create a design of experiment (DoE) for the sensitivity data
-		cmd( "wm deiconify .log; raise .log; focus .log" );
 		plog( "\nCreating design of experiments configuration files.\nIt may take a while, please wait... " );
+		cmd( "wm deiconify .log; raise .log; focus .log; update" );
 		sensitivity_sequential( &findexSens, rsense, sizMC );
 		plog( " Done\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );
 		sensitivity_created( );				// explain user how to proceed
@@ -4534,7 +4534,6 @@ case 72:
 		int samples = ( *doeext == '0') ? 0 : -1;
 
 		// adjust an NOLH design of experiment (DoE) for the sensitivity data
-		plog( "\nCreating design of experiments, it may take a while, please wait... " );
 		design *NOLHdoe = new design( rsense, 1, NOLHfile, 1, samples, doesz );
 		
 		if ( NOLHdoe -> n == 0 )					// DoE configuration is not ok?
@@ -4675,7 +4674,6 @@ case 80:
 			findexSens = 1;
 		
 		// adjust a design of experiment (DoE) for the sensitivity data
-		cmd( "wm deiconify .log; raise .log; focus .log" );
 		design *rand_doe = new design( rsense, 2, "", findexSens, sizMC );
 		sensitivity_doe( &findexSens, rand_doe );
 		sensitivity_created( );				// explain user how to proceed
@@ -4802,7 +4800,6 @@ case 81:
 		findexSens = 1;
 		
 		// adjust a design of experiment (DoE) for the sensitivity data
-		cmd( "wm deiconify .log; raise .log; focus .log" );
 		design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, jumpSz, nTraj );
 		sensitivity_doe( &findexSens, rand_doe );
 		sensitivity_created( );				// explain user how to proceed
@@ -5113,14 +5110,14 @@ case 68:
 			break;
 
 	// check for existing NW executable
-	sprintf( ch, "%s/lsd_gnuNW", exec_path );			// form full executable name
+	sprintf( ch, "%s/lsdNW", exec_path );			// form full executable name
 	cmd( "if { $tcl_platform(platform) == \"windows\" } { set choice 1 } { set choice 0 }" );
 	if ( *choice == 1 )
 		strcat( ch, ".exe" );							// add Windows ending
 
 	if ( ( f = fopen( ch, "rb" ) ) == NULL ) 
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsd_gnuNW' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\"" );
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsdNW\\[.exe\\]' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\"" );
 		break;
 	}
 	fclose( f );
@@ -5446,7 +5443,7 @@ case 68:
 		cmd( "exec %s &", lab );
 
 	plog( "\nParallel batch file started: %s", "", lab );
-	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Run Batch\" -message \"Script/batch started\" -detail \"The script/batch was started in separated process(es). The results and log files are being created in the folder:\\n\\n$path\\n\\nCheck the '.log' files to see the results or use the command 'tail  -F  <name>.log' in a shell/command prompt to follow simulation execution (there is one log file per assigned process/core).\"" );
+	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Run Batch\" -message \"Script/batch started\" -detail \"The script/batch was started in separated process(es). The results and log files are being created in the folder:\n\n$path\n\nCheck the '.log' files to see the results or use the command 'tail  -F  <name>.log' in a shell/command prompt to follow simulation execution (there is one log file per assigned process/core).\"" );
 	
 	cmd( "set path $oldpath; cd $path" );
 	
@@ -5464,14 +5461,14 @@ case 69:
 	}
 
 	// check for existing NW executable
-	sprintf( lab, "%s/lsd_gnuNW", exec_path );			// form full executable name
+	sprintf( lab, "%s/lsdNW", exec_path );				// form full executable name
 	cmd( "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}" );
 	if ( *choice == 1 )
 		strcat( lab, ".exe" );							// add Windows ending
 
 	if ( ( f = fopen( lab, "rb" ) ) == NULL ) 
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsd_gnuNW' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM.\"" );
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsdNW\\[.exe\\]' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM.\"" );
 		break;
 	}
 	fclose( f );
@@ -6787,7 +6784,7 @@ SENSITIVITY_CREATED
 ****************************************************/
 void sensitivity_created( void )
 {
-	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' menu option in LMM. This step has to be done every time you modify your equations file.\n\nSecond, start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\n\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to be run (usually 1). If your configuration files are in a subdirectory of your model directory, please add their relative path before the configuration file name (i.e. <path>/<configuration_file>).\"" );
+	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' menu option in LMM. This step has to be done every time you modify your equations file.\n\nSecond, start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsdNW  -f  <configuration_file>  -s  <n>\n\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to be run (usually 1). If your configuration files are in a subdirectory of your model directory, please add their relative path before the configuration file name (<path>/<configuration_file>).\"" );
 }
 
 

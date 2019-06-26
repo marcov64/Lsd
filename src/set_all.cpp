@@ -1513,6 +1513,12 @@ double mat_sum_dists( double **a, int m, int n, double **b )
 	return sum;
 }
 
+// use reproducible source of randomness
+int uniform_int_0( int max ) 
+{ 
+	return uniform_int( 0, max - 1 ); 
+}
+
 
 /*****************************************************************************
 MORRIS_OAT
@@ -1561,7 +1567,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 		int *perm = new int[ k ];
 		for ( i = 0; i < k; ++i )
 			perm [ i ] = i;
-		random_shuffle( & perm[ 0 ], & perm[ k ] );
+		random_shuffle( & perm[ 0 ], & perm[ k ], uniform_int_0 );
 
 		P = mat_copy_scal( P, k, k, 0 );
 		for ( i = 0; i < k; ++i )
@@ -1894,6 +1900,9 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 
 	if ( rsens == NULL )					// valid pointer?
 		typ = 0;							// trigger invalid design
+		
+	plog( "\nCreating design of experiments, it may take a while, please wait... " );
+	cmd( "wm deiconify .log; raise .log; focus .log; update" );
 	
 	switch ( typ )
 	{
@@ -2190,7 +2199,5 @@ void sensitivity_doe( int *findex, design *doe )
 		*findex = *findex + 1;
 	}
 	
-	plog( " Done" );
-	
-	plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );
+	plog( "\nSensitivity analysis configurations produced: %d\n", "", findexSens - 1 );
 }
