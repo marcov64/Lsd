@@ -351,7 +351,7 @@ namespace LSD_VALIDATE {
 
 
         ss << track_source(p, c, var, has_id, is_dummy, fun_name);
-        cout << ss.str().c_str(); //print to console, too.
+        cout << ss.str().c_str() << flush; //print to console, too.
         return ss.str();
 
     }
