@@ -199,10 +199,17 @@ namespace LSD_VALIDATE {
     }
 
     //return label of variable under computation
-    std::string label_of_var_of_o(variable* var = NULL)
+    std::string label_of_var_of_o(variable* var = NULL, const char* fun_name = "noVarErr?")
     {
         if (var == NULL) {
-            return "noVarErr?";
+            std::string out = fun_name;
+            if(out.compare("noVarErr?")==0)
+                return out;
+            else{
+                out = "external function: " + out;
+                return out;
+            }
+                
         }
         else {
             try {
@@ -223,9 +230,10 @@ namespace LSD_VALIDATE {
     std::vector< std::pair < std::string, int > > non_id_object_vars_called;
     std::string current_callee_type;
 
-    std::string track_source(object* p, object* c = NULL, variable* var = NULL, bool has_id = true, bool is_dummy = false)
+    std::string track_source(object* p, object* c = NULL, variable* var = NULL, bool has_id = true, bool is_dummy = false, const char* fun_name = "noVarErr")
     {
-        indent_level++; //increase indentation.
+        if (strcmp(fun_name, "noVarErr") == 0) //not for EXT options
+            indent_level++; //increase indentation.
 
         //those objects without id are only reported if the are first and/or last.
         std::string first_last_add = "";
@@ -260,7 +268,7 @@ namespace LSD_VALIDATE {
                 for (int i = 0; i < indent_level; i++)
                     ss << "  ";
                 ss << std::setw(40) << label_id_of_o(p);
-                ss << " -> " << std::setw(32) << label_of_var_of_o(var);
+                ss << " -> " << std::setw(32) << label_of_var_of_o(var, fun_name);
                 ss << " called by " << std::setw(32) << label_id_of_o(c, has_id);
                 ss << " " << first_last_add;
                 if (is_dummy)
@@ -292,6 +300,8 @@ namespace LSD_VALIDATE {
 
     std::string skip_print(object* p, variable* var)
     {
+        if (p == NULL || var == NULL)
+            return "false";
         int i = 0;
         for (object* cur = root->search(p->label); cur != p; cur = cur->hyper_next()) {
             if (++i > TRACK_SEQUENCE_MAX_SAME)
@@ -310,7 +320,7 @@ namespace LSD_VALIDATE {
 
     std::string check_if_same;
     int same_count;
-    std::string track_sequence(int time, object* p, object* c = NULL, variable* var = NULL, bool has_id = true, bool is_dummy = false)
+    std::string track_sequence(int time, object* p, object* c = NULL, variable* var = NULL, bool has_id = true, bool is_dummy = false, const char* fun_name = "")
     {
         stringstream ss;
         ss << "";
@@ -319,8 +329,7 @@ namespace LSD_VALIDATE {
             same_count = 0;
             time_call = time;
             ss << "\n" << setw(80) << " -- -- -- -- -- -- -- -- ";
-            ss << "\n" << setw(5) << "" << "Time is now:" << time;
-            cout << "\n" << setw(5) << "" << "Time is now:" << time;
+            ss << "\n" << setw(5) << "" << "Time is now:" << time;            
             ss << "\n" << setw(5) << "'t'" << ":" << setw(40) << "'Object'" << "->" << setw(32) << "'Variable'" << " called by " << "'Calling Object'";
         }
         auto skip_buff = skip_print(p,var);
@@ -341,7 +350,8 @@ namespace LSD_VALIDATE {
 
 
 
-        ss << track_source(p, c, var, has_id, is_dummy);
+        ss << track_source(p, c, var, has_id, is_dummy, fun_name);
+        cout << ss.str().c_str(); //print to console, too.
         return ss.str();
 
     }
@@ -514,8 +524,9 @@ namespace LSD_VALIDATE {
 /* Tracking of equations etc., special tracking of objects with "_ID" or "ID".*/
 
 #ifdef USE_TRACK_SEQUENCE
-
-//   #undef TRACK_SEQUENCE
+#define TRACK_SEQUENCE_EXT(LSD_Obj) \
+  if ( !fast && t <= TRACK_SEQUENCE_MAX_T)  { LOG(LSD_VALIDATE::track_sequence(t,LSD_Obj,NULL,NULL,true,false,__func__).c_str()); };
+#define TRACK_SEQUENCE_EXT_GLOBAL TRACK_SEQUENCE_EXT(root)
 #define TRACK_SEQUENCE \
   if ( !fast && t <= TRACK_SEQUENCE_MAX_T)  { LOG(LSD_VALIDATE::track_sequence(t,p,c,var,true).c_str()); };
 #define TRACK_SEQUENCE_DUMMY \
@@ -529,6 +540,8 @@ namespace LSD_VALIDATE {
 // #define TRACK_SEQUENCE_ALWAYS { LOG(LSD_VALIDATE::track_sequence(t,p,c,var).c_str()); };
 #define TRACK_SEQUENCE_INFO  LSD_VALIDATE::track_sequence(t,p,c,var).c_str()
 #else
+#define TRACK_SEQUENCE_EXT(LSD_Obj) void( LSD_Obj );
+#define TRACK_SEQUENCE_EXT_GLOBAL void();
 #define TRACK_SEQUENCE  void();
 #define TRACK_SEQUENCE_DUMMY void();
 // #define TRACK_SEQUENCE_FIRST_OR_LAST void();
