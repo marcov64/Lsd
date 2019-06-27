@@ -75,24 +75,37 @@ inline bool chk_hook( object* ptr, unsigned num )
 /***************************************************
     GET_CYCLE_OBJ
     Support function used in CYCLEx macros
+    Fix vs 7xbeta: only search locally to mitigate arbitrary position.
+        E.g., if there are multiple child-objects which themselves container
+        the object "label".
 ***************************************************/
-inline void cycle_error( const char* label )
+inline void cycle_error( const char* label, const char* labelParent="" )
 {
   char msg[ MAX_LINE_SIZE ];
   
-  sprintf( msg, "'%s' is missing for cycling", label );
-  error_hard( msg, "object not found",
-              "create object in model structure" );
+  if (strcmp(labelParent,"")==0) {
+        sprintf( msg, "'%s' is missing for cycling", label );
+        error_hard( msg, "object not found",
+            "create object in model structure" );    
+  } else {
+    sprintf( msg, "'%s' is missing in selected parent '%s' for cycling", label, labelParent );
+    error_hard( msg, "object not found without arbitration",
+              "make sure to call CYCLEx command from correct parent object." );  
+  }
+  
 }
 
 inline object* cycle_obj( object* parent, char const* label, char const* command )
 {
   extern object* blueprint;       // LSD blueprint (effective model in use )
-  object* cur = parent->search( label );
+  object* cur = parent->search_local( label );
   
   if ( cur == NULL )
-    if ( blueprint->search( label ) == NULL ) // not zero-instance object?
-    { cycle_error( label ); }
+    if ( strcmp( blueprint->search( label )->up->label, parent->label ) != 0 ) // not zero-instance object?
+        if (parent->search( label ) == NULL) // not anywhere in the model?
+            cycle_error( label );
+        else // there, but wrong place!
+            cycle_error( label, parent->label );    
     
   return cur;
 }
