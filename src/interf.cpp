@@ -65,7 +65,6 @@ USED CASE 97
 #include "decl.h"
 
 bool initVal = false;				// new variable initial setting going on
-bool justAddedVar = false;			// control the selection of last added variable
 bool redrawReq = false;				// flag for asynchronous window redraw request
 char *res_g;
 int natBat = true;					// native (Windows/Linux) batch format flag (bool)
@@ -256,20 +255,8 @@ int browse( object *r, int *choice )
 				}
 
 				cmd( "incr app" );
-
-				if ( cv->next == NULL && justAddedVar )	// last variable & just added a new variable?
-				{
-					justAddedVar = false;
-					cmd( ".l.v.c.var_name selection clear 0 end; \
-						.l.v.c.var_name selection set end; \
-						set lst [ .l.v.c.var_name curselection ]; \
-						if { ! [ string equal $lst \"\" ] } { \
-							set res [ .l.v.c.var_name get $lst ]; \
-							set listfocus 1; \
-							set itemfocus $lst \
-						}" );
-				}
 			}
+			
 			cmd( "set nVar [ .l.v.c.var_name size ]" );
 		}
 
@@ -1340,8 +1327,8 @@ case 2:
 
 			if ( done == 0 )
 			{
-				cmd( "set text_description [.addelem.d.f.text get 1.0 end]" );
-				cmd( "if { $text_description==\"\\n\"} {set text_description \"(no description available)\"} {}" );
+				cmd( "set text_description [ .addelem.d.f.text get 1.0 end ]" );
+				cmd( "if { $text_description==\"\\n\" } {set text_description \"(no description available)\" }" );
 				lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
 				if ( param == 1 )
 					add_description( lab, "Parameter", lab1 );
@@ -1367,14 +1354,12 @@ case 2:
 					
 					for ( i = 0; i < num + 1; ++i )
 						cv->val[ i ] = 0;
-					
-					justAddedVar = true;	// flag variable just added (for acquiring focus)
 				}
 				
 				initParent = r;	
 				
 				// update focus memory
-				cmd( "set listfocus 1; set itemfocus [ .l.v.c.var_name index end ]; set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]" );
+				cmd( "set listfocus 1; set itemfocus [ .l.v.c.var_name index end ]" );
 				cmd( "lappend modElem %s }", lab );
 				struct_loaded = true;		// some model structure loaded
 				unsaved_change( true );		// signal unsaved change
