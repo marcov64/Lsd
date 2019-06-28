@@ -298,6 +298,7 @@ int browse( object *r, int *choice )
 					} \
 				}" );
 			cmd( "bind .l.v.c.var_name <Double-Button-1> { \
+					set dblclk 1; \
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]; \
@@ -482,10 +483,14 @@ int browse( object *r, int *choice )
 		}
 		
 		cmd( "bind .l.v.c.var_name <Button-1> { \
-				set listfocus 1; \
-				set itemfocus [ .l.v.c.var_name curselection ]; \
-				set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]; \
-				update_options \
+				set dblclk 0; \
+				after 200; \
+				if { ! $dblclk } { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]; \
+					update_options \
+				} \
 			}" );
 		cmd( "bind .l.v.c.var_name <Left> { \
 				focus .l.s.c.son_name; \
@@ -593,6 +598,7 @@ int browse( object *r, int *choice )
 					} \
 				}" );
 			cmd( "bind .l.s.c.son_name <Double-Button-1> { \
+					set dblclk 1; \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
 					set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
@@ -696,10 +702,14 @@ int browse( object *r, int *choice )
 		cmd( "bind .l.s.c.son_name <BackSpace> { set choice 5 }" );
 		
 		cmd( "bind .l.s.c.son_name <Button-1> { \
-				set listfocus 2; \
-				set itemfocus [ .l.s.c.son_name curselection ]; \
-				set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
-				update_options \
+				set dblclk 0; \
+				after 200; \
+				if { ! $dblclk } { \
+					set listfocus 2; \
+					set itemfocus [ .l.s.c.son_name curselection ]; \
+					set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
+					update_options \
+				} \
 			}" );
 		cmd( "bind .l.s.c.son_name <Right> { \
 				focus .l.v.c.var_name; \
