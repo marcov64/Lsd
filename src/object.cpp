@@ -1017,7 +1017,14 @@ variable* object::search_var_local(char const* lab)
     The field caller is used to avoid deadlocks when
     from descendants the search goes up again, or from the parent down.
     Uses the fast variable look-up map of the searched variables.
+    
+    ADDED: search_var_global version that searches everywhere. Needed in (e.g.) ABMAT
 *************************************************/
+variable* object::search_var_global(object* caller, char const* lab, bool no_error)
+{
+    search_var(caller, lab, no_error, false, NULL);
+}
+
 
 variable* object::search_var(object* caller, char const* lab, bool no_error,
                              bool no_search, object* maxLevel)
@@ -2863,14 +2870,14 @@ std::vector<double> object::gatherData_all_cnd(char const* lab, char const condV
   object* cur, *next_cur;
   variable* cv;
   bool conditional = !(strlen(condition) == 0);
-  cv = search_var(this, lab, true, no_search, this);
+  cv = search_var(this, lab, true, false, this); //allow to gather data anywhere below.   
   
   if (cv != NULL) {
     for (cur = cv->up; cur != NULL; cur = go_brother(cur)) {
       cur->cal(lab, lag);
     } // update first.
     
-    cv = search_var(this, lab, true, no_search,
+    cv = search_var(this, lab, true, false,
                     this); // search again, the original one may be dead.
   }
   
@@ -2894,18 +2901,12 @@ std::vector<double> object::gatherData_all_cnd(char const* lab, char const condV
   }
   
   cur = cv->up;
-  
-  try {
-    // if (this == cur) {
+
     if (strcmp(cur->label, this->label) == 0) {
       sprintf(msg, "%s and %s ", cur->label, this->label);
       plog(msg);
-      throw "cannot call from same level";
+      error_hard("cannot call from same level");
     }
-  }
-  catch (const char* str) {
-    plog(str);
-  }
   
   //Cycle through the chain of variables in current subtree and gather data
   auto cycle_var = next_var(this, lab, true);
@@ -2984,8 +2985,7 @@ void object::compareStats(char const* lab1, char const* lab2, double* r, int sta
     r[3] = m_stats.at(astat_tb);
     r[4] = m_stats.at(astat_L1);
     r[5] = m_stats.at(astat_L2);
-  }
-  
+  }  
   CatchAll("Uuuuuups");
   
 }
@@ -3025,10 +3025,8 @@ void object::eightStats(std::vector<double>& Data, double* r)
     r[10] = m_stats.at(astat_sd);
     r[11] = m_stats.at(astat_Lcv);
     r[12] = m_stats.at(astat_Lsk);
-    r[13] = m_stats.at(astat_Lku);
-    
-  }
-  
+    r[13] = m_stats.at(astat_Lku);   
+  }  
   CatchAll("Uuuuuups");
 }
 

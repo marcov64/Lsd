@@ -961,7 +961,7 @@ void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2la
   //so we check on category level.
   
   //check that the object added is not a function.
-  variable* target1 = root->search_var(root, varlab);
+  variable* target1 = root->search_var_global(root, varlab);
   
   if (target1 == NULL) {
     //first check if the variable varLab exists in the model.
