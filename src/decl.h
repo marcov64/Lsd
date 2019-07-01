@@ -26,6 +26,7 @@ const char* dev_err_info(const char* func, const char* file, int line);
 #define __DEV_ERR_INFO__ (dev_err_info(__func__,__FILE__,__LINE__))
 
 //A Debugging macro, see https://codereview.stackexchange.com/q/2484
+#ifndef NO_ERROR_TRAP
 #define CatchAll( msg ) \
   catch( const std::exception &e )    \
   {   \
@@ -45,6 +46,13 @@ const char* dev_err_info(const char* func, const char* file, int line);
     }\
     catch(...){assert(0);} \
   }
+#else
+    #define CatchAll( msg ) \
+    catch( ... ) { /* Do not catch anything */ \
+    cout << "Throwing!\n" << msg << endl; \
+    throw; \
+    }
+#endif    
 
 // check compiler C++ standard support
 #ifndef CPP_DEFAULT
@@ -401,6 +409,7 @@ struct object {
   object* turbosearch( char const* label, double tot, double num );
   object* turbosearch_cond( char const* label, double value );
   variable* add_empty_var( char const* str );
+  variable* search_var_global(object* caller, char const* lab, bool no_error = false ); //search globally despite NO_SEARCH setting
   variable* search_var_local(char const* label); //search only in object
   variable* search_var( object* caller, char const* label, bool no_error = false, bool no_search = false, object* maxLevel = NULL );
   void add_obj( char const* label, int num, int propagate );
