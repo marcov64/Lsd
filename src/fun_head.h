@@ -29,6 +29,13 @@
 #include "check.h"                    // LSD macro check support code
 #include "validate.h"               //TRACK_SEQUENCE and other validation helpers
 
+// set ABMAT max variable length
+#if ! defined MAX_ABMAT_VAR_LENGTH   
+  int MAX_ABMAT_BASEVAR_LENGTH = ( 30 - 18 ) / 2; 
+#else
+  int MAX_ABMAT_BASEVAR_LENGTH = ( MAX_ABMAT_VAR_LENGTH - 18 ) / 2;
+#endif   
+
 // create and set fast lookup flag
 #if ! defined FAST_LOOKUP || ! defined CPP11
 bool fast_lookup = false;

@@ -220,6 +220,7 @@ struct gisMap;
 struct gisPosition;
 struct Wrap;
 //ABMAT
+extern int MAX_ABMAT_BASEVAR_LENGTH;
 class abmat_total_stats;
 typedef std::map< std::string, double > ms_statsT;
 enum Tabmat {a_pLSD, a_pstat, a_pmic, a_pmac, a_micro, a_fact, a_macro, a_cond, a_comp };
