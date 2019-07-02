@@ -1,17 +1,14 @@
 /*************************************************************
     validate.h
     Copyright: Frederik Schaff
-    Version: 1.11 (dec 2018)
+    Version: 1.2 (June 2019)
 
-    Licence: MIT
+    Licence: This file alone: MIT
 
-    usage: just include in your model file ("fun_XXX.cpp") header
-    before MODELBEGIN:
-
-    #include "validate.h"
-
-
-    Commenting is not good yet...
+    Provides some tools for validating.
+    
+   
+    Commenting is not good yet... AND NEEDS UPDATING!
 
     This file contains methods to allow printing the caller graph.
     It is an additional toolset to the LSD Stack Printing possible in
@@ -124,8 +121,8 @@
 #define TRACK_SEQUENCE_MAX_SAME 5
 #endif
 
-#ifndef TRACK_SINGLE_TEQUATION_MAX_T
-#define TRACK_SINGLE_TEQUATION_MAX_T 5
+#ifndef BIRTH_TRACK_ALL_T
+#define BIRTH_TRACK_ALL_T TRACK_SEQUENCE_MAX_T
 #endif
 
 #define USE_OLD_ID_LABEL_PATTERN false //a switch to allow the name pattern ID_Label instead of default Label_ID
@@ -304,7 +301,7 @@ namespace LSD_VALIDATE {
             return "false";
         int i = 0;
         for (object* cur = root->search(p->label); cur != p; cur = cur->hyper_next()) {
-            if (++i > TRACK_SEQUENCE_MAX_SAME)
+            if (++i > TRACK_SEQUENCE_MAX_SAME && p->t_birth > BIRTH_TRACK_ALL_T ) //Always track new born
                 return "";
         }
         if (i == TRACK_SEQUENCE_MAX_SAME) {
@@ -532,33 +529,16 @@ namespace LSD_VALIDATE {
 #define TRACK_SEQUENCE_DUMMY \
   if ( !fast && t <= TRACK_SEQUENCE_MAX_T)  { LOG(LSD_VALIDATE::track_sequence(t,p,c,var,true,true).c_str()); };
 #define END_EQ_TRACK_SEQUENCE LSD_VALIDATE::end_equation_reduce_indent();
-//   #undef TRACK_SEQUENCE_FIRST_OR_LAST
-// #define TRACK_SEQUENCE_FIRST_OR_LAST \
-// if ( !fast && t <= TRACK_SEQUENCE_MAX_T )  { LOG(LSD_VALIDATE::track_sequence(t,p,c,var,false).c_str()); };
-// #define TRACK_SEQUENCE_FIRST_OR_LAST_ALWAYS \
-// LOG(LSD_VALIDATE::track_sequence(t,p,c,var,false).c_str());
-// #define TRACK_SEQUENCE_ALWAYS { LOG(LSD_VALIDATE::track_sequence(t,p,c,var).c_str()); };
+
 #define TRACK_SEQUENCE_INFO  LSD_VALIDATE::track_sequence(t,p,c,var).c_str()
 #else
 #define TRACK_SEQUENCE_EXT(LSD_Obj) void( LSD_Obj );
 #define TRACK_SEQUENCE_EXT_GLOBAL void();
 #define TRACK_SEQUENCE  void();
 #define TRACK_SEQUENCE_DUMMY void();
-// #define TRACK_SEQUENCE_FIRST_OR_LAST void();
-// #define TRACK_SEQUENCE_FIRST_OR_LAST_ALWAYS void();
-// #define TRACK_SEQUENCE_ALWAYS void();
+
 #define TRACK_SEQUENCE_INFO void();
 #define END_EQ_TRACK_SEQUENCE void();
 #endif
 
-// #ifdef SWITCH_TRACK_SEQUENCE_ALL
-// #define TEQUATION( X ) \
-// EQUATION( X ) \
-// if ( COUNT(p->label) > TRACK_SINGLE_TEQUATION_MAX_T) { \
-// TRACK_SEQUENCE_FIRST_OR_LAST  \
-// } else {           \
-// TRACK_SEQUENCE \
-// }
-// #else
-// #define TEQUATION EQUATION( X )
-// #endif
+
