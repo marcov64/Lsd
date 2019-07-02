@@ -304,7 +304,7 @@ namespace LSD_VALIDATE {
             if (++i > TRACK_SEQUENCE_MAX_SAME && p->t_birth > BIRTH_TRACK_ALL_T ) //Always track new born
                 return "";
         }
-        if (i == TRACK_SEQUENCE_MAX_SAME) {
+        if (i == TRACK_SEQUENCE_MAX_SAME && ! (p->t_birth > BIRTH_TRACK_ALL_T) ) {
             std::string buffer = "\n Skipping info for next elements of type '";
             buffer += p==NULL?"NULL":p->label;
             buffer += "->";
