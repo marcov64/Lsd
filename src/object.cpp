@@ -344,6 +344,7 @@ bridge::~bridge( void )
 int object::init( object* _up, char const* lab )
 {
   up = _up;
+  t_birth = t; //Object born NOW
   v = NULL;
   v_map.clear( );
   next = NULL;

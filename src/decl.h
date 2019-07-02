@@ -309,6 +309,7 @@ struct object {
   bool to_compute;
   int acounter;
   int lstCntUpd;            // period of last counter update
+  int t_birth; //birth date of the object
   bridge* b;
   object* next;
   object* up;
