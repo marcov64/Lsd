@@ -176,7 +176,17 @@ namespace LSD_VALIDATE {
         }
         else {
             try {
-                sID_LABEL << obj_->label;
+                std::string temp(obj_->label);
+                object* cur = obj_;
+                for (cur = cur->up; cur != NULL; cur = cur->up){
+                    temp.insert(0,"->");
+                    if ( cur->is_unique() )
+                        temp.insert(0,")");
+                        temp.insert(0,std::to_string(static_cast<int>(cur->unique_id())));
+                        temp.insert(0,"(");
+                        temp.insert(0,cur->label);
+                }                    
+                sID_LABEL << temp;
             }
             catch (...) {
                 return "Not Root Not Null Not Regular Object";
