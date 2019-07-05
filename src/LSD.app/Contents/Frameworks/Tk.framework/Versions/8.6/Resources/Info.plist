@@ -15,12 +15,12 @@
 	<string>Tk</string>
 	<key>CFBundleGetInfoString</key>
 	<string>Tk AQUA 8.6.9,
-Copyright © 1989-2018 Tcl Core Team,
-Copyright © 2002-2018 Daniel A. Steffen,
-	Copyright © 1989-2018 Contributors,
-	Copyright © 2011-2018 Kevin Walzer/WordTech
+Copyright © 1989-2019 Tcl Core Team,
+Copyright © 2002-2019 Daniel A. Steffen,
+	Copyright © 1989-2019 Contributors,
+	Copyright © 2011-2019 Kevin Walzer/WordTech
 	Communications LLC,
-	Copyright © 2014-2018 Marc Culler,
+	Copyright © 2014-2019 Marc Culler,
 Copyright © 2001-2009 Apple Inc.,
 Copyright © 2001-2002 Jim Ingham &amp; Ian Reid</string>
 	<key>CFBundleIdentifier</key>

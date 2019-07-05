@@ -36,7 +36,7 @@
 	<key>CFBundleExecutable</key>
 	<string>LMM</string>
 	<key>CFBundleGetInfoString</key>
-	<string>LSD Model Manager 7.1,
+	<string>LSD Model Manager 7.2,
 	Copyright © Marco Valente,
 	Copyright © Marcelo C. Pereira</string>
 	<key>CFBundleIconFile</key>
@@ -54,11 +54,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>7.1</string>
+	<string>7.2</string>
 	<key>CFBundleSignature</key>
 	<string>LMM</string>
 	<key>CFBundleVersion</key>
-	<string>7.1</string>
+	<string>7.2</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.10.0</string>
 	<key>LSRequiresCarbon</key>
