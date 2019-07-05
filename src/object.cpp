@@ -3026,7 +3026,11 @@ double object::write( char const *lab, double value, int time, int lag )
 		}
 		else
 		{
-			eff_lag = lag - ( t - cv->last_update );
+			// handle rewriting already computed values
+			if ( time >= t || cv->last_update <= time )
+				eff_lag = lag - ( t - cv->last_update );	// first write in time
+			else
+				eff_lag = lag - ( t - time );				// rewrite in time
 			
 			if ( eff_lag < 0 || eff_lag > cv->num_lag )
 			{
