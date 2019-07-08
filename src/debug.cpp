@@ -61,7 +61,7 @@ DEB
 int deb( object *r, object *c, char const *lab, double *res, bool interact )
 {
 bool pre_running;
-char ch[ 4 * MAX_ELEM_LENGTH ], *ch1;
+char ch[ 4 * MAX_ELEM_LENGTH ], *ch1, ch2[ MAX_ELEM_LENGTH ];
 int i, j, k, count, cond, eff_lags;
 double value_search, app_res, *app_values;
 long node;
@@ -992,7 +992,8 @@ while ( choice == 0 )
 						if ( k != 0 )
 						{
 							cmd( "radiobutton $hk.t.t.h%d -text \"Hook %d to %s (%d)\" -variable hook -value %d", i, i, r->hooks[ i ]->label, k, i );
-							sprintf( ch, "%s $hk.t.t.h%d", ch, i );
+							sprintf( ch2, " $hk.t.t.h%d", i );
+							strncat( ch, ch2, 4 * MAX_ELEM_LENGTH - strlen( ch ) - 1 );
 							++count;
 						}
 					}
@@ -1004,7 +1005,8 @@ while ( choice == 0 )
 					if ( k != 0 )
 					{
 						cmd( "radiobutton $hk.t.t.h%d -text \"Static Hook to %s (%d)\" -variable hook -value %d", i, r->hook->label, k, i );
-						sprintf( ch, "%s $hk.t.t.h%d", ch, i );
+						sprintf( ch2, " $hk.t.t.h%d", i );
+						strncat( ch, ch2, 4 * MAX_ELEM_LENGTH - strlen( ch ) - 1 );
 						++count;
 					}
 				}
