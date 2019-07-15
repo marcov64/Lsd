@@ -179,15 +179,15 @@ proc slct { } {
 # CHECK_SYS_OPT
 # Check (best guess) if system option configuration is valid for the platform
 #************************************************
-set win32Yes [ list ".exe" "85" "/gnu/" "g++" "-lz" "-mthreads" "-mwindows" ]
-set win32No  [ list "/gnu64/" "-framework" "-lpthread" ]
-set win64Yes [ list ".exe" "86" "/gnu64/" "x86_64-w64-mingw32-g++" "gnu++14" "-lz" "-mthreads" "-mwindows" ]
+set win32Yes [ list ".exe" "85" "/gnu/" "g++" "-ltcl" "-ltk" "-lz" "-mthreads" "-mwindows" ]
+set win32No  [ list "/gnu64/" "x86_64-w64-mingw32-g++" "-framework" "-lpthread" "gnu++14" ]
+set win64Yes [ list ".exe" "86" "x86_64-w64-mingw32-g++" "-ltcl" "-ltk" "-lz" "-mthreads" "-mwindows" ]
 set win64No  [ list "/gnu/" "-framework" "-lpthread" ]
-set linuxYes [ list "8.6" "g++" "-lz" "-lpthread" "gnu++14" ]
+set linuxYes [ list "8.6" "g++" "-ltcl" "-ltk" "-lz" "-lpthread" ]
 set linuxNo  [ list ".exe" "/gnu64/" "x86_64-w64-mingw32-g++" "-framework" "-mthreads" "-mwindows" ]
-set osxYes [ list "g++" "-framework" "-lz" "-lpthread" "gnu++14" ]
+set osxYes [ list "g++" "-framework" "-lz" "-lpthread" ]
 set osxNo  [ list ".exe" "/gnu/" "/gnu64/" "x86_64-w64-mingw32-g++" "-mthreads" "-mwindows" ]
-set macYes [ list "g++" "-framework" "-lz" "-lpthread" "-DMAC_PKG" "gnu++14" ]
+set macYes [ list "g++" "-framework" "-lz" "-lpthread" "-DMAC_PKG" ]
 set macNo  [ list ".exe" "/gnu/" "/gnu64/" "x86_64-w64-mingw32-g++" "-mthreads" "-mwindows" ]
 
 proc check_sys_opt { } {
