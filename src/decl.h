@@ -199,6 +199,7 @@ struct object
 	bool load_param( char *file_name, int repl, FILE *f );
 	bool load_struct( FILE *f );
 	bool under_computation( void );
+	bool under_comput_var( char const *lab );
 	bridge *search_bridge( char const *lab, bool no_error = false );
 	double av( char const *lab, int lag );
 	double cal( char const *l, int lag );

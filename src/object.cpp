@@ -2009,6 +2009,23 @@ bool object::under_computation( void )
 	
 	
 /****************************************************
+UNDER_COMPUT_VAR
+Check if a variable in object is under computation
+****************************************************/
+bool object::under_comput_var( char const *lab )
+{
+	variable *cv;
+	
+	cv = search_var_err( this, lab, false, false, "retrieving" );
+	
+	if ( cv != NULL && cv->under_computation )
+		return true;
+	
+	return false;
+}
+	
+	
+/****************************************************
 CAL (*)
 Return the value of Variable or Parameter with label lab with lag lag.
 The method search for the Variable starting from this Object and then calls

@@ -172,7 +172,7 @@ bool no_ptr_chk = true;
 
 #define EQUATION_DUMMY( X, Y ) \
 	if ( ! strcmp( label, X ) ) { \
-		if ( strlen( Y ) > 0 ) \
+		if ( strlen( Y ) > 0 && ! var->up->under_comput_var( ( char * ) Y ) ) \
 		{ \
 			var->dummy = true; \
 			p->cal( p, ( char * ) Y, 0, true ); \
@@ -235,7 +235,7 @@ bool no_ptr_chk = true;
 #define EQUATION_DUMMY( X, Y ) \
 	{ string( X ), [ ]( object *caller, variable *var ) \
 		{ \
-			if ( strlen( Y ) > 0 ) \
+			if ( strlen( Y ) > 0 && ! var->up->under_comput_var( ( char * ) Y ) ) \
 			{ \
 				var->dummy = true; \
 				var->up->cal( var->up, ( char * ) Y, 0, true ); \
