@@ -290,7 +290,7 @@ struct object
 	void search_inst( object *obj, int *pos );
 	void sort_asc( object *from, char *l_var );
 	void sort_desc( object *from, char *l_var );
-	void update( void );
+	void update( bool recurse, bool user );
 };
 
 struct variable

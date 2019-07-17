@@ -821,7 +821,7 @@ void run( void )
 			// only update if simulation not paused
 			if ( ! pause_run )
 #endif
-				root->update( );
+				root->update( true, false );
 
 			perc_done = ( 100 * t ) / max_step;
 			

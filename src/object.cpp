@@ -204,10 +204,10 @@ cal() for that variable (see variable::cal), that returns the desired value.
 - int init( object *_up, char *_label );
 Initialization for an object. Assigns _up to up and creates the label
 
-- void update( void ) ;
+- void update( bool recurse ) ;
 The recursive function computing the equations for a new time step in the
 simulation. It first requests the values for its own variables. Then calls update
-for all the descendants.
+for all the descendants if recurse is true.
 
 - object *hyper_next( char *lab );
 Returns the next object whose name is lab. That is, it makes a search only down
@@ -380,7 +380,7 @@ void object::recreate_maps( void )
 
 
 /****************************************************
-UPDATE
+UPDATE (*)
 Compute the value of all the Variables in the Object, saving the values 
 and updating the runtime plot. 
 
@@ -388,7 +388,7 @@ For optimization purposes the system tries to ignores descending objects
 marked to be not computed. The implementation is quite baroque, but it
 should be the fastest.
 ****************************************************/
-void object::update( void ) 
+void object::update( bool recurse, bool user ) 
 {
 	bool deleted = false;
 	bridge *cb, *cb1;
@@ -399,6 +399,9 @@ void object::update( void )
 
 	for ( cv = v; ! deleted && cv != NULL && quit != 2; cv = cv->next )
 	{ 
+		if ( cv->under_computation )// don't update if under computation!
+			continue;
+		
 		if ( cv->param == 0 && cv->last_update < t )
 		{
 #ifdef PARALLEL_MODE
@@ -414,22 +417,23 @@ void object::update( void )
 			if ( cv->save || cv->savei )
 				cv->data[ t ] = cv->val[ 0 ];
 #ifndef NO_WINDOW    
-			if ( cv->plot == 1 )
-			plot_rt( cv );
+			if ( ! user && cv->plot == 1 )
+				plot_rt( cv );
 #endif   
 		}
 	}
 
-	for ( cb = b; ! deleted && cb != NULL && quit != 2; cb = cb1 )
-	{
-		cb1 = cb->next;
-		if ( cb->head != NULL && cb->head->to_compute )
-			for ( cur = cb->head; ! deleted && cur != NULL; cur = cur1 )
-			{
-				cur1 = cur->next;
-				cur->update( );
-			}
-	}
+	if ( recurse )
+		for ( cb = b; ! deleted && cb != NULL && quit != 2; cb = cb1 )
+		{
+			cb1 = cb->next;
+			if ( cb->head != NULL && cb->head->to_compute )
+				for ( cur = cb->head; ! deleted && cur != NULL; cur = cur1 )
+				{
+					cur1 = cur->next;
+					cur->update( true, user );
+				}
+		}
 	
 	if ( ! deleted )				// do only if not already deleted
 		del_flag = NULL;			// unregister feedback channel
