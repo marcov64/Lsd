@@ -880,7 +880,7 @@ variable *object::search_var( object *caller, char const *lab, bool no_error,
 		// search down only if one instance exists and the label is different from caller
 		if ( cb->head != NULL && ( caller == NULL || strcmp( cb->head->label, caller->label ) ) )
 		{
-			cv = cb->head->search_var( this, lab, no_error, false, false );
+			cv = cb->head->search_var( this, lab, no_error, no_search, false );
 			if ( cv != NULL )
 				return cv;
 		}   
@@ -893,7 +893,7 @@ variable *object::search_var( object *caller, char const *lab, bool no_error,
 		return NULL;
 
 	// Search up in the tree
-	if ( caller != up )
+	if ( up != caller )
 	{ 
 		if ( up == NULL )
 		{
