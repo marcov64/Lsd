@@ -542,7 +542,7 @@ namespace LSD_VALIDATE {
 
 #define TRACK_SEQUENCE_INFO  LSD_VALIDATE::track_sequence(t,p,c,var).c_str()
 #else
-#define TRACK_SEQUENCE_EXT(LSD_Obj) void( LSD_Obj );
+#define TRACK_SEQUENCE_EXT(LSD_Obj) void();
 #define TRACK_SEQUENCE_EXT_GLOBAL void();
 #define TRACK_SEQUENCE  void();
 #define TRACK_SEQUENCE_DUMMY void();
