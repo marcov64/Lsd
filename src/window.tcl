@@ -483,7 +483,7 @@ proc geomtop { { w . } } {
 # and later reopened, at the same place/size
 #************************************************
 proc geomtosave { { w . } } {
-	global wndMenuHeight
+	global CurPlatform wndMenuHeight
 
 	# handle virtual top windows names
 	if { [ string equal $w .lmm ] || [ string equal $w .lsd ] } {
@@ -501,36 +501,46 @@ proc geomtosave { { w . } } {
 	set contentsLeft [ winfo rootx $realW ]
 	set contentsTop [ winfo rooty $realW ]
 	
-#tk_messageBox -message "w=$w\nwidth=$width\nheight=$height\ndecorationLeft=$decorationLeft\ndecorationTop=$decorationTop\ncontentsLeft=$contentsLeft\ncontentsTop=$contentsTop"
-
 	# handle windows with incorrect size/position because of Tk ugly bugs in each platform
-	if { $::CurPlatform == "linux" } {
-		set realHeight $height
-		set realX $contentsLeft
-
-		switch $w {
-			.da -
-			.deb {
-				set realY [ expr $decorationTop + $contentsLeft - $decorationLeft + 8 ]
-			}
-			.lat {
-				set realY [ expr $decorationTop + $contentsLeft - $decorationLeft ]
-			}
-			default {
-				set realY [ expr $decorationTop + $contentsLeft - $decorationLeft - 2 ]
+	switch $CurPlatform {
+		linux {
+			set realHeight $height
+			set realX $contentsLeft
+	
+			switch $w {
+				.da -
+				.deb {
+					set realY [ expr $decorationTop + $contentsLeft - $decorationLeft + 8 ]
+				}
+				.lat {
+					set realY [ expr $decorationTop + $contentsLeft - $decorationLeft ]
+				}
+				default {
+					set realY [ expr $decorationTop + $contentsLeft - $decorationLeft - 2 ]
+				}
 			}
 		}
-	} else {
-		set realX $decorationLeft
-		set realY $decorationTop
-
-		switch $w {
-			.da -
-			.deb {
-				set realHeight [ expr $height + $contentsTop - $decorationTop - ( $wndMenuHeight + 20 ) ]
-			}
-			default {
-				set realHeight [ expr $height + $contentsTop - $decorationTop - $wndMenuHeight ]
+		
+		mac -
+		osx {
+			set realX $decorationLeft
+			set realY $decorationTop
+			set realHeight [ expr $height + $contentsTop - $decorationTop - $wndMenuHeight ]
+		}
+		
+		win32 -
+		win64 {
+			set realX $decorationLeft
+			set realY $decorationTop
+	
+			switch $w {
+				.da -
+				.deb {
+					set realHeight [ expr $height + $contentsTop - $decorationTop - ( $wndMenuHeight + 20 ) ]
+				}
+				default {
+					set realHeight [ expr $height + $contentsTop - $decorationTop - $wndMenuHeight ]
+				}
 			}
 		}
 	}
