@@ -143,6 +143,19 @@ double ran1( long *idum_loc = NULL );
 #define RND ( ran1( ) )
 #endif
 
+// date/time format
+#define DATE_FMT "%d %B, %Y"
+
+// configuration files details
+#define LMM_OPTIONS "lmm_options.txt"
+#define SYSTEM_OPTIONS "system_options.txt"
+#define MODEL_OPTIONS "model_options.txt"
+#define GROUP_INFO "groupinfo.txt"
+#define MODEL_INFO "modelinfo.txt"
+#define DESCRIPTION "description.txt"
+#define LMM_OPTIONS_NUM 15
+#define MODEL_INFO_NUM 9
+
 using namespace std;
 
 // classes definitions
@@ -622,6 +635,8 @@ bool discard_change( bool checkSense = true, bool senseOnly = false, const char 
 bool get_bool( const char *tcl_var, bool *var = NULL );
 bool is_equation_header( char *line, char *var, char *updt_in );
 bool load_description( char *msg, FILE *f );
+bool load_lmm_options( void );
+bool load_model_info( void );
 bool load_prev_configuration( void );
 bool open_configuration( object *&r, bool reload );
 bool save_configuration( int findex = 0 );
@@ -810,6 +825,8 @@ void uncover_browser( void );
 void unload_configuration ( bool full );
 void unwind_stack( void );
 void update_bounds( void );
+void update_lmm_options( void );
+void update_model_info( bool geomOnly = false );
 void wipe_out( object *d );
 void write_list( FILE *frep, object *root, int flag_all, char const *prefix );
 void write_obj( object *r, FILE *frep );
@@ -896,6 +913,12 @@ extern o_setT obj_list;			// list with all existing LSD objects
 extern sense *rsense;       	// LSD sensitivity analysis structure
 extern variable *cemetery;  	// LSD saved data series (from last simulation run )
 
+// constant string arrays
+extern const char *lmm_options[ ];
+extern const char *lmm_defaults[ ];
+extern const char *model_info[ ];
+extern const char *model_defaults[ ];
+
 // multi-threading control 
 #ifdef PARALLEL_MODE
 extern atomic< bool > parallel_ready;	// flag to indicate multitasking is available
@@ -913,6 +936,7 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_set_c_var( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
+int Tcl_update_model_info( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST ov[ ] );
 #endif									// NO_WINDOW
 

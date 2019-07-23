@@ -82,14 +82,32 @@ used up to 88 options
 #define SIGMEM NSIG + 1			// out of memory signal
 #define SIGSTL NSIG + 2			// standard library exception signal
 
+// date/time format
+#define DATE_FMT "%d %B, %Y"
+
 // Eigen library include command
 #define EIGEN "#define EIGENLIB"
+
+// LSD managed folders (not for user models)
+#define LSD_DIR_NUM 8
+
+// configuration files details
+#define LMM_OPTIONS "lmm_options.txt"
+#define SYSTEM_OPTIONS "system_options.txt"
+#define MODEL_OPTIONS "model_options.txt"
+#define GROUP_INFO "groupinfo.txt"
+#define MODEL_INFO "modelinfo.txt"
+#define DESCRIPTION "description.txt"
+#define LMM_OPTIONS_NUM 15
+#define MODEL_INFO_NUM 9
 
 using namespace std;
 
 // auxiliary C procedures
 bool compile_run( bool run, bool nw = false );
 bool discard_change( void );	// ask before discarding unsaved changes
+bool load_lmm_options( void );
+bool load_model_info( const char *path );
 bool use_eigen( void );			// check is Eigen library is in use
 char *get_fun_name( char *str, bool nw = false );
 int ModManMain( int argn, char **argv );
@@ -101,6 +119,8 @@ void create_compresult_window( bool nw = false );
 void handle_signals( void );
 void log_tcl_error( const char *cm, const char *message );
 void make_makefile( bool nw = false );
+void update_lmm_options( bool justWinGeom = false );
+void update_model_info( void );
 void signal_handler( int signum );
 
 // global variables
@@ -113,6 +133,13 @@ int choice;
 int shigh;						// syntax highlighting state (0, 1 or 2)
 int tosave = false;				// modified file flag
 int v_counter = 0; 				//counter of the v[ i ] variables inserted in the equations
+
+// constant string arrays
+const char *lmm_options[ LMM_OPTIONS_NUM ] = { "sysTerm", "HtmlBrowser", "fonttype", "wish", "LsdSrc", "dim_character", "tabsize", "wrap", "shigh", "autoHide", "showFileCmds", "LsdNew", "DbgExe", "restoreWin", "lmmGeom" };
+const char *lmm_defaults[ LMM_OPTIONS_NUM ] = { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", "$DefaultWish", "src", "$DefaultFontSize", "2", "1", "2", "0", "0", "Work", "$DefaultDbgExe", "1", "#" };
+const char *model_info[ MODEL_INFO_NUM ] = { "modelName", "modelVersion", "modelDate", "lsdGeom", "logGeom", "strGeom", "daGeom", "debGeom", "latGeom" };
+const char *model_defaults[ MODEL_INFO_NUM ] = { "(no name)", "1.0", "[ clock format [ clock seconds ] -format \"$DATE_FMT\" ]", "#", "#", "#", "#", "#", "#" };
+const char *lsd_dir[ LSD_DIR_NUM ] = { "src", "gnu", "gnu64", "Manual", "LMM.app", "R", "lwi", "___" };
 
 
 /*************************************
@@ -157,7 +184,8 @@ int main( int argn, char **argv )
  *************************************/
 int ModManMain( int argn, char **argv )
 {
-int i, num, sourcefile = 0, macro = 1;
+bool found;
+int i, j, num, sourcefile = 0, macro = 1;
 char *s, str[ MAX_LINE_SIZE + 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], str2[ 5 * MAX_PATH_LENGTH ];
 FILE *f;
 
@@ -211,9 +239,23 @@ cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set cho
 if ( choice )
 {
 	log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
-	cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\n\nLSD is aborting now.\"" );
+	cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the \\src directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
 	return 4;
 }
+
+// set system defaults in tcl
+cmd( "set LMM_OPTIONS \"%s\"", LMM_OPTIONS );
+cmd( "set SYSTEM_OPTIONS \"%s\"", SYSTEM_OPTIONS );
+cmd( "set MODEL_OPTIONS \"%s\"", MODEL_OPTIONS );
+cmd( "set GROUP_INFO \"%s\"", GROUP_INFO );
+cmd( "set MODEL_INFO \"%s\"", MODEL_INFO );
+cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
+cmd( "set DATE_FMT \"%s\"", DATE_FMT );
+#ifdef MAC_PKG
+cmd( "set MAC_PKG 1" );
+#else
+cmd( "set MAC_PKG 0" );
+#endif
 
 // try to open text file if name is provided in the command line
 if ( argn > 1 )
@@ -227,7 +269,7 @@ if ( argn > 1 )
 	}
 	msg[ i ] = '\0';
 	cmd( "set filetoload \"%s\"", msg );
-	cmd( "if { ! [ file pathtype \"$filetoload\" ] == \"absolute\" } { set filetoload \"[pwd]/$filetoload\" }" );
+	cmd( "if { ! [ file pathtype \"$filetoload\" ] == \"absolute\" } { set filetoload \"[ pwd ]/$filetoload\" }" );
 }
 
 // prepare to use exec path to find LSD directory
@@ -275,46 +317,9 @@ for ( i = 0; i < num; ++i )
 		rootLsd[ i ] = '/';
 cmd( "set RootLsd \"%s\"", rootLsd );
 
-// read configuration file
-cmd( "set choice [ file exist \"$RootLsd/lmm_options.txt\" ]" );
-if ( choice == 1 )
-{
-	cmd( "set f [open \"$RootLsd/lmm_options.txt\" r]" );
-	cmd( "gets $f sysTerm" );
-	cmd( "gets $f HtmlBrowser" );
-	cmd( "gets $f fonttype" );
-	cmd( "gets $f wish" );
-	cmd( "gets $f LsdSrc" );
-	cmd( "gets $f dim_character" );
-	cmd( "gets $f tabsize" );
-	cmd( "gets $f wrap" );
-	cmd( "gets $f shigh" );
-	cmd( "gets $f autoHide" );
-	cmd( "gets $f showFileCmds" );
-	cmd( "gets $f LsdNew" );
-	cmd( "gets $f DbgExe" );
-	cmd( "close $f" );
-	// handle old options file
-	cmd( "if { $sysTerm == \"\" || $HtmlBrowser == \"\" || $fonttype == \"\" || $wish == \"\" || $LsdSrc == \"\" || $dim_character == \"\" || $tabsize == \"\" || $wrap == \"\" || $shigh == \"\" || $autoHide == \"\" || $showFileCmds == \"\" || $LsdNew == \"\" || $DbgExe == \"\" } { set choice 0 }" );
-}
-else
-{
-	cmd( "set sysTerm \"\"" );
-	cmd( "set HtmlBrowser \"\"" );
-	cmd( "set fonttype \"\"" );
-	cmd( "set wish \"\"" );
-	cmd( "set LsdSrc \"src\"" );
-	cmd( "set dim_character \"\"" );
-	cmd( "set tabsize \"\"" );
-	cmd( "set wrap \"\"" );
-	cmd( "set shigh \"\"" );
-	cmd( "set autoHide \"\"" );
-	cmd( "set showFileCmds \"\"" );
-	cmd( "set LsdNew \"\"" );
-	cmd( "set DbgExe \"\"" );
-}
-
-i = choice;
+// load/check configuration files
+i = load_lmm_options( );
+check_option_files( true );
 
 // load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 choice = 0;
@@ -347,55 +352,11 @@ if ( choice != 0 )
 // create a Tcl command that calls the C discard_change function before killing LMM
 Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 
-// set platform-specific variables
-cmd( "if [ string equal $tcl_platform(platform) unix ] { set CurPlatform linux; set DefaultExe lsd; set DefaultMakeExe $makeLinux; set DefaultWish $wishLinux; set DefaultSysTerm $sysTermLinux; set DefaultDbgExe $dbgLinux; set DefaultHtmlBrowser $browserLinux; set DefaultFont $fontLinux; set DefaultFontSize $fontSizeLinux; set small_character [ expr $DefaultFontSize - $deltaSizeLinux ] }" );
-#ifdef MAC_PKG
-cmd( "if [ string equal $tcl_platform(os) Darwin ] { set CurPlatform mac; set DefaultExe LSD; set DefaultMakeExe $makeMac; set DefaultWish $wishMacTk86; set DefaultSysTerm $sysTermMac; set DefaultDbgExe $dbgMac; set DefaultHtmlBrowser $browserMac; set DefaultFont $fontMac; set DefaultFontSize $fontSizeMac; set small_character [ expr $DefaultFontSize - $deltaSizeMac ] }" );
-#else
-cmd( "if [ string equal $tcl_platform(os) Darwin ] { set CurPlatform osx; set DefaultExe lsd; set DefaultMakeExe $makeMac; set DefaultWish $wishMacTk85; set DefaultSysTerm $sysTermMac; set DefaultDbgExe $dbgMac; set DefaultHtmlBrowser $browserMac; set DefaultFont $fontMac; set DefaultFontSize $fontSizeMac; set small_character [ expr $DefaultFontSize - $deltaSizeMac ] }" );
-#endif
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set CurPlatform win32; set DefaultExe lsd; set DefaultMakeExe $makeWin32; set DefaultWish $wishWinTk85; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu }" );
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set CurPlatform win64; set DefaultExe lsd; if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { set DefaultMakeExe $makeWin64mgw } { set DefaultMakeExe $makeWin64cyg }; set DefaultWish $wishWinTk86; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu64 }" );
-cmd( "set MakeExe \"$DefaultMakeExe\"" );
-
-// handle non-existent or old options file for new options
+// fix non-existent or old options file for new options
 if ( i == 0 )
- {
-	// set new parameters
-	cmd( "if { $sysTerm == \"\" } { set sysTerm \"$DefaultSysTerm\" }" );// default debugger terminal
-	cmd( "if { $HtmlBrowser == \"\" } { set HtmlBrowser \"$DefaultHtmlBrowser\" }" );// default browser
-	cmd( "if { $wish == \"\" } { set wish \"$DefaultWish\" }" );// default tcl interpreter
-	cmd( "if { $LsdSrc == \"\" } { set LsdSrc src }" );	// source path
-	cmd( "if { $fonttype == \"\" } { set fonttype $DefaultFont }" );
-	cmd( "if { $dim_character == \"\" } { set dim_character $DefaultFontSize }" );
-	cmd( "if { $tabsize == \"\" } { set tabsize 2 }" );	// default tab size
-	cmd( "if { $wrap == \"\" } { set wrap 1 }" );		// default text wrapping mode (1=yes)
-	cmd( "if { $shigh == \"\" } { set shigh 2 }" );		// default is full syntax highlighting
-	cmd( "if { $autoHide == \"\" } { set autoHide 0 }" );// default is to not auto hide LMM on run
-	cmd( "if { $showFileCmds == \"\" } { set showFileCmds 0 }" );// default is no text file commands in File menu
-	cmd( "if { $LsdNew == \"\" } { set LsdNew Work }" );// default new model subdirectory is "Work"
-	cmd( "if { $DbgExe == \"\" } { set DbgExe \"$DefaultDbgExe\" }" );// default debugger
-	
-	// save to config file
-	cmd( "set f [open \"$RootLsd/lmm_options.txt\" w]" );
-	cmd( "puts $f \"$sysTerm\"" );
-	cmd( "puts $f \"$HtmlBrowser\"" );
-	cmd( "puts $f \"$fonttype\"" );
-	cmd( "puts $f $wish" );  
-	cmd( "puts $f $LsdSrc" );
-	cmd( "puts $f $dim_character" );
-	cmd( "puts $f $tabsize" );
-	cmd( "puts $f $wrap" );
-	cmd( "puts $f $shigh" );
-	cmd( "puts $f $autoHide" );
-	cmd( "puts $f $showFileCmds" );
-	cmd( "puts $f $LsdNew" );
-	cmd( "puts $f \"$DbgExe\"" );
-	cmd( "close $f" );
- }
- 
-check_option_files( true );
+	update_lmm_options(  ); 		// update config file
 
+// Tcl global variables
 cmd( "set choice 0" );
 cmd( "set recolor \"\"" );
 cmd( "set docase 0" );
@@ -406,21 +367,25 @@ cmd( "set endsearch end" );
 cmd( "set currentpos \"\"" );
 cmd( "set currentdoc \"\"" );
 cmd( "set v_num 0" );
-cmd( "set shigh_temp $shigh" );
 cmd( "set alignMode \"LMM\"" );
+cmd( "set MakeExe \"$DefaultMakeExe\"" );
+cmd( "set small_character [ expr $dim_character - $deltaSize ]" );
+cmd( "set font_normal [ list \"$fonttype\" $dim_character ]" );
+cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
 
 // TCL to C globally connected variables
+cmd( "set shigh_temp $shigh" );
 Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
 Tcl_LinkVar( inter, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
 Tcl_LinkVar( inter, "macro", ( char * ) &macro, TCL_LINK_BOOLEAN);
 Tcl_LinkVar( inter, "shigh", ( char * ) &shigh, TCL_LINK_INT );
-cmd( "set shigh $shigh_temp" );	// restore correct value
+cmd( "set shigh $shigh_temp" );		// restore correct value
 
 // set main window
 cmd( "wm withdraw ." );
 cmd( "wm title . \"LSD Model Manager\"" );
 cmd( "wm protocol . WM_DELETE_WINDOW { set choice 1 }" );
-cmd( ". configure -menu .m" );		// define here to avoid redimensining the window
+cmd( ". configure -menu .m" );		// define here to avoid re-dimensioning the window
 cmd( "icontop . lmm" );
 cmd( "sizetop .lmm" );
 cmd( "setglobkeys ." );				// set global keys for main window
@@ -733,7 +698,7 @@ cmd( "frame .f.hea -relief groove -bd 2" );
 
 cmd( "frame .f.hea.grp" );
 cmd( "label .f.hea.grp.tit -text \"Group: \"" );
-cmd( "label .f.hea.grp.dat -text \"$modelgroup\" -fg red" );
+cmd( "label .f.hea.grp.dat -text \"$modelGroup\" -fg red" );
 cmd( "pack .f.hea.grp.tit .f.hea.grp.dat -side left" );
 
 cmd( "frame .f.hea.mod" );
@@ -988,7 +953,7 @@ cmd( "pack .f.t.hs -fill x" );
 
 cmd( "set filename \"noname.txt\"" );
 cmd( "set dirname \"[ pwd ]\"" );
-cmd( "set modeldir \"[ pwd ]\"" );
+cmd( "set modelDir \"[ pwd ]\"" );
 cmd( "set groupdir \"[ pwd ]\"" );
 
 cmd( ".f.t.t tag remove sel 1.0 end" );
@@ -1070,7 +1035,10 @@ if ( choice == 1 || choice == 2 || choice == 3 || choice == 5 || choice == 6 || 
 // exit LMM
 
 if ( choice == 1 )
+{
+	update_lmm_options( true );	// update window position, if required
 	return 0;
+}
 
 
 // compile the model, invoking make
@@ -1095,7 +1063,7 @@ if ( choice == 2 || choice == 6 )
 if ( choice == 3 )
 {
 	cmd( ".f.t.t delete 0.0 end" );
-	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
+	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
@@ -1104,21 +1072,21 @@ if ( choice == 3 )
 		goto loop;
 	}
 
-	cmd( "cd \"$modeldir\"" );
+	cmd( "cd \"$modelDir\"" );
 	make_makefile( ); 
 	cmd( "cd \"$RootLsd\"" );
-	cmd( "if { [file exists \"$modeldir/makefile\"]==1} {set choice 1} {set choice 0}" );
+	cmd( "if { [ file exists \"$modelDir/makefile\" ] } { set choice 1 } { set choice 0 }" );
 	if ( choice == 1 )
 	{
-		cmd( "set file [open \"$modeldir/makefile\" r]" );
-		cmd( ".f.t.t insert end [read -nonewline $file]" );
+		cmd( "set file [ open \"$modelDir/makefile\" r ]" );
+		cmd( ".f.t.t insert end [ read -nonewline $file ]" );
 		cmd( ".f.t.t edit reset" );
 		cmd( "close $file" );
 	} 
 	
 	sourcefile = 0; 
 	
-	cmd( "set before [.f.t.t get 1.0 end]" );
+	cmd( "set before [ .f.t.t get 1.0 end ]" );
 	cmd( "set filename makefile" );
 	cmd( ".f.t.t mark set insert 1.0" );
 	cmd( ".f.hea.file.dat conf -text \"makefile\"" );
@@ -1157,7 +1125,7 @@ if ( choice == 4 )
 
 if ( choice == 5 || choice == 50 )
 {
-	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
+	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
@@ -1166,21 +1134,21 @@ if ( choice == 5 || choice == 50 )
 		goto loop;
 	}
 
-	cmd( "set dirname \"$modeldir\"" );
-	cmd( "set filename description.txt" );
+	cmd( "set dirname \"$modelDir\"" );
+	cmd( "set filename $DESCRIPTION" );
 	  
 	cmd( ".f.t.t delete 0.0 end" );
 	cmd( "set choice 0; if { [ file exists \"$dirname/$filename\" ] } { set choice 1; if { [ file size \"$dirname/$filename\" ] <= 2 } { set choice 0; file delete \"$dirname/$filename\" } }" );
 	if ( choice == 1 )
 	{
-		cmd( "set file [ open \"$dirname/description.txt\" r ]" );
+		cmd( "set file [ open \"$dirname/$DESCRIPTION\" r ]" );
 		cmd( ".f.t.t insert end [ read -nonewline $file ]" );
 		cmd( "close $file" );
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
 	}
 	else		// if no description, ask if the user wants to create it or not
 	{
-		cmd( "set answer [ tk_messageBox -parent . -type yesno -default no -icon question -title \"Create Description\" -message \"Create a description file?\" -detail \"There is no valid description file ('description.txt') set for the model\n\nDo you want to create a description file now?\n\nPress 'No' to just show the equations file.\" ]" );
+		cmd( "set answer [ tk_messageBox -parent . -type yesno -default no -icon question -title \"Create Description\" -message \"Create a description file?\" -detail \"There is no valid description file ('$DESCRIPTION') set for the model\n\nDo you want to create a description file now?\n\nPress 'No' to just show the equations file.\" ]" );
 		cmd( " if [ string equal $answer yes ] { set choice 1 } { set choice 2 } " );
 		if ( choice == 2 )
 		{
@@ -1189,7 +1157,7 @@ if ( choice == 5 || choice == 50 )
 			choice = 8;		// load equations file
 			goto loop;
 		}
-		cmd( ".f.t.t insert end \"Model $modelname (ver. $version)\n\n(Enter the Model description text here)\n\n(PRESS CTRL+E TO EDIT EQUATIONS)\n\"" );
+		cmd( ".f.t.t insert end \"Model $modelName (ver. $modelVersion)\n\n(Enter the Model description text here)\n\n(PRESS CTRL+E TO EDIT EQUATIONS)\n\"" );
 	}
 
 	sourcefile = 0;
@@ -1214,7 +1182,7 @@ if ( choice == 5 || choice == 50 )
 
 if ( choice == 7 )
 {
-	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
+	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
 		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -1232,7 +1200,7 @@ if ( choice == 7 )
 
 if ( choice == 8 )
 {
-	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
+	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
@@ -1252,7 +1220,7 @@ if ( choice == 8 )
 	cmd( "set oldfile \"$filename\"" );
 	cmd( "set olddir \"$dirname\"" );
 	cmd( "set filename \"%s\"", s );
-	cmd( "set dirname \"$modeldir\"" );
+	cmd( "set dirname \"$modelDir\"" );
 	cmd( "if [ file exist \"$dirname/$filename\" ] { \
 			set file [ open \"$dirname/$filename\" r ]; \
 			.f.t.t delete 1.0 end; \
@@ -1273,7 +1241,7 @@ if ( choice == 8 )
 		goto loop;
 
 	// handle the opening of files from the compilation error window
-	cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$modeldir/$filename\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
+	cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$modelDir/$filename\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
 			.f.t.t tag add sel $errlin.0 $errlin.end; \
 			if { [ info exists errcol ] && $errcol != \"\" && [ string is integer -strict $errcol ] } { \
 				.f.t.t see $errlin.$errcol; \
@@ -1637,7 +1605,7 @@ if ( choice == 21 )
 
 if ( choice == 13 || choice == 58 )
 {
-	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
+	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
@@ -1646,7 +1614,7 @@ if ( choice == 13 || choice == 58 )
 		goto loop;
 	}
 	  
-	cmd( "cd \"$modeldir\"" );
+	cmd( "cd \"$modelDir\"" );
 
 	if ( choice == 58 )
 	{
@@ -1660,7 +1628,7 @@ if ( choice == 13 || choice == 58 )
 		cmd( "if [ string equal -nocase $DbgExe gdb ] { set cmdbreak \"--args\" } { set cmdbreak \"\" }" ); 
 
 	make_makefile( );  
-	cmd( "set fapp [file nativename \"$modeldir/makefile\"]" );
+	cmd( "set fapp [file nativename \"$modelDir/makefile\"]" );
 	s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
 	f = fopen( s, "r" );
 	if ( f == NULL )
@@ -1709,7 +1677,7 @@ if ( choice == 13 || choice == 58 )
 	if ( s == NULL || ! strcmp( s, "" ) )
 		goto end_gdb;
 	strncpy( str, s, 999 );
-	s = ( char * ) Tcl_GetVar( inter, "modeldir", 0 );
+	s = ( char * ) Tcl_GetVar( inter, "modelDir", 0 );
 	if ( s != NULL && strcmp( s, "" ) )
 	{
 		sprintf( str2, "%s/%s", s, str );
@@ -1753,26 +1721,26 @@ if ( choice == 14 )
 	cmd( "destroytop .mm" );	// close compilation results, if open
 
 	// prevent creating new groups in LSD directory
-	cmd( "if { [ string equal $groupdir [ pwd ] ] && [ file exists \"$groupdir/$LsdNew/groupinfo.txt\" ] } \
+	cmd( "if { [ string equal $groupdir [ pwd ] ] && [ file exists \"$groupdir/$LsdNew/$GROUP_INFO\" ] } \
 			{	set answer [ tk_messageBox -parent . -type okcancel -title Warning \
 				-icon warning -default ok -message \"Invalid parent group\" \
 				-detail \"Cannot create group/model in the Root group. Press 'OK' to change to the '$LsdNew' group before proceeding.\" ]; \
 				if [ string equal $answer ok ] { \
 					set groupdir \"$groupdir/$LsdNew\"; \
-					set f [open \"$groupdir/groupinfo.txt\" r]; \
+					set f [open \"$groupdir/$GROUP_INFO\" r]; \
 					set app \"[gets $f]\"; \
 					close $f; \
-					if [ string equal \"$modelgroup\" \"$rootname\" ] { \
-						set modelgroup \"$app\" \
+					if [ string equal \"$modelGroup\" \"$rootname\" ] { \
+						set modelGroup \"$app\" \
 					} else { \
-						set modelgroup \"$modelgroup/$app\" \
+						set modelGroup \"$modelGroup/$app\" \
 					}; \
-					.f.hea.grp.dat conf -text \"$modelgroup\"; \
+					.f.hea.grp.dat conf -text \"$modelGroup\"; \
 					set choice 1 \
 				} else { \
 					set choice 0 \
 				} \
-			}");		
+			}" );		
 	if ( choice == 0 )
 		goto loop;
 
@@ -1782,7 +1750,7 @@ if ( choice == 14 )
 
 	cmd( "frame .a.tit" );
 	cmd( "label .a.tit.l -text \"Current group:\"" );
-	cmd( "label .a.tit.n -fg red -text \"$modelgroup\"" );
+	cmd( "label .a.tit.n -fg red -text \"$modelGroup\"" );
 	cmd( "pack .a.tit.l .a.tit.n" );
 
 	cmd( "frame .a.f -relief groove -bd 2" );
@@ -1822,7 +1790,7 @@ if ( choice == 14 )
 
 		cmd( "frame .a.tit" );
 		cmd( "label .a.tit.l -text \"Current group:\"" );
-		cmd( "label .a.tit.n -fg red -text \"$modelgroup\"" );
+		cmd( "label .a.tit.n -fg red -text \"$modelGroup\"" );
 		cmd( "pack .a.tit.l .a.tit.n" );
 
 		cmd( "frame .a.mname" );
@@ -1877,7 +1845,7 @@ if ( choice == 14 )
 		}
 		
 		// control for existing directory
-		cmd( "if { [ file exists \"$groupdir/$mdir\"] == 1 } { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+		cmd( "if { [ file exists \"$groupdir/$mdir\" ] == 1 } { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 		if ( choice == 3 )
 		{
 			cmd( "focus .a.mdir.e" );
@@ -1888,9 +1856,9 @@ if ( choice == 14 )
 		cmd( "file mkdir \"$groupdir/$mdir\"" );
 		cmd( "cd \"$groupdir/$mdir\"" );
 		cmd( "set groupdir \"$groupdir/$mdir\"" );
-		cmd( "set f [open groupinfo.txt w]; puts -nonewline $f \"$mname\"; close $f" );
-		cmd( "set f [open description.txt w]; puts -nonewline $f \"[ .a.tdes.e get 0.0 end ]\"; close $f" );
-		cmd( "if [ string equal \"$modelgroup\" \"$rootname\" ] { set modelgroup \"$mname\" } { set modelgroup \"$modelgroup/$mname\" }" );
+		cmd( "set f [ open $GROUP_INFO w ]; puts -nonewline $f \"$mname\"; close $f" );
+		cmd( "set f [ open $DESCRIPTION w ]; puts -nonewline $f \"[ .a.tdes.e get 0.0 end ]\"; close $f" );
+		cmd( "if [ string equal \"$modelGroup\" \"$rootname\" ] { set modelGroup \"$mname\" } { set modelGroup \"$modelGroup/$mname\" }" );
 
 		cmd( "destroytop .a" );
 		//end of creation of a new group
@@ -1908,7 +1876,7 @@ if ( choice == 14 )
 
 	cmd( "frame .a.tit" );
 	cmd( "label .a.tit.l -text \"Current group:\"" );
-	cmd( "label .a.tit.n -fg red -text \"$modelgroup\"" );
+	cmd( "label .a.tit.n -fg red -text \"$modelGroup\"" );
 	cmd( "pack .a.tit.l .a.tit.n" );
 
 	cmd( "frame .a.mname" );
@@ -1948,6 +1916,8 @@ if ( choice == 14 )
 	if ( choice == 2 )
 	{
 		cmd( "destroytop .a" );
+		cmd( "set modelName \"\"" );
+		cmd( "set modelVersion \"\"" );
 		choice = 0;
 		goto loop;
 	}
@@ -1980,29 +1950,27 @@ if ( choice == 14 )
 		cmd( "if { [ file isdirectory [ lindex $dir %d ] ] == 1 } { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
 		s = ( char * ) Tcl_GetVar( inter, "curdir", 0 );
 		strncpy( str, s, 499 );
-		if ( strcmp( str, "___" ) && strcmp( str, "gnu" )  && strcmp( str, "gnu64" ) && strcmp( str, "src" ) && strcmp( str, "Manual" ) && strcmp( str, "R" ) && strcmp( str, "lwi" ) )
-		{
-			cmd( "set ex [ file exists \"$curdir/modelinfo.txt\" ]" );
-			cmd( "if { $ex == 0 } { set choice 0 } { set choice 1 }" );
-			if ( choice == 1 )
-			{
-				cmd( "set f [ open \"$curdir/modelinfo.txt\" r ]" );
-				cmd( "set cname [ gets $f ]; set cver [ gets $f ];" );
-				cmd( "close $f" );
-			} 
-			else
-				cmd( "set cname $curdir; set cver \"0.1\"" );
+		
+		// check for invalid directories (LSD managed)
+		for ( found = false, j = 0; j < LSD_DIR_NUM; ++j )
+			if ( ! strcmp( str, lsd_dir[ j ] ) )
+				found = true;
 			
-			cmd( "set comp [ string compare $cname $mname ]" );
-			cmd( "set comp1 [ string compare $cver $mver ]" );
-			cmd( "if { $comp == 0 && $comp1 == 0} { set choice 3; set errdir $curdir }" );
-			cmd( "if { $comp == 0 } { set choice 4; set errdir $curdir }" );
+		if ( ! found )
+		{
+			if ( ! load_model_info( str ) )
+				cmd( "set modelName $curdir; set modelVersion \"1.0\"" );
+			
+			cmd( "set comp [ string compare $modelName $mname ]" );
+			cmd( "set comp1 [ string compare $modelVersion $mver ]" );
+			cmd( "if { $comp == 0 && $comp1 == 0} { set choice 3 }" );
+			cmd( "if { $comp == 0 } { set choice 4 }" );
 		}
-	 }
+	}
 	 
 	if ( choice == 3 )
 	{
-		cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"" );
+		cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $curdir).\"" );
 		cmd( ".a.mname.e selection range 0 end" );
 		cmd( "focus .a.mname.e" );
 		goto loop_copy_new;
@@ -2011,13 +1979,15 @@ if ( choice == 14 )
 	if ( choice == 4 )
 	{
 		choice = 0;
-		cmd( "set answer [tk_messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' already exists (ver. $mver).\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you should cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\"]" );
+		cmd( "set answer [ tk_messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' (ver. $mver) already exists in directory: $curdir.\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you may cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\" ]" );
 		s = ( char * ) Tcl_GetVar( inter, "answer", 0 );
 	
-		cmd( "if { ! [ string compare $answer ok] } { set choice 1 } { set choice 0 }" );
+		cmd( "if { ! [ string compare $answer ok ] } { set choice 1 } { set choice 0 }" );
 		if ( choice == 0 )
 		{
 			cmd( "destroytop .a" );
+			cmd( "set modelName \"\"" );
+			cmd( "set modelVersion \"\"" );
 			goto loop;
 		} 
 	} 
@@ -2027,12 +1997,13 @@ if ( choice == 14 )
 	// create a new empty model
 
 	cmd( "set dirname $groupdir/$mdir" );
-	cmd( "set modeldir $groupdir/$mdir" );
-	cmd( "set modelname $mname" );
-	cmd( "set version $mver" );
-	cmd( ".f.hea.mod.dat conf -text \"$modelname\"" );
-	cmd( ".f.hea.ver.dat conf -text \"$version\"" );
-	cmd( ".f.hea.grp.dat conf -text \"$modelgroup\"" );
+	cmd( "set modelDir $groupdir/$mdir" );
+	cmd( "set modelName $mname" );
+	cmd( "set modelVersion $mver" );
+	cmd( "set modelDate \"\"" );
+	cmd( ".f.hea.mod.dat conf -text \"$modelName\"" );
+	cmd( ".f.hea.ver.dat conf -text \"$modelVersion\"" );
+	cmd( ".f.hea.grp.dat conf -text \"$modelGroup\"" );
 
 	cmd( "file mkdir \"$dirname\"" );
 
@@ -2042,23 +2013,11 @@ if ( choice == 14 )
 		cmd( "set fun_base \"fun_baseC.cpp\"" );
 
 	// create the empty equation file
-	cmd( "file copy \"$RootLsd/$LsdSrc/$fun_base\" \"$modeldir/fun_$mdir.cpp\"" ); 
+	cmd( "file copy \"$RootLsd/$LsdSrc/$fun_base\" \"$modelDir/fun_$mdir.cpp\"" ); 
 
-	cmd( "cd \"$dirname\"" );
-
-	// create the model_options.txt file
+	// create the model options and info files
 	check_option_files( );
-
-	// insert the modelinfo file, 
-	cmd( "set before [ .f.t.t get 1.0 end ]" );
-	cmd( "set f [ open modelinfo.txt w ]" );
-	cmd( "puts $f \"$modelname\"" );
-	cmd( "puts $f \"$version\"" );
-	cmd( "set frmt \"%%d %%B, %%Y\"" );
-	cmd( "puts $f \"[ clock format [ clock seconds ] -format \"$frmt\" ]\"" );
-	cmd( "close $f" );
-
-	cmd( "cd \"$RootLsd\"" );
+	update_model_info( );
 
 	cmd( ".m.file entryconf 2 -state normal" );
 	cmd( ".m.file entryconf 3 -state normal" );
@@ -2074,9 +2033,9 @@ if ( choice == 14 )
 	cmd( ".m.model entryconf 10 -state normal" );
 	cmd( ".m.model entryconf 12 -state normal" );
 
-	cmd( "tk_messageBox -parent . -type ok -title \"Model Created\" -icon info -message \"Model '$mname' created\" -detail \"Version: $mver\nDirectory: $dirname\"" );
+	cmd( "tk_messageBox -parent . -type ok -title \"New Model\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: $modelDir\"" );
 
-	cmd( "set before [ .f.t.t get 0.0 end ]" ); //avoid to re-issue a warning for non saved files
+	cmd( "set before [ .f.t.t get 1.0 end ]" ); //avoid to re-issue a warning for non saved files
 	
 	choice = 50;
 	goto loop;
@@ -4831,7 +4790,7 @@ if ( choice == 33 )
 
 	Tcl_LinkVar( inter, "choiceSM", ( char * ) & num, TCL_LINK_INT );
 	num = 0;
-
+	
 	cmd( "showmodel $groupdir" );
 	cmd( "focus .l" );
 
@@ -4850,18 +4809,18 @@ if ( choice == 33 )
 		goto loop;
 	}
 
-	cmd( "set groupdir [ lindex $lrn 0 ]" );	//the group dir is the same for every element
+	cmd( "set groupdir [ lindex $lrn 0 ]" );	// the group dir is the same for every element
 	if ( choice == 14 )
-		goto loop; 		//create a new model/group
+		goto loop; 								// create a new model/group
 
-	cmd( "set modelname [ lindex $lmn $result ]" );
-	cmd( "set version [ lindex $lver $result ]" );
-	cmd( "set modeldir [ lindex $ldn $result ]" );
-	cmd( "set dirname $modeldir" );
+	cmd( "set modelDir [ lindex $ldn $result ]" );
+	cmd( "set dirname $modelDir" );
+	
+	load_model_info( ( char * ) Tcl_GetVar( inter, "modelDir", 0 ) );
 
-	cmd( ".f.hea.grp.dat conf -text \"$modelgroup\"" );
-	cmd( ".f.hea.mod.dat conf -text \"$modelname\"" );
-	cmd( ".f.hea.ver.dat conf -text \"$version\"" );
+	cmd( ".f.hea.grp.dat conf -text \"$modelGroup\"" );
+	cmd( ".f.hea.mod.dat conf -text \"$modelName\"" );
+	cmd( ".f.hea.ver.dat conf -text \"$modelVersion\"" );
 
 	cmd( ".m.file entryconf 2 -state normal" );
 	cmd( ".m.file entryconf 3 -state normal" );
@@ -4877,7 +4836,7 @@ if ( choice == 33 )
 	cmd( ".m.model entryconf 10 -state normal" );
 	cmd( ".m.model entryconf 12 -state normal" );
 
-	choice = 50;		// load description file
+	choice = 50;								// load description file
 	goto loop;
 }
 
@@ -4885,8 +4844,10 @@ if ( choice == 33 )
 // create a new version of the current model
 if ( choice == 41 )
 {
-	cmd( "set mname $modelname" );
-	cmd( "set mver $version" );
+	cmd( "set oldModelName $modelName" );
+	cmd( "set oldModelVersion $modelVersion" );
+	cmd( "set mname $modelName" );
+	cmd( "set mver $modelVersion" );
 	cmd( "set mdir $dirname" );
 
 	cmd( "newtop .a \"Save Model As...\" { set choice 2 }" );
@@ -4895,9 +4856,9 @@ if ( choice == 41 )
 	cmd( "label .a.tit.l -text \"Original model:\"" );
 
 	cmd( "frame .a.tit.n" );
-	cmd( "label .a.tit.n.n -fg red -text \"$modelname\"" );
+	cmd( "label .a.tit.n.n -fg red -text \"$modelName\"" );
 	cmd( "label .a.tit.n.l1 -text \"( version\"" );
-	cmd( "label .a.tit.n.v -fg red -text \"$version\"" );
+	cmd( "label .a.tit.n.v -fg red -text \"$modelVersion\"" );
 	cmd( "label .a.tit.n.l2 -text \")\"" );
 	cmd( "pack .a.tit.n.n .a.tit.n.l1 .a.tit.n.v .a.tit.n.l2 -side left" );
 
@@ -4938,6 +4899,8 @@ if ( choice == 41 )
 	if ( choice == 2 )
 	{
 		cmd( "destroytop .a" );  
+		cmd( "set modelName $oldModelName" );
+		cmd( "set modelVersion $oldModelVersion" );
 		choice = 0;
 		goto loop;
 	}
@@ -4961,35 +4924,34 @@ if ( choice == 41 )
 	} 
 
 	// control for an existing model with the same name AND same version
-	cmd( "set dir [glob -nocomplain *]" );
-	cmd( "set num [llength $dir]" );
+	cmd( "set dir [ glob -nocomplain * ]" );
+	cmd( "set num [ llength $dir ]" );
 	strcpy( str, " " );
 	for ( i = 0; i < num && choice != 3; ++i )
 	{
 		cmd( "if { [ file isdirectory [ lindex $dir %d ] ] == 1 } { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
 		s = ( char * ) Tcl_GetVar( inter, "curdir", 0 );
 		strncpy( str, s, 499 );
-		if ( strcmp( str, "___" ) && strcmp( str, "gnu" ) && strcmp( str, "gnu64" ) && strcmp( str, "src" ) && strcmp( str, "LMM.app" ) && strcmp( str, "R" ) && strcmp( str, "Manual" ) )
+		
+		// check for invalid directories (LSD managed)
+		for ( found = false, j = 0; j < LSD_DIR_NUM; ++j )
+			if ( ! strcmp( str, lsd_dir[ j ] ) )
+				found = true;
+			
+		if ( ! found )
 		{
-			cmd( "set ex [ file exists \"$curdir/modelinfo.txt\" ]" );
-			cmd( "if { $ex == 0 } { set choice 0 } { set choice 1 }" );
-			if ( choice == 1 )
-			{
-				cmd( "set f [ open \"$curdir/modelinfo.txt\" r ]" );
-				cmd( "set cname [ gets $f ]; set cver [ gets $f ];" );
-				cmd( "close $f" );
-			}
-			else
-				cmd( "set cname $curdir; set cver \"0.1\"" );
-			cmd( "set comp [ string compare $cname $mname ]" );
-			cmd( "set comp1 [ string compare $cver $mver ]" );
-			cmd( "if { $comp == 0 && $comp1 == 0 } { set choice 3; set errdir $curdir }" );
+			if ( ! load_model_info( str ) )
+				cmd( "set modelName $curdir; set modelVersion \"1.0\"" );
+
+			cmd( "set comp [ string compare $modelName $mname ]" );
+			cmd( "set comp1 [ string compare $modelVersion $mver ]" );
+			cmd( "if { $comp == 0 && $comp1 == 0 } { set choice 3 }" );
 		}
 	}
 	 
 	if ( choice == 3 )
 	{
-		 cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create new model\" -detail \"The model '$mname' already exists (directory: $errdir).\"" );
+		cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $curdir).\"" );
 		cmd( ".a.mname.e selection range 0 end" );
 		cmd( "focus .a.mname.e" );
 		goto loop_copy;
@@ -5000,23 +4962,17 @@ if ( choice == 41 )
 	// create a new copycat model
 	cmd( "file copy \"$dirname\" \"$mdir\"" );
 	cmd( "set dirname \"$mdir\"" );
-	cmd( "set modeldir \"$mdir\"" );
-	cmd( "set modelname \"$mname\"" );
-	cmd( "set version \"$mver\"" );
-	cmd( ".f.hea.mod.dat conf -text \"$modelname\"" );
-	cmd( ".f.hea.ver.dat conf -text \"$version\"" );
-	cmd( "set ex [file exists \"$dirname/modelinfo.txt\"]" );
-	cmd( "if { $ex == 0 } { set choice 0 } { set choice 1 }" );
-	if ( choice == 1 )
-		cmd( "file delete \"$dirname/modelinfo.txt\"" );
+	cmd( "set modelDir \"$mdir\"" );
+	cmd( "set modelName \"$mname\"" );
+	cmd( "set modelVersion \"$mver\"" );
+	cmd( "set modelDate \"\"" );
+	cmd( ".f.hea.mod.dat conf -text \"$modelName\"" );
+	cmd( ".f.hea.ver.dat conf -text \"$modelVersion\"" );
 	
-	cmd( "set f [ open \"$dirname/modelinfo.txt\" w ]" );
-	cmd( "puts $f \"$modelname\"" );
-	cmd( "puts $f \"$version\"" );
-	cmd( "set frmt \"%%d %%B, %%Y\"" );
-	cmd( "puts $f \"[ clock format [ clock seconds ] -format \"$frmt\" ]\"" );
-	cmd( "close $f" );
-	cmd( "tk_messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$mname' created\" -detail \"Version: $mver\nDirectory: $dirname\"" );
+	// create the model info file
+	update_model_info( );
+
+	cmd( "tk_messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: $modelDir\"" );
 
 	choice = 49;
 	goto loop;
@@ -5073,7 +5029,7 @@ if ( choice == 43 )
 // show and edit model info
 if ( choice == 44 )
 {
-	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
+	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
 		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -5081,34 +5037,27 @@ if ( choice == 44 )
 		goto loop;
 	}
 
-	cmd( "set choice [file exists \"$modeldir/modelinfo.txt\"]" );
-	i = choice;
-	if ( i == 0 )
-		cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Cannot find file for model info\" -detail \"Please, check the date of creation.\"" );
-	else
-	{
-		cmd( "set f [open \"$modeldir/modelinfo.txt\" r]" );
-		cmd( "gets $f; gets $f; set date [gets $f]" ); 
-		cmd( "close $f" );
-	}
+	if ( ! load_model_info( ( char * ) Tcl_GetVar( inter, "modelDir", 0 ) ) )
+		update_model_info( );			// recreate the model info file
 	  
-	cmd( "set complete_dir [file nativename [file join [pwd] \"$modeldir\"]]" );
+	cmd( "set mname $modelName" );
+	cmd( "set mver $modelVersion" );
+	cmd( "set mdate $modelDate" );
+
+	cmd( "set complete_dir [ file nativename [ file join [ pwd ] \"$modelDir\" ] ]" );
 
 	s = get_fun_name( str );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		choice = 0;
-		goto loop;
+		cmd( "set eqname \"\"" );
+		cmd( "set edate \"\"" );
 	}
-
-	cmd( "set eqname \"%s\"", s );
-
-	cmd( "set frmt \"%%d %%B, %%Y\"" );
-	cmd( "set last \"[clock format [file mtime \"$modeldir/$eqname\"] -format \"$frmt\"]\"" );
-
-	cmd( "set mname $modelname" );
-	cmd( "set mver $version" );
-
+	else
+	{
+		cmd( "set eqname \"%s\"", s );
+		cmd( "set edate \"[ clock format [ file mtime \"$modelDir/$eqname\" ] -format \"$DATE_FMT\" ]\"" );
+	}
+	
 	cmd( "newtop .a \"Model Info\" { set choice 2 }" );
 
 	cmd( "frame .a.mname" );
@@ -5122,21 +5071,21 @@ if ( choice == 44 )
 	cmd( "pack .a.mver.l .a.mver.e" );
 
 	cmd( "frame .a.mdir" );
-	cmd( "label .a.mdir.l -text \"Model home subdirectory\"" );
+	cmd( "label .a.mdir.l -text \"Model home directory\"" );
 	cmd( "entry .a.mdir.e -width 35 -state disabled -textvariable complete_dir -justify center" );
 	cmd( "pack .a.mdir.l .a.mdir.e" );
 
 	cmd( "frame .a.date" );
 	cmd( "label .a.date.l -text \"Creation date\"" );
-	cmd( "entry .a.date.e -width 20 %s -textvariable date -justify center", i == 1 ? "-state disabled" : "" );
+	cmd( "entry .a.date.e -width 20 -textvariable mdate -justify center" );
 	cmd( "pack .a.date.l .a.date.e" );
 
-	cmd( "frame .a.mdate" );
-	cmd( "label .a.mdate.l -text \"Modification date (equations)\"" );
-	cmd( "entry .a.mdate.e -width 20 -state disabled -textvariable last -justify center" );
-	cmd( "pack .a.mdate.l .a.mdate.e" );
+	cmd( "frame .a.edate" );
+	cmd( "label .a.edate.l -text \"Modification date (equations)\"" );
+	cmd( "entry .a.edate.e -width 20 -state disabled -textvariable edate -justify center" );
+	cmd( "pack .a.edate.l .a.edate.e" );
 
-	cmd( "pack .a.mname .a.mver .a.mdir .a.date .a.mdate -padx 5 -pady 5" );
+	cmd( "pack .a.mname .a.mver .a.mdir .a.date .a.edate -padx 5 -pady 5" );
 
 	cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
 	cmd( "bind .a.mname.e <Return> { focus .a.mver.e; .a.mver.e selection range 0 end }" );
@@ -5154,15 +5103,15 @@ if ( choice == 44 )
 
 	if ( choice == 1 )
 	{
-		cmd( "set modelname $mname" );
-		cmd( "set version $mver" );
-		cmd( "set f [open \"$modeldir/modelinfo.txt\" w]" );
-		cmd( "puts $f \"$modelname\"" );
-		cmd( "puts $f \"$version\"" );
-		cmd( "puts $f \"$date\"" );
-		cmd( "close $f" );
-		cmd( ".f.hea.mod.dat conf -text \"$modelname\"" );
-		cmd( ".f.hea.ver.dat conf -text \"$version\"" );
+		cmd( "set modelName $mname" );
+		cmd( "set modelVersion $mver" );
+		cmd( "if [ check_date $mdate ] { set modelDate $mdate } { set modelDate \"\"; tk_messageBox -type ok -title Error -icon error -message \"Invalid date\" -detail \"Dates must be set in the 'dd M, yyyy' format.\nSetting to current date.\" }" );
+		
+		cmd( ".f.hea.mod.dat conf -text \"$modelName\"" );
+		cmd( ".f.hea.ver.dat conf -text \"$modelVersion\"" );
+
+		// update the model info file
+		update_model_info( );
 	}
 
 	choice = 0;
@@ -5205,10 +5154,10 @@ if ( choice == 46 || choice == 49 )
 // System Options
 if ( choice == 47 )
 {
-	cmd( "set choice [ file exists \"$LsdSrc/system_options.txt\" ]" );
+	cmd( "set choice [ file exists \"$LsdSrc/$SYSTEM_OPTIONS\" ]" );
 	if ( choice == 1 )
 	{
-		cmd( "set f [ open \"$LsdSrc/system_options.txt\" r ]" );
+		cmd( "set f [ open \"$LsdSrc/$SYSTEM_OPTIONS\" r ]" );
 		cmd( "set a [ read -nonewline $f ]" );
 		cmd( "close $f" );
 		choice = 0;
@@ -5249,7 +5198,7 @@ if ( choice == 47 )
 					file delete -force \"$i\" \
 				} \
 			}; \
-			set objs [ glob -nocomplain -directory \"$modeldir\" *.o src makefile* makemessage.txt lsd* *.exe *.app ]; \
+			set objs [ glob -nocomplain -directory \"$modelDir\" *.o src makefile* makemessage.txt lsd* *.exe *.app ]; \
 			foreach i $objs { \
 				catch { \
 					file delete -force \"$i\" \
@@ -5266,7 +5215,7 @@ if ( choice == 47 )
 
 	if ( choice == 1 )
 	{
-		cmd( "set f [ open \"$LsdSrc/system_options.txt\" w ]" );
+		cmd( "set f [ open \"$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
 		cmd( "puts -nonewline $f [ .l.t.text get 1.0 end ]" );
 		cmd( "close $f" );
 		choice = 46; 	//go to create makefile
@@ -5283,7 +5232,7 @@ if ( choice == 47 )
 // Model Options
 if ( choice == 48 )
 {
-	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
+	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
 		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -5295,10 +5244,10 @@ if ( choice == 48 )
 	if ( s == NULL || ! strcmp( s, "" ) )
 		check_option_files( );
 
-	cmd( "cd \"$modeldir\"" );
+	cmd( "cd \"$modelDir\"" );
 
 	cmd( "set b \"%s\"", s );
-	cmd( "set f [ open model_options.txt r ]" );
+	cmd( "set f [ open $MODEL_OPTIONS r ]" );
 	cmd( "set a [ read -nonewline $f ]" );
 	cmd( "close $f" );
 
@@ -5375,14 +5324,14 @@ if ( choice == 48 )
 				set a [.l.t.text get 1.0 end]; \
 				set pos [ string first \"FUN_EXTRA=\" $a ]; \
 			}; \
-			set fun_extra [ tk_getOpenFile -parent .l -title \"Select Additional Source Files\" -multiple yes -initialdir \"$modeldir\" -filetypes {{{C++ header files} {.h .hpp .h++}} {{C++ source files} {.c .cpp .c++}} {{All files} {*}} } ]; \
+			set fun_extra [ tk_getOpenFile -parent .l -title \"Select Additional Source Files\" -multiple yes -initialdir \"$modelDir\" -filetypes {{{C++ header files} {.h .hpp .h++}} {{C++ source files} {.c .cpp .c++}} {{All files} {*}} } ]; \
 			if { $fun_extra == \"\" } { \
 				return \
 			}; \
 			set extra_files [ list ]; \
 			foreach x $fun_extra { \
-				set dirlen [ string length $modeldir ]; \
-				if { [ string equal -length $dirlen $modeldir $x ] } { \
+				set dirlen [ string length $modelDir ]; \
+				if { [ string equal -length $dirlen $modelDir $x ] } { \
 					if { [ string index $x $dirlen ] == \"/\" || [ string index $x $dirlen ] == \"\\\\\" } {  \
 						incr dirlen; \
 					}; \
@@ -5416,7 +5365,7 @@ if ( choice == 48 )
 					file delete -force \"$i\" \
 				} \
 			}; \
-			set objs [ glob -nocomplain -directory \"$modeldir\" *.o src break.gdb makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.app *.bak *.err ]; \
+			set objs [ glob -nocomplain -directory \"$modelDir\" *.o src break.gdb makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.app *.bak *.err ]; \
 			foreach i $objs { \
 				catch { \
 					file delete -force \"$i\" \
@@ -5445,7 +5394,7 @@ if ( choice == 48 )
 
 	if ( choice == 1 )
 	{
-		cmd( "set f [open model_options.txt w]" );
+		cmd( "set f [ open $MODEL_OPTIONS w ]" );
 		cmd( "puts -nonewline $f [.l.t.text get 1.0 end]" );
 		cmd( "close $f" );
 		choice = 46;		//go to create makefile
@@ -5555,19 +5504,8 @@ if ( choice == 59 )
 // LMM system options
 if ( choice == 60 )
 {
-	cmd( "set temp_var1 \"$sysTerm\"" );
-	cmd( "set temp_var2 \"$HtmlBrowser\"" );
-	cmd( "set temp_var3 \"$fonttype\"" );
-	cmd( "set temp_var4 $wish" );
-	cmd( "set temp_var5 $LsdSrc" );
-	cmd( "set temp_var6 $dim_character" );
-	cmd( "set temp_var7 $tabsize" );
-	cmd( "set temp_var8 $wrap" );
-	cmd( "set temp_var9 $shigh" );
-	cmd( "set temp_var10 $autoHide" );
-	cmd( "set temp_var11 $showFileCmds" );
-	cmd( "set temp_var12 $LsdNew" );
-	cmd( "set temp_var13 $DbgExe" );
+	for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
+		cmd( "set temp_var%d \"$%s\"", i, lmm_options[ i - 1 ] );
 
 	cmd( "newtop .a \"Options\" { set choice 2 }" );
 
@@ -5641,16 +5579,18 @@ if ( choice == 60 )
 	cmd( "checkbutton .a.num8.v_num8 -variable temp_var8 -text \"Wrap text\"" );
 	cmd( "checkbutton .a.num8.v_num10 -variable temp_var10 -text \"Auto-hide on run\"" );
 	cmd( "checkbutton .a.num8.v_num11 -variable temp_var11 -text \"Show text file commands\"" );
-	cmd( "pack .a.num8.v_num8 .a.num8.v_num10 .a.num8.v_num11" );
+	cmd( "checkbutton .a.num8.v_num14 -variable temp_var14 -text \"Restore window positions\"" );
+	cmd( "pack .a.num8.v_num8 .a.num8.v_num10 .a.num8.v_num11 .a.num8.v_num14" );
 	cmd( "bind .a.num8.v_num8 <Return> { focus .a.num8.v_num10 }" );
 	cmd( "bind .a.num8.v_num10 <Return> { focus .a.num8.v_num11 }" );
-	cmd( "bind .a.num8.v_num11 <Return> { focus .a.f2.ok }" );
+	cmd( "bind .a.num8.v_num11 <Return> { focus .a.num8.v_num14 }" );
+	cmd( "bind .a.num8.v_num14 <Return> { focus .a.f2.ok }" );
 
 	cmd( "pack .a.num .a.num13 .a.num2 .a.num4 .a.num12 .a.num5 .a.num3 .a.num7 .a.num9 .a.num8 -padx 5 -pady 5" );
 
 	cmd( "frame .a.f1" );
-	cmd( "button .a.f1.def -width $butWid -text Default -command {set temp_var1 \"$DefaultSysTerm\"; set temp_var2 \"$DefaultHtmlBrowser\"; set temp_var3 \"$DefaultFont\"; set temp_var5 src; set temp_var6 $DefaultFontSize; write_any .a.num7.v 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work; set temp_var13 \"$DefaultDbgExe\"}" );
-	cmd( "button .a.f1.help -width $butWid -text Help -command {LsdHelp LMM.html#SystemOpt}" );
+	cmd( "button .a.f1.def -width $butWid -text Default -command { set temp_var1 \"%s\"; set temp_var2 \"%s\"; set temp_var3 \"%s\"; set temp_var4 \"%s\"; set temp_var5 \"%s\"; set temp_var6 \"%s\"; write_any .a.num7.v \"%s\"; set temp_var8 \"%s\"; set temp_var9 \"%s\"; set temp_var10 \"%s\"; set temp_var11 \"%s\"; set temp_var12 \"%s\"; set temp_var13 \"%s\"; set temp_var14 \"%s\"; set temp_var15 \"%s\" }", lmm_defaults[0], lmm_defaults[1], lmm_defaults[2], lmm_defaults[3], lmm_defaults[4], lmm_defaults[5], lmm_defaults[6], lmm_defaults[7], lmm_defaults[8], lmm_defaults[9], lmm_defaults[10], lmm_defaults[11], lmm_defaults[12], lmm_defaults[13], lmm_defaults[14] );
+	cmd( "button .a.f1.help -width $butWid -text Help -command { LsdHelp LMM.html#SystemOpt }" );
 	cmd( "pack .a.f1.def .a.f1.help -padx 10 -side left" );
 	cmd( "pack .a.f1 -anchor e" );
 
@@ -5675,42 +5615,20 @@ if ( choice == 60 )
 	{
 		cmd( "if { $showFileCmds != $temp_var11 } { tk_messageBox -parent . -icon warning -title Warning -type ok -message \"Restart required\" -detail \"Restart required after configuration changes. Only after LMM is closed and restarted the changes will be applied.\" }" );
 
-		cmd( "set sysTerm \"$temp_var1\"" );
-		cmd( "set HtmlBrowser \"$temp_var2\"" );
-		cmd( "set fonttype \"$temp_var3\"" );
-		cmd( "set wish $temp_var4" );
-		cmd( "set LsdSrc $temp_var5" );
-		cmd( "if [ string is integer -strict $temp_var6 ] { set dim_character $temp_var6 }" );
-		cmd( "if [ string is integer -strict $temp_var7 ] { set tabsize $temp_var7 }" );
-		cmd( "set wrap $temp_var8" );
-		cmd( "set shigh $temp_var9" );
-		cmd( "set autoHide $temp_var10" );
-		cmd( "set showFileCmds $temp_var11" );
-		cmd( "set LsdNew $temp_var12" );
-		cmd( "set DbgExe $temp_var13" );
+		cmd( "if { ! [ string is integer -strict $temp_var6 ] } { set temp_var6 $dim_character }" );
+		cmd( "if { ! [ string is integer -strict $temp_var7 ] } { set temp_var7 $tabsize }" );
+
+		for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
+			cmd( "set %s \"$temp_var%d\"", lmm_options[ i - 1 ], i );
+
+		// save to config file
+		update_lmm_options(  ); 				// update config file
 
 		cmd( "set a [ list \"$fonttype\" $dim_character ]" );
 		cmd( ".f.t.t conf -font \"$a\"" );
 		cmd( "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
 		cmd( "setwrap .f.t.t $wrap" );			// adjust text wrap
 		color( shigh, 0, 0 );					// set color highlights (all text)
-
-		// save to config file
-		cmd( "set f [open \"$RootLsd/lmm_options.txt\" w]" );
-		cmd( "puts $f  \"$sysTerm\"" );
-		cmd( "puts $f \"$HtmlBrowser\"" );
-		cmd( "puts $f \"$fonttype\"" );
-		cmd( "puts $f $wish" );
-		cmd( "puts $f $LsdSrc" );
-		cmd( "puts $f $dim_character" );
-		cmd( "puts $f $tabsize" );
-		cmd( "puts $f $wrap" );
-		cmd( "puts $f $shigh" );
-		cmd( "puts $f $autoHide" );
-		cmd( "puts $f $showFileCmds" );
-		cmd( "puts $f $LsdNew" );
-		cmd( "puts $f  \"$DbgExe\"" );
-		cmd( "close $f" );
 	}
 
 	choice = 0;
@@ -5726,26 +5644,26 @@ if ( choice == 62 )
 		goto loop;
 	
 	// copy the base LSD source files to distribution directory
-	cmd( "if { ! [ file exists \"$modeldir/src\" ] } { file mkdir \"$modeldir/src\" }" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/main.cpp\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/lsdmain.cpp\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/file.cpp\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/nets.cpp\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/object.cpp\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/util.cpp\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/variab.cpp\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/check.h\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/decl.h\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head.h\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head_fast.h\" \"$modeldir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/system_options.txt\" \"$modeldir/src\"" );
+	cmd( "if { ! [ file exists \"$modelDir/src\" ] } { file mkdir \"$modelDir/src\" }" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/main.cpp\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/lsdmain.cpp\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/file.cpp\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/nets.cpp\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/object.cpp\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/util.cpp\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/variab.cpp\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/check.h\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/decl.h\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head.h\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head_fast.h\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" \"$modelDir/src\"" );
 	
 	// copy Eigen library files if in use, just once to save time
 	if( use_eigen( ) )
-		cmd( "if { ! [ file exists \"$modeldir/src/Eigen\" ] } { file copy -force \"$RootLsd/$LsdSrc/Eigen\" \"$modeldir/src\" }" );
+		cmd( "if { ! [ file exists \"$modelDir/src/Eigen\" ] } { file copy -force \"$RootLsd/$LsdSrc/Eigen\" \"$modelDir/src\" }" );
 
 	// define the no window compilation macro
-	cmd( "set f [ open \"$modeldir/src/choose.h\" w ]" );
+	cmd( "set f [ open \"$modelDir/src/choose.h\" w ]" );
 	cmd( "puts -nonewline $f \"#define NO_WINDOW\\n\"" );
 	cmd( "close $f" );
 
@@ -5888,7 +5806,7 @@ if ( choice == 69 )
 // Show extra source files
 if ( choice == 70 )
 {	
-	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
+	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
 		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -5897,12 +5815,12 @@ if ( choice == 70 )
 	}
 	
 	// Create model options file if it doesn't exist
-	cmd( "set choice [ file exists \"$modeldir/model_options.txt\" ]" );
+	cmd( "set choice [ file exists \"$modelDir/$MODEL_OPTIONS\" ]" );
 	if ( choice == 0 )
 		make_makefile( );
 
 	choice = 0;
-	cmd( "set fapp [ file nativename \"$modeldir/model_options.txt\" ]" );
+	cmd( "set fapp [ file nativename \"$modelDir/$MODEL_OPTIONS\" ]" );
 	s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
 	if ( s == NULL || ( f = fopen( s, "r" ) ) == NULL )
 	{
@@ -5924,7 +5842,7 @@ if ( choice == 70 )
 	
 	cmd( "set fun_extra [ split [ string trim \"%s\" ] \" \t\" ]", str + 10 );
 	cmd( "set extra_files [ list ]" );
-	cmd( "foreach x $fun_extra { if { [ string trim $x ] != \"\" && ( [ file exists \"$x\" ] || [ file exists \"$modeldir/$x\" ] ) } { lappend extra_files \"$x\" } }" );
+	cmd( "foreach x $fun_extra { if { [ string trim $x ] != \"\" && ( [ file exists \"$x\" ] || [ file exists \"$modelDir/$x\" ] ) } { lappend extra_files \"$x\" } }" );
 	cmd( "set brr \"\"" );
 	cmd( "set e .extra" );
 
@@ -5932,7 +5850,7 @@ if ( choice == 70 )
 
 	cmd( "frame $e.lf " );
 	cmd( "label $e.lf.l1 -justify center -text \"Show additional\nsource files for model:\"" );
-	cmd( "label $e.lf.l2 -fg red -text \"$modelname\"" );
+	cmd( "label $e.lf.l2 -fg red -text \"$modelName\"" );
 	cmd( "pack $e.lf.l1 $e.lf.l2" );
 	
 	cmd( "frame $e.l" );
@@ -5968,7 +5886,7 @@ if ( choice == 70 )
 	
 	if ( choice == 1 && strlen( s ) > 0 )
 	{
-		cmd( "if { ! [ file exists \"$brr\" ] && [ file exists \"$modeldir/$brr\" ] } { set brr \"$modeldir/$brr\" }" );
+		cmd( "if { ! [ file exists \"$brr\" ] && [ file exists \"$modelDir/$brr\" ] } { set brr \"$modelDir/$brr\" }" );
 		choice = 71;
 	}
 	else
@@ -5984,8 +5902,8 @@ if ( choice == 87 )
 	// check if file exists and normalize name for comparisons
 	cmd( "if { [ file exists \"$errfil\" ] } { \
 			set errfil \"[ file normalize \"$errfil\" ]\" \
-		} elseif { $errfil != \"\" && [ file exists \"$modeldir/$errfil\" ] } { \
-			set errfil \"[ file normalize \"$modeldir/$errfil\" ]\" \
+		} elseif { $errfil != \"\" && [ file exists \"$modelDir/$errfil\" ] } { \
+			set errfil \"[ file normalize \"$modelDir/$errfil\" ]\" \
 		} else { \
 			set errfil \"\" \
 		}" );
@@ -6015,12 +5933,12 @@ if ( choice == 87 )
 		// check if main equation file is not the current file
 		s = get_fun_name( str );
 		if ( s != NULL && strlen( s ) > 0 )
-			cmd( "if [ string equal \"$errfil\" \"[ file normalize \"$modeldir/%s\" ]\" ] { set choice 8 }", s );		// open main equation file
+			cmd( "if [ string equal \"$errfil\" \"[ file normalize \"$modelDir/%s\" ]\" ] { set choice 8 }", s );		// open main equation file
 												
 		// try to open an extra file defined by the user
 		if ( choice == 0 )
 		{	// open the configuration file
-			cmd( "set fapp [ file nativename \"$modeldir/model_options.txt\" ]" );
+			cmd( "set fapp [ file nativename \"$modelDir/$MODEL_OPTIONS\" ]" );
 			s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
 			if ( s == NULL || strlen( s ) == 0 || ( f = fopen( s, "r" ) ) == NULL )
 			{
@@ -6031,7 +5949,7 @@ if ( choice == 87 )
 				fclose( f );
 				
 			// search in all source files (except main, already done)
-			cmd( "set source_files [ get_source_files $modeldir ]" );
+			cmd( "set source_files [ get_source_files $modelDir ]" );
 			cmd( "if { [ llength $source_files ] > 1 } { set fun_extra [ lreplace $source_files 0 0 ]; set choice [ llength $fun_extra ] } { set choice 0 }" );
 	
 			if ( choice > 0 )
@@ -6041,8 +5959,8 @@ if ( choice == 87 )
 						if { $x != \"\" } { \
 							if { [ file exists \"$x\" ] } { \
 								set x \"[ file normalize \"$x\" ]\" \
-							} elseif { [ file exists \"$modeldir/$x\" ] } { \
-								set x \"[ file normalize \"$modeldir/$x\" ]\" \
+							} elseif { [ file exists \"$modelDir/$x\" ] } { \
+								set x \"[ file normalize \"$modelDir/$x\" ]\" \
 							} else { \
 								set x \"\" \
 							}; \
@@ -6364,6 +6282,122 @@ void color(int hiLev, long iniLin, long finLin)
 
 
 /*********************************
+ LOAD_LMM_OPTIONS
+ *********************************/
+bool load_lmm_options( void )
+{
+	cmd( "set choice [ file exists \"$RootLsd/$LMM_OPTIONS\" ]" );
+	
+	if ( choice == 1 )								// file exists?
+	{
+		cmd( "set f [ open \"$RootLsd/$LMM_OPTIONS\" r ]" );
+		
+		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )	// read parameters, returning 1 if incomplete
+		{
+			cmd( "gets $f %s", lmm_options[ i ] );
+			cmd( "if { $%s == \"\" } { set choice 0 }", lmm_options[ i ] );
+		}
+		
+		cmd( "close $f" );
+	}
+	else
+	{
+		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
+			cmd( "set %s \"\"", lmm_options[ i ] );
+	
+		// fix now missing source directory name
+		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ 4 ], lmm_options[ 4 ], lmm_defaults[ 4 ] );
+	}
+	
+	return choice;
+}
+ 
+
+/*********************************
+ UPDATE_LMM_OPTIONS
+ *********************************/
+void update_lmm_options( bool justWinGeom )
+{
+	if ( justWinGeom )
+	{
+		cmd( "set done 1" );
+		cmd( "if { $restoreWin } { set curGeom [ geomtosave .lmm ]; if { $curGeom != \"\" && ! [ string equal $lmmGeom $curGeom ] } { set done 0 } }" );
+		
+		if ( atoi( Tcl_GetVar( inter, "done", 0 ) ) )	// nothing to save?
+			return;
+	
+		load_lmm_options( );				// if just saving window geometry, first reload from disk
+
+		cmd( "set lmmGeom $curGeom" );
+	}
+	
+	// save options to disk
+	cmd( "set f [ open \"$RootLsd/$LMM_OPTIONS\" w ]" );
+	
+	// set undefined parameters to defaults
+	for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
+	{
+		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", lmm_options[ i ], lmm_options[ i ] );
+		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ i ], lmm_options[ i ], lmm_defaults[ i ] );
+		cmd( "puts $f \"$%s\"", lmm_options[ i ] );
+	}
+		
+	cmd( "close $f" );
+}
+
+
+/*********************************
+ LOAD_MODEL_INFO
+ *********************************/
+bool load_model_info( const char *path )
+{
+	cmd( "set choice [ file exists \"%s/$MODEL_INFO\" ]", path );
+	
+	if ( choice == 1 )							// file exists?
+	{
+		cmd( "set f [ open \"%s/$MODEL_INFO\" r ]", path );
+		
+		for ( int i = 0; i < MODEL_INFO_NUM; ++i )	// read parameters, returning 1 if incomplete
+		{
+			cmd( "gets $f %s", model_info[ i ] );
+			cmd( "if { $%s == \"\" } { set choice 0 }", model_info[ i ] );
+		}
+		
+		cmd( "close $f" );
+	}
+	
+	return choice;
+}
+ 
+
+/*********************************
+ UPDATE_MODEL_INFO
+ *********************************/
+void update_model_info( void )
+{
+	// set undefined parameters to defaults
+	for ( int i = 0; i < MODEL_INFO_NUM; ++i )
+	{
+		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
+		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
+	}
+	
+	// save info to disk
+	cmd( "set f [ open \"$modelDir/$MODEL_INFO\" w ]" );
+	
+	// set undefined parameters to defaults before saving
+	for ( int i = 0; i < MODEL_INFO_NUM; ++i )
+	{
+		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
+		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
+		cmd( "puts $f \"$%s\"", model_info[ i ] );
+	}
+		
+	cmd( "close $f" );
+}
+
+
+/*********************************
  MAKE_MAKEFILE
  *********************************/
 void make_makefile( bool nw )
@@ -6375,11 +6409,11 @@ void make_makefile( bool nw )
 
 	check_option_files( );
 
-	cmd( "set f [ open \"$modeldir/model_options.txt\" r ]" );
+	cmd( "set f [ open \"$modelDir/$MODEL_OPTIONS\" r ]" );
 	cmd( "set a [ read -nonewline $f ]" );
 	cmd( "close $f" );
 
-	cmd( "set f [ open \"$RootLsd/$LsdSrc/system_options.txt\" r ]" );
+	cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" r ]" );
 	cmd( "set d [ read -nonewline $f ]" );
 	cmd( "close $f" );
 	
@@ -6395,7 +6429,7 @@ void make_makefile( bool nw )
 	cmd( "close $f" );
 
 	cmd( "set c \"# Model compilation options\\n$a\\n\\n# System compilation options\\n$d\\nLSDROOT=$RootLsd\\n\\n# Body of makefile%s (from src/makefile_base%s.txt)\\n$b\"", suffix, suffix );
-	cmd( "set f [ open \"$modeldir/makefile%s\" w ]", suffix );
+	cmd( "set f [ open \"$modelDir/makefile%s\" w ]", suffix );
 	cmd( "puts -nonewline $f $c" );
 	cmd( "close $f" );
 }
@@ -6411,20 +6445,20 @@ void check_option_files( bool sys )
 	
 	if ( ! sys )
 	{
-		cmd( "set exists [ file exists \"$modeldir/model_options.txt\" ]" );
+		cmd( "set exists [ file exists \"$modelDir/$MODEL_OPTIONS\" ]" );
 		
 		if ( ! exists )
 		{
-			cmd( "set dir [ glob -nocomplain \"$modeldir/fun_*.cpp\" ]" );
+			cmd( "set dir [ glob -nocomplain \"$modelDir/fun_*.cpp\" ]" );
 			cmd( "if { $dir != \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
 			cmd( "set a \"TARGET=$DefaultExe\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=-O3 -ggdb3\\nSWITCH_CC_LNK=\"" );
-			cmd( "set f [ open \"$modeldir/model_options.txt\" w ]" );
+			cmd( "set f [ open \"$modelDir/$MODEL_OPTIONS\" w ]" );
 			cmd( "puts -nonewline $f $a" );
 			cmd( "close $f" );
 		}
 	}
 	
-	cmd( "set exists [ file exists \"$RootLsd/$LsdSrc/system_options.txt\"]" );
+	cmd( "set exists [ file exists \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\"]" );
 	if ( ! exists )
 	{
 		cmd( "if [ string equal $tcl_platform(platform) windows ] { \
@@ -6440,7 +6474,7 @@ void check_option_files( bool sys )
 #else
 		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_osx.txt\" }" );
 #endif
-		cmd( "set f [ open \"$RootLsd/$LsdSrc/system_options.txt\" w ]" );
+		cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
 		cmd( "set f1 [ open \"$RootLsd/$LsdSrc/$sysfile\" r ]" );
 		cmd( "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"" );
 		cmd( "puts -nonewline $f [ read $f1 ]" );
@@ -6461,7 +6495,7 @@ char *get_fun_name( char *str, bool nw )
 	
 	make_makefile( nw );
 
-	cmd( "set fapp [ file nativename \"$modeldir/makefile%s\" ]", nw ? "NW" : "" );
+	cmd( "set fapp [ file nativename \"$modelDir/makefile%s\" ]", nw ? "NW" : "" );
 	s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
   
 	f = fopen( s, "r" );
@@ -6497,7 +6531,7 @@ bool use_eigen( void )
 	char *path, *fun_file, full_name[ MAX_PATH_LENGTH ], buffer[ 2 * MAX_PATH_LENGTH ];
 	FILE *f;
 	
-	path = ( char * ) Tcl_GetVar( inter, "modeldir", 0 );
+	path = ( char * ) Tcl_GetVar( inter, "modelDir", 0 );
 	fun_file = get_fun_name( buffer, true );
 	
 	if( path == NULL || fun_file == NULL )
@@ -6533,9 +6567,9 @@ bool compile_run( bool run, bool nw )
 	Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
 	
 	cmd( "destroytop .mm" );	// close any open compilation results window
-	cmd( "cd \"$modeldir\"" );
+	cmd( "cd \"$modelDir\"" );
 	
-	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
+	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
 		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -6552,7 +6586,7 @@ bool compile_run( bool run, bool nw )
 	s = get_fun_name( str, nw );
 	if ( s == NULL || ! strcmp( s, "" ) || ( f = fopen( s, "r" ) ) == NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Equation file not found\" -detail \"File '%s' is no longer available in directory '$modeldir'.\" ", s );
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Equation file not found\" -detail \"File '%s' is no longer available in directory '$modelDir'.\" ", s );
 		goto end;
 	}
 	else
@@ -6561,7 +6595,7 @@ bool compile_run( bool run, bool nw )
 	cmd( "set fname \"%s\"", s );
 	
 	// get target exec name
-	cmd( "set fapp [ file nativename \"$modeldir/makefile%s\" ]", nw ? "NW" : "" );
+	cmd( "set fapp [ file nativename \"$modelDir/makefile%s\" ]", nw ? "NW" : "" );
 	s = ( char * )Tcl_GetVar( inter, "fapp", 0 );
 	f = fopen( s, "r" );
 	fscanf( f, "%999s", str );
@@ -6639,12 +6673,12 @@ bool compile_run( bool run, bool nw )
 	else
 	{
 		if ( nw )
-			cmd( "tk_messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n$modeldir\n\nto another computer (including the subdirectory 'src'). After the copy, use the following steps to use the model program in the new computer:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\n\nSee LSD documentation for further details.\"" );
+			cmd( "tk_messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n$modelDir\n\nto another computer (including the subdirectory 'src'). After the copy, use the following steps to use the model program in the new computer:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\n\nSee LSD documentation for further details.\"" );
 		
 		if ( run )							// no problem - execute
 		{
 			// create the element list file in background
-			cmd( "after 0 { create_elem_file $modeldir }; update" );
+			cmd( "after 0 { create_elem_file $modelDir }; update" );
 
 #ifdef MAC_PKG
 			cmd( "if [ string equal $tcl_platform(platform) windows ] { set res 3 } { if [ string equal $tcl_platform(os) Darwin ] { set res 2 } { set res 1 } }" );
@@ -6815,7 +6849,7 @@ void create_compresult_window( bool nw )
 
 	cmd( "showtop .mm lefttoW no no no" );
 
-	cmd( "if [ file exists \"$modeldir/makemessage.txt\" ] { set file [open \"$modeldir/makemessage.txt\"]; .mm.t.t insert end [read $file]; close $file } { .mm.t.t insert end \"(no compilation errors)\" }" );
+	cmd( "if [ file exists \"$modelDir/makemessage.txt\" ] { set file [open \"$modelDir/makemessage.txt\"]; .mm.t.t insert end [read $file]; close $file } { .mm.t.t insert end \"(no compilation errors)\" }" );
 	cmd( ".mm.t.t mark set insert \"1.0\"" );
 	cmd( ".mm.b.ferr invoke" );
 	

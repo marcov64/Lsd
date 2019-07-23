@@ -594,7 +594,7 @@ while ( true )
 			Tcl_UnlinkVar( inter, "nv" );
 			Tcl_UnlinkVar( inter, "avgSmpl" );
 
-			cmd( "catch { set a [ glob -nocomplain plotxy_* ] }" ); //remove directories
+			cmd( "catch { set a [ glob -nocomplain plotxy_* ] }" ); // remove directories
 			cmd( "foreach b $a { catch { file delete -force $b } }" );
 			return;
 		  

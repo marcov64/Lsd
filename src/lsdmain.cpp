@@ -72,7 +72,7 @@ char *alt_path = NULL;		// alternative output path
 char *eq_file = NULL;		// equation file content
 char *exec_file = NULL;		// name of executable file
 char *exec_path = NULL;		// path of executable file
-char *lsdroot = NULL;		// path of LSD root directory
+char *rootLsd = NULL;		// path of LSD root directory
 char *path = NULL;			// path of current configuration
 char *sens_file = NULL;		// current sensitivity analysis file
 char *simul_name = NULL;	// name of current simulation configuration
@@ -118,7 +118,7 @@ int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
 lsdstack *stacklog = NULL;	// LSD stack
-map < string, profile > prof;	// set of saved profiling times
+map < string, profile > prof;// set of saved profiling times
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
 object *currObj = NULL;		// pointer to current object in browser
 object *root = NULL;		// LSD root object
@@ -127,6 +127,12 @@ o_setT obj_list;			// set with all existing LSD objects
 sense *rsense = NULL;		// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
 FILE *log_file = NULL;		// log file, if any
+
+// constant string arrays
+const char *lmm_options[ LMM_OPTIONS_NUM ] = { "sysTerm", "HtmlBrowser", "fonttype", "wish", "LsdSrc", "dim_character", "tabsize", "wrap", "shigh", "autoHide", "showFileCmds", "LsdNew", "DbgExe", "restoreWin", "lmmGeom" };
+const char *lmm_defaults[ LMM_OPTIONS_NUM ] = { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", "$DefaultWish", "src", "$DefaultFontSize", "2", "1", "2", "0", "0", "Work", "$DefaultDbgExe", "1", "#" };
+const char *model_info[ MODEL_INFO_NUM ] = { "modelName", "modelVersion", "modelDate", "lsdGeom", "logGeom", "strGeom", "daGeom", "debGeom", "latGeom" };
+const char *model_defaults[ MODEL_INFO_NUM ] = { "(no name)", "1.0", "[ clock format [ clock seconds ] -format \"$DATE_FMT\" ]", "#", "#", "#", "#", "#", "#" };
 
 #ifdef CPP11
 eq_mapT eq_map;				// fast equation look-up map
@@ -381,9 +387,23 @@ int lsdmain( int argn, char **argv )
 	if ( choice )
 	{
 		log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
-		cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\n\nLSD is aborting now.\"" );
+		cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the \\src directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
 		myexit( 8 ); 
 	}
+
+	// set system defaults in tcl
+	cmd( "set LMM_OPTIONS \"%s\"", LMM_OPTIONS );
+	cmd( "set SYSTEM_OPTIONS \"%s\"", SYSTEM_OPTIONS );
+	cmd( "set MODEL_OPTIONS \"%s\"", MODEL_OPTIONS );
+	cmd( "set GROUP_INFO \"%s\"", GROUP_INFO );
+	cmd( "set MODEL_INFO \"%s\"", MODEL_INFO );
+	cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
+	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
+#ifdef MAC_PKG
+	cmd( "set MAC_PKG 1" );
+#else
+	cmd( "set MAC_PKG 0" );
+#endif
 
 	// try to use exec_path to change to the model directory
 	if ( strlen( exec_path ) == 0 || ! strcmp( exec_path, "/" ) )
@@ -401,10 +421,10 @@ int lsdmain( int argn, char **argv )
 	cmd( "set path [ file normalize \"%s\" ]", exec_path );
 	
 	// check if directory is ok and if executable is inside a macOS package
-	cmd( "if [ file exists \"$path/modelinfo.txt\" ] { \
+	cmd( "if [ file exists \"$path/$MODEL_INFO\" ] { \
 			cd \"$path\" \
 		} { \
-			if [ file exists \"$path/../../../modelinfo.txt\" ] { \
+			if [ file exists \"$path/../../../$MODEL_INFO\" ] { \
 				cd \"$path/../../..\"; \
 				set path \"[ pwd ]\" \
 			} { \
@@ -451,37 +471,17 @@ int lsdmain( int argn, char **argv )
 	}
 	cmd( "set env(LSDROOT) $RootLsd" );
 	str = ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
-	lsdroot = new char[ strlen( str ) + 1 ];
-	strcpy( lsdroot, str );
-	len = strlen( lsdroot );
+	rootLsd = new char[ strlen( str ) + 1 ];
+	strcpy( rootLsd, str );
+	len = strlen( rootLsd );
 	for ( i = 0; i < len; ++i )
-		if ( lsdroot[ i ] == '\\' )
-			lsdroot[ i ] = '/';
-	cmd( "set RootLsd \"%s\"", lsdroot );
+		if ( rootLsd[ i ] == '\\' )
+			rootLsd[ i ] = '/';
+	cmd( "set RootLsd \"%s\"", rootLsd );
 
-	cmd( "set choice [ file exist \"$RootLsd/lmm_options.txt\" ]" );
-	if ( choice == 1 )
-	{
-		cmd( "set f [open \"$RootLsd/lmm_options.txt\" r]" );
-		cmd( "gets $f sysTerm" );
-		cmd( "gets $f HtmlBrowser" );
-		cmd( "gets $f fonttype" );
-		cmd( "gets $f wish" );
-		cmd( "gets $f LsdSrc" );
-		cmd( "gets $f dim_character" );
-		cmd( "gets $f tabsize" );
-		cmd( "close $f" );
-	}
-	else
-	{
-		cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the 'Options' in menu 'File'.\"" );
-		
-		cmd( "set LsdSrc src" );
-		cmd( "set tabsize 2" );
-	}
-		
-	i = choice;
-	
+	// load/check LMM configuration file
+	i = load_lmm_options( );
+
 	// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 	choice = 0;
 
@@ -507,8 +507,9 @@ int lsdmain( int argn, char **argv )
 		myexit( 200 + choice );
 	}
 
-	// create a Tcl command that calls the C discard_change function before killing LSD
+	// create a Tcl command that calls the C discard_change/update_model_info functions
 	Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
+	Tcl_CreateCommand( inter, "update_model_info", Tcl_update_model_info, NULL, NULL );
 
 	// create Tcl commands that get and set LSD object/variable properties
 	Tcl_CreateCommand( inter, "get_obj_conf", Tcl_get_obj_conf, NULL, NULL );
@@ -525,20 +526,15 @@ int lsdmain( int argn, char **argv )
 	// create Tcl command to upload series data
 	Tcl_CreateObjCommand( inter, "upload_series", Tcl_upload_series, NULL, NULL );
 
-	// set platform-specific variables 
+	// fix non-existent or old options file for new options
 	if ( i == 0 )
-	{
-		cmd( "if [ string equal $tcl_platform(platform) unix ] { set wish $wishLinux; set sysTerm $sysTermLinux; set HtmlBrowser $browserLinux; set fonttype $fontLinux; set dim_character $fontSizeLinux }" );
-#ifdef MAC_PKG
-		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish $wishMacTk86; set sysTerm $sysTermMac; set HtmlBrowser $browserMac; set fonttype $fontMac; set dim_character $fontSizeMac }" );
-#else
-		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish $wishMacTk85; set sysTerm $sysTermMac; set HtmlBrowser $browserMac; set fonttype $fontMac; set dim_character $fontSizeMac }" );
-#endif
-		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set wish $wishWinTk85; set sysTerm $sysTermWindows; set HtmlBrowser $browserWindows; set fonttype $fontWindows; set dim_character $fontSizeWindows }" );
-		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set wish $wishWinTk86; set sysTerm $sysTermWindows; set HtmlBrowser $browserWindows; set fonttype $fontWindows; set dim_character $fontSizeWindows }" );
-	}
+		update_lmm_options(  ); 		// update config file
 
-	cmd( "if [ string equal $tcl_platform(platform) windows ] { set small_character [ expr $dim_character - $deltaSizeWindows ] } { if [ string equal $tcl_platform(os) Darwin ] { set small_character [ expr $dim_character - $deltaSizeMac ] } { set small_character [ expr $dim_character - $deltaSizeLinux ] } }" );
+	// load/check model configuration file
+	i = load_model_info( );
+	
+	// Tcl global variables
+	cmd( "set small_character [ expr $dim_character - $deltaSize ]" );
 	cmd( "set font_normal [ list \"$fonttype\" $dim_character ]" );
 	cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
 	cmd( "set gpterm $gnuplotTerm" );
@@ -555,8 +551,9 @@ int lsdmain( int argn, char **argv )
 	create_logwindow( );
 	cmd( "init_canvas_colors" );
 
+	// load/check model configuration files
 	read_eq_filename( equation_name );
-			
+
 	struct_file = new char[ strlen( simul_name ) + 5 ];
 	sprintf( struct_file, "%s.lsd", simul_name );
 
@@ -564,6 +561,10 @@ int lsdmain( int argn, char **argv )
 	strcpy( lsd_eq_file, "" );
 	sprintf( name_rep, "report_%s.html", simul_name );
 
+	// fix model configuration file
+	if ( i == 0 )
+		update_model_info( );
+	
 	grandTotal = true;				// not in parallel mode: use .tot headers
 #endif
 
@@ -618,7 +619,7 @@ int lsdmain( int argn, char **argv )
 	delete [ ] struct_file;
 	delete [ ] path;
 	delete [ ] simul_name;
-	delete [ ] lsdroot;
+	delete [ ] rootLsd;
 
 	return 0;
 }
@@ -906,12 +907,6 @@ void run( void )
 						cmd( ".log.but.pause conf -text Pause" );
 					}
 					break;
-
-				case 35:		// error exit
-					log_tcl_error( "Unexpected termination", "Please try again" );
-					cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Unexpected termination\" -detail \"Please try again.\"" );
-					myexit( 12 );
-				break;
 
 				default:
 				break;
@@ -1245,7 +1240,7 @@ void create_logwindow( void )
 	if ( ! tk_ok )
 		myexit( 7 );
 
-	cmd( "newtop .log \"LSD Log\" { if { [ discard_change ] == \"ok\" } { exit } { } } \"\"" );
+	cmd( "newtop .log \"LSD Log\" { if [ string equal [ discard_change ] ok ] { exit } } \"\"" );
 
 	cmd( "set w .log.text" );
 	cmd( "frame $w" );
@@ -1556,6 +1551,134 @@ bool search_parallel( object *r )
 				return true;
 
 	return false;
+}
+
+
+/*********************************
+ LOAD_LMM_OPTIONS
+ *********************************/
+bool load_lmm_options( void )
+{
+	cmd( "set choice [ file exists \"$RootLsd/$LMM_OPTIONS\" ]" );
+	
+	if ( choice == 1 )								// file exists?
+	{
+		cmd( "set f [ open \"$RootLsd/$LMM_OPTIONS\" r ]" );
+		
+		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )	// read parameters, returning 1 if incomplete
+		{
+			cmd( "gets $f %s", lmm_options[ i ] );
+			cmd( "if { $%s == \"\" } { set choice 0 }", lmm_options[ i ] );
+		}
+		
+		cmd( "close $f" );
+	}
+	else
+	{
+		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
+			cmd( "set %s \"\"", lmm_options[ i ] );
+	
+		// fix now missing source directory name
+		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ 4 ], lmm_options[ 4 ], lmm_defaults[ 4 ] );
+	}
+	
+	return choice;
+}
+ 
+
+/*********************************
+ UPDATE_LMM_OPTIONS
+ *********************************/
+void update_lmm_options( void )
+{
+	// save options to disk
+	cmd( "set f [ open \"$RootLsd/$LMM_OPTIONS\" w ]" );
+	
+	// set undefined parameters to defaults
+	for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
+	{
+		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", lmm_options[ i ], lmm_options[ i ] );
+		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ i ], lmm_options[ i ], lmm_defaults[ i ] );
+		cmd( "puts $f \"$%s\"", lmm_options[ i ] );
+	}
+		
+	cmd( "close $f" );
+}
+
+
+/*********************************
+ LOAD_MODEL_INFO
+ *********************************/
+bool load_model_info( void )
+{
+	cmd( "set choice [ file exists \"%s/$MODEL_INFO\" ]", exec_path );
+	
+	if ( choice == 1 )								// file exists?
+	{
+		cmd( "set f [ open \"%s/$MODEL_INFO\" r ]", exec_path );
+		
+		for ( int i = 0; i < MODEL_INFO_NUM; ++i )	// read parameters, returning 1 if incomplete
+		{
+			cmd( "gets $f %s", model_info[ i ] );
+			cmd( "if { $%s == \"\" } { set choice 0 }", model_info[ i ] );
+		}
+		
+		cmd( "close $f" );
+	}
+	
+	return choice;
+}
+ 
+
+/*********************************
+ UPDATE_MODEL_INFO
+ *********************************/
+const char *winToSave[ 6 ] = { "lsd", "log", "str", "da", "deb", "lat" };
+
+void update_model_info( bool geomOnly )
+{
+	for ( int i = 0; i < 6; ++i )
+	{
+		cmd( "set done 1" );
+		cmd( "if { $::restoreWin } { set curGeom [ geomtosave .%s ]; if { $curGeom != \"\" && ! [ string equal $::%sGeom $curGeom ] } { set done 0 } }",  winToSave[ i ],  winToSave[ i ] );
+		
+		if ( atoi( Tcl_GetVar( inter, "done", 0 ) ) )	// nothing to save?
+			continue;
+
+		cmd( "set ::%sGeom $curGeom", winToSave[ i ] );
+	}
+	
+	if ( geomOnly )
+		return;
+	
+	// ensure model name is set
+	cmd( "if { ! [ info exists modelName ] } { set modelName \"\" }" );
+	cmd( "if { $modelName == \"\" } { regsub \"fun_\" \"%s\" \"\" modelName; regsub \".cpp\" \"$modelName\" \"\" modelName }", equation_name );
+	
+	// save info to disk
+	cmd( "set f [ open \"%s/$MODEL_INFO\" w ]", exec_path );
+	
+	// set undefined parameters to defaults before saving
+	for ( int i = 0; i < MODEL_INFO_NUM; ++i )
+	{
+		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
+		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
+		cmd( "puts $f \"$%s\"", model_info[ i ] );
+	}
+		
+	cmd( "close $f" );
+}
+
+
+/****************************************************
+TCL_UPDATE_MODEL_INFO
+Entry point function for access from the Tcl interpreter
+****************************************************/
+int Tcl_update_model_info( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+{
+	update_model_info( true );
+	Tcl_SetResult( inter, ( char * ) "ok", TCL_VOLATILE );
+	return TCL_OK;
 }
 
 

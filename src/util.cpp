@@ -1380,12 +1380,12 @@ void read_eq_filename( char *s )
 	char lab[ MAX_PATH_LENGTH ];
 	FILE *f;
 
-	sprintf( lab, "%s/model_options.txt", exec_path );
+	sprintf( lab, "%s/%s", exec_path, MODEL_OPTIONS );
 	f = fopen( lab, "r" );
 	
 	if ( f == NULL )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'model_options.txt' not found\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File not found\" -detail \"File '$MODEL_OPTIONS' missing, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
 		return;
 	}
 	
@@ -1394,7 +1394,7 @@ void read_eq_filename( char *s )
 	fclose( f );
 	if ( strncmp( lab, "FUN=", 4 ) != 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -title -title Error -icon error -message \"File 'model_options.txt' corrupted\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
+		cmd( "tk_messageBox -parent . -type ok -title -title Error -icon error -message \"File corrupted\" -detail \"File '$MODEL_OPTIONS' has invalid contents, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
 		return;
 	}
 
@@ -1819,7 +1819,7 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 	dimW = pixW / columns;
 
 	// create the window with the lattice, roughly 600 pixels as maximum dimension
-	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
+	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" { destroytop .lat } \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
 
 	cmd( "bind .lat <Button-2> { .lat.b.ok invoke }" );
 	cmd( "bind .lat <Button-3> { event generate .lat <Button-2> -x %%x -y %%y }" );

@@ -13,7 +13,7 @@
 # SHOWMODEL.TCL
 # Tcl scripts used to browse in the LSD models .
 #
-# The script starts from the LSD root and reads the modelinfo.txt or groupinfo.txt in all
+# The script starts from the LSD root and reads the model info or group info files in all
 # the descending directories. Users can browse through the model, create new models,
 # create new groups, or delete them.
 #
@@ -24,17 +24,18 @@
 #*************************************************************
 
 set rootname "Root"
-set modelgroup "$rootname"
+set modelGroup "$rootname"
 set result 0
 set memory 0
 set ltip ""
+set months [ list January February March April May June July August September October November December ]	
 
 
 #************************************************
 # SHOWMODEL
 #************************************************
 proc showmodel pippo {
-	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelgroup upSymbol groupSymbol RootLsd memory ltip fonttype small_character bRlf ovBrlf
+	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelGroup upSymbol groupSymbol RootLsd memory ltip fonttype small_character bRlf ovBrlf GROUP_INFO MODEL_INFO DESCRIPTION
 
 	unset -nocomplain lmn lver lmd ldn lrn lbn group
 	lappend lmn
@@ -60,7 +61,7 @@ proc showmodel pippo {
 		$m add command -label "Select Model/Group" -underline 0 -accelerator Enter -command {
 			set result [ .l.l.l curselection ]
 			if { [ lindex $group $result ] == 1 } { 
-				set modelgroup "[ lindex $lmn $result ]"
+				set modelGroup "[ lindex $lmn $result ]"
 				showmodel [ lindex $ldn $result ]
 			} else { 
 				set choiceSM 1
@@ -251,7 +252,7 @@ proc showmodel pippo {
 		showtop .l centerS
 	}
 
-	.l.l.tit.n conf -text [ lindex [ split "$modelgroup" "/" ] end ]
+	.l.l.tit.n conf -text [ lindex [ split "$modelGroup" "/" ] end ]
 
 	set curdir [ pwd ]
 	if { ! [ file isdirectory "$pippo" ] } {
@@ -262,7 +263,7 @@ proc showmodel pippo {
 	cd "$pippo"
 	if [ string compare -nocase "$pippo" "$RootLsd" ] {
 		.l.l.l insert end "$upSymbol"
-		set upgroup "[ file dirname "$modelgroup" ]"
+		set upgroup "[ file dirname "$modelGroup" ]"
 		if [ string equal "$upgroup" "." ] {
 			set upgroup "$rootname"
 		}
@@ -270,7 +271,7 @@ proc showmodel pippo {
 		lappend group 1
 		lappend lmd "Return to group: $upgroup"
 		lappend lrn "[ pwd ]"
-		lappend lbn "$modelgroup"
+		lappend lbn "$modelGroup"
 		lappend ldn "[ file dirname "$pippo" ]"
 		lappend lmn "$upgroup"
 	}
@@ -279,21 +280,21 @@ proc showmodel pippo {
 
 	# list groups
 	foreach i $dir {
-		if { ! [ file exists "$i/modelinfo.txt" ] && [ file exists "$i/groupinfo.txt" ] } {
-			set f [ open "$i/groupinfo.txt" r ]
+		if { ! [ file exists "$i/$MODEL_INFO" ] && [ file exists "$i/$GROUP_INFO" ] } {
+			set f [ open "$i/$GROUP_INFO" r ]
 			set app "[ gets $f ]"
 			close $f
-			if [ string equal "$modelgroup" "$rootname" ] {
+			if [ string equal "$modelGroup" "$rootname" ] {
 				lappend lmn "$app"
 			} else {
-				lappend lmn "$modelgroup/$app"
+				lappend lmn "$modelGroup/$app"
 			}
 			lappend lver -1
 			lappend ldn "$pippo/$i"
 			lappend lrn "[ pwd ]"
-			lappend lbn "$modelgroup"
-			if [ file exists "$i/description.txt" ] {
-				set f [ open "$i/description.txt" ]
+			lappend lbn "$modelGroup"
+			if [ file exists "$i/$DESCRIPTION" ] {
+				set f [ open "$i/$DESCRIPTION" ]
 				lappend lmd "[ read -nonewline $f ]"
 				close $f
 			} else {
@@ -307,25 +308,29 @@ proc showmodel pippo {
 
 	# list files
 	foreach i $dir {
-		if [ file exists "$i/modelinfo.txt" ] {
-			set f [ open "$i/modelinfo.txt" r ]
+		if [ file exists "$i/$MODEL_INFO" ] {
+			fix_info $i
+			
+			set f [ open "$i/$MODEL_INFO" r ]
 			set app1 "[ gets $f ]"
 			set app2 "[ gets $f ]"
 			set app3 "[ gets $f ]"
 			close $f
-			fix_info $i $app1 $app2 $app3
+			
 			lappend lmn "$app1"
 			lappend lver "$app2"
 			lappend ldn "$pippo/$i"
 			lappend lrn "[ pwd ]"
-			lappend lbn "$modelgroup"
-			if [ file exists "$i/description.txt" ] {
-				set f [ open "$i/description.txt" ]
+			lappend lbn "$modelGroup"
+			
+			if [ file exists "$i/$DESCRIPTION" ] {
+				set f [ open "$i/$DESCRIPTION" ]
 				lappend lmd "[ read -nonewline $f ]"
 				close $f
 			} else {
 				lappend lmd "Model: $app1\nin directory: $pippo/$i\n(description not available)"
 			}
+			
 			lappend group 0
 			.l.l.l insert end "$app1 (ver. $app2)"				 
 			.l.l.l itemconf end -fg blue
@@ -368,7 +373,7 @@ proc mcopy i {
 # Remove a model/group, placing it in a trashbin
 #************************************************
 proc mdelete i {
-	global lrn ldn lmn group RootLsd memory
+	global lrn ldn lmn group RootLsd memory  GROUP_INFO DESCRIPTION
 
 	set memory 0
 	.l.m.edit entryconf 2 -state disabled
@@ -390,18 +395,22 @@ proc mdelete i {
 
 		if { $answer == "yes" } {
 			set modelDir [ string range [ lindex $ldn $i ] 0 [ expr [ string last / [ lindex $ldn $i ] ] - 1 ] ] 
-			file mkdir $RootLsd/trashbin
-			set f [ open $RootLsd/trashbin/groupinfo.txt w ]
+			file mkdir "$RootLsd/trashbin"
+			set f [ open "$RootLsd/trashbin/$GROUP_INFO" w ]
 			puts $f "Deleted Models"
 			close $f
-			set f [ open $RootLsd/trashbin/description.txt w ]
+			set f [ open "$RootLsd/trashbin/$DESCRIPTION" w ]
 			puts $f "Folder containing deleted models.\n"
 			close $f
 			set modelName [ string range [ lindex $ldn $i ] [ expr [ string last / [ lindex $ldn $i ] ] + 1 ] end ]
-			if { [ file exists $RootLsd/trashbin/$modelName ] } {
-				file delete -force $RootLsd/trashbin/$modelName
+			if { [ file exists "$RootLsd/trashbin/$modelName" ] } {
+				file delete -force "$RootLsd/trashbin/$modelName"
 			}
-			file rename -force [ lindex $ldn $i ] $RootLsd/trashbin/$modelName
+			
+			if { [ catch { file rename -force [ lindex $ldn $i ] "$RootLsd/trashbin/$modelName" } ] } {
+				tk_messageBox -parent .l -title Error -icon error -type ok -message "Delete error" -detail "Directory [ lindex $ldn $i ] cannot be deleted now.\nYou may try again later."
+			}
+			
 			showmodel [ lindex $lrn $i ]
 		}
 	}
@@ -413,7 +422,7 @@ proc mdelete i {
 # Edit the model/group name and description
 #************************************************
 proc medit i {
-	global lrn ldn lmn group lmd result memory fonttype small_character
+	global lrn ldn lmn group lmd result memory fonttype small_character GROUP_INFO MODEL_INFO DESCRIPTION
 
 	set memory 0
 	.l.m.edit entryconf 2 -state disabled
@@ -455,13 +464,13 @@ proc medit i {
 	okcancel .l.e b { 
 		set app "[ .l.e.n.n get ]"
 		if { [ lindex $group $result ] == 1 } {
-			set f [ open "[ lindex $ldn $result ]/groupinfo.txt" w ]
+			set f [ open "[ lindex $ldn $result ]/$GROUP_INFO" w ]
 		} else {
-			set f [ open "[ lindex $ldn $result ]/modelinfo.txt" w ]
+			set f [ open "[ lindex $ldn $result ]/$MODEL_INFO" w ]
 		}
 		puts -nonewline $f "$app"
 		close $f
-		set f [ open "[ lindex $ldn $result ]/description.txt" w]
+		set f [ open "[ lindex $ldn $result ]/$DESCRIPTION" w ]
 		puts -nonewline $f [ .l.e.t.t.text get 0.0 end ]
 		close $f
 		destroytop .l.e
@@ -487,7 +496,7 @@ proc medit i {
 # Paste a previously copied model/group
 #************************************************
 proc mpaste i {
-	global copydir copyver copylabel copydscr lrn modelgroup lmn lver lmd choiceSM fonttype small_character
+	global copydir copyver copylabel copydscr lrn modelGroup lmn lver lmd choiceSM fonttype small_character MODEL_INFO DESCRIPTION
 
 	set pastedir [ lindex $lrn $i ]
 
@@ -568,10 +577,10 @@ proc mpaste i {
 				file mkdir $pastedir/$appd
 				set copylist [ glob -nocomplain $copydir/* ]
 				foreach a $copylist { catch [ file copy -force "$a" "$pastedir/$appd" ] }
-				set f [ open "$pastedir/$appd/description.txt" w ]
+				set f [ open "$pastedir/$appd/$DESCRIPTION" w ]
 				puts -nonewline $f "$appdsc"
 				close $f
-				set f [ open "$pastedir/$appd/modelinfo.txt" w ]
+				set f [ open "$pastedir/$appd/$MODEL_INFO" w ]
 				puts $f "$appl"
 				puts $f "$appv"
 				set frmt "%d %B, %Y"
@@ -589,24 +598,80 @@ proc mpaste i {
 
 #************************************************
 # FIX_INFO
-# Fix invalid information in modelinfo.txt
+# Fix invalid information in model info file
 #************************************************
-proc fix_info { fi l1 l2 l3 } {
-	if { [ string length $l3 ] != 0 } {
-		set date [ split $l3 ]
-		set day [ lindex $date 0 ]
-		if { [ string is integer $day ] && ( $day < 1 || $day > 31 ) } {
-			set newDate 1
-			catch { set newDate [ clock format $day -format "%d" ] }
-			set len [ llength $date ]
-			for { set i 1 } { $i < $len } { incr i } {
-				set newDate "$newDate [ lindex $date $i ]"
-			}
-			set f [ open "$fi/modelinfo.txt" w ]
-			puts $f $l1
-			puts $f $l2
-			puts $f $newDate
-			close $f
+proc fix_info { fi } {
+	global MODEL_INFO MODEL_INFO_NUM DATE_FMT
+	
+	set f [ open "$fi/$MODEL_INFO" r ]
+	set l1 "[ gets $f ]"
+	set l2 "[ gets $f ]"
+	set l3 "[ gets $f ]"
+	close $f
+
+	if { $l1 == "" } {
+		set newName "$fi"
+		set fix 1
+	} else {
+		set newName $l1
+		set fix 0
+	}
+	
+	if { $l2 == "" } {
+		set newVer "1.0"
+		set fix 1
+	} else {
+		set newVer $l2
+	}
+	
+	if { $l3 == "" } {
+		set newDate [ clock format [ clock seconds ] -format "$DATE_FMT" ]
+		set fix 1
+	} else {
+		if { ! [ check_date $l3 ] } {
+			set newDate [ clock format [ clock seconds ] -format "$DATE_FMT" ]
+			set fix 1
+		} else {
+			set newDate $l3
 		}
 	}
+	
+	if { $fix } {
+		set f [ open "$fi/$MODEL_INFO" w ]
+		puts $f $newName
+		puts $f $newVer
+		puts $f $newDate
+		
+		for { set i 3 } { i < $MODEL_INFO_NUM } { incr i } {
+			puts $f "#"
+		}
+		
+		close $f
+	}
+}
+
+
+#************************************************
+# CHECK_DATE
+# Check date format (dd M, yyyy)
+#************************************************
+proc check_date { str } {
+	global months
+
+	regsub -all "," $str "" date
+	set date [ split $date ]
+	
+	if { [ llength $date ] < 3 } {
+		return 0
+	}
+	
+	set day [ lindex $date 0 ]
+	set month [ lindex $date 1 ]
+	set year [ lindex $date 2 ]
+	
+	if { ! [ string is integer -strict $day ] || $day < 1 || $day > 31 || [ lsearch $months $month ] < 0 || ! [ string is integer -strict $year ] || $year < 1980 || $year > 2100 } {
+		return 0
+	}
+	
+	return 1
 }

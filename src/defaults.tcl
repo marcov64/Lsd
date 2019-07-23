@@ -117,6 +117,13 @@ set corrYlinux	-55
 set corrXwindows 0
 set corrYwindows 0
 
+# OS specific default model executable name
+set exeLinux "lsd"
+set exeMacPkg "LSD"
+set exeMacOSX "lsd"
+set exeWin32 "lsd"
+set exeWin64 "lsd"
+
 # OS specific default system terminal
 set sysTermMac		"Terminal"	; # "Terminal", "xterm"
 set sysTermLinux	"xterm"		; # "gnome-terminal", "xterm", "uxterm"
@@ -156,8 +163,72 @@ set gnuplotGrid3D	"60,60,3"				;
 set gnuplotOptions	"set ticslevel 0.0"		;
 
 
-#************************************************
-# DEFAULTS_LOADED
-# Indicate defaults are loaded
-#************************************************
-proc defaults_loaded { } { }
+# set platform-specific defaults
+if { [ string equal $tcl_platform(platform) unix ] } { 
+	set CurPlatform linux
+	set DefaultExe $exeLinux
+	set DefaultMakeExe $makeLinux
+	set DefaultWish $wishLinux
+	set DefaultSysTerm $sysTermLinux
+	set DefaultDbgExe $dbgLinux
+	set DefaultHtmlBrowser $browserLinux
+	set DefaultFont $fontLinux
+	set DefaultFontSize $fontSizeLinux
+	set deltaSize $deltaSizeLinux
+}
+
+if { [ string equal $tcl_platform(os) Darwin ] && $MAC_PKG } {
+	set CurPlatform mac
+	set DefaultExe $exeMacPkg
+	set DefaultMakeExe $makeMac
+	set DefaultWish $wishMacTk86
+	set DefaultSysTerm $sysTermMac
+	set DefaultDbgExe $dbgMac
+	set DefaultHtmlBrowser $browserMac
+	set DefaultFont $fontMac
+	set DefaultFontSize $fontSizeMac
+	set deltaSize $deltaSizeMac
+}
+
+if { [ string equal $tcl_platform(os) Darwin ] && ! $MAC_PKG } {
+	set CurPlatform osx
+	set DefaultExe $exeMacOSX
+	set DefaultMakeExe $makeMac
+	set DefaultWish $wishMacTk85
+	set DefaultSysTerm $sysTermMac
+	set DefaultDbgExe $dbgMac
+	set DefaultHtmlBrowser $browserMac
+	set DefaultFont $fontMac
+	set DefaultFontSize $fontSizeMac
+	set deltaSize $deltaSizeMac
+}
+
+if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { 
+	set CurPlatform win32
+	set DefaultExe $exeWin32
+	set DefaultMakeExe $makeWin32
+	set DefaultWish $wishWinTk85
+	set DefaultSysTerm $sysTermWindows
+	set DefaultDbgExe $dbgWindows
+	set DefaultHtmlBrowser $browserWindows
+	set DefaultFont $fontWindows
+	set DefaultFontSize $fontSizeWindows
+	set deltaSize $deltaSizeWindows
+}
+
+if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { 
+	set CurPlatform win64
+	set DefaultExe $exeWin64
+	if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { 
+		set DefaultMakeExe $makeWin64mgw 
+	} else { 
+		set DefaultMakeExe $makeWin64cyg 
+	}
+	set DefaultWish $wishWinTk86
+	set DefaultSysTerm $sysTermWindows
+	set DefaultDbgExe $dbgWindows
+	set DefaultHtmlBrowser $browserWindows
+	set DefaultFont $fontWindows
+	set DefaultFontSize $fontSizeWindows
+	set deltaSize $deltaSizeWindows
+}

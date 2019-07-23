@@ -57,7 +57,8 @@ if [ info exists alignMode ] {
 }
 
 # list of windows with predefined sizes & positions
-set wndLst [ list .lsd .lmm .log .str ]
+set wndLst [ list .lmm .lsd .log .str .da .deb .lat ]
+set wndMenuHeight 0
 
 # register static special, OS-dependent configurations
 if [ string equal $tcl_platform(platform) unix ] {
@@ -165,8 +166,8 @@ image create photo resultImg -file "$RootLsd/$LsdSrc/icons/result.$iconExt"
 # Set global key mappings
 #************************************************
 proc setglobkeys { w { chkChg 1 } } {
-	global conWnd grabLst
-	global parWndLst logWndFn
+	global conWnd grabLst parWndLst logWndFn
+	
 	# soft/hard exit (check for unsaved changes or not)
 	if { $chkChg } {
 		bind $w <Control-Alt-x> { if [ string equal [ discard_change ] ok ] { exit }; break }
@@ -285,8 +286,6 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	# copy of applied geometry, if any
 	set gm ""
 	
-	set doGrab 0
-	
 	#handle main windows differently
 	if { [ lsearch $wndLst $w ] < 0 } {
 	
@@ -329,10 +328,12 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 			}
 			
 			if { ! [ string equal "" $x ] && ! [ string equal "" $y ] } {
+			
 				if { [ string equal $pos coverW ] } {
 					set sizeX [ expr [ winfo width [ winfo parent $w ] ] + 10 ]
 					set sizeY [ expr [ winfo height [ winfo parent $w ] ] + 30 ]
 				}
+				
 				if { ! [ string equal $pos xy ]	&& $sizeX != 0 && $sizeY != 0 } {
 					set gm ${sizeX}x${sizeY}+$x+$y
 				} {
@@ -353,23 +354,13 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 		
 		wm resizable $w $resizeX $resizeY
-		
-		if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
-		
-			set parWndLst [ linsert $parWndLst 0 $w ]
-			
-			# postpone grab to make sure window is visible
-			if { $grab } {
-				set doGrab 1
-			}
-		}	
 	} {
 		#known windows - simply apply defaults if not done before
 		if { ! [ string equal $pos current ] } {
 			sizetop $w
 		}
 	}
-	
+
 	if { ! [ winfo viewable [ winfo toplevel $w ] ] } {
 		wm deiconify $w
 	}
@@ -378,10 +369,12 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	focus $w
 	
 	update
-	
+
 	# grab focus, if required, updating the grabbing list
-	if { $doGrab } {
+	if { $grab && $w != "." && [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
 	
+		set parWndLst [ linsert $parWndLst 0 $w ]
+		
 		if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
 			lappend grabLst "$w [ grab current $w ]"
 		}
@@ -414,9 +407,14 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 # DESTROYTOP
 #************************************************
 proc destroytop w {
-	global defaultFocus parWndLst grabLst noParLst logWndFn
+	global wndLst defaultFocus parWndLst grabLst noParLst logWndFn
 
 	if { ! [ winfo exists $w ] } return
+	
+	# save main windows sizes/positions
+	if { [ lsearch $wndLst $w ] >= 0 } {
+		update_model_info
+	}
 	
 	if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
 		if [ info exists grabLst ] {
@@ -453,52 +451,197 @@ proc destroytop w {
 
 
 #************************************************
+# GEOMTOP
+# Return REAL size & positions of a top window
+#************************************************
+proc geomtop { { w . } } {
+
+	# extract info from Tk/window manager
+	set geom [ wm geometry $w ]
+	scan $geom "%dx%d+%d+%d" width height decorationLeft decorationTop
+	set contentsTop [ winfo rooty $w ]
+	set contentsLeft [ winfo rootx $w ]
+	
+	# measure left edge, and assume all edges except top are the same thickness
+	set decorationThickness [ expr $contentsLeft - $decorationLeft ]
+
+	# find titlebar plus menubar thickness
+	set menubarThickness [ expr $contentsTop - $decorationTop ]
+	
+	# compute real values
+	incr width [ expr 2 * $decorationThickness ]
+	incr height $decorationThickness
+	incr height $menubarThickness
+	
+	return [ list $width $height $decorationLeft $decorationTop ]
+}
+	
+	
+#************************************************
+# GEOMTOSAVE
+# Return size & position of a window to be saved
+# and later reopened, at the same place/size
+#************************************************
+proc geomtosave { { w . } } {
+	global wndMenuHeight
+
+	# handle virtual top windows names
+	if { [ string equal $w .lmm ] || [ string equal $w .lsd ] } {
+		set realW .
+	} else {
+		set realW $w
+	}
+
+	if { ! [ winfo exists $realW ] } {
+		return ""
+	}
+	
+	set geom [ wm geometry $realW ]
+	scan $geom "%dx%d+%d+%d" width height decorationLeft decorationTop
+	set contentsTop [ winfo rooty $realW ]
+	
+#tk_messageBox -message "width=$width\nheight=$height\ndecorationLeft=$decorationLeft\ndecorationTop=$decorationTop\nwndMenuHeight=$wndMenuHeight"
+				
+	# handle windows with incorrect height because of menu (Tk ugly bugs)
+	switch $w {
+		.da -
+		.deb {
+			set menuHeight [ expr $wndMenuHeight + 20 ]
+		}
+		default {
+			set menuHeight $wndMenuHeight
+		}
+	}
+	
+	set realHeight [ expr $height + $contentsTop - $decorationTop - $menuHeight ]
+	
+	return ${width}x${realHeight}+${decorationLeft}+${decorationTop}
+}
+
+
+#************************************************
+# CHECKGEOM
+# check for window mostly out of the (main) 
+# screen or invalid and use the default if needed
+#************************************************
+proc checkgeom { geom defGeom screenWidth screenHeight } {
+	global restoreWin
+	
+	if { ! $restoreWin || $geom == "#" } {
+		return $defGeom
+	} else {
+		set n [ scan $geom "%dx%d+%d+%d" width height decorationLeft decorationTop ]
+		
+		if { $n != 4 } {
+			return $defGeom
+		} else {
+			set centerX [ expr $decorationLeft + $width / 2 ]
+			set centerY [ expr $decorationTop + $height / 2 ]
+
+			if { $centerX < 0 || $centerX > $screenWidth || $centerY < 0 || $centerY > $screenHeight } {
+				return $defGeom
+			}
+		}
+	}
+	
+	return $geom
+}
+
+
+#************************************************
 # SIZETOP
 # Adjust main windows to default size & positions
 #************************************************
 proc sizetop { { w all } } {
-	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn
+	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom wndMenuHeight
 
 	update
 	
+	if { [ string equal $w .lsd ] || [ string equal $w .lmm ] } {
+	
+		set realW .
+	
+		# save initial height of the top decoration (menu, title bar and border)
+		if { $wndMenuHeight == 0 } {
+			set curGeom [ wm geometry . ]
+			scan $curGeom "%dx%d+%d+%d" width height decorationLeft decorationTop
+			set contentsTop [ winfo rooty . ]
+			set wndMenuHeight [ expr $contentsTop - $decorationTop ]
+		}
+	} else {
+		set realW $w
+	}
+	
+	set screenWidth [ winfo screenwidth $realW ]
+	set screenHeight [ winfo screenheight $realW ]
+					
 	foreach wnd $wndLst {
 		if { ! [ string compare $w all ] || ! [ string compare $w $wnd ] } {
 		
 			switch $wnd {
+			
 				.lsd {
-					wm geometry . "${hsizeB}x$vsizeB+[ getx . topleftS ]+[ gety . topleftS ]"
+					set defGeom "${hsizeB}x$vsizeB+[ getx . topleftS ]+[ gety . topleftS ]"
+					wm geometry . [ checkgeom $lsdGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize . $hsizeB [ expr $vsizeB / 2 ]
 				}
+				
 				.lmm {
-					if { [ expr [ winfo screenwidth . ] ] < ( $hsizeL + 2 * $bordsize ) } {
-						set W [ expr [winfo screenwidth . ] - 2 * $bordsize ] 
+					if { $screenWidth < ( $hsizeL + 2 * $bordsize ) } {
+						set W [ expr $screenWidth - 2 * $bordsize ] 
 					} {
 						set W $hsizeL
 					}
-					set H [ expr [ winfo screenheight . ] - $tbarsize - 2 * $vmargin - 2 * $bordsize ]
+					set H [ expr $screenHeight - $tbarsize - 2 * $vmargin - 2 * $bordsize ]
 					if { $H < $vsizeL } {
-						set H [ expr [ winfo screenheight . ] - $tbarsize - 2 * $bordsize ] 
+						set H [ expr $screenHeight - $tbarsize - 2 * $bordsize ] 
 					}
-					if { [ expr [ winfo screenwidth . ] ] < ( $hsizeL + 2 * $bordsize + $hmargin ) } {
+					if { $screenWidth < ( $hsizeL + 2 * $bordsize + $hmargin ) } {
 						set X 0
 					} {
-						set X [ expr [ winfo screenwidth . ] - $hmargin - $bordsize - $W ]
+						set X [ expr $screenWidth - $hmargin - $bordsize - $W ]
 					}
-					set Y [ expr ( [ winfo screenheight . ] - $tbarsize ) / 2 - $bordsize - $H / 2]
-					wm geom . "${W}x$H+$X+$Y"
+					set Y [ expr ( $screenHeight - $tbarsize ) / 2 - $bordsize - $H / 2 ]
+					
+					set defGeom "${W}x$H+$X+$Y"
+
+					wm geometry . [ checkgeom $lmmGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize . $hsizeLmin $vsizeLmin
 				}
+				
 				.log {
-					set X [ getx .log bottomrightS ]
-					set Y [ gety .log bottomrightS ]
-					wm geom .log +$X+$Y
+					set defGeom "+[ getx .log bottomrightS ]+[ gety .log bottomrightS ]"
+					wm geometry .log [ checkgeom $logGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .log [ winfo width .log ] [ winfo height .log ]
 				}
+				
 				.str {
 					set posXstr [ expr [ winfo x . ] + [ winfo width . ] + 2 * $bordsize + $hmargin + $corrX ]
 					set posYstr [ expr [ winfo y . ] + $corrY ]
-					wm geometry .str ${hsizeM}x${vsizeM}+${posXstr}+${posYstr}	
+					set defGeom "${hsizeM}x${vsizeM}+${posXstr}+${posYstr}"
+					wm geometry .str [ checkgeom $strGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .str [ expr $hsizeM / 2 ] [ expr $vsizeM / 2 ]	
+				}
+				
+				.da {
+					set defGeom "+[ getx .da overM ]+[ gety .da overM ]"
+					wm geometry .da [ checkgeom $daGeom $defGeom $screenWidth $screenHeight ]
+					wm minsize .da [ winfo width .da ] [ winfo height .da ]
+					wm resizable .da 0 1
+				}
+				
+				.deb {
+					set defGeom "+[ getx .deb topleftW ]+[ gety .deb topleftW ]"
+					wm geometry .deb [ checkgeom $debGeom $defGeom $screenWidth $screenHeight ]
+					wm minsize .deb [ winfo width .deb ] [ winfo height .deb ]
+					wm resizable .deb 0 1
+				}
+
+				.lat {
+					set defGeom "+[ getx .lat centerS ]+[ gety .lat centerS ]"
+					wm geometry .lat [ checkgeom $latGeom $defGeom $screenWidth $screenHeight ]
+					wm minsize .lat [ winfo width .lat ] [ winfo height .lat ]
+					wm resizable .lat 0 0
 				}
 			}
 		}

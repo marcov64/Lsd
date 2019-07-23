@@ -19,11 +19,11 @@
 # List models returning the list a exploring directory b
 #************************************************
 proc lst_mdl { } {
-	global lmod ldir lgroup cgroup
+	global lmod ldir lgroup cgroup GROUP_INFO MODEL_INFO
 
-	if [ file exists modelinfo.txt ] {
+	if [ file exists $MODEL_INFO ] {
 		lappend ldir [ pwd ]
-		set f [ open modelinfo.txt r ]
+		set f [ open $MODEL_INFO r ]
 		set info [ gets $f ]
 		close $f
 		lappend lmod "$info"
@@ -36,8 +36,8 @@ proc lst_mdl { } {
 		set flag 0
 		if [ file isdirectory $i ] {
 			cd $i
-			if [ file exists groupinfo.txt ] {
-				set f [ open groupinfo.txt r ]
+			if [ file exists $GROUP_INFO ] {
+				set f [ open $GROUP_INFO r ]
 				set info [ gets $f ]
 				close $f
 				if { $cgroup != "." } {
@@ -191,13 +191,13 @@ set macYes [ list "g++" "-framework" "-lz" "-lpthread" "-DMAC_PKG" ]
 set macNo  [ list ".exe" "/gnu/" "/gnu64/" "x86_64-w64-mingw32-g++" "-mthreads" "-mwindows" ]
 
 proc check_sys_opt { } {
-	global LsdSrc CurPlatform win32Yes win32No win64Yes win64No linuxYes linuxNo osxYes osxNo macYes macNo
+	global LsdSrc CurPlatform win32Yes win32No win64Yes win64No linuxYes linuxNo osxYes osxNo macYes macNo SYSTEM_OPTIONS
 	
-	if { ! [ file exists "$LsdSrc/system_options.txt" ] } { 
-		return "File 'system_options.txt' not found (click 'Default' button to recreate it)"
+	if { ! [ file exists "$LsdSrc/$SYSTEM_OPTIONS" ] } { 
+		return "File '$SYSTEM_OPTIONS' not found (click 'Default' button to recreate it)"
 	}
 	
-	set f [ open "$LsdSrc/system_options.txt" r ]
+	set f [ open "$LsdSrc/$SYSTEM_OPTIONS" r ]
 	set options [ read -nonewline $f ]
 	close $f
 	
@@ -357,12 +357,13 @@ proc make_background { target threads nw macPkg } {
 # Get the list of source files, including the main and extra files
 #************************************************
 proc get_source_files { path } {
+	global MODEL_OPTIONS
 
-	if { ! [ file exists "$path/model_options.txt" ] } { 
+	if { ! [ file exists "$path/$MODEL_OPTIONS" ] } { 
 		return [ list ]
 	}
 
-	set f [ open "$path/model_options.txt" r ]
+	set f [ open "$path/$MODEL_OPTIONS" r ]
 	set options [ read -nonewline $f ]
 	close $f
 

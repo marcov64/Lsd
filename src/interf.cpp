@@ -1136,6 +1136,15 @@ else
 switch ( *choice )
 {
 
+// Exit LSD
+case 11:
+
+	if ( discard_change( ) )	// unsaved configuration changes ?
+		myexit( 0 );
+	
+break;
+
+
 // Add a Variable to the current or the pointed object (defined in tcl $vname)
 case 2:
 
@@ -2978,15 +2987,6 @@ case 1:
 	return n;
 
 
-// Exit LSD
-case 11:
-
-	if ( discard_change( ) )	// unsaved configuration changes ?
-		myexit( 0 );
-	
-break;
-
-
 // Load a model
 case 17:
 // Reload model
@@ -3655,15 +3655,6 @@ case 34:
 
 	if ( cur2 != NULL )			// restore original current object
 		r = cur2;
-
-break;
-
-
-// Window destroyed
-case 35:
-
-	if ( discard_change( ) )	// check for unsaved configuration changes
-		myexit( 0 );
 
 break;
 
@@ -7003,7 +6994,7 @@ Returns: 0: abort, 1: continue without saving
 ****************************************************/
 bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 {
-	// don't stop if simulation is runnig
+	// don't stop if simulation is running
 	if ( running )
 	{
 		cmd( "set answer [ tk_messageBox -parent .log -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\" ]" );
@@ -7011,7 +7002,7 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 	}
 	// nothing to save?
 	if ( ! unsavedData && ! unsavedChange && ! unsavedSense )
-		return true;					// yes: simply discard configuration
+		goto end_true;				// yes: simply discard configuration
 	
 	// no: ask for confirmation
 	if ( ! senseOnly && unsavedData )
@@ -7023,7 +7014,7 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 			if ( checkSense )
 				cmd( "set question \"Recent changes to sensitivity data are not saved!\nDo you want to discard and continue?\"" );
 			else
-				return true;		// checking sensitivity data is disabled
+				goto end_true;		// checking sensitivity data is disabled
 				
 	// must disable because of a bug in Tk when open dialog
 	if ( ! brCovered )
@@ -7038,11 +7029,14 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 		cmd( ".l.v.c.var_name configure -state normal" );
 	}
 	
-	const char *ans = Tcl_GetVar( inter, "ans", 0 );
-	if ( atoi( ans ) == 1 )
-		return true;
-	else
+	if ( atoi( Tcl_GetVar( inter, "ans", 0 ) ) != 1 )
 		return false;
+	
+	end_true:
+	
+	update_model_info( );	// save windows positions if appropriate
+	
+	return true;
 }
 
 
