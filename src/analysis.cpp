@@ -5545,7 +5545,7 @@ void plot_lattice( int *choice )
 		{
 			val = time_cross == 1 ? data[ ncol * j + i ][ time ] : 
 									data[ 0 ][ first + ncol * j + i ];
-			color = max( 0, min( 1100, round( val * cscale ) ) );
+			color = max( 0, min( 1099, round( val * cscale ) ) );
 			if ( is_nan( color ) || ! is_finite( color ) )
 			  color = 0;
 

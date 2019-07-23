@@ -1754,7 +1754,7 @@ proc init_canvas_colors { } {
 	}
 	set ::c$i white
 	
-	# fill the colors 1001-1100 with gray shades
+	# fill the colors 1000-1099 with gray shades
 	for { set j 0 } { $j < 10 } { incr j } {
 		for { set k 0 } { $k < 10 } { incr k; incr i } {
 			if { ! ( $j == 0 && $k == 0 ) } {

@@ -1766,7 +1766,7 @@ result::~result( void )
 /***************************************************
 INIT_LATTICE
 Create a new run time lattice having:
-- pix=maximum pixel (600 should fit in typical screens, 0=default size)
+- pix= maximum pixel (600 should fit in typical screens, 0=default size)
 - nrow= number of rows
 - ncol= number of columns
 - lrow= label of variable or parameter indicating the row value
@@ -1787,6 +1787,8 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 		plog( "\nError: invalid lattice initialization values, ignoring.\n");
 		return -1;
 	}
+	
+	init_color = min( init_color, 1099 );	// limit to valid palette
 
 	// reset the LSD lattice, if any
 	close_lattice( );
