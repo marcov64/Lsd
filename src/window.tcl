@@ -498,24 +498,44 @@ proc geomtosave { { w . } } {
 	
 	set geom [ wm geometry $realW ]
 	scan $geom "%dx%d+%d+%d" width height decorationLeft decorationTop
+	set contentsLeft [ winfo rootx $realW ]
 	set contentsTop [ winfo rooty $realW ]
 	
-#tk_messageBox -message "width=$width\nheight=$height\ndecorationLeft=$decorationLeft\ndecorationTop=$decorationTop\nwndMenuHeight=$wndMenuHeight"
-				
-	# handle windows with incorrect height because of menu (Tk ugly bugs)
-	switch $w {
-		.da -
-		.deb {
-			set menuHeight [ expr $wndMenuHeight + 20 ]
+#tk_messageBox -message "w=$w\nwidth=$width\nheight=$height\ndecorationLeft=$decorationLeft\ndecorationTop=$decorationTop\ncontentsLeft=$contentsLeft\ncontentsTop=$contentsTop"
+
+	# handle windows with incorrect size/position because of Tk ugly bugs in each platform
+	if { $::CurPlatform == "linux" } {
+		set realHeight $height
+		set realX $contentsLeft
+
+		switch $w {
+			.da -
+			.deb {
+				set realY [ expr $decorationTop + $contentsLeft - $decorationLeft + 8 ]
+			}
+			.lat {
+				set realY [ expr $decorationTop + $contentsLeft - $decorationLeft ]
+			}
+			default {
+				set realY [ expr $decorationTop + $contentsLeft - $decorationLeft - 2 ]
+			}
 		}
-		default {
-			set menuHeight $wndMenuHeight
+	} else {
+		set realX $decorationLeft
+		set realY $decorationTop
+
+		switch $w {
+			.da -
+			.deb {
+				set realHeight [ expr $height + $contentsTop - $decorationTop - ( $wndMenuHeight + 20 ) ]
+			}
+			default {
+				set realHeight [ expr $height + $contentsTop - $decorationTop - $wndMenuHeight ]
+			}
 		}
 	}
-	
-	set realHeight [ expr $height + $contentsTop - $decorationTop - $menuHeight ]
-	
-	return ${width}x${realHeight}+${decorationLeft}+${decorationTop}
+
+	return ${width}x${realHeight}+${realX}+${realY}
 }
 
 
