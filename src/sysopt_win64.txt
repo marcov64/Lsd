@@ -15,5 +15,5 @@ LIBS=-lz
 
 # Compiler options
 CC=x86_64-w64-mingw32-g++
-GLOBAL_CC=-march=native -std=gnu++14 -w
+GLOBAL_CC=-march=native -std=gnu++14 -w -mno-avx512f
 SSWITCH_CC=-mthreads -mwindows -O3
