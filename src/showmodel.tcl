@@ -642,7 +642,7 @@ proc fix_info { fi } {
 		puts $f $newVer
 		puts $f $newDate
 		
-		for { set i 3 } { i < $MODEL_INFO_NUM } { incr i } {
+		for { set i 3 } { $i < $MODEL_INFO_NUM } { incr i } {
 			puts $f "#"
 		}
 		

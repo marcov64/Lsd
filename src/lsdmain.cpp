@@ -397,6 +397,7 @@ int lsdmain( int argn, char **argv )
 	cmd( "set MODEL_OPTIONS \"%s\"", MODEL_OPTIONS );
 	cmd( "set GROUP_INFO \"%s\"", GROUP_INFO );
 	cmd( "set MODEL_INFO \"%s\"", MODEL_INFO );
+	cmd( "set MODEL_INFO_NUM %d", MODEL_INFO_NUM );
 	cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
 	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
 #ifdef MAC_PKG

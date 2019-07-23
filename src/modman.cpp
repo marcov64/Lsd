@@ -249,6 +249,7 @@ cmd( "set SYSTEM_OPTIONS \"%s\"", SYSTEM_OPTIONS );
 cmd( "set MODEL_OPTIONS \"%s\"", MODEL_OPTIONS );
 cmd( "set GROUP_INFO \"%s\"", GROUP_INFO );
 cmd( "set MODEL_INFO \"%s\"", MODEL_INFO );
+cmd( "set MODEL_INFO_NUM %d", MODEL_INFO_NUM );
 cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
 cmd( "set DATE_FMT \"%s\"", DATE_FMT );
 #ifdef MAC_PKG
@@ -6321,14 +6322,14 @@ void update_lmm_options( bool justWinGeom )
 	if ( justWinGeom )
 	{
 		cmd( "set done 1" );
-		cmd( "if { $restoreWin } { set curGeom [ geomtosave .lmm ]; if { $curGeom != \"\" && ! [ string equal $lmmGeom $curGeom ] } { set done 0 } }" );
+		cmd( "if { $::restoreWin } { set curGeom [ geomtosave .lmm ]; if { $curGeom != \"\" && ! [ string equal $::lmmGeom $curGeom ] } { set done 0 } }" );
 		
 		if ( atoi( Tcl_GetVar( inter, "done", 0 ) ) )	// nothing to save?
 			return;
 	
 		load_lmm_options( );				// if just saving window geometry, first reload from disk
 
-		cmd( "set lmmGeom $curGeom" );
+		cmd( "set ::lmmGeom $curGeom" );
 	}
 	
 	// save options to disk
