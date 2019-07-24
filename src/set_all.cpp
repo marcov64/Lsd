@@ -117,7 +117,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "frame .sa.m.f1.val" );
 	cmd( "label .sa.m.f1.val.l -text \"Initialization data\"" );
 
-	cmd( "frame .sa.m.f1.val.i -relief groove -bd 2" );
+	cmd( "frame .sa.m.f1.val.i" );
 
 	cmd( "frame .sa.m.f1.val.i.l1" );
 	cmd( "label .sa.m.f1.val.i.l1.l1 -text \"Equal to\"" );
@@ -186,7 +186,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "frame .sa.m.f2.s" );
 	cmd( "label .sa.m.f2.s.tit -text \"Object instances selection\"" );
 
-	cmd( "frame .sa.m.f2.s.i -relief groove -bd 2" );
+	cmd( "frame .sa.m.f2.s.i" );
 
 	cmd( "frame .sa.m.f2.s.i.l" );
 
@@ -226,7 +226,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "frame .sa.m.f2.rnd" );
 	cmd( "label .sa.m.f2.rnd.l -text \"Random number generator\"" );
 
-	cmd( "frame .sa.m.f2.rnd.i -relief groove -bd 2" );
+	cmd( "frame .sa.m.f2.rnd.i" );
 
 	cmd( "frame .sa.m.f2.rnd.i.le" );
 	cmd( "checkbutton .sa.m.f2.rnd.i.le.f -text \"Reset the generator\" -variable use_seed -command { if $use_seed { .sa.m.f2.rnd.i.le.s.e1 conf -state normal } { .sa.m.f2.rnd.i.le.s.e1 conf -state disabled } }" );

@@ -587,9 +587,8 @@ cmd( "$w add command -label \"Writing LSD Models Tutorial\" -underline 0 -comman
 cmd( "$w add separator" );
 cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%s} {%s} }", _LSD_VERSION_, _LSD_DATE_  );
 
-
 // Button bar
-cmd( "frame .bbar -bd 2" );
+cmd( "frame .bbar" );
 
 cmd( "button .bbar.open -image openImg -relief $bRlf -overrelief $ovBrlf -command { set choice 33 }" );
 cmd( "button .bbar.save -image saveImg -relief $bRlf -overrelief $ovBrlf -command { .m.file invoke 2 }" );
@@ -669,7 +668,7 @@ cmd( "bind .bbar.help <Leave> { set ttip \"\" }" );
 cmd( "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.wrap .bbar.compile .bbar.comprun .bbar.gdb .bbar.info .bbar.descr .bbar.equation .bbar.extra .bbar.set .bbar.hide .bbar.help .bbar.tip -padx 3 -side left" );
 cmd( "pack .bbar -anchor w -fill x" );
 
-cmd( "frame .f -bd 2" );
+cmd( "frame .f" );
 cmd( "frame .f.t" );
 cmd( "scrollbar .f.t.vs -command \".f.t.t yview\"" );
 cmd( "scrollbar .f.t.hs -orient horiz -command \".f.t.t xview\"" );
@@ -679,6 +678,7 @@ cmd( "set b [ lindex $a 3 ]" );
 cmd( "if { $dim_character == 0 } { set dim_character [ lindex $b 1 ] }" );
 cmd( "if { $dim_character == \"\" } { set dim_character $DefaultFontSiz e }" );
 cmd( "set a [ list \"$fonttype\" $dim_character ]" );
+
 // set preferred tab size and wrap option
 cmd( "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
 cmd( "setwrap .f.t.t $wrap" );		// adjust text wrap
@@ -695,45 +695,70 @@ cmd( ".f.t.t tag configure ckword -foreground purple4" );
 cmd( ".f.t.t configure -selectbackground gray" );
 cmd( ".f.t.t configure -selectforeground black" );
 
-cmd( "frame .f.hea -relief groove -bd 2" );
+cmd( "frame .f.hea" );
 
-cmd( "frame .f.hea.grp" );
-cmd( "label .f.hea.grp.tit -text \"Group: \"" );
-cmd( "label .f.hea.grp.dat -text \"$modelGroup\" -fg red" );
-cmd( "pack .f.hea.grp.tit .f.hea.grp.dat -side left" );
+cmd( "frame .f.hea.info" );
 
-cmd( "frame .f.hea.mod" );
-cmd( "label .f.hea.mod.tit -text \"Model: \"" );
-cmd( "label .f.hea.mod.dat -text \"(no model)\" -fg red" );
-cmd( "pack .f.hea.mod.tit .f.hea.mod.dat -side left" );
+cmd( "frame .f.hea.info.grp" );
+cmd( "label .f.hea.info.grp.tit -text \"Group: \"" );
+cmd( "label .f.hea.info.grp.dat -text \"$modelGroup\" -fg red" );
+cmd( "pack .f.hea.info.grp.tit .f.hea.info.grp.dat -side left" );
 
-cmd( "frame .f.hea.ver" );
-cmd( "label .f.hea.ver.tit -text \"Version: \"" );
-cmd( "label .f.hea.ver.dat -text \"\" -fg red" );
-cmd( "pack .f.hea.ver.tit .f.hea.ver.dat -side left" );
+cmd( "label .f.hea.info.pad1 -width 2" );
 
-cmd( "frame .f.hea.file" );
-cmd( "label .f.hea.file.tit -text \"File: \"" );
-cmd( "label .f.hea.file.dat -text \"(no file)\" -fg red" );
-cmd( "pack .f.hea.file.tit .f.hea.file.dat -side left" );
+cmd( "frame .f.hea.info.mod" );
+cmd( "label .f.hea.info.mod.tit -text \"Model: \"" );
+cmd( "label .f.hea.info.mod.dat -text \"(no model)\" -fg red" );
+cmd( "pack .f.hea.info.mod.tit .f.hea.info.mod.dat -side left" );
 
-cmd( "frame .f.hea.line" );
-cmd( "label .f.hea.line.line -relief sunk -width 12 -text \"[ .f.t.t index insert ]\"" );
-cmd( "pack .f.hea.line.line -anchor e -expand no" );
-cmd( "pack .f.hea.grp .f.hea.mod .f.hea.ver .f.hea.file .f.hea.line -side left -expand yes -fill x" );
+cmd( "label .f.hea.info.pad2 -width 2" );
 
-cmd( "bind .f.hea.line.line <Button-1> { set choice 10 }" );
-cmd( "bind .f.hea.line.line <Button-2> { set choice 10 }" );
-cmd( "bind .f.hea.line.line <Button-3> { set choice 10 }" );
+cmd( "frame .f.hea.info.ver" );
+cmd( "label .f.hea.info.ver.tit -text \"Version: \"" );
+cmd( "label .f.hea.info.ver.dat -text \"\" -fg red" );
+cmd( "pack .f.hea.info.ver.tit .f.hea.info.ver.dat -side left" );
+
+cmd( "label .f.hea.info.pad3 -width 2" );
+
+cmd( "frame .f.hea.info.file" );
+cmd( "label .f.hea.info.file.tit -text \"File: \"" );
+cmd( "label .f.hea.info.file.dat -text \"(no file)\" -fg red" );
+cmd( "pack .f.hea.info.file.tit .f.hea.info.file.dat -side left" );
+
+cmd( "pack .f.hea.info.grp .f.hea.info.pad1 .f.hea.info.mod .f.hea.info.pad2 .f.hea.info.ver .f.hea.info.pad3 .f.hea.info.file -side left" );
+
+cmd( "pack .f.hea.info -side left -anchor w -expand yes" );
+
+cmd( "frame .f.hea.cur" );
+
+cmd( "frame .f.hea.cur.line" );
+cmd( "label .f.hea.cur.line.ln1 -text \"Ln: \"" );
+cmd( "label .f.hea.cur.line.ln2 -width 4 -fg red -font [ font create -size $small_character -weight bold ]" );
+cmd( "pack .f.hea.cur.line.ln1 .f.hea.cur.line.ln2 -side left" );
+
+cmd( "frame .f.hea.cur.col" );
+cmd( "label .f.hea.cur.col.col1 -text \"Col: \"" );
+cmd( "label .f.hea.cur.col.col2 -width 3 -fg red -font [ font create -size $small_character -weight bold ]" );
+cmd( "pack .f.hea.cur.col.col1 .f.hea.cur.col.col2 -side left" );
+
+cmd( "pack .f.hea.cur.line .f.hea.cur.col -side left" );
+
+cmd( "pack .f.hea.cur -side left -anchor e" );
 
 cmd( "pack .f.hea -fill x" );
+
 cmd( "pack .f.t -expand yes -fill both" );
 cmd( "pack .f.t.vs -side right -fill y" );
 cmd( "pack .f.t.t -expand yes -fill both" );
 cmd( "pack .f.t.hs -fill x" );
 
 cmd( "bind . <F1> { .m.help invoke 0; break }" );
-cmd( "bind . <Control-n> { tk_menuSetFocus .m.file}; bind . <Control-N> { tk_menuSetFocus .m.file }" );
+cmd( "bind . <Control-n> { tk_menuSetFocus .m.file }; bind . <Control-N> { tk_menuSetFocus .m.file }" );
+cmd( "bind .f.hea.cur.line.ln1 <Button-1> { set choice 10 }" );
+cmd( "bind .f.hea.cur.line.ln2 <Button-1> { set choice 10 }" );
+cmd( "bind .f.hea.cur.col.col1 <Button-1> { set choice 10 }" );
+cmd( "bind .f.hea.cur.col.col2 <Button-1> { set choice 10 }" );
+
 
 // procedures to save cursor environment before and after changes in text window for syntax coloring
 cmd( "proc savCurIni { } { \
@@ -748,7 +773,10 @@ cmd( "proc savCurFin { } { \
 		set curPosFin [.f.t.t index insert]; \
 		.f.t.t edit modified false \
 	}" );
-cmd( "proc updCurWnd { } { .f.hea.line.line conf -text [ .f.t.t index insert ] }" );
+cmd( "proc updCurWnd { } { \
+		.f.hea.cur.line.ln2 configure -text [ lindex [ split [ .f.t.t index insert ] . ] 0 ]; \
+		.f.hea.cur.col.col2 configure -text [ expr 1 + [ lindex [ split [ .f.t.t index insert ] . ] 1 ] ] \
+	}" );
 
 // redefine bindings to better support new syntax highlight routine
 cmd( "bind .f.t.t <KeyPress> { savCurIni }" );
@@ -851,9 +879,7 @@ cmd( "bind . <KeyPress-Insert> { # nothing }" );
 cmd( "bind .f.t.t <KeyPress-Return> {+set choice 16}" );
 cmd( "bind .f.t.t <KeyRelease-space> {+.f.t.t edit separator}" );
 
-/*
-POPUP menu
-*/
+// context menu
 cmd( "menu .v -tearoff 0" );
 
 cmd( "bind .f.t.t <3> { \
@@ -952,7 +978,7 @@ cmd( "pack .f.t.vs -side right -fill y" );
 cmd( "pack .f.t.t -expand yes -fill both" );
 cmd( "pack .f.t.hs -fill x" );
 
-cmd( "set filename \"noname.txt\"" );
+cmd( "set filename \"(no name)\"" );
 cmd( "set dirname \"[ pwd ]\"" );
 cmd( "set modelDir \"[ pwd ]\"" );
 cmd( "set groupdir \"[ pwd ]\"" );
@@ -973,7 +999,8 @@ if ( argn > 1 )
 		cmd( ".f.t.t mark set insert 1.0" );
 		cmd( "set filename \"[ file tail \"$filetoload\" ]\"" );
 		cmd( "set dirname [ file dirname \"$filetoload\" ]" );
-		cmd( "set before [ .f.t.t get 1.0 end ]; .f.hea.file.dat conf -text \"$filename\"" );
+		cmd( "set before [ .f.t.t get 1.0 end ]" ); 
+		cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 
 		cmd( "set s [ file extension \"$filetoload\" ]" );
 		s = ( char * ) Tcl_GetVar( inter, "s", 0 );
@@ -1003,8 +1030,9 @@ loop:
 
 cmd( "if { ! $keepfocus } { focus .f.t.t; update } { set keepfocus 0 }" );
 
-// update file save status in titlebar
+// update file save status in titlebar and cursor position in info bar
 cmd( "update_title_bar" );
+cmd( "updCurWnd" );
 
 // main command loop
 while ( ! choice )
@@ -1090,7 +1118,7 @@ if ( choice == 3 )
 	cmd( "set before [ .f.t.t get 1.0 end ]" );
 	cmd( "set filename makefile" );
 	cmd( ".f.t.t mark set insert 1.0" );
-	cmd( ".f.hea.file.dat conf -text \"makefile\"" );
+	cmd( ".f.hea.info.file.dat conf -text \"makefile\"" );
 	cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );  
 	
 	choice = 0;
@@ -1114,7 +1142,7 @@ if ( choice == 4 )
 		cmd( "set before [ .f.t.t get 0.0 end ]" );
 		cmd( "set dirname [ file dirname \"$curfilename\" ]" );
 		cmd( "set filename [ file tail \"$curfilename\" ]" );
-		cmd( ".f.hea.file.dat conf -text \"$filename\"" );
+		cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 	}
 	
 	choice = 0;
@@ -1164,7 +1192,7 @@ if ( choice == 5 || choice == 50 )
 	sourcefile = 0;
 	cmd( ".f.t.t edit reset" );
 	cmd( ".f.t.t mark set insert 1.0" );
-	cmd( ".f.hea.file.dat conf -text \"$filename\"" );
+	cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 	  
 	cmd( "unset -nocomplain ud udi rd rdi" );
 	cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
@@ -1256,7 +1284,7 @@ if ( choice == 8 )
 		}" );
 
 	cmd( "set before [ .f.t.t get 1.0 end ]" );
-	cmd( ".f.hea.file.dat conf -text \"$filename\"" );
+	cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 
 	cmd( ".f.t.t tag add bc \"1.0\"" );
 	cmd( ".f.t.t tag add fc \"1.0\"" );
@@ -1296,7 +1324,7 @@ if ( choice == 10 )
 				.f.t.t see $line.0; \
 				.f.t.t mark set insert $line.0; \
 				.f.t.t tag add sel $line.0 $line.end; \
-				.f.hea.line.line conf -text [ .f.t.t index insert ] \
+				updCurWnd \
 			} { \
 				bell \
 			}; \
@@ -1736,7 +1764,7 @@ if ( choice == 14 )
 					} else { \
 						set modelGroup \"$modelGroup/$app\" \
 					}; \
-					.f.hea.grp.dat conf -text \"$modelGroup\"; \
+					.f.hea.info.grp.dat conf -text \"$modelGroup\"; \
 					set choice 1 \
 				} else { \
 					set choice 0 \
@@ -2002,9 +2030,9 @@ if ( choice == 14 )
 	cmd( "set modelName $mname" );
 	cmd( "set modelVersion $mver" );
 	cmd( "set modelDate \"\"" );
-	cmd( ".f.hea.mod.dat conf -text \"$modelName\"" );
-	cmd( ".f.hea.ver.dat conf -text \"$modelVersion\"" );
-	cmd( ".f.hea.grp.dat conf -text \"$modelGroup\"" );
+	cmd( ".f.hea.info.mod.dat conf -text \"$modelName\"" );
+	cmd( ".f.hea.info.ver.dat conf -text \"$modelVersion\"" );
+	cmd( ".f.hea.info.grp.dat conf -text \"$modelGroup\"" );
 
 	cmd( "file mkdir \"$dirname\"" );
 
@@ -2083,7 +2111,7 @@ if ( choice == 15 || choice == 71 )
 		}" );
 
 	cmd( "set before [ .f.t.t get 1.0 end ]" ); 
-	cmd( ".f.hea.file.dat conf -text \"$filename\"" );
+	cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 
 	cmd( "set s [ file extension \"$filename\" ]" );
 	s = ( char * ) Tcl_GetVar( inter, "s", 0 );
@@ -2392,9 +2420,9 @@ if ( choice == 51 )
 	cmd( "newtop .a \"Math Functions\" { set choice 2 }" );
 
 	cmd( "frame .a.e" );
-	cmd( "label .a.e.l -text \"Function parameters\"" );
+	cmd( "label .a.e.l -text \"Function parameter(s)\"" );
 
-	cmd( "frame .a.e.e -bd 2 -relief groove" );
+	cmd( "frame .a.e.e" );
 
 	cmd( "frame .a.e.e.e1" );
 	cmd( "label .a.e.e.e1.l -text Minimum" );
@@ -2433,7 +2461,7 @@ if ( choice == 51 )
 
 	cmd( "pack .a.f.r1 .a.f.r2 .a.f.r3 .a.f.r4 .a.f.r5 .a.f.r6 .a.f.r7 .a.f.r8 .a.f.r9 .a.f.r10 .a.f.r11 .a.f.r12 .a.f.r13 .a.f.r14 .a.f.r15 .a.f.r16 .a.f.r17 -anchor w" );
 
-	cmd( "label .a.more -text \"See Help for more functions/distributions\"" );
+	cmd( "label .a.more -text \"(see Help for more functions/distributions)\"" );
 	
 	cmd( "pack .a.e .a.f .a.more -padx 5 -pady 5" );
 
@@ -4819,9 +4847,9 @@ if ( choice == 33 )
 	
 	load_model_info( ( char * ) Tcl_GetVar( inter, "modelDir", 0 ) );
 
-	cmd( ".f.hea.grp.dat conf -text \"$modelGroup\"" );
-	cmd( ".f.hea.mod.dat conf -text \"$modelName\"" );
-	cmd( ".f.hea.ver.dat conf -text \"$modelVersion\"" );
+	cmd( ".f.hea.info.grp.dat conf -text \"$modelGroup\"" );
+	cmd( ".f.hea.info.mod.dat conf -text \"$modelName\"" );
+	cmd( ".f.hea.info.ver.dat conf -text \"$modelVersion\"" );
 
 	cmd( ".m.file entryconf 2 -state normal" );
 	cmd( ".m.file entryconf 3 -state normal" );
@@ -4967,8 +4995,8 @@ if ( choice == 41 )
 	cmd( "set modelName \"$mname\"" );
 	cmd( "set modelVersion \"$mver\"" );
 	cmd( "set modelDate \"\"" );
-	cmd( ".f.hea.mod.dat conf -text \"$modelName\"" );
-	cmd( ".f.hea.ver.dat conf -text \"$modelVersion\"" );
+	cmd( ".f.hea.info.mod.dat conf -text \"$modelName\"" );
+	cmd( ".f.hea.info.ver.dat conf -text \"$modelVersion\"" );
 	
 	// create the model info file
 	update_model_info( );
@@ -5108,8 +5136,8 @@ if ( choice == 44 )
 		cmd( "set modelVersion $mver" );
 		cmd( "if [ check_date $mdate ] { set modelDate $mdate } { set modelDate \"\"; tk_messageBox -type ok -title Error -icon error -message \"Invalid date\" -detail \"Dates must be set in the 'dd M, yyyy' format.\nSetting to current date.\" }" );
 		
-		cmd( ".f.hea.mod.dat conf -text \"$modelName\"" );
-		cmd( ".f.hea.ver.dat conf -text \"$modelVersion\"" );
+		cmd( ".f.hea.info.mod.dat conf -text \"$modelName\"" );
+		cmd( ".f.hea.info.ver.dat conf -text \"$modelVersion\"" );
 
 		// update the model info file
 		update_model_info( );
@@ -5125,10 +5153,10 @@ if ( choice == 39 )
 {
 	cmd( ".f.t.t delete 1.0 end" );
 	cmd( "set before [ .f.t.t get 1.0 end ]" );
-	cmd( "set filename noname.txt" );
+	cmd( "set filename newfile.txt" );
 	cmd( "set dirname [ pwd ]" );
 	cmd( ".f.t.t mark set insert 1.0" );
-	cmd( ".f.hea.file.dat conf -text \"noname.txt\"" );
+	cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 	cmd( "unset -nocomplain ud udi rd rdi" );
 	cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
 	cmd( "lappend udi [ .f.t.t index insert ]" );
@@ -5996,7 +6024,7 @@ if ( choice == 87 )
 					.f.t.t see $errlin.0; \
 					.f.t.t mark set insert $errlin.0 \
 				}; \
-				.f.hea.line.line conf -text [ .f.t.t index insert ] \
+				updCurWnd \
 			}" );
 		
 		choice = 0;						// nothing else to do

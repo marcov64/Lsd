@@ -231,7 +231,7 @@ array set opts {
     ignoreblanksopt   "-b"
     ignoreblanks      1
     editor            ""
-    filetypes         {{{{Text Files} .txt} {{LSD Equation Files} .cpp} {{LSD Configuration Files} .lsd} {All Files} *}}
+    filetypes         {{{Text Files} .txt} {{LSD Equation Files} .cpp} {{LSD Configuration Files} .lsd} {{All Files} *}}
     geometry          "60x30"
     showcbs           1
     showln            1
@@ -1348,8 +1348,8 @@ proc create-display {} {
     build-status
     build-popupMenu
 
-    frame .separator1 -height 2 -borderwidth 2 -relief groove
-    frame .separator2 -height 2 -borderwidth 2 -relief groove
+    frame .separator1 -height 2
+    frame .separator2 -height 2
 
     # ... and fit it all together...
     . configure -menu $w(menubar)
@@ -2038,7 +2038,7 @@ proc show-find {} {
         wm withdraw $w(findDialog)
         update idletasks
 
-        frame $w(findDialog).content -bd 2 -relief groove
+        frame $w(findDialog).content
         pack $w(findDialog).content -side top -fill both -expand y -padx 0 \
           -pady 5
 
@@ -2516,7 +2516,7 @@ proc build-toolbar {} {
     toolbutton $toolbar.find_tx -text "Find" -command do-find -bd 1 -pady 1
 
     # navigation widgets
-    label $toolbar.diffnavlbl -text "Diff:" -pady 0 -bd 2 -relief groove
+    label $toolbar.diffnavlbl -text "Diff:" -pady 0
 
     toolbutton $toolbar.prev_im -image prevDiffImage -command [list move -1] \
       -bd 1
@@ -2542,7 +2542,7 @@ proc build-toolbar {} {
     toolbutton $toolbar.center_tx -text "Center" -command center -bd 1 -pady 1
 
     # the merge widgets
-    label $toolbar.mergechoicelbl -text "Merge:" -pady 0 -bd 2 -relief groove
+    label $toolbar.mergechoicelbl -text "Merge:" -pady 0
 
     radiobutton $toolbar.m2_im -borderwidth 1 -indicatoron false \
       -selectcolor $w(selcolor) \
@@ -2577,7 +2577,7 @@ proc build-toolbar {} {
       -takefocus 0
 
     # The bookmarks
-    label $toolbar.bkmklbl -text "Mark:" -pady 0 -bd 2 -relief groove
+    label $toolbar.bkmklbl -text "Mark:" -pady 0
 
     toolbutton $toolbar.bkmkset_im -image markSetImage -command \
       [list diffmark mark] -bd 1
@@ -3114,7 +3114,7 @@ proc customize {} {
 
         pack $rb -side left
 
-        frame $frame -bd 2 -relief groove -width 400 -height 300
+        frame $frame -width 400 -height 300
     }
     set g(prefPage) $w(preferences).fGeneral
 
@@ -5734,7 +5734,7 @@ proc newDiffDialog {} {
             $w(newDiffPopup)}
         wm withdraw $w(newDiffPopup)
 
-        set simple [frame $w(newDiffPopup).simple -borderwidth 2 -relief groove]
+        set simple [frame $w(newDiffPopup).simple]
 
         label $simple.l1 -text "File 1:"
         label $simple.l2 -text "File 2:"
@@ -5773,8 +5773,7 @@ proc newDiffDialog {} {
 
         grid columnconfigure $simple 0 -weight 0
 
-        set options [frame $w(newDiffPopup).options -borderwidth 2 \
-          -relief groove]
+        set options [frame $w(newDiffPopup).options]
 
         button $options.more -text "More" -command open-more-options
 
@@ -6089,7 +6088,7 @@ proc write-report {command args} {
                 setAquaDialogStyle $w(reportPopup)
             }
 
-            set cf [frame $w(reportPopup).clientFrame -bd 2 -relief groove]
+            set cf [frame $w(reportPopup).clientFrame]
             set bf [frame $w(reportPopup).buttonFrame -bd 0]
             pack $cf -side top -fill both -expand y -padx 5 -pady 5
             pack $bf -side bottom -fill x -expand n

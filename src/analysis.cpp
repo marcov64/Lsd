@@ -178,29 +178,29 @@ cmd( "set gpoptions \"$gnuplotOptions\"" );
 
 cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change() ? "*" : " ", simul_name );
 
-cmd( "menu .da.m -tearoff 0 -relief groove -bd 2" );
+cmd( "menu .da.m -tearoff 0" );
 
 cmd( "set w .da.m.exit" );
 cmd( ".da.m add cascade -label Exit -menu $w -underline 0" );
-cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
+cmd( "menu $w -tearoff 0" );
 cmd( "$w add command -label \"Quit and Return to Browser\" -command {set choice 2} -underline 0 -accelerator Esc" );
 
 cmd( "set w .da.m.gp" );
 cmd( ".da.m add cascade -label Gnuplot -menu $w -underline 0" );
-cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
+cmd( "menu $w -tearoff 0" );
 cmd( "$w add command -label \"Open...\" -command {set choice 4} -underline 5 -accelerator Ctrl+G" );
 cmd( "$w add command -label \"Options...\" -command {set choice 37} -underline 8" );
 
 cmd( "set w .da.m.opt" );
 cmd( ".da.m add cascade -label Options -menu $w -underline 0" );
-cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
+cmd( "menu $w -tearoff 0" );
 cmd( "$w add command -label \"Colors...\" -command {set choice 21} -underline 0" );
 cmd( "$w add command -label \"Plot Parameters...\" -command {set choice 22} -underline 0" );
 cmd( "$w add command -label \"Lattice Parameters...\" -command {set choice 44} -underline 0" );
 cmd( "$w add checkbutton -label \"Average Y Values\" -variable avgSmpl -underline 8" );
 
 cmd( "set w .da.m.help" );
-cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
+cmd( "menu $w -tearoff 0" );
 cmd( ".da.m add cascade -label Help -menu $w -underline 0" );
 cmd( "$w add command -label \"Help on Analysis of Results\" -underline 0 -accelerator F1 -command { set choice 41 }" );
 cmd( "$w add command -label \"LSD Quick Help\" -underline 4 -command { LsdHelp LSD_quickhelp.html }" );
@@ -367,7 +367,7 @@ cmd( "pack .da.f.h.xy.seq .da.f.h.xy.xy -anchor w" );
 
 cmd( "pack .da.f.h.v .da.f.h.tc .da.f.h.xy -side left -padx 11" );
 
-cmd( "frame .da.f.tit -relief groove -bd 2" );
+cmd( "frame .da.f.tit" );
 cmd( "label .da.f.tit.l -text Title" );
 cmd( "entry .da.f.tit.e -textvariable tit -width 36 -justify center" );
 
@@ -827,7 +827,7 @@ while ( true )
 			cmd( "pack .da.file.pos.p1 .da.file.pos.p2 -side left -ipadx 11" );
 
 			cmd( "set dim 270" );
-			cmd( "frame .da.file.dim -bd 2" );
+			cmd( "frame .da.file.dim" );
 			cmd( "label .da.file.dim.l1 -text \"Dimension\"" );
 			cmd( "entry .da.file.dim.n -width 4 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set dim %%P; return 1 } { %%W delete 0 end; %%W insert 0 $dim; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.file.dim.n insert 0 $dim" );
@@ -1669,22 +1669,22 @@ while ( true )
 			cmd( "newtop .da.a \"Gnuplot Options\" { set choice 2 } .da" );
 			cmd( "label .da.a.l -text \"Options for invoking Gnuplot\"" );
 
-			cmd( "frame .da.a.st -bd 2" );
+			cmd( "frame .da.a.st" );
 			cmd( "label .da.a.st.l -text \"System terminal\"" );
 			cmd( "entry .da.a.st.e -textvariable sysTermTmp -width 20 -justify center" );
 			cmd( "pack .da.a.st.l .da.a.st.e -side left" );
 
-			cmd( "frame .da.a.t -bd 2" );
+			cmd( "frame .da.a.t" );
 			cmd( "label .da.a.t.l -text \"Plot terminal (blank for default)\"" );
 			cmd( "entry .da.a.t.e -textvariable gptermTmp -width 12 -justify center" );
 			cmd( "pack .da.a.t.l .da.a.t.e -side left" );
 
-			cmd( "frame .da.a.d -bd 2" );
+			cmd( "frame .da.a.d" );
 			cmd( "label .da.a.d.l -text \"3D grid configuration\"" );
 			cmd( "entry .da.a.d.e -textvariable gpdgrid3dTmp -width 12 -justify center" );
 			cmd( "pack .da.a.d.l .da.a.d.e -side left" );
 
-			cmd( "frame .da.a.o -relief groove -bd 2" );
+			cmd( "frame .da.a.o" );
 			cmd( "label .da.a.o.l -text \"Other options\"" );
 			cmd( "text .da.a.o.t -undo 1 -height 10 -width 50 -font \"$font_small\"" );
 			cmd( ".da.a.o.t insert end \"$gpoptions\"" );
@@ -5161,7 +5161,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 
 	cmd( "label $w.b.pad -width 6" );
 
-	cmd( "frame $w.b.z -bd 2 -relief groove" );
+	cmd( "frame $w.b.z" );
 	cmd( "label $w.b.z.l -text Zoom" );
 
 	cmd( "frame $w.b.z.b" );
@@ -8151,7 +8151,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	cmd( "button $w.b.s.stop -width $butWid -text Stop -command { set choice 2 } -state disabled -underline 0" );
 	cmd( "pack $w.b.s.save $w.b.s.stop -pady 5" );
 
-	cmd( "frame $w.b.z -bd 2 -relief groove" );
+	cmd( "frame $w.b.z" );
 	cmd( "label $w.b.z.l -text Zoom" );
 
 	cmd( "frame $w.b.z.b" );

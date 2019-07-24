@@ -116,7 +116,7 @@ void report( int *choice, object *r )
 	cmd( "frame .w.g" );
 	cmd( "label .w.g.l -text \"Included sections\"" );
 
-	cmd( "frame .w.g.opt -bd 2 -relief groove" );
+	cmd( "frame .w.g.opt" );
 	cmd( "checkbutton .w.g.opt.desc -text \"Description\" -variable desc" );
 	cmd( "checkbutton .w.g.opt.extra -text \"User section\" -variable extra -command { if { $extra } { .w.s.e2.file.new conf -state normal; .w.s.e2.h conf -state normal; .w.s.e2.header.tit conf -state normal; .w.s.e2.file.tit conf -state normal } { .w.s.e2.file.new conf -state disabled; .w.s.e2.h conf -state disabled; .w.s.e2.header.tit conf -state disabled; .w.s.e2.file.tit conf -state disabled } }" );
 	cmd( "checkbutton .w.g.opt.obs -text \"Selected variables\" -variable obs" );
@@ -129,7 +129,7 @@ void report( int *choice, object *r )
 	cmd( "frame .w.s" );
 	cmd( "label .w.s.lab -text \"User supplied section\"" );
 
-	cmd( "frame .w.s.e2 -bd 2 -relief groove" );
+	cmd( "frame .w.s.e2" );
 	cmd( "checkbutton .w.s.e2.h -state disabled -text \"Use HTML tags\" -variable html2" );
 
 	cmd( "frame .w.s.e2.header" );

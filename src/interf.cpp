@@ -722,7 +722,7 @@ int browse( object *r, int *choice )
 			}" );
 
 		// navigation (top) panel
-		cmd( "frame .l.p -relief groove -bd 2" );
+		cmd( "frame .l.p" );
 
 		cmd( "frame .l.p.up_name" );
 		cmd( "label .l.p.up_name.d -text \"Parent object:\" -width 12 -anchor w" );
@@ -923,7 +923,7 @@ int browse( object *r, int *choice )
 
 			// Button bar
 			cmd( "destroy .bbar" );
-			cmd( "frame .bbar -bd 2" );
+			cmd( "frame .bbar" );
 
 			cmd( "button .bbar.open -image openImg -relief $bRlf -overrelief $ovBrlf -command {set choice 17}" );
 			cmd( "button .bbar.reload -image reloadImg -relief $bRlf -overrelief $ovBrlf -command {set choice 38}" );
@@ -1289,13 +1289,13 @@ case 2:
 
 	cmd( "set w $T.d" );
 	cmd( "frame $w" );
-	cmd( "frame $w.f -bd 2 -relief groove" );
-	cmd( "label $w.f.lab -text \"Description\"" );
+	cmd( "label $w.lab -text \"Description\"" );
+	cmd( "frame $w.f" );
 	cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
 	cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
 	cmd( "pack $w.f.yscroll -side right -fill y" );
-	cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
-	cmd( "pack $w.f" );
+	cmd( "pack $w.f.text -expand yes -fill both" );
+	cmd( "pack $w.lab $w.f" );
 
 	cmd( "pack $T.l $T.f $T.d -pady 5" );
 	
@@ -1463,13 +1463,13 @@ case 3:
 
 	cmd( "set w $T.d" );
 	cmd( "frame $w" );
-	cmd( "frame $w.f -bd 2 -relief groove" );
-	cmd( "label $w.f.lab -text \"Description\"" );
+	cmd( "label $w.lab -text \"Description\"" );
+	cmd( "frame $w.f" );
 	cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
 	cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
 	cmd( "pack $w.f.yscroll -side right -fill y" );
-	cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
-	cmd( "pack $w.f" );
+	cmd( "pack $w.f.text -expand yes -fill both" );
+	cmd( "pack $w.lab $w.f" );
 
 	cmd( "pack $T.l $T.f $w -pady 5" );
 	cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#AddADesc } { set done 2 }" );
@@ -1585,13 +1585,13 @@ case 32:
 
 	cmd( "set w $T.d" );
 	cmd( "frame $w" );
-	cmd( "frame $w.f -bd 2 -relief groove" );
-	cmd( "label $w.f.lab -text \"Description\"" );
+	cmd( "label $w.lab -text \"Description\"" );
+	cmd( "frame $w.f" );
 	cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
 	cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
 	cmd( "pack $w.f.yscroll -side right -fill y" );
-	cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
-	cmd( "pack $w.f" );
+	cmd( "pack $w.f.text -expand yes -fill both" );
+	cmd( "pack $w.lab $w.f" );
 
 	cmd( "pack $T.l $T.f $w -pady 5" );
 	cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#InsertAParent } { set done 2 }" );
@@ -1748,12 +1748,12 @@ case 6:
 	cmd( "set w $T.desc" );
 
 	cmd( "frame $w" );
-	cmd( "frame $w.f -bd 2 -relief groove" );
-	cmd( "label $w.f.int -text \"Description\"" );
+	cmd( "label $w.int -text \"Description\"" );
+	cmd( "frame $w.f" );
 	cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
 	cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
 	cmd( "pack $w.f.yscroll -side right -fill y" );
-	cmd( "pack $w.f.int $w.f.text -anchor w -expand yes -fill both" );
+	cmd( "pack $w.f.text -anchor w -expand yes -fill both" );
 
 	for ( i = 0; cur_descr->text[ i ] != ( char ) NULL; ++i )
 		if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\' )
@@ -1762,7 +1762,7 @@ case 6:
 			cmd( "$w.f.text insert end \"\\%c\"", cur_descr->text[ i ] );
 
 	cmd( "$w.f.text delete \"end - 1 char\"" );
-	cmd( "pack $w.f -fill x -expand yes" );
+	cmd( "pack $w.int $w.f -fill x -expand yes" );
 
 	cmd( "pack $T.h $T.b0 $T.b1 $w -pady 5" );
 
@@ -2069,21 +2069,24 @@ case 7:
 	else
 		cmd( "pack $Td.opt.l $Td.opt.obs -side left" );
 
-	cmd( "frame $Td.f -bd 2 -relief groove" );
+	cmd( "frame $Td.f" );
 	cmd( "label $Td.f.int -text \"Description\"" );
 
-	cmd( "scrollbar $Td.f.yscroll -command \"$Td.f.text yview\"" );
-	cmd( "text $Td.f.text -undo 1 -wrap word -width 60 -height 8 -relief sunken -yscrollcommand \"$Td.f.yscroll set\" -font \"$font_small\"" );
-	cmd( "pack $Td.f.yscroll -side right -fill y" );
-	cmd( "pack $Td.f.int $Td.f.text -anchor w -expand yes -fill both" );
-
+	cmd( "frame $Td.f.desc" );
+	cmd( "scrollbar $Td.f.desc.yscroll -command \"$Td.f.desc.text yview\"" );
+	cmd( "text $Td.f.desc.text -undo 1 -wrap word -width 60 -height 8 -relief sunken -yscrollcommand \"$Td.f.desc.yscroll set\" -font \"$font_small\"" );
+	cmd( "pack $Td.f.desc.yscroll -side right -fill y" );
+	cmd( "pack $Td.f.desc.text -anchor w -expand yes -fill both" );
+	
 	for ( i = 0; cur_descr->text[ i ] != '\0'; ++i )
 		if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\')
-			cmd( "$Td.f.text insert end \"%c\"", cur_descr->text[ i ] );
+			cmd( "$Td.f.desc.text insert end \"%c\"", cur_descr->text[ i ] );
 		else
-			cmd( "$Td.f.text insert end \"\\%c\"", cur_descr->text[ i ] );
+			cmd( "$Td.f.desc.text insert end \"\\%c\"", cur_descr->text[ i ] );
 
-	cmd( "$Td.f.text delete \"end - 1 char\"" );
+	cmd( "$Td.f.desc.text delete \"end - 1 char\"" );
+
+	cmd( "pack $Td.f.int $Td.f.desc" );
 
 	cmd( "frame $Td.b" );
 	cmd( "button $Td.b.eq -width [ expr $butWid + 3 ] -text \"View Code\" -command {set done 3} -underline 3" );
@@ -2102,22 +2105,27 @@ case 7:
 
 	if ( cv->param == 1 || cv->num_lag > 0 )
 	{
-		cmd( "frame $Td.i -bd 2 -relief groove" );
+		cmd( "frame $Td.i" );
 		cmd( "label $Td.i.int -text \"Comments on initial values\"" );
-		cmd( "scrollbar $Td.i.yscroll -command \"$Td.i.text yview\"" );
-		cmd( "text $Td.i.text -undo 1 -wrap word -width 60 -height 3 -relief sunken -yscrollcommand \"$Td.i.yscroll set\" -font \"$font_small\"" );
-		cmd( "pack $Td.i.yscroll -side right -fill y" );
-		if (cur_descr->init != NULL )
+
+		cmd( "frame $Td.i.desc" );
+		cmd( "scrollbar $Td.i.desc.yscroll -command \"$Td.i.desc.text yview\"" );
+		cmd( "text $Td.i.desc.text -undo 1 -wrap word -width 60 -height 3 -relief sunken -yscrollcommand \"$Td.i.desc.yscroll set\" -font \"$font_small\"" );
+		cmd( "pack $Td.i.desc.yscroll -side right -fill y" );
+		cmd( "pack $Td.i.desc.text -anchor w -expand yes -fill both" );
+
+		if ( cur_descr->init != NULL )
 		{
 			for ( i = 0; cur_descr->init[ i ] != '\0'; ++i )
 				if ( cur_descr->init[ i ] != '[' && cur_descr->init[ i ] != ']' && cur_descr->init[ i ] != '{' && cur_descr->init[ i ] != '}' && cur_descr->init[ i ] != '\"' && cur_descr->text[ i ] != '\\')
-					cmd( "$Td.i.text insert end \"%c\"", cur_descr->init[ i ] );
+					cmd( "$Td.i.desc.text insert end \"%c\"", cur_descr->init[ i ] );
 				else
-					cmd( "$Td.i.text insert end \"\\%c\"", cur_descr->init[ i ] );
+					cmd( "$Td.i.desc.text insert end \"\\%c\"", cur_descr->init[ i ] );
 	  
-			cmd( "$Td.i.text delete \"end - 1 char\"" );
+			cmd( "$Td.i.desc.text delete \"end - 1 char\"" );
 		}
-		cmd( "pack $Td.i.int $Td.i.text -anchor w -expand yes -fill both" );
+		
+		cmd( "pack $Td.i.int $Td.i.desc" );
 	  
 		cmd( "frame $Td.b2" );
 		cmd( "button $Td.b2.setall -width [ expr $butWid + 3 ] -text \"Initial Values\" -command { set done 11 } -underline 1" );
@@ -2166,19 +2174,19 @@ case 7:
 
 	if ( done == 9 ) 
 	{
-		cmd( "set text_description \"[ .chgelem.desc.f.text get 1.0 end ]\"" );
+		cmd( "set text_description \"[ .chgelem.desc.f.desc.text get 1.0 end ]\"" );
 		change_descr_text( lab_old );
 	  
 		auto_document( choice, lab_old, "ALL", true );
-		cmd( ".chgelem.desc.f.text delete 1.0 end" );
+		cmd( ".chgelem.desc.f.desc.text delete 1.0 end" );
 
 		for ( i = 0; cur_descr->text[ i ] != '\0'; ++i )
 			if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\')
-				cmd( ".chgelem.desc.f.text insert end \"%c\"", cur_descr->text[ i ] );
+				cmd( ".chgelem.desc.f.desc.text insert end \"%c\"", cur_descr->text[ i ] );
 			else
-				cmd( ".chgelem.desc.f.text insert end \"\\%c\"", cur_descr->text[ i ] );
+				cmd( ".chgelem.desc.f.desc.text insert end \"\\%c\"", cur_descr->text[ i ] );
 		  
-		cmd( ".chgelem.desc.f.text delete \"end - 1 char\"" );
+		cmd( ".chgelem.desc.f.desc.text delete \"end - 1 char\"" );
 		unsaved_change( true );		// signal unsaved change
 	}
 
@@ -2210,11 +2218,11 @@ case 7:
 		   cv->observe = ( observe == 'y' ) ? true : false;
 		}
 		  
-		cmd( "set text_description \"[.chgelem.desc.f.text get 1.0 end]\"" );
+		cmd( "set text_description \"[.chgelem.desc.f.desc.text get 1.0 end]\"" );
 		change_descr_text( lab_old );
 		if ( cv->param == 1 || cv->num_lag > 0 )
 		{
-			cmd( "set text_description \"[.chgelem.desc.i.text get 1.0 end]\"" );
+			cmd( "set text_description \"[.chgelem.desc.i.desc.text get 1.0 end]\"" );
 			change_init_text( lab_old );
 		}
 	  

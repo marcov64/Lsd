@@ -64,7 +64,7 @@ set bordsize	2	; # width of windows borders
 set tbarsize	55	; # size in pixels of bottom taskbar (exclusion area) - Windows 7+ = 82
 set hsizeL		800	; # LMM horizontal size in pixels
 set vsizeL		600	; # LMM vertical size in pixels
-set hsizeLmin	600	; # LMM minimum horizontal size in pixels
+set hsizeLmin	620	; # LMM minimum horizontal size in pixels
 set vsizeLmin	300	; # LMM minimum vertical size in pixels
 set hsizeB 		400	; # browser horizontal size in pixels
 set vsizeB		620	; # browser vertical size in pixels

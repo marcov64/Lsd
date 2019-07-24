@@ -53,7 +53,7 @@ proc showmodel pippo {
 	} else { 
 		newtop .l "LSD Model Browser" { .l.m.file invoke 2 }
 		
-		menu .l.m -tearoff 0 -relief groove -bd 2
+		menu .l.m -tearoff 0
 		
 		set m .l.m.file 
 		menu $m -tearoff 0
@@ -78,7 +78,7 @@ proc showmodel pippo {
 		}
 
 		set m .l.m.edit 
-		menu $m -tearoff 0 -relief groove -bd 2
+		menu $m -tearoff 0
 		.l.m add cascade -label Edit -menu $m -underline 0
 		$m add command -label "Edit Name/Description..." -underline 0 -accelerator Ctrl+E -command {
 			medit [ .l.l.l curselection ] 
@@ -100,7 +100,7 @@ proc showmodel pippo {
 		}
 
 		set m .l.m.help 
-		menu $m -tearoff 0 -relief groove -bd 2
+		menu $m -tearoff 0
 		.l.m add cascade -label Help -menu $m -underline 0
 		$m add command -label "Help" -underline 0 -accelerator F1 -command { 
 			LsdHelp modelbrowser.html 
@@ -114,7 +114,7 @@ proc showmodel pippo {
 		.l configure -menu .l.m
 
 		set ltip ""
-		frame .l.bbar -bd 2
+		frame .l.bbar
 		button .l.bbar.new -image newImg -relief $bRlf -overrelief $ovBrlf -command  { .l.m.file invoke 1 }
 		button .l.bbar.edit -image editImg -relief $bRlf -overrelief $ovBrlf -command  { .l.m.edit invoke 0 }
 		button .l.bbar.copy -image copyImg -relief $bRlf -overrelief $ovBrlf -command  { .l.m.edit invoke 1 }
@@ -137,7 +137,7 @@ proc showmodel pippo {
 		pack .l.bbar.new .l.bbar.edit .l.bbar.copy .l.bbar.paste .l.bbar.delete .l.bbar.help .l.bbar.tip -padx 3 -side left
 		pack .l.bbar -anchor w -fill x
 		
-		frame .l.l -relief groove -bd 2
+		frame .l.l
 
 		frame .l.l.tit
 		label .l.l.tit.g -text "Current group:"
@@ -161,7 +161,7 @@ proc showmodel pippo {
 		.l.l.l.m  add command -label Paste -state disabled -command { .l.m.edit invoke 2 }
 		.l.l.l.m  add command -label Delete -command { .l.m.edit invoke 3 }
 
-		frame .l.t -relief groove -bd 2
+		frame .l.t
 		label .l.t.tit -text Description
 		pack .l.t.tit -expand yes -fill x
 		scrollbar .l.t.yscroll -command ".l.t.text yview"
