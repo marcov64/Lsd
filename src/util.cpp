@@ -336,10 +336,10 @@ void error_hard( const char* logText, const char* boxTitle, const char* boxText,
   cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD Browser to edit the model configuration\"" );
   cmd( "radiobutton .cazzo.e.b.d -variable err -value 3 -text \"Open LSD Debugger on the offending variable and object instance\"" );
   cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD Browser to edit the model equations' code in LMM\"" );
-    
+  
   cmd( "radiobutton .cazzo.e.b.t -variable err -value 4 -text \"Advanced GDB: Throw an error to unwind the stack in GDB\"" );
   
-    
+  
   cmd( "pack .cazzo.e.b.r .cazzo.e.b.d .cazzo.e.b.e .cazzo.e.b.t -anchor w" );
   
   
@@ -361,10 +361,10 @@ void error_hard( const char* logText, const char* boxTitle, const char* boxText,
   
   cmd( "set choice $err" );
   cmd( "destroytop .cazzo" );
-    
-  if (choice == 4)
-  {     object* ptr = NULL;
-        ptr->up = NULL; 
+  
+  if (choice == 4) {
+    object* ptr = NULL;
+    ptr->up = NULL;
   }  //This is a hack to throw.
   
   if ( choice == 3 ) {

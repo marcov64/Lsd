@@ -6,8 +6,8 @@
     Licence: This file alone: MIT
 
     Provides some tools for validating.
-    
-   
+
+
     Commenting is not good yet... AND NEEDS UPDATING!
 
     This file contains methods to allow printing the caller graph.
@@ -114,317 +114,343 @@
 #include <assert.h>
 
 #ifndef TRACK_SEQUENCE_MAX_T
-#define TRACK_SEQUENCE_MAX_T max_step
+  #define TRACK_SEQUENCE_MAX_T max_step
 #endif
 
 #ifndef TRACK_SEQUENCE_MAX_SAME
-#define TRACK_SEQUENCE_MAX_SAME 5
+  #define TRACK_SEQUENCE_MAX_SAME 5
 #endif
 
 #ifndef BIRTH_TRACK_ALL_T
-#define BIRTH_TRACK_ALL_T TRACK_SEQUENCE_MAX_T
+  #define BIRTH_TRACK_ALL_T TRACK_SEQUENCE_MAX_T
 #endif
 
 #define USE_OLD_ID_LABEL_PATTERN false //a switch to allow the name pattern ID_Label instead of default Label_ID
 
 namespace LSD_VALIDATE {
 
-    int indent_level = -1; //indentation, increase with each call of track sequence
-    void end_equation_reduce_indent()
-    {
-        indent_level--;
+  int indent_level = -1; //indentation, increase with each call of track sequence
+  void end_equation_reduce_indent()
+  {
+    indent_level--;
+  };
+  
+  struct s_assert_time;
+  
+  struct s_assert_time {
+    double time; //allowed time
+    timespec t_start;
+    timespec t_end;
+    
+    s_assert_time( double time ) : time(time) {
+      clock_gettime(CLOCK_MONOTONIC, &t_start);
     };
-
-    struct s_assert_time;
-
-    struct s_assert_time {
-        double time; //allowed time
-        timespec t_start;
-        timespec t_end;
-
-        s_assert_time( double time ) : time(time)
-        {
-            clock_gettime(CLOCK_MONOTONIC, &t_start);
-        };
-
-        bool operator()( )
-        {
-            clock_gettime(CLOCK_MONOTONIC, &t_end);
-            double elapsed = ( (double) (t_end.tv_sec - t_start.tv_sec) ) + ( (double) (t_end.tv_nsec - t_start.tv_nsec) ) / 10.0e9;
-            if (elapsed > time) {
-                plog("\nError in s_assert_time()");
-                return false;
-            }
-            else
-                return true;
-        };
+    
+    bool operator()( ) {
+      clock_gettime(CLOCK_MONOTONIC, &t_end);
+      double elapsed = ( (double) (t_end.tv_sec - t_start.tv_sec) ) + ( (double) (t_end.tv_nsec - t_start.tv_nsec) ) / 10.0e9;
+      
+      if (elapsed > time) {
+        plog("\nError in s_assert_time()");
+        return false;
+      }
+      else
+      { return true; }
     };
-
-    //   static bool dummy_has_id;
-    //label_id_of_o
-    //return the label of the object with its unique ID, if wanted.
-    std::string label_id_of_o(object* obj_ = NULL, bool treat_as_id = true )
-    {
-        //std::string ID_LABEL;
-        stringstream sID_LABEL;
-        sID_LABEL << "";
-        if (obj_ == NULL) {
-            return "Null";
-        }
-        else if (obj_ == root) {
-            return "root";
-        }
-        else {
-            try {
-                std::string temp(obj_->label);
-                object* cur = obj_;
-                for (cur = cur->up; cur != NULL; cur = cur->up){
-                    temp.insert(0,"->");
-                    if ( cur->is_unique() )
-                        temp.insert(0,")");
-                        temp.insert(0,std::to_string(static_cast<int>(cur->unique_id())));
-                        temp.insert(0,"(");
-                        temp.insert(0,cur->label);
-                }                    
-                sID_LABEL << temp;
-            }
-            catch (...) {
-                return "Not Root Not Null Not Regular Object";
-            }
-        }
-
-        if (treat_as_id == true) {
-            if ( obj_->is_unique() ) {
-                sID_LABEL << " (" << obj_->unique_id() << ")";
-            }
-            else if (obj_->next != NULL) {
-
-                sID_LABEL << obj_;
-            }
-        }
-        return sID_LABEL.str();
+  };
+  
+  //   static bool dummy_has_id;
+  //label_id_of_o
+  //return the label of the object with its unique ID, if wanted.
+  std::string label_id_of_o(object* obj_ = NULL, bool treat_as_id = true )
+  {
+    //std::string ID_LABEL;
+    stringstream sID_LABEL;
+    sID_LABEL << "";
+    
+    if (obj_ == NULL) {
+      return "Null";
     }
-
-    //return label of variable under computation
-    std::string label_of_var_of_o(variable* var = NULL, const char* fun_name = "noVarErr?")
-    {
-        if (var == NULL) {
-            std::string out = fun_name;
-            if(out.compare("noVarErr?")==0)
-                return out;
-            else{
-                out = "external function: " + out;
-                return out;
-            }
-                
-        }
-        else {
-            try {
-                return std::string(var->label);
-            }
-            catch (...) {
-                return "noLabelForVar?";
-            }
-        }
+    else if (obj_ == root) {
+      return "root";
     }
-
-    /* To do: Gather same groups of calls (loops) */
-
-    // object* former_callee_obj=NULL;
-    // object* former_caller_obj=NULL;
-    // int init_former_callee=-1;
-
-    std::vector< std::pair < std::string, int > > non_id_object_vars_called;
-    std::string current_callee_type;
-
-    std::string track_source(object* p, object* c = NULL, variable* var = NULL, bool has_id = true, bool is_dummy = false, const char* fun_name = "noVarErr")
-    {
-        if (strcmp(fun_name, "noVarErr") == 0) //not for EXT options
-            indent_level++; //increase indentation.
-
-        //those objects without id are only reported if the are first and/or last.
-        std::string first_last_add = "";
-        int first_or_last = 0;
-        if (!has_id) {
-            //first, check if p is the last of its kind.
-            if (p->next == NULL) {
-                first_or_last++;
-                first_last_add = " :: LAST obj of its kind";
-            }
-
-            //next, find first object of that kind and check if it is p.
-            if (p->up->search(p->label) == p) {  //p is the first of its kind
-                first_or_last++;
-                first_last_add = " :: FIRST obj of its kind";
-            }
-            if (first_or_last == 2) {
-                //unique element in obj.
-                first_last_add = " :: SINGLE element in parent";
-            }
+    else {
+      try {
+        std::string temp(obj_->label);
+        object* cur = obj_;
+        
+        for (cur = cur->up; cur != NULL; cur = cur->up) {
+          temp.insert(0, "->");
+          
+          if ( cur->is_unique() )
+          { temp.insert(0, ")"); }
+          
+          temp.insert(0, std::to_string(static_cast<int>(cur->unique_id())));
+          temp.insert(0, "(");
+          temp.insert(0, cur->label);
         }
-
-        //skip elements not in a row.
-        if ( has_id || first_or_last > 0) {
-            stringstream ss;
-            ss << "";
-            try {
-                ss << "\n" << std::setw(5) << t;
-                ss << " : ";
-                if (indent_level > 0)
-                    ss << "(" << std::setw(2) << indent_level << ")";
-                for (int i = 0; i < indent_level; i++)
-                    ss << "  ";
-                ss << std::setw(40) << label_id_of_o(p);
-                ss << " -> " << std::setw(32) << label_of_var_of_o(var, fun_name);
-                ss << " called by " << std::setw(32) << label_id_of_o(c, has_id);
-                ss << " " << first_last_add;
-                if (is_dummy)
-                    ss  << "( DUMMY )";
-                return ss.str();
-            }
-            catch (...) {
-                ss << "\n... error";
-                return ss.str();
-            }
-        }
-        else {
-            return "";
-        }
+        
+        sID_LABEL << temp;
+      }
+      catch (...) {
+        return "Not Root Not Null Not Regular Object";
+      }
     }
-
-    int time_call = -1;
-
-    std::string callType(object* p, object* c, variable* var)
-    {
-        std::string identifier = "total calls of '";
-        identifier += var == NULL ? "NULL" : var->label;
-        identifier += "->";
-        identifier += p == NULL ? "NULL" : p->label;
-        identifier += "' called by Object '";
-        identifier += c == NULL ? "NULL" : c->label;
-        return identifier;
+    
+    if (treat_as_id == true) {
+      if ( obj_->is_unique() ) {
+        sID_LABEL << " (" << obj_->unique_id() << ")";
+      }
+      else if (obj_->next != NULL) {
+      
+        sID_LABEL << obj_;
+      }
     }
-
-    std::string skip_print(object* p, variable* var)
-    {
-        if (p == NULL || var == NULL)
-            return "false";
-        int i = 0;
-        for (object* cur = root->search(p->label); cur != p; cur = cur->hyper_next()) {
-            if (++i > TRACK_SEQUENCE_MAX_SAME && p->t_birth > BIRTH_TRACK_ALL_T ) //Always track new born
-                return "";
-        }
-        if (i == TRACK_SEQUENCE_MAX_SAME && ! (p->t_birth > BIRTH_TRACK_ALL_T) ) {
-            std::string buffer = "\n Skipping info for next elements of type '";
-            buffer += p==NULL?"NULL":p->label;
-            buffer += "->";
-            buffer += var==NULL?"NULL":var->label;
-            buffer += "'";
-            return buffer;
-        }
-        return "false";
+    
+    return sID_LABEL.str();
+  }
+  
+  //return label of variable under computation
+  std::string label_of_var_of_o(variable* var = NULL, const char* fun_name = "noVarErr?")
+  {
+    if (var == NULL) {
+      std::string out = fun_name;
+      
+      if (out.compare("noVarErr?") == 0)
+      { return out; }
+      else {
+        out = "external function: " + out;
+        return out;
+      }
+      
     }
-
-    std::string check_if_same;
-    int same_count;
-    std::string track_sequence(int time, object* p, object* c = NULL, variable* var = NULL, bool has_id = true, bool is_dummy = false, const char* fun_name = "")
-    {
-        stringstream ss;
-        ss << "";
-        if (time != time_call) {
-            check_if_same.clear();
-            same_count = 0;
-            time_call = time;
-            ss << "\n" << setw(80) << " -- -- -- -- -- -- -- -- ";
-            ss << "\n" << setw(5) << "" << "Time is now:" << time;            
-            ss << "\n" << setw(5) << "'t'" << ":" << setw(40) << "'Object'" << "->" << setw(32) << "'Variable'" << " called by " << "'Calling Object'";
-        }
-        auto skip_buff = skip_print(p,var);
-        if (skip_buff.compare("false") != 0){
-            ss << skip_buff;
-            return ss.str();
-        }
-        std::string buffer = callType(p, c, var);
-        if (buffer.compare(check_if_same) == 0) {
-            same_count++;
-            return "";
-        }
-        else if (check_if_same.size() > 0) {
-            ss << "\n " << check_if_same << " : " << same_count;
-            same_count = 0;
-            check_if_same.clear();
-        }
-
-
-
-        ss << track_source(p, c, var, has_id, is_dummy, fun_name);
-        cout << ss.str().c_str() << flush; //print to console, too.
+    else {
+      try {
+        return std::string(var->label);
+      }
+      catch (...) {
+        return "noLabelForVar?";
+      }
+    }
+  }
+  
+  /* To do: Gather same groups of calls (loops) */
+  
+  // object* former_callee_obj=NULL;
+  // object* former_caller_obj=NULL;
+  // int init_former_callee=-1;
+  
+  std::vector< std::pair < std::string, int > > non_id_object_vars_called;
+  std::string current_callee_type;
+  
+  std::string track_source(object* p, object* c = NULL, variable* var = NULL, bool has_id = true, bool is_dummy = false, const char* fun_name = "noVarErr")
+  {
+    if (strcmp(fun_name, "noVarErr") == 0) //not for EXT options
+    { indent_level++; } //increase indentation.
+    
+    //those objects without id are only reported if the are first and/or last.
+    std::string first_last_add = "";
+    int first_or_last = 0;
+    
+    if (!has_id) {
+      //first, check if p is the last of its kind.
+      if (p->next == NULL) {
+        first_or_last++;
+        first_last_add = " :: LAST obj of its kind";
+      }
+      
+      //next, find first object of that kind and check if it is p.
+      if (p->up->search(p->label) == p) {  //p is the first of its kind
+        first_or_last++;
+        first_last_add = " :: FIRST obj of its kind";
+      }
+      
+      if (first_or_last == 2) {
+        //unique element in obj.
+        first_last_add = " :: SINGLE element in parent";
+      }
+    }
+    
+    //skip elements not in a row.
+    if ( has_id || first_or_last > 0) {
+      stringstream ss;
+      ss << "";
+      
+      try {
+        ss << "\n" << std::setw(5) << t;
+        ss << " : ";
+        
+        if (indent_level > 0)
+        { ss << "(" << std::setw(2) << indent_level << ")"; }
+        
+        for (int i = 0; i < indent_level; i++)
+        { ss << "  "; }
+        
+        ss << std::setw(40) << label_id_of_o(p);
+        ss << " -> " << std::setw(32) << label_of_var_of_o(var, fun_name);
+        ss << " called by " << std::setw(32) << label_id_of_o(c, has_id);
+        ss << " " << first_last_add;
+        
+        if (is_dummy)
+        { ss  << "( DUMMY )"; }
+        
         return ss.str();
-
+      }
+      catch (...) {
+        ss << "\n... error";
+        return ss.str();
+      }
     }
-
-    // returns: -2 -error, -1: is root, 0: not head not last, 1: head, 2: last
-    int p_is_first_or_last_in_line(object* p)
-    {
-        if (p == root) {
-            return -1; //root
-        }
-        else if (p->next == NULL) {
-            return 2; //last
-        }
-        else {
-            bridge* cb = p->up->b;
-            while (cb != NULL && strcmp(cb->head->label, p->label) != 0 ) { //if there is a cb->head and (only then) if this is not of the same type as p
-                cb = cb->next;
-            }
-            if (cb == NULL) {
-                return -2; //does not exist
-            }
-            if (cb->head == p) {
-                return 1; //is head;
-            }
-            else {
-                return 0; //is not head
-            }
-        }
+    else {
+      return "";
     }
-
+  }
+  
+  int time_call = -1;
+  
+  std::string callType(object* p, object* c, variable* var)
+  {
+    std::string identifier = "total calls of '";
+    identifier += var == NULL ? "NULL" : var->label;
+    identifier += "->";
+    identifier += p == NULL ? "NULL" : p->label;
+    identifier += "' called by Object '";
+    identifier += c == NULL ? "NULL" : c->label;
+    return identifier;
+  }
+  
+  std::string skip_print(object* p, variable* var)
+  {
+    if (p == NULL || var == NULL)
+    { return "false"; }
+    
+    int i = 0;
+    
+    for (object* cur = root->search(p->label); cur != p; cur = cur->hyper_next()) {
+      if (++i > TRACK_SEQUENCE_MAX_SAME && p->t_birth > BIRTH_TRACK_ALL_T ) //Always track new born
+      { return ""; }
+    }
+    
+    if (i == TRACK_SEQUENCE_MAX_SAME && ! (p->t_birth > BIRTH_TRACK_ALL_T) ) {
+      std::string buffer = "\n Skipping info for next elements of type '";
+      buffer += p == NULL ? "NULL" : p->label;
+      buffer += "->";
+      buffer += var == NULL ? "NULL" : var->label;
+      buffer += "'";
+      return buffer;
+    }
+    
+    return "false";
+  }
+  
+  std::string check_if_same;
+  int same_count;
+  std::string track_sequence(int time, object* p, object* c = NULL, variable* var = NULL, bool has_id = true, bool is_dummy = false, const char* fun_name = "")
+  {
+    stringstream ss;
+    ss << "";
+    
+    if (time != time_call) {
+      check_if_same.clear();
+      same_count = 0;
+      time_call = time;
+      ss << "\n" << setw(80) << " -- -- -- -- -- -- -- -- ";
+      ss << "\n" << setw(5) << "" << "Time is now:" << time;
+      ss << "\n" << setw(5) << "'t'" << ":" << setw(40) << "'Object'" << "->" << setw(32) << "'Variable'" << " called by " << "'Calling Object'";
+    }
+    
+    auto skip_buff = skip_print(p, var);
+    
+    if (skip_buff.compare("false") != 0) {
+      ss << skip_buff;
+      return ss.str();
+    }
+    
+    std::string buffer = callType(p, c, var);
+    
+    if (buffer.compare(check_if_same) == 0) {
+      same_count++;
+      return "";
+    }
+    else if (check_if_same.size() > 0) {
+      ss << "\n " << check_if_same << " : " << same_count;
+      same_count = 0;
+      check_if_same.clear();
+    }
+    
+    
+    
+    ss << track_source(p, c, var, has_id, is_dummy, fun_name);
+    cout << ss.str().c_str() << flush; //print to console, too.
+    return ss.str();
+    
+  }
+  
+  // returns: -2 -error, -1: is root, 0: not head not last, 1: head, 2: last
+  int p_is_first_or_last_in_line(object* p)
+  {
+    if (p == root) {
+      return -1; //root
+    }
+    else if (p->next == NULL) {
+      return 2; //last
+    }
+    else {
+      bridge* cb = p->up->b;
+      
+      while (cb != NULL && strcmp(cb->head->label, p->label) != 0 ) { //if there is a cb->head and (only then) if this is not of the same type as p
+        cb = cb->next;
+      }
+      
+      if (cb == NULL) {
+        return -2; //does not exist
+      }
+      
+      if (cb->head == p) {
+        return 1; //is head;
+      }
+      else {
+        return 0; //is not head
+      }
+    }
+  }
+  
 }
 
 /*** Following: a set of macros as API */
 
 //in no window mode, stop all information printing and testing
 #ifndef NO_WINDOW_TRACKING
-#ifdef NO_WINDOW
-#ifndef DISABLE_LOCAL_CLOCKS
-#define DISABLE_LOCAL_CLOCKS
-#endif
-#ifdef USE_ASSERTS
-#undef USE_ASSERTS
-#endif
-#ifndef SWITCH_TRACK_SEQUENCE_OFF
-#define SWITCH_TRACK_SEQUENCE_OFF
-#endif
-#ifndef SWITCH_VERBOSE_OFF
-#define SWITCH_VERBOSE_OFF
-#endif
-#ifndef SWITCH_TEST_OFF
-#define SWITCH_TEST_OFF
-#endif
-#endif
+  #ifdef NO_WINDOW
+    #ifndef DISABLE_LOCAL_CLOCKS
+      #define DISABLE_LOCAL_CLOCKS
+    #endif
+    #ifdef USE_ASSERTS
+      #undef USE_ASSERTS
+    #endif
+    #ifndef SWITCH_TRACK_SEQUENCE_OFF
+      #define SWITCH_TRACK_SEQUENCE_OFF
+    #endif
+    #ifndef SWITCH_VERBOSE_OFF
+      #define SWITCH_VERBOSE_OFF
+    #endif
+    #ifndef SWITCH_TEST_OFF
+      #define SWITCH_TEST_OFF
+    #endif
+  #endif
 #endif
 
 /* Tools for assertions */
 #ifdef USE_ASSERTS
-#define SET_TIME_CHECK( TIME ) LSD_VALIDATE::s_assert_time assert_time( TIME );  plog("\nSet Time Check");
-#define RESET_TIME_CHECK       assert_time = LSD_VALIDATE::s_assert_time(assert_time.time);
-#define ASSERT_TIME_CHECK      assert( assert_time( ) );
-#define ASSERT_EXPRESSION( EXPR )      assert( EXPR );
+  #define SET_TIME_CHECK( TIME ) LSD_VALIDATE::s_assert_time assert_time( TIME );  plog("\nSet Time Check");
+  #define RESET_TIME_CHECK       assert_time = LSD_VALIDATE::s_assert_time(assert_time.time);
+  #define ASSERT_TIME_CHECK      assert( assert_time( ) );
+  #define ASSERT_EXPRESSION( EXPR )      assert( EXPR );
 #else
-#define SET_TIME_CHECK( TIME ) void( TIME );
-#define RESET_TIME_CHECK
-#define ASSERT_TIME_CHECK
-#define ASSERT_EXPRESSION( EXPR ) void( EXPR );
+  #define SET_TIME_CHECK( TIME ) void( TIME );
+  #define RESET_TIME_CHECK
+  #define ASSERT_TIME_CHECK
+  #define ASSERT_EXPRESSION( EXPR ) void( EXPR );
 #endif
 
 // To get time info, see   http://stackoverflow.com/a/2962914/3895476
@@ -442,52 +468,52 @@ namespace LSD_VALIDATE {
 #else  // DISABLE_LOCAL_CLOCKS not defined
 
 #define SET_LOCAL_CLOCK_X(DirectPrint) \
-    bool REPORT_LOCAL_CLOCK_DirectPrint = DirectPrint;\
-    std::string REPORT_LOCAL_CLOCK_report; \
-    struct timespec local_start, local_finish;   \
-    clock_gettime(CLOCK_MONOTONIC, &local_start); \
-    int local_clock_id = int(local_start.tv_sec);\
-    if (REPORT_LOCAL_CLOCK_DirectPrint) { \
-      LOG("\n\tCLOCK Setting clock with ID %i",local_clock_id); \
-    } else { \
-      REPORT_LOCAL_CLOCK_report+="\n\tCLOCK Setting clock with ID " + std::to_string(local_clock_id); \
-    }
+  bool REPORT_LOCAL_CLOCK_DirectPrint = DirectPrint;\
+  std::string REPORT_LOCAL_CLOCK_report; \
+  struct timespec local_start, local_finish;   \
+  clock_gettime(CLOCK_MONOTONIC, &local_start); \
+  int local_clock_id = int(local_start.tv_sec);\
+  if (REPORT_LOCAL_CLOCK_DirectPrint) { \
+    LOG("\n\tCLOCK Setting clock with ID %i",local_clock_id); \
+  } else { \
+    REPORT_LOCAL_CLOCK_report+="\n\tCLOCK Setting clock with ID " + std::to_string(local_clock_id); \
+  }
 
 #define RESET_LOCAL_CLOCK_X(DirectPrint) \
-    REPORT_LOCAL_CLOCK_DirectPrint = DirectPrint;\
-    REPORT_LOCAL_CLOCK_report.clear();\
-    local_clock_id++;\
-    clock_gettime(CLOCK_MONOTONIC, &local_start);\
-    local_clock_id = int(local_start.tv_sec);\
-    if(REPORT_LOCAL_CLOCK_DirectPrint) {\
-      LOG("\n\tCLOCK Re-setting clock with new ID %i",local_clock_id);\
-    } else { \
-      REPORT_LOCAL_CLOCK_report+="\n\tCLOCK Re-setting clock with new ID " + std::to_string(local_clock_id); \
-    }
+  REPORT_LOCAL_CLOCK_DirectPrint = DirectPrint;\
+  REPORT_LOCAL_CLOCK_report.clear();\
+  local_clock_id++;\
+  clock_gettime(CLOCK_MONOTONIC, &local_start);\
+  local_clock_id = int(local_start.tv_sec);\
+  if(REPORT_LOCAL_CLOCK_DirectPrint) {\
+    LOG("\n\tCLOCK Re-setting clock with new ID %i",local_clock_id);\
+  } else { \
+    REPORT_LOCAL_CLOCK_report+="\n\tCLOCK Re-setting clock with new ID " + std::to_string(local_clock_id); \
+  }
 
 #define REPORT_LOCAL_CLOCK_X(mintime)  \
-    {                             \
-      clock_gettime(CLOCK_MONOTONIC, &local_finish);\
-      double elapsed = (local_finish.tv_sec - local_start.tv_sec);\
-             elapsed += (local_finish.tv_nsec - local_start.tv_nsec) / 1000000000.0;\
-      if (double(mintime)<elapsed){\
-        if (!REPORT_LOCAL_CLOCK_DirectPrint){ \
-          LOG("%s",REPORT_LOCAL_CLOCK_report.c_str()); \
-        } \
-          LOG("\n\tCLOCK Local clock with ID %i: Seconds elapsed: %g",local_clock_id,elapsed);\
-      }\
-    }
+  {                             \
+    clock_gettime(CLOCK_MONOTONIC, &local_finish);\
+    double elapsed = (local_finish.tv_sec - local_start.tv_sec);\
+    elapsed += (local_finish.tv_nsec - local_start.tv_nsec) / 1000000000.0;\
+    if (double(mintime)<elapsed){\
+      if (!REPORT_LOCAL_CLOCK_DirectPrint){ \
+        LOG("%s",REPORT_LOCAL_CLOCK_report.c_str()); \
+      } \
+      LOG("\n\tCLOCK Local clock with ID %i: Seconds elapsed: %g",local_clock_id,elapsed);\
+    }\
+  }
 
 
 #define ADD_LOCAL_CLOCK_INFO(text) \
-    if (REPORT_LOCAL_CLOCK_DirectPrint){ \
-      LOG(text); \
-    } else {    \
-      REPORT_LOCAL_CLOCK_report += string(text);  \
-    }
+  if (REPORT_LOCAL_CLOCK_DirectPrint){ \
+    LOG(text); \
+  } else {    \
+    REPORT_LOCAL_CLOCK_report += string(text);  \
+  }
 
 #define ADD_LOCAL_CLOCK_TRACKSEQUENCE \
-      REPORT_LOCAL_CLOCK_report += LSD_VALIDATE::track_sequence(t,p,c,var);
+  REPORT_LOCAL_CLOCK_report += LSD_VALIDATE::track_sequence(t,p,c,var);
 
 #endif  //defined DISABLE_LOCAL_CLOCKS end
 
@@ -513,19 +539,19 @@ namespace LSD_VALIDATE {
 /* To clearly mark tests and also allow to not run them */
 
 #ifndef SWITCH_TEST_OFF
-#define TEST_MODE(X) if (X)           //Testing on
-#define TEST_ELSE } else {
+  #define TEST_MODE(X) if (X)           //Testing on
+  #define TEST_ELSE } else {
 #else
-#define TEST_MODE(X) if (false && X)  //Testing off
-#define TEST_ELSE
+  #define TEST_MODE(X) if (false && X)  //Testing off
+  #define TEST_ELSE
 #endif
 
 /* A verbose mode */
 
 #ifndef SWITCH_VERBOSE_OFF
-#define VERBOSE_MODE(X) if (X)          //Verbose on
+  #define VERBOSE_MODE(X) if (X)          //Verbose on
 #else
-#define VERBOSE_MODE(X) if (false && X) //Verbose off
+  #define VERBOSE_MODE(X) if (false && X) //Verbose off
 #endif
 
 /* Tracking of equations etc., special tracking of objects with "_ID" or "ID".*/

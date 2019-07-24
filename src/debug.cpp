@@ -92,6 +92,7 @@ int deb( object* r, object* c, char const* lab, double* res, bool interact )
     { cmd( "$w add command -label \"Quit and Resume Simulation\" -command { set choice 7 } -underline 0 -accelerator Esc" ); }
     else
     { cmd( "$w add command -label \"Quit and Return to Browser\" -command { set choice 7 } -underline 0 -accelerator Esc" ); }
+    
     cmd( "$w add command -label \"Cause crash to analyse stack in GDB\" -command { set choice 666 }" );
     
     cmd( "set w .deb.m.help" );
@@ -1069,14 +1070,13 @@ debug_maincycle:
         
         break;
         
-        case 666: //Cause crash 
-        {
-            cout << "\nCausing a crash deliberately!" << endl;
-            plog("\nCausing a crash deliberately!");
-            object* crash = NULL;
-            crash->up = NULL;
+      case 666: { //Cause crash
+          cout << "\nCausing a crash deliberately!" << endl;
+          plog("\nCausing a crash deliberately!");
+          object* crash = NULL;
+          crash->up = NULL;
         }
-            break;
+        break;
         
       default:
         choice = 0;

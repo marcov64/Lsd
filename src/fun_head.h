@@ -30,11 +30,11 @@
 #include "validate.h"               //TRACK_SEQUENCE and other validation helpers
 
 // set ABMAT max variable length
-#if ! defined MAX_ABMAT_VAR_LENGTH   
-  int MAX_ABMAT_BASEVAR_LENGTH = ( 30 - 18 ) / 2; 
+#if ! defined MAX_ABMAT_VAR_LENGTH
+  int MAX_ABMAT_BASEVAR_LENGTH = ( 30 - 18 ) / 2;
 #else
   int MAX_ABMAT_BASEVAR_LENGTH = ( MAX_ABMAT_VAR_LENGTH - 18 ) / 2;
-#endif   
+#endif
 
 // create and set fast lookup flag
 #if ! defined FAST_LOOKUP || ! defined CPP11
@@ -97,7 +97,7 @@ bool no_ptr_chk = true;
   netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
   FILE *f; \
   INIT_POINTERS \
-  EQ_USER_VARS  
+  EQ_USER_VARS
 
 #define EQ_NOT_FOUND \
   char msg[ TCL_BUFF_STR ]; \
@@ -171,7 +171,7 @@ bool no_ptr_chk = true;
 
 #define EQUATION( X ) \
   if ( ! strcmp( label, X ) ) {\
-  {TRACK_SEQUENCE}
+    {TRACK_SEQUENCE}
 
 #define RESULT( X ) \
   END_EQ_TRACK_SEQUENCE \

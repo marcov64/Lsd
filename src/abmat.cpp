@@ -144,7 +144,7 @@ bool abmat_dynamic_factors_allowed;
 
 void abmat_init( )
 {
-    
+
   s_abmat_intervals.clear();
   m_abmat_variables.clear();
   m_abmat_varnames.clear();
@@ -272,7 +272,7 @@ const char* abmat_varname_convert( const char* lab)
     std::string s_short = std::string(lab);
     
     if (s_short.length() > MAX_ABMAT_BASEVAR_LENGTH) {
-      s_short.resize(MAX_ABMAT_BASEVAR_LENGTH-3); //drop last chars
+      s_short.resize(MAX_ABMAT_BASEVAR_LENGTH - 3); //drop last chars
       s_short.append( std::to_string(i_abmat_varnames) );
       
       if (++i_abmat_varnames > 999) {
