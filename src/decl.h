@@ -826,7 +826,7 @@ void unload_configuration ( bool full );
 void unwind_stack( void );
 void update_bounds( void );
 void update_lmm_options( void );
-void update_model_info( bool geomOnly = false );
+void update_model_info( void );
 void wipe_out( object *d );
 void write_list( FILE *frep, object *root, int flag_all, char const *prefix );
 void write_obj( object *r, FILE *frep );
@@ -936,7 +936,6 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_set_c_var( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
-int Tcl_update_model_info( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST ov[ ] );
 #endif									// NO_WINDOW
 

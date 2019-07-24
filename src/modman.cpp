@@ -6322,14 +6322,14 @@ void update_lmm_options( bool justWinGeom )
 	if ( justWinGeom )
 	{
 		cmd( "set done 1" );
-		cmd( "if { $::restoreWin } { set curGeom [ geomtosave .lmm ]; if { $curGeom != \"\" && ! [ string equal $::lmmGeom $curGeom ] } { set done 0 } }" );
+		cmd( "if { $restoreWin } { set curGeom [ geomtosave .lmm ]; if { $curGeom != \"\" && ! [ string equal $lmmGeom $curGeom ] } { set done 0 } }" );
 		
 		if ( atoi( Tcl_GetVar( inter, "done", 0 ) ) )	// nothing to save?
 			return;
 	
 		load_lmm_options( );				// if just saving window geometry, first reload from disk
 
-		cmd( "set ::lmmGeom $curGeom" );
+		cmd( "set lmmGeom $curGeom" );
 	}
 	
 	// save options to disk

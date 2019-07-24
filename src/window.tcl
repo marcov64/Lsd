@@ -407,13 +407,18 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 # DESTROYTOP
 #************************************************
 proc destroytop w {
-	global wndLst defaultFocus parWndLst grabLst noParLst logWndFn
+	global restoreWin wndLst defaultFocus parWndLst grabLst noParLst logWndFn
 
 	if { ! [ winfo exists $w ] } return
 	
 	# save main windows sizes/positions
-	if { [ lsearch $wndLst $w ] >= 0 } {
-		update_model_info
+	if { $restoreWin && [ lsearch $wndLst $w ] >= 0 } {
+		set curGeom [ geomtosave $w ]
+		
+		if { $curGeom != "" } {
+			set wName [ string range $w 1 3 ]
+			set ::${wName}Geom $curGeom
+		}
 	}
 	
 	if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {

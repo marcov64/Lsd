@@ -508,9 +508,8 @@ int lsdmain( int argn, char **argv )
 		myexit( 200 + choice );
 	}
 
-	// create a Tcl command that calls the C discard_change/update_model_info functions
+	// create a Tcl command that calls the C discard_change function before killing LSD
 	Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
-	Tcl_CreateCommand( inter, "update_model_info", Tcl_update_model_info, NULL, NULL );
 
 	// create Tcl commands that get and set LSD object/variable properties
 	Tcl_CreateCommand( inter, "get_obj_conf", Tcl_get_obj_conf, NULL, NULL );
@@ -1636,21 +1635,11 @@ bool load_model_info( void )
  *********************************/
 const char *winToSave[ 6 ] = { "lsd", "log", "str", "da", "deb", "lat" };
 
-void update_model_info( bool geomOnly )
+void update_model_info( void )
 {
+	// update existing windows positions
 	for ( int i = 0; i < 6; ++i )
-	{
-		cmd( "set done 1" );
-		cmd( "if { $::restoreWin } { set curGeom [ geomtosave .%s ]; if { $curGeom != \"\" && ! [ string equal $::%sGeom $curGeom ] } { set done 0 } }",  winToSave[ i ],  winToSave[ i ] );
-		
-		if ( atoi( Tcl_GetVar( inter, "done", 0 ) ) )	// nothing to save?
-			continue;
-
-		cmd( "set ::%sGeom $curGeom", winToSave[ i ] );
-	}
-	
-	if ( geomOnly )
-		return;
+		cmd( "if { $restoreWin } { set curGeom [ geomtosave .%s ]; if { $curGeom != \"\" } { set %sGeom $curGeom } }",  winToSave[ i ],  winToSave[ i ] );
 	
 	// ensure model name is set
 	cmd( "if { ! [ info exists modelName ] } { set modelName \"\" }" );
@@ -1668,18 +1657,6 @@ void update_model_info( bool geomOnly )
 	}
 		
 	cmd( "close $f" );
-}
-
-
-/****************************************************
-TCL_UPDATE_MODEL_INFO
-Entry point function for access from the Tcl interpreter
-****************************************************/
-int Tcl_update_model_info( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
-{
-	update_model_info( true );
-	Tcl_SetResult( inter, ( char * ) "ok", TCL_VOLATILE );
-	return TCL_OK;
 }
 
 
