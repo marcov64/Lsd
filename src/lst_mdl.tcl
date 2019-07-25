@@ -90,8 +90,8 @@ proc chs_mdl { } {
 	set cgroup ""
 	set glabel ""
 
-	unset sd
-	unset sf
+	unset -nocomplain sd
+	unset -nocomplain sf
 
 	lst_mdl
 
