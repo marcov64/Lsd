@@ -5183,10 +5183,10 @@ if ( choice == 46 || choice == 49 )
 // System Options
 if ( choice == 47 )
 {
-	cmd( "set choice [ file exists \"$LsdSrc/$SYSTEM_OPTIONS\" ]" );
+	cmd( "set choice [ file exists \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" ]" );
 	if ( choice == 1 )
 	{
-		cmd( "set f [ open \"$LsdSrc/$SYSTEM_OPTIONS\" r ]" );
+		cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" r ]" );
 		cmd( "set a [ read -nonewline $f ]" );
 		cmd( "close $f" );
 		choice = 0;
@@ -5218,7 +5218,7 @@ if ( choice == 47 )
 			} { \
 				set a \"File $DefaultSysOpt is missing\nPlease reinstall LSD\" \
 			}; \
-			.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
+			.l.t.text insert end \"LSDROOT=$RootLsd\\n\"; \
 			.l.t.text insert end \"$a\"; \
 			.l.d.msg configure -text \"\"; \
 			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.gch ]; \
@@ -5244,7 +5244,7 @@ if ( choice == 47 )
 
 	if ( choice == 1 )
 	{
-		cmd( "set f [ open \"$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
+		cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
 		cmd( "puts -nonewline $f [ .l.t.text get 1.0 end ]" );
 		cmd( "close $f" );
 		choice = 46; 	//go to create makefile
@@ -5444,11 +5444,7 @@ if ( choice == 57 )
 {
 	cmd( "destroytop .mm" );	// close compilation results, if open
 
-	cmd( "if [ string equal $tcl_platform(platform) unix ] { set choice 1 } { set choice 2 }" );
-	if ( choice == 1 )		// unix
-		cmd( "exec $wish $LsdSrc/tkdiff.tcl &" );
-	if ( choice == 2 )		// windows
-		cmd( "exec $wish $LsdSrc/tkdiff.tcl &" );
+	cmd( "exec $wish $RootLsd/$LsdSrc/tkdiff.tcl &" );
 	 
 	choice = 0;
 	goto loop;
@@ -5471,12 +5467,8 @@ if ( choice == 61 )
 		choice = 0;
 		goto loop;
 	}
-	 
-	cmd( "if [ string equal $tcl_platform(platform) unix ] { set choice 1 } { set choice 2 }" );
-	if ( choice == 1 )		// unix
-		cmd( "exec $wish src/tkdiff.tcl [file join \"$d1\" \"$f1\"] [file join \"$d2\" \"$f2\"] &" );
-	if ( choice == 2 )		// windows
-		cmd( "exec $wish src/tkdiff.tcl [file join \"$d1\" \"$f1\"] [file join \"$d2\" \"$f2\"]  &" );
+
+	cmd( "exec $wish $RootLsd/$LsdSrc/tkdiff.tcl [ file join \"$d1\" \"$f1\" ] [ file join \"$d2\" \"$f2\" ] &" );
 	 
 	choice = 0;
 	goto loop;

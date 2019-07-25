@@ -82,8 +82,6 @@ proc chs_mdl { } {
 
 	set lmod ""
 	set ldir ""
-	set sd ""
-	set sf ""
 	set d1 ""
 	set d2 ""
 	set f1 ""
@@ -92,8 +90,6 @@ proc chs_mdl { } {
 	set cgroup ""
 	set glabel ""
 
-	unset lmod
-	unset ldir
 	unset sd
 	unset sf
 
@@ -107,8 +103,8 @@ proc chs_mdl { } {
 	pack .l.l.tit
 	
 	frame .l.l.l
-	scrollbar .l.l.l.vs -command ".l.l.l yview"
-	listbox .l.l.l.l -height 30 -width 70 -yscroll ".l.l.l.vs set" -selectmode browse
+	scrollbar .l.l.l.vs -command ".l.l.l.l yview"
+	listbox .l.l.l.l -height 20 -width 50 -yscroll ".l.l.l.vs set" -selectmode browse
 	mouse_wheel .l.l.l.l
 	
 	bind .l.l.l.l <ButtonRelease> { set glabel [ lindex $lgroup [ .l.l.l.l curselection ] ]; .l.l.gt.t configu -text "$glabel" }
@@ -151,7 +147,7 @@ proc chs_mdl { } {
 	
 	bind .l.t.f1.m2.f <3> { set tmp [ tk_getOpenFile -parent .l -title "Load LSD File" -initialdir "$d2" ]; if { $tmp != "" && ! [ fn_spaces "$tmp" .l ] } {set f2 [file tail $tmp] } }
 	
-	button .l.t.f1.m2.i -width $butWid -text Insert -command {slct; if { [info exists sd]} {set d2 "$sd"; set f2 "$sf"} }
+	button .l.t.f1.m2.i -width $butWid -text Insert -command {slct; if { [ info exists sd ] } { set d2 "$sd"; set f2 "$sf" } }
 	pack .l.t.f1.m2.l
 	pack .l.t.f1.m2.d .l.t.f1.m2.f -expand yes -fill x -anchor nw
 	pack .l.t.f1.m2.i -padx 10 -pady 10 -anchor n
@@ -166,7 +162,7 @@ proc chs_mdl { } {
 	pack .l.t.b.cmp .l.t.b.cnc -padx 10 -pady 10 -side left
 	pack .l.t.b -side bottom -anchor e
 
-	pack .l.l .l.t -expand yes -fill both -side left
+	pack .l.l .l.t -padx 10 -pady 10 -expand yes -fill both -side left
 
 	set j 0
 	foreach i $lmod {
@@ -195,13 +191,13 @@ set macYes [ list "g++" "-framework" "-lz" "-lpthread" "-DMAC_PKG" ]
 set macNo  [ list ".exe" "/gnu/" "/gnu64/" "x86_64-w64-mingw32-g++" "-mthreads" "-mwindows" ]
 
 proc check_sys_opt { } {
-	global LsdSrc CurPlatform win32Yes win32No win64Yes win64No linuxYes linuxNo osxYes osxNo macYes macNo SYSTEM_OPTIONS
+	global RootLsd LsdSrc CurPlatform win32Yes win32No win64Yes win64No linuxYes linuxNo osxYes osxNo macYes macNo SYSTEM_OPTIONS
 	
-	if { ! [ file exists "$LsdSrc/$SYSTEM_OPTIONS" ] } { 
+	if { ! [ file exists "$RootLsd/$LsdSrc/$SYSTEM_OPTIONS" ] } { 
 		return "File '$SYSTEM_OPTIONS' not found (click 'Default' button to recreate it)"
 	}
 	
-	set f [ open "$LsdSrc/$SYSTEM_OPTIONS" r ]
+	set f [ open "$RootLsd/$LsdSrc/$SYSTEM_OPTIONS" r ]
 	set options [ read -nonewline $f ]
 	close $f
 	
