@@ -1576,12 +1576,13 @@ proc get_series { size data } {
 # Generic routine to convert a list into a bytearray
 #************************************************
 proc listToByteArray { valuetype list { elemsize 0 } } {
+
 	if { $valuetype == "i" || $valuetype == "I" } {
 		if { $::tcl_platform(byteOrder) == "littleEndian" } {
 			set valuetype "i"
-	   } {
+		} {
 			set valuetype "I"
-	   }
+		}
 	}
 
 	switch -- $valuetype {
@@ -1589,9 +1590,9 @@ proc listToByteArray { valuetype list { elemsize 0 } } {
 		   set result [ binary format ${valuetype}* $list ]
 		}
 		s {
-			set result {}
+			set result { }
 			foreach elem $list {
-			  append result [ binary format a$elemsize $elem ]
+				append result [ binary format a$elemsize $elem ]
 			}
 		}
 		default {
@@ -1602,23 +1603,24 @@ proc listToByteArray { valuetype list { elemsize 0 } } {
 	return $result
 }
 
+interp alias { } stringsToByteArray { } listToByteArray s
+interp alias { } intsToByteArray    { } listToByteArray i
+interp alias { } floatsToByteArray  { } listToByteArray f
+interp alias { } doublesToByteArray { } listToByteArray d
+
 
 #************************************************
 # BYTEARRAYTOLIST
 # Generic routine to convert a bytearray into a list
 #************************************************
-interp alias {} stringsToByteArray {} listToByteArray s
-interp alias {} intsToByteArray    {} listToByteArray i
-interp alias {} floatsToByteArray  {} listToByteArray f
-interp alias {} doublesToByteArray {} listToByteArray d
-
 proc byteArrayToList { valuetype bytearray { elemsize 0 } } {
+
 	if { $valuetype == "i" || $valuetype == "I" } {
-	   if { $::tcl_platform(byteOrder) == "littleEndian" } {
-		  set valuetype "i"
-	   } else {
-		  set valuetype "I"
-	   }
+		if { $::tcl_platform(byteOrder) == "littleEndian" } {
+			set valuetype "i"
+		} else {
+			set valuetype "I"
+		}
 	}
 
 	switch -- $valuetype {
@@ -1626,7 +1628,7 @@ proc byteArrayToList { valuetype bytearray { elemsize 0 } } {
 		   binary scan $bytearray ${valuetype}* result
 		}
 		s {
-			set result  {}
+			set result  { }
 			set length  [ string length $bytearray ]
 			set noelems [ expr { $length / $elemsize } ]
 			for { set i 0 } { $i < $noelems } { incr i } {
@@ -1648,10 +1650,10 @@ proc byteArrayToList { valuetype bytearray { elemsize 0 } } {
 	return $result
 }
 
-interp alias {} byteArrayToStrings {} byteArrayToList s
-interp alias {} byteArrayToInts    {} byteArrayToList i
-interp alias {} byteArrayToFloats  {} byteArrayToList f
-interp alias {} byteArrayToDoubles {} byteArrayToList d
+interp alias { } byteArrayToStrings { } byteArrayToList s
+interp alias { } byteArrayToInts    { } byteArrayToList i
+interp alias { } byteArrayToFloats  { } byteArrayToList f
+interp alias { } byteArrayToDoubles { } byteArrayToList d
 
 
 #************************************************

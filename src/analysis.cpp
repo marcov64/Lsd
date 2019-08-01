@@ -7477,7 +7477,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	{
 		// move the x-axis pointer in discrete steps
 		x2 = x1 + ( 1 + h ) * step;
-		h++;            	// counter for the average when many values occupy one x point
+		++h;            	// counter for the average when many values occupy one x point
 		
 		// fix initial x point if scale is too coarse
 		if ( i == iniCase && x2 - x1 > 1 )
@@ -7589,13 +7589,14 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	}
 
 	// transfer data to Tcl and plot it
+	cmd( "unset -nocomplain pdataX pdataY" );
+	
 	cdata = pdataX;					// send series x values to Tcl
 	cmd( "get_series %d pdataX", j );
 	
 	color = allblack ? 1001 : 0;	// select gray scale or color range
 		
-	*choice = 0;
-	for ( k = 0; k < nLine; ++k, ++color )
+	for ( *choice = k = 0; k < nLine; ++k, ++color )
 	{
 		cdata = pdataY[ k ];		// send series y values to Tcl
 		cmd( "get_series %d pdataY", j );
