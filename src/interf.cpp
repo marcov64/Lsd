@@ -2008,7 +2008,89 @@ case 7:
 	cmd( "pack $T.h.o.l $T.h.o.obj -side left -padx 2" );
 
 	cmd( "pack $T.h.l $T.h.o" );
-
+	
+	if ( cv->num_lag > 0 || cv->param == 1 )
+	{
+		cmd( "frame $T.h.i" );
+		cmd( "label $T.h.i.l -text \"Initial value%s%s:\"", cv->num_lag > 1 ? "s" : "", cv->up->next == NULL ? "" : " (first instance)" );
+		
+		if ( cv->data_loaded != '-' )
+		{
+			char widget[ 20 ], widgets[ 4 * 20 ];
+			strcpy ( widgets, "" );
+			
+			j = ( cv->param == 1 ) ? 1 : min( cv->num_lag, 4 );
+			for ( i = 0; i < j; ++i )
+			{
+				cmd( "frame $T.h.i.v%d", i );
+				cmd( "label $T.h.i.v%d.val -fg red -text \"%g\"", i, cv->val[ i ] );
+				
+				if ( j > 1 )
+				{
+					cmd( "label $T.h.i.v%d.lag -text \"(%d)\"", i, i + 1 );
+					cmd( "pack $T.h.i.v%d.val $T.h.i.v%d.lag -side left", i, i );
+				}
+				else
+					cmd( "pack $T.h.i.v%d.val", i );
+				
+				sprintf( widget, " $T.h.i.v%d", i );
+				strcat( widgets, widget );
+			}
+			
+			cmd( "pack $T.h.i.l %s -side left -padx 1", widgets );
+		}
+		else
+		{
+			cmd( "label $T.h.i.val -fg red -text \"(uninitialized)\"" );
+			cmd( "pack $T.h.i.l $T.h.i.val -side left -padx 2" );
+		}
+		
+		cmd( "pack $T.h.i" );
+	}
+	
+	if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 1 ) )
+	{
+		cmd( "frame $T.h.u" );
+		
+		if ( cv->delay > 0 )
+		{
+			cmd( "frame $T.h.u.d" );
+			cmd( "label $T.h.u.d.l -text \"Initial updating delay:\"" );
+			cmd( "label $T.h.u.d.v -fg red -text \"%d\"", cv->delay );
+			cmd( "pack $T.h.u.d.l $T.h.u.d.v -side left -padx 2" );
+			cmd( "pack $T.h.u.d" );
+		}
+		
+		if ( cv->delay_range > 0 )
+		{
+			cmd( "frame $T.h.u.dr" );
+			cmd( "label $T.h.u.dr.l -text \"Random updating delay range:\"" );
+			cmd( "label $T.h.u.dr.v -fg red -text \"%d\"", cv->delay_range );
+			cmd( "pack $T.h.u.dr.l $T.h.u.dr.v -side left -padx 2" );
+			cmd( "pack $T.h.u.dr" );
+		}
+		
+		if ( cv->period > 1 )
+		{
+			cmd( "frame $T.h.u.p" );
+			cmd( "label $T.h.u.p.l -text \"Updating period:\"" );
+			cmd( "label $T.h.u.p.v -fg red -text \"%d\"", cv->period );
+			cmd( "pack $T.h.u.p.l $T.h.u.p.v -side left -padx 2" );
+			cmd( "pack $T.h.u.p" );
+		}
+		
+		if ( cv->period_range > 1 )
+		{
+			cmd( "frame $T.h.u.pr" );
+			cmd( "label $T.h.u.pr.l -text \"Random updating period range:\"" );
+			cmd( "label $T.h.u.pr.v -fg red -text \"%d\"", cv->period_range );
+			cmd( "pack $T.h.u.pr.l $T.h.u.pr.v -side left -padx 2" );
+			cmd( "pack $T.h.u.pr" );
+		}
+		
+		cmd( "pack $T.h.u" );			
+	}
+	
 	cmd( "frame $T.b0" );
 	cmd( "button $T.b0.prop -width $butWid -text Properties -command { set done 5 } -underline 1" );
 	cmd( "button $T.b0.upd -width $butWid -text Updating -command { set done 14 } -underline 7" );

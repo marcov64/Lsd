@@ -7589,9 +7589,8 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	}
 
 	// transfer data to Tcl and plot it
-	cmd( "unset -nocomplain pdataX pdataY" );
-	
 	cdata = pdataX;					// send series x values to Tcl
+	cmd( "unset -nocomplain pdataX" );
 	cmd( "get_series %d pdataX", j );
 	
 	color = allblack ? 1001 : 0;	// select gray scale or color range
@@ -7599,6 +7598,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	for ( *choice = k = 0; k < nLine; ++k, ++color )
 	{
 		cdata = pdataY[ k ];		// send series y values to Tcl
+		cmd( "unset -nocomplain pdataY" );
 		cmd( "get_series %d pdataY", j );
 		
 		int colorPlot = ( color < 1100 ) ? color : 0;	// use black if out of colors
