@@ -474,6 +474,9 @@ if ( num_var == 0 )
   cmd( "tk_messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"There are no series available\" -detail \"Click on button 'Add...' to load series from results files.\n\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"" );  
 else
 {
+	if ( sim_num > 1 )
+	  cmd( "tk_messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"Only series from last run are loaded\" -detail \"Click on button 'Add...' to load series from saved simulation results. You can use 'Ctrl' and 'Shift' keys to select multiple files at once. Avoid selecting the results file from last run, as data is already loaded and would be duplicated.\"" );  
+	
 	cmd( ".da.vars.lb.v selection set 0" );
 	cmd( ".da.vars.lb.v activate 0" );
 	cmd( ".da.vars.lb.v see 0" );
