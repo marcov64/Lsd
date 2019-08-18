@@ -2570,10 +2570,10 @@ void plot_tseries( int *choice )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-			min_c = max_c = start[ i ];
+				min_c = max_c = max( start[ i ], 1 );
 
 			if ( start[ i ] < min_c )
-				min_c = start[ i ];
+				min_c = max( start[ i ], 1 );
 			
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
@@ -4008,10 +4008,10 @@ void plot_gnu( int *choice )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = start[ i ];
+				min_c = max_c = max( start[ i ], 1 );
 			
 			if ( start[ i ] < min_c )
-				min_c = start[ i ];
+				min_c = max( start[ i ], 1 );
 			
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
@@ -4454,10 +4454,10 @@ void plot_cs_xy( int *choice )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = start[ i ];
+				min_c = max_c = max( start[ i ], 1 );
 			
 			if ( start[ i ] < min_c )
-				min_c = start[ i ];
+				min_c = max( start[ i ], 1 );
 			
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
@@ -4857,10 +4857,10 @@ void plot_phase_diagram( int *choice )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = start[ i ];
+				min_c = max_c = max( start[ i ], 1 );
 			
 			if ( start[ i ] < min_c )
-				min_c = start[ i ];
+				min_c = max( start[ i ], 1 );
 			
 			if (end[ i ] > max_c )
 				max_c = end[ i ] > num_c?num_c:end[ i ];
@@ -5495,15 +5495,15 @@ void plot_lattice( int *choice )
 	{
 		if ( autom_x || min_c >= max_c )
 		{
-			first = start[ 0 ];
+			first = max( start[ 0 ], 1 );
 			last = end[ 0 ];
 		}
 		else
 		{
-			if ( min_c > start[ 0 ] )
+			if ( min_c > max( start[ 0 ], 1 ) )
 				first = min_c;
 			else
-				first = start[ 0 ];
+				first = max( start[ 0 ], 1 );
 			
 			if ( max_c < end[ 0 ] )  
 				last = max_c;
@@ -5732,15 +5732,15 @@ void histograms( int *choice )
 
 	if ( autom_x || min_c >= max_c )
 	{
-		first = start;
+		first = max( start, 1 );
 		last = end;
 	}
 	else
 	{
-		if ( min_c>start)
+		if ( min_c > max( start, 1 ) )
 			first = min_c;
 		else
-			first = start;
+			first = max( start, 1 );
 		
 		if ( max_c < end )  
 			last = max_c;
@@ -6392,9 +6392,9 @@ void create_series( int *choice )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = start[ i ];
+				min_c = max_c = max( start[ i ], 1 );
 			if ( start[ i ] < min_c )
-				min_c = start[ i ];
+				min_c = max( start[ i ], 1 );
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
@@ -7423,7 +7423,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 			
 		case CRSSECT:
 			nLine = *end;
-			iniCase = 0;
+			iniCase = 1;
 			endCase = nv - 1;
 			break;
 			
@@ -7593,7 +7593,6 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 
 	// transfer data to Tcl and plot it
 	cdata = pdataX;					// send series x values to Tcl
-	cmd( "unset -nocomplain pdataX" );
 	cmd( "get_series %d pdataX", j );
 	
 	color = allblack ? 1001 : 0;	// select gray scale or color range
