@@ -377,7 +377,7 @@ cmd( "checkbutton .da.f.tit.chk.allblack -text \"No colors\" -variable allblack"
 cmd( "checkbutton .da.f.tit.chk.grid -text \"Grids\" -variable grid" );
 cmd( "pack .da.f.tit.chk.allblack .da.f.tit.chk.grid -anchor w" );
 
-cmd( "frame .da.f.tit.lp" );
+cmd( "frame .da.f.tit.lp -relief groove -bd 2" );
 cmd( "radiobutton .da.f.tit.lp.line -text \"Lines\" -variable line_point -value 1" );
 cmd( "radiobutton .da.f.tit.lp.point -text \"Points\" -variable line_point -value 2" );
 cmd( "pack .da.f.tit.lp.line .da.f.tit.lp.point -anchor w" );
@@ -7501,14 +7501,14 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 					if ( data[ k ] == NULL )
 						continue;
 					
-					if ( start[ k ] < i && end[ k ] >= i )
+					if ( i > 1 && start[ k ] < i && end[ k ] >= i )
 					{
 						yVal = data[ k ][ i ];
 						tOk = true;
 					}
 					else
 					{
-						if ( start[ k ] == i )
+						if ( start[ k ] == i || ( i <= 1 && start[ k ] == 0 ) )
 							yVal = data[ k ][ i ];
 						
 						tOk = false;
