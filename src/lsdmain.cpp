@@ -1174,7 +1174,7 @@ bool alloc_save_mem( object *r )
 		// choose next update step for special updating variables
 		if ( cv->delay > 0 || cv->delay_range > 0 )
 		{
-			cv->next_update = 1 + cv->delay;
+			cv->next_update = cv->delay;
 			if ( cv->delay_range > 0 )
 				cv->next_update += rnd_int( 0, cv->delay_range );
 		}
