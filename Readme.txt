@@ -167,6 +167,12 @@ pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb
 
 add-msys2-to-path PATH
 
+SLOW GDB OPERATION: the GDB debugger can become very slow in Windows when the models are large. This is due to the Windows special handling of the heap (dynamic memory allocation) for programs being debugged. It is normally safe to disable this special handling by defining the folowing environment variable:
+
+_NO_DEBUG_HEAP=1
+
+To define it, open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, press "New...", type "_NO_DEBUG_HEAP" as the variable name, and "1" as its value. Press "Ok" 3 times and you are done.
+
 
 ******************
 Linux Installation

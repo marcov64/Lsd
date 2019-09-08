@@ -337,6 +337,7 @@ bool object::load_struct( FILE *f )
 		{ 
 			fscanf( f, "%*[ ]%99s", ch );
 			add_obj( ch, 1, 0 );
+			cmd( "lappend modObj %s", ch );
 
 			// find the bridge which contains the object
 			cb = search_bridge( ch );
@@ -816,7 +817,7 @@ void unload_configuration ( bool full )
 	currObj = NULL;								// no current object pointer
 	unsaved_change( false );					// signal no unsaved change
 	cmd( "destroytop .lat" );					// remove lattice window
-	cmd( "unset -nocomplain modElem" );			// no elements in model structure
+	cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );	// no elements in model structure
 	
 	if ( ! running )
 	{

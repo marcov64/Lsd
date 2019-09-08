@@ -988,8 +988,12 @@ int browse( object *r, int *choice )
 
 	main_cycle:
 	
-	// update element list removing duplicates and sorting
+	// update element lists removing duplicates and sorting
+	cmd( "if [ info exists modObj ] { set modObj [ lsort -dictionary -unique $modObj ] }" );
 	cmd( "if [ info exists modElem ] { set modElem [ lsort -dictionary -unique $modElem ] }" );
+	cmd( "if [ info exists modVar ] { set modVar [ lsort -dictionary -unique $modVar ] }" );
+	cmd( "if [ info exists modPar ] { set modPar [ lsort -dictionary -unique $modPar ] }" );
+	cmd( "if [ info exists modFun ] { set modFun [ lsort -dictionary -unique $modFun ] }" );
 
 	// restore correct selection on list boxes
 	cmd( "if { $listfocus == 1 } { \
@@ -1347,15 +1351,26 @@ case 2:
 			if ( done == 0 )
 			{
 				cmd( "set text_description [ .addelem.d.f.text get 1.0 end ]" );
-				cmd( "if { $text_description==\"\\n\" } {set text_description \"(no description available)\" }" );
+				cmd( "if { $text_description==\"\\n\" } { set text_description \"(no description available)\" }" );
 				lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
 				if ( param == 1 )
+				{
 					add_description( lab, "Parameter", lab1 );
+					cmd( "lappend modPar %s", lab );
+				}
 				if ( param == 0 )
+				{
 					add_description( lab, "Variable", lab1 );
+					cmd( "lappend modVar %s", lab );
+				}
 				if ( param == 2 )
+				{
 					add_description( lab, "Function", lab1 );
+					cmd( "lappend modFun %s", lab );
+				}
 				
+				cmd( "lappend modElem %s", lab );
+
 				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				{ 
 					cv = cur->add_empty_var( lab );
@@ -1379,7 +1394,6 @@ case 2:
 				
 				// update focus memory
 				cmd( "set listfocus 1; set itemfocus [ .l.v.c.var_name index end ]" );
-				cmd( "lappend modElem %s }", lab );
 				struct_loaded = true;		// some model structure loaded
 				unsaved_change( true );		// signal unsaved change
 				redrawRoot = true;			// force browser redraw
@@ -1513,6 +1527,7 @@ case 3:
 		cmd( "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available)\"} {}" );
 		lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
 		add_description( lab, "Object", lab1 );
+		cmd( "lappend modObj %s", lab );
 		
 		// update focus memory
 		cmd( "set listfocus 2; set itemfocus [ .l.s.c.son_name index end ]; set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]" );
@@ -1634,10 +1649,11 @@ case 32:
 			r = r->up;
 	}
 
-	cmd( "set text_description [.inspar.d.f.text get 1.0 end]" );  
-	cmd( "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available)\"} {}" );
+	cmd( "set text_description [ .inspar.d.f.text get 1.0 end ]" );  
+	cmd( "if { $text_description==\"\\n\" || $text_description==\"\" } { set text_description \"(no description available)\" }" );
 	lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
 	add_description( lab, "Object", lab1 );
+	cmd( "lappend modObj %s", lab );
 
 	unsaved_change( true );		// signal unsaved change
 	redrawRoot = true;			// force browser redraw
@@ -2516,13 +2532,23 @@ case 76:
 			}
 		}
 		
-		// remove from element list
+		// remove from element lists
 		cmd( "if [ info exists modElem ] { set pos [ lsearch -exact $modElem %s ]; if { $pos >= 0 } { set modElem [ lreplace $modElem $pos $pos ] } }", lab_old  );
+		cmd( "if [ info exists modPar ] { set pos [ lsearch -exact $modPar %s ]; if { $pos >= 0 } { set modPar [ lreplace $modPar $pos $pos ] } }", lab_old  );
+		cmd( "if [ info exists modVar ] { set pos [ lsearch -exact $modVar %s ]; if { $pos >= 0 } { set modVar [ lreplace $modVar $pos $pos ] } }", lab_old  );
+		cmd( "if [ info exists modFun ] { set pos [ lsearch -exact $modFun %s ]; if { $pos >= 0 } { set modFun [ lreplace $modFun $pos $pos ] } }", lab_old  );
 
 		if ( ! delVar )
 		{
 			// add to element lists
 			cmd( "lappend modElem %s", lab );
+			
+			if ( cv->param == 0 )
+				cmd( "lappend modVar %s", lab );
+			if ( cv->param == 1 )
+				cmd( "lappend modPar %s", lab );
+			if ( cv->param == 2 )
+				cmd( "lappend modFun %s", lab );
 			
 			change_descr_lab( lab_old, lab, "", "", "" );
 		}
@@ -6392,12 +6418,17 @@ void wipe_out( object *d )
 	object *cur;
 	variable *cv;
 
+	cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", d->label );
+
 	change_descr_lab( d->label, "", "", "", "" );
 
 	for ( cv = d->v; cv != NULL; cv = cv->next )
 	{
-		// remove from element list
-		cmd( "if [ info exists modElem ] { set pos [ lsearch -exact $modElem %s ]; if { $pos >= 0 } { set modElem [ lreplace $modElem $pos $pos ] } }", cv->label  );
+		// remove from element lists
+		cmd( "if [ info exists modElem ] { set pos [ lsearch -exact $modElem %s ]; if { $pos >= 0 } { set modElem [ lreplace $modElem $pos $pos ] } }", cv->label );
+		cmd( "if [ info exists modVar ] { set pos [ lsearch -exact $modVar %s ]; if { $pos >= 0 } { set modVar [ lreplace $modVar $pos $pos ] } }", cv->label );
+		cmd( "if [ info exists modPar ] { set pos [ lsearch -exact $modPar %s ]; if { $pos >= 0 } { set modPar [ lreplace $modPar $pos $pos ] } }", cv->label );
+		cmd( "if [ info exists modFun ] { set pos [ lsearch -exact $modFun %s ]; if { $pos >= 0 } { set modFun [ lreplace $modFun $pos $pos ] } }", cv->label );
 
 		change_descr_lab( cv->label, "" , "", "", "" );
 	}

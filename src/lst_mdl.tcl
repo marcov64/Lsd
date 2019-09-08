@@ -398,19 +398,21 @@ proc get_source_files { path } {
 # Produce the element list file (elements.txt) to be used in LSD browser
 #************************************************
 # list of commands to search for parameters (X=number of macro arguments, Y=position of parameter)
-set cmds_1_1 [ list V SUM MAX MIN AVE SD STAT RECALC ]
-set cmds_2_1 [ list WHTAVE SEARCH_CND WRITE INCR MULT ]
-set cmds_2_2 [ list VS SUMS MAXS MINS AVES WHTAVE SDS STATS RNDDRAW RECALCS ]
-set cmds_3_1 [ list WRITEL ]
-set cmds_3_2 [ list WHTAVES SEARCH_CNDS RNDDRAW_TOT WRITES INCRS MULTS SORT ]
+set cmds_1_1 [ list V SUM MAX MIN AVE MED SD STAT RECALC LAST_CALC INIT_TSEARCH_CND ]
+set cmds_2_1 [ list VL SUML MAXL MINL AVEL MEDL WHTAVE SDL SEARCH_CND TSEARCH_CND WRITE INCR MULT V_CHEAT ]
+set cmds_2_2 [ list VS SUMS MAXS MINS AVES MEDS WHTAVE SDS STATS RNDDRAW RECALCS LAST_CALCS INIT_TSEARCH_CNDS ]
+set cmds_3_1 [ list WRITEL SEARCH_CNDL V_CHEATL ]
+set cmds_3_2 [ list VLS SUMLS MAXLS MINLS AVELS MEDLS WHTAVES SDLS SEARCH_CNDS TSEARCH_CNDS RNDDRAWL RNDDRAW_TOT WRITES INCRS MULTS SORT V_CHEATS ]
 set cmds_3_3 [ list WHTAVES RNDDRAWS ]
-set cmds_4_2 [ list WRITELS SORT2 ]
-set cmds_4_3 [ list RNDDRAW_TOTS SORTS SORT2 ]
-set cmds_5_3 [ list SORT2S ]
+set cmds_4_1 [ list WRITELL ]
+set cmds_4_2 [ list WHTAVELS WRITELS SEARCH_CNDLS RNDDRAW_TOTL SORT2 V_CHEATLS ]
+set cmds_4_3 [ list WHTAVELS RNDDRAWLS RNDDRAW_TOTS SORTS SORT2 ]
+set cmds_5_2 [ list WRITELLS ]
+set cmds_5_3 [ list RNDDRAW_TOTLS SORT2S ]
 set cmds_5_4 [ list SORT2S ]
 
 proc create_elem_file { path } {
-	global exeTime cmds_1_1 cmds_2_1 cmds_2_2 cmds_3_1 cmds_3_2 cmds_3_3 cmds_4_2 cmds_4_3 cmds_5_3 cmds_5_4
+	global exeTime cmds_1_1 cmds_2_1 cmds_2_2 cmds_3_1 cmds_3_2 cmds_3_3 cmds_4_1 cmds_4_2 cmds_4_3 cmds_5_2 cmds_5_3 cmds_5_4
 	
 	# don't recreate if executable file was not changed
 	if { [ file exists "$path/elements.txt" ] && [ info exists exeTime ] } {
@@ -484,6 +486,12 @@ proc create_elem_file { path } {
 				lappend pars $par
 			}
 		}
+		foreach cmd $cmds_4_1 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+,[^;]+\)} ] $text ]
+			foreach { call par } $calls {
+				lappend pars $par
+			}
+		}
 		foreach cmd $cmds_4_2 {
 			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
@@ -492,6 +500,12 @@ proc create_elem_file { path } {
 		}
 		foreach cmd $cmds_4_3 {
 			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+\)} ] $text ]
+			foreach { call par } $calls {
+				lappend pars $par
+			}
+		}
+		foreach cmd $cmds_5_2 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
@@ -553,15 +567,23 @@ proc read_elem_file { path } {
 # Update the missing elements list, considering the elements already in the model structure
 #************************************************
 proc upd_miss_elem { } {
-	global modElem progVar progPar missPar missVar
+	global modObj modElem progVar progPar missPar missVar
 	
 	if [ info exists modElem ] {
-		set missVar [ lsort -dictionary [ remove_elem $progVar $modElem ] ]
-		set missPar [ lsort -dictionary [ remove_elem $progPar $modElem ] ]
+		set missVar [ remove_elem $progVar $modElem ]
+		set missPar [ remove_elem $progPar $modElem ]
 	} else {
 		set missVar $progVar
 		set missPar $progPar
 	}
+	
+	if [ info exists modObj ] {
+		set missVar [ remove_elem $missVar $modObj ]
+		set missPar [ remove_elem $missPar $modObj ]
+	}
+	
+	set missVar [ lsort -dictionary $missVar ]
+	set missPar [ lsort -dictionary $missPar ]
 }
 
 

@@ -701,7 +701,7 @@ while ( choice == 0 )
 			cmd( "frame $s.l" );
 			cmd( "label $s.l.l -text \"Find object containing variable\"" );
 			cmd( "entry $s.l.e -width 20 -justify center -textvariable en" );
-			cmd( "bind $s.l.e <KeyRelease> {if { %%N < 256 && [info exists modElem] } { set bb1 [.deb.so.l.e index insert]; set bc1 [.deb.so.l.e get]; set bf1 [lsearch -glob $modElem $bc1*]; if { $bf1 !=-1 } { set bd1 [lindex $modElem $bf1]; .deb.so.l.e delete 0 end; .deb.so.l.e insert 0 $bd1; .deb.so.l.e index $bb1; .deb.so.l.e selection range $bb1 end } } }" );
+			cmd( "bind $s.l.e <KeyRelease> { if { %%N < 256 && [ info exists modElem ] } { set bb1 [ .deb.so.l.e index insert ]; set bc1 [ .deb.so.l.e get ]; set bf1 [ lsearch -glob $modElem $bc1* ]; if { $bf1 !=-1 } { set bd1 [ lindex $modElem $bf1 ]; .deb.so.l.e delete 0 end; .deb.so.l.e insert 0 $bd1; .deb.so.l.e index $bb1; .deb.so.l.e selection range $bb1 end } } }" );
 			cmd( "pack $s.l.l $s.l.e" );
 
 			cmd( "frame $s.c" );

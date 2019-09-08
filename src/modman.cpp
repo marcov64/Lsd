@@ -1685,7 +1685,7 @@ if ( choice == 13 || choice == 58 )
 	
 		case 2:		// Mac
 #ifdef MAC_PKG
-            cmd("if [string equal $cmdbreak \"--args\"] { set cmdbreak \"\"} {}");
+            cmd( "if [ string equal $cmdbreak \"--args\" ] { set cmdbreak \"\" }" );
 			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s\\\"\" & } result", str1, str1 );
 #else
 			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f %s\\\"\" & } result", str1 );
