@@ -234,7 +234,7 @@ void plog( char const *cm, char const *tag, ... )
 	{
 		cmd( "set log_ok [ winfo exists .log ]" );
 		cmd( "if $log_ok { .log.text.text.internal see [ .log.text.text.internal index insert ] }" );
-		cmd( "if $log_ok { .log.text.text.internal insert end \"%s\" %s }", message, tag );
+		cmd( "if $log_ok { catch { .log.text.text.internal insert end \"%s\" %s } }", message, tag );
 		cmd( "if $log_ok { .log.text.text.internal see end }" );
 	}
 	else

@@ -7508,7 +7508,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 					}
 					else
 					{
-						if ( start[ k ] == i || ( i <= 1 && start[ k ] == 0 ) )
+						if ( start[ k ] == i || ( i <= 1 && start[ k ] <= 0 ) )
 							yVal = data[ k ][ i ];
 						
 						tOk = false;
@@ -7564,7 +7564,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 				}
 				else
 				{
-					if ( start[ k ] == i )
+					if ( start[ k ] == i || ( i <= 1 && start[ k ] <= 0 ) )
 					{ 	// series entering after x1
 						if ( ! xnext )					// "intra" step?
 							y[ k ] = yVal * h;			// suppose from the beginning of x1
