@@ -2917,7 +2917,7 @@ if ( choice == 29 )
 {
 	cmd( "set v_num 0" );
 	cmd( "set v_label \"\"" );
-	cmd( "set v_lag 0" );
+	cmd( "set v_lag T" );
 	cmd( "set v_obj p" );
 
 	if ( macro )
@@ -2939,7 +2939,7 @@ if ( choice == 29 )
 
 	cmd( "frame .a.l" );
 	cmd( "label .a.l.l -text \"Time step appearing as latest computation\"" );
-	cmd( "entry .a.l.e -width 3 -textvariable v_lag -justify center" );
+	cmd( "entry .a.l.e -width 15 -textvariable v_lag -justify center" );
 	cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.l.l .a.l.e" );
 
@@ -2974,14 +2974,14 @@ if ( choice == 29 )
 
 	if ( macro )
 	{
-		cmd( "if {$v_obj == \"p\" && $v_lag == 0} { .f.t.t insert insert \"WRITE(\\\"$v_label\\\", $v_num);\"}" );
-		cmd( "if {$v_obj == \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\", $v_num, $v_lag);\"}" );
-		cmd( "if {$v_obj != \"p\" && $v_lag == 0} { .f.t.t insert insert \"WRITES($v_obj, \\\"$v_label\\\", $v_num);\"}" );
-		cmd( "if {$v_obj != \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"WRITELS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\"}" );
+		cmd( "if { $v_obj == \"p\" && ( $v_lag == \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITE(\\\"$v_label\\\", $v_num);\"}" );
+		cmd( "if { $v_obj == \"p\" && $v_lag != \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\", $v_num, $v_lag);\"}" );
+		cmd( "if { $v_obj != \"p\" && ( $v_lag == \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITES($v_obj, \\\"$v_label\\\", $v_num);\"}" );
+		cmd( "if { $v_obj != \"p\" && $v_lag != \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITELS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\"}" );
 	}
 	else
 	{
-		cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\", $v_num, $v_lag);\"}" );
+		cmd( ".f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\", $v_num, $v_lag);\"" );
 	}
 	cmd( ".f.t.t see insert" );
 
