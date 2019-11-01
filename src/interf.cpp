@@ -3401,6 +3401,16 @@ case 24:
 		break;
 
 	n = root->search( res_g );
+	*choice = 0;
+
+	if ( n == NULL )
+	{	// check if it is not a zero-instance object
+		n = blueprint->search( res_g );
+		if ( n != NULL )
+			cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Cannot show no-instance object\" -detail \"All instances of '%s' were deleted.\nSelect another object or reload your configuration and try again.\"", res_g );
+
+		break;
+	}
 
 	if ( n != r )
 	{
@@ -3408,19 +3418,21 @@ case 24:
 		cmd( "set listfocus 1; set itemfocus 0" ); // point for first var in listbox
 	}
 
-	*choice = 0;
 	return n;
 
 
 // Edit initial values of Objects pointed on the graphical map (NOT USED)
 case 25:
 
-	if (res_g == NULL )
-	  break;
+	if ( res_g == NULL )
+		break;
 
 	r = root->search( res_g );
-
 	*choice = 0;
+
+	if ( r == NULL )
+		break;
+
 	edit_data( root, choice, r->label );
 	cmd( "destroytop .ini" );
 
