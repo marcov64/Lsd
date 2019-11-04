@@ -234,6 +234,7 @@ struct object
 	double multiply( char const *lab, double value );
 	double overall_max( char const *lab, int lag );
 	double overall_min( char const *lab, int lag );
+	double perc( char const *lab, int lag, double p );
 	double read_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, char const *ext = "net" );
 	double recal( char const *l );
 	double sd( char const *lab, int lag );
