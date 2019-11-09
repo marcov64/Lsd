@@ -75,7 +75,7 @@ object *initParent = NULL;			// parent of new variable initial setting
 
 
 // list of choices that are bad with existing run data
-int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
+int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
@@ -3394,7 +3394,7 @@ case 22:
 break;
 
 
-// Move browser to Object pointed on the graphical model map
+// Move browser to Object pointed on the graphical model structure map
 case 24:
 
 	if ( res_g == NULL )
@@ -3421,22 +3421,8 @@ case 24:
 	return n;
 
 
-// Edit initial values of Objects pointed on the graphical map (NOT USED)
+// NOT USED
 case 25:
-
-	if ( res_g == NULL )
-		break;
-
-	r = root->search( res_g );
-	*choice = 0;
-
-	if ( r == NULL )
-		break;
-
-	edit_data( root, choice, r->label );
-	cmd( "destroytop .ini" );
-
-	unsaved_change( true );		// signal unsaved change
 
 break;
 

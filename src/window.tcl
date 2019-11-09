@@ -488,7 +488,7 @@ proc geomtop { { w . } } {
 # and later reopened, at the same place/size
 #************************************************
 proc geomtosave { { w . } } {
-	global CurPlatform wndMenuHeight
+	global CurPlatform wndMenuHeight hfactM vfactM
 
 	# handle virtual top windows names
 	if { [ string equal $w .lmm ] || [ string equal $w .lsd ] } {
@@ -549,8 +549,13 @@ proc geomtosave { { w . } } {
 			}
 		}
 	}
+	
+	if { $w == ".str" } {
+		return ${width}x${realHeight}+${realX}+${realY}:${hfactM}+${vfactM}
+	} {
+		return ${width}x${realHeight}+${realX}+${realY}
+	}
 
-	return ${width}x${realHeight}+${realX}+${realY}
 }
 
 
@@ -560,20 +565,24 @@ proc geomtosave { { w . } } {
 # screen or invalid and use the default if needed
 #************************************************
 proc checkgeom { geom defGeom screenWidth screenHeight } {
-	global restoreWin
+	global restoreWin hfactMmin vfactMmin
 	
 	if { ! $restoreWin || $geom == "#" } {
 		return $defGeom
 	} else {
-		set n [ scan $geom "%dx%d+%d+%d" width height decorationLeft decorationTop ]
+		set n [ scan $geom "%dx%d+%d+%d:%f+%f" width height decorationLeft decorationTop hScale vScale ]
 		
-		if { $n != 4 } {
+		if { $n < 4 } {
 			return $defGeom
 		} else {
 			set centerX [ expr $decorationLeft + $width / 2 ]
 			set centerY [ expr $decorationTop + $height / 2 ]
 
 			if { $centerX < 0 || $centerX > $screenWidth || $centerY < 0 || $centerY > $screenHeight } {
+				return $defGeom
+			}
+			
+			if { $n == 6 && ( $hScale < $hfactMmin || $vScale < $vfactMmin ) } {
 				return $defGeom
 			}
 		}
@@ -588,7 +597,7 @@ proc checkgeom { geom defGeom screenWidth screenHeight } {
 # Adjust main windows to default size & positions
 #************************************************
 proc sizetop { { w all } } {
-	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom wndMenuHeight
+	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom hfactM vfactM wndMenuHeight
 
 	update
 	
@@ -654,7 +663,14 @@ proc sizetop { { w all } } {
 					set posXstr [ expr [ winfo x . ] + [ winfo width . ] + 2 * $bordsize + $hmargin + $corrX ]
 					set posYstr [ expr [ winfo y . ] + $corrY ]
 					set defGeom "${hsizeM}x${vsizeM}+${posXstr}+${posYstr}"
-					wm geometry .str [ checkgeom $strGeom $defGeom $screenWidth $screenHeight ]
+
+					# handle the extra scaling parameters
+					set geom [ split [ checkgeom $strGeom $defGeom $screenWidth $screenHeight ] ":" ]
+					wm geometry .str [ lindex $geom 0 ]
+					if { [ lindex $geom 1 ] != "" } {
+						scan [ lindex $geom 1 ] "%f+%f" hfactM vfactM
+					}
+					
 					wm minsize .str [ expr $hsizeM / 2 ] [ expr $vsizeM / 2 ]	
 				}
 				

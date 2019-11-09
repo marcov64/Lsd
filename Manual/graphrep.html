@@ -2,7 +2,7 @@
 
 <head>
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
-<meta name=Generator content="Microsoft Word 14 (filtered)">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
 <title>Model Structure</title>
 <style>
 <!--
@@ -11,48 +11,51 @@
 	{font-family:Wingdings;
 	panose-1:5 0 0 0 0 0 0 0 0 0;}
 @font-face
-	{font-family:Wingdings;
-	panose-1:5 0 0 0 0 0 0 0 0 0;}
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
 @font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
+@font-face
+	{font-family:"Segoe UI";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
 	{margin-right:0cm;
 	margin-left:0cm;
 	font-size:12.0pt;
-	font-family:"Arial","sans-serif";}
+	font-family:"Arial",sans-serif;}
 h1
-	{mso-style-link:"Título 1 Char";
+	{mso-style-link:"Heading 1 Char";
 	margin-right:0cm;
 	margin-left:0cm;
 	font-size:14.0pt;
-	font-family:"Arial","sans-serif";
+	font-family:"Arial",sans-serif;
 	color:#254061;
 	font-weight:bold;}
 h2
-	{mso-style-link:"Título 2 Char";
+	{mso-style-link:"Heading 2 Char";
 	margin-top:24.0pt;
 	margin-right:0cm;
 	margin-left:0cm;
 	font-size:12.0pt;
-	font-family:"Arial","sans-serif";
+	font-family:"Arial",sans-serif;
 	font-weight:bold;}
 h3
-	{mso-style-link:"Título 3 Char";
+	{mso-style-link:"Heading 3 Char";
 	margin-top:36.0pt;
 	margin-right:0cm;
 	margin-left:0cm;
 	font-size:12.0pt;
-	font-family:"Arial","sans-serif";
+	font-family:"Arial",sans-serif;
 	font-weight:bold;}
 p.MsoTitle, li.MsoTitle, div.MsoTitle
-	{mso-style-link:"Título Char";
+	{mso-style-link:"Title Char";
 	margin-right:0cm;
 	margin-left:0cm;
 	text-align:center;
 	font-size:18.0pt;
-	font-family:"Arial","sans-serif";
+	font-family:"Arial",sans-serif;
 	color:#254061;
 	font-weight:bold;}
 a:link, span.MsoHyperlink
@@ -65,77 +68,142 @@ p
 	{margin-right:0cm;
 	margin-left:0cm;
 	font-size:12.0pt;
-	font-family:"Arial","sans-serif";}
+	font-family:"Arial",sans-serif;}
 tt
 	{font-family:"Courier New";}
 p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
-	{mso-style-link:"Texto de balão Char";
+	{mso-style-link:"Balloon Text Char";
 	margin-right:0cm;
 	margin-left:0cm;
 	font-size:8.0pt;
-	font-family:"Tahoma","sans-serif";}
+	font-family:"Tahoma",sans-serif;}
 p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
 	{margin-right:0cm;
 	margin-left:0cm;
 	font-size:12.0pt;
-	font-family:"Arial","sans-serif";}
+	font-family:"Arial",sans-serif;}
 p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
 	{margin-right:0cm;
 	margin-left:36.0pt;
 	font-size:12.0pt;
-	font-family:"Arial","sans-serif";}
-span.Ttulo1Char
-	{mso-style-name:"Título 1 Char";
-	mso-style-link:"Título 1";
-	font-family:"Arial","sans-serif";
-	color:#254061;
-	font-weight:bold;}
-span.Ttulo2Char
-	{mso-style-name:"Título 2 Char";
-	mso-style-link:"Título 2";
-	font-family:"Arial","sans-serif";
-	font-weight:bold;}
-span.Ttulo3Char
-	{mso-style-name:"Título 3 Char";
-	mso-style-link:"Título 3";
-	font-family:"Arial","sans-serif";
-	font-weight:bold;}
-span.TtuloChar
-	{mso-style-name:"Título Char";
-	mso-style-link:Título;
-	font-family:"Arial","sans-serif";
-	color:#254061;
-	font-weight:bold;}
-span.TextodebaloChar
-	{mso-style-name:"Texto de balão Char";
-	mso-style-link:"Texto de balão";
-	font-family:"Tahoma","sans-serif";}
+	font-family:"Arial",sans-serif;}
+span.Heading1Char
+	{mso-style-name:"Heading 1 Char";
+	mso-style-link:"Heading 1";
+	font-family:"Cambria",serif;
+	color:#365F91;}
+span.Heading2Char
+	{mso-style-name:"Heading 2 Char";
+	mso-style-link:"Heading 2";
+	font-family:"Cambria",serif;
+	color:#365F91;}
+span.Heading3Char
+	{mso-style-name:"Heading 3 Char";
+	mso-style-link:"Heading 3";
+	font-family:"Cambria",serif;
+	color:#243F60;}
+p.msonormal0, li.msonormal0, div.msonormal0
+	{mso-style-name:msonormal;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;}
+span.TitleChar
+	{mso-style-name:"Title Char";
+	mso-style-link:Title;
+	font-family:"Cambria",serif;
+	letter-spacing:-.5pt;}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-link:"Balloon Text";
+	font-family:"Segoe UI",sans-serif;}
 p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
 	{mso-style-name:msolistparagraphcxspfirst;
 	margin-right:0cm;
 	margin-left:36.0pt;
 	font-size:12.0pt;
-	font-family:"Arial","sans-serif";}
+	font-family:"Arial",sans-serif;}
 p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
 	{mso-style-name:msolistparagraphcxspmiddle;
 	margin-right:0cm;
 	margin-left:36.0pt;
 	font-size:12.0pt;
-	font-family:"Arial","sans-serif";}
+	font-family:"Arial",sans-serif;}
 p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
 	{mso-style-name:msolistparagraphcxsplast;
 	margin-right:0cm;
 	margin-left:36.0pt;
 	font-size:12.0pt;
-	font-family:"Arial","sans-serif";}
+	font-family:"Arial",sans-serif;}
 p.msochpdefault, li.msochpdefault, div.msochpdefault
 	{mso-style-name:msochpdefault;
 	margin-right:0cm;
 	margin-left:0cm;
 	font-size:10.0pt;
-	font-family:"Arial","sans-serif";}
+	font-family:"Arial",sans-serif;}
+span.Ttulo1Char
+	{mso-style-name:"T\00EDtulo 1 Char";
+	mso-style-link:"T\00EDtulo 1";
+	font-family:"Arial",sans-serif;
+	color:#254061;
+	font-weight:bold;}
+p.Ttulo1, li.Ttulo1, div.Ttulo1
+	{mso-style-name:"T\00EDtulo 1";
+	mso-style-link:"T\00EDtulo 1 Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;}
+span.Ttulo2Char
+	{mso-style-name:"T\00EDtulo 2 Char";
+	mso-style-link:"T\00EDtulo 2";
+	font-family:"Arial",sans-serif;
+	font-weight:bold;}
+p.Ttulo2, li.Ttulo2, div.Ttulo2
+	{mso-style-name:"T\00EDtulo 2";
+	mso-style-link:"T\00EDtulo 2 Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;}
+span.Ttulo3Char
+	{mso-style-name:"T\00EDtulo 3 Char";
+	mso-style-link:"T\00EDtulo 3";
+	font-family:"Arial",sans-serif;
+	font-weight:bold;}
+p.Ttulo3, li.Ttulo3, div.Ttulo3
+	{mso-style-name:"T\00EDtulo 3";
+	mso-style-link:"T\00EDtulo 3 Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;}
+span.TtuloChar
+	{mso-style-name:"T\00EDtulo Char";
+	mso-style-link:T\00EDtulo;
+	font-family:"Arial",sans-serif;
+	color:#254061;
+	font-weight:bold;}
+p.Ttulo, li.Ttulo, div.Ttulo
+	{mso-style-name:T\00EDtulo;
+	mso-style-link:"T\00EDtulo Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;}
+span.TextodebaloChar
+	{mso-style-name:"Texto de bal\00E3o Char";
+	mso-style-link:"Texto de bal\00E3o";
+	font-family:"Tahoma",sans-serif;}
+p.Textodebalo, li.Textodebalo, div.Textodebalo
+	{mso-style-name:"Texto de bal\00E3o";
+	mso-style-link:"Texto de bal\00E3o Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;}
 span.Cdigo
-	{mso-style-name:Código;
+	{mso-style-name:C\00F3digo;
 	font-family:"Courier New";
 	color:gray;}
 .MsoChpDefault
@@ -160,76 +228,110 @@ div.WordSection1
 
 </head>
 
-<body lang=EN-US link=blue vlink=purple>
+<body lang=PT-BR link=blue vlink=purple>
 
 <div class=WordSection1>
 
-<p class=MsoTitle>&nbsp;</p>
+<p class=MsoTitle><span lang=EN-US>&nbsp;</span></p>
 
-<p class=MsoTitle><a name=graphrep></a>LSD Model Structure</p>
+<p class=MsoTitle><a name=graphrep></a><span lang=EN-US>LSD Model Structure</span></p>
 
-<p class=MsoNormal align=center style='text-align:center'><img width=482
-height=347 src="image/model_struct.png"></p>
+<p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
+width=482 height=347 src="image/model_struct.png"></span></p>
 
-<p class=MsoNormal>The LSD Model Structure window presents an interactive
-graphical representation of the <a href="LSD_faqs.html#model">LSD model</a>
-<a href="LSD_faqs.html#modelstructure">hierarchical structure of
+<p class=MsoNormal><span lang=EN-US>The LSD Model Structure window presents an
+interactive graphical representation of the <a href="LSD_faqs.html#model">LSD
+model</a> <a href="LSD_faqs.html#modelstructure">hierarchical structure of
 Objects</a>. It is automatically opened whenever a <a
-href="LSD_faqs.html#modelsetting">model configuration</a> is loaded in
-the <a href="LSD_windows.html#browser">LSD Browser</a>. The model
-structure can be used to quickly browse through the model, since the <a
-href="LSD_faqs.html#object">Object</a> symbols can be (left- and
-right-) clicked.</p>
+href="LSD_faqs.html#modelsetting">model configuration</a> is loaded in the <a
+href="LSD_windows.html#browser">LSD Browser</a>. The model structure can be
+used to quickly browse through the model, since the <a
+href="LSD_faqs.html#object">Object</a> symbols can be (left- and right-)
+clicked.</span></p>
 
-<p class=MsoNormal>Each <a href="LSD_faqs.html#object">Object type</a>
-in the model is represented by its name in red and a white circle connected
-with a line to its parent Object. Below each Object circle symbol are reported
-the number of <a href="LSD_faqs.html#object">instances</a> currently
+<p class=MsoNormal><span lang=EN-US>Each <a href="LSD_faqs.html#object">Object
+type</a> in the model is represented by its name in red and a white circle
+connected with a line to its parent Object. Below each Object circle symbol are
+reported the number of <a href="LSD_faqs.html#object">instances</a> currently
 existing in the model for that Object. In case there are multiple instances of
 its parent Object, there is one number for each group of descendants from each
 instance of the parent Object. If there are too many groups to present, LSD
-shows only the initial ones. </p>
+shows only the initial ones. </span></p>
 
-<p class=MsoNormal>The top-most <span class=Cdigo>Root</span> Object is not
-shown in the <a href="LSD_faqs.html#modelstructure">model structure</a>,
-as it should not contain any element most of the times. All direct descendants
-(sons) of the <span class=Cdigo>Root</span> Object are shown at the top of the
-structure. In the level below, are the descendants of the sons of Root (its
-grandsons), as well all other Objects descending from them and so on. Very
-large model structures (too wide or too deep) may show incomplete in the
-default view of the window. To uncover the hidden Objects, the user may use the
-scroll bars to pan around the model structure or increase (or maximize) the
-size of the LSD Model Structure.</p>
+<p class=MsoNormal><span lang=EN-US>The top-most </span><span class=Cdigo><span
+lang=EN-US>Root</span></span><span lang=EN-US> Object is not shown in the <a
+href="LSD_faqs.html#modelstructure">model structure</a>, as it should not
+contain any element most of the times. All direct descendants (sons) of the </span><span
+class=Cdigo><span lang=EN-US>Root</span></span><span lang=EN-US> Object are
+shown at the top of the structure. In the level below, are the descendants of
+the sons of Root (its grandsons), as well all other Objects descending from
+them and so on. Very large model structures (too wide or too deep) may show
+incomplete in the default view of the window. To uncover the hidden Objects,
+the user may use the scroll bars to pan around the model structure or increase
+(or maximize) the size of the LSD Model Structure.</span></p>
 
-<h2>Interacting with the model structure</h2>
+<h2><span lang=EN-US>Interacting with the model structure</span></h2>
 
-<p class=MsoNormal>Hovering with the mouse over an Object symbol briefly shows
-the list of elements contained in it:</p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><a href="LSD_faqs.html#parameter">Parameter</a> names are
-followed by <span class=Cdigo>(P)</span> </p>
+<p class=MsoNormal><span lang=EN-US>Hovering with the mouse over an Object
+symbol briefly shows the list of elements contained in it:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><a href="LSD_faqs.html#variable">Variable</a> names are
-followed by <span class=Cdigo>(V)</span> or <span class=Cdigo>(V_X)</span>,
-where <span class=Cdigo>X</span> is the maximum number of <a
-href="LSD_faqs.html#variable">lags</a> used. </p>
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US><a href="LSD_faqs.html#parameter">Parameter</a>
+names are followed by </span><span class=Cdigo><span lang=EN-US>(P)</span></span><span
+lang=EN-US> </span></p>
 
-<p class=MsoNormal>The LSD Model Structure can be used to change the <a
-href="LSD_windows.html#browser">LSD Browser</a> current Object by
-(left-) clicking on its symbol.</p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US><a href="LSD_faqs.html#variable">Variable</a>
+names are followed by </span><span class=Cdigo><span lang=EN-US>(V)</span></span><span
+lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>(V_X)</span></span><span
+lang=EN-US>, where </span><span class=Cdigo><span lang=EN-US>X</span></span><span
+lang=EN-US> is the maximum number of <a href="LSD_faqs.html#variable">lags</a>
+used. </span></p>
 
-<p class=MsoNormal>It is also possible to access the Object context menu by
-right-clicking its symbol. From the pop-up menu the user can perform several
-actions on the selected Object: add a new parent, rename, change the number of
-instances, delete, add elements, edit initial values and browse elements.</p>
+<p class=MsoNormal><span lang=EN-US>The LSD Model Structure can be used to
+change the <a href="LSD_windows.html#browser">LSD Browser</a> current Object by
+(left-) clicking on its symbol.</span></p>
 
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+<p class=MsoNormal><span lang=EN-US>It is also possible to access the Object
+context menu by right-clicking its symbol. From the pop-up menu the user can
+perform several actions on the selected Object: add a new parent, rename,
+change the number of instances, delete, add elements, edit initial values and
+browse elements.</span></p>
+
+<h2><span lang=EN-US>Changing the distribution of the Objects</span></h2>
+
+<p class=MsoNormal><span lang=EN-US>The distribution of the Object
+representations on the LSD Model Structure can adjusted using the five buttons
+available in the lower right side of the window:</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US>A: automatically adjusts both the horizontal and
+vertical space distribution of Objects, trying to use as much of the window
+area as possible.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US>&#9650;/&#9660;: decreases/increases the
+vertical space distribution of Objects in the window.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US>&#9668;/&#9658;: decreases/increases the
+horizontal space distribution of Objects in the window.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>When the Model Structure window is resized,
+it may be necessary to use these buttons to be able to see all the Objects in
+the model configuration.</span></p>
+
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
@@ -240,7 +342,7 @@ instances, delete, add elements, edit initial values and browse elements.</p>
  </tr>
 </table>
 
-<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span lang=EN-US>&nbsp;</span></p>
 
 </div>
 

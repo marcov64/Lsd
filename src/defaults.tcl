@@ -80,6 +80,26 @@ set daCwidLinux		28	; # series lists width (Linux)
 set daCwidMac		28	; # Mac
 set daCwidWindows	36	; # Windows
 
+# model structure window defaults
+set borderM		20		; # open space to border
+set nsizeM		20		; # node size (diameter)
+set vmarginM	20		; # labels margins to nodes
+set vstepM		75		; # vertical absolute step
+set hfactM		1.0		; # initial horizontal scaling factor
+set vfactM		1.0		; # initial vertical scaling factor
+set hfactMmin	0.5		; # minimum horizontal scaling factor
+set vfactMmin	0.7		; # minimum vertical scaling factor
+set rstepM		0.1		; # relative scaling factor step step
+set rfactM		0.3		; # horizontal range exponential factor
+set rinitM		750		; # horizontal initial width (4 root sons)
+set rincrM		100		; # horizontal width increase step
+set bhstepM		26		; # button vertical step
+set bvstepM		25		; # button vertical step
+set ncolorM 	white	; # node color
+set ncolorMsel 	blue	; # selected node color
+set tcolorM 	red		; # node name color
+set lcolorM 	gray	; # line color
+
 # mouse wheel scroll factor (sensitivity)
 set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down
 set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Windows
