@@ -93,8 +93,12 @@ set rstepM		0.1		; # relative scaling factor step step
 set rfactM		0.3		; # horizontal range exponential factor
 set rinitM		750		; # horizontal initial width (4 root sons)
 set rincrM		100		; # horizontal width increase step
-set bhstepM		26		; # button vertical step
-set bvstepM		25		; # button vertical step
+set bsizeMwin	2		; # button size (Windows/Mac)
+set bsizeMlin	1		; # button size (Linux)
+set bhstepMwin	25		; # button horizontal step (Windows/Mac)
+set bhstepMlin	35		; # button horizontal step (Linux)
+set bvstepMwin	26		; # button vertical step (Windows/Mac)
+set bvstepMlin	30		; # button vertical step (Linux)
 set ncolorM 	white	; # node color
 set ncolorMsel 	blue	; # selected node color
 set tcolorM 	red		; # node name color
@@ -195,6 +199,9 @@ if { [ string equal $tcl_platform(platform) unix ] } {
 	set DefaultFont $fontLinux
 	set DefaultFontSize $fontSizeLinux
 	set deltaSize $deltaSizeLinux
+	set bsizeM $bsizeMlin
+	set bhstepM $bhstepMlin
+	set bvstepM $bvstepMlin
 }
 
 if { [ string equal $tcl_platform(os) Darwin ] && $MAC_PKG } {
@@ -208,6 +215,9 @@ if { [ string equal $tcl_platform(os) Darwin ] && $MAC_PKG } {
 	set DefaultFont $fontMac
 	set DefaultFontSize $fontSizeMac
 	set deltaSize $deltaSizeMac
+	set bsizeM $bsizeMwin
+	set bhstepM $bhstepMwin
+	set bvstepM $bvstepMwin
 }
 
 if { [ string equal $tcl_platform(os) Darwin ] && ! $MAC_PKG } {
@@ -221,6 +231,9 @@ if { [ string equal $tcl_platform(os) Darwin ] && ! $MAC_PKG } {
 	set DefaultFont $fontMac
 	set DefaultFontSize $fontSizeMac
 	set deltaSize $deltaSizeMac
+	set bsizeM $bsizeMwin
+	set bhstepM $bhstepMwin
+	set bvstepM $bvstepMwin
 }
 
 if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { 
@@ -234,6 +247,9 @@ if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_pla
 	set DefaultFont $fontWindows
 	set DefaultFontSize $fontSizeWindows
 	set deltaSize $deltaSizeWindows
+	set bsizeM $bsizeMwin
+	set bhstepM $bhstepMwin
+	set bvstepM $bvstepMwin
 }
 
 if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { 
@@ -251,4 +267,7 @@ if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_pla
 	set DefaultFont $fontWindows
 	set DefaultFontSize $fontSizeWindows
 	set deltaSize $deltaSizeWindows
+	set bsizeM $bsizeMwin
+	set bhstepM $bhstepMwin
+	set bvstepM $bvstepMwin
 }

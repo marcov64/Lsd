@@ -134,26 +134,23 @@ void draw_buttons( void )
 			set vratioM 1 \
 		}" );
 	
-//cmd( "tk_messageBox -message \".str:\nwm geom=[wm geom $g]\nwinfo geom=[winfo geom $g]\nwinfo width=[winfo width $g]\nwinfo height=[winfo height $g]\nwinfo reqwidth=[winfo reqwidth $g]\nwinfo reqheight=[winfo reqheight $g]\n\nbbox.width=[expr $x2 - $x1]\nbbox.height=[expr $y2 - $y1]\n\ncanvas.width=[ expr [$g.f.c canvasx [winfo width $g]] - [$g.f.c canvasx 0] ]\ncanvas.height=[ expr [$g.f.c canvasy [winfo height $g]] - [$g.f.c canvasy 0] ]\n\nhratio=$hratioM\nvratio=$vratioM\n\nhfact=$hfactM\nvfact=$vfactM\n\nn=$n\"" );
-
-
-	cmd( "button $g.f.c.hplus -text \"\u25B6\" -width 2 -height 1 -command { \
+	cmd( "button $g.f.c.hplus -text \"\u25B6\" -width $bsizeM -height 1 -command { \
 			set hfactM [ expr $hfactM + $rstepM ]; \
 			set choice_g 70 \
 		}" );
-	cmd( "button $g.f.c.hminus -text \"\u25C0\" -width 2 -height 1 -command { \
+	cmd( "button $g.f.c.hminus -text \"\u25C0\" -width $bsizeM -height 1 -command { \
 			set hfactM [ expr max( [ expr $hfactM - $rstepM ], $hfactMmin ) ]; \
 			set choice_g 70 \
 		}" );
-	cmd( "button $g.f.c.vplus -text \"\u25BC\" -width 2 -height 1 -command { \
+	cmd( "button $g.f.c.vplus -text \"\u25BC\" -width $bsizeM -height 1 -command { \
 			set vfactM [ expr $vfactM + $rstepM ]; \
 			set choice_g 70 \
 		}" );
-	cmd( "button $g.f.c.vminus -text \"\u25B2\" -width 2 -height 1 -command { \
+	cmd( "button $g.f.c.vminus -text \"\u25B2\" -width $bsizeM -height 1 -command { \
 			set vfactM [ expr max( [ expr $vfactM - $rstepM ], $vfactMmin ) ]; \
 			set choice_g 70 \
 		}" );
-	cmd( "button $g.f.c.auto -text \"A\" -width 2 -height 1 -command { \
+	cmd( "button $g.f.c.auto -text \"A\" -width $bsizeM -height 1 -command { \
 			set hfactM [ expr $hfactM * $hratioM ]; \
 			set vfactM [ expr $vfactM * $vratioM ]; \
 			set choice_g 70 \
@@ -163,10 +160,10 @@ void draw_buttons( void )
 	cmd( "set rowM [ expr $cy2 - $borderM ]" );
 	
 	cmd( "$g.f.c create window $colM $rowM -window $g.f.c.auto" );
-	cmd( "$g.f.c create window [ expr $colM - $bvstepM ] $rowM -window $g.f.c.hplus" );
-	cmd( "$g.f.c create window [ expr $colM - 2 * $bvstepM ] $rowM -window $g.f.c.hminus" );
-	cmd( "$g.f.c create window $colM [ expr $rowM - $bhstepM ] -window $g.f.c.vplus" );
-	cmd( "$g.f.c create window $colM [ expr $rowM - 2 * $bhstepM ] -window $g.f.c.vminus" );
+	cmd( "$g.f.c create window [ expr $colM - $bhstepM ] $rowM -window $g.f.c.hplus" );
+	cmd( "$g.f.c create window [ expr $colM - 2 * $bhstepM ] $rowM -window $g.f.c.hminus" );
+	cmd( "$g.f.c create window $colM [ expr $rowM - $bvstepM ] -window $g.f.c.vplus" );
+	cmd( "$g.f.c create window $colM [ expr $rowM - 2 * $bvstepM ] -window $g.f.c.vminus" );
 }
 
 
