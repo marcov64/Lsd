@@ -46,4 +46,4 @@ else
 fi
 
 # fix alias icon
-"$LSDROOT"/gnu/bin/SetFileIcon -file ~/Desktop/"$ALIAS" -image "$LSDROOT"/src/icons/lsd.icns
+"$LSDROOT"/gnu/bin/seticon "$LSDROOT"/src/icons/lsd.icns ~/Desktop/"$ALIAS"

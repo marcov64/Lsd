@@ -20,7 +20,7 @@ LSD includes third party software under the license of the copyright owners:
 Eigen 3.3.4 is copyrighted by Benoit Jacob and others under a MPL2 license, http://eigen.tuxfamily.org
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under a GPL 2.1 license, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under a GPL 2.1 license, http://harvest.nps.edu
-SetFileIcon 0.1 is copyrighted by HAMSoft Engineering, http://hamsoftengineering.com
+seticon/osxconutils is copyrighted by Sveinbjorn Thordarson, https://sveinbjorn.org/osxiconutils
 Shortcut.exe 1.11 is copyrighted by Marty List, http://www.OptimumX.com
 Silk icon set 1.3 is copyrighted by Mark James under a CCA 2.5 license, http://www.famfamfam.com/lab/icons/silk
 
