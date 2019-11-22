@@ -624,16 +624,11 @@ proc fix_info { fi } {
 		set newVer $l2
 	}
 	
-	if { $l3 == "" } {
-		set newDate [ clock format [ clock seconds ] -format "$DATE_FMT" ]
+	if { ! [ string is print $l3 ] } {
+		set newDate ""
 		set fix 1
 	} else {
-		if { ! [ check_date $l3 ] } {
-			set newDate [ clock format [ clock seconds ] -format "$DATE_FMT" ]
-			set fix 1
-		} else {
-			set newDate $l3
-		}
+		set newDate $l3
 	}
 	
 	if { $fix } {
@@ -641,37 +636,6 @@ proc fix_info { fi } {
 		puts $f $newName
 		puts $f $newVer
 		puts $f $newDate
-		
-		for { set i 3 } { $i < $MODEL_INFO_NUM } { incr i } {
-			puts $f "#"
-		}
-		
 		close $f
 	}
-}
-
-
-#************************************************
-# CHECK_DATE
-# Check date format (dd M, yyyy)
-#************************************************
-proc check_date { str } {
-	global months
-
-	regsub -all "," $str "" date
-	set date [ split $date ]
-	
-	if { [ llength $date ] < 3 } {
-		return 0
-	}
-	
-	set day [ lindex $date 0 ]
-	set month [ lindex $date 1 ]
-	set year [ lindex $date 2 ]
-	
-	if { ! [ string is integer -strict $day ] || $day < 1 || $day > 31 || [ lsearch $months $month ] < 0 || ! [ string is integer -strict $year ] || $year < 1980 || $year > 2100 } {
-		return 0
-	}
-	
-	return 1
 }

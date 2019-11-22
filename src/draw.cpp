@@ -135,24 +135,24 @@ void draw_buttons( void )
 		}" );
 	
 	cmd( "button $g.f.c.hplus -text \"\u25B6\" -width $bsizeM -height 1 -command { \
-			set hfactM [ expr $hfactM + $rstepM ]; \
+			set hfactM [ round_N [ expr $hfactM + $rstepM ] 2 ]; \
 			set choice_g 70 \
 		}" );
 	cmd( "button $g.f.c.hminus -text \"\u25C0\" -width $bsizeM -height 1 -command { \
-			set hfactM [ expr max( [ expr $hfactM - $rstepM ], $hfactMmin ) ]; \
+			set hfactM [ round_N [ expr max( [ expr $hfactM - $rstepM ], $hfactMmin ) ] 2 ]; \
 			set choice_g 70 \
 		}" );
 	cmd( "button $g.f.c.vplus -text \"\u25BC\" -width $bsizeM -height 1 -command { \
-			set vfactM [ expr $vfactM + $rstepM ]; \
+			set vfactM [ round_N [ expr $vfactM + $rstepM ] 2 ]; \
 			set choice_g 70 \
 		}" );
 	cmd( "button $g.f.c.vminus -text \"\u25B2\" -width $bsizeM -height 1 -command { \
-			set vfactM [ expr max( [ expr $vfactM - $rstepM ], $vfactMmin ) ]; \
+			set vfactM [ round_N [ expr max( [ expr $vfactM - $rstepM ], $vfactMmin ) ] 2 ]; \
 			set choice_g 70 \
 		}" );
 	cmd( "button $g.f.c.auto -text \"A\" -width $bsizeM -height 1 -command { \
-			set hfactM [ expr $hfactM * $hratioM ]; \
-			set vfactM [ expr $vfactM * $vratioM ]; \
+			set hfactM [ round_N [ expr $hfactM * $hratioM ] 2 ]; \
+			set vfactM [ round_N [ expr $vfactM * $vratioM ] 2 ]; \
 			set choice_g 70 \
 		}" );
 		

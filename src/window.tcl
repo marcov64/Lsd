@@ -1825,6 +1825,26 @@ proc update_title_bar { } {
 
 
 #************************************************
+# ROUND_N
+# Round float to N decimal positions
+#************************************************
+proc round_N { float N } {
+	return [ expr round( $float * pow( 10, $N ) ) / pow( 10, $N ) ]
+}
+
+
+#************************************************
+# CURRENT_DATE
+# Current date in the default date format
+#************************************************
+proc current_date { } {
+	global DATE_FMT
+	
+	return [ clock format [ clock seconds ] -format $DATE_FMT ]
+}
+
+
+#************************************************
 # OPEN_GNUPLOT
 # Open gnuplot window
 #************************************************

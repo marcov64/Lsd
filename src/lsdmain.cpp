@@ -132,7 +132,8 @@ FILE *log_file = NULL;		// log file, if any
 const char *lmm_options[ LMM_OPTIONS_NUM ] = { "sysTerm", "HtmlBrowser", "fonttype", "wish", "LsdSrc", "dim_character", "tabsize", "wrap", "shigh", "autoHide", "showFileCmds", "LsdNew", "DbgExe", "restoreWin", "lmmGeom" };
 const char *lmm_defaults[ LMM_OPTIONS_NUM ] = { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", "$DefaultWish", "src", "$DefaultFontSize", "2", "1", "2", "0", "0", "Work", "$DefaultDbgExe", "1", "#" };
 const char *model_info[ MODEL_INFO_NUM ] = { "modelName", "modelVersion", "modelDate", "lsdGeom", "logGeom", "strGeom", "daGeom", "debGeom", "latGeom" };
-const char *model_defaults[ MODEL_INFO_NUM ] = { "(no name)", "1.0", "[ clock format [ clock seconds ] -format \"$DATE_FMT\" ]", "#", "#", "#", "#", "#", "#" };
+const char *model_defaults[ MODEL_INFO_NUM ] = { "(no name)", "1.0", "[ current_date ]", "#", "#", "#", "#", "#", "#" };
+const char *wnd_names[ MODEL_INFO_NUM - 3 ] = { "lsd", "log", "str", "da", "deb", "lat" };
 
 #ifdef CPP11
 eq_mapT eq_map;				// fast equation look-up map
@@ -1633,14 +1634,12 @@ bool load_model_info( void )
 /*********************************
  UPDATE_MODEL_INFO
  *********************************/
-const char *winToSave[ 6 ] = { "lsd", "log", "str", "da", "deb", "lat" };
-
 void update_model_info( void )
 {
 	// update existing windows positions
 	for ( int i = 0; i < 6; ++i )
-		cmd( "if { $restoreWin } { set curGeom [ geomtosave .%s ]; if { $curGeom != \"\" } { set %sGeom $curGeom } }",  winToSave[ i ],  winToSave[ i ] );
-	
+		cmd( "if { $restoreWin } { set curGeom [ geomtosave .%s ]; if { $curGeom != \"\" } { set %s $curGeom } }", wnd_names[ i ], model_info[ i + 3 ] );
+
 	// ensure model name is set
 	cmd( "if { ! [ info exists modelName ] } { set modelName \"\" }" );
 	cmd( "if { $modelName == \"\" } { regsub \"fun_\" \"%s\" \"\" modelName; regsub \".cpp\" \"$modelName\" \"\" modelName }", equation_name );

@@ -138,7 +138,7 @@ int v_counter = 0; 				//counter of the v[ i ] variables inserted in the equatio
 const char *lmm_options[ LMM_OPTIONS_NUM ] = { "sysTerm", "HtmlBrowser", "fonttype", "wish", "LsdSrc", "dim_character", "tabsize", "wrap", "shigh", "autoHide", "showFileCmds", "LsdNew", "DbgExe", "restoreWin", "lmmGeom" };
 const char *lmm_defaults[ LMM_OPTIONS_NUM ] = { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", "$DefaultWish", "src", "$DefaultFontSize", "2", "1", "2", "0", "0", "Work", "$DefaultDbgExe", "1", "#" };
 const char *model_info[ MODEL_INFO_NUM ] = { "modelName", "modelVersion", "modelDate", "lsdGeom", "logGeom", "strGeom", "daGeom", "debGeom", "latGeom" };
-const char *model_defaults[ MODEL_INFO_NUM ] = { "(no name)", "1.0", "[ clock format [ clock seconds ] -format \"$DATE_FMT\" ]", "#", "#", "#", "#", "#", "#" };
+const char *model_defaults[ MODEL_INFO_NUM ] = { "(no name)", "1.0", "[ current_date ]", "#", "#", "#", "#", "#", "#" };
 const char *lsd_dir[ LSD_DIR_NUM ] = { "src", "gnu", "gnu64", "Manual", "LMM.app", "R", "lwi", "___" };
 
 
@@ -5134,7 +5134,7 @@ if ( choice == 44 )
 	{
 		cmd( "set modelName $mname" );
 		cmd( "set modelVersion $mver" );
-		cmd( "if [ check_date $mdate ] { set modelDate $mdate } { set modelDate \"\"; tk_messageBox -type ok -title Error -icon error -message \"Invalid date\" -detail \"Dates must be set in the 'dd M, yyyy' format.\nSetting to current date.\" }" );
+		cmd( "if { [ string is print -strict $mdate ] } { set modelDate \"$mdate\" } { set modelDate \"[ current_date ]\" }" );
 		
 		cmd( ".f.hea.info.mod.dat conf -text \"$modelName\"" );
 		cmd( ".f.hea.info.ver.dat conf -text \"$modelVersion\"" );
