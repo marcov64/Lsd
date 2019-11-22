@@ -35,7 +35,7 @@ proc LsdAbout { ver dat { parWnd "." } } {
 
 
 #************************************************
-# gccVersion
+# GCCVERSION
 # Get GCC compiler version string
 #************************************************
 proc gccVersion { } {

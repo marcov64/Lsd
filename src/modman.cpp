@@ -5227,10 +5227,12 @@ if ( choice == 47 )
 					file delete -force \"$i\" \
 				} \
 			}; \
-			set objs [ glob -nocomplain -directory \"$modelDir\" *.o src makefile* makemessage.txt lsd* *.exe *.app ]; \
-			foreach i $objs { \
-				catch { \
-					file delete -force \"$i\" \
+			if { ! [ string equal -nocase \"$modelDir\" \"$RootLsd\" ] } { \
+				set objs [ glob -nocomplain -directory \"$modelDir\" *.o src makefile* makemessage.txt lsd* *.exe *.app ]; \
+				foreach i $objs { \
+					catch { \
+						file delete -force \"$i\" \
+					} \
 				} \
 			} \
 		} { set choice 1 } { LsdHelp LMM.html#compilation_options } { set choice 2 }" );
