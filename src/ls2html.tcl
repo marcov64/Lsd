@@ -27,9 +27,59 @@ proc LsdAbout { ver dat { parWnd "." } } {
 	set os $tcl_platform(os)
 	set osV $tcl_platform(osVersion)
 	set tclV [ info patch ]
+	set gccV [ gccVersion ]
 	set copyr "written by Marco Valente, Universita' dell'Aquila\nand by Marcelo Pereira, University of Campinas\n\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License"
 	
-	tk_messageBox -parent $parWnd -type ok -icon info -title $tit -message "Version $ver ($dat)" -detail "Platform: $plat ($mach)\nOS: $os ($osV)\nTcl/Tk: $tclV\n\n$copyr"
+	tk_messageBox -parent $parWnd -type ok -icon info -title $tit -message "Version $ver ($dat)" -detail "Platform: $plat ($mach)\nOS: $os ($osV)\nTcl/Tk: $tclV\nGCC: $gccV\n\n$copyr"
+}
+
+
+#************************************************
+# gccVersion
+# Get GCC compiler version string
+#************************************************
+proc gccVersion { } {
+	global RootLsd LsdSrc SYSTEM_OPTIONS
+	
+	if { ! [ file exists "$RootLsd/$LsdSrc/$SYSTEM_OPTIONS" ] } {
+		return "(system options missing)"
+	}
+	
+	set f [ open "$RootLsd/$LsdSrc/$SYSTEM_OPTIONS" r ]
+	set a [ read -nonewline $f ]
+	close $f
+	
+	set p [ string first "CC=" [ string toupper $a ] ]
+	if { $p < 0 || [ string index $a [ expr $p - 1 ] ] == "_" } {
+		return "(invalid system options)"
+	}
+	
+	set p [ expr $p + [ string length "CC=" ] ]
+	set e [ string first "\n" $a $p ]
+	if { $e < 0 } {
+		set e end
+	}
+	
+	set cc [ string trim [ string range $a $p $e ] ]
+	if { [ string length $cc ] == 0 } {
+		return "(invalid system options)"
+	}
+	
+	if { [ catch { exec $cc --version } r ] } {
+		return "(cannot run compiler)"
+	}
+	
+	set e [ string first "\n" $r ]
+	if { $e < 0 } {
+		set e end
+	}
+	
+	set v [ string trim [ string range $r 0 $e ] ]
+	if { [ string length $v ] == 0 } {
+		return "(unknown compiler version)"
+	} else {
+		return $v
+	}
 }
 
 
