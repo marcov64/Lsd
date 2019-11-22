@@ -15,7 +15,7 @@ TCL_DLL_FILE="tcl86.dll"
 TCL_VERSION='8.6'
 TCL_MAJOR_VERSION='8'
 TCL_MINOR_VERSION='6'
-TCL_PATCH_LEVEL='.9'
+TCL_PATCH_LEVEL='.10'
 
 # C compiler to use for compilation.
 TCL_CC='x86_64-w64-mingw32-gcc'
@@ -104,14 +104,14 @@ TCL_LD_SEARCH_FLAGS=''
 TCL_COMPAT_OBJS=''
 
 # Name of the ranlib program to use.
-TCL_RANLIB='x86_64-w64-mingw32-ranlib'
+TCL_RANLIB='ranlib'
 
 # -l flag to pass to the linker to pick up the Tcl library
 TCL_LIB_FLAG=''
 
 # String to pass to linker to pick up the Tcl library from its
 # build directory.
-TCL_BUILD_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/tcl8.6.9/win -ltcl86'
+TCL_BUILD_LIB_SPEC='-LC:/msys64/home/Marcelo/tcl8.6.10/win -ltcl86'
 
 # String to pass to linker to pick up the Tcl library from its
 # installed directory.
@@ -146,7 +146,7 @@ TCL_UNSHARED_LIB_SUFFIX='${NODOT_VERSION}${DBGX}.a'
 # different place than the directory containing the source files, this
 # points to the location of the sources, not the location where Tcl was
 # compiled.
-TCL_SRC_DIR='C:/Windows/cygwin64/home/Marcelo/tcl8.6.9'
+TCL_SRC_DIR='C:/msys64/home/Marcelo/tcl8.6.10'
 
 # List of standard directories in which to look for packages during
 # "package require" commands.  Contains the "prefix" directory plus also
@@ -164,14 +164,14 @@ TCL_STUB_LIB_FLAG='-ltclstub86'
 
 # String to pass to linker to pick up the Tcl stub library from its
 # build directory.
-TCL_BUILD_STUB_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/tcl8.6.9/win -ltclstub86'
+TCL_BUILD_STUB_LIB_SPEC='-LC:/msys64/home/Marcelo/tcl8.6.10/win -ltclstub86'
 
 # String to pass to linker to pick up the Tcl stub library from its
 # installed directory.
 TCL_STUB_LIB_SPEC='-L/Lsd/gnu64/lib -ltclstub86'
 
 # Path to the Tcl stub library in the build directory.
-TCL_BUILD_STUB_LIB_PATH='C:/Windows/cygwin64/home/Marcelo/tcl8.6.9/win/libtclstub86.a'
+TCL_BUILD_STUB_LIB_PATH='C:/msys64/home/Marcelo/tcl8.6.10/win/libtclstub86.a'
 
 # Path to the Tcl stub library in the install directory.
 TCL_STUB_LIB_PATH='/Lsd/gnu64/lib/libtclstub86.a'

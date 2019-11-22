@@ -352,7 +352,7 @@ package require \fBThread  ?2\&.8?\fR
 The \fBthread\fR extension creates threads that contain Tcl
 interpreters, and it lets you send scripts to those threads for
 evaluation\&.
-Additionaly, it provides script-level access to basic thread
+Additionally, it provides script-level access to basic thread
 synchronization primitives, like mutexes and condition variables\&.
 .SH COMMANDS
 This section describes commands for creating and destroying threads
@@ -362,8 +362,10 @@ and sending scripts to threads for evaluation\&.
 This command creates a thread that contains a Tcl interpreter\&.
 The Tcl interpreter either evaluates the optional \fBscript\fR, if
 specified, or it waits in the event loop for scripts that arrive via
-the \fBthread::send\fR command\&. The result, if any, of the
-optional \fBscript\fR is never returned to the caller\&.
+the \fBthread::send\fR command\&. Both of them would take place simultaneously
+with the return of command \fBthread::create\fR to the caller thread\&.
+Neither the caller is waiting for the finishing of optional \fBscript\fR,
+nor the result, if any, of the \fBscript\fR is returned to the caller\&.
 The result of \fBthread::create\fR is the ID of the thread\&. This is
 the opaque handle which identifies the newly created thread for
 all other package commands\&. The handle of the thread goes out of scope
@@ -390,7 +392,7 @@ and if its internal reference count drops to zero, the thread is
 marked for exit\&. This kicks the thread out of the event loop
 servicing and the thread continues to execute commands passed in
 the \fBscript\fR argument, following the \fBthread::wait\fR
-command\&. If this was the last command in the script, as usualy the
+command\&. If this was the last command in the script, as usually the
 case, the thread will exit\&.
 .sp
 It is possible to create a situation in which it may be impossible
@@ -423,7 +425,7 @@ i\&.e\&. it is unreserved\&. This counter gets incremented by a call to
 \fBthread::preserve\fR and decremented by a call to \fBthread::release\fR
 command\&. These two commands implement simple but effective thread
 reservation system and offer predictable and controllable thread
-termination capabilities\&. It is however possible to create initialy
+termination capabilities\&. It is however possible to create initially
 preserved threads by using flag \fB-preserved\fR of the
 \fBthread::create\fR command\&. Threads created with this flag have the
 initial value of the reference counter of 1 (one), and are thus
@@ -505,7 +507,7 @@ message string; otherwise, a default error message string will be used\&.
 Use of this command is deprecated in favour of more advanced thread
 reservation system implemented with \fBthread::preserve\fR and
 \fBthread::release\fR commands\&. Support for \fBthread::unwind\fR
-command will dissapear in some future major release of the extension\&.
+command will disappear in some future major release of the extension\&.
 .sp
 This command stops a prior \fBthread::wait\fR command\&. Execution of
 the script passed to newly created thread will continue from the
@@ -518,13 +520,13 @@ situations\&.
 Use of this command is deprecated in favour of more advanced thread
 reservation system implemented with \fBthread::preserve\fR and
 \fBthread::release\fR commands\&. Support for \fBthread::exit\fR
-command will dissapear in some future major release of the extension\&.
+command will disappear in some future major release of the extension\&.
 .sp
 This command forces a thread stuck in the \fBthread::wait\fR command to
-unconditionaly exit\&. The thread's exit status defaults to 666 and can be
+unconditionally exit\&. The thread's exit status defaults to 666 and can be
 specified using the optional \fIstatus\fR argument\&. The execution of
 \fBthread::exit\fR command is guaranteed to leave the program memory in the
-unconsistent state, produce memory leaks and otherwise affect other subsytem(s)
+inconsistent state, produce memory leaks and otherwise affect other subsystem(s)
 of the Tcl application in an unpredictable manner\&. The command returns empty
 result but may trigger Tcl error with the message "target thread died" in some
 situations\&.
@@ -552,7 +554,7 @@ command, like \fBupdate\fR, \fBvwait\fR, etc\&.
 .sp
 Optional \fBvarname\fR specifies name of the variable to store
 the result of the \fIscript\fR\&. Without the \fB-async\fR flag,
-the command returns the evaluation code, similarily to the standard
+the command returns the evaluation code, similarly to the standard
 Tcl \fBcatch\fR command\&. If, however, the \fB-async\fR flag is
 specified, the command returns immediately and caller can later
 \fBvwait\fR on ?varname? to get the result of the passed \fIscript\fR
@@ -627,19 +629,14 @@ ID \fIid\fR in the similar way as the standard Tcl command
 \fBfconfigure\fR configures some Tcl channel options\&. Options currently
 supported are: \fB-eventmark\fR and \fB-unwindonerror\fR\&.
 .sp
-The \fB-eventmark\fR option, when set, limits the number of
-asynchronously posted scripts to the thread event loop\&.
-The \fBthread::send -async\fR command will block until the number
-of pending scripts in the event loop does not drop below the value
-configured with \fB-eventmark\fR\&. Default value for the
-\fB-eventmark\fR is 0 (zero) which effectively disables the checking,
-i\&.e\&. allows for unlimited number of posted scripts\&.
+When \fB-eventmark\fR is provided with a value greater than 0 (zero), that
+value is the maximum number of asynchronously posted scripts that may be
+pending for the thread\&.  \fBthread::send -async\fR blocks until the number of
+pending scripts in the event loop drops below the \fB-eventmark\fR value\&.
 .sp
-The \fB-unwindonerror\fR option, when set, causes the
-target thread to unwind if the result of the script processing
-resulted in error\&. Default value for the \fB-unwindonerror\fR
-is 0 (false), i\&.e\&. thread continues to process scripts after one
-of the posted scripts fails\&.
+When \fB-unwindonerror\fR is provided with a value of true, an error result
+in a script causes the thread to unwind, making it unavailable to evaluate
+additional scripts\&.
 .TP
 \fBthread::transfer\fR \fIid\fR \fIchannel\fR
 This moves the specified \fIchannel\fR from the current thread
@@ -687,7 +684,7 @@ Restrictions: same as for transferring shared channels with the
 This attaches the previously detached \fIchannel\fR in the
 current thread/interpreter\&. For already existing channels,
 the command does nothing, i\&.e\&. it is not an error to attach the
-same channel more than once\&. The first operation will actualy
+same channel more than once\&. The first operation will actually
 perform the operation, while all subsequent operation will just
 do nothing\&. Command throws error if the \fIchannel\fR cannot be
 found in the list of detached channels and/or in the current
@@ -739,7 +736,7 @@ Attempt to unlock the already unlocked mutex will throw Tcl error\&.
 This command creates many-readers/single-writer mutexes\&. Reader/writer
 mutexes allow you to serialize access to a shared resource more optimally\&.
 In situations where a shared resource gets mostly read and seldom modified,
-you might gain some performace by using reader/writer mutexes instead of
+you might gain some performance by using reader/writer mutexes instead of
 exclusive or recursive mutexes\&.
 .sp
 For reading the resource, thread should obtain a read lock on the resource\&.
@@ -783,8 +780,8 @@ This command provides script-level access to condition variables\&.
 A condition variable creates a safe environment for the program
 to test some condition, sleep on it when false and be awakened
 when it might have become true\&. A condition variable is always
-used in the conjuction with an exclusive mutex\&. If you attempt
-to use other type of mutex in conjuction with the condition
+used in the conjunction with an exclusive mutex\&. If you attempt
+to use other type of mutex in conjunction with the condition
 variable, a Tcl error will be thrown\&.
 .sp
 The command supports following subcommands and options:

@@ -44,11 +44,11 @@ What is LSD?
 
 LSD is based on the assumption that simulation models are distinguished from simulation programs. Using LSD a user is concerned exclusively with the description of the theoretical model, while all the technicalities of the program implementing the model are automatically generated in an intuitive and computationally efficient way.
 
-LSD can be considered as a modelling language. Using LSD a user is required to describe a model as if it were a system of discrete equations, where each variable is associated to piece of code (usually short and simple), indicating how the generic instance of the variable must compute its value at a generic time step. No other coding is required (e.g. to define the simulation cycle, saving data series, etc.). The required programming skills to use LSD are therefore solely dependent on the complexity of the equations of the model.
+LSD can be considered as a modeling language. Using LSD a user is required to describe a model as if it were a system of discrete equations, where each variable is associated to piece of code (usually short and simple), indicating how the generic instance of the variable must compute its value at a generic time step. No other coding is required (e.g. to define the simulation cycle, saving data series, etc.). The required programming skills to use LSD are therefore solely dependent on the complexity of the equations of the model.
 
-The code for the equations is expressed in a highly symbolic form, using a development environment providing assistance and examples. From this code the system automatically generates a program endowed with a complete set of interfaces to exploit the model. With such interfaces the user can: define the elements of the model, run simulations in various modes, inspect in any details events at run time, being informed on errors, analyse the results, generate automatic documentation.
+The code for the equations is expressed in a highly symbolic form, using a development environment providing assistance and examples. From this code the system automatically generates a program endowed with a complete set of interfaces to exploit the model. With such interfaces the user can: define the elements of the model, run simulations in various modes, inspect in any details events at run time, being informed on errors, analyze the results, generate automatic documentation.
 
-The user interfaces and the skills required to implement simple models can be learned in a few days of training. Being based on C++ a LSD model can both express any computational content, and make use of existing libraries, generating extremely fast and efficient code. LSD is an opensource project and makes use of other open source tools, as the GNU C++ compiler, Tcl/Tk windowing toolkit, gnuplot graphical package. LSD is available natively for Linux, Windows and Mac OS X systems, with minimal requirements.
+The user interfaces and the skills required to implement simple models can be learned in a few days of training. Being based on C++ a LSD model can both express any computational content, and make use of existing libraries, generating extremely fast and efficient code. LSD is an open source project and makes use of other open source tools, as the GNU C++ compiler, Tcl/Tk windowing toolkit, gnuplot graphical package. LSD is available natively for Linux, Windows and Mac OS X systems, with minimal requirements.
 
 
 ************************
@@ -102,13 +102,13 @@ GNUPLOT INSTALLATION:
 
 It is recommended, but not required, to install the Gnuplot graphical plotting application. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. The required Gnuplot installer (64-bit preferred, except for old Windows 32-bit computers) can be downloaded from http://www.gnuplot.info . The step-by-step instructions to install Gnuplot are:
 
-1. In an internet browser, open the site http://www.gnuplot.info , choose the desired release (the last stable one is recommended), click on the respective Release link, and on the files list choose gpXXX-winYY-mingw.exe, where XXX is the current version number an YY is the Windows type (currently, gp525-win64-mingw.exe, for 64-bit Windows).
+1. In an internet browser, open the site http://www.gnuplot.info, choose the desired version (the current stable one is recommended), click on the respective Release link, and on the files list choose gpXXX-winYY-mingw.exe, where XXX is the current version number an YY is the Windows type (currently, gp527-win64-mingw.exe, for 64-bit Windows).
 
-2. Open Windows Explorer and double-click on the downloaded Gnuplot installer (e.g., gp525-win64-mingw.exe).
+2. Open Windows Explorer and double-click on the downloaded Gnuplot installer (e.g., gp527-win64-mingw.exe).
 
 3. Accept the agreement, press "Next" twice, agree with the default installation folder, press "Next", accept the proposed components to install, press "Next", accept the creation of a Start Menu item, and press "Next" again.
 
-4. In the "Select Additional Tasks", set the terminal type to "wxt", keep the proposed file associations, and MAKE SURE you select the "Add application directory to your PATH environment variable". If this option is not visible, you need to scroll down in the window to see it. Press "Next" and then "Install". When the installation is completed, press "Finish".
+4. In the "Select Additional Tasks", set the terminal type to "wxt", keep the proposed file associations, and MAKE SURE you select the "Add application directory to your PATH environment variable". If this option is not visible, you need to scroll down in the window to see it. Press "Next" and then "Install". When the installation is completed, press "Next" and "Finish".
 
 ATTENTION: If Gnuplot is not included in the Windows PATH environment variable, LSD will not be able to use Gnuplot. If this option is missing, Gnuplot must be installed again using the correct options as described above.
 
@@ -145,7 +145,7 @@ Alternatively, or if you have problems with the command above, you can use Windo
 
 If you cannot create the LSD icon on your desktop following the steps above, you may still run LSD by double-clicking the file "run64.bat" inside the LSD installation directory.
 
-WARNING: LSD operates by creating and modifying executable (.exe) files for your simulation models. This kind of procedure may be INCORRECTLY detected as suspicious by some antivirus software and incorrect operation of LSD may arise, particularly when you try to compile and/or run your model. In this case, you may try to reconfigure your antivirus to allow LSD operation or try to TEMPORARILY disable it entirely. Microsoft standard antivirus software (included and enabled by default in Windows 10) is known to operate properly with LSD and offers a good level of protection for most users.
+WARNING: LSD operates by creating and modifying executable (.exe) files for your simulation models. This kind of procedure may be INCORRECTLY detected as suspicious by some anti-virus software and incorrect operation of LSD may arise, particularly when you try to compile and/or run your model. In this case, you may try to reconfigure your anti-virus to allow LSD operation or try to TEMPORARILY disable it entirely. Microsoft standard anti-virus software (included and enabled by default in Windows 10) is known to operate properly with LSD and offers a good level of protection for most users.
 
 MSYS2: Please note that MSYS2 is NOT required if the above instructions for installing Cygwin were already performed. Steps to configure MSYS2:
 
@@ -216,7 +216,7 @@ You may need to recompile LMM if the included pre-compiled versions have problem
 
 make -f makefile.linux
 
-If the compilation fails, the most likely reason is the mis-specification of the locations of the files required for the compilation. The major problem is that Tcl/Tk may be installed in your systems in several different locations. The makefile contains a list of variables for the directory needed for the Tcl/Tk libraries and include files. For example, on some systems you have the Tcl/Tk library located in /usr/lib, or /usr/local/lib, or usr/share/lib, etc. Similary, the include files may be located in different directories. The makefile lists the files you need to identify; check the location for those files and edit the makefile as appropriate for your system. 
+If the compilation fails, the most likely reason is the mis-specification of the locations of the files required for the compilation. The major problem is that Tcl/Tk may be installed in your systems in several different locations. The makefile contains a list of variables for the directory needed for the Tcl/Tk libraries and include files. For example, on some systems you have the Tcl/Tk library located in /usr/lib, or /usr/local/lib, or usr/share/lib, etc. Similarly, the include files may be located in different directories. The makefile lists the files you need to identify; check the location for those files and edit the makefile as appropriate for your system. 
 
 It is also possible that Tcl/Tk requires further libraries besides those specified in the makefile. If you have errors even after having specified the correct path to the Tcl/Tk libraries, then find out where the file wish is located (using the command "whereis wish"), and then find out which libraries are used with the command:
 

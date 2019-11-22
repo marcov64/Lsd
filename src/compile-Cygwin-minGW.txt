@@ -1,8 +1,11 @@
-To configure for mingw in Cygwin 64-bit use:
+To configure for mingw in Cygwin/MSYS2 64-bit use:
 
 TCL/TK (https://www.tcl.tk/software/tcltk/download.html):
 
+cd tclX.X.X/tkX.X.X
 ./configure --enable-threads --disable-symbols --enable-64bit CC=x86_64-w64-mingw32-gcc --prefix=/Lsd/gnu64 --exec-prefix=/Lsd/gnu64 --build=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32
+make
+make install
 
 MAKE (http://ftp.gnu.org/gnu/make):
 

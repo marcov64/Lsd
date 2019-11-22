@@ -17,7 +17,7 @@ TK_DLL_FILE="tk86.dll"
 TK_VERSION='8.6'
 TK_MAJOR_VERSION='8'
 TK_MINOR_VERSION='6'
-TK_PATCH_LEVEL='.9'
+TK_PATCH_LEVEL='.10'
 
 # -D flags for use with the C compiler.
 TK_DEFS='-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DSTDC_HEADERS=1 -DTCL_THREADS=1 -DUSE_THREAD_ALLOC=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DMODULE_SCOPE=extern -DTCL_CFG_DO64BIT=1 -DHAVE_NO_SEH=1 -DHAVE_CAST_TO_UNION=1 -DHAVE_UXTHEME_H=1 -DHAVE_VSSYM32_H=1 -DNDEBUG=1 -DTCL_CFG_OPTIMIZED=1 '
@@ -47,7 +47,7 @@ TK_LIB_FLAG='-ltk86'
 
 # String to pass to linker to pick up the Tk library from its
 # build directory.
-TK_BUILD_LIB_SPEC='-L/home/Marcelo/tk8.6.9/win -ltk86'
+TK_BUILD_LIB_SPEC='-L/home/Marcelo/tk8.6.10/win -ltk86'
 
 # String to pass to linker to pick up the Tk library from its
 # installed directory.
@@ -59,7 +59,7 @@ TK_LIB_SPEC='-L/Lsd/gnu64/lib -ltk86'
 # different place than the directory containing the source files, this
 # points to the location of the sources, not the location where Tk was
 # compiled.
-TK_SRC_DIR='/home/Marcelo/tk8.6.9'
+TK_SRC_DIR='/home/Marcelo/tk8.6.10'
 
 # Needed if you want to make a 'fat' shared library library
 # containing tk objects or link a different wish.
@@ -74,14 +74,14 @@ TK_STUB_LIB_FLAG='-ltkstub86'
 
 # String to pass to linker to pick up the Tk stub library from its
 # build directory.
-TK_BUILD_STUB_LIB_SPEC='-L/home/Marcelo/tk8.6.9/win -ltkstub86'
+TK_BUILD_STUB_LIB_SPEC='-L/home/Marcelo/tk8.6.10/win -ltkstub86'
 
 # String to pass to linker to pick up the Tk stub library from its
 # installed directory.
 TK_STUB_LIB_SPEC='-L/Lsd/gnu64/lib -ltkstub86'
 
 # Path to the Tk stub library in the build directory.
-TK_BUILD_STUB_LIB_PATH='/home/Marcelo/tk8.6.9/win/libtkstub86.a'
+TK_BUILD_STUB_LIB_PATH='/home/Marcelo/tk8.6.10/win/libtkstub86.a'
 
 # Path to the Tk stub library in the install directory.
 TK_STUB_LIB_PATH='/Lsd/gnu64/lib/libtkstub86.a'
