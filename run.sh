@@ -1,7 +1,7 @@
 #!/bin/bash
 #**************************************************************
 #
-#	LSD 7.2 - July 2019
+#	LSD 7.2 - December 2019
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #

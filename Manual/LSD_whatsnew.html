@@ -245,11 +245,11 @@ improvements and changes:</span></p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US><a href="browser.html#updating">Variable
-update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be
-updated/recomputed under arbitrary time schemes, deterministic or random. The
-modeler can now configure update periods larger than 1, including an initial
-“sleep” for any Variable. Both period and initial times can be set as a fixed
-number or a uniform random draw from a modeler-defined range.</span></p>
+update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be updated/recomputed
+under arbitrary time schemes, deterministic or random. The modeler can now
+configure update periods larger than 1, including an initial “sleep” for any
+Variable. Both period and initial times can be set as a fixed number or a
+uniform random draw from a modeler-defined range.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -305,16 +305,25 @@ lang=EN-US>MED(…)</span></a></span><span lang=EN-US> / </span><span
 class=Cdigo><a href="LSD_macros.html#PERC"><span lang=EN-US>PERC(…)</span></a></span><span
 lang=EN-US> computes the median / percentile of a Variable contained in a
 brotherhood of Objects. </span><span class=Cdigo><a
-href="LSD_macros.html#UPDATE"><span lang=EN-US>UPDATE</span></a></span> <span
-lang=EN-US>provides a tool to compute all Variables in a single Object or in an
-entire subtree of the model, useful for updating aggregates before Object
+href="LSD_macros.html#UPDATE"><span lang=EN-US>UPDATE</span></a></span><span
+lang=EN-US> provides a tool to compute all Variables in a single Object or in
+an entire subtree of the model, useful for updating aggregates before Object
 deletions.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>Bug fixes</span><span lang=EN-US>, mainly for
-macOS users (required for Mojave), lattices are working again.</span></p>
+</span></span><b><span lang=EN-US>Compiler info on <a href="menuhelp.html#about">About
+LSD window</a>. </span></b><span lang=EN-US>The information about the compiler
+being used for model compilation in now presented, allowing for easy
+identification of compiler mismatch problems. </span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US>New embedded Tcl/Tk 8.6.10, bug fixes</span><span
+lang=EN-US>, mainly for macOS users (required for Mojave/Catalina), lattices
+are working again.</span></p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'><span lang=EN-US>&nbsp;</span></p>
 
@@ -350,10 +359,10 @@ data download.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Fast Object and Variable look-up</span></b><span
 lang=EN-US>. Significant search speed-up of larger models by the allocation of
-high-performance dynamic memory maps to sets of Object instances (bridges), Variables
-and Parameters. It replaces linked-list sequential searching in most situations
-at the expense of slightly higher memory footprint. It affects both user
-generated searches and internal LSD element look ups. User searches (</span><span
+high-performance dynamic memory maps to sets of Object instances (bridges),
+Variables and Parameters. It replaces linked-list sequential searching in most
+situations at the expense of slightly higher memory footprint. It affects both
+user generated searches and internal LSD element look ups. User searches (</span><span
 class=Cdigo><span lang=EN-US>TSEARCH_CND(…)</span></span><span lang=EN-US>)
 require the user explicitly initialize the map structure (</span><span
 class=Cdigo><span lang=EN-US>INIT_TSEARCH_CND(…)</span></span><span lang=EN-US>),
@@ -430,9 +439,9 @@ number (</span><span class=Cdigo><span lang=EN-US>SEARCH_INST(…)</span></span><s
 lang=EN-US>). Option to disable/enable the automatic search of Variables and
 Parameters (</span><span class=Cdigo><span lang=EN-US>NO_SEARCH</span></span><span
 lang=EN-US>/</span><span class=Cdigo><span lang=EN-US>USE_SEARCH</span></span><span
-lang=EN-US>). New <a href="LSD_macros.html#DEBUG">debug-control macros</a> allow
-finer control of the LSD Debugger activation and log file creation. Please
-refer to the <a href="LSD_macros.html">LSD Macros</a> documentation.</span></p>
+lang=EN-US>). New <a href="LSD_macros.html#DEBUG">debug-control macros</a>
+allow finer control of the LSD Debugger activation and log file creation.
+Please refer to the <a href="LSD_macros.html">LSD Macros</a> documentation.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -458,9 +467,9 @@ lang=EN-US> Macro documentation.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Improved Gnuplot support</span></b><span
 lang=EN-US>. Automatic usage of default plotting terminals, supporting
-contemporaneous options like Qt and wxt. Updated system terminal options,
-shared with LMM. WARNING: the old Windows 32-bit version of Gnuplot was removed
-from LSD, now users in all platforms must install Gnuplot, please refer to </span><span
+contemporaneous options like Qt and wxt. Updated system terminal options, shared
+with LMM. WARNING: the old Windows 32-bit version of Gnuplot was removed from
+LSD, now users in all platforms must install Gnuplot, please refer to </span><span
 class=Cdigo><span lang=EN-US><a href="../Readme.txt">Readme.txt</a></span></span><span
 lang=EN-US> for details.</span></p>
 
@@ -674,8 +683,8 @@ including save to disk. Revised lattice windows. New lattice color options
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New pseudorandom number generator.</span></b><span
-lang=EN-US> A new (default) Mersenne-Twister generator included (old Parks-Miler
-still available as option).</span></p>
+lang=EN-US> A new (default) Mersenne-Twister generator included (old
+Parks-Miler still available as option).</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
