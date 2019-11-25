@@ -62,35 +62,112 @@ set wndMenuHeight 0
 
 # register static special, OS-dependent configurations
 if [ string equal $tcl_platform(platform) unix ] {
+	
+	# mac
 	if [ string equal $tcl_platform(os) Darwin ] {
-		if [ string equal [ info tclversion ] 8.6 ] {		
-			set butWid $butMacTk86
-		} {
-			set butWid $butMacTk85
+		
+		if { $MAC_PKG } {
+			set CurPlatform mac
+			set DefaultExe $exeMacPkg
+		} else {
+			set CurPlatform osx
+			set DefaultExe $exeMacOSX
 		}
+		
+		if { [ string equal [ info tclversion ] 8.6 ] } {	
+			if { [ string equal [ info patchlevel ] 8.6.9 ] } {
+				set butWid $butMacTk869
+			} else {
+				set butWid $butMac
+			}
+			
+			set DefaultWish $wishMacTk86
+		} else {
+			set butWid $butMac
+			set DefaultWish $wishMacTk85
+		}
+		
 		set daCwid $daCwidMac
 		set corrX $corrXmac
 		set corrY $corrYmac
 		
+		set DefaultSysTerm $sysTermMac
 		set systemTerm $sysTermMac
 		set gnuplotTerm $gnuplotTermMac
-	} {
+		set DefaultMakeExe $makeMac
+		set DefaultDbgExe $dbgMac
+		set DefaultHtmlBrowser $browserMac
+		set DefaultFont $fontMac
+		set DefaultFontSize $fontSizeMac
+		set deltaSize $deltaSizeMac
+		set bsizeM $bsizeMwin
+		set bhstepM $bhstepMwin
+		set bvstepM $bvstepMwin
+		
+	# linux
+	} else {
+
+		set CurPlatform linux
+		
 		set butWid $butLinux
 		set daCwid $daCwidLinux
 		set corrX $corrXlinux
 		set corrY $corrYlinux
 		
+		set DefaultSysTerm $sysTermLinux
 		set systemTerm $sysTermLinux
 		set gnuplotTerm $gnuplotTermLinux
+		set DefaultExe $exeLinux
+		set DefaultMakeExe $makeLinux
+		set DefaultWish $wishLinux
+		set DefaultDbgExe $dbgLinux
+		set DefaultHtmlBrowser $browserLinux
+		set DefaultFont $fontLinux
+		set DefaultFontSize $fontSizeLinux
+		set deltaSize $deltaSizeLinux
+		set bsizeM $bsizeMlin
+		set bhstepM $bhstepMlin
+		set bvstepM $bvstepMlin
 	}
-} {
+	
+# Windows
+} else {
+	
+	# Windows 32 or 64-bit?
+	if { [ string equal $tcl_platform(machine) intel ] } { 
+		set CurPlatform win32
+		set DefaultExe $exeWin32
+		set DefaultMakeExe $makeWin32
+		set DefaultWish $wishWinTk85
+	} else {
+		set CurPlatform win64
+		set DefaultExe $exeWin64
+		set DefaultWish $wishWinTk86
+		
+		# Cygwin or MSYS2?
+		if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { 
+			set DefaultMakeExe $makeWin64mgw 
+		} else { 
+			set DefaultMakeExe $makeWin64cyg 
+		}
+	}
+	
 	set butWid $butWindows
 	set daCwid $daCwidWindows
 	set corrX $corrXwindows
 	set corrY $corrYwindows
 	
+	set DefaultSysTerm $sysTermWindows
 	set systemTerm $sysTermWindows
 	set gnuplotTerm $gnuplotTermWindows
+	set DefaultDbgExe $dbgWindows
+	set DefaultHtmlBrowser $browserWindows
+	set DefaultFont $fontWindows
+	set DefaultFontSize $fontSizeWindows
+	set deltaSize $deltaSizeWindows
+	set bsizeM $bsizeMwin
+	set bhstepM $bhstepMwin
+	set bvstepM $bvstepMwin
 }
 
 # text line default canvas height & minimum horizontal border width

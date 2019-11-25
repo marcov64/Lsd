@@ -65,7 +65,7 @@ proc gccVersion { } {
 		return "(invalid system options)"
 	}
 	
-	if { [ catch { exec $cc --version } r ] } {
+	if { [ catch { exec $cc --version } r ] && ( ! [ info exists r ] || [ string length $r ] == 0 ) } {
 		return "(cannot run compiler)"
 	}
 	
