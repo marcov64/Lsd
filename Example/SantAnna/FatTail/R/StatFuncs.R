@@ -11,7 +11,7 @@ subboMinSample <- 50           # minimum sample size in Subbotin fits (significa
 subboBlimit <- 0               # maximum limit for b to be considered valid (0=no limit)
 useSubbotools <- TRUE          # use Subbotools (T) or normalp package (F)
 useASubbotin <- TRUE           # use symmetric (=F) or asymmetric Subbotin (=T)
-subbotoolsFolder <- "subbotools-1.3.0-cygwin64\\"  # subbotools location (leave blank in linux)
+subbotoolsFolder <- "subbotools-1.3.0\\"  # subbotools location (leave blank in linux)
 useALaplace <- TRUE            # use symmetric (=F) or asymmetric Laplace (=T)
 nBins  <- 20                   # number of bins to use in histograms
 nSample <- 50                  # sample size for goodness of fit tests
