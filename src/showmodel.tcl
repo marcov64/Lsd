@@ -252,7 +252,7 @@ proc showmodel pippo {
 		showtop .l centerS
 	}
 
-	.l.l.tit.n conf -text [ lindex [ split "$modelGroup" "/" ] end ]
+	.l.l.tit.n conf -text "$modelGroup"
 
 	set curdir [ pwd ]
 	if { ! [ file isdirectory "$pippo" ] } {
@@ -261,12 +261,17 @@ proc showmodel pippo {
 	}
 
 	cd "$pippo"
-	if [ string compare -nocase "$pippo" "$RootLsd" ] {
+	if { ! [ string equal -nocase "$pippo" "$RootLsd" ] } {
 		.l.l.l insert end "$upSymbol"
-		set upgroup "[ file dirname "$modelGroup" ]"
-		if [ string equal "$upgroup" "." ] {
+		set updir "[ file dirname "[ pwd ]" ]"
+		if { ! [ string equal -nocase "$updir" "$RootLsd" ] && [ file exists "$updir/$GROUP_INFO" ] } {
+			set f [ open "$updir/$GROUP_INFO" r ]
+			set upgroup "[ gets $f ]"
+			close $f
+		} else {
 			set upgroup "$rootname"
 		}
+
 		lappend lver -1
 		lappend group 1
 		lappend lmd "Return to group: $upgroup"
@@ -284,11 +289,8 @@ proc showmodel pippo {
 			set f [ open "$i/$GROUP_INFO" r ]
 			set app "[ gets $f ]"
 			close $f
-			if [ string equal "$modelGroup" "$rootname" ] {
-				lappend lmn "$app"
-			} else {
-				lappend lmn "$modelGroup/$app"
-			}
+
+			lappend lmn "$app"
 			lappend lver -1
 			lappend ldn "$pippo/$i"
 			lappend lrn "[ pwd ]"
@@ -298,7 +300,7 @@ proc showmodel pippo {
 				lappend lmd "[ read -nonewline $f ]"
 				close $f
 			} else {
-				lappend lmd "Group directory: $app\n(description not available)"
+				lappend lmd "Group: $app\n(description not available)"
 			}
 			lappend group 1
 			.l.l.l insert end "$groupSymbol$app"
@@ -378,7 +380,9 @@ proc mdelete i {
 	set memory 0
 	.l.m.edit entryconf 2 -state disabled
 
-	if { [ lindex $lmn $i ] == "<UP>" } { return }
+	if { [ lindex $lmn $i ] == "<UP>" } { 
+		return 
+	}
 
 	if { [ lindex $group $i ] == 1 } {
 		set item group
@@ -387,24 +391,28 @@ proc mdelete i {
 	}
 
 	if { [ string match -nocase $RootLsd/trashbin* [ lindex $ldn $i ] ] } {
-		set answer [ tk_messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n(dir [ lindex $ldn $i ])?" ]
+		set answer [ tk_messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ lindex $ldn $i ])?" ]
 		file delete -force [ lindex $ldn $i ]
 		showmodel [ lindex $lrn $i ]
 	} else {
-		set answer [ tk_messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n(dir [ lindex $ldn $i ])?" ]
+		set answer [ tk_messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ lindex $ldn $i ])?" ]
 
 		if { $answer == "yes" } {
 			set modelDir [ string range [ lindex $ldn $i ] 0 [ expr [ string last / [ lindex $ldn $i ] ] - 1 ] ] 
-			file mkdir "$RootLsd/trashbin"
-			set f [ open "$RootLsd/trashbin/$GROUP_INFO" w ]
-			puts $f "Deleted Models"
-			close $f
-			set f [ open "$RootLsd/trashbin/$DESCRIPTION" w ]
-			puts $f "Folder containing deleted models.\n"
-			close $f
+			if { ! [ file exists "$RootLsd/trashbin" ] } {
+				file mkdir "$RootLsd/trashbin"
+			}
+			if { ! [ file exists "$RootLsd/trashbin/$GROUP_INFO" ] } {
+				set f [ open "$RootLsd/trashbin/$GROUP_INFO" w ]
+				puts $f "Deleted Models"
+				close $f
+				set f [ open "$RootLsd/trashbin/$DESCRIPTION" w ]
+				puts $f "Folder containing deleted models.\n"
+				close $f
+			}
 			set modelName [ string range [ lindex $ldn $i ] [ expr [ string last / [ lindex $ldn $i ] ] + 1 ] end ]
 			if { [ file exists "$RootLsd/trashbin/$modelName" ] } {
-				file delete -force "$RootLsd/trashbin/$modelName"
+				catch { file delete -force "$RootLsd/trashbin/$modelName" }
 			}
 			
 			if { [ catch { file rename -force [ lindex $ldn $i ] "$RootLsd/trashbin/$modelName" } ] } {
@@ -428,7 +436,7 @@ proc medit i {
 	.l.m.edit entryconf 2 -state disabled
 	
 	set result $i
-	set app "[ lindex $lmn $i ]"
+
 	if { [ lindex $group $i ] == 1 } {
 		set item group
 	} else {
@@ -462,13 +470,12 @@ proc medit i {
 	pack .l.e.tit .l.e.n .l.e.t -padx 5 -pady 5
 
 	okcancel .l.e b { 
-		set app "[ .l.e.n.n get ]"
 		if { [ lindex $group $result ] == 1 } {
 			set f [ open "[ lindex $ldn $result ]/$GROUP_INFO" w ]
 		} else {
 			set f [ open "[ lindex $ldn $result ]/$MODEL_INFO" w ]
 		}
-		puts -nonewline $f "$app"
+		puts -nonewline $f "[ .l.e.n.n get ]"
 		close $f
 		set f [ open "[ lindex $ldn $result ]/$DESCRIPTION" w ]
 		puts -nonewline $f [ .l.e.t.t.text get 0.0 end ]

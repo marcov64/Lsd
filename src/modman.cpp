@@ -1756,14 +1756,9 @@ if ( choice == 14 )
 				-detail \"Cannot create group/model in the Root group. Press 'OK' to change to the '$LsdNew' group before proceeding.\" ]; \
 				if [ string equal $answer ok ] { \
 					set groupdir \"$groupdir/$LsdNew\"; \
-					set f [open \"$groupdir/$GROUP_INFO\" r]; \
-					set app \"[gets $f]\"; \
+					set f [ open \"$groupdir/$GROUP_INFO\" r ]; \
+					set modelGroup \"[ gets $f ]\"; \
 					close $f; \
-					if [ string equal \"$modelGroup\" \"$rootname\" ] { \
-						set modelGroup \"$app\" \
-					} else { \
-						set modelGroup \"$modelGroup/$app\" \
-					}; \
 					.f.hea.info.grp.dat conf -text \"$modelGroup\"; \
 					set choice 1 \
 				} else { \
@@ -1887,7 +1882,7 @@ if ( choice == 14 )
 		cmd( "set groupdir \"$groupdir/$mdir\"" );
 		cmd( "set f [ open $GROUP_INFO w ]; puts -nonewline $f \"$mname\"; close $f" );
 		cmd( "set f [ open $DESCRIPTION w ]; puts -nonewline $f \"[ .a.tdes.e get 0.0 end ]\"; close $f" );
-		cmd( "if [ string equal \"$modelGroup\" \"$rootname\" ] { set modelGroup \"$mname\" } { set modelGroup \"$modelGroup/$mname\" }" );
+		cmd( "set modelGroup \"$mname\"" );
 
 		cmd( "destroytop .a" );
 		//end of creation of a new group
