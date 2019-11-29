@@ -60,14 +60,15 @@ proc showmodel pippo {
 		.l.m add cascade -label File -menu $m -underline 0
 		$m add command -label "Select Model/Group" -underline 0 -accelerator Enter -command {
 			set result [ .l.l.l curselection ]
-			if { [ lindex $group $result ] == 1 } { 
+			if { [ lindex $group $result ] == 0 } { 
+				set choiceSM 1
+			} else { 
 				set modelGroup "[ lindex $lmn $result ]"
 				showmodel [ lindex $ldn $result ]
-			} else { 
-				set choiceSM 1
 			} 
 		}
 		$m add command -label "New Model/Group..." -underline 0  -accelerator Insert -command { 
+			set result -1
 			set memory 0
 			set choiceSM 14
 		} 
@@ -81,22 +82,29 @@ proc showmodel pippo {
 		menu $m -tearoff 0
 		.l.m add cascade -label Edit -menu $m -underline 0
 		$m add command -label "Edit Name/Description..." -underline 0 -accelerator Ctrl+E -command {
-			medit [ .l.l.l curselection ] 
+			set result [ .l.l.l curselection ]
+			medit $result 
 		}
 		$m add command -label "Copy" -underline 0 -accelerator Ctrl+C -command {
-			mcopy [ .l.l.l curselection ] 
+			set result [ .l.l.l curselection ]
+			mcopy $result 
 		}
 		if { $memory == 0 } {
 			$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -state disabled -command {
-				mpaste [ .l.l.l curselection ] 
+				set result [ .l.l.l curselection ]
+				mpaste $result 
 			} 
 		} else {
 			$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -command {
-				mpaste [ .l.l.l curselection ] 
+				set result [ .l.l.l curselection ]
+				mpaste $result 
 			} 
 		}
 		$m add command -label "Delete..." -underline 0 -accelerator Delete -command {
-			mdelete [ .l.l.l curselection ] 
+			set result [ .l.l.l curselection ]
+			if { [ lindex $group $result ] != -1 } { 
+				mdelete $result 
+			}
 		}
 
 		set m .l.m.help 
@@ -262,7 +270,6 @@ proc showmodel pippo {
 
 	cd "$pippo"
 	if { ! [ string equal -nocase "$pippo" "$RootLsd" ] } {
-		.l.l.l insert end "$upSymbol"
 		set updir "[ file dirname "[ pwd ]" ]"
 		if { ! [ string equal -nocase "$updir" "$RootLsd" ] && [ file exists "$updir/$GROUP_INFO" ] } {
 			set f [ open "$updir/$GROUP_INFO" r ]
@@ -273,12 +280,13 @@ proc showmodel pippo {
 		}
 
 		lappend lver -1
-		lappend group 1
 		lappend lmd "Return to group: $upgroup"
 		lappend lrn "[ pwd ]"
 		lappend lbn "$modelGroup"
 		lappend ldn "[ file dirname "$pippo" ]"
 		lappend lmn "$upgroup"
+		lappend group -1
+		.l.l.l insert end "$upSymbol"
 	}
 
 	set dir [ lsort -dictionary [ glob -nocomplain -type d * ] ]
@@ -356,9 +364,7 @@ proc showmodel pippo {
 proc mcopy i {
 	global copylabel copyver copydir copydscr group ldn memory lmn lver lmd
 	
-	if { [ lindex $group $i ] == 1 } {
-		tk_messageBox -parent .l -title Error -type ok -icon error -message "Cannot copy groups" -detail "Check for existing names and try again." 
-	} else {
+	if { [ lindex $group $i ] == 0 } {
 		set memory 1
 		.l.m.edit entryconf 2 -state normal
 
@@ -366,6 +372,8 @@ proc mcopy i {
 		set copyver [ lindex $lver $i ]
 		set copydir [ lindex $ldn $i ]
 		set copydscr [ lindex $lmd $i ]
+	} else {
+		tk_messageBox -parent .l -title Error -type ok -icon error -message "Cannot copy groups" -detail "Check for existing names and try again." 
 	}
 }
 
@@ -380,14 +388,10 @@ proc mdelete i {
 	set memory 0
 	.l.m.edit entryconf 2 -state disabled
 
-	if { [ lindex $lmn $i ] == "<UP>" } { 
-		return 
-	}
-
-	if { [ lindex $group $i ] == 1 } {
-		set item group
-	} else {
+	if { [ lindex $group $i ] == 0 } {
 		set item model
+	} else {
+		set item group
 	}
 
 	if { [ string match -nocase $RootLsd/trashbin* [ lindex $ldn $i ] ] } {
@@ -437,10 +441,10 @@ proc medit i {
 	
 	set result $i
 
-	if { [ lindex $group $i ] == 1 } {
-		set item group
-	} else {
+	if { [ lindex $group $i ] == 0 } {
 		set item model
+	} else {
+		set item group
 	}
 
 	newtop .l.e "Edit" { .l.e.b.can invoke }
@@ -470,10 +474,10 @@ proc medit i {
 	pack .l.e.tit .l.e.n .l.e.t -padx 5 -pady 5
 
 	okcancel .l.e b { 
-		if { [ lindex $group $result ] == 1 } {
-			set f [ open "[ lindex $ldn $result ]/$GROUP_INFO" w ]
-		} else {
+		if { [ lindex $group $result ] == 0 } {
 			set f [ open "[ lindex $ldn $result ]/$MODEL_INFO" w ]
+		} else {
+			set f [ open "[ lindex $ldn $result ]/$GROUP_INFO" w ]
 		}
 		puts -nonewline $f "[ .l.e.n.n get ]"
 		close $f
