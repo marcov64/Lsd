@@ -5565,15 +5565,26 @@ case 68:
 
 	cmd( "catch { exec %s & }", lab );
 	
-	i = *choice;
 	cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon info -title \"Run Batch\" -message \"Script/batch started\" -detail \"The script/batch was started in separated process(es). The results and log files are being created in the folder:\n\n$path\n\nDo you want to launch the multitail command now (it must be installed)?\" ]" );
 	cmd( "switch $answer { yes { set choice 1 } no { set choice 0 } }" );
 	if ( *choice )
 	{
-		if ( i == 1 )				// Windows
-			cmd( "catch { exec -- $sysTerm /k multitail -s %d --retry-all %s & }", j > 2 ? ( ( j - 1 ) > 8 ? 3 : 2 ) : 1, lab2 );
-		else						// Linux
-			cmd( "catch { exec -- $sysTerm -e multitail -s %d --retry-all %s & }", j > 2 ? ( ( j - 1 ) > 8 ? 3 : 2 ) : 1, lab2 );
+		cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set choice 2 } { set choice 1 } } { set choice 3 }" );
+	
+		switch( *choice )
+		{
+				
+			case 1:				// Linux
+				cmd( "catch { exec -- $sysTerm -e multitail -s %d --retry-all %s & }", j > 2 ? ( ( j - 1 ) > 8 ? 3 : 2 ) : 1, lab2 );
+				break;
+
+			case 2:				// Mac
+				cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $path; clear; multitail -s %d --retry-all %s\\\"\" & } result", j > 2 ? ( ( j - 1 ) > 8 ? 3 : 2 ) : 1, lab2 );
+				break;
+
+			case 3:				// Windows
+				cmd( "catch { exec -- $sysTerm /k multitail -s %d --retry-all %s & }", j > 2 ? ( ( j - 1 ) > 8 ? 3 : 2 ) : 1, lab2 );
+		}
 	}
 	
 	cmd( "set path $oldpath; cd $path" );
@@ -5777,7 +5788,7 @@ case 69:
 	}
 
 	// start the job
-	cmd( "set oldpath [pwd]" );
+	cmd( "set oldpath [ pwd ]" );
 	cmd( "set path \"%s\"", path );
 	if ( strlen( path ) > 0 )
 		cmd( "cd $path" );
@@ -5787,15 +5798,26 @@ case 69:
 	else										// Unix
 		cmd( "catch { exec nice %s -f %s %s %s %s >& %s.log & }", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
 
-	i = *choice;
 	cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results and log files are being created in the folder:\n\n$path\n\nDo you want to launch the tail command now?\" ]" );
 	cmd( "switch $answer { yes { set choice 1 } no { set choice 0 } }" );
 	if ( *choice )
 	{
-		if ( i == 1 )				// Windows
-			cmd( "catch { exec $sysTerm /k tail -F %s.log & }", simul_name );
-		else						// Linux
-			cmd( "catch { exec $sysTerm -e tail -F %s.log & }", simul_name );
+		cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set choice 2 } { set choice 1 } } { set choice 3 }" );
+	
+		switch( *choice )
+		{
+				
+			case 1:				// Linux
+				cmd( "catch { exec $sysTerm -e tail -F %s.log & }", simul_name );
+			 	break;
+			
+			case 2:				// Mac
+				cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $path; clear; tail -F %s.log\\\"\" & } result", simul_name );
+				break;
+
+			case 3:				// Windows
+				cmd( "catch { exec $sysTerm /k tail -F %s.log & }", simul_name );
+		}
 	}
 	
 	cmd( "set path $oldpath; cd $path" );
