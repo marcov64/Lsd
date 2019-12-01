@@ -1117,7 +1117,7 @@ object *operate( object *r, int *choice )
 {
 bool saveAs, delVar, renVar, table;
 char observe, initial, *lab1, *lab2, *lab3, *lab4, lab[ TCL_BUFF_STR ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ];
-int sl, done = 0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, ffirst, fnext, temp[ 10 ];
+int sl, done = 0, num, i, j, k, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, temp[ 10 ];
 long nLinks;
 double fake = 0;
 FILE *f;
@@ -5378,12 +5378,12 @@ case 68:
 	
 	get_int( "cores", & param );
 	get_int( "threads", & nature );
-	if ( param < 1 || param > 64 ) 
-		param = max_threads;
+	if ( param < 1 || param > SRV_MAX_CORES ) 
+		param = min( max_threads, SRV_MAX_CORES );
 	
 	get_int( "threads", & nature );
-	if ( nature < 1 || nature > 64 ) 
-		nature = max_threads;
+	if ( nature < 1 || nature > SRV_MAX_CORES ) 
+		nature = min( max_threads, SRV_MAX_CORES );
 	
 	strncpy( out_bat, ( char * ) Tcl_GetVar( inter, "res2", 0 ), MAX_PATH_LENGTH - 1 );
 	
@@ -5448,8 +5448,8 @@ case 68:
 					lab1[ 0 ]='\0';
 		}
 		
-		// set background low priority in servers (cores/jobs > 8)
-		if ( nature > 8 || ( param > 8 && fnext - ffirst > 8 ) )
+		// set background low priority in servers (cores/jobs > SRV_MIN_CORES)
+		if ( nature > SRV_MIN_CORES || ( param > SRV_MIN_CORES && fnext - ffirst > SRV_MIN_CORES ) )
 		{
 			sprintf( msg, "nice %s", ch );
 			strcpy( ch, msg );
@@ -5466,34 +5466,61 @@ case 68:
 	
 	if ( fSeq && ( fnext - ffirst ) > param )	// if possible, work in blocks
 	{
+		lab2 = new char[ param * ( strlen( out_file ) + 15 ) + 1 ];
+		strcpy( lab2, "" );
+	
 		num = ( fnext - ffirst ) / param;		// base number of cases per core
 		sl = ( fnext - ffirst ) % param;		// remaining cases per core
 		for ( i = ffirst, j = 1; j <= param; ++j )	// allocates files by the number of cores
 		{
+			sprintf( lab_old, "%s_%d.log", out_file, j );
+			
 			if ( *choice == 1 || *choice == 4 )	// Windows
-				fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s\" -s %d -e %d %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s_%d.log\" 2>&1\r\n", j, nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, j );
+				fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s\" -s %d -e %d %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s\" 2>&1\r\n", j, nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", lab_old );
 			else								// Unix
-				fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s -s %d -e %d %s %s %s > \"$LSD_CONFIG_PATH\"/%s_%d.log 2>&1 &\n", nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, j );
+				fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s -s %d -e %d %s %s %s > \"$LSD_CONFIG_PATH\"/%s 2>&1 &\n", nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", lab_old );
+				
 			j <= sl ? i += num + 1 : i += num;
+			
+			if ( strlen( lab2 ) > 0 )
+				strcat( lab2, " " );
+			strcat( lab2, lab_old );
 		}
 	}
 	else										// if not, do one by one
+	{
+		lab2 = new char[ ( fnext - ffirst ) * ( strlen( out_file ) + 15 ) + 1 ];
+		strcpy( lab2, "" );
+	
 		for ( i = ffirst, j = 1; i < fnext; ++i, ++j )
+		{
 			if ( fSeq )
+			{
+				sprintf( lab_old, "%s_%d.log", out_file, i );
+				
 				if ( *choice == 1 || *choice == 4 )	// Windows
-					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s_%d.lsd\" %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s_%d.log\" 2>&1\r\n", j, nature, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, i );
+					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s_%d.lsd\" %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s\" 2>&1\r\n", j, nature, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", lab_old );
 				else								// Unix
-					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s_%d.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s_%d.log 2>&1 &\n", nature, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, i );
+					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s_%d.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s 2>&1 &\n", nature, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", lab_old );
+			}
 			else
 			{	// get the selected file names, one by one
 				cmd( "set res3 [lindex $bah %d]; set res3 [file tail $res3]; set last [expr [string last .lsd $res3] - 1]; set res3 [string range $res3 0 $last]", j - 1  );
 				strncpy( out_file, ( char * ) Tcl_GetVar( inter, "res3", 0 ), MAX_PATH_LENGTH - 1 );
 				
+				sprintf( lab_old, "%s.log", out_file );
+				
 				if ( *choice == 1 || *choice == 4 )	// Windows
-					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s.lsd\" %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s.log\" 2>&1\r\n", j, nature, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file );
+					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s.lsd\" %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s\" 2>&1\r\n", j, nature, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", lab_old );
 				else								// Unix
-					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s.log 2>&1 &\n", nature, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file );
+					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s 2>&1 &\n", nature, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", lab_old );
 			}
+			
+			if ( strlen( lab2 ) > 0 )
+				strcat( lab2, " " );
+			strcat( lab2, lab_old );
+		}
+	}
 	
 	if ( fSeq )
 		if ( *choice == 1 || *choice == 4 )	// Windows closing
@@ -5523,12 +5550,12 @@ case 68:
 	plog( "\nParallel batch file created: %s", "", lab );
 	
 	if ( ! natBat )
-		break;
+		goto end_68;
 
 	// ask if script/batch should be executed right away
 	cmd( "set answer [ tk_messageBox -parent . -type yesno -icon question -default no -title \"Run Batch\" -message \"Run created script/batch?\" -detail \"The script/batch for running the configuration files was created. Press 'Yes' if you want to start the script/batch as separated processes now.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 2 } }" ); 
 	if ( *choice == 2 )
-		break;
+		goto end_68;
 
 	// start the job
 	cmd( "set oldpath [pwd]" );
@@ -5536,16 +5563,23 @@ case 68:
 	if ( strlen( out_dir ) > 0 )
 		cmd( "cd $path" );
 
-	cmd( "if { $tcl_platform(platform) == \"windows\" } { set choice 1 } { set choice 0 }" );
-	if ( *choice == 1 )						// Windows?
-		cmd( "exec %s &", lab );
-	else									// Unix
-		cmd( "exec %s &", lab );
-
-	plog( "\nParallel batch file started: %s", "", lab );
-	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Run Batch\" -message \"Script/batch started\" -detail \"The script/batch was started in separated process(es). The results and log files are being created in the folder:\n\n$path\n\nCheck the '.log' files to see the results or use the command 'tail  -F  <name>.log' in a shell/command prompt to follow simulation execution (there is one log file per assigned process/core).\"" );
+	cmd( "catch { exec %s & }", lab );
+	
+	i = *choice;
+	cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon info -title \"Run Batch\" -message \"Script/batch started\" -detail \"The script/batch was started in separated process(es). The results and log files are being created in the folder:\n\n$path\n\nDo you want to launch the multitail command now (it must be installed)?\" ]" );
+	cmd( "switch $answer { yes { set choice 1 } no { set choice 0 } }" );
+	if ( *choice )
+	{
+		if ( i == 1 )				// Windows
+			cmd( "catch { exec -- $sysTerm /k multitail -s %d --retry-all %s & }", j > 2 ? ( ( j - 1 ) > 8 ? 3 : 2 ) : 1, lab2 );
+		else						// Linux
+			cmd( "catch { exec -- $sysTerm -e multitail -s %d --retry-all %s & }", j > 2 ? ( ( j - 1 ) > 8 ? 3 : 2 ) : 1, lab2 );
+	}
 	
 	cmd( "set path $oldpath; cd $path" );
+	
+	end_68:
+	delete [ ] lab2;
 	
 break;
 
@@ -5749,13 +5783,23 @@ case 69:
 		cmd( "cd $path" );
 
 	if ( *choice == 1 )							// Windows?
-		cmd( "exec %s -f %s %s %s %s >& %s.log  &", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
+		cmd( "catch { exec %s -f %s %s %s %s >& %s.log & }", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
 	else										// Unix
-		cmd( "exec nice %s -f %s %s %s %s >& %s.log  &", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
+		cmd( "catch { exec nice %s -f %s %s %s %s >& %s.log & }", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
 
-	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results files are being created in the folder:\\n\\n$path\\n\\nCheck the '%s.log' file to see the results or use the command 'tail  -F  %s.log' in a shell/command prompt to follow simulation execution.\"", simul_name, simul_name );
+	i = *choice;
+	cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results and log files are being created in the folder:\n\n$path\n\nDo you want to launch the tail command now?\" ]" );
+	cmd( "switch $answer { yes { set choice 1 } no { set choice 0 } }" );
+	if ( *choice )
+	{
+		if ( i == 1 )				// Windows
+			cmd( "catch { exec $sysTerm /k tail -F %s.log & }", simul_name );
+		else						// Linux
+			cmd( "catch { exec $sysTerm -e tail -F %s.log & }", simul_name );
+	}
 	
 	cmd( "set path $oldpath; cd $path" );
+	
 break;
 
 

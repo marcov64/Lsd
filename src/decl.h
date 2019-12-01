@@ -112,6 +112,8 @@ Global definitions among all LSD C++ modules
 #define SENS_SEP " ,;|/#\t\n"			// sensitivity data valid separators
 #define USER_D_VARS 1000				// number of user double variables
 #define UPD_PER 0.2						// update period during simulation run in s
+#define SRV_MIN_CORES 12				// minimum number of cores to consider a server
+#define SRV_MAX_CORES 64				// maximum number of cores to use in a server
 
 // user defined signals
 #define SIGMEM NSIG + 1					// out of memory signal

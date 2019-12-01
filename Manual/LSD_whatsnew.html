@@ -245,11 +245,11 @@ improvements and changes:</span></p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US><a href="browser.html#updating">Variable
-update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be updated/recomputed
-under arbitrary time schemes, deterministic or random. The modeler can now
-configure update periods larger than 1, including an initial “sleep” for any
-Variable. Both period and initial times can be set as a fixed number or a
-uniform random draw from a modeler-defined range.</span></p>
+update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be
+updated/recomputed under arbitrary time schemes, deterministic or random. The
+modeler can now configure update periods larger than 1, including an initial
+“sleep” for any Variable. Both period and initial times can be set as a fixed
+number or a uniform random draw from a modeler-defined range.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -305,9 +305,9 @@ lang=EN-US>MED(…)</span></a></span><span lang=EN-US> / </span><span
 class=Cdigo><a href="LSD_macros.html#PERC"><span lang=EN-US>PERC(…)</span></a></span><span
 lang=EN-US> computes the median / percentile of a Variable contained in a
 brotherhood of Objects. </span><span class=Cdigo><a
-href="LSD_macros.html#UPDATE"><span lang=EN-US>UPDATE</span></a></span><span
-lang=EN-US> provides a tool to compute all Variables in a single Object or in
-an entire subtree of the model, useful for updating aggregates before Object
+href="LSD_macros.html#UPDATE"><span lang=EN-US>UPDATE</span></a></span> <span
+lang=EN-US>provides a tool to compute all Variables in a single Object or in an
+entire subtree of the model, useful for updating aggregates before Object
 deletions.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
@@ -317,6 +317,25 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 LSD window</a>. </span></b><span lang=EN-US>The information about the compiler
 being used for model compilation in now presented, allowing for easy
 identification of compiler mismatch problems. </span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Automatic launch of </span></b><span
+class=Cdigo><b><span lang=EN-US>tail</span></b></span><span lang=EN-US> </span><b>/</b><b>
+</b><span class=Cdigo><b><span lang=EN-US>multitail</span></b></span><b><span
+lang=EN-US>.</span></b><span lang=EN-US> <a name="_Hlk26036486">When starting
+background execution of simulations (menu </a></span><a
+href="menurun.html#batch"><span lang=EN-US style='font-family:"Courier New"'>Run&gt;Start
+'No Window' Batch</span></a><span lang=EN-US> and </span><a
+href="menurun.html#parallel"><span lang=EN-US style='font-family:"Courier New"'>Run&gt;Create/Start
+Parallel Batch</span></a><span lang=EN-US>), LSD offers to launch </span><span
+class=Cdigo><span lang=EN-US>tail</span></span><span lang=EN-US> or </span><span
+class=Cdigo><span lang=EN-US>multitail</span></span><span lang=EN-US>
+applications to follow up the simulation execution. </span><span class=Cdigo><span
+lang=EN-US>multitail</span></span><span lang=EN-US> must be installed by the
+user in all platforms. See </span><span class=Cdigo><span lang=EN-US>readme.txt</span></span><span
+lang=EN-US> for installation instructions on each platform.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -393,8 +412,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>Standard C++11 random library. </span></b><span
 lang=EN-US>Use the new powerful random number generator facilities included in
 the C++ library, which may be significantly faster, and add several <a
-href="LSD_macros.html#randomdraw">new distributions</a> to draw from (thanks
-Frederik for the suggestion).</span></p>
+href="LSD_macros.html#randomdraw">new distributions</a> to draw from (thanks Frederik
+for the suggestion).</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -467,9 +486,9 @@ lang=EN-US> Macro documentation.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Improved Gnuplot support</span></b><span
 lang=EN-US>. Automatic usage of default plotting terminals, supporting
-contemporaneous options like Qt and wxt. Updated system terminal options, shared
-with LMM. WARNING: the old Windows 32-bit version of Gnuplot was removed from
-LSD, now users in all platforms must install Gnuplot, please refer to </span><span
+contemporaneous options like Qt and wxt. Updated system terminal options,
+shared with LMM. WARNING: the old Windows 32-bit version of Gnuplot was removed
+from LSD, now users in all platforms must install Gnuplot, please refer to </span><span
 class=Cdigo><span lang=EN-US><a href="../Readme.txt">Readme.txt</a></span></span><span
 lang=EN-US> for details.</span></p>
 

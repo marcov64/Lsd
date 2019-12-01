@@ -79,9 +79,9 @@ To install LSD, simply unzip the LSD distribution file on the desired folder. In
 
 1. In an internet browser, open the site https://github.com/marcov64/Lsd/releases , choose the desired release, and click on the respective "Source code (zip)" link to download the LSD distribution file.
 
-2. Open Windows Explorer and double-click on the downloaded LSD distribution file to open it (e.g., Lsd-7.1-master.zip).
+2. Open Windows Explorer and double-click on the downloaded LSD distribution file to open it (e.g., Lsd-7.2-master.zip).
 
-3. Drag the single folder inside the distribution file (e.g., Lsd-7.1-master) to the desired location. The recommended is "C:\", normally labeled as "Local Disk (C:)" in Windows Explorer.
+3. Drag the single folder inside the distribution file (e.g., Lsd-7.2-master) to the desired location. The recommended is "C:\", normally labeled as "Local Disk (C:)" in Windows Explorer.
 
 This will create the whole LSD folder structure. The distribution file may be deleted after installation.
 
@@ -117,7 +117,7 @@ ATTENTION: If Gnuplot is not included in the Windows PATH environment variable, 
 Windows installation (64-bit only)
 **********************************
 
-To use the 64-bit mode of LSD, you need the GNU 64-bit C++ compiler installed (Cygwin or MSYS2 mingw-w64-x86_64 versions are both fine). The Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64"). If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, four non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make and gdb). Lastly, Cygwin must be added to the PATH environment variable (not done by the installer).
+To use the 64-bit mode of LSD, you need the GNU 64-bit C++ compiler installed (Cygwin or MSYS2 mingw-w64-x86_64 versions are both fine). The Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64"). If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, four non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Lastly, Cygwin must be added to the PATH environment variable (not done by the installer).
 
 If you prefer to use MSYS2 instead of Cygwin (only recommended for advanced users), see instructions at the end of this section.
 
@@ -129,7 +129,7 @@ Step-by-step procedure to enable LSD 64-bit mode (an internet connection is requ
 
 3. When the installer opens, choose "Install from Internet", accept the proposed root install directory (C:\cygwin64), press "Next", opt for installing for "All Users", press "Next", accept the proposed local package directory (C:\cygwin64), "Next" again, select "Direct Connection", press "Next", choose any of the offered download sites (one closer to your location will just provide faster downloads), and "Next".
 
-4. When the "Select Packages" window opens, click on the View option list, choose "Full" (to see the list with all packages), type the name of each required package in the Search box, find the EXACT name in the packages list (do not use partial matches), and on the "New" column change the option from "Skip" to the latest available version (the one with the higher number). Repeat this process for each of the four required packages: "mingw64-x86_64-gcc-g++", "mingw64-x86_64-zlib", "make" and "gdb".
+4. When the "Select Packages" window opens, click on the View option list, choose "Full" (to see the list with all packages), type the name of each required package in the Search box, find the EXACT name in the packages list (do not use partial matches), and on the "New" column change the option from "Skip" to the latest available version (the one with the higher number). Repeat this process for each of the five required packages: "mingw64-x86_64-gcc-g++", "mingw64-x86_64-zlib", "make", "gdb", and "multitail".
 
 5. When all the required packages are marked for download, choose "Next", accept the proposed changes and proceed to download and install Cygwin. Please wait until the installer finishes (it may take a while) and close the installer when requested.
 
@@ -178,11 +178,11 @@ To define it, open "Control Panel", sequentially select "System and Security", "
 Linux Installation
 ******************
 
-To install LSD, simply unpack the LSD distribution file (e.g., Lsd-7.1-master.tar.gz) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using your file manager. This will create the whole directory structure. 
+To install LSD, simply unpack the LSD distribution file (e.g., Lsd-7.2-master.tar.gz) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using your file manager. This will create the whole directory structure. 
 
 Alternatively, it is also possible to unpack the distribution file using the terminal using the command (".tar.gz" extension files only):
 
-tar -xzf Lsd-7.1-master.tar.gz
+tar -xzf Lsd-7.2-master.tar.gz
 
 The distribution file may be deleted after installation.
 
@@ -194,11 +194,11 @@ To use the LSD in Linux it is necessary to have the GNU gcc/g++ compiler (versio
 
 In Debian or Ubuntu, to make sure you have the correct libraries you can use:
 
-sudo apt-get install build-essential gdb gnuplot-qt zlib1g-dev tcl8.6-dev tk8.6-dev
+sudo apt-get install build-essential gdb gnuplot-qt zlib1g-dev tcl8.6-dev tk8.6-dev multitail
 
 In Fedora, CentOS or Red Hat, the equivalent command is:
 
-sudo yum install gcc-c++ make gdb gnuplot zlib-devel tcl tk tcl-devel tk-devel
+sudo yum install gcc-c++ make gdb gnuplot zlib-devel tcl tk tcl-devel tk-devel multitail
 
 IN CASE OF PROBLEMS:
 
@@ -233,11 +233,11 @@ macOS (10.10+) Installation
 
 LSD is only supported in mac computers as a native macOS (Aqua) application. 
 
-To install LSD, simply unzip the LSD distribution file (e.g., Lsd-7.1-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
+To install LSD, simply unzip the LSD distribution file (e.g., Lsd-7.2-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
 
 Next, open the Terminal application (located inside the Utilities app folder), and type the following commands (each line must be completed by pressing "Enter"):
 
-cd ~/Lsd-7.1-master
+cd ~/Lsd-7.2-master
 ./add-shortcut-mac.sh
 
 After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD.
@@ -248,13 +248,13 @@ xcode-select --install
 
 Then, in the opened window, click on the "Install" button (do NOT click on the "Get Xcode" button), accept the license and wait the installation to complete (you may have to reboot to finish the installation).
 
-It is recommended, but not required, to install the Gnuplot graphical plotting application. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. The easiest way to install Gnuplot is to use the Homebrew package manager for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
+It is recommended, but not required, to install multitail and Gnuplot applications. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. The easiest way to install Gnuplot is to use the Homebrew package manager for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
 
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 After Homebrew installation finishes (details at http://brew.sh), you can install Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
 
-brew install gnuplot --with-qt
+brew install multitail gnuplot
 
 IN CASE OF PROBLEMS:
 
