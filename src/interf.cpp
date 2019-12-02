@@ -5569,21 +5569,25 @@ case 68:
 	cmd( "switch $answer { yes { set choice 1 } no { set choice 0 } }" );
 	if ( *choice )
 	{
+		// number of columns
+		--j;
+		i = j > 4 ? ( j > 8 ? ( j > 12 ? 4 : 3 ) : 2 ) : 1;
+		
 		cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set choice 2 } { set choice 1 } } { set choice 3 }" );
 	
 		switch( *choice )
 		{
 				
 			case 1:				// Linux
-				cmd( "catch { exec -- $sysTerm -e multitail -s %d --retry-all %s & }", j > 2 ? ( ( j - 1 ) > 8 ? 3 : 2 ) : 1, lab2 );
+				cmd( "catch { exec -- $sysTerm -e multitail -s %d --retry-all %s & }", i, lab2 );
 				break;
 
 			case 2:				// Mac
-				cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $path; clear; multitail -s %d --retry-all %s\\\"\" & } result", j > 2 ? ( ( j - 1 ) > 8 ? 3 : 2 ) : 1, lab2 );
+				cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $path; clear; multitail -s %d --retry-all %s\\\"\" & } result", i, lab2 );
 				break;
 
 			case 3:				// Windows
-				cmd( "catch { exec -- $sysTerm /k multitail -s %d --retry-all %s & }", j > 2 ? ( ( j - 1 ) > 8 ? 3 : 2 ) : 1, lab2 );
+				cmd( "catch { exec -- $sysTerm /k multitail -s %d --retry-all %s & }", i, lab2 );
 		}
 	}
 	
