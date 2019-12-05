@@ -17,7 +17,7 @@ LSD is copyrighted by Marco Valente and Marcelo C. Pereira (version 7.x addition
 
 LSD includes third party software under the license of the copyright owners:
 
-Eigen 3.3.4 is copyrighted by Benoit Jacob and others under a MPL2 license, http://eigen.tuxfamily.org
+Eigen 3.3.7 is copyrighted by Benoit Jacob and others under a MPL2 license, http://eigen.tuxfamily.org
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under a GPL 2.1 license, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under a GPL 2.1 license, http://harvest.nps.edu
 seticon/osxconutils is copyrighted by Sveinbjorn Thordarson, https://sveinbjorn.org/osxiconutils
@@ -231,7 +231,7 @@ IMPORTANT: if you modified the makefile to compile LMM, the same changes need to
 macOS (10.10+) Installation
 ***************************
 
-LSD is only supported in mac computers as a native macOS (Aqua) application. 
+LSD is only supported in mac computers as a native macOS (Aqua) application. Dark mode (macOS 10.14+) is not fully supported because of the color scheme imposed by macOS (colors may be manually remapped to attenuate the problem changing the src/defaults.tcl file, look for the 'default colors' section).
 
 To install LSD, simply unzip the LSD distribution file (e.g., Lsd-7.2-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
 
