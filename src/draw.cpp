@@ -156,7 +156,14 @@ void draw_buttons( void )
 			set choice_g 70 \
 		}" );
 		
-	cmd( "set colM [ expr $cx2 - $borderM ]" );
+	cmd( "bind $g <Control-plus> { invoke .str.f.c.hplus }" );
+	cmd( "bind $g <Control-minus> { invoke .str.f.c.hminus }" );
+	cmd( "bind $g <Alt-plus> { invoke .str.f.c.vplus }" );
+	cmd( "bind $g <Alt-minus> { invoke .str.f.c.vminus }" );
+	cmd( "bind $g <Control-a> { invoke .str.f.c.auto }; bind $g <Control-A> { invoke .str.f.c.auto }" );
+	cmd( "bind $g <Alt-a> { invoke .str.f.c.auto }; bind $g <Alt-A> { invoke .str.f.c.auto }" );
+		
+	cmd( "set colM [ expr $cx2 - $borderM - $borderMadj ]" );
 	cmd( "set rowM [ expr $cy2 - $borderM ]" );
 	
 	cmd( "$g.f.c create window $colM $rowM -window $g.f.c.auto" );

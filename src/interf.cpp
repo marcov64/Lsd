@@ -225,19 +225,19 @@ int browse( object *r, int *choice )
 					if ( cv->num_lag == 0 )
 					{
 						cmd( ".l.v.c.var_name insert end \"%s (V$varFlags)\"", cv->label );
-						cmd( ".l.v.c.var_name itemconf $app -fg blue" );
+						cmd( ".l.v.c.var_name itemconf $app -fg $varcolor" );
 					}
 					else
 					{
 						cmd( ".l.v.c.var_name insert end \"%s (V_%d$varFlags)\"", cv->label, cv->num_lag );
-						cmd( ".l.v.c.var_name itemconf $app -fg purple" );
+						cmd( ".l.v.c.var_name itemconf $app -fg $lvarcolor" );
 					}
 				}
 				
 				if ( cv->param == 1 )
 				{
 					cmd( ".l.v.c.var_name insert end \"%s (P$varFlags)\"", cv->label );
-					cmd( ".l.v.c.var_name itemconf $app -fg black" );
+					cmd( ".l.v.c.var_name itemconf $app" );
 				}
 				
 				if ( cv->param == 2 )
@@ -245,12 +245,12 @@ int browse( object *r, int *choice )
 					if ( cv->num_lag == 0 )
 					{
 						cmd( " .l.v.c.var_name insert end \"%s (F$varFlags)\"", cv->label );
-						cmd( ".l.v.c.var_name itemconf $app -fg firebrick" );
+						cmd( ".l.v.c.var_name itemconf $app -fg $funcolor" );
 					}
 					else
 					{
 						cmd( ".l.v.c.var_name insert end \"%s (F_%d$varFlags)\"", cv->label, cv->num_lag );
-						cmd( ".l.v.c.var_name itemconf $app -fg tomato" );
+						cmd( ".l.v.c.var_name itemconf $app -fg $lfuncolor" );
 					}
 				}
 
@@ -540,7 +540,7 @@ int browse( object *r, int *choice )
 				}
 				
 				cmd( ".l.s.c.son_name insert end \"%s (#%d%s)\"", cb->blabel, num, done ? "" : "-" );
-				cmd( ".l.s.c.son_name itemconf $app -fg red" );
+				cmd( ".l.s.c.son_name itemconf $app -fg $objcolor" );
 				cmd( "incr app" );
 			}
 		}	
@@ -728,18 +728,18 @@ int browse( object *r, int *choice )
 		cmd( "label .l.p.up_name.d -text \"Parent object:\" -width 12 -anchor w" );
 		if ( r->up != NULL )
 		{
-			cmd( "label .l.p.up_name.n -anchor e -text \" %s \" -foreground red", r->up->label );
+			cmd( "label .l.p.up_name.n -anchor w -text \" %s \" -foreground red", r->up->label );
 			cmd( "bind . <KeyPress-u> { set itemfocus 0; set choice 5 }; bind . <KeyPress-U> { set itemfocus 0; set choice 5 }" );
 		}
 		else
-			cmd( "label .l.p.up_name.n -anchor e -text \"\"" );
+			cmd( "label .l.p.up_name.n -anchor w -text \"\"" );
 
 		cmd( "pack .l.p.up_name.d .l.p.up_name.n -side left" );
 		cmd( "pack .l.p.up_name -padx 9 -anchor w" );
 
 		cmd( "frame .l.p.tit" );
 		cmd( "label .l.p.tit.lab -text \"Current object:\" -width 12 -anchor w" );
-		cmd( "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text \" %s \" %s -font [ font create -size $small_character -weight bold ]", r->label, r->up == NULL ? "" : "-command { set ttip \"\"; set choice 6 }" );
+		cmd( "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor w -width -1 -text \" %s \" %s -font [ font create -size $small_character -weight bold ]", r->label, r->up == NULL ? "" : "-command { set ttip \"\"; set choice 6 }" );
 
 		if ( r->up != NULL ) 
 		{

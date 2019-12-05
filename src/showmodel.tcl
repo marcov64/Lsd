@@ -35,7 +35,7 @@ set months [ list January February March April May June July August September Oc
 # SHOWMODEL
 #************************************************
 proc showmodel pippo {
-	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelGroup upSymbol groupSymbol RootLsd memory ltip fonttype small_character bRlf ovBrlf GROUP_INFO MODEL_INFO DESCRIPTION
+	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelGroup upSymbol groupSymbol RootLsd memory ltip fonttype small_character bRlf ovBrlf GROUP_INFO MODEL_INFO DESCRIPTION grpcolor modcolor
 
 	unset -nocomplain lmn lver lmd ldn lrn lbn group
 	lappend lmn
@@ -312,7 +312,7 @@ proc showmodel pippo {
 			}
 			lappend group 1
 			.l.l.l insert end "$groupSymbol$app"
-			.l.l.l itemconf end -fg red
+			.l.l.l itemconf end -fg $grpcolor
 		}
 	}
 
@@ -343,7 +343,7 @@ proc showmodel pippo {
 			
 			lappend group 0
 			.l.l.l insert end "$app1 (ver. $app2)"				 
-			.l.l.l itemconf end -fg blue
+			.l.l.l itemconf end -fg $modcolor
 		}
 	}
 

@@ -2183,7 +2183,7 @@ while ( true )
 			cmd( "destroytop $w" ); 
 			
 			if ( *choice == 1 )
-				cmd( "$ccanvas create text $hereX $hereY -text \"$itext\" -font $fontP -tags { text draw }" );
+				cmd( "$ccanvas create text $hereX $hereY -text \"$itext\" -fill black -font $fontP -tags { text draw }" );
 			
 			break;
 
@@ -8202,17 +8202,17 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	{
 		case TSERIES:
 			for ( i = 0; i < hticks + 2; ++i )
-				cmd( "$p create text %d [ expr %d + $pad3 ] -font $fontP -anchor n -text %d -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, min_c + ( int ) floor( i * ( double ) ( max_c - min_c ) / ( hticks + 1 ) ) );
+				cmd( "$p create text %d [ expr %d + $pad3 ] -fill black -font $fontP -anchor n -text %d -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, min_c + ( int ) floor( i * ( double ) ( max_c - min_c ) / ( hticks + 1 ) ) );
 			break;
 			
 		case CRSSECT:
-			cmd( "$p create text %d [ expr %d + $pad3 ] -font $fontP -anchor nw -text \"%d series\" -tag { p text }", hbordsize, vsize + lheight, nv );
+			cmd( "$p create text %d [ expr %d + $pad3 ] -fill black -font $fontP -anchor nw -text \"%d series\" -tag { p text }", hbordsize, vsize + lheight, nv );
 			break;
 			
 		case HISTOGR:
 		case HISTOCS:
 			for ( i = 0; i < hticks + 2; ++i )
-				cmd( "$p create text %d [ expr %d + $pad3 ] -font $fontP -anchor n -text %.*g -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, pdigits, bins[ 0 ].lowb + i * ( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) / ( hticks + 1 ) );
+				cmd( "$p create text %d [ expr %d + $pad3 ] -fill black -font $fontP -anchor n -text %.*g -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, pdigits, bins[ 0 ].lowb + i * ( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) / ( hticks + 1 ) );
 			break;			
 	}
 
@@ -8222,7 +8222,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 		yVal = miny + ( vticks + 1 - i ) * ( maxy - miny ) / ( vticks + 1 );
 		yVal = ( fabs( yVal ) < ( maxy - miny ) * MARG ) ? 0 : yVal;
 		
-		cmd( "$p create text %d %d -font $fontP -anchor e -text %.*g -tag { p text }", hbordsize - htmargin - 5, tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, yVal );
+		cmd( "$p create text %d %d -fill black -font $fontP -anchor e -text %.*g -tag { p text }", hbordsize - htmargin - 5, tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, yVal );
 		
 		// second y-axis series values ( if any )
 		if ( y2on )
@@ -8230,7 +8230,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			yVal = cminy2 + ( vticks + 1 - i ) * ( cmaxy2 - cminy2 ) / ( vticks + 1 );
 			yVal = ( fabs( yVal ) < ( cmaxy2 - cminy2 ) * MARG ) ? 0 : yVal;
 		
-			cmd( "$p create text %d %d -font $fontP -anchor w -text %.*g -tag { p text }", hbordsize + hsize + htmargin + 5, tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, yVal );
+			cmd( "$p create text %d %d -fill black -font $fontP -anchor w -text %.*g -tag { p text }", hbordsize + hsize + htmargin + 5, tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, yVal );
 		}
 	}
 
@@ -8279,7 +8279,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	}
 
 	if ( i < nLine )
-		cmd( "$p create text $xlabel $ylabel -font $fontP -anchor nw -text \"(%d more...)\"", nLine - i );
+		cmd( "$p create text $xlabel $ylabel -fill black -font $fontP -anchor nw -text \"(%d more...)\"", nLine - i );
 
 	cmd( "update" );	
 }

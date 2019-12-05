@@ -684,14 +684,14 @@ cmd( "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
 cmd( "setwrap .f.t.t $wrap" );		// adjust text wrap
 
 // set syntax colors
-cmd( ".f.t.t tag configure comment1 -foreground green4" );
-cmd( ".f.t.t tag configure comment2 -foreground green4" );
-cmd( ".f.t.t tag configure str -foreground blue4" );
-cmd( ".f.t.t tag configure cprep -foreground SaddleBrown" );
-cmd( ".f.t.t tag configure lsdvar -foreground red4" );
-cmd( ".f.t.t tag configure lsdmacro -foreground DodgerBlue4" );
-cmd( ".f.t.t tag configure ctype -foreground DarkViolet" );
-cmd( ".f.t.t tag configure ckword -foreground purple4" );
+cmd( ".f.t.t tag configure comment1 -foreground $commcolor" );
+cmd( ".f.t.t tag configure comment2 -foreground $commcolor" );
+cmd( ".f.t.t tag configure str -foreground $strcolor" );
+cmd( ".f.t.t tag configure cprep -foreground $prepcolor" );
+cmd( ".f.t.t tag configure ctype -foreground $typecolor" );
+cmd( ".f.t.t tag configure ckword -foreground $kwrdcolor" );
+cmd( ".f.t.t tag configure lsdvar -foreground $vlsdcolor" );
+cmd( ".f.t.t tag configure lsdmacro -foreground $mlsdcolor" );
 cmd( ".f.t.t configure -selectbackground gray" );
 cmd( ".f.t.t configure -selectforeground black" );
 

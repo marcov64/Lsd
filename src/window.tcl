@@ -77,14 +77,27 @@ if [ string equal $tcl_platform(platform) unix ] {
 		if { [ string equal [ info tclversion ] 8.6 ] } {	
 			if { [ string equal [ info patchlevel ] 8.6.9 ] } {
 				set butWid $butMacTk869
+				set bsizeM $bsizeMwin
+				set bhstepM $bhstepMwin
+				set borderMadj 0
+				set darkMode 0
 			} else {
 				set butWid $butMac
+				set bsizeM $bsizeMlin
+				set bhstepM $bhstepMmac
+				set borderMadj $borderMmac
+				update
+				set darkMode [ tk::unsupported::MacWindowStyle isdark . ]
 			}
 			
 			set DefaultWish $wishMacTk86
 		} else {
 			set butWid $butMac
+			set bsizeM $bsizeMwin
+			set bhstepM $bhstepMwin
 			set DefaultWish $wishMacTk85
+			set borderMadj 0
+			set darkMode 0
 		}
 		
 		set daCwid $daCwidMac
@@ -100,8 +113,6 @@ if [ string equal $tcl_platform(platform) unix ] {
 		set DefaultFont $fontMac
 		set DefaultFontSize $fontSizeMac
 		set deltaSize $deltaSizeMac
-		set bsizeM $bsizeMwin
-		set bhstepM $bhstepMwin
 		set bvstepM $bvstepMwin
 		
 	# linux
@@ -128,6 +139,8 @@ if [ string equal $tcl_platform(platform) unix ] {
 		set bsizeM $bsizeMlin
 		set bhstepM $bhstepMlin
 		set bvstepM $bvstepMlin
+		set borderMadj 0
+		set darkMode 0
 	}
 	
 # Windows
@@ -168,6 +181,41 @@ if [ string equal $tcl_platform(platform) unix ] {
 	set bsizeM $bsizeMwin
 	set bhstepM $bhstepMwin
 	set bvstepM $bvstepMwin
+	set borderMadj 0
+	set darkMode 0
+}
+
+# adjust between dark and light desktop modes
+if { $darkMode } {
+	set commcolor $commcolorD
+	set strcolor $strcolorD 
+	set prepcolor $prepcolorD
+	set typecolor $typecolorD
+	set kwrdcolor $kwrdcolorD
+	set vlsdcolor $vlsdcolorD
+	set mlsdcolor $mlsdcolorD
+	set varcolor $varcolorD
+	set lvarcolor $lvarcolorD
+	set funcolor $funcolorD
+	set lfuncolor $lfuncolorD
+	set objcolor $objcolorD
+	set grpcolor $grpcolorD
+	set modcolor $modcolorD
+} else {
+	set commcolor $commcolorL
+	set strcolor $strcolorL 
+	set prepcolor $prepcolorL
+	set typecolor $typecolorL
+	set kwrdcolor $kwrdcolorL
+	set vlsdcolor $vlsdcolorL
+	set mlsdcolor $mlsdcolorL
+	set varcolor $varcolorL
+	set lvarcolor $lvarcolorL
+	set funcolor $funcolorL
+	set lfuncolor $lfuncolorL
+	set objcolor $objcolorL 
+	set grpcolor $grpcolorL
+	set modcolor $modcolorL
 }
 
 # text line default canvas height & minimum horizontal border width

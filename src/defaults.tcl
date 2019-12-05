@@ -16,6 +16,58 @@
 
 package require Tk
 
+# default colors in palette and other elements
+set defcolors	{ black red green #d0d000 #fb46bc blue DeepSkyBlue1 grey40 PaleTurquoise2 cyan aquamarine DarkSeaGreen1 chartreuse1 OliveDrab khaki3 LightGoldenrod4 sienna1 chocolate4 firebrick3 orange1 salmon3 }
+
+set commcolorL	green4		; # color of comments (light mode)
+set commcolorD	DarkOliveGreen3	; # color of comments (dark mode)
+set strcolorL	blue4		; # color of strings (light mode)
+set strcolorD	RoyalBlue	; # color of strings (dark mode)
+set prepcolorL	SaddleBrown	; # color of C preprocessor (light mode)
+set prepcolorD	tan1		; # color of C preprocessor (dark mode)
+set typecolorL	DarkViolet	; # color of C type (light mode)
+set typecolorD	Cyan3		; # color of C type (dark mode)
+set kwrdcolorL	purple4		; # color of C keyword (light mode)
+set kwrdcolorD	"medium orchid"	; # color of C keyword (dark mode)
+set vlsdcolorL	red4		; # color of LSD variable (light mode)
+set vlsdcolorD	tomato		; # color of LSD variable (dark mode)
+set mlsdcolorL	DodgerBlue4	; # color of LSD macro (light mode)
+set mlsdcolorD	SlateGray3	; # color of LSD macro (dark mode)
+set varcolorL	blue		; # color of variable label (light mode)
+set varcolorD	tan1		; # color of variable label (dark mode)
+set lvarcolorL	purple		; # color of lagged variable label (light mode)
+set lvarcolorD	DarkOliveGreen3	; # color of lagged variable label (dark mode)
+set funcolorL	firebrick	; # color of function label (light mode)
+set funcolorD	RoyalBlue	; # color of function label (dark mode)
+set lfuncolorL	tomato		; # color of lagged function label (light mode)
+set lfuncolorD	"medium orchid"	; # color of lagged function label (dark mode)
+set objcolorL	red			; # color of object label (light mode)
+set objcolorD	tomato		; # color of object label (dark mode)
+set grpcolorL	red			; # color of model group label (light mode)
+set grpcolorD	tomato		; # color of model group label (dark mode)
+set modcolorL	blue		; # color of model label (light mode)
+set modcolorD	SlateGray3	; # color of model label (dark mode)
+set axcolorP	gray25		; # color of plot axis
+set grcolorP	gray75		; # color of plot grid
+
+# main windows size and margins (must be even numbers)
+set hmargin		20	; # horizontal right margin from the screen borders
+set vmargin		20	; # vertical margins from the screen borders
+set bordsize	2	; # width of windows borders
+set tbarsize	55	; # size in pixels of bottom taskbar (exclusion area) - Windows 7+ = 82
+set hsizeL		800	; # LMM horizontal size in pixels
+set vsizeL		600	; # LMM vertical size in pixels
+set hsizeLmin	620	; # LMM minimum horizontal size in pixels
+set vsizeLmin	300	; # LMM minimum vertical size in pixels
+set hsizeB 		400	; # browser horizontal size in pixels
+set vsizeB		620	; # browser vertical size in pixels
+set hsizeM 		600	; # model structure horizontal size in pixels
+set vsizeM		400	; # model structure vertical size in pixels
+set hsizeI 		800	; # initial values editor horizontal size in pixels
+set vsizeI		600	; # initial values editor vertical size in pixels
+set hsizeN 		350	; # objects numbers editor horizontal size in pixels
+set vsizeN		550	; # objects numbers editor vertical size in pixels
+
 # plot windows size and margins
 set hsizeP 		600	; # default plot (time series) horizontal size in pixels
 set vsizeP		300	; # default plot (time series) vertical size in pixels
@@ -52,29 +104,6 @@ set pointsizeP	1.0	; # default size of points (<1:./<2:x/<3:+/>=3:round)
 set maxzoomP	4.0	; # maximum zoom magnification factor in plots
 set minzoomP	0.5	; # minimum zoom shrinking factor in plots
 
-# default colors in palette and other elements
-set defcolors	{ black red green #d0d000 #fb46bc blue DeepSkyBlue1 grey40 PaleTurquoise2 cyan aquamarine DarkSeaGreen1 chartreuse1 OliveDrab khaki3 LightGoldenrod4 sienna1 chocolate4 firebrick3 orange1 salmon3 }
-set axcolorP	gray25	; # color of plot axis
-set grcolorP	gray75	; # color of plot grid
-
-# main windows size and margins (must be even numbers)
-set hmargin		20	; # horizontal right margin from the screen borders
-set vmargin		20	; # vertical margins from the screen borders
-set bordsize	2	; # width of windows borders
-set tbarsize	55	; # size in pixels of bottom taskbar (exclusion area) - Windows 7+ = 82
-set hsizeL		800	; # LMM horizontal size in pixels
-set vsizeL		600	; # LMM vertical size in pixels
-set hsizeLmin	620	; # LMM minimum horizontal size in pixels
-set vsizeLmin	300	; # LMM minimum vertical size in pixels
-set hsizeB 		400	; # browser horizontal size in pixels
-set vsizeB		620	; # browser vertical size in pixels
-set hsizeM 		600	; # model structure horizontal size in pixels
-set vsizeM		400	; # model structure vertical size in pixels
-set hsizeI 		800	; # initial values editor horizontal size in pixels
-set vsizeI		600	; # initial values editor vertical size in pixels
-set hsizeN 		350	; # objects numbers editor horizontal size in pixels
-set vsizeN		550	; # objects numbers editor vertical size in pixels
-
 # analysis window sizes (must be even numbers)
 set daCwidLinux		28	; # series lists width (Linux)
 set daCwidMac		28	; # Mac
@@ -93,12 +122,14 @@ set rstepM		0.1		; # relative scaling factor step step
 set rfactM		0.3		; # horizontal range exponential factor
 set rinitM		750		; # horizontal initial width (4 root sons)
 set rincrM		100		; # horizontal width increase step
-set bsizeMwin	2		; # button size (Windows/Mac)
-set bsizeMlin	1		; # button size (Linux)
-set bhstepMwin	25		; # button horizontal step (Windows/Mac)
+set bsizeMwin	2		; # button size (Windows/Mac 8.6.9)
+set bsizeMlin	1		; # button size (Linux/Mac 8.6.10+)
+set bhstepMwin	25		; # button horizontal step (Windows/Mac 8.6.9)
 set bhstepMlin	35		; # button horizontal step (Linux)
+set bhstepMmac	45		; # button horizontal step (Mac 8.6.10+)
 set bvstepMwin	26		; # button vertical step (Windows/Mac)
 set bvstepMlin	30		; # button vertical step (Linux)
+set borderMmac	10		; # additional open space to border (Mac 8.6.10+)
 set ncolorM 	white	; # node color
 set ncolorMsel 	blue	; # selected node color
 set tcolorM 	red		; # node name color
@@ -129,7 +160,7 @@ set deltaSizeWindows	2
 
 # OS specific default window buttons widths
 set butLinux	7
-set butMac		7
+set butMac		5
 set butMacTk869	8
 set butWindows	9
 
