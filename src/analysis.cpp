@@ -316,12 +316,12 @@ cmd( "checkbutton .da.f.h.v.ft.auto -text \"Use all cases \" -variable auto_x -c
 
 cmd( "frame .da.f.h.v.ft.from" );
 cmd( "label .da.f.h.v.ft.from.minc -text \"From case\"" );
-cmd( "entry .da.f.h.v.ft.from.mnc -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set minc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $minc; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "entry .da.f.h.v.ft.from.mnc -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 } { set minc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $minc; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "pack .da.f.h.v.ft.from.minc .da.f.h.v.ft.from.mnc -side left" );
 
 cmd( "frame .da.f.h.v.ft.to" );
 cmd( "label .da.f.h.v.ft.to.maxc -text \"to case\"" );
-cmd( "entry .da.f.h.v.ft.to.mxc -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set maxc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $maxc; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "entry .da.f.h.v.ft.to.mxc -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P >= $minc } { set maxc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $maxc; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "pack  .da.f.h.v.ft.to.maxc .da.f.h.v.ft.to.mxc -side left" );
 
 cmd( "pack .da.f.h.v.ft.auto .da.f.h.v.ft.from .da.f.h.v.ft.to -side left -ipadx 15" );
