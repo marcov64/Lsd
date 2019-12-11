@@ -299,6 +299,7 @@ for ( i = 0, itw = offers->begin( ); itw != offers->end( ); ++itw )
 			quit_worker( cur );
 		
 		hire_worker( cur, 2, itw->firm, v[4] );	// pay requested wage
+		++i;
 		++h;
 	}	
 	
