@@ -270,7 +270,7 @@ double variable::cal( object *caller, int lag )
 
 			if ( eff_lag > num_lag )	// in principle, invalid lag
 			{
-				if ( ! ( save || savei ) )	// and not saved
+				if ( no_saved || ! ( save || savei ) )	// and not saved
 					goto error;
 				else
 					if ( lag > t - start )	// or before there are saved values
@@ -514,7 +514,8 @@ double variable::cal( object *caller, int lag )
 
 	error:
 	
-	sprintf( msg, "variable or function '%s' (object '%s') requested \nwith lag=%d but declared with lag=%d\nThree possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- mark '%s' to be saved (variables only)", label, up->label, lag, num_lag, label, lag, caller == NULL ? "(none)" : caller->label, label, num_lag, label );
+	eff_lag = ( param == 0 ) ? eff_lag : lag;
+	sprintf( msg, "variable or function '%s' (object '%s') requested \nwith lag=%d but declared with lag=%d\nPossible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- enable USE_SAVED and mark '%s' to be saved (variables only)", label, up->label, eff_lag, num_lag, label, eff_lag, caller == NULL ? "(none)" : caller->label, label, num_lag, label );
 	error_hard( msg, "invalid lag used", 
 				"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation" );
 	

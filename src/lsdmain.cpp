@@ -49,6 +49,7 @@ bool fast;					// safe copy of fast_mode flag
 bool log_ok = false;		// control for log window available
 bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
+bool no_saved = true;		// disable the usage of saved values as lagged ones
 bool no_search;				// disable the standard variable search mechanism
 bool no_window = false;		// no-window command line job
 bool no_zero_instance = false;// flag to allow deleting last object instance

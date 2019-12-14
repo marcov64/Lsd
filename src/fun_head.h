@@ -263,6 +263,8 @@ bool no_ptr_chk = true;
 #define USE_NAN { use_nan = true; }
 #define NO_POINTER_CHECK build_obj_list( false )
 #define USE_POINTER_CHECK build_obj_list( true )
+#define NO_SAVED { no_saved = true; }
+#define USE_SAVED { no_saved = false; }
 #define NO_SEARCH { no_search = true; }
 #define USE_SEARCH { no_search = false; }
 #define NO_ZERO_INSTANCE { no_zero_instance = true; }
