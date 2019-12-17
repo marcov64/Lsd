@@ -785,7 +785,7 @@ proc sizetop { { w all } } {
 				}
 				
 				.str {
-					set posXstr [ expr [ winfo x . ] + [ winfo width . ] + 2 * $bordsize + $hmargin + $corrX ]
+					set posXstr [ expr [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] - 2 * $bordsize ]
 					set posYstr [ expr [ winfo y . ] + $corrY ]
 					set defGeom "${hsizeM}x${vsizeM}+${posXstr}+${posYstr}"
 
@@ -944,46 +944,59 @@ proc primdisp w {
 # compute x coordinate of new window according to the types
 #************************************************
 proc getx { w pos } {
-	global corrX hmargin bordsize
+	global corrX hmargin bordsize shiftW
+	
+	set par [ winfo parent $w ]
+	if { $par == "" } { 
+		set par . 
+	}
 	
 	switch $pos {
 		centerS { 
 			set hpos [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
 		}
 		centerW { 
-			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ]
+			set hpos [ expr [ winfo x $par ] + $corrX + [ winfo width $par ] / 2  - [ winfo reqwidth $w ] / 2 ]
 		}
 		topleftS { 
 			set hpos [ expr $hmargin + $corrX ]
 		}
 		topleftW { 
-			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX + 10 ]
+			set hpos [ expr [ winfo x $par ] + $corrX + 10 ]
 		}
 		overM { 
 			set hpos [ expr [ winfo x . ] + $corrX ]
 		}
 		coverW { 
-			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX ]
+			set hpos [ expr [ winfo x $par ] + $corrX ]
 		}
 		bottomrightS {
 			set hpos [ expr [ winfo screenwidth $w ] - $hmargin - [ winfo reqwidth $w ] ]
 		}
 		righttoW {
-			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX + $hmargin + [ winfo reqwidth [ winfo parent $w ] ] - 2 * $bordsize ]
+			set hpos [ expr [ winfo x $par ] + $corrX + $hmargin + [ winfo width $par ] + 2 * $bordsize ]
 		}
 		lefttoW {
-			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX - $hmargin - [ winfo reqwidth $w ] + 2 * $bordsize ]
+			set hpos [ expr [ winfo x $par ] + $corrX - $hmargin - [ winfo reqwidth $w ] + 2 * $bordsize ]
+		}
+		righttoMshift {
+			set hpos [ expr [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] - 2 * $bordsize + $shiftW ]
 		}
 		default { 
 			set hpos [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
 		}
 	}
 		
-	if { $hpos < $corrX && [ primdisp [ winfo parent $w ] ] } {
-		return $corrX
-	} else {
-		return $hpos
+	if [ primdisp $par ] {
+		if { $hpos < $corrX } {
+			return $corrX
+		}
+		if { $hpos > [ expr [ winfo screenwidth $par ] - [ winfo reqwidth $w ] / 2 ] } {
+			return [ expr [ winfo x $par ] + $corrX + $hmargin + 2 * $bordsize ]
+		}
 	}
+	
+	return $hpos
 }
 
 
@@ -992,46 +1005,59 @@ proc getx { w pos } {
 # compute y coordinate of new window according to the types
 #************************************************
 proc gety { w pos } {
-	global corrY vmargin tbarsize
+	global corrY vmargin tbarsize shiftW
+	
+	set par [ winfo parent $w ]
+	if { $par == "" } { 
+		set par . 
+	}
 	
 	switch $pos {
 		centerS { 
 			set vpos [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
 		}
 		centerW { 
-			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ]
+			set vpos [ expr [ winfo y $par ] + $corrY + [ winfo height $par ] / 2  - [ winfo reqheight $w ] / 2 ]
 		}
 		topleftS { 
 			set vpos [ expr $vmargin + $corrY ]
 		}
 		topleftW { 
-			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY + 30 ]
+			set vpos [ expr [ winfo y $par ] + $corrY + 30 ]
 		}
 		overM { 
 			set vpos [ expr [ winfo y . ] + $corrY ]
 		}
 		coverW { 
-			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+			set vpos [ expr [ winfo y $par ] + $corrY ]
 		}
 		bottomrightS {
 			set vpos [ expr [ winfo screenheight $w ] - $vmargin - $tbarsize - [ winfo reqheight $w ] ]
 		}
 		righttoW {
-			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+			set vpos [ expr [ winfo y $par ] + $corrY ]
 		}
 		lefttoW {
-			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+			set vpos [ expr [ winfo y $par ] + $corrY ]
+		}
+		righttoMshift {
+			set vpos [ expr [ winfo y . ] + $corrY + $shiftW ]
 		}
 		default { 
 			set vpos [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
 		}
 	} 
 		
-	if { $vpos < $corrY && [ primdisp [ winfo parent $w ] ] } {
-		return $corrY
-	} else {
-		return $vpos
+	if [ primdisp $par ] {
+		if { $vpos < $corrY } {
+			return $corrY
+		}
+		if { $vpos > [ expr [ winfo screenheight $par ] - [ winfo reqheight $w ] / 2 ] } {
+			return [ expr [ winfo y $par ] + $corrY ]
+		}
 	}
+	
+	return $vpos
 }
 
 

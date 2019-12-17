@@ -88,13 +88,6 @@ set avgSmplP	1	; # average Y values when multi-sampling (0=no/1:yes)
 set smoothP		no	; # options are no, yes or raw
 set splstepsP 	3	; # number of spline segments when smoothP is raw
 
-# lattice options (maximum & default, color scale)
-set hsizeLatMax	1024; # maximum lattice horizontal size in pixels
-set vsizeLatMax	1024; # maximum lattice vertical size in pixels
-set hsizeLat	400	; # default lattice horizontal size in pixels
-set vsizeLat	400	; # default lattice vertical size in pixels
-set cscaleLat	1.0	; # default color scale (1:1.0)
-
 # plot windows defaults
 set grayscaleP	0	; # default color mode for plots (0=color)
 set gridP		0	; # defaut grid mode (0=no grid)
@@ -108,6 +101,13 @@ set minzoomP	0.5	; # minimum zoom shrinking factor in plots
 set daCwidLinux		28	; # series lists width (Linux)
 set daCwidMac		28	; # Mac
 set daCwidWindows	36	; # Windows
+
+# lattice options (maximum & default, color scale)
+set hsizeLatMax	1024; # maximum lattice horizontal size in pixels
+set vsizeLatMax	1024; # maximum lattice vertical size in pixels
+set hsizeLat	400	; # default lattice horizontal size in pixels
+set vsizeLat	400	; # default lattice vertical size in pixels
+set cscaleLat	1.0	; # default color scale (1:1.0)
 
 # model structure window defaults
 set borderM		20		; # open space to border
@@ -134,6 +134,23 @@ set ncolorM 	white	; # node color
 set ncolorMsel 	blue	; # selected node color
 set tcolorM 	red		; # node name color
 set lcolorM 	gray	; # line color
+
+# runtime windows defaults
+set hsizeR		500	; # horizontal size in pixels
+set vsizeR		300	; # vertical size in pixels
+set botvsizeR	50	; # bottom part height
+set sclhsizeR	75	; # scale width
+set cvhmarginR	8	; # horizontal margin for canvas
+set botvmarginR	30	; # vertical margin for bottom part
+set sclvmarginR	3	; # vertical margin for scale
+set hticksR		5	; # number of horizontal run-time plot legend ticks
+set vticksR		2	; # number of vertical run-time plot legend ticks
+set ticmarginR	5	; # margin for legend ticks
+set lablinR		5	; # labels per line
+set linlabR		3	; # lines of label
+set linvsizeR	18	; # label lines height
+set pdigitsR	3	; # default precision digits
+set shiftR		20	; # new window shift
 
 # mouse wheel scroll factor (sensitivity)
 set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down

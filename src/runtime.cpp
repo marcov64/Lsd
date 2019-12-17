@@ -37,28 +37,11 @@ the function used run time to plot the value of variable v
 
 #include "decl.h"
 
-int width = 500;				// runtime plot area dimensions
-int height = 300;
-int b_height = 48;
-int s_width = 75;
-int h_margin = 8;
-int t_margin = 3;
-int b_margin = 30;
-int h_ticks = 5;
-int v_ticks = 2;
-int tick = 5;
-int lab_lin = 5;				// labels per line
-int lin_lab = 3;				// lines of label
-int lin_height = 18;
-int p_digits = 3;				// precision digits
 char intval[ 100 ];				// string buffer
-char **tp;						// labels of variables to plot in runtime
 double ymax;
 double ymed;
 double ymin;
 double *old_val;
-double plot_step;
-int shift = 20;					// new window shift
 variable **list_var;
 
 
@@ -76,7 +59,7 @@ void prepare_plot( object *r, int id_sim )
 	if ( i == 0 )
 		return;
 	
-	tp = new char *[ i ];
+	cmd( "unset -nocomplain tp" );
 	list_var = new variable *[ i ];
 	old_val = new double [ i ];
 	i = 0;
@@ -114,14 +97,13 @@ void assign( object *r, int *i, char *lab )
 	bridge *cb;
 	object *c, *c1;
 	variable *a;
-
+	
 	for ( a = r->v; a != NULL; a = a->next )
 		if ( a->plot == 1 )
 		{
 			list_var[ *i ] = a; 	// assigns the address of a to the list to plot
 			sprintf( msg, "%s%s", a->label, lab );
-			tp[ *i ] = new char[ strlen( msg ) + 1 ];
-			strcpy( tp[ *i ], msg );
+			cmd( "lappend tp %s", msg );
 			*i = *i + 1;
 		}
 
@@ -148,9 +130,7 @@ INIT_PLOT
 **************************************/
 void init_plot( int num, int id_sim )
 {
-	int i, j, k, l;
-	
-	plot_step = ( max_step > width ) ? 1 : width / ( double ) max_step;
+	cmd( "if { %d > $hsizeR } { set plot_step 1 } { set plot_step [ expr $hsizeR / %d.0 ] }", max_step, max_step );
 	cmd( "set scrollB 0" );
 
 	cmd( "set activeplot .plt%d", id_sim );
@@ -164,11 +144,11 @@ void init_plot( int num, int id_sim )
 	cmd( "frame $activeplot.c" );
 	
 	// vertical scale values
-	cmd( "canvas $activeplot.c.yscale -width %d -height %d", s_width, height + t_margin + b_margin );
+	cmd( "canvas $activeplot.c.yscale -width $sclhsizeR -height [ expr $vsizeR + $sclvmarginR + $botvmarginR ]" );
 
-	cmd( "$activeplot.c.yscale create text %d %d -anchor e -justify right -text \"\" -tag ymax", s_width, ( int ) max( t_margin, 10 ) );
-	cmd( "$activeplot.c.yscale create text %d %d -anchor e -justify right -text \"\" -tag medy", s_width, t_margin + height / 2 );
-	cmd( "$activeplot.c.yscale create text %d %d -anchor e -justify right -text \"\" -tag ymin", s_width, t_margin + height );
+	cmd( "$activeplot.c.yscale create text $sclhsizeR [ expr max( $sclvmarginR, 10 ) ] -anchor e -justify right -text \"\" -tag ymax" );
+	cmd( "$activeplot.c.yscale create text $sclhsizeR [ expr $sclvmarginR + $vsizeR / 2 ] -anchor e -justify right -text \"\" -tag medy" );
+	cmd( "$activeplot.c.yscale create text $sclhsizeR [ expr $sclvmarginR + $vsizeR ] -anchor e -justify right -text \"\" -tag ymin" );
 	
 	cmd( "pack $activeplot.c.yscale -side left -anchor nw" );
 	
@@ -176,23 +156,25 @@ void init_plot( int num, int id_sim )
 	cmd( "frame $activeplot.c.c  " );
 	cmd( "set p $activeplot.c.c.cn" );
 	cmd( "scrollbar $activeplot.c.c.hscroll -orient horiz -command \"$p xview\"" );
-	cmd( "canvas $p -width %d -height %d -bg white -scrollregion {0 0 %d %d} -xscrollcommand \"$activeplot.c.c.hscroll set\" -xscrollincrement 1 -yscrollincrement 1", width + 2 * h_margin, height + t_margin + b_margin, max_step, height + t_margin + b_margin );
+	cmd( "canvas $p -width [ expr $hsizeR + 2 * $cvhmarginR ] -height [ expr $vsizeR + $sclvmarginR + $botvmarginR ] -bg white -scrollregion \"0 0 %d [ expr $vsizeR + $sclvmarginR + $botvmarginR ]\" -xscrollcommand \"$activeplot.c.c.hscroll set\" -xscrollincrement 1 -yscrollincrement 1", max_step );
 	cmd( "pack $activeplot.c.c.hscroll -side bottom -expand yes -fill x" );
 	
 	// horizontal grid lines
-	for ( i = 0; i <= v_ticks; ++i )
-	{
-		cmd( "$p create line %d %d %d %d -fill grey60", h_margin - tick, t_margin + height * i / v_ticks, ( int )( h_margin + max_step * plot_step ), t_margin + height * i / v_ticks );
-	}
+	cmd( "for { set i 0 } { $i <= $vticksR } { incr i } { \
+			$p create line [ expr $cvhmarginR - $ticmarginR ] [ expr $sclvmarginR + $vsizeR * $i / $vticksR ] [ expr $cvhmarginR + %d * $plot_step ] [ expr $sclvmarginR + $vsizeR * $i / $vticksR ] -fill grey60 \
+		}", max_step );
 
 	// vertical grid lines
-	for ( i = 0, j = h_margin; j <= h_margin + max_step * plot_step; ++i, j += width / h_ticks )
-	{
-		k = height + t_margin + tick;
-		l = ( plot_step > 1 ) ? max_step * i / h_ticks : j - h_margin;
-		cmd( "$p create line %d %d %d %d -fill grey60", j, t_margin, j, k );
-		cmd( "$p create text %d %d -text %d -anchor n", j, k + tick, l );
-	}
+	cmd( "set k [ expr $vsizeR + $sclvmarginR + $ticmarginR ]" );
+	cmd( "for { set i 0; set j $cvhmarginR } { $j <= $cvhmarginR + %d * $plot_step } { incr i; set j [ expr $j + $hsizeR / $hticksR ] } { \
+			if { $plot_step > 1 } { \
+				set l [ expr %d * $i / $hticksR ] \
+			} else { \
+				set l [ expr $j - $cvhmarginR ] \
+			}; \
+			$p create line $j $sclvmarginR $j $k -fill grey60; \
+			$p create text $j [ expr $k + $ticmarginR ] -text $l -anchor n \
+	}	", max_step, max_step );
 	
 	cmd( "pack $p -anchor nw" );
 	cmd( "pack $activeplot.c.c -anchor nw" );
@@ -201,38 +183,31 @@ void init_plot( int num, int id_sim )
 	cmd( "mouse_wheel $p" );
 	
 	// bottom part
-	cmd( "canvas $activeplot.fond -width %d -height %d", s_width + width + 2 * h_margin, b_height );
+	cmd( "canvas $activeplot.fond -width [ expr $sclhsizeR + $hsizeR + 2 * $cvhmarginR ] -height $botvsizeR" );
 
 	// controls
 	cmd( "checkbutton $activeplot.fond.shift -text Scroll -variable scrollB -command { set_c_var done_in 8 }" );	
 	cmd( "if { $tcl_platform(platform) == \"windows\" } { set goWid 7 } { set goWid 5 }" );
-	cmd( "button $activeplot.fond.go -width $goWid -text Center -command { set halfCanvas %d; set_c_var done_in 7 }", width / 2 );
+	cmd( "button $activeplot.fond.go -width $goWid -text Center -command { set halfCanvas [ expr $hsizeR / 2 ]; set_c_var done_in 7 }" );
 
-	cmd( "$activeplot.fond create window %d %d -window $activeplot.fond.shift", s_width / 2, b_height / 4 - 5 );
-	cmd( "$activeplot.fond create window %d %d -window $activeplot.fond.go", s_width / 2, 3 * b_height / 4 );
+	cmd( "$activeplot.fond create window [ expr $sclhsizeR / 2 ] [ expr $botvsizeR / 4 - 5 ] -window $activeplot.fond.shift" );
+	cmd( "$activeplot.fond create window [ expr $sclhsizeR / 2 ] [ expr 3 * $botvsizeR / 4 ] -window $activeplot.fond.go" );
 	
 	// labels
-	for ( i = 0, j = 0, k = 0; i < ( num < lin_lab * lab_lin ? num : lin_lab * lab_lin ); ++i )
-	{
-		cmd( "$activeplot.fond create text %d %d -anchor nw -text %s -fill $c%d", s_width + t_margin + j * width / lab_lin, k * lin_height, tp[ i ], i  );
-		if ( j < lab_lin - 1 )
-			++j;
-		else
-		{
-			++k;
-			j = 0;
-		}
-	}
+	cmd( "for { set i 0; set j 0; set k 0 } { $i < [ expr min( %d, $linlabR * $lablinR ) ] } { incr i } { \
+			$activeplot.fond create text [ expr $sclhsizeR + $sclvmarginR + $j * $hsizeR / $lablinR ] [ expr $k * $linvsizeR ] -anchor nw -text [ lindex $tp $i ] -fill [ set c$i ]; \
+			if { $j < [ expr $lablinR - 1 ] } { \
+				incr j \
+			} else { \
+				incr k; \
+				set j 0 \
+			} \
+		}", num );
+		
 	cmd( "pack $activeplot.fond -expand yes -fill both -pady 7" );
 	
-	// calculate window shift position
-	i = id_sim * shift;
-	sprintf( intval,"%i",i );
-	Tcl_SetVar( inter, "shift", intval, 0 );
-	cmd( "set posXrt [ expr [ winfo x . ] + [ winfo width . ] + 2 * $bordsize + $hmargin + $corrX + $shift ]" );
-	cmd( "set posYrt [ expr [ winfo y . ] + $corrY + $shift ]" );
-
-	cmd( "showtop  $activeplot xy no no no $posXrt $posYrt" );
+	cmd( "set shiftW [ expr %d * $shiftR ]", id_sim - 1 );	// calculate window shift position
+	cmd( "showtop  $activeplot righttoMshift no no no" );
 	
 	if ( fast_mode > 0 )
 	{
@@ -253,8 +228,11 @@ PLOT_RT
 void plot_rt( variable *v )
 {
 	bool relabel = false;
-	int x1, x2, y1, y2;
+	int height, p_digits;
 	double value, scale, zero_lim;
+	
+	height = get_int( "vsizeR", &height );
+	p_digits = get_int( "pdigitsR", &p_digits );
 	
 	// limit the number of run-time plot variables
 	if ( cur_plt > 100 )
@@ -285,7 +263,7 @@ void plot_rt( variable *v )
 		
 		relabel = true;
 		
-		cmd( "$activeplot.c.c.cn scale punto 0 %d 1 %lf", height, scale  < 0.01 ? 0.01 : scale  );
+		cmd( "$activeplot.c.c.cn scale punto 0 $vsizeR 1 %lf", scale  < 0.01 ? 0.01 : scale  );
 	}
 
 	if ( v->val[ 0 ] <= ymin )
@@ -319,13 +297,14 @@ void plot_rt( variable *v )
 		return;
 	}
 
-	x1 = ( int ) floor( h_margin + t * plot_step );
-	x2 = ( int ) floor( h_margin + ( t - 1 ) * plot_step );
-	y1 = ( int ) floor( t_margin + ( height - ( ( v->val[ 0 ] - ymin ) / ( ymax - ymin ) ) * height ) );
-	y2 = ( int ) floor( t_margin + ( height - ( ( old_val[ cur_plt ] - ymin ) / ( ymax - ymin ) ) * height ) );
-	old_val[ cur_plt ] = v->val[ 0 ];
+	cmd( "set x1 [ expr floor( $cvhmarginR + %d * $plot_step ) ]", t );
+	cmd( "set x2 [ expr floor( $cvhmarginR + ( %d - 1 ) * $plot_step ) ]", t );
+	cmd( "set y1 [ expr floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) ]", v->val[ 0 ], ymin, ymax, ymin );
+	cmd( "set y2 [ expr floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) ]", old_val[ cur_plt ], ymin, ymax, ymin );
 
-	cmd( "$activeplot.c.c.cn create line %d %d %d %d -tag punto -fill $c%d", x2, y2, x1, y1, cur_plt );
+	cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", cur_plt );
+	
+	old_val[ cur_plt ] = v->val[ 0 ];
 	++cur_plt;
 }
 

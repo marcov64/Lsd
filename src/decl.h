@@ -83,8 +83,8 @@ Global definitions among all LSD C++ modules
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 2
-#define _LSD_VERSION_ "7.2"
-#define _LSD_DATE_ "December 1 2019"        // __DATE__
+#define _LSD_VERSION_ "7.2-2"
+#define _LSD_DATE_ "December 31 2019"   // __DATE__
 
 // global constants
 #define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)

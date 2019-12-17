@@ -632,7 +632,7 @@ RUN
 *********************************/
 void run( void )
 {
-	bool batch_sequential_loop = false;
+	bool one_dot, batch_sequential_loop = false;
 	char bar_done[ 2 * BAR_DONE_SIZE ];
 	int i, perc_done, last_done;
 	FILE *f;
@@ -755,6 +755,7 @@ void run( void )
 		use_nan = false;
 		no_search = false;
 		on_bar = false;
+		one_dot = true;
 		done_in = 0;
 		actual_steps = 0;
 		perc_done = 0;
@@ -771,20 +772,22 @@ void run( void )
 				if ( perc_done % 10 == 0 )
 				{
 					char new_perc[ 10 ];
-					sprintf( new_perc, "%d%%", perc_done );
+					sprintf( new_perc, "%s%d%%", ! one_dot ? "." : "", perc_done );
 					strcat( bar_done, new_perc );
 					
 					// check if continuing existing bar or starting a new one
 					if ( fast_mode == 1 )
 					{
 						if ( on_bar )
-							plog( "%d%%", "bar", perc_done );
+							plog( "%s%d%%", "bar", ! one_dot ? "." : "", perc_done );
 						else
 						{
 							on_bar = true;
 							plog( "\n%s", "bar", bar_done );
 						}
-					}					
+					}	
+					
+					one_dot = false;
 				}
 				else
 					if ( perc_done % ( 100 / ( BAR_DONE_SIZE - 33 ) ) == 0 )
@@ -802,6 +805,8 @@ void run( void )
 								plog( "\n%s", "bar", bar_done );
 							}
 						}						
+						
+						one_dot = true;
 					}
 					
 				last_done = perc_done;
@@ -935,7 +940,7 @@ void run( void )
 		end = clock( );
 
 		if ( fast_mode == 1 && on_bar )
-			plog( "100%%", "bar" );
+			plog( "%s100%%", "bar", ! one_dot ? "." : "" );
 		if ( fast_mode < 2 )
 			plog( "\nSimulation %d of %d %s at t = %d (%.2f sec.)\n", "", i, sim_num, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
