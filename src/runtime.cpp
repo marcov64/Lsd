@@ -173,7 +173,9 @@ void init_plot( int num, int id_sim )
 				set l [ expr $j - $cvhmarginR ] \
 			}; \
 			$p create line $j $sclvmarginR $j $k -fill grey60; \
-			$p create text $j [ expr $k + $ticmarginR ] -text $l -anchor n \
+			if { $l > 0 } { \
+				$p create text $j [ expr $k + $ticmarginR ] -text $l -anchor n \
+			} \
 	}	", max_step, max_step );
 	
 	cmd( "pack $p -anchor nw" );
