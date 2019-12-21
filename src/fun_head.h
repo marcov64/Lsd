@@ -732,7 +732,7 @@ bool no_ptr_chk = true;
   #define ADD_ALL_TO_SPACE( OBJ ) { p->register_allOfKind_at_grid_rnd( OBJ ); }
   #define ADD_ALL_TO_SPACE_WHERE( OBJ, WHERE ) { WHERE->register_allOfKind_at_grid_rnd( OBJ); }
   
-  #define ADD_ALL_TO_SPACE_CND(obj, condVarLab, condition, condVal, WHERE ) { p->register_allOfKind_at_grid_rnd_cnd( obj, condVarLab, condition, condVal); }
+  #define ADD_ALL_TO_SPACE_CND(obj, condVarLab, condition, condVal ) { p->register_allOfKind_at_grid_rnd_cnd( obj, condVarLab, condition, condVal); }
   #define ADD_ALL_TO_SPACE_CND_WHERE( obj, condVarLab, condition, condVal, WHERE ) { WHERE->register_allOfKind_at_grid_rnd_cnd( obj, condVarLab, condition, condVal); }
   
   // POSITION
