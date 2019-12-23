@@ -514,6 +514,12 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		raise $w
 	}
 	
+	# because of macOS bug when not grabbing scroll bar doesn't work...
+	if { ! $grab && [ string equal [ tk windowingsystem ] aqua ] } { 
+		grab set $w
+		grab release $w
+	}
+	
 	if { [ info exists buttonF ] && [ winfo exists $w.$buttonF.ok ] } {
 		$w.$buttonF.ok configure -default active -state active
 		focus $w.$buttonF.ok
