@@ -38,15 +38,16 @@ if ( V( "_life2cycle" ) < 3 )					// entrant?
 	END_EQUATION( max( VL( "_D2d", 1 ), CURRENT ) );
 
 v[10] = VS( PARENT, "e0" );						// animal spirits parameter
+k = VS( GRANDPARENT, "flagExpect" );			// expectation form
+j = ( k == 0 || k > 4 ) ? 1 : ( k == 1 ) ? 4 : 2;// req. number of data periods
 
-// compute the 4-period demand moving average, balanced between then
-// effective fulfilled demand and the consumer potential demand (orders)
-for ( i = 1; i <= 4; ++i )
+// compute the mix between fulfilled and potential demand (orders)
+for ( i = 1; i <= j; ++i )
 	v[ i ] = ( 1 - v[10] ) * VL( "_D2", i ) + v[10] * VL( "_D2d", i );
 
-switch ( ( int ) VS( GRANDPARENT, "flagExpect" ) )
+switch ( k )
 {
-	//  myopic expectations with 1-period memory
+	// myopic expectations with 1-period memory
 	case 0:
 	default:
 		v[0] = v[1];
@@ -507,11 +508,10 @@ v[2] = VL( "_K", 1 );							// available capital stock
 v[3] = VS( PARENT, "m2" );						// machine output per period
 v[4] = VL( "_w2avg", 1 );						// average firm wage
 
-if ( v[1] == 0 )								// nothing to produce?
-	v[1] = v[2];								// just compute for all vintages
+// number of unused machines, max should be total-1 to compute cost/productivity
+v[5] = max( floor( v[2] / v[3] ) - ceil( max( v[1], v[3] ) / v[3] ), 0 );
 
-v[5] = max( floor( v[2] / v[3] ) - ceil( v[1] / v[3] ), 0 );// unused machines
-
+// scan all vintages, from oldest to newest, preferring to use newer ones
 v[0] = v[6] = v[7] = v[8] = 0;					// accumulators
 CYCLE( cur, "Vint" )							// choose vintages to use
 {
@@ -520,19 +520,23 @@ CYCLE( cur, "Vint" )							// choose vintages to use
 	if ( v[5] >= v[9] )							// none to be used in the vint.?
 	{
 		v[5] -= v[9];							// less machines not to use
-		WRITES( cur, "_toUseVint", 0 );			// no machine to use for vint.
-		continue;								// next vintage
+		v[12] = 0;								// no machine to use in vintage
+	}
+	else
+	{
+		v[10] = VS( cur, "_Avint" );			// vintage notional productivity
+		v[11] = VLS( cur, "_AeVint", 1 );		// vintage effective product.
+		v[6] += v[12] = v[9] - v[5];			// add to be used machines
+		v[7] += v[12] * v[10];					// add notional productivities
+		v[8] += v[12] * v[11];					// add effective productivities
+		v[0] += v[12] * v[4] / v[11];			// add used machines cost
+		v[5] = 0;								// no more machine not to use
+		
+		if ( v[1] == 0 )
+			v[12] = 0;							// no worker if no production
 	}
 	
-	v[6] += v[10] = v[9] - v[5];				// add to be used machines
-	v[11] = VS( cur, "_Avint" );				// vintage notional productivity
-	v[12] = VLS( cur, "_AeVint", 1 );			// vintage effective product.
-	v[7] += v[10] * v[11];						// add notional productivities
-	v[8] += v[10] * v[12];						// add effective productivities
-	v[0] += v[10] * v[4] / v[12];				// add used machines cost
-
-	v[5] = 0;									// no more machine not to use
-	WRITES( cur, "_toUseVint", v[10] );			// number mach. to try to use
+	WRITES( cur, "_toUseVint", v[12] );			// number mach. to try to use
 }
 
 if ( v[6] == 0 )								// no machine?
@@ -569,17 +573,14 @@ switch( ( int ) V( "_life2cycle" ) )				// entrant firm state
 		END_EQUATION( 0 );
 
 	case 1:											// first-period entrant
-		// fair share lower-bounded slightly above exit threshold
-		END_EQUATION( max( 1 / VLS( PARENT, "F2", 1 ), 1.01 * v[1] ) )
+		v[0] = VL( "_K", 1 ) / VLS( PARENT, "K", 1 );// same as capital share
+		END_EQUATION( max( v[0], v[1] ) );			// but over minimum
 		
 	case 2:											// 2nd-4th-period entrant
 		// replicator equation					
 		v[0] = VL( "_f2", 1 ) * ( 1 + VS( PARENT, "chi" ) * 
 								  ( V( "_E" ) / VS( PARENT, "Eavg" ) - 1 ) );
-								  
-		// ensure entrant stay in the market for 4 periods
-		if ( v[0] < v[1] )
-			v[0] = 1.01 * v[1];
+		v[0] = max( v[0], v[1] );					// but over minimum
 		break;
 		
 	case 3:											// incumbent
@@ -661,24 +662,11 @@ Mark-up of firm in consumption-good sector
 v[1] = VL( "_f2", 1 );							// past periods market shares
 v[2] = VL( "_f2", 2 );
 v[3] = VS( PARENT, "f2min" );					// market exit share threshold
-v[4] = VL( "_Q2e", 1 );							// past periods production
-v[5] = VL( "_Q2e", 2 );
-v[6] = VS( GRANDPARENT, "mLim" );				// absolute change limit
 
-// update mark-up only if not exiting and only under normal competition and 
-// operating conditions
-if ( v[1] > v[3] && v[2] > v[3] && v[4] > 0 && v[5] > 0 && 
-	 ( ( v[1] > v[2] && v[4] > v[5] ) || ( v[1] < v[2] && v[4] < v[5] ) ) )
-{
-	v[7] = VS( PARENT, "upsilon" ) * ( ( v[1] - v[2] ) / v[2] );
-	
-	if ( v[6] > 0 )
-		v[7] = max( min( v[7], v[6] ), - v[6] );// apply bounds to change
-}
-else
-	v[7] = 0;
+if ( v[1] < v[3] || v[2] < v[3] )				// just entered firms keep it
+	END_EQUATION( CURRENT );
 
-RESULT( CURRENT * ( 1 + v[7] ) )
+RESULT( CURRENT * ( 1 + VS( PARENT, "upsilon" ) * ( v[1] / v[2] - 1 ) ) )
 
 
 EQUATION( "_q2" )
@@ -728,20 +716,14 @@ CYCLE( cur, "Broch" )							// use brochures to find supplier
 
 // if supplier is found, simply update it, if not, draw a random one
 if ( cur2 != NULL && cur3 != NULL )
-	WRITES( cur2, "_tSel", t );					// update selection time
+	WRITES( cur2, "_tSel", T );					// update selection time
 else											// no brochure received
 {
 	cur1 = RNDDRAW_FAIRS( CAPSECL2, "Firm1" );	// draw new supplier
 	i = VS( cur1, "_ID1" );
 	
-	cur2 = ADDOBJS( cur1, "Cli" );				// add object to new supplier
-	WRITES( cur2, "_IDc", V( "_ID2" ) );		// update client ID
-	WRITES( cur2, "_tSel", t );					// update selection time
-	
-	cur3 = ADDOBJ( "Broch" );					// add brochure
-	WRITES( cur3, "_IDs", i );					// update supplier ID
-	WRITE_SHOOKS( cur3, cur2 );					// pointer to supplier client list
-	WRITE_SHOOKS( cur2, cur3 );					// pointer to client brochure list
+	// create the brochure/client interconnected objects
+	cur3 = send_brochure( i, cur1, V( "_ID2" ), p );
 }
 
 WRITE_HOOK( SUPPL, cur3 );						// pointer to current brochure
@@ -892,7 +874,7 @@ VS( SHOOKS( cur )->up, "_Q1e" );				// make sure supplier produced
 v[1] = VS( SHOOKS( cur ), "_nCan" );			// canceled machine number
 k = VS( SHOOKS( cur ), "_tOrd" );				// time of canceled order
 
-if ( k == t && v[1] > 0 )
+if ( k == T && v[1] > 0 )
 {	
 	v[2] = VS( PARENT, "m2" );					// machine output per period
 	v[3] = V( "_SI" ) / v[2];					// machines to substitute
@@ -954,7 +936,7 @@ if ( v[2] + v[3] > 0 )
 	v[4] = floor( ( v[2] + v[3] ) / v[1] );		// total number of new machines
 
 	if ( v[4] > 0 )								// new machines to install?
-		add_vintage( p, v[4] );					// create new vintage
+		add_vintage( p, v[4], false );			// create vintage
 }
 
 v[5] = max( VL( "_K", 1 ) + v[3] - V( "_Kd" ), 0 );// desired capital shrinkage
@@ -962,7 +944,7 @@ v[6] = floor( v[5] / v[1] );					// machines to remove from K
 
 v[7] = floor( v[2] / v[1] );					// machines to substitute in K
 
-j = t + 1;										// oldest vintage so far
+j = T + 1;										// oldest vintage so far
 h = 0;											// oldest vintage ID
 CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 {
@@ -1212,13 +1194,6 @@ Desired production change (absolute) for a firm in consumption-good sector
 RESULT( V( "_Q2d" ) - VL( "_Q2e", 1 ) )
 
 
-EQUATION( "_l2" )
-/*
-Unfilled demand of firm in consumption-good sector
-*/
-RESULT( max( V( "_D2d" ) - V( "_D2" ), 0 ) )
-
-
 EQUATION( "_life2cycle" )
 /*
 Stage in life cycle of firm in consumer-good sector:
@@ -1445,6 +1420,12 @@ EQUATION_DUMMY( "_hires2", "hires2" )
 /*
 Effective number of workers hired in period for firm in sector 2
 Updated in 'hires2'
+*/
+
+EQUATION_DUMMY( "_l2", "D2" )
+/*
+Unfilled demand of firm in consumption-good sector
+Updated in 'D2'
 */
 
 EQUATION_DUMMY( "_oldVint", "_K" )

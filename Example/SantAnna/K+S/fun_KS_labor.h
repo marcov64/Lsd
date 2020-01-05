@@ -44,7 +44,7 @@ v[5] = VS( PARENT, "flagWorkerLBU" );			// learning mode
 	
 for ( ; h < j ; h += v[1] ) 					// add missing workers
 {	
-	cur = ADDOBJL( "Worker", t - 1 );			// insert object to be updated
+	cur = ADDOBJL( "Worker", T - 1 );			// insert object to be updated
 	ADDHOOKS( cur, WORKERHK );					// add object hooks
 	
 	WRITES( cur, "_ID", ++i );					// new ID
@@ -53,7 +53,7 @@ for ( ; h < j ; h += v[1] ) 					// add missing workers
 	WRITES( cur, "_employed", 0 );
 	
 	for ( i = 1; i <= 8; ++i )					// lagged wage memory
-		WRITELLS( cur, "_w", v[2], t - 1, i );
+		WRITELLS( cur, "_w", v[2], T - 1, i );
 	
 	if ( v[5] == 1 || v[5] == 3 )				// vintage skills in use?
 		v[6] = v[4];							// get public skills
@@ -92,9 +92,9 @@ Only used if 'flagHeterWage' is set to zero
 
 if ( VS( PARENT, "flagHeterWage" ) == 0 )
 {
-	v[1] = VS( LABSUPL2, "psi1" );				// inflation adjust. parameter
-	v[2] = VS( LABSUPL2, "psi2" );				// general prod. adjust. param.
-	v[3] = VS( LABSUPL2, "psi3" );				// unemploym. adjust. parameter
+	v[1] = V( "psi1" );							// inflation adjust. parameter
+	v[2] = V( "psi2" );							// general prod. adjust. param.
+	v[3] = V( "psi3" );							// unemploym. adjust. parameter
 	v[5] = VLS( CONSECL1, "dCPIb", 1 );			// inflation variation
 	v[6] = VLS( PARENT, "dAb", 1 );				// general productivity variat.
 	v[7] = VL( "dUeB", 1 );						// unemployment variation

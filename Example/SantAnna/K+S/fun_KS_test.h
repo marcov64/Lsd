@@ -21,23 +21,23 @@ Print detailed statistics of country macro (!=0 if error is found)
 Set the time range in 'testCtIni' and 'testCtEnd'
 */
 
-if ( t == 1 )
+if ( T == 1 )
 	PLOG( "\n Optional statistics being computed in object 'Stats'" );
 
 v[1] = V( "testCtIni" );
 v[2] = V( "testCtEnd" );
 
-if ( t >= v[2] )
+if ( T >= v[2] )
 	PARAMETER;									// compute for the last time
 
-if ( t < v[1] || v[2] == 0 )
+if ( T < v[1] || v[2] == 0 )
 	END_EQUATION( 0 )
 
 h = v[3] = 1 + v[2] - v[1];						// number of periods
 
 static double iniGDP, iniA, iniDeb, iniSavAcc;
 
-if ( t == v[1] )
+if ( T == v[1] )
 	LOG( "\n @@@ TESTING OF COUNTRY MACRO STARTED" );
 
 int errors = 0;									// error counter
@@ -84,7 +84,7 @@ all.insert( all.end( ), posit, END_ARR( posit ) );
 all.insert( all.end( ), finite, END_ARR( finite ) );
 
 // first period actions
-if ( t == v[1] )
+if ( T == v[1] )
 {
 	iniGDP = GDP;
 	iniA = A;
@@ -93,7 +93,7 @@ if ( t == v[1] )
 }
 	
 // national accounting
-LOG( "\n  @@ (t=%d) dA=%.2g dGDP=%.2g C%%%%=%.2g I%%%%=%.2g G%%%%=%.2g dN%%%%=%.2g Sav%%%%=%.2g", t, 
+LOG( "\n  @@ (t=%g) dA=%.2g dGDP=%.2g C%%%%=%.2g I%%%%=%.2g G%%%%=%.2g dN%%%%=%.2g Sav%%%%=%.2g", T, 
 	  dA, dGDP, C / GDPnom, Inom / GDPnom, G / GDPnom, dNnom / GDPnom, Sav / GDPnom );
 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
@@ -134,7 +134,7 @@ check_error( cEntry / GDPnom > TOL, "HIGH-EQUITY", 0, & errors );
 check_error( Deb / GDPnom > 100 * TOL, "EXPLOSIVE-DEBT", 0, & errors );
 
 // last period actions
-if ( t == v[2] )
+if ( T == v[2] )
 {
 	v[4] = ( log( GDP + 1 ) - log( iniGDP + 1 ) ) / v[3]; 
 	v[5] = ( log( A ) - log( iniA ) ) / v[3];
@@ -167,15 +167,15 @@ Set the time range in 'testFtIni' and 'testFtEnd'
 v[1] = V( "testFtIni" );
 v[2] = V( "testFtEnd" );
 
-if ( t >= v[2] )
+if ( T >= v[2] )
 	PARAMETER;									// compute for the last time
 
-if ( t < v[1] || v[2] == 0 )
+if ( T < v[1] || v[2] == 0 )
 	END_EQUATION( 0 )
 
 h = v[3] = 1 + v[2] - v[1];						// number of periods
 
-if ( t == v[1] )
+if ( T == v[1] )
 	LOG( "\n $$$$ TESTING OF FINANCIAL SECTOR STARTED" );
 
 // scan banks for severe problems
@@ -238,8 +238,8 @@ all.insert( all.end( ), posit, END_ARR( posit ) );
 all.insert( all.end( ), finite, END_ARR( finite ) );
 
 // bank customers and crisis/bail-outs
-LOG( "\n  $$$ (t=%d) #Bank=%d #Client1=%g #Client2=%g Bfail=%g Gbail=%.3g phi=%.2g", 
-	 t, k, v[4], v[5], Bfail, Gbail, phi );
+LOG( "\n  $$$ (t=%g) #Bank=%d #Client1=%g #Client2=%g Bfail=%g Gbail=%.3g phi=%.2g", 
+	 T, k, v[4], v[5], Bfail, Gbail, phi );
 	 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
@@ -280,7 +280,7 @@ check_error( TC < -1, "NEGATIVE-TOTAL-CREDIT", 0, & errors );
 
 check_error( TCerr.size( ) > 0, "INCONSISTENT-TC-FREE", TCerr.size( ), & errors ); 
 
-if ( t == v[2] )
+if ( T == v[2] )
 	LOG( "\n $$$$ TESTING OF FINANCIAL SECTOR FINISHED" );
 
 RESULT( errors )
@@ -295,15 +295,15 @@ Set the time range in 'testLtIni' and 'testLtEnd'
 v[1] = V( "testLtIni" );
 v[2] = V( "testLtEnd" );
 
-if ( t >= v[2] )
+if ( T >= v[2] )
 	PARAMETER;									// compute for the last time
 
-if ( t < v[1] || v[2] == 0 )
+if ( T < v[1] || v[2] == 0 )
 	END_EQUATION( 0 )
 
 h = v[3] = 1 + v[2] - v[1];						// number of periods
 
-if ( t == v[1] )
+if ( T == v[1] )
 	LOG( "\n +++ TESTING OF LABOR SUPPLY STARTED" );
 
 // scan workers for severe problems
@@ -447,8 +447,8 @@ all.insert( all.end( ), posit, END_ARR( posit ) );
 all.insert( all.end( ), finite, END_ARR( finite ) );
 
 // employment summary
-LOG( "\n  ++ (t=%d) Ls=%g L=%g Ltrain=%g V=%.2g U=%.2g Us=%.2g Ue=%.2g", 
-	 t, Ls, L, Ltrain, Vac, U, Us, Ue );
+LOG( "\n  ++ (t=%g) Ls=%g L=%g Ltrain=%g V=%.2g U=%.2g Us=%.2g Ue=%.2g", 
+	 T, Ls, L, Ltrain, Vac, U, Us, Ue );
 	 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
@@ -459,7 +459,10 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 for ( itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
-check_error( Ls < L || Ls < Ltrain, "INCONSISTENT-LABOR", 0, & errors );
+check_error( U > 1 || Vac > 1, "INCONSISTENT-LABOR-STATS", 0, & errors );
+
+check_error( L1 + L2 != L || Ls < L || Ls < Ltrain, 
+			 "INCONSISTENT-LABOR", 0, & errors );
 
 check_error( L1 != v[7] * Lscale || L1 != v[10] * Lscale, 
 			 "INCONSISTENT-LABOR-S1", 0, & errors );
@@ -507,7 +510,7 @@ check_error( wChgErr.size( ) > 0, "LARGE-WAGE-CHANGE", wChgErr.size( ), & errors
 
 check_error( wRerr.size( ) > 0, "LARGE-REQ-WAGE-CHANGE", wRerr.size( ), & errors ); 
 
-if ( t == v[2] )
+if ( T == v[2] )
 	LOG( "\n +++ TESTING OF LABOR SUPPLY FINISHED" );
 
 RESULT( errors )
@@ -522,15 +525,15 @@ Set the time range in 'test1StIni' and 'test1StEnd'
 v[1] = V( "test1StIni" );
 v[2] = V( "test1StEnd" );
 
-if ( t >= v[2] )
+if ( T >= v[2] )
 	PARAMETER;									// compute for the last time
 
-if ( t < v[1] || v[2] == 0 )
+if ( T < v[1] || v[2] == 0 )
 	END_EQUATION( 0 )
 
 h = v[3] = 1 + v[2] - v[1];						// number of periods
 
-if ( t == v[1] )
+if ( T == v[1] )
 	LOG( "\n ^^^ TESTING OF CAPITAL-GOOD SECTOR STARTED" );
 
 // scan firms for severe problems
@@ -552,7 +555,7 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	if ( VS( cur, "_c1" ) <= 0 || VS( cur, "_p1" ) <= 0 )
 		c1err.push_back( cur );
 	
-	if ( VS( cur, "_t1ent" ) > t && VS( cur, "_HC" ) + VS( cur, "_NC" ) <= 0 )
+	if ( VS( cur, "_t1ent" ) > T && VS( cur, "_HC" ) + VS( cur, "_NC" ) <= 0 )
 		CliErr.push_back( cur );
 	
 	++k;
@@ -569,6 +572,7 @@ double F1 = VS( CAPSECL1, "F1" );
 double JO1 = VS( CAPSECL1, "JO1" );
 double L1 = VS( CAPSECL1, "L1" );
 double L1d = VS( CAPSECL1, "L1d" );
+double L1dRD = VS( CAPSECL1, "L1dRD" );
 double L1rd = VS( CAPSECL1, "L1rd" );
 double MC1 = VS( CAPSECL1, "MC1" );
 double NW1 = VS( CAPSECL1, "NW1" );
@@ -589,15 +593,16 @@ double retires1 = VS( CAPSECL1, "retires1" );
 double sT1min = VS( CAPSECL1, "sT1min" );
 double w1avg = VS( CAPSECL1, "w1avg" );
 
+double Ls = VS( LABSUPL1, "Ls" );
 double HH1 = VS( SECSTAL1, "HH1" );
 double HP1 = VS( SECSTAL1, "HP1" );
 double RD = VS( SECSTAL1, "RD" );
 double age1avg = VS( SECSTAL1, "age1avg" );
 double cred1c = VS( SECSTAL1, "cred1c" );
 
-double nonNeg[ ] = { D1, Deb1, Div1, JO1, L1, L1d, L1rd, Q1, Q1e, S1, Tax1, W1, 
-					 fires1, hires1, imi, inn, quits1, retires1, HH1, HP1, RD,
-					 age1avg, cred1c };
+double nonNeg[ ] = { D1, Deb1, Div1, JO1, L1, L1d, L1dRD, L1rd, Q1, Q1e, S1, 
+					 Tax1, W1, fires1, hires1, imi, inn, quits1, retires1, HH1, 
+					 HP1, RD, age1avg, cred1c };
 double posit[ ] = { A1, F1, PPI, sT1min, w1avg };
 double finite[ ] = { NW1, entry1exit, Pi1 };
 
@@ -606,8 +611,8 @@ all.insert( all.end( ), posit, END_ARR( posit ) );
 all.insert( all.end( ), finite, END_ARR( finite ) );
 
 // innovation, productivity
-LOG( "\n  ^^ (t=%d) F1=%g inn=%g Imi=%g A1=%.3g D1=%.3g Q1=%.3g Q1e=%.3g", 
-	 t, F1, inn, imi, A1, D1, Q1, Q1e );
+LOG( "\n  ^^ (t=%g) F1=%g inn=%.3g imi=%.3g A1=%.3g D1=%.3g Q1=%.3g Q1e=%.3g", 
+	 T, F1, inn, imi, A1, D1, Q1, Q1e );
 	 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
@@ -629,7 +634,8 @@ check_error( Q1e > Q1 || Q1 > D1, "INCONSISTENT-PRODUCTION", 0, & errors );
 LOG( "\n   ^ JO1=%g L1d=%g L1=%g L1rd=%g ret1=%g quit1=%g fire1=%g hire1=%g", 
 	 JO1, L1d, L1, L1rd, retires1, quits1, fires1, hires1 );
 
-check_error( L1rd > L1 || L1d < JO1 || hires1 > L1d + quits1 + retires1, 
+check_error( L1dRD > L1rd || L1rd > L1 || L1d < JO1 || L1 > Ls || 
+			 hires1 > L1d + quits1 + retires1, 
 			 "INCONSISTENT-LABOR", 0, & errors );
 
 // cash flow
@@ -638,7 +644,7 @@ LOG( "\n   ^ S1=%.3g W1=%.3g Tax1=%.3g Pi1=%.3g NW1=%.3g",
 
 check_error( round( W1 ) != round( v[5] ), "INCONSISTENT-PAYROLL", 0, & errors ); 
 
-check_error( S1 + RD < W1, "INCONSISTENT-WAGES", 0, & errors );
+check_error( S1 + RD < ( 1 - TOL ) * W1, "INCONSISTENT-WAGES", 0, & errors );
 
 check_error( c1err.size( ) > 0, "ZERO-COST-FIRM", c1err.size( ), & errors ); 
 
@@ -657,7 +663,7 @@ check_error( CliErr.size( ) > 0, "NO-CLIENT-FIRMS", CliErr.size( ), & errors );
 
 check_error( HH1 > 1 || HP1 > 2, "INCONSISTENT-STATS", 0, & errors );
 
-if ( t == v[2] )
+if ( T == v[2] )
 	LOG( "\n ^^^ TESTING OF CAPITAL-GOOD SECTOR FINISHED" );
 
 RESULT( errors )
@@ -672,15 +678,15 @@ Set the time range in 'test2StIni' and 'test2StEnd'
 v[1] = V( "test2StIni" );
 v[2] = V( "test2StEnd" );
 
-if ( t >= v[2] )
+if ( T >= v[2] )
 	PARAMETER;									// compute for the last time
 
-if ( t < v[1] || v[2] == 0 )
+if ( T < v[1] || v[2] == 0 )
 	END_EQUATION( 0 )
 
 h = v[3] = 1 + v[2] - v[1];						// number of periods
 
-if ( t == v[1] )
+if ( T == v[1] )
 	LOG( "\n &&& TESTING OF CONSUMPTION-GOOD SECTOR STARTED" );
 
 // scan firms for severe problems
@@ -788,6 +794,7 @@ double w2oAvg = VS( CONSECL1, "w2oAvg" );
 
 double Kavb = VLS( CONSECL1, "K", 1 );
 
+double Ls = VS( LABSUPL1, "Ls" );
 double HH2 = VS( SECSTAL1, "HH2" );
 double HP2 = VS( SECSTAL1, "HP2" );
 double age2avg = VS( SECSTAL1, "age2avg" );
@@ -809,8 +816,8 @@ all.insert( all.end( ), posit, END_ARR( posit ) );
 all.insert( all.end( ), finite, END_ARR( finite ) );
 
 // capital and investment
-LOG( "\n  && (t=%d) F2=%g Kd=%.3g Kavb=%.3g K=%.3g", 
-	 t, F2, Kd, Kavb, K );
+LOG( "\n  && (t=%g) F2=%g Kd=%.3g Kavb=%.3g K=%.3g", 
+	 T, F2, Kd, Kavb, K );
 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
@@ -852,7 +859,7 @@ check_error( Q2err.size( ) > 0, "NO-PROD-FIRMS", Q2err.size( ), & errors );
 LOG( "\n   & JO2=%g L2d=%g L2=%g ret2=%g quit2=%g fire2=%g hire2=%g", 
 	 JO2, L2d, L2, retires2, quits2, fires2, hires2 );
 
-check_error( L2d < JO2 || hires2 > L2d + quits2 + retires2, 
+check_error( L2d > L2 || L2d < JO2 || L2 > Ls || hires2 > L2d + quits2 + retires2, 
 			 "INCONSISTENT-LABOR", 0, & errors );
 
 check_error( L2err.size( ) > 0, "NO-LABOR-PRODUCING", L2err.size( ), & errors ); 
@@ -898,7 +905,7 @@ check_error( v[4] < 1 - TOL / 10 || v[4] > 1 + TOL / 10,
 
 check_error( HH2 > 1 || HP2 > 2, "INCONSISTENT-STATS", 0, & errors );
 
-if ( t == v[2] )
+if ( T == v[2] )
 	LOG( "\n &&& TESTING OF CONSUMPTION-GOOD SECTOR FINISHED" );
 
 RESULT( errors )
@@ -919,10 +926,10 @@ static FILE *firms1 = NULL;						// output file pointer
 v[1] = V( "test1tIni" );
 v[2] = V( "test1tEnd" );
 
-if ( t >= v[2] )
+if ( T >= v[2] )
 	PARAMETER;									// compute for the last time
 
-if ( t < v[1] || v[2] == 0 )
+if ( T < v[1] || v[2] == 0 )
 	END_EQUATION( 0 )
 
 v[3] = V( "test1idIni" );
@@ -934,7 +941,7 @@ k = v[6] = v[3] > 0 ? 1 + v[4] - v[3] : v[4];	// number of firms
 static double iniAtau, iniBtau;
 static firmMapT entr;
 
-if ( t == v[1] )
+if ( T == v[1] )
 {
 	LOG( "\n *** TESTING OF CAPITAL-GOOD FIRMS STARTED" );
 
@@ -1013,14 +1020,14 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	all.insert( all.end( ), finite, END_ARR( finite ) );
 
 	// first period actions (single-firm analysis only)
-	if ( k == 1 && t == v[1] )
+	if ( k == 1 && T == v[1] )
 	{
 		iniAtau = _Atau;
 		iniBtau = _Btau;
 	}
 	
-	LOG( "\n  ** (t=%d) ID1=%d t1ent=%d #Client=%d:", t, i, h, j );
-	fprintf( firms1, "%d,%d,%d,%d", t, i, h, j );
+	LOG( "\n  ** (t=%g) ID1=%d t1ent=%d #Client=%d:", T, i, h, j );
+	fprintf( firms1, "%g,%d,%d,%d", T, i, h, j );
 	
 	for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 		check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
@@ -1059,7 +1066,7 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	check_error( j < _BC, "INCONSISTENT-BUYERS", 0, & errors );
 
 	// last period actions (single-firm analysis only)
-	if ( k == 1 && t == v[2] )
+	if ( k == 1 && T == v[2] )
 	{
 		LOG( "\n   * AtauGwth=%.3g BtauGwth=%.3g", 
 			 ( log( _Atau + 1 ) - log( iniAtau + 1 ) ) / v[5], 
@@ -1069,7 +1076,7 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	fputs( "\n", firms1 );
 }
 
-if ( t == v[2] )
+if ( T == v[2] )
 {
 	LOG( "\n *** TESTING OF CAPITAL-GOOD FIRMS FINISHED" );
 	fclose( firms1 );
@@ -1092,10 +1099,10 @@ static FILE *firms2 = NULL;						// output file pointer
 v[1] = V( "test2tIni" );
 v[2] = V( "test2tEnd" );
 
-if ( t >= v[2] )
+if ( T >= v[2] )
 	PARAMETER;									// compute for the last time
 
-if ( t < v[1] || v[2] == 0 )
+if ( T < v[1] || v[2] == 0 )
 	END_EQUATION( 0 )
 
 v[3] = V( "test2idIni" );
@@ -1107,7 +1114,7 @@ k = v[6] = v[3] > 0 ? 1 + v[4] - v[3] : v[4];	// number of firms
 static double iniK, iniNW2, iniDeb2; 
 static firmMapT entr;
 
-if ( t == v[1] )
+if ( T == v[1] )
 {
 	LOG( "\n ### TESTING OF CONSUMER-GOOD FIRMS STARTED" );
 	
@@ -1121,15 +1128,16 @@ if ( t == v[1] )
 	if ( firms2 == NULL )						// don't reopen if already open
 	{
 		firms2 = fopen( TEST2FILE, "w" );		// (re)create the file
-		fprintf( firms2, "%s,%s,%s,%s\n",		// file header
-				 "t,ID2,t2ent,life2cycle,Broch,Vint,Wrk",
-				 "Kd,Kavb,EId,SId,EI,SI,CI,K,Q2d,Q2,Q2e,L2d,L2,c2,s2avg",
+		fprintf( firms2, "%s,%s,%s,%s,%s\n",	// file header
+				 "t,ID2,t2ent,life2cycle,Broch,Vint,Wrk,pVint",
+				 "Kd,Kavb,EId,SId,EI,SI,CI,K", "D2e,Q2d,Q2,Q2e,L2d,L2,c2,s2avg",
 				 "Pi2,NW2,Deb2,Deb2max,cred2,cred2c",
 				 "mu2,p2,D2,S2,W2+B2,f2,N" );
 	}
 }
 
 double Lscale = VS( LABSUPL1, "Lscale" );		// labor scale
+double iota = VS( CONSECL1, "iota" );			// production slack
 double m2 = VS( CONSECL1, "m2" );				// machine scale
 double mu20 = VS( CONSECL1, "mu20" );			// initial mark-up
 double wCap = VS( LABSUPL1, "wCap" );			// wage cap
@@ -1188,7 +1196,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 		if ( VS( cur1, "_IDvint" ) < h )
 			IDerr.push_back( cur1 );
 		
-		if ( VS( cur1, "_tVint" ) < h || VS( cur1, "_tVint" ) > t )
+		if ( VS( cur1, "_tVint" ) < h || VS( cur1, "_tVint" ) > T )
 			tVintErr.push_back( cur1 );
 		
 		if ( i < 0 || i > _L2 )
@@ -1220,10 +1228,12 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	v[18] = COUNTS( cur, "Broch" );
 	v[19] = COUNTS( cur, "Vint" );
 	v[20] = COUNTS( cur, "Wrk2" ) * Lscale;
+	cur1 = HOOKS( cur, TOPVINT );
 	
 	double _B2 = VS( cur, "_B2" );
 	double _CI = VS( cur, "_CI" );
 	double _D2 = VS( cur, "_D2" );
+	double _D2e = VS( cur, "_D2e" );
 	double _Deb2 = VS( cur, "_Deb2" );
 	double _Deb2max = VS( cur, "_Deb2max" );
 	double _EI = VS( cur, "_EI" );
@@ -1254,11 +1264,13 @@ CYCLES( CONSECL1, cur, "Firm2" )
 
 	double _Kavb = VLS( cur, "_K", 1 );
 	double _w2oPast = VLS( cur, "_w2o", 1 );
+	double _pVint = ( cur1 != NULL && VS( cur1, "_tVint" ) == T ) ? 
+					VS( cur1, "_pVint" ) : 0;
 	
-	double nonNeg[ ] = { _B2, _CI, _D2, _Deb2, _Deb2max, _EI, _EId, _K, _Kavb, 
-						 _Kd, _L2, _L2d, _N, _Q2d, _Q2, _Q2e, _S2, _SI, _SId, 
-						 _W2, _cred2, _cred2c, _c2, _c2e, _f2, _life2cycle, 
-						 _s2avg };
+	double nonNeg[ ] = { _B2, _CI, _D2, _D2e, _Deb2, _Deb2max, _EI, _EId, _K, 
+						 _Kavb, _Kd, _L2, _L2d, _N, _Q2d, _Q2, _Q2e, _S2, _SI, 
+						 _SId, _W2, _cred2, _cred2c, _c2, _c2e, _f2, _life2cycle, 
+						 _s2avg, _pVint };
 	double posit[ ] = { _mu2, _p2, _t2ent, _w2o };
 	double finite[ ] = { _NW2, _Pi2 };
 
@@ -1267,16 +1279,16 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	all.insert( all.end( ), finite, END_ARR( finite ) );
 
 	// first period actions (single-firm analysis only)
-	if ( k == 1 && t == v[1] )
+	if ( k == 1 && T == v[1] )
 	{
 		iniK = _K;
 		iniNW2 = _NW2;
 		iniDeb2 = _Deb2;
 	}
 	
-	LOG( "\n  ## (t=%d) ID2=%d t2ent=%d life2cycle=%g #Broch=%g #Vint=%g #Wrk=%g", 
-		 t, j, h, _life2cycle, v[18], v[19], v[20] );
-	fprintf( firms2, "%d,%d,%d,%g,%g,%g,%g", t, j, h, _life2cycle, v[18], v[19], v[20] );
+	LOG( "\n  ## (t=%g) ID2=%d t2ent=%d life2cycle=%g #Broch=%g #Vint=%g #Wrk=%g pVint=%g", 
+		 T, j, h, _life2cycle, v[18], v[19], v[20], round( _pVint ) );
+	fprintf( firms2, "%g,%d,%d,%g,%g,%g,%g,%g", T, j, h, _life2cycle, v[18], v[19], v[20], _pVint );
 	
 	for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 		check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
@@ -1292,6 +1304,8 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	// capital and investment
 	LOG( "\n   # Kd=%g Kavb=%g EId=%g SId=%g EI=%g SI=%g CI=%g K=%g", 
 		 _Kd, _Kavb, _EId, _SId, _EI, _SI, _CI, _K );
+	fprintf( firms2, ",%g,%g,%g,%g,%g,%g,%g,%g", 
+		 _Kd, _Kavb, _EId, _SId, _EI, _SI, _CI, _K );
 		 
 	check_error( _life2cycle > 0 && v[19] == 0, "NO-VINTAGE", 0, & errors ); 
 	
@@ -1306,13 +1320,13 @@ CYCLES( CONSECL1, cur, "Firm2" )
 				 ( _life2cycle > 0 && _K == 0 ), 
 				 "INCONSISTENT-CAPITAL", 0, & errors );
 		 
-	LOG( "\n   # Q2d=%g Q2=%g Q2e=%g L2d=%g L2=%g c2=%.2g s2avg=%.2g", 
-		 _Q2d, _Q2, round( _Q2e ), _L2d, _L2, _c2, _s2avg );
-	fprintf( firms2, ",%g,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g", 
-		 _Kd, _Kavb, _EId, _SId, _EI, _SI, _CI, _K, _Q2d, _Q2, 
-		 _Q2e, _L2d, _L2, _c2, _s2avg );
+	LOG( "\n   # D2e=%g Q2d=%g Q2=%g Q2e=%g L2d=%g L2=%g c2=%.2g s2avg=%.2g", 
+		 round( _D2e ), _Q2d, _Q2, round( _Q2e ), _L2d, _L2, _c2, _s2avg );
+	fprintf( firms2, ",%g,%g,%g,%g,%g,%g,%g,%g", 
+		 _D2e, _Q2d, _Q2, _Q2e, _L2d, _L2, _c2, _s2avg );
 		 
-	check_error( _Q2 > _Q2d || _Q2e > _K * _s2avg || _Q2e > _Q2, 
+	check_error( _Q2d > floor( ( 1 + iota ) * _D2e - _N ) || 
+				 _Q2 > _Q2d || _Q2e > _K * _s2avg || _Q2e > _Q2, 
 				 "INCONSISTENT-PRODUCTION", 0, & errors );
 
 	check_error( QvintErr.size( ) > 0, "INVALID-PROD-VINT", QvintErr.size( ), & errors ); 
@@ -1360,7 +1374,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 				 "INCONSISTENT-PAYROLL", 0, & errors ); 
 
 	// last period actions (single-firm analysis only)
-	if ( k == 1 && t == v[2] )
+	if ( k == 1 && T == v[2] )
 	{
 		LOG( "\n   # Kgwth=%.3g NW2gwth=%.3g Deb2gwth=%.3g",
 			 ( log( _K + 1 ) - log( iniK + 1 ) ) / v[5], 
@@ -1371,7 +1385,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	fputs( "\n", firms2 );
 }
 
-if ( t == v[2] )
+if ( T == v[2] )
 {
 	LOG( "\n ### TESTING OF CONSUMER-GOOD FIRMS FINISHED" );
 	fclose( firms2 );

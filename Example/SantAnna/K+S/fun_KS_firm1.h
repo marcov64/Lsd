@@ -20,7 +20,7 @@ double Btau = VL( "_Btau", 1 );					// previous period productivity
 double xi = VS( PARENT, "xi" );					// share of R&D for innovation
 
 // normalized share of workers on R&D of the firm
-double L1rdShr = V( "_L1rd" ) * VS( LABSUPL2, "Ls0" ) / VLS( LABSUPL2, "Ls", 1 );
+double L1rdShr = VL( "_L1rd", 1 ) * VS( LABSUPL2, "Ls0" ) / VLS( LABSUPL2, "Ls", 1 );
 
 // innovation process (success probability)
 v[1] = 1 - exp( - VS( PARENT, "zeta1" ) * xi * L1rdShr );
@@ -115,7 +115,7 @@ WRITE( "_imi", v[12] );
 
 // add entry to the map of vintage productivity and skill
 i = V( "_ID1" );								// firm ID
-j = VNT( t, i );								// vintage ID
+j = VNT( T, i );								// vintage ID
 h = VS( GRANDPARENT, "flagWorkerLBU" );			// learning mode
 if ( h == 0 || h == 2 )							// no learning by using
 	v[13] = 1;									// maximum skills
@@ -156,19 +156,17 @@ firmMapT firms = V_EXTS( GRANDPARENT, country, firm2map );// list with all firms
 h = firms.size( );								// number of firms in sector 2
 k = V( "_HC" );									// number of historical clients
 j = V( "_ID1" );								// current firm ID
-v[1] = VS( PARENT, "gamma" );					// new customer share
-v[2] = VS( PARENT, "F1" );						// firms in sector 1
 
 CYCLE( cur, "Cli" )								// remove historical clients
 	firms.erase( ( int ) VS( cur, "_IDc" ) );
 	
-i = ceil( v[1] * k );							// new clients in period
+i = ceil( VS( PARENT, "gamma" ) * k );			// new clients in period
 i = v[0] = min( max( i, 1 ), min( h - k, firms.size( ) ) );// between [1, F2 - HC]
 
-v[3] = max( 1, ceil( h / v[2] ) );				// firm fair share
+v[1] = max( 1, ceil( h / VS( PARENT, "F1" ) ) );// firm fair share
 
-if ( k + i < v[3] )								// ensure at least fair share
-	i = v[0] = v[3] - k;
+if ( k + i < v[1] )								// ensure at least fair share
+	i = v[0] = v[1] - k;
 
 // build vector of all target firms (not yet clients)
 vector < firmPairT > targets( firms.begin( ), firms.end( ) );
@@ -180,14 +178,8 @@ for ( ; i > 0; --i )
 	firmPairT client = targets[ h ];			// retrieve drawn map pair
 	targets.erase( targets.begin( ) + h );		// remove drawn firm from list
 
-	cur1 = ADDOBJ( "Cli" );						// add object to new client
-	WRITES( cur1, "_IDc", client.first );		// update client ID
-	WRITES( cur1, "_tSel", t );					// update selection time
-
-	cur2 = ADDOBJS( client.second, "Broch" );	// add brochure to client
-	WRITES( cur2, "_IDs", j );					// update supplier ID
-	WRITE_SHOOKS( cur2, cur1 );					// pointer to supplier client list
-	WRITE_SHOOKS( cur1, cur2 );					// pointer to client brochure list
+	// create the brochure/client interconnected objects
+	send_brochure( j, p, client.first, client.second );
 }
 
 RESULT( v[0] )
@@ -242,7 +234,7 @@ else
 		
 		// shrink or cancel all exceeding orders
 		CYCLE( cur, "Cli" )
-			if ( VS( cur, "_tOrd" ) == t )		// order in this period?
+			if ( VS( cur, "_tOrd" ) == T )		// order in this period?
 			{
 				if ( v[10] == 1 )				// bankruptcy?
 					INCRS( cur, "_nCan", VS( cur, "_nOrd" ) );
@@ -272,7 +264,7 @@ if ( v[1] > 0 )
 	v[0] = v[2] * v[1];
 else											// no sales
 	// keep current expenditure or a share of available cash
-	v[0] = max( CURRENT, v[2] * VL( "_NW1", 1 ) );
+	v[0] = min( CURRENT, v[2] * VL( "_NW1", 1 ) );
 	
 // always hire at least one worker
 RESULT( max( v[0], VLS( PARENT, "w1avg", 1 ) ) )
@@ -364,7 +356,7 @@ VS( CONSECL2, "Id" );							// make sure all orders are sent
 j = v[0] = 0;									// machine/active customer count
 CYCLE( cur, "Cli" )
 {
-	if ( VS( cur, "_tOrd" ) == t )				// order in this period?
+	if ( VS( cur, "_tOrd" ) == T )				// order in this period?
 	{
 		v[0] += VS( cur, "_nOrd" );
 		++j;
@@ -382,12 +374,10 @@ Number of historical client firms from consumer-good sector.
 Also removes old, non-buying clients.
 */
 
-j = V( "_ID1" );								// current firm ID
-
 i = 0;											// client counter
 CYCLE_SAFE( cur, "Cli" )						// remove old clients
 {
-	if ( VS( cur, "_tSel" ) < t - 1 )			// last selection is old?
+	if ( VS( cur, "_tSel" ) < T - 1 )			// last selection is old?
 	{
 		DELETE( SHOOKS( cur ) );				// remove supplier brochure entry
 		DELETE( cur );							// remove client entry
@@ -405,14 +395,17 @@ Labor employed by firm in capital-good sector
 Includes R&D labor
 */
 
-// total workers in firm after possible shortage
-v[0] = round( V( "_L1d" ) * VS( PARENT, "L1" ) / VS( PARENT, "L1d" ) );
-			  
-// adjust R&D count if supply is very limiter (< L1rd)
-if ( v[0] < V( "_L1rd" ) )
-	WRITE( "_L1rd", v[0] );
+v[1] = VS( PARENT, "L1" );						// total labor in sector 1
+v[2] = VS( PARENT, "L1d" );						// total labor demand in sector 1
+v[3] = VS( PARENT, "L1rd" );					// R&D labor in sector 1
+v[4] = VS( PARENT, "L1dRD" );					// R&D labor demand in sector 1
+v[5] = V( "_L1d" );								// firm total labor demand
+v[6] = V( "_L1rd" );							// firm R&D labor
+v[7] = V( "_L1dRD" );							// firm R&D labor demand
 
-RESULT( v[0] )
+// total workers in firm after possible shortage of workers
+RESULT( min( v[6] + ( v[2] > v[4] ? round( ( v[5] - v[7] ) * ( v[1] - v[3] ) / 
+										   ( v[2] - v[4] ) ) : 0 ), v[5] ) )
 
 
 EQUATION( "_L1d" )
@@ -420,18 +413,21 @@ EQUATION( "_L1d" )
 Labor demand of firm in capital-good sector
 Includes R&D labor
 */
-
-v[1] = V( "_L1rd" );							// R&D demand
-v[2] = ceil( V( "_Q1" ) / ( V( "_Btau" ) * VS( PARENT, "m1" ) ) );
-												// machine production demand
-RESULT( v[1] + v[2] )
+RESULT( V( "_L1dRD" ) + ceil( V( "_Q1" ) / ( V( "_Btau" ) * VS( PARENT, "m1" ) ) ) )
 
 
-EQUATION( "_L1rd" )
+EQUATION( "_L1dRD" )
 /*
 R&D labor demand of firm in capital-good sector
 */
 RESULT( ceil( V( "_RD" ) / VLS( PARENT, "w1avg", 1 ) ) )
+
+
+EQUATION( "_L1rd" )
+/*
+R&D labor employed by firm in capital-good sector
+*/
+RESULT( ceil( V( "_L1dRD" ) * VS( PARENT, "L1rd" ) / VS( PARENT, "L1dRD" ) ) )
 
 
 EQUATION( "_Pi1" )
@@ -457,24 +453,25 @@ Effective output of firm in capital-good sector
 */
 
 v[0] = V( "_Q1" );								// planned production
-j = V( "_L1" );									// effective labor available
-k = V( "_L1d" );								// desired total workers
+v[1] = V( "_L1" );								// effective labor available
+v[2] = V( "_L1d" );								// desired total workers
 
-if ( j >= k || 									// required labor available?
-	 VS( GRANDPARENT, "flagMachDeliv" ) == 0 )
+// required labor available?
+if ( v[1] >= v[2] || VS( GRANDPARENT, "flagMachDeliv" ) == 0 )
 	END_EQUATION( v[0] );						// produce as planned
 	
-h = V( "_L1rd" );								// workers not in production
+v[3] = V( "_L1rd" );							// effective R&D workers
+v[4] = V( "_L1dRD" );							// desired R&D workers
 
-v[1] = 1 - ( double ) max( j - h, 0 ) / ( k - h );// adjustment factor
+v[5] = 1 - ( v[1] - v[3] ) / ( v[2] - v[4] );	// adjustment factor
 
 // adjust all pending orders, supplying at least one machine
 CYCLE( cur, "Cli" )
-	if ( VS( cur, "_tOrd" ) == t )				// order in this period?
+	if ( VS( cur, "_tOrd" ) == T )				// order in this period?
 	{
-		v[2] = VS( cur, "_nOrd" ) - VS( cur, "_nCan" );// existing net orders
-		v[0] -= v[3] = min( floor( v[2] * v[1] ), v[2] - 1 );
-		INCRS( cur, "_nCan", v[3] );
+		v[6] = VS( cur, "_nOrd" ) - VS( cur, "_nCan" );// existing net orders
+		v[0] -= v[7] = min( floor( v[6] * v[5] ), v[6] - 1 );
+		INCRS( cur, "_nCan", v[7] );
 	}
 	
 RESULT( max( v[0], 0 ) )						// avoid negative in part. cases

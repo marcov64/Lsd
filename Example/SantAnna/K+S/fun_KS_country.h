@@ -223,7 +223,7 @@ EQUATION( "dGDP" )
 /*
 Gross domestic product (log) growth rate
 */
-RESULT( log( V( "GDP" ) + 1 ) - log( VL( "GDP", 1 ) + 1 ) )
+RESULT( T > 1 ? log( V( "GDP" ) + 1 ) - log( VL( "GDP", 1 ) + 1 ) : 0 )
 
 
 EQUATION( "entryExit" )
@@ -231,9 +231,13 @@ EQUATION( "entryExit" )
 Perform the entry and exit process in all sectors
 */
 
-// ensure financial aggregates are computed before entry/exit
-VS( FINSECL0, "Cl" ); VS( FINSECL0, "Depo" ); VS( FINSECL0, "Loans" ); 
-VS( FINSECL0, "PiB" );
+// ensure aggregates depending on firm objects are computed
+UPDATE;											// country variables
+UPDATES( FINSECL0 );							// financial sector variables
+UPDATES( LABSUPL0 );							// labor-supply variables
+UPDATES( MACSTAL0 );							// statistics-only variables
+UPDATES( SECSTAL0 );
+UPDATES( LABSTAL0 );
 
 // reset entry/exit cost/credit
 WRITE( "cEntry", 0 );
@@ -242,6 +246,7 @@ WRITE( "cExit", 0 );
 v[0] = VS( CAPSECL0, "entry1exit" ) + VS( CONSECL0, "entry2exit" );
 
 VS( FINSECL0, "cScores" );						// set the credit pecking order
+RECALCS( SECSTAL0, "BadDeb" );					// update bad debt after exits
 
 RESULT( v[0] )
 
@@ -274,7 +279,7 @@ Changed parameters:
 		flagIndexWage -> flagIndexWageChg
 */
 
-if ( t == ( int ) V( "TregChg" ) )				// in time, replace parameters
+if ( T == ( int ) V( "TregChg" ) )				// in time, replace parameters
 {
 	WRITE( "flagSearchMode", V( "flagSearchModeChg" ) );
 	WRITE( "flagIndexMinWage", V( "flagIndexMinWageChg" ) );
@@ -303,7 +308,7 @@ if ( t == ( int ) V( "TregChg" ) )				// in time, replace parameters
 			WRITES( cur, "_postChg", 1 );		// set all firms as post-change
 	}
 	
-	LOG( "\n Regime changed (t=%d)", t );
+	LOG( "\n Regime changed (t=%g)", T );
 	PARAMETER;									// no more evaluate this eq.
 	v[0] = 1;
 }
@@ -427,6 +432,7 @@ WRITELS( cur1, "PPI0", p10, -1 );
 WRITELS( cur2, "CPI", p20, -1 );
 WRITELS( cur2, "F2", F20, -1 );
 WRITELS( cur3, "phi", phiT, -1 );
+WRITELS( cur3, "r", rT, -1 ); 
 WRITELS( cur3, "rDeb", rT, -1 );				// interest rate structure 
 WRITELS( cur3, "rRes", rT, -1 );				// to be defined later
 WRITELS( cur4, "Ls", Ls0, -1 );

@@ -17,25 +17,23 @@ Positive values indicate non-economical machines but still in technical life
 Negative values represent machines out of technical life to be scrapped ASAP
 */
 
+if ( V( "_tVint" ) <= T - VS( GRANDPARENT, "eta" ) )// out of technical life?
+	END_EQUATION( - V( "_nVint" ) )				// scrap if not in use
+	
 VS( PARENT, "_supplier" );						// ensure supplier is selected
-cur = SHOOKS( HOOKS( PARENT, SUPPL ) )->up;		// pointer to new supplier
+cur = SHOOKS( HOOKS( PARENT, SUPPL ) )->up;		// pointer to supplier
 v[1] = VLS( PARENT, "_w2avg", 1 );				// average firm wage
 
-if ( V( "_tVint" ) > t - VS( GRANDPARENT, "eta" ) )	// still in technical life?
-{
-	// unit cost advantage of new machines
-	v[2] = v[1] / V( "_Avint" ) - v[1] / VS( cur, "_Atau" );
-	
-	// if new machine cost is not better in absolute terms or
-	// payback period of replacing current vintage is over b
-	if ( v[2] <= 0 || 
-		 VS( cur, "_p1" ) / VS( GRANDPARENT, "m2" ) / v[2] > VS( GRANDPARENT, "b" ) )
-		END_EQUATION( 0 );						// nothing to scrap	
+// unit cost advantage of new machines
+v[2] = v[1] / V( "_Avint" ) - v[1] / VS( cur, "_Atau" );
 
-	END_EQUATION( V( "_nVint" ) );				// scrap if can be replaced
-}
+// if new machine cost is not better in absolute terms or
+// payback period of replacing current vintage is over b
+if ( v[2] <= 0 || 
+	 VS( cur, "_p1" ) / VS( GRANDPARENT, "m2" ) / v[2] > VS( GRANDPARENT, "b" ) )
+	END_EQUATION( 0 );							// nothing to scrap	
 
-RESULT( - V( "_nVint" ) )						// scrap if not in use
+RESULT( V( "_nVint" ) )							// scrap if can be replaced
 
 
 EQUATION( "_dLdVint" )

@@ -102,7 +102,7 @@ Execute the current time-step for all existing countries
 CYCLE( cur, "Country" )
 	VS( cur, "timeStep" );
 
-RESULT( t )
+RESULT( T )
 
 
 EQUATION( "timeStep" )
@@ -180,7 +180,7 @@ v[14] = VS( FINSECL0, "NWb" );					// liquid assets of banks
 
 v[15] = VS( FINSECL0, "rDeb" );					// interest rate on debt
 
-RESULT( t )
+RESULT( T )
 
 
 MODELEND

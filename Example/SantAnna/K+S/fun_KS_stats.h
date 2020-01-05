@@ -40,9 +40,10 @@ RESULT( ( VS( CAPSECL2, "W1" ) + VS( CONSECL2, "W2" ) +
 
 EQUATION( "dA" )
 /*
-Overall productivity (log) growth rate
+Overall productivity growth rate
 */
-RESULT( log( VS( GRANDPARENT, "A" ) + 1 ) - log( VLS( GRANDPARENT, "A", 1 ) + 1 ) )
+v[1] = VLS( GRANDPARENT, "A", 1 );
+RESULT( v[1] > 0 ? VS( GRANDPARENT, "A" ) / v[1] - 1 : 0 )
 
 
 /*========================= FINANCIAL SECTOR STATS ===========================*/
@@ -135,6 +136,13 @@ RESULT( SUMS( FINSECL2, "_TC" ) )
 
 /*======================= CAPITAL-GOOD SECTOR STATS ==========================*/
 
+EQUATION( "HCavg" )
+/*
+Number of historical clients of capital-good firms
+*/
+RESULT( AVES( CAPSECL2, "_HC" ) )
+
+
 EQUATION( "HH1" )
 /*
 Normalized Herfindahl-Hirschman index for capital-good sector
@@ -208,6 +216,13 @@ else
 RESULT( v[0] )
 
 
+EQUATION( "NCavg" )
+/*
+Number of new clients of capital-good firms
+*/
+RESULT( AVES( CAPSECL2, "_NC" ) )
+
+
 EQUATION( "RD" )
 /*
 R&D expenditure of capital-good sector
@@ -222,7 +237,7 @@ Average age of firms in capital-good sector
 
 v[0] = 0;										// firm age accumulator
 CYCLES( CAPSECL2, cur, "Firm1" )
-	v[0] += t - VS( cur, "_t1ent" ) + 1;
+	v[0] += T - VS( cur, "_t1ent" ) + 1;
 	
 RESULT( v[0] / VS( CAPSECL2, "F1" ) )
 
@@ -478,7 +493,7 @@ Average age of firms in consumption-good sector
 
 v[0] = 0;										// firm age accumulator
 CYCLES( CONSECL2, cur, "Firm2" )
-	v[0] += t - VS( cur, "_t2ent" ) + 1;
+	v[0] += T - VS( cur, "_t2ent" ) + 1;
 	
 RESULT( v[0] / VS( CONSECL2, "F2" ) )
 
@@ -502,6 +517,18 @@ EQUATION( "mu2avg" )
 Weighted average mark-up of consumption-good sector
 */
 RESULT( WHTAVES( CONSECL2, "_mu2", "_f2" ) )
+
+
+EQUATION( "nBrochAvg" )
+/*
+Average number of machine brochures available to firms in consumer-good sector
+*/
+
+v[0] = 0;
+CYCLES( CONSECL2, cur, "Firm2" )
+	v[0] += COUNTS( cur, "Broch");
+
+RESULT( v[0] / VS( CONSECL2, "F2" ) )
 
 
 EQUATION( "noWrk2" )
@@ -663,7 +690,7 @@ EQUATION( "V" )
 /*
 Effective vacancy rate (unfilled positions over total labor supply)
 */
-RESULT( t > 1 ? min( ( VS( CAPSECL2, "JO1" ) + VS( CONSECL2, "JO2" ) ) / 
+RESULT( T > 1 ? min( ( VS( CAPSECL2, "JO1" ) + VS( CONSECL2, "JO2" ) ) / 
 					   VS( LABSUPL2, "Ls" ), 1 ) : 0 )
 
 
@@ -672,7 +699,8 @@ EQUATION( "dw" )
 Nominal average wage growth rate
 */
 v[1] = VLS( LABSUPL2, "wAvg", 1 );
-RESULT( v[1] > 0 ? VS( LABSUPL2, "wAvg" ) / v[1] : 0 )
+v[2] = VS( LABSUPL2, "wAvg" );
+RESULT( v[1] > 0 && v[2] > 0 ? log( v[2] ) - log( v[1] ) : 0 )
 
 
 EQUATION( "part" )

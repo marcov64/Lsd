@@ -13,7 +13,7 @@
 EQUATION( "D2" )
 /*
 Demand fulfilled by firms in consumption-good sector
-Update '_D2'
+Update '_D2', '_l2'
 */
 
 k = V( "F2" );									// number of firms
@@ -28,11 +28,12 @@ CYCLE( cur, "Firm2" )
 	f2[ j ] = VS( cur, "_f2" );					// firm market share
 	sup2[ j ] = VS( cur, "_Q2e" ) + VLS( cur, "_N", 1 );// firm available supply
 	WRITES( cur, "_D2", 0 );					// demand fulfilled accumulator
+	WRITES( cur, "_l2", 0 );					// assume no unsatisfied demand
 	++j;
 }
 
 // cycle through firms until all demand is allocated or no more product to sell
-v[0] = 0;										// fulfilled demand accumulator
+v[0] = i = 0;									// fulfilled demand accumulator
 while ( v[1] > 1 )
 {
 	v[2] = j = 0;								// shares yet unallocated
@@ -58,6 +59,9 @@ while ( v[1] > 1 )
 					v[0] += sup2[ j ];			// accumulate to total demand
 					v[1] -= sup2[ j ];			// discount from desired demand
 					f2[ j ] = sup2[ j ] = 0;	// nothing else to supply
+					
+					if ( i == 0 )				// unsatisfied demand metric
+						WRITES( cur, "_l2", dem2[ j ] - sup2[ j ] );
 				}
 			}
 			else
@@ -72,6 +76,8 @@ while ( v[1] > 1 )
 			f2[ j ] /= v[2];					// rescale share remaining firms
 	else
 		break;									// nothing else to supply
+	
+	++i;
 }
 
 RESULT( v[0] )
@@ -91,32 +97,9 @@ All relevant aggregate variables in sector must be computed before existing
 firms are deleted, so all active firms in period are considered
 */
 
-VS( PARENT, "GDP" );							// ensure markets are closed
 SUM( "_D2d" );									// desired demand before chg
 SUMS( LABSUPL1, "_B" );							// register bonuses
-
-V( "A2" ); V( "A2p" ); V( "B2" ); V( "CI" ); 	// ensure aggregates in industry
-V( "CPI" ); V( "D2" ); V( "D2d" ); V( "D2e" );  // computed before entry/exit
-V( "Deb2" ); V( "Div2" ); V( "Eavg" ); V( "EI" ); V( "I" ); V( "Inom" ); 
-V( "JO2" ); V( "K" ); V( "Kd" ); V( "L2" ); V( "L2d" ); V( "N" ); V( "NW2" ); 
-V( "Pi2" ); V( "Pi2rateAvg" ); V( "Q2" ); V( "Q2d" ); V( "Q2e" ); V( "Q2p" ); 
-V( "Q2u" ); V( "S2" ); V( "SI" ); V( "Tax2" ); V( "W2" ); V( "c2" ); V( "c2e" ); 
-V( "dCPI" ); V( "dCPIb" ); V( "dNnom" ); V( "f2critChg" ); V( "f2posChg" ); 
-V( "fires2" ); V( "hires2" ); V( "l2avg" ); V( "l2max" ); V( "l2min" ); 
-V( "oldVint" ); V( "p2avg" ); V( "p2max" ); V( "p2min" ); V( "q2avg" ); 
-V( "q2max" ); V( "q2min" ); V( "quits2" ); V( "retires2" ); V( "sV2avg" ); 
-V( "w2avg" ); V( "w2oAvg" ); V( "w2oMax" ); V( "w2realAvg" );
-
-VS( SECSTAL1, "A2posChg" ); VS( SECSTAL1, "A2preChg" ); VS( SECSTAL1, "A2sd" ); 
-VS( SECSTAL1, "A2sdPosChg" ); VS( SECSTAL1, "A2sdPreChg" ); 
-VS( SECSTAL1, "B2payers" ); VS( SECSTAL1, "HH2" ); VS( SECSTAL1, "HP2" ); 
-VS( SECSTAL1, "age2avg" ); VS( SECSTAL1, "cred2c" ); VS( SECSTAL1, "dN" ); 
-VS( SECSTAL1, "mu2avg" ); VS( SECSTAL1, "noWrk2" ); VS( SECSTAL1, "q2posChg" ); 
-VS( SECSTAL1, "q2preChg" ); VS( SECSTAL1, "s2avg" ); 
-VS( LABSTAL1, "L2ent" ); VS( LABSTAL1, "L2exit" ); VS( LABSTAL1, "L2larg" ); 
-VS( LABSTAL1, "L2v" ); VS( LABSTAL1, "w2avgLarg" ); VS( LABSTAL1, "w2oMin" ); 
-VS( LABSTAL1, "w2realPosChg" ); VS( LABSTAL1, "w2realPreChg" ); 
-VS( LABSTAL1, "wAvgReal" ); 
+UPDATE;											// ensure aggregates are computed
 
 double MC2 = V( "MC2" );						// market conditions in sector 2
 double MC2_1 = VL( "MC2", 1 );					// market conditions in sector 2
@@ -478,12 +461,7 @@ EQUATION( "Id" )
 Total desired investment in terms of output capacity (real terms)
 Don't recompute 'SI'/'EI' at this stage, to wait for order cancellations
 */
-
-v[0] = 0;
-CYCLE( cur, "Firm2" )
-	v[0] += VS( cur, "_SI" ) + VS( cur, "_EI" );
-		
-RESULT( v[0] )	
+RESULT( SUM( "_SI" ) + SUM( "_EI" ) )	
 
 
 EQUATION( "Inom" )
@@ -556,13 +534,8 @@ EQUATION( "Pi2rateAvg" )
 Average (weighted by market share) profit rate of firm in consumption-good 
 sector
 */
-
-v[0] = 0;										// accumulator
-CYCLE( cur, "Firm2" )
-	if ( VS( cur, "_life2cycle" ) > 0 )			// consider only non-entrants
-		v[0] += VS( cur, "_Pi2rate" ) * VS( cur, "_f2" );
-												// compute weighted average
-RESULT( v[0] )
+V( "CPI" );										// ensure m.s. are updated
+RESULT( WHTAVE( "_Pi2rate", "_f2"  ) )
 
 
 EQUATION( "Q2" )
@@ -675,7 +648,7 @@ Two criteria: 1. minimum entry holding period
 			  2. entrants jointly acquire a certain market share
 */
 
-if ( t >= VS( PARENT, "TregChg" ) + V( "ent2HldPer" ) && 
+if ( T >= VS( PARENT, "TregChg" ) + V( "ent2HldPer" ) && 
 	 V( "f2posChg" ) >= V( "f2trdChg" ) )
 {
 	v[0] = 1;									// threshold was met

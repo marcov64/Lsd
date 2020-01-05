@@ -16,16 +16,16 @@ Open job positions in capital-good sector
 */
 
 v[1] = VS( LABSUPL1, "Ls" );					// available labor force
-v[2] = V( "L1rd" );								// R&D labor in sector 1
+v[2] = V( "L1dRD" );							// R&D labor demand in sector 1
 v[3] = V( "L1d" ) - v[2];						// production labor in sector 1
 v[4] = VS( CONSECL1, "L2d" );					// production labor in sector 2
 v[5] = COUNT( "Wrk1" ) * VS( LABSUPL1, "Lscale" );// current workers
 
 // split possible labor shortage proportionally up to a limit (to avoid crashes)
 if ( ( v[3] + v[4] ) > ( v[1] - v[2] ) )
-	v[3] *= max( ( v[1] - v[2] ) / ( v[3] + v[4] ), 1 - V( "short1max" ) );
+	v[3] *= max( ( v[1] - v[2] ) / ( v[3] + v[4] ), 1 - V( "L1shortMax" ) );
 
-RESULT( max( 0, ceil( v[2] + v[3] - v[5] ) ) )	// hires scaled and rounded up
+RESULT( max( ceil( v[2] + v[3] - v[5] ), 0 ) )	// hires scaled and rounded up
 
 
 EQUATION( "MC1" )
@@ -43,17 +43,7 @@ firms are deleted, so all active firms in period are considered
 */
 
 VS( CONSECL1, "K" );							// ensure canceled orders acct'd
-VS( PARENT, "GDP" );							// ensure markets are closed
-
-V( "A1" ); V( "D1" ); V( "Deb1" ); V( "Div1" );	// ensure aggregates in sector
-V( "JO1" ); V( "L1" ); V( "L1d" ); V( "L1rd" );	// computed before entry/exit
-V( "NW1" ); V( "Pi1" ); V( "Q1" ); V( "Q1e" ); V( "S1" ); V( "Tax1" ); 
-V( "W1" ); V( "dA1b" ); V( "fires1" ); V( "hires1" ); V( "imi" ); V( "inn" ); 
-V( "quits1" ); V( "retires1" ); V( "sT1min" ); V( "w1avg" );
-
-VS( SECSTAL1, "HH1" ); VS( SECSTAL1, "HP1" ); VS( SECSTAL1, "RD" ); 
-VS( SECSTAL1, "age1avg" ); VS( SECSTAL1, "cred1c" ); VS( SECSTAL1, "s1avg" ); 
-VS( LABSTAL1, "L1ent" ); VS( LABSTAL1, "L1exit" ); VS( LABSTAL1, "L1v" ); 
+UPDATE;											// ensure aggregates are computed
 
 double MC1 = V( "MC1" );						// market conditions in sector 1
 double MC1_1 = VL( "MC1", 1 );					// market conditions in sector 1
@@ -77,7 +67,7 @@ i = 0;											// firm counter
 v[1] = v[2] = 0;								// accumulators
 CYCLE( cur, "Firm1" )
 {
-	if ( t >= VS( cur, "_t1ent" ) + n1 )
+	if ( T >= VS( cur, "_t1ent" ) + n1 )
 	{
 		for ( v[3] = j = 0; j < n1; ++j )
 			v[3] += VLS( cur, "_BC", j );		// n1 periods customer number
@@ -170,14 +160,14 @@ VS( CONSECL1, "quits2" );
 
 v[1] = VS( LABSUPL1, "Lscale" );				// labor scaling
 v[2] = VS( LABSUPL1, "Ls" );					// available labor force
-v[3] = V( "L1rd" );								// R&D labor in sector 1
+v[3] = V( "L1dRD" );							// R&D labor demand in sector 1
 v[4] = V( "L1d" ) - v[3];						// production labor in sector 1
 v[5] = VS( CONSECL1, "L2d" );					// production labor in sector 2
 v[6] = COUNT( "Wrk1" );							// current workers (scaled)
 
-// split possible labor shortage proportionally (to avoid crashes)
+// split possible labor shortage proportionally up to a limit (to avoid crashes)
 if ( ( v[4] + v[5] ) > ( v[2] - v[3] ) )
-	v[4] *= ( v[2] - v[3] ) / ( v[4] + v[5] );
+	v[4] *= max( ( v[2] - v[3] ) / ( v[4] + v[5] ), 1 - V( "L1shortMax" ) );
 
 // fires in sector 1, scaled-down and rounded-up
 j = v[6] - ceil( ( v[4] + v[3] ) / v[1] );
@@ -317,28 +307,6 @@ Number of firms in capital-good sector
 RESULT( COUNT( "Firm1" ) )
 
 
-EQUATION( "imi" )
-/*
-Imitation successes in capital-good sector
-Also ensures all innovation/imitation is done, brochures are distributed and
-learning-by-doing skills are updated
-*/
-SUM( "_Atau" );									// ensure innovation is done
-SUM( "_NC" );									// ensure brochures distributed
-VS( CONSECL1, "sV2avg" );						// ensure vintage skills updt'd
-RESULT( SUM( "_imi" ) )
-
-
-EQUATION( "inn" )
-/*
-Innovation successes in capital-good sector
-Also ensures all innovation/imitation is done, brochures are distributed and
-learning-by-doing skills are updated
-*/
-V( "imi" );										// ensure innovation is done
-RESULT( SUM( "_inn" ) )
-
-
 EQUATION( "L1" )
 /*
 Work force (labor) size employed by capital-good sector
@@ -356,11 +324,19 @@ Includes R&D labor
 RESULT( SUM( "_L1d" ) )
 
 
-EQUATION( "L1rd" )
+EQUATION( "L1dRD" )
 /*
 Total R&D labor demand from firms in capital-good sector
 */
-RESULT( SUM( "_L1rd" ) )
+RESULT( SUM( "_L1dRD" ) )
+
+
+EQUATION( "L1rd" )
+/*
+Total R&D labor employed by firms in capital-good sector
+*/
+RESULT( min( V( "L1dRD" ), 
+		min( V( "L1" ), round( VS( LABSUPL1, "Ls" ) * V( "L1rdMax" ) ) ) ) )
 
 
 EQUATION( "NW1" )
@@ -431,6 +407,28 @@ Notional productivity (bounded) rate of change in capital-good sector
 Used for wages adjustment only
 */
 RESULT( mov_avg_bound( p, "A1", VS( PARENT, "mLim" ) ) )
+
+
+EQUATION( "imi" )
+/*
+Imitation success rate in capital-good sector
+Also ensures all innovation/imitation is done, brochures are distributed and
+learning-by-doing skills are updated
+*/
+SUM( "_Atau" );									// ensure innovation is done
+SUM( "_NC" );									// ensure brochures distributed
+VS( CONSECL1, "sV2avg" );						// ensure vintage skills updt'd
+RESULT( SUM( "_imi" ) / V( "F1" ) )
+
+
+EQUATION( "inn" )
+/*
+Innovation success rate in capital-good sector
+Also ensures all innovation/imitation is done, brochures are distributed and
+learning-by-doing skills are updated
+*/
+V( "imi" );										// ensure innovation is done
+RESULT( SUM( "_inn" ) / V( "F1" ) )
 
 
 EQUATION( "quits1" )

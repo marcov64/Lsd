@@ -209,6 +209,7 @@ Label Root
 				Var: _HC
 				Var: _L1
 				Var: _L1d
+				Var: _L1dRD
 				Var: _L1rd
 				Var: _NC
 				Var: _NW1
@@ -241,7 +242,8 @@ Label Root
 			Param: F10
 			Param: F1max
 			Param: F1min
-			Param: LD1max
+			Param: L1rdMax
+			Param: L1shortMax
 			Param: NW10
 			Param: PPI0
 			Param: Phi3
@@ -257,7 +259,6 @@ Label Root
 			Param: mu1
 			Param: n1
 			Param: nu
-			Param: short1max
 			Param: x1inf
 			Param: x1sup
 			Param: x5
@@ -273,6 +274,7 @@ Label Root
 			Var: JO1
 			Var: L1
 			Var: L1d
+			Var: L1dRD
 			Var: L1rd
 			Var: MC1
 			Var: NW1
@@ -324,6 +326,7 @@ Label Root
 					Param: _Avint
 					Param: _IDvint
 					Param: _nVint
+					Param: _pVint
 					Param: _tVint
 					Param: _toUseVint
 					Var: _AeVint
@@ -546,6 +549,7 @@ Label Root
 				Var: Bfail
 				Var: BadDeb
 				Var: BadDebAcc
+				Var: HCavg
 				Var: HHb
 				Var: HH1
 				Var: HH2
@@ -553,12 +557,14 @@ Label Root
 				Var: HP1
 				Var: HP2
 				Var: RD
+				Var: NCavg
 				Var: age1avg
 				Var: age2avg
 				Var: cred1c
 				Var: cred2c
 				Var: dN
 				Var: mu2avg
+				Var: nBrochAvg
 				Var: noWrk2
 				Var: q2posChg
 				Var: q2preChg
@@ -646,7 +652,6 @@ Label Root
 		Param: flagFireRule
 		Param: flagFireRuleChg
 		Param: flagFiscalRule
-		Param: flagFreeCash
 		Param: flagGovExp
 		Param: flagHeterWage
 		Param: flagHireOrder1
@@ -727,7 +732,6 @@ Param: flagFireOrder2Chg 0 n + n n	5
 Param: flagFireRule 0 n + n n	3
 Param: flagFireRuleChg 0 n + n n	2
 Param: flagFiscalRule 0 n + n n	0
-Param: flagFreeCash 0 n + n n	2
 Param: flagGovExp 0 n + n n	3
 Param: flagHeterWage 0 n + n n	1
 Param: flagHireOrder1 0 n + n n	3
@@ -821,7 +825,7 @@ Var: PiB 0 s + n n
 Var: TaxB 1 n + n n	0
 Var: cScores 0 n + n n
 Var: phi 1 s + n n	0
-Var: r 0 s + n n
+Var: r 1 s + n n	0
 Var: rDeb 1 n + n n	0
 Var: rRes 1 n + n n	0
 
@@ -935,7 +939,8 @@ Param: Deb10ratio 0 n + n n	1
 Param: F10 0 n + n n	20
 Param: F1max 0 n + n n	100
 Param: F1min 0 n + n n	1
-Param: LD1max 0 n + n n	0.2
+Param: L1rdMax 0 n + n n	0.2
+Param: L1shortMax 0 n + n n	0.2
 Param: NW10 0 n + n n	1000
 Param: PPI0 0 n + n n	0
 Param: Phi3 0 n + n n	0.1
@@ -951,7 +956,6 @@ Param: m1 0 n + n n	0.1
 Param: mu1 0 n + n n	0.1
 Param: n1 0 n + n n	8
 Param: nu 0 n + n n	0.04
-Param: short1max 0 n + n n	0.2
 Param: x1inf 0 n + n n	-0.15
 Param: x1sup 0 n + n n	0.15
 Param: x5 0 n + n n	0.3
@@ -967,6 +971,7 @@ Var: F1 1 s + n n	0
 Var: JO1 0 n + n n
 Var: L1 1 s + n n	0
 Var: L1d 0 s + n n
+Var: L1dRD 0 s + n n
 Var: L1rd 0 s + n n
 Var: MC1 1 s + n n	0
 Var: NW1 1 s + n n	0
@@ -1006,7 +1011,8 @@ Var: _Div1 0 n + n n
 Var: _HC 0 n + n n
 Var: _L1 0 n + n n
 Var: _L1d 0 n + n n
-Var: _L1rd 0 n + n n
+Var: _L1dRD 0 n + n n
+Var: _L1rd 1 n + n n	0
 Var: _NC 0 n + n n
 Var: _NW1 1 n + n n	0
 Var: _Pi1 0 n + n n
@@ -1132,7 +1138,7 @@ Var: oldVint 1 n + n n	1
 Var: p2avg 0 s + n n
 Var: p2max 0 n + n n
 Var: p2min 0 n + n n
-Var: q2avg 0 s + n n
+Var: q2avg 1 s + n n	0
 Var: q2max 0 n + n n
 Var: q2min 0 n + n n
 Var: quits2 0 s + n n
@@ -1217,6 +1223,7 @@ Object: Vint C	1
 Param: _Avint 0 n + n n	1
 Param: _IDvint 0 n + n n	0
 Param: _nVint 0 n + n n	0
+Param: _pVint 0 n + n n	0
 Param: _tVint 0 n + n n	0
 Param: _toUseVint 0 n + n n	0
 Var: _AeVint 1 n + n n	1
@@ -1277,6 +1284,7 @@ Var: Bda 0 s + n n
 Var: Bfail 0 s + n p
 Var: BadDeb 0 s + n n
 Var: BadDebAcc 0 n + n n
+Var: HCavg 0 s + n n
 Var: HHb 0 s + n n
 Var: HH1 0 s + n n
 Var: HH2 0 s + n n
@@ -1284,12 +1292,14 @@ Var: HPb 0 s + n n
 Var: HP1 0 s + n n
 Var: HP2 0 s + n n
 Var: RD 0 s + n n
+Var: NCavg 0 s + n n
 Var: age1avg 0 s + n n
 Var: age2avg 0 s + n n
 Var: cred1c 0 s + n n
 Var: cred2c 0 s + n n
 Var: dN 0 s + n n
 Var: mu2avg 0 s + n p
+Var: nBrochAvg 0 s + n n
 Var: noWrk2 0 s + n n
 Var: q2posChg 0 s + n n
 Var: q2preChg 0 s + n n
@@ -1475,15 +1485,6 @@ Government fiscal rule
 4 = soft balanced budget rule with maximum debt and deficit on GDP (only if GDP growing)
 _INIT_
 All 1 instances equal to 0.
-END_DESCRIPTION
-
-Parameter_flagFreeCash
-Distribution of outstanding firm free cash flow
-0 = do not distribute (firm accumulates it)
-1 = distribute dividends when appropriate (according to parameters d1/d2)
-3 = distribute to a single non-worker individual per firm
-_INIT_
-All 1 instances equal to 2.
 END_DESCRIPTION
 
 Parameter_flagGovExp
@@ -2854,8 +2855,15 @@ _INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION
 
-Parameter_LD1max
-Maximum share of labor market for capital-good sector (production workers)
+Parameter_L1rdMax
+Maximum share of R&D labor
+(0, 1)
+_INIT_
+All 1 instances equal to 0.2.
+END_DESCRIPTION
+
+Parameter_L1shortMax
+Maximum labor shortage allowed in capital-good sector
 (0, 1)
 _INIT_
 All 1 instances equal to 0.2.
@@ -2965,13 +2973,6 @@ _INIT_
 All 1 instances equal to 0.04.
 END_DESCRIPTION
 
-Parameter_short1max
-Maximum labor shortage allowed in capital-good sector
-(0, 1)
-_INIT_
-All 1 instances equal to 0.2.
-END_DESCRIPTION
-
 Parameter_x1inf
 Lower support for new machine productivity change
 (x1inf < x1sup)
@@ -3068,8 +3069,14 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_L1dRD
+Total R&D labor demand from firms in capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
 Variable_L1rd
-R&D labor demand in capital-good sector
+Total R&D labor employed by firms in capital-good sector
 _INIT_
 
 END_DESCRIPTION
@@ -3300,10 +3307,16 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable__L1rd
+Variable__L1dRD
 R&D labor demand of firm in capital-good sector
 _INIT_
 
+END_DESCRIPTION
+
+Variable__L1rd
+R&D labor employed by firm in capital-good sector
+_INIT_
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable__NC
@@ -4093,7 +4106,7 @@ Variable_q2avg
 Weighted average product quality in consumer-good sector
 Weighted by output
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_q2max
@@ -4600,6 +4613,12 @@ _INIT_
 All 200 instances equal to 0.
 END_DESCRIPTION
 
+Parameter__pVint
+Price of machines in vintage
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Parameter__tVint
 Time the machine vintage was build
 _INIT_
@@ -4961,6 +4980,13 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_HCavg
+Number of historical clients of capital-good firms
+
+_INIT_
+
+END_DESCRIPTION
+
 Variable_HHb
 Normalized Herfindahl-Hirschman concentration index for the banking sector
 _INIT_
@@ -5003,6 +5029,11 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_NCavg
+Number of new clients of capital-good firms
+
+END_DESCRIPTION
+
 Variable_age1avg
 Average age of firms in capital-good sector
 _INIT_
@@ -5035,6 +5066,13 @@ END_DESCRIPTION
 
 Variable_mu2avg
 Weighted average mark-up of consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_nBrochAvg
+Average number of machine brochures available to firms in consumer-good sector
+
 _INIT_
 
 END_DESCRIPTION
