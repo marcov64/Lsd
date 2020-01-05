@@ -530,14 +530,14 @@ while ( true )
 	}   
 
 	// update linked variables with values in entry boxes
-	cmd( "set minc [ .da.f.h.v.ft.from.mnc get ]" );
-	cmd( "set maxc [ .da.f.h.v.ft.to.mxc get ]" );
-	cmd( "set miny [ .da.f.h.v.sc.min.min get ]" );
-	cmd( "set maxy [ .da.f.h.v.sc.max.max get ]" );
-	cmd( "set num_y2 [ .da.f.h.v.y2.f.e get ]" );
-	cmd( "set point_size [ .da.f.tit.ps.e get ]" ); 
-	cmd( "set pdigits [ .da.f.tit.pr.e get ]" ); 
-
+	cmd( "if [ string is double [ .da.f.h.v.sc.min.min get ] ] { set miny [ .da.f.h.v.sc.min.min get ] }" );
+	cmd( "if [ string is double [ .da.f.h.v.sc.max.max get ] ] { set maxy [ .da.f.h.v.sc.max.max get ] }" );
+	cmd( "if [ string is integer [ .da.f.h.v.ft.from.mnc get ] ] { set minc [ .da.f.h.v.ft.from.mnc get ] }" );
+	cmd( "if [ string is integer [ .da.f.h.v.ft.to.mxc get ] ] { set maxc [ .da.f.h.v.ft.to.mxc get ] }" );
+	cmd( "if [ string is double [ .da.f.h.v.y2.f.e get ] ] { set num_y2 [ .da.f.h.v.y2.f.e get ] }" );
+	cmd( "if [ string is integer [ .da.f.tit.ps.e get ] ] { set point_size [ .da.f.tit.ps.e get ] }" ); 
+	cmd( "if [ string is integer [ .da.f.tit.pr.e get ] ] { set pdigits [ .da.f.tit.pr.e get ] }" ); 
+	
 	cmd( "set nv [ .da.vars.ch.v size ]" );
 	
 	// check options consistency and fix if necessary
