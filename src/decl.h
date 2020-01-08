@@ -489,6 +489,7 @@ struct object {
   bool access_GridPosElements (int x, int y, std::function<bool(object* use_obj)> do_stuff);
   
   object* search_at_position(char const lab[], double x, double y, bool single);
+  object* search_at_position(char const lab[], bool single, bool grid, object* where);
   object* search_at_position(char const lab[], bool single, bool grid = false);
   object* search_at_neighbour_position(char const lab[], int direction, bool single);
   object* search_at_neighbour_position(char const lab[], char const direction[], bool single);
@@ -527,13 +528,20 @@ struct object {
   double get_pos(char xyz);
   double random_pos(const char xy);
   
-  bool get_move_position(gisMap* map, int direction, double& x_inOut, double& y_inOut);
+  bool get_move_position(gisMap* map, int direction, double& x_inOut, double& y_inOut, bool noChange);
   bool move(char const direction[]);
   bool move(int dir); //0 stay put, 1 move north, 2 move north-east , ...
   
   int char2int_direction(char const direction[]);
   bool check_positions(double& _x, double& _y, bool noChange = false); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
   bool check_positions(gisMap* map, double& _xOut, double& _yOut, bool noChange = false);
+  
+  std::vector<int> possible_movements_full();
+  std::vector<int> possible_movements_move();
+  std::vector<int> possible_movements_full(double const x_pos, double const y_pos);
+  std::vector<int> possible_movements_move(double const x_pos, double const y_pos);
+  std::vector<int> possible_movements(bool noMoveOption);
+  std::vector<int> possible_movements(double const x_pos, double const y_pos, bool noMoveOption);
   
   std::string gis_info(bool append = false);
   

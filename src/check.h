@@ -146,6 +146,12 @@ double bad_ptr_dbl( object* ptr, const char* file, int line )
   return 0.;
 }
 
+bool bad_ptr_bool( object* ptr, const char* file, int line )
+{
+  bad_ptr_dbl( ptr, file, line );
+  return false;
+}
+
 char* bad_ptr_chr( object* ptr, const char* file, int line )
 {
   bad_ptr_dbl( ptr, file, line );
