@@ -223,8 +223,8 @@ struct Wrap;
 extern int MAX_ABMAT_BASEVAR_LENGTH;
 class abmat_total_stats;
 typedef std::map< std::string, double > ms_statsT;
-enum Tabmat {a_pLSD, a_pstat, a_pmic, a_pmac, a_micro, a_fact, a_macro, a_cond, a_comp };
-static const Tabmat  AllAbmatTypes[] = {a_pLSD, a_pstat, a_pmic, a_pmac, a_micro, a_fact, a_macro, a_cond, a_comp }; //The order defines the order for the file/tree
+enum Tabmat {a_pLSD, a_pstat, a_pmic, a_pmac, a_fmic, a_fmac, a_micro, a_fact, a_macro, a_cond, a_comp };
+static const Tabmat  AllAbmatTypes[] = {a_pLSD, a_pstat, a_pmic, a_pmac, a_fmic, a_fmac, a_micro, a_fact, a_macro, a_cond, a_comp }; //The order defines the order for the file/tree
 struct next_var; //functional to cycle through variables
 
 extern const char* lfirst;
@@ -1079,6 +1079,13 @@ extern object* root;
 
 //new abmat functions
 #ifdef CPP11
+
+#ifndef ABMAT_NO_SHORTENING_OF_NAMES
+  #define ABMAT_SHORTNAMES true
+#else
+  #define ABMAT_SHORTNAMES false
+#endif
+
 void abmat_write(object* oVar, char const* lab, double value);
 void abmat_write(variable* cv, char const* lab, double value);
 ms_statsT abmat_stats( void );
@@ -1093,6 +1100,7 @@ std::string get_abmat_varname_fact_total( const char* condlab);
 std::string get_abmat_varname_fact( const char* condlab, const int condVal);
 std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1, bool flag_fact_n = false);
+void abmat_use_long_names();
 void abmat_allow_dynamic_factors();
 void abmat_update_sim_pars( );
 void abmat_add_sim_par(std::string lab, double value);
@@ -1103,6 +1111,8 @@ void abmat_add_comp(std::string varlab, std::string var2lab);
 void abmat_add_cond(std::string varlab, std::string var2lab);
 void abmat_add_par_macro(std::string varlab);
 void abmat_add_par_micro(std::string varlab);
+void abmat_add_final_macro(std::string varlab);
+void abmat_add_final_micro(std::string varlab);
 void abmat_add_par_static(std::string varlab);
 void abmat_create_tree();
 //void add_abmat_object(std::string abmat_type, std::string varlab, std::string varlab2 = "");

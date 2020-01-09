@@ -1105,6 +1105,7 @@ bool no_ptr_chk = true;
   //   }
   // }
   
+  #define ABMAT_USE_LONG_NAMES { abmat_use_long_names(); } //TODO ENSURE CALLED FIRST!
   #define ABMAT_DYNAMIC_FACTORS { abmat_allow_dynamic_factors(); }
   #define ABMAT_ADD_MICRO( lab1 ) { abmat_add_micro( lab1 ); }
   #define ABMAT_ADD_MACRO( lab1 ) { abmat_add_macro( lab1 ); }
@@ -1115,6 +1116,9 @@ bool no_ptr_chk = true;
   #define ABMAT_ADD_PSTATIC( lab1 ) { abmat_add_par_static( lab1 ); }
   #define ABMAT_ADD_PMACRO( lab1 ) { abmat_add_par_macro( lab1 ); }
   #define ABMAT_ADD_PMICRO( lab1 ) { abmat_add_par_micro( lab1 ); }
+
+  #define ABMAT_ADD_FMACRO( lab1 ) { abmat_add_final_macro( lab1 ); }
+  #define ABMAT_ADD_FMICRO( lab1 ) { abmat_add_final_micro( lab1 ); }
   
   #define ABMAT_ADD_INTERVAL( start, end ) { add_abmat_interval(start, end); }
   
