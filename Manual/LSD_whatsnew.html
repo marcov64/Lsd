@@ -236,7 +236,7 @@ div.WordSection1
 
 <p class=MsoTitle><span lang=EN-US>What’s new in LSD</span></p>
 
-<h1><span lang=EN-US>Version 7.2 (Dec 2019)</span></h1>
+<h1><span lang=EN-US>Version 7.2-2 (Feb 2020)</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>The version just introduces a few
 improvements and changes:</span></p>
@@ -245,11 +245,11 @@ improvements and changes:</span></p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US><a href="browser.html#updating">Variable
-update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be updated/recomputed
-under arbitrary time schemes, deterministic or random. The modeler can now
-configure update periods larger than 1, including an initial “sleep” for any
-Variable. Both period and initial times can be set as a fixed number or a
-uniform random draw from a modeler-defined range.</span></p>
+update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be
+updated/recomputed under arbitrary time schemes, deterministic or random. The
+modeler can now configure update periods larger than 1, including an initial
+“sleep” for any Variable. Both period and initial times can be set as a fixed
+number or a uniform random draw from a modeler-defined range.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -305,12 +305,13 @@ lang=EN-US>MED(…)</span></a></span><span lang=EN-US> / </span><span
 class=Cdigo><a href="LSD_macros.html#PERC"><span lang=EN-US>PERC(…)</span></a></span><span
 lang=EN-US> computes the median / percentile of a Variable contained in a
 brotherhood of Objects. </span><span class=Cdigo><a
-href="LSD_macros.html#UPDATE"><span lang=EN-US>UPDATE</span></a></span><span
-lang=EN-US> provides a tool to compute all Variables in a single Object or in
-an entire subtree of the model, useful for updating aggregates before Object
-deletions. </span><span class=Cdigo><a href="LSD_macros.html#USE_SAVED">USE_SAVED</a></span><span
-lang=EN-US> allows accessing any lagged value of a Variable being saved,
-irrespective of the lag number definition.</span></p>
+href="LSD_macros.html#UPDATE"><span lang=EN-US>UPDATE</span></a></span> <span
+lang=EN-US>provides a tool to compute all Variables in a single Object or in an
+entire subtree of the model, useful for updating aggregates before Object
+deletions. </span><span class=Cdigo><a href="LSD_macros.html#USE_SAVED"><span
+lang=EN-US>USE_SAVED</span></a></span><span lang=EN-US> allows accessing any
+lagged value of a Variable being saved, irrespective of the lag number
+definition.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -342,9 +343,18 @@ instructions on each platform.</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>New embedded Tcl/Tk 8.6.10, bug fixes</span><span
+</span></span><b><span lang=EN-US>More new series options.</span></b><span
+lang=EN-US> When <a href="menudata_res.html#add_series">creating new series
+from existing ones</a> in <a href="menudata_res_arquivos">LSD Analysis of
+Results window</a>, options to multiply, invert and create confidence intervals
+are now available, allowing for the construction of complex new series.</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US>New embedded Tcl/Tk 8.6.10</span><span
 lang=EN-US>, mainly for macOS users (required for Mojave/Catalina), lattices
-are working again.</span></p>
+are working again, bug fixes.</span></p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'><span lang=EN-US>&nbsp;</span></p>
 
@@ -560,9 +570,10 @@ templates in LMM.</span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Advanced sensitivity analysis.</span></b><span
-lang=EN-US> Monte Carlo (by range or points), Elementary Effects and Near-orthogonal
-Latin Hypercube sampling tools (Design of Experiments). External DoE file
-import. Full integration with R advanced sensitivity analysis package.</span></p>
+lang=EN-US> Monte Carlo (by range or points), Elementary Effects and
+Near-orthogonal Latin Hypercube sampling tools (Design of Experiments).
+External DoE file import. Full integration with R advanced sensitivity analysis
+package.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -710,9 +721,9 @@ Parks-Miler still available as option).</span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New statistical functions.</span></b><span
-lang=EN-US> Random draws from lognormal, beta and asymmetric Laplace distributions.
-Cumulative distribution functions for the uniform, normal, lognormal, Poisson,
-gamma, beta and asymmetric Laplace distributions.</span></p>
+lang=EN-US> Random draws from lognormal, beta and asymmetric Laplace
+distributions. Cumulative distribution functions for the uniform, normal,
+lognormal, Poisson, gamma, beta and asymmetric Laplace distributions.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -762,8 +773,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>New network functions and macros.</span></b><span
 lang=EN-US> Added command for the creation and manipulation of a network from
 Equations. Network is formed by brother Objects and several standard network
-templates (random, Small World, Power-Law, etc.) are available for quick and automatic
-network creation.</span></p>
+templates (random, Small World, Power-Law, etc.) are available for quick and
+automatic network creation.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -893,12 +904,13 @@ or amount of data to save.</span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Smoother installation and run under Linux.</span></b><span
-lang=EN-US> A number of problems of compatibility with different Linux
-distribution should be solved.</span></p>
+lang=EN-US> A number of problems of compatibility with different Linux distribution
+should be solved.</span></p>
 
 <p class=MsoListParagraph style='margin-left:35.7pt;text-indent:-17.85pt'><span
 lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>Other minor bug fixes and documentation improvements.</span></p>
+</span></span><span lang=EN-US>Other minor bug fixes and documentation
+improvements.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
 

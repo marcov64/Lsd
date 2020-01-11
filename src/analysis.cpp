@@ -6202,7 +6202,7 @@ void create_series( int *choice )
 {
 	bool first;
 	char *lapp, **str, **tag;
-	double nmax = 0, nmin = 0, nmean, nvar, nn, thflt, z_crit, **data;
+	double nmax = 0, nmin = 0, nmean, nvar, nn, sum, prod, thflt, z_crit, **data;
 	int i, j, k, flt, cs_long, type_series, new_series, confi, *start, *end, *id;
 	store *app;
 
@@ -6260,6 +6260,8 @@ void create_series( int *choice )
 	cmd( "frame .da.s.i.r -relief groove -bd 2" );
 	cmd( "radiobutton .da.s.i.r.m -text \"Average\" -variable bidi -value 1 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Avg\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
 	cmd( "radiobutton .da.s.i.r.z -text \"Sum\" -variable bidi -value 5 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Sum\"; set vname $headname$basename; .da.s.n.nv selection range 0 end  }" );
+	cmd( "radiobutton .da.s.i.r.x -text \"Product\" -variable bidi -value 9 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Prod\"; set vname $headname$basename; .da.s.n.nv selection range 0 end  }" );
+	cmd( "radiobutton .da.s.i.r.i -text \"Invert\" -variable bidi -value 10 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Inv\"; set vname $headname$basename; .da.s.n.nv selection range 0 end  }" );
 	cmd( "radiobutton .da.s.i.r.n -text \"Count\" -variable bidi -value 7 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Num\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
 	cmd( "radiobutton .da.s.i.r.f -text \"Maximum\" -variable bidi -value 2 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Max\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
 	cmd( "radiobutton .da.s.i.r.t -text \"Minimum\" -variable bidi -value 3 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Min\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
@@ -6274,7 +6276,7 @@ void create_series( int *choice )
 	cmd( "write_disabled .da.s.i.r.ci.p $confi" ); 
 	cmd( "pack .da.s.i.r.ci.c .da.s.i.r.ci.x .da.s.i.r.ci.p .da.s.i.r.ci.perc -side left" );
 
-	cmd( "pack .da.s.i.r.m .da.s.i.r.z .da.s.i.r.n .da.s.i.r.f .da.s.i.r.t .da.s.i.r.c .da.s.i.r.s .da.s.i.r.ci -anchor w" );
+	cmd( "pack .da.s.i.r.m .da.s.i.r.z .da.s.i.r.x .da.s.i.r.i .da.s.i.r.n .da.s.i.r.f .da.s.i.r.t .da.s.i.r.c .da.s.i.r.s .da.s.i.r.ci -anchor w" );
 	cmd( "pack .da.s.i.l .da.s.i.r" );
 
 	cmd( "set a [ .da.vars.ch.v get 0 ]" );
@@ -6307,8 +6309,8 @@ void create_series( int *choice )
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set thflt [ .da.s.f.t.th get ]" ); 
-	cmd( "set confi [ .da.s.i.r.ci.p get ]" ); 
+	cmd( "if [ string is double [ .da.s.f.t.th get ] ] { set thflt [ .da.s.f.t.th get ] }" ); 
+	cmd( "if [ string is integer [ .da.s.i.r.ci.p get ] ] { set confi [ .da.s.i.r.ci.p get ] }" ); 
 	cmd( "destroytop .da.s" );
 
 	Tcl_UnlinkVar( inter, "thflt" );
@@ -6416,18 +6418,18 @@ void create_series( int *choice )
 
 			for ( i = min_c; i <= max_c; ++i )
 			{
-				nmean = nn = nvar = 0;
+				nn = nvar = sum = 0;
 				first = true;
 				for ( j = 0; j < nv; ++j )
 				{
 					if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i ] > thflt) || ( flt == 2 && data[ j ][ i ] < thflt) ) )		// ignore NaNs
 					{
-						nmean += data[ j ][ i ];
+						sum += data[ j ][ i ];
 						nvar += data[ j ][ i ] * data[ j ][ i ];
 						nn++;
 						if ( first)
 						{
-							nmin = nmax = data[ j ][ i ];
+							nmin = nmax = prod = data[ j ][ i ];
 							first = false;
 						}
 						else
@@ -6436,15 +6438,16 @@ void create_series( int *choice )
 								nmin = data[ j ][ i ];
 							if ( nmax<data[ j ][ i ] )
 								nmax = data[ j ][ i ];
+							prod *= data[ j ][ i ];
 						} 
 					}
 				}
 
 				if ( nn == 0 )	// not a single valid value?
-					nn = nmean = nvar = nmin = nmax = NAN;
+					nn = nmean = nvar = nmin = nmax = sum = prod = NAN;
 				else
 				{
-					nmean /= nn;
+					nmean = sum / nn;
 					nvar /= nn;
 					nvar -= nmean * nmean;
 				}
@@ -6458,11 +6461,20 @@ void create_series( int *choice )
 				if ( type_series == 4 )
 					vs[ num_var ].data[ i ] = nvar;
 				if ( type_series == 5 )
-					vs[ num_var ].data[ i ] = nmean * nn;
+					vs[ num_var ].data[ i ] = sum;
 				if ( type_series == 7 )
 					vs[ num_var ].data[ i ] = nn;
 				if ( type_series == 8 )
 					vs[ num_var ].data[ i ] = sqrt( nvar );
+				if ( type_series == 9 )
+					vs[ num_var ].data[ i ] = prod;
+				if ( type_series == 10 )
+				{
+					if ( nmean != 0 )
+						vs[ num_var ].data[ i ] = 1 / nmean;
+					else
+						vs[ num_var ].data[ i ] = NAN;
+				}
 				if ( type_series == 11 )
 					vs[ num_var ].data[ i ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
 				if ( type_series == 12 )
@@ -6486,18 +6498,18 @@ void create_series( int *choice )
 
 			for ( j = 0; j < nv; ++j )
 			{
-				nmean = nn = nvar = 0;
+				nn = nvar = sum = 0;
 				first = true;
 				for ( i = min_c; i <= max_c; ++i )
 				{
 					if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i ] > thflt) || ( flt == 2 && data[ j ][ i ] < thflt) ) )
 					{
-						nmean += data[ j ][ i ];
+						sum += data[ j ][ i ];
 						nvar += data[ j ][ i ]*data[ j ][ i ];
 						nn++;
 						if ( first)
 						{
-							nmin = nmax = data[ j ][ i ];
+							nmin = nmax = prod = data[ j ][ i ];
 							first = false;
 						}
 						else
@@ -6506,15 +6518,16 @@ void create_series( int *choice )
 								nmin = data[ j ][ i ];
 							if ( nmax<data[ j ][ i ] )
 								nmax = data[ j ][ i ];
+							prod *= data[ j ][ i ];
 						} 
 					}
 			   }
 
 			   if ( nn == 0 )	// not a single valid value?
-					nn = nmean = nvar = nmin = nmax = NAN;
+					nn = nmean = nvar = nmin = nmax = sum = prod = NAN;
 			   else
 			   {
-					nmean /= nn;
+					nmean = sum / nn;
 					nvar /= nn;
 					nvar -= nmean * nmean;
 			   }
@@ -6528,11 +6541,20 @@ void create_series( int *choice )
 				if ( type_series == 4 )
 					vs[ num_var ].data[ j ] = nvar;
 				if ( type_series == 5 )
-					vs[ num_var ].data[ j ] = nmean * nn;
+					vs[ num_var ].data[ j ] = sum;
 				if ( type_series == 7 )
 					vs[ num_var ].data[ j ] = nn;
 				if ( type_series == 8 )
 					vs[ num_var ].data[ i ] = sqrt( nvar );
+				if ( type_series == 9 )
+					vs[ num_var ].data[ j ] = prod;
+				if ( type_series == 10 )
+				{
+					if ( nmean != 0 )
+						vs[ num_var ].data[ j ] = 1 / nmean;
+					else
+						vs[ num_var ].data[ j ] = NAN;
+				}
 				if ( type_series == 11 )
 					vs[ num_var ].data[ i ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
 				if ( type_series == 12 )
