@@ -531,6 +531,7 @@ struct object {
   bool get_move_position(gisMap* map, int direction, double& x_inOut, double& y_inOut, bool noChange);
   bool move(char const direction[]);
   bool move(int dir); //0 stay put, 1 move north, 2 move north-east , ...
+  bool move_toward(object* target);
   
   int char2int_direction(char const direction[]);
   bool check_positions(double& _x, double& _y, bool noChange = false); //check if coordinates are on map. If not, transform if possible (wrapping) or report false

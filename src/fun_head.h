@@ -799,6 +799,10 @@ bool no_ptr_chk = true;
   // return value: succes, bool (true == 1/false == 0)
   #define MOVE(DIRECTION) ( p->move(DIRECTION) )
   #define MOVES(PTR, DIRECTION) (CHK_PTR_BOOL( PTR )  PTR->move(DIRECTION) )
+
+  #define MOVE_TOWARD(TARGET) ( p->move_toward(TARGET) )
+  #define MOVE_TOWARDS(PTR,TARGET) ( CHK_PTR_BOOL( PTR )->move_toward(TARGET) )
+
   //to add: Move sequence, use ints.
   
   // TELEPORT
