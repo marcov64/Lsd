@@ -131,7 +131,9 @@ INIT_PLOT
 void init_plot( int num, int id_sim )
 {
 	cmd( "if { %d > $hsizeR } { set plot_step 1 } { set plot_step [ expr $hsizeR / %d.0 ] }", max_step, max_step );
-	cmd( "set scrollB 0" );
+	
+	cmd( "set scrollB 1" );
+	scrollB = 1;
 
 	cmd( "set activeplot .plt%d", id_sim );
 
@@ -190,7 +192,7 @@ void init_plot( int num, int id_sim )
 	// controls
 	cmd( "checkbutton $activeplot.fond.shift -text Scroll -variable scrollB -command { set_c_var done_in 8 }" );	
 	cmd( "if { $tcl_platform(platform) == \"windows\" } { set goWid 7 } { set goWid 5 }" );
-	cmd( "button $activeplot.fond.go -width $goWid -text Center -command { set halfCanvas [ expr $hsizeR / 2 ]; set_c_var done_in 7 }" );
+	cmd( "button $activeplot.fond.go -width $goWid -text Center -command { set_c_var done_in 7 }" );
 
 	cmd( "$activeplot.fond create window [ expr $sclhsizeR / 2 ] [ expr $botvsizeR / 4 - 5 ] -window $activeplot.fond.shift" );
 	cmd( "$activeplot.fond create window [ expr $sclhsizeR / 2 ] [ expr 3 * $botvsizeR / 4 ] -window $activeplot.fond.go" );

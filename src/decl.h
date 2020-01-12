@@ -858,6 +858,7 @@ extern bool on_bar;				// flag to indicate bar is being draw in log window
 extern bool parallel_mode;		// parallel mode (multithreading) status
 extern bool redrawRoot;			// control for redrawing root window (.)
 extern bool running;			// simulation is running
+extern bool scrollB;			// scroll check box state in current runtime plot
 extern bool struct_loaded;		// a valid configuration file is loaded
 extern bool tk_ok;				// control for tk_ready to operate
 extern bool unsavedData;		// control for unsaved simulation results

@@ -60,7 +60,7 @@ bool pause_run;				// pause running simulation
 bool redrawRoot;			// control for redrawing root window (.)
 bool running = false;		// simulation is running
 bool save_alt_path = false;	// alternate save path flag
-bool scroll;				// scroll state in current runtime plot
+bool scrollB;				// scroll box state in current runtime plot
 bool struct_loaded = false;	// a valid configuration file is loaded
 bool tk_ok = false;			// control for tk ready to operate
 bool unsavedData = false;	// flag unsaved simulation results
@@ -744,7 +744,6 @@ void run( void )
 		init_math_error( );
 
 		seed++;
-		scroll = false;
 		pause_run = false;
 		debug_flag = false;
 		error_hard_thread = false;
@@ -889,14 +888,14 @@ void run( void )
 
 				// runtime plot events
 				case 7:  		// Center button
-					cmd( "if { [ winfo exist .plt%d ] && %d > $halfCanvas } { \
-							set newpos [ expr %lf - [ expr  $halfCanvas / %lf ] ]; \
+					cmd( "if { [ winfo exist .plt%d ] && %d > [ expr $hsizeR / 2 ] } { \
+							set newpos [ expr %lf - [ expr  [ expr $hsizeR / 2 ] / %lf ] ]; \
 							$activeplot.c.c.cn xview moveto $newpos \
 						}", i, t, t / ( double ) max_step, ( double ) max_step );
 					break;
 
 				case 8: 		// Scroll checkbox
-					scroll = ! scroll;
+					scrollB = ! scrollB;
 					break;
 
 				case 9: 		// Pause simulation
@@ -922,8 +921,8 @@ void run( void )
 			done_in = 0;
 
 			// perform scrolling if enabled
-			if ( ! pause_run && scroll )
-				cmd( "if [ winfo exist .plt%d ] { $activeplot.c.c.cn xview scroll 1 units }", i );
+			if ( ! pause_run && scrollB )
+				cmd( "if { [ winfo exist .plt%d ] && %d > [ expr $hsizeR * 0.8 ] } { $activeplot.c.c.cn xview scroll 1 units }", i, t );
 
 			if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER )
 			{
