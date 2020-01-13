@@ -326,7 +326,7 @@ namespace LSD_VALIDATE {
     
     int i = 0;
     
-    for (object* cur = root->search(p->label); cur != p; cur = cur->hyper_next()) {
+    for (object* cur = root->search(p->label); cur != p && cur != NULL; cur = cur->hyper_next()) {      
       if (++i > TRACK_SEQUENCE_MAX_SAME && p->t_birth > BIRTH_TRACK_ALL_T ) //Always track new born
       { return ""; }
     }

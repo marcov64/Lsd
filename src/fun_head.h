@@ -963,7 +963,8 @@ bool no_ptr_chk = true;
   //  Change style
   
   #define SEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, true) )
-  #define SEARCH_POSITION_XY_WHERE( LAB, X, Y, WHERE )  ( WHERE->search_at_position(LAB, X, Y, true) )
+  #define SEARCH_POSITION_XY_WHERE( LAB, X, Y, WHERE )  ( CHK_PTR_OBJ( WHERE ) WHERE->search_at_position(LAB, X, Y, true) )
+
   #define SEARCH_POSITION(LAB)  ( p->search_at_position(LAB, true) )
   #define SEARCH_POSITIONS(PTR, LAB)  (CHK_PTR_OBJ( PTR )  PTR->search_at_position(LAB, true) )
   
@@ -999,13 +1000,13 @@ bool no_ptr_chk = true;
   //  elements at the given position.
   
   #define COUNT_POSITION(LAB)  ( p->elements_at_position( LAB, false ) )
-  #define COUNT_POSITIONS(PTR, LAB) (CHK_PTR_DBL( PTR )  PTR->elements_at_position( LAB, false ) )
+  #define COUNT_POSITION_WHERE(LAB, WHERE) (CHK_PTR_DBL( WHERE )  WHERE->elements_at_position( LAB, false ) )
   
   #define COUNT_POSITION_XY(LAB, X, Y)  ( p->elements_at_position( LAB, X, Y ) )
   #define COUNT_POSITION_XY_WHERE( LAB, X, Y, WHERE) ( WHERE->elements_at_position( LAB, X, Y ) )
   
   #define COUNT_POSITION_GRID(LAB)  ( p->elements_at_position( LAB, true ) )
-  #define COUNT_POSITION_GRIDS(PTR, LAB) (CHK_PTR_DBL( PTR )  PTR->elements_at_position( LAB, true ) )
+  #define COUNT_POSITION_GRID_WHERE(LAB, WHERE) (CHK_PTR_DBL( WHERE )  WHERE->elements_at_position( LAB, true ) )
   
   // Additional Utilities
   // ANY_GIS just checks if there is a map associated to the object
@@ -1013,8 +1014,8 @@ bool no_ptr_chk = true;
   #define ANY_GIS ( p->position != NULL ? true : false  )
   #define ANY_GISS(PTR) (CHK_PTR_BOOL( PTR )  PTR->position != NULL ? true : false )
   
-  #define SAME_GIS(TARGET) ( p->ptr_map() == TARGET->ptr_map() )
-  #define SAME_GISS(PTR,TARGET) (CHK_PTR_BOOL( PTR )  PTR->ptr_map() == TARGET->ptr_map() )
+  #define SAME_GIS_WHERE(WHERE) ( p->ptr_map() == WHERE->ptr_map() )
+  #define SAME_GISS_WHERE(PTR,WHERE) (CHK_PTR_BOOL( PTR )  PTR->ptr_map() == WHERE->ptr_map() )
   
   #define GIS_INFOS( PTR ) ( ( CHK_PTR_CHR(PTR) PTR->gis_info().c_str()) )
   #define GIS_INFO ( (p->gis_info().c_str()) )
