@@ -971,6 +971,10 @@ size.doe <- function( doeFile ) {
 
   # First file must be the a DoE (baseName_xx_yy)
   split <- strsplit( doeFile, "_" )[[ 1 ]]
+
+  # Check paths starting with '.' or '..' or invalid format
+  if( length( split ) == 0 )
+    stop( "Characters '.' and '..' are not allowed on path name" )
   if( is.na( as.integer( split[ length( split ) ] ) ) ||
       is.na( as.integer( split[ length( split ) - 1 ] ) ) )
     stop( "Invalid DoE .csv file naming/numbering (must be baseName_XX_YY)" )
