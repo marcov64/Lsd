@@ -2637,7 +2637,7 @@ double norm( double mean, double dev )
 		else
 			if ( ! normStopErr )
 			{
-				plog( "\nWarning: too many negative standard deviation errors, stop reporting...\n" );
+				plog( "\nWarning: too many negative standard deviation errors in function 'norm', stop reporting...\n" );
 				normStopErr = true;
 			}
 
@@ -2667,7 +2667,7 @@ double lnorm( double mean, double dev )
 		else
 			if ( ! lnormStopErr )
 			{
-				plog( "\nWarning: too many negative standard deviation errors, stop reporting...\n" );
+				plog( "\nWarning: too many negative standard deviation errors in function 'lnorm', stop reporting...\n" );
 				lnormStopErr = true;
 			}
 			
@@ -2696,7 +2696,7 @@ double gamma( double alpha, double beta )
 		else
 			if ( ! gammaStopErr )
 			{
-				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many non-positive parameter errors in function 'gamma', stop reporting...\n" );
 				gammaStopErr = true;
 			}
 			
@@ -2725,7 +2725,7 @@ double bernoulli( double p )
 		else
 			if ( ! bernoStopErr )
 			{
-				plog( "\nWarning: too many invalid probability errors, stop reporting...\n" );
+				plog( "\nWarning: too many invalid probability errors in function 'bernoulli', stop reporting...\n" );
 				bernoStopErr = true;
 			}
 			
@@ -2757,7 +2757,7 @@ double poisson( double mean )
 		else
 			if ( ! poissStopErr )
 			{
-				plog( "\nWarning: too many negative mean errors, stop reporting...\n" );
+				plog( "\nWarning: too many negative mean errors in function 'poisson', stop reporting...\n" );
 				poissStopErr = true;
 			}
 			
@@ -2786,7 +2786,7 @@ double geometric( double p )
 		else
 			if ( ! geomStopErr )
 			{
-				plog( "\nWarning: too many invalid probability errors, stop reporting...\n" );
+				plog( "\nWarning: too many invalid probability errors in function 'geometric', stop reporting...\n" );
 				geomStopErr = true;
 			}
 			
@@ -2818,7 +2818,7 @@ double binomial( double p, double t )
 		else
 			if ( ! binomStopErr )
 			{
-				plog( "\nWarning: too many invalid parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many invalid parameter errors in function 'binomial', stop reporting...\n" );
 				binomStopErr = true;
 			}
 			
@@ -2850,7 +2850,7 @@ double cauchy( double a, double b )
 		else
 			if ( ! cauchStopErr )
 			{
-				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many non-positive parameter errors in function 'cauchy', stop reporting...\n" );
 				cauchStopErr = true;
 			}
 			
@@ -2879,7 +2879,7 @@ double chi_squared( double n )
 		else
 			if ( ! chisqStopErr )
 			{
-				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many non-positive parameter errors in function 'chi_squared', stop reporting...\n" );
 				chisqStopErr = true;
 			}
 			
@@ -2908,7 +2908,7 @@ double exponential( double lambda )
 		else
 			if ( ! expStopErr )
 			{
-				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many non-positive parameter errors in function 'exponential', stop reporting...\n" );
 				expStopErr = true;
 			}
 			
@@ -2937,7 +2937,7 @@ double fisher( double m, double n )
 		else
 			if ( ! fishStopErr )
 			{
-				plog( "\nWarning: too many invalid parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many invalid parameter errors in function 'fisher', stop reporting...\n" );
 				fishStopErr = true;
 			}
 			
@@ -2966,7 +2966,7 @@ double student( double n )
 		else
 			if ( ! studStopErr )
 			{
-				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many non-positive parameter errors in function 'student', stop reporting...\n" );
 				studStopErr = true;
 			}
 			
@@ -2995,7 +2995,7 @@ double weibull( double a, double b )
 		else
 			if ( ! weibStopErr )
 			{
-				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many non-positive parameter errors in function 'weibull', stop reporting...\n" );
 				weibStopErr = true;
 			}
 			
@@ -3025,7 +3025,7 @@ double beta( double alpha, double beta )
 		else
 			if ( ! betaStopErr )
 			{
-				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many non-positive parameter errors in function 'beta', stop reporting...\n" );
 				betaStopErr = true;
 			}
 			
@@ -3400,7 +3400,7 @@ double norm( double mean, double dev )
 		else
 			if ( ! normStopErr )
 			{
-				plog( "\nWarning: too many negative standard deviation errors, stop reporting...\n" );
+				plog( "\nWarning: too many negative standard deviation errors in function 'norm', stop reporting...\n" );
 				normStopErr = true;
 			}
 
@@ -3455,7 +3455,7 @@ double lnorm( double mean, double dev )
 		else
 			if ( ! lnormStopErr )
 			{
-				plog( "\nWarning: too many negative standard deviation errors, stop reporting...\n" );
+				plog( "\nWarning: too many negative standard deviation errors in function 'lnorm', stop reporting...\n" );
 				lnormStopErr = true;
 			}
 			
@@ -3538,7 +3538,7 @@ double gamma( double alpha, double beta )
 		else
 			if ( ! gammaStopErr )
 			{
-				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many non-positive parameter errors in function 'gamma', stop reporting...\n" );
 				gammaStopErr = true;
 			}
 			
@@ -3566,7 +3566,7 @@ double bernoulli( double p )
 		else
 			if ( ! bernoStopErr )
 			{
-				plog( "\nWarning: too many invalid probability errors, stop reporting...\n" );
+				plog( "\nWarning: too many invalid probability errors in function 'bernoulli', stop reporting...\n" );
 				bernoStopErr = true;
 			}
 			
@@ -3674,7 +3674,7 @@ double poisson( double mean )
 		else
 			if ( ! poissStopErr )
 			{
-				plog( "\nWarning: too many negative mean errors, stop reporting...\n" );
+				plog( "\nWarning: too many negative mean errors in function 'poisson', stop reporting...\n" );
 				poissStopErr = true;
 			}
 			
@@ -3704,7 +3704,7 @@ double beta( double alpha, double beta )
 		else
 			if ( ! betaStopErr )
 			{
-				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many non-positive parameter errors in function 'beta', stop reporting...\n" );
 				betaStopErr = true;
 			}
 			
@@ -3749,7 +3749,7 @@ double pareto( double mu, double alpha )
 		else
 			if ( ! paretStopErr )
 			{
-				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many non-positive parameter errors in function 'pareto', stop reporting...\n" );
 				paretStopErr = true;
 			}
 			
@@ -3778,7 +3778,7 @@ double alapl( double mu, double alpha1, double alpha2 )
 		else
 			if ( ! alaplStopErr )
 			{
-				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				plog( "\nWarning: too many non-positive parameter errors in function 'alapl', stop reporting...\n" );
 				alaplStopErr = true;
 			}
 			
