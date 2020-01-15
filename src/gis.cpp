@@ -2040,10 +2040,10 @@ bool object::move_toward(object* target){
   direction += verticalDirection > 0 ? 'n' : (verticalDirection < 0 ? 's' : '!');
   direction += horizontalDirection > 0 ? 'e' : (horizontalDirection < 0 ? 'w' : '!');
 
-  char msg[ TCL_BUFF_STR ];
-  sprintf( msg,"Pos: %g,%g  Target: %g,%g  Wrap: %s  Resulting direction: %s",
-  position->x, position->y, target->position->x, target->position->y, position->map->wrap.noWrap?"none":"some", direction.c_str());
-  plog( msg );
+  // char msg[ TCL_BUFF_STR ];
+  // sprintf( msg,"Pos: %g,%g  Target: %g,%g  Wrap: %s  Resulting direction: %s",
+  // position->x, position->y, target->position->x, target->position->y, position->map->wrap.noWrap?"none":"some", direction.c_str());
+  // plog( msg );
   
 
   return move(direction.c_str());
