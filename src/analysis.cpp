@@ -1536,9 +1536,9 @@ while ( true )
 		  
 		// Insert the variables selected in the list of the variables to plot
 		case 6:
-			cmd( "set a [.da.vars.lb.v curselection]" );
-			cmd( "foreach i $a {.da.vars.ch.v insert end [.da.vars.lb.v get $i ]}" );
-			cmd( "set tit [.da.vars.ch.v get 0]" );
+			cmd( "set a [ .da.vars.lb.v curselection ]" );
+			cmd( "foreach i $a { .da.vars.ch.v insert end [ .da.vars.lb.v get $i ] }" );
+			cmd( "set tit [ .da.vars.ch.v get 0 ]" );
 
 			break;
 
@@ -1546,7 +1546,8 @@ while ( true )
 		// Remove the vars. selected from the variables to plot
 		case 7:
 			cmd( "set steps 0" );
-			cmd( "foreach i [.da.vars.ch.v curselection] {.da.vars.ch.v delete [ expr $i - $steps]; incr steps}" );
+			cmd( "foreach i [ .da.vars.ch.v curselection ] { .da.vars.ch.v delete [ expr $i - $steps ]; incr steps }" );
+			cmd( "if { [ .da.vars.ch.v size ] == 0 } { set tit \"\" } { set tit [ .da.vars.ch.v get 0 ] }" );
 			
 			break;
 
@@ -1554,13 +1555,14 @@ while ( true )
 		// Remove all the variables from the list of vars to plot
 		case 8:
 			cmd( ".da.vars.ch.v delete 0 end" );
+			cmd( "set tit \"\"" );
 
 			break;
 
 
 		// Insert new series ( from disk or combining existing series).
 		case 24:
-			if ( nv > 0 )
+			if ( num_var > 0 )
 			{
 				cmd( "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
 				cmd( "label .da.s.l -text \"Source of additional series\"" );
@@ -1569,7 +1571,7 @@ while ( true )
 				cmd( "frame .da.s.i -relief groove -bd 2" );
 				cmd( "radiobutton .da.s.i.c -text \"Create new series from selected\" -variable bidi -value 4" );
 				cmd( "radiobutton .da.s.i.a -text \"Moving average series from selected\" -variable bidi -value 5" );
-				cmd( "radiobutton .da.s.i.f -text \"File( s) of saved results\" -variable bidi -value 1" );
+				cmd( "radiobutton .da.s.i.f -text \"File(s) of saved results\" -variable bidi -value 1" );
 				cmd( "pack .da.s.i.c .da.s.i.a .da.s.i.f -anchor w" );
 
 				cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady 5 -padx 5" );
@@ -3240,7 +3242,7 @@ void insert_data_file( bool gz, int *num_v, int *num_c )
 #ifdef LIBZ
 	gzFile fz = NULL;
 #endif
-	char ch, app_str[ 20 ], *tok, *linbuf;
+	char ch, *tok, *linbuf;
 	int i, j, new_v, new_c;
 	bool header = false;
 	long linsiz = 1;
@@ -3256,10 +3258,7 @@ void insert_data_file( bool gz, int *num_v, int *num_c )
 	}
 
 	new_v = 0;
-	if ( *num_v == 0 )
-		plog( "\nResult data from file %s:\n", "", filename );
-	else
-		plog( "\nAdditional data file number %d.\nResult data from file %s:\n", "", file_counter, filename );  
+	plog( "\nResults data from file %s (F_%d)\n", "", filename, file_counter );
 
 	if ( ! gz )
 		ch = ( char ) fgetc( f );
@@ -3304,7 +3303,7 @@ void insert_data_file( bool gz, int *num_v, int *num_c )
 #endif
 	}
 
-	plog( "- %d Variables\n", "",  new_v );
+	plog( " %d series", "",  new_v );
 
 	cmd( "update" );
 
@@ -3341,12 +3340,10 @@ void insert_data_file( bool gz, int *num_v, int *num_c )
 #endif
 	}
 
-	plog( "- %d Cases\nLoading...", "", new_c );
+	plog( ", %d cases. Loading...", "", new_c );
 
 	if ( *num_v == 0 )
-	{
 		vs = new store[ new_v ];
-	}
 	else
 	{
 		app = new store[ new_v + *num_v ];
@@ -3369,11 +3366,6 @@ void insert_data_file( bool gz, int *num_v, int *num_c )
 		fz = gzopen( filename, "rt" );
 #endif
 	}
-
-	if ( *num_v>-1 )
-		sprintf( app_str, " (file=%d)", file_counter );
-	else
-		strcpy( app_str, "" );
 
 	linsiz = ( int ) max( linsiz, new_v * ( DBL_DIG + 4 ) ) + 1;
 	linbuf = new char[ linsiz ];
@@ -3403,19 +3395,20 @@ void insert_data_file( bool gz, int *num_v, int *num_c )
 		}
 		
 		sscanf( tok, "%s %s (%d %d)", vs[ i ].label, vs[ i ].tag, &( vs[ i ].start ), &( vs[ i ].end ) );	
-		strcat( vs[ i ].label, "F" );
 		sprintf( msg, "%d_%s", file_counter, vs[ i ].tag);
 		strcpy( vs[ i ].tag, msg );
 		vs[ i ].rank = i;
 
 		if ( vs[ i ].start != -1 )
-			cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d %s\"", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, i, app_str );
+			sprintf( msg, "%s F_%s (%d-%d) #%d", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, i );
 		else
 		{
-			cmd( ".da.vars.lb.v insert end \"%s %s (0-%d) #%d %s\"", vs[ i ].label, vs[ i ].tag, new_c-1, i, app_str );
+			sprintf( msg, "%s F_%s (0-%d) #%d", vs[ i ].label, vs[ i ].tag, new_c - 1, i );
 			vs[ i ].start = 0;
-			vs[ i ].end = new_c-1;
+			vs[ i ].end = new_c - 1;
 		}
+		
+		cmd( ".da.vars.lb.v insert end \"%s\"", msg );
 	 
 		cmd( "lappend DaModElem %s", vs[ i ].label );
 
@@ -3463,7 +3456,7 @@ void insert_data_file( bool gz, int *num_v, int *num_c )
 	if ( new_c > max_c )
 		max_c = new_c; 
 
-	plog( " Done\n" );
+	plog( " Done" );
 
 	end:
 
