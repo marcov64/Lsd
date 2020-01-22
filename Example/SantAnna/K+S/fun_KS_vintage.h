@@ -17,7 +17,7 @@ Positive values indicate non-economical machines but still in technical life
 Negative values represent machines out of technical life to be scrapped ASAP
 */
 
-if ( V( "_tVint" ) <= T - VS( GRANDPARENT, "eta" ) )// out of technical life?
+if ( V( "_tVint" ) < T - VS( GRANDPARENT, "eta" ) )// out of technical life?
 	END_EQUATION( - V( "_nVint" ) )				// scrap if not in use
 	
 VS( PARENT, "_supplier" );						// ensure supplier is selected

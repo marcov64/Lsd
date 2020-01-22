@@ -118,12 +118,12 @@ Also updated in 'C', 'Sav'
 */
 
 // apply interest to the savings balance
-v[0] = CURRENT * ( 1 + VS( FINSECL0, "rD" ) );// update savings
+v[0] = CURRENT * ( 1 + VS( FINSECL0, "rD" ) );	// update savings
 
 // add entry (equity) / exit (net cash) cost/credit incurred by households
 v[0] += - VL( "cEntry", 1 ) + VL( "cExit", 1 );
 
-RESULT( ROUND( v[0], 0 ) )						// avoid rounding errors on zero
+RESULT( ROUND( v[0], 0, 0.001 ) )				// avoid rounding errors on zero
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
@@ -181,7 +181,7 @@ Residual nominal consumption in period (forced savings in currency terms)
 */
 
 // unfilled demand=forced savings
-v[0] = ( VS( CONSECL0, "D2d" ) - VS( CONSECL0, "D2" ) ) * VS( CONSECL0, "CPI" );
+v[0] = V( "C" ) + V( "G" ) - VS( CONSECL0, "D2" ) * VS( CONSECL0, "CPI" );
 
 V( "SavAcc" );									// ensure up-to-date before
 INCR( "SavAcc", v[0] );							// updating accumulated

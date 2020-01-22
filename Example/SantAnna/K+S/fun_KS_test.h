@@ -1263,6 +1263,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	double _w2o = VS( cur, "_w2o" );
 
 	double _Kavb = VLS( cur, "_K", 1 );
+	double _N_1 = VLS( cur, "_N", 1 );	
 	double _w2oPast = VLS( cur, "_w2o", 1 );
 	double _pVint = ( cur1 != NULL && VS( cur1, "_tVint" ) == T ) ? 
 					VS( cur1, "_pVint" ) : 0;
@@ -1325,7 +1326,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	fprintf( firms2, ",%g,%g,%g,%g,%g,%g,%g,%g", 
 		 _D2e, _Q2d, _Q2, _Q2e, _L2d, _L2, _c2, _s2avg );
 		 
-	check_error( _Q2d > floor( ( 1 + iota ) * _D2e - _N ) || 
+	check_error( _Q2d > 0 && floor( _Q2d ) > ceil( ( 1 + iota ) * _D2e - _N_1 ) || 
 				 _Q2 > _Q2d || _Q2e > _K * _s2avg || _Q2e > _Q2, 
 				 "INCONSISTENT-PRODUCTION", 0, & errors );
 

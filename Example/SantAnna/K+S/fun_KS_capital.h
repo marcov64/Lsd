@@ -58,29 +58,29 @@ int F10 = V( "F10" );							// initial number of firms
 int F1max = V( "F1max" );						// max firms in sector 1
 int F1min = V( "F1min" );						// min firms in sector 1
 
-h = F1;											// initial number of firms
-vector < bool > quit( h, false );				// vector of firms' quit status
+vector < bool > quit( F1, false );				// vector of firms' quit status
 
 // mark bankrupt and market-share-irrelevant firms to quit the market
-j = k = 0;										// best firm registers
-i = 0;											// firm counter
-v[1] = v[2] = 0;								// accumulators
+h = F1;											// initial number of firms
+v[1] = v[2] = v[3] = i = k = 0;					// accum., counters, registers
 CYCLE( cur, "Firm1" )
 {
-	if ( T >= VS( cur, "_t1ent" ) + n1 )
+	v[4] = VS( cur, "_NW1" );					// current net wealth
+	
+	if ( v[4] < 0 || T >= VS( cur, "_t1ent" ) + n1 )// bankrupt or incumbent?
 	{
-		for ( v[3] = j = 0; j < n1; ++j )
-			v[3] += VLS( cur, "_BC", j );		// n1 periods customer number
+		for ( v[5] = j = 0; j < n1; ++j )
+			v[5] += VLS( cur, "_BC", j );		// n1 periods customer number
 		
-		if ( VS( cur, "_NW1" ) < 0 || v[3] == 0 )
+		if ( v[4] < 0 || v[5] <= 0 )
 		{
 			quit[ i ] = true;					// mark for likely exit
 			--h;								// one less firm
 			
-			if ( v[3] > j )						// best firm so far?
+			if ( v[5] > v[3] )					// best firm so far?
 			{
 				k = i;							// save firm index
-				j = v[3];						// and customer number
+				v[3] = v[5];					// and customer number
 			}
 		}
 	}
@@ -105,22 +105,24 @@ CYCLE_SAFE( cur, "Firm1" )
 			if ( h == 0 && i == k )				// best firm must get new equity
 			{
 				// new equity required
-				v[4] = NW10u + VS( cur, "_Deb1" ) - VS( cur, "_NW1" );
-				v[1] += v[4];					// accumulate "entry" equity cost
+				v[6] = NW10u + VS( cur, "_Deb1" ) - VS( cur, "_NW1" );
+				v[1] += v[6];					// accumulate "entry" equity cost
 				
 				WRITES( cur, "_Deb1", 0 );		// reset debt
-				INCRS( cur, "_NW1", v[4] );		// add new equity
+				INCRS( cur, "_NW1", v[6] );		// add new equity
 			}
 	}
 
 	++i;
 }
 
+V( "f1rescale" );								// redistribute exiting m.s.
+
 // compute the potential number of entrants
-v[5] = ( MC1_1 == 0 ) ? 0 : MC1 / MC1_1 - 1;// change in market conditions
+v[7] = ( MC1_1 == 0 ) ? 0 : MC1 / MC1_1 - 1;// change in market conditions
 
 k = max( 0, ceil( F1 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
-						 omicron * min( max( v[5], x2inf ), x2sup ) ) ) );
+						 omicron * min( max( v[7], x2inf ), x2sup ) ) ) );
 				 
 // apply return-to-the-average stickiness random shock to the number of entrants
 k -= min( RND * stick * ( ( double ) ( F1 - j ) / F10 - 1 ) * F10, k );
@@ -141,7 +143,7 @@ INCRS( PARENT, "cExit", v[2] );					// account exit credits
 WRITE( "exit1", ( double ) j / F1 );
 WRITE( "entry1", ( double ) k / F1 );
 
-V( "f1rescale" );								// redistribute exiting m.s.
+V( "f1rescale" );								// redistribute entrant m.s.
 INIT_TSEARCHT( "Firm1", i );					// prepare turbo search indexing
 
 RESULT( v[0] )
@@ -231,7 +233,7 @@ while ( j > 0 && appl->size( ) > 0 )
 	const application candidate = appl->front( );
 
 	// offered wage ok (ignore very small differences)?
-	if ( ROUND( candidate.w, v[2] ) <= v[2] )
+	if ( ROUND( candidate.w, v[2], 0.01 ) <= v[2] )
 	{
 		// already employed? First quit current job
 		if ( VS( candidate.wrk, "_employed" ) )
@@ -274,8 +276,8 @@ EQUATION( "A1" )
 /*
 Productivity of capital-good sector
 */
-v[1] = V( "Q1e" );
-RESULT( v[1] > 0 ? WHTAVE( "_Btau", "_Q1e" ) / v[1] : AVE( "_Btau" ) )
+V( "PPI" );										// ensure m.s. are updated
+RESULT( WHTAVE( "_Btau", "_f1" ) )
 
 
 EQUATION( "D1" )
@@ -520,7 +522,7 @@ To be called after market shares are changed in '_f1' and 'entry1exit'
 
 v[1] = SUM( "_f1" );							// add-up market shares
 
-if ( ROUND( v[1], 1 ) == 1.0 )					// ignore rounding errors
+if ( ROUND( v[1], 1, 0.001 ) == 1.0 )			// ignore rounding errors
 	END_EQUATION( v[1] );
 
 v[0] = 0;										// accumulator

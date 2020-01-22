@@ -37,13 +37,16 @@ if ( V( "_life2cycle" ) < 3 )					// entrant?
 	// myopic-optimistic expectations
 	END_EQUATION( max( VL( "_D2d", 1 ), CURRENT ) );
 
-v[10] = VS( PARENT, "e0" );						// animal spirits parameter
+v[9] = VS( PARENT, "e0" );						// animal spirits parameter
 k = VS( GRANDPARENT, "flagExpect" );			// expectation form
 j = ( k == 0 || k > 4 ) ? 1 : ( k == 1 ) ? 4 : 2;// req. number of data periods
 
 // compute the mix between fulfilled and potential demand (orders)
 for ( i = 1; i <= j; ++i )
-	v[ i ] = ( 1 - v[10] ) * VL( "_D2", i ) + v[10] * VL( "_D2d", i );
+{
+	v[10] = VL( "_D2", i );
+	v[ i ] = max( ( 1 - v[9] ) * v[10] + v[9] * VL( "_D2d", i ), v[10] );
+}
 
 switch ( k )
 {
@@ -194,16 +197,25 @@ v[3] = VS( PARENT, "m2" );						// machine output per period
 if ( v[2] < v[3] )								// no capital yet?
 	END_EQUATION( v[1] );						// no growth threshold
 
-// min rounded capital
-v[4] = ceil( ( 1 + VS( PARENT, "kappaMin" ) ) * v[2] / v[3] ) * v[3];
+v[4] = VS( PARENT, "kappaMin" );				// investment floor multiple
 
-if ( v[1] > v[4] )								// minimum capital reached?
+// min rounded capital
+v[5] = round( ( 1 + v[4] ) * v[2] / v[3] ) * v[3];
+
+if ( v[1] > v[5] )								// minimum capital reached?
 {
-	// max rounded capital
-	v[6] = ceil( ( 1 + VS( PARENT, "kappaMax" ) ) * v[2] / v[3] ) * v[3];
-	
-	v[7] = min( v[1], v[6] );					// cap desired capital, if needed
-	v[0] = max( ceil( ( v[7] - v[2] ) / v[3] ) * v[3], 0 );// rounded investment 
+	if ( v[4] > 0 )
+		v[0] = v[5] - v[2];
+	else
+	{
+		v[6] = VS( PARENT, "kappaMax" );		// investment cap multiple
+		v[7] = round( ( 1 + v[6] ) * v[2] / v[3] ) * v[3];
+		
+		if ( v[6] > 0 && v[1] > v[7] )
+			v[0] = v[7] - v[2];					// max rounded capital
+		else
+			v[0] = floor( ( v[1] - v[2] ) / v[3] ) * v[3];
+	}
 }
 else
 	v[0] = 0;									// no expansion investment
@@ -219,14 +231,9 @@ Desired capital stock of firm in consumption-good sector
 if ( V( "_life2cycle" ) == 0 )					// if fresh entrant
 	END_EQUATION( CURRENT );					// keep initially desired capital
 
-v[1] = VS( PARENT, "m2" );						// machine output per period
-
 // desired capacity with slack and utilization, based on expectations/inventories
-v[2] = max( ( 1 + VS( PARENT, "iota" ) ) * V( "_D2e" ) - VL( "_N", 1 ), 0 ) / 
-	   VS( PARENT, "u" );
-
-// desired capital with slack, round up to m2 units
-RESULT( ceil( v[2] / v[1] ) * v[1] )
+RESULT( max( ( 1 + VS( PARENT, "iota" ) ) * V( "_D2e" ) - VL( "_N", 1 ), 0 ) / 
+		VS( PARENT, "u" ) )
 
 
 EQUATION( "_Q2" )
@@ -294,7 +301,7 @@ if ( V( "_life2cycle" ) == 0 )					// if fresh entrant
 v[1] = max( ( 1 + VS( PARENT, "iota" ) ) * V( "_D2e" ) - VL( "_N", 1 ), 0 );
 
 // limited to the available capital stock
-RESULT( floor( min( v[1], VL( "_K", 1 ) ) ) )
+RESULT( min( v[1], VL( "_K", 1 ) ) )
 
 
 EQUATION( "_SI" )
@@ -903,7 +910,7 @@ EQUATION( "_D2d" )
 /*
 Desired (potential) demand for firm in consumption-good sector
 */
-RESULT( VS( PARENT, "D2d" ) * V( "_f2" ) )
+RESULT( V( "_f2" ) * VS( PARENT, "D2d" ) )
 
 
 EQUATION( "_JO2" )
@@ -1052,7 +1059,7 @@ VS( PARENT, "D2" );								// ensure demand is allocated
 
 v[0] = CURRENT + V( "_Q2e" ) - V( "_D2" );
 
-RESULT( ROUND( v[0], 0 ) )						// avoid rounding errors on zero
+RESULT( ROUND( v[0], 0, 0.001 ) )				// avoid rounding errors on zero
 
 
 EQUATION( "_Pi2rate" )

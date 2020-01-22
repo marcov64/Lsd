@@ -26,10 +26,7 @@ double mov_avg_bound( object *obj, const char *var, double lim )
 		g = ( prev != 0 ) ? VLS( obj, var, i ) / prev - 1 : 0;
 		
 		if ( lim > 0 )
-		{
-			g = min( g, lim );					// apply bounds
-			g = max( g, - lim );
-		}
+			g = max( min( g, lim ), - lim );	// apply bounds
 		
 		sum_g += g;
 	}
@@ -606,8 +603,8 @@ double fire_workers( object *firm, int mode, double xsCap, double *redCap )
 
 double entry_firm1( object *sector, int n, bool newInd )
 {
-	double Atau, AtauMax, AtauMin, Btau, BtauMax, BtauMin, F1, F2, L1rd, NW1, 
-		   NW10, RD, c1, f1, p1, sV, w1avg, mult, equity = 0;
+	double Atau, AtauMax, Btau, BtauMax, D10, L1rd, NW1, NW10, RD0, c1, f1, p1, 
+		   sV, w1avg, mult, equity = 0;
 	int ID1, IDb;
 	object *firm, *bank, *cli, 
 		   *cons = SEARCHS( sector->up, "Consumption" ), 
@@ -621,32 +618,35 @@ double entry_firm1( object *sector, int n, bool newInd )
 	double beta2 = VS( sector, "beta2" );		// upper support for imitation
 	double mu1 = VS( sector, "mu1" );			// mark-up in sector 1
 	double m1 = VS( sector, "m1" );				// worker production scale
-	double nu = VS( sector, "nu" );				// R&D share of sales
-	double n1 = VS( sector, "n1" );				// maximum time without clients
+	double nu = VS( sector, "nu" );				// share of R&D expenses
 	double x5 = VS( sector, "x5" );				// entrant upper advantage
 	
 	if ( newInd )
 	{
-		Atau = Btau = AtauMax = AtauMin = BtauMax = BtauMin = 1;
-		F1 = n;									// initial number of firms
-		F2 = VS( cons, "F20" );					// initial of firms in sector 2
+		Atau = Btau = AtauMax = BtauMax = 1;
 		NW10 = VS( sector, "NW10" ); 			// initial wealth in sector 1
 		f1 = 1.0 / n;							// fair share
 		sV = VS( lab, "sAvg" );					// initial worker skills
 		w1avg = 1;								// initial wage
+		
+		// initial demand expectation, assuming all sector 2 firms, 
+		// 1/eta replacement factor and fair share in sector 1
+		D10 = ceil( VS( cons, "K0" ) / VS( cons, "m2" ) ) / VS( cons, "eta" ) * 
+			  VS( cons, "F20" ) / n;
 	}
 	else
 	{
 		AtauMax = MAXS( sector, "_Atau" );		// best machine productivity
-		AtauMin = MINS( sector, "_Atau" );		// worse machine productivity
 		BtauMax = MAXS( sector, "_Btau" );		// best productivity in sector 1
-		BtauMin = MINS( sector, "_Btau" );		// worse productivity in s. 1
-		F1 = VS( sector, "F1" );				// current number of firms
-		F2 = VS( cons, "F2" );					// number of firms in sector 2
-		NW10 = WHTAVES( sector, "_NW1", "_f1" );// average wealth in sector 1
+		NW10 = max( WHTAVES( sector, "_NW1", "_f1" ), VS( sector, "NW10" ) * 
+					VS( sector, "PPI" ) / VS( sector, "PPI0" ) );
 		f1 = 0;									// no market share
 		sV = 1;									// worker skills
 		w1avg = VS( sector, "w1avg" );			// average wage in sector 1
+
+		// initial demand is the expected machine replacement under fair share
+		D10 = VS( cons, "K" ) / VS( cons, "m2" ) / VS( cons, "eta" ) / 
+			  VS( sector, "F1" );
 	}
 	
 	// add entrant firms (end of period, don't try to sell)
@@ -681,19 +681,17 @@ double entry_firm1( object *sector, int n, bool newInd )
 			// initial technological (imitation from best firm)
 			Atau = beta( alpha2, beta2 );		// draw A from Beta(alpha,beta)
 			Atau *= AtauMax * ( 1 + x5 );		// fraction of top firm
-			Atau = max( Atau, AtauMin );		// bounded by the worse firm
 			Btau = beta( alpha2, beta2 );		// draw B from Beta(alpha,beta)
 			Btau *= BtauMax * ( 1 + x5 );		// fraction of top firm
-			Btau = max( Btau, BtauMin );		// bounded by the worse firm
 		}
 		
 		// initial cost, price and net wealth to pay at least for initial R&D
-		mult = newInd ? 1 : uniform( Phi3, Phi4 );// NW multiple
 		c1 = w1avg / ( Btau * m1 );				// unit cost
 		p1 = ( 1 + mu1 ) * c1;					// unit price
-		RD = max( n1 * nu * p1 * F2 / F1, w1avg );// expected R&D initial cost 
-		L1rd = round( RD / w1avg );				// workers in R&D
-		NW1 = max( RD, mult * NW10 );			// initial cash
+		RD0 = max( nu * D10 * p1, w1avg );		// R&D expense
+		L1rd = floor( RD0 / w1avg );			// workers in R&D
+		mult = newInd ? 1 : uniform( Phi3, Phi4 );// NW multiple
+		NW1 = mult * NW10;						// initial cash
 		equity += NW1 * ( 1 - Deb10ratio );		// account public entry equity
 
 		// initialize variables
@@ -705,7 +703,7 @@ double entry_firm1( object *sector, int n, bool newInd )
 			WRITELS( firm, "_Deb1", NW1 * Deb10ratio, -1 );
 			WRITELS( firm, "_L1rd", L1rd, -1 );
 			WRITELS( firm, "_NW1", NW1, -1 );
-			WRITELS( firm, "_RD", RD, -1 );
+			WRITELS( firm, "_RD", RD0, -1 );
 			WRITELS( firm, "_f1", f1, -1 );
 			WRITELS( firm, "_qc1", 1, -1 );
 			
@@ -720,12 +718,13 @@ double entry_firm1( object *sector, int n, bool newInd )
 			WRITES( firm, "_Deb1", NW1 * Deb10ratio );
 			WRITES( firm, "_L1rd", L1rd );
 			WRITES( firm, "_NW1", NW1 );
-			WRITES( firm, "_RD", RD );
+			WRITES( firm, "_RD", RD0 );
 			WRITES( firm, "_c1", c1 );
 			WRITES( firm, "_p1", p1 );
 			
 			// compute variables requiring calculation in t 
 			RECALCS( firm, "_Deb1max" );		// prudential credit limit
+			RECALCS( firm, "_NC" );				// set initial clients
 			VS( firm, "_cred1" );				// update available credit
 		}
 	}
@@ -740,8 +739,8 @@ double entry_firm1( object *sector, int n, bool newInd )
 double entry_firm2( object *sector, int n, bool newInd )
 {
 	bool postChg;
-	double A2, D2e, Eavg, K, Kd, NW2, NW20, Q2u, c2, f2, f2posChg, life2cycle, 
-		   p2, q2, w2avg, w2realAvg, cash, mult, equity = 0;
+	double A2, D20, D2e, Eavg, K, Kd, N, NW2, NW20, Q2u, c2, f2, f2posChg, 
+		   life2cycle, p2, q2, w2avg, w2realAvg, cash, mult, equity = 0;
 	int ID2, IDb, t2ent;
 	object *firm, *bank, *cli, *suppl, *broch, *vint, *wrk,
 		   *cap = SEARCHS( sector->up, "Capital" ), 
@@ -764,8 +763,21 @@ double entry_firm2( object *sector, int n, bool newInd )
 
 	if ( newInd )
 	{
+		double K0 = VS( sector, "K0" );			// initial capital in sector 2
+		double mu1 = VS( cap, "mu1" );			// mark-up in sector 1
+		double m1 = VS( cap, "m1" );			// worker output per period
+		double phi = VS( fin, "phi" );			// unemployment benefit rate
+		double p10 = ( 1 + mu1 ) / m1;			// initial price of machines
+		double SIr0 = n * ceil( K0 / m2 ) / VS( sector, "eta");// subst. r. inv.
+		double RD0 = VS( cap, "nu" ) * SIr0 * p10;// initial R&D expense
+		
+		// fair share of initial steady state demand
+		D20 = ( ( SIr0 / m1 + RD0 ) * ( 1 - phi ) + VS( lab, "Ls0" ) * phi ) / 
+			  ( mu20 + phi ) / n;
+		  
 		Eavg = 1;								// initial competitiveness
-		K = VS( sector, "K0" );					// initial capital in sector 2
+		K = K0;									// initial capital in sector 2
+		N = iota * D20;							// initial inventories
 		NW20 = VS( sector, "NW20" );			// initial wealth in sector 2
 		Q2u = u;								// initial capacity utilization
 		f2 = 1.0 / n;							// fair share
@@ -849,7 +861,7 @@ double entry_firm2( object *sector, int n, bool newInd )
 		// initial desired capital/expected demand, rounded to # of machines
 		mult = newInd ? 1 : uniform( Phi1, Phi2 );// capital multiple
 		Kd = ceil( max( mult * K / m2, 1 ) ) * m2; 
-		D2e = u * Kd;
+		D2e = newInd ? D20 : u * Kd;
 		
 		// define entrant initial free cash (1 period wages or default minimum)
 		mult = newInd ? 1 : uniform( Phi1, Phi2 );// NW multiple
@@ -873,6 +885,7 @@ double entry_firm2( object *sector, int n, bool newInd )
 		{
 			WRITELS( firm, "_Deb2", cash * Deb20ratio, -1 );
 			WRITELS( firm, "_K", Kd, -1 );
+			WRITELS( firm, "_N", N, -1 );
 			WRITELS( firm, "_NW2", NW2, -1 );
 			WRITELS( firm, "_f2", f2, -1 );
 			WRITELS( firm, "_f2", f2, -1 );

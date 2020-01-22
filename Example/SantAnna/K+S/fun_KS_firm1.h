@@ -12,18 +12,18 @@
 
 EQUATION( "_Atau" )
 /*
-Productivity of the current vintage of machines when employed for production.
-Also updates '_Btau'.
+Productivity of the new vintage of machines when employed for production
+Also updates '_Btau'
 */
 
 double Btau = VL( "_Btau", 1 );					// previous period productivity
 double xi = VS( PARENT, "xi" );					// share of R&D for innovation
 
-// normalized share of workers on R&D of the firm
-double L1rdShr = VL( "_L1rd", 1 ) * VS( LABSUPL2, "Ls0" ) / VLS( LABSUPL2, "Ls", 1 );
+// normalized workers on R&D of the firm
+double L1rdN = VL( "_L1rd", 1 ) * VS( LABSUPL2, "Ls0" ) / VLS( LABSUPL2, "Ls", 1 );
 
 // innovation process (success probability)
-v[1] = 1 - exp( - VS( PARENT, "zeta1" ) * xi * L1rdShr );
+v[1] = 1 - exp( - VS( PARENT, "zeta1" ) * xi * L1rdN );
 
 if ( bernoulli( v[1] ) )						// innovation succeeded?
 {
@@ -39,10 +39,10 @@ if ( bernoulli( v[1] ) )						// innovation succeeded?
 	v[3] = Btau * ( 1 + x1inf + beta( alpha1, beta1 ) * ( x1sup - x1inf ) );
 }
 else
-	v[2] = v[3] = 0;									// innovation failure
+	v[2] = v[3] = 0;							// innovation failure
 
 // imitation process (success probability)
-v[4] = 1 - exp( - VS( PARENT, "zeta2" ) * ( 1 - xi ) * L1rdShr ); 
+v[4] = 1 - exp( - VS( PARENT, "zeta2" ) * ( 1 - xi ) * L1rdN ); 
 
 if ( bernoulli( v[4] ) )						// imitation succeeded?
 {
@@ -55,8 +55,8 @@ if ( bernoulli( v[4] ) )						// imitation succeeded?
 			imiProb[ i++ ] = 0;					// can't self-imitate
 		else
 		{
-			v[6] = sqrt( max( pow( VLS( cur, "_Btau", 1 ) - Btau, 2 ) +
-							   pow( VLS( cur, "_Atau", 1 ) - CURRENT, 2 ), 0 ) );
+			v[6] = sqrt( pow( VLS( cur, "_Btau", 1 ) - Btau, 2 ) +
+						 pow( VLS( cur, "_Atau", 1 ) - CURRENT, 2 ) );
 			v[5] += imiProb[ i++ ] = ( v[6] > 0 ) ? 1 / v[6] : 0;
 		}
 
@@ -546,7 +546,7 @@ Updated in '_D1'
 
 EQUATION_DUMMY( "_Btau", "" )
 /*
-Productivity of labor in producing the current vintage of machines
+Productivity of labor in producing the new vintage of machines
 Updated in '_Atau'
 */
 

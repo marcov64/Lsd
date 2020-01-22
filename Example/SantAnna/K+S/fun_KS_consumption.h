@@ -17,7 +17,7 @@ Update '_D2', '_l2'
 */
 
 k = V( "F2" );									// number of firms
-v[1] = V( "D2d" );								// real desired demand
+v[1] = V( "D2d" );								// real demand
 
 // create and fill temporary share and supply vectors & initialize firm demand
 dblVecT f2( k ), sup2( k ), dem2( k );
@@ -34,9 +34,10 @@ CYCLE( cur, "Firm2" )
 
 // cycle through firms until all demand is allocated or no more product to sell
 v[0] = i = 0;									// fulfilled demand accumulator
-while ( v[1] > 1 )
+while ( v[1] > 0.01 )
 {
-	v[2] = j = 0;								// shares yet unallocated
+	v[2] = v[1];								// remaining unallocated demand
+	v[3] = j = 0;								// shares yet unallocated
 	CYCLE( cur, "Firm2" )
 	{
 		if ( f2[ j ] > 0 )						// firm has demand to supply
@@ -49,19 +50,19 @@ while ( v[1] > 1 )
 				{
 					INCRS( cur, "_D2", dem2[ j ] );// supply all demanded
 					v[0] += dem2[ j ];			// accumulate to total demand
-					v[1] -= dem2[ j ];			// discount from desired demand
-					v[2] += f2[ j ];			// save share yet to allocate
+					v[2] -= dem2[ j ];			// discount from desired demand
+					v[3] += f2[ j ];			// save share yet to allocate
 					sup2[ j ] -= dem2[ j ];		// make supplied unavailable
 				}
 				else
 				{
-					INCRS( cur, "_D2", sup2[ j ] );// supply all available
-					v[0] += sup2[ j ];			// accumulate to total demand
-					v[1] -= sup2[ j ];			// discount from desired demand
-					f2[ j ] = sup2[ j ] = 0;	// nothing else to supply
-					
 					if ( i == 0 )				// unsatisfied demand metric
 						WRITES( cur, "_l2", dem2[ j ] - sup2[ j ] );
+
+					INCRS( cur, "_D2", sup2[ j ] );// supply all available
+					v[0] += sup2[ j ];			// accumulate to total demand
+					v[2] -= sup2[ j ];			// discount from desired demand
+					f2[ j ] = sup2[ j ] = 0;	// nothing else to supply
 				}
 			}
 			else
@@ -71,12 +72,13 @@ while ( v[1] > 1 )
 		++j;
 	}
 	
-	if ( v[2] > 0 )								// unallocated shares remaining?
+	if ( v[3] > 0 )								// unallocated shares remaining?
 		for ( j = 0; j < k; ++j )
-			f2[ j ] /= v[2];					// rescale share remaining firms
+			f2[ j ] /= v[3];					// rescale remaining firms
 	else
 		break;									// nothing else to supply
 	
+	v[1] = v[2];								// update unallocated
 	++i;
 }
 
@@ -116,29 +118,29 @@ int F20 = V( "F20" );							// initial number of firms
 int F2max = V( "F2max" );						// max firms in sector 2
 int F2min = V( "F2min" );						// min firms in sector 2
 
-h = F2;											// initial number of firms
-vector < bool > quit( h, false );				// vector of firms' quit status
+vector < bool > quit( F2, false );				// vector of firms' quit status
 
 // mark bankrupt and market-share-irrelevant incumbent firms to quit the market
-v[1] = v[2] = v[3] = 0;							// accumulators
-v[4] = k = 0;									// best firm registers
-i = 0;											// firm counter
+h = F2;											// initial number of firms
+v[1] = v[2] = v[3] = v[4] = i = k = 0;			// accum., counters, registers
 CYCLE( cur, "Firm2" )
 {
-	if ( VS( cur, "_life2cycle" ) > 1 )
+	v[5] = VS( cur, "_NW2" );					// current net wealth
+	
+	if ( v[5] < 0 || VS( cur, "_life2cycle" ) > 1 )// bankrupt or incumbent?
 	{
-		for ( v[5] = j = 0; j < n2; ++j )
-			v[5] += VLS( cur, "_f2", j );		// n2 periods market share
+		for ( v[6] = j = 0; j < n2; ++j )
+			v[6] += VLS( cur, "_f2", j ) / n2;	// n2 periods avg. market share
 		
-		if ( VS( cur, "_NW2" ) < 0 || v[5] < f2min )
+		if ( v[5] < 0 || v[6] < f2min )
 		{
 			quit[ i ] = true;					// mark for likely exit
 			--h;								// one less firm
 			
-			if ( v[5] > v[4] )					// best firm so far?
+			if ( v[6] > v[4] )					// best firm so far?
 			{
 				k = i;							// save firm index
-				v[4] = v[5];					// and market share
+				v[4] = v[6];					// and market share
 			}
 		}
 	}
@@ -163,22 +165,24 @@ CYCLE_SAFE( cur, "Firm2" )
 			if ( h == 0 && i == k )				// best firm must get new equity
 			{
 				// new equity required
-				v[6] = NW20u + VS( cur, "_Deb2" ) - VS( cur, "_NW2" );
-				v[2] += v[6];					// accumulate "entry" equity cost
+				v[7] = NW20u + VS( cur, "_Deb2" ) - VS( cur, "_NW2" );
+				v[2] += v[7];					// accumulate "entry" equity cost
 				
 				WRITES( cur, "_Deb2", 0 );		// reset debt
-				INCRS( cur, "_NW2", v[6] );		// add new equity
+				INCRS( cur, "_NW2", v[7] );		// add new equity
 			}
 	}
 
 	++i;
 }
 
+V( "f2rescale" );								// redistribute exiting m.s.
+
 // compute the potential number of entrants
-v[7] = ( MC2_1 == 0 ) ? 0 : MC2 / MC2_1 - 1;// change in market conditions
+v[8] = ( MC2_1 == 0 ) ? 0 : MC2 / MC2_1 - 1;// change in market conditions
 
 k = max( 0, ceil( F2 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
-						 omicron * min( max( v[7], x2inf ), x2sup ) ) ) );
+						 omicron * min( max( v[8], x2inf ), x2sup ) ) ) );
 				 
 // apply return-to-the-average stickiness random shock to the number of entrants
 k -= min( RND * stick * ( ( double ) ( F2 - j ) / F20 - 1 ) * F20, k );
@@ -200,7 +204,7 @@ INCRS( PARENT, "cExit", v[3] );					// account exit credits
 WRITE( "exit2", ( double ) j / F2 );
 WRITE( "entry2", ( double ) k / F2 );
 
-V( "f2rescale" );								// redistribute exiting m.s.
+V( "f2rescale" );								// redistribute entrant m.s.
 V( "firm2maps" );								// update firm mapping vectors
 
 RESULT( v[0] )
@@ -251,7 +255,7 @@ for ( i = 0, itw = offers->begin( ); itw != offers->end( ); ++itw )
 		v[5] = VS( candidate.wrk, "_employed" );
 		if ( ! ( v[5] && VS( candidate.wrk, "_Te" ) == 0 ) )
 		{
-			if ( ROUND( candidate.w, itw->offer ) <= itw->offer )
+			if ( ROUND( candidate.w, itw->offer, 0.01 ) <= itw->offer )
 			{
 				// already employed? First quit current job
 				if ( v[5] )
@@ -357,16 +361,16 @@ EQUATION( "A2" )
 /*
 Productivity of consumption-good sector
 */
-v[1] = V( "Q2e" );
-RESULT( v[1] > 0 ? WHTAVE( "_A2", "_Q2e" ) / v[1] : AVE( "_A2" ) )
+V( "CPI" );										// ensure m.s. are updated
+RESULT( WHTAVE( "_A2", "_f2" ) )
 
 
 EQUATION( "A2p" )
 /*
 Potential notional productivity of consumption-good sector
 */
-v[1] = V( "Q2" );
-RESULT( v[1] > 0 ? WHTAVE( "_A2p", "_Q2" ) / v[1] : CURRENT )
+V( "CPI" );										// ensure m.s. are updated
+RESULT( WHTAVE( "_A2p", "_f2" ) )
 
 
 EQUATION( "B2" )
@@ -394,7 +398,7 @@ RESULT( WHTAVE( "_p2", "_f2" ) )
 
 EQUATION( "D2d" )
 /*
-Desired demand for consumption-good sector
+Desired demand for firms in consumption-good sector
 */
 RESULT( ( VS( PARENT, "C" ) + VS( PARENT, "G" ) ) / V( "CPI" ) )
 
@@ -812,7 +816,7 @@ To be called after market shares are changed in '_f2' and 'entry2exit'
 
 v[1] = SUM( "_f2" );							// add-up market shares
 
-if ( ROUND( v[1], 1 ) == 1.0 )					// ignore rounding errors
+if ( ROUND( v[1], 1, 0.001 ) == 1.0 )			// ignore rounding errors
 	END_EQUATION( v[1] );
 
 v[0] = 0;										// accumulator

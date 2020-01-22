@@ -124,8 +124,8 @@ struct firm2									// extensions to Firm2 object
 
 /*============================== SUPPORT MACROS ==============================*/
 
-// macro to round values too close to a reference (tolerance = 0.001)
-#define ROUND( V, Ref ) ( abs( V - Ref ) > 0.001 ? V : Ref )
+// macro to round values too close to a reference
+#define ROUND( V, Ref, Tol ) ( abs( V - Ref ) > Tol ? V : Ref )
 
 // macros to pack/unpack vintage (machine technological generation) data
 #define VNT( T0, IDsuppl ) \
