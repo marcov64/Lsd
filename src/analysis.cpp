@@ -71,6 +71,7 @@ used case 44
 #define HISTOCS	5
 
 bool avgSmplMsg;
+bool first_run = true;
 char filename[ MAX_PATH_LENGTH ];
 double maxy, maxy2;
 double miny, miny2;
@@ -475,7 +476,12 @@ Tcl_SetVar( inter, "running", running ? "1" : "0", 0 );
 cmd( "if $running { showtop .da overM 0 1 } { showtop .da overM 0 1 0 }" );
 
 if ( num_var == 0 )
-  cmd( "tk_messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"There are no series available\" -detail \"Click on button 'Add...' to load series from results files.\n\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"" );  
+{
+	if ( first_run )
+		cmd( "tk_messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"There are no series available\" -detail \"Click on button 'Add...' to load series from results files.\n\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"" );
+	
+	first_run = false;
+}
 else
 {
 	if ( sim_num > 1 )
@@ -1763,6 +1769,7 @@ while ( true )
 								delete [ ] vs;
 								vs = NULL;
 								num_var = 0;
+								file_counter = 0;
 							}
 							
 							goto end_add;
@@ -1780,6 +1787,7 @@ while ( true )
 									delete [ ] vs;
 									vs = NULL;
 									num_var = 0;
+									file_counter = 0;
 								}
 							
 								goto end_add;
@@ -1818,6 +1826,7 @@ while ( true )
 						delete [ ] vs;
 						vs = vs_new;
 						num_var -= m;
+						file_counter = 0;
 					}
 					
 					plog( "Done\n" );
