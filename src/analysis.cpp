@@ -6513,6 +6513,8 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 	
 	confi = get_int( "confi", & confi );
 	type_series = get_int( "bidi", & type_series );
+	new_series = 1;
+	z_crit = 0;
 	
 	// set option specific parameters
 	switch ( type_series )
@@ -6549,9 +6551,6 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 			cmd( "set basename $vname; set tailname \"_avg\"; set vname $basename$tailname" );
 			z_crit = z_star[ ( int ) max( min( confi, 99 ), 80 ) - 80 ];
 			break;
-			
-		default:
-			new_series = 1;
 	}
 	
 	data = new double *[ sel_series ];
@@ -6633,7 +6632,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 
 			for ( i = min_c; i <= max_c; ++i )
 			{
-				nn = nvar = sum = 0;
+				nn = nvar = sum = prod = 0;
 				first = true;
 				for ( j = 0; j < sel_series; ++j )
 				{
@@ -6704,7 +6703,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 
 			for ( j = 0; j < sel_series; ++j )
 			{
-				nn = nvar = sum = 0;
+				nn = nvar = sum = prod = 0;
 				first = true;
 				for ( i = min_c; i <= max_c; ++i )
 				{

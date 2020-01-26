@@ -32,15 +32,15 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     names[[ stat ]] <- "GDP growth"
     units[[ stat ]] <- "Average GDP growth rate"
     # Calculates periodic GDP growth rates for each MC series
-    for(j in 1 : nSize)
-      for(i in TmaskStat)
-        if(i == 1) {
-          temp[i - warmUpStat, j ] <- 0
-        }else
-          temp[i - warmUpStat, j ] <- ( log0( mcData[[ k ]][i, "GDP", j ] ) -
-                                       log0( mcData[[ k ]][i - 1, "GDP", j ] ) )
+    for( j in 1 : nSize )
+      for( i in TmaskStat )
+        if( i == 1 ) {
+          temp[ i - warmUpStat, j ] <- 0
+        } else
+          temp[ i - warmUpStat, j ] <- ( log0( mcData[[ k ]][ i, "GDP", j ] ) -
+                                           log0( mcData[[ k ]][ i - 1, "GDP", j ] ) )
     # Remove +/-infinite values and replace by +/-1
-    temp[is.infinite(temp)] <- sign(temp[is.infinite(temp)] )
+    temp[ is.infinite( temp ) ] <- sign( temp[ is.infinite( temp ) ] )
     x <- colMeans( temp, na.rm = TRUE )
     bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
     statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
@@ -53,15 +53,15 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     names[[ stat ]] <- "Volatility of GDP growth"
     units[[ stat ]] <- "Standard deviation of GDP growth rate"
     # Calculates periodic GDP growth rates for each MC series
-    for(j in 1 : nSize)
-      for(i in TmaskStat)
-        if(i == 1) {
-          temp[i - warmUpStat, j ] <- 0
+    for( j in 1 : nSize )
+      for( i in TmaskStat )
+        if( i == 1 ) {
+          temp[ i - warmUpStat, j ] <- 0
         } else
-          temp[i - warmUpStat, j ] <- ( log0( mcData[[ k ]][i, "GDP", j ] ) -
-                                       log0( mcData[[ k ]][i - 1, "GDP", j ] ) )
+          temp[ i - warmUpStat, j ] <- ( log0( mcData[[ k ]][ i, "GDP", j ] ) -
+                                           log0( mcData[[ k ]][ i - 1, "GDP", j ] ) )
     # Remove +/-infinite values and replace by +/-1
-    temp[is.infinite(temp)] <- sign(temp[is.infinite(temp)] )
+    temp[ is.infinite( temp ) ] <- sign( temp[ is.infinite( temp ) ] )
     x <- colSds( temp, na.rm = TRUE )
     bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
     statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
@@ -74,18 +74,18 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     names[[ stat ]] <- "Likelihood of GDP crises"
     units[[ stat ]] <- "Likelihood (probability) of GDP crises"
     # Mark crises periods (= 1) when GDP growth is less than -3%
-    for(j in 1 : nSize){
-      for(i in TmaskStat){
-        if(i == 1){
-          temp[i - warmUpStat, j ] <- 0
+    for( j in 1 : nSize ){
+      for( i in TmaskStat ){
+        if( i == 1 ){
+          temp[ i - warmUpStat, j ] <- 0
         }
         else{
-          if( log0( mcData[[ k ]][i, "GDP", j ] ) -
-             log0( mcData[[ k ]][i - 1, "GDP", j ] ) < -0.03){
-            temp[i - warmUpStat, j ] <- 1
+          if( log0( mcData[[ k ]][ i, "GDP", j ] ) -
+              log0( mcData[[ k ]][ i - 1, "GDP", j ] ) < -0.03){
+            temp[ i - warmUpStat, j ] <- 1
           }
           else{
-            temp[i - warmUpStat, j ] <- 0
+            temp[ i - warmUpStat, j ] <- 0
           }
         }
       }
@@ -114,7 +114,7 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     stat <- stat + 1
     names[[ stat ]] <- "Tax"
     units[[ stat ]] <- "Government tax income over GDP"
-    temp <- mcData[[ k ]][ TmaskStat, "Tax", ] / mcData[[ k ]][ TmaskStat, "GDP", ]
+    temp <- mcData[[ k ]][ TmaskStat, "Tax", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     x <- colMeans( temp, na.rm = TRUE )
     bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
@@ -127,7 +127,7 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     stat <- stat + 1
     names[[ stat ]] <- "Government total expenditure"
     units[[ stat ]] <- "Total government expenditure over GDP"
-    temp <- mcData[[ k ]][ TmaskStat, "G", ] / mcData[[ k ]][ TmaskStat, "GDP", ]
+    temp <- mcData[[ k ]][ TmaskStat, "G", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     x <- colMeans( temp, na.rm = TRUE )
     bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
@@ -140,7 +140,7 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     stat <- stat + 1
     names[[ stat ]] <- "Government deficit"
     units[[ stat ]] <- "Government deficit over GDP"
-    temp <- mcData[[ k ]][ TmaskStat, "Def", ] / mcData[[ k ]][ TmaskStat, "GDP", ]
+    temp <- mcData[[ k ]][ TmaskStat, "Def", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     x <- colMeans( temp, na.rm = TRUE )
     bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
@@ -153,7 +153,7 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     stat <- stat + 1
     names[[ stat ]] <- "Government debt"
     units[[ stat ]] <- "Government debt over GDP"
-    temp <- mcData[[ k ]][ TmaskStat, "Deb", ] / mcData[[ k ]][ TmaskStat, "GDP", ]
+    temp <- mcData[[ k ]][ TmaskStat, "Deb", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     x <- colMeans( temp, na.rm = TRUE )
     bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
@@ -166,7 +166,7 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     stat <- stat + 1
     names[[ stat ]] <- "Credit supply"
     units[[ stat ]] <- "Total banks credit supply over GDP"
-    temp <- mcData[[ k ]][ TmaskStat, "TC", ] / mcData[[ k ]][ TmaskStat, "GDP", ]
+    temp <- mcData[[ k ]][ TmaskStat, "TC", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     x <- colMeans( temp, na.rm = TRUE )
     bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
@@ -179,7 +179,7 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     stat <- stat + 1
     names[[ stat ]] <- "Loans"
     units[[ stat ]] <- "Total banks loans over GDP"
-    temp <- mcData[[ k ]][ TmaskStat, "Loans", ] / mcData[[ k ]][ TmaskStat, "GDP", ]
+    temp <- mcData[[ k ]][ TmaskStat, "Loans", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     x <- colMeans( temp, na.rm = TRUE )
     bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
@@ -206,12 +206,12 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     names[[ stat ]] <- "Full employment frequency"
     units[[ stat ]] <- "Frequency (probability) of full employment"
     # Format full employment MC series (1 = full employment, 0 = otherwise)
-    for(j in 1 : nSize)
-      for(i in TmaskStat)
-        if(mcData[[ k ]][i, "U", j ] == 0) {
-          temp[i - warmUpStat, j ] <- 1
+    for( j in 1 : nSize )
+      for( i in TmaskStat )
+        if( mcData[[ k ]][ i, "U", j ] == 0) {
+          temp[ i - warmUpStat, j ] <- 1
         } else
-          temp[i - warmUpStat, j ] <- 0
+          temp[ i - warmUpStat, j ] <- 0
     x <- colMeans( temp, na.rm = TRUE )
     bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
     statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
@@ -328,15 +328,15 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     names[[ stat ]] <- "Productivity growth"
     units[[ stat ]] <- "Average productivity growth rate"
     # Calculates periodic productivity growth rates for each MC series
-    for(j in 1 : nSize)
-      for(i in TmaskStat)
-        if(i == 1) {
-          temp[i - warmUpStat, j ] <- 0
+    for( j in 1 : nSize )
+      for( i in TmaskStat )
+        if( i == 1 ) {
+          temp[ i - warmUpStat, j ] <- 0
         } else
-          temp[i - warmUpStat, j ] <- ( log0( mcData[[ k ]][i, "A", j ] ) -
-                                       log0( mcData[[ k ]][i - 1, "A", j ] ) )
+          temp[ i - warmUpStat, j ] <- ( log0( mcData[[ k ]][ i, "A", j ] ) -
+                                           log0( mcData[[ k ]][ i - 1, "A", j ] ) )
     # Remove +/-infinite values and replace by +/-1
-    temp[is.infinite(temp)] <- sign(temp[is.infinite(temp)] )
+    temp[ is.infinite( temp ) ] <- sign( temp[ is.infinite( temp ) ] )
     x <- colMeans( temp, na.rm = TRUE )
     bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
     statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )

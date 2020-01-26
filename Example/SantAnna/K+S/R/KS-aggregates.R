@@ -21,7 +21,7 @@ expVal <- c( "Fordist", "Competitive" )   # case parameter values
 firmTypes = c( "Pre-change firms", "Post-change firms" )
 
 # Aggregated variables to use
-logVars <- c( "GDP", "EI", "dN", "C", "I", "Deb1", "Deb2",
+logVars <- c( "GDP", "GDPnom", "EI", "dN", "D2", "I", "Deb1", "Deb2",
               "NWb", "NW1", "NW2", "S1", "S2", "A", "A2preChg",
               "A2posChg", "wAvgReal", "w2realPreChg", "w2realPosChg",
               "G", "Gbail", "Gtrain", "Tax", "Deb", "Def", "BadDeb",
@@ -260,7 +260,7 @@ for( k in 1 : nExp ){ # Experiment k
   # ---- Bandpass filtered GDP, consumption and investment cycles graphic ----
   #
 
-  plot_bpf( list( log0( Adata[[ k ]]$GDP ), log0( Adata[[ k ]]$C ),
+  plot_bpf( list( log0( Adata[[ k ]]$GDP ), log0( Adata[[ k ]]$D2 ),
                   log0( Adata[[ k ]]$I ), log0( Adata[[ k ]]$A ) ),
             pl = lowP, pu = highP, nfix = bpfK, mask = TmaskPlot,
             mrk = transMk, col = colors, lty = lTypes,
@@ -305,8 +305,8 @@ for( k in 1 : nExp ){ # Experiment k
     # Monte carlo average growth rates
     gdp.growth[ j ] <- ( log0( mcData[[ k ]][ nTstat, "GDP", j ] ) -
                         log0( mcData[[ k ]][ warmUpStat + 1, "GDP", j ] ) ) / TmaxStat
-    cReal.growth[ j ] <- ( log0( mcData[[ k ]][ nTstat, "C", j ] ) -
-                          log0( mcData[[ k ]][ warmUpStat + 1, "C", j ] ) ) / TmaxStat
+    cReal.growth[ j ] <- ( log0( mcData[[ k ]][ nTstat, "D2", j ] ) -
+                          log0( mcData[[ k ]][ warmUpStat + 1, "D2", j ] ) ) / TmaxStat
     iR.growth[ j ] <- ( log0( mcData[[ k ]][ nTstat, "I", j ] ) -
                        log0( mcData[[ k ]][ warmUpStat + 1, "I", j ] ) ) / TmaxStat
     A.growth[ j ] <- ( log0( mcData[[ k ]][ nTstat, "A", j ] ) -
@@ -320,7 +320,7 @@ for( k in 1 : nExp ){ # Experiment k
 
     # Apply Baxter-King filter to the series
     gdp.bpf <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "GDP", j ] ), pl = lowP, pu = highP, nfix = bpfK )
-    cReal.bpf <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "C", j ] ), pl = lowP, pu = highP, nfix = bpfK )
+    cReal.bpf <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "D2", j ] ), pl = lowP, pu = highP, nfix = bpfK )
     iR.bpf <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "I", j ] ), pl = lowP, pu = highP, nfix = bpfK )
     A.bpf <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "A", j ] ), pl = lowP, pu = highP, nfix = bpfK )
     wAvgReal.bpf <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "wAvgReal", j ] ), pl = lowP, pu = highP, nfix = bpfK )
@@ -349,7 +349,7 @@ for( k in 1 : nExp ){ # Experiment k
     # Augmented Dickey-Fuller tests for unit roots
     gdp.adf[[ j ]] <- adf.test( log0( mcData[[ k ]][ TmaskStat, "GDP", j ] ) )
     gdp.bpf.adf[[ j ]] <- adf.test(gdp.bpf$cycle[ TmaskBpf, 1 ] )
-    cReal.adf[[ j ]] <- adf.test( log0( mcData[[ k ]][ TmaskStat, "C", j ] ) )
+    cReal.adf[[ j ]] <- adf.test( log0( mcData[[ k ]][ TmaskStat, "D2", j ] ) )
     cReal.bpf.adf[[ j ]] <- adf.test(cReal.bpf$cycle[ TmaskBpf, 1 ] )
     iR.adf[[ j ]] <- adf.test( log0( mcData[[ k ]][ TmaskStat, "I", j ] ) )
     iR.bpf.adf[[ j ]] <- adf.test( iR.bpf$cycle[ TmaskBpf, 1 ] )

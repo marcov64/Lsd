@@ -21,10 +21,9 @@ expVal <- c( "Fordist", "Competitive" )   # case parameter values
 firmTypes = c( "Pre-change firms", "Post-change firms" )
 
 # Firm-level variables to use
-firmVar <- c( "_A2", "_Q2e", "_w2realAvg", "_s2avg", "_postChg", "_L2", "_f2" )
+firmVar <- c( "_A2", "_Q2e", "_w2realAvg", "_s2avg", "_postChg" )
 addFirmVar <- c( "growth2", "normO2", "normA2", "normRW2", "normSK2", "normO2grow",
-                 "normA2grow", "normRW2grow", "normSK2grow", "f2l", "A2d", "lA2",
-                 "lrwAvg2" )
+                 "normA2grow", "normRW2grow", "normSK2grow" )
 sector <- "( Consumption-goods sector )"
 
 
@@ -101,16 +100,10 @@ readExp <- function( exper ) {
       s2avg <- s2avg[ s2avg > 0 ]
       mean.s2avg <- mean( s2avg, na.rm = TRUE )
 
-      tot2 <- as.vector( mc[ i, "L2", , m ] )
-      tot2 <- tot2[ is.finite( tot2 ) ]
-      tot2 <- tot2[ tot2 > 0 ]
-      sum.tot2 <- sum( tot2, na.rm = TRUE )
-
       if( ! is.finite( mean.Q2e ) ) mean.Q2e <- 0
       if( ! is.finite( mean.A2 ) ) mean.A2 <- 0
       if( ! is.finite( mean.w2realAvg ) ) mean.w2realAvg <- 0
       if( ! is.finite( mean.s2avg ) ) mean.s2avg <- 0
-      if( ! is.finite( sum.tot2 ) ) sum.tot2 <- 0
 
       for( j in 1 : nFirms ){            # and all firms (instances)
 
@@ -119,8 +112,7 @@ readExp <- function( exper ) {
             is.na( mc[ i, "A2", j, m ] ) || mc[ i, "A2", j, m ] < 1 ||
             is.na( mc[ i, "w2realAvg", j, m ] ) || mc[ i, "w2realAvg", j, m ] <= 0 ||
             is.na( mc[ i, "s2avg", j, m ] ) || mc[ i, "s2avg", j, m ] <= 0 ||
-            is.na( mc[ i, "postChg", j, m ] ) || is.na( mc[ i, "Q2e", j, m ] ) ||
-            is.na( mc[ i, "L2", j, m ] ) || is.na( mc[ i, "postChg", j, m ] ) ) {
+            is.na( mc[ i, "postChg", j, m ] ) || is.na( mc[ i, "Q2e", j, m ] ) ) {
           mc[ i, , j, m ] <- rep( NA, nVar )
           next
         }
@@ -134,19 +126,6 @@ readExp <- function( exper ) {
           mc[ i, "normRW2", j, m ] <- mc[ i, "w2realAvg", j, m ] / mean.w2realAvg
         if( mean.s2avg != 0 )
           mc[ i, "normSK2", j, m ] <- mc[ i, "s2avg", j, m ] / mean.s2avg
-
-        # FHK decomposition variables
-        if( mc[ i, "Q2e", j, m ] > 0 && mc[ i, "L2", j, m ] > 0 ) {
-          mc[ i, "A2d", j, m ] <- mc[ i, "Q2e", j, m ] / mc[ i, "L2", j, m ]
-          mc[ i, "lA2", j, m ] <- log( mc[ i, "Q2e", j, m ] / mc[ i, "L2", j, m ] )
-
-          if( sum.tot2 > 0 )
-            mc[ i, "f2l", j, m ] <- mc[ i, "L2", j, m ] / sum.tot2
-        }
-
-        # wage x productivity regression extra variable
-        if( mc[ i, "w2realAvg", j, m ] > 0 )
-          mc[ i, "lrwAvg2", j, m ] <- log( mc[ i, "w2realAvg", j, m ] )
 
         # Growth rates and deltas are calculated only from 2nd period and for non-entrant firms
         if( i > 1 ) {

@@ -1326,7 +1326,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	fprintf( firms2, ",%g,%g,%g,%g,%g,%g,%g,%g", 
 		 _D2e, _Q2d, _Q2, _Q2e, _L2d, _L2, _c2, _s2avg );
 		 
-	check_error( _Q2d > 0 && floor( _Q2d ) > ceil( ( 1 + iota ) * _D2e - _N_1 ) || 
+	check_error( ( _Q2d > 0 && floor( _Q2d ) > ceil( ( 1 + iota ) * _D2e - _N_1 ) ) || 
 				 _Q2 > _Q2d || _Q2e > _K * _s2avg || _Q2e > _Q2, 
 				 "INCONSISTENT-PRODUCTION", 0, & errors );
 

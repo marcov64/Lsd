@@ -10,6 +10,13 @@
 
 /*========================= COUNTRY-LEVEL STATS ==============================*/
 
+EQUATION( "Creal" )
+/*
+Real aggregated consumption
+*/
+RESULT( VS( GRANDPARENT, "C" ) / VS( CONSECL2, "CPI" ) )
+
+
 EQUATION( "DebGDP" )
 /*
 Government debt on GDP ratio
