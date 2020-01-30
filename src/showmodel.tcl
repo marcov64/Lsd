@@ -475,12 +475,30 @@ proc medit i {
 
 	okcancel .l.e b { 
 		if { [ lindex $group $result ] == 0 } {
+			if [ file exists "[ lindex $ldn $result ]/$MODEL_INFO" ] {
+				set a [ list ]
+				set f [ open "[ lindex $ldn $result ]/$MODEL_INFO" r ]
+				gets $f line
+				for { set i 1 } { $line != "" } { incr i } {
+					lappend a "$line"
+					gets $f line
+				}
+				close $f
+			} else {
+				set i 1
+			}
+			
 			set f [ open "[ lindex $ldn $result ]/$MODEL_INFO" w ]
+			puts -nonewline $f "[ .l.e.n.n get ]"
+			for { set j 1 } { $j < $i } { incr j } {
+				puts -nonewline $f "\n[ lindex $a $j ]"
+			}
+			close $f
 		} else {
 			set f [ open "[ lindex $ldn $result ]/$GROUP_INFO" w ]
+			puts -nonewline $f "[ .l.e.n.n get ]"
+			close $f
 		}
-		puts -nonewline $f "[ .l.e.n.n get ]"
-		close $f
 		set f [ open "[ lindex $ldn $result ]/$DESCRIPTION" w ]
 		puts -nonewline $f [ .l.e.t.t.text get 0.0 end ]
 		close $f
