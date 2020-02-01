@@ -28,7 +28,7 @@ suppressPackageStartupMessages( require( matrixStats, warn.conflicts = FALSE, qu
 suppressPackageStartupMessages( require( tseries, warn.conflicts = FALSE, quietly = TRUE ) )
 suppressPackageStartupMessages( require( np, warn.conflicts = FALSE, quietly = TRUE ) )
 suppressPackageStartupMessages( require( extrafont, warn.conflicts = FALSE, quietly = TRUE ) )
-invisible( capture.output( require( mFilter, warn.conflicts = FALSE, quietly = TRUE ) ) )
+suppressPackageStartupMessages( require( mFilter, warn.conflicts = FALSE, quietly = TRUE ) )
 
 # subbotools location (leave blank in linux/Mac)
 if( tolower( .Platform$OS.type ) == "windows" ){

@@ -296,6 +296,7 @@ cmd( "pack .da.vars.lb .da.vars.b .da.vars.ch .da.vars.pl -side left  -expand tr
 cmd( "pack .da.vars -expand true -fill y" );
 
 // add time series in memory
+cmd( "set DaModElem [ list ]" );
 if ( actual_steps > 0 )
 {
 	insert_data_mem( root, &num_var, &num_c );
@@ -492,9 +493,6 @@ else
 	cmd( ".da.vars.lb.v see 0" );
 	cmd( "focus .da.vars.lb.v" );
 }
-
-// make a copy to allow insertion of new temporary variables
-cmd( "if [ info exists modElem ] { set DaModElem $modElem } { set DaModElem [ list ] }" );
 
 // main loop
 
@@ -3354,6 +3352,7 @@ void insert_labels_mem( object *r, int *num_v, int *num_c )
 			{
 				set_lab_tit( cv );
 				cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
+				cmd( "if { [ lsearch -exact $DaModElem %s ] < 0 } { lappend DaModElem %s }", cv->label, cv->label );
 				if ( cv->end > *num_c )
 					*num_c = cv->end;
 				*num_v += 1;
@@ -3368,6 +3367,7 @@ void insert_labels_mem( object *r, int *num_v, int *num_c )
 		for ( cv = cemetery; cv != NULL; cv = cv->next )
 		{  
 			cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
+			cmd( "if { [ lsearch -exact $DaModElem %s ] < 0 } { lappend DaModElem %s }", cv->label, cv->label );
 			if ( cv->end > *num_c )
 				*num_c = cv->end;
 			*num_v += 1;
