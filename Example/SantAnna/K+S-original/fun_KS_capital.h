@@ -39,16 +39,10 @@ else
 RESULT( v[2] + ( v[3] - v[2] ) * v[6] )
 
 
-EQUATION( "MC1" )
-/*
-Market conditions index for entry in capital-good sector
-*/
-RESULT( log( max( VL( "NW1", 1 ), 0 ) + 1 ) - log( VL( "Deb1", 1 ) + 1 ) )
-
-
 EQUATION( "entry1exit" )
 /*
-Perform entry and exit of firms in the capital-good sector
+Rate of entry-exit of firms in the capital-good sector
+Perform entry and exit of firms 
 All relevant aggregate variables in sector must be computed before existing
 firms are deleted, so all active firms in period are considered
 */
@@ -56,18 +50,9 @@ firms are deleted, so all active firms in period are considered
 VS( CONSECL1, "K" );							// ensure canceled orders acct'd
 UPDATE;											// ensure aggregates are computed
 
-double MC1 = V( "MC1" );						// market conditions in sector 1
-double MC1_1 = VL( "MC1", 1 );					// market conditions in sector 1
 double NW10u = V( "NW10" ) * V( "PPI" ) / V( "PPI0" );// minimum wealth in s. 1
 double n1 = V( "n1" );							// market participation period
-double omicron = VS( PARENT, "omicron" );		// entry sensitivity to mkt cond
-double stick = VS( PARENT, "stick" );			// stickiness in number of firms
-double x2inf = VS( PARENT, "x2inf" );			// entry lower distrib. support
-double x2sup = VS( PARENT, "x2sup" );			// entry upper distrib. support
-int F1 = V( "F1" );								// current number of firms
-int F10 = V( "F10" );							// initial number of firms
-int F1max = V( "F1max" );						// max firms in sector 1
-int F1min = V( "F1min" );						// min firms in sector 1
+int F1 = V( "F1" );								// number of firms
 
 vector < bool > quit( F1, false );				// vector of firms' quit status
 
@@ -128,35 +113,16 @@ CYCLE_SAFE( cur, "Firm1" )
 
 V( "f1rescale" );								// redistribute exiting m.s.
 
-// compute the potential number of entrants
-v[7] = ( MC1_1 == 0 ) ? 0 : MC1 / MC1_1 - 1;// change in market conditions
+// replace exiting firms by entrants
+v[1] += entry_firm1( p, j, false );				// add entrant-firm objects
 
-k = max( 0, ceil( F1 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
-						 omicron * min( max( v[7], x2inf ), x2sup ) ) ) );
-				 
-// apply return-to-the-average stickiness random shock to the number of entrants
-k -= min( RND * stick * ( ( double ) ( F1 - j ) / F10 - 1 ) * F10, k );
-
-// ensure limits are enforced to the number of entrants
-if ( F1 - j + k < F1min )
-	k = F1min - F1 + j;
-
-if ( F1 + k > F1max )
-	k = F1max - F1 + j;
-
-v[0] = k - j;									// net number of entrants
-v[1] += entry_firm1( p, k, false );				// add entrant-firm objects
-
-i = INCR( "F1", v[0] );							// update the number of firms
 INCRS( PARENT, "cEntry", v[1] );				// account equity cost of entry
 INCRS( PARENT, "cExit", v[2] );					// account exit credits
-WRITE( "exit1", ( double ) j / F1 );
-WRITE( "entry1", ( double ) k / F1 );
 
 V( "f1rescale" );								// redistribute entrant m.s.
 INIT_TSEARCHT( "Firm1", i );					// prepare turbo search indexing
 
-RESULT( v[0] )
+RESULT( ( double ) j / F1 )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
@@ -166,7 +132,7 @@ EQUATION( "A1" )
 Productivity of capital-good sector
 */
 V( "PPI" );										// ensure m.s. are updated
-RESULT( WHTAVE( "_Btau", "_f1" ) )
+RESULT( V( "Q1e" ) > 0 ? WHTAVE( "_Btau", "_f1" ) : CURRENT )
 
 
 EQUATION( "D1" )
@@ -189,13 +155,6 @@ Total dividends paid by firms in capital-good sector
 */
 V( "Tax1" );									// ensure dividends are computed
 RESULT( SUM( "_Div1" ) )
-
-
-EQUATION( "F1" )
-/*
-Number of firms in capital-good sector
-*/
-RESULT( COUNT( "Firm1" ) )
 
 
 EQUATION( "JO1" )
@@ -341,18 +300,6 @@ RESULT( v[0] )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
-
-EQUATION_DUMMY( "entry1", "entry1exit" )
-/*
-Rate of entering firms in capital-good sector
-Updated in 'entry1exit'
-*/
-
-EQUATION_DUMMY( "exit1", "entry1exit" )
-/*
-Rate of exiting firms in capital-good sector
-Updated in 'entry1exit'
-*/
 
 EQUATION_DUMMY( "exit1fail", "entry1exit" )
 /*

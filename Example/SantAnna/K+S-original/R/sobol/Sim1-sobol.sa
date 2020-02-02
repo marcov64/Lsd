@@ -1,0 +1,16 @@
+beta2 0 2 f: 1 5
+x5 0 2 f: 0 1
+alpha2 0 2 f: 1 5
+phi 0 2 f: 0 1
+mu1 0 2 f: 0.01 0.2
+mu20 0 2 f: 0.1 0.5
+gamma 0 2 f: 0.2 0.8
+F1 0 2 i: 10 40
+f2min 0 2 f: 1e-06 1e-03
+iota 0 2 f: 0 0.3
+upsilon 0 2 f: 0.01 0.1
+m2 0 2 f: 10 100
+omega2 0 2 f: 0.2 5
+Lambda 0 2 f: 1 4
+beta1 0 2 f: 1 5
+zeta2 0 2 f: 0.1 0.6
