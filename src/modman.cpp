@@ -71,7 +71,7 @@ used up to 88 options
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 2
 #define _LSD_VERSION_ "7.2-2"
-#define _LSD_DATE_ "February 1 2020"   // __DATE__
+#define _LSD_DATE_ "February 10 2020"   // __DATE__
 
 // general buffer limits
 #define TCL_BUFF_STR 3000		// standard Tcl buffer size (>1000)
@@ -1657,7 +1657,7 @@ if ( choice == 13 || choice == 58 )
 		cmd( "if [ string equal -nocase $DbgExe gdb ] { set cmdbreak \"--args\" } { set cmdbreak \"\" }" ); 
 
 	make_makefile( );  
-	cmd( "set fapp [file nativename \"$modelDir/makefile\"]" );
+	cmd( "set fapp [ file nativename \"$modelDir/makefile\" ]" );
 	s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
 	f = fopen( s, "r" );
 	if ( f == NULL )
@@ -1869,7 +1869,7 @@ if ( choice == 14 )
 		}
 		
 		// control for existing directory
-		cmd( "if { [ file exists \"$groupdir/$mdir\" ] == 1 } { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+		cmd( "if [ file exists \"$groupdir/$mdir\" ] { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 		if ( choice == 3 )
 		{
 			cmd( "focus .a.mdir.e" );
@@ -1956,7 +1956,7 @@ if ( choice == 14 )
 	} 
 
 	// control for existing directory
-	cmd( "if { [ file exists \"$mdir\" ] == 1 } { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+	cmd( "if [ file exists \"$mdir\" ] { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 	if ( choice == 3 )
 	{
 		cmd( "focus .a.mdir.e" );
@@ -1971,7 +1971,7 @@ if ( choice == 14 )
 	
 	for ( i = 0; i < num; ++i )
 	{
-		cmd( "if { [ file isdirectory [ lindex $dir %d ] ] == 1 } { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
+		cmd( "if [ file isdirectory [ lindex $dir %d ] ] { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
 		s = ( char * ) Tcl_GetVar( inter, "curdir", 0 );
 		strncpy( str, s, 499 );
 		
@@ -4939,7 +4939,7 @@ if ( choice == 41 )
 	} 
 
 	// control for existing directory
-	cmd( "if { [ file exists \"$mdir\" ] == 1 } { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+	cmd( "if [ file exists \"$mdir\" ] { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 	if ( choice == 3 )
 	{
 		cmd( "focus .a.mdir.e" );
@@ -4953,7 +4953,7 @@ if ( choice == 41 )
 	strcpy( str, " " );
 	for ( i = 0; i < num && choice != 3; ++i )
 	{
-		cmd( "if { [ file isdirectory [ lindex $dir %d ] ] == 1 } { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
+		cmd( "if [ file isdirectory [ lindex $dir %d ] ] { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
 		s = ( char * ) Tcl_GetVar( inter, "curdir", 0 );
 		strncpy( str, s, 499 );
 		
@@ -5079,7 +5079,7 @@ if ( choice == 44 )
 	else
 	{
 		cmd( "set eqname \"%s\"", s );
-		cmd( "set edate \"[ clock format [ file mtime \"$modelDir/$eqname\" ] -format \"$DATE_FMT\" ]\"" );
+		cmd( "if [ file exists \"$modelDir/$eqname\" ] { set edate \"[ clock format [ file mtime \"$modelDir/$eqname\" ] -format \"$DATE_FMT\" ]\" } { set edate \"\" }" );
 	}
 	
 	cmd( "newtop .a \"Model Info\" { set choice 2 }" );
@@ -5277,7 +5277,7 @@ if ( choice == 48 )
 	cmd( "set a [ read -nonewline $f ]" );
 	cmd( "close $f" );
 
-	cmd( "set gcc_conf \"TARGET=$DefaultExe\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=\"" );
+	cmd( "set gcc_conf \"TARGET=$DefaultExe\\nFUN=[ file rootname \"$b\" ]\\nFUN_EXTRA=\\nSWITCH_CC=\"" );
 	cmd( "if [ string equal $CurPlatform \"win32\" ] { set gcc_deb_nopt \"-O0\" } { set gcc_deb_nopt \"-Og\" }" );
 	cmd( "set gcc_deb \"$gcc_conf$gcc_deb_nopt -ggdb3\\nSWITCH_CC_LNK=\"" );
 	cmd( "set gcc_opt \"$gcc_conf -O3\\nSWITCH_CC_LNK=\"" );
