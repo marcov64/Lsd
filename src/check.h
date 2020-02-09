@@ -146,6 +146,22 @@ double bad_ptr_dbl( object* ptr, const char* file, int line )
   return 0.;
 }
 
+int bad_ptr_int( object* ptr, const char* file, int line )
+{
+  char msg[ MAX_LINE_SIZE ];
+  
+  if ( ptr == NULL )
+  { sprintf( msg, "NULL pointer used in file '%s', line %d", file, line ); }
+  else
+  { sprintf( msg, "pointer to non-existing object used\nin file '%s', line %d", file, line ); }
+  
+  error_hard( msg, "invalid pointer operation",
+              "check your equation code to ensure pointer points\nto a valid object before the operation",
+              true );
+              
+  return 0;
+}
+
 bool bad_ptr_bool( object* ptr, const char* file, int line )
 {
   bad_ptr_dbl( ptr, file, line );

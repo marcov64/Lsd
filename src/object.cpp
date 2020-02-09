@@ -495,7 +495,11 @@ void object::declare_as_nonUnique()
     UNIQUE_ID
     Return the unique ID which can be used for fast look-up, if any.
 ****************************************************/
-double object::unique_id()
+double object::unique_id() {
+  return (double) unique_id_int();
+}
+
+int object::unique_id_int()
 {
   if (uID == NULL) {
     sprintf( msg, "object '%s' cannot be retrieved by its unique id", label );
@@ -505,7 +509,7 @@ double object::unique_id()
     return -0.0;
   }
   else {
-    return (double) uID -> id;
+    return uID -> id;
   }
 }
 #endif //#ifdef CPP11
@@ -2883,7 +2887,7 @@ std::vector<double> object::gatherData_all_cnd(char const* lab, char const condV
   }
   
   if (cv == NULL) {
-    cv = blueprint->search(this->label)->search_var(this, lab, true, no_search);
+    cv = blueprint->search(this->label)->search_var(this, lab, true, false,this);
     
     if (cv == NULL) {
       sprintf(msg, "element '%s' is missing for calculating statistics", lab);

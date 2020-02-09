@@ -55,6 +55,7 @@ bool no_ptr_chk = false;
 #define CHK_PTR_NOP( O ) if ( chk_ptr( O ) ) bad_ptr_void( O, __FILE__, __LINE__ );
 #define CHK_PTR_CHR( O ) chk_ptr( O ) ? bad_ptr_chr( O, __FILE__, __LINE__ ) :
 #define CHK_PTR_DBL( O ) chk_ptr( O ) ? bad_ptr_dbl( O, __FILE__, __LINE__ ) :
+#define CHK_PTR_INT( O ) chk_ptr( O ) ? bad_ptr_int( O, __FILE__, __LINE__ ) :
 #define CHK_PTR_BOOL( O ) chk_ptr( O ) ? bad_ptr_bool( O, __FILE__, __LINE__ ) :
 #define CHK_PTR_LNK( O ) chk_ptr( O ) ? bad_ptr_lnk( O, __FILE__, __LINE__ ) :
 #define CHK_PTR_OBJ( O ) chk_ptr( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
@@ -303,7 +304,9 @@ bool no_ptr_chk = true;
 #ifdef CPP11
   #define MAKE_UNIQUE( LAB ) p->declare_as_unique( ( char * ) LAB )
   #define UID  ( p->unique_id( )  )
-  #define UIDS( PTR ) ( CHK_PTR_DBL(PTR) PTR->unique_id( ) ) 
+  #define UIDS( PTR ) ( CHK_PTR_DBL(PTR) PTR->unique_id_int( ) ) 
+  #define UID_INT  ( p->unique_id( )  )
+  #define UID_INTS( PTR ) ( CHK_PTR_INT(PTR) PTR->unique_id_int( ) ) 
   #define SEARCH_UID( ID ) ( root->obj_by_unique_id( int ( ID ) ) )
 #endif //#ifdef CPP11
 #define RND_SEED ( ( double ) seed - 1 )
@@ -719,6 +722,7 @@ bool no_ptr_chk = true;
   #define ADD_TO_SPACE_XYS_WHERE( PTR, X, Y, WHERE)  {CHK_PTR_BOOL( PTR )  PTR->register_at_map(WHERE, X, Y); }
   #define ADD_TO_SPACE_SHARE_WHERE( WHERE ) { p->register_at_map(WHERE); }
   #define ADD_TO_SPACE_SHARES_WHERE(PTR, WHERE) {CHK_PTR_BOOL( PTR )  PTR->register_at_map(WHERE); }
+  #define ADD_TO_SPACE_SHARES(PTR) {CHK_PTR_BOOL( PTR )  PTR->register_at_map(p); }
   
   #define ADD_TO_SPACE_CENTER_XY_WHERE( X, Y, X2, Y2, WHERE)  { p->register_at_map_between(WHERE, X, Y, X2, Y2); }
   #define ADD_TO_SPACE_CENTER_XYS_WHERE( PTR, X, Y, X2, Y2, WHERE)  { CHK_PTR_BOOL( PTR )  PTR->register_at_map_between(WHERE, X, Y, X2, Y2); }

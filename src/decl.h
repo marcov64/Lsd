@@ -444,6 +444,7 @@ struct object {
   void declare_as_unique(char const* uLab); //this object and all of its kind will become "unique", allowing for fast access by the new unique id.
   object* obj_by_unique_id(int id); //function to retreave object by unique id.
   void declare_as_nonUnique(); //when the object is deleted, clean up and update info.
+  int unique_id_int();
   double unique_id();  //retrieve unique id, if any.
 #endif //#ifdef CPP11
   
