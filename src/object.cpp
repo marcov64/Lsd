@@ -1775,8 +1775,13 @@ object* object::add_n_objects2( char const* lab, int n, object* ex, int t_update
   
   if (cur != NULL && cur->uID != NULL)
   { uids = true; }
-  else
-  { uids = false; }
+  else {
+    object* cur_blueprint = blueprint->search( lab );
+    if (cur_blueprint != NULL && cur_blueprint->uID != NULL)
+    { uids = true; }
+    else
+    { uids = false; }
+  }
   
   // check if copy from an object in a gis. If yes, then this one inherits all info AND is registered at same pos.
   // blueprint is never part of gis
