@@ -1129,7 +1129,7 @@ bool no_ptr_chk = true;
   #define ABMAT_ADD_FMACRO( lab1 ) { abmat_add_final_macro( lab1 ); }
   #define ABMAT_ADD_FMICRO( lab1 ) { abmat_add_final_micro( lab1 ); }
   
-  #define ABMAT_ADD_INTERVAL( start, end ) { add_abmat_interval(start, end); }
+  #define ABMAT_ADD_INTERVAL( start, end ) { abmat_add_interval(start, end); }
   
 #endif //#ifdef CPP11
 

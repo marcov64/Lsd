@@ -1109,6 +1109,7 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
 void abmat_use_long_names();
 void abmat_allow_dynamic_factors();
 void abmat_update_sim_pars( );
+void abmat_add_interval( int start, int end );
 void abmat_add_sim_par(std::string lab, double value);
 void abmat_add_micro(std::string varlab);
 void abmat_add_macro(std::string varlab);
