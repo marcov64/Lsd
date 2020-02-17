@@ -99,8 +99,10 @@ void object::set_distance_type( char type )
   }
   
   position->map->distance_type = type;
-  sprintf( gismsg, "\nSwitched distance to type '%c' (c: Chebyshev, e: Euclidean, m: Manhattan)", type);
-  plog(gismsg);
+  if (this == root){ //only print for root.
+    sprintf( gismsg, "\nSwitched distance for root to type '%c' (c: Chebyshev, e: Euclidean, m: Manhattan)", type);
+    plog(gismsg);
+  }
   return;
 }
 

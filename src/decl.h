@@ -919,8 +919,8 @@ class result {            // results file object
     
 #ifdef LIBZ
     gzFile fz;              // compressed file pointer
-#endif
-    
+#endif  
+
     void title_recursive( object* r, int i ); // write file header (recursively)
     void data_recursive( object* r, int i );  // save a single time step (recursively)
     
@@ -929,7 +929,11 @@ class result {            // results file object
     void write_title(const char* label, const char* lab_tit, bool single, bool header, int start, int end);
     
   public:
-  
+
+    void use_abmat(){
+      switch_abmat = true;
+    }
+
     result( char const* fname, char const* fmode, bool dozip = false, bool docsv = false, bool switch_abmat = false );
     // constructor
     ~result( void );          // destructor

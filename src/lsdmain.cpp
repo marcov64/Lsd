@@ -989,8 +989,9 @@ void run( void )
           if ( fast_mode < 2 )
           { plog( "Saving results in file %s%s... ", "", msg, dozip ? ".gz" : "" ); }
           
-          //abmat does not intercept here, but abmat variables are considered alongside normal ones.
-          rf = new result( msg, "wt", dozip, docsv ); // create results file object
+          
+          rf = new result( msg, "wt", dozip, docsv ); // create results file object#
+          if (switch_abmat) {rf->use_abmat();}
           rf->title( root, 1 );           // write header
           rf->data( root, 0, actual_steps );      // write all data
           delete rf;                  // close file and delete object
