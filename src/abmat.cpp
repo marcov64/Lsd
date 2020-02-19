@@ -153,13 +153,13 @@ void abmat_init( )
   i_abmat_varnames = 0;
   abmat_series_saved = 0;
   abmat_dynamic_factors_allowed = false;
-  abmat_short_names = false;
+  abmat_short_names = true;
   abmat_create_tree();
 }
 
 void abmat_use_long_names()
 {
-  abmat_short_names = true;
+  abmat_short_names = false;
   plog("\n(ABMAT) : Not shortening variable names.");
   return;
 }
@@ -284,7 +284,7 @@ const char* abmat_varname_convert( const char* lab)
   if (m_abmat_varnames.count(lab) == 0 ) {
     std::string s_short = std::string(lab);
 
-    if (false == abmat_short_names ) {
+    if ( true == abmat_short_names ) {
     
       if (s_short.length() > MAX_ABMAT_BASEVAR_LENGTH) {
         s_short.resize(MAX_ABMAT_BASEVAR_LENGTH - 3); //drop last chars
@@ -353,17 +353,17 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
     case a_pLSD:
       varname.insert(0, "_");
       varname.insert(0, apar_LSD);
-      return varname;
+      break;
       
     case a_pstat:
       varname.insert(0, "_");
       varname.insert(0, apar_stat);
-      return varname;
+      break;
       
     case a_pmac:
       varname.insert(0, "_");
       varname.insert(0, apar_mac);
-      return varname;
+      break;
       
     case a_pmic:
       varname.insert(0, "_");
@@ -373,7 +373,7 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
     case a_fmac:
       varname.insert(0, "_");
       varname.insert(0, afin_mac);
-      return varname;
+      break;
       
     case a_fmic:
       varname.insert(0, "_");
@@ -381,13 +381,13 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
       break;
       
     case a_macro:
-      return varname;//nothing to add ever
+      break;
       
       
     case a_comp:
       varname.append("_v_");
       varname.append( abmat_varname_convert(var2lab) );
-      return varname;
+      break;
       
     case a_micro:
       break;//nothing to add
@@ -395,6 +395,7 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
     case a_cond:
       varname.append("_c_");
       varname.append( abmat_varname_convert(var2lab) );
+      break;
       
     case a_fact: //factorial share info.
       if (!flag_fact_n) {
@@ -421,13 +422,14 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
   //Add stat info
   switch (stattype) {
     case a_pmic:
+    case a_fmic:
     case a_micro:
     case a_cond: {
         varname.append("_");
         varname.append(statname);
       }
       
-      return varname;
+      break;
       
     case a_fact:
       if (flag_fact_n) {
@@ -436,15 +438,15 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
       else {
         varname.append("_shr");    //share in 0,1
       }
-      
-      return varname;
-      
+      break;            
     default:
       error_hard( __DEV_ERR_INFO__, "defaulting should not happen (2)",
                   "contact the developer.",
                   true );
       return "";
   }
+
+  return varname;
 }
 
 
@@ -1003,6 +1005,10 @@ void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2la
   //check if the abmat object associated to the variable
   //exists. Note: It may be included in multiple categories
   //so we check on category level.
+
+  #ifdef NO_WINDOW
+  no_res = true; //never save results in no window mode IF ABMAT IS ACTIVE.
+  #endif
   
   //check that the object added is not a function.
   variable* target1 = root->search_var_global(root, varlab);
