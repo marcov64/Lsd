@@ -73,6 +73,8 @@ bool no_ptr_chk = true;
 #define CHK_PTR_NOP( O )
 #define CHK_PTR_CHR( O )
 #define CHK_PTR_DBL( O )
+#define CHK_PTR_INT( O )
+#define CHK_PTR_BOOL( O )
 #define CHK_PTR_LNK( O )
 #define CHK_PTR_OBJ( O )
 #define CHK_PTR_VOID( O )

@@ -990,8 +990,7 @@ void run( void )
           { plog( "Saving results in file %s%s... ", "", msg, dozip ? ".gz" : "" ); }
           
           
-          rf = new result( msg, "wt", dozip, docsv ); // create results file object#
-          if (switch_abmat) {rf->use_abmat();}
+          rf = new result( msg, "wt", dozip, docsv); // create results file object#          
           rf->title( root, 1 );           // write header
           rf->data( root, 0, actual_steps );      // write all data
           delete rf;                  // close file and delete object
