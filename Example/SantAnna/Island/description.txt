@@ -111,4 +111,23 @@ Each KnownIsland instance is the hub of a star network to all other relevant kno
  . Link creation depends on the signal intensity threshold defined by MinSgnPrb
  . All links are bidirectional
  . Link weight is defined by the exponential decay factor between the two islands
+ 
+Data analysis
+-------------
+Some R scripts are provided to analyze the model outputs, to perform sensitivity analysis, and to generate response surfaces:
 
+aggregates_analysis.R - analyze model aggregate variables
+
+elementary-effects-SA.R - perform Morris OAT elementary effects sensitivity analysis
+
+kriging-sobol-SA.R - fit Kriging meta-model, perform Sobol sensitivity analysis on it, and present the response surface
+
+poly-sobol-SA.R - fit polynomial meta-model, perform Sobol sensitivity analysis on it, and present the response surface (experimental, use with care)
+
+sobol-SA.R - perform Sobol sensitivity analysis directly on DoE data (require dense sampling), no response surface analysis
+
+optimize-MM.R - using a fitted meta-model, find points in the parameter space which maximize and minimize the value of the selected variable
+
+The scripts and the pre-defined example configurations to use the scripts can be found in folders in the R folder inside the model folder ([LSD_directory]/Example/SantAnna/Island/R). 
+
+All the scripts assume the R working directory is set to this particular folder. All the scripts require the following R packages (and its dependencies) to be installed: LSDsensitivity, normalp, nortest, mFilter, matrixStats, tseries, gplots, plotrix, extrafont.

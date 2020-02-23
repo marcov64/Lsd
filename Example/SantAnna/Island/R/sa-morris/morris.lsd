@@ -143,9 +143,9 @@ Param: _yTarget 0 n + n n	0
 Param: _Qlast 0 n + n n	0
 Var: _a 1 n + n n	0
 
-SIM_NUM 10
+SIM_NUM 5
 SEED 1
-MAX_STEP 1000
+MAX_STEP 500
 EQUATION fun_Island.cpp
 MODELREPORT report_Sim1.html
 

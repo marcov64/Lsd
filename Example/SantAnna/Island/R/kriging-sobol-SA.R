@@ -29,7 +29,7 @@ raster <- FALSE                       # raster or vector plots
 res <- 600                            # resolution of raster mode (in dpi)
 
 grid3d <- 25                          # density for 3D wireframe plots
-theta3d <- 230                        # horizontal view angle
+theta3d <- 320                        # horizontal view angle
 phi3d <- 20                           # vertical view angle
 
 

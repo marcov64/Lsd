@@ -993,42 +993,6 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
                paste0( folder, "/", outDir, "/", repName, "", k, "_perf_comp.csv") )
   }
 
-  #
-  # ---- Produce crisis recoveries report ----
-  #
-
-  if( crisesPlt ) {
-
-    cat( "\nGenerating crises report...\n")
-
-    # Close main plot file
-    dev.off()
-
-    # Select type of output
-    if( raster ){
-      # Open PNG (bitmap) files for output
-      png( paste0( folder, "/", outDir, "/", repName, "_crisis_%d.png" ),
-           width = plotW, height = plotH, units = "in", res = res )
-
-    } else {
-      # Open PDF plot file for output
-      pdf(paste0( folder, "/", outDir, "/", repName, "_crisis.pdf" ),
-          width = plotW, height = plotH )
-      par( mfrow = c ( plotRows, plotCols ) )             # define plots per page
-    }
-
-    # Plot all GDP recovery runs
-
-    for( k in 1 : nExp )                                  # for each experiment
-      for( j in 1 : nSize )                               # for each MC case
-        plot_recovery( mcData[[ k ]][ , "Q", j ], mcData[[ k ]][ , "g", j ],
-                       mask = TmaskStat, warm = warmUpPlot, mrk = transMk,
-                       strt = rec.starts[[ j, k ]], dur = rec.times[[ j, k ]],
-                       per = crisisPre, xlab = "Time", ylab = "Log Q",
-                       tit = paste( "GDP long-term trend recovery after crisis sample (", legends[ k ], ")" ),
-                       subtit = paste( "( dashed line: pre-crisis trend / gray boxes: trend recovey period / MC case =",
-                                       j, "/ period =", warmUpStat, "-", nTsteps, ")" ) )
-  }
 
 #******************************************************************
 #
