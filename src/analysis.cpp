@@ -1640,9 +1640,49 @@ while ( true )
 				if ( *choice == 0 )
 					break;
 				
-				cmd( "set srchTxt [ string tolower $srchTxt ]" );
-				cmd( "set a [ .da.vars.lb.v get 0 end ]; set i 0" );
-				cmd( "foreach b $a { set choice [ string first $srchTxt [ string tolower [ lindex [ split $b ] 0 ] ] ]; if { $choice != -1 } { break } { set i [ expr $i + 1 ] } }" );
+				cmd( "set a [ .da.vars.lb.v get 0 end ]" );
+				
+				// first search exact name, then look for partial match
+				*choice = -1;
+				cmd( "set i 0" );
+				cmd( "foreach b $a { \
+						if [ string equal $srchTxt [ lindex [ split $b ] 0 ] ] { \
+							set choice 0; \
+							break \
+						} { \
+							set i [ expr $i + 1 ] \
+						} \
+					}" );
+				
+				// partial but case sensitive
+				if ( *choice == -1 )
+				{
+					cmd( "set i 0" );
+					cmd( "foreach b $a { \
+							set choice [ string first $srchTxt [ lindex [ split $b ] 0 ] ]; \
+							if { $choice != -1 } { \
+								break \
+							} { \
+								set i [ expr $i + 1 ] \
+							} \
+						}" );
+				}
+				
+				// partial but case insensitive
+				if ( *choice == -1 )
+				{
+					cmd( "set srchTxt [ string tolower $srchTxt ]" );
+					cmd( "set i 0" );
+					cmd( "foreach b $a { \
+							set choice [ string first $srchTxt [ string tolower [ lindex [ split $b ] 0 ] ] ]; \
+							if { $choice != -1 } { \
+								break \
+							} { \
+								set i [ expr $i + 1 ] \
+							} \
+						}" );
+				}
+				
 				if ( *choice != -1 )
 					cmd( "focus .da.vars.lb.v; .da.vars.lb.v selection clear 0 end; .da.vars.lb.v selection set $i; .da.vars.lb.v activate $i; .da.vars.lb.v see $i" );
 				else
