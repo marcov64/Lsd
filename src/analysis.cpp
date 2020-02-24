@@ -1003,13 +1003,17 @@ while ( true )
 				break;
 			}
 
-			cmd( "if {[.da.vars.ch.v get 0] == \"\"} {set tit \"\"} {}" );
+			cmd( "if { [ .da.vars.ch.v get 0 ] == \"\" } { set tit \"\" }" );
 			cmd( "set choice $ssys" );
 			if ( *choice == 2 )
 			{
-				cmd( "set tot [.da.vars.lb.v get 0 end]" );
-				cmd( "foreach i $tot { if { [lindex [split $i ] 0] == \"$b\"} {  .da.vars.ch.v insert end \"$i\"  } {}}" );
-				cmd( "if {\"$tit\" == \"\"} {set tit [.da.vars.ch.v get 0]} {}" );
+				cmd( "set tot [ .da.vars.lb.v get 0 end ]" );
+				cmd( "foreach i $tot { \
+					if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+						insert_series .da.vars.ch.v \"$i\" \
+					} \
+				}" );
+				cmd( "if { \"$tit\" == \"\" } { set tit [ .da.vars.ch.v get 0 ] }" );
 			}
 			 
 			if ( *choice == 1 )
@@ -1018,16 +1022,24 @@ while ( true )
 				i  = * choice;
 
 				*choice = -1;
-				cmd( "for {set x 0} {$x<$i} {incr x} {if {[.da.a.q.f.l.e$x get] != \"\"} {set choice $x}}" );
+				cmd( "for { set x 0 } { $x < $i } { incr x } { \
+						if { [ .da.a.q.f.l.e$x get ] != \"\" } { \
+							set choice $x \
+						} \
+					}" );
 				if ( *choice == -1 )
 				{
-					cmd( "set tot [.da.vars.lb.v get 0 end]" );
-					cmd( "foreach i $tot { if { [lindex [split $i ] 0] == \"$b\"} { .da.vars.ch.v insert end \"$i\"  } }" );
+					cmd( "set tot [ .da.vars.lb.v get 0 end ]" );
+					cmd( "foreach i $tot { \
+							if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+								insert_series .da.vars.ch.v \"$i\" \
+							} \
+						}" );
 				}
 				else
 				{
-					cmd( "set tot [.da.vars.lb.v get 0 end]" );
-					cmd( "if { [ info exist vcell] == 1} {unset vcell} {}" );
+					cmd( "set tot [ .da.vars.lb.v get 0 end ]" );
+					cmd( "unset -nocomplain vcell" );
 					cmd( "set choice $ntag" );
 					for ( j = 0; j < *choice; ++j )
 						cmd( "lappend vcell $v%d", j );
@@ -1035,22 +1047,94 @@ while ( true )
 					switch ( i )
 					{
 						case 0:
-							cmd( "foreach i $tot { if { [lindex [split $i ] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] == [lindex [split [lindex [split $i ] 1 ] {_}] $x] } { set c 0 } }; if $c { .da.vars.ch.v insert end \"$i\" } } }" );
+							cmd( "foreach i $tot { \
+									if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+										set c 1; \
+										for { set x 0 } { $x < $ntag } { incr x } { \
+											if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] == [ lindex [ split [ lindex [ split $i ] 1 ] {_} ] $x ] } { \
+												set c 0 \
+											} \
+										}; \
+										if { $c == 1 } { \
+											insert_series .da.vars.ch.v \"$i\" \
+										} \
+									} \
+								}" );
 							break;
 						case 1:
-							cmd( "foreach i $tot { if { [lindex [split $i ] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] != [lindex [split [lindex [split $i ] 1 ] {_}] $x] } { set c 0} {} }; if { $c == 1 } {  .da.vars.ch.v insert end \"$i\"  } {}} {}}" );
+							cmd( "foreach i $tot { \
+									if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+										set c 1; \
+										for { set x 0 } { $x < $ntag } { incr x } { \
+											if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] != [ lindex [ split [ lindex [ split $i ] 1 ] {_} ] $x ] } { \
+												set c 0 \
+											} \
+										}; \
+										if { $c == 1 } { \
+											insert_series .da.vars.ch.v \"$i\" \
+										} \
+									} \
+								}" );
 							break;
 						case 2:
-							cmd( "foreach i $tot { if { [lindex [split $i ] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] > [lindex [split [lindex [split $i ] 1 ] {_}] $x] } { set c 0} {} }; if { $c == 1 } {  .da.vars.ch.v insert end \"$i\"  } {}} {}}" );
+							cmd( "foreach i $tot { \
+									if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+										set c 1; \
+										for { set x 0 } { $x < $ntag } { incr x } { \
+											if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] > [ lindex [ split [ lindex [ split $i ] 1 ] {_} ] $x ] } { \
+												set c 0 \
+											} \
+										}; \
+										if { $c == 1 } { \
+											insert_series .da.vars.ch.v \"$i\" \
+										} \
+									} \
+								}" );
 							break;
 						case 3:
-							cmd( "foreach i $tot { if { [lindex [split $i ] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] >= [lindex [split [lindex [split $i ] 1 ] {_}] $x] } { set c 0} {} }; if { $c == 1 } {  .da.vars.ch.v insert end \"$i\"  } {}} {}}" );
+							cmd( "foreach i $tot { \
+									if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+										set c 1; \
+										for { set x 0 } { $x < $ntag } { incr x } { \
+											if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] >= [ lindex [ split [ lindex [ split $i ] 1 ] {_} ] $x ] } { \
+												set c 0\
+											} \
+										}; \
+										if { $c == 1 } { \
+											insert_series .da.vars.ch.v \"$i\" \
+										} \
+									} \
+								}" );
 							break;
 						case 4:
-							cmd( "foreach i $tot { if { [lindex [split $i ] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] < [lindex [split [lindex [split $i ] 1 ] {_}] $x] } { set c 0} {} }; if { $c == 1 } {  .da.vars.ch.v insert end \"$i\"  } {}} {}}" );
+							cmd( "foreach i $tot { \
+									if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+										set c 1; \
+										for { set x 0 } { $x < $ntag } { incr x } { \
+											if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] < [ lindex [ split [ lindex [ split $i ] 1 ] {_} ] $x ] } { \
+												set c 0 \
+											} \
+										}; \
+										if { $c == 1 } { \
+											insert_series .da.vars.ch.v \"$i\" \
+										} \
+									} \
+								}" );
 							break;
 						case 5:
-						   cmd( "foreach i $tot { if { [lindex [split $i ] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] <= [lindex [split [lindex [split $i ] 1 ] {_}] $x] } { set c 0} {} }; if { $c == 1 } {  .da.vars.ch.v insert end \"$i\"  } {}} {}}" );
+						   cmd( "foreach i $tot { \
+									if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+										set c 1; \
+										for { set x 0 } { $x < $ntag } { incr x } { \
+											if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] <= [ lindex [ split [ lindex [ split $i ] 1 ] {_} ] $x ] } { \
+												set c 0 \
+											} \
+										}; \
+										if { $c == 1 } { \
+											insert_series .da.vars.ch.v \"$i\" \
+										} \
+									} \
+								}" );
 					} 
 				}
 				
@@ -1062,8 +1146,8 @@ while ( true )
 				l = *choice;
 				cmd( "set choice $cond" );
 				p = *choice;
-				cmd( "set tot [.da.vars.lb.v get 0 end]" );
-				cmd( "set choice [llength $tot]" );
+				cmd( "set tot [ .da.vars.lb.v get 0 end ]" );
+				cmd( "set choice [ llength $tot ]" );
 				j = *choice;
 
 				if ( l == 3 )
@@ -1117,7 +1201,7 @@ while ( true )
 							}
 							
 							if ( r == 1 )
-								cmd( ".da.vars.ch.v insert end $res" );
+								cmd( "insert_series .da.vars.ch.v $res" );
 						}
 					}
 				}
@@ -1125,7 +1209,7 @@ while ( true )
 
 			cmd( "destroytop .da.a" );
 
-			cmd( "if {\"$tit\" == \"\"} {set tit [.da.vars.ch.v get 0]} {}" );
+			cmd( "if { \"$tit\" == \"\" } { set tit [ .da.vars.ch.v get 0 ] }" );
 
 			break;
 
@@ -1239,10 +1323,16 @@ while ( true )
 			cmd( ".da.vars.ch.v selection clear 0 end" );
 
 			if ( *choice == 2 )
-			 {
-				 cmd( "set tot [.da.vars.ch.v get 0 end]" );
-				 cmd( "set myc 0; foreach i $tot { if { [lindex [split $i ] 0] == \"$b\"} {  .da.vars.ch.v selection set $myc  } {}; incr myc}" );
-			 }
+			{
+				 cmd( "set tot [ .da.vars.ch.v get 0 end ]" );
+				 cmd( "set myc 0" );
+				 cmd( "foreach i $tot { \
+						if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+							.da.vars.ch.v selection set $myc \
+						}; \
+						incr myc \
+					}" );
+			}
 			 
 			if ( *choice == 1 )
 			{
@@ -1250,16 +1340,26 @@ while ( true )
 				i = *choice;
 
 				*choice = -1;
-				cmd( "for {set x 0} {$x<$i} {incr x} {if {[.da.a.q.f.l.e$x get] != \"\"} {set choice $x}}" );
+				cmd( "for { set x 0 } { $x < $i } { incr x } { \
+						if { [ .da.a.q.f.l.e$x get ] != \"\" } { \
+							set choice $x \
+						} \
+					}" );
 				if ( *choice == -1 )
 				{
-					cmd( "set tot [.da.vars.ch.v get 0 end]" );
-					cmd( "set myc 0; foreach i $tot { if { [lindex [split $i ] 0] == \"$b\"} { .da.vars.ch.v selection set $myc }; incr myc }" );
+					cmd( "set tot [ .da.vars.ch.v get 0 end ]" );
+					cmd( "set myc 0" ); 
+					cmd( "foreach i $tot { \
+							if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+								.da.vars.ch.v selection set $myc \
+							}; \
+							incr myc \
+						}" );
 				}
 				else
 				{
-					cmd( "set tot [.da.vars.ch.v get 0 end]" );
-					cmd( "if { [ info exist vcell] == 1} {unset vcell} {}" );
+					cmd( "set tot [ .da.vars.ch.v get 0 end ]" );
+					cmd( "unset -nocomplain vcell" );
 					cmd( "set choice $ntag" );
 					for ( j = 0; j < *choice; ++j )
 						cmd( "lappend vcell $v%d", j );
@@ -1294,8 +1394,8 @@ while ( true )
 				l = *choice;
 				cmd( "set choice $cond" );
 				p = *choice;
-				cmd( "set tot [.da.vars.ch.v get 0 end]" );
-				cmd( "set choice [llength $tot]" );
+				cmd( "set tot [ .da.vars.ch.v get 0 end ]" );
+				cmd( "set choice [ llength $tot ]" );
 				j = *choice;
 
 				if ( l == 3 )
@@ -1356,7 +1456,17 @@ while ( true )
 
 			cmd( "destroytop .da.a" );
 
-			cmd( "if { ! $selOnly } { set steps 0; foreach i [ .da.vars.ch.v curselection ] { .da.vars.ch.v delete [ expr $i - $steps ]; incr steps} } { if { [ llength [ .da.vars.ch.v curselection ] ] > 0 } { .da.vars.ch.v see [ lindex [ .da.vars.ch.v curselection ] 0 ] } }" );
+			cmd( "if { ! $selOnly } { \
+					set steps 0; \
+					foreach i [ .da.vars.ch.v curselection ] { \
+						.da.vars.ch.v delete [ expr $i - $steps ]; \
+						incr steps \
+					} \
+				} { \
+					if { [ llength [ .da.vars.ch.v curselection ] ] > 0 } { \
+						.da.vars.ch.v see [ lindex [ .da.vars.ch.v curselection ] 0 ] \
+					} \
+				}" );
 
 			break;
 
@@ -1365,14 +1475,14 @@ while ( true )
 
 		// remove a plot
 		case 20:
-			cmd( "set answer [tk_messageBox -parent .da -type yesno -title Confirmation -message \"Delete plot?\" -detail \"Press 'Yes' to delete plot:\\n$tit\" -icon question -default yes]" );
-			cmd( "if {[string compare $answer yes] == 0} { set choice 1} {set choice 0}" );
+			cmd( "set answer [ tk_messageBox -parent .da -type yesno -title Confirmation -message \"Delete plot?\" -detail \"Press 'Yes' to delete plot:\\n$tit\" -icon question -default yes ]" );
+			cmd( "if { [ string compare $answer yes ] == 0 } { set choice 1 } { set choice 0 }" );
 			if ( *choice == 0 )
 				break;
 			
 			cmd( "scan $it %%d)%%s a b" );
-			cmd( "set ex [winfo exists .da.f.new$a]" );
-			cmd( "if { $ex == 1 } {destroytop .da.f.new$a; .da.vars.pl.v delete $n_it} {.da.vars.pl.v delete $n_it}" );
+			cmd( "set ex [ winfo exists .da.f.new$a ]" );
+			cmd( "if { $ex == 1 } { destroytop .da.f.new$a; .da.vars.pl.v delete $n_it } { .da.vars.pl.v delete $n_it }" );
 
 			break;
 
@@ -1380,7 +1490,7 @@ while ( true )
 		// Raise the clicked plot
 		case 3:
 			cmd( "scan $it %%d)%%s a b" );
-			cmd( "set ex [winfo exists .da.f.new$a]" );
+			cmd( "set ex [ winfo exists .da.f.new$a ]" );
 			*choice = 0;
 			cmd( "if { $ex == 1 } { wm deiconify .da.f.new$a; raise .da.f.new$a; focus .da.f.new$a } { set choice 1 }" );
 			if ( *choice == 1 )
@@ -1403,66 +1513,69 @@ while ( true )
 
 		// Sort
 		case 5:
-			cmd( "set a [.da.vars.lb.v get 0 end]" );
-			cmd( "set choice [llength $a]" );
+			cmd( "set a [ .da.vars.lb.v get 0 end ]" );
+			cmd( "set choice [ llength $a ]" );
 			if ( *choice == 0 )
 				break;
 			
-			cmd( "set b [lsort -command comp_und $a]" );		// use special sort procedure to keep underscores at the end
+			cmd( "set b [ lsort -command comp_und $a ]" );		// use special sort procedure to keep underscores at the end
 			cmd( ".da.vars.lb.v delete 0 end" );
-			cmd( "foreach i $b {.da.vars.lb.v insert end $i}" );
+			cmd( "foreach i $b { insert_series .da.vars.lb.v \"$i\" }" );
 			
 			break;
 		  
 		  
 		// Sort ( descending order)
 		case 38:
-			cmd( "set a [.da.vars.lb.v get 0 end]" );
-			cmd( "set choice [llength $a]" );
+			cmd( "set a [ .da.vars.lb.v get 0 end ]" );
+			cmd( "set choice [ llength $a ]" );
 			if ( *choice == 0 )
 				break;
 			
-			cmd( "set b [lsort -decreasing -dictionary $a]" );
+			cmd( "set b [ lsort -decreasing -dictionary $a ]" );
 			cmd( ".da.vars.lb.v delete 0 end" );
-			cmd( "foreach i $b {.da.vars.lb.v insert end $i}" );
+			cmd( "foreach i $b { insert_series .da.vars.lb.v \"$i\" }" );
 			
 			break;
 		 
 
 		// sort the selection in selected series list in inverse order
 		case 34:
-			cmd( "set a [.da.vars.ch.v curselection]" );
-			cmd( "set choice [llength $a]" );
+			cmd( "set a [ .da.vars.ch.v curselection ]" );
+			cmd( "set choice [ llength $a ]" );
 			if ( *choice == 0 )
 				break;
 
-			cmd( "set b {}" );
-			cmd( "foreach i $a {lappend b [.da.vars.ch.v get $i ]}" );
-			cmd( "set c [lsort -decreasing -dictionary $b]" );
+			cmd( "set b { }" );
+			cmd( "foreach i $a { lappend b [ .da.vars.ch.v get $i ] }" );
+			cmd( "set c [ lsort -decreasing -dictionary $b ]" );
 			cmd( "set d -1" );
-			cmd( "foreach i $a {.da.vars.ch.v delete $i; .da.vars.ch.v insert $i [lindex $c [ incr d] ] }" );
+			cmd( "foreach i $a { \
+					.da.vars.ch.v delete $i; \
+					insert_series .da.vars.ch.v \"[ lindex $c [ incr d ] ]\" $i \
+				}" );
 			
 			break;
 
 		   
 		// Unsort
 		case 14:
-			cmd( "set a [.da.vars.lb.v get 0 end]" );
-			cmd( "set choice [llength $a]" );
+			cmd( "set a [ .da.vars.lb.v get 0 end ]" );
+			cmd( "set choice [ llength $a ]" );
 			if ( *choice == 0 )
 				break;
 
 			cmd( ".da.vars.lb.v delete 0 end" );
 			for ( i = 0; i < num_var; ++i )
-				cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d\"", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, vs[ i ].rank );
+				cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, vs[ i ].rank );
 			
 			break;
 
 		   
 		// Sort on End
 		case 15:
-			cmd( "set a [.da.vars.lb.v get 0 end]" );
-			cmd( "set choice [llength $a]" );
+			cmd( "set a [ .da.vars.lb.v get 0 end ]" );
+			cmd( "set choice [ llength $a ]" );
 			if ( *choice == 0 )
 				break;
 
@@ -1475,7 +1588,7 @@ while ( true )
 			cmd( ".da.vars.lb.v delete 0 end" );
 			
 			for ( i = 0; i < num_var; ++i )
-				cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d\"", app_store[ i ].label, app_store[ i ].tag, app_store[ i ].start, app_store[ i ].end, app_store[ i ].rank );
+				cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", app_store[ i ].label, app_store[ i ].tag, app_store[ i ].start, app_store[ i ].end, app_store[ i ].rank );
 			
 			delete [ ] app_store;
 				
@@ -1484,8 +1597,8 @@ while ( true )
 		   
 		// Find first instance of series in the available series listbox
 		case 39:
-			cmd( "set a [.da.vars.lb.v get 0 end]" );
-			cmd( "set choice [llength $a]" );
+			cmd( "set a [ .da.vars.lb.v get 0 end ]" );
+			cmd( "set choice [ llength $a ]" );
 			if ( *choice == 0 )
 				break;
 
@@ -1493,7 +1606,20 @@ while ( true )
 			cmd( "newtop .da.a \"Find Series\" { set choice 2 } .da" );
 			cmd( "label .da.a.l -text \"Series name (or part)\"" );
 			cmd( "entry .da.a.e -textvariable srchTxt -width 20 -justify center" );
-			cmd( "bind .da.a.e <KeyRelease> {if { %%N < 256 && [ info exists DaModElem] } { set bb1 [.da.a.e index insert]; set bc1 [.da.a.e get]; set bf1 [lsearch -glob $DaModElem $bc1*]; if { $bf1  != -1 } { set bd1 [lindex $DaModElem $bf1 ]; .da.a.e delete 0 end; .da.a.e insert 0 $bd1; .da.a.e index $bb1; .da.a.e selection range $bb1 end } } }" );
+			cmd( "bind .da.a.e <KeyRelease> { \
+					if { %%N < 256 && [ info exists DaModElem ] } { \
+						set bb1 [ .da.a.e index insert ]; \
+						set bc1 [ .da.a.e get ]; \
+						set bf1 [ lsearch -glob $DaModElem $bc1* ]; \
+						if { $bf1  != -1 } { \
+							set bd1 [ lindex $DaModElem $bf1 ]; \
+							.da.a.e delete 0 end; \
+							.da.a.e insert 0 $bd1; \
+							.da.a.e index $bb1; \
+							.da.a.e selection range $bb1 end \
+						} \
+					} \
+				}" );
 			cmd( "label .da.a.n -text \"(finds first instance only,\nuse 'F3' or 'Ctrl+N' to find others)\"" );
 			cmd( "pack .da.a.l .da.a.e .da.a.n -pady 5 -padx 5" );
 			cmd( "okhelpcancel .da.a b  { set choice 1 } { LsdHelp menudata_res.html#find } { set choice 2 }" );
@@ -1545,7 +1671,7 @@ while ( true )
 		// Insert the variables selected in the list of the variables to plot
 		case 6:
 			cmd( "set a [ .da.vars.lb.v curselection ]" );
-			cmd( "foreach i $a { .da.vars.ch.v insert end [ .da.vars.lb.v get $i ] }" );
+			cmd( "foreach i $a { insert_series .da.vars.ch.v \"[ .da.vars.lb.v get $i ]\" }" );
 			cmd( "set tit [ .da.vars.ch.v get 0 ]" );
 
 			break;
@@ -3351,7 +3477,7 @@ void insert_labels_mem( object *r, int *num_v, int *num_c )
 		if ( cv->save )
 			{
 				set_lab_tit( cv );
-				cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
+				cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
 				cmd( "if { [ lsearch -exact $DaModElem %s ] < 0 } { lappend DaModElem %s }", cv->label, cv->label );
 				if ( cv->end > *num_c )
 					*num_c = cv->end;
@@ -3366,7 +3492,7 @@ void insert_labels_mem( object *r, int *num_v, int *num_c )
 	if ( r->up == NULL )
 		for ( cv = cemetery; cv != NULL; cv = cv->next )
 		{  
-			cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
+			cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
 			cmd( "if { [ lsearch -exact $DaModElem %s ] < 0 } { lappend DaModElem %s }", cv->label, cv->label );
 			if ( cv->end > *num_c )
 				*num_c = cv->end;
@@ -3596,7 +3722,7 @@ void insert_data_file( bool gz, int *num_v, int *num_c, vector < string > *var_n
 	 
 		if ( keep_vars )
 		{
-			cmd( ".da.vars.lb.v insert end \"%s\"", msg );		
+			cmd( "insert_series .da.vars.lb.v \"%s\"", msg );
 			cmd( "lappend DaModElem %s", vs[ i ].label );
 		}
 	 
@@ -6768,7 +6894,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 			}
 		}
 		
-		cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d\"", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank ); 
+		cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank ); 
 
 		cmd( "lappend DaModElem %s", vs[ num_var ].label  );
 		
@@ -6994,7 +7120,7 @@ void create_maverag( int *choice )
 			}
 		}
 		
-		cmd( ".da.vars.lb.v insert end \"%s %s (%d-%d) #%d\"", vs[ num_var + i ].label, vs[ num_var + i ].tag, vs[ num_var + i ].start, vs[ num_var + i ].end, num_var + i ); 
+		cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", vs[ num_var + i ].label, vs[ num_var + i ].tag, vs[ num_var + i ].start, vs[ num_var + i ].end, num_var + i ); 
 
 		cmd( "lappend DaModElem %s", vs[ num_var + i ].label );
 	}

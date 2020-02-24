@@ -1459,6 +1459,39 @@ proc write_disabled { w val } {
 
 
 #************************************************
+# INSERT_SERIES
+# Append series to a listbox, coloring the entry
+# according to the origin of the series
+#************************************************
+proc insert_series { lbox ser { pos end } } {
+	global lvarcolor funcolor lfuncolor
+
+	set orig [ lindex [ split [ lindex [ split $ser ] 1 ] _ ] 0 ]
+	
+	switch $orig {
+		C {
+			set color $lvarcolor 
+		}
+		
+		F { 
+			set color $funcolor 
+		}
+		
+		MC {
+			set color $lfuncolor 
+		}
+		
+		default {
+			set color black 
+		}
+	}
+	
+	$lbox insert $pos "$ser"
+	$lbox itemconfigure $pos -fg $color
+}
+
+
+#************************************************
 # SETTAB
 # Procedure to adjust tab size according to font type and size
 #************************************************
