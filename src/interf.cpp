@@ -3787,7 +3787,7 @@ case 37:
 	*choice = 0;
 	if ( actual_steps == 0 )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Simulation not run, nothing to save\" -detail \"Please select in the menu Run the option Run before using this option.\"" );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Simulation not run, nothing to save\" -detail \"Select menu option Run>Run before using this option.\"" );
 		break;
 	}
 

@@ -1464,11 +1464,15 @@ proc write_disabled { w val } {
 # according to the origin of the series
 #************************************************
 proc insert_series { lbox ser { pos end } } {
-	global lvarcolor funcolor lfuncolor
+	global varcolor lvarcolor funcolor lfuncolor
 
 	set orig [ lindex [ split [ lindex [ split $ser ] 1 ] _ ] 0 ]
 	
 	switch $orig {
+		U {
+			set color $varcolor 
+		}
+		
 		C {
 			set color $lvarcolor 
 		}
@@ -1682,10 +1686,13 @@ proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
 					if { $lenxy == 2 } {
 						set xi [ lindex $xy 0 ]
 						set yi [ lindex $xy 1 ]
-						$c create oval [ expr $xi - $width / 2 ] \
-							[ expr $yi - $width / 2 ] [ expr $xi + $width / 2 ] \
-							[ expr $yi + $width / 2 ] -fill $fill \
-							-width 0 -outline white -tags $tagsdots
+						# x
+						$c create line [ expr $xi + 2 ] [ expr $yi + 2 ] \
+							[ expr $xi - 3 ] [ expr $yi - 3 ] \
+							-width 1 -fill $fill -tags $tagsdots
+						$c create line [ expr $xi + 2 ] [ expr $yi - 2 ] \
+							[ expr $xi - 3 ] [ expr $yi + 3 ] \
+							-width 1 -fill $fill -tags $tagsdots
 					}
 				}
 				# restart line
@@ -1701,9 +1708,13 @@ proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
 		if { [ llength $xy ] == 2 } {
 			set xi [ lindex $xy 0 ]
 			set yi [ lindex $xy 1 ]
-			$c create oval [ expr $xi - $width / 2 ] [ expr $yi - $width / 2 ] \
-				[ expr $xi + $width / 2 ] [ expr $yi + $width / 2 ] -fill $fill \
-				-width 0 -outline white -tags $tagsdots
+			# x
+			$c create line [ expr $xi + 2 ] [ expr $yi + 2 ] \
+				[ expr $xi - 3 ] [ expr $yi - 3 ] \
+				-width 1 -fill $fill -tags $tagsdots
+			$c create line [ expr $xi + 2 ] [ expr $yi - 2 ] \
+				[ expr $xi - 3 ] [ expr $yi + 3 ] \
+				-width 1 -fill $fill -tags $tagsdots
 		}
 	}
 }
@@ -1722,13 +1733,12 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 		set xi [ lindex $x $i ]
 		set yi [ lindex $y $i ]
 		if { $xi >= 0 && $yi >= 0 } {
-			if { $width == 1 } {
-				# +
-				$c create line [ expr $xi + 2 ] $yi [ expr $xi - 3 ] $yi \
-					-width 1 -fill $fill -tags $tagsdots
-				$c create line $xi [ expr $yi + 2 ] $xi [ expr $yi - 3 ] \
-					-width 1 -fill $fill -tags $tagsdots
-			} elseif { $width == 2 } {
+			if { $width < 1 } {
+				# small point
+				$c create oval [ expr $xi - 1 ] [ expr $yi - 1 ] \
+					[ expr $xi + 1 ] [ expr $yi + 1 ] -fill $fill \
+					-width 0 -outline white -tags $tagsdots
+			} elseif { $width == 1 } {
 				# x
 				$c create line [ expr $xi + 2 ] [ expr $yi + 2 ] \
 					[ expr $xi - 3 ] [ expr $yi - 3 ] \
@@ -1736,11 +1746,12 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 				$c create line [ expr $xi + 2 ] [ expr $yi - 2 ] \
 					[ expr $xi - 3 ] [ expr $yi + 3 ] \
 					-width 1 -fill $fill -tags $tagsdots
-			} elseif { $width < 1 } {
-				# small point
-				$c create oval [ expr $xi - 1 ] [ expr $yi - 1 ] \
-					[ expr $xi + 1 ] [ expr $yi + 1 ] -fill $fill \
-					-width 0 -outline white -tags $tagsdots
+			} elseif { $width <= 2 } {
+				# +
+				$c create line [ expr $xi + 3 ] $yi [ expr $xi - 4 ] $yi \
+					-width 1 -fill $fill -tags $tagsdots
+				$c create line $xi [ expr $yi + 3 ] $xi [ expr $yi - 4 ] \
+					-width 1 -fill $fill -tags $tagsdots
 			} else {
 				# filled circle
 				$c create oval [ expr $xi - $width / 2 ] [ expr $yi - $width / 2 ] \

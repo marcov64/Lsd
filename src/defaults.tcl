@@ -93,7 +93,7 @@ set grayscaleP	0	; # default color mode for plots (0=color)
 set gridP		0	; # defaut grid mode (0=no grid)
 set linemodeP	1	; # default line mode (1:lines/2:points)
 set pdigitsP	3	; # default precision digits
-set pointsizeP	1.0	; # default size of points (<1:./<2:x/<3:+/>=3:round)
+set pointsizeP	1.0	; # default size of points/lines (<1:./=1:x<=2:+/>2:round)
 set maxzoomP	4.0	; # maximum zoom magnification factor in plots
 set minzoomP	0.5	; # minimum zoom shrinking factor in plots
 

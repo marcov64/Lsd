@@ -57,7 +57,7 @@ Sort in descending order the variables. Used in plot_cross.
 *************************************************************/
 
 /* 
-used case 44
+used case 47
 */
 
 #include "decl.h"
@@ -90,6 +90,7 @@ int line_point;
 int logs;
 int max_c;
 int min_c;
+int first_c;
 int num_c;
 int num_var;
 int num_y2;
@@ -163,7 +164,7 @@ cur_plot = 0;
 file_counter = 0;
 num_var = 0;
 autom_x = true;
-max_c = min_c = num_c = 1;
+max_c = min_c = num_c = first_c = 1;
 autom = true;
 miny = maxy = 0;
 time_cross = xy = false;
@@ -181,7 +182,7 @@ cmd( "set list_times [ list ]" );
 cmd( "set gpdgrid3d \"$gnuplotGrid3D\"" );
 cmd( "set gpoptions \"$gnuplotOptions\"" );
 
-cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change() ? "*" : " ", simul_name );
+cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change( ) ? "*" : " ", simul_name );
 
 cmd( "menu .da.m -tearoff 0" );
 
@@ -299,7 +300,9 @@ cmd( "pack .da.vars -expand true -fill y" );
 cmd( "set DaModElem [ list ]" );
 if ( actual_steps > 0 )
 {
-	insert_data_mem( root, &num_var, &num_c );
+	insert_data_mem( root, &num_var );
+	
+	min_c = max( first_c, 1 );
 	max_c = num_c;
 }
 
@@ -322,7 +325,7 @@ cmd( "checkbutton .da.f.h.v.ft.auto -text \"Use all cases \" -variable auto_x -c
 
 cmd( "frame .da.f.h.v.ft.from" );
 cmd( "label .da.f.h.v.ft.from.minc -text \"From case\"" );
-cmd( "entry .da.f.h.v.ft.from.mnc -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 } { set minc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $minc; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "entry .da.f.h.v.ft.from.mnc -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P >= 0 } { set minc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $minc; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "pack .da.f.h.v.ft.from.minc .da.f.h.v.ft.from.mnc -side left" );
 
 cmd( "frame .da.f.h.v.ft.to" );
@@ -441,6 +444,9 @@ cmd( "bind .da <Control-v> { set fromPlot 0; set choice 11 }; bind .da <Control-
 cmd( "bind .da <Control-e> { set choice 10 }; bind .da <Control-E> { set choice 10 }" );	// save data
 cmd( "bind .da <Control-d> { set choice 36 }; bind .da <Control-D> { set choice 36 }" );	// show data
 cmd( "bind .da <Control-t> { set choice 12 }; bind .da <Control-D> { set choice 12 }" );	// statistics
+cmd( "bind .da <Control-b> { set choice 45 }; bind .da <Control-B> { set choice 45 }" ); 	// add not saved series
+cmd( "bind .da <Control-w> { set choice 46 }; bind .da <Control-W> { set choice 46 }" ); 	// create new series from existing
+cmd( "bind .da <Control-m> { set choice 47 }; bind .da <Control-M> { set choice 47 }" ); 	// create moving average from existing
 
 // create special sort procedure to keep names starting with underline at the end
 cmd( "proc comp_und { n1 n2 } { \
@@ -906,14 +912,14 @@ while ( true )
 		// Use right button of the mouse to select all series with a given label
 		case 30:
 			Tcl_LinkVar( inter, "compvalue", ( char * ) &compvalue, TCL_LINK_DOUBLE );
-			cmd( "set a [split $res]" );
-			cmd( "set b [lindex $a 0]" );
-			cmd( "set c [lindex $a 1 ]" ); //get the tag value
-			cmd( "set i [llength [split $c {_}] ]" );
+			cmd( "set a [ split $res ]" );
+			cmd( "set b [ lindex $a 0 ]" );
+			cmd( "set c [ lindex $a 1 ]" ); // get the tag value
+			cmd( "set i [ llength [ split $c {_} ] ]" );
 			cmd( "set ntag $i" );
 			cmd( "set ssys 2" );
-			cmd( "if { ! [ info exist tvar ] } {set tvar $maxc}" );
-			cmd( "if { ! [ info exist cond] } {set cond 1}" );
+			cmd( "if { ! [ info exist tvar ] } { set tvar $maxc }" );
+			cmd( "if { ! [ info exist cond ] } { set cond 1 }" );
 
 			cmd( "newtop .da.a \"Select Series\" { set choice 2 } .da" );
 
@@ -1218,15 +1224,15 @@ while ( true )
 		case 33:
 			cmd( "unset -nocomplain compvalue" );
 			Tcl_LinkVar( inter, "compvalue", ( char * ) &compvalue, TCL_LINK_DOUBLE );
-			cmd( "set a [split $res]" );
-			cmd( "set b [lindex $a 0]" );
-			cmd( "set c [lindex $a 1 ]" ); //get the tag value
-			cmd( "set i [llength [split $c {_}] ]" );
+			cmd( "set a [ split $res ]" );
+			cmd( "set b [ lindex $a 0 ]" );
+			cmd( "set c [ lindex $a 1 ]" ); //get the tag value
+			cmd( "set i [ llength [split $c {_} ] ]" );
 			cmd( "set ntag $i" );
 			cmd( "set ssys 2" );
 			cmd( "if { ! [ info exist tvar ] } { set tvar $maxc }" );
-			cmd( "if { ! [ info exist cond] } { set cond 1 }" );
-			cmd( "if { ! [ info exist selOnly] } { set selOnly 0 }" );
+			cmd( "if { ! [ info exist cond ] } { set cond 1 }" );
+			cmd( "if { ! [ info exist selOnly ] } { set selOnly 0 }" );
 
 			cmd( "newtop .da.a \"Unselect Series\" { set choice 2 } .da" );
 
@@ -1604,29 +1610,35 @@ while ( true )
 
 			cmd( "set srchTxt \"\"; set srchInst 1" );
 			cmd( "newtop .da.a \"Find Series\" { set choice 2 } .da" );
-			cmd( "label .da.a.l -text \"Series name (or part)\"" );
-			cmd( "entry .da.a.e -textvariable srchTxt -width 20 -justify center" );
-			cmd( "bind .da.a.e <KeyRelease> { \
+			
+			cmd( "frame .da.a.v" );
+			cmd( "label .da.a.v.l -text \"Series name (or part)\"" );
+			cmd( "entry .da.a.v.e -textvariable srchTxt -width 20 -justify center" );
+			cmd( "label .da.a.v.n -text \"(finds first instance only,\nuse 'F3' or 'Ctrl+N' to find others)\"" );
+
+			cmd( "pack .da.a.v.l .da.a.v.e .da.a.v.n" );
+			cmd( "pack .da.a.v -pady 5 -padx 5" );
+
+			cmd( "bind .da.a.v.e <Return> { set choice 1 }" );
+			cmd( "bind .da.a.v.e <Escape> { set choice 2 }" );
+			cmd( "bind .da.a.v.e <KeyRelease> { \
 					if { %%N < 256 && [ info exists DaModElem ] } { \
-						set bb1 [ .da.a.e index insert ]; \
-						set bc1 [ .da.a.e get ]; \
+						set bb1 [ .da.a.v.e index insert ]; \
+						set bc1 [ .da.a.v.e get ]; \
 						set bf1 [ lsearch -glob $DaModElem $bc1* ]; \
 						if { $bf1  != -1 } { \
 							set bd1 [ lindex $DaModElem $bf1 ]; \
-							.da.a.e delete 0 end; \
-							.da.a.e insert 0 $bd1; \
-							.da.a.e index $bb1; \
-							.da.a.e selection range $bb1 end \
+							.da.a.v.e delete 0 end; \
+							.da.a.v.e insert 0 $bd1; \
+							.da.a.v.e index $bb1; \
+							.da.a.v.e selection range $bb1 end \
 						} \
 					} \
 				}" );
-			cmd( "label .da.a.n -text \"(finds first instance only,\nuse 'F3' or 'Ctrl+N' to find others)\"" );
-			cmd( "pack .da.a.l .da.a.e .da.a.n -pady 5 -padx 5" );
+
 			cmd( "okhelpcancel .da.a b  { set choice 1 } { LsdHelp menudata_res.html#find } { set choice 2 }" );
-			cmd( "bind .da.a.e <Return> { set choice 1 }" );
-			cmd( "bind .da.a.e <Escape> { set choice 2 }" );
 			cmd( "showtop .da.a" );
-			cmd( "focus .da.a.e" );
+			cmd( "focus .da.a.v.e" );
 
 			*choice = 0;
 			while ( *choice == 0 )
@@ -1732,66 +1744,102 @@ while ( true )
 			cmd( "set tit \"\"" );
 
 			break;
+			
 
-
+		// Add existing variables (no saved)
+		case 45: 
+			cmd( "set bidi 0" );
+			
+		// Add new series from existing ones
+		case 46:
+			if ( *choice == 46 )
+				cmd( "set bidi 4" );
+			
+		// Add moving average series from existing ones
+		case 47: 
+			if ( *choice == 47 )
+				cmd( "set bidi 5" );
+			
 		// Insert new series ( from disk or combining existing series).
 		case 24:
-			if ( num_var > 0 )
+			if ( *choice == 24 )
 			{
-				cmd( "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
-				cmd( "label .da.s.l -text \"Source of additional series\"" );
+				if ( actual_steps > 0 )
+				{
+					cmd( "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
+					cmd( "label .da.s.l -text \"Source of additional series\"" );
 
-				cmd( "set bidi 4" );
-				cmd( "frame .da.s.i -relief groove -bd 2" );
-				cmd( "radiobutton .da.s.i.c -text \"Create new series from selected\" -variable bidi -value 4" );
-				cmd( "radiobutton .da.s.i.a -text \"Moving average series from selected\" -variable bidi -value 5" );
-				cmd( "radiobutton .da.s.i.f -text \"File(s) of saved results\" -variable bidi -value 1" );
-				cmd( "pack .da.s.i.c .da.s.i.a .da.s.i.f -anchor w" );
+					cmd( "set bidi 4" );
+					cmd( "frame .da.s.i -relief groove -bd 2" );
+					cmd( "radiobutton .da.s.i.c -text \"Create new series from selected\" -underline 0 -variable bidi -value 4" );
+					cmd( "radiobutton .da.s.i.a -text \"Moving average series from selected\" -underline 0 -variable bidi -value 5" );
+					cmd( "radiobutton .da.s.i.e -text \"Existing unsaved element\" -underline 0 -variable bidi -value 0" );
+					cmd( "radiobutton .da.s.i.f -text \"File(s) of saved results\" -underline 0 -variable bidi -value 1" );
+					cmd( "pack .da.s.i.c .da.s.i.a .da.s.i.e .da.s.i.f -anchor w" );
+					
+					cmd( "bind .da.s <KeyPress-c> { set bidi 4 }; bind .da.s <KeyPress-C> { set bidi 4 }" );
+					cmd( "bind .da.s <KeyPress-m> { set bidi 5 }; bind .da.s <KeyPress-M> { set bidi 5 }" );
+					cmd( "bind .da.s <KeyPress-e> { set bidi 0 }; bind .da.s <KeyPress-E> { set bidi 0 }" );
+					cmd( "bind .da.s <KeyPress-f> { set bidi 1 }; bind .da.s <KeyPress-F> { set bidi 1 }" );
 
-				cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady 5 -padx 5" );
+					cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady 5 -padx 5" );
+					
+					if ( nv == 0 )
+					{
+						cmd( ".da.s.i.c configure -state disabled" );
+						cmd( ".da.s.i.a configure -state disabled" );
+						cmd( "set bidi 0" );
+					}
+				}
+				else
+				{
+					cmd( "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
+					cmd( "label .da.s.l -text \"Source of additional series\"" );
+
+					cmd( "set bidi 1" );
+					cmd( "frame .da.s.i -relief groove -bd 2" );
+					cmd( "radiobutton .da.s.i.f -text \"File(s) of saved results\" -variable bidi -value 1" );
+					cmd( "radiobutton .da.s.i.m -text \"Files from Monte Carlo experiment\" -variable bidi -value 3" );
+					cmd( "pack .da.s.i.f .da.s.i.m -anchor w" );
+
+					cmd( "bind .da.s <KeyPress-f> { set bidi 1 }; bind .da.s <KeyPress-F> { set bidi 1 }" );
+					cmd( "bind .da.s <KeyPress-m> { set bidi 3 }; bind .da.s <KeyPress-M> { set bidi 3 }" );
+
+					cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady 5 -padx 5" );
+				}
+
+				cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#add_series } { set choice 2 }" );
+				cmd( "showtop .da.s" );
+
+				*choice = 0;
+				while ( *choice == 0 )
+				  Tcl_DoOneEvent( 0 );
+
+				cmd( "destroytop .da.s" );
+
+				if ( *choice == 2 )
+					break;
 			}
-			else
-			{
-				cmd( "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
-				cmd( "label .da.s.l -text \"Source of additional series\"" );
-
-				cmd( "set bidi 1" );
-				cmd( "frame .da.s.i -relief groove -bd 2" );
-				cmd( "radiobutton .da.s.i.f -text \"File(s) of saved results\" -variable bidi -value 1" );
-				cmd( "radiobutton .da.s.i.m -text \"Files from Monte Carlo experiment\" -variable bidi -value 3" );
-				cmd( "pack .da.s.i.f .da.s.i.m -anchor w" );
-
-				cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady 5 -padx 5" );
-			}
-
-			cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#add_series } { set choice 2 }" );
-			cmd( "showtop .da.s" );
-
-			*choice = 0;
-			while ( *choice == 0 )
-			  Tcl_DoOneEvent( 0 );
-
-			cmd( "destroytop .da.s" );
-
-			if ( *choice == 2 )
-				break;
-
+				
 			mc = false;
 			cmd( "set choice $bidi" );
 			switch ( *choice )
 			{
 				case 4:
-					*choice = 0;
 					create_series( choice, false, cur_var );
-					*choice = 0;
+					cmd( ".da.vars.lb.v see end" );
 					break;
 
 				case 5:
-					*choice = 0;
 					create_maverag( choice );
-					*choice = 0;
+					cmd( ".da.vars.lb.v see end" );
 					break;
 				
+				case 0:
+					add_unsaved( choice );
+					cmd( ".da.vars.lb.v see end" );		
+					break;
+					
 				case 3:
 					mc = true;
 					
@@ -1852,10 +1900,7 @@ while ( true )
 					Tcl_UnlinkVar( inter, "confi" );
 
 					if ( *choice == 2 )
-					{
-						*choice = 0;
 						break;
-					}
 					
 				case 1:
 					gz = false;
@@ -1880,7 +1925,6 @@ while ( true )
 					{
 						cmd( "tk_messageBox -parent .da -type ok -icon error -title Error -message \"Invalid number of results files\" -detail \"Monte Carlo experiment requires two or more files. Please adjust the number of simulation runs properly and regenerate the files.\"" );
 						plog( "\nError: invalid number of files\n" );
-						*choice = 0;
 						break;
 					}
 				
@@ -1907,14 +1951,14 @@ while ( true )
 						{
 							fclose( f );
 							++file_counter;
-							insert_data_file( gz, &num_var, &num_c, &var_names[ i ], k );
+							insert_data_file( gz, &num_var, &var_names[ i ], k );
 						}
 						else
 							plog( "\nError: could not open file: %s\n", "", filename );
 					}
 					
 					if ( ! mc )
-						goto end_add;
+						goto add_err;
 					
 					plog( "\nCreating MC series..." );
 					
@@ -1936,7 +1980,7 @@ while ( true )
 								file_counter = 0;
 							}
 							
-							goto end_add;
+							goto add_err;
 						}
 						
 						for ( j = 0; j < l; ++j )
@@ -1954,7 +1998,7 @@ while ( true )
 									file_counter = 0;
 								}
 							
-								goto end_add;
+								goto add_err;
 							}
 						}
 					}
@@ -1979,12 +2023,12 @@ while ( true )
 					
 					if ( ! k && num_var > m )
 					{
-						store * vs_new = new store[ num_var - m ];
+						store *vs_new = new store[ num_var - m ];
 						for ( i = m, j = 0; i < num_var; ++i, ++j )
 						{
 							vs_new[ j ] = vs[ i ];
 							strcpy( vs_new[ j ].label, vs[ i ].label );
-							strcpy( vs_new[ j ].tag, vs[ i ].tag);
+							strcpy( vs_new[ j ].tag, vs[ i ].tag );
 						} 
 						
 						delete [ ] vs;
@@ -1994,14 +2038,14 @@ while ( true )
 					}
 					
 					plog( "Done\n" );
+					break;
+					
+				add_err:
+					var_names.clear( );
+					cur_var.clear( );
 			}
 
-			end_add:
-			var_names.clear( );
-			cur_var.clear( );
-			*choice = 0;
-			
-			break;
+		break;
 
 
 		// MAIN MENU ACTIONS
@@ -2819,11 +2863,19 @@ void update_bounds( void )
 		maxy2 = 1;
 	}
 	
-	if ( min_c < 1 )
-		min_c = 1;
+	if ( min_c < first_c )
+		min_c = max( first_c, 1 );
 	
 	if ( max_c <= min_c )
+	{
 		max_c = min_c + 1;
+		
+		if ( max_c > num_c && num_c > 0 )
+		{
+			max_c = num_c;
+			min_c = num_c - 1;
+		}
+	}
 
 	cmd( "write_any .da.f.h.v.ft.from.mnc $minc" );
 	cmd( "write_any .da.f.h.v.ft.to.mxc $maxc" );
@@ -2865,7 +2917,7 @@ void plot_tseries( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = 1;
+		min_c = max( first_c, 1 );
 		max_c = num_c;
 	}
 
@@ -2887,7 +2939,13 @@ void plot_tseries( int *choice )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
-				plog( "\nError: invalid data\n" );
+			{
+				error_hard( "invalid series data", 
+							"internal problem in LSD", 
+							"if error persists, please contact developers",
+							true );
+				myexit( 18 );
+			}
 	   
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
 			{
@@ -3075,7 +3133,7 @@ void plot_cross( int *choice )
 	
 	if ( autom_x )
 	{
-		min_c = 1;
+		min_c = max( first_c, 1 );
 		max_c = num_c;
 	}
 
@@ -3105,7 +3163,13 @@ void plot_cross( int *choice )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
-				plog( "\nError: invalid data\n" );
+			{
+				error_hard( "invalid series data", 
+							"internal problem in LSD", 
+							"if error persists, please contact developers",
+							true );
+				myexit( 18 );
+			}
 	   
 			if ( logs )			// apply log to the values to show "log scale"
 			{
@@ -3495,47 +3559,91 @@ double *search_lab_tit( object *r, char *s, char *t, int st, int en )
 /***************************************************
 INSERT_DATA_MEM
 ****************************************************/
-void insert_data_mem( object *r, int *num_v, int *num_c )
+void insert_data_mem( object *r, int *num_v, char *lab )
 {
-	insert_labels_mem( r, num_v, num_c );
-	vs = new store[ *num_v ];
-	*num_v = 0;
-	insert_store_mem( r, num_v );
+	int i, ini_v = *num_v;
+	
+	insert_labels_mem( r, num_v, lab );
+	
+	store *vs_new = new store[ *num_v ];
+	
+	for ( i = 0; i < ini_v; ++i )
+	{
+		vs_new[ i ] = vs[ i ];
+		strcpy( vs_new[ i ].label, vs[ i ].label );
+		strcpy( vs_new[ i ].tag, vs[ i ].tag );
+	}
+	
+	delete [ ] vs;
+	vs = vs_new;
+	
+	insert_store_mem( r, &ini_v, lab );
+	
+	if ( *num_v != ini_v )
+	{
+		error_hard( "invalid number of series", 
+					"internal problem in LSD", 
+					"if error persists, please contact developers",
+					true );
+		myexit( 19 );
+	}
 }
 
 
 /***************************************************
 INSERT_LABELS_MEM
 ****************************************************/
-void insert_labels_mem( object *r, int *num_v, int *num_c )
+void insert_labels_mem( object *r, int *num_v, char *lab )
 {
+	bool found;
+	char tag_pref[3];
 	object *cur;
 	variable *cv;
 	bridge *cb;
 
-	for ( cv = r->v; cv != NULL; cv = cv->next )
-		if ( cv->save )
+	for ( found = false, cv = r->v; cv != NULL; cv = cv->next )
+		if ( ( lab == NULL && cv->save ) || ( lab != NULL && ! strcmp( cv->label, lab ) ) )
+		{
+			if ( cv->save )
+				strcpy( tag_pref, "" );
+			else
 			{
-				set_lab_tit( cv );
-				cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
-				cmd( "if { [ lsearch -exact $DaModElem %s ] < 0 } { lappend DaModElem %s }", cv->label, cv->label );
-				if ( cv->end > *num_c )
-					*num_c = cv->end;
-				*num_v += 1;
+				found = true;
+				strcpy( tag_pref, "U_" );
+				cv->start = cv->last_update - cv->num_lag;
+				cv->end = cv->last_update;
 			}
-
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+			
+			set_lab_tit( cv );
+			cmd( "insert_series .da.vars.lb.v \"%s %s%s (%d-%d) #%d\"", cv->label, tag_pref, cv->lab_tit, cv->start, cv->end, *num_v );
+			cmd( "if { [ lsearch -exact $DaModElem %s ] < 0 } { lappend DaModElem %s }", cv->label, cv->label );
+			
+			if ( cv->end > num_c )
+				num_c = cv->end;
+			
+			if ( cv->start < first_c )
+				first_c = cv->start;
+			
+			*num_v += 1;
+		}
+	
+	for ( cb = r->b; cb != NULL && ! found; cb = cb->next )
 		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
-				insert_labels_mem( cur, num_v, num_c );
+				insert_labels_mem( cur, num_v, lab );
 	 
-	if ( r->up == NULL )
+	if ( r->up == NULL && lab == NULL )
 		for ( cv = cemetery; cv != NULL; cv = cv->next )
 		{  
 			cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
 			cmd( "if { [ lsearch -exact $DaModElem %s ] < 0 } { lappend DaModElem %s }", cv->label, cv->label );
-			if ( cv->end > *num_c )
-				*num_c = cv->end;
+			
+			if ( cv->end > num_c )
+				num_c = cv->end;
+			
+			if ( cv->start < first_c )
+				first_c = cv->start;
+			
 			*num_v += 1;
 		}
 }
@@ -3544,31 +3652,49 @@ void insert_labels_mem( object *r, int *num_v, int *num_c )
 /***************************************************
 INSERT_STORE_MEM
 ****************************************************/
-void insert_store_mem( object *r, int *num_v )
+void insert_store_mem( object *r, int *num_v, char *lab )
 {
+	bool found;
+	char tag_pref[3];
+	int i;
 	object *cur;
 	variable *cv;
 	bridge *cb;
 
-	for ( cv=r->v; cv != NULL; cv = cv->next )
-		if ( cv->save )
+	for ( found = false, cv = r->v; cv != NULL; cv = cv->next )
+		if ( ( lab == NULL && cv->save ) || ( lab != NULL && ! strcmp( cv->label, lab ) ) )
 		{
+			if ( cv->save )
+				strcpy( tag_pref, "" );
+			else
+			{
+				found = true;
+				strcpy( tag_pref, "U_" );
+				
+				delete [ ] cv->data;
+				cv->data = new double [ cv->num_lag + 1 ];
+				
+				for ( i = 0; i < cv->num_lag + 1; ++i )
+					cv->data[ i ] = cv->val[ cv->num_lag - i ];
+			}
+			
 			set_lab_tit( cv );
 			strcpy( vs[ *num_v ].label, cv->label );
-			strcpy( vs[ *num_v ].tag, cv->lab_tit );
+			sprintf( vs[ *num_v ].tag, "%s%s", tag_pref, cv->lab_tit );
 			vs[ *num_v ].start = cv->start;
 			vs[ *num_v ].end = cv->end;
 			vs[ *num_v ].rank = *num_v;
 			vs[ *num_v ].data = cv->data;
+			
 			*num_v += 1;
 		}
 	  
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = r->b; cb != NULL && ! found; cb = cb->next )
 		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
-				insert_store_mem( cur, num_v );
+				insert_store_mem( cur, num_v, lab );
 	 
-	if ( r->up == NULL )
+	if ( r->up == NULL && lab == NULL )
 		for ( cv = cemetery; cv != NULL; cv = cv->next )
 		{
 			strcpy( vs[ *num_v ].label,cv->label );
@@ -3585,7 +3711,7 @@ void insert_store_mem( object *r, int *num_v )
 /***************************************************
 INSERT_DATA_FILE
 ****************************************************/
-void insert_data_file( bool gz, int *num_v, int *num_c, vector < string > *var_names, bool keep_vars )
+void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool keep_vars )
 {
 	FILE *f = NULL;
 #ifdef LIBZ
@@ -3700,7 +3826,7 @@ void insert_data_file( bool gz, int *num_v, int *num_c, vector < string > *var_n
 		{
 			app[ i ] = vs[ i ];
 			strcpy( app[ i ].label, vs[ i ].label );
-			strcpy( app[ i ].tag, vs[ i ].tag);
+			strcpy( app[ i ].tag, vs[ i ].tag );
 		} 
 		
 		delete [ ] vs;
@@ -3744,8 +3870,7 @@ void insert_data_file( bool gz, int *num_v, int *num_c, vector < string > *var_n
 		}
 		
 		sscanf( tok, "%s %s (%d %d)", vs[ i ].label, vs[ i ].tag, &( vs[ i ].start ), &( vs[ i ].end ) );	
-		sprintf( msg, "F_%d_%s", file_counter, vs[ i ].tag);
-		strcpy( vs[ i ].tag, msg );
+		sprintf( vs[ i ].tag, "F_%d_%s", file_counter, vs[ i ].tag );
 		vs[ i ].rank = i;
 
 		if ( vs[ i ].start != -1 )
@@ -3755,6 +3880,7 @@ void insert_data_file( bool gz, int *num_v, int *num_c, vector < string > *var_n
 			sprintf( msg, "%s %s (0-%d) #%d", vs[ i ].label, vs[ i ].tag, new_c - 1, i );
 			vs[ i ].start = 0;
 			vs[ i ].end = new_c - 1;
+			first_c = 0;
 		}
 		
 		var_names->push_back( msg );
@@ -3788,7 +3914,7 @@ void insert_data_file( bool gz, int *num_v, int *num_c, vector < string > *var_n
 			if ( tok == NULL )
 			{
 				plog( "\nError: invalid data, aborting file load.\n" );
-				*num_c += ( j > 0 ? j - 1 : 0 ) > *num_c ? ( j > 0 ? j - 1 : 0 ) : 0;
+				num_c += ( j > 0 ? j - 1 : 0 ) > num_c ? ( j > 0 ? j - 1 : 0 ) : 0;
 				goto end;
 			}
 	  
@@ -3803,10 +3929,11 @@ void insert_data_file( bool gz, int *num_v, int *num_c, vector < string > *var_n
 
 	*num_v += new_v;
 	new_c--;
-	if ( new_c > *num_c )
-		*num_c = new_c;
+	if ( new_c > num_c )
+		num_c = new_c;
 	if ( new_c > max_c )
 		max_c = new_c; 
+	min_c = 1;
 
 	plog( " Done" );
 
@@ -3849,7 +3976,7 @@ void statistics( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = 1;
+		min_c = max( first_c, 1 );
 		max_c = num_c;
 	}
 
@@ -3871,7 +3998,13 @@ void statistics( int *choice )
 		{
 			data[ i ] = vs[ id[ i ] ].data; 
 			if ( data[ i ] == NULL )
-			plog( "\nError: invalid data\n" );
+			{
+				error_hard( "invalid series data", 
+							"internal problem in LSD", 
+							"if error persists, please contact developers",
+							true );
+				myexit( 18 );
+			}
 	   
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
 			{
@@ -4015,7 +4148,7 @@ void statistics_cross( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = 1;
+		min_c = max( first_c, 1 );
 		max_c = num_c;
 	}
 
@@ -4032,7 +4165,13 @@ void statistics_cross( int *choice )
 		
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
-			plog( "\nError: invalid data\n" );
+		{
+			error_hard( "invalid series data", 
+						"internal problem in LSD", 
+						"if error persists, please contact developers",
+						true );
+			myexit( 18 );
+		}
 	   
 		if ( logs )			// apply log to the values to show "log scale" in the y-axis
 		{
@@ -4295,7 +4434,7 @@ void plot_gnu( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = 1;
+		min_c = max( first_c, 1 );
 		max_c = num_c;
 	}
 
@@ -4317,7 +4456,13 @@ void plot_gnu( int *choice )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
-				plog( "\nError: invalid data\n" );
+			{
+				error_hard( "invalid series data", 
+							"internal problem in LSD", 
+							"if error persists, please contact developers",
+							true );
+				myexit( 18 );
+			}
 
 			if ( logs )		// apply log to the values to show "log scale" in the y-axis
 			{
@@ -4745,7 +4890,7 @@ void plot_cs_xy( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = 1;
+		min_c = max( first_c, 1 );
 		max_c = num_c;
 	}
 
@@ -4767,7 +4912,13 @@ void plot_cs_xy( int *choice )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
-				plog( "\nError: invalid data\n" );
+			{
+				error_hard( "invalid series data", 
+							"internal problem in LSD", 
+							"if error persists, please contact developers",
+							true );
+				myexit( 18 );
+			}
 	   
 			if ( logs )		// apply log to the values to show "log scale" in the y-axis
 			{
@@ -5058,7 +5209,7 @@ void plot_cs_xy( int *choice )
 	} 
 	else
 	{
-		sprintf( msg, "splot 'data.gp' using 1:2:3 %s t \"%s_%s(%d)\"", str2, str[2*block_length ], tag[2*block_length ], time_sel ); 
+		sprintf( msg, "splot 'data.gp' using 1:2:3 %s t \"%s_%s(%d)\"", str2, str[ 2 * block_length ], tag[ 2 * block_length ], time_sel ); 
 		
 		i = 3;
 	}  
@@ -5149,7 +5300,7 @@ void plot_phase_diagram( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = 1;
+		min_c = max( first_c, 1 );
 		max_c = num_c;
 	}
 
@@ -5171,7 +5322,13 @@ void plot_phase_diagram( int *choice )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
-				plog( "\nError: invalid data\n" );
+			{
+				error_hard( "invalid series data", 
+							"internal problem in LSD", 
+							"if error persists, please contact developers",
+							true );
+				myexit( 18 );
+			}
 	   
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
 			{
@@ -5806,7 +5963,13 @@ void plot_lattice( int *choice )
 		// get series data and take logs if necessary
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
-			plog( "\nError: invalid data\n" );
+		{
+			error_hard( "invalid series data", 
+						"internal problem in LSD", 
+						"if error persists, please contact developers",
+						true );
+			myexit( 18 );
+		}
 	  
 		if ( logs )			// apply log to the values to show "log scale"
 		{
@@ -6049,7 +6212,13 @@ void histograms( int *choice )
 
 	data = vs[ id ].data;
 	if ( data == NULL )
-		plog( "\nError: invalid data\n" );
+	{
+		error_hard( "invalid series data", 
+					"internal problem in LSD", 
+					"if error persists, please contact developers",
+					true );
+		myexit( 18 );
+	}
 
 	if ( logs )			// apply log to the values to show "log scale" in the y-axis
 	{
@@ -6305,7 +6474,7 @@ void histograms_cs( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = 1;
+		min_c = max( first_c, 1 );
 		max_c = num_c;
 	}
 
@@ -6322,7 +6491,13 @@ void histograms_cs( int *choice )
 		
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
-			plog( "\nError: invalid data\n" );
+		{
+			error_hard( "invalid series data", 
+						"internal problem in LSD", 
+						"if error persists, please contact developers",
+						true );
+			myexit( 18 );
+		}
 	  
 		if ( logs )			// apply log to the values to show "log scale" in the y-axis
 		{
@@ -6732,7 +6907,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 	{
 		app[ i ] = vs[ i ];
 		strcpy( app[ i ].label, vs[ i ].label );
-		strcpy( app[ i ].tag, vs[ i ].tag);
+		strcpy( app[ i ].tag, vs[ i ].tag );
 	} 
 
 	delete [ ] vs;
@@ -6740,7 +6915,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 
 	if ( autom_x )
 	{
-		min_c = 1;
+		min_c = max( first_c, 1 );
 		max_c = num_c;
 	}
 
@@ -6765,7 +6940,13 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
-				plog( "\nError: invalid data\n" );
+			{
+				error_hard( "invalid series data", 
+							"internal problem in LSD", 
+							"if error persists, please contact developers",
+							true );
+				myexit( 18 );
+			}
 		}
 	}
 
@@ -6786,8 +6967,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 		lapp = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 		strcpy( vs[ num_var ].label, lapp );
 		lapp = ( char * ) Tcl_GetVar( inter, "vtag", 0 );
-		sprintf( msg, "%s_%s", mc ? "MC" : "C", lapp );
-		strcpy( vs[ num_var ].tag, msg );
+		sprintf( vs[ num_var ].tag, "%s_%s", mc ? "MC" : "C", lapp );
 		vs[ num_var ].rank = var_num;
 			
 		if ( cs_long == 1 )									// compute over series?
@@ -6965,8 +7145,6 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 		}
 	}
 
-	cmd( ".da.vars.lb.v see end" );
-	
 	for ( i = 0; i < sel_series; ++i )
 	{
 		delete [ ] str[ i ];
@@ -7070,7 +7248,7 @@ void create_maverag( int *choice )
 	{
 		app[ i ] = vs[ i ];
 		strcpy( app[ i ].label, vs[ i ].label );
-		strcpy( app[ i ].tag, vs[ i ].tag);
+		strcpy( app[ i ].tag, vs[ i ].tag );
 	} 
 	
 	delete [ ] vs;
@@ -7078,7 +7256,7 @@ void create_maverag( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = 1;
+		min_c = max( first_c, 1 );
 		max_c = num_c;
 	}
 
@@ -7093,10 +7271,8 @@ void create_maverag( int *choice )
 		strcpy( msg, lapp );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 
-		sprintf( msg, "%s_%cma%d", str[ i ], ma_type == 0 ? 's' : 'c', flt );
-		strcpy( vs[ num_var + i ].label, msg );
-		sprintf( msg, "C_%s", tag[ i ] );
-		strcpy( vs[ num_var + i ].tag, msg );
+		sprintf( vs[ num_var + i ].label, "%s_%cma%d", str[ i ], ma_type == 0 ? 's' : 'c', flt );
+		sprintf( vs[ num_var + i ].tag, "C_%s", tag[ i ] );
 		vs[ num_var + i ].start = ( ma_type == 0 ) ? start[ i ] + flt - 1 : start[ i ];
 		vs[ num_var + i ].end = end[ i ];
 		vs[ num_var + i ].rank = num_var + i;
@@ -7106,7 +7282,13 @@ void create_maverag( int *choice )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
-				plog( "\nError: invalid data\n" );
+			{
+				error_hard( "invalid series data", 
+							"internal problem in LSD", 
+							"if error persists, please contact developers",
+							true );
+				myexit( 18 );
+			}
 
 			if ( ma_type == 0 )		// simple moving average
 			{
@@ -7165,7 +7347,6 @@ void create_maverag( int *choice )
 		cmd( "lappend DaModElem %s", vs[ num_var + i ].label );
 	}
 
-	cmd( ".da.vars.lb.v see end" );
 	num_var += nv; 
 
 	for ( i = 0; i < nv; ++i )
@@ -7183,6 +7364,78 @@ void create_maverag( int *choice )
 }
 
 
+/***************************************************
+ADD_UNSAVED
+****************************************************/
+void add_unsaved( int *choice )
+{
+	char *lab;
+	
+	if ( actual_steps == 0 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Simulation not run\" -detail \"Select menu option Run>Run before using this option.\"" );
+		return;
+	}
+
+	cmd( "set bidi \"\"" );
+	
+	cmd( "set unSavElem { }" );
+	cmd( "foreach b $modElem { \
+			if { [ lsearch $DaModElem $b ] < 0 } { \
+				lappend unSavElem $b \
+			} \
+		}" );
+	
+	cmd( "newtop .da.s \"Add Unsaved Element\" { set choice 2 } .da" );
+	
+	cmd( "frame .da.s.i" );
+	cmd( "label .da.s.i.l -text \"Element name (or part)\"" );
+	cmd( "ttk::combobox .da.s.i.e -width 20 -textvariable bidi -justify center -values $unSavElem" );
+	cmd( "pack .da.s.i.l .da.s.i.e" );
+	cmd( "pack .da.s.i -pady 5 -padx 5" );
+	
+	cmd( "bind .da.s.i.e <Return> { set choice 1 }" );
+	cmd( "bind .da.s.i.e <Escape> { set choice 2 }" );
+	cmd( "bind .da.s.i.e <KeyRelease> { \
+			if { %%N < 256 && [ info exists unSavElem ] } { \
+				set b [ .da.s.i.e index insert ]; \
+				set s [ .da.s.i.e get ]; \
+				set f [ lsearch -glob $unSavElem $s* ]; \
+				if { $f !=-1 } { \
+					set d [ lindex $unSavElem $f ]; \
+					.da.s.i.e delete 0 end; \
+					.da.s.i.e insert 0 $d; \
+					.da.s.i.e index $b; \
+					.da.s.i.e selection range $b end \
+				} \
+			} \
+		}" );
+
+	cmd( "okhelpcancel .da.s b  { set choice 1 } { LsdHelp menudata_res.html#add_series } { set choice 2 }" );
+	cmd( "showtop .da.s" );
+	cmd( "focus .da.s.i.e" );
+	
+	*choice = 0;
+	while( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
+	
+	cmd( "destroytop .da.s" );
+	
+	if( *choice == 2 )
+		return;
+	
+	cmd( "set choice [ lsearch $modElem $bidi ]" );
+	if( *choice < 0 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -icon error -title Error -message \"Invalid element name\" -detail \"There is no element in the model structure with the given name.\"" );
+		return;
+	}
+	
+	lab = ( char * ) Tcl_GetVar( inter, "bidi", 0 );
+	insert_data_mem( root, &num_var, lab );
+}
+
+	
 /************************
  SAVE_DATAzip
  ************************/
@@ -7240,7 +7493,13 @@ void save_datazip( int *choice )
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
-			plog( "\nError: invalid data\n" );
+		{
+				error_hard( "invalid series data", 
+							"internal problem in LSD", 
+							"if error persists, please contact developers",
+							true );
+				myexit( 18 );
+		}
 		
 		if ( max_c < end[ i ] )
 			max_c = end[ i ];
@@ -7722,33 +7981,27 @@ void plog_series( int *choice )
 	str = new char *[ nv ];
 	tag = new char *[ nv ];
 
-	app = new store[ 1 + num_var ];
-
-	for ( i = 0; i < num_var; ++i )
-	{
-		app[ i ] = vs[ i ];
-		strcpy( app[ i ].label, vs[ i ].label );
-		strcpy( app[ i ].tag, vs[ i ].tag);
-	}
-	 
-	delete [ ] vs;
-	vs = app;
-
 	for ( i = 0; i < nv; ++i )
 	{
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
 		
-		cmd( "set res [.da.vars.ch.v get %d]", i );
+		cmd( "set res [ .da.vars.ch.v get %d ]", i );
 		lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		strcpy( msg,lapp );
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( lapp, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
-				plog( "\nError: invalid data\n" );
+			{
+				error_hard( "invalid series data", 
+							"internal problem in LSD", 
+							"if error persists, please contact developers",
+							true );
+				myexit( 18 );
+			}
 		}
 	}
 
@@ -7908,14 +8161,14 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 					if ( data[ k ] == NULL )
 						continue;
 					
-					if ( i > 1 && start[ k ] < i && end[ k ] >= i )
+					if ( i > min( iniCase, 1 ) && start[ k ] < i && end[ k ] >= i )
 					{
 						yVal = data[ k ][ i ];
 						tOk = true;
 					}
 					else
 					{
-						if ( start[ k ] == i || ( i <= 1 && start[ k ] <= 0 ) )
+						if ( start[ k ] == i || ( i <= 1 && start[ k ] <= 0 && end[ k ] >= i ) )
 							yVal = data[ k ][ i ];
 						
 						tOk = false;

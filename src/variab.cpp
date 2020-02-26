@@ -218,8 +218,8 @@ int variable::init( object *_up, char const *_label, int _num_lag, double *v, in
 	lock_guard < mutex > lock( parallel_comp );
 #endif	
 	
-	up =_up;
-    save =_save;
+	up = _up;
+    save = _save;
 	
 	i = strlen( _label ) + 1;
 	label = new char[ i ];
@@ -229,7 +229,7 @@ int variable::init( object *_up, char const *_label, int _num_lag, double *v, in
 	if ( num_lag >= 0 )
 	{
 		val = new double[ num_lag + 1 ];
-		for ( i = 0; i < num_lag + 1; i++ )
+		for ( i = 0; i < num_lag + 1; ++i )
 			val[ i ] = v[ i ];
 	}
 	else
