@@ -52,7 +52,7 @@ bool no_more_memory = false;// memory overflow when setting data save structure
 bool no_saved = true;		// disable the usage of saved values as lagged ones
 bool no_search;				// disable the standard variable search mechanism
 bool no_window = false;		// no-window command line job
-bool no_zero_instance = false;// flag to allow deleting last object instance
+bool no_zero_instance = true;// flag to allow deleting last object instance
 bool non_var = false;		// flag to indicate INTERACT macro condition
 bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
