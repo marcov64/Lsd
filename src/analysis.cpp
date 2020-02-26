@@ -8854,8 +8854,13 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	for ( i = 0; i < nv; ++i )
 		cmd( "lappend series%d \"%s_%s\"", cur_plot, str[ i ], tag[ i ] );
 		
-	// axis lines, ticks & grid
-	cmd( "canvas_axis $p %d %d %d", type, grid, y2on );
+	// axis lines, ticks & grid (adjust ticks for few horizontal cases)
+	if ( type == TSERIES && ( max_c - min_c ) / ( hticks + 1 ) < 10 )
+		for ( ; hticks > 0; --hticks )
+			if ( ( max_c - min_c ) % ( hticks + 1 ) == 0 )
+				break;
+			
+	cmd( "canvas_axis $p %d %d %d %d", type, grid, hticks, y2on );
 
 	// x-axis values
 	switch ( type )

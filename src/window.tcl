@@ -1600,19 +1600,19 @@ proc scale_canvas { c type ratio } {
 # CANVAS_AXIS
 # Create the canvas plotting axes and the optional grid
 #************************************************
-proc canvas_axis { c type grid { y2 0 } } {
-	global hsizeP vsizeP hbordsizeP tbordsizeP hticksP vticksP axcolorP grcolorP 
+proc canvas_axis { c type grid hticks { y2 0 } } {
+	global hsizeP vsizeP hbordsizeP tbordsizeP vticksP axcolorP grcolorP 
 	
 	# x-axis, ticks & x-grid
 	$c create line $hbordsizeP $tbordsizeP [ expr $hbordsizeP + $hsizeP ] $tbordsizeP -width 1 -fill $axcolorP -tag p
 	$c create line $hbordsizeP [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
-
+	
 	if { $type == 0 || $type == 4 || $type == 5 } {
-		for { set i 0 } { $i < [ expr $hticksP + 2 ] } { incr i } {
-			if { $grid && $i > 0 && $i < [ expr $hticksP + 1 ] } {
-				$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + 1 ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + $vsizeP - 1 ] -fill $grcolorP -width 1 -tags {g p} 
+		for { set i 0 } { $i < [ expr $hticks + 2 ] } { incr i } {
+			if { $grid && $i > 0 && $i < [ expr $hticks + 1 ] } {
+				$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + 1 ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP - 1 ] -fill $grcolorP -width 1 -tags {g p} 
 			}
-			$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + $vsizeP + 5 ] -fill $axcolorP -width 1 -tags p
+			$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP + 5 ] -fill $axcolorP -width 1 -tags p
 		}
 	}
 	
