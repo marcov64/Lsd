@@ -650,13 +650,27 @@ SEARCH_DESCRIPTION
 description *search_description( char *lab )
 {
 	description *cur;
+	variable *cv;
 
 	for ( cur = descr; cur != NULL; cur = cur->next )
 	{
 		if ( ! strcmp( cur->label, lab ) )
 			return cur;
 	}
-	return NULL;
+	
+	cv = root->search_var( NULL, lab );
+	
+	if ( cv == NULL )
+		return NULL;
+	
+	if ( cv->param == 0 )
+		add_description( lab, "Variable", "(no description available )" );
+	if ( cv->param == 1 )
+		add_description( lab, "Parameter", "(no description available )" );  
+	if ( cv->param == 2 )
+		add_description( lab, "Function", "(no description available )" );  
+
+	return search_description( lab );
 } 
 
 
@@ -699,104 +713,104 @@ void autofill_descr( object *o )
 /***************************************************
 CHANGE_DESCR_LAB
 ***************************************************/
-void change_descr_lab(char const *lab_old, char const *lab, char const *type, char const *text, char const *init)
+void change_descr_lab( char const *lab_old, char const *lab, char const *type, char const *text, char const *init )
 {
 	description *cur, *cur1;
 
-	for (cur=descr; cur!=NULL; cur=cur->next)
-	 {
-	  if (!strcmp(cur->label, lab_old) )
-	   {
-
-	   if (!strcmp(lab, "" ) && !strcmp(type, "" ) && !strcmp(text, "" ) && !strcmp(init, "" ) )
+	for ( cur = descr; cur != NULL; cur = cur->next )
+	{
+		if ( ! strcmp( cur->label, lab_old ) )
 		{
-		 delete [ ] cur->label;
-		 delete [ ] cur->type;
-		 delete [ ] cur->text;
-		 if (cur->init != NULL )
-		  delete [ ] cur->init;
+
+			if ( ! strcmp( lab, "" ) && ! strcmp( type, "" ) && ! strcmp( text, "" ) && ! strcmp(init, "" ) )
+			{
+				delete [ ] cur->label;
+				delete [ ] cur->type;
+				delete [ ] cur->text;
+				delete [ ] cur->init;
 		  
-		if ( cur == descr )
-		{
-			descr = cur->next;	
-			delete cur;
-		}
-		else
-		{
-			for ( cur1 = descr; cur1->next != cur; cur1 = cur1->next );
+				if ( cur == descr )
+				{
+					descr = cur->next;	
+					delete cur;
+				}
+				else
+				{
+					for ( cur1 = descr; cur1->next != cur; cur1 = cur1->next );
+					
+					cur1->next = cur->next;
+					delete cur;
+				} 
+			}
 			
-			cur1->next = cur->next;
-			delete cur;
-		} 
-		 
-		}
-	   if (strcmp(lab, "" ) )
-		{
-		 delete [ ] cur->label;
-		 cur->label=new char[strlen(lab)+1];
-		 strcpy(cur->label, lab);
-		} 
-	   if (strcmp(type, "" ) )
-		{
-		 delete [ ] cur->type;
-		 cur->type=new char[strlen(type)+1];
-		 strcpy(cur->type, type);
-		}
-	   if (strcmp(text, "" ) )
-		{
-		 delete [ ] cur->text;
-		 cur->text=new char[strlen(text)+1];
-		 strcpy(cur->text, text);
-		} 
-	   if (strcmp(init, "" ) )
-		{
-		 if (cur->init != NULL )
-		   delete [ ] cur->init;
-		 cur->init=new char[strlen(init)+1];
-		 strcpy(cur->init, init);
-		} 
+			if ( strcmp( lab, "" ) )
+			{
+				delete [ ] cur->label;
+				cur->label = new char [ strlen( lab ) + 1 ];
+				strcpy( cur->label, lab );
+			}
+			
+			if ( strcmp( type, "" ) )
+			{
+				delete [ ] cur->type;
+				cur->type = new char [ strlen( type ) + 1 ];
+				strcpy( cur->type, type );
+			}
+			
+			if ( strcmp( text, "" ) )
+			{
+				delete [ ] cur->text;
+				cur->text = new char [ strlen( text ) + 1 ];
+				strcpy( cur->text, text );
+			} 
+			
+			if ( strcmp( init, "" ) )
+			{
+				delete [ ] cur->init;
+				cur->init = new char [ strlen( init ) + 1 ];
+				strcpy( cur->init, init );
+			} 
 
-	   return;
-	  
-	   }
-	 }
+		   return;
+		}
+	}
 }
 
 
 /***************************************************
 ADD_DESCRIPTION
 ***************************************************/
-void add_description(char const *lab, char const *type, char const *text)
+void add_description( char const *lab, char const *type, char const *text )
 {
 	description *cur;
 
-	if (descr == NULL )
-		cur=descr=new description;
+	if ( descr == NULL )
+		cur = descr = new description;
 	else
 	{ 
-		for (cur=descr; cur->next!=NULL; cur=cur->next);
+		for ( cur = descr; cur->next != NULL; cur = cur->next );
 	  
-		cur->next=new description;
-		cur=cur->next;
+		cur->next = new description;
+		cur = cur->next;
 	}  
 
-	cur->next=NULL;
-	cur->label=new char[strlen(lab)+1];
-	strcpy(cur->label, lab);
-	cur->type=new char[strlen(type)+1];
-	strcpy(cur->type, type);
-	if (text!=NULL && strlen(text) != 0 )
+	cur->next = NULL;
+	cur->label = new char [ strlen( lab ) + 1 ];
+	strcpy( cur->label, lab );
+	cur->type = new char [ strlen( type ) + 1 ];
+	strcpy( cur->type, type );
+	if ( text != NULL && strlen( text ) != 0 )
 	{
-		cur->text=new char[strlen(text)+1]; 
-		strcpy(cur->text, text);
+		cur->text = new char [ strlen( text ) + 1 ]; 
+		strcpy( cur->text, text );
 	}
 	else
 	{
-		cur->text=new char[29]; 
-		strcpy(cur->text, "(no description available)");
+		cur->text = new char[ 29 ]; 
+		strcpy( cur->text, "(no description available)" );
 	}
 	   
-	cur->init=NULL;
+	cur->init = NULL;
 }
 
 

@@ -426,6 +426,7 @@ bool load_description( char *msg, FILE *f )
 		app->next = new description;
 		app = app->next;
 	} 
+	
 	app->next = NULL;
 	app->text = app->init = NULL;
 	app->label = new char[ strlen( label ) + 1 ];
@@ -434,7 +435,7 @@ bool load_description( char *msg, FILE *f )
 	strcpy( app->type, type );
 
 	strcpy( str1, "" );
-	fgets(str, MAX_LINE_SIZE, f );		// skip first newline character
+	fgets( str, MAX_LINE_SIZE, f );		// skip first newline character
 	for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) && strncmp( str, "_INIT_", 6 ) && strlen( str1 ) < 9 *MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
 		strcat( str1, str );
 
