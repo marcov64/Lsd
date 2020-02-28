@@ -1,5 +1,5 @@
 # CORRECTIONS: need to reset these variables to allow for no window version
-CC_NW=$(CC_CROSS)g++
+CC_NW=$(CC)
 SRC_DIR=$(SRC)/
 LSDROOT=.
 INCLUDE=-I$(PATH_HEADER) -I$(SRC)
