@@ -3672,10 +3672,10 @@ void insert_store_mem( object *r, int *num_v, char *lab )
 				strcpy( tag_pref, "U_" );
 				
 				delete [ ] cv->data;
-				cv->data = new double [ cv->num_lag + 1 ];
+				cv->data = new double [ max_step + 1 ];
 				
-				for ( i = 0; i < cv->num_lag + 1; ++i )
-					cv->data[ i ] = cv->val[ cv->num_lag - i ];
+				for ( i = 0; i <= cv->num_lag; ++i )
+					cv->data[ cv->start + i ] = cv->val[ cv->num_lag - i ];
 			}
 			
 			set_lab_tit( cv );
