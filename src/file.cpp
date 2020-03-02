@@ -866,25 +866,25 @@ void unload_configuration ( bool full )
 /*********************************
 SAVE_SINGLE
 *********************************/
-void save_single( variable *vcv )
+void save_single( variable *v )
 {
 	int i;
 	FILE *f;
 
 #ifdef PARALLEL_MODE
 	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( vcv->parallel_comp );
+	lock_guard < mutex > lock( v->parallel_comp );
 #endif	
 
-	set_lab_tit( vcv );
-	sprintf( msg, "%s_%s-%d_%d_seed-%d.res", vcv->label, vcv->lab_tit, vcv->start, vcv->end, seed - 1 );
+	set_lab_tit( v );
+	sprintf( msg, "%s_%s-%d_%d_seed-%d.res", v->label, v->lab_tit, v->start, v->end, seed - 1 );
 	f = fopen( msg, "wt" );  		// use text mode for Windows better compatibility
 
-	fprintf( f, "%s %s (%d %d)\t\n", vcv->label, vcv->lab_tit, vcv->start, vcv->end );
+	fprintf( f, "%s %s (%d %d)\t\n", v->label, v->lab_tit, v->start, v->end );
 
 	for ( i = 0; i <= t - 1; ++i )
-		if ( i >= vcv->start && i <= vcv->end && ! is_nan( vcv->data[ i ] ) )	// save NaN as n/a
-			fprintf( f,"%lf\t\n", vcv->data[ i ] );
+		if ( i >= v->start && i <= v->end && ! is_nan( v->data[ i - v->start ] ) )	// save NaN as n/a
+			fprintf( f,"%lf\t\n", v->data[ i - v->start ] );
 		else
 			fprintf( f,"%s\t\n", nonavail );
 	  

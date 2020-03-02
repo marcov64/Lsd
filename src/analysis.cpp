@@ -248,7 +248,7 @@ cmd( "bind $f.v <Return> {.da.vars.b.in invoke}" );
 cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.lb.v <Return> }" );
 cmd( "bind $f.v <Button-2> {.da.vars.lb.v selection clear 0 end;.da.vars.lb.v selection set @%%x,%%y; set res [selection get]; set choice 30}" );
 cmd( "bind $f.v <Button-3> { event generate .da.vars.lb.v <Button-2> -x %%x -y %%y }" );
-cmd( "bind $f.v <KeyPress-space> {set res [.da.vars.lb.v get active]; set choice 30}; bind $f.v <KeyPress-space> {set res [.da.vars.lb.v get active]; set choice 30}" );
+cmd( "bind $f.v <KeyPress-space> { set res [ .da.vars.lb.v get active ]; set choice 30 }; bind $f.v <KeyPress-space> { set res [ .da.vars.lb.v get active ]; set choice 30 }" );
 
 cmd( "bind $f.v <Shift-Button-2> {.da.vars.lb.v selection clear 0 end;.da.vars.lb.v selection set @%%x,%%y; set res [selection get]; set choice 16}" );
 cmd( "bind $f.v <Shift-Button-3> { event generate .da.vars.lb.v <Shift-Button-2> -x %%x -y %%y }" );
@@ -265,7 +265,7 @@ cmd( "bind $f.v <Return> {.da.b.ts invoke}" );
 cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.ch.v <BackSpace> }" );
 cmd( "bind $f.v <Button-2> {.da.vars.ch.v selection clear 0 end;.da.vars.ch.v selection set @%%x,%%y; set res [selection get]; set choice 33}" );
 cmd( "bind $f.v <Button-3> { event generate .da.vars.ch.v <Button-2> -x %%x -y %%y }" );
-cmd( "bind $f.v <KeyPress-space> {set res [.da.vars.ch.v get active]; set choice 33}; bind $f.v <KeyPress-space> {set res [.da.vars.ch.v get active]; set choice 33}" );
+cmd( "bind $f.v <KeyPress-space> { set res [ .da.vars.ch.v get active ]; set choice 33 }; bind $f.v <KeyPress-space> { set res [ .da.vars.ch.v get active ]; set choice 33 }" );
 
 cmd( "set f .da.vars.pl" );
 cmd( "frame $f" );
@@ -274,11 +274,11 @@ cmd( "listbox $f.v -width $daCwid -yscroll \"$f.v_scroll set\" -selectmode singl
 cmd( "pack $f.v $f.v_scroll -side left -fill y" );
 
 cmd( "mouse_wheel $f.v" );
-cmd( "bind $f.v <Return> {set it [selection get];set choice 3}" );
+cmd( "bind $f.v <Return> { set it [ selection get ]; set choice 3 }" );
 cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.pl.v <Return> }" );
-cmd( "bind $f.v <Button-2> {.da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set @%%x,%%y; set it [selection get]; set n_it [.da.vars.pl.v curselection]; set choice 20}" );
+cmd( "bind $f.v <Button-2> { .da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set @%%x,%%y; set it [ selection get ]; set n_it [ .da.vars.pl.v curselection ]; set choice 20 }" );
 cmd( "bind $f.v <Button-3> { event generate .da.vars.pl.v <Button-2> -x %%x -y %%y }" );
-cmd( "bind .da <KeyPress-Delete> {set n_it [.da.vars.pl.v curselection]; if {$n_it != \"\" } {set it [selection get]; set choice 20} {}}" );
+cmd( "bind .da <KeyPress-Delete> { set n_it [ .da.vars.pl.v curselection ]; if { $n_it != \"\" } { set it [ selection get ]; set choice 20 } }" );
 
 cmd( "frame .da.vars.b" );
 cmd( "set f .da.vars.b" );
@@ -893,7 +893,7 @@ while ( true )
 					cmd( "set heightpost %d", plot_l[ *choice ] );
 				else
 				{
-					cmd( "set str [.da.f.new$a.f.plots conf -height]" );
+					cmd( "set str [ .da.f.new$a.f.plots conf -height ]" );
 					cmd( "scan $str \"%%s %%s %%s %%s %%d\" trash1 trash2 trash3 trash4 heighpost" );
 				} 
 			}
@@ -960,7 +960,7 @@ while ( true )
 			cmd( "frame .da.a.q.f2.f" );
 			cmd( "label .da.a.q.f2.f.l -text \"Label\"" );
 			cmd( "entry .da.a.q.f2.f.e -width 17 -textvariable svar -justify center -state disabled" );
-			cmd( "bind .da.a.q.f2.f.e <KeyRelease> {if { %%N < 256 && [ info exists DaModElem] } { set bb1 [.da.a.q.f2.f.e index insert]; set bc1 [.da.a.q.f2.f.e get]; set bf1 [lsearch -glob $DaModElem $bc1*]; if { $bf1  != -1 } {set bd1 [lindex $DaModElem $bf1 ]; .da.a.q.f2.f.e delete 0 end; .da.a.q.f2.f.e insert 0 $bd1; .da.a.q.f2.f.e index $bb1; .da.a.q.f2.f.e selection range $bb1 end } } }" );
+			cmd( "bind .da.a.q.f2.f.e <KeyRelease> { if { %%N < 256 && [ info exists DaModElem ] } { set bb1 [ .da.a.q.f2.f.e index insert ]; set bc1 [ .da.a.q.f2.f.e get ]; set bf1 [ lsearch -glob $DaModElem $bc1* ]; if { $bf1  != -1 } { set bd1 [ lindex $DaModElem $bf1 ]; .da.a.q.f2.f.e delete 0 end; .da.a.q.f2.f.e insert 0 $bd1; .da.a.q.f2.f.e index $bb1; .da.a.q.f2.f.e selection range $bb1 end } } }" );
 			cmd( "bind .da.a.q.f2.f.e <Return> {focus .da.a.c.v.c.e; .da.a.c.v.c.e selection range 0 end}" );
 			cmd( "pack .da.a.q.f2.f.l .da.a.q.f2.f.e -anchor w -side left" );
 			cmd( "pack .da.a.q.f2.f -anchor w -padx 22" );
@@ -1175,33 +1175,33 @@ while ( true )
 					if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 					{
 						datum = vs[ k ].data;
-						if ( is_finite( datum[ h ] ) )		// ignore NaNs
+						if ( is_finite( datum[ h - l ] ) )		// ignore NaNs
 						{
 							r = 0;
 							switch ( p )
 							{
 								case 0: 
-									if ( datum[ h ] != compvalue )
+									if ( datum[ h - l ] != compvalue )
 										r = 1;
 									break;
 								case 1: 
-									if ( datum[ h ] == compvalue )
+									if ( datum[ h - l ] == compvalue )
 										r = 1;
 									break;
 								case 2: 
-									if ( datum[ h ] >= compvalue )
+									if ( datum[ h - l ] >= compvalue )
 										r = 1;
 									break;
 								case 3: 
-									if ( datum[ h ] > compvalue )
+									if ( datum[ h - l ] > compvalue )
 										r = 1;
 									break;
 								case 4: 
-									if ( datum[ h ] <= compvalue )
+									if ( datum[ h - l ] <= compvalue )
 										r = 1;
 									break;
 								case 5: 
-									if ( datum[ h ] < compvalue )
+									if ( datum[ h - l ] < compvalue )
 										r = 1;
 									break;
 							}
@@ -1273,7 +1273,7 @@ while ( true )
 			cmd( "frame .da.a.q.f2.f" );
 			cmd( "label .da.a.q.f2.f.l -text \"Label\"" );
 			cmd( "entry .da.a.q.f2.f.e -width 17 -textvariable svar -justify center -state disabled" );
-			cmd( "bind .da.a.q.f2.f.e <KeyRelease> {if { %%N < 256 && [ info exists DaModElem] } { set bb1 [.da.a.q.f2.f.e index insert]; set bc1 [.da.a.q.f2.f.e get]; set bf1 [lsearch -glob $DaModElem $bc1*]; if { $bf1  != -1 } {set bd1 [lindex $DaModElem $bf1 ]; .da.a.q.f2.f.e delete 0 end; .da.a.q.f2.f.e insert 0 $bd1; .da.a.q.f2.f.e index $bb1; .da.a.q.f2.f.e selection range $bb1 end } } }" );
+			cmd( "bind .da.a.q.f2.f.e <KeyRelease> { if { %%N < 256 && [ info exists DaModElem ] } { set bb1 [ .da.a.q.f2.f.e index insert ]; set bc1 [ .da.a.q.f2.f.e get ]; set bf1 [ lsearch -glob $DaModElem $bc1* ]; if { $bf1  != -1 } { set bd1 [ lindex $DaModElem $bf1 ]; .da.a.q.f2.f.e delete 0 end; .da.a.q.f2.f.e insert 0 $bd1; .da.a.q.f2.f.e index $bb1; .da.a.q.f2.f.e selection range $bb1 end } } }" );
 			cmd( "bind .da.a.q.f2.f.e <Return> {focus .da.a.c.v.c.e; .da.a.c.v.c.e selection range 0 end}" );
 			cmd( "pack .da.a.q.f2.f.l .da.a.q.f2.f.e -anchor w -side left" );
 			cmd( "pack .da.a.q.f2.f -anchor w -padx 22" );
@@ -1423,33 +1423,33 @@ while ( true )
 					if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 					{
 						datum = vs[ k ].data;
-						if ( is_finite( datum[ h ] ) )		// ignore NaNs
+						if ( is_finite( datum[ h - l ] ) )		// ignore NaNs
 						{
 							r = 0;
 							switch ( p )
 							{
 								case 0: 
-									if ( datum[ h ] != compvalue )
+									if ( datum[ h - l ] != compvalue )
 										r = 1;
 									break;
 								case 1: 
-									if ( datum[ h ] == compvalue )
+									if ( datum[ h - l ] == compvalue )
 										r = 1;
 									break;
 								case 2: 
-									if ( datum[ h ] >= compvalue )
+									if ( datum[ h - l ] >= compvalue )
 										r = 1;
 									break;
 								case 3: 
-									if ( datum[ h ] > compvalue )
+									if ( datum[ h - l ] > compvalue )
 										r = 1;
 									break;
 								case 4: 
-									if ( datum[ h ] <= compvalue )
+									if ( datum[ h - l ] <= compvalue )
 										r = 1;
 									break;
 								case 5: 
-									if ( datum[ h ] < compvalue )
+									if ( datum[ h - l ] < compvalue )
 										r = 1;
 									break;
 							}
@@ -2111,7 +2111,7 @@ while ( true )
 				cmd( "set sysTerm $sysTermTmp" );
 				cmd( "set gpterm $gptermTmp" );
 				cmd( "set gpdgrid3d $gpdgrid3dTmp" );
-				cmd( "set gpoptions [.da.a.o.t get 0.0 end]" ); 
+				cmd( "set gpoptions [ .da.a.o.t get 0.0 end ]" ); 
 			}
 
 			cmd( "destroytop .da.a" );
@@ -2818,6 +2818,8 @@ while ( true )
 		default:
 			break;
 	}
+	
+	cmd( "update" );
 }
 }
 
@@ -2887,10 +2889,10 @@ void update_bounds( void )
  ****************************************************/
 void plot_tseries( int *choice )
 {
-	bool y2on, done, stopErr = false;
+	bool y2on, done;
 	char *app, **str, **tag;
-	double temp, **data, **logdata;
-	int i, j, *start, *end, *id, logErrCnt = 0;
+	double temp, **data;
+	int i, j, *start, *end, *id;
 
 	if ( nv > 1000 )
 	{
@@ -2908,7 +2910,6 @@ void plot_tseries( int *choice )
 	}
 
 	data = new double *[ nv ];
-	logdata = new double *[ nv ];
 	start = new int [ nv ];
 	end = new int [ nv ];
 	id = new int [ nv ];
@@ -2927,9 +2928,8 @@ void plot_tseries( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
-		logdata[ i ] = NULL;
 
-		cmd( "set res [.da.vars.ch.v get %d]", i );
+		cmd( "set res [ .da.vars.ch.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -2948,26 +2948,7 @@ void plot_tseries( int *choice )
 			}
 	   
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
-			{
-				logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-				for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-				if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-					logdata[ i ][ j ] = log( data[ i ][ j ] );
-				else
-				{
-					logdata[ i ][ j ] = NAN;
-					if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-						plog( "\nWarning: zero or negative values in log plot (ignored)\n         Series: %d, Case: %d", "", i + 1, j );
-					else
-						if ( ! stopErr )
-						{
-							plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-							stopErr = true;
-						}
-				}
-				
-				data[ i ] = logdata[ i ];			// replace the data series
-			}
+				data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "plot" );
 		}
 	}
 
@@ -3011,17 +2992,17 @@ void plot_tseries( int *choice )
 		for ( done = false, i = 0; i < num_y2 - 1 && i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
-				if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )		// ignore NaNs
+				if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) )		// ignore NaNs
 				{
-					miny = maxy = data[ i ][ j ];
+					miny = maxy = data[ i ][ j - start[ i ] ];
 					done = true;
 				}
 				
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny )		// ignore NaNs
-					miny = data[ i ][ j ];
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )		// ignore NaNs
+					miny = data[ i ][ j - start[ i ] ];
 					
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )		// ignore NaNs
-					maxy = data[ i ][ j ];
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )		// ignore NaNs
+					maxy = data[ i ][ j - start[ i ] ];
 			}
 		
 		// condition the max and min values 
@@ -3041,17 +3022,17 @@ void plot_tseries( int *choice )
 	for ( miny2 = maxy2 = 0, done = false, i = num_y2 - 1; i < nv; ++i )
 		for ( j = min_c; j <= max_c; ++j )
 		{
-			if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )		// ignore NaNs
+			if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) )		// ignore NaNs
 			{
-				miny2 = maxy2 = data[ i ][ j ];
+				miny2 = maxy2 = data[ i ][ j - start[ i ] ];
 				done = true;
 			}
 			
-			if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny2 )		// ignore NaNs
-				miny2 = data[ i ][ j ];
+			if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny2 )		// ignore NaNs
+				miny2 = data[ i ][ j - start[ i ] ];
 				
-			if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy2 )		// ignore NaNs
-				maxy2 = data[ i ][ j ];
+			if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy2 )		// ignore NaNs
+				maxy2 = data[ i ][ j - start[ i ] ];
 		}
 		
 	// check if not all invalid data
@@ -3079,12 +3060,11 @@ void plot_tseries( int *choice )
 		delete [ ] tag[ i ];
 		
 		if ( logs )
-			delete [ ] logdata[ i ];
+			delete [ ] data[ i ];
 	}
 
 	delete [ ] str;
 	delete [ ] tag;
-	delete [ ] logdata;
 	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
@@ -3097,10 +3077,10 @@ PLOT_CROSS
 ****************************************************/
 void plot_cross( int *choice )
 {
-	bool first, stopErr = false;
+	bool first;
 	char *app, **str, **tag;
-	double temp, **val, **data, **logdata;
-	int i, j, k, nt, new_nv, *list_times, *pos, *start, *end, *id, *erase, logErrCnt = 0;
+	double temp, **val, **data;
+	int i, j, k, nt, new_nv, *list_times, *pos, *start, *end, *id, *erase;
 
 	cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
 	get_int( "nt", & nt );
@@ -3122,7 +3102,6 @@ void plot_cross( int *choice )
 	str = new char *[ nv ];
 	tag = new char *[ nv ];
 	data = new double *[ nv ];
-	logdata = new double *[ nv ];
 
 	for ( i = 0; i < nt; ++i )
 	{
@@ -3143,9 +3122,8 @@ void plot_cross( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
-		logdata[ i ] = NULL;
 
-		cmd( "set res [.da.vars.ch.v get %d]", i );
+		cmd( "set res [ .da.vars.ch.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -3172,26 +3150,7 @@ void plot_cross( int *choice )
 			}
 	   
 			if ( logs )			// apply log to the values to show "log scale"
-			{
-				logdata[ new_nv ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-				for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-					if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-						logdata[ new_nv ][ j ] = log( data[ i ][ j ] );
-					else
-					{
-						logdata[ new_nv ][ j ] = NAN;
-						if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-							plog( "\nWarning: zero or negative values in log plot (ignored)\n         Series: %d, Case: %d", "", i + 1, j );
-						else
-							if ( ! stopErr )
-							{
-								plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-								stopErr = true;
-							}
-					}
-					
-				data[ i ] = logdata[ new_nv ];		// replace the data series
-			}
+				data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "plot" );
 			
 			val[ new_nv ] = new double[ nt ];
 			new_nv++;
@@ -3207,9 +3166,9 @@ void plot_cross( int *choice )
 	for ( j = 0, first = true, i = 0; j < nv; ++j )
 	{
 		for ( k = 0; k < nt; ++k )
-			if ( erase[ j ] == 0 && is_finite( data[ j ][ list_times[ k ] ] ) )		// ignore NaNs
+			if ( erase[ j ] == 0 && is_finite( data[ j ][ list_times[ k ] - start[ j ] ] ) )		// ignore NaNs
 			{
-				val[ i ][ k ] = data[ j ][ list_times[ k ] ];
+				val[ i ][ k ] = data[ j ][ list_times[ k ] - start[ j ] ];
 			
 				// auto-find minimums and maximums
 				if ( autom )
@@ -3281,7 +3240,7 @@ void plot_cross( int *choice )
 		delete [ ] val[ i ];
 		
 		if ( logs )
-			delete [ ] logdata[ i ];
+			delete [ ] data[ i ];
 	}
 
 	delete [ ] list_times;
@@ -3290,7 +3249,6 @@ void plot_cross( int *choice )
 	delete [ ] erase;
 	delete [ ] str;
 	delete [ ] tag;
-	delete [ ] logdata;
 	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
@@ -3440,7 +3398,7 @@ void set_cs_data( int *choice )
 	if ( *choice == 2 )
 		goto end;
 
-	cmd( "if { [.da.s.u.i.lb.lb.lb size] == 0 } { tk_messageBox -parent .da.s -type ok -title Error -icon error -message \"No time step selected\" -detail \"At least one case/time step must be selected. Please try again.\"; set choice 2 }" );
+	cmd( "if { [ .da.s.u.i.lb.lb.lb size ] == 0 } { tk_messageBox -parent .da.s -type ok -title Error -icon error -message \"No time step selected\" -detail \"At least one case/time step must be selected. Please try again.\"; set choice 2 }" );
 
 	if ( *choice == 2 )
 		goto end;
@@ -3526,33 +3484,36 @@ void sort_cs_asc( char **s,char **t, double **v, int nv, int nt, int c )
 
 
 /***************************************************
-SEARCH_LAB_TIT
+LOG_DATA
 ****************************************************/
-double *search_lab_tit( object *r, char *s, char *t, int st, int en )
+double *log_data( double *data, int start, int end, int ser, const char *err_msg )
 {
-	object *cur;
-	variable *cv;
-	double *res = NULL;
+	bool stopErr;
+	double *logdata;
+	int i, errCnt;
 	
-	sprintf( msg, "%s_%s", s, t );
-	for ( cur = r; cur != NULL && res == NULL; cur = cur->next )
-	{ 
-		for ( cv = cur->v; cv != NULL; cv = cv->next )
+	logdata = new double [ end - start + 1 ];
+	
+	for ( stopErr = false, errCnt = 0, i = 0; i <= end - start; ++i )
+		if ( ! is_nan( data[ i ] ) && data[ i ] > 0.0 )
+			logdata[ i ] = log( data[ i ] );
+		else
 		{
-			if ( cv->save == 1 && ! strcmp( cv->lab_tit, msg ) && st == cv->start )
-			return cv->data;
+			logdata[ i ] = NAN;
+			if ( ++errCnt < ERR_LIM )	// prevent slow down due to I/O
+				if ( ser >= 0 )
+					plog( "\nWarning: zero or negative values in log %s (ignored)\n         Series: %d, Case: %d", "", err_msg, ser + 1, start + i );
+				else
+					plog( "\nWarning: zero or negative values in log %s (ignored)\n         Case: %d", "", err_msg, start + i );
+			else
+				if ( ! stopErr )
+				{
+					plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+					stopErr = true;
+				}
 		}
-		
-		if ( cur->b != NULL && cur->b->head != NULL )
-			res = search_lab_tit( cur->b->head, s, t, st, en );
-	}
 	
-	if ( res == NULL && r->up == NULL )
-		for ( cv = cemetery; cv != NULL && res == NULL; cv = cv->next )
-			if ( ! strcmp( cv->lab_tit, msg ) && st == cv->start )
-				return cv->data;
-
-	return res;
+	return logdata;
 }
 
 
@@ -3585,7 +3546,7 @@ void insert_data_mem( object *r, int *num_v, char *lab )
 					"internal problem in LSD", 
 					"if error persists, please contact developers",
 					true );
-		myexit( 19 );
+		myexit( 18 );
 	}
 }
 
@@ -3671,11 +3632,21 @@ void insert_store_mem( object *r, int *num_v, char *lab )
 				found = true;
 				strcpy( tag_pref, "U_" );
 				
-				delete [ ] cv->data;
-				cv->data = new double [ max_step + 1 ];
+				// use C stdlib to be able to deallocate memory for deleted objects
+				if ( cv->data == NULL )
+					cv->data = ( double * ) malloc( ( cv->num_lag + 1 ) * sizeof( double ) );
+				
+				if ( cv->data == NULL )
+				{
+					error_hard( "cannot allocate memory for unsaved series", 
+								"out of memory", 
+								"if there is memory available and the error persists,\nplease contact developers",
+								true );
+					myexit( 19 );
+				}	
 				
 				for ( i = 0; i <= cv->num_lag; ++i )
-					cv->data[ cv->start + i ] = cv->val[ cv->num_lag - i ];
+					cv->data[ i ] = cv->val[ cv->num_lag - i ];
 			}
 			
 			set_lab_tit( cv );
@@ -3803,7 +3774,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 #endif
 		}
 		if ( ch == '\n' )
-			new_c += 1;
+			++new_c;
 	}
 
 	if ( ! gz )
@@ -3884,7 +3855,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		}
 		
 		var_names->push_back( msg );
-		vs[ i ].data = new double[ new_c + 2 ];
+		vs[ i ].data = new double[ vs[ i ].end - vs[ i ].start + 1 ];
 	 
 		if ( keep_vars )
 		{
@@ -3919,9 +3890,9 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 			}
 	  
 			if ( ! strcmp( tok, nonavail ) )	// it's a non-available observation
-				vs[ i ].data[ j ] = NAN;
+				vs[ i ].data[ j - vs[ i ].start ] = NAN;
 			else
-				sscanf( tok, "%lf", &( vs[ i ].data[ j ] ) );
+				sscanf( tok, "%lf", &( vs[ i ].data[ j - vs[ i ].start ] ) );
 			
 			tok = strtok( NULL, "\t" );			// get next token, if any
 		}
@@ -3955,10 +3926,9 @@ STATISTICS
 ************************/
 void statistics( int *choice )
 {
-	bool stopErr = false;
 	char *app, **str, **tag, str1[ 50 ], longmsg[ 300 ];
-	double **data, **logdata, av, var, num, ymin, ymax, sig;
-	int i, j, *start, *end, *id, logErrCnt = 0;
+	double **data, av, var, num, ymin, ymax, sig;
+	int i, j, *start, *end, *id;
 
 	if ( nv == 0 )			// no variables selected
 	{
@@ -3967,7 +3937,6 @@ void statistics( int *choice )
 	}
 
 	data = new double *[ nv ];
-	logdata = new double *[ nv ];
 	start = new int [ nv ];
 	end = new int [ nv ];
 	id = new int [ nv ];
@@ -3986,9 +3955,8 @@ void statistics( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
-		logdata[ i ] = NULL;
 		
-		cmd( "set res [.da.vars.ch.v get %d]", i );
+		cmd( "set res [ .da.vars.ch.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -4007,28 +3975,7 @@ void statistics( int *choice )
 			}
 	   
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
-			{
-				logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-				for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-					if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )	// ignore NaNs
-						logdata[ i ][ j ] = log( data[ i ][ j ] );
-					else
-					{
-						logdata[ i ][ j ] = NAN;
-						if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-						{
-							plog( "\nWarning: zero or negative values in log statistics (ignored)\n         Series: %d, Case: %d", "", i + 1, j );
-						}
-						else
-							if ( ! stopErr )
-							{
-								plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-								stopErr = true;
-							}
-					}
-					
-				data[ i ] = logdata[ i ];				// replace the data series
-			}
+				data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "statistics" );
 		}
 	}
 
@@ -4048,17 +3995,18 @@ void statistics( int *choice )
 
 		for ( av = var = num = 0, j = min_c; j <= max_c; ++j )
 		{
-			if ( j >= start[ i ] && j <= end[ i ] && is_finite( data[ i ][ j ] ) )	// ignore NaNs
+			if ( j >= start[ i ] && j <= end[ i ] && is_finite( data[ i ][ j - start[ i ] ] ) )	// ignore NaNs
 			{
-				if ( data[ i ][ j ] < ymin )
-					ymin = data[ i ][ j ];
+				if ( data[ i ][ j - start[ i ] ] < ymin )
+					ymin = data[ i ][ j - start[ i ] ];
 				
-				if ( data[ i ][ j ] > ymax )
-					ymax = data[ i ][ j ];
+				if ( data[ i ][ j - start[ i ] ] > ymax )
+					ymax = data[ i ][ j - start[ i ] ];
 				
-				av += data[ i ][ j ];
-				var += data[ i ][ j ] * data[ i ][ j ];
-				num++;
+				av += data[ i ][ j - start[ i ] ];
+				var += data[ i ][ j - start[ i ] ] * data[ i ][ j - start[ i ] ];
+				
+				++num;
 			}
 		}
 
@@ -4091,12 +4039,11 @@ void statistics( int *choice )
 		delete [ ] tag[ i ];
 		
 		if ( logs )
-			delete [ ] logdata[ i ];
+			delete [ ] data[ i ];
 	}
 
 	delete [ ] str;
 	delete [ ] tag;
-	delete [ ] logdata;
 	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
@@ -4109,10 +4056,10 @@ STATISTICS_CROSS
 ************************/
 void statistics_cross( int *choice )
 {
-	bool first, stopErr = false;
+	bool first;
 	char *app, **str, **tag, str1[ 50 ], longmsg[ 300 ];
-	double **data, **logdata, av, var, num, ymin = 0, ymax = 0, sig;
-	int i, j, h, k, nt, *start, *end, *id, *list_times, logErrCnt = 0;
+	double **data, av, var, num, ymin = 0, ymax = 0, sig;
+	int i, j, h, k, nt, *start, *end, *id, *list_times;
 
 	Tcl_LinkVar( inter, "nt", ( char * ) &nt, TCL_LINK_INT );
 	cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
@@ -4139,7 +4086,6 @@ void statistics_cross( int *choice )
 	Tcl_UnlinkVar( inter, "k" );
 
 	data = new double *[ nv ];
-	logdata = new double *[ nv ];
 	start = new int [ nv ];
 	end = new int [ nv ];
 	id = new int [ nv ];
@@ -4158,7 +4104,7 @@ void statistics_cross( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		
-		cmd( "set res [.da.vars.ch.v get %d]", i );
+		cmd( "set res [ .da.vars.ch.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -4174,26 +4120,7 @@ void statistics_cross( int *choice )
 		}
 	   
 		if ( logs )			// apply log to the values to show "log scale" in the y-axis
-		{
-			logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-			for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-				if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-					logdata[ i ][ j ] = log( data[ i ][ j ] );
-				else
-				{
-					logdata[ i ][ j ] = NAN;
-					if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-						plog( "\nWarning: zero or negative values in log statistics (ignored)\n         Series: %d, Case: %d", "", i + 1, j );
-					else
-						if ( ! stopErr )
-						{
-							plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-							stopErr = true;
-						}
-				}
-				
-			data[ i ] = logdata[ i ];				// replace the data series
-		}
+			data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "statistics" );
 	}
 
 	if ( logs )
@@ -4211,23 +4138,24 @@ void statistics_cross( int *choice )
 		first = true;
 		for ( av = var = num = 0, i = 0; i < nv; ++i )
 		{
-			if ( h >= start[ i ] && h <= end[ i ] && is_finite( data[ i ][ h ] ) )		// ignore NaNs
+			if ( h >= start[ i ] && h <= end[ i ] && is_finite( data[ i ][ h - start[ i ] ] ) )		// ignore NaNs
 			{
 				if ( first )
 				{
-					ymin = ymax = data[ i ][ h ];
+					ymin = ymax = data[ i ][ h - start[ i ] ];
 					first = false;
 				}
 				
-				if ( data[ i ][ h ] < ymin )
-					ymin = data[ i ][ h ];
+				if ( data[ i ][ h - start[ i ] ] < ymin )
+					ymin = data[ i ][ h - start[ i ] ];
 				
-				if ( data[ i ][ h ] > ymax )
-					ymax = data[ i ][ h ];
+				if ( data[ i ][ h - start[ i ] ] > ymax )
+					ymax = data[ i ][ h - start[ i ] ];
 				
-				av += data[ i ][ h ];
-				num++;
-				var += data[ i ][ h ]*data[ i ][ h ];
+				av += data[ i ][ h - start[ i ] ];
+				var += data[ i ][ h - start[ i ] ] * data[ i ][ h - start[ i ] ];
+				
+				++num;
 			}
 		}
 		
@@ -4257,13 +4185,12 @@ void statistics_cross( int *choice )
 		delete [ ] tag[ i ];
 		
 		if ( logs )
-			delete [ ] logdata[ i ];
+			delete [ ] data[ i ];
 	}
 
 	delete [ ] list_times;
 	delete [ ] str;
 	delete [ ] tag;
-	delete [ ] logdata;
 	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
@@ -4356,10 +4283,10 @@ Draws the XY plots, with the first series as X and the others as Y's
 ****************************************************/
 void plot_gnu( int *choice )
 {
-	bool done, stopErr = false;
+	bool done;
 	char *app, **str, **tag, str1[ 50 ], str2[ 100 ], str3[ 10 ], dirname[ MAX_PATH_LENGTH ];
-	double **data, **logdata;
-	int i, j, box, ndim, gridd, *start, *end, *id, nanv = 0, logErrCnt = 0;
+	double **data;
+	int i, j, box, ndim, gridd, *start, *end, *id, nanv = 0;
 	FILE *f, *f2;
 
 	if ( nv == 0 )
@@ -4425,7 +4352,6 @@ void plot_gnu( int *choice )
 		ndim = 2; 
 
 	data = new double *[ nv ];
-	logdata = new double *[ nv ];
 	start = new int [ nv ];
 	end = new int [ nv ];
 	id = new int [ nv ];
@@ -4444,9 +4370,8 @@ void plot_gnu( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
-		logdata[ i ] = NULL;
 		
-		cmd( "set res [.da.vars.ch.v get %d]", i );
+		cmd( "set res [ .da.vars.ch.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -4465,28 +4390,7 @@ void plot_gnu( int *choice )
 			}
 
 			if ( logs )		// apply log to the values to show "log scale" in the y-axis
-			{
-				logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-				for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-					if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )	// ignore NaNs
-						logdata[ i ][ j ] = log( data[ i ][ j ] );
-					else
-					{
-						logdata[ i ][ j ] = NAN;
-						if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-						{
-							plog( "\nWarning: zero or negative values in log Gnuplot (ignored)\n         Series: %d, Case: %d", "", i + 1, j );
-						}
-						else
-							if ( ! stopErr )
-							{
-								plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-								stopErr = true;
-							}
-					}
-					
-				data[ i ] = logdata[ i ];				// replace the data series
-			}
+				data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "Gnuplot" );
 		}
 		else
 			nanv++; 
@@ -4516,17 +4420,17 @@ void plot_gnu( int *choice )
 		for ( done = false, i = 1; i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
-				if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )	// ignore NaNs
+				if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) )	// ignore NaNs
 				{
-					miny = maxy = data[ i ][ j ];
+					miny = maxy = data[ i ][ j - start[ i ] ];
 					done = true;
 				}
 				
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny )	// ignore NaNs
-					miny = data[ i ][ j ];
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )	// ignore NaNs
+					miny = data[ i ][ j - start[ i ] ];
 					
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )	// ignore NaNs
-					maxy = data[ i ][ j ];
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )	// ignore NaNs
+					maxy = data[ i ][ j - start[ i ] ];
 			}
 	   
 	cmd( "set dirxy plotxy_%d", cur_plot );
@@ -4585,7 +4489,7 @@ void plot_gnu( int *choice )
 				if ( start[ i ] <= max_c && end[ i ] >= min_c )
 				{
 					if ( j >= start[ i ] && i <= end[ i ] )
-						fprintf( f, "%.*g\t", pdigits, data[ i ][ j ] );
+						fprintf( f, "%.*g\t", pdigits, data[ i ][ j - start[ i ] ] );
 					else
 						fprintf( f, "nan\t" );  
 				}
@@ -4605,7 +4509,7 @@ void plot_gnu( int *choice )
 						if ( start[ i ] <= max_c && end[ i ] >= min_c )
 						{
 							if ( j >= start[ i ] && i <= end[ i ] )
-								fprintf( f, "%d\t%.*g\t", i + 1, pdigits, data[ i ][ j ] );
+								fprintf( f, "%d\t%.*g\t", i + 1, pdigits, data[ i ][ j - start[ i ] ] );
 							else
 								fprintf( f, "%d\tnan\t", i + 1 );        
 						}
@@ -4622,7 +4526,7 @@ void plot_gnu( int *choice )
 						if ( start[ i ] <= max_c && end[ i ] >= min_c )
 						{
 							if ( j >= start[ i ] && i <= end[ i ] ) 
-								fprintf( f, "%.*g\t", pdigits, data[ i ][ j ] );
+								fprintf( f, "%.*g\t", pdigits, data[ i ][ j - start[ i ] ] );
 							else
 								fprintf( f, "nan\t" );  
 						} 
@@ -4641,7 +4545,7 @@ void plot_gnu( int *choice )
 						if ( start[ i ] <= max_c && end[ i ] >= min_c )
 						{
 							if ( j >= start[ i ] && i <= end[ i ] )
-								fprintf( f, "%d\t%d\t%.*g\n", j, i + 1, pdigits, data[ i ][ j ] );
+								fprintf( f, "%d\t%d\t%.*g\n", j, i + 1, pdigits, data[ i ][ j - start[ i ] ] );
 							else
 								fprintf( f, "%d\t%d\tnan\n", j , i + 1 );         
 						}
@@ -4655,7 +4559,7 @@ void plot_gnu( int *choice )
 						if ( start[ i ] <= max_c && end[ i ] >= min_c )
 						{
 							if ( j >= start[ i ] && i <= end[ i ] )
-								fprintf( f, "%d\t%.*g\n", j, pdigits, data[ i ][ j ] );
+								fprintf( f, "%d\t%.*g\n", j, pdigits, data[ i ][ j - start[ i ] ] );
 							else
 								fprintf( f, "%d\tnan\n", j );         
 						}
@@ -4849,12 +4753,11 @@ void plot_gnu( int *choice )
 		delete [ ] tag[ i ];
 		
 		if ( logs )
-			delete [ ] logdata[ i ];
+			delete [ ] data[ i ];
 	}
 
 	delete [ ] str;
 	delete [ ] tag;
-	delete [ ] logdata;
 	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
@@ -4867,10 +4770,10 @@ PLOT_CS_XY
 *****************************************/
 void plot_cs_xy( int *choice )
 {
-	bool done, stopErr = false;
+	bool done;
 	char *app, **str, **tag, str1[ TCL_BUFF_STR ], str2[ 5 * MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
-	double **data, **logdata, previous_row;
-	int i, j, time_sel, block_length, ndim, *start, *end, *id, logErrCnt = 0;
+	double **data, previous_row;
+	int i, j, time_sel, block_length, ndim, *start, *end, *id;
 	FILE *f, *f2;
 
 	if ( nv < 2 )
@@ -4881,7 +4784,6 @@ void plot_cs_xy( int *choice )
 	}
 
 	data = new double *[ nv ];
-	logdata = new double *[ nv ];
 	start = new int [ nv ];
 	end = new int [ nv ];
 	id = new int [ nv ];
@@ -4900,9 +4802,8 @@ void plot_cs_xy( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
-		logdata[ i ] = NULL;
 		
-		cmd( "set res [.da.vars.ch.v get %d]", i );
+		cmd( "set res [ .da.vars.ch.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -4921,26 +4822,7 @@ void plot_cs_xy( int *choice )
 			}
 	   
 			if ( logs )		// apply log to the values to show "log scale" in the y-axis
-			{
-				logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-				for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-					if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-						logdata[ i ][ j ] = log( data[ i ][ j ] );
-					else
-					{
-						logdata[ i ][ j ] = NAN;
-						if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-							plog( "\nWarning: zero or negative values in log plot (ignored)\n         Series: %d, Case: %d", "", i + 1, j );
-						else
-							if ( ! stopErr )
-							{
-								plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-								stopErr = true;
-							}
-					}
-					
-				data[ i ] = logdata[ i ];			// replace the data series
-			}
+				data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "plot" );
 		}
 	}
 
@@ -4968,17 +4850,17 @@ void plot_cs_xy( int *choice )
 		for ( done = false, i = 1; i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
-				if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )	// ignore NaNs
+				if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) )	// ignore NaNs
 				{
-					miny = maxy = data[ i ][ j ];
+					miny = maxy = data[ i ][ j - start[ i ] ];
 					done = true;
 				}
 				
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny )	// ignore NaNs
-					miny = data[ i ][ j ];
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )	// ignore NaNs
+					miny = data[ i ][ j - start[ i ] ];
 					
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )	// ignore NaNs
-					maxy = data[ i ][ j ];
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )	// ignore NaNs
+					maxy = data[ i ][ j - start[ i ] ];
 			}
 
 	cmd( "set bidi %d", end[ 0 ] );
@@ -5089,30 +4971,30 @@ void plot_cs_xy( int *choice )
 	f = fopen( "data.gp", "w" );
 
 	if ( start[ 0 ] == end[ 0 ] )  
-		previous_row = data[ 0 ][ end[ 0 ] ];
+		previous_row = data[ 0 ][ end[ 0 ] - start[ 0 ] ];
 	else
-		previous_row = data[ 0 ][ time_sel ];  
+		previous_row = data[ 0 ][ time_sel - start[ 0 ] ];  
 	  
 	for ( j = 0; j < block_length; ++j )
 	{
 
 		if ( start[ 0 ] == end[ 0 ] )  
 		{
-			if ( data[ j ][ end[ j ] ] != previous_row )
-				previous_row = data[ j ][ end[ j ] ];
+			if ( data[ j ][ end[ j ] - start[ j ] ] != previous_row )
+				previous_row = data[ j ][ end[ j ] - start[ j ] ];
 		}
 		else
 		{
-			if ( data[ j ][ time_sel ] != previous_row )
-				previous_row = data[ j ][ time_sel ];
+			if ( data[ j ][ time_sel - start[ j ] ] != previous_row )
+				previous_row = data[ j ][ time_sel - start[ j ] ];
 		}
 		 
 		for ( i = 0; i < nv; i += block_length )
 			if ( start[ i + j ] == end[ i + j ] )  
-				fprintf( f, "%.*g\t", pdigits, data[ i + j ][ end[ i + j ] ] );
+				fprintf( f, "%.*g\t", pdigits, data[ i + j ][ end[ i + j ] - start[ i + j ] ] );
 			else
 				if ( start[ i + j ] <= max_c && end[ i + j ] >= min_c && start[ i + j ] <= time_sel && end[ i + j ] >= time_sel )
-					fprintf( f, "%.*g\t", pdigits, data[ i + j ][ time_sel ] );
+					fprintf( f, "%.*g\t", pdigits, data[ i + j ][ time_sel - start[ i + j ] ] );
 
 		fprintf( f, "\n" );
 	}
@@ -5259,12 +5141,11 @@ void plot_cs_xy( int *choice )
 		delete [ ] tag[ i ];
 		
 		if ( logs )
-			delete [ ] logdata[ i ];
+			delete [ ] data[ i ];
 	}
 
 	delete [ ] str;
 	delete [ ] tag;
-	delete [ ] logdata;
 	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
@@ -5277,10 +5158,10 @@ PLOT_PHASE_DIAGRAM
 ****************************************************/
 void plot_phase_diagram( int *choice )
 {
-	bool done, stopErr = false;
+	bool done;
 	char *app, **str, **tag, str1[ 50 ], str2[ 100 ], str3[ 100 ], dirname[ MAX_PATH_LENGTH ];
-	double **data, **logdata;
-	int i, j, nlags, *start, *end, *id, logErrCnt = 0;
+	double **data;
+	int i, j, nlags, *start, *end, *id;
 	FILE *f, *f2;
 
 	if ( nv != 1 )
@@ -5291,7 +5172,6 @@ void plot_phase_diagram( int *choice )
 	}
 
 	data = new double *[ nv ];
-	logdata = new double *[ nv ];
 	start = new int [ nv ];
 	end = new int [ nv ];
 	id = new int [ nv ];
@@ -5310,9 +5190,8 @@ void plot_phase_diagram( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
-		logdata[ i ] = NULL;
 		
-		cmd( "set res [.da.vars.ch.v get %d]", i );
+		cmd( "set res [ .da.vars.ch.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -5331,26 +5210,7 @@ void plot_phase_diagram( int *choice )
 			}
 	   
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
-			{
-				logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-				for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-					if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-						logdata[ i ][ j ] = log( data[ i ][ j ] );
-					else
-					{
-						logdata[ i ][ j ] = NAN;
-						if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-							plog( "\nWarning: zero or negative values in log plot (ignored)\n         Series: %d, Case: %d", "", i + 1, j );
-						else
-							if ( ! stopErr )
-							{
-								plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-								stopErr = true;
-							}
-					}
-					
-				data[ i ] = logdata[ i ];				// replace the data series
-			}
+				data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "plot" );
 		}
 	}
 
@@ -5364,8 +5224,8 @@ void plot_phase_diagram( int *choice )
 			if ( start[ i ] < min_c )
 				min_c = max( start[ i ], 1 );
 			
-			if (end[ i ] > max_c )
-				max_c = end[ i ] > num_c?num_c:end[ i ];
+			if ( end[ i ] > max_c )
+				max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
 
 	// auto-find minimums and maximums
@@ -5376,17 +5236,17 @@ void plot_phase_diagram( int *choice )
 		for ( done = false, i = 0; i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
-				if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) )		// ignore NaNs
+				if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) )		// ignore NaNs
 				{
-					miny = maxy = data[ i ][ j ];
+					miny = maxy = data[ i ][ j - start[ i ] ];
 					done = true;
 				}
 				
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] < miny )		// ignore NaNs
-					miny = data[ i ][ j ];
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )		// ignore NaNs
+					miny = data[ i ][ j - start[ i ] ];
 					
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j ] ) && data[ i ][ j ] > maxy )		// ignore NaNs
-					maxy = data[ i ][ j ];
+				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )		// ignore NaNs
+					maxy = data[ i ][ j - start[ i ] ];
 			}
 		
 	cmd( "newtop .da.s \"Lags Selection\" { set choice 2 } .da" );
@@ -5444,7 +5304,7 @@ void plot_phase_diagram( int *choice )
 	{
 		for ( i = 0; i <= nlags; ++i )
 			if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
-				fprintf( f, "%lf\t", data[ 0 ][ j + i ] );
+				fprintf( f, "%lf\t", data[ 0 ][ j + i - start[ 0 ] ] );
 
 		fprintf( f, "\n" );
 	}
@@ -5533,12 +5393,11 @@ void plot_phase_diagram( int *choice )
 		delete [ ] tag[ i ];
 		
 		if ( logs )
-			delete [ ] logdata[ i ];
+			delete [ ] data[ i ];
 	}
 	
 	delete [ ] str;
 	delete [ ] tag;
-	delete [ ] logdata;
 	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
@@ -5841,10 +5700,9 @@ PLOT_LATTICE
 ****************************************************/
 void plot_lattice( int *choice )
 {
-	bool stopErr = false;
 	char *app, **str, **tag;
-	double val, color, cscale, **data, **logdata;
-	int i, j, hi, le, first = 1, last, time, hsize, vsize, ncol, nlin, tot, *start, *end, *id, logErrCnt = 0;
+	double val, color, cscale, **data;
+	int i, j, hi, le, first = 1, last, time, hsize, vsize, ncol, nlin, tot, *start, *end, *id;
 
 	if ( nv == 0 )
 	{
@@ -5879,7 +5737,6 @@ void plot_lattice( int *choice )
 		ncol--;
 
 	data = new double *[ nv ];
-	logdata = new double *[ nv ];
 	start = new int [ nv ];
 	end = new int [ nv ];
 	id = new int [ nv ];
@@ -5940,7 +5797,7 @@ void plot_lattice( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 
-		cmd( "set res [.da.vars.ch.v get %d]", i );
+		cmd( "set res [ .da.vars.ch.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -5952,10 +5809,7 @@ void plot_lattice( int *choice )
 			*choice = 2;
 			
 			for ( j = i + 1; j < nv; ++j )		// indicate non allocated positions
-			{
 				str[ j ] = tag[ j ] = NULL;
-				logdata[ j ] = NULL;
-			}
 			
 			goto end1;
 		}
@@ -5972,26 +5826,7 @@ void plot_lattice( int *choice )
 		}
 	  
 		if ( logs )			// apply log to the values to show "log scale"
-		{
-			logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-			for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-			if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-				logdata[ i ][ j ] = log( data[ i ][ j ] );
-			else
-			{
-				logdata[ i ][ j ] = NAN;
-				if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-					plog( "\nWarning: zero or negative values in log lattice (ignored)\n         Series: %d, Case: %d", "", i + 1, j );
-				else
-					if ( ! stopErr )
-					{
-						plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-						stopErr = true;
-					}
-				}
-				
-			data[ i ] = logdata[ i ];				// replace the data series
-		}
+			data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "lattice" );
 	}
 
 
@@ -6020,7 +5855,7 @@ void plot_lattice( int *choice )
 		}
 		
 		for ( tot = 0, i = first; i <= last; ++i )	// count number of points excluding NaNs
-			if ( ! is_nan( data[ 0 ][ i ] ) && is_finite( data[ 0 ][ i ] ) )
+			if ( ! is_nan( data[ 0 ][ i - start[ 0 ] ] ) && is_finite( data[ 0 ][ i - start[ 0 ] ] ) )
 				tot++;
 	}
 	else
@@ -6054,8 +5889,8 @@ void plot_lattice( int *choice )
 	for ( j = 0; j < nlin; ++j )
 		for ( i = 0; i < ncol; ++i )
 		{
-			val = time_cross == 1 ? data[ ncol * j + i ][ time ] : 
-									data[ 0 ][ first + ncol * j + i ];
+			val = time_cross == 1 ? data[ ncol * j + i ][ time - start[ ncol * j + i ] ] : 
+									data[ 0 ][ first + ncol * j + i - start[ 0 ] ];
 			color = max( 0, min( 1099, round( val * cscale ) ) );
 			if ( is_nan( color ) || ! is_finite( color ) )
 			  color = 0;
@@ -6148,14 +5983,13 @@ void plot_lattice( int *choice )
 		delete [ ] tag[ i ];
 		
 		if ( logs )
-			delete [ ] logdata[ i ];
+			delete [ ] data[ i ];
 	}
 
 	end1:
 
 	delete [ ] str;
 	delete [ ] tag;
-	delete [ ] logdata;
 	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
@@ -6183,12 +6017,10 @@ double mean, var;
 
 void histograms( int *choice )
 {
+	bool norm;
 	char *app, **str, **tag;
-	double mx = 0, mn = 0, step, a, lminy, lmaxy, *data, *logdata = NULL;
+	double mx = 0, mn = 0, step, a, lminy, lmaxy, *data;
 	int i, j, first, last, stat, start, end, id;
-
-	int logErrCnt = 0;				// log errors counter to prevent excess messages
-	bool norm, stopErr = false;
 
 	if ( nv != 1 )
 	{
@@ -6205,7 +6037,7 @@ void histograms( int *choice )
 	str[ 0 ] = new char[ MAX_ELEM_LENGTH ];
 	tag[ 0 ] = new char[ MAX_ELEM_LENGTH ];
 
-	cmd( "set res [.da.vars.ch.v get 0]" );
+	cmd( "set res [ .da.vars.ch.v get 0 ]" );
 	app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 	strcpy( msg, app );
 	sscanf( msg, "%s %s (%d-%d) #%d", str[ 0 ], tag[ 0 ], &start, &end, &id );
@@ -6221,28 +6053,7 @@ void histograms( int *choice )
 	}
 
 	if ( logs )			// apply log to the values to show "log scale" in the y-axis
-	{
-		logdata = new double[ end + 1 ];		// create space for the logged values
-		for ( j = start; j <= end; ++j )		// log everything possible
-			if ( ! is_nan( data[ j ] ) && data[ j ] > 0.0 )	// ignore NaNs
-				logdata[ j ] = log( data[ j ] );
-			else
-			{
-				logdata[ j ] = NAN;
-				if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-				{
-					plog( "\nWarning: zero or negative values in log histogram (ignored)\nCase: %d", "", j );
-				}
-				else
-					if ( ! stopErr )
-					{
-						plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-						stopErr = true;
-					}
-			}
-		   
-		data = logdata;							// replace the data series
-	}
+		data = log_data( data, start, end, -1, "histogram" );
 
 	if ( autom_x || min_c >= max_c )
 	{
@@ -6263,7 +6074,7 @@ void histograms( int *choice )
 	}  
 
 	for ( j = 0, i = first; i <= last; ++i )	// count number of points excluding NaNs
-		if ( ! is_nan( data[ i ] ) && is_finite( data[ i ] ) )
+		if ( ! is_nan( data[ i - start ] ) && is_finite( data[ i - start ] ) )
 			++j;
 
 	cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
@@ -6304,22 +6115,24 @@ void histograms( int *choice )
 	mean = var = cases = 0;
 	for ( i = first; i <= last; ++i )
 	{
-		if ( is_nan( data[ i ] ) || ! is_finite( data[ i ] ) )	// ignore NaNs
+		if ( is_nan( data[ i - start ] ) || ! is_finite( data[ i - start ] ) )	// ignore NaNs
 			continue;
 			
 		if ( i == first )
-			mx = mn = data[ i ];
+			mx = mn = data[ i - start ];
 		else
 		{
-			if ( data[ i ] > mx )
-				mx = data[ i ];
+			if ( data[ i - start ] > mx )
+				mx = data[ i - start ];
 			else
-				if ( data[ i ] < mn )
-					mn = data[ i ];
+				if ( data[ i - start ] < mn )
+					mn = data[ i - start ];
 		}  
-		mean += data[ i ];
-		var += data[ i ]*data[ i ];
-		cases++;
+		
+		mean += data[ i - start ];
+		var += data[ i - start ] * data[ i - start ];
+		
+		++cases;
 	}
 
 	if ( cases == 0 )
@@ -6351,28 +6164,28 @@ void histograms( int *choice )
 	 
 	for ( i = first; i <= last; ++i )
 	{
-		if ( is_nan( data[ i ] ) || ! is_finite( data[ i ] ) )
+		if ( is_nan( data[ i - start ] ) || ! is_finite( data[ i - start ] ) )
 			continue;
 
-		a = floor( num_bins*( data[ i ] - mn ) / ( mx - mn ) );
+		a = floor( num_bins*( data[ i - start ] - mn ) / ( mx - mn ) );
 
 		j = ( int ) a;
 		if ( j == num_bins)
 			j--;
 
 		if ( bins[ j ].num == 0 )
-			bins[ j ].min=bins[ j ].max = data[ i ];
+			bins[ j ].min = bins[ j ].max = data[ i - start ];
 		else
 		{
-			if ( bins[ j ].min > data[ i ] )
-				bins[ j ].min = data[ i ];
+			if ( bins[ j ].min > data[ i - start ] )
+				bins[ j ].min = data[ i - start ];
 			else
-				if ( bins[ j ].max < data[ i ] )
-					bins[ j ].max = data[ i ];
+				if ( bins[ j ].max < data[ i - start ] )
+					bins[ j ].max = data[ i - start ];
 		}  
 		
+		bins[ j ].av += data[ i - start ];
 		bins[ j ].num++;   
-		bins[ j ].av += data[ i ];
 	} 
 
 	a = ( mx - mn ) / ( num_bins - 1 );
@@ -6435,11 +6248,13 @@ void histograms( int *choice )
 
 	end:
 
+	if ( logs )
+		delete [ ] data;
+	
 	delete [ ] str[ 0 ];
 	delete [ ] tag[ 0 ];
 	delete [ ] str;
 	delete [ ] tag;
-	delete [ ] logdata;
 }
 
 
@@ -6448,10 +6263,10 @@ HISTOGRAMS CS
 ****************************************************/
 void histograms_cs( int *choice )
 {
-	bool norm, stopErr = false;
+	bool norm;
 	char *app, **str, **tag;
-	double mx = 0, mn = 0, step, a, lminy, lmaxy, **data, **logdata;
-	int i, j, stat, active_v, *start, *end, *id, logErrCnt = 0;
+	double mx = 0, mn = 0, step, a, lminy, lmaxy, **data;
+	int i, j, stat, active_v, *start, *end, *id;
 
 	if ( nv < 2 )
 	{
@@ -6465,7 +6280,6 @@ void histograms_cs( int *choice )
 	}
 
 	data = new double *[ nv ];
-	logdata = new double *[ nv ];
 	start = new int [ nv ];
 	end = new int [ nv ];
 	id = new int [ nv ];
@@ -6484,7 +6298,7 @@ void histograms_cs( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		
-		cmd( "set res [.da.vars.ch.v get %d]", i );
+		cmd( "set res [ .da.vars.ch.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -6500,26 +6314,7 @@ void histograms_cs( int *choice )
 		}
 	  
 		if ( logs )			// apply log to the values to show "log scale" in the y-axis
-		{
-			logdata[ i ] = new double[ end[ i ] + 1 ];	// create space for the logged values
-			for ( j = start[ i ]; j <= end[ i ]; ++j )		// log everything possible
-				if ( ! is_nan( data[ i ][ j ] ) && data[ i ][ j ] > 0.0 )		// ignore NaNs
-					logdata[ i ][ j ] = log( data[ i ][ j ] );
-				else
-				{
-					logdata[ i ][ j ] = NAN;
-					if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
-						plog( "\nWarning: zero or negative values in log histogram (ignored)\n         Series: %d, Case: %d", "", i + 1, j );
-					else
-						if ( ! stopErr )
-						{
-							plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
-							stopErr = true;
-						}
-				}
-				
-			data[ i ] = logdata[ i ];				// replace the data series
-		}
+			data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "histogram" );
 	}
 
 	cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
@@ -6571,23 +6366,24 @@ void histograms_cs( int *choice )
 	mean = var = cases = 0;
 	active_v = 0;
 	for ( i = 0; i < nv; ++i )
-		if ( start[ i ] <= time_cs && end[ i ] >= time_cs && is_finite( data[ i ][ time_cs ] ) )		// ignore NaNs
+		if ( start[ i ] <= time_cs && end[ i ] >= time_cs && is_finite( data[ i ][ time_cs - start[ i ] ] ) )		// ignore NaNs
 		{
 			if ( active_v == 0 )
-				mx = mn = data[ i ][ time_cs ];
+				mx = mn = data[ i ][ time_cs - start[ i ] ];
 			else
 			{
-				if ( data[ i ][ time_cs ] > mx )
-					mx = data[ i ][ time_cs ];
+				if ( data[ i ][ time_cs - start[ i ] ] > mx )
+					mx = data[ i ][ time_cs - start[ i ] ];
 				else
-					if ( data[ i ][ time_cs ] < mn )
-						mn = data[ i ][ time_cs ];
+					if ( data[ i ][ time_cs - start[ i ] ] < mn )
+						mn = data[ i ][ time_cs - start[ i ] ];
 			}  
 			
-			mean += data[ i ][ time_cs ];
-			var += data[ i ][ time_cs ]*data[ i ][ time_cs ];
-			cases++;
-			active_v++;
+			mean += data[ i ][ time_cs - start[ i ] ];
+			var += data[ i ][ time_cs - start[ i ] ] * data[ i ][ time_cs - start[ i ] ];
+			
+			++cases;
+			++active_v;
 		}
 
 	if ( cases == 0 )
@@ -6612,28 +6408,28 @@ void histograms_cs( int *choice )
 	 
 	for ( i = 0; i < nv; ++i )
 	{
-		if ( start[ i ] > time_cs || end[ i ] < time_cs || ! is_finite( data[ i ][ time_cs ] ) )
+		if ( start[ i ] > time_cs || end[ i ] < time_cs || ! is_finite( data[ i ][ time_cs - start[ i ] ] ) )
 			continue;
 
-		a = floor( num_bins * ( data[ i ][ time_cs ] - mn ) / ( mx - mn ) );
+		a = floor( num_bins * ( data[ i ][ time_cs - start[ i ] ] - mn ) / ( mx - mn ) );
 			
 		j = ( int ) a;
 		if ( j == num_bins )
 			--j;
 		
 		if ( bins[ j ].num == 0 )
-			bins[ j ].min=bins[ j ].max = data[ i ][ time_cs ];
+			bins[ j ].min=bins[ j ].max = data[ i ][ time_cs - start[ i ] ];
 		else
 		{
-			if ( bins[ j ].min > data[ i ][ time_cs ] )
-				bins[ j ].min = data[ i ][ time_cs ];
+			if ( bins[ j ].min > data[ i ][ time_cs - start[ i ] ] )
+				bins[ j ].min = data[ i ][ time_cs - start[ i ] ];
 			else
-				if ( bins[ j ].max < data[ i ][ time_cs ] )
-					bins[ j ].max = data[ i ][ time_cs ];
+				if ( bins[ j ].max < data[ i ][ time_cs - start[ i ] ] )
+					bins[ j ].max = data[ i ][ time_cs - start[ i ] ];
 		}
 		
 		bins[ j ].num++;   
-		bins[ j ].av += data[ i ][ time_cs ];
+		bins[ j ].av += data[ i ][ time_cs - start[ i ] ];
 	} 
 
 	a = ( mx - mn ) / ( num_bins - 1 );
@@ -6699,12 +6495,11 @@ void histograms_cs( int *choice )
 		delete [ ] tag[ i ];
 		
 		if ( logs )
-			delete [ ] logdata[ i ];
+			delete [ ] data[ i ];
 	}
 	
 	delete [ ] str;
 	delete [ ] tag; 
-	delete [ ] logdata;
 	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
@@ -6972,7 +6767,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 			
 		if ( cs_long == 1 )									// compute over series?
 		{
-			vs[ num_var ].data = new double[ max_c + 2 ];
+			vs[ num_var ].data = new double[ max_c - min_c + 1 ];
 			vs[ num_var ].end = max_c;
 			vs[ num_var ].start = min_c;
 
@@ -6982,23 +6777,25 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 				first = true;
 				for ( j = 0; j < sel_series; ++j )
 				{
-					if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i ] > thflt) || ( flt == 2 && data[ j ][ i ] < thflt) ) )		// ignore NaNs
+					if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i - start[ j ] ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i - start[ j ] ] > thflt ) || ( flt == 2 && data[ j ][ i - start[ j ] ] < thflt ) ) )		// ignore NaNs
 					{
-						sum += data[ j ][ i ];
-						nvar += data[ j ][ i ] * data[ j ][ i ];
-						nn++;
-						if ( first)
+						sum += data[ j ][ i - start[ j ] ];
+						nvar += data[ j ][ i - start[ j ] ] * data[ j ][ i - start[ j ] ];
+						
+						++nn;
+						
+						if ( first )
 						{
-							nmin = nmax = prod = data[ j ][ i ];
+							nmin = nmax = prod = data[ j ][ i - start[ j ] ];
 							first = false;
 						}
 						else
 						{
-							if ( nmin>data[ j ][ i ] )
-								nmin = data[ j ][ i ];
-							if ( nmax<data[ j ][ i ] )
-								nmax = data[ j ][ i ];
-							prod *= data[ j ][ i ];
+							if ( nmin > data[ j ][ i - start[ j ] ] )
+								nmin = data[ j ][ i - start[ j ] ];
+							if ( nmax < data[ j ][ i - start[ j ] ] )
+								nmax = data[ j ][ i - start[ j ] ];
+							prod *= data[ j ][ i - start[ j ] ];
 						} 
 					}
 				}
@@ -7013,32 +6810,32 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 				}
 			   
 				if ( type_series == 1 || type_series == 6 || type_series == 15 || type_series == 16 )
-					vs[ num_var ].data[ i ] = nmean;
+					vs[ num_var ].data[ i - min_c ] = nmean;
 				if ( type_series == 2 || type_series == 13 )
-					vs[ num_var ].data[ i ] = nmax;
+					vs[ num_var ].data[ i - min_c ] = nmax;
 				if ( type_series == 3 )
-					vs[ num_var ].data[ i ] = nmin;
+					vs[ num_var ].data[ i - min_c ] = nmin;
 				if ( type_series == 4 )
-					vs[ num_var ].data[ i ] = nvar;
+					vs[ num_var ].data[ i - min_c ] = nvar;
 				if ( type_series == 5 )
-					vs[ num_var ].data[ i ] = sum;
+					vs[ num_var ].data[ i - min_c ] = sum;
 				if ( type_series == 7 )
-					vs[ num_var ].data[ i ] = nn;
+					vs[ num_var ].data[ i - min_c ] = nn;
 				if ( type_series == 8 )
-					vs[ num_var ].data[ i ] = sqrt( nvar );
+					vs[ num_var ].data[ i - min_c ] = sqrt( nvar );
 				if ( type_series == 9 )
-					vs[ num_var ].data[ i ] = prod;
+					vs[ num_var ].data[ i - min_c ] = prod;
 				if ( type_series == 10 )
 				{
 					if ( nmean != 0 )
-						vs[ num_var ].data[ i ] = 1 / nmean;
+						vs[ num_var ].data[ i - min_c ] = 1 / nmean;
 					else
-						vs[ num_var ].data[ i ] = NAN;
+						vs[ num_var ].data[ i - min_c ] = NAN;
 				}
 				if ( type_series == 11 )
-					vs[ num_var ].data[ i ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
+					vs[ num_var ].data[ i - min_c ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
 				if ( type_series == 12 )
-					vs[ num_var ].data[ i ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
+					vs[ num_var ].data[ i - min_c ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
 			}
 		} 
 		else												// compute over cases
@@ -7053,23 +6850,25 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 				first = true;
 				for ( i = min_c; i <= max_c; ++i )
 				{
-					if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i ] > thflt) || ( flt == 2 && data[ j ][ i ] < thflt) ) )
+					if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i - start[ j ] ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i - start[ j ] ] > thflt ) || ( flt == 2 && data[ j ][ i - start[ j ] ] < thflt ) ) )
 					{
-						sum += data[ j ][ i ];
-						nvar += data[ j ][ i ]*data[ j ][ i ];
-						nn++;
-						if ( first)
+						sum += data[ j ][ i - start[ j ] ];
+						nvar += data[ j ][ i - start[ j ] ] * data[ j ][ i - start[ j ] ];
+						
+						++nn;
+						
+						if ( first )
 						{
-							nmin = nmax = prod = data[ j ][ i ];
+							nmin = nmax = prod = data[ j ][ i - start[ j ] ];
 							first = false;
 						}
 						else
 						{
-							if ( nmin>data[ j ][ i ] )
-								nmin = data[ j ][ i ];
-							if ( nmax<data[ j ][ i ] )
-								nmax = data[ j ][ i ];
-							prod *= data[ j ][ i ];
+							if ( nmin > data[ j ][ i - start[ j ] ] )
+								nmin = data[ j ][ i - start[ j ] ];
+							if ( nmax < data[ j ][ i - start[ j ] ] )
+								nmax = data[ j ][ i - start[ j ] ];
+							prod *= data[ j ][ i - start[ j ] ];
 						} 
 					}
 				}
@@ -7096,7 +6895,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 				if ( type_series == 7 )
 					vs[ num_var ].data[ j ] = nn;
 				if ( type_series == 8 )
-					vs[ num_var ].data[ i ] = sqrt( nvar );
+					vs[ num_var ].data[ j ] = sqrt( nvar );
 				if ( type_series == 9 )
 					vs[ num_var ].data[ j ] = prod;
 				if ( type_series == 10 )
@@ -7107,9 +6906,9 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 						vs[ num_var ].data[ j ] = NAN;
 				}
 				if ( type_series == 11 )
-					vs[ num_var ].data[ i ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
+					vs[ num_var ].data[ j ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
 				if ( type_series == 12 )
-					vs[ num_var ].data[ i ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
+					vs[ num_var ].data[ j ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
 					
 			}
 		}
@@ -7276,7 +7075,7 @@ void create_maverag( int *choice )
 		vs[ num_var + i ].start = ( ma_type == 0 ) ? start[ i ] + flt - 1 : start[ i ];
 		vs[ num_var + i ].end = end[ i ];
 		vs[ num_var + i ].rank = num_var + i;
-		vs[ num_var + i ].data = new double[ max_c + 2 ];
+		vs[ num_var + i ].data = new double[ vs[ num_var + i ].end - vs[ num_var + i ].start + 1 ];
 		
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
@@ -7295,10 +7094,10 @@ void create_maverag( int *choice )
 				for ( k = start[ i ] + flt - 1; k <= end[ i ]; ++k )
 				{
 					for ( xapp = 0, h = 0, j = k - flt + 1; j <= k; ++j )
-						if ( is_finite( data[ i ][ j ] ) )		// not a NaN?
+						if ( is_finite( data[ i ][ j - start[ i ] ] ) )		// not a NaN?
 						{
-							xapp += data[ i ][ j ];
-							h++;
+							xapp += data[ i ][ j - start[ i ] ];
+							++h;
 						}
 						
 					if ( h == 0 )
@@ -7306,16 +7105,16 @@ void create_maverag( int *choice )
 					else
 						xapp /= h;
 					
-					vs[ num_var + i ].data[ k ] = xapp;
+					vs[ num_var + i ].data[ k - vs[ num_var + i ].start ] = xapp;
 				}
 			}
 			else					// central moving average
 			{
 				// average of first period in data
 				for ( xapp = 0, h = 0, j = start[ i ]; j < start[ i ] + flt; ++j )
-					if ( is_finite( data[ i ][ j ] ) )		// not a NaN?
+					if ( is_finite( data[ i ][ j - start[ i ] ] ) )		// not a NaN?
 					{
-						xapp += data[ i ][ j ];
+						xapp += data[ i ][ j - start[ i ] ];
 						h++;
 					}
 					
@@ -7325,20 +7124,20 @@ void create_maverag( int *choice )
 					xapp /= h;
 
 				for ( j = start[ i ]; j < start[ i ] + ( flt - 1 ) / 2; ++j )
-					vs[ num_var + i ].data[ j ] = xapp;
+					vs[ num_var + i ].data[ j - vs[ num_var + i ].start ] = xapp;
 
 				for ( ; j < end[ i ] - ( flt - 1 ) / 2; ++j )
 				{
-					if ( is_finite( data[ i ][ j - ( flt - 1 ) / 2 ] ) && is_finite( data[ i ][ j + ( flt - 1 ) / 2 ] ) )
-						xapp = xapp - data[ i ][ j - ( flt - 1 ) / 2 ] / flt + data[ i ][ j + ( flt - 1 ) / 2 ] / flt;
+					if ( is_finite( data[ i ][ j - ( flt - 1 ) / 2 - start[ i ] ] ) && is_finite( data[ i ][ j + ( flt - 1 ) / 2 - start[ i ] ] ) )
+						xapp = xapp - data[ i ][ j - ( flt - 1 ) / 2 - start[ i ] ] / flt + data[ i ][ j + ( flt - 1 ) / 2 - start[ i ] ] / flt;
 					else
 						xapp = NAN;
 					
-					vs[ num_var + i ].data[ j ] = xapp;
+					vs[ num_var + i ].data[ j - vs[ num_var + i ].start ] = xapp;
 				}
 				
 				for ( ; j <= end[ i ]; ++j )
-					vs[ num_var + i ].data[ j ] = xapp;     
+					vs[ num_var + i ].data[ j - vs[ num_var + i ].start ] = xapp;     
 			}
 		}
 		
@@ -7487,10 +7286,11 @@ void save_datazip( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		
-		cmd( "set res [.da.vars.ch.v get %d]", i );
+		cmd( "set res [ .da.vars.ch.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
 		{
@@ -7654,7 +7454,7 @@ void save_datazip( int *choice )
 	if ( strlen( path ) > 0 )
 		cmd( "cd \"$path\"" );
 
-	cmd( "set bah [tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes {{{%s} {%s}} {{All files} {*}} }]", ext, descr, ext );
+	cmd( "set bah [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }  } ]", ext, descr, ext );
 	app = ( char * ) Tcl_GetVar( inter, "bah", 0 );
 	strcpy( msg, app );
 
@@ -7848,8 +7648,8 @@ void save_datazip( int *choice )
 			{
 				for ( i = 0; i < nv; ++i )
 				{
-					if ( j >= start[ i ] && j <= end[ i ] && ! is_nan( data[ i ][ j ] ) )		// write NaN as n/a
-						gzprintf( fsavez, "%.*G", SIG_DIG, data[ i ][ j ] );
+					if ( j >= start[ i ] && j <= end[ i ] && ! is_nan( data[ i ][ j - start[ i ] ] ) )		// write NaN as n/a
+						gzprintf( fsavez, "%.*G", SIG_DIG, data[ i ][ j - start[ i ] ] );
 					else
 						gzprintf( fsavez, "%s", misval );
 			  
@@ -7867,8 +7667,8 @@ void save_datazip( int *choice )
 			{
 				for ( i = 0; i < nv; ++i )
 				{
-					if ( j >= start[ i ] && j <= end[ i ] && ! is_nan( data[ i ][ j ] ) )		// write NaN as n/a
-						fprintf( fsave, "%.*G", SIG_DIG, data[ i ][ j ] );  
+					if ( j >= start[ i ] && j <= end[ i ] && ! is_nan( data[ i ][ j - start[ i ] ] ) )		// write NaN as n/a
+						fprintf( fsave, "%.*G", SIG_DIG, data[ i ][ j - start[ i ] ] );  
 					else
 						fprintf( fsave, "%s", misval );  
 			  
@@ -7886,9 +7686,9 @@ void save_datazip( int *choice )
 		{
 			for ( i = 0; i < nv; ++i )
 			{
-				if ( j >= start[ i ] && j <= end[ i ] && ! is_nan( data[ i ][ j ] ) )		// write NaN as n/a
+				if ( j >= start[ i ] && j <= end[ i ] && ! is_nan( data[ i ][ j - start[ i ] ] ) )		// write NaN as n/a
 				{
-					sprintf( msg, "%.*G", ( int ) min( numcol - 6, SIG_DIG ), data[ i ][ j ] );
+					sprintf( msg, "%.*G", ( int ) min( numcol - 6, SIG_DIG ), data[ i ][ j - start[ i ] ] );
 					strcat( msg, str0 );
 					msg[ numcol ] = '\0';
 				}
@@ -8030,15 +7830,15 @@ void plog_series( int *choice )
 
 	for ( i = min_c; i <= max_c; ++i )
 	{
-		if ( start[ 0 ] <= i && end[ 0 ] >= i && ! is_nan( data[ 0 ][ i ] ) )
-			plog( "%d\t%.*g", "series", i, pdigits, data[ 0 ][ i ] );
+		if ( start[ 0 ] <= i && end[ 0 ] >= i && ! is_nan( data[ 0 ][ i - start[ 0 ] ] ) )
+			plog( "%d\t%.*g", "series", i, pdigits, data[ 0 ][ i - start[ 0 ] ] );
 		else
 			plog( "%d\t%s", "series", i, nonavail );		// write NaN as n/a
 		
 		for ( j = 1; j < nv; ++j )
 		{
-			if ( start[ j ] <= i && end[ j ] >= i && ! is_nan( data[ j ][ i ] ) )
-				plog( "\t%.*g", "series", pdigits, data[ j ][ i ] );
+			if ( start[ j ] <= i && end[ j ] >= i && ! is_nan( data[ j ][ i - start[ j ] ] ) )
+				plog( "\t%.*g", "series", pdigits, data[ j ][ i - start[ j ] ] );
 			else
 				plog( "\t%s", "series", nonavail );		// write NaN as n/a
 		}
@@ -8163,13 +7963,13 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 					
 					if ( i > min( iniCase, 1 ) && start[ k ] < i && end[ k ] >= i )
 					{
-						yVal = data[ k ][ i ];
+						yVal = data[ k ][ i - start[ k ] ];
 						tOk = true;
 					}
 					else
 					{
 						if ( start[ k ] == i || ( i <= 1 && start[ k ] <= 0 && end[ k ] >= i ) )
-							yVal = data[ k ][ i ];
+							yVal = data[ k ][ i - start[ k ] ];
 						
 						tOk = false;
 					}
@@ -8181,7 +7981,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 					if ( data[ i ] == NULL )
 						continue;
 					
-					yVal = data[ i ][ k ];
+					yVal = data[ i ][ k - start[ i ] ];
 					tOk = true;
 					
 					break;

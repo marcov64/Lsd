@@ -276,7 +276,7 @@ double variable::cal( object *caller, int lag )
 					if ( lag > t - start )	// or before there are saved values
 						goto error;
 				
-				return data[ t - lag ];	// use saved past value				
+				return data[ t - lag - start ];	// use saved past value				
 			}
 			else
 				return val[ eff_lag ];	// use regular past value
@@ -1003,24 +1003,17 @@ void variable::empty( void )
 		lock_guard < mutex > lock( parallel_comp );
 #endif	
 			
-		if ( ( data != NULL && save != true && savei != true ) || label == NULL )
+		if ( label == NULL || val == NULL )
 		{
 			sprintf( msg, "failure while deallocating variable %s", label );
 			error_hard( msg, "internal problem in LSD", 
 						"if error persists, please contact developers", true );
 			return;
 		}
+	}
 
-		delete [ ] label;
-		delete [ ] data;
-		delete [ ] lab_tit;
-		delete [ ] val;
-	}
-	else
-	{
-		delete [ ] label;
-		delete [ ] data;
-		delete [ ] lab_tit;
-		delete [ ] val;
-	}
+	delete [ ] label;
+	delete [ ] val;
+	delete [ ] lab_tit;
+	free( data );		// use C stdlib to be able to deallocate memory for deleted objects
 }

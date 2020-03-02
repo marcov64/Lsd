@@ -1098,33 +1098,6 @@ double get_double( const char *tcl_var, double *var )
 
 
 /***************************************************
-ADD_CEMETERY
-Store the variable in a list of variables in objects deleted
-but to be used for analysis.
-***************************************************/
-void add_cemetery( variable *v )
-{
-	variable *cv;
-	
-	if ( v->savei )
-		save_single( v );
-	
-	if ( cemetery == NULL )
-	{
-		cemetery = v;
-		v->next = NULL;
-	}
-	else
-	{
-		for ( cv = cemetery; cv->next != NULL; cv = cv->next );
-	  
-		cv->next = v;
-		v->next = NULL;
-	}
-}
-
-
-/***************************************************
 COLLECT_CEMETERY
 Processes variables from an object required to go to cemetery 
 ***************************************************/
@@ -1139,12 +1112,41 @@ void collect_cemetery( object *o )
 		// need to save?
 		if ( running && ( cv->save == true || cv->savei == true ) )
 		{
+			if ( cv->savei )
+				save_single( cv );			// update file
+	
+			set_lab_tit( cv );				// update last lab_tit
+			
 			cv->end = t;					// define last period,
-			cv->data[ t ] = cv->val[ 0 ];	// last value
-			set_lab_tit( cv );				// and last lab_tit
+			cv->data[ t - cv->start ] = cv->val[ 0 ];	// and last value
+			
+			// use C stdlib to be able to deallocate memory for deleted objects
+			cv->data = ( double * ) realloc( cv->data, ( t - cv->start + 1 ) * sizeof( double ) );
+			
 			add_cemetery( cv );				// put in cemetery (destroy cv->next)
 		}
 	}
+}
+
+
+/***************************************************
+ADD_CEMETERY
+Store the variable in a list of variables in objects deleted
+but to be used for analysis.
+***************************************************/
+void add_cemetery( variable *v )
+{
+	variable *cv;
+	
+	if ( cemetery == NULL )
+		cemetery = last_cemetery = v;
+	else
+	{
+		last_cemetery->next = v;
+		last_cemetery = v;
+	}
+	
+	last_cemetery->next = NULL;
 }
 
 
@@ -1163,7 +1165,7 @@ void empty_cemetery( void )
 		cv = cv1;
 	}
 	
-	cemetery = NULL;
+	cemetery = last_cemetery = NULL;
 }
 
 
@@ -1525,23 +1527,23 @@ void result::data_recursive( object *r, int i )
 	{
 		if ( cv->save == 1 )
 		{
-			if ( cv->start <= i && cv->end >= i && ! is_nan( cv->data[ i ] ) )
+			if ( cv->start <= i && cv->end >= i && ! is_nan( cv->data[ i - cv->start ] ) )
 			{
 				if ( dozip )
 				{
 #ifdef LIBZ
 					if ( docsv )
-						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i ] );
+						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
 					else
-						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i ] );
+						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
 #endif
 				}
 				else
 				{
 					if ( docsv )
-						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i ] );
+						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
 					else
-						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i ] );
+						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
 				}
 			}
 			else
@@ -1583,23 +1585,23 @@ void result::data_recursive( object *r, int i )
 	{
 		for ( cv = cemetery; cv != NULL; cv = cv->next )
 		{
-			if ( cv->start <=i && cv->end >= i && ! is_nan( cv->data[ i ] ) )
+			if ( cv->start <= i && cv->end >= i && ! is_nan( cv->data[ i - cv->start ] ) )
 			{
 				if ( dozip )
 				{
 #ifdef LIBZ
 					if ( docsv )
-						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i ] );
+						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
 					else
-						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i ] );
+						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
 #endif
 				}
 				else
 				{
 					if ( docsv )
-						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i ] );
+						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
 					else
-						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i ] );
+						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
 				}
 			}
 			else					// save NaN as n/a

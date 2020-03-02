@@ -126,7 +126,8 @@ object *root = NULL;		// LSD root object
 object *wait_delete = NULL;	// LSD object waiting for deletion
 o_setT obj_list;			// set with all existing LSD objects
 sense *rsense = NULL;		// LSD sensitivity analysis structure
-variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
+variable *cemetery = NULL;	// LSD saved data from deleted objects
+variable *last_cemetery = NULL;	// LSD last saved data from deleted objects
 FILE *log_file = NULL;		// log file, if any
 
 // constant string arrays
@@ -722,6 +723,7 @@ void run( void )
 			build_obj_list( true );
 
 		series_saved = 0;
+		t = 1;
 
 		if ( ! alloc_save_mem( root ) )
 		{
@@ -1185,38 +1187,9 @@ bool alloc_save_mem( object *r )
 				cv->next_update += rnd_int( 0, cv->delay_range );
 		}
 		
-		if ( ( cv->save || cv->savei ) && ! no_more_memory )
-		{
-			if ( cv->num_lag > 0 || cv->param == 1 )
-				cv->start = 0;
-			else
-				cv->start = 1;
-			cv->end = max_step;
+		if ( cv->save || cv->savei )
+			alloc_save_var( cv );
 
-			delete [ ] cv->data;
-
-			try 
-			{
-				cv->data = new double[ max_step + 1 ];
-			}
-			catch( bad_alloc& ) 
-			{
-				set_lab_tit( cv );
-				plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", cv->lab_tit );
-				cv->save = cv->savei = 0;
-				no_more_memory = true;
-			}
-
-			++series_saved;
-			if ( cv->num_lag > 0  || cv->param == 1 )
-				cv->data[ 0 ] = cv->val[ 0 ];
-		}
-		else
-		{
-			if ( no_more_memory )
-				cv->save = cv->savei = 0;
-		}
-		
 		if ( ( cv->num_lag > 0 || cv->param == 1 ) && cv->data_loaded == '-' )
 		{
 			sprintf( msg, "%s '%s' in object '%s' has not been initialized", cv->param == 1 ? "parameter" : "variable", cv->label, r->label );
@@ -1232,6 +1205,56 @@ bool alloc_save_mem( object *r )
 
 	if ( quit != 2 )
 		quit = toquit;
+	
+	return ! no_more_memory;
+}
+
+
+/*********************************
+ALLOC_SAVE_VAR
+*********************************/
+bool alloc_save_var( variable *v )
+{
+	bool prev_state = no_more_memory;
+	
+	if ( ! running )
+		return true;
+	
+	if ( ! no_more_memory )
+	{
+		if ( v->num_lag > 0 || v->param == 1 )
+			v->start = t - 1;
+		else
+			v->start = t;
+		
+		v->end = max_step;
+
+		// use C stdlib to be able to deallocate memory for deleted objects
+		free( v->data );
+		v->data = ( double * ) malloc( ( v->end - v->start + 1 ) * sizeof( double ) );
+
+		if( v->data == NULL )
+		{
+			no_more_memory = true;
+			v->save = v->savei = false;
+			v->start = v->end = 0;
+			
+			if ( no_more_memory != prev_state )
+			{
+				set_lab_tit( v );
+				plog( "\nWarning: cannot allocate memory for saving '%s %s' (object '%s')\n Subsequent series will not be saved\n", "", v->label, v->lab_tit, v->up->label );
+			}
+		}
+		else
+		{
+			if ( v->num_lag > 0  || v->param == 1 )
+				v->data[ 0 ] = v->val[ 0 ];
+			
+			++series_saved;
+		}
+	}
+	else
+		v->save = v->savei = false;
 	
 	return ! no_more_memory;
 }

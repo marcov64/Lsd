@@ -634,6 +634,7 @@ FILE *search_data_ent( char *name, variable *v );
 FILE *search_data_str( char const *name, char const *init, char const *str );
 FILE *search_str( char const *name, char const *str );
 bool alloc_save_mem( object *r );
+bool alloc_save_var( variable *v );
 bool contains( FILE *f, char *lab, int len );
 bool discard_change( bool checkSense = true, bool senseOnly = false, const char title[ ] = "" );
 bool get_bool( const char *tcl_var, bool *var = NULL );
@@ -658,6 +659,7 @@ description *search_description( char *lab );
 double get_double( const char *tcl_var, double *var = NULL );
 double lower_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
 double upper_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
+double *log_data( double *data, int start, int end, int ser, const char *err_msg );
 int browse( object *r, int *choice );
 int check_label( char *l, object *r );
 int compute_copyfrom( object *c, int *choice );
@@ -780,7 +782,7 @@ void save_data1( int *choice );
 void save_datazip( int *choice );
 void save_eqfile( FILE *f );
 void save_pos( object * );
-void save_single( variable *vcv );
+void save_single( variable *v );
 void scan_used_lab( char *lab, int *choice );
 void scan_using_lab( char *lab, int *choice );
 void search_title( object *root, char *tag, int *i, char *lab, int *incr );
@@ -918,7 +920,8 @@ extern object *currObj;			// pointer to current object in browser
 extern object *wait_delete;		// LSD object waiting for deletion
 extern o_setT obj_list;			// list with all existing LSD objects
 extern sense *rsense;       	// LSD sensitivity analysis structure
-extern variable *cemetery;  	// LSD saved data series (from last simulation run )
+extern variable *cemetery;  	// LSD saved data from deleted objects
+extern variable *last_cemetery;	// LSD last saved data from deleted objects
 
 // constant string arrays
 extern const char *lmm_options[ ];
