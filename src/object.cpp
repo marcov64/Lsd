@@ -802,10 +802,10 @@ void object::search_inst( object *obj, int *pos )
 			return;
 		}
 
-		// search among descendants only if object yet not found
+		// search among descendants only if object yet not found (speed-up)
 		if ( ! found )
 		{
-			if ( strcmp( cur->label, obj->label ) )
+			if ( no_ptr_chk || strcmp( cur->label, obj->label ) )
 			{
 				for ( cb = cur->b; cb != NULL && *pos == 0; cb = cb->next )
 					if ( cb->head != NULL )
