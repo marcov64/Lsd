@@ -788,23 +788,32 @@ or 0 if not found
 ********************************************/
 void object::search_inst( object *obj, int *pos )
 {
+	bool found;
 	int i;
 	bridge *cb;
 	object *cur;
 
 	// search among brothers
-	for ( cur = this, i = 1; cur != NULL; cur = cur->hyper_next( ), ++i )
+	for ( found = false, i = 1, cur = this; cur != NULL; cur = cur->hyper_next( ), ++i )
 	{
 		if ( cur == obj )				// done if found
 		{
 			*pos = i;
 			return;
 		}
-	
-		// search among descendants
-		for ( cb = cur->b; cb != NULL && *pos == 0; cb = cb->next )
-			if ( cb->head != NULL )
-				cb->head->search_inst( obj, pos );
+
+		// search among descendants only if object yet not found
+		if ( ! found )
+		{
+			if ( strcmp( cur->label, obj->label ) )
+			{
+				for ( cb = cur->b; cb != NULL && *pos == 0; cb = cb->next )
+					if ( cb->head != NULL )
+						cb->head->search_inst( obj, pos );
+			}
+			else
+				found = true;
+		}
 	}
 }
 
@@ -815,23 +824,34 @@ double object::search_inst( object *obj )
 	
 	if ( obj == NULL )					// default is self
 		obj = this;
-	
-	if ( up == NULL )					// root?
-	{
-		if ( obj == this )
-			return 1.;
 		
-		if ( b->head == NULL )
-			return 0.;					// no instance in model
-		else
-			cur = b->head;
+	// if pointer check available quickly check for non-existing objects
+	if ( obj != this && ! no_ptr_chk )
+	{
+		if ( obj_list.find( obj ) == obj_list.end( ) )
+			return 0;
+		
+		cur = obj;
 	}
 	else
-		// get first instance of current object brotherhood
-		cur = up->search_bridge( label )->head;
+		cur = this;
 	
+	if ( cur->up == NULL )				// root?
+	{
+		if ( obj == cur )
+			return 1;
+		
+		if ( cur->b->head == NULL )
+			return 0;					// no instances in model
+		else
+			cur = cur->b->head;
+	}
+	else
+		// get first instance of found/current object brotherhood
+		cur = cur->up->search_bridge( cur->label )->head;
+			
 	pos = 0;
-	if ( cur != NULL)
+	if ( cur != NULL )
 		cur->search_inst( obj, &pos );	// check for instance recursively
 	
 	return pos;
