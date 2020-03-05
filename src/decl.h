@@ -304,7 +304,7 @@ struct object
 	void replicate( int num, int propagate );
 	void save_param( FILE *f );
 	void save_struct( FILE *f, char const *tab );
-	void search_inst( object *obj, int *pos );
+	void search_inst( object *obj, long *pos );
 	void sort_asc( object *from, char *l_var );
 	void sort_desc( object *from, char *l_var );
 	void update( bool recurse, bool user );

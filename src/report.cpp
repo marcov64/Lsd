@@ -489,9 +489,10 @@ void write_var( variable *v, FILE *frep )
 	if ( v->param == 0 || v->param == 2 )
 	{
 		fprintf( frep,"<I>Using: &nbsp;</I>" );
-		for ( cur = v->up; cur->up != NULL; cur = cur->up ); // reach root
+		
 		fatto = 0;
-		find_using( cur, v, frep );
+		find_using( root, v, frep );
+
 		if ( fatto == 0 )
 			fprintf( frep, "(none)" );
 	} 

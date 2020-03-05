@@ -786,10 +786,10 @@ calling object instances and then into its
 descendants, returning the instance number 
 or 0 if not found
 ********************************************/
-void object::search_inst( object *obj, int *pos )
+void object::search_inst( object *obj, long *pos )
 {
 	bool found;
-	int i;
+	long i;
 	bridge *cb;
 	object *cur;
 
@@ -819,7 +819,7 @@ void object::search_inst( object *obj, int *pos )
 
 double object::search_inst( object *obj )
 {
-	int pos;
+	long pos;
 	object *cur;
 	
 	if ( obj == NULL )					// default is self
@@ -836,17 +836,7 @@ double object::search_inst( object *obj )
 	else
 		cur = this;
 	
-	if ( cur->up == NULL )				// root?
-	{
-		if ( obj == cur )
-			return 1;
-		
-		if ( cur->b->head == NULL )
-			return 0;					// no instances in model
-		else
-			cur = cur->b->head;
-	}
-	else
+	if ( cur->up != NULL )				// not root?
 		// get first instance of found/current object brotherhood
 		cur = cur->up->search_bridge( cur->label )->head;
 			
