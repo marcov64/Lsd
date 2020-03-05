@@ -786,7 +786,7 @@ calling object instances and then into its
 descendants, returning the instance number 
 or 0 if not found
 ********************************************/
-void object::search_inst( object *obj, long *pos )
+void object::search_inst( object *obj, long *pos, long *checked )
 {
 	bool found;
 	long i;
@@ -794,11 +794,18 @@ void object::search_inst( object *obj, long *pos )
 	object *cur;
 
 	// search among brothers
-	for ( found = false, i = 1, cur = this; cur != NULL; cur = cur->hyper_next( ), ++i )
+	for ( found = false, i = 1, cur = this; cur != NULL && *pos == 0; cur = cur->hyper_next( ), ++i )
 	{
 		if ( cur == obj )				// done if found
 		{
 			*pos = i;
+			return;
+		}
+		
+		*checked += 1;
+		if ( *checked > MAX_OBJ_CHK )	// stop if too many objects
+		{
+			*pos = -1;
 			return;
 		}
 
@@ -809,7 +816,7 @@ void object::search_inst( object *obj, long *pos )
 			{
 				for ( cb = cur->b; cb != NULL && *pos == 0; cb = cb->next )
 					if ( cb->head != NULL )
-						cb->head->search_inst( obj, pos );
+						cb->head->search_inst( obj, pos, checked );
 			}
 			else
 				found = true;
@@ -817,9 +824,9 @@ void object::search_inst( object *obj, long *pos )
 	}
 }
 
-double object::search_inst( object *obj )
+double object::search_inst( object *obj, bool fun )
 {
-	long pos;
+	long pos, checked;
 	object *cur;
 	
 	if ( obj == NULL )					// default is self
@@ -840,11 +847,11 @@ double object::search_inst( object *obj )
 		// get first instance of found/current object brotherhood
 		cur = cur->up->search_bridge( cur->label )->head;
 			
-	pos = 0;
+	pos = checked = 0;
 	if ( cur != NULL )
-		cur->search_inst( obj, &pos );	// check for instance recursively
+		cur->search_inst( obj, &pos, &checked );// check for instance recursively
 	
-	return pos;
+	return fun ? max( pos, 0 ) : pos;
 }
 
 

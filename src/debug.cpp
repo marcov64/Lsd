@@ -966,6 +966,8 @@ while ( choice == 0 )
 			
 			if ( j > 0 )
 			{
+				vector < bool > checked( j + 1, false );
+				
 				cmd( "set hook 0" );
 				
 				cmd( "set hk .deb.hk" );
@@ -984,39 +986,43 @@ while ( choice == 0 )
 				
 				strcpy( ch, "pack" );
 				
-				for ( count = i = 0; i < j; ++i )
+				for ( i = 0; i < j; ++i )
 					if ( r->hooks[ i ] != NULL )
 					{
-						k = root->search_inst( r->hooks[ i ] );
+						k = root->search_inst( r->hooks[ i ], false );
 						
 						if ( k != 0 )
 						{
-							cmd( "radiobutton $hk.t.t.h%d -text \"Hook %d to %s (%d)\" -variable hook -value %d", i, i, r->hooks[ i ]->label, k, i );
+							if ( k > 0 )
+							{
+								cmd( "radiobutton $hk.t.t.h%d -text \"Hook %d to %s (%d)\" -variable hook -value %d", i, i, r->hooks[ i ]->label, k, i );
+								checked[ i ] = true;
+							}
+							else
+								cmd( "radiobutton $hk.t.t.h%d -text \"Hook %d to (unchecked)\" -variable hook -value %d", i, i, i );
+								
 							sprintf( ch2, " $hk.t.t.h%d", i );
 							strncat( ch, ch2, 4 * MAX_ELEM_LENGTH - strlen( ch ) - 1 );
-							++count;
 						}
 					}
 				
 				if ( r->hook != NULL )
 				{
-					k = root->search_inst( r->hook );
+					k = root->search_inst( r->hook, false );
 					
 					if ( k != 0 )
 					{
-						cmd( "radiobutton $hk.t.t.h%d -text \"Static Hook to %s (%d)\" -variable hook -value %d", i, r->hook->label, k, i );
+						if ( k > 0 )
+						{
+							cmd( "radiobutton $hk.t.t.h%d -text \"Static Hook to %s (%d)\" -variable hook -value %d", i, r->hook->label, k, i );
+								checked[ i ] = true;
+						}
+						else
+							cmd( "radiobutton $hk.t.t.h%d -text \"Static Hook to (unchecked)\" -variable hook -value %d", i, i );
+						
 						sprintf( ch2, " $hk.t.t.h%d", i );
 						strncat( ch, ch2, 4 * MAX_ELEM_LENGTH - strlen( ch ) - 1 );
-						++count;
 					}
-				}
-				
-				if ( count == 0 )
-				{
-					cmd( "destroytop $hk" );
-					cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer(s)\" -detail \"Check if your code is using valid (non-NULL) pointers to LSD objects or avoid using this option.\"" );
-					choice = 0;
-					break;
 				}
 				
 				strcat( ch, " -anchor w" );
@@ -1044,6 +1050,14 @@ while ( choice == 0 )
 				{
 					get_int( "hook", &i );
 					
+					if ( ! checked[ i ] )
+					{
+						cmd( "if [ string equal [ tk_messageBox -parent .deb -type okcancel -icon warning -title Warning -default cancel -message \"Cannot check hook pointer\" -detail \"Cannot check if hook points to a valid object. LSD may crash if jumping to an invalid hook pointer.\" ] ok ] { set choice 1 } { set choice 0 }" );
+						
+						if ( choice == 0 )
+							break;
+					}						
+					
 					if ( i < j )
 						choice = deb( r->hooks[ i ], c, lab, res, interact );
 					else
@@ -1055,11 +1069,21 @@ while ( choice == 0 )
 			else
 				if ( r->hook != NULL )
 				{
-					if ( root->search_inst( r->hook ) == 0 )
+					k = root->search_inst( r->hook, false );
+					
+					if ( k == 0 )
 					{
 						cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to LSD objects or avoid using this option.\"" );
 						choice = 0;
 						break;
+					}
+					
+					if ( k < 0 )
+					{
+						cmd( "if [ string equal [ tk_messageBox -parent .deb -type okcancel -icon warning -title Warning -default cancel -message \"Cannot check hook pointer\" -detail \"Cannot check if hook points to a valid object. LSD may crash if jumping to an invalid hook pointer.\" ] ok ] { set choice 1 } { set choice 0 }" );
+						
+						if ( choice == 0 )
+							break;
 					}
 					
 					choice = deb( r->hook, c, lab, res, interact );
@@ -1304,9 +1328,8 @@ SHOW_TMP_VARS
 ********************************************/
 void show_tmp_vars( object *r, bool update )
 {
-	bool valid;
 	char i_names[ ] = { 'i', 'j', 'h', 'k' };
-	int i, j, m, n = 0;
+	int i, j, m, n;
 	netLink *curLnk = NULL;
 	object *cur;
 	
@@ -1363,7 +1386,7 @@ void show_tmp_vars( object *r, bool update )
 			return;
 		}
 	
-	m = root->search_inst( r );
+	m = root->search_inst( r, true );
 	cmd( "$in.l1.n.name configure -text \"%s\"", r->label == NULL ? "" : r->label );
 	cmd( "$in.l1.n.id configure -text \"%d\"", m );
 	
@@ -1422,25 +1445,26 @@ void show_tmp_vars( object *r, bool update )
 		else
 			cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text \"cur%d\"", j );
 		
-		valid = false;
+		n = 0;
 		if ( o_values[ j ] == NULL )
 			cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text NULL" );
 		else
 		{
 			// search an object pointed by the pointer
-			n = ( int ) root->search_inst( o_values[ j ] );
+			n = ( int ) root->search_inst( o_values[ j ], false );
+			
 			if ( n > 0 && o_values[ j ]->label != NULL )
-			{
 				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"%s(%d)\"", o_values[ j ]->label, n );
-				valid = true;
-			}
 			else
-				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"(invalid)\"" );
+				if ( n < 0 )
+					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"(unchecked)\"" );
+				else
+					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"(invalid)\"" );
 		}
 		
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 		
-		if ( valid )
+		if ( n > 0 )
 		{
 			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", o_values[ j ]->label, n );
 			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", o_values[ j ]->label, n );
@@ -1467,25 +1491,25 @@ void show_tmp_vars( object *r, bool update )
 		else
 		{
 			// try search a link pointed by the pointer in current object only
-			valid = false;
+			n = 0;
 			if ( r->node != NULL )
 			{
 				for ( curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next )
 					if ( curLnk == n_values[ j ] && curLnk->ptrTo != NULL && curLnk->ptrTo->label != NULL )
 					{
 						cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"%s(%ld)\"", curLnk->ptrTo->label, curLnk->serTo );
-						valid = true;
+						n = 1;
 						break;
 					}
 			}
 			
-			if ( ! valid )
+			if ( n > 0 )
 				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"(unknown)\"" );
 		}
 		
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 		
-		if ( valid && curLnk != NULL )
+		if ( n > 0 && curLnk != NULL )
 		{
 			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, curLnk->ptrTo->label );
 			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, curLnk->ptrTo->label );
@@ -1513,25 +1537,26 @@ void show_tmp_vars( object *r, bool update )
 			cur = r->hooks[ j ];	
 		}
 		
-		valid = false;
+		n = 0;
 		if ( cur == NULL )
 			cmd( "label $in.n.t.n$i.val -width 12 -pady 0 -bd 0 -foreground red -text NULL" );
 		else
 		{
 			// search an object pointed by the hook
-			n = ( int ) root->search_inst( cur );
+			n = ( int ) root->search_inst( cur, false );
+			
 			if ( n > 0 && cur->label != NULL )
-			{
 				cmd( "label $in.n.t.n$i.val -width 12 -pady 0 -bd 0 -foreground red -text \"%s(%d)\"", cur->label, n );
-				valid = true;
-			}
 			else
-				cmd( "label $in.n.t.n$i.val -width 12 -pady 0 -bd 0 -foreground red -text \"(invalid)\"" );
+				if ( n < 0 )
+					cmd( "label $in.n.t.n$i.val -width 12 -pady 0 -bd 0 -foreground red -text \"(unchecked)\"" );
+				else
+					cmd( "label $in.n.t.n$i.val -width 12 -pady 0 -bd 0 -foreground red -text \"(invalid)\"" );
 		}
 		
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 		
-		if ( valid )
+		if ( n > 0 )
 		{
 			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", cur->label, n );
 			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", cur->label, n );

@@ -102,6 +102,7 @@ Global definitions among all LSD C++ modules
 #define MAX_WAIT_TIME 10				// maximum wait time for a variable computation ( sec.)
 #define MAX_TIMEOUT 100					// maximum timeout for multi-thread scheduler (millisec.)
 #define MAX_LEVEL 10					// maximum number of object levels (plotting only)
+#define MAX_OBJ_CHK	10000000			// maximum number of objects to check when searching
 #define ERR_LIM 5						// maximum number of repeated error messages
 #define MARG 0.01						// y-axis % plot clearance margin
 #define MARG_CONST 0.1					// y-axis % plot clearance margin for constant series
@@ -240,7 +241,7 @@ struct object
 	double read_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, char const *ext = "net" );
 	double recal( char const *l );
 	double sd( char const *lab, int lag );
-	double search_inst( object *obj = NULL );
+	double search_inst( object *obj = NULL, bool fun = true );
 	double stat( char const *lab, double *v = NULL );
 	double stats_net( char const *lab, double *r );
 	double sum( char const *lab, int lag );
@@ -304,7 +305,7 @@ struct object
 	void replicate( int num, int propagate );
 	void save_param( FILE *f );
 	void save_struct( FILE *f, char const *tab );
-	void search_inst( object *obj, long *pos );
+	void search_inst( object *obj, long *pos, long *checked );
 	void sort_asc( object *from, char *l_var );
 	void sort_desc( object *from, char *l_var );
 	void update( bool recurse, bool user );
