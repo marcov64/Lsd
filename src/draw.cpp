@@ -332,7 +332,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 		
 		// set the default horizontal scale factor per level
 		for ( k = 0; k < MAX_LEVEL; ++ k )
-			level_factor[ k ] = 1.0;
+			level_factor[ k ] = 0.3;
 
 		// pick hand set scale factors
 		switch ( i )
@@ -342,19 +342,19 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 				level_factor[ 0 ] = 0.4;
 				level_factor[ 1 ] = 0.1;
 				level_factor[ 2 ] = 0.5;
-				level_factor[ 3 ] = 1.0;
+				level_factor[ 3 ] = 0.6;
 				break;
 			case 2:
 				level_factor[ 0 ] = 0.5;
 				level_factor[ 1 ] = 0.8;
 				level_factor[ 2 ] = 0.6;
-				level_factor[ 3 ] = 0.5;
+				level_factor[ 3 ] = 0.4;
 				break;
 			case 3:
 				level_factor[ 0 ] = 0.6;
 				level_factor[ 1 ] = 1.1;
 				level_factor[ 2 ] = 0.4;
-				level_factor[ 3 ] = 0.5;
+				level_factor[ 3 ] = 0.4;
 				break;
 			case 4:
 				level_factor[ 0 ] = 0.7;

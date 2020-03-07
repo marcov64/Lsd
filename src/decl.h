@@ -737,7 +737,7 @@ void file_name( char *name );
 void fill_list_par( object *r, int flag_all );
 void fill_list_var( object *r, int flag_all, int flag_init );
 void find_lags( object *r );
-void find_using( object *r, variable *v, FILE *frep );
+void find_using( object *r, variable *v, FILE *frep, bool *found );
 void get_sa_limits( object *r, FILE *out, const char *sep );
 void get_saved( object *n, FILE *out, const char *sep, bool all_var = false );
 void get_var_descr( char const *lab, char *descr, int descr_len );

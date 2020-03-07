@@ -796,17 +796,20 @@ void object::search_inst( object *obj, long *pos, long *checked )
 	// search among brothers
 	for ( found = false, i = 1, cur = this; cur != NULL && *pos == 0; cur = cur->hyper_next( ), ++i )
 	{
-		if ( cur == obj )				// done if found
+		if ( cur == obj )					// done if found
 		{
 			*pos = i;
 			return;
 		}
 		
-		*checked += 1;
-		if ( *checked > MAX_OBJ_CHK )	// stop if too many objects
+		if ( *checked >= 0 )				// don't stop during simulation
 		{
-			*pos = -1;
-			return;
+			*checked += 1;
+			if ( *checked > MAX_OBJ_CHK )	// stop if too many objects
+			{
+				*pos = -1;
+				return;
+			}
 		}
 
 		// search among descendants only if object yet not found (speed-up)
@@ -847,11 +850,12 @@ double object::search_inst( object *obj, bool fun )
 		// get first instance of found/current object brotherhood
 		cur = cur->up->search_bridge( cur->label )->head;
 			
-	pos = checked = 0;
+	pos = 0;
+	checked = fun ? -1 : 0;
 	if ( cur != NULL )
 		cur->search_inst( obj, &pos, &checked );// check for instance recursively
 	
-	return fun ? max( pos, 0 ) : pos;
+	return pos;
 }
 
 

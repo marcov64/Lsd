@@ -434,6 +434,7 @@ SCAN_USING_LAB
 ****************************************************/
 void scan_using_lab( char *lab, int *choice )
 {
+	bool found = false;
 	int caller = *choice;
 	variable *cv;
 
@@ -466,7 +467,7 @@ void scan_using_lab( char *lab, int *choice )
 	cmd( "done $list b { destroytop .listusing_%s }", lab );		// done button
 
 	cv = root->search_var( root, lab );
-	find_using( root, cv, NULL );
+	find_using( root, cv, NULL, & found );
 	
 	cmd( "set choice [ $list.l.l size ]" );
 	if ( *choice != 0 )

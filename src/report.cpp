@@ -43,7 +43,6 @@ bool table;
 int code;
 int desc;
 int extra;
-int fatto;
 int file_error;
 int init;
 int lmenu;
@@ -424,7 +423,7 @@ WRITE_VAR
 *******************************/
 void write_var( variable *v, FILE *frep )
 {
-	bool one;
+	bool one, found;
 	char *app, *fname, c1_lab[ 2 * MAX_LINE_SIZE ], c2_lab[ 2 * MAX_LINE_SIZE ], c3_lab[ 2 * MAX_LINE_SIZE ], updt_in[ MAX_ELEM_LENGTH + 1 ];
 	int i, j, k, done, flag_begin, flag_string, flag_comm, flag_var, nfiles;
 	object *cur;
@@ -447,7 +446,7 @@ void write_var( variable *v, FILE *frep )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
-	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set res [ llength $source_files ]" );
 	get_int( "res", &nfiles );
 		
@@ -490,10 +489,10 @@ void write_var( variable *v, FILE *frep )
 	{
 		fprintf( frep,"<I>Using: &nbsp;</I>" );
 		
-		fatto = 0;
-		find_using( root, v, frep );
-
-		if ( fatto == 0 )
+		found = false;
+		find_using( root, v, frep, & found );
+		
+		if ( ! found )
 			fprintf( frep, "(none)" );
 	} 
 
@@ -528,7 +527,7 @@ void write_var( variable *v, FILE *frep )
 			 
 				if ( ! strcmp( c2_lab, v->label ) )
 				{
-					fatto = 0;
+					found = false;
 					one = true;
 					 
 					if ( k == 0 )
@@ -538,9 +537,9 @@ void write_var( variable *v, FILE *frep )
 					
 					fprintf( frep, "<BR>\n<TT>%s</TT>", c1_lab );
 					 
-					while ( done > 0 || fatto == 0 )
+					while ( done > 0 || ! found )
 					{
-						fatto = 1;
+						found = true;
 						fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun );
 						strcpy( c3_lab, c1_lab );
 						clean_spaces( c3_lab );
@@ -670,7 +669,7 @@ void write_var( variable *v, FILE *frep )
 /******************************
 FIND_USING
 *******************************/
-void find_using( object *r, variable *v, FILE *frep )
+void find_using( object *r, variable *v, FILE *frep, bool *found )
 {
 	bool one;
 	int count, done, i, nfiles;
@@ -681,7 +680,7 @@ void find_using( object *r, variable *v, FILE *frep )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
-	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set res [ llength $source_files ]" );
 	get_int( "res", &nfiles );
 	
@@ -715,6 +714,8 @@ void find_using( object *r, variable *v, FILE *frep )
 	{
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 		{
+			cmd( "set usingList [ list ]" );
+			
 			for ( i = 0; i < nfiles; ++i )
 			{
 				cmd( "set brr [ lindex $source_files %d ]", i );
@@ -732,11 +733,18 @@ void find_using( object *r, variable *v, FILE *frep )
 				{
 					if ( is_equation_header( c1_lab, c2_lab, updt_in ) )
 					{
-						done = 0;
+						done = false;
 						if ( ! strcmp( c2_lab, v->label ) )
 							done = contains( ffun, cv->label, strlen( cv->label ) );
 						if ( done )
 						{
+							// avoid duplicated variable equations
+							cmd( "if { [ lsearch -exact $usingList %s ] >= 0 } { set res 1 } { set res 0 }", cv->label );
+							if ( get_int( "res", & done ) )
+								continue;
+							else
+								cmd( "lappend usingList %s", cv->label );
+							
 							if ( frep != NULL )
 							{
 								fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one ? ", " : "", cv->label, cv->label );
@@ -744,7 +752,8 @@ void find_using( object *r, variable *v, FILE *frep )
 							}
 							else
 								cmd( "$list.l.l insert end %s", cv->label );
-							fatto = 1;
+							
+							*found = true;
 						}
 					}
 				}
@@ -754,7 +763,7 @@ void find_using( object *r, variable *v, FILE *frep )
 		}
 
 		if ( cur->b != NULL )
-			find_using( cur->b->head, v, frep );
+			find_using( cur->b->head, v, frep, found );
 	}
 }
 
