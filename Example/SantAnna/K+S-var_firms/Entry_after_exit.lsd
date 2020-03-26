@@ -616,7 +616,7 @@ Param: F10 0 n + n n	50
 Param: F1max 0 n + n n	50
 Param: F1min 0 n + n n	50
 Param: L1rdMax 0 n + n n	0.2
-Param: L1shortMax 0 n + n n	0.2
+Param: L1shortMax 0 n + n n	1
 Param: NW10 0 n + n n	10000
 Param: PPI0 0 n + n n	0
 Param: Phi3 0 n + n n	0.1
@@ -1682,7 +1682,7 @@ Parameter_L1shortMax
 Maximum labor shortage allowed in capital-good sector
 (0, 1)
 _INIT_
-All 1 instances equal to 0.2.
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_NW10
@@ -3542,7 +3542,6 @@ END_DESCRIPTION
 
 DOCUOBSERVE
 Root
-_postChg
 _A2
 _E
 _JO2
