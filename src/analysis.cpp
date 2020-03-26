@@ -2468,56 +2468,56 @@ while ( true )
 
 		// Edit labels
 		case 26:
-			cmd( "set itext [$ccanvas itemcget current -text]" );
-			cmd( "set ifont [lindex [$ccanvas itemcget current -font] 0]" );
-			cmd( "set idim [lindex [$ccanvas itemcget current -font] 1 ]" );
-			cmd( "set istyle [lindex [$ccanvas itemcget current -font] 2 ]" );
-			cmd( "set icolor [$ccanvas itemcget current -fill]" );  
+			cmd( "set itext [ $ccanvas itemcget current -text ]" );
+			cmd( "set ifont [ lindex [ $ccanvas itemcget current -font ] 0 ]" );
+			cmd( "set idim [ lindex [ $ccanvas itemcget current -font ] 1 ]" );
+			cmd( "set istyle [ lindex [ $ccanvas itemcget current -font ] 2 ]" );
+			cmd( "set icolor [ $ccanvas itemcget current -fill ]" );  
 			cmd( "set fontall 0" );
 			cmd( "set colorall 0" );
 			
-			cmd( "set w $ccanvas.a" );
-			cmd( "newtop $w \"Edit Label\" { set choice 2 } $ccanvas" );
-			cmd( "wm geometry $w +$LX+$LY" );
+			cmd( "set wid $ccanvas.a" );
+			cmd( "newtop $wid \"Edit Label\" { set choice 2 } $ccanvas" );
+			cmd( "wm geometry $wid +$LX+$LY" );
 			
-			cmd( "frame $w.l" );
-			cmd( "label $w.l.t -text \"New label\"" );
-			cmd( "entry $w.l.e -textvariable itext -width 30 -justify center" );
-			cmd( "pack $w.l.t $w.l.e" );
+			cmd( "frame $wid.l" );
+			cmd( "label $wid.l.t -text \"New label\"" );
+			cmd( "entry $wid.l.e -textvariable itext -width 30 -justify center" );
+			cmd( "pack $wid.l.t $wid.l.e" );
 			
-			cmd( "frame $w.format" );
-			cmd( "label $w.format.tit -text \"Font name, size and style\"" );
+			cmd( "frame $wid.format" );
+			cmd( "label $wid.format.tit -text \"Font name, size and style\"" );
 			
-			cmd( "frame $w.format.e" );
-			cmd( "ttk::combobox $w.format.e.font -textvariable ifont -values [ font families ] -width 15" );
-			cmd( "ttk::combobox $w.format.e.dim -textvariable idim -values [ list 4 6 8 10 11 12 14 18 24 32 48 60 ] -width 3 -justify center" );
-			cmd( "ttk::combobox $w.format.e.sty -textvariable istyle -values [ list normal bold italic \"bold italic\" ] -width 10 -justify center" );
-			cmd( "pack $w.format.e.font $w.format.e.dim $w.format.e.sty -padx 2 -side left" );
+			cmd( "frame $wid.format.e" );
+			cmd( "ttk::combobox $wid.format.e.font -textvariable ifont -values [ font families ] -width 15" );
+			cmd( "ttk::combobox $wid.format.e.dim -textvariable idim -values [ list 4 6 8 10 11 12 14 18 24 32 48 60 ] -width 3 -justify center" );
+			cmd( "ttk::combobox $wid.format.e.sty -textvariable istyle -values [ list normal bold italic \"bold italic\" ] -width 10 -justify center" );
+			cmd( "pack $wid.format.e.font $wid.format.e.dim $wid.format.e.sty -padx 2 -side left" );
 			
-			cmd( "pack $w.format.tit $w.format.e" );
+			cmd( "pack $wid.format.tit $wid.format.e" );
 			
-			cmd( "frame $w.c" );
-			cmd( "label $w.c.l -text \"Text color\"" );
-			cmd( "button $w.c.color -width 5 -text Set -foreground white -background $icolor -command { set app [ tk_chooseColor -parent $w -title \"Text Color\" -initialcolor $icolor ]; if { $app != \"\" } { set icolor $app }; $w.c.color configure -background $icolor }" );
-			cmd( "pack $w.c.l $w.c.color -padx 2 -side left" );
+			cmd( "frame $wid.c" );
+			cmd( "label $wid.c.l -text \"Text color\"" );
+			cmd( "button $wid.c.color -width 5 -text Set -foreground white -background $icolor -command { set app [ tk_chooseColor -parent $wid -title \"Text Color\" -initialcolor $icolor ]; if { $app != \"\" } { set icolor $app }; $wid.c.color configure -background $icolor }" );
+			cmd( "pack $wid.c.l $wid.c.color -padx 2 -side left" );
 			
-			cmd( "frame $w.fall" );
-			cmd( "checkbutton $w.fall.font -text \"Apply font to all text items\" -variable fontall" );
-			cmd( "checkbutton $w.fall.color -text \"Apply color to all text items\" -variable colorall" );
-			cmd( "pack $w.fall.font $w.fall.color" );
+			cmd( "frame $wid.fall" );
+			cmd( "checkbutton $wid.fall.font -text \"Apply font to all text items\" -variable fontall" );
+			cmd( "checkbutton $wid.fall.color -text \"Apply color to all text items\" -variable colorall" );
+			cmd( "pack $wid.fall.font $wid.fall.color" );
 			
-			cmd( "pack $w.l $w.format $w.c $w.fall -padx 5 -pady 5" );
+			cmd( "pack $wid.l $wid.format $wid.c $wid.fall -padx 5 -pady 5" );
 			
-			cmd( "okXhelpcancel $w b Delete { set itext \"\"; set choice 1 } { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
+			cmd( "okXhelpcancel $wid b Delete { set itext \"\"; set choice 1 } { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
 			
-			cmd( "bind $w.l.e <Return> { $w.b.ok invoke }" );
-			cmd( "bind $w.format.e.font <Return> { $w.b.ok invoke }" );
-			cmd( "bind $w.format.e.dim <Return> { $w.b.ok invoke }" );
-			cmd( "bind $w.format.e.sty <Return> { $w.b.ok invoke }" );
+			cmd( "bind $wid.l.e <Return> { $wid.b.ok invoke }" );
+			cmd( "bind $wid.format.e.font <Return> { $wid.b.ok invoke }" );
+			cmd( "bind $wid.format.e.dim <Return> { $wid.b.ok invoke }" );
+			cmd( "bind $wid.format.e.sty <Return> { $wid.b.ok invoke }" );
 			
-			cmd( "showtop $w current" );
-			cmd( "focus $w.l.e" );
-			cmd( "$w.l.e selection range 0 end" );
+			cmd( "showtop $wid current" );
+			cmd( "focus $wid.l.e" );
+			cmd( "$wid.l.e selection range 0 end" );
 			
 			*choice = 0;
 			while ( ! *choice )
@@ -2542,7 +2542,7 @@ while ( true )
 					cmd( "$ccanvas itemconf text -fill $icolor" );
 			} 
 			
-			cmd( "destroytop $w" ); 
+			cmd( "destroytop $wid" ); 
 			
 			break;
 
@@ -2551,29 +2551,29 @@ while ( true )
 		case 27:
 			cmd( "set itext \"new text\"" );
 			
-			cmd( "set w $ccanvas.a" );
-			cmd( "newtop $w \"New Labels\" { set choice 2 } $ccanvas" );
-			cmd( "wm geometry $w +$LX+$LY" );
+			cmd( "set wid $ccanvas.a" );
+			cmd( "newtop $wid \"New Labels\" { set choice 2 } $ccanvas" );
+			cmd( "wm geometry $wid +$LX+$LY" );
 			
-			cmd( "frame $w.l" );
-			cmd( "label $w.l.t -text \"New label\"" );
-			cmd( "entry $w.l.e -textvariable itext -width 30 -justify center" );
-			cmd( "pack $w.l.t $w.l.e" );
-			cmd( "pack $w.l -padx 5 -pady 5" );
+			cmd( "frame $wid.l" );
+			cmd( "label $wid.l.t -text \"New label\"" );
+			cmd( "entry $wid.l.e -textvariable itext -width 30 -justify center" );
+			cmd( "pack $wid.l.t $wid.l.e" );
+			cmd( "pack $wid.l -padx 5 -pady 5" );
 			
-			cmd( "okhelpcancel $w b { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
+			cmd( "okhelpcancel $wid b { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
 			
-			cmd( "bind $w.l.e <Return> { $w.b.ok invoke}" );
+			cmd( "bind $wid.l.e <Return> { $wid.b.ok invoke}" );
 			
-			cmd( "showtop $w current" );
-			cmd( "focus $w.l.e" );
-			cmd( "$w.l.e selection range 0 end" );
+			cmd( "showtop $wid current" );
+			cmd( "focus $wid.l.e" );
+			cmd( "$wid.l.e selection range 0 end" );
 			
 			*choice = 0;
 			while ( ! *choice )
 				Tcl_DoOneEvent( 0 );
 			
-			cmd( "destroytop $w" ); 
+			cmd( "destroytop $wid" ); 
 			
 			if ( *choice == 1 )
 				cmd( "$ccanvas create text $hereX $hereY -text \"$itext\" -fill black -font $fontP -tags { text draw }" );
@@ -2594,52 +2594,52 @@ while ( true )
 						set iarrow [ $ccanvas itemcget $cline -arrow ]; \
 						set idash [ $ccanvas itemcget $cline -dash ] \
 					}" );
-			cmd( "set icolor [$ccanvas itemcget $cline -fill ]" );
+			cmd( "set icolor [ $ccanvas itemcget $cline -fill ]" );
 			cmd( "set widthall 0" );
 			cmd( "set colorall 0" );
 			
-			cmd( "set w $ccanvas.a" );
-			cmd( "newtop $w \"Edit Line\" { set choice 2 } $ccanvas" );
-			cmd( "wm geometry $w +$LX+$LY" );
+			cmd( "set wid $ccanvas.a" );
+			cmd( "newtop $wid \"Edit Line\" { set choice 2 } $ccanvas" );
+			cmd( "wm geometry $wid +$LX+$LY" );
 			
-			cmd( "frame $w.l" );
-			cmd( "label $w.l.t -text \"Width\"" );
-			cmd( "entry $w.l.e -textvariable iwidth -width 5 -justify center -state disabled -validate focusout -vcmd { if [ string is double -strict %%P ] { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invcmd { bell }" );
-			cmd( "pack $w.l.t $w.l.e -padx 2 -side left" );
+			cmd( "frame $wid.l" );
+			cmd( "label $wid.l.t -text \"Width\"" );
+			cmd( "entry $wid.l.e -textvariable iwidth -width 5 -justify center -state disabled -validate focusout -vcmd { if [ string is double -strict %%P ] { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invcmd { bell }" );
+			cmd( "pack $wid.l.t $wid.l.e -padx 2 -side left" );
 			
-			cmd( "frame $w.c" );
-			cmd( "label $w.c.l -text \"Color\"" );
-			cmd( "button $w.c.color -width 5 -text Set -foreground white -background $icolor -command { set app [ tk_chooseColor -parent $w -title \"Line Color\" -initialcolor $icolor ]; if { $app != \"\" } { set icolor $app }; $w.c.color configure -background $icolor }" );
-			cmd( "label $w.c.t -text \"   Dash pattern\"" );
-			cmd( "ttk::combobox $w.c.e -textvariable idash -values [ list \"\" \". \" \"- \" \"-.\" \"-..\" ] -width 3 -justify center -state disabled" ); 
-			cmd( "pack $w.c.l $w.c.color $w.c.t $w.c.e -padx 2 -side left" );
+			cmd( "frame $wid.c" );
+			cmd( "label $wid.c.l -text \"Color\"" );
+			cmd( "button $wid.c.color -width 5 -text Set -foreground white -background $icolor -command { set app [ tk_chooseColor -parent $wid -title \"Line Color\" -initialcolor $icolor ]; if { $app != \"\" } { set icolor $app }; $wid.c.color configure -background $icolor }" );
+			cmd( "label $wid.c.t -text \"   Dash pattern\"" );
+			cmd( "ttk::combobox $wid.c.e -textvariable idash -values [ list \"\" \". \" \"- \" \"-.\" \"-..\" ] -width 3 -justify center -state disabled" ); 
+			cmd( "pack $wid.c.l $wid.c.color $wid.c.t $wid.c.e -padx 2 -side left" );
 			
-			cmd( "frame $w.d" );
-			cmd( "label $w.d.t -text \"Line-end arrow( s)\"" );
-			cmd( "ttk::combobox $w.d.e -textvariable iarrow -values [ list none first last both ] -width 7 -state disabled" );
-			cmd( "pack $w.d.t $w.d.e -padx 2 -side left" );
+			cmd( "frame $wid.d" );
+			cmd( "label $wid.d.t -text \"Line-end arrow( s)\"" );
+			cmd( "ttk::combobox $wid.d.e -textvariable iarrow -values [ list none first last both ] -width 7 -state disabled" );
+			cmd( "pack $wid.d.t $wid.d.e -padx 2 -side left" );
 			
-			cmd( "frame $w.fall" );
-			cmd( "checkbutton $w.fall.font -text \"Apply width to all line items\" -variable widthall -state disabled" );
-			cmd( "checkbutton $w.fall.color -text \"Apply color to all line items\" -variable colorall" );
-			cmd( "pack $w.fall.font $w.fall.color" );
+			cmd( "frame $wid.fall" );
+			cmd( "checkbutton $wid.fall.font -text \"Apply width to all line items\" -variable widthall -state disabled" );
+			cmd( "checkbutton $wid.fall.color -text \"Apply color to all line items\" -variable colorall" );
+			cmd( "pack $wid.fall.font $wid.fall.color" );
 			
-			cmd( "pack $w.l $w.c $w.d $w.fall -padx 5 -pady 5" );
+			cmd( "pack $wid.l $wid.c $wid.d $wid.fall -padx 5 -pady 5" );
 			
-			cmd( "okXhelpcancel $w b Delete { set iwidth 0; set choice 1 } { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
+			cmd( "okXhelpcancel $wid b Delete { set iwidth 0; set choice 1 } { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
 			
-			cmd( "bind $w.l.e <Return> { $w.b.ok invoke }" );
-			cmd( "bind $w.c.e <Return> { $w.b.ok invoke }" );
-			cmd( "bind $w.d.e <Return> { $w.b.ok invoke }" );
+			cmd( "bind $wid.l.e <Return> { $wid.b.ok invoke }" );
+			cmd( "bind $wid.c.e <Return> { $wid.b.ok invoke }" );
+			cmd( "bind $wid.d.e <Return> { $wid.b.ok invoke }" );
 			
-			cmd( "showtop $w current" );
-			cmd( "focus $w.l.e" );
-			cmd( "$w.l.e selection range 0 end" );
+			cmd( "showtop $wid current" );
+			cmd( "focus $wid.l.e" );
+			cmd( "$wid.l.e selection range 0 end" );
 		 
 			// enable most options for non-dotted lines
-			cmd( "if { ! $dots } { $w.l.e  configure -state normal; $w.c.e  configure -state normal; $w.fall.font  configure -state normal }" );
+			cmd( "if { ! $dots } { $wid.l.e  configure -state normal; $wid.c.e  configure -state normal; $wid.fall.font  configure -state normal }" );
 			// enable dashes & arrows for drawing lines only
-			cmd( "if $draw { $w.d.e  configure -state normal }" );
+			cmd( "if $draw { $wid.d.e  configure -state normal }" );
 
 			*choice = 0;
 			while ( ! *choice )
@@ -2671,7 +2671,7 @@ while ( true )
 					cmd( "$ccanvas itemconf line -fill $icolor" );
 			} 
 			
-			cmd( "destroytop $w" ); 
+			cmd( "destroytop $wid" ); 
 			
 			break;
 
@@ -2749,41 +2749,41 @@ while ( true )
 		// Edit bar
 		case 42:
 			cmd( "set iwidth [ $ccanvas itemcget current -width ]" );
-			cmd( "set icolor1 [$ccanvas itemcget current -outline ]" );
-			cmd( "set icolor2 [$ccanvas itemcget current -fill ]" );
+			cmd( "set icolor1 [ $ccanvas itemcget current -outline ]" );
+			cmd( "set icolor2 [ $ccanvas itemcget current -fill ]" );
 			cmd( "set widthall 0" );
 			cmd( "set colorall 0" );
 			
-			cmd( "set w $ccanvas.a" );
-			cmd( "newtop $w \"Edit Bar\" { set choice 2 } $ccanvas" );
-			cmd( "wm geometry $w +$LX+$LY" );
+			cmd( "set wid $ccanvas.a" );
+			cmd( "newtop $wid \"Edit Bar\" { set choice 2 } $ccanvas" );
+			cmd( "wm geometry $wid +$LX+$LY" );
 			
-			cmd( "frame $w.c" );
-			cmd( "label $w.c.l -text \"Fill color\"" );
-			cmd( "button $w.c.color -width 5 -text Set -foreground white -background $icolor2 -command { set app [ tk_chooseColor -parent $w -title \"Fill Color\" -initialcolor $icolor2 ]; if { $app != \"\" } { set icolor2 $app }; $w.c.color configure -background $icolor2 }" );
-			cmd( "pack $w.c.l $w.c.color -padx 2 -side left" );
+			cmd( "frame $wid.c" );
+			cmd( "label $wid.c.l -text \"Fill color\"" );
+			cmd( "button $wid.c.color -width 5 -text Set -foreground white -background $icolor2 -command { set app [ tk_chooseColor -parent $wid -title \"Fill Color\" -initialcolor $icolor2 ]; if { $app != \"\" } { set icolor2 $app }; $wid.c.color configure -background $icolor2 }" );
+			cmd( "pack $wid.c.l $wid.c.color -padx 2 -side left" );
 			
-			cmd( "frame $w.l" );
-			cmd( "label $w.l.t -text \"Outline width\"" );
-			cmd( "entry $w.l.e -textvariable iwidth -width 5 -justify center -validate focusout -vcmd { if [ string is double -strict %%P ] { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invcmd { bell }" );
-			cmd( "label $w.l.l -text \" color\"" );
-			cmd( "button $w.l.color -width 5 -text Set -foreground white -background $icolor1 -command { set app [ tk_chooseColor -parent $w -title \"Outline Color\" -initialcolor $icolor1 ]; if { $app != \"\" } { set icolor1 $app }; $w.l.color configure -background $icolor1 }" );
-			cmd( "pack $w.l.t $w.l.e $w.l.l $w.l.color -padx 2 -side left" );
+			cmd( "frame $wid.l" );
+			cmd( "label $wid.l.t -text \"Outline width\"" );
+			cmd( "entry $wid.l.e -textvariable iwidth -width 5 -justify center -validate focusout -vcmd { if [ string is double -strict %%P ] { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invcmd { bell }" );
+			cmd( "label $wid.l.l -text \" color\"" );
+			cmd( "button $wid.l.color -width 5 -text Set -foreground white -background $icolor1 -command { set app [ tk_chooseColor -parent $wid -title \"Outline Color\" -initialcolor $icolor1 ]; if { $app != \"\" } { set icolor1 $app }; $wid.l.color configure -background $icolor1 }" );
+			cmd( "pack $wid.l.t $wid.l.e $wid.l.l $wid.l.color -padx 2 -side left" );
 			
-			cmd( "frame $w.fall" );
-			cmd( "checkbutton $w.fall.color -text \"Apply fill to all bar items\" -variable colorall" );
-			cmd( "checkbutton $w.fall.font -text \"Apply outline to all bar items\" -variable widthall" );
-			cmd( "pack $w.fall.color $w.fall.font" );
+			cmd( "frame $wid.fall" );
+			cmd( "checkbutton $wid.fall.color -text \"Apply fill to all bar items\" -variable colorall" );
+			cmd( "checkbutton $wid.fall.font -text \"Apply outline to all bar items\" -variable widthall" );
+			cmd( "pack $wid.fall.color $wid.fall.font" );
 			
-			cmd( "pack $w.c $w.l $w.fall -padx 5 -pady 5" );
+			cmd( "pack $wid.c $wid.l $wid.fall -padx 5 -pady 5" );
 			
-			cmd( "okXhelpcancel $w b Delete { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
+			cmd( "okXhelpcancel $wid b Delete { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
 			
-			cmd( "bind $w.l.e <Return> { $w.b.ok invoke }" );
+			cmd( "bind $wid.l.e <Return> { $wid.b.ok invoke }" );
 			
-			cmd( "showtop $w current" );
-			cmd( "focus $w.l.e" );
-			cmd( "$w.l.e selection range 0 end" );
+			cmd( "showtop $wid current" );
+			cmd( "focus $wid.l.e" );
+			cmd( "$wid.l.e selection range 0 end" );
 			
 			*choice = 0;
 			while ( ! *choice )
@@ -2810,7 +2810,7 @@ while ( true )
 			if ( *choice == 3 )
 				cmd( "$ccanvas delete current" );
 			
-			cmd( "destroytop $w" ); 
+			cmd( "destroytop $wid" ); 
 			
 			break;
 
