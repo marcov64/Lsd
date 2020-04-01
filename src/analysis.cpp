@@ -100,6 +100,7 @@ int plot_l[ MAX_PLOTS ];
 int plot_nl[ MAX_PLOTS ];
 int plot_w[ MAX_PLOTS ];
 int res;
+int showInit;
 int time_cross;
 int type_plot[ MAX_PLOTS ];
 int var_num;
@@ -140,8 +141,10 @@ cover_browser( "Analysis of Results...", "Analysis of Results window is open", "
 Tcl_LinkVar( inter, "cur_plot", ( char * ) &cur_plot, TCL_LINK_INT );
 Tcl_LinkVar( inter, "nv", ( char * ) &nv, TCL_LINK_INT );
 Tcl_LinkVar( inter, "avgSmpl", ( char * ) &avgSmpl, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "showInit", ( char * ) &showInit, TCL_LINK_BOOLEAN );
 Tcl_LinkVar( inter, "auto", ( char * ) &autom, TCL_LINK_BOOLEAN );
 Tcl_LinkVar( inter, "auto_x", ( char * ) &autom_x, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "firstc", ( char * ) &first_c, TCL_LINK_INT );
 Tcl_LinkVar( inter, "minc", ( char * ) &min_c, TCL_LINK_INT );
 Tcl_LinkVar( inter, "maxc", ( char * ) &max_c, TCL_LINK_INT );
 Tcl_LinkVar( inter, "miny", ( char * ) &miny, TCL_LINK_DOUBLE );
@@ -178,6 +181,7 @@ cmd( "set point_size $pointsizeP" );
 cmd( "set line_point $linemodeP" );
 cmd( "set pdigits $pdigitsP" );
 cmd( "set avgSmpl $avgSmplP" );
+cmd( "set showInit $showInitP" );
 cmd( "set list_times [ list ]" );
 cmd( "set gpdgrid3d \"$gnuplotGrid3D\"" );
 cmd( "set gpoptions \"$gnuplotOptions\"" );
@@ -189,21 +193,22 @@ cmd( "menu .da.m -tearoff 0" );
 cmd( "set w .da.m.exit" );
 cmd( ".da.m add cascade -label Exit -menu $w -underline 0" );
 cmd( "menu $w -tearoff 0" );
-cmd( "$w add command -label \"Quit and Return to Browser\" -command {set choice 2} -underline 0 -accelerator Esc" );
+cmd( "$w add command -label \"Quit and Return to Browser\" -command { set choice 2 } -underline 0 -accelerator Esc" );
 
 cmd( "set w .da.m.gp" );
 cmd( ".da.m add cascade -label Gnuplot -menu $w -underline 0" );
 cmd( "menu $w -tearoff 0" );
-cmd( "$w add command -label \"Open...\" -command {set choice 4} -underline 5 -accelerator Ctrl+G" );
-cmd( "$w add command -label \"Options...\" -command {set choice 37} -underline 8" );
+cmd( "$w add command -label \"Open...\" -command { set choice 4 } -underline 5 -accelerator Ctrl+G" );
+cmd( "$w add command -label \"Options...\" -command { set choice 37 } -underline 8" );
 
 cmd( "set w .da.m.opt" );
 cmd( ".da.m add cascade -label Options -menu $w -underline 0" );
 cmd( "menu $w -tearoff 0" );
-cmd( "$w add command -label \"Colors...\" -command {set choice 21} -underline 0" );
-cmd( "$w add command -label \"Plot Parameters...\" -command {set choice 22} -underline 0" );
-cmd( "$w add command -label \"Lattice Parameters...\" -command {set choice 44} -underline 0" );
+cmd( "$w add command -label \"Colors...\" -command { set choice 21 } -underline 0" );
+cmd( "$w add command -label \"Plot Parameters...\" -command { set choice 22 } -underline 0" );
+cmd( "$w add command -label \"Lattice Parameters...\" -command { set choice 44 } -underline 0" );
 cmd( "$w add checkbutton -label \"Average Y Values\" -variable avgSmpl -underline 8" );
+cmd( "$w add checkbutton -label \"Show Initial Values\" -variable showInit -underline 5 -command { if { $showInit } { set a 0 } { set a 1 }; set minc [ expr max( $firstc, $a ) ]; write_any .da.f.h.v.ft.from.mnc $minc }" );
 
 cmd( "set w .da.m.help" );
 cmd( "menu $w -tearoff 0" );
@@ -246,7 +251,7 @@ cmd( "pack $f.v $f.v_scroll -side left -fill y" );
 cmd( "mouse_wheel $f.v" );
 cmd( "bind $f.v <Return> {.da.vars.b.in invoke}" );
 cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.lb.v <Return> }" );
-cmd( "bind $f.v <Button-2> {.da.vars.lb.v selection clear 0 end;.da.vars.lb.v selection set @%%x,%%y; set res [selection get]; set choice 30}" );
+cmd( "bind $f.v <Button-2> {.da.vars.lb.v selection clear 0 end;.da.vars.lb.v selection set @%%x,%%y; set res [ selection get ]; set choice 30}" );
 cmd( "bind $f.v <Button-3> { event generate .da.vars.lb.v <Button-2> -x %%x -y %%y }" );
 cmd( "bind $f.v <KeyPress-space> { set res [ .da.vars.lb.v get active ]; set choice 30 }; bind $f.v <KeyPress-space> { set res [ .da.vars.lb.v get active ]; set choice 30 }" );
 
@@ -302,7 +307,7 @@ if ( actual_steps > 0 )
 {
 	insert_data_mem( root, &num_var );
 	
-	min_c = max( first_c, 1 );
+	min_c = max( first_c, showInit ? 0 : 1 );
 	max_c = num_c;
 }
 
@@ -592,6 +597,7 @@ while ( true )
 				
 			Tcl_UnlinkVar( inter, "auto" );
 			Tcl_UnlinkVar( inter, "auto_x" );
+			Tcl_UnlinkVar( inter, "firstc" );
 			Tcl_UnlinkVar( inter, "minc" );
 			Tcl_UnlinkVar( inter, "maxc" );
 			Tcl_UnlinkVar( inter, "miny" );
@@ -610,6 +616,7 @@ while ( true )
 			Tcl_UnlinkVar( inter, "cur_plot" );
 			Tcl_UnlinkVar( inter, "nv" );
 			Tcl_UnlinkVar( inter, "avgSmpl" );
+			Tcl_UnlinkVar( inter, "showInit" );
 
 			cmd( "catch { set a [ glob -nocomplain plotxy_* ] }" ); // remove directories
 			cmd( "foreach b $a { catch { file delete -force $b } }" );
@@ -924,7 +931,7 @@ while ( true )
 			cmd( "newtop .da.a \"Select Series\" { set choice 2 } .da" );
 
 			cmd( "frame .da.a.tit" );
-			cmd( "label .da.a.tit.l -text \"Select series with label\"" );
+			cmd( "label .da.a.tit.l -text \"Select series with name\"" );
 			cmd( "label .da.a.tit.s -text \"$b\" -foreground red" );
 			cmd( "pack .da.a.tit.l .da.a.tit.s" );
 			cmd( "frame .da.a.q -relief groove -bd 2" );
@@ -958,7 +965,7 @@ while ( true )
 			cmd( "bind .da.a.q.f2.s <Return> {focus .da.a.q.f2.f.e; .da.a.q.f2.f.e selection range 0 end}" );
 			cmd( "pack .da.a.q.f2.s -anchor w" );
 			cmd( "frame .da.a.q.f2.f" );
-			cmd( "label .da.a.q.f2.f.l -text \"Label\"" );
+			cmd( "label .da.a.q.f2.f.l -text \"Name\"" );
 			cmd( "entry .da.a.q.f2.f.e -width 17 -textvariable svar -justify center -state disabled" );
 			cmd( "bind .da.a.q.f2.f.e <KeyRelease> { if { %%N < 256 && [ info exists DaModElem ] } { set bb1 [ .da.a.q.f2.f.e index insert ]; set bc1 [ .da.a.q.f2.f.e get ]; set bf1 [ lsearch -glob $DaModElem $bc1* ]; if { $bf1  != -1 } { set bd1 [ lindex $DaModElem $bf1 ]; .da.a.q.f2.f.e delete 0 end; .da.a.q.f2.f.e insert 0 $bd1; .da.a.q.f2.f.e index $bb1; .da.a.q.f2.f.e selection range $bb1 end } } }" );
 			cmd( "bind .da.a.q.f2.f.e <Return> {focus .da.a.c.v.c.e; .da.a.c.v.c.e selection range 0 end}" );
@@ -1237,7 +1244,7 @@ while ( true )
 			cmd( "newtop .da.a \"Unselect Series\" { set choice 2 } .da" );
 
 			cmd( "frame .da.a.tit" );
-			cmd( "label .da.a.tit.l -text \"Unselect series with label\"" );
+			cmd( "label .da.a.tit.l -text \"Unselect series with name\"" );
 			cmd( "label .da.a.tit.s -text \"$b\" -foreground red" );
 			cmd( "pack .da.a.tit.l .da.a.tit.s" );
 			cmd( "frame .da.a.q -relief groove -bd 2" );
@@ -1271,7 +1278,7 @@ while ( true )
 			cmd( "bind .da.a.q.f2.s <Return> {focus .da.a.q.f2.f.e; .da.a.q.f2.f.e selection range 0 end}" );
 			cmd( "pack .da.a.q.f2.s -anchor w" );
 			cmd( "frame .da.a.q.f2.f" );
-			cmd( "label .da.a.q.f2.f.l -text \"Label\"" );
+			cmd( "label .da.a.q.f2.f.l -text \"Name\"" );
 			cmd( "entry .da.a.q.f2.f.e -width 17 -textvariable svar -justify center -state disabled" );
 			cmd( "bind .da.a.q.f2.f.e <KeyRelease> { if { %%N < 256 && [ info exists DaModElem ] } { set bb1 [ .da.a.q.f2.f.e index insert ]; set bc1 [ .da.a.q.f2.f.e get ]; set bf1 [ lsearch -glob $DaModElem $bc1* ]; if { $bf1  != -1 } { set bd1 [ lindex $DaModElem $bf1 ]; .da.a.q.f2.f.e delete 0 end; .da.a.q.f2.f.e insert 0 $bd1; .da.a.q.f2.f.e index $bb1; .da.a.q.f2.f.e selection range $bb1 end } } }" );
 			cmd( "bind .da.a.q.f2.f.e <Return> {focus .da.a.c.v.c.e; .da.a.c.v.c.e selection range 0 end}" );
@@ -2477,11 +2484,11 @@ while ( true )
 			cmd( "set colorall 0" );
 			
 			cmd( "set wid $ccanvas.a" );
-			cmd( "newtop $wid \"Edit Label\" { set choice 2 } $ccanvas" );
+			cmd( "newtop $wid \"Edit Text\" { set choice 2 } $ccanvas" );
 			cmd( "wm geometry $wid +$LX+$LY" );
 			
 			cmd( "frame $wid.l" );
-			cmd( "label $wid.l.t -text \"New label\"" );
+			cmd( "label $wid.l.t -text \"New text\"" );
 			cmd( "entry $wid.l.e -textvariable itext -width 30 -justify center" );
 			cmd( "pack $wid.l.t $wid.l.e" );
 			
@@ -2552,11 +2559,11 @@ while ( true )
 			cmd( "set itext \"new text\"" );
 			
 			cmd( "set wid $ccanvas.a" );
-			cmd( "newtop $wid \"New Labels\" { set choice 2 } $ccanvas" );
+			cmd( "newtop $wid \"New Text\" { set choice 2 } $ccanvas" );
 			cmd( "wm geometry $wid +$LX+$LY" );
 			
 			cmd( "frame $wid.l" );
-			cmd( "label $wid.l.t -text \"New label\"" );
+			cmd( "label $wid.l.t -text \"New text\"" );
 			cmd( "entry $wid.l.e -textvariable itext -width 30 -justify center" );
 			cmd( "pack $wid.l.t $wid.l.e" );
 			cmd( "pack $wid.l -padx 5 -pady 5" );
@@ -2866,7 +2873,7 @@ void update_bounds( void )
 	}
 	
 	if ( min_c < first_c )
-		min_c = max( first_c, 1 );
+		min_c = max( first_c, showInit ? 0 : 1 );
 	
 	if ( max_c <= min_c )
 	{
@@ -2918,7 +2925,7 @@ void plot_tseries( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = max( first_c, 1 );
+		min_c = max( first_c, showInit ? 0 : 1 );
 		max_c = num_c;
 	}
 
@@ -2958,10 +2965,10 @@ void plot_tseries( int *choice )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = max( start[ i ], 1 );
+				min_c = max_c = max( start[ i ], showInit ? 0 : 1 );
 
 			if ( start[ i ] < min_c )
-				min_c = max( start[ i ], 1 );
+				min_c = max( start[ i ], showInit ? 0 : 1 );
 			
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
@@ -3112,7 +3119,7 @@ void plot_cross( int *choice )
 	
 	if ( autom_x )
 	{
-		min_c = max( first_c, 1 );
+		min_c = max( first_c, showInit ? 0 : 1 );
 		max_c = num_c;
 	}
 
@@ -3867,7 +3874,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	}
 
 	// read data lines
-	for ( j = 0; j < new_c; ++j )
+	for ( first_c = 1, j = 0; j < new_c; ++j )
 	{
 		if ( ! gz )
 			fgets( linbuf, linsiz, f );		// buffers one entire line
@@ -3892,8 +3899,12 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 			if ( ! strcmp( tok, nonavail ) )	// it's a non-available observation
 				vs[ i ].data[ j - vs[ i ].start ] = NAN;
 			else
+			{
 				sscanf( tok, "%lf", &( vs[ i ].data[ j - vs[ i ].start ] ) );
-			
+				
+				if ( j == 0 )				// at least one lagged variable?
+					first_c = 0;
+			}
 			tok = strtok( NULL, "\t" );			// get next token, if any
 		}
 	}
@@ -3904,7 +3915,8 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		num_c = new_c;
 	if ( new_c > max_c )
 		max_c = new_c; 
-	min_c = 1;
+	
+	min_c = max( first_c, showInit ? 0 : 1 );
 
 	plog( " Done" );
 
@@ -3945,7 +3957,7 @@ void statistics( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = max( first_c, 1 );
+		min_c = max( first_c, showInit ? 0 : 1 );
 		max_c = num_c;
 	}
 
@@ -4094,7 +4106,7 @@ void statistics_cross( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = max( first_c, 1 );
+		min_c = max( first_c, showInit ? 0 : 1 );
 		max_c = num_c;
 	}
 
@@ -4360,7 +4372,7 @@ void plot_gnu( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = max( first_c, 1 );
+		min_c = max( first_c, showInit ? 0 : 1 );
 		max_c = num_c;
 	}
 
@@ -4402,10 +4414,10 @@ void plot_gnu( int *choice )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = max( start[ i ], 1 );
+				min_c = max_c = max( start[ i ], showInit ? 0 : 1 );
 			
 			if ( start[ i ] < min_c )
-				min_c = max( start[ i ], 1 );
+				min_c = max( start[ i ], showInit ? 0 : 1 );
 			
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
@@ -4792,7 +4804,7 @@ void plot_cs_xy( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = max( first_c, 1 );
+		min_c = max( first_c, showInit ? 0 : 1 );
 		max_c = num_c;
 	}
 
@@ -4832,10 +4844,10 @@ void plot_cs_xy( int *choice )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = max( start[ i ], 1 );
+				min_c = max_c = max( start[ i ], showInit ? 0 : 1 );
 			
 			if ( start[ i ] < min_c )
-				min_c = max( start[ i ], 1 );
+				min_c = max( start[ i ], showInit ? 0 : 1 );
 			
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
@@ -5180,7 +5192,7 @@ void plot_phase_diagram( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = max( first_c, 1 );
+		min_c = max( first_c, showInit ? 0 : 1 );
 		max_c = num_c;
 	}
 
@@ -5219,10 +5231,10 @@ void plot_phase_diagram( int *choice )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = max( start[ i ], 1 );
+				min_c = max_c = max( start[ i ], showInit ? 0 : 1 );
 			
 			if ( start[ i ] < min_c )
-				min_c = max( start[ i ], 1 );
+				min_c = max( start[ i ], showInit ? 0 : 1 );
 			
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
@@ -5686,10 +5698,10 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "bind $p <Button-3> { event generate .da.f.new%d.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
 
 	// save plot info
-	type_plot[ n ] = GNUPLOT; //Gnuplot plot
-	plot_w[ n ] = hsize;	// plot width
-	plot_l[ n ] = vsize; 	//height of plot with labels
-	plot_nl[ n ] = vsize; 	//height of plot without labels   
+	type_plot[ n ] = GNUPLOT; 	// Gnuplot plot
+	plot_w[ n ] = hsize;		// plot width
+	plot_l[ n ] = vsize; 		// height of plot with labels
+	plot_nl[ n ] = vsize; 		// height of plot without labels   
 	 
 	*choice = 0;
 }
@@ -5843,10 +5855,10 @@ void plot_lattice( int *choice )
 		}
 		else
 		{
-			if ( min_c > max( start[ 0 ], 1 ) )
+			if ( min_c > max( start[ 0 ], showInit ? 0 : 1 ) )
 				first = min_c;
 			else
-				first = max( start[ 0 ], 1 );
+				first = max( start[ 0 ], showInit ? 0 : 1 );
 			
 			if ( max_c < end[ 0 ] )  
 				last = max_c;
@@ -6057,15 +6069,15 @@ void histograms( int *choice )
 
 	if ( autom_x || min_c >= max_c )
 	{
-		first = max( start, 1 );
+		first = max( start, showInit ? 0 : 1 );
 		last = end;
 	}
 	else
 	{
-		if ( min_c > max( start, 1 ) )
+		if ( min_c > max( start, showInit ? 0 : 1 ) )
 			first = min_c;
 		else
-			first = max( start, 1 );
+			first = max( start, showInit ? 0 : 1 );
 		
 		if ( max_c < end )  
 			last = max_c;
@@ -6288,7 +6300,7 @@ void histograms_cs( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = max( first_c, 1 );
+		min_c = max( first_c, showInit ? 0 : 1 );
 		max_c = num_c;
 	}
 
@@ -6599,7 +6611,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 		cmd( "set vname $basename$tailname" );
 
 		cmd( "frame .da.s.n" );
-		cmd( "label .da.s.n.lnv -text \"New series label\"" );
+		cmd( "label .da.s.n.lnv -text \"New series name\"" );
 		cmd( "entry .da.s.n.nv -width 30 -textvariable vname -justify center" );
 		cmd( "pack .da.s.n.lnv .da.s.n.nv" );
 
@@ -6710,7 +6722,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 
 	if ( autom_x )
 	{
-		min_c = max( first_c, 1 );
+		min_c = max( first_c, showInit ? 0 : 1 );
 		max_c = num_c;
 	}
 
@@ -6749,9 +6761,9 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 		for ( i = 0; i < sel_series; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = max( start[ i ], 1 );
+				min_c = max_c = max( start[ i ], showInit ? 0 : 1 );
 			if ( start[ i ] < min_c )
-				min_c = max( start[ i ], 1 );
+				min_c = max( start[ i ], showInit ? 0 : 1 );
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
@@ -7055,7 +7067,7 @@ void create_maverag( int *choice )
 
 	if ( autom_x )
 	{
-		min_c = max( first_c, 1 );
+		min_c = max( first_c, showInit ? 0 : 1 );
 		max_c = num_c;
 	}
 

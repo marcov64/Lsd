@@ -84,7 +84,8 @@ set vsizePxy	450	; # default plot (XY) vertical size in pixels
 set fontP		{ Helvetica 9 normal }; # default plot text font/size/mode
 set hticksP		3	; # number of horizontal plot legend ticks
 set vticksP		3	; # number of vertical plot legend ticks
-set avgSmplP	1	; # average Y values when multi-sampling (0=no/1:yes)
+set avgSmplP	1	; # average Y values when multi-sampling (0=no/1=yes)
+set showInitP	0	; # use initial values (t-1) in plots/data (0=no/1=yes)
 set smoothP		no	; # options are no, yes or raw
 set splstepsP 	3	; # number of spline segments when smoothP is raw
 
