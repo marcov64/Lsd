@@ -30,6 +30,7 @@ Must be the first variable in the list.
 */
 
 FAST;											// comment to show log/debug messages
+USE_ZERO_INSTANCE;								// enable zero-instance objects
 
 v[0] = v[1] = 0;								// island/known island counters
 v[2] = V( "pi" );								// island probability

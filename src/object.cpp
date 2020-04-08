@@ -957,9 +957,9 @@ variable *object::search_var_err( object *caller, char const *lab, bool no_searc
 
 		if ( no_zero_instance )
 		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab );
+			sprintf( msg, "all instances of the object containing '%s' were deleted", lab );
 			error_hard( msg, "last object instance deleted", 
-						"check your equation code to ensure at least one instance\nof any object is kept", 
+						"check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE", 
 						true );
 		}
 	}
