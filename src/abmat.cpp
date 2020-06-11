@@ -141,6 +141,7 @@ std::map <const char*, std::set<int> > m_abmat_conditions; //save conditioning f
 int i_abmat_varnames; //simple counter for up to 3 digits
 int abmat_series_saved;
 bool abmat_dynamic_factors_allowed;
+bool abmat_short_names;
 
 void abmat_init( )
 {
@@ -152,7 +153,15 @@ void abmat_init( )
   i_abmat_varnames = 0;
   abmat_series_saved = 0;
   abmat_dynamic_factors_allowed = false;
+  abmat_short_names = true;
   abmat_create_tree();
+}
+
+void abmat_use_long_names()
+{
+  abmat_short_names = false;
+  plog("\n(ABMAT) : Not shortening variable names.");
+  return;
 }
 
 void abmat_allow_dynamic_factors()
@@ -182,11 +191,15 @@ const char* lfact = "fact"; //factor
 const char* lpstat = "P_Static";
 const char* lpmic = "P_Micro";
 const char* lpmac = "P_Macro";
+const char* lfmic = "F_Micro";
+const char* lfmac = "F_Macro";
 const char* lpLSD = "P_LSD";
 
 const char* apar_stat = "PStat";
 const char* apar_mic = "PMicro";
 const char* apar_mac = "PMacro";
+const char* afin_mic = "FMicro";
+const char* afin_mac = "FMacro";
 const char* apar_LSD = "PLSD";
 
 const char* astat_n = "n";
@@ -270,16 +283,19 @@ const char* abmat_varname_convert( const char* lab)
   //check if exists, else create
   if (m_abmat_varnames.count(lab) == 0 ) {
     std::string s_short = std::string(lab);
+
+    if ( true == abmat_short_names ) {
     
-    if (s_short.length() > MAX_ABMAT_BASEVAR_LENGTH) {
-      s_short.resize(MAX_ABMAT_BASEVAR_LENGTH - 3); //drop last chars
-      s_short.append( std::to_string(i_abmat_varnames) );
-      
-      if (++i_abmat_varnames > 999) {
-        error_hard( __DEV_ERR_INFO__, "too many variables to be shortened",
-                    "If you need more than 1000, please contact the developer.",
-                    true );
-        return "";
+      if (s_short.length() > MAX_ABMAT_BASEVAR_LENGTH) {
+        s_short.resize(MAX_ABMAT_BASEVAR_LENGTH - 3); //drop last chars
+        s_short.append( std::to_string(i_abmat_varnames) );
+        
+        if (++i_abmat_varnames > 999) {
+          error_hard( __DEV_ERR_INFO__, "too many variables to be shortened",
+                      "If you need more than 1000, please contact the developer.",
+                      true );
+          return "";
+        }
       }
     }
     
@@ -337,31 +353,41 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
     case a_pLSD:
       varname.insert(0, "_");
       varname.insert(0, apar_LSD);
-      return varname;
+      break;
       
     case a_pstat:
       varname.insert(0, "_");
       varname.insert(0, apar_stat);
-      return varname;
+      break;
       
     case a_pmac:
       varname.insert(0, "_");
       varname.insert(0, apar_mac);
-      return varname;
+      break;
       
     case a_pmic:
       varname.insert(0, "_");
       varname.insert(0, apar_mic);
       break;
+
+    case a_fmac:
+      varname.insert(0, "_");
+      varname.insert(0, afin_mac);
+      break;
+      
+    case a_fmic:
+      varname.insert(0, "_");
+      varname.insert(0, afin_mic);
+      break;
       
     case a_macro:
-      return varname;//nothing to add ever
+      break;
       
       
     case a_comp:
       varname.append("_v_");
       varname.append( abmat_varname_convert(var2lab) );
-      return varname;
+      break;
       
     case a_micro:
       break;//nothing to add
@@ -369,6 +395,7 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
     case a_cond:
       varname.append("_c_");
       varname.append( abmat_varname_convert(var2lab) );
+      break;
       
     case a_fact: //factorial share info.
       if (!flag_fact_n) {
@@ -395,13 +422,14 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
   //Add stat info
   switch (stattype) {
     case a_pmic:
+    case a_fmic:
     case a_micro:
     case a_cond: {
         varname.append("_");
         varname.append(statname);
       }
       
-      return varname;
+      break;
       
     case a_fact:
       if (flag_fact_n) {
@@ -410,15 +438,25 @@ std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* 
       else {
         varname.append("_shr");    //share in 0,1
       }
-      
-      return varname;
-      
+      break;  
+
+    //nothing to add
+    case a_comp:
+    case a_fmac:    
+    case a_macro:
+    case a_pLSD:
+    case a_pmac:
+    case a_pstat:
+    break;
+
     default:
       error_hard( __DEV_ERR_INFO__, "defaulting should not happen (2)",
                   "contact the developer.",
                   true );
       return "";
   }
+
+  return varname;
 }
 
 
@@ -866,6 +904,16 @@ void abmat_add_par_macro(std::string varlab)
   abmat_add_object_intern(a_pmac, varlab.c_str(), "", std::set<int>());
 }
 
+void abmat_add_final_micro(std::string varlab)
+{
+  abmat_add_object_intern(a_fmic, varlab.c_str(), "", std::set<int>());
+}
+
+void abmat_add_final_macro(std::string varlab)
+{
+  abmat_add_object_intern(a_fmac, varlab.c_str(), "", std::set<int>());
+}
+
 
 /****************************************
     ABMAT_CREATE_TREE
@@ -907,6 +955,14 @@ void abmat_create_tree()
         
       case a_pmac:
         typeLab = lpmac;
+        break;
+
+      case a_fmic:
+        typeLab = lfmic;
+        break;
+        
+      case a_fmac:
+        typeLab = lfmac;
         break;
         
       case a_pLSD:
@@ -959,6 +1015,10 @@ void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2la
   //check if the abmat object associated to the variable
   //exists. Note: It may be included in multiple categories
   //so we check on category level.
+
+  #ifdef NO_WINDOW
+  no_res = true; //never save results in no window mode IF ABMAT IS ACTIVE.
+  #endif
   
   //check that the object added is not a function.
   variable* target1 = root->search_var_global(root, varlab);
@@ -1039,6 +1099,14 @@ void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2la
       
     case a_pmac:
       typeLab = lpmac;
+      break;
+    
+    case a_fmic:
+        typeLab = lfmic;
+        break;
+        
+    case a_fmac:
+      typeLab = lfmac;
       break;
       
     default: //checked already
@@ -1192,6 +1260,7 @@ void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2la
       
     //each cond is also treated as non-cond micro. pmic is considered the same except for saving data.
     case a_pmic:
+    case a_fmic:
     case a_micro:
       if (var1_added) {
         auto stats_template = abmat_stats( ); //retrieve map of stats
@@ -1214,6 +1283,7 @@ void abmat_add_object_intern(Tabmat type, char const* varlab, char const* var2la
       
     case a_pstat:
     case a_pmac:
+    case a_fmac:
     case a_macro:
       if (var1_added) {
         //a macro object holds a variable with the same name, maybe shortened.
@@ -1611,16 +1681,31 @@ void abmat_scalars(variable* vVar, Tabmat type, ms_statsT& scalars)
         break;
         
       case a_pmac:
-      case a_pmic: {
-          auto vname2 = abmat_varname_tot(vVar->label, i);
-          scalars.emplace(vname2, data[0]);
-          plog("\nAdded variable ");
-          plog(vname2.c_str());
-          plog(" with value ");
-          plog(std::to_string(data[0]).c_str());
-          //auto vname = abmat_varname_tot(vVar->label, i, stat.first);
-          
-        }
+      case a_pmic: 
+      {
+        auto vname2 = abmat_varname_tot(vVar->label, i);          
+        scalars.emplace(vname2, data.front());
+        plog("\nAdded variable ");
+        plog(vname2.c_str());
+        plog(" with value ");
+        plog(std::to_string(data.front()).c_str());
+        //auto vname = abmat_varname_tot(vVar->label, i, stat.first);
+        
+      }
+      break;
+
+      case a_fmac:
+      case a_fmic: 
+      {
+        auto vname2 = abmat_varname_tot(vVar->label, i);          
+        scalars.emplace(vname2, data.back());
+        plog("\nAdded variable ");
+        plog(vname2.c_str());
+        plog(" with value ");
+        plog(std::to_string(data.back()).c_str());
+        //auto vname = abmat_varname_tot(vVar->label, i, stat.first);
+        
+      }
         
         return;
         
@@ -1718,6 +1803,12 @@ Tabmat abmat_toVar_type(object* toVar)
   else if ( strcmp(toVar->label, lpmac) == 0 ) {
     type = a_pmac;
   }
+  else if ( strcmp(toVar->label, lfmic) == 0 ) {
+    type = a_fmic;
+  }
+  else if ( strcmp(toVar->label, lfmac) == 0 ) {
+    type = a_fmac;
+  }
   else if ( strcmp(toVar->label, lpLSD) == 0 ) {
     type = a_pLSD;
   }
@@ -1753,6 +1844,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
       }
       
     case a_pmic:  //track, although only 1. item at each interval is relevant
+    case a_fmic:
     case a_micro: {
         std::vector<double> data = root->gatherData_all(oVar->label); //calls also with NULL
         auto stats_template = abmat_stats( data ); //retrieve map of stats
@@ -1773,6 +1865,7 @@ void abmat_update_variable(object* oVar, Tabmat type)
       
       
     case a_pmac:    //track, although only 1. item at each interval is relevant
+    case a_fmac:
     case a_macro: {
         //simply copy the current data.
         double val = root->cal(NULL, oVar->label, 0);

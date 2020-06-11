@@ -1,10 +1,10 @@
 # CORRECTIONS: need to reset these variables to allow for no window version
-CC_NW=$(CC_CROSS)g++
+CC_NW=$(CC)
 SRC_DIR=$(SRC)/
 LSDROOT=.
 INCLUDE=-I$(PATH_HEADER) -I$(SRC)
 LIBS_NW=$(LIBS) -lpthread
-SWITCH_CC_NW=$(GLOBAL_CC) $(SWITCH_CC) -O3
+SWITCH_CC_NW=$(GLOBAL_CC) $(SWITCH_CC) -O3 -static-libstdc++ -static-libgcc
 TARGET_NW=lsd_gnuNW
 
 #Link all together
@@ -85,13 +85,13 @@ $(SRC_DIR)abmat.cpp $(SRC_DIR)decl.h
 $(FUN).obj: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)choose.h \
 $(SRC_DIR)decl.h $(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(SRC_DIR)fun_head_fast.h
 
-	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)abmat.cpp -o $(SRC_DIR)abmat.obj $(INCLUDE)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)abmat.cpp -o $(SRC_DIR)abmat.obj
 
 
 $(FUN).obj: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)choose.h \
 $(SRC_DIR)decl.h $(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(SRC_DIR)fun_head_fast.h
 
-	$(CC_NW) $(SWITCH_CC_NW) -c $(FUN).cpp -o $(FUN).obj $(INCLUDE)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(FUN).cpp -o $(FUN).obj
 
 
 clean:

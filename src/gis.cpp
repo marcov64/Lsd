@@ -99,8 +99,10 @@ void object::set_distance_type( char type )
   }
   
   position->map->distance_type = type;
-  sprintf( gismsg, "\nSwitched distance to type '%c' (c: Chebyshev, e: Euclidean, m: Manhattan)", type);
-  plog(gismsg);
+  if (this == root){ //only print for root.
+    sprintf( gismsg, "\nSwitched distance for root to type '%c' (c: Chebyshev, e: Euclidean, m: Manhattan)", type);
+    plog(gismsg);
+  }
   return;
 }
 
@@ -1721,6 +1723,35 @@ object* object::search_at_position(char const lab[], bool single, bool grid)
   { return search_at_position(lab, trunc(position->x), trunc(position->y), single); }
 }
 
+//use position of this to look at map of where.
+object* object::search_at_position(char const lab[], bool single, bool grid, object* where)
+{
+#ifndef NO_POINTER_CHECK
+
+  if (ptr_map() == NULL) {
+    sprintf( gismsg, "failure in search_at_position() for object '%s'", label );
+    error_hard( gismsg, "the object is not registered in any map",
+                "check your code to prevent this situation" );
+    return NULL;
+  }
+  
+    if (where->ptr_map() == NULL) {
+    sprintf( gismsg, "failure in search_at_position() for where object '%s'", label );
+    error_hard( gismsg, "the object is not registered in any map",
+                "check your code to prevent this situation" );
+    return NULL;
+  }
+  
+#endif
+  
+  if (grid == false)
+  { return where->search_at_position(lab, position->x, position->y, single); }
+  else
+  { return where->search_at_position(lab, trunc(position->x), trunc(position->y), single); }
+}
+
+
+
 //  search_at_neighbour_position
 //  Find an object at a position reachable by moving one step in the direction
 //  if single is true, check that it is the only one
@@ -1742,7 +1773,7 @@ object* object::search_at_neighbour_position(char const lab[], int direction, bo
   double x_inOut = position->x;
   double y_inOut = position->y;
   
-  if (get_move_position(ptr_map(), direction, x_inOut, y_inOut) == false) {
+  if (get_move_position(ptr_map(), direction, x_inOut, y_inOut, true) == false) {
     sprintf( gismsg, "failure in search_at_neighbour_position() for object '%s' and direction %i", label, direction );
     error_hard( gismsg, "the move is not allowed",
                 "check your code to prevent this situation" );
@@ -1879,46 +1910,53 @@ double object::get_pos(char xyz)
 //  char2int_direction
 //  helper: Transform character direction format to integer.
 int object::char2int_direction(char const direction[])
-{
-  int dir = 0; //stay put
-  
+{  
   switch (direction[0]) {
     case 'n':
       if (direction[1] == 'w') {
-        dir = 8; //north-west
+        return 8; //north-west
       }
       else if (direction[1] == 'e') {
-        dir = 2; //north-east
+        return 2; //north-east
       }
       else {
-        dir = 1; //north
-      }
-      
-      break;
+        return 1; //north
+      }      
       
     case 'e':
-      dir = 3;
-      break;
+      if (direction[1] == 'n' ) {
+        return 2; //north-east
+      } else if (direction[1] == 's') {
+        return 4; //south-east;
+      } else {
+        return 3; //east
+      }
       
     case 's':
       if (direction[1] == 'w') {
-        dir = 6; //south-west
+        return 6; //south-west
       }
       else if (direction[1] == 'e') {
-        dir = 4; //south-east
+        return 4; //south-east
       }
       else {
-        dir = 5; //south
+        return 5; //south
       }
       
-      break;
-      
     case 'w':
-      dir = 7;
-      break;
+      if (direction[1] == 'n') {
+        return 2; //north-west
+      } else if (direction[1] == 's') {
+        return 6; //south-west
+      } else {
+        return 7; //west      
+      }
+
+    case '!': 
+      return char2int_direction(&direction[1]); //if the first element is ! then check the second.
       
     default :
-      dir = 0; //stay put.
+      return 0; //stay put.
   }
 }
 
@@ -1950,7 +1988,7 @@ bool object::move(int direction)
   double x_out = position->x;
   double y_out = position->y;
   
-  if (get_move_position(ptr_map(), direction, x_out, y_out) == false) {
+  if (get_move_position(ptr_map(), direction, x_out, y_out, true) == false) {
     return false;
   }
   else {
@@ -1958,8 +1996,63 @@ bool object::move(int direction)
   }
 }
 
+/* Move in the direction of the target.
+ * Always moves first diagonal (if allowed) before moving straight.
+ *  
+ */
+bool object::move_toward(object* target){
+  #ifndef NO_POINTER_CHECK
+
+  if (ptr_map() == NULL) {
+    sprintf( gismsg, "failure in move_toward() for object '%s'", label );
+    error_hard( gismsg, "the object is not registered in any map",
+                "check your code to prevent this situation" );
+    return false;
+  }
+
+    if (target->ptr_map() == NULL) {
+    sprintf( gismsg, "failure in move_toward() for object '%s' and target 's'", label, target->label );
+    error_hard( gismsg, "the target is not registered in any map",
+                "check your code to prevent this situation" );
+    return false;
+  }
+  
+#endif
+
+  //For x and y direction, determine naively without wraping the direction.
+  //Then check if in case of wrapping moving in other direction is faster.
+
+  //horizontal distance: +1 move up, -1 move down, 0 stay. 
+  int horizontalDirection = target->position->x > position->x ? 1 : (target->position->x < position->x ? -1 : 0 );
+  //check wrap horizontal
+  double noWrap_xDist = pseudo_distance(position->x, 0, target->position->x, 0, true);
+  double wrap_xDist = ptr_map()->wrap.noWrap ? noWrap_xDist : pseudo_distance(position->x, 0, target->position->x, 0, false);
+  if ( wrap_xDist < noWrap_xDist )  horizontalDirection *= -1;
+
+  //vertical distance: +1 move up, -1 move down, 0 stay. 
+  int verticalDirection = target->position->y > position->y ? 1 : (target->position->y < position->y ? -1 : 0 );
+
+  //check wrap vertical
+  double noWrap_yDist = pseudo_distance(0, position->y, 0, target->position->y, true);
+  double wrap_yDist = ptr_map()->wrap.noWrap ? noWrap_yDist : pseudo_distance(0, position->y, 0, target->position->y, false);
+  if ( wrap_yDist < noWrap_yDist )  verticalDirection *= -1;
+  
+  //based on x and y direction and distance type, define direction.
+  std::string direction = "";
+  direction += verticalDirection > 0 ? 'n' : (verticalDirection < 0 ? 's' : '!');
+  direction += horizontalDirection > 0 ? 'e' : (horizontalDirection < 0 ? 'w' : '!');
+
+  // char msg[ TCL_BUFF_STR ];
+  // sprintf( msg,"Pos: %g,%g  Target: %g,%g  Wrap: %s  Resulting direction: %s",
+  // position->x, position->y, target->position->x, target->position->y, position->map->wrap.noWrap?"none":"some", direction.c_str());
+  // plog( msg );
+  
+
+  return move(direction.c_str());
+};
+
 //  Calculate the new position for after the move. Set the inOut position accordingly.
-bool object::get_move_position(gisMap* map, int direction, double& x_inOut, double& y_inOut)
+bool object::get_move_position(gisMap* map, int direction, double& x_inOut, double& y_inOut, bool noChange)
 {
   switch (direction) {
     case 0:
@@ -2002,7 +2095,7 @@ bool object::get_move_position(gisMap* map, int direction, double& x_inOut, doub
       break; //nw
   }
   
-  return check_positions(map, x_inOut, y_inOut); //Adjust if necessary. Control for Wrapping.
+  return check_positions(map, x_inOut, y_inOut, noChange); //Adjust if necessary. Control for Wrapping.
 }
 
 //wrapper
@@ -2019,6 +2112,64 @@ bool object::check_positions(double& _xOut, double& _yOut, bool noChange)
   
 #endif
   return check_positions(ptr_map(), _xOut, _yOut, noChange);
+}
+
+
+//  Return a vector with possible directions, including stay put.
+std::vector<int> object::possible_movements_full(){
+    return possible_movements(true);
+}    
+
+//  Return a vector with possible directions, not including stay put.
+std::vector<int> object::possible_movements_move(){
+    return possible_movements(false);
+}    
+
+//  Return a vector with possible directions, including stay put.
+std::vector<int> object::possible_movements_full(double const x_pos, double const y_pos){
+    return possible_movements(x_pos, y_pos, true);
+}    
+
+//  Return a vector with possible directions, not including stay put.
+std::vector<int> object::possible_movements_move(double const x_pos, double const y_pos){
+    return possible_movements(x_pos, y_pos, false);
+}    
+
+std::vector<int> object::possible_movements(bool noMoveOption){
+
+  if (this->ptr_map() == NULL) {
+    sprintf( gismsg, "failure in possible_movements() for object '%s'", label );
+    error_hard( gismsg, "the object is not registered in any map",
+                "check your code to prevent this situation" );
+    return std::vector<int>();
+  }
+  
+  return possible_movements(get_pos('x'),get_pos('y'),noMoveOption);
+  
+}
+
+std::vector<int> object::possible_movements(double const x_pos, double const y_pos, bool noMoveOption){
+
+  if (this->ptr_map() == NULL) {
+    sprintf( gismsg, "failure in possible_movements() for object '%s'", label );
+    error_hard( gismsg, "the object is not registered in any map",
+                "check your code to prevent this situation" );
+    return std::vector<int>();
+  }
+    
+    std::vector<int> directions;
+    if (noMoveOption)
+        directions.push_back(0);
+    
+    for (int direction = 1; direction <= 8; direction++){
+        double temp_x = x_pos; //get modified!
+        double temp_y = y_pos;
+        if ( true == get_move_position(ptr_map(), direction, temp_x, temp_y, true) ) {
+            directions.push_back(direction);
+        }        
+    }
+    
+    return directions;
 }
 
 //  check_positions
@@ -2482,15 +2633,23 @@ std::string object::gis_info(bool append)
   }
   
   char buffer[300];
+  const void * address = static_cast<const void*>(position->map);
+  std::stringstream ss;
+  ss << address; 
   
   if (!append) {
+    
     if (true == is_unique() )
-    { sprintf(buffer, "%s UID %g position (%g,%g) at map %p", buffer1, unique_id(), position->x, position->y, position->map); }
+    { sprintf(buffer, "%s UID %g position (%g,%g) at map %s", buffer1, unique_id(), position->x, position->y, ss.str().c_str()  ); }
     else
-    { sprintf(buffer, "%s (no UID) position (%g,%g) at map %p", buffer1, position->x, position->y, position->map); }
+    { 
+  const void * address2 = static_cast<const void*>(this);
+  std::stringstream ss2;
+  ss2 << address2; 
+  sprintf(buffer, "%s (%s) position (%g,%g) at map %s", buffer1, ss2.str().c_str(), position->x, position->y, ss.str().c_str() ); }
   }
   else
-  { sprintf(buffer, " position (%g,%g) at map %p", position->x, position->y, position->map); }
+  { sprintf(buffer, " position (%g,%g) at map %s", position->x, position->y,  ss.str().c_str() ); }
   
   return std::string(buffer);
 }

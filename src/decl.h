@@ -223,8 +223,8 @@ struct Wrap;
 extern int MAX_ABMAT_BASEVAR_LENGTH;
 class abmat_total_stats;
 typedef std::map< std::string, double > ms_statsT;
-enum Tabmat {a_pLSD, a_pstat, a_pmic, a_pmac, a_micro, a_fact, a_macro, a_cond, a_comp };
-static const Tabmat  AllAbmatTypes[] = {a_pLSD, a_pstat, a_pmic, a_pmac, a_micro, a_fact, a_macro, a_cond, a_comp }; //The order defines the order for the file/tree
+enum Tabmat {a_pLSD, a_pstat, a_pmic, a_pmac, a_fmic, a_fmac, a_micro, a_fact, a_macro, a_cond, a_comp };
+static const Tabmat  AllAbmatTypes[] = {a_pLSD, a_pstat, a_pmic, a_pmac, a_fmic, a_fmac, a_micro, a_fact, a_macro, a_cond, a_comp }; //The order defines the order for the file/tree
 struct next_var; //functional to cycle through variables
 
 extern const char* lfirst;
@@ -444,6 +444,7 @@ struct object {
   void declare_as_unique(char const* uLab); //this object and all of its kind will become "unique", allowing for fast access by the new unique id.
   object* obj_by_unique_id(int id); //function to retreave object by unique id.
   void declare_as_nonUnique(); //when the object is deleted, clean up and update info.
+  int unique_id_int();
   double unique_id();  //retrieve unique id, if any.
 #endif //#ifdef CPP11
   
@@ -489,6 +490,7 @@ struct object {
   bool access_GridPosElements (int x, int y, std::function<bool(object* use_obj)> do_stuff);
   
   object* search_at_position(char const lab[], double x, double y, bool single);
+  object* search_at_position(char const lab[], bool single, bool grid, object* where);
   object* search_at_position(char const lab[], bool single, bool grid = false);
   object* search_at_neighbour_position(char const lab[], int direction, bool single);
   object* search_at_neighbour_position(char const lab[], char const direction[], bool single);
@@ -527,13 +529,21 @@ struct object {
   double get_pos(char xyz);
   double random_pos(const char xy);
   
-  bool get_move_position(gisMap* map, int direction, double& x_inOut, double& y_inOut);
+  bool get_move_position(gisMap* map, int direction, double& x_inOut, double& y_inOut, bool noChange);
   bool move(char const direction[]);
   bool move(int dir); //0 stay put, 1 move north, 2 move north-east , ...
+  bool move_toward(object* target);
   
   int char2int_direction(char const direction[]);
   bool check_positions(double& _x, double& _y, bool noChange = false); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
   bool check_positions(gisMap* map, double& _xOut, double& _yOut, bool noChange = false);
+  
+  std::vector<int> possible_movements_full();
+  std::vector<int> possible_movements_move();
+  std::vector<int> possible_movements_full(double const x_pos, double const y_pos);
+  std::vector<int> possible_movements_move(double const x_pos, double const y_pos);
+  std::vector<int> possible_movements(bool noMoveOption);
+  std::vector<int> possible_movements(double const x_pos, double const y_pos, bool noMoveOption);
   
   std::string gis_info(bool append = false);
   
@@ -909,8 +919,8 @@ class result {            // results file object
     
 #ifdef LIBZ
     gzFile fz;              // compressed file pointer
-#endif
-    
+#endif  
+
     void title_recursive( object* r, int i ); // write file header (recursively)
     void data_recursive( object* r, int i );  // save a single time step (recursively)
     
@@ -919,7 +929,11 @@ class result {            // results file object
     void write_title(const char* label, const char* lab_tit, bool single, bool header, int start, int end);
     
   public:
-  
+
+    void use_abmat(){
+      switch_abmat = true;
+    }
+
     result( char const* fname, char const* fmode, bool dozip = false, bool docsv = false, bool switch_abmat = false );
     // constructor
     ~result( void );          // destructor
@@ -1071,6 +1085,13 @@ extern object* root;
 
 //new abmat functions
 #ifdef CPP11
+
+#ifndef ABMAT_NO_SHORTENING_OF_NAMES
+  #define ABMAT_SHORTNAMES true
+#else
+  #define ABMAT_SHORTNAMES false
+#endif
+
 void abmat_write(object* oVar, char const* lab, double value);
 void abmat_write(variable* cv, char const* lab, double value);
 ms_statsT abmat_stats( void );
@@ -1085,8 +1106,10 @@ std::string get_abmat_varname_fact_total( const char* condlab);
 std::string get_abmat_varname_fact( const char* condlab, const int condVal);
 std::string get_abmat_varname_comp(const char* var1lab, const char* var2lab);
 std::string get_abmat_varname(Tabmat stattype, const char* var1lab, const char* statname = "", const char* var2lab = "", const int condVal = -1, bool flag_fact_n = false);
+void abmat_use_long_names();
 void abmat_allow_dynamic_factors();
 void abmat_update_sim_pars( );
+void abmat_add_interval( int start, int end );
 void abmat_add_sim_par(std::string lab, double value);
 void abmat_add_micro(std::string varlab);
 void abmat_add_macro(std::string varlab);
@@ -1095,6 +1118,8 @@ void abmat_add_comp(std::string varlab, std::string var2lab);
 void abmat_add_cond(std::string varlab, std::string var2lab);
 void abmat_add_par_macro(std::string varlab);
 void abmat_add_par_micro(std::string varlab);
+void abmat_add_final_macro(std::string varlab);
+void abmat_add_final_micro(std::string varlab);
 void abmat_add_par_static(std::string varlab);
 void abmat_create_tree();
 //void add_abmat_object(std::string abmat_type, std::string varlab, std::string varlab2 = "");
