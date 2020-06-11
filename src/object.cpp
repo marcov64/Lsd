@@ -495,7 +495,11 @@ void object::declare_as_nonUnique()
     UNIQUE_ID
     Return the unique ID which can be used for fast look-up, if any.
 ****************************************************/
-double object::unique_id()
+double object::unique_id() {
+  return (double) unique_id_int();
+}
+
+int object::unique_id_int()
 {
   if (uID == NULL) {
     sprintf( msg, "object '%s' cannot be retrieved by its unique id", label );
@@ -505,7 +509,7 @@ double object::unique_id()
     return -0.0;
   }
   else {
-    return (double) uID -> id;
+    return uID -> id;
   }
 }
 #endif //#ifdef CPP11
@@ -1771,8 +1775,13 @@ object* object::add_n_objects2( char const* lab, int n, object* ex, int t_update
   
   if (cur != NULL && cur->uID != NULL)
   { uids = true; }
-  else
-  { uids = false; }
+  else {
+    object* cur_blueprint = blueprint->search( lab );
+    if (cur_blueprint != NULL && cur_blueprint->uID != NULL)
+    { uids = true; }
+    else
+    { uids = false; }
+  }
   
   // check if copy from an object in a gis. If yes, then this one inherits all info AND is registered at same pos.
   // blueprint is never part of gis
@@ -2883,7 +2892,7 @@ std::vector<double> object::gatherData_all_cnd(char const* lab, char const condV
   }
   
   if (cv == NULL) {
-    cv = blueprint->search(this->label)->search_var(this, lab, true, no_search);
+    cv = blueprint->search(this->label)->search_var(this, lab, true, false,this);
     
     if (cv == NULL) {
       sprintf(msg, "element '%s' is missing for calculating statistics", lab);

@@ -55,6 +55,7 @@ bool no_ptr_chk = false;
 #define CHK_PTR_NOP( O ) if ( chk_ptr( O ) ) bad_ptr_void( O, __FILE__, __LINE__ );
 #define CHK_PTR_CHR( O ) chk_ptr( O ) ? bad_ptr_chr( O, __FILE__, __LINE__ ) :
 #define CHK_PTR_DBL( O ) chk_ptr( O ) ? bad_ptr_dbl( O, __FILE__, __LINE__ ) :
+#define CHK_PTR_INT( O ) chk_ptr( O ) ? bad_ptr_int( O, __FILE__, __LINE__ ) :
 #define CHK_PTR_BOOL( O ) chk_ptr( O ) ? bad_ptr_bool( O, __FILE__, __LINE__ ) :
 #define CHK_PTR_LNK( O ) chk_ptr( O ) ? bad_ptr_lnk( O, __FILE__, __LINE__ ) :
 #define CHK_PTR_OBJ( O ) chk_ptr( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
@@ -72,6 +73,8 @@ bool no_ptr_chk = true;
 #define CHK_PTR_NOP( O )
 #define CHK_PTR_CHR( O )
 #define CHK_PTR_DBL( O )
+#define CHK_PTR_INT( O )
+#define CHK_PTR_BOOL( O )
 #define CHK_PTR_LNK( O )
 #define CHK_PTR_OBJ( O )
 #define CHK_PTR_VOID( O )
@@ -303,7 +306,9 @@ bool no_ptr_chk = true;
 #ifdef CPP11
   #define MAKE_UNIQUE( LAB ) p->declare_as_unique( ( char * ) LAB )
   #define UID  ( p->unique_id( )  )
-  #define UIDS( PTR ) ( CHK_PTR_DBL(PTR) PTR->unique_id( ) ) 
+  #define UIDS( PTR ) ( CHK_PTR_DBL(PTR) PTR->unique_id_int( ) ) 
+  #define UID_INT  ( p->unique_id( )  )
+  #define UID_INTS( PTR ) ( CHK_PTR_INT(PTR) PTR->unique_id_int( ) ) 
   #define SEARCH_UID( ID ) ( root->obj_by_unique_id( int ( ID ) ) )
 #endif //#ifdef CPP11
 #define RND_SEED ( ( double ) seed - 1 )
@@ -719,6 +724,7 @@ bool no_ptr_chk = true;
   #define ADD_TO_SPACE_XYS_WHERE( PTR, X, Y, WHERE)  {CHK_PTR_BOOL( PTR )  PTR->register_at_map(WHERE, X, Y); }
   #define ADD_TO_SPACE_SHARE_WHERE( WHERE ) { p->register_at_map(WHERE); }
   #define ADD_TO_SPACE_SHARES_WHERE(PTR, WHERE) {CHK_PTR_BOOL( PTR )  PTR->register_at_map(WHERE); }
+  #define ADD_TO_SPACE_SHARES(PTR) {CHK_PTR_BOOL( PTR )  PTR->register_at_map(p); }
   
   #define ADD_TO_SPACE_CENTER_XY_WHERE( X, Y, X2, Y2, WHERE)  { p->register_at_map_between(WHERE, X, Y, X2, Y2); }
   #define ADD_TO_SPACE_CENTER_XYS_WHERE( PTR, X, Y, X2, Y2, WHERE)  { CHK_PTR_BOOL( PTR )  PTR->register_at_map_between(WHERE, X, Y, X2, Y2); }
@@ -799,6 +805,10 @@ bool no_ptr_chk = true;
   // return value: succes, bool (true == 1/false == 0)
   #define MOVE(DIRECTION) ( p->move(DIRECTION) )
   #define MOVES(PTR, DIRECTION) (CHK_PTR_BOOL( PTR )  PTR->move(DIRECTION) )
+
+  #define MOVE_TOWARD(TARGET) ( p->move_toward(TARGET) )
+  #define MOVE_TOWARDS(PTR,TARGET) ( CHK_PTR_BOOL( PTR )->move_toward(TARGET) )
+
   //to add: Move sequence, use ints.
   
   // TELEPORT
@@ -959,7 +969,8 @@ bool no_ptr_chk = true;
   //  Change style
   
   #define SEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, true) )
-  #define SEARCH_POSITION_XY_WHERE( LAB, X, Y, WHERE )  ( WHERE->search_at_position(LAB, X, Y, true) )
+  #define SEARCH_POSITION_XY_WHERE( LAB, X, Y, WHERE )  ( CHK_PTR_OBJ( WHERE ) WHERE->search_at_position(LAB, X, Y, true) )
+
   #define SEARCH_POSITION(LAB)  ( p->search_at_position(LAB, true) )
   #define SEARCH_POSITIONS(PTR, LAB)  (CHK_PTR_OBJ( PTR )  PTR->search_at_position(LAB, true) )
   
@@ -995,13 +1006,13 @@ bool no_ptr_chk = true;
   //  elements at the given position.
   
   #define COUNT_POSITION(LAB)  ( p->elements_at_position( LAB, false ) )
-  #define COUNT_POSITIONS(PTR, LAB) (CHK_PTR_DBL( PTR )  PTR->elements_at_position( LAB, false ) )
+  #define COUNT_POSITION_WHERE(LAB, WHERE) (CHK_PTR_DBL( WHERE )  WHERE->elements_at_position( LAB, false ) )
   
   #define COUNT_POSITION_XY(LAB, X, Y)  ( p->elements_at_position( LAB, X, Y ) )
   #define COUNT_POSITION_XY_WHERE( LAB, X, Y, WHERE) ( WHERE->elements_at_position( LAB, X, Y ) )
   
   #define COUNT_POSITION_GRID(LAB)  ( p->elements_at_position( LAB, true ) )
-  #define COUNT_POSITION_GRIDS(PTR, LAB) (CHK_PTR_DBL( PTR )  PTR->elements_at_position( LAB, true ) )
+  #define COUNT_POSITION_GRID_WHERE(LAB, WHERE) (CHK_PTR_DBL( WHERE )  WHERE->elements_at_position( LAB, true ) )
   
   // Additional Utilities
   // ANY_GIS just checks if there is a map associated to the object
@@ -1009,8 +1020,8 @@ bool no_ptr_chk = true;
   #define ANY_GIS ( p->position != NULL ? true : false  )
   #define ANY_GISS(PTR) (CHK_PTR_BOOL( PTR )  PTR->position != NULL ? true : false )
   
-  #define SAME_GIS(TARGET) ( p->ptr_map() == TARGET->ptr_map() )
-  #define SAME_GISS(PTR,TARGET) (CHK_PTR_BOOL( PTR )  PTR->ptr_map() == TARGET->ptr_map() )
+  #define SAME_GIS_WHERE(WHERE) ( p->ptr_map() == WHERE->ptr_map() )
+  #define SAME_GISS_WHERE(PTR,WHERE) (CHK_PTR_BOOL( PTR )  PTR->ptr_map() == WHERE->ptr_map() )
   
   #define GIS_INFOS( PTR ) ( ( CHK_PTR_CHR(PTR) PTR->gis_info().c_str()) )
   #define GIS_INFO ( (p->gis_info().c_str()) )
@@ -1105,6 +1116,7 @@ bool no_ptr_chk = true;
   //   }
   // }
   
+  #define ABMAT_USE_LONG_NAMES { abmat_use_long_names(); } //TODO ENSURE CALLED FIRST!
   #define ABMAT_DYNAMIC_FACTORS { abmat_allow_dynamic_factors(); }
   #define ABMAT_ADD_MICRO( lab1 ) { abmat_add_micro( lab1 ); }
   #define ABMAT_ADD_MACRO( lab1 ) { abmat_add_macro( lab1 ); }
@@ -1115,8 +1127,11 @@ bool no_ptr_chk = true;
   #define ABMAT_ADD_PSTATIC( lab1 ) { abmat_add_par_static( lab1 ); }
   #define ABMAT_ADD_PMACRO( lab1 ) { abmat_add_par_macro( lab1 ); }
   #define ABMAT_ADD_PMICRO( lab1 ) { abmat_add_par_micro( lab1 ); }
+
+  #define ABMAT_ADD_FMACRO( lab1 ) { abmat_add_final_macro( lab1 ); }
+  #define ABMAT_ADD_FMICRO( lab1 ) { abmat_add_final_micro( lab1 ); }
   
-  #define ABMAT_ADD_INTERVAL( start, end ) { add_abmat_interval(start, end); }
+  #define ABMAT_ADD_INTERVAL( start, end ) { abmat_add_interval(start, end); }
   
 #endif //#ifdef CPP11
 

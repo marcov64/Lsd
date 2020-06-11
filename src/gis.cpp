@@ -99,8 +99,10 @@ void object::set_distance_type( char type )
   }
   
   position->map->distance_type = type;
-  sprintf( gismsg, "\nSwitched distance to type '%c' (c: Chebyshev, e: Euclidean, m: Manhattan)", type);
-  plog(gismsg);
+  if (this == root){ //only print for root.
+    sprintf( gismsg, "\nSwitched distance for root to type '%c' (c: Chebyshev, e: Euclidean, m: Manhattan)", type);
+    plog(gismsg);
+  }
   return;
 }
 
@@ -1922,7 +1924,13 @@ int object::char2int_direction(char const direction[])
       }      
       
     case 'e':
-      return 3;
+      if (direction[1] == 'n' ) {
+        return 2; //north-east
+      } else if (direction[1] == 's') {
+        return 4; //south-east;
+      } else {
+        return 3; //east
+      }
       
     case 's':
       if (direction[1] == 'w') {
@@ -1936,7 +1944,16 @@ int object::char2int_direction(char const direction[])
       }
       
     case 'w':
-      return 7;      
+      if (direction[1] == 'n') {
+        return 2; //north-west
+      } else if (direction[1] == 's') {
+        return 6; //south-west
+      } else {
+        return 7; //west      
+      }
+
+    case '!': 
+      return char2int_direction(&direction[1]); //if the first element is ! then check the second.
       
     default :
       return 0; //stay put.
@@ -1978,6 +1995,61 @@ bool object::move(int direction)
     return change_position(x_out, y_out);
   }
 }
+
+/* Move in the direction of the target.
+ * Always moves first diagonal (if allowed) before moving straight.
+ *  
+ */
+bool object::move_toward(object* target){
+  #ifndef NO_POINTER_CHECK
+
+  if (ptr_map() == NULL) {
+    sprintf( gismsg, "failure in move_toward() for object '%s'", label );
+    error_hard( gismsg, "the object is not registered in any map",
+                "check your code to prevent this situation" );
+    return false;
+  }
+
+    if (target->ptr_map() == NULL) {
+    sprintf( gismsg, "failure in move_toward() for object '%s' and target 's'", label, target->label );
+    error_hard( gismsg, "the target is not registered in any map",
+                "check your code to prevent this situation" );
+    return false;
+  }
+  
+#endif
+
+  //For x and y direction, determine naively without wraping the direction.
+  //Then check if in case of wrapping moving in other direction is faster.
+
+  //horizontal distance: +1 move up, -1 move down, 0 stay. 
+  int horizontalDirection = target->position->x > position->x ? 1 : (target->position->x < position->x ? -1 : 0 );
+  //check wrap horizontal
+  double noWrap_xDist = pseudo_distance(position->x, 0, target->position->x, 0, true);
+  double wrap_xDist = ptr_map()->wrap.noWrap ? noWrap_xDist : pseudo_distance(position->x, 0, target->position->x, 0, false);
+  if ( wrap_xDist < noWrap_xDist )  horizontalDirection *= -1;
+
+  //vertical distance: +1 move up, -1 move down, 0 stay. 
+  int verticalDirection = target->position->y > position->y ? 1 : (target->position->y < position->y ? -1 : 0 );
+
+  //check wrap vertical
+  double noWrap_yDist = pseudo_distance(0, position->y, 0, target->position->y, true);
+  double wrap_yDist = ptr_map()->wrap.noWrap ? noWrap_yDist : pseudo_distance(0, position->y, 0, target->position->y, false);
+  if ( wrap_yDist < noWrap_yDist )  verticalDirection *= -1;
+  
+  //based on x and y direction and distance type, define direction.
+  std::string direction = "";
+  direction += verticalDirection > 0 ? 'n' : (verticalDirection < 0 ? 's' : '!');
+  direction += horizontalDirection > 0 ? 'e' : (horizontalDirection < 0 ? 'w' : '!');
+
+  // char msg[ TCL_BUFF_STR ];
+  // sprintf( msg,"Pos: %g,%g  Target: %g,%g  Wrap: %s  Resulting direction: %s",
+  // position->x, position->y, target->position->x, target->position->y, position->map->wrap.noWrap?"none":"some", direction.c_str());
+  // plog( msg );
+  
+
+  return move(direction.c_str());
+};
 
 //  Calculate the new position for after the move. Set the inOut position accordingly.
 bool object::get_move_position(gisMap* map, int direction, double& x_inOut, double& y_inOut, bool noChange)

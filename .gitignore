@@ -26,3 +26,5 @@ elements.txt
 makefileNW
 lsd_gnu*
 *.gch
+.idea/*
+.vscode/*
