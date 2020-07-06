@@ -3695,7 +3695,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 #ifdef LIBZ
 	gzFile fz = NULL;
 #endif
-	char ch, *tok, *linbuf;
+	char ch, *tok, *linbuf, *tag;
 	int i, j, new_v, new_c;
 	bool header = false;
 	long linsiz = 1;
@@ -3848,19 +3848,22 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		}
 		
 		sscanf( tok, "%s %s (%d %d)", vs[ i ].label, vs[ i ].tag, &( vs[ i ].start ), &( vs[ i ].end ) );	
-		sprintf( vs[ i ].tag, "F_%d_%s", file_counter, vs[ i ].tag );
 		vs[ i ].rank = i;
 
+		tag = new char [ strlen( vs[ i ].tag ) + 10 ];
+		sprintf( tag, "F_%d_%s", file_counter, vs[ i ].tag );
+
 		if ( vs[ i ].start != -1 )
-			sprintf( msg, "%s %s (%d-%d) #%d", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, i );
+			sprintf( msg, "%s %s (%d-%d) #%d", vs[ i ].label, tag, vs[ i ].start, vs[ i ].end, i );
 		else
 		{
-			sprintf( msg, "%s %s (0-%d) #%d", vs[ i ].label, vs[ i ].tag, new_c - 1, i );
+			sprintf( msg, "%s %s (0-%d) #%d", vs[ i ].label, tag, new_c - 1, i );
 			vs[ i ].start = 0;
 			vs[ i ].end = new_c - 1;
 			first_c = 0;
 		}
 		
+		delete [ ] tag;
 		var_names->push_back( msg );
 		vs[ i ].data = new double[ vs[ i ].end - vs[ i ].start + 1 ];
 	 
@@ -4725,10 +4728,10 @@ void plot_gnu( int *choice )
 					if ( gridd == 0 )
 					{
 						if ( box == 1 )
-							sprintf( str2, ", 'data.gp' using 1:%d:%d %s t \"\"",2+2*i, 2*i+3, str1 ); 
+							sprintf( str2, ", 'data.gp' using 1:%d:%d %s t \"\"", 2 + 2 * i, 2 * i + 3, str1 ); 
 						else
 							if ( i <= nv / 2 )
-								sprintf( str2, ", 'data.gp' using 1:%d:%d %s t \"\"", i + 1, ( nv-nanv) / 2+i + 1, str1 ); 
+								sprintf( str2, ", 'data.gp' using 1:%d:%d %s t \"\"", i + 1, ( nv - nanv ) / 2 + i + 1, str1 ); 
 							else
 								strcpy( str2, "" );     
 					} 
