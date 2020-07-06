@@ -2830,7 +2830,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 	for ( a = 0; cur != NULL; cur = cur->next )
 		a += cur->cal( lv, lag );
   
-	if ( is_inf( a ) )
+	if ( is_nan( a ) || is_inf( a ) )
 	{
 		sprintf( msg, "element '%s' has invalid value '%g' for random drawing", lv, a );  
 		error_hard( msg, "invalid random draw option", 
