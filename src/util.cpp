@@ -1136,8 +1136,6 @@ but to be used for analysis.
 ***************************************************/
 void add_cemetery( variable *v )
 {
-	variable *cv;
-	
 	if ( cemetery == NULL )
 		cemetery = last_cemetery = v;
 	else

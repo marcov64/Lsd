@@ -7778,7 +7778,6 @@ void plog_series( int *choice )
 	char *lapp, **str, **tag;
 	double **data;
 	int i, j, *start, *end, *id;
-	store *app;
 
 	if ( nv == 0 )			// no variables selected
 	{

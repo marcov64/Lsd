@@ -70,8 +70,8 @@ used up to 88 options
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 2
-#define _LSD_VERSION_ "7.2-2"
-#define _LSD_DATE_ "February 10 2020"   // __DATE__
+#define _LSD_VERSION_ "7.2-3"
+#define _LSD_DATE_ "July 10 2020"   // __DATE__
 
 // general buffer limits
 #define TCL_BUFF_STR 3000		// standard Tcl buffer size (>1000)
@@ -6895,7 +6895,7 @@ void handle_signals( void )
 // handle critical system signals
 void signal_handler( int signum )
 {
-	char msg2[ MAX_LINE_SIZE + 1 ];
+	char msg2[ strlen( msg ) + 30 ];
 
 	switch ( signum )
 	{
@@ -6933,7 +6933,7 @@ void signal_handler( int signum )
 			break;			
 	}
 	
-	snprintf( msg2, MAX_LINE_SIZE, "System Signal received: %s", msg );
+	snprintf( msg2, strlen( msg ) + 30, "System Signal received: %s", msg );
 	log_tcl_error( "FATAL ERROR", msg2 );
 	if ( tk_ok )
 		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nLMM will close now.\"", msg );

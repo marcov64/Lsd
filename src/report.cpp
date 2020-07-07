@@ -426,7 +426,6 @@ void write_var( variable *v, FILE *frep )
 	bool one, found;
 	char *app, *fname, c1_lab[ 2 * MAX_LINE_SIZE ], c2_lab[ 2 * MAX_LINE_SIZE ], c3_lab[ 2 * MAX_LINE_SIZE ], updt_in[ MAX_ELEM_LENGTH + 1 ];
 	int i, j, k, done, flag_begin, flag_string, flag_comm, flag_var, nfiles;
-	object *cur;
 	FILE *ffun ;
 
 	cmd( "update" );
