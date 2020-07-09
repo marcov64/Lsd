@@ -60,6 +60,7 @@ Global definitions among all LSD C++ modules
 #include <unordered_map>
 #include <unordered_set>
 #include <chrono>
+#include <random>
 #endif
 
 // comment the next line to compile without libz
@@ -674,6 +675,7 @@ int my_strcmp( char *a, char *b );
 int num_sensitivity_variables( sense *rsens );
 int rnd_int( int min, int max );
 int shrink_gnufile( void );
+int uniform_int_0( int max );
 long get_long( const char *tcl_var, long *var = NULL );
 long num_sensitivity_points( sense *rsens );
 object *check_net_struct( object *caller, char const *nodeLab, bool noErr = false );

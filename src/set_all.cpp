@@ -326,12 +326,14 @@ void set_all( int *choice, object *original, char *lab, int lag )
 
 	if ( use_seed )
 		init_random( ( unsigned ) rnd_seed );
+	
+	j = 0;
 
 	switch ( res )
 	{
 		// equal to
 		case 1:							
-			for ( i = 1, j = 0, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -345,7 +347,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 
 		// range
 		case 9:	
-			for ( i = 1, j = 0, cur = r, counter = -1; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = r, counter = -1; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( ( ( i - cases_from ) % step_in == 0 ) ) )
 					counter++;
 
@@ -371,7 +373,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 
 		// increasing	
 		case 2:  
-			for ( i = 1, j = 0, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 			{
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
@@ -391,7 +393,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 		
 		// increasing (groups)
 		case 4: 
-			for ( i = 1, j = 0, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( to_all == 1 || ( cases_from <= i && cases_to >= i ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -410,7 +412,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 
 		// random (uniform)
 		case 3: 
-			for ( i = 1, j = 0, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -425,7 +427,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 		
 		// random integer (uniform)
 		case 8:
-			for ( i = 1, j = 0, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -440,7 +442,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 			
 		// random (normal)
 		case 5: 
-			for ( i = 1, j = 0, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -474,7 +476,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 			if ( fscanf( f, "%99s", ch ) == EOF )				// the label
 				return;
 				
-			for ( i = 1, j = 0, cur = r; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = r; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( to_all == 1 || ( cases_from <= i && cases_to >= i ) )
 				{
 					kappa = fscanf( f, "%lf", &value );
@@ -1175,12 +1177,6 @@ double mat_sum_dists( double **a, int m, int n, double **b )
 	return sum;
 }
 
-// use reproducible source of randomness
-int uniform_int_0( int max ) 
-{ 
-	return uniform_int( 0, max - 1 ); 
-}
-
 
 /*****************************************************************************
 MORRIS_OAT
@@ -1229,7 +1225,12 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 		int *perm = new int[ k ];
 		for ( i = 0; i < k; ++i )
 			perm [ i ] = i;
-		random_shuffle( & perm[ 0 ], & perm[ k ], uniform_int_0 );
+		
+#ifdef CPP11
+		shuffle( & perm[ 0 ], & perm[ k ], mt19937( seed ) );
+#else
+		random_shuffle( & perm[ 0 ], & perm[ k ], uniform_int_0 );	// deprecated
+#endif
 
 		P = mat_copy_scal( P, k, k, 0 );
 		for ( i = 0; i < k; ++i )

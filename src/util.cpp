@@ -52,11 +52,6 @@ given the file name name, the routine searches for the data line for the variabl
 
 #include "decl.h"
 
-#ifdef CPP11
-#include <random>						// use new random libraries if possible
-#endif
-
-
 int **lattice = NULL;					// lattice data colors array
 int rows = 0;							// lattice size
 int columns = 0;
@@ -3391,6 +3386,16 @@ double uniform_int( double min, double max )
 	if ( min > max )
 		return 0;
 	return ( floor( min + ran1( ) * ( max + 1 - min ) ) );
+}
+
+
+/****************************************************
+UNIFORM_INT_0
+reproducible source of randomness for random_shuffle
+****************************************************/
+int uniform_int_0( int max ) 
+{ 
+	return uniform_int( 0, max - 1 ); 
 }
 
 

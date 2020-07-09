@@ -591,7 +591,7 @@ LOAD_CONFIGURATION
 int load_configuration( bool reload, bool quick )
 {
 	int i, j = 0, load = 0;
-	char msg[ MAX_LINE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ];
+	char msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
 	object *cur;
 	variable *cur_var, *cur_var1;
 	description *cur_descr;
@@ -666,20 +666,20 @@ int load_configuration( bool reload, bool quick )
 		load = 7;
 		goto endLoad;
 	}
-	strcpy( msg, "NONE" );
-	fgets( msg, MAX_PATH_LENGTH - 1, f );
-    if ( msg[ strlen( msg ) - 1 ] == '\n' )
-		msg[ strlen( msg ) - 1 ] = '\0';
-    if ( msg[ strlen( msg ) - 1 ] == '\r' )
-		msg[ strlen( msg ) - 1 ] = '\0';
+	strcpy( name, "NONE" );
+	fgets( name, MAX_PATH_LENGTH - 1, f );
+    if ( name[ strlen( name ) - 1 ] == '\n' )
+		name[ strlen( name ) - 1 ] = '\0';
+    if ( name[ strlen( name ) - 1 ] == '\r' )
+		name[ strlen( name ) - 1 ] = '\0';
 
 	// use the current equation name only if the file exists
-	snprintf( full_name, 2 * MAX_PATH_LENGTH - 1, "%s/%s", exec_path, msg + 1 );
+	snprintf( full_name, 2 * MAX_PATH_LENGTH - 1, "%s/%s", exec_path, name + 1 );
 	g = fopen( full_name, "r" );
 	if ( g != NULL )
 	{
 		fclose( g );
-		strncpy( equation_name, msg + 1, MAX_PATH_LENGTH - 1 );
+		strncpy( equation_name, name + 1, MAX_PATH_LENGTH - 1 );
 	}
 	
 	fscanf( f, "%999s", msg );					// should be MODELREPORT
