@@ -1,4 +1,18 @@
-# Makefile for lsd_confgen in Linux/Cygwin
+#**************************************************************
+#
+#	LSD 7.2 - December 2019
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#	
+#**************************************************************
+
+#**************************************************************
+# MAKEFILE.CONFGEN
+# Makefile for lsd_confgen in linux (use EXT=.exe for Cygwin/MSYS2, OSX for mac).
+#**************************************************************
 
 CC=g++	
 TARGET=lsd_confgen
@@ -20,11 +34,14 @@ SRC_DIR=$(LSDROOT)/$(SRC)/
 # Do not modify
 INCLUDE=-I$(PATH_HEADER) -I$(LSDROOT)/src
 
-$(TARGET)$(EXT): $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)confgen.obj $(SRC_DIR)file.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)nets.obj $(SRC_DIR)util.obj 
-	$(CC) $(SWITCH_CC) $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)confgen.obj $(SRC_DIR)file.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)nets.obj $(SRC_DIR)util.obj -L$(PATH_LIB) $(LIBS) -o $(TARGET)
+$(TARGET)$(EXT): $(SRC_DIR)main.obj $(SRC_DIR)confgen.obj $(SRC_DIR)file.obj \
+	$(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)nets.obj $(SRC_DIR)util.obj 
+	$(CC) $(SWITCH_CC) $(SRC_DIR)main.obj $(SRC_DIR)confgen.obj $(SRC_DIR)file.obj \
+	$(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)nets.obj $(SRC_DIR)util.obj \
+	-L$(PATH_LIB) $(LIBS) -o $(TARGET)
 
-$(SRC_DIR)main_gnuwin.obj: $(SRC_DIR)main_gnuwin.cpp 
-	$(CC) $(SWITCH_CC) -c $(SRC_DIR)main_gnuwin.cpp -o $(SRC_DIR)main_gnuwin.obj $(INCLUDE)
+$(SRC_DIR)main.obj: $(SRC_DIR)main.cpp 
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)main.cpp -o $(SRC_DIR)main.obj $(INCLUDE)
 
 $(SRC_DIR)confgen.obj: $(SRC_DIR)confgen.cpp 
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)confgen.cpp -o $(SRC_DIR)confgen.obj $(INCLUDE)
@@ -46,4 +63,5 @@ $(SRC_DIR)util.obj: $(SRC_DIR)util.cpp
 
 # Clean object files for building for another distribution
 clean:
-	$(RM) $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)confgen.obj $(SRC_DIR)file.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)nets.obj $(SRC_DIR)util.obj
+	$(RM) $(SRC_DIR)main.obj $(SRC_DIR)confgen.obj $(SRC_DIR)file.obj \
+	$(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)nets.obj $(SRC_DIR)util.obj

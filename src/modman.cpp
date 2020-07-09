@@ -6,39 +6,39 @@
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
  *************************************************************/
 
 /*************************************************************
 MODMAN.CPP
-This program is a front end for dealing with LSD models code (running, compiling, editing, 
+This program is a front end for dealing with LSD models code (running, compiling, editing,
 debugging LSD model programs). See the manual for help on its use.
 
-IMPORTANT: this is _NOT_ a LSD model, but the best I could produce of something similar to 
+IMPORTANT: this is _NOT_ a LSD model, but the best I could produce of something similar to
 a programming environment for LSD model programs.
 
 This file can be compiled with the command line:
 
 make -f <makefile>
 
-There are several makefiles in LSD root directory appropriate to different environments 
+There are several makefiles in LSD root directory appropriate to different environments
 (Windows, Mac & Linux) and configurations (32 or 64-bit).
 
-LMM starts in a quite weird way. If there is no parameter in the call used to start it, the only 
-operation it does is to ... run a copy of itself followed by the parameter "kickstart". This trick 
-is required because under Windows there are troubles launching external package from a "first 
+LMM starts in a quite weird way. If there is no parameter in the call used to start it, the only
+operation it does is to ... run a copy of itself followed by the parameter "kickstart". This trick
+is required because under Windows there are troubles launching external package from a "first
 instance" of a program.
 
-LMM reads all the directories that are not: Manual, gnu, gnu64, LMM.app, lwi, R and src as model 
-directories, where it expect to find certain files. At any given moment a model name is stored, 
-together with its directory and the file shown. 
+LMM reads all the directories that are not: Manual, gnu, gnu64, LMM.app, lwi, R and src as model
+directories, where it expect to find certain files. At any given moment a model name is stored,
+together with its directory and the file shown.
 
 Any internal command is executed in a condition like this:
 
 if ( choice == x )
  do_this_and_that
 
-and returned to the main cycle. After each block the flow returns to "loop" where the main 
+and returned to the main cycle. After each block the flow returns to "loop" where the main
 Tcl_DoOneEvent loop sits.
 
 The widget of importance are:
@@ -62,7 +62,7 @@ used up to 88 options
 #include <new>
 
 // check compiler C++ standard support
-#if __cplusplus >= 201103L 
+#if __cplusplus >= 201103L
 #define CPP11
 #include <thread>
 #endif
@@ -127,7 +127,7 @@ void signal_handler( int signum );
 Tcl_Interp *inter = NULL;
 bool tk_ok = false;				// control for tk_ready to operate
 char *exec_path = NULL;			// path of executable file
-char msg[ TCL_BUFF_STR ]; 
+char msg[ TCL_BUFF_STR ];
 char rootLsd[ MAX_PATH_LENGTH ];
 int choice;
 int shigh;						// syntax highlighting state (0, 1 or 2)
@@ -148,7 +148,7 @@ const char *lsd_dir[ LSD_DIR_NUM ] = { "src", "gnu", "gnu64", "Manual", "LMM.app
 int main( int argn, char **argv )
 {
 	int res = 0;
-	
+
 	// register all signal handlers
 	handle_signals( );
 
@@ -169,7 +169,7 @@ int main( int argn, char **argv )
 	{
 		abort( );				// raises a SIGABRT exception, tell user & close
 	}
-	
+
 	if ( inter != NULL )
 	{
 		cmd( "if { ! [ catch { package present Tk } ] } { destroy . }" );
@@ -213,7 +213,7 @@ if ( choice != 1234567890 )
 	log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
 	return 2;
 }
-	
+
 // initialize & test the tk application
 choice = 1;
 num = Tk_Init( inter );
@@ -305,7 +305,7 @@ if ( choice )
 	{
 		log_tcl_error( "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
 		cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
-		return 5;	
+		return 5;
 	}
 	cmd( "set env(LSDROOT) $RootLsd" );
 }
@@ -557,7 +557,7 @@ cmd( "$w add command -label \"Help on LMM\" -underline 0 -accelerator F1 -comman
 if ( macro )
   cmd( "$w add command -label \"Help on Macros for LSD Equations\" -underline 8 -command { LsdHelp LSD_macros.html }" );
 else
-  cmd( "$w add command -label \"Help on C++ for LSD Equations\" -underline 8 -command { LsdHelp LSD_functions.html }" ); 
+  cmd( "$w add command -label \"Help on C++ for LSD Equations\" -underline 8 -command { LsdHelp LSD_functions.html }" );
 
 cmd( "$w add command -label \"LSD Documentation\" -underline 4 -command { LsdHelp LSD_documentation.html }" );
 cmd( "$w add separator" );
@@ -794,7 +794,7 @@ cmd( "bind .f.t.t <Control-w> { \
 	}" );
 
 cmd( "bind .f.t.t <Control-f> { set choice 11 }; bind .f.t.t <Control-F> { set choice 11 }" );
-cmd( "bind .f.t.t <Control-s> { .m.file invoke 2 }" ); 
+cmd( "bind .f.t.t <Control-s> { .m.file invoke 2 }" );
 cmd( "bind .f.t.t <Control-a> { set choice 4 }" );
 cmd( "bind .f.t.t <Control-r> { set choice 2 }; bind .f.t.t <Control-R> { set choice 2 }" );
 cmd( "bind .f.t.t <Control-e> { set choice 8 }" );
@@ -977,7 +977,7 @@ if ( argn > 1 )
 {
 	cmd( "if [ file exists \"$filetoload\" ] { set choice 0 } { set choice -2 }" );
 	if ( choice == 0 )
-	{	
+	{
 		cmd( "set file [ open \"$filetoload\" ]" );
 		cmd( ".f.t.t insert end [ read $file ]" );
 		cmd( ".f.t.t edit reset" );
@@ -985,7 +985,7 @@ if ( argn > 1 )
 		cmd( ".f.t.t mark set insert 1.0" );
 		cmd( "set filename \"[ file tail \"$filetoload\" ]\"" );
 		cmd( "set dirname [ file dirname \"$filetoload\" ]" );
-		cmd( "set before [ .f.t.t get 1.0 end ]" ); 
+		cmd( "set before [ .f.t.t get 1.0 end ]" );
 		cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 
 		cmd( "set s [ file extension \"$filetoload\" ]" );
@@ -1004,11 +1004,11 @@ if ( argn > 1 )
 		}
    }
    else
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" ); 
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" );
 }
 else
 	choice = 33; 				// open model browser
-  
+
 cmd( "wm deiconify .; raise ." );
 cmd( "set keepfocus 0" );
 
@@ -1030,7 +1030,7 @@ else
 		cmd( "updColChg 1" );
 
 recolor_all = recolor = false;
-	
+
 // main command loop
 while ( ! choice )
 {
@@ -1046,7 +1046,7 @@ while ( ! choice )
 	{
 		goto loop;
 	}
-}   
+}
 
 // update file save status in titlebar
 cmd( "update_title_bar" );
@@ -1063,17 +1063,14 @@ if ( choice != 23 )
 // start evaluating the executed command
 
 // exit LMM
-
 if ( choice == 1 )
 {
 	update_lmm_options( true );	// update window position, if required
 	return 0;
 }
 
-
 // compile the model, invoking make
 // Run the model
-
 if ( choice == 2 || choice == 6 )
 {
 	cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ tk_messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
@@ -1083,13 +1080,11 @@ if ( choice == 2 || choice == 6 )
 		compile_run( choice == 2 ? true : false );
 		choice = 0;
 	}
-	
+
 	goto loop;
 }
 
-
 /* Insert in the text window the makefile of the selected model */
-
 if ( choice == 3 )
 {
 	cmd( ".f.t.t delete 0.0 end" );
@@ -1103,7 +1098,7 @@ if ( choice == 3 )
 	}
 
 	cmd( "cd \"$modelDir\"" );
-	make_makefile( ); 
+	make_makefile( );
 	cmd( "cd \"$RootLsd\"" );
 	cmd( "if { [ file exists \"$modelDir/makefile\" ] } { set choice 1 } { set choice 0 }" );
 	if ( choice == 1 )
@@ -1112,23 +1107,21 @@ if ( choice == 3 )
 		cmd( ".f.t.t insert end [ read -nonewline $file ]" );
 		cmd( ".f.t.t edit reset" );
 		cmd( "close $file" );
-	} 
-	
-	sourcefile = 0; 
-	
+	}
+
+	sourcefile = 0;
+
 	cmd( "set before [ .f.t.t get 1.0 end ]" );
 	cmd( "set filename makefile" );
 	cmd( ".f.t.t mark set insert 1.0" );
 	cmd( ".f.hea.info.file.dat conf -text \"makefile\"" );
-	cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );  
-	
+	cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );
+
 	choice = 0;
 	goto loop;
 }
 
-
 /* Save the file currently shown */
-
 if ( choice == 4 )
 {
 	cmd( "set curfilename [tk_getSaveFile -parent . -title \"Save File\" -initialfile $filename -initialdir $dirname]" );
@@ -1145,14 +1138,12 @@ if ( choice == 4 )
 		cmd( "set filename [ file tail \"$curfilename\" ]" );
 		cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 	}
-	
+
 	choice = 0;
 	goto loop;
 }
 
-
 /* Load the description file */
-
 if ( choice == 5 || choice == 50 )
 {
 	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
@@ -1166,7 +1157,7 @@ if ( choice == 5 || choice == 50 )
 
 	cmd( "set dirname \"$modelDir\"" );
 	cmd( "set filename $DESCRIPTION" );
-	  
+
 	cmd( ".f.t.t delete 0.0 end" );
 	cmd( "set choice 0; if { [ file exists \"$dirname/$filename\" ] } { set choice 1; if { [ file size \"$dirname/$filename\" ] <= 2 } { set choice 0; file delete \"$dirname/$filename\" } }" );
 	if ( choice == 1 )
@@ -1194,22 +1185,20 @@ if ( choice == 5 || choice == 50 )
 	cmd( ".f.t.t edit reset" );
 	cmd( ".f.t.t mark set insert 1.0" );
 	cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
-	  
+
 	cmd( "unset -nocomplain ud udi rd rdi" );
 	cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
 	cmd( "lappend udi [ .f.t.t index insert ]" );
-	  
+
 	if ( choice == 50 )
 		choice = 46; 			// go to create makefile, after the model selection
 	else
 		choice = 0;
-	
+
 	goto loop;
 }
- 
- 
-/* Show compilation result */
 
+/* Show compilation result */
 if ( choice == 7 )
 {
 	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
@@ -1225,9 +1214,7 @@ if ( choice == 7 )
 	goto loop;
 }
 
-
 /* Insert in the text window the main equation file */
-
 if ( choice == 8 )
 {
 	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
@@ -1238,7 +1225,7 @@ if ( choice == 8 )
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	s = get_fun_name( str );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
@@ -1266,7 +1253,7 @@ if ( choice == 8 )
 			set choice 0 \
 		}" );
 	cmd( "unset -nocomplain oldfile olddir" );
-		
+
 	if ( ! choice )
 		goto loop;
 
@@ -1292,15 +1279,13 @@ if ( choice == 8 )
 	cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
 	cmd( "lappend udi [ .f.t.t index insert ]" );
 
-	sourcefile = 1; 
+	sourcefile = 1;
 	recolor_all = true;
 	choice = 0;
 	goto loop;
 }
 
-
 /* Find a line in the text */
-
 if ( choice == 10 )
 {
 	cmd( "set line \"\"" );
@@ -1344,9 +1329,7 @@ if ( choice == 10 )
 	goto loop;
 }
 
-
 /* Find a text pattern in the text */
-
 if ( choice == 11 )
 {
 	cmd( "set docase 0" );
@@ -1435,9 +1418,7 @@ if ( choice == 11 )
 	goto loop;
 }
 
-
 /* Search again the same pattern in the text */
-
 if ( choice == 12 || choice == 88 )
 {
 	if ( choice == 12 )
@@ -1465,14 +1446,12 @@ if ( choice == 12 || choice == 88 )
 				bell \
 			} \
 		}" );
-		
+
 	choice = 0;
 	goto loop;
 }
 
-
 /* Find and replace a text pattern in the text */
-
 if ( choice == 21 )
 {
 	cmd( "set docase 1" );
@@ -1553,7 +1532,7 @@ if ( choice == 21 )
 		} { \
 			set choice 5 \
 		}" );
-		
+
 	cmd( "bind .l.l.e <Up> { \
 			if { $lfindsize > 0 && $curcounter > 0 } { \
 				incr curcounter -1; \
@@ -1582,7 +1561,7 @@ if ( choice == 21 )
 	cmd( "focus .l.l.e" );
 
 	choice = 0;
-	
+
 	here:
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
@@ -1594,7 +1573,7 @@ if ( choice == 21 )
 	}
 
 	while ( choice == 4 )
-	{ 
+	{
 		cmd( "if { [ string length $cur ] > 0 } { \
 			.f.t.t delete $cur \"$cur + $length char\"; \
 			.f.t.t see $cur; \
@@ -1605,31 +1584,29 @@ if ( choice == 21 )
 		} { \
 			set choice 0 \
 		}" );
-		
-		if ( choice != 0 )  
+
+		if ( choice != 0 )
 			cmd( "if { $docase } { \
 						set cur [ .f.t.t search -count length $dirsearch -- \"$textsearch\" $cur $endsearch ] \
 					} else { \
 						set cur [ .f.t.t search -count length -nocase $dirsearch -- \"$textsearch\" $cur $endsearch ] \
 					}" );
-		
+
 		cmd( "raise .l" );
 		cmd( "focus .l" );
-		Tcl_DoOneEvent( 0 );  
+		Tcl_DoOneEvent( 0 );
 		goto here;
 	}
 
 	cmd( "destroytop .l" );
 	cmd( ".f.t.t tag remove found 1.0 end" );
-	
+
 	recolor_all = true;
 	choice = 0;
 	goto loop;
 }
 
-
 // Run the model in the gdb debugger
-
 if ( choice == 13 || choice == 58 )
 {
 	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
@@ -1640,7 +1617,7 @@ if ( choice == 13 || choice == 58 )
 		choice = 0;
 		goto loop;
 	}
-	  
+
 	cmd( "cd \"$modelDir\"" );
 
 	if ( choice == 58 )
@@ -1652,9 +1629,9 @@ if ( choice == 13 || choice == 58 )
 		cmd( "if [ string equal -nocase $DbgExe lldb ] { set cmdbreak \"-sbreak.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
 	}
 	else
-		cmd( "if [ string equal -nocase $DbgExe gdb ] { set cmdbreak \"--args\" } { set cmdbreak \"\" }" ); 
+		cmd( "if [ string equal -nocase $DbgExe gdb ] { set cmdbreak \"--args\" } { set cmdbreak \"\" }" );
 
-	make_makefile( );  
+	make_makefile( );
 	cmd( "set fapp [ file nativename \"$modelDir/makefile\" ]" );
 	s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
 	f = fopen( s, "r" );
@@ -1674,13 +1651,13 @@ if ( choice == 13 || choice == 58 )
 	strcpy( str1, str + 7 );
 
 	cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set choice 2 } { set choice 1 } } { set choice 3 }" );
-	
+
 	switch( choice )
 	{
 		case 1:		// Unix
 			sprintf( msg, "catch { exec $sysTerm -e $DbgExe $cmdbreak %s & } result", str1 );
 			break;
-	
+
 		case 2:		// Mac
 #ifdef MAC_PKG
             cmd( "if [ string equal $cmdbreak \"--args\" ] { set cmdbreak \"\" }" );
@@ -1689,16 +1666,16 @@ if ( choice == 13 || choice == 58 )
 			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f %s\\\"\" & } result", str1 );
 #endif
 			break;
-			
+
 		case 3:		// Windows
 			strcat( str1, ".exe" );
 			sprintf( msg, "catch { exec $sysTerm /c $DbgExe $cmdbreak %s & } result", str1 );
 			break;
-			
+
 		default:
 			goto end_gdb;
 	}
-	
+
 	// check if executable file is older than model file
 	s = get_fun_name( str );
 	if ( s == NULL || ! strcmp( s, "" ) )
@@ -1740,9 +1717,7 @@ if ( choice == 13 || choice == 58 )
 	goto loop;
 }
 
-
 /* create a new model/group */
-
 if ( choice == 14 )
 {
 	cmd( "destroytop .mm" );	// close compilation results, if open
@@ -1762,7 +1737,7 @@ if ( choice == 14 )
 				} else { \
 					set choice 0 \
 				} \
-			}" );		
+			}" );
 	if ( choice == 0 )
 		goto loop;
 
@@ -1783,7 +1758,7 @@ if ( choice == 14 )
 	cmd( "pack .a.tit .a.f -padx 5 -pady 5" );
 
 	cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
-	
+
 	cmd( "bind .a.f <KeyPress-Return> { .a.b.ok invoke }" );
 	cmd( "bind .a <Up> {.a.f.r1 invoke}" );
 	cmd( "bind .a <Down> {.a.f.r2 invoke}" );
@@ -1865,7 +1840,7 @@ if ( choice == 14 )
 			cmd( ".a.mdir.e selection range 0 end" );
 			goto here_newgroup;
 		}
-		
+
 		// control for existing directory
 		cmd( "if [ file exists \"$groupdir/$mdir\" ] { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 		if ( choice == 3 )
@@ -1951,7 +1926,7 @@ if ( choice == 14 )
 	   cmd( "focus .a.mdir.e" );
 	   cmd( ".a.mdir.e selection range 0 end" );
 	   goto loop_copy_new;
-	} 
+	}
 
 	// control for existing directory
 	cmd( "if [ file exists \"$mdir\" ] { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
@@ -1960,50 +1935,50 @@ if ( choice == 14 )
 		cmd( "focus .a.mdir.e" );
 		cmd( ".a.mdir.e selection range 0 end" );
 		goto loop_copy_new;
-	} 
+	}
 
 	// control for an existing model with the same name AND same version
 	cmd( "set dir [ glob -nocomplain * ]" );
 	cmd( "set num [ llength $dir ]" );
 	strcpy(str, " ");
-	
+
 	for ( i = 0; i < num; ++i )
 	{
 		cmd( "if [ file isdirectory [ lindex $dir %d ] ] { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
 		s = ( char * ) Tcl_GetVar( inter, "curdir", 0 );
 		strncpy( str, s, 499 );
-		
+
 		// check for invalid directories (LSD managed)
 		for ( found = false, j = 0; j < LSD_DIR_NUM; ++j )
 			if ( ! strcmp( str, lsd_dir[ j ] ) )
 				found = true;
-			
+
 		if ( ! found )
 		{
 			if ( ! load_model_info( str ) )
 				cmd( "set modelName $curdir; set modelVersion \"1.0\"" );
-			
+
 			cmd( "set comp [ string compare $modelName $mname ]" );
 			cmd( "set comp1 [ string compare $modelVersion $mver ]" );
 			cmd( "if { $comp == 0 && $comp1 == 0} { set choice 3 }" );
 			cmd( "if { $comp == 0 } { set choice 4 }" );
 		}
 	}
-	 
+
 	if ( choice == 3 )
 	{
 		cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $curdir).\"" );
 		cmd( ".a.mname.e selection range 0 end" );
 		cmd( "focus .a.mname.e" );
 		goto loop_copy_new;
-	} 
-	 
+	}
+
 	if ( choice == 4 )
 	{
 		choice = 0;
 		cmd( "set answer [ tk_messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' (ver. $mver) already exists in directory: $curdir.\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you may cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\" ]" );
 		s = ( char * ) Tcl_GetVar( inter, "answer", 0 );
-	
+
 		cmd( "if { ! [ string compare $answer ok ] } { set choice 1 } { set choice 0 }" );
 		if ( choice == 0 )
 		{
@@ -2011,9 +1986,9 @@ if ( choice == 14 )
 			cmd( "set modelName \"\"" );
 			cmd( "set modelVersion \"\"" );
 			goto loop;
-		} 
-	} 
-	 
+		}
+	}
+
 	cmd( "destroytop .a" );
 
 	// create a new empty model
@@ -2031,11 +2006,11 @@ if ( choice == 14 )
 
 	if ( macro )
 		cmd( "set fun_base \"fun_baseMacro.cpp\"" );
-	else 
+	else
 		cmd( "set fun_base \"fun_baseC.cpp\"" );
 
 	// create the empty equation file
-	cmd( "file copy \"$RootLsd/$LsdSrc/$fun_base\" \"$modelDir/fun_$mdir.cpp\"" ); 
+	cmd( "file copy \"$RootLsd/$LsdSrc/$fun_base\" \"$modelDir/fun_$mdir.cpp\"" );
 
 	// create the model options and info files
 	check_option_files( );
@@ -2058,14 +2033,12 @@ if ( choice == 14 )
 	cmd( "tk_messageBox -parent . -type ok -title \"New Model\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: $modelDir\"" );
 
 	cmd( "set before [ .f.t.t get 1.0 end ]" ); //avoid to re-issue a warning for non saved files
-	
+
 	choice = 50;
 	goto loop;
 }
 
-
 /* open a text file */
-
 if ( choice == 15 || choice == 71 )
 {
 	if ( choice == 15 )
@@ -2078,16 +2051,16 @@ if ( choice == 15 || choice == 71 )
 
 	cmd( "if [ file exists \"$brr\" ] { set choice 1 } { set choice 0 }" );
 	if ( choice == 0 )
-		goto loop; 
+		goto loop;
 
-	cmd( ".f.t.t delete 1.0 end" ); 
-	cmd( "set dirname [ file dirname \"$brr\" ]" ); 
-	cmd( "set filename [ file tail \"$brr\" ]" ); 
-	cmd( "set file [ open \"$brr\" r ]" ); 
-	cmd( ".f.t.t insert end [ read -nonewline $file ]" ); 
-	cmd( "close $file" ); 
-	cmd( ".f.t.t edit reset" ); 
-	cmd( ".f.t.t tag remove sel 1.0 end" ); 
+	cmd( ".f.t.t delete 1.0 end" );
+	cmd( "set dirname [ file dirname \"$brr\" ]" );
+	cmd( "set filename [ file tail \"$brr\" ]" );
+	cmd( "set file [ open \"$brr\" r ]" );
+	cmd( ".f.t.t insert end [ read -nonewline $file ]" );
+	cmd( "close $file" );
+	cmd( ".f.t.t edit reset" );
+	cmd( ".f.t.t tag remove sel 1.0 end" );
 
 	// handle the opening of files from the compilation error window
 	cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$dirname/$filename\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
@@ -2103,7 +2076,7 @@ if ( choice == 15 || choice == 71 )
 			.f.t.t mark set insert 1.0 \
 		}" );
 
-	cmd( "set before [ .f.t.t get 1.0 end ]" ); 
+	cmd( "set before [ .f.t.t get 1.0 end ]" );
 	cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 
 	cmd( "set s [ file extension \"$filename\" ]" );
@@ -2131,33 +2104,29 @@ if ( choice == 15 || choice == 71 )
 	goto loop;
 }
 
-
 /* insert automatic tabs */
-
 if ( choice == 16 )
 {
 	cmd( "set in [ .f.t.t index insert ]" );
 	cmd( "scan $in %%d.%%d line col" );
 	cmd( "set line [ expr $line - 1 ]" );
 	cmd( "set s [ .f.t.t get $line.0 $line.end ]" );
-	
+
 	s = ( char * ) Tcl_GetVar( inter, "s", 0 );
 	for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
 	  str[ i ] = s[ i ];
-  
+
 	if ( i > 0 )
 	{
 		str[ i ] = '\0';
 		cmd( ".f.t.t insert insert \"%s\"", str );
 	}
-	
+
 	choice = 0;
 	goto loop;
 }
 
-
 /* find matching parenthesis */
-
 if ( choice == 17)
 {
 	cmd( "set sym [.f.t.t get insert]" );
@@ -2169,7 +2138,7 @@ if ( choice == 17)
 	cmd( ".f.t.t tag add sel $cur \"$cur + 1char\"" );
 	if ( num > 0 )
 		cmd( "set cur [.f.t.t index \"insert + 1 char\"]" );
-  
+
 	while ( num != 0 && choice != 0 )
 	{
 		cmd( "set a [.f.t.t search $direction \"\\{\" $cur $terminal]" );
@@ -2179,7 +2148,7 @@ if ( choice == 17)
 		cmd( "if {$a==$b} {set choice 0}" );
 		if ( choice == 0 )
 			goto loop;
-		
+
 		if ( num > 0 )
 			cmd( "if {[.f.t.t compare $a < $b]} {set num [expr $num + 1]; set cur [.f.t.t index \"$a+1char\"]} {set num [expr $num - 1]; set cur [.f.t.t index \"$b+1char\"]}" );
 		else
@@ -2187,7 +2156,7 @@ if ( choice == 17)
 
 
 	}
-	
+
 	choice = 0;
 
 	cmd( " if { [string compare $sign \"+\"]==0 } {.f.t.t tag add sel \"$cur - 1char\" $cur ; set num 1} {.f.t.t tag add sel $cur \"$cur + 1char\"; set num 0}" );
@@ -2195,7 +2164,6 @@ if ( choice == 17)
 	cmd( ".f.t.t see $cur" );
 	goto loop;
 }
-
 
 // MACRO VERSION
 // Insert a LSD macro, to be used in LSD equations' code
@@ -2256,7 +2224,7 @@ if ( choice == 28 && macro )
 	cmd( "destroytop .a" );
 
 	if ( choice == 2 )
-	{ 
+	{
 		choice = 0;
 		goto loop;
 	}
@@ -2264,7 +2232,6 @@ if ( choice == 28 && macro )
 	cmd( "set choice $res" );
 	goto loop;
 }
-
 
 // C++ VERSION
 // Insert a LSD script, to be used in LSD equations' code
@@ -2332,13 +2299,12 @@ if ( choice == 28 && ! macro )
 	goto loop;
 }
 
-
 // insert a math function
 if ( choice == 51 )
 {
-	cmd( "set value1 \"0\"" ); 
-	cmd( "set value2 \"1\"" ); 
-	cmd( "set res 9" ); 
+	cmd( "set value1 \"0\"" );
+	cmd( "set value2 \"1\"" );
+	cmd( "set res 9" );
 	cmd( "set str {uniform($value1, $value2)}" );
 
 	cmd( "newtop .a \"Math Functions\" { set choice 2 }" );
@@ -2386,7 +2352,7 @@ if ( choice == 51 )
 	cmd( "pack .a.f.r1 .a.f.r2 .a.f.r3 .a.f.r4 .a.f.r5 .a.f.r6 .a.f.r7 .a.f.r8 .a.f.r9 .a.f.r10 .a.f.r11 .a.f.r12 .a.f.r13 .a.f.r14 .a.f.r15 .a.f.r16 .a.f.r17 -anchor w" );
 
 	cmd( "label .a.more -text \"(see Help for more functions/distributions)\"" );
-	
+
 	cmd( "pack .a.e .a.f .a.more -padx 5 -pady 5" );
 
 	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LSD_macros.html#Math } { set choice 2 }" );
@@ -2402,11 +2368,11 @@ if ( choice == 51 )
 	cmd( "destroytop .a" );
 
 	if ( choice == 2 )
-	{ 
+	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( ".f.t.t insert insert [ subst $str ] }" );
 	cmd( ".f.t.t see insert" );
 
@@ -2467,7 +2433,7 @@ if ( choice == 25 )
 		cmd( ".f.t.t insert insert \"res=;\\n\"" );
 		cmd( ".f.t.t insert insert \"goto end;\\n}\\n\"" );
 		cmd( ".f.t.t mark set insert \"$a + 3 line\"" );
-		cmd( ".f.t.t tag add sel insert \"insert + 7 char\"" );	
+		cmd( ".f.t.t tag add sel insert \"insert + 7 char\"" );
 	}
 
 	v_counter = 0;
@@ -2534,7 +2500,7 @@ if ( choice == 26 )
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	if ( macro )
@@ -2556,13 +2522,12 @@ if ( choice == 26 )
 	cmd( "if {$v_num==\"\"} { set num -1} {set num $v_num}" );
 	if (num!=-1)
 	 v_counter=++num;
- 
+
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // insert a cycle for (cur=p->search("Label"); cur!=NULL; cur=go_brother(cur) )
 if ( choice == 27 )
@@ -2613,7 +2578,7 @@ if ( choice == 27 )
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	if ( macro )
@@ -2658,7 +2623,6 @@ if ( choice == 27 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // insert a v[0]=p->increment("Var",value)
 if ( choice == 40 )
@@ -2716,7 +2680,7 @@ if ( choice == 40 )
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	if ( macro )
@@ -2741,7 +2705,6 @@ if ( choice == 40 )
 	goto loop;
 }
 
-
 // insert a v[0]=p->multiply("Var",0)
 if ( choice == 45 )
 {
@@ -2754,7 +2717,7 @@ if ( choice == 45 )
 		cmd( "newtop .a \"Insert 'MULT' Command\" { set choice 2 }" );
 	else
 		cmd( "newtop .a \"Insert 'multiply' Command\" { set choice 2 }" );
-		
+
 	cmd( "frame .a.v" );
 	cmd( "label .a.v.l -text \"Number v\\\[x\\] to assign the result after multiplication\"" );
 	cmd( "entry .a.v.e -width 2 -textvariable v_num -justify center" );
@@ -2798,7 +2761,7 @@ if ( choice == 45 )
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	if ( macro )
@@ -2822,7 +2785,6 @@ if ( choice == 45 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // insert a p->write("Var",0,0)
 if ( choice == 29 )
@@ -2880,7 +2842,7 @@ if ( choice == 29 )
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	if ( macro )
@@ -2899,7 +2861,6 @@ if ( choice == 29 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // insert a cur=p->search_var_cond("Var",1,0)
 if ( choice == 30 )
@@ -2925,7 +2886,7 @@ if ( choice == 30 )
 	cmd( "label .a.v.l -text \"Value to search for\"" );
 	cmd( "entry .a.v.e -width 15 -textvariable v_num -justify center" );
 	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
-	cmd( "pack .a.v.l .a.v.e" ); 
+	cmd( "pack .a.v.l .a.v.e" );
 
 	cmd( "frame .a.n" );
 	cmd( "label .a.n.l -text \"Variable or parameter to search\"" );
@@ -2964,7 +2925,7 @@ if ( choice == 30 )
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	if ( macro )
@@ -2983,7 +2944,6 @@ if ( choice == 30 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // insert a p->lsdqsort("Object", "Variable", "DIRECTION")
 if ( choice == 31 )
@@ -3069,7 +3029,6 @@ if ( choice == 31 )
 	goto loop;
 }
 
-
 // insert a add_an_obj
 if ( choice == 52 )
 {
@@ -3121,7 +3080,7 @@ if ( choice == 52 )
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
 	cmd( ".a.d.e selection range 0 end" );
-	 
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
@@ -3133,7 +3092,7 @@ if ( choice == 52 )
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	if ( macro )
@@ -3166,7 +3125,6 @@ if ( choice == 52 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // insert a delete_obj
 if ( choice == 53 )
@@ -3203,7 +3161,7 @@ if ( choice == 53 )
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	if ( macro )
@@ -3215,7 +3173,6 @@ if ( choice == 53 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // insert a RNDDRAW
 if ( choice == 54 )
@@ -3287,9 +3244,9 @@ if ( choice == 54 )
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
-	
+
 	cmd( "if { $v_tot == \"\" } { set choice 1 } { set choice 2 }" );
 
 	if ( macro )
@@ -3297,10 +3254,10 @@ if ( choice == 54 )
 		if ( choice == 1 )
 		 {
 		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label != \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW(\\\"$v_num\\\", \\\"$v_label\\\");\"}" );
-		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label == \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIR(\\\"$v_num\\\");\"}" );  
+		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label == \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIR(\\\"$v_num\\\");\"}" );
 		  cmd( "if {$v_obj == \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAWL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\"}" );
 		  cmd( "if {$v_obj != \"p\" && $v_lag == 0 && $v_label != \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAWS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\");\"}" );
-		  cmd( "if {$v_obj != \"p\" && $v_lag == 0 && $v_label == \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIRS($v_obj, \\\"$v_num\\\");\"}" );  
+		  cmd( "if {$v_obj != \"p\" && $v_lag == 0 && $v_label == \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIRS($v_obj, \\\"$v_num\\\");\"}" );
 		  cmd( "if {$v_obj != \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAWLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\"}" );
 		 }
 		else
@@ -3323,7 +3280,6 @@ if ( choice == 54 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // insert a SEARCH
 if ( choice == 55 )
@@ -3374,7 +3330,7 @@ if ( choice == 55 )
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	if ( macro )
@@ -3386,7 +3342,6 @@ if ( choice == 55 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // insert a SUM
 if ( choice == 56 )
@@ -3444,7 +3399,7 @@ if ( choice == 56 )
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	if ( macro )
@@ -3473,18 +3428,17 @@ if ( choice == 56 )
 	goto loop;
 }
 
-
 // insert a network macro
 if ( choice == 72 )
 {
 	cmd( "set res 73");
-	
+
 	cmd( "newtop .a \"Network Macros\" { set choice 2 }" );
 
 	cmd( "label .a.tit -text \"Available LSD network macros\"" );
 
 	cmd( "frame .a.f -bd 2 -relief groove" );
-	
+
 	cmd( "radiobutton .a.f.r1 -text \"INIT - create a new network\" -variable res -value 73 -underline 0" );
 	cmd( "radiobutton .a.f.r2 -text \"LOAD - load a network from a file\" -variable res -value 74 -underline 0" );
 	cmd( "radiobutton .a.f.r3 -text \"SAVE - save a network to a file\" -variable res -value 75 -underline 0" );
@@ -3532,16 +3486,15 @@ if ( choice == 72 )
 	cmd( "destroytop .a" );
 
 	if ( choice == 2 )
-	{ 
+	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set choice $res" );		// execute selected macro
 
 	goto loop;
 }
-
 
 // create a new network
 if ( choice == 73 )
@@ -3549,7 +3502,7 @@ if ( choice == 73 )
 	cmd( "set netListLong [ list \"Disconnected (no links)\" \"Fully connected\" \"Star (undirected)\" \"Circle (undirected)\" \"Lattice (directed)\" \"Random (directed)\" \"Random (undirected)\" \"Uniform random (directed)\" \"Renyi-Erdos random (undirected)\" \"Small World (undirected)\" \"Scale-free (undirected)\" ]");
 	cmd( "set netListShort [ list \"DISCONNECTED\" \"CONNECTED\" \"STAR\" \"CIRCLE\" \"LATTICE\" \"RANDOM-DIR\" \"RANDOM-UNDIR\" \"UNIFORM\" \"RENYI-ERDOS\" \"SMALL-WORLD\" \"SCALE-FREE\" ]");
 	cmd( "set netListPar [ list [ list ] [ list ] [ list ] [ list \"Number of neighbors\" ] [ list \"Number of columns\" \"Neighbors (4 or 8)\" ] [ list \"Number of links\" ] [ list \"Number of links (2 per connection)\" ] [ list \"Out-degree\" ] [ list \"Out-degree\" ] [ list \"Out-degree\" \"Reconnection probability\" ] [ list \"Out-degree\" \"Power-law degree\" ] ]");
-	
+
 	cmd( "set v_net [ lindex $netListLong 0 ]" );
 	cmd( "set v_label \"\"" );
 	cmd( "set v_num 2" );
@@ -3603,29 +3556,29 @@ if ( choice == 73 )
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
 	cmd( ".a.d.e selection range 0 end" );
-	 
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "set res [ .a.d.e current ]" );
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "if { $v_par1 == \"\"} { set v_par1 0 }" );
 	cmd( "if { $v_par2 == \"\"} { set v_par2 0 }" );
-	
+
 	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\"}" );
 	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\"}" );
 	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\"}" );
-	
+
 	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\"}" );
 	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\"}" );
 	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\"}" );
@@ -3634,7 +3587,6 @@ if ( choice == 73 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // load a network from a file
 if ( choice == 74 )
@@ -3670,19 +3622,19 @@ if ( choice == 74 )
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
 	cmd( ".a.d.e selection range 0 end" );
-	
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"LOAD_NET(\\\"$v_label\\\", \\\"$v_net\\\");\"}" );
@@ -3692,7 +3644,6 @@ if ( choice == 74 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // save a network to a file
 if ( choice == 75 )
@@ -3728,19 +3679,19 @@ if ( choice == 75 )
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
 	cmd( ".a.d.e selection range 0 end" );
-	
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SAVE_NET(\\\"$v_label\\\", \\\"$v_net\\\");\"}" );
@@ -3750,7 +3701,6 @@ if ( choice == 75 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // add a network snapshot to a file
 if ( choice == 76 )
@@ -3786,19 +3736,19 @@ if ( choice == 76 )
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
 	cmd( ".a.d.e selection range 0 end" );
-	
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SNAP_NET(\\\"$v_label\\\", \\\"$v_net\\\");\"}" );
@@ -3808,7 +3758,6 @@ if ( choice == 76 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // add a node or link
 if ( choice == 77 )
@@ -3820,17 +3769,17 @@ if ( choice == 77 )
 	cmd( "set v_obj p" );
 
 	cmd( "newtop .a \"Insert 'ADDNODE/LINK' Command\" { set choice 2 }" );
-	
+
 	cmd( "frame .a.c" );
 	cmd( "label .a.c.l -text \"Add to the network a\"" );
-	
+
 	cmd( "frame .a.c.b -bd 2 -relief groove" );
 	cmd( "radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { write_any .a.d.e cur; .a.i.l configure -text \"Unique ID number\"; .a.n.l configure -text \"Node name (optional)\"; write_any .a.n.e \"\"; .a.o.l configure -text \"Object for new network node\" }" );
 	cmd( "radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { write_any .a.d.e curl; .a.i.l configure -text \"Link weight\"; .a.n.l configure -text \"Destination node object\"; write_any .a.n.e cur; .a.o.l configure -text \"Origin node object\" }" );
 	cmd( "bind .a.c.b.e <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f -side left" );
-	
+
 	cmd( "pack .a.c.l .a.c.b" );
 
 	cmd( "frame .a.d" );
@@ -3865,24 +3814,24 @@ if ( choice == 77 )
 	cmd( ".a.c.b.e invoke" );
 	cmd( "focus .a.d.e" );
 	cmd( ".a.d.e selection range 0 end" );
-	
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "set choice $v_type" );
 	cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
-	
+
 	if ( choice == 0 )
 	{
 		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODE($v_num, \\\"$v_label\\\")\" }" );
@@ -3895,14 +3844,13 @@ if ( choice == 77 )
 		cmd( "if { $v_obj != \"p\" && $v_num ==\"\" } { .f.t.t insert insert \"ADDLINKS($v_obj, $v_label)\" }" );
 		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKWS($v_obj, $v_label, $v_num)\" }" );
 	}
-	
+
 	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
-	
+
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // get the values of a node or link
 if ( choice == 78 )
@@ -3912,10 +3860,10 @@ if ( choice == 78 )
 	cmd( "set v_obj p" );
 
 	cmd( "newtop .a \"Insert 'V_NODE/LINK' Command\" { set choice 2 }" );
-	
+
 	cmd( "frame .a.c" );
 	cmd( "label .a.c.l -text \"Get the value of\"" );
-	
+
 	cmd( "frame .a.c.b -bd 2 -relief groove" );
 	cmd( "radiobutton .a.c.b.e -text \"Node ID\" -width 8 -variable v_type -value 0 -command { .a.v.l configure -text \"Number v\\\[x\\] to assign to\"; write_any .a.v.e %d; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }", v_counter );
 	cmd( "radiobutton .a.c.b.f -text \"Node name\" -width 8 -variable v_type -value 1 -command { .a.v.l configure -text \"char  pointer to assign to\"; write_any .a.v.e \"\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }" );
@@ -3924,7 +3872,7 @@ if ( choice == 78 )
 	cmd( "bind .a.c.b.f <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "bind .a.c.b.g <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f .a.c.b.g -side left" );
-	
+
 	cmd( "pack .a.c.l .a.c.b" );
 
 	cmd( "frame .a.v" );
@@ -3947,23 +3895,23 @@ if ( choice == 78 )
 	cmd( ".a.c.b.e invoke" );
 	cmd( "focus .a.v.e" );
 	cmd( ".a.v.e selection range 0 end" );
-	
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "set choice $v_type" );
-	
+
 	switch ( choice )
 	{
 		case 0:
@@ -3975,7 +3923,7 @@ if ( choice == 78 )
 			if ( num != -1 )
 				v_counter = ++num;
 			break;
-			
+
 		case 1:
 			cmd( "if { $v_num != \"\" } { .f.t.t insert insert \"$v_num = \" }" );
 			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"V_NODENAME()\"}" );
@@ -3994,14 +3942,13 @@ if ( choice == 78 )
 		default:
 			break;
 	}
-	
+
 	cmd( "if { $v_num!=\"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
-	
+
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // write values to a node or link
 if ( choice == 79 )
@@ -4011,10 +3958,10 @@ if ( choice == 79 )
 	cmd( "set v_obj p" );
 
 	cmd( "newtop .a \"Insert 'WRITE_NODE/LINK' Command\" { set choice 2 }" );
-	
+
 	cmd( "frame .a.c" );
 	cmd( "label .a.c.l -text \"Write a value to\"" );
-	
+
 	cmd( "frame .a.c.b -bd 2 -relief groove" );
 	cmd( "radiobutton .a.c.b.e -text \"Node ID\" -width 8 -variable v_type -value 0 -command { .a.v.l configure -text \"Node ID to set\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }", v_counter );
 	cmd( "radiobutton .a.c.b.f -text \"Node name\" -width 8 -variable v_type -value 1 -command { .a.v.l configure -text \"Node name to set\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }" );
@@ -4023,7 +3970,7 @@ if ( choice == 79 )
 	cmd( "bind .a.c.b.f <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "bind .a.c.b.g <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f .a.c.b.g -side left" );
-	
+
 	cmd( "pack .a.c.l .a.c.b" );
 
 	cmd( "frame .a.v" );
@@ -4046,30 +3993,30 @@ if ( choice == 79 )
 	cmd( ".a.c.b.e invoke" );
 	cmd( "focus .a.v.e" );
 	cmd( ".a.v.e selection range 0 end" );
-	
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "set choice $v_type" );
-	
+
 	switch ( choice )
 	{
 		case 0:
 			cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEID($v_num);\" }" );
 			cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEIDS($v_obj, $v_num);\" }" );
 			break;
-			
+
 		case 1:
 			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"WRITE_NODENAME(\\\"$v_num\\\");\"}" );
 			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"WRITE_NODENAMES($v_obj, \\\"$v_num\\\");\" }" );
@@ -4083,11 +4030,10 @@ if ( choice == 79 )
 			break;
 	}
 	cmd( ".f.t.t see insert" );
-	
+
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // cycle through links
 if ( choice == 80 )
@@ -4116,19 +4062,19 @@ if ( choice == 80 )
 	cmd( "showtop .a" );
 	cmd( "focus .a.c.e" );
 	cmd( ".a.c.e selection range 0 end" );
-	
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"CYCLE_LINK($v_obj)\\n\"}" );
@@ -4166,7 +4112,6 @@ if ( choice == 80 )
 	goto loop;
 }
 
-
 // search for a node or link
 if ( choice == 81 )
 {
@@ -4179,14 +4124,14 @@ if ( choice == 81 )
 
 	cmd( "frame .a.c" );
 	cmd( "label .a.c.l -text \"Search for a\"" );
-	
+
 	cmd( "frame .a.c.b -bd 2 -relief groove" );
 	cmd( "radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { write_any .a.d.e cur; .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\" }" );
 	cmd( "radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { write_any .a.d.e curl; .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Node object\" }" );
 	cmd( "bind .a.c.b.e <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f -side left" );
-	
+
 	cmd( "pack .a.c.l .a.c.b" );
 
 	cmd( "frame .a.d" );
@@ -4227,18 +4172,18 @@ if ( choice == 81 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "set choice $v_type" );
 	cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
-	
+
 	if ( choice == 0 )
 	{
 		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_NODE(\\\"$v_label\\\", $v_num)\" }" );
@@ -4249,14 +4194,13 @@ if ( choice == 81 )
 		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_LINK($v_num)\" }" );
 		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_LINKS($v_obj, $v_num)\" }" );
 	}
-	
+
 	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // get objects connected by link
 if ( choice == 82 )
@@ -4269,14 +4213,14 @@ if ( choice == 82 )
 
 	cmd( "frame .a.c" );
 	cmd( "label .a.c.l -text \"Get the node object\"" );
-	
+
 	cmd( "frame .a.c.b -bd 2 -relief groove" );
 	cmd( "radiobutton .a.c.b.e -text \"Link points to\" -width 12 -variable v_type -value 0" );
 	cmd( "radiobutton .a.c.b.f -text \"Link points from\" -width 12 -variable v_type -value 1" );
 	cmd( "bind .a.c.b.e <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f -side left" );
-	
+
 	cmd( "pack .a.c.l .a.c.b" );
 
 	cmd( "frame .a.d" );
@@ -4298,24 +4242,24 @@ if ( choice == 82 )
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
 	cmd( ".a.d.e selection range 0 end" );
-	
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "set choice $v_type" );
 	cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
-	
+
 	if ( choice == 0 )
 		cmd( ".f.t.t insert insert \"LINKTO($v_obj)\" }" );
 	else
@@ -4323,11 +4267,10 @@ if ( choice == 82 )
 
 	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
-	
+
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // shuffle nodes in a network
 if ( choice == 83 )
@@ -4356,19 +4299,19 @@ if ( choice == 83 )
 	cmd( "showtop .a" );
 	cmd( "focus .a.n.e" );
 	cmd( ".a.n.e selection range 0 end" );
-	
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SHUFFLE_NET(\\\"$v_label\\\");\"}" );
@@ -4378,7 +4321,6 @@ if ( choice == 83 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // random draw a node or link
 if ( choice == 84 )
@@ -4392,14 +4334,14 @@ if ( choice == 84 )
 
 	cmd( "frame .a.c" );
 	cmd( "label .a.c.l -text \"Randomly draw a\"" );
-	
+
 	cmd( "frame .a.c.b -bd 2 -relief groove" );
 	cmd( "radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { write_any .a.d.e cur; .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\" }" );
 	cmd( "radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { write_any .a.d.e curl; .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Network node object\" }" );
 	cmd( "bind .a.c.b.e <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f -side left" );
-	
+
 	cmd( "pack .a.c.l .a.c.b" );
 
 	cmd( "frame .a.d" );
@@ -4428,24 +4370,24 @@ if ( choice == 84 )
 	cmd( ".a.c.b.e invoke" );
 	cmd( "focus .a.d.e" );
 	cmd( ".a.d.e selection range 0 end" );
-	
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "set choice $v_type" );
 	cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
-	
+
 	if ( choice == 0 )
 	{
 		cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"RNDDRAW_NODE(\\\"$v_label\\\")\" }" );
@@ -4464,7 +4406,6 @@ if ( choice == 84 )
 	goto loop;
 }
 
-
 // delete a network, node or link
 if ( choice == 85 )
 {
@@ -4476,7 +4417,7 @@ if ( choice == 85 )
 
 	cmd( "frame .a.c" );
 	cmd( "label .a.c.l -text \"Delete a\"" );
-	
+
 	cmd( "frame .a.c.b -bd 2 -relief groove" );
 	cmd( "radiobutton .a.c.b.e -text Network -width 6 -variable v_type -value 0 -command { .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\"; write_any .a.o.e p }" );
 	cmd( "radiobutton .a.c.b.f -text Node -width 6 -variable v_type -value 1 -command { .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Node object\"; write_any .a.o.e p }" );
@@ -4485,7 +4426,7 @@ if ( choice == 85 )
 	cmd( "bind .a.c.b.f <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "bind .a.c.b.g <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f .a.c.b.g -side left" );
-	
+
 	cmd( "pack .a.c.l .a.c.b" );
 
 	cmd( "frame .a.n" );
@@ -4508,30 +4449,30 @@ if ( choice == 85 )
 	cmd( ".a.c.b.e invoke" );
 	cmd( "focus .a.n.e" );
 	cmd( ".a.n.e selection range 0 end" );
-	
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "set choice $v_type" );
-	
+
 	switch ( choice )
 	{
 		case 0:
 			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"DELETE_NET(\\\"$v_label\\\");\" }" );
 			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"DELETE_NETS($v_obj, \\\"$v_label\\\");\" }" );
 			break;
-			
+
 		case 1:
 			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"DELETE_NODE();\"}" );
 			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"DELETE_NODES($v_obj);\" }" );
@@ -4550,7 +4491,6 @@ if ( choice == 85 )
 	goto loop;
 }
 
-
 // statistics about a network or node
 if ( choice == 86 )
 {
@@ -4562,14 +4502,14 @@ if ( choice == 86 )
 
 	cmd( "frame .a.c" );
 	cmd( "label .a.c.l -text \"Get statistics from a\"" );
-	
+
 	cmd( "frame .a.c.b -bd 2 -relief groove" );
 	cmd( "radiobutton .a.c.b.e -text Network -width 6 -variable v_type -value 0 -command { .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\"; write_any .a.o.e p }" );
 	cmd( "radiobutton .a.c.b.f -text Node -width 6 -variable v_type -value 1 -command { .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Node object\"; write_any .a.o.e p }" );
 	cmd( "bind .a.c.b.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f -side left" );
-	
+
 	cmd( "pack .a.c.l .a.c.b" );
 
 	cmd( "frame .a.n" );
@@ -4592,23 +4532,23 @@ if ( choice == 86 )
 	cmd( ".a.c.b.e invoke" );
 	cmd( "focus .a.n.e" );
 	cmd( ".a.n.e selection range 0 end" );
-	
+
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
-	  
+
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	 
+
 	cmd( "set a [ .f.t.t index insert ]" );
 
 	cmd( "set choice $v_type" );
-	
+
 	if ( choice == 0 )
 	{
 		cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"STAT_NET(\\\"$v_label\\\");\" }" );
@@ -4624,7 +4564,6 @@ if ( choice == 86 )
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
-
 
 // find matching parenthesis
 if ( choice == 32 )
@@ -4650,12 +4589,12 @@ if ( choice == 32 )
 
 	if ( choice == 0 )
 		goto loop;
-	
+
 	cmd( "set cur [ .f.t.t index insert ]" );
 	cmd( ".f.t.t tag add sel $cur \"$cur + 1char\"" );
 	if ( num > 0 )
 		cmd( "set cur [.f.t.t index \"insert + 1 char\"]" );
-	
+
 	while ( num != 0 && choice != 0 )
 	{
 		cmd( "set a [ .f.t.t search $direction \"\\(\" $cur $terminal ]" );
@@ -4670,7 +4609,7 @@ if ( choice == 32 )
 		else
 			cmd( "if [ .f.t.t compare $a > $b ] { set num [ expr $num + 1 ]; set cur [ .f.t.t index $a ] } { set num [ expr $num - 1 ]; set cur [ .f.t.t index $b ] }" );
 	}
-	
+
 	choice = 0;
 
 	cmd( " if { ! [ string compare $sign \"+\" ] } { .f.t.t tag add sel \"$cur - 1char\" $cur ; set num 1 } { .f.t.t tag add sel $cur \"$cur + 1char\"; set num 0 }" );
@@ -4679,7 +4618,6 @@ if ( choice == 32 )
 	goto loop;
 }
 
-
 // select a model
 if ( choice == 33 )
 {
@@ -4687,7 +4625,7 @@ if ( choice == 33 )
 
 	Tcl_LinkVar( inter, "choiceSM", ( char * ) & num, TCL_LINK_INT );
 	num = 0;
-	
+
 	cmd( "showmodel $groupdir" );
 	cmd( "focus .l" );
 
@@ -4712,7 +4650,7 @@ if ( choice == 33 )
 
 	cmd( "set modelDir [ lindex $ldn $result ]" );
 	cmd( "set dirname $modelDir" );
-	
+
 	load_model_info( ( char * ) Tcl_GetVar( inter, "modelDir", 0 ) );
 
 	cmd( ".f.hea.info.grp.dat conf -text \"$modelGroup\"" );
@@ -4736,7 +4674,6 @@ if ( choice == 33 )
 	choice = 50;								// load description file
 	goto loop;
 }
-
 
 // create a new version of the current model
 if ( choice == 41 )
@@ -4795,7 +4732,7 @@ if ( choice == 41 )
 
 	if ( choice == 2 )
 	{
-		cmd( "destroytop .a" );  
+		cmd( "destroytop .a" );
 		cmd( "set modelName $oldModelName" );
 		cmd( "set modelVersion $oldModelVersion" );
 		choice = 0;
@@ -4809,7 +4746,7 @@ if ( choice == 41 )
 		cmd( "focus .a.mdir.e" );
 		cmd( ".a.mdir.e selection range 0 end" );
 		goto loop_copy;
-	} 
+	}
 
 	// control for existing directory
 	cmd( "if [ file exists \"$mdir\" ] { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
@@ -4818,7 +4755,7 @@ if ( choice == 41 )
 		cmd( "focus .a.mdir.e" );
 		cmd( ".a.mdir.e selection range 0 end" );
 		goto loop_copy;
-	} 
+	}
 
 	// control for an existing model with the same name AND same version
 	cmd( "set dir [ glob -nocomplain * ]" );
@@ -4829,12 +4766,12 @@ if ( choice == 41 )
 		cmd( "if [ file isdirectory [ lindex $dir %d ] ] { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
 		s = ( char * ) Tcl_GetVar( inter, "curdir", 0 );
 		strncpy( str, s, 499 );
-		
+
 		// check for invalid directories (LSD managed)
 		for ( found = false, j = 0; j < LSD_DIR_NUM; ++j )
 			if ( ! strcmp( str, lsd_dir[ j ] ) )
 				found = true;
-			
+
 		if ( ! found )
 		{
 			if ( ! load_model_info( str ) )
@@ -4845,14 +4782,14 @@ if ( choice == 41 )
 			cmd( "if { $comp == 0 && $comp1 == 0 } { set choice 3 }" );
 		}
 	}
-	 
+
 	if ( choice == 3 )
 	{
 		cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $curdir).\"" );
 		cmd( ".a.mname.e selection range 0 end" );
 		cmd( "focus .a.mname.e" );
 		goto loop_copy;
-	} 
+	}
 
 	cmd( "destroytop .a" );
 
@@ -4865,7 +4802,7 @@ if ( choice == 41 )
 	cmd( "set modelDate \"\"" );
 	cmd( ".f.hea.info.mod.dat conf -text \"$modelName\"" );
 	cmd( ".f.hea.info.ver.dat conf -text \"$modelVersion\"" );
-	
+
 	// create the model info file
 	update_model_info( );
 
@@ -4875,7 +4812,6 @@ if ( choice == 41 )
 	goto loop;
 }
 
-
 // increase indent
 if ( choice == 42 )
 {
@@ -4883,7 +4819,7 @@ if ( choice == 42 )
 	cmd( "if { [ string length $in ] == 0 } { set choice 0 } { set choice 1 }" );
 	if ( choice == 0 )
 		goto loop;
-	
+
 	cmd( "scan $in \"%%d.%%d %%d.%%d\" line1 col1 line2 col2" );
 	cmd( "set num $line1" );
 	i = num;
@@ -4896,7 +4832,6 @@ if ( choice == 42 )
 	goto loop;
 }
 
-
 // decrease indent
 if ( choice == 43 )
 {
@@ -4904,7 +4839,7 @@ if ( choice == 43 )
 	cmd( "if { [ string length $in ] == 0 } { set choice 0 } { set choice 1 }" );
 	if ( choice == 0 )
 		goto loop;
-	
+
 	cmd( "scan $in \"%%d.%%d %%d.%%d\" line1 col1 line2 col2" );
 	cmd( "set num $line1" );
 	i = num;
@@ -4917,11 +4852,10 @@ if ( choice == 43 )
 		if ( choice == 1 )
 			cmd( ".f.t.t delete %d.0 ", i );
 	}
-	 
+
 	choice = 0;
 	goto loop;
 }
-
 
 // show and edit model info
 if ( choice == 44 )
@@ -4936,7 +4870,7 @@ if ( choice == 44 )
 
 	if ( ! load_model_info( ( char * ) Tcl_GetVar( inter, "modelDir", 0 ) ) )
 		update_model_info( );			// recreate the model info file
-	  
+
 	cmd( "set mname $modelName" );
 	cmd( "set mver $modelVersion" );
 	cmd( "set mdate $modelDate" );
@@ -4954,7 +4888,7 @@ if ( choice == 44 )
 		cmd( "set eqname \"%s\"", s );
 		cmd( "if [ file exists \"$modelDir/$eqname\" ] { set edate \"[ clock format [ file mtime \"$modelDir/$eqname\" ] -format \"$DATE_FMT\" ]\" } { set edate \"\" }" );
 	}
-	
+
 	cmd( "newtop .a \"Model Info\" { set choice 2 }" );
 
 	cmd( "frame .a.mname" );
@@ -5003,7 +4937,7 @@ if ( choice == 44 )
 		cmd( "set modelName $mname" );
 		cmd( "set modelVersion $mver" );
 		cmd( "if { [ string is print -strict $mdate ] } { set modelDate \"$mdate\" } { set modelDate \"[ current_date ]\" }" );
-		
+
 		cmd( ".f.hea.info.mod.dat conf -text \"$modelName\"" );
 		cmd( ".f.hea.info.ver.dat conf -text \"$modelVersion\"" );
 
@@ -5014,7 +4948,6 @@ if ( choice == 44 )
 	choice = 0;
 	goto loop;
 }
-
 
 // create a new file
 if ( choice == 39 )
@@ -5033,7 +4966,6 @@ if ( choice == 39 )
 	goto loop;
 }
 
-
 // create the makefile
 if ( choice == 46 || choice == 49 )
 {
@@ -5043,10 +4975,9 @@ if ( choice == 46 || choice == 49 )
 		choice = 0;		//just create the makefile
 	if ( choice == 49 )	//after this show the description file (and a model is created)
 		choice = 50;
-	  
-	goto loop;
-} 
 
+	goto loop;
+}
 
 // System Options
 if ( choice == 47 )
@@ -5074,7 +5005,7 @@ if ( choice == 47 )
 	cmd( "frame .l.d" );
 	cmd( "label .l.d.msg -text [ check_sys_opt ] -fg red" );
 	cmd( "pack .l.d.msg" );
-	
+
 	cmd( "pack .l.t .l.d" );
 
 	cmd( "okXhelpcancel .l b Default { \
@@ -5120,13 +5051,12 @@ if ( choice == 47 )
 		choice = 46; 	//go to create makefile
 	}
 	else
-		choice = 0; 
+		choice = 0;
 
 	cmd( "destroytop .l" );
 
 	goto loop;
-} 
-
+}
 
 // Model Options
 if ( choice == 48 )
@@ -5274,11 +5204,11 @@ if ( choice == 48 )
 	cmd( "pack .l.d.opt.debug .l.d.opt.ext .l.d.opt.def .l.d.opt.cle -padx 10 -pady 5 -side left" );
 
 	cmd( "pack .l.d.opt" );
-	
+
 	cmd( "pack .l.t .l.d -anchor e" );
 
 	cmd( "okhelpcancel .l b { set choice 1 } { LsdHelp LMM.html#model_options } { set choice 2 }" );
-	
+
 	cmd( "bind .l.d.opt.ext <KeyPress-Return> { .l.d.opt.ext invoke }" );
 	cmd( "bind .l.d.opt.def <KeyPress-Return> { .l.d.opt.def invoke }" );
 	cmd( "bind .l.d.opt.cle <KeyPress-Return> { .l.d.opt.cle invoke }" );
@@ -5299,15 +5229,14 @@ if ( choice == 48 )
 		choice = 46;		//go to create makefile
 	}
 	else
-		choice = 0; 
+		choice = 0;
 
 	cmd( "cd \"$RootLsd\"" );
 
 	cmd( "destroytop .l" );
 
 	goto loop;
-} 
-
+}
 
 // launch tkdiff
 if ( choice == 57 )
@@ -5315,11 +5244,10 @@ if ( choice == 57 )
 	cmd( "destroytop .mm" );	// close compilation results, if open
 
 	cmd( "exec $wish $RootLsd/$LsdSrc/tkdiff.tcl &" );
-	 
+
 	choice = 0;
 	goto loop;
 }
-
 
 // start tkdiff with model selection
 if ( choice == 61 )
@@ -5339,11 +5267,10 @@ if ( choice == 61 )
 	}
 
 	cmd( "exec $wish $RootLsd/$LsdSrc/tkdiff.tcl [ file join \"$d1\" \"$f1\" ] [ file join \"$d2\" \"$f2\" ] &" );
-	 
+
 	choice = 0;
 	goto loop;
 }
-
 
 // change font
 if ( choice == 59 )
@@ -5390,7 +5317,6 @@ if ( choice == 59 )
 	choice = 0;
 	goto loop;
 }
-
 
 // LMM system options
 if ( choice == 60 )
@@ -5497,7 +5423,7 @@ if ( choice == 60 )
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
-	
+
 	cmd( "set temp_var7 [ .a.num7.v get ]" );
 
 	cmd( "destroytop .a" );
@@ -5526,14 +5452,13 @@ if ( choice == 60 )
 	goto loop;
 }
 
-
 // generate the no window distribution
 if ( choice == 62 )
 {
 	cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ tk_messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
 	if ( choice == 0 )
 		goto loop;
-	
+
 	// copy the base LSD source files to distribution directory
 	cmd( "if { ! [ file exists \"$modelDir/src\" ] } { file mkdir \"$modelDir/src\" }" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/main.cpp\" \"$modelDir/src\"" );
@@ -5548,7 +5473,7 @@ if ( choice == 62 )
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head.h\" \"$modelDir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head_fast.h\" \"$modelDir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" \"$modelDir/src\"" );
-	
+
 	// copy Eigen library files if in use, just once to save time
 	if( use_eigen( ) )
 		cmd( "if { ! [ file exists \"$modelDir/src/Eigen\" ] } { file copy -force \"$RootLsd/$LsdSrc/Eigen\" \"$modelDir/src\" }" );
@@ -5565,7 +5490,6 @@ if ( choice == 62 )
 	goto loop;
 }
 
-
 // Full syntax highlighting
 if ( choice == 64 )
 {
@@ -5574,7 +5498,6 @@ if ( choice == 64 )
 	choice = 0;
 	goto loop;
 }
-
 
 // Partial syntax highlighting
 if ( choice == 65 )
@@ -5585,7 +5508,6 @@ if ( choice == 65 )
 	goto loop;
 }
 
-
 // No syntax highlighting
 if ( choice == 66 )
 {
@@ -5594,7 +5516,6 @@ if ( choice == 66 )
 	choice = 0;
 	goto loop;
 }
-
 
 // Change tab size
 if ( choice == 67 )
@@ -5610,7 +5531,7 @@ if ( choice == 67 )
 	cmd( "pack .a.l -padx 5 -pady 5" );
 
 	cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
-	
+
 	cmd( "bind .a.l.v_num <KeyPress-Return> { .a.b.ok invoke }" );
 
 	cmd( "showtop .a" );
@@ -5622,7 +5543,7 @@ if ( choice == 67 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "if [ string is integer -strict [ .a.l.v_num get ] ] { set tabsize [ .a.l.v_num get ] } { set choice 2 }" );
-	
+
 	cmd( "destroytop .a" );
 
 	if ( choice == 2 )
@@ -5630,17 +5551,16 @@ if ( choice == 67 )
 		choice = 0;
 		goto loop;
 	}
-	
+
 	cmd( "settab .f.t.t $tabsize \"[ .f.t.t cget -font ]\"" );
-	
+
 	choice = 0;
 	goto loop;
 }
 
-
 // Adjust context menu for LSD macros
 if ( choice == 68 )
-{	
+{
 	cmd( "destroy .v.i" );
 	cmd( "menu .v.i -tearoff 0" );
 	cmd( ".v.i add command -label \"EQUATION\" -command {set choice 25} -accelerator Ctrl+E" );
@@ -5662,10 +5582,9 @@ if ( choice == 68 )
 	goto loop;
 }
 
-
 // Adjust context menu for LSD C++
 if ( choice == 69 )
-{	
+{
 	cmd( "destroy .v.i" );
 	cmd( "menu .v.i -tearoff 0" );
 	cmd( ".v.i add command -label \"LSD equation/function\" -command {set choice 25} -accelerator Ctrl+E" );
@@ -5686,10 +5605,9 @@ if ( choice == 69 )
 	goto loop;
 }
 
-
 // Show extra source files
 if ( choice == 70 )
-{	
+{
 	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
@@ -5697,7 +5615,7 @@ if ( choice == 70 )
 		choice = 0;
 		goto loop;
 	}
-	
+
 	// Create model options file if it doesn't exist
 	cmd( "set choice [ file exists \"$modelDir/$MODEL_OPTIONS\" ]" );
 	if ( choice == 0 )
@@ -5711,7 +5629,7 @@ if ( choice == 70 )
 		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
 		goto loop;
 	}
-	
+
 	while ( fgets( str, MAX_LINE_SIZE - 1, f ) != NULL && strncmp( str, "FUN_EXTRA=", 10 ) );
 	fclose( f );
 	if ( strncmp( str, "FUN_EXTRA=", 10 ) || sscanf( str + 10, "%s", str1 ) < 1 )
@@ -5723,7 +5641,7 @@ if ( choice == 70 )
 	str[ i ] = '\0';				// remove LF
 	if ( str[ --i ] == '\r' )
 		str[ i ] = '\0';			// remove CR (Windows)
-	
+
 	cmd( "set fun_extra [ split [ string trim \"%s\" ] \" \t\" ]", str + 10 );
 	cmd( "set extra_files [ list ]" );
 	cmd( "foreach x $fun_extra { if { [ string trim $x ] != \"\" && ( [ file exists \"$x\" ] || [ file exists \"$modelDir/$x\" ] ) } { lappend extra_files \"$x\" } }" );
@@ -5736,7 +5654,7 @@ if ( choice == 70 )
 	cmd( "label $e.lf.l1 -justify center -text \"Show additional\nsource files for model:\"" );
 	cmd( "label $e.lf.l2 -fg red -text \"$modelName\"" );
 	cmd( "pack $e.lf.l1 $e.lf.l2" );
-	
+
 	cmd( "frame $e.l" );
 	cmd( "scrollbar $e.l.v_scroll -command \"$e.l.l yview\"" );
 	cmd( "listbox $e.l.l -listvariable extra_files -width 30 -height 15 -selectmode single -yscroll \"$e.l.v_scroll set\"" );
@@ -5751,7 +5669,7 @@ if ( choice == 70 )
 
 	cmd( "label $e.l3 -text \"(double-click to show the file)\"" );
 	cmd( "label $e.l4 -text \"Extra files are added using\n'Model Options' in menu 'Model'\"" );
-	
+
 	cmd( "pack $e.lf $e.l $e.l3 $e.l4 -pady 5 -padx 5" );
 
 	cmd( "okcancel $e b { set choice 1 } { set choice 2 }" );
@@ -5761,13 +5679,13 @@ if ( choice == 70 )
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
-	
+
 	cmd( "set i [ $e.l.l curselection ]" );
 	cmd( "destroytop $e" );
-	
+
 	cmd( "if { $i == \"\" } { set brr \"\" } { set brr [ lindex $extra_files $i ] }" );
 	s = ( char * ) Tcl_GetVar( inter, "brr", 0 );
-	
+
 	if ( choice == 1 && strlen( s ) > 0 )
 	{
 		cmd( "if { ! [ file exists \"$brr\" ] && [ file exists \"$modelDir/$brr\" ] } { set brr \"$modelDir/$brr\" }" );
@@ -5775,14 +5693,13 @@ if ( choice == 70 )
 	}
 	else
 		choice = 0;
-	
+
 	goto loop;
 }
 
-
 // show the file/line/column containing error from compilation results window
 if ( choice == 87 )
-{	
+{
 	// check if file exists and normalize name for comparisons
 	cmd( "if { [ file exists \"$errfil\" ] } { \
 			set errfil \"[ file normalize \"$errfil\" ]\" \
@@ -5804,21 +5721,21 @@ if ( choice == 87 )
 			}" );
 	if ( choice == 0 )
 		goto loop;				// insufficient data to show error
-	
+
 	// check if file is already loaded
 	cmd( "if { [ string equal \"$errfil\" \"[ file normalize \"$dirname/$filename\" ]\" ] } { \
 			set choice 1 \
 		} { \
 			set choice 0 \
 		}" );
-		
+
 	if ( choice == 0 )
-	{	
+	{
 		// check if main equation file is not the current file
 		s = get_fun_name( str );
 		if ( s != NULL && strlen( s ) > 0 )
 			cmd( "if [ string equal \"$errfil\" \"[ file normalize \"$modelDir/%s\" ]\" ] { set choice 8 }", s );		// open main equation file
-												
+
 		// try to open an extra file defined by the user
 		if ( choice == 0 )
 		{	// open the configuration file
@@ -5831,11 +5748,11 @@ if ( choice == 87 )
 			}
 			else
 				fclose( f );
-				
+
 			// search in all source files (except main, already done)
 			cmd( "set source_files [ get_source_files $modelDir ]" );
 			cmd( "if { [ llength $source_files ] > 1 } { set fun_extra [ lreplace $source_files 0 0 ]; set choice [ llength $fun_extra ] } { set choice 0 }" );
-	
+
 			if ( choice > 0 )
 			{	// search error file in the extra files list
 				cmd( "foreach x $fun_extra { \
@@ -5855,7 +5772,7 @@ if ( choice == 87 )
 						} \
 					}" );
 			}
-			
+
 			if ( choice == 0 )
 			{
 				cmd( "tk_messageBox -parent .mm -title Warning -icon warning -type ok -message \"File not tracked\" -detail \"LMM is able to show error only in your main equation file or in extra files explicitly included.\n\nIf you want to track additional extra files, please open 'Model Options' in menu 'Model' and include all (additional) extra files names at the end of the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, press 'Default' button first.\"" );
@@ -5863,7 +5780,7 @@ if ( choice == 87 )
 			}
 		}
 	}
-	
+
 	// show the error position on screen
 	cmd( "wm deiconify .; raise .; focus .f.t.t" );
 
@@ -5881,26 +5798,25 @@ if ( choice == 87 )
 				}; \
 				updCurWnd \
 			}" );
-		
+
 		choice = 0;						// nothing else to do
 	}
 	else
 		// load the found extra file as correct "choice" is already set
 		cmd( "set brr \"$errfil\"" );
-	
+
 	goto loop;
 }
 
-
 // reset colors after a sign for recoloring
 if ( choice == 23 )
-{ 
+{
 	if ( sourcefile != 0 )
-	{	
+	{
 		// text window not ready?
-		if ( Tcl_GetVar( inter, "curPosIni", 0 ) == NULL || Tcl_GetVar( inter, "curPosFin", 0 ) == NULL || strlen( Tcl_GetVar( inter, "curPosIni", 0 ) ) == 0 || strlen( Tcl_GetVar( inter, "curPosFin", 0 ) ) == 0 )			
+		if ( Tcl_GetVar( inter, "curPosIni", 0 ) == NULL || Tcl_GetVar( inter, "curPosFin", 0 ) == NULL || strlen( Tcl_GetVar( inter, "curPosIni", 0 ) ) == 0 || strlen( Tcl_GetVar( inter, "curPosFin", 0 ) ) == 0 )
 			goto loop;
-		
+
 		// check if inside or close to multi-line comment and enlarge region appropriately
 		cmd( "if { [ lsearch -exact [ .f.t.t tag names $curPosIni ] comment1 ] != -1 } { \
 					set curPosFin [ .f.t.t search */ $curPosIni end ]; \
@@ -5920,13 +5836,13 @@ if ( choice == 23 )
 						} \
 					} \
 				}" );
-				
+
 		// find the range of lines to reeval the coloring
 		char *curPosIni=( char* ) Tcl_GetVar( inter,"curPosIni", 0 ); // position before insertion
 		char *curPosFin=( char* ) Tcl_GetVar( inter,"curPosFin", 0 ); // position after insertion
 		char *curSelIni=( char* ) Tcl_GetVar( inter,"curSelIni", 0 ); // selection before insertion
 		char *curSelFin=( char* ) Tcl_GetVar( inter,"curSelFin", 0 ); // selection after insertion
-		
+
 		// collect all selection positions, before and after change
 		float curPos[ 6 ];
 		int nVal = 0;
@@ -5938,25 +5854,24 @@ if ( choice == 23 )
 		nVal += i < 0 ? 0 : i;
 		i = sscanf( curSelFin, "%f %f", &curPos[ nVal ], &curPos[ nVal + 1 ] );
 		nVal += i < 0 ? 0 : i;
-		
+
 		// find previous and next lines to select (worst case scenario)
 		long prevLin = ( long ) floor( curPos[ 0 ] );
 		long nextLin = ( long ) floor( curPos[ 0 ] ) + 1;
 		for ( i = 1; i < nVal; ++i )
 		{
-			if ( curPos[ i ] < prevLin ) 
+			if ( curPos[ i ] < prevLin )
 				prevLin = ( long ) floor( curPos[ i ] );
-			if ( curPos[ i ] + 1 > nextLin ) 
+			if ( curPos[ i ] + 1 > nextLin )
 				nextLin = ( long ) floor( curPos[ i ] ) + 1;
 		}
-		
+
 		color( shigh, prevLin, nextLin );
 	}
-	
+
 	choice = 0;
 	goto loop;
 }
-
 
 // ignore invalid command
 if ( choice != 1 )
@@ -5987,14 +5902,14 @@ bool firstCall = true;
 void cmd( const char *cm, ... )
 {
 	char message[ TCL_BUFF_STR ];
-	
+
 	// abort if Tcl interpreter not initialized
 	if ( inter == NULL )
 	{
 		printf( "\nTcl interpreter not initialized. Quitting LSD now.\n" );
 		abort( );
 	}
-	
+
 	if ( strlen( cm ) >= TCL_BUFF_STR )
 	{
 		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR to at least %ld bytes.", ( long int ) strlen( cm ) );
@@ -6005,11 +5920,11 @@ void cmd( const char *cm, ... )
 
 	char buffer[ TCL_BUFF_STR ];
 	va_list argptr;
-	
+
 	va_start( argptr, cm );
 	int reqSz = vsnprintf( buffer, TCL_BUFF_STR, cm, argptr );
 	va_end( argptr );
-	
+
 	if ( reqSz >= TCL_BUFF_STR )
 	{
 		sprintf( message, "Tcl buffer too small. Please increase TCL_BUFF_STR to at least %d bytes.", reqSz + 1 );
@@ -6046,7 +5961,7 @@ void log_tcl_error( const char *cm, const char *message )
 		sprintf( fname, "%s/LMM.err", rootLsd );
 	else
 		sprintf( fname, "LMM.err" );
-	
+
 	f = fopen( fname, "a" );
 	if ( f == NULL )
 	{
@@ -6173,7 +6088,7 @@ void color(int hiLev, long iniLin, long finLin)
 		strcpy(count[ i ], pcount);
 		ppos = ( char * ) Tcl_GetVar( inter, "pos", 0 );
 		pos[ i ] = ( char * ) calloc( strlen( ppos ) + 1, sizeof( char ) );
-		strcpy(pos[ i ], ppos); 
+		strcpy(pos[ i ], ppos);
 	}
 	if ( tsize == 0 )
 		return;							// nothing to do
@@ -6225,7 +6140,7 @@ void color(int hiLev, long iniLin, long finLin)
 			ppos = ( char * ) Tcl_GetVar( inter, "end", 0 );
 			sscanf( ppos, "%ld.%ld", &curLin, &curCol );
 		}
-		
+
 	Tcl_UnlinkVar( inter, "lin");
 	Tcl_UnlinkVar( inter, "col");
 	Tcl_UnlinkVar( inter, "cnt");
@@ -6239,31 +6154,31 @@ void color(int hiLev, long iniLin, long finLin)
 bool load_lmm_options( void )
 {
 	cmd( "set choice [ file exists \"$RootLsd/$LMM_OPTIONS\" ]" );
-	
+
 	if ( choice == 1 )								// file exists?
 	{
 		cmd( "set f [ open \"$RootLsd/$LMM_OPTIONS\" r ]" );
-		
+
 		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )	// read parameters, returning 1 if incomplete
 		{
 			cmd( "gets $f %s", lmm_options[ i ] );
 			cmd( "if { $%s == \"\" } { set choice 0 }", lmm_options[ i ] );
 		}
-		
+
 		cmd( "close $f" );
 	}
 	else
 	{
 		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
 			cmd( "set %s \"\"", lmm_options[ i ] );
-	
+
 		// fix now missing source directory name
 		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ 4 ], lmm_options[ 4 ], lmm_defaults[ 4 ] );
 	}
-	
+
 	return choice;
 }
- 
+
 
 /*********************************
  UPDATE_LMM_OPTIONS
@@ -6274,18 +6189,18 @@ void update_lmm_options( bool justWinGeom )
 	{
 		cmd( "set done 1" );
 		cmd( "if { $restoreWin } { set curGeom [ geomtosave .lmm ]; if { $curGeom != \"\" && ! [ string equal $lmmGeom $curGeom ] } { set done 0 } }" );
-		
+
 		if ( atoi( Tcl_GetVar( inter, "done", 0 ) ) )	// nothing to save?
 			return;
-	
+
 		load_lmm_options( );				// if just saving window geometry, first reload from disk
 
 		cmd( "set lmmGeom $curGeom" );
 	}
-	
+
 	// save options to disk
 	cmd( "set f [ open \"$RootLsd/$LMM_OPTIONS\" w ]" );
-	
+
 	// set undefined parameters to defaults
 	for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
 	{
@@ -6293,7 +6208,7 @@ void update_lmm_options( bool justWinGeom )
 		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ i ], lmm_options[ i ], lmm_defaults[ i ] );
 		cmd( "puts $f \"$%s\"", lmm_options[ i ] );
 	}
-		
+
 	cmd( "close $f" );
 }
 
@@ -6304,23 +6219,23 @@ void update_lmm_options( bool justWinGeom )
 bool load_model_info( const char *path )
 {
 	cmd( "set choice [ file exists \"%s/$MODEL_INFO\" ]", path );
-	
+
 	if ( choice == 1 )							// file exists?
 	{
 		cmd( "set f [ open \"%s/$MODEL_INFO\" r ]", path );
-		
+
 		for ( int i = 0; i < MODEL_INFO_NUM; ++i )	// read parameters, returning 1 if incomplete
 		{
 			cmd( "gets $f %s", model_info[ i ] );
 			cmd( "if { $%s == \"\" } { set choice 0 }", model_info[ i ] );
 		}
-		
+
 		cmd( "close $f" );
 	}
-	
+
 	return choice;
 }
- 
+
 
 /*********************************
  UPDATE_MODEL_INFO
@@ -6333,10 +6248,10 @@ void update_model_info( void )
 		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
 		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
 	}
-	
+
 	// save info to disk
 	cmd( "set f [ open \"$modelDir/$MODEL_INFO\" w ]" );
-	
+
 	// set undefined parameters to defaults before saving
 	for ( int i = 0; i < MODEL_INFO_NUM; ++i )
 	{
@@ -6344,7 +6259,7 @@ void update_model_info( void )
 		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
 		cmd( "puts $f \"$%s\"", model_info[ i ] );
 	}
-		
+
 	cmd( "close $f" );
 }
 
@@ -6368,7 +6283,7 @@ void make_makefile( bool nw )
 	cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" r ]" );
 	cmd( "set d [ read -nonewline $f ]" );
 	cmd( "close $f" );
-	
+
 #ifdef MAC_PKG
 	if ( nw )
 		cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile_base%s.txt\" r ]", suffix );
@@ -6394,11 +6309,11 @@ void check_option_files( bool sys )
 {
 	int exists;
 	Tcl_LinkVar( inter, "exists", ( char * ) &exists, TCL_LINK_BOOLEAN );
-	
+
 	if ( ! sys )
 	{
 		cmd( "set exists [ file exists \"$modelDir/$MODEL_OPTIONS\" ]" );
-		
+
 		if ( ! exists )
 		{
 			cmd( "set dir [ glob -nocomplain \"$modelDir/fun_*.cpp\" ]" );
@@ -6409,7 +6324,7 @@ void check_option_files( bool sys )
 			cmd( "close $f" );
 		}
 	}
-	
+
 	cmd( "set exists [ file exists \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\"]" );
 	if ( ! exists )
 	{
@@ -6431,9 +6346,9 @@ void check_option_files( bool sys )
 		cmd( "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"" );
 		cmd( "puts -nonewline $f [ read $f1 ]" );
 		cmd( "close $f" );
-		cmd( "close $f1" );    
+		cmd( "close $f1" );
 	}
-	
+
 	Tcl_UnlinkVar( inter, "exists" );
 }
 
@@ -6444,29 +6359,29 @@ char *get_fun_name( char *str, bool nw )
 {
 	char *s, buf[ MAX_PATH_LENGTH ];
 	FILE *f;
-	
+
 	make_makefile( nw );
 
 	cmd( "set fapp [ file nativename \"$modelDir/makefile%s\" ]", nw ? "NW" : "" );
 	s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
-  
+
 	f = fopen( s, "r" );
 	if ( f == NULL )
 		goto error;
-	
+
 	fgets( str, MAX_LINE_SIZE - 1, f );
 	while ( strncmp( str, "FUN=", 4 ) && ! feof( f ) )
-		fgets( str, MAX_LINE_SIZE - 1, f );   
-	
+		fgets( str, MAX_LINE_SIZE - 1, f );
+
 	fclose( f );
-	
+
 	if ( strncmp( str, "FUN=", 4 ) != 0 )
 		goto error;
 
 	sscanf( str + 4, "%499s", buf );
 	sprintf( str, "%s.cpp", buf );
 	return str;
-	
+
 error:
 	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not found or corrupted\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
 	return NULL;
@@ -6482,26 +6397,26 @@ bool use_eigen( void )
 	bool nfound = true;
 	char *path, *fun_file, full_name[ MAX_PATH_LENGTH ], buffer[ 2 * MAX_PATH_LENGTH ];
 	FILE *f;
-	
+
 	path = ( char * ) Tcl_GetVar( inter, "modelDir", 0 );
 	fun_file = get_fun_name( buffer, true );
-	
+
 	if( path == NULL || fun_file == NULL )
 		return false;
-	
+
 	snprintf( full_name, MAX_PATH_LENGTH, "%s/%s", path, fun_file );
 	f = fopen( full_name, "r" );
 	if( f == NULL )
 		return false;
 
-	while ( fgets( buffer, 2 * MAX_PATH_LENGTH, f ) != NULL && 
-			( nfound = strncmp( buffer, EIGEN, strlen( EIGEN ) ) ) );   
-	
+	while ( fgets( buffer, 2 * MAX_PATH_LENGTH, f ) != NULL &&
+			( nfound = strncmp( buffer, EIGEN, strlen( EIGEN ) ) ) );
+
 	fclose( f );
-	
+
 	if ( nfound )
 		return false;
-	
+
 	return true;
 }
 
@@ -6515,12 +6430,12 @@ bool compile_run( bool run, bool nw )
 	char *s, str[ 2 * MAX_PATH_LENGTH ];
 	int res, max_threads = 1;
 	FILE *f;
-	
+
 	Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
-	
+
 	cmd( "destroytop .mm" );	// close any open compilation results window
 	cmd( "cd \"$modelDir\"" );
-	
+
 	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
@@ -6533,7 +6448,7 @@ bool compile_run( bool run, bool nw )
 		cmd( "set oldObj \"[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
 		cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
 	}
-  
+
 	// get source name
 	s = get_fun_name( str, nw );
 	if ( s == NULL || ! strcmp( s, "" ) || ( f = fopen( s, "r" ) ) == NULL )
@@ -6543,9 +6458,9 @@ bool compile_run( bool run, bool nw )
 	}
 	else
 		fclose( f );
-	
+
 	cmd( "set fname \"%s\"", s );
-	
+
 	// get target exec name
 	cmd( "set fapp [ file nativename \"$modelDir/makefile%s\" ]", nw ? "NW" : "" );
 	s = ( char * )Tcl_GetVar( inter, "fapp", 0 );
@@ -6564,12 +6479,12 @@ bool compile_run( bool run, bool nw )
 	// show compilation banner
 	cmd( "if { ! $autoHide || ! %d } { set parWnd .; set posWnd centerW } { set parWnd \"\"; set posWnd centerS }", run );
 	cmd( "newtop .t \"Please Wait\" \"\" $parWnd" );
-	
+
 	if ( nw )
 		cmd( "label .t.l1 -font {-weight bold } -text \"Compiling 'No Window' model...\"" );
 	else
 		cmd( "label .t.l1 -font {-weight bold } -text \"Compiling model...\"" );
-	
+
 	if ( run )
 		cmd( "label .t.l2 -text \"Just recompiling equation file(s) changes.\nOn success, the new model program will be launched.\nOn failure, a new window will show the compilation errors.\"" );
 	else
@@ -6577,11 +6492,11 @@ bool compile_run( bool run, bool nw )
 			cmd( "label .t.l2 -text \"Creating command-line model program  ('lsdNW').\nOn success, the model directory can be also ported to any computer.\nOn failure, a new window will show the compilation errors.\"" );
 		else
 			cmd( "label .t.l2 -text \"Recompiling the entire model program.\nOn success, the new program will NOT be launched.\nOn failure, a new window will show the compilation errors.\"" );
-		
+
 	cmd( "pack .t.l1 .t.l2 -padx 5 -pady 5" );
 	cmd( "cancel .t b { set res 2 }");
 	cmd( "showtop .t $posWnd" );
-  
+
 	// minimize LMM if required
 	cmd( "set res $autoHide" );		// get auto hide status
 	if ( res && run )				// hide LMM?
@@ -6598,7 +6513,7 @@ bool compile_run( bool run, bool nw )
 	cmd( "make_background %s %d %d %d", str + 7, max_threads, nw, true );
 #else
 	cmd( "make_background %s %d %d %d", str + 7, max_threads, nw, false );
-#endif	
+#endif
 
 	// loop to wait compilation to finish or be aborted
 	while ( res < 0 )
@@ -6606,7 +6521,7 @@ bool compile_run( bool run, bool nw )
 
 	// close banner
 	cmd( "destroytop .t" );
-	
+
 	if ( res == 2 )
 	{
 		cmd( "catch { close $makePipe }" );
@@ -6614,7 +6529,7 @@ bool compile_run( bool run, bool nw )
 		cmd( "wm deiconify ." );
 		goto end;
 	}
-	
+
 	if ( res == 0 )							// compilation failure?
 	{
 		cmd( "set res $autoHide" );			// get auto hide status
@@ -6626,7 +6541,7 @@ bool compile_run( bool run, bool nw )
 	{
 		if ( nw )
 			cmd( "tk_messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n$modelDir\n\nto another computer (including the subdirectory 'src'). After the copy, use the following steps to use the model program in the new computer:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\n\nSee LSD documentation for further details.\"" );
-		
+
 		if ( run )							// no problem - execute
 		{
 			// create the element list file in background
@@ -6682,11 +6597,11 @@ void create_compresult_window( bool nw )
 	cmd( "text .mm.t.t -yscrollcommand \".mm.t.yscroll set\" -wrap word -font \"$a\"" );
 	cmd( "pack .mm.t.yscroll -side right -fill y" );
 	cmd( "pack .mm.t.t -expand yes -fill both" );
-	
+
 	cmd( "pack .mm.t -expand yes -fill both" );
-	
+
 	cmd( "frame .mm.i" );
-	
+
 	cmd( "frame .mm.i.f" );
 	cmd( "label .mm.i.f.l -text \"File:\"" );
 	cmd( "label .mm.i.f.n -anchor w -width 50 -fg red" );
@@ -6706,7 +6621,7 @@ void create_compresult_window( bool nw )
 	cmd( "pack .mm.i" );
 
 	cmd( "frame .mm.b" );
-	
+
 	cmd( "button .mm.b.perr -width [ expr $butWid + 4 ] -text \"Previous Error\" -underline 0 -command { \
 			focus .mm.t.t; \
 			set start \"$cerr linestart\"; \
@@ -6783,7 +6698,7 @@ void create_compresult_window( bool nw )
 	cmd( "button .mm.b.close -width [ expr $butWid + 4 ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; wm deiconify .; raise .; focus .f.t.t; set keepfocus 0 }" );
 	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx 10 -pady 10 -expand yes -fill x -side left" );
 	cmd( "pack .mm.b -side right" );
-	
+
 	cmd( "bind .mm <p> { .mm.b.perr invoke }; bind .mm <P> { .mm.b.perr invoke }" );
 	cmd( "bind .mm.t.t <Up> { .mm.b.perr invoke; break }" );
 	cmd( "bind .mm.t.t <Left> { .mm.b.perr invoke; break }" );
@@ -6804,7 +6719,7 @@ void create_compresult_window( bool nw )
 	cmd( "if [ file exists \"$modelDir/makemessage.txt\" ] { set file [open \"$modelDir/makemessage.txt\"]; .mm.t.t insert end [read $file]; close $file } { .mm.t.t insert end \"(no compilation errors)\" }" );
 	cmd( ".mm.t.t mark set insert \"1.0\"" );
 	cmd( ".mm.b.ferr invoke" );
-	
+
 	cmd( ".mm.t.t configure -state disabled" );
 	cmd( "wm deiconify .mm; raise .mm; focus .mm.t.t" );
 	cmd( "set keepfocus 1" );
@@ -6821,7 +6736,7 @@ bool discard_change( void )
 {
 	if ( ! tosave )
 		return true;					// yes: simply discard configuration
-	
+
 	// ask for confirmation
 	cmd( "set answer [ tk_messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save current file?\" -detail \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\" ]" );
 	cmd( "if [ string equal $answer yes ] { \
@@ -6837,12 +6752,12 @@ bool discard_change( void )
 			set choice 0 \
 		} { \
 			set ans 1 \
-		}" );  
+		}" );
 
 	const char *ans = Tcl_GetVar( inter, "ans", 0 );
 	if ( atoi( ans ) == 0 )
 		return false;
-	
+
 	return true;
 }
 
@@ -6872,8 +6787,8 @@ int signals[ NUM_SIG ] = { SIGINT, SIGQUIT, SIGTERM, SIGWINCH, SIGABRT, SIGFPE, 
 #define NUM_SIG 6
 int signals[ NUM_SIG ] = { SIGINT, SIGTERM, SIGABRT, SIGFPE, SIGILL, SIGSEGV };
 const char *signal_names[ NUM_SIG ] = { "", "", "", "Floating-point exception", "Illegal instruction", "Segmentation violation", };
-const char *strsignal( int signum ) 
-{ 
+const char *strsignal( int signum )
+{
 	int i;
 	for ( i = 0; i < NUM_SIG && signals[ i ] != signum; ++i );
 	if ( i == NUM_SIG )
@@ -6885,7 +6800,7 @@ const char *strsignal( int signum )
 void handle_signals( void )
 {
 	for ( int i = 0; i < NUM_SIG; ++i )
-		signal( signals[ i ], signal_handler );  
+		signal( signals[ i ], signal_handler );
 }
 
 
@@ -6915,10 +6830,10 @@ void signal_handler( int signum )
 		case SIGMEM:
 			sprintf( msg, "Out of memory" );
 			break;
-			
+
 		case SIGSTL:
 			break;
-			
+
 		case SIGABRT:
 		case SIGFPE:
 		case SIGILL:
@@ -6930,9 +6845,9 @@ void signal_handler( int signum )
 #endif
 		default:
 			strncpy( msg, strsignal( signum ), 999 );
-			break;			
+			break;
 	}
-	
+
 	snprintf( msg2, strlen( msg ) + 30, "System Signal received: %s", msg );
 	log_tcl_error( "FATAL ERROR", msg2 );
 	if ( tk_ok )
