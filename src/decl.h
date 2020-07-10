@@ -280,6 +280,7 @@ struct object
 	object *lsdqsort( char const *obj, char const *var, char const *direction );
 	object *lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
 	object *search( char const *lab, bool no_search = false );
+	object *search_err( char const *lab, bool no_search, char const *errmsg );
 	object *search_node_net( char const *lab, long id ); 
 	object *search_var_cond( char const *lab, double value, int lag );
 	object *shuffle_nodes_net( char const *lab );

@@ -73,41 +73,12 @@ inline bool chk_hook( object *ptr, unsigned num )
 
 
 /***************************************************
-GET_CYCLE_OBJ
+CYCLE_OBJ
 Support function used in CYCLEx macros
 ***************************************************/
-inline void cycle_error( const char *label )
-{
-	char msg[ MAX_LINE_SIZE ];
-	
-	sprintf( msg, "'%s' is missing for cycling", label );
-	error_hard( msg, "object not found", 
-				"create object in model structure" );
-}
-
 inline object *cycle_obj( object *parent, char const *label, char const *command )
 {
-	extern object *blueprint;   		// LSD blueprint (effective model in use )
-	object *cur, *cur1;
-
-	cur = parent->search( label, no_search );
-	
-	if ( cur == NULL )
-	{
-		// check zero-instance object?
-		if ( no_zero_instance )
-			cycle_error( label );
-		
-		if ( no_search )
-		{			
-			cur1 = blueprint->search( parent->label );	// parent in blueprint
-			
-			if ( cur1 == NULL || cur1->search( label, true ) == NULL )
-				cycle_error( label );
-		}
-	}
-	
-	return cur;
+	return parent->search_err( label, no_search, "cycling" );
 }
 
 

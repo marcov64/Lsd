@@ -6,7 +6,7 @@
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
  *************************************************************/
 
 /*************************************************************
@@ -286,9 +286,9 @@ bridge::bridge( const char *lab )
 	next = NULL;
 	mn = NULL;
 	head = NULL;
-	search_var = NULL;	
+	search_var = NULL;
 	o_map.clear( );
-	
+
 	blabel = new char[ strlen( lab ) + 1 ];
 	strcpy( blabel, lab );
 }
@@ -301,7 +301,7 @@ bridge::bridge( const bridge &b )
 	blabel = b.blabel;
 	mn = b.mn;
 	head = b.head;
-	search_var = b.search_var;	
+	search_var = b.search_var;
 	o_map = b.o_map;
 }
 
@@ -311,22 +311,22 @@ bridge::~bridge( void )
 
 	if ( copy )
 		return;					// don't empty copy bridges
-		
+
 	if ( mn != NULL )			// turbo search node exists?
 	{
 		mn->empty( );
 		delete mn;
 	}
-	
+
 	for ( cur = head; cur != NULL; cur = cur1 )
-	{ 
+	{
 		cur1 = cur->next;
 		cur->empty( );
 		delete cur;
 	}
-	
+
 	delete [ ] search_var;
-	
+
 	delete [ ] blabel;
 }
 
@@ -354,7 +354,7 @@ int object::init( object *_up, char const *lab )
 	lstCntUpd = 0; 				// counter never updated
 	del_flag = NULL;			// address of flag to signal deletion
 	deleting = false;			// not being deleted
-	
+
 	return 0;
 }
 
@@ -370,7 +370,7 @@ void object::recreate_maps( void )
 
 	v_map.clear( );
 	b_map.clear( );
-	
+
 	for ( cv = v; cv != NULL; cv = cv->next )
 		v_map.insert( v_pairT( cv->label, cv ) );
 
@@ -381,27 +381,27 @@ void object::recreate_maps( void )
 
 /****************************************************
 UPDATE (*)
-Compute the value of all the Variables in the Object, saving the values 
-and updating the runtime plot. 
+Compute the value of all the Variables in the Object, saving the values
+and updating the runtime plot.
 
 For optimization purposes the system tries to ignores descending objects
 marked to be not computed. The implementation is quite baroque, but it
 should be the fastest.
 ****************************************************/
-void object::update( bool recurse, bool user ) 
+void object::update( bool recurse, bool user )
 {
 	bool deleted = false;
 	bridge *cb, *cb1;
 	object *cur, *cur1;
 	variable *cv;
-	
+
 	del_flag = & deleted;			// register feedback channel
 
 	for ( cv = v; ! deleted && cv != NULL && quit != 2; cv = cv->next )
-	{ 
+	{
 		if ( cv->under_computation )// don't update if under computation!
 			continue;
-		
+
 		if ( cv->param == 0 && cv->last_update < t )
 		{
 #ifdef PARALLEL_MODE
@@ -411,15 +411,15 @@ void object::update( bool recurse, bool user )
 #endif
 				cv->cal( NULL, 0 );
 		}
-		
+
 		if ( ! deleted  )
 		{
 			if ( cv->save || cv->savei )
 				cv->data[ t - cv->start ] = cv->val[ 0 ];
-#ifndef NO_WINDOW    
+#ifndef NO_WINDOW
 			if ( ! user && cv->plot == 1 )
 				plot_rt( cv );
-#endif   
+#endif
 		}
 	}
 
@@ -434,10 +434,10 @@ void object::update( bool recurse, bool user )
 					cur->update( true, user );
 				}
 		}
-	
+
 	if ( ! deleted )				// do only if not already deleted
 		del_flag = NULL;			// unregister feedback channel
-} 
+}
 
 
 /****************************************************
@@ -447,7 +447,7 @@ object *go_brother( object *c )
 {
 	if ( c == NULL || c->next == NULL )
 		return NULL;
-	
+
 	return c->next;
 }
 
@@ -469,7 +469,7 @@ object *skip_next_obj( object *tr, int *count )
 object *skip_next_obj( object *tr )
 {
 	bridge *cb;
-	
+
 	if ( tr == NULL || tr->up == NULL )
 		return NULL;
 
@@ -478,7 +478,7 @@ object *skip_next_obj( object *tr )
 	if ( cb == NULL || cb->next == NULL )
 		return NULL;
 	else
-		return cb->next->head; 
+		return cb->next->head;
 }
 
 
@@ -526,7 +526,7 @@ bridge *object::search_bridge( char const *lab, bool no_error )
 
 	if ( ! no_error )
 		error_hard( "invalid data structure (bridge not found)",
-					"internal problem in LSD", 
+					"internal problem in LSD",
 					"if error persists, please contact developers",
 					true );
 	return NULL;
@@ -547,11 +547,11 @@ object *object::search( char const *lab, bool no_search )
 	// the current object?
 	if ( ! strcmp( label, lab ) )
 		return this;
-	
+
 	// Search among the descendants of current object
 	if ( ( bit = b_map.find( lab ) ) != b_map.end( ) )
 		return bit->second->head;
-	
+
 	// stop if search is disabled
 	if ( no_search )
 		return NULL;
@@ -562,8 +562,8 @@ object *object::search( char const *lab, bool no_search )
 		if ( cb->head != NULL )
 			cur = cb->head->search( lab );
 		else
-			cur = NULL;  
-		
+			cur = NULL;
+
 		if ( cur != NULL )
 			return cur;
 	}
@@ -572,19 +572,52 @@ object *object::search( char const *lab, bool no_search )
 }
 
 
+/************************************************
+SEARCH_ERR
+*************************************************/
+object *object::search_err( char const *lab, bool no_search, char const *errmsg )
+{
+	object *cur;
+
+	cur = search( lab, no_search );
+	if ( cur == NULL )
+	{	// check if it is not a zero-instance object
+		cur = blueprint->search( lab );				// current object in blueprint
+		if ( cur == NULL )
+		{
+			sprintf( msg, "object '%s' is missing for %s", lab, errmsg );
+			error_hard( msg, "object not found",
+						"create variable or parameter in model structure" );
+		}
+
+		if ( no_zero_instance )
+		{
+			sprintf( msg, "all instances of '%s' were deleted", lab );
+			error_hard( msg, "object has no instance",
+						"check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
+						true );
+		}
+
+		cur = NULL;									// do not return blueprint objects
+	}
+
+	return cur;
+}
+
+
 /****************************
 EMPTY
 turbosearch component
 *****************************/
-void mnode::empty( void ) 
+void mnode::empty( void )
 {
 	int i;
-	
-	if ( son != NULL ) 
+
+	if ( son != NULL )
 	{
 		for ( i = 0; i < 10; ++i )
 			son[ i ].empty( );
-		delete [ ] son; 
+		delete [ ] son;
 	}
 }
 
@@ -593,11 +626,11 @@ void mnode::empty( void )
 EMPTYTURBO
 remove all turbo search nodes
 *****************************/
-void object::emptyturbo( void ) 
+void object::emptyturbo( void )
 {
 	bridge *cb;
 	object *cur;
-	
+
 	for ( cb = this->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->mn != NULL )
@@ -605,7 +638,7 @@ void object::emptyturbo( void )
 			cb->mn->empty( );
 			delete cb->mn;
 			cb->mn = NULL;
-		} 
+		}
 		for ( cur = cb->head; cur != NULL; cur = cur->next )
 			cur->emptyturbo( );
 	}
@@ -628,8 +661,8 @@ void mnode::create( double level )
 		son = new mnode[ 10 ];
 		if ( son == NULL )
 		{
-			error_hard( "cannot allocate memory for turbo searching", 
-						"out of memory", 
+			error_hard( "cannot allocate memory for turbo searching",
+						"out of memory",
 						"if there is memory available and the error persists,\nplease contact developers",
 						true );
 			return;
@@ -637,13 +670,13 @@ void mnode::create( double level )
 
 		for ( i = 0; i < 10 && globalcur != NULL; ++i )
 			son[ i ].create( level - 1 );
-		
+
 		return;
 	}
 
 	son = NULL;
 	pntr = globalcur;
-	
+
 	if ( globalcur->next != NULL )
 		globalcur = globalcur->next;
 }
@@ -665,21 +698,21 @@ object *mnode::fetch( double *n, double level )
 	if ( level == 0 )
 		cur = son[ ( int )( *n ) ].pntr;
 	else
-	{  
+	{
 		a = pow( 10, level );
 		b = floor( *n / a );
 		*n = *n - b * a ;
 		cur = son[ ( int ) b ].fetch( n, level );
 	}
-	
-	return cur; 
+
+	return cur;
 }
 
 
 /****************************
 INITTURBO (*)
 Generate the data structure required to use the turbosearch.
-- lab must be the label of the descending object whose set is to be organized 
+- lab must be the label of the descending object whose set is to be organized
 - num is the total number of objects (if not provided or zero, it's calculated).
 *****************************/
 double object::initturbo( char const *lab, double tot = 0 )
@@ -691,20 +724,20 @@ double object::initturbo( char const *lab, double tot = 0 )
 	cb = search_bridge( lab, true );
 	if ( cb == NULL )
 	{
-		sprintf( msg, "object '%s' is missing for turbo search", lab ); 
-		error_hard( msg, "object not found", 
+		sprintf( msg, "object '%s' is missing for turbo search", lab );
+		error_hard( msg, "object not found",
 					"create object in model structure" );
 		return 0;
-	} 
-	
+	}
+
 	if ( cb->head == NULL )
 	{
-		sprintf( msg, "failure when initializing object '%s' for turbo search", lab ); 
-		error_hard( msg, "object has no instance", 
+		sprintf( msg, "failure when initializing object '%s' for turbo search", lab );
+		error_hard( msg, "object has no instance",
 					"check your equation code to prevent this situation",
 					true );
 		return 0;
-	} 
+	}
 
 	if ( tot <= 0 )				// if size not informed, compute it
 		for ( tot = 0, cur = this->search( lab ); cur != NULL; ++tot, cur = go_brother( cur ) );
@@ -712,19 +745,19 @@ double object::initturbo( char const *lab, double tot = 0 )
 #ifdef PARALLEL_MODE
 	// prevent concurrent initialization by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
-#endif	
+#endif
 
 	if ( cb->mn != NULL )		// remove existing mnode
 	{
 		cb->mn->empty( );
 		delete cb->mn;
 	}
-	
+
 	globalcur = cb->head;
 	lev = ( tot > 1 ) ? floor( log10( tot - 1 ) ) + 1 : 1;
 	cb->mn = new mnode;
 	cb->mn->create( lev );
-	
+
 	return tot;
 }
 
@@ -742,38 +775,38 @@ object *object::turbosearch( char const *lab, double tot, double num )
 
 	if ( num < 1 )
 	{
-		sprintf( msg, "position '%.0lf' is invalid for turbo searching object '%s'", num, lab ); 
-		error_hard( msg, "invalid search operation", 
+		sprintf( msg, "position '%.0lf' is invalid for turbo searching object '%s'", num, lab );
+		error_hard( msg, "invalid search operation",
 					"check your equation code to prevent this situation",
 					true );
 		return NULL;
-	} 
-	 
+	}
+
 	cb = search_bridge( lab, true );
 	if ( cb == NULL )
 	{
-		sprintf( msg, "failure when turbo searching object '%s'", lab ); 
-		error_hard( msg, "object not found", 
+		sprintf( msg, "failure when turbo searching object '%s'", lab );
+		error_hard( msg, "object not found",
 					"check your equation code to prevent this situation",
 					true );
 		return NULL;
-	} 
+	}
 
 	if ( cb->mn == NULL )
 	{
-		sprintf( msg, "object '%s' is not initialized for turbo search", lab ); 
-		error_hard( msg, "invalid search operation", 
+		sprintf( msg, "object '%s' is not initialized for turbo search", lab );
+		error_hard( msg, "invalid search operation",
 					"check your equation code to prevent this situation",
 					true );
 		return NULL;
-	} 
-	 
+	}
+
 	val = num - 1;
 	if ( tot > 1 )					// if size is informed
 		lev = floor( log10( tot - 1 ) ) + 1;
 	else
 		lev = 0;					// if not, use default
-	
+
 	return( cb->mn->fetch( &val, lev ) );
 }
 
@@ -781,9 +814,9 @@ object *object::turbosearch( char const *lab, double tot, double num )
 /*******************************************
 SEARCH_INST (*)
 Searches the model for an object instance
-pointed by 'obj' searching first among the 
+pointed by 'obj' searching first among the
 calling object instances and then into its
-descendants, returning the instance number 
+descendants, returning the instance number
 or 0 if not found
 ********************************************/
 void object::search_inst( object *obj, long *pos, long *checked )
@@ -801,7 +834,7 @@ void object::search_inst( object *obj, long *pos, long *checked )
 			*pos = i;
 			return;
 		}
-		
+
 		if ( *checked >= 0 )				// don't stop during simulation
 		{
 			*checked += 1;
@@ -831,30 +864,30 @@ double object::search_inst( object *obj, bool fun )
 {
 	long pos, checked;
 	object *cur;
-	
+
 	if ( obj == NULL )					// default is self
 		obj = this;
-		
+
 	// if pointer check available quickly check for non-existing objects
 	if ( obj != this && ! no_ptr_chk )
 	{
 		if ( obj_list.find( obj ) == obj_list.end( ) )
 			return 0;
-		
+
 		cur = obj;
 	}
 	else
 		cur = this;
-	
+
 	if ( cur->up != NULL )				// not root?
 		// get first instance of found/current object brotherhood
 		cur = cur->up->search_bridge( cur->label )->head;
-			
+
 	pos = 0;
 	checked = fun ? -1 : 0;
 	if ( cur != NULL )
 		cur->search_inst( obj, &pos, &checked );// check for instance recursively
-	
+
 	return pos;
 }
 
@@ -880,10 +913,10 @@ The field caller is used to avoid deadlocks when
 from descendants the search goes up again, or from the parent down.
 Uses the fast variable look-up map of the searched variables.
 *************************************************/
-variable *object::search_var( object *caller, char const *lab, bool no_error, 
+variable *object::search_var( object *caller, char const *lab, bool no_error,
 							  bool no_search, bool search_sons )
 {
-	bridge *cb; 
+	bridge *cb;
 	variable *cv;
 	v_mapT::iterator vit;
 
@@ -904,9 +937,9 @@ variable *object::search_var( object *caller, char const *lab, bool no_error,
 			cv = cb->head->search_var( this, lab, no_error, no_search, false );
 			if ( cv != NULL )
 				return cv;
-		}   
+		}
 		else
-			cv = NULL; 
+			cv = NULL;
 	}
 
 	// stop if search is disabled
@@ -915,19 +948,19 @@ variable *object::search_var( object *caller, char const *lab, bool no_error,
 
 	// Search up in the tree
 	if ( up != caller )
-	{ 
+	{
 		if ( up == NULL )
 		{
 			if ( ! no_error )
 			{
 				sprintf( msg, "element '%s' is missing", lab );
-				error_hard( msg, "variable or parameter not found", 
+				error_hard( msg, "variable or parameter not found",
 							"create variable or parameter in model structure" );
 			}
-			
+
 			return NULL;
 		}
-		
+
 		cv = up->search_var( this, lab, no_error, false, false );
 	}
 
@@ -938,7 +971,7 @@ variable *object::search_var( object *caller, char const *lab, bool no_error,
 /************************************************
 SEARCH_VAR_ERR
 *************************************************/
-variable *object::search_var_err( object *caller, char const *lab, bool no_search, 
+variable *object::search_var_err( object *caller, char const *lab, bool no_search,
 								  bool search_sons, char const *errmsg )
 {
 	object *cur;
@@ -951,15 +984,15 @@ variable *object::search_var_err( object *caller, char const *lab, bool no_searc
 		if ( cur == NULL || cur->search_var( NULL, lab, true, no_search, search_sons ) == NULL )
 		{
 			sprintf( msg, "element '%s' is missing for %s", lab, errmsg );
-			error_hard( msg, "variable or parameter not found", 
+			error_hard( msg, "variable or parameter not found",
 						"create variable or parameter in model structure" );
 		}
 
 		if ( no_zero_instance )
 		{
 			sprintf( msg, "all instances of the object containing '%s' were deleted", lab );
-			error_hard( msg, "last object instance deleted", 
-						"check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE", 
+			error_hard( msg, "last object instance deleted",
+						"check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
 						true );
 		}
 	}
@@ -1011,41 +1044,41 @@ double object::initturbo_cond( char const *lab )
 	cv = search_var_err( this, lab, false, false, "turbo conditional searching" );
 	if ( cv == NULL )
 		return 0;
-	
+
 	if ( cv->up->up == NULL )				// variable at root level?
 	{
 		sprintf( msg, "element '%s' is at root level (always single-instanced)", lab );
-		error_hard( msg, "invalid variable or parameter for turbo search", 
+		error_hard( msg, "invalid variable or parameter for turbo search",
 					"check your model structure to prevent this situation" );
 		return 0;
 	}
-		
+
 	// find the bridge which contains the object containing the variable
 	if ( ( bit = cv->up->up->b_map.find( cv->up->label ) ) == cv->up->up->b_map.end( ) )
 	{
 		error_hard( "invalid data structure (bridge not found)",
-					"internal problem in LSD", 
+					"internal problem in LSD",
 					"if error persists, please contact developers",
 					true );
 		return 0;
 	}
-	
+
 #ifdef PARALLEL_MODE
 	// prevent concurrent initialization by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
-#endif	
+#endif
 
 	cb = bit->second;
 	cb->o_map.clear( );						// remove any existing mapping
-	
+
 	// fill the map with the object values
 	for ( cur = cb->head; cur != NULL; cur = cur->next )
 		cb->o_map.insert( o_pairT ( cur->cal( lab, 0 ), cur ) );
-	
+
 	// register the name of variable for which the map is set
 	cb->search_var = new char [ strlen( lab ) + 1 ];
 	strcpy( cb->search_var, lab );
-	
+
 	return cb->o_map.size( );
 }
 
@@ -1066,36 +1099,36 @@ object *object::turbosearch_cond( char const *lab, double value )
 	cv = search_var_err( this, lab, false, false, "turbo conditional searching" );
 	if ( cv == NULL )
 		return NULL;
-	
+
 	if ( cv->up->up == NULL )				// variable at root level?
 	{
 		sprintf( msg, "element '%s' is at root level (always single-instanced)", lab );
-		error_hard( msg, "invalid variable or parameter for turbo search", 
+		error_hard( msg, "invalid variable or parameter for turbo search",
 					"check your model structure to prevent this situation" );
 		return NULL;
 	}
-		
+
 	// find the bridge which contains the object containing the variable
 	if ( ( bit = cv->up->up->b_map.find( cv->up->label ) ) == cv->up->up->b_map.end( ) )
 	{
 		error_hard( "invalid data structure (bridge not found)",
-					"internal problem in LSD", 
+					"internal problem in LSD",
 					"if error persists, please contact developers",
 					true );
 		return NULL;
 	}
-	
+
 	cb = bit->second;
 
 	if ( cb->o_map.size( ) == 0 || cb->search_var == NULL || strcmp( cb->search_var, lab ) )
 	{
-		sprintf( msg, "element '%s' is not initialized for turbo conditional search", lab ); 
-		error_hard( msg, "invalid search operation", 
+		sprintf( msg, "element '%s' is not initialized for turbo conditional search", lab );
+		error_hard( msg, "invalid search operation",
 					"check your equation code to prevent this situation",
 					true );
 		return NULL;
-	} 
-	
+	}
+
 	// find the object containing the variable
 	if ( ( oit = cb->o_map.find( value ) ) != cb->o_map.end( ) )
 		return oit->second;
@@ -1112,11 +1145,11 @@ void object::add_var( char const *lab, int lag, double *val, int save )
 {
 	variable *cv;
 	object *cur;
-	
+
 	if ( search_var( this, lab, true, true, false ) != NULL )
 	{
 		sprintf( msg, "element '%s' already exists in object '%s'", lab, label );
-		error_hard( msg, "variable or parameter not added", 
+		error_hard( msg, "variable or parameter not added",
 					"choose an unique name for the element",
 					true );
 	}
@@ -1131,7 +1164,7 @@ void object::add_var( char const *lab, int lag, double *val, int save )
 			cv->next = new variable;
 			cv = cv->next;
 		}
-		
+
 		if ( cv == NULL )
 		{
 			sprintf( msg, "cannot allocate memory for adding element '%s'", lab );
@@ -1140,7 +1173,7 @@ void object::add_var( char const *lab, int lag, double *val, int save )
 						true );
 			return;
 		}
-		
+
 		cv->init( cur, lab, lag, val, save );
 		cur->v_map.insert( v_pairT ( lab, cv ) );
 	}
@@ -1158,7 +1191,7 @@ variable *object::add_empty_var( char const *lab )
 	if ( search_var( this, lab, true, true, false ) != NULL )
 	{
 		sprintf( msg, "element '%s' already exists in object '%s'", lab, label );
-		error_hard( msg, "variable or parameter not added", 
+		error_hard( msg, "variable or parameter not added",
 					"choose an unique name for the element",
 					true );
 	}
@@ -1171,7 +1204,7 @@ variable *object::add_empty_var( char const *lab )
 		cv->next = new variable;
 		cv = cv->next;
 	}
-	
+
 	if ( cv == NULL )
 	{
 		sprintf( msg, "cannot allocate memory for adding element '%s'", lab );
@@ -1180,8 +1213,8 @@ variable *object::add_empty_var( char const *lab )
 					true );
 		return NULL;
 	}
-	 
-	cv->init( this, lab, -1, NULL, 0 );		
+
+	cv->init( this, lab, -1, NULL, 0 );
 	v_map.insert( v_pairT ( lab, cv ) );
 
 	return cv;
@@ -1199,7 +1232,7 @@ void object::add_var_from_example( variable *example )
 	if ( search_var( this, example->label, true, true, false ) != NULL )
 	{
 		sprintf( msg, "element '%s' already exists in object '%s'", example->label, label );
-		error_hard( msg, "variable or parameter not added", 
+		error_hard( msg, "variable or parameter not added",
 					"choose an unique name for the element",
 					true );
 	}
@@ -1221,7 +1254,7 @@ void object::add_var_from_example( variable *example )
 					true );
 		return;
 	}
-		
+
 	cv->init( this, example->label, example->num_lag, example->val, example->save );
 	cv->savei = example->savei;
 	cv->last_update = example->last_update;
@@ -1245,7 +1278,7 @@ void object::add_var_from_example( variable *example )
 /****************************************************
 ADD_OBJ
 Add num sons with label lab to ANY object like this one, wherever is on the
-tree 
+tree
 ****************************************************/
 void object::add_obj( char const *lab, int num, int propagate )
 {
@@ -1264,16 +1297,16 @@ void object::add_obj( char const *lab, int num, int propagate )
 			cb->next = new bridge( lab );
 			cb = cb->next;
 		}
-		
+
 		if ( cb == NULL )
 		{
 			sprintf( msg, "cannot allocate memory for adding object '%s'", lab );
-			error_hard( msg, "out of memory", 
+			error_hard( msg, "out of memory",
 						"if there is memory available and the error persists,\nplease contact developers",
 						true );
 			return;
 		}
-				
+
 		// create object instances
 		for ( i = 0; i < num; ++i )
 		{
@@ -1285,15 +1318,15 @@ void object::add_obj( char const *lab, int num, int propagate )
 			if ( cur1 == NULL )
 			{
 				sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", lab );
-				error_hard( msg, "out of memory", 
+				error_hard( msg, "out of memory",
 							"if there is memory available and the error persists,\nplease contact developers",
 							true );
 				return;
 			}
-			
+
 			cur1->init( cur, lab );
-		} 
-		
+		}
+
 		cur->b_map.insert( b_pairT ( lab, cb ) );
 	}
 }
@@ -1312,38 +1345,38 @@ void object::insert_parent_obj( char const *lab )
 	if ( up != NULL )
 	{
 		cur1 = up->hyper_next( up->label );
-		
+
 		if ( cur1 != NULL )
 		{	// implement the change to all (old) parents in the model
 			cur = cur1->search( label );
 			cur->insert_parent_obj( lab );
 		}
 	}
-	
+
 	newo = new object;
 	if ( newo == NULL )
 	{
 		sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", lab );
-		error_hard( msg, "out of memory", 
+		error_hard( msg, "out of memory",
 					"if there is memory available and the error persists,\nplease contact developers",
 					true );
 		return;
 	}
-			
+
 	newo->init( up, lab );
 
 	newb = new bridge( lab );
 	if ( newb == NULL )
 	{
 		sprintf( msg, "cannot allocate memory for adding object '%s'", lab );
-		error_hard( msg, "out of memory", 
+		error_hard( msg, "out of memory",
 					"if there is memory available and the error persists,\nplease contact developers",
 					true );
 		return;
 	}
 
 	newb->head = newo;
-	
+
 	if ( up == NULL )			// root?
 	{	// insert new parent below root
 		newo->up = this;
@@ -1352,24 +1385,24 @@ void object::insert_parent_obj( char const *lab )
 		newo->v = v;
 		b = newb;
 		v = NULL;
-		
+
 		// adjust old sons of root to sons of the new object
 		for ( cb = newo->b; cb != NULL; cb = cb->next )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
 				cur->up = newo;
-		
+
 		// clear bridge of root and add single added new object
 		b_map.clear( );
-		b_map.insert( b_pairT ( lab, newb ) );	
+		b_map.insert( b_pairT ( lab, newb ) );
 	}
 	else
 	{	// insert new parent over this object
-		
+
 		// remove this object's bridge from parent's map
 		up->b_map.erase( label );
 		up->b_map.insert( b_pairT ( lab, newb ) );
-		
-		// find the predecessor of current object's bridge, if any 
+
+		// find the predecessor of current object's bridge, if any
 		for ( cb1 = NULL, cb = up->b; strcmp( cb->blabel, label ); cb1 = cb, cb = cb->next );
 
 		if ( cb1 == NULL )
@@ -1387,7 +1420,7 @@ void object::insert_parent_obj( char const *lab )
 		for ( cur = cb->head; cur != NULL; cur = cur->next )
 			cur->up = newo;
 	}
-} 
+}
 
 
 /****************************************************
@@ -1403,31 +1436,31 @@ void object::replicate( int num, int propagate )
 		cur = hyper_next( label );
 	else
 		cur = NULL;
-	
+
 	if ( cur != NULL )
 		cur->replicate( num, 1 );
-	
+
 	skip_next_obj( this, &usl );
 	for ( cur = this, i = 1; i < usl; cur = cur->next, ++i );
 
 	for ( i = usl; i < num; ++i )
 	{
 		cur1 = cur->next;
-		cur->next = new object;		
+		cur->next = new object;
 		if ( cur->next == NULL )
 		{
 			sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", label );
-			error_hard( msg, "out of memory", 
+			error_hard( msg, "out of memory",
 						"if there is memory available and the error persists,\nplease contact developers",
 						true );
 			return;
 		}
-		
+
 		cur->next->init( up, label );
 		cur->next->to_compute = to_compute;
 		cur->next->next = cur1;
 		cur->to_compute = to_compute;
-		
+
 		cur1 = cur->next;
 		for ( cv = v; cv != NULL; cv = cv->next )
 			cur1->add_var_from_example( cv );
@@ -1451,32 +1484,32 @@ void copy_descendant( object *from, object *to )
 		to->b = NULL;
 		return;
 	}
-	
+
 	// create the first bridge
 	to->b = new bridge( from->b->blabel );
 	if ( to->b == NULL )
 	{
 		sprintf( msg, "cannot allocate memory for adding object '%s'", from->label );
-		error_hard( msg, "out of memory", 
+		error_hard( msg, "out of memory",
 					"if there is memory available and the error persists,\nplease contact developers",
 					true );
 		return;
 	}
-	
+
 	// add bridge to new object lookup map
 	to->b_map.insert( b_pairT ( to->b->blabel, to->b ) );
-	
+
 	// create the first (head) object
 	if ( from->b->head == NULL )
 		cur = blueprint->search( from->b->blabel );
 	else
 		cur = from->b->head;
-	
+
 	to->b->head = new object;
 	if ( to->b->head == NULL )
 	{
 		sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", to->label );
-		error_hard( msg, "out of memory", 
+		error_hard( msg, "out of memory",
 					"if there is memory available and the error persists,\nplease contact developers",
 					true );
 		return;
@@ -1484,7 +1517,7 @@ void copy_descendant( object *from, object *to )
 
 	to->b->head->init( to, cur->label );
 	to->b->head->to_compute = cur->to_compute;
-	
+
 	// copy variables of head object
 	for ( cv = cur->v; cv != NULL; cv = cv->next )
 		to->b->head->add_var_from_example( cv );
@@ -1494,41 +1527,41 @@ void copy_descendant( object *from, object *to )
 
 	// create following bridges
 	for ( cb = to->b, cb1 = from->b->next; cb1 != NULL; cb1 = cb1->next )
-	{ 
+	{
 		cb->next = new bridge( cb1->blabel );
-		cb = cb->next;		
+		cb = cb->next;
 		if ( cb == NULL )
 		{
 			sprintf( msg, "cannot allocate memory for adding object '%s'", cb1->blabel );
-			error_hard( msg, "out of memory", 
+			error_hard( msg, "out of memory",
 						"if there is memory available and the error persists,\nplease contact developers",
 						true );
 			return;
 		}
-		
+
 		to->b_map.insert( b_pairT ( cb1->blabel, cb ) );
-		
+
 		if ( cb1->head == NULL )
 			cur = blueprint->search( cb1->blabel );
 		else
 			cur = cb1->head;
-		
-		cb->head = new object;   
+
+		cb->head = new object;
 		if ( cb->head == NULL )
 		{
 			sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", cur->label );
-			error_hard( msg, "out of memory", 
+			error_hard( msg, "out of memory",
 						"if there is memory available and the error persists,\nplease contact developers",
 						true );
 			return;
 		}
-		
+
 		cb->head->init( to, cur->label );
 		cb->head->to_compute = cur->to_compute;
-		
+
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			cb->head->add_var_from_example( cv );
-		
+
 		copy_descendant( cur, cb->head );
 	}
 }
@@ -1566,28 +1599,28 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 
 	// check the labels and prepare the bridge to attach to
 	for ( cb2 = b; cb2 != NULL && strcmp( cb2->blabel, lab ); cb2 = cb2->next );
-	
+
 	if ( cb2 == NULL )
 	{
 		sprintf( msg, "object '%s' contains no son object '%s' for adding instance(s)", label, lab );
-		error_hard( msg, "object not found", 
+		error_hard( msg, "object not found",
 					"create son object in model structure" );
 		return NULL;
 	}
-	
+
 	if ( ex == NULL || strcmp( ex->label, lab ) )
 	{
 		sprintf( msg, "bad example pointer when adding object '%s'", lab );
-		error_hard( msg, "invalid example object", 
+		error_hard( msg, "invalid example object",
 					"check your equation code to prevent this situation",
 					true );
 		return NULL;
 	}
-	
+
 #ifdef PARALLEL_MODE
 	// prevent concurrent additions by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
-#endif	
+#endif
 
 	cb2->counter_updated = false;
 
@@ -1606,12 +1639,12 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 		if ( cur == NULL )
 		{
 			sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", lab );
-			error_hard( msg, "out of memory", 
+			error_hard( msg, "out of memory",
 						"if there is memory available and the error persists,\nplease contact developers",
 						true );
 			return NULL;
 		}
-		
+
 		cur->init( this, lab );
 
 		if ( net )						// if objects are nodes in a network
@@ -1620,7 +1653,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 			if ( cur->node == NULL )
 			{
 				sprintf( msg, "cannot allocate memory for adding object '%s' to network", lab );
-				error_hard( msg, "out of memory", 
+				error_hard( msg, "out of memory",
 							"if there is memory available and the error persists,\nplease contact developers",
 							true );
 				return NULL;
@@ -1628,7 +1661,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 		}
 
 		// create its variables and initialize them
-		for ( cv = ex->v; cv != NULL; cv = cv->next )  
+		for ( cv = ex->v; cv != NULL; cv = cv->next )
 		  cur->add_var_from_example( cv );
 
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
@@ -1636,7 +1669,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 #ifdef PARALLEL_MODE
 			// prevent concurrent use by more than one thread
 			lock_guard < mutex > lock( cv->parallel_comp );
-#endif		
+#endif
 			if ( running && cv->param != 1 )
 			{
 				if ( t_update < 0 && cv->last_update == 0 )
@@ -1646,16 +1679,16 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 					if ( t_update >= 0 && t_update < cv->last_update && t > 1 )
 					{
 						sprintf( msg, "invalid update time (%d) to set object '%s'\nvariable '%s' was updated later (%d)", t_update, lab, cv->label, cv->last_update );
-						error_hard( msg, "cannot add object", 
+						error_hard( msg, "cannot add object",
 									"check your equation code to prevent this situation",
 									true );
 						return NULL;
 					}
-					
+
 					if ( t_update >= 0 )
 						cv->last_update = t_update;
 				}
-				
+
 				// choose next update step for special updating variables
 				if ( cv->delay > 0 || cv->delay_range > 0 )
 				{
@@ -1664,7 +1697,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 						cv->next_update += rnd_int( 0, cv->delay_range );
 				}
 			}
-			
+
 			if ( cv->save || cv->savei )
 				alloc_save_var( cv );
 		}
@@ -1677,11 +1710,11 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 				cb1 = cur->b = new bridge( cb->blabel );
 			else
 				cb1 = cb1->next = new bridge( cb->blabel );
-				
+
 			if ( cb1 == NULL )
 			{
 				sprintf( msg, "cannot allocate memory for adding object '%s'", cb->blabel );
-				error_hard( msg, "out of memory", 
+				error_hard( msg, "out of memory",
 							"if there is memory available and the error persists,\nplease contact developers",
 							true );
 				return NULL;
@@ -1689,7 +1722,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 
 			// add bridge to new object lookup map
 			cur->b_map.insert( b_pairT ( cb->blabel, cb1 ) );
-	
+
 			for ( cur1 = cb->head; cur1 != NULL; cur1 = cur1->next )
 				cur->add_n_objects2( cur1->label, 1, cur1, t_update );
 		}
@@ -1700,24 +1733,24 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 			first = cur;
 			if ( cb2->head == NULL )
 				cb2->head = cur;
-			else 
+			else
 			{
 				for ( cur1 = cb2->head; cur1->next != NULL; cur1 = cur1->next );
-				cur1->next = cur; 
+				cur1->next = cur;
 			}
 		}
 		else
-			last->next = cur;  
+			last->next = cur;
 
 		last = cur;
-		
+
 		// update object list for user pointer checking
 		if ( ! no_ptr_chk )
 		{
 #ifdef PARALLEL_MODE
 			// prevent concurrent update by more than one thread
 			lock_guard < mutex > lock( parallel_obj_list );
-#endif	
+#endif
 			obj_list.insert( cur );
 		}
 	}
@@ -1743,7 +1776,7 @@ void delete_bridge( object *d )
 		d->up->b = d->up->b->next;
 		d->up->b_map.erase( cb->blabel );
 		delete cb;
-	} 
+	}
 	else
 	{	// find position in bridge chain (not first)
 		for ( cb = d->up->b, cb1 = NULL; cb != NULL; cb1 = cb, cb = cb->next )
@@ -1764,29 +1797,29 @@ Remove the object from the model
 Before killing the Variables data to be saved are stored
 in the "cemetery", a linked chain storing data to be analyzed.
 ****************************************************/
-void object::delete_obj( void ) 
+void object::delete_obj( void )
 {
 	object *cur = this;
 	bridge *cb;
-	
+
 	if ( cur == NULL )
 		return;					// ignore deleting null object
-	
+
 	{							// create context for lock
 #ifdef PARALLEL_MODE
 		// prevent concurrent deletion by more than one thread
 		lock_guard < mutex > lock( parallel_comp );
-#endif	
+#endif
 
 		if ( deleting )			// ignore if deleting already going on
-			return;					
-		
+			return;
+
 		if ( under_computation( ) )
 		{
 			if ( wait_delete != NULL && wait_delete != this )
 			{
 				sprintf( msg, "cannot schedule the deletion of object '%s'", label );
-				error_hard( msg, "deletion already pending", 
+				error_hard( msg, "deletion already pending",
 							"check your equation code to prevent deleting objects recursively",
 							true );
 				return;
@@ -1797,9 +1830,9 @@ void object::delete_obj( void )
 				return;
 			}
 		}
-			
+
 		deleting = true;		// signal deletion to other threads
-		
+
 		if ( wait_delete == this )
 			wait_delete = NULL;	// finally deleting pending object
 	}
@@ -1810,10 +1843,10 @@ void object::delete_obj( void )
 #ifdef PARALLEL_MODE
 		// prevent concurrent update by more than one thread
 		lock_guard < mutex > lock( parallel_obj_list );
-#endif	
+#endif
 		obj_list.erase( this );
 	}
-		
+
 	collect_cemetery( this );	// collect required variables BEFORE removing object from linked list
 
 	// find the bridge
@@ -1821,7 +1854,7 @@ void object::delete_obj( void )
 		cb = up->search_bridge( label );
 	else
 		cb = NULL;
-	
+
 	if ( cb != NULL )
 	{
 		if ( cb->head == this )
@@ -1833,12 +1866,12 @@ void object::delete_obj( void )
 				if ( no_zero_instance )
 				{
 					sprintf( msg, "cannot delete all instances of '%s'", label );
-					error_hard( msg, "last object instance deleted", 
+					error_hard( msg, "last object instance deleted",
 								"check your equation code to ensure at least one instance\nof any object is kept",
 								true );
 					return;
 				}
-				
+
 				cb->head = NULL;
 			}
 		}
@@ -1847,18 +1880,18 @@ void object::delete_obj( void )
 			for ( cur = cb->head; cur->next != this; cur = cur->next );
 			cur->next = next;
 		}
-		
+
 		cb->counter_updated = false;
-	}	
-	
+	}
+
 	if ( del_flag != NULL )
 		*del_flag = true;		// flag deletion to caller, if requested
-		
+
 	if ( cb->search_var != NULL )	// indexed objects?
 		cb->o_map.erase( cal( cb->search_var, 0 ) );	// try to remove map entry
 
 	empty( );
-	
+
 	delete this;
 }
 
@@ -1867,14 +1900,14 @@ void object::delete_obj( void )
 EMPTY
 Garbage collection for Objects.
 ****************************************************/
-void object::empty( void ) 
+void object::empty( void )
 {
 	bridge *cb, *cb1;
 	variable *cv, *cv1;
 
 	if ( root == this )
 		blueprint->empty( );
- 
+
 	for ( cv = v; cv != NULL; cv = cv1 )
 		if ( running && ( cv->save || cv->savei ) )
 			cv1 = cv->next; 	// variable should have been already saved to cemetery!!!
@@ -1891,10 +1924,10 @@ void object::empty( void )
 	for ( cb = b; cb != NULL; cb = cb1 )
 	{
 		cb1 = cb->next;
-		delete cb; 
+		delete cb;
 	}
-	
-	b = NULL; 
+
+	b = NULL;
 	b_map.clear( );
 
 	if ( node != NULL )			// network data to delete?
@@ -1902,7 +1935,7 @@ void object::empty( void )
 		delete node;
 		node = NULL;
 	}
-	 
+
 	delete [ ] label;
 	label = NULL;
 }
@@ -1912,10 +1945,10 @@ void object::empty( void )
 DELETE_VAR
 Remove the variable from the object
 ****************************************************/
-void object::delete_var( char const *lab ) 
+void object::delete_var( char const *lab )
 {
 	variable *cv, *cv1;
-	
+
 	if ( ! strcmp( v->label, lab ) )
 	{	// first variable in the chain
 		cv = v->next;
@@ -1954,13 +1987,13 @@ void object::chg_lab( char const *lab )
 	if ( cur != NULL )
 	{
 		cb = cur->search_bridge( label );
-		
+
 		if ( cb->head != NULL )
 			cb->head->chg_lab( lab );
 	}
 
 	cb = up->search_bridge( label );
-	
+
 	up->b_map.erase( cb->blabel );
 	delete [ ] cb->blabel;
 	cb->blabel = new char[ strlen( lab ) + 1 ];
@@ -1986,7 +2019,7 @@ void object::chg_var_lab( char const *old, char const *newname )
 
 	for ( cv = v; cv != NULL; cv = cv->next)
 		if ( ! strcmp( cv->label, old ) )
-		{ 
+		{
 			v_map.erase( old );
 			delete [ ] cv->label;
 			cv->label = new char[ strlen( newname ) + 1 ];
@@ -2013,16 +2046,16 @@ bool object::under_computation( void )
 		for ( cur = cb->head; cur != NULL; cur = cur->next )
 			if ( cur->under_computation( ) )
 				return true;
-	 
+
 	// check variables directly contained in object
 	for ( cv = v; cv != NULL; cv = cv->next )
 		if ( cv->under_computation && ! cv->dummy )
 			return true;
-	
+
 	return false;
 }
-	
-	
+
+
 /****************************************************
 UNDER_COMPUT_VAR
 Check if a variable in object is under computation
@@ -2030,16 +2063,16 @@ Check if a variable in object is under computation
 bool object::under_comput_var( char const *lab )
 {
 	variable *cv;
-	
+
 	cv = search_var_err( this, lab, false, false, "retrieving" );
-	
+
 	if ( cv != NULL && cv->under_computation )
 		return true;
-	
+
 	return false;
 }
-	
-	
+
+
 /****************************************************
 CAL (*)
 Return the value of Variable or Parameter with label lab with lag lag.
@@ -2099,7 +2132,7 @@ double object::last_cal( char const *lab )
 	cv = search_var_err( this, lab, no_search, false, "last updating" );
 	if ( cv == NULL )
 		return NAN;
-	
+
 	return cv->last_update;
 }
 
@@ -2116,10 +2149,10 @@ double object::recal( char const *lab )
 	cv = search_var_err( this, lab, no_search, false, "recalculating" );
 	if ( cv == NULL )
 		return NAN;
-	
+
 	cv->last_update = t - 1;
 	cv->next_update = t;
-	
+
 	return cv->val[ 0 ];
 }
 
@@ -2167,7 +2200,7 @@ double object::overall_max( char const *lab, int lag )
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
-	
+
 	for ( tot = -DBL_MAX; cur != NULL; cur = go_brother( cur ) )
 		if ( tot < ( temp = cur->cal( this, lab, lag ) ) )
 			tot = temp;
@@ -2193,7 +2226,7 @@ double object::overall_min( char const *lab, int lag )
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
-	
+
 	for ( tot = DBL_MAX; cur != NULL; cur = go_brother( cur ) )
 		if ( tot > ( temp = cur->cal( this, lab, lag ) ) )
 			tot = temp;
@@ -2285,11 +2318,11 @@ double object::perc( char const *lab, int lag, double p )
 	object *cur;
 	variable *cv;
 	vector < double > vals;
-	
+
 	if ( p < 0 || p > 1 )
 	{
 		sprintf( msg, "percentile '%g' is invalid", p );
-		error_hard( msg, "invalid value (0 <= p <= 1 required)", 
+		error_hard( msg, "invalid value (0 <= p <= 1 required)",
 					"check your equation code to prevent this situation",
 					true );
 
@@ -2311,13 +2344,13 @@ double object::perc( char const *lab, int lag, double p )
 	if ( n > 0 )
 	{
 		sort( vals.begin( ), vals.end( ) );
-		
+
 		// compute using the C=1 variant a la NumPy
 		x = p * ( n - 1 ) + 1;
 		floor_x = floor( x );
 		vx = vals[ floor_x - 1 ];
 		vx1 = floor_x < n ? vals[ floor_x ] : vx;
-		
+
 		return vx + modf( x, &tmp ) * ( vx1 - vx );
 	}
 	else
@@ -2339,7 +2372,7 @@ double object::sd( char const *lab, int lag )
 	cv = search_var_err( this, lab, no_search, true, "calculating s.d." );
 	if ( cv == NULL )
 		return NAN;
-	
+
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
@@ -2359,36 +2392,18 @@ double object::sd( char const *lab, int lag )
 
 /****************************************************
 COUNT (*)
-Count the number of object lab instances below this 
+Count the number of object lab instances below this
 ****************************************************/
 double object::count( char const *lab )
 {
 	int count;
 	object *cur;
-	
-	cur = search( lab );
-	
-	if ( cur == NULL )
-	{	// check if it is not a zero-instance object 
-		cur = blueprint->search( lab );
-		if ( cur == NULL )
-		{
-			sprintf( msg, "object '%s' is missing for counting", lab );
-			error_hard( msg, "object not found", 
-						"create object in model structure" );
-		}
 
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' were deleted", lab ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
+	cur = search_err( lab, no_search, "counting" );
+
+	if ( cur == NULL )
 		return 0;
-	}
-	
+
 	for ( count = 0; cur != NULL; cur = go_brother( cur ), ++count );
 
 	return count;
@@ -2397,40 +2412,22 @@ double object::count( char const *lab )
 
 /****************************************************
 COUNT_ALL (*)
-Count the number of all object lab instances below 
-and besides the current object type (include siblings) 
+Count the number of all object lab instances below
+and besides the current object type (include siblings)
 ****************************************************/
 double object::count_all( char const *lab )
 {
 	int count;
 	object *cur;
-	
+
 	if ( up->b->head != NULL )
-		cur = up->b->head->search( lab );			// pick always first instance
+		cur = up->b->head->search_err( lab, no_search, "counting" );// pick always first instance
 	else
-		cur = search( lab );						// count from here (bad)
-	
+		cur = search_err( lab, no_search, "counting" );	// count from here (bad)
+
 	if ( cur == NULL )
-	{	// check if it is not a zero-instance object 
-		cur = blueprint->search( lab );
-		if ( cur == NULL )
-		{
-			sprintf( msg, "object '%s' is missing for counting", lab );
-			error_hard( msg, "object not found", 
-						"create object in model structure" );
-		}
-		
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' were deleted", lab ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
 		return 0;
-	}
-	
+
 	for ( count = 0; cur != NULL; cur = cur->hyper_next( lab ), ++count );
 
 	return count;
@@ -2462,11 +2459,11 @@ double object::stat( char const *lab, double *r )
 
 	if ( r == NULL )
 		r = r_temp;
-	
+
 	cv = search_var_err( this, lab, no_search, true, "calculating statistics" );
 	if ( cv == NULL || cv->up == NULL )
 	{
-		r[ 0 ] = 0;	
+		r[ 0 ] = 0;
 		r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = r[ 5 ] = r[ 6 ] = NAN;
 		return 0;
 	}
@@ -2475,32 +2472,32 @@ double object::stat( char const *lab, double *r )
 	r[ 1 ] =  r[ 2 ] = 0;
 	r[ 3 ] = DBL_MIN;
 	r[ 4 ] = DBL_MAX;
-	
+
 	for ( n = 0; cur != NULL; cur = go_brother( cur ), ++n )
 	{
 		val = cur->cal( lab, 0 );
 		r[ 1 ] += val;
 		r[ 2 ] += val * val;
-		
+
 		if ( val > r[ 3 ] )
 			r[ 3 ] = val;
-		
+
 		if ( val < r[ 4 ] )
 			r[ 4 ] = val;
-		
+
 		vals.push_back( val );
 	}
-	
+
 	r[ 0 ] = n;
-	
+
 	if ( n > 0 )
 	{
 		r[ 1 ] /= n;
 		r[ 2 ] = r[ 2 ] / n - r[ 1 ] * r[ 1 ];
 		r[ 6 ] = r[ 2 ] >= 0 ? sqrt( r[ 2 ] ) : NAN;
-		
+
 		sort( vals.begin( ), vals.end( ) );
-		
+
 		if ( n % 2 == 0 )
 			r[ 5 ] = ( vals[ n / 2 - 1 ] + vals[ n / 2 ] ) / 2;
 		else
@@ -2508,7 +2505,7 @@ double object::stat( char const *lab, double *r )
 	}
 	else
 		r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = r[ 5 ] = r[ 6 ] = NAN;
-	
+
 	return r[ 0 ];
 }
 
@@ -2528,7 +2525,7 @@ int sort_function_up( const void *a, const void *b )
 		else
 			return 1;
 	}
-	
+
 	// handles the case of node id comparison
 	if ( ( *( object ** ) a )->node->id < ( *( object ** ) b )->node->id )
 		return -1;
@@ -2545,7 +2542,7 @@ int sort_function_down( const void *a, const void *b )
 		else
 			return 1;
 	}
-	
+
 	// handles the case of node id comparison
 	if ( ( *( object ** ) a )->node->id > ( *( object ** ) b )->node->id )
 		return -1;
@@ -2567,24 +2564,24 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 		cv = search_var_err( this, var, no_search, true, "sorting" );
 		if ( cv == NULL )
 			return NULL;
-		
+
 		cur = cv->up;
 		if ( cur == NULL || strcmp( obj, cur->label ) )
 		{
 			sprintf( msg, "element '%s' is missing (object '%s') for sorting", var, obj );
-			error_hard( msg, "variable or parameter not found", 
+			error_hard( msg, "variable or parameter not found",
 						"create variable or parameter in model structure" );
 			return NULL;
 		}
-	
+
 		if ( cur->up == NULL )
 		{
 			sprintf( msg, "object '%s' is missing for sorting", obj );
-			error_hard( msg, "object not found", 
+			error_hard( msg, "object not found",
 						"create object in model structure" );
 			return NULL;
 		}
-	
+
 		cb = cur->up->search_bridge( obj, true );
 	}
 	else									// pick network object to sort
@@ -2596,8 +2593,8 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 			else
 			{
 				sprintf( msg, "object '%s' has no network data structure", obj );
-				error_hard( msg, "invalid network object", 
-							"check your equation code to add\nthe network structure before using this macro", 
+				error_hard( msg, "invalid network object",
+							"check your equation code to add\nthe network structure before using this macro",
 							true );
 				return NULL;
 			}
@@ -2608,24 +2605,24 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 	if ( cb == NULL )
 	{
 		sprintf( msg, "object '%s' is missing for sorting", obj);
-		error_hard( msg, "object not found", 
+		error_hard( msg, "object not found",
 					"create object in model structure" );
 		return NULL;
 	}
-	
+
 	if ( cb->head == NULL )
 	{
-		sprintf( msg, "all instances of object '%s' were deleted", obj ); 
-		error_hard( msg, "object has no instance", 
+		sprintf( msg, "all instances of object '%s' were deleted", obj );
+		error_hard( msg, "object has no instance",
 					"check your equation code to prevent this situation",
 					true );
 		return NULL;
-	} 
-	
+	}
+
 #ifdef PARALLEL_MODE
 	// prevent concurrent sorting by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
-#endif	
+#endif
 
 	cb->counter_updated = false;
 	cur = cb->head;
@@ -2637,12 +2634,12 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 		mylist[ i ] = cur;
 		cur = cur->next;
 	}
-	
+
 	strncpy( dir, direction, 5 );
 	str_upr( dir );
-	
+
 	qsort_lab = ( char * ) var;
-	
+
 	if ( ! strcmp( dir, "UP" ) )
 		qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_up );
 	else
@@ -2651,13 +2648,13 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 		else
 		{
 			sprintf( msg, "direction '%s' is invalid for sorting", direction );
-			error_hard( msg, "invalid sort option ('UP' or 'DOWN' required)", 
+			error_hard( msg, "invalid sort option ('UP' or 'DOWN' required)",
 						"check your equation code to prevent this situation",
 						true );
 			delete [ ] mylist;
 			return NULL;
 		}
-	
+
 	cb->head = mylist[ 0 ];
 
 	for ( i = 1; i < num; ++i )
@@ -2666,7 +2663,7 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 	mylist[ i - 1 ]->next = NULL;
 
 	delete [ ] mylist;
-	
+
 	return cb->head;
 }
 
@@ -2678,10 +2675,10 @@ Two stage sorting. Objects with identical values of var1 are sorted according to
 int sort_function_up_two( const void *a, const void *b )
 {
 	double x, y;
-	
+
 	x = ( *( object ** ) a )->cal( qsort_lab, 0 );
 	y = ( *( object ** ) b )->cal( qsort_lab, 0 );
-	
+
 	if ( x < y )
 		return -1;
 	else
@@ -2697,7 +2694,7 @@ int sort_function_up_two( const void *a, const void *b )
 int sort_function_down_two( const void *a, const void *b )
 {
 	double x, y;
-	
+
 	x = ( *( object ** ) a )->cal( qsort_lab, 0 );
 	y = ( *( object ** ) b )->cal( qsort_lab, 0 );
 
@@ -2722,32 +2719,32 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 	variable *cv;
 
 	cb = search_bridge( obj, true );			// try to find the bridge
-	   
+
 	if ( cb == NULL )
 	{
 		sprintf( msg, "object '%s' is missing for sorting", obj );
-		error_hard( msg, "object not found", 
+		error_hard( msg, "object not found",
 					"create object in model structure" );
 		return NULL;
 	}
-	
+
 	if ( cb->head == NULL )
 	{
-		sprintf( msg, "all instances of object '%s' were deleted", obj ); 
-		error_hard( msg, "object has no instance", 
+		sprintf( msg, "all instances of object '%s' were deleted", obj );
+		error_hard( msg, "object has no instance",
 					"check your equation code to ensure at least one instance\nof any object is kept",
 					true );
 	}
-	
+
 	cv = search_var_err( this, var1, no_search, true, "sorting" );
 	if ( cv == NULL )
 		return NULL;
-	 
+
 	cur = cv->up;
 	if ( cur == NULL || strcmp( obj, cur->label ) )
 	{
 		sprintf( msg, "element '%s' is missing (object '%s') for sorting", var1, obj );
-		error_hard( msg, "variable or parameter not found", 
+		error_hard( msg, "variable or parameter not found",
 					"create variable or parameter in model structure" );
 		return NULL;
 	}
@@ -2755,7 +2752,7 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 	if ( cur->up == NULL )
 	{
 		sprintf( msg, "object '%s' is missing for sorting", obj );
-		error_hard( msg, "object not found", 
+		error_hard( msg, "object not found",
 					"create object in model structure" );
 		return NULL;
 	}
@@ -2763,7 +2760,7 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 #ifdef PARALLEL_MODE
 	// prevent concurrent sorting by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
-#endif	
+#endif
 
 	cb->counter_updated = false;
 	cur = cb->head;
@@ -2775,13 +2772,13 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 		mylist[ i ] = cur;
 		cur = cur->next;
 	}
-	
+
 	strncpy( dir, direction, 5 );
 	str_upr( dir );
 
 	qsort_lab = ( char * ) var1;
 	qsort_lab_secondary = ( char * ) var2;
-    
+
 	if ( ! strcmp( dir, "UP" ) )
 		qsort( ( void * )mylist, num, sizeof( mylist[ 0 ] ), sort_function_up_two );
 	else
@@ -2790,7 +2787,7 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 		else
 		{
 			sprintf( msg, "direction '%s' is invalid for sorting", direction );
-			error_hard( msg, "invalid sort option ('UP' or 'DOWN' required)", 
+			error_hard( msg, "invalid sort option ('UP' or 'DOWN' required)",
 						"check your equation code to prevent this situation",
 						true );
 			delete [ ] mylist;
@@ -2801,18 +2798,18 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 
 	for ( i = 1; i < num; ++i )
 		( mylist[ i - 1 ] )->next = mylist[ i ];
-	
+
 	mylist[ i - 1 ]->next = NULL;
 
 	delete [ ] mylist;
-	
+
 	return cb->head;
 }
 
 
 /*********************
 DRAW_RND (*)
-Draw randomly an object with label lo with probabilities proportional 
+Draw randomly an object with label lo with probabilities proportional
 to the values of their Variables or Parameters lv
 *********************/
 object *object::draw_rnd( char const *lo, char const *lv, int lag )
@@ -2829,11 +2826,11 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 
 	for ( a = 0; cur != NULL; cur = cur->next )
 		a += cur->cal( lv, lag );
-  
+
 	if ( is_nan( a ) || is_inf( a ) )
 	{
-		sprintf( msg, "element '%s' has invalid value '%g' for random drawing", lv, a );  
-		error_hard( msg, "invalid random draw option", 
+		sprintf( msg, "element '%s' has invalid value '%g' for random drawing", lv, a );
+		error_hard( msg, "invalid random draw option",
 					"check your equation code to prevent this situation",
 					true );
 		return NULL;
@@ -2841,69 +2838,51 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 
 	if ( a == 0 )
 	{
-		sprintf( msg, "element '%s' has only zero values for random drawing", lv );  
-		error_hard( msg, "invalid random draw option", 
+		sprintf( msg, "element '%s' has only zero values for random drawing", lv );
+		error_hard( msg, "invalid random draw option",
 					"check your equation code to prevent this situation",
 					true );
 		return NULL;
 	}
-	
+
 	do
 	{
 		b = RND * a;
 	}
 	while ( b == a ); 	// avoid RND == 1
-	
+
 	a = cur1->cal( lv, lag );
 	for ( cur = cur1, cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cur1->next )
 	{
 		a += cur1->cal( lv, lag );
 		cur = cur1;
 	}
-	
+
 	return cur;
 }
 
 
 /*********************
 DRAW_RND (*)
-Draw randomly an object with label lab with identical probabilities 
+Draw randomly an object with label lab with identical probabilities
 *********************/
 object *object::draw_rnd( char const *lab )
 {
 	double a, b;
 	object *cur, *cur1;
 
-	cur1 = cur = search( lab );
+	cur1 = cur = search_err( lab, no_search, "random drawing" );
 
 	if ( cur == NULL )
-	{	// check if it is not a zero-instance object 
-		cur = blueprint->search( lab );
-		if ( cur == NULL )
-		{
-			sprintf( msg, "object '%s' is missing for random drawing", lab );
-			error_hard( msg, "object not found", 
-						"create object in model structure" );
-		}
-
-		if ( no_zero_instance )
-		{
-			sprintf( msg, "all instances of '%s' were deleted", lab ); 
-			error_hard( msg, "object has no instance", 
-						"check your equation code to ensure at least one instance\nof any object is kept",
-						true );
-		}
-		
 		return NULL;
-	}
-	
+
 	for ( a = 0 ; cur != NULL; cur = cur->next )
 		++a;
 
 	if ( a == 0 )
 	{
 		sprintf( msg, "object '%s' is missing for random drawing", lab );
-		error_hard( msg, "object not found", 
+		error_hard( msg, "object not found",
 					"create object in model structure" );
 		return NULL;
 	}
@@ -2913,13 +2892,13 @@ object *object::draw_rnd( char const *lab )
 		b = RND * a;
 	}
 	while ( b == a ); 	// avoid RND == 1
-	
+
 	for ( a = 1, cur = cur1, cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cur1->next )
 	{
 		++a;
 		cur = cur1;
 	}
-	
+
 	return cur;
 }
 
@@ -2936,12 +2915,12 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 
 	if ( tot <= 0 )
 	{
-		sprintf( msg, "element '%s' has invalid value '%g' for random drawing", lv, tot );  
-		error_hard( msg, "invalid random draw option", 
+		sprintf( msg, "element '%s' has invalid value '%g' for random drawing", lv, tot );
+		error_hard( msg, "invalid random draw option",
 					"check your equation code to prevent this situation",
 					true );
 		return NULL;
-	}  
+	}
 
 	cv = search_var_err( this, lv, no_search, true, "random drawing" );
 	if ( cv == NULL )
@@ -2956,16 +2935,16 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 		a += cur1->cal( lv, lag );
 		cur = cur1;
 	}
-	
+
 	if ( a > tot )
 	{
-		sprintf( msg, "element '%s' has invalid value '%g' for random drawing", lv, tot );  
-		error_hard( msg, "invalid random draw option", 
+		sprintf( msg, "element '%s' has invalid value '%g' for random drawing", lv, tot );
+		error_hard( msg, "invalid random draw option",
 					"check your equation code to prevent this situation",
 					true );
 		return NULL;
 	}
-	
+
 	return cur;
 }
 
@@ -2979,26 +2958,26 @@ double object::write( char const *lab, double value, int time, int lag )
 {
     int i, eff_lag, eff_time;
 	variable *cv;
-	
+
     if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
 		sprintf( msg, "value '%g' is invalid for writing to element '%s'", value, lab );
-		error_hard( msg, "invalid write operation", 
+		error_hard( msg, "invalid write operation",
 					"check your equation code to prevent this situation",
 					true );
         return NAN;
     }
-    
+
 	cv = search_var_err( this, lab, true, false, "writing" );
 	if ( cv == NULL )
 		return NAN;
-	
+
 	if ( cv->under_computation )
 	{
 		if ( ! cv->dummy )
 		{
 			sprintf( msg, "variable '%s' is under computation and cannot be written", lab );
-			error_hard( msg, "invalid write operation", 
+			error_hard( msg, "invalid write operation",
 						"check your equation code to prevent this situation",
 						true );
 			return NAN;
@@ -3010,7 +2989,7 @@ double object::write( char const *lab, double value, int time, int lag )
 		else
 		{
 			sprintf( msg, "variable '%s' is under dummy computation and cannot be written", lab );
-			error_hard( msg, "deadlock during parallel computation", 
+			error_hard( msg, "deadlock during parallel computation",
 						"check your equation code to prevent this situation",
 						true );
 			return NAN;
@@ -3021,11 +3000,11 @@ double object::write( char const *lab, double value, int time, int lag )
 #ifdef PARALLEL_MODE
 	// prevent concurrent use by more than one thread
 	lock_guard < mutex > lock( cv->parallel_comp );
-#endif	
+#endif
 	if ( cv->param != 1 && time <= 0 && t > 1 )
 	{
 		sprintf( msg, "invalid update time (%d) for variable '%s'", time, lab );
-		error_hard( msg, "invalid write operation", 
+		error_hard( msg, "invalid write operation",
 					"check your equation code to prevent this situation",
 					true );
 		return NAN;
@@ -3037,7 +3016,7 @@ double object::write( char const *lab, double value, int time, int lag )
 		if ( - time > cv->num_lag )		// check for invalid lag
 		{
 			sprintf( msg, "invalid initial lag (%d) for variable '%s'", time, lab );
-			error_hard( msg, "invalid write operation", 
+			error_hard( msg, "invalid write operation",
 						"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 						false );
 			return NAN;
@@ -3045,10 +3024,10 @@ double object::write( char const *lab, double value, int time, int lag )
 
 		cv->val[ - time - 1 ] = value;
 		cv->last_update = 0;	// force new updating
-		
+
 		if ( time == -1 && ( cv->save || cv->savei ) )
 			cv->data[ 0 ] = value;
-		
+
 		// choose next update step for special updating variables
 		if ( cv->delay > 0 || cv->delay_range > 0 )
 		{
@@ -3062,7 +3041,7 @@ double object::write( char const *lab, double value, int time, int lag )
 		if ( lag < 0 || lag > cv->num_lag )
 		{
 			sprintf( msg, "invalid lag (%d) for variable '%s'", lag, lab );
-			error_hard( msg, "invalid write operation", 
+			error_hard( msg, "invalid write operation",
 						"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 						false );
 			return NAN;
@@ -3072,11 +3051,11 @@ double object::write( char const *lab, double value, int time, int lag )
 		if ( time >= t && lag == 0 && cv->last_update < t )
 			for ( i = 0; i < cv->num_lag; ++i )
 				cv->val[ cv->num_lag - i ] = cv->val[ cv->num_lag - i - 1 ];
-		
+
 		if ( lag == 0 )
 		{
 			cv->val[ 0 ] = value;
-	
+
 			// choose next update step for special updating variables
 			if ( cv->period > 1 || cv->period_range > 0 )
 			{
@@ -3092,25 +3071,25 @@ double object::write( char const *lab, double value, int time, int lag )
 				eff_lag = lag - ( t - cv->last_update );	// first write in time
 			else
 				eff_lag = lag - ( t - time );				// rewrite in time
-			
+
 			if ( eff_lag < 0 || eff_lag > cv->num_lag )
 			{
 				sprintf( msg, "invalid update time (%d) and lag (%d) for variable '%s'", time, lag, lab );
-				error_hard( msg, "invalid write operation", 
+				error_hard( msg, "invalid write operation",
 							"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 							true );
 				return NAN;
 			}
 
 			cv->val[ eff_lag ] = value;
-		}		
-		
+		}
+
 		cv->last_update = time;
 		eff_time = time - lag;
 		if ( eff_time >= cv->start && eff_time <= cv->end && ( cv->save || cv->savei ) )
 			cv->data[ eff_time - cv->start ] = value;
 	}
-	
+
 	return value;
 }
 
@@ -3125,11 +3104,11 @@ double object::increment( char const *lab, double value )
 {
     variable *cv;
 	double new_value;
-	
+
     if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
 		sprintf( msg, "value '%g' is invalid for incrementing element '%s'", value, lab );
-		error_hard( msg, "invalid write operation", 
+		error_hard( msg, "invalid write operation",
 					"check your equation code to prevent this situation",
 					true );
         return NAN;
@@ -3138,10 +3117,10 @@ double object::increment( char const *lab, double value )
 	cv = search_var_err( this, lab, true, false, "incrementing" );
 	if ( cv == NULL )
 		return NAN;
-	
+
 	new_value = cv->val[ 0 ] + value;
 	this->write( lab, new_value, t );
-	
+
 	return new_value;
 }
 
@@ -3156,11 +3135,11 @@ double object::multiply( char const *lab, double value )
 {
     variable *cv;
 	double new_value;
-	
+
     if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
 		sprintf( msg, "value '%g' is invalid for multiplying element '%s'", value, lab );
-		error_hard( msg, "invalid write operation", 
+		error_hard( msg, "invalid write operation",
 					"check your equation code to prevent this situation",
 					true );
         return NAN;
@@ -3169,10 +3148,10 @@ double object::multiply( char const *lab, double value )
 	cv = search_var_err( this, lab, true, false, "multiplying" );
 	if ( cv == NULL )
 		return NAN;
-	
+
 	new_value = cv->val[ 0 ] * value;
 	this->write( lab, new_value, t );
-	
+
 	return new_value;
 }
 
@@ -3181,17 +3160,17 @@ double object::multiply( char const *lab, double value )
 LAT_DOWN (*)
 return the object "up" the cell of a lattice
 *****************************/
-object *object::lat_down( void ) 
+object *object::lat_down( void )
 {
 	int i, j;
 	object *cur;
-	
+
 	for ( i = 1, cur = up->search( label ); cur != this; cur = go_brother( cur ), ++i );
 
 	cur = go_brother( up );
 	if ( cur == NULL )
 		cur = up->up->search( up->label );
-	 
+
 	for ( j = 1, cur = cur->search( label ); j < i; cur = go_brother( cur ), ++j );
 
 	return cur;
@@ -3202,7 +3181,7 @@ object *object::lat_down( void )
 LAT_UP (*)
 return the object "down" the cell of a lattice
 *****************************/
-object *object::lat_up( void ) 
+object *object::lat_up( void )
 {
 	int i, k;
 	object *cur, *cur1, *cur2;
@@ -3225,14 +3204,14 @@ object *object::lat_up( void )
 LAT_RIGHT (*)
 return the object "right" the cell of a lattice
 *****************************/
-object *object::lat_right( void ) 
+object *object::lat_right( void )
 {
 	object *cur;
 
 	cur = go_brother( this );
 	if ( cur == NULL )
 	 cur = up->search( label );
- 
+
 	return cur;
 }
 
@@ -3241,7 +3220,7 @@ object *object::lat_right( void )
 LAT_LEFT (*)
 return the object "left" the cell of a lattice
 *****************************/
-object *object::lat_left( void ) 
+object *object::lat_left( void )
 {
 	object *cur;
 
@@ -3263,10 +3242,10 @@ double build_obj_list( bool set_list )
 #ifdef PARALLEL_MODE
 	// prevent concurrent update by more than one thread
 	lock_guard < mutex > lock( parallel_obj_list );
-#endif	
-	
+#endif
+
 	obj_list.clear( );			// reset list
-	
+
 	if ( set_list )
 	{
 		collect_inst( root, obj_list );
@@ -3274,7 +3253,7 @@ double build_obj_list( bool set_list )
 	}
 	else
 		no_ptr_chk = true;
-	
+
 	return obj_list.size( );
 }
 
@@ -3288,14 +3267,14 @@ void collect_inst( object *r, o_setT &list )
 {
 	bridge *cb;
 	object *cur;
-	
+
 	// collect own address
 	list.insert( r );
-	
+
 	// search among descendants
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL; cur = cur->hyper_next( ) )
-			collect_inst( cur, list );	
+			collect_inst( cur, list );
 }
 
 
@@ -3304,12 +3283,12 @@ INTERACT (*)
 Interrupt the simulation, as for the debugger, allowing the insertion of a value.
 Note that the debugging window, in this model, accept the entry key stroke as a run.
 ********************************************/
-double object::interact( char const *text, double v, double *tv, int i, int j, 
-						 int h, int k, object *cur, object *cur1, object *cur2, 
-						 object *cur3, object *cur4, object *cur5, object *cur6, 
-						 object *cur7, object *cur8, object *cur9, netLink *curl, 
-						 netLink *curl1, netLink *curl2, netLink *curl3, 
-						 netLink *curl4, netLink *curl5, netLink *curl6, 
+double object::interact( char const *text, double v, double *tv, int i, int j,
+						 int h, int k, object *cur, object *cur1, object *cur2,
+						 object *cur3, object *cur4, object *cur5, object *cur6,
+						 object *cur7, object *cur8, object *cur9, netLink *curl,
+						 netLink *curl1, netLink *curl2, netLink *curl3,
+						 netLink *curl4, netLink *curl5, netLink *curl6,
 						 netLink *curl7, netLink *curl8, netLink *curl9 )
 {
 #ifndef NO_WINDOW
@@ -3320,7 +3299,7 @@ double object::interact( char const *text, double v, double *tv, int i, int j,
 	{
 		for ( n = 0; n < USER_D_VARS; ++n )
 			d_values[ n ] = tv[ n ];
-		
+
 		i_values[ 0 ] = i;
 		i_values[ 1 ] = j;
 		i_values[ 2 ] = h;
@@ -3345,11 +3324,11 @@ double object::interact( char const *text, double v, double *tv, int i, int j,
 		n_values[ 7 ] = curl7;
 		n_values[ 8 ] = curl8;
 		n_values[ 9 ] = curl9;
-		
+
 		non_var = true;					// signals INTERACT macro
 		deb( this, NULL, text, &app, true );
 	}
-	
+
 	return app;
 #else
 	return v;
