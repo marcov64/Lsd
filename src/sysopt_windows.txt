@@ -3,12 +3,12 @@ EXT=.exe
 
 # Libraries options
 TCL_VERSION=86
-PATH_TCL_HEADER=$(LSDROOT)/gnu64/include
-PATH_TK_HEADER=$(LSDROOT)/gnu64/include
-PATH_HEADER=$(LSDROOT)/gnu64/include
-PATH_TCL_LIB=$(LSDROOT)/gnu64/lib
-PATH_TK_LIB=$(LSDROOT)/gnu64/lib
-PATH_LIB=$(LSDROOT)/gnu64/lib
+PATH_TCL_HEADER=$(LSDROOT)/gnu/include
+PATH_TK_HEADER=$(LSDROOT)/gnu/include
+PATH_HEADER=$(LSDROOT)/gnu/include
+PATH_TCL_LIB=$(LSDROOT)/gnu/lib
+PATH_TK_LIB=$(LSDROOT)/gnu/lib
+PATH_LIB=$(LSDROOT)/gnu/lib
 TCL_LIB=-ltcl$(TCL_VERSION)
 TK_LIB=-ltk$(TCL_VERSION)
 LIBS=-lz

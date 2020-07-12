@@ -28,15 +28,15 @@ TARGET=lmm
 EXT=.exe
 SWITCH_CC=-mthreads -mwindows -O3
 
-# For MS Windows 64-bit systems, using Cygwin-minGW GCC and Tcl/Tk in the Lsd installation.
+# For Windows, using Cygwin-minGW GCC and Tcl/Tk in the Lsd installation.
 LSDROOT=.
 TCL_VERSION=86
-PATH_TCL_HEADER=$(LSDROOT)/gnu64/include
-PATH_TK_HEADER=$(LSDROOT)/gnu64/include
-PATH_HEADER=$(LSDROOT)/gnu64/include
-PATH_TCL_LIB=$(LSDROOT)/gnu64/lib
-PATH_TK_LIB=$(LSDROOT)/gnu64/lib
-PATH_LIB=$(LSDROOT)/gnu64/lib
+PATH_TCL_HEADER=$(LSDROOT)/gnu/include
+PATH_TK_HEADER=$(LSDROOT)/gnu/include
+PATH_HEADER=$(LSDROOT)/gnu/include
+PATH_TCL_LIB=$(LSDROOT)/gnu/lib
+PATH_TK_LIB=$(LSDROOT)/gnu/lib
+PATH_LIB=$(LSDROOT)/gnu/lib
 LIBS=
 
 # from here you should not need to modify anything
