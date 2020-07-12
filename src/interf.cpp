@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 7.3 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -912,7 +912,7 @@ int browse( object *r, int *choice )
 			cmd( "$w add command -label \"Using LSD Models Tutorial\" -underline 0 -command { LsdHelp model_using.html }" );
 			cmd( "$w add command -label \"Writing LSD Models Tutorial\" -underline 0 -command { LsdHelp model_writing.html }" );
 			cmd( "$w add separator" );
-			cmd( "if { $tcl_platform(platform) == \"unix\" } { $w add command -label \"Set Browser\" -command { set choice 48 } -underline 0 }" );
+			cmd( "if { ! [ string equal $CurPlatform windows ] } { $w add command -label \"Set Browser\" -command { set choice 48 } -underline 0 }" );
 			cmd( "$w add command -label \"Model Report\" -underline 0 -command { set choice 44 }" );
 			cmd( "$w add separator" );
 			cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%s} {%s} }", _LSD_VERSION_, _LSD_DATE_  );
@@ -3951,11 +3951,6 @@ case 44:
 	else
 		cmd( "set fname %s", name_rep );
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "app", 0 );
-	cmd( "set app $tcl_platform(osVersion)" );
-
-	lab1 = ( char * ) Tcl_GetVar( inter, "app", 0 );
-
 	if ( *choice == 1 ) 		// model report exists
 		cmd( "LsdHtml $fname" );
   
@@ -5211,8 +5206,7 @@ case 68:
 
 	// check for existing NW executable
 	sprintf( ch, "%s/lsdNW", exec_path );			// form full executable name
-	cmd( "if { $tcl_platform(platform) == \"windows\" } { set choice 1 } { set choice 0 }" );
-	if ( *choice == 1 )
+	if ( platform == WINDOWS )
 		strcat( ch, ".exe" );							// add Windows ending
 
 	if ( ( f = fopen( ch, "rb" ) ) == NULL ) 
@@ -5388,7 +5382,7 @@ case 68:
 	strncpy( out_bat, ( char * ) Tcl_GetVar( inter, "res2", 0 ), MAX_PATH_LENGTH - 1 );
 	
 	// select batch format & create batch file
-	cmd( "if { $tcl_platform(platform) == \"windows\" } { if { $natBat == 1 } { set choice 1 } { set choice 2 } } { if { $natBat == 1 } { set choice 3 } { set choice 4 } }" );
+	cmd( "if [ string equal $CurPlatform windows ] { if { $natBat == 1 } { set choice 1 } { set choice 2 } } { if { $natBat == 1 } { set choice 3 } { set choice 4 } }" );
 	if ( fSeq )
 		if ( *choice == 1 || *choice == 4 )
 			sprintf( lab, "%s/%s_%d_%d.bat", out_dir, out_bat, ffirst, fnext - 1 );
@@ -5573,20 +5567,18 @@ case 68:
 		--j;
 		i = j > 4 ? ( j > 8 ? ( j > 12 ? 4 : 3 ) : 2 ) : 1;
 		
-		cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set choice 2 } { set choice 1 } } { set choice 3 }" );
-	
-		switch( *choice )
+		switch( platform )
 		{
 				
-			case 1:				// Linux
+			case LINUX:
 				cmd( "catch { exec -- $sysTerm -e multitail -s %d --retry-all %s & }", i, lab2 );
 				break;
 
-			case 2:				// Mac
+			case MAC:
 				cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $path; clear; multitail -s %d --retry-all %s\\\"\" & } result", i, lab2 );
 				break;
 
-			case 3:				// Windows
+			case WINDOWS:
 				cmd( "catch { exec -- $sysTerm /k multitail -s %d --retry-all %s & }", i, lab2 );
 		}
 	}
@@ -5611,8 +5603,7 @@ case 69:
 
 	// check for existing NW executable
 	sprintf( lab, "%s/lsdNW", exec_path );				// form full executable name
-	cmd( "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}" );
-	if ( *choice == 1 )
+	if ( platform == WINDOWS )
 		strcat( lab, ".exe" );							// add Windows ending
 
 	if ( ( f = fopen( lab, "rb" ) ) == NULL ) 
@@ -5805,24 +5796,20 @@ case 69:
 	cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results and log files are being created in the folder:\n\n$path\n\nDo you want to launch the tail command now?\" ]" );
 	cmd( "switch $answer { yes { set choice 1 } no { set choice 0 } }" );
 	if ( *choice )
-	{
-		cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set choice 2 } { set choice 1 } } { set choice 3 }" );
-	
-		switch( *choice )
+		switch( platform )
 		{
 				
-			case 1:				// Linux
+			case LINUX:
 				cmd( "catch { exec $sysTerm -e tail -F %s.log & }", simul_name );
 			 	break;
 			
-			case 2:				// Mac
+			case MAC:
 				cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $path; clear; tail -F %s.log\\\"\" & } result", simul_name );
 				break;
 
-			case 3:				// Windows
+			case WINDOWS:
 				cmd( "catch { exec $sysTerm /k tail -F %s.log & }", simul_name );
 		}
-	}
 	
 	cmd( "set path $oldpath; cd $path" );
 	

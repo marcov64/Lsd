@@ -1,6 +1,6 @@
 #*************************************************************
 #
-#	LSD 7.2 - December 2019
+#	LSD 7.3 - December 2020
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -179,19 +179,15 @@ proc chs_mdl { } {
 # CHECK_SYS_OPT
 # Check (best guess) if system option configuration is valid for the platform
 #************************************************
-set win32Yes [ list ".exe" "85" "/gnu/" "g++" "-ltcl" "-ltk" "-lz" "-mthreads" "-mwindows" ]
-set win32No  [ list "/gnu64/" "x86_64-w64-mingw32-g++" "-framework" "-lpthread" "gnu++14" ]
-set win64Yes [ list ".exe" "86" "x86_64-w64-mingw32-g++" "-ltcl" "-ltk" "-lz" "-mthreads" "-mwindows" ]
-set win64No  [ list "/gnu/" "-framework" "-lpthread" ]
+set winYes [ list ".exe" "86" "x86_64-w64-mingw32-g++" "-ltcl" "-ltk" "-lz" "-mthreads" "-mwindows" ]
+set winNo  [ list "-framework" "-lpthread" ]
 set linuxYes [ list "8.6" "g++" "-ltcl" "-ltk" "-lz" "-lpthread" ]
-set linuxNo  [ list ".exe" "/gnu64/" "x86_64-w64-mingw32-g++" "-framework" "-mthreads" "-mwindows" ]
-set osxYes [ list "g++" "-framework" "-lz" "-lpthread" ]
-set osxNo  [ list ".exe" "/gnu/" "/gnu64/" "x86_64-w64-mingw32-g++" "-mthreads" "-mwindows" ]
+set linuxNo  [ list ".exe" "x86_64-w64-mingw32-g++" "-framework" "-mthreads" "-mwindows" ]
 set macYes [ list "g++" "-framework" "-lz" "-lpthread" "-DMAC_PKG" ]
-set macNo  [ list ".exe" "/gnu/" "/gnu64/" "x86_64-w64-mingw32-g++" "-mthreads" "-mwindows" ]
+set macNo  [ list ".exe" "/gnu/" "x86_64-w64-mingw32-g++" "-mthreads" "-mwindows" ]
 
 proc check_sys_opt { } {
-	global RootLsd LsdSrc CurPlatform win32Yes win32No win64Yes win64No linuxYes linuxNo osxYes osxNo macYes macNo SYSTEM_OPTIONS
+	global RootLsd LsdSrc CurPlatform winYes winNo winYes winNo linuxYes linuxNo macYes macNo SYSTEM_OPTIONS
 	
 	if { ! [ file exists "$RootLsd/$LsdSrc/$SYSTEM_OPTIONS" ] } { 
 		return "File '$SYSTEM_OPTIONS' not found (click 'Default' button to recreate it)"
@@ -202,21 +198,13 @@ proc check_sys_opt { } {
 	close $f
 	
 	switch $CurPlatform {
-		win32 {
-			set yes $win32Yes
-			set no $win32No
-		}
-		win64 {
-			set yes $win64Yes
-			set no $win64No
+		windows {
+			set yes $winYes
+			set no $winNo
 		}
 		linux {
 			set yes $linuxYes
 			set no $linuxNo
-		}
-		osx {
-			set yes $osxYes
-			set no $osxNo
 		}
 		mac {
 			set yes $macYes
@@ -298,7 +286,7 @@ proc make_wait { } {
 # Start a makefile as a background task
 #************************************************
 proc make_background { target threads nw macPkg } {
-	global tcl_platform MakeExe RootLsd LsdGnu targetExe iniTime makePipe
+	global CurPlatform MakeExe RootLsd LsdGnu targetExe iniTime makePipe
 	
 	if { $nw } {
 		set makeSuffix "NW"
@@ -306,13 +294,13 @@ proc make_background { target threads nw macPkg } {
 		set makeSuffix ""
 	};
 	
-	if [ string equal $tcl_platform(platform) windows ] {
+	if [ string equal $CurPlatform windows ] {
 		set exeSuffix ".exe"
 	} else {
 		set exeSuffix ""
 	}
 	
-	if { ! $nw && $macPkg && [ string equal $tcl_platform(os) Darwin ] } {
+	if { ! $nw && $macPkg && [ string equal $CurPlatform mac ] } {
 		set targetExe "$target.app/Contents/MacOS/$target"
 	} else {
 		set targetExe "$target$exeSuffix"
@@ -321,7 +309,7 @@ proc make_background { target threads nw macPkg } {
 	set iniTime [ clock seconds ]
 	
 	# handle Windows access to open executable and empty compilation windows
-	if [ string equal $tcl_platform(platform) windows ] {
+	if [ string equal $CurPlatform windows ] {
 	
 		if [ file exists "$target$exeSuffix" ] {
 			if [ string equal [ info tclversion ] 8.6 ] {

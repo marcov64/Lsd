@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 7.3 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -1224,9 +1224,9 @@ void deb_show( object *r )
 	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
 
 	// adjust spacing to align labels with data and increase columns width to better fill window
-	cmd( "if [ string equal $tcl_platform(platform) windows ] { set w1 20; set w2 25; set w3 10; set wwidth 100 }" );
-	cmd( "if [ string equal $tcl_platform(platform) unix ] { set w1 20; set w2 24; set w3 10; set wwidth 100 }" );
-	cmd( "if [ string equal $tcl_platform(os) Darwin ] { set w1 15; set w2 18; set w3 9; set wwidth 115 }" );
+	cmd( "if [ string equal $CurPlatform windows ] { set w1 20; set w2 25; set w3 10; set wwidth 100 }" );
+	cmd( "if [ string equal $CurPlatform linux ] { set w1 20; set w2 24; set w3 10; set wwidth 100 }" );
+	cmd( "if [ string equal $CurPlatform mac ] { set w1 15; set w2 18; set w3 9; set wwidth 115 }" );
 
 	cmd( "if { ! [ winfo exists .deb.tit ] } { \
 			frame .deb.tit; \

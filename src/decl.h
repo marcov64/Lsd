@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 7.3 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -14,15 +14,14 @@ DECL.H
 Global definitions among all LSD C++ modules
 *************************************************************/
 
+// LSD version strings, for About... boxes and code testing
+#define _LSD_MAJOR_ 7
+#define _LSD_MINOR_ 3
+#define _LSD_VERSION_ "7.3-0"
+#define _LSD_DATE_ "December 31 2020"   // __DATE__
+
 // LSD compilation options file
 #include "choose.h"
-
-// check compiler C++ standard support
-#ifndef CPP_DEFAULT
-#if __cplusplus >= 201103L 
-#define CPP11
-#endif
-#endif
 
 // standard libraries used
 #include <stdio.h>
@@ -38,19 +37,15 @@ Global definitions among all LSD C++ modules
 #include <signal.h>
 #include <csetjmp>
 #include <sys/stat.h>
+#include <zlib.h>
 #include <algorithm>
+#include <random>
 #include <string>
 #include <vector>
 #include <list>
 #include <new>
 #include <map>
 #include <set>
-
-#ifdef CPP11
-// comment the next line to disable parallel mode (multi-threading)
-#define PARALLEL_MODE
-
-// multithreading libraries for C++11
 #include <atomic>
 #include <thread>
 #include <mutex>
@@ -60,16 +55,10 @@ Global definitions among all LSD C++ modules
 #include <unordered_map>
 #include <unordered_set>
 #include <chrono>
-#include <random>
-#endif
 
-// comment the next line to compile without libz
-#ifndef CPP_DEFAULT
-#define LIBZ 							
-#ifdef LIBZ
-#include <zlib.h>
-#endif
-#endif
+
+// comment the next line to disable parallel mode (multi-threading)
+#define PARALLEL_MODE
 
 // Tcl/Tk for graphical version (not no-window version)
 #ifndef NO_WINDOW
@@ -80,12 +69,6 @@ Global definitions among all LSD C++ modules
 #ifdef DEBUG_MODE
 #define NO_ERROR_TRAP
 #endif
-
-// LSD version strings, for About... boxes and code testing
-#define _LSD_MAJOR_ 7
-#define _LSD_MINOR_ 2
-#define _LSD_VERSION_ "7.2-3"
-#define _LSD_DATE_ "July 10 2020"   // __DATE__
 
 // global constants
 #define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)
@@ -147,6 +130,11 @@ double ran1( long *idum_loc = NULL );
 #define RND ( ran1( ) )
 #endif
 
+// platform codes
+#define LINUX	1
+#define MAC		2
+#define WINDOWS	3
+
 // date/time format
 #define DATE_FMT "%d %B, %Y"
 
@@ -175,19 +163,12 @@ typedef pair < string, bridge * > b_pairT;
 typedef pair < double, object * > o_pairT;
 typedef pair < string, variable * > v_pairT;
 typedef vector < object * > o_vecT;
-#ifndef CPP11
-typedef map < string, bridge * > b_mapT;
-typedef map < double, object * > o_mapT;
-typedef map < string, variable * > v_mapT;
-typedef set < object * > o_setT;
-#else
 typedef function < double( object *caller, variable *var ) > eq_funcT;
 typedef unordered_map < string, eq_funcT > eq_mapT;
 typedef unordered_map < string, bridge * > b_mapT;
 typedef unordered_map < double, object * > o_mapT;
 typedef unordered_map < string, variable * > v_mapT;
 typedef unordered_set < object * > o_setT;
-#endif
 
 struct object
 {
@@ -347,9 +328,7 @@ struct variable
 	mutex parallel_comp;				// mutex lock for parallel computation
 #endif
 
-#ifdef CPP11
 	eq_funcT eq_func;					// pointer to equation function for fast look-up
-#endif
 
 	variable( void );					// empty constructor
 	variable( const variable &v );		// copy constructor
@@ -482,10 +461,7 @@ class result							// results file object
 	bool docsv;							// comma separated .csv text format
 	bool dozip;							// compressed file flag
 	bool firstCol;						// flag for first column in line
-
-#ifdef LIBZ
 	gzFile fz;							// compressed file pointer
-#endif
 
 	void title_recursive( object *r, int i );	// write file header (recursively)
 	void data_recursive( object *r, int i );	// save a single time step (recursively)
@@ -550,9 +526,15 @@ double bernoulli( double p );							// draw from a Bernoulli distribution
 double beta( double alpha, double beta );				// draw from a beta distribution
 double betacdf( double alpha, double beta, double x );	// beta cumulative distribution function
 double betacf( double a, double b, double x );			// beta distribution function
+double binomial( double p, double t );					// draw from a binomial distribution
 double build_obj_list( bool set_list );					// build the object list for pointer checking
+double cauchy( double a, double b );					// draw from a Cauchy distribution
+double chi_squared( double n );							// draw from a chi-squared distribution
+double exponential( double lambda );					// draw from an exponential distribution
 double fact( double x );								// Factorial function
+double fisher( double m, double n );					// draw from a Fisher-F distribution
 double gamma( double alpha, double beta = 1 );			// draw from a gamma distribution
+double geometric( double p );							// draw from a geometric distribution
 double init_lattice( int init_color = -0xffffff, double nrow = 100, double ncol = 100, double pixW = 0, double pixH = 0 );
 double lnorm( double mu, double sigma );				// draw from a lognormal distribution
 double lnormcdf( double mu, double sigma, double x );	// lognormal cumulative distribution function
@@ -568,10 +550,12 @@ double read_lattice( double line, double col );
 double round( double r );
 double round_digits( double value, int digits );
 double save_lattice( const char fname[ ] = "lattice" );
+double student( double n );								// draw from a Student-T distribution
 double unifcdf( double a, double b, double x );			// uniform cumulative distribution function
 double uniform( double min, double max );
 double uniform_int( double min, double max );
 double update_lattice( double line, double col, double val = 1 );
+double weibull( double a, double b );					// draw from a Weibull distribution
 void close_lattice( void );
 void deb_log( bool on, int time = 0 );					// control debug mode
 void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "", bool defQuit = false );
@@ -580,17 +564,6 @@ void msleep( unsigned msec = 1000 );					// sleep process for milliseconds
 void plog( char const *msg, char const *tag = "", ... );
 void results_alt_path( const char * );  				// change where results are saved.
 void set_fast( int level );								// enable fast mode
-
-#ifdef CPP11
-double binomial( double p, double t );					// draw from a binomial distribution
-double cauchy( double a, double b );					// draw from a Cauchy distribution
-double chi_squared( double n );							// draw from a chi-squared distribution
-double exponential( double lambda );					// draw from an exponential distribution
-double fisher( double m, double n );					// draw from a Fisher-F distribution
-double geometric( double p );							// draw from a geometric distribution
-double student( double n );								// draw from a Student-T distribution
-double weibull( double a, double b );					// draw from a Weibull distribution
-#endif
 
 
 // global variables (visible to the users)
@@ -604,20 +577,18 @@ extern bool use_nan;					// flag to allow using Not a Number value
 extern char *path;						// folder where the configuration is
 extern char *simul_name;				// configuration name being run (for saving networks)
 extern double def_res;					// default equation result
+extern eq_mapT eq_map;					// map to fast equation look-up
 extern int cur_sim;
 extern int debug_flag;
 extern int fast_mode;
 extern int max_step;
+extern int platform;					// OS platform (1=Linux, 2=Mac, 3=Windows)
 extern int quit;
 extern int ran_gen;						// pseudo-random number generator to use (1-5) )
 extern int sim_num;
 extern int t;
 extern unsigned seed;
 extern object *root;
-
-#ifdef CPP11
-extern eq_mapT eq_map;					// map to fast equation look-up
-#endif
 
 #ifndef NO_WINDOW
 extern int i_values[ ];					// user temporary variables copy

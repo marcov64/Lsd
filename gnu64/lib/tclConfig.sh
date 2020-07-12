@@ -55,11 +55,11 @@ TCL_LIBS='-lnetapi32 -lkernel32 -luser32 -ladvapi32 -luserenv -lws2_32'
 
 # Top-level directory in which Tcl's platform-independent files are
 # installed.
-TCL_PREFIX='/Lsd/gnu64'
+TCL_PREFIX='/Lsd/gnu'
 
 # Top-level directory in which Tcl's platform-specific files (e.g.
 # executables) are installed.
-TCL_EXEC_PREFIX='/Lsd/gnu64'
+TCL_EXEC_PREFIX='/Lsd/gnu'
 
 # Flags to pass to cc when compiling the components of a shared library:
 TCL_SHLIB_CFLAGS=''
@@ -115,11 +115,11 @@ TCL_BUILD_LIB_SPEC='-LC:/msys64/home/Marcelo/tcl8.6.10/win -ltcl86'
 
 # String to pass to linker to pick up the Tcl library from its
 # installed directory.
-TCL_LIB_SPEC='-L/Lsd/gnu64/lib -ltcl86'
+TCL_LIB_SPEC='-L/Lsd/gnu/lib -ltcl86'
 
 # String to pass to the compiler so that an extension can
 # find installed Tcl headers.
-TCL_INCLUDE_SPEC='-I/Lsd/gnu64/include'
+TCL_INCLUDE_SPEC='-I/Lsd/gnu/include'
 
 # Indicates whether a version numbers should be used in -l switches
 # ("ok" means it's safe to use switches like -ltcl7.5;  "nodots" means
@@ -151,7 +151,7 @@ TCL_SRC_DIR='C:/msys64/home/Marcelo/tcl8.6.10'
 # List of standard directories in which to look for packages during
 # "package require" commands.  Contains the "prefix" directory plus also
 # the "exec_prefix" directory, if it is different.
-TCL_PACKAGE_PATH='/Lsd/gnu64/lib'
+TCL_PACKAGE_PATH='/Lsd/gnu/lib'
 
 # Tcl supports stub.
 TCL_SUPPORTS_STUBS=1
@@ -168,13 +168,13 @@ TCL_BUILD_STUB_LIB_SPEC='-LC:/msys64/home/Marcelo/tcl8.6.10/win -ltclstub86'
 
 # String to pass to linker to pick up the Tcl stub library from its
 # installed directory.
-TCL_STUB_LIB_SPEC='-L/Lsd/gnu64/lib -ltclstub86'
+TCL_STUB_LIB_SPEC='-L/Lsd/gnu/lib -ltclstub86'
 
 # Path to the Tcl stub library in the build directory.
 TCL_BUILD_STUB_LIB_PATH='C:/msys64/home/Marcelo/tcl8.6.10/win/libtclstub86.a'
 
 # Path to the Tcl stub library in the install directory.
-TCL_STUB_LIB_PATH='/Lsd/gnu64/lib/libtclstub86.a'
+TCL_STUB_LIB_PATH='/Lsd/gnu/lib/libtclstub86.a'
 
 # Flag, 1: we built Tcl with threads enabled, 0 we didn't
 TCL_THREADS=1

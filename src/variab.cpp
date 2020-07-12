@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 7.3 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -159,10 +159,7 @@ variable::variable( void )
 	period_range = 0;
 	up = NULL;
 	next = NULL;
-	
-#ifdef CPP11
 	eq_func = NULL;
-#endif	
 }
 
 
@@ -199,10 +196,7 @@ variable::variable( const variable &v )
 	period_range = v.period_range;
 	up = v.up;
 	next = v.next;
-	
-#ifdef CPP11
 	eq_func = v.eq_func;
-#endif	
 }
 
 

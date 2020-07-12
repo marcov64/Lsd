@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 7.3 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -29,7 +29,7 @@ operation it does is to ... run a copy of itself followed by the parameter "kick
 is required because under Windows there are troubles launching external package from a "first
 instance" of a program.
 
-LMM reads all the directories that are not: Manual, gnu, gnu64, LMM.app, lwi, R and src as model
+LMM reads all the directories that are not: Manual, gnu, LMM.app, lwi, R and src as model
 directories, where it expect to find certain files. At any given moment a model name is stored,
 together with its directory and the file shown.
 
@@ -50,6 +50,12 @@ The widget of importance are:
 used up to 88 options
 *******/
 
+// LSD version strings, for About... boxes and code testing
+#define _LSD_MAJOR_ 7
+#define _LSD_MINOR_ 3
+#define _LSD_VERSION_ "7.3-0"
+#define _LSD_DATE_ "December 31 2020"   // __DATE__
+
 #include <tk.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,18 +66,7 @@ used up to 88 options
 #include <signal.h>
 #include <sys/stat.h>
 #include <new>
-
-// check compiler C++ standard support
-#if __cplusplus >= 201103L
-#define CPP11
 #include <thread>
-#endif
-
-// LSD version strings, for About... boxes and code testing
-#define _LSD_MAJOR_ 7
-#define _LSD_MINOR_ 2
-#define _LSD_VERSION_ "7.2-3"
-#define _LSD_DATE_ "July 10 2020"   // __DATE__
 
 // general buffer limits
 #define TCL_BUFF_STR 3000		// standard Tcl buffer size (>1000)
@@ -82,6 +77,11 @@ used up to 88 options
 #define SIGMEM NSIG + 1			// out of memory signal
 #define SIGSTL NSIG + 2			// standard library exception signal
 
+// platform codes
+#define LINUX	1
+#define MAC		2
+#define WINDOWS	3
+
 // date/time format
 #define DATE_FMT "%d %B, %Y"
 
@@ -89,7 +89,7 @@ used up to 88 options
 #define EIGEN "#define EIGENLIB"
 
 // LSD managed folders (not for user models)
-#define LSD_DIR_NUM 8
+#define LSD_DIR_NUM 7
 
 // configuration files details
 #define LMM_OPTIONS "lmm_options.txt"
@@ -130,6 +130,7 @@ char *exec_path = NULL;			// path of executable file
 char msg[ TCL_BUFF_STR ];
 char rootLsd[ MAX_PATH_LENGTH ];
 int choice;
+int platform = 0;				// OS platform (1=Linux, 2=Mac, 3=Windows)
 int shigh;						// syntax highlighting state (0, 1 or 2)
 int tosave = false;				// modified file flag
 int v_counter = 0; 				//counter of the v[ i ] variables inserted in the equations
@@ -139,7 +140,7 @@ const char *lmm_options[ LMM_OPTIONS_NUM ] = { "sysTerm", "HtmlBrowser", "fontty
 const char *lmm_defaults[ LMM_OPTIONS_NUM ] = { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", "$DefaultWish", "src", "$DefaultFontSize", "2", "1", "2", "0", "0", "Work", "$DefaultDbgExe", "1", "#" };
 const char *model_info[ MODEL_INFO_NUM ] = { "modelName", "modelVersion", "modelDate", "lsdGeom", "logGeom", "strGeom", "daGeom", "debGeom", "latGeom" };
 const char *model_defaults[ MODEL_INFO_NUM ] = { "(no name)", "1.0", "[ current_date ]", "#", "#", "#", "#", "#", "#" };
-const char *lsd_dir[ LSD_DIR_NUM ] = { "src", "gnu", "gnu64", "Manual", "LMM.app", "R", "lwi", "___" };
+const char *lsd_dir[ LSD_DIR_NUM ] = { "src", "gnu", "Manual", "LMM.app", "R", "lwi", "___" };
 
 
 /*************************************
@@ -228,12 +229,6 @@ if ( choice )
 tk_ok = true;
 cmd( "tk appname lmm" );
 
-// disable Carbon compatibility in Mac
-cmd( "if [ string equal $tcl_platform(os) Darwin ] { set ::tk::mac::useCompatibilityMetrics 0 }" );
-
-// close console if open (usually only in Mac)
-cmd( "if [ string equal $tcl_platform(os) Darwin ] { foreach i [ winfo interps ] { if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { send $i \"wm iconify .; wm withdraw .; destroy .\" } } }" );
-
 // check installation directory for no spaces in name
 cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
 if ( choice )
@@ -252,11 +247,6 @@ cmd( "set MODEL_INFO \"%s\"", MODEL_INFO );
 cmd( "set MODEL_INFO_NUM %d", MODEL_INFO_NUM );
 cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
 cmd( "set DATE_FMT \"%s\"", DATE_FMT );
-#ifdef MAC_PKG
-cmd( "set MAC_PKG 1" );
-#else
-cmd( "set MAC_PKG 0" );
-#endif
 
 // try to open text file if name is provided in the command line
 if ( argn > 1 )
@@ -348,6 +338,34 @@ if ( choice != 0 )
 	log_tcl_error( "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
 	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
 	return 10 + choice;
+}
+
+s = ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 );
+if ( ! strcmp( s, "linux" ) )
+	platform = LINUX;
+else
+	if ( ! strcmp( s, "mac" ) )
+		platform = MAC;
+	else
+		if ( ! strcmp( s, "windows" ) )
+			platform = WINDOWS;
+		else
+		{
+			log_tcl_error( "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
+			cmd( "tk_messageBox -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
+			return 10;
+		}
+
+if ( platform == MAC )
+{
+	cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
+
+	// close console if open (usually only in Mac)
+	cmd( "foreach i [ winfo interps ] { \
+			if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { \
+				send $i \"wm iconify .; wm withdraw .; destroy .\" \
+			} \
+		}" );
 }
 
 // create a Tcl command that calls the C discard_change function before killing LMM
@@ -859,8 +877,8 @@ cmd( "bind .f.t.t <BackSpace> { \
 		updColChg; \
 		break \
 	}" );
-cmd( "if [ string equal $tcl_platform(platform) unix ] { bind .f.t.t <Control-Insert> { .m.edit invoke 4; break } }" );
-cmd( "if [ string equal $tcl_platform(platform) unix ] { bind .f.t.t <Shift-Insert> { .m.edit invoke 5; break } }" );
+cmd( "if { ! [ string equal $CurPlatform windows ] } { bind .f.t.t <Control-Insert> { .m.edit invoke 4; break } }" );
+cmd( "if { ! [ string equal $CurPlatform windows ] } { bind .f.t.t <Shift-Insert> { .m.edit invoke 5; break } }" );
 
 cmd( "bind .f.t.t <KeyPress-Return> {+set choice 16}" );
 cmd( "bind .f.t.t <KeyRelease-space> {+.f.t.t edit separator}" );
@@ -1650,24 +1668,18 @@ if ( choice == 13 || choice == 58 )
 
 	strcpy( str1, str + 7 );
 
-	cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set choice 2 } { set choice 1 } } { set choice 3 }" );
-
-	switch( choice )
+	switch( platform )
 	{
-		case 1:		// Unix
+		case LINUX:
 			sprintf( msg, "catch { exec $sysTerm -e $DbgExe $cmdbreak %s & } result", str1 );
 			break;
 
-		case 2:		// Mac
-#ifdef MAC_PKG
+		case MAC:
             cmd( "if [ string equal $cmdbreak \"--args\" ] { set cmdbreak \"\" }" );
 			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s\\\"\" & } result", str1, str1 );
-#else
-			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f %s\\\"\" & } result", str1 );
-#endif
 			break;
 
-		case 3:		// Windows
+		case WINDOWS:
 			strcat( str1, ".exe" );
 			sprintf( msg, "catch { exec $sysTerm /c $DbgExe $cmdbreak %s & } result", str1 );
 			break;
@@ -1685,11 +1697,7 @@ if ( choice == 13 || choice == 58 )
 	if ( s != NULL && strcmp( s, "" ) )
 	{
 		sprintf( str2, "%s/%s", s, str );
-#ifdef MAC_PKG
 		sprintf( str, "%s/%s.app/Contents/MacOS/%s", s, str1, str1 );
-#else
-		sprintf( str, "%s/%s", s, str1 );
-#endif
 	}
 
 	// get OS info for files
@@ -5081,11 +5089,20 @@ if ( choice == 48 )
 	cmd( "close $f" );
 
 	cmd( "set gcc_conf \"TARGET=$DefaultExe\\nFUN=[ file rootname \"$b\" ]\\nFUN_EXTRA=\\nSWITCH_CC=\"" );
-	cmd( "if [ string equal $CurPlatform \"win32\" ] { set gcc_deb_nopt \"-O0\" } { set gcc_deb_nopt \"-Og\" }" );
+	cmd( "set gcc_deb_nopt \"-Og\"" );
 	cmd( "set gcc_deb \"$gcc_conf$gcc_deb_nopt -ggdb3\\nSWITCH_CC_LNK=\"" );
 	cmd( "set gcc_opt \"$gcc_conf -O3\\nSWITCH_CC_LNK=\"" );
 
-	cmd( "set pos [ string first \"SWITCH_CC=\" $a ]; if { $pos == -1 } { set choice 0 } { if { [ string first \" -g\" $a $pos ] == -1 } { set debug 0 } { set debug 1 } }" );
+	cmd( "set pos [ string first \"SWITCH_CC=\" $a ]" );
+	cmd( "if { $pos == -1 } { \
+			set choice 0 \
+		} { \
+			if { [ string first \" -g\" $a $pos ] == -1 } { \
+				set debug 0 \
+			} { \
+				set debug 1 \
+			} \
+		}" );
 
 	cmd( "newtop .l \"Model Options\" { set choice 2 }" );
 
@@ -6284,14 +6301,14 @@ void make_makefile( bool nw )
 	cmd( "set d [ read -nonewline $f ]" );
 	cmd( "close $f" );
 
-#ifdef MAC_PKG
 	if ( nw )
 		cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile_base%s.txt\" r ]", suffix );
 	else
-		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set f [ open \"$RootLsd/$LsdSrc/makefile_base_mac.txt\" r ] } { set f [ open \"$RootLsd/$LsdSrc/makefile_base.txt\" r ] }" );
-#else
-	cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile_base%s.txt\" r ]", suffix );
-#endif
+		cmd( "if [ string equal $CurPlatform mac ] { \
+				set f [ open \"$RootLsd/$LsdSrc/makefile_base_mac.txt\" r ] \
+			} { \
+				set f [ open \"$RootLsd/$LsdSrc/makefile_base.txt\" r ] \
+			}" );
 	cmd( "set b [ read -nonewline $f ]" );
 	cmd( "close $f" );
 
@@ -6328,19 +6345,9 @@ void check_option_files( bool sys )
 	cmd( "set exists [ file exists \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\"]" );
 	if ( ! exists )
 	{
-		cmd( "if [ string equal $tcl_platform(platform) windows ] { \
-				if [ string equal $tcl_platform(machine) intel ] { \
-					set sysfile \"sysopt_win32.txt\" \
-				} { \
-					set sysfile \"sysopt_win64.txt\" \
-				} \
-			}" );
-		cmd( "if [ string equal $tcl_platform(platform) unix ] { set sysfile \"sysopt_linux.txt\" }" );
-#ifdef MAC_PKG
-		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" }" );
-#else
-		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_osx.txt\" }" );
-#endif
+		cmd( "if [ string equal $CurPlatform windows ] { set sysfile \"sysopt_windows.txt\" }" );
+		cmd( "if [ string equal $CurPlatform linux ] { set sysfile \"sysopt_linux.txt\" }" );
+		cmd( "if [ string equal $CurPlatform mac ] { set sysfile \"sysopt_mac.txt\" }" );
 		cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
 		cmd( "set f1 [ open \"$RootLsd/$LsdSrc/$sysfile\" r ]" );
 		cmd( "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"" );
@@ -6395,7 +6402,7 @@ error:
 bool use_eigen( void )
 {
 	bool nfound = true;
-	char *path, *fun_file, full_name[ MAX_PATH_LENGTH ], buffer[ 2 * MAX_PATH_LENGTH ];
+	char *path, *fun_file, full_name[ MAX_PATH_LENGTH + 1 ], buffer[ 2 * MAX_PATH_LENGTH ];
 	FILE *f;
 
 	path = ( char * ) Tcl_GetVar( inter, "modelDir", 0 );
@@ -6409,7 +6416,7 @@ bool use_eigen( void )
 	if( f == NULL )
 		return false;
 
-	while ( fgets( buffer, 2 * MAX_PATH_LENGTH, f ) != NULL &&
+	while ( fgets( buffer, 2 * MAX_PATH_LENGTH - 1, f ) != NULL &&
 			( nfound = strncmp( buffer, EIGEN, strlen( EIGEN ) ) ) );
 
 	fclose( f );
@@ -6503,17 +6510,11 @@ bool compile_run( bool run, bool nw )
 		cmd( "wm iconify ." );
 
 	// number of cores for make parallelization
-#ifdef CPP11
 	max_threads = thread::hardware_concurrency( );
-#endif
 
 	// start compilation as a background task
 	res = -1;
-#ifdef MAC_PKG
 	cmd( "make_background %s %d %d %d", str + 7, max_threads, nw, true );
-#else
-	cmd( "make_background %s %d %d %d", str + 7, max_threads, nw, false );
-#endif
 
 	// loop to wait compilation to finish or be aborted
 	while ( res < 0 )
@@ -6547,20 +6548,17 @@ bool compile_run( bool run, bool nw )
 			// create the element list file in background
 			cmd( "after 0 { create_elem_file $modelDir }; update" );
 
-#ifdef MAC_PKG
-			cmd( "if [ string equal $tcl_platform(platform) windows ] { set res 3 } { if [ string equal $tcl_platform(os) Darwin ] { set res 2 } { set res 1 } }" );
-#else
-			cmd( "if [ string equal $tcl_platform(platform) windows ] { set res 3 } { set res 1 }" );
-#endif
-			switch ( res )
+			switch ( platform )
 			{
-				case 1:	// unix
+				case LINUX:
 					cmd( "catch { exec ./%s & } result", str + 7 );
 					break;
-				case 2:	// mac package
+					
+				case MAC:
 					cmd( "catch { exec open -F -n ./%s.app & } result", str + 7 );
 					break;
-				case 3:	// win2k, XP, 7, 8, 10...
+					
+				case WINDOWS:
 					cmd( "catch { exec %s.exe & } result", str + 7 );
 					break;
 			}

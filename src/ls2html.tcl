@@ -1,6 +1,6 @@
 #*************************************************************
 #
-#	LSD 7.2 - December 2019
+#	LSD 7.3 - December 2020
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -103,13 +103,13 @@ proc LsdExit { } {
 # LSDHELP
 #************************************************
 proc LsdHelp a {
-	global HtmlBrowser tcl_platform RootLsd
+	global HtmlBrowser CurPlatform RootLsd
 	set here [ pwd ]
 	set f [ open $RootLsd/Manual/temp.html w ]
 	puts $f "<meta http-equiv=\"Refresh\" content=\"0;url=$a\">"
 	close $f
-	set b "[file nativename $RootLsd/Manual/temp.html]"
-	if { $tcl_platform(platform) == "unix" } {
+	set b "[ file nativename $RootLsd/Manual/temp.html ]"
+	if { ! [ string equal $CurPlatform windows ] } {
 		exec $HtmlBrowser $b &
 	} {
 		exec cmd.exe /c start $b &
@@ -121,12 +121,12 @@ proc LsdHelp a {
 # LSDHTML
 #************************************************
 proc LsdHtml a {
-	global HtmlBrowser tcl_platform
+	global HtmlBrowser CurPlatform
 	set f [ open temp.html w ]
 	puts $f "<meta http-equiv=\"Refresh\" content=\"0;url=$a\">"
 	close $f
 	set b "temp.html"
-	if { $tcl_platform(platform) == "unix" } {
+	if { ! [ string equal $CurPlatform windows ] } {
 		exec $HtmlBrowser $b &
 	} {
 		exec cmd.exe /c start $b &
@@ -138,8 +138,8 @@ proc LsdHtml a {
 # LSDTKDIFF
 #************************************************
 proc LsdTkDiff { a b { c "" } { d "" } } {
-	global tcl_platform RootLsd wish LsdSrc
-	if { $tcl_platform(platform) == "unix" } {
+	global CurPlatform RootLsd wish LsdSrc
+	if [ string equal $CurPlatform windows ] {
 		exec $wish $RootLsd/$LsdSrc/tkdiff.tcl -L "$c" -L "$d" -lsd $a $b &
 	} {
 		exec $wish $RootLsd/$LsdSrc/tkdiff.tcl -L "$c" -L "$d" -lsd $a $b &
@@ -155,31 +155,39 @@ proc LsdTkDiff { a b { c "" } { d "" } } {
 # the "chop" parameter is the number of characters to chop from the beginning of the directory.
 # For example, if the directory is C:/Lsd5.1, setting chop=3 will make appear the directory names as Lsd5.1
 #************************************************
-proc ls2html {from chop} {
+proc ls2html { from chop } {
 
-	catch [set list [glob *]]
-	if { [info exists list] == 0 } {return }
-
-	foreach i $list {
-		if { [file isdirectory $i] == 1 } {lappend ldir $i} {lappend lfile $i } 
+	catch [ set list [ glob * ] ]
+	if { ! [ info exists list ] } { 
+		return 
 	}
 
-	if { [info exists ldir] == 1 } {
-		set sortedlist [lsort -dictionary $ldir]
-		foreach i $sortedlist {
-			cd $i; ls2html $from $chop; cd ..;
+	foreach i $list {
+		if { [ file isdirectory $i ] } { 
+			lappend ldir $i 
+		} { 
+			lappend lfile $i 
 		} 
 	}
 
-	set f [open index.html w]
-	puts $f "<B><font size=+3><U>Directory: [string range [pwd] $chop end ]</U></font></B>"
-	if { [pwd] != $from } {
+	if { [ info exists ldir ] } {
+		set sortedlist [ lsort -dictionary $ldir ]
+		foreach i $sortedlist {
+			cd $i
+			ls2html $from $chop
+			cd ..
+		} 
+	}
+
+	set f [ open index.html w ]
+	puts $f "<B><font size=+3><U>Directory: [ string range [ pwd ] $chop end ]</U></font></B>"
+	if { ! [ string equal [ pwd ] $from ] } {
 		puts $f "\n<br><a href=\"../index.html\">Return</a> to UP directory" 
 	}
 
 	puts $f "\n<br>"
 
-	if { [info exists ldir] == 1 } {
+	if { [ info exists ldir ] } {
 		puts $f "\n<br><hr style=\"width: 100%; height: 2px;\">"
 		puts $f "<B><font size=+2>List of directories</B></font>\n<br>"
 		foreach i $sortedlist {
@@ -187,32 +195,32 @@ proc ls2html {from chop} {
 		} 
 	} 
 
-	if { [info exists lfile] == 1 } {
-		set sortedlist [lsort -dictionary $lfile]
+	if { [ info exists lfile ] } {
+		set sortedlist [ lsort -dictionary $lfile ]
 		puts $f "\n<br><hr style=\"width: 100%; height: 2px;\">"
 		puts $f "<B><font size=+2>List of files</font></B>\n<br>"
 		puts $f "<br><b><font face=\"Courier New,Courier\">File name...................Size, &nbsp Date</font></b><br>\n"
 
 		foreach i $sortedlist {
-			if { [string compare $i index.html] } {
+			if { [ string compare $i index.html ] } {
 				puts $f "<font face=\"Courier New,Courier\"><a href=\"$i\">$i</a>" 
-				set len [string length $i]
-				set np [expr 30 -$len]
-				set np [expr $np - [string length [file size $i]]]
-				set fill [string repeat . $np]
+				set len [ string length $i ]
+				set np [ expr 30 -$len ]
+				set np [ expr $np - [ string length [ file size $i ] ] ]
+				set fill [ string repeat . $np ]
 				puts $f "$fill [file size $i], "
-				set fdate [clock format [file mtime $i] -format "%e %h %Y"]
+				set fdate [ clock format [ file mtime $i ] -format "%e %h %Y" ]
 				puts $f "$fdate </font>\n<br>"
 			}
 		}
 	}
 
-	if { [file exist description.txt] } {
+	if { [ file exist description.txt ] } {
 		puts $f "<hr style=\"width: 100%; height: 2px;\">"
 		puts $f "<B><font size=+2>Description</font></B>\n<br>\n<br>"
-		set desc [open description.txt r]
-		while { ![eof $desc] } {
-			puts $f [gets $desc]
+		set desc [ open description.txt r ]
+		while { ! [ eof $desc ] } {
+			puts $f [ gets $desc ]
 			puts $f "<br>"
 		}   
 		close $desc

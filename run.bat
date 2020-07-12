@@ -1,7 +1,7 @@
 @echo off
 rem *************************************************************
 rem
-rem	 LSD 7.2 - December 2019
+rem	 LSD 7.3 - December 2020
 rem	 written by Marco Valente, Universita' dell'Aquila
 rem	 and by Marcelo Pereira, University of Campinas
 rem
@@ -12,11 +12,11 @@ rem *************************************************************
 
 rem *************************************************************
 rem  RUN.BAT
-rem  LMM startup command in Windows 32-bit.
+rem  LMM startup command in Windows.
 rem *************************************************************
 
 if "%1"=="/?" (
-	echo Open LSD LMM, 32-bit version
+	echo Open LSD LMM
 	echo Usage: run [LSDROOT] [FILE]
 	goto end
 )
@@ -33,6 +33,6 @@ if not "%1"=="" (
 ) else (
 	set LSDROOT=%CD%
 )
-path %LSDROOT%\gnu\bin;%PATH%
+path %PATH%;%LSDROOT%\gnu\bin
 start lmm.exe %2
 :end

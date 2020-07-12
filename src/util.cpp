@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 7.3 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -1500,11 +1500,7 @@ void result::data( object *root, int initstep, int endtstep )
 		data_recursive( root, i );		// output one data line
 		
 		if ( dozip )				// and change line
-		{
-#ifdef LIBZ
 			gzprintf( fz, "\n" );
-#endif
-		}
 		else
 			fprintf( f, "\n" );
 	}
@@ -1524,12 +1520,10 @@ void result::data_recursive( object *r, int i )
 			{
 				if ( dozip )
 				{
-#ifdef LIBZ
 					if ( docsv )
 						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
 					else
 						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
-#endif
 				}
 				else
 				{
@@ -1543,12 +1537,10 @@ void result::data_recursive( object *r, int i )
 			{
 				if ( dozip )		// save NaN as n/a
 				{
-#ifdef LIBZ
 					if ( docsv )
 						gzprintf( fz, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
 					else
 						gzprintf( fz, "%s\t", nonavail );
-#endif
 				}
 				else
 				{
@@ -1582,12 +1574,10 @@ void result::data_recursive( object *r, int i )
 			{
 				if ( dozip )
 				{
-#ifdef LIBZ
 					if ( docsv )
 						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
 					else
 						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
-#endif
 				}
 				else
 				{
@@ -1601,12 +1591,10 @@ void result::data_recursive( object *r, int i )
 			{
 				if ( dozip )
 				{
-#ifdef LIBZ
 					if ( docsv )
 						gzprintf( fz, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
 					else
 						gzprintf( fz, "%s\t", nonavail );
-#endif
 				}
 				else
 				{
@@ -1630,11 +1618,7 @@ void result::title( object *root, int flag )
 	title_recursive( root, flag );		// output header
 		
 	if ( dozip )						// and change line
-	{
-#ifdef LIBZ
 		gzprintf( fz, "\n" );
-#endif
-	}
 	else
 		fprintf( f, "\n" );
 }
@@ -1658,12 +1642,10 @@ void result::title_recursive( object *r, int header )
 			{
 				if ( dozip )
 				{
-#ifdef LIBZ
 					if ( docsv )
 						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
 					else
 						gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-#endif
 				}
 				else
 				{
@@ -1677,12 +1659,10 @@ void result::title_recursive( object *r, int header )
 			{
 				if ( dozip )
 				{
-#ifdef LIBZ
 					if ( docsv )
 						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
 					else
 						gzprintf( fz, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
-#endif
 				}
 				else
 				{
@@ -1716,12 +1696,10 @@ void result::title_recursive( object *r, int header )
 		{
 			if ( dozip )
 			{
-#ifdef LIBZ
 				if ( docsv )
 					gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
 				else
 					gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-#endif
 			}
 			else
 			{
@@ -1739,20 +1717,15 @@ void result::title_recursive( object *r, int header )
 // open the appropriate file for saving the results (constructor)
 result::result( char const *fname, char const *fmode, bool dozip, bool docsv )
 {
-#ifndef LIBZ
-	dozip = false;				// disable zip if libraries not available
-#endif
 	this->docsv = docsv;
 	this->dozip = dozip;		// save local class flag
 	if ( dozip )
 	{
-#ifdef LIBZ
-			char *fnamez = new char[ strlen( fname ) + 4 ];	// append .gz to the file name
-			strcpy( fnamez, fname );
-			strcat( fnamez, ".gz");
-			fz = gzopen( fnamez, fmode );
-			delete [ ] fnamez;
-#endif
+		char *fnamez = new char[ strlen( fname ) + 4 ];	// append .gz to the file name
+		strcpy( fnamez, fname );
+		strcat( fnamez, ".gz");
+		fz = gzopen( fnamez, fmode );
+		delete [ ] fnamez;
 	}
 	else
 		f = fopen( fname, fmode );
@@ -1762,11 +1735,7 @@ result::result( char const *fname, char const *fmode, bool dozip, bool docsv )
 result::~result( void )
 {
 	if ( dozip )
-	{
-#ifdef LIBZ
 		gzclose( fz );
-#endif
-	}
 	else
 		fclose( f );
 }
@@ -2450,13 +2419,6 @@ char *str_upr( char *str )
 	return str;
 }
 
-/****************************************************
-C++11 Standard Library <random> functions
-If C++11 or higher is not available, use the old
-LSD functions
-****************************************************/
-
-#ifdef CPP11
 
 /****************************************************
 INIT_RANDOM
@@ -3048,707 +3010,6 @@ double beta( double alpha, double beta )
 	double draw = cur_gen( distr1 );
 	return draw / ( draw + cur_gen( distr2 ) );
 }
-
-#else
-
-/***************************************************
-PMRAND_OPEN
-Park-Miller pseudo-random number generator with Bays-Durham shuffling
-and Press et al. (1992) protections with period 2^31 - 1 in (0,1)
-***************************************************/
-#define IA 16807
-#define IM 2147483647
-#define AM (1.0/IM)
-#define IQ 127773
-#define IR 2836
-#define NTAB 32
-#define NDIV (1+(IM-1)/NTAB)
-#define EPS 1.2e-7
-#define RNMX (1.0-EPS)
-
-double PMRand_open( long *idum )
-{
-	int j;
-	long k;
-	static long iy = 0, iv[ NTAB ];
-	double temp;
-
-	if ( *idum <= 0 || ! iy ) 
-	{
-		if ( - ( *idum ) < 1 ) 
-			*idum = 1;
-		else 
-			*idum = - ( *idum );
-		for ( j = NTAB + 7; j >= 0; --j ) 
-		{
-			k = ( *idum ) / IQ;
-			*idum = IA * ( *idum - k * IQ ) - IR * k;
-			if ( *idum < 0 ) 
-				*idum += IM;
-			if ( j < NTAB ) 
-				iv[ j ] = *idum;
-		}
-		
-		iy = iv[ 0 ];
-	}
-	
-	k = ( *idum ) / IQ;
-	*idum = IA * ( *idum - k * IQ ) - IR * k;
-	if ( *idum < 0 ) 
-		*idum += IM;
-	
-	j = iy / NDIV;
-	iy = iv[ j ];
-	iv[ j ] = *idum;
-	if ( ( temp = AM * iy ) > RNMX ) 
-		return RNMX;
-	else 
-		return temp;
-}
-   
-
-/***************************************************
-MTRAND
-Mersenne Twister pseudo-random number generator
-with period 2^19937 - 1 with improved initialization scheme,
-modified on 2002/1/26 by Takuji Nishimura and Makoto Matsumoto.
-The generators returning floating point numbers are based on
-a version by Isaku Wada, 2002/01/09
-This version is a port from the original C-code to C++ by
-Jasper Bedaux (http://www.bedaux.net/mtrand/).
-Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
-All rights reserved.
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-1. Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
-3. The names of its contributors may not be used to endorse or promote
-products derived from this software without specific prior written
-permission.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-***************************************************/
-
-class MTRand_int32 { // Mersenne Twister random number generator
-public:
-// default constructor: uses default seed only if this is the first instance
-  MTRand_int32() { if (!init) seed(5489UL); init = true; }
-// constructor with 32 bit int as seed
-  MTRand_int32(unsigned long s) { seed(s); init = true; }
-// constructor with array of size 32 bit ints as seed
-  MTRand_int32(const unsigned long* array, int size) { seed(array, size); init = true; }
-// the two seed functions
-  void seed(unsigned long); // seed with 32 bit integer
-  void seed(const unsigned long*, int size); // seed with array
-// overload operator() to make this a generator (functor)
-  unsigned long operator()() { return rand_int32(); }
-// 2007-02-11: made the destructor virtual; thanks "double more" for pointing this out
-  virtual ~MTRand_int32() {} // destructor
-protected: // used by derived classes, otherwise not accessible; use the ()-operator
-  unsigned long rand_int32(); // generate 32 bit random integer
-private:
-  static const int n = 624, m = 397; // compile time constants
-// the variables below are static (no duplicates can exist)
-  static unsigned long state[n]; // state vector array
-  static int p; // position in state array
-  static bool init; // true if init function is called
-// private functions used to generate the pseudo random numbers
-  unsigned long twiddle(unsigned long, unsigned long); // used by gen_state()
-  void gen_state(); // generate new state
-// make copy constructor and assignment operator unavailable, they don't make sense
-  MTRand_int32(const MTRand_int32&); // copy constructor not defined
-  void operator=(const MTRand_int32&); // assignment operator not defined
-};
-
-// inline for speed, must therefore reside in header file
-inline unsigned long MTRand_int32::twiddle(unsigned long u, unsigned long v) {
-  return (((u & 0x80000000UL) | (v & 0x7FFFFFFFUL)) >> 1)
-    ^ ((v & 1UL) * 0x9908B0DFUL);
-// 2013-07-22: line above modified for performance according to http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/Ierymenko.html
-// thanks Vitaliy FEOKTISTOV for pointing this out
-}
-
-inline unsigned long MTRand_int32::rand_int32() { // generate 32 bit random int
-  if (p == n) gen_state(); // new state vector needed
-// gen_state() is split off to be non-inline, because it is only called once
-// in every 624 calls and otherwise irand() would become too big to get inlined
-  unsigned long x = state[p++];
-  x ^= (x >> 11);
-  x ^= (x << 7) & 0x9D2C5680UL;
-  x ^= (x << 15) & 0xEFC60000UL;
-  return x ^ (x >> 18);
-}
-
-// generates double floating point numbers in the half-open interval [0, 1)
-class MTRand : public MTRand_int32 {
-public:
-  MTRand() : MTRand_int32() {}
-  MTRand(unsigned long seed) : MTRand_int32(seed) {}
-  MTRand(const unsigned long* seed, int size) : MTRand_int32(seed, size) {}
-  ~MTRand() {}
-  double operator()() {
-    return static_cast<double>(rand_int32()) * (1. / 4294967296.); } // divided by 2^32
-private:
-  MTRand(const MTRand&); // copy constructor not defined
-  void operator=(const MTRand&); // assignment operator not defined
-};
-
-// generates double floating point numbers in the closed interval [0, 1]
-class MTRand_closed : public MTRand_int32 {
-public:
-  MTRand_closed() : MTRand_int32() {}
-  MTRand_closed(unsigned long seed) : MTRand_int32(seed) {}
-  MTRand_closed(const unsigned long* seed, int size) : MTRand_int32(seed, size) {}
-  ~MTRand_closed() {}
-  double operator()() {
-    return static_cast<double>(rand_int32()) * (1. / 4294967295.); } // divided by 2^32 - 1
-private:
-  MTRand_closed(const MTRand_closed&); // copy constructor not defined
-  void operator=(const MTRand_closed&); // assignment operator not defined
-};
-
-// generates double floating point numbers in the open interval (0, 1)
-class MTRand_open : public MTRand_int32 {
-public:
-  MTRand_open() : MTRand_int32() {}
-  MTRand_open(unsigned long seed) : MTRand_int32(seed) {}
-  MTRand_open(const unsigned long* seed, int size) : MTRand_int32(seed, size) {}
-  ~MTRand_open() {}
-  double operator()() {
-    return (static_cast<double>(rand_int32()) + .5) * (1. / 4294967296.); } // divided by 2^32
-private:
-  MTRand_open(const MTRand_open&); // copy constructor not defined
-  void operator=(const MTRand_open&); // assignment operator not defined
-};
-
-// generates 53 bit resolution doubles in the half-open interval [0, 1)
-class MTRand53 : public MTRand_int32 {
-public:
-  MTRand53() : MTRand_int32() {}
-  MTRand53(unsigned long seed) : MTRand_int32(seed) {}
-  MTRand53(const unsigned long* seed, int size) : MTRand_int32(seed, size) {}
-  ~MTRand53() {}
-  double operator()() {
-    return (static_cast<double>(rand_int32() >> 5) * 67108864. + 
-      static_cast<double>(rand_int32() >> 6)) * (1. / 9007199254740992.); }
-private:
-  MTRand53(const MTRand53&); // copy constructor not defined
-  void operator=(const MTRand53&); // assignment operator not defined
-};
-
-// initialization of static private members
-unsigned long MTRand_int32::state[n] = {0x0UL};
-int MTRand_int32::p = 0;
-bool MTRand_int32::init = false;
-
-void MTRand_int32::gen_state() { // generate new state vector
-  for (int i = 0; i < (n - m); ++i)
-    state[ i ] = state[i + m] ^ twiddle(state[ i ], state[i + 1]);
-  for (int i = n - m; i < (n - 1); ++i)
-    state[ i ] = state[i + m - n] ^ twiddle(state[ i ], state[i + 1]);
-  state[n - 1] = state[m - 1] ^ twiddle(state[n - 1], state[ 0 ]);
-  p = 0; // reset position
-}
-
-void MTRand_int32::seed(unsigned long s) {  // init by 32 bit seed
-  state[ 0 ] = s & 0xFFFFFFFFUL; // for > 32 bit machines
-  for (int i = 1; i < n; ++i) {
-    state[ i ] = 1812433253UL * (state[i - 1] ^ (state[i - 1] >> 30)) + i;
-// see Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier
-// in the previous versions, MSBs of the seed affect only MSBs of the array state
-// 2002/01/09 modified by Makoto Matsumoto
-    state[ i ] &= 0xFFFFFFFFUL; // for > 32 bit machines
-  }
-  p = n; // force gen_state() to be called for next random number
-}
-
-void MTRand_int32::seed(const unsigned long* array, int size) { // init by array
-  seed(19650218UL);
-  int i = 1, j = 0;
-  for (int k = ((n > size) ? n : size); k; --k) {
-    state[ i ] = (state[ i ] ^ ((state[i - 1] ^ (state[i - 1] >> 30)) * 1664525UL))
-      + array[ j ] + j; // non linear
-    state[ i ] &= 0xFFFFFFFFUL; // for > 32 bit machines
-    ++j; j %= size;
-    if ((++i) == n) { state[ 0 ] = state[n - 1]; i = 1; }
-  }
-  for (int k = n - 1; k; --k) {
-    state[ i ] = (state[ i ] ^ ((state[i - 1] ^ (state[i - 1] >> 30)) * 1566083941UL)) - i;
-    state[ i ] &= 0xFFFFFFFFUL; // for > 32 bit machines
-    if ((++i) == n) { state[ 0 ] = state[n - 1]; i = 1; }
-  }
-  state[ 0 ] = 0x80000000UL; // MSB is 1; assuring non-zero initial array
-  p = n; // force gen_state() to be called for next random number
-}
-
-
-/****************************************************
-INIT_RANDOM
-Pseudo-random number generator to extract draws
-ran_gen =	1 : Park-Miller in (0,1)
-ran_gen =	2 : Mersenne-Twister in (0,1)
-ran_gen =	3 : Mersenne-Twister in [0,1]
-ran_gen =	4 : Mersenne-Twister in [0,1)
-ran_gen =	5 : Mersenne-Twister with 53 bits resolution in [0,1)
-****************************************************/
-int ran_gen = 1;	// default pseudo-random number generator
-int dum = 0;
-long idum = 0;		// Park-Miller sequential control (default seed)
-
-MTRand_open mt2;	// Mersenne-Twister object in (0,1)
-MTRand_closed mt3;	// Mersenne-Twister object in [0,1]
-MTRand mt4; 		// Mersenne-Twister object in [0,1)
-MTRand53 mt5;		// Mersenne-Twister object with 53 bits resolution in [0,1)
-
-// Set seed to all random generators
-void init_random( unsigned seed )
-{
-	dum = 0;
-	idum = -seed;
-	PMRand_open( &idum );	// PM in (0,1)
-	mt2.seed( seed );		// MT in (0,1)
-	mt3.seed( seed );		// MT in [0,1]
-	mt4.seed( seed );		// MT in [0,1)
-	mt5.seed( seed );		// MT with 53 bits resolution in [0,1)
-}
-
-
-/***************************************************
-RAN1
-Call the preset pseudo-random number generator
-***************************************************/
-double ran1( long *idum_loc )
-{
-	// Manage default (internal) number sequence
-	// ONLY FOR PARK-MILER generator
-	if ( idum_loc == NULL )
-		idum_loc = & idum;
-
-	switch ( ran_gen )
-	{
-		case 2:
-			return mt2( );			// in (0,1)
-			break;
-		case 3:
-			return mt3( );			// in [0,1]
-			break;
-		case 4:
-			return mt4( );			// in [0,1)
-			break;
-		case 5:
-			return mt5( );			// 53 bits resolution in [0,1]
-			break;
-		case 1:
-		default:
-			return PMRand_open( idum_loc );
-	}
-}
-
-
-/****************************************************
-RND_INT
-****************************************************/
-int rnd_int( int min, int max )
-{
-	return ( floor( min + ran1( ) * ( max + 1 - min ) ) );
-}
-
-
-/****************************************************
-UNIFORM
-****************************************************/
-double uniform( double min, double max )
-{
-	if ( min > max )
-		return 0;
-	return ( min + ran1( ) * ( max - min ) );
-}
-
-
-/****************************************************
-UNIFORM_INT
-****************************************************/
-double uniform_int( double min, double max )
-{
-	if ( min > max )
-		return 0;
-	return ( floor( min + ran1( ) * ( max + 1 - min ) ) );
-}
-
-
-/****************************************************
-UNIFORM_INT_0
-reproducible source of randomness for random_shuffle
-****************************************************/
-int uniform_int_0( int max ) 
-{ 
-	return uniform_int( 0, max - 1 ); 
-}
-
-
-/***************************************************
-NORM
-***************************************************/
-double norm( double mean, double dev )
-{
-	static bool normStopErr;
-	double gasdev, R, v1, v2, fac;
-	static double gset;
-	int boh = 1;
-	
-	if ( dev < 0 )
-	{
-		if ( ++normErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: negative standard deviation in function 'norm'" );
-			normStopErr = false;
-		}
-		else
-			if ( ! normStopErr )
-			{
-				plog( "\nWarning: too many negative standard deviation errors in function 'norm', stop reporting...\n" );
-				normStopErr = true;
-			}
-
-		return mean;
-	}
-
-	if ( dum == 0 )
-	{ 
-		do
-		{ 
-			v1 = 2.0 * ran1( ) - 1;
-			boh = 1;
-			v2 = 2.0 * ran1( ) - 1;
-			R = v1 * v1 + v2 * v2;
-		}
-		while ( R >= 1 );
-		
-		fac = log( R );
-		fac = fac / R;
-		fac = fac * ( -2.0 );
-		fac = sqrt( fac );
-		gset = v1 * fac;
-		gasdev = v2 * fac;
-		dum = 1;
-	}
-	else
-	{
-		gasdev = gset;
-		dum = 0;
-	}
-	gasdev = gasdev * dev + mean;
-	
-	return gasdev;
-}
-
-
-/***************************************************
-LNORM
-Return a draw from a lognormal distribution
-***************************************************/
-double lnorm( double mean, double dev )
-{
-	static bool lnormStopErr;
-	
-	if ( dev <= 0 )
-	{
-		if ( ++lnormErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: negative standard deviation in function 'lnorm'" );
-			lnormStopErr = false;
-		}
-		else
-			if ( ! lnormStopErr )
-			{
-				plog( "\nWarning: too many negative standard deviation errors in function 'lnorm', stop reporting...\n" );
-				lnormStopErr = true;
-			}
-			
-		return exp( mean );
-	}
-
-	return exp( norm( mean, dev ) );
-}
-
-
-/****************************************************
-GAMMA
-****************************************************/
-extern int quit;
-
-// support function to gamma
-double gamdev( int ia, long *idum_loc = NULL )
-{
-	int j;
-	double am, e, s, v1, v2, x, y;
-
-	// Manage default (internal) number sequence
-	// WORKS ONLY FOR PARK-MILER generator
-	if ( idum_loc == NULL )
-		idum_loc = & idum;
-
-	if ( ia < 1 ) 
-	{
-		error_hard( "inconsistent state in gamma function",
-					"internal problem in LSD", 
-					"if error persists, please contact developers", 
-					true );
-		quit = 1;
-		return 0;
-	} 
-	if ( ia < 6 )
-	{
-		x = 1.0;
-		for ( j = 1; j <= ia; ++j )
-			x *= ran1( idum_loc );
-		x = - log( x );
-	}
-	else
-	{
-		do
-		{
-			do
-			{
-				do
-				{ 
-					v1 = ran1( idum_loc );
-					v2 = 2 * ran1( idum_loc ) - 1.0;
-				}
-				while ( v1 * v1 + v2 * v2 > 1.0 );
-				
-				y = v2 / v1;
-				am = ia - 1;
-				s = sqrt( 2.0 * am + 1.0 );
-				x = s * y + am;
-			}
-			while ( x <= 0 );
-			e = ( 1 + y * y ) * exp( am * log( x / am ) - s * y );
-		}
-		while ( ran1( idum_loc ) > e );
-	} 
-	return x;
-}
-
-double gamma( double alpha, double beta )
-{
-	static bool gammaStopErr;
-	
-	if ( alpha <= 0 || beta <= 0 )
-	{
-		if ( ++gammaErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: non-positive alpha or beta parameters in function 'gamma'" );
-			gammaStopErr = false;
-		}
-		else
-			if ( ! gammaStopErr )
-			{
-				plog( "\nWarning: too many non-positive parameter errors in function 'gamma', stop reporting...\n" );
-				gammaStopErr = true;
-			}
-			
-		return 0.0;
-	}
-
-	return gamdev( ( int ) round( alpha ), & idum );
-}
-
-
-/****************************************************
-BERNOULLI
-****************************************************/
-double bernoulli( double p )
-{
-	static bool bernoStopErr;
-	
-	if ( p < 0 || p > 1 )
-	{
-		if ( ++bernoErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: probability out of [0, 1] in function 'bernoulli'" );
-			bernoStopErr = false;
-		}
-		else
-			if ( ! bernoStopErr )
-			{
-				plog( "\nWarning: too many invalid probability errors in function 'bernoulli', stop reporting...\n" );
-				bernoStopErr = true;
-			}
-			
-		if ( p < 0 )
-			return 0.0;
-		else
-			return 1.0;
-	}
-
-	double dice = ran1( );
-	if ( dice < p )
-		return 1;
-	return 0;
-}
-
-
-/****************************************************
-POISSON
-****************************************************/
-
-// support function to poidev
-double gammaln( double xx )
-{
-	double x, y, tmp, ser;
-	static double cof[ 6 ]={ 76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5};
-	int j;
-	
-	y = x = xx;
-	tmp = x + 5.5;
-	tmp -= ( x + 0.5 ) * log( tmp );
-	ser = 1.000000000190015;
-	
-	for ( j = 0; j <= 5; ++j ) 
-		ser += cof[ j ] / ++y;
-	
-	return -tmp + log( 2.5066282746310005 * ser / x );
-}
-
-// support function to poisson
-double poidev( double xm, long *idum_loc = NULL )
-{
-	double em, t, y;
-	static double sq , alxm, g, oldm = ( -1.0 );
-
-	// Manage default (internal) number sequence
-	// WORKS ONLY FOR PARK-MILER generator
-	if ( idum_loc == NULL )
-		idum_loc = & idum;
-
-	if ( xm < 12.0 ) 
-	{
-		if ( xm != oldm ) 
-		{
-			oldm = xm;
-			g = exp( - xm );
-		}
-		
-		em = -1;
-		t = 1.0;
-		
-		do 
-		{
-			++em;
-			t *= ran1( idum_loc );
-		} 
-		while ( t > g );
-	} 
-	else 
-	{
-		if ( xm != oldm ) 
-		{
-			oldm = xm;
-			sq = sqrt( 2.0 * xm );
-			alxm = log( xm );
-			g = xm * alxm - gammaln( xm + 1.0 );
-		}
-		do 
-		{
-			do 
-			{
-				y = tan( M_PI * ran1( idum_loc ) );
-				em = sq * y + xm;
-			} 
-			while ( em < 0.0 );   
-			
-			em = floor( em );
-			t = 0.9 * ( 1.0 + y * y ) * exp( em * alxm - gammaln( em + 1.0 ) - g );
-		} 
-		while ( ran1( idum_loc ) > t );
-	}
-	return em;
-}
-
-double poisson( double mean )
-{
-	static bool poissStopErr;
-	
-	if ( mean < 0 )
-	{
-		if ( ++poissErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: negative mean in function 'poisson'" );
-			poissStopErr = false;
-		}
-		else
-			if ( ! poissStopErr )
-			{
-				plog( "\nWarning: too many negative mean errors in function 'poisson', stop reporting...\n" );
-				poissStopErr = true;
-			}
-			
-		return 0.0;
-	}
-
-	return poidev( mean, & idum );
-}
-
-
-/***************************************************
-BETA
-Return a draw from a Beta(alfa,beta) distribution
-Dosi et al. (2010) K+S
-***************************************************/
-double beta( double alpha, double beta )
-{
-	static bool betaStopErr;
-	
-	if ( alpha <= 0 || beta <= 0 )
-	{
-		if ( ++betaErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: non-positive alpha or beta parameters in function 'beta'" );
-			betaStopErr = false;
-		}
-		else
-			if ( ! betaStopErr )
-			{
-				plog( "\nWarning: too many non-positive parameter errors in function 'beta', stop reporting...\n" );
-				betaStopErr = true;
-			}
-			
-		if ( alpha < beta )
-			return 0.0;
-		else
-			return 1.0;
-	}
-
-	double U, V, den;
-	U = ran1( );
-	V = ran1( ); 
-	den = pow( U, ( 1 / alpha ) ) + pow( V, ( 1 / beta ) );
-	
-	while ( den <= 0 || den > 1)
-	{
-		U = ran1( );
-		V = ran1( );
-		den = pow( U,( 1 / alpha ) ) + pow( V, ( 1 / beta ) );
-	}
-
-	return pow( U , ( 1 / alpha ) ) / den;
-}
-
-#endif
 
 
 /****************************************************

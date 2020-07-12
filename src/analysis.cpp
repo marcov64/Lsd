@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 7.3 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -229,7 +229,7 @@ cmd( ".da configure -menu .da.m" );
 cmd( "bind .da <F1> { .da.m.help invoke 0; break }" );
 
 // adjust horizontal text space usage
-cmd( "if { $tcl_platform(os) == \"Windows NT\" } { set pad -3 } { if { $tcl_platform(os) == \"Darwin\" } { set pad 1 } { set pad 2 } }" );
+cmd( "if [ string equal $CurPlatform windows ] { set pad -3 } { if [ string equal $CurPlatform mac ] { set pad 1 } { set pad 2 } }" );
 
 cmd( "set f .da.head" );
 cmd( "frame $f" );
@@ -1911,13 +1911,9 @@ while ( true )
 					
 				case 1:
 					gz = false;
-#ifdef LIBZ
 					const char extRes[ ] = ".res .res.gz";
 					const char extTot[ ] = ".tot .tot.gz";
-#else
-					const char extRes[ ] = ".res";
-					const char extTot[ ] = ".tot";
-#endif 
+
 					// make sure there is a path set
 					cmd( "set path \"%s\"", path );
 					if ( strlen( path ) > 0 )
@@ -1948,10 +1944,9 @@ while ( true )
 						cmd( "set datafile [ lindex $lab %d ]", i );
 						app = ( char * ) Tcl_GetVar( inter, "datafile", 0 );
 						strcpy( filename, app );
-#ifdef LIBZ
 						if ( strlen( filename ) > 3 && ! strcmp( &filename[ strlen( filename ) - 3 ], ".gz" ) )
 							gz = true;
-#endif	
+
 						f = fopen( filename, "r" );
 					
 						if ( f != NULL )
@@ -3692,9 +3687,7 @@ INSERT_DATA_FILE
 void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool keep_vars )
 {
 	FILE *f = NULL;
-#ifdef LIBZ
 	gzFile fz = NULL;
-#endif
 	char ch, *tok, *linbuf, *tag;
 	int i, j, new_v, new_c;
 	bool header = false;
@@ -3704,11 +3697,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	if ( ! gz )
 		f = fopen( filename, "rt" );
 	else
-	{
-#ifdef LIBZ
 		fz = gzopen( filename, "rt" );
-#endif
-	}
 
 	new_v = 0;
 	plog( "\nResults data from file %s (F_%d)\n", "", filename, file_counter );
@@ -3716,22 +3705,15 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	if ( ! gz )
 		ch = ( char ) fgetc( f );
 	else
-	{
-#ifdef LIBZ
 		ch = ( char ) gzgetc( fz );
-#endif
-	}
 
 	while ( ch != '\n' )
 	{
 		if ( ! gz )
 			ch = ( char ) fgetc( f );
 		else
-		{
-#ifdef LIBZ
 			ch = ( char ) gzgetc( fz );
-#endif
-		}
+
 		if ( ch == '\t' )
 			new_v += 1;
 	   
@@ -3750,11 +3732,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	if ( ! gz )
 		fclose( f );
 	else
-	{
-#ifdef LIBZ
 		gzclose( fz );
-#endif
-	}
 
 	plog( " %d series", "",  new_v );
 
@@ -3763,11 +3741,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	if ( ! gz )
 		f = fopen( filename, "rt" );
 	else
-	{
-#ifdef LIBZ
 		fz = gzopen( filename, "rt" );
-#endif
-	}
 
 	new_c = -1;
 	while ( ch != EOF )
@@ -3775,11 +3749,8 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		if ( ! gz )
 			ch = ( char ) fgetc( f );
 		else
-		{
-#ifdef LIBZ
 			ch = ( char ) gzgetc( fz );
-#endif
-		}
+
 		if ( ch == '\n' )
 			++new_c;
 	}
@@ -3787,11 +3758,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	if ( ! gz )
 		fclose( f );
 	else
-	{
-#ifdef LIBZ
 		gzclose( fz );
-#endif
-	}
 
 	plog( ", %d cases. Loading...", "", new_c );
 
@@ -3814,11 +3781,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	if ( ! gz )
 		f = fopen( filename, "rt" );
 	else
-	{
-#ifdef LIBZ
 		fz = gzopen( filename, "rt" );
-#endif
-	}
 
 	linsiz = ( int ) max( linsiz, new_v * ( DBL_DIG + 4 ) ) + 1;
 	linbuf = new char[ linsiz ];
@@ -3832,11 +3795,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	if ( ! gz )
 		fgets( linbuf, linsiz, f );		// buffers one entire line
 	else
-	{
-#ifdef LIBZ
 		gzgets( fz, linbuf, linsiz );
-#endif
-	}
 
 	tok = strtok( linbuf , "\t" ); 		// prepares for parsing and get first one
 	for ( i = *num_v; i < new_v + *num_v; ++i )
@@ -3882,11 +3841,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		if ( ! gz )
 			fgets( linbuf, linsiz, f );		// buffers one entire line
 		else
-		{
-#ifdef LIBZ
 			gzgets( fz, linbuf, linsiz );
-#endif
-		}
 	 
 		tok = strtok( linbuf , "\t" ); 		// prepares for parsing and get first one
 		
@@ -3928,11 +3883,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	if ( ! gz )
 		fclose( f );
 	else
-	{
-#ifdef LIBZ
 		gzclose( fz );
-#endif
-	}
 }
 
 
@@ -7263,11 +7214,7 @@ void save_datazip( int *choice )
 	int i, j, fr, typelab, del, type_res, *start, *end, *id, headprefix = 0;
 	FILE *fsave = NULL;
 
-#ifdef LIBZ
 	gzFile fsavez = NULL;
-#else
-	FILE *fsavez = NULL; 
-#endif 
 
 	const char str0[ ] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000";
 	const char strsp[ ] = "                                                                                ";
@@ -7345,11 +7292,7 @@ void save_datazip( int *choice )
 
 	cmd( "checkbutton .da.lab.dozip -text \"Generate zipped file\" -variable dozip" );
 
-#ifdef LIBZ
 	cmd( "pack .da.lab.f .da.lab.dozip -padx 5 -pady 5" );
-#else
-	cmd( "pack .da.lab.f -padx 5 -pady 5" );
-#endif
 
 	cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp menudata_res.html#save } { set choice 2 }" );
 
@@ -7477,11 +7420,7 @@ void save_datazip( int *choice )
 		goto end;
 
 	if ( dozip == 1 ) 
-	{
-#ifdef LIBZ
 		fsavez = gzopen( msg, "wt" );
-#endif 
-	} 
 	else
 		fsave = fopen( msg, "wt" );  // use text mode for Windows better compatibility
 
@@ -7522,11 +7461,7 @@ void save_datazip( int *choice )
 					if ( headprefix == 1 )
 					{
 						if ( dozip == 1 ) 
-						{
-#ifdef LIBZ
 							gzprintf( fsavez, "#" );
-#endif
-						} 
 						else
 							fprintf( fsave, "#" );
 					}  
@@ -7535,12 +7470,10 @@ void save_datazip( int *choice )
 					{
 						if ( dozip == 1 ) 
 						{
-#ifdef LIBZ 
 							gzprintf( fsavez, "%s_%s", str[ i ], tag[ i ] );
 						   
 							if ( i < nv - 1 )  
 								gzprintf( fsavez, "%s", delimiter );
-#endif 
 						} 
 						else
 						{
@@ -7557,11 +7490,7 @@ void save_datazip( int *choice )
 					if ( headprefix == 1 )
 					{
 						if ( dozip == 1 ) 
-						{
-#ifdef LIBZ
 							gzprintf( fsavez, "#" );
-#endif
-						} 
 						else
 							fprintf( fsave, "#" );
 					}  
@@ -7570,12 +7499,10 @@ void save_datazip( int *choice )
 					{
 						if ( dozip == 1 ) 
 						{
-#ifdef LIBZ
 							gzprintf( fsavez, "%s%d", labprefix, i );
 					   
 							if ( i < nv - 1 )  
 								gzprintf( fsavez, "%s", delimiter );
-#endif
 						} 
 						else
 						{
@@ -7592,11 +7519,7 @@ void save_datazip( int *choice )
 					for ( i = 0; i < nv; ++i )
 					{
 						if ( dozip == 1 ) 
-						{
-#ifdef LIBZ 
 							gzprintf( fsavez, "%s %s (%d %d)\t", str[ i ], tag[ i ], start[ i ], end[ i ] );
-#endif 
-						} 
 						else
 							fprintf( fsave, "%s %s (%d %d)\t", str[ i ], tag[ i ], start[ i ], end[ i ] );  
 					}  
@@ -7609,11 +7532,7 @@ void save_datazip( int *choice )
 			if ( headprefix == 1 )
 			{
 				if ( dozip == 1 ) 
-				{
-#ifdef LIBZ 
 					gzprintf( fsavez, "#" );
-#endif 
-				} 
 				else
 					fprintf( fsave, "#" );  
 			}    
@@ -7634,22 +7553,14 @@ void save_datazip( int *choice )
 					msg[ numcol ] = '\0';
 					
 				if ( dozip == 1 ) 
-				{
-#ifdef LIBZ
 					gzprintf( fsavez, "%s", msg );
-#endif
-				} 
 				else
 					fprintf( fsave, "%s", msg ); 
 			}
 		}
 
 		if ( dozip == 1 ) 
-		{
-#ifdef LIBZ 
 			gzprintf( fsavez, "\n" );
-#endif 
-		} 
 		else
 			fprintf( fsave, "\n" );  
 	}
@@ -7658,7 +7569,6 @@ void save_datazip( int *choice )
 	{
 		if ( dozip == 1 )
 		{
-#ifdef LIBZ
 			for ( j = min_c; j <= max_c; ++j )
 			{
 				for ( i = 0; i < nv; ++i )
@@ -7674,7 +7584,6 @@ void save_datazip( int *choice )
 				
 				gzprintf( fsavez, "\n" );
 			}
-#endif 
 		}
 		else
 		{
@@ -7715,32 +7624,20 @@ void save_datazip( int *choice )
 				}
 				
 				if ( dozip == 1 ) 
-				{
-#ifdef LIBZ
 					gzprintf( fsavez, "%s", msg );
-#endif 
-				}
 				else
 					fprintf( fsave, "%s", msg );  
 			}
 			
 			if ( dozip == 1 ) 
-			{
-#ifdef LIBZ
 				gzprintf( fsavez, "\n" );
-#endif
-			} 
 			else
 				fprintf( fsave, "\n" );  
 		}
 	}
 
 	if ( dozip == 1 ) 
-	{
-#ifdef LIBZ
 		gzclose( fsavez);
-#endif
-	}
 	else
 		fclose( fsave );  
 
@@ -8592,12 +8489,12 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	
 	// adjust horizontal text space usage
 	if ( y2on )							
-		cmd( "set datWid 26; if { $tcl_platform(os) == \"Windows NT\" } { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
+		cmd( "set datWid 26; if [ string equal $CurPlatform windows ] { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
 	else
-		cmd( "set datWid 20; if { $tcl_platform(os) == \"Windows NT\" } { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
+		cmd( "set datWid 20; if [ string equal $CurPlatform windows ] { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
 	
 	// adjust vertical text adjustment
-	cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set pad3 3 } { set pad3 0 } } { set pad3 -3 }" );
+	cmd( "if [ string equal $CurPlatform linux ] { set pad3 0 } { if [ string equal $CurPlatform mac ] { set pad3 3 } { set pad3 -3 } }" );
 	
 	cmd( "frame $w.b.c.case" );
 	cmd( "label $w.b.c.case.l -text \"%s:\" -width 11 -anchor e", txtCase );

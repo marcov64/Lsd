@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 7.3 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -35,6 +35,7 @@ char nonavail[ ] = "NA";	// string for unavailable values (use R default)
 char tabs[ ] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";	// Log window tabs
 double def_res = 0;			// default equation result
 int add_to_tot = false;		// flag to append results to existing totals file (bool)
+int dozip = true;			// compressed results file flag (bool)
 int max_step = 100;			// default number of simulation runs
 int overwConf = true;		// overwrite configuration on run flag (bool)
 int saveConf = false;		// save configuration on results saving (bool)
@@ -88,6 +89,7 @@ char msg[ TCL_BUFF_STR ] = "";				// auxiliary Tcl buffer
 char name_rep[ MAX_PATH_LENGTH ] = "";		// documentation report file name
 char tcl_dir[ MAX_PATH_LENGTH ] = "";		// Tcl/Tk directory
 description *descr = NULL;	// model description structure
+eq_mapT eq_map;				// fast equation look-up map
 int actual_steps = 0;		// number of executed time steps
 int choice;					// Tcl menu control variable (main window)
 int choice_g;               // Tcl menu control variable (structure window)
@@ -106,6 +108,7 @@ int macro;					// equations style (macros or C++) (bool)
 int max_threads = 1;		// maximum number of parallel threads 
 int no_res = false;			// do not produce .res results files (bool)
 int parallel_disable = false;// flag to control parallel mode
+int platform = 0;			// OS platform (1=Linux, 2=Mac, 3=Windows)
 int prof_aggr_time = false;	// show aggregate profiling times
 int prof_min_msecs = 0;		// profile only variables taking more than X msecs.
 int prof_obs_only = false;	// profile only observed variables
@@ -136,16 +139,6 @@ const char *lmm_defaults[ LMM_OPTIONS_NUM ] = { "$DefaultSysTerm", "$DefaultHtml
 const char *model_info[ MODEL_INFO_NUM ] = { "modelName", "modelVersion", "modelDate", "lsdGeom", "logGeom", "strGeom", "daGeom", "debGeom", "latGeom" };
 const char *model_defaults[ MODEL_INFO_NUM ] = { "(no name)", "1.0", "[ current_date ]", "#", "#", "#", "#", "#", "#" };
 const char *wnd_names[ MODEL_INFO_NUM - 3 ] = { "lsd", "log", "str", "da", "deb", "lat" };
-
-#ifdef CPP11
-eq_mapT eq_map;				// fast equation look-up map
-#endif
-
-#ifdef LIBZ
-int dozip = true;			// compressed results file flag (bool)
-#else
-int dozip = false;
-#endif
 
 #ifndef NO_WINDOW
 int i_values[ 4 ];			// user temporary variables copy
@@ -380,12 +373,6 @@ int lsdmain( int argn, char **argv )
 	tk_ok = true;
 	cmd( "tk appname lsd" );
 
-	// disable Carbon compatibility in Mac
-	cmd( "if [ string equal $tcl_platform(os) Darwin ] { set ::tk::mac::useCompatibilityMetrics 0 }" );
-
-	// close console if open (usually only in Mac)
-	cmd( "if [ string equal $tcl_platform(os) Darwin ] { foreach i [ winfo interps ] { if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { send $i \"wm iconify .; wm withdraw .; destroy .\" } } }" );
-
 	cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
 	if ( choice )
 	{
@@ -403,11 +390,6 @@ int lsdmain( int argn, char **argv )
 	cmd( "set MODEL_INFO_NUM %d", MODEL_INFO_NUM );
 	cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
 	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
-#ifdef MAC_PKG
-	cmd( "set MAC_PKG 1" );
-#else
-	cmd( "set MAC_PKG 0" );
-#endif
 
 	// try to use exec_path to change to the model directory
 	if ( strlen( exec_path ) == 0 || ! strcmp( exec_path, "/" ) )
@@ -511,6 +493,34 @@ int lsdmain( int argn, char **argv )
 		myexit( 200 + choice );
 	}
 
+	str = ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 );
+	if ( ! strcmp( str, "linux" ) )
+		platform = LINUX;
+	else
+		if ( ! strcmp( str, "mac" ) )
+			platform = MAC;
+		else
+			if ( ! strcmp( str, "windows" ) )
+				platform = WINDOWS;
+			else
+			{
+				log_tcl_error( "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
+				cmd( "tk_messageBox -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
+				myexit( 200 );
+			}
+
+	if ( platform == MAC )
+	{
+		cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
+
+		// close console if open (usually only in Mac)
+		cmd( "foreach i [ winfo interps ] { \
+				if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { \
+					send $i \"wm iconify .; wm withdraw .; destroy .\" \
+				} \
+			}" );
+	}
+	
 	// create a Tcl command that calls the C discard_change function before killing LSD
 	Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 

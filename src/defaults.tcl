@@ -1,6 +1,6 @@
 #*************************************************************
 #
-#	LSD 7.2 - December 2019
+#	LSD 7.3 - December 2020
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -191,11 +191,9 @@ set corrXwindows 0
 set corrYwindows 0
 
 # OS specific default model executable name
-set exeLinux "lsd"
-set exeMacPkg "LSD"
-set exeMacOSX "lsd"
-set exeWin32 "lsd"
-set exeWin64 "lsd"
+set exeLinux 	"lsd"
+set exeMac 		"LSD"
+set exeWindows 	"lsd"
 
 # OS specific default system terminal
 set sysTermMac		"Terminal"	; # "Terminal", "xterm"
@@ -213,18 +211,15 @@ set browserLinux	"firefox"	; # "open", "firefox", "chrome"
 set browserWindows	"open"		; # "open", "firefox", "chrome"
 
 # OS specific default wish utility
-set wishMacTk85		"wish8.5"
-set wishMacTk86		"wish8.6"
+set wishMac			"wish8.6"
 set wishLinux		"wish"
-set wishWinTk85		"wish85.exe"
-set wishWinTk86		"wish86.exe"
+set wishWindows		"wish86.exe"
 
 # OS specific make utility
 set makeMac			"make"
 set makeLinux		"make"
-set makeWin32		"make.exe"
-set makeWin64cyg	"make.exe"
-set makeWin64mgw	"mingw32-make.exe"
+set makeWinCygwin	"make.exe"
+set makeWinMingw	"mingw32-make.exe"
 
 # OS specific default gnuplot terminal (empty string=gnuplot default)
 set gnuplotTermMac		""	; # "qt", "x11"

@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 7.3 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -66,7 +66,7 @@ void edit_data( object *root, int *choice, char *obj_name )
 	int i, counter, lag;
 	object *first;
 
-	cmd( "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 9; set cbd 2 } {set cwidth 8; set cbd 2}" );
+	cmd( "if [ string equal $CurPlatform mac ] { set cwidth 9; set cbd 2 } { set cwidth 8; set cbd 2 }" );
 
 	Tcl_LinkVar( inter, "lag", ( char * ) &lag, TCL_LINK_INT );
 

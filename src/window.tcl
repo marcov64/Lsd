@@ -1,24 +1,24 @@
 #*************************************************************
 #
-#	LSD 7.2 - December 2019
+#	LSD 7.3 - December 2020
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
 #	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
-#	
+#
 #*************************************************************
 
 #*************************************************************
 # WINDOW.TCL
-# Procedures to adjust window positioning & startup code. 
+# Procedures to adjust window positioning & startup code.
 #
 # Types of window positioning:
 #
 # centerS: center over the primary display, only available if the parent window
 #	center is also in the primary display (if not, falback to centerW)
 # centerW: center over the parent window (in any display)
-# topleftS: put over the top left corner of screen of primary display, only 
+# topleftS: put over the top left corner of screen of primary display, only
 #	available if the parent window center is also in the primary display (if not,
 #	falback to topleftW)
 # topleftW: put over the top left corner of parent window (around menu bar)
@@ -27,83 +27,47 @@
 # current: keep current position
 #*************************************************************
 
-package require Tk 8.5
+# load packages
+package require Tk 8.6
 
-# Enable console window to be opened with CTRL+ALT+J
-set conWnd		true
+# load extra code
+source "$RootLsd/$LsdSrc/dblclick.tcl" ;	# enhancements to double-click in text widgets
+source "$RootLsd/$LsdSrc/defaults.tcl" ;	# load LSD windows defaults
 
-# Enable window functions operation logging
-set logWndFn	false
-
-# Enable coordinates test window
-set testWnd		false
-
-# Warn old Tcl/Tk in macOS
-if { [ string equal [ tk windowingsystem ] aqua ] && [ string equal [ info tclversion ] 8.5 ] } {
-	tk_messageBox -type ok -icon warning -title Warning \
-	-message "Old Tcl/Tk version" \
-	-detail "Please update your Tcl/Tk version to version 8.6 or higher.\nSome problems may appear when using an old version."
-}
-
-# Variable 'alignMode' configure special, per module (LMM, LSD), settings
-unset -nocomplain defaultPos defaultFocus
-if [ info exists alignMode ] {
-	if [ string equal -nocase $alignMode "LMM" ] {
-		set defaultPos centerW
-		set defaultFocus .f.t.t
-	} else {
-		set defaultPos centerW
-	}
-}
-
-# list of windows with predefined sizes & positions
-set wndLst [ list .lmm .lsd .log .str .da .deb .lat ]
-set wndMenuHeight 0
+# optional development tools
+set conWnd		true ;	# enable console window to be opened with CTRL+ALT+J
+set logWndFn	false ;	# enable window functions operation logging
+set testWnd		false ;	# enable coordinates test window
 
 # register static special, OS-dependent configurations
 if [ string equal $tcl_platform(platform) unix ] {
-	
+
 	# mac
 	if [ string equal $tcl_platform(os) Darwin ] {
-		
-		if { $MAC_PKG } {
-			set CurPlatform mac
-			set DefaultExe $exeMacPkg
-		} else {
-			set CurPlatform osx
-			set DefaultExe $exeMacOSX
-		}
-		
-		if { [ string equal [ info tclversion ] 8.6 ] } {	
-			if { [ string equal [ info patchlevel ] 8.6.9 ] } {
-				set butWid $butMacTk869
-				set bsizeM $bsizeMwin
-				set bhstepM $bhstepMwin
-				set borderMadj 0
-				set darkMode 0
-			} else {
-				set butWid $butMac
-				set bsizeM $bsizeMlin
-				set bhstepM $bhstepMmac
-				set borderMadj $borderMmac
-				update
-				set darkMode [ tk::unsupported::MacWindowStyle isdark . ]
-			}
-			
-			set DefaultWish $wishMacTk86
-		} else {
-			set butWid $butMac
+
+		set CurPlatform mac
+		set DefaultExe $exeMac
+
+		if { [ string equal [ info patchlevel ] 8.6.9 ] } {
+			set butWid $butMacTk869
 			set bsizeM $bsizeMwin
 			set bhstepM $bhstepMwin
-			set DefaultWish $wishMacTk85
 			set borderMadj 0
 			set darkMode 0
+		} else {
+			set butWid $butMac
+			set bsizeM $bsizeMlin
+			set bhstepM $bhstepMmac
+			set borderMadj $borderMmac
+			update
+			set darkMode [ tk::unsupported::MacWindowStyle isdark . ]
 		}
-		
+
+		set DefaultWish $wishMac
 		set daCwid $daCwidMac
 		set corrX $corrXmac
 		set corrY $corrYmac
-		
+
 		set DefaultSysTerm $sysTermMac
 		set systemTerm $sysTermMac
 		set gnuplotTerm $gnuplotTermMac
@@ -114,17 +78,17 @@ if [ string equal $tcl_platform(platform) unix ] {
 		set DefaultFontSize $fontSizeMac
 		set deltaSize $deltaSizeMac
 		set bvstepM $bvstepMwin
-		
+
 	# linux
 	} else {
 
 		set CurPlatform linux
-		
+
 		set butWid $butLinux
 		set daCwid $daCwidLinux
 		set corrX $corrXlinux
 		set corrY $corrYlinux
-		
+
 		set DefaultSysTerm $sysTermLinux
 		set systemTerm $sysTermLinux
 		set gnuplotTerm $gnuplotTermLinux
@@ -142,53 +106,50 @@ if [ string equal $tcl_platform(platform) unix ] {
 		set borderMadj 0
 		set darkMode 0
 	}
-	
+
 # Windows
 } else {
-	
-	# Windows 32 or 64-bit?
-	if { [ string equal $tcl_platform(machine) intel ] } { 
-		set CurPlatform win32
-		set DefaultExe $exeWin32
-		set DefaultMakeExe $makeWin32
-		set DefaultWish $wishWinTk85
+	# Not 64-bit?
+	if { ! [ string equal $tcl_platform(platform) windows ] || ! [ string equal $tcl_platform(machine) amd64 ] } {
+		set CurPlatform unsupported
 	} else {
-		set CurPlatform win64
-		set DefaultExe $exeWin64
-		set DefaultWish $wishWinTk86
-		
+	
+		set CurPlatform windows
+		set DefaultExe $exeWindows
+		set DefaultWish $wishWindows
+
 		# Cygwin or MSYS2?
-		if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { 
-			set DefaultMakeExe $makeWin64mgw 
-		} else { 
-			set DefaultMakeExe $makeWin64cyg 
+		if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } {
+			set DefaultMakeExe $makeWinMingw
+		} else {
+			set DefaultMakeExe $makeWinCygwin
 		}
+
+		set butWid $butWindows
+		set daCwid $daCwidWindows
+		set corrX $corrXwindows
+		set corrY $corrYwindows
+
+		set DefaultSysTerm $sysTermWindows
+		set systemTerm $sysTermWindows
+		set gnuplotTerm $gnuplotTermWindows
+		set DefaultDbgExe $dbgWindows
+		set DefaultHtmlBrowser $browserWindows
+		set DefaultFont $fontWindows
+		set DefaultFontSize $fontSizeWindows
+		set deltaSize $deltaSizeWindows
+		set bsizeM $bsizeMwin
+		set bhstepM $bhstepMwin
+		set bvstepM $bvstepMwin
+		set borderMadj 0
+		set darkMode 0
 	}
-	
-	set butWid $butWindows
-	set daCwid $daCwidWindows
-	set corrX $corrXwindows
-	set corrY $corrYwindows
-	
-	set DefaultSysTerm $sysTermWindows
-	set systemTerm $sysTermWindows
-	set gnuplotTerm $gnuplotTermWindows
-	set DefaultDbgExe $dbgWindows
-	set DefaultHtmlBrowser $browserWindows
-	set DefaultFont $fontWindows
-	set DefaultFontSize $fontSizeWindows
-	set deltaSize $deltaSizeWindows
-	set bsizeM $bsizeMwin
-	set bhstepM $bhstepMwin
-	set bvstepM $bvstepMwin
-	set borderMadj 0
-	set darkMode 0
 }
 
 # adjust between dark and light desktop modes
 if { $darkMode } {
 	set commcolor $commcolorD
-	set strcolor $strcolorD 
+	set strcolor $strcolorD
 	set prepcolor $prepcolorD
 	set typecolor $typecolorD
 	set kwrdcolor $kwrdcolorD
@@ -203,7 +164,7 @@ if { $darkMode } {
 	set modcolor $modcolorD
 } else {
 	set commcolor $commcolorL
-	set strcolor $strcolorL 
+	set strcolor $strcolorL
 	set prepcolor $prepcolorL
 	set typecolor $typecolorL
 	set kwrdcolor $kwrdcolorL
@@ -213,10 +174,25 @@ if { $darkMode } {
 	set lvarcolor $lvarcolorL
 	set funcolor $funcolorL
 	set lfuncolor $lfuncolorL
-	set objcolor $objcolorL 
+	set objcolor $objcolorL
 	set grpcolor $grpcolorL
 	set modcolor $modcolorL
 }
+
+# Variable 'alignMode' configure special, per module (LMM, LSD), settings
+unset -nocomplain defaultPos defaultFocus
+if [ info exists alignMode ] {
+	if [ string equal -nocase $alignMode "LMM" ] {
+		set defaultPos centerW
+		set defaultFocus .f.t.t
+	} else {
+		set defaultPos centerW
+	}
+}
+
+# list of windows with predefined sizes & positions
+set wndLst [ list .lmm .lsd .log .str .da .deb .lat ]
+set wndMenuHeight 0
 
 # text line default canvas height & minimum horizontal border width
 set lheightP [ expr int( [ font actual $fontP -size ] * [ tk scaling ] ) + $vtmarginP ]
@@ -241,10 +217,10 @@ if [ string equal [ tk windowingsystem ] aqua ] {
 }
 
 # toolbar images format
-if [ string equal [ info tclversion ] 8.6 ] { 
-	set iconExt png 
-} { 
-	set iconExt gif 
+if [ string equal [ info tclversion ] 8.6 ] {
+	set iconExt png
+} {
+	set iconExt gif
 }
 
 #************************************************
@@ -292,7 +268,7 @@ image create photo resultImg -file "$RootLsd/$LsdSrc/icons/result.$iconExt"
 #************************************************
 proc setglobkeys { w { chkChg 1 } } {
 	global conWnd grabLst parWndLst logWndFn
-	
+
 	# soft/hard exit (check for unsaved changes or not)
 	if { $chkChg } {
 		bind $w <Control-Alt-x> { if [ string equal [ discard_change ] ok ] { exit }; break }
@@ -303,7 +279,7 @@ proc setglobkeys { w { chkChg 1 } } {
 	}
 	# open Tcl/Tk console
 	if { $conWnd } {
-		bind $w <Control-Alt-j> { 
+		bind $w <Control-Alt-j> {
 			# remove existing grabs
 			if [ info exists grabLst ] {
 				set lastGrab [ expr [ llength $grabLst ] - 1 ]
@@ -313,7 +289,7 @@ proc setglobkeys { w { chkChg 1 } } {
 				}
 			}
 			tk_console
-			break 
+			break
 		}
 		bind $w <Control-Alt-J> { event generate . <Control-Alt-j> }
 	}
@@ -327,7 +303,7 @@ proc setglobkeys { w { chkChg 1 } } {
 proc newtop { w { name "" } { destroy { } } { par "." } } {
 	global tcl_platform RootLsd LsdSrc parWndLst grabLst noParLst logWndFn
 
-	if [ winfo exists $w ] { 
+	if [ winfo exists $w ] {
 		destroytop $w
 	}
 	toplevel $w
@@ -335,7 +311,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 	if { $par != "" } {
 		if { $par != "." } {
 			if { [ winfo viewable [ winfo toplevel $par ] ] } {
-				wm transient $w $par 
+				wm transient $w $par
 			}
 		} {
 			# attribute transient only if not in the no parent list and window is visible
@@ -348,7 +324,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 				if { [ llength $parWndLst ] > 0 && ! [ string equal [ lindex $parWndLst 0 ] $w ] } {
 					# set transient only if parent's parent is visible
 					if { [ winfo viewable [ winfo toplevel [ lindex $parWndLst 0 ] ] ] } {
-						wm transient $w [ lindex $parWndLst 0 ] 
+						wm transient $w [ lindex $parWndLst 0 ]
 					}
 				} {
 					wm transient $w .
@@ -356,14 +332,14 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 			} {
 				wm transient $w .
 			}
-		} 
+		}
 	}
 	wm group $w .
 	wm title $w $name
 	wm protocol $w WM_DELETE_WINDOW $destroy
 	setglobkeys $w
-	
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, grab:$grabLst)" } 
+
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, grab:$grabLst)" }
 }
 
 
@@ -376,14 +352,14 @@ proc settop { w { name no } { destroy no } { par no } } {
 
 	if { $par != no } {
 		if { [ winfo viewable [ winfo toplevel $par ] ] } {
-			wm transient $w $par 
+			wm transient $w $par
 		}
 	}
 	if { $name != no } {
-		wm title $w $name 
+		wm title $w $name
 	}
 	if { $destroy != no } {
-		wm protocol $w WM_DELETE_WINDOW $destroy 
+		wm protocol $w WM_DELETE_WINDOW $destroy
 	}
 	update
 	if { ! [ winfo viewable [ winfo toplevel $w ] ] } {
@@ -395,9 +371,9 @@ proc settop { w { name no } { destroy no } { par no } } {
 	} {
 		focus $w
 	}
-	update 
-	
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsettop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
+	update
+
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsettop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" }
 }
 
 
@@ -407,25 +383,25 @@ proc settop { w { name no } { destroy no } { par no } } {
 #************************************************
 proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } { buttonF b } { noMinSize no } } {
 	global defaultPos wndLst parWndLst grabLst noParLst logWndFn
-	
+
 	# copy of applied geometry, if any
 	set gm ""
-	
+
 	#handle main windows differently
 	if { [ lsearch $wndLst $w ] < 0 } {
-	
+
 		# unknown window (not a main one)
 		if { ! [ string equal $pos xy ] && $sizeX != 0 } {
-			$w configure -width $sizeX 
+			$w configure -width $sizeX
 		}
 		if { ! [ string equal $pos xy ] && $sizeY != 0 } {
-			$w configure -height $sizeY 
+			$w configure -height $sizeY
 		}
-		
+
 		update
-		
+
 		if { ! [ string equal $pos current ] } {
-		
+
 			# handle different window default position
 			if [ string equal $pos none ] {
 				if [ info exists defaultPos ] {
@@ -434,7 +410,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 					set pos centerW
 				}
 			}
-					
+
 			# don't use screen based positioning if not in primary display
 			if { [ string equal $pos centerS ] && ! [ primdisp [ winfo parent $w ] ] } {
 				if [ info exists defaultPos ] {
@@ -443,7 +419,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 					set pos centerW
 				}
 			}
-			
+
 			if { ! [ string equal $pos xy ]	} {
 				set x [ getx $w $pos ]
 				set y [ gety $w $pos ]
@@ -451,33 +427,33 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 				set x $sizeX
 				set y $sizeY
 			}
-			
+
 			if { ! [ string equal "" $x ] && ! [ string equal "" $y ] } {
-			
+
 				if { [ string equal $pos coverW ] } {
 					set sizeX [ expr [ winfo width [ winfo parent $w ] ] + 10 ]
 					set sizeY [ expr [ winfo height [ winfo parent $w ] ] + 30 ]
 				}
-				
+
 				if { ! [ string equal $pos xy ]	&& $sizeX != 0 && $sizeY != 0 } {
 					set gm ${sizeX}x${sizeY}+$x+$y
 				} {
 					set gm +$x+$y
 				}
-				wm geometry $w $gm 
+				wm geometry $w $gm
 			}
 		} {
 			if { $sizeX != 0 && $sizeY != 0 } {
-				set gm ${sizeX}x${sizeY} 
-				wm geometry $w $gm 
+				set gm ${sizeX}x${sizeY}
+				wm geometry $w $gm
 			}
 		}
-		
+
 		if { ! $noMinSize && ( $resizeX || $resizeY ) } {
 			update
 			wm minsize $w [ winfo width $w ] [ winfo height $w ]
 		}
-		
+
 		wm resizable $w $resizeX $resizeY
 	} {
 		#known windows - simply apply defaults if not done before
@@ -492,34 +468,34 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 
 	raise $w
 	focus $w
-	
+
 	update
 
 	# grab focus, if required, updating the grabbing list
 	if { $grab && $w != "." && [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
-	
+
 		set parWndLst [ linsert $parWndLst 0 $w ]
-		
+
 		if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
 			lappend grabLst "$w [ grab current $w ]"
 		}
-		
+
 		grab set $w
-		
+
 		# reposition window because of macOS bug when grabbing
-		if { [ string equal [ tk windowingsystem ] aqua ] && $gm != "" } { 
+		if { [ string equal [ tk windowingsystem ] aqua ] && $gm != "" } {
 			wm geometry $w $gm
 		}
-		
+
 		raise $w
 	}
-	
+
 	# because of macOS bug when not grabbing scroll bar doesn't work...
-	if { ! $grab && [ string equal [ tk windowingsystem ] aqua ] } { 
+	if { ! $grab && [ string equal [ tk windowingsystem ] aqua ] } {
 		grab set $w
 		grab release $w
 	}
-	
+
 	if { [ info exists buttonF ] && [ winfo exists $w.$buttonF.ok ] } {
 		$w.$buttonF.ok configure -default active -state active
 		focus $w.$buttonF.ok
@@ -529,8 +505,8 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	} {
 		focus $w
 	}
-	
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], minsize:[wm minsize $w], primdisp:[ primdisp [ winfo parent $w ] ], parWndLst:$parWndLst, grab:$grabLst)" } 
+
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], minsize:[wm minsize $w], primdisp:[ primdisp [ winfo parent $w ] ], parWndLst:$parWndLst, grab:$grabLst)" }
 }
 
 
@@ -541,17 +517,17 @@ proc destroytop w {
 	global restoreWin wndLst defaultFocus parWndLst grabLst noParLst logWndFn
 
 	if { ! [ winfo exists $w ] } return
-	
+
 	# save main windows sizes/positions
 	if { $restoreWin && [ lsearch $wndLst $w ] >= 0 } {
 		set curGeom [ geomtosave $w ]
-		
+
 		if { $curGeom != "" } {
 			set wName [ string range $w 1 3 ]
 			set ::${wName}Geom $curGeom
 		}
 	}
-	
+
 	if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
 		if [ info exists grabLst ] {
 			set igrab [ lsearch -glob $grabLst "$w *" ]
@@ -564,13 +540,13 @@ proc destroytop w {
 					}
 					raise $grabPar
 					focus $grabPar
-					grab set $grabPar 
+					grab set $grabPar
 				}
 				set grabLst [ lreplace $grabLst $igrab $igrab ]
 			}
 		}
 		if { [ llength $parWndLst ] > 0 } {
-			set parWndLst [ lreplace $parWndLst 0 0 ] 
+			set parWndLst [ lreplace $parWndLst 0 0 ]
 		}
 	}
 	# handle different window default focus on destroy
@@ -597,22 +573,22 @@ proc geomtop { { w . } } {
 	scan $geom "%dx%d+%d+%d" width height decorationLeft decorationTop
 	set contentsTop [ winfo rooty $w ]
 	set contentsLeft [ winfo rootx $w ]
-	
+
 	# measure left edge, and assume all edges except top are the same thickness
 	set decorationThickness [ expr $contentsLeft - $decorationLeft ]
 
 	# find titlebar plus menubar thickness
 	set menubarThickness [ expr $contentsTop - $decorationTop ]
-	
+
 	# compute real values
 	incr width [ expr 2 * $decorationThickness ]
 	incr height $decorationThickness
 	incr height $menubarThickness
-	
+
 	return [ list $width $height $decorationLeft $decorationTop ]
 }
-	
-	
+
+
 #************************************************
 # GEOMTOSAVE
 # Return size & position of a window to be saved
@@ -631,18 +607,18 @@ proc geomtosave { { w . } } {
 	if { ! [ winfo exists $realW ] } {
 		return ""
 	}
-	
+
 	set geom [ wm geometry $realW ]
 	scan $geom "%dx%d+%d+%d" width height decorationLeft decorationTop
 	set contentsLeft [ winfo rootx $realW ]
 	set contentsTop [ winfo rooty $realW ]
-	
+
 	# handle windows with incorrect size/position because of Tk ugly bugs in each platform
 	switch $CurPlatform {
 		linux {
 			set realHeight $height
 			set realX $contentsLeft
-	
+
 			switch $w {
 				.da -
 				.deb {
@@ -656,19 +632,17 @@ proc geomtosave { { w . } } {
 				}
 			}
 		}
-		
-		mac -
-		osx {
+
+		mac {
 			set realX $decorationLeft
 			set realY $decorationTop
 			set realHeight [ expr $height + $contentsTop - $decorationTop - $wndMenuHeight ]
 		}
-		
-		win32 -
-		win64 {
+
+		windows {
 			set realX $decorationLeft
 			set realY $decorationTop
-	
+
 			switch $w {
 				.da -
 				.deb {
@@ -680,7 +654,7 @@ proc geomtosave { { w . } } {
 			}
 		}
 	}
-	
+
 	if { $w == ".str" } {
 		return ${width}x${realHeight}+${realX}+${realY}:${hfactM}+${vfactM}
 	} {
@@ -692,17 +666,17 @@ proc geomtosave { { w . } } {
 
 #************************************************
 # CHECKGEOM
-# check for window mostly out of the (main) 
+# check for window mostly out of the (main)
 # screen or invalid and use the default if needed
 #************************************************
 proc checkgeom { geom defGeom screenWidth screenHeight } {
 	global restoreWin hfactMmin vfactMmin
-	
+
 	if { ! $restoreWin || $geom == "#" } {
 		return $defGeom
 	} else {
 		set n [ scan $geom "%dx%d+%d+%d:%f+%f" width height decorationLeft decorationTop hScale vScale ]
-		
+
 		if { $n < 4 } {
 			return $defGeom
 		} else {
@@ -712,13 +686,13 @@ proc checkgeom { geom defGeom screenWidth screenHeight } {
 			if { $centerX < 0 || $centerX > $screenWidth || $centerY < 0 || $centerY > $screenHeight } {
 				return $defGeom
 			}
-			
+
 			if { $n == 6 && ( $hScale < $hfactMmin || $vScale < $vfactMmin ) } {
 				return $defGeom
 			}
 		}
 	}
-	
+
 	return $geom
 }
 
@@ -731,11 +705,11 @@ proc sizetop { { w all } } {
 	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom hfactM vfactM wndMenuHeight
 
 	update
-	
+
 	if { [ string equal $w .lsd ] || [ string equal $w .lmm ] } {
-	
+
 		set realW .
-	
+
 		# save initial height of the top decoration (menu, title bar and border)
 		if { $wndMenuHeight == 0 } {
 			set curGeom [ wm geometry . ]
@@ -746,30 +720,30 @@ proc sizetop { { w all } } {
 	} else {
 		set realW $w
 	}
-	
+
 	set screenWidth [ winfo screenwidth $realW ]
 	set screenHeight [ winfo screenheight $realW ]
-					
+
 	foreach wnd $wndLst {
 		if { ! [ string compare $w all ] || ! [ string compare $w $wnd ] } {
-		
+
 			switch $wnd {
-			
+
 				.lsd {
 					set defGeom "${hsizeB}x$vsizeB+[ getx . topleftS ]+[ gety . topleftS ]"
 					wm geometry . [ checkgeom $lsdGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize . $hsizeB [ expr $vsizeB / 2 ]
 				}
-				
+
 				.lmm {
 					if { $screenWidth < ( $hsizeL + 2 * $bordsize ) } {
-						set W [ expr $screenWidth - 2 * $bordsize ] 
+						set W [ expr $screenWidth - 2 * $bordsize ]
 					} {
 						set W $hsizeL
 					}
 					set H [ expr $screenHeight - $tbarsize - 2 * $vmargin - 2 * $bordsize ]
 					if { $H < $vsizeL } {
-						set H [ expr $screenHeight - $tbarsize - 2 * $bordsize ] 
+						set H [ expr $screenHeight - $tbarsize - 2 * $bordsize ]
 					}
 					if { $screenWidth < ( $hsizeL + 2 * $bordsize + $hmargin ) } {
 						set X 0
@@ -777,19 +751,19 @@ proc sizetop { { w all } } {
 						set X [ expr $screenWidth - $hmargin - $bordsize - $W ]
 					}
 					set Y [ expr ( $screenHeight - $tbarsize ) / 2 - $bordsize - $H / 2 ]
-					
+
 					set defGeom "${W}x$H+$X+$Y"
 
 					wm geometry . [ checkgeom $lmmGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize . $hsizeLmin $vsizeLmin
 				}
-				
+
 				.log {
 					set defGeom "+[ getx .log bottomrightS ]+[ gety .log bottomrightS ]"
 					wm geometry .log [ checkgeom $logGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .log [ winfo width .log ] [ winfo height .log ]
 				}
-				
+
 				.str {
 					set posXstr [ expr [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] - 2 * $bordsize ]
 					set posYstr [ expr [ winfo y . ] + $corrY ]
@@ -801,17 +775,17 @@ proc sizetop { { w all } } {
 					if { [ lindex $geom 1 ] != "" } {
 						scan [ lindex $geom 1 ] "%f+%f" hfactM vfactM
 					}
-					
-					wm minsize .str [ expr $hsizeM / 2 ] [ expr $vsizeM / 2 ]	
+
+					wm minsize .str [ expr $hsizeM / 2 ] [ expr $vsizeM / 2 ]
 				}
-				
+
 				.da {
 					set defGeom "+[ getx .da overM ]+[ gety .da overM ]"
 					wm geometry .da [ checkgeom $daGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .da [ winfo width .da ] [ winfo height .da ]
 					wm resizable .da 0 1
 				}
-				
+
 				.deb {
 					set defGeom "+[ getx .deb topleftW ]+[ gety .deb topleftW ]"
 					wm geometry .deb [ checkgeom $debGeom $defGeom $screenWidth $screenHeight ]
@@ -831,7 +805,7 @@ proc sizetop { { w all } } {
 
 	update
 
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" }
 }
 
 
@@ -861,12 +835,12 @@ proc resizetop { w sizeX { sizeY 0 } } {
 	}
 	if { $sizeX != [ winfo width $w ] || $sizeY != [ winfo height $w ] } {
 		if { $sizeX > 0 && $sizeY > 0 } {
-			wm geom $w ${sizeX}x${sizeY} 
+			wm geom $w ${sizeX}x${sizeY}
 		}
 	}
 	update
 
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nresizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nresizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" }
 }
 
 
@@ -875,32 +849,26 @@ proc resizetop { w sizeX { sizeY 0 } } {
 # Set window icon
 #************************************************
 proc icontop { w type } {
-	global tcl_platform RootLsd LsdSrc lmmImg lsdImg iconExt
-	
+	global CurPlatform RootLsd LsdSrc lmmImg lsdImg iconExt
+
 	if { $type == "" } {
 		wm iconbitmap $w ""
 		return
 	}
-	
-	if { $tcl_platform(platform) == "windows" } {
+
+	if [ string equal $CurPlatform windows ] {
 		if [ string equal $w . ] {
 			wm iconbitmap $w -default $RootLsd/$LsdSrc/icons/$type.ico
 		} {
 			wm iconbitmap $w $RootLsd/$LsdSrc/icons/$type.ico
 		}
-	} 
-	
-	if { $tcl_platform(platform) == "unix" } { 
-		if { $tcl_platform(os) == "Darwin" } {
-			
+	} elseif [ string equal $CurPlatform linux ] {
+		if [ string equal $w . ] {
+			wm iconphoto $w -default ${type}Img
+			wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
 		} {
-			if [ string equal $w . ] {
-				wm iconphoto $w -default ${type}Img
-				wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
-			} {
-				wm iconphoto $w ${type}Img
-				wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
-			}
+			wm iconphoto $w ${type}Img
+			wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
 		}
 	}
 }
@@ -912,7 +880,7 @@ proc icontop { w type } {
 #************************************************
 proc align { w1 w2 { side R } } {
 	global hmargin corrX corrY logWndFn
-	
+
 	set a [ winfo width $w1 ]
 	set b [ winfo height $w1 ]
 	set c [ expr [ winfo x $w2 ] + $corrX ]
@@ -942,7 +910,7 @@ proc primdisp w {
 	} {
 		return false
 	}
-} 
+}
 
 
 #************************************************
@@ -951,29 +919,29 @@ proc primdisp w {
 #************************************************
 proc getx { w pos } {
 	global corrX hmargin bordsize shiftW
-	
+
 	set par [ winfo parent $w ]
-	if { $par == "" } { 
-		set par . 
+	if { $par == "" } {
+		set par .
 	}
-	
+
 	switch $pos {
-		centerS { 
+		centerS {
 			set hpos [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
 		}
-		centerW { 
+		centerW {
 			set hpos [ expr [ winfo x $par ] + $corrX + [ winfo width $par ] / 2  - [ winfo reqwidth $w ] / 2 ]
 		}
-		topleftS { 
+		topleftS {
 			set hpos [ expr $hmargin + $corrX ]
 		}
-		topleftW { 
+		topleftW {
 			set hpos [ expr [ winfo x $par ] + $corrX + 10 ]
 		}
-		overM { 
+		overM {
 			set hpos [ expr [ winfo x . ] + $corrX ]
 		}
-		coverW { 
+		coverW {
 			set hpos [ expr [ winfo x $par ] + $corrX ]
 		}
 		bottomrightS {
@@ -988,11 +956,11 @@ proc getx { w pos } {
 		righttoMshift {
 			set hpos [ expr [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] - 2 * $bordsize + $shiftW ]
 		}
-		default { 
+		default {
 			set hpos [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
 		}
 	}
-		
+
 	if [ primdisp $par ] {
 		if { $hpos < $corrX } {
 			return $corrX
@@ -1001,7 +969,7 @@ proc getx { w pos } {
 			return [ expr [ winfo x $par ] + $corrX + $hmargin + 2 * $bordsize ]
 		}
 	}
-	
+
 	return $hpos
 }
 
@@ -1012,29 +980,29 @@ proc getx { w pos } {
 #************************************************
 proc gety { w pos } {
 	global corrY vmargin tbarsize shiftW
-	
+
 	set par [ winfo parent $w ]
-	if { $par == "" } { 
-		set par . 
+	if { $par == "" } {
+		set par .
 	}
-	
+
 	switch $pos {
-		centerS { 
+		centerS {
 			set vpos [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
 		}
-		centerW { 
+		centerW {
 			set vpos [ expr [ winfo y $par ] + $corrY + [ winfo height $par ] / 2  - [ winfo reqheight $w ] / 2 ]
 		}
-		topleftS { 
+		topleftS {
 			set vpos [ expr $vmargin + $corrY ]
 		}
-		topleftW { 
+		topleftW {
 			set vpos [ expr [ winfo y $par ] + $corrY + 30 ]
 		}
-		overM { 
+		overM {
 			set vpos [ expr [ winfo y . ] + $corrY ]
 		}
-		coverW { 
+		coverW {
 			set vpos [ expr [ winfo y $par ] + $corrY ]
 		}
 		bottomrightS {
@@ -1049,11 +1017,11 @@ proc gety { w pos } {
 		righttoMshift {
 			set vpos [ expr [ winfo y . ] + $corrY + $shiftW ]
 		}
-		default { 
+		default {
 			set vpos [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
 		}
-	} 
-		
+	}
+
 	if [ primdisp $par ] {
 		if { $vpos < $corrY } {
 			return $corrY
@@ -1062,7 +1030,7 @@ proc gety { w pos } {
 			return [ expr [ winfo y $par ] + $corrY ]
 		}
 	}
-	
+
 	return $vpos
 }
 
@@ -1405,9 +1373,9 @@ proc disable_window { w m { args "" } } {
 			}
 		}
 	}
-	update 
+	update
 }
-	
+
 
 #************************************************
 # ENABLE_WINDOW
@@ -1429,7 +1397,7 @@ proc enable_window { w m { args "" } } {
 	}
 	update
 }
-	
+
 
 #************************************************
 # WRITE_ANY
@@ -1467,29 +1435,29 @@ proc insert_series { lbox ser { pos end } } {
 	global varcolor lvarcolor funcolor lfuncolor
 
 	set orig [ lindex [ split [ lindex [ split $ser ] 1 ] _ ] 0 ]
-	
+
 	switch $orig {
 		U {
-			set color $varcolor 
+			set color $varcolor
 		}
-		
+
 		C {
-			set color $lvarcolor 
+			set color $lvarcolor
 		}
-		
-		F { 
-			set color $funcolor 
+
+		F {
+			set color $funcolor
 		}
-		
+
 		MC {
-			set color $lfuncolor 
+			set color $lfuncolor
 		}
-		
+
 		default {
-			set color black 
+			set color black
 		}
 	}
-	
+
 	$lbox insert $pos "$ser"
 	$lbox itemconfigure $pos -fg $color
 }
@@ -1499,9 +1467,9 @@ proc insert_series { lbox ser { pos end } } {
 # SETTAB
 # Procedure to adjust tab size according to font type and size
 #************************************************
-proc settab { w size font } { 
+proc settab { w size font } {
 	set tabwidth "[ expr { $size * [ font measure "$font" 0 ] } ] left"
-	$w conf -font "$font" -tabs $tabwidth -tabstyle wordprocessor 
+	$w conf -font "$font" -tabs $tabwidth -tabstyle wordprocessor
 }
 
 
@@ -1509,11 +1477,11 @@ proc settab { w size font } {
 # SETWRAP
 # Procedure to adjust text wrapping
 #************************************************
-proc setwrap { w wrap } { 
-	if { $wrap == 1 } { 
-		$w conf -wrap word 
-	} else { 
-		$w conf -wrap none } 
+proc setwrap { w wrap } {
+	if { $wrap == 1 } {
+		$w conf -wrap word
+	} else {
+		$w conf -wrap none }
 }
 
 
@@ -1522,26 +1490,24 @@ proc setwrap { w wrap } {
 # bind the mouse wheel to the y scrollbar
 #************************************************
 proc mouse_wheel { w } {
-	global tcl_platform sfmwheel winmwscale
-	
-	if [ string equal $tcl_platform(platform) windows ] {
+	global CurPlatform sfmwheel winmwscale
+
+	if [ string equal $CurPlatform windows ] {
 		bind $w <MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ]; if { $winmwscale <= 0 } { set winmwscale 1 } }; %W yview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
 		bind $w <Shift-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ]; if { $winmwscale <= 0 } { set winmwscale 1 } }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
 		bind $w <Control-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ]; if { $winmwscale <= 0 } { set winmwscale 1 } }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
 		bind $w <Alt-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ]; if { $winmwscale <= 0 } { set winmwscale 1 } }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
-	} {
-		if [ string equal $tcl_platform(os) Darwin ] {
-			bind $w <MouseWheel> { %W yview scroll [ expr -1 * $sfmwheel * %D ] units }
-			bind $w <Shift-MouseWheel> { %W xview scroll [ expr -1 * $sfmwheel * %D ] units }
-			bind $w <Control-MouseWheel> { %W xview scroll [ expr -1 * $sfmwheel * %D ] units }
-		} {
-			bind $w <4> { %W yview scroll [ expr -1 * $sfmwheel ] units }
-			bind $w <5> { %W yview scroll $sfmwheel units }
-			bind $w <Shift-4> { %W xview scroll [ expr -1 * $sfmwheel ] units }
-			bind $w <Shift-5> { %W xview scroll $sfmwheel units }
-			bind $w <Control-4> { %W xview scroll [ expr -1 * $sfmwheel ] units }
-			bind $w <Control-5> { %W xview scroll $sfmwheel units }
-		}
+	} elseif [ string equal $CurPlatform mac ] {
+		bind $w <MouseWheel> { %W yview scroll [ expr -1 * $sfmwheel * %D ] units }
+		bind $w <Shift-MouseWheel> { %W xview scroll [ expr -1 * $sfmwheel * %D ] units }
+		bind $w <Control-MouseWheel> { %W xview scroll [ expr -1 * $sfmwheel * %D ] units }
+	} else {
+		bind $w <4> { %W yview scroll [ expr -1 * $sfmwheel ] units }
+		bind $w <5> { %W yview scroll $sfmwheel units }
+		bind $w <Shift-4> { %W xview scroll [ expr -1 * $sfmwheel ] units }
+		bind $w <Shift-5> { %W xview scroll $sfmwheel units }
+		bind $w <Control-4> { %W xview scroll [ expr -1 * $sfmwheel ] units }
+		bind $w <Control-5> { %W xview scroll $sfmwheel units }
 	}
 }
 
@@ -1552,13 +1518,13 @@ proc mouse_wheel { w } {
 #************************************************
 proc move_canvas { c x y { x0 -1 } { y0 -1 } } {
 	global hereX hereY
-	
+
 	if { $x0 > 0 } { set hereX $x0 }
 	if { $y0 > 0 } { set hereY $y0 }
-	
+
 	if { [ info exists hereX ] && [ info exists hereY ] } {
 		$c move all [ expr { $x - $hereX } ] [ expr { $y - $hereY } ]
-    }   
+    }
     set hereX $x
     set hereY $y
 }
@@ -1571,25 +1537,25 @@ proc move_canvas { c x y { x0 -1 } { y0 -1 } } {
 proc scale_canvas { c type ratio } {
 	global vsizeP tbordsizeP bbordsizeP maxzoomP minzoomP
 	upvar $ratio finalRatio
-	
+
     if { $type == "+" } {
         set ratio [ expr sqrt( 2.0 ) ]
     } else {
         set ratio [ expr 1.0 / sqrt( 2.0 ) ]
-    }  
-	
+    }
+
 	set sro [ $c cget -scrollregion ]
-	
+
 	set newH [ expr ( [ lindex $sro 3 ] - [ lindex $sro 1 ] ) * $ratio ]
 	set origH [ expr $vsizeP + $tbordsizeP + $bbordsizeP ]
 	set newRatio [ expr $newH / $origH ]
-	
+
 	if { $newRatio < $maxzoomP && $newRatio > $minzoomP } {
 		set srn [ list ]
 		for { set i 0 } { $i < 4 } { incr i } {
 			lappend srn [ expr round( [ lindex $sro $i ] * $ratio ) ]
 		}
-		$c configure -scrollregion $srn 
+		$c configure -scrollregion $srn
 		$c scale all 0 0 $ratio $ratio
 		set finalRatio $newRatio
 	}
@@ -1601,21 +1567,21 @@ proc scale_canvas { c type ratio } {
 # Create the canvas plotting axes and the optional grid
 #************************************************
 proc canvas_axis { c type grid hticks { y2 0 } } {
-	global hsizeP vsizeP hbordsizeP tbordsizeP vticksP axcolorP grcolorP 
-	
+	global hsizeP vsizeP hbordsizeP tbordsizeP vticksP axcolorP grcolorP
+
 	# x-axis, ticks & x-grid
 	$c create line $hbordsizeP $tbordsizeP [ expr $hbordsizeP + $hsizeP ] $tbordsizeP -width 1 -fill $axcolorP -tag p
 	$c create line $hbordsizeP [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
-	
+
 	if { $type == 0 || $type == 4 || $type == 5 } {
 		for { set i 0 } { $i < [ expr $hticks + 2 ] } { incr i } {
 			if { $grid && $i > 0 && $i < [ expr $hticks + 1 ] } {
-				$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + 1 ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP - 1 ] -fill $grcolorP -width 1 -tags {g p} 
+				$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + 1 ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP - 1 ] -fill $grcolorP -width 1 -tags {g p}
 			}
 			$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP + 5 ] -fill $axcolorP -width 1 -tags p
 		}
 	}
-	
+
 	# y-axis, ticks & y-grid
 	$c create line $hbordsizeP $tbordsizeP $hbordsizeP [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
 	$c create line [ expr $hbordsizeP + $hsizeP ]  $tbordsizeP [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
@@ -1640,7 +1606,7 @@ proc plot_bars { c x1 y1 x2 y2 { tags "" } { fill white } { width 1 } } {
 
 	set size [ expr min( [ llength $x1 ], [ llength $y1 ], [ llength $x2 ], [ llength $y2 ]  ) ]
 	lappend tags bar series
-	
+
 	for { set i 0 } { $i < $size } { incr i } {
 		# valid point?
 		set x1i [ lindex $x1 $i ]
@@ -1700,7 +1666,7 @@ proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
 			}
 		}
 	}
-	
+
 	# plot last segment, if any
 	if { [ llength $xy ] >= 4 } {
 		$c create line $xy -width $width -fill $fill -tags $tags
@@ -1728,7 +1694,7 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 	lappend tagsdots dots series
 
 	set size [ expr min( [ llength $x ], [ llength $y ] ) ]
-	
+
 	for { set i 0 } { $i < $size } { incr i } {
 		set xi [ lindex $x $i ]
 		set yi [ lindex $y $i ]
@@ -1766,7 +1732,7 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 #************************************************
 # GET_SERIES
 # Set a byte array to hold data series that can be accessed from C
-# Based on code by Arjen Markus (http://wiki.tcl.tk/4179) 
+# Based on code by Arjen Markus (http://wiki.tcl.tk/4179)
 #************************************************
 proc get_series { size data } {
 	upvar $data _data
@@ -1793,9 +1759,10 @@ proc get_series { size data } {
 # Generic routine to convert a list into a bytearray
 #************************************************
 proc listToByteArray { valuetype list { elemsize 0 } } {
-
+	global tcl_platform
+	
 	if { $valuetype == "i" || $valuetype == "I" } {
-		if { $::tcl_platform(byteOrder) == "littleEndian" } {
+		if [ string equal $tcl_platform(byteOrder) littleEndian ] {
 			set valuetype "i"
 		} {
 			set valuetype "I"
@@ -1816,7 +1783,7 @@ proc listToByteArray { valuetype list { elemsize 0 } } {
 			error "Unknown value type: $valuetype"
 		}
 	}
-	
+
 	return $result
 }
 
@@ -1831,9 +1798,10 @@ interp alias { } doublesToByteArray { } listToByteArray d
 # Generic routine to convert a bytearray into a list
 #************************************************
 proc byteArrayToList { valuetype bytearray { elemsize 0 } } {
+	global tcl_platform
 
 	if { $valuetype == "i" || $valuetype == "I" } {
-		if { $::tcl_platform(byteOrder) == "littleEndian" } {
+		if [ string equal $tcl_platform(byteOrder) littleEndian ] {
 			set valuetype "i"
 		} else {
 			set valuetype "I"
@@ -1863,7 +1831,7 @@ proc byteArrayToList { valuetype bytearray { elemsize 0 } } {
 			error "Unknown value type: $valuetype"
 		}
 	}
-	
+
 	return $result
 }
 
@@ -1878,7 +1846,7 @@ interp alias { } byteArrayToDoubles { } byteArrayToList d
 # Initialize Tk canvas colors
 #************************************************
 # list of all Tk named colors
-set allcolors { 
+set allcolors {
 	snow {ghost white} {white smoke} gainsboro {floral white}
 	{old lace} linen {antique white} {papaya whip} {blanched almond}
 	bisque {peach puff} {navajo white} moccasin cornsilk ivory
@@ -1949,23 +1917,23 @@ set allcolors {
 	plum2 plum3 plum4 MediumOrchid1 MediumOrchid2 MediumOrchid3
 	MediumOrchid4 DarkOrchid1 DarkOrchid2 DarkOrchid3 DarkOrchid4
 	purple1 purple2 purple3 purple4 MediumPurple1 MediumPurple2
-	MediumPurple3 MediumPurple4 thistle1 thistle2 thistle3 thistle4 
+	MediumPurple3 MediumPurple4 thistle1 thistle2 thistle3 thistle4
 }
 
 proc init_canvas_colors { } {
 	global defcolors allcolors
 	set unusedcolors [ lsort $allcolors ]
-	
+
 	# load default colors
 	for { set i 0 } { $i < [ llength $defcolors ] } { incr i } {
 		set color [ lindex $defcolors $i ]
 		set ::c$i $color
-		
+
 		# remove from list
 		set pos [ lsearch -sorted $unusedcolors $color ]
 		set unusedcolors [ lreplace $unusedcolors $pos $pos ]
 	}
-	
+
 	# load remaining colors
 	set n [ expr $i + [ llength $unusedcolors ] ]
 	for { } { $i < $n } { incr i } {
@@ -1974,7 +1942,7 @@ proc init_canvas_colors { } {
 		set j [ expr min( int( rand( ) * $m ), $m - 1 ) ]
 		set color [ lindex $unusedcolors $j ]
 		set ::c$i $color
-		
+
 		# remove from list
 		set pos [ lsearch -sorted $unusedcolors $color ]
 		set unusedcolors [ lreplace $unusedcolors $pos $pos ]
@@ -1987,7 +1955,7 @@ proc init_canvas_colors { } {
 		}
 	}
 	set ::c$i white
-	
+
 	# fill the colors 1000-1099 with gray shades
 	for { set j 0 } { $j < 10 } { incr j } {
 		for { set k 0 } { $k < 10 } { incr k; incr i } {
@@ -1997,7 +1965,7 @@ proc init_canvas_colors { } {
 				} {
 					set ::c$i gray$k$j
 				}
-			}			
+			}
 		}
 	}
 }
@@ -2009,16 +1977,16 @@ proc init_canvas_colors { } {
 #************************************************
 proc update_title_bar { } {
 	global tosave before filename
-	
-	if [ winfo exists .f.t.t ] { 
-		set after [ .f.t.t get 1.0 end ] 
-	} else { 
-		set after $before 
+
+	if [ winfo exists .f.t.t ] {
+		set after [ .f.t.t get 1.0 end ]
+	} else {
+		set after $before
 	}
-	if [ string compare $before $after ] { 
+	if [ string compare $before $after ] {
 		set tosave 1
-		wm title . "*$filename - LMM" 
-	} else { 
+		wm title . "*$filename - LMM"
+	} else {
 		set tosave 0
 		wm title . "  $filename - LMM"
 	}
@@ -2040,7 +2008,7 @@ proc round_N { float N } {
 #************************************************
 proc current_date { } {
 	global DATE_FMT
-	
+
 	return [ clock format [ clock seconds ] -format $DATE_FMT ]
 }
 
@@ -2050,30 +2018,28 @@ proc current_date { } {
 # Open gnuplot window
 #************************************************
 proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
-	global tcl_platform sysTerm
-	
-	if [ string equal $script "" ] { 
-		set args "" 
+	global CurPlatform sysTerm
+
+	if [ string equal $script "" ] {
+		set args ""
 	} else {
 		set args "-p $script"
 	}
-	
-	if [ string equal $tcl_platform(platform) unix ] {
-		if [ string equal $tcl_platform(os) Darwin ] {
-			if { $wait } {
-				set ret [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $script; exit\"" } ]
-			} else {
-				set ret [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $args; exit\"" & } ]
-			}
+
+	if [ string equal $CurPlatform mac ] {
+		if { $wait } {
+			set ret [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $script; exit\"" } ]
 		} else {
-			if { $wait } {
-				set ret [ catch { exec $sysTerm -e "gnuplot $script; exit" } ]
-			} else {
-				set ret [ catch { exec $sysTerm -e "gnuplot $args; exit" & } ]
-			}
+			set ret [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $args; exit\"" & } ]
+		}
+	} elseif [ string equal $CurPlatform linux ] {
+		if { $wait } {
+			set ret [ catch { exec $sysTerm -e "gnuplot $script; exit" } ]
+		} else {
+			set ret [ catch { exec $sysTerm -e "gnuplot $args; exit" & } ]
 		}
 	} else {
-		if [ string equal $script "" ] { 
+		if [ string equal $script "" ] {
 			set ret [ catch { exec wgnuplot.exe & } ]
 		} else {
 			if { $wait } {
@@ -2085,12 +2051,12 @@ proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
 	}
 
 	if { $ret != 0 } {
-		if [ string equal $errmsg "" ] { 
-			set errmsg "Please check if Gnuplot is installed and set up properly." 
+		if [ string equal $errmsg "" ] {
+			set errmsg "Please check if Gnuplot is installed and set up properly."
 		}
-		
-		tk_messageBox -parent $par -type ok -icon error -title Error -message "Gnuplot failed to launch" -detail "Gnuplot returned error '$ret'.\n$errmsg" 
-	}			
+
+		tk_messageBox -parent $par -type ok -icon error -title Error -message "Gnuplot failed to launch" -detail "Gnuplot returned error '$ret'.\n$errmsg"
+	}
 
 	return $ret
 }
@@ -2102,7 +2068,7 @@ proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
 #************************************************
 proc tk_console { } {
 	global conWnd
-	
+
 	if { ! $conWnd } {
 		return
 	}
@@ -2111,8 +2077,8 @@ proc tk_console { } {
 		tkcon::Init
 		tkcon title "Tcl/Tk Debug Console"
 	}
-	
-	tkcon show 
+
+	tkcon show
 }
 
 
@@ -2146,52 +2112,52 @@ if { $conWnd } {
 #************************************************
 if $testWnd {
 	newtop .tst "LSD Coordinates Test Window" { destroytop .tst } ""
-	
+
 	frame .tst.xy
 	label .tst.xy.l1 -anchor e -text "X:"
 	label .tst.xy.v1 -anchor w -fg red
 	label .tst.xy.l2 -anchor e -text "   Y:"
 	label .tst.xy.v2 -anchor w -fg red
 	pack .tst.xy.l1 .tst.xy.v1 .tst.xy.l2 .tst.xy.v2 -side left -padx 2 -pady 2
-	
+
 	frame .tst.r
 	label .tst.r.l1 -anchor e -text "rootx:"
 	label .tst.r.v1 -anchor w -fg red
 	label .tst.r.l2 -anchor e -text "   rooty:"
 	label .tst.r.v2 -anchor w -fg red
 	pack .tst.r.l1 .tst.r.v1 .tst.r.l2 .tst.r.v2 -side left -padx 2 -pady 2
-	
+
 	frame .tst.v
 	label .tst.v.l1 -anchor e -text "vrootx:"
 	label .tst.v.v1 -anchor w -fg red
 	label .tst.v.l2 -anchor e -text "   vrooty:"
 	label .tst.v.v2 -anchor w -fg red
 	pack .tst.v.l1 .tst.v.v1 .tst.v.l2 .tst.v.v2 -side left -padx 2 -pady 2
-	
+
 	frame .tst.s
 	label .tst.s.l1 -anchor e -text "screenwidth:"
 	label .tst.s.v1 -anchor w -fg red
 	label .tst.s.l2 -anchor e -text "   screenheight:"
 	label .tst.s.v2 -anchor w -fg red
 	pack .tst.s.l1 .tst.s.v1 .tst.s.l2 .tst.s.v2 -side left -padx 2 -pady 2
-	
+
 	frame .tst.t
 	label .tst.t.l1 -anchor e -text "vrootwidth:"
 	label .tst.t.v1 -anchor w -fg red
 	label .tst.t.l2 -anchor e -text "   vrootheight:"
 	label .tst.t.v2 -anchor w -fg red
 	pack .tst.t.l1 .tst.t.v1 .tst.t.l2 .tst.t.v2 -side left -padx 2 -pady 2
-	
+
 	frame .tst.m
 	label .tst.m.l1 -anchor e -text "maxwidth:"
 	label .tst.m.v1 -anchor w -fg red
 	label .tst.m.l2 -anchor e -text "   maxheight:"
 	label .tst.m.v2 -anchor w -fg red
 	pack .tst.m.l1 .tst.m.v1 .tst.m.l2 .tst.m.v2 -side left -padx 2 -pady 2
-	
+
 	pack .tst.xy .tst.r .tst.v .tst.s .tst.t .tst.m
-	
-	bind .tst <Motion> { 
+
+	bind .tst <Motion> {
 		.tst.xy.v1 configure -text %X
 		.tst.xy.v2 configure -text %Y
 		.tst.r.v1 configure -text [ winfo rootx .tst ]
@@ -2205,6 +2171,6 @@ if $testWnd {
 		.tst.m.v1 configure -text [ lindex [ wm maxsize .tst ] 0 ]
 		.tst.m.v2 configure -text [ lindex [ wm maxsize .tst ] 1 ]
 	}
-	
+
 	showtop .tst current yes yes no
 }

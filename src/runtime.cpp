@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 7.3 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -191,7 +191,7 @@ void init_plot( int num, int id_sim )
 
 	// controls
 	cmd( "checkbutton $activeplot.fond.shift -text Scroll -variable scrollB -command { set_c_var done_in 8 }" );	
-	cmd( "if { $tcl_platform(platform) == \"windows\" } { set goWid 7 } { set goWid 5 }" );
+	cmd( "if [ string equal $CurPlatform windows ] { set goWid 7 } { set goWid 5 }" );
 	cmd( "button $activeplot.fond.go -width $goWid -text Center -command { set_c_var done_in 7 }" );
 
 	cmd( "$activeplot.fond create window [ expr $sclhsizeR / 2 ] [ expr $botvsizeR / 4 - 5 ] -window $activeplot.fond.shift" );

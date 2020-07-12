@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 7.3 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -1226,11 +1226,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 		for ( i = 0; i < k; ++i )
 			perm [ i ] = i;
 		
-#ifdef CPP11
 		shuffle( & perm[ 0 ], & perm[ k ], mt19937( seed ) );
-#else
-		random_shuffle( & perm[ 0 ], & perm[ k ], uniform_int_0 );	// deprecated
-#endif
 
 		P = mat_copy_scal( P, k, k, 0 );
 		for ( i = 0; i < k; ++i )

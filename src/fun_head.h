@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 7.3 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -26,7 +26,7 @@ using namespace Eigen;
 #include "check.h"										// LSD macro check support code
 
 // create and set fast lookup flag
-#if ! defined FAST_LOOKUP || ! defined CPP11
+#if ! defined FAST_LOOKUP
 bool fast_lookup = false;
 void init_map( ) { };
 #else
@@ -137,8 +137,8 @@ bool no_ptr_chk = true;
 #define DEBUG_CODE
 #endif
 
-// handle fast equation look-up if enabled and C++11 is available
-#if ! defined FAST_LOOKUP || ! defined CPP11
+// handle fast equation look-up if enabled
+#if ! defined FAST_LOOKUP
 // use standard chain method for look-up
 #define MODELBEGIN \
 	double variable::fun( object *caller ) \
