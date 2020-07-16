@@ -179,12 +179,12 @@ proc chs_mdl { } {
 # CHECK_SYS_OPT
 # Check (best guess) if system option configuration is valid for the platform
 #************************************************
-set winYes [ list ".exe" "86" "x86_64-w64-mingw32-g++" "-ltcl" "-ltk" "-lz" "-mthreads" "-mwindows" ]
+set winYes [ list ".exe" "86" "WRC" "windres" "x86_64-w64-mingw32-g++" "-ltcl" "-ltk" "-lz" "-mthreads" "-mwindows" ]
 set winNo  [ list "-framework" "-lpthread" ]
 set linuxYes [ list "8.6" "g++" "-ltcl" "-ltk" "-lz" "-lpthread" ]
-set linuxNo  [ list ".exe" "x86_64-w64-mingw32-g++" "-framework" "-mthreads" "-mwindows" ]
+set linuxNo  [ list ".exe" "WRC" "windres" "x86_64-w64-mingw32-g++" "-framework" "-mthreads" "-mwindows" ]
 set macYes [ list "g++" "-framework" "-lz" "-lpthread" "-DMAC_PKG" ]
-set macNo  [ list ".exe" "/gnu/" "x86_64-w64-mingw32-g++" "-mthreads" "-mwindows" ]
+set macNo  [ list ".exe" "/gnu/" "WRC" "windres" "x86_64-w64-mingw32-g++" "-mthreads" "-mwindows" ]
 
 proc check_sys_opt { } {
 	global RootLsd LsdSrc CurPlatform winYes winNo winYes winNo linuxYes linuxNo macYes macNo SYSTEM_OPTIONS

@@ -315,27 +315,26 @@ check_option_files( true );
 // load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 choice = 0;
 
-// load native Tk windows defaults
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/defaults.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/defaults.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0100, 0x01 );
-
 // load native Tk procedures for windows management
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0200, 0x02 );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } err0x01 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0100, 0x01 );
 
 // load native Tcl procedures for external files handling
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0400, 0x04 );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } err0x02 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0200, 0x02 );
 
 // load additional native Tcl procedures for external files handling
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0800, 0x08 );
-
-// load module to improve to improve mouse selection
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/dblclick.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/dblclick.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x1000, 0x10 );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } err0x04 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0400, 0x04 );
 
 // load the model browser module
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/showmodel.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/showmodel.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x2000, 0x20 );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/showmodel.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/showmodel.tcl\" } err0x08 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0800, 0x08 );
 
 if ( choice != 0 )
 {
-	log_tcl_error( "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
+	char *err0x01 = ( char * ) Tcl_GetVar( inter, "err0x01", 0 );
+	char *err0x02 = ( char * ) Tcl_GetVar( inter, "err0x02", 0 );
+	char *err0x04 = ( char * ) Tcl_GetVar( inter, "err0x04", 0 );
+	char *err0x08 = ( char * ) Tcl_GetVar( inter, "err0x08", 0 );
+	snprintf( msg, TCL_BUFF_STR - 1, "Required Tcl/Tk source file(s) missing or corrupted (0x%04x), check your installation and reinstall LSD if the problem persists\n\n0x01: %s\n\n0x02: %s\n\n0x04: %s\n\n0x08: %s", choice, err0x01, err0x02, err0x04, err0x08 );
+	log_tcl_error( "Source files check failed", msg );
 	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
 	return 10 + choice;
 }
@@ -5005,7 +5004,7 @@ if ( choice == 47 )
 
 	cmd( "frame .l.t" );
 	cmd( "scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-	cmd( "text .l.t.text -undo 1 -wrap word -font [ list \"$DefaultFont\" $small_character normal ] -width 70 -height 20 -yscrollcommand \".l.t.yscroll set\"" );
+	cmd( "text .l.t.text -undo 1 -wrap word -font [ list \"$DefaultFont\" $small_character normal ] -width 70 -height 22 -yscrollcommand \".l.t.yscroll set\"" );
 	cmd( ".l.t.text insert end $a" );
 	cmd( "pack .l.t.yscroll -side right -fill y" );
 	cmd( "pack .l.t.text" );
@@ -6286,11 +6285,6 @@ void update_model_info( void )
  *********************************/
 void make_makefile( bool nw )
 {
-	char suffix[ 3 ] = "";
-
-	if ( nw )
-		strcpy( suffix, "NW" );
-
 	check_option_files( );
 
 	cmd( "set f [ open \"$modelDir/$MODEL_OPTIONS\" r ]" );
@@ -6301,19 +6295,13 @@ void make_makefile( bool nw )
 	cmd( "set d [ read -nonewline $f ]" );
 	cmd( "close $f" );
 
-	if ( nw )
-		cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile_base%s.txt\" r ]", suffix );
-	else
-		cmd( "if [ string equal $CurPlatform mac ] { \
-				set f [ open \"$RootLsd/$LsdSrc/makefile_base_mac.txt\" r ] \
-			} { \
-				set f [ open \"$RootLsd/$LsdSrc/makefile_base.txt\" r ] \
-			}" );
+	cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile_%s.txt\" r ]", nw ? "NW" : ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 ) );
+	
 	cmd( "set b [ read -nonewline $f ]" );
 	cmd( "close $f" );
 
-	cmd( "set c \"# Model compilation options\\n$a\\n\\n# System compilation options\\n$d\\nLSDROOT=$RootLsd\\n\\n# Body of makefile%s (from src/makefile_base%s.txt)\\n$b\"", suffix, suffix );
-	cmd( "set f [ open \"$modelDir/makefile%s\" w ]", suffix );
+	cmd( "set c \"# Model compilation options\\n$a\\n\\n# System compilation options\\n$d\\nLSDROOT=$RootLsd\\n\\n# Body of makefile%s (from src/makefile_%s.txt)\\n$b\"", nw ? "NW" : "", nw ? "NW" : ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 ) );
+	cmd( "set f [ open \"$modelDir/makefile%s\" w ]", nw ? "NW" : "" );
 	cmd( "puts -nonewline $f $c" );
 	cmd( "close $f" );
 }

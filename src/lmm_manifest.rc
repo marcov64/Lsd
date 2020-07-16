@@ -1,0 +1,46 @@
+/*************************************************************
+
+	LSD 7.3 - December 2020
+	written by Marco Valente, Universita' dell'Aquila
+	and by Marcelo Pereira, University of Campinas
+
+	Copyright Marco Valente and Marcelo Pereira
+	LSD is distributed under the GNU General Public License
+	
+ *************************************************************/
+
+/**************************************************************
+ LMM_MANIFEST.RC
+ Windows resource file for LMM
+**************************************************************/
+
+#include <winuser.h>
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "lmm.exe.manifest"
+
+101 ICON "icons/lmm.ico"
+
+1 VERSIONINFO
+FILEVERSION     7,3,0,0
+PRODUCTVERSION  7,3,0,0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      VALUE "CompanyName", "Marco Valente & Marcelo C. Pereira"
+      VALUE "FileDescription", "LSD Model Manager (LMM)"
+      VALUE "FileVersion", "7.3"
+      VALUE "InternalName", "LMM"
+      VALUE "LegalCopyright", "Copyright Marco Valente and Marcelo C. Pereira"
+      VALUE "OriginalFilename", "lmm.exe"
+      VALUE "ProductName", "LSD"
+      VALUE "ProductVersion", "7.3"
+    END
+  END
+
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END

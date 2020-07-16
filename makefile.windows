@@ -23,6 +23,7 @@
 #    "modman.cpp" in directory "src".
 #**************************************************************
 
+WRC=windres
 CC=x86_64-w64-mingw32-g++
 TARGET=lmm
 EXT=.exe
@@ -48,12 +49,17 @@ SRC_DIR=$(LSDROOT)/$(SRC)/
 # Do not modify
 INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(PATH_HEADER) -I$(LSDROOT)/src
 
-$(TARGET)$(EXT): $(SRC_DIR)modman.o
-	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o -L$(PATH_TCL_LIB) -ltcl$(TCL_VERSION) -L$(PATH_TK_LIB) -ltk$(TCL_VERSION) -L$(PATH_LIB) $(LIBS) -o $(TARGET)
+$(TARGET)$(EXT): $(SRC_DIR)modman.o $(SRC_DIR)lmm_manifest.o
+	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)lmm_manifest.o \
+	-L$(PATH_TCL_LIB) -ltcl$(TCL_VERSION) -L$(PATH_TK_LIB) -ltk$(TCL_VERSION) \
+	-L$(PATH_LIB) $(LIBS) -o $(TARGET)
 
 $(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp 
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLUDE)
 
+$(SRC_DIR)lmm_manifest.o: $(SRC_DIR)lmm_manifest.rc $(SRC_DIR)lmm.exe.manifest
+	$(WRC) -i $(SRC_DIR)lmm_manifest.rc -o $(SRC_DIR)lmm_manifest.o $(INCLUDE)
+
 # Clean object files for building for another distribution
 clean:
-	$(RM) $(SRC_DIR)modman.o
+	$(RM) $(SRC_DIR)modman.o $(SRC_DIR)lmm_manifest.o

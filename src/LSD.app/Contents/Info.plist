@@ -36,7 +36,7 @@
 	<key>CFBundleExecutable</key>
 	<string>LSD</string>
 	<key>CFBundleGetInfoString</key>
-	<string>LSD Browser 7.2,
+	<string>LSD Browser 7.3,
 	Copyright © Marco Valente,
 	Copyright © Marcelo C. Pereira</string>
 	<key>CFBundleIconFile</key>
@@ -54,11 +54,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>7.2</string>
+	<string>7.3</string>
 	<key>CFBundleSignature</key>
 	<string>LSD</string>
 	<key>CFBundleVersion</key>
-	<string>7.2</string>
+	<string>7.3</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.10.0</string>
 	<key>LSRequiresCarbon</key>
