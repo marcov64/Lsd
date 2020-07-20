@@ -225,12 +225,12 @@ int browse( object *r, int *choice )
 					if ( cv->num_lag == 0 )
 					{
 						cmd( ".l.v.c.var_name insert end \"%s (V$varFlags)\"", cv->label );
-						cmd( ".l.v.c.var_name itemconf $app -fg $varcolor" );
+						cmd( ".l.v.c.var_name itemconf $app -fg $colorsTheme(var)" );
 					}
 					else
 					{
 						cmd( ".l.v.c.var_name insert end \"%s (V_%d$varFlags)\"", cv->label, cv->num_lag );
-						cmd( ".l.v.c.var_name itemconf $app -fg $lvarcolor" );
+						cmd( ".l.v.c.var_name itemconf $app -fg $colorsTheme(lvar)" );
 					}
 				}
 				
@@ -245,12 +245,12 @@ int browse( object *r, int *choice )
 					if ( cv->num_lag == 0 )
 					{
 						cmd( " .l.v.c.var_name insert end \"%s (F$varFlags)\"", cv->label );
-						cmd( ".l.v.c.var_name itemconf $app -fg $funcolor" );
+						cmd( ".l.v.c.var_name itemconf $app -fg $colorsTheme(fun)" );
 					}
 					else
 					{
 						cmd( ".l.v.c.var_name insert end \"%s (F_%d$varFlags)\"", cv->label, cv->num_lag );
-						cmd( ".l.v.c.var_name itemconf $app -fg $lfuncolor" );
+						cmd( ".l.v.c.var_name itemconf $app -fg $colorsTheme(lfun)" );
 					}
 				}
 
@@ -540,7 +540,7 @@ int browse( object *r, int *choice )
 				}
 				
 				cmd( ".l.s.c.son_name insert end \"%s (#%d%s)\"", cb->blabel, num, done ? "" : "-" );
-				cmd( ".l.s.c.son_name itemconf $app -fg $objcolor" );
+				cmd( ".l.s.c.son_name itemconf $app -fg $colorsTheme(obj)" );
 				cmd( "incr app" );
 			}
 		}	
@@ -4191,7 +4191,7 @@ case 53:
 	fclose( f );
 
 	read_eq_filename( lab );
-	cmd( "LsdTkDiff %s %s \"Equations on '%s'\" \"Equations on '%s.lsd'\"", lab, ch, equation_name, simul_name  );
+	cmd( "open_diff %s %s %s %s.lsd", lab, ch, equation_name, simul_name  );
 
 break;
 
@@ -4229,7 +4229,7 @@ case 82:
 
 	cmd( "file copy -force -- $res1 ext-cfg.tmp" );
 	cmd( "file copy -force -- %s int-cfg.tmp", struct_file );
-	cmd( "LsdTkDiff ext-cfg.tmp int-cfg.tmp \"Configuration on '%s'\" \"Configuration on '%s.lsd' (LOADED)\"", lab2, simul_name );
+	cmd( "open_diff ext-cfg.tmp int-cfg.tmp %s %s.lsd", lab2, simul_name );
 
 break;
 

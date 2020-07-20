@@ -98,7 +98,7 @@ used up to 88 options
 #define GROUP_INFO "groupinfo.txt"
 #define MODEL_INFO "modelinfo.txt"
 #define DESCRIPTION "description.txt"
-#define LMM_OPTIONS_NUM 15
+#define LMM_OPTIONS_NUM 16
 #define MODEL_INFO_NUM 9
 
 using namespace std;
@@ -136,8 +136,8 @@ int tosave = false;				// modified file flag
 int v_counter = 0; 				//counter of the v[ i ] variables inserted in the equations
 
 // constant string arrays
-const char *lmm_options[ LMM_OPTIONS_NUM ] = { "sysTerm", "HtmlBrowser", "fonttype", "wish", "LsdSrc", "dim_character", "tabsize", "wrap", "shigh", "autoHide", "showFileCmds", "LsdNew", "DbgExe", "restoreWin", "lmmGeom" };
-const char *lmm_defaults[ LMM_OPTIONS_NUM ] = { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", "$DefaultWish", "src", "$DefaultFontSize", "2", "1", "2", "0", "0", "Work", "$DefaultDbgExe", "1", "#" };
+const char *lmm_options[ LMM_OPTIONS_NUM ] = { "sysTerm", "HtmlBrowser", "fonttype", "wish", "LsdSrc", "dim_character", "tabsize", "wrap", "shigh", "autoHide", "showFileCmds", "LsdNew", "DbgExe", "restoreWin", "lmmGeom", "lsdTheme" };
+const char *lmm_defaults[ LMM_OPTIONS_NUM ] = { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", "$DefaultWish", "src", "$DefaultFontSize", "2", "1", "2", "0", "0", "Work", "$DefaultDbgExe", "1", "#", "$DefaultTheme" };
 const char *model_info[ MODEL_INFO_NUM ] = { "modelName", "modelVersion", "modelDate", "lsdGeom", "logGeom", "strGeom", "daGeom", "debGeom", "latGeom" };
 const char *model_defaults[ MODEL_INFO_NUM ] = { "(no name)", "1.0", "[ current_date ]", "#", "#", "#", "#", "#", "#" };
 const char *lsd_dir[ LSD_DIR_NUM ] = { "src", "gnu", "Manual", "LMM.app", "R", "lwi", "___" };
@@ -186,7 +186,7 @@ int main( int argn, char **argv )
 int ModManMain( int argn, char **argv )
 {
 bool found, recolor = false;
-int i, j, num, sourcefile = 0, macro = 1, recolor_all = 0;
+int i, j, num, sourcefile = 0, recolor_all = 0;
 char *s, str[ MAX_LINE_SIZE + 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], str2[ 5 * MAX_PATH_LENGTH ];
 FILE *f;
 
@@ -234,7 +234,7 @@ cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set cho
 if ( choice )
 {
 	log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
-	cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the \\src directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
+	cmd( "ttk::messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the \\src directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
 	return 4;
 }
 
@@ -294,7 +294,7 @@ if ( choice )
 	if ( choice )
 	{
 		log_tcl_error( "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
-		cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+		cmd( "ttk::messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 		return 5;
 	}
 	cmd( "set env(LSDROOT) $RootLsd" );
@@ -315,17 +315,17 @@ check_option_files( true );
 // load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 choice = 0;
 
-// load native Tk procedures for windows management
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } err0x01 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0100, 0x01 );
+// load native Tk procedures for graphical user interface management
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/gui.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/gui.tcl\" } err0x01 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0100, 0x01 );
 
 // load native Tcl procedures for external files handling
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } err0x02 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0200, 0x02 );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/file.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/file.tcl\" } err0x02 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0200, 0x02 );
 
-// load additional native Tcl procedures for external files handling
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } err0x04 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0400, 0x04 );
+// load native Tcl procedures for general utilities
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/util.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/util.tcl\" } err0x04 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0400, 0x04 );
 
-// load the model browser module
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/showmodel.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/showmodel.tcl\" } err0x08 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0800, 0x08 );
+// load the native model browser module
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/model.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/model.tcl\" } err0x08 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0800, 0x08 );
 
 if ( choice != 0 )
 {
@@ -335,7 +335,7 @@ if ( choice != 0 )
 	char *err0x08 = ( char * ) Tcl_GetVar( inter, "err0x08", 0 );
 	snprintf( msg, TCL_BUFF_STR - 1, "Required Tcl/Tk source file(s) missing or corrupted (0x%04x), check your installation and reinstall LSD if the problem persists\n\n0x01: %s\n\n0x02: %s\n\n0x04: %s\n\n0x08: %s", choice, err0x01, err0x02, err0x04, err0x08 );
 	log_tcl_error( "Source files check failed", msg );
-	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
+	cmd( "ttk::messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
 	return 10 + choice;
 }
 
@@ -351,7 +351,7 @@ else
 		else
 		{
 			log_tcl_error( "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
-			cmd( "tk_messageBox -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
+			cmd( "ttk::messageBox -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
 			return 10;
 		}
 
@@ -395,7 +395,6 @@ cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
 cmd( "set shigh_temp $shigh" );
 Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
 Tcl_LinkVar( inter, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
-Tcl_LinkVar( inter, "macro", ( char * ) &macro, TCL_LINK_BOOLEAN);
 Tcl_LinkVar( inter, "recolor_all", ( char * ) &recolor_all, TCL_LINK_BOOLEAN);
 Tcl_LinkVar( inter, "shigh", ( char * ) &shigh, TCL_LINK_INT );
 cmd( "set shigh $shigh_temp" );		// restore correct value
@@ -404,16 +403,17 @@ cmd( "set shigh $shigh_temp" );		// restore correct value
 cmd( "wm withdraw ." );
 cmd( "wm title . \"LSD Model Manager\"" );
 cmd( "wm protocol . WM_DELETE_WINDOW { set choice 1 }" );
-cmd( ". configure -menu .m" );		// define here to avoid re-dimensioning the window
+cmd( ". configure -menu .m -background $colorsTheme(bg)" );
 cmd( "icontop . lmm" );
 cmd( "sizetop .lmm" );
 cmd( "setglobkeys ." );				// set global keys for main window
+cmd( "setstyles" );					// set ttk custom style
 
 // main menu
-cmd( "menu .m -tearoff 0" );
+cmd( "ttk::menu .m -tearoff 0" );
 
 cmd( "set w .m.file" );
-cmd( "menu $w -tearoff 0" );
+cmd( "ttk::menu $w -tearoff 0" );
 cmd( ".m add cascade -label File -menu $w -underline 0" );
 cmd( "$w add command -label \"New Model/Group...\" -underline 0 -command { set choice 14 }" );	// entryconfig 0
 cmd( "$w add command -label \"Browse Models...\" -underline 0 -command { set choice 33 } -accelerator Ctrl+b" );	// entryconfig 1
@@ -462,7 +462,7 @@ cmd( "$w add separator" );
 cmd( "$w add command -label \"Quit\" -command { set choice 1 } -underline 0 -accelerator Ctrl+q" );
 
 cmd( "set w .m.edit" );
-cmd( "menu $w -tearoff 0" );
+cmd( "ttk::menu $w -tearoff 0" );
 cmd( ".m add cascade -label Edit -menu $w -underline 0" );
 
 // make menu the same as ctrl-z/y (more color friendly)
@@ -535,16 +535,16 @@ cmd( "$w add check -label \"Wrap/Unwrap\" -variable wrap -command { setwrap .f.t
 cmd( "$w add command -label \"Tab Size...\" -command { set choice 67 } -underline 7" );
 cmd( "$w add command -label \"Insert LSD Macro...\" -command { set choice 28 } -underline 0 -accelerator Ctrl+i" );
 
-cmd( "menu $w.color -tearoff 0" );
+cmd( "ttk::menu $w.color -tearoff 0" );
 cmd( "$w.color add radio -label \" Full\" -variable shigh -value 2 -command { set choice 64 } -underline 1 -accelerator \"Ctrl+;\"" );
 cmd( "$w.color add radio -label \" Partial\" -variable shigh -value 1 -command { set choice 65 } -underline 1 -accelerator Ctrl+," );
 cmd( "$w.color add radio -label \" None\" -variable shigh -value 0 -command { set choice 66 } -underline 1 -accelerator Ctrl+." );
 
 cmd( "set w .m.model" );
-cmd( "menu $w -tearoff 0" );
+cmd( "ttk::menu $w -tearoff 0" );
 cmd( ".m add cascade -label Model -menu $w -underline 0" );
 cmd( "$w add command -label \"Compile and Run...\" -state disabled -underline 0 -command { set choice 2 } -accelerator Ctrl+r" );	// entryconfig 0
-cmd( "$w add command -label \"Recompile\" -state disabled -underline 0 -command {set choice 6} -accelerator Ctrl+p" );	// entryconfig 1
+cmd( "$w add command -label \"Recompile\" -state disabled -underline 0 -command { set choice 6 } -accelerator Ctrl+p" );	// entryconfig 1
 cmd( "$w add command -label \"[ string toupper $DbgExe ] Debugger\" -state disabled -underline 0 -command { set choice 13 } -accelerator Ctrl+g" );	// entryconfig 2
 cmd( "$w add command -label \"Create 'No Window' Version\" -underline 8 -state disabled -command { set choice 62 }" );	// entryconfig 3
 cmd( "$w add command -label \"Model Info...\" -underline 6 -state disabled -command { set choice 44 }" );	// entryconfig 4
@@ -559,23 +559,12 @@ cmd( "$w add command -label \"Model Options...\" -underline 4 -state disabled -c
 cmd( "$w add command -label \"System Options...\" -underline 0 -command { set choice 47 }" );	// entryconfig 13
 cmd( "$w add separator" );	// entryconfig 14
 cmd( "$w add check -label \"Auto-hide LMM\" -variable autoHide -underline 0" );	// entryconfig 15
-cmd( "$w add cascade -label \"Equation Code Style\" -underline 1 -menu $w.macro" );	// entryconfig 16
-
-cmd( "menu $w.macro -tearoff 0" );
-cmd( "$w.macro add radio -label \"Use LSD Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for LSD Equations\" -underline 6 -command { LsdHelp LSD_macros.html }; set choice 68}" );
-cmd( "$w.macro add radio -label \"Use LSD C++ functions\" -variable macro -value 0 -command { \
-		.m.help entryconf 1 -label \"Help on C++ for LSD Equations\" -underline 8 -command { LsdHelp LSD_functions.html }; set choice 69 \
-	}" );
 
 cmd( "set w .m.help" );
-cmd( "menu $w -tearoff 0" );
+cmd( "ttk::menu $w -tearoff 0" );
 cmd( ".m add cascade -label Help -menu $w -underline 0" );
 cmd( "$w add command -label \"Help on LMM\" -underline 0 -accelerator F1 -command { LsdHelp LMM.html }" );
-if ( macro )
-  cmd( "$w add command -label \"Help on Macros for LSD Equations\" -underline 8 -command { LsdHelp LSD_macros.html }" );
-else
-  cmd( "$w add command -label \"Help on C++ for LSD Equations\" -underline 8 -command { LsdHelp LSD_functions.html }" );
-
+cmd( "$w add command -label \"Help on Macros for LSD Equations\" -underline 8 -command { LsdHelp LSD_macros.html }" );
 cmd( "$w add command -label \"LSD Documentation\" -underline 4 -command { LsdHelp LSD_documentation.html }" );
 cmd( "$w add separator" );
 cmd( "$w add command -label \"LMM Primer Tutorial\" -underline 4 -command { LsdHelp LMM_primer.html }" );
@@ -585,20 +574,20 @@ cmd( "$w add separator" );
 cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%s} {%s} }", _LSD_VERSION_, _LSD_DATE_  );
 
 // Button bar
-cmd( "frame .bbar" );
+cmd( "ttk::frame .bbar" );
 
-cmd( "button .bbar.open -image openImg -relief $bRlf -overrelief $ovBrlf -command { set choice 33 }" );
-cmd( "button .bbar.save -image saveImg -relief $bRlf -overrelief $ovBrlf -command { .m.file invoke 2 }" );
-cmd( "button .bbar.undo -image undoImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 0 }" );
-cmd( "button .bbar.redo -image redoImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 1 }" );
-cmd( "button .bbar.cut -image cutImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 3 }" );
-cmd( "button .bbar.copy -image copyImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 4 }" );
-cmd( "button .bbar.paste -image pasteImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 5 }" );
-cmd( "button .bbar.find -image findImg -relief $bRlf -overrelief $ovBrlf -command { set choice 11 }" );
-cmd( "button .bbar.replace -image replaceImg -relief $bRlf -overrelief $ovBrlf -command { set choice 21 }" );
-cmd( "button .bbar.indent -image indentImg -relief $bRlf -overrelief $ovBrlf -command { set choice 42 }" );
-cmd( "button .bbar.deindent -image deindentImg -relief $bRlf -overrelief $ovBrlf -command { set choice 43 }" );
-cmd( "button .bbar.wrap -image wrapImg -relief $bRlf -overrelief $ovBrlf -command { \
+cmd( "ttk::button .bbar.open -image openImg -style Toolbutton -command { set choice 33 }" );
+cmd( "ttk::button .bbar.save -image saveImg -style Toolbutton -command { .m.file invoke 2 }" );
+cmd( "ttk::button .bbar.undo -image undoImg -style Toolbutton -command { .m.edit invoke 0 }" );
+cmd( "ttk::button .bbar.redo -image redoImg -style Toolbutton -command { .m.edit invoke 1 }" );
+cmd( "ttk::button .bbar.cut -image cutImg -style Toolbutton -command { .m.edit invoke 3 }" );
+cmd( "ttk::button .bbar.copy -image copyImg -style Toolbutton -command { .m.edit invoke 4 }" );
+cmd( "ttk::button .bbar.paste -image pasteImg -style Toolbutton -command { .m.edit invoke 5 }" );
+cmd( "ttk::button .bbar.find -image findImg -style Toolbutton -command { set choice 11 }" );
+cmd( "ttk::button .bbar.replace -image replaceImg -style Toolbutton -command { set choice 21 }" );
+cmd( "ttk::button .bbar.indent -image indentImg -style Toolbutton -command { set choice 42 }" );
+cmd( "ttk::button .bbar.deindent -image deindentImg -style Toolbutton -command { set choice 43 }" );
+cmd( "ttk::button .bbar.wrap -image wrapImg -style Toolbutton -command { \
 		if { $wrap == 0 } { \
 			set wrap 1 \
 		} { \
@@ -606,17 +595,17 @@ cmd( "button .bbar.wrap -image wrapImg -relief $bRlf -overrelief $ovBrlf -comman
 		}; \
 		setwrap .f.t.t $wrap \
 	}" );
-cmd( "button .bbar.compile -image compileImg -relief $bRlf -overrelief $ovBrlf -command { set choice 6 }" );
-cmd( "button .bbar.comprun -image comprunImg -relief $bRlf -overrelief $ovBrlf -command { set choice 2 }" );
-cmd( "button .bbar.gdb -image gdbImg -relief $bRlf -overrelief $ovBrlf -command { set choice 13 }" );
-cmd( "button .bbar.info -image infoImg -relief $bRlf -overrelief $ovBrlf -command { set choice 44 }" );
-cmd( "button .bbar.descr -image descrImg -relief $bRlf -overrelief $ovBrlf -command { set choice 5 }" );
-cmd( "button .bbar.equation -image equationImg -relief $bRlf -overrelief $ovBrlf -command { set choice 8 }" );
-cmd( "button .bbar.extra -image extraImg -relief $bRlf -overrelief $ovBrlf -command { set choice 70 }" );
-cmd( "button .bbar.set -image setImg -relief $bRlf -overrelief $ovBrlf -command { set choice 48 }" );
-cmd( "button .bbar.hide -image hideImg -relief $bRlf -overrelief $ovBrlf -command { set autoHide [ expr ! $autoHide ] }" );
-cmd( "button .bbar.help -image helpImg -relief $bRlf -overrelief $ovBrlf -command { LsdHelp LSD_macros.html }" );
-cmd( "label .bbar.tip -textvariable ttip -font { Arial 8 } -fg gray -width 30 -anchor w" );
+cmd( "ttk::button .bbar.compile -image compileImg -style Toolbutton -command { set choice 6 }" );
+cmd( "ttk::button .bbar.comprun -image comprunImg -style Toolbutton -command { set choice 2 }" );
+cmd( "ttk::button .bbar.gdb -image gdbImg -style Toolbutton -command { set choice 13 }" );
+cmd( "ttk::button .bbar.info -image infoImg -style Toolbutton -command { set choice 44 }" );
+cmd( "ttk::button .bbar.descr -image descrImg -style Toolbutton -command { set choice 5 }" );
+cmd( "ttk::button .bbar.equation -image equationImg -style Toolbutton -command { set choice 8 }" );
+cmd( "ttk::button .bbar.extra -image extraImg -style Toolbutton -command { set choice 70 }" );
+cmd( "ttk::button .bbar.set -image setImg -style Toolbutton -command { set choice 48 }" );
+cmd( "ttk::button .bbar.hide -image hideImg -style Toolbutton -command { set autoHide [ expr ! $autoHide ] }" );
+cmd( "ttk::button .bbar.help -image helpImg -style Toolbutton -command { LsdHelp LSD_macros.html }" );
+cmd( "ttk::label .bbar.tip -textvariable ttip -width 30 -style graySmall.TLabel -anchor w" );
 
 cmd( "bind .bbar.open <Enter> { set ttip \"Browse models...\" }" );
 cmd( "bind .bbar.open <Leave> { set ttip \"\" }" );
@@ -669,14 +658,15 @@ cmd( "bind .bbar.hide <Leave> { set ttip \"\" }" );
 cmd( "bind .bbar.help <Enter> { set ttip \"Help on macros for LSD equations\" }" );
 cmd( "bind .bbar.help <Leave> { set ttip \"\" }" );
 
-cmd( "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.wrap .bbar.compile .bbar.comprun .bbar.gdb .bbar.info .bbar.descr .bbar.equation .bbar.extra .bbar.set .bbar.hide .bbar.help .bbar.tip -padx 3 -side left" );
-cmd( "pack .bbar -anchor w -fill x" );
+cmd( "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.wrap .bbar.compile .bbar.comprun .bbar.gdb .bbar.info .bbar.descr .bbar.equation .bbar.extra .bbar.set .bbar.hide .bbar.help .bbar.tip -side left" );
+cmd( "pack .bbar -padx 3 -anchor w -fill x" );
 
-cmd( "frame .f" );
-cmd( "frame .f.t" );
-cmd( "scrollbar .f.t.vs -command \".f.t.t yview\"" );
-cmd( "scrollbar .f.t.hs -orient horiz -command \".f.t.t xview\"" );
-cmd( "text .f.t.t -undo 1 -height 2 -autoseparators 1 -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\"" );
+cmd( "ttk::frame .f" );
+cmd( "ttk::frame .f.t" );
+cmd( "ttk::scrollbar .f.t.vs -command \".f.t.t yview\"" );
+cmd( "ttk::scrollbar .f.t.hs -orient horiz -command \".f.t.t xview\"" );
+cmd( "ttk::text .f.t.t -undo 1 -height 2 -autoseparators 1 -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\" -entry 1 -dark $darkTheme" );
+
 cmd( "set a [ .f.t.t conf -font ]" );
 cmd( "set b [ lindex $a 3 ]" );
 cmd( "if { $dim_character == 0 } { set dim_character [ lindex $b 1 ] }" );
@@ -688,68 +678,68 @@ cmd( "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
 cmd( "setwrap .f.t.t $wrap" );		// adjust text wrap
 
 // set colors
-cmd( ".f.t.t tag configure comment1 -foreground $commcolor" );
-cmd( ".f.t.t tag configure comment2 -foreground $commcolor" );
-cmd( ".f.t.t tag configure str -foreground $strcolor" );
-cmd( ".f.t.t tag configure cprep -foreground $prepcolor" );
-cmd( ".f.t.t tag configure ctype -foreground $typecolor" );
-cmd( ".f.t.t tag configure ckword -foreground $kwrdcolor" );
-cmd( ".f.t.t tag configure lsdvar -foreground $vlsdcolor" );
-cmd( ".f.t.t tag configure lsdmacro -foreground $mlsdcolor" );
-cmd( ".f.t.t configure -selectbackground gray" );
-cmd( ".f.t.t configure -selectforeground black" );
+cmd( ".f.t.t tag configure comment1 -foreground $colorsTheme(comm)" );
+cmd( ".f.t.t tag configure comment2 -foreground $colorsTheme(comm)" );
+cmd( ".f.t.t tag configure str -foreground $colorsTheme(str)" );
+cmd( ".f.t.t tag configure cprep -foreground $colorsTheme(prep)" );
+cmd( ".f.t.t tag configure ctype -foreground $colorsTheme(type)" );
+cmd( ".f.t.t tag configure ckword -foreground $colorsTheme(kwrd)" );
+cmd( ".f.t.t tag configure lsdvar -foreground $colorsTheme(vlsd)" );
+cmd( ".f.t.t tag configure lsdmacro -foreground $colorsTheme(mlsd)" );
 
-cmd( "frame .f.hea" );
+cmd( "ttk::frame .f.hea" );
 
-cmd( "frame .f.hea.info" );
+cmd( "ttk::frame .f.hea.info" );
 
-cmd( "frame .f.hea.info.grp" );
-cmd( "label .f.hea.info.grp.tit -text \"Group: \"" );
-cmd( "label .f.hea.info.grp.dat -text \"$modelGroup\" -fg red" );
+cmd( "ttk::frame .f.hea.info.grp" );
+cmd( "ttk::label .f.hea.info.grp.tit -text \"Group: \"" );
+cmd( "ttk::label .f.hea.info.grp.dat -text \"$modelGroup\" -style red.TLabel" );
 cmd( "pack .f.hea.info.grp.tit .f.hea.info.grp.dat -side left" );
 
-cmd( "label .f.hea.info.pad1 -width 2" );
+cmd( "ttk::label .f.hea.info.pad1 -width 2" );
 
-cmd( "frame .f.hea.info.mod" );
-cmd( "label .f.hea.info.mod.tit -text \"Model: \"" );
-cmd( "label .f.hea.info.mod.dat -text \"(no model)\" -fg red" );
+cmd( "ttk::frame .f.hea.info.mod" );
+cmd( "ttk::label .f.hea.info.mod.tit -text \"Model: \"" );
+cmd( "ttk::label .f.hea.info.mod.dat -text \"(no model)\" -style red.TLabel" );
 cmd( "pack .f.hea.info.mod.tit .f.hea.info.mod.dat -side left" );
 
-cmd( "label .f.hea.info.pad2 -width 2" );
+cmd( "ttk::label .f.hea.info.pad2 -width 2" );
 
-cmd( "frame .f.hea.info.ver" );
-cmd( "label .f.hea.info.ver.tit -text \"Version: \"" );
-cmd( "label .f.hea.info.ver.dat -text \"\" -fg red" );
+cmd( "ttk::frame .f.hea.info.ver" );
+cmd( "ttk::label .f.hea.info.ver.tit -text \"Version: \"" );
+cmd( "ttk::label .f.hea.info.ver.dat -text \"\" -style red.TLabel" );
 cmd( "pack .f.hea.info.ver.tit .f.hea.info.ver.dat -side left" );
 
-cmd( "label .f.hea.info.pad3 -width 2" );
+cmd( "ttk::label .f.hea.info.pad3 -width 2" );
 
-cmd( "frame .f.hea.info.file" );
-cmd( "label .f.hea.info.file.tit -text \"File: \"" );
-cmd( "label .f.hea.info.file.dat -text \"(no file)\" -fg red" );
+cmd( "ttk::frame .f.hea.info.file" );
+cmd( "ttk::label .f.hea.info.file.tit -text \"File: \"" );
+cmd( "ttk::label .f.hea.info.file.dat -text \"(no file)\" -style red.TLabel" );
 cmd( "pack .f.hea.info.file.tit .f.hea.info.file.dat -side left" );
 
 cmd( "pack .f.hea.info.grp .f.hea.info.pad1 .f.hea.info.mod .f.hea.info.pad2 .f.hea.info.ver .f.hea.info.pad3 .f.hea.info.file -side left" );
 
 cmd( "pack .f.hea.info -side left -anchor w -expand yes" );
 
-cmd( "frame .f.hea.cur" );
+cmd( "ttk::frame .f.hea.cur" );
 
-cmd( "frame .f.hea.cur.line" );
-cmd( "label .f.hea.cur.line.ln1 -text \"Ln: \"" );
-cmd( "label .f.hea.cur.line.ln2 -width 4 -fg red -font [ font create -size $small_character -weight bold ]" );
+cmd( "ttk::frame .f.hea.cur.line" );
+cmd( "ttk::label .f.hea.cur.line.ln1 -text \"Ln: \"" );
+cmd( "ttk::label .f.hea.cur.line.ln2 -width 4 -style redBoldSmall.TLabel" );
+cmd( ".f.hea.cur.line.ln2 configure -text 1" );
 cmd( "pack .f.hea.cur.line.ln1 .f.hea.cur.line.ln2 -side left" );
 
-cmd( "frame .f.hea.cur.col" );
-cmd( "label .f.hea.cur.col.col1 -text \"Col: \"" );
-cmd( "label .f.hea.cur.col.col2 -width 3 -fg red -font [ font create -size $small_character -weight bold ]" );
+cmd( "ttk::frame .f.hea.cur.col" );
+cmd( "ttk::label .f.hea.cur.col.col1 -text \"Col: \"" );
+cmd( "ttk::label .f.hea.cur.col.col2 -width 3 -style redBoldSmall.TLabel" );
+cmd( ".f.hea.cur.col.col2 configure -text 1" );
 cmd( "pack .f.hea.cur.col.col1 .f.hea.cur.col.col2 -side left" );
 
 cmd( "pack .f.hea.cur.line .f.hea.cur.col -side left" );
 
 cmd( "pack .f.hea.cur -side left -anchor e" );
 
-cmd( "pack .f.hea -fill x" );
+cmd( "pack .f.hea -padx 5 -pady 3 -fill x" );
 
 cmd( "pack .f.t -expand yes -fill both" );
 cmd( "pack .f.t.vs -side right -fill y" );
@@ -883,7 +873,7 @@ cmd( "bind .f.t.t <KeyPress-Return> {+set choice 16}" );
 cmd( "bind .f.t.t <KeyRelease-space> {+.f.t.t edit separator}" );
 
 // context menu
-cmd( "menu .v -tearoff 0" );
+cmd( "ttk::menu .v -tearoff 0" );
 
 cmd( "bind .f.t.t <3> { \
 		%%W mark set insert [ .f.t.t index @%%x,%%y ]; \
@@ -910,43 +900,22 @@ cmd( ".v add command -label \"Find...\" -command { set choice 11 }" );
 cmd( ".v add command -label \"Match \\\{ \\}\" -command { set choice 17 }" );
 cmd( ".v add command -label \"Match \\\( \\)\" -command { set choice 32 }" );
 
-if ( ! macro )
-{
-	cmd( "menu .v.i -tearoff 0" );
-	cmd( ".v.i add command -label \"LSD equation/function\" -command { set choice 25 } -accelerator Ctrl+E" );
-	cmd( ".v.i add command -label \"cal(...)\" -command { set choice 26 } -accelerator Ctrl+V" );
-	cmd( ".v.i add command -label \"for ( ; ; )\" -command { set choice 27 } -accelerator Ctrl+C" );
-	cmd( ".v.i add command -label \"sum(...)\" -command { set choice 56 } -accelerator Ctrl+U" );
-	cmd( ".v.i add command -label \"increment(...)\" -command { set choice 40 } -accelerator Ctrl+I" );
-	cmd( ".v.i add command -label \"multiply(...)\" -command { set choice 45 } -accelerator Ctrl+M" );
-	cmd( ".v.i add command -label \"search(...)\" -command { set choice 5 5} -accelerator Ctrl+A" );
-	cmd( ".v.i add command -label \"search_var_cond(...)\" -command { set choice 30 } -accelerator Ctrl+S" );
-	cmd( ".v.i add command -label \"lsdqsort(...)\" -command { set choice 31 } -accelerator Ctrl+T" );
-	cmd( ".v.i add command -label \"draw_rnd\" -command { set choice 54 } -accelerator Ctrl+N" );
-	cmd( ".v.i add command -label \"write(...)\" -command { set choice 29 } -accelerator Ctrl+W" );
-	cmd( ".v.i add command -label \"add_n_objects2\" -command { set choice 52 } -accelerator Ctrl+O" );
-	cmd( ".v.i add command -label \"delete_obj\" -command { set choice 53 } -accelerator Ctrl+D" );
-	cmd( ".v.i add command -label \"Math functions\" -command { set choice 51 } -accelerator Ctrl+H" );
-}
-else
-{
-	cmd( "menu .v.i -tearoff 0" );
-	cmd( ".v.i add command -label \"EQUATION\" -command { set choice 25 } -accelerator Ctrl+E" );
-	cmd( ".v.i add command -label \"V(...)\" -command { set choice 26 } -accelerator Ctrl+V" );
-	cmd( ".v.i add command -label \"CYCLE(...)\" -command { set choice 27 } -accelerator Ctrl+C" );
-	cmd( ".v.i add command -label \"SUM(...)\" -command { set choice 56 } -accelerator Ctrl+U" );
-	cmd( ".v.i add command -label \"INCR(...)\" -command { set choice 40 } -accelerator Ctrl+I" );
-	cmd( ".v.i add command -label \"MULT(...)\" -command { set choice 45 } -accelerator Ctrl+M" );
-	cmd( ".v.i add command -label \"SEARCH(...)\" -command { set choice 55 } -accelerator Ctrl+A" );
-	cmd( ".v.i add command -label \"SEARCH_CND(...)\" -command { set choice 30 } -accelerator Ctrl+S" );
-	cmd( ".v.i add command -label \"SORT(...)\" -command { set choice 31 } -accelerator Ctrl+T" );
-	cmd( ".v.i add command -label \"RNDDRAW(...)\" -command { set choice 54 } -accelerator Ctrl+N" );
-	cmd( ".v.i add command -label \"WRITE(...)\" -command { set choice 29 } -accelerator Ctrl+W" );
-	cmd( ".v.i add command -label \"ADDOBJ(...)\" -command { set choice 52 } -accelerator Ctrl+O" );
-	cmd( ".v.i add command -label \"DELETE(...)\" -command { set choice 53 } -accelerator Ctrl+D" );
-	cmd( ".v.i add command -label \"Network macros\" -command { set choice 72 } -accelerator Ctrl+K" );
-	cmd( ".v.i add command -label \"Math functions\" -command { set choice 51 } -accelerator Ctrl+H" );
-}
+cmd( "ttk::menu .v.i -tearoff 0" );
+cmd( ".v.i add command -label \"EQUATION\" -command { set choice 25 } -accelerator Ctrl+E" );
+cmd( ".v.i add command -label \"V(...)\" -command { set choice 26 } -accelerator Ctrl+V" );
+cmd( ".v.i add command -label \"CYCLE(...)\" -command { set choice 27 } -accelerator Ctrl+C" );
+cmd( ".v.i add command -label \"SUM(...)\" -command { set choice 56 } -accelerator Ctrl+U" );
+cmd( ".v.i add command -label \"INCR(...)\" -command { set choice 40 } -accelerator Ctrl+I" );
+cmd( ".v.i add command -label \"MULT(...)\" -command { set choice 45 } -accelerator Ctrl+M" );
+cmd( ".v.i add command -label \"SEARCH(...)\" -command { set choice 55 } -accelerator Ctrl+A" );
+cmd( ".v.i add command -label \"SEARCH_CND(...)\" -command { set choice 30 } -accelerator Ctrl+S" );
+cmd( ".v.i add command -label \"SORT(...)\" -command { set choice 31 } -accelerator Ctrl+T" );
+cmd( ".v.i add command -label \"RNDDRAW(...)\" -command { set choice 54 } -accelerator Ctrl+N" );
+cmd( ".v.i add command -label \"WRITE(...)\" -command { set choice 29 } -accelerator Ctrl+W" );
+cmd( ".v.i add command -label \"ADDOBJ(...)\" -command { set choice 52 } -accelerator Ctrl+O" );
+cmd( ".v.i add command -label \"DELETE(...)\" -command { set choice 53 } -accelerator Ctrl+D" );
+cmd( ".v.i add command -label \"Network macros\" -command { set choice 72 } -accelerator Ctrl+K" );
+cmd( ".v.i add command -label \"Math functions\" -command { set choice 51 } -accelerator Ctrl+H" );
 
 cmd( "bind .f.t.t <Control-E> { set choice 25 }" );
 cmd( "bind .f.t.t <Control-V> { set choice 26; break }" );
@@ -1021,7 +990,7 @@ if ( argn > 1 )
 		}
    }
    else
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" );
 }
 else
 	choice = 33; 				// open model browser
@@ -1090,7 +1059,7 @@ if ( choice == 1 )
 // Run the model
 if ( choice == 2 || choice == 6 )
 {
-	cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ tk_messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
+	cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
 
 	if ( choice != 0 )
 	{
@@ -1109,7 +1078,7 @@ if ( choice == 3 )
 
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 		choice = 0;
 		goto loop;
 	}
@@ -1132,7 +1101,7 @@ if ( choice == 3 )
 	cmd( "set filename makefile" );
 	cmd( ".f.t.t mark set insert 1.0" );
 	cmd( ".f.hea.info.file.dat conf -text \"makefile\"" );
-	cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );
+	cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );
 
 	choice = 0;
 	goto loop;
@@ -1167,7 +1136,7 @@ if ( choice == 5 || choice == 50 )
 
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 		choice = 0;
 		goto loop;
 	}
@@ -1186,7 +1155,7 @@ if ( choice == 5 || choice == 50 )
 	}
 	else		// if no description, ask if the user wants to create it or not
 	{
-		cmd( "set answer [ tk_messageBox -parent . -type yesno -default no -icon question -title \"Create Description\" -message \"Create a description file?\" -detail \"There is no valid description file ('$DESCRIPTION') set for the model\n\nDo you want to create a description file now?\n\nPress 'No' to just show the equations file.\" ]" );
+		cmd( "set answer [ ttk::messageBox -parent . -type yesno -default no -icon question -title \"Create Description\" -message \"Create a description file?\" -detail \"There is no valid description file ('$DESCRIPTION') set for the model\n\nDo you want to create a description file now?\n\nPress 'No' to just show the equations file.\" ]" );
 		cmd( " if [ string equal $answer yes ] { set choice 1 } { set choice 2 } " );
 		if ( choice == 2 )
 		{
@@ -1221,7 +1190,7 @@ if ( choice == 7 )
 	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 		choice = 0;
 		goto loop;
 	}
@@ -1238,7 +1207,7 @@ if ( choice == 8 )
 
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 		choice = 0;
 		goto loop;
 	}
@@ -1246,7 +1215,7 @@ if ( choice == 8 )
 	s = get_fun_name( str );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Invalid equation file name\" -detail \"Check the 'FUN' field in menu 'Model', 'Model Options' for a valid equation file name.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid equation file name\" -detail \"Check the 'FUN' field in menu 'Model', 'Model Options' for a valid equation file name.\"" );
 		choice = 0;
 		goto loop;
 	}
@@ -1266,7 +1235,7 @@ if ( choice == 8 )
 		} { \
 			set filename \"$oldfile\"; \
 			set dirname \"$olddir\"; \
-			tk_messageBox -parent . -title Error -icon error -type ok -message \"Equation file not found\" -detail \"If equation file has been renamed, update the 'FUN' field in menu 'Model', 'Model Options'.\"; \
+			ttk::messageBox -parent . -title Error -icon error -type ok -message \"Equation file not found\" -detail \"If equation file has been renamed, update the 'FUN' field in menu 'Model', 'Model Options'.\"; \
 			set choice 0 \
 		}" );
 	cmd( "unset -nocomplain oldfile olddir" );
@@ -1307,11 +1276,11 @@ if ( choice == 10 )
 {
 	cmd( "set line \"\"" );
 
-	cmd( "newtop .search_line \"Go To\" { .search_line.b.can invoke }" );
+	cmd( "newtop .search_line \"Go To\" { .search_line.b.cancel invoke }" );
 
-	cmd( "frame .search_line.l" );
-	cmd( "label .search_line.l.l -text \"Line number\"" );
-	cmd( "entry .search_line.l.e -width 10 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set line %%P; return 1 } { %%W delete 0 end; %%W insert 0 $line; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::frame .search_line.l" );
+	cmd( "ttk::label .search_line.l.l -text \"Line number\"" );
+	cmd( "ttk::entry .search_line.l.e -width 10 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set line %%P; return 1 } { %%W delete 0 end; %%W insert 0 $line; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "pack .search_line.l.l .search_line.l.e" );
 
 	cmd( "pack .search_line.l -padx 5 -pady 5" );
@@ -1355,19 +1324,19 @@ if ( choice == 11 )
 	cmd( "set curcounter $lfindsize" );
 	cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
 
-	cmd( "newtop .find \"Find\" { .find.b.can invoke }" );
+	cmd( "newtop .find \"Find\" { .find.b.cancel invoke }" );
 
-	cmd( "frame .find.l" );
-	cmd( "label .find.l.l -text \"Text to find\"" );
-	cmd( "entry .find.l.e -width 25 -textvariable textsearch -justify center" );
+	cmd( "ttk::frame .find.l" );
+	cmd( "ttk::label .find.l.l -text \"Text to find\"" );
+	cmd( "ttk::entry .find.l.e -width 25 -textvariable textsearch -justify center" );
 	cmd( "pack .find.l.l .find.l.e" );
 
-	cmd( "frame .find.r -relief groove -bd 2" );
-	cmd( "radiobutton .find.r.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command { set endsearch 1.0 }" );
-	cmd( "radiobutton .find.r.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command { set endsearch end }" );
+	cmd( "ttk::frame .find.r -relief solid -borderwidth 1" );
+	cmd( "ttk::radiobutton .find.r.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command { set endsearch 1.0 }" );
+	cmd( "ttk::radiobutton .find.r.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command { set endsearch end }" );
 	cmd( "pack .find.r.r2 .find.r.r1 -side left -padx 5" );
 
-	cmd( "checkbutton .find.c -text \"Case sensitive\" -variable docase" );
+	cmd( "ttk::checkbutton .find.c -text \"Case sensitive\" -variable docase" );
 
 	cmd( "pack .find.l .find.r .find.c -padx 5 -pady 5" );
 
@@ -1478,29 +1447,29 @@ if ( choice == 21 )
 	cmd( "set cur \"\"" );
 	cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
 
-	cmd( "newtop .l \"Replace\" { .l.b2.can invoke }" );
+	cmd( "newtop .l \"Replace\" { .l.b2.cancel invoke }" );
 
-	cmd( "frame .l.l" );
-	cmd( "label .l.l.l -text \"Text to find\"" );
-	cmd( "entry .l.l.e -width 25 -textvariable textsearch -justify center" );
+	cmd( "ttk::frame .l.l" );
+	cmd( "ttk::label .l.l.l -text \"Text to find\"" );
+	cmd( "ttk::entry .l.l.e -width 25 -textvariable textsearch -justify center" );
 	cmd( "pack .l.l.l .l.l.e" );
 
-	cmd( "frame .l.p" );
-	cmd( "label .l.p.l -text \"Text to replace\"" );
-	cmd( "entry .l.p.e -width 25 -textvariable textrepl -justify center" );
+	cmd( "ttk::frame .l.p" );
+	cmd( "ttk::label .l.p.l -text \"Text to replace\"" );
+	cmd( "ttk::entry .l.p.e -width 25 -textvariable textrepl -justify center" );
 	cmd( "pack .l.p.l .l.p.e" );
 
-	cmd( "frame .l.r -relief groove -bd 2" );
-	cmd( "radiobutton .l.r.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command { set endsearch 1.0 }" );
-	cmd( "radiobutton .l.r.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command { set endsearch end }" );
+	cmd( "ttk::frame .l.r -relief solid -borderwidth 1" );
+	cmd( "ttk::radiobutton .l.r.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command { set endsearch 1.0 }" );
+	cmd( "ttk::radiobutton .l.r.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command { set endsearch end }" );
 	cmd( "pack .l.r.r2 .l.r.r1 -side left -padx 5" );
 
-	cmd( "checkbutton .l.c -text \"Case sensitive\" -variable docase" );
+	cmd( "ttk::checkbutton .l.c -text \"Case sensitive\" -variable docase" );
 
 	cmd( "pack .l.l .l.p .l.r .l.c -padx 5 -pady 5" );
 
-	cmd( "frame .l.b1" );
-	cmd( "button .l.b1.repl -width $butWid -state disabled -text Replace -command { \
+	cmd( "ttk::frame .l.b1" );
+	cmd( "ttk::button .l.b1.repl -width $butWid -state disabled -text Replace -command { \
 			if { [ string length $cur ] > 0 } { \
 				.f.t.t delete $cur \"$cur + $length char\"; \
 				.f.t.t insert $cur \"$textrepl\"; \
@@ -1510,7 +1479,7 @@ if ( choice == 21 )
 				.l.b2.ok invoke \
 			} \
 		}" );
-	cmd( "button .l.b1.all -width $butWid -state disabled -text \"Repl. All\" -command { set choice 4 }" );
+	cmd( "ttk::button .l.b1.all -width $butWid -state disabled -text \"Repl. All\" -command { set choice 4 }" );
 	cmd( "pack .l.b1.repl .l.b1.all -padx 10 -side left" );
 
 	cmd( "pack .l.b1 -anchor e" );
@@ -1630,7 +1599,7 @@ if ( choice == 13 || choice == 58 )
 
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 		choice = 0;
 		goto loop;
 	}
@@ -1654,14 +1623,14 @@ if ( choice == 13 || choice == 58 )
 	f = fopen( s, "r" );
 	if ( f == NULL )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
 		goto end_gdb;
 	}
 	fscanf( f, "%999s", str );
 	while ( strncmp( str, "TARGET=", 7 ) && fscanf( f, "%999s", str ) != EOF );
 	if ( strncmp(str, "TARGET=", 7) != 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
 		goto end_gdb;
 	}
 
@@ -1705,14 +1674,14 @@ if ( choice == 13 || choice == 58 )
 	{
 		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
 		{
-			cmd( "set answer [tk_messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing executable file is older than the last version of the model.\n\nPress 'OK' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\"]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+			cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing executable file is older than the last version of the model.\n\nPress 'OK' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
 			if ( choice == 2 )
 				goto end_gdb;
 		}
 	}
 	else
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Executable not found\" -detail \"Compile the model before running it in the [ string toupper $DbgExe ] debugger.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Executable not found\" -detail \"Compile the model before running it in the [ string toupper $DbgExe ] debugger.\"" );
 		goto end_gdb;
 	}
 
@@ -1731,7 +1700,7 @@ if ( choice == 14 )
 
 	// prevent creating new groups in LSD directory
 	cmd( "if { [ string equal $groupdir [ pwd ] ] && [ file exists \"$groupdir/$LsdNew/$GROUP_INFO\" ] } \
-			{	set answer [ tk_messageBox -parent . -type okcancel -title Warning \
+			{	set answer [ ttk::messageBox -parent . -type okcancel -title Warning \
 				-icon warning -default ok -message \"Invalid parent group\" \
 				-detail \"Cannot create group/model in the Root group. Press 'OK' to change to the '$LsdNew' group before proceeding.\" ]; \
 				if [ string equal $answer ok ] { \
@@ -1752,14 +1721,14 @@ if ( choice == 14 )
 
 	cmd( "newtop .a \"New Model\" { set choice 2 }" );
 
-	cmd( "frame .a.tit" );
-	cmd( "label .a.tit.l -text \"Current group:\"" );
-	cmd( "label .a.tit.n -fg red -text \"$modelGroup\"" );
+	cmd( "ttk::frame .a.tit" );
+	cmd( "ttk::label .a.tit.l -text \"Current group:\"" );
+	cmd( "ttk::label .a.tit.n -style red.TLabel -text \"$modelGroup\"" );
 	cmd( "pack .a.tit.l .a.tit.n" );
 
-	cmd( "frame .a.f -relief groove -bd 2" );
-	cmd( "radiobutton .a.f.r1 -variable temp -value 1 -text \"Create a new model in the current group\" -anchor w" );
-	cmd( "radiobutton .a.f.r2 -variable temp -value 2 -text \"Create a new model in a new group\" -anchor w" );
+	cmd( "ttk::frame .a.f -relief solid -borderwidth 1" );
+	cmd( "ttk::radiobutton .a.f.r1 -variable temp -value 1 -text \"Create a new model in the current group\" -anchor w" );
+	cmd( "ttk::radiobutton .a.f.r2 -variable temp -value 2 -text \"Create a new model in a new group\" -anchor w" );
 	cmd( "pack .a.f.r1 .a.f.r2 -anchor w" );
 
 	cmd( "pack .a.tit .a.f -padx 5 -pady 5" );
@@ -1767,8 +1736,8 @@ if ( choice == 14 )
 	cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
 
 	cmd( "bind .a.f <KeyPress-Return> { .a.b.ok invoke }" );
-	cmd( "bind .a <Up> {.a.f.r1 invoke}" );
-	cmd( "bind .a <Down> {.a.f.r2 invoke}" );
+	cmd( "bind .a <Up> { .a.f.r1 invoke }" );
+	cmd( "bind .a <Down> { .a.f.r2 invoke }" );
 
 	cmd( "showtop .a" );
 
@@ -1792,25 +1761,25 @@ if ( choice == 14 )
 
 		cmd( "newtop .a \"New Group\" { set choice 2 }" );
 
-		cmd( "frame .a.tit" );
-		cmd( "label .a.tit.l -text \"Current group:\"" );
-		cmd( "label .a.tit.n -fg red -text \"$modelGroup\"" );
+		cmd( "ttk::frame .a.tit" );
+		cmd( "ttk::label .a.tit.l -text \"Current group:\"" );
+		cmd( "ttk::label .a.tit.n -style red.TLabel -text \"$modelGroup\"" );
 		cmd( "pack .a.tit.l .a.tit.n" );
 
-		cmd( "frame .a.mname" );
-		cmd( "label .a.mname.l -text \"New group name\"" );
-		cmd( "entry .a.mname.e -width 25 -textvariable mname -justify center" );
+		cmd( "ttk::frame .a.mname" );
+		cmd( "ttk::label .a.mname.l -text \"New group name\"" );
+		cmd( "ttk::entry .a.mname.e -width 25 -textvariable mname -justify center" );
 		cmd( "pack .a.mname.l .a.mname.e" );
 
-		cmd( "frame .a.mdir" );
-		cmd( "label .a.mdir.l -text \"New (non-existing) subdirectory name\"" );
-		cmd( "entry .a.mdir.e -width 35 -textvariable mdir -justify center" );
+		cmd( "ttk::frame .a.mdir" );
+		cmd( "ttk::label .a.mdir.l -text \"New (non-existing) subdirectory name\"" );
+		cmd( "ttk::entry .a.mdir.e -width 35 -textvariable mdir -justify center" );
 		cmd( "pack .a.mdir.l .a.mdir.e" );
 
-		cmd( "frame .a.tdes" );
-		cmd( "label .a.tdes.l -text \"Group description\"" );
+		cmd( "ttk::frame .a.tdes" );
+		cmd( "ttk::label .a.tdes.l -text \"Group description\"" );
 		cmd( "set a [ list \"$fonttype\" $small_character ]" );
-		cmd( "text .a.tdes.e -undo 1 -width 60 -height 15 -font \"$a\"" );
+		cmd( "ttk::text .a.tdes.e -undo 1 -width 60 -height 15 -entry 1 -dark $darkTheme -style small.TText" );
 		cmd( "pack .a.tdes.l .a.tdes.e" );
 
 		cmd( "pack .a.tit .a.mname .a.mdir .a.tdes -padx 5 -pady 5" );
@@ -1842,14 +1811,14 @@ if ( choice == 14 )
 		cmd( "if { [ llength [ split $mdir ] ] > 1 } { set choice -1 }" );
 		if ( choice == -1 )
 		{
-			cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
+			cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
 			cmd( "focus .a.mdir.e" );
 			cmd( ".a.mdir.e selection range 0 end" );
 			goto here_newgroup;
 		}
 
 		// control for existing directory
-		cmd( "if [ file exists \"$groupdir/$mdir\" ] { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+		cmd( "if [ file exists \"$groupdir/$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 		if ( choice == 3 )
 		{
 			cmd( "focus .a.mdir.e" );
@@ -1878,24 +1847,24 @@ if ( choice == 14 )
 
 	cmd( "newtop .a \"New Model\" { set choice 2 }" );
 
-	cmd( "frame .a.tit" );
-	cmd( "label .a.tit.l -text \"Current group:\"" );
-	cmd( "label .a.tit.n -fg red -text \"$modelGroup\"" );
+	cmd( "ttk::frame .a.tit" );
+	cmd( "ttk::label .a.tit.l -text \"Current group:\"" );
+	cmd( "ttk::label .a.tit.n -style red.TLabel -text \"$modelGroup\"" );
 	cmd( "pack .a.tit.l .a.tit.n" );
 
-	cmd( "frame .a.mname" );
-	cmd( "label .a.mname.l -text \"New model name\"" );
-	cmd( "entry .a.mname.e -width 25 -textvariable mname -justify center" );
+	cmd( "ttk::frame .a.mname" );
+	cmd( "ttk::label .a.mname.l -text \"New model name\"" );
+	cmd( "ttk::entry .a.mname.e -width 25 -textvariable mname -justify center" );
 	cmd( "pack .a.mname.l .a.mname.e" );
 
-	cmd( "frame .a.mver" );
-	cmd( "label .a.mver.l -text \"Version\"" );
-	cmd( "entry .a.mver.e -width 10 -textvariable mver -justify center" );
+	cmd( "ttk::frame .a.mver" );
+	cmd( "ttk::label .a.mver.l -text \"Version\"" );
+	cmd( "ttk::entry .a.mver.e -width 10 -textvariable mver -justify center" );
 	cmd( "pack .a.mver.l .a.mver.e" );
 
-	cmd( "frame .a.mdir" );
-	cmd( "label .a.mdir.l -text \"New (non-existing) subdirectory name\"" );
-	cmd( "entry .a.mdir.e -width 35 -textvariable mdir -justify center" );
+	cmd( "ttk::frame .a.mdir" );
+	cmd( "ttk::label .a.mdir.l -text \"New (non-existing) subdirectory name\"" );
+	cmd( "ttk::entry .a.mdir.e -width 35 -textvariable mdir -justify center" );
 	cmd( "pack .a.mdir.l .a.mdir.e" );
 
 	cmd( "pack .a.tit .a.mname .a.mver .a.mdir -padx 5 -pady 5" );
@@ -1929,14 +1898,14 @@ if ( choice == 14 )
 	cmd( "if { [ llength [ split $mdir ] ] > 1 } { set choice -1 }" );
 	if ( choice == -1 )
 	{
-		cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
+		cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
 	   cmd( "focus .a.mdir.e" );
 	   cmd( ".a.mdir.e selection range 0 end" );
 	   goto loop_copy_new;
 	}
 
 	// control for existing directory
-	cmd( "if [ file exists \"$mdir\" ] { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+	cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 	if ( choice == 3 )
 	{
 		cmd( "focus .a.mdir.e" );
@@ -1967,14 +1936,14 @@ if ( choice == 14 )
 
 			cmd( "set comp [ string compare $modelName $mname ]" );
 			cmd( "set comp1 [ string compare $modelVersion $mver ]" );
-			cmd( "if { $comp == 0 && $comp1 == 0} { set choice 3 }" );
+			cmd( "if { $comp == 0 && $comp1 == 0 } { set choice 3 }" );
 			cmd( "if { $comp == 0 } { set choice 4 }" );
 		}
 	}
 
 	if ( choice == 3 )
 	{
-		cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $curdir).\"" );
+		cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $curdir).\"" );
 		cmd( ".a.mname.e selection range 0 end" );
 		cmd( "focus .a.mname.e" );
 		goto loop_copy_new;
@@ -1983,7 +1952,7 @@ if ( choice == 14 )
 	if ( choice == 4 )
 	{
 		choice = 0;
-		cmd( "set answer [ tk_messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' (ver. $mver) already exists in directory: $curdir.\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you may cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\" ]" );
+		cmd( "set answer [ ttk::messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' (ver. $mver) already exists in directory: $curdir.\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you may cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\" ]" );
 		s = ( char * ) Tcl_GetVar( inter, "answer", 0 );
 
 		cmd( "if { ! [ string compare $answer ok ] } { set choice 1 } { set choice 0 }" );
@@ -1999,7 +1968,6 @@ if ( choice == 14 )
 	cmd( "destroytop .a" );
 
 	// create a new empty model
-
 	cmd( "set dirname $groupdir/$mdir" );
 	cmd( "set modelDir $groupdir/$mdir" );
 	cmd( "set modelName $mname" );
@@ -2011,13 +1979,8 @@ if ( choice == 14 )
 
 	cmd( "file mkdir \"$dirname\"" );
 
-	if ( macro )
-		cmd( "set fun_base \"fun_baseMacro.cpp\"" );
-	else
-		cmd( "set fun_base \"fun_baseC.cpp\"" );
-
 	// create the empty equation file
-	cmd( "file copy \"$RootLsd/$LsdSrc/$fun_base\" \"$modelDir/fun_$mdir.cpp\"" );
+	cmd( "file copy \"$RootLsd/$LsdSrc/fun_base.cpp\" \"$modelDir/fun_$mdir.cpp\"" );
 
 	// create the model options and info files
 	check_option_files( );
@@ -2037,7 +2000,7 @@ if ( choice == 14 )
 	cmd( ".m.model entryconf 10 -state normal" );
 	cmd( ".m.model entryconf 12 -state normal" );
 
-	cmd( "tk_messageBox -parent . -type ok -title \"New Model\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: $modelDir\"" );
+	cmd( "ttk::messageBox -parent . -type ok -title \"New Model\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: $modelDir\"" );
 
 	cmd( "set before [ .f.t.t get 1.0 end ]" ); //avoid to re-issue a warning for non saved files
 
@@ -2051,7 +2014,7 @@ if ( choice == 15 || choice == 71 )
 	if ( choice == 15 )
 	{
 		cmd( "set brr [ tk_getOpenFile -parent . -title \"Load Text File\" -initialdir $dirname ]" );
-		cmd( "if { [string length $brr] == 0 } { set choice 0 } { set choice 1 }" );
+		cmd( "if { [ string length $brr ] == 0 } { set choice 0 } { set choice 1 }" );
 		if ( choice == 0 )
 			goto loop;
 	}
@@ -2136,155 +2099,88 @@ if ( choice == 16 )
 /* find matching parenthesis */
 if ( choice == 17)
 {
-	cmd( "set sym [.f.t.t get insert]" );
-	cmd( "if {[string compare $sym \"\\{\"]!=0} {if {[string compare $sym \"\\}\"]!=0} {set choice 0} {set num -1; set direction -backwards; set fsign +; set sign \"\"; set terminal \"1.0\"}} {set num 1; set direction -forwards; set fsign -; set sign +; set terminal end}" );
+	cmd( "set sym [ .f.t.t get insert ]" );
+	cmd( "if { [ string compare $sym \"\\{\"] != 0 } { if { [ string compare $sym \"\\}\" ] != 0 } { set choice 0 } { set num -1; set direction -backwards; set fsign +; set sign \"\"; set terminal \"1.0\" } } { set num 1; set direction -forwards; set fsign -; set sign +; set terminal end }" );
 
 	if ( choice == 0 )
 		goto loop;
 	cmd( "set cur [ .f.t.t index insert ]" );
 	cmd( ".f.t.t tag add sel $cur \"$cur + 1char\"" );
 	if ( num > 0 )
-		cmd( "set cur [.f.t.t index \"insert + 1 char\"]" );
+		cmd( "set cur [ .f.t.t index \"insert + 1 char\" ]" );
 
 	while ( num != 0 && choice != 0 )
 	{
-		cmd( "set a [.f.t.t search $direction \"\\{\" $cur $terminal]" );
-		cmd( "if {$a==\"\"} {set a [.f.t.t index $terminal]}" );
-		cmd( "set b [.f.t.t search $direction \"\\}\" $cur $terminal]" );
-		cmd( "if {$b==\"\"} {set b [.f.t.t index $terminal]}" );
-		cmd( "if {$a==$b} {set choice 0}" );
+		cmd( "set a [ .f.t.t search $direction \"\\{\" $cur $terminal ]" );
+		cmd( "if { $a == \"\" } { set a [ .f.t.t index $terminal ] }" );
+		cmd( "set b [ .f.t.t search $direction \"\\}\" $cur $terminal ]" );
+		cmd( "if { $b == \"\" } { set b [.f.t.t index $terminal] }" );
+		cmd( "if { $a == $b } { set choice 0 }" );
 		if ( choice == 0 )
 			goto loop;
 
 		if ( num > 0 )
-			cmd( "if {[.f.t.t compare $a < $b]} {set num [expr $num + 1]; set cur [.f.t.t index \"$a+1char\"]} {set num [expr $num - 1]; set cur [.f.t.t index \"$b+1char\"]}" );
+			cmd( "if [ .f.t.t compare $a < $b ] { set num [ expr $num + 1 ]; set cur [ .f.t.t index \"$a+1char\" ] } { set num [ expr $num - 1 ]; set cur [ .f.t.t index \"$b+1char\" ] }" );
 		else
-			cmd( "if {[.f.t.t compare $a > $b]} {set num [expr $num + 1]; set cur [.f.t.t index $a]} {set num [expr $num - 1]; set cur [.f.t.t index $b]}" );
+			cmd( "if [ .f.t.t compare $a > $b ] { set num [ expr $num + 1 ]; set cur [ .f.t.t index $a ] } { set num [ expr $num - 1 ]; set cur [ .f.t.t index $b ] }" );
 
 
 	}
 
 	choice = 0;
 
-	cmd( " if { [string compare $sign \"+\"]==0 } {.f.t.t tag add sel \"$cur - 1char\" $cur ; set num 1} {.f.t.t tag add sel $cur \"$cur + 1char\"; set num 0}" );
+	cmd( " if { ! [ string compare $sign \"+\" ] } { .f.t.t tag add sel \"$cur - 1char\" $cur ; set num 1 } { .f.t.t tag add sel $cur \"$cur + 1char\"; set num 0 }" );
 
 	cmd( ".f.t.t see $cur" );
 	goto loop;
 }
 
-// MACRO VERSION
 // Insert a LSD macro, to be used in LSD equations' code
-if ( choice == 28 && macro )
+if ( choice == 28 )
 {
 	cmd( "set res 26" );
 
 	cmd( "newtop .a \"Insert LSD macro\" { set choice 2 }" );
 
-	cmd( "label .a.tit -text \"Available LSD macros\"" );
+	cmd( "ttk::label .a.tit -text \"Available LSD macros\"" );
 
-	cmd( "frame .a.r -bd 2 -relief groove" );
-	cmd( "radiobutton .a.r.equ -text \"EQUATION - insert a new LSD equation\" -underline 0 -variable res -value 25" );
-	cmd( "radiobutton .a.r.cal -text \"V(...) - request the value of a variable\" -underline 0 -variable res -value 26" );
-	cmd( "radiobutton .a.r.for -text \"CYCLE - insert a cycle over a group of objects\" -underline 0 -variable res -value 27" );
-	cmd( "radiobutton .a.r.sum -text \"SUM - compute the sum of a variable over a set of objects\" -underline 1 -variable res -value 56" );
-	cmd( "radiobutton .a.r.incr -text \"INCR - increment the value of a parameter\" -underline 0 -variable res -value 40" );
-	cmd( "radiobutton .a.r.mult -text \"MULT - multiply the value of a parameter\" -underline 0 -variable res -value 45" );
-	cmd( "radiobutton .a.r.sear -text \"SEARCH - search the first instance an object type\" -underline 2 -variable res -value 55" );
-	cmd( "radiobutton .a.r.scnd -text \"SEARCH_CND - conditional search a specific object\" -underline 0 -variable res -value 30" );
-	cmd( "radiobutton .a.r.lqs -text \"SORT - sort a group of objects\" -underline 3 -variable res -value 31" );
-	cmd( "radiobutton .a.r.rndo -text \"RNDDRAW - draw an object\" -underline 1 -variable res -value 54" );
-	cmd( "radiobutton .a.r.wri -text \"WRITE - overwrite a variable or parameter with a new value\" -underline 0 -variable res -value 29" );
-	cmd( "radiobutton .a.r.addo -text \"ADDOBJ - add a new object\" -underline 3 -variable res -value 52" );
-	cmd( "radiobutton .a.r.delo -text \"DELETE - delete an object\" -underline 0 -variable res -value 53" );
-	cmd( "radiobutton .a.r.net -text \"Network macros\" -underline 6 -variable res -value 72" );
-	cmd( "radiobutton .a.r.math -text \"Mathematical functions\" -underline 12 -variable res -value 51" );
+	cmd( "ttk::frame .a.r -borderwidth 1 -relief solid" );
+	cmd( "ttk::radiobutton .a.r.equ -text \"EQUATION - insert a new LSD equation\" -underline 0 -variable res -value 25" );
+	cmd( "ttk::radiobutton .a.r.cal -text \"V(...) - request the value of a variable\" -underline 0 -variable res -value 26" );
+	cmd( "ttk::radiobutton .a.r.for -text \"CYCLE - insert a cycle over a group of objects\" -underline 0 -variable res -value 27" );
+	cmd( "ttk::radiobutton .a.r.sum -text \"SUM - compute the sum of a variable over a set of objects\" -underline 1 -variable res -value 56" );
+	cmd( "ttk::radiobutton .a.r.incr -text \"INCR - increment the value of a parameter\" -underline 0 -variable res -value 40" );
+	cmd( "ttk::radiobutton .a.r.mult -text \"MULT - multiply the value of a parameter\" -underline 0 -variable res -value 45" );
+	cmd( "ttk::radiobutton .a.r.sear -text \"SEARCH - search the first instance an object type\" -underline 2 -variable res -value 55" );
+	cmd( "ttk::radiobutton .a.r.scnd -text \"SEARCH_CND - conditional search a specific object\" -underline 0 -variable res -value 30" );
+	cmd( "ttk::radiobutton .a.r.lqs -text \"SORT - sort a group of objects\" -underline 3 -variable res -value 31" );
+	cmd( "ttk::radiobutton .a.r.rndo -text \"RNDDRAW - draw an object\" -underline 1 -variable res -value 54" );
+	cmd( "ttk::radiobutton .a.r.wri -text \"WRITE - overwrite a variable or parameter with a new value\" -underline 0 -variable res -value 29" );
+	cmd( "ttk::radiobutton .a.r.addo -text \"ADDOBJ - add a new object\" -underline 3 -variable res -value 52" );
+	cmd( "ttk::radiobutton .a.r.delo -text \"DELETE - delete an object\" -underline 0 -variable res -value 53" );
+	cmd( "ttk::radiobutton .a.r.net -text \"Network macros\" -underline 6 -variable res -value 72" );
+	cmd( "ttk::radiobutton .a.r.math -text \"Mathematical functions\" -underline 12 -variable res -value 51" );
 
 	cmd( "pack .a.r.equ .a.r.cal .a.r.for .a.r.sum .a.r.incr .a.r.mult .a.r.sear .a.r.scnd .a.r.lqs .a.r.rndo .a.r.wri .a.r.addo .a.r.delo .a.r.net .a.r.math -anchor w" );
 	cmd( "pack .a.tit .a.r -padx 5 -pady 5" );
 
 	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LMM.html#LsdScript } { set choice 2 }" );
 
-	cmd( "bind .a <KeyPress-e> {.a.r.equ invoke; set choice 1}; bind .a <KeyPress-E> {.a.r.equ invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-v> {.a.r.cal invoke; set choice 1}; bind .a <KeyPress-V> {.a.r.cal invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-u> {.a.r.sum invoke; set choice 1}; bind .a <KeyPress-U> {.a.r.sum invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-s> {.a.r.scnd invoke; set choice 1}; bind .a <KeyPress-S> {.a.r.scnd invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-a> {.a.r.sear invoke; set choice 1}; bind .a <KeyPress-A> {.a.r.sear invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-w> {.a.r.wri invoke; set choice 1}; bind .a <KeyPress-W> {.a.r.wri invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-c> {.a.r.for invoke; set choice 1}; bind .a <KeyPress-C> {.a.r.for invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-t> {.a.r.lqs invoke; set choice 1}; bind .a <KeyPress-T> {.a.r.lqs invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-o> {.a.r.addo invoke; set choice 1}; bind .a <KeyPress-O> {.a.r.addo invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-d> {.a.r.delo invoke; set choice 1}; bind .a <KeyPress-D> {.a.r.delo invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-i> {.a.r.incr invoke; set choice 1}; bind .a <KeyPress-I> {.a.r.incr invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-m> {.a.r.mult invoke; set choice 1}; bind .a <KeyPress-M> {.a.r.mult invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}; bind .a <KeyPress-H> {.a.r.math invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-k> {.a.r.net invoke; set choice 1}; bind .a <KeyPress-K> {.a.r.net invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}; bind .a <KeyPress-N> {.a.r.rndo invoke; set choice 1}" );
-	cmd( "bind .a <Return> { .a.b.ok invoke }" );
-
-	cmd( "showtop .a" );
-	cmd( "focus .a.r.cal" );
-
-	choice = 0;
-	while ( choice == 0 )
-		Tcl_DoOneEvent( 0 );
-
-	cmd( "destroytop .a" );
-
-	if ( choice == 2 )
-	{
-		choice = 0;
-		goto loop;
-	}
-
-	cmd( "set choice $res" );
-	goto loop;
-}
-
-// C++ VERSION
-// Insert a LSD script, to be used in LSD equations' code
-if ( choice == 28 && ! macro )
-{
-	cmd( "set res 26" );
-
-	cmd( "newtop .a \"Insert LSD Script\" { set choice 2 }" );
-
-	cmd( "label .a.tit -text \"Available LSD scripts\" -justify center" );
-
-	cmd( "frame .a.r -bd 2 -relief groove" );
-	cmd( "radiobutton .a.r.equ -text \"LSD equation/function - insert a new LSD equation\" -underline 0 -variable res -value 25" );
-	cmd( "radiobutton .a.r.cal -text \"cal - request the value of a variable\" -underline 0 -variable res -value 26" );
-	cmd( "radiobutton .a.r.for -text \"for - insert a cycle over a group of objects\" -underline 0 -variable res -value 27" );
-	cmd( "radiobutton .a.r.sum -text \"sum - compute the sum of a variable over a set of objects\" -underline 1 -variable res -value 56" );
-	cmd( "radiobutton .a.r.incr -text \"increment - increment the value of a parameter\" -underline 0 -variable res -value 40" );
-	cmd( "radiobutton .a.r.mult -text \"multiply - multiply the value of a parameter\" -underline 0 -variable res -value 45" );
-	cmd( "radiobutton .a.r.sear -text \"search - search the first instance an object type\" -underline 3 -variable res -value 55" );
-	cmd( "radiobutton .a.r.scnd -text \"search_var_cond - conditional search a specific object\" -underline 0 -variable res -value 30" );
-	cmd( "radiobutton .a.r.lqs -text \"lsdqsort - sort a group of objects\" -underline 7 -variable res -value 31" );
-	cmd( "radiobutton .a.r.rndo -text \"draw_rnd - draw an object\" -underline 6 -variable res -value 54" );
-	cmd( "radiobutton .a.r.wri -text \"write - overwrite a variable or parameter with a new value\" -underline 0 -variable res -value 29" );
-	cmd( "radiobutton .a.r.addo -text \"add_n_objects2 - add new objects\" -underline 0 -variable res -value 52" );
-	cmd( "radiobutton .a.r.delo -text \"delete_obj - delete an object\" -underline 0 -variable res -value 53" );
-	cmd( "radiobutton .a.r.math -text \"Insert a mathematical function\" -underline 12 -variable res -value 51" );
-
-	cmd( "pack .a.r.equ .a.r.cal .a.r.for .a.r.sum .a.r.incr .a.r.mult .a.r.sear .a.r.scnd .a.r.lqs .a.r.rndo .a.r.wri .a.r.addo .a.r.delo .a.r.math -anchor w" );
-	cmd( "pack .a.tit .a.r -padx 5 -pady 5" );
-
-	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LMM.html#LsdScript } { set choice 2 }" );
-
-	cmd( "bind .a <KeyPress-e> {.a.r.equ invoke; set choice 1}; bind .a <KeyPress-E> {.a.r.equ invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-c> {.a.r.cal invoke; set choice 1}; bind .a <KeyPress-C> {.a.r.cal invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-u> {.a.r.sum invoke; set choice 1}; bind .a <KeyPress-U> {.a.r.sum invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-s> {.a.r.scnd invoke; set choice 1}; bind .a <KeyPress-S> {.a.r.scnd invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-r> {.a.r.sear invoke; set choice 1}; bind .a <KeyPress-R> {.a.r.sear invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-w> {.a.r.wri invoke; set choice 1}; bind .a <KeyPress-W> {.a.r.wri invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-f> {.a.r.for invoke; set choice 1}; bind .a <KeyPress-F> {.a.r.for invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-t> {.a.r.lqs invoke; set choice 1}; bind .a <KeyPress-T> {.a.r.lqs invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-a> {.a.r.addo invoke; set choice 1}; bind .a <KeyPress-A> {.a.r.addo invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-d> {.a.r.delo invoke; set choice 1}; bind .a <KeyPress-D> {.a.r.delo invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-i> {.a.r.incr invoke; set choice 1}; bind .a <KeyPress-I> {.a.r.incr invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-m> {.a.r.mult invoke; set choice 1}; bind .a <KeyPress-M> {.a.r.mult invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}; bind .a <KeyPress-H> {.a.r.math invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}; bind .a <KeyPress-N> {.a.r.rndo invoke; set choice 1}" );
+	cmd( "bind .a <KeyPress-e> { .a.r.equ invoke; set choice 1 }; bind .a <KeyPress-E> { .a.r.equ invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-v> { .a.r.cal invoke; set choice 1 }; bind .a <KeyPress-V> { .a.r.cal invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-u> { .a.r.sum invoke; set choice 1 }; bind .a <KeyPress-U> { .a.r.sum invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-s> { .a.r.scnd invoke; set choice 1 }; bind .a <KeyPress-S> { .a.r.scnd invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-a> { .a.r.sear invoke; set choice 1 }; bind .a <KeyPress-A> { .a.r.sear invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-w> { .a.r.wri invoke; set choice 1 }; bind .a <KeyPress-W> { .a.r.wri invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-c> { .a.r.for invoke; set choice 1 }; bind .a <KeyPress-C> { .a.r.for invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-t> { .a.r.lqs invoke; set choice 1 }; bind .a <KeyPress-T> { .a.r.lqs invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-o> { .a.r.addo invoke; set choice 1 }; bind .a <KeyPress-O> { .a.r.addo invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-d> { .a.r.delo invoke; set choice 1 }; bind .a <KeyPress-D> { .a.r.delo invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-i> { .a.r.incr invoke; set choice 1 }; bind .a <KeyPress-I> { .a.r.incr invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-m> { .a.r.mult invoke; set choice 1 }; bind .a <KeyPress-M> { .a.r.mult invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-h> { .a.r.math invoke; set choice 1 }; bind .a <KeyPress-H> { .a.r.math invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-k> { .a.r.net invoke; set choice 1 }; bind .a <KeyPress-K> { .a.r.net invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-n> { .a.r.rndo invoke; set choice 1 }; bind .a <KeyPress-N> { .a.r.rndo invoke; set choice 1 }" );
 	cmd( "bind .a <Return> { .a.b.ok invoke }" );
 
 	cmd( "showtop .a" );
@@ -2316,20 +2212,20 @@ if ( choice == 51 )
 
 	cmd( "newtop .a \"Math Functions\" { set choice 2 }" );
 
-	cmd( "frame .a.e" );
-	cmd( "label .a.e.l -text \"Function parameter(s)\"" );
+	cmd( "ttk::frame .a.e" );
+	cmd( "ttk::label .a.e.l -text \"Function parameter(s)\"" );
 
-	cmd( "frame .a.e.e" );
+	cmd( "ttk::frame .a.e.e" );
 
-	cmd( "frame .a.e.e.e1" );
-	cmd( "label .a.e.e.e1.l -text Minimum" );
-	cmd( "entry .a.e.e.e1.e -width 20 -justify center -textvariable value1" );
+	cmd( "ttk::frame .a.e.e.e1" );
+	cmd( "ttk::label .a.e.e.e1.l -text Minimum" );
+	cmd( "ttk::entry .a.e.e.e1.e -width 20 -justify center -textvariable value1" );
 	cmd( "bind .a.e.e.e1.e <Return> { if [ string equal [ .a.e.e.e2.e cget -state ] normal ] { focus .a.e.e.e2.e; .a.e.e.e2.e selection range 0 end } { .a.b.ok invoke } }" );
 	cmd( "pack .a.e.e.e1.l .a.e.e.e1.e" );
 
-	cmd( "frame .a.e.e.e2" );
-	cmd( "label .a.e.e.e2.l -text Maximum" );
-	cmd( "entry .a.e.e.e2.e -width 20 -justify center -textvariable value2" );
+	cmd( "ttk::frame .a.e.e.e2" );
+	cmd( "ttk::label .a.e.e.e2.l -text Maximum" );
+	cmd( "ttk::entry .a.e.e.e2.e -width 20 -justify center -textvariable value2" );
 	cmd( "bind .a.e.e.e2.e <Return> { .a.b.ok invoke }" );
 	cmd( "pack .a.e.e.e2.l .a.e.e.e2.e" );
 
@@ -2337,28 +2233,28 @@ if ( choice == 51 )
 
 	cmd( "pack .a.e.l .a.e.e" );
 
-	cmd( "frame .a.f -bd 2 -relief groove" );
-	cmd( "radiobutton .a.f.r1 -text \"Square root\" -variable res -value 1 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {sqrt($value1)} }" );
-	cmd( "radiobutton .a.f.r2 -text \"Power\" -variable res -value 2 -command {.a.e.e.e1.l conf -text \"Base\"; .a.e.e.e2.l conf -text \"Exponent\"; .a.e.e.e2.e conf -state normal; set str {pow($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r3 -text \"Exponential\" -variable res -value 3 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {exp($value1)} }" );
-	cmd( "radiobutton .a.f.r4 -text \"Logarithm\" -variable res -value 4 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {log($value1)} }" );
-	cmd( "radiobutton .a.f.r5 -text \"Absolute value\" -variable res -value 5 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {abs($value1)} }" );
-	cmd( "radiobutton .a.f.r6 -text \"Minimum value\" -variable res -value 6 -command {.a.e.e.e1.l conf -text \"Value 1\"; .a.e.e.e2.l conf -text \"Value 2\"; .a.e.e.e2.e conf -state normal; set str {min($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r7 -text \"Maximum value\" -variable res -value 7 -command {.a.e.e.e1.l conf -text \"Value 1\"; .a.e.e.e2.l conf -text \"Value 2\"; .a.e.e.e2.e conf -state normal; set str {max($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r8 -text \"Round to closest integer\" -variable res -value 8 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {round($value1)} }" );
-	cmd( "radiobutton .a.f.r9 -text \"Uniform random draw\" -variable res -value 9 -command {.a.e.e.e1.l conf -text Minimum; .a.e.e.e2.l conf -text Maximum; .a.e.e.e2.e conf -state normal; set str {uniform($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r10 -text \"Integer uniform random draw\" -variable res -value 10 -command {.a.e.e.e1.l conf -text Minimum; .a.e.e.e2.l conf -text Maximum; .a.e.e.e2.e conf -state normal; set str {uniform_int($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r11 -text \"Bernoulli random draw\" -variable res -value 11 -command {.a.e.e.e1.l conf -text Probability; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {bernoulli($value1)} }" );
-	cmd( "radiobutton .a.f.r12 -text \"Poisson random draw\" -variable res -value 12 -command {.a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {poisson($value1)} }" );
-	cmd( "radiobutton .a.f.r13 -text \"Normal random draw\" -variable res -value 13 -command {.a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text \"Std. deviation\"; .a.e.e.e2.e conf -state normal; set str {norm($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r14 -text \"Lognormal random draw\" -variable res -value 14 -command {.a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text \"Std. deviation\"; .a.e.e.e2.e conf -state normal; set str {lnorm($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r15 -text \"Beta random draw\" -variable res -value 15 -command {.a.e.e.e1.l conf -text Alpha; .a.e.e.e2.l conf -text Beta; .a.e.e.e2.e conf -state normal; set str {beta($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r16 -text \"Gamma random draw\" -variable res -value 16 -command {.a.e.e.e1.l conf -text Alpha; .a.e.e.e2.l conf -text Beta; .a.e.e.e2.e conf -state normal; set str {gamma($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r17 -text \"Pareto random draw\" -variable res -value 17 -command {.a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text Alpha; .a.e.e.e2.e conf -state normal; set str {pareto($value1, $value2)} }" );
+	cmd( "ttk::frame .a.f -borderwidth 1 -relief solid" );
+	cmd( "ttk::radiobutton .a.f.r1 -text \"Square root\" -variable res -value 1 -command { .a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {sqrt($value1)} }" );
+	cmd( "ttk::radiobutton .a.f.r2 -text \"Power\" -variable res -value 2 -command { .a.e.e.e1.l conf -text \"Base\"; .a.e.e.e2.l conf -text \"Exponent\"; .a.e.e.e2.e conf -state normal; set str {pow($value1, $value2)} }" );
+	cmd( "ttk::radiobutton .a.f.r3 -text \"Exponential\" -variable res -value 3 -command { .a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {exp($value1)} }" );
+	cmd( "ttk::radiobutton .a.f.r4 -text \"Logarithm\" -variable res -value 4 -command { .a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {log($value1)} }" );
+	cmd( "ttk::radiobutton .a.f.r5 -text \"Absolute value\" -variable res -value 5 -command { .a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {abs($value1)} }" );
+	cmd( "ttk::radiobutton .a.f.r6 -text \"Minimum value\" -variable res -value 6 -command { .a.e.e.e1.l conf -text \"Value 1\"; .a.e.e.e2.l conf -text \"Value 2\"; .a.e.e.e2.e conf -state normal; set str {min($value1, $value2)} }" );
+	cmd( "ttk::radiobutton .a.f.r7 -text \"Maximum value\" -variable res -value 7 -command { .a.e.e.e1.l conf -text \"Value 1\"; .a.e.e.e2.l conf -text \"Value 2\"; .a.e.e.e2.e conf -state normal; set str {max($value1, $value2)} }" );
+	cmd( "ttk::radiobutton .a.f.r8 -text \"Round to closest integer\" -variable res -value 8 -command { .a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {round($value1)} }" );
+	cmd( "ttk::radiobutton .a.f.r9 -text \"Uniform random draw\" -variable res -value 9 -command { .a.e.e.e1.l conf -text Minimum; .a.e.e.e2.l conf -text Maximum; .a.e.e.e2.e conf -state normal; set str {uniform($value1, $value2)} }" );
+	cmd( "ttk::radiobutton .a.f.r10 -text \"Integer uniform random draw\" -variable res -value 10 -command { .a.e.e.e1.l conf -text Minimum; .a.e.e.e2.l conf -text Maximum; .a.e.e.e2.e conf -state normal; set str {uniform_int($value1, $value2)} }" );
+	cmd( "ttk::radiobutton .a.f.r11 -text \"Bernoulli random draw\" -variable res -value 11 -command { .a.e.e.e1.l conf -text Probability; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {bernoulli($value1)} }" );
+	cmd( "ttk::radiobutton .a.f.r12 -text \"Poisson random draw\" -variable res -value 12 -command { .a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {poisson($value1)} }" );
+	cmd( "ttk::radiobutton .a.f.r13 -text \"Normal random draw\" -variable res -value 13 -command { .a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text \"Std. deviation\"; .a.e.e.e2.e conf -state normal; set str {norm($value1, $value2)} }" );
+	cmd( "ttk::radiobutton .a.f.r14 -text \"Lognormal random draw\" -variable res -value 14 -command { .a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text \"Std. deviation\"; .a.e.e.e2.e conf -state normal; set str {lnorm($value1, $value2)} }" );
+	cmd( "ttk::radiobutton .a.f.r15 -text \"Beta random draw\" -variable res -value 15 -command { .a.e.e.e1.l conf -text Alpha; .a.e.e.e2.l conf -text Beta; .a.e.e.e2.e conf -state normal; set str {beta($value1, $value2)} }" );
+	cmd( "ttk::radiobutton .a.f.r16 -text \"Gamma random draw\" -variable res -value 16 -command { .a.e.e.e1.l conf -text Alpha; .a.e.e.e2.l conf -text Beta; .a.e.e.e2.e conf -state normal; set str {gamma($value1, $value2)} }" );
+	cmd( "ttk::radiobutton .a.f.r17 -text \"Pareto random draw\" -variable res -value 17 -command { .a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text Alpha; .a.e.e.e2.e conf -state normal; set str {pareto($value1, $value2)} }" );
 
 	cmd( "pack .a.f.r1 .a.f.r2 .a.f.r3 .a.f.r4 .a.f.r5 .a.f.r6 .a.f.r7 .a.f.r8 .a.f.r9 .a.f.r10 .a.f.r11 .a.f.r12 .a.f.r13 .a.f.r14 .a.f.r15 .a.f.r16 .a.f.r17 -anchor w" );
 
-	cmd( "label .a.more -text \"(see Help for more functions/distributions)\"" );
+	cmd( "ttk::label .a.more -text \"(see Help for more functions/distributions)\"" );
 
 	cmd( "pack .a.e .a.f .a.more -padx 5 -pady 5" );
 
@@ -2395,9 +2291,9 @@ if ( choice == 25 )
 
 	cmd( "newtop .a \"Insert Equation\" { set choice 2 }" );
 
-	cmd( "frame .a.label" );
-	cmd( "label .a.label.l -text \"Variable/function name\"" );
-	cmd( "entry .a.label.n -width 20 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.label" );
+	cmd( "ttk::label .a.label.l -text \"Variable/function name\"" );
+	cmd( "ttk::entry .a.label.n -width 20 -textvariable v_label -justify center" );
 	cmd( "pack .a.label.l .a.label.n" );
 
 	cmd( "bind .a.label.n <Return> { focus .a.b.ok }" );
@@ -2423,27 +2319,14 @@ if ( choice == 25 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	if ( macro )
-	{
-		cmd( ".f.t.t insert insert \"EQUATION(\\\"$v_label\\\")\\n\"" );
-		cmd( ".f.t.t insert insert \"/*\\nComment\\n*/\\n\\n\"" );
-		cmd( ".f.t.t insert insert \"RESULT( )\\n\"" );
-		cmd( ".f.t.t mark set insert \"$a + 2 line\"" );
-		cmd( ".f.t.t tag add sel insert \"insert + 7 char\"" );
-	}
-	else
-	{
-		cmd( ".f.t.t insert insert \"if (! strcmp(label,\\\"$v_label\\\") )\\n\"" );
-		cmd( ".f.t.t insert insert \"{\\n\"" );
-		cmd( ".f.t.t insert insert \"/*\\nComment\\n*/\\n\"" );
-		cmd( ".f.t.t insert insert \"\\n\"" );
-		cmd( ".f.t.t insert insert \"res=;\\n\"" );
-		cmd( ".f.t.t insert insert \"goto end;\\n}\\n\"" );
-		cmd( ".f.t.t mark set insert \"$a + 3 line\"" );
-		cmd( ".f.t.t tag add sel insert \"insert + 7 char\"" );
-	}
+	cmd( ".f.t.t insert insert \"EQUATION(\\\"$v_label\\\")\\n\"" );
+	cmd( ".f.t.t insert insert \"/*\\nComment\\n*/\\n\\n\"" );
+	cmd( ".f.t.t insert insert \"RESULT( )\\n\"" );
+	cmd( ".f.t.t mark set insert \"$a + 2 line\"" );
+	cmd( ".f.t.t tag add sel insert \"insert + 7 char\"" );
 
 	v_counter = 0;
+	
 	cmd( ".f.t.t see insert" );
 
 	recolor_all = true;
@@ -2451,7 +2334,7 @@ if ( choice == 25 )
 	goto loop;
 }
 
-// insert a v[0]=p->cal("Var",0)
+// insert a V macro
 if ( choice == 26 )
 {
 	cmd( "set v_num %d", v_counter );
@@ -2459,32 +2342,29 @@ if ( choice == 26 )
 	cmd( "set v_lag 0" );
 	cmd( "set v_obj p" );
 
-	if ( macro )
-		cmd( "newtop .a \"Insert 'V(...)' Command\" { set choice 2 }" );
-	else
-		cmd( "newtop .a \"Insert 'cal'\" { set choice 2 }" );
+	cmd( "newtop .a \"Insert 'V(...)' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.v" );
-	cmd( "label .a.v.l -text \"Number v\\\[x\\] to assign to\"" );
-	cmd( "entry .a.v.e -width 2 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.v" );
+	cmd( "ttk::label .a.v.l -text \"Number v\\\[x\\] to assign to\"" );
+	cmd( "ttk::entry .a.v.e -width 2 -textvariable v_num -justify center" );
 	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Variable or parameter to retrieve\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Variable or parameter to retrieve\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.l" );
-	cmd( "label .a.l.l -text \"Lag to use\"" );
-	cmd( "entry .a.l.e -width 2 -textvariable v_lag -justify center" );
+	cmd( "ttk::frame .a.l" );
+	cmd( "ttk::label .a.l.l -text \"Lag to use\"" );
+	cmd( "ttk::entry .a.l.e -width 2 -textvariable v_lag -justify center" );
 	cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.l.l .a.l.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Parent object\"" );
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Parent object\"" );
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -2510,25 +2390,19 @@ if ( choice == 26 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	if ( macro )
-	{
-		cmd( "if {$v_num!=\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\] = \"}" );
+	cmd( "if { $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
 
-		cmd( "if {$v_lag==0 && $v_obj==\"p\"} { .f.t.t insert insert \"V(\\\"$v_label\\\")\"}" );
-		cmd( "if {$v_lag!=0 && $v_obj==\"p\"} { .f.t.t insert insert \"VL(\\\"$v_label\\\", $v_lag)\"}" );
-		cmd( "if {$v_lag==0 && $v_obj!=\"p\"} { .f.t.t insert insert \"VS($v_obj, \\\"$v_label\\\")\"}" );
-		cmd( "if {$v_lag!=0 && $v_obj!=\"p\" && [string is integer -strict $v_lag]} { .f.t.t insert insert \"VLS($v_obj, \\\"$v_label\\\", $v_lag)\"}" );
-	}
-	else
-	{
-		cmd( "if {$v_num==\"\" && [string is integer -strict $v_num] && [string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj->cal(\\\"$v_label\\\", $v_lag)\"} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->cal(\\\"$v_label\\\", $v_lag)\"; incr v_num}" );
-	}
+	cmd( "if { $v_lag == 0 && $v_obj == \"p\" } { .f.t.t insert insert \"V(\\\"$v_label\\\")\" }" );
+	cmd( "if { $v_lag != 0 && $v_obj == \"p\" } { .f.t.t insert insert \"VL(\\\"$v_label\\\", $v_lag)\" }" );
+	cmd( "if { $v_lag == 0 && $v_obj != \"p\" } { .f.t.t insert insert \"VS($v_obj, \\\"$v_label\\\")\" }" );
+	cmd( "if { $v_lag != 0 && $v_obj != \"p\" && [ string is integer -strict $v_lag ] } { .f.t.t insert insert \"VLS($v_obj, \\\"$v_label\\\", $v_lag)\" }" );
 
-	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\"}" );
+	cmd( "if { $v_num != \"\" } { .f.t.t insert insert \";\" }" );
 
-	cmd( "if {$v_num==\"\"} { set num -1} {set num $v_num}" );
-	if (num!=-1)
-	 v_counter=++num;
+	cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
+	
+	if ( num != -1 )
+		v_counter = ++num;
 
 	cmd( ".f.t.t see insert" );
 
@@ -2536,33 +2410,30 @@ if ( choice == 26 )
 	goto loop;
 }
 
-// insert a cycle for (cur=p->search("Label"); cur!=NULL; cur=go_brother(cur) )
+// insert a CYCLE macro
 if ( choice == 27 )
 {
 	cmd( "set v_label \"\"" );
 	cmd( "set v_obj cur" );
 	cmd( "set v_par p" );
 
-	if ( macro )
-		cmd( "newtop .a \"Insert 'CYCLE' Command\" { set choice 2 }" );
-	else
-		cmd( "newtop .a \"Insert 'for' Cycle\" { set choice 2 }" );
+	cmd( "newtop .a \"Insert 'CYCLE' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Object to cycle through\"" );
-	cmd( "entry .a.o.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Object to cycle through\"" );
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.c.e; .a.c.e selection range 0 end }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
-	cmd( "frame .a.c" );
-	cmd( "label .a.c.l -text \"Cycling pointer\"" );
-	cmd( "entry .a.c.e -width 6 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.c" );
+	cmd( "ttk::label .a.c.l -text \"Cycling pointer\"" );
+	cmd( "ttk::entry .a.c.e -width 6 -textvariable v_obj -justify center" );
 	cmd( "bind .a.c.e <Return> { focus .a.p.e; .a.p.e selection range 0 end }" );
 	cmd( "pack .a.c.l .a.c.e" );
 
-	cmd( "frame .a.p" );
-	cmd( "label .a.p.l -text \"Parent object\"" );
-	cmd( "entry .a.p.e -width 25 -textvariable v_par -justify center" );
+	cmd( "ttk::frame .a.p" );
+	cmd( "ttk::label .a.p.l -text \"Parent object\"" );
+	cmd( "ttk::entry .a.p.e -width 25 -textvariable v_par -justify center" );
 	cmd( "bind .a.p.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.p.l .a.p.e" );
 
@@ -2588,50 +2459,40 @@ if ( choice == 27 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	if ( macro )
+	cmd( "if { $v_par == \"p\" } { .f.t.t insert insert \"CYCLE($v_obj, \\\"$v_label\\\")\\n\" } { .f.t.t insert insert \"CYCLES($v_par, $v_obj, \\\"$v_label\\\")\\n\" }" );
+
+	cmd( "set in [ .f.t.t index insert ]" );
+	cmd( "scan $in %%d.%%d line col" );
+	cmd( "set line [ expr $line -1 ]" );
+	cmd( "set s [ .f.t.t get $line.0 $line.end ]" );
+	s = ( char * ) Tcl_GetVar( inter, "s", 0 );
+	for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
+		str[ i ] = s[ i ];
+	if ( i > 0 )
 	{
-		cmd( "if { $v_par == \"p\" } { .f.t.t insert insert \"CYCLE($v_obj, \\\"$v_label\\\")\\n\" } { .f.t.t insert insert \"CYCLES($v_par, $v_obj, \\\"$v_label\\\")\\n\" }" );
-
-		cmd( "set in [ .f.t.t index insert ]" );
-		cmd( "scan $in %%d.%%d line col" );
-		cmd( "set line [ expr $line -1 ]" );
-		cmd( "set s [ .f.t.t get $line.0 $line.end ]" );
-		s = ( char * ) Tcl_GetVar( inter, "s", 0 );
-		for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
-			str[ i ] = s[ i ];
-		if ( i > 0 )
-		{
-			str[ i ] = '\0';
-			cmd( ".f.t.t insert insert \"%s\"", str );
-			cmd( ".f.t.t insert insert \"{\\n\"" );
-			cmd( ".f.t.t insert insert \"%s\\t\"", str );
-			cmd( "set b [ .f.t.t index insert ]" );
-			cmd( ".f.t.t insert insert \"\\n%s\"", str );
-		}
-		else
-		{
-			cmd( ".f.t.t insert insert \"{\\n\"" );
-			cmd( ".f.t.t insert insert \"\\t\"" );
-			cmd( "set b [ .f.t.t index insert ]" );
-			cmd( ".f.t.t insert insert \"\\n\"" );
-		}
-
-		cmd( ".f.t.t insert insert \"}\\n\"" );
-		cmd( ".f.t.t mark set insert \"$b\"" );
+		str[ i ] = '\0';
+		cmd( ".f.t.t insert insert \"%s\"", str );
+		cmd( ".f.t.t insert insert \"{\\n\"" );
+		cmd( ".f.t.t insert insert \"%s\\t\"", str );
+		cmd( "set b [ .f.t.t index insert ]" );
+		cmd( ".f.t.t insert insert \"\\n%s\"", str );
 	}
 	else
 	{
-		cmd( ".f.t.t insert insert \"for ($v_obj = $v_par->search(\\\"$v_label\\\"); $v_obj != NULL; $v_obj = go_brother($v_obj) )\\n\"" );
-		cmd( ".f.t.t insert insert \"{\\n\\t\\n}\\n\"" );
-		cmd( ".f.t.t mark set insert \"$a + 2 line + 2 char\"" );
+		cmd( ".f.t.t insert insert \"{\\n\"" );
+		cmd( ".f.t.t insert insert \"\\t\"" );
+		cmd( "set b [ .f.t.t index insert ]" );
+		cmd( ".f.t.t insert insert \"\\n\"" );
 	}
-	cmd( ".f.t.t see insert" );
+
+	cmd( ".f.t.t insert insert \"}\\n\"" );
+	cmd( ".f.t.t mark set insert \"$b\"" );
 
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
 
-// insert a v[0]=p->increment("Var",value)
+// insert a INCR macro
 if ( choice == 40 )
 {
 	cmd( "set v_num %d", v_counter );
@@ -2639,32 +2500,29 @@ if ( choice == 40 )
 	cmd( "set v_val 1" );
 	cmd( "set v_obj p" );
 
-	if ( macro )
-		cmd( "newtop .a \"Insert 'INCR' Command\" { set choice 2 }" );
-	else
-		cmd( "newtop .a \"Insert 'increment' Command\" { set choice 2 }" );
+	cmd( "newtop .a \"Insert 'INCR' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.v" );
-	cmd( "label .a.v.l -text \"Number v\\\[x\\] to assign the result after increment\"" );
-	cmd( "entry .a.v.e -width 2 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.v" );
+	cmd( "ttk::label .a.v.l -text \"Number v\\\[x\\] to assign the result after increment\"" );
+	cmd( "ttk::entry .a.v.e -width 2 -textvariable v_num -justify center" );
 	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Variable to increase\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Variable to increase\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.a.e; .a.a.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.a" );
-	cmd( "label .a.a.l -text \"Value to add\"" );
-	cmd( "entry .a.a.e -width 15 -textvariable v_val -justify center" );
+	cmd( "ttk::frame .a.a" );
+	cmd( "ttk::label .a.a.l -text \"Value to add\"" );
+	cmd( "ttk::entry .a.a.e -width 15 -textvariable v_val -justify center" );
 	cmd( "bind .a.a.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.a.l .a.a.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Parent object\"" );
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Parent object\"" );
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -2690,21 +2548,15 @@ if ( choice == 40 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	if ( macro )
-	{
-		cmd( "if {$v_num!=\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\] = \"}" );
-		cmd( "if {$v_obj!=\"p\"} {.f.t.t insert insert \"INCRS($v_obj, \\\"$v_label\\\", $v_val)\"} {.f.t.t insert insert \"INCR(\\\"$v_label\\\", $v_val)\"}" );
-	}
-	else
-	{
-		cmd( "if {$v_num==\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"$v_obj->increment(\\\"$v_label\\\", $v_val)\"} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->increment(\\\"$v_label\\\", $v_val)\";incr v_num}" );
-	}
+	cmd( "if { $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"INCRS($v_obj, \\\"$v_label\\\", $v_val)\" } { .f.t.t insert insert \"INCR(\\\"$v_label\\\", $v_val)\" }" );
 
-	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\"}" );
+	cmd( "if { $v_num != \"\" } { .f.t.t insert insert \";\" }" );
 
-	cmd( "if {$v_num==\"\" } {set num -1} {set num $v_num}" );
-	if (num!=-1)
-	 v_counter=++num;
+	cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
+	
+	if ( num != -1 )
+		v_counter = ++num;
 
 	cmd( ".f.t.t see insert" );
 
@@ -2712,7 +2564,7 @@ if ( choice == 40 )
 	goto loop;
 }
 
-// insert a v[0]=p->multiply("Var",0)
+// insert a MULT macro
 if ( choice == 45 )
 {
 	cmd( "set v_num %d", v_counter );
@@ -2720,32 +2572,29 @@ if ( choice == 45 )
 	cmd( "set v_val 1" );
 	cmd( "set v_obj p" );
 
-	if ( macro )
-		cmd( "newtop .a \"Insert 'MULT' Command\" { set choice 2 }" );
-	else
-		cmd( "newtop .a \"Insert 'multiply' Command\" { set choice 2 }" );
+	cmd( "newtop .a \"Insert 'MULT' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.v" );
-	cmd( "label .a.v.l -text \"Number v\\\[x\\] to assign the result after multiplication\"" );
-	cmd( "entry .a.v.e -width 2 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.v" );
+	cmd( "ttk::label .a.v.l -text \"Number v\\\[x\\] to assign the result after multiplication\"" );
+	cmd( "ttk::entry .a.v.e -width 2 -textvariable v_num -justify center" );
 	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Variable to multiply\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Variable to multiply\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.a.e; .a.a.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.a" );
-	cmd( "label .a.a.l -text \"Value to multiply\"" );
-	cmd( "entry .a.a.e -width 15 -textvariable v_val -justify center" );
+	cmd( "ttk::frame .a.a" );
+	cmd( "ttk::label .a.a.l -text \"Value to multiply\"" );
+	cmd( "ttk::entry .a.a.e -width 15 -textvariable v_val -justify center" );
 	cmd( "bind .a.a.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.a.l .a.a.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Parent object\"" );
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Parent object\"" );
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -2771,21 +2620,15 @@ if ( choice == 45 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	if ( macro )
-	{
-		cmd( "if {$v_num!=\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\] = \"}" );
-		cmd( "if {$v_obj!=\"p\"} {.f.t.t insert insert \"MULTS($v_obj, \\\"$v_label\\\", $v_val)\"} {.f.t.t insert insert \"MULT(\\\"$v_label\\\", $v_val)\"}" );
-	}
-	else
-	{
-		cmd( "if {$v_num==\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"$v_obj->multiply(\\\"$v_label\\\", $v_val)\"} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->multiply(\\\"$v_label\\\", $v_val)\";incr v_num}" );
-	}
+	cmd( "if { $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"MULTS($v_obj, \\\"$v_label\\\", $v_val)\" } { .f.t.t insert insert \"MULT(\\\"$v_label\\\", $v_val)\" }" );
 
-	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\"}" );
+	cmd( "if { $v_num != \"\" } { .f.t.t insert insert \";\" }" );
 
-	cmd( "if {$v_num==\"\" } {set num -1} {set num $v_num}" );
-	if (num!=-1)
-	 v_counter=++num;
+	cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
+	
+	if ( num != -1 )
+		v_counter = ++num;
 
 	cmd( ".f.t.t see insert" );
 
@@ -2793,7 +2636,7 @@ if ( choice == 45 )
 	goto loop;
 }
 
-// insert a p->write("Var",0,0)
+// insert a WRITE macro
 if ( choice == 29 )
 {
 	cmd( "set v_num 0" );
@@ -2801,32 +2644,29 @@ if ( choice == 29 )
 	cmd( "set v_lag T" );
 	cmd( "set v_obj p" );
 
-	if ( macro )
-		cmd( "newtop .a \"Insert 'WRITE' Command\" { set choice 2 }" );
-	else
-		cmd( "newtop .a \"Insert 'write' Command\" { set choice 2 }" );
+	cmd( "newtop .a \"Insert 'WRITE' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.v" );
-	cmd( "label .a.v.l -text \"Value to write\"" );
-	cmd( "entry .a.v.e -width 15 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.v" );
+	cmd( "ttk::label .a.v.l -text \"Value to write\"" );
+	cmd( "ttk::entry .a.v.e -width 15 -textvariable v_num -justify center" );
 	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Variable or parameter to write\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Variable or parameter to write\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.l" );
-	cmd( "label .a.l.l -text \"Time step appearing as latest computation\"" );
-	cmd( "entry .a.l.e -width 15 -textvariable v_lag -justify center" );
+	cmd( "ttk::frame .a.l" );
+	cmd( "ttk::label .a.l.l -text \"Time step appearing as latest computation\"" );
+	cmd( "ttk::entry .a.l.e -width 15 -textvariable v_lag -justify center" );
 	cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.l.l .a.l.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Parent object\"" );
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Parent object\"" );
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -2852,24 +2692,18 @@ if ( choice == 29 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	if ( macro )
-	{
-		cmd( "if { $v_obj == \"p\" && ( $v_lag == \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITE(\\\"$v_label\\\", $v_num);\"}" );
-		cmd( "if { $v_obj == \"p\" && $v_lag != \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\", $v_num, $v_lag);\"}" );
-		cmd( "if { $v_obj != \"p\" && ( $v_lag == \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITES($v_obj, \\\"$v_label\\\", $v_num);\"}" );
-		cmd( "if { $v_obj != \"p\" && $v_lag != \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITELS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\"}" );
-	}
-	else
-	{
-		cmd( ".f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\", $v_num, $v_lag);\"" );
-	}
+	cmd( "if { $v_obj == \"p\" && ( $v_lag == \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITE(\\\"$v_label\\\", $v_num);\" }" );
+	cmd( "if { $v_obj == \"p\" && $v_lag != \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\", $v_num, $v_lag);\" }" );
+	cmd( "if { $v_obj != \"p\" && ( $v_lag == \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITES($v_obj, \\\"$v_label\\\", $v_num);\" }" );
+	cmd( "if { $v_obj != \"p\" && $v_lag != \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITELS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\" }" );
+
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
 
-// insert a cur=p->search_var_cond("Var",1,0)
+// insert a SEARCH_CND macro
 if ( choice == 30 )
 {
 	cmd( "set v_obj0 cur" );
@@ -2878,38 +2712,35 @@ if ( choice == 30 )
 	cmd( "set v_lag 0" );
 	cmd( "set v_obj p" );
 
-	if ( macro )
-		cmd( "newtop .a \"Insert 'SEARCH_CND' Command\" { set choice 2 }" );
-	else
-		cmd( "newtop .a \"Insert 'search_var_cond' Command\" { set choice 2 }" );
+	cmd( "newtop .a \"Insert 'SEARCH_CND' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Pointer to return the object found\"" );
-	cmd( "entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Pointer to return the object found\"" );
+	cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.v" );
-	cmd( "label .a.v.l -text \"Value to search for\"" );
-	cmd( "entry .a.v.e -width 15 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.v" );
+	cmd( "ttk::label .a.v.l -text \"Value to search for\"" );
+	cmd( "ttk::entry .a.v.e -width 15 -textvariable v_num -justify center" );
 	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Variable or parameter to search\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Variable or parameter to search\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.l" );
-	cmd( "label .a.l.l -text \"Lag to use\"" );
-	cmd( "entry .a.l.e -width 2 -textvariable v_lag -justify center" );
+	cmd( "ttk::frame .a.l" );
+	cmd( "ttk::label .a.l.l -text \"Lag to use\"" );
+	cmd( "ttk::entry .a.l.e -width 2 -textvariable v_lag -justify center" );
 	cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.l.l .a.l.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Object from which to search\"" );
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Object from which to search\"" );
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -2935,24 +2766,18 @@ if ( choice == 30 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	if ( macro )
-	{
-		cmd( "if {$v_obj == \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CND(\\\"$v_label\\\", $v_num);\"}" );
-		cmd( "if {$v_obj == \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDL(\\\"$v_label\\\", $v_num, $v_lag);\"}" );
-		cmd( "if {$v_obj != \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDS($v_obj, \\\"$v_label\\\", $v_num);\"}" );
-		cmd( "if {$v_obj != \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDLS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\"}" );
-	}
-	else
-	{
-		cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->search_var_cond(\\\"$v_label\\\", $v_num, $v_lag);\"}" );
-	}
+	cmd( "if { $v_obj == \"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CND(\\\"$v_label\\\", $v_num);\" }" );
+	cmd( "if { $v_obj == \"p\" && [ string is integer -strict $v_lag ] && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDL(\\\"$v_label\\\", $v_num, $v_lag);\" }" );
+	cmd( "if { $v_obj != \"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDS($v_obj, \\\"$v_label\\\", $v_num);\" }" );
+	cmd( "if { $v_obj != \"p\" && [ string is integer -strict $v_lag ] && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDLS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\" }" );
+
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
 
-// insert a p->lsdqsort("Object", "Variable", "DIRECTION")
+// insert a SORT macro
 if ( choice == 31 )
 {
 	cmd( "set v_obj p" );
@@ -2960,33 +2785,30 @@ if ( choice == 31 )
 	cmd( "set v_label \"\"" );
 	cmd( "set v_direction 1" );
 
-	if ( macro )
-		cmd( "newtop .a \"Insert 'SORT' Command\" { set choice 2 }" );
-	else
-		cmd( "newtop .a \"Insert 'lsdqsort' Command\" { set choice 2 }" );
+	cmd( "newtop .a \"Insert 'SORT' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Object to be sorted\"" );
-	cmd( "entry .a.d.e -width 25 -textvariable v_obj0 -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Object to be sorted\"" );
+	cmd( "ttk::entry .a.d.e -width 25 -textvariable v_obj0 -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Variable or parameter for sorting\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Variable or parameter for sorting\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.s.u }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.s" );
-	cmd( "label .a.s.l -text \"Sorting direction\"" );
-	cmd( "radiobutton .a.s.u -text Increasing -variable v_direction -value 1" );
-	cmd( "radiobutton .a.s.d -text Decreasing -variable v_direction -value 2" );
+	cmd( "ttk::frame .a.s" );
+	cmd( "ttk::label .a.s.l -text \"Sorting direction\"" );
+	cmd( "ttk::radiobutton .a.s.u -text Increasing -variable v_direction -value 1" );
+	cmd( "ttk::radiobutton .a.s.d -text Decreasing -variable v_direction -value 2" );
 	cmd( "bind .a.s <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.s.l .a.s.u .a.s.d" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Parent object\"" );
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Parent object\"" );
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -3013,30 +2835,21 @@ if ( choice == 31 )
 	cmd( "set choice $v_direction" );
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	if ( macro )
-	{
-		if ( choice == 1)
-		  cmd( "set direction \"UP\"" );
-		else
-		  cmd( "set direction \"DOWN\"" );
-
-		cmd( "if {$v_obj == \"p\"} {.f.t.t insert insert \"SORT(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\");\"}" );
-		cmd( "if {$v_obj != \"p\"} {.f.t.t insert insert \"SORTS($v_obj, \\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\");\"}" );
-	}
+	if ( choice == 1)
+	  cmd( "set direction \"UP\"" );
 	else
-	{
-		if ( choice == 1 )
-		  cmd( ".f.t.t insert insert \"$v_obj->lsdqsort(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"UP\\\");\"" );
-		else
-		  cmd( ".f.t.t insert insert \"$v_obj->lsdqsort(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"DOWN\\\");\"" );
-	}
+	  cmd( "set direction \"DOWN\"" );
+
+	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SORT(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\");\" }" );
+	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SORTS($v_obj, \\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\");\" }" );
+
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
 
-// insert a add_an_obj
+// insert a ADDOBJ macro
 if ( choice == 52 )
 {
 	cmd( "set v_obj0 cur" );
@@ -3045,38 +2858,35 @@ if ( choice == 52 )
 	cmd( "set v_num \"\"" );
 	cmd( "set v_obj p" );
 
-	if ( macro )
-		cmd( "newtop .a \"Insert 'ADDOBJ' Command\" { set choice 2 }" );
-	else
-		cmd( "newtop .a \"Insert 'add_n_objects2' Command\" { set choice 2 }" );
+	cmd( "newtop .a \"Insert 'ADDOBJ' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Pointer to return the object created\"" );
-	cmd( "entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Pointer to return the object created\"" );
+	cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Object to create\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Object to create\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.x.e; .a.x.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.x" );
-	cmd( "label .a.x.l -text \"Number of objects to create\"" );
-	cmd( "entry .a.x.e -width 6 -textvariable numobj -justify center" );
+	cmd( "ttk::frame .a.x" );
+	cmd( "ttk::label .a.x.l -text \"Number of objects to create\"" );
+	cmd( "ttk::entry .a.x.e -width 6 -textvariable numobj -justify center" );
 	cmd( "bind .a.x.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "pack .a.x.l .a.x.e" );
 
-	cmd( "frame .a.v" );
-	cmd( "label .a.v.l -text \"Example object (if available)\"" );
-	cmd( "entry .a.v.e -width 25 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.v" );
+	cmd( "ttk::label .a.v.l -text \"Example object (if available)\"" );
+	cmd( "ttk::entry .a.v.e -width 25 -textvariable v_num -justify center" );
 	cmd( "bind .a.v.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Parent object for new object(s)\"" );
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Parent object for new object(s)\"" );
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -3102,50 +2912,40 @@ if ( choice == 52 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	if ( macro )
-	{
-		cmd( "if { $numobj == \"1\" } { set choice 1 } { set choice 0 }" );
-		cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
+	cmd( "if { $numobj == \"1\" } { set choice 1 } { set choice 0 }" );
+	cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
-		if ( choice  == 1 )
-		{
-		cmd( "if { $v_obj == \"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\" }" );
-		cmd( "if { $v_obj == \"p\" && $v_num!=\"\" } { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj, \\\"$v_label\\\");\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num != \"\" } { .f.t.t insert insert \"ADDOBJ_EXS($v_obj, \\\"$v_label\\\", $v_num);\" }" );
-		}
-		else
-		{
-		cmd( "if { $v_obj == \"p\" && $v_num!=\"\" } { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
-		cmd( "if { $v_obj != \"p\" && $v_num!= \"\" } { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
-		cmd( "if { $v_obj == \"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\"; set choice -3 }" );
-		cmd( "if { $v_obj != \"p\" && $v_num== \"\" } { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\"; set choice -3 }" );
-		}
+	if ( choice  == 1 )
+	{
+	cmd( "if { $v_obj == \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\" }" );
+	cmd( "if { $v_obj == \"p\" && $v_num != \"\" } { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\" }" );
+	cmd( "if { $v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj, \\\"$v_label\\\");\" }" );
+	cmd( "if { $v_obj != \"p\" && $v_num != \"\" } { .f.t.t insert insert \"ADDOBJ_EXS($v_obj, \\\"$v_label\\\", $v_num);\" }" );
 	}
 	else
 	{
-		cmd( "if { $v_num==\"\" } { .f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj);\" }" );
-		cmd( "if { $v_num!=\"\" } { .f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj, $v_num);\" }" );
+	cmd( "if { $v_obj == \"p\" && $v_num != \"\" } { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
+	cmd( "if { $v_obj != \"p\" && $v_num != \"\" } { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
+	cmd( "if { $v_obj == \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\"; set choice -3 }" );
+	cmd( "if { $v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\"; set choice -3 }" );
 	}
+
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
 
-// insert a delete_obj
+// insert a DELETE macro
 if ( choice == 53 )
 {
 	cmd( "set v_obj0 cur" );
 
-	if ( macro )
-		cmd( "newtop .a \"Insert 'DELETE' Command\" { set choice 2 }" );
-	else
-		cmd( "newtop .a \"Insert 'delete_obj' Command\" { set choice 2 }" );
+	cmd( "newtop .a \"Insert 'DELETE' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Object to delete\"" );
-	cmd( "entry .a.d.e -width 25 -textvariable v_obj0 -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Object to delete\"" );
+	cmd( "ttk::entry .a.d.e -width 25 -textvariable v_obj0 -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
@@ -3171,17 +2971,15 @@ if ( choice == 53 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	if ( macro )
-		cmd( ".f.t.t insert insert \"DELETE($v_obj0);\"" );
-	else
-		cmd( ".f.t.t insert insert \"$v_obj0->delete_obj();\"" );
+	cmd( ".f.t.t insert insert \"DELETE($v_obj0);\"" );
+
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
 
-// insert a RNDDRAW
+// insert a RNDDRAW macro
 if ( choice == 54 )
 {
 	cmd( "set v_obj0 cur" );
@@ -3191,44 +2989,41 @@ if ( choice == 54 )
 	cmd( "set v_tot \"\"" );
 	cmd( "set v_obj p" );
 
-	if ( macro )
-		cmd( "newtop .a \"Insert 'RNDDRAW' Command\" { set choice 2 }" );
-	else
-		cmd( "newtop .a \"Insert 'draw_rnd' Command\" { set choice 2 }" );
+	cmd( "newtop .a \"Insert 'RNDDRAW' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Pointer to return the object found\"" );
-	cmd( "entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Pointer to return the object found\"" );
+	cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.v" );
-	cmd( "label .a.v.l -text \"Object to draw\"" );
-	cmd( "entry .a.v.e -width 25 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.v" );
+	cmd( "ttk::label .a.v.l -text \"Object to draw\"" );
+	cmd( "ttk::entry .a.v.e -width 25 -textvariable v_num -justify center" );
 	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Variable or parameter defining probabilities\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Variable or parameter defining probabilities\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.l" );
-	cmd( "label .a.l.l -text \"Lag to use\"" );
-	cmd( "entry .a.l.e -width 2 -textvariable v_lag -justify center" );
+	cmd( "ttk::frame .a.l" );
+	cmd( "ttk::label .a.l.l -text \"Lag to use\"" );
+	cmd( "ttk::entry .a.l.e -width 2 -textvariable v_lag -justify center" );
 	cmd( "bind .a.l.e <Return> { focus .a.t.e; .a.t.e selection range 0 end }" );
 	cmd( "pack .a.l.l .a.l.e" );
 
-	cmd( "frame .a.t" );
-	cmd( "label .a.t.l -text \"Sum over all values (if available)\"" );
-	cmd( "entry .a.t.e -width 15 -textvariable v_tot -justify center" );
+	cmd( "ttk::frame .a.t" );
+	cmd( "ttk::label .a.t.l -text \"Sum over all values (if available)\"" );
+	cmd( "ttk::entry .a.t.e -width 15 -textvariable v_tot -justify center" );
 	cmd( "bind .a.t.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.t.l .a.t.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Object from which to search\"" );
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Object from which to search\"" );
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -3256,65 +3051,53 @@ if ( choice == 54 )
 
 	cmd( "if { $v_tot == \"\" } { set choice 1 } { set choice 2 }" );
 
-	if ( macro )
-	{
-		if ( choice == 1 )
-		 {
-		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label != \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW(\\\"$v_num\\\", \\\"$v_label\\\");\"}" );
-		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label == \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIR(\\\"$v_num\\\");\"}" );
-		  cmd( "if {$v_obj == \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAWL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\"}" );
-		  cmd( "if {$v_obj != \"p\" && $v_lag == 0 && $v_label != \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAWS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\");\"}" );
-		  cmd( "if {$v_obj != \"p\" && $v_lag == 0 && $v_label == \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIRS($v_obj, \\\"$v_num\\\");\"}" );
-		  cmd( "if {$v_obj != \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAWLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\"}" );
-		 }
-		else
-		 {
-		  cmd( "if {$v_obj == \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOT(\\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\"}" );
-		  cmd( "if {$v_obj == \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\"}" );
-		  cmd( "if {$v_obj != \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOTS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\"}" );
-		  cmd( "if {$v_obj != \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\"}" );
-		 }
-	}
+	if ( choice == 1 )
+	 {
+	  cmd( "if { $v_obj == \"p\" && $v_lag == 0 && $v_label != \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW(\\\"$v_num\\\", \\\"$v_label\\\");\" }" );
+	  cmd( "if { $v_obj == \"p\" && $v_lag == 0 && $v_label == \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIR(\\\"$v_num\\\");\" }" );
+	  cmd( "if { $v_obj == \"p\" && $v_lag != 0 && [ string is integer -strict $v_lag ] } { .f.t.t insert insert \"$v_obj0 = RNDDRAWL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\" }" );
+	  cmd( "if { $v_obj != \"p\" && $v_lag == 0 && $v_label != \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAWS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\");\" }" );
+	  cmd( "if { $v_obj != \"p\" && $v_lag == 0 && $v_label == \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIRS($v_obj, \\\"$v_num\\\");\" }" );
+	  cmd( "if { $v_obj != \"p\" && $v_lag != 0 && [ string is integer -strict $v_lag ] } { .f.t.t insert insert \"$v_obj0 = RNDDRAWLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\" }" );
+	 }
 	else
-	{
-		if ( choice == 1 )
-		  cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\"}" );
-		else
-		  cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\"}" );
-	}
+	 {
+	  cmd( "if { $v_obj == \"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOT(\\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\" }" );
+	  cmd( "if { $v_obj == \"p\" && $v_lag != 0 && [ string is integer -strict $v_lag ] } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\" }" );
+	  cmd( "if { $v_obj != \"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOTS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\" }" );
+	  cmd( "if { $v_obj != \"p\" && $v_lag != 0 && [ string is integer -strict $v_lag ] } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\" }" );
+	 }
+
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
 
-// insert a SEARCH
+// insert a SEARCH macro
 if ( choice == 55 )
 {
 	cmd( "set v_obj0 cur" );
 	cmd( "set v_label \"\"" );
 	cmd( "set v_obj p" );
 
-	if ( macro )
-		cmd( "newtop .a \"Insert 'SEARCH' Command\" { set choice 2 }" );
-	else
-		cmd( "newtop .a \"Insert 'search' Command\" { set choice 2 }" );
+	cmd( "newtop .a \"Insert 'SEARCH' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Pointer to return the object found\"" );
-	cmd( "entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Pointer to return the object found\"" );
+	cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Object to search\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Object to search\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Object from which to search\"" );
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Object from which to search\"" );
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -3340,17 +3123,15 @@ if ( choice == 55 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	if ( macro )
-		cmd( "if { $v_obj == \"p\" } {.f.t.t insert insert \"$v_obj0 = SEARCH(\\\"$v_label\\\");\"} {.f.t.t insert insert \"$v_obj0 = SEARCHS($v_obj, \\\"$v_label\\\");\"}" );
-	else
-		cmd( ".f.t.t insert insert \"$v_obj0 = $v_obj->search(\\\"$v_label\\\");\"" );
+	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"$v_obj0 = SEARCH(\\\"$v_label\\\");\" } { .f.t.t insert insert \"$v_obj0 = SEARCHS($v_obj, \\\"$v_label\\\");\" }" );
+
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
 	goto loop;
 }
 
-// insert a SUM
+// insert a SUM macro
 if ( choice == 56 )
 {
 	cmd( "set v_num %d", v_counter );
@@ -3358,32 +3139,29 @@ if ( choice == 56 )
 	cmd( "set v_lag 0" );
 	cmd( "set v_obj p" );
 
-	if ( macro )
-		cmd( "newtop .a \"Insert 'SUM' Command\" { set choice 2 }" );
-	else
-		cmd( "newtop .a \"Insert 'sum' Command\" { set choice 2 }" );
+	cmd( "newtop .a \"Insert 'SUM' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.v" );
-	cmd( "label .a.v.l -text \"Number v\\\[x\\] to assign the result\"" );
-	cmd( "entry .a.v.e -width 2 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.v" );
+	cmd( "ttk::label .a.v.l -text \"Number v\\\[x\\] to assign the result\"" );
+	cmd( "ttk::entry .a.v.e -width 2 -textvariable v_num -justify center" );
 	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Variable or parameter to sum\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Variable or parameter to sum\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.l" );
-	cmd( "label .a.l.l -text \"Lag to use\"" );
-	cmd( "entry .a.l.e -width 2 -textvariable v_lag -justify center" );
+	cmd( "ttk::frame .a.l" );
+	cmd( "ttk::label .a.l.l -text \"Lag to use\"" );
+	cmd( "ttk::entry .a.l.e -width 2 -textvariable v_lag -justify center" );
 	cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.l.l .a.l.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Parent object\"" );
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Parent object\"" );
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -3409,25 +3187,19 @@ if ( choice == 56 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	if ( macro )
-	{
-		cmd( "if {$v_num!=\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\] = \"}" );
+	cmd( "if { $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
 
-		cmd( "if {$v_lag==0 && $v_obj==\"p\"} { .f.t.t insert insert \"SUM(\\\"$v_label\\\")\"}" );
-		cmd( "if {$v_lag!=0 && [string is integer -strict $v_lag] && $v_obj==\"p\"} { .f.t.t insert insert \"SUML(\\\"$v_label\\\", $v_lag)\"}" );
-		cmd( "if {$v_lag==0 && $v_obj!=\"p\"} { .f.t.t insert insert \"SUMS($v_obj, \\\"$v_label\\\")\"}" );
-		cmd( "if {$v_lag!=0 && [string is integer -strict $v_lag] && $v_obj!=\"p\"} { .f.t.t insert insert \"SUMLS($v_obj, \\\"$v_label\\\", $v_lag)\"}" );
-	}
-	else
-	{
-		cmd( "if {$v_num!=\"\" && [string is integer -strict $v_num] && [string is integer -strict $v_lag]} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->sum(\\\"$v_label\\\", $v_lag)\"} {.f.t.t insert insert \"$v_obj->sum(\\\"$v_label\\\", $v_lag)\"}" );
-	}
+	cmd( "if { $v_lag == 0 && $v_obj == \"p\" } { .f.t.t insert insert \"SUM(\\\"$v_label\\\")\" }" );
+	cmd( "if { $v_lag != 0 && [ string is integer -strict $v_lag ] && $v_obj == \"p\" } { .f.t.t insert insert \"SUML(\\\"$v_label\\\", $v_lag)\" }" );
+	cmd( "if { $v_lag == 0 && $v_obj != \"p\" } { .f.t.t insert insert \"SUMS($v_obj, \\\"$v_label\\\")\" }" );
+	cmd( "if { $v_lag != 0 && [ string is integer -strict $v_lag ] && $v_obj != \"p\" } { .f.t.t insert insert \"SUMLS($v_obj, \\\"$v_label\\\", $v_lag)\" }" );
 
-	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\"}" );
+	cmd( "if { $v_num != \"\" } { .f.t.t insert insert \";\" }" );
 
-	cmd( "if {$v_num==\"\"} { set num -1} {set num $v_num}" );
+	cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
+	
 	if ( num != -1 )
-		v_counter=++num;
+		v_counter = ++num;
 
  	cmd( ".f.t.t see insert" );
 
@@ -3442,24 +3214,24 @@ if ( choice == 72 )
 
 	cmd( "newtop .a \"Network Macros\" { set choice 2 }" );
 
-	cmd( "label .a.tit -text \"Available LSD network macros\"" );
+	cmd( "ttk::label .a.tit -text \"Available LSD network macros\"" );
 
-	cmd( "frame .a.f -bd 2 -relief groove" );
+	cmd( "ttk::frame .a.f -borderwidth 1 -relief solid" );
 
-	cmd( "radiobutton .a.f.r1 -text \"INIT - create a new network\" -variable res -value 73 -underline 0" );
-	cmd( "radiobutton .a.f.r2 -text \"LOAD - load a network from a file\" -variable res -value 74 -underline 0" );
-	cmd( "radiobutton .a.f.r3 -text \"SAVE - save a network to a file\" -variable res -value 75 -underline 0" );
-	cmd( "radiobutton .a.f.r4 -text \"SNAP - add a network snapshot to a file\" -variable res -value 76 -underline 1" );
-	cmd( "radiobutton .a.f.r5 -text \"ADD - add a node or link\" -variable res -value 77 -underline 0" );
-	cmd( "radiobutton .a.f.r6 -text \"V - get the values of a node or link\" -variable res -value 78 -underline 0" );
-	cmd( "radiobutton .a.f.r7 -text \"WRITE - set the values of a node or link\" -variable res -value 79 -underline 0" );
-	cmd( "radiobutton .a.f.r8 -text \"CYCLE - cycle through links\" -variable res -value 80 -underline 0" );
-	cmd( "radiobutton .a.f.r9 -text \"SEARCH - search for a node or link\" -variable res -value 81 -underline 1" );
-	cmd( "radiobutton .a.f.r10 -text \"LINK - get objects connected by link\" -variable res -value 82 -underline 3" );
-	cmd( "radiobutton .a.f.r11 -text \"SHUFFLE - shuffle nodes in a network\" -variable res -value 83 -underline 1" );
-	cmd( "radiobutton .a.f.r12 -text \"RNDDRAW - random draw a node or link\" -variable res -value 84 -underline 0" );
-	cmd( "radiobutton .a.f.r13 -text \"DELETE - delete a network, node or link\" -variable res -value 85 -underline 0" );
-	cmd( "radiobutton .a.f.r14 -text \"STAT - statistics about a network or node\" -variable res -value 86 -underline 1" );
+	cmd( "ttk::radiobutton .a.f.r1 -text \"INIT - create a new network\" -variable res -value 73 -underline 0" );
+	cmd( "ttk::radiobutton .a.f.r2 -text \"LOAD - load a network from a file\" -variable res -value 74 -underline 0" );
+	cmd( "ttk::radiobutton .a.f.r3 -text \"SAVE - save a network to a file\" -variable res -value 75 -underline 0" );
+	cmd( "ttk::radiobutton .a.f.r4 -text \"SNAP - add a network snapshot to a file\" -variable res -value 76 -underline 1" );
+	cmd( "ttk::radiobutton .a.f.r5 -text \"ADD - add a node or link\" -variable res -value 77 -underline 0" );
+	cmd( "ttk::radiobutton .a.f.r6 -text \"V - get the values of a node or link\" -variable res -value 78 -underline 0" );
+	cmd( "ttk::radiobutton .a.f.r7 -text \"WRITE - set the values of a node or link\" -variable res -value 79 -underline 0" );
+	cmd( "ttk::radiobutton .a.f.r8 -text \"CYCLE - cycle through links\" -variable res -value 80 -underline 0" );
+	cmd( "ttk::radiobutton .a.f.r9 -text \"SEARCH - search for a node or link\" -variable res -value 81 -underline 1" );
+	cmd( "ttk::radiobutton .a.f.r10 -text \"LINK - get objects connected by link\" -variable res -value 82 -underline 3" );
+	cmd( "ttk::radiobutton .a.f.r11 -text \"SHUFFLE - shuffle nodes in a network\" -variable res -value 83 -underline 1" );
+	cmd( "ttk::radiobutton .a.f.r12 -text \"RNDDRAW - random draw a node or link\" -variable res -value 84 -underline 0" );
+	cmd( "ttk::radiobutton .a.f.r13 -text \"DELETE - delete a network, node or link\" -variable res -value 85 -underline 0" );
+	cmd( "ttk::radiobutton .a.f.r14 -text \"STAT - statistics about a network or node\" -variable res -value 86 -underline 1" );
 
 	cmd( "pack .a.f.r1 .a.f.r2 .a.f.r3 .a.f.r4 .a.f.r5 .a.f.r6 .a.f.r7 .a.f.r8 .a.f.r9 .a.f.r10 .a.f.r11 .a.f.r12 .a.f.r13 .a.f.r14 -anchor w" );
 
@@ -3467,20 +3239,20 @@ if ( choice == 72 )
 
 	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LSD_macros.html#Networks } { set choice 2 }" );
 
-	cmd( "bind .a <KeyPress-i> {.a.f.r1  invoke; set choice 1}; bind .a <KeyPress-I> {.a.f.r1  invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-l> {.a.f.r2  invoke; set choice 1}; bind .a <KeyPress-L> {.a.f.r2  invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-s> {.a.f.r3  invoke; set choice 1}; bind .a <KeyPress-S> {.a.f.r3  invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-n> {.a.f.r4  invoke; set choice 1}; bind .a <KeyPress-N> {.a.f.r4  invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-a> {.a.f.r5  invoke; set choice 1}; bind .a <KeyPress-A> {.a.f.r5  invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-v> {.a.f.r6  invoke; set choice 1}; bind .a <KeyPress-V> {.a.f.r6  invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-w> {.a.f.r7  invoke; set choice 1}; bind .a <KeyPress-W> {.a.f.r7  invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-c> {.a.f.r8  invoke; set choice 1}; bind .a <KeyPress-C> {.a.f.r8  invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-e> {.a.f.r9  invoke; set choice 1}; bind .a <KeyPress-E> {.a.f.r9  invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-k> {.a.f.r10 invoke; set choice 1}; bind .a <KeyPress-K> {.a.f.r10 invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-h> {.a.f.r11 invoke; set choice 1}; bind .a <KeyPress-H> {.a.f.r11 invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-r> {.a.f.r12 invoke; set choice 1}; bind .a <KeyPress-R> {.a.f.r12 invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-d> {.a.f.r13 invoke; set choice 1}; bind .a <KeyPress-D> {.a.f.r13 invoke; set choice 1}" );
-	cmd( "bind .a <KeyPress-t> {.a.f.r14 invoke; set choice 1}; bind .a <KeyPress-T> {.a.f.r14.a.r.net invoke; set choice 1}" );
+	cmd( "bind .a <KeyPress-i> { .a.f.r1  invoke; set choice 1 }; bind .a <KeyPress-I> { .a.f.r1  invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-l> { .a.f.r2  invoke; set choice 1 }; bind .a <KeyPress-L> { .a.f.r2  invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-s> { .a.f.r3  invoke; set choice 1 }; bind .a <KeyPress-S> { .a.f.r3  invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-n> { .a.f.r4  invoke; set choice 1 }; bind .a <KeyPress-N> { .a.f.r4  invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-a> { .a.f.r5  invoke; set choice 1 }; bind .a <KeyPress-A> { .a.f.r5  invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-v> { .a.f.r6  invoke; set choice 1 }; bind .a <KeyPress-V> { .a.f.r6  invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-w> { .a.f.r7  invoke; set choice 1 }; bind .a <KeyPress-W> { .a.f.r7  invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-c> { .a.f.r8  invoke; set choice 1 }; bind .a <KeyPress-C> { .a.f.r8  invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-e> { .a.f.r9  invoke; set choice 1 }; bind .a <KeyPress-E> { .a.f.r9  invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-k> { .a.f.r10 invoke; set choice 1 }; bind .a <KeyPress-K> { .a.f.r10 invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-h> { .a.f.r11 invoke; set choice 1 }; bind .a <KeyPress-H> { .a.f.r11 invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-r> { .a.f.r12 invoke; set choice 1 }; bind .a <KeyPress-R> { .a.f.r12 invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-d> { .a.f.r13 invoke; set choice 1 }; bind .a <KeyPress-D> { .a.f.r13 invoke; set choice 1 }" );
+	cmd( "bind .a <KeyPress-t> { .a.f.r14 invoke; set choice 1 }; bind .a <KeyPress-T> { .a.f.r14.a.r.net invoke; set choice 1 }" );
 	cmd( "bind .a <Return> { .a.b.ok invoke }" );
 
 	cmd( "showtop .a" );
@@ -3519,40 +3291,40 @@ if ( choice == 73 )
 
 	cmd( "newtop .a \"Insert 'INIT_NET' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Type of network to create\"" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Type of network to create\"" );
 	cmd( "ttk::combobox .a.d.e -width 30 -textvariable v_net -justify center -values $netListLong" );
 	cmd( "bind .a.d.e <<ComboboxSelected>> { set a [ lindex [ lindex $netListPar [ .a.d.e current ] ] 0 ]; if { $a == \"\" } { set a \"(unused)\"; .a.p1.e configure -state disabled } { .a.p1.e configure -state normal }; .a.p1.l configure -text $a; set a [ lindex [ lindex $netListPar [ .a.d.e current ] ] 1 ]; if { $a == \"\" } { set a \"(unused)\"; .a.p2.e configure -state disabled } { .a.p2.e configure -state normal }; .a.p2.l configure -text $a }" );
 	cmd( "bind .a.d.e <Return> { focus .a.x.e; .a.x.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.x" );
-	cmd( "label .a.x.l -text \"Number of nodes\"" );
-	cmd( "entry .a.x.e -width 6 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.x" );
+	cmd( "ttk::label .a.x.l -text \"Number of nodes\"" );
+	cmd( "ttk::entry .a.x.e -width 6 -textvariable v_num -justify center" );
 	cmd( "bind .a.x.e <Return> { focus .a.p1.e; .a.p1.e selection range 0 end }" );
 	cmd( "pack .a.x.l .a.x.e" );
 
-	cmd( "frame .a.p1" );
-	cmd( "label .a.p1.l -text \"(unused)\"" );
-	cmd( "entry .a.p1.e -width 6 -textvariable v_par1 -justify center -state disabled" );
+	cmd( "ttk::frame .a.p1" );
+	cmd( "ttk::label .a.p1.l -text \"(unused)\"" );
+	cmd( "ttk::entry .a.p1.e -width 6 -textvariable v_par1 -justify center -state disabled" );
 	cmd( "bind .a.p1.e <Return> { focus .a.p2.e; .a.p2.e selection range 0 end }" );
 	cmd( "pack .a.p1.l .a.p1.e" );
 
-	cmd( "frame .a.p2" );
-	cmd( "label .a.p2.l -text \"(unused)\"" );
-	cmd( "entry .a.p2.e -width 6 -textvariable v_par2 -justify center -state disabled" );
+	cmd( "ttk::frame .a.p2" );
+	cmd( "ttk::label .a.p2.l -text \"(unused)\"" );
+	cmd( "ttk::entry .a.p2.e -width 6 -textvariable v_par2 -justify center -state disabled" );
 	cmd( "bind .a.p2.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.p2.l .a.p2.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Network node object name\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Network node object name\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Network nodes parent object\"" );
-	cmd( "entry .a.o.e -width 6 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Network nodes parent object\"" );
+	cmd( "ttk::entry .a.o.e -width 6 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -3579,16 +3351,16 @@ if ( choice == 73 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	cmd( "if { $v_par1 == \"\"} { set v_par1 0 }" );
-	cmd( "if { $v_par2 == \"\"} { set v_par2 0 }" );
+	cmd( "if { $v_par1 == \"\" } { set v_par1 0 }" );
+	cmd( "if { $v_par2 == \"\" } { set v_par2 0 }" );
 
-	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\"}" );
-	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\"}" );
-	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\"}" );
+	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\" }" );
+	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\" }" );
+	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\" }" );
 
-	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\"}" );
-	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\"}" );
-	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\"}" );
+	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\" }" );
+	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\" }" );
+	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\" }" );
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
@@ -3604,21 +3376,21 @@ if ( choice == 74 )
 
 	cmd( "newtop .a \"Insert 'LOAD_NET' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Network file name (without .net Pajek extension)\"" );
-	cmd( "entry .a.d.e -width 25 -textvariable v_net -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Network file name (without .net Pajek extension)\"" );
+	cmd( "ttk::entry .a.d.e -width 25 -textvariable v_net -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Network node object name\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Network node object name\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Network nodes parent object\"" );
-	cmd( "entry .a.o.e -width 6 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Network nodes parent object\"" );
+	cmd( "ttk::entry .a.o.e -width 6 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -3644,8 +3416,8 @@ if ( choice == 74 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"LOAD_NET(\\\"$v_label\\\", \\\"$v_net\\\");\"}" );
-	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"LOAD_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\"}" );
+	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"LOAD_NET(\\\"$v_label\\\", \\\"$v_net\\\");\" }" );
+	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"LOAD_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\" }" );
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
@@ -3661,21 +3433,21 @@ if ( choice == 75 )
 
 	cmd( "newtop .a \"Insert 'SAVE_NET' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Network file name (without .net Pajek extension)\"" );
-	cmd( "entry .a.d.e -width 25 -textvariable v_net -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Network file name (without .net Pajek extension)\"" );
+	cmd( "ttk::entry .a.d.e -width 25 -textvariable v_net -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Network node object name\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Network node object name\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Network nodes parent object\"" );
-	cmd( "entry .a.o.e -width 6 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Network nodes parent object\"" );
+	cmd( "ttk::entry .a.o.e -width 6 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -3701,8 +3473,8 @@ if ( choice == 75 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SAVE_NET(\\\"$v_label\\\", \\\"$v_net\\\");\"}" );
-	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SAVE_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\"}" );
+	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SAVE_NET(\\\"$v_label\\\", \\\"$v_net\\\");\" }" );
+	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SAVE_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\" }" );
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
@@ -3718,21 +3490,21 @@ if ( choice == 76 )
 
 	cmd( "newtop .a \"Insert 'SNAP_NET' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Network file name (without .paj Pajek extension)\"" );
-	cmd( "entry .a.d.e -width 25 -textvariable v_net -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Network file name (without .paj Pajek extension)\"" );
+	cmd( "ttk::entry .a.d.e -width 25 -textvariable v_net -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Network node object name\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Network node object name\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Network nodes parent object\"" );
-	cmd( "entry .a.o.e -width 6 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Network nodes parent object\"" );
+	cmd( "ttk::entry .a.o.e -width 6 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -3758,8 +3530,8 @@ if ( choice == 76 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SNAP_NET(\\\"$v_label\\\", \\\"$v_net\\\");\"}" );
-	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SNAP_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\"}" );
+	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SNAP_NET(\\\"$v_label\\\", \\\"$v_net\\\");\" }" );
+	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SNAP_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\" }" );
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
@@ -3777,39 +3549,39 @@ if ( choice == 77 )
 
 	cmd( "newtop .a \"Insert 'ADDNODE/LINK' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.c" );
-	cmd( "label .a.c.l -text \"Add to the network a\"" );
+	cmd( "ttk::frame .a.c" );
+	cmd( "ttk::label .a.c.l -text \"Add to the network a\"" );
 
-	cmd( "frame .a.c.b -bd 2 -relief groove" );
-	cmd( "radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { write_any .a.d.e cur; .a.i.l configure -text \"Unique ID number\"; .a.n.l configure -text \"Node name (optional)\"; write_any .a.n.e \"\"; .a.o.l configure -text \"Object for new network node\" }" );
-	cmd( "radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { write_any .a.d.e curl; .a.i.l configure -text \"Link weight\"; .a.n.l configure -text \"Destination node object\"; write_any .a.n.e cur; .a.o.l configure -text \"Origin node object\" }" );
+	cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
+	cmd( "ttk::radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { write_any .a.d.e cur; .a.i.l configure -text \"Unique ID number\"; .a.n.l configure -text \"Node name (optional)\"; write_any .a.n.e \"\"; .a.o.l configure -text \"Object for new network node\" }" );
+	cmd( "ttk::radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { write_any .a.d.e curl; .a.i.l configure -text \"Link weight\"; .a.n.l configure -text \"Destination node object\"; write_any .a.n.e cur; .a.o.l configure -text \"Origin node object\" }" );
 	cmd( "bind .a.c.b.e <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f -side left" );
 
 	cmd( "pack .a.c.l .a.c.b" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Pointer to return the object created\"" );
-	cmd( "entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Pointer to return the object created\"" );
+	cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.i.e; .a.i.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.i" );
-	cmd( "label .a.i.l" ); 			// ID or weight
-	cmd( "entry .a.i.e -width 6 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.i" );
+	cmd( "ttk::label .a.i.l" ); 			// ID or weight
+	cmd( "ttk::entry .a.i.e -width 6 -textvariable v_num -justify center" );
 	cmd( "bind .a.i.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.i.l .a.i.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l" );			// name or destination
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l" );			// name or destination
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l" );			// object or origin object
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l" );			// object or origin object
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -3841,18 +3613,18 @@ if ( choice == 77 )
 
 	if ( choice == 0 )
 	{
-		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODE($v_num, \\\"$v_label\\\")\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODES($v_obj, $v_num, \\\"$v_label\\\")\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODE($v_num, \\\"$v_label\\\")\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODES($v_obj, $v_num, \\\"$v_label\\\")\" }" );
 	}
 	else
 	{
-		cmd( "if { $v_obj == \"p\" && $v_num ==\"\" } { .f.t.t insert insert \"ADDLINK($v_label)\" }" );
-		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKW($v_label, $v_num)\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num ==\"\" } { .f.t.t insert insert \"ADDLINKS($v_obj, $v_label)\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKWS($v_obj, $v_label, $v_num)\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDLINK($v_label)\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num != \"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKW($v_label, $v_num)\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDLINKS($v_obj, $v_label)\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num != \"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKWS($v_obj, $v_label, $v_num)\" }" );
 	}
 
-	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\" }" );
+	cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
@@ -3868,13 +3640,13 @@ if ( choice == 78 )
 
 	cmd( "newtop .a \"Insert 'V_NODE/LINK' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.c" );
-	cmd( "label .a.c.l -text \"Get the value of\"" );
+	cmd( "ttk::frame .a.c" );
+	cmd( "ttk::label .a.c.l -text \"Get the value of\"" );
 
-	cmd( "frame .a.c.b -bd 2 -relief groove" );
-	cmd( "radiobutton .a.c.b.e -text \"Node ID\" -width 8 -variable v_type -value 0 -command { .a.v.l configure -text \"Number v\\\[x\\] to assign to\"; write_any .a.v.e %d; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }", v_counter );
-	cmd( "radiobutton .a.c.b.f -text \"Node name\" -width 8 -variable v_type -value 1 -command { .a.v.l configure -text \"char  pointer to assign to\"; write_any .a.v.e \"\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }" );
-	cmd( "radiobutton .a.c.b.g -text \"Link weight\" -width 8 -variable v_type -value 2 -command { .a.v.l configure -text \"Number v\\\[x\\] to assign to\"; write_any .a.v.e %d; .a.o.l configure -text \"Link pointer\"; write_any .a.o.e curl }", v_counter );
+	cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
+	cmd( "ttk::radiobutton .a.c.b.e -text \"Node ID\" -width 8 -variable v_type -value 0 -command { .a.v.l configure -text \"Number v\\\[x\\] to assign to\"; write_any .a.v.e %d; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }", v_counter );
+	cmd( "ttk::radiobutton .a.c.b.f -text \"Node name\" -width 8 -variable v_type -value 1 -command { .a.v.l configure -text \"char  pointer to assign to\"; write_any .a.v.e \"\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }" );
+	cmd( "ttk::radiobutton .a.c.b.g -text \"Link weight\" -width 8 -variable v_type -value 2 -command { .a.v.l configure -text \"Number v\\\[x\\] to assign to\"; write_any .a.v.e %d; .a.o.l configure -text \"Link pointer\"; write_any .a.o.e curl }", v_counter );
 	cmd( "bind .a.c.b.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "bind .a.c.b.g <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
@@ -3882,15 +3654,15 @@ if ( choice == 78 )
 
 	cmd( "pack .a.c.l .a.c.b" );
 
-	cmd( "frame .a.v" );
-	cmd( "label .a.v.l" );			// v[x] or char pointer name
-	cmd( "entry .a.v.e -width 15 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.v" );
+	cmd( "ttk::label .a.v.l" );			// v[x] or char pointer name
+	cmd( "ttk::entry .a.v.e -width 15 -textvariable v_num -justify center" );
 	cmd( "bind .a.v.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l" );			// object node or link
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l" );			// object node or link
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -3922,26 +3694,28 @@ if ( choice == 78 )
 	switch ( choice )
 	{
 		case 0:
-			cmd( "if { $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+			cmd( "if { $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
 			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"V_NODEID()\" }" );
 			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"V_NODEIDS($v_obj)\" }" );
 
 			cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
+			
 			if ( num != -1 )
 				v_counter = ++num;
 			break;
 
 		case 1:
 			cmd( "if { $v_num != \"\" } { .f.t.t insert insert \"$v_num = \" }" );
-			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"V_NODENAME()\"}" );
+			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"V_NODENAME()\" }" );
 			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"V_NODENAMES($v_obj)\" }" );
 			break;
 
 		case 2:
-			cmd( "if { $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+			cmd( "if { $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
 			cmd( ".f.t.t insert insert \"V_LINK($v_obj)\"" );
 
 			cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
+			
 			if ( num != -1 )
 				v_counter = ++num;
 			break;
@@ -3950,7 +3724,7 @@ if ( choice == 78 )
 			break;
 	}
 
-	cmd( "if { $v_num!=\"\" } { .f.t.t insert insert \";\" }" );
+	cmd( "if { $v_num != \"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
@@ -3966,13 +3740,13 @@ if ( choice == 79 )
 
 	cmd( "newtop .a \"Insert 'WRITE_NODE/LINK' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.c" );
-	cmd( "label .a.c.l -text \"Write a value to\"" );
+	cmd( "ttk::frame .a.c" );
+	cmd( "ttk::label .a.c.l -text \"Write a value to\"" );
 
-	cmd( "frame .a.c.b -bd 2 -relief groove" );
-	cmd( "radiobutton .a.c.b.e -text \"Node ID\" -width 8 -variable v_type -value 0 -command { .a.v.l configure -text \"Node ID to set\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }", v_counter );
-	cmd( "radiobutton .a.c.b.f -text \"Node name\" -width 8 -variable v_type -value 1 -command { .a.v.l configure -text \"Node name to set\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }" );
-	cmd( "radiobutton .a.c.b.g -text \"Link weight\" -width 8 -variable v_type -value 2 -command { .a.v.l configure -text \"Link weight to set\"; .a.o.l configure -text \"Link pointer\"; write_any .a.o.e curl }", v_counter );
+	cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
+	cmd( "ttk::radiobutton .a.c.b.e -text \"Node ID\" -width 8 -variable v_type -value 0 -command { .a.v.l configure -text \"Node ID to set\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }", v_counter );
+	cmd( "ttk::radiobutton .a.c.b.f -text \"Node name\" -width 8 -variable v_type -value 1 -command { .a.v.l configure -text \"Node name to set\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }" );
+	cmd( "ttk::radiobutton .a.c.b.g -text \"Link weight\" -width 8 -variable v_type -value 2 -command { .a.v.l configure -text \"Link weight to set\"; .a.o.l configure -text \"Link pointer\"; write_any .a.o.e curl }", v_counter );
 	cmd( "bind .a.c.b.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "bind .a.c.b.g <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
@@ -3980,15 +3754,15 @@ if ( choice == 79 )
 
 	cmd( "pack .a.c.l .a.c.b" );
 
-	cmd( "frame .a.v" );
-	cmd( "label .a.v.l" );			// ID, name, weight
-	cmd( "entry .a.v.e -width 25 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.v" );
+	cmd( "ttk::label .a.v.l" );			// ID, name, weight
+	cmd( "ttk::entry .a.v.e -width 25 -textvariable v_num -justify center" );
 	cmd( "bind .a.v.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l" );			// object node or link
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l" );			// object node or link
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -4020,17 +3794,17 @@ if ( choice == 79 )
 	switch ( choice )
 	{
 		case 0:
-			cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEID($v_num);\" }" );
-			cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEIDS($v_obj, $v_num);\" }" );
+			cmd( "if { $v_obj == \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEID($v_num);\" }" );
+			cmd( "if { $v_obj != \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEIDS($v_obj, $v_num);\" }" );
 			break;
 
 		case 1:
-			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"WRITE_NODENAME(\\\"$v_num\\\");\"}" );
+			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"WRITE_NODENAME(\\\"$v_num\\\");\" }" );
 			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"WRITE_NODENAMES($v_obj, \\\"$v_num\\\");\" }" );
 			break;
 
 		case 2:
-			cmd( "if { $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"WRITE_LINK($v_obj, $v_num);\" }" );
+			cmd( "if { $v_num != \"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"WRITE_LINK($v_obj, $v_num);\" }" );
 			break;
 
 		default:
@@ -4050,15 +3824,15 @@ if ( choice == 80 )
 
 	cmd( "newtop .a \"Insert 'CYCLE_LINK' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.c" );
-	cmd( "label .a.c.l -text \"Cycling link pointer\"" );
-	cmd( "entry .a.c.e -width 6 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.c" );
+	cmd( "ttk::label .a.c.l -text \"Cycling link pointer\"" );
+	cmd( "ttk::entry .a.c.e -width 6 -textvariable v_obj -justify center" );
 	cmd( "bind .a.c.e <Return> { focus .a.p.e; .a.p.e selection range 0 end }" );
 	cmd( "pack .a.c.l .a.c.e" );
 
-	cmd( "frame .a.p" );
-	cmd( "label .a.p.l -text \"Parent node object\"" );
-	cmd( "entry .a.p.e -width 25 -textvariable v_par -justify center" );
+	cmd( "ttk::frame .a.p" );
+	cmd( "ttk::label .a.p.l -text \"Parent node object\"" );
+	cmd( "ttk::entry .a.p.e -width 25 -textvariable v_par -justify center" );
 	cmd( "bind .a.p.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.p.l .a.p.e" );
 
@@ -4084,7 +3858,7 @@ if ( choice == 80 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"CYCLE_LINK($v_obj)\\n\"}" );
+	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"CYCLE_LINK($v_obj)\\n\" }" );
 	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"CYCLE_LINKS($v_par, $v_obj)\\n\" }" );
 
 	cmd( "set in [ .f.t.t index insert ]" );
@@ -4129,39 +3903,39 @@ if ( choice == 81 )
 
 	cmd( "newtop .a \"Insert 'SEARCH_NODE/LINK' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.c" );
-	cmd( "label .a.c.l -text \"Search for a\"" );
+	cmd( "ttk::frame .a.c" );
+	cmd( "ttk::label .a.c.l -text \"Search for a\"" );
 
-	cmd( "frame .a.c.b -bd 2 -relief groove" );
-	cmd( "radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { write_any .a.d.e cur; .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\" }" );
-	cmd( "radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { write_any .a.d.e curl; .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Node object\" }" );
+	cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
+	cmd( "ttk::radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { write_any .a.d.e cur; .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\" }" );
+	cmd( "ttk::radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { write_any .a.d.e curl; .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Node object\" }" );
 	cmd( "bind .a.c.b.e <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f -side left" );
 
 	cmd( "pack .a.c.l .a.c.b" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Pointer to return the element found\"" );
-	cmd( "entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Pointer to return the element found\"" );
+	cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.v" );
-	cmd( "label .a.v.l -text \"ID to search for\"" );
-	cmd( "entry .a.v.e -width 15 -textvariable v_num -justify center" );
+	cmd( "ttk::frame .a.v" );
+	cmd( "ttk::label .a.v.l -text \"ID to search for\"" );
+	cmd( "ttk::entry .a.v.e -width 15 -textvariable v_num -justify center" );
 	cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l" );			// object name or unused
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l" );			// object name or unused
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l" );			// parent object or node object
-	cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l" );			// parent object or node object
+	cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -4193,16 +3967,16 @@ if ( choice == 81 )
 
 	if ( choice == 0 )
 	{
-		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_NODE(\\\"$v_label\\\", $v_num)\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_NODES($v_obj, \\\"$v_label\\\", $v_num)\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_NODE(\\\"$v_label\\\", $v_num)\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_NODES($v_obj, \\\"$v_label\\\", $v_num)\" }" );
 	}
 	else
 	{
-		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_LINK($v_num)\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_LINKS($v_obj, $v_num)\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_LINK($v_num)\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_LINKS($v_obj, $v_num)\" }" );
 	}
 
-	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\" }" );
+	cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
@@ -4218,27 +3992,27 @@ if ( choice == 82 )
 
 	cmd( "newtop .a \"Insert 'LINKTO/FROM' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.c" );
-	cmd( "label .a.c.l -text \"Get the node object\"" );
+	cmd( "ttk::frame .a.c" );
+	cmd( "ttk::label .a.c.l -text \"Get the node object\"" );
 
-	cmd( "frame .a.c.b -bd 2 -relief groove" );
-	cmd( "radiobutton .a.c.b.e -text \"Link points to\" -width 12 -variable v_type -value 0" );
-	cmd( "radiobutton .a.c.b.f -text \"Link points from\" -width 12 -variable v_type -value 1" );
+	cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
+	cmd( "ttk::radiobutton .a.c.b.e -text \"Link points to\" -width 12 -variable v_type -value 0" );
+	cmd( "ttk::radiobutton .a.c.b.f -text \"Link points from\" -width 12 -variable v_type -value 1" );
 	cmd( "bind .a.c.b.e <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f -side left" );
 
 	cmd( "pack .a.c.l .a.c.b" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Pointer to return the node pointed\"" );
-	cmd( "entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Pointer to return the node pointed\"" );
+	cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.v" );
-	cmd( "label .a.v.l -text \"Link pointer\"" );
-	cmd( "entry .a.v.e -width 6 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.v" );
+	cmd( "ttk::label .a.v.l -text \"Link pointer\"" );
+	cmd( "ttk::entry .a.v.e -width 6 -textvariable v_obj -justify center" );
 	cmd( "bind .a.v.e <Return>  { focus .a.f.ok }" );
 	cmd( "pack .a.v.l .a.v.e" );
 
@@ -4272,7 +4046,7 @@ if ( choice == 82 )
 	else
 		cmd( ".f.t.t insert insert \"LINKFROM($v_obj)\" }" );
 
-	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\" }" );
+	cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
@@ -4287,15 +4061,15 @@ if ( choice == 83 )
 
 	cmd( "newtop .a \"Insert 'SHUFFLE_NET' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l -text \"Network node object name\"" );
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l -text \"Network node object name\"" );
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l -text \"Network nodes parent object\"" );
-	cmd( "entry .a.o.e -width 6 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l -text \"Network nodes parent object\"" );
+	cmd( "ttk::entry .a.o.e -width 6 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -4321,8 +4095,8 @@ if ( choice == 83 )
 
 	cmd( "set a [ .f.t.t index insert ]" );
 
-	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SHUFFLE_NET(\\\"$v_label\\\");\"}" );
-	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SHUFFLE_NETS($v_obj, \\\"$v_label\\\");\"}" );
+	cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SHUFFLE_NET(\\\"$v_label\\\");\" }" );
+	cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SHUFFLE_NETS($v_obj, \\\"$v_label\\\");\" }" );
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
@@ -4339,33 +4113,33 @@ if ( choice == 84 )
 
 	cmd( "newtop .a \"Insert 'RNDDRAW_NODE/LINK' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.c" );
-	cmd( "label .a.c.l -text \"Randomly draw a\"" );
+	cmd( "ttk::frame .a.c" );
+	cmd( "ttk::label .a.c.l -text \"Randomly draw a\"" );
 
-	cmd( "frame .a.c.b -bd 2 -relief groove" );
-	cmd( "radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { write_any .a.d.e cur; .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\" }" );
-	cmd( "radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { write_any .a.d.e curl; .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Network node object\" }" );
+	cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
+	cmd( "ttk::radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { write_any .a.d.e cur; .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\" }" );
+	cmd( "ttk::radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { write_any .a.d.e curl; .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Network node object\" }" );
 	cmd( "bind .a.c.b.e <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f -side left" );
 
 	cmd( "pack .a.c.l .a.c.b" );
 
-	cmd( "frame .a.d" );
-	cmd( "label .a.d.l -text \"Pointer to return the element drawn\"" );
-	cmd( "entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
+	cmd( "ttk::frame .a.d" );
+	cmd( "ttk::label .a.d.l -text \"Pointer to return the element drawn\"" );
+	cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 	cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.d.l .a.d.e" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l" );			// network name or unused
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l" );			// network name or unused
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l" );			// parent object or node object
-	cmd( "entry .a.o.e -width 6 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l" );			// parent object or node object
+	cmd( "ttk::entry .a.o.e -width 6 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -4406,7 +4180,7 @@ if ( choice == 84 )
 		cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"RNDDRAW_LINKS($v_obj)\" }" );
 	}
 
-	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\" }" );
+	cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \";\" }" );
 	cmd( ".f.t.t see insert" );
 
 	recolor = true;		// trigger recoloring
@@ -4422,13 +4196,13 @@ if ( choice == 85 )
 
 	cmd( "newtop .a \"Insert 'DELETE_NET/NODE/LINK' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.c" );
-	cmd( "label .a.c.l -text \"Delete a\"" );
+	cmd( "ttk::frame .a.c" );
+	cmd( "ttk::label .a.c.l -text \"Delete a\"" );
 
-	cmd( "frame .a.c.b -bd 2 -relief groove" );
-	cmd( "radiobutton .a.c.b.e -text Network -width 6 -variable v_type -value 0 -command { .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\"; write_any .a.o.e p }" );
-	cmd( "radiobutton .a.c.b.f -text Node -width 6 -variable v_type -value 1 -command { .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Node object\"; write_any .a.o.e p }" );
-	cmd( "radiobutton .a.c.b.g -text Link -width 6 -variable v_type -value 2 -command { .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Link pointer\"; write_any .a.o.e curl }" );
+	cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
+	cmd( "ttk::radiobutton .a.c.b.e -text Network -width 6 -variable v_type -value 0 -command { .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\"; write_any .a.o.e p }" );
+	cmd( "ttk::radiobutton .a.c.b.f -text Node -width 6 -variable v_type -value 1 -command { .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Node object\"; write_any .a.o.e p }" );
+	cmd( "ttk::radiobutton .a.c.b.g -text Link -width 6 -variable v_type -value 2 -command { .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Link pointer\"; write_any .a.o.e curl }" );
 	cmd( "bind .a.c.b.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "bind .a.c.b.g <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
@@ -4436,15 +4210,15 @@ if ( choice == 85 )
 
 	cmd( "pack .a.c.l .a.c.b" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l" );			// object name or unused
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l" );			// object name or unused
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l" );			// parent object or node object
-	cmd( "entry .a.o.e -width 6 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l" );			// parent object or node object
+	cmd( "ttk::entry .a.o.e -width 6 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -4481,7 +4255,7 @@ if ( choice == 85 )
 			break;
 
 		case 1:
-			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"DELETE_NODE();\"}" );
+			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"DELETE_NODE();\" }" );
 			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"DELETE_NODES($v_obj);\" }" );
 			break;
 
@@ -4507,27 +4281,27 @@ if ( choice == 86 )
 
 	cmd( "newtop .a \"Insert 'STAT_NET/NODE' Command\" { set choice 2 }" );
 
-	cmd( "frame .a.c" );
-	cmd( "label .a.c.l -text \"Get statistics from a\"" );
+	cmd( "ttk::frame .a.c" );
+	cmd( "ttk::label .a.c.l -text \"Get statistics from a\"" );
 
-	cmd( "frame .a.c.b -bd 2 -relief groove" );
-	cmd( "radiobutton .a.c.b.e -text Network -width 6 -variable v_type -value 0 -command { .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\"; write_any .a.o.e p }" );
-	cmd( "radiobutton .a.c.b.f -text Node -width 6 -variable v_type -value 1 -command { .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Node object\"; write_any .a.o.e p }" );
+	cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
+	cmd( "ttk::radiobutton .a.c.b.e -text Network -width 6 -variable v_type -value 0 -command { .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\"; write_any .a.o.e p }" );
+	cmd( "ttk::radiobutton .a.c.b.f -text Node -width 6 -variable v_type -value 1 -command { .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Node object\"; write_any .a.o.e p }" );
 	cmd( "bind .a.c.b.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "bind .a.c.b.f <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 	cmd( "pack .a.c.b.e .a.c.b.f -side left" );
 
 	cmd( "pack .a.c.l .a.c.b" );
 
-	cmd( "frame .a.n" );
-	cmd( "label .a.n.l" );			// object name or unused
-	cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
+	cmd( "ttk::frame .a.n" );
+	cmd( "ttk::label .a.n.l" );			// object name or unused
+	cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
 	cmd( "bind .a.n.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 	cmd( "pack .a.n.l .a.n.e" );
 
-	cmd( "frame .a.o" );
-	cmd( "label .a.o.l" );			// parent object or node object
-	cmd( "entry .a.o.e -width 6 -textvariable v_obj -justify center" );
+	cmd( "ttk::frame .a.o" );
+	cmd( "ttk::label .a.o.l" );			// parent object or node object
+	cmd( "ttk::entry .a.o.e -width 6 -textvariable v_obj -justify center" );
 	cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 	cmd( "pack .a.o.l .a.o.e" );
 
@@ -4563,7 +4337,7 @@ if ( choice == 86 )
 	}
 	else
 	{
-			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"STAT_NODE();\"}" );
+			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"STAT_NODE();\" }" );
 			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"STAT_NODES($v_obj);\" }" );
 	}
 	cmd( ".f.t.t see insert" );
@@ -4693,31 +4467,31 @@ if ( choice == 41 )
 
 	cmd( "newtop .a \"Save Model As...\" { set choice 2 }" );
 
-	cmd( "frame .a.tit" );
-	cmd( "label .a.tit.l -text \"Original model:\"" );
+	cmd( "ttk::frame .a.tit" );
+	cmd( "ttk::label .a.tit.l -text \"Original model:\"" );
 
-	cmd( "frame .a.tit.n" );
-	cmd( "label .a.tit.n.n -fg red -text \"$modelName\"" );
-	cmd( "label .a.tit.n.l1 -text \"( version\"" );
-	cmd( "label .a.tit.n.v -fg red -text \"$modelVersion\"" );
-	cmd( "label .a.tit.n.l2 -text \")\"" );
+	cmd( "ttk::frame .a.tit.n" );
+	cmd( "ttk::label .a.tit.n.n -style red.TLabel -text \"$modelName\"" );
+	cmd( "ttk::label .a.tit.n.l1 -text \"( version\"" );
+	cmd( "ttk::label .a.tit.n.v -style red.TLabel -text \"$modelVersion\"" );
+	cmd( "ttk::label .a.tit.n.l2 -text \")\"" );
 	cmd( "pack .a.tit.n.n .a.tit.n.l1 .a.tit.n.v .a.tit.n.l2 -side left" );
 
 	cmd( "pack .a.tit.l .a.tit.n" );
 
-	cmd( "frame .a.mname" );
-	cmd( "label .a.mname.l -text \"New model name\"" );
-	cmd( "entry .a.mname.e -width 25 -textvariable mname -justify center" );
+	cmd( "ttk::frame .a.mname" );
+	cmd( "ttk::label .a.mname.l -text \"New model name\"" );
+	cmd( "ttk::entry .a.mname.e -width 25 -textvariable mname -justify center" );
 	cmd( "pack .a.mname.l .a.mname.e" );
 
-	cmd( "frame .a.mver" );
-	cmd( "label .a.mver.l -text \"Version\"" );
-	cmd( "entry .a.mver.e -width 10 -textvariable mver -justify center" );
+	cmd( "ttk::frame .a.mver" );
+	cmd( "ttk::label .a.mver.l -text \"Version\"" );
+	cmd( "ttk::entry .a.mver.e -width 10 -textvariable mver -justify center" );
 	cmd( "pack .a.mver.l .a.mver.e" );
 
-	cmd( "frame .a.mdir" );
-	cmd( "label .a.mdir.l -text \"New (non-existing) directory name\"" );
-	cmd( "entry .a.mdir.e -width 35 -textvariable mdir -justify center" );
+	cmd( "ttk::frame .a.mdir" );
+	cmd( "ttk::label .a.mdir.l -text \"New (non-existing) directory name\"" );
+	cmd( "ttk::entry .a.mdir.e -width 35 -textvariable mdir -justify center" );
 	cmd( "pack .a.mdir.l .a.mdir.e" );
 
 	cmd( "pack .a.tit .a.mname .a.mver .a.mdir -padx 5 -pady 5" );
@@ -4749,14 +4523,14 @@ if ( choice == 41 )
 	cmd( "if { [ llength [ split $mdir ] ] > 1 } { set choice -1 }" );
 	if ( choice == -1 )
 	{
-		cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
+		cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
 		cmd( "focus .a.mdir.e" );
 		cmd( ".a.mdir.e selection range 0 end" );
 		goto loop_copy;
 	}
 
 	// control for existing directory
-	cmd( "if [ file exists \"$mdir\" ] { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+	cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 	if ( choice == 3 )
 	{
 		cmd( "focus .a.mdir.e" );
@@ -4792,7 +4566,7 @@ if ( choice == 41 )
 
 	if ( choice == 3 )
 	{
-		cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $curdir).\"" );
+		cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $curdir).\"" );
 		cmd( ".a.mname.e selection range 0 end" );
 		cmd( "focus .a.mname.e" );
 		goto loop_copy;
@@ -4813,7 +4587,7 @@ if ( choice == 41 )
 	// create the model info file
 	update_model_info( );
 
-	cmd( "tk_messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: $modelDir\"" );
+	cmd( "ttk::messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: $modelDir\"" );
 
 	choice = 49;
 	goto loop;
@@ -4855,7 +4629,7 @@ if ( choice == 43 )
 	for ( ; i <= num; ++i )
 	{
 		cmd( "set c [.f.t.t get %d.0]", i );
-		cmd( "if { $c == \" \" } {set choice 1} {set choice 0}" );
+		cmd( "if { $c == \" \" } { set choice 1 } { set choice 0 }" );
 		if ( choice == 1 )
 			cmd( ".f.t.t delete %d.0 ", i );
 	}
@@ -4870,7 +4644,7 @@ if ( choice == 44 )
 	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 		choice = 0;
 		goto loop;
 	}
@@ -4898,29 +4672,29 @@ if ( choice == 44 )
 
 	cmd( "newtop .a \"Model Info\" { set choice 2 }" );
 
-	cmd( "frame .a.mname" );
-	cmd( "label .a.mname.l -text \"Model name\"" );
-	cmd( "entry .a.mname.e -width 25 -textvariable mname -justify center" );
+	cmd( "ttk::frame .a.mname" );
+	cmd( "ttk::label .a.mname.l -text \"Model name\"" );
+	cmd( "ttk::entry .a.mname.e -width 25 -textvariable mname -justify center" );
 	cmd( "pack .a.mname.l .a.mname.e" );
 
-	cmd( "frame .a.mver" );
-	cmd( "label .a.mver.l -text \"Version\"" );
-	cmd( "entry .a.mver.e -width 10 -textvariable mver -justify center" );
+	cmd( "ttk::frame .a.mver" );
+	cmd( "ttk::label .a.mver.l -text \"Version\"" );
+	cmd( "ttk::entry .a.mver.e -width 10 -textvariable mver -justify center" );
 	cmd( "pack .a.mver.l .a.mver.e" );
 
-	cmd( "frame .a.mdir" );
-	cmd( "label .a.mdir.l -text \"Model home directory\"" );
-	cmd( "entry .a.mdir.e -width 35 -state disabled -textvariable complete_dir -justify center" );
+	cmd( "ttk::frame .a.mdir" );
+	cmd( "ttk::label .a.mdir.l -text \"Model home directory\"" );
+	cmd( "ttk::entry .a.mdir.e -width 35 -state disabled -textvariable complete_dir -justify center" );
 	cmd( "pack .a.mdir.l .a.mdir.e" );
 
-	cmd( "frame .a.date" );
-	cmd( "label .a.date.l -text \"Creation date\"" );
-	cmd( "entry .a.date.e -width 20 -textvariable mdate -justify center" );
+	cmd( "ttk::frame .a.date" );
+	cmd( "ttk::label .a.date.l -text \"Creation date\"" );
+	cmd( "ttk::entry .a.date.e -width 20 -textvariable mdate -justify center" );
 	cmd( "pack .a.date.l .a.date.e" );
 
-	cmd( "frame .a.edate" );
-	cmd( "label .a.edate.l -text \"Modification date (equations)\"" );
-	cmd( "entry .a.edate.e -width 20 -state disabled -textvariable edate -justify center" );
+	cmd( "ttk::frame .a.edate" );
+	cmd( "ttk::label .a.edate.l -text \"Modification date (equations)\"" );
+	cmd( "ttk::entry .a.edate.e -width 20 -state disabled -textvariable edate -justify center" );
 	cmd( "pack .a.edate.l .a.edate.e" );
 
 	cmd( "pack .a.mname .a.mver .a.mdir .a.date .a.edate -padx 5 -pady 5" );
@@ -5002,15 +4776,15 @@ if ( choice == 47 )
 
 	cmd( "newtop .l \"System Options\" { set choice 2 }" );
 
-	cmd( "frame .l.t" );
-	cmd( "scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-	cmd( "text .l.t.text -undo 1 -wrap word -font [ list \"$DefaultFont\" $small_character normal ] -width 70 -height 22 -yscrollcommand \".l.t.yscroll set\"" );
+	cmd( "ttk::frame .l.t" );
+	cmd( "ttk::scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
+	cmd( "ttk::text .l.t.text -undo 1 -wrap word -width 70 -height 22 -yscrollcommand \".l.t.yscroll set\" -entry 1 -dark $darkTheme -style small.TText" );
 	cmd( ".l.t.text insert end $a" );
 	cmd( "pack .l.t.yscroll -side right -fill y" );
 	cmd( "pack .l.t.text" );
 
-	cmd( "frame .l.d" );
-	cmd( "label .l.d.msg -text [ check_sys_opt ] -fg red" );
+	cmd( "ttk::frame .l.d" );
+	cmd( "ttk::label .l.d.msg -text [ check_sys_opt ] -style red.TLabel" );
 	cmd( "pack .l.d.msg" );
 
 	cmd( "pack .l.t .l.d" );
@@ -5071,7 +4845,7 @@ if ( choice == 48 )
 	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 		choice = 0;
 		goto loop;
 	}
@@ -5105,17 +4879,17 @@ if ( choice == 48 )
 
 	cmd( "newtop .l \"Model Options\" { set choice 2 }" );
 
-	cmd( "frame .l.t" );
-	cmd( "scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-	cmd( "text .l.t.text -undo 1 -wrap word -font [ list \"$DefaultFont\" $small_character normal ] -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\"" );
+	cmd( "ttk::frame .l.t" );
+	cmd( "ttk::scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
+	cmd( "ttk::text .l.t.text -undo 1 -wrap word -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\" -entry 1 -dark $darkTheme -style small.TText" );
 	cmd( ".l.t.text insert end $a" );
 	cmd( "pack .l.t.yscroll -side right -fill y" );
 	cmd( "pack .l.t.text" );
 
-	cmd( "frame .l.d" );
+	cmd( "ttk::frame .l.d" );
 
-	cmd( "frame .l.d.opt" );
-	cmd( "checkbutton .l.d.opt.debug -text Debug -variable debug -command { \
+	cmd( "ttk::frame .l.d.opt" );
+	cmd( "ttk::checkbutton .l.d.opt.debug -text Debug -variable debug -command { \
 			set a [.l.t.text get 1.0 end]; \
 			set pos [ string first \"SWITCH_CC=\" $a ]; \
 			if { $pos == -1 } { \
@@ -5161,7 +4935,7 @@ if ( choice == 48 )
 				.l.t.text insert end \"[ string trim $a ]\n\" \
 			} \
 		}" );
-	cmd( "button .l.d.opt.ext -width $butWid -text \"Add Extra\" -command { \
+	cmd( "ttk::button .l.d.opt.ext -width $butWid -text \"Add Extra\" -command { \
 			set a [.l.t.text get 1.0 end]; \
 			set pos [ string first \"FUN_EXTRA=\" $a ]; \
 			if { $pos == -1 } { \
@@ -5169,7 +4943,7 @@ if ( choice == 48 )
 				set a [.l.t.text get 1.0 end]; \
 				set pos [ string first \"FUN_EXTRA=\" $a ]; \
 			}; \
-			set fun_extra [ tk_getOpenFile -parent .l -title \"Select Additional Source Files\" -multiple yes -initialdir \"$modelDir\" -filetypes {{{C++ header files} {.h .hpp .h++}} {{C++ source files} {.c .cpp .c++}} {{All files} {*}} } ]; \
+			set fun_extra [ tk_getOpenFile -parent .l -title \"Select Additional Source Files\" -multiple yes -initialdir \"$modelDir\" -filetypes { { {C++ header files} {.h .hpp .h++} } { {C++ source files} {.c .cpp .c++} } { {All files} {*} } } ]; \
 			if { $fun_extra == \"\" } { \
 				return \
 			}; \
@@ -5194,7 +4968,7 @@ if ( choice == 48 )
 			.l.t.text delete 1.0 end; \
 			.l.t.text insert end \"[ string trim $a ]\n\" \
 		}" );
-	cmd( "button .l.d.opt.def -width $butWid -text \"Default\" -command { \
+	cmd( "ttk::button .l.d.opt.def -width $butWid -text \"Default\" -command { \
 			if { $debug == 0 } { \
 				set default \"$gcc_opt\" \
 			} else { \
@@ -5203,7 +4977,7 @@ if ( choice == 48 )
 			.l.t.text delete 1.0 end; \
 			.l.t.text insert end \"$default\" \
 		}" );
-	cmd( "button .l.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
+	cmd( "ttk::button .l.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
 			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.gch ]; \
 			foreach i $objs { \
 				catch { \
@@ -5296,10 +5070,10 @@ if ( choice == 59 )
 
 	cmd( "newtop .a \"Change Font\" { set choice 2 }" );
 
-	cmd( "frame .a.l" );
-	cmd( "label .a.l.l -text \"Font family and size\"" );
+	cmd( "ttk::frame .a.l" );
+	cmd( "ttk::label .a.l.l -text \"Font family and size\"" );
 
-	cmd( "frame .a.l.e" );
+	cmd( "ttk::frame .a.l.e" );
 	cmd( "ttk::combobox .a.l.e.font -justify center -textvariable ifont -values [ font families ] -width 15" );
 	cmd( "ttk::combobox .a.l.e.dim -justify center -textvariable idim -values [ list 4 6 8 9 10 11 12 14 18 24 32 48 60 ] -width 3" );
 	cmd( "pack .a.l.e.font .a.l.e.dim -side left" );
@@ -5334,125 +5108,171 @@ if ( choice == 59 )
 	goto loop;
 }
 
-// LMM system options
+// LMM options
 if ( choice == 60 )
 {
+	cmd( "updateTheme" );
+	
 	for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
+	{
 		cmd( "set temp_var%d \"$%s\"", i, lmm_options[ i - 1 ] );
-
+		cmd( "set default_var%d \"%s\"", i, lmm_defaults[ i - 1 ] );
+	}
+	
+	cmd( "set temp_var16 \"[ dict get $themeToName $temp_var16 ]\"" );
+	cmd( "set default_var16 \"[ dict get $themeToName $default_var16 ]\"" );
+	
 	cmd( "newtop .a \"Options\" { set choice 2 }" );
+	
+	cmd( "ttk::frame .a.f" );
 
-	cmd( "frame .a.num" );
-	cmd( "label .a.num.l -text \"System terminal\"" );
-	cmd( "entry .a.num.v -width 25 -textvariable temp_var1 -justify center" );
-	cmd( "pack .a.num.l .a.num.v" );
-	cmd( "bind .a.num.v <Return> { focus .a.num13.v; .a.num13.v selection range 0 end }" );
+	cmd( "ttk::frame .a.f.c1" );					// coluna 1
 
-	cmd( "frame .a.num13" );
-	cmd( "label .a.num13.l -text \"Debugger\"" );
-	cmd( "entry .a.num13.v -width 25 -textvariable temp_var13 -justify center" );
-	cmd( "pack .a.num13.l .a.num13.v" );
-	cmd( "bind .a.num13.v <Return> { focus .a.num2.v; .a.num2.v selection range 0 end }" );
+	cmd( "ttk::frame .a.f.c1.num" );
+	cmd( "ttk::label .a.f.c1.num.l -text \"System terminal\"" );
+	cmd( "ttk::entry .a.f.c1.num.v -width 25 -textvariable temp_var1 -justify center" );
+	cmd( "pack .a.f.c1.num.l .a.f.c1.num.v" );
+	cmd( "bind .a.f.c1.num.v <Return> { focus .a.f.c1.num13.v; .a.f.c1.num13.v selection range 0 end }" );
 
-	cmd( "frame .a.num2" );
-	cmd( "label .a.num2.l -text \"HTML browser\"" );
-	cmd( "entry .a.num2.v -width 25 -textvariable temp_var2 -justify center" );
-	cmd( "pack .a.num2.l .a.num2.v" );
-	cmd( "bind .a.num2.v <Return> { focus .a.num4.v; .a.num4.v selection range 0 end }" );
+	cmd( "ttk::frame .a.f.c1.num13" );
+	cmd( "ttk::label .a.f.c1.num13.l -text \"Debugger\"" );
+	cmd( "ttk::entry .a.f.c1.num13.v -width 25 -textvariable temp_var13 -justify center" );
+	cmd( "pack .a.f.c1.num13.l .a.f.c1.num13.v" );
+	cmd( "bind .a.f.c1.num13.v <Return> { focus .a.f.c1.num2.v; .a.f.c1.num2.v selection range 0 end }" );
 
-	cmd( "frame .a.num4" );
-	cmd( "label .a.num4.l -text \"Tcl/Tk Wish\"" );
-	cmd( "entry .a.num4.v -width 25 -textvariable temp_var4 -justify center" );
-	cmd( "pack .a.num4.l .a.num4.v" );
-	cmd( "bind .a.num4.v <Return> { focus .a.num12.v; .a.num12.v selection range 0 end }" );
+	cmd( "ttk::frame .a.f.c1.num2" );
+	cmd( "ttk::label .a.f.c1.num2.l -text \"HTML browser\"" );
+	cmd( "ttk::entry .a.f.c1.num2.v -width 25 -textvariable temp_var2 -justify center" );
+	cmd( "pack .a.f.c1.num2.l .a.f.c1.num2.v" );
+	cmd( "bind .a.f.c1.num2.v <Return> { focus .a.f.c1.num4.v; .a.f.c1.num4.v selection range 0 end }" );
 
-	cmd( "frame .a.num12" );
-	cmd( "label .a.num12.l -text \"New models subdirectory\"" );
-	cmd( "entry .a.num12.v -width 25 -textvariable temp_var12 -justify center" );
-	cmd( "pack .a.num12.l .a.num12.v" );
-	cmd( "bind .a.num12.v <Return> { focus .a.num5.v; .a.num5.v selection range 0 end }" );
+	cmd( "ttk::frame .a.f.c1.num4" );
+	cmd( "ttk::label .a.f.c1.num4.l -text \"Tcl/Tk Wish\"" );
+	cmd( "ttk::entry .a.f.c1.num4.v -width 25 -textvariable temp_var4 -justify center" );
+	cmd( "pack .a.f.c1.num4.l .a.f.c1.num4.v" );
+	cmd( "bind .a.f.c1.num4.v <Return> { focus .a.f.c1.num12.v; .a.f.c1.num12.v selection range 0 end }" );
 
-	cmd( "frame .a.num5" );
-	cmd( "label .a.num5.l -text \"Source code subdirectory\"" );
-	cmd( "entry .a.num5.v -width 25 -textvariable temp_var5 -justify center" );
-	cmd( "pack .a.num5.l .a.num5.v" );
-	cmd( "bind .a.num5.v <Return> { focus .a.num3.fv }" );
+	cmd( "ttk::frame .a.f.c1.num12" );
+	cmd( "ttk::label .a.f.c1.num12.l -text \"New models subdirectory\"" );
+	cmd( "ttk::entry .a.f.c1.num12.v -width 25 -textvariable temp_var12 -justify center" );
+	cmd( "pack .a.f.c1.num12.l .a.f.c1.num12.v" );
+	cmd( "bind .a.f.c1.num12.v <Return> { focus .a.f.c1.num5.v; .a.f.c1.num5.v selection range 0 end }" );
 
-	cmd( "frame .a.num3" );
-	cmd( "label .a.num3.l -text \"Font family and size\"" );
-	cmd( "frame .a.num3.f" );
-	cmd( "ttk::combobox .a.num3.f.v -justify center -textvariable temp_var3 -values [ font families ] -width 15" );
-	cmd( "ttk::combobox .a.num3.f.s -justify center -textvariable temp_var6 -values [ list 4 6 8 9 10 11 12 14 18 24 32 48 60 ] -width 3" );
-	cmd( "pack .a.num3.f.v .a.num3.f.s -side left" );
-	cmd( "pack .a.num3.l .a.num3.f" );
-	cmd( "bind .a.num3.f.v <Return> { focus .a.num7.v; .a.num7.v selection range 0 end }" );
+	cmd( "ttk::frame .a.f.c1.num5" );
+	cmd( "ttk::label .a.f.c1.num5.l -text \"Source code subdirectory\"" );
+	cmd( "ttk::entry .a.f.c1.num5.v -width 25 -textvariable temp_var5 -justify center" );
+	cmd( "pack .a.f.c1.num5.l .a.f.c1.num5.v" );
+	cmd( "bind .a.f.c1.num5.v <Return> { focus .a.f.c2.num16.v; .a.f.c2.num16.v selection range 0 end }" );
 
-	cmd( "frame .a.num7" );
-	cmd( "label .a.num7.l -text \"Tab size (characters)\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .a.num7.v -width 3 -from 1 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set temp_var7 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var7; return 0 } } -invalidcommand { bell } -justify center } { entry .a.num7.v -width 2 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set temp_var7 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var7; return 0 } } -invalidcommand { bell } -justify center }" );
-	cmd( "write_any .a.num7.v $temp_var7" );
-	cmd( "pack .a.num7.l .a.num7.v" );
-	cmd( "bind .a.num7.v <Return> { focus .a.num9.r.v3 }" );
+	cmd( "pack .a.f.c1.num .a.f.c1.num13 .a.f.c1.num2 .a.f.c1.num4 .a.f.c1.num12 .a.f.c1.num5 -padx 5 -pady 5" );
 
-	cmd( "frame .a.num9" );
-	cmd( "label .a.num9.l -text \"Syntax highlights\"" );
+	cmd( "pack .a.f.c1 -padx 10 -side left" );
+	
+	cmd( "ttk::frame .a.f.c2" );					// coluna 2
 
-	cmd( "frame .a.num9.r -relief groove -bd 2" );
-	cmd( "radiobutton .a.num9.r.v1 -variable temp_var9 -value 0 -text None" );
-	cmd( "radiobutton .a.num9.r.v2 -variable temp_var9 -value 1 -text Partial" );
-	cmd( "radiobutton .a.num9.r.v3 -variable temp_var9 -value 2 -text Full" );
-	cmd( "pack .a.num9.r.v1 .a.num9.r.v2 .a.num9.r.v3 -side left" );
+	cmd( "ttk::frame .a.f.c2.num16" );
+	cmd( "ttk::label .a.f.c2.num16.l -text \"Interface theme\"" );
+	cmd( "ttk::combobox .a.f.c2.num16.v -justify center -textvariable temp_var16 -values $themeNames -width 22 -validate focusout -validatecommand { if { [ lsearch $themeNames %%P ] >= 0 } { set temp_var16 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var16; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "pack .a.f.c2.num16.l .a.f.c2.num16.v" );
+	cmd( "bind .a.f.c2.num16.v <Return> { focus .a.f.c2.num3.f.v; .a.f.c2.num7.v selection range 0 end }" );
+	
+	cmd( "ttk::frame .a.f.c2.num3" );
+	cmd( "ttk::label .a.f.c2.num3.l -text \"Font family and size\"" );
+	cmd( "ttk::frame .a.f.c2.num3.f" );
+	cmd( "ttk::combobox .a.f.c2.num3.f.v -justify center -textvariable temp_var3 -values [ font families ] -width 15" );
+	cmd( "ttk::combobox .a.f.c2.num3.f.s -justify center -textvariable temp_var6 -values [ list 4 6 8 9 10 11 12 14 18 24 32 48 60 ] -width 3" );
+	cmd( "pack .a.f.c2.num3.f.v .a.f.c2.num3.f.s -side left" );
+	cmd( "pack .a.f.c2.num3.l .a.f.c2.num3.f" );
+	cmd( "bind .a.f.c2.num3.f.v <Return> { focus .a.f.c2.num3.f.s; .a.f.c2.num3.f.s selection range 0 end }" );
+	cmd( "bind .a.f.c2.num3.f.s <Return> { focus .a.f.c2.num7.v; .a.f.c2.num7.v selection range 0 end }" );
 
-	cmd( "pack .a.num9.l .a.num9.r" );
-	cmd( "bind .a.num9.r.v1 <Return> { focus .a.num8.v_num8 }" );
-	cmd( "bind .a.num9.r.v2 <Return> { focus .a.num8.v_num8 }" );
-	cmd( "bind .a.num9.r.v3 <Return> { focus .a.num8.v_num8 }" );
+	cmd( "ttk::frame .a.f.c2.num7" );
+	cmd( "ttk::label .a.f.c2.num7.l -text \"Tab size (characters)\"" );
+	cmd( "ttk::spinbox .a.f.c2.num7.v -width 3 -from 1 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set temp_var7 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var7; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "write_any .a.f.c2.num7.v $temp_var7" );
+	cmd( "pack .a.f.c2.num7.l .a.f.c2.num7.v" );
+	cmd( "bind .a.f.c2.num7.v <Return> { focus .a.f.c2.num9.r.v3 }" );
 
-	cmd( "frame .a.num8" );
-	cmd( "checkbutton .a.num8.v_num8 -variable temp_var8 -text \"Wrap text\"" );
-	cmd( "checkbutton .a.num8.v_num10 -variable temp_var10 -text \"Auto-hide on run\"" );
-	cmd( "checkbutton .a.num8.v_num11 -variable temp_var11 -text \"Show text file commands\"" );
-	cmd( "checkbutton .a.num8.v_num14 -variable temp_var14 -text \"Restore window positions\"" );
-	cmd( "pack .a.num8.v_num8 .a.num8.v_num10 .a.num8.v_num11 .a.num8.v_num14" );
-	cmd( "bind .a.num8.v_num8 <Return> { focus .a.num8.v_num10 }" );
-	cmd( "bind .a.num8.v_num10 <Return> { focus .a.num8.v_num11 }" );
-	cmd( "bind .a.num8.v_num11 <Return> { focus .a.num8.v_num14 }" );
-	cmd( "bind .a.num8.v_num14 <Return> { focus .a.f2.ok }" );
+	cmd( "ttk::frame .a.f.c2.num9" );
+	cmd( "ttk::label .a.f.c2.num9.l -text \"Syntax highlights\"" );
 
-	cmd( "pack .a.num .a.num13 .a.num2 .a.num4 .a.num12 .a.num5 .a.num3 .a.num7 .a.num9 .a.num8 -padx 5 -pady 5" );
+	cmd( "ttk::frame .a.f.c2.num9.r -relief solid -borderwidth 1" );
+	cmd( "ttk::radiobutton .a.f.c2.num9.r.v1 -variable temp_var9 -value 0 -text None" );
+	cmd( "ttk::radiobutton .a.f.c2.num9.r.v2 -variable temp_var9 -value 1 -text Partial" );
+	cmd( "ttk::radiobutton .a.f.c2.num9.r.v3 -variable temp_var9 -value 2 -text Full" );
+	cmd( "pack .a.f.c2.num9.r.v1 .a.f.c2.num9.r.v2 .a.f.c2.num9.r.v3 -padx 3 -pady 3 -side left" );
 
-	cmd( "frame .a.f1" );
-	cmd( "button .a.f1.def -width $butWid -text Default -command { set temp_var1 \"%s\"; set temp_var2 \"%s\"; set temp_var3 \"%s\"; set temp_var4 \"%s\"; set temp_var5 \"%s\"; set temp_var6 \"%s\"; write_any .a.num7.v \"%s\"; set temp_var8 \"%s\"; set temp_var9 \"%s\"; set temp_var10 \"%s\"; set temp_var11 \"%s\"; set temp_var12 \"%s\"; set temp_var13 \"%s\"; set temp_var14 \"%s\"; set temp_var15 \"%s\" }", lmm_defaults[0], lmm_defaults[1], lmm_defaults[2], lmm_defaults[3], lmm_defaults[4], lmm_defaults[5], lmm_defaults[6], lmm_defaults[7], lmm_defaults[8], lmm_defaults[9], lmm_defaults[10], lmm_defaults[11], lmm_defaults[12], lmm_defaults[13], lmm_defaults[14] );
-	cmd( "button .a.f1.help -width $butWid -text Help -command { LsdHelp LMM.html#SystemOpt }" );
-	cmd( "pack .a.f1.def .a.f1.help -padx 10 -side left" );
-	cmd( "pack .a.f1 -anchor e" );
+	cmd( "pack .a.f.c2.num9.l .a.f.c2.num9.r" );
+	cmd( "bind .a.f.c2.num9.r.v1 <Return> { focus .a.f.c2.num8.v_num8 }" );
+	cmd( "bind .a.f.c2.num9.r.v2 <Return> { focus .a.f.c2.num8.v_num8 }" );
+	cmd( "bind .a.f.c2.num9.r.v3 <Return> { focus .a.f.c2.num8.v_num8 }" );
 
-	cmd( "okcancel .a f2 { set choice 1 } { set choice 2 }" );
+	cmd( "ttk::frame .a.f.c2.num8" );
+	cmd( "ttk::checkbutton .a.f.c2.num8.v_num8 -variable temp_var8 -text \"Wrap text\"" );
+	cmd( "ttk::checkbutton .a.f.c2.num8.v_num10 -variable temp_var10 -text \"Auto-hide on run\"" );
+	cmd( "ttk::checkbutton .a.f.c2.num8.v_num11 -variable temp_var11 -text \"Show text file commands\"" );
+	cmd( "ttk::checkbutton .a.f.c2.num8.v_num14 -variable temp_var14 -text \"Restore window positions\"" );
+	cmd( "pack .a.f.c2.num8.v_num8 .a.f.c2.num8.v_num10 .a.f.c2.num8.v_num11 .a.f.c2.num8.v_num14 -anchor w" );
+	cmd( "bind .a.f.c2.num8.v_num8 <Return> { focus .a.f.c2.num8.v_num10 }" );
+	cmd( "bind .a.f.c2.num8.v_num10 <Return> { focus .a.f.c2.num8.v_num11 }" );
+	cmd( "bind .a.f.c2.num8.v_num11 <Return> { focus .a.f.c2.num8.v_num14 }" );
+	cmd( "bind .a.f.c2.num8.v_num14 <Return> { focus .a.b.ok }" );
 
-	cmd( "bind .a.f1.def <KeyPress-Return> { .a.f1.def invoke }" );
-	cmd( "bind .a.f1.help <KeyPress-Return> { .a.f1.help invoke }" );
+	cmd( "pack .a.f.c2.num16 .a.f.c2.num3 .a.f.c2.num7 .a.f.c2.num9 .a.f.c2.num8 -padx 5 -pady 5" );
+
+	cmd( "pack .a.f.c2 -padx 10 -side left" );
+	
+	cmd( "pack .a.f" );
+	
+	cmd( "proc set_defaults { } { \
+			global temp_var1 temp_var2 temp_var3 temp_var4 temp_var5 temp_var6 temp_var7 temp_var8 temp_var9 temp_var10 temp_var11 temp_var12 temp_var13 temp_var14 temp_var15 temp_var16; \
+			global default_var1 default_var2 default_var3 default_var4 default_var5 default_var6 default_var7 default_var8 default_var9 default_var10 default_var11 default_var12 default_var13 default_var14 default_var15 default_var16;\
+			set temp_var1 \"$default_var1\"; \
+			set temp_var2 \"$default_var2\"; \
+			set temp_var3 \"$default_var3\"; \
+			set temp_var4 \"$default_var4\"; \
+			set temp_var5 \"$default_var5\"; \
+			set temp_var6 \"$default_var6\"; \
+			write_any .a.f.c2.num7.v \"$default_var7\"; \
+			set temp_var8 \"$default_var8\"; \
+			set temp_var9 \"$default_var9\"; \
+			set temp_var10 \"$default_var10\"; \
+			set temp_var11 \"$default_var11\"; \
+			set temp_var12 \"$default_var12\"; \
+			set temp_var13 \"$default_var13\"; \
+			set temp_var14 \"$default_var14\"; \
+			set temp_var15 \"$default_var15\"; \
+			set temp_var16 \"$default_var16\" \
+		}" );
+
+	cmd( "okXhelpcancel .a b Default { set_defaults } { set choice 1 } { LsdHelp LMM.html#SystemOpt } { set choice 2 }" );
 
 	cmd( "showtop .a" );
-	cmd( "focus .a.num.v" );
-	cmd( ".a.num.v selection range 0 end" );
+	cmd( "focus .a.f.c1.num.v" );
+	cmd( ".a.f.c1.num.v selection range 0 end" );
 
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set temp_var7 [ .a.num7.v get ]" );
+	cmd( "set temp_var7 [ .a.f.c2.num7.v get ]" );
 
 	cmd( "destroytop .a" );
 
 	if ( choice == 1 )
 	{
-		cmd( "if { $showFileCmds != $temp_var11 } { tk_messageBox -parent . -icon warning -title Warning -type ok -message \"Restart required\" -detail \"Restart required after configuration changes. Only after LMM is closed and restarted the changes will be applied.\" }" );
+		cmd( "if { $showFileCmds != $temp_var11 || $lsdTheme != $temp_var16 } { \
+				ttk::messageBox -parent . -icon warning -title Warning -type ok -message \"LMM restart required\" -detail \"Please restart LMM for changes to be applied.\" \
+			}" );
 
 		cmd( "if { ! [ string is integer -strict $temp_var6 ] } { set temp_var6 $dim_character }" );
 		cmd( "if { ! [ string is integer -strict $temp_var7 ] } { set temp_var7 $tabsize }" );
+		cmd( "if { [ lsearch $themeNames $temp_var16 ] < 0 } { set temp_var16 [ dict get $themeToName $lsdTheme ] }" );
 
 		for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
 			cmd( "set %s \"$temp_var%d\"", lmm_options[ i - 1 ], i );
+
+		cmd( "set lsdTheme \"[ dict get $nameToTheme $temp_var16 ]\"" );
 
 		// save to config file
 		update_lmm_options(  ); 				// update config file
@@ -5471,7 +5291,7 @@ if ( choice == 60 )
 // generate the no window distribution
 if ( choice == 62 )
 {
-	cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ tk_messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
+	cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
 	if ( choice == 0 )
 		goto loop;
 
@@ -5538,9 +5358,9 @@ if ( choice == 67 )
 {
 	cmd( "newtop .a \"Tab Size\" { set choice 2 }" );
 
-	cmd( "frame .a.l" );
-	cmd( "label .a.l.l -text \"Tab size (characters)\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .a.l.v_num -width 3 -from 1 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set tabsize %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tabsize; return 0 } } -invalidcommand { bell } -justify center } { entry .a.l.v_num -width 3 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set tabsize %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tabsize; return 0 } } -invalidcommand { bell } -justify center }" );
+	cmd( "ttk::frame .a.l" );
+	cmd( "ttk::label .a.l.l -text \"Tab size (characters)\"" );
+	cmd( "ttk::spinbox .a.l.v_num -width 3 -from 1 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set tabsize %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tabsize; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "write_any .a.l.v_num $tabsize" );
 	cmd( "pack .a.l.l .a.l.v_num" );
 
@@ -5579,21 +5399,21 @@ if ( choice == 68 )
 {
 	cmd( "destroy .v.i" );
 	cmd( "menu .v.i -tearoff 0" );
-	cmd( ".v.i add command -label \"EQUATION\" -command {set choice 25} -accelerator Ctrl+E" );
-	cmd( ".v.i add command -label \"V(...)\" -command {set choice 26} -accelerator Ctrl+V" );
-	cmd( ".v.i add command -label \"CYCLE(...)\" -command {set choice 27} -accelerator Ctrl+C" );
-	cmd( ".v.i add command -label \"SUM(...)\" -command {set choice 56} -accelerator Ctrl+U" );
-	cmd( ".v.i add command -label \"INCR(...)\" -command {set choice 40} -accelerator Ctrl+I" );
-	cmd( ".v.i add command -label \"MULT(...)\" -command {set choice 45} -accelerator Ctrl+M" );
-	cmd( ".v.i add command -label \"SEARCH(...)\" -command {set choice 55} -accelerator Ctrl+A" );
-	cmd( ".v.i add command -label \"SEARCH_CND(...)\" -command {set choice 30} -accelerator Ctrl+S" );
-	cmd( ".v.i add command -label \"SORT(...)\" -command {set choice 31} -accelerator Ctrl+T" );
-	cmd( ".v.i add command -label \"RNDDRAW(...)\" -command {set choice 54} -accelerator Ctrl+N" );
-	cmd( ".v.i add command -label \"WRITE(...)\" -command {set choice 29} -accelerator Ctrl+W" );
-	cmd( ".v.i add command -label \"ADDOBJ(...)\" -command {set choice 52} -accelerator Ctrl+O" );
-	cmd( ".v.i add command -label \"DELETE(...)\" -command {set choice 53} -accelerator Ctrl+D" );
+	cmd( ".v.i add command -label \"EQUATION\" -command { set choice 25 } -accelerator Ctrl+E" );
+	cmd( ".v.i add command -label \"V(...)\" -command { set choice 26 } -accelerator Ctrl+V" );
+	cmd( ".v.i add command -label \"CYCLE(...)\" -command { set choice 27 } -accelerator Ctrl+C" );
+	cmd( ".v.i add command -label \"SUM(...)\" -command { set choice 56 } -accelerator Ctrl+U" );
+	cmd( ".v.i add command -label \"INCR(...)\" -command { set choice 40 } -accelerator Ctrl+I" );
+	cmd( ".v.i add command -label \"MULT(...)\" -command { set choice 45 } -accelerator Ctrl+M" );
+	cmd( ".v.i add command -label \"SEARCH(...)\" -command { set choice 55 } -accelerator Ctrl+A" );
+	cmd( ".v.i add command -label \"SEARCH_CND(...)\" -command { set choice 30 } -accelerator Ctrl+S" );
+	cmd( ".v.i add command -label \"SORT(...)\" -command { set choice 31 } -accelerator Ctrl+T" );
+	cmd( ".v.i add command -label \"RNDDRAW(...)\" -command { set choice 54 } -accelerator Ctrl+N" );
+	cmd( ".v.i add command -label \"WRITE(...)\" -command { set choice 29 } -accelerator Ctrl+W" );
+	cmd( ".v.i add command -label \"ADDOBJ(...)\" -command { set choice 52 } -accelerator Ctrl+O" );
+	cmd( ".v.i add command -label \"DELETE(...)\" -command { set choice 53 } -accelerator Ctrl+D" );
 	cmd( ".v.i add command -label \"Network macros\" -command { set choice 72 } -accelerator Ctrl+K" );
-	cmd( ".v.i add command -label \"Math functions\" -command {set choice 51} -accelerator Ctrl+H" );
+	cmd( ".v.i add command -label \"Math functions\" -command { set choice 51 } -accelerator Ctrl+H" );
 	choice = 0;
 	goto loop;
 }
@@ -5603,20 +5423,20 @@ if ( choice == 69 )
 {
 	cmd( "destroy .v.i" );
 	cmd( "menu .v.i -tearoff 0" );
-	cmd( ".v.i add command -label \"LSD equation/function\" -command {set choice 25} -accelerator Ctrl+E" );
-	cmd( ".v.i add command -label \"cal(...)\" -command {set choice 26} -accelerator Ctrl+V" );
-	cmd( ".v.i add command -label \"for ( ; ; )\" -command {set choice 27} -accelerator Ctrl+C" );
-	cmd( ".v.i add command -label \"sum(...)\" -command {set choice 56} -accelerator Ctrl+U" );
-	cmd( ".v.i add command -label \"increment(...)\" -command {set choice 40} -accelerator Ctrl+I" );
-	cmd( ".v.i add command -label \"multiply(...)\" -command {set choice 45} -accelerator Ctrl+M" );
-	cmd( ".v.i add command -label \"search(...)\" -command {set choice 55} -accelerator Ctrl+A" );
-	cmd( ".v.i add command -label \"search_var_cond(...)\" -command {set choice 30} -accelerator Ctrl+S" );
-	cmd( ".v.i add command -label \"lsdqsort(...)\" -command {set choice 31} -accelerator Ctrl+T" );
-	cmd( ".v.i add command -label \"draw_rnd\" -command {set choice 54} -accelerator Ctrl+N" );
-	cmd( ".v.i add command -label \"write(...)\" -command {set choice 29} -accelerator Ctrl+W" );
-	cmd( ".v.i add command -label \"add_n_objects2\" -command {set choice 52} -accelerator Ctrl+O" );
-	cmd( ".v.i add command -label \"delete_obj\" -command {set choice 53} -accelerator Ctrl+D" );
-	cmd( ".v.i add command -label \"Math functions\" -command {set choice 51} -accelerator Ctrl+H" );
+	cmd( ".v.i add command -label \"LSD equation/function\" -command { set choice 25 } -accelerator Ctrl+E" );
+	cmd( ".v.i add command -label \"cal(...)\" -command { set choice 26 } -accelerator Ctrl+V" );
+	cmd( ".v.i add command -label \"for ( ; ; )\" -command { set choice 27 } -accelerator Ctrl+C" );
+	cmd( ".v.i add command -label \"sum(...)\" -command { set choice 56 } -accelerator Ctrl+U" );
+	cmd( ".v.i add command -label \"increment(...)\" -command { set choice 40 } -accelerator Ctrl+I" );
+	cmd( ".v.i add command -label \"multiply(...)\" -command { set choice 45 } -accelerator Ctrl+M" );
+	cmd( ".v.i add command -label \"search(...)\" -command { set choice 55 } -accelerator Ctrl+A" );
+	cmd( ".v.i add command -label \"search_var_cond(...)\" -command { set choice 30 } -accelerator Ctrl+S" );
+	cmd( ".v.i add command -label \"lsdqsort(...)\" -command { set choice 31 } -accelerator Ctrl+T" );
+	cmd( ".v.i add command -label \"draw_rnd\" -command { set choice 54 } -accelerator Ctrl+N" );
+	cmd( ".v.i add command -label \"write(...)\" -command { set choice 29 } -accelerator Ctrl+W" );
+	cmd( ".v.i add command -label \"add_n_objects2\" -command { set choice 52 } -accelerator Ctrl+O" );
+	cmd( ".v.i add command -label \"delete_obj\" -command { set choice 53 } -accelerator Ctrl+D" );
+	cmd( ".v.i add command -label \"Math functions\" -command { set choice 51 } -accelerator Ctrl+H" );
 	choice = 0;
 	goto loop;
 }
@@ -5627,7 +5447,7 @@ if ( choice == 70 )
 	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 		choice = 0;
 		goto loop;
 	}
@@ -5642,7 +5462,7 @@ if ( choice == 70 )
 	s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
 	if ( s == NULL || ( f = fopen( s, "r" ) ) == NULL )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
 		goto loop;
 	}
 
@@ -5650,7 +5470,7 @@ if ( choice == 70 )
 	fclose( f );
 	if ( strncmp( str, "FUN_EXTRA=", 10 ) || sscanf( str + 10, "%s", str1 ) < 1 )
 	{
-		cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"No extra files defined\" -detail \"Open 'Model Options' in menu 'Model' and include all extra files names in the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, press 'Default' button first.\"" );
+		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"No extra files defined\" -detail \"Open 'Model Options' in menu 'Model' and include all extra files names in the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, press 'Default' button first.\"" );
 		goto loop;
 	}
 	i = strlen( str ) - 1;
@@ -5666,14 +5486,14 @@ if ( choice == 70 )
 
 	cmd( "newtop $e \"Extra Files\" { set choice 2 }"  );
 
-	cmd( "frame $e.lf " );
-	cmd( "label $e.lf.l1 -justify center -text \"Show additional\nsource files for model:\"" );
-	cmd( "label $e.lf.l2 -fg red -text \"$modelName\"" );
+	cmd( "ttk::frame $e.lf " );
+	cmd( "ttk::label $e.lf.l1 -justify center -text \"Show additional\nsource files for model:\"" );
+	cmd( "ttk::label $e.lf.l2 -style red.TLabel -text \"$modelName\"" );
 	cmd( "pack $e.lf.l1 $e.lf.l2" );
 
-	cmd( "frame $e.l" );
-	cmd( "scrollbar $e.l.v_scroll -command \"$e.l.l yview\"" );
-	cmd( "listbox $e.l.l -listvariable extra_files -width 30 -height 15 -selectmode single -yscroll \"$e.l.v_scroll set\"" );
+	cmd( "ttk::frame $e.l" );
+	cmd( "ttk::scrollbar $e.l.v_scroll -command \"$e.l.l yview\"" );
+	cmd( "ttk::listbox $e.l.l -listvariable extra_files -width 30 -height 15 -selectmode single -yscroll \"$e.l.v_scroll set\" -dark $darkTheme" );
 	cmd( "pack $e.l.l $e.l.v_scroll -side left -fill y" );
 	cmd( "mouse_wheel $e.l.l" );
 
@@ -5683,8 +5503,8 @@ if ( choice == 70 )
 	else
 		cmd( "$e.l.l insert end \"(none)\"" );
 
-	cmd( "label $e.l3 -text \"(double-click to show the file)\"" );
-	cmd( "label $e.l4 -text \"Extra files are added using\n'Model Options' in menu 'Model'\"" );
+	cmd( "ttk::label $e.l3 -text \"(double-click to show the file)\"" );
+	cmd( "ttk::label $e.l4 -text \"Extra files are added using\n'Model Options' in menu 'Model'\"" );
 
 	cmd( "pack $e.lf $e.l $e.l3 $e.l4 -pady 5 -padx 5" );
 
@@ -5729,7 +5549,7 @@ if ( choice == 87 )
 				set choice 0 \
 			} { \
 				if [ string equal -nocase [ file tail \"$errfil\" ] \"fun_head.h\" ] { \
-					tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Error in LSD macro expansion\" -detail \"Please check the offending file and line in the description following the error message.\"; \
+					ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Error in LSD macro expansion\" -detail \"Please check the offending file and line in the description following the error message.\"; \
 					set choice 0 \
 				} else { \
 					set choice 1 \
@@ -5759,7 +5579,7 @@ if ( choice == 87 )
 			s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
 			if ( s == NULL || strlen( s ) == 0 || ( f = fopen( s, "r" ) ) == NULL )
 			{
-				cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model' and then try again.\"" );
+				cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model' and then try again.\"" );
 				goto loop;
 			}
 			else
@@ -5791,7 +5611,7 @@ if ( choice == 87 )
 
 			if ( choice == 0 )
 			{
-				cmd( "tk_messageBox -parent .mm -title Warning -icon warning -type ok -message \"File not tracked\" -detail \"LMM is able to show error only in your main equation file or in extra files explicitly included.\n\nIf you want to track additional extra files, please open 'Model Options' in menu 'Model' and include all (additional) extra files names at the end of the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, press 'Default' button first.\"" );
+				cmd( "ttk::messageBox -parent .mm -title Warning -icon warning -type ok -message \"File not tracked\" -detail \"LMM is able to show error only in your main equation file or in extra files explicitly included.\n\nIf you want to track additional extra files, please open 'Model Options' in menu 'Model' and include all (additional) extra files names at the end of the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, press 'Default' button first.\"" );
 				goto loop;				// file not available
 			}
 		}
@@ -5899,7 +5719,6 @@ if ( choice != 1 )
 Tcl_UnlinkVar( inter, "choice");
 Tcl_UnlinkVar( inter, "num");
 Tcl_UnlinkVar( inter, "tosave");
-Tcl_UnlinkVar( inter, "macro");
 Tcl_UnlinkVar( inter, "recolor_all");
 Tcl_UnlinkVar( inter, "shigh");
 
@@ -5931,7 +5750,7 @@ void cmd( const char *cm, ... )
 		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR to at least %ld bytes.", ( long int ) strlen( cm ) );
 		log_tcl_error( cm, message );
 		if ( tk_ok )
-			cmd( "tk_messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Save your data and close LMM after pressing 'OK'.\"" );
+			cmd( "ttk::messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Save your data and close LMM after pressing 'OK'.\"" );
 	}
 
 	char buffer[ TCL_BUFF_STR ];
@@ -5946,7 +5765,7 @@ void cmd( const char *cm, ... )
 		sprintf( message, "Tcl buffer too small. Please increase TCL_BUFF_STR to at least %d bytes.", reqSz + 1 );
 		log_tcl_error( cm, message );
 		if ( tk_ok )
-			cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
+			cmd( "ttk::messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
 	}
 	else
 	{
@@ -5956,7 +5775,7 @@ void cmd( const char *cm, ... )
 		{
 			log_tcl_error( cm, Tcl_GetStringResult( inter ) );
 			if ( tk_ok )
-				cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl error\" -detail \"More information in file 'LMM.err'.\"" );
+				cmd( "ttk::messageBox -type ok -title Error -icon error -message \"Tcl error\" -detail \"More information in file 'LMM.err'.\"" );
 		}
 	}
 }
@@ -6010,7 +5829,7 @@ struct hit
 	char previous, next;
 };
 // color types (0-n) to Tk tags mapping
-const char *cTypes[ ] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdmacro", "ctype", "ckword"};
+const char *cTypes[ ] = { "comment1", "comment2", "cprep", "str", "lsdvar", "lsdmacro", "ctype", "ckword" };
 // regular expressions identifying colored text types
  const char *cRegex[ ] = {
 	"/\[*].*\[*]/",		// each item define one different color
@@ -6151,7 +5970,7 @@ void color(int hiLev, long iniLin, long finLin)
 			if ( hits[ k ].type < 4 )		// non token?
 				cmd( ".f.t.t tag add %s $lin.$col $end", cTypes[ hits[ k ].type ] );
 			else							// token - should not be inside another word
-				cmd( "if {[regexp {\\w} [.f.t.t get \"$lin.$col - 1 any chars\"]]==0 && [regexp {\\w} [.f.t.t get $end]]==0} {.f.t.t tag add %s $lin.$col $end}", cTypes[ hits[ k ].type ] );
+				cmd( "if { [ regexp {\\w} [ .f.t.t get \"$lin.$col - 1 any chars\" ] ] == 0 && [ regexp {\\w} [ .f.t.t get $end ] ] == 0 } { .f.t.t tag add %s $lin.$col $end }", cTypes[ hits[ k ].type ] );
 			// next search position
 			ppos = ( char * ) Tcl_GetVar( inter, "end", 0 );
 			sscanf( ppos, "%ld.%ld", &curLin, &curCol );
@@ -6378,7 +6197,7 @@ char *get_fun_name( char *str, bool nw )
 	return str;
 
 error:
-	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not found or corrupted\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
+	cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not found or corrupted\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
 	return NULL;
 }
 
@@ -6434,7 +6253,7 @@ bool compile_run( bool run, bool nw )
 	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 		goto end;
 	}
 
@@ -6448,7 +6267,7 @@ bool compile_run( bool run, bool nw )
 	s = get_fun_name( str, nw );
 	if ( s == NULL || ! strcmp( s, "" ) || ( f = fopen( s, "r" ) ) == NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Equation file not found\" -detail \"File '%s' is no longer available in directory '$modelDir'.\" ", s );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Equation file not found\" -detail \"File '%s' is no longer available in directory '$modelDir'.\" ", s );
 		goto end;
 	}
 	else
@@ -6465,7 +6284,7 @@ bool compile_run( bool run, bool nw )
 	fclose( f );
 	if ( strncmp( str, "TARGET=", 7 ) != 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile%s corrupted\" -detail \"Check 'Model Options' and 'System Options' in menu 'Model'.\"", nw ? "NW" : "" );
+		cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Makefile%s corrupted\" -detail \"Check 'Model Options' and 'System Options' in menu 'Model'.\"", nw ? "NW" : "" );
 		goto end;
 	}
 	if ( nw )
@@ -6476,17 +6295,17 @@ bool compile_run( bool run, bool nw )
 	cmd( "newtop .t \"Please Wait\" \"\" $parWnd" );
 
 	if ( nw )
-		cmd( "label .t.l1 -font {-weight bold } -text \"Compiling 'No Window' model...\"" );
+		cmd( "ttk::label .t.l1 -style bold.TLabel -text \"Compiling 'No Window' model...\"" );
 	else
-		cmd( "label .t.l1 -font {-weight bold } -text \"Compiling model...\"" );
+		cmd( "ttk::label .t.l1 -style bold.TLabel -text \"Compiling model...\"" );
 
 	if ( run )
-		cmd( "label .t.l2 -text \"Just recompiling equation file(s) changes.\nOn success, the new model program will be launched.\nOn failure, a new window will show the compilation errors.\"" );
+		cmd( "ttk::label .t.l2 -text \"Just recompiling equation file(s) changes.\nOn success, the new model program will be launched.\nOn failure, a new window will show the compilation errors.\"" );
 	else
 		if ( nw )
-			cmd( "label .t.l2 -text \"Creating command-line model program  ('lsdNW').\nOn success, the model directory can be also ported to any computer.\nOn failure, a new window will show the compilation errors.\"" );
+			cmd( "ttk::label .t.l2 -text \"Creating command-line model program  ('lsdNW').\nOn success, the model directory can be also ported to any computer.\nOn failure, a new window will show the compilation errors.\"" );
 		else
-			cmd( "label .t.l2 -text \"Recompiling the entire model program.\nOn success, the new program will NOT be launched.\nOn failure, a new window will show the compilation errors.\"" );
+			cmd( "ttk::label .t.l2 -text \"Recompiling the entire model program.\nOn success, the new program will NOT be launched.\nOn failure, a new window will show the compilation errors.\"" );
 
 	cmd( "pack .t.l1 .t.l2 -padx 5 -pady 5" );
 	cmd( "cancel .t b { set res 2 }");
@@ -6529,7 +6348,7 @@ bool compile_run( bool run, bool nw )
 	else
 	{
 		if ( nw )
-			cmd( "tk_messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n$modelDir\n\nto another computer (including the subdirectory 'src'). After the copy, use the following steps to use the model program in the new computer:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\n\nSee LSD documentation for further details.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n$modelDir\n\nto another computer (including the subdirectory 'src'). After the copy, use the following steps to use the model program in the new computer:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\n\nSee LSD documentation for further details.\"" );
 
 		if ( run )							// no problem - execute
 		{
@@ -6574,41 +6393,41 @@ void create_compresult_window( bool nw )
 
 	cmd( "newtop .mm \"Compilation Errors%s\" { .mm.b.close invoke } \"\"", nw ? " (No Window Version)" : "" );
 
-	cmd( "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\n- Check the 'Readme.txt' in LSD installation directory for information on particular problems.\"" );
+	cmd( "ttk::label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\n- Check the 'Readme.txt' in LSD installation directory for information on particular problems.\"" );
 	cmd( "pack .mm.lab" );
 
-	cmd( "frame .mm.t" );
-	cmd( "scrollbar .mm.t.yscroll -command \".mm.t.t yview\"" );
+	cmd( "ttk::frame .mm.t" );
+	cmd( "ttk::scrollbar .mm.t.yscroll -command \".mm.t.t yview\"" );
 	cmd( "set a [ list \"$fonttype\" $small_character ]" );
-	cmd( "text .mm.t.t -yscrollcommand \".mm.t.yscroll set\" -wrap word -font \"$a\"" );
+	cmd( "ttk::text .mm.t.t -yscrollcommand \".mm.t.yscroll set\" -wrap word -dark $darkTheme -style small.TText" );
 	cmd( "pack .mm.t.yscroll -side right -fill y" );
 	cmd( "pack .mm.t.t -expand yes -fill both" );
 
 	cmd( "pack .mm.t -expand yes -fill both" );
 
-	cmd( "frame .mm.i" );
+	cmd( "ttk::frame .mm.i" );
 
-	cmd( "frame .mm.i.f" );
-	cmd( "label .mm.i.f.l -text \"File:\"" );
-	cmd( "label .mm.i.f.n -anchor w -width 50 -fg red" );
+	cmd( "ttk::frame .mm.i.f" );
+	cmd( "ttk::label .mm.i.f.l -text \"File:\"" );
+	cmd( "ttk::label .mm.i.f.n -anchor w -width 50 -style red.TLabel" );
 	cmd( "pack .mm.i.f.l .mm.i.f.n -side left" );
 
-	cmd( "frame .mm.i.l" );
-	cmd( "label .mm.i.l.l -text \"Line:\"" );
-	cmd( "label .mm.i.l.n -anchor w -width 5 -fg red" );
+	cmd( "ttk::frame .mm.i.l" );
+	cmd( "ttk::label .mm.i.l.l -text \"Line:\"" );
+	cmd( "ttk::label .mm.i.l.n -anchor w -width 5 -style red.TLabel" );
 	cmd( "pack .mm.i.l.l .mm.i.l.n -side left" );
 
-	cmd( "frame .mm.i.c" );
-	cmd( "label .mm.i.c.l -text \"Column:\"" );
-	cmd( "label .mm.i.c.n -anchor w -width 5 -fg red" );
+	cmd( "ttk::frame .mm.i.c" );
+	cmd( "ttk::label .mm.i.c.l -text \"Column:\"" );
+	cmd( "ttk::label .mm.i.c.n -anchor w -width 5 -style red.TLabel" );
 	cmd( "pack .mm.i.c.l .mm.i.c.n -side left" );
 
 	cmd( "pack .mm.i.f .mm.i.l .mm.i.c -padx 10 -pady 5 -side left" );
 	cmd( "pack .mm.i" );
 
-	cmd( "frame .mm.b" );
+	cmd( "ttk::frame .mm.b" );
 
-	cmd( "button .mm.b.perr -width [ expr $butWid + 4 ] -text \"Previous Error\" -underline 0 -command { \
+	cmd( "ttk::button .mm.b.perr -width [ expr $butWid + 4 ] -text \"Previous Error\" -underline 0 -command { \
 			focus .mm.t.t; \
 			set start \"$cerr linestart\"; \
 			set errtemp [ .mm.t.t search -nocase -regexp -count errlen -backward -- $error $start 1.0];  \
@@ -6642,8 +6461,8 @@ void create_compresult_window( bool nw )
 				.mm.i.c.n configure -text $errcol; \
 			} \
 		}" );
-	cmd( "button .mm.b.gerr -width [ expr $butWid + 4 ] -text \"Go to Error\" -underline 0 -command { set choice 87 }" );
-	cmd( "button .mm.b.ferr -width [ expr $butWid + 4 ] -text \"Next Error\" -underline 0 -command { \
+	cmd( "ttk::button .mm.b.gerr -width [ expr $butWid + 4 ] -text \"Go to Error\" -underline 0 -command { set choice 87 }" );
+	cmd( "ttk::button .mm.b.ferr -width [ expr $butWid + 4 ] -text \"Next Error\" -underline 0 -command { \
 			focus .mm.t.t; \
 			if { ! [ string equal $cerr 1.0 ] } { \
 				set start \"$cerr lineend\" \
@@ -6681,7 +6500,7 @@ void create_compresult_window( bool nw )
 				.mm.i.c.n configure -text $errcol; \
 			} \
 		}" );
-	cmd( "button .mm.b.close -width [ expr $butWid + 4 ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; wm deiconify .; raise .; focus .f.t.t; set keepfocus 0 }" );
+	cmd( "ttk::button .mm.b.close -width [ expr $butWid + 4 ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; wm deiconify .; raise .; focus .f.t.t; set keepfocus 0 }" );
 	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx 10 -pady 10 -expand yes -fill x -side left" );
 	cmd( "pack .mm.b -side right" );
 
@@ -6724,7 +6543,7 @@ bool discard_change( void )
 		return true;					// yes: simply discard configuration
 
 	// ask for confirmation
-	cmd( "set answer [ tk_messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save current file?\" -detail \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\" ]" );
+	cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save current file?\" -detail \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\" ]" );
 	cmd( "if [ string equal $answer yes ] { \
 			set curfile [ file join \"$dirname\" \"$filename\" ]; \
 			set file [ open \"$curfile\" w ]; \
@@ -6837,7 +6656,7 @@ void signal_handler( int signum )
 	snprintf( msg2, strlen( msg ) + 30, "System Signal received: %s", msg );
 	log_tcl_error( "FATAL ERROR", msg2 );
 	if ( tk_ok )
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nLMM will close now.\"", msg );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nLMM will close now.\"", msg );
 	Tcl_Finalize( );
 	exit( -signum );				// abort program
 }

@@ -160,9 +160,9 @@ void show_eq( char *lab, int *choice )
 			} \
 		}", lab, lab );
 
-	cmd( ".eq_%s.f.text tag conf vars -foreground blue4", lab );
-	cmd( ".eq_%s.f.text tag conf comment_line -foreground green4", lab );
-	cmd( ".eq_%s.f.text tag conf temp_var -foreground red4", lab );
+	cmd( ".eq_%s.f.text tag conf vars -foreground $colorsTheme(str)", lab );
+	cmd( ".eq_%s.f.text tag conf comment_line -foreground $colorsTheme(comm)", lab );
+	cmd( ".eq_%s.f.text tag conf temp_var -foreground $colorsTheme(vlsd)", lab );
 
 	cmd( "set mytag \"\"" );
 

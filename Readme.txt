@@ -23,6 +23,12 @@ NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest
 seticon/osxconutils is copyrighted by Sveinbjorn Thordarson, https://sveinbjorn.org/osxiconutils
 Shortcut.exe 1.11 is copyrighted by Marty List, http://www.OptimumX.com
 Silk icon set 1.3 is copyrighted by Mark James under CCA 2.5 license, http://www.famfamfam.com/lab/icons/silk
+awthemes 9.2.2 is copyrighted by Brad Lanam, https://sourceforge.net/projects/tcl-awthemes
+BallroomDJ 3.29.20 is copyrighted by Brad Lanam, https://sourceforge.net/projects/ballroomdj
+ttkthemes 3.1.0 is copyrighted by RedFantom under GNU GPL 3+, https://github.com/TkinterEP/ttkthemes
+dblclick.tcl is copyrighted by Wolf-Dieter Busch under OLL, https://wiki.tcl-lang.org/page/doubleclick
+tkcon 2.5 is copyrighted by Jeffrey Hobbs, https://wiki.tcl-lang.org/page/Tkcon
+tkdiff 4.2 is copyrighted by John M. Klassa and others GNU GPL 2+, https://sourceforge.net/projects/tkdiff/
 
 
 ********

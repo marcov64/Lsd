@@ -11,301 +11,18 @@
 
 #*************************************************************
 # WINDOW.TCL
-# Procedures to adjust window positioning & startup code.
-#
-# Types of window positioning:
-#
-# centerS: center over the primary display, only available if the parent window
-#	center is also in the primary display (if not, falback to centerW)
-# centerW: center over the parent window (in any display)
-# topleftS: put over the top left corner of screen of primary display, only
-#	available if the parent window center is also in the primary display (if not,
-#	falback to topleftW)
-# topleftW: put over the top left corner of parent window (around menu bar)
-# coverW: cover the parent window (same size & position)
-# overM: over the main window (same top-left position)
-# current: keep current position
+# Collection of procedures to manage LSD windows.
 #*************************************************************
-
-# load packages
-package require Tk 8.6
-
-# load extra code
-source "$RootLsd/$LsdSrc/dblclick.tcl" ;	# enhancements to double-click in text widgets
-source "$RootLsd/$LsdSrc/defaults.tcl" ;	# load LSD windows defaults
-
-# optional development tools
-set conWnd		true ;	# enable console window to be opened with CTRL+ALT+J
-set logWndFn	false ;	# enable window functions operation logging
-set testWnd		false ;	# enable coordinates test window
-
-# register static special, OS-dependent configurations
-if [ string equal $tcl_platform(platform) unix ] {
-
-	# mac
-	if [ string equal $tcl_platform(os) Darwin ] {
-
-		set CurPlatform mac
-		set DefaultExe $exeMac
-
-		if { [ string equal [ info patchlevel ] 8.6.9 ] } {
-			set butWid $butMacTk869
-			set bsizeM $bsizeMwin
-			set bhstepM $bhstepMwin
-			set borderMadj 0
-			set darkMode 0
-		} else {
-			set butWid $butMac
-			set bsizeM $bsizeMlin
-			set bhstepM $bhstepMmac
-			set borderMadj $borderMmac
-			update
-			set darkMode [ tk::unsupported::MacWindowStyle isdark . ]
-		}
-
-		set DefaultWish $wishMac
-		set daCwid $daCwidMac
-		set corrX $corrXmac
-		set corrY $corrYmac
-
-		set DefaultSysTerm $sysTermMac
-		set systemTerm $sysTermMac
-		set gnuplotTerm $gnuplotTermMac
-		set DefaultMakeExe $makeMac
-		set DefaultDbgExe $dbgMac
-		set DefaultHtmlBrowser $browserMac
-		set DefaultFont $fontMac
-		set DefaultFontSize $fontSizeMac
-		set deltaSize $deltaSizeMac
-		set bvstepM $bvstepMwin
-
-	# linux
-	} else {
-
-		set CurPlatform linux
-
-		set butWid $butLinux
-		set daCwid $daCwidLinux
-		set corrX $corrXlinux
-		set corrY $corrYlinux
-
-		set DefaultSysTerm $sysTermLinux
-		set systemTerm $sysTermLinux
-		set gnuplotTerm $gnuplotTermLinux
-		set DefaultExe $exeLinux
-		set DefaultMakeExe $makeLinux
-		set DefaultWish $wishLinux
-		set DefaultDbgExe $dbgLinux
-		set DefaultHtmlBrowser $browserLinux
-		set DefaultFont $fontLinux
-		set DefaultFontSize $fontSizeLinux
-		set deltaSize $deltaSizeLinux
-		set bsizeM $bsizeMlin
-		set bhstepM $bhstepMlin
-		set bvstepM $bvstepMlin
-		set borderMadj 0
-		set darkMode 0
-	}
-
-# Windows
-} else {
-	# Not 64-bit?
-	if { ! [ string equal $tcl_platform(platform) windows ] || ! [ string equal $tcl_platform(machine) amd64 ] } {
-		set CurPlatform unsupported
-	} else {
-	
-		set CurPlatform windows
-		set DefaultExe $exeWindows
-		set DefaultWish $wishWindows
-
-		# Cygwin or MSYS2?
-		if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } {
-			set DefaultMakeExe $makeWinMingw
-		} else {
-			set DefaultMakeExe $makeWinCygwin
-		}
-
-		set butWid $butWindows
-		set daCwid $daCwidWindows
-		set corrX $corrXwindows
-		set corrY $corrYwindows
-
-		set DefaultSysTerm $sysTermWindows
-		set systemTerm $sysTermWindows
-		set gnuplotTerm $gnuplotTermWindows
-		set DefaultDbgExe $dbgWindows
-		set DefaultHtmlBrowser $browserWindows
-		set DefaultFont $fontWindows
-		set DefaultFontSize $fontSizeWindows
-		set deltaSize $deltaSizeWindows
-		set bsizeM $bsizeMwin
-		set bhstepM $bhstepMwin
-		set bvstepM $bvstepMwin
-		set borderMadj 0
-		set darkMode 0
-	}
-}
-
-# adjust between dark and light desktop modes
-if { $darkMode } {
-	set commcolor $commcolorD
-	set strcolor $strcolorD
-	set prepcolor $prepcolorD
-	set typecolor $typecolorD
-	set kwrdcolor $kwrdcolorD
-	set vlsdcolor $vlsdcolorD
-	set mlsdcolor $mlsdcolorD
-	set varcolor $varcolorD
-	set lvarcolor $lvarcolorD
-	set funcolor $funcolorD
-	set lfuncolor $lfuncolorD
-	set objcolor $objcolorD
-	set grpcolor $grpcolorD
-	set modcolor $modcolorD
-} else {
-	set commcolor $commcolorL
-	set strcolor $strcolorL
-	set prepcolor $prepcolorL
-	set typecolor $typecolorL
-	set kwrdcolor $kwrdcolorL
-	set vlsdcolor $vlsdcolorL
-	set mlsdcolor $mlsdcolorL
-	set varcolor $varcolorL
-	set lvarcolor $lvarcolorL
-	set funcolor $funcolorL
-	set lfuncolor $lfuncolorL
-	set objcolor $objcolorL
-	set grpcolor $grpcolorL
-	set modcolor $modcolorL
-}
-
-# Variable 'alignMode' configure special, per module (LMM, LSD), settings
-unset -nocomplain defaultPos defaultFocus
-if [ info exists alignMode ] {
-	if [ string equal -nocase $alignMode "LMM" ] {
-		set defaultPos centerW
-		set defaultFocus .f.t.t
-	} else {
-		set defaultPos centerW
-	}
-}
-
-# list of windows with predefined sizes & positions
-set wndLst [ list .lmm .lsd .log .str .da .deb .lat ]
-set wndMenuHeight 0
-
-# text line default canvas height & minimum horizontal border width
-set lheightP [ expr int( [ font actual $fontP -size ] * [ tk scaling ] ) + $vtmarginP ]
-set hbordsizeP	$hmbordsizeP
-
-# current position of structure window
-set posXstr 0
-set posYstr 0
-
-# lists to hold the windows parents stacks and exceptions to the parent mgmt.
-set parWndLst [ list ]
-set grabLst [ list ]
-set noParLst [ list .log .str .plt .lat .tst ]
-
-# toolbar buttons style
-if [ string equal [ tk windowingsystem ] aqua ] { 
-	set bRlf raised
-	set ovBrlf "" 
-} { 
-	set bRlf flat
-	set ovBrlf groove 
-}
-
-# toolbar images format
-if [ string equal [ info tclversion ] 8.6 ] {
-	set iconExt png
-} {
-	set iconExt gif
-}
-
-#************************************************
-# Load icon images
-#************************************************
-image create photo lsdImg -file "$RootLsd/$LsdSrc/icons/lsd.$iconExt"
-image create photo lmmImg -file "$RootLsd/$LsdSrc/icons/lmm.$iconExt"
-image create photo newImg -file "$RootLsd/$LsdSrc/icons/new.$iconExt"
-image create photo openImg -file "$RootLsd/$LsdSrc/icons/open.$iconExt"
-image create photo saveImg -file "$RootLsd/$LsdSrc/icons/save.$iconExt"
-image create photo undoImg -file "$RootLsd/$LsdSrc/icons/undo.$iconExt"
-image create photo redoImg -file "$RootLsd/$LsdSrc/icons/redo.$iconExt"
-image create photo cutImg -file "$RootLsd/$LsdSrc/icons/cut.$iconExt"
-image create photo deleteImg -file "$RootLsd/$LsdSrc/icons/delete.$iconExt"
-image create photo copyImg -file "$RootLsd/$LsdSrc/icons/copy.$iconExt"
-image create photo pasteImg -file "$RootLsd/$LsdSrc/icons/paste.$iconExt"
-image create photo editImg -file "$RootLsd/$LsdSrc/icons/edit.$iconExt"
-image create photo findImg -file "$RootLsd/$LsdSrc/icons/find.$iconExt"
-image create photo replaceImg -file "$RootLsd/$LsdSrc/icons/replace.$iconExt"
-image create photo indentImg -file "$RootLsd/$LsdSrc/icons/indent.$iconExt"
-image create photo deindentImg -file "$RootLsd/$LsdSrc/icons/deindent.$iconExt"
-image create photo wrapImg -file "$RootLsd/$LsdSrc/icons/wrap.$iconExt"
-image create photo compileImg -file "$RootLsd/$LsdSrc/icons/compile.$iconExt"
-image create photo comprunImg -file "$RootLsd/$LsdSrc/icons/comprun.$iconExt"
-image create photo gdbImg -file "$RootLsd/$LsdSrc/icons/gdb.$iconExt"
-image create photo infoImg -file "$RootLsd/$LsdSrc/icons/info.$iconExt"
-image create photo descrImg -file "$RootLsd/$LsdSrc/icons/descr.$iconExt"
-image create photo equationImg -file "$RootLsd/$LsdSrc/icons/equation.$iconExt"
-image create photo extraImg -file "$RootLsd/$LsdSrc/icons/extra.$iconExt"
-image create photo setImg -file "$RootLsd/$LsdSrc/icons/set.$iconExt"
-image create photo hideImg -file "$RootLsd/$LsdSrc/icons/hide.$iconExt"
-image create photo helpImg -file "$RootLsd/$LsdSrc/icons/help.$iconExt"
-image create photo reloadImg -file "$RootLsd/$LsdSrc/icons/reload.$iconExt"
-image create photo structImg -file "$RootLsd/$LsdSrc/icons/struct.$iconExt"
-image create photo initImg -file "$RootLsd/$LsdSrc/icons/init.$iconExt"
-image create photo numberImg -file "$RootLsd/$LsdSrc/icons/number.$iconExt"
-image create photo runImg -file "$RootLsd/$LsdSrc/icons/run.$iconExt"
-image create photo dataImg -file "$RootLsd/$LsdSrc/icons/data.$iconExt"
-image create photo resultImg -file "$RootLsd/$LsdSrc/icons/result.$iconExt"
-
-
-#************************************************
-# SETGLOBKEYS
-# Set global key mappings
-#************************************************
-proc setglobkeys { w { chkChg 1 } } {
-	global conWnd grabLst parWndLst logWndFn
-
-	# soft/hard exit (check for unsaved changes or not)
-	if { $chkChg } {
-		bind $w <Control-Alt-x> { if [ string equal [ discard_change ] ok ] { exit }; break }
-		bind $w <Control-Alt-X> { event generate . <Control-Alt-x> }
-	} else {
-		bind $w <Control-Alt-x> { exit }
-		bind $w <Control-Alt-X> { event generate . <Control-Alt-x> }
-	}
-	# open Tcl/Tk console
-	if { $conWnd } {
-		bind $w <Control-Alt-j> {
-			# remove existing grabs
-			if [ info exists grabLst ] {
-				set lastGrab [ expr [ llength $grabLst ] - 1 ]
-				if { $lastGrab >= 0 } {
-					grab release [ lindex [ lindex $grabLst $lastGrab ] 0 ]
-					set grabLst [ list ]
-				}
-			}
-			tk_console
-			break
-		}
-		bind $w <Control-Alt-J> { event generate . <Control-Alt-j> }
-	}
-}
-
 
 #************************************************
 # NEWTOP
 # Procedure to create top level new windows
 #************************************************
 proc newtop { w { name "" } { destroy { } } { par "." } } {
-	global tcl_platform RootLsd LsdSrc parWndLst grabLst noParLst logWndFn
+	global RootLsd LsdSrc parWndLst grabLst noParLst logWndFn colorsTheme
 
-	if [ winfo exists $w ] {
-		destroytop $w
-	}
+	destroytop $w
+
 	toplevel $w
 	wm withdraw $w
 	if { $par != "" } {
@@ -337,6 +54,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 	wm group $w .
 	wm title $w $name
 	wm protocol $w WM_DELETE_WINDOW $destroy
+	$w configure -background $colorsTheme(bg)
 	setglobkeys $w
 
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, grab:$grabLst)" }
@@ -380,6 +98,18 @@ proc settop { w { name no } { destroy no } { par no } } {
 #************************************************
 # SHOWTOP
 # Configure the window
+#
+# Types of window positioning:
+# centerS: center over the primary display, only available if the parent window
+#	center is also in the primary display (if not, falback to centerW)
+# centerW: center over the parent window (in any display)
+# topleftS: put over the top left corner of screen of primary display, only
+#	available if the parent window center is also in the primary display (if not,
+#	falback to topleftW)
+# topleftW: put over the top left corner of parent window (around menu bar)
+# coverW: cover the parent window (same size & position)
+# overM: over the main window (same top-left position)
+# current: keep current position
 #************************************************
 proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } { buttonF b } { noMinSize no } } {
 	global defaultPos wndLst parWndLst grabLst noParLst logWndFn
@@ -512,11 +242,14 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 
 #************************************************
 # DESTROYTOP
+# Destroy window, if it exists
 #************************************************
 proc destroytop w {
 	global restoreWin wndLst defaultFocus parWndLst grabLst noParLst logWndFn
 
-	if { ! [ winfo exists $w ] } return
+	if { $w == "" || ! [ winfo exists $w ] } {
+		return
+	}
 
 	# save main windows sizes/positions
 	if { $restoreWin && [ lsearch $wndLst $w ] >= 0 } {
@@ -1036,328 +769,8 @@ proc gety { w pos } {
 
 
 #************************************************
-# OKHELPCANCEL
-# Procedure to create standard button set
-#************************************************
-# procedures to create standard button sets
-proc okhelpcancel { w fr comOk comHelp comCancel } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width $butWid -text OK -command $comOk
-	button $w.$fr.help -width $butWid -text Help -command $comHelp
-	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
-	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
-	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
-	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.ok $w.$fr.help $w.$fr.can -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# OKHELP
-# Procedure to create standard button set
-#************************************************
-proc okhelp { w fr comOk comHelp } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width $butWid -text OK -command $comOk
-	button $w.$fr.help -width $butWid -text Help -command $comHelp
-	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
-	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.ok $w.$fr.help -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# OKCANCEL
-# Procedure to create standard button set
-#************************************************
-proc okcancel { w fr comOk comCancel } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width $butWid -text OK -command $comOk
-	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
-	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
-	pack $w.$fr.ok $w.$fr.can -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# HELPCANCEL
-# Procedure to create standard button set
-#************************************************
-proc helpcancel { w fr comHelp comCancel } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.help -width $butWid -text Help -command $comHelp
-	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
-	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
-	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
-	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.help $w.$fr.can -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# OK
-# Procedure to create standard button set
-#************************************************
-proc ok { w fr comOk } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width $butWid -text OK -command $comOk
-	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
-	pack $w.$fr.ok -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# CANCEL
-# Procedure to create standard button set
-#************************************************
-proc cancel { w fr comCancel } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
-	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
-	pack $w.$fr.can -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# XCANCEL
-# Procedure to create standard button set
-#************************************************
-proc Xcancel { w fr nameX comX comCancel } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	if { [ string length "$nameX" ] > $butWid } { 
-		set Xwid [ string length "$nameX" ] 
-	} else {
-		set Xwid $butWid 
-	}
-	button $w.$fr.ok -width $Xwid -text $nameX -command $comX
-	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
-	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
-	pack $w.$fr.ok $w.$fr.can -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# OKXHELPCANCEL
-# Procedure to create standard button set
-#************************************************
-proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	if { [ string length "$nameX" ] > $butWid } { 
-		set Xwid [ string length "$nameX" ] 
-	} else {
-		set Xwid $butWid 
-	}
-	button $w.$fr.ok -width $butWid -text OK -command $comOk
-	button $w.$fr.x -width $Xwid -text $nameX -command $comX
-	button $w.$fr.help -width $butWid -text Help -command $comHelp
-	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
-	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	bind $w.$fr.x <KeyPress-Return> "$w.$fr.x invoke"
-	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
-	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
-	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.ok $w.$fr.x $w.$fr.help $w.$fr.can -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# XYOKHELPCANCEL
-# Procedure to create standard button set
-#************************************************
-proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	if { [ string length "$nameX" ] > $butWid } { 
-		set Xwid [ string length "$nameX" ] 
-	} else {
-		set Xwid $butWid 
-	}
-	if { [ string length "$nameY" ] > $butWid } { 
-		set Ywid [ string length "$nameY" ] 
-	} else {
-		set Ywid $butWid 
-	}
-	frame $w.$fr.r1
-	button $w.$fr.r1.x -width $Xwid -text $nameX -command $comX
-	button $w.$fr.r1.y -width $Ywid -text $nameY -command $comY
-	frame $w.$fr.r2
-	button $w.$fr.r2.ok -width $butWid -text OK -command $comOk
-	button $w.$fr.r2.help -width $butWid -text Help -command $comHelp
-	button $w.$fr.r2.can -width $butWid -text Cancel -command $comCancel
-	bind $w.$fr.r1.x <KeyPress-Return> "$w.$fr.r1.x invoke"
-	bind $w.$fr.r1.y <KeyPress-Return> "$w.$fr.r1.y invoke"
-	bind $w.$fr.r2.ok <KeyPress-Return> "$w.$fr.r2.ok invoke"
-	bind $w.$fr.r2.help <KeyPress-Return> "$w.$fr.r2.help invoke"
-	bind $w.$fr.r2.can <KeyPress-Return> "$w.$fr.r2.can invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.r2.can invoke"
-	bind $w <F1> "$w.$fr.r2.help invoke"
-	pack $w.$fr.r1.x $w.$fr.r1.y -padx 10 -side left
-	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.can -padx 10 -side left
-	pack $w.$fr.r1 -anchor w
-	pack $w.$fr.r2  -pady 10
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# XYZOKHELPCANCEL
-# Procedure to create standard button set
-#************************************************
-proc XYZokhelpcancel { w fr nameX nameY nameZ comX comY comZ comOk comHelp comCancel } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	if { [ string length "$nameX" ] > $butWid } { 
-		set Xwid [ string length "$nameX" ] 
-	} else {
-		set Xwid $butWid 
-	}
-	if { [ string length "$nameY" ] > $butWid } { 
-		set Ywid [ string length "$nameY" ] 
-	} else {
-		set Ywid $butWid 
-	}
-	frame $w.$fr.r1
-	button $w.$fr.r1.x -width $Xwid -text $nameX -command $comX
-	button $w.$fr.r1.y -width $Ywid -text $nameY -command $comY
-	button $w.$fr.r1.z -width $Ywid -text $nameZ -command $comZ
-	frame $w.$fr.r2
-	button $w.$fr.r2.ok -width $butWid -text OK -command $comOk
-	button $w.$fr.r2.help -width $butWid -text Help -command $comHelp
-	button $w.$fr.r2.can -width $butWid -text Cancel -command $comCancel
-	bind $w.$fr.r1.x <KeyPress-Return> "$w.$fr.r1.x invoke"
-	bind $w.$fr.r1.y <KeyPress-Return> "$w.$fr.r1.y invoke"
-	bind $w.$fr.r1.z <KeyPress-Return> "$w.$fr.r1.z invoke"
-	bind $w.$fr.r2.ok <KeyPress-Return> "$w.$fr.r2.ok invoke"
-	bind $w.$fr.r2.help <KeyPress-Return> "$w.$fr.r2.help invoke"
-	bind $w.$fr.r2.can <KeyPress-Return> "$w.$fr.r2.can invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.r2.can invoke"
-	bind $w <F1> "$w.$fr.r2.help invoke"
-	pack $w.$fr.r1.x $w.$fr.r1.y $w.$fr.r1.z -padx 10 -side left
-	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.can -padx 10 -side left
-	pack $w.$fr.r1 -anchor w
-	pack $w.$fr.r2  -pady 10
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# DONEHELP
-# Procedure to create standard button set
-#************************************************
-proc donehelp { w fr comDone comHelp } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width $butWid -text Done -command $comDone
-	button $w.$fr.help -width $butWid -text Help -command $comHelp
-	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
-	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.ok $w.$fr.help -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# DONE
-# Procedure to create standard button set
-#************************************************
-proc done { w fr comDone } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width $butWid -text Done -command $comDone
-	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
-	pack $w.$fr.ok -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# COMPHELPDONE
-# Procedure to create standard button set
-#************************************************
-proc comphelpdone { w fr comComp comHelp comDone } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.com -width $butWid -text Compute -command $comComp
-	button $w.$fr.help -width $butWid -text Help -command $comHelp
-	button $w.$fr.ok -width $butWid -text Done -command $comDone
-	bind $w.$fr.com <KeyPress-Return> "$w.$fr.com invoke"
-	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
-	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
-	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.com $w.$fr.help $w.$fr.ok -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# FINDHELPDONE
-# Procedure to create standard button set
-#************************************************
-proc findhelpdone { w fr comFind comHelp comDone } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.search -width $butWid -text Find -command $comFind
-	button $w.$fr.help -width $butWid -text Help -command $comHelp
-	button $w.$fr.ok -width $butWid -text Done -command $comDone
-	bind $w.$fr.search <KeyPress-Return> "$w.$fr.search invoke"
-	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
-	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
-	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.search $w.$fr.help $w.$fr.ok -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
-# SAVE
-# Procedure to create standard button set
-#************************************************
-proc save { w fr comSave } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width $butWid -text Save -command $comSave
-	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	pack $w.$fr.ok -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
-
-#************************************************
 # DISABLE_WINDOW
-# Command to disable windows in cases where grab is inappropriate (only menus if not TK8.6)
+# Command to disable windows in cases where grab is inappropriate
 # call parameters are: container window, menu name, widgets names
 #************************************************
 proc disable_window { w m { args "" } } {
@@ -1366,11 +779,9 @@ proc disable_window { w m { args "" } } {
 			$w.$m entryconfig $i -state disabled
 		}
 	}
-	if [ string equal [ info tclversion ] "8.6" ] {
-		foreach i $args {
-			if [ winfo exists $w.$i ] {
-				tk busy hold $w.$i
-			}
+	foreach i $args {
+		if [ winfo exists $w.$i ] {
+			tk busy hold $w.$i
 		}
 	}
 	update
@@ -1379,7 +790,7 @@ proc disable_window { w m { args "" } } {
 
 #************************************************
 # ENABLE_WINDOW
-# Command to enable windows in cases where grab is inappropriate (only menus if not TK8.6)
+# Command to enable windows in cases where grab is inappropriate
 # call parameters are: container window, menu name, widgets names
 #************************************************
 proc enable_window { w m { args "" } } {
@@ -1388,14 +799,440 @@ proc enable_window { w m { args "" } } {
 			$w.$m entryconfig $i -state normal
 		}
 	}
-	if [ string equal [ info tclversion ] "8.6" ] {
-		foreach i $args {
-			if [ winfo exists $w.$i ] {
-				tk busy forget $w.$i
-			}
+	foreach i $args {
+		if [ winfo exists $w.$i ] {
+			tk busy forget $w.$i
 		}
 	}
 	update
+}
+
+
+#************************************************
+# SETGLOBKEYS
+# Set global key mappings in all windows
+#************************************************
+proc setglobkeys { w { chkChg 1 } } {
+	global conWnd grabLst parWndLst logWndFn
+
+	# soft/hard exit (check for unsaved changes or not)
+	if { $chkChg } {
+		bind $w <Control-Alt-x> { if [ string equal [ discard_change ] ok ] { exit }; break }
+		bind $w <Control-Alt-X> { event generate . <Control-Alt-x> }
+	} else {
+		bind $w <Control-Alt-x> { exit }
+		bind $w <Control-Alt-X> { event generate . <Control-Alt-x> }
+	}
+	# open Tcl/Tk console
+	if { $conWnd } {
+		bind $w <Control-Alt-j> {
+			# remove existing grabs
+			if [ info exists grabLst ] {
+				set lastGrab [ expr [ llength $grabLst ] - 1 ]
+				if { $lastGrab >= 0 } {
+					grab release [ lindex [ lindex $grabLst $lastGrab ] 0 ]
+					set grabLst [ list ]
+				}
+			}
+			tk_console
+			break
+		}
+		bind $w <Control-Alt-J> { event generate . <Control-Alt-j> }
+	}
+}
+
+
+#************************************************
+# OKHELPCANCEL
+# Procedure to create standard button set
+#************************************************
+# procedures to create standard button sets
+proc okhelpcancel { w fr comOk comHelp comCancel } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
+	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
+	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
+	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
+	bind $w <F1> "$w.$fr.help invoke"
+	pack $w.$fr.ok $w.$fr.help $w.$fr.cancel -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# OKHELP
+# Procedure to create standard button set
+#************************************************
+proc okhelp { w fr comOk comHelp } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
+	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
+	bind $w <F1> "$w.$fr.help invoke"
+	pack $w.$fr.ok $w.$fr.help -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# OKCANCEL
+# Procedure to create standard button set
+#************************************************
+proc okcancel { w fr comOk comCancel } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
+	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
+	pack $w.$fr.ok $w.$fr.cancel -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# HELPCANCEL
+# Procedure to create standard button set
+#************************************************
+proc helpcancel { w fr comHelp comCancel } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
+	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
+	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
+	bind $w <F1> "$w.$fr.help invoke"
+	pack $w.$fr.help $w.$fr.cancel -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# OK
+# Procedure to create standard button set
+#************************************************
+proc ok { w fr comOk } {
+	global butWid butPad butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
+	pack $w.$fr.ok -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# CANCEL
+# Procedure to create standard button set
+#************************************************
+proc cancel { w fr comCancel } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
+	pack $w.$fr.cancel -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# XCANCEL
+# Procedure to create standard button set
+#************************************************
+proc Xcancel { w fr nameX comX comCancel } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	if { [ string length "$nameX" ] > $butWid } {
+		set Xwid [ string length "$nameX" ]
+	} else {
+		set Xwid $butWid
+	}
+	ttk::button $w.$fr.ok -width $Xwid -text $nameX -command $comX
+	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
+	pack $w.$fr.ok $w.$fr.cancel -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# OKXHELPCANCEL
+# Procedure to create standard button set
+#************************************************
+proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	if { [ string length "$nameX" ] > $butWid } {
+		set Xwid [ string length "$nameX" ]
+	} else {
+		set Xwid $butWid
+	}
+	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
+	ttk::button $w.$fr.x -width $Xwid -text $nameX -command $comX
+	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
+	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w.$fr.x <KeyPress-Return> "$w.$fr.x invoke"
+	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
+	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
+	bind $w <F1> "$w.$fr.help invoke"
+	pack $w.$fr.ok $w.$fr.x $w.$fr.help $w.$fr.cancel -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# XYOKHELPCANCEL
+# Procedure to create standard button set
+#************************************************
+proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	if { [ string length "$nameX" ] > $butWid } {
+		set Xwid [ string length "$nameX" ]
+	} else {
+		set Xwid $butWid
+	}
+	if { [ string length "$nameY" ] > $butWid } {
+		set Ywid [ string length "$nameY" ]
+	} else {
+		set Ywid $butWid
+	}
+	ttk::frame $w.$fr.r1
+	ttk::button $w.$fr.r1.x -width $Xwid -text $nameX -command $comX
+	ttk::button $w.$fr.r1.y -width $Ywid -text $nameY -command $comY
+	ttk::frame $w.$fr.r2
+	ttk::button $w.$fr.r2.ok -width $butWid -text OK -command $comOk
+	ttk::button $w.$fr.r2.help -width $butWid -text Help -command $comHelp
+	ttk::button $w.$fr.r2.cancel -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.r1.x <KeyPress-Return> "$w.$fr.r1.x invoke"
+	bind $w.$fr.r1.y <KeyPress-Return> "$w.$fr.r1.y invoke"
+	bind $w.$fr.r2.ok <KeyPress-Return> "$w.$fr.r2.ok invoke"
+	bind $w.$fr.r2.help <KeyPress-Return> "$w.$fr.r2.help invoke"
+	bind $w.$fr.r2.cancel <KeyPress-Return> "$w.$fr.r2.cancel invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.r2.cancel invoke"
+	bind $w <F1> "$w.$fr.r2.help invoke"
+	pack $w.$fr.r1.x $w.$fr.r1.y -padx $butPad -side left
+	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.cancel -padx $butPad -side left
+	pack $w.$fr.r1 -anchor w
+	pack $w.$fr.r2 -pady $butPad
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# XYZOKHELPCANCEL
+# Procedure to create standard button set
+#************************************************
+proc XYZokhelpcancel { w fr nameX nameY nameZ comX comY comZ comOk comHelp comCancel } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	if { [ string length "$nameX" ] > $butWid } {
+		set Xwid [ string length "$nameX" ]
+	} else {
+		set Xwid $butWid
+	}
+	if { [ string length "$nameY" ] > $butWid } {
+		set Ywid [ string length "$nameY" ]
+	} else {
+		set Ywid $butWid
+	}
+	ttk::frame $w.$fr.r1
+	ttk::button $w.$fr.r1.x -width $Xwid -text $nameX -command $comX
+	ttk::button $w.$fr.r1.y -width $Ywid -text $nameY -command $comY
+	ttk::button $w.$fr.r1.z -width $Ywid -text $nameZ -command $comZ
+	ttk::frame $w.$fr.r2
+	ttk::button $w.$fr.r2.ok -width $butWid -text OK -command $comOk
+	ttk::button $w.$fr.r2.help -width $butWid -text Help -command $comHelp
+	ttk::button $w.$fr.r2.cancel -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.r1.x <KeyPress-Return> "$w.$fr.r1.x invoke"
+	bind $w.$fr.r1.y <KeyPress-Return> "$w.$fr.r1.y invoke"
+	bind $w.$fr.r1.z <KeyPress-Return> "$w.$fr.r1.z invoke"
+	bind $w.$fr.r2.ok <KeyPress-Return> "$w.$fr.r2.ok invoke"
+	bind $w.$fr.r2.help <KeyPress-Return> "$w.$fr.r2.help invoke"
+	bind $w.$fr.r2.cancel <KeyPress-Return> "$w.$fr.r2.cancel invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.r2.cancel invoke"
+	bind $w <F1> "$w.$fr.r2.help invoke"
+	pack $w.$fr.r1.x $w.$fr.r1.y $w.$fr.r1.z -padx $butPad -side left
+	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.cancel -padx $butPad -side left
+	pack $w.$fr.r1 -anchor w
+	pack $w.$fr.r2 -pady $butPad
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# DONEHELP
+# Procedure to create standard button set
+#************************************************
+proc donehelp { w fr comDone comHelp } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.ok -width $butWid -text Done -command $comDone
+	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
+	bind $w <F1> "$w.$fr.help invoke"
+	pack $w.$fr.ok $w.$fr.help -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# DONE
+# Procedure to create standard button set
+#************************************************
+proc done { w fr comDone } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.ok -width $butWid -text Done -command $comDone
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
+	pack $w.$fr.ok -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# COMPHELPDONE
+# Procedure to create standard button set
+#************************************************
+proc comphelpdone { w fr comComp comHelp comDone } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.com -width $butWid -text Compute -command $comComp
+	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
+	ttk::button $w.$fr.ok -width $butWid -text Done -command $comDone
+	bind $w.$fr.com <KeyPress-Return> "$w.$fr.com invoke"
+	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
+	bind $w <F1> "$w.$fr.help invoke"
+	pack $w.$fr.com $w.$fr.help $w.$fr.ok -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# FINDHELPDONE
+# Procedure to create standard button set
+#************************************************
+proc findhelpdone { w fr comFind comHelp comDone } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.search -width $butWid -text Find -command $comFind
+	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
+	ttk::button $w.$fr.ok -width $butWid -text Done -command $comDone
+	bind $w.$fr.search <KeyPress-Return> "$w.$fr.search invoke"
+	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
+	bind $w <F1> "$w.$fr.help invoke"
+	pack $w.$fr.search $w.$fr.help $w.$fr.ok -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# SAVE
+# Procedure to create standard button set
+#************************************************
+proc save { w fr comSave } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.ok -width $butWid -text Save -command $comSave
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	pack $w.$fr.ok -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# YESNO
+# Procedure to create standard button set
+#************************************************
+# procedures to create standard button sets
+proc yesno { w fr comYes comNo } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.yes -width $butWid -text Yes -command $comYes
+	ttk::button $w.$fr.no -width $butWid -text No -command $comNo
+	bind $w.$fr.yes <KeyPress-Return> "$w.$fr.yes invoke"
+	bind $w.$fr.no <KeyPress-Return> "$w.$fr.no invoke"
+	pack $w.$fr.yes $w.$fr.no -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# YESNOCANCEL
+# Procedure to create standard button set
+#************************************************
+# procedures to create standard button sets
+proc yesnocancel { w fr comYes comNo comCancel } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.yes -width $butWid -text Yes -command $comYes
+	ttk::button $w.$fr.no -width $butWid -text No -command $comNo
+	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.yes <KeyPress-Return> "$w.$fr.yes invoke"
+	bind $w.$fr.no <KeyPress-Return> "$w.$fr.no invoke"
+	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
+	pack $w.$fr.yes $w.$fr.no $w.$fr.cancel -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# RETRYCANCEL
+# Procedure to create standard button set
+#************************************************
+proc retrycancel { w fr comRetry comCancel } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.retry -width $butWid -text Retry -command $comRetry
+	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
+	bind $w.$fr.retry <KeyPress-Return> "$w.$fr.retry invoke"
+	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
+	pack $w.$fr.retry $w.$fr.cancel -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
+}
+
+
+#************************************************
+# ABORTRETRYIGNORE
+# Procedure to create standard button set
+#************************************************
+# procedures to create standard button sets
+proc abortretryignore { w fr comAbort comRetry comIgnore } {
+	global butWid butPad
+	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
+	ttk::button $w.$fr.abort -width $butWid -text Abort -command $comAbort
+	ttk::button $w.$fr.retry -width $butWid -text Retry -command $comRetry
+	ttk::button $w.$fr.ignore -width $butWid -text Ignore -command $comIgnore
+	bind $w.$fr.abort <KeyPress-Return> "$w.$fr.abort invoke"
+	bind $w.$fr.retry <KeyPress-Return> "$w.$fr.retry invoke"
+	bind $w.$fr.ignore <KeyPress-Return> "$w.$fr.ignore invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.ignore invoke"
+	pack $w.$fr.abort $w.$fr.retry $w.$fr.ignore -padx $butPad -pady $butPad -side left
+	pack $w.$fr -side right
 }
 
 
@@ -1422,6 +1259,28 @@ proc write_disabled { w val } {
 		$w conf -state normal
 		write_any $w $val
 		$w conf -state disabled
+	}
+}
+
+
+#************************************************
+# UPDATE_TITLE_BAR
+# Update LMM main window title bar according to file save status
+#************************************************
+proc update_title_bar { } {
+	global tosave before filename
+
+	if [ winfo exists .f.t.t ] {
+		set after [ .f.t.t get 1.0 end ]
+	} else {
+		set after $before
+	}
+	if [ string compare $before $after ] {
+		set tosave 1
+		wm title . "*$filename - LMM"
+	} else {
+		set tosave 0
+		wm title . "  $filename - LMM"
 	}
 }
 
@@ -1730,196 +1589,9 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 
 
 #************************************************
-# GET_SERIES
-# Set a byte array to hold data series that can be accessed from C
-# Based on code by Arjen Markus (http://wiki.tcl.tk/4179)
-#************************************************
-proc get_series { size data } {
-	upvar $data _data
-
-	set _data [ list ]
-	# Create a list with the correct number of integer elements
-	for { set i 0 } { $i < $size } { incr i } {
-	   lappend _data 0
-	}
-
-	# Convert the list to a byte array
-	set c_data [ intsToByteArray $_data ]
-
-	# Call the C routine - that will fill the byte array
-	upload_series $size $c_data
-
-	# Convert the byte array into an ordinary list
-	set _data [ byteArrayToInts $c_data ]
-}
-
-
-#************************************************
-# LISTTOBYTEARRAY
-# Generic routine to convert a list into a bytearray
-#************************************************
-proc listToByteArray { valuetype list { elemsize 0 } } {
-	global tcl_platform
-	
-	if { $valuetype == "i" || $valuetype == "I" } {
-		if [ string equal $tcl_platform(byteOrder) littleEndian ] {
-			set valuetype "i"
-		} {
-			set valuetype "I"
-		}
-	}
-
-	switch -- $valuetype {
-		f - d - i - I {
-		   set result [ binary format ${valuetype}* $list ]
-		}
-		s {
-			set result { }
-			foreach elem $list {
-				append result [ binary format a$elemsize $elem ]
-			}
-		}
-		default {
-			error "Unknown value type: $valuetype"
-		}
-	}
-
-	return $result
-}
-
-interp alias { } stringsToByteArray { } listToByteArray s
-interp alias { } intsToByteArray    { } listToByteArray i
-interp alias { } floatsToByteArray  { } listToByteArray f
-interp alias { } doublesToByteArray { } listToByteArray d
-
-
-#************************************************
-# BYTEARRAYTOLIST
-# Generic routine to convert a bytearray into a list
-#************************************************
-proc byteArrayToList { valuetype bytearray { elemsize 0 } } {
-	global tcl_platform
-
-	if { $valuetype == "i" || $valuetype == "I" } {
-		if [ string equal $tcl_platform(byteOrder) littleEndian ] {
-			set valuetype "i"
-		} else {
-			set valuetype "I"
-		}
-	}
-
-	switch -- $valuetype {
-		f - d - i - I {
-		   binary scan $bytearray ${valuetype}* result
-		}
-		s {
-			set result  { }
-			set length  [ string length $bytearray ]
-			set noelems [ expr { $length / $elemsize } ]
-			for { set i 0 } { $i < $noelems } { incr i } {
-				set elem [ string range $bytearray \
-						[ expr { $i * $elemsize } ] \
-						[ expr { ( $i + 1 ) * $elemsize - 1 } ] ]
-				set posnull [ string first "\000" $elem ]
-				if { $posnull != -1 } {
-					set elem [ string range $elem 0 [ expr { $posnull - 1 } ] ]
-				}
-				lappend result $elem
-			}
-		}
-		default {
-			error "Unknown value type: $valuetype"
-		}
-	}
-
-	return $result
-}
-
-interp alias { } byteArrayToStrings { } byteArrayToList s
-interp alias { } byteArrayToInts    { } byteArrayToList i
-interp alias { } byteArrayToFloats  { } byteArrayToList f
-interp alias { } byteArrayToDoubles { } byteArrayToList d
-
-
-#************************************************
 # INIT_CANVAS_COLORS
 # Initialize Tk canvas colors
 #************************************************
-# list of all Tk named colors
-set allcolors {
-	snow {ghost white} {white smoke} gainsboro {floral white}
-	{old lace} linen {antique white} {papaya whip} {blanched almond}
-	bisque {peach puff} {navajo white} moccasin cornsilk ivory
-	{lemon chiffon} seashell honeydew {mint cream} azure {alice blue}
-	lavender {lavender blush} {misty rose} white black {dark slate gray}
-	{dim gray} {slate gray} {light slate gray} gray {light grey}
-	{midnight blue} navy {cornflower blue} {dark slate blue} {slate blue}
-	{medium slate blue} {light slate blue} {medium blue} {royal blue}
-	blue {dodger blue} {deep sky blue} {sky blue} {light sky blue}
-	{steel blue} {light steel blue} {light blue} {powder blue}
-	{pale turquoise} {dark turquoise} {medium turquoise} turquoise
-	cyan {light cyan} {cadet blue} {medium aquamarine} aquamarine
-	{dark green} {dark olive green} {dark sea green} {sea green}
-	{medium sea green} {light sea green} {pale green} {spring green}
-	{lawn green} green chartreuse {medium spring green} {green yellow}
-	{lime green} {yellow green} {forest green} {olive drab} {dark khaki}
-	khaki {pale goldenrod} {light goldenrod yellow} {light yellow} yellow
-	gold {light goldenrod} goldenrod {dark goldenrod} {rosy brown}
-	{indian red} {saddle brown} sienna peru burlywood beige wheat
-	{sandy brown} tan chocolate firebrick brown {dark salmon} salmon
-	{light salmon} orange {dark orange} coral {light coral} tomato
-	{orange red} red {hot pink} {deep pink} pink {light pink}
-	{pale violet red} maroon {medium violet red} {violet red}
-	magenta violet plum orchid {medium orchid} {dark orchid} {dark violet}
-	{blue violet} purple {medium purple} thistle snow2 snow3
-	snow4 seashell2 seashell3 seashell4 AntiqueWhite1 AntiqueWhite2
-	AntiqueWhite3 AntiqueWhite4 bisque2 bisque3 bisque4 PeachPuff2
-	PeachPuff3 PeachPuff4 NavajoWhite2 NavajoWhite3 NavajoWhite4
-	LemonChiffon2 LemonChiffon3 LemonChiffon4 cornsilk2 cornsilk3
-	cornsilk4 ivory2 ivory3 ivory4 honeydew2 honeydew3 honeydew4
-	LavenderBlush2 LavenderBlush3 LavenderBlush4 MistyRose2 MistyRose3
-	MistyRose4 azure2 azure3 azure4 SlateBlue1 SlateBlue2 SlateBlue3
-	SlateBlue4 RoyalBlue1 RoyalBlue2 RoyalBlue3 RoyalBlue4 blue2 blue4
-	DodgerBlue2 DodgerBlue3 DodgerBlue4 SteelBlue1 SteelBlue2
-	SteelBlue3 SteelBlue4 DeepSkyBlue2 DeepSkyBlue3 DeepSkyBlue4
-	SkyBlue1 SkyBlue2 SkyBlue3 SkyBlue4 LightSkyBlue1 LightSkyBlue2
-	LightSkyBlue3 LightSkyBlue4 SlateGray1 SlateGray2 SlateGray3
-	SlateGray4 LightSteelBlue1 LightSteelBlue2 LightSteelBlue3
-	LightSteelBlue4 LightBlue1 LightBlue2 LightBlue3 LightBlue4
-	LightCyan2 LightCyan3 LightCyan4 PaleTurquoise1 PaleTurquoise2
-	PaleTurquoise3 PaleTurquoise4 CadetBlue1 CadetBlue2 CadetBlue3
-	CadetBlue4 turquoise1 turquoise2 turquoise3 turquoise4 cyan2 cyan3
-	cyan4 DarkSlateGray1 DarkSlateGray2 DarkSlateGray3 DarkSlateGray4
-	aquamarine2 aquamarine4 DarkSeaGreen1 DarkSeaGreen2 DarkSeaGreen3
-	DarkSeaGreen4 SeaGreen1 SeaGreen2 SeaGreen3 PaleGreen1 PaleGreen2
-	PaleGreen3 PaleGreen4 SpringGreen2 SpringGreen3 SpringGreen4
-	green2 green3 green4 chartreuse2 chartreuse3 chartreuse4
-	OliveDrab1 OliveDrab2 OliveDrab4 DarkOliveGreen1 DarkOliveGreen2
-	DarkOliveGreen3 DarkOliveGreen4 khaki1 khaki2 khaki3 khaki4
-	LightGoldenrod1 LightGoldenrod2 LightGoldenrod3 LightGoldenrod4
-	LightYellow2 LightYellow3 LightYellow4 yellow2 yellow3 yellow4
-	gold2 gold3 gold4 goldenrod1 goldenrod2 goldenrod3 goldenrod4
-	DarkGoldenrod1 DarkGoldenrod2 DarkGoldenrod3 DarkGoldenrod4
-	RosyBrown1 RosyBrown2 RosyBrown3 RosyBrown4 IndianRed1 IndianRed2
-	IndianRed3 IndianRed4 sienna1 sienna2 sienna3 sienna4 burlywood1
-	burlywood2 burlywood3 burlywood4 wheat1 wheat2 wheat3 wheat4 tan1
-	tan2 tan4 chocolate1 chocolate2 chocolate3 firebrick1 firebrick2
-	firebrick3 firebrick4 brown1 brown2 brown3 brown4 salmon1 salmon2
-	salmon3 salmon4 LightSalmon2 LightSalmon3 LightSalmon4 orange2
-	orange3 orange4 DarkOrange1 DarkOrange2 DarkOrange3 DarkOrange4
-	coral1 coral2 coral3 coral4 tomato2 tomato3 tomato4 OrangeRed2
-	OrangeRed3 OrangeRed4 red2 red3 red4 DeepPink2 DeepPink3 DeepPink4
-	HotPink1 HotPink2 HotPink3 HotPink4 pink1 pink2 pink3 pink4
-	LightPink1 LightPink2 LightPink3 LightPink4 PaleVioletRed1
-	PaleVioletRed2 PaleVioletRed3 PaleVioletRed4 maroon1 maroon2
-	maroon3 maroon4 VioletRed1 VioletRed2 VioletRed3 VioletRed4
-	magenta2 magenta3 magenta4 orchid1 orchid2 orchid3 orchid4 plum1
-	plum2 plum3 plum4 MediumOrchid1 MediumOrchid2 MediumOrchid3
-	MediumOrchid4 DarkOrchid1 DarkOrchid2 DarkOrchid3 DarkOrchid4
-	purple1 purple2 purple3 purple4 MediumPurple1 MediumPurple2
-	MediumPurple3 MediumPurple4 thistle1 thistle2 thistle3 thistle4
-}
-
 proc init_canvas_colors { } {
 	global defcolors allcolors
 	set unusedcolors [ lsort $allcolors ]
@@ -1972,97 +1644,6 @@ proc init_canvas_colors { } {
 
 
 #************************************************
-# UPDATE_TITLE_BAR
-# Update LMM main window title bar according to file save status
-#************************************************
-proc update_title_bar { } {
-	global tosave before filename
-
-	if [ winfo exists .f.t.t ] {
-		set after [ .f.t.t get 1.0 end ]
-	} else {
-		set after $before
-	}
-	if [ string compare $before $after ] {
-		set tosave 1
-		wm title . "*$filename - LMM"
-	} else {
-		set tosave 0
-		wm title . "  $filename - LMM"
-	}
-}
-
-
-#************************************************
-# ROUND_N
-# Round float to N decimal positions
-#************************************************
-proc round_N { float N } {
-	return [ expr round( $float * pow( 10, $N ) ) / pow( 10, $N ) ]
-}
-
-
-#************************************************
-# CURRENT_DATE
-# Current date in the default date format
-#************************************************
-proc current_date { } {
-	global DATE_FMT
-
-	return [ clock format [ clock seconds ] -format $DATE_FMT ]
-}
-
-
-#************************************************
-# OPEN_GNUPLOT
-# Open gnuplot window
-#************************************************
-proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
-	global CurPlatform sysTerm
-
-	if [ string equal $script "" ] {
-		set args ""
-	} else {
-		set args "-p $script"
-	}
-
-	if [ string equal $CurPlatform mac ] {
-		if { $wait } {
-			set ret [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $script; exit\"" } ]
-		} else {
-			set ret [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $args; exit\"" & } ]
-		}
-	} elseif [ string equal $CurPlatform linux ] {
-		if { $wait } {
-			set ret [ catch { exec $sysTerm -e "gnuplot $script; exit" } ]
-		} else {
-			set ret [ catch { exec $sysTerm -e "gnuplot $args; exit" & } ]
-		}
-	} else {
-		if [ string equal $script "" ] {
-			set ret [ catch { exec wgnuplot.exe & } ]
-		} else {
-			if { $wait } {
-				set ret [ catch { exec wgnuplot.exe $script } ]
-			} else {
-				set ret [ catch { exec wgnuplot.exe -p $script & } ]
-			}
-		}
-	}
-
-	if { $ret != 0 } {
-		if [ string equal $errmsg "" ] {
-			set errmsg "Please check if Gnuplot is installed and set up properly."
-		}
-
-		tk_messageBox -parent $par -type ok -icon error -title Error -message "Gnuplot failed to launch" -detail "Gnuplot returned error '$ret'.\n$errmsg"
-	}
-
-	return $ret
-}
-
-
-#************************************************
 # TK_CONSOLE
 # Open Tk console window
 #************************************************
@@ -2079,98 +1660,4 @@ proc tk_console { } {
 	}
 
 	tkcon show
-}
-
-
-#************************************************
-# CONWND
-# load and set console configuration
-#************************************************
-if { $conWnd } {
-	set msg "File(s) missing or corrupted"
-	set det "Tcl/Tk console file 'tkcon.tcl' is missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is continuing without console support."
-	if [ file exists "$RootLsd/$LsdSrc/tkcon.tcl" ] {
-		if { [ catch { source "$RootLsd/$LsdSrc/tkcon.tcl" } ] == 0 } {
-			set tkcon::PRIV(showOnStartup) 0
-			set tkcon::PRIV(root) .console
-			set tkcon::PRIV(protocol) { tkcon hide }
-			set tkcon::OPT(exec) ""
-		} else {
-			set conWnd false
-			tk_messageBox -type ok -icon warning -title Warning -message $msg -detail $det
-		}
-	} else {
-		set conWnd false
-			tk_messageBox -type ok -icon warning -title Warning -message $msg -detail $det
-	}
-}
-
-
-#************************************************
-# TESTWND
-# Open test window if enabled
-#************************************************
-if $testWnd {
-	newtop .tst "LSD Coordinates Test Window" { destroytop .tst } ""
-
-	frame .tst.xy
-	label .tst.xy.l1 -anchor e -text "X:"
-	label .tst.xy.v1 -anchor w -fg red
-	label .tst.xy.l2 -anchor e -text "   Y:"
-	label .tst.xy.v2 -anchor w -fg red
-	pack .tst.xy.l1 .tst.xy.v1 .tst.xy.l2 .tst.xy.v2 -side left -padx 2 -pady 2
-
-	frame .tst.r
-	label .tst.r.l1 -anchor e -text "rootx:"
-	label .tst.r.v1 -anchor w -fg red
-	label .tst.r.l2 -anchor e -text "   rooty:"
-	label .tst.r.v2 -anchor w -fg red
-	pack .tst.r.l1 .tst.r.v1 .tst.r.l2 .tst.r.v2 -side left -padx 2 -pady 2
-
-	frame .tst.v
-	label .tst.v.l1 -anchor e -text "vrootx:"
-	label .tst.v.v1 -anchor w -fg red
-	label .tst.v.l2 -anchor e -text "   vrooty:"
-	label .tst.v.v2 -anchor w -fg red
-	pack .tst.v.l1 .tst.v.v1 .tst.v.l2 .tst.v.v2 -side left -padx 2 -pady 2
-
-	frame .tst.s
-	label .tst.s.l1 -anchor e -text "screenwidth:"
-	label .tst.s.v1 -anchor w -fg red
-	label .tst.s.l2 -anchor e -text "   screenheight:"
-	label .tst.s.v2 -anchor w -fg red
-	pack .tst.s.l1 .tst.s.v1 .tst.s.l2 .tst.s.v2 -side left -padx 2 -pady 2
-
-	frame .tst.t
-	label .tst.t.l1 -anchor e -text "vrootwidth:"
-	label .tst.t.v1 -anchor w -fg red
-	label .tst.t.l2 -anchor e -text "   vrootheight:"
-	label .tst.t.v2 -anchor w -fg red
-	pack .tst.t.l1 .tst.t.v1 .tst.t.l2 .tst.t.v2 -side left -padx 2 -pady 2
-
-	frame .tst.m
-	label .tst.m.l1 -anchor e -text "maxwidth:"
-	label .tst.m.v1 -anchor w -fg red
-	label .tst.m.l2 -anchor e -text "   maxheight:"
-	label .tst.m.v2 -anchor w -fg red
-	pack .tst.m.l1 .tst.m.v1 .tst.m.l2 .tst.m.v2 -side left -padx 2 -pady 2
-
-	pack .tst.xy .tst.r .tst.v .tst.s .tst.t .tst.m
-
-	bind .tst <Motion> {
-		.tst.xy.v1 configure -text %X
-		.tst.xy.v2 configure -text %Y
-		.tst.r.v1 configure -text [ winfo rootx .tst ]
-		.tst.r.v2 configure -text [ winfo rooty .tst ]
-		.tst.v.v1 configure -text [ winfo vrootx .tst ]
-		.tst.v.v2 configure -text [ winfo vrooty .tst ]
-		.tst.s.v1 configure -text [ winfo screenwidth .tst ]
-		.tst.s.v2 configure -text [ winfo screenheight .tst ]
-		.tst.t.v1 configure -text [ winfo vrootwidth .tst ]
-		.tst.t.v2 configure -text [ winfo vrootheight .tst ]
-		.tst.m.v1 configure -text [ lindex [ wm maxsize .tst ] 0 ]
-		.tst.m.v2 configure -text [ lindex [ wm maxsize .tst ] 1 ]
-	}
-
-	showtop .tst current yes yes no
 }

@@ -145,7 +145,7 @@ double ran1( long *idum_loc = NULL );
 #define GROUP_INFO "groupinfo.txt"
 #define MODEL_INFO "modelinfo.txt"
 #define DESCRIPTION "description.txt"
-#define LMM_OPTIONS_NUM 15
+#define LMM_OPTIONS_NUM 16
 #define MODEL_INFO_NUM 9
 
 using namespace std;

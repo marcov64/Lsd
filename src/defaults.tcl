@@ -14,8 +14,6 @@
 # Default values for the Tk windowing system. 
 #*************************************************************
 
-package require Tk
-
 # default colors in palette and other elements
 set defcolors	{ black red green #d0d000 #fb46bc blue DeepSkyBlue1 grey40 PaleTurquoise2 cyan aquamarine DarkSeaGreen1 chartreuse1 OliveDrab khaki3 LightGoldenrod4 sienna1 chocolate4 firebrick3 orange1 salmon3 }
 
@@ -161,6 +159,14 @@ set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Window
 set upSymbol 	"\u25B2 .."	; # up in tree structure symbol
 set groupSymbol	"\u25B6 "	; # group symbol
 
+# OS specific default interface theme
+set themeMac			"aqua"		; # native macOS theme
+set themeLinux			"awlight"	; # Adwaita light theme
+set themeLinuxDark		"awdark"	; # Adwaita dark theme
+set themeWindows		"vista"		; # native Windows light theme
+set themeWindowsDark	"black"		; # Windows dark theme
+set darkThemeSuffixes	[ list dark black obscure ]; # words identifying Linux dark themes
+
 # OS specific monospaced font name
 set fontMac		"Monaco"			; # "Courier"
 set fontLinux	"DejaVu Sans Mono"	; # "Courier"
@@ -181,6 +187,7 @@ set butLinux	7
 set butMac		5
 set butMacTk869	8
 set butWindows	9
+set butPad 10
 
 # OS specific screen location offset adjustments
 set corrXmac	0
@@ -229,3 +236,126 @@ set gnuplotTermWindows	""	; # "wxt", "qt" , "windows"
 # default gnuplot options
 set gnuplotGrid3D	"60,60,3"				;
 set gnuplotOptions	"set ticslevel 0.0"		;
+
+# default diff application settings
+set diffApp			"tkdiff.tcl"		; # command line diff application to use
+set diffAppType		0					; # type of application (0=tk/1=terminal/2=graphical)
+set diffFile1		"-lsd"				; # option to inform first file name		
+set diffFile2		""					; # option to inform second file name		
+set diffFile1name	"-L"				; # option for naming first file
+set diffFile2name	"-L"				; # option for naming second file
+
+# known themes table and associated parameters
+# theme list elements:		0:plat		1:pkg name				2:full name			3:dark	4:tbpad
+set themeTable(alt) 	   	{ all		ttk::theme::alt			"Alt"				0		1	 }
+set themeTable(clam) 	   	{ all		ttk::theme::clam		"Clam"				0		2	 }
+set themeTable(classic)    	{ all		ttk::theme::classic		"Classic"			0		1	 }
+set themeTable(default)    	{ all		ttk::theme::default		"Default"			0		3	 }
+set themeTable(aqua) 	   	{ mac		ttk::theme::aqua		"Aqua"				0		3	 }
+set themeTable(vista)      	{ windows	ttk::theme::vista		"Vista"				0		4	 }
+set themeTable(winnative)  	{ windows	ttk::theme::winnative	"Windows Native"	0		2	 }
+set themeTable(awdark)     	{ all		awdark					"Adwaita Dark"		1		2	 }
+set themeTable(awlight)    	{ all		awlight					"Adwaita Light"		0		2	 }
+set themeTable(aquablue)   	{ all		ttk::theme::aquablue 	"Aqua Blue"			0		-7	 }
+set themeTable(blueelegance) { all		ttk::theme::blueelegance "Blue Elegance"	0		3	 }
+set themeTable(sriv)       	{ all		ttk::theme::sriv     	"Sriv"				0		1	 }
+set themeTable(waldorf)	   	{ all		ttk::theme::waldorf	 	"Waldorf"			0		-7	 }
+set themeTable(aquativo)   	{ all		ttk::theme::aquativo 	"Aquativo"			0		2	 }
+set themeTable(arc)			{ all		ttk::theme::arc    	 	"Arc"				0		-1	 }
+set themeTable(black)      	{ all		ttk::theme::black    	"Black"				1		2	 }
+set themeTable(blue)   	   	{ all		ttk::theme::blue   	 	"Blue"				0		2	 }
+set themeTable(breeze)     	{ all		ttk::theme::breeze   	"Breeze"			0		1	 }
+set themeTable(clearlooks) 	{ all		ttk::theme::clearlooks	"Clearlooks"		0		-7	 }
+set themeTable(elegance)   	{ all		ttk::theme::elegance 	"Elegance"			0		3	 }
+set themeTable(equilux)    	{ all		ttk::theme::equilux  	"Equilux"			1		-1	 }
+set themeTable(itft1)      	{ all		ttk::theme::itft1    	"ITFT1"				0		2	 }
+set themeTable(keramik)    	{ all		ttk::theme::keramik  	"Keramik"			0		2	 }
+set themeTable(keramik_alt)	{ all		ttk::theme::keramik_alt	"Keramik Alt"		0		2	 }
+set themeTable(kroc)   	   	{ all		ttk::theme::kroc   	 	"Kroc"				0		2	 }
+set themeTable(plastik)    	{ all		ttk::theme::plastik  	"Plastik"			0		0	 }
+set themeTable(scidblue)   	{ all		ttk::theme::scid 		"Scid Blue"			0		-10	 }
+set themeTable(scidgreen)  	{ all		ttk::theme::scid		"Scid Green"		0		-10	 }
+set themeTable(scidgrey)   	{ all		ttk::theme::scid 		"Scid Grey"			0		-10	 }
+set themeTable(scidmint)   	{ all		ttk::theme::scid 		"Scid Mint"			0		-10	 }
+set themeTable(scidpink)   	{ all		ttk::theme::scid 		"Scid Pink"			0		-10	 }
+set themeTable(scidpurple) 	{ all		ttk::theme::scid		"Scid Purple"		0		-10	 }
+set themeTable(scidsand)   	{ all		ttk::theme::scid 		"Scid Sand"			0		-10	 }
+set themeTable(smog)       	{ all		ttk::theme::smog     	"Smog"				0		3	 }
+set themeTable(winxpblue)  	{ all		ttk::theme::winxpblue	"Windows XP Blue"	0		2	 }
+set themeTable(ubuntu)	   	{ all		ttk::theme::ubuntu	 	"Radiance"			0		-10	 }
+set themeTable(yaru)	   	{ all		ttk::theme::yaru	 	"Yaru"				0		0	 }
+
+# list of all Tk named colors
+set allcolors {
+	snow {ghost white} {white smoke} gainsboro {floral white}
+	{old lace} linen {antique white} {papaya whip} {blanched almond}
+	bisque {peach puff} {navajo white} moccasin cornsilk ivory
+	{lemon chiffon} seashell honeydew {mint cream} azure {alice blue}
+	lavender {lavender blush} {misty rose} white black {dark slate gray}
+	{dim gray} {slate gray} {light slate gray} gray {light grey}
+	{midnight blue} navy {cornflower blue} {dark slate blue} {slate blue}
+	{medium slate blue} {light slate blue} {medium blue} {royal blue}
+	blue {dodger blue} {deep sky blue} {sky blue} {light sky blue}
+	{steel blue} {light steel blue} {light blue} {powder blue}
+	{pale turquoise} {dark turquoise} {medium turquoise} turquoise
+	cyan {light cyan} {cadet blue} {medium aquamarine} aquamarine
+	{dark green} {dark olive green} {dark sea green} {sea green}
+	{medium sea green} {light sea green} {pale green} {spring green}
+	{lawn green} green chartreuse {medium spring green} {green yellow}
+	{lime green} {yellow green} {forest green} {olive drab} {dark khaki}
+	khaki {pale goldenrod} {light goldenrod yellow} {light yellow} yellow
+	gold {light goldenrod} goldenrod {dark goldenrod} {rosy brown}
+	{indian red} {saddle brown} sienna peru burlywood beige wheat
+	{sandy brown} tan chocolate firebrick brown {dark salmon} salmon
+	{light salmon} orange {dark orange} coral {light coral} tomato
+	{orange red} red {hot pink} {deep pink} pink {light pink}
+	{pale violet red} maroon {medium violet red} {violet red}
+	magenta violet plum orchid {medium orchid} {dark orchid} {dark violet}
+	{blue violet} purple {medium purple} thistle snow2 snow3
+	snow4 seashell2 seashell3 seashell4 AntiqueWhite1 AntiqueWhite2
+	AntiqueWhite3 AntiqueWhite4 bisque2 bisque3 bisque4 PeachPuff2
+	PeachPuff3 PeachPuff4 NavajoWhite2 NavajoWhite3 NavajoWhite4
+	LemonChiffon2 LemonChiffon3 LemonChiffon4 cornsilk2 cornsilk3
+	cornsilk4 ivory2 ivory3 ivory4 honeydew2 honeydew3 honeydew4
+	LavenderBlush2 LavenderBlush3 LavenderBlush4 MistyRose2 MistyRose3
+	MistyRose4 azure2 azure3 azure4 SlateBlue1 SlateBlue2 SlateBlue3
+	SlateBlue4 RoyalBlue1 RoyalBlue2 RoyalBlue3 RoyalBlue4 blue2 blue4
+	DodgerBlue2 DodgerBlue3 DodgerBlue4 SteelBlue1 SteelBlue2
+	SteelBlue3 SteelBlue4 DeepSkyBlue2 DeepSkyBlue3 DeepSkyBlue4
+	SkyBlue1 SkyBlue2 SkyBlue3 SkyBlue4 LightSkyBlue1 LightSkyBlue2
+	LightSkyBlue3 LightSkyBlue4 SlateGray1 SlateGray2 SlateGray3
+	SlateGray4 LightSteelBlue1 LightSteelBlue2 LightSteelBlue3
+	LightSteelBlue4 LightBlue1 LightBlue2 LightBlue3 LightBlue4
+	LightCyan2 LightCyan3 LightCyan4 PaleTurquoise1 PaleTurquoise2
+	PaleTurquoise3 PaleTurquoise4 CadetBlue1 CadetBlue2 CadetBlue3
+	CadetBlue4 turquoise1 turquoise2 turquoise3 turquoise4 cyan2 cyan3
+	cyan4 DarkSlateGray1 DarkSlateGray2 DarkSlateGray3 DarkSlateGray4
+	aquamarine2 aquamarine4 DarkSeaGreen1 DarkSeaGreen2 DarkSeaGreen3
+	DarkSeaGreen4 SeaGreen1 SeaGreen2 SeaGreen3 PaleGreen1 PaleGreen2
+	PaleGreen3 PaleGreen4 SpringGreen2 SpringGreen3 SpringGreen4
+	green2 green3 green4 chartreuse2 chartreuse3 chartreuse4
+	OliveDrab1 OliveDrab2 OliveDrab4 DarkOliveGreen1 DarkOliveGreen2
+	DarkOliveGreen3 DarkOliveGreen4 khaki1 khaki2 khaki3 khaki4
+	LightGoldenrod1 LightGoldenrod2 LightGoldenrod3 LightGoldenrod4
+	LightYellow2 LightYellow3 LightYellow4 yellow2 yellow3 yellow4
+	gold2 gold3 gold4 goldenrod1 goldenrod2 goldenrod3 goldenrod4
+	DarkGoldenrod1 DarkGoldenrod2 DarkGoldenrod3 DarkGoldenrod4
+	RosyBrown1 RosyBrown2 RosyBrown3 RosyBrown4 IndianRed1 IndianRed2
+	IndianRed3 IndianRed4 sienna1 sienna2 sienna3 sienna4 burlywood1
+	burlywood2 burlywood3 burlywood4 wheat1 wheat2 wheat3 wheat4 tan1
+	tan2 tan4 chocolate1 chocolate2 chocolate3 firebrick1 firebrick2
+	firebrick3 firebrick4 brown1 brown2 brown3 brown4 salmon1 salmon2
+	salmon3 salmon4 LightSalmon2 LightSalmon3 LightSalmon4 orange2
+	orange3 orange4 DarkOrange1 DarkOrange2 DarkOrange3 DarkOrange4
+	coral1 coral2 coral3 coral4 tomato2 tomato3 tomato4 OrangeRed2
+	OrangeRed3 OrangeRed4 red2 red3 red4 DeepPink2 DeepPink3 DeepPink4
+	HotPink1 HotPink2 HotPink3 HotPink4 pink1 pink2 pink3 pink4
+	LightPink1 LightPink2 LightPink3 LightPink4 PaleVioletRed1
+	PaleVioletRed2 PaleVioletRed3 PaleVioletRed4 maroon1 maroon2
+	maroon3 maroon4 VioletRed1 VioletRed2 VioletRed3 VioletRed4
+	magenta2 magenta3 magenta4 orchid1 orchid2 orchid3 orchid4 plum1
+	plum2 plum3 plum4 MediumOrchid1 MediumOrchid2 MediumOrchid3
+	MediumOrchid4 DarkOrchid1 DarkOrchid2 DarkOrchid3 DarkOrchid4
+	purple1 purple2 purple3 purple4 MediumPurple1 MediumPurple2
+	MediumPurple3 MediumPurple4 thistle1 thistle2 thistle3 thistle4
+}

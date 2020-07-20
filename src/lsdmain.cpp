@@ -134,8 +134,8 @@ variable *last_cemetery = NULL;	// LSD last saved data from deleted objects
 FILE *log_file = NULL;		// log file, if any
 
 // constant string arrays
-const char *lmm_options[ LMM_OPTIONS_NUM ] = { "sysTerm", "HtmlBrowser", "fonttype", "wish", "LsdSrc", "dim_character", "tabsize", "wrap", "shigh", "autoHide", "showFileCmds", "LsdNew", "DbgExe", "restoreWin", "lmmGeom" };
-const char *lmm_defaults[ LMM_OPTIONS_NUM ] = { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", "$DefaultWish", "src", "$DefaultFontSize", "2", "1", "2", "0", "0", "Work", "$DefaultDbgExe", "1", "#" };
+const char *lmm_options[ LMM_OPTIONS_NUM ] = { "sysTerm", "HtmlBrowser", "fonttype", "wish", "LsdSrc", "dim_character", "tabsize", "wrap", "shigh", "autoHide", "showFileCmds", "LsdNew", "DbgExe", "restoreWin", "lmmGeom", "lsdTheme" };
+const char *lmm_defaults[ LMM_OPTIONS_NUM ] = { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", "$DefaultWish", "src", "$DefaultFontSize", "2", "1", "2", "0", "0", "Work", "$DefaultDbgExe", "1", "#", "$DefaultTheme" };
 const char *model_info[ MODEL_INFO_NUM ] = { "modelName", "modelVersion", "modelDate", "lsdGeom", "logGeom", "strGeom", "daGeom", "debGeom", "latGeom" };
 const char *model_defaults[ MODEL_INFO_NUM ] = { "(no name)", "1.0", "[ current_date ]", "#", "#", "#", "#", "#", "#" };
 const char *wnd_names[ MODEL_INFO_NUM - 3 ] = { "lsd", "log", "str", "da", "deb", "lat" };
@@ -471,14 +471,14 @@ int lsdmain( int argn, char **argv )
 	// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 	choice = 0;
 
-	// load native Tk procedures for windows management
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } err0x01 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0100, 0x01 );
+	// load native Tk procedures for graphical user interface management
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/gui.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/gui.tcl\" } err0x01 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0100, 0x01 );
 
-	// load native Tcl procedures for external files handling
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } err0x02 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0200, 0x02 );
+	// load native Tcl procedures for general utilities
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/file.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/file.tcl\" } err0x02 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0200, 0x02 );
 
 	// load additional native Tcl procedures for external files handling
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } err0x04 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0400, 0x04 );
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/util.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/util.tcl\" } err0x04 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0400, 0x04 );
 
 	if ( choice != 0 )
 	{
