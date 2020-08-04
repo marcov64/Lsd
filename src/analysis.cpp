@@ -3899,15 +3899,20 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 				goto end;
 			}
 	  
-			if ( ! strcmp( tok, nonavail ) )	// it's a non-available observation
-				vs[ i ].data[ j - vs[ i ].start ] = NAN;
-			else
+	  		// ignore not started / already ended series' column
+			if ( j >= vs[ i ].start && j <= vs[ i ].end )
 			{
-				sscanf( tok, "%lf", &( vs[ i ].data[ j - vs[ i ].start ] ) );
-				
-				if ( j == 0 )				// at least one lagged variable?
-					first_c = 0;
+				if ( ! strcmp( tok, nonavail ) )	// it's a non-available observation
+					vs[ i ].data[ j - vs[ i ].start ] = NAN;
+				else
+				{
+					sscanf( tok, "%lf", &( vs[ i ].data[ j - vs[ i ].start ] ) );
+					
+					if ( j == 0 )				// at least one lagged variable?
+						first_c = 0;
+				}
 			}
+			
 			tok = strtok( NULL, "\t" );			// get next token, if any
 		}
 	}
