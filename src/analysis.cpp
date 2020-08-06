@@ -7939,6 +7939,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	int **pdataY = new int *[ nLine ];	// matrix of visual average scaled/rounded values
 	for ( k = 0; k < nLine; ++k )
 	{
+		y[ k ] = 0;
 		pdataY[ k ] = new int [ hsize + 1 ];
 		for ( i = 0; i < hsize + 1; ++i )
 			pdataY[ k ][ i ] = -1;	// mark all as non plot
