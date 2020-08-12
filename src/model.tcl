@@ -149,7 +149,7 @@ proc showmodel pippo {
 
 		ttk::frame .l.l.tit
 		ttk::label .l.l.tit.g -text "Current group:"
-		ttk::label .l.l.tit.n -style red.TLabel
+		ttk::label .l.l.tit.n -style hl.TLabel
 		pack .l.l.tit.g .l.l.tit.n -side left
 
 		pack .l.l.tit -pady 3 -anchor w
@@ -173,10 +173,10 @@ proc showmodel pippo {
 		ttk::label .l.t.tit -text Description
 		pack .l.t.tit -pady 3 -expand yes -fill x
 		ttk::scrollbar .l.t.yscroll -command ".l.t.text yview"
-		set a [ list "$fonttype" $small_character ]
-		ttk::text .l.t.text -wrap word -font "$a" -width 60 -yscrollcommand ".l.t.yscroll set" -dark $darkTheme
+		ttk::text .l.t.text -wrap word -width 60 -yscrollcommand ".l.t.yscroll set" -entry 0 -dark $darkTheme -style smallFixed.TText
 		pack .l.t.yscroll -side right -fill y
 		pack .l.t.text -expand yes -fill both
+		mouse_wheel .l.t.text
 
 		pack .l.l .l.t -expand yes -fill both -side left
 		
@@ -192,6 +192,23 @@ proc showmodel pippo {
 		bind .l <Insert> { .l.m.file invoke 1 }
 		bind .l <Return> { .l.m.file invoke 0 }
 		
+		bind .l <KeyRelease> {
+			set kk %K
+			if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } {
+				if [ string equal $kk underscore ] {
+					set kk _
+				}
+				set ll %W
+				set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] "${kk}*" ]
+				if { $ff == -1 } {
+					set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] "${kk}*" ]
+				}
+				if { $ff >= 0 } {
+					selectinlist $ll $ff
+				}
+			}
+		}
+
 		bind .l.l.l <Double-Button-1> { set dblclk 1; .l.m.file invoke 0 } 
 
 		bind .l.l.l <Button-1> {
@@ -234,7 +251,7 @@ proc showmodel pippo {
 		
 		bind .l <Up> {
 			if { [ .l.l.l curselection ] > 0 } {
-				set app [expr [ .l.l.l curselection ] - 1]
+				set app [ expr [ .l.l.l curselection ] - 1 ]
 				.l.l.l selection clear 0 end
 				.l.l.l selection set $app
 				.l.t.text conf -state normal
@@ -246,7 +263,7 @@ proc showmodel pippo {
 
 		bind .l <Down> {
 			if { [ .l.l.l curselection ] < [ expr [ .l.l.l size ] - 1 ] } {
-				set app [expr [ .l.l.l curselection ] + 1 ]
+				set app [ expr [ .l.l.l curselection ] + 1 ]
 				.l.l.l selection clear 0 end
 				.l.l.l selection set $app
 				.l.t.text conf -state normal
@@ -257,7 +274,7 @@ proc showmodel pippo {
 		}
 		
 		# call procedure to adjust geometry and block lmm window, if fresh new window
-		showtop .l centerS
+		showtop .l
 	}
 
 	.l.l.tit.n conf -text "$modelGroup"
@@ -342,7 +359,7 @@ proc showmodel pippo {
 			}
 			
 			lappend group 0
-			.l.l.l insert end "$app1 (ver. $app2)"				 
+			.l.l.l insert end "$app1 (v. $app2)"				 
 			.l.l.l itemconf end -fg $colorsTheme(mod)
 		}
 	}
@@ -451,7 +468,7 @@ proc medit i {
 
 	ttk::frame .l.e.tit
 	ttk::label .l.e.tit.l -text "Current $item:"
-	ttk::label .l.e.tit.n -text "[ lindex $lmn $i ]" -style red.TLabel
+	ttk::label .l.e.tit.n -text "[ lindex $lmn $i ]" -style hl.TLabel
 	pack .l.e.tit.l  .l.e.tit.n -side left -padx 2
 
 	ttk::frame .l.e.n
@@ -464,11 +481,11 @@ proc medit i {
 	ttk::label .l.e.t.l -text "Description"
 	ttk::frame .l.e.t.t
 	ttk::scrollbar .l.e.t.t.yscroll -command ".l.e.t.t.text yview"
-	set a [ list "$fonttype" $small_character ]
-	ttk::text .l.e.t.t.text -wrap word -width 60 -height 20 -font "$a" -yscrollcommand ".l.e.t.t.yscroll set" -entry 1 -dark $darkTheme
+	ttk::text .l.e.t.t.text -wrap word -width 60 -height 20 -yscrollcommand ".l.e.t.t.yscroll set" -dark $darkTheme -style smallFixed.TText
 	.l.e.t.t.text insert end "[ lindex $lmd $i ]"
 	pack .l.e.t.t.yscroll -side right -fill y
 	pack .l.e.t.t.text
+	mouse_wheel .l.e.t.t.text
 	pack .l.e.t.l .l.e.t.t
 
 	pack .l.e.tit .l.e.n .l.e.t -padx 5 -pady 5
@@ -535,12 +552,12 @@ proc mpaste i {
 
 	ttk::frame .l.p.tit.t1
 	ttk::label .l.p.tit.t1.l -text "Original model:"
-	ttk::label .l.p.tit.t1.n -text "$copylabel" -style red.TLabel
+	ttk::label .l.p.tit.t1.n -text "$copylabel" -style hl.TLabel
 	pack .l.p.tit.t1.l  .l.p.tit.t1.n -side left -padx 2
 
 	ttk::frame .l.p.tit.t2
 	ttk::label .l.p.tit.t2.l -text "Current group:"
-	ttk::label .l.p.tit.t2.n -text "[ lindex $lrn $i ]" -style red.TLabel
+	ttk::label .l.p.tit.t2.n -text "[ lindex $lrn $i ]" -style hl.TLabel
 	pack .l.p.tit.t2.l  .l.p.tit.t2.n -side left -padx 2
 
 	pack .l.p.tit.t1  .l.p.tit.t2
@@ -568,11 +585,11 @@ proc mpaste i {
 
 	ttk::frame .l.p.t.t
 	ttk::scrollbar .l.p.t.t.yscroll -command ".l.p.t.t.text yview"
-	set a [ list "$fonttype" $small_character ]
-	ttk::text .l.p.t.t.text -wrap word -width 60 -height 20 -font "$a" -yscrollcommand ".l.p.t.t.yscroll set" -entry 1 -dark $darkTheme
+	ttk::text .l.p.t.t.text -wrap word -width 60 -height 20 -yscrollcommand ".l.p.t.t.yscroll set" -dark $darkTheme -style smallFixed.TText
 	.l.p.t.t.text insert end "$copydscr"
 	pack .l.p.t.t.yscroll -side right -fill y
 	pack .l.p.t.t.text
+	mouse_wheel .l.p.t.t.text
 	pack .l.p.t.l .l.p.t.t
 
 	pack .l.p.tit .l.p.n .l.p.v .l.p.d .l.p.t -padx 5 -pady 5
@@ -667,121 +684,4 @@ proc fix_info { fi } {
 		puts $f $newDate
 		close $f
 	}
-}
-
-
-#************************************************
-# CHS_MDL
-# Compare models dialog
-#************************************************
-proc slct { } {
-	global sd sf ldir
-	
-	set tmp [ .l.l.l.l curselection ]
-	if { $tmp == "" } {
-		set sd ""
-		set sf ""
-		return 
-	}
-
-	set sd [ lindex $ldir $tmp ]
-	set sf [ file tail [ glob -nocomplain [ file join $sd *.cpp ] ] ]
-}
-
-
-proc chs_mdl { } {
-	global lmod ldir sd sf d1 d2 f1 f2 lgroup cgroup butWid
-
-	set lmod ""
-	set ldir ""
-	set d1 ""
-	set d2 ""
-	set f1 ""
-	set f2 ""
-	set lgroup ""
-	set cgroup ""
-	set glabel ""
-
-	unset -nocomplain sd
-	unset -nocomplain sf
-
-	lst_mdl
-
-	newtop .l "LSD Models" { set choice -1; destroytop .l }
-
-	frame .l.l
-	
-	label .l.l.tit -text "List of models"
-	pack .l.l.tit
-	
-	frame .l.l.l
-	scrollbar .l.l.l.vs -command ".l.l.l.l yview"
-	listbox .l.l.l.l -height 20 -width 50 -yscroll ".l.l.l.vs set" -selectmode browse
-	mouse_wheel .l.l.l.l
-	
-	bind .l.l.l.l <ButtonRelease> { set glabel [ lindex $lgroup [ .l.l.l.l curselection ] ]; .l.l.gt.t configu -text "$glabel" }
-	bind .l.l.l.l <KeyRelease-Up> { set glabel [ lindex $lgroup [ .l.l.l.l curselection ] ]; .l.l.gt.t configu -text "$glabel" }
-	bind .l.l.l.l <KeyRelease-Down> { set glabel [ lindex $lgroup [ .l.l.l.l curselection ] ]; .l.l.gt.t configu -text "$glabel" }
-	
-	pack .l.l.l.vs -side right -fill y
-	pack .l.l.l.l -expand yes -fill both 
-	pack .l.l.l 
-	
-	frame .l.l.gt
-	label .l.l.gt.l -text "Selected model is in group:" 
-	label .l.l.gt.t -text "$glabel" -fg red
-	pack .l.l.gt.l .l.l.gt.t
-
-	pack .l.l.gt -expand yes -fill x -anchor w -padx 10 -pady 10
-
-	frame .l.t
-	frame .l.t.f1 
-	label .l.t.f1.tit -text "Selected models"
-	
-	frame .l.t.f1.m1
-	label .l.t.f1.m1.l -text "First model"
-	entry .l.t.f1.m1.d -width 50 -textvariable d1 -justify center
-	entry .l.t.f1.m1.f -width 20 -textvariable f1 -justify center
-	
-	bind .l.t.f1.m1.f <3> { set tmp [ tk_getOpenFile -parent .l -title "Load LSD File" -initialdir "$d1" ]; if { $tmp != "" && ! [ fn_spaces "$tmp" .l ] } { set f1 [ file tail $tmp ] } }
-	
-	button .l.t.f1.m1.i -width $butWid -text Insert -command { slct; if { [ info exists sd ] } { set d1 "$sd"; set f1 "$sf" } }
-	
-	pack .l.t.f1.m1.l
-	pack .l.t.f1.m1.d .l.t.f1.m1.f -expand yes -fill x
-	
-	pack .l.t.f1.m1.i -padx 10 -pady 10 -anchor n
-
-	frame .l.t.f1.m2
-	label .l.t.f1.m2.l -text "Second model"
-	entry .l.t.f1.m2.d -width 50 -textvariable d2 -justify center
-	entry .l.t.f1.m2.f -width 20 -textvariable f2 -justify center
-	
-	bind .l.t.f1.m2.f <3> { set tmp [ tk_getOpenFile -parent .l -title "Load LSD File" -initialdir "$d2" ]; if { $tmp != "" && ! [ fn_spaces "$tmp" .l ] } { set f2 [ file tail $tmp ] } }
-	
-	button .l.t.f1.m2.i -width $butWid -text Insert -command { slct; if { [ info exists sd ] } { set d2 "$sd"; set f2 "$sf" } }
-	pack .l.t.f1.m2.l
-	pack .l.t.f1.m2.d .l.t.f1.m2.f -expand yes -fill x -anchor nw
-	pack .l.t.f1.m2.i -padx 10 -pady 10 -anchor n
-
-	pack .l.t.f1.tit .l.t.f1.m1 .l.t.f1.m2 -expand yes -fill both -anchor n -padx 10 -pady 10
-	pack .l.t.f1 -fill x -anchor n
-
-	frame .l.t.b
-	button .l.t.b.cmp -width $butWid -text Compare -command { destroytop .l; set choice 1 }
-	button .l.t.b.cnc -width $butWid -text Cancel -command { destroytop .l; set d1 ""; set choice -1 }
-
-	pack .l.t.b.cmp .l.t.b.cnc -padx 10 -pady 10 -side left
-	pack .l.t.b -side bottom -anchor e
-
-	pack .l.l .l.t -padx 10 -pady 10 -expand yes -fill both -side left
-
-	set j 0
-	foreach i $lmod {
-		set k [ lindex $lgroup $j ]
-		incr j
-		.l.l.l.l insert end "$i" 
-	}
-	
-	showtop .l centerS
 }

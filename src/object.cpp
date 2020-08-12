@@ -1196,6 +1196,14 @@ variable *object::add_empty_var( char const *lab )
 					true );
 	}
 
+#ifndef NO_WINDOW
+	if ( ! valid_label( lab ) )
+	{
+		plog( "\nWarning: invalid variable name '%s', please rename", "", lab );
+		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in variable name\" -detail \"Variable '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
+	}
+#endif
+
 	if ( v == NULL )
 		cv = v = new variable;
 	else
@@ -1285,6 +1293,14 @@ void object::add_obj( char const *lab, int num, int propagate )
 	int i;
 	bridge *cb;
 	object *cur, *cur1;
+	
+#ifndef NO_WINDOW
+	if ( ! valid_label( lab ) )
+	{
+		plog( "\nWarning: invalid object name '%s', please rename", "", lab );
+		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in object name\" -detail \"Object '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
+	}
+#endif
 
 	for ( cur = this; cur != NULL; propagate == 1 ? cur = cur->hyper_next( label ) : cur = NULL )
 	{
@@ -2847,9 +2863,9 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 
 	do
 	{
-		b = RND * a;
+		b = ran1( ) * a;
 	}
-	while ( b == a ); 	// avoid RND == 1
+	while ( b == a ); 	// avoid ran1 == 1
 
 	a = cur1->cal( lv, lag );
 	for ( cur = cur1, cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cur1->next )
@@ -2889,9 +2905,9 @@ object *object::draw_rnd( char const *lab )
 
 	do
 	{
-		b = RND * a;
+		b = ran1( ) * a;
 	}
-	while ( b == a ); 	// avoid RND == 1
+	while ( b == a ); 	// avoid ran1 == 1
 
 	for ( a = 1, cur = cur1, cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cur1->next )
 	{
@@ -2928,7 +2944,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 
 	cur1 = cur = cv->up;
 
-	b = RND * tot;
+	b = ran1( ) * tot;
 	a = cur1->cal( lv, lag );
 	for ( cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cur1->next )
 	{

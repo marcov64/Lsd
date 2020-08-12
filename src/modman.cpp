@@ -388,8 +388,6 @@ cmd( "set v_num 0" );
 cmd( "set alignMode \"LMM\"" );
 cmd( "set MakeExe \"$DefaultMakeExe\"" );
 cmd( "set small_character [ expr $dim_character - $deltaSize ]" );
-cmd( "set font_normal [ list \"$fonttype\" $dim_character ]" );
-cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
 
 // TCL to C globally connected variables
 cmd( "set shigh_temp $shigh" );
@@ -433,12 +431,11 @@ cmd( "$w add command -label \"Save Model\" -underline 0 -state disabled -command
 	} -underline 0 -accelerator Ctrl+s" );	// entryconfig 2
 cmd( "$w add command -label \"Save Model As...\" -state disabled -underline 0 -command { set choice 41 } -underline 11 -accelerator Ctrl+a" );	// entryconfig 3
 cmd( "$w add separator" );	// entryconfig 4
-cmd( "$w add command -label \"Compare Models...\" -underline 3 -command { set choice 61 } -underline 0" );
-cmd( "$w add command -label \"TkDiff...\" -command { set choice 57 } -underline 0" );
-cmd( "$w add separator" );
+cmd( "$w add command -label \"Compare Models...\" -underline 3 -command { set choice 61 } -underline 0" );		// entryconfig 5
+cmd( "$w add separator" );		// entryconfig 6
 
-cmd( "if { $showFileCmds == 1 } { $w add command -label \"New Text File\" -command { set choice 39 } -underline 4 }" );
-cmd( "if { $showFileCmds == 1 } { $w add command -label \"Open Text File...\" -command { set choice 15 } -underline 0 -accelerator Ctrl+o }" );
+cmd( "if { $showFileCmds } { $w add command -label \"New Text File\" -command { set choice 39 } -underline 4 }" );		// entryconfig (7)
+cmd( "if { $showFileCmds } { $w add command -label \"Open Text File...\" -command { set choice 15 } -underline 0 -accelerator Ctrl+o }" );		// entryconfig (8)
 cmd( "if { $showFileCmds == 1 } { \
 		$w add command -label \"Save Text File\" -command { \
 			if { [ string length \"$filename\" ] > 0 } { \
@@ -453,13 +450,13 @@ cmd( "if { $showFileCmds == 1 } { \
 				set before [ .f.t.t get 0.0 end ]; \
 				set choice 999 \
 			} \
-		} -underline 2 }" );
-cmd( "if { $showFileCmds == 1 } { $w add command -label \"Save Text File As...\" -command { set choice 4 } -underline 3 }" );
-cmd( "if { $showFileCmds == 1 } { $w add separator }" );
+		} -underline 2 }" );		// entryconfig (9)
+cmd( "if { $showFileCmds } { $w add command -label \"Save Text File As...\" -command { set choice 4 } -underline 3 }" );		// entryconfig (10)
+cmd( "if { $showFileCmds } { $w add separator }" );		// entryconfig (11)
 
-cmd( "$w add command -label \"Options...\" -command { set choice 60 } -underline 1" );
-cmd( "$w add separator" );
-cmd( "$w add command -label \"Quit\" -command { set choice 1 } -underline 0 -accelerator Ctrl+q" );
+cmd( "$w add command -label \"Options...\" -command { set choice 60 } -underline 1" );		// entryconfig 7/(12)
+cmd( "$w add separator" );		// entryconfig 8/(13)
+cmd( "$w add command -label \"Quit\" -command { set choice 1 } -underline 0 -accelerator Ctrl+q" );		// entryconfig 4/(14)
 
 cmd( "set w .m.edit" );
 cmd( "ttk::menu $w -tearoff 0" );
@@ -500,39 +497,39 @@ cmd( "$w add command -label Delete -command { \
 		}; \
 		updColChg \
 	} -accelerator Del" );	// entryconfig 6
-cmd( "$w add separator" );
-cmd( "$w add command -label \"Find...\" -command { set choice 11 } -underline 0 -accelerator Ctrl+f" );
-cmd( "$w add command -label \"Find Again\" -command { set choice 12 } -underline 5 -accelerator F3" );
-cmd( "$w add command -label \"Find Backwards\" -command { set choice 88 } -underline 5 -accelerator Ctrl+F3" );
-cmd( "$w add command -label \"Replace...\" -command { set choice 21 } -underline 0" );
-cmd( "$w add command -label \"Go to Line...\" -command { set choice 10 } -underline 6 -accelerator Ctrl+l" );
-cmd( "$w add separator" );
-cmd( "$w add command -label \"Match \\\{ \\}\" -command { set choice 17 } -accelerator Ctrl+m" );
-cmd( "$w add command -label \"Match \\\( \\)\" -command { set choice 32 } -accelerator Ctrl+u" );
-cmd( "$w add command -label \"Insert \\\{\" -command { .f.t.t insert insert \\\{ } -accelerator Ctrl+\\\(" );
-cmd( "$w add command -label \"Insert \\}\" -command { .f.t.t insert insert \\} } -accelerator Ctrl+\\)" );
-cmd( "$w add separator" );
-cmd( "$w add command -label \"Indent\" -command { set choice 42 } -accelerator Ctrl+>" );
-cmd( "$w add command -label \"De-indent\" -command { set choice 43 } -accelerator Ctrl+<" );
-cmd( "$w add separator" );
+cmd( "$w add separator" );	// entryconfig 7
+cmd( "$w add command -label \"Find...\" -command { set choice 11 } -underline 0 -accelerator Ctrl+f" );	// entryconfig 8
+cmd( "$w add command -label \"Find Again\" -command { set choice 12 } -underline 5 -accelerator F3" );	// entryconfig 9
+cmd( "$w add command -label \"Find Backwards\" -command { set choice 88 } -underline 5 -accelerator Ctrl+F3" );	// entryconfig 10
+cmd( "$w add command -label \"Replace...\" -command { set choice 21 } -underline 0" );	// entryconfig 11
+cmd( "$w add command -label \"Go to Line...\" -command { set choice 10 } -underline 6 -accelerator Ctrl+l" );	// entryconfig 12
+cmd( "$w add separator" );	// entryconfig 13
+cmd( "$w add command -label \"Match \\\{ \\}\" -command { set choice 17 } -accelerator Ctrl+m" );	// entryconfig 14
+cmd( "$w add command -label \"Match \\\( \\)\" -command { set choice 32 } -accelerator Ctrl+u" );	// entryconfig 15
+cmd( "$w add command -label \"Insert \\\{\" -command { .f.t.t insert insert \\\{ } -accelerator Ctrl+\\\(" );	// entryconfig 16
+cmd( "$w add command -label \"Insert \\}\" -command { .f.t.t insert insert \\} } -accelerator Ctrl+\\)" );	// entryconfig 17
+cmd( "$w add separator" );	// entryconfig 18
+cmd( "$w add command -label \"Indent\" -command { set choice 42 } -accelerator Ctrl+>" );	// entryconfig 19
+cmd( "$w add command -label \"De-indent\" -command { set choice 43 } -accelerator Ctrl+<" );	// entryconfig 20
+cmd( "$w add separator" );	// entryconfig 21
 cmd( "$w add command -label \"Larger Font\" -command { \
-		incr dim_character 1; \
-		set a [ list \"$fonttype\" $dim_character ]; \
-		.f.t.t conf -font \"$a\"; \
-		settab .f.t.t $tabsize \"$a\" \
-	} -accelerator Ctrl+'+'" );
+		if { $dim_character < 60 } { \
+			incr dim_character 1; \
+			ttk::style configure fixed.TText -font [ font create -family \"$fonttype\" -size $dim_character ]; \
+			settab .f.t.t $tabsize fixed.TText \
+		} \
+	} -accelerator \"Ctrl +\"" );	// entryconfig 22
 cmd( "$w add command -label \"Smaller Font\" -command { \
-		incr dim_character -1; \
-		set a [ list \"$fonttype\" $dim_character ]; \
-		.f.t.t conf -font \"$a\"; \
-		settab .f.t.t $tabsize \"$a\" \
-	} -accelerator Ctrl+'-'" );
-cmd( "$w add command -label \"Font...\" -command { set choice 59 } -underline 8" );
-cmd( "$w add separator" );
+		if { $dim_character > 4 } { \
+			incr dim_character -1; \
+			ttk::style configure fixed.TText -font [ font create -family \"$fonttype\" -size $dim_character ]; \
+			settab .f.t.t $tabsize fixed.TText \
+		} \
+	} -accelerator \"Ctrl -\"" );	// entryconfig 23
+cmd( "$w add separator" );	// entryconfig 24
 // add option to ajust syntax highlighting (word coloring)
 cmd( "$w add cascade -label \"Syntax Highlighting\" -menu $w.color -underline 0" );
 cmd( "$w add check -label \"Wrap/Unwrap\" -variable wrap -command { setwrap .f.t.t $wrap } -underline 1 -accelerator Ctrl+w " );
-cmd( "$w add command -label \"Tab Size...\" -command { set choice 67 } -underline 7" );
 cmd( "$w add command -label \"Insert LSD Macro...\" -command { set choice 28 } -underline 0 -accelerator Ctrl+i" );
 
 cmd( "ttk::menu $w.color -tearoff 0" );
@@ -665,16 +662,11 @@ cmd( "ttk::frame .f" );
 cmd( "ttk::frame .f.t" );
 cmd( "ttk::scrollbar .f.t.vs -command \".f.t.t yview\"" );
 cmd( "ttk::scrollbar .f.t.hs -orient horiz -command \".f.t.t xview\"" );
-cmd( "ttk::text .f.t.t -undo 1 -height 2 -autoseparators 1 -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\" -entry 1 -dark $darkTheme" );
-
-cmd( "set a [ .f.t.t conf -font ]" );
-cmd( "set b [ lindex $a 3 ]" );
-cmd( "if { $dim_character == 0 } { set dim_character [ lindex $b 1 ] }" );
-cmd( "if { $dim_character == \"\" } { set dim_character $DefaultFontSiz e }" );
-cmd( "set a [ list \"$fonttype\" $dim_character ]" );
+cmd( "ttk::text .f.t.t -autoseparators 1 -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\" -dark $darkTheme -style fixed.TText" );
+cmd( "mouse_wheel .f.t.t" );
 
 // set preferred tab size and wrap option
-cmd( "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
+cmd( "settab .f.t.t $tabsize fixed.TText" );	// adjust tabs size to font type/size
 cmd( "setwrap .f.t.t $wrap" );		// adjust text wrap
 
 // set colors
@@ -693,28 +685,28 @@ cmd( "ttk::frame .f.hea.info" );
 
 cmd( "ttk::frame .f.hea.info.grp" );
 cmd( "ttk::label .f.hea.info.grp.tit -text \"Group: \"" );
-cmd( "ttk::label .f.hea.info.grp.dat -text \"$modelGroup\" -style red.TLabel" );
+cmd( "ttk::label .f.hea.info.grp.dat -text \"$modelGroup\" -style hl.TLabel" );
 cmd( "pack .f.hea.info.grp.tit .f.hea.info.grp.dat -side left" );
 
 cmd( "ttk::label .f.hea.info.pad1 -width 2" );
 
 cmd( "ttk::frame .f.hea.info.mod" );
 cmd( "ttk::label .f.hea.info.mod.tit -text \"Model: \"" );
-cmd( "ttk::label .f.hea.info.mod.dat -text \"(no model)\" -style red.TLabel" );
+cmd( "ttk::label .f.hea.info.mod.dat -text \"(no model)\" -style hl.TLabel" );
 cmd( "pack .f.hea.info.mod.tit .f.hea.info.mod.dat -side left" );
 
 cmd( "ttk::label .f.hea.info.pad2 -width 2" );
 
 cmd( "ttk::frame .f.hea.info.ver" );
 cmd( "ttk::label .f.hea.info.ver.tit -text \"Version: \"" );
-cmd( "ttk::label .f.hea.info.ver.dat -text \"\" -style red.TLabel" );
+cmd( "ttk::label .f.hea.info.ver.dat -text \"\" -style hl.TLabel" );
 cmd( "pack .f.hea.info.ver.tit .f.hea.info.ver.dat -side left" );
 
 cmd( "ttk::label .f.hea.info.pad3 -width 2" );
 
 cmd( "ttk::frame .f.hea.info.file" );
 cmd( "ttk::label .f.hea.info.file.tit -text \"File: \"" );
-cmd( "ttk::label .f.hea.info.file.dat -text \"(no file)\" -style red.TLabel" );
+cmd( "ttk::label .f.hea.info.file.dat -text \"(no file)\" -style hl.TLabel" );
 cmd( "pack .f.hea.info.file.tit .f.hea.info.file.dat -side left" );
 
 cmd( "pack .f.hea.info.grp .f.hea.info.pad1 .f.hea.info.mod .f.hea.info.pad2 .f.hea.info.ver .f.hea.info.pad3 .f.hea.info.file -side left" );
@@ -725,14 +717,12 @@ cmd( "ttk::frame .f.hea.cur" );
 
 cmd( "ttk::frame .f.hea.cur.line" );
 cmd( "ttk::label .f.hea.cur.line.ln1 -text \"Ln: \"" );
-cmd( "ttk::label .f.hea.cur.line.ln2 -width 4 -style redBoldSmall.TLabel" );
-cmd( ".f.hea.cur.line.ln2 configure -text 1" );
+cmd( "ttk::label .f.hea.cur.line.ln2 -width 4 -style hlBoldSmall.TLabel -text 1" );
 cmd( "pack .f.hea.cur.line.ln1 .f.hea.cur.line.ln2 -side left" );
 
 cmd( "ttk::frame .f.hea.cur.col" );
 cmd( "ttk::label .f.hea.cur.col.col1 -text \"Col: \"" );
-cmd( "ttk::label .f.hea.cur.col.col2 -width 3 -style redBoldSmall.TLabel" );
-cmd( ".f.hea.cur.col.col2 configure -text 1" );
+cmd( "ttk::label .f.hea.cur.col.col2 -width 3 -style hlBoldSmall.TLabel -text 1" );
 cmd( "pack .f.hea.cur.col.col1 .f.hea.cur.col.col2 -side left" );
 
 cmd( "pack .f.hea.cur.line .f.hea.cur.col -side left" );
@@ -806,17 +796,7 @@ cmd( "bind .f.t.t <Control-a> { set choice 4 }" );
 cmd( "bind .f.t.t <Control-r> { set choice 2 }; bind .f.t.t <Control-R> { set choice 2 }" );
 cmd( "bind .f.t.t <Control-e> { set choice 8 }" );
 cmd( "bind .f.t.t <Control-j> { set choice 70 }" );
-cmd( "bind .f.t.t <Control-o> { \
-		if { $tk_strictMotif == 0 } { \
-			set a [ .f.t.t index insert ]; \
-			.f.t.t delete \"$a lineend\" \
-		}; \
-		if { $showFileCmds == 1 } { \
-			set choice 15 \
-		}; \
-		updColChg; \
-		break \
-	}" );
+cmd( "bind .f.t.t <Control-o> { if { $showFileCmds } { set choice 8; break } { break } }" );
 cmd( "bind .f.t.t <Control-q> { set choice 1 }; bind .f.t.t <Control-Q> { set choice 1 }" );
 cmd( "bind .f.t.t <Control-p> { set choice 6; break }; bind .f.t.t <Control-P> { set choice 6; break }" );
 cmd( "bind .f.t.t <Control-u> { set choice 32 }" );
@@ -824,16 +804,8 @@ cmd( "bind .f.t.t <Control-m> { set choice 17 }" );
 cmd( "bind .f.t.t <Control-g> { set choice 13 }; bind .f.t.t <Control-G> { set choice 13 }" );
 cmd( "bind .f.t.t <Control-d> { set choice 5; break }" );
 cmd( "bind .f.t.t <Control-b> { set choice 33; break }; bind .f.t.t <Control-B> { set choice 33; break }" );
-cmd( "bind .f.t.t <Control-minus> { \
-		incr dim_character -2; \
-		set a [ list \"$fonttype\" $dim_character ]; \
-		.f.t.t conf -font \"$a\" \
-	}" );
-cmd( "bind .f.t.t <Control-plus> { \
-		incr dim_character 2; \
-		set a [ list \"$fonttype\" $dim_character ]; \
-		.f.t.t conf -font \"$a\" \
-	}" );
+cmd( "bind .f.t.t <Control-minus> { .m.edit invoke 23 }" );
+cmd( "bind .f.t.t <Control-plus> { .m.edit invoke 22 }" );
 cmd( "bind .f.t.t <Control-parenleft> { .f.t.t insert insert \\{ }" );
 cmd( "bind .f.t.t <Control-parenright> { .f.t.t insert insert \\} }" );
 cmd( "bind .f.t.t <Control-greater> { set choice 42 }" );
@@ -995,7 +967,7 @@ if ( argn > 1 )
 else
 	choice = 33; 				// open model browser
 
-cmd( "wm deiconify .; raise ." );
+cmd( "focustop .f.t.t" );
 cmd( "set keepfocus 0" );
 
 loop:
@@ -1280,14 +1252,14 @@ if ( choice == 10 )
 
 	cmd( "ttk::frame .search_line.l" );
 	cmd( "ttk::label .search_line.l.l -text \"Line number\"" );
-	cmd( "ttk::entry .search_line.l.e -width 10 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set line %%P; return 1 } { %%W delete 0 end; %%W insert 0 $line; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::entry .search_line.l.e -justify center -width 10" );
 	cmd( "pack .search_line.l.l .search_line.l.e" );
 
 	cmd( "pack .search_line.l -padx 5 -pady 5" );
 
 	cmd( "okcancel .search_line b { \
 			set line [ .search_line.l.e get ]; \
-			if { $line != \"\" && [ string is integer -strict $line ] && $line > 0 } { \
+			if { $line != \"\" && [ string is integer -strict $line ] && $line >= 0 } { \
 				.f.t.t tag remove sel 1.0 end; \
 				.f.t.t see $line.0; \
 				.f.t.t mark set insert $line.0; \
@@ -1318,7 +1290,7 @@ if ( choice == 10 )
 /* Find a text pattern in the text */
 if ( choice == 11 )
 {
-	cmd( "set docase 0" );
+	cmd( "set docase 1" );
 	cmd( "set dirsearch \"-forwards\"" );
 	cmd( "set endsearch end" );
 	cmd( "set curcounter $lfindsize" );
@@ -1331,10 +1303,10 @@ if ( choice == 11 )
 	cmd( "ttk::entry .find.l.e -width 25 -textvariable textsearch -justify center" );
 	cmd( "pack .find.l.l .find.l.e" );
 
-	cmd( "ttk::frame .find.r -relief solid -borderwidth 1" );
+	cmd( "ttk::frame .find.r -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 	cmd( "ttk::radiobutton .find.r.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command { set endsearch 1.0 }" );
 	cmd( "ttk::radiobutton .find.r.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command { set endsearch end }" );
-	cmd( "pack .find.r.r2 .find.r.r1 -side left -padx 5" );
+	cmd( "pack .find.r.r2 .find.r.r1 -side left" );
 
 	cmd( "ttk::checkbutton .find.c -text \"Case sensitive\" -variable docase" );
 
@@ -1459,10 +1431,10 @@ if ( choice == 21 )
 	cmd( "ttk::entry .l.p.e -width 25 -textvariable textrepl -justify center" );
 	cmd( "pack .l.p.l .l.p.e" );
 
-	cmd( "ttk::frame .l.r -relief solid -borderwidth 1" );
+	cmd( "ttk::frame .l.r -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 	cmd( "ttk::radiobutton .l.r.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command { set endsearch 1.0 }" );
 	cmd( "ttk::radiobutton .l.r.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command { set endsearch end }" );
-	cmd( "pack .l.r.r2 .l.r.r1 -side left -padx 5" );
+	cmd( "pack .l.r.r2 .l.r.r1 -side left" );
 
 	cmd( "ttk::checkbutton .l.c -text \"Case sensitive\" -variable docase" );
 
@@ -1480,7 +1452,7 @@ if ( choice == 21 )
 			} \
 		}" );
 	cmd( "ttk::button .l.b1.all -width $butWid -state disabled -text \"Repl. All\" -command { set choice 4 }" );
-	cmd( "pack .l.b1.repl .l.b1.all -padx 10 -side left" );
+	cmd( "pack .l.b1.repl .l.b1.all -padx $butPad -side left" );
 
 	cmd( "pack .l.b1 -anchor e" );
 
@@ -1543,7 +1515,7 @@ if ( choice == 21 )
 
 	cmd( "showtop .l" );
 	cmd( ".l.l.e selection range 0 end" );
-	cmd( ".f.t.t tag conf found -background red -foreground white" );
+	cmd( ".f.t.t tag conf found -background $colorsTheme(sbg) -foreground $colorsTheme(sfg)" );
 	cmd( "focus .l.l.e" );
 
 	choice = 0;
@@ -1578,8 +1550,7 @@ if ( choice == 21 )
 						set cur [ .f.t.t search -count length -nocase $dirsearch -- \"$textsearch\" $cur $endsearch ] \
 					}" );
 
-		cmd( "raise .l" );
-		cmd( "focus .l" );
+		cmd( "focustop .l" );
 		Tcl_DoOneEvent( 0 );
 		goto here;
 	}
@@ -1665,7 +1636,11 @@ if ( choice == 13 || choice == 58 )
 	if ( s != NULL && strcmp( s, "" ) )
 	{
 		sprintf( str2, "%s/%s", s, str );
-		sprintf( str, "%s/%s.app/Contents/MacOS/%s", s, str1, str1 );
+		
+		if ( platform == MAC )
+			sprintf( str, "%s/%s.app/Contents/MacOS/%s", s, str1, str1 );
+		else
+			sprintf( str, "%s/%s", s, str1 );
 	}
 
 	// get OS info for files
@@ -1723,12 +1698,12 @@ if ( choice == 14 )
 
 	cmd( "ttk::frame .a.tit" );
 	cmd( "ttk::label .a.tit.l -text \"Current group:\"" );
-	cmd( "ttk::label .a.tit.n -style red.TLabel -text \"$modelGroup\"" );
+	cmd( "ttk::label .a.tit.n -style hl.TLabel -text \"$modelGroup\"" );
 	cmd( "pack .a.tit.l .a.tit.n" );
 
-	cmd( "ttk::frame .a.f -relief solid -borderwidth 1" );
-	cmd( "ttk::radiobutton .a.f.r1 -variable temp -value 1 -text \"Create a new model in the current group\" -anchor w" );
-	cmd( "ttk::radiobutton .a.f.r2 -variable temp -value 2 -text \"Create a new model in a new group\" -anchor w" );
+	cmd( "ttk::frame .a.f -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+	cmd( "ttk::radiobutton .a.f.r1 -variable temp -value 1 -text \"Create a new model in the current group\"" );
+	cmd( "ttk::radiobutton .a.f.r2 -variable temp -value 2 -text \"Create a new model in a new group\"" );
 	cmd( "pack .a.f.r1 .a.f.r2 -anchor w" );
 
 	cmd( "pack .a.tit .a.f -padx 5 -pady 5" );
@@ -1740,6 +1715,8 @@ if ( choice == 14 )
 	cmd( "bind .a <Down> { .a.f.r2 invoke }" );
 
 	cmd( "showtop .a" );
+
+	cmd( "mousewarpto .a.b.ok" );
 
 	choice = 0;
 	while ( choice == 0 )
@@ -1763,7 +1740,7 @@ if ( choice == 14 )
 
 		cmd( "ttk::frame .a.tit" );
 		cmd( "ttk::label .a.tit.l -text \"Current group:\"" );
-		cmd( "ttk::label .a.tit.n -style red.TLabel -text \"$modelGroup\"" );
+		cmd( "ttk::label .a.tit.n -style hl.TLabel -text \"$modelGroup\"" );
 		cmd( "pack .a.tit.l .a.tit.n" );
 
 		cmd( "ttk::frame .a.mname" );
@@ -1779,7 +1756,7 @@ if ( choice == 14 )
 		cmd( "ttk::frame .a.tdes" );
 		cmd( "ttk::label .a.tdes.l -text \"Group description\"" );
 		cmd( "set a [ list \"$fonttype\" $small_character ]" );
-		cmd( "ttk::text .a.tdes.e -undo 1 -width 60 -height 15 -entry 1 -dark $darkTheme -style small.TText" );
+		cmd( "ttk::text .a.tdes.e -width 60 -height 15 -dark $darkTheme -style smallFixed.TText" );
 		cmd( "pack .a.tdes.l .a.tdes.e" );
 
 		cmd( "pack .a.tit .a.mname .a.mdir .a.tdes -padx 5 -pady 5" );
@@ -1849,7 +1826,7 @@ if ( choice == 14 )
 
 	cmd( "ttk::frame .a.tit" );
 	cmd( "ttk::label .a.tit.l -text \"Current group:\"" );
-	cmd( "ttk::label .a.tit.n -style red.TLabel -text \"$modelGroup\"" );
+	cmd( "ttk::label .a.tit.n -style hl.TLabel -text \"$modelGroup\"" );
 	cmd( "pack .a.tit.l .a.tit.n" );
 
 	cmd( "ttk::frame .a.mname" );
@@ -4413,8 +4390,9 @@ if ( choice == 33 )
 	while ( num == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "destroytop .l; bind .f.t.t <Enter> { }" );
-	cmd( "wm deiconify .; raise ." );
+	cmd( "destroytop .l" );
+	cmd( "bind .f.t.t <Enter> { }" );
+	cmd( "focustop .f.t.t" );
 
 	choice = num;
 	Tcl_UnlinkVar( inter, "choiceSM" );
@@ -4471,9 +4449,9 @@ if ( choice == 41 )
 	cmd( "ttk::label .a.tit.l -text \"Original model:\"" );
 
 	cmd( "ttk::frame .a.tit.n" );
-	cmd( "ttk::label .a.tit.n.n -style red.TLabel -text \"$modelName\"" );
+	cmd( "ttk::label .a.tit.n.n -style hl.TLabel -text \"$modelName\"" );
 	cmd( "ttk::label .a.tit.n.l1 -text \"( version\"" );
-	cmd( "ttk::label .a.tit.n.v -style red.TLabel -text \"$modelVersion\"" );
+	cmd( "ttk::label .a.tit.n.v -style hl.TLabel -text \"$modelVersion\"" );
 	cmd( "ttk::label .a.tit.n.l2 -text \")\"" );
 	cmd( "pack .a.tit.n.n .a.tit.n.l1 .a.tit.n.v .a.tit.n.l2 -side left" );
 
@@ -4704,8 +4682,8 @@ if ( choice == 44 )
 	cmd( "bind .a.mver.e <Return> { focus .a.b.ok }" );
 
 	cmd( "showtop .a" );
-	cmd( ".a.mname.e selection range 0 end" );
-	cmd( "focus .a.mname.e" );
+	
+	cmd( "mousewarpto .a.b.ok" );
 
 	choice = 0;
 	while ( choice == 0 )
@@ -4778,13 +4756,14 @@ if ( choice == 47 )
 
 	cmd( "ttk::frame .l.t" );
 	cmd( "ttk::scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-	cmd( "ttk::text .l.t.text -undo 1 -wrap word -width 70 -height 22 -yscrollcommand \".l.t.yscroll set\" -entry 1 -dark $darkTheme -style small.TText" );
+	cmd( "ttk::text .l.t.text -wrap word -width 70 -height 22 -yscrollcommand \".l.t.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
 	cmd( ".l.t.text insert end $a" );
 	cmd( "pack .l.t.yscroll -side right -fill y" );
 	cmd( "pack .l.t.text" );
+	cmd( "mouse_wheel .l.t.text" );
 
 	cmd( "ttk::frame .l.d" );
-	cmd( "ttk::label .l.d.msg -text [ check_sys_opt ] -style red.TLabel" );
+	cmd( "ttk::label .l.d.msg -text [ check_sys_opt ] -style hl.TLabel" );
 	cmd( "pack .l.d.msg" );
 
 	cmd( "pack .l.t .l.d" );
@@ -4881,10 +4860,11 @@ if ( choice == 48 )
 
 	cmd( "ttk::frame .l.t" );
 	cmd( "ttk::scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-	cmd( "ttk::text .l.t.text -undo 1 -wrap word -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\" -entry 1 -dark $darkTheme -style small.TText" );
+	cmd( "ttk::text .l.t.text -wrap word -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
 	cmd( ".l.t.text insert end $a" );
 	cmd( "pack .l.t.yscroll -side right -fill y" );
 	cmd( "pack .l.t.text" );
+	cmd( "mouse_wheel .l.t.text" );
 
 	cmd( "ttk::frame .l.d" );
 
@@ -4991,7 +4971,7 @@ if ( choice == 48 )
 				} \
 			} \
 		}" );
-	cmd( "pack .l.d.opt.debug .l.d.opt.ext .l.d.opt.def .l.d.opt.cle -padx 10 -pady 5 -side left" );
+	cmd( "pack .l.d.opt.debug .l.d.opt.ext .l.d.opt.def .l.d.opt.cle -padx $butPad -pady 5 -side left" );
 
 	cmd( "pack .l.d.opt" );
 
@@ -5028,25 +5008,31 @@ if ( choice == 48 )
 	goto loop;
 }
 
-// launch tkdiff
-if ( choice == 57 )
-{
-	cmd( "destroytop .mm" );	// close compilation results, if open
-
-	cmd( "exec $wish $RootLsd/$LsdSrc/tkdiff.tcl &" );
-
-	choice = 0;
-	goto loop;
-}
-
-// start tkdiff with model selection
+// start diff with model selection
 if ( choice == 61 )
 {
 	cmd( "destroytop .mm" );	// close compilation results, if open
 
-	choice = 0;
-	cmd( "chs_mdl" );
+	cmd( "set eqname \"\"" );
+	cmd( "set complete_dir \"\"" );
 
+	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
+	if ( s != NULL && strcmp( s, "" ) )
+	{
+		if ( ! load_model_info( ( char * ) Tcl_GetVar( inter, "modelDir", 0 ) ) )
+			update_model_info( );			// recreate the model info file
+
+		s = get_fun_name( str );
+		if ( s != NULL && strcmp( s, "" ) )
+		{
+			cmd( "set eqname \"%s\"", s );
+			cmd( "set complete_dir [ file nativename [ file join [ pwd ] \"$modelDir\" ] ]" );
+		}
+	}
+
+	cmd( "choose_models $complete_dir $eqname" );
+
+	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
@@ -5056,53 +5042,7 @@ if ( choice == 61 )
 		goto loop;
 	}
 
-	cmd( "exec $wish $RootLsd/$LsdSrc/tkdiff.tcl [ file join \"$d1\" \"$f1\" ] [ file join \"$d2\" \"$f2\" ] &" );
-
-	choice = 0;
-	goto loop;
-}
-
-// change font
-if ( choice == 59 )
-{
-	cmd( "set ifont \"$fonttype\"" );
-	cmd( "set idim $dim_character" );
-
-	cmd( "newtop .a \"Change Font\" { set choice 2 }" );
-
-	cmd( "ttk::frame .a.l" );
-	cmd( "ttk::label .a.l.l -text \"Font family and size\"" );
-
-	cmd( "ttk::frame .a.l.e" );
-	cmd( "ttk::combobox .a.l.e.font -justify center -textvariable ifont -values [ font families ] -width 15" );
-	cmd( "ttk::combobox .a.l.e.dim -justify center -textvariable idim -values [ list 4 6 8 9 10 11 12 14 18 24 32 48 60 ] -width 3" );
-	cmd( "pack .a.l.e.font .a.l.e.dim -side left" );
-
-	cmd( "pack .a.l.l .a.l.e" );
-	cmd( "pack .a.l -padx 5 -pady 5" );
-
-	cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
-	cmd( "bind .a.l.e.font <Return> {invoke .a.b.ok}" );
-	cmd( "bind .a.l.e.dim <Return> {invoke .a.b.ok}" );
-
-	cmd( "showtop .a" );
-	cmd( "focus .a.l.e.font" );
-
-	choice = 0;
-	while ( choice == 0 )
-		Tcl_DoOneEvent( 0 );
-
-	cmd( "destroytop .a" );
-
-	if ( choice == 2 )
-	{
-		choice = 0;
-		goto loop;
-	}
-
-	cmd( "set fonttype \"$ifont\"" );
-	cmd( "set dim_character $idim" );
-	cmd( "set a [ list \"$fonttype\" $dim_character ]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"" );
+	cmd( "open_diff [ file join \"$d1\" \"$f1\" ] [ file join \"$d2\" \"$f2\" ] \"$f1\" \"$f2\"" );
 
 	choice = 0;
 	goto loop;
@@ -5126,7 +5066,7 @@ if ( choice == 60 )
 	
 	cmd( "ttk::frame .a.f" );
 
-	cmd( "ttk::frame .a.f.c1" );					// coluna 1
+	cmd( "ttk::frame .a.f.c1" );					// column 1
 
 	cmd( "ttk::frame .a.f.c1.num" );
 	cmd( "ttk::label .a.f.c1.num.l -text \"System terminal\"" );
@@ -5168,19 +5108,22 @@ if ( choice == 60 )
 
 	cmd( "pack .a.f.c1 -padx 10 -side left" );
 	
-	cmd( "ttk::frame .a.f.c2" );					// coluna 2
+	cmd( "ttk::frame .a.f.c2" );					// column 2
 
 	cmd( "ttk::frame .a.f.c2.num16" );
 	cmd( "ttk::label .a.f.c2.num16.l -text \"Interface theme\"" );
-	cmd( "ttk::combobox .a.f.c2.num16.v -justify center -textvariable temp_var16 -values $themeNames -width 22 -validate focusout -validatecommand { if { [ lsearch $themeNames %%P ] >= 0 } { set temp_var16 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var16; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::combobox .a.f.c2.num16.v -justify center -values $themeNames -width 22 -validate focusout -validatecommand { set n %%P; if { $n in $themeNames } { set temp_var16 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var16; return 0 } } -invalidcommand { bell }" );
+	cmd( "write_any .a.f.c2.num16.v $temp_var16" );
 	cmd( "pack .a.f.c2.num16.l .a.f.c2.num16.v" );
 	cmd( "bind .a.f.c2.num16.v <Return> { focus .a.f.c2.num3.f.v; .a.f.c2.num7.v selection range 0 end }" );
 	
 	cmd( "ttk::frame .a.f.c2.num3" );
-	cmd( "ttk::label .a.f.c2.num3.l -text \"Font family and size\"" );
+	cmd( "ttk::label .a.f.c2.num3.l -text \"Font name and size\"" );
 	cmd( "ttk::frame .a.f.c2.num3.f" );
-	cmd( "ttk::combobox .a.f.c2.num3.f.v -justify center -textvariable temp_var3 -values [ font families ] -width 15" );
-	cmd( "ttk::combobox .a.f.c2.num3.f.s -justify center -textvariable temp_var6 -values [ list 4 6 8 9 10 11 12 14 18 24 32 48 60 ] -width 3" );
+	cmd( "ttk::combobox .a.f.c2.num3.f.v -justify center -values [ lsort -dictionary [ font families ] ] -width 15 -validate focusout -validatecommand { set n %%P; if { $n in [ font families ] } { set temp_var3 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var3; return 0 } } -invalidcommand { bell }" );
+	cmd( "write_any .a.f.c2.num3.f.v $temp_var3" );
+	cmd( "ttk::combobox .a.f.c2.num3.f.s -justify center -values [ list 4 6 8 9 10 11 12 14 18 24 32 48 60 ] -width 3 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 4 && $n <= 60 } { set temp_var6 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var6; return 0 } } -invalidcommand { bell }" );
+	cmd( "write_any .a.f.c2.num3.f.s $temp_var6" );
 	cmd( "pack .a.f.c2.num3.f.v .a.f.c2.num3.f.s -side left" );
 	cmd( "pack .a.f.c2.num3.l .a.f.c2.num3.f" );
 	cmd( "bind .a.f.c2.num3.f.v <Return> { focus .a.f.c2.num3.f.s; .a.f.c2.num3.f.s selection range 0 end }" );
@@ -5188,7 +5131,7 @@ if ( choice == 60 )
 
 	cmd( "ttk::frame .a.f.c2.num7" );
 	cmd( "ttk::label .a.f.c2.num7.l -text \"Tab size (characters)\"" );
-	cmd( "ttk::spinbox .a.f.c2.num7.v -width 3 -from 1 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set temp_var7 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var7; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::spinbox .a.f.c2.num7.v -justify center -width 3 -from 1 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99 } { set temp_var7 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var7; return 0 } } -invalidcommand { bell }" );
 	cmd( "write_any .a.f.c2.num7.v $temp_var7" );
 	cmd( "pack .a.f.c2.num7.l .a.f.c2.num7.v" );
 	cmd( "bind .a.f.c2.num7.v <Return> { focus .a.f.c2.num9.r.v3 }" );
@@ -5196,11 +5139,11 @@ if ( choice == 60 )
 	cmd( "ttk::frame .a.f.c2.num9" );
 	cmd( "ttk::label .a.f.c2.num9.l -text \"Syntax highlights\"" );
 
-	cmd( "ttk::frame .a.f.c2.num9.r -relief solid -borderwidth 1" );
+	cmd( "ttk::frame .a.f.c2.num9.r -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 	cmd( "ttk::radiobutton .a.f.c2.num9.r.v1 -variable temp_var9 -value 0 -text None" );
 	cmd( "ttk::radiobutton .a.f.c2.num9.r.v2 -variable temp_var9 -value 1 -text Partial" );
 	cmd( "ttk::radiobutton .a.f.c2.num9.r.v3 -variable temp_var9 -value 2 -text Full" );
-	cmd( "pack .a.f.c2.num9.r.v1 .a.f.c2.num9.r.v2 .a.f.c2.num9.r.v3 -padx 3 -pady 3 -side left" );
+	cmd( "pack .a.f.c2.num9.r.v1 .a.f.c2.num9.r.v2 .a.f.c2.num9.r.v3 -side left" );
 
 	cmd( "pack .a.f.c2.num9.l .a.f.c2.num9.r" );
 	cmd( "bind .a.f.c2.num9.r.v1 <Return> { focus .a.f.c2.num8.v_num8 }" );
@@ -5225,24 +5168,22 @@ if ( choice == 60 )
 	cmd( "pack .a.f" );
 	
 	cmd( "proc set_defaults { } { \
-			global temp_var1 temp_var2 temp_var3 temp_var4 temp_var5 temp_var6 temp_var7 temp_var8 temp_var9 temp_var10 temp_var11 temp_var12 temp_var13 temp_var14 temp_var15 temp_var16; \
-			global default_var1 default_var2 default_var3 default_var4 default_var5 default_var6 default_var7 default_var8 default_var9 default_var10 default_var11 default_var12 default_var13 default_var14 default_var15 default_var16;\
-			set temp_var1 \"$default_var1\"; \
-			set temp_var2 \"$default_var2\"; \
-			set temp_var3 \"$default_var3\"; \
-			set temp_var4 \"$default_var4\"; \
-			set temp_var5 \"$default_var5\"; \
-			set temp_var6 \"$default_var6\"; \
-			write_any .a.f.c2.num7.v \"$default_var7\"; \
-			set temp_var8 \"$default_var8\"; \
-			set temp_var9 \"$default_var9\"; \
-			set temp_var10 \"$default_var10\"; \
-			set temp_var11 \"$default_var11\"; \
-			set temp_var12 \"$default_var12\"; \
-			set temp_var13 \"$default_var13\"; \
-			set temp_var14 \"$default_var14\"; \
-			set temp_var15 \"$default_var15\"; \
-			set temp_var16 \"$default_var16\" \
+			set ::temp_var1 \"$::default_var1\"; \
+			set ::temp_var2 \"$::default_var2\"; \
+			set ::temp_var3 \"$::default_var3\"; \
+			set ::temp_var4 \"$::default_var4\"; \
+			set ::temp_var5 \"$::default_var5\"; \
+			set ::temp_var6 \"$::default_var6\"; \
+			write_any .a.f.c2.num7.v \"$::default_var7\"; \
+			set ::temp_var8 \"$::default_var8\"; \
+			set ::temp_var9 \"$::default_var9\"; \
+			set ::temp_var10 \"$::default_var10\"; \
+			set ::temp_var11 \"$::default_var11\"; \
+			set ::temp_var12 \"$::default_var12\"; \
+			set ::temp_var13 \"$::default_var13\"; \
+			set ::temp_var14 \"$::default_var14\"; \
+			set ::temp_var15 \"$::default_var15\"; \
+			set ::temp_var16 \"$::default_var16\" \
 		}" );
 
 	cmd( "okXhelpcancel .a b Default { set_defaults } { set choice 1 } { LsdHelp LMM.html#SystemOpt } { set choice 2 }" );
@@ -5261,25 +5202,24 @@ if ( choice == 60 )
 
 	if ( choice == 1 )
 	{
+		cmd( "if { ! ( \"$temp_var3\" in [ font families ] ) } { set temp_var3 \"$fonttype\"; bell }" );
+		cmd( "if { ! [ string is integer -strict $temp_var6 ] || $temp_var6 < 4 || $temp_var6 > 60 } { set temp_var6 $dim_character; bell }" );
+		cmd( "if { ! [ string is integer -strict $temp_var7 ] || $temp_var7 < 1 || $temp_var7 > 99 } { set temp_var7 $tabsize; bell }" );
+		cmd( "if { ! ( \"$temp_var16\" in $themeNames ) } { set temp_var16 \"$lsdTheme\"; bell } { set temp_var16 [ dict get $nameToTheme $temp_var16 ] }" );
+
 		cmd( "if { $showFileCmds != $temp_var11 || $lsdTheme != $temp_var16 } { \
 				ttk::messageBox -parent . -icon warning -title Warning -type ok -message \"LMM restart required\" -detail \"Please restart LMM for changes to be applied.\" \
 			}" );
 
-		cmd( "if { ! [ string is integer -strict $temp_var6 ] } { set temp_var6 $dim_character }" );
-		cmd( "if { ! [ string is integer -strict $temp_var7 ] } { set temp_var7 $tabsize }" );
-		cmd( "if { [ lsearch $themeNames $temp_var16 ] < 0 } { set temp_var16 [ dict get $themeToName $lsdTheme ] }" );
-
 		for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
 			cmd( "set %s \"$temp_var%d\"", lmm_options[ i - 1 ], i );
 
-		cmd( "set lsdTheme \"[ dict get $nameToTheme $temp_var16 ]\"" );
-
-		// save to config file
 		update_lmm_options(  ); 				// update config file
 
-		cmd( "set a [ list \"$fonttype\" $dim_character ]" );
-		cmd( ".f.t.t conf -font \"$a\"" );
-		cmd( "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
+		// adjust text styles and apply
+		cmd( "ttk::style configure fixed.TText -font [ font create -family \"$fonttype\" -size $dim_character ]" );
+		cmd( "ttk::style configure smallFixed.TText -font [ font create -family \"$fonttype\" -size $small_character ]" );
+		cmd( "settab .f.t.t $tabsize fixed.TText" );	// adjust tabs size to font type/size
 		cmd( "setwrap .f.t.t $wrap" );			// adjust text wrap
 		recolor_all = true;
 	}
@@ -5353,52 +5293,11 @@ if ( choice == 66 )
 	goto loop;
 }
 
-// Change tab size
-if ( choice == 67 )
-{
-	cmd( "newtop .a \"Tab Size\" { set choice 2 }" );
-
-	cmd( "ttk::frame .a.l" );
-	cmd( "ttk::label .a.l.l -text \"Tab size (characters)\"" );
-	cmd( "ttk::spinbox .a.l.v_num -width 3 -from 1 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set tabsize %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tabsize; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( "write_any .a.l.v_num $tabsize" );
-	cmd( "pack .a.l.l .a.l.v_num" );
-
-	cmd( "pack .a.l -padx 5 -pady 5" );
-
-	cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
-
-	cmd( "bind .a.l.v_num <KeyPress-Return> { .a.b.ok invoke }" );
-
-	cmd( "showtop .a" );
-	cmd( "focus .a.l.v_num" );
-	cmd( ".a.l.v_num selection range 0 end" );
-
-	choice = 0;
-	while ( choice == 0 )
-		Tcl_DoOneEvent( 0 );
-
-	cmd( "if [ string is integer -strict [ .a.l.v_num get ] ] { set tabsize [ .a.l.v_num get ] } { set choice 2 }" );
-
-	cmd( "destroytop .a" );
-
-	if ( choice == 2 )
-	{
-		choice = 0;
-		goto loop;
-	}
-
-	cmd( "settab .f.t.t $tabsize \"[ .f.t.t cget -font ]\"" );
-
-	choice = 0;
-	goto loop;
-}
-
 // Adjust context menu for LSD macros
 if ( choice == 68 )
 {
 	cmd( "destroy .v.i" );
-	cmd( "menu .v.i -tearoff 0" );
+	cmd( "ttk::menu .v.i -tearoff 0" );
 	cmd( ".v.i add command -label \"EQUATION\" -command { set choice 25 } -accelerator Ctrl+E" );
 	cmd( ".v.i add command -label \"V(...)\" -command { set choice 26 } -accelerator Ctrl+V" );
 	cmd( ".v.i add command -label \"CYCLE(...)\" -command { set choice 27 } -accelerator Ctrl+C" );
@@ -5422,7 +5321,7 @@ if ( choice == 68 )
 if ( choice == 69 )
 {
 	cmd( "destroy .v.i" );
-	cmd( "menu .v.i -tearoff 0" );
+	cmd( "ttk::menu .v.i -tearoff 0" );
 	cmd( ".v.i add command -label \"LSD equation/function\" -command { set choice 25 } -accelerator Ctrl+E" );
 	cmd( ".v.i add command -label \"cal(...)\" -command { set choice 26 } -accelerator Ctrl+V" );
 	cmd( ".v.i add command -label \"for ( ; ; )\" -command { set choice 27 } -accelerator Ctrl+C" );
@@ -5488,7 +5387,7 @@ if ( choice == 70 )
 
 	cmd( "ttk::frame $e.lf " );
 	cmd( "ttk::label $e.lf.l1 -justify center -text \"Show additional\nsource files for model:\"" );
-	cmd( "ttk::label $e.lf.l2 -style red.TLabel -text \"$modelName\"" );
+	cmd( "ttk::label $e.lf.l2 -style hl.TLabel -text \"$modelName\"" );
 	cmd( "pack $e.lf.l1 $e.lf.l2" );
 
 	cmd( "ttk::frame $e.l" );
@@ -5618,7 +5517,7 @@ if ( choice == 87 )
 	}
 
 	// show the error position on screen
-	cmd( "wm deiconify .; raise .; focus .f.t.t" );
+	cmd( "focustop .f.t.t" );
 
 	if ( choice == 1 )
 	{	// file already loaded, just point error
@@ -6300,12 +6199,12 @@ bool compile_run( bool run, bool nw )
 		cmd( "ttk::label .t.l1 -style bold.TLabel -text \"Compiling model...\"" );
 
 	if ( run )
-		cmd( "ttk::label .t.l2 -text \"Just recompiling equation file(s) changes.\nOn success, the new model program will be launched.\nOn failure, a new window will show the compilation errors.\"" );
+		cmd( "ttk::label .t.l2 -justify center -text \"Just recompiling equation file(s) changes.\nOn success, the new model program will be launched.\nOn failure, a new window will show the compilation errors.\"" );
 	else
 		if ( nw )
-			cmd( "ttk::label .t.l2 -text \"Creating command-line model program  ('lsdNW').\nOn success, the model directory can be also ported to any computer.\nOn failure, a new window will show the compilation errors.\"" );
+			cmd( "ttk::label .t.l2 -justify center -text \"Creating command-line model program  ('lsdNW').\nOn success, the model directory can be also ported to any computer.\nOn failure, a new window will show the compilation errors.\"" );
 		else
-			cmd( "ttk::label .t.l2 -text \"Recompiling the entire model program.\nOn success, the new program will NOT be launched.\nOn failure, a new window will show the compilation errors.\"" );
+			cmd( "ttk::label .t.l2 -justify center -text \"Recompiling the entire model program.\nOn success, the new program will NOT be launched.\nOn failure, a new window will show the compilation errors.\"" );
 
 	cmd( "pack .t.l1 .t.l2 -padx 5 -pady 5" );
 	cmd( "cancel .t b { set res 2 }");
@@ -6334,7 +6233,7 @@ bool compile_run( bool run, bool nw )
 	{
 		cmd( "catch { close $makePipe }" );
 		cmd( "if [ file exists make.bat ] { file delete make.bat }" );
-		cmd( "wm deiconify ." );
+		cmd( "focustop .f.t.t" );
 		goto end;
 	}
 
@@ -6342,7 +6241,7 @@ bool compile_run( bool run, bool nw )
 	{
 		cmd( "set res $autoHide" );			// get auto hide status
 		if ( run && res )					// auto unhide LMM if necessary
-			cmd( "wm deiconify ." );  		// only reopen if error
+			cmd( "focustop .f.t.t" );  		// only reopen if error
 		create_compresult_window( nw );		// show errors
 	}
 	else
@@ -6398,10 +6297,10 @@ void create_compresult_window( bool nw )
 
 	cmd( "ttk::frame .mm.t" );
 	cmd( "ttk::scrollbar .mm.t.yscroll -command \".mm.t.t yview\"" );
-	cmd( "set a [ list \"$fonttype\" $small_character ]" );
-	cmd( "ttk::text .mm.t.t -yscrollcommand \".mm.t.yscroll set\" -wrap word -dark $darkTheme -style small.TText" );
+	cmd( "ttk::text .mm.t.t -yscrollcommand \".mm.t.yscroll set\" -wrap word -entry 0 -dark $darkTheme -style smallFixed.TText" );
 	cmd( "pack .mm.t.yscroll -side right -fill y" );
 	cmd( "pack .mm.t.t -expand yes -fill both" );
+	cmd( "mouse_wheel .mm.t.t" );
 
 	cmd( "pack .mm.t -expand yes -fill both" );
 
@@ -6409,17 +6308,17 @@ void create_compresult_window( bool nw )
 
 	cmd( "ttk::frame .mm.i.f" );
 	cmd( "ttk::label .mm.i.f.l -text \"File:\"" );
-	cmd( "ttk::label .mm.i.f.n -anchor w -width 50 -style red.TLabel" );
+	cmd( "ttk::label .mm.i.f.n -anchor w -width 50 -style hl.TLabel" );
 	cmd( "pack .mm.i.f.l .mm.i.f.n -side left" );
 
 	cmd( "ttk::frame .mm.i.l" );
 	cmd( "ttk::label .mm.i.l.l -text \"Line:\"" );
-	cmd( "ttk::label .mm.i.l.n -anchor w -width 5 -style red.TLabel" );
+	cmd( "ttk::label .mm.i.l.n -anchor w -width 5 -style hl.TLabel" );
 	cmd( "pack .mm.i.l.l .mm.i.l.n -side left" );
 
 	cmd( "ttk::frame .mm.i.c" );
 	cmd( "ttk::label .mm.i.c.l -text \"Column:\"" );
-	cmd( "ttk::label .mm.i.c.n -anchor w -width 5 -style red.TLabel" );
+	cmd( "ttk::label .mm.i.c.n -anchor w -width 5 -style hl.TLabel" );
 	cmd( "pack .mm.i.c.l .mm.i.c.n -side left" );
 
 	cmd( "pack .mm.i.f .mm.i.l .mm.i.c -padx 10 -pady 5 -side left" );
@@ -6500,8 +6399,8 @@ void create_compresult_window( bool nw )
 				.mm.i.c.n configure -text $errcol; \
 			} \
 		}" );
-	cmd( "ttk::button .mm.b.close -width [ expr $butWid + 4 ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; wm deiconify .; raise .; focus .f.t.t; set keepfocus 0 }" );
-	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx 10 -pady 10 -expand yes -fill x -side left" );
+	cmd( "ttk::button .mm.b.close -width [ expr $butWid + 4 ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; focustop .f.t.t; set keepfocus 0 }" );
+	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx $butPad -pady $butPad -expand yes -fill x -side left" );
 	cmd( "pack .mm.b -side right" );
 
 	cmd( "bind .mm <p> { .mm.b.perr invoke }; bind .mm <P> { .mm.b.perr invoke }" );
@@ -6526,7 +6425,7 @@ void create_compresult_window( bool nw )
 	cmd( ".mm.b.ferr invoke" );
 
 	cmd( ".mm.t.t configure -state disabled" );
-	cmd( "wm deiconify .mm; raise .mm; focus .mm.t.t" );
+	cmd( "focustop .mm.t.t" );
 	cmd( "set keepfocus 1" );
 	cmd( "update" );
 }

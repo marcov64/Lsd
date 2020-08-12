@@ -41,7 +41,8 @@ PATH_LIB=$(LSDROOT)/gnu/lib
 LIBS=
 
 # from here you should not need to modify anything
-RM=rm -f
+RM=rm -force
+RM_SEP=,
 SRC=src
 SRC_DIR=$(LSDROOT)/$(SRC)/
 
@@ -62,4 +63,4 @@ $(SRC_DIR)lmm_manifest.o: $(SRC_DIR)lmm_manifest.rc $(SRC_DIR)lmm.exe.manifest
 
 # Clean object files for building for another distribution
 clean:
-	$(RM) $(SRC_DIR)modman.o $(SRC_DIR)lmm_manifest.o
+	$(RM) $(SRC_DIR)modman.o $(RM_SEP) $(SRC_DIR)lmm_manifest.o

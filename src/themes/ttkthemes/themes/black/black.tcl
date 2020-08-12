@@ -74,7 +74,7 @@ namespace eval ttk::theme::black {
 
     # ttk widgets.
     $styleCmd configure TButton \
-        -width -8 -padding {5 1} -relief raised
+        -width -8 -padding {5 1} -relief raised -anchor center
     $styleCmd configure TMenubutton \
         -width -11 -padding {5 1} -relief raised
     $styleCmd configure TCheckbutton \
@@ -86,6 +86,9 @@ namespace eval ttk::theme::black {
         -fieldbackground white -foreground black \
         -padding {2 0}
     $styleCmd configure TCombobox \
+        -fieldbackground white -foreground black \
+        -padding {2 0}
+    $styleCmd configure TSpinbox \
         -fieldbackground white -foreground black \
         -padding {2 0}
 

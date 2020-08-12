@@ -270,7 +270,9 @@ bool no_ptr_chk = true;
 #define NO_ZERO_INSTANCE { no_zero_instance = true; }
 #define USE_ZERO_INSTANCE { no_zero_instance = false; }
 #define PARAMETER { var->param = 1; }
-#define RND_GENERATOR( X ) { ran_gen = X; }
+#define RND ( ran1( ) )
+#define RND_SEED ( ( double ) seed - 1 )
+#define RND_GENERATOR( X ) set_random( ( int ) X )
 #define RND_SETSEED( X ) { seed = ( unsigned ) X; init_random( seed ); }
 #define SLEEP( X ) msleep( ( unsigned ) X )
 
@@ -279,9 +281,10 @@ bool no_ptr_chk = true;
 #define CURRENT ( var->val[ 0 ] )
 #define PARENT ( p->up )
 #define GRANDPARENT ( CHK_PTR_OBJ( p->up ) p->up->up )
-#define RND_SEED ( ( double ) seed - 1 )
 #define T ( ( double ) t )
 #define LAST_T ( ( double ) max_step )
+#define RUN ( ( double ) cur_sim )
+#define LAST_RUN ( ( double ) sim_num )
 
 #define LOG( ... ) \
 { \

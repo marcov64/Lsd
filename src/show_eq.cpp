@@ -61,7 +61,7 @@ void show_eq( char *lab, int *choice )
 	sprintf( full_name, "%s/%s", exec_path, fname );
 	if ( ( f = fopen( full_name, "r" ) ) == NULL )
 	{
-		cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to search it.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }", equation_name  );
+		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to search it.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }", equation_name  );
 		cmd( "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir \"%s\" -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ]; if [ fn_spaces \"$res\" . ] { set res \"\" } { set res [ file tail $res ] } }", exec_path );
 
 		if ( *choice == 1 )
@@ -103,7 +103,7 @@ void show_eq( char *lab, int *choice )
 	{
 		if ( f != NULL )
 			fclose( f );
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Equation not found\" -detail \"Equation for '%s' not found (check the spelling or equation file name).\"", lab  );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Equation not found\" -detail \"Equation for '%s' not found (check the spelling or equation file name).\"", lab  );
 		return;
 	}
 
@@ -111,11 +111,12 @@ void show_eq( char *lab, int *choice )
 	cmd( "set s \"\"" );
 	cmd( "newtop $w \"'%s' %s Equation (%s)\" { destroytop .eq_%s } $parWnd", lab, eq_dum ? "Dummy" : "", fname, lab );
 
-	cmd( "frame $w.f" );
-	cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-	cmd( "scrollbar $w.f.xscroll -orient horiz -command \"$w.f.text xview\"" );
-	cmd( "text $w.f.text -font \"$font_small\" -wrap none -tabstyle wordprocessor -yscrollcommand \"$w.f.yscroll set\" -xscrollcommand \"$w.f.xscroll set\"" );
-	cmd( "settab $w.f.text $tabsize \"$font_small\"" );
+	cmd( "ttk::frame $w.f" );
+	cmd( "ttk::scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
+	cmd( "ttk::scrollbar $w.f.xscroll -orient horiz -command \"$w.f.text xview\"" );
+	cmd( "ttk::text $w.f.text -wrap none -tabstyle wordprocessor -yscrollcommand \"$w.f.yscroll set\" -xscrollcommand \"$w.f.xscroll set\" -entry 0 -dark $darkTheme -style smallFixed.TText" );
+	cmd( "mouse_wheel $w.f.text" );
+	cmd( "settab $w.f.text $tabsize smallFixed.TText" );
 	cmd( "pack $w.f.yscroll -side right -fill y" );
 	cmd( "pack $w.f.xscroll -side bottom -fill x" );
 	cmd( "pack $w.f.text -expand yes -fill both" );
@@ -124,9 +125,9 @@ void show_eq( char *lab, int *choice )
 			set W .eq_%s; \
 			set cur1 [ $W.f.text index insert ]; \
 			newtop $W.s \"\" { destroytop $W.s } $W; \
-			label $W.s.l -text \"Find\"; \
-			entry $W.s.e -textvariable s -justify center; \
-			button $W.s.b -width $butWid -text OK -command { \
+			ttk::label $W.s.l -text \"Find\"; \
+			ttk::entry $W.s.e -textvariable s -justify center; \
+			ttk::button $W.s.b -width $butWid -text OK -command { \
 				destroytop $W.s; \
 				set cur1 [ $W.f.text search -count length $s $cur1 ]; \
 				if { [ string length $cur1 ] > 0 } { \
@@ -139,9 +140,9 @@ void show_eq( char *lab, int *choice )
 				} \
 			}; \
 			pack $W.s.l $W.s.e -padx 5; \
-			pack $W.s.b -padx 10 -pady 10; \
+			pack $W.s.b -padx $butPad -pady $butPad; \
 			bind $W.s <KeyPress-Return> { $W.s.b invoke }; \
-			showtop $W.s centerS; \
+			showtop $W.s centerW; \
 			$W.s.e selection range 0 end; \
 			focus $W.s.e \
 		} { LsdHelp equation.html } { destroytop .eq_%s }", lab, lab  );
@@ -308,7 +309,7 @@ void show_eq( char *lab, int *choice )
 
 	cmd( "bind .eq_%s.f.text <Double-1> {.eq_%s.f.text tag remove sel 1.0 end; set a @%%x,%%y; .eq_%s.f.text tag add sel \"$a wordstart\" \"$a wordend\"; set res [.eq_%s.f.text get sel.first sel.last]; set choice 29 }", lab, lab, lab, lab );
 
-	cmd( "showtop $w centerS 1 1" );
+	cmd( "showtop $w centerW 1 1" );
 
 	cmd( ".eq_%s.f.text conf -state disabled", lab );
 }
@@ -336,21 +337,21 @@ void scan_used_lab( char *lab, int *choice )
 		
 		cmd( "newtop $list \"Used In\" { destroytop .list_%s }", lab  );
 
-		cmd( "frame $list.lf " );
-		cmd( "label $list.lf.l1 -text \"Equations using\"" );
-		cmd( "label $list.lf.l2 -fg red -text \"%s\"", lab );
+		cmd( "ttk::frame $list.lf " );
+		cmd( "ttk::label $list.lf.l1 -text \"Equations using\"" );
+		cmd( "ttk::label $list.lf.l2 -style hl.TLabel -text \"%s\"", lab );
 		cmd( "pack $list.lf.l1 $list.lf.l2" );
 
-		cmd( "frame $list.l" );
-		cmd( "scrollbar $list.l.v_scroll -command \".list_%s.l.l yview\"", lab );
-		cmd( "listbox $list.l.l -width 25 -selectmode single -yscroll \".list_%s.l.v_scroll set\"", lab );
+		cmd( "ttk::frame $list.l" );
+		cmd( "ttk::scrollbar $list.l.v_scroll -command \".list_%s.l.l yview\"", lab );
+		cmd( "ttk::listbox $list.l.l -width 25 -selectmode single -yscroll \".list_%s.l.v_scroll set\" -dark $darkTheme", lab );
 		cmd( "pack $list.l.l  $list.l.v_scroll -side left -fill y" );
 		cmd( "mouse_wheel $list.l.l" );
 
 		if ( caller != 1 )
-			cmd( "label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
+			cmd( "ttk::label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
 		else
-			cmd( "label $list.l3" );
+			cmd( "ttk::label $list.l3" );
 
 		cmd( "pack $list.lf $list.l $list.l3 -padx 5 -pady 5 -expand yes -fill both" );
 
@@ -446,21 +447,21 @@ void scan_using_lab( char *lab, int *choice )
 
 	cmd( "newtop $list \"Using\" { destroytop .listusing_%s }", lab  );
 
-	cmd( "frame $list.lf " );
-	cmd( "label $list.lf.l1 -justify center -text \"Elements used in\"" );
-	cmd( "label $list.lf.l2 -fg red -text \"%s\"", lab );
+	cmd( "ttk::frame $list.lf " );
+	cmd( "ttk::label $list.lf.l1 -justify center -text \"Elements used in\"" );
+	cmd( "ttk::label $list.lf.l2 -style hl.TLabel -text \"%s\"", lab );
 	cmd( "pack $list.lf.l1 $list.lf.l2" );
 
-	cmd( "frame $list.l" );
-	cmd( "scrollbar $list.l.v_scroll -command \".listusing_%s.l.l yview\"", lab );
-	cmd( "listbox $list.l.l -width 25 -selectmode single -yscroll \".listusing_%s.l.v_scroll set\"", lab );
+	cmd( "ttk::frame $list.l" );
+	cmd( "ttk::scrollbar $list.l.v_scroll -command \".listusing_%s.l.l yview\"", lab );
+	cmd( "ttk::listbox $list.l.l -width 25 -selectmode single -yscroll \".listusing_%s.l.v_scroll set\" -dark $darkTheme", lab );
 	cmd( "pack $list.l.l $list.l.v_scroll -side left -fill y" );
 	cmd( "mouse_wheel $list.l.l" );
 
 	if ( caller != 1 )
-		cmd( "label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
+		cmd( "ttk::label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
 	else
-		cmd( "label $list.l3" );
+		cmd( "ttk::label $list.l3" );
 
 	cmd( "pack $list.lf $list.l $list.l3 -padx 5 -pady 5 -expand yes -fill both" );
 

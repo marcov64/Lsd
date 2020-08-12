@@ -21,10 +21,6 @@
 # in WINDOW.TCL.
 #*************************************************************
 
-    set bRlf flat
-    set ovBrlf groove 
-	
-
 package require Tk 8.6
 
 #************************************************
@@ -79,12 +75,10 @@ if [ string equal $CurPlatform mac ] {
 
 	if { [ string equal [ info patchlevel ] 8.6.9 ] } {
 		set butWid $butMacTk869
-		set bsizeM $bsizeMwin
 		set bhstepM $bhstepMwin
 		set borderMadj 0
 	} else {
 		set butWid $butMac
-		set bsizeM $bsizeMlin
 		set bhstepM $bhstepMmac
 		set borderMadj $borderMmac
 	}
@@ -105,7 +99,6 @@ if [ string equal $CurPlatform mac ] {
 	set corrX $corrXlinux
 	set corrY $corrYlinux
 	set butWid $butLinux
-	set bsizeM $bsizeMlin
 	set bhstepM $bhstepMlin
 	set bvstepM $bvstepMlin
 	set borderMadj 0
@@ -125,16 +118,23 @@ if [ string equal $CurPlatform mac ] {
 	set corrX $corrXwindows
 	set corrY $corrYwindows
 	set butWid $butWindows
-	set bsizeM $bsizeMwin
 	set bhstepM $bhstepMwin
 	set bvstepM $bvstepMwin
 	set borderMadj 0
 	
+	# Inherit OS setting
+	set mouseWarp [ ismousesnapon $CurPlatform ]
+	
 	# Cygwin or MSYS2?
+	set DefaultMakeExe make.exe
 	if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } {
-		set DefaultMakeExe $makeWinMingw
+		if { ! [ catch { exec where $makeWinMingw } ] } {
+			set DefaultMakeExe $makeWinMingw
+		}
 	} else {
-		set DefaultMakeExe $makeWinCygwin
+		if { ! [ catch { exec where $makeWinCygwin } ] } {
+			set DefaultMakeExe $makeWinCygwin
+		}
 	}
 }
 
@@ -179,14 +179,43 @@ set colorsTheme(fg) [ ttk::style lookup . -foreground  ]
 set colorsTheme(sbg) [ ttk::style lookup . -selectbackground ]
 set colorsTheme(sfg) [ ttk::style lookup . -selectforeground ]
 set colorsTheme(ebg) [ ttk::style lookup . -fieldbackground ]
-set colorsTheme(efg) [ ttk::style lookup . -insertcolor  ]
-set colorsTheme(dbg) [ ttk::style lookup TScale -troughcolor disabled ]
+set colorsTheme(efg) [ ttk::style lookup . -insertcolor ]
+#set colorsTheme(dbg) [ ttk::style lookup TScrollbar -troughcolor disabled ]
+set colorsTheme(dbg) [ ttk::style lookup . -troughcolor ]
 set colorsTheme(dfg) [ ttk::style lookup . -foreground disabled ]
 set colorsTheme(isbg) [ ttk::style lookup . -lightcolor ]
-set colorsTheme(hc) [ ttk::style lookup . -focuscolor ]	
+set colorsTheme(hc) [ ttk::style lookup . -selectbackground ]
+
+# fix missing colors
+if { $colorsTheme(ebg) == "" } {
+	set colorsTheme(ebg) [ ttk::style lookup TEntry -selectbackground ]
+}
+if { $colorsTheme(efg) == "" } {
+	set colorsTheme(efg) [ ttk::style lookup TEntry -selectforeground ]
+}
+if { $colorsTheme(dbg) == "" } {
+	set colorsTheme(dbg) [ ttk::style lookup Treeview -background ]
+}
+if { $colorsTheme(isbg) == "" } {
+	set colorsTheme(isbg) [ ttk::style lookup . -background ]
+}
+
+foreach color [ array names colorsTheme ] {
+	if { $colorsTheme($color) == "" || [ catch { winfo rgb . $colorsTheme($color) } ] } {
+		if { $color in [ list sbg ebg dbg isbg ] } {
+			set colorsTheme($color) $colorsTheme(bg)
+		}
+		if { $color in [ list sfg efg dfg hc ] } {
+			set colorsTheme($color) $colorsTheme(fg)
+		}
+		tk_messageBox -icon warning -title Warning -message "Incomplete color palette" -detail "Color '$color' is missing or invalid in current theme '$lsdTheme', replacing with gray shade."
+	}
+}
 
 # adjust between dark and light desktop modes
 if { $darkTheme } {
+	set defcolors $defcolorsD
+	set colorsTheme(hl) $hlcolorD
 	set colorsTheme(comm) $commcolorD
 	set colorsTheme(str) $strcolorD
 	set colorsTheme(prep) $prepcolorD
@@ -194,6 +223,7 @@ if { $darkTheme } {
 	set colorsTheme(kwrd) $kwrdcolorD
 	set colorsTheme(vlsd) $vlsdcolorD
 	set colorsTheme(mlsd) $mlsdcolorD
+	set colorsTheme(par) $parcolorD
 	set colorsTheme(var) $varcolorD
 	set colorsTheme(lvar) $lvarcolorD
 	set colorsTheme(fun) $funcolorD
@@ -202,6 +232,8 @@ if { $darkTheme } {
 	set colorsTheme(grp) $grpcolorD
 	set colorsTheme(mod) $modcolorD
 } else {
+	set defcolors $defcolorsL
+	set colorsTheme(hl) $hlcolorL
 	set colorsTheme(comm) $commcolorL
 	set colorsTheme(str) $strcolorL
 	set colorsTheme(prep) $prepcolorL
@@ -209,6 +241,7 @@ if { $darkTheme } {
 	set colorsTheme(kwrd) $kwrdcolorL
 	set colorsTheme(vlsd) $vlsdcolorL
 	set colorsTheme(mlsd) $mlsdcolorL
+	set colorsTheme(par) $parcolorL
 	set colorsTheme(var) $varcolorL
 	set colorsTheme(lvar) $lvarcolorL
 	set colorsTheme(fun) $funcolorL
@@ -310,46 +343,46 @@ if $conWnd {
 if $testWnd {
 	newtop .tst "LSD Coordinates Test Window" { destroytop .tst } ""
 
-	frame .tst.xy
-	label .tst.xy.l1 -anchor e -text "X:"
-	label .tst.xy.v1 -anchor w -fg red
-	label .tst.xy.l2 -anchor e -text "   Y:"
-	label .tst.xy.v2 -anchor w -fg red
+	ttk::frame .tst.xy
+	ttk::label .tst.xy.l1 -anchor e -text "X:"
+	ttk::label .tst.xy.v1 -anchor w -style hl.TLabel
+	ttk::label .tst.xy.l2 -anchor e -text "   Y:"
+	ttk::label .tst.xy.v2 -anchor w -style hl.TLabel
 	pack .tst.xy.l1 .tst.xy.v1 .tst.xy.l2 .tst.xy.v2 -side left -padx 2 -pady 2
 
-	frame .tst.r
-	label .tst.r.l1 -anchor e -text "rootx:"
-	label .tst.r.v1 -anchor w -fg red
-	label .tst.r.l2 -anchor e -text "   rooty:"
-	label .tst.r.v2 -anchor w -fg red
+	ttk::frame .tst.r
+	ttk::label .tst.r.l1 -anchor e -text "rootx:"
+	ttk::label .tst.r.v1 -anchor w -style hl.TLabel
+	ttk::label .tst.r.l2 -anchor e -text "   rooty:"
+	ttk::label .tst.r.v2 -anchor w -style hl.TLabel
 	pack .tst.r.l1 .tst.r.v1 .tst.r.l2 .tst.r.v2 -side left -padx 2 -pady 2
 
-	frame .tst.v
-	label .tst.v.l1 -anchor e -text "vrootx:"
-	label .tst.v.v1 -anchor w -fg red
-	label .tst.v.l2 -anchor e -text "   vrooty:"
-	label .tst.v.v2 -anchor w -fg red
+	ttk::frame .tst.v
+	ttk::label .tst.v.l1 -anchor e -text "vrootx:"
+	ttk::label .tst.v.v1 -anchor w -style hl.TLabel
+	ttk::label .tst.v.l2 -anchor e -text "   vrooty:"
+	ttk::label .tst.v.v2 -anchor w -style hl.TLabel
 	pack .tst.v.l1 .tst.v.v1 .tst.v.l2 .tst.v.v2 -side left -padx 2 -pady 2
 
-	frame .tst.s
-	label .tst.s.l1 -anchor e -text "screenwidth:"
-	label .tst.s.v1 -anchor w -fg red
-	label .tst.s.l2 -anchor e -text "   screenheight:"
-	label .tst.s.v2 -anchor w -fg red
+	ttk::frame .tst.s
+	ttk::label .tst.s.l1 -anchor e -text "screenwidth:"
+	ttk::label .tst.s.v1 -anchor w -style hl.TLabel
+	ttk::label .tst.s.l2 -anchor e -text "   screenheight:"
+	ttk::label .tst.s.v2 -anchor w -style hl.TLabel
 	pack .tst.s.l1 .tst.s.v1 .tst.s.l2 .tst.s.v2 -side left -padx 2 -pady 2
 
-	frame .tst.t
-	label .tst.t.l1 -anchor e -text "vrootwidth:"
-	label .tst.t.v1 -anchor w -fg red
-	label .tst.t.l2 -anchor e -text "   vrootheight:"
-	label .tst.t.v2 -anchor w -fg red
+	ttk::frame .tst.t
+	ttk::label .tst.t.l1 -anchor e -text "vrootwidth:"
+	ttk::label .tst.t.v1 -anchor w -style hl.TLabel
+	ttk::label .tst.t.l2 -anchor e -text "   vrootheight:"
+	ttk::label .tst.t.v2 -anchor w -style hl.TLabel
 	pack .tst.t.l1 .tst.t.v1 .tst.t.l2 .tst.t.v2 -side left -padx 2 -pady 2
 
-	frame .tst.m
-	label .tst.m.l1 -anchor e -text "maxwidth:"
-	label .tst.m.v1 -anchor w -fg red
-	label .tst.m.l2 -anchor e -text "   maxheight:"
-	label .tst.m.v2 -anchor w -fg red
+	ttk::frame .tst.m
+	ttk::label .tst.m.l1 -anchor e -text "maxwidth:"
+	ttk::label .tst.m.v1 -anchor w -style hl.TLabel
+	ttk::label .tst.m.l2 -anchor e -text "   maxheight:"
+	ttk::label .tst.m.v2 -anchor w -style hl.TLabel
 	pack .tst.m.l1 .tst.m.v1 .tst.m.l2 .tst.m.v2 -side left -padx 2 -pady 2
 
 	pack .tst.xy .tst.r .tst.v .tst.s .tst.t .tst.m

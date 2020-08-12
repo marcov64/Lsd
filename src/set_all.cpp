@@ -79,143 +79,143 @@ void set_all( int *choice, object *original, char *lab, int lag )
 
 	cmd( "newtop .sa \"Set All Objects Initialization\" { set choice 2 }" );
 
-	cmd( "frame .sa.head" );					// heading
-	cmd( "label .sa.head.lg -text \"Set initial values for\"" );
+	cmd( "ttk::frame .sa.head" );					// heading
+	cmd( "ttk::label .sa.head.lg -text \"Set initial values for\"" );
 
-	cmd( "frame .sa.head.l" );
+	cmd( "ttk::frame .sa.head.l" );
 	if ( cv->param != 0 )
 	{
 		if ( cv->param == 2 )
-			cmd( "label .sa.head.l.c -text \"Function: \"" );
+			cmd( "ttk::label .sa.head.l.c -text \"Function: \"" );
 		else
-			cmd( "label .sa.head.l.c -text \"Parameter: \"" );
+			cmd( "ttk::label .sa.head.l.c -text \"Parameter: \"" );
 		
-		cmd( "label .sa.head.l.n -text \"%s\" -fg red", lab  );
+		cmd( "ttk::label .sa.head.l.n -text \"%s\" -style hl.TLabel", lab  );
 		cmd( "pack .sa.head.l.c .sa.head.l.n -side left" );
 	}
 	else
 	{
-		cmd( "label .sa.head.l.c -text \"Variable: \"" );
-		cmd( "label .sa.head.l.n1 -text \"%s  \" -fg red", lab );
-		cmd( "label .sa.head.l.n2 -text \"\\[  lag \"" );
-		cmd( "label .sa.head.l.n3 -text \"%d\" -fg red", t - cv->last_update + lag + 1  );
-		cmd( "label .sa.head.l.n4 -text \"\\]\"" );
+		cmd( "ttk::label .sa.head.l.c -text \"Variable: \"" );
+		cmd( "ttk::label .sa.head.l.n1 -text \"%s  \" -style hl.TLabel", lab );
+		cmd( "ttk::label .sa.head.l.n2 -text \"\\[  lag \"" );
+		cmd( "ttk::label .sa.head.l.n3 -text \"%d\" -style hl.TLabel", t - cv->last_update + lag + 1  );
+		cmd( "ttk::label .sa.head.l.n4 -text \"\\]\"" );
 		cmd( "pack .sa.head.l.c .sa.head.l.n1 .sa.head.l.n2 .sa.head.l.n3 .sa.head.l.n4 -side left" );
 	}
 
-	cmd( "frame .sa.head.lo" );
-	cmd( "label .sa.head.lo.l -text \"Contained in object: \"" );
-	cmd( "label .sa.head.lo.o -text \"%s\" -fg red", cv->up->label  );
+	cmd( "ttk::frame .sa.head.lo" );
+	cmd( "ttk::label .sa.head.lo.l -text \"Contained in object: \"" );
+	cmd( "ttk::label .sa.head.lo.o -text \"%s\" -style hl.TLabel", cv->up->label  );
 	cmd( "pack .sa.head.lo.l .sa.head.lo.o -side left" );
 
 	cmd( "pack .sa.head.lg .sa.head.l .sa.head.lo" );
 
-	cmd( "frame .sa.m" );			
+	cmd( "ttk::frame .sa.m" );			
 
-	cmd( "frame .sa.m.f1" );					// left column
+	cmd( "ttk::frame .sa.m.f1" );					// left column
 
-	cmd( "frame .sa.m.f1.val" );
-	cmd( "label .sa.m.f1.val.l -text \"Initialization data\"" );
+	cmd( "ttk::frame .sa.m.f1.val" );
+	cmd( "ttk::label .sa.m.f1.val.l -text \"Initialization data\"" );
 
-	cmd( "frame .sa.m.f1.val.i" );
+	cmd( "ttk::frame .sa.m.f1.val.i" );
 
-	cmd( "frame .sa.m.f1.val.i.l1" );
-	cmd( "label .sa.m.f1.val.i.l1.l1 -text \"Equal to\"" );
-	cmd( "entry .sa.m.f1.val.i.l1.e1 -validate focusout -vcmd { if [ string is double -strict %%P ] { set value1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value1; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "ttk::frame .sa.m.f1.val.i.l1" );
+	cmd( "ttk::label .sa.m.f1.val.i.l1.l1 -text \"Equal to\"" );
+	cmd( "ttk::entry .sa.m.f1.val.i.l1.e1 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value1; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "pack .sa.m.f1.val.i.l1.l1 .sa.m.f1.val.i.l1.e1" );
 
-	cmd( "frame .sa.m.f1.val.i.l2" );
-	cmd( "label .sa.m.f1.val.i.l2.l2 -text \"(none )\"" );
-	cmd( "entry .sa.m.f1.val.i.l2.e2 -validate focusout -vcmd { if [ string is double -strict %%P ] { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; return 0 } } -invcmd { bell } -justify center -state disabled" );
+	cmd( "ttk::frame .sa.m.f1.val.i.l2" );
+	cmd( "ttk::label .sa.m.f1.val.i.l2.l2 -text \"(none)\"" );
+	cmd( "ttk::entry .sa.m.f1.val.i.l2.e2 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 	cmd( "pack .sa.m.f1.val.i.l2.l2 .sa.m.f1.val.i.l2.e2" );
 
 	cmd( "pack .sa.m.f1.val.i.l1 .sa.m.f1.val.i.l2 -expand yes -fill x  -ipadx 5 -ipady 2" );
 
 	cmd( "pack .sa.m.f1.val.l .sa.m.f1.val.i" );
 
-	cmd( "frame .sa.m.f1.rd" );
-	cmd( "label .sa.m.f1.rd.l -text \"Initialization method\"" );
+	cmd( "ttk::frame .sa.m.f1.rd" );
+	cmd( "ttk::label .sa.m.f1.rd.l -text \"Initialization method\"" );
 
-	cmd( "frame .sa.m.f1.rd.i -relief groove -bd 2" );
-	cmd( "radiobutton .sa.m.f1.rd.i.r1 -text \"Equal to\" -variable res -value 1 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Value\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"(none)\"; .sa.m.f1.val.i.l2.e2 conf -state disabled; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
+	cmd( "ttk::frame .sa.m.f1.rd.i -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r1 -text \"Equal to\" -variable res -value 1 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Value\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"(none)\"; .sa.m.f1.val.i.l2.e2 conf -state disabled; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
 	cmd( "bind .sa.m.f1.rd.i.r1 <Down> {focus .sa.m.f1.rd.i.r9; .sa.m.f1.rd.i.r9 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r1 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
 
-	cmd( "radiobutton .sa.m.f1.rd.i.r9 -text \"Range\" -variable res -value 9 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
+	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r9 -text \"Range\" -variable res -value 9 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
 	cmd( "bind .sa.m.f1.rd.i.r9 <Down> {focus .sa.m.f1.rd.i.r2; .sa.m.f1.rd.i.r2 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r9 <Up> {focus .sa.m.f1.rd.i.r1; .sa.m.f1.rd.i.r1 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r9 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
 
-	cmd( "radiobutton .sa.m.f1.rd.i.r2 -text \"Increasing\" -variable res -value 2 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Start\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Step\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
+	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r2 -text \"Increasing\" -variable res -value 2 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Start\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Step\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
 	cmd( "bind .sa.m.f1.rd.i.r2 <Down> {focus .sa.m.f1.rd.i.r4; .sa.m.f1.rd.i.r4 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r2 <Up> {focus .sa.m.f1.rd.i.r9; .sa.m.f1.rd.i.r9 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r2 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
 
-	cmd( "radiobutton .sa.m.f1.rd.i.r4 -text \"Increasing (groups)\" -variable res -value 4 -command {.sa.m.f1.val.i.l1.l1 conf -text \"Start\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Step\"; .sa.m.f1.val.i.l2.e2 conf -state normal; set step_in 1; .sa.m.f2.s.i.l.a.e conf -state disabled; .sa.m.f2.s.i.l.f conf -state disabled; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
+	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r4 -text \"Increasing (groups)\" -variable res -value 4 -command {.sa.m.f1.val.i.l1.l1 conf -text \"Start\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Step\"; .sa.m.f1.val.i.l2.e2 conf -state normal; set step_in 1; .sa.m.f2.s.i.l.a.e conf -state disabled; .sa.m.f2.s.i.l.f conf -state disabled; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
 	cmd( "bind .sa.m.f1.rd.i.r4 <Up> {focus .sa.m.f1.rd.i.r2; .sa.m.f1.rd.i.r2 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r4 <Down> {focus .sa.m.f1.rd.i.r3; .sa.m.f1.rd.i.r3 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r4 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
 
-	cmd( "radiobutton .sa.m.f1.rd.i.r3 -text \"Random (uniform)\" -variable res -value 3 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; .sa.m.f2.rnd.i.le.f conf -state normal }" );
+	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r3 -text \"Random (uniform)\" -variable res -value 3 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; .sa.m.f2.rnd.i.le.f conf -state normal }" );
 	cmd( "bind .sa.m.f1.rd.i.r3 <Up> {focus .sa.m.f1.rd.i.r4; .sa.m.f1.rd.i.r4 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r3 <Down> {focus .sa.m.f1.rd.i.r8; .sa.m.f1.rd.i.r8 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r3 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
 
-	cmd( "radiobutton .sa.m.f1.rd.i.r8 -text \"Random integer (uniform)\" -variable res -value 8 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; .sa.m.f2.rnd.i.le.f conf -state normal }" );
+	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r8 -text \"Random integer (uniform)\" -variable res -value 8 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; .sa.m.f2.rnd.i.le.f conf -state normal }" );
 	cmd( "bind .sa.m.f1.rd.i.r8 <Up> {focus .sa.m.f1.rd.i.r3; .sa.m.f1.rd.i.r3 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r8 <Down> {focus .sa.m.f1.rd.i.r5; .sa.m.f1.rd.i.r5 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r8 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
 
-	cmd( "radiobutton .sa.m.f1.rd.i.r5 -text \"Random (normal)\" -variable res -value 5 -command {.sa.m.f1.val.i.l1.l1 conf -text \"Mean\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Std. deviation\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; .sa.m.f2.rnd.i.le.f conf -state normal }" );
+	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r5 -text \"Random (normal)\" -variable res -value 5 -command {.sa.m.f1.val.i.l1.l1 conf -text \"Mean\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Std. deviation\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; .sa.m.f2.rnd.i.le.f conf -state normal }" );
 	cmd( "bind .sa.m.f1.rd.i.r5 <Up> {focus .sa.m.f1.rd.i.r8; .sa.m.f1.rd.i.r8 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r5 <Down> {focus .sa.m.f1.rd.i.r7; .sa.m.f1.rd.i.r7 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r5 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
 
-	cmd( "radiobutton .sa.m.f1.rd.i.r7 -text \"Import from data file\" -variable res -value 7 -command { .sa.m.f1.val.i.l1.l1 conf -text \"(none)\"; .sa.m.f1.val.i.l1.e1 conf -state disabled; .sa.m.f1.val.i.l2.l2 conf -text \"(none)\"; .sa.m.f1.val.i.l2.e2 conf -state disabled; set step_in 1; .sa.m.f2.s.i.l.a.e conf -state disabled; .sa.m.f2.s.i.l.f conf -state disabled; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
+	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r7 -text \"Import from data file\" -variable res -value 7 -command { .sa.m.f1.val.i.l1.l1 conf -text \"(none)\"; .sa.m.f1.val.i.l1.e1 conf -state disabled; .sa.m.f1.val.i.l2.l2 conf -text \"(none)\"; .sa.m.f1.val.i.l2.e2 conf -state disabled; set step_in 1; .sa.m.f2.s.i.l.a.e conf -state disabled; .sa.m.f2.s.i.l.f conf -state disabled; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
 	cmd( "bind .sa.m.f1.rd.i.r7 <Up> {focus .sa.m.f1.rd.i.r5; .sa.m.f1.rd.i.r5 invoke}" );
 	cmd( "bind .sa.m.f1.rd.i.r7 <Return> {.sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
 
-	cmd( "pack .sa.m.f1.rd.i.r1 .sa.m.f1.rd.i.r9 .sa.m.f1.rd.i.r2 .sa.m.f1.rd.i.r4 .sa.m.f1.rd.i.r3 .sa.m.f1.rd.i.r8 .sa.m.f1.rd.i.r5 .sa.m.f1.rd.i.r7 -anchor w -padx 2" );
+	cmd( "pack .sa.m.f1.rd.i.r1 .sa.m.f1.rd.i.r9 .sa.m.f1.rd.i.r2 .sa.m.f1.rd.i.r4 .sa.m.f1.rd.i.r3 .sa.m.f1.rd.i.r8 .sa.m.f1.rd.i.r5 .sa.m.f1.rd.i.r7 -anchor w" );
 
 	cmd( "pack .sa.m.f1.rd.l .sa.m.f1.rd.i" );
 
 	cmd( "pack .sa.m.f1.val .sa.m.f1.rd -expand yes -fill x -padx 5 -pady 5" );
 
-	cmd( "frame .sa.m.f2" );					// right column
+	cmd( "ttk::frame .sa.m.f2" );					// right column
 
-	cmd( "frame .sa.m.f2.s" );
-	cmd( "label .sa.m.f2.s.tit -text \"Object instance selection\"" );
+	cmd( "ttk::frame .sa.m.f2.s" );
+	cmd( "ttk::label .sa.m.f2.s.tit -text \"Object instance selection\"" );
 
-	cmd( "frame .sa.m.f2.s.i" );
+	cmd( "ttk::frame .sa.m.f2.s.i" );
 
-	cmd( "frame .sa.m.f2.s.i.l" );
+	cmd( "ttk::frame .sa.m.f2.s.i.l" );
 
-	cmd( "frame .sa.m.f2.s.i.l.a" );
-	cmd( "label .sa.m.f2.s.i.l.a.l -text \"Apply every\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.l.a.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.l.a.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invcmd { bell } -justify center }" );
-	cmd( "label .sa.m.f2.s.i.l.a.l1 -text \"instance( s)\"" );
+	cmd( "ttk::frame .sa.m.f2.s.i.l.a" );
+	cmd( "ttk::label .sa.m.f2.s.i.l.a.l -text \"Apply every\"" );
+	cmd( "ttk::spinbox .sa.m.f2.s.i.l.a.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::label .sa.m.f2.s.i.l.a.l1 -text \"instance( s)\"" );
 	cmd( "pack .sa.m.f2.s.i.l.a.l .sa.m.f2.s.i.l.a.e .sa.m.f2.s.i.l.a.l1 -side left -padx 1" );
 
-	cmd( "checkbutton .sa.m.f2.s.i.l.f -text \"Fill-in\" -variable fill" );
+	cmd( "ttk::checkbutton .sa.m.f2.s.i.l.f -text \"Fill-in\" -variable fill" );
 	cmd( "pack  .sa.m.f2.s.i.l.a .sa.m.f2.s.i.l.f -padx 5 -side left" );
 	cmd( "pack  .sa.m.f2.s.i.l -pady 2" );
 
-	cmd( "frame .sa.m.f2.s.i.sel -relief groove -bd 2" );
-	cmd( "radiobutton .sa.m.f2.s.i.sel.all -text \"Apply to all instances\" -variable to_all -value 1 -command { .sa.m.f2.s.i.sel2.c.to conf -state disabled; .sa.m.f2.s.i.sel2.c.from conf -state disabled; bind .sa.m.f2.s.i.sel2.c.from <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { } }" );
-	cmd( "radiobutton .sa.m.f2.s.i.sel.sel -text \"Apply to a range of instances\" -variable to_all -value 0 -command { .sa.m.f2.s.i.sel2.c.to conf -state normal; .sa.m.f2.s.i.sel2.c.from conf -state normal; bind .sa.m.f2.s.i.sel2.c.from <Button-3> { set choice 9 }; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { set choice 10 }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> { set choice 9 }; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { set choice 10 } }" );
+	cmd( "ttk::frame .sa.m.f2.s.i.sel -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+	cmd( "ttk::radiobutton .sa.m.f2.s.i.sel.all -text \"Apply to all instances\" -variable to_all -value 1 -command { .sa.m.f2.s.i.sel2.c.to conf -state disabled; .sa.m.f2.s.i.sel2.c.from conf -state disabled; bind .sa.m.f2.s.i.sel2.c.from <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { } }" );
+	cmd( "ttk::radiobutton .sa.m.f2.s.i.sel.sel -text \"Apply to a range of instances\" -variable to_all -value 0 -command { .sa.m.f2.s.i.sel2.c.to conf -state normal; .sa.m.f2.s.i.sel2.c.from conf -state normal; bind .sa.m.f2.s.i.sel2.c.from <Button-3> { set choice 9 }; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { set choice 10 }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> { set choice 9 }; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { set choice 10 } }" );
 	cmd( "pack .sa.m.f2.s.i.sel.all .sa.m.f2.s.i.sel.sel -anchor w" );
 	cmd( "pack .sa.m.f2.s.i.sel -pady 2" );
 
-	cmd( "frame .sa.m.f2.s.i.sel2" );
+	cmd( "ttk::frame .sa.m.f2.s.i.sel2" );
 
-	cmd( "frame .sa.m.f2.s.i.sel2.c" );
-	cmd( "label .sa.m.f2.s.i.sel2.c.lfrom -text \"From\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.sel2.c.from -width 5 -from 1 -to 9999 -state disabled -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.sel2.c.from -width 5 -state disabled -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invcmd { bell } -justify center }" );
-	cmd( "label .sa.m.f2.s.i.sel2.c.lto -text \"to\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.sel2.c.to -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.sel2.c.to -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame .sa.m.f2.s.i.sel2.c" );
+	cmd( "ttk::label .sa.m.f2.s.i.sel2.c.lfrom -text \"From\"" );
+	cmd( "ttk::spinbox .sa.m.f2.s.i.sel2.c.from -width 5 -from 1 -to 9999 -state disabled -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::label .sa.m.f2.s.i.sel2.c.lto -text \"to\"" );
+	cmd( "ttk::spinbox .sa.m.f2.s.i.sel2.c.to -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "pack .sa.m.f2.s.i.sel2.c.lfrom .sa.m.f2.s.i.sel2.c.from .sa.m.f2.s.i.sel2.c.lto .sa.m.f2.s.i.sel2.c.to -side left -pady 1" );
 
-	cmd( "label .sa.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
+	cmd( "ttk::label .sa.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
 	cmd( "pack .sa.m.f2.s.i.sel2.c .sa.m.f2.s.i.sel2.obs" );
 	cmd( "pack .sa.m.f2.s.i.sel2 -pady 2" );
 
@@ -223,16 +223,16 @@ void set_all( int *choice, object *original, char *lab, int lag )
 
 	cmd( "pack .sa.m.f2.s" );
 
-	cmd( "frame .sa.m.f2.rnd" );
-	cmd( "label .sa.m.f2.rnd.l -text \"Random number generator\"" );
+	cmd( "ttk::frame .sa.m.f2.rnd" );
+	cmd( "ttk::label .sa.m.f2.rnd.l -text \"Random number generator\"" );
 
-	cmd( "frame .sa.m.f2.rnd.i" );
+	cmd( "ttk::frame .sa.m.f2.rnd.i" );
 
-	cmd( "frame .sa.m.f2.rnd.i.le" );
-	cmd( "checkbutton .sa.m.f2.rnd.i.le.f -text \"Reset the generator\" -variable use_seed -state disabled -command { if $use_seed { .sa.m.f2.rnd.i.le.s.e1 conf -state normal } { .sa.m.f2.rnd.i.le.s.e1 conf -state disabled } }" );
-	cmd( "frame .sa.m.f2.rnd.i.le.s" );
-	cmd( "label .sa.m.f2.rnd.i.le.s.l1 -text \"Seed\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.rnd.i.le.s.e1 -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { if { [ string is integer -strict %%P ] && %%P > 0 } { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.rnd.i.le.s.e1 -width 5 -state disabled -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 } { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame .sa.m.f2.rnd.i.le" );
+	cmd( "ttk::checkbutton .sa.m.f2.rnd.i.le.f -text \"Reset the generator\" -variable use_seed -state disabled -command { if $use_seed { .sa.m.f2.rnd.i.le.s.e1 conf -state normal } { .sa.m.f2.rnd.i.le.s.e1 conf -state disabled } }" );
+	cmd( "ttk::frame .sa.m.f2.rnd.i.le.s" );
+	cmd( "ttk::label .sa.m.f2.rnd.i.le.s.l1 -text \"Seed\"" );
+	cmd( "ttk::spinbox .sa.m.f2.rnd.i.le.s.e1 -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "pack .sa.m.f2.rnd.i.le.s.l1 .sa.m.f2.rnd.i.le.s.e1 -side left -padx 1" );
 
 	cmd( "pack .sa.m.f2.rnd.i.le.f .sa.m.f2.rnd.i.le.s -side left -padx 5" );
@@ -241,7 +241,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 
 	cmd( "pack .sa.m.f2.rnd.l .sa.m.f2.rnd.i" );
 
-	cmd( "checkbutton .sa.m.f2.ud -text \"Update initialization comments\" -variable update_d" );
+	cmd( "ttk::checkbutton .sa.m.f2.ud -text \"Update initialization comments\" -variable update_d" );
 
 	cmd( "pack .sa.m.f2.s .sa.m.f2.rnd .sa.m.f2.ud -anchor w -expand yes -fill x" );
 
@@ -490,7 +490,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 				}
 			
 			if ( cur != NULL || kappa == EOF )
-				cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", l );
+				cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", l );
 			
 			sprintf( action, "set with data from file %s", l );
 			break;
@@ -624,6 +624,9 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl )
 	object *cur;
 	variable *cvar;
 
+	// reset random number generator 
+	init_random( seed );
+
 	if ( s->next != NULL )
 	{
 		for ( i = 0; i < s->nvalues; ++i )
@@ -654,12 +657,12 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl )
 
 		}
 
-		if ( probSampl == 1.0 || RND <= probSampl )	// if required draw if point will be sampled
+		if ( probSampl == 1.0 || ran1( ) <= probSampl )	// if required draw if point will be sampled
 		{
 			if ( ! save_configuration( *findex ) )
 			{
 				plog( " Aborted" );
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
 				return;
 			}
 			
@@ -710,36 +713,39 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 	double start, end;
 	char *sss = NULL, *tok = NULL, type;
 
+	// reset random number generator 
+	init_random( seed );
+
 	Tcl_LinkVar( inter, "integerV", ( char * ) &integerV, TCL_LINK_BOOLEAN );
 	integerV = s->entryOk ? s->integer : false;
 
 	cmd( "set sens .sens" );
 	cmd( "newtop .sens \"Sensitivity Analysis\" { set choice 2 }" );
 
-	cmd( "frame .sens.lab" );
+	cmd( "ttk::frame .sens.lab" );
 	if ( nval > 0)								// number of values defined (0=no)?
-		cmd( "label .sens.lab.l1 -text \"Enter n=%d values for:\"", s->nvalues );
+		cmd( "ttk::label .sens.lab.l1 -text \"Enter n=%d values for:\"", s->nvalues );
 	else
-		cmd( "label .sens.lab.l1 -text \"Enter the desired values (at least 2) for:\"" );
+		cmd( "ttk::label .sens.lab.l1 -text \"Enter the desired values (at least 2) for:\"" );
 
-	cmd( "label .sens.lab.l2 -fg red -text \"%s\"", s->label );
+	cmd( "ttk::label .sens.lab.l2 -style hl.TLabel -text \"%s\"", s->label );
 	cmd( "pack .sens.lab.l1 .sens.lab.l2 -side left -padx 2" );
 
-	cmd( "label .sens.obs -text \"Paste of clipboard data is allowed, most separators are accepted\n\nUse a \'=BEGIN:END@SAMPLES%%TYPE\' clause to specify a number of samples within a range.\nSpaces are not allowed within clauses. TYPE values are \'L\' for linear and \'R\' for random samples.\"" );
+	cmd( "ttk::label .sens.obs -text \"Paste of clipboard data is allowed, most separators are accepted\n\nUse a \'=BEGIN:END@SAMPLES%%TYPE\' clause to specify a number of samples within a range.\nSpaces are not allowed within clauses. TYPE values are \'L\' for linear and \'R\' for random samples.\"" );
 	cmd( "pack .sens.lab .sens.obs -pady 5" );
 
-	cmd( "frame .sens.t" );
-	cmd( "scrollbar .sens.t.v_scroll -command \".sens.t.t yview\"" );
-	cmd( "text .sens.t.t -undo 1 -height 10 -width 60 -font \"$font_normal\" -yscroll \".sens.t.v_scroll set\"" ); 
-	cmd( "mouse_wheel .sens.t.t" );
+	cmd( "ttk::frame .sens.t" );
+	cmd( "ttk::scrollbar .sens.t.v_scroll -command \".sens.t.t yview\"" );
+	cmd( "ttk::text .sens.t.t -height 10 -width 60 -yscroll \".sens.t.v_scroll set\" -dark $darkTheme -style smallFixed.TText" ); 
 	cmd( "pack .sens.t.t .sens.t.v_scroll -side left -fill y" ); 
+	cmd( "mouse_wheel .sens.t.t" );
 
-	cmd( "frame .sens.fb" );
-	cmd( "button .sens.fb.paste -width [ expr $butWid + 3 ] -text \"Paste Clipboard\" -command { tk_textPaste .sens.t.t }" );
-	cmd( "button .sens.fb.del -width [ expr $butWid + 3 ] -text \"Delete Values\" -command { .sens.t.t delete 0.0 end }" );
-	cmd( "button .sens.fb.rem -width [ expr $butWid + 3 ] -text \"Remove\" -command { set choice 3 }" );
-	cmd( "checkbutton .sens.fb.int -variable integerV -text \"Round to integer\"" );
-	cmd( "pack .sens.fb.paste .sens.fb.del .sens.fb.rem .sens.fb.int -padx 10 -pady 10 -side left" );
+	cmd( "ttk::frame .sens.fb" );
+	cmd( "ttk::button .sens.fb.paste -width [ expr $butWid + 3 ] -text \"Paste Clipboard\" -command { tk_textPaste .sens.t.t }" );
+	cmd( "ttk::button .sens.fb.del -width [ expr $butWid + 3 ] -text \"Delete Values\" -command { .sens.t.t delete 0.0 end }" );
+	cmd( "ttk::button .sens.fb.rem -width [ expr $butWid + 3 ] -text \"Remove\" -command { set choice 3 }" );
+	cmd( "ttk::checkbutton .sens.fb.int -variable integerV -text \"Round to integer\"" );
+	cmd( "pack .sens.fb.paste .sens.fb.del .sens.fb.rem .sens.fb.int -padx $butPad -pady $butPad -side left" );
 	cmd( "pack .sens.t .sens.fb" );
 
 	cmd( "okhelpcancel .sens fb2 { set choice 1 } { LsdHelp menudata_sa.html#entry } { set choice 2 }" );
@@ -825,7 +831,7 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 			tok = strtok( sss, SENS_SEP );	// accepts several separators
 			if ( tok == NULL )				// finished too early?
 			{
-				cmd( "tk_messageBox -parent . -title \"Sensitivity Analysis\" -icon error -type ok -message \"Less values than required\" -detail \"Please insert the correct number of values.\"" );
+				cmd( "ttk::messageBox -parent . -title \"Sensitivity Analysis\" -icon error -type ok -message \"Less values than required\" -detail \"Please insert the correct number of values.\"" );
 				*choice = 0;
 				cmd( "focus .sens.t.t" );
 				break;
@@ -850,7 +856,7 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 				if ( toupper( type ) == 'R' && samples > 0 )// random sampling 
 					for ( int j = 0; j < samples; ++j, ++i )
 					{
-						s->v[ i ] = fmin( start, end ) + RND * ( fmax( start, end ) - fmin( start, end ) );
+						s->v[ i ] = fmin( start, end ) + ran1( ) * ( fmax( start, end ) - fmin( start, end ) );
 						s->v[ i ] = integerV ? round( s->v[ i ] ) : s->v[ i ];
 					}
 			}
@@ -1058,7 +1064,7 @@ MAT_*
 Matrix operations support functions for morris_oat() and enhancements
 ******************************************************************************/
 // Random choice between two numbers
-#define RND_CHOICE( o1, o2 ) ( RND < 0.5 ? o1 : o2 )
+#define RND_CHOICE( o1, o2 ) ( ran1( ) < 0.5 ? o1 : o2 )
 
 // allocate dynamic space for matrix
 double **mat_new( int m, int n )
@@ -1197,6 +1203,9 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 	int i, j, l;
     double delta = ( double ) jump / ( p - 1 );	// grid step delta
 	
+	// reset random number generator 
+	init_random( seed );
+
 	// allocate all temporary matrices
 	double **B = mat_new( k + 1, k ),
 		**DM = mat_new( k, k ),
@@ -1226,7 +1235,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 		for ( i = 0; i < k; ++i )
 			perm [ i ] = i;
 		
-		shuffle( & perm[ 0 ], & perm[ k ], mt19937( seed ) );
+		shuffle( & perm[ 0 ], & perm[ k ], mt32 );
 
 		P = mat_copy_scal( P, k, k, 0 );
 		for ( i = 0; i < k; ++i )
@@ -1561,7 +1570,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 		typ = 0;							// trigger invalid design
 		
 	plog( "\nCreating design of experiments, it may take a while, please wait... " );
-	cmd( "wm deiconify .log; raise .log; focus .log; update" );
+	cmd( "focustop .log" );
 	
 	switch ( typ )
 	{
@@ -1701,7 +1710,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 			{
 				ptr[ i ] = new double[ k ];	// allocate 2nd level data
 				for ( j = 0; j < k; j++ )	// for all factors
-					ptr[ i ][ j ] = lo[ j ] + RND * ( hi[ j ] - lo[ j ] );
+					ptr[ i ][ j ] = lo[ j ] + ran1( ) * ( hi[ j ] - lo[ j ] );
 			}
 			
 			break;	
@@ -1851,7 +1860,7 @@ void sensitivity_doe( int *findex, design *doe )
 		if ( ! save_configuration( *findex ) )
 		{
 			plog( " Aborted" );
-			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
 			return;
 		}
 		

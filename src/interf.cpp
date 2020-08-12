@@ -129,7 +129,7 @@ void create( void )
 
 	// restore previous object and cursor position in browser, if any
 	cur = restore_pos( root );
-	redrawRoot = true;					// browser redraw when drawing the first time
+	redrawRoot = redrawStruc = true;	// browser/ structure redraw when drawing the first time
 	choice_g = choice = 0;
 
 	// Main Cycle ********************************
@@ -148,11 +148,15 @@ void create( void )
 			cur = root;
 		}
 
-		show_graph( cur );
+		if ( redrawStruc )
+		{
+			show_graph( cur );
+			redrawStruc = false;
+		}
 		
 		if ( message_logged )
 		{
-			cmd( "wm deiconify .log; raise .log; focus .log; update" );
+			cmd( "focustop .log" );
 			message_logged = false;
 		}    
 
@@ -192,13 +196,13 @@ int browse( object *r, int *choice )
 	if ( redrawRoot ) 
 	{
 		cmd( "destroy .t .l" );
-		cmd( "frame .l" );
+		cmd( "ttk::frame .l" );
 
-		cmd( "frame .l.v" );
+		cmd( "ttk::frame .l.v" );
 
-		cmd( "frame .l.v.c" );
-		cmd( "scrollbar .l.v.c.v_scroll -command \".l.v.c.var_name yview\"" );
-		cmd( "listbox .l.v.c.var_name -selectmode browse -yscroll \".l.v.c.v_scroll set\"" );
+		cmd( "ttk::frame .l.v.c" );
+		cmd( "ttk::scrollbar .l.v.c.v_scroll -command \".l.v.c.var_name yview\"" );
+		cmd( "ttk::listbox .l.v.c.var_name -selectmode browse -yscroll \".l.v.c.v_scroll set\" -dark $darkTheme" );
 		cmd( "mouse_wheel .l.v.c.var_name" );
 
 		// populate the variables panel
@@ -237,7 +241,7 @@ int browse( object *r, int *choice )
 				if ( cv->param == 1 )
 				{
 					cmd( ".l.v.c.var_name insert end \"%s (P$varFlags)\"", cv->label );
-					cmd( ".l.v.c.var_name itemconf $app" );
+					cmd( ".l.v.c.var_name itemconf $app -fg $colorsTheme(par)" );
 				}
 				
 				if ( cv->param == 2 )
@@ -260,10 +264,10 @@ int browse( object *r, int *choice )
 			cmd( "set nVar [ .l.v.c.var_name size ]" );
 		}
 
-		cmd( "label .l.v.lab -text \"Variables & parameters ($nVar)\"" );
+		cmd( "ttk::label .l.v.lab -text \"Variables & parameters ($nVar)\"" );
 
 		// variables panel context menu (right mouse button)
-		cmd( "menu .l.v.c.var_name.v -tearoff 0" );
+		cmd( "ttk::menu .l.v.c.var_name.v -tearoff 0" );
 		cmd( ".l.v.c.var_name.v add command -label Change -command { set choice 7 }" );	// entryconfig 0
 		cmd( ".l.v.c.var_name.v add command -label Properties -command { set choice 75 }" );	// entryconfig 1
 		cmd( ".l.v.c.var_name.v add command -label \"Updating (\u00A7)\" -state disabled -command { set choice 96 }" );	// entryconfig 2
@@ -328,29 +332,23 @@ int browse( object *r, int *choice )
 						set plot [ get_var_conf $vname plot ]; \
 						set num [ get_var_conf $vname debug ]; \
 						set parallel [ get_var_conf $vname parallel ]; \
-						switch $color { \
-							purple { } \
-							blue { \
-								.l.v.c.var_name.v entryconfig 19 -state disabled; \
-								.l.v.c.var_name.v entryconfig 20 -state disabled; \
-							} \
-							black { \
-								.l.v.c.var_name.v entryconfig 2 -state disabled; \
-								.l.v.c.var_name.v entryconfig 6 -state disabled; \
-								.l.v.c.var_name.v entryconfig 7 -state disabled; \
-								.l.v.c.var_name.v entryconfig 15 -state disabled; \
-								.l.v.c.var_name.v entryconfig 16 -state disabled \
-							} \
-							tomato { \
-								.l.v.c.var_name.v entryconfig 2 -state disabled; \
-								.l.v.c.var_name.v entryconfig 7 -state disabled \
-							} \
-							firebrick { \
-								.l.v.c.var_name.v entryconfig 2 -state disabled; \
-								.l.v.c.var_name.v entryconfig 7 -state disabled; \
-								.l.v.c.var_name.v entryconfig 19 -state disabled; \
-								.l.v.c.var_name.v entryconfig 20 -state disabled; \
-							} \
+						if [ string equal $color $colorsTheme(var) ] { \
+							.l.v.c.var_name.v entryconfig 19 -state disabled; \
+							.l.v.c.var_name.v entryconfig 20 -state disabled; \
+						} elseif [ string equal $color $colorsTheme(par) ] { \
+							.l.v.c.var_name.v entryconfig 2 -state disabled; \
+							.l.v.c.var_name.v entryconfig 6 -state disabled; \
+							.l.v.c.var_name.v entryconfig 7 -state disabled; \
+							.l.v.c.var_name.v entryconfig 15 -state disabled; \
+							.l.v.c.var_name.v entryconfig 16 -state disabled \
+						} elseif [ string equal $color $colorsTheme(lfun) ] { \
+							.l.v.c.var_name.v entryconfig 2 -state disabled; \
+							.l.v.c.var_name.v entryconfig 7 -state disabled \
+						} elseif [ string equal $color $colorsTheme(fun) ] { \
+							.l.v.c.var_name.v entryconfig 2 -state disabled; \
+							.l.v.c.var_name.v entryconfig 7 -state disabled; \
+							.l.v.c.var_name.v entryconfig 19 -state disabled; \
+							.l.v.c.var_name.v entryconfig 20 -state disabled; \
 						}; \
 						if { $itemfocus == 0 } { \
 							.l.v.c.var_name.v entryconfig 9 -state disabled \
@@ -458,7 +456,7 @@ int browse( object *r, int *choice )
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color black ] } { \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color $colorsTheme(par) ] } { \
 						set num [ expr ! [ get_var_conf $vname debug ] ]; \
 						set ctxMenuCmd \"set_var_conf $vname debug $num\"; \
 						set choice 95 \
@@ -471,7 +469,7 @@ int browse( object *r, int *choice )
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color black ] && ! [ string equal $color tomato ] && ! [ string equal $color firebrick ] } { \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color $colorsTheme(par) ] && ! [ string equal $color $colorsTheme(lfun) ] && ! [ string equal $color $colorsTheme(fun) ] } { \
 						set parallel [ expr ! [ get_var_conf $vname parallel ] ]; \
 						set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; \
 						set choice 95 \
@@ -479,6 +477,22 @@ int browse( object *r, int *choice )
 				}" );
 			cmd( "bind .l.v.c.var_name <ampersand> { \
 					event generate .l.v.c.var_name <F8> \
+				}" );
+			cmd( "bind .l.v.c.var_name <KeyRelease> { \
+					set kk %K; \
+					if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } { \
+						if [ string equal $kk underscore ] { \
+							set kk _ \
+						}; \
+						set ll %W; \
+						set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
+						if { $ff == -1 } { \
+							set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
+						}; \
+						if { $ff >= 0 } { \
+							selectinlist $ll $ff \
+						} \
+					} \
 				}" );
 		}
 		
@@ -496,17 +510,15 @@ int browse( object *r, int *choice )
 				focus .l.s.c.son_name; \
 				set listfocus 2; \
 				set itemfocus 0; \
-				.l.s.c.son_name selection set 0; \
-				.l.s.c.son_name activate 0; \
-				.l.s.c.son_name see 0; \
+				selectinlist .l.s.c.son_name 0; \
 				update_options \
 			}" );
 			
-		cmd( "frame .l.s" );
+		cmd( "ttk::frame .l.s" );
 
-		cmd( "frame .l.s.c" );
-		cmd( "scrollbar .l.s.c.v_scroll -command \".l.s.c.son_name yview\"" );
-		cmd( "listbox .l.s.c.son_name -selectmode browse -yscroll \".l.s.c.v_scroll set\"" );
+		cmd( "ttk::frame .l.s.c" );
+		cmd( "ttk::scrollbar .l.s.c.v_scroll -command \".l.s.c.son_name yview\"" );
+		cmd( "ttk::listbox .l.s.c.son_name -selectmode browse -yscroll \".l.s.c.v_scroll set\" -dark $darkTheme" );
 		cmd( "mouse_wheel .l.s.c.son_name" );
 
 		// populate the objects panel
@@ -545,10 +557,10 @@ int browse( object *r, int *choice )
 			}
 		}	
 
-		cmd( "label .l.s.lab -text \"Descending objects ([ expr $app - $upObjItem ])\"" );
+		cmd( "ttk::label .l.s.lab -text \"Descending objects ([ expr $app - $upObjItem ])\"" );
 
 		// objects panel context menu (right mouse button)
-		cmd( "menu .l.s.c.son_name.v -tearoff 0" );
+		cmd( "ttk::menu .l.s.c.son_name.v -tearoff 0" );
 		cmd( ".l.s.c.son_name.v add command -label \"Select\" -command { set choice 4 }" );	// entryconfig 0
 		cmd( ".l.s.c.son_name.v add command -label \"Parent\" -command { set choice 5 }" );	// entryconfig 1
 		cmd( ".l.s.c.son_name.v add command -label \"Insert Parent\" -command { set choice 32 }" );	// entryconfig 2
@@ -567,7 +579,7 @@ int browse( object *r, int *choice )
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 15
 		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );	// entryconfig 16
 		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );	// entryconfig 17
-		cmd( "menu .l.s.c.son_name.v.a -tearoff 0" );
+		cmd( "ttk::menu .l.s.c.son_name.v.a -tearoff 0" );
 		cmd( ".l.s.c.son_name.v.a add command -label Variable -command { set choice 2; set param 0 }" );
 		cmd( ".l.s.c.son_name.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
 		cmd( ".l.s.c.son_name.v.a add command -label Function -command { set choice 2; set param 2 }" );
@@ -697,6 +709,22 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.s.c.son_name <minus> { \
 					event generate .l.s.c.son_name <F5> \
 				}" );
+			cmd( "bind .l.s.c.son_name <KeyRelease> { \
+					set kk %K; \
+					if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } { \
+						if [ string equal $kk underscore ] { \
+							set kk _ \
+						}; \
+						set ll %W; \
+						set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
+						if { $ff == -1 } { \
+							set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
+						}; \
+						if { $ff >= 0 } { \
+							selectinlist $ll $ff \
+						} \
+					} \
+				}" );
 		}
 
 		cmd( "bind .l.s.c.son_name <BackSpace> { set choice 5 }" );
@@ -715,31 +743,29 @@ int browse( object *r, int *choice )
 				focus .l.v.c.var_name; \
 				set listfocus 1; \
 				set itemfocus 0; \
-				.l.v.c.var_name selection set 0; \
-				.l.v.c.var_name activate 0; \
-				.l.v.c.var_name see 0; \
+				selectinlist .l.v.c.var_name 0; \
 				update_options \
 			}" );
 
 		// navigation (top) panel
-		cmd( "frame .l.p" );
+		cmd( "ttk::frame .l.p" );
 
-		cmd( "frame .l.p.up_name" );
-		cmd( "label .l.p.up_name.d -text \"Parent object:\" -width 12 -anchor w" );
+		cmd( "ttk::frame .l.p.up_name" );
+		cmd( "ttk::label .l.p.up_name.d -text \"Parent object:\" -width 15 -anchor w" );
 		if ( r->up != NULL )
 		{
-			cmd( "label .l.p.up_name.n -anchor w -text \" %s \" -foreground red", r->up->label );
+			cmd( "ttk::label .l.p.up_name.n -text \" %s \" -anchor w -style hl.TLabel", r->up->label );
 			cmd( "bind . <KeyPress-u> { set itemfocus 0; set choice 5 }; bind . <KeyPress-U> { set itemfocus 0; set choice 5 }" );
 		}
 		else
-			cmd( "label .l.p.up_name.n -anchor w -text \"\"" );
+			cmd( "ttk::label .l.p.up_name.n -anchor w -text \"\"" );
 
 		cmd( "pack .l.p.up_name.d .l.p.up_name.n -side left" );
-		cmd( "pack .l.p.up_name -padx 9 -anchor w" );
+		cmd( "pack .l.p.up_name -padx 5 -anchor w" );
 
-		cmd( "frame .l.p.tit" );
-		cmd( "label .l.p.tit.lab -text \"Current object:\" -width 12 -anchor w" );
-		cmd( "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor w -width -1 -text \" %s \" %s -font [ font create -size $small_character -weight bold ]", r->label, r->up == NULL ? "" : "-command { set ttip \"\"; set choice 6 }" );
+		cmd( "ttk::frame .l.p.tit" );
+		cmd( "ttk::label .l.p.tit.lab -text \"Current object:\" -width 15 -anchor w" );
+		cmd( "ttk::button .l.p.tit.but -width -1 -text \" %s \" -style hlBold.Toolbutton %s", r->label, r->up == NULL ? "" : "-command { set ttip \"\"; set choice 6 }" );
 
 		if ( r->up != NULL ) 
 		{
@@ -747,10 +773,10 @@ int browse( object *r, int *choice )
 			cmd( "bind .l.p.tit.but <Leave> { set ttip \"\" }" );
 		}
 		else
-			cmd( ".l.p.tit.but configure -disabledforeground red -state disabled" );
+			cmd( ".l.p.tit.but configure -state disabled" );
 
 		cmd( "pack .l.p.tit.lab .l.p.tit.but -side left" );
-		cmd( "pack .l.p.tit -padx 8 -anchor w" );
+		cmd( "pack .l.p.tit -padx 5 -anchor w" );
 
 		// main menu - avoid redrawing the menu if it already exists and is configured
 		cmd( "set existMenu [ winfo exists .m ]" );
@@ -759,10 +785,10 @@ int browse( object *r, int *choice )
 			 strcmp( Tcl_GetVar( inter, "confMenu", 0 ), ".m" ) )
 		{
 			cmd( "destroy .m" );
-			cmd( "menu .m -tearoff 0" );
+			cmd( "ttk::menu .m -tearoff 0" );
 
 			cmd( "set w .m.file" );
-			cmd( "menu $w -tearoff 0" );
+			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( ".m add cascade -label File -menu $w -underline 0" );
 			cmd( "$w add command -label \"Load...\" -underline 0 -accelerator Ctrl+L -command { set choice 17 }" );
 			cmd( "$w add command -label Reload -underline 0 -accelerator Ctrl+W -command { set choice 38 }" );
@@ -804,7 +830,7 @@ int browse( object *r, int *choice )
 			cmd( "$w add command -label Quit -underline 0 -accelerator Ctrl+Q -command { set choice 11 }" );
 
 			cmd( "set w .m.model" );
-			cmd( "menu $w -tearoff 0" );
+			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( ".m add cascade -label Model -menu $w -underline 0" );
 			cmd( "$w add command -label \"Add Variable...\" -underline 4 -accelerator Ctrl+V -command { set param 0; set choice 2 }" );
 			cmd( "$w add command -label \"Add Parameter...\" -underline 4 -accelerator Ctrl+P -command { set param 1; set choice 2 }" );
@@ -833,7 +859,7 @@ int browse( object *r, int *choice )
 			cmd( "$w add checkbutton -label \"Ignore Equation File\" -underline 0 -variable ignore_eq_file -command { set choice 54 }" );
 
 			cmd( "set w .m.model.sort" );
-			cmd( "menu $w -tearoff 0" );
+			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( "$w add command -label \"Ascending (alphabetic only)\" -underline 0 -accelerator F3 -command { set sort_order 0; set choice 94 }" );
 			cmd( "$w add command -label \"Descending (alphabetic only)\" -underline 0 -accelerator F4 -command { set sort_order 1; set choice 94 }" );
 			cmd( "$w add command -label \"Ascending (parameters first)\" -underline 11 -accelerator Shift+F3 -command { set sort_order 2; set choice 94 }" );
@@ -842,10 +868,10 @@ int browse( object *r, int *choice )
 			cmd( "$w add command -label \"Descending (variables first)\" -underline 17 -accelerator Ctrl+F4 -command { set sort_order 5; set choice 94 }" );
 			
 			cmd( "set w .m.data" );
-			cmd( "menu $w -tearoff 0" );
+			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( ".m add cascade -label Data -menu $w -underline 0" );
-			cmd( "$w add command -label \"Initial Values...\" -command {set choice 21} -underline 0 -accelerator Ctrl+I" );
-			cmd( "$w add command -label \"Numbers of Objects....\" -command {set choice 19} -accelerator Ctrl+O -underline 0" );
+			cmd( "$w add command -label \"Initial Values...\" -command { set choice 21 } -underline 0 -accelerator Ctrl+I" );
+			cmd( "$w add command -label \"Numbers of Objects....\" -command { set choice 19 } -accelerator Ctrl+O -underline 0" );
 			
 			cmd( "$w add separator" );
 			
@@ -857,7 +883,7 @@ int browse( object *r, int *choice )
 			cmd( "$w add command -label \"Data Browse...\" -command { set choice 34 } -underline 5 -accelerator Ctrl+B" );
 
 			cmd( "set w .m.data.setsens" );
-			cmd( "menu $w -tearoff 0" );
+			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( "$w add command -label \"Full (online)\" -underline 0 -command { set choice 62 }" );
 			cmd( "$w add command -label \"Full (batch)\" -underline 6 -command { set choice 63 }" );
 			cmd( "$w add command -label \"MC Point Sampling (batch)...\" -underline 0 -command { set choice 71 }" );
@@ -866,7 +892,7 @@ int browse( object *r, int *choice )
 			cmd( "$w add command -label \"NOLH Sampling (batch)...\" -underline 0 -command { set choice 72 }" );
 
 			cmd( "set w .m.run" );
-			cmd( "menu $w -tearoff 0" );
+			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( ".m add cascade -label Run -menu $w -underline 0" );
 			cmd( "$w add command -label Run -underline 0 -accelerator Ctrl+R -command { set choice 1 }" );
 			cmd( "$w add command -label \"Start 'No Window' Batch...\" -underline 0 -command { set choice 69 }" );
@@ -884,7 +910,7 @@ int browse( object *r, int *choice )
 			cmd( "$w add command -label \"Close Run-time Plots\" -command { set choice 40 } -underline 0" );
 
 			cmd( "set w .m.run.show" );
-			cmd( "menu $w -tearoff 0" );
+			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( "$w add command -label Save -underline 0 -command { set choice 39 }" );
 			cmd( "$w add command -label \"Run-time Plot\" -underline 0 -command { set choice 84 }" );
 			cmd( "$w add command -label Debug -underline 0 -command { set choice 85 }" );
@@ -895,14 +921,14 @@ int browse( object *r, int *choice )
 			cmd( "$w add command -label \"Sensitivity Analysis\" -underline 1 -command { set choice 66 }" );
 			
 			cmd( "set w .m.run.rem" );
-			cmd( "menu $w -tearoff 0" );
+			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( "$w add command -label Save -underline 0 -accelerator Ctrl+G -command { set choice 30 }" );
 			cmd( "$w add command -label \"Run-time Plot\" -underline 0 -command { set choice 31 }" );
 			cmd( "$w add command -label Debug -underline 0 -accelerator Ctrl+F -command { set choice 27 }" );
 			cmd( "$w add command -label Parallelize -underline 0 -command { set choice 87 }" );
 			
 			cmd( "set w .m.help" );
-			cmd( "menu $w -tearoff 0" );
+			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( ".m add cascade -label Help -menu $w -underline 0" );
 			cmd( "$w add command -label \"Help on Browser\" -underline 0 -accelerator F1 -command { LsdHelp browser.html }" );
 			cmd( "$w add command -label \"LSD Quick Help\" -underline 4 -command { LsdHelp LSD_quickhelp.html }" );
@@ -923,68 +949,67 @@ int browse( object *r, int *choice )
 
 			// Button bar
 			cmd( "destroy .bbar" );
-			cmd( "frame .bbar" );
+			cmd( "ttk::frame .bbar" );
 
-			cmd( "button .bbar.open -image openImg -relief $bRlf -overrelief $ovBrlf -command {set choice 17}" );
-			cmd( "button .bbar.reload -image reloadImg -relief $bRlf -overrelief $ovBrlf -command {set choice 38}" );
-			cmd( "button .bbar.save -image saveImg -relief $bRlf -overrelief $ovBrlf -command {set choice 18}" );
-			cmd( "button .bbar.struct -image structImg -relief $bRlf -overrelief $ovBrlf -command {set strWindowOn [ expr ! $strWindowOn ]; set choice 70} -state $strWindowB" );
-			cmd( "button .bbar.find -image findImg -relief $bRlf -overrelief $ovBrlf -command {set choice 50}" );
-			cmd( "button .bbar.init -image initImg -relief $bRlf -overrelief $ovBrlf -command {set choice 21}" );
-			cmd( "button .bbar.number -image numberImg -relief $bRlf -overrelief $ovBrlf -command {set choice 19}" );
-			cmd( "button .bbar.set -image setImg -relief $bRlf -overrelief $ovBrlf -command {set choice 22}" );
-			cmd( "button .bbar.run -image runImg -relief $bRlf -overrelief $ovBrlf -command {set choice 1}" );
-			cmd( "button .bbar.data -image dataImg -relief $bRlf -overrelief $ovBrlf -command {set choice 34}" );
-			cmd( "button .bbar.result -image resultImg -relief $bRlf -overrelief $ovBrlf -command {set choice 26}" );
-			cmd( "label .bbar.tip -textvariable ttip -font {Arial 8} -fg gray -width 17 -anchor w" );
+			cmd( "ttk::button .bbar.open -image openImg -style Toolbutton -command { set choice 17 }" );
+			cmd( "ttk::button .bbar.reload -image reloadImg -style Toolbutton -command { set choice 38 }" );
+			cmd( "ttk::button .bbar.save -image saveImg -style Toolbutton -command { set choice 18 }" );
+			cmd( "ttk::button .bbar.struct -image structImg -style Toolbutton -command { set strWindowOn [ expr ! $strWindowOn ]; set choice 70 } -state $strWindowB" );
+			cmd( "ttk::button .bbar.find -image findImg -style Toolbutton -command { set choice 50 }" );
+			cmd( "ttk::button .bbar.init -image initImg -style Toolbutton -command { set choice 21 }" );
+			cmd( "ttk::button .bbar.number -image numberImg -style Toolbutton -command { set choice 19 }" );
+			cmd( "ttk::button .bbar.set -image setImg -style Toolbutton -command { set choice 22 }" );
+			cmd( "ttk::button .bbar.run -image runImg -style Toolbutton -command { set choice 1 }" );
+			cmd( "ttk::button .bbar.data -image dataImg -style Toolbutton -command { set choice 34 }" );
+			cmd( "ttk::button .bbar.result -image resultImg -style Toolbutton -command { set choice 26 }" );
+			cmd( "ttk::label .bbar.tip -textvariable ttip -style graySmall.TLabel -width 17 -anchor w" );
 
-			cmd( "bind .bbar.open <Enter> {set ttip \"Open...\"}" );
-			cmd( "bind .bbar.open <Leave> {set ttip \"\"}" );
-			cmd( "bind .bbar.reload <Enter> {set ttip \"Reload\"}" );
-			cmd( "bind .bbar.reload <Leave> {set ttip \"\"}" );
-			cmd( "bind .bbar.save <Enter> {set ttip \"Save\"}" );
-			cmd( "bind .bbar.save <Leave> {set ttip \"\"}" );
-			cmd( "bind .bbar.struct <Enter> { if $strWindowOn {set ttip \"Hide structure\"} {set ttip \"Show structure\"}}" );
-			cmd( "bind .bbar.struct <Leave> {set ttip \"\"}" );
-			cmd( "bind .bbar.find <Enter> {set ttip \"Find element...\"}" );
-			cmd( "bind .bbar.find <Leave> {set ttip \"\"}" );
-			cmd( "bind .bbar.init <Enter> {set ttip \"Initial values...\"}" );
-			cmd( "bind .bbar.init <Leave> {set ttip \"\"}" );
-			cmd( "bind .bbar.number <Enter> {set ttip \"Num. objects...\"}" );
-			cmd( "bind .bbar.number <Leave> {set ttip \"\"}" );
-			cmd( "bind .bbar.set <Enter> {set ttip \"Settings...\"}" );
-			cmd( "bind .bbar.set <Leave> {set ttip \"\"}" );
-			cmd( "bind .bbar.run <Enter> {set ttip \"Run\"}" );
-			cmd( "bind .bbar.run <Leave> {set ttip \"\"}" );
-			cmd( "bind .bbar.data <Enter> {set ttip \"Data browse...\"}" );
-			cmd( "bind .bbar.data <Leave> {set ttip \"\"}" );
-			cmd( "bind .bbar.result <Enter> {set ttip \"Analysis...\"}" );
-			cmd( "bind .bbar.result <Leave> {set ttip \"\"}" );
+			cmd( "bind .bbar.open <Enter> { set ttip \"Open...\" }" );
+			cmd( "bind .bbar.open <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.reload <Enter> { set ttip \"Reload\" }" );
+			cmd( "bind .bbar.reload <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.save <Enter> { set ttip \"Save\" }" );
+			cmd( "bind .bbar.save <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.struct <Enter> { if $strWindowOn { set ttip \"Hide structure\" } { set ttip \"Show structure\" } }" );
+			cmd( "bind .bbar.struct <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.find <Enter> { set ttip \"Find element...\" }" );
+			cmd( "bind .bbar.find <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.init <Enter> { set ttip \"Initial values...\" }" );
+			cmd( "bind .bbar.init <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.number <Enter> { set ttip \"Num. objects...\" }" );
+			cmd( "bind .bbar.number <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.set <Enter> { set ttip \"Settings...\" }" );
+			cmd( "bind .bbar.set <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.run <Enter> { set ttip \"Run\" }" );
+			cmd( "bind .bbar.run <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.data <Enter> { set ttip \"Data browse...\" }" );
+			cmd( "bind .bbar.data <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.result <Enter> { set ttip \"Analysis...\" }" );
+			cmd( "bind .bbar.result <Leave> { set ttip \"\" }" );
 
-			cmd( "pack .bbar.open .bbar.reload .bbar.save .bbar.struct .bbar.find .bbar.init .bbar.number .bbar.set .bbar.run .bbar.data .bbar.result .bbar.tip -padx 3 -side left" );
-			cmd( "pack .bbar -anchor w -fill x" );
+			cmd( "pack .bbar.open .bbar.reload .bbar.save .bbar.struct .bbar.find .bbar.init .bbar.number .bbar.set .bbar.run .bbar.data .bbar.result .bbar.tip -side left" );
+			cmd( "pack .bbar -padx 3 -anchor w -fill x" );
 		}
 
+		cmd( "pack .l.v.lab" );
 		cmd( "pack .l.v.c.v_scroll -side right -fill y" );
 		cmd( "pack .l.v.c.var_name -fill both -expand yes" );
-		cmd( "pack .l.v.lab -fill x" );
 		cmd( "pack .l.v.c -fill both -expand yes" );
 
+		cmd( "pack .l.s.lab" );
 		cmd( "pack .l.s.c.v_scroll -side right -fill y" );
 		cmd( "pack .l.s.c.son_name -fill both -expand yes" );
-		cmd( "pack .l.s.lab -fill x" );
 		cmd( "pack .l.s.c -fill both -expand yes" );
 
 		cmd( "pack .l.p.up_name .l.p.tit" );
-		cmd( "pack .l.p -fill x" );
+		cmd( "pack .l.p -pady 3 -fill x" );
 
 		cmd( "pack .l.s .l.v -side left -fill both -expand yes" );
 
 		cmd( "pack .l -fill both -expand yes" );
 	}
 
-	cmd( "wm deiconify ." );
-	cmd( "update" );
+	cmd( "focustop ." );
 
 	main_cycle:
 	
@@ -1015,7 +1040,7 @@ int browse( object *r, int *choice )
 				set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ] \
 			}; \
 			if { [ .l.v.c.var_name index active ] != $itemfocus } { \
-				.l.v.c.var_name activate $itemfocus \
+				selectinlist .l.v.c.var_name $itemfocus \
 			}; \
 			focus .l.v.c.var_name; \
 		}" );
@@ -1038,7 +1063,7 @@ int browse( object *r, int *choice )
 				set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ] \
 			}; \
 			if { [ .l.s.c.son_name index active ] != $itemfocus } { \
-				.l.s.c.son_name activate $itemfocus \
+				selectinlist .l.s.c.son_name $itemfocus \
 			}; \
 			focus .l.s.c.son_name; \
 		}" );
@@ -1188,17 +1213,17 @@ case 2:
 	switch ( param )
 	{
 		case 0:								// variable
-			cmd( "frame $T.l" );
-			cmd( "label $T.l.l1 -text \"New variable in object:\"" );
-			cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
+			cmd( "ttk::frame $T.l" );
+			cmd( "ttk::label $T.l.l1 -text \"New variable in object:\"" );
+			cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
 			cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
 
-			cmd( "frame $T.f" );
-			cmd( "label $T.f.lab_ent -text \"Variable name\"" );
-			cmd( "label $T.f.lab_num -text \"Maximum lags\"" );
-			cmd( "label $T.f.sp -width 5" );
+			cmd( "ttk::frame $T.f" );
+			cmd( "ttk::label $T.f.lab_ent -text \"Variable name\"" );
+			cmd( "ttk::label $T.f.lab_num -text \"Maximum lags\"" );
+			cmd( "ttk::label $T.f.sp -width 5" );
 			cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missVar" );
-			cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.ent_num -width 3 -from 0 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set num %%P; if { $num > 0 } { $T.b.x configure -state normal } { $T.b.x configure -state disabled }; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -command { if { [ $T.f.ent_num get ] > 0 } { $T.b.x configure -state normal } { $T.b.x configure -state disabled } } -invalidcommand { bell } -justify center } { entry $T.f.ent_num -width 3 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set num %%P; if { $num > 0 } { $T.b.x configure -state normal } { $T.b.x configure -state disabled }; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center }" );
+			cmd( "ttk::spinbox $T.f.ent_num -width 3 -from 0 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99 } { set num %%P; if { $num > 0 } { $T.b.x configure -state normal } { $T.b.x configure -state disabled }; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -command { if { [ $T.f.ent_num get ] > 0 } { $T.b.x configure -state normal } { $T.b.x configure -state disabled } } -invalidcommand { bell } -justify center" );
 			cmd( "write_any $T.f.ent_num $num" );
 			cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left -padx 2" );
 			cmd( "bind $T.f.ent_var <KeyRelease> { \
@@ -1225,13 +1250,13 @@ case 2:
 			break;
 
 		case 2:								// function
-			cmd( "frame $T.l" );
-			cmd( "label $T.l.l1 -text \"New function in object:\"" );
-			cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
+			cmd( "ttk::frame $T.l" );
+			cmd( "ttk::label $T.l.l1 -text \"New function in object:\"" );
+			cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
 			cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
 
-			cmd( "frame $T.f" );
-			cmd( "label $T.f.lab_ent -text \"Function name\"" );
+			cmd( "ttk::frame $T.f" );
+			cmd( "ttk::label $T.f.lab_ent -text \"Function name\"" );
 			cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missVar" );
 			cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
 			cmd( "bind $T.f.ent_var <KeyRelease> { \
@@ -1258,13 +1283,13 @@ case 2:
 			break;
 
 		case 1:								// parameter
-			cmd( "frame $T.l" );
-			cmd( "label $T.l.l1 -text \"New parameter in object:\"" );
-			cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
+			cmd( "ttk::frame $T.l" );
+			cmd( "ttk::label $T.l.l1 -text \"New parameter in object:\"" );
+			cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
 			cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
 
-			cmd( "frame $T.f" );
-			cmd( "label $T.f.lab_ent -text \"Parameter name\"" );
+			cmd( "ttk::frame $T.f" );
+			cmd( "ttk::label $T.f.lab_ent -text \"Parameter name\"" );
 			cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missPar" );
 			cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
 			cmd( "bind $T.f.ent_var <KeyRelease> { \
@@ -1292,13 +1317,14 @@ case 2:
 	}
 
 	cmd( "set w $T.d" );
-	cmd( "frame $w" );
-	cmd( "label $w.lab -text \"Description\"" );
-	cmd( "frame $w.f" );
-	cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-	cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
+	cmd( "ttk::frame $w" );
+	cmd( "ttk::label $w.lab -text \"Description\"" );
+	cmd( "ttk::frame $w.f" );
+	cmd( "ttk::scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
+	cmd( "ttk::text $w.f.text -wrap word -width 60 -height 6 -yscrollcommand \"$w.f.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
 	cmd( "pack $w.f.yscroll -side right -fill y" );
 	cmd( "pack $w.f.text -expand yes -fill both" );
+	cmd( "mouse_wheel $w.f.text" );
 	cmd( "pack $w.lab $w.f" );
 
 	cmd( "pack $T.l $T.f $T.d -pady 5" );
@@ -1334,7 +1360,7 @@ case 2:
 			done = check_label( lab, cur );
 			if ( done == 1 )
 			{
-				cmd( "tk_messageBox -parent .addelem -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
+				cmd( "ttk::messageBox -parent .addelem -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
 				cmd( "focus .addelem.f.ent_var; .addelem.f.ent_var selection range 0 end" );
 				done = 0;
 				goto here_newelem;
@@ -1342,7 +1368,7 @@ case 2:
 			
 			if ( done == 2 )
 			{
-				cmd( "tk_messageBox -parent .addelem -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+				cmd( "ttk::messageBox -parent .addelem -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters. Choose a different name and try again.\"" );
 				cmd( "focus .addelem.f.ent_var; .addelem.f.ent_var selection range 0 end" );
 				done = 0;
 				goto here_newelem;
@@ -1396,7 +1422,7 @@ case 2:
 				cmd( "set listfocus 1; set itemfocus [ .l.v.c.var_name index end ]" );
 				struct_loaded = true;		// some model structure loaded
 				unsaved_change( true );		// signal unsaved change
-				redrawRoot = true;			// force browser redraw
+				redrawRoot = redrawStruc = true;	// force browser/structure redraw
 			}
 		}
 		else
@@ -1421,7 +1447,7 @@ case 2:
 	{
 		if ( param == 0 && num < 1 )
 		{
-			cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot set initial value\" -detail \"The variable '%s' was created with maximum lag equal to zero. No initial value is required.\"", lab );
+			cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot set initial value\" -detail \"The variable '%s' was created with maximum lag equal to zero. No initial value is required.\"", lab );
 			initVal = false;
 			break;
 		}
@@ -1464,25 +1490,26 @@ case 3:
 	cmd( "set T .addobj" );
 	cmd( "newtop $T \"Add Object\" { set done 2 }" );
 
-	cmd( "frame $T.l" );
-	cmd( "label $T.l.l1 -text \"New object descending from:\"" );
-	cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
+	cmd( "ttk::frame $T.l" );
+	cmd( "ttk::label $T.l.l1 -text \"New object descending from:\"" );
+	cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
 	cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
 
-	cmd( "frame $T.f" );
-	cmd( "label $T.f.lab_ent -text \"Object name\"" );
-	cmd( "entry $T.f.ent_var -width 20 -textvariable lab -justify center" );
+	cmd( "ttk::frame $T.f" );
+	cmd( "ttk::label $T.f.lab_ent -text \"Object name\"" );
+	cmd( "ttk::entry $T.f.ent_var -width 20 -textvariable lab -justify center" );
 	cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
 	cmd( "bind $T.f.ent_var <KeyPress-Return> {focus $T.b.ok}" );
 
 	cmd( "set w $T.d" );
-	cmd( "frame $w" );
-	cmd( "label $w.lab -text \"Description\"" );
-	cmd( "frame $w.f" );
-	cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-	cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
+	cmd( "ttk::frame $w" );
+	cmd( "ttk::label $w.lab -text \"Description\"" );
+	cmd( "ttk::frame $w.f" );
+	cmd( "ttk::scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
+	cmd( "ttk::text $w.f.text -wrap word -width 60 -height 6 -yscrollcommand \"$w.f.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
 	cmd( "pack $w.f.yscroll -side right -fill y" );
 	cmd( "pack $w.f.text -expand yes -fill both" );
+	cmd( "mouse_wheel $w.f.text" );
 	cmd( "pack $w.lab $w.f" );
 
 	cmd( "pack $T.l $T.f $w -pady 5" );
@@ -1508,7 +1535,7 @@ case 3:
 		done = check_label( lab, cur ); // check that the label does not exist already
 		if ( done == 1 )
 		{
-			cmd( "tk_messageBox -parent .addobj -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
+			cmd( "ttk::messageBox -parent .addobj -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
 			cmd( "focus .addobj.f.ent_var; .addobj.f.ent_var selection range 0 end" );
 			done = 0;
 			goto here_newobject;
@@ -1516,7 +1543,7 @@ case 3:
 		
 		if ( done == 2 )
 		{
-			cmd( "tk_messageBox -parent .addobj -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+			cmd( "ttk::messageBox -parent .addobj -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters. Choose a different name and try again.\"" );
 			cmd( "focus .addobj.f.ent_var; .addobj.f.ent_var selection range 0 end" );
 			done = 0;
 			goto here_newobject;
@@ -1524,7 +1551,7 @@ case 3:
 		
 		r->add_obj( lab, 1, 1 );
 		cmd( "set text_description [.addobj.d.f.text get 1.0 end]" );  
-		cmd( "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available)\"} {}" );
+		cmd( "if { $text_description==\"\\n\" || $text_description==\"\" } { set text_description \"(no description available)\" }" );
 		lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
 		add_description( lab, "Object", lab1 );
 		cmd( "lappend modObj %s", lab );
@@ -1533,7 +1560,7 @@ case 3:
 		cmd( "set listfocus 2; set itemfocus [ .l.s.c.son_name index end ]; set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]" );
 		struct_loaded = true;	// some model structure loaded
 		unsaved_change( true );	// signal unsaved change
-		redrawRoot = true;		// force browser redraw
+		redrawRoot = redrawStruc = true;	// force browser/structure redraw
 	}
 
 	here_endobject:
@@ -1574,7 +1601,7 @@ case 32:
 
 	if ( r->up == NULL )
 	{
-		cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -title Error -icon error -message \"Cannot insert a parent of Root\" -detail \"Press 'OK' if you want the new object to be a descendant of Root and contain all current descendants from Root.\" ]; if [ string equal -nocase $answer ok ] { set done 1 } { set done 2 }" );
+		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -title Error -icon error -message \"Cannot insert a parent of Root\" -detail \"Press 'OK' if you want the new object to be a descendant of Root and contain all current descendants from Root.\" ]; if [ string equal -nocase $answer ok ] { set done 1 } { set done 2 }" );
 		if ( done == 2 )
 			goto here_endparent;
 		done = 0;
@@ -1585,27 +1612,28 @@ case 32:
 	cmd( "set T .inspar" );
 	cmd( "newtop $T \"Add Parent\" { set done 2 }" );
 
-	cmd( "frame $T.l" );
-	cmd( "label $T.l.l1 -text \"New parent to:\"" );
-	cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
-	cmd( "label $T.l.l3 -text \"descending from:\"" );
-	cmd( "label $T.l.l4 -text \"%s\" -fg red", r->up == NULL ? "(none)" : r->up->label );
+	cmd( "ttk::frame $T.l" );
+	cmd( "ttk::label $T.l.l1 -text \"New parent to:\"" );
+	cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
+	cmd( "ttk::label $T.l.l3 -text \"descending from:\"" );
+	cmd( "ttk::label $T.l.l4 -text \"%s\" -style hl.TLabel", r->up == NULL ? "(none)" : r->up->label );
 	cmd( "pack $T.l.l1 $T.l.l2 $T.l.l3 $T.l.l4 -side left -padx 2" );
 
-	cmd( "frame $T.f" );
-	cmd( "label $T.f.lab_ent -text \"Object name\"" );
-	cmd( "entry $T.f.ent_var -width 20 -textvariable lab -justify center" );
+	cmd( "ttk::frame $T.f" );
+	cmd( "ttk::label $T.f.lab_ent -text \"Object name\"" );
+	cmd( "ttk::entry $T.f.ent_var -width 20 -textvariable lab -justify center" );
 	cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
 	cmd( "bind $T.f.ent_var <KeyPress-Return> {focus $T.b.ok}" );
 
 	cmd( "set w $T.d" );
-	cmd( "frame $w" );
-	cmd( "label $w.lab -text \"Description\"" );
-	cmd( "frame $w.f" );
-	cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-	cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
+	cmd( "ttk::frame $w" );
+	cmd( "ttk::label $w.lab -text \"Description\"" );
+	cmd( "ttk::frame $w.f" );
+	cmd( "ttk::scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
+	cmd( "ttk::text $w.f.text -wrap word -width 60 -height 6 -yscrollcommand \"$w.f.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
 	cmd( "pack $w.f.yscroll -side right -fill y" );
 	cmd( "pack $w.f.text -expand yes -fill both" );
+	cmd( "mouse_wheel $w.f.text" );
 	cmd( "pack $w.lab $w.f" );
 
 	cmd( "pack $T.l $T.f $w -pady 5" );
@@ -1630,7 +1658,7 @@ case 32:
 		done = check_label( lab1, cur ); // check that the label does not exist already
 		if ( done == 1 )
 		{
-			cmd( "tk_messageBox -parent .inspar -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
+			cmd( "ttk::messageBox -parent .inspar -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
 			cmd( "focus .inspar.f.ent_var; .inspar.f.ent_var selection range 0 end" );
 			done = 0;
 			goto here_newparent;
@@ -1638,7 +1666,7 @@ case 32:
 	   
 		if ( done == 2 )
 		{
-			cmd( "tk_messageBox -parent .inspar -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+			cmd( "ttk::messageBox -parent .inspar -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
 			cmd( "focus .inspar.f.ent_var; .inspar.f.ent_var selection range 0 end" );
 			done = 0;
 			goto here_newparent;
@@ -1656,7 +1684,7 @@ case 32:
 	cmd( "lappend modObj %s", lab );
 
 	unsaved_change( true );		// signal unsaved change
-	redrawRoot = true;			// force browser redraw
+	redrawRoot = redrawStruc = true;	// force browser/structure redraw
 
 	here_endparent:
 
@@ -1686,7 +1714,7 @@ case 4:
 	cmd( "set listfocus 2; set itemfocus 0" );
 
 	*choice = 0;
-	redrawRoot = true;			// force browser redraw
+	redrawRoot = redrawStruc = true;	// force browser/structure redraw
 	return n;
 
 
@@ -1701,7 +1729,7 @@ case 5:
 	cmd( "set listfocus 2; set itemfocus %d", r->up->up == NULL ? i : i + 1 ); 
 
 	*choice = 0;
-	redrawRoot = true;					// force browser redraw
+	redrawRoot = redrawStruc = true;	// force browser/structure redraw
 	return r->up;
 
 
@@ -1729,7 +1757,7 @@ case 6:
 
 	if ( ! strcmp( r->label, "Root" ) )	// cannot change Root
 	{
-		cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Cannot change Root\" -detail \"Please select an existing object or insert a new one before using this option.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Cannot change Root\" -detail \"Please select an existing object or insert a new one before using this option.\"" );
 		break;
 	}
 
@@ -1745,31 +1773,32 @@ case 6:
 	cmd( "set T .objprop" );
 	cmd( "newtop $T \"Change Object\" { set choice 2 }" );
 
-	cmd( "frame $T.h" );
+	cmd( "ttk::frame $T.h" );
 
-	cmd( "label $T.h.lab_ent -text \"Object:\"" );
-	cmd( "label $T.h.ent_var -fg red -text $lab" );
+	cmd( "ttk::label $T.h.lab_ent -text \"Object:\"" );
+	cmd( "ttk::label $T.h.ent_var -style hl.TLabel -text $lab" );
 	cmd( "pack $T.h.lab_ent $T.h.ent_var -side left -padx 2" );
 
-	cmd( "frame $T.b0" );
-	cmd( "button $T.b0.prop -width $butWid -text Rename -command { set useCurrObj yes; set choice 83 } -underline 0" );
-	cmd( "button $T.b0.num -width $butWid -text Number -command { set useCurrObj yes; set choice 33 } -underline 0" );
-	cmd( "button $T.b0.del -width $butWid -text Delete -command { set choice 74 } -underline 0" );
-	cmd( "pack $T.b0.prop $T.b0.num $T.b0.del -padx 10 -side left" );
+	cmd( "ttk::frame $T.b0" );
+	cmd( "ttk::button $T.b0.prop -width $butWid -text Rename -command { set useCurrObj yes; set choice 83 } -underline 0" );
+	cmd( "ttk::button $T.b0.num -width $butWid -text Number -command { set useCurrObj yes; set choice 33 } -underline 0" );
+	cmd( "ttk::button $T.b0.del -width $butWid -text Delete -command { set choice 74 } -underline 0" );
+	cmd( "pack $T.b0.prop $T.b0.num $T.b0.del -padx $butPad -side left" );
 
-	cmd( "frame $T.b1" );
-	cmd( "checkbutton $T.b1.com -text \"Compute: force the computation of the variables in this object\" -variable to_compute -underline 1" );
+	cmd( "ttk::frame $T.b1" );
+	cmd( "ttk::checkbutton $T.b1.com -text \"Compute: force the computation of the variables in this object\" -variable to_compute -underline 1" );
 	cmd( "pack $T.b1.com" );
 
 	cmd( "set w $T.desc" );
 
-	cmd( "frame $w" );
-	cmd( "label $w.int -text \"Description\"" );
-	cmd( "frame $w.f" );
-	cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-	cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
+	cmd( "ttk::frame $w" );
+	cmd( "ttk::label $w.int -text \"Description\"" );
+	cmd( "ttk::frame $w.f" );
+	cmd( "ttk::scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
+	cmd( "ttk::text $w.f.text -wrap word -width 60 -height 10 -yscrollcommand \"$w.f.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
 	cmd( "pack $w.f.yscroll -side right -fill y" );
 	cmd( "pack $w.f.text -anchor w -expand yes -fill both" );
+	cmd( "mouse_wheel $w.f.text" );
 
 	for ( i = 0; cur_descr->text[ i ] != ( char ) NULL; ++i )
 		if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\' )
@@ -1802,7 +1831,7 @@ case 6:
 		unsaved_change( true );		// signal unsaved change
 
 		// save description changes
-		cmd( "set text_description \"[.objprop.desc.f.text get 1.0 end]\"" );
+		cmd( "set text_description \"[ .objprop.desc.f.text get 1.0 end ]\"" );
 		change_descr_text( lab_old );
 		lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
 		add_description( lab, "Object", lab1 );
@@ -1864,7 +1893,7 @@ case 83:
 		
 	if ( nature == 74 )		// delete
 	{
-		cmd( "set answer [ tk_messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete object?\" -detail \"Press 'Yes' to confirm deleting '$vname'\n\nNote that all descendants will be also deleted!\" ]" );
+		cmd( "set answer [ ttk::messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete object?\" -detail \"Press 'Yes' to confirm deleting '$vname'\n\nNote that all descendants will be also deleted!\" ]" );
 		cmd( "switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 		if ( *choice == 2 )
 			break;
@@ -1877,14 +1906,14 @@ case 83:
 		cmd( "set T .chgnam" );
 		cmd( "newtop $T \"Rename\" { set choice 2 }" );
 
-		cmd( "frame $T.l" );
-		cmd( "label $T.l.l -text \"Object:\"" );
-		cmd( "label $T.l.n -fg red -text \"$vname\"" );
+		cmd( "ttk::frame $T.l" );
+		cmd( "ttk::label $T.l.l -text \"Object:\"" );
+		cmd( "ttk::label $T.l.n -style hl.TLabel -text \"$vname\"" );
 		cmd( "pack $T.l.l $T.l.n -side left -padx 2" );
 
-		cmd( "frame $T.e" );
-		cmd( "label $T.e.l -text \"New name\"" );
-		cmd( "entry $T.e.e -width 20 -textvariable vname -justify center" );
+		cmd( "ttk::frame $T.e" );
+		cmd( "ttk::label $T.e.l -text \"New name\"" );
+		cmd( "ttk::entry $T.e.e -width 20 -textvariable vname -justify center" );
 		cmd( "pack $T.e.l $T.e.e -side left -padx 2" );
 
 		cmd( "pack $T.l $T.e -padx 5 -pady 5" );
@@ -1917,14 +1946,14 @@ case 83:
 				done = check_label( lab, cur1 );
 				if ( done == 1 )
 				{
-					cmd( "tk_messageBox -parent .chgnam -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
+					cmd( "ttk::messageBox -parent .chgnam -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
 					cmd( "focus .chgnam.e.e; .chgnam.e.e selection range 0 end" );
 					goto here_newname;
 				}
 				
 				if ( done == 2 )
 				{
-					cmd( "tk_messageBox -parent .chgnam -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+					cmd( "ttk::messageBox -parent .chgnam -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
 					cmd( "focus .chgnam.e.e; .chgnam.e.e selection range 0 end" );
 					goto here_newname;
 				}
@@ -1947,7 +1976,7 @@ case 83:
 	else
 		unsaved_change( true );					// signal unsaved change
 	
-	redrawRoot = true;							// request browser redraw
+	redrawRoot = redrawStruc = true;			// force browser/structure redraw
 
 break;
 
@@ -1955,13 +1984,13 @@ break;
 // Edit variable name (defined in tcl $vname) and set debug/saving/plot flags
 case 7:
 
-	redrawRoot = true;					// assume browser redraw required
+	redrawRoot = redrawStruc = true;	// force browser/structure redraw
 	int savei, parallel;
 
 	cmd( "if { ! [ catch { set vname [ .l.v.c.var_name get [ .l.v.c.var_name curselection ] ] } ] && ! [ string equal $vname \"\" ] } { set choice 1 } { set choice 0 }" );
 	if ( *choice == 0 )
 	{ 
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No element selected\" -detail \"Please select an element (variable, parameter) before using this option.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No element selected\" -detail \"Please select an element (variable, parameter) before using this option.\"" );
 		break;
 	}
 
@@ -2004,31 +2033,31 @@ case 7:
 	cmd( "set T .chgelem" );
 	cmd( "newtop $T \"Change Element\" { set done 2 }" );
 
-	cmd( "frame $T.h" );
+	cmd( "ttk::frame $T.h" );
 
-	cmd( "frame $T.h.l" );
+	cmd( "ttk::frame $T.h.l" );
 	
 	if ( cv->param == 0 )
-		cmd( "label $T.h.l.lab_ent -text \"Variable:\"" );
+		cmd( "ttk::label $T.h.l.lab_ent -text \"Variable:\"" );
 	if ( cv->param == 1 )
-		cmd( "label $T.h.l.lab_ent -text \"Parameter:\"" );
+		cmd( "ttk::label $T.h.l.lab_ent -text \"Parameter:\"" );
 	if ( cv->param == 2 )
-		cmd( "label $T.h.l.lab_ent -text \"Function:\"" );
+		cmd( "ttk::label $T.h.l.lab_ent -text \"Function:\"" );
 	
-	cmd( "label $T.h.l.ent_var -fg red -text $vname" );
+	cmd( "ttk::label $T.h.l.ent_var -style hl.TLabel -text $vname" );
 	cmd( "pack $T.h.l.lab_ent $T.h.l.ent_var -side left -padx 2" );
 
-	cmd( "frame $T.h.o" );
-	cmd( "label $T.h.o.l -text \"In object:\"" );
-	cmd( "label $T.h.o.obj -fg red -text \"%s\"", cv->up->label );
+	cmd( "ttk::frame $T.h.o" );
+	cmd( "ttk::label $T.h.o.l -text \"In object:\"" );
+	cmd( "ttk::label $T.h.o.obj -style hl.TLabel -text \"%s\"", cv->up->label );
 	cmd( "pack $T.h.o.l $T.h.o.obj -side left -padx 2" );
 
 	cmd( "pack $T.h.l $T.h.o" );
 	
 	if ( cv->num_lag > 0 || cv->param == 1 )
 	{
-		cmd( "frame $T.h.i" );
-		cmd( "label $T.h.i.l -text \"Initial value%s%s:\"", cv->num_lag > 1 ? "s" : "", cv->up->next == NULL ? "" : " (first instance)" );
+		cmd( "ttk::frame $T.h.i" );
+		cmd( "ttk::label $T.h.i.l -text \"Initial value%s%s:\"", cv->num_lag > 1 ? "s" : "", cv->up->next == NULL ? "" : " (first instance)" );
 		
 		if ( cv->data_loaded != '-' )
 		{
@@ -2038,12 +2067,12 @@ case 7:
 			j = ( cv->param == 1 ) ? 1 : min( cv->num_lag, 4 );
 			for ( i = 0; i < j; ++i )
 			{
-				cmd( "frame $T.h.i.v%d", i );
-				cmd( "label $T.h.i.v%d.val -fg red -text \"%g\"", i, cv->val[ i ] );
+				cmd( "ttk::frame $T.h.i.v%d", i );
+				cmd( "ttk::label $T.h.i.v%d.val -style hl.TLabel -text \"%g\"", i, cv->val[ i ] );
 				
 				if ( j > 1 )
 				{
-					cmd( "label $T.h.i.v%d.lag -text \"(%d)\"", i, i + 1 );
+					cmd( "ttk::label $T.h.i.v%d.lag -text \"(%d)\"", i, i + 1 );
 					cmd( "pack $T.h.i.v%d.val $T.h.i.v%d.lag -side left", i, i );
 				}
 				else
@@ -2057,7 +2086,7 @@ case 7:
 		}
 		else
 		{
-			cmd( "label $T.h.i.val -fg red -text \"(uninitialized)\"" );
+			cmd( "ttk::label $T.h.i.val -style hl.TLabel -text \"(uninitialized)\"" );
 			cmd( "pack $T.h.i.l $T.h.i.val -side left -padx 2" );
 		}
 		
@@ -2066,40 +2095,40 @@ case 7:
 	
 	if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 1 ) )
 	{
-		cmd( "frame $T.h.u" );
+		cmd( "ttk::frame $T.h.u" );
 		
 		if ( cv->delay > 0 )
 		{
-			cmd( "frame $T.h.u.d" );
-			cmd( "label $T.h.u.d.l -text \"Initial updating delay:\"" );
-			cmd( "label $T.h.u.d.v -fg red -text \"%d\"", cv->delay );
+			cmd( "ttk::frame $T.h.u.d" );
+			cmd( "ttk::label $T.h.u.d.l -text \"Initial updating delay:\"" );
+			cmd( "ttk::label $T.h.u.d.v -style hl.TLabel -text \"%d\"", cv->delay );
 			cmd( "pack $T.h.u.d.l $T.h.u.d.v -side left -padx 2" );
 			cmd( "pack $T.h.u.d" );
 		}
 		
 		if ( cv->delay_range > 0 )
 		{
-			cmd( "frame $T.h.u.dr" );
-			cmd( "label $T.h.u.dr.l -text \"Random updating delay range:\"" );
-			cmd( "label $T.h.u.dr.v -fg red -text \"%d\"", cv->delay_range );
+			cmd( "ttk::frame $T.h.u.dr" );
+			cmd( "ttk::label $T.h.u.dr.l -text \"Random updating delay range:\"" );
+			cmd( "ttk::label $T.h.u.dr.v -style hl.TLabel -text \"%d\"", cv->delay_range );
 			cmd( "pack $T.h.u.dr.l $T.h.u.dr.v -side left -padx 2" );
 			cmd( "pack $T.h.u.dr" );
 		}
 		
 		if ( cv->period > 1 )
 		{
-			cmd( "frame $T.h.u.p" );
-			cmd( "label $T.h.u.p.l -text \"Updating period:\"" );
-			cmd( "label $T.h.u.p.v -fg red -text \"%d\"", cv->period );
+			cmd( "ttk::frame $T.h.u.p" );
+			cmd( "ttk::label $T.h.u.p.l -text \"Updating period:\"" );
+			cmd( "ttk::label $T.h.u.p.v -style hl.TLabel -text \"%d\"", cv->period );
 			cmd( "pack $T.h.u.p.l $T.h.u.p.v -side left -padx 2" );
 			cmd( "pack $T.h.u.p" );
 		}
 		
 		if ( cv->period_range > 1 )
 		{
-			cmd( "frame $T.h.u.pr" );
-			cmd( "label $T.h.u.pr.l -text \"Random updating period range:\"" );
-			cmd( "label $T.h.u.pr.v -fg red -text \"%d\"", cv->period_range );
+			cmd( "ttk::frame $T.h.u.pr" );
+			cmd( "ttk::label $T.h.u.pr.l -text \"Random updating period range:\"" );
+			cmd( "ttk::label $T.h.u.pr.v -style hl.TLabel -text \"%d\"", cv->period_range );
 			cmd( "pack $T.h.u.pr.l $T.h.u.pr.v -side left -padx 2" );
 			cmd( "pack $T.h.u.pr" );
 		}
@@ -2107,32 +2136,32 @@ case 7:
 		cmd( "pack $T.h.u" );			
 	}
 	
-	cmd( "frame $T.b0" );
-	cmd( "button $T.b0.prop -width $butWid -text Properties -command { set done 5 } -underline 1" );
-	cmd( "button $T.b0.upd -width $butWid -text Updating -command { set done 14 } -underline 7" );
-	cmd( "button $T.b0.mov -width $butWid -text Move -command { set done 13 } -underline 0" );
-	cmd( "button $T.b0.del -width $butWid -text Delete -command { set done 10 } -underline 2" );
+	cmd( "ttk::frame $T.b0" );
+	cmd( "ttk::button $T.b0.prop -width $butWid -text Properties -command { set done 5 } -underline 1" );
+	cmd( "ttk::button $T.b0.upd -width $butWid -text Updating -command { set done 14 } -underline 7" );
+	cmd( "ttk::button $T.b0.mov -width $butWid -text Move -command { set done 13 } -underline 0" );
+	cmd( "ttk::button $T.b0.del -width $butWid -text Delete -command { set done 10 } -underline 2" );
 	
 	if ( cv->param == 0 )
 	{
 		cmd( "bind $T <Control-g> \"$T.b0.upd invoke\"; bind $T <Control-G> \"$T.b0.upd invoke\"" );
 		
-		cmd( "pack $T.b0.prop $T.b0.upd $T.b0.mov $T.b0.del -padx 10 -side left" );
+		cmd( "pack $T.b0.prop $T.b0.upd $T.b0.mov $T.b0.del -padx $butPad -side left" );
 	}
 	else
-		cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx 10 -side left" );
+		cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx $butPad -side left" );
 
-	cmd( "frame $T.b1" );
+	cmd( "ttk::frame $T.b1" );
 
-	cmd( "frame $T.b1.sav" );
-	cmd( "checkbutton $T.b1.sav.n -text \"Save: save the series for analysis      \" -variable save -underline 0 -command { if $save { .chgelem.b1.sav.i configure -state normal } { set savei 0; .chgelem.b1.sav.i configure -state disabled } }" );
-	cmd( "checkbutton $T.b1.sav.i -text \"Save in separate files\" -variable savei -underline 17" );
+	cmd( "ttk::frame $T.b1.sav" );
+	cmd( "ttk::checkbutton $T.b1.sav.n -text \"Save: save the series for analysis      \" -variable save -underline 0 -command { if $save { .chgelem.b1.sav.i configure -state normal } { set savei 0; .chgelem.b1.sav.i configure -state disabled } }" );
+	cmd( "ttk::checkbutton $T.b1.sav.i -text \"Save in separate files\" -variable savei -underline 17" );
 	cmd( "if { ! $save } { set savei 0; .chgelem.b1.sav.i configure -state disabled }" );
 	cmd( "pack $T.b1.sav.n $T.b1.sav.i -side left -anchor w" );
 
-	cmd( "checkbutton $T.b1.plt -text \"Run-time plot: observe the series during the simulation execution\" -variable plot -underline 9" );
-	cmd( "checkbutton $T.b1.deb -text \"Debug: allow interruption after this equation/function\" -variable debug -underline 0" );
-	cmd( "checkbutton $T.b1.par -text \"Parallel: allow multi-object parallel updating for this equation\" -variable parallel -underline 0" );
+	cmd( "ttk::checkbutton $T.b1.plt -text \"Run-time plot: observe the series during the simulation execution\" -variable plot -underline 9" );
+	cmd( "ttk::checkbutton $T.b1.deb -text \"Debug: allow interruption after this equation/function\" -variable debug -underline 0" );
+	cmd( "ttk::checkbutton $T.b1.par -text \"Parallel: allow multi-object parallel updating for this equation\" -variable parallel -underline 0" );
 
 	switch ( cv->param )
 	{
@@ -2152,12 +2181,12 @@ case 7:
 	cmd( "pack $T.h $T.b0 $T.b1 -pady 5" );
 
 	cmd( "set Td $T.desc" );
-	cmd( "frame $Td" );
+	cmd( "ttk::frame $Td" );
 
-	cmd( "frame $Td.opt" );
-	cmd( "label $Td.opt.l -text \"Include in documentation to be\"" );
-	cmd( "checkbutton $Td.opt.ini -text \"Initialized\" -variable initial -underline 0" ); 
-	cmd( "checkbutton $Td.opt.obs -text \"Observed\" -variable observe -underline 0" );
+	cmd( "ttk::frame $Td.opt" );
+	cmd( "ttk::label $Td.opt.l -text \"Include in documentation to be\"" );
+	cmd( "ttk::checkbutton $Td.opt.ini -text \"Initialized\" -variable initial -underline 0" ); 
+	cmd( "ttk::checkbutton $Td.opt.obs -text \"Observed\" -variable observe -underline 0" );
 	
 	if ( cv->param == 1 || cv->num_lag > 0 )
 	{
@@ -2167,14 +2196,15 @@ case 7:
 	else
 		cmd( "pack $Td.opt.l $Td.opt.obs -side left" );
 
-	cmd( "frame $Td.f" );
-	cmd( "label $Td.f.int -text \"Description\"" );
+	cmd( "ttk::frame $Td.f" );
+	cmd( "ttk::label $Td.f.int -text \"Description\"" );
 
-	cmd( "frame $Td.f.desc" );
-	cmd( "scrollbar $Td.f.desc.yscroll -command \"$Td.f.desc.text yview\"" );
-	cmd( "text $Td.f.desc.text -undo 1 -wrap word -width 60 -height 8 -relief sunken -yscrollcommand \"$Td.f.desc.yscroll set\" -font \"$font_small\"" );
+	cmd( "ttk::frame $Td.f.desc" );
+	cmd( "ttk::scrollbar $Td.f.desc.yscroll -command \"$Td.f.desc.text yview\"" );
+	cmd( "ttk::text $Td.f.desc.text -wrap word -width 60 -height 8 -yscrollcommand \"$Td.f.desc.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
 	cmd( "pack $Td.f.desc.yscroll -side right -fill y" );
 	cmd( "pack $Td.f.desc.text -anchor w -expand yes -fill both" );
+	cmd( "mouse_wheel $Td.f.desc.text" );
 	
 	for ( i = 0; cur_descr->text[ i ] != '\0'; ++i )
 		if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\')
@@ -2186,31 +2216,32 @@ case 7:
 
 	cmd( "pack $Td.f.int $Td.f.desc" );
 
-	cmd( "frame $Td.b" );
-	cmd( "button $Td.b.eq -width [ expr $butWid + 3 ] -text \"View Code\" -command {set done 3} -underline 3" );
-	cmd( "button $Td.b.auto_doc -width [ expr $butWid + 3 ] -text \"Auto Descr.\" -command {set done 9} -underline 0" );
-	cmd( "button $Td.b.us -width [ expr $butWid + 3 ] -text \"Using Element\" -command {set done 4} -underline 0" );
-	cmd( "button $Td.b.using -width [ expr $butWid + 3 ] -text \"Elements Used\" -command {set done 7} -underline 0" );
+	cmd( "ttk::frame $Td.b" );
+	cmd( "ttk::button $Td.b.eq -width [ expr $butWid + 3 ] -text \"View Code\" -command { set done 3 } -underline 3" );
+	cmd( "ttk::button $Td.b.auto_doc -width [ expr $butWid + 3 ] -text \"Auto Descr.\" -command { set done 9 } -underline 0" );
+	cmd( "ttk::button $Td.b.us -width [ expr $butWid + 3 ] -text \"Using Element\" -command { set done 4 } -underline 0" );
+	cmd( "ttk::button $Td.b.using -width [ expr $butWid + 3 ] -text \"Elements Used\" -command { set done  7} -underline 0" );
 	
 	if ( ! strcmp( cur_descr->type, "Parameter" ) )
-		cmd( "pack $Td.b.auto_doc $Td.b.us -padx 10 -side left" );
+		cmd( "pack $Td.b.auto_doc $Td.b.us -padx $butPad -side left" );
 	else
 	{
-		cmd( "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx 5 -side left" );
+		cmd( "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx $butPad -side left" );
 		cmd( "bind $T <Control-w> \"$Td.b.eq invoke\"; bind $T <Control-W> \"$Td.b.eq invoke\"" );
 		cmd( "bind $T <Control-e> \"$Td.b.using invoke\"; bind $T <Control-E> \"$Td.b.using invoke\"" );
 	}
 
 	if ( cv->param == 1 || cv->num_lag > 0 )
 	{
-		cmd( "frame $Td.i" );
-		cmd( "label $Td.i.int -text \"Comments on initial values\"" );
+		cmd( "ttk::frame $Td.i" );
+		cmd( "ttk::label $Td.i.int -text \"Comments on initial values\"" );
 
-		cmd( "frame $Td.i.desc" );
-		cmd( "scrollbar $Td.i.desc.yscroll -command \"$Td.i.desc.text yview\"" );
-		cmd( "text $Td.i.desc.text -undo 1 -wrap word -width 60 -height 3 -relief sunken -yscrollcommand \"$Td.i.desc.yscroll set\" -font \"$font_small\"" );
+		cmd( "ttk::frame $Td.i.desc" );
+		cmd( "ttk::scrollbar $Td.i.desc.yscroll -command \"$Td.i.desc.text yview\"" );
+		cmd( "ttk::text $Td.i.desc.text -wrap word -width 60 -height 3 -yscrollcommand \"$Td.i.desc.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
 		cmd( "pack $Td.i.desc.yscroll -side right -fill y" );
 		cmd( "pack $Td.i.desc.text -anchor w -expand yes -fill both" );
+		cmd( "mouse_wheel $Td.i.desc.text" );
 
 		if ( cur_descr->init != NULL )
 		{
@@ -2225,10 +2256,10 @@ case 7:
 		
 		cmd( "pack $Td.i.int $Td.i.desc" );
 	  
-		cmd( "frame $Td.b2" );
-		cmd( "button $Td.b2.setall -width [ expr $butWid + 3 ] -text \"Initial Values\" -command { set done 11 } -underline 1" );
-		cmd( "button $Td.b2.sens -width [ expr $butWid + 3 ] -text \"Sensitivity\" -command { set done 12 } -underline 5" );
-		cmd( "pack $Td.b2.setall $Td.b2.sens -padx 10 -side left" );
+		cmd( "ttk::frame $Td.b2" );
+		cmd( "ttk::button $Td.b2.setall -width [ expr $butWid + 3 ] -text \"Initial Values\" -command { set done 11 } -underline 1" );
+		cmd( "ttk::button $Td.b2.sens -width [ expr $butWid + 3 ] -text \"Sensitivity\" -command { set done 12 } -underline 5" );
+		cmd( "pack $Td.b2.setall $Td.b2.sens -padx $butPad -side left" );
 		
 		cmd( "pack $Td.opt $Td.f $Td.b $Td.i $Td.b2 -pady 5" );
 	  
@@ -2293,7 +2324,7 @@ case 7:
 
 	if ( done == 2 || done == 8 )	// esc/cancel
 	{
-		redrawRoot = false;			// no browser redraw
+		redrawRoot = redrawStruc = false;	// no redraw necessary
 		goto here_endelem;
 	}
 	else
@@ -2329,7 +2360,7 @@ case 7:
 		if ( save == 1 || savei == 1 )
 			for ( cur = r; cur != NULL; cur = cur->up )
 				if ( ! cur->to_compute )
-					cmd( "tk_messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\"", lab_old, cur->label );
+					cmd( "ttk::messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\"", lab_old, cur->label );
 	}
 
 	if ( done != 8 )
@@ -2375,7 +2406,7 @@ case 7:
 
 	if ( *choice != 0 )
 	{
-		redrawRoot = false;			// no browser redraw yet
+		redrawRoot = redrawStruc = false;	// no redraw yet
 		return r;					// execute command
 	} 
 
@@ -2399,7 +2430,7 @@ case 76:
 	{
 		delVar = renVar = true;
 
-		cmd( "set answer [ tk_messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete element?\" -detail \"Press 'Yes' to confirm deleting '$vname'\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
+		cmd( "set answer [ ttk::messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete element?\" -detail \"Press 'Yes' to confirm deleting '$vname'\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 		if ( *choice == 1 )
 			cmd( "set vname \"\"; set nature 3; set numlag 0" );	// configure to delete
 		else
@@ -2415,28 +2446,28 @@ case 76:
 		cmd( "set T .prop" );
 		cmd( "newtop $T \"Properties\" { set choice 2 }" );
 
-		cmd( "frame $T.h" );
-		cmd( "label $T.h.l1 -text \"Element:\"" );
-		cmd( "label $T.h.l2 -text \"%s\" -fg red", cv->label );
+		cmd( "ttk::frame $T.h" );
+		cmd( "ttk::label $T.h.l1 -text \"Element:\"" );
+		cmd( "ttk::label $T.h.l2 -text \"%s\" -style hl.TLabel", cv->label );
 		cmd( "pack $T.h.l1 $T.h.l2 -side left -padx 2" );
 		
-		cmd( "frame $T.n" );
-		cmd( "label $T.n.var -text \"Name\"" );
-		cmd( "entry $T.n.e -width 20 -textvariable vname -justify center" );
-		cmd( "label $T.n.sp -width 2" );
-		cmd( "label $T.n.l -text \"Lags\"" );
-		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.n.lag -width 3 -from 0 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set numlag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numlag; return 0 } } -invalidcommand { bell } -justify center } { entry $T.n.lag -width 2 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set numlag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numlag; return 0 } } -invcmd { bell } -justify center }" );
+		cmd( "ttk::frame $T.n" );
+		cmd( "ttk::label $T.n.var -text \"Name\"" );
+		cmd( "ttk::entry $T.n.e -width 20 -textvariable vname -justify center" );
+		cmd( "ttk::label $T.n.sp -width 2" );
+		cmd( "ttk::label $T.n.l -text \"Lags\"" );
+		cmd( "ttk::spinbox $T.n.lag -justify center -width 3 -from 0 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99 } { set numlag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numlag; return 0 } } -invalidcommand { bell }" );
 		cmd( "$T.n.lag insert 0 $numlag" ); 
 		cmd( "if { $nature != 0 } { $T.n.lag configure -state disabled }" );
 		cmd( "pack $T.n.var $T.n.e $T.n.sp $T.n.l $T.n.lag -side left -padx 2" );
 
-		cmd( "frame $T.v" );
-		cmd( "label $T.v.l -text \"Type\"" );
+		cmd( "ttk::frame $T.v" );
+		cmd( "ttk::label $T.v.l -text \"Type\"" );
 		
-		cmd( "frame $T.v.o -bd 2 -relief groove" );
-		cmd( "radiobutton $T.v.o.var -text Variable -variable nature -value 0 -underline 0 -command { $T.n.lag configure -state normal }" );
-		cmd( "radiobutton $T.v.o.par -text Parameter -variable nature -value 1 -underline 0 -command { $T.n.lag configure -state disabled }" );
-		cmd( "radiobutton $T.v.o.fun -text Function -variable nature -value 2 -underline 0 -command { $T.n.lag configure -state disabled }" );
+		cmd( "ttk::frame $T.v.o -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+		cmd( "ttk::radiobutton $T.v.o.var -text Variable -variable nature -value 0 -underline 0 -command { $T.n.lag configure -state normal }" );
+		cmd( "ttk::radiobutton $T.v.o.par -text Parameter -variable nature -value 1 -underline 0 -command { $T.n.lag configure -state disabled }" );
+		cmd( "ttk::radiobutton $T.v.o.fun -text Function -variable nature -value 2 -underline 0 -command { $T.n.lag configure -state disabled }" );
 		cmd( "pack  $T.v.o.var $T.v.o.par $T.v.o.fun -anchor w" );
 		
 		cmd( "pack $T.v.l $T.v.o" );
@@ -2522,12 +2553,12 @@ case 76:
 
 			if ( *choice == 1 )
 			{
-				cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
+				cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
 				goto here_endprop;
 			}
 			if ( *choice == 2 )
 			{
-				cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+				cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
 				goto here_endprop;
 			}
 		}
@@ -2568,7 +2599,7 @@ case 76:
 	else
 		unsaved_change( true );					// signal unsaved change
 	
-	redrawRoot = true;							// request browser redraw
+	redrawRoot = redrawStruc = true;			// force browser/structure redraw
 
 	here_endprop:
 
@@ -2586,17 +2617,17 @@ case 79:
 	cmd( "set TT .objs" );
 	cmd( "newtop $TT \"Move\" { set choice 2 }" );
 
-	cmd( "frame $TT.l" );
-	cmd( "label $TT.l.l -text \"Element:\"" );
-	cmd( "label $TT.l.n -fg red -text \"%s\"", lab_old );
+	cmd( "ttk::frame $TT.l" );
+	cmd( "ttk::label $TT.l.l -text \"Element:\"" );
+	cmd( "ttk::label $TT.l.n -style hl.TLabel -text \"%s\"", lab_old );
 	cmd( "pack $TT.l.l $TT.l.n -side left -padx 2" );
 
-	cmd( "frame $TT.v" );
-	cmd( "label $TT.v.l -text \"Move to\"" );
+	cmd( "ttk::frame $TT.v" );
+	cmd( "ttk::label $TT.v.l -text \"Move to\"" );
 
-	cmd( "frame $TT.v.t" );
-	cmd( "scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );
-	cmd( "listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\"" );
+	cmd( "ttk::frame $TT.v.t" );
+	cmd( "ttk::scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );
+	cmd( "ttk::listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\" -dark $darkTheme" );
 	cmd( "pack $TT.v.t.lb $TT.v.t.v_scroll -side left -fill y" );
 	cmd( "mouse_wheel $TT.v.t.lb" );
 	insert_object( "$TT.v.t.lb", root );
@@ -2634,7 +2665,7 @@ case 79:
 		cur->delete_var( lab_old );
 
 	unsaved_change( true );		// signal unsaved change
-	redrawRoot = true;			// request browser redraw
+	redrawRoot = redrawStruc = true;	// force browser/structure redraw
 
 break;
 
@@ -2669,18 +2700,18 @@ case 78:
 		cmd( "set T .lag" );
 		cmd( "newtop $T \"Lag Selection\" { set choice 0 }" );
 
-		cmd( "frame $T.i" );
-		cmd( "label $T.i.l -text \"Use lag\"" );
-		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.i.e -width 3 -from 1 -to %d -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set lag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lag; return 0 } } -invalidcommand { bell } -justify center } { entry $T.i.e -width 2 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set lag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lag; return 0 } } -invcmd { bell } -justify center }", cv->num_lag );
+		cmd( "ttk::frame $T.i" );
+		cmd( "ttk::label $T.i.l -text \"Use lag\"" );
+		cmd( "ttk::spinbox $T.i.e -justify center -width 3 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= %d } { set lag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lag; return 0 } } -invalidcommand { bell }", cv->num_lag, cv->num_lag );
 		cmd( "$T.i.e insert 0 $lag" ); 
 		cmd( "pack $T.i.l $T.i.e -side left -padx 2" );
 		
-		cmd( "frame $T.o" );
-		cmd( "label $T.o.l1 -text \"( valid values:\"" );
-		cmd( "label $T.o.w1 -text 1 -fg red" );
-		cmd( "label $T.o.l2 -text to" );
-		cmd( "label $T.o.w2 -text %d -fg red", cv->num_lag );
-		cmd( "label $T.o.l3 -text \")\"" );
+		cmd( "ttk::frame $T.o" );
+		cmd( "ttk::label $T.o.l1 -text \"( valid values:\"" );
+		cmd( "ttk::label $T.o.w1 -text 1 -style hl.TLabel" );
+		cmd( "ttk::label $T.o.l2 -text to" );
+		cmd( "ttk::label $T.o.w2 -text %d -style hl.TLabel", cv->num_lag );
+		cmd( "ttk::label $T.o.l3 -text \")\"" );
 		cmd( "pack $T.o.l1 $T.o.w1 $T.o.l2 $T.o.w2 $T.o.l3 -side left -padx 2" );
 		
 		cmd( "pack $T.i $T.o -padx 5 -pady 5" );
@@ -2708,7 +2739,7 @@ case 78:
 		// abort if necessary
 		if ( lag < 0 || lag > ( cv->num_lag - 1 ) )
 		{
-			cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Invalid lag selected\" -detail \"Select a valid lag value for the variable or change the number of lagged values for this variable.\"" );
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid lag selected\" -detail \"Select a valid lag value for the variable or change the number of lagged values for this variable.\"" );
 			break;
 		}
 	}
@@ -2739,7 +2770,7 @@ case 78:
 			{
 				initVal = false;
 				initParent = NULL;
-				redrawRoot = true;		// redraw is needed to show new element
+				redrawRoot = redrawStruc = true;	// redraw is needed to show new element
 			}
 		}
 	}
@@ -2831,34 +2862,34 @@ case 96:
 	cmd( "set T .updating" );
 	cmd( "newtop $T \"Variable Updating\" { set choice 2 }" );
 
-	cmd( "frame $T.h" );
-	cmd( "label $T.h.l1 -text \"Variable:\"" );
-	cmd( "label $T.h.l2 -text \"%s\" -fg red", cv->label );
+	cmd( "ttk::frame $T.h" );
+	cmd( "ttk::label $T.h.l1 -text \"Variable:\"" );
+	cmd( "ttk::label $T.h.l2 -text \"%s\" -style hl.TLabel", cv->label );
 	cmd( "pack $T.h.l1 $T.h.l2 -side left -padx 2" );
 		
-	cmd( "frame $T.f" );
+	cmd( "ttk::frame $T.f" );
 
-	cmd( "frame $T.f.c" );
-	cmd( "label $T.f.c.l2 -width 16 -anchor e -text \"Initial delay\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.c.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { if { [ string is integer -strict %%P ] && %%P >= 0 } { set delay %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.c.e2 -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P >= 0 } { set delay %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame $T.f.c" );
+	cmd( "ttk::label $T.f.c.l2 -width 16 -anchor e -text \"Initial delay\"" );
+	cmd( "ttk::spinbox $T.f.c.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99999 } { set delay %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.c.e2 insert 0 $delay" ); 
 	cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx 2 -pady 2" );
 
-	cmd( "frame $T.f.a" );
-	cmd( "label $T.f.a.l -width 16 -anchor e -text \"Random delay range\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.a.e -width 7 -from 0 -to 99999 -validate focusout -validatecommand { if { [ string is integer -strict %%P ] && %%P >= 0 } { set delay_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay_range; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.a.e -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P >= 0 } { set delay_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay_range; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame $T.f.a" );
+	cmd( "ttk::label $T.f.a.l -width 16 -anchor e -text \"Random delay range\"" );
+	cmd( "ttk::spinbox $T.f.a.e -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99999 } { set delay_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay_range; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.a.e insert 0 $delay_range" ); 
 	cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx 2 -pady 2" );
 
-	cmd( "frame $T.f.b" );
-	cmd( "label $T.f.b.l1 -width 16 -anchor e -text \"Period\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.b.e1 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { if { [ string is integer -strict %%P ] && %%P > 0 } { set period %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.b.e1 -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 } { set period %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame $T.f.b" );
+	cmd( "ttk::label $T.f.b.l1 -width 16 -anchor e -text \"Period\"" );
+	cmd( "ttk::spinbox $T.f.b.e1 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99999 } { set period %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.b.e1 insert 0 $period" ); 
 	cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
 
-	cmd( "frame $T.f.d" );
-	cmd( "label $T.f.d.l2 -width 16 -anchor e -text \"Random period range\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.d.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { if { [ string is integer -strict %%P ] && %%P >= 0 } { set period_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period_range; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.d.e2 -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P >= 0 } { set period_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period_range; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame $T.f.d" );
+	cmd( "ttk::label $T.f.d.l2 -width 16 -anchor e -text \"Random period range\"" );
+	cmd( "ttk::spinbox $T.f.d.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99999 } { set period_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period_range; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.d.e2 insert 0 $period_range" ); 
 	cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx 2 -pady 2" );
 
@@ -2925,7 +2956,7 @@ case 1:
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to run the simulation.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to run the simulation.\"" );
 		break;
 	}
 
@@ -2935,7 +2966,7 @@ case 1:
 	count_save( n, &series_saved );
 	if ( series_saved == 0 )
 	{
-		cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"If you proceed, there will be no data to be analyzed after the simulation is run. If this is not the intended behavior, please mark the variables and parameters to be saved before running the simulation.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } " );
+		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"If you proceed, there will be no data to be analyzed after the simulation is run. If this is not the intended behavior, please mark the variables and parameters to be saved before running the simulation.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } " );
 		if ( *choice == 2 )
 		{
 			*choice = 0;
@@ -2946,7 +2977,7 @@ case 1:
 	// warn missing debugger
 	if ( ! parallel_disable && search_parallel( root ) && ( when_debug > 0 || stack_info > 0 || prof_aggr_time ) )
 	{
-		cmd( "set answer [ tk_messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\n\nPress 'OK' to proceed and disable parallel processing settings or 'Cancel' to return to LSD Browser.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }" );
+		cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\n\nPress 'OK' to proceed and disable parallel processing settings or 'Cancel' to return to LSD Browser.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }" );
 		if ( *choice == 2 )
 		{
 			*choice = 0;
@@ -2984,62 +3015,62 @@ case 1:
 	cmd( "set T .run" );
 	cmd( "newtop $T \"Run Simulation\" { set choice 2 }" );
 
-	cmd( "frame $T.f1" );
-	cmd( "label $T.f1.l -text \"Model configuration\"" );
-	cmd( "label $T.f1.w -text \"%s\" -fg red", simul_name );
+	cmd( "ttk::frame $T.f1" );
+	cmd( "ttk::label $T.f1.l -text \"Model configuration\"" );
+	cmd( "ttk::label $T.f1.w -text \"%s\" -style hl.TLabel", simul_name );
 	cmd( "pack $T.f1.l $T.f1.w" );
 
-	cmd( "frame $T.f2" );
+	cmd( "ttk::frame $T.f2" );
 
-	cmd( "frame $T.f2.t" );
-	cmd( "label $T.f2.t.l -text \"Time steps:\"" );
-	cmd( "label $T.f2.t.w -text \"%d\" -fg red", max_step );
+	cmd( "ttk::frame $T.f2.t" );
+	cmd( "ttk::label $T.f2.t.l -text \"Time steps:\"" );
+	cmd( "ttk::label $T.f2.t.w -text \"%d\" -style hl.TLabel", max_step );
 	cmd( "pack $T.f2.t.l $T.f2.t.w -side left -padx 2" );
 		
 	if ( sim_num > 1 )
 	{
-		cmd( "frame $T.f2.n" );
-		cmd( "label $T.f2.n.l -text \"Number of simulations:\"" );
-		cmd( "label $T.f2.n.w -text \"%d\" -fg red", sim_num );
+		cmd( "ttk::frame $T.f2.n" );
+		cmd( "ttk::label $T.f2.n.l -text \"Number of simulations:\"" );
+		cmd( "ttk::label $T.f2.n.w -text \"%d\" -style hl.TLabel", sim_num );
 		cmd( "pack $T.f2.n.l $T.f2.n.w -side left -padx 2" );
 		
 		cmd( "pack $T.f2.t $T.f2.n" );
 
-		cmd( "frame $T.f3" );
-		cmd( "label $T.f3.l -text \"Results files\"" );
+		cmd( "ttk::frame $T.f3" );
+		cmd( "ttk::label $T.f3.l -text \"Results files\"" );
 		
-		cmd( "frame $T.f3.w" );
+		cmd( "ttk::frame $T.f3.w" );
 		
-		cmd( "frame $T.f3.w.l1" );
-		cmd( "label $T.f3.w.l1.l -text \"from:\"" );
-		cmd( "label $T.f3.w.l1.w -fg red -text \"$firstFile.$resExt$zipExt\"" );
+		cmd( "ttk::frame $T.f3.w.l1" );
+		cmd( "ttk::label $T.f3.w.l1.l -text \"from:\"" );
+		cmd( "ttk::label $T.f3.w.l1.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
 		cmd( "pack $T.f3.w.l1.l $T.f3.w.l1.w -side left -padx 2" );
 		
-		cmd( "frame $T.f3.w.l2" );
-		cmd( "label $T.f3.w.l2.l -text \"to:\"" );
-		cmd( "label $T.f3.w.l2.w -fg red -text \"$lastFile.$resExt$zipExt\"" );
+		cmd( "ttk::frame $T.f3.w.l2" );
+		cmd( "ttk::label $T.f3.w.l2.l -text \"to:\"" );
+		cmd( "ttk::label $T.f3.w.l2.w -style hl.TLabel -text \"$lastFile.$resExt$zipExt\"" );
 		cmd( "pack $T.f3.w.l2.l $T.f3.w.l2.w -side left -padx 2" );
 		
 		cmd( "pack $T.f3.w.l1 $T.f3.w.l2" );
 
 		cmd( "pack $T.f3.l $T.f3.w" );
 
-		cmd( "frame $T.f4" );
-		cmd( "label $T.f4.l1 -text \"Totals file (last steps)\"" );
-		cmd( "label $T.f4.l2 -fg red -text \"$totFile.$totExt$zipExt\"" );
+		cmd( "ttk::frame $T.f4" );
+		cmd( "ttk::label $T.f4.l1 -text \"Totals file (last steps)\"" );
+		cmd( "ttk::label $T.f4.l2 -style hl.TLabel -text \"$totFile.$totExt$zipExt\"" );
 		
 		cmd( "set choice [ file exists \"%s%s$totFile.$totExt$zipExt\" ]", path, strlen( path ) > 0 ? "/" : "" );
-		cmd( "label $T.f4.l3 -text \"%s\"", *choice ? "(WARNING: totals file already exists)" : "" );
+		cmd( "ttk::label $T.f4.l3 -text \"%s\"", *choice ? "(WARNING: totals file already exists)" : "" );
 		cmd( "pack $T.f4.l1 $T.f4.l2 $T.f4.l3" );
 
 		add_to_tot = ( *choice ) ? add_to_tot : false;
 
-		cmd( "frame $T.f5" );
-		cmd( "checkbutton $T.f5.a -text \"Append to existing totals file\" -variable add_to_tot -state %s", *choice ? "normal" : "disabled" );
-		cmd( "checkbutton $T.f5.b -text \"Skip generating results files\" -variable no_res" );
-		cmd( "checkbutton $T.f5.c -text \"Generate zipped files\" -variable dozip -command { if $dozip { set zipExt \".gz\" } { set zipExt \"\" }; $T.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; $T.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; $T.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; if [ file exists \"%s%s$totFile.$totExt$zipExt\" ] { $T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; $T.f5.a configure -state normal } { $T.f4.l3 configure -text \"\"; $T.f5.a configure -state disabled } }", path, strlen( path ) > 0 ? "/" : "" );
-		cmd( "checkbutton $T.f5.d -text \"Comma-separated text format (.csv)\" -variable docsv -command { if $docsv { set resExt csv; set totExt csv } { set resExt res; set totExt tot }; $T.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; $T.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; $T.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; if [ file exists \"%s%s$totFile.$totExt$zipExt\" ] { $T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; $T.f5.a configure -state normal } { $T.f4.l3 configure -text \"\"; $T.f5.a configure -state disabled } }", path, strlen( path ) > 0 ? "/" : "" );
-		cmd( "checkbutton $T.f5.e -text \"Update configuration file\" -variable overwConf" );
+		cmd( "ttk::frame $T.f5" );
+		cmd( "ttk::checkbutton $T.f5.a -text \"Append to existing totals file\" -variable add_to_tot -state %s", *choice ? "normal" : "disabled" );
+		cmd( "ttk::checkbutton $T.f5.b -text \"Skip generating results files\" -variable no_res" );
+		cmd( "ttk::checkbutton $T.f5.c -text \"Generate zipped files\" -variable dozip -command { if $dozip { set zipExt \".gz\" } { set zipExt \"\" }; $T.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; $T.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; $T.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; if [ file exists \"%s%s$totFile.$totExt$zipExt\" ] { $T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; $T.f5.a configure -state normal } { $T.f4.l3 configure -text \"\"; $T.f5.a configure -state disabled } }", path, strlen( path ) > 0 ? "/" : "" );
+		cmd( "ttk::checkbutton $T.f5.d -text \"Comma-separated text format (.csv)\" -variable docsv -command { if $docsv { set resExt csv; set totExt csv } { set resExt res; set totExt tot }; $T.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; $T.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; $T.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; if [ file exists \"%s%s$totFile.$totExt$zipExt\" ] { $T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; $T.f5.a configure -state normal } { $T.f4.l3 configure -text \"\"; $T.f5.a configure -state disabled } }", path, strlen( path ) > 0 ? "/" : "" );
+		cmd( "ttk::checkbutton $T.f5.e -text \"Update configuration file\" -variable overwConf" );
 		cmd( "pack $T.f5.a $T.f5.b $T.f5.c $T.f5.d %s -anchor w", overwConf ? "$T.f5.e" : "" );
 		
 		cmd( "pack $T.f1 $T.f2 $T.f3 $T.f3 $T.f4 $T.f5 -padx 5 -pady 5" );
@@ -3049,9 +3080,9 @@ case 1:
 		*choice = 0;
 		cmd( "pack $T.f2.t" );
 		
-		cmd( "label $T.f3 -text \"(results will be saved in memory only)\"" );
+		cmd( "ttk::label $T.f3 -text \"(results will be saved in memory only)\"" );
 		
-		cmd( "checkbutton $T.f6 -text \"Update configuration file\" -variable overwConf" );
+		cmd( "ttk::checkbutton $T.f6 -text \"Update configuration file\" -variable overwConf" );
 		
 		cmd( "pack $T.f1 $T.f2 $T.f3 %s -padx 5 -pady 5", overwConf ? "$T.f6" : "" );
 	}
@@ -3059,6 +3090,8 @@ case 1:
 	cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#run } { set choice 2 }" );
 
 	cmd( "showtop $T" );
+	
+	cmd( "mousewarpto $T.b.ok" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -3088,7 +3121,7 @@ case 1:
 	{
 		if ( ! save_configuration( ) )
 		{
-			cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
+			cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
 			if ( *choice == 2 )
 			{
 				*choice = 0;
@@ -3128,7 +3161,7 @@ case 73:
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration to save\" -detail \"Create a configuration before saving.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration to save\" -detail \"Create a configuration before saving.\"" );
 		break;
 	}
 
@@ -3136,7 +3169,7 @@ case 73:
 
 	if ( actual_steps > 0 )
 	{ 
-		cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Configuration is the final state of a simulation run\" -detail \"Press 'OK' to save it anyway or 'Cancel' to abort saving.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } } " );
+		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Configuration is the final state of a simulation run\" -detail \"Press 'OK' to save it anyway or 'Cancel' to abort saving.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } } " );
 
 		if ( done == 2 )
 		{
@@ -3188,7 +3221,7 @@ case 73:
 
 	if ( ! save_configuration( ) )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"The model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", simul_name  );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"The model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", simul_name  );
 	}
 	else
 		unsaved_change( false );					// signal no unsaved change
@@ -3288,51 +3321,51 @@ case 22:
 	cmd( "set T .simset" );
 	cmd( "newtop $T \"Simulation Settings\" { set choice 2 }" );
 
-	cmd( "frame $T.f" );
+	cmd( "ttk::frame $T.f" );
 
-	cmd( "frame $T.f.c" );
-	cmd( "label $T.f.c.l2 -width 25 -anchor e -text \"Simulation steps\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.c.e2 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set max_step %%P; return 1 } { %%W delete 0 end; %%W insert 0 $max_step; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.c.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set max_step %%P; return 1 } { %%W delete 0 end; %%W insert 0 $max_step; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame $T.f.c" );
+	cmd( "ttk::label $T.f.c.l2 -width 25 -anchor e -text \"Simulation steps\"" );
+	cmd( "ttk::spinbox $T.f.c.e2 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99999 } { set max_step %%P; return 1 } { %%W delete 0 end; %%W insert 0 $max_step; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.c.e2 insert 0 $max_step" ); 
 	cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx 2 -pady 2" );
 
-	cmd( "frame $T.f.a" );
-	cmd( "label $T.f.a.l -width 25 -anchor e -text \"Number of simulation runs\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.a.e -width 7 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set sim_num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sim_num; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.a.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set sim_num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sim_num; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame $T.f.a" );
+	cmd( "ttk::label $T.f.a.l -width 25 -anchor e -text \"Number of simulation runs\"" );
+	cmd( "ttk::spinbox $T.f.a.e -width 7 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set sim_num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sim_num; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.a.e insert 0 $sim_num" ); 
 	cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx 2 -pady 2" );
 
-	cmd( "frame $T.f.b" );
-	cmd( "label $T.f.b.l1 -width 25 -anchor e -text \"Random numbers initial seed\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.b.e1 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.b.e1 -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 } { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame $T.f.b" );
+	cmd( "ttk::label $T.f.b.l1 -width 25 -anchor e -text \"Random numbers initial seed\"" );
+	cmd( "ttk::spinbox $T.f.b.e1 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99999 } { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.b.e1 insert 0 $seed" ); 
 	cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
 
-	cmd( "frame $T.f.d" );
-	cmd( "label $T.f.d.l2 -width 25 -anchor e -text \"Start debugger at step (0:none)\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.d.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set when_debug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $when_debug; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.d.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set when_debug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $when_debug; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame $T.f.d" );
+	cmd( "ttk::label $T.f.d.l2 -width 25 -anchor e -text \"Start debugger at step (0:none)\"" );
+	cmd( "ttk::spinbox $T.f.d.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99999 } { set when_debug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $when_debug; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.d.e2 insert 0 $when_debug" ); 
 	cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx 2 -pady 2" );
 
-	cmd( "frame $T.f.e" );
-	cmd( "label $T.f.e.l2 -width 25 -anchor e -text \"Profile up to stack level (0:none)\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.e.e2 -width 7 -from 0 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set stack_info %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_info; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.e.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set stack_info %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_info; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame $T.f.e" );
+	cmd( "ttk::label $T.f.e.l2 -width 25 -anchor e -text \"Profile up to stack level (0:none)\"" );
+	cmd( "ttk::spinbox $T.f.e.e2 -width 7 -from 0 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99 } { set stack_info %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_info; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.e.e2 insert 0 $stack_info" ); 
 	cmd( "pack $T.f.e.l2 $T.f.e.e2 -side left -anchor w -padx 2 -pady 2" );
 
-	cmd( "frame $T.f.f" );
-	cmd( "label $T.f.f.l2 -width 25 -anchor e -text \"Profile minimum time (0:all)\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.f.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set prof_min_msecs %%P; return 1 } { %%W delete 0 end; %%W insert 0 $prof_min_msecs; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.f.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set prof_min_msecs %%P; return 1 } { %%W delete 0 end; %%W insert 0 $prof_min_msecs; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame $T.f.f" );
+	cmd( "ttk::label $T.f.f.l2 -width 25 -anchor e -text \"Profile minimum time (0:all)\"" );
+	cmd( "ttk::spinbox $T.f.f.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99999 } { set prof_min_msecs %%P; return 1 } { %%W delete 0 end; %%W insert 0 $prof_min_msecs; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.f.e2 insert 0 $prof_min_msecs" ); 
 	cmd( "pack $T.f.f.l2 $T.f.f.e2 -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "pack $T.f.c $T.f.a $T.f.b $T.f.d $T.f.e $T.f.f -anchor w" );
 
-	cmd( "checkbutton $T.f.obs -text \"Profile observed variables only\" -variable prof_obs_only" );
-	cmd( "checkbutton $T.f.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
+	cmd( "ttk::checkbutton $T.f.obs -text \"Profile observed variables only\" -variable prof_obs_only" );
+	cmd( "ttk::checkbutton $T.f.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
 
 #ifdef PARALLEL_MODE
-	cmd( "checkbutton $T.f.npar -text \"Disable parallel computation\" -variable parallel_disable" );
+	cmd( "ttk::checkbutton $T.f.npar -text \"Disable parallel computation\" -variable parallel_disable" );
 	if ( ! search_parallel( root ) || max_threads < 2 )
 		cmd( "$T.f.npar configure -state disabled" );
 	cmd( "pack $T.f.obs $T.f.aggr $T.f.npar -anchor w" );
@@ -3407,14 +3440,14 @@ case 24:
 	{	// check if it is not a zero-instance object
 		n = blueprint->search( res_g );
 		if ( n != NULL )
-			cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Cannot show no-instance object\" -detail \"All instances of '%s' were deleted.\nSelect another object or reload your configuration and try again.\"", res_g );
+			cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Cannot show no-instance object\" -detail \"All instances of '%s' were deleted.\nSelect another object or reload your configuration and try again.\"", res_g );
 
 		break;
 	}
 
 	if ( n != r )
 	{
-		redrawRoot = true;	// force browser redraw
+		redrawRoot = redrawStruc = true;		// force browser/structure redraw
 		cmd( "set listfocus 1; set itemfocus 0" ); // point for first var in listbox
 	}
 
@@ -3438,7 +3471,7 @@ break;
 // Remove all the debugging flags
 case 27:
 
-	cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove debug flags?\" -detail \"Confirm the removal of all debugging information. Debugger will not stop in any variable update.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
+	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove debug flags?\" -detail \"Confirm the removal of all debugging information. Debugger will not stop in any variable update.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
 	if ( *choice == 1 )
 	{
@@ -3454,7 +3487,7 @@ case 28:
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to change the equation file.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to change the equation file.\"" );
 		break;
 	}
 
@@ -3490,7 +3523,7 @@ break;
 // Remove all the save flags
 case 30:
 
-	cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove save flags?\" -detail \"Confirm the removal of all saving information. No data will be saved.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
+	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove save flags?\" -detail \"Confirm the removal of all saving information. No data will be saved.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
 	if ( *choice == 1 )
 	{
@@ -3592,8 +3625,8 @@ break;
 // Close all Runtime Plots
 case 40:
 
-	cmd( "set a [split [winfo children .] ]" );
-	cmd( " foreach i $a {if [string match .plt* $i] {destroytop $i}}" );
+	cmd( "set a [ split [ winfo children . ] ]" );
+	cmd( " foreach i $a {if [ string match .plt* $i ] {destroytop $i}}" );
 
 break;
 
@@ -3601,7 +3634,7 @@ break;
 // Remove all the plot flags
 case 31:
 
-	cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove plot flags?\" -detail \"Confirm the removal of all run-time plot information. No data will be plotted during run time.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
+	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove plot flags?\" -detail \"Confirm the removal of all run-time plot information. No data will be plotted during run time.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
 	if ( *choice == 1 )
 	{
@@ -3615,7 +3648,7 @@ break;
 // Remove all the parallel flags
 case 87:
 
-	cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove parallel flags?\" -detail \"Confirm the removal of all parallel processing information. No parallelization will be performed.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
+	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove parallel flags?\" -detail \"Confirm the removal of all parallel processing information. No parallelization will be performed.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
 	if ( *choice == 1 )
 	{
@@ -3650,7 +3683,7 @@ case 33:
 
 	if ( r->up == NULL )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Cannot create copies of 'Root' object\" -detail \"Consider, if necessary, to add a new parent object here: all the elements will be moved in the newly created object, which can be multiplied in many copies.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Cannot create copies of 'Root' object\" -detail \"Consider, if necessary, to add a new parent object here: all the elements will be moved in the newly created object, which can be multiplied in many copies.\"" );
 		goto here_endinst;
 	}
 
@@ -3662,31 +3695,31 @@ case 33:
 	cmd( "set T .numinst" );
 	cmd( "newtop $T \"Number of Instances\" { set choice 2 }" );
 
-	cmd( "frame $T.l" );
-	cmd( "label $T.l.l1 -text \"Object:\"" );
-	cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
+	cmd( "ttk::frame $T.l" );
+	cmd( "ttk::label $T.l.l1 -text \"Object:\"" );
+	cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
 	cmd( "pack $T.l.l1 $T.l.l2 -side left" );
 
-	cmd( "frame $T.e" );
+	cmd( "ttk::frame $T.e" );
 
-	cmd( "frame $T.e.e" );
-	cmd( "label $T.e.e.l -text \"Number of instances\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.e.e.ent -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center } { entry $T.e.e.ent -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame $T.e.e" );
+	cmd( "ttk::label $T.e.e.l -text \"Number of instances\"" );
+	cmd( "ttk::spinbox $T.e.e.ent -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "pack $T.e.e.l $T.e.e.ent -side left -padx 2" );
 
-	cmd( "label $T.e.l -text \"(all groups of this object will be affected)\"" );
+	cmd( "ttk::label $T.e.l -text \"(all groups of this object will be affected)\"" );
 	cmd( "pack $T.e.e $T.e.l" );
 
-	cmd( "frame $T.cp" );
-	cmd( "label $T.cp.l -text \"Copy from instance\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.cp.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invalidcommand { bell } -justify center } { entry $T.cp.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center }" );
-	cmd( "button $T.cp.compute -width 7 -text Compute -command { set choice 3 }" );
+	cmd( "ttk::frame $T.cp" );
+	cmd( "ttk::label $T.cp.l -text \"Copy from instance\"" );
+	cmd( "ttk::spinbox $T.cp.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::button $T.cp.compute -width 7 -text Compute -command { set choice 3 }" );
 	cmd( "pack $T.cp.l $T.cp.e $T.cp.compute -side left -padx 2" );
 
 	cmd( "pack $T.l $T.e $T.cp -pady 5 -padx 5" );
 
 	cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menudata_objn.html#this } { set choice 2 }" );
-	cmd( "bind $T.e.e.ent <KeyPress-Return> {set choice 1}" );
+	cmd( "bind $T.e.e.ent <KeyPress-Return> { set choice 1 }" );
 
 	cmd( "showtop $T" );
 
@@ -3735,7 +3768,7 @@ case 33:
 	chg_obj_num( &r, num, i, NULL, choice, k );
 
 	unsaved_change( true );		// signal unsaved change
-	redrawRoot = true;			// update list boxes
+	redrawRoot = redrawStruc = true;	// force browser/structure redraw
 
 	here_endinst:
 	if ( cur2 != NULL )			// restore original current object
@@ -3787,7 +3820,7 @@ case 37:
 	*choice = 0;
 	if ( actual_steps == 0 )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Simulation not run, nothing to save\" -detail \"Select menu option Run>Run before using this option.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Simulation not run, nothing to save\" -detail \"Select menu option Run>Run before using this option.\"" );
 		break;
 	}
 
@@ -3807,21 +3840,21 @@ case 37:
 	// choose a name
 	cmd( "newtop .n \"Save Results\" { set choice 2 }" );
 
-	cmd( "frame .n.n" ); 
-	cmd( "label .n.n.l -text \"Base name for file(s)\"" );
-	cmd( "entry .n.n.e -width 30 -textvariable lab -justify center" );
+	cmd( "ttk::frame .n.n" ); 
+	cmd( "ttk::label .n.n.l -text \"Base name for file(s)\"" );
+	cmd( "ttk::entry .n.n.e -width 30 -textvariable lab -justify center" );
 	cmd( "pack .n.n.l .n.n.e" );
 
-	cmd( "frame .n.do" );
-	cmd( "checkbutton .n.do.zip -text \"Generate zipped results file\" -variable dozip" );
-	cmd( "checkbutton .n.do.csv -text \"Comma-separated text format (.csv)\" -variable docsv" );
-	cmd( "checkbutton .n.do.conf -text \"Save associated configuration\" -variable saveConf" );
+	cmd( "ttk::frame .n.do" );
+	cmd( "ttk::checkbutton .n.do.zip -text \"Generate zipped results file\" -variable dozip" );
+	cmd( "ttk::checkbutton .n.do.csv -text \"Comma-separated text format (.csv)\" -variable docsv" );
+	cmd( "ttk::checkbutton .n.do.conf -text \"Save associated configuration\" -variable saveConf" );
 	cmd( "pack .n.do.zip .n.do.csv .n.do.conf -anchor w" );
 
 	cmd( "pack .n.n .n.do -padx 5 -pady 5" );
 
 	cmd( "okcancel .n b { set choice 1 } { set choice 2 }" );
-	cmd( "bind .n <KeyPress-Return> {set choice 1}" );
+	cmd( "bind .n <KeyPress-Return> { set choice 1 }" );
 
 	cmd( "showtop .n" );
 	cmd( "focus .n.n.e" );
@@ -3841,7 +3874,7 @@ case 37:
 	if ( *choice == 2 )
 		break;
 
-	cmd( "wm deiconify .log; raise .log; focus .log" );
+	cmd( "focustop .log" );
 
 	lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
 	strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
@@ -3882,11 +3915,11 @@ case 43:
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to update descriptions.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to update descriptions.\"" );
 		break;
 	}
 
-	cmd( "set answer [tk_messageBox -parent . -message \"Replace existing descriptions?\" -detail \"Automatic data will replace any previous entered descriptions. Proceed?\" -type yesno -title Confirmation -icon question -default yes]" );
+	cmd( "set answer [ttk::messageBox -parent . -message \"Replace existing descriptions?\" -detail \"Automatic data will replace any previous entered descriptions. Proceed?\" -type yesno -title Confirmation -icon question -default yes]" );
 	cmd( "if { [ string compare $answer yes ] == 0 } { set choice 0 } { set choice 1 }" );
 
 	if ( *choice == 1 )
@@ -3896,12 +3929,12 @@ case 43:
 
 	cmd( "newtop .warn \"Generate Descriptions\" { set choice 2 }" );
 
-	cmd( "frame .warn.m" );
-	cmd( "label .warn.m.l -text \"Elements to update\"" );
+	cmd( "ttk::frame .warn.m" );
+	cmd( "ttk::label .warn.m.l -text \"Elements to update\"" );
 
-	cmd( "frame .warn.m.o -relief groove -bd 2" );
-	cmd( "radiobutton .warn.m.o.var -text \"Only variables\" -variable x -value 1" );
-	cmd( "radiobutton .warn.m.o.all -text \"All elements\" -variable x -value 2" );
+	cmd( "ttk::frame .warn.m.o -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+	cmd( "ttk::radiobutton .warn.m.o.var -text \"Only variables\" -variable x -value 1" );
+	cmd( "ttk::radiobutton .warn.m.o.all -text \"All elements\" -variable x -value 2" );
 	cmd( "pack .warn.m.o.var .warn.m.o.all -anchor w" );
 
 	cmd( "pack .warn.m.l .warn.m.o" );
@@ -3935,10 +3968,10 @@ break;
 case 44:
 
 	sprintf( name_rep, "report_%s.html", simul_name );
-	cmd( "set choice [file exists %s]", name_rep );
+	cmd( "set choice [ file exists %s ]", name_rep );
 	if ( *choice == 0 )
 	{
-		cmd( "set answer [tk_messageBox -parent . -message \"Model report not found\" -detail \"You may create a model report file from menu Model or press 'OK' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel]" );
+		cmd( "set answer [ ttk::messageBox -parent . -message \"Model report not found\" -detail \"You may create a model report file from menu Model or press 'OK' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel ]" );
 		cmd( "if { [ string compare $answer ok ] == 0 } { set choice 0 } { set choice 1 }" );
 		if ( *choice == 1 )
 			break;
@@ -4005,8 +4038,8 @@ case 48:
 
 	cmd( "newtop .a \"Set Browser\" { set choice 2 }" );
 
-	cmd( "label .a.l2 -text \"HTML browser for help pages\"" );
-	cmd( "entry .a.v_num2 -width 20 -textvariable temp_var -justify center" );
+	cmd( "ttk::label .a.l2 -text \"HTML browser for help pages\"" );
+	cmd( "ttk::entry .a.v_num2 -width 20 -textvariable temp_var -justify center" );
 	cmd( "bind .a.v_num2 <Return> { set choice 1 }" );
 	cmd( "pack .a.l2 .a.v_num2 -padx 5" );
 
@@ -4033,7 +4066,7 @@ case 50:
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to find elements.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to find elements.\"" );
 		break;
 	}
 
@@ -4041,12 +4074,12 @@ case 50:
 
 	cmd( "newtop .srch \"Find Element\" { set choice 2 }" );
 
-	cmd( "frame .srch.i" );
-	cmd( "label .srch.i.l -text \"Element name\"" );
+	cmd( "ttk::frame .srch.i" );
+	cmd( "ttk::label .srch.i.l -text \"Element name\"" );
 	cmd( "ttk::combobox .srch.i.e -width 20 -textvariable bidi -justify center -values $modElem" );
 	cmd( "pack .srch.i.l .srch.i.e" );
 
-	cmd( "label .srch.o -text \"(type the initial letters of the\nname, LSD will complete it)\"" );
+	cmd( "ttk::label .srch.o -text \"(type the initial letters of the\nname, LSD will complete it)\"" );
 	cmd( "pack .srch.i .srch.o -padx 5 -pady 5" );
 	cmd( "pack .srch.i" );
 
@@ -4096,7 +4129,7 @@ case 55:
 		return cv->up;
 	}
 	else
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Element not found\" -detail \"Check the spelling of the element name.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Element not found\" -detail \"Check the spelling of the element name.\"" );
 
 break;
 
@@ -4109,18 +4142,18 @@ case 51:
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to upload an equation file.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to upload an equation file.\"" );
 		break;
 	}
 
 	if ( !strcmp( eq_file, lsd_eq_file ) )
 	{
-		cmd( "tk_messageBox -parent . -title \"Upload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be uploaded differing from the current configuration file.\" -type ok" );
+		cmd( "ttk::messageBox -parent . -title \"Upload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be uploaded differing from the current configuration file.\" -type ok" );
 		break;
 	}
 
-	cmd( "set answer [tk_messageBox -parent . -title Confirmation -icon question -message \"Replace equations?\" -detail \"The equations associated to the configuration file are going to be replaced with the equations used for the LSD model program. Press 'OK' to confirm.\" -type okcancel -default ok]" );
-	cmd( "if {[string compare $answer ok] == 0} {set choice 1} {set choice 0}" );
+	cmd( "set answer [ ttk::messageBox -parent . -title Confirmation -icon question -message \"Replace equations?\" -detail \"The equations associated to the configuration file are going to be replaced with the equations used for the LSD model program. Press 'OK' to confirm.\" -type okcancel -default ok ]" );
+	cmd( "if { [ string compare $answer ok ] == 0 } { set choice 1 } { set choice 0 }" );
 	if ( *choice == 0 )
 		break;
 
@@ -4139,20 +4172,20 @@ case 52:
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to offload an equation file.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to offload an equation file.\"" );
 		break;
 	}
 
 	if ( ! strcmp( eq_file, lsd_eq_file ) )
 	{
-		cmd( "tk_messageBox -parent . -title \"Offload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be offloaded differing from the current equation file.\" -type ok" );
+		cmd( "ttk::messageBox -parent . -title \"Offload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be offloaded differing from the current equation file.\" -type ok" );
 		break;
 	}
 
 	cmd( "set res1 fun_%s.cpp", simul_name );
 	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ]", exec_path );
 
-	cmd( "if {[string length $bah] > 0} { set choice 1; set res1 [file tail $bah]} {set choice 0}" );
+	cmd( "if { [ string length $bah ] > 0 } { set choice 1; set res1 [ file tail $bah ] } { set choice 0 }" );
 	if ( *choice == 0 )
 	  break;
 
@@ -4165,7 +4198,7 @@ case 52:
 	f = fopen( lab, "wb" );
 	fprintf( f, "%s", lsd_eq_file );
 	fclose( f );
-	cmd( "tk_messageBox -parent . -title \"Offload Equations\" -icon info -message \"Equation file '$res1' created\" -detail \"You need to create a new LSD model to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok" );
+	cmd( "ttk::messageBox -parent . -title \"Offload Equations\" -icon info -message \"Equation file '$res1' created\" -detail \"You need to create a new LSD model to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok" );
 
 break;
 
@@ -4175,13 +4208,13 @@ case 53:
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to compare equation files.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to compare equation files.\"" );
 		break;
 	}
 
 	if ( strlen( lsd_eq_file ) == 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon Warning -title Warning -message \"No equations loaded\" -detail \"Please upload an equation file before trying to compare equation files.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon Warning -title Warning -message \"No equations loaded\" -detail \"Please upload an equation file before trying to compare equation files.\"" );
 		break;
 	}
 
@@ -4201,7 +4234,7 @@ case 82:
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to compare configuration files.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to compare configuration files.\"" );
 		break;
 	}
 
@@ -4222,7 +4255,7 @@ case 82:
 	f = fopen( lab1, "r" );
 	if ( f == NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Cannot open file\" -detail \"Error opening file '%s'.\"", lab2 );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Cannot open file\" -detail \"Error opening file '%s'.\"", lab2 );
 		break;
 	}
 	fclose( f );
@@ -4252,7 +4285,7 @@ case 92:
 	
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to create LaTex code.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to create LaTex code.\"" );
 		break;
 	}
 
@@ -4260,13 +4293,13 @@ case 92:
 	cmd( "set choice [ file exists %s ]", ch );
 	if ( *choice == 1 )
 	{
-		cmd( "set answer [ tk_messageBox -parent . -message \"File '%s' already exists\" -detail \"Please confirm overwriting it.\" -type okcancel -title Warning -icon warning -default ok ]", ch );
+		cmd( "set answer [ ttk::messageBox -parent . -message \"File '%s' already exists\" -detail \"Please confirm overwriting it.\" -type okcancel -title Warning -icon warning -default ok ]", ch );
 		cmd( "if [ string equal $answer ok ] { set choice 0 } { set choice 1 }" );
 		if ( *choice == 1 )
 			break;
 	}
 
-	cmd( "wm deiconify .log; raise .log; focus .log" );
+	cmd( "focustop .log" );
 	plog("\nWriting LaTex code. Please wait... " );
 
 	f = fopen( ch, "wt" );
@@ -4390,14 +4423,14 @@ case 62:
 		root->add_n_objects2( cur->label, i - 1, cur );
 		
 		plog( "\nUpdating configuration, it may take a while, please wait..." );
-		cmd( "wm deiconify .log; raise .log; focus .log; update" );
+		cmd( "focustop .log" );
 		sensitivity_parallel( cur, rsense );
 		plog( " Done" );
 	
 		unsaved_change( true );				// signal unsaved change
-		redrawRoot = true;					// request browser redraw
+		redrawRoot = redrawStruc = true;	// force browser/structure redraw
 		
-		cmd( "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"Structure changed\" -detail \"LSD has changed your model structure, replicating the entire model for each sensitivity configuration. If you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Structure changed\" -detail \"LSD has changed your model structure, replicating the entire model for each sensitivity configuration. If you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"" );
 	}
 	else
 		sensitivity_undefined( );			// throw error
@@ -4433,7 +4466,7 @@ case 63:
 		
 		// create a design of experiment (DoE) for the sensitivity data
 		plog( "\nCreating design of experiments configuration files.\nIt may take a while, please wait... " );
-		cmd( "wm deiconify .log; raise .log; focus .log; update" );
+		cmd( "focustop .log" );
 		sensitivity_sequential( &findexSens, rsense );
 		plog( " Done\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );	
 		sensitivity_created( );				// explain user how to proceed
@@ -4478,13 +4511,13 @@ case 71:
 		
 		cmd( "newtop .s \"MC Point Sampling\" { set choice 2 }" );
 		
-		cmd( "frame .s.i" );
-		cmd( "label .s.i.l -text \"Monte Carlo sample size as\n%% of sensitivity space size\n(0 to 100)\"" );
-		cmd( "entry .s.i.e -width 5 -validate focusout -vcmd { if [ string is double -strict %%P ] { set sizMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sizMC; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "ttk::frame .s.i" );
+		cmd( "ttk::label .s.i.l -text \"Monte Carlo sample size as\n%% of sensitivity space size\n(0 to 100)\"" );
+		cmd( "ttk::entry .s.i.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 && $n <= 100 } { set sizMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sizMC; return 0 } } -invalidcommand { bell } -justify center" );
 		cmd( ".s.i.e insert 0 $sizMC" ); 
 		cmd( "pack .s.i.l .s.i.e" );
 		
-		cmd( "label .s.w -text \"(large samples are not recommended)\"" );
+		cmd( "ttk::label .s.w -text \"(large samples are not recommended)\"" );
 		
 		cmd( "pack .s.i .s.w -padx 5 -pady 5" );
 
@@ -4509,7 +4542,7 @@ case 71:
 		sizMC /= 100.0;
 		if ( ( sizMC * maxMC ) < 1 || sizMC > 1.0 )
 		{
-			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sample size\" -detail \"Invalid Monte Carlo sample size to perform the sensitivity analysis. Select a number between 0%% and 100%% that produces at least one sample (in average).\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid sample size\" -detail \"Invalid Monte Carlo sample size to perform the sensitivity analysis. Select a number between 0%% and 100%% that produces at least one sample (in average).\"" );
 			*choice = 0;
 			break;
 		}
@@ -4531,7 +4564,7 @@ case 71:
 		
 		// create a design of experiment (DoE) for the sensitivity data
 		plog( "\nCreating design of experiments configuration files.\nIt may take a while, please wait... " );
-		cmd( "wm deiconify .log; raise .log; focus .log; update" );
+		cmd( "focustop .log" );
 		sensitivity_sequential( &findexSens, rsense, sizMC );
 		plog( " Done\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );
 		sensitivity_created( );				// explain user how to proceed
@@ -4577,22 +4610,23 @@ case 72:
 		
 		cmd( "newtop .s \"NOLH Sampling\" { set choice 2 }" );
 		
-		cmd( "frame .s.o" );
-		cmd( "label .s.o.l1 -text \"NOLH table\"" );
-		cmd( "ttk::combobox .s.o.c -width 15 -textvariable doesize -values $doeList -justify center" );
-		cmd( "label .s.o.l2 -text \"(factors \u00D7 samples \u00D7 ext. samples)\"" );
+		cmd( "ttk::frame .s.o" );
+		cmd( "ttk::label .s.o.l1 -text \"NOLH table\"" );
+		cmd( "ttk::combobox .s.o.c -width 15 -values $doeList -justify center -validate focusout -validatecommand { set n %%P; if { $n in $doeList } { set doesize %%P; return 1 } { %%W delete 0 end; %%W insert 0 $doesize; return 0 } } -invalidcommand { bell }" );
+		cmd( "write_any .s.o.c $doesize" );
+		cmd( "ttk::label .s.o.l2 -text \"(factors \u00D7 samples \u00D7 ext. samples)\"" );
 		cmd( "pack .s.o.l1 .s.o.c .s.o.l2" );
 		
-		cmd( "checkbutton .s.e -text \"Extended number of samples\" -variable doeext" );
+		cmd( "ttk::checkbutton .s.e -text \"Extended number of samples\" -variable doeext" );
 		if( varSA > 22 )
 			cmd( ".s.e configure -state disabled" );
 	
-		cmd( "checkbutton .s.d -text \"External design file\" -variable extdoe -command { if { $extdoe == 1 } { .s.o.c configure -state disabled; .s.e configure -state disabled; .s.i.e configure -state normal; .s.i.e selection range 0 end; focus .s.i.e } { .s.o.c configure -state normal; .s.e configure -state normal; .s.i.e configure -state disabled } }" );
+		cmd( "ttk::checkbutton .s.d -text \"External design file\" -variable extdoe -command { if { $extdoe == 1 } { .s.o.c configure -state disabled; .s.e configure -state disabled; .s.i.e configure -state normal; .s.i.e selection range 0 end; focus .s.i.e } { .s.o.c configure -state normal; .s.e configure -state normal; .s.i.e configure -state disabled } }" );
 		
-		cmd( "frame .s.i" );
-		cmd( "label .s.i.l -text \"Design file name\"" );
-		cmd( "entry .s.i.e -width 20 -justify center -textvariable NOLHfile -state disabled" );
-		cmd( "label .s.i.w -text \"(file must be in the same folder\nas the configuration file; CSV\nformat with NO empty lines)\"" );
+		cmd( "ttk::frame .s.i" );
+		cmd( "ttk::label .s.i.l -text \"Design file name\"" );
+		cmd( "ttk::entry .s.i.e -width 20 -justify center -textvariable NOLHfile -state disabled" );
+		cmd( "ttk::label .s.i.w -text \"(file must be in the same folder\nas the configuration file; CSV\nformat with NO empty lines)\"" );
 		cmd( "pack .s.i.l .s.i.e .s.i.w" );
 		
 		cmd( "pack .s.o .s.e .s.d .s.i -padx 5 -pady 5" );
@@ -4605,6 +4639,7 @@ case 72:
 		while ( *choice == 0 )
 			Tcl_DoOneEvent( 0 );
 		
+		cmd( "if { [ .s.o.c get ] in $doeList } { set doesize [ .s.o.c get ] } { bell }" );
 		cmd( "destroytop .s" );
 		
 		if ( *choice == 2 )
@@ -4633,7 +4668,7 @@ case 72:
 		
 		if ( NOLHdoe -> n == 0 )					// DoE configuration is not ok?
 		{
-			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration error\" -detail \"It was not possible to create a Non Orthogonal Latin Hypercube (NOLH) Design of Experiment (DoE) for the current sensitivity configuration. If the number of variables (factors) is large than 29, an external NOLH has to be provided in the file NOLH.csv (empty lines not allowed).\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration error\" -detail \"It was not possible to create a Non Orthogonal Latin Hypercube (NOLH) Design of Experiment (DoE) for the current sensitivity configuration. If the number of variables (factors) is large than 29, an external NOLH has to be provided in the file NOLH.csv (empty lines not allowed).\"" );
 			delete NOLHdoe;
 			break;
 		}
@@ -4655,7 +4690,7 @@ case 72:
 		findexSens = 1;
 		
 		// create a design of experiment (DoE) for the sensitivity data
-		cmd( "wm deiconify .log; raise .log; focus .log" );
+		cmd( "focustop .log" );
 		sensitivity_doe( &findexSens, NOLHdoe );
 		sensitivity_created( );				// explain user how to proceed
 		
@@ -4676,7 +4711,7 @@ case 72:
 			return n;
 		}
 		
-		cmd( "set answer [ tk_messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Create out-of-main-sample set of samples?\" -detail \"An out-of-sample set allows for better meta-model selection and fit-quality evaluation.\n\nPress 'Yes' to create a Monte Carlo sample now or 'No' otherwise.\" ]" );
+		cmd( "set answer [ ttk::messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Create out-of-main-sample set of samples?\" -detail \"An out-of-sample set allows for better meta-model selection and fit-quality evaluation.\n\nPress 'Yes' to create a Monte Carlo sample now or 'No' otherwise.\" ]" );
 		cmd( "switch $answer { yes { set choice 80 } no { set choice 0 } }" );
 		
 		if ( *choice != 0 )
@@ -4707,15 +4742,15 @@ case 80:
 		
 		cmd( "newtop .s \"MC Range Sampling\" { set choice 2 }" );
 		
-		cmd( "frame .s.i" );
-		cmd( "label .s.i.l -text \"Monte Carlo sample size\nas number of samples\"" );
-		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .s.i.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set sizMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sizMC; return 0 } } -invalidcommand { bell } -justify center } { entry .s.i.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set sizMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sizMC; return 0 } } -invcmd { bell } -justify center }" );
+		cmd( "ttk::frame .s.i" );
+		cmd( "ttk::label .s.i.l -text \"Monte Carlo sample size\nas number of samples\"" );
+		cmd( "ttk::spinbox .s.i.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set sizMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sizMC; return 0 } } -invalidcommand { bell } -justify center" );
 		cmd( ".s.i.e insert 0 $sizMC" ); 
 		cmd( "pack .s.i.l .s.i.e" );
 		
 		if ( findexSens > 1 )			// there are previously saved sensitivity files?
 		{
-			cmd( "checkbutton .s.c -text \"Append to existing configuration files\" -variable applst" );
+			cmd( "ttk::checkbutton .s.c -text \"Append to existing configuration files\" -variable applst" );
 			cmd( "pack .s.i .s.c -padx 5 -pady 5" );
 		}
 		else
@@ -4741,7 +4776,7 @@ case 80:
 		// Check if number is valid
 		if ( sizMC < 1 )
 		{
-			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sample size\" -detail \"Invalid Monte Carlo sample size to perform the sensitivity analysis. Select at least one sample.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid sample size\" -detail \"Invalid Monte Carlo sample size to perform the sensitivity analysis. Select at least one sample.\"" );
 			*choice = 0;
 			break;
 		}
@@ -4817,35 +4852,35 @@ case 81:
 		
 		cmd( "newtop .s \"Elementary Effects Sampling\" { set choice 2 }" );
 		
-		cmd( "frame .s.i" );
-		cmd( "label .s.i.l1 -text \"Number of trajectories (r)\"" );
-		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .s.i.e1 -width 5 -from 1 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set nTraj %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nTraj; return 0 } } -invalidcommand { bell } -justify center } { entry .s.i.e1 -width 10 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set nTraj %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nTraj; return 0 } } -invcmd { bell } -justify center }" );
+		cmd( "ttk::frame .s.i" );
+		cmd( "ttk::label .s.i.l1 -text \"Number of trajectories (r)\"" );
+		cmd( "ttk::spinbox .s.i.e1 -width 5 -from 1 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99 } { set nTraj %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nTraj; return 0 } } -invalidcommand { bell } -justify center" );
 		cmd( ".s.i.e1 insert 0 $nTraj" ); 
-		cmd( "label .s.i.l2 -text \"([expr $varSA + 1]\u00D7r samples to create)\"" );
+		cmd( "ttk::label .s.i.l2 -text \"([expr $varSA + 1]\u00D7r samples to create)\"" );
 		cmd( "pack .s.i.l1 .s.i.e1 .s.i.l2" );	
 		
-		cmd( "frame .s.p" );
-		cmd( "label .s.p.l1 -text \"Trajectories pool size (M)\"" );
-		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .s.p.e2 -width 5 -from 1 -to 999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set nSampl %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nSampl; return 0 } } -invalidcommand { bell } -justify center } { entry .s.p.e2 -width 10 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set nSampl %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nSampl; return 0 } } -invcmd { bell } -justify center }" );
+		cmd( "ttk::frame .s.p" );
+		cmd( "ttk::label .s.p.l1 -text \"Trajectories pool size (M)\"" );
+		cmd( "ttk::spinbox .s.p.e2 -width 5 -from 1 -to 999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 999 } { set nSampl %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nSampl; return 0 } } -invalidcommand { bell } -justify center" );
 		cmd( ".s.p.e2 insert 0 $nSampl" ); 
-		cmd( "label .s.p.l2 -text \"(M > r enables optimization)\"" );
+		cmd( "ttk::label .s.p.l2 -text \"(M > r enables optimization)\"" );
 		cmd( "pack .s.p.l1 .s.p.e2 .s.p.l2" );	
 		
-		cmd( "frame .s.l" );
-		cmd( "label .s.l.l1 -text \"Number of levels (p)\"" );
-		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .s.l.e3 -width 5 -from 1 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set nLevels %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nLevels; return 0 } } -invalidcommand { bell } -justify center } { entry .s.l.e3 -width 10 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set nLevels %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nLevels; return 0 } } -invcmd { bell } -justify center }" );
+		cmd( "ttk::frame .s.l" );
+		cmd( "ttk::label .s.l.l1 -text \"Number of levels (p)\"" );
+		cmd( "ttk::spinbox .s.l.e3 -width 5 -from 1 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99 } { set nLevels %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nLevels; return 0 } } -invalidcommand { bell } -justify center" );
 		cmd( ".s.l.e3 insert 0 $nLevels" ); 
-		cmd( "label .s.l.l2 -text \"(must be even)\"" );
+		cmd( "ttk::label .s.l.l2 -text \"(must be even)\"" );
 		cmd( "pack .s.l.l1 .s.l.e3 .s.l.l2" );	
 		
-		cmd( "frame .s.j" );
-		cmd( "label .s.j.l1 -text \"Jump size\"" );
-		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .s.j.e4 -width 5 -from 1 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set jumpSz %%P; return 1 } { %%W delete 0 end; %%W insert 0 $jumpSz; return 0 } } -invalidcommand { bell } -justify center } { entry .s.j.e4 -width 10 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set jumpSz %%P; return 1 } { %%W delete 0 end; %%W insert 0 $jumpSz; return 0 } } -invcmd { bell } -justify center }" );
+		cmd( "ttk::frame .s.j" );
+		cmd( "ttk::label .s.j.l1 -text \"Jump size\"" );
+		cmd( "ttk::spinbox .s.j.e4 -width 5 -from 1 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99 } { set jumpSz %%P; return 1 } { %%W delete 0 end; %%W insert 0 $jumpSz; return 0 } } -invalidcommand { bell } -justify center" );
 		cmd( ".s.j.e4 insert 0 $jumpSz" ); 
-		cmd( "label .s.j.l2 -text \"( \u0394\u00D7(p - 1) )\"" );
+		cmd( "ttk::label .s.j.l2 -text \"( \u0394\u00D7(p - 1) )\"" );
 		cmd( "pack .s.j.l1 .s.j.e4 .s.j.l2" );	
 		
-		cmd( "label .s.t -text \"(for details on setting Elementary Effects\nsampling parameters see Morris (1991),\nCampolongo et al. (2007) and Ruano et al. (2012))\"" );
+		cmd( "ttk::label .s.t -text \"(for details on setting Elementary Effects\nsampling parameters see Morris (1991),\nCampolongo et al. (2007) and Ruano et al. (2012))\"" );
 		
 		cmd( "pack .s.i .s.p .s.l .s.j .s.t -padx 5 -pady 5" );
 		
@@ -4876,7 +4911,7 @@ case 81:
 		// Check if numbers are valid
 		if ( nLevels < 2 || nLevels % 2 != 0 || nTraj < 2 || nSampl < nTraj || jumpSz < 1 )
 		{
-			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid configuration\" -detail \"Invalid Elementary Effects configuration to perform the sensitivity analysis. Check Morris (1991) and Campolongo et al. (2007) for details.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid configuration\" -detail \"Invalid Elementary Effects configuration to perform the sensitivity analysis. Check Morris (1991) and Campolongo et al. (2007) for details.\"" );
 			*choice = 0;
 			break;
 		}
@@ -4928,14 +4963,14 @@ case 64:
 	// check a model is already loaded
 	if ( ! struct_loaded )
 	{ 
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load one before trying to load a sensitivity analysis configuration.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load one before trying to load a sensitivity analysis configuration.\"" );
 		break;
     } 
 	
 	// check for existing sensitivity data loaded
 	if ( rsense != NULL ) 
 	{
-		cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default ok -title Warning -message \"Sensitivity data already loaded\" -detail \"Press 'OK' if you want to discard the existing data before loading a new sensitivity configuration.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 2}}" );
+		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -icon warning -default ok -title Warning -message \"Sensitivity data already loaded\" -detail \"Press 'OK' if you want to discard the existing data before loading a new sensitivity configuration.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } }" );
 		if ( *choice == 2 )
 			break;
 		
@@ -4954,7 +4989,7 @@ case 64:
 
 	// open dialog box to get file name & folder
 	cmd( " set bah [ tk_getOpenFile -parent . -title \"Load Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile \"$res\" -initialdir \"$path\"  -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
-	cmd( "if { [string length $bah] > 0 && ! [ fn_spaces \"$bah\" . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .sa $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
+	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .sa $res ] -1 ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
 	if ( *choice == 2 )
 		break;
 	
@@ -4974,12 +5009,12 @@ case 64:
 	f = fopen( sens_file, "rt" );
 	if ( f == NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity Analysis file not found\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity Analysis file not found\"" );
 		break;
 	}
 	
 	if ( load_sensitivity( f ) != 0 )
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sensitivity analysis file\" -detail \"Please check if you select a valid file or recreate your sensitivity configuration.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid sensitivity analysis file\" -detail \"Please check if you select a valid file or recreate your sensitivity configuration.\"" );
 
 	fclose( f );
 	
@@ -5021,12 +5056,12 @@ case 65:
 	f = fopen( sens_file, "wt" );  // use text mode for Windows better compatibility
 	if ( f == NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file not saved\" -detail \"Please check if the file name and path are valid.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file not saved\" -detail \"Please check if the file name and path are valid.\"" );
 		break;
 	}
 	
 	if ( ! save_sensitivity( f ) )
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY.\"" );
 
 	fclose( f );
 	unsavedSense = false;			// nothing to save
@@ -5039,7 +5074,7 @@ case 91:
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration to export\" -detail \"Please load or create a configuration before trying to export the details on the elements to save.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration to export\" -detail \"Please load or create a configuration before trying to export the details on the elements to save.\"" );
 		break;
 	}
 
@@ -5048,7 +5083,7 @@ case 91:
 	count_save( root, &i );
 	if ( i == 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"Please mark the variables and parameters to be saved before trying to export the details on the elements to save.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"Please mark the variables and parameters to be saved before trying to export the details on the elements to save.\"" );
 		break;
 	}
 	
@@ -5076,7 +5111,7 @@ case 91:
 	f = fopen( lab, "wt" );  // use text mode for Windows better compatibility
 	if ( f == NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Saved elements configuration file not saved\" -detail \"Please check if the file name and path are valid.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Saved elements configuration file not saved\" -detail \"Please check if the file name and path are valid.\"" );
 		break;
 	}
 	
@@ -5124,7 +5159,7 @@ case 90:
 	f = fopen( lab, "wt" );  // use text mode for Windows better compatibility
 	if ( f == NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity limits file not saved\" -detail \"Please check if the file name and path are valid.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity limits file not saved\" -detail \"Please check if the file name and path are valid.\"" );
 		break;
 	}
 	
@@ -5148,7 +5183,7 @@ case 66:
 	// check for existing sensitivity data loaded
 	if ( rsense == NULL ) 
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"There is no sensitivity data to show\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"There is no sensitivity data to show\"" );
 		break;
 	}
 	
@@ -5177,7 +5212,7 @@ case 67:
 	// check for existing sensitivity data loaded
 	if ( rsense == NULL ) 
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No sensitivity data to remove\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No sensitivity data to remove\"" );
 		break;
 	}
 	
@@ -5211,7 +5246,7 @@ case 68:
 
 	if ( ( f = fopen( ch, "rb" ) ) == NULL ) 
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsdNW\\[.exe\\]' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsdNW\\[.exe\\]' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\"" );
 		break;
 	}
 	fclose( f );
@@ -5224,7 +5259,7 @@ case 68:
 	{
 		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
 		{
-			cmd( "set answer [tk_messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing No Window executable file is older than the current version of the current executable.\n\nPress 'OK' to continue anyway or 'Cancel' to abort. Please recompile the model using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\"]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+			cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing No Window executable file is older than the current version of the current executable.\n\nPress 'OK' to continue anyway or 'Cancel' to abort. Please recompile the model using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
 			if ( *choice == 2 )
 				break;
 		}
@@ -5233,7 +5268,7 @@ case 68:
 	// check if serial sensitivity configuration was just created
 	*choice = 0;
 	if ( findexSens > 0 )
-		cmd( "set answer [ tk_messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Script/batch created\" -detail \"A sequential sensitivity set of configuration files was just created and can be used to create the script/batch.\n\nPress 'Yes' to confirm or 'No' to select a different set of files.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" ); 
+		cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Script/batch created\" -detail \"A sequential sensitivity set of configuration files was just created and can be used to create the script/batch.\n\nPress 'Yes' to confirm or 'No' to select a different set of files.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" ); 
 	if ( *choice == 2 )
 		break;
 	
@@ -5242,7 +5277,7 @@ case 68:
 	{
 		if ( strlen( path ) == 0 || strlen( simul_name ) == 0 )
 		{
-			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid simulation folder or name\" -detail \"Please try again.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid simulation folder or name\" -detail \"Please try again.\"" );
 			findexSens = 0;						// no sensitivity created
 			break;
 		}
@@ -5257,7 +5292,7 @@ case 68:
 	}
 	else										// ask for first configuration file
 	{
-		cmd( "set answer [ tk_messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Select sequence of configuration files?\" -detail \"Press 'Yes' to choose the first file of the continuous sequence (format: 'name_NNN.lsd') or 'No' to select a different set of files (use 'Ctrl' to pick multiple files).\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" ); 
+		cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Select sequence of configuration files?\" -detail \"Press 'Yes' to choose the first file of the continuous sequence (format: 'name_NNN.lsd') or 'No' to select a different set of files (use 'Ctrl' to pick multiple files).\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" ); 
 		if ( *choice == 2 )
 			break;
 		else
@@ -5318,30 +5353,30 @@ case 68:
 	cmd( "set res2 $res" );
 	cmd( "newtop .s \"Parallel Batch\" { set choice 2 }" );
 
-	cmd( "frame .s.t" );
-	cmd( "label .s.t.l -text \"Batch file base name\"" );
-	cmd( "entry .s.t.e -width 20 -textvariable res2 -justify center" );
+	cmd( "ttk::frame .s.t" );
+	cmd( "ttk::label .s.t.l -text \"Batch file base name\"" );
+	cmd( "ttk::entry .s.t.e -width 20 -textvariable res2 -justify center" );
 	cmd( "pack .s.t.l .s.t.e" );
 		
-	cmd( "frame .s.c" );
-	cmd( "label .s.c.l -text \"Number of parallel\nLSD processes\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .s.c.e -width 5 -from 1 -to 99 -justify center -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center } { entry .s.c.e -width 5 -justify center -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame .s.c" );
+	cmd( "ttk::label .s.c.l -text \"Number of parallel\nLSD processes\"" );
+	cmd( "ttk::spinbox .s.c.e -width 5 -from 1 -to 99 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".s.c.e insert 0 $cores" ); 
-	cmd( "label .s.c.w -text \"(a number higher than the\nnumber of processors/cores\nis not recommended)\"" );
+	cmd( "ttk::label .s.c.w -text \"(a number higher than the\nnumber of processors/cores\nis not recommended)\"" );
 	cmd( "pack .s.c.l .s.c.e .s.c.w" );
 	
-	cmd( "frame .s.p" );
-	cmd( "label .s.p.l -text \"Number of threads\nper LSD process\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .s.p.e -width 5 -from 1 -to 99 -justify center -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set threads %%P; return 1 } { %%W delete 0 end; %%W insert 0 $threads; return 0 } } -invalidcommand { bell } -justify center } { entry .s.p.e -width 5 -justify center -validate focusout -vcmd { if [ string is integer -strict %%P ] { set threads %%P; return 1 } { %%W delete 0 end; %%W insert 0 $threads; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame .s.p" );
+	cmd( "ttk::label .s.p.l -text \"Number of threads\nper LSD process\"" );
+	cmd( "ttk::spinbox .s.p.e -width 5 -from 1 -to 99 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99 } { set threads %%P; return 1 } { %%W delete 0 end; %%W insert 0 $threads; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".s.p.e insert 0 $threads" ); 
-	cmd( "label .s.p.w -text \"(a number higher than 1\nis only useful when parallel\ncomputation is enabled)\"" );
+	cmd( "ttk::label .s.p.w -text \"(a number higher than 1\nis only useful when parallel\ncomputation is enabled)\"" );
 	cmd( "pack .s.p.l .s.p.e .s.p.w" );
 	
-	cmd( "frame .s.o" );
-	cmd( "checkbutton .s.o.nores -text \"Skip generating results files\" -variable no_res" );
-	cmd( "checkbutton .s.o.n -text \"Native batch format\" -variable natBat" );
-	cmd( "checkbutton .s.o.dozip -text \"Generate zipped files\" -variable dozip" );
-	cmd( "checkbutton .s.o.docsv -text \"Comma-separated text format (.csv)\" -variable docsv" );
+	cmd( "ttk::frame .s.o" );
+	cmd( "ttk::checkbutton .s.o.nores -text \"Skip generating results files\" -variable no_res" );
+	cmd( "ttk::checkbutton .s.o.n -text \"Native batch format\" -variable natBat" );
+	cmd( "ttk::checkbutton .s.o.dozip -text \"Generate zipped files\" -variable dozip" );
+	cmd( "ttk::checkbutton .s.o.docsv -text \"Comma-separated text format (.csv)\" -variable docsv" );
 	cmd( "pack .s.o.nores .s.o.n .s.o.dozip .s.o.docsv -anchor w" );
 	
 	cmd( "pack .s.t .s.c .s.p .s.o -padx 5 -pady 5" );
@@ -5499,7 +5534,7 @@ case 68:
 			}
 			else
 			{	// get the selected file names, one by one
-				cmd( "set res3 [lindex $bah %d]; set res3 [file tail $res3]; set last [expr [string last .lsd $res3] - 1]; set res3 [string range $res3 0 $last]", j - 1  );
+				cmd( "set res3 [ lindex $bah %d ]; set res3 [ file tail $res3 ]; set last [ expr [ string last .lsd $res3 ] - 1 ]; set res3 [ string range $res3 0 $last ]", j - 1  );
 				strncpy( out_file, ( char * ) Tcl_GetVar( inter, "res3", 0 ), MAX_PATH_LENGTH - 1 );
 				
 				sprintf( lab_old, "%s.log", out_file );
@@ -5547,7 +5582,7 @@ case 68:
 		goto end_68;
 
 	// ask if script/batch should be executed right away
-	cmd( "set answer [ tk_messageBox -parent . -type yesno -icon question -default no -title \"Run Batch\" -message \"Run created script/batch?\" -detail \"The script/batch for running the configuration files was created. Press 'Yes' if you want to start the script/batch as separated processes now.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 2 } }" ); 
+	cmd( "set answer [ ttk::messageBox -parent . -type yesno -icon question -default no -title \"Run Batch\" -message \"Run created script/batch?\" -detail \"The script/batch for running the configuration files was created. Press 'Yes' if you want to start the script/batch as separated processes now.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 2 } }" ); 
 	if ( *choice == 2 )
 		goto end_68;
 
@@ -5559,7 +5594,7 @@ case 68:
 
 	cmd( "catch { exec %s & }", lab );
 	
-	cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon info -title \"Run Batch\" -message \"Script/batch started\" -detail \"The script/batch was started in separated process(es). The results and log files are being created in the folder:\n\n$path\n\nDo you want to launch the multitail command now (it must be installed)?\" ]" );
+	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Run Batch\" -message \"Script/batch started\" -detail \"The script/batch was started in separated process(es). The results and log files are being created in the folder:\n\n$path\n\nDo you want to launch the multitail command now (it must be installed)?\" ]" );
 	cmd( "switch $answer { yes { set choice 1 } no { set choice 0 } }" );
 	if ( *choice )
 	{
@@ -5597,7 +5632,7 @@ case 69:
 	// check a model is already loaded
 	if ( ! struct_loaded )
 	{ 
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to start a 'No Window' batch.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to start a 'No Window' batch.\"" );
 		break;
 	}
 
@@ -5608,7 +5643,7 @@ case 69:
 
 	if ( ( f = fopen( lab, "rb" ) ) == NULL ) 
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsdNW\\[.exe\\]' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsdNW\\[.exe\\]' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM.\"" );
 		break;
 	}
 	fclose( f );
@@ -5621,7 +5656,7 @@ case 69:
 	{
 		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
 		{
-			cmd( "set answer [tk_messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing No Window executable file is older than the current version of the current executable.\n\nPress 'OK' to continue anyway or 'Cancel' to abort. Please recompile the model using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\"]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+			cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing No Window executable file is older than the current version of the current executable.\n\nPress 'OK' to continue anyway or 'Cancel' to abort. Please recompile the model using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
 			if ( *choice == 2 )
 				break;
 		}
@@ -5649,59 +5684,59 @@ case 69:
 	cmd( "set b .batch" );
 	cmd( "newtop $b \"Start Batch\" { set choice 2 }" );
 
-	cmd( "frame $b.f1" );
-	cmd( "label $b.f1.l -text \"Model configuration\"" );
-	cmd( "label $b.f1.w -text \"%s\" -fg red", simul_name );
+	cmd( "ttk::frame $b.f1" );
+	cmd( "ttk::label $b.f1.l -text \"Model configuration\"" );
+	cmd( "ttk::label $b.f1.w -text \"%s\" -style hl.TLabel", simul_name );
 	cmd( "pack $b.f1.l $b.f1.w" );
 	
-	cmd( "frame $b.f2" );
+	cmd( "ttk::frame $b.f2" );
 	
-	cmd( "frame $b.f2.t" );
-	cmd( "label $b.f2.t.l -text \"Time steps:\"" );
-	cmd( "label $b.f2.t.w -text \"%d\" -fg red", max_step );
+	cmd( "ttk::frame $b.f2.t" );
+	cmd( "ttk::label $b.f2.t.l -text \"Time steps:\"" );
+	cmd( "ttk::label $b.f2.t.w -text \"%d\" -style hl.TLabel", max_step );
 	cmd( "pack $b.f2.t.l $b.f2.t.w -side left -padx 2" );
 	
-	cmd( "frame $b.f2.n" );
-	cmd( "label $b.f2.n.l -text \"Number of simulations:\"" );
-	cmd( "label $b.f2.n.w -text \"%d\" -fg red", sim_num );
+	cmd( "ttk::frame $b.f2.n" );
+	cmd( "ttk::label $b.f2.n.l -text \"Number of simulations:\"" );
+	cmd( "ttk::label $b.f2.n.w -text \"%d\" -style hl.TLabel", sim_num );
 	cmd( "pack $b.f2.n.l $b.f2.n.w -side left -padx 2" );
 	cmd( "pack $b.f2.t $b.f2.n" );
 
-	cmd( "frame $b.f3" );
-	cmd( "label $b.f3.l -text \"Results file(s)\"" );
+	cmd( "ttk::frame $b.f3" );
+	cmd( "ttk::label $b.f3.l -text \"Results file(s)\"" );
 	
 	if ( sim_num > 1 )	// multiple runs case
 	{
-		cmd( "frame $b.f3.w" );
+		cmd( "ttk::frame $b.f3.w" );
 		
-		cmd( "frame $b.f3.w.l1" );
-		cmd( "label $b.f3.w.l1.l -text \"from:\"" );
-		cmd( "label $b.f3.w.l1.w -fg red -text \"$firstFile.$resExt$zipExt\"" );
+		cmd( "ttk::frame $b.f3.w.l1" );
+		cmd( "ttk::label $b.f3.w.l1.l -text \"from:\"" );
+		cmd( "ttk::label $b.f3.w.l1.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
 		cmd( "pack $b.f3.w.l1.l $b.f3.w.l1.w -side left -padx 2" );
 		
-		cmd( "frame $b.f3.w.l2" );
-		cmd( "label $b.f3.w.l2.l -text \"to:\"" );
-		cmd( "label $b.f3.w.l2.w -fg red -text \"$lastFile.$resExt$zipExt\"" );
+		cmd( "ttk::frame $b.f3.w.l2" );
+		cmd( "ttk::label $b.f3.w.l2.l -text \"to:\"" );
+		cmd( "ttk::label $b.f3.w.l2.w -style hl.TLabel -text \"$lastFile.$resExt$zipExt\"" );
 		cmd( "pack $b.f3.w.l2.l $b.f3.w.l2.w -side left -padx 2" );
 		
 		cmd( "pack $b.f3.w.l1 $b.f3.w.l2" );
 	}
 	else				// single run case
-		cmd( "label $b.f3.w -fg red -text \"$firstFile.$resExt$zipExt\"" );
+		cmd( "ttk::label $b.f3.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
 
 	cmd( "pack $b.f3.l $b.f3.w" );
 
-	cmd( "frame $b.f4" );
-	cmd( "label $b.f4.l1 -text \"Totals file (last steps)\"" );
-	cmd( "label $b.f4.l2 -fg red -text \"$totFile.$totExt$zipExt\"" );
+	cmd( "ttk::frame $b.f4" );
+	cmd( "ttk::label $b.f4.l1 -text \"Totals file (last steps)\"" );
+	cmd( "ttk::label $b.f4.l2 -style hl.TLabel -text \"$totFile.$totExt$zipExt\"" );
 	
 	cmd( "set choice [ expr [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] ]", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
-	cmd( "label $b.f4.l3 -text \"\n\"", *choice ? "(WARNING: existing files in destination\nfolder will be overwritten)" : "" );
+	cmd( "ttk::label $b.f4.l3 -text \"\n\"", *choice ? "(WARNING: existing files in destination\nfolder will be overwritten)" : "" );
 	cmd( "pack $b.f4.l1 $b.f4.l2 $b.f4.l3" );
 	
-	cmd( "frame $b.f5" );
-	cmd( "checkbutton $b.f5.nores -text \"Skip generating results files\" -variable no_res" );
-	cmd( "checkbutton $b.f5.dozip -text \"Generate zipped files\" -variable dozip -command { \
+	cmd( "ttk::frame $b.f5" );
+	cmd( "ttk::checkbutton $b.f5.nores -text \"Skip generating results files\" -variable no_res" );
+	cmd( "ttk::checkbutton $b.f5.dozip -text \"Generate zipped files\" -variable dozip -command { \
 			if $dozip { \
 				set zipExt .gz \
 			} else { \
@@ -5720,7 +5755,7 @@ case 69:
 				$b.f4.l3 configure -text \"\n\" \
 			} \
 		}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
-	cmd( "checkbutton $b.f5.docsv -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
+	cmd( "ttk::checkbutton $b.f5.docsv -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
 			if $docsv { set resExt csv; set totExt csv } { \
 				set resExt res; \
 				set totExt tot \
@@ -5738,7 +5773,7 @@ case 69:
 				$b.f4.l3 configure -text \"\n\" \
 			} \
 		}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
-	cmd( "checkbutton $b.f5.tosave -text \"Update configuration file\" -variable overwConf" );
+	cmd( "ttk::checkbutton $b.f5.tosave -text \"Update configuration file\" -variable overwConf" );
 	cmd( "pack $b.f5.nores $b.f5.dozip $b.f5.docsv %s -anchor w", overwConf ? "$b.f5.tosave" : "" );
 	
 	cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f5 -padx 5 -pady 5" );
@@ -5771,7 +5806,7 @@ case 69:
 	{
 		if ( ! save_configuration( ) )
 		{
-			cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name  );
+			cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name  );
 			if ( *choice == 2 )
 			{
 				*choice = 0;
@@ -5793,7 +5828,7 @@ case 69:
 	else										// Unix
 		cmd( "catch { exec nice %s -f %s %s %s %s >& %s.log & }", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
 
-	cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results and log files are being created in the folder:\n\n$path\n\nDo you want to launch the tail command now?\" ]" );
+	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results and log files are being created in the folder:\n\n$path\n\nDo you want to launch the tail command now?\" ]" );
 	cmd( "switch $answer { yes { set choice 1 } no { set choice 0 } }" );
 	if ( *choice )
 		switch( platform )
@@ -5821,7 +5856,7 @@ case 88:
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to load a network structure file.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to load a network structure file.\"" );
 		break;
 	}
 
@@ -5855,24 +5890,24 @@ case 88:
 	}
 	else
 	{
-		cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or directory\" -detail \"Please check if an existing network structure file (Pajek .net format) was selected.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or directory\" -detail \"Please check if an existing network structure file (Pajek .net format) was selected.\"" );
 		break;
 	}
 
 	cmd( "set TT .objs" );
 	cmd( "newtop $TT \"Load Network\" { set choice 2 }" );
 
-	cmd( "frame $TT.l" );
-	cmd( "label $TT.l.l -text \"Suggested object:\"" );
-	cmd( "label $TT.l.n -fg red -text \"%s\"", lab_old );
+	cmd( "ttk::frame $TT.l" );
+	cmd( "ttk::label $TT.l.l -text \"Suggested object:\"" );
+	cmd( "ttk::label $TT.l.n -style hl.TLabel -text \"%s\"", lab_old );
 	cmd( "pack $TT.l.l $TT.l.n -padx 2" );
 
-	cmd( "frame $TT.v" );
-	cmd( "label $TT.v.l -text \"Object representing\nthe network nodes\"" );
+	cmd( "ttk::frame $TT.v" );
+	cmd( "ttk::label $TT.v.l -text \"Object representing\nthe network nodes\"" );
 
-	cmd( "frame $TT.v.t" );
-	cmd( "scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );
-	cmd( "listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\"" );
+	cmd( "ttk::frame $TT.v.t" );
+	cmd( "ttk::scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );
+	cmd( "ttk::listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\" -dark $darkTheme" );
 	cmd( "pack $TT.v.t.lb $TT.v.t.v_scroll -side left -fill y" );
 	cmd( "mouse_wheel $TT.v.t.lb" );
 	insert_object( "$TT.v.t.lb", root );
@@ -5917,7 +5952,7 @@ case 88:
 		nLinks = cur->up->read_file_net( lab4, lab1, lab2, -1, lab3 );
 		if ( nLinks == 0 )
 		{
-			cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the file contents for a valid Pajek network structure file (Pajek .net format) and make sure you select a valid object for attributing the network's nodes role.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the file contents for a valid Pajek network structure file (Pajek .net format) and make sure you select a valid object for attributing the network's nodes role.\"" );
 			plog( "Error: No network links created\n" );
 		}
 		else
@@ -5925,7 +5960,7 @@ case 88:
 	}
 	else
 	{
-		cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select a valid object for attributing the network's nodes role.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select a valid object for attributing the network's nodes role.\"" );
 		plog( "Error: No network links created\n" );
 	}
 	
@@ -5937,19 +5972,19 @@ case 89:
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to save a network structure file.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to save a network structure file.\"" );
 		break;
 	}
 
 	cmd( "set TT .objs" );
 	cmd( "newtop $TT \"Save Network\" { set choice 2 }" );
 
-	cmd( "frame $TT.v" );
-	cmd( "label $TT.v.l -text \"Object containing\nthe network nodes\"" );
+	cmd( "ttk::frame $TT.v" );
+	cmd( "ttk::label $TT.v.l -text \"Object containing\nthe network nodes\"" );
 
-	cmd( "frame $TT.v.t" );
-	cmd( "scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );
-	cmd( "listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\"" );
+	cmd( "ttk::frame $TT.v.t" );
+	cmd( "ttk::scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );
+	cmd( "ttk::listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\" -dark $darkTheme" );
 	cmd( "pack $TT.v.t.lb $TT.v.t.v_scroll -side left -fill y" );
 	cmd( "mouse_wheel $TT.v.t.lb" );
 
@@ -5958,7 +5993,7 @@ case 89:
 	if ( get_int( "numNets" ) == 0 )
 	{
 		cmd( "destroytop .objs" );
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No network object found\" -detail \"Please make sure there are objects set as network nodes before saving the network structure.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No network object found\" -detail \"Please make sure there are objects set as network nodes before saving the network structure.\"" );
 		break;
 	}
 
@@ -5988,7 +6023,7 @@ case 89:
 	cur = root->search( lab4 );
 	if ( cur == NULL || cur->node == NULL || cur->up == NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select an object which is already a node of an existing network.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select an object which is already a node of an existing network.\"" );
 		break;
 	}
 
@@ -6015,7 +6050,7 @@ case 89:
 	nLinks = cur->up->write_file_net( lab4, lab1, lab2, -1 );
 	if ( nLinks == 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the chosen directory/file for WRITE access and make sure you select a valid object for retrieving the network's nodes.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the chosen directory/file for WRITE access and make sure you select a valid object for retrieving the network's nodes.\"" );
 		plog( "Error: No network links saved\n" );
 	}
 	else
@@ -6036,12 +6071,12 @@ case 93:
 	cmd( "set TT .objs" );
 	cmd( "newtop $TT \"Unload Network\" { set choice 2 }" );
 
-	cmd( "frame $TT.v" );
-	cmd( "label $TT.v.l -text \"Object containing\nthe network nodes\"" );
+	cmd( "ttk::frame $TT.v" );
+	cmd( "ttk::label $TT.v.l -text \"Object containing\nthe network nodes\"" );
 
-	cmd( "frame $TT.v.t" );
-	cmd( "scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );
-	cmd( "listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\"" );
+	cmd( "ttk::frame $TT.v.t" );
+	cmd( "ttk::scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );
+	cmd( "ttk::listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\" -dark $darkTheme" );
 	cmd( "pack $TT.v.t.lb $TT.v.t.v_scroll -side left -fill y" );
 	cmd( "mouse_wheel $TT.v.t.lb" );
 
@@ -6050,7 +6085,7 @@ case 93:
 	if ( get_int( "numNets" ) == 0 )
 	{
 		cmd( "destroytop .objs" );
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No network object found\" -detail \"Please make sure there are objects set as network nodes before unloading the network structure.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No network object found\" -detail \"Please make sure there are objects set as network nodes before unloading the network structure.\"" );
 		break;
 	}
 
@@ -6080,7 +6115,7 @@ case 93:
 	cur = root->search( lab4 );
 	if ( cur == NULL || cur->node == NULL || cur->up == NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select an object which is already a node of an existing network.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select an object which is already a node of an existing network.\"" );
 		break;
 	}
 
@@ -6091,7 +6126,7 @@ case 93:
 break;
 
 
-// Context-menu operation: execute the command in 'ctxMenuCmd'
+// context-menu operation: execute the command in 'ctxMenuCmd'
 case 95:
 
 	if ( Tcl_GetVar( inter, "ctxMenuCmd", 0 ) == NULL )
@@ -6100,13 +6135,15 @@ case 95:
 	cmd( "eval $ctxMenuCmd" );					// execute command
 	
 	cmd( "unset -nocomplain ctxMenuCmd" );
-	redrawRoot = true;							// force browser redraw
+	redrawRoot = redrawStruc = true;			// force browser/structure redraw
 
 break;
 
 
-// No-operation: toggle the state of the model structure windows, refresh window
+// toggle the state of the model structure windows, refresh window
 case 70:
+
+	redrawStruc = true;
 
 break;
 
@@ -6507,11 +6544,8 @@ int check_label( char *l, object *r )
 	object *cur;
 	variable *cv;
 
-	Tcl_SetVar( inter, "nameVar", l, 0 );
-	cmd( "if [ regexp {^[a-zA-Z_][a-zA-Z0-9_]*$} $nameVar ] { set answer 1 } { set answer 0 }" );
-	const char *answer = Tcl_GetVar( inter, "answer", 0 );
-	if ( *answer == '0' )
-		return 2;				// error if invalid characters (incl. spaces)
+	if ( ! valid_label( l ) )
+		return 2;				// invalid characters (incl. spaces)
 
 	if ( ! strcmp( l, r->label ) )
 		return 1;
@@ -6542,25 +6576,25 @@ Define keyboard shortcuts to menu items
 void set_shortcuts( const char *window, const char *help )
 {
 	cmd( "bind %s <F1> { LsdHelp %s }", window, help  );
-	cmd( "bind %s <Control-l> {set choice 17}; bind %s <Control-L> {set choice 17}", window, window  );
-	cmd( "bind %s <Control-s> {set choice 18}; bind %s <Control-S> {set choice 18}", window, window  );
-	cmd( "bind %s <Control-e> {set choice 20}; bind %s <Control-E> {set choice 20}", window, window  );
-	cmd( "bind %s <Control-q> {set choice 11}; bind %s <Control-Q> {set choice 11}", window, window  );
-	cmd( "bind %s <Control-v> {set param 0; set choice 2}; bind %s <Control-V> {set param 0; set choice 2}", window, window  );
-	cmd( "bind %s <Control-p> {set param 1; set choice 2}; bind %s <Control-P> {set param 1; set choice 2}", window, window  );
-	cmd( "bind %s <Control-n> {set param 2; set choice 2}; bind %s <Control-N> {set param 2; set choice 2}", window, window  );
-	cmd( "bind %s <Control-d> {set choice 3}; bind %s <Control-D> {set choice 3}", window, window  );
-	cmd( "bind %s <Control-o> {set choice 19}; bind %s <Control-O> {set choice 19}", window, window  );
-	cmd( "bind %s <Control-i> {set choice 21}; bind %s <Control-I> {set choice 21}", window, window  );
-	cmd( "bind %s <Control-a> {set choice 26}; bind %s <Control-A> {set choice 26}", window, window  );
-	cmd( "bind %s <Control-r> {set choice 1}; bind %s <Control-R> {set choice 1}", window, window  );
-	cmd( "bind %s <Control-m> {set choice 22}; bind %s <Control-M> {set choice 22}", window, window  );
-	cmd( "bind %s <Control-f> {set choice 50}; bind %s <Control-F> {set choice 50}", window, window  );
-	cmd( "bind %s <Control-u> {set choice 28}; bind %s <Control-U> {set choice 28}", window, window  );
-	cmd( "bind %s <Control-g> {set choice 30}; bind %s <Control-G> {set choice 30}", window, window  );
-	cmd( "bind %s <Control-b> {set choice 34}; bind %s <Control-B> {set choice 34}", window, window  );
-	cmd( "bind %s <Control-z> {set choice 37}; bind %s <Control-Z> {set choice 37}", window, window  );
-	cmd( "bind %s <Control-w> {set choice 38}; bind %s <Control-W> {set choice 38}", window, window  );
+	cmd( "bind %s <Control-l> { set choice 17 }; bind %s <Control-L> { set choice 17 }", window, window  );
+	cmd( "bind %s <Control-s> { set choice 18 }; bind %s <Control-S> { set choice 18 }", window, window  );
+	cmd( "bind %s <Control-e> { set choice 20 }; bind %s <Control-E> { set choice 20 }", window, window  );
+	cmd( "bind %s <Control-q> { set choice 11 }; bind %s <Control-Q> { set choice 11 }", window, window  );
+	cmd( "bind %s <Control-v> { set param 0; set choice 2 }; bind %s <Control-V> { set param 0; set choice 2 }", window, window  );
+	cmd( "bind %s <Control-p> { set param 1; set choice 2 }; bind %s <Control-P> { set param 1; set choice 2 }", window, window  );
+	cmd( "bind %s <Control-n> { set param 2; set choice 2 }; bind %s <Control-N> { set param 2; set choice 2 }", window, window  );
+	cmd( "bind %s <Control-d> { set choice 3 }; bind %s <Control-D> { set choice 3 }", window, window  );
+	cmd( "bind %s <Control-o> { set choice 19 }; bind %s <Control-O> { set choice 19 }", window, window  );
+	cmd( "bind %s <Control-i> { set choice 21 }; bind %s <Control-I> { set choice 21 }", window, window  );
+	cmd( "bind %s <Control-a> { set choice 26 }; bind %s <Control-A> { set choice 26 }", window, window  );
+	cmd( "bind %s <Control-r> { set choice 1 }; bind %s <Control-R> { set choice 1 }", window, window  );
+	cmd( "bind %s <Control-m> { set choice 22 }; bind %s <Control-M> { set choice 22 }", window, window  );
+	cmd( "bind %s <Control-f> { set choice 50 }; bind %s <Control-F> { set choice 50 }", window, window  );
+	cmd( "bind %s <Control-u> { set choice 28 }; bind %s <Control-U> { set choice 28 }", window, window  );
+	cmd( "bind %s <Control-g> { set choice 30 }; bind %s <Control-G> { set choice 30 }", window, window  );
+	cmd( "bind %s <Control-b> { set choice 34 }; bind %s <Control-B> { set choice 34 }", window, window  );
+	cmd( "bind %s <Control-z> { set choice 37 }; bind %s <Control-Z> { set choice 37 }", window, window  );
+	cmd( "bind %s <Control-w> { set choice 38 }; bind %s <Control-W> { set choice 38 }", window, window  );
 	cmd( "bind %s <Control-Tab> { set strWindowOn [ expr ! $strWindowOn ]; set choice 70 }", window  );
 }
 
@@ -6579,7 +6613,7 @@ void control_tocompute( object *r, char *l )
 	{
 		if ( cv->save == 1 )
 		{
-			cmd( "set res [ tk_messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, l );
+			cmd( "set res [ ttk::messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, l );
 			cmd( "if [ string equal $res cancel ] { set res 1 } { set res 0 }" );
 			get_int( "res", &res );
 			
@@ -6937,7 +6971,7 @@ SENSITIVITY_TOO_LARGE
 ****************************************************/
 void sensitivity_too_large( void )
 {
-	cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"The required number of configuration points to perform sensitivity analysis is likely too large to be processed in reasonable time.\n\nPress 'OK' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
+	cmd( "set answer [ ttk::messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"The required number of configuration points to perform sensitivity analysis is likely too large to be processed in reasonable time.\n\nPress 'OK' if you want to continue anyway or 'Cancel' to abort the command now.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 0 } }" );
 }
 
 
@@ -6946,7 +6980,7 @@ SENSITIVITY_CREATED
 ****************************************************/
 void sensitivity_created( void )
 {
-	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' menu option in LMM. This step has to be done every time you modify your equations file.\n\nSecond, start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsdNW  -f  <configuration_file>  -s  <n>\n\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to be run (usually 1). If your configuration files are in a subdirectory of your model directory, please add their relative path before the configuration file name (<path>/<configuration_file>).\"" );
+	cmd( "ttk::messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' menu option in LMM. This step has to be done every time you modify your equations file.\n\nSecond, start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsdNW  -f  <configuration_file>  -s  <n>\n\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to be run (usually 1). If your configuration files are in a subdirectory of your model directory, please add their relative path before the configuration file name (<path>/<configuration_file>).\"" );
 }
 
 
@@ -6955,7 +6989,7 @@ SENSITIVITY_UNDEFINED
 ****************************************************/
 void sensitivity_undefined( void )
 {
- 	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis items not found\" -detail \"Before using this option you have to select at least one parameter or lagged variable initial value to perform the sensitivity analysis and inform the corresponding values to be explored.\n\nTo set the sensitivity analysis values (or ranges), use the 'Sensitivity Analysis' button in the 'Model'/'Change Element...' menu option (or the corresponding context menu option) and inform the values or range(s) using the syntax explained in the 'Sensitivity Analysis' entry window (it is possible to paste a list of values from the clipboard). You can repeat this procedure for each required parameter or initial value.\n\nSensitivity Analysis values are NOT saved in the standard LSD configuration file (.lsd) and if needed they MUST be saved in a LSD sensitivity analysis file (.sa) using the 'File'/'Save Sensitivity...' menu option.\"" );
+ 	cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis items not found\" -detail \"Before using this option you have to select at least one parameter or lagged variable initial value to perform the sensitivity analysis and inform the corresponding values to be explored.\n\nTo set the sensitivity analysis values (or ranges), use the 'Sensitivity Analysis' button in the 'Model'/'Change Element...' menu option (or the corresponding context menu option) and inform the values or range(s) using the syntax explained in the 'Sensitivity Analysis' entry window (it is possible to paste a list of values from the clipboard). You can repeat this procedure for each required parameter or initial value.\n\nSensitivity Analysis values are NOT saved in the standard LSD configuration file (.lsd) and if needed they MUST be saved in a LSD sensitivity analysis file (.sa) using the 'File'/'Save Sensitivity...' menu option.\"" );
 }
 
 
@@ -6977,7 +7011,7 @@ bool load_prev_configuration( void )
 	
 	if ( load_configuration( true ) != 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Previously loaded configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Previously loaded configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"" );
 		
 		unload_configuration( true );			// full unload everything
 		return false;
@@ -6988,7 +7022,7 @@ bool load_prev_configuration( void )
 		f = fopen( saFile, "rt" );
 		if ( f == NULL || load_sensitivity( f ) != 0 )
 		{
-			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file cannot be reloaded\" -detail \"Previously loaded SA configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file cannot be reloaded\" -detail \"Previously loaded SA configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"" );
 			return false;
 		}
 		
@@ -7044,20 +7078,20 @@ bool open_configuration( object *&r, bool reload )
 		strcpy( lastObj, "" );					// disable last object for reload
 	}
 
-	redrawRoot = true;							// force browser redraw
+	redrawRoot = redrawStruc = true;		// force browser/structure redraw
 		
 	switch ( load_configuration( reload ) )		// try to load the configuration
 	{
 		case 1:									// file/path not found
 			if ( strlen( path ) > 0 )
-				cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", simul_name, path );
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", simul_name, path );
 			else
-				cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", simul_name  );
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", simul_name  );
 			return false;
 			
 		case 2:
 		case 3:
-			cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected.\"" );
 			return false;
 			
 		case 4:
@@ -7072,7 +7106,7 @@ bool open_configuration( object *&r, bool reload )
 		case 11:
 		case 12:								// problem from DOCUINITIAL section
 		case 13:
-			cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected and if the loaded configuration is correct.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected and if the loaded configuration is correct.\"" );
 	}
 
 	if ( reload )
@@ -7081,7 +7115,7 @@ bool open_configuration( object *&r, bool reload )
 		currObj = r = root;						// new structure
 	
 	iniShowOnce = false;						// show warning on # of columns in .ini
-	redrawRoot = true;							// force browser redraw
+	redrawRoot = redrawStruc = true;			// force browser/structure redraw
 
 	return true;
 }
@@ -7173,7 +7207,7 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 	// don't stop if simulation is running
 	if ( running )
 	{
-		cmd( "set answer [ tk_messageBox -parent .log -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\" ]" );
+		cmd( "set answer [ ttk::messageBox -parent .log -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\" ]" );
 		return false;
 	}
 	// nothing to save?
@@ -7198,7 +7232,7 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 		cmd( ".l.s.c.son_name configure -state disabled" );
 		cmd( ".l.v.c.var_name configure -state disabled" );
 	}
-	cmd( "if [ string equal [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard data?%s%s\" -detail $question ] yes ] { set ans 1 } { set ans 0 }", strlen( title ) != 0 ? "\n\n" : "", title );  
+	cmd( "if [ string equal [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard data?%s%s\" -detail $question ] yes ] { set ans 1 } { set ans 0 }", strlen( title ) != 0 ? "\n\n" : "", title );  
 	if ( ! brCovered )
 	{
 		cmd( ".l.s.c.son_name configure -state normal" );
@@ -7352,7 +7386,7 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 		for ( cur = currObj; cur != NULL; cur = cur->up )
 			if ( ! cur->to_compute )
 			{
-				cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\"", vname, cur->label );
+				cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\"", vname, cur->label );
 				break;
 			}
 	}

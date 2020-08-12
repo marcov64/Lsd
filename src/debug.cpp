@@ -74,7 +74,15 @@ int mode = ( lab == NULL ) ? 2 : ( ! strcmp( lab, "Paused by User" ) ) ? 3 : ( s
 Tcl_SetVar( inter, "lab", lab, 0 );
 
 cmd( "set deb .deb" );
-cmd( "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { set debTitle \"LSD Data Browser\" } { set debTitle \"LSD Debugger\" }; newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; set justCreated true }", unsaved_change() ? "*" : " ", simul_name  );
+cmd( "if { ! [ winfo exists .deb ] } { \
+		if [ string equal $lab \"\" ] { \
+			set debTitle \"LSD Data Browser\" \
+		} { \
+			set debTitle \"LSD Debugger\" \
+		}; \
+		newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; \
+		set justCreated true \
+	}", unsaved_change() ? "*" : " ", simul_name  );
 
 // avoid redrawing the menu if it already exists and is configured
 cmd( "set existMenu [ winfo exists .deb.m ]" );
@@ -83,16 +91,16 @@ if ( ! strcmp( Tcl_GetVar( inter, "existMenu", 0 ), "0" ) ||
 	 strcmp( Tcl_GetVar( inter, "confMenu", 0 ), ".deb.m" ) )
 {
 	cmd( "destroy .deb.m" );
-	cmd( "menu .deb.m -tearoff 0" );
+	cmd( "ttk::menu .deb.m -tearoff 0" );
 	cmd( "set w .deb.m.exit" );
 	cmd( ".deb.m add cascade -label Exit -menu $w -underline 0" );
-	cmd( "menu $w -tearoff 0" );
+	cmd( "ttk::menu $w -tearoff 0" );
 	if ( mode == 3 )
 		cmd( "$w add command -label \"Quit and Resume Simulation\" -command { set choice 7 } -underline 0 -accelerator Esc" );
 	else
 		cmd( "$w add command -label \"Quit and Return to Browser\" -command { set choice 7 } -underline 0 -accelerator Esc" );
 	cmd( "set w .deb.m.help" );
-	cmd( "menu $w -tearoff 0" );
+	cmd( "ttk::menu $w -tearoff 0" );
 	cmd( ".deb.m add cascade -label Help -menu $w -underline 0" );
 	cmd( "$w add command -label \"Help on Debugger\" -underline 0 -accelerator F1 -command { LsdHelp debug.html }" );
 	cmd( "$w add command -label \"LSD Quick Help\" -underline 4 -command { LsdHelp LSD_quickhelp.html }" );
@@ -115,81 +123,81 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 { 
 	cmd( "destroy .deb.b" );
 
-	cmd( "frame .deb.b -border 6" );
+	cmd( "ttk::frame .deb.b" );
 	
 	// first row of buttons (always shown)
-	cmd( "frame .deb.b.move" );
+	cmd( "ttk::frame .deb.b.move" );
 
-	cmd( "button .deb.b.move.up -width $butWid -text Up -command {set choice 3} -underline 0" );
-	cmd( "button .deb.b.move.down -width $butWid -text Down -command {set choice 6} -underline 0" );
-	cmd( "button .deb.b.move.prev -width $butWid -text Previous -command {set choice 12} -underline 0" );
-	cmd( "button .deb.b.move.broth -width $butWid -text Next -command {set choice 4} -underline 0" );
-	cmd( "button .deb.b.move.hypern -width $butWid -text \"Next Type\" -command {set choice 5} -underline 5" );
-	cmd( "button .deb.b.move.last -width $butWid -text Last -command {set choice 14} -underline 0" );
-	cmd( "button .deb.b.move.search -width $butWid -text Find -command {set choice 10} -underline 0" );
-	cmd( "button .deb.b.move.hook -width $butWid -text Hooks -command {set choice 21} -underline 0" );
-	cmd( "button .deb.b.move.net -width $butWid -text Network -command {set choice 22} -underline 3" );
+	cmd( "ttk::button .deb.b.move.up -width $butWid -text Up -command { set choice 3 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.down -width $butWid -text Down -command { set choice 6 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.prev -width $butWid -text Previous -command { set choice 12 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.broth -width $butWid -text Next -command { set choice 4 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.hypern -width $butWid -text \"Next Type\" -command { set choice 5 } -underline 5" );
+	cmd( "ttk::button .deb.b.move.last -width $butWid -text Last -command { set choice 14 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.search -width $butWid -text Find -command { set choice 10 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.hook -width $butWid -text Hooks -command { set choice 21 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.net -width $butWid -text Network -command { set choice 22 } -underline 3" );
 	
-	cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.hook .deb.b.move.net -padx 8 -pady 5 -side left -expand no -fill none" );
+	cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.hook .deb.b.move.net -padx $butPad -side left" );
 	
-	cmd( "pack .deb.b.move -expand no -fill none -anchor e" );
-	
-	cmd( "bind .deb <KeyPress-u> {.deb.b.move.up invoke}; bind .deb <KeyPress-U> {.deb.b.move.up invoke}" );
-	cmd( "bind .deb <Up> {.deb.b.move.up invoke}" );
-	cmd( "bind .deb <KeyPress-n> {.deb.b.move.broth invoke}; bind .deb <KeyPress-N> {.deb.b.move.broth invoke}" );
-	cmd( "bind .deb <Right> {.deb.b.move.broth invoke}" );
-	cmd( "bind .deb <KeyPress-t> {.deb.b.move.hypern invoke}; bind .deb <KeyPress-T> {.deb.b.move.hypern invoke}" );
-	cmd( "bind .deb <KeyPress-l> {.deb.b.move.last invoke}; bind .deb <KeyPress-L> {.deb.b.move.last invoke}" );
-	cmd( "bind .deb <KeyPress-d> {.deb.b.move.down invoke}; bind .deb <KeyPress-D> {.deb.b.move.down invoke}" );
-	cmd( "bind .deb <Down> {.deb.b.move.down invoke}" );
-	cmd( "bind .deb <KeyPress-h> {set choice 21}; bind .deb <KeyPress-H> {set choice 21}" );
-	cmd( "bind .deb <KeyPress-w> {set choice 22}; bind .deb <KeyPress-W> {set choice 22}" );
-	cmd( "bind .deb <KeyPress-f> {.deb.b.move.search invoke}; bind .deb <KeyPress-F> {.deb.b.move.search invoke}" );
-	cmd( "bind .deb <KeyPress-p> {.deb.b.move.prev invoke}; bind .deb <KeyPress-P> {.deb.b.move.prev invoke}" );
-	cmd( "bind .deb <Left> {.deb.b.move.prev invoke}" );
-	cmd( "bind .deb <KeyPress-Escape> {set choice 7}" );
+	cmd( "bind .deb <KeyPress-u> { .deb.b.move.up invoke }; bind .deb <KeyPress-U> {  .deb.b.move.up invoke }" );
+	cmd( "bind .deb <Up> { .deb.b.move.up invoke }" );
+	cmd( "bind .deb <KeyPress-n> { .deb.b.move.broth invoke }; bind .deb <KeyPress-N> { .deb.b.move.broth invoke }" );
+	cmd( "bind .deb <Right> { .deb.b.move.broth invoke }" );
+	cmd( "bind .deb <KeyPress-t> { .deb.b.move.hypern invoke }; bind .deb <KeyPress-T> { .deb.b.move.hypern invoke }" );
+	cmd( "bind .deb <KeyPress-l> { .deb.b.move.last invoke} ; bind .deb <KeyPress-L> { .deb.b.move.last invoke }" );
+	cmd( "bind .deb <KeyPress-d> { .deb.b.move.down invoke }; bind .deb <KeyPress-D> { .deb.b.move.down invoke }" );
+	cmd( "bind .deb <Down> { .deb.b.move.down invoke }" );
+	cmd( "bind .deb <KeyPress-h> { set choice 21 }; bind .deb <KeyPress-H> { set choice 21 }" );
+	cmd( "bind .deb <KeyPress-w> { set choice 22 }; bind .deb <KeyPress-W> { set choice 22 }" );
+	cmd( "bind .deb <KeyPress-f> { .deb.b.move.search invoke }; bind .deb <KeyPress-F> { .deb.b.move.search invoke }" );
+	cmd( "bind .deb <KeyPress-p> { .deb.b.move.prev invoke }; bind .deb <KeyPress-P> { .deb.b.move.prev invoke }" );
+	cmd( "bind .deb <Left> {. deb.b.move.prev invoke }" );
+	cmd( "bind .deb <KeyPress-Escape> { set choice 7 }" );
 
 	// second row of buttons (if applicable)
 	if ( mode == 1 || mode == 3 )
 	{
 		cmd( "set stack_flag %d", stack_info );
 		
-		cmd( "frame .deb.b.act" );
+		cmd( "ttk::frame .deb.b.act" );
 		
 		if ( mode == 1 )
 		{
-			cmd( "button .deb.b.act.run -width $butWid -text Run -command {set choice 2; set_c_var done_in 0} -underline 0" );
-			cmd( "button .deb.b.act.until -width $butWid -text Until -command {set choice 16; set_c_var done_in 0} -underline 3" );
-			cmd( "button .deb.b.act.ok -width $butWid -text Step -command {set choice 1; set_c_var done_in 3} -underline 0" );
-			cmd( "button .deb.b.act.call -width $butWid -text Caller -command {set choice 9} -underline 0" );
-			cmd( "button .deb.b.act.prn_v -width $butWid -text \"v\\\[...\\]\" -command {set choice 15} -underline 0" );
+			cmd( "ttk::button .deb.b.act.run -width $butWid -text Run -command { set choice 2; set_c_var done_in 0 } -underline 0" );
+			cmd( "ttk::button .deb.b.act.until -width $butWid -text Until -command { set choice 16; set_c_var done_in 0 } -underline 3" );
+			cmd( "ttk::button .deb.b.act.ok -width $butWid -text Step -command { set choice 1; set_c_var done_in 3 } -underline 0" );
+			cmd( "ttk::button .deb.b.act.call -width $butWid -text Caller -command { set choice 9 } -underline 0" );
+			cmd( "ttk::button .deb.b.act.prn_v -width $butWid -text \"v\\\[...\\]\" -command { set choice 15 } -underline 0" );
 			
-			cmd( "bind .deb <KeyPress-r> {.deb.b.act.run invoke}; bind .deb <KeyPress-R> {.deb.b.act.run invoke}" );
-			cmd( "bind .deb <KeyPress-i> {.deb.b.act.until invoke}; bind .deb <KeyPress-I> {.deb.b.act.until invoke}" );
-			cmd( "bind .deb <KeyPress-s> {.deb.b.act.ok invoke}; bind .deb <KeyPress-S> {.deb.b.act.ok invoke}" );
-			cmd( "bind .deb <KeyPress-c> {.deb.b.act.call invoke}; bind .deb <KeyPress-C> {.deb.b.act.call invoke}" );
-			cmd( "bind .deb <KeyPress-v> {.deb.b.act.prn_v invoke}; bind .deb <KeyPress-V> {.deb.b.act.prn_v invoke}" );
+			cmd( "bind .deb <KeyPress-r> { .deb.b.act.run invoke }; bind .deb <KeyPress-R> { .deb.b.act.run invoke }" );
+			cmd( "bind .deb <KeyPress-i> { .deb.b.act.until invoke }; bind .deb <KeyPress-I> { .deb.b.act.until invoke }" );
+			cmd( "bind .deb <KeyPress-s> { .deb.b.act.ok invoke }; bind .deb <KeyPress-S> { .deb.b.act.ok invoke }" );
+			cmd( "bind .deb <KeyPress-c> { .deb.b.act.call invoke }; bind .deb <KeyPress-C> { .deb.b.act.call invoke }" );
+			cmd( "bind .deb <KeyPress-v> { .deb.b.act.prn_v invoke }; bind .deb <KeyPress-V> { .deb.b.act.prn_v invoke }" );
 		}
 		
-		cmd( "button .deb.b.act.an -width $butWid -text Analysis -command {set choice 11} -underline 0" );
-		cmd( "button .deb.b.act.prn_stck -width $butWid -text Stack -command {set choice 13} -underline 4" );
+		cmd( "ttk::button .deb.b.act.an -width $butWid -text Analysis -command { set choice 11 } -underline 0" );
+		cmd( "ttk::button .deb.b.act.prn_stck -width $butWid -text Stack -command { set choice 13 } -underline 4" );
 		
-		cmd( "bind .deb <KeyPress-a> {.deb.b.act.an invoke}; bind .deb <KeyPress-A> {.deb.b.act.an invoke}" );
-		cmd( "bind .deb <KeyPress-k> {.deb.b.act.prn_stck invoke}; bind .deb <KeyPress-K> {.deb.b.act.prn_stck invoke}" );
+		cmd( "bind .deb <KeyPress-a> { .deb.b.act.an invoke }; bind .deb <KeyPress-A> { .deb.b.act.an invoke }" );
+		cmd( "bind .deb <KeyPress-k> { .deb.b.act.prn_stck invoke }; bind .deb <KeyPress-K> { .deb.b.act.prn_stck invoke }" );
 		
-		cmd( "frame .deb.b.act.stack" );
-		cmd( "label .deb.b.act.stack.l -text \"Stack level\"" );
-		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .deb.b.act.stack.e -width 3 -from 0 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invalidcommand { bell } -justify center } { entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center }" );
+		cmd( "ttk::frame .deb.b.act.stack" );
+		cmd( "ttk::label .deb.b.act.stack.l -text \"Stack level\"" );
+		cmd( "ttk::spinbox .deb.b.act.stack.e -width 3 -from 0 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99 } { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invalidcommand { bell } -justify center" );
 		cmd( ".deb.b.act.stack.e insert 0 $stack_flag" ); 
-		cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -side left -pady 1 -expand no -fill none" );
+		cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -padx 2 -side left" );
 		
 		if ( mode == 1 )
-			cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.call .deb.b.act.prn_v .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx 10 -pady 5 -side left -expand no -fill none" );
+			cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.call .deb.b.act.prn_v .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butPad -side left" );
 		else
-			cmd( "pack .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx 10 -pady 5 -side left -expand no -fill none" );
+			cmd( "pack .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butPad -side left" );
 	
-		cmd( "pack .deb.b.act -expand no -fill none -anchor e" );
+		cmd( "pack .deb.b.move .deb.b.act -ipady [ expr $butPad / 2 ] -anchor e" );
 	}
+	else
+		cmd( "pack .deb.b.move -ipady [ expr $butPad / 2 ] -anchor e" );		
 }
 
 app_res = *res;
@@ -204,15 +212,15 @@ while ( choice == 0 )
 	if ( mode == 1 || mode == 4 )
 	{
 		cmd( "if { ! [ winfo exists .deb.v ] } { \
-				frame .deb.v; \
-				frame .deb.v.v1; \
-				label .deb.v.v1.name1 -text \"Variable:\"; \
-				label .deb.v.v1.name2 -width 20 -anchor w -fg red -text \"\"; \
-				label .deb.v.v1.time1 -text \"Time step:\"; \
-				label .deb.v.v1.time2 -width 5 -anchor w -fg red; \
-				label .deb.v.v1.val1 -text \"Value \"; \
-				entry .deb.v.v1.val2 -width 15 -validate key \
-				-justify center -state disabled -vcmd { \
+				ttk::frame .deb.v; \
+				ttk::frame .deb.v.v1; \
+				ttk::label .deb.v.v1.name1 -text \"Variable:\"; \
+				ttk::label .deb.v.v1.name2 -width 20 -anchor w -style hl.TLabel -text \"\"; \
+				ttk::label .deb.v.v1.time1 -text \"Time step:\"; \
+				ttk::label .deb.v.v1.time2 -width 5 -anchor w -style hl.TLabel; \
+				ttk::label .deb.v.v1.val1 -text \"Value \"; \
+				ttk::entry .deb.v.v1.val2 -width 15 -validate key \
+				-justify center -state disabled -validatecommand { \
 					if [ string is double -strict %%P ] { \
 						set value %%P; \
 						set value_change 1; \
@@ -227,7 +235,7 @@ while ( choice == 0 )
 						return 0 \
 					} \
 				}; \
-				label .deb.v.v1.obs -text \"\"; \
+				ttk::label .deb.v.v1.obs -text \"\"; \
 				if { %d == 1 } { \
 					pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 .deb.v.v1.obs -side left; \
 					bind .deb <KeyPress-g> { set choice 77 }; \
@@ -244,12 +252,10 @@ while ( choice == 0 )
 
 	deb_show( r );
 
-	cmd( "pack .deb.b -side right -expand no -expand no -fill none" );
+	cmd( "pack .deb.b -pady [ expr $butPad / 2 ] -side right -after .deb.cc" );
 
-	cmd( "if $justCreated { showtop .deb topleftW 0 1; set justCreated false }" );
+	cmd( "if $justCreated { showtop .deb topleftW 0 1; set justCreated false } { focustop .deb }" );
 
-	cmd( "raise .deb; focus .deb" );
-	
 	// update variable label field
 	cmd( "if [ winfo exists .deb.v.v1.name1 ] { \
 			if { %d == 0 } { \
@@ -427,7 +433,7 @@ while ( choice == 0 )
 		case 7:
 			if ( mode == 1 )
 			{
-				cmd( "set answer [ tk_messageBox -parent .deb -type okcancel -default cancel -icon warning -title Warning -message \"Stop simulation\" -detail \"Quitting the simulation run.\nPress 'OK' to confirm.\" ]; if [ string equal $answer ok ] { set choice 0 } { set choice 1 }" );
+				cmd( "set answer [ ttk::messageBox -parent .deb -type okcancel -default cancel -icon warning -title Warning -message \"Stop simulation\" -detail \"Quitting the simulation run.\nPress 'OK' to confirm.\" ]; if [ string equal $answer ok ] { set choice 0 } { set choice 1 }" );
 			} 
 			else
 				choice = 0; 
@@ -449,7 +455,7 @@ while ( choice == 0 )
 			}
 
 			if ( mode == 3 )
-				cmd( "wm deiconify .log; raise .log; focus .log" );
+				cmd( "focustop .log" );
 
 			break;
 			
@@ -471,40 +477,40 @@ while ( choice == 0 )
 			cmd( "set e .deb.stat" );
 			cmd( "newtop $e \"Element Status\" { set choice 1 } .deb" );
 
-			cmd( "frame $e.n" );
+			cmd( "ttk::frame $e.n" );
 			switch ( cv->param )
 			{
 				case 1:
-					cmd( "label $e.n.l -text \"Parameter:\"" );
+					cmd( "ttk::label $e.n.l -text \"Parameter:\"" );
 					break;
 
 				case 2:
-					cmd( "label $e.n.l -text \"Function:\"" );
+					cmd( "ttk::label $e.n.l -text \"Function:\"" );
 					break;
 					
 				case 0:
-					cmd( "label $e.n.l -text \"Variable:\"" );
+					cmd( "ttk::label $e.n.l -text \"Variable:\"" );
 					break;
 			}
-			cmd( "label $e.n.v -fg red -text $res" );
+			cmd( "ttk::label $e.n.v -style hl.TLabel -text $res" );
 			cmd( "pack $e.n.l $e.n.v -side left -padx 2" );
 
-			cmd( "frame $e.t" );
-			cmd( "label $e.t.l -text \"Current time:\"" );
-			cmd( "label $e.t.v -fg red -text $time" );
+			cmd( "ttk::frame $e.t" );
+			cmd( "ttk::label $e.t.l -text \"Current time:\"" );
+			cmd( "ttk::label $e.t.v -style hl.TLabel -text $time" );
 			cmd( "pack $e.t.l $e.t.v -side left -padx 2" );
 
-			cmd( "frame $e.u" );
-			cmd( "label $e.u.l -text \"Last update time:\"" );
-			cmd( "label $e.u.v -fg red -text %d", cv->last_update );
+			cmd( "ttk::frame $e.u" );
+			cmd( "ttk::label $e.u.l -text \"Last update time:\"" );
+			cmd( "ttk::label $e.u.v -style hl.TLabel -text %d", cv->last_update );
 			cmd( "pack $e.u.l $e.u.v -side left -padx 2" );
 
-			cmd( "frame $e.x" );
-			cmd( "label $e.x.l -text \"Next update time:\"" );
-			cmd( "label $e.x.v -fg red -text %d", cv->next_update > 0 ? cv->next_update : cv->last_update < t ? t : t + 1 );
+			cmd( "ttk::frame $e.x" );
+			cmd( "ttk::label $e.x.l -text \"Next update time:\"" );
+			cmd( "ttk::label $e.x.v -style hl.TLabel -text %d", cv->next_update > 0 ? cv->next_update : cv->last_update < t ? t : t + 1 );
 			cmd( "pack $e.x.l $e.x.v -side left -padx 2" );
 
-			cmd( "frame $e.v" );
+			cmd( "ttk::frame $e.v" );
 			for ( i = 0; i <= eff_lags; ++i )
 			{
 				cmd( "set val%d %g", i, cv->val[ i ] );
@@ -512,17 +518,17 @@ while ( choice == 0 )
 				sprintf( ch, "val%d", i );
 				Tcl_LinkVar( inter, ch, ( char * ) &( app_values[ i ] ), TCL_LINK_DOUBLE );
 
-				cmd( "frame $e.v.l$i" );
+				cmd( "ttk::frame $e.v.l$i" );
 
 				if ( i == 0 )
-					cmd( "label $e.v.l$i.l -text \"Value:\"" );
+					cmd( "ttk::label $e.v.l$i.l -text \"Value:\"" );
 				else
-					cmd( "label $e.v.l$i.l -text \"Lag $i:\"" );
+					cmd( "ttk::label $e.v.l$i.l -text \"Lag $i:\"" );
 
-				cmd( "entry $e.v.l%d.e -width 15 -validate focusout -vcmd { if [ string is double -strict %%P ] { set val%d %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val%d; return 0 } } -invcmd { bell } -justify center", i, i, i );
+				cmd( "ttk::entry $e.v.l%d.e -width 15 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set val%d %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val%d; return 0 } } -invalidcommand { bell } -justify center", i, i, i );
 				cmd( "$e.v.l%d.e insert 0 $val%d", i, i ); 
 
-				cmd( "button $e.v.l$i.sa -width 5 -text \"Set All\" -command { set sa %i; set choice 10 }", i );
+				cmd( "ttk::button $e.v.l$i.sa -width 5 -text \"Set All\" -command { set sa %i; set choice 10 }", i );
 				cmd( "pack $e.v.l$i.l $e.v.l$i.e $e.v.l$i.sa -side left -padx 2" );
 				cmd( "pack $e.v.l$i" );
 			}
@@ -539,17 +545,17 @@ while ( choice == 0 )
 				else
 					cmd( "pack $e.n $e.t $e.u" );
 				
-				cmd( "frame $e.d" );
-				cmd( "checkbutton $e.d.deb -text \"Debug this instance only\" -variable debug" );
-				cmd( "checkbutton $e.d.deball -text \"Debug all instances\" -variable debugall -command { if { $debugall == 1 } { set debug 1; set undebugall 0; .deb.stat.d.deb configure -state disabled } { set debug 0; set undebugall 1; .deb.stat.d.deb configure -state normal } }" );
+				cmd( "ttk::frame $e.d" );
+				cmd( "ttk::checkbutton $e.d.deb -text \"Debug this instance only\" -variable debug" );
+				cmd( "ttk::checkbutton $e.d.deball -text \"Debug all instances\" -variable debugall -command { if { $debugall == 1 } { set debug 1; set undebugall 0; .deb.stat.d.deb configure -state disabled } { set debug 0; set undebugall 1; .deb.stat.d.deb configure -state normal } }" );
 				cmd( "pack $e.d.deb $e.d.deball" );
 
 				cmd( "pack $e.v $e.d -pady 5 -padx 5" );	
 
-				cmd( "frame $e.b1" );
-				cmd( "button $e.b1.eq -width $butWid -text Equation -command { set choice 8 }" );
-				cmd( "button $e.b1.cond -width $butWid -text \"Set Break\" -command { set choice 7 }" );
-				cmd( "button $e.b1.exec -width $butWid -text Update -command { set choice 9 }" );
+				cmd( "ttk::frame $e.b1" );
+				cmd( "ttk::button $e.b1.eq -width $butWid -text Equation -command { set choice 8 }" );
+				cmd( "ttk::button $e.b1.cond -width $butWid -text \"Set Break\" -command { set choice 7 }" );
+				cmd( "ttk::button $e.b1.exec -width $butWid -text Update -command { set choice 9 }" );
 				cmd( "pack $e.b1.eq $e.b1.cond $e.b1.exec -padx 10 -side left" );
 				cmd( "pack $e.b1" );	
 			}
@@ -604,26 +610,26 @@ while ( choice == 0 )
 
 				cmd( "newtop $cb \"Conditional Break\" { set choice 2 } .deb" );
 
-				cmd( "frame $cb.l" );
-				cmd( "label $cb.l.l -text \"Variable:\"" );
-				cmd( "label $cb.l.n -fg red -text %s", cv->label );
+				cmd( "ttk::frame $cb.l" );
+				cmd( "ttk::label $cb.l.l -text \"Variable:\"" );
+				cmd( "ttk::label $cb.l.n -style hl.TLabel -text %s", cv->label );
 				cmd( "pack $cb.l.l $cb.l.n -side left -padx 2" );
 
-				cmd( "frame $cb.t" );
-				cmd( "label $cb.t.l -text \"Type of conditional break\"" );
+				cmd( "ttk::frame $cb.t" );
+				cmd( "ttk::label $cb.t.l -text \"Type of conditional break\"" );
 
-				cmd( "frame $cb.t.t -relief groove -bd 2" );
-				cmd( "radiobutton $cb.t.t.none -text \"None\" -variable cond -value 0 -command { .deb.cbrk.v.e configure -state disabled }" );
-				cmd( "radiobutton $cb.t.t.eq -text \"=\" -variable cond -value 1 -command { .deb.cbrk.v.e configure -state normal; .deb.cbrk.v.e selection range 0 end; focus .deb.cbrk.v.e }" );
-				cmd( "radiobutton $cb.t.t.gr -text \">\" -variable cond -value 2 -command { .deb.cbrk.v.e configure -state normal; .deb.cbrk.v.e selection range 0 end; focus .deb.cbrk.v.e }" );
-				cmd( "radiobutton $cb.t.t.le -text \"<\" -variable cond -value 3 -command { .deb.cbrk.v.e configure -state normal; .deb.cbrk.v.e selection range 0 end; focus .deb.cbrk.v.e }" );
+				cmd( "ttk::frame $cb.t.t -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+				cmd( "ttk::radiobutton $cb.t.t.none -text \"None\" -variable cond -value 0 -command { .deb.cbrk.v.e configure -state disabled }" );
+				cmd( "ttk::radiobutton $cb.t.t.eq -text \"=\" -variable cond -value 1 -command { .deb.cbrk.v.e configure -state normal; .deb.cbrk.v.e selection range 0 end; focus .deb.cbrk.v.e }" );
+				cmd( "ttk::radiobutton $cb.t.t.gr -text \">\" -variable cond -value 2 -command { .deb.cbrk.v.e configure -state normal; .deb.cbrk.v.e selection range 0 end; focus .deb.cbrk.v.e }" );
+				cmd( "ttk::radiobutton $cb.t.t.le -text \"<\" -variable cond -value 3 -command { .deb.cbrk.v.e configure -state normal; .deb.cbrk.v.e selection range 0 end; focus .deb.cbrk.v.e }" );
 				cmd( "pack $cb.t.t.none $cb.t.t.eq $cb.t.t.gr $cb.t.t.le -anchor w" );
 
 				cmd( "pack $cb.t.l $cb.t.t" );
 
-				cmd( "frame $cb.v" );
-				cmd( "label $cb.v.l -text Value" );
-				cmd( "entry $cb.v.e -width 10 -validate focusout -vcmd { if [ string is double -strict %%P ] { set cond_val %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cond_val; return 0 } } -invcmd { bell } -justify center -state disabled" );
+				cmd( "ttk::frame $cb.v" );
+				cmd( "ttk::label $cb.v.l -text Value" );
+				cmd( "ttk::entry $cb.v.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set cond_val %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cond_val; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 				cmd( "write_any $cb.v.e $cond_val" ); 
 				cmd( "if { $cond != 0 } { $cb.v.e configure -state normal; $cb.v.e selection range 0 end; focus $cb.v.e }" );
 				cmd( "pack $cb.v.l $cb.v.e" );
@@ -634,6 +640,8 @@ while ( choice == 0 )
 				cmd( "bind $cb.v.e <Return> { set choice 1 }" );
 
 				cmd( "showtop $cb" );
+
+				cmd( "mousewarpto $cb.b.ok" );
 
 				choice = 0;
 				while ( choice == 0 )
@@ -698,30 +706,30 @@ while ( choice == 0 )
 			cmd( "set s .deb.so" );
 			cmd( "newtop $s \"Find Object\" { set choice 2 } .deb" );
 
-			cmd( "frame $s.l" );
-			cmd( "label $s.l.l -text \"Find object containing variable\"" );
-			cmd( "entry $s.l.e -width 20 -justify center -textvariable en" );
+			cmd( "ttk::frame $s.l" );
+			cmd( "ttk::label $s.l.l -text \"Find object containing variable\"" );
+			cmd( "ttk::entry $s.l.e -width 20 -justify center -textvariable en" );
 			cmd( "bind $s.l.e <KeyRelease> { if { %%N < 256 && [ info exists modElem ] } { set bb1 [ .deb.so.l.e index insert ]; set bc1 [ .deb.so.l.e get ]; set bf1 [ lsearch -glob $modElem $bc1* ]; if { $bf1 !=-1 } { set bd1 [ lindex $modElem $bf1 ]; .deb.so.l.e delete 0 end; .deb.so.l.e insert 0 $bd1; .deb.so.l.e index $bb1; .deb.so.l.e selection range $bb1 end } } }" );
 			cmd( "pack $s.l.l $s.l.e" );
 
-			cmd( "frame $s.c" );
-			cmd( "label $s.c.l -text \"Conditional to value\"" );
+			cmd( "ttk::frame $s.c" );
+			cmd( "ttk::label $s.c.l -text \"Conditional to value\"" );
 
-			cmd( "frame $s.c.cond -relief groove -bd 2" );
-			cmd( "radiobutton $s.c.cond.any -text \"Any\" -variable condition -value 0 -command { .deb.so.v.e configure -state disabled }" );
-			cmd( "radiobutton $s.c.cond.eq -text \"=\" -variable condition -value 1 -command { .deb.so.v.e configure -state normal }" );
-			cmd( "radiobutton $s.c.cond.geq -text \u2265 -variable condition -value 2 -command { .deb.so.v.e configure -state normal }" );
-			cmd( "radiobutton $s.c.cond.leq -text \u2264 -variable condition -value 3 -command { .deb.so.v.e configure -state normal }" );
-			cmd( "radiobutton $s.c.cond.gr -text \">\" -variable condition -value 4 -command { .deb.so.v.e configure -state normal }" );
-			cmd( "radiobutton $s.c.cond.le -text \"<\" -variable condition -value 5 -command { .deb.so.v.e configure -state normal }" );
-			cmd( "radiobutton $s.c.cond.not -text \u2260 -variable condition -value 6 -command { .deb.so.v.e configure -state normal }" );
+			cmd( "ttk::frame $s.c.cond -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+			cmd( "ttk::radiobutton $s.c.cond.any -text \"Any\" -variable condition -value 0 -command { .deb.so.v.e configure -state disabled }" );
+			cmd( "ttk::radiobutton $s.c.cond.eq -text \"=\" -variable condition -value 1 -command { .deb.so.v.e configure -state normal }" );
+			cmd( "ttk::radiobutton $s.c.cond.geq -text \u2265 -variable condition -value 2 -command { .deb.so.v.e configure -state normal }" );
+			cmd( "ttk::radiobutton $s.c.cond.leq -text \u2264 -variable condition -value 3 -command { .deb.so.v.e configure -state normal }" );
+			cmd( "ttk::radiobutton $s.c.cond.gr -text \">\" -variable condition -value 4 -command { .deb.so.v.e configure -state normal }" );
+			cmd( "ttk::radiobutton $s.c.cond.le -text \"<\" -variable condition -value 5 -command { .deb.so.v.e configure -state normal }" );
+			cmd( "ttk::radiobutton $s.c.cond.not -text \u2260 -variable condition -value 6 -command { .deb.so.v.e configure -state normal }" );
 			cmd( "pack $s.c.cond.any $s.c.cond.eq $s.c.cond.geq $s.c.cond.leq $s.c.cond.gr $s.c.cond.le $s.c.cond.not -anchor w" );
 
 			cmd( "pack $s.c.l $s.c.cond" );
 
-			cmd( "frame $s.v" );
-			cmd( "label $s.v.l -text Value" );
-			cmd( "entry $s.v.e -width 10 -validate focusout -vcmd { if [ string is double -strict %%P ] { set value_search %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value_search; return 0 } } -invcmd { bell } -justify center -state disabled" );
+			cmd( "ttk::frame $s.v" );
+			cmd( "ttk::label $s.v.l -text Value" );
+			cmd( "ttk::entry $s.v.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value_search %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value_search; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 			cmd( "write_any $s.v.e $value_search" ); 
 			cmd( "pack $s.v.l $s.v.e" );
 
@@ -892,7 +900,7 @@ while ( choice == 0 )
 		// Print Stack
 		case 13:
 			print_stack( );
-			cmd( "wm deiconify .log; raise .log; focus .log" );
+			cmd( "focustop .log" );
 			choice = 0;
 			break;
 
@@ -916,9 +924,9 @@ while ( choice == 0 )
 			cmd( "set t .deb.tdeb" );
 			cmd( "newtop $t \"Run Until\" { set choice 2 } .deb" );
 
-			cmd( "frame $t.t" );
-			cmd( "label $t.t.l -text \"Run until time step\"" );
-			cmd( "entry $t.t.val -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set tdebug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tdebug; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "ttk::frame $t.t" );
+			cmd( "ttk::label $t.t.l -text \"Run until time step\"" );
+			cmd( "ttk::entry $t.t.val -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set tdebug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tdebug; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$t.t.val insert 0 $tdebug" ); 
 			cmd( "pack $t.t.l $t.t.val" );
 
@@ -974,15 +982,15 @@ while ( choice == 0 )
 				
 				cmd( "newtop $hk \"Choose Hook\" { set choice 2 } .deb" );
 				
-				cmd( "frame $hk.l" );
-				cmd( "label $hk.l.l -text \"Object:\"" );
-				cmd( "label $hk.l.n -fg red -text %s", r->label );
+				cmd( "ttk::frame $hk.l" );
+				cmd( "ttk::label $hk.l.l -text \"Object:\"" );
+				cmd( "ttk::label $hk.l.n -style hl.TLabel -text %s", r->label );
 				cmd( "pack $hk.l.l $hk.l.n -side left -padx 2" );
 
-				cmd( "frame $hk.t" );
-				cmd( "label $hk.t.l -text \"Available hooks\"" );
+				cmd( "ttk::frame $hk.t" );
+				cmd( "ttk::label $hk.t.l -text \"Available hooks\"" );
 
-				cmd( "frame $hk.t.t -relief groove -bd 2" );
+				cmd( "ttk::frame $hk.t.t -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 				
 				strcpy( ch, "pack" );
 				
@@ -995,11 +1003,11 @@ while ( choice == 0 )
 						{
 							if ( k > 0 )
 							{
-								cmd( "radiobutton $hk.t.t.h%d -text \"Hook %d to %s (%d)\" -variable hook -value %d", i, i, r->hooks[ i ]->label, k, i );
+								cmd( "ttk::radiobutton $hk.t.t.h%d -text \"Hook %d to %s (%d)\" -variable hook -value %d", i, i, r->hooks[ i ]->label, k, i );
 								checked[ i ] = true;
 							}
 							else
-								cmd( "radiobutton $hk.t.t.h%d -text \"Hook %d to (unchecked)\" -variable hook -value %d", i, i, i );
+								cmd( "ttk::radiobutton $hk.t.t.h%d -text \"Hook %d to (unchecked)\" -variable hook -value %d", i, i, i );
 								
 							sprintf( ch2, " $hk.t.t.h%d", i );
 							strncat( ch, ch2, 4 * MAX_ELEM_LENGTH - strlen( ch ) - 1 );
@@ -1014,11 +1022,11 @@ while ( choice == 0 )
 					{
 						if ( k > 0 )
 						{
-							cmd( "radiobutton $hk.t.t.h%d -text \"Static Hook to %s (%d)\" -variable hook -value %d", i, r->hook->label, k, i );
+							cmd( "ttk::radiobutton $hk.t.t.h%d -text \"Static Hook to %s (%d)\" -variable hook -value %d", i, r->hook->label, k, i );
 								checked[ i ] = true;
 						}
 						else
-							cmd( "radiobutton $hk.t.t.h%d -text \"Static Hook to (unchecked)\" -variable hook -value %d", i, i );
+							cmd( "ttk::radiobutton $hk.t.t.h%d -text \"Static Hook to (unchecked)\" -variable hook -value %d", i, i );
 						
 						sprintf( ch2, " $hk.t.t.h%d", i );
 						strncat( ch, ch2, 4 * MAX_ELEM_LENGTH - strlen( ch ) - 1 );
@@ -1030,8 +1038,8 @@ while ( choice == 0 )
 
 				cmd( "pack $hk.t.l $hk.t.t" );
 
-				cmd( "frame $hk.m" );
-				cmd( "label $hk.m.l -text \"(invalid and NULL hooks not shown)\"" );
+				cmd( "ttk::frame $hk.m" );
+				cmd( "ttk::label $hk.m.l -text \"(invalid and NULL hooks not shown)\"" );
 				cmd( "pack $hk.m.l" );
 				
 				cmd( "pack $hk.l $hk.t $hk.m -padx 5 -pady 5" );
@@ -1040,6 +1048,8 @@ while ( choice == 0 )
 
 				cmd( "showtop $hk" );
 				
+				cmd( "mousewarpto $hk.b.ok" );
+
 				choice = 0;
 				while ( choice == 0 )
 					Tcl_DoOneEvent( 0 );
@@ -1052,7 +1062,7 @@ while ( choice == 0 )
 					
 					if ( ! checked[ i ] )
 					{
-						cmd( "if [ string equal [ tk_messageBox -parent .deb -type okcancel -icon warning -title Warning -default cancel -message \"Cannot check hook pointer\" -detail \"Cannot check if hook points to a valid object. LSD may crash if jumping to an invalid hook pointer.\" ] ok ] { set choice 1 } { set choice 0 }" );
+						cmd( "if [ string equal [ ttk::messageBox -parent .deb -type okcancel -icon warning -title Warning -default cancel -message \"Cannot check hook pointer\" -detail \"Cannot check if hook points to a valid object. LSD may crash if jumping to an invalid hook pointer.\" ] ok ] { set choice 1 } { set choice 0 }" );
 						
 						if ( choice == 0 )
 							break;
@@ -1073,14 +1083,14 @@ while ( choice == 0 )
 					
 					if ( k == 0 )
 					{
-						cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to LSD objects or avoid using this option.\"" );
+						cmd( "ttk::messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to LSD objects or avoid using this option.\"" );
 						choice = 0;
 						break;
 					}
 					
 					if ( k < 0 )
 					{
-						cmd( "if [ string equal [ tk_messageBox -parent .deb -type okcancel -icon warning -title Warning -default cancel -message \"Cannot check hook pointer\" -detail \"Cannot check if hook points to a valid object. LSD may crash if jumping to an invalid hook pointer.\" ] ok ] { set choice 1 } { set choice 0 }" );
+						cmd( "if [ string equal [ ttk::messageBox -parent .deb -type okcancel -icon warning -title Warning -default cancel -message \"Cannot check hook pointer\" -detail \"Cannot check if hook points to a valid object. LSD may crash if jumping to an invalid hook pointer.\" ] ok ] { set choice 1 } { set choice 0 }" );
 						
 						if ( choice == 0 )
 							break;
@@ -1139,7 +1149,7 @@ while ( choice == 0 )
 			cmd( "set choice [ file exists $name_rep ]" );
 
 			cmd( "if { $choice == 1 } { LsdHtml $name_rep }" );
-			cmd( "if { $choice == 0 } { tk_messageBox -parent .deb -type ok -title Error -icon error -message \"Report file not available\" -detail \"You can create the report in menu Model.\" }" );
+			cmd( "if { $choice == 0 } { ttk::messageBox -parent .deb -type ok -title Error -icon error -message \"Report file not available\" -detail \"You can create the report in menu Model.\" }" );
 			choice = 0;
 			break;
 
@@ -1199,24 +1209,36 @@ void deb_show( object *r )
 	int i;
 
 	// fix the top frame before proceeding
-	cmd( "if { ! [ winfo exists .deb.v ] } { frame .deb.v }" );
+	cmd( "if { ! [ winfo exists .deb.v ] } { \
+			ttk::frame .deb.v \
+		}" );
 	cmd( "if { ! [ winfo exists .deb.v.v2 ] } { \
-			frame .deb.v.v2; \
-			label .deb.v.v2.obj -text \"Level & object instance: \"; \
-			label .deb.v.v2.instance -fg red -text \"\"; \
+			ttk::frame .deb.v.v2; \
+			ttk::label .deb.v.v2.obj -text \"Level:object(instance): \"; \
+			ttk::label .deb.v.v2.instance -style hl.TLabel -text \"\"; \
 			pack .deb.v.v2.obj .deb.v.v2.instance -side left; \
 			if [ winfo exists .deb.v.v1 ] { \
 				pack .deb.v.v1 .deb.v.v2 -padx 5 -pady 5 -anchor w \
 			} { \
 				pack .deb.v.v2 -padx 5 -pady 5 -anchor w \
 			}; \
-			pack .deb.v -anchor w -expand no -fill x \
+			pack .deb.v -anchor w \
 		}" );
 
 	if ( r->up != NULL )
 	{
-		cmd( "bind .deb.v.v2.obj <Button-1> {if { [winfo exist .deb.w] } { destroy .deb.w }; set choice 17}" );
-		cmd( "bind .deb.v.v2.instance <Button-1> {if { [winfo exist .deb.w] } { destroy .deb.w }; set choice 17}" );
+		cmd( "bind .deb.v.v2.obj <Button-1> { \
+				if [ winfo exists .deb.w ] { \
+					destroy .deb.w \
+				}; \
+				set choice 17 \
+			}" );
+		cmd( "bind .deb.v.v2.instance <Button-1> { \
+				if [ winfo exists .deb.w ] { \
+					destroy .deb.w \
+				}; \
+				set choice 17 \
+			}" );
 	}
 
 	strcpy( ch, "" );
@@ -1224,37 +1246,38 @@ void deb_show( object *r )
 	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
 
 	// adjust spacing to align labels with data and increase columns width to better fill window
-	cmd( "if [ string equal $CurPlatform windows ] { set w1 20; set w2 25; set w3 10; set wwidth 100 }" );
-	cmd( "if [ string equal $CurPlatform linux ] { set w1 20; set w2 24; set w3 10; set wwidth 100 }" );
-	cmd( "if [ string equal $CurPlatform mac ] { set w1 15; set w2 18; set w3 9; set wwidth 115 }" );
-
+	cmd( "if [ string equal $CurPlatform windows ] { set w1 20; set w2 25; set w3 11; set p1 1; set p2 15; set adj 0.8 }" );
+	cmd( "if [ string equal $CurPlatform linux ] { set w1 20; set w2 24; set w3 10; set p1 1; set p2 1; set adj 0.8 }" );
+	cmd( "if [ string equal $CurPlatform mac ] { set w1 15; set w2 18; set w3 9; set p1 1; set p2 1; set adj 0.8 }" );
+	
 	cmd( "if { ! [ winfo exists .deb.tit ] } { \
-			frame .deb.tit; \
-			frame .deb.tit.h1; \
-			label .deb.tit.h1.pad -width 1 -pady 0 -bd 0 ; \
-			label .deb.tit.h1.name -text Variable -width $w1 -pady 0 -bd 0 -anchor w; \
-			label .deb.tit.h1.val -text Value -width $w2 -pady 0 -bd 0 -fg red; \
-			label .deb.tit.h1.last -text \"Last update\" -width $w3 -pady 0 -bd 0; \
-			pack .deb.tit.h1.pad .deb.tit.h1.name .deb.tit.h1.val .deb.tit.h1.last -side left; \
-			label .deb.tit.pad -pady 0 -bd 0 -text \u2009; \
-			frame .deb.tit.h2; \
-			label .deb.tit.h2.pad -width 1 -pady 0 -bd 0 ; \
-			label .deb.tit.h2.name -text Variable -width $w1 -pady 0 -bd 0 -anchor w; \
-			label .deb.tit.h2.val -text Value -width $w2 -pady 0 -bd 0 -fg red; \
-			label .deb.tit.h2.last -text \"Last update\" -width $w3 -pady 0 -bd 0; \
-			pack .deb.tit.h2.pad .deb.tit.h2.name .deb.tit.h2.val .deb.tit.h2.last -side left -anchor w; \
-			pack .deb.tit.h1 .deb.tit.pad .deb.tit.h2 -expand no -side left; \
-			pack .deb.tit -side top -anchor w -expand no -after .deb.v \
+			set t1 [ expr int( floor( $w1 * [ font measure [ ttk::style lookup TLabel -font active TkDefaultFont ] Variable ] / [ font measure [ ttk::style lookup boldSmall.TLabel -font ] Variable ] ) ) ]; \
+			set t2 [ expr int( floor( $w2 * [ font measure [ ttk::style lookup TLabel -font active TkDefaultFont ] Value ] / [ font measure [ ttk::style lookup hlBoldSmall.TLabel -font ] Value ] ) ) ]; \
+			set t3 [ expr int( floor( $w3 * [ font measure [ ttk::style lookup TLabel -font active TkDefaultFont ] \"Last update\" ] / [ font measure [ ttk::style lookup boldSmall.TLabel -font ] \"Last update\" ] ) ) ]; \
+			set t4 [ expr int( floor( $p2 * [ font measure [ ttk::style lookup TLabel -font active TkDefaultFont ] 0 ] / [ font measure [ ttk::style lookup boldSmall.TLabel -font ] 0 ] ) ) ]; \
+			ttk::frame .deb.tit; \
+			ttk::label .deb.tit.pad11 -width $p1; \
+			ttk::label .deb.tit.name1 -style boldSmall.TLabel -text Variable -width $t1 -anchor w; \
+			ttk::label .deb.tit.val1 -style hlBoldSmall.TLabel -text Value -width $t2; \
+			ttk::label .deb.tit.last1 -style boldSmall.TLabel -text \"Last update\" -width $t3; \
+			ttk::label .deb.tit.pad2 -style boldSmall.TLabel -text \u2009 -width $t4; \
+			ttk::label .deb.tit.pad12 -width $p1; \
+			ttk::label .deb.tit.name2 -style boldSmall.TLabel -text Variable -width $t1 -anchor w; \
+			ttk::label .deb.tit.val2 -style hlBoldSmall.TLabel -text Value -width $t2; \
+			ttk::label .deb.tit.last2 -style boldSmall.TLabel -text \"Last update\" -width $t3; \
+			pack .deb.tit.pad11 .deb.tit.name1 .deb.tit.val1 .deb.tit.last1 .deb.tit.pad2 .deb.tit.pad12 .deb.tit.name2 .deb.tit.val2 .deb.tit.last2 -side left; \
+			pack .deb.tit -side top -anchor w -after .deb.v \
 		}" );
 
 	cmd( "if { ! [ winfo exists .deb.cc ] } { \
-			frame .deb.cc; \
-			scrollbar .deb.cc.scroll -command \".deb.cc.l yview\"; \
+			set wwidth [ expr int( ( 2 * ( $p1 + $w1 + $w2 + $w3 ) + $p2 ) * $adj ) ]; \
+			ttk::frame .deb.cc; \
+			ttk::scrollbar .deb.cc.scroll -command \".deb.cc.l yview\"; \
 			pack .deb.cc.scroll -side right -fill y; \
-			text .deb.cc.l -yscrollcommand \".deb.cc.scroll set\" -wrap none -width $wwidth -cursor arrow; \
+			ttk::text .deb.cc.l -yscrollcommand \".deb.cc.scroll set\" -wrap none -width $wwidth -entry 0 -dark $darkTheme; \
 			mouse_wheel .deb.cc.l; \
-			pack .deb.cc.l -expand yes -fill both; \
-			pack .deb.cc -expand yes -fill both\
+			pack .deb.cc.l; \
+			pack .deb.cc -side top -anchor w -after .deb.tit -expand yes -fill y \
 		} { \
 			.deb.cc.l configure -state normal\
 		}" );
@@ -1263,7 +1286,7 @@ void deb_show( object *r )
 
 	if ( r->v == NULL )
 	{
-		cmd( "label .deb.cc.l.no_var -text \"(no variables defined)\"" );
+		cmd( "ttk::label .deb.cc.l.no_var -text \" (no variables defined)\"" );
 		cmd( ".deb.cc.l window create end -window .deb.cc.l.no_var" );
 	}
 	else
@@ -1274,33 +1297,34 @@ void deb_show( object *r )
 		{
 			cmd( "set last %d", ap_v->last_update );
 			cmd( "set val %g", ap_v->val[ 0 ] );
-			cmd( "frame .deb.cc.l.e$i" );
-			cmd( "label .deb.cc.l.e$i.pad1 -width 1 -pady 0 -bd 0" );
-			cmd( "label .deb.cc.l.e$i.name -width $w1 -pady 0 -anchor w -bd 0 -text %s", ap_v->label );
+			cmd( "ttk::frame .deb.cc.l.e$i" );
+			cmd( "ttk::label .deb.cc.l.e$i.pad1 -width $p1" );
+			cmd( "ttk::label .deb.cc.l.e$i.name -width $w1 -anchor w -text %s", ap_v->label );
 			
 			if ( is_nan( ap_v->val[ 0 ] ) )
-				cmd( "label .deb.cc.l.e$i.val -width $w2 -pady 0 -bd 0 -fg red -text NAN" );
+				cmd( "ttk::label .deb.cc.l.e$i.val -width $w2 -style hl.TLabel -text NAN" );
 			else
 				if ( is_inf( ap_v->val[ 0 ] ) )
-					cmd( "label .deb.cc.l.e$i.val -width $w2 -pady 0 -bd 0 -fg red -text %sINFINITY", ap_v->val[ 0 ] < 0 ? "-" : "" );
+					cmd( "ttk::label .deb.cc.l.e$i.val -width $w2 -style hl.TLabel -text %sINFINITY", ap_v->val[ 0 ] < 0 ? "-" : "" );
 				else
 					if ( ap_v->val[ 0 ] != 0 && fabs( ap_v->val[ 0 ] ) < SIG_MIN )	// insignificant value?			
-						cmd( "label .deb.cc.l.e$i.val -width $w2 -pady 0 -bd 0 -fg red -text ~0" );
+						cmd( "ttk::label .deb.cc.l.e$i.val -width $w2 -style hl.TLabel -text ~0" );
 					else
-						cmd( "label .deb.cc.l.e$i.val -width $w2 -pady 0 -bd 0 -fg red -text $val" );
+						cmd( "ttk::label .deb.cc.l.e$i.val -width $w2 -style hl.TLabel -text $val" );
 			
 			if ( ap_v->param == 0 )
-				cmd( "label .deb.cc.l.e$i.last -width $w3 -pady 0 -bd 0 -text $last" );
+				cmd( "ttk::label .deb.cc.l.e$i.last -width $w3 -text $last" );
 			if ( ap_v->param == 1 )
-				cmd( "label .deb.cc.l.e$i.last -width $w3 -pady 0 -bd 0 -text (P)" );
+				cmd( "ttk::label .deb.cc.l.e$i.last -width $w3 -text (P)" );
 			if ( ap_v->param == 2 )
-				cmd( "label .deb.cc.l.e$i.last -width $w3 -pady 0 -bd 0 -text (F)" );
+				cmd( "ttk::label .deb.cc.l.e$i.last -width $w3 -text (F)" );
 			
 			if ( i % 2 == 0 )
 			{
-				cmd( "label .deb.cc.l.e$i.pad2 -pady 0 -bd 0 -bg white -text \u2009" );
+				cmd( "ttk::label .deb.cc.l.e$i.pad2 -width $p2 -text \u2009" );
 			
 				cmd( "pack .deb.cc.l.e$i.pad2 .deb.cc.l.e$i.pad1 .deb.cc.l.e$i.name .deb.cc.l.e$i.val .deb.cc.l.e$i.last -side left" );
+				cmd( "mouse_wheel .deb.cc.l.e$i.pad2" );
 			}
 			else
 				cmd( "pack .deb.cc.l.e$i.pad1 .deb.cc.l.e$i.name .deb.cc.l.e$i.val .deb.cc.l.e$i.last -side left" );
@@ -1308,6 +1332,10 @@ void deb_show( object *r )
 			cmd( "bind .deb.cc.l.e$i.name <Button-1> { set res %s; set lstDebPos [ .deb.cc.l index @%%x,%%y ]; set choice 8 }", ap_v->label );
 			cmd( "bind .deb.cc.l.e$i.name <Button-2> { set res %s; set lstDebPos [ .deb.cc.l index @%%x,%%y ]; set choice 29 }", ap_v->label );
 			cmd( "bind .deb.cc.l.e$i.name <Button-3> { event generate .deb.cc.l.e$i.name <Button-2> -x %%x -y %%y }" );
+
+			cmd( "mouse_wheel .deb.cc.l.e$i.name" );
+			cmd( "mouse_wheel .deb.cc.l.e$i.val" );
+			cmd( "mouse_wheel .deb.cc.l.e$i.last" );
 
 			cmd( ".deb.cc.l window create end -window .deb.cc.l.e$i" );
 			if ( i % 2 == 0 )
@@ -1339,37 +1367,37 @@ void show_tmp_vars( object *r, bool update )
 	{
 		cmd( "newtop $in \"v\\[...\\]\" { destroytop .deb.val } .deb" ); 
 
-		cmd( "frame $in.l1" );
-		cmd( "label $in.l1.l -text \"Name and instance\"" );
-		cmd( "frame $in.l1.n" );
-		cmd( "label $in.l1.n.name -foreground red" );
-		cmd( "label $in.l1.n.sep -text |" );
-		cmd( "label $in.l1.n.id -foreground red" );
+		cmd( "ttk::frame $in.l1" );
+		cmd( "ttk::label $in.l1.l -text \"Name and instance\"" );
+		cmd( "ttk::frame $in.l1.n" );
+		cmd( "ttk::label $in.l1.n.name -style hl.TLabel" );
+		cmd( "ttk::label $in.l1.n.sep -text |" );
+		cmd( "ttk::label $in.l1.n.id -style hl.TLabel" );
 		cmd( "pack $in.l1.n.name $in.l1.n.sep $in.l1.n.id -side left" );
 		cmd( "pack $in.l1.l $in.l1.n" );
 		
-		cmd( "frame $in.l2" );
-		cmd( "label $in.l2.id -width 6 -text Variable" );
-		cmd( "label $in.l2.pad" );
-		cmd( "label $in.l2.val -width 14 -fg red -text Value" );
+		cmd( "ttk::frame $in.l2" );
+		cmd( "ttk::label $in.l2.id -width 6 -text Variable" );
+		cmd( "ttk::label $in.l2.pad" );
+		cmd( "ttk::label $in.l2.val -width 14 -style hl.TLabel -text Value" );
 		cmd( "pack $in.l2.id $in.l2.pad $in.l2.val -side left" );
 
 		cmd( "pack $in.l1 $in.l2 -pady 2" );
 
-		cmd( "frame $in.n" );
-		cmd( "scrollbar $in.n.yscroll -command \"$in.n.t yview\"" );
+		cmd( "ttk::frame $in.n" );
+		cmd( "ttk::scrollbar $in.n.yscroll -command \"$in.n.t yview\"" );
 		cmd( "pack $in.n.yscroll -side right -fill y" );
-		cmd( "text $in.n.t -width 18 -height 27 -yscrollcommand \"$in.n.yscroll set\" -wrap none -cursor arrow" );
+		cmd( "ttk::text $in.n.t -width 18 -height 27 -yscrollcommand \"$in.n.yscroll set\" -wrap none -entry 0 -dark $darkTheme" );
 		cmd( "mouse_wheel $in.n.t" );
 		cmd( "pack $in.n.t -expand yes -fill both" );
 		cmd( "pack $in.n -expand yes -fill both" );
 		
-		cmd( "label $in.l3 -text \"(double-click name to\nchange to object)\"" );
+		cmd( "ttk::label $in.l3 -text \"(double-click name to\nchange to object)\"" );
 		cmd( "pack $in.l3 -pady 5" );
 
 		cmd( "showtop $in topleftW 0 1 0" );
 
-		cmd( "$in.n.t tag configure bold -font [ font create -family TkDefaultFont -size $small_character -weight bold ]" );
+		cmd( "$in.n.t tag configure bold -font [ ttk::style lookup boldSmallProp.TText -font ]" );
 
 		cmd( "if { ! [ winfo exists .deb.net ] } { align $in .deb } { align $in .deb.net }" );
 	}
@@ -1396,20 +1424,20 @@ void show_tmp_vars( object *r, bool update )
 	
 	for ( i = 1, j = 0; j < 10; ++i, ++j )
 	{
-		cmd( "frame $in.n.t.n$i" );
-		cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text \"v\\\[%d\\]\"", j );
-		cmd( "label $in.n.t.n$i.pad -width 1 -pady 0 -bd 0" );
+		cmd( "ttk::frame $in.n.t.n$i" );
+		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"v\\\[%d\\]\"", j );
+		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 		
 		if ( is_nan( d_values[ j ] ) )
-			cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text NAN" );
+			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NAN" );
 		else
 			if ( is_inf( d_values[ j ] ) )
-				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %sINFINITY", d_values[ j ] < 0 ? "-" : "" );
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", d_values[ j ] < 0 ? "-" : "" );
 			else
 				if ( d_values[ j ] != 0 && fabs( d_values[ j ] ) < SIG_MIN )	// insignificant value?
-					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text ~0" );
+					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text ~0" );
 				else
-					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %g", d_values[ j ] );
+					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", d_values[ j ] );
 				
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 		
@@ -1421,11 +1449,11 @@ void show_tmp_vars( object *r, bool update )
 	
 	for ( j = 0; j < ( int ) ( sizeof i_names / sizeof i_names[ 0 ] ); ++i, ++j )
 	{
-		cmd( "frame $in.n.t.n$i" );
-		cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text \"%c\"", i_names[ j ] );
-		cmd( "label $in.n.t.n$i.pad -width 1 -pady 0 -bd 0" );
+		cmd( "ttk::frame $in.n.t.n$i" );
+		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"%c\"", i_names[ j ] );
+		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 		
-		cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %d", i_values[ j ] );
+		cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %d", i_values[ j ] );
 
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 		
@@ -1437,29 +1465,29 @@ void show_tmp_vars( object *r, bool update )
 	
 	for ( j = 0; j < 10; ++i, ++j )
 	{
-		cmd( "frame $in.n.t.n$i" );
-		cmd( "label $in.n.t.n$i.pad -width 1 -pady 0 -bd 0" );
+		cmd( "ttk::frame $in.n.t.n$i" );
+		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 		
 		if ( j == 0 )
-			cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text cur" );
+			cmd( "ttk::label $in.n.t.n$i.var -width 6 -text cur" );
 		else
-			cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text \"cur%d\"", j );
+			cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"cur%d\"", j );
 		
 		n = 0;
 		if ( o_values[ j ] == NULL )
-			cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text NULL" );
+			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NULL" );
 		else
 		{
 			// search an object pointed by the pointer
 			n = ( int ) root->search_inst( o_values[ j ], false );
 			
 			if ( n > 0 && o_values[ j ]->label != NULL )
-				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"%s(%d)\"", o_values[ j ]->label, n );
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%d)\"", o_values[ j ]->label, n );
 			else
 				if ( n < 0 )
-					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"(unchecked)\"" );
+					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"(unchecked)\"" );
 				else
-					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"(invalid)\"" );
+					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"(invalid)\"" );
 		}
 		
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
@@ -1478,16 +1506,16 @@ void show_tmp_vars( object *r, bool update )
 	
 	for ( j = 0; j < 10; ++i, ++j )
 	{
-		cmd( "frame $in.n.t.n$i" );
-		cmd( "label $in.n.t.n$i.pad -width 1 -pady 0 -bd 0" );
+		cmd( "ttk::frame $in.n.t.n$i" );
+		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 		
 		if ( j == 0 )
-			cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text curl" );
+			cmd( "ttk::label $in.n.t.n$i.var -width 6 -text curl" );
 		else
-			cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text \"curl%d\"", j );
+			cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"curl%d\"", j );
 		
 		if ( n_values[ j ] == NULL )
-			cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text NULL" );
+			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NULL" );
 		else
 		{
 			// try search a link pointed by the pointer in current object only
@@ -1497,14 +1525,14 @@ void show_tmp_vars( object *r, bool update )
 				for ( curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next )
 					if ( curLnk == n_values[ j ] && curLnk->ptrTo != NULL && curLnk->ptrTo->label != NULL )
 					{
-						cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"%s(%ld)\"", curLnk->ptrTo->label, curLnk->serTo );
+						cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%ld)\"", curLnk->ptrTo->label, curLnk->serTo );
 						n = 1;
 						break;
 					}
 			}
 			
 			if ( n > 0 )
-				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text \"(unknown)\"" );
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"(unknown)\"" );
 		}
 		
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
@@ -1523,35 +1551,35 @@ void show_tmp_vars( object *r, bool update )
 	
 	for ( j = -1; j < ( int ) r->hooks.size( ); ++i, ++j )
 	{
-		cmd( "frame $in.n.t.n$i" );
-		cmd( "label $in.n.t.n$i.pad -width 1 -pady 0 -bd 0" );
+		cmd( "ttk::frame $in.n.t.n$i" );
+		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
 		if ( j < 0 )
 		{
-			cmd( "label $in.n.t.n$i.var -width 7 -pady 0 -bd 0 -text SHOOK" );
+			cmd( "ttk::label $in.n.t.n$i.var -width 7 -text SHOOK" );
 			cur = r->hook;	
 		}
 		else
 		{
-			cmd( "label $in.n.t.n$i.var -width 7 -pady 0 -bd 0 -text \"HOOK(%d)\"", j );
+			cmd( "ttk::label $in.n.t.n$i.var -width 7 -text \"HOOK(%d)\"", j );
 			cur = r->hooks[ j ];	
 		}
 		
 		n = 0;
 		if ( cur == NULL )
-			cmd( "label $in.n.t.n$i.val -width 12 -pady 0 -bd 0 -foreground red -text NULL" );
+			cmd( "ttk::label $in.n.t.n$i.val -width 12 -style hl.TLabel -text NULL" );
 		else
 		{
 			// search an object pointed by the hook
 			n = ( int ) root->search_inst( cur, false );
 			
 			if ( n > 0 && cur->label != NULL )
-				cmd( "label $in.n.t.n$i.val -width 12 -pady 0 -bd 0 -foreground red -text \"%s(%d)\"", cur->label, n );
+				cmd( "ttk::label $in.n.t.n$i.val -width 12 -style hl.TLabel -text \"%s(%d)\"", cur->label, n );
 			else
 				if ( n < 0 )
-					cmd( "label $in.n.t.n$i.val -width 12 -pady 0 -bd 0 -foreground red -text \"(unchecked)\"" );
+					cmd( "ttk::label $in.n.t.n$i.val -width 12 -style hl.TLabel -text \"(unchecked)\"" );
 				else
-					cmd( "label $in.n.t.n$i.val -width 12 -pady 0 -bd 0 -foreground red -text \"(invalid)\"" );
+					cmd( "ttk::label $in.n.t.n$i.val -width 12 -style hl.TLabel -text \"(invalid)\"" );
 		}
 		
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
@@ -1570,20 +1598,20 @@ void show_tmp_vars( object *r, bool update )
 	
 	for ( j = 10; j < min( 100, USER_D_VARS ); ++i, ++j )
 	{
-		cmd( "frame $in.n.t.n$i" );
-		cmd( "label $in.n.t.n$i.var -width 6 -pady 0 -bd 0 -text \"v\\\[%d\\]\"", j );
-		cmd( "label $in.n.t.n$i.pad -width 1 -pady 0 -bd 0" );
+		cmd( "ttk::frame $in.n.t.n$i" );
+		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"v\\\[%d\\]\"", j );
+		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 		
 		if ( is_nan( d_values[ j ] ) )
-			cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text NAN" );
+			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NAN" );
 		else
 			if ( is_inf( d_values[ j ] ) )
-				cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %sINFINITY", d_values[ j ] < 0 ? "-" : "" );
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", d_values[ j ] < 0 ? "-" : "" );
 			else
 				if ( d_values[ j ] != 0 && fabs( d_values[ j ] ) < SIG_MIN )	// insignificant value?
-					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text ~0" );
+					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text ~0" );
 				else
-					cmd( "label $in.n.t.n$i.val -width 13 -pady 0 -bd 0 -foreground red -text %g", d_values[ j ] );
+					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", d_values[ j ] );
 				
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 		
@@ -1613,42 +1641,42 @@ void show_neighbors( object *r, bool update )
 	{
 		cmd( "newtop $n \"Network\" { destroytop .deb.net } .deb" );
 		
-		cmd( "frame $n.l1" );
-		cmd( "label $n.l1.l -text \"Node ID and name\"" );
-		cmd( "frame $n.l1.n" );
-		cmd( "label $n.l1.n.id -foreground red" );
-		cmd( "label $n.l1.n.sep -text |" );
-		cmd( "label $n.l1.n.name -foreground red" );
+		cmd( "ttk::frame $n.l1" );
+		cmd( "ttk::label $n.l1.l -text \"Node ID and name\"" );
+		cmd( "ttk::frame $n.l1.n" );
+		cmd( "ttk::label $n.l1.n.id -style hl.TLabel" );
+		cmd( "ttk::label $n.l1.n.sep -text |" );
+		cmd( "ttk::label $n.l1.n.name -style hl.TLabel" );
 		cmd( "pack $n.l1.n.id $n.l1.n.sep $n.l1.n.name -side left" );
 		cmd( "pack $n.l1.l $n.l1.n" );
 		
-		cmd( "frame $n.l2" );
-		cmd( "label $n.l2.l -text \"Num. links out:\"" );
-		cmd( "label $n.l2.n -foreground red" );
+		cmd( "ttk::frame $n.l2" );
+		cmd( "ttk::label $n.l2.l -text \"Num. links out:\"" );
+		cmd( "ttk::label $n.l2.n -style hl.TLabel" );
 		cmd( "pack $n.l2.l $n.l2.n -side left" );
 		
-		cmd( "frame $n.l3" );
-		cmd( "label $n.l3.l -text \"Outgoing links\"" );
+		cmd( "ttk::frame $n.l3" );
+		cmd( "ttk::label $n.l3.l -text \"Outgoing links\"" );
 		
-		cmd( "frame $n.l3.h" );
-		cmd( "label $n.l3.h.id -width 6 -text \"Dest. ID\"" );
-		cmd( "label $n.l3.h.pad -width 2" );
-		cmd( "label $n.l3.h.wght -width 12 -foreground red -text \"(Weight) \"" );
+		cmd( "ttk::frame $n.l3.h" );
+		cmd( "ttk::label $n.l3.h.id -width 6 -text \"Dest. ID\"" );
+		cmd( "ttk::label $n.l3.h.pad -width 2" );
+		cmd( "ttk::label $n.l3.h.wght -width 12 -style hl.TLabel -text \"(Weight) \"" );
 		cmd( "pack $n.l3.h.id $n.l3.h.pad $n.l3.h.wght -side left" );
 
 		cmd( "pack $n.l3.l $n.l3.h" );
 
 		cmd( "pack $n.l1 $n.l2 $n.l3 -pady 2" );
 
-		cmd( "frame $n.n" );
-		cmd( "scrollbar $n.n.yscroll -command \".deb.net.n.t yview\"" );
+		cmd( "ttk::frame $n.n" );
+		cmd( "ttk::scrollbar $n.n.yscroll -command \".deb.net.n.t yview\"" );
 		cmd( "pack $n.n.yscroll -side right -fill y" );
-		cmd( "text $n.n.t -width 18 -height 19 -yscrollcommand \"$n.n.yscroll set\" -wrap none -cursor arrow" );
+		cmd( "ttk::text $n.n.t -width 18 -height 19 -yscrollcommand \"$n.n.yscroll set\" -wrap none -entry 0 -dark $darkTheme" );
 		cmd( "mouse_wheel $n.n.t" );
 		cmd( "pack $n.n.t -expand yes -fill both" );
 		cmd( "pack $n.n -expand yes -fill both" );
 		
-		cmd( "label $n.l4 -text \"(double-click ID to\nchange to node)\"" );
+		cmd( "ttk::label $n.l4 -text \"(double-click ID to\nchange to node)\"" );
 		cmd( "pack $n.l4 -pady 5" );
 		
 		cmd( "showtop $n topleftW 0 1 0" );
@@ -1675,13 +1703,13 @@ void show_neighbors( object *r, bool update )
 	
 	for ( i = 1, curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next, ++i )
 	{
-		cmd( "frame $n.n.t.n$i" );
-		cmd( "label $n.n.t.n$i.nodeto -width 6 -pady 0 -bd 0 -text %ld", curLnk->ptrTo->node->id );
-		cmd( "label $n.n.t.n$i.pad -width 2 -pady 0 -bd 0" );
+		cmd( "ttk::frame $n.n.t.n$i" );
+		cmd( "ttk::label $n.n.t.n$i.nodeto -width 6 -text %ld", curLnk->ptrTo->node->id );
+		cmd( "ttk::label $n.n.t.n$i.pad -width 2" );
 		if ( curLnk->weight != 0 )
-			cmd( "label $n.n.t.n$i.weight -width 12 -pady 0 -bd 0 -foreground red -text %g", curLnk->weight );
+			cmd( "ttk::label $n.n.t.n$i.weight -width 12 -style hl.TLabel -text %g", curLnk->weight );
 		else
-			cmd( "label $n.n.t.n$i.weight -width 12 -pady 0 -bd 0" );
+			cmd( "ttk::label $n.n.t.n$i.weight -width 12" );
 		
 		cmd( "pack $n.n.t.n$i.nodeto $n.n.t.n$i.pad $n.n.t.n$i.weight -side left" );
 		

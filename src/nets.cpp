@@ -305,8 +305,8 @@ netLink *object::draw_link_net( void )
 	}
 
 	do
-		drawPoint = RND * sum;
-	while ( drawPoint == sum );					// avoid RND == 1
+		drawPoint = ran1( ) * sum;
+	while ( drawPoint == sum );					// avoid ran1 == 1
 	
 	for ( accProb = 0, cur = cur1 = node->first;// accumulate probabilities
 		  accProb <= drawPoint && cur != NULL; cur = cur->next )
@@ -540,8 +540,8 @@ object *object::draw_node_net( char const *lab )
 	}
 
 	do
-		drawPoint = RND * sum;
-	while ( drawPoint == sum );						// avoid RND == 1
+		drawPoint = ran1( ) * sum;
+	while ( drawPoint == sum );						// avoid ran1 == 1
 	
 	for ( accProb = 0, cur = cur2 = cur1;			// accumulate probabilities
 		  accProb <= drawPoint && cur != NULL; 		// until reaching the right object
@@ -1010,7 +1010,7 @@ long object::init_renyi_erdos_net( char const *lab, long numNodes, double linkPr
 	{																// for all nodes except last
 		for ( endNode = startNode + 1; endNode <= numNodes; endNode++ )
 		{															// and for all higher numbered nodes
-			if ( RND < linkProb )									// draws the existence of a link between both
+			if ( ran1( ) < linkProb )								// draws the existence of a link between both
 			{
 				cur = turbosearch( lab, 0, (double) startNode );	// searches first node object
 				cur1 = turbosearch( lab, 0, (double) endNode );		// searches second node object
@@ -1124,7 +1124,7 @@ long object::init_small_world_net( char const *lab, long numNodes, long outDeg, 
 	for ( ; cur != NULL; cur = go_brother( cur ) )
 																	// scan all nodes
 		for ( link = 1; link <= numNeigh; link++ )					// all possible neighbors' node IDs
-			if ( RND < rho ) 										// draw rewiring probability
+			if ( ran1( ) < rho ) 									// draw rewiring probability
 			{														// if rewiring
 				idNode = cur->node->serNum;							// get current node ID
 				tryNode = idNode + link;							// next node to try

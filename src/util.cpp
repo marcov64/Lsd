@@ -29,10 +29,6 @@ require a writable string.
 - void plog( char *m );
 print  message string m in the Log screen.
 
-- int my_strcmp( char *a, char *b )
-It is a normal strcmp, but it catches the possibility of both strings being
-NULL
-
 - FILE *search_str( char *name, char *str )
 given a string name, returns the file corresponding to name, and the current
 position of the file is just after str. Think I don't use any longer.
@@ -96,7 +92,7 @@ void cmd( const char *cm, ... )
 		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %lu bytes.", ( long unsigned int ) strlen( cm ) + 1 );
 		log_tcl_error( cm, message );
 		if ( tk_ok )
-			cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"LSD will close immediately after pressing 'OK'.\"" );
+			cmd( "ttk::messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"LSD will close immediately after pressing 'OK'.\"" );
 		myexit( 24 );
 	}
 
@@ -112,7 +108,7 @@ void cmd( const char *cm, ... )
 		sprintf( message, "Tcl buffer too small. Please increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.", reqSz + 1 );
 		log_tcl_error( cm, message );
 		if ( tk_ok )
-			cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
+			cmd( "ttk::messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
 	}
 	else
 	{
@@ -287,14 +283,14 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 			plog( "\nOffending code contained in the equation for variable: '%s'", "", stacklog->vs->label );
 		plog( "\nSuggestion: %s", "", boxText );
 		print_stack( );
-		cmd( "wm deiconify .log; raise .log; focus -force .log" );
-		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\n\nSimulation cannot continue.\"", boxTitle, boxText  );
+		cmd( "focustop .log" );
+		cmd( "ttk::messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\n\nSimulation cannot continue.\"", boxTitle, boxText  );
 	}
 	else
 	{
 		plog( "\n\nError: %s\nDetails: %s", "", boxTitle, logText );
 		plog( "\nSuggestion: %s\n", "", boxText );
-		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\"", boxTitle, boxText  );
+		cmd( "ttk::messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\"", boxTitle, boxText  );
 	}
 #endif
 
@@ -305,26 +301,25 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 
 #ifndef NO_WINDOW
 	uncover_browser( );
-	cmd( "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
+	cmd( "focustop .log" );
 
 	cmd( "set err %d", defQuit ? 1 : 2 );
 
 	cmd( "newtop .cazzo Error" );
 
-	cmd( "frame .cazzo.t" );
-	cmd( "label .cazzo.t.l -fg red -text \"An error occurred during the simulation\"" );
+	cmd( "ttk::frame .cazzo.t" );
+	cmd( "ttk::label .cazzo.t.l -style hl.TLabel -text \"An error occurred during the simulation\"" );
 	cmd( "pack .cazzo.t.l -pady 10" );
-	cmd( "label .cazzo.t.l1 -text \"Information about the error\nis reported in the log window.\nResults are available in the LSD browser.\"" );
+	cmd( "ttk::label -justify center .cazzo.t.l1 -text \"Information about the error is reported in the log window.\nPartial results are available in the LSD browser.\"" );
 	cmd( "pack .cazzo.t.l1" );
 
-	cmd( "frame .cazzo.e" );
-	cmd( "label .cazzo.e.l -text \"Choose one option to continue\"" );
+	cmd( "ttk::frame .cazzo.e" );
+	cmd( "ttk::label .cazzo.e.l -text \"Choose one option to continue\"" );
 
-	cmd( "frame .cazzo.e.b -relief groove -bd 2" );
-	cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD Browser to edit the model configuration\"" );
-	cmd( "radiobutton .cazzo.e.b.d -variable err -value 3 -text \"Open LSD Debugger on the offending variable and object instance\"" );
-	cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD Browser to edit the model equations' code in LMM\"" );
-
+	cmd( "ttk::frame .cazzo.e.b -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+	cmd( "ttk::radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD Browser to edit the model configuration\"" );
+	cmd( "ttk::radiobutton .cazzo.e.b.d -variable err -value 3 -text \"Open LSD Debugger on the offending variable and object instance\"" );
+	cmd( "ttk::radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD Browser to edit the model equations' code in LMM\"" );
 	cmd( "pack .cazzo.e.b.r .cazzo.e.b.d .cazzo.e.b.e -anchor w" );
 
 	cmd( "pack .cazzo.e.l .cazzo.e.b" );
@@ -333,7 +328,9 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 
 	cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
 
-	cmd( "showtop .cazzo centerS" );
+	cmd( "showtop .cazzo centerW" );
+	
+	cmd( "mousewarpto .cazzo.b.ok" );
 	
 	if ( parallel_mode || fast_mode != 0 )
 		cmd( ".cazzo.e.b.d configure -state disabled" );
@@ -1038,6 +1035,21 @@ void auto_document( int *choice, char const *lab, char const *which, bool append
 }
 
 
+/****************************************************
+VALID_LABEL
+****************************************************/
+bool valid_label( const char *lab )
+{
+	Tcl_SetVar( inter, "lab", lab, 0 );
+	cmd( "if [ regexp {^[a-zA-Z_][a-zA-Z0-9_]*$} $lab ] { set answer 1 } { set answer 0 }" );
+	const char *answer = Tcl_GetVar( inter, "answer", 0 );
+	if ( *answer == '0' )
+		return false;
+	else
+		return true;
+}
+
+
 /***************************************************
 GET_BOOL
 ***************************************************/
@@ -1159,20 +1171,6 @@ void empty_cemetery( void )
 	}
 	
 	cemetery = last_cemetery = NULL;
-}
-
-
-/****************************************************
-MY_STRCMP
-****************************************************/
-int my_strcmp( char *a, char *b )
-{
-	int res;
-	if ( a == NULL && b == NULL )
-		return 0;
-
-	res = strcmp( a, b );
-	return res;
 }
 
 
@@ -1394,7 +1392,7 @@ void read_eq_filename( char *s )
 	
 	if ( f == NULL )
 	{
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File not found\" -detail \"File '$MODEL_OPTIONS' missing, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"File not found\" -detail \"File '$MODEL_OPTIONS' missing, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
 		return;
 	}
 	
@@ -1403,7 +1401,7 @@ void read_eq_filename( char *s )
 	fclose( f );
 	if ( strncmp( lab, "FUN=", 4 ) != 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -title -title Error -icon error -message \"File corrupted\" -detail \"File '$MODEL_OPTIONS' has invalid contents, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title -title Error -icon error -message \"File corrupted\" -detail \"File '$MODEL_OPTIONS' has invalid contents, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
 		return;
 	}
 
@@ -1499,7 +1497,7 @@ void result::data( object *root, int initstep, int endtstep )
 		
 		data_recursive( root, i );		// output one data line
 		
-		if ( dozip )				// and change line
+		if ( dozip )					// and change line
 			gzprintf( fz, "\n" );
 		else
 			fprintf( f, "\n" );
@@ -1811,14 +1809,14 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 	else
 	{
 		sprintf( init_color_string, "$c%d", init_color );		// no: use the positive RGB value
-		// create (white) pallete entry if invalid palette in init_color
-		cmd( "if { ! [ info exist c%d ] } { set c%d white }", init_color, init_color  );
+		// create (background color) pallete entry if invalid palette in init_color
+		cmd( "if { ! [ info exist c%d ] } { set c%d $colorsTheme(bg) }", init_color, init_color  );
 	}
 			
-	if ( init_color == 1001 )
-		cmd( "canvas .lat.c -height %d -width %d -bg white", ( unsigned int ) pixH, ( unsigned int ) pixW );
-	else
-		cmd( "canvas .lat.c -height %d -width %d -bg %s", ( unsigned int ) pixH, ( unsigned int ) pixW, init_color_string );
+	cmd( "ttk::canvas .lat.c -height %d -width %d -entry 0 -dark $darkTheme", ( unsigned int ) pixH, ( unsigned int ) pixW );
+	
+	if ( init_color != 1001 )
+		cmd( ".lat.c configure -background %s", init_color_string );
 
 	cmd( "pack .lat.c" );
 
@@ -1936,8 +1934,8 @@ double update_lattice( double line, double col, double val )
 	else
 	{
 		sprintf( val_string, "$c%d", val_int );			// no: use the predefined Tk color
-		// create (white) pallete entry if invalid palette in val
-		cmd( "if { ! [ info exist c%d ] } { set c%d white }", val_int, val_int  );
+		// create (background color) pallete entry if invalid palette in val
+		cmd( "if { ! [ info exist c%d ] } { set c%d $colorsTheme(bg) }", val_int, val_int  );
 	}
 		
 	cmd( ".lat.c itemconfigure c%d_%d -fill %s", line_int + 1, col_int + 1, val_string );
@@ -2424,18 +2422,21 @@ char *str_upr( char *str )
 INIT_RANDOM
 Set seed to all random generators
 Pseudo-random number generator to extract draws
-ran_gen =	1 : Linear congruential in (0,1)
-ran_gen =	2 : Mersenne-Twister in (0,1)
-ran_gen =	3 : Linear congruential in [0,1)
-ran_gen =	4 : Mersenne-Twister in [0,1)
-ran_gen =	5 : Mersenne-Twister with 64 bits resolution in [0,1)
-ran_gen =	6 : Lagged fibonacci with 24 bits resolution in [0,1)
-ran_gen =	7 : Lagged fibonacci with 48 bits resolution in [0,1)
+ran_gen_id = 0 : system (not pseudo) random device in (0,1)
+ran_gen_id = 1 : Linear congruential in (0,1)
+ran_gen_id = 2 : Mersenne-Twister in (0,1)
+ran_gen_id = 3 : Linear congruential in [0,1)
+ran_gen_id = 4 : Mersenne-Twister in [0,1)
+ran_gen_id = 5 : Mersenne-Twister with 64 bits resolution in [0,1)
+ran_gen_id = 6 : Lagged fibonacci with 24 bits resolution in [0,1)
+ran_gen_id = 7 : Lagged fibonacci with 48 bits resolution in [0,1)
 ****************************************************/
-int ran_gen = 2;					// default pseudo-random number generator
+
+int ran_gen_id = 2;					// ID of initial generator (DO NOT CHANGE)
 
 #ifdef PARALLEL_MODE
-mutex parallel_lc1;					// mutex locks for random generator operations
+mutex parallel_rd;					// mutex locks for random generator operations
+mutex parallel_lc1;
 mutex parallel_lc2;
 mutex parallel_mt32;
 mutex parallel_mt64;
@@ -2443,6 +2444,7 @@ mutex parallel_lf24;
 mutex parallel_lf48;
 #endif	
 
+random_device rd;					// system random device
 minstd_rand lc1;					// linear congruential generator (internal)
 minstd_rand lc2;					// linear congruential generator (user)
 mt19937 mt32;						// Mersenne-Twister 32 bits generator
@@ -2458,6 +2460,15 @@ void init_random( unsigned seed )
 	mt64.seed( seed );				// Mersenne-Twister 64 bits
 	lf24.seed( seed );				// lagged fibonacci 24 bits
 	lf48.seed( seed );				// lagged fibonacci 48 bits
+}
+
+template < class distr > double draw_rd( distr &d )
+{
+#ifdef PARALLEL_MODE
+	// prevent concurrent draw by more than one thread
+	lock_guard < mutex > lock( parallel_rd );
+#endif	
+	return d( rd );
 }
 
 template < class distr > double draw_lc1( distr &d )
@@ -2515,24 +2526,16 @@ template < class distr > double draw_lf48( distr &d )
 }
 
 
-/****************************************************
-RND_INT
-****************************************************/
-int rnd_int( int min, int max )
-{
-	uniform_int_distribution< int > distr( min, max );
-	return draw_lc1( distr );
-}
-
-
 /***************************************************
-CUR_GEN
+DRAW_GEN
 Generate the draw using current generator object
 ***************************************************/
-template < class distr > double cur_gen( distr &d )
+template < class distr > double draw_gen( distr &d )
 {
-	switch ( ran_gen )
+	switch ( ran_gen_id )
 	{
+		case 0:						// system (not pseudo) random generator
+			return draw_rd( d );
 		case 1:						// linear congruential in (0,1)
 		case 3:						// linear congruential in [0,1)
 		default:
@@ -2555,8 +2558,59 @@ template < class distr > double cur_gen( distr &d )
 
 
 /***************************************************
+SET_RANDOM
+Set the generator object to be used in draws
+***************************************************/
+void *set_random( int gen )
+{
+	if ( gen >= 0 && gen <= 7 )
+	{
+		ran_gen_id = gen;
+		
+		switch ( ran_gen_id )
+		{
+			case 0:						// system (not pseudo) random generator
+				if ( ! HW_RAND_GEN )
+					plog( "\nWarning: true random generator not available\n" );
+				return ( ( void * ) & rd );
+
+			case 1:						// linear congruential in (0,1)
+			case 3:						// linear congruential in [0,1)
+				return ( ( void * ) & lc2 );
+
+			case 2:						// Mersenne-Twister 32 bits in (0,1)
+			case 4:						// Mersenne-Twister 32 bits in [0,1)
+				return ( ( void * ) & mt32 );
+
+			case 5:						// Mersenne-Twister 64 bits in [0,1)
+				return ( ( void * ) & mt64 );
+
+			case 6:						// lagged fibonacci 24 bits in [0,1)
+				return ( ( void * ) & lf24 );
+				break;
+			case 7:						// lagged fibonacci 48 bits in [0,1)
+				return ( ( void * ) & lf48 );
+		}
+	}
+	
+	return NULL;
+}
+
+
+/****************************************************
+RND_INT
+****************************************************/
+int rnd_int( int min, int max )
+{
+	uniform_int_distribution< int > distr( min, max );
+	return draw_lc1( distr );
+}
+
+
+/***************************************************
 RAN1
 Call the preset pseudo-random number generator
+Just generates numbers > 0 and < 1
 ***************************************************/
 double ran1( long *unused )
 {
@@ -2564,8 +2618,8 @@ double ran1( long *unused )
 	uniform_real_distribution< double > distr( 0, 1 );
 	
 	do
-		ran = cur_gen( distr );
-	while ( ran_gen < 3 && ran == 0.0 );
+		ran = draw_gen( distr );
+	while ( ran == 0.0 && ran_gen_id < 3 );
 
 	return ran;
 }
@@ -2577,7 +2631,7 @@ UNIFORM
 double uniform( double min, double max )
 {
 	uniform_real_distribution< double > distr( min, max );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2587,7 +2641,7 @@ UNIFORM_INT
 double uniform_int( double min, double max )
 {
 	uniform_int_distribution< int > distr( ( long ) min, ( long ) max );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2600,23 +2654,12 @@ double norm( double mean, double dev )
 	
 	if ( dev < 0 )	
 	{
-		if ( ++normErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: negative standard deviation in function 'norm'" );
-			normStopErr = false;
-		}
-		else
-			if ( ! normStopErr )
-			{
-				plog( "\nWarning: too many negative standard deviation errors in function 'norm', stop reporting...\n" );
-				normStopErr = true;
-			}
-
+		warn_distr( & normErrCnt, & normStopErr, "norm", "negative standard deviation" );
 		return mean;
 	}
 
 	normal_distribution< double > distr( mean, dev );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2630,23 +2673,12 @@ double lnorm( double mean, double dev )
 	
 	if ( dev < 0 )
 	{
-		if ( ++lnormErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: negative standard deviation in function 'lnorm'" );
-			lnormStopErr = false;
-		}
-		else
-			if ( ! lnormStopErr )
-			{
-				plog( "\nWarning: too many negative standard deviation errors in function 'lnorm', stop reporting...\n" );
-				lnormStopErr = true;
-			}
-			
+		warn_distr( & lnormErrCnt, & lnormStopErr, "lnorm", "negative standard deviation" );
 		return exp( mean );
 	}
 
 	lognormal_distribution< double > distr( mean, dev );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2659,23 +2691,12 @@ double gamma( double alpha, double beta )
 	
 	if ( alpha <= 0 || beta <= 0 )
 	{
-		if ( ++gammaErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: non-positive alpha or beta parameters in function 'gamma'" );
-			gammaStopErr = false;
-		}
-		else
-			if ( ! gammaStopErr )
-			{
-				plog( "\nWarning: too many non-positive parameter errors in function 'gamma', stop reporting...\n" );
-				gammaStopErr = true;
-			}
-			
+		warn_distr( & gammaErrCnt, & gammaStopErr, "gamma", "non-positive alpha or beta parameter" );
 		return 0.0;
 	}
 
 	gamma_distribution< double > distr( alpha, beta );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2688,17 +2709,7 @@ double bernoulli( double p )
 	
 	if ( p < 0 || p > 1 )
 	{
-		if ( ++bernoErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: probability out of [0, 1] in function 'bernoulli'" );
-			bernoStopErr = false;
-		}
-		else
-			if ( ! bernoStopErr )
-			{
-				plog( "\nWarning: too many invalid probability errors in function 'bernoulli', stop reporting...\n" );
-				bernoStopErr = true;
-			}
+		warn_distr( & bernoErrCnt, & bernoStopErr, "bernoulli", "probability out of \\[0, 1\\]" );
 			
 		if ( p < 0 )
 			return 0.0;
@@ -2707,7 +2718,7 @@ double bernoulli( double p )
 	}
 
 	bernoulli_distribution distr( p );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2720,23 +2731,12 @@ double poisson( double mean )
 	
 	if ( mean < 0 )
 	{
-		if ( ++poissErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: negative mean in function 'poisson'" );
-			poissStopErr = false;
-		}
-		else
-			if ( ! poissStopErr )
-			{
-				plog( "\nWarning: too many negative mean errors in function 'poisson', stop reporting...\n" );
-				poissStopErr = true;
-			}
-			
+		warn_distr( & poissErrCnt, & poissStopErr, "poisson", "negative mean" );
 		return 0.0;
 	}
 
 	poisson_distribution< int > distr( mean );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2749,17 +2749,7 @@ double geometric( double p )
 	
 	if ( p < 0 || p > 1 )
 	{
-		if ( ++geomErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: probability out of [0, 1] in function 'geometric'" );
-			geomStopErr = false;
-		}
-		else
-			if ( ! geomStopErr )
-			{
-				plog( "\nWarning: too many invalid probability errors in function 'geometric', stop reporting...\n" );
-				geomStopErr = true;
-			}
+		warn_distr( & geomErrCnt, & geomStopErr, "geometric", "probability out of \\[0, 1\\]" );
 			
 		if ( p < 0 )
 			return 0.0;
@@ -2768,7 +2758,7 @@ double geometric( double p )
 	}
 
 	geometric_distribution< int > distr( p );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2781,17 +2771,7 @@ double binomial( double p, double t )
 	
 	if ( p < 0 || p > 1 || t <= 0 )
 	{
-		if ( ++binomErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: invalid parameters in function 'binomial'" );
-			binomStopErr = false;
-		}
-		else
-			if ( ! binomStopErr )
-			{
-				plog( "\nWarning: too many invalid parameter errors in function 'binomial', stop reporting...\n" );
-				binomStopErr = true;
-			}
+		warn_distr( & binomErrCnt, & binomStopErr, "binomial", "invalid parameter" );
 			
 		if ( p < 0 || t <= 0 )
 			return 0.0;
@@ -2800,7 +2780,7 @@ double binomial( double p, double t )
 	}
 
 	binomial_distribution< int > distr( t, p );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2813,23 +2793,12 @@ double cauchy( double a, double b )
 	
 	if ( b <= 0 )
 	{
-		if ( ++cauchErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: non-positive b parameter in function 'cauchy'" );
-			cauchStopErr = false;
-		}
-		else
-			if ( ! cauchStopErr )
-			{
-				plog( "\nWarning: too many non-positive parameter errors in function 'cauchy', stop reporting...\n" );
-				cauchStopErr = true;
-			}
-			
+		warn_distr( & cauchErrCnt, & cauchStopErr, "cauchy", "non-positive b parameter" );
 		return a;
 	}
 
 	cauchy_distribution< double > distr( a, b );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2842,23 +2811,12 @@ double chi_squared( double n )
 	
 	if ( n <= 0 )
 	{
-		if ( ++chisqErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: non-positive n parameter in function 'chi_squared'" );
-			chisqStopErr = false;
-		}
-		else
-			if ( ! chisqStopErr )
-			{
-				plog( "\nWarning: too many non-positive parameter errors in function 'chi_squared', stop reporting...\n" );
-				chisqStopErr = true;
-			}
-			
+		warn_distr( & chisqErrCnt, & chisqStopErr, "chi_squared", "non-positive n parameter" );
 		return 0.0;
 	}
 
 	chi_squared_distribution< double > distr( n );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2871,23 +2829,12 @@ double exponential( double lambda )
 	
 	if ( lambda <= 0 )
 	{
-		if ( ++expErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: non-positive lambda parameter in function 'exponential'" );
-			expStopErr = false;
-		}
-		else
-			if ( ! expStopErr )
-			{
-				plog( "\nWarning: too many non-positive parameter errors in function 'exponential', stop reporting...\n" );
-				expStopErr = true;
-			}
-			
+		warn_distr( & expErrCnt, & expStopErr, "exponential", "non-positive lambda parameter" );
 		return 0.0;
 	}
 
 	exponential_distribution< double > distr( lambda );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2900,23 +2847,12 @@ double fisher( double m, double n )
 	
 	if ( m <= 0 || n <= 0 )
 	{
-		if ( ++fishErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: invalid parameters in function 'fisher'" );
-			fishStopErr = false;
-		}
-		else
-			if ( ! fishStopErr )
-			{
-				plog( "\nWarning: too many invalid parameter errors in function 'fisher', stop reporting...\n" );
-				fishStopErr = true;
-			}
-			
+		warn_distr( & fishErrCnt, & fishStopErr, "fisher", "invalid parameter" );
 		return 0.0;
 	}
 
 	fisher_f_distribution< double > distr( m, n );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2929,23 +2865,12 @@ double student( double n )
 	
 	if ( n <= 0 )
 	{
-		if ( ++studErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: non-positive n parameter in function 'student'" );
-			studStopErr = false;
-		}
-		else
-			if ( ! studStopErr )
-			{
-				plog( "\nWarning: too many non-positive parameter errors in function 'student', stop reporting...\n" );
-				studStopErr = true;
-			}
-			
+		warn_distr( & studErrCnt, & studStopErr, "student", "non-positive n parameter" );
 		return 0.0;
 	}
 
 	student_t_distribution< double > distr( n );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2958,23 +2883,12 @@ double weibull( double a, double b )
 	
 	if ( a <= 0 || b <= 0 )
 	{
-		if ( ++weibErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: non-positive a or b parameters in function 'weibull'" );
-			weibStopErr = false;
-		}
-		else
-			if ( ! weibStopErr )
-			{
-				plog( "\nWarning: too many non-positive parameter errors in function 'weibull', stop reporting...\n" );
-				weibStopErr = true;
-			}
-			
+		warn_distr( & weibErrCnt, & weibStopErr, "weibull", "non-positive a or b parameter" );
 		return 0.0;
 	}
 
 	weibull_distribution< double > distr( a, b );
-	return cur_gen( distr );
+	return draw_gen( distr );
 }
 
 
@@ -2988,17 +2902,7 @@ double beta( double alpha, double beta )
 	
 	if ( alpha <= 0 || beta <= 0 )
 	{
-		if ( ++betaErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: non-positive alpha or beta parameters in function 'beta'" );
-			betaStopErr = false;
-		}
-		else
-			if ( ! betaStopErr )
-			{
-				plog( "\nWarning: too many non-positive parameter errors in function 'beta', stop reporting...\n" );
-				betaStopErr = true;
-			}
+		warn_distr( & betaErrCnt, & betaStopErr, "beta", "non-positive alpha or beta parameter" );
 			
 		if ( alpha < beta )
 			return 0.0;
@@ -3007,8 +2911,8 @@ double beta( double alpha, double beta )
 	}
 
 	gamma_distribution< double > distr1( alpha, 1.0 ), distr2( beta, 1.0 );
-	double draw = cur_gen( distr1 );
-	return draw / ( draw + cur_gen( distr2 ) );
+	double draw = draw_gen( distr1 );
+	return draw / ( draw + draw_gen( distr2 ) );
 }
 
 
@@ -3021,18 +2925,7 @@ double pareto( double mu, double alpha )
 	
 	if ( mu <= 0 || alpha <= 0 )
 	{
-		if ( ++paretErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: non-positive mu or alpha parameters in function 'pareto'" );
-			paretStopErr = false;
-		}
-		else
-			if ( ! paretStopErr )
-			{
-				plog( "\nWarning: too many non-positive parameter errors in function 'pareto', stop reporting...\n" );
-				paretStopErr = true;
-			}
-			
+		warn_distr( & paretErrCnt, & paretStopErr, "pareto", "non-positive mu or alpha parameter" );
 		return mu;
 	}
 
@@ -3050,18 +2943,7 @@ double alapl( double mu, double alpha1, double alpha2 )
 	
 	if ( alpha1 <= 0 || alpha2 <= 0 )
 	{
-		if ( ++alaplErrCnt < ERR_LIM )	// prevent slow down due to I/O
-		{
-			plog( "\nWarning: non-positive alpha1 or alpha2 parameters in function 'alapl'" );
-			alaplStopErr = false;
-		}
-		else
-			if ( ! alaplStopErr )
-			{
-				plog( "\nWarning: too many non-positive parameter errors in function 'alapl', stop reporting...\n" );
-				alaplStopErr = true;
-			}
-			
+		warn_distr( & alaplErrCnt, & alaplStopErr, "alapl", "non-positive alpha1 or alpha2 parameter" );
 		return mu;
 	}
 
@@ -3070,6 +2952,25 @@ double alapl( double mu, double alpha1, double alpha2 )
 		return mu + alpha1 * log( draw * ( 1 + alpha1 / alpha2 ) );
 	else 
 		return mu - alpha2 * log( ( 1 - draw ) * ( 1 + alpha1 / alpha2 ) );
+}
+
+
+/****************************************************
+WARN_DISTR
+****************************************************/
+void warn_distr( int *errCnt, bool *stopErr, const char *distr, const char *msg )
+{
+	if ( ++( *errCnt ) < ERR_LIM )	// prevent slow down due to I/O
+	{
+		plog( "\nWarning: %s in function '%s'", "", msg, distr );
+		*stopErr = false;
+	}
+	else
+		if ( ! *stopErr )
+		{
+			plog( "\nWarning: too many warnings in function '%s', stop reporting...\n", "", distr );
+			*stopErr = true;
+		}
 }
 
 

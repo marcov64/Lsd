@@ -14,9 +14,12 @@
 # Default values for the Tk windowing system. 
 #*************************************************************
 
-# default colors in palette and other elements
-set defcolors	{ black red green #d0d000 #fb46bc blue DeepSkyBlue1 grey40 PaleTurquoise2 cyan aquamarine DarkSeaGreen1 chartreuse1 OliveDrab khaki3 LightGoldenrod4 sienna1 chocolate4 firebrick3 orange1 salmon3 }
+# default colors in palette and other elements, according to the theme type (light/dark)
+set defcolorsL	{ black red green #d0d000 #fb46bc blue DeepSkyBlue1 RoyalBlue1 PaleTurquoise2 cyan aquamarine DarkSeaGreen1 chartreuse1 OliveDrab khaki3 LightGoldenrod4 sienna1 chocolate4 firebrick3 orange1 salmon3 }
+set defcolorsD	{ white tomato green yellow2 pink "steel blue" DeepSkyBlue1 RoyalBlue1 PaleTurquoise2 cyan aquamarine DarkSeaGreen1 chartreuse1 OliveDrab khaki3 LightGoldenrod4 sienna1 chocolate4 firebrick3 orange1 salmon3 }
 
+set hlcolorL	red			; # general highlight color
+set hlcolorD	tomato			; # general highlight color
 set commcolorL	green4		; # color of comments (light mode)
 set commcolorD	DarkOliveGreen3	; # color of comments (dark mode)
 set strcolorL	blue4		; # color of strings (light mode)
@@ -31,6 +34,8 @@ set vlsdcolorL	red4		; # color of LSD variable (light mode)
 set vlsdcolorD	tomato		; # color of LSD variable (dark mode)
 set mlsdcolorL	DodgerBlue4	; # color of LSD macro (light mode)
 set mlsdcolorD	SlateGray3	; # color of LSD macro (dark mode)
+set parcolorL	black		; # color of parameter label (light mode)
+set parcolorD	white		; # color of parameter label (dark mode)
 set varcolorL	blue		; # color of variable label (light mode)
 set varcolorD	tan1		; # color of variable label (dark mode)
 set lvarcolorL	purple		; # color of lagged variable label (light mode)
@@ -45,14 +50,12 @@ set grpcolorL	red			; # color of model group label (light mode)
 set grpcolorD	tomato		; # color of model group label (dark mode)
 set modcolorL	blue		; # color of model label (light mode)
 set modcolorD	SlateGray3	; # color of model label (dark mode)
-set axcolorP	gray25		; # color of plot axis
-set grcolorP	gray75		; # color of plot grid
 
 # main windows size and margins (must be even numbers)
 set hmargin		20	; # horizontal right margin from the screen borders
 set vmargin		20	; # vertical margins from the screen borders
 set bordsize	2	; # width of windows borders
-set tbarsize	55	; # size in pixels of bottom taskbar (exclusion area) - Windows 7+ = 82
+set tbarsize	60	; # size in pixels of bottom taskbar (exclusion area)
 set hsizeL		800	; # LMM horizontal size in pixels
 set vsizeL		600	; # LMM vertical size in pixels
 set hsizeLmin	620	; # LMM minimum horizontal size in pixels
@@ -61,10 +64,13 @@ set hsizeB 		400	; # browser horizontal size in pixels
 set vsizeB		620	; # browser vertical size in pixels
 set hsizeM 		600	; # model structure horizontal size in pixels
 set vsizeM		400	; # model structure vertical size in pixels
-set hsizeI 		800	; # initial values editor horizontal size in pixels
-set vsizeI		600	; # initial values editor vertical size in pixels
 set hsizeN 		350	; # objects numbers editor horizontal size in pixels
 set vsizeN		550	; # objects numbers editor vertical size in pixels
+set hsizeImin	300	; # initial values editor minimum horizontal size in pixels
+set vsizeImin	200	; # initial values editor minimum vertical size in pixels
+set butPad 		10	; # padding area (X/Y) for buttons
+set frPadX		3	; # padding area (X) for frame borders
+set frPadY		2	; # padding area (Y) for frame borders
 
 # plot windows size and margins
 set hsizeP 		600	; # default plot (time series) horizontal size in pixels
@@ -121,18 +127,12 @@ set rstepM		0.1		; # relative scaling factor step step
 set rfactM		0.3		; # horizontal range exponential factor
 set rinitM		750		; # horizontal initial width (4 root sons)
 set rincrM		100		; # horizontal width increase step
-set bsizeMwin	2		; # button size (Windows/Mac 8.6.9)
-set bsizeMlin	1		; # button size (Linux/Mac 8.6.10+)
 set bhstepMwin	25		; # button horizontal step (Windows/Mac 8.6.9)
 set bhstepMlin	35		; # button horizontal step (Linux)
 set bhstepMmac	45		; # button horizontal step (Mac 8.6.10+)
 set bvstepMwin	26		; # button vertical step (Windows/Mac)
 set bvstepMlin	30		; # button vertical step (Linux)
 set borderMmac	10		; # additional open space to border (Mac 8.6.10+)
-set ncolorM 	white	; # node color
-set ncolorMsel 	blue	; # selected node color
-set tcolorM 	red		; # node name color
-set lcolorM 	gray	; # line color
 
 # runtime windows defaults
 set hsizeR		500	; # horizontal size in pixels
@@ -155,6 +155,9 @@ set shiftR		20	; # new window shift
 set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down
 set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Windows
 
+# mouse auto snap to buttons (ignored in Windows, as it uses system default)
+set mouseWarp	1	; # set to 0 to disable auto-snapping
+	
 # folder/group/object symbols
 set upSymbol 	"\u25B2 .."	; # up in tree structure symbol
 set groupSymbol	"\u25B6 "	; # group symbol
@@ -187,7 +190,6 @@ set butLinux	7
 set butMac		5
 set butMacTk869	8
 set butWindows	9
-set butPad 10
 
 # OS specific screen location offset adjustments
 set corrXmac	0
@@ -240,10 +242,11 @@ set gnuplotOptions	"set ticslevel 0.0"		;
 # default diff application settings
 set diffApp			"tkdiff.tcl"		; # command line diff application to use
 set diffAppType		0					; # type of application (0=tk/1=terminal/2=graphical)
-set diffFile1		"-lsd"				; # option to inform first file name		
+set diffFile1		""					; # option to inform first file name		
 set diffFile2		""					; # option to inform second file name		
 set diffFile1name	"-L"				; # option for naming first file
 set diffFile2name	"-L"				; # option for naming second file
+set diffOptions		"-lsd"				; # other options
 
 # known themes table and associated parameters
 # theme list elements:		0:plat		1:pkg name				2:full name			3:dark	4:tbpad

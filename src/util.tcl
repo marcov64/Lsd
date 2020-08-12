@@ -19,18 +19,28 @@
 # Show LSD About dialog box
 #************************************************
 proc LsdAbout { ver dat { parWnd "." } } {
+
+	set copyr "written by Marco Valente, Universita' dell'Aquila\nand Marcelo Pereira, University of Campinas\n\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License\nLSD is free software and comes with ABSOLUTELY NO WARRANTY"
+	
+	ttk::messageBox -parent $parWnd -type ok -icon info -title "About LSD" -message "LSD Version $ver ($dat)" -detail "$copyr\n\n[ LsdEnv \n ]"
+}
+
+
+#************************************************
+# LSDENV
+# Return current LSD working environment
+#************************************************
+proc LsdEnv { sep } {
 	global tcl_platform
 
-	set tit "About LSD"
 	set plat [ string totitle $tcl_platform(platform) ];
 	set mach $tcl_platform(machine)
 	set os $tcl_platform(os)
 	set osV $tcl_platform(osVersion)
 	set tclV [ info patch ]
 	set gccV [ gccVersion ]
-	set copyr "written by Marco Valente, Universita' dell'Aquila\nand by Marcelo Pereira, University of Campinas\n\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License"
 	
-	ttk::messageBox -parent $parWnd -type ok -icon info -title $tit -message "Version $ver ($dat)" -detail "Platform: $plat ($mach)\nOS: $os ($osV)\nTcl/Tk: $tclV\nGCC: $gccV\n\n$copyr"
+	return "Platform: $plat ($mach)${sep}OS: $os ($osV)${sep}Tcl/Tk: $tclV\nGCC: $gccV"
 }
 
 
@@ -104,31 +114,22 @@ proc current_date { } {
 
 
 #************************************************
-# FN_SPACES
-# Checks is a filename has spaces
-# Set 'mult' to one if multiple file names are allowed
+# INVERT_COLOR
+# Invert a color in Tk format
 #************************************************
-proc fn_spaces { fn { par . } { mult 0 } } {
-	if $mult {
-		set count [ llength $fn ]
-	} else {
-		set count 1
-	}
 
-	for { set i 0 } { $i < $count } { incr i } {
-		if $mult {
-			set file "[ lindex $fn $i ]"
-		} else {
-			set file "$fn"
-		}
-		if { [ string first " " "$file" ] != -1 } {
-			ttk::messageBox -parent $par -type ok -title Error -icon error -message "Invalid file name or path" -detail "Invalid file name/path:\n\n'$fn'\n\nLSD files must have no spaces in the file names nor in their directory path. Please rename the file and/or move it to a different directory."
-			return true
-		} else {
-			return false
-		}
+proc invert_color { color } {
+	global colorsTheme
+
+	if [ catch { set rgbColor [ winfo rgb . $color ] } ] {
+		return $colorsTheme(fg)
 	}
-	return false
+	
+    set rgbInvert [ list [ expr 65535 - [ lindex $rgbColor 0 ] ] \
+						 [ expr 65535 - [ lindex $rgbColor 1 ] ] \
+						 [ expr 65535 - [ lindex $rgbColor 2 ] ] ]
+						 
+    return [ format "#%04x%04x%04x" {*}$rgbInvert ]
 }
 
 

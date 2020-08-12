@@ -63,7 +63,7 @@ void report( int *choice, object *r )
 
 	if ( ! struct_loaded )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to create a report.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to create a report.\"" );
 		return;
 	}
 
@@ -72,8 +72,8 @@ void report( int *choice, object *r )
 	cmd( "set choice [file exists $mrep]" );
 	if ( *choice == 1 )
 	{
-		cmd( "set answer [tk_messageBox -parent . -message \"Model report already exists\" -detail \"Please confirm overwriting it.\" -type okcancel -title Warning -icon warning -default ok]" );
-		cmd( "if {[string compare -nocase $answer ok] == 0} {set choice 0} {set choice 1}" );
+		cmd( "set answer [ ttk::messageBox -parent . -message \"Model report already exists\" -detail \"Please confirm overwriting it.\" -type okcancel -title Warning -icon warning -default ok ]" );
+		cmd( "if { ! [ string compare -nocase $answer ok ] } { set choice 0 } { set choice 1 }" );
 		if ( *choice == 1 )
 			return;
 	}
@@ -97,49 +97,49 @@ void report( int *choice, object *r )
 
 	cmd( "newtop .w \"Report Generation\" { set choice 3 }" );
 
-	cmd( "frame .w.f" );
-	cmd( "label .w.f.l -text \"Model title\"" );
-	cmd( "entry .w.f.e -width 30 -textvariable reptit -justify center" );
+	cmd( "ttk::frame .w.f" );
+	cmd( "ttk::label .w.f.l -text \"Model title\"" );
+	cmd( "ttk::entry .w.f.e -width 30 -textvariable reptit -justify center" );
 	cmd( "pack .w.f.l .w.f.e -side left" );
 
-	cmd( "frame .w.l" );
-	cmd( "label .w.l.l -text \"Variables presentation\"" );
+	cmd( "ttk::frame .w.l" );
+	cmd( "ttk::label .w.l.l -text \"Variables presentation\"" );
 
-	cmd( "frame .w.l.opt -bd 2 -relief groove" );
-	cmd( "radiobutton .w.l.opt.popup -text \"List boxes\" -variable lmenu -value 1" );
-	cmd( "radiobutton .w.l.opt.text -text \"Text lists\" -variable lmenu -value 0" );
+	cmd( "ttk::frame .w.l.opt -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+	cmd( "ttk::radiobutton .w.l.opt.popup -text \"List boxes\" -variable lmenu -value 1" );
+	cmd( "ttk::radiobutton .w.l.opt.text -text \"Text lists\" -variable lmenu -value 0" );
 	cmd( "pack .w.l.opt.popup .w.l.opt.text -anchor w" );
 
 	cmd( "pack .w.l.l .w.l.opt" );
 
-	cmd( "frame .w.g" );
-	cmd( "label .w.g.l -text \"Included sections\"" );
+	cmd( "ttk::frame .w.g" );
+	cmd( "ttk::label .w.g.l -text \"Included sections\"" );
 
-	cmd( "frame .w.g.opt" );
-	cmd( "checkbutton .w.g.opt.desc -text \"Description\" -variable desc" );
-	cmd( "checkbutton .w.g.opt.extra -text \"User section\" -variable extra -command { if { $extra } { .w.s.e2.file.new conf -state normal; .w.s.e2.h conf -state normal; .w.s.e2.header.tit conf -state normal; .w.s.e2.file.tit conf -state normal } { .w.s.e2.file.new conf -state disabled; .w.s.e2.h conf -state disabled; .w.s.e2.header.tit conf -state disabled; .w.s.e2.file.tit conf -state disabled } }" );
-	cmd( "checkbutton .w.g.opt.obs -text \"Selected variables\" -variable obs" );
-	cmd( "checkbutton .w.g.opt.init -text \"Initial values\" -variable init" );
-	cmd( "checkbutton .w.g.opt.code -text \"Equations code\" -variable code" );
+	cmd( "ttk::frame .w.g.opt" );
+	cmd( "ttk::checkbutton .w.g.opt.desc -text \"Description\" -variable desc" );
+	cmd( "ttk::checkbutton .w.g.opt.extra -text \"User section\" -variable extra -command { if { $extra } { .w.s.e2.file.new conf -state normal; .w.s.e2.h conf -state normal; .w.s.e2.header.tit conf -state normal; .w.s.e2.file.tit conf -state normal } { .w.s.e2.file.new conf -state disabled; .w.s.e2.h conf -state disabled; .w.s.e2.header.tit conf -state disabled; .w.s.e2.file.tit conf -state disabled } }" );
+	cmd( "ttk::checkbutton .w.g.opt.obs -text \"Selected variables\" -variable obs" );
+	cmd( "ttk::checkbutton .w.g.opt.init -text \"Initial values\" -variable init" );
+	cmd( "ttk::checkbutton .w.g.opt.code -text \"Equations code\" -variable code" );
 	cmd( "pack .w.g.opt.desc .w.g.opt.extra .w.g.opt.obs .w.g.opt.init .w.g.opt.code -anchor w" );
 
 	cmd( "pack .w.g.l .w.g.opt" );
 
-	cmd( "frame .w.s" );
-	cmd( "label .w.s.lab -text \"User supplied section\"" );
+	cmd( "ttk::frame .w.s" );
+	cmd( "ttk::label .w.s.lab -text \"User supplied section\"" );
 
-	cmd( "frame .w.s.e2" );
-	cmd( "checkbutton .w.s.e2.h -state disabled -text \"Use HTML tags\" -variable html2" );
+	cmd( "ttk::frame .w.s.e2" );
+	cmd( "ttk::checkbutton .w.s.e2.h -state disabled -text \"Use HTML tags\" -variable html2" );
 
-	cmd( "frame .w.s.e2.header" );
-	cmd( "label .w.s.e2.header.tlab -text \"Title\"" );
-	cmd( "entry .w.s.e2.header.tit -width 30 -state disabled -textvariable tit2 -justify center" );
+	cmd( "ttk::frame .w.s.e2.header" );
+	cmd( "ttk::label .w.s.e2.header.tlab -text \"Title\"" );
+	cmd( "ttk::entry .w.s.e2.header.tit -width 30 -state disabled -textvariable tit2 -justify center" );
 	cmd( "pack .w.s.e2.header.tlab .w.s.e2.header.tit -side left -padx 2" );
 
-	cmd( "frame .w.s.e2.file" );
-	cmd( "label .w.s.e2.file.tlab -text \"Get from file\"" );
-	cmd( "entry .w.s.e2.file.tit -width 25 -state disabled -textvariable file2 -justify center" );
-	cmd( "button .w.s.e2.file.new -width 5 -state disabled -text Search -command { set file2 [ tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} } -initialdir \"%s\" ]; if [ fn_spaces \"$file2\" .w ] { set file2 \"\" } }", exec_path );
+	cmd( "ttk::frame .w.s.e2.file" );
+	cmd( "ttk::label .w.s.e2.file.tlab -text \"Get from file\"" );
+	cmd( "ttk::entry .w.s.e2.file.tit -width 25 -state disabled -textvariable file2 -justify center" );
+	cmd( "ttk::button .w.s.e2.file.new -width 5 -state disabled -text Search -command { set file2 [ tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} } -initialdir \"%s\" ]; if [ fn_spaces \"$file2\" .w ] { set file2 \"\" } }", exec_path );
 	cmd( "pack .w.s.e2.file.tlab .w.s.e2.file.tit .w.s.e2.file.new -side left -padx 2" );
 
 	cmd( "pack .w.s.e2.h .w.s.e2.header .w.s.e2.file -padx 5 -pady 2" );
@@ -177,7 +177,7 @@ void report( int *choice, object *r )
 
 	while ( strlen( equation_name ) == 0 || ( f = fopen( equation_name, "r" ) ) == NULL )
 	{
-		cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'OK' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ] ]; if [ fn_spaces \"$res\" . ] { set res \"\" }; set choice 1 } { set choice 2 }", equation_name );
+		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'OK' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ] ]; if [ fn_spaces \"$res\" . ] { set res \"\" }; set choice 1 } { set choice 2 }", equation_name );
 
 		if ( *choice == 1 )
 		{
@@ -198,12 +198,12 @@ void report( int *choice, object *r )
 
 	if ( frep == NULL )
 	{
-		cmd( "tk_messageBox -parent . -message \"Cannot write to disk\" -detail \"Please check if the model directory is not full or READ-ONLY.\" -type ok -title Error -icon error" );
+		cmd( "ttk::messageBox -parent . -message \"Cannot write to disk\" -detail \"Please check if the model directory is not full or READ-ONLY.\" -type ok -title Error -icon error" );
 		plog( "\nError writing report.\n" );
 		goto end;
 	}
 		
-	cmd( "wm deiconify .log; raise .log; focus .log" );
+	cmd( "focustop .log" );
 	plog( "\nWriting report. Please wait... " );
 
 	fprintf( frep, "<HTML>\n<HEAD> <META NAME=\"Author\" CONTENT=\"Automatically generated by LSD - Laboratory for Simulation Development, copyright by Marco Valente\">\n" );

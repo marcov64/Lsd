@@ -79,7 +79,12 @@ void set_obj_number( object *r, int *choice )
 	Tcl_LinkVar( inter, "max_depth", ( char * ) &max_depth, TCL_LINK_INT );
 
 	cmd( "set ini .ini" );
-	cmd( "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $hsizeN $vsizeN } { resizetop .ini $hsizeN $vsizeN }" );
+	cmd( "if { ! [ winfo exists .ini ] } { \
+			newtop .ini; \
+			showtop .ini topleftW 1 1 1 $hsizeN $vsizeN \
+		} { \
+			resizetop .ini $hsizeN $vsizeN \
+		}" );
 
 	in_set_obj = true;
 	strcpy( lab_view, "" );
@@ -92,13 +97,14 @@ void set_obj_number( object *r, int *choice )
 		// reset title and destroy command because may be coming from edit_data
 		cmd( "settop .ini \"%s%s - LSD Object Number Editor\" { set choice 1; set result -1 }", unsaved_change() ? "*" : " ", simul_name );
 	  
-		cmd( "frame .ini.obj" );
+		cmd( "ttk::frame .ini.obj" );
 		cmd( "pack .ini.obj -fill both -expand yes" );
 		cmd( "set b .ini.obj" );
-		cmd( "scrollbar $b.scroll -command \"$b.list yview\"" );
-		cmd( "scrollbar $b.scrollh -command \"$b.list xview\" -orient horizontal" );
+		cmd( "ttk::scrollbar $b.scroll -command \"$b.list yview\"" );
+		cmd( "ttk::scrollbar $b.scrollh -command \"$b.list xview\" -orient horizontal" );
 		cmd( "set t $b.list" );
-		cmd( "text $t -yscrollcommand \"$b.scroll set\" -xscrollcommand \"$b.scrollh set\" -wrap none -cursor arrow" );
+		cmd( "ttk::text $t -yscrollcommand \"$b.scroll set\" -xscrollcommand \"$b.scrollh set\" -wrap none -entry 0 -dark $darkTheme" );
+		cmd( "mouse_wheel $t" );
 
 		strcpy( ch, "" );
 		i = 0;
@@ -115,14 +121,14 @@ void set_obj_number( object *r, int *choice )
 		cmd( "pack $b.list -fill both -expand yes" );
 		cmd( "pack $b" );
 		cmd( "set msg \"\"" );
-		cmd( "label .ini.msglab -textvariable msg" );
+		cmd( "ttk::label .ini.msglab -textvariable msg" );
 		cmd( "pack .ini.msglab -pady 5" );
 	  
-		cmd( "frame .ini.f" );
-		cmd( "label .ini.f.tmd -text \"Show level:\"" );
-		cmd( "label .ini.f.emd -width 2 -fg red -text \"$max_depth \"" );
-		cmd( "button .ini.f.mn -width 2 -text \"-\" -command { if { $max_depth > 1 } { incr max_depth -1; set choice 4 } }" );
-		cmd( "button .ini.f.pl -width 2 -text \"+\" -command { if { %d } { incr max_depth; set choice 4 } }", hid_level );
+		cmd( "ttk::frame .ini.f" );
+		cmd( "ttk::label .ini.f.tmd -text \"Show level:\"" );
+		cmd( "ttk::label .ini.f.emd -width 2 -style hl.TLabel -text \"$max_depth \"" );
+		cmd( "ttk::button .ini.f.mn -width 2 -text \"-\" -command { if { $max_depth > 1 } { incr max_depth -1; set choice 4 } }" );
+		cmd( "ttk::button .ini.f.pl -width 2 -text \"+\" -command { if { %d } { incr max_depth; set choice 4 } }", hid_level );
 		cmd( "pack .ini.f.tmd .ini.f.emd .ini.f.mn .ini.f.pl -side left" );
 	
 		cmd( "pack .ini.f -anchor e -padx 10 -pady 5" );
@@ -246,18 +252,18 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 		{
 			*value = num;
 			
-			cmd( "label $t.lab$i -text \"%s %s \" -foreground red -bg white -justify left", indent, c->label );
+			cmd( "ttk::label $t.lab$i -text \"%s %s \" -style hl.TLabel -justify left", indent, c->label );
 			cmd( "pack $t.lab$i -anchor w" );
 
 			if ( strlen( tag ) != 0 )
-				cmd( "label $t.tag$i -text \" in %s %s \" -bg white", (c->up)->label, tag );
+				cmd( "ttk::label $t.tag$i -text \" in %s %s \"", (c->up)->label, tag );
 			else
-				cmd( "label $t.tag$i -text \" \" -bg white" );
+				cmd( "ttk::label $t.tag$i -text \" \"" );
 
 			cmd( "pack $t.tag$i -anchor w" );
 
 			cmd( "set count$i $val" );
-			cmd( "label $t.val$i -text $val -width 5 -relief raised" );
+			cmd( "ttk::button $t.val$i -text $val -width 5 -command { set result %d; set num $count%d; set toview \"$t.val%d\"; set choice 2 }", *i, *i, *i );
 			cmd( "pack $t.val$i" );
 			cmd( "$t window create end -window $t.lab$i" );
 			cmd( "$t window create end -window $t.tag$i" );
@@ -271,7 +277,6 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 				hid_level = true;
 
 			cmd( "$t insert end \\n" );
-			cmd( "bind $t.val$i <Button-1> { set result %d; set num $count%d; set toview \"$t.val%d\"; set choice 2 }", *i, *i, *i );
 			cmd( "bind $t.lab$i <Button-1> { set obj_name %s; set choice 3 }", c->label );
 		   
 			if ( ! in_edit_data )				// show only if not already recursing
@@ -312,7 +317,7 @@ int compute_copyfrom( object *c, int *choice )
 
 	if ( c == NULL || c->up == NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Element in Root object\" -detail \"The Root object is always single-instanced, so any element contained in it has only one instance.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Element in Root object\" -detail \"The Root object is always single-instanced, so any element contained in it has only one instance.\"" );
 		return 1;
 	}
 
@@ -321,17 +326,17 @@ int compute_copyfrom( object *c, int *choice )
 	cmd( "set cc .compcopy" );
 	cmd( "newtop $cc \"Instance Number\" { set cconf 1; set choice 1 }" );
 
-	cmd( "frame $cc.l" );
-	cmd( "label $cc.l.l -text \"Determine the effective instance number of '%s' \\nby computing the instance numbers of the containing objects.\\nPress 'Done' to use the number and continue.\"", c->label );
+	cmd( "ttk::frame $cc.l" );
+	cmd( "ttk::label $cc.l.l -text \"Determine the effective instance number of '%s' \\nby computing the instance numbers of the containing objects.\\nPress 'Done' to use the number and continue.\"", c->label );
 	cmd( "pack $cc.l.l" );
 
-	cmd( "frame $cc.f" );
+	cmd( "ttk::frame $cc.f" );
 
 	for ( i = 1, j = 1, cur = c; cur->up != NULL; cur = cur->up, ++j ) 
 	{
-		cmd( "frame $cc.f.f%d", j );
-		cmd( "label $cc.f.f%d.l -text \"Instance number of '%s'\"", j, cur->label );
-		cmd( "entry $cc.f.f%d.e -width 5 -textvariable num%d -justify center", j, j );
+		cmd( "ttk::frame $cc.f.f%d", j );
+		cmd( "ttk::label $cc.f.f%d.l -text \"Instance number of '%s'\"", j, cur->label );
+		cmd( "ttk::entry $cc.f.f%d.e -width 5 -textvariable num%d -justify center", j, j );
 		cmd( "pack $cc.f.f%d.l $cc.f.f%d.e -side left -padx 2", j, j );
 
 		for ( i = 1, cur1 = cur->up->search( cur->label ); cur1 != cur; cur1 = cur1->next, ++i );
@@ -347,11 +352,11 @@ int compute_copyfrom( object *c, int *choice )
 		cmd( "bind $cc.f.f%d.e <Return> { focus .compcopy.f.f%d.e; .compcopy.f.f%d.e selection range 0 end}", j, j - 1, j - 1 );
 	}
 
-	cmd( "bind $cc.f.f1.e <Return> \"focus $cc.b.com\"" );
+	cmd( "bind $cc.f.f1.e <Return> \"focus $cc.b.comp\"" );
 
-	cmd( "frame $cc.r" );
-	cmd( "label $cc.r.l -text \"Global instance number:\"" );
-	cmd( "label $cc.r.res -fg red -text %d", i );
+	cmd( "ttk::frame $cc.r" );
+	cmd( "ttk::label $cc.r.l -text \"Global instance number:\"" );
+	cmd( "ttk::label $cc.r.res -style hl.TLabel -text %d", i );
 	cmd( "pack $cc.r.l $cc.r.res -side left -padx 2" );
 
 	cmd( "pack $cc.l $cc.f $cc.r -pady 5 -padx 5" );
@@ -359,6 +364,8 @@ int compute_copyfrom( object *c, int *choice )
 	cmd( "comphelpdone $cc b { set cconf 1; set choice 2 } { LsdHelp menudata_objn.html#compute } { set cconf 1; set choice 1 }" );
 
 	cmd( "showtop $cc" );
+
+	cmd( "mousewarpto $cc.b.comp" );
 
 	res = i;
 
@@ -442,35 +449,35 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 	cmd( "set n .numobj" );
 	cmd( "newtop $n \"Number of Instances\" { set conf 1; set choice 2 }" );
 
-	cmd( "frame $n.l" );
+	cmd( "ttk::frame $n.l" );
 
-	cmd( "frame $n.l.n1" );
-	cmd( "label $n.l.n1.l1 -text \"Object:\"" );
-	cmd( "label $n.l.n1.l2 -fg red -text \"%s\"", c->label );
+	cmd( "ttk::frame $n.l.n1" );
+	cmd( "ttk::label $n.l.n1.l1 -text \"Object:\"" );
+	cmd( "ttk::label $n.l.n1.l2 -style hl.TLabel -text \"%s\"", c->label );
 	cmd( "pack $n.l.n1.l1 $n.l.n1.l2 -side left" );
 
-	cmd( "frame $n.l.n2" );
-	cmd( "label $n.l.n2.l1 -text \"Contained in:\"" );
-	cmd( "label $n.l.n2.l2 -fg red -text \"%s %s\"", c->up->label, tag );
+	cmd( "ttk::frame $n.l.n2" );
+	cmd( "ttk::label $n.l.n2.l1 -text \"Contained in:\"" );
+	cmd( "ttk::label $n.l.n2.l2 -style hl.TLabel -text \"%s %s\"", c->up->label, tag );
 	cmd( "pack $n.l.n2.l1 $n.l.n2.l2 -side left" );
 
 	cmd( "pack $n.l.n1 $n.l.n2" );
 
-	cmd( "frame $n.e" );
-	cmd( "label $n.e.l -text \"Number of instances\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $n.e.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center } { entry $n.e.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center }" );
+	cmd( "ttk::frame $n.e" );
+	cmd( "ttk::label $n.e.l -text \"Number of instances\"" );
+	cmd( "ttk::spinbox $n.e.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "pack $n.e.l $n.e.e -side left -padx 2" );
 
-	cmd( "frame $n.cp" );
-	cmd( "label $n.cp.l -text \"Copy from instance\"" );
-	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $n.cp.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invalidcommand { bell } -justify center } { entry $n.cp.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center }" );
-	cmd( "button $n.cp.compute -width 7 -text Compute -command { set conf 1; set choice 3; .numobj.cp.e selection range 0 end; focus .numobj.cp.e }" );
+	cmd( "ttk::frame $n.cp" );
+	cmd( "ttk::label $n.cp.l -text \"Copy from instance\"" );
+	cmd( "ttk::spinbox $n.cp.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::button $n.cp.compute -width 7 -text Compute -command { set conf 1; set choice 3; .numobj.cp.e selection range 0 end; focus .numobj.cp.e }" );
 	cmd( "pack $n.cp.l $n.cp.e $n.cp.compute -side left -padx 2" );
 
-	cmd( "frame $n.ef" );
-	cmd( "label $n.ef.l -text \"Modify groups\"" );
+	cmd( "ttk::frame $n.ef" );
+	cmd( "ttk::label $n.ef.l -text \"Modify groups\"" );
 
-	cmd( "frame $n.ef.g -relief groove -bd 2" );
+	cmd( "ttk::frame $n.ef.g -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 	
 	for ( j = 1, cur = c->up; cur->up != NULL; cur = cur->up, j++ )
 	{
@@ -479,18 +486,18 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 			first = cur->up->search( cur->label );
 			for ( k = 1; first != cur; first = go_brother( first ), ++k );
 			cmd( "set affect 1.%d", k );
-			cmd( "radiobutton $n.ef.g.r1 -text \"This group of '%s' contained in '%s' #%d\" -variable affect -value 1.%d", c->label, cur->label, k, k );
+			cmd( "ttk::radiobutton $n.ef.g.r1 -text \"This group of '%s' contained in '%s' #%d\" -variable affect -value 1.%d", c->label, cur->label, k, k );
 		}
 		else
 		{
 			first = cur->up->search( cur->label );
 			for ( k = 1; first != cur; first = go_brother( first ), ++k );
-			cmd( "radiobutton $n.ef.g.r%d -text \"All groups of '%s' contained in '%s' #%d\" -variable affect -value %d.%d", j, c->label, cur->label, k, j, k );
+			cmd( "ttk::radiobutton $n.ef.g.r%d -text \"All groups of '%s' contained in '%s' #%d\" -variable affect -value %d.%d", j, c->label, cur->label, k, j, k );
 		}
 		cmd( "pack $n.ef.g.r%d -anchor w", j );
 	}
 	
-	cmd( "radiobutton $n.ef.g.r%d -text \"All groups of '%s' in the model\" -variable affect -value %d.1", j, c->label, j );
+	cmd( "ttk::radiobutton $n.ef.g.r%d -text \"All groups of '%s' in the model\" -variable affect -value %d.1", j, c->label, j );
 	cmd( "pack $n.ef.g.r%d -anchor w", j );
 
 	max_level = j;
@@ -565,7 +572,7 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 	cmd( "set choice $num" );
 	chg_obj_num( &c, *choice, affect, pippo, choice, cfrom );
 
-	redrawRoot = true;			// update list boxes
+	redrawRoot = redrawStruc = true;	// update list boxes & structure
 
 	delete [ ] pippo;
 }
@@ -632,28 +639,30 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 	cmd( "newtop $d \"Delete Instances\" { set choice 3 }" );
 	cmd( "set conf 0" );
 
-	cmd( "frame $d.l" );
-	cmd( "label $d.l.l1 -text \"Object:\"" );
-	cmd( "label $d.l.l2 -fg red -text \"%s\"", ( *r )->label );
+	cmd( "ttk::frame $d.l" );
+	cmd( "ttk::label $d.l.l1 -text \"Object:\"" );
+	cmd( "ttk::label $d.l.l2 -style hl.TLabel -text \"%s\"", ( *r )->label );
 	cmd( "pack $d.l.l1 $d.l.l2 -side left" );
 
-	cmd( "frame $d.t" );
-	cmd( "label $d.t.txt1 -text \"Do you want to delete the last\"" );
+	cmd( "ttk::frame $d.t" );
+	cmd( "ttk::label $d.t.txt1 -text \"Do you want to delete the last\"" );
 
-	cmd( "label $d.t.txt2 -text \"%d instances(s)\" -fg red", actual-desired );
-	cmd( "label $d.t.txt3 -text \"or you want to choose them?\"" );
+	cmd( "ttk::label $d.t.txt2 -text \"%d instances(s)\" -style hl.TLabel", actual-desired );
+	cmd( "ttk::label $d.t.txt3 -text \"or you want to choose them?\"" );
 	cmd( "pack $d.t.txt1 $d.t.txt2 $d.t.txt3" );
 	cmd( "pack $d.l $d.t -padx 5 -pady 5" );
 
-	cmd( "frame $d.b" );
-	cmd( "button $d.b.last -width $butWid -text Last -command { set choice 1 }" );
-	cmd( "button $d.b.choose -width $butWid -text Choose -command { set choice 2 }" );
+	cmd( "ttk::frame $d.b" );
+	cmd( "ttk::button $d.b.last -width $butWid -text Last -command { set choice 1 }" );
+	cmd( "ttk::button $d.b.choose -width $butWid -text Choose -command { set choice 2 }" );
 	cmd( "pack $d.b.last $d.b.choose -padx 10 -side left" );
 	cmd( "pack $d.b" );
 
 	cmd( "helpcancel $d b2 { LsdHelp menudata_objn.html#pick_remove } { set choice 3 }" );
 
 	cmd( "showtop $d" );
+
+	cmd( "mousewarpto $d.b.last" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -679,15 +688,15 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 
 		cmd( "newtop $d \"Choose Instances\" { set choice 2 }" );
 
-		cmd( "frame $d.l" );
-		cmd( "label $d.l.l1 -text \"Object:\"" );
-		cmd( "label $d.l.l2 -fg red -text \"%s\"", ( *r )->label );
+		cmd( "ttk::frame $d.l" );
+		cmd( "ttk::label $d.l.l1 -text \"Object:\"" );
+		cmd( "ttk::label $d.l.l2 -style hl.TLabel -text \"%s\"", ( *r )->label );
 		cmd( "pack $d.l.l1 $d.l.l2 -side left" );
 
-		cmd( "frame $d.t" );
-		cmd( "label $d.t.tit -text \"Instance to delete\"", (*r)->label );
-		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $d.t.e -width 6 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set value %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value; return 0 } } -invalidcommand { bell } -justify center } { entry $d.t.e -width 6 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set value %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value; return 0 } } -invcmd { bell } -justify center }" );
-		cmd( "label $d.t.tit1 -text \"\"" );
+		cmd( "ttk::frame $d.t" );
+		cmd( "ttk::label $d.t.tit -text \"Instance to delete\"", (*r)->label );
+		cmd( "ttk::spinbox $d.t.e -width 6 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set value %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value; return 0 } } -invalidcommand { bell } -justify center" );
+		cmd( "ttk::label $d.t.tit1 -text \"\"" );
 		cmd( "pack $d.t.tit $d.t.e $d.t.tit1" );
 		cmd( "pack $d.l $d.t -padx 5 -pady 5" );
 
@@ -781,7 +790,7 @@ void chg_obj_num( object **c, int value, int level, int pippo[ ], int *choice, i
 	for ( first = cur->search( ( *c )->label), i = 1; i < cfrom && first != NULL; first = first->hyper_next( first->label ), ++i );
 	if ( first == NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Object instance not found\" -detail \"Instance %d of object '%s' not found.\"", cfrom, ( *c )->label );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Object instance not found\" -detail \"Instance %d of object '%s' not found.\"", cfrom, ( *c )->label );
 		return;
 	}
 	 

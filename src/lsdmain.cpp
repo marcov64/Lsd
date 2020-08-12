@@ -59,6 +59,7 @@ bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool pause_run;				// pause running simulation
 bool redrawRoot;			// control for redrawing root window (.)
+bool redrawStruc;			// control for redrawing model structure window
 bool running = false;		// simulation is running
 bool save_alt_path = false;	// alternate save path flag
 bool scrollB;				// scroll box state in current runtime plot
@@ -377,7 +378,7 @@ int lsdmain( int argn, char **argv )
 	if ( choice )
 	{
 		log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
-		cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the \\src directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
+		cmd( "ttk::messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the \\src directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
 		myexit( 8 ); 
 	}
 
@@ -421,7 +422,7 @@ int lsdmain( int argn, char **argv )
 	if ( choice )
 	{
 		log_tcl_error( "Model files check", "Required model file(s) missing or corrupted, check the model directory and recreate the model if the problem persists" );
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some model files are missing or corrupted.\nPlease recreate your model if the problem persists.\n\nLSD is aborting now.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some model files are missing or corrupted.\nPlease recreate your model if the problem persists.\n\nLSD is aborting now.\"" );
 		myexit( 200 );
 	}
 	str = ( char * ) Tcl_GetVar( inter, "path", 0 );
@@ -452,7 +453,7 @@ int lsdmain( int argn, char **argv )
 	if ( choice )
 	{
 		log_tcl_error( "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where LSD is installed" );
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where LSD is installed.\n\nLSD is aborting now.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where LSD is installed.\n\nLSD is aborting now.\"" );
 		myexit( 9 );
 	}
 	cmd( "set env(LSDROOT) $RootLsd" );
@@ -487,7 +488,7 @@ int lsdmain( int argn, char **argv )
 		char *err0x04 = ( char * ) Tcl_GetVar( inter, "err0x04", 0 );
 		snprintf( msg, TCL_BUFF_STR - 1, "Required Tcl/Tk source file(s) missing or corrupted (0x%04x), check your installation and reinstall LSD if the problem persists\n\n0x01: %s\n\n0x02: %s\n\n0x04: %s", choice, err0x01, err0x02, err0x04 );
 		log_tcl_error( "Source files check failed", msg );
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
 		myexit( 200 + choice );
 	}
 
@@ -503,7 +504,7 @@ int lsdmain( int argn, char **argv )
 			else
 			{
 				log_tcl_error( "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
-				cmd( "tk_messageBox -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
+				cmd( "ttk::messageBox -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
 				myexit( 200 );
 			}
 
@@ -546,21 +547,20 @@ int lsdmain( int argn, char **argv )
 	
 	// Tcl global variables
 	cmd( "set small_character [ expr $dim_character - $deltaSize ]" );
-	cmd( "set font_normal [ list \"$fonttype\" $dim_character ]" );
-	cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
 	cmd( "set gpterm $gnuplotTerm" );
 
 	// set main window
 	cmd( "wm withdraw ." );
 	cmd( "wm title . \"LSD Browser\"" );
 	cmd( "wm protocol . WM_DELETE_WINDOW { if [ string equal [ discard_change ] ok ] { exit } }" ); 
-	cmd( ". configure -menu .m" );		// define here to avoid redimensining the window
+	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
 	cmd( "icontop . lsd" );
 	cmd( "sizetop .lsd" );
 	cmd( "setglobkeys ." );				// set global keys for main window
-
-	create_logwindow( );
+	cmd( "setstyles" );					// set ttk custom style
 	cmd( "init_canvas_colors" );
+	
+	create_logwindow( );
 
 	// load/check model configuration files
 	read_eq_filename( equation_name );
@@ -673,7 +673,7 @@ void run( void )
 	prof.clear( );			// reset profiling times
 
 	cover_browser( "Running...", "The simulation is being executed", "Use the LSD Log window buttons to interact:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables" );
-	cmd( "wm deiconify .log; raise .log; focus .log" );
+	cmd( "focustop .log" );
 #else
 	plog( "\nProcessing configuration file %s ...\n", "", struct_file );
 #endif
@@ -704,7 +704,7 @@ void run( void )
 			{
 #ifndef NO_WINDOW 
 				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
 #else
 				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );	
 #endif
@@ -719,7 +719,7 @@ void run( void )
 			{
 #ifndef NO_WINDOW 
 				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
 #else
 				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );
 #endif
@@ -737,7 +737,7 @@ void run( void )
 		{
 #ifndef NO_WINDOW 
 			log_tcl_error( "Memory allocation", "Not enough memory, too many series saved for the memory available" );
-			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, max_step );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, max_step );
 #else
 			fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step );
 #endif
@@ -832,7 +832,7 @@ void run( void )
 			if ( when_debug == t )
 			{
 				debug_flag = true;
-				cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update }" );
+				cmd( "focustop .deb" );
 			}
 
 			// only update if simulation not paused
@@ -871,7 +871,7 @@ void run( void )
 					{
 						when_debug = t + 1;
 						debug_flag = true;
-						cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb }" );
+						cmd( "focustop .deb" );
 					}
 					else			// if paused, just call the data browser
 					{
@@ -883,7 +883,7 @@ void run( void )
 				case 4:			// Observe button in Log window / o/O key in Runtime window
 					set_fast( 0 );
 					cmd( "set a [ split [ winfo children . ] ]" );
-					cmd( "foreach i $a { if [ string match .plt* $i ] { wm deiconify $i; raise $i } }" );
+					cmd( "foreach i $a { if [ string match .plt* $i ] { focustop $i } }" );
 					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.fond.go conf -state normal }", i, i );
 					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.fond.shift conf -state normal }", i, i );
 					break;
@@ -1063,7 +1063,7 @@ void run( void )
 	uncover_browser( );
 	set_buttons_log( false );
 	show_prof_aggr( );
-	cmd( "wm deiconify .log; raise .log; focus .log" );
+	cmd( "focustop .log" );
 #endif
 
 #ifdef PARALLEL_MODE
@@ -1163,7 +1163,7 @@ void unwind_stack( void )
 	{
 #ifndef NO_WINDOW 
 		log_tcl_error( "Internal error", "LSD trace stack corrupted" );	
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Internal LSD error\" -detail \"The LSD trace stack is corrupted.\nLSD will close now.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Internal LSD error\" -detail \"The LSD trace stack is corrupted.\nLSD will close now.\"" );
 #else
 		fprintf( stderr, "\nLSD trace stack corrupted.\n" );	
 #endif
@@ -1269,7 +1269,7 @@ bool alloc_save_var( variable *v )
 
 
 /*********************************
-CREATE_LOG_WINDOW
+CREATE_LOGWINDOW
 *********************************/
 #ifndef NO_WINDOW
 void create_logwindow( void )
@@ -1280,14 +1280,15 @@ void create_logwindow( void )
 	cmd( "newtop .log \"LSD Log\" { if [ string equal [ discard_change ] ok ] { exit } } \"\"" );
 
 	cmd( "set w .log.text" );
-	cmd( "frame $w" );
-	cmd( "scrollbar $w.scroll -command \"$w.text yview\"" );
-	cmd( "scrollbar $w.scrollx -command \"$w.text xview\" -orient hor" );
-	cmd( "text $w.text -relief sunken -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none -font \"$font_normal\"" );
+	cmd( "ttk::frame $w" );
+	cmd( "ttk::scrollbar $w.scroll -command \"$w.text yview\"" );
+	cmd( "ttk::scrollbar $w.scrollx -command \"$w.text xview\" -orient hor" );
+	cmd( "ttk::text $w.text -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none -entry 0 -dark $darkTheme -style smallFixed.TText" );
+	cmd( "mouse_wheel $w.text" );
 	cmd( "$w.text configure -tabs {%s}", tabs  );
 
 	// Log window tags
-	cmd( "$w.text tag configure highlight -foreground red" );
+	cmd( "$w.text tag configure highlight -foreground $colorsTheme(hl)" );
 	cmd( "$w.text tag configure tabel" );
 	cmd( "$w.text tag configure series -tabs {2c 5c 8c}" );
 	cmd( "$w.text tag configure prof1 -tabs {5c 7.5c 9c 11.2c 13.2c 17.5c}" );
@@ -1299,17 +1300,17 @@ void create_logwindow( void )
 	cmd( "pack $w -expand yes -fill both" );
 
 	cmd( "set w .log.but" );
-	cmd( "frame $w" );
-	cmd( "button $w.stop -width $butWid -text Stop -command {set_c_var done_in 1} -underline 0 -state disabled" );
-	cmd( "button $w.pause -width $butWid -text Pause -command {set_c_var done_in 9} -underline 0 -state disabled" );
-	cmd( "button $w.speed -width $butWid -text Fast -command {set_c_var done_in 2} -underline 0 -state disabled" );
-	cmd( "button $w.obs -width $butWid -text Observe -command {set_c_var done_in 4} -underline 0 -state disabled" );
-	cmd( "button $w.deb -width $butWid -text Debug -command {set_c_var done_in 3} -underline 0 -state disabled" );
-	cmd( "button $w.help -width $butWid -text Help -command {LsdHelp log.html} -underline 0" );
-	cmd( "button $w.copy -width $butWid -text Copy -command {tk_textCopy .log.text.text} -underline 0" );
+	cmd( "ttk::frame $w" );
+	cmd( "ttk::button $w.stop -width $butWid -text Stop -command {set_c_var done_in 1} -underline 0 -state disabled" );
+	cmd( "ttk::button $w.pause -width $butWid -text Pause -command {set_c_var done_in 9} -underline 0 -state disabled" );
+	cmd( "ttk::button $w.speed -width $butWid -text Fast -command {set_c_var done_in 2} -underline 0 -state disabled" );
+	cmd( "ttk::button $w.obs -width $butWid -text Observe -command {set_c_var done_in 4} -underline 0 -state disabled" );
+	cmd( "ttk::button $w.deb -width $butWid -text Debug -command {set_c_var done_in 3} -underline 0 -state disabled" );
+	cmd( "ttk::button $w.help -width $butWid -text Help -command {LsdHelp log.html} -underline 0" );
+	cmd( "ttk::button $w.copy -width $butWid -text Copy -command {tk_textCopy .log.text.text} -underline 0" );
 
-	cmd( "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx 5 -pady 10 -side left" );
-	cmd( "pack $w -padx 10 -side right" );
+	cmd( "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx $butPad -pady $butPad -side left" );
+	cmd( "pack $w -side right" );
 
 	cmd( "showtop .log none 1 1 0" );
 	set_shortcuts_log( ".log", "log.html" );
@@ -1320,6 +1321,8 @@ void create_logwindow( void )
 
 	// a Tcl/Tk version of plog
 	cmd( "proc plog cm { .log.text.text.internal insert end $cm; .log.text.text.internal see end }" );
+	
+	cmd( "plog \"LSD Version %s (%s)\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License\nLSD is free software and comes with ABSOLUTELY NO WARRANTY\n[ LsdEnv {  } ]\n\"", _LSD_VERSION_, _LSD_DATE_ );
 
 	log_ok = true;
 }
@@ -1360,16 +1363,16 @@ SET_SHORTCUTS_LOG
 void set_shortcuts_log( const char *window, const char *help )
 {
 	cmd( "bind %s <F1> { LsdHelp %s }", window, help  );
-	cmd( "bind %s <KeyPress-s> {.log.but.stop invoke}; bind %s <KeyPress-S> {.log.but.stop invoke}", window, window );
-	cmd( "bind %s <KeyPress-p> {.log.but.pause invoke}; bind %s <KeyPress-P> {.log.but.pause invoke}", window, window );
-	cmd( "bind %s <KeyPress-r> {.log.but.pause invoke}; bind %s <KeyPress-R> {.log.but.pause invoke}", window, window );
-	cmd( "bind %s <KeyPress-f> {.log.but.speed invoke}; bind %s <KeyPress-F> {.log.but.speed invoke}", window, window );
-	cmd( "bind %s <KeyPress-o> {.log.but.obs invoke}; bind %s <KeyPress-O> {.log.but.obs invoke}", window, window );
-	cmd( "bind %s <KeyPress-d> {.log.but.deb invoke}; bind %s <KeyPress-D> {.log.but.deb invoke}", window, window );
-	cmd( "bind %s <KeyPress-h> {.log.but.help invoke}; bind %s <KeyPress-H> {.log.but.help invoke}", window, window );
-	cmd( "bind %s <KeyPress-c> {.log.but.copy invoke}; bind %s <KeyPress-C> {.log.but.copy invoke}", window, window );
-	cmd( "bind %s <Control-c> {.log.but.copy invoke}; bind %s <Control-C> {.log.but.copy invoke}", window, window );
-	cmd( "bind %s <KeyPress-Escape> {focus -force .}", window );
+	cmd( "bind %s <KeyPress-s> { .log.but.stop invoke }; bind %s <KeyPress-S> { .log.but.stop invoke }", window, window );
+	cmd( "bind %s <KeyPress-p> { .log.but.pause invoke }; bind %s <KeyPress-P> { .log.but.pause invoke }", window, window );
+	cmd( "bind %s <KeyPress-r> { .log.but.pause invoke }; bind %s <KeyPress-R> { .log.but.pause invoke }", window, window );
+	cmd( "bind %s <KeyPress-f> { .log.but.speed invoke }; bind %s <KeyPress-F> { .log.but.speed invoke }", window, window );
+	cmd( "bind %s <KeyPress-o> { .log.but.obs invoke }; bind %s <KeyPress-O> { .log.but.obs invoke }", window, window );
+	cmd( "bind %s <KeyPress-d> { .log.but.deb invoke }; bind %s <KeyPress-D> { .log.but.deb invoke }", window, window );
+	cmd( "bind %s <KeyPress-h> { .log.but.help invoke }; bind %s <KeyPress-H> { .log.but.help invoke }", window, window );
+	cmd( "bind %s <KeyPress-c> { .log.but.copy invoke }; bind %s <KeyPress-C> { .log.but.copy invoke }", window, window );
+	cmd( "bind %s <Control-c> { .log.but.copy invoke }; bind %s <Control-C> { .log.but.copy invoke }", window, window );
+	cmd( "bind %s <KeyPress-Escape> { focustop . }", window );
 }
 
 
@@ -1396,22 +1399,18 @@ void cover_browser( const char *text1, const char *text2, const char *text3 )
 	if ( brCovered )		// ignore if already covered
 		return;
 		
-	cmd( "if [ winfo exists .str ] { wm withdraw .str }" );
-
 	cmd( "set origMainTit [ wm title . ]; wm title . \"$origMainTit (DISABLED)\"" );
 	cmd( "destroy .bbar .m .l" );
 	
-	cmd( "frame .t" );
-	cmd( "label .t.l1 -font {-weight bold} -text \"%s\"", text1  );
-	cmd( "label .t.l2 -text \"\n%s\"", text2  );
-	cmd( "label .t.l3 -fg red -text \"\nInteraction with the LSD Browser is now disabled\"" );
-	cmd( "label .t.l4 -justify left -text \"\n%s\"", text3  );
+	cmd( "ttk::frame .t" );
+	cmd( "ttk::label .t.l1 -text \"%s\" -style bold.TLabel", text1  );
+	cmd( "ttk::label .t.l2 -text \"\n%s\"", text2  );
+	cmd( "ttk::label .t.l3 -text \"\nInteraction with the LSD Browser is now disabled\" -style hl.TLabel" );
+	cmd( "ttk::label .t.l4 -justify left -text \"\n%s\"", text3  );
 	cmd( "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
 	cmd( "pack .t -fill both -expand yes -padx 10 -pady 10" );
-	cmd( "focus .t");
-	set_shortcuts_log( ".t", "runtime.html" );
-	
 	cmd( "update" );
+	set_shortcuts_log( ".t", "runtime.html" );
 	
 	brCovered = true;
 	redrawRoot = false;
@@ -1429,11 +1428,8 @@ void uncover_browser( void )
 	cmd( "destroytop .deb" );
 	cmd( "destroy .t" );
 	cmd( "wm title . $origMainTit" );
-	cmd( "if { [ string equal [ wm state . ] normal ] && [ winfo exist .str ] && ! [ string equal [ wm state .str ] normal ] } { wm deiconify .str; lower .str }" );
-	cmd( "if { [ string equal [ wm state . ] normal ] } { raise .; focus . }" );
+	cmd( "if { [ string equal [ wm state . ] normal ] } { focustop . }" );
 
-	cmd( "update" );
-	
 	brCovered = false;
 	redrawRoot = true;
 }
@@ -1740,7 +1736,7 @@ void deb_log( bool on, int time )
 			{
 				when_debug = t;
 				debug_flag = true;
-				cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update }" );
+				cmd( "focustop .deb" );
 			}
 		
 		// ignore if log already open

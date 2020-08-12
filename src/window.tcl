@@ -19,12 +19,20 @@
 # Procedure to create top level new windows
 #************************************************
 proc newtop { w { name "" } { destroy { } } { par "." } } {
-	global RootLsd LsdSrc parWndLst grabLst noParLst logWndFn colorsTheme
+	global RootLsd LsdSrc parWndLst grabLst noParLst logWndFn colorsTheme activeplot
 
 	destroytop $w
+	toplevel $w -colormap $par -background $colorsTheme(bg)
+	
+	# try to prevent LSD to withdraw and grab windows focus when deiconify
+	if { $w in [ list .deb .lat .mm ] || ( [ info exists activeplot ] && [ string equal $w $activeplot ] ) } {
+		if { [ focus -displayof . ] != "" } {
+			wm withdraw $w
+		}
+	} elseif { $par == "" || [ focus -displayof $par ] != "" } {
+		wm withdraw $w
+	}
 
-	toplevel $w
-	wm withdraw $w
 	if { $par != "" } {
 		if { $par != "." } {
 			if { [ winfo viewable [ winfo toplevel $par ] ] } {
@@ -51,10 +59,10 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 			}
 		}
 	}
+	
 	wm group $w .
 	wm title $w $name
 	wm protocol $w WM_DELETE_WINDOW $destroy
-	$w configure -background $colorsTheme(bg)
 	setglobkeys $w
 
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, grab:$grabLst)" }
@@ -80,7 +88,7 @@ proc settop { w { name no } { destroy no } { par no } } {
 		wm protocol $w WM_DELETE_WINDOW $destroy
 	}
 	update
-	if { ! [ winfo viewable [ winfo toplevel $w ] ] } {
+	if { ! [ winfo viewable [ winfo toplevel $w ] ] && [ focus -displayof $w ] != "" } {
 		wm deiconify $w
 	}
 	raise $w
@@ -112,7 +120,7 @@ proc settop { w { name no } { destroy no } { par no } } {
 # current: keep current position
 #************************************************
 proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } { buttonF b } { noMinSize no } } {
-	global defaultPos wndLst parWndLst grabLst noParLst logWndFn
+	global defaultPos hmargin vmargin bordsize tbarsize wndLst parWndLst grabLst noParLst logWndFn
 
 	# copy of applied geometry, if any
 	set gm ""
@@ -136,7 +144,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 			if [ string equal $pos none ] {
 				if [ info exists defaultPos ] {
 					set pos $defaultPos
-				} {
+				} else {
 					set pos centerW
 				}
 			}
@@ -145,7 +153,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 			if { [ string equal $pos centerS ] && ! [ primdisp [ winfo parent $w ] ] } {
 				if [ info exists defaultPos ] {
 					set pos $defaultPos
-				} {
+				} else {
 					set pos centerW
 				}
 			}
@@ -153,7 +161,18 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 			if { ! [ string equal $pos xy ]	} {
 				set x [ getx $w $pos ]
 				set y [ gety $w $pos ]
-			} {
+				
+				set maxHgt [ expr [ winfo screenwidth $w ] - $x - 2 * $bordsize - $hmargin ]
+				set maxWid [ expr [ winfo screenheight $w ] - $y- 2 * $bordsize - $vmargin - $tbarsize ]
+				if { $sizeX > $maxHgt } {
+					set sizeX $maxHgt
+					$w configure -width $sizeX
+				}
+				if { $sizeY > $maxWid } {
+					set sizeY $maxWid
+					$w configure -height $sizeY
+				}
+			} else {
 				set x $sizeX
 				set y $sizeY
 			}
@@ -167,12 +186,12 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 
 				if { ! [ string equal $pos xy ]	&& $sizeX != 0 && $sizeY != 0 } {
 					set gm ${sizeX}x${sizeY}+$x+$y
-				} {
+				} else {
 					set gm +$x+$y
 				}
 				wm geometry $w $gm
 			}
-		} {
+		} else {
 			if { $sizeX != 0 && $sizeY != 0 } {
 				set gm ${sizeX}x${sizeY}
 				wm geometry $w $gm
@@ -185,14 +204,14 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 
 		wm resizable $w $resizeX $resizeY
-	} {
+	} else {
 		#known windows - simply apply defaults if not done before
 		if { ! [ string equal $pos current ] } {
 			sizetop $w
 		}
 	}
 
-	if { ! [ winfo viewable [ winfo toplevel $w ] ] } {
+	if { ! [ winfo viewable [ winfo toplevel $w ] ] && [ focus -displayof $w ] != "" } {
 		wm deiconify $w
 	}
 
@@ -232,7 +251,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	} elseif { [ info exists buttonF ] && [ winfo exists $w.$buttonF.r2.ok ] } {
 		$w.$buttonF.r2.ok configure -default active -state active
 		focus $w.$buttonF.r2.ok
-	} {
+	} else {
 		focus $w
 	}
 
@@ -268,11 +287,10 @@ proc destroytop w {
 				grab release $w
 				set grabPar [ string range [ lindex $grabLst $igrab ] [ expr [ string first " " [ lindex $grabLst $igrab ] ] + 1 ] end ]
 				if { $grabPar != "" } {
-					if { ! [ winfo viewable $grabPar ] } {
+					if { ! [ winfo viewable $grabPar ] && [ focus -displayof $grabPar ] != "" } {
 						wm deiconify $grabPar
 					}
-					raise $grabPar
-					focus $grabPar
+					focustop $grabPar
 					grab set $grabPar
 				}
 				set grabLst [ lreplace $grabLst $igrab $igrab ]
@@ -285,7 +303,7 @@ proc destroytop w {
 	# handle different window default focus on destroy
 	if [ info exists defaultFocus ] {
 		focus $defaultFocus
-	} {
+	} else {
 		focus [ winfo parent $w ]
 	}
 	destroy $w
@@ -390,7 +408,7 @@ proc geomtosave { { w . } } {
 
 	if { $w == ".str" } {
 		return ${width}x${realHeight}+${realX}+${realY}:${hfactM}+${vfactM}
-	} {
+	} else {
 		return ${width}x${realHeight}+${realX}+${realY}
 	}
 
@@ -471,7 +489,7 @@ proc sizetop { { w all } } {
 				.lmm {
 					if { $screenWidth < ( $hsizeL + 2 * $bordsize ) } {
 						set W [ expr $screenWidth - 2 * $bordsize ]
-					} {
+					} else {
 						set W $hsizeL
 					}
 					set H [ expr $screenHeight - $tbarsize - 2 * $vmargin - 2 * $bordsize ]
@@ -480,7 +498,7 @@ proc sizetop { { w all } } {
 					}
 					if { $screenWidth < ( $hsizeL + 2 * $bordsize + $hmargin ) } {
 						set X 0
-					} {
+					} else {
 						set X [ expr $screenWidth - $hmargin - $bordsize - $W ]
 					}
 					set Y [ expr ( $screenHeight - $tbarsize ) / 2 - $bordsize - $H / 2 ]
@@ -547,7 +565,7 @@ proc sizetop { { w all } } {
 # Resize the window
 #************************************************
 proc resizetop { w sizeX { sizeY 0 } } {
-	global parWndLst grabLst logWndFn
+	global hmargin vmargin bordsize tbarsize parWndLst grabLst logWndFn
 
 	if { $sizeX <= 0 } {
 		set sizeX [ winfo width $w ]
@@ -555,12 +573,10 @@ proc resizetop { w sizeX { sizeY 0 } } {
 	if { $sizeY <= 0 } {
 		set sizeY [ winfo height $w ]
 	}
-	if { $sizeX > [ expr [ winfo screenwidth $w ] - [ winfo rootx $w ] ] } {
-		set sizeX [ expr [ winfo screenwidth $w ] - [ winfo rootx $w ] ]
-	}
-	if { $sizeY > [ expr [ winfo screenheight $w ] - [ winfo rooty $w ] ] } {
-		set sizeY [ expr [ winfo screenheight $w ] - [ winfo rooty $w ] ]
-	}
+	
+	set sizeX [ expr min( $sizeX, [ winfo screenwidth $w ] - [ winfo rootx $w ] - 2 * $bordsize - $hmargin ) ]
+	set sizeY [ expr min( $sizeY, [ winfo screenheight $w ] - [ winfo rooty $w ] - 2 * $bordsize - $vmargin - $tbarsize ) ]
+	
 	set newMinX [ expr min( [ lindex [ wm minsize $w ] 0 ], $sizeX ) ]
 	set newMinY [ expr min( [ lindex [ wm minsize $w ] 1 ], $sizeY ) ]
 	if { $newMinX != [ lindex [ wm minsize $w ] 0 ] || $newMinY != [ lindex [ wm minsize $w ] 1 ] } {
@@ -571,9 +587,36 @@ proc resizetop { w sizeX { sizeY 0 } } {
 			wm geom $w ${sizeX}x${sizeY}
 		}
 	}
+	
 	update
 
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nresizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" }
+}
+
+
+#************************************************
+# FOCUSTOP
+# Set focus to the given window only if a
+# LSD window has currently the system focus
+#************************************************
+proc focustop { w1 { w2 "" } } {
+
+	if [ winfo exists $w1 ] {
+		update
+		
+		set t1 [ winfo toplevel $w1 ]
+		if { ! [ winfo viewable $t1 ] && [ focus -displayof $t1 ] != "" } {
+			wm deiconify $t1
+		}
+		
+		if { $w2 != "" && [ winfo exists $w2 ] && [ winfo toplevel $w2 ] != $t1 } {
+			raise $t1 [ winfo toplevel $w2 ]
+		} else {
+			raise $t1
+		}
+		
+		focus $w1
+	}
 }
 
 
@@ -592,14 +635,14 @@ proc icontop { w type } {
 	if [ string equal $CurPlatform windows ] {
 		if [ string equal $w . ] {
 			wm iconbitmap $w -default $RootLsd/$LsdSrc/icons/$type.ico
-		} {
+		} else {
 			wm iconbitmap $w $RootLsd/$LsdSrc/icons/$type.ico
 		}
 	} elseif [ string equal $CurPlatform linux ] {
 		if [ string equal $w . ] {
 			wm iconphoto $w -default ${type}Img
 			wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
-		} {
+		} else {
 			wm iconphoto $w ${type}Img
 			wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
 		}
@@ -640,7 +683,7 @@ proc align { w1 w2 { side R } } {
 proc primdisp w {
 	if { [ winfo rootx $w ] > 0 && [ winfo rootx $w ] < [ winfo screenwidth $w ] && [ winfo rooty $w ] > 0 && [ winfo rooty $w ] < [ winfo screenheight $w ] } {
 		return true
-	} {
+	} else {
 		return false
 	}
 }
@@ -817,7 +860,12 @@ proc setglobkeys { w { chkChg 1 } } {
 
 	# soft/hard exit (check for unsaved changes or not)
 	if { $chkChg } {
-		bind $w <Control-Alt-x> { if [ string equal [ discard_change ] ok ] { exit }; break }
+		bind $w <Control-Alt-x> { 
+			if [ string equal [ discard_change ] ok ] { 
+				exit 
+			}
+			break
+		}
 		bind $w <Control-Alt-X> { event generate . <Control-Alt-x> }
 	} else {
 		bind $w <Control-Alt-x> { exit }
@@ -843,10 +891,35 @@ proc setglobkeys { w { chkChg 1 } } {
 
 
 #************************************************
+# SELECTINLIST
+# Select, activate and show a listbox item
+#************************************************
+proc selectinlist { w pos { foc 0 } } {
+	if { [ winfo exists $w ] && [ string equal -nocase [ winfo class $w ] listbox ] && [ $w size ] > 0 } {
+		if [ string is integer -strict $pos ] {
+			set pos [ expr max( min( $pos, [ $w size ] - 1 ), 0 ) ]
+		} elseif { ! ( $pos in [ list active end ] ) } {
+			return
+		}
+		
+		$w selection clear 0 end
+		$w selection set $pos
+		$w activate $pos
+		$w see $pos
+		
+		if { $foc } {
+			focus $w
+		}
+		
+		update
+	}
+}
+
+
+#************************************************
 # OKHELPCANCEL
 # Procedure to create standard button set
 #************************************************
-# procedures to create standard button sets
 proc okhelpcancel { w fr comOk comHelp comCancel } {
 	global butWid butPad
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
@@ -1115,15 +1188,15 @@ proc done { w fr comDone } {
 proc comphelpdone { w fr comComp comHelp comDone } {
 	global butWid butPad
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
-	ttk::button $w.$fr.com -width $butWid -text Compute -command $comComp
+	ttk::button $w.$fr.comp -width $butWid -text Compute -command $comComp
 	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
 	ttk::button $w.$fr.ok -width $butWid -text Done -command $comDone
-	bind $w.$fr.com <KeyPress-Return> "$w.$fr.com invoke"
+	bind $w.$fr.comp <KeyPress-Return> "$w.$fr.comp invoke"
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
 	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.com $w.$fr.help $w.$fr.ok -padx $butPad -pady $butPad -side left
+	pack $w.$fr.comp $w.$fr.help $w.$fr.ok -padx $butPad -pady $butPad -side left
 	pack $w.$fr -side right
 }
 
@@ -1237,13 +1310,58 @@ proc abortretryignore { w fr comAbort comRetry comIgnore } {
 
 
 #************************************************
+# MOUSEWARPTO
+# Move the mouse pointer to widget (button) w
+# If disableMouseWarp is 1, does nothing
+#************************************************
+proc mousewarpto w {
+	global mouseWarp
+	
+	update
+	if { $mouseWarp && [ winfo viewable $w ] } {
+		after 100
+		focus $w
+		# do it twice to bypass Tk bug (first warp just go to the dialog not the button)
+		update
+		event generate $w <Motion> -warp 1 \
+			-x [ expr [ winfo width $w ] / 2 ] -y [ expr [ winfo height $w ] / 2 ]
+		update
+		event generate $w <Motion> -warp 1 \
+			-x [ expr [ winfo width $w ] / 2 ] -y [ expr [ winfo height $w ] / 2 ]
+	}
+}
+
+
+#************************************************
+# ISMOUSESNAPON
+# Check for a system mouse auto-snap mode
+# In Linux, only GTK themes are detected
+#************************************************
+proc ismousesnapon { platform } {
+	if [ string equal $platform mac ] {
+		return 0
+	} elseif [ string equal $platform linux ] {
+		return 0
+	} elseif [ string equal $platform windows ] {
+		package require registry
+		if { ! [ catch { set SnapToDefaultButton [ registry get "HKEY_CURRENT_USER\\Control Panel\\Mouse" SnapToDefaultButton ] } ] } {
+			if { $SnapToDefaultButton } {
+				return 1
+			}
+		}
+	}
+	return 0
+}
+
+
+#************************************************
 # WRITE_ANY
 # Read any entry widget (normal or disabled)
 #************************************************
 proc write_any { w val } {
 	if [ string equal [ $w cget -state ] disabled ] {
 		write_disabled $w $val
-	} {
+	} else {
 		$w delete 0 end
 		$w insert 0 $val
 	}
@@ -1291,44 +1409,37 @@ proc update_title_bar { } {
 # according to the origin of the series
 #************************************************
 proc insert_series { lbox ser { pos end } } {
-	global varcolor lvarcolor funcolor lfuncolor
+	global colorsTheme
 
 	set orig [ lindex [ split [ lindex [ split $ser ] 1 ] _ ] 0 ]
 
 	switch $orig {
 		U {
-			set color $varcolor
+			set color $colorsTheme(var)
 		}
 
 		C {
-			set color $lvarcolor
+			set color $colorsTheme(lvar)
 		}
 
 		F {
-			set color $funcolor
+			set color $colorsTheme(fun)
 		}
 
 		MC {
-			set color $lfuncolor
+			set color $colorsTheme(lfun)
 		}
 
 		default {
-			set color black
+			set color ""
 		}
 	}
 
 	$lbox insert $pos "$ser"
-	$lbox itemconfigure $pos -fg $color
-}
-
-
-#************************************************
-# SETTAB
-# Procedure to adjust tab size according to font type and size
-#************************************************
-proc settab { w size font } {
-	set tabwidth "[ expr { $size * [ font measure "$font" 0 ] } ] left"
-	$w conf -font "$font" -tabs $tabwidth -tabstyle wordprocessor
+	
+	if { $color != "" } {
+		$lbox itemconfigure $pos -fg $color
+	}
 }
 
 
@@ -1346,28 +1457,97 @@ proc setwrap { w wrap } {
 
 #************************************************
 # MOUSE_WHEEL
-# bind the mouse wheel to the y scrollbar
+# Bind the mouse wheel to the y scrollbar of 
+# the window w or the first (grand) parent with 
+# a vertical scrollbar
 #************************************************
 proc mouse_wheel { w } {
-	global CurPlatform sfmwheel winmwscale
+	global CurPlatform
 
 	if [ string equal $CurPlatform windows ] {
-		bind $w <MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ]; if { $winmwscale <= 0 } { set winmwscale 1 } }; %W yview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
-		bind $w <Shift-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ]; if { $winmwscale <= 0 } { set winmwscale 1 } }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
-		bind $w <Control-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ]; if { $winmwscale <= 0 } { set winmwscale 1 } }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
-		bind $w <Alt-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ]; if { $winmwscale <= 0 } { set winmwscale 1 } }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
+		bind $w <MouseWheel> { scroll_wheel_windows %D %W }
+		bind $w <Shift-MouseWheel> { scroll_wheel_windows %D %W }
+		bind $w <Control-MouseWheel> { scroll_wheel_windows %D %W }
+		bind $w <Alt-MouseWheel> { scroll_wheel_windows %D %W }
 	} elseif [ string equal $CurPlatform mac ] {
-		bind $w <MouseWheel> { %W yview scroll [ expr -1 * $sfmwheel * %D ] units }
-		bind $w <Shift-MouseWheel> { %W xview scroll [ expr -1 * $sfmwheel * %D ] units }
-		bind $w <Control-MouseWheel> { %W xview scroll [ expr -1 * $sfmwheel * %D ] units }
+		bind $w <MouseWheel> { scroll_wheel_mac %D %W }
+		bind $w <Shift-MouseWheel> { scroll_wheel_mac %D %W }
+		bind $w <Control-MouseWheel> { scroll_wheel_mac %D %W }
 	} else {
-		bind $w <4> { %W yview scroll [ expr -1 * $sfmwheel ] units }
-		bind $w <5> { %W yview scroll $sfmwheel units }
-		bind $w <Shift-4> { %W xview scroll [ expr -1 * $sfmwheel ] units }
-		bind $w <Shift-5> { %W xview scroll $sfmwheel units }
-		bind $w <Control-4> { %W xview scroll [ expr -1 * $sfmwheel ] units }
-		bind $w <Control-5> { %W xview scroll $sfmwheel units }
+		bind $w <4> { scroll_wheel_linux %D %W -1 }
+		bind $w <5> { scroll_wheel_linux %D %W 1 }
+		bind $w <Shift-4> { scroll_wheel_linux %D %W -1 }
+		bind $w <Shift-5> { scroll_wheel_linux %D %W 1 }
+		bind $w <Control-4> { scroll_wheel_linux %D %W -1 }
+		bind $w <Control-5> { scroll_wheel_linux %D %W 1 }
 	}
+}
+
+
+#************************************************
+# SCROLL_WHEEL_WINDOWS
+# Handle scroll wheel event in Windows
+#************************************************
+proc scroll_wheel_windows { delta w } {
+	global winmwscale sfmwheel
+	
+	if { [ expr abs( $delta ) ] < $winmwscale } { 
+		set winmwscale [ expr abs( $delta ) ]
+		if { $winmwscale <= 0 } { 
+			set winmwscale 1
+		}
+	}
+	
+	set scrW [ find_scrollable $w ]
+	if { $scrW != "" } {
+		$scrW yview scroll [ expr -1 * $sfmwheel * $delta / $winmwscale ] units
+	}
+}
+
+
+#************************************************
+# SCROLL_WHEEL_MAC
+# Handle scroll wheel event in macOS
+#************************************************
+proc scroll_wheel_mac { delta w } {
+	global sfmwheel
+	
+	set scrW [ find_scrollable $w ]
+	if { $scrW != "" } {
+		$scrW yview scroll [ expr -1 * $sfmwheel * %D ] units
+	}
+}
+
+
+#************************************************
+# SCROLL_WHEEL_LINUX
+# Handle scroll wheel event in Linux
+#************************************************
+proc scroll_wheel_linux { delta w dir } {
+	global sfmwheel
+	
+	set scrW [ find_scrollable $w ]
+	if { $scrW != "" } {
+		$scrW yview scroll [ expr $dir * $sfmwheel ] units
+	}
+}
+
+
+#************************************************
+# FIND_SCROLLABLE
+# Find the first window over w, including itself
+# which has a vertical scrollbar
+#************************************************
+proc find_scrollable { w } {
+	for { set scrW $w } \
+		{ [ winfo exists $scrW ] && [ winfo class $scrW ] != "Toplevel" } \
+		{ set scrW [ winfo parent $scrW ] } {
+		if { [ winfo class $scrW ] in { Text Canvas Listbox } && \
+			 [ $scrW cget -yscrollcommand ] != "" } {
+			return $scrW
+		}
+	}
+	return ""
 }
 
 
@@ -1426,32 +1606,32 @@ proc scale_canvas { c type ratio } {
 # Create the canvas plotting axes and the optional grid
 #************************************************
 proc canvas_axis { c type grid hticks { y2 0 } } {
-	global hsizeP vsizeP hbordsizeP tbordsizeP vticksP axcolorP grcolorP
+	global hsizeP vsizeP hbordsizeP tbordsizeP vticksP colorsTheme
 
 	# x-axis, ticks & x-grid
-	$c create line $hbordsizeP $tbordsizeP [ expr $hbordsizeP + $hsizeP ] $tbordsizeP -width 1 -fill $axcolorP -tag p
-	$c create line $hbordsizeP [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
+	$c create line $hbordsizeP $tbordsizeP [ expr $hbordsizeP + $hsizeP ] $tbordsizeP -width 1 -fill $colorsTheme(dfg) -tag p
+	$c create line $hbordsizeP [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $colorsTheme(dfg) -tag p
 
 	if { $type == 0 || $type == 4 || $type == 5 } {
 		for { set i 0 } { $i < [ expr $hticks + 2 ] } { incr i } {
 			if { $grid && $i > 0 && $i < [ expr $hticks + 1 ] } {
-				$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + 1 ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP - 1 ] -fill $grcolorP -width 1 -tags {g p}
+				$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + 1 ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP - 1 ] -fill $colorsTheme(bg) -width 1 -tags {g p}
 			}
-			$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP + 5 ] -fill $axcolorP -width 1 -tags p
+			$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP + 5 ] -fill $colorsTheme(dfg) -width 1 -tags p
 		}
 	}
 
 	# y-axis, ticks & y-grid
-	$c create line $hbordsizeP $tbordsizeP $hbordsizeP [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
-	$c create line [ expr $hbordsizeP + $hsizeP ]  $tbordsizeP [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
+	$c create line $hbordsizeP $tbordsizeP $hbordsizeP [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $colorsTheme(dfg) -tag p
+	$c create line [ expr $hbordsizeP + $hsizeP ]  $tbordsizeP [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $colorsTheme(dfg) -tag p
 
 	for { set i 0 } { $i < [ expr $vticksP + 2 ] } { incr i } {
 		if { $grid && $i > 0 && $i < [ expr $vticksP + 1 ] } {
-			$c create line [ expr $hbordsizeP + 1 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] [ expr $hbordsizeP + $hsizeP - 1 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $grcolorP -width 1 -tags {g p}
+			$c create line [ expr $hbordsizeP + 1 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] [ expr $hbordsizeP + $hsizeP - 1 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $colorsTheme(bg) -width 1 -tags {g p}
 		}
-		$c create line [ expr $hbordsizeP - 5 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] $hbordsizeP [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $axcolorP -width 1 -tag p
+		$c create line [ expr $hbordsizeP - 5 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] $hbordsizeP [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $colorsTheme(dfg) -width 1 -tag p
 		if $y2 {
-			$c create line [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] [ expr $hbordsizeP + $hsizeP + 5 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $axcolorP -width 1 -tag p
+			$c create line [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] [ expr $hbordsizeP + $hsizeP + 5 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $colorsTheme(dfg) -width 1 -tag p
 		}
 	}
 }
@@ -1461,8 +1641,13 @@ proc canvas_axis { c type grid hticks { y2 0 } } {
 # PLOT_BARS
 # plot color filled bars
 #************************************************
-proc plot_bars { c x1 y1 x2 y2 { tags "" } { fill white } { width 1 } } {
-
+proc plot_bars { c x1 y1 x2 y2 { tags "" } { fill "" } { width 1 } } {
+	global colorsTheme
+	
+	if { $fill == "" } {
+		set fill $colorsTheme(bg)
+	}
+	
 	set size [ expr min( [ llength $x1 ], [ llength $y1 ], [ llength $x2 ], [ llength $y2 ]  ) ]
 	lappend tags bar series
 
@@ -1500,14 +1685,14 @@ proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
 		if { $xi >= 0 && $yi >= 0 } {
 			# add one more segment
 			lappend xy $xi $yi
-		} { # last point in segment?
+		} else { # last point in segment?
 			set lenxy [ llength $xy ]
 			if { $lenxy > 0 } {
 				# plot line segment/single point till now
 				if { $lenxy >= 4 } {
 					$c create line $xy -width $width -fill $fill -smooth $smoothP \
 						-splinesteps $splstepsP -tags $tags
-				} {
+				} else {
 					if { $lenxy == 2 } {
 						set xi [ lindex $xy 0 ]
 						set yi [ lindex $xy 1 ]
@@ -1529,7 +1714,7 @@ proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
 	# plot last segment, if any
 	if { [ llength $xy ] >= 4 } {
 		$c create line $xy -width $width -fill $fill -tags $tags
-	} {
+	} else {
 		if { [ llength $xy ] == 2 } {
 			set xi [ lindex $xy 0 ]
 			set yi [ lindex $xy 1 ]
@@ -1550,6 +1735,7 @@ proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
 # plot one series as a set of points on canvas
 #************************************************
 proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
+	
 	lappend tagsdots dots series
 
 	set size [ expr min( [ llength $x ], [ llength $y ] ) ]
@@ -1562,7 +1748,7 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 				# small point
 				$c create oval [ expr $xi - 1 ] [ expr $yi - 1 ] \
 					[ expr $xi + 1 ] [ expr $yi + 1 ] -fill $fill \
-					-width 0 -outline white -tags $tagsdots
+					-width 0 -outline [ $c cget -background ] -tags $tagsdots
 			} elseif { $width == 1 } {
 				# x
 				$c create line [ expr $xi + 2 ] [ expr $yi + 2 ] \
@@ -1581,7 +1767,7 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 				# filled circle
 				$c create oval [ expr $xi - $width / 2 ] [ expr $yi - $width / 2 ] \
 					[ expr $xi + $width / 2 ] [ expr $yi + $width / 2 ] -fill $fill \
-					-width 0 -outline white -tags $tagsdots
+					-width 0 -outline [ $c cget -background ] -tags $tagsdots
 			}
 		}
 	}
@@ -1593,7 +1779,7 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 # Initialize Tk canvas colors
 #************************************************
 proc init_canvas_colors { } {
-	global defcolors allcolors
+	global defcolors allcolors colorsTheme
 	set unusedcolors [ lsort $allcolors ]
 
 	# load default colors
@@ -1623,10 +1809,10 @@ proc init_canvas_colors { } {
 	# fill the rest till color 1000
 	if { $i < 1000 } {
 		for { } { $i < 1000 } { incr i } {
-			set ::c$i black
+			set ::c$i $colorsTheme(fg)
 		}
 	}
-	set ::c$i white
+	set ::c$i $colorsTheme(bg)
 
 	# fill the colors 1000-1099 with gray shades
 	for { set j 0 } { $j < 10 } { incr j } {
@@ -1634,7 +1820,7 @@ proc init_canvas_colors { } {
 			if { ! ( $j == 0 && $k == 0 ) } {
 				if { $k == 0 } {
 					set ::c$i gray$j
-				} {
+				} else {
 					set ::c$i gray$k$j
 				}
 			}

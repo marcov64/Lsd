@@ -404,8 +404,7 @@ href="#_Browse_Models_2">Browse Models</a>, <a href="#_Save_Model">Save Model</a
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US><a href="#_Compare_Models.">Compare Models</a>, <a
-href="#_TkDiff">TkDiff</a></span></p>
+</span></span><span lang=EN-US><a href="#_Compare_Models.">Compare Models</a></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
@@ -447,8 +446,8 @@ there are two main groups created: </span><span class=Cdigo><span lang=EN-US>Exa
 Models</span></span><span lang=EN-US> and </span><span class=Cdigo><span
 lang=EN-US>Work in Progress</span></span><span lang=EN-US>. In the first group
 you find several ready-to-run example models (see the <a href="model_using.html">tutorial</a>
-on how to use them). You are encouraged to save your new models inside the
-second group.</span></p>
+on how to use them). You are encouraged to save your new models inside the second
+group.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The LSD Model Browser window lists the
 models available in the current group. Models are organized in a tree of
@@ -562,29 +561,20 @@ original copy.<a name="_Compare_Models."></a></span></p>
 
 <h2><span lang=EN-US style='color:black'>Compare Models </span></h2>
 
-<p class=MsoNormal><span lang=EN-US>Use TkDiff (see <a href="#_TkDiff">below</a>)
-to compare the <a href="LSD_faqs.html#equationfile">equation files</a> from two
-<a href="LSD_faqs.html#model">LSD models</a>. This command shows the complete
-list of LSD models present in the computer. </span></p>
+<p class=MsoNormal><span lang=EN-US>Use TkDiff (or other Diff utility defined
+in </span><span class=Cdigo>default.tcl</span><span lang=EN-US>) to compare the
+<a href="LSD_faqs.html#equationfile">equation files</a> from two <a
+href="LSD_faqs.html#model">LSD models</a>. This command shows the complete list
+of LSD models present in the computer. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Users need to select the first model and
 then click on the top </span><span class=Cdigo><span lang=EN-US>Insert</span></span><span
 lang=EN-US> button. Next, select the second model and click the bottom </span><span
 class=Cdigo><span lang=EN-US>Insert</span></span><span lang=EN-US> button.
 Finally, click on </span><span class=Cdigo><span lang=EN-US>Compare</span></span><span
-lang=EN-US> to launch the TkDiff window comparing the selected models. TkDiff
-will mark the differences between the equation files of the two models.</span></p>
-
-<h2><a name="_TkDiff"></a><span lang=EN-US>TkDiff </span></h2>
-
-<p class=MsoNormal><span lang=EN-US>TkDiff can be used to compare any pair of
-text files, identifying their differences. It shows differences between two
-files, useful to compare equations' code differences in two versions of the
-same model. </span></p>
-
-<p class=MsoNormal><span lang=EN-US>User must choose the two files to be
-compared, optionally providing additional options to TkDiff (see TkDiff
-documentation for details).<a name=compmod></a><a name=newfile></a><a
+lang=EN-US> to launch the differences window comparing the selected models. The
+Diff utility marks the differences between the equation files of the two
+models.<a name="_TkDiff"></a><a name=compmod></a><a name=newfile></a><a
 name="_New_Text_File"></a></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
@@ -730,20 +720,22 @@ lang=EN-US>: the name of the subdirectory where LSD source code is installed
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Interface theme</span></b><span lang=EN-US>:
 the theme sets the colors used for all elements of LMM and LSD windows as well
-the scrollbar appearance. LSD applies different default (light/dark) themes
-according to the computer platform (Windows: </span><span class=Cdigo><span
-lang=EN-US>Vista</span></span><span lang=EN-US> / </span><span class=Cdigo><span
-lang=EN-US>Black</span></span><span lang=EN-US>, Mac: </span><span class=Cdigo><span
-lang=EN-US>Aqua</span></span><span lang=EN-US>, Linux: </span><span
-class=Cdigo><span lang=EN-US>Adwaita Light</span></span><span lang=EN-US> / </span><span
-class=Cdigo><span lang=EN-US>Adwaita Dark</span></span><span lang=EN-US>). LSD
-selects the exact default theme also considering the computer interface mode
-(light or dark) during startup. Automatic </span><span class=Cdigo>Aqua</span><span
-lang=EN-US> dark theme is available only on macOS 10.15 and later. The user may
-also change from the default themes, which are not affected by the computer
-light/dark mode. To set back to the (current) default theme, just click on the </span><span
-class=Cdigo>Default</span><span lang=EN-US> button. Theme changes are only
-applied the next time LMM and LSD are started.</span></p>
+the appearance of buttons, scrollbars, and other interface elements. LSD
+automatically switches between different default (light/dark) themes according
+to the computer platform (Windows: </span><span class=Cdigo><span lang=EN-US>Vista</span></span><span
+lang=EN-US> / </span><span class=Cdigo><span lang=EN-US>Black</span></span><span
+lang=EN-US>, Mac: </span><span class=Cdigo><span lang=EN-US>Aqua Light</span></span><span
+lang=EN-US> / </span><span class=Cdigo><span lang=EN-US>Dark</span></span><span
+lang=EN-US>, Linux: </span><span class=Cdigo><span lang=EN-US>Adwaita Light</span></span><span
+lang=EN-US> / </span><span class=Cdigo><span lang=EN-US>Dark</span></span><span
+lang=EN-US>). LSD selects the default theme considering the computer interface
+mode (light or dark) during the program startup. Automatic </span><span
+class=Cdigo><span lang=EN-US>Aqua Dark</span></span><span lang=EN-US> theme is
+available only on macOS 10.15 and later. The user may also change from the
+default themes, which are not affected by the computer current light/dark mode.
+To set back to the (current) default theme, just click on the </span><span
+class=Cdigo><span lang=EN-US>Default</span></span><span lang=EN-US> button.
+Theme changes are only applied the next time LMM and LSD are started.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
@@ -873,14 +865,14 @@ lang=FR><a href="#_De-indent"><span lang=EN-US>De-indent</span></a></span></p>
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span lang=EN-US><a href="#_Larger_Font">Larger Font</a>, <a
-href="#_Smaller_Font">Smaller Font</a>, <a href="#changefont">Font</a></span></p>
+href="#_Smaller_Font">Smaller Font</a> </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span lang=EN-US><a href="#_Syntax_Highlighting">Syntax
 Highlighting</a>, <a href="#_Wrap/Unwrap_(Ctrl+w)">Wrap/Unwrap</a>, <a
-href="#_Tab_Size">Tab Size</a>, <a href="#_Insert_LSD_Macro">Insert LSD Macro</a></span></p>
+href="#_Insert_LSD_Macro">Insert LSD Macro</a></span></p>
 
 <h2><a name="_Undo"></a><span lang=EN-US>Undo</span></h2>
 
@@ -1027,9 +1019,9 @@ next occurrence;</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Replace all</span></b><span lang=EN-US>:
-replace all instances of the searched text until the end of the text, if
-searching up, or the beginning, otherwise.</span></p>
+</span></span><b><span lang=EN-US>Replace all</span></b><span lang=EN-US>: replace
+all instances of the searched text until the end of the text, if searching up,
+or the beginning, otherwise.</span></p>
 
 <h2><a name="_Go_to_Line"></a><span lang=EN-US>Go to Line</span></h2>
 
@@ -1152,10 +1144,10 @@ easier reading.</span></p>
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><a name=LsdScript></a><a
-  name=wrap></a><a name=lfont></a><a name="_Larger_Font"></a><span lang=EN-US>&nbsp;</span><span
-  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
-  text-decoration:none'>&#9650;Top</span></a></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><a
+  name="_Larger_Font"></a><a name=lfont></a><a name=wrap></a><a name=LsdScript></a><span
+  lang=EN-US>&nbsp;</span><span style='font-size:10.0pt;color:black'><a
+  href="#top"><span style='color:red;text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -1168,6 +1160,10 @@ class=Cdigo><span lang=EN-US>Ctrl+'+'</span></span><span lang=EN-US>.</span></p>
 <p class=MsoNormal><span lang=EN-US>Increase the size of the typeface font used
 in the editor area. </span></p>
 
+<p class=MsoNormal><span lang=EN-US>This is a temporary setting. For changing
+the font settings permanently, including the typeface, please use LMM <a
+href="#_Options">Options</a>.</span></p>
+
 <h2><a name=sfont></a><a name="_Smaller_Font"></a><span lang=EN-US>Smaller Font</span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>: </span><span
@@ -1176,13 +1172,9 @@ class=Cdigo><span lang=EN-US>Ctrl+'-'</span></span><span lang=EN-US>.</span></p>
 <p class=MsoNormal><span lang=EN-US>Decrease the size of the typeface font used
 in the editor area. </span></p>
 
-<h2><a name=changefont></a><span lang=EN-US>Font</span></h2>
-
-<p class=MsoNormal><span lang=EN-US>Set the typeface family and the font size
-to use in the editor.<a name=indent></a> </span></p>
-
-<p class=MsoNormal><span lang=EN-US>This is a temporary setting. For changing
-the font settings permanently, please use LMM <a href="#_Options">Options</a>.</span></p>
+<p class=MsoNormal><a name=changefont></a><span lang=EN-US>This is a temporary
+setting. For changing the font settings permanently, including the typeface,
+please use LMM <a href="#_Options">Options</a>.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -1225,18 +1217,8 @@ the wrapping modes. The wrapping mode does not affect the contents of the text
 file, but only its appearance on the screen. This is a temporary setting. For
 changing the wrapping setting permanently, please use LMM <a href="#_Options">Options</a>.</span></p>
 
-<h2><a name="_Tab_Size"></a><span lang=EN-US>Tab Size</span></h2>
-
-<p class=MsoNormal><span lang=EN-US>Defines how many columns a tab character
-should span on screen. Tab characters are not converted to spaces.</span></p>
-
-<p class=MsoNormal><span lang=EN-US>The tab size does not affect the contents
-of the text file, but only its appearance on the screen. This is a temporary
-setting. For changing the tab size setting permanently, please use LMM <a
-href="#_Options">Options</a>.</span></p>
-
-<h2><a name="_Insert_LSD_Macro"></a><a name="select_macro"></a><span
-lang=EN-US>Insert LSD Macro</span></h2>
+<h2><a name="_Tab_Size"></a><a name="_Insert_LSD_Macro"></a><a
+name="select_macro"></a><span lang=EN-US>Insert LSD Macro</span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcuts</span></i><span lang=EN-US>: </span><span
 class=Cdigo><span lang=EN-US>Ctrl+i</span></span><span lang=EN-US> or use the
@@ -1371,11 +1353,11 @@ on it.</span></p>
 <p class=MsoNormal><span lang=EN-US>The external debugger allows the modeler to
 follow the <a href="LSD_faqs.html#simulationrun">simulation run</a>
 instruction-by-instruction. A debugger is a program which runs other programs
-in a controlled environment. When a program is run in a debugger, it is
-possible to observe in detail what it does, for example, interrupting its
-calculations and checking the values of its internal variables. The debugger
-works as if the single lines of code execute their respective commands only
-when explicitly directed to do so. </span></p>
+in a controlled environment. When a program is run in a debugger, it is possible
+to observe in detail what it does, for example, interrupting its calculations
+and checking the values of its internal variables. The debugger works as if the
+single lines of code execute their respective commands only when explicitly
+directed to do so. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Note that GDB and LLDB are <a
 href="LSD_faqs.html#c">C++</a> debuggers. Therefore, they know nothing of LSD
@@ -1400,8 +1382,8 @@ point, check the value of any variable, and make the program proceed by single
 steps. It is usually useful to focus on one Equation at a time and see the
 behavior of the program while executing it. </span></p>
 
-<p class=MsoNormal><span lang=EN-US>Below, some basic GDB commands are
-presented (LLDB commands are similar but not the same, please check the LLDB
+<p class=MsoNormal><span lang=EN-US>Below, some basic GDB commands are presented
+(LLDB commands are similar but not the same, please check the LLDB
 documentation). GDB commands are typed at its command prompt text window. For
 more information, please refer to the GDB documentation). </span></p>
 
@@ -1553,8 +1535,8 @@ clusters, allowing the processing of huge numbers of <a
 href="LSD_faqs.html#simulationrun">simulation runs</a> in parallel. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Since there is no graphical interface, the
-No Window version needs a <a href="LSD_faqs.html#modelsetting">model
-configuration file</a> (</span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
+No Window version needs a <a href="LSD_faqs.html#modelsetting">model configuration
+file</a> (</span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
 lang=EN-US> extension) already prepared using the graphical <a
 href="LSD_windows.html#browser">LSD Browser</a>. The simulation results are
 automatically stored in files (</span><span class=Cdigo><span lang=EN-US>.res</span></span><span
@@ -1629,8 +1611,8 @@ configuration file.</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US>4)<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><b><span
-lang=EN-US>Analyze the results:</span></b><span lang=EN-US> use the produced results
-files in the desired program (LSD or R).</span></p>
+lang=EN-US>Analyze the results:</span></b><span lang=EN-US> use the produced
+results files in the desired program (LSD or R).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The non-graphical LSD model program can be
 run under two different setups: single or multiple configurations. </span></p>
@@ -1647,12 +1629,13 @@ lang=EN-US> lsd_gnuNW -f XXXXX.lsd</span></span></p>
 <p class=MsoNormal><span lang=EN-US>Linux/macOS:</span><span class=Cdigo><span
 lang=EN-US> ./lsd_gnuNW -f XXXXX.lsd</span></span></p>
 
-<p class=MsoNormal><span lang=EN-US>The second setup uses multiple, sequentially-numbered
-configuration files, typically produced using LSD <a href="LSD_faqs.html#sa">sensitivity
-analysis</a> tools. The terminal command line (for a configuration named </span><span
-class=Cdigo><span lang=EN-US>XXXXX</span></span><span lang=EN-US>, the first
-sequential number set to </span><span class=Cdigo><span lang=EN-US>N</span></span><span
-lang=EN-US> and the current directory set to the model home) is:</span></p>
+<p class=MsoNormal><span lang=EN-US>The second setup uses multiple,
+sequentially-numbered configuration files, typically produced using LSD <a
+href="LSD_faqs.html#sa">sensitivity analysis</a> tools. The terminal command
+line (for a configuration named </span><span class=Cdigo><span lang=EN-US>XXXXX</span></span><span
+lang=EN-US>, the first sequential number set to </span><span class=Cdigo><span
+lang=EN-US>N</span></span><span lang=EN-US> and the current directory set to
+the model home) is:</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Windows:</span><span class=Cdigo><span
 lang=EN-US> lsd_gnuNW -f XXXXX –s N</span></span></p>
@@ -1730,8 +1713,8 @@ not exist, it is automatically created. </span></p>
 automatically shown by the <a href="LSD_windows.html#modelbrowser">LSD Model
 Browser</a> and open when a model is loaded in LMM, it is important to have at
 least the basic model information included in the beginning of this document.
-Modelers are also encouraged to include details about how to set-up and experiment
-with the model, including a self-explanatory list of the available <a
+Modelers are also encouraged to include details about how to set-up and
+experiment with the model, including a self-explanatory list of the available <a
 href="LSD_faqs.html#modelsetting">model configuration files</a>.</span></p>
 
 <h2><a name=eqution></a><a name="_Show_Equations"></a><span lang=EN-US>Show
@@ -1863,7 +1846,7 @@ the table below. </span></p>
   <p class=MsoNormal><span class=Cdigo><b>TARGET=</b></span></p>
   </td>
   <td style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>lsd_gnu</span></span><span
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>lsd</span></span><span
   lang=EN-US> (Windows, Linux)</span></p>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>LSD</span></span><span
   lang=EN-US><br>
@@ -1919,7 +1902,7 @@ the table below. </span></p>
   <p class=MsoNormal><span class=Cdigo><b>SWITCH_CC=</b></span></p>
   </td>
   <td style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-O0 -ggdb3</span></span><span
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-Og -ggdb3</span></span><span
   lang=EN-US><br>
   (debug on)</span></p>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-O3</span></span><span
@@ -1932,7 +1915,7 @@ the table below. </span></p>
   lang=EN-US> switch can be added to this entry. The default </span><span
   class=Cdigo><span lang=EN-US>-ggdb3</span></span><span lang=EN-US> option
   includes full (external) debugging information. The default </span><span
-  class=Cdigo><span lang=EN-US>-O0</span></span><span lang=EN-US> prevents code
+  class=Cdigo><span lang=EN-US>-Og</span></span><span lang=EN-US> prevents code
   optimization to ensure a better debugging experience. Options </span><span
   class=Cdigo><span lang=EN-US>-O3</span></span><span lang=EN-US> turns on full
   compiler optimization, slowing down compiler speed but generating slightly
@@ -2096,7 +2079,7 @@ installed in case of Linux computers) </span></p>
   version number (1 digit).</span></p>
   <p class=MsoNormal><span lang=EN-US style='color:black'>In case of errors in
   Linux like: <br>
-  </span><span class=Cdigo><span lang=EN-US>cannot open –ltcl8.X: No such file
+  </span><span class=Cdigo><span lang=EN-US>cannot open –ltcl8.6: No such file
   or directory <br>
   </span></span><span class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;
   color:black'>try</span></span><span lang=EN-US style='color:black'> a
@@ -2457,10 +2440,10 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 <p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>: </span><span
 class=Cdigo><span lang=EN-US>F1</span></span><span lang=EN-US>.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Access the <a href="#_top">LMM manual</a> (this
-document) in the configured web browser. If the browser is already open, the
-help page may show as an additional window or tab, according to the web browser
-configuration.</span></p>
+<p class=MsoNormal><span lang=EN-US>Access the <a href="#_top">LMM manual</a>
+(this document) in the configured web browser. If the browser is already open,
+the help page may show as an additional window or tab, according to the web
+browser configuration.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>From any help page you can navigate the
 entire LSD documentation using the top navigation bar.</span></p>

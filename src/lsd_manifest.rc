@@ -29,7 +29,7 @@ BEGIN
     BLOCK "040904E4"
     BEGIN
       VALUE "CompanyName", "Marco Valente & Marcelo C. Pereira"
-      VALUE "FileDescription", "LSD Browser"
+      VALUE "FileDescription", "LSD"
       VALUE "FileVersion", "7.3"
       VALUE "InternalName", "LSD"
       VALUE "LegalCopyright", "Copyright Marco Valente and Marcelo C. Pereira"

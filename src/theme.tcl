@@ -96,22 +96,54 @@ proc updateTheme { } {
 # Redefine standard styles when necessary
 #************************************************
 proc setstyles { } {
-	global lsdTheme themeTable small_character
+	global lsdTheme themeTable colorsTheme fonttype dim_character small_character
 	
+	# toolbutton widget styles
 	if { [ array names themeTable -exact $lsdTheme ] != "" } {
 		set tbpad [ lindex $themeTable($lsdTheme) 4 ]
 	} else {
 		set tbpad 3
 	}
-	ttk::style configure Toolbutton -padding "$tbpad $tbpad" 
+	ttk::style configure Toolbutton -anchor center -padding "$tbpad $tbpad"
+	ttk::style configure bold.Toolbutton \
+		-font [ font create -weight bold ]
+	ttk::style configure hlBold.Toolbutton -anchor w -foreground $colorsTheme(hl) \
+		-font [ font create -size $small_character -weight bold ]
+	ttk::style map hlBold.Toolbutton -foreground [ list disabled $colorsTheme(hl) ] \
+		-background [ list disabled [ ttk::style lookup Toolbutton -background !disabled ] ] \
+		-font [ list disabled [ font create -size $small_character ] ] 
 	
-	ttk::style configure small.TText -font [ font create -size $small_character ]
+	# button widget styles
+	ttk::style configure center.TButton -anchor center -width -1
+	ttk::style configure small.TButton -padding 0 \
+		-font [ font create -size $small_character ]
+
+	# entry widget styles
+	ttk::style configure TEntry -justify center
+
+	# text widget styles (manually managed in ttk::text below)
+	ttk::style configure TText \
+		-font TkTextFont
+	ttk::style configure boldSmallProp.TText \
+		-font [ font create -family TkDefaultFont -size $small_character -weight bold ]
+	ttk::style configure fixed.TText \
+		-font [ font create -family "$fonttype" -size $dim_character ]
+	ttk::style configure smallFixed.TText \
+		-font [ font create -family "$fonttype" -size $small_character ]
 	
-	ttk::style configure red.TLabel -foreground red
-	ttk::style configure bold.TLabel -font [ font create -weight bold ]
-	ttk::style configure boldSmall.TLabel -font [ font create -size $small_character -weight bold ]
-	ttk::style configure redBoldSmall.TLabel -foreground red -font [ font create -size $small_character -weight bold ]
-	ttk::style configure graySmall.TLabel -foreground gray -font [ font create -size $small_character ]
+	# label widget styles
+	ttk::style configure TLabel -anchor center
+	ttk::style configure hl.TLabel -foreground $colorsTheme(hl)
+	ttk::style configure bold.TLabel \
+		-font [ font create -weight bold ]
+	ttk::style configure hlBold.TLabel -foreground $colorsTheme(hl) \
+		-font [ font create -weight bold ]
+	ttk::style configure boldSmall.TLabel \
+		-font [ font create -size $small_character -weight bold ]
+	ttk::style configure hlBoldSmall.TLabel -foreground $colorsTheme(hl) \
+		-font [ font create -size $small_character -weight bold ]
+	ttk::style configure graySmall.TLabel -foreground gray \
+		-font [ font create -size $small_character ]
 }
 
 
@@ -133,11 +165,22 @@ proc setcolor { w args } {
 
 
 #************************************************
+# SETTAB
+# Adjust tab size according to font type and size
+#************************************************
+proc settab { w size style } {
+	set font [ ttk::style lookup $style -font ]
+	set tabwidth "[ expr { $size * [ font measure "$font" 0 ] } ] left"
+	$w conf -font "$font" -tabs $tabwidth -tabstyle wordprocessor
+}
+
+
+#************************************************
 # TTK::TEXT
 # Create a ttk-like themed text widget
 #************************************************
 proc ttk::text { w args } {
-	array set options [ concat { -entry 0 -dark 0 -style "" } $args ]
+	array set options [ concat { -entry 1 -dark 0 -style "" } $args ]
 	set entry $options(-entry)
 	set dark $options(-dark)
 	set style $options(-style)
@@ -148,22 +191,27 @@ proc ttk::text { w args } {
 	::text $w {*}[ array get options ]
 	
 	$w configure -relief flat -borderwidth 0
-	
-	if [ string equal -style small.TText ] {
-		$w configure -font [ ttk::style lookup small.TText -font ]
+
+	if { $style != "" } {
+		catch { $w configure -font [ ttk::style lookup $style -font ] }
 	}
 	
 	if { $entry } {
+		$w configure -undo 1
 		if { $dark } {
 			setcolor $w -background dbg -foreground fg
 		} else {
 			setcolor $w -background ebg -foreground efg
 		}
-	} elseif { $dark } {
-		setcolor $w -background bg -foreground fg
 	} else {
-		setcolor $w -background bg -foreground efg
+		$w configure -cursor "" -insertofftime 1 -insertontime 0
+		if { $dark } {
+			setcolor $w -background bg -foreground fg
+		} else {
+			setcolor $w -background bg -foreground efg
+		}
 	}
+	
 	setcolor $w -selectbackground sbg \
 				-selectforeground sfg \
 				-inactiveselectbackground isbg \
@@ -189,8 +237,9 @@ proc ttk::listbox { w args } {
 	if { $dark } {
 		setcolor $w -background dbg
 	} else {
-		setcolor $w -background bg
+		setcolor $w -background ebg
 	}
+	
 	setcolor $w -foreground fg \
 				-selectbackground sbg \
 				-selectforeground sfg \
@@ -219,6 +268,43 @@ proc ttk::menu { w args } {
 
 
 #************************************************
+# TTK::CANVAS
+# Create a ttk-like themed canvas widget
+#************************************************
+proc ttk::canvas { w args } {
+	array set options [ concat { -entry 1 -dark 0 } $args ]
+	set entry $options(-entry)
+	set dark $options(-dark)
+	array unset options "-entry"
+	array unset options "-dark"
+
+	::canvas $w {*}[ array get options ]
+
+	$w configure -relief flat -borderwidth 0 -highlightthickness 0
+	
+	if { $entry } {
+		if { $dark } {
+			setcolor $w -background dbg
+		} else {
+			setcolor $w -background ebg
+		}
+	} else {
+		if { $dark } {
+			setcolor $w -background bg
+		} else {
+			setcolor $w -background bg
+		}
+	}
+	
+	setcolor $w -selectbackground sbg \
+				-selectforeground sfg \
+				-highlightcolor hc \
+				-highlightbackground bg \
+				-insertbackground fg
+}
+
+
+#************************************************
 # TTK::MESSAGEBOX
 # Create a ttk-like themed message box
 #************************************************
@@ -236,7 +322,7 @@ proc ttk::messageBox { args } {
 	
 	array set options [ concat { -default "" -detail "" -icon info -message "" -parent . -title "" -type ok } $args ]
 
-	set name [ concat .msgBox_ [ expr int( rand( ) * 10000 ) ] ]
+	set name [ string cat .msgBox_ [ expr int( rand( ) * 10000 ) ] ]
 	
 	foreach { option parameter } [ array get options ] {
 		switch $option {
@@ -255,7 +341,7 @@ proc ttk::messageBox { args } {
 			-parent {
 				if { $parameter != "." } {
 					if [ winfo exists $parameter ] {
-						set name ${parameter}.${name}
+						set name ${parameter}${name}
 					}
 				}
 			} 
@@ -370,7 +456,15 @@ proc ttk::messageBox_draw { name icon title parent message detail type default }
 	pack $name.bottom -side right
 	
 	showtop $name centerW
-	focus  $name.bottom.$default
+	
+	if [ winfo exists $name.bottom.$default ] {
+		$name.bottom.$default configure -default active
+		mousewarpto $name.bottom.$default
+	}
+	
+	if [ string equal $icon error ] {
+		bell
+	}
 	
 	vwait ttk::msgBoxValue
 	return $ttk::msgBoxValue

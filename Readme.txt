@@ -245,7 +245,7 @@ IMPORTANT: if you modified the makefile to compile LMM, the same changes need to
 5.1 Cygwin compiler installation (optional)
 *******************************************
 
-The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64"). If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, four non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Lastly, Cygwin must be added to the PATH environment variable (not done by the installer).
+The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64"). If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, four non-default packages are REQUIRED by LSD (gcc-core, mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Lastly, Cygwin must be added to the PATH environment variable (not done by the installer).
 
 Step-by-step procedure to install the Cygwing 64-bit compiler (an internet connection is required):
 
@@ -255,7 +255,7 @@ Step-by-step procedure to install the Cygwing 64-bit compiler (an internet conne
 
 3. When the installer opens, choose "Install from Internet", accept the proposed root install directory (C:\cygwin64), press "Next", opt for installing for "All Users", press "Next", accept the proposed local package directory (C:\cygwin64), "Next" again, select "Direct Connection", press "Next", choose any of the offered download sites (one closer to your location will just provide faster downloads), and "Next".
 
-4. When the "Select Packages" window opens, click on the View option list, choose "Full" (to see the list with all packages), type the name of each required package in the Search box, find the EXACT name in the packages list (do not use partial matches), and on the "New" column change the option from "Skip" to the latest available version (the one with the higher number). Repeat this process for each of the five required packages: "mingw64-x86_64-gcc-g++", "mingw64-x86_64-zlib", "make", "gdb", and "multitail".
+4. When the "Select Packages" window opens, click on the View option list, choose "Full" (to see the list with all packages), type the name of each required package in the Search box, find the EXACT name in the packages list (do not use partial matches), and on the "New" column change the option from "Skip" to the latest available version (the one with the higher number). Repeat this process for each of the six required packages: "gcc-core", "mingw64-x86_64-gcc-g++", "mingw64-x86_64-zlib", "make", "gdb", and "multitail".
 
 5. When all the required packages are marked for download, choose "Next", accept the proposed changes and proceed to download and install Cygwin. Please wait until the installer finishes (it may take a while) and close the installer when requested.
 

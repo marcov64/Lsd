@@ -856,8 +856,8 @@ void unload_configuration ( bool full )
 			cmd( "cd \"$path\"" );
 		
 		cmd( "set listfocus 1; set itemfocus 0" ); 	// point for first var in listbox
-		strcpy( lastObj, "" );			// disable last object for reload
-		redrawRoot = true;				// force browser redraw
+		strcpy( lastObj, "" );					// disable last object for reload
+		redrawRoot = redrawStruc = true;		// force browser/structure redraw
 #endif
 	}
 }
@@ -1077,23 +1077,23 @@ int load_sensitivity( FILE *f )
 	// error handling
 	error1:
 		if ( cv != NULL )
-			cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Invalid lag selected\" -detail \"Variable '%s' has no lags set.\"", lab );
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid lag selected\" -detail \"Variable '%s' has no lags set.\"", lab );
 		i = 1;
 		goto error;
 	error2:
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Invalid range\" -detail \"Element '%s' has less than two values to test.\"", lab );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid range\" -detail \"Element '%s' has less than two values to test.\"", lab );
 		i = 2;
 		goto error;
 	error3:
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Invalid element type\" -detail \"Element '%s' has an invalid value set.\"", lab );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid element type\" -detail \"Element '%s' has an invalid value set.\"", lab );
 		i = 3;
 		goto error;
 	error4:
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Missing separator\" -detail \"Element '%s' has no separator character (':').\"", lab );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Missing separator\" -detail \"Element '%s' has no separator character (':').\"", lab );
 		i = 4;
 		goto error;
 	error5:
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Invalid range value\" -detail \"Element '%s' has non-numeric range values.\"", lab );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid range value\" -detail \"Element '%s' has non-numeric range values.\"", lab );
 		i = 5;
 		goto error;
 		

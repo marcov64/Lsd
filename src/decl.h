@@ -56,14 +56,13 @@ Global definitions among all LSD C++ modules
 #include <unordered_set>
 #include <chrono>
 
-
-// comment the next line to disable parallel mode (multi-threading)
-#define PARALLEL_MODE
-
 // Tcl/Tk for graphical version (not no-window version)
 #ifndef NO_WINDOW
 #include <tk.h>
 #endif
+
+// comment the next line to disable parallel mode (multi-threading)
+#define PARALLEL_MODE
 
 // disable code that make gdb debugging harder
 #ifdef DEBUG_MODE
@@ -116,6 +115,13 @@ Global definitions among all LSD C++ modules
 #endif
 #define NaN NAN
 
+// hardware random generator present?
+#ifdef __RDSEED__
+#define HW_RAND_GEN true
+#else
+#define HW_RAND_GEN false
+#endif
+
 // access permissions in Linux/Mac
 #ifndef ACCESSPERMS
 #define ACCESSPERMS 0777 
@@ -123,12 +129,6 @@ Global definitions among all LSD C++ modules
 
 // Choose directory/file separator
 #define foldersep( dir ) ( dir[ 0 ] == '\0' ? "" : "/" )
-
-// define the base pseudo random number generator
-#ifndef RND
-double ran1( long *idum_loc = NULL );
-#define RND ( ran1( ) )
-#endif
 
 // platform codes
 #define LINUX	1
@@ -547,6 +547,7 @@ double paretocdf( double mu, double alpha, double x );
 double poisson( double m );
 double poissoncdf( double lambda, double k );			// poisson cumulative distribution function
 double read_lattice( double line, double col );
+double ran1( long *unused = 0 );
 double round( double r );
 double round_digits( double value, int digits );
 double save_lattice( const char fname[ ] = "lattice" );
@@ -564,6 +565,7 @@ void msleep( unsigned msec = 1000 );					// sleep process for milliseconds
 void plog( char const *msg, char const *tag = "", ... );
 void results_alt_path( const char * );  				// change where results are saved.
 void set_fast( int level );								// enable fast mode
+void *set_random( int gen );							// set random generator
 
 
 // global variables (visible to the users)
@@ -584,7 +586,6 @@ extern int fast_mode;
 extern int max_step;
 extern int platform;					// OS platform (1=Linux, 2=Mac, 3=Windows)
 extern int quit;
-extern int ran_gen;						// pseudo-random number generator to use (1-5) )
 extern int sim_num;
 extern int t;
 extern unsigned seed;
@@ -624,6 +625,7 @@ bool search_parallel( object *r );
 bool sort_listbox( int box, int order, object *r );
 bool unsaved_change( bool );
 bool unsaved_change( void );
+bool valid_label( const char *lab );
 char *NOLH_valid_tables( int k, char* ch );
 char *clean_file( char * );
 char *clean_path( char * );
@@ -643,7 +645,6 @@ int load_configuration( bool reload, bool quick = false );
 int load_sensitivity( FILE *f );
 int lsdmain( int argn, char **argv );
 int min_hborder( int *choice, int pdigits, double miny, double maxy );
-int my_strcmp( char *a, char *b );
 int num_sensitivity_variables( sense *rsens );
 int rnd_int( int min, int max );
 int shrink_gnufile( void );
@@ -810,6 +811,7 @@ void unwind_stack( void );
 void update_bounds( void );
 void update_lmm_options( void );
 void update_model_info( void );
+void warn_distr( int *errCnt, bool *stopErr, const char *distr, const char *msg );
 void wipe_out( object *d );
 void write_list( FILE *frep, object *root, int flag_all, char const *prefix );
 void write_obj( object *r, FILE *frep );
@@ -835,6 +837,7 @@ extern bool non_var;			// flag to indicate INTERACT macro condition
 extern bool on_bar;				// flag to indicate bar is being draw in log window
 extern bool parallel_mode;		// parallel mode (multithreading) status
 extern bool redrawRoot;			// control for redrawing root window (.)
+extern bool redrawStruc;		// control for redrawing model structure window
 extern bool running;			// simulation is running
 extern bool scrollB;			// scroll check box state in current runtime plot
 extern bool struct_loaded;		// a valid configuration file is loaded
@@ -890,6 +893,7 @@ extern int wr_warn_cnt;			// invalid write operations warning counter
 extern long nodesSerial;		// network node serial number global counter
 extern lsdstack *stacklog;		// LSD stack
 extern map< string, profile > prof;// set of saved profiling times
+extern mt19937 mt32;			// Mersenne-Twister 32 bits generator
 extern object *blueprint;   	// LSD blueprint (effective model in use )
 extern object *currObj;			// pointer to current object in browser
 extern object *wait_delete;		// LSD object waiting for deletion
@@ -897,6 +901,7 @@ extern o_setT obj_list;			// list with all existing LSD objects
 extern sense *rsense;       	// LSD sensitivity analysis structure
 extern variable *cemetery;  	// LSD saved data from deleted objects
 extern variable *last_cemetery;	// LSD last saved data from deleted objects
+extern void *random_engine;		// current random number generator engine
 
 // constant string arrays
 extern const char *lmm_options[ ];

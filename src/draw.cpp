@@ -55,61 +55,60 @@ void show_graph( object *t )
 		return;
 	}
 	
-	cmd( "set g .str" );
 	for ( top = t; top->up != NULL; top = top->up );
 
-	cmd( "set strExist [ winfo exists $g ]" );
+	cmd( "set strExist [ winfo exists .str ]" );
 	if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only if needed
 	{
-		cmd( "newtop $g \"\" { set strWindowOn 0; set choice 70 } \"\"" );
-		cmd( "wm transient $g ." );
-		cmd( "sizetop $g" );
+		cmd( "newtop .str \"\" { set strWindowOn 0; set choice 70 } \"\"" );
+		cmd( "wm transient .str ." );
+		cmd( "sizetop .str" );
 	}
 	else
-		cmd( "destroy $g.f" );										// or just recreate canvas
+		cmd( "destroy .str.f" );										// or just recreate canvas
 
-	cmd( "wm title $g \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
+	cmd( "wm title .str \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
 	
-	cmd( "frame $g.f" );
-	cmd( "canvas $g.f.c -xscrollincrement 1" );
-	cmd( "pack $g.f.c -expand yes -fill both" );
-	cmd( "pack $g.f -expand yes -fill both" );
+	cmd( "ttk::frame .str.f" );
+	cmd( "ttk::canvas .str.f.c -xscrollincrement 1 -entry 0 -dark $darkTheme" );
+	cmd( "pack .str.f.c -expand yes -fill both" );
+	cmd( "pack .str.f -expand yes -fill both" );
 
-	cmd( "showtop $g current yes yes no 0 0 b" );
+	cmd( "showtop .str current yes yes no 0 0 b" );
 	
 	draw_obj( top, t );
 	
-	cmd( "set hrsizeM [ winfo width $g ]" );
-	cmd( "set vrsizeM [ winfo height $g ]" );
-	cmd( "$g.f.c xview scroll [ expr - int ( $hrsizeM / 2 ) ] units" );
+	cmd( "set hrsizeM [ winfo width .str ]" );
+	cmd( "set vrsizeM [ winfo height .str ]" );
+	cmd( ".str.f.c xview scroll [ expr - int ( $hrsizeM / 2 ) ] units" );
 	
 	draw_buttons( );
 	
-	cmd( "bind $g.f.c <Configure> { if { $hrsizeM != [ winfo width .str ] || $vrsizeM != [ winfo height .str ] } { set choice_g 70 } }" );
-	cmd( "bind $g.f.c <Button-1> { if [ info exists res_g ] { destroy .list; set choice_g 24 } }" );
-	cmd( "bind $g.f.c <Button-2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup .str.f.c.v %%X %%Y } }" );
-	cmd( "bind $g.f.c <Button-3> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup .str.f.c.v %%X %%Y } }" );
+	cmd( "bind .str.f.c <Configure> { if { $hrsizeM != [ winfo width .str ] || $vrsizeM != [ winfo height .str ] } { set choice_g 70 } }" );
+	cmd( "bind .str.f.c <Button-1> { if [ info exists res_g ] { destroy .list; set choice_g 24 } }" );
+	cmd( "bind .str.f.c <Button-2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup .str.f.c.v %%X %%Y } }" );
+	cmd( "bind .str.f.c <Button-3> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup .str.f.c.v %%X %%Y } }" );
 
-	cmd( "menu $g.f.c.v -tearoff 0" );
-	cmd( "$g.f.c.v add command -label \"Make Current\" -command { set choice 4 }" );
-	cmd( "$g.f.c.v add command -label \"Insert Parent\" -command { set choice 32 }" );
-	cmd( "$g.f.c.v add separator" );
-	cmd( "$g.f.c.v add command -label Change -command { set choice 6 }" );
-	cmd( "$g.f.c.v add command -label Rename -command { set choice 83 }" );
-	cmd( "$g.f.c.v add command -label Number -command { set choice 33 }" );
-	cmd( "$g.f.c.v add command -label Delete -command { set choice 74 }" );
-	cmd( "$g.f.c.v add separator" );
-	cmd( "$g.f.c.v add cascade -label Add -menu $g.f.c.v.a" );
-	cmd( "$g.f.c.v add separator" );
-	cmd( "$g.f.c.v add command -label \"Initial Values\" -command { set choice 21 }" );
-	cmd( "$g.f.c.v add command -label \"Browse Data\" -command { set choice 34 }" );
-	cmd( "menu $g.f.c.v.a -tearoff 0" );
-	cmd( "$g.f.c.v.a add command -label Variable -command { set choice 2; set param 0 }" );
-	cmd( "$g.f.c.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
-	cmd( "$g.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
-	cmd( "$g.f.c.v.a add command -label Object -command { set choice 3 }" );
+	cmd( "ttk::menu .str.f.c.v -tearoff 0" );
+	cmd( ".str.f.c.v add command -label \"Make Current\" -command { set choice 4 }" );
+	cmd( ".str.f.c.v add command -label \"Insert Parent\" -command { set choice 32 }" );
+	cmd( ".str.f.c.v add separator" );
+	cmd( ".str.f.c.v add command -label Change -command { set choice 6 }" );
+	cmd( ".str.f.c.v add command -label Rename -command { set choice 83 }" );
+	cmd( ".str.f.c.v add command -label Number -command { set choice 33 }" );
+	cmd( ".str.f.c.v add command -label Delete -command { set choice 74 }" );
+	cmd( ".str.f.c.v add separator" );
+	cmd( ".str.f.c.v add cascade -label Add -menu .str.f.c.v.a" );
+	cmd( ".str.f.c.v add separator" );
+	cmd( ".str.f.c.v add command -label \"Initial Values\" -command { set choice 21 }" );
+	cmd( ".str.f.c.v add command -label \"Browse Data\" -command { set choice 34 }" );
+	cmd( "ttk::menu .str.f.c.v.a -tearoff 0" );
+	cmd( ".str.f.c.v.a add command -label Variable -command { set choice 2; set param 0 }" );
+	cmd( ".str.f.c.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
+	cmd( ".str.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
+	cmd( ".str.f.c.v.a add command -label Object -command { set choice 3 }" );
 
-	set_shortcuts( "$g", "graphrep.html" );
+	set_shortcuts( ".str", "graphrep.html" );
 
 	cmd( "update" );
 }
@@ -120,11 +119,11 @@ DRAW_BUTTONS
 ****************************************************/
 void draw_buttons( void )
 {
-	cmd( "set n [ scan [ $g.f.c bbox all ] \"%%d %%d %%d %%d\" x1 y1 x2 y2 ]" );
-	cmd( "set cx1 [ $g.f.c canvasx 0 ]" );
-	cmd( "set cy1 [ $g.f.c canvasy 0 ]" );
-	cmd( "set cx2 [ $g.f.c canvasx [ winfo width $g ] ]" );
-	cmd( "set cy2 [ $g.f.c canvasy [ winfo height $g ] ]" );
+	cmd( "set n [ scan [ .str.f.c bbox all ] \"%%d %%d %%d %%d\" x1 y1 x2 y2 ]" );
+	cmd( "set cx1 [ .str.f.c canvasx 0 ]" );
+	cmd( "set cy1 [ .str.f.c canvasy 0 ]" );
+	cmd( "set cx2 [ .str.f.c canvasx [ winfo width .str ] ]" );
+	cmd( "set cy2 [ .str.f.c canvasy [ winfo height .str ] ]" );
 	
 	cmd( "if { $n == 4 } { \
 			set hratioM [ expr ( $cx2 - $cx1 ) / ( $x2 - $x1 + 2 * $borderM ) ]; \
@@ -134,43 +133,43 @@ void draw_buttons( void )
 			set vratioM 1 \
 		}" );
 	
-	cmd( "button $g.f.c.hplus -text \"\u25B6\" -width $bsizeM -height 1 -command { \
+	cmd( "ttk::button .str.f.c.hplus -text \"\u25B6\" -width 2 -style bold.Toolbutton -command { \
 			set hfactM [ round_N [ expr $hfactM + $rstepM ] 2 ]; \
 			set choice_g 70 \
 		}" );
-	cmd( "button $g.f.c.hminus -text \"\u25C0\" -width $bsizeM -height 1 -command { \
+	cmd( "ttk::button .str.f.c.hminus -text \"\u25C0\" -width 2 -style bold.Toolbutton -command { \
 			set hfactM [ round_N [ expr max( [ expr $hfactM - $rstepM ], $hfactMmin ) ] 2 ]; \
 			set choice_g 70 \
 		}" );
-	cmd( "button $g.f.c.vplus -text \"\u25BC\" -width $bsizeM -height 1 -command { \
+	cmd( "ttk::button .str.f.c.vplus -text \"\u25BC\" -width 2 -style Toolbutton -command { \
 			set vfactM [ round_N [ expr $vfactM + $rstepM ] 2 ]; \
 			set choice_g 70 \
 		}" );
-	cmd( "button $g.f.c.vminus -text \"\u25B2\" -width $bsizeM -height 1 -command { \
+	cmd( "ttk::button .str.f.c.vminus -text \"\u25B2\" -width 2 -style Toolbutton -command { \
 			set vfactM [ round_N [ expr max( [ expr $vfactM - $rstepM ], $vfactMmin ) ] 2 ]; \
 			set choice_g 70 \
 		}" );
-	cmd( "button $g.f.c.auto -text \"A\" -width $bsizeM -height 1 -command { \
+	cmd( "ttk::button .str.f.c.auto -text \"A\" -width 2 -style bold.Toolbutton -command { \
 			set hfactM [ round_N [ expr $hfactM * $hratioM ] 2 ]; \
 			set vfactM [ round_N [ expr $vfactM * $vratioM ] 2 ]; \
 			set choice_g 70 \
 		}" );
 		
-	cmd( "bind $g <Control-plus> { invoke .str.f.c.hplus }" );
-	cmd( "bind $g <Control-minus> { invoke .str.f.c.hminus }" );
-	cmd( "bind $g <Alt-plus> { invoke .str.f.c.vplus }" );
-	cmd( "bind $g <Alt-minus> { invoke .str.f.c.vminus }" );
-	cmd( "bind $g <Control-a> { invoke .str.f.c.auto }; bind $g <Control-A> { invoke .str.f.c.auto }" );
-	cmd( "bind $g <Alt-a> { invoke .str.f.c.auto }; bind $g <Alt-A> { invoke .str.f.c.auto }" );
+	cmd( "bind .str <Control-plus> { invoke .str.f.c.hplus }" );
+	cmd( "bind .str <Control-minus> { invoke .str.f.c.hminus }" );
+	cmd( "bind .str <Alt-plus> { invoke .str.f.c.vplus }" );
+	cmd( "bind .str <Alt-minus> { invoke .str.f.c.vminus }" );
+	cmd( "bind .str <Control-a> { invoke .str.f.c.auto }; bind .str <Control-A> { invoke .str.f.c.auto }" );
+	cmd( "bind .str <Alt-a> { invoke .str.f.c.auto }; bind .str <Alt-A> { invoke .str.f.c.auto }" );
 		
 	cmd( "set colM [ expr $cx2 - $borderM - $borderMadj ]" );
 	cmd( "set rowM [ expr $cy2 - $borderM ]" );
 	
-	cmd( "$g.f.c create window $colM $rowM -window $g.f.c.auto" );
-	cmd( "$g.f.c create window [ expr $colM - $bhstepM ] $rowM -window $g.f.c.hplus" );
-	cmd( "$g.f.c create window [ expr $colM - 2 * $bhstepM ] $rowM -window $g.f.c.hminus" );
-	cmd( "$g.f.c create window $colM [ expr $rowM - $bvstepM ] -window $g.f.c.vplus" );
-	cmd( "$g.f.c create window $colM [ expr $rowM - 2 * $bvstepM ] -window $g.f.c.vminus" );
+	cmd( ".str.f.c create window $colM $rowM -window .str.f.c.auto" );
+	cmd( ".str.f.c create window [ expr $colM - $bhstepM ] $rowM -window .str.f.c.hplus" );
+	cmd( ".str.f.c create window [ expr $colM - 2 * $bhstepM ] $rowM -window .str.f.c.hminus" );
+	cmd( ".str.f.c create window $colM [ expr $rowM - $bvstepM ] -window .str.f.c.vplus" );
+	cmd( ".str.f.c create window $colM [ expr $rowM - 2 * $bvstepM ] -window .str.f.c.vminus" );
 }
 
 
@@ -313,7 +312,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 	}
 	else
 	{
-		cmd( "$g.f.c delete all" );
+		cmd( ".str.f.c delete all" );
 		get_int( "borderM", &level );
 		center = 0;
 	}
@@ -412,7 +411,7 @@ PUT_NODE
 ****************************************************/
 void put_node( int x, int y, char *str, bool sel )
 {
-	cmd( "$g.f.c create oval [ expr %d - $nsizeM / 2 ] [ expr %d + $vmarginM - $nsizeM / 2 ] [ expr %d + $nsizeM / 2 ] [ expr %d + $vmarginM + $nsizeM / 2 ]  -fill $%s -outline $lcolorM -tags %s", x, y, x, y, sel ? "ncolorMsel" : "ncolorM", str );
+	cmd( ".str.f.c create oval [ expr %d - $nsizeM / 2 ] [ expr %d + $vmarginM - $nsizeM / 2 ] [ expr %d + $nsizeM / 2 ] [ expr %d + $vmarginM + $nsizeM / 2 ]  -fill $colorsTheme(%s) -outline $colorsTheme(dfg) -tags %s", x, y, x, y, sel ? "hc" : "sfg", str );
 }
 
 
@@ -421,7 +420,7 @@ PUT_LINE
 ****************************************************/
 void put_line( int x1, int y1, int x2 )
 {
-    cmd( "$g.f.c create line %d [ expr round ( %d - $vstepM * $vfactM + $vmarginM + $nsizeM / 2 ) ] %d [ expr round ( %d + $nsizeM / 2 ) ] -fill $lcolorM", x1, y1, x2, y1 );
+    cmd( ".str.f.c create line %d [ expr round ( %d - $vstepM * $vfactM + $vmarginM + $nsizeM / 2 ) ] %d [ expr round ( %d + $nsizeM / 2 ) ] -fill $colorsTheme(dfg)", x1, y1, x2, y1 );
 }
 
 
@@ -430,15 +429,36 @@ PUT_TEXT
 ****************************************************/
 void put_text( char *str, char *n, int x, int y, char *str2 )
 {
-	cmd( "$g.f.c create text %d %d -text \"%s\" -fill $tcolorM -tags %s", x, y - 1, str, str2 );
+	cmd( ".str.f.c create text %d %d -text \"%s\" -fill $colorsTheme(hl) -tags %s", x, y - 1, str, str2 );
 
 	// text for node numerosity (handle single "1" differently to displace from line)
 	if ( ! strcmp( n, "1" ) )
-		cmd( "$g.f.c create text [ expr %d - 2 ] [ expr %d + 2 * $vmarginM + 1 ] -text \"%s\" -tags %s", x, y, n, str2 );
+		cmd( ".str.f.c create text [ expr %d - 2 ] [ expr %d + 2 * $vmarginM + 1 ] -text \"%s\" -fill $colorsTheme(fg) -tags %s", x, y, n, str2 );
 	else
-		cmd( "$g.f.c create text %d [ expr %d + 2 * $vmarginM + 1 ] -text \"%s\" -tags %s", x, y, n, str2 );
+		cmd( ".str.f.c create text %d [ expr %d + 2 * $vmarginM + 1 ] -text \"%s\" -fill $colorsTheme(fg) -tags %s", x, y, n, str2 );
 
-	cmd( "$g.f.c bind %s <Enter> { set res_g %s; if [ winfo exists .list ] { destroy .list }; toplevel .list; wm transient .list $g; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; frame .list.h; label .list.h.l -text \"Object:\"; label .list.h.n -fg red -text \"%s\"; pack .list.h.l .list.h.n -side left -padx 2; label .list.l -text \"$list_%s\" -justify left; pack .list.h .list.l; align .list $g }", str2, str2, str2, str2 );
+	cmd( ".str.f.c bind %s <Enter> { \
+			set res_g %s; \
+			if [ winfo exists .list ] { \
+				destroy .list \
+			}; \
+			toplevel .list -colormap .str -background $colorsTheme(bg); \
+			wm transient .list .str; \
+			wm title .list \"\"; \
+			wm protocol .list WM_DELETE_WINDOW { }; \
+			ttk::frame .list.h; \
+			ttk::label .list.h.l -text \"Object:\"; \
+			ttk::label .list.h.n -style hl.TLabel -text \"%s\"; \
+			pack .list.h.l .list.h.n -side left -padx 2; \
+			ttk::label .list.l -text \"$list_%s\" -justify left; \
+			pack .list.h .list.l; \
+			align .list .str \
+		}", str2, str2, str2, str2 );
 
-	cmd( "$g.f.c bind %s <Leave> { if [ info exists res_g ] { unset res_g }; destroy .list}", str2 );
+	cmd( ".str.f.c bind %s <Leave> { \
+			if [ info exists res_g ] { \
+				unset res_g \
+			}; \
+			destroy .list \
+		}", str2 );
 }

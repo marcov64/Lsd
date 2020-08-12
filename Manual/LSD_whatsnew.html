@@ -114,6 +114,31 @@ open.</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Interface improvements</span></b><span
+lang=EN-US>. Several small usability improvements. Tabbed interface for <a
+href="runtime.html">Run-time</a> and <a href="menudata_res.html">Analysis of
+Results</a> plot windows. Quick-search keys on all list boxes. Improvements to
+the </span><span class=Cdigo><a href="menudata_init.html"><span lang=EN-US>Data&gt;Initial
+Values</span></a></span><span lang=EN-US> and </span><span class=Cdigo><span
+lang=EN-US><a href="menudata_objn.html">Data&gt;Number of Objects</a></span></span><span
+lang=EN-US> windows. Mouse snapping to default buttons (optional).</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Support for true random number generator</span></b><span
+lang=EN-US>. If the hardware offers a truly random, non-deterministic random
+number generator, LSD can use it to all available <a
+href="LSD_macros.html#randomdraw">random draw types</a>. This is NOT the
+default simulation configuration, however, the Macro </span><span class=Cdigo><span
+lang=EN-US><a href="LSD_macros.html#RND_GENERATOR">RND_GENERATOR(0)</a></span></span><span
+lang=EN-US> must be invoked prior to the use of this particular generator. If
+the system does not support this generator, a regular pseudo-random number
+generator is used.</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Embedded Windows 64-bit compiler.</span></b><span
 lang=EN-US> The C++ compiler preinstalled with LSD in Windows computers was
 updated to a modern, 64-bit version of GCC compiler. This allows the generation
@@ -125,9 +150,21 @@ memory.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Removed support for legacy platforms.</span></b><span
 lang=EN-US> Windows 32-bit and Mac OS X (10.09 and below) are no longer
-supported by LSD. This was done because of the very small base of those
-platforms nowadays (computers typically 10-year old or more). Users of these
-legacy platforms may still use LSD version 7.2.</span></p>
+supported by LSD. This was done because of the small base of those platforms
+nowadays (computers typically 10-year old or more), and the possibility of
+adding new features not supported on them. Also, Tcl/Tk version 8.6 is now the
+minimum requirement in Linux. Users of these legacy platforms may still use LSD
+version 7.2.</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>New Macros.</span></b><span lang=EN-US> </span><span
+class=Cdigo><span lang=EN-US><a href="LSD_macros.html#T">RUN</a></span></span><span
+lang=EN-US> informs the current run number in a multi-run simulation execution.
+</span><span class=Cdigo><a href="LSD_macros.html#T"><span lang=EN-US>LAST_RUN</span></a></span><span
+lang=EN-US> provides the total number of runs configured for the current
+simulation.</span></p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'><span lang=EN-US>&nbsp;</span></p>
 
@@ -249,8 +286,8 @@ simulations (menu </a><a href="menurun.html#batch"><span style='font-family:
 href="menurun.html#parallel"><span style='font-family:"Courier New"'>Run&gt;Create/Start
 Parallel Batch</span></a>), LSD offers to launch </span><span class=Cdigo><span
 lang=EN-US>tail</span></span><span lang=EN-US> or </span><span class=Cdigo><span
-lang=EN-US>multitail</span></span><span lang=EN-US> applications to follow up the
-simulation execution. </span><span class=Cdigo><span lang=EN-US>multitail</span></span><span
+lang=EN-US>multitail</span></span><span lang=EN-US> applications to follow up
+the simulation execution. </span><span class=Cdigo><span lang=EN-US>multitail</span></span><span
 lang=EN-US> must be installed by the user in all platforms. See </span><span
 class=Cdigo><span lang=EN-US>readme.txt</span></span><span lang=EN-US> for
 installation instructions on each platform.</span></p>
@@ -330,8 +367,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>Standard C++11 random library. </span></b><span
 lang=EN-US>Use the new powerful random number generator facilities included in
 the C++ library, which may be significantly faster, and add several <a
-href="LSD_macros.html#randomdraw">new distributions</a> to draw from (thanks Frederik
-for the suggestion).</span></p>
+href="LSD_macros.html#randomdraw">new distributions</a> to draw from (thanks
+Frederik for the suggestion).</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -376,9 +413,9 @@ number (</span><span class=Cdigo><span lang=EN-US>SEARCH_INST(…)</span></span><s
 lang=EN-US>). Option to disable/enable the automatic search of Variables and
 Parameters (</span><span class=Cdigo><span lang=EN-US>NO_SEARCH</span></span><span
 lang=EN-US>/</span><span class=Cdigo><span lang=EN-US>USE_SEARCH</span></span><span
-lang=EN-US>). New <a href="LSD_macros.html#DEBUG">debug-control macros</a>
-allow finer control of the LSD Debugger activation and log file creation.
-Please refer to the <a href="LSD_macros.html">LSD Macros</a> documentation.</span></p>
+lang=EN-US>). New <a href="LSD_macros.html#DEBUG">debug-control macros</a> allow
+finer control of the LSD Debugger activation and log file creation. Please
+refer to the <a href="LSD_macros.html">LSD Macros</a> documentation.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -679,8 +716,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>New network functions and macros.</span></b><span
 lang=EN-US> Added command for the creation and manipulation of a network from
 Equations. Network is formed by brother Objects and several standard network
-templates (random, Small World, Power-Law, etc.) are available for quick and automatic
-network creation.</span></p>
+templates (random, Small World, Power-Law, etc.) are available for quick and
+automatic network creation.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -702,9 +739,9 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>Graphical interface tweaks.</span></b><span
 lang=EN-US> Fix resetting of window size, reduce flicker and standardize menu
 item names. Allow copying from the Log window. Fix tabs management in LMM.
-Allow disabling Model Structure window. Add direct options (buttons) for
-deleting model structure elements. New LSD and LMM icons in Windows and Linux.
-Improved initial windows sizes and placement.</span></p>
+Allow disabling Model Structure window. Add direct options (buttons) for deleting
+model structure elements. New LSD and LMM icons in Windows and Linux. Improved
+initial windows sizes and placement.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
