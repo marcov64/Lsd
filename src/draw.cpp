@@ -86,8 +86,8 @@ void show_graph( object *t )
 	
 	cmd( "bind .str.f.c <Configure> { if { $hrsizeM != [ winfo width .str ] || $vrsizeM != [ winfo height .str ] } { set choice_g 70 } }" );
 	cmd( "bind .str.f.c <Button-1> { if [ info exists res_g ] { destroy .list; set choice_g 24 } }" );
-	cmd( "bind .str.f.c <Button-2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup .str.f.c.v %%X %%Y } }" );
-	cmd( "bind .str.f.c <Button-3> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup .str.f.c.v %%X %%Y } }" );
+	cmd( "bind .str.f.c <Button-2> { if [ info exists res_g ] { destroy .list; set vname $res_g; set useCurrObj no; tk_popup .str.f.c.v %%X %%Y } }" );
+	cmd( "bind .str.f.c <Button-3> { if [ info exists res_g ] { destroy .list; set vname $res_g; set useCurrObj no; tk_popup .str.f.c.v %%X %%Y } }" );
 
 	cmd( "ttk::menu .str.f.c.v -tearoff 0" );
 	cmd( ".str.f.c.v add command -label \"Make Current\" -command { set choice 4 }" );

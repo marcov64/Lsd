@@ -187,7 +187,7 @@ int ModManMain( int argn, char **argv )
 {
 bool found, recolor = false;
 int i, j, num, sourcefile = 0, recolor_all = 0;
-char *s, str[ MAX_LINE_SIZE + 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], str2[ 5 * MAX_PATH_LENGTH ];
+char *s, str[ 5 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], str2[ 6 * MAX_PATH_LENGTH ];
 FILE *f;
 
 // initialize the tcl interpreter

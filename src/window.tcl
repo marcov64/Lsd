@@ -88,9 +88,7 @@ proc settop { w { name no } { destroy no } { par no } } {
 		wm protocol $w WM_DELETE_WINDOW $destroy
 	}
 	update
-	if { ! [ winfo viewable [ winfo toplevel $w ] ] && [ focus -displayof $w ] != "" } {
-		wm deiconify $w
-	}
+	deiconifytop $w
 	raise $w
 	if { [ info exists buttonF ] && [ winfo exists $w.$buttonF.ok ] } {
 		focus $w.$buttonF.ok
@@ -211,12 +209,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 	}
 
-	if { ! [ winfo viewable [ winfo toplevel $w ] ] && [ focus -displayof $w ] != "" } {
-		wm deiconify $w
-	}
-
-	raise $w
-	focus $w
+	focustop $w
 
 	update
 
@@ -287,9 +280,6 @@ proc destroytop w {
 				grab release $w
 				set grabPar [ string range [ lindex $grabLst $igrab ] [ expr [ string first " " [ lindex $grabLst $igrab ] ] + 1 ] end ]
 				if { $grabPar != "" } {
-					if { ! [ winfo viewable $grabPar ] && [ focus -displayof $grabPar ] != "" } {
-						wm deiconify $grabPar
-					}
 					focustop $grabPar
 					grab set $grabPar
 				}
@@ -605,9 +595,7 @@ proc focustop { w1 { w2 "" } } {
 		update
 		
 		set t1 [ winfo toplevel $w1 ]
-		if { ! [ winfo viewable $t1 ] && [ focus -displayof $t1 ] != "" } {
-			wm deiconify $t1
-		}
+		deiconifytop $t1
 		
 		if { $w2 != "" && [ winfo exists $w2 ] && [ winfo toplevel $w2 ] != $t1 } {
 			raise $t1 [ winfo toplevel $w2 ]
@@ -616,6 +604,22 @@ proc focustop { w1 { w2 "" } } {
 		}
 		
 		focus $w1
+	}
+}
+
+
+#************************************************
+# DEICONIFYTOP
+# Deiconify/map window if not yet viewable
+# In Windows, also requires LSD has the focus
+#************************************************
+proc deiconifytop { w } {
+	global CurPlatform
+
+	if { ! [ winfo viewable $w ] && \
+		 ( ! [ string equal $CurPlatform windows ] || \
+		   [ focus -displayof $w ] != "" ) } {
+		wm deiconify $w
 	}
 }
 

@@ -186,7 +186,7 @@ set deltaSizeLinux		1
 set deltaSizeWindows	2
 
 # OS specific default window buttons widths
-set butLinux	7
+set butLinux	9
 set butMac		5
 set butMacTk869	8
 set butWindows	9

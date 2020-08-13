@@ -24,20 +24,22 @@
 # Redefine standard styles when necessary
 # In Linux, only GTK themes are detected
 #************************************************
-proc isDarkTheme { platform darkSuffixes } {
-	if [ string equal $platform mac ] {
+proc isDarkTheme { } {
+	global CurPlatform darkThemeSuffixes
+
+	if [ string equal $CurPlatform mac ] {
 		if { ! [ string equal [ info patchlevel ] 8.6.9 ] } {
 			update
 			return tk::unsupported::MacWindowStyle isdark .
 		}
-	} elseif [ string equal $platform linux ] {
+	} elseif [ string equal $CurPlatform linux ] {
 		catch { exec gsettings get org.gnome.desktop.interface gtk-theme } results
-		foreach namePart $darkSuffixes {
-			if { [ string first [ string tolower $results ] $namePart ] >= 0 } {
+		foreach namePart $darkThemeSuffixes {
+			if { [ string first $namePart [ string tolower $results ] ] >= 0 } {
 				return 1
 			}
 		}
-	} elseif [ string equal $platform windows ] {
+	} elseif [ string equal $CurPlatform windows ] {
 		package require registry
 		if { ! [ catch { set AppsUseLightTheme [ registry get HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize AppsUseLightTheme ] } ] } {
 			if { ! $AppsUseLightTheme } {
@@ -57,13 +59,13 @@ proc isDarkTheme { platform darkSuffixes } {
 # if default theme is selected
 #************************************************
 proc updateTheme { } {
-	global CurPlatform DefaultTheme lsdTheme darkThemeSuffixes themeMac \
-		   themeLinux themeLinuxDark themeWindows themeWindowsDark
+	global CurPlatform DefaultTheme lsdTheme themeMac themeLinux \
+		   themeLinuxDark themeWindows themeWindowsDark
 	
 	if [ string equal $CurPlatform mac ] {
 		set DefaultTheme $themeMac
 	} elseif [ string equal $CurPlatform linux ] {
-		if [ isDarkTheme $CurPlatform $darkThemeSuffixes ] {
+		if [ isDarkTheme ] {
 			set DefaultTheme $themeLinuxDark
 			if [ string equal $lsdTheme $themeLinux ] {
 				set lsdTheme $themeLinuxDark
@@ -75,7 +77,7 @@ proc updateTheme { } {
 			}
 		}
 	} elseif [ string equal $CurPlatform windows ] {
-		if [ isDarkTheme $CurPlatform $darkThemeSuffixes ] {
+		if [ isDarkTheme ] {
 			set DefaultTheme $themeWindowsDark
 			if [ string equal $lsdTheme $themeWindows ] {
 				set lsdTheme $themeWindowsDark
@@ -190,21 +192,21 @@ proc ttk::text { w args } {
 	
 	::text $w {*}[ array get options ]
 	
-	$w configure -relief flat -borderwidth 0
+	$w configure -relief flat -highlightthickness 1
 
 	if { $style != "" } {
 		catch { $w configure -font [ ttk::style lookup $style -font ] }
 	}
 	
 	if { $entry } {
-		$w configure -undo 1
+		$w configure -undo 1 -highlightthickness 1
 		if { $dark } {
 			setcolor $w -background dbg -foreground fg
 		} else {
 			setcolor $w -background ebg -foreground efg
 		}
 	} else {
-		$w configure -cursor "" -insertofftime 1 -insertontime 0
+		$w configure -highlightthickness 0 -cursor "" -insertofftime 1 -insertontime 0
 		if { $dark } {
 			setcolor $w -background bg -foreground fg
 		} else {
@@ -256,7 +258,7 @@ proc ttk::listbox { w args } {
 proc ttk::menu { w args } {
 	::menu $w {*}$args
 
-	$w configure -relief flat -borderwidth 0
+	$w configure -relief flat -activeborderwidth 0
 
 	setcolor $w -background bg \
 				-foreground fg \

@@ -1247,7 +1247,7 @@ void deb_show( object *r )
 
 	// adjust spacing to align labels with data and increase columns width to better fill window
 	cmd( "if [ string equal $CurPlatform windows ] { set w1 20; set w2 25; set w3 11; set p1 1; set p2 15; set adj 0.8 }" );
-	cmd( "if [ string equal $CurPlatform linux ] { set w1 20; set w2 24; set w3 10; set p1 1; set p2 1; set adj 0.8 }" );
+	cmd( "if [ string equal $CurPlatform linux ] { set w1 20; set w2 15; set w3 7; set p1 0; set p2 10; set adj 1.3 }" );
 	cmd( "if [ string equal $CurPlatform mac ] { set w1 15; set w2 18; set w3 9; set p1 1; set p2 1; set adj 0.8 }" );
 	
 	cmd( "if { ! [ winfo exists .deb.tit ] } { \
