@@ -121,12 +121,12 @@ void set_all( int *choice, object *original, char *lab, int lag )
 
 	cmd( "ttk::frame .sa.m.f1.val.i.l1" );
 	cmd( "ttk::label .sa.m.f1.val.i.l1.l1 -text \"Equal to\"" );
-	cmd( "ttk::entry .sa.m.f1.val.i.l1.e1 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value1; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::entry .sa.m.f1.val.i.l1.e1 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value1; set err .sa.m.f1.val.i.l1.e1; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "pack .sa.m.f1.val.i.l1.l1 .sa.m.f1.val.i.l1.e1" );
 
 	cmd( "ttk::frame .sa.m.f1.val.i.l2" );
 	cmd( "ttk::label .sa.m.f1.val.i.l2.l2 -text \"(none)\"" );
-	cmd( "ttk::entry .sa.m.f1.val.i.l2.e2 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
+	cmd( "ttk::entry .sa.m.f1.val.i.l2.e2 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; set err .sa.m.f1.val.i.l2.e2; set choice 1; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 	cmd( "pack .sa.m.f1.val.i.l2.l2 .sa.m.f1.val.i.l2.e2" );
 
 	cmd( "pack .sa.m.f1.val.i.l1 .sa.m.f1.val.i.l2 -expand yes -fill x  -ipadx 5 -ipady 2" );
@@ -192,7 +192,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 
 	cmd( "ttk::frame .sa.m.f2.s.i.l.a" );
 	cmd( "ttk::label .sa.m.f2.s.i.l.a.l -text \"Apply every\"" );
-	cmd( "ttk::spinbox .sa.m.f2.s.i.l.a.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::spinbox .sa.m.f2.s.i.l.a.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; set err .sa.m.f2.s.i.l.a.e; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "ttk::label .sa.m.f2.s.i.l.a.l1 -text \"instance( s)\"" );
 	cmd( "pack .sa.m.f2.s.i.l.a.l .sa.m.f2.s.i.l.a.e .sa.m.f2.s.i.l.a.l1 -side left -padx 1" );
 
@@ -210,9 +210,9 @@ void set_all( int *choice, object *original, char *lab, int lag )
 
 	cmd( "ttk::frame .sa.m.f2.s.i.sel2.c" );
 	cmd( "ttk::label .sa.m.f2.s.i.sel2.c.lfrom -text \"From\"" );
-	cmd( "ttk::spinbox .sa.m.f2.s.i.sel2.c.from -width 5 -from 1 -to 9999 -state disabled -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::spinbox .sa.m.f2.s.i.sel2.c.from -width 5 -from 1 -to 9999 -state disabled -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; set err .sa.m.f2.s.i.sel2.c.from; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "ttk::label .sa.m.f2.s.i.sel2.c.lto -text \"to\"" );
-	cmd( "ttk::spinbox .sa.m.f2.s.i.sel2.c.to -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::spinbox .sa.m.f2.s.i.sel2.c.to -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; set err .sa.m.f2.s.i.sel2.c.to; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "pack .sa.m.f2.s.i.sel2.c.lfrom .sa.m.f2.s.i.sel2.c.from .sa.m.f2.s.i.sel2.c.lto .sa.m.f2.s.i.sel2.c.to -side left -pady 1" );
 
 	cmd( "ttk::label .sa.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
@@ -232,7 +232,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "ttk::checkbutton .sa.m.f2.rnd.i.le.f -text \"Reset the generator\" -variable use_seed -state disabled -command { if $use_seed { .sa.m.f2.rnd.i.le.s.e1 conf -state normal } { .sa.m.f2.rnd.i.le.s.e1 conf -state disabled } }" );
 	cmd( "ttk::frame .sa.m.f2.rnd.i.le.s" );
 	cmd( "ttk::label .sa.m.f2.rnd.i.le.s.l1 -text \"Seed\"" );
-	cmd( "ttk::spinbox .sa.m.f2.rnd.i.le.s.e1 -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::spinbox .sa.m.f2.rnd.i.le.s.e1 -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; set err .sa.m.f2.rnd.i.le.s.e1; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "pack .sa.m.f2.rnd.i.le.s.l1 .sa.m.f2.rnd.i.le.s.e1 -side left -padx 1" );
 
 	cmd( "pack .sa.m.f2.rnd.i.le.f .sa.m.f2.rnd.i.le.s -side left -padx 5" );
@@ -259,6 +259,8 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "bind .sa.m.f2.s.i.sel2.c.from <Return> {focus .sa.m.f2.s.i.sel2.c.to; .sa.m.f2.s.i.sel2.c.from selection range 0 end }" );
 	cmd( "bind .sa.m.f2.s.i.sel2.c.to <Return> {focus .sa.b.ok}" );
 	cmd( "bind .sa.m.f2.rnd.i.le.s.e1 <Return> {focus .sa.b.ok}" );
+	
+	cmd( "set err \"\"" );
 
 	cmd( "showtop .sa topleftW" );
 
@@ -271,10 +273,10 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "write_any .sa.m.f2.s.i.sel2.c.from $cases_from" ); 
 	cmd( "write_any .sa.m.f2.s.i.sel2.c.to $cases_to" ); 
 	cmd( "write_any .sa.m.f2.rnd.i.le.s.e1 $rnd_seed" ); 
-
+	
 	if ( selFocus )
 	{
-		cmd( "focus .sa.m.f1.val.i.l1.e1; .sa.m.f1.val.i.l1.e1 selection range 0 end" );	// speed-up data entry focusing first data field
+		cmd( "if { $err == \"\" } { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1 } { $err selection range 0 end; focus $err; set err \"\" }" );
 		selFocus = false;
 	}
 
@@ -299,13 +301,24 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	}
 
 	// save current linked variables values before closing
-	cmd( "if [ string is double -strict [ .sa.m.f1.val.i.l1.e1 get ] ] { set value1 [ .sa.m.f1.val.i.l1.e1 get ] } { bell }" );
-	cmd( "if [ string is double -strict [ .sa.m.f1.val.i.l2.e2 get ] ] { set value2 [ .sa.m.f1.val.i.l2.e2 get ] } { bell }" ); 
-	cmd( "if { [ string is integer -strict [ .sa.m.f2.s.i.l.a.e get ] ] && [ .sa.m.f2.s.i.l.a.e get ] > 0 } { set step_in [ .sa.m.f2.s.i.l.a.e get ] } { bell }" ); 
-	cmd( "if { [ string is integer -strict [ .sa.m.f2.s.i.sel2.c.from get ] ] && [ .sa.m.f2.s.i.sel2.c.from get ] > 0 } { set cases_from [ .sa.m.f2.s.i.sel2.c.from get ] } { bell }" ); 
-	cmd( "if { [ string is integer -strict [ .sa.m.f2.s.i.sel2.c.to get ] ] && [ .sa.m.f2.s.i.sel2.c.to get ] > $cases_from } { set cases_to [ .sa.m.f2.s.i.sel2.c.to get ] } { bell }" ); 
-	cmd( "if { [ string is integer -strict [ .sa.m.f2.rnd.i.le.s.e1 get ] ] && [ .sa.m.f2.rnd.i.le.s.e1 get ] > 0 } { set rnd_seed [ .sa.m.f2.rnd.i.le.s.e1 get ] } { bell }" ); 
+	cmd( "if [ string is double -strict [ .sa.m.f1.val.i.l1.e1 get ] ] { set value1 [ .sa.m.f1.val.i.l1.e1 get ] } { set err .sa.m.f1.val.i.l1.e1 }" );
+	cmd( "if [ string is double -strict [ .sa.m.f1.val.i.l2.e2 get ] ] { set value2 [ .sa.m.f1.val.i.l2.e2 get ] } { set err .sa.m.f1.val.i.l2.e2 }" ); 
+	cmd( "if { [ string is integer -strict [ .sa.m.f2.s.i.l.a.e get ] ] && [ .sa.m.f2.s.i.l.a.e get ] > 0 } { set step_in [ .sa.m.f2.s.i.l.a.e get ] } { set err .sa.m.f2.s.i.l.a.e }" ); 
+	cmd( "if { [ string is integer -strict [ .sa.m.f2.s.i.sel2.c.from get ] ] && [ .sa.m.f2.s.i.sel2.c.from get ] > 0 } { set cases_from [ .sa.m.f2.s.i.sel2.c.from get ] } { set err .sa.m.f2.s.i.sel2.c.from }" ); 
+	cmd( "if { [ string is integer -strict [ .sa.m.f2.s.i.sel2.c.to get ] ] && [ .sa.m.f2.s.i.sel2.c.to get ] > $cases_from } { set cases_to [ .sa.m.f2.s.i.sel2.c.to get ] } { set err .sa.m.f2.s.i.sel2.c.to }" ); 
+	cmd( "if { [ string is integer -strict [ .sa.m.f2.rnd.i.le.s.e1 get ] ] && [ .sa.m.f2.rnd.i.le.s.e1 get ] > 0 } { set rnd_seed [ .sa.m.f2.rnd.i.le.s.e1 get ] } { set err .sa.m.f2.rnd.i.le.s.e1 }" ); 
 
+	cmd( "if { $err != \"\" } { \
+			ttk::messageBox -parent .sa -title Error -icon error -type ok -message \"Invalid value\" -detail \"Values must be numeric only and decimal numbers must use the point ('.') as the decimal separator. Choose a different value and try again.\"; \
+			set choice 0 \
+		}" );
+		
+	if ( *choice == 0 )
+	{
+		selFocus = true;
+		goto here_setall;
+	}
+	
 	cmd( "destroytop .sa" );
 
 	Tcl_UnlinkVar( inter, "value1" );
@@ -490,7 +503,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 				}
 			
 			if ( cur != NULL || kappa == EOF )
-				cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", l );
+				cmd( "ttk::messageBox -parent .sa -title Error -icon error -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", l );
 			
 			sprintf( action, "set with data from file %s", l );
 			break;
@@ -831,7 +844,7 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 			tok = strtok( sss, SENS_SEP );	// accepts several separators
 			if ( tok == NULL )				// finished too early?
 			{
-				cmd( "ttk::messageBox -parent . -title \"Sensitivity Analysis\" -icon error -type ok -message \"Less values than required\" -detail \"Please insert the correct number of values.\"" );
+				cmd( "ttk::messageBox -parent .sens -title \"Sensitivity Analysis\" -icon error -type ok -message \"Invalid or less than required values\" -detail \"Decimal numbers must use the point ('.') as the decimal separator. Insert the correct number of values.\"" );
 				*choice = 0;
 				cmd( "focus .sens.t.t" );
 				break;
