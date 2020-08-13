@@ -253,12 +253,12 @@ cmd( "mouse_wheel $f.v" );
 cmd( "bind $f.v <Return> { .da.vars.b.in invoke; break }" );
 cmd( "bind $f.v <KeyPress-space> { set res [ .da.vars.lb.v get active ]; set choice 30; break }" );
 cmd( "bind $f.v <KeyRelease> { \
-		set kk %K; \
+		set kk %%K; \
 		if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } { \
 			if [ string equal $kk underscore ] { \
 				set kk _ \
 			}; \
-			set ll %W; \
+			set ll %%W; \
 			set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 			if { $ff == -1 } { \
 				set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
@@ -284,12 +284,12 @@ cmd( "bind $f.v <BackSpace> { .da.vars.b.out invoke; break }" );
 cmd( "bind $f.v <Return> { .da.b.ts invoke; break }" );
 cmd( "bind $f.v <KeyPress-space> { set res [ .da.vars.ch.v get active ]; set choice 33; break }" );
 cmd( "bind $f.v <KeyRelease> { \
-		set kk %K; \
+		set kk %%K; \
 		if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } { \
 			if [ string equal $kk underscore ] { \
 				set kk _ \
 			}; \
-			set ll %W; \
+			set ll %%W; \
 			set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 			if { $ff == -1 } { \
 				set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
@@ -312,9 +312,9 @@ cmd( "mouse_wheel $f.v" );
 cmd( "bind $f.v <Return> { set it [ selection get ]; set choice 3; break }" );
 cmd( "bind .da <Delete> { set n_it [ .da.vars.pl.v curselection ]; if { $n_it != \"\" } { set it [ selection get ]; set choice 20 }; break }" );
 cmd( "bind $f.v <KeyRelease> { \
-		set kk %K; \
+		set kk %%K; \
 		if { [ string length $kk ] == 1 && [ string is digit -strict $kk ] } { \
-			set ll %W; \
+			set ll %%W; \
 			set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 			if { $ff == -1 } { \
 				set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
@@ -5321,21 +5321,21 @@ void plot_cs_xy( int *choice )
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#3dCrossSection } { set choice 2 }" );
 
-	cmd( "bind .da.s.v.e <KeyRelease> {set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
+	cmd( "bind .da.s.v.e <KeyRelease> { set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
 	cmd( "set nnvar %d", nv );
-	cmd( "bind .da.s.v.e <Return> {set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-	cmd( "bind .da.s.v.e <Tab> {set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-	cmd( "bind .da.s.d.r.2d <Return> {set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-	cmd( "bind .da.s.d.r.2d <ButtonRelease-1> {set ndim 2; set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-	cmd( "bind .da.s.d.r.3d <ButtonRelease-1> {set ndim 3; set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-	cmd( "bind .da.s.d.r.2d <Down> {.da.s.d.r.3d invoke; focus .da.s.d.r.3d; set ndim 3; set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-	cmd( "bind .da.s.d.r.3d <Up> {.da.s.d.r.2d invoke; focus .da.s.d.r.2d; set ndim 2; set blength [ expr $nnvar / ($numv + $ndim-1 )]; .da.s.v.n conf -text \"Block length: $blength\"}" );
-	cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
-	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
-	cmd( "bind .da.s.i.e <KeyPress-Return> {if {$ndim == 2} { focus .da.s.d.r.2d } {focus .da.s.d.r.3d}}" );
-	cmd( "bind .da.s.d.r.2d <KeyPress-Return> {.da.s.v.e selection range 0 end; focus .da.s.v.e}" );
-	cmd( "bind .da.s.d.r.3d <KeyPress-Return> {.da.s.v.e selection range 0 end; focus .da.s.v.e}" );
-	cmd( "bind .da.s.v.e <KeyPress-Return> {focus .da.s.b.ok}" );
+	cmd( "bind .da.s.v.e <Return> { set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.v.e <Tab> { set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.d.r.2d <Return> { set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.d.r.2d <ButtonRelease-1> { set ndim 2; set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.d.r.3d <ButtonRelease-1> { set ndim 3; set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.d.r.2d <Down> { .da.s.d.r.3d invoke; focus .da.s.d.r.3d; set ndim 3; set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.d.r.3d <Up> { .da.s.d.r.2d invoke; focus .da.s.d.r.2d; set ndim 2; set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s <KeyPress-Return> { set choice 1 }" );
+	cmd( "bind .da.s <KeyPress-Escape> { set choice 2 }" );
+	cmd( "bind .da.s.i.e <KeyPress-Return> { if { $ndim == 2 } { focus .da.s.d.r.2d } { focus .da.s.d.r.3d } }" );
+	cmd( "bind .da.s.d.r.2d <KeyPress-Return> { .da.s.v.e selection range 0 end; focus .da.s.v.e }" );
+	cmd( "bind .da.s.d.r.3d <KeyPress-Return> { .da.s.v.e selection range 0 end; focus .da.s.v.e }" );
+	cmd( "bind .da.s.v.e <KeyPress-Return> { focus .da.s.b.ok }" );
 
 	cmd( "showtop .da.s" );
 

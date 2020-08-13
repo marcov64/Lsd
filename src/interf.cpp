@@ -479,12 +479,12 @@ int browse( object *r, int *choice )
 					event generate .l.v.c.var_name <F8> \
 				}" );
 			cmd( "bind .l.v.c.var_name <KeyRelease> { \
-					set kk %K; \
+					set kk %%K; \
 					if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } { \
 						if [ string equal $kk underscore ] { \
 							set kk _ \
 						}; \
-						set ll %W; \
+						set ll %%W; \
 						set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 						if { $ff == -1 } { \
 							set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
@@ -710,12 +710,12 @@ int browse( object *r, int *choice )
 					event generate .l.s.c.son_name <F5> \
 				}" );
 			cmd( "bind .l.s.c.son_name <KeyRelease> { \
-					set kk %K; \
+					set kk %%K; \
 					if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } { \
 						if [ string equal $kk underscore ] { \
 							set kk _ \
 						}; \
-						set ll %W; \
+						set ll %%W; \
 						set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 						if { $ff == -1 } { \
 							set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
@@ -1535,7 +1535,7 @@ case 3:
 		done = check_label( lab, cur ); // check that the label does not exist already
 		if ( done == 1 )
 		{
-			cmd( "ttk::messageBox -parent .addobj -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
+			cmd( "ttk::messageBox -parent .addobj -title Error -icon error -type ok -message \"Name already exists in the model\" -detail \"Choose a different name and try again.\"" );
 			cmd( "focus .addobj.f.ent_var; .addobj.f.ent_var selection range 0 end" );
 			done = 0;
 			goto here_newobject;
