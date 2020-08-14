@@ -1319,19 +1319,36 @@ proc abortretryignore { w fr comAbort comRetry comIgnore } {
 # If disableMouseWarp is 1, does nothing
 #************************************************
 proc mousewarpto w {
-	global mouseWarp
+	global mouseWarp curX curY
 	
 	update
-	if { $mouseWarp && [ winfo viewable $w ] } {
+	if { $mouseWarp && [ winfo exists $w ] && [ winfo viewable $w ] } {
+		set wX [ expr [ winfo width $w ] / 2 ]
+		set wY [ expr [ winfo height $w ] / 2 ]
+		set curX 0
+		set curY 0
+		
+		bind $w <Motion> {
+			set curX %x
+			set curY %y
+		}
+		
 		after 100
 		focus $w
-		# do it twice to bypass Tk bug (first warp just go to the dialog not the button)
+		
+		# first move pointer to toplevel to bypass Tk bug
+		set t [ winfo toplevel $w ]
+		event generate $t <Motion> -warp 1 -x [ expr [ winfo width $t ] / 2 ] -y [ expr [ winfo height $t ] / 2 ]
 		update
-		event generate $w <Motion> -warp 1 \
-			-x [ expr [ winfo width $w ] / 2 ] -y [ expr [ winfo height $w ] / 2 ]
-		update
-		event generate $w <Motion> -warp 1 \
-			-x [ expr [ winfo width $w ] / 2 ] -y [ expr [ winfo height $w ] / 2 ]
+
+		# do it as required to bypass Tk bug (first warps just go to the dialog not the button)
+		for { set tries 0 } { ( $curX != $wX || $curY != $wY ) && $tries < 10 } { incr tries } {
+			event generate $w <Motion> -warp 1 -x $wX -y $wY
+			update
+		}
+		
+		bind $w <Motion> { }
+		unset curX curY
 	}
 }
 

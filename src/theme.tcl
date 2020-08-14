@@ -396,8 +396,8 @@ proc ttk::messageBox_draw { name icon title parent message detail type default }
 	destroytop $ttk::msgBoxName
 	set ttk::msgBoxName $name
 	
-	newtop $name $title "ttk::messageBox_exit $default" $parent
-
+	newtop $name $title "" $parent
+	
 	ttk::frame $name.top
 	
 	ttk::frame $name.top.icon
@@ -437,27 +437,34 @@ proc ttk::messageBox_draw { name icon title parent message detail type default }
 	switch $type {
 		abortretryignore {
 			abortretryignore  $name bottom { ttk::messageBox_exit abort } { ttk::messageBox_exit retry } { ttk::messageBox_exit ignore }
+			set close abort
 		}
 		ok {
 			ok $name bottom { ttk::messageBox_exit ok }
+			set close ok
 		} 
 		okcancel {
 			okcancel $name bottom { ttk::messageBox_exit ok } { ttk::messageBox_exit cancel }
+			set close cancel
 		} 
 		retrycancel {
 			retrycancel $name bottom { ttk::messageBox_exit retry } { ttk::messageBox_exit cancel }
+			set close cancel
 		} 
 		yesno {
 			yesno $name bottom { ttk::messageBox_exit yes } { ttk::messageBox_exit no }
+			set close no
 		} 
 		yesnocancel {
 			yesnocancel $name bottom { ttk::messageBox_exit yes } { ttk::messageBox_exit no } { ttk::messageBox_exit cancel }
+			set close cancel
 		}
 	}
 	
 	pack $name.bottom -side right
 	
 	showtop $name centerW
+	wm protocol $name WM_DELETE_WINDOW "ttk::messageBox_exit $close"
 	
 	if [ winfo exists $name.bottom.$default ] {
 		$name.bottom.$default configure -default active
