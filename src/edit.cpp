@@ -823,8 +823,7 @@ void chg_obj_num( object **c, int value, int level, int pippo[ ], int *choice, i
 					while ( go_brother( cur1 ) != NULL )
 					{ 
 						app = cur1->next->next;
-						cur1->next->empty( );
-						delete cur1->next;
+						cur1->next->delete_obj( );
 						cur1->next = app;
 					}
 				}

@@ -223,11 +223,9 @@ int lsdmain( int argn, char **argv )
 		delete [ ] vars[ i ];
 		delete [ ] values[ i ];
 	}
-	empty_cemetery();
-	blueprint->empty();
-	root->empty();
-	delete blueprint;
-	delete root;
+	empty_cemetery( );
+	root->delete_obj( );
+	blueprint->delete_obj( );
 	delete stacklog;
 	delete [ ] struct_file;
 	delete [ ] config_file;

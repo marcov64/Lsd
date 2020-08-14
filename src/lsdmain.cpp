@@ -619,13 +619,13 @@ int lsdmain( int argn, char **argv )
 
 #endif 
 
+	empty_stack( );
 	empty_lattice( );
-	empty_description( );
+	empty_sensitivity( rsense );
 	empty_cemetery( );
-	blueprint->empty( );
-	root->empty( );
-	delete blueprint;
-	delete root;
+	empty_description( );
+	blueprint->delete_obj( );
+	root->delete_obj( );
 	delete stacklog;
 	delete [ ] struct_file;
 	delete [ ] path;
@@ -745,7 +745,7 @@ void run( void )
 		}
 		 
 		// reset trace stack
-		unwind_stack( );
+		empty_stack( );
 
 		// new random routine' initialization
 		init_random( seed );
@@ -1130,7 +1130,7 @@ void set_fast( int level )
 				  when_debug > 0 ? "debugging" : "profiling" );
 			return;
 		}
-		unwind_stack( );
+		empty_stack( );
 		deb_log( false );
 	}
 	
@@ -1140,9 +1140,9 @@ void set_fast( int level )
 
 
 /*********************************
-UNWIND_STACK
+EMPTY_STACK
 *********************************/
-void unwind_stack( void )
+void empty_stack( void )
 {
 	if ( stacklog != NULL )
 	{

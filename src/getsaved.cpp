@@ -194,10 +194,8 @@ int lsdmain( int argn, char **argv )
 		get_saved( root, stdout, "\t", all_var );
 
 	empty_cemetery( );
-	blueprint->empty( );
-	root->empty( );
-	delete blueprint;
-	delete root;
+	root->delete_obj( );
+	blueprint->delete_obj( );
 	delete stacklog;
 	delete [ ] out_file;
 	delete [ ] simul_name;

@@ -233,6 +233,34 @@ int variable::init( object *_up, char const *_label, int _num_lag, double *v, in
 }
 
 
+/****************************************************
+EMPTY
+****************************************************/
+void variable::empty( void ) 
+{
+	if ( running )
+	{
+#ifdef PARALLEL_MODE
+		// prevent concurrent use by more than one thread
+		lock_guard < mutex > lock( parallel_comp );
+#endif	
+			
+		if ( label == NULL || val == NULL )
+		{
+			sprintf( msg, "failure while deallocating variable %s", label );
+			error_hard( msg, "internal problem in LSD", 
+						"if error persists, please contact developers", true );
+			return;
+		}
+	}
+
+	delete [ ] label;
+	delete [ ] val;
+	delete [ ] lab_tit;
+	free( data );		// use C stdlib to be able to deallocate memory for deleted objects
+}
+
+
 /***************************************************
 CAL
 Standard version (non parallel computation)
@@ -983,31 +1011,3 @@ void parallel_update( variable *v, object* p, object *caller )
 	parallel_ready = true;
 }
 #endif
-
-
-/****************************************************
-EMPTY
-****************************************************/
-void variable::empty( void ) 
-{
-	if ( running )
-	{
-#ifdef PARALLEL_MODE
-		// prevent concurrent use by more than one thread
-		lock_guard < mutex > lock( parallel_comp );
-#endif	
-			
-		if ( label == NULL || val == NULL )
-		{
-			sprintf( msg, "failure while deallocating variable %s", label );
-			error_hard( msg, "internal problem in LSD", 
-						"if error persists, please contact developers", true );
-			return;
-		}
-	}
-
-	delete [ ] label;
-	delete [ ] val;
-	delete [ ] lab_tit;
-	free( data );		// use C stdlib to be able to deallocate memory for deleted objects
-}

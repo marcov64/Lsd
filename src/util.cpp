@@ -310,7 +310,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 	cmd( "ttk::frame .cazzo.t" );
 	cmd( "ttk::label .cazzo.t.l -style hl.TLabel -text \"An error occurred during the simulation\"" );
 	cmd( "pack .cazzo.t.l -pady 10" );
-	cmd( "ttk::label -justify center .cazzo.t.l1 -text \"Information about the error is reported in the log window.\nPartial results are available in the LSD browser.\"" );
+	cmd( "ttk::label .cazzo.t.l1 -justify center -text \"Information about the error is reported in the log window.\nPartial results are available in the LSD browser.\"" );
 	cmd( "pack .cazzo.t.l1" );
 
 	cmd( "ttk::frame .cazzo.e" );
@@ -359,7 +359,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 	if ( choice == 2 )
 	{
 		// do run( ) cleanup
-		unwind_stack( );
+		empty_stack( );
 		actual_steps = t;
 		unsavedData = true;				// flag unsaved simulation results
 		running = false;
@@ -1102,76 +1102,6 @@ double get_double( const char *tcl_var, double *var )
 }
 
 #endif
-
-
-/***************************************************
-COLLECT_CEMETERY
-Processes variables from an object required to go to cemetery 
-***************************************************/
-void collect_cemetery( object *o )
-{
-	variable *cv, *nv;
-	
-	for ( cv = o->v; cv != NULL; cv = nv )	// scan all variables
-	{
-		nv = cv->next;						// pointer to next variable
-		
-		// need to save?
-		if ( running && ( cv->save == true || cv->savei == true ) )
-		{
-			if ( cv->savei )
-				save_single( cv );			// update file
-	
-			set_lab_tit( cv );				// update last lab_tit
-			
-			cv->end = t;					// define last period,
-			cv->data[ t - cv->start ] = cv->val[ 0 ];	// and last value
-			
-			// use C stdlib to be able to deallocate memory for deleted objects
-			cv->data = ( double * ) realloc( cv->data, ( t - cv->start + 1 ) * sizeof( double ) );
-			
-			add_cemetery( cv );				// put in cemetery (destroy cv->next)
-		}
-	}
-}
-
-
-/***************************************************
-ADD_CEMETERY
-Store the variable in a list of variables in objects deleted
-but to be used for analysis.
-***************************************************/
-void add_cemetery( variable *v )
-{
-	if ( cemetery == NULL )
-		cemetery = last_cemetery = v;
-	else
-	{
-		last_cemetery->next = v;
-		last_cemetery = v;
-	}
-	
-	last_cemetery->next = NULL;
-}
-
-
-/***************************************************
-EMPTY_CEMETERY
-***************************************************/
-void empty_cemetery( void )
-{
-	variable *cv, *cv1;
-	
-	for ( cv = cemetery; cv !=NULL ; )
-	{
-		cv1 = cv->next;
-		cv->empty( );
-		delete cv;
-		cv = cv1;
-	}
-	
-	cemetery = last_cemetery = NULL;
-}
 
 
 /***************************************************

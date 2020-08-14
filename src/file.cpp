@@ -545,6 +545,23 @@ void save_description( object *r, FILE *f )
 
 
 /*****************************************************************************
+RESET_BLUEPRINT
+	reset the current blueprint
+******************************************************************************/
+void reset_blueprint( object *r )
+{
+	if ( blueprint != NULL )
+	{
+		blueprint->delete_obj( );
+		blueprint = new object;
+		blueprint->init( NULL, "Root" );
+	}
+	
+	set_blueprint( blueprint, r );
+}
+
+
+/*****************************************************************************
 SET_BLUEPRINT
 	copy the naked structure of the model into another object, called blueprint, 
 	to be used for adding objects without example
@@ -796,11 +813,13 @@ UNLOAD_CONFIGURATION
 ******************************************************************************/
 void unload_configuration ( bool full )
 {
-	root->empty( );								// remove current model structure
+	root->delete_obj( );						// remove current model structure
+	root = new object;
 	root->init( NULL, "Root" );
 	empty_description( );
 	add_description( "Root", "Object", "(no description available)" );      
-	blueprint->empty( );
+	blueprint->delete_obj( );
+	blueprint = new object;
 	blueprint->init( NULL, "Root" );
 
 	empty_cemetery( );							// garbage collection

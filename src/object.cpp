@@ -215,10 +215,8 @@ and up, but does never consider objects before the one from which the search
 starts from. It is used to chase objects of lab type even when they are scattered
 in different groups.
 
-- void add_var( char *label, int lag, double *val, int save );
-Add a variable to all the object of this type, initializing its main fields,
-that is label, number of lag, initial values and whether is has to be saved or
-not
+- void add_empty_var( char *label );
+Add a variable to the object
 
 - void add_obj( char *label, int num );
 Add a new object type in the model as descendant of current one
@@ -1138,49 +1136,6 @@ object *object::turbosearch_cond( char const *lab, double value )
 
 
 /****************************************************
-ADD_VAR
-Add a Variable to all the Objects of this type in the model
-****************************************************/
-void object::add_var( char const *lab, int lag, double *val, int save )
-{
-	variable *cv;
-	object *cur;
-
-	if ( search_var( this, lab, true, true, false ) != NULL )
-	{
-		sprintf( msg, "element '%s' already exists in object '%s'", lab, label );
-		error_hard( msg, "variable or parameter not added",
-					"choose an unique name for the element",
-					true );
-	}
-
-	for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
-	{
-		if ( cur->v == NULL )
-			cv = cur->v = new variable;
-		else
-		{
-			for ( cv = cur->v; cv->next != NULL; cv = cv->next );
-			cv->next = new variable;
-			cv = cv->next;
-		}
-
-		if ( cv == NULL )
-		{
-			sprintf( msg, "cannot allocate memory for adding element '%s'", lab );
-			error_hard( msg, "out of memory",
-						"if there is memory available and the error persists,\nplease contact developers",
-						true );
-			return;
-		}
-
-		cv->init( cur, lab, lag, val, save );
-		cur->v_map.insert( v_pairT ( lab, cv ) );
-	}
-}
-
-
-/****************************************************
 ADD_EMPTY_VAR
 Add a new (empty) Variable, used in the creation of the model structure
 ****************************************************/
@@ -1863,8 +1818,6 @@ void object::delete_obj( void )
 		obj_list.erase( this );
 	}
 
-	collect_cemetery( this );	// collect required variables BEFORE removing object from linked list
-
 	// find the bridge
 	if ( up != NULL )
 		cb = up->search_bridge( label );
@@ -1898,13 +1851,13 @@ void object::delete_obj( void )
 		}
 
 		cb->counter_updated = false;
+
+		if ( cb->search_var != NULL )						// indexed objects?
+			cb->o_map.erase( cal( cb->search_var, 0 ) );	// try to remove map entry
 	}
 
 	if ( del_flag != NULL )
 		*del_flag = true;		// flag deletion to caller, if requested
-
-	if ( cb->search_var != NULL )	// indexed objects?
-		cb->o_map.erase( cal( cb->search_var, 0 ) );	// try to remove map entry
 
 	empty( );
 
@@ -1919,20 +1872,11 @@ Garbage collection for Objects.
 void object::empty( void )
 {
 	bridge *cb, *cb1;
-	variable *cv, *cv1;
 
 	if ( root == this )
 		blueprint->empty( );
 
-	for ( cv = v; cv != NULL; cv = cv1 )
-		if ( running && ( cv->save || cv->savei ) )
-			cv1 = cv->next; 	// variable should have been already saved to cemetery!!!
-		else
-		{
-			cv1 = cv->next;
-			cv->empty( );
-			delete cv;
-		}
+	collect_cemetery( );	// collect required variables BEFORE removing
 
 	v = NULL;
 	v_map.clear( );
@@ -1957,6 +1901,82 @@ void object::empty( void )
 }
 
 
+/***************************************************
+COLLECT_CEMETERY
+Processes variables from an object required to go to cemetery
+Also destroy variables not requiring saving
+***************************************************/
+void object::collect_cemetery( void )
+{
+	variable *cv, *nv;
+	
+	for ( cv = v; cv != NULL; cv = nv )		// scan all variables
+	{
+		nv = cv->next;						// pointer to next variable
+		
+		// need to save?
+		if ( running && ( cv->save == true || cv->savei == true ) )
+		{
+			if ( cv->savei )
+				save_single( cv );			// update file
+	
+			set_lab_tit( cv );				// update last lab_tit
+			
+			cv->end = t;					// define last period,
+			cv->data[ t - cv->start ] = cv->val[ 0 ];	// and last value
+			
+			// use C stdlib to be able to deallocate memory for deleted objects
+			cv->data = ( double * ) realloc( cv->data, ( t - cv->start + 1 ) * sizeof( double ) );
+			
+			add_cemetery( cv );				// put in cemetery (destroy cv->next)
+		}
+		else
+		{
+			cv->empty( );					// detroy the ones not requiring saving
+			delete cv;
+		}
+	}
+}
+
+
+/***************************************************
+ADD_CEMETERY
+Store the variable in a list of variables in objects deleted
+but to be used for analysis.
+***************************************************/
+void add_cemetery( variable *v )
+{
+	if ( cemetery == NULL )
+		cemetery = last_cemetery = v;
+	else
+	{
+		last_cemetery->next = v;
+		last_cemetery = v;
+	}
+	
+	last_cemetery->next = NULL;
+}
+
+
+/***************************************************
+EMPTY_CEMETERY
+***************************************************/
+void empty_cemetery( void )
+{
+	variable *cv, *cv1;
+	
+	for ( cv = cemetery; cv !=NULL ; )
+	{
+		cv1 = cv->next;
+		cv->empty( );
+		delete cv;
+		cv = cv1;
+	}
+	
+	cemetery = last_cemetery = NULL;
+}
+
+
 /****************************************************
 DELETE_VAR
 Remove the variable from the object
@@ -1967,10 +1987,9 @@ void object::delete_var( char const *lab )
 
 	if ( ! strcmp( v->label, lab ) )
 	{	// first variable in the chain
-		cv = v->next;
 		v_map.erase( lab );
-		delete [ ] v->label;
-		delete [ ] v->val;
+		cv = v->next;
+		v->empty( );
 		delete v;
 		v = cv;
 	}
@@ -1978,10 +1997,9 @@ void object::delete_var( char const *lab )
 		for ( cv = v; cv->next != NULL; cv = cv->next)
 			if ( ! strcmp( cv->next->label, lab ) )
 			{
-				cv1 = cv->next->next;
 				v_map.erase( lab );
-				delete [ ] cv->next->label;
-				delete [ ] cv->next->val;
+				cv1 = cv->next->next;
+				cv->next->empty( );
 				delete cv->next;
 				cv->next = cv1;
 				break;

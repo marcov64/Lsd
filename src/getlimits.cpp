@@ -210,10 +210,8 @@ int lsdmain( int argn, char **argv )
 
 	empty_sensitivity( rsense );
 	empty_cemetery( );
-	blueprint->empty( );
-	root->empty( );
-	delete blueprint;
-	delete root;
+	root->delete_obj( );
+	blueprint->delete_obj( );
 	delete stacklog;
 	delete [ ] out_file;
 	delete [ ] simul_name;

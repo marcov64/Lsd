@@ -3114,8 +3114,7 @@ case 1:
 	}
 
 	for ( n = r; n->up != NULL; n = n->up );
-	blueprint->empty( );			    // update blueprint to consider last changes
-	set_blueprint( blueprint, n );
+	reset_blueprint( n );			    // update blueprint to consider last changes
 
 	if ( overwConf )					// save if needed
 	{
@@ -5799,8 +5798,7 @@ case 69:
 	}
 
 	for ( n = r; n->up != NULL; n = n->up );
-	blueprint->empty( );		    // update blueprint to consider last changes
-	set_blueprint( blueprint, n );
+	reset_blueprint( n );			// update blueprint to consider last changes
 	
 	if ( overwConf )				// save if needed
 	{
