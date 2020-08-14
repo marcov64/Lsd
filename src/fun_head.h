@@ -249,6 +249,8 @@ bool no_ptr_chk = true;
 // redefine as macro to avoid conflicts with C++ version in <cmath.h>
 #define abs( X ) _abs( X )
 #define pi M_PI
+#define UP "UP"
+#define DOWN "DOWN"
 
 #define ABORT { quit = 1; }
 #define DEBUG_START deb_log( true )
