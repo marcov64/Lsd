@@ -550,14 +550,25 @@ RESET_BLUEPRINT
 ******************************************************************************/
 void reset_blueprint( object *r )
 {
-	if ( blueprint != NULL )
-	{
-		blueprint->delete_obj( );
-		blueprint = new object;
-		blueprint->init( NULL, "Root" );
-	}
-	
+	empty_blueprint( );
+	blueprint = new object;
+	blueprint->init( NULL, "Root" );
 	set_blueprint( blueprint, r );
+}
+
+
+/*****************************************************************************
+EMPTY_BLUEPRINT
+	remove the current blueprint
+******************************************************************************/
+void empty_blueprint( void )
+{
+	if ( blueprint == NULL )
+		return;
+
+	blueprint->empty( );
+	blueprint->delete_obj( );
+	blueprint = NULL;
 }
 
 
@@ -813,14 +824,13 @@ UNLOAD_CONFIGURATION
 ******************************************************************************/
 void unload_configuration ( bool full )
 {
-	root->delete_obj( );						// remove current model structure
+	empty_blueprint( );						// remove current model structure
+	empty_description( );
+	root->delete_obj( );
 	root = new object;
 	root->init( NULL, "Root" );
-	empty_description( );
 	add_description( "Root", "Object", "(no description available)" );      
-	blueprint->delete_obj( );
-	blueprint = new object;
-	blueprint->init( NULL, "Root" );
+	reset_blueprint( NULL );
 
 	empty_cemetery( );							// garbage collection
 	empty_sensitivity( rsense ); 				// discard sensitivity analysis data

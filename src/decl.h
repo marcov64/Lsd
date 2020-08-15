@@ -702,6 +702,7 @@ void draw_obj( object *t, object *sel, int level = 0, int center = 0, int from =
 void edit_data( object *root, int *choice, char *obj_name );
 void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done );
 void eliminate_obj( object **r, int actual, int desired , int *choice );
+void empty_blueprint( void );
 void empty_cemetery( void );
 void empty_description( void );
 void empty_lattice( void );

@@ -1859,6 +1859,8 @@ void object::delete_obj( void )
 	if ( del_flag != NULL )
 		*del_flag = true;		// flag deletion to caller, if requested
 
+	collect_cemetery( );		// collect required variables BEFORE removing
+
 	empty( );
 
 	delete this;
@@ -1872,12 +1874,15 @@ Garbage collection for Objects.
 void object::empty( void )
 {
 	bridge *cb, *cb1;
-
-	if ( root == this )
-		blueprint->empty( );
-
-	collect_cemetery( );	// collect required variables BEFORE removing
-
+	variable *cv, *cv1;
+	
+	for ( cv = v; cv != NULL; cv = cv1 )
+	{
+		cv1 = cv->next;
+		cv->empty( );
+		delete cv;
+	}
+		
 	v = NULL;
 	v_map.clear( );
 
@@ -1908,11 +1913,11 @@ Also destroy variables not requiring saving
 ***************************************************/
 void object::collect_cemetery( void )
 {
-	variable *cv, *nv;
+	variable *cv, *cv1;
 	
-	for ( cv = v; cv != NULL; cv = nv )		// scan all variables
+	for ( cv = v; cv != NULL; cv = cv1 )	// scan all variables
 	{
-		nv = cv->next;						// pointer to next variable
+		cv1 = cv->next;						// pointer to next variable
 		
 		// need to save?
 		if ( running && ( cv->save == true || cv->savei == true ) )
@@ -1928,7 +1933,7 @@ void object::collect_cemetery( void )
 			// use C stdlib to be able to deallocate memory for deleted objects
 			cv->data = ( double * ) realloc( cv->data, ( t - cv->start + 1 ) * sizeof( double ) );
 			
-			add_cemetery( cv );				// put in cemetery (destroy cv->next)
+			add_cemetery( cv );				// transfer to cemetery
 		}
 		else
 		{
@@ -1936,6 +1941,8 @@ void object::collect_cemetery( void )
 			delete cv;
 		}
 	}
+	
+	v = NULL;
 }
 
 

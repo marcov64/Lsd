@@ -182,8 +182,7 @@ int lsdmain( int argn, char **argv )
 	root = new object;
 	root->init( NULL, "Root" );
 	add_description( "Root", "Object", "(no description available)" );
-	blueprint = new object;
-	blueprint->init( NULL, "Root" );
+	reset_blueprint( NULL );
 
 #ifdef NO_WINDOW
 	
@@ -623,8 +622,8 @@ int lsdmain( int argn, char **argv )
 	empty_lattice( );
 	empty_sensitivity( rsense );
 	empty_cemetery( );
+	empty_blueprint( );
 	empty_description( );
-	blueprint->delete_obj( );
 	root->delete_obj( );
 	delete stacklog;
 	delete [ ] struct_file;
