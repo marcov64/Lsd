@@ -96,30 +96,35 @@ void edit_data( object *root, int *choice, char *obj_name )
 		cmd( "set lastIniSz { 0 0 }" );	// handle first configuration
 		cmd( "set iniDone 0" );
 		
-		// adjust spreadsheet size when top pack frame resizes
+		// adjust spreadsheet size when toplevel window resizes
 		cmd( "bind .ini <Configure> { \
-				set iniSz [ list [ winfo width .ini ] [ winfo height .ini ] ]; \
-				if { $iniSz != $lastIniSz } { \
-					set lastIniSz $iniSz; \
-					set canBbox [ $g.can bbox all ]; \
-					if { $iniDone } { \
-						set maxWid [ lindex $iniSz 0 ]; \
-						set maxHgt [ expr [ lindex $iniSz 1 ] - 110 ] \
-					} { \
-						set maxWid [ expr [ winfo screenwidth .ini ] - [ getx .ini topleftW ] - 2 * $bordsize - $hmargin ]; \
-						set maxHgt [ expr [ winfo screenheight .ini ] - [ gety .ini topleftW ] - 2 * $bordsize - $vmargin - $tbarsize - 110 ] \
+				if { ! [ info exists iniConfRun ] } { \
+					set iniConfRun 1; \
+					set iniSz [ list [ winfo width .ini ] [ winfo height .ini ] ]; \
+					if { $iniSz != $lastIniSz } { \
+						update; \
+						set lastIniSz $iniSz; \
+						set canBbox [ $g.can bbox all ]; \
+						if { $iniDone } { \
+							set maxWid [ lindex $iniSz 0 ]; \
+							set maxHgt [ expr [ lindex $iniSz 1 ] - 110 ] \
+						} { \
+							set maxWid [ expr [ winfo screenwidth .ini ] - [ getx .ini topleftW ] - 2 * $bordsize - $hmargin ]; \
+							set maxHgt [ expr [ winfo screenheight .ini ] - [ gety .ini topleftW ] - 2 * $bordsize - $vmargin - $tbarsize - 110 ] \
+						}; \
+						set desWid [ expr min( max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ] + [ winfo width $g.ys ], [ lindex $iniSz 0 ] ), $maxWid ) ]; \
+						set desHgt [ expr min( max( [ lindex $canBbox 3 ] - [ lindex $canBbox 1 ] + [ winfo height $g.xs ], 40 ), $maxHgt ) ]; \
+						$g configure -width $desWid -height $desHgt; \
+						$g.can configure -scrollregion $canBbox \
 					}; \
-					set desWid [ expr min( max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ] + [ winfo width $g.ys ], [ lindex $iniSz 0 ] ) , $maxWid ) ]; \
-					set desHgt [ expr min( max( [ lindex $canBbox 3 ] - [ lindex $canBbox 1 ] + [ winfo height $g.xs ], 40 ), $maxHgt ) ]; \
-					$g configure -width $desWid -height $desHgt; \
-					$g.can configure -scrollregion $canBbox \
+					unset iniConfRun \
 				} \
 			}" );
 
 		// canvas to hold the initial values spreadsheet so it can be scrollable
-		cmd( "ttk::canvas $g.can -yscrollcommand \".ini.t.grid.ys set\" -xscrollcommand \".ini.t.grid.xs set\" -entry 0 -dark $darkTheme" );
-		cmd( "ttk::scrollbar $g.ys -command \".ini.t.grid.can yview\"" );
-		cmd( "ttk::scrollbar $g.xs -command \".ini.t.grid.can xview\" -orient horizontal" );
+		cmd( "ttk::canvas $g.can -yscrollcommand { .ini.t.grid.ys set } -xscrollcommand { .ini.t.grid.xs set } -entry 0 -dark $darkTheme" );
+		cmd( "ttk::scrollbar $g.ys -command { .ini.t.grid.can yview }" );
+		cmd( "ttk::scrollbar $g.xs -command { .ini.t.grid.can xview } -orient horizontal" );
 		cmd( "grid $g.can $g.ys -sticky nsew" );
 		cmd( "grid $g.xs -sticky ew" );
 		cmd( "mouse_wheel $g.can" );
@@ -388,6 +393,16 @@ void link_data( object *root, char *lab )
 	object *cur, *cur1;
 	variable *cv, *cv1;
 
+	// scroll large tables to show selected cell
+	cmd( "if { [ info procs iniselcell ] == \"\" } { \
+			proc iniselcell { cell } { \
+				global g; \
+				focus $cell; \
+				$cell selection range 0 end; \
+				canvassee $g.can $cell \
+			} \
+		}" );
+		
 	cur1 = root->search( lab );
 	strcpy( previous, "" );
 	
@@ -446,13 +461,22 @@ void link_data( object *root, char *lab )
 				cmd( "grid $w.c%d_v%sp -row %d -column [ expr 2 + %d ] -padx 1", i, cv->label, k, i );
 				cmd( "mouse_wheel $w.c%d_v%sp", i, cv->label );
 				
+				cmd( "bind $w.c%d_v%sp <Button-1> { iniselcell $w.c%d_v%sp; break }", i, cv->label, i, cv->label );
+				
 				if ( strlen( previous ) != 0 )
 				{
-					cmd( "bind $w.c%d_v%sp <Button-1> { $w.c%d_v%sp selection range 0 end }", i, cv->label, i, cv->label );
-					cmd( "bind %s <Return> { focus $w.c%d_v%sp; $w.c%d_v%sp selection range 0 end }", previous, i, cv->label, i, cv->label );
-					cmd( "bind $w.c%d_v%sp <Shift-Return> { focus %s; %s selection range 0 end }", i, cv->label, previous, previous );
-					cmd( "bind %s <Down> { focus $w.c%d_v%sp; $w.c%d_v%sp selection range 0 end }", previous, i, cv->label, i, cv->label );
-					cmd( "bind $w.c%d_v%sp <Up> { focus %s; %s selection range 0 end }", i, cv->label, previous, previous );
+					cmd( "bind %s <Return> { iniselcell $w.c%d_v%sp }", previous, i, cv->label );
+					cmd( "bind $w.c%d_v%sp <Shift-Return> { iniselcell %s }", i, cv->label, previous );
+					cmd( "bind %s <Tab> { iniselcell $w.c%d_v%sp }", previous, i, cv->label );
+					cmd( "bind $w.c%d_v%sp <Shift-Tab> { iniselcell %s }", i, cv->label, previous );
+					cmd( "bind %s <Down> { iniselcell $w.c%d_v%sp }", previous, i, cv->label );
+					cmd( "bind $w.c%d_v%sp <Up> { iniselcell %s }", i, cv->label, previous );
+				}
+				else
+				{
+					cmd( "bind $w.c%d_v%sp <Shift-Return> { break }", i, cv->label );
+					cmd( "bind %s <Tab> { break }", previous );
+					cmd( "bind $w.c%d_v%sp <Shift-Tab> { break }", i, cv->label );
 				}
 				
 				cmd( "bind $w.c%d_v%sp <FocusIn> { \
@@ -484,13 +508,22 @@ void link_data( object *root, char *lab )
 					cmd( "grid $w.c%d_v%s_%d -row %d -column [ expr 2 + %d ] -padx 1", i, cv->label, j, k, i );
 					cmd( "mouse_wheel $w.c%d_v%s_%d", i, cv->label, j );
 
+					cmd( "bind  $w.c%d_v%s_%d <Button-1> { iniselcell $w.c%d_v%s_%d; break }", i, cv->label, j, i, cv->label, j );
+					
 					if ( strlen( previous ) != 0 )
 					{
-						cmd( "bind  $w.c%d_v%s_%d <Button-1> { $w.c%d_v%s_%d selection range 0 end }", i, cv->label, j, i, cv->label, j );
-						cmd( "bind %s <Return> { focus $w.c%d_v%s_%d; $w.c%d_v%s_%d selection range 0 end }", previous, i, cv->label, j, i, cv->label, j );
-						cmd( "bind  $w.c%d_v%s_%d <Shift-Return> { focus %s; %s selection range 0 end }", i, cv->label, j, previous, previous );
-						cmd( "bind %s <Down> { focus $w.c%d_v%s_%d; $w.c%d_v%s_%d selection range 0 end }", previous, i, cv->label, j, i, cv->label, j );
-						cmd( "bind  $w.c%d_v%s_%d <Up> { focus %s; %s selection range 0 end }", i, cv->label, j, previous, previous );
+						cmd( "bind %s <Return> { iniselcell $w.c%d_v%s_%d }", previous, i, cv->label, j );
+						cmd( "bind  $w.c%d_v%s_%d <Shift-Return> { iniselcell %s }", i, cv->label, j, previous );
+						cmd( "bind %s <Tab> { iniselcell $w.c%d_v%s_%d }", previous, i, cv->label, j );
+						cmd( "bind  $w.c%d_v%s_%d <Shift-Tab> { iniselcell %s }", i, cv->label, j, previous );
+						cmd( "bind %s <Down> { iniselcell $w.c%d_v%s_%d }", previous, i, cv->label, j );
+						cmd( "bind  $w.c%d_v%s_%d <Up> { iniselcell %s }", i, cv->label, j, previous );
+					}
+					else
+					{
+						cmd( "bind  $w.c%d_v%s_%d <Shift-Return> { break }", i, cv->label, j );
+						cmd( "bind %s <Tab> { break }", previous );
+						cmd( "bind  $w.c%d_v%s_%d <Shift-Tab> { break }", i, cv->label, j );
 					}
 					
 					cmd( "bind $w.c%d_v%s_%d <FocusIn> { \
@@ -513,6 +546,14 @@ void link_data( object *root, char *lab )
 			}
 		}
 	  
+		// missing binds for last cell
+		if ( strlen( previous ) != 0 )
+		{
+			cmd( "bind %s <Return> { break }", previous );
+			cmd( "bind %s <Tab> { break }", previous );
+			cmd( "bind %s <Down> { break }", previous );
+		}
+		
 		// indicate columns overflow (>MAX_COLS)
 		if ( ! colOvflw && cur != NULL )
 			colOvflw = true;

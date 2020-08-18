@@ -921,6 +921,38 @@ proc selectinlist { w pos { foc 0 } } {
 
 
 #************************************************
+# CANVASSEE
+# Change the canvas scrollbars' positions to see
+# completely an window item in canvas
+#************************************************
+proc canvassee { c w } { \
+	set bb [ $c bbox all ]; \
+	set xv [ $c xview ]; \
+	set yv [ $c yview ]; \
+	set cw [ expr [ lindex $bb 2 ] - [ lindex $bb 0 ] ]; \
+	set ch [ expr [ lindex $bb 3 ] - [ lindex $bb 1 ] ]; \
+	set xmi [ expr [ lindex $bb 0 ] + [ lindex $xv 0 ] * $cw ]; \
+	set xma [ expr [ lindex $bb 0 ] + [ lindex $xv 1 ] * $cw ]; \
+	set ymi [ expr [ lindex $bb 1 ] + [ lindex $yv 0 ] * $ch ]; \
+	set yma [ expr [ lindex $bb 1 ] + [ lindex $yv 1 ] * $ch ]; \
+	set wx [ expr [ $c canvasx [ winfo x $w ] ] - $xmi ]; \
+	set wy [ expr [ $c canvasy [ winfo y $w ] ] - $ymi ]; \
+	set ww [ winfo width $w ]; \
+	set wh [ winfo height $w ]; \
+	if { $wx < $xmi } { \
+		$c xview moveto [ expr [ lindex $xv 0 ] + ( $wx - $xmi ) / $cw ] \
+	} elseif { [ expr $wx + $ww ] > $xma } { \
+		$c xview moveto [ expr [ lindex $xv 0 ] + ( $wx + $ww - $xma ) / $cw ] \
+	}; \
+	if { $wy < $ymi } { \
+		$c yview moveto [ expr [ lindex $yv 0 ] + ( $wy - $ymi ) / $ch ] \
+	} elseif { [ expr $wy + $wh ] > $yma } { \
+		$c yview moveto [ expr [ lindex $yv 0 ] + ( $wy + $wh - $yma ) / $ch ] \
+	}; \
+} \
+
+
+#************************************************
 # OKHELPCANCEL
 # Procedure to create standard button set
 #************************************************
