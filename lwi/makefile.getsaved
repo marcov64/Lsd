@@ -17,13 +17,13 @@
 CC=g++	
 TARGET=lsd_getsaved
 EXT=
-SWITCH_CC=-DNO_WINDOW -DCPP_DEFAULT -Wno-unused-result -O3
+SWITCH_CC=-Wno-unused-result -O3
 
 # For Unix systems, using OS native compiler and Tcl/Tk.
 LSDROOT=..
 PATH_HEADER=. #path to general headers
 PATH_LIB=. #path to general libraries
-LIBS= #additional libraries
+LIBS=-lz #additional libraries
 
 # from here you should not need to modify anything
 RM=rm -f
@@ -40,28 +40,29 @@ $(TARGET)$(EXT): $(SRC_DIR)main.obj $(SRC_DIR)getsaved.obj $(SRC_DIR)file.obj \
 	$(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)nets.obj $(SRC_DIR)util.obj \
 	-L$(PATH_LIB) $(LIBS) -o $(TARGET)
 
-$(SRC_DIR)main.obj: $(SRC_DIR)main.cpp 
+$(SRC_DIR)main.obj: $(SRC_DIR)main.cpp $(SRC_DIR)choose.h $(SRC_DIR)decl.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)main.cpp -o $(SRC_DIR)main.obj $(INCLUDE)
 
-$(SRC_DIR)getsaved.obj: $(SRC_DIR)getsaved.cpp 
+$(SRC_DIR)getsaved.obj: $(SRC_DIR)getsaved.cpp $(SRC_DIR)choose.h $(SRC_DIR)decl.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)getsaved.cpp -o $(SRC_DIR)getsaved.obj $(INCLUDE)
 
-$(SRC_DIR)file.obj: $(SRC_DIR)file.cpp 
+$(SRC_DIR)file.obj: $(SRC_DIR)file.cpp $(SRC_DIR)choose.h $(SRC_DIR)decl.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)file.cpp -o $(SRC_DIR)file.obj $(INCLUDE)
 
-$(SRC_DIR)object.obj: $(SRC_DIR)object.cpp 
+$(SRC_DIR)object.obj: $(SRC_DIR)object.cpp $(SRC_DIR)choose.h $(SRC_DIR)decl.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)object.cpp -o $(SRC_DIR)object.obj $(INCLUDE)
 
-$(SRC_DIR)variab.obj: $(SRC_DIR)variab.cpp 
+$(SRC_DIR)variab.obj: $(SRC_DIR)variab.cpp $(SRC_DIR)choose.h $(SRC_DIR)decl.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.obj $(INCLUDE)
 
-$(SRC_DIR)nets.obj: $(SRC_DIR)nets.cpp 
+$(SRC_DIR)nets.obj: $(SRC_DIR)nets.cpp $(SRC_DIR)choose.h $(SRC_DIR)decl.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.obj $(INCLUDE)
 
-$(SRC_DIR)util.obj: $(SRC_DIR)util.cpp 
+$(SRC_DIR)util.obj: $(SRC_DIR)util.cpp $(SRC_DIR)choose.h $(SRC_DIR)decl.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)util.cpp -o $(SRC_DIR)util.obj $(INCLUDE)
 
-# Clean object files for building for another distribution
+$(SRC_DIR)choose.h:
+	cp choose.h $(SRC_DIR)
+
 clean:
-	$(RM) $(SRC_DIR)main.obj $(SRC_DIR)getsaved.obj $(SRC_DIR)file.obj \
-	$(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)nets.obj $(SRC_DIR)util.obj
+	$(RM) $(SRC_DIR)*.obj $(SRC_DIR)choose.h

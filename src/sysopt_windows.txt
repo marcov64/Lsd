@@ -15,6 +15,6 @@ LIBS=-lz
 
 # Compiler options
 WRC=windres
-CC=x86_64-w64-mingw32-g++
+CC=g++
 GLOBAL_CC=-march=native -std=gnu++14 -w
 SSWITCH_CC=-mthreads -mwindows -O3

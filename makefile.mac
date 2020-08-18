@@ -28,7 +28,7 @@ PATH_TCL_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/Headers
 PATH_TK_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/Headers
 PATH_LIB=$(SRC_DIR)LSD.app/Contents/Frameworks
 
-RM=rm -f
+RM=rm -f -R
 TARGET_PKG=$(TARGET).app/Contents/MacOS/$(TARGET)
 
 # Variable used to prepare the options to search for the tcl and tk headers

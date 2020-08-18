@@ -14,6 +14,9 @@ SWITCH_CC_NW=$(GLOBAL_CC) $(SWITCH_CC) -O3 -g0
 SUFFIX_NW=NW
 TARGET_NW=lsd$(SUFFIX_NW)
 
+# OS command to delete files
+RM=rm -f
+
 # link executable
 $(TARGET_NW)$(EXT): $(FUN)$(SUFFIX_NW).o $(SRC_DIR)main.o $(SRC_DIR)lsdmain.o \
 $(SRC_DIR)file.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)util.o \
@@ -66,4 +69,4 @@ $(SRC_DIR)choose.h $(SRC_DIR)decl.h $(SRC_DIR)system_options.txt
 	-c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.o
 	
 clean:
-	rm $(SRC_DIR)*.o $(FUN)$(SUFFIX_NW).o $(TARGET_NW)*
+	$(RM) $(SRC_DIR)*.o $(FUN)$(SUFFIX_NW).o $(TARGET_NW)*

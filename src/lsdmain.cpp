@@ -150,7 +150,7 @@ Tcl_Interp *inter = NULL;	// global Tcl interpreter in LSD
 #endif
 
 #ifdef PARALLEL_MODE
-map< thread::id, worker * > thr_ptr;	// worker thread pointers
+map < thread::id, worker * > thr_ptr;	// worker thread pointers
 thread::id main_thread;		// LSD main thread ID
 worker *workers = NULL;		// multi-thread parallel worker data
 #endif
@@ -166,11 +166,13 @@ int lsdmain( int argn, char **argv )
 
 	path = new char[ strlen( "" ) + 1 ];
 	simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
+	exec_path = new char[ MAX_PATH_LENGTH + 1 ]; 
 	strcpy( path, "" );
 	strcpy( tcl_dir, "" );
 	strcpy( simul_name, DEF_CONF_FILE );
+	exec_path = _getcwd( exec_path, MAX_PATH_LENGTH );
 	exec_file = clean_file( argv[ 0 ] );	// global pointer to the name of executable file
-	exec_path = clean_path( getcwd( NULL, 0 ) );	// global pointer to path of executable file
+	exec_path = clean_path( exec_path );	// global pointer to path of executable file
 
 #ifdef PARALLEL_MODE
 	main_thread = this_thread::get_id( );
@@ -190,10 +192,16 @@ int lsdmain( int argn, char **argv )
 	findex = 1;
 	fend = 0;							// no file number limit
 
+	if ( exec_file == NULL || exec_path == NULL )
+	{
+		fprintf( stderr, "\nInvalid LSD executable name or path.\nThis is the No Window version of LSD.\nMake sure the LSD directory is not too deep into the disk directory tree (over %d chars).\n\n", MAX_PATH_LENGTH );
+		myexit( 1 );
+	}
+	
 	if ( argn < 3 )
 	{
 		fprintf( stderr, "\nThis is the No Window version of LSD.\nCommand line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n\n" );
-		myexit( 1 );
+		myexit( 0 );
 	}
 	else
 	{
@@ -286,6 +294,7 @@ int lsdmain( int argn, char **argv )
 		fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n\n", struct_file );
 		myexit( 3 );
 	}
+	
 	fclose( f );
 
 	if ( load_configuration( true ) != 0 )
@@ -302,11 +311,18 @@ int lsdmain( int argn, char **argv )
 #else 
 	for ( i = 1; argv[ i ] != NULL; i++ )
 	{
+		if ( exec_file == NULL || exec_path == NULL )
+		{
+			log_tcl_error( "Invalid LSD executable name or path", "Make sure the LSD directory is not too deep into the disk directory tree" );
+			myexit( 1 );
+		}
+		
 		if ( argv[ i ][ 0 ] != '-' || ( argv[ i ][ 1 ] != 'f' && argv[ i ][ 1 ] != 'i' && argv[ i ][ 1 ] != 'c' ) )
 		{
 			log_tcl_error( "Command line parameters", "Invalid option, available options: -i TCL_DIRECTORY / -f MODEL_NAME / -c MAX_CORES" );
 			myexit( 1 );
 		}
+		
 		if ( argv[ i ][ 1 ] == 'f' )
 		{
 			delete [ ] simul_name;
@@ -626,10 +642,11 @@ int lsdmain( int argn, char **argv )
 	empty_description( );
 	root->delete_obj( );
 	delete stacklog;
-	delete [ ] struct_file;
 	delete [ ] path;
-	delete [ ] simul_name;
 	delete [ ] rootLsd;
+	delete [ ] exec_path;
+	delete [ ] simul_name;
+	delete [ ] struct_file;
 
 	return 0;
 }
@@ -1529,10 +1546,15 @@ CLEAN_FILE
 // remove any path prefixes to filename, if present
 char *clean_file( char *filename )
 {
-	if ( strchr( filename, '/' ) != NULL )
-		return strrchr( filename, '/' ) + 1;
-	if ( strchr( filename, '\\' ) != NULL )
-		return strrchr( filename, '\\' ) + 1;
+	if ( filename != NULL )
+	{
+		if ( strchr( filename, '/' ) != NULL )
+			return strrchr( filename, '/' ) + 1;
+		
+		if ( strchr( filename, '\\' ) != NULL )
+			return strrchr( filename, '\\' ) + 1;
+	}
+	
 	return filename;
 }
 
@@ -1544,6 +1566,10 @@ CLEAN_PATH
 char *clean_path( char *filepath )
 {
 	int i, len = strlen( "/cygdrive/" );
+	
+	if ( filepath == NULL )
+		return NULL;
+	
 	if ( ! strncmp( filepath, "/cygdrive/", len ) )
 	{
 		char *temp = new char[ strlen( filepath ) + 1 ];

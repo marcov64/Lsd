@@ -16,9 +16,7 @@ Execute the lsd_getsaved command line utility.
 Lists all variables being saved in a configuration.
 *************************************************************/
 
-#include <set>
 #include "decl.h"
-
 
 #define SEP	",;\t"			// column separators to use
 
@@ -99,7 +97,7 @@ int lsdmain( int argn, char **argv )
 
 	if ( argn < 3 )
 	{
-		fprintf( stderr, "\nThis is LSD Saved Variable Reader.\nIt reads a LSD configuration file (.lsd) and shows the variables/parameters\nbeing saved, optionally saving them in a comma separated text file (.csv).\n\nCommand line options:\n'-a' show all variables/parameters\n'-f FILENAME.lsd' the configuration file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n" );
+		fprintf( stderr, "\nThis is LSD Saved Variable Reader.\nIt reads a LSD configuration file (.lsd) and shows the variables/parameters\nbeing saved, optionally saving them in a comma separated text file (.csv).\n\nCommand line options:\n'-a' show all variables/parameters\n'-f FILENAME.lsd' the configuration file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n\n" );
 		myexit( 1 );
 	}
 	else
@@ -128,21 +126,21 @@ int lsdmain( int argn, char **argv )
 				continue;
 			}
 
-			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is LSD Saved Variable Reader.\n\nCommand line options:\n'-a' show all variables/parameters\n'-f FILENAME.lsd' the configuration file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n", argv[ i ][ 0 ], argv[ i ][ 1 ] );
+			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is LSD Saved Variable Reader.\n\nCommand line options:\n'-a' show all variables/parameters\n'-f FILENAME.lsd' the configuration file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n\n", argv[ i ][ 0 ], argv[ i ][ 1 ] );
 			myexit( 2 );
 		}
 	}
 
 	if ( struct_file == NULL )
 	{
-		fprintf( stderr, "\nNo configuration file provided.\nThis is LSD Saved Variable Reader.\nSpecify a -f FILENAME.lsd to use for reading the saved variables (if any).\n" );
+		fprintf( stderr, "\nNo configuration file provided.\nThis is LSD Saved Variable Reader.\nSpecify a -f FILENAME.lsd to use for reading the saved variables (if any).\n\n" );
 		myexit( 3 );
 	}
 
 	f = fopen( struct_file, "r" );
 	if ( f == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Saved Variable Reader.\nSpecify an existing -f FILENAME.lsd configuration file.\n", struct_file );
+		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Saved Variable Reader.\nSpecify an existing -f FILENAME.lsd configuration file.\n\n", struct_file );
 		myexit( 4 );
 	}
 	fclose( f );
@@ -150,19 +148,11 @@ int lsdmain( int argn, char **argv )
 	root = new object;
 	root->init( NULL, "Root" );
 	add_description( "Root", "Object", "(no description available)" );
-	blueprint = new object;
-	blueprint->init( NULL, "Root" );
-	stacklog = new lsdstack;
-	stacklog->prev = NULL;
-	stacklog->next = NULL;
-	stacklog->ns = 0;
-	stacklog->vs = NULL;
-	strcpy( stacklog->label, "LSD Simulation Manager" );
-	stack = 0;
+	reset_blueprint( NULL );
 
 	if ( load_configuration( true ) != 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Saved Variable Reader.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
+		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Saved Variable Reader.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n\n", struct_file );
 		myexit( 5 );
 	}
 
@@ -178,7 +168,7 @@ int lsdmain( int argn, char **argv )
 		f = fopen( out_file, "wt" );
 		if ( f == NULL )
 		{
-			fprintf( stderr, "\nFile '%s' cannot be saved.\nThis is LSD Saved Variable Reader.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n", out_file  );
+			fprintf( stderr, "\nFile '%s' cannot be saved.\nThis is LSD Saved Variable Reader.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n\n", out_file  );
 			myexit( 6 );
 		}
 
@@ -193,10 +183,9 @@ int lsdmain( int argn, char **argv )
 	else	// send to stdout
 		get_saved( root, stdout, "\t", all_var );
 
-	empty_cemetery( );
+	empty_blueprint( );
+	empty_description( );
 	root->delete_obj( );
-	blueprint->delete_obj( );
-	delete stacklog;
 	delete [ ] out_file;
 	delete [ ] simul_name;
 
@@ -214,48 +203,4 @@ double variable::fun( object* r ) { return NAN; }
 /*********************************
 ALLOC_SAVE_VAR
 *********************************/
-bool alloc_save_var( variable *v )
-{
-	bool prev_state = no_more_memory;
-
-	if ( ! running )
-		return true;
-
-	if ( ! no_more_memory )
-	{
-		if ( v->num_lag > 0 || v->param == 1 )
-			v->start = t - 1;
-		else
-			v->start = t;
-
-		v->end = max_step;
-
-		// use C stdlib to be able to deallocate memory for deleted objects
-		free( v->data );
-		v->data = ( double * ) malloc( ( v->end - v->start + 1 ) * sizeof( double ) );
-
-		if( v->data == NULL )
-		{
-			no_more_memory = true;
-			v->save = v->savei = false;
-			v->start = v->end = 0;
-
-			if ( no_more_memory != prev_state )
-			{
-				set_lab_tit( v );
-				plog( "\nWarning: cannot allocate memory for saving '%s %s' (object '%s')\n Subsequent series will not be saved\n", "", v->label, v->lab_tit, v->up->label );
-			}
-		}
-		else
-		{
-			if ( v->num_lag > 0  || v->param == 1 )
-				v->data[ 0 ] = v->val[ 0 ];
-
-			++series_saved;
-		}
-	}
-	else
-		v->save = v->savei = false;
-
-	return ! no_more_memory;
-}
+bool alloc_save_var( variable *v ) { return true; }

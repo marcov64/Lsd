@@ -204,11 +204,11 @@ void init_plot( int num, int id_sim )
 
 	// controls
 	cmd( "ttk::checkbutton $activeplot.fond.shift -text Scroll -variable scrollB -command { set_c_var done_in 8 }" );	
-	cmd( "if [ string equal $CurPlatform windows ] { set goWid 7 } { set goWid 5 }" );
+	cmd( "if [ string equal $CurPlatform windows ] { set goWid 7 } { set goWid 6 }" );
 	cmd( "ttk::button $activeplot.fond.go -width $goWid -text Center -command { set_c_var done_in 7 }" );
 
 	cmd( "$activeplot.fond create window [ expr $sclhsizeR / 2 ] [ expr $botvsizeR / 4 - 5 ] -window $activeplot.fond.shift" );
-	cmd( "$activeplot.fond create window [ expr $sclhsizeR / 2 ] [ expr 3 * $botvsizeR / 4 ] -window $activeplot.fond.go" );
+	cmd( "$activeplot.fond create window [ expr $sclhsizeR / 2 ] [ expr 3 * $botvsizeR / 4 - 2 ] -window $activeplot.fond.go" );
 	
 	// labels
 	cmd( "for { set i 0; set j 0; set k 0 } { $i < [ expr min( %d, $linlabR * $lablinR ) ] } { incr i } { \

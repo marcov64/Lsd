@@ -20,9 +20,6 @@ Global definitions among all LSD C++ modules
 #define _LSD_VERSION_ "7.3-0"
 #define _LSD_DATE_ "December 31 2020"   // __DATE__
 
-// LSD compilation options file
-#include "choose.h"
-
 // standard libraries used
 #include <stdio.h>
 #include <string.h>
@@ -56,13 +53,20 @@ Global definitions among all LSD C++ modules
 #include <unordered_set>
 #include <chrono>
 
+// LSD special compilation options (normally not used)
+#if __has_include( "choose.h" )
+#include "choose.h"
+#endif
+
 // Tcl/Tk for graphical version (not no-window version)
 #ifndef NO_WINDOW
 #include <tk.h>
 #endif
 
 // comment the next line to disable parallel mode (multi-threading)
+#ifndef NO_PARALLEL
 #define PARALLEL_MODE
+#endif
 
 // disable code that make gdb debugging harder
 #ifdef DEBUG_MODE

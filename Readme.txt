@@ -17,6 +17,9 @@ LSD is copyrighted by Marco Valente and Marcelo C. Pereira (version 7.x addition
 
 LSD includes third party software under the license of the copyright owners:
 
+GCC 10.2 is copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
+Tcl/Tk 8.6 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
+MSYS2 2.0, https://www.msys2.org
 Eigen 3.3.7 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest.nps.edu
@@ -111,7 +114,7 @@ For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
 4.1 Windows installation (64-bit ONLY)
 **************************************
 
-IMPORTANT: from version 7.3 and higher, LSD supports only Windows 64-bit. If you must run LSD in a Windows 32-bit computer, please use the 7.3 version which can be downloaded from the same site indicated below. If you are unsure of the version of Windows in your computer, please check in "Windows > Settings > System > About > System type".
+IMPORTANT: from version 7.3 and higher, LSD supports only Windows 64-bit. If you must run LSD in a Windows 32-bit computer, please use the 7.2 version which can be downloaded from the same site indicated below. If you are unsure of the version of Windows in your computer, please check in "Windows > Settings > System > About > System type".
 
 To install LSD, simply unzip the LSD distribution file on the desired folder. In most cases "C:\" (the root of the hard disk) is the best option. The simplest way of doing is:
 
@@ -216,7 +219,7 @@ sudo yum install gcc-c++ make gdb gnuplot zlib-devel tcl tk tcl-devel tk-devel m
 
 IN CASE OF PROBLEMS:
 
-Please check your configuration has at least g++ version 6.4 installed (you may check it by issuing the command "g++ -v" in terminal). Ubuntu minimum supported version is 18.04 (older versions can be updated to use g++ 6.4 or newer but this is not the default configuration). If only g++ version 4.8 is available, it is usually possible to use it if the user change the "-std=gnu++14" directive to "-std=gnu++11" in the GLOBAL_CC parameter in LMM menu "Model>System Options".
+Please check your configuration has at least g++ version 6.4 installed (you may check it by issuing the command "g++ -v" in terminal). Ubuntu minimum supported version is 18.04 (older versions can be updated to use g++ 6.4 or newer but this is not the default configuration).
 
 Also make sure if Tcl/Tk version 8.6 is present (use the command "echo 'puts $tcl_version;exit 0' | tclsh" to get the installed version).
 

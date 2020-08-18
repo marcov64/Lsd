@@ -16,9 +16,7 @@ Execute the lsd_confgen command line utility.
 Generates new configurations from a base one.
 *************************************************************/
 
-#include <set>
 #include "decl.h"
-
 
 #define SEP	",;\t"			// column separators to use
 
@@ -105,7 +103,7 @@ int lsdmain( int argn, char **argv )
 
 	if ( argn < 7 )
 	{
-		fprintf( stderr, "\nThis is LSD Configuration Generator.\nIt creates new LSD configuration file(s) (.lsd) based on changed parameters\nor variables initial values described in a comma separated text file (.csv).\nEach changed element should take one line. First column must contain the\nparameter or variable name. Second (and additional) column(s) must contain\nthe values to apply in the new configuration. First line (header) is required\nand considered for the number of columns only. One configuration is generated\nfor each column with values, sequentially numbered.\n\nCommand line options:\n'-f FILENAME.lsd' the original configuration file to use as base\n'-c CONFIG.csv' comma separated text file with new configuration values\n'-o FILE_BASE_NAME' base name (no extension) to save new configuration file(s)\n" );
+		fprintf( stderr, "\nThis is LSD Configuration Generator.\nIt creates new LSD configuration file(s) (.lsd) based on changed parameters\nor variables initial values described in a comma separated text file (.csv).\nEach changed element should take one line. First column must contain the\nparameter or variable name. Second (and additional) column(s) must contain\nthe values to apply in the new configuration. First line (header) is required\nand considered for the number of columns only. One configuration is generated\nfor each column with values, sequentially numbered.\n\nCommand line options:\n'-f FILENAME.lsd' the original configuration file to use as base\n'-c CONFIG.csv' comma separated text file with new configuration values\n'-o FILE_BASE_NAME' base name (no extension) to save new configuration file(s)\n\n" );
 		myexit( 1 );
 	}
 	else
@@ -134,21 +132,21 @@ int lsdmain( int argn, char **argv )
 				continue;
 			}
 
-			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is LSD Configuration Generator.\n\nCommand line options:\n'-f FILENAME.lsd' the original configuration file to use as base\n'-c CONFIG.csv' comma separated text file with new configuration values\n'-o FILE_BASE_NAME' base name (no extension) to save new configuration file(s)\n", argv[ i ][ 0 ], argv[ i ][ 1 ] );
+			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is LSD Configuration Generator.\n\nCommand line options:\n'-f FILENAME.lsd' the original configuration file to use as base\n'-c CONFIG.csv' comma separated text file with new configuration values\n'-o FILE_BASE_NAME' base name (no extension) to save new configuration file(s)\n\n", argv[ i ][ 0 ], argv[ i ][ 1 ] );
 			myexit( 2 );
 		}
 	}
 
 	if ( struct_file == NULL )
 	{
-		fprintf( stderr, "\nNo original configuration file provided.\nThis is LSD Configuration Generator.\nSpecify a -f FILENAME.lsd to use as a base for the new configuration files.\n" );
+		fprintf( stderr, "\nNo original configuration file provided.\nThis is LSD Configuration Generator.\nSpecify a -f FILENAME.lsd to use as a base for the new configuration files.\n\n" );
 		myexit( 3 );
 	}
 
 	f = fopen( struct_file, "r" );
 	if ( f == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Configuration Generator.\nSpecify an existing -f FILENAME.lsd base configuration file.\n", struct_file );
+		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Configuration Generator.\nSpecify an existing -f FILENAME.lsd base configuration file.\n\n", struct_file );
 		myexit( 4 );
 	}
 	fclose( f );
@@ -164,7 +162,7 @@ int lsdmain( int argn, char **argv )
 	f = fopen( config_file, "r" );
 	if ( f == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Configuration Generator.\nSpecify an existing -c CONFIG.csv to use as the new configuration values.\n", config_file );
+		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Configuration Generator.\nSpecify an existing -c CONFIG.csv to use as the new configuration values.\n\n", config_file );
 		myexit( 4 );
 	}
 	fclose( f );
@@ -180,26 +178,18 @@ int lsdmain( int argn, char **argv )
 	root = new object;
 	root->init( NULL, "Root" );
 	add_description( "Root", "Object", "(no description available)" );
-	blueprint = new object;
-	blueprint->init( NULL, "Root" );
-	stacklog = new lsdstack;
-	stacklog->prev = NULL;
-	stacklog->next = NULL;
-	stacklog->ns = 0;
-	stacklog->vs = NULL;
-	strcpy( stacklog->label, "LSD Simulation Manager" );
-	stack = 0;
+	reset_blueprint( NULL );
 
 	if ( load_configuration( true ) != 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Configuration Generator.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
+		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Configuration Generator.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n\n", struct_file );
 		myexit( 5 );
 	}
 
 	confs = load_confs_csv( config_file );
 	if ( confs == 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Configuration Generator.\nSpecify a -c CONFIG.csv with a valid comma separated format.\n", config_file );
+		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Configuration Generator.\nSpecify a -c CONFIG.csv with a valid comma separated format.\n\n", config_file );
 		myexit( 6 );
 	}
 
@@ -207,13 +197,13 @@ int lsdmain( int argn, char **argv )
 	{
 		if ( ! change_configuration( root, i ) )
 		{
-			fprintf( stderr, "\nInvalid parameter or variable name.\nThis is LSD Configuration Generator.\nCheck if the spelling of the names of parameters and variables is exactly the\nsame as in the original configuration.\n" );
+			fprintf( stderr, "\nInvalid parameter or variable name.\nThis is LSD Configuration Generator.\nCheck if the spelling of the names of parameters and variables is exactly the\nsame as in the original configuration.\n\n" );
 			myexit( 7 );
 		}
 
 		if ( ! save_configuration( confs == 1 ? 0 : i ) )
 		{
-			fprintf( stderr, "\nFile '%s.lsd' cannot be saved.\nThis is LSD Configuration Generator.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n", simul_name  );
+			fprintf( stderr, "\nFile '%s.lsd' cannot be saved.\nThis is LSD Configuration Generator.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n\n", simul_name  );
 			myexit( 8 );
 		}
 	}
@@ -223,10 +213,9 @@ int lsdmain( int argn, char **argv )
 		delete [ ] vars[ i ];
 		delete [ ] values[ i ];
 	}
-	empty_cemetery( );
+	empty_blueprint( );
+	empty_description( );
 	root->delete_obj( );
-	blueprint->delete_obj( );
-	delete stacklog;
 	delete [ ] struct_file;
 	delete [ ] config_file;
 	delete [ ] simul_name;
@@ -435,48 +424,4 @@ double variable::fun( object* r ) { return NAN; }
 /*********************************
 ALLOC_SAVE_VAR
 *********************************/
-bool alloc_save_var( variable *v )
-{
-	bool prev_state = no_more_memory;
-
-	if ( ! running )
-		return true;
-
-	if ( ! no_more_memory )
-	{
-		if ( v->num_lag > 0 || v->param == 1 )
-			v->start = t - 1;
-		else
-			v->start = t;
-
-		v->end = max_step;
-
-		// use C stdlib to be able to deallocate memory for deleted objects
-		free( v->data );
-		v->data = ( double * ) malloc( ( v->end - v->start + 1 ) * sizeof( double ) );
-
-		if( v->data == NULL )
-		{
-			no_more_memory = true;
-			v->save = v->savei = false;
-			v->start = v->end = 0;
-
-			if ( no_more_memory != prev_state )
-			{
-				set_lab_tit( v );
-				plog( "\nWarning: cannot allocate memory for saving '%s %s' (object '%s')\n Subsequent series will not be saved\n", "", v->label, v->lab_tit, v->up->label );
-			}
-		}
-		else
-		{
-			if ( v->num_lag > 0  || v->param == 1 )
-				v->data[ 0 ] = v->val[ 0 ];
-
-			++series_saved;
-		}
-	}
-	else
-		v->save = v->savei = false;
-
-	return ! no_more_memory;
-}
+bool alloc_save_var( variable *v ) { return true; }

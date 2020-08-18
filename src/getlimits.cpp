@@ -16,9 +16,7 @@ Executes the lsd_getlimits command line utility.
 Lists all initial values ranges and configuration.
 *************************************************************/
 
-#include <set>
 #include "decl.h"
-
 
 #define SEP	",;\t"			// column separators to use
 
@@ -98,7 +96,7 @@ int lsdmain( int argn, char **argv )
 
 	if ( argn < 5 )
 	{
-		fprintf( stderr, "\nThis is LSD Initial Values Range Reader.\nIt reads a LSD configuration file (.lsd) and a LSD sensitivity analysis file\n(.sa) and shows the ranges used for variables/parameters being analyzed,\noptionally saving them in a comma separated text file (.csv).\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-s FILENAME.sa' the sensitivity analysis file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n" );
+		fprintf( stderr, "\nThis is LSD Initial Values Range Reader.\nIt reads a LSD configuration file (.lsd) and a LSD sensitivity analysis file\n(.sa) and shows the ranges used for variables/parameters being analyzed,\noptionally saving them in a comma separated text file (.csv).\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-s FILENAME.sa' the sensitivity analysis file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n\n" );
 		myexit( 1 );
 	}
 	else
@@ -127,21 +125,21 @@ int lsdmain( int argn, char **argv )
 				continue;
 			}
 
-			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is LSD Initial Values Range Reader.\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-s FILENAME.sa' the sensitivity analysis file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n", argv[ i ][ 0 ], argv[ i ][ 1 ] );
+			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is LSD Initial Values Range Reader.\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-s FILENAME.sa' the sensitivity analysis file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n\n", argv[ i ][ 0 ], argv[ i ][ 1 ] );
 			myexit( 2 );
 		}
 	}
 
 	if ( struct_file == NULL )
 	{
-		fprintf( stderr, "\nNo original configuration file provided.\nThis is LSD Initial Values Range Reader.\nSpecify a -f FILENAME.lsd to use for reading the saved variables (if any).\n" );
+		fprintf( stderr, "\nNo original configuration file provided.\nThis is LSD Initial Values Range Reader.\nSpecify a -f FILENAME.lsd to use for reading the saved variables (if any).\n\n" );
 		myexit( 3 );
 	}
 
 	f = fopen( struct_file, "r" );
 	if ( f == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Initial Values Range Reader.\nSpecify an existing -f FILENAME.lsd configuration file.\n", struct_file );
+		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Initial Values Range Reader.\nSpecify an existing -f FILENAME.lsd configuration file.\n\n", struct_file );
 		myexit( 4 );
 	}
 	fclose( f );
@@ -149,25 +147,17 @@ int lsdmain( int argn, char **argv )
 	root = new object;
 	root->init( NULL, "Root" );
 	add_description( "Root", "Object", "(no description available)" );
-	blueprint = new object;
-	blueprint->init( NULL, "Root" );
-	stacklog = new lsdstack;
-	stacklog->prev = NULL;
-	stacklog->next = NULL;
-	stacklog->ns = 0;
-	stacklog->vs = NULL;
-	strcpy( stacklog->label, "LSD Simulation Manager" );
-	stack = 0;
+	reset_blueprint( NULL );
 
 	if ( load_configuration( true ) != 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Initial Values Range Reader.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
+		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Initial Values Range Reader.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n\n", struct_file );
 		myexit( 5 );
 	}
 
 	if ( sens_file == NULL )
 	{
-		fprintf( stderr, "\nNo sensitivity analysis file provided.\nThis is LSD Initial Values Range Reader.\nSpecify a -s FILENAME.sa to use for reading the values limits (if any).\n" );
+		fprintf( stderr, "\nNo sensitivity analysis file provided.\nThis is LSD Initial Values Range Reader.\nSpecify a -s FILENAME.sa to use for reading the values limits (if any).\n\n" );
 		myexit( 6 );
 	}
 
@@ -175,13 +165,13 @@ int lsdmain( int argn, char **argv )
 	f = fopen( sens_file, "rt" );
 	if ( f == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Initial Values Range Reader.\nSpecify an existing -s FILENAME.sa sensitivity analysis file.\n", sens_file );
+		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Initial Values Range Reader.\nSpecify an existing -s FILENAME.sa sensitivity analysis file.\n\n", sens_file );
 		myexit( 7 );
 	}
 
 	if ( load_sensitivity( f ) != 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Initial Values Range Reader.\nCheck if the file is a valid LSD sensitivity analysis or regenerate it using the LSD Browser.\n", sens_file  );
+		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Initial Values Range Reader.\nCheck if the file is a valid LSD sensitivity analysis or regenerate it using the LSD Browser.\n\n", sens_file  );
 		fclose( f );
 		myexit( 8 );
 	}
@@ -193,7 +183,7 @@ int lsdmain( int argn, char **argv )
 		f = fopen( out_file, "wt" );
 		if ( f == NULL )
 		{
-			fprintf( stderr, "\nFile '%s' cannot be saved.\nThis is LSD Initial Values Range Reader.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n", out_file  );
+			fprintf( stderr, "\nFile '%s' cannot be saved.\nThis is LSD Initial Values Range Reader.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n\n", out_file  );
 			myexit( 9 );
 		}
 
@@ -209,10 +199,9 @@ int lsdmain( int argn, char **argv )
 		get_sa_limits( root, stdout, "\t" );
 
 	empty_sensitivity( rsense );
-	empty_cemetery( );
+	empty_blueprint( );
+	empty_description( );
 	root->delete_obj( );
-	blueprint->delete_obj( );
-	delete stacklog;
 	delete [ ] out_file;
 	delete [ ] simul_name;
 
@@ -230,48 +219,4 @@ double variable::fun( object* r ) { return NAN; }
 /*********************************
 ALLOC_SAVE_VAR
 *********************************/
-bool alloc_save_var( variable *v )
-{
-	bool prev_state = no_more_memory;
-
-	if ( ! running )
-		return true;
-
-	if ( ! no_more_memory )
-	{
-		if ( v->num_lag > 0 || v->param == 1 )
-			v->start = t - 1;
-		else
-			v->start = t;
-
-		v->end = max_step;
-
-		// use C stdlib to be able to deallocate memory for deleted objects
-		free( v->data );
-		v->data = ( double * ) malloc( ( v->end - v->start + 1 ) * sizeof( double ) );
-
-		if( v->data == NULL )
-		{
-			no_more_memory = true;
-			v->save = v->savei = false;
-			v->start = v->end = 0;
-
-			if ( no_more_memory != prev_state )
-			{
-				set_lab_tit( v );
-				plog( "\nWarning: cannot allocate memory for saving '%s %s' (object '%s')\n Subsequent series will not be saved\n", "", v->label, v->lab_tit, v->up->label );
-			}
-		}
-		else
-		{
-			if ( v->num_lag > 0  || v->param == 1 )
-				v->data[ 0 ] = v->val[ 0 ];
-
-			++series_saved;
-		}
-	}
-	else
-		v->save = v->savei = false;
-
-	return ! no_more_memory;
-}
+bool alloc_save_var( variable *v ) { return true; }

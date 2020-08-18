@@ -174,8 +174,8 @@ if { ! [ string equal $lsdTheme aqua ] } {
 }
 
 # get basic data from set theme
-set colorsTheme(bg) [ ttk::style lookup . -background  ]
-set colorsTheme(fg) [ ttk::style lookup . -foreground  ]
+set colorsTheme(bg) [ ttk::style lookup . -background ]
+set colorsTheme(fg) [ ttk::style lookup . -foreground ]
 set colorsTheme(sbg) [ ttk::style lookup . -selectbackground ]
 set colorsTheme(sfg) [ ttk::style lookup . -selectforeground ]
 set colorsTheme(ebg) [ ttk::style lookup . -fieldbackground ]

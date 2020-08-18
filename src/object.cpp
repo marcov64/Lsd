@@ -1818,6 +1818,9 @@ void object::delete_obj( void )
 		obj_list.erase( this );
 	}
 
+	// collect required variables BEFORE removing instances (bridge)
+	collect_cemetery( );
+
 	// find the bridge
 	if ( up != NULL )
 		cb = up->search_bridge( label );
@@ -1859,17 +1862,16 @@ void object::delete_obj( void )
 	if ( del_flag != NULL )
 		*del_flag = true;		// flag deletion to caller, if requested
 
-	collect_cemetery( );		// collect required variables BEFORE removing
+	empty( );					// empty object but don't delete it
 
-	empty( );
-
-	delete this;
+	delete this;				// delete (suicide) now
 }
 
 
 /****************************************************
 EMPTY
-Garbage collection for Objects.
+Garbage collection for objects
+Delete the entire son tree below
 ****************************************************/
 void object::empty( void )
 {
@@ -1886,7 +1888,7 @@ void object::empty( void )
 	v = NULL;
 	v_map.clear( );
 
-	for ( cb = b; cb != NULL; cb = cb1 )
+	for ( cb = b; cb != NULL; cb = cb1 )	// delete sons
 	{
 		cb1 = cb->next;
 		delete cb;
