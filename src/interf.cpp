@@ -7,8 +7,8 @@
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
-	Silk icon set 1.3 by Mark James
-	http://www.famfamfam.com/lab/icons/silk 
+	See Readme.txt for copyright information of
+	third parties' code used in LSD
 	
  *************************************************************/
 

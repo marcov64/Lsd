@@ -7,15 +7,14 @@
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
+	See Readme.txt for copyright information of
+	third parties' code used in LSD
+	
  *************************************************************/
 
 /*************************************************************
 NOLH.H
 Contains near-orthogonal Latin hypercube designs of experiments (DoE).
-
-The DoEs contained here are used under the license of the copyright owners:
-NOLHDesigns_v6.xls is copyrighted by Susan M. Sanchez under a GPL 2.1 license, http://harvest.nps.edu
-NOB_Mixed_512DP_v1.xls is copyrighted by Helcio Vieira under a GPL 2.1 license, http://harvest.nps.edu
 *************************************************************/
 
 // NOLH tables (Sanchez 2009 + Cioppa 2002)

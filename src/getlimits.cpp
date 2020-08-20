@@ -7,6 +7,9 @@
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 
+	See Readme.txt for copyright information of
+	third parties' code used in LSD
+	
  *************************************************************/
 
 /*************************************************************
