@@ -18,12 +18,23 @@
 #*************************************************************
 
 #************************************************
+# BGERROR
+# Handle Tcl background errors (mostly in events)
+#************************************************
+proc bgerror { message } {
+	global errorInfo
+	
+	log_tcl_error $errorInfo $message
+}
+
+
+#************************************************
 # LSDABOUT
 # Show LSD About dialog box
 #************************************************
 proc LsdAbout { ver dat { parWnd "." } } {
 
-	set copyr "written by Marco Valente, Universita' dell'Aquila\nand Marcelo Pereira, University of Campinas\n\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License\nLSD is free software and comes with ABSOLUTELY NO WARRANTY"
+	set copyr "written by Marco Valente, Universita' dell'Aquila\nand Marcelo Pereira, University of Campinas\n\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License\nLSD is free software and comes with ABSOLUTELY NO WARRANTY\n\nSee Readme.txt for copyright information of third parties' code used in LSD"
 	
 	ttk::messageBox -parent $parWnd -type ok -icon info -title "About LSD" -message "LSD Version $ver ($dat)" -detail "$copyr\n\n[ LsdEnv \n ]"
 }

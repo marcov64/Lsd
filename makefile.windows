@@ -27,10 +27,14 @@ WRC=windres
 CC=g++
 TARGET=lmm
 EXT=.exe
-SWITCH_CC=-mthreads -mwindows -O3
+SWITCH_CC=-DLMM -mthreads -mwindows -O3
 
-# For Windows, using Cygwin-minGW GCC and Tcl/Tk in the Lsd installation.
+# from here you should not need to modify anything
+
+# using GCC and Tcl/Tk in the Lsd installation
 LSDROOT=.
+SRC=src
+SRC_DIR=$(LSDROOT)/$(SRC)/
 TCL_VERSION=86
 PATH_TCL_HEADER=$(LSDROOT)/gnu/include
 PATH_TK_HEADER=$(LSDROOT)/gnu/include
@@ -40,26 +44,26 @@ PATH_TK_LIB=$(LSDROOT)/gnu/lib
 PATH_LIB=$(LSDROOT)/gnu/lib
 LIBS=
 
-# from here you should not need to modify anything
+# OS command to delete files
 RM=rm -f
-SRC=src
-SRC_DIR=$(LSDROOT)/$(SRC)/
 
-# Variable used to prepare the options to search for the tcl and tk headers
-# Do not modify
+# variable to search for the tcl and tk headers
 INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(PATH_HEADER) -I$(LSDROOT)/src
 
-$(TARGET)$(EXT): $(SRC_DIR)modman.o $(SRC_DIR)lmm_manifest.o
-	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)lmm_manifest.o \
+$(TARGET)$(EXT): $(SRC_DIR)modman.o $(SRC_DIR)common.o $(SRC_DIR)lmm_manifest.o
+	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common.o $(SRC_DIR)lmm_manifest.o \
 	-L$(PATH_TCL_LIB) -ltcl$(TCL_VERSION) -L$(PATH_TK_LIB) -ltk$(TCL_VERSION) \
 	-L$(PATH_LIB) $(LIBS) -o $(TARGET)
 
-$(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp 
+$(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLUDE)
+
+$(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o $(INCLUDE)
 
 $(SRC_DIR)lmm_manifest.o: $(SRC_DIR)lmm_manifest.rc $(SRC_DIR)lmm.exe.manifest
 	$(WRC) -i $(SRC_DIR)lmm_manifest.rc -o $(SRC_DIR)lmm_manifest.o $(INCLUDE)
 
-# Clean object files for building for another distribution
+# delete object files
 clean:
-	$(RM) $(SRC_DIR)modman.o $(SRC_DIR)lmm_manifest.o
+	$(RM) $(SRC_DIR)modman.o $(SRC_DIR)common.o $(SRC_DIR)lmm_manifest.o

@@ -34,6 +34,7 @@ Prepare variables to store saved data.
 // some program defaults
 bool grandTotal = false;	// flag to produce or not grand total in batch processing
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
+char err_file[ ] = "LSD.err";// error log file name
 char nonavail[ ] = "NA";	// string for unavailable values (use R default)
 char tabs[ ] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";	// Log window tabs
 double def_res = 0;			// default equation result
@@ -137,12 +138,15 @@ variable *cemetery = NULL;	// LSD saved data from deleted objects
 variable *last_cemetery = NULL;	// LSD last saved data from deleted objects
 FILE *log_file = NULL;		// log file, if any
 
-// constant string arrays
-const char *lmm_options[ LMM_OPTIONS_NUM ] = { "sysTerm", "HtmlBrowser", "fonttype", "wish", "LsdSrc", "dim_character", "tabsize", "wrap", "shigh", "autoHide", "showFileCmds", "LsdNew", "DbgExe", "restoreWin", "lmmGeom", "lsdTheme" };
-const char *lmm_defaults[ LMM_OPTIONS_NUM ] = { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", "$DefaultWish", "src", "$DefaultFontSize", "2", "1", "2", "0", "0", "Work", "$DefaultDbgExe", "1", "#", "$DefaultTheme" };
-const char *model_info[ MODEL_INFO_NUM ] = { "modelName", "modelVersion", "modelDate", "lsdGeom", "logGeom", "strGeom", "daGeom", "debGeom", "latGeom" };
-const char *model_defaults[ MODEL_INFO_NUM ] = { "(no name)", "1.0", "[ current_date ]", "#", "#", "#", "#", "#", "#" };
-const char *wnd_names[ MODEL_INFO_NUM - 3 ] = { "lsd", "log", "str", "da", "deb", "lat" };
+// constant arrays
+const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
+const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
+const char *model_info[ MODEL_INFO_NUM ] = MODEL_INFO_NAME;
+const char *model_defaults[ MODEL_INFO_NUM ] = MODEL_INFO_DEFAULT;
+const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
+const char *wnd_names[ LSD_WIN_NUM ] = LSD_WIN_NAME;
+const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
+
 
 #ifndef NO_WINDOW
 int i_values[ 4 ];			// user temporary variables copy
@@ -468,21 +472,30 @@ int lsdmain( int argn, char **argv )
 			}; \
 			cd $here; \
 		}" );
+
 	if ( choice )
 	{
 		log_tcl_error( "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where LSD is installed" );
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where LSD is installed.\n\nLSD is aborting now.\"" );
 		myexit( 9 );
 	}
+	
 	cmd( "set env(LSDROOT) $RootLsd" );
+	
 	str = ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
-	rootLsd = new char[ strlen( str ) + 1 ];
-	strcpy( rootLsd, str );
-	len = strlen( rootLsd );
-	for ( i = 0; i < len; ++i )
-		if ( rootLsd[ i ] == '\\' )
-			rootLsd[ i ] = '/';
-	cmd( "set RootLsd \"%s\"", rootLsd );
+	if ( str != NULL && strlen( str ) > 0 )
+	{
+		rootLsd = new char[ strlen( str ) + 1 ];
+		strcpy( rootLsd, str );
+		rootLsd = clean_path( rootLsd );
+		cmd( "set RootLsd \"%s\"", rootLsd );
+	}
+	else
+	{
+		log_tcl_error( "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+		myexit( 9 );
+	}
 
 	// load/check LMM configuration file
 	i = load_lmm_options( );
@@ -556,12 +569,15 @@ int lsdmain( int argn, char **argv )
 	// create Tcl command to upload series data
 	Tcl_CreateObjCommand( inter, "upload_series", Tcl_upload_series, NULL, NULL );
 
+	// Tcl command to save message to LSD log
+	Tcl_CreateCommand( inter, "log_tcl_error", Tcl_log_tcl_error, NULL, NULL );
+
 	// fix non-existent or old options file for new options
 	if ( i == 0 )
 		update_lmm_options(  ); 		// update config file
 
 	// load/check model configuration file
-	i = load_model_info( );
+	i = load_model_info( exec_path );
 	
 	// Tcl global variables
 	cmd( "set small_character [ expr $dim_character - $deltaSize ]" );
@@ -1509,8 +1525,8 @@ void show_prof_aggr( void )
 
 /*********************************
 RESULTS_ALT_PATH
+simple tool to allow changing where results are saved.
 *********************************/
-//Simple tool to allow changing where results are saved.
 void results_alt_path( const char *altPath )
 {
 	if ( save_alt_path )
@@ -1543,55 +1559,6 @@ void results_alt_path( const char *altPath )
 }
 
 
-/*********************************
-CLEAN_FILE
-*********************************/
-// remove any path prefixes to filename, if present
-char *clean_file( char *filename )
-{
-	if ( filename != NULL )
-	{
-		if ( strchr( filename, '/' ) != NULL )
-			return strrchr( filename, '/' ) + 1;
-		
-		if ( strchr( filename, '\\' ) != NULL )
-			return strrchr( filename, '\\' ) + 1;
-	}
-	
-	return filename;
-}
-
-
-/*********************************
-CLEAN_PATH
-*********************************/
-// remove cygwin path prefix, if present, and replace \ with /
-char *clean_path( char *filepath )
-{
-	int i, len = strlen( "/cygdrive/" );
-	
-	if ( filepath == NULL )
-		return NULL;
-	
-	if ( ! strncmp( filepath, "/cygdrive/", len ) )
-	{
-		char *temp = new char[ strlen( filepath ) + 1 ];
-		temp[ 0 ] = toupper( filepath[ len ] );		// copy drive letter
-		temp[ 1 ] = ':';							// insert ':'
-		strcpy( temp + 2, filepath + len + 1 );		// copy removing prefix
-		strcpy( filepath, temp );
-		delete [ ] temp;
-	}
-	
-	len = strlen( filepath );
-	for ( i = 0; i < len; ++i )
-		if ( filepath[ i ]=='\\' )					// replace \ with /
-			filepath[ i ]='/';
-			
-	return filepath;
-}
-
-
 /***************************************
 SEARCH_PARALLEL
 ***************************************/
@@ -1612,110 +1579,6 @@ bool search_parallel( object *r )
 				return true;
 
 	return false;
-}
-
-
-/*********************************
- LOAD_LMM_OPTIONS
- *********************************/
-bool load_lmm_options( void )
-{
-	cmd( "set choice [ file exists \"$RootLsd/$LMM_OPTIONS\" ]" );
-	
-	if ( choice == 1 )								// file exists?
-	{
-		cmd( "set f [ open \"$RootLsd/$LMM_OPTIONS\" r ]" );
-		
-		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )	// read parameters, returning 1 if incomplete
-		{
-			cmd( "gets $f %s", lmm_options[ i ] );
-			cmd( "if { $%s == \"\" } { set choice 0 }", lmm_options[ i ] );
-		}
-		
-		cmd( "close $f" );
-	}
-	else
-	{
-		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
-			cmd( "set %s \"\"", lmm_options[ i ] );
-	
-		// fix now missing source directory name
-		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ 4 ], lmm_options[ 4 ], lmm_defaults[ 4 ] );
-	}
-	
-	return choice;
-}
- 
-
-/*********************************
- UPDATE_LMM_OPTIONS
- *********************************/
-void update_lmm_options( void )
-{
-	// save options to disk
-	cmd( "set f [ open \"$RootLsd/$LMM_OPTIONS\" w ]" );
-	
-	// set undefined parameters to defaults
-	for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
-	{
-		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", lmm_options[ i ], lmm_options[ i ] );
-		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ i ], lmm_options[ i ], lmm_defaults[ i ] );
-		cmd( "puts $f \"$%s\"", lmm_options[ i ] );
-	}
-		
-	cmd( "close $f" );
-}
-
-
-/*********************************
- LOAD_MODEL_INFO
- *********************************/
-bool load_model_info( void )
-{
-	cmd( "set choice [ file exists \"%s/$MODEL_INFO\" ]", exec_path );
-	
-	if ( choice == 1 )								// file exists?
-	{
-		cmd( "set f [ open \"%s/$MODEL_INFO\" r ]", exec_path );
-		
-		for ( int i = 0; i < MODEL_INFO_NUM; ++i )	// read parameters, returning 1 if incomplete
-		{
-			cmd( "gets $f %s", model_info[ i ] );
-			cmd( "if { $%s == \"\" } { set choice 0 }", model_info[ i ] );
-		}
-		
-		cmd( "close $f" );
-	}
-	
-	return choice;
-}
- 
-
-/*********************************
- UPDATE_MODEL_INFO
- *********************************/
-void update_model_info( void )
-{
-	// update existing windows positions
-	for ( int i = 0; i < 6; ++i )
-		cmd( "if { $restoreWin } { set curGeom [ geomtosave .%s ]; if { $curGeom != \"\" } { set %s $curGeom } }", wnd_names[ i ], model_info[ i + 3 ] );
-
-	// ensure model name is set
-	cmd( "if { ! [ info exists modelName ] } { set modelName \"\" }" );
-	cmd( "if { $modelName == \"\" } { regsub \"fun_\" \"%s\" \"\" modelName; regsub \".cpp\" \"$modelName\" \"\" modelName }", equation_name );
-	
-	// save info to disk
-	cmd( "set f [ open \"%s/$MODEL_INFO\" w ]", exec_path );
-	
-	// set undefined parameters to defaults before saving
-	for ( int i = 0; i < MODEL_INFO_NUM; ++i )
-	{
-		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
-		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
-		cmd( "puts $f \"$%s\"", model_info[ i ] );
-	}
-		
-	cmd( "close $f" );
 }
 
 

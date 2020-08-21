@@ -17,17 +17,21 @@
 CC=g++	
 TARGET=lmm
 EXT=
-SWITCH_CC=-Wno-unused-result -O3
-DEFAULT_TCL_VERSION=8.6
+SWITCH_CC=-DLMM -Wno-unused-result -O3
 
-# Check Tcl/Tk version
+# from here you should not need to modify anything
+
+# Check Tcl/Tk version (minimum 8.6)
+DEFAULT_TCL_VERSION=8.6
 TCL_VERSION=$(shell echo 'puts $$tcl_version;exit 0' | tclsh)
 ifeq ("$(TCL_VERSION)","")
 TCL_VERSION=$(DEFAULT_TCL_VERSION)
 endif
 
-# For Unix systems, using OS native compiler and Tcl/Tk.
+# using OS native compiler and Tcl/Tk
 LSDROOT=.
+SRC=src
+SRC_DIR=$(LSDROOT)/$(SRC)/
 PATH_TCL_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the file tcl.h
 PATH_TK_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the tk.h
 PATH_TCL_LIB=/usr/lib #path to the file libtclXXX.a
@@ -35,21 +39,23 @@ PATH_TK_LIB=/usr/lib #path to the file libtkXXX.a
 PATH_LIB=/usr/lib #path to general libraries
 LIBS=-lX11 #additional libraries
 
-# from here you should not need to modify anything
+# OS command to delete files
 RM=rm -f
-SRC=src
-SRC_DIR=$(LSDROOT)/$(SRC)/
 
-# Variable used to prepare the options to search for the tcl and tk headers
-# Do not modify
+# variable used to search for the tcl and tk headers
 INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(PATH_HEADER) -I$(LSDROOT)/src
 
-$(TARGET)$(EXT): $(SRC_DIR)modman.o
-	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o -L$(PATH_TCL_LIB) -ltcl$(TCL_VERSION) -L$(PATH_TK_LIB) -ltk$(TCL_VERSION) -L$(PATH_LIB) $(LIBS) -o $(TARGET)
+$(TARGET)$(EXT): $(SRC_DIR)modman.o $(SRC_DIR)common.o
+	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common.o -L$(PATH_TCL_LIB) \
+	-ltcl$(TCL_VERSION) -L$(PATH_TK_LIB) -ltk$(TCL_VERSION) -L$(PATH_LIB) $(LIBS) \
+	-o $(TARGET)
 
-$(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp 
+$(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLUDE)
 
-# Clean object files for building for another distribution
+$(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o $(INCLUDE)
+
+# delete object files
 clean:
-	$(RM) $(SRC_DIR)modman.o
+	$(RM) $(SRC_DIR)modman.o $(SRC_DIR)common.o

@@ -445,7 +445,7 @@ bool load_description( char *msg, FILE *f )
 	if ( strncmp( str, "END_DESCRIPTION", 15 ) && strncmp( str, "_INIT_", 6 ) )
 		return false;
 
-	kill_trailing_newline( str1 );
+	clean_newlines( str1 );
 
 	app->text = new char[ strlen( str1 ) + 1 ];
 	strcpy( app->text, str1 );
@@ -459,7 +459,7 @@ bool load_description( char *msg, FILE *f )
 		if ( strncmp( str, "END_DESCRIPTION", 15 ) )
 			return false;
 
-		kill_trailing_newline( str1 );
+		clean_newlines( str1 );
 		app->init = new char[ strlen( str1 ) + 1 ];
 		strcpy( app->init, str1 );
 	}

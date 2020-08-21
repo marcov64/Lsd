@@ -53,97 +53,43 @@ The widget of importance are:
 used up to 88 options
 *******/
 
-// LSD version strings, for About... boxes and code testing
-#define _LSD_MAJOR_ 7
-#define _LSD_MINOR_ 3
-#define _LSD_VERSION_ "7.3-0"
-#define _LSD_DATE_ "December 31 2020"   // __DATE__
-
-#include <tk.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <math.h>
-#include <time.h>
-#include <signal.h>
-#include <sys/stat.h>
-#include <new>
-#include <thread>
-
-// general buffer limits
-#define TCL_BUFF_STR 3000		// standard Tcl buffer size (>1000)
-#define MAX_PATH_LENGTH 500		// maximum path length
-#define MAX_LINE_SIZE 1000		// max size of a text line to read from files (>999)
-
-// user defined signals
-#define SIGMEM NSIG + 1			// out of memory signal
-#define SIGSTL NSIG + 2			// standard library exception signal
-
-// platform codes
-#define LINUX	1
-#define MAC		2
-#define WINDOWS	3
-
-// date/time format
-#define DATE_FMT "%d %B, %Y"
+// common definitions for LMM and LSD
+#include "common.h"
 
 // Eigen library include command
 #define EIGEN "#define EIGENLIB"
 
-// LSD managed folders (not for user models)
-#define LSD_DIR_NUM 7
-
-// configuration files details
-#define LMM_OPTIONS "lmm_options.txt"
-#define SYSTEM_OPTIONS "system_options.txt"
-#define MODEL_OPTIONS "model_options.txt"
-#define GROUP_INFO "groupinfo.txt"
-#define MODEL_INFO "modelinfo.txt"
-#define DESCRIPTION "description.txt"
-#define LMM_OPTIONS_NUM 16
-#define MODEL_INFO_NUM 9
-
-using namespace std;
-
 // auxiliary C procedures
 bool compile_run( bool run, bool nw = false );
-bool discard_change( void );	// ask before discarding unsaved changes
-bool load_lmm_options( void );
-bool load_model_info( const char *path );
 bool use_eigen( void );			// check is Eigen library is in use
 char *get_fun_name( char *str, bool nw = false );
 int ModManMain( int argn, char **argv );
-int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[ ] );// Tcl entry point
 void check_option_files( bool sys = false );
-void cmd( const char *cm, ... );
 void color( int hiLev, long iniLin, long finLin );
 void create_compresult_window( bool nw = false );
-void handle_signals( void );
-void log_tcl_error( const char *cm, const char *message );
 void make_makefile( bool nw = false );
-void update_lmm_options( bool justWinGeom = false );
-void update_model_info( void );
-void signal_handler( int signum );
 
 // global variables
-Tcl_Interp *inter = NULL;
 bool tk_ok = false;				// control for tk_ready to operate
 char *exec_path = NULL;			// path of executable file
-char msg[ TCL_BUFF_STR ];
-char rootLsd[ MAX_PATH_LENGTH ];
-int choice;
+char *rootLsd = NULL;			// path of LSD root directory
+char err_file[ ] = "LMM.err";	// error log file name
+char msg[ TCL_BUFF_STR ] = "";	// auxiliary Tcl buffer
+int choice;						// Tcl menu control variable
 int platform = 0;				// OS platform (1=Linux, 2=Mac, 3=Windows)
 int shigh;						// syntax highlighting state (0, 1 or 2)
 int tosave = false;				// modified file flag
-int v_counter = 0; 				//counter of the v[ i ] variables inserted in the equations
+Tcl_Interp *inter = NULL;		// Tcl standard interpreter pointer
 
 // constant string arrays
-const char *lmm_options[ LMM_OPTIONS_NUM ] = { "sysTerm", "HtmlBrowser", "fonttype", "wish", "LsdSrc", "dim_character", "tabsize", "wrap", "shigh", "autoHide", "showFileCmds", "LsdNew", "DbgExe", "restoreWin", "lmmGeom", "lsdTheme" };
-const char *lmm_defaults[ LMM_OPTIONS_NUM ] = { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", "$DefaultWish", "src", "$DefaultFontSize", "2", "1", "2", "0", "0", "Work", "$DefaultDbgExe", "1", "#", "$DefaultTheme" };
-const char *model_info[ MODEL_INFO_NUM ] = { "modelName", "modelVersion", "modelDate", "lsdGeom", "logGeom", "strGeom", "daGeom", "debGeom", "latGeom" };
-const char *model_defaults[ MODEL_INFO_NUM ] = { "(no name)", "1.0", "[ current_date ]", "#", "#", "#", "#", "#", "#" };
-const char *lsd_dir[ LSD_DIR_NUM ] = { "src", "gnu", "Manual", "LMM.app", "R", "lwi", "___" };
+const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
+const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
+const char *model_info[ MODEL_INFO_NUM ] = MODEL_INFO_NAME;
+const char *model_defaults[ MODEL_INFO_NUM ] = MODEL_INFO_DEFAULT;
+const char *lsd_dir[ LSD_DIR_NUM ] = LSD_DIR_NAME;
+const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
+const char *wnd_names[ LSD_WIN_NUM ] = LSD_WIN_NAME;
+const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
 
 /*************************************
@@ -154,7 +100,7 @@ int main( int argn, char **argv )
 	int res = 0;
 
 	// register all signal handlers
-	handle_signals( );
+	handle_signals( signal_handler );
 
 	try
 	{
@@ -174,11 +120,7 @@ int main( int argn, char **argv )
 		abort( );				// raises a SIGABRT exception, tell user & close
 	}
 
-	if ( inter != NULL )
-	{
-		cmd( "if { ! [ catch { package present Tk } ] } { destroy . }" );
-		Tcl_Finalize( );
-	}
+	myexit( res );
 	return res;
 }
 
@@ -189,7 +131,7 @@ int main( int argn, char **argv )
 int ModManMain( int argn, char **argv )
 {
 bool found, recolor = false;
-int i, j, num, sourcefile = 0, recolor_all = 0;
+int i, j, num, sourcefile = 0, recolor_all = 0, v_counter = 0;
 char *s, str[ 5 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], str2[ 6 * MAX_PATH_LENGTH ];
 FILE *f;
 
@@ -273,6 +215,13 @@ if ( s != NULL && strlen( s ) > 0 )
 {
 	exec_path = new char[ strlen( s ) + 1 ];
 	strcpy( exec_path, s );
+	exec_path = clean_path( exec_path );
+}
+else
+{
+	log_tcl_error( "LMM executable check", "Cannot locate LSD executable on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+	cmd( "ttk::messageBox -type ok -icon error -title Error -message \"LMM executable not found\" -detail \"Cannot locate the LMM executable folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+	return 5;
 }
 
 // check if LSDROOT environment variable exists and use it if so
@@ -298,18 +247,27 @@ if ( choice )
 	{
 		log_tcl_error( "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
 		cmd( "ttk::messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
-		return 5;
+		return 6;
 	}
+	
 	cmd( "set env(LSDROOT) $RootLsd" );
 }
 
 s =  ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
-strncpy( rootLsd, s, 499 );
-num = strlen( rootLsd );
-for ( i = 0; i < num; ++i )
-	if ( rootLsd[ i ] == '\\' )
-		rootLsd[ i ] = '/';
-cmd( "set RootLsd \"%s\"", rootLsd );
+if ( s != NULL && strlen( s ) > 0 )
+{
+	rootLsd = new char[ strlen( s ) + 1 ];
+	strcpy( rootLsd, s );
+	rootLsd = clean_path( rootLsd );
+	cmd( "set RootLsd \"%s\"", rootLsd );
+}
+else
+{
+	log_tcl_error( "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+	cmd( "ttk::messageBox -type ok -icon error -title Error -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+	return 7;
+}
+	
 
 // load/check configuration files
 i = load_lmm_options( );
@@ -372,6 +330,9 @@ if ( platform == MAC )
 
 // create a Tcl command that calls the C discard_change function before killing LMM
 Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
+
+// Tcl command to save message to LSD log
+Tcl_CreateCommand( inter, "log_tcl_error", Tcl_log_tcl_error, NULL, NULL );
 
 // fix non-existent or old options file for new options
 if ( i == 0 )
@@ -5242,12 +5203,14 @@ if ( choice == 62 )
 	cmd( "if { ! [ file exists \"$modelDir/src\" ] } { file mkdir \"$modelDir/src\" }" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/main.cpp\" \"$modelDir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/lsdmain.cpp\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/common.cpp\" \"$modelDir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/file.cpp\" \"$modelDir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/nets.cpp\" \"$modelDir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/object.cpp\" \"$modelDir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/util.cpp\" \"$modelDir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/variab.cpp\" \"$modelDir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/check.h\" \"$modelDir/src\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/common.h\" \"$modelDir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/decl.h\" \"$modelDir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head.h\" \"$modelDir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head_fast.h\" \"$modelDir/src\"" );
@@ -5624,99 +5587,10 @@ Tcl_UnlinkVar( inter, "tosave");
 Tcl_UnlinkVar( inter, "recolor_all");
 Tcl_UnlinkVar( inter, "shigh");
 
-cmd( "LsdExit" );
+delete [ ] rootLsd;
+delete [ ] exec_path;
 
 return 0;
-}
-
-
-/*************************************
- CMD
- *************************************/
-bool firstCall = true;
-
-// enhanced cmd with embedded sprintf capabilities and integrated buffer underrun protection
-void cmd( const char *cm, ... )
-{
-	char message[ TCL_BUFF_STR ];
-
-	// abort if Tcl interpreter not initialized
-	if ( inter == NULL )
-	{
-		printf( "\nTcl interpreter not initialized. Quitting LSD now.\n" );
-		abort( );
-	}
-
-	if ( strlen( cm ) >= TCL_BUFF_STR )
-	{
-		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR to at least %ld bytes.", ( long int ) strlen( cm ) );
-		log_tcl_error( cm, message );
-		if ( tk_ok )
-			cmd( "ttk::messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Save your data and close LMM after pressing 'OK'.\"" );
-	}
-
-	char buffer[ TCL_BUFF_STR ];
-	va_list argptr;
-
-	va_start( argptr, cm );
-	int reqSz = vsnprintf( buffer, TCL_BUFF_STR, cm, argptr );
-	va_end( argptr );
-
-	if ( reqSz >= TCL_BUFF_STR )
-	{
-		sprintf( message, "Tcl buffer too small. Please increase TCL_BUFF_STR to at least %d bytes.", reqSz + 1 );
-		log_tcl_error( cm, message );
-		if ( tk_ok )
-			cmd( "ttk::messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
-	}
-	else
-	{
-		int code = Tcl_Eval( inter, buffer );
-
-		if ( code != TCL_OK )
-		{
-			log_tcl_error( cm, Tcl_GetStringResult( inter ) );
-			if ( tk_ok )
-				cmd( "ttk::messageBox -type ok -title Error -icon error -message \"Tcl error\" -detail \"More information in file 'LMM.err'.\"" );
-		}
-	}
-}
-
-
-/*************************************
- LOG_TCL_ERROR
- *************************************/
-void log_tcl_error( const char *cm, const char *message )
-{
-	FILE *f;
-	char fname[ 2 * MAX_PATH_LENGTH ];
-	time_t rawtime;
-	struct tm *timeinfo;
-	char ftime[ 80 ];
-
-	if ( strlen( rootLsd ) > 0 )
-		sprintf( fname, "%s/LMM.err", rootLsd );
-	else
-		sprintf( fname, "LMM.err" );
-
-	f = fopen( fname, "a" );
-	if ( f == NULL )
-	{
-		printf( "\nCannot write log file to disk. Check write permissions\n" );
-		return;
-	}
-
-	time( &rawtime );
-	timeinfo = localtime( &rawtime );
-	strftime ( ftime, 80, "%x %X", timeinfo );
-
-	if ( firstCall )
-	{
-		firstCall = false;
-		fprintf( f,"\n\n====================> NEW TCL SESSION\n" );
-	}
-	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, message );
-	fclose( f );
 }
 
 
@@ -5886,122 +5760,6 @@ void color(int hiLev, long iniLin, long finLin)
 
 
 /*********************************
- LOAD_LMM_OPTIONS
- *********************************/
-bool load_lmm_options( void )
-{
-	cmd( "set choice [ file exists \"$RootLsd/$LMM_OPTIONS\" ]" );
-
-	if ( choice == 1 )								// file exists?
-	{
-		cmd( "set f [ open \"$RootLsd/$LMM_OPTIONS\" r ]" );
-
-		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )	// read parameters, returning 1 if incomplete
-		{
-			cmd( "gets $f %s", lmm_options[ i ] );
-			cmd( "if { $%s == \"\" } { set choice 0 }", lmm_options[ i ] );
-		}
-
-		cmd( "close $f" );
-	}
-	else
-	{
-		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
-			cmd( "set %s \"\"", lmm_options[ i ] );
-
-		// fix now missing source directory name
-		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ 4 ], lmm_options[ 4 ], lmm_defaults[ 4 ] );
-	}
-
-	return choice;
-}
-
-
-/*********************************
- UPDATE_LMM_OPTIONS
- *********************************/
-void update_lmm_options( bool justWinGeom )
-{
-	if ( justWinGeom )
-	{
-		cmd( "set done 1" );
-		cmd( "if { $restoreWin } { set curGeom [ geomtosave .lmm ]; if { $curGeom != \"\" && ! [ string equal $lmmGeom $curGeom ] } { set done 0 } }" );
-
-		if ( atoi( Tcl_GetVar( inter, "done", 0 ) ) )	// nothing to save?
-			return;
-
-		load_lmm_options( );				// if just saving window geometry, first reload from disk
-
-		cmd( "set lmmGeom $curGeom" );
-	}
-
-	// save options to disk
-	cmd( "set f [ open \"$RootLsd/$LMM_OPTIONS\" w ]" );
-
-	// set undefined parameters to defaults
-	for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
-	{
-		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", lmm_options[ i ], lmm_options[ i ] );
-		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ i ], lmm_options[ i ], lmm_defaults[ i ] );
-		cmd( "puts $f \"$%s\"", lmm_options[ i ] );
-	}
-
-	cmd( "close $f" );
-}
-
-
-/*********************************
- LOAD_MODEL_INFO
- *********************************/
-bool load_model_info( const char *path )
-{
-	cmd( "set choice [ file exists \"%s/$MODEL_INFO\" ]", path );
-
-	if ( choice == 1 )							// file exists?
-	{
-		cmd( "set f [ open \"%s/$MODEL_INFO\" r ]", path );
-
-		for ( int i = 0; i < MODEL_INFO_NUM; ++i )	// read parameters, returning 1 if incomplete
-		{
-			cmd( "gets $f %s", model_info[ i ] );
-			cmd( "if { $%s == \"\" } { set choice 0 }", model_info[ i ] );
-		}
-
-		cmd( "close $f" );
-	}
-
-	return choice;
-}
-
-
-/*********************************
- UPDATE_MODEL_INFO
- *********************************/
-void update_model_info( void )
-{
-	// set undefined parameters to defaults
-	for ( int i = 0; i < MODEL_INFO_NUM; ++i )
-	{
-		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
-		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
-	}
-
-	// save info to disk
-	cmd( "set f [ open \"$modelDir/$MODEL_INFO\" w ]" );
-
-	// set undefined parameters to defaults before saving
-	for ( int i = 0; i < MODEL_INFO_NUM; ++i )
-	{
-		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
-		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
-		cmd( "puts $f \"$%s\"", model_info[ i ] );
-	}
-
-	cmd( "close $f" );
-}
-
-
-/*********************************
  MAKE_MAKEFILE
  *********************************/
 void make_makefile( bool nw )
@@ -6067,6 +5825,7 @@ void check_option_files( bool sys )
 
 	Tcl_UnlinkVar( inter, "exists" );
 }
+
 
 /*********************************
  GET_FUN_NAME
@@ -6466,99 +6225,4 @@ bool discard_change( void )
 		return false;
 
 	return true;
-}
-
-
-/****************************************************
-TCL_DISCARD_CHANGE
-Entry point function for access from the Tcl interpreter
-****************************************************/
-int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
-{
-	if ( discard_change( ) == 1 )
-		Tcl_SetResult( inter, ( char * ) "ok", TCL_VOLATILE );
-	else
-		Tcl_SetResult( inter, ( char * ) "cancel", TCL_VOLATILE );
-	return TCL_OK;
-}
-
-
-/*********************************
- HANDLE_SIGNALS
- *********************************/
-// provide support to the old 32-bit gcc compiler
-#ifdef SIGSYS
-#define NUM_SIG 11
-int signals[ NUM_SIG ] = { SIGINT, SIGQUIT, SIGTERM, SIGWINCH, SIGABRT, SIGFPE, SIGILL, SIGSEGV, SIGBUS, SIGSYS, SIGXFSZ };
-#else
-#define NUM_SIG 6
-int signals[ NUM_SIG ] = { SIGINT, SIGTERM, SIGABRT, SIGFPE, SIGILL, SIGSEGV };
-const char *signal_names[ NUM_SIG ] = { "", "", "", "Floating-point exception", "Illegal instruction", "Segmentation violation", };
-const char *strsignal( int signum )
-{
-	int i;
-	for ( i = 0; i < NUM_SIG && signals[ i ] != signum; ++i );
-	if ( i == NUM_SIG )
-		return "Unknow exception";
-	return signal_names[ i ];
-}
-#endif
-
-void handle_signals( void )
-{
-	for ( int i = 0; i < NUM_SIG; ++i )
-		signal( signals[ i ], signal_handler );
-}
-
-
-/*********************************
- SIGNAL_HANDLER
- *********************************/
-// handle critical system signals
-void signal_handler( int signum )
-{
-	char msg2[ strlen( msg ) + 30 ];
-
-	switch ( signum )
-	{
-#ifdef SIGQUIT
-		case SIGQUIT:
-#endif
-		case SIGINT:
-		case SIGTERM:
-			choice = 1;				// regular quit (checking for save)
-			return;
-#ifdef SIGWINCH
-		case SIGWINCH:
-			cmd( "sizetop all" );	// readjust windows size/positions
-			cmd( "update" );
-			return;
-#endif
-		case SIGMEM:
-			sprintf( msg, "Out of memory" );
-			break;
-
-		case SIGSTL:
-			break;
-
-		case SIGABRT:
-		case SIGFPE:
-		case SIGILL:
-		case SIGSEGV:
-#ifdef SIGBUS
-		case SIGBUS:
-		case SIGSYS:
-		case SIGXFSZ:
-#endif
-		default:
-			strncpy( msg, strsignal( signum ), 999 );
-			break;
-	}
-
-	snprintf( msg2, strlen( msg ) + 30, "System Signal received: %s", msg );
-	log_tcl_error( "FATAL ERROR", msg2 );
-	if ( tk_ok )
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nLMM will close now.\"", msg );
-	Tcl_Finalize( );
-	exit( -signum );				// abort program
 }

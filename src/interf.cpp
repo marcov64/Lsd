@@ -7249,20 +7249,6 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 
 
 /****************************************************
-TCL_DISCARD_CHANGE
-Entry point function for access from the Tcl interpreter
-****************************************************/
-int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
-{
-	if ( discard_change( ) == 1 )
-		Tcl_SetResult( inter, ( char * ) "ok", TCL_VOLATILE );
-	else
-		Tcl_SetResult( inter, ( char * ) "cancel", TCL_VOLATILE );
-	return TCL_OK;
-}
-
-
-/****************************************************
 TCL_GET_VAR_DESCR
 Function to get variable description on
 equation file(s) from Tcl

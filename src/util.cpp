@@ -66,109 +66,6 @@ mutex error;
 #endif	
 
 
-#ifndef NO_WINDOW
-
-/****************************************************
-CMD
-****************************************************/
-bool firstCall = true;
-
-void cmd( const char *cm, ... )
-{
-	char message[ TCL_BUFF_STR ];
-	
-	// abort if Tcl interpreter not initialized
-	if ( inter == NULL )
-	{
-		printf( "\nTcl interpreter not initialized. Quitting LSD now.\n" );
-		myexit( 24 );
-	}
-	
-#ifdef PARALLEL_MODE
-	// abort if not running in main LSD thread
-	if ( this_thread::get_id( ) != main_thread )
-		return;
-#endif
-	
-	if ( strlen( cm ) >= TCL_BUFF_STR )
-	{
-		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %lu bytes.", ( long unsigned int ) strlen( cm ) + 1 );
-		log_tcl_error( cm, message );
-		if ( tk_ok )
-			cmd( "ttk::messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"LSD will close immediately after pressing 'OK'.\"" );
-		myexit( 24 );
-	}
-
-	char buffer[ TCL_BUFF_STR ];
-	va_list argptr;
-	
-	va_start( argptr, cm );
-	int reqSz = vsnprintf( buffer, TCL_BUFF_STR, cm, argptr );
-	va_end( argptr );
-	
-	if ( reqSz >= TCL_BUFF_STR )
-	{
-		sprintf( message, "Tcl buffer too small. Please increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.", reqSz + 1 );
-		log_tcl_error( cm, message );
-		if ( tk_ok )
-			cmd( "ttk::messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
-	}
-	else
-	{
-		int code = Tcl_Eval( inter, buffer );
-
-		if ( code != TCL_OK )
-			log_tcl_error( cm, Tcl_GetStringResult( inter ) );
-	}
-}
-
-
-/****************************************************
-LOG_TCL_ERROR
-****************************************************/
-void log_tcl_error( const char *cm, const char *message )
-{
-	FILE *f;
-	char fname[ MAX_PATH_LENGTH ];
-	time_t rawtime;
-	struct tm *timeinfo;
-	char ftime[ 80 ];
-
-	if ( strlen( exec_path ) > 0 )
-		sprintf( fname, "%s/LSD.err", exec_path );
-	else
-		sprintf( fname, "LSD.err" );
-
-	f = fopen( fname,"a" );
-	if ( f == NULL )
-	{
-		plog( "\nCannot write log file to disk. Check write permissions\n" );
-		return;
-	}
-
-	time( &rawtime );
-	timeinfo = localtime( &rawtime );
-	strftime ( ftime, 80, "%x %X", timeinfo );
-
-	if ( firstCall )
-	{
-		firstCall = false;
-		fprintf( f,"\n\n====================> NEW TCL SESSION\n" );
-	}
-	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, message );
-	fclose( f );
-	
-	plog( "\nInternal LSD error. See file '%s'\n", "", fname );
-}
-
-#else
-
-void cmd( const char *cm, ... )
-{
-}
-#endif
-
-
 /*********************************
 PLOG
 The optional tag parameter has to correspond to the log window existing tags
@@ -425,34 +322,14 @@ void print_stack( void )
 
 
 /****************************************************
-MSLEEP
-****************************************************/
-#ifdef _WIN32
-#include <windows.h>
-void msleep( unsigned msec )
-{
-	Sleep( msec );
-	return;
-}
-#else
-#include <unistd.h>	
-void msleep( unsigned msec )
-{
-	usleep( msec * 1000 );
-	return;
-}
-#endif
-
-
-/****************************************************
 SEARCH_STR
 ****************************************************/
-FILE *search_str( char const *name, char const *str )
+FILE *search_str( char const *fname, char const *str )
 {
 	FILE *f;
 	char got[ MAX_LINE_SIZE ];
 
-	f = fopen( name, "r" );
+	f = fopen( fname, "r" );
 	if ( f == NULL )
 		return NULL;
 
@@ -1037,144 +914,7 @@ void auto_document( int *choice, char const *lab, char const *which, bool append
 	}						// end of the for (desc)
 }
 
-
-/****************************************************
-VALID_LABEL
-****************************************************/
-bool valid_label( const char *lab )
-{
-	Tcl_SetVar( inter, "lab", lab, 0 );
-	cmd( "if [ regexp {^[a-zA-Z_][a-zA-Z0-9_]*$} $lab ] { set answer 1 } { set answer 0 }" );
-	const char *answer = Tcl_GetVar( inter, "answer", 0 );
-	if ( *answer == '0' )
-		return false;
-	else
-		return true;
-}
-
-
-/***************************************************
-GET_BOOL
-***************************************************/
-bool get_bool( const char *tcl_var, bool *var )
-{
-	int intvar;
-	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%d", & intvar );
-	if ( var != NULL )
-		*var = intvar ? true : false;
-	return ( intvar ? true : false );
-}
-
-
-/***************************************************
-GET_INT
-***************************************************/
-int get_int( const char *tcl_var, int *var )
-{
-	int intvar;
-	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%d", & intvar );
-	if ( var != NULL )
-		*var = intvar;
-	return intvar;
-}
-
-
-/***************************************************
-GET_LONG
-***************************************************/
-long get_long( const char *tcl_var, long *var )
-{
-	long longvar;
-	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%ld", & longvar );
-	if ( var != NULL )
-		*var = longvar;
-	return longvar;
-}
-
-
-/***************************************************
-GET_DOUBLE
-***************************************************/
-double get_double( const char *tcl_var, double *var )
-{
-	double dblvar;
-	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%lf", & dblvar );
-	if ( var != NULL )
-		*var = dblvar;
-	return dblvar;
-}
-
 #endif
-
-
-/***************************************************
-KILL_INITIAL_NEWLINE
-***************************************************/
-void kill_initial_newline( char *s )
-{
-	char *d;
-	int i, j;
-	
-	j = strlen( s );
-
-	d = new char[ j + 1 ];
-
-	for ( i = 0; i < j; ++i )
-		if ( s[ i ] != '\n' )
-			break;
-
-	strcpy( d, s + i );
-	strcpy( s, d );
-	delete [ ] d;
-}
-
-
-/***************************************************
-KILL_TRAILING_NEWLINE
-***************************************************/
-void kill_trailing_newline( char *s )
-{
-	int i, done = 0;
-	
-	kill_initial_newline( s );
-
-	while ( done == 0 )
-	{ 
-		done = 1;
-		for ( i = 0; s[ i ] != '\0'; ++i )
-			if ( s[ i ] == '\n' && s[ i + 1 ] == '\0' )
-			{
-				s[ i ] = '\0';
-				done = 0;
-			} 
-	}
-}
-
-
-/***************************************************
-CLEAN_SPACES
-***************************************************/
-void clean_spaces( char *s )
-{
-	int i, j;
-	char app[ MAX_LINE_SIZE ];
-
-	app[ MAX_LINE_SIZE - 1 ] = '\0';
-	for ( j = 0, i = 0; s[ i ] != '\0' && i < MAX_LINE_SIZE - 1; ++i )
-		switch ( s[ i ] )
-		{
-			case ' ':
-			case '\t':
-				break;
-				
-			default: 
-				app[ j++ ] = s[ i ];
-				break;
-		}
-		
-	app[ j ] = '\0';
-	strcpy( s, app );
-}
 
 
 /****************************************************
@@ -2330,24 +2070,6 @@ bool is_nan( double x )
 #else
 	return isnan( x );
 #endif
-}
-
-
-/****************************************************
-STR_UPR
-function may be missing in some compiler libraries
-****************************************************/
-char *str_upr( char *str )
-{
-	unsigned char *p = ( unsigned char * ) str;
-
-	while ( *p )
-	{
-		*p = toupper( *p );
-		++p;
-	}
-
-	return str;
 }
 
 

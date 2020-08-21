@@ -16,33 +16,38 @@
 
 CC=g++
 TARGET=LMM
-SWITCH_CC=-DMAC_PKG -Wno-unused-result -mmacosx-version-min=10.10 -O3
+SWITCH_CC=-DLMM -DMAC_PKG -Wno-unused-result -mmacosx-version-min=10.10 -O3
 
 # from here you should not need to modify anything
+
+# using native compiler and Lsd supplied Tcl/Tk frameworks
 LSDROOT=.
 SRC=src
 SRC_DIR=$(LSDROOT)/$(SRC)/
-
-# For MacOS, using native compiler and Lsd supplied Tcl/Tk frameworks.
 PATH_TCL_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/Headers
 PATH_TK_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/Headers
 PATH_LIB=$(SRC_DIR)LSD.app/Contents/Frameworks
 
+# OS command to delete files
 RM=rm -f -R
-TARGET_PKG=$(TARGET).app/Contents/MacOS/$(TARGET)
 
-# Variable used to prepare the options to search for the tcl and tk headers
-# Do not modify
+# variable to search for the tcl and tk headers
 INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(LSDROOT)/src
 
-# Adjust executable to use the provided Tcl/Tk frameworks
-$(TARGET_PKG): $(SRC_DIR)modman.o
-	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o -F$(PATH_LIB) -framework Tcl -framework Tk -o $(TARGET_PKG)
+# adjust executable to use the provided Tcl/Tk frameworks
+TARGET_PKG=$(TARGET).app/Contents/MacOS/$(TARGET)
+
+$(TARGET_PKG): $(SRC_DIR)modman.o $(SRC_DIR)common.o 
+	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common.o -F$(PATH_LIB) \
+	-framework Tcl -framework Tk -o $(TARGET_PKG)
 	touch -c -f $(TARGET).app
 
-$(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp 
+$(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLUDE)
 
-# Clean object files for building for another distribution
+$(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o $(INCLUDE)
+
+# delete object files
 clean:
-	$(RM) $(SRC_DIR)modman.o
+	$(RM) $(SRC_DIR)modman.o $(SRC_DIR)common.o
