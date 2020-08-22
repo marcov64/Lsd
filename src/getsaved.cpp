@@ -79,6 +79,10 @@ sense *rsense = NULL;		// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
 variable *last_cemetery = NULL;	// LSD last saved data from deleted objects
 
+// constant string arrays
+const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
+const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
+
 
 char *out_file = NULL;		// output .csv file, if any
 

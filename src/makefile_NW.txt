@@ -1,62 +1,58 @@
-# reset variables to allow for no-window version
-LSDROOT=.
-
 # specify where are the sources of LSD
 SRC_DIR=$(SRC)/
 
 # location of headers
-INCLUDE=-I$(PATH_HEADER) -I$(SRC)
+INCLUDE=-I$(SRC) -I$(PATH_HEADER)
 
 # common dependencies (all source files)
-COM_DEP=$(SRC_DIR)choose.h $(SRC_DIR)decl.h $(SRC_DIR)common.h 
-COM_DEP_SYS=$(COM_DEP) $(SRC_DIR)system_options.txt
+COM_DEP=$(SRC_DIR)decl.h $(SRC_DIR)common.h 
 
 # no-window specific variables
-LIBS_NW=$(LIBS) -lpthread
-CC_NW=$(CC_CROSS)g++
-SWITCH_CC_NW=$(GLOBAL_CC) $(SWITCH_CC) -O3 -g0
 SUFFIX_NW=NW
+LIB_NW=$(LIB) -lpthread
+CC_NW=$(CC_CROSS)g++
+SWITCH_CC_NW=$(GLOBAL_CC) $(SWITCH_CC) -DNW -O3 -g0
 TARGET_NW=lsd$(SUFFIX_NW)
 
 # OS command to delete files
 RM=rm -f
 
 # link executable
-$(TARGET_NW)$(EXT): $(FUN)$(SUFFIX_NW).o $(SRC_DIR)common.o $(SRC_DIR)main.o \
+$(TARGET_NW): $(FUN)$(SUFFIX_NW).o $(SRC_DIR)common.o $(SRC_DIR)main.o \
 $(SRC_DIR)lsdmain.o $(SRC_DIR)file.o $(SRC_DIR)nets.o $(SRC_DIR)object.o \
 $(SRC_DIR)util.o $(SRC_DIR)variab.o
 	$(CC_NW) $(SWITCH_CC_NW) $(FUN)$(SUFFIX_NW).o $(SRC_DIR)common.o \
 	$(SRC_DIR)main.o $(SRC_DIR)lsdmain.o $(SRC_DIR)file.o $(SRC_DIR)nets.o \
 	$(SRC_DIR)object.o $(SRC_DIR)util.o $(SRC_DIR)variab.o \
-	$(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIBS_NW) -o $(TARGET_NW)
+	$(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)
 
 # compile modules
-$(FUN)$(SUFFIX_NW).o: $(FUN).cpp $(FUN_EXTRA) model_options.txt \
-$(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(SRC_DIR)fun_head_fast.h $(COM_DEP)
+$(FUN)$(SUFFIX_NW).o: $(FUN).cpp $(FUN_EXTRA) $(SRC_DIR)check.h \
+$(SRC_DIR)fun_head.h $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(FUN).cpp -o $(FUN)$(SUFFIX_NW).o
 
 $(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o
 
-$(SRC_DIR)main.o: $(SRC_DIR)main.cpp $(COM_DEP_SYS)
+$(SRC_DIR)main.o: $(SRC_DIR)main.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)main.cpp -o $(SRC_DIR)main.o
 
-$(SRC_DIR)lsdmain.o: $(SRC_DIR)lsdmain.cpp $(COM_DEP_SYS)
+$(SRC_DIR)lsdmain.o: $(SRC_DIR)lsdmain.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.o
 
-$(SRC_DIR)file.o: $(SRC_DIR)file.cpp $(COM_DEP_SYS)
+$(SRC_DIR)file.o: $(SRC_DIR)file.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)file.cpp -o $(SRC_DIR)file.o
 
-$(SRC_DIR)nets.o: $(SRC_DIR)nets.cpp $(COM_DEP_SYS)
+$(SRC_DIR)nets.o: $(SRC_DIR)nets.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.o
 
-$(SRC_DIR)object.o: $(SRC_DIR)object.cpp $(COM_DEP_SYS)
+$(SRC_DIR)object.o: $(SRC_DIR)object.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)object.cpp -o $(SRC_DIR)object.o
 
-$(SRC_DIR)util.o: $(SRC_DIR)util.cpp $(COM_DEP_SYS)
+$(SRC_DIR)util.o: $(SRC_DIR)util.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)util.cpp -o $(SRC_DIR)util.o
 
-$(SRC_DIR)variab.o: $(SRC_DIR)variab.cpp $(COM_DEP_SYS)
+$(SRC_DIR)variab.o: $(SRC_DIR)variab.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.o
 	
 # remove compiled files

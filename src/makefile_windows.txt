@@ -2,13 +2,13 @@
 SRC_DIR=$(LSDROOT)/$(SRC)/
 
 # location of tcl/tk and other headers
-INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(PATH_HEADER) -I$(LSDROOT)/$(SRC)
+INCLUDE=-I$(LSDROOT)/$(SRC) -I$(PATH_TCLTK_HEADER) -I$(PATH_HEADER)
 
 # OS command to delete files
 RM=rm -f
 
 # link executable
-$(TARGET)$(EXT): $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)main.o $(SRC_DIR)lsdmain.o \
+$(TARGET).exe: $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)main.o $(SRC_DIR)lsdmain.o \
 $(SRC_DIR)analysis.o $(SRC_DIR)debug.o $(SRC_DIR)draw.o $(SRC_DIR)edit.o \
 $(SRC_DIR)edit_dat.o $(SRC_DIR)file.o $(SRC_DIR)interf.o $(SRC_DIR)nets.o \
 $(SRC_DIR)object.o $(SRC_DIR)report.o $(SRC_DIR)runtime.o $(SRC_DIR)set_all.o \
@@ -19,8 +19,7 @@ $(SRC_DIR)show_eq.o $(SRC_DIR)util.o $(SRC_DIR)variab.o $(SRC_DIR)lsd_manifest.o
 	$(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)report.o $(SRC_DIR)runtime.o \
 	$(SRC_DIR)set_all.o $(SRC_DIR)show_eq.o $(SRC_DIR)util.o $(SRC_DIR)variab.o \
 	$(SRC_DIR)lsd_manifest.o \
-	$(SWITCH_CC_LNK) -L$(PATH_TCL_LIB) $(TCL_LIB) -L$(PATH_TK_LIB) $(TK_LIB) \
-	-L$(PATH_LIB) $(LIBS) -o $(TARGET)
+	$(SWITCH_CC_LNK) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(TARGET)
 
 # compile modules
 $(FUN).o: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)check.h \
@@ -28,7 +27,7 @@ $(SRC_DIR)decl.h.gch $(SRC_DIR)fun_head.h $(SRC_DIR)fun_head_fast.h
 	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(INCLUDE) -c $(FUN).cpp -o $(FUN).o
 	
 $(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
-	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o
 
 $(SRC_DIR)main.o: $(SRC_DIR)main.cpp $(SRC_DIR)decl.h.gch
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)main.cpp -o $(SRC_DIR)main.o
@@ -85,9 +84,8 @@ $(SRC_DIR)lsd_manifest.o: $(SRC_DIR)lsd_manifest.rc $(SRC_DIR)lsd.exe.manifest
 	$(WRC) -i $(SRC_DIR)lsd_manifest.rc -o $(SRC_DIR)lsd_manifest.o $(INCLUDE)
 
 $(SRC_DIR)decl.h.gch: $(SRC_DIR)decl.h $(SRC_DIR)common.h $(SRC_DIR)system_options.txt
-	$(RM) $(SRC_DIR)choose.h
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)decl.h -o $(SRC_DIR)decl.h.gch
 
 # remove compiled files
 clean:
-	$(RM) $(SRC_DIR)*.o $(SRC_DIR)*.gch $(FUN).o $(TARGET)*
+	$(RM) $(SRC_DIR)*.o $(SRC_DIR)*.gch $(FUN).o $(TARGET).exe

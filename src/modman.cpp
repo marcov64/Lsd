@@ -179,7 +179,7 @@ cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set cho
 if ( choice )
 {
 	log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
-	cmd( "ttk::messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the \\src directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
+	cmd( "ttk::messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the sources (src) directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
 	return 4;
 }
 
@@ -225,17 +225,17 @@ else
 }
 
 // check if LSDROOT environment variable exists and use it if so
-cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if [ file exists \"$RootLsd/src/decl.h\" ] { cd \"$RootLsd\"; set choice 0 } { set choice 1 } } { set choice 1 }" );
+cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if [ file exists \"$RootLsd/Manual/LMM.html\" ] { cd \"$RootLsd\"; set choice 0 } { set choice 1 } } { set choice 1 }" );
 
 if ( choice )
 {
 	choice = 0;
 	cmd( "set RootLsd [ file normalize \"%s\" ]", exec_path );
 	// check if directory is ok and if executable is inside a macOS package
-	cmd( "if [ file exists \"$RootLsd/src/decl.h\" ] { \
+	cmd( "if [ file exists \"$RootLsd/Manual/LMM.html\" ] { \
 			cd \"$RootLsd\" \
 		} { \
-			if [ file exists \"$RootLsd/../../../src/decl.h\" ] { \
+			if [ file exists \"$RootLsd/../../../Manual/LMM.html\" ] { \
 				cd \"$RootLsd/../../..\"; \
 				set RootLsd \"[ pwd ]\" \
 			} { \
@@ -4720,7 +4720,7 @@ if ( choice == 47 )
 
 	cmd( "ttk::frame .l.t" );
 	cmd( "ttk::scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-	cmd( "ttk::text .l.t.text -wrap word -width 70 -height 22 -yscrollcommand \".l.t.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
+	cmd( "ttk::text .l.t.text -wrap word -width 70 -height 20 -yscrollcommand \".l.t.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
 	cmd( ".l.t.text insert end $a" );
 	cmd( "pack .l.t.yscroll -side right -fill y" );
 	cmd( "pack .l.t.text" );
@@ -4741,7 +4741,9 @@ if ( choice == 47 )
 			} { \
 				set a \"File $DefaultSysOpt is missing\nPlease reinstall LSD\" \
 			}; \
-			.l.t.text insert end \"LSDROOT=$RootLsd\\n\"; \
+			.l.t.text insert end \"# LSD options\n\"; \
+			.l.t.text insert end \"LSDROOT=$RootLsd\n\"; \
+			.l.t.text insert end \"SRC=$LsdSrc\n\n\"; \
 			.l.t.text insert end \"$a\"; \
 			.l.d.msg configure -text \"\"; \
 			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.gch ]; \
@@ -4804,10 +4806,10 @@ if ( choice == 48 )
 	cmd( "set a [ read -nonewline $f ]" );
 	cmd( "close $f" );
 
-	cmd( "set gcc_conf \"TARGET=$DefaultExe\\nFUN=[ file rootname \"$b\" ]\\nFUN_EXTRA=\\nSWITCH_CC=\"" );
-	cmd( "set gcc_deb_nopt \"-Og\"" );
-	cmd( "set gcc_deb \"$gcc_conf$gcc_deb_nopt -ggdb3\\nSWITCH_CC_LNK=\"" );
-	cmd( "set gcc_opt \"$gcc_conf -O3\\nSWITCH_CC_LNK=\"" );
+	cmd( "set gcc_conf \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=\"" );
+	cmd( "set gcc_deb_nopt \"-O0\"" );
+	cmd( "set gcc_deb \"$gcc_conf$gcc_deb_nopt -ggdb3\nSWITCH_CC_LNK=\"" );
+	cmd( "set gcc_opt \"$gcc_conf -O3\nSWITCH_CC_LNK=\"" );
 
 	cmd( "set pos [ string first \"SWITCH_CC=\" $a ]" );
 	cmd( "if { $pos == -1 } { \
@@ -5200,30 +5202,24 @@ if ( choice == 62 )
 		goto loop;
 
 	// copy the base LSD source files to distribution directory
-	cmd( "if { ! [ file exists \"$modelDir/src\" ] } { file mkdir \"$modelDir/src\" }" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/main.cpp\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/lsdmain.cpp\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/common.cpp\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/file.cpp\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/nets.cpp\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/object.cpp\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/util.cpp\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/variab.cpp\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/check.h\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/common.h\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/decl.h\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head.h\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head_fast.h\" \"$modelDir/src\"" );
-	cmd( "file copy -force \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" \"$modelDir/src\"" );
+	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc\" ] } { file mkdir \"$modelDir/$LsdSrc\" }" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/main.cpp\" \"$modelDir/$LsdSrc\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/lsdmain.cpp\" \"$modelDir/$LsdSrc\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/common.cpp\" \"$modelDir/$LsdSrc\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/file.cpp\" \"$modelDir/$LsdSrc\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/nets.cpp\" \"$modelDir/$LsdSrc\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/object.cpp\" \"$modelDir/$LsdSrc\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/util.cpp\" \"$modelDir/$LsdSrc\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/variab.cpp\" \"$modelDir/$LsdSrc\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/check.h\" \"$modelDir/$LsdSrc\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/common.h\" \"$modelDir/$LsdSrc\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/decl.h\" \"$modelDir/$LsdSrc\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head.h\" \"$modelDir/$LsdSrc\"" );
+	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head_fast.h\" \"$modelDir/$LsdSrc\"" );
 
 	// copy Eigen library files if in use, just once to save time
 	if( use_eigen( ) )
-		cmd( "if { ! [ file exists \"$modelDir/src/Eigen\" ] } { file copy -force \"$RootLsd/$LsdSrc/Eigen\" \"$modelDir/src\" }" );
-
-	// define the no window compilation macro
-	cmd( "set f [ open \"$modelDir/src/choose.h\" w ]" );
-	cmd( "puts -nonewline $f \"#define NO_WINDOW\\n\"" );
-	cmd( "close $f" );
+		cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/Eigen\" ] } { file copy -force \"$RootLsd/$LsdSrc/Eigen\" \"$modelDir/$LsdSrc\" }" );
 
 	// create makefileNW and compile a local machine version of lsdNW
 	compile_run( false, true );
@@ -5779,7 +5775,7 @@ void make_makefile( bool nw )
 	cmd( "set b [ read -nonewline $f ]" );
 	cmd( "close $f" );
 
-	cmd( "set c \"# Model compilation options\\n$a\\n\\n# System compilation options\\n$d\\nLSDROOT=$RootLsd\\n\\n# Body of makefile%s (from src/makefile_%s.txt)\\n$b\"", nw ? "NW" : "", nw ? "NW" : ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 ) );
+	cmd( "set c \"# Model compilation options\\n$a\\n\\n# System compilation options\\n$d\\nLSDROOT=$RootLsd\\n\\n# Body of makefile%s (from makefile_%s.txt)\\n$b\"", nw ? "NW" : "", nw ? "NW" : ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 ) );
 	cmd( "set f [ open \"$modelDir/makefile%s\" w ]", nw ? "NW" : "" );
 	cmd( "puts -nonewline $f $c" );
 	cmd( "close $f" );
@@ -5802,7 +5798,7 @@ void check_option_files( bool sys )
 		{
 			cmd( "set dir [ glob -nocomplain \"$modelDir/fun_*.cpp\" ]" );
 			cmd( "if { $dir != \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
-			cmd( "set a \"TARGET=$DefaultExe\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=-O3 -ggdb3\\nSWITCH_CC_LNK=\"" );
+			cmd( "set a \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
 			cmd( "set f [ open \"$modelDir/$MODEL_OPTIONS\" w ]" );
 			cmd( "puts -nonewline $f $a" );
 			cmd( "close $f" );
@@ -5812,12 +5808,12 @@ void check_option_files( bool sys )
 	cmd( "set exists [ file exists \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\"]" );
 	if ( ! exists )
 	{
-		cmd( "if [ string equal $CurPlatform windows ] { set sysfile \"sysopt_windows.txt\" }" );
-		cmd( "if [ string equal $CurPlatform linux ] { set sysfile \"sysopt_linux.txt\" }" );
-		cmd( "if [ string equal $CurPlatform mac ] { set sysfile \"sysopt_mac.txt\" }" );
+		cmd( "if [ string equal $tcl_platform(platform) windows ] { set sysfile \"sysopt_windows.txt\" } elseif [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } else { set sysfile \"sysopt_linux.txt\" }" );
 		cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
 		cmd( "set f1 [ open \"$RootLsd/$LsdSrc/$sysfile\" r ]" );
-		cmd( "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"" );
+		cmd( "puts -nonewline $f \"# LSD options\n\"" );
+		cmd( "puts -nonewline $f \"LSDROOT=$RootLsd\n\"" );
+		cmd( "puts -nonewline $f \"SRC=$LsdSrc\n\n\"" );
 		cmd( "puts -nonewline $f [ read $f1 ]" );
 		cmd( "close $f" );
 		cmd( "close $f1" );
@@ -6009,7 +6005,7 @@ bool compile_run( bool run, bool nw )
 	else
 	{
 		if ( nw )
-			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n$modelDir\n\nto another computer (including the subdirectory 'src'). After the copy, use the following steps to use the model program in the new computer:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\n\nSee LSD documentation for further details.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n$modelDir\n\nto another computer (including the subdirectory '$LsdSrc'). After the copy, use the following steps to use the model program in the new computer:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\n\nSee LSD documentation for further details.\"" );
 
 		if ( run )							// no problem - execute
 		{

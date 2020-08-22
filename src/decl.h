@@ -17,11 +17,6 @@ DECL.H
 Global definitions among all LSD C++ modules
 *************************************************************/
 
-// comment the next line to disable parallel mode (multi-threading)
-#ifndef NO_PARALLEL
-#define PARALLEL_MODE
-#endif
-
 // disable code that make gdb debugging harder
 #ifdef DEBUG_MODE
 #define NO_ERROR_TRAP
@@ -165,7 +160,7 @@ extern int t;
 extern unsigned seed;
 extern object *root;
 
-#ifndef NO_WINDOW
+#ifndef NW
 extern int i_values[ ];					// user temporary variables copy
 extern double d_values[ ];
 extern object *o_values[ ];
@@ -370,7 +365,7 @@ void write_obj( object *r, FILE *frep );
 void write_str( object *r, FILE *frep, int dep, char const *prefix );
 void write_var( variable *v, FILE *frep );
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 void parallel_update( variable *v, object* p, object *caller = NULL );
 #endif
 
@@ -448,15 +443,13 @@ extern variable *last_cemetery;	// LSD last saved data from deleted objects
 extern void *random_engine;		// current random number generator engine
 
 // multi-threading control 
-#ifdef PARALLEL_MODE
+#ifndef NP
 extern atomic< bool > parallel_ready;	// flag to indicate multitasking is available
 extern map< thread::id, worker * > thr_ptr;	// worker thread pointers
-extern thread::id main_thread;			// LSD main thread ID
-extern worker *workers;					// multi-thread parallel worker data
 #endif
 
 // Tcl/Tk specific definitions (for the windowed version only)
-#ifndef NO_WINDOW
+#ifndef NW
 
 // C to TCL interface functions
 int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );

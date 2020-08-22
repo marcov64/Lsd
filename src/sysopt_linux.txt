@@ -1,19 +1,13 @@
-SRC=src
-EXT=
-
 # Libraries options
 TCL_VERSION=8.6
-PATH_TCL_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the file tcl.h
-PATH_TK_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the tk.h
+PATH_TCLTK_HEADER=.        # path to tcl.h and tk.h
+PATH_TCLTK_LIB=.           # path to libtclXXX.a and libtkXXX.a
+TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
 PATH_HEADER=.
-PATH_TCL_LIB=.
-PATH_TK_LIB=.
 PATH_LIB=.
-TCL_LIB=-ltcl$(TCL_VERSION)
-TK_LIB=-ltk$(TCL_VERSION)
-LIBS=-lz -lpthread
+LIB=-lz -lpthread
 
 # Compiler options
 CC=g++
-GLOBAL_CC=-march=native -std=gnu++14 -w
+GLOBAL_CC=-march=native -w
 SSWITCH_CC=-fnon-call-exceptions -O3

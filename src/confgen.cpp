@@ -86,6 +86,10 @@ int *lags = NULL;			// array of variables lags
 int num_confs = 0;			// total configurations to produce
 int num_vars = 0;			// total variables/parameters to change
 
+// constant string arrays
+const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
+const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
+
 
 bool change_configuration( object *root, int findex );
 int load_confs_csv( char *config );

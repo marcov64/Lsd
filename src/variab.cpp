@@ -119,7 +119,7 @@ object::delete_obj to cancel an object.
 
 clock_t start_profile[ 100 ], end_profile[ 100 ];
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 // semaphore to enable just a single parallel call at a time
 atomic < bool > parallel_ready( true );
 condition_variable update;
@@ -210,7 +210,7 @@ int variable::init( object *_up, char const *_label, int _num_lag, double *v, in
 {
 	int i;
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// prevent concurrent use by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
 #endif	
@@ -243,7 +243,7 @@ void variable::empty( void )
 {
 	if ( running )
 	{
-#ifdef PARALLEL_MODE
+#ifndef NP
 		// prevent concurrent use by more than one thread
 		lock_guard < mutex > lock( parallel_comp );
 #endif	
@@ -277,7 +277,7 @@ double variable::cal( object *caller, int lag )
 	if ( param == 1 )
 		return val[ 0 ];					//it is a parameter, ignore lags
 	
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// prepare mutex for variables and functions updated in multiple threads
 	unique_lock < mutex > guard( parallel_comp, defer_lock );
 #endif	
@@ -311,7 +311,7 @@ double variable::cal( object *caller, int lag )
 			// already calculated this time step or not to be calculated this time step
 			if ( last_update >= t || t < next_update )
 				return( val[ 0 ] );		
-#ifdef PARALLEL_MODE
+#ifndef NP
 			// prevent parallel computation of the same variable (except dummy equations)
 			if ( parallel_mode && ! dummy )
 				 guard.lock( );
@@ -331,7 +331,7 @@ double variable::cal( object *caller, int lag )
 		if ( caller == NULL )			// update or inadequate caller
 			return val[ 0 ];   
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 		// prevent parallel computation of the same function (except dummy equations)
 		if ( parallel_mode && ! dummy )
 			 guard.lock( );
@@ -351,7 +351,7 @@ double variable::cal( object *caller, int lag )
 
 	under_computation = true;
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 	if ( fast_mode == 0 && ! parallel_mode )
 #else
 	if ( fast_mode == 0 )
@@ -378,7 +378,7 @@ double variable::cal( object *caller, int lag )
 			return 0;
 		}
 
-#ifndef NO_WINDOW
+#ifndef NW
 		if ( stack_info >= stack && ( ! prof_obs_only || observe ) )
 			start_profile[ stack - 1 ] = pstart = clock( );
 		else
@@ -386,7 +386,7 @@ double variable::cal( object *caller, int lag )
 				pstart = clock( );				
 #endif
 	}
-#ifndef NO_WINDOW
+#ifndef NW
 	else
 		if ( prof_aggr_time )
 			pstart = clock( );				
@@ -438,13 +438,13 @@ double variable::cal( object *caller, int lag )
 			next_update += rnd_int( 0, period_range );
 	}
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 	if ( fast_mode == 0 && ! parallel_mode )
 #else
 	if ( fast_mode == 0 )
 #endif	
 	{
-#ifndef NO_WINDOW
+#ifndef NW
 		if ( prof_aggr_time )
 		{
 			pend = clock( );
@@ -548,7 +548,7 @@ double variable::cal( object *caller, int lag )
 }
 
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 /***************************************************
 CAL_WORKER
 Multi-thread worker for parallel computation
@@ -601,7 +601,7 @@ void worker::cal_worker( void )
 				// compute the Variable's equation
 				user_excpt = true;			// allow distinguishing among internal & user exceptions
 
-#ifndef NO_WINDOW 
+#ifndef NW 
 				if ( setjmp( env ) )		// allow recovering from signals
 					return;
 #endif			
@@ -765,7 +765,7 @@ void worker::signal( int sig )
 	free = false;
 	running = false;
 	
-#ifndef NO_WINDOW 
+#ifndef NW 
 	longjmp( env, 1 );				// recover from crash on user code
 #endif
 }

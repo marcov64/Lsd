@@ -1,19 +1,13 @@
-SRC=src
-EXT=
-
 # Libraries options
-PATH_TCLTK_FRMWRK=./$(TARGET).app/Contents/Frameworks
 PATH_TCL_HEADER=Tcl.framework/Headers
 PATH_TK_HEADER=Tk.framework/Headers
+PATH_TCLTK_LIB=./$(TARGET).app/Contents/Frameworks
+TCLTK_LIB=-framework Tcl -framework Tk
 PATH_HEADER=.
-PATH_TCL_LIB=
-PATH_TK_LIB=
 PATH_LIB=.
-TCL_LIB=-framework Tcl
-TK_LIB=-framework Tk
-LIBS=-lz -lpthread
+LIB=-lz -lpthread
 
 # Compiler options
 CC=g++
-GLOBAL_CC=-DMAC_PKG -march=native -std=gnu++14 -w
+GLOBAL_CC=-march=native -w
 SSWITCH_CC=-fnon-call-exceptions -O3

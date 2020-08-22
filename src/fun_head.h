@@ -105,7 +105,7 @@ bool no_ptr_chk = true;
 		error_hard( msg, "invalid equation result", "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation", true ); \
 	}
 
-#ifndef NO_WINDOW
+#ifndef NW
 #define DEBUG_CODE \
 	if ( debug_flag ) \
 	{ \

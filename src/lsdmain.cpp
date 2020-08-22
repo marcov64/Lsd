@@ -148,7 +148,7 @@ const char *wnd_names[ LSD_WIN_NUM ] = LSD_WIN_NAME;
 const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
 
-#ifndef NO_WINDOW
+#ifndef NW
 int i_values[ 4 ];			// user temporary variables copy
 double d_values[ USER_D_VARS ];
 object *o_values[ 10 ];
@@ -156,7 +156,7 @@ netLink *n_values[ 10 ];
 Tcl_Interp *inter = NULL;	// global Tcl interpreter in LSD
 #endif
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 map < thread::id, worker * > thr_ptr;	// worker thread pointers
 thread::id main_thread;		// LSD main thread ID
 worker *workers = NULL;		// multi-thread parallel worker data
@@ -181,7 +181,7 @@ int lsdmain( int argn, char **argv )
 	exec_file = clean_file( argv[ 0 ] );	// global pointer to the name of executable file
 	exec_path = clean_path( exec_path );	// global pointer to path of executable file
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 	main_thread = this_thread::get_id( );
 	max_threads = ( MAX_CORES <= 0 ) ? thread::hardware_concurrency( ) : MAX_CORES;
 #else
@@ -193,7 +193,7 @@ int lsdmain( int argn, char **argv )
 	add_description( "Root", "Object", "(no description available)" );
 	reset_blueprint( NULL );
 
-#ifdef NO_WINDOW
+#ifdef NW
 	
 	no_window = true;
 	findex = 1;
@@ -310,7 +310,7 @@ int lsdmain( int argn, char **argv )
 		myexit( 4 );
 	}
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 	if ( j > 0 && j < max_threads )
 		max_threads = j;
 #endif	
@@ -353,7 +353,7 @@ int lsdmain( int argn, char **argv )
 		}
 	}
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 	if ( j > 0 && j < max_threads )
 		max_threads = j;
 #endif	
@@ -625,7 +625,7 @@ int lsdmain( int argn, char **argv )
 	strcpy( stacklog->label, "LSD Simulation Manager" );
 	stack = 0;
 
-#ifndef NO_WINDOW
+#ifndef NW
 
 	while ( 1 )
 	{
@@ -683,7 +683,7 @@ void run( void )
 	clock_t start, end, last_update;
 	result *rf;					// pointer for results files (may be zipped or not)
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// check if there are parallel computing variables
 	if ( parallel_disable || max_threads < 2 )
 		parallel_mode = parallel_ready = false;
@@ -702,7 +702,7 @@ void run( void )
 	parallel_mode = false;
 #endif	
 
-#ifndef NO_WINDOW
+#ifndef NW
 	set_buttons_log( true );
 
 	prof.clear( );			// reset profiling times
@@ -721,7 +721,7 @@ void run( void )
 		cur_sim = i;	 	// Update the global variable holding information on the current run in the set of runs
 		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed (sorry Nadia!)
 
-#ifndef NO_WINDOW
+#ifndef NW
 		prepare_plot( root, i );
 #endif
 		if ( fast_mode < 2 )
@@ -737,7 +737,7 @@ void run( void )
 		{
 			if ( load_configuration( true ) != 0 )
 			{
-#ifndef NO_WINDOW 
+#ifndef NW 
 				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
 #else
@@ -752,7 +752,7 @@ void run( void )
 		if ( i > 1 )
 			if ( load_configuration( true, true ) != 0 )
 			{
-#ifndef NO_WINDOW 
+#ifndef NW 
 				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
 #else
@@ -770,7 +770,7 @@ void run( void )
 
 		if ( ! alloc_save_mem( root ) )
 		{
-#ifndef NO_WINDOW 
+#ifndef NW 
 			log_tcl_error( "Memory allocation", "Not enough memory, too many series saved for the memory available" );
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, max_step );
 #else
@@ -856,7 +856,7 @@ void run( void )
 				last_done = perc_done;
 			}
 			
-#ifndef NO_WINDOW 
+#ifndef NW 
 			// restart runtime variables color cycle
 			cur_plt = 0;
 
@@ -877,7 +877,7 @@ void run( void )
 
 			perc_done = ( 100 * t ) / max_step;
 			
-#ifndef NO_WINDOW
+#ifndef NW
 			if ( fast_mode == 0 && ! cur_plt && ! pause_run )
 				plog( "\nSimulation %d of %d time step t = %d done (%d%%)", "", i, sim_num, t, perc_done );
 				
@@ -991,7 +991,7 @@ void run( void )
 		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
 			quit = 0;
 		
-#ifndef NO_WINDOW 
+#ifndef NW 
 		cmd( "destroytop .deb" );
 		cmd( "update" );
 		reset_plot( i );
@@ -1094,14 +1094,14 @@ void run( void )
 	if ( fast_mode == 2 )
 		plog( "\nSimulation %d of %d finished at t = %d\n", "", i - 1, sim_num, t - 1 );
 
-#ifndef NO_WINDOW 
+#ifndef NW 
 	uncover_browser( );
 	set_buttons_log( false );
 	show_prof_aggr( );
 	cmd( "focustop .log" );
 #endif
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// stop multi-thread workers
 	delete [ ] workers;
 	workers = NULL;
@@ -1115,7 +1115,7 @@ void run( void )
 SET_VAR
 *********************************/
 // function to set a c variable when not in a Tcl idle loop (hardcoded vars only)
-#ifndef NO_WINDOW   
+#ifndef NW   
 int Tcl_set_c_var( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ];
@@ -1196,7 +1196,7 @@ void empty_stack( void )
 	}
 	else
 	{
-#ifndef NO_WINDOW 
+#ifndef NW 
 		log_tcl_error( "Internal error", "LSD trace stack corrupted" );	
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Internal LSD error\" -detail \"The LSD trace stack is corrupted.\nLSD will close now.\"" );
 #else
@@ -1306,7 +1306,7 @@ bool alloc_save_var( variable *v )
 /*********************************
 CREATE_LOGWINDOW
 *********************************/
-#ifndef NO_WINDOW
+#ifndef NW
 void create_logwindow( void )
 {
 	if ( ! tk_ok )
@@ -1394,7 +1394,7 @@ void reset_end( object *r )
 /*********************************
 SET_SHORTCUTS_LOG
 *********************************/
-#ifndef NO_WINDOW
+#ifndef NW
 void set_shortcuts_log( const char *window, const char *help )
 {
 	cmd( "bind %s <F1> { LsdHelp %s }", window, help  );
@@ -1591,7 +1591,7 @@ debugger
 ********************************************/
 void deb_log( bool on, int time )
 { 
-#ifndef NO_WINDOW  
+#ifndef NW  
 	// check if should turn off
 	if ( ! on || parallel_mode || fast_mode != 0 )
 	{

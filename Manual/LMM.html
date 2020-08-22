@@ -428,9 +428,9 @@ Model/Group</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>Create a new <a href="LSD_faqs.html#model">LSD
 model</a>, optionally inside a new group of models. According to the user
-selection, the model (or group) can created inside the current group, as pointed
-in the <a href="#infobar">information bar</a>, or in a newly created group
-contained in the current one.</span></p>
+selection, the model (or group) can created inside the current group, as
+pointed in the <a href="#infobar">information bar</a>, or in a newly created
+group contained in the current one.</span></p>
 
 <h2><a name="_Browse_Models_2"></a><span lang=EN-US>Browse Models </span></h2>
 
@@ -559,7 +559,7 @@ original copy.<a name="_Compare_Models."></a></span></p>
  </tr>
 </table>
 
-<h2><span lang=EN-US style='color:black'>Compare Models </span></h2>
+<h2><span lang=EN-US>Compare Models </span></h2>
 
 <p class=MsoNormal><span lang=EN-US>Use TkDiff (or other Diff utility defined
 in </span><span class=Cdigo><span lang=EN-US>default.tcl</span></span><span
@@ -663,7 +663,7 @@ the <a href="#_Options">Options</a> window.<a name="_Options"></a></span></p>
  </tr>
 </table>
 
-<h2><a name=options></a><span lang=EN-US style='color:black'>Options </span></h2>
+<h2><a name=options></a><span lang=EN-US>Options </span></h2>
 
 <p class=MsoNormal><span lang=EN-US>LSD user can set several options in both
 LMM and the <a href="LSD_faqs.html#modelprogram">LSD model programs</a> using
@@ -904,7 +904,7 @@ editing action.<a name="_Cut"></a></span></p>
  </tr>
 </table>
 
-<h2><span lang=EN-US>Cut</span></h2>
+<h2><span lang=EN-US style='color:black'>Cut</span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcuts</span></i><span lang=EN-US>: </span><span
 class=Cdigo><span lang=EN-US>Ctrl+x</span></span><span lang=EN-US> or click the
@@ -1047,7 +1047,7 @@ name=match></a><a name="_Match_{_}"></a></span></p>
  </tr>
 </table>
 
-<h2><span lang=EN-US style='color:black'>Match { }</span></h2>
+<h2><span lang=EN-US>Match { }</span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcuts</span></i><span lang=EN-US>: </span><span
 class=Cdigo><span lang=EN-US>Ctrl+m</span></span><span lang=EN-US> or use the
@@ -1144,10 +1144,10 @@ easier reading.</span></p>
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><a name=LsdScript></a><a
-  name=wrap></a><a name=lfont></a><a name="_Larger_Font"></a><span lang=EN-US>&nbsp;</span><span
-  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
-  text-decoration:none'>&#9650;Top</span></a></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><a
+  name="_Larger_Font"></a><a name=lfont></a><a name=wrap></a><a name=LsdScript></a><span
+  lang=EN-US>&nbsp;</span><span style='font-size:10.0pt;color:black'><a
+  href="#top"><span style='color:red;text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -1352,12 +1352,12 @@ on it.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The external debugger allows the modeler to
 follow the <a href="LSD_faqs.html#simulationrun">simulation run</a>
-instruction-by-instruction. A debugger is a program which runs other programs in
-a controlled environment. When a program is run in a debugger, it is possible
-to observe in detail what it does, for example, interrupting its calculations
-and checking the values of its internal variables. The debugger works as if the
-single lines of code execute their respective commands only when explicitly
-directed to do so. </span></p>
+instruction-by-instruction. A debugger is a program which runs other programs
+in a controlled environment. When a program is run in a debugger, it is
+possible to observe in detail what it does, for example, interrupting its
+calculations and checking the values of its internal variables. The debugger
+works as if the single lines of code execute their respective commands only
+when explicitly directed to do so. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Note that GDB and LLDB are <a
 href="LSD_faqs.html#c">C++</a> debuggers. Therefore, they know nothing of LSD
@@ -1366,10 +1366,10 @@ representations. The debugger permits, for example, to investigate line by line
 the execution of an equation. However, this means that one has also to follow
 line-by-line a lot of non-interesting technical code. </span></p>
 
-<p class=MsoNormal><span lang=EN-US>LSD modelers may find more useful the LSD
-Debugger: it follows the simulation at the level of individual Equations. When
-one Variable, marked to be debugged, is computed, the LSD debugger interrupts
-the simulation, shows the value produced in the equation, the values of the </span><span
+<p class=MsoNormal><span lang=EN-US>LSD modelers may find more useful the LSD Debugger:
+it follows the simulation at the level of individual Equations. When one
+Variable, marked to be debugged, is computed, the LSD debugger interrupts the
+simulation, shows the value produced in the equation, the values of the </span><span
 class=Cdigo><span lang=EN-US>v[n]</span></span><span lang=EN-US> temporary
 values, the model’s elements values, etc., permitting to find, most of times,
 the cause of an error. See the <a href="debug.html">LSD Debugger help page</a>.
@@ -1697,7 +1697,8 @@ href="LSD_faqs.html#equationfile">equation file</a></span></p>
  </tr>
 </table>
 
-<h2><a name="_Show_Description"></a><span lang=EN-US>Show Description </span></h2>
+<h2><a name="_Show_Description"></a><span lang=EN-US style='color:black'>Show
+Description </span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcuts</span></i><span lang=EN-US>: </span><span
 class=Cdigo><span lang=EN-US>Ctrl+d</span></span><span lang=EN-US> or click the
@@ -1901,7 +1902,7 @@ the table below. </span></p>
   <p class=MsoNormal><span class=Cdigo><b>SWITCH_CC=</b></span></p>
   </td>
   <td style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-Og -ggdb3</span></span><span
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-O0 -ggdb3</span></span><span
   lang=EN-US><br>
   (debug on)</span></p>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-O3</span></span><span
@@ -1914,13 +1915,13 @@ the table below. </span></p>
   lang=EN-US> switch can be added to this entry. The default </span><span
   class=Cdigo><span lang=EN-US>-ggdb3</span></span><span lang=EN-US> option
   includes full (external) debugging information. The default </span><span
-  class=Cdigo><span lang=EN-US>-Og</span></span><span lang=EN-US> prevents code
+  class=Cdigo><span lang=EN-US>-O0</span></span><span lang=EN-US> prevents code
   optimization to ensure a better debugging experience. Options </span><span
   class=Cdigo><span lang=EN-US>-O3</span></span><span lang=EN-US> turns on full
-  compiler optimization, slowing down compiler speed but generating slightly
-  faster code. See the documentation for the GCC compiler for further options.
-  The </span><span class=Cdigo><span lang=EN-US>Debug</span></span><span
-  lang=EN-US> checkbox can be used to switch among the debug on/off states.</span></p>
+  compiler optimization, slowing down compiler speed but generating faster
+  code. See the documentation for the GCC compiler for further options. The </span><span
+  class=Cdigo><span lang=EN-US>Debug</span></span><span lang=EN-US> checkbox
+  can be used to switch among the debug on/off states.</span></p>
   </td>
  </tr>
  <tr>
@@ -1932,7 +1933,7 @@ the table below. </span></p>
   </td>
   <td style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span lang=EN-US>Any optional compiler switch to be used
-  by the linker only can be added to this entry.</span></p>
+  by the linker (only) can be added to this entry.</span></p>
   </td>
  </tr>
 </table>
@@ -1996,12 +1997,12 @@ installed in case of Linux computers) </span></p>
   5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal align=center style='text-align:center'><b>Entry</b></p>
   </td>
-  <td width="32%" valign=top style='width:32.94%;background:#BFBFBF;padding:
+  <td width="34%" valign=top style='width:34.02%;background:#BFBFBF;padding:
   5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal align=center style='text-align:center'><b><span
   style='color:black'>Default</span></b></p>
   </td>
-  <td width="43%" valign=top style='width:43.38%;background:#BFBFBF;padding:
+  <td width="42%" valign=top style='width:42.3%;background:#BFBFBF;padding:
   5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal align=center style='text-align:center'><b><span
   style='color:black'>Comments</span></b></p>
@@ -2011,14 +2012,14 @@ installed in case of Linux computers) </span></p>
   <td width="21%" style='width:21.64%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo><b>LSDROOT=</b></span></p>
   </td>
-  <td width="32%" style='width:32.94%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <td width="34%" style='width:34.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>C:/Lsd-X.Y</span></span><span
   lang=EN-US><br>
   (Windows)</span></p>
   <p class=MsoNormal><span class=Cdigo>~/Lsd-X.Y<br>
   </span>(Linux/macOS)</p>
   </td>
-  <td width="43%" style='width:43.38%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <td width="42%" style='width:42.3%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span lang=EN-US>This is the root of the </span><a
   href="LSD_manual.html#install"><span lang=EN-US>LSD installation directory</span></a><span
   lang=EN-US>.</span></p>
@@ -2028,10 +2029,10 @@ installed in case of Linux computers) </span></p>
   <td width="21%" style='width:21.64%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo><b>SRC=</b></span></p>
   </td>
-  <td width="32%" style='width:32.94%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <td width="34%" style='width:34.02%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo>src</span></p>
   </td>
-  <td width="43%" style='width:43.38%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <td width="42%" style='width:42.3%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span lang=EN-US style='color:black'>The subdirectory in
   the </span><span style='color:black'><a href="LSD_manual.html#install"><span
   lang=EN-US>LSD installation directory</span></a></span><span lang=EN-US
@@ -2043,239 +2044,206 @@ installed in case of Linux computers) </span></p>
  </tr>
  <tr>
   <td width="21%" style='width:21.64%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><b>EXT=</b></span></p>
-  </td>
-  <td width="32%" style='width:32.94%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>.exe</span></span><span
-  lang=EN-US><br>
-  (Windows)</span></p>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>[blank]</span></span><span
-  lang=EN-US><br>
-  (Linux/macOS)</span></p>
-  </td>
-  <td width="43%" style='width:43.38%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US>The operating system file extension
-  required for executable files.</span></p>
-  </td>
- </tr>
- <tr>
-  <td width="21%" style='width:21.64%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo><b>TCL_VERSION=</b></span></p>
   </td>
-  <td width="32%" style='width:32.94%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <td width="34%" style='width:34.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>86</span></span><span
-  lang=EN-US style='color:black'><br>
+  lang=EN-US><br>
   (Windows)</span></p>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>8.6</span></span><span
-  lang=EN-US style='color:black'><br>
+  lang=EN-US><br>
   (Linux)</span></p>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>[blank]</span></span><span
-  lang=EN-US style='color:black'><br>
+  lang=EN-US><br>
   (macOS)</span></p>
   </td>
-  <td width="43%" style='width:43.38%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US style='color:black'>Tcl/Tk libraries
-  version number (1 digit).</span></p>
-  <p class=MsoNormal><span lang=EN-US style='color:black'>In case of errors in
-  Linux like: <br>
+  <td width="42%" style='width:42.3%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US>Tcl/Tk libraries version number (1
+  digit).</span></p>
+  <p class=MsoNormal><span lang=EN-US>In case of errors in Linux like: <br>
   </span><span class=Cdigo><span lang=EN-US>cannot open –ltcl8.6: No such file
   or directory <br>
   </span></span><span class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;
-  color:black'>try</span></span><span lang=EN-US style='color:black'> a
-  different version number (check your system) or using a separating dot.</span></p>
+  color:windowtext'>try</span></span><span lang=EN-US> a higher version number
+  (check your system) or using a separating dot.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="21%" style='width:21.64%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>PATH_TCLTK_HEADER=</b></span></p>
+  </td>
+  <td width="34%" style='width:34.02%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>$(LSDROOT)/gnu/include</span></span><span
+  lang=EN-US style='color:black'><br>
+  (Windows)</span></p>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>.</span></span><span
+  lang=EN-US style='color:black'><br>
+  (Linux)</span></p>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>[blank]</span></span><span
+  style='color:black'><br>
+  (macOS)</span></p>
+  </td>
+  <td width="42%" style='width:42.3%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black'>Path to the Tcl/Tk
+  header files directory. A “</span><span class=Cdigo><span lang=EN-US>.</span></span><span
+  lang=EN-US style='color:black'>” indicates no path (use default paths only).
+  This entry cannot be left blank.</span></p>
   </td>
  </tr>
  <tr>
   <td width="21%" style='width:21.64%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><b>PATH_TCLTK_</b></span> <span
-  class=Cdigo><b>FRMWRK=</b></span></p>
+  <p class=MsoNormal><span class=Cdigo><b>PATH_TCL_HEADER=</b></span></p>
   </td>
-  <td width="32%" style='width:32.94%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <td width="34%" style='width:34.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>[blank]</span></span><span
   lang=EN-US><br>
   (Windows/Linux)</span></p>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>$(LSDROOT)/LMM.app/<br>
-  Contents/Frameworks</span></span><span lang=EN-US><br>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>Tcl.framework/Headers</span></span><span
+  lang=EN-US><br>
   (macOS)</span></p>
   </td>
-  <td width="43%" style='width:43.38%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US>Absolute path to the Tcl/Tk framework
-  directory.</span></p>
+  <td width="42%" style='width:42.3%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US>Relative path (from </span><span
+  class=Cdigo><b><span lang=EN-US>PATH_TCLTK_LIB</span></b></span><span
+  lang=EN-US>) to the Tcl header files directory.</span></p>
+  <p class=MsoNormal><span lang=EN-US>Only used for macOS.</span></p>
   </td>
  </tr>
  <tr>
   <td width="21%" style='width:21.64%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><b>PATH_TCL_HEADER=</b></span></p>
-  </td>
-  <td width="32%" style='width:32.94%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>$(LSDROOT)/gnu/include</span></span><span
-  lang=EN-US style='color:black'><br>
-  (Windows)</span></p>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>/usr/include/tcl$(TCL_VERSION)</span></span><span
-  lang=EN-US style='color:black'><br>
-  (Linux)</span></p>
-  <p class=MsoNormal><span class=Cdigo>Tcl.framework/Headers</span><span
-  style='color:black'><br>
-  (macOS)</span></p>
-  </td>
-  <td width="43%" style='width:43.38%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US style='color:black'>Absolute path to the
-  Tcl header files directory.</span></p>
-  </td>
- </tr>
- <tr>
-  <td width="21%" style='width:21.64%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo><b>PATH_TK_HEADER=</b></span></p>
   </td>
-  <td width="32%" style='width:32.94%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>$(LSDROOT)/gnu/include</span></span><span
-  lang=EN-US><br>
-  (Windows)</span></p>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>/usr/include/tcl$(TCL_VERSION)</span></span><span
-  lang=EN-US><br>
-  (Linux)</span></p>
-  <p class=MsoNormal><span class=Cdigo>Tk.framework/Headers</span><br>
-  (macOS)</p>
-  </td>
-  <td width="43%" style='width:43.38%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US>Absolute path to the Tk header files
-  directory.</span></p>
-  </td>
- </tr>
- <tr>
-  <td width="21%" style='width:21.64%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><b>PATH_HEADER=</b></span></p>
-  </td>
-  <td width="32%" style='width:32.94%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>$(LSDROOT)/gnu/include</span></span><span
-  lang=EN-US style='color:black'><br>
-  (Windows)</span></p>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>.</span></span><span
-  lang=EN-US style='color:black'><br>
-  (Linux/macOS)</span></p>
-  </td>
-  <td width="43%" style='width:43.38%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US style='color:black'>Absolute path to the
-  standard C++ header files directory.</span></p>
-  </td>
- </tr>
- <tr>
-  <td width="21%" style='width:21.64%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><b>PATH_TCL_LIB=</b></span></p>
-  </td>
-  <td width="32%" style='width:32.94%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>$(LSDROOT)/gnu/lib</span></span><span
-  lang=EN-US><br>
-  (Windows)</span></p>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>.</span></span><span
-  lang=EN-US><br>
-  (Linux/macOS)</span></p>
-  </td>
-  <td width="43%" style='width:43.38%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US>Absolute path to the Tcl library
-  directory.</span></p>
-  </td>
- </tr>
- <tr>
-  <td width="21%" style='width:21.64%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><b>PATH_TK_LIB=</b></span></p>
-  </td>
-  <td width="32%" style='width:32.94%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>$(LSDROOT)/gnu/lib</span></span><span
-  lang=EN-US style='color:black'><br>
-  (Windows)</span></p>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>.</span></span><span
-  lang=EN-US style='color:black'><br>
-  (Linux/macOS)</span></p>
-  </td>
-  <td width="43%" style='width:43.38%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US style='color:black'>Absolute path to the
-  Tk library directory.</span></p>
-  </td>
- </tr>
- <tr>
-  <td width="21%" style='width:21.64%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><b>PATH_LIB=</b></span></p>
-  </td>
-  <td width="32%" style='width:32.94%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>$(LSDROOT)/gnu/lib</span></span><span
-  lang=EN-US><br>
-  (Windows)</span></p>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>.</span></span><span
-  lang=EN-US><br>
-  (Linux/macOS)</span></p>
-  </td>
-  <td width="43%" style='width:43.38%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US>Absolute path to the standard C++
-  libraries directory.</span></p>
-  </td>
- </tr>
- <tr>
-  <td width="21%" style='width:21.64%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><b>TCL_LIB=</b></span></p>
-  </td>
-  <td width="32%" style='width:32.94%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-ltcl$(TCL_VERSION)</span></span><span
+  <td width="34%" style='width:34.02%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>[blank]</span></span><span
   lang=EN-US style='color:black'><br>
   (Windows/Linux)</span></p>
-  <p class=MsoNormal><span class=Cdigo>-framework Tcl</span><span
-  style='color:black'><br>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>Tk.framework/Headers</span></span><span
+  lang=EN-US style='color:black'><br>
   (macOS)</span></p>
   </td>
-  <td width="43%" style='width:43.38%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US style='color:black'>Name of Tcl
-  library/framework file.</span></p>
+  <td width="42%" style='width:42.3%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black'>Relative path (from </span><span
+  class=Cdigo><b><span lang=EN-US>PATH_TCLTK_LIB</span></b></span><span
+  lang=EN-US style='color:black'>) to the Tk header files directory.</span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black'>Only used for macOS.</span></p>
   </td>
  </tr>
  <tr>
   <td width="21%" style='width:21.64%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><b>TK_LIB=</b></span></p>
+  <p class=MsoNormal><span class=Cdigo><b>PATH_TCLTK_LIB=</b></span></p>
   </td>
-  <td width="32%" style='width:32.94%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-ltk$(TCL_VERSION)</span></span><span
+  <td width="34%" style='width:34.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>$(LSDROOT)/gnu/lib</span></span><span
   lang=EN-US><br>
-  (Windows/Linux)</span></p>
-  <p class=MsoNormal><span class=Cdigo>-framework Tk</span><br>
-  (macOS)</p>
+  (Windows)</span></p>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>.</span></span><span
+  lang=EN-US><br>
+  (Linux)</span></p>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>./$(TARGET).app/Contents/Frameworks</span></span><span
+  lang=EN-US><br>
+  (macOS)</span></p>
   </td>
-  <td width="43%" style='width:43.38%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US>Name of Tk library/framework file.</span></p>
+  <td width="42%" style='width:42.3%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US>Path to the Tcl/Tk library directory. A “</span><span
+  class=Cdigo><span lang=EN-US>.</span></span><span lang=EN-US>” indicates no
+  path (use default paths only). This entry cannot be left blank.</span></p>
   </td>
  </tr>
  <tr>
   <td width="21%" style='width:21.64%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><b>LIBS=</b></span></p>
+  <p class=MsoNormal><span class=Cdigo><b>TCLTK_LIB=</b></span></p>
   </td>
-  <td width="32%" style='width:32.94%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <td width="34%" style='width:34.02%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-ltcl$(TCL_VERSION)
+  -ltk$(TCL_VERSION)</span></span><span lang=EN-US style='color:black'><br>
+  (Windows/Linux)</span></p>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-framework Tcl
+  -framework Tk</span></span><span lang=EN-US style='color:black'><br>
+  (macOS)</span></p>
+  </td>
+  <td width="42%" style='width:42.3%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black'>Linker include option
+  for Tcl/Tk libraries/frameworks.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="21%" style='width:21.64%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>PATH_HEADER=</b></span></p>
+  </td>
+  <td width="34%" style='width:34.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>.</span></span></p>
+  </td>
+  <td width="42%" style='width:42.3%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US>Path to any additional header file
+  directory. A “</span><span class=Cdigo><span lang=EN-US>.</span></span><span
+  lang=EN-US>” indicates no path (use default paths only). This entry cannot be
+  left blank.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="21%" style='width:21.64%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>PATH_LIB=</b></span></p>
+  </td>
+  <td width="34%" style='width:34.02%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>.</span></span></p>
+  </td>
+  <td width="42%" style='width:42.3%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black'>Path to any
+  additional library directory. A “</span><span class=Cdigo><span lang=EN-US>.</span></span><span
+  lang=EN-US style='color:black'>” indicates no path (use default paths only).
+  This entry cannot be left blank.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="21%" style='width:21.64%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>LIB=</b></span></p>
+  </td>
+  <td width="34%" style='width:34.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-lz</span></span><span
-  lang=EN-US style='color:black'><br>
+  lang=EN-US><br>
   (Windows)</span></p>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-lz -lpthread</span></span><span
-  lang=EN-US style='color:black'><br>
+  lang=EN-US><br>
   (Linux/macOS)</span></p>
   </td>
-  <td width="43%" style='width:43.38%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US style='color:black'>Name of additional
-  libraries to be used. Insert here any special library to be used with the
-  model.</span></p>
-  <p class=MsoNormal><span lang=EN-US style='color:black'>Minimum required
-  libraries are </span><span class=Cdigo><span lang=EN-US>zlib</span></span><span
-  lang=EN-US style='color:black'> (handle compressed result files) and </span><span
-  class=Cdigo><span lang=EN-US>pthreadlib</span></span><span lang=EN-US
-  style='color:black'> (multitasking, Linux/macOS only). </span></p>
+  <td width="42%" style='width:42.3%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US>Name of additional libraries to be used.
+  Add here any additional library to be used with the model.</span></p>
+  <p class=MsoNormal><span lang=EN-US>Minimum <i>required</i> libraries are </span><span
+  class=Cdigo><span lang=EN-US>zlib</span></span><span lang=EN-US> (handle
+  compressed result files) and </span><span class=Cdigo><span lang=EN-US>pthreadlib</span></span><span
+  lang=EN-US> (multitasking, Linux/macOS only). </span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="21%" style='width:21.64%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>WRC=</b></span></p>
+  </td>
+  <td width="34%" style='width:34.02%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo>windres</span><span lang=EN-US
+  style='color:black'><br>
+  (Windows)</span></p>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>[blank]</span><br>
+  </span><span style='color:black'>(Linux/macOS)</span></p>
+  </td>
+  <td width="42%" style='width:42.3%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black'>The Windows resource
+  compiler.</span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black'>Only used for
+  Windows.</span></p>
   </td>
  </tr>
  <tr>
   <td width="21%" style='width:21.64%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo><b>CC=</b></span></p>
   </td>
-  <td width="32%" style='width:32.94%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <td width="34%" style='width:34.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo>g++</span></p>
   </td>
-  <td width="43%" style='width:43.38%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <td width="42%" style='width:42.3%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span lang=EN-US>The </span><a
   href="LSD_faqs.html#compiler"><span lang=EN-US>C++ compiler</span></a><span
-  lang=EN-US> name.</span></p>
+  lang=EN-US> command available in the computer.</span></p>
   <p class=MsoNormal><span lang=EN-US>By default, Windows uses the minGW
   compiler which is preinstalled with LSD. <br>
   The user may install a different compiler or version (optional).</span></p>
@@ -2285,26 +2253,27 @@ installed in case of Linux computers) </span></p>
   <td width="21%" style='width:21.64%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo><b>GLOBAL_CC=</b></span></p>
   </td>
-  <td width="32%" style='width:32.94%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo>-march=native -std=gnu++14</span></p>
+  <td width="34%" style='width:34.02%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo>-march=native -w</span></p>
   </td>
-  <td width="43%" style='width:43.38%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <td width="42%" style='width:42.3%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span lang=EN-US style='color:black'>Compiler switches
-  (options) to be used with all models.</span></p>
+  (options) to be used for all files (system and equations). Added to the </span><span
+  style='color:black'><a href="#_Model_Options_1"><span lang=EN-US>model
+  specific switches</span></a></span><span lang=EN-US style='color:black'> for
+  the </span><span style='color:black'><a href="LSD_faqs.html#equationfile"><span
+  lang=EN-US>equation file(s)</span></a></span><span lang=EN-US
+  style='color:black'>.</span></p>
   <p class=MsoNormal><span lang=EN-US style='color:black'>Default switches
-  produces code optimized for the compiling computer (may not run on older
-  computers).</span></p>
-  <p class=MsoNormal><span lang=EN-US style='color:black'>The minimum supported
-  C++ version is </span><span style='color:black'><a href="LSD_faqs.html#c"><span
-  lang=EN-US>C++11</span></a></span><span lang=EN-US style='color:black'> but
-  the default version is C++14.</span></p>
+  produces code optimized for the compiling computer (executables may not run
+  on older computers) and no optional (non-error) warnings.</span></p>
   </td>
  </tr>
  <tr>
   <td width="21%" style='width:21.64%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo><b>SSWITCH_CC=</b></span></p>
   </td>
-  <td width="32%" style='width:32.94%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <td width="34%" style='width:34.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-mthreads -mwindows -O3</span></span><span
   lang=EN-US><br>
   (Windows)</span></p>
@@ -2312,32 +2281,16 @@ installed in case of Linux computers) </span></p>
   -O3</span></span><span lang=EN-US><br>
   (Linux/macOS)</span></p>
   </td>
-  <td width="43%" style='width:43.38%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US>Default compiler switches (options) to be
-  used for all models. May be reset by the </span><a href="#_Model_Options_1"><span
+  <td width="42%" style='width:42.3%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US>Compiler switches (options) to be used
+  for system files. Do not affect </span><a href="#_Model_Options_1"><span
   lang=EN-US>model specific switches</span></a><span lang=EN-US> for the </span><a
   href="LSD_faqs.html#equationfile"><span lang=EN-US>equation file(s)</span></a><span
   lang=EN-US>.</span></p>
   <p class=MsoNormal><span lang=EN-US>Except for the </span><span class=Cdigo><span
   lang=EN-US>-O3</span></span><span lang=EN-US> switch (full code
-  optimization), all the remaining default switches are <i>compulsory</i> and
+  optimization), all the remaining default switches are <i>required</i> and
   should not be changed.</span></p>
-  </td>
- </tr>
- <tr>
-  <td width="21%" style='width:21.64%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo><b>WRC=</b></span></p>
-  </td>
-  <td width="32%" style='width:32.94%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span class=Cdigo>windres</span><span lang=EN-US
-  style='color:black'><br>
-  (Windows)</span></p>
-  </td>
-  <td width="43%" style='width:43.38%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US style='color:black'>The Windows resource
-  compiler.</span></p>
-  <p class=MsoNormal><span lang=EN-US style='color:black'>Not used for Linux
-  and macOS.</span></p>
   </td>
  </tr>
 </table>
@@ -2375,8 +2328,7 @@ LSD.</span></p>
  </tr>
 </table>
 
-<h2><a name="_Auto-Hide_LMM_on"></a><span lang=EN-US style='color:black'>Auto-Hide
-LMM</span></h2>
+<h2><a name="_Auto-Hide_LMM_on"></a><span lang=EN-US>Auto-Hide LMM</span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>:
 click the on the white window with a down green arrow icon on the tool bar.</span></p>
@@ -2491,13 +2443,14 @@ navigation bar.</span></p>
  </tr>
 </table>
 
-<h2><a name="_LMM_Primer_Tutorial"></a><span lang=EN-US>LMM Primer Tutorial</span></h2>
+<h2><a name="_LMM_Primer_Tutorial"></a><span lang=EN-US style='color:black'>LMM
+Primer Tutorial</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>LSD absolute new users are strongly
 recommended to do this <a href="LMM_primer.html">first tutorial</a>, covering
-the very basic operations and concepts of <a href="LSD_faqs.html#lmm">LMM</a> and
-LSD. It guides first-time users to open LMM, explore its basic components and
-test the running of the example models available in the LSD installation. </span></p>
+the very basic operations and concepts of <a href="LSD_faqs.html#lmm">LMM</a>
+and LSD. It guides first-time users to open LMM, explore its basic components
+and test the running of the example models available in the LSD installation. </span></p>
 
 <h2><a name="_Using_LSD_Models"></a><span lang=EN-US>Using LSD Models Tutorial</span></h2>
 
@@ -2512,7 +2465,8 @@ Tutorial</span></h2>
 <p class=MsoNormal><span lang=EN-US>The <a href="model_writing.html">third
 tutorial</a> offers an introduction to users planning to develop their own <a
 href="LSD_faqs.html#model">LSD models</a> or modify existing ones. It is
-organized as a step-by-step guide on the creation of a simple LSD simulation model.</span></p>
+organized as a step-by-step guide on the creation of a simple LSD simulation
+model.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -2525,7 +2479,7 @@ organized as a step-by-step guide on the creation of a simple LSD simulation mod
  </tr>
 </table>
 
-<h2><a name="_About_LMM"></a><span lang=EN-US style='color:black'>About LSD</span></h2>
+<h2><a name="_About_LMM"></a><span lang=EN-US>About LSD</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>Present technical details about LSD, the
 computer platform in use, the operating system<a name="_Hlk25529838">, the

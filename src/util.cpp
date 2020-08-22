@@ -61,7 +61,7 @@ int fishErrCnt, studErrCnt, weibErrCnt, betaErrCnt, paretErrCnt, alaplErrCnt;
 double dimW = 0;						// lattice screen size
 double dimH = 0;
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 mutex error;
 #endif	
 
@@ -90,7 +90,7 @@ void plog( char const *cm, char const *tag, ... )
 	else
 		on_bar = false;
 	
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// abort if not running in main LSD thread
 	if ( this_thread::get_id( ) != main_thread )
 		return;
@@ -114,7 +114,7 @@ void plog( char const *cm, char const *tag, ... )
 			message[ j++ ] = buffer[ i ];
 	message[ j ] = '\0';
 
-#ifdef NO_WINDOW 
+#ifdef NW 
 	printf( "%s", message );
 	fflush( stdout );
 #else
@@ -149,7 +149,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 	if ( quit == 2 )		// simulation already being stopped
 		return;
 		
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// prevent concurrent use by more than one thread
 	lock_guard < mutex > lock( error );
 	
@@ -169,7 +169,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 	}
 #endif	
 		
-#ifndef NO_WINDOW
+#ifndef NW
 	if ( running )			// handle running events differently
 	{
 		cmd( "if [ winfo exists .deb ] { destroytop .deb }" );
@@ -199,7 +199,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 
 	quit = 2;				// do not continue simulation
 
-#ifndef NO_WINDOW
+#ifndef NW
 	uncover_browser( );
 	cmd( "focustop .log" );
 
@@ -273,7 +273,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 		root->emptyturbo( );
 		uncover_browser( );
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 		// stop multi-thread workers
 		delete [ ] workers;
 		workers = NULL;
@@ -686,7 +686,7 @@ void add_description( char const *lab, char const *type, char const *text )
 }
 
 
-#ifndef NO_WINDOW
+#ifndef NW
 
 /****************************************************
 SEARCH_ALL_SOURCES
@@ -1050,7 +1050,7 @@ void save_eqfile( FILE *f )
 }
 
 
-#ifndef NO_WINDOW
+#ifndef NW
 
 /***************************************************
 READ_EQ_FILENAME
@@ -1454,7 +1454,7 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 		for ( j = 0; j < columns; ++j )
 			lattice[ i ][ j ] = init_color;
 		
-#ifndef NO_WINDOW
+#ifndef NW
 
 	get_int( "hsizeLat", & hsize );			// 400
 	get_int( "vsizeLat", & vsize );			// 400
@@ -1550,7 +1550,7 @@ void close_lattice( void )
 {
 	empty_lattice( );
 	
-#ifndef NO_WINDOW
+#ifndef NW
 	cmd( "destroytop .lat" );
 #endif
 }
@@ -1594,7 +1594,7 @@ double update_lattice( double line, double col, double val )
 		else
 			lattice[ line_int ][ col_int ] = val_int;
 	}
-#ifndef NO_WINDOW
+#ifndef NW
 
 	// avoid operation if canvas was closed
 	cmd( "if [ winfo exists .lat.c ] { set latcanv 1 } { set latcanv 0 }" );
@@ -1655,7 +1655,7 @@ double save_lattice( const char *fname )
 {
 	char *latcanv;
 
-#ifndef NO_WINDOW
+#ifndef NW
 
 	// avoid operation if no canvas or no file name
 	cmd( "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
@@ -2089,7 +2089,7 @@ ran_gen_id = 7 : Lagged fibonacci with 48 bits resolution in [0,1)
 
 int ran_gen_id = 2;					// ID of initial generator (DO NOT CHANGE)
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 mutex parallel_rd;					// mutex locks for random generator operations
 mutex parallel_lc1;
 mutex parallel_lc2;
@@ -2119,7 +2119,7 @@ void init_random( unsigned seed )
 
 template < class distr > double draw_rd( distr &d )
 {
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_rd );
 #endif	
@@ -2128,7 +2128,7 @@ template < class distr > double draw_rd( distr &d )
 
 template < class distr > double draw_lc1( distr &d )
 {
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_lc1 );
 #endif	
@@ -2137,7 +2137,7 @@ template < class distr > double draw_lc1( distr &d )
 
 template < class distr > double draw_lc2( distr &d )
 {
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_lc2 );
 #endif	
@@ -2146,7 +2146,7 @@ template < class distr > double draw_lc2( distr &d )
 
 template < class distr > double draw_mt32( distr &d )
 {
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_mt32 );
 #endif	
@@ -2155,7 +2155,7 @@ template < class distr > double draw_mt32( distr &d )
 
 template < class distr > double draw_mt64( distr &d )
 {
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_mt64 );
 #endif	
@@ -2164,7 +2164,7 @@ template < class distr > double draw_mt64( distr &d )
 
 template < class distr > double draw_lf24( distr &d )
 {
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_lf24 );
 #endif	
@@ -2173,7 +2173,7 @@ template < class distr > double draw_lf24( distr &d )
 
 template < class distr > double draw_lf48( distr &d )
 {
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_lf48 );
 #endif	

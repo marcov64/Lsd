@@ -12,43 +12,36 @@
 #**************************************************************
 # MAKEFILE.LINUX
 # Makefile for LMM in linux.
+# In a command prompt (terminal) in Lsd root directory, use
+#  make -f makefile.linux
+# to compile LMM program using the source files in
+# directory "src".
 #**************************************************************
 
 CC=g++	
 TARGET=lmm
-EXT=
-SWITCH_CC=-DLMM -Wno-unused-result -O3
+SWITCH_CC=-DLMM -DNP -Wno-unused-result -O3
 
 # from here you should not need to modify anything
-
-# Check Tcl/Tk version (minimum 8.6)
-DEFAULT_TCL_VERSION=8.6
-TCL_VERSION=$(shell echo 'puts $$tcl_version;exit 0' | tclsh)
-ifeq ("$(TCL_VERSION)","")
-TCL_VERSION=$(DEFAULT_TCL_VERSION)
-endif
 
 # using OS native compiler and Tcl/Tk
 LSDROOT=.
 SRC=src
 SRC_DIR=$(LSDROOT)/$(SRC)/
-PATH_TCL_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the file tcl.h
-PATH_TK_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the tk.h
-PATH_TCL_LIB=/usr/lib #path to the file libtclXXX.a
-PATH_TK_LIB=/usr/lib #path to the file libtkXXX.a
-PATH_LIB=/usr/lib #path to general libraries
-LIBS=-lX11 #additional libraries
+TCL_VERSION=8.6
+PATH_TCLTK_HEADER=        # path to tcl.h and tk.h
+PATH_TCLTK_LIB=           # path to libtclXXX.a and libtkXXX.a
+TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
 
 # OS command to delete files
 RM=rm -f
 
 # variable used to search for the tcl and tk headers
-INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(PATH_HEADER) -I$(LSDROOT)/src
+INCLUDE=-I$(PATH_TCLTK_HEADER) -I$(LSDROOT)/$(SRC)
 
-$(TARGET)$(EXT): $(SRC_DIR)modman.o $(SRC_DIR)common.o
-	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common.o -L$(PATH_TCL_LIB) \
-	-ltcl$(TCL_VERSION) -L$(PATH_TK_LIB) -ltk$(TCL_VERSION) -L$(PATH_LIB) $(LIBS) \
-	-o $(TARGET)
+$(TARGET): $(SRC_DIR)modman.o $(SRC_DIR)common.o
+	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common.o \
+	-L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(TARGET)
 
 $(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLUDE)

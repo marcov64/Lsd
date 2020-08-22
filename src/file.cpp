@@ -846,7 +846,7 @@ void unload_configuration ( bool full )
 	findexSens = 0;								// reset sensitivity serial number
 	nodesSerial = 0;							// reset network node serial number
 	
-#ifndef NO_WINDOW
+#ifndef NW
 	currObj = NULL;								// no current object pointer
 	unsaved_change( false );					// signal no unsaved change
 	cmd( "destroytop .lat" );					// remove lattice window
@@ -881,7 +881,7 @@ void unload_configuration ( bool full )
 		strcpy( lsd_eq_file, "" );				// reset other file names
 		sprintf( name_rep, "report_%s.html", simul_name );
 
-#ifndef NO_WINDOW
+#ifndef NW
 		cmd( "set path \"%s\"", path );
 		cmd( "set res \"%s\"", simul_name );
 		if ( strlen( path ) > 0 )
@@ -903,7 +903,7 @@ void save_single( variable *v )
 	int i;
 	FILE *f;
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 	// prevent concurrent use by more than one thread
 	lock_guard < mutex > lock( v->parallel_comp );
 #endif	
@@ -1148,7 +1148,7 @@ void empty_sensitivity( sense *cs )
 	
 	if ( cs->next != NULL )	// recursively start from the end of the list
 		empty_sensitivity( cs->next );
-#ifndef NO_WINDOW
+#ifndef NW
 	else
 		NOLH_clear( );		// deallocate DoE (last object only)
 #endif

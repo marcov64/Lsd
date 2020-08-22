@@ -3363,7 +3363,7 @@ case 22:
 	cmd( "ttk::checkbutton $T.f.obs -text \"Profile observed variables only\" -variable prof_obs_only" );
 	cmd( "ttk::checkbutton $T.f.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
 
-#ifdef PARALLEL_MODE
+#ifndef NP
 	cmd( "ttk::checkbutton $T.f.npar -text \"Disable parallel computation\" -variable parallel_disable" );
 	if ( ! search_parallel( root ) || max_threads < 2 )
 		cmd( "$T.f.npar configure -state disabled" );
@@ -7171,7 +7171,7 @@ bool unsaved_change( bool val )
 	{
 		unsavedChange = val;
 		
-#ifndef NO_WINDOW
+#ifndef NW
 		char chgMark[ ] = "\0\0";
 		chgMark[ 0 ] = unsavedChange ? '*' : ' ';
 
