@@ -1192,6 +1192,7 @@ if ( choice == 8 )
 		} else { \
 			.f.t.t mark set insert 1.0 \
 		}" );
+	cmd( "updCurWnd" );
 
 	cmd( "set before [ .f.t.t get 1.0 end ]" );
 	cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
@@ -1295,6 +1296,7 @@ if ( choice == 11 )
 					}; \
 					.f.t.t mark set insert \"$cur + $length char\" ; \
 					.f.t.t see $cur; \
+					updCurWnd; \
 					destroytop .find; \
 					focus .f.t.t; \
 					set keepfocus 0; \
@@ -1363,6 +1365,7 @@ if ( choice == 12 || choice == 88 )
 				}; \
 				.f.t.t mark set insert \"$cur + $length char\"; \
 				.f.t.t see $cur; \
+				updCurWnd; \
 				update \
 			} else { \
 				bell \
@@ -1410,7 +1413,8 @@ if ( choice == 21 )
 				.f.t.t delete $cur \"$cur + $length char\"; \
 				.f.t.t insert $cur \"$textrepl\"; \
 				if { [ string compare $endsearch end ] != 0 } { \
-					.f.t.t mark set insert $cur \
+					.f.t.t mark set insert $cur; \
+					updCurWnd \
 				}; \
 				.l.b2.ok invoke \
 			} \
@@ -1440,8 +1444,9 @@ if ( choice == 21 )
 					} else { \
 						.f.t.t mark set insert $cur \
 					}; \
-					update; \
 					.f.t.t see $cur; \
+					updCurWnd; \
+					update; \
 					.l.b1.repl conf -state normal; \
 					.l.b1.all conf -state normal \
 				} else { \
@@ -1986,6 +1991,7 @@ if ( choice == 15 || choice == 71 )
 		} else { \
 			.f.t.t mark set insert 1.0 \
 		}" );
+	cmd( "updCurWnd" );
 
 	cmd( "set before [ .f.t.t get 1.0 end ]" );
 	cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
