@@ -20,7 +20,7 @@ RESULT(v[0])
 EQUATION("SFC_Total_Interest_Payments_Classes")
 	v[0]=SUML("Class_Debt",1);
 	v[1]=V("Basic_Interest_Rate");
-	v[2]=v[4]*v[5];
+	v[2]=v[0]*v[1];
 RESULT(v[2])
 
 EQUATION("SFC_Total_Variation_Financial_Assets_Firms")
