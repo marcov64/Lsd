@@ -1004,26 +1004,26 @@ variable *object::search_var_err( object *caller, char const *lab, bool no_searc
 /****************************************************
 SEARCH_VAR_COND (*)
 Search for the Variable or Parameter lab with value value and return it, if found.
+Normally searches all branches of the object containing the variable, except
+if the NO_SEARCH command is issued before the macro, when it only search the
+current branch of the model.
 Return NULL if not found.
 ****************************************************/
 object *object::search_var_cond( char const *lab, double value, int lag )
 {
 	double res;
-	object *cur, *cur1;
+	object *cur;
 	variable *cv;
 
-	for ( cur1 = this; cur1 != NULL; cur1 = cur1->up )
-	{
-		cv = cur1->search_var_err( this, lab, no_search, false, "conditional searching" );
-		if ( cv == NULL )
-			return NULL;
+	cv = search_var_err( this, lab, no_search, false, "conditional searching" );
+	if ( cv == NULL )
+		return NULL;
 
-		for ( cur = cv->up; cur != NULL; cur = cur->hyper_next(  ) )
-		{
-			res = cur->cal( lab, lag );
-			if ( res == value )
-				return cur;
-		}
+	for ( cur = cv->up; cur != NULL; no_search ? cur = cur->next : cur = cur->hyper_next(  ) )
+	{
+		res = cur->cal( lab, lag );
+		if ( res == value )
+			return cur;
 	}
 
 	return NULL;
