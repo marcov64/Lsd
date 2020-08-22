@@ -36,6 +36,8 @@ Calibrarion Hypotesis:
 
 /*****BEGIN AGGREGATING CLASSES*****/
 
+USE_ZERO_INSTANCE;
+
 v[5]=v[6]=v[7]=v[8]=v[9]=v[10]=0;
 CYCLE(cur, "CLASSES")
 {
