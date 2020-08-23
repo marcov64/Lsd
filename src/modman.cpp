@@ -492,14 +492,8 @@ cmd( "$w add command -label \"Smaller Font\" -command { \
 	} -accelerator \"Ctrl -\"" );	// entryconfig 23
 cmd( "$w add separator" );	// entryconfig 24
 // add option to ajust syntax highlighting (word coloring)
-cmd( "$w add cascade -label \"Syntax Highlighting\" -menu $w.color -underline 0" );
 cmd( "$w add check -label \"Wrap/Unwrap\" -variable wrap -command { setwrap .f.t.t $wrap } -underline 1 -accelerator Ctrl+w " );
 cmd( "$w add command -label \"Insert LSD Macro...\" -command { set choice 28 } -underline 0 -accelerator Ctrl+i" );
-
-cmd( "ttk::menu $w.color -tearoff 0" );
-cmd( "$w.color add radio -label \" Full\" -variable shigh -value 2 -command { set choice 64 } -underline 1" );
-cmd( "$w.color add radio -label \" Partial\" -variable shigh -value 1 -command { set choice 65 } -underline 1" );
-cmd( "$w.color add radio -label \" None\" -variable shigh -value 0 -command { set choice 66 } -underline 1" );
 
 cmd( "set w .m.model" );
 cmd( "ttk::menu $w -tearoff 0" );
@@ -5227,33 +5221,6 @@ if ( choice == 62 )
 	// create makefileNW and compile a local machine version of lsdNW
 	compile_run( false, true );
 
-	choice = 0;
-	goto loop;
-}
-
-// Full syntax highlighting
-if ( choice == 64 )
-{
-	shigh = 2;
-	recolor_all = true;
-	choice = 0;
-	goto loop;
-}
-
-// Partial syntax highlighting
-if ( choice == 65 )
-{
-	shigh = 1;
-	recolor_all = true;
-	choice = 0;
-	goto loop;
-}
-
-// No syntax highlighting
-if ( choice == 66 )
-{
-	shigh = 0;
-	recolor_all = true;
 	choice = 0;
 	goto loop;
 }
