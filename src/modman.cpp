@@ -497,9 +497,9 @@ cmd( "$w add check -label \"Wrap/Unwrap\" -variable wrap -command { setwrap .f.t
 cmd( "$w add command -label \"Insert LSD Macro...\" -command { set choice 28 } -underline 0 -accelerator Ctrl+i" );
 
 cmd( "ttk::menu $w.color -tearoff 0" );
-cmd( "$w.color add radio -label \" Full\" -variable shigh -value 2 -command { set choice 64 } -underline 1 -accelerator \"Ctrl+;\"" );
-cmd( "$w.color add radio -label \" Partial\" -variable shigh -value 1 -command { set choice 65 } -underline 1 -accelerator Ctrl+," );
-cmd( "$w.color add radio -label \" None\" -variable shigh -value 0 -command { set choice 66 } -underline 1 -accelerator Ctrl+." );
+cmd( "$w.color add radio -label \" Full\" -variable shigh -value 2 -command { set choice 64 } -underline 1" );
+cmd( "$w.color add radio -label \" Partial\" -variable shigh -value 1 -command { set choice 65 } -underline 1" );
+cmd( "$w.color add radio -label \" None\" -variable shigh -value 0 -command { set choice 66 } -underline 1" );
 
 cmd( "set w .m.model" );
 cmd( "ttk::menu $w -tearoff 0" );
@@ -772,11 +772,8 @@ cmd( "bind .f.t.t <Control-minus> { .m.edit invoke 23 }" );
 cmd( "bind .f.t.t <Control-plus> { .m.edit invoke 22 }" );
 cmd( "bind .f.t.t <Control-parenleft> { .f.t.t insert insert \\{ }" );
 cmd( "bind .f.t.t <Control-parenright> { .f.t.t insert insert \\} }" );
-cmd( "bind .f.t.t <Control-greater> { set choice 42 }" );
-cmd( "bind .f.t.t <Control-less> { set choice 43 }" );
-cmd( "bind .f.t.t <Control-semicolon> { set choice 64 }" );
-cmd( "bind .f.t.t <Control-comma> { set choice 65 }" );
-cmd( "bind .f.t.t <Control-period> { set choice 66 }" );
+cmd( "bind .f.t.t <Control-greater> { set choice 42 }; bind .f.t.t <Control-period> { set choice 42 }" );
+cmd( "bind .f.t.t <Control-less> { set choice 43 }; bind .f.t.t <Control-comma> { set choice 43 }" );
 cmd( "bind .f.t.t <Alt-q> { .m postcascade 0 }; bind .f.t.t <Alt-Q> { .m postcascade 0 }" );
 
 // redefine the default Tk bindings adding "break" to avoid further event processing
