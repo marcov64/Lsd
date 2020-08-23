@@ -16,13 +16,13 @@ COM_DEP_SYS=$(COM_DEP) $(SRC_DIR)system_options.txt
 RM=rm -f -R
 
 # link executable
-$(TARGET_PKG): $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)main.o $(SRC_DIR)lsdmain.o \
+$(TARGET_PKG): $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o \
 $(SRC_DIR)analysis.o $(SRC_DIR)debug.o $(SRC_DIR)draw.o $(SRC_DIR)edit.o \
 $(SRC_DIR)edit_dat.o $(SRC_DIR)file.o $(SRC_DIR)interf.o $(SRC_DIR)nets.o \
 $(SRC_DIR)object.o $(SRC_DIR)report.o $(SRC_DIR)runtime.o $(SRC_DIR)set_all.o \
 $(SRC_DIR)show_eq.o $(SRC_DIR)util.o $(SRC_DIR)variab.o \
 $(TARGET).app/Contents/Info.plist
-	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)main.o \
+	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(FUN).o $(SRC_DIR)common.o \
 	$(SRC_DIR)lsdmain.o $(SRC_DIR)analysis.o $(SRC_DIR)debug.o $(SRC_DIR)draw.o \
 	$(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o $(SRC_DIR)file.o $(SRC_DIR)interf.o \
 	$(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)report.o $(SRC_DIR)runtime.o \
@@ -47,9 +47,6 @@ $(TARGET).app/Contents/Info.plist
 	
 $(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o
-
-$(SRC_DIR)main.o: $(SRC_DIR)main.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)main.cpp -o $(SRC_DIR)main.o
 
 $(SRC_DIR)lsdmain.o: $(SRC_DIR)lsdmain.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.o

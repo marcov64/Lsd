@@ -8,16 +8,16 @@ INCLUDE=-I$(LSDROOT)/$(SRC) -I$(PATH_TCLTK_HEADER) -I$(PATH_HEADER)
 RM=rm -f
 
 # link executable
-$(TARGET): $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)main.o $(SRC_DIR)lsdmain.o \
-$(SRC_DIR)analysis.o $(SRC_DIR)debug.o $(SRC_DIR)draw.o $(SRC_DIR)edit.o \
-$(SRC_DIR)edit_dat.o $(SRC_DIR)file.o $(SRC_DIR)interf.o $(SRC_DIR)nets.o \
-$(SRC_DIR)object.o $(SRC_DIR)report.o $(SRC_DIR)runtime.o $(SRC_DIR)set_all.o \
-$(SRC_DIR)show_eq.o $(SRC_DIR)util.o $(SRC_DIR)variab.o
-	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)main.o \
-	$(SRC_DIR)lsdmain.o $(SRC_DIR)analysis.o $(SRC_DIR)debug.o $(SRC_DIR)draw.o \
-	$(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o $(SRC_DIR)file.o $(SRC_DIR)interf.o \
-	$(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)report.o $(SRC_DIR)runtime.o \
-	$(SRC_DIR)set_all.o $(SRC_DIR)show_eq.o $(SRC_DIR)util.o $(SRC_DIR)variab.o \
+$(TARGET): $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o $(SRC_DIR)analysis.o \
+$(SRC_DIR)debug.o $(SRC_DIR)draw.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o \
+$(SRC_DIR)file.o $(SRC_DIR)interf.o $(SRC_DIR)nets.o $(SRC_DIR)object.o \
+$(SRC_DIR)report.o $(SRC_DIR)runtime.o $(SRC_DIR)set_all.o $(SRC_DIR)show_eq.o \
+$(SRC_DIR)util.o $(SRC_DIR)variab.o
+	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o \
+	$(SRC_DIR)analysis.o $(SRC_DIR)debug.o $(SRC_DIR)draw.o $(SRC_DIR)edit.o \
+	$(SRC_DIR)edit_dat.o $(SRC_DIR)file.o $(SRC_DIR)interf.o $(SRC_DIR)nets.o \
+	$(SRC_DIR)object.o $(SRC_DIR)report.o $(SRC_DIR)runtime.o $(SRC_DIR)set_all.o \
+	$(SRC_DIR)show_eq.o $(SRC_DIR)util.o $(SRC_DIR)variab.o \
 	$(SWITCH_CC_LNK) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(TARGET)
 
 # compile modules
@@ -27,9 +27,6 @@ $(SRC_DIR)decl.h.gch $(SRC_DIR)fun_head.h $(SRC_DIR)fun_head_fast.h
 	
 $(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o
-
-$(SRC_DIR)main.o: $(SRC_DIR)main.cpp $(SRC_DIR)decl.h.gch
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)main.cpp -o $(SRC_DIR)main.o
 
 $(SRC_DIR)lsdmain.o: $(SRC_DIR)lsdmain.cpp $(SRC_DIR)decl.h.gch
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.o

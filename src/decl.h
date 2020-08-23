@@ -15,12 +15,13 @@
 /*************************************************************
 DECL.H
 Global definitions among all LSD C++ modules
-*************************************************************/
 
-// disable code that make gdb debugging harder
-#ifdef DEBUG_MODE
-#define NO_ERROR_TRAP
-#endif
+Relevant flags (when defined):
+
+- NW: No Window executable
+- NP: no parallel (multi-task) processing
+- NT: no signal trapping (better when debugging in GDB)
+*************************************************************/
 
 // common definitions for LMM and LSD
 #include "common.h"
@@ -72,7 +73,7 @@ Global definitions among all LSD C++ modules
 // redefine NAN to use faster non-signaling NaNs
 #if has_quiet_NaN 
 #undef NAN
-#define NAN quiet_NaN()
+#define NAN quiet_NaN( )
 #endif
 #define NaN NAN
 

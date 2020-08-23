@@ -18,11 +18,11 @@ TARGET_NW=lsd$(SUFFIX_NW)
 RM=rm -f
 
 # link executable
-$(TARGET_NW): $(FUN)$(SUFFIX_NW).o $(SRC_DIR)common.o $(SRC_DIR)main.o \
-$(SRC_DIR)lsdmain.o $(SRC_DIR)file.o $(SRC_DIR)nets.o $(SRC_DIR)object.o \
+$(TARGET_NW): $(FUN)$(SUFFIX_NW).o $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o \
+$(SRC_DIR)file.o $(SRC_DIR)nets.o $(SRC_DIR)object.o \
 $(SRC_DIR)util.o $(SRC_DIR)variab.o
 	$(CC_NW) $(SWITCH_CC_NW) $(FUN)$(SUFFIX_NW).o $(SRC_DIR)common.o \
-	$(SRC_DIR)main.o $(SRC_DIR)lsdmain.o $(SRC_DIR)file.o $(SRC_DIR)nets.o \
+	$(SRC_DIR)lsdmain.o $(SRC_DIR)file.o $(SRC_DIR)nets.o \
 	$(SRC_DIR)object.o $(SRC_DIR)util.o $(SRC_DIR)variab.o \
 	$(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)
 
@@ -33,9 +33,6 @@ $(SRC_DIR)fun_head.h $(SRC_DIR)decl.h $(SRC_DIR)common.h
 
 $(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o
-
-$(SRC_DIR)main.o: $(SRC_DIR)main.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)main.cpp -o $(SRC_DIR)main.o
 
 $(SRC_DIR)lsdmain.o: $(SRC_DIR)lsdmain.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.o

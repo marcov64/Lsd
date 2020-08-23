@@ -30,18 +30,14 @@ RM=rm -f
 # variable to search for the tcl and tk headers
 INCLUDE=-I$(LSDROOT)/$(SRC)
 
-$(TARGET): $(SRC_DIR)common.o $(SRC_DIR)main.o $(SRC_DIR)confgen.o \
-$(SRC_DIR)file.o $(SRC_DIR)object.o $(SRC_DIR)variab.o $(SRC_DIR)nets.o \
-$(SRC_DIR)util.o 
-	$(CC) $(SWITCH_CC) $(SRC_DIR)common.o $(SRC_DIR)main.o $(SRC_DIR)confgen.o \
-	$(SRC_DIR)file.o $(SRC_DIR)object.o $(SRC_DIR)variab.o $(SRC_DIR)nets.o \
-	$(SRC_DIR)util.o $(LIB) -o $(TARGET)
+$(TARGET): $(SRC_DIR)common.o $(SRC_DIR)confgen.o $(SRC_DIR)file.o \
+$(SRC_DIR)object.o $(SRC_DIR)variab.o $(SRC_DIR)nets.o $(SRC_DIR)util.o 
+	$(CC) $(SWITCH_CC) $(SRC_DIR)common.o $(SRC_DIR)confgen.o $(SRC_DIR)file.o \
+	$(SRC_DIR)object.o $(SRC_DIR)variab.o $(SRC_DIR)nets.o $(SRC_DIR)util.o \
+	$(LIB) -o $(TARGET)
 
 $(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o $(INCLUDE)
-
-$(SRC_DIR)main.o: $(SRC_DIR)main.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC) $(SWITCH_CC) -c $(SRC_DIR)main.cpp -o $(SRC_DIR)main.o $(INCLUDE)
 
 $(SRC_DIR)confgen.o: $(SRC_DIR)confgen.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)confgen.cpp -o $(SRC_DIR)confgen.o $(INCLUDE)
@@ -61,5 +57,6 @@ $(SRC_DIR)nets.o: $(SRC_DIR)nets.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 $(SRC_DIR)util.o: $(SRC_DIR)util.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)util.cpp -o $(SRC_DIR)util.o $(INCLUDE)
 
+# remove compiled files
 clean:
 	$(RM) $(SRC_DIR)*.o $(TARGET)

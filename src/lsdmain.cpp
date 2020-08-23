@@ -27,6 +27,12 @@ also to manage the messages from user and from the model at run time.
 
 - bool alloc_save_mem( );
 Prepare variables to store saved data.
+
+Relevant flags (when defined):
+
+- NW: No Window executable
+- NP: no parallel (multi-task) processing
+- NT: no signal trapping (better when debugging in GDB)
 *************************************************************/
 
 #include "decl.h"
@@ -163,9 +169,49 @@ worker *workers = NULL;		// multi-thread parallel worker data
 #endif
 
 
+/*************************************
+ MAIN
+ *************************************/
+int main( int argn, char **argv )
+{
+	int res = 0;
+
+#ifndef NT
+	// register all signal handlers
+	handle_signals( signal_handler );
+
+	try
+	{
+#endif
+
+		res = lsdmain( argn, argv );
+		
+#ifndef NT
+	}
+	catch ( bad_alloc& )	// out of memory conditions
+	{
+		signal_handler( SIGMEM );
+	}
+	catch ( exception& exc )// other known error conditions
+	{
+		sprintf( msg, "\nSTL exception of type: %s\n", exc.what( ) );
+		signal_handler( SIGSTL );
+	}
+	catch ( ... )				// other unknown error conditions
+	{
+		abort( );				// raises a SIGABRT exception, tell user & close
+	}
+
+#endif
+
+	myexit( res );
+	return res;
+}
+
+
 /*********************************
-LSD MAIN
-*********************************/
+ LSDMAIN
+ *********************************/
 int lsdmain( int argn, char **argv )
 {
 	char *str;

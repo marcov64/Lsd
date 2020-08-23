@@ -95,9 +95,42 @@ bool change_configuration( object *root, int findex );
 int load_confs_csv( char *config );
 
 
+/*************************************
+ MAIN
+ *************************************/
+int main( int argn, char **argv )
+{
+	int res = 0;
+
+	// register all signal handlers
+	handle_signals( signal_handler );
+
+	try
+	{
+		res = lsdmain( argn, argv );
+	}
+	catch ( bad_alloc& )	// out of memory conditions
+	{
+		signal_handler( SIGMEM );
+	}
+	catch ( exception& exc )// other known error conditions
+	{
+		sprintf( msg, "\nSTL exception of type: %s\n", exc.what( ) );
+		signal_handler( SIGSTL );
+	}
+	catch ( ... )				// other unknown error conditions
+	{
+		abort( );				// raises a SIGABRT exception, tell user & close
+	}
+
+	myexit( res );
+	return res;
+}
+
+
 /*********************************
-LSD MAIN
-*********************************/
+ LSDMAIN
+ *********************************/
 int lsdmain( int argn, char **argv )
 {
 	int i, confs;
