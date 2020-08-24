@@ -446,7 +446,7 @@ proc checkgeom { geom defGeom screenWidth screenHeight } {
 # Adjust main windows to default size & positions
 #************************************************
 proc sizetop { { w all } } {
-	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom hfactM vfactM wndMenuHeight
+	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM hsizeD vsizeD corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom hfactM vfactM wndMenuHeight
 
 	update
 
@@ -531,9 +531,16 @@ proc sizetop { { w all } } {
 				}
 
 				.deb {
-					set defGeom "+[ getx .deb topleftW ]+[ gety .deb topleftW ]"
+					set defGeom "${hsizeD}x${vsizeD}+[ getx .deb topleftW ]+[ gety .deb topleftW ]"
+					set n [ scan $debGeom "%dx%d+%d+%d" width height x y ]
+					if { $n < 4 } {
+						set debGeom $defGeom
+					} else {
+						set debGeom "${hsizeD}x[ expr max ( $height, $vsizeD ) ]+${x}+${y}"
+					}
+				
 					wm geometry .deb [ checkgeom $debGeom $defGeom $screenWidth $screenHeight ]
-					wm minsize .deb [ winfo width .deb ] [ winfo height .deb ]
+					wm minsize .deb $hsizeD $vsizeD
 					wm resizable .deb 0 1
 				}
 
@@ -653,6 +660,43 @@ proc icontop { w type } {
 			wm iconphoto $w ${type}Img
 			wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
 		}
+	}
+}
+
+
+#************************************************
+# PLACELINE
+# Place a line of slaves in a master
+#************************************************
+proc placeline { slvLst widLst y hgt { relX 1 } { relY 0 } } {
+
+	if { [ llength $slvLst ] != [ llength $widLst ] } {
+		error "\nplaceline: slave and width lists have different size"
+		return
+	}
+	
+	if { $relX } {
+		set xCmd -relx
+		set widCmd -relwidth
+	} else {
+		set xCmd -x
+		set widCmd -width
+	}
+	
+	if { $relY } {
+		set yCmd "-rely $y"
+		set hgtCmd "-relheight $hgt"
+	} else {
+		set yCmd "-y $y"
+		set hgtCmd "-height $hgt"
+	}
+	
+	set curX 0
+	
+	foreach w $slvLst wid $widLst {
+		place $w {*}$xCmd $curX {*}$widCmd $wid {*}$yCmd {*}$hgtCmd
+		
+		set curX [ expr $curX + $wid ]
 	}
 }
 
@@ -1556,7 +1600,10 @@ proc scroll_wheel_windows { delta w } {
 	
 	set scrW [ find_scrollable $w ]
 	if { $scrW != "" } {
-		$scrW yview scroll [ expr -1 * $sfmwheel * $delta / $winmwscale ] units
+		set wPos [ $scrW yview ]
+		if { ( $delta > 0 && $wPos < 1 ) || ( $delta < 0 && $wPos > 0 ) } {
+			$scrW yview scroll [ expr -1 * $sfmwheel * $delta / $winmwscale ] units
+		}
 	}
 }
 
@@ -1570,7 +1617,10 @@ proc scroll_wheel_mac { delta w } {
 	
 	set scrW [ find_scrollable $w ]
 	if { $scrW != "" } {
-		$scrW yview scroll [ expr -1 * $sfmwheel * %D ] units
+		set wPos [ $scrW yview ]
+		if { ( $delta > 0 && $wPos < 1 ) || ( $delta < 0 && $wPos > 0 ) } {
+			$scrW yview scroll [ expr -1 * $sfmwheel * $delta ] units
+		}
 	}
 }
 
@@ -1584,7 +1634,10 @@ proc scroll_wheel_linux { delta w dir } {
 	
 	set scrW [ find_scrollable $w ]
 	if { $scrW != "" } {
-		$scrW yview scroll [ expr $dir * $sfmwheel ] units
+		set wPos [ $scrW yview ]
+		if { ( $dir > 0 && $wPos < 1 ) || ( $dir < 0 && $wPos > 0 ) } {
+			$scrW yview scroll [ expr $dir * $sfmwheel ] units
+		}
 	}
 }
 

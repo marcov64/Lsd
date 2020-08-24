@@ -13,7 +13,7 @@
  *************************************************************/
 
 /*************************************************************
-LSD_MAIN.CPP 
+LSDMAIN.CPP 
 Contains:
 - early initialization (namely, of the Log windows)
 - the main cycle: browse a model, run simulation, return to the browser.
@@ -153,7 +153,7 @@ const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
 const char *wnd_names[ LSD_WIN_NUM ] = LSD_WIN_NAME;
 const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
-
+// conditional variables
 #ifndef NW
 int i_values[ 4 ];			// user temporary variables copy
 double d_values[ USER_D_VARS ];

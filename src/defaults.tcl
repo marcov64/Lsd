@@ -154,6 +154,15 @@ set linvsizeR	18	; # label lines height
 set pdigitsR	3	; # default precision digits
 set shiftR		20	; # new window shift
 
+# debug/data browse windows defaults
+set hsizeD		800		; # window width (pixels)
+set vsizeD		400		; # window minimum height (pixels)
+set vspcszD		5		; # line horizontal space size (pixels)
+set hnamshD		0.15	; # variable name horizontal share (1 column out of 2)
+set hvalshD		0.20	; # variable value horizontal share (1 column out of 2)
+set hupdshD		0.10	; # variable last update horizontal share (1 column out of 2)
+set hpadshD		0.10	; # column pad horizontal share (1 column)
+
 # mouse wheel scroll factor (sensitivity)
 set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down
 set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Windows

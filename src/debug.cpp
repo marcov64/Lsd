@@ -56,6 +56,7 @@ fill in all the content of the object.
 #include "decl.h"
 
 lsdstack *asl = NULL;			// debug stack
+object *debLstObj;				// last object shown
 
 
 /*******************************************
@@ -84,7 +85,7 @@ cmd( "if { ! [ winfo exists .deb ] } { \
 			set debTitle \"LSD Debugger\" \
 		}; \
 		newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; \
-		set justCreated true \
+		set newDeb true \
 	}", unsaved_change() ? "*" : " ", simul_name  );
 
 // avoid redrawing the menu if it already exists and is configured
@@ -254,10 +255,13 @@ while ( choice == 0 )
 	}
 
 	deb_show( r );
+	debLstObj = r;
 
 	cmd( "pack .deb.b -pady [ expr $butPad / 2 ] -side right -after .deb.cc" );
 
-	cmd( "if $justCreated { showtop .deb topleftW 0 1; set justCreated false } { focustop .deb }" );
+	cmd( "if { $newDeb } { showtop .deb topleftW; set newDeb false } { focustop .deb }" );
+	cmd( "set debDone 1" );
+	cmd( "event generate .deb <Configure>" );	// resize canvas as window is mapped now
 
 	// update variable label field
 	cmd( "if [ winfo exists .deb.v.v1.name1 ] { \
@@ -337,6 +341,10 @@ while ( choice == 0 )
 		else
 			cmd( "if [ string is double -strict $value ] { write_any .deb.v.v1.val2 [ format %%g $value ] }" ); 
 	}
+
+	// resize the scrollbar if needed
+	cmd( "set debDone 2" );
+	cmd( "event generate .deb <Configure>" );
 
 	// debug command loop
 	while ( ! choice )
@@ -1248,109 +1256,151 @@ void deb_show( object *r )
 	attach_instance_number( ch, r );
 	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
 
-	// adjust spacing to align labels with data and increase columns width to better fill window
-	cmd( "if [ string equal $CurPlatform windows ] { set w1 20; set w2 25; set w3 11; set p1 1; set p2 15; set adj 0.8 }" );
-	cmd( "if [ string equal $CurPlatform linux ] { set w1 20; set w2 15; set w3 7; set p1 0; set p2 10; set adj 1.3 }" );
-	cmd( "if [ string equal $CurPlatform mac ] { set w1 15; set w2 18; set w3 9; set p1 1; set p2 1; set adj 0.8 }" );
-	
 	cmd( "if { ! [ winfo exists .deb.tit ] } { \
-			set t1 [ expr int( floor( $w1 * [ font measure [ ttk::style lookup TLabel -font active TkDefaultFont ] Variable ] / [ font measure [ ttk::style lookup boldSmall.TLabel -font ] Variable ] ) ) ]; \
-			set t2 [ expr int( floor( $w2 * [ font measure [ ttk::style lookup TLabel -font active TkDefaultFont ] Value ] / [ font measure [ ttk::style lookup hlBoldSmall.TLabel -font ] Value ] ) ) ]; \
-			set t3 [ expr int( floor( $w3 * [ font measure [ ttk::style lookup TLabel -font active TkDefaultFont ] \"Last update\" ] / [ font measure [ ttk::style lookup boldSmall.TLabel -font ] \"Last update\" ] ) ) ]; \
-			set t4 [ expr int( floor( $p2 * [ font measure [ ttk::style lookup TLabel -font active TkDefaultFont ] 0 ] / [ font measure [ ttk::style lookup boldSmall.TLabel -font ] 0 ] ) ) ]; \
-			ttk::frame .deb.tit; \
-			ttk::label .deb.tit.pad11 -width $p1; \
-			ttk::label .deb.tit.name1 -style boldSmall.TLabel -text Variable -width $t1 -anchor w; \
-			ttk::label .deb.tit.val1 -style hlBoldSmall.TLabel -text Value -width $t2; \
-			ttk::label .deb.tit.last1 -style boldSmall.TLabel -text \"Last update\" -width $t3; \
-			ttk::label .deb.tit.pad2 -style boldSmall.TLabel -text \u2009 -width $t4; \
-			ttk::label .deb.tit.pad12 -width $p1; \
-			ttk::label .deb.tit.name2 -style boldSmall.TLabel -text Variable -width $t1 -anchor w; \
-			ttk::label .deb.tit.val2 -style hlBoldSmall.TLabel -text Value -width $t2; \
-			ttk::label .deb.tit.last2 -style boldSmall.TLabel -text \"Last update\" -width $t3; \
-			pack .deb.tit.pad11 .deb.tit.name1 .deb.tit.val1 .deb.tit.last1 .deb.tit.pad2 .deb.tit.pad12 .deb.tit.name2 .deb.tit.val2 .deb.tit.last2 -side left; \
-			pack .deb.tit -side top -anchor w -after .deb.v \
+			set fntSz [ font metrics [ ttk::style lookup boldSmall.TLabel -font ] -linespace ]; \
+			ttk::frame .deb.tit -height [ expr $fntSz + $vspcszD ]; \
+			ttk::label .deb.tit.name1 -style boldSmall.TLabel -text Variable -anchor w; \
+			ttk::label .deb.tit.val1 -style hlBoldSmall.TLabel -text Value; \
+			ttk::label .deb.tit.last1 -style boldSmall.TLabel -text \"Last update\"; \
+			ttk::label .deb.tit.pad -style boldSmall.TLabel; \
+			ttk::label .deb.tit.name2 -style boldSmall.TLabel -text Variable -anchor w; \
+			ttk::label .deb.tit.val2 -style hlBoldSmall.TLabel -text Value; \
+			ttk::label .deb.tit.last2 -style boldSmall.TLabel -text \"Last update\"; \
+			placeline { .deb.tit.name1 .deb.tit.val1 .deb.tit.last1 .deb.tit.pad .deb.tit.name2 .deb.tit.val2 .deb.tit.last2 } [ list $hnamshD $hvalshD $hupdshD $hpadshD $hnamshD $hvalshD $hupdshD ] 0 $fntSz; \
+			pack .deb.tit -padx 5 -anchor w -fill x -after .deb.v \
 		}" );
 
-	cmd( "if { ! [ winfo exists .deb.cc ] } { \
-			set wwidth [ expr int( ( 2 * ( $p1 + $w1 + $w2 + $w3 ) + $p2 ) * $adj ) ]; \
-			ttk::frame .deb.cc; \
-			ttk::scrollbar .deb.cc.scroll -command \".deb.cc.l yview\"; \
-			pack .deb.cc.scroll -side right -fill y; \
-			ttk::text .deb.cc.l -yscrollcommand \".deb.cc.scroll set\" -wrap none -width $wwidth -entry 0 -dark $darkTheme; \
-			mouse_wheel .deb.cc.l; \
-			pack .deb.cc.l; \
-			pack .deb.cc -side top -anchor w -after .deb.tit -expand yes -fill y \
+	// create single top frame to grid, where the values table can be built
+	// and a canvas to hold the table so it can be scrollable
+	cmd( "set g .deb.cc.grid" );
+	cmd( "if [ winfo exists .deb.cc ] { \
+			$g.can delete all; \
+			if { ! %d } { \
+				$g.can yview moveto 0; \
+				unset -nocomplain lstDebPos \
+			} \
 		} { \
-			.deb.cc.l configure -state normal\
-		}" );
-
-	cmd( ".deb.cc.l delete 1.0 end" );
+			ttk::frame .deb.cc; \
+			ttk::frame $g; \
+			grid $g; \
+			grid rowconfigure $g 0 -weight 1; \
+			grid columnconfigure $g 0 -weight 1; \
+			grid propagate $g 0; \
+			set lastDebSz { 0 0 }; \
+			set debDone 0; \
+			set fntWid [ font measure [ ttk::style lookup TLabel -font active TkDefaultFont ] 0 ]; \
+			set hcharszD [ expr int( 1 * ( $hsizeD - 21 ) / $fntWid ) ]; \
+			set hnamszD [ expr round( $hnamshD * $hcharszD ) ]; \
+			set hvalszD [ expr round( $hvalshD * $hcharszD ) ]; \
+			set hupdszD [ expr round( $hupdshD * $hcharszD ) ]; \
+			set hpadszD [ expr round( $hpadshD * $hcharszD ) - 1 ]; \
+			ttk::canvas $g.can -yscrollcommand { .deb.cc.grid.scroll set } -entry 0 -dark $darkTheme; \
+			ttk::scrollbar $g.scroll -command { .deb.cc.grid.can yview }; \
+			grid $g.can $g.scroll -sticky nsew; \
+			mouse_wheel $g.can; \
+			pack .deb.cc -padx 5 -anchor w -expand 1 -fill both -after .deb.tit; \
+			bind .deb <Configure> { \
+				if { ! [ info exists debConfRun ] } { \
+					set debConfRun 1; \
+					set debSz [ list [ winfo width .deb ] [ winfo height .deb ] ]; \
+					if { $debSz != $lastDebSz || ( $debDone == 1 && ! [ info exists debButHgt ] ) } { \
+						update; \
+						set lastDebSz $debSz; \
+						set canBbox [ $g.can bbox all ]; \
+						if { $debDone == 1 } { \
+							set desWid [ winfo width .deb.cc ]; \
+							set desHgt [ winfo height .deb.cc ]; \
+							if { ! [ info exists debButHgt ] } { \
+								set debButHgt [ expr [ lindex $debSz 1 ] - $desHgt ]; \
+							} elseif { $debButHgt > [ expr [ lindex $debSz 1 ] - $desHgt ] } { \
+								set desHgt [ expr [ lindex $debSz 1 ] - $debButHgt ] \
+							}; \
+							$g configure -width $desWid -height $desHgt; \
+							.deb.cc.grid.can.f configure -width $desWid -height $desHgt; \
+							$g.can configure -scrollregion $canBbox \
+						} { \
+							set desWid [ expr max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ], 400 ) ]; \
+							set desHgt [ expr max( [ lindex $canBbox 3 ] - [ lindex $canBbox 1 ], 250 ) ]; \
+							unset -nocomplain debButHgt \
+						}; \
+					} elseif { $debDone == 2 } { \
+						set debDone 1; \
+						$g.can configure -scrollregion [ $g.can bbox all ] \
+					}; \
+					unset debConfRun \
+				} \
+			} \
+		}", r == debLstObj ? 1 : 0 );
 
 	if ( r->v == NULL )
 	{
-		cmd( "ttk::label .deb.cc.l.no_var -text \" (no variables defined)\"" );
-		cmd( ".deb.cc.l window create end -window .deb.cc.l.no_var" );
+		cmd( "$g.can create text 0 0" );	// reference to position message
+		cmd( "$g.can create text [ expr ( $hsizeD - 10 ) / 2 ] [ expr $vsizeD / 3 ] -text \"(no elements in object)\" -font [ ttk::style lookup boldSmall.TLabel -font ] -fill $colorsTheme(fg)" );
 	}
 	else
 	{
 		Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
 
+		// single frame ($w=.deb.cc.grid.can.f) in canvas to hold all cells
+		cmd( "set w $g.can.f" );
+		cmd( "destroy $w" );
+		cmd( "ttk::frame $w" );
+		cmd( "$g.can create window 0 0 -window $w -anchor nw" );
+		
 		for ( i = 1, ap_v = r->v; ap_v != NULL; ap_v = ap_v->next, ++i )
 		{
 			cmd( "set last %d", ap_v->last_update );
 			cmd( "set val %g", ap_v->val[ 0 ] );
-			cmd( "ttk::frame .deb.cc.l.e$i" );
-			cmd( "ttk::label .deb.cc.l.e$i.pad1 -width $p1" );
-			cmd( "ttk::label .deb.cc.l.e$i.name -width $w1 -anchor w -text %s", ap_v->label );
+			cmd( "ttk::frame $w.e$i" );
+			cmd( "ttk::label $w.e$i.name -width $hnamszD -anchor w -text %s", ap_v->label );
 			
 			if ( is_nan( ap_v->val[ 0 ] ) )
-				cmd( "ttk::label .deb.cc.l.e$i.val -width $w2 -style hl.TLabel -text NAN" );
+				cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text NAN" );
 			else
 				if ( is_inf( ap_v->val[ 0 ] ) )
-					cmd( "ttk::label .deb.cc.l.e$i.val -width $w2 -style hl.TLabel -text %sINFINITY", ap_v->val[ 0 ] < 0 ? "-" : "" );
+					cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text %sINFINITY", ap_v->val[ 0 ] < 0 ? "-" : "" );
 				else
 					if ( ap_v->val[ 0 ] != 0 && fabs( ap_v->val[ 0 ] ) < SIG_MIN )	// insignificant value?			
-						cmd( "ttk::label .deb.cc.l.e$i.val -width $w2 -style hl.TLabel -text ~0" );
+						cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text ~0" );
 					else
-						cmd( "ttk::label .deb.cc.l.e$i.val -width $w2 -style hl.TLabel -text $val" );
+						cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text $val" );
 			
 			if ( ap_v->param == 0 )
-				cmd( "ttk::label .deb.cc.l.e$i.last -width $w3 -text $last" );
+				cmd( "ttk::label $w.e$i.last -width $hupdszD -text $last" );
 			if ( ap_v->param == 1 )
-				cmd( "ttk::label .deb.cc.l.e$i.last -width $w3 -text (P)" );
+				cmd( "ttk::label $w.e$i.last -width $hupdszD -text (P)" );
 			if ( ap_v->param == 2 )
-				cmd( "ttk::label .deb.cc.l.e$i.last -width $w3 -text (F)" );
+				cmd( "ttk::label $w.e$i.last -width $hupdszD -text (F)" );
 			
 			if ( i % 2 == 0 )
 			{
-				cmd( "ttk::label .deb.cc.l.e$i.pad2 -width $p2 -text \u2009" );
+				cmd( "ttk::label $w.e$i.pad -width $hpadszD -text \u2009" );
 			
-				cmd( "pack .deb.cc.l.e$i.pad2 .deb.cc.l.e$i.pad1 .deb.cc.l.e$i.name .deb.cc.l.e$i.val .deb.cc.l.e$i.last -side left" );
-				cmd( "mouse_wheel .deb.cc.l.e$i.pad2" );
+				cmd( "grid $w.e$i.pad $w.e$i.name $w.e$i.val $w.e$i.last" );
+				cmd( "grid $w.e$i -column 1 -row [ expr int( ( $i - 1 ) / 2 ) ]" );
+				cmd( "mouse_wheel $w.e$i.pad" );
 			}
 			else
-				cmd( "pack .deb.cc.l.e$i.pad1 .deb.cc.l.e$i.name .deb.cc.l.e$i.val .deb.cc.l.e$i.last -side left" );
+			{
+				cmd( "grid $w.e$i.name $w.e$i.val $w.e$i.last" );
+				cmd( "grid $w.e$i" );
+			}
 
-			cmd( "bind .deb.cc.l.e$i.name <Button-1> { set res %s; set lstDebPos [ .deb.cc.l index @%%x,%%y ]; set choice 8 }", ap_v->label );
-			cmd( "bind .deb.cc.l.e$i.name <Button-2> { set res %s; set lstDebPos [ .deb.cc.l index @%%x,%%y ]; set choice 29 }", ap_v->label );
-			cmd( "bind .deb.cc.l.e$i.name <Button-3> { event generate .deb.cc.l.e$i.name <Button-2> -x %%x -y %%y }" );
+			cmd( "mouse_wheel $w.e$i.name" );
+			cmd( "mouse_wheel $w.e$i.val" );
+			cmd( "mouse_wheel $w.e$i.last" );
 
-			cmd( "mouse_wheel .deb.cc.l.e$i.name" );
-			cmd( "mouse_wheel .deb.cc.l.e$i.val" );
-			cmd( "mouse_wheel .deb.cc.l.e$i.last" );
-
-			cmd( ".deb.cc.l window create end -window .deb.cc.l.e$i" );
-			if ( i % 2 == 0 )
-				cmd( ".deb.cc.l insert end \\n" );
+			cmd( "bind $w.e$i.name <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", ap_v->label );
+			cmd( "bind $w.e$i.name <Button-2> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 29 }", ap_v->label );
+			cmd( "bind $w.e$i.name <Button-3> { event generate .deb.cc.grid.can.f.e$i.name <Button-2> -x %%x -y %%y }" );
 		}
-	   
-		cmd( "if [ info exists lstDebPos ] { .deb.cc.l see $lstDebPos; unset lstDebPos }" );
+
+		cmd( "set debConfChg 1" );
+		cmd( "event generate .deb <Configure>" );
+		cmd( "if [ info exists lstDebPos ] { $g.can yview moveto [ lindex $lstDebPos 0 ]; unset lstDebPos }" );
 		
 		Tcl_UnlinkVar( inter, "i" );
 	}
-
-	cmd( ".deb.cc.l configure -state disabled" );
 }
 
 
