@@ -164,7 +164,7 @@ void set_obj_number( object *r, int *choice )
 			}
 		}   
 
-		if ( *choice == 3 && in_edit_data )		// avoid recursion
+		if ( *choice == 3 )// && in_edit_data )		// avoid recursion
 		{
 			*choice = 0;
 			goto noredraw;
@@ -282,7 +282,7 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 			cmd( "$t insert end \\n" );
 			cmd( "bind $t.lab$i <Button-1> { set obj_name %s; set choice 3 }", c->label );
 		   
-			if ( ! in_edit_data )				// show only if not already recursing
+//			if ( ! in_edit_data )				// show only if not already recursing
 				cmd( "bind $t.lab$i <Enter> { set msg \"Click to edit values for '%s'\" }", c->label );
 			cmd( "bind $t.lab$i <Leave> { set msg \"\" }" );
 		}

@@ -3287,7 +3287,6 @@ case 21:
 	edit_data(n, choice, r->label);
 
 	unsaved_change( true );			// signal unsaved change
-	cmd( "destroytop .ini" );
 
 	if ( cur2 != NULL )				// restore original current object
 		r = cur2;
@@ -7162,8 +7161,8 @@ UNSAVED_CHANGE
 Read or set the UnsavedChange flag and update windows titles accordingly
 ****************************************************/
 bool unsavedChange = false;		// control for unsaved changes in configuration
-#define WND_NUM 7				// number of windows to update (in wndName)
-const char *wndName[ ] = { ".", ".log", ".str", ".ini", ".da", ".deb", ".lat" };
+#define WND_NUM 8				// number of windows to update (in wndName)
+const char *wndName[ ] = { ".", ".log", ".str", ".inid", ".inin", ".da", ".deb", ".lat" };
 
 bool unsaved_change( bool val )
 {

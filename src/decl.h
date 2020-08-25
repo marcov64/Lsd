@@ -230,7 +230,6 @@ void change_descr_lab( char const *lab_old, char const *lab, char const *type, c
 void change_descr_text( char *lab );
 void change_init_text( char *lab );
 void chg_obj_num( object **c, int value, int all, int pippo[ ], int *choice, int cfrom );
-void clean_cell( object *root, char *tag, char *lab );
 void clean_debug( object *n );
 void clean_parallel( object *n );
 void clean_plot( object *n );
@@ -262,6 +261,7 @@ void empty_cemetery( void );
 void empty_description( void );
 void empty_lattice( void );
 void empty_sensitivity( sense *cs );
+void empty_stack( void );
 void entry_new_objnum( object *c, int *choice, char const *tag );
 void file_name( char *name );
 void fill_list_par( object *r, int flag_all );
@@ -282,7 +282,7 @@ void insert_labels_mem( object *r, int *num_v, char *lab = NULL );
 void insert_obj_num( object *root, char const *tag, char const *indent, int counter, int *i, int *value );
 void insert_object( const char *w, object *r, bool netOnly = false );
 void insert_store_mem( object *r, int *num_v, char *lab = NULL );
-void link_data( object *root, char *lab );
+void link_cells( object *root, char *lab );
 void plog_series( int *choice );
 void plot( int type, int *start, int *end, char **str, char **tag, int *choice, bool norm );
 void plot( int type, int nv, double **data, int *start, int *end, int *id, char **str, char **tag, int *choice );
@@ -305,6 +305,7 @@ void reset_blueprint( object *r );
 void reset_end( object *r );
 void reset_plot( int run );
 void run( void );
+void save_cells( object *r, char *lab );
 void save_data1( int *choice );
 void save_datazip( int *choice );
 void save_eqfile( FILE *f );
@@ -329,6 +330,7 @@ void set_shortcuts_log( const char *window, const char *help );
 void set_title( object *c, char *lab, char *tag, int *incr );
 void shift_desc( int direction, char *dlab, object *r );
 void shift_var( int direction, char *vlab, object *r );
+void show_cells( object *r, char *lab );
 void show_debug( object *n );
 void show_eq( char *lab, int *choice );
 void show_graph( object *t );
@@ -357,7 +359,7 @@ void tex_report_observe( object *r, FILE *f, bool table = true );
 void tex_report_struct( object *r, FILE *f, bool table = true );
 void uncover_browser( void );
 void unload_configuration ( bool full );
-void empty_stack( void );
+void unlink_cells( object *r, char *lab );
 void update_bounds( void );
 void warn_distr( int *errCnt, bool *stopErr, const char *distr, const char *msg );
 void wipe_out( object *d );
@@ -376,8 +378,6 @@ extern bool brCovered;			// browser cover currently covered
 extern bool eq_dum;				// current equation is dummy
 extern bool error_hard_thread;	// flag to error_hard() called in worker thread
 extern bool ignore_eq_file;		// control of configuration files equation updating
-extern bool in_edit_data;		// in initial settings mode
-extern bool in_set_obj;			// in setting number of objects mode
 extern bool iniShowOnce;		// prevent repeating warning on # of columns
 extern bool log_ok;				// control for log window available
 extern bool message_logged;		// new message posted in log window
