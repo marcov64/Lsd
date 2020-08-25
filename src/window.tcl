@@ -1601,7 +1601,10 @@ proc scroll_wheel_windows { delta w } {
 	set scrW [ find_scrollable $w ]
 	if { $scrW != "" } {
 		set wPos [ $scrW yview ]
-		if { ( $delta > 0 && $wPos < 1 ) || ( $delta < 0 && $wPos > 0 ) } {
+		set top [ lindex $wPos 0 ]
+		set bot [ lindex $wPos 1 ]
+		if { ( ! ( $top == 0.0 && $bot == 1.0 ) ) && \
+			 ( ( $delta > 0 && $top > 0.0 ) || ( $delta < 0 && $bot < 1.0 ) ) } {
 			$scrW yview scroll [ expr -1 * $sfmwheel * $delta / $winmwscale ] units
 		}
 	}
@@ -1618,7 +1621,10 @@ proc scroll_wheel_mac { delta w } {
 	set scrW [ find_scrollable $w ]
 	if { $scrW != "" } {
 		set wPos [ $scrW yview ]
-		if { ( $delta > 0 && $wPos < 1 ) || ( $delta < 0 && $wPos > 0 ) } {
+		set top [ lindex $wPos 0 ]
+		set bot [ lindex $wPos 1 ]
+		if { ( ! ( $top == 0.0 && $bot == 1.0 ) ) && \
+			 ( ( $delta > 0 && $top > 0.0 ) || ( $delta < 0 && $bot < 1.0 ) ) } {
 			$scrW yview scroll [ expr -1 * $sfmwheel * $delta ] units
 		}
 	}
@@ -1635,7 +1641,8 @@ proc scroll_wheel_linux { delta w dir } {
 	set scrW [ find_scrollable $w ]
 	if { $scrW != "" } {
 		set wPos [ $scrW yview ]
-		if { ( $dir > 0 && $wPos < 1 ) || ( $dir < 0 && $wPos > 0 ) } {
+		if { ( ! ( $top == 0.0 && $bot == 1.0 ) ) && \
+			 ( ( $dir > 0 && $top > 0.0 ) || ( $dir < 0 && $bot < 1.0 ) ) } {
 			$scrW yview scroll [ expr $dir * $sfmwheel ] units
 		}
 	}

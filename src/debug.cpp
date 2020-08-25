@@ -1267,7 +1267,7 @@ void deb_show( object *r )
 			ttk::label .deb.tit.val2 -style hlBoldSmall.TLabel -text Value; \
 			ttk::label .deb.tit.last2 -style boldSmall.TLabel -text \"Last update\"; \
 			placeline { .deb.tit.name1 .deb.tit.val1 .deb.tit.last1 .deb.tit.pad .deb.tit.name2 .deb.tit.val2 .deb.tit.last2 } [ list $hnamshD $hvalshD $hupdshD $hpadshD $hnamshD $hvalshD $hupdshD ] 0 $fntSz; \
-			pack .deb.tit -padx 5 -anchor w -fill x -after .deb.v \
+			pack .deb.tit -anchor w -fill x -after .deb.v \
 		}" );
 
 	// create single top frame to grid, where the values table can be built
@@ -1289,7 +1289,7 @@ void deb_show( object *r )
 			set lastDebSz { 0 0 }; \
 			set debDone 0; \
 			set fntWid [ font measure [ ttk::style lookup TLabel -font active TkDefaultFont ] 0 ]; \
-			set hcharszD [ expr int( 1 * ( $hsizeD - 21 ) / $fntWid ) ]; \
+			set hcharszD [ expr int( ( $hsizeD - 15 ) / $fntWid ) ]; \
 			set hnamszD [ expr round( $hnamshD * $hcharszD ) ]; \
 			set hvalszD [ expr round( $hvalshD * $hcharszD ) ]; \
 			set hupdszD [ expr round( $hupdshD * $hcharszD ) ]; \
@@ -1298,7 +1298,7 @@ void deb_show( object *r )
 			ttk::scrollbar $g.scroll -command { .deb.cc.grid.can yview }; \
 			grid $g.can $g.scroll -sticky nsew; \
 			mouse_wheel $g.can; \
-			pack .deb.cc -padx 5 -anchor w -expand 1 -fill both -after .deb.tit; \
+			pack .deb.cc -anchor w -expand 1 -fill both -after .deb.tit; \
 			bind .deb <Configure> { \
 				if { ! [ info exists debConfRun ] } { \
 					set debConfRun 1; \
@@ -1316,7 +1316,6 @@ void deb_show( object *r )
 								set desHgt [ expr [ lindex $debSz 1 ] - $debButHgt ] \
 							}; \
 							$g configure -width $desWid -height $desHgt; \
-							.deb.cc.grid.can.f configure -width $desWid -height $desHgt; \
 							$g.can configure -scrollregion $canBbox \
 						} { \
 							set desWid [ expr max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ], 400 ) ]; \
@@ -1374,7 +1373,7 @@ void deb_show( object *r )
 			
 			if ( i % 2 == 0 )
 			{
-				cmd( "ttk::label $w.e$i.pad -width $hpadszD -text \u2009" );
+				cmd( "ttk::label $w.e$i.pad -width $hpadszD" );
 			
 				cmd( "grid $w.e$i.pad $w.e$i.name $w.e$i.val $w.e$i.last" );
 				cmd( "grid $w.e$i -column 1 -row [ expr int( ( $i - 1 ) / 2 ) ]" );
