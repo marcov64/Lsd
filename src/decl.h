@@ -18,6 +18,7 @@ Global definitions among all LSD C++ modules
 
 Relevant flags (when defined):
 
+- FUN: user model equation file
 - NW: No Window executable
 - NP: no parallel (multi-task) processing
 - NT: no signal trapping (better when debugging in GDB)
@@ -201,7 +202,6 @@ int check_label( char *l, object *r );
 int compute_copyfrom( object *c, int *choice );
 int load_configuration( bool reload, bool quick = false );
 int load_sensitivity( FILE *f );
-int lsdmain( int argn, char **argv );
 int min_hborder( int *choice, int pdigits, double miny, double maxy );
 int num_sensitivity_variables( sense *rsens );
 int rnd_int( int min, int max );

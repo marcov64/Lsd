@@ -56,14 +56,10 @@ used up to 88 options
 // common definitions for LMM and LSD
 #include "common.h"
 
-// Eigen library include command
-#define EIGEN "#define EIGENLIB"
-
 // auxiliary C procedures
 bool compile_run( bool run, bool nw = false );
 bool use_eigen( void );			// check is Eigen library is in use
 char *get_fun_name( char *str, bool nw = false );
-int modmanmain( int argn, char **argv );
 void check_option_files( bool sys = false );
 void color( int hiLev, long iniLin, long finLin );
 void create_compresult_window( bool nw = false );
@@ -93,42 +89,9 @@ const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
 
 /*************************************
- MAIN
+ LSDMAIN
  *************************************/
-int main( int argn, char **argv )
-{
-	int res = 0;
-
-	// register all signal handlers
-	handle_signals( signal_handler );
-
-	try
-	{
-		res = modmanmain( argn, argv );
-	}
-	catch ( bad_alloc&  )		// out of memory conditions
-	{
-		signal_handler( SIGMEM );
-	}
-	catch ( exception& exc )	// other known error conditions
-	{
-		sprintf( msg, "\nSTL exception of type: %s\n", exc.what( ) );
-		signal_handler( SIGSTL );
-	}
-	catch ( ... )				// other unknown error conditions
-	{
-		abort( );				// raises a SIGABRT exception, tell user & close
-	}
-
-	myexit( res );
-	return res;
-}
-
-
-/*************************************
- MODMANMAIN
- *************************************/
-int modmanmain( int argn, char **argv )
+int lsdmain( int argn, char **argv )
 {
 	bool found, recolor = false;
 	int i, j, num, sourcefile = 0, recolor_all = 0, v_counter = 0;

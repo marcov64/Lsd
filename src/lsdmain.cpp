@@ -30,6 +30,7 @@ Prepare variables to store saved data.
 
 Relevant flags (when defined):
 
+- FUN: user model equation file
 - NW: No Window executable
 - NP: no parallel (multi-task) processing
 - NT: no signal trapping (better when debugging in GDB)
@@ -167,46 +168,6 @@ map < thread::id, worker * > thr_ptr;	// worker thread pointers
 thread::id main_thread;		// LSD main thread ID
 worker *workers = NULL;		// multi-thread parallel worker data
 #endif
-
-
-/*************************************
- MAIN
- *************************************/
-int main( int argn, char **argv )
-{
-	int res = 0;
-
-#ifndef NT
-	// register all signal handlers
-	handle_signals( signal_handler );
-
-	try
-	{
-#endif
-
-		res = lsdmain( argn, argv );
-		
-#ifndef NT
-	}
-	catch ( bad_alloc& )	// out of memory conditions
-	{
-		signal_handler( SIGMEM );
-	}
-	catch ( exception& exc )// other known error conditions
-	{
-		sprintf( msg, "\nSTL exception of type: %s\n", exc.what( ) );
-		signal_handler( SIGSTL );
-	}
-	catch ( ... )				// other unknown error conditions
-	{
-		abort( );				// raises a SIGABRT exception, tell user & close
-	}
-
-#endif
-
-	myexit( res );
-	return res;
-}
 
 
 /*********************************

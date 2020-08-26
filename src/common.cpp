@@ -15,10 +15,19 @@
 /*************************************************************
  COMMON.CPP 
  Code common between LMM and LSD Browser.
+ 
+ Relevant flags (when defined):
+ 
+ - LMM: Model Manager executable
+ - FUN: user model equation file
+ - NW: No Window executable
+ - NP: no parallel (multi-task) processing
+ - NT: no signal trapping (better when debugging in GDB)
  *************************************************************/
 
 #include "common.h"
 
+// Tcl/Tk-dependent modules
 #ifndef NW
 
 /*********************************
@@ -359,6 +368,45 @@ double get_double( const char *tcl_var, double *var )
 void cmd( const char *cm, ... ) { }
 
 #endif
+
+
+/*************************************
+ MAIN
+ *************************************/
+int main( int argn, char **argv )
+{
+	int res = 0;
+
+#ifndef NT
+	// register all signal handlers
+	handle_signals( signal_handler );
+
+	try
+	{
+#endif
+		res = lsdmain( argn, argv );
+		
+#ifndef NT
+	}
+	catch ( bad_alloc& )	// out of memory conditions
+	{
+		signal_handler( SIGMEM );
+	}
+	catch ( exception& exc )// other known error conditions
+	{
+		sprintf( msg, "\nSTL exception of type: %s\n", exc.what( ) );
+		signal_handler( SIGSTL );
+	}
+	catch ( ... )				// other unknown error conditions
+	{
+		abort( );				// raises a SIGABRT exception, tell user & close
+	}
+
+#endif
+
+	myexit( res );
+	return res;
+}
 
 
 /****************************************************

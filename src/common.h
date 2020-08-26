@@ -15,6 +15,14 @@
 /*************************************************************
  COMMON.H
  Global definitions common between LMM and LSD Browser
+ 
+ Relevant flags (when defined):
+ 
+ - LMM: Model Manager executable
+ - FUN: user model equation file
+ - NW: No Window executable
+ - NP: no parallel (multi-task) processing
+ - NT: no signal trapping (better when debugging in GDB)
  *************************************************************/
 
 // LSD version strings, for About... boxes and code testing
@@ -73,6 +81,9 @@
 // user defined signals
 #define SIGMEM NSIG + 1					// out of memory signal
 #define SIGSTL NSIG + 2					// standard library exception signal
+
+// Eigen library include command
+#define EIGEN "#define EIGENLIB"
 
 // constant string arrays
 #define LMM_OPTIONS_NUM 16
@@ -498,6 +509,7 @@ const char *strsignal( int signum );
 double get_double( const char *tcl_var, double *var = NULL );
 int deb( object *r, object *c, char const *lab, double *res, bool interact = false );
 int get_int( const char *tcl_var, int *var = NULL );
+int lsdmain( int argn, char **argv );
 long get_long( const char *tcl_var, long *var = NULL );
 void check_option_files( bool sys );
 void clean_spaces( char *s );
