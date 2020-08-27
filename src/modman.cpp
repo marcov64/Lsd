@@ -405,24 +405,24 @@ int lsdmain( int argn, char **argv )
 	cmd( "$w add separator" );	// entryconfig 2
 	// collect information to focus recoloring
 	cmd( "$w add command -label Cut -command { \
-			savCurIni; \
+			sav_cur_ini; \
 			tk_textCut .f.t.t; \
-			updColChg \
+			upd_color \
 		} -underline 1 -accelerator Ctrl+x" );	// entryconfig 3
 	cmd( "$w add command -label Copy -command { tk_textCopy .f.t.t } -underline 0 -accelerator Ctrl+c" );	// entryconfig 4
 	cmd( "$w add command -label Paste -command { \
-			savCurIni; \
+			sav_cur_ini; \
 			tk_textPaste .f.t.t; \
-			updColChg \
+			upd_color \
 		} -underline 0 -accelerator Ctrl+v" );	// entryconfig 5
 	cmd( "$w add command -label Delete -command { \
-			savCurIni; \
+			sav_cur_ini; \
 			if [ string equal [ .f.t.t tag ranges sel ] \"\" ] { \
 				.f.t.t delete insert \
 			} { \
 				.f.t.t delete sel.first sel.last \
 			}; \
-			updColChg \
+			upd_color \
 		} -accelerator Del" );	// entryconfig 6
 	cmd( "$w add separator" );	// entryconfig 7
 	cmd( "$w add command -label \"Find...\" -command { set choice 11 } -underline 0 -accelerator Ctrl+f" );	// entryconfig 8
@@ -657,37 +657,11 @@ int lsdmain( int argn, char **argv )
 	cmd( "pack .f.t.t -expand yes -fill both" );
 	cmd( "pack .f.t.hs -fill x" );
 
-	// procedures to save cursor environment before and after changes in text window for syntax coloring
-	cmd( "proc savCurIni { } { \
-			global curSelIni curPosIni; \
-			set curSelIni [ .f.t.t tag nextrange sel 1.0 ]; \
-			set curPosIni [ .f.t.t index insert ]; \
-			.f.t.t edit modified false \
-		}" );
-	cmd( "proc savCurFin { } { \
-			global curSelFin curPosFin; \
-			set curSelFin [ .f.t.t tag nextrange sel 1.0 ]; \
-			set curPosFin [ .f.t.t index insert ]; \
-			.f.t.t edit modified false \
-		}" );
-	cmd( "proc updColChg { { always 0 } } { \
-			global choice; \
-			if { $always || [ .f.t.t edit modified ] } { \
-				savCurFin; \
-				set choice 23 \
-			}; \
-			updCurWnd \
-		}" );
-	cmd( "proc updCurWnd { } { \
-			.f.hea.cur.line.ln2 configure -text [ lindex [ split [ .f.t.t index insert ] . ] 0 ]; \
-			.f.hea.cur.col.col2 configure -text [ expr 1 + [ lindex [ split [ .f.t.t index insert ] . ] 1 ] ] \
-		}" );
-
 	// redefine bindings to better support new syntax highlight routine
-	cmd( "bind .f.t.t <KeyPress> { savCurIni }" );
-	cmd( "bind .f.t.t <KeyRelease> { updColChg }" );
-	cmd( "bind .f.t.t <ButtonPress> { savCurIni }" );
-	cmd( "bind .f.t.t <ButtonRelease> { updColChg }" );
+	cmd( "bind .f.t.t <KeyPress> { sav_cur_ini }" );
+	cmd( "bind .f.t.t <KeyRelease> { upd_color }" );
+	cmd( "bind .f.t.t <ButtonPress> { sav_cur_ini }" );
+	cmd( "bind .f.t.t <ButtonRelease> { upd_color }" );
 
 	// button and key specific bindings
 	cmd( "bind .f.hea.cur.line.ln1 <Button-1> { set choice 10 }" );
@@ -741,7 +715,7 @@ int lsdmain( int argn, char **argv )
 	cmd( "bind .f.t.t <Control-v> { .m.edit invoke 5; break }" );
 	cmd( "bind .f.t.t <Delete> { .m.edit invoke 6; break }" );
 	cmd( "bind .f.t.t <BackSpace> { \
-			savCurIni; \
+			sav_cur_ini; \
 			if [ string equal [ .f.t.t tag ranges sel ] \"\" ] { \
 				if { ! [ string equal [ .f.t.t index insert ] 1.0 ] } { \
 					.f.t.t delete insert-1c \
@@ -750,10 +724,10 @@ int lsdmain( int argn, char **argv )
 				.f.t.t delete sel.first sel.last \
 			}; \
 			if [ .f.t.t edit modified ] { \
-				savCurFin; \
+				sav_cur_end; \
 				set choice 23 \
 			}; \
-			updColChg; \
+			upd_color; \
 			break \
 		}" );
 	cmd( "if { ! [ string equal $CurPlatform windows ] } { bind .f.t.t <Control-Insert> { .m.edit invoke 4; break } }" );
@@ -898,12 +872,12 @@ int lsdmain( int argn, char **argv )
 	// start recolor if needed
 	if ( recolor_all )				// all text?
 	{
-		cmd( "savCurIni; savCurFin; updCurWnd" );	// save data for recolor
+		cmd( "sav_cur_ini; sav_cur_end; upd_cursor" );	// save data for recolor
 		color( shigh, 0, 0 );		// set color types (all text)
 	}
 	else
 		if ( recolor )				// just around cursor?
-			cmd( "updColChg 1" );
+			cmd( "upd_color 1" );
 
 	recolor_all = recolor = false;
 
@@ -934,7 +908,7 @@ int lsdmain( int argn, char **argv )
 
 	// save data for recolor if there is not a pending recolor
 	if ( choice != 23 )
-		cmd( "savCurIni" );
+		cmd( "sav_cur_ini" );
 
 	// start evaluating the executed command
 
@@ -1146,7 +1120,7 @@ int lsdmain( int argn, char **argv )
 			} else { \
 				.f.t.t mark set insert 1.0 \
 			}" );
-		cmd( "updCurWnd" );
+		cmd( "upd_cursor" );
 
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
 		cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
@@ -1183,7 +1157,7 @@ int lsdmain( int argn, char **argv )
 					.f.t.t see $line.0; \
 					.f.t.t mark set insert $line.0; \
 					.f.t.t tag add sel $line.0 $line.end; \
-					updCurWnd \
+					upd_cursor \
 				} { \
 					bell \
 				}; \
@@ -1250,7 +1224,7 @@ int lsdmain( int argn, char **argv )
 						}; \
 						.f.t.t mark set insert \"$cur + $length char\" ; \
 						.f.t.t see $cur; \
-						updCurWnd; \
+						upd_cursor; \
 						destroytop .find; \
 						focus .f.t.t; \
 						set keepfocus 0; \
@@ -1319,7 +1293,7 @@ int lsdmain( int argn, char **argv )
 					}; \
 					.f.t.t mark set insert \"$cur + $length char\"; \
 					.f.t.t see $cur; \
-					updCurWnd; \
+					upd_cursor; \
 					update \
 				} else { \
 					bell \
@@ -1368,7 +1342,7 @@ int lsdmain( int argn, char **argv )
 					.f.t.t insert $cur \"$textrepl\"; \
 					if { [ string compare $endsearch end ] != 0 } { \
 						.f.t.t mark set insert $cur; \
-						updCurWnd \
+						upd_cursor \
 					}; \
 					.l.b2.ok invoke \
 				} \
@@ -1399,7 +1373,7 @@ int lsdmain( int argn, char **argv )
 							.f.t.t mark set insert $cur \
 						}; \
 						.f.t.t see $cur; \
-						updCurWnd; \
+						upd_cursor; \
 						update; \
 						.l.b1.repl conf -state normal; \
 						.l.b1.all conf -state normal \
@@ -1945,7 +1919,7 @@ int lsdmain( int argn, char **argv )
 			} else { \
 				.f.t.t mark set insert 1.0 \
 			}" );
-		cmd( "updCurWnd" );
+		cmd( "upd_cursor" );
 
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
 		cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
@@ -5425,7 +5399,7 @@ int lsdmain( int argn, char **argv )
 						.f.t.t see $errlin.0; \
 						.f.t.t mark set insert $errlin.0 \
 					}; \
-					updCurWnd \
+					upd_cursor \
 				}" );
 
 			choice = 0;						// nothing else to do

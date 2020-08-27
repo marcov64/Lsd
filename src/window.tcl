@@ -968,6 +968,17 @@ proc selectinlist { w pos { foc 0 } } {
 
 
 #************************************************
+# ADDTOLIST
+# Procedure to add a new plot to a listbox,
+# selecting it
+#************************************************
+proc addtolist { w text } {
+	$w insert end "$text"
+	selectinlist $w end
+}
+
+
+#************************************************
 # CANVASSEE
 # Change the canvas scrollbars' positions to see
 # completely an window item in canvas
@@ -997,6 +1008,18 @@ proc canvassee { c w } { \
 		$c yview moveto [ expr [ lindex $yv 0 ] + ( $wy + $wh - $yma ) / $ch ] \
 	}; \
 } \
+
+
+#************************************************
+# INISELCELL
+# Scroll table in canvas to show selected
+# text cell, selecting its content
+#************************************************
+proc selectcell { can cell } {
+	focus $cell
+	$cell selection range 0 end
+	canvassee $can $cell
+}
 
 
 #************************************************

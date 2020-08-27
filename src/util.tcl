@@ -216,6 +216,127 @@ proc check_sys_opt { } {
 
 
 #************************************************
+# SAV_CUR_INI
+# Save LMM cursor environment before
+# changes in text window for syntax coloring
+#************************************************
+proc sav_cur_ini { } {
+	global curSelIni curPosIni
+	
+	set curSelIni [ .f.t.t tag nextrange sel 1.0 ]
+	set curPosIni [ .f.t.t index insert ]
+	.f.t.t edit modified false
+}
+
+
+#************************************************
+# SAV_CUR_END
+# Save LMM cursor environment after 
+# changes in text window for syntax coloring
+#************************************************
+proc sav_cur_end { } {
+	global curSelFin curPosFin
+	
+	set curSelFin [ .f.t.t tag nextrange sel 1.0 ]
+	set curPosFin [ .f.t.t index insert ]
+	.f.t.t edit modified false
+}
+
+
+#************************************************
+# UPD_COLOR
+# Update LMM text window syntax coloring 
+#************************************************
+proc upd_color { { force 0 } } {
+	global choice
+	
+	if { $force || [ .f.t.t edit modified ] } {
+		sav_cur_end
+		set choice 23
+	}
+	
+	upd_cursor
+}
+
+
+#************************************************
+# UPD_CURSOR
+# Update LMM cursor coordinates window 
+#************************************************
+proc upd_cursor { } {
+	.f.hea.cur.line.ln2 configure -text [ lindex [ split [ .f.t.t index insert ] . ] 0 ]
+	.f.hea.cur.col.col2 configure -text [ expr 1 + [ lindex [ split [ .f.t.t index insert ] . ] 1 ] ]
+}
+
+
+#************************************************
+# PLOG
+# Tcl/Tk version of C "plog" function to 
+# show a string in the LSD Log window
+#************************************************
+proc plog cm {
+	.log.text.text.internal insert end $cm
+	.log.text.text.internal see end
+}
+
+	
+#************************************************
+# UPD_MENU_VISIB
+# Update active menu options in LSD Model Browser
+# according to panel in use
+#************************************************
+proc upd_menu_visib { } {
+	global listfocus prevlistfocus
+	
+	if { $listfocus == 1 && $prevlistfocus != 1 } {
+		.m.model.sort entryconfig 2 -state normal
+		.m.model.sort entryconfig 3 -state normal
+		.m.model.sort entryconfig 4 -state normal
+		.m.model.sort entryconfig 5 -state normal
+	}
+	
+	if { $listfocus == 2  && $prevlistfocus != 2 } {
+		.m.model.sort entryconfig 2 -state disabled
+		.m.model.sort entryconfig 3 -state disabled
+		.m.model.sort entryconfig 4 -state disabled
+		.m.model.sort entryconfig 5 -state disabled
+	}
+	
+	set prevlistfocus $listfocus
+}
+
+
+#************************************************
+# COMP_UND
+# Create special sort procedure to keep names 
+# starting with underline at the end
+#************************************************
+proc comp_und { n1 n2 } {
+
+	if [ string equal $n1 $n2 ] {
+		return 0
+	}
+	
+	if { ! [ expr { [ string index $n1 0 ] == "_" && [ string index $n2 0 ] == "_" } ] } {
+		if { [ string index $n1 0 ] == "_" } {
+			return 1
+		} else
+		if { [ string index $n2 0 ] == "_" } {
+			return -1
+		}
+	}
+	
+	set listn [ lsort -dictionary [ list $n1 $n2 ] ]
+	
+	if [ string equal [ lindex $listn 0 ] $n1 ] {
+		return -1
+	} {
+		return 1
+	}
+}
+
+
+#************************************************
 # GET_SERIES
 # Set a byte array to hold data series that can be accessed from C
 # Based on code by Arjen Markus (http://wiki.tcl.tk/4179)

@@ -109,24 +109,6 @@ void create( void )
 	cmd( "set c \"\"" );
 	cmd( "if $strWindowOn { set strWindowB active } { set strWindowB normal }" );
 
-	// function to update active options according to panel in use
-	cmd( "proc update_options { } { \
-			global listfocus prevlistfocus; \
-			if { $listfocus == 1 && $prevlistfocus != 1 } { \
-				.m.model.sort entryconfig 2 -state normal; \
-				.m.model.sort entryconfig 3 -state normal; \
-				.m.model.sort entryconfig 4 -state normal; \
-				.m.model.sort entryconfig 5 -state normal \
-			}; \
-			if { $listfocus == 2  && $prevlistfocus != 2 } { \
-				.m.model.sort entryconfig 2 -state disabled; \
-				.m.model.sort entryconfig 3 -state disabled; \
-				.m.model.sort entryconfig 4 -state disabled; \
-				.m.model.sort entryconfig 5 -state disabled \
-			}; \
-			set prevlistfocus $listfocus \
-		}" );
-
 	// restore previous object and cursor position in browser, if any
 	cur = restore_pos( root );
 	redrawRoot = redrawStruc = true;	// browser/ structure redraw when drawing the first time
@@ -503,7 +485,7 @@ int browse( object *r, int *choice )
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]; \
-					update_options \
+					upd_menu_visib \
 				} \
 			}" );
 		cmd( "bind .l.v.c.var_name <Left> { \
@@ -511,7 +493,7 @@ int browse( object *r, int *choice )
 				set listfocus 2; \
 				set itemfocus 0; \
 				selectinlist .l.s.c.son_name 0; \
-				update_options \
+				upd_menu_visib \
 			}" );
 			
 		cmd( "ttk::frame .l.s" );
@@ -736,7 +718,7 @@ int browse( object *r, int *choice )
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
 					set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
-					update_options \
+					upd_menu_visib \
 				} \
 			}" );
 		cmd( "bind .l.s.c.son_name <Right> { \
@@ -744,7 +726,7 @@ int browse( object *r, int *choice )
 				set listfocus 1; \
 				set itemfocus 0; \
 				selectinlist .l.v.c.var_name 0; \
-				update_options \
+				upd_menu_visib \
 			}" );
 
 		// navigation (top) panel
@@ -1068,7 +1050,7 @@ int browse( object *r, int *choice )
 			focus .l.s.c.son_name; \
 		}" );
 
-	cmd( "update_options" );		// update active menu options
+	cmd( "upd_menu_visib" );		// update active menu options
 	cmd( "if $strWindowOn { set strWindowB active } { set strWindowB normal }" );
 	cmd( "set useCurrObj yes" );	// flag to select among the current or the clicked object
 

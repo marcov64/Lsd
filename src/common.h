@@ -28,8 +28,8 @@
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 3
-#define _LSD_VERSION_ "7.3-0"
-#define _LSD_DATE_ "December 31 2020"   // __DATE__
+#define _LSD_VERSION_ "7.3-beta"
+#define _LSD_DATE_ "August 31 2020"   // __DATE__
 
 // standard libraries used
 #include <cstdlib>

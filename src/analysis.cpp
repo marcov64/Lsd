@@ -500,33 +500,6 @@ cmd( "bind .da <Control-b> { set choice 45 }; bind .da <Control-B> { set choice 
 cmd( "bind .da <Control-w> { set choice 46 }; bind .da <Control-W> { set choice 46 }" ); 	// create new series from existing
 cmd( "bind .da <Control-m> { set choice 47 }; bind .da <Control-M> { set choice 47 }" ); 	// create moving average from existing
 
-// create special sort procedure to keep names starting with underline at the end
-cmd( "proc comp_und { n1 n2 } { \
-		if [ string equal $n1 $n2 ] { \
-			return 0 \
-		}; \
-		if { ! [ expr { [ string index $n1 0 ] == \"_\" && [ string index $n2 0 ] == \"_\" } ] } { \
-			if { [ string index $n1 0 ] == \"_\" } { \
-				return 1 \
-			}; \
-			if { [ string index $n2 0 ] == \"_\" } { \
-				return -1 \
-			}; \
-		}; \
-		set listn [ lsort -dictionary [ list $n1 $n2 ] ]; \
-		if [ string equal [ lindex $listn 0 ] $n1 ] { \
-			return -1 \
-		} { \
-			return 1 \
-		}; \
-	}" );
-
-// procedure to add a new plot to the plot list
-cmd( "proc add_plot { plot name } { \
-		.da.vars.pl.v insert end \"$plot) $name\"; \
-		selectinlist .da.vars.pl.v end \
-	}" );
-
 // grab focus when called from LSD Debugger
 Tcl_SetVar( inter, "running", running ? "1" : "0", 0 );
 cmd( "if $running { showtop .da overM 0 1 } { showtop .da overM 0 1 0 }" );
@@ -676,7 +649,7 @@ while ( true )
 			if ( *choice == 2 )		//plot aborted
 				cur_plot--;
 			else
-				cmd( "add_plot $cur_plot $tit" );
+				cmd( "addtolist .da.vars.pl.f.v \"${cur_plot}) ${tit}\"" );
 			
 			break;
 
@@ -696,7 +669,7 @@ while ( true )
 			if ( *choice == 2 )		//plot aborted
 				cur_plot--;
 			else
-				cmd( "add_plot $cur_plot $tit" );
+				cmd( "addtolist .da.vars.pl.f.v \"${cur_plot}) ${tit}\"" );
 				
 			break;
 
@@ -713,7 +686,7 @@ while ( true )
 			if ( *choice == 2 )
 				cur_plot--;
 			else
-				cmd( "add_plot $cur_plot $tit" );
+				cmd( "addtolist .da.vars.pl.f.v \"${cur_plot}) ${tit}\"" );
 			
 			break;
 
@@ -727,7 +700,7 @@ while ( true )
 			if ( *choice == 2 )		//plot aborted
 				cur_plot--;
 			else
-				cmd( "add_plot $cur_plot $tit" );
+				cmd( "addtolist .da.vars.pl.f.v \"${cur_plot}) ${tit}\"" );
 			
 			break;
 
@@ -742,7 +715,7 @@ while ( true )
 			if ( *choice == 2 )		//plot aborted
 				cur_plot--;
 			else   
-				cmd( "add_plot $cur_plot $tit" );
+				cmd( "addtolist .da.vars.pl.f.v \"${cur_plot}) ${tit}\"" );
 			
 			break;
 
@@ -760,7 +733,7 @@ while ( true )
 			if ( *choice == 2 )		//plot aborted
 				cur_plot--;
 			else   
-				cmd( "add_plot $cur_plot $tit" );
+				cmd( "addtolist .da.vars.pl.f.v \"${cur_plot}) ${tit}\"" );
 				
 			break;
 

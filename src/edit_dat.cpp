@@ -297,16 +297,6 @@ void link_cells( object *r, char *lab )
 	object *cur, *cur1;
 	variable *cv, *cv1;
 
-	// scroll large tables to show selected cell
-	cmd( "if { [ info procs iniselcell ] == \"\" } { \
-			proc iniselcell { cell } { \
-				global g; \
-				focus $cell; \
-				$cell selection range 0 end; \
-				canvassee $g.can $cell \
-			} \
-		}" );
-		
 	cur1 = r->search( lab );
 	strcpy( previous, "" );
 	
@@ -365,16 +355,16 @@ void link_cells( object *r, char *lab )
 				cmd( "grid $w.c%d_v%sp -row %d -column [ expr 2 + %d ] -padx 1", i, cv->label, k, i );
 				cmd( "mouse_wheel $w.c%d_v%sp", i, cv->label );
 				
-				cmd( "bind $w.c%d_v%sp <Button-1> { iniselcell $w.c%d_v%sp; break }", i, cv->label, i, cv->label );
+				cmd( "bind $w.c%d_v%sp <Button-1> { selectcell $g.can $w.c%d_v%sp; break }", i, cv->label, i, cv->label );
 				
 				if ( strlen( previous ) != 0 )
 				{
-					cmd( "bind %s <Return> { iniselcell $w.c%d_v%sp }", previous, i, cv->label );
-					cmd( "bind $w.c%d_v%sp <Shift-Return> { iniselcell %s }", i, cv->label, previous );
-					cmd( "bind %s <Tab> { iniselcell $w.c%d_v%sp }", previous, i, cv->label );
-					cmd( "bind $w.c%d_v%sp <Shift-Tab> { iniselcell %s }", i, cv->label, previous );
-					cmd( "bind %s <Down> { iniselcell $w.c%d_v%sp }", previous, i, cv->label );
-					cmd( "bind $w.c%d_v%sp <Up> { iniselcell %s }", i, cv->label, previous );
+					cmd( "bind %s <Return> { selectcell $g.can $w.c%d_v%sp }", previous, i, cv->label );
+					cmd( "bind $w.c%d_v%sp <Shift-Return> { selectcell $g.can %s }", i, cv->label, previous );
+					cmd( "bind %s <Tab> { selectcell $g.can $w.c%d_v%sp }", previous, i, cv->label );
+					cmd( "bind $w.c%d_v%sp <Shift-Tab> { selectcell $g.can %s }", i, cv->label, previous );
+					cmd( "bind %s <Down> { selectcell $g.can $w.c%d_v%sp }", previous, i, cv->label );
+					cmd( "bind $w.c%d_v%sp <Up> { selectcell $g.can %s }", i, cv->label, previous );
 				}
 				else
 				{
@@ -411,16 +401,16 @@ void link_cells( object *r, char *lab )
 					cmd( "grid $w.c%d_v%s_%d -row %d -column [ expr 2 + %d ] -padx 1", i, cv->label, j, k, i );
 					cmd( "mouse_wheel $w.c%d_v%s_%d", i, cv->label, j );
 
-					cmd( "bind  $w.c%d_v%s_%d <Button-1> { iniselcell $w.c%d_v%s_%d; break }", i, cv->label, j, i, cv->label, j );
+					cmd( "bind  $w.c%d_v%s_%d <Button-1> { selectcell $g.can $w.c%d_v%s_%d; break }", i, cv->label, j, i, cv->label, j );
 					
 					if ( strlen( previous ) != 0 )
 					{
-						cmd( "bind %s <Return> { iniselcell $w.c%d_v%s_%d }", previous, i, cv->label, j );
-						cmd( "bind  $w.c%d_v%s_%d <Shift-Return> { iniselcell %s }", i, cv->label, j, previous );
-						cmd( "bind %s <Tab> { iniselcell $w.c%d_v%s_%d }", previous, i, cv->label, j );
-						cmd( "bind  $w.c%d_v%s_%d <Shift-Tab> { iniselcell %s }", i, cv->label, j, previous );
-						cmd( "bind %s <Down> { iniselcell $w.c%d_v%s_%d }", previous, i, cv->label, j );
-						cmd( "bind  $w.c%d_v%s_%d <Up> { iniselcell %s }", i, cv->label, j, previous );
+						cmd( "bind %s <Return> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->label, j );
+						cmd( "bind  $w.c%d_v%s_%d <Shift-Return> { selectcell $g.can %s }", i, cv->label, j, previous );
+						cmd( "bind %s <Tab> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->label, j );
+						cmd( "bind  $w.c%d_v%s_%d <Shift-Tab> { selectcell $g.can %s }", i, cv->label, j, previous );
+						cmd( "bind %s <Down> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->label, j );
+						cmd( "bind  $w.c%d_v%s_%d <Up> { selectcell $g.can %s }", i, cv->label, j, previous );
 					}
 					else
 					{
