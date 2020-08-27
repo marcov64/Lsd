@@ -105,11 +105,6 @@ set pointsizeP	1.0	; # default size of points/lines (<1:./=1:x<=2:+/>2:round)
 set maxzoomP	4.0	; # maximum zoom magnification factor in plots
 set minzoomP	0.5	; # minimum zoom shrinking factor in plots
 
-# analysis window sizes (must be even numbers)
-set daCwidLinux		28	; # series lists width (Linux)
-set daCwidMac		28	; # Mac
-set daCwidWindows	36	; # Windows
-
 # lattice options (maximum & default, color scale)
 set hsizeLatMax	1024; # maximum lattice horizontal size in pixels
 set vsizeLatMax	1024; # maximum lattice vertical size in pixels

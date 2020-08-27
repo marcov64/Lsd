@@ -119,9 +119,7 @@ void analysis( int *choice )
 {
 	*choice = 0;
 	while ( *choice == 0 )
-		read_data( choice ); 	//Cases and Variables
-
-	*choice = 0;
+		read_data( choice );
 }
 
 
@@ -131,9 +129,9 @@ READ_DATA
 void read_data( int *choice )
 {
 bool gz, mc;
-int i, h, j, k, l, m, p, r;
-char *app, dirname[ MAX_PATH_LENGTH ], str1[ MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ];
-double *datum, compvalue = 0;
+char *app, dirname[ MAX_PATH_LENGTH + 1 ], str1[ MAX_ELEM_LENGTH + 1 ], str2[ MAX_ELEM_LENGTH + 1 ], str3[ MAX_ELEM_LENGTH + 1 ];
+double *datum, compvalue;
+int h, i, j, k, l, m, p, r;
 vector < string > cur_var;
 vector < vector < string > > var_names;
 store *app_store;
@@ -193,6 +191,7 @@ cmd( "set gpoptions \"$gnuplotOptions\"" );
 
 cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change( ) ? "*" : " ", simul_name );
 
+// main menu
 cmd( "ttk::menu .da.m -tearoff 0" );
 
 cmd( "set w .da.m.exit" );
@@ -233,28 +232,25 @@ cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%
 cmd( ".da configure -menu .da.m" );
 cmd( "bind .da <F1> { .da.m.help invoke 0; break }" );
 
-// adjust horizontal text space usage
-cmd( "if [ string equal $CurPlatform windows ] { set pad 0 } { if [ string equal $CurPlatform mac ] { set pad 1 } { set pad 2 } }" );
-
-cmd( "set f .da.head" );
-cmd( "ttk::frame $f" );
-cmd( "ttk::label $f.lb -width [ expr $daCwid + $pad ] -padding 0 -text \"Series available\"" );
-cmd( "ttk::label $f.pad -width [ expr $butWid - 3 ] -padding 0" );
-cmd( "ttk::label $f.ch -width [ expr $daCwid + $pad ] -padding 0 -text \"Series selected\"" );
-cmd( "ttk::label $f.pl -width [ expr $daCwid + $pad ] -padding 0 -text \"Plots\"" );
-cmd( "pack $f.lb $f.pad $f.ch $f.pl -padx 0 -pady 0 -side left" );
-cmd( "pack $f -pady 5 -fill x" );
-
+// top listboxes band
 cmd( "ttk::frame .da.vars" );
 
-cmd( "set f .da.vars.lb" );
+// available series listbox
+cmd( "ttk::frame .da.vars.lb" );
+cmd( "ttk::label .da.vars.lb.th -text \"Series available\" -style boldSmall.TLabel" );
+cmd( "pack .da.vars.lb.th" );
+
+cmd( "set f .da.vars.lb.f" );
 cmd( "ttk::frame $f" );
+cmd( "ttk::listbox $f.v -selectmode extended -yscroll \"$f.v_scroll set\" -dark $darkTheme" );
+cmd( "pack $f.v -side left -expand 1 -fill both" );
 cmd( "ttk::scrollbar $f.v_scroll -command \"$f.v yview\"" );
-cmd( "ttk::listbox $f.v -selectmode extended -width $daCwid -yscroll \"$f.v_scroll set\" -dark $darkTheme" );
-cmd( "pack $f.v $f.v_scroll -side left -fill y" );
+cmd( "pack $f.v_scroll -side left -fill y" );
+cmd( "pack $f -expand 1 -fill both" );
+
 cmd( "mouse_wheel $f.v" );
 cmd( "bind $f.v <Return> { .da.vars.b.in invoke; break }" );
-cmd( "bind $f.v <KeyPress-space> { set res [ .da.vars.lb.v get active ]; set choice 30; break }" );
+cmd( "bind $f.v <space> { set res [ .da.vars.lb.f.v get active ]; set choice 30; break }" );
 cmd( "bind $f.v <KeyRelease> { \
 		set kk %%K; \
 		if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } { \
@@ -271,21 +267,63 @@ cmd( "bind $f.v <KeyRelease> { \
 			} \
 		} \
 	}" );
-cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.lb.v <Return> }" );
-cmd( "bind $f.v <Button-2> { .da.vars.lb.v selection clear 0 end;.da.vars.lb.v selection set @%%x,%%y; set res [ selection get ]; set choice 30 } " );
-cmd( "bind $f.v <Button-3> { event generate .da.vars.lb.v <Button-2> -x %%x -y %%y }" );
-cmd( "bind $f.v <Shift-Button-2> { .da.vars.lb.v selection clear 0 end;.da.vars.lb.v selection set @%%x,%%y; set res [ selection get ]; set choice 16 }" );
-cmd( "bind $f.v <Shift-Button-3> { event generate .da.vars.lb.v <Shift-Button-2> -x %%x -y %%y }" );
+cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.lb.f.v <Return> }" );
+cmd( "bind $f.v <Button-2> { .da.vars.lb.f.v selection clear 0 end;.da.vars.lb.f.v selection set @%%x,%%y; set res [ selection get ]; set choice 30 } " );
+cmd( "bind $f.v <Button-3> { event generate .da.vars.lb.f.v <Button-2> -x %%x -y %%y }" );
+cmd( "bind $f.v <Shift-Button-2> { .da.vars.lb.f.v selection clear 0 end;.da.vars.lb.f.v selection set @%%x,%%y; set res [ selection get ]; set choice 16 }" );
+cmd( "bind $f.v <Shift-Button-3> { event generate .da.vars.lb.f.v <Shift-Button-2> -x %%x -y %%y }" );
 
-cmd( "set f .da.vars.ch" );
+// add time series in memory to listbox
+cmd( "set DaModElem [ list ]" );
+if ( actual_steps > 0 )
+{
+	insert_data_mem( root, &num_var );
+	
+	min_c = max( first_c, showInit ? 0 : 1 );
+	max_c = num_c;
+}
+
+cmd( "ttk::frame .da.vars.lb.bh" );
+cmd( "ttk::label .da.vars.lb.bh.nvar -text \"Series = %d\"", num_var  );
+cmd( "ttk::label .da.vars.lb.bh.pad -width 4" );
+cmd( "ttk::label .da.vars.lb.bh.ncas -text \"Cases = $numc\" " );
+cmd( "pack .da.vars.lb.bh.nvar .da.vars.lb.bh.pad .da.vars.lb.bh.ncas -side left" );
+cmd( "pack .da.vars.lb.bh" );
+
+
+// vertical toolbar
+cmd( "set f .da.vars.b" );
 cmd( "ttk::frame $f" );
+cmd( "ttk::label $f.pad1 -style boldSmall.TLabel" );
+cmd( "ttk::button $f.in -width [ expr $butWid - 3 ] -style Toolbutton -text \u25b6 -command { set choice 6 }" );
+cmd( "ttk::button $f.out -width [ expr $butWid - 3 ] -style Toolbutton -state disabled -text \u25c0 -command { set choice 7 }" );
+cmd( "ttk::button $f.sort -width [ expr $butWid - 3 ] -style Toolbutton -text \"Sort \u25b2\" -command { set choice 5 } -underline 0" );
+cmd( "ttk::button $f.sortdesc -width [ expr $butWid - 3 ] -style Toolbutton -text \"Sort \u25bc\" -command { set choice 38 } -underline 1" );
+cmd( "ttk::button $f.sortend -width [ expr $butWid - 3 ] -style Toolbutton -text \"Sort+\" -command { set choice 15 } -underline 2" );
+cmd( "ttk::button $f.unsort -width [ expr $butWid - 3 ] -style Toolbutton -text \"Unsort\" -command { set choice 14 } -underline 0" );
+cmd( "ttk::button $f.search -width [ expr $butWid - 3 ] -style Toolbutton -text Find... -command { set choice 39 } -underline 0" );
+cmd( "ttk::button $f.add -width [ expr $butWid - 3 ] -style Toolbutton -text \"Add...\" -command { set choice 24 } -underline 0" );
+cmd( "ttk::button $f.empty -width [ expr $butWid - 3 ] -style Toolbutton -text Clear -command { set choice 8 } -underline 0" );
+cmd( "ttk::label $f.pad2" );
+cmd( "pack $f.pad1 $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.search $f.add $f.empty $f.pad2 -padx 2 -pady 1 -fill y" );
+
+// selected series listbox
+cmd( "ttk::frame .da.vars.ch" );
+cmd( "ttk::label .da.vars.ch.th -text \"Series selected\" -style boldSmall.TLabel" );
+cmd( "pack .da.vars.ch.th" );
+
+cmd( "set f .da.vars.ch.f" );
+cmd( "ttk::frame $f" );
+cmd( "ttk::listbox $f.v -selectmode extended -yscroll \"$f.v_scroll set\" -dark $darkTheme" );
+cmd( "pack $f.v -side left -expand 1 -fill both" );
 cmd( "ttk::scrollbar $f.v_scroll -command \"$f.v yview\"" );
-cmd( "ttk::listbox $f.v -selectmode extended -width $daCwid -yscroll \"$f.v_scroll set\" -dark $darkTheme" );
-cmd( "pack $f.v $f.v_scroll -side left -fill y" );
+cmd( "pack $f.v_scroll -side left -fill y" );
+cmd( "pack $f -expand 1 -fill both" );
+
 cmd( "mouse_wheel $f.v" );
 cmd( "bind $f.v <BackSpace> { .da.vars.b.out invoke; break }" );
 cmd( "bind $f.v <Return> { .da.b.ts invoke; break }" );
-cmd( "bind $f.v <KeyPress-space> { set res [ .da.vars.ch.v get active ]; set choice 33; break }" );
+cmd( "bind $f.v <space> { set res [ .da.vars.ch.f.v get active ]; set choice 33; break }" );
 cmd( "bind $f.v <KeyRelease> { \
 		set kk %%K; \
 		if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } { \
@@ -302,18 +340,29 @@ cmd( "bind $f.v <KeyRelease> { \
 			} \
 		} \
 	}" );
-cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.ch.v <BackSpace> }" );
-cmd( "bind $f.v <Button-2> {.da.vars.ch.v selection clear 0 end;.da.vars.ch.v selection set @%%x,%%y; set res [selection get]; set choice 33}" );
-cmd( "bind $f.v <Button-3> { event generate .da.vars.ch.v <Button-2> -x %%x -y %%y }" );
+cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.ch.f.v <BackSpace> }" );
+cmd( "bind $f.v <Button-2> {.da.vars.ch.f.v selection clear 0 end;.da.vars.ch.f.v selection set @%%x,%%y; set res [selection get]; set choice 33}" );
+cmd( "bind $f.v <Button-3> { event generate .da.vars.ch.f.v <Button-2> -x %%x -y %%y }" );
 
-cmd( "set f .da.vars.pl" );
+cmd( "ttk::label .da.vars.ch.sel -text \"Series = [ .da.vars.ch.f.v size ]\"" );
+cmd( "pack .da.vars.ch.sel" );
+
+// plots listbox
+cmd( "ttk::frame .da.vars.pl" );
+cmd( "ttk::label .da.vars.pl.th -text Plots -style boldSmall.TLabel" );
+cmd( "pack .da.vars.pl.th" );
+
+cmd( "set f .da.vars.pl.f" );
 cmd( "ttk::frame $f" );
+cmd( "ttk::listbox $f.v -selectmode single -yscroll \"$f.v_scroll set\" -dark $darkTheme" );
+cmd( "pack $f.v -side left -expand 1 -fill both" );
 cmd( "ttk::scrollbar $f.v_scroll -command \"$f.v yview\"" );
-cmd( "ttk::listbox $f.v -width $daCwid -yscroll \"$f.v_scroll set\" -selectmode single -dark $darkTheme" );
-cmd( "pack $f.v $f.v_scroll -side left -fill y" );
+cmd( "pack $f.v_scroll -side left -fill y" );
+cmd( "pack $f -expand 1 -fill both" );
+
 cmd( "mouse_wheel $f.v" );
 cmd( "bind $f.v <Return> { set it [ selection get ]; set choice 3; break }" );
-cmd( "bind .da <Delete> { set n_it [ .da.vars.pl.v curselection ]; if { $n_it != \"\" } { set it [ selection get ]; set choice 20 }; break }" );
+cmd( "bind .da <Delete> { set n_it [ .da.vars.pl.f.v curselection ]; if { $n_it != \"\" } { set it [ selection get ]; set choice 20 }; break }" );
 cmd( "bind $f.v <KeyRelease> { \
 		set kk %%K; \
 		if { [ string length $kk ] == 1 && [ string is digit -strict $kk ] } { \
@@ -327,82 +376,59 @@ cmd( "bind $f.v <KeyRelease> { \
 			} \
 		} \
 	}" );
-cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.pl.v <Return> }" );
-cmd( "bind $f.v <Button-2> { .da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set @%%x,%%y; set it [ selection get ]; set n_it [ .da.vars.pl.v curselection ]; set choice 20 }" );
-cmd( "bind $f.v <Button-3> { event generate .da.vars.pl.v <Button-2> -x %%x -y %%y }" );
+cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.pl.f.v <Return> }" );
+cmd( "bind $f.v <Button-2> { .da.vars.pl.f.v selection clear 0 end; .da.vars.pl.f.v selection set @%%x,%%y; set it [ selection get ]; set n_it [ .da.vars.pl.f.v curselection ]; set choice 20 }" );
+cmd( "bind $f.v <Button-3> { event generate .da.vars.pl.f.v <Button-2> -x %%x -y %%y }" );
 
-cmd( "ttk::frame .da.vars.b" );
-cmd( "set f .da.vars.b" );
-cmd( "ttk::button $f.in -width [ expr $butWid - 3 ] -style Toolbutton -text \u25b6 -command { set choice 6 }" );
-cmd( "ttk::button $f.out -width [ expr $butWid - 3 ] -style Toolbutton -state disabled -text \u25c0 -command { set choice 7 }" );
-cmd( "ttk::button $f.sort -width [ expr $butWid - 3 ] -style Toolbutton -text \"Sort \u25b2\" -command { set choice 5 } -underline 0" );
-cmd( "ttk::button $f.sortdesc -width [ expr $butWid - 3 ] -style Toolbutton -text \"Sort \u25bc\" -command { set choice 38 } -underline 1" );
-cmd( "ttk::button $f.sortend -width [ expr $butWid - 3 ] -style Toolbutton -text \"Sort+\" -command { set choice 15 } -underline 2" );
-cmd( "ttk::button $f.unsort -width [ expr $butWid - 3 ] -style Toolbutton -text \"Unsort\" -command { set choice 14 } -underline 0" );
-cmd( "ttk::button $f.search -width [ expr $butWid - 3 ] -style Toolbutton -text Find... -command { set choice 39 } -underline 0" );
-cmd( "ttk::button $f.add -width [ expr $butWid - 3 ] -style Toolbutton -text \"Add...\" -command { set choice 24 } -underline 0" );
-cmd( "ttk::button $f.empty -width [ expr $butWid - 3 ] -style Toolbutton -text Clear -command { set choice 8 } -underline 0" );
-cmd( "pack $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.search $f.add $f.empty -padx 2 -pady 1 -fill y" );
+cmd( "ttk::label .da.vars.pl.plot -text \"Plots = [ .da.vars.pl.f.v size ]\"" );
+cmd( "pack .da.vars.pl.plot" );
 
-cmd( "pack .da.vars.lb .da.vars.b .da.vars.ch .da.vars.pl -side left -expand 1 -fill y" );
-cmd( "pack .da.vars -expand 1 -fill y" );
+// pack listboxes and vertical toolbar together
+cmd( "pack .da.vars.lb -side left -expand 1 -fill both" );
+cmd( "pack .da.vars.b -side left -anchor n" );
+cmd( "pack .da.vars.ch .da.vars.pl -side left -expand 1 -fill both" );
+cmd( "pack .da.vars -pady 5 -expand 1 -fill both" );
 
-// add time series in memory
-cmd( "set DaModElem [ list ]" );
-if ( actual_steps > 0 )
-{
-	insert_data_mem( root, &num_var );
-	
-	min_c = max( first_c, showInit ? 0 : 1 );
-	max_c = num_c;
-}
-
-cmd( "ttk::frame .da.com" );
-cmd( "ttk::label .da.com.nvar -text \"Series = %d\" -width [ expr ( $daCwid + 2 * int( $pad / 2 - 0.5 ) ) / 2 ] -padding 0", num_var  );
-cmd( "ttk::label .da.com.ncas -text \"Cases = $numc\" -width [ expr ( $daCwid + 2 * int( $pad / 2 - 0.5 ) ) / 2 ] -padding 0" );
-cmd( "ttk::label .da.com.pad -width [ expr $butWid - 3 ] -padding 0" );
-cmd( "ttk::label .da.com.selec -text \"Series = [ .da.vars.ch.v size ]\" -width [ expr $daCwid + $pad ] -padding 0" );
-cmd( "ttk::label .da.com.plot -text \"Plots = [ .da.vars.pl.v size ]\" -width [ expr $daCwid + $pad ] -padding 0" );
-cmd( "pack .da.com.nvar .da.com.ncas .da.com.pad .da.com.selec .da.com.plot -padx 0 -pady 0 -side left" );
-cmd( "pack .da.com -pady 5 -fill x" );
-
+// controls band
 cmd( "ttk::frame .da.f" );
-cmd( "ttk::frame .da.f.h" );
-cmd( "ttk::frame .da.f.h.v" );
 
-cmd( "ttk::frame .da.f.h.v.ft" );
+cmd( "ttk::frame .da.f.h" );				// first horizontal group of controls
+
+cmd( "ttk::frame .da.f.h.v" );				// left options block
+
+cmd( "ttk::frame .da.f.h.v.ft" );			// cases options
 
 cmd( "ttk::checkbutton .da.f.h.v.ft.auto -text \"Use all cases \" -variable auto_x -command { if { $auto_x } { .da.f.h.v.ft.to.mxc conf -state disabled; .da.f.h.v.ft.from.mnc conf -state disabled } { .da.f.h.v.ft.to.mxc conf -state normal; .da.f.h.v.ft.from.mnc conf -state normal } }" );
 
 cmd( "ttk::frame .da.f.h.v.ft.from" );
 cmd( "ttk::label .da.f.h.v.ft.from.minc -text \"From case\"" );
 cmd( "ttk::entry .da.f.h.v.ft.from.mnc -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= $numc } { set minc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $minc; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-cmd( "pack .da.f.h.v.ft.from.minc .da.f.h.v.ft.from.mnc -ipadx 2 -side left" );
+cmd( "pack .da.f.h.v.ft.from.minc .da.f.h.v.ft.from.mnc -ipadx 5 -side left" );
 
 cmd( "ttk::frame .da.f.h.v.ft.to" );
 cmd( "ttk::label .da.f.h.v.ft.to.maxc -text \"to case\"" );
 cmd( "ttk::entry .da.f.h.v.ft.to.mxc -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= $minc && $n <= $numc } { set maxc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $maxc; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-cmd( "pack  .da.f.h.v.ft.to.maxc .da.f.h.v.ft.to.mxc -ipadx 2 -side left" );
+cmd( "pack  .da.f.h.v.ft.to.maxc .da.f.h.v.ft.to.mxc -ipadx 5 -side left" );
 
-cmd( "pack .da.f.h.v.ft.auto .da.f.h.v.ft.from .da.f.h.v.ft.to -side left -ipadx 5" );
+cmd( "pack .da.f.h.v.ft.auto .da.f.h.v.ft.from .da.f.h.v.ft.to -side left -padx 5 -expand 1 -fill x" );
 
-cmd( "ttk::frame .da.f.h.v.sc" );
+cmd( "ttk::frame .da.f.h.v.sc" );			// scaling/limits options
 
 cmd( "ttk::checkbutton .da.f.h.v.sc.auto -text \"Y self-scaling\" -variable auto -command { if { $auto } { .da.f.h.v.sc.max.max conf -state disabled; .da.f.h.v.sc.min.min conf -state disabled } { .da.f.h.v.sc.max.max conf -state normal; .da.f.h.v.sc.min.min conf -state normal } }" );
 
 cmd( "ttk::frame .da.f.h.v.sc.min" );
 cmd( "ttk::label .da.f.h.v.sc.min.lmin -text \"Min. Y\"" );
 cmd( "ttk::entry .da.f.h.v.sc.min.min -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set miny %%P; return 1 } { %%W delete 0 end; %%W insert 0 $miny; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-cmd( "pack .da.f.h.v.sc.min.lmin .da.f.h.v.sc.min.min -ipadx 2 -side left" );
+cmd( "pack .da.f.h.v.sc.min.lmin .da.f.h.v.sc.min.min -ipadx 5 -side left" );
 
 cmd( "ttk::frame .da.f.h.v.sc.max" );
 cmd( "ttk::label .da.f.h.v.sc.max.lmax -text \"Max. Y\"" );
 cmd( "ttk::entry .da.f.h.v.sc.max.max -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set maxy %%P; return 1 } { %%W delete 0 end; %%W insert 0 $maxy; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-cmd( "pack .da.f.h.v.sc.max.lmax .da.f.h.v.sc.max.max -ipadx 2 -side left" );
+cmd( "pack .da.f.h.v.sc.max.lmax .da.f.h.v.sc.max.max -ipadx 5 -side left" );
 
-cmd( "pack .da.f.h.v.sc.auto .da.f.h.v.sc.min .da.f.h.v.sc.max -side left -ipadx 5" );
+cmd( "pack .da.f.h.v.sc.auto .da.f.h.v.sc.min .da.f.h.v.sc.max -side left -padx 5 -expand 1 -fill x" );
 
-cmd( "ttk::frame .da.f.h.v.y2" );
+cmd( "ttk::frame .da.f.h.v.y2" );			// log and 2nd y axis
 cmd( "ttk::checkbutton .da.f.h.v.y2.logs -text \"Series in logs\" -variable logs" );
 cmd( "ttk::label .da.f.h.v.y2.pad" );
 cmd( "ttk::checkbutton .da.f.h.v.y2.y2 -text \"Y2 axis\" -variable y2 -command { if { ! $y2 } { .da.f.h.v.y2.f.e conf -state disabled } { .da.f.h.v.y2.f.e conf -state normal } }" );
@@ -410,13 +436,14 @@ cmd( "ttk::checkbutton .da.f.h.v.y2.y2 -text \"Y2 axis\" -variable y2 -command {
 cmd( "ttk::frame .da.f.h.v.y2.f" );
 cmd( "ttk::label .da.f.h.v.y2.f.l -text \"First series in Y2 axis\"" );
 cmd( "ttk::entry .da.f.h.v.y2.f.e -width 4 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set num_y2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num_y2; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-cmd( "pack .da.f.h.v.y2.f.l .da.f.h.v.y2.f.e -ipadx 2 -side left" );
+cmd( "pack .da.f.h.v.y2.f.l .da.f.h.v.y2.f.e -ipadx 5 -side left" );
 
-cmd( "pack .da.f.h.v.y2.logs .da.f.h.v.y2.pad .da.f.h.v.y2.y2 .da.f.h.v.y2.f -side left -ipadx 5" );
+cmd( "pack .da.f.h.v.y2.logs .da.f.h.v.y2.pad .da.f.h.v.y2.y2 .da.f.h.v.y2.f -side left -padx 5 -expand 1 -fill x" );
 
-cmd( "pack .da.f.h.v.ft .da.f.h.v.sc .da.f.h.v.y2 -anchor w" );
+cmd( "pack .da.f.h.v.ft .da.f.h.v.sc .da.f.h.v.y2 -anchor w -expand 1 -fill x" );
 
-cmd( "ttk::frame .da.f.h.tc -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ] -padding [ list $frPadX $frPadY ]" );
+// right options block
+cmd( "ttk::frame .da.f.h.tc -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 cmd( "ttk::radiobutton .da.f.h.tc.time -text \"Time series\" -variable tc -value 0 -command { if { $xy == 0 } { .da.f.h.v.y2.y2 conf -state normal }; if { $xy == 1 } { .da.f.tit.lp.line config -state normal; set line_point $linemodeP } }" );
 cmd( "ttk::radiobutton .da.f.h.tc.cross -text \"Cross-section\" -variable tc -value 1 -command { .da.f.h.v.y2.y2 deselect; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; if { $xy == 1 } { set line_point 2;  .da.f.tit.lp.line config -state disabled } }" );
 cmd( "pack .da.f.h.tc.time .da.f.h.tc.cross -anchor w" );
@@ -426,43 +453,52 @@ cmd( "ttk::radiobutton .da.f.h.xy.seq -text \"Sequence\" -variable xy -value 0 -
 cmd( "ttk::radiobutton .da.f.h.xy.xy -text \"XY plot\" -variable xy -value 1 -command { .da.f.h.v.y2.y2 deselect; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; .da.f.tit.run.gnu conf -state normal; set gnu 1; .da.f.tit.run.watch conf -state disabled; if { $tc == 1 } { set line_point 2;  .da.f.tit.lp.line config -state disabled } }" );
 cmd( "pack .da.f.h.xy.seq .da.f.h.xy.xy -anchor w" );
 
-cmd( "pack .da.f.h.v .da.f.h.tc .da.f.h.xy -side left -padx 10" );
+// pack first horizontal group of controls
+cmd( "pack .da.f.h.v .da.f.h.tc .da.f.h.xy -padx 20 -side left -expand 1 -fill x" );
 
+// second horizontal group of controls
 cmd( "ttk::frame .da.f.tit" );
-cmd( "ttk::label .da.f.tit.l -text Title" );
-cmd( "ttk::entry .da.f.tit.e -textvariable tit -width 35 -justify center" );
 
-cmd( "ttk::frame .da.f.tit.chk" );
+cmd( "ttk::frame .da.f.tit.t" );				// title box
+cmd( "ttk::label .da.f.tit.t.l -text Title" );
+cmd( "ttk::entry .da.f.tit.t.e -textvariable tit -width 35 -justify center" );
+cmd( "pack .da.f.tit.t.l .da.f.tit.t.e -ipadx 5 -side left" );
+
+cmd( "ttk::frame .da.f.tit.chk" );			// golor/grid options
 
 cmd( "ttk::checkbutton .da.f.tit.chk.allblack -text \"No colors\" -variable allblack" );
 cmd( "ttk::checkbutton .da.f.tit.chk.grid -text \"Grids\" -variable grid" );
 cmd( "pack .da.f.tit.chk.allblack .da.f.tit.chk.grid -anchor w" );
 
-cmd( "ttk::frame .da.f.tit.lp -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-cmd( "ttk::radiobutton .da.f.tit.lp.line -text \"Lines\" -variable line_point -value 1" );
-cmd( "ttk::radiobutton .da.f.tit.lp.point -text \"Points\" -variable line_point -value 2" );
-cmd( "pack .da.f.tit.lp.line .da.f.tit.lp.point -padx 10 -anchor w" );
-
-cmd( "ttk::frame .da.f.tit.ps" );
-cmd( "ttk::label .da.f.tit.ps.l -text \"Point size\"" );
-cmd( "ttk::spinbox .da.f.tit.ps.e -width 4 -from 0.2 -to 9.8 -increment 0.2 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n >= 0.2 && $n <= 9.8 } { set point_size %%P; return 1 } { %%W delete 0 end; %%W insert 0 $point_size; return 0 } } -invalidcommand { bell } -justify center" );
-cmd( "pack .da.f.tit.ps.l .da.f.tit.ps.e" );
-
-cmd( "ttk::frame .da.f.tit.run" );			// field for adjusting 
+cmd( "ttk::frame .da.f.tit.run" );			// watch/gnuplot options 
 cmd( "ttk::checkbutton .da.f.tit.run.watch -text Watch -variable watch" );
 cmd( "ttk::checkbutton .da.f.tit.run.gnu -text Gnuplot -variable gnu -state disabled" );
 cmd( "pack .da.f.tit.run.watch .da.f.tit.run.gnu -anchor w" );
 
-cmd( "ttk::frame .da.f.tit.pr" );			// field for adjusting y-axis precision
+cmd( "ttk::frame .da.f.tit.pr" );			// precision positions
 cmd( "ttk::label .da.f.tit.pr.l -text \"Precision\"" );
 cmd( "ttk::spinbox .da.f.tit.pr.e -width 2 -from 0 -to 9 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 9 } { set pdigits %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pdigits; return 0 } } -invalidcommand { bell } -justify center" );
 cmd( "pack .da.f.tit.pr.l .da.f.tit.pr.e" );
 
-cmd( "pack .da.f.tit.l .da.f.tit.e .da.f.tit.chk .da.f.tit.run .da.f.tit.pr .da.f.tit.ps .da.f.tit.lp -side left -padx 5" );
+cmd( "ttk::frame .da.f.tit.ps" );			// point size
+cmd( "ttk::label .da.f.tit.ps.l -text \"Point size\"" );
+cmd( "ttk::spinbox .da.f.tit.ps.e -width 4 -from 0.2 -to 9.8 -increment 0.2 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n >= 0.2 && $n <= 9.8 } { set point_size %%P; return 1 } { %%W delete 0 end; %%W insert 0 $point_size; return 0 } } -invalidcommand { bell } -justify center" );
+cmd( "pack .da.f.tit.ps.l .da.f.tit.ps.e" );
 
+// line/points option
+cmd( "ttk::frame .da.f.tit.lp -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+cmd( "ttk::radiobutton .da.f.tit.lp.line -text \"Lines\" -variable line_point -value 1" );
+cmd( "ttk::radiobutton .da.f.tit.lp.point -text \"Points\" -variable line_point -value 2" );
+cmd( "pack .da.f.tit.lp.line .da.f.tit.lp.point -anchor w" );
+
+// pack second horizontal group of controls
+cmd( "pack .da.f.tit.t .da.f.tit.chk .da.f.tit.run .da.f.tit.pr .da.f.tit.ps .da.f.tit.lp -padx 10 -pady 5 -side left -expand 1 -fill x" );
+
+// pack controls band
 cmd( "pack .da.f.h .da.f.tit" );
-cmd( "pack .da.f" );
+cmd( "pack .da.f -padx 5 -pady 5" );
 
+// button bar
 cmd( "ttk::frame .da.b" );
 cmd( "ttk::button .da.b.ts -width $butWid -text Plot -command { set choice 1 } -underline 0" );
 cmd( "ttk::button .da.b.dump -width $butWid -text \"Save Plot\" -command { set fromPlot 0; set choice 11 } -underline 2" );
@@ -472,8 +508,8 @@ cmd( "ttk::button .da.b.st -width $butWid -text Statistics -command { set choice
 cmd( "ttk::button .da.b.fr -width $butWid -text Histogram -command { set choice 32 } -underline 0" );
 cmd( "ttk::button .da.b.lat -width $butWid -text Lattice -command { set choice 23 } -underline 0" );
 
-cmd( "pack .da.b.ts .da.b.dump .da.b.sv .da.b.sp .da.b.st .da.b.fr .da.b.lat  -padx $butPad -pady $butPad -side left -expand no -fill none" );
-cmd( "pack .da.b -side right -expand no -fill none" );
+cmd( "pack .da.b.ts .da.b.dump .da.b.sv .da.b.sp .da.b.st .da.b.fr .da.b.lat  -padx $butPad -pady $butPad -side left" );
+cmd( "pack .da.b -side right" );
 
 // top window shortcuts binding
 cmd( "bind .da <KeyPress-Escape> { set choice 2 }" );	// quit
@@ -502,7 +538,7 @@ cmd( "bind .da <Control-m> { set choice 47 }; bind .da <Control-M> { set choice 
 
 // grab focus when called from LSD Debugger
 Tcl_SetVar( inter, "running", running ? "1" : "0", 0 );
-cmd( "if $running { showtop .da overM 0 1 } { showtop .da overM 0 1 0 }" );
+cmd( "if $running { showtop .da overM } { showtop .da overM 1 1 0 }" );
 
 if ( num_var == 0 )
 {
@@ -516,7 +552,7 @@ else
 	if ( sim_num > 1 )
 	  cmd( "ttk::messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"Only series from last run are loaded\" -detail \"Click on button 'Add...' to load series from saved simulation results. You can use 'Ctrl' and 'Shift' keys to select multiple files at once. Avoid selecting the results file from last run, as data is already loaded and would be duplicated.\"" );  
 	
-	cmd( "selectinlist .da.vars.lb.v 0 1" );
+	cmd( "selectinlist .da.vars.lb.f.v 0 1" );
 }
 
 // main loop
@@ -526,8 +562,45 @@ while ( true )
 	// sort the list of available variables
 	cmd( "if [ info exists DaModElem ] { set DaModElem [ lsort -unique -dictionary $DaModElem ] }" );
 
-	// enable/disable the remove series button in the series toolbar
-	cmd( "if { [ .da.vars.ch.v size ] > 0 } { .da.vars.b.out conf -state normal } { .da.vars.b.out conf -state disabled }" );
+	// enable/disable the buttons in the series toolbar and buttons
+	cmd( "if { [ .da.vars.lb.f.v size ] > 0 } { \
+			.da.vars.b.in conf -state normal; \
+			.da.vars.b.sort conf -state normal; \
+			.da.vars.b.sortdesc conf -state normal; \
+			.da.vars.b.sortend conf -state normal; \
+			.da.vars.b.unsort conf -state normal; \
+			.da.vars.b.search conf -state normal \
+		} { \
+			.da.vars.b.in conf -state disabled; \
+			.da.vars.b.sort conf -state disabled; \
+			.da.vars.b.sortdesc conf -state disabled; \
+			.da.vars.b.sortend conf -state disabled; \
+			.da.vars.b.unsort conf -state disabled; \
+			.da.vars.b.search conf -state disabled \
+		}" );
+	cmd( "if { [ .da.vars.ch.f.v size ] > 0 } { \
+			.da.vars.b.out conf -state normal; \
+			.da.vars.b.empty conf -state normal; \
+			.da.f.tit.t.e conf -state normal; \
+			.da.b.ts conf -state normal; \
+			.da.b.dump conf -state normal; \
+			.da.b.sv conf -state normal; \
+			.da.b.sp conf -state normal; \
+			.da.b.st conf -state normal; \
+			.da.b.fr conf -state normal; \
+			.da.b.lat conf -state normal; \
+		} { \
+			.da.vars.b.out conf -state disabled; \
+			.da.vars.b.empty conf -state disabled; \
+			.da.f.tit.t.e conf -state disabled; \
+			.da.b.ts conf -state disabled; \
+			.da.b.dump conf -state disabled; \
+			.da.b.sv conf -state disabled; \
+			.da.b.sp conf -state disabled; \
+			.da.b.st conf -state disabled; \
+			.da.b.fr conf -state disabled; \
+			.da.b.lat conf -state disabled; \
+		}" );
 
 	// reset first second scale series if option is disabled
 	cmd( "if { ! $y2 } { set num_y2 2 }" );
@@ -539,28 +612,15 @@ while ( true )
 	cmd( "write_any .da.f.tit.pr.e $pdigits" ); 
 
 	// update on-screen statistics
-	cmd( ".da.com.nvar conf -text \"Series = %d\"", num_var );
-	cmd( ".da.com.ncas conf -text \"Cases = $numc\"" );
-	cmd( ".da.com.selec conf -text \"Series = [ .da.vars.ch.v size ]\"" );
-	cmd( ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"" );
+	cmd( ".da.vars.lb.bh.nvar conf -text \"Series = %d\"", num_var );
+	cmd( ".da.vars.lb.bh.ncas conf -text \"Cases = $numc\"" );
+	cmd( ".da.vars.ch.sel conf -text \"Series = [ .da.vars.ch.f.v size ]\"" );
+	cmd( ".da.vars.pl.plot conf -text \"Plots = [ .da.vars.pl.f.v size ]\"" );
 
 	// analysis command loop
 	*choice = 0;
 	while ( ! *choice )
-	{
-		try
-		{
-			Tcl_DoOneEvent( 0 );
-		}
-		catch ( bad_alloc& )		// raise memory problems
-		{
-			throw;
-		}
-		catch ( ... )				// ignore the rest
-		{
-			continue;
-		}
-	}   
+		Tcl_DoOneEvent( 0 );
 
 	// update linked variables with values in entry boxes
 	cmd( "if [ string is double [ .da.f.h.v.sc.min.min get ] ] { set miny [ .da.f.h.v.sc.min.min get ] }" );
@@ -571,7 +631,7 @@ while ( true )
 	cmd( "if [ string is integer [ .da.f.tit.ps.e get ] ] { set point_size [ .da.f.tit.ps.e get ] }" ); 
 	cmd( "if [ string is integer [ .da.f.tit.pr.e get ] ] { set pdigits [ .da.f.tit.pr.e get ] }" ); 
 	
-	cmd( "set nv [ .da.vars.ch.v size ]" );
+	cmd( "set nv [ .da.vars.ch.f.v size ]" );
 	
 	// check options consistency and fix if necessary
 	update_bounds( );
@@ -596,7 +656,7 @@ while ( true )
 	{
 		// Exit
 		case 2:
-			cmd( "if { [ .da.vars.pl.v size ] != 0 } { set answer [ ttk::messageBox -parent .da -type okcancel -title Confirmation -icon question -default ok -message \"Exit Analysis of Results?\" -detail \"All the plots and series created and not saved will be lost.\"] } { set answer ok }" );
+			cmd( "if { [ .da.vars.pl.f.v size ] != 0 } { set answer [ ttk::messageBox -parent .da -type okcancel -title Confirmation -icon question -default ok -message \"Exit Analysis of Results?\" -detail \"All the plots and series created and not saved will be lost.\"] } { set answer ok }" );
 			app = ( char * ) Tcl_GetVar( inter, "answer", 0 );
 
 			cmd( "if { [ string compare $answer ok ] == 0 } { } { set choice 0 }" );
@@ -791,7 +851,7 @@ while ( true )
 			cmd( "set choice $fromPlot" );
 			if ( ! *choice )
 			{
-				cmd( "set choice [ .da.vars.pl.v size ]" );
+				cmd( "set choice [ .da.vars.pl.f.v size ]" );
 				if ( *choice == 0 )		 // no plots to save
 				{
 					cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"No plot available\" -detail \"Place one or more series in the Series Selected listbox and select 'Plot' to produce a plot.\"" );
@@ -800,7 +860,7 @@ while ( true )
 
 				do
 				{
-					cmd( "set iti [ .da.vars.pl.v curselection ]" );
+					cmd( "set iti [ .da.vars.pl.f.v curselection ]" );
 					cmd( "if { [ string length $iti ] == 0 } { set choice 1 } { set choice 0 }" );
 
 					if ( *choice == 1 )
@@ -823,7 +883,7 @@ while ( true )
 
 				*choice = 0;
 				
-				cmd( "set it [ .da.vars.pl.v get $iti ]" );
+				cmd( "set it [ .da.vars.pl.f.v get $iti ]" );
 			}
 
 			
@@ -933,6 +993,7 @@ while ( true )
 
 		// Use right button of the mouse to select all series with a given label
 		case 30:
+			compvalue = 0;
 			Tcl_LinkVar( inter, "compvalue", ( char * ) &compvalue, TCL_LINK_DOUBLE );
 			cmd( "set a [ split $res ]" );
 			cmd( "set b [ lindex $a 0 ]" );
@@ -1142,18 +1203,18 @@ while ( true )
 				break;
 			}
 
-			cmd( "if { [ .da.vars.ch.v get 0 ] == \"\" } { set tit \"\" }" );
+			cmd( "if { [ .da.vars.ch.f.v get 0 ] == \"\" } { set tit \"\" }" );
 			cmd( "set choice $ssys" );
 			
 			if ( *choice == 2 )
 			{
-				cmd( "set tot [ .da.vars.lb.v get 0 end ]" );
+				cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
 				cmd( "foreach i $tot { \
 					if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
-						insert_series .da.vars.ch.v \"$i\" \
+						insert_series .da.vars.ch.f.v \"$i\" \
 					} \
 				}" );
-				cmd( "if { \"$tit\" == \"\" } { set tit [ .da.vars.ch.v get 0 ] }" );
+				cmd( "if { \"$tit\" == \"\" } { set tit [ .da.vars.ch.f.v get 0 ] }" );
 			}
 			 
 			if ( *choice == 1 )
@@ -1170,16 +1231,16 @@ while ( true )
 					
 				if ( *choice == -1 )
 				{
-					cmd( "set tot [ .da.vars.lb.v get 0 end ]" );
+					cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
 					cmd( "foreach i $tot { \
 							if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
-								insert_series .da.vars.ch.v \"$i\" \
+								insert_series .da.vars.ch.f.v \"$i\" \
 							} \
 						}" );
 				}
 				else
 				{
-					cmd( "set tot [ .da.vars.lb.v get 0 end ]" );
+					cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
 					cmd( "set vcell [ list ]" );
 					cmd( "for { set x 0 } { $x < $ntag } { incr x } { \
 							if { [ array exists vtag ] && [ info exists vtag($x) ] } { \
@@ -1199,7 +1260,7 @@ while ( true )
 											} \
 										}; \
 										if { $c == 1 } { \
-											insert_series .da.vars.ch.v \"$i\" \
+											insert_series .da.vars.ch.f.v \"$i\" \
 										} \
 									} \
 								}" );
@@ -1214,7 +1275,7 @@ while ( true )
 											} \
 										}; \
 										if { $c == 1 } { \
-											insert_series .da.vars.ch.v \"$i\" \
+											insert_series .da.vars.ch.f.v \"$i\" \
 										} \
 									} \
 								}" );
@@ -1229,7 +1290,7 @@ while ( true )
 											} \
 										}; \
 										if { $c == 1 } { \
-											insert_series .da.vars.ch.v \"$i\" \
+											insert_series .da.vars.ch.f.v \"$i\" \
 										} \
 									} \
 								}" );
@@ -1244,7 +1305,7 @@ while ( true )
 											} \
 										}; \
 										if { $c == 1 } { \
-											insert_series .da.vars.ch.v \"$i\" \
+											insert_series .da.vars.ch.f.v \"$i\" \
 										} \
 									} \
 								}" );
@@ -1259,7 +1320,7 @@ while ( true )
 											} \
 										}; \
 										if { $c == 1 } { \
-											insert_series .da.vars.ch.v \"$i\" \
+											insert_series .da.vars.ch.f.v \"$i\" \
 										} \
 									} \
 								}" );
@@ -1274,7 +1335,7 @@ while ( true )
 											} \
 										}; \
 										if { $c == 1 } { \
-											insert_series .da.vars.ch.v \"$i\" \
+											insert_series .da.vars.ch.f.v \"$i\" \
 										} \
 									} \
 								}" );
@@ -1289,7 +1350,7 @@ while ( true )
 				l = *choice;
 				cmd( "set choice $cond" );
 				p = *choice;
-				cmd( "set tot [ .da.vars.lb.v get 0 end ]" );
+				cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
 				cmd( "set choice [ llength $tot ]" );
 				j = *choice;
 
@@ -1344,7 +1405,7 @@ while ( true )
 							}
 							
 							if ( r == 1 )
-								cmd( "insert_series .da.vars.ch.v $res" );
+								cmd( "insert_series .da.vars.ch.f.v $res" );
 						}
 					}
 				}
@@ -1352,13 +1413,14 @@ while ( true )
 
 			cmd( "destroytop .da.a" );
 
-			cmd( "if { \"$tit\" == \"\" } { set tit [ .da.vars.ch.v get 0 ] }" );
+			cmd( "if { \"$tit\" == \"\" } { set tit [ .da.vars.ch.f.v get 0 ] }" );
 
 			break;
 
 
 		// Use right button of the mouse to remove series selected with different criteria
 		case 33:
+			compvalue = 0;
 			Tcl_LinkVar( inter, "compvalue", ( char * ) &compvalue, TCL_LINK_DOUBLE );
 			cmd( "set a [ split $res ]" );
 			cmd( "set b [ lindex $a 0 ]" );
@@ -1572,16 +1634,16 @@ while ( true )
 				break;
 			}
 
-			cmd( ".da.vars.ch.v selection clear 0 end" );
+			cmd( ".da.vars.ch.f.v selection clear 0 end" );
 			cmd( "set choice $ssys" );
 
 			if ( *choice == 2 )
 			{
-				 cmd( "set tot [ .da.vars.ch.v get 0 end ]" );
+				 cmd( "set tot [ .da.vars.ch.f.v get 0 end ]" );
 				 cmd( "set myc 0" );
 				 cmd( "foreach i $tot { \
 						if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
-							.da.vars.ch.v selection set $myc \
+							.da.vars.ch.f.v selection set $myc \
 						}; \
 						incr myc \
 					}" );
@@ -1601,18 +1663,18 @@ while ( true )
 					
 				if ( *choice == -1 )
 				{
-					cmd( "set tot [ .da.vars.ch.v get 0 end ]" );
+					cmd( "set tot [ .da.vars.ch.f.v get 0 end ]" );
 					cmd( "set myc 0" ); 
 					cmd( "foreach i $tot { \
 							if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
-								.da.vars.ch.v selection set $myc \
+								.da.vars.ch.f.v selection set $myc \
 							}; \
 							incr myc \
 						}" );
 				}
 				else
 				{
-					cmd( "set tot [ .da.vars.ch.v get 0 end ]" );
+					cmd( "set tot [ .da.vars.ch.f.v get 0 end ]" );
 					cmd( "set vcell [ list ]" );
 					cmd( "set choice $ntag" );
 					cmd( "for { set x 0 } { $x < $ntag } { incr x } { \
@@ -1634,7 +1696,7 @@ while ( true )
 											} \
 										}; \
 										if { $c == 1 } { \
-											.da.vars.ch.v selection set $myc \
+											.da.vars.ch.f.v selection set $myc \
 										} \
 									}; \
 									incr myc \
@@ -1651,7 +1713,7 @@ while ( true )
 											} \
 										}; \
 										if { $c == 1 } { \
-											.da.vars.ch.v selection set $myc \
+											.da.vars.ch.f.v selection set $myc \
 										} \
 									}; \
 									incr myc \
@@ -1668,7 +1730,7 @@ while ( true )
 											} \
 										}; \
 										if { $c == 1 } { \
-											.da.vars.ch.v selection set $myc \
+											.da.vars.ch.f.v selection set $myc \
 										} \
 									}; \
 									incr myc \
@@ -1685,7 +1747,7 @@ while ( true )
 											} \
 										}; \
 										if { $c == 1 } { \
-											.da.vars.ch.v selection set $myc \
+											.da.vars.ch.f.v selection set $myc \
 										} \
 									}; \
 									incr myc \
@@ -1702,7 +1764,7 @@ while ( true )
 											} \
 										}; \
 										if { $c == 1 } { \
-											.da.vars.ch.v selection set $myc \
+											.da.vars.ch.f.v selection set $myc \
 										} \
 									}; \
 									incr myc \
@@ -1719,7 +1781,7 @@ while ( true )
 											} \
 										}; \
 										if { $c == 1 } { \
-											.da.vars.ch.v selection set $myc \
+											.da.vars.ch.f.v selection set $myc \
 										} \
 									}; \
 									incr myc \
@@ -1735,7 +1797,7 @@ while ( true )
 				l = *choice;
 				cmd( "set choice $cond" );
 				p = *choice;
-				cmd( "set tot [ .da.vars.ch.v get 0 end ]" );
+				cmd( "set tot [ .da.vars.ch.f.v get 0 end ]" );
 				cmd( "set choice [ llength $tot ]" );
 				j = *choice;
 
@@ -1789,7 +1851,7 @@ while ( true )
 									break;
 							}
 							if ( r == 1 )
-								cmd( ".da.vars.ch.v selection set %d", i );
+								cmd( ".da.vars.ch.f.v selection set %d", i );
 						}
 					}
 				}
@@ -1799,13 +1861,13 @@ while ( true )
 
 			cmd( "if { ! $selOnly } { \
 					set steps 0; \
-					foreach i [ .da.vars.ch.v curselection ] { \
-						.da.vars.ch.v delete [ expr $i - $steps ]; \
+					foreach i [ .da.vars.ch.f.v curselection ] { \
+						.da.vars.ch.f.v delete [ expr $i - $steps ]; \
 						incr steps \
 					} \
 				} { \
-					if { [ llength [ .da.vars.ch.v curselection ] ] > 0 } { \
-						.da.vars.ch.v see [ lindex [ .da.vars.ch.v curselection ] 0 ] \
+					if { [ llength [ .da.vars.ch.f.v curselection ] ] > 0 } { \
+						.da.vars.ch.f.v see [ lindex [ .da.vars.ch.f.v curselection ] 0 ] \
 					} \
 				}" );
 
@@ -1822,7 +1884,7 @@ while ( true )
 				break;
 			
 			cmd( "scan $it %%d)%%s a b" );
-			cmd( "if [ winfo exists .da.f.new$a ] { destroytop .da.f.new$a; .da.vars.pl.v delete $n_it } { .da.vars.pl.v delete $n_it }" );
+			cmd( "if [ winfo exists .da.f.new$a ] { destroytop .da.f.new$a; .da.vars.pl.f.v delete $n_it } { .da.vars.pl.f.v delete $n_it }" );
 
 			break;
 
@@ -1851,76 +1913,76 @@ while ( true )
 
 		// Sort
 		case 5:
-			cmd( "set a [ .da.vars.lb.v get 0 end ]" );
+			cmd( "set a [ .da.vars.lb.f.v get 0 end ]" );
 			cmd( "set choice [ llength $a ]" );
 			if ( *choice == 0 )
 				break;
 			
 			cmd( "set b [ lsort -command comp_und $a ]" );		// use special sort procedure to keep underscores at the end
-			cmd( ".da.vars.lb.v delete 0 end" );
-			cmd( "foreach i $b { insert_series .da.vars.lb.v \"$i\" }" );
+			cmd( ".da.vars.lb.f.v delete 0 end" );
+			cmd( "foreach i $b { insert_series .da.vars.lb.f.v \"$i\" }" );
 			
-			cmd( "selectinlist .da.vars.lb.v 0 1" );
+			cmd( "selectinlist .da.vars.lb.f.v 0 1" );
 			
 			break;
 		  
 		  
 		// Sort ( descending order)
 		case 38:
-			cmd( "set a [ .da.vars.lb.v get 0 end ]" );
+			cmd( "set a [ .da.vars.lb.f.v get 0 end ]" );
 			cmd( "set choice [ llength $a ]" );
 			if ( *choice == 0 )
 				break;
 			
 			cmd( "set b [ lsort -decreasing -dictionary $a ]" );
-			cmd( ".da.vars.lb.v delete 0 end" );
-			cmd( "foreach i $b { insert_series .da.vars.lb.v \"$i\" }" );
+			cmd( ".da.vars.lb.f.v delete 0 end" );
+			cmd( "foreach i $b { insert_series .da.vars.lb.f.v \"$i\" }" );
 			
-			cmd( "selectinlist .da.vars.lb.v 0 1" );
+			cmd( "selectinlist .da.vars.lb.f.v 0 1" );
 			
 			break;
 		 
 
 		// sort the selection in selected series list in inverse order
 		case 34:
-			cmd( "set a [ .da.vars.ch.v curselection ]" );
+			cmd( "set a [ .da.vars.ch.f.v curselection ]" );
 			cmd( "set choice [ llength $a ]" );
 			if ( *choice == 0 )
 				break;
 
 			cmd( "set b { }" );
-			cmd( "foreach i $a { lappend b [ .da.vars.ch.v get $i ] }" );
+			cmd( "foreach i $a { lappend b [ .da.vars.ch.f.v get $i ] }" );
 			cmd( "set c [ lsort -decreasing -dictionary $b ]" );
 			cmd( "set d -1" );
 			cmd( "foreach i $a { \
-					.da.vars.ch.v delete $i; \
-					insert_series .da.vars.ch.v \"[ lindex $c [ incr d ] ]\" $i \
+					.da.vars.ch.f.v delete $i; \
+					insert_series .da.vars.ch.f.v \"[ lindex $c [ incr d ] ]\" $i \
 				}" );
 				
-			cmd( "selectinlist .da.vars.lb.v 0 1" );
+			cmd( "selectinlist .da.vars.lb.f.v 0 1" );
 			
 			break;
 
 		   
 		// Unsort
 		case 14:
-			cmd( "set a [ .da.vars.lb.v get 0 end ]" );
+			cmd( "set a [ .da.vars.lb.f.v get 0 end ]" );
 			cmd( "set choice [ llength $a ]" );
 			if ( *choice == 0 )
 				break;
 
-			cmd( ".da.vars.lb.v delete 0 end" );
+			cmd( ".da.vars.lb.f.v delete 0 end" );
 			for ( i = 0; i < num_var; ++i )
-				cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, vs[ i ].rank );
+				cmd( "insert_series .da.vars.lb.f.v \"%s %s (%d-%d) #%d\"", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, vs[ i ].rank );
 			
-			cmd( "selectinlist .da.vars.lb.v 0 1" );
+			cmd( "selectinlist .da.vars.lb.f.v 0 1" );
 			
 			break;
 
 		   
 		// Sort on End
 		case 15:
-			cmd( "set a [ .da.vars.lb.v get 0 end ]" );
+			cmd( "set a [ .da.vars.lb.f.v get 0 end ]" );
 			cmd( "set choice [ llength $a ]" );
 			if ( *choice == 0 )
 				break;
@@ -1931,21 +1993,21 @@ while ( true )
 				app_store[ i ] = vs[ i ];
 			
 			sort_on_end( app_store );
-			cmd( ".da.vars.lb.v delete 0 end" );
+			cmd( ".da.vars.lb.f.v delete 0 end" );
 			
 			for ( i = 0; i < num_var; ++i )
-				cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", app_store[ i ].label, app_store[ i ].tag, app_store[ i ].start, app_store[ i ].end, app_store[ i ].rank );
+				cmd( "insert_series .da.vars.lb.f.v \"%s %s (%d-%d) #%d\"", app_store[ i ].label, app_store[ i ].tag, app_store[ i ].start, app_store[ i ].end, app_store[ i ].rank );
 			
 			delete [ ] app_store;
 			
-			cmd( "selectinlist .da.vars.lb.v 0 1" );
+			cmd( "selectinlist .da.vars.lb.f.v 0 1" );
 				
 			break;
 
 		   
 		// Find first instance of series in the available series listbox
 		case 39:
-			cmd( "set a [ .da.vars.lb.v get 0 end ]" );
+			cmd( "set a [ .da.vars.lb.f.v get 0 end ]" );
 			cmd( "set choice [ llength $a ]" );
 			if ( *choice == 0 )
 				break;
@@ -1994,7 +2056,7 @@ while ( true )
 				if ( *choice == 0 )
 					break;
 				
-				cmd( "set a [ .da.vars.lb.v get 0 end ]" );
+				cmd( "set a [ .da.vars.lb.f.v get 0 end ]" );
 				
 				// first search exact name, then look for partial match
 				*choice = -1;
@@ -2038,7 +2100,7 @@ while ( true )
 				}
 				
 				if ( *choice != -1 )
-					cmd( "selectinlist .da.vars.lb.v $i 1" );
+					cmd( "selectinlist .da.vars.lb.f.v $i 1" );
 				else
 					cmd( "ttk::messageBox -parent .da -type ok -title \"Error\" -icon error -default ok -message \"Series not found\" -detail \"Check if the name was spelled correctly or use just part of the name. This command is case insensitive.\"" );
 			}
@@ -2052,10 +2114,10 @@ while ( true )
 			if ( *choice == 0 )
 				break;
 
-			cmd( "set a [ .da.vars.lb.v get 0 end ]; set i 0; set inst 0" );
+			cmd( "set a [ .da.vars.lb.f.v get 0 end ]; set i 0; set inst 0" );
 			cmd( "foreach b $a { set choice [ string first $srchTxt [ string tolower [ lindex [ split $b ] 0 ] ] ]; if { $choice != -1 } { set inst [ expr $inst + 1 ]; if { $inst > $srchInst } { set srchInst $inst; break } }; set i [ expr $i + 1 ] }" );
 			if ( *choice != -1 )
-				cmd( "selectinlist .da.vars.lb.v $i" );
+				cmd( "selectinlist .da.vars.lb.f.v $i" );
 			else
 				cmd( "ttk::messageBox -parent .da -type ok -title \"Error\" -icon error -default ok -message \"Series not found\" -detail \"No additional instance of series found.\"" );
 
@@ -2064,9 +2126,9 @@ while ( true )
 		  
 		// Insert the variables selected in the list of the variables to plot
 		case 6:
-			cmd( "set a [ .da.vars.lb.v curselection ]" );
-			cmd( "foreach i $a { insert_series .da.vars.ch.v \"[ .da.vars.lb.v get $i ]\" }" );
-			cmd( "set tit [ .da.vars.ch.v get 0 ]" );
+			cmd( "set a [ .da.vars.lb.f.v curselection ]" );
+			cmd( "foreach i $a { insert_series .da.vars.ch.f.v \"[ .da.vars.lb.f.v get $i ]\" }" );
+			cmd( "set tit [ .da.vars.ch.f.v get 0 ]" );
 
 			break;
 
@@ -2074,15 +2136,15 @@ while ( true )
 		// Remove the vars. selected from the variables to plot
 		case 7:
 			cmd( "set steps 0" );
-			cmd( "foreach i [ .da.vars.ch.v curselection ] { .da.vars.ch.v delete [ expr $i - $steps ]; incr steps }" );
-			cmd( "if { [ .da.vars.ch.v size ] == 0 } { set tit \"\" } { set tit [ .da.vars.ch.v get 0 ] }" );
+			cmd( "foreach i [ .da.vars.ch.f.v curselection ] { .da.vars.ch.f.v delete [ expr $i - $steps ]; incr steps }" );
+			cmd( "if { [ .da.vars.ch.f.v size ] == 0 } { set tit \"\" } { set tit [ .da.vars.ch.f.v get 0 ] }" );
 			
 			break;
 
 		  
 		// Remove all the variables from the list of vars to plot
 		case 8:
-			cmd( ".da.vars.ch.v delete 0 end" );
+			cmd( ".da.vars.ch.f.v delete 0 end" );
 			cmd( "set tit \"\"" );
 
 			break;
@@ -2170,17 +2232,17 @@ while ( true )
 			{
 				case 4:
 					create_series( choice, false, cur_var );
-					cmd( "selectinlist .da.vars.lb.v end" );
+					cmd( "selectinlist .da.vars.lb.f.v end" );
 					break;
 
 				case 5:
 					create_maverag( choice );
-					cmd( "selectinlist .da.vars.lb.v end" );
+					cmd( "selectinlist .da.vars.lb.f.v end" );
 					break;
 				
 				case 0:
 					add_unsaved( choice );
-					cmd( "selectinlist .da.vars.lb.v end" );
+					cmd( "selectinlist .da.vars.lb.f.v end" );
 					break;
 					
 				case 3:
@@ -2209,7 +2271,7 @@ while ( true )
 					cmd( "pack .da.s.i.r.m .da.s.i.r.z .da.s.i.r.x .da.s.i.r.i .da.s.i.r.n .da.s.i.r.a -anchor w" );
 					cmd( "pack .da.s.i.l .da.s.i.r" );
 
-					cmd( "set a [ .da.vars.ch.v get 0 ]" );
+					cmd( "set a [ .da.vars.ch.f.v get 0 ]" );
 					cmd( "set basename [ lindex [ split $a ] 0 ]" );
 					cmd( "set tailname \"_avg\"" );
 					cmd( "set vname $basename$tailname" );
@@ -2382,7 +2444,7 @@ while ( true )
 					var_names.clear( );
 					cur_var.clear( );
 					
-					cmd( "selectinlist .da.vars.lb.v 0" );
+					cmd( "selectinlist .da.vars.lb.f.v 0" );
 			}
 
 		break;
@@ -3346,7 +3408,7 @@ void plot_tseries( int *choice )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
 
-		cmd( "set res [ .da.vars.ch.v get %d ]", i );
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -3540,7 +3602,7 @@ void plot_cross( int *choice )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
 
-		cmd( "set res [ .da.vars.ch.v get %d ]", i );
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -3993,7 +4055,7 @@ void insert_labels_mem( object *r, int *num_v, char *lab )
 			}
 			
 			set_lab_tit( cv );
-			cmd( "insert_series .da.vars.lb.v \"%s %s%s (%d-%d) #%d\"", cv->label, tag_pref, cv->lab_tit, cv->start, cv->end, *num_v );
+			cmd( "insert_series .da.vars.lb.f.v \"%s %s%s (%d-%d) #%d\"", cv->label, tag_pref, cv->lab_tit, cv->start, cv->end, *num_v );
 			cmd( "if { [ lsearch -exact $DaModElem %s ] < 0 } { lappend DaModElem %s }", cv->label, cv->label );
 			
 			if ( cv->end > num_c )
@@ -4013,7 +4075,7 @@ void insert_labels_mem( object *r, int *num_v, char *lab )
 	if ( r->up == NULL && lab == NULL )
 		for ( cv = cemetery; cv != NULL; cv = cv->next )
 		{  
-			cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
+			cmd( "insert_series .da.vars.lb.f.v \"%s %s (%d-%d) #%d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
 			cmd( "if { [ lsearch -exact $DaModElem %s ] < 0 } { lappend DaModElem %s }", cv->label, cv->label );
 			
 			if ( cv->end > num_c )
@@ -4242,7 +4304,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	 
 		if ( keep_vars )
 		{
-			cmd( "insert_series .da.vars.lb.v \"%s\"", msg );
+			cmd( "insert_series .da.vars.lb.f.v \"%s\"", msg );
 			cmd( "lappend DaModElem %s", vs[ i ].label );
 		}
 	 
@@ -4341,7 +4403,7 @@ void statistics( int *choice )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
 		
-		cmd( "set res [ .da.vars.ch.v get %d ]", i );
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -4489,7 +4551,7 @@ void statistics_cross( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		
-		cmd( "set res [ .da.vars.ch.v get %d ]", i );
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -4757,7 +4819,7 @@ void plot_gnu( int *choice )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
 		
-		cmd( "set res [ .da.vars.ch.v get %d ]", i );
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -5189,7 +5251,7 @@ void plot_cs_xy( int *choice )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
 		
-		cmd( "set res [ .da.vars.ch.v get %d ]", i );
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -5579,7 +5641,7 @@ void plot_phase_diagram( int *choice )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
 		
-		cmd( "set res [ .da.vars.ch.v get %d ]", i );
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -6185,7 +6247,7 @@ void plot_lattice( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 
-		cmd( "set res [ .da.vars.ch.v get %d ]", i );
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -6426,7 +6488,7 @@ void histograms( int *choice )
 	str[ 0 ] = new char[ MAX_ELEM_LENGTH ];
 	tag[ 0 ] = new char[ MAX_ELEM_LENGTH ];
 
-	cmd( "set res [ .da.vars.ch.v get 0 ]" );
+	cmd( "set res [ .da.vars.ch.f.v get 0 ]" );
 	app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 	strcpy( msg, app );
 	sscanf( msg, "%s %s (%d-%d) #%d", str[ 0 ], tag[ 0 ], &start, &end, &id );
@@ -6687,7 +6749,7 @@ void histograms_cs( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		
-		cmd( "set res [ .da.vars.ch.v get %d ]", i );
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -6982,7 +7044,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 		cmd( "pack .da.s.i.r.m .da.s.i.r.z .da.s.i.r.x .da.s.i.r.i .da.s.i.r.n .da.s.i.r.f .da.s.i.r.t .da.s.i.r.c .da.s.i.r.s .da.s.i.r.ci -anchor w" );
 		cmd( "pack .da.s.i.l .da.s.i.r" );
 
-		cmd( "set a [ .da.vars.ch.v get 0 ]" );
+		cmd( "set a [ .da.vars.ch.f.v get 0 ]" );
 		cmd( "set basename [ lindex [ split $a ] 0 ]" );
 		cmd( "set tailname \"_avg\"" );
 		cmd( "set vname $basename$tailname" );
@@ -7113,7 +7175,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 			strcpy( msg, var_names[ i ].c_str( ) );
 		else
 		{
-			cmd( "set res [ .da.vars.ch.v get %d ]", i );
+			cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 			lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
 			strcpy( msg, lapp );
 		}
@@ -7302,7 +7364,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 			}
 		}
 		
-		cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank ); 
+		cmd( "insert_series .da.vars.lb.f.v \"%s %s (%d-%d) #%d\"", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank ); 
 
 		cmd( "lappend DaModElem %s", vs[ num_var ].label  );
 		
@@ -7454,7 +7516,7 @@ void create_maverag( int *choice )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
 
-		cmd( "set res [ .da.vars.ch.v get %d ]", i );
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, lapp );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -7530,7 +7592,7 @@ void create_maverag( int *choice )
 			}
 		}
 		
-		cmd( "insert_series .da.vars.lb.v \"%s %s (%d-%d) #%d\"", vs[ num_var + i ].label, vs[ num_var + i ].tag, vs[ num_var + i ].start, vs[ num_var + i ].end, num_var + i ); 
+		cmd( "insert_series .da.vars.lb.f.v \"%s %s (%d-%d) #%d\"", vs[ num_var + i ].label, vs[ num_var + i ].tag, vs[ num_var + i ].start, vs[ num_var + i ].end, num_var + i ); 
 
 		cmd( "lappend DaModElem %s", vs[ num_var + i ].label );
 	}
@@ -7673,7 +7735,7 @@ void save_datazip( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		
-		cmd( "set res [ .da.vars.ch.v get %d ]", i );
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		strcpy( msg, app );
 		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
@@ -8125,7 +8187,7 @@ void plog_series( int *choice )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
 		
-		cmd( "set res [ .da.vars.ch.v get %d ]", i );
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
 		sscanf( lapp, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 

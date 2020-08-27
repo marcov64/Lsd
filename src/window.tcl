@@ -527,7 +527,7 @@ proc sizetop { { w all } } {
 					set defGeom "+[ getx .da overM ]+[ gety .da overM ]"
 					wm geometry .da [ checkgeom $daGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .da [ winfo width .da ] [ winfo height .da ]
-					wm resizable .da 0 1
+					wm resizable .da 1 1
 				}
 
 				.deb {

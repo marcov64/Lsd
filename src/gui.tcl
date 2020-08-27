@@ -72,7 +72,6 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultFontSize $fontSizeMac
 	set deltaSize $deltaSizeMac
 	set bvstepM $bvstepMwin
-	set daCwid $daCwidMac
 	set corrX $corrXmac
 	set corrY $corrYmac
 
@@ -98,7 +97,6 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultFont $fontLinux
 	set DefaultFontSize $fontSizeLinux
 	set deltaSize $deltaSizeLinux
-	set daCwid $daCwidLinux
 	set corrX $corrXlinux
 	set corrY $corrYlinux
 	set butWid $butLinux
@@ -117,7 +115,6 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultFont $fontWindows
 	set DefaultFontSize $fontSizeWindows
 	set deltaSize $deltaSizeWindows
-	set daCwid $daCwidWindows
 	set corrX $corrXwindows
 	set corrY $corrYwindows
 	set butWid $butWindows
