@@ -458,11 +458,9 @@ SKIP_NEXT_OBJ
 ****************************************************/
 object *skip_next_obj( object *tr, int *count )
 {
-	int i;
 	object *cur;
 
-	for ( cur = tr, i = 0; cur != NULL; cur = cur->next, ++i );
-	*count = i;
+	for ( cur = tr, *count = 0; cur != NULL; cur = cur->next, *count += 1 );
 
 	return skip_next_obj( tr );
 }

@@ -67,8 +67,8 @@ set hsizeB 		400	; # browser horizontal size in pixels
 set vsizeB		620	; # browser vertical size in pixels
 set hsizeM 		600	; # model structure horizontal size in pixels
 set vsizeM		400	; # model structure vertical size in pixels
-set hsizeN 		350	; # objects numbers editor horizontal size in pixels
-set vsizeN		550	; # objects numbers editor vertical size in pixels
+set hsizeNmin	300	; # objects numbers editor minimum horizontal size in pixels
+set vsizeNmin	550	; # objects numbers editor minimum vertical size in pixels
 set hsizeImin	300	; # initial values editor minimum horizontal size in pixels
 set vsizeImin	200	; # initial values editor minimum vertical size in pixels
 set butPad 		10	; # padding area (X/Y) for buttons

@@ -3252,11 +3252,8 @@ case 19:
 	
 	*choice = 0;
 	set_obj_number( root, choice );
-	cmd( "destroytop .ini" );
 	
 	r = root->search( lab );
-
-	unsaved_change( true );							// signal unsaved change
 
 break;
 
@@ -3284,7 +3281,7 @@ case 21:
 
 	for ( n = r; n->up != NULL; n = n->up );
 
-	edit_data(n, choice, r->label);
+	edit_data( n, choice, r->label );
 
 	unsaved_change( true );			// signal unsaved change
 
@@ -3682,18 +3679,18 @@ case 33:
 	if ( r->up == NULL )
 	{
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Cannot create copies of 'Root' object\" -detail \"Consider, if necessary, to add a new parent object here: all the elements will be moved in the newly created object, which can be multiplied in many copies.\"" );
-		goto here_endinst;
+		goto endinst;
 	}
 
 	skip_next_obj( r, &num );
-	Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
-
+	cmd( "set num %d", num );
 	cmd( "set cfrom 1" );
 
 	cmd( "set T .numinst" );
 	cmd( "newtop $T \"Number of Instances\" { set choice 2 }" );
 
 	cmd( "ttk::frame $T.l" );
+	
 	cmd( "ttk::label $T.l.l1 -text \"Object:\"" );
 	cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
 	cmd( "pack $T.l.l1 $T.l.l2 -side left" );
@@ -3702,74 +3699,72 @@ case 33:
 
 	cmd( "ttk::frame $T.e.e" );
 	cmd( "ttk::label $T.e.e.l -text \"Number of instances\"" );
-	cmd( "ttk::spinbox $T.e.e.ent -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( "pack $T.e.e.l $T.e.e.ent -side left -padx 2" );
+	cmd( "ttk::spinbox $T.e.e.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "pack $T.e.e.l $T.e.e.e -side left -padx 2" );
 
 	cmd( "ttk::label $T.e.l -text \"(all groups of this object will be affected)\"" );
 	cmd( "pack $T.e.e $T.e.l" );
 
 	cmd( "ttk::frame $T.cp" );
 	cmd( "ttk::label $T.cp.l -text \"Copy from instance\"" );
-	cmd( "ttk::spinbox $T.cp.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( "ttk::button $T.cp.compute -width 7 -text Compute -command { set choice 3 }" );
+	cmd( "ttk::spinbox $T.cp.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invalidcommand { bell } -justify center", num, num );
+	cmd( "ttk::button $T.cp.compute -width $butWid -text Compute -command { set choice 3; .numinst.cp.e selection range 0 end; focus .numinst.cp.e }" );
 	cmd( "pack $T.cp.l $T.cp.e $T.cp.compute -side left -padx 2" );
 
 	cmd( "pack $T.l $T.e $T.cp -pady 5 -padx 5" );
 
 	cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menudata_objn.html#this } { set choice 2 }" );
-	cmd( "bind $T.e.e.ent <KeyPress-Return> { set choice 1 }" );
+	cmd( "bind $T.e.e.e <Return> { set choice 1 }" );
 
 	cmd( "showtop $T" );
 
 	i = 1;
-	*choice = 0;
 
-	here_objec_num:
+	objec_num:
 
-	cmd( "write_any .numinst.e.e.ent $num" ); 
-	cmd( "write_any .numinst.cp.e $cfrom" ); 
+	cmd( "write_any $T.e.e.e $num" ); 
+	cmd( "write_any $T.cp.e $cfrom" ); 
 
 	if ( i == 1 )
 	{
-		cmd( ".numinst.e.e.ent selection range 0 end" );
-		cmd( "focus .numinst.e.e.ent" );
+		cmd( "$T.e.e.e selection range 0 end" );
+		cmd( "focus $T.e.e.e" );
 		i = 0;
 	}
 
+	*choice = 0;
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set num [ .numinst.e.e.ent get ]" ); 
-	cmd( "set cfrom [ .numinst.cp.e get ]" ); 
+	cmd( "set num [ $T.e.e.e get ]" ); 
+	cmd( "set cfrom [ $T.cp.e get ]" ); 
 
 	if ( *choice == 3 )
 	{
-		*choice = 0;
-		k = compute_copyfrom( r, choice );
+		k = compute_copyfrom( r, choice, ".numinst" );
 		if ( k > 0 )
 			cmd( "set cfrom %d", k );
-		*choice = 0;
-		goto here_objec_num;
+
+		goto objec_num;
 	} 
 
-	cmd( "destroytop .numinst" );
-	Tcl_UnlinkVar( inter, "num" );
+	cmd( "destroytop $T" );
 
 	if ( *choice == 2 )
-		goto here_endinst;
+		goto endinst;
 
-	cmd( "set choice $cfrom" );
-	k = *choice;
-	*choice = 0;
-
+	k = get_int( "cfrom", &k );
+	num = get_int( "num", &num );
 	for ( i = 0, cur = r->up; cur != NULL; ++i, cur = cur->up ); 
+
 	chg_obj_num( &r, num, i, NULL, choice, k );
 
-	unsaved_change( true );		// signal unsaved change
+	unsaved_change( true );				// signal unsaved change
 	redrawRoot = redrawStruc = true;	// force browser/structure redraw
 
-	here_endinst:
-	if ( cur2 != NULL )			// restore original current object
+	endinst:
+	
+	if ( cur2 != NULL )					// restore original current object
 		r = cur2;
 
 break;

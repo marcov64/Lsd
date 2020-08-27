@@ -290,7 +290,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	if ( *choice == 9 )
 	{
 		// search instance from
-		i = compute_copyfrom( original, choice );
+		i = compute_copyfrom( original, choice, ".sa" );
 		cmd( "set cases_from %d", i );
 		goto here_setall;
 	}
@@ -298,7 +298,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	if ( *choice == 10 )
 	{
 		// search instance to
-		i = compute_copyfrom( original, choice );
+		i = compute_copyfrom( original, choice, ".sa" );
 		cmd( "set cases_to %d", i );
 		goto here_setall;
 	}

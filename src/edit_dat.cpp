@@ -60,7 +60,7 @@ EDIT_DATA
 ****************************************************/
 void edit_data( object *r, int *choice, char *lab )
 {
-	char *l , ch[ 2 * MAX_ELEM_LENGTH ], ch1[ MAX_ELEM_LENGTH ];
+	char ch[ 2 * MAX_ELEM_LENGTH ], ch1[ MAX_ELEM_LENGTH ];
 	int i, counter, lag;
 	object *first;
 
@@ -149,20 +149,20 @@ void edit_data( object *r, int *choice, char *lab )
 
 	cmd( "pack .inid.t -expand 1 -fill both" );
 	
-	cmd( "set msg \"\"" );
-	cmd( "ttk::label .inid.msg -width 45 -textvariable msg" );
+	cmd( "set inidMsg \"\"" );
+	cmd( "ttk::label .inid.msg -width 45 -textvariable inidMsg" );
 	cmd( "ttk::label .inid.err -text \"\"" );
 	cmd( "pack .inid.msg .inid.err -padx 5 -pady 5" );
 
 	cmd( "donehelp .inid b { set choice 1 } { LsdHelp menudata_init.html }" );
 
-	cmd( "bind .inid <KeyPress-Escape> { set choice 1 }" );
+	cmd( "bind .inid <Escape> { set choice 1 }" );
 	cmd( "bind .inid <F1> { LsdHelp menudata_init.html }" );
 
 	// show overflow warning just once per configuration but always indicate
 	if ( colOvflw )
 	{
-		cmd( ".ini.err conf -text \"OBJECTS NOT SHOWN! (> %d)\" -style hl.TLabel", MAX_COLS );
+		cmd( ".inid.err conf -text \"OBJECTS NOT SHOWN! (> %d)\" -style hl.TLabel", MAX_COLS );
 		if ( ! iniShowOnce )
 		{
 			cmd( "update" );
@@ -176,11 +176,9 @@ void edit_data( object *r, int *choice, char *lab )
 	cmd( "pack propagate .inid 0" );
 	cmd( "set iniDone 1" );
 
-	noredraw:
+	editloop:
 	
 	cmd( "update" );
-	cmd( "if [ info exists lastEditPosX ] { $g.can xview moveto $lastEditPosX; unset lastEditPosX }" );
-	cmd( "if [ info exists lastEditPosY ] { $g.can yview moveto $lastEditPosY; unset lastEditPosY }" );
 	cmd( "if { [ info exists lastFocus ] && $lastFocus != \"\" && [ winfo exists $lastFocus ] } { focus $lastFocus; $lastFocus selection range 0 end; unset lastFocus }" );
 
 	// editor main command loop
@@ -188,21 +186,18 @@ void edit_data( object *r, int *choice, char *lab )
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set lastEditPosX [ lindex [ $g.can xview ] 0 ]" );
-	cmd( "set lastEditPosY [ lindex [ $g.can yview ] 0 ]" );
-		
-	// clean up
 	save_cells( r, lab );
 
 	if ( *choice == 2 )
 	{	
-		l = ( char * ) Tcl_GetVar( inter, "var-S-A", 0 );
-		strcpy( ch, l );
-		
-		set_all( choice, first, ch, lag );
-		show_cells( r, lab );
+		if ( Tcl_GetVar( inter, "var_name", 0 ) != NULL )
+		{
+			strcpy( ch, ( char * ) Tcl_GetVar( inter, "var_name", 0 ) );
+			set_all( choice, first, ch, lag );
+			show_cells( r, lab );
+		}
 
-		goto noredraw;
+		goto editloop;
 	}
 
 	cmd( "destroytop .inid" );
@@ -325,12 +320,12 @@ void link_cells( object *r, char *lab )
 			cmd( "ttk::label $w.tit_t%s -text %s", cv1->label, ch1 );
 			cmd( "grid $w.tit_t%s -row %d -sticky w -padx { 2 5 }", cv1->label, k );
 			cmd( "mouse_wheel $w.tit_t%s", cv1->label );
-			cmd( "bind $w.tit_t%s <Enter> { set msg \"Parameter '%s' in '%s'\" }", cv1->label, cv1->label, cur1->label );
-			cmd( "bind $w.tit_t%s <Leave> { set msg \"\" }", cv1->label );
+			cmd( "bind $w.tit_t%s <Enter> { set inidMsg \"Parameter '%s' in '%s'\" }", cv1->label, cv1->label, cur1->label );
+			cmd( "bind $w.tit_t%s <Leave> { set inidMsg \"\" }", cv1->label );
 			cmd( "ttk::label $w.typ_t%s -text (P) -style hl.TLabel", cv1->label );
 			cmd( "grid $w.typ_t%s -row %d -column 1 -padx 1", cv1->label, k );
 			cmd( "mouse_wheel $w.typ_t%s", cv1->label );
-			cmd( "ttk::button $w.t%s -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s; set lastFocus [ focus -displayof $w ] }", cv1->label, cv1->label, j, cv1->label );
+			cmd( "ttk::button $w.t%s -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set choice 2; set var_name %s; set lag %d; set position $w.tit_t%s; set lastFocus [ focus -displayof $w ] }", cv1->label, cv1->label, j, cv1->label );
 			cmd( "grid $w.t%s -row %d -column 2", cv1->label, k );
 			cmd( "mouse_wheel $w.t%s", cv1->label );
 		}
@@ -343,13 +338,13 @@ void link_cells( object *r, char *lab )
 				
 				cmd( "ttk::label $w.tit_t%s_%d -text %s", cv1->label, j, ch1 );
 				cmd( "grid $w.tit_t%s_%d -row %d -sticky w -padx { 2 5 }", cv1->label, j, k );
-				cmd( "bind $w.tit_t%s_%d <Enter> { set msg \"Variable '%s' (lag %d) in '%s'\" }", cv1->label, j, cv1->label, j + 1, cur1->label );
-				cmd( "bind $w.tit_t%s_%d <Leave> { set msg \"\" }", cv1->label, j );
+				cmd( "bind $w.tit_t%s_%d <Enter> { set inidMsg \"Variable '%s' (lag %d) in '%s'\" }", cv1->label, j, cv1->label, j + 1, cur1->label );
+				cmd( "bind $w.tit_t%s_%d <Leave> { set inidMsg \"\" }", cv1->label, j );
 				cmd( "mouse_wheel $w.tit_t%s_%d", cv1->label, j );
 				cmd( "ttk::label $w.typ_t%s_%d -text (V_%d) -style hl.TLabel", cv1->label, j, j + 1 );
 				cmd( "grid $w.typ_t%s_%d -row %d -column 1 -padx 1", cv1->label, j, k );
 				cmd( "mouse_wheel $w.typ_t%s_%d", cv1->label, j );
-				cmd( "ttk::button $w.t%s_%d -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s_%d; set lastFocus [ focus -displayof $w ] }", cv1->label, j, cv1->label, j, cv1->label, j );
+				cmd( "ttk::button $w.t%s_%d -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set choice 2; set var_name %s; set lag %d; set position $w.tit_t%s_%d; set lastFocus [ focus -displayof $w ] }", cv1->label, j, cv1->label, j, cv1->label, j );
 				cmd( "grid $w.t%s_%d -row %d -column 2", cv1->label, j, k );
 				cmd( "mouse_wheel $w.t%s_%d", cv1->label, j );
 			}
@@ -390,13 +385,12 @@ void link_cells( object *r, char *lab )
 				
 				cmd( "bind $w.c%d_v%sp <FocusIn> { \
 						if { $tag_%d != \"\" } { \
-							set t \" (instance $tag_%d)\" \
+							set inidMsg \"Parameter '%s' (instance $tag_%d)\" \
 						} { \
-							set t \"\" \
-						}; \
-						set msg \"Parameter '%s'$t\" \
-					}", i, cv->label, i, i, cv->label );
-				cmd( "bind $w.c%d_v%sp <FocusOut> { set msg \"\" }", i, cv->label );
+							set inidMsg \"Parameter '%s'\" \
+						} \
+					}", i, cv->label, i, cv->label, i, cv->label );
+				cmd( "bind $w.c%d_v%sp <FocusOut> { set inidMsg \"\" }", i, cv->label );
 				sprintf( previous, "$w.c%d_v%sp", i, cv->label );
 				
 				if ( ! lastFocus )
@@ -437,13 +431,12 @@ void link_cells( object *r, char *lab )
 					
 					cmd( "bind $w.c%d_v%s_%d <FocusIn> { \
 							if { $tag_%d != \"\" } { \
-								set t \" (instance $tag_%d)\" \
+								set inidMsg \"Variable '%s' (lag %d) (instance $tag_%d)\" \
 							} { \
-								set t \"\" \
-							}; \
-							set msg \"Variable '%s' (lag %d)$t\" \
-						}", i, cv->label, j, i, i, cv->label, j + 1 );
-					cmd( "bind $w.c%d_v%s_%d <FocusOut> { set msg \"\" }", i, cv->label, j );
+								set inidMsg \"Variable '%s' (lag %d)\" \
+							} \
+						}", i, cv->label, j, i, cv->label, j + 1, i, cv->label, j + 1 );
+					cmd( "bind $w.c%d_v%s_%d <FocusOut> { set inidMsg \"\" }", i, cv->label, j );
 					sprintf( previous, "$w.c%d_v%s_%d", i, cv->label, j );
 					
 					if ( ! lastFocus )
@@ -529,10 +522,10 @@ void save_cells( object *r, char *lab )
 	for ( i = 1; i <= MAX_COLS && cur != NULL; cur = cur->hyper_next( lab ), ++i )
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			if ( cv->param == 1 )
-				cmd( "set p%s_%d [ $w.c%d_v%sp get ]", cv->label, i, i, cv->label );
+				cmd( "catch \"set p%s_%d [ $w.c%d_v%sp get ]\"", cv->label, i, i, cv->label );
 			else
 				for ( j = 0; j < cv->num_lag; ++j )
-					cmd( "set v%s_%d_%d [ $w.c%d_v%s_%d get ]", cv->label, i, j, i, cv->label, j );
+					cmd( "catch \"set v%s_%d_%d [ $w.c%d_v%s_%d get ]\"", cv->label, i, j, i, cv->label, j );
 }
 
 

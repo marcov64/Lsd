@@ -974,7 +974,7 @@ while ( choice == 0 )
 		// change the object number of instances (click on level / object instance)
 		case 17:
 			if ( r->up != NULL )
-				entry_new_objnum( r, &choice, "" );
+				entry_new_objnum( r, "", &choice );
 
 			choice = 0;
 			break;
@@ -1687,59 +1687,59 @@ void show_neighbors( object *r, bool update )
 	if ( r->node == NULL )
 		return;
 
-	cmd( "set n .deb.net" );
-	cmd( "set existNet [ winfo exists $n ]" );
+	cmd( "set N .deb.net" );
+	cmd( "set existNet [ winfo exists $N ]" );
 	if ( ! strcmp( Tcl_GetVar( inter, "existNet", 0 ), "0" ) )
 	{
-		cmd( "newtop $n \"Network\" { destroytop .deb.net } .deb" );
+		cmd( "newtop $N \"Network\" { destroytop .deb.net } .deb" );
 		
-		cmd( "ttk::frame $n.l1" );
-		cmd( "ttk::label $n.l1.l -text \"Node ID and name\"" );
-		cmd( "ttk::frame $n.l1.n" );
-		cmd( "ttk::label $n.l1.n.id -style hl.TLabel" );
-		cmd( "ttk::label $n.l1.n.sep -text |" );
-		cmd( "ttk::label $n.l1.n.name -style hl.TLabel" );
-		cmd( "pack $n.l1.n.id $n.l1.n.sep $n.l1.n.name -side left" );
-		cmd( "pack $n.l1.l $n.l1.n" );
+		cmd( "ttk::frame $N.l1" );
+		cmd( "ttk::label $N.l1.l -text \"Node ID and name\"" );
+		cmd( "ttk::frame $N.l1.n" );
+		cmd( "ttk::label $N.l1.n.id -style hl.TLabel" );
+		cmd( "ttk::label $N.l1.n.sep -text |" );
+		cmd( "ttk::label $N.l1.n.name -style hl.TLabel" );
+		cmd( "pack $N.l1.n.id $N.l1.n.sep $N.l1.n.name -side left" );
+		cmd( "pack $N.l1.l $N.l1.n" );
 		
-		cmd( "ttk::frame $n.l2" );
-		cmd( "ttk::label $n.l2.l -text \"Num. links out:\"" );
-		cmd( "ttk::label $n.l2.n -style hl.TLabel" );
-		cmd( "pack $n.l2.l $n.l2.n -side left" );
+		cmd( "ttk::frame $N.l2" );
+		cmd( "ttk::label $N.l2.l -text \"Num. links out:\"" );
+		cmd( "ttk::label $N.l2.n -style hl.TLabel" );
+		cmd( "pack $N.l2.l $N.l2.n -side left" );
 		
-		cmd( "ttk::frame $n.l3" );
-		cmd( "ttk::label $n.l3.l -text \"Outgoing links\"" );
+		cmd( "ttk::frame $N.l3" );
+		cmd( "ttk::label $N.l3.l -text \"Outgoing links\"" );
 		
-		cmd( "ttk::frame $n.l3.h" );
-		cmd( "ttk::label $n.l3.h.id -width 6 -text \"Dest. ID\"" );
-		cmd( "ttk::label $n.l3.h.pad -width 2" );
-		cmd( "ttk::label $n.l3.h.wght -width 12 -style hl.TLabel -text \"(Weight) \"" );
-		cmd( "pack $n.l3.h.id $n.l3.h.pad $n.l3.h.wght -side left" );
+		cmd( "ttk::frame $N.l3.h" );
+		cmd( "ttk::label $N.l3.h.id -width 6 -text \"Dest. ID\"" );
+		cmd( "ttk::label $N.l3.h.pad -width 2" );
+		cmd( "ttk::label $N.l3.h.wght -width 12 -style hl.TLabel -text \"(Weight) \"" );
+		cmd( "pack $N.l3.h.id $N.l3.h.pad $N.l3.h.wght -side left" );
 
-		cmd( "pack $n.l3.l $n.l3.h" );
+		cmd( "pack $N.l3.l $N.l3.h" );
 
-		cmd( "pack $n.l1 $n.l2 $n.l3 -pady 2" );
+		cmd( "pack $N.l1 $N.l2 $N.l3 -pady 2" );
 
-		cmd( "ttk::frame $n.n" );
-		cmd( "ttk::scrollbar $n.n.yscroll -command \".deb.net.n.t yview\"" );
-		cmd( "pack $n.n.yscroll -side right -fill y" );
-		cmd( "ttk::text $n.n.t -width 18 -height 19 -yscrollcommand \"$n.n.yscroll set\" -wrap none -entry 0 -dark $darkTheme" );
-		cmd( "mouse_wheel $n.n.t" );
-		cmd( "pack $n.n.t -expand yes -fill both" );
-		cmd( "pack $n.n -expand yes -fill both" );
+		cmd( "ttk::frame $N.n" );
+		cmd( "ttk::scrollbar $N.n.yscroll -command \".deb.net.n.t yview\"" );
+		cmd( "pack $N.n.yscroll -side right -fill y" );
+		cmd( "ttk::text $N.n.t -width 18 -height 19 -yscrollcommand \"$N.n.yscroll set\" -wrap none -entry 0 -dark $darkTheme" );
+		cmd( "mouse_wheel $N.n.t" );
+		cmd( "pack $N.n.t -expand yes -fill both" );
+		cmd( "pack $N.n -expand yes -fill both" );
 		
-		cmd( "ttk::label $n.l4 -text \"(double-click ID to\nchange to node)\"" );
-		cmd( "pack $n.l4 -pady 5" );
+		cmd( "ttk::label $N.l4 -text \"(double-click ID to\nchange to node)\"" );
+		cmd( "pack $N.l4 -pady 5" );
 		
-		cmd( "showtop $n topleftW 0 1 0" );
+		cmd( "showtop $N topleftW 0 1 0" );
 		
-		cmd( "if { ! [ winfo exists .deb.val ] } { align $n .deb } { align $n .deb.val }" );
+		cmd( "if { ! [ winfo exists .deb.val ] } { align $N .deb } { align $N .deb.val }" );
 	}
 	else
 		if ( update )
 		{
-			cmd( "$n.n.t configure -state normal" );
-			cmd( "$n.n.t delete 1.0 end" );
+			cmd( "$N.n.t configure -state normal" );
+			cmd( "$N.n.t delete 1.0 end" );
 		}
 		else
 		{
@@ -1747,35 +1747,35 @@ void show_neighbors( object *r, bool update )
 			return;
 		}
 	
-	cmd( "$n.l1.n.id configure -text \"%ld\"", r->node->id );
-	cmd( "$n.l1.n.name configure -text \"%s\"", r->node->name == NULL ? "" : r->node->name );
-	cmd( "$n.l2.n configure -text %ld", r->node->nLinks );
+	cmd( "$N.l1.n.id configure -text \"%ld\"", r->node->id );
+	cmd( "$N.l1.n.name configure -text \"%s\"", r->node->name == NULL ? "" : r->node->name );
+	cmd( "$N.l2.n configure -text %ld", r->node->nLinks );
 	
 	Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
 	
 	for ( i = 1, curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next, ++i )
 	{
-		cmd( "ttk::frame $n.n.t.n$i" );
-		cmd( "ttk::label $n.n.t.n$i.nodeto -width 6 -text %ld", curLnk->ptrTo->node->id );
-		cmd( "ttk::label $n.n.t.n$i.pad -width 2" );
+		cmd( "ttk::frame $N.n.t.n$i" );
+		cmd( "ttk::label $N.n.t.n$i.nodeto -width 6 -text %ld", curLnk->ptrTo->node->id );
+		cmd( "ttk::label $N.n.t.n$i.pad -width 2" );
 		if ( curLnk->weight != 0 )
-			cmd( "ttk::label $n.n.t.n$i.weight -width 12 -style hl.TLabel -text %g", curLnk->weight );
+			cmd( "ttk::label $N.n.t.n$i.weight -width 12 -style hl.TLabel -text %g", curLnk->weight );
 		else
-			cmd( "ttk::label $n.n.t.n$i.weight -width 12" );
+			cmd( "ttk::label $N.n.t.n$i.weight -width 12" );
 		
-		cmd( "pack $n.n.t.n$i.nodeto $n.n.t.n$i.pad $n.n.t.n$i.weight -side left" );
+		cmd( "pack $N.n.t.n$i.nodeto $N.n.t.n$i.pad $N.n.t.n$i.weight -side left" );
 		
-		cmd( "bind $n.n.t.n$i.nodeto <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, r->label );
+		cmd( "bind $N.n.t.n$i.nodeto <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, r->label );
 		
 		if ( curLnk->weight != 0 )
-			cmd( "bind $n.n.t.n$i.weight <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, r->label );
+			cmd( "bind $N.n.t.n$i.weight <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, r->label );
 		
-		cmd( "$n.n.t window create end -window $n.n.t.n$i" );
-		cmd( "$n.n.t insert end \\n" );
+		cmd( "$N.n.t window create end -window $N.n.t.n$i" );
+		cmd( "$N.n.t insert end \n" );
 	}
 	
 	Tcl_UnlinkVar( inter, "i" );
-	cmd( "$n.n.t configure -state disabled" );
+	cmd( "$N.n.t configure -state disabled" );
 }	
 
 
