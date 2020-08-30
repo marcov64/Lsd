@@ -18,8 +18,8 @@
 # directory "src".
 #**************************************************************
 
-WRC=windres
 CC=g++
+WRC=windres
 TARGET=lmm
 SWITCH_CC=-DLMM -DNP -mthreads -mwindows -O3
 

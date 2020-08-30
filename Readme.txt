@@ -20,6 +20,7 @@ LSD includes third party software under the license of the copyright owners:
 GCC 10.2 is copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
 Tcl/Tk 8.6 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
 MSYS2 2.0, https://www.msys2.org
+Cygwin 3.1.6 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
 Eigen 3.3.7 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest.nps.edu
@@ -252,7 +253,7 @@ The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make su
 
 Step-by-step procedure to install the Cygwing 64-bit compiler (an internet connection is required):
 
-1. In an internet browser, open the site http://www.cygwin.com and find the link to download the Cygwin installer file for Windows 64-bit (setup-x86_64.exe).
+1. In an internet browser, open the site https://www.cygwin.com and find the link to download the Cygwin installer file for Windows 64-bit (setup-x86_64.exe).
 
 2. In Windows Explorer, double click the downloaded "setup-x86_64.exe" installer file.
 
@@ -281,7 +282,7 @@ Please note that MSYS2 compiler is NOT required if the above instructions for in
 
 Step-by-step procedure to install the MSYS2 64-bit compiler (an internet connection is required):
 
-1. Download and install the MSYS2 64-bit installer from http://www.msys2.org.
+1. Download and install the MSYS2 64-bit installer from https://www.msys2.org.
 
 2. Open the MSYS2 shell and update MSYS2 using the command:
 
@@ -293,7 +294,7 @@ pacman -Su
 
 4. Still in the shell, install the compiler and required tools:
 
-pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb
+pacman -S mingw-w64-x86_64-make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb
 
 5. Add the compiler to path, double clicking on "add-msys2-to-path.bat" file (in LSD installation folder) if MSYS2 was installed on the default path (C:\msys64). Otherwise, use the command below in the LSD installation folder (replacing PATH with the chosen installation folder):
 

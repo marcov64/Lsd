@@ -36,6 +36,6 @@ if not "%1"=="" (
 ) else (
 	set LSDROOT=%CD%
 )
-path %PATH%;%LSDROOT%\gnu\bin
+path %LSDROOT%\gnu\bin;%PATH%
 start lmm.exe %2
 :end
