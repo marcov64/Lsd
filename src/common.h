@@ -88,7 +88,7 @@
 // constant string arrays
 #define LMM_OPTIONS_NUM 16
 #define MODEL_INFO_NUM 9
-#define LSD_DIR_NUM 7
+#define LSD_DIR_NUM 8
 #define LSD_WIN_NUM MODEL_INFO_NUM - 3
 #define REG_SIG_NUM 6
 #define LMM_OPTIONS_NAME { "sysTerm", "HtmlBrowser", "fonttype", \
@@ -109,7 +109,7 @@
 #define MODEL_INFO_DEFAULT { "(no name)", "1.0", "[ current_date ]", \
 							 "#", "#", "#", \
 							 "#", "#", "#" };
-#define LSD_DIR_NAME { "src", "gnu", "Manual", "LMM.app", "R", "lwi", "___" }
+#define LSD_DIR_NAME { "src", "gnu", "installer", "Manual", "LMM.app", "R", "lwi", "___" }
 #define LSD_WIN_NAME { "lsd", "log", "str", "da", "deb", "lat" }
 #define REG_SIG_CODE { SIGINT, SIGTERM, SIGABRT, SIGFPE, SIGILL, SIGSEGV }
 #define REG_SIG_NAME { "Interrupt signal", "Terminate signal", "Abort signal", \

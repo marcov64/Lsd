@@ -1,0 +1,8 @@
+[Setup]
+Lang=en
+Dir=C:\Program Files\gnuplot
+Group=gnuplot
+NoIcons=0
+SetupType=custom
+Components=core,docs
+Tasks=defaulttermwxt,associate,associate\plt,associate\gp,associate\gpl,modifypath

@@ -1,0 +1,58 @@
+#**************************************************************
+#
+#	LSD 7.3 - December 2020
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#	
+#**************************************************************
+
+#**************************************************************
+# MAKEFILE-MAC
+# Makefile for LMM in macOS.
+# In a command prompt (terminal) in Lsd root directory, use
+#  make -f makefile-mac
+# to compile LMM program using the source files in
+# directory "src".
+#**************************************************************
+
+CC=g++
+TARGET=LMM
+SWITCH_CC=-DLMM -DNP -Wno-unused-result -mmacosx-version-min=10.10 -O3
+
+# from here you should not need to modify anything
+
+# using native compiler and Lsd supplied Tcl/Tk frameworks
+LSDROOT=.
+SRC=src
+SRC_DIR=$(LSDROOT)/$(SRC)/
+PATH_TCL_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/Headers
+PATH_TK_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/Headers
+PATH_TCLTK_LIB=$(SRC_DIR)LSD.app/Contents/Frameworks
+TCLTK_LIB=-framework Tcl -framework Tk
+
+# OS command to delete files
+RM=rm -f -R
+
+# variable to search for the tcl and tk headers
+INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(LSDROOT)/src
+
+# adjust executable to use the provided Tcl/Tk frameworks
+TARGET_PKG=$(TARGET).app/Contents/MacOS/$(TARGET)
+
+$(TARGET_PKG): $(SRC_DIR)modman.o $(SRC_DIR)common.o 
+	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common.o \
+	-F$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(TARGET_PKG)
+	touch -c -f $(TARGET).app
+
+$(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLUDE)
+
+$(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o $(INCLUDE)
+
+# delete object files
+clean:
+	$(RM) $(SRC_DIR)modman.o $(SRC_DIR)common.o

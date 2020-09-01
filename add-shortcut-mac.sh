@@ -50,3 +50,6 @@ fi
 
 # fix alias icon
 "$LSDROOT"/gnu/bin/seticon "$LSDROOT"/src/icons/lsd.icns ~/Desktop/"$ALIAS"
+
+# remove Windows files
+"$LSDROOT"/gnu/remove-unused.sh

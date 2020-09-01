@@ -44,5 +44,7 @@ else
 		mkdir -p ~/.local/share/applications
 	fi
 	cp -f "$DESKTOP"/"$TARGET" ~/.local/share/applications
+	
+	# remove Windows files
+	"$LSDROOT"/gnu/remove-unused.sh
 fi
-

@@ -21,6 +21,8 @@ GCC 10.2 is copyrighted by the Free Software Foundation, Inc. under GPL 3, https
 Tcl/Tk 8.6 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
 MSYS2 2.0, https://www.msys2.org
 Cygwin 3.1.6 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
+7-Zip LZMA SDK 19.0 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
+Gnuplot 5.2.8 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
 Eigen 3.3.7 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest.nps.edu
@@ -32,7 +34,7 @@ BallroomDJ 3.29.20 is copyrighted by Brad Lanam, https://sourceforge.net/project
 ttkthemes 3.1.0 is copyrighted by RedFantom under GNU GPL 3+, https://github.com/TkinterEP/ttkthemes
 dblclick.tcl is copyrighted by Wolf-Dieter Busch under OLL, https://wiki.tcl-lang.org/page/doubleclick
 tkcon 2.5 is copyrighted by Jeffrey Hobbs, https://wiki.tcl-lang.org/page/Tkcon
-tkdiff 4.2 is copyrighted by John M. Klassa and others GNU GPL 2+, https://sourceforge.net/projects/tkdiff/
+tkdiff 4.2 is copyrighted by John M. Klassa and others GNU GPL 2+, https://sourceforge.net/projects/tkdiff
 
 
 ********

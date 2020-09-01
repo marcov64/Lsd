@@ -32,7 +32,7 @@ operation it does is to ... run a copy of itself followed by the parameter "kick
 is required because under Windows there are troubles launching external package from a "first
 instance" of a program.
 
-LMM reads all the directories that are not: Manual, gnu, LMM.app, lwi, R and src as model
+LMM reads all the directories that are not: Manual, gnu, installer, LMM.app, lwi, R and src as model
 directories, where it expect to find certain files. At any given moment a model name is stored,
 together with its directory and the file shown.
 
@@ -4668,8 +4668,8 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "okXhelpcancel .l b Default { \
 				.l.t.text delete 1.0 end; \
-				if [ file exists \"$RootLsd/$LsdSrc/sysopt_$CurPlatform.txt\" ] { \
-					set file [ open \"$RootLsd/$LsdSrc/sysopt_$CurPlatform.txt\" r ]; \
+				if [ file exists \"$RootLsd/$LsdSrc/system_options-$CurPlatform.txt\" ] { \
+					set file [ open \"$RootLsd/$LsdSrc/system_options-$CurPlatform.txt\" r ]; \
 					set a [ read -nonewline $file ]; \
 					close $file \
 				} { \
@@ -5676,7 +5676,7 @@ void make_makefile( bool nw )
 	cmd( "set d [ read -nonewline $f ]" );
 	cmd( "close $f" );
 
-	cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile_%s.txt\" r ]", nw ? "NW" : ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 ) );
+	cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile-%s.txt\" r ]", nw ? "NW" : ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 ) );
 	
 	cmd( "set b [ read -nonewline $f ]" );
 	cmd( "close $f" );
@@ -5714,7 +5714,7 @@ void check_option_files( bool sys )
 	cmd( "set exists [ file exists \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\"]" );
 	if ( ! exists )
 	{
-		cmd( "if [ string equal $tcl_platform(platform) windows ] { set sysfile \"sysopt_windows.txt\" } elseif [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } else { set sysfile \"sysopt_linux.txt\" }" );
+		cmd( "if [ string equal $tcl_platform(platform) windows ] { set sysfile \"system_options-windows.txt\" } elseif [ string equal $tcl_platform(os) Darwin ] { set sysfile \"system_options-mac.txt\" } else { set sysfile \"system_options-linux.txt\" }" );
 		cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
 		cmd( "set f1 [ open \"$RootLsd/$LsdSrc/$sysfile\" r ]" );
 		cmd( "puts -nonewline $f \"# LSD options\n\"" );

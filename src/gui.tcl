@@ -122,7 +122,7 @@ if [ string equal $CurPlatform mac ] {
 	set bvstepM $bvstepMwin
 	set borderMadj 0
 	
-	# Inherit OS setting
+	# inherit OS setting
 	set mouseWarp [ ismousesnapon $CurPlatform ]
 	
 	# Cygwin or MSYS2?
@@ -134,6 +134,14 @@ if [ string equal $CurPlatform mac ] {
 	} else {
 		if { ! [ catch { exec where $makeWinCygwin } ] } {
 			set DefaultMakeExe $makeWinCygwin
+		}
+	}
+	
+	# Gnuplot on path? if not, try default install folder
+	set gnuplotExe "wgnuplot.exe"
+	if [ catch { exec where $gnuplotExe } ] {
+		if [ file exists "C:/Program Files/gnuplot/bin/$gnuplotExe" ] {
+			set gnuplotExe "C:/Program Files/gnuplot/bin/$gnuplotExe"
 		}
 	}
 }

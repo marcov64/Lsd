@@ -405,7 +405,7 @@ proc open_diff { file1 file2 { file1name "" } { file2name "" } } {
 # Open external gnuplot application
 #************************************************
 proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
-	global CurPlatform sysTerm
+	global CurPlatform sysTerm gnuplotExe
 
 	if [ string equal $script "" ] {
 		set args ""
@@ -430,12 +430,12 @@ proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
 		}
 		windows {
 			if [ string equal $script "" ] {
-				set error [ catch { exec wgnuplot.exe & } result ]
+				set error [ catch { exec $gnuplotExe & } result ]
 			} else {
 				if { $wait } {
-					set error [ catch { exec wgnuplot.exe $script } result ]
+					set error [ catch { exec $gnuplotExe $script } result ]
 				} else {
-					set error [ catch { exec wgnuplot.exe -p $script & } result ]
+					set error [ catch { exec $gnuplotExe -p $script & } result ]
 				}
 			}
 		}

@@ -15,7 +15,8 @@ rem *************************************************************
 
 rem *************************************************************
 rem  ADD-SHORTCUT-WINDOWS.BAT
-rem  Add a shortcut to LSD LMM in the Windows desktop.
+rem  Add a shortcut to LSD LMM in the Windows desktop and
+rem  Start menu program list.
 rem *************************************************************
 
 if "%1"=="/?" (
@@ -23,5 +24,9 @@ if "%1"=="/?" (
 	echo Usage: add-shortcut-windows
 	goto end
 )
-"%CD%\gnu\bin\Shortcut.exe" /f:"%USERPROFILE%\Desktop\LMM.lnk" /a:c /t:"%CD%\run.bat" /w:%CD% /r:7 /i:%CD%\src\icons\lsd.ico /d:"Lsd Model Manager"
+
+"%CD%\gnu\bin\Shortcut.exe" /f:"%USERPROFILE%\Desktop\LSD.lnk" /a:c /t:"%CD%\run.bat" /w:%CD% /r:7 /i:%CD%\src\icons\lsd.ico /d:"LSD Model Manager"
+
+copy "%USERPROFILE%\Desktop\LSD.lnk" "%AppData%\Microsoft\Windows\Start Menu\Programs"
+
 :end

@@ -16,7 +16,12 @@ rem *************************************************************
 rem *************************************************************
 rem  MSYS2-IMPORT.BAT
 rem  Copy required files from MSYS2 installation including:
-rem 
+rem  - MSYS2 libraries
+rem  - make utility (Win32 with embedded linux shell)
+rem  - gcc compiler
+rem  - Tcl/Tk framework
+rem  - gdb debugger
+rem  - diff compare tool
 rem *************************************************************
 
 if "%1"=="/?" (
@@ -55,7 +60,7 @@ set GCC_VER=10.2.0
 set OPT=/D/Q/Y
 set XOPT=%OPT%/S
 
-rem MSYS2 base and make
+rem MSYS2 libraries and make utility
 XCOPY %OPT% %MSYS_DIR%\usr\bin\make.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\rm.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\msys-2.0.dll %LSD_DIR%\gnu\bin\

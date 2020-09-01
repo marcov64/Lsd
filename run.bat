@@ -23,6 +23,7 @@ if "%1"=="/?" (
 	echo Usage: run [LSDROOT] [FILE]
 	goto end
 )
+
 if not "%1"=="" (
 	if defined LSDROOT (
 		if not "%LSDROOT%"=="%1" (
@@ -36,6 +37,24 @@ if not "%1"=="" (
 ) else (
 	set LSDROOT=%CD%
 )
-path %LSDROOT%\gnu\bin;%PATH%
+
+where x86_64-w64-mingw32-g++.exe >nul 2>&1
+
+if exist %LSDROOT%\gnu\bin\ (
+	if "%ERRORLEVEL%"=="0" (
+		set PREPEND=
+		set APPEND=;%LSDROOT%\gnu\bin
+	) else (
+		set PREPEND=%LSDROOT%\gnu\bin;
+		set APPEND=
+	)
+) else (
+	echo No compatible 64-bit C++compiler is available
+	set PREPEND=
+	set APPEND=
+)
+
+path %PREPEND%%PATH%%APPEND%
 start lmm.exe %2
+
 :end

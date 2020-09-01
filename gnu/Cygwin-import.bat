@@ -16,8 +16,8 @@ rem *************************************************************
 rem *************************************************************
 rem  CYGWIN-IMPORT.BAT
 rem  Copy required files from MSYS2 installation including:
-rem  - multitail
-rem  - Cygwin DLLs
+rem  - Cygwin libraries
+rem  - multitail utility
 rem *************************************************************
 
 if "%1"=="/?" (
@@ -55,13 +55,13 @@ if "%2"=="" (
 set OPT=/D/Q/Y
 set XOPT=%OPT%/S
 
-rem Cygwin base
+rem Cygwin libraries
 XCOPY %OPT% %CYG_DIR%\bin\cygwin1.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %CYG_DIR%\bin\cygncursesw-10.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %CYG_DIR%\bin\cygpanelw-10.dll %LSD_DIR%\gnu\bin\
 
 rem multitail utility
 XCOPY %OPT% %CYG_DIR%\bin\multitail.exe %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %CYG_DIR%\bin\cygncursesw-10.dll %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %CYG_DIR%\bin\cygpanelw-10.dll %LSD_DIR%\gnu\bin\
 XCOPY %XOPT% %CYG_DIR%\usr\share\terminfo %LSD_DIR%\gnu\usr\share\terminfo\
 
 :end

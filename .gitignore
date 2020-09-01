@@ -1,10 +1,10 @@
 Work/
 trashbin/
-Manual/src/
 lwi/nbproject/
 SyncToy*
 *.err
 *.o
+*.bak
 *.res
 *res.gz
 *.tot
@@ -16,7 +16,6 @@ makemessage.txt
 system_options.txt
 lmm_options.txt
 temp.html
-n++.wsp
 *.Rproj.user
 *.Rdata
 .Rproj.user
@@ -24,6 +23,5 @@ n++.wsp
 elements.txt
 makefileNW
 *.gch
-lsd.*
-lsdNW*
-Example/SantAnna/K+S/src/
+lsd.exe
+lsdNW.exe

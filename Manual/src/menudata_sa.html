@@ -1,0 +1,1974 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 14">
+<meta name=Originator content="Microsoft Word 14">
+<link rel=File-List href="menudata_sa_arquivos/filelist.xml">
+<link rel=Preview href="menudata_sa_arquivos/preview.wmf">
+<link rel=Edit-Time-Data href="menudata_sa_arquivos/editdata.mso">
+<!--[if !mso]>
+<style>
+v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style>
+<![endif]-->
+<title>Sensitivity Analysis</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
+  <o:Revision>28</o:Revision>
+  <o:TotalTime>14397</o:TotalTime>
+  <o:Created>2018-03-16T18:08:00Z</o:Created>
+  <o:LastSaved>2018-07-18T19:17:00Z</o:LastSaved>
+  <o:Pages>7</o:Pages>
+  <o:Words>5450</o:Words>
+  <o:Characters>31068</o:Characters>
+  <o:Lines>258</o:Lines>
+  <o:Paragraphs>72</o:Paragraphs>
+  <o:CharactersWithSpaces>36446</o:CharactersWithSpaces>
+  <o:Version>14.00</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]-->
+<link rel=themeData href="menudata_sa_arquivos/themedata.thmx">
+<link rel=colorSchemeMapping href="menudata_sa_arquivos/colorschememapping.xml">
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:Zoom>110</w:Zoom>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:TrackMoves>false</w:TrackMoves>
+  <w:TrackFormatting/>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:DoNotPromoteQF/>
+  <w:LidThemeOther>EN-US</w:LidThemeOther>
+  <w:LidThemeAsian>X-NONE</w:LidThemeAsian>
+  <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SplitPgBreakAndParaMark/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+  <m:mathPr>
+   <m:mathFont m:val="Cambria Math"/>
+   <m:brkBin m:val="before"/>
+   <m:brkBinSub m:val="&#45;-"/>
+   <m:smallFrac m:val="off"/>
+   <m:dispDef/>
+   <m:lMargin m:val="0"/>
+   <m:rMargin m:val="0"/>
+   <m:defJc m:val="centerGroup"/>
+   <m:wrapIndent m:val="1440"/>
+   <m:intLim m:val="subSup"/>
+   <m:naryLim m:val="undOvr"/>
+  </m:mathPr></w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" DefUnhideWhenUsed="true"
+  DefSemiHidden="true" DefQFormat="false" DefPriority="99"
+  LatentStyleCount="267">
+  <w:LsdException Locked="false" Priority="0" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Normal"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 1"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 2"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 3"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 4"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 5"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 6"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 7"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 8"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 9"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 1"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 2"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 3"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 4"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 5"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 6"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 7"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 8"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 9"/>
+  <w:LsdException Locked="false" Priority="35" QFormat="true" Name="caption"/>
+  <w:LsdException Locked="false" Priority="10" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Title"/>
+  <w:LsdException Locked="false" Priority="1" Name="Default Paragraph Font"/>
+  <w:LsdException Locked="false" Priority="11" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Subtitle"/>
+  <w:LsdException Locked="false" Priority="22" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Strong"/>
+  <w:LsdException Locked="false" Priority="20" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Emphasis"/>
+  <w:LsdException Locked="false" Priority="59" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Table Grid"/>
+  <w:LsdException Locked="false" UnhideWhenUsed="false" Name="Placeholder Text"/>
+  <w:LsdException Locked="false" Priority="1" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="No Spacing"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 1"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 1"/>
+  <w:LsdException Locked="false" UnhideWhenUsed="false" Name="Revision"/>
+  <w:LsdException Locked="false" Priority="34" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="List Paragraph"/>
+  <w:LsdException Locked="false" Priority="29" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Quote"/>
+  <w:LsdException Locked="false" Priority="30" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Intense Quote"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 1"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 1"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 2"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 2"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 2"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 3"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 3"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 3"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 4"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 4"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 4"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 5"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 5"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 5"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 6"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 6"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 6"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="19" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Subtle Emphasis"/>
+  <w:LsdException Locked="false" Priority="21" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Intense Emphasis"/>
+  <w:LsdException Locked="false" Priority="31" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Subtle Reference"/>
+  <w:LsdException Locked="false" Priority="32" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Intense Reference"/>
+  <w:LsdException Locked="false" Priority="33" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Book Title"/>
+  <w:LsdException Locked="false" Priority="37" Name="Bibliography"/>
+  <w:LsdException Locked="false" Priority="39" QFormat="true" Name="TOC Heading"/>
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:2;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:2;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-520081665 -1073717157 41 0 66047 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+h1
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Título 1 Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:1;
+	font-size:14.0pt;
+	font-family:"Arial","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	color:#254061;
+	font-weight:bold;}
+h2
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Título 2 Char";
+	margin-top:24.0pt;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:2;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	font-weight:bold;}
+h3
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Título 3 Char";
+	margin-top:36.0pt;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:3;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	font-weight:bold;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-noshow:yes;
+	mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Título Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	text-align:center;
+	mso-pagination:widow-orphan;
+	font-size:18.0pt;
+	font-family:"Arial","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	color:#254061;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+tt
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	font-family:"Courier New";
+	mso-ascii-font-family:"Courier New";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-hansi-font-family:"Courier New";
+	mso-bidi-font-family:"Courier New";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-link:"Texto de balão Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{mso-style-noshow:yes;
+	mso-style-priority:1;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{mso-style-noshow:yes;
+	mso-style-priority:34;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:36.0pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.Ttulo1Char
+	{mso-style-name:"Título 1 Char";
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Título 1";
+	font-family:"Arial","sans-serif";
+	mso-ascii-font-family:Arial;
+	mso-hansi-font-family:Arial;
+	mso-bidi-font-family:Arial;
+	color:#254061;
+	font-weight:bold;}
+span.Ttulo2Char
+	{mso-style-name:"Título 2 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Título 2";
+	font-family:"Arial","sans-serif";
+	mso-ascii-font-family:Arial;
+	mso-hansi-font-family:Arial;
+	mso-bidi-font-family:Arial;
+	font-weight:bold;}
+span.Ttulo3Char
+	{mso-style-name:"Título 3 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Título 3";
+	font-family:"Arial","sans-serif";
+	mso-ascii-font-family:Arial;
+	mso-hansi-font-family:Arial;
+	mso-bidi-font-family:Arial;
+	font-weight:bold;}
+span.TtuloChar
+	{mso-style-name:"Título Char";
+	mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:Título;
+	font-family:"Arial","sans-serif";
+	mso-ascii-font-family:Arial;
+	mso-hansi-font-family:Arial;
+	mso-bidi-font-family:Arial;
+	color:#254061;
+	font-weight:bold;}
+span.TextodebaloChar
+	{mso-style-name:"Texto de balão Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Texto de balão";
+	font-family:"Tahoma","sans-serif";
+	mso-ascii-font-family:Tahoma;
+	mso-hansi-font-family:Tahoma;
+	mso-bidi-font-family:Tahoma;}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:36.0pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:36.0pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:36.0pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Arial","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.Cdigo
+	{mso-style-name:Código;
+	mso-style-unhide:no;
+	font-family:"Courier New";
+	mso-ascii-font-family:"Courier New";
+	mso-hansi-font-family:"Courier New";
+	mso-bidi-font-family:"Courier New";
+	color:gray;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	mso-default-props:yes;
+	font-size:10.0pt;
+	mso-ansi-font-size:10.0pt;
+	mso-bidi-font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 3.0cm 70.85pt 3.0cm;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:1243370276;
+	mso-list-type:hybrid;
+	mso-list-template-ids:644096210 67698703 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l0:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l0:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l0:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l1
+	{mso-list-id:1322004172;
+	mso-list-type:hybrid;
+	mso-list-template-ids:100017336 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l1:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l1:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l1:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l1:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l1:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l1:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l1:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l1:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l1:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l2
+	{mso-list-id:1588463275;
+	mso-list-type:hybrid;
+	mso-list-template-ids:478289072 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l2:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l2:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l2:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l2:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l2:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l2:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l2:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l2:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l2:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l3
+	{mso-list-id:1782073111;
+	mso-list-type:hybrid;
+	mso-list-template-ids:223801394 828805846 1629360326 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l3:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:35.85pt;
+	text-indent:-18.0pt;}
+@list l3:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:71.85pt;
+	text-indent:-18.0pt;}
+@list l3:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:107.85pt;
+	text-indent:-9.0pt;}
+@list l3:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:143.85pt;
+	text-indent:-18.0pt;}
+@list l3:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:179.85pt;
+	text-indent:-18.0pt;}
+@list l3:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:215.85pt;
+	text-indent:-9.0pt;}
+@list l3:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:251.85pt;
+	text-indent:-18.0pt;}
+@list l3:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:287.85pt;
+	text-indent:-18.0pt;}
+@list l3:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:323.85pt;
+	text-indent:-9.0pt;}
+@list l4
+	{mso-list-id:1985695795;
+	mso-list-type:hybrid;
+	mso-list-template-ids:644096210 67698703 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l4:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l4:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l4:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l4:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l4:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l4:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l4:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l4:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l4:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Tabela normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman","serif";}
+</style>
+<![endif]-->
+<link rel=icon href="image/lsd.png">
+<meta name=Author content="LSD - Laboratory for Simulation Development">
+
+<iframe name=navbar src=navbar.html scrolling=no style='position:fixed;
+ border-bottom-style:none;border-left-style:none;border-right-style:none;
+ border-top-style:none;height:55px;left:0in;overflow:hidden;right:0in;
+ top:0in;width:100%'>
+</iframe>
+
+<!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="1026"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body lang=EN-US link=blue vlink=purple style='tab-interval:36.0pt'>
+
+<div class=WordSection1>
+
+<p class=MsoTitle><o:p>&nbsp;</o:p></p>
+
+<p class=MsoTitle>LSD Sensitivity Analysis</p>
+
+<div align=center>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="72%"
+ style='width:72.92%;mso-cellspacing:0cm;mso-yfti-tbllook:1184;mso-padding-alt:
+ 0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width=394 style='width:295.2pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal><span style='mso-no-proof:yes'><img width=390 height=444
+  id="_x0000_i1030" src="image/sa.png"></span><span style='mso-fareast-font-family:
+  "Times New Roman"'><o:p></o:p></span></p>
+  </td>
+  <td width=211 valign=top style='width:157.95pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:16.2pt;text-indent:-16.2pt;mso-list:l3 level1 lfo2'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>1.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_SA_workflow">SA workflow</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:16.2pt;text-indent:-16.2pt;mso-list:l3 level1 lfo2'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_Configuring_values">Configuring values</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:16.2pt;text-indent:-16.2pt;mso-list:l3 level1 lfo2'><![if !supportLists]><span
+  lang=FR style='mso-fareast-font-family:Arial;mso-ansi-language:FR'><span
+  style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=FR style='mso-ansi-language:FR'><a
+  href="#_Full_sampling_SA">Full<span lang=EN-US style='mso-ansi-language:EN-US'>
+  sampling SA (online)</span></a><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:16.2pt;text-indent:-16.2pt;mso-list:l3 level1 lfo2'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>4.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span></span><![endif]><span
+  lang=FR style='mso-ansi-language:FR'><a href="#_Full_sampling_SA_1"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Full sampling SA (batch)</span></a>
+  </span></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:16.2pt;text-indent:-16.2pt;mso-list:l3 level1 lfo2'><![if !supportLists]><span
+  lang=FR style='mso-fareast-font-family:Arial;mso-ansi-language:FR'><span
+  style='mso-list:Ignore'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=FR style='mso-ansi-language:FR'><a
+  href="#_MC_point_sampling">MC<span lang=EN-US style='mso-ansi-language:EN-US'>
+  point sampling SA</span></a><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:16.2pt;text-indent:-16.2pt;mso-list:l3 level1 lfo2'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_MC_range_sampling">MC range sampling SA</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:16.2pt;text-indent:-16.2pt;mso-list:l3 level1 lfo2'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>7.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_EE_sampling_SA">EE sampling SA</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:16.2pt;text-indent:-16.2pt;mso-list:l3 level1 lfo2'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>8.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_NOLH_sampling_SA">NOLH sampling SA</a> </p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:16.2pt;text-indent:-16.2pt;mso-list:l3 level1 lfo2'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>9.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_LSDsensitivity_R_package">LSDsensitivity R package</a></p>
+  </td>
+ </tr>
+</table>
+
+</div>
+
+<p class=MsoNormal align=center style='text-align:center'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal><a href="LSD_faqs.html#sa">Sensitivity analysis</a> (SA)
+allows the user to generate one or more <a href="LSD_faqs.html#modelsetting">model
+configuration(s)</a> with a different combination of the initialization values
+for <a href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a>. SA is typically done to
+evaluate how uncertainty in the results of a <a
+href="LSD_faqs.html#simulationrun">simulation run</a> can be apportioned to the
+sources of uncertainty in the model <a href="LSD_faqs.html#equation">Equations</a>
+and configuration. </p>
+
+<p class=MsoNormal>When the number of elements involved in the SA is large or
+the number of values for each element is significant, the manual assignment of
+the initialization data can be difficult and prone to errors. LSD can
+automatically generate and run all the required configurations, each one
+containing one combination of the required initialization values, to perform
+different SA approaches.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_SA_workflow"></a>SA workflow</h1>
+
+<p class=MsoNormal>The idea behind SA is the exploration of the model <a
+href="LSD_faqs.html#simulationrun">simulation results</a>, provided by its <a
+href="LSD_faqs.html#variable">Variables</a>, according to different <a
+href="LSD_faqs.html#modelsetting">initialization values</a> for <a
+href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a> (the factors, in SA terms).
+Comprehensive SA usually goes beyond simply changing initialization values one
+at a time and involves modifying multiple values for several factors at once,
+in a (likely complicated) combinatorial process. </p>
+
+<p class=MsoNormal>For example, suppose your model includes Parameter A and
+Parameter B (the factors), each with only one instance in the model. If you
+want to test the model with A assuming values <span class=Cdigo>1</span>, <span
+class=Cdigo>3</span>, <span class=Cdigo>5</span> ,<span class=Cdigo>7</span>
+(four levels) and B taking the initial values <span class=Cdigo>2</span>, <span
+class=Cdigo>4</span> (two levels), a proper SA should explore the 8 possible
+combinations of the two factors: (<span class=Cdigo>1</span>,<span class=Cdigo>2</span>),
+(<span class=Cdigo>1</span>,<span class=Cdigo>4</span>), (<span class=Cdigo>3</span>,<span
+class=Cdigo>2</span>), (<span class=Cdigo>3</span>,<span class=Cdigo>4</span>),
+(<span class=Cdigo>5</span>,<span class=Cdigo>2</span>), (<span class=Cdigo>5</span>,<span
+class=Cdigo>4</span>), (<span class=Cdigo>7</span>,<span class=Cdigo>2</span>),
+(<span class=Cdigo>7</span>,<span class=Cdigo>4</span>). In SA terms, this
+approach is our design of experiments (DoE) and the ensuing combinations list
+represents the points in the sampling set. In LSD, to perform the SA of your
+model using this DoE you need to generate 8 different <span class=Cdigo>.lsd</span>
+<a href="LSD_faqs.html#modelsetting">model configuration</a> files, each one
+assigned to a sampling point, <a href="LSD_faqs.html#simulationrun">run the
+simulation</a> for each configuration file, and <a href="LSD_faqs.html#results">compare
+the results</a> obtained for the sampling set composing the DoE.</p>
+
+<p class=MsoNormal>Also note that, because of the “combinatorics curse”, the
+full exploration of the entire parametric space – a factorial DoE – is
+restricted, because of computational time constraints, to situations involving
+just a few factors and levels. For larger models, SA usually involves
+exploration of many factors (Parameters and lagged Variables in LSD) over a
+large number of levels for each factor. To overcome the combinatorics curse,
+two approaches are usually employed: sampling the factorial DoE or using a
+high-efficiency DoE.</p>
+
+<p class=MsoNormal>LSD offers a full set of tools to perform sophisticated <a
+href="LSD_faqs.html#sa">sensitivity analysis</a> (SA), divided in two groups.
+The first one covers the sampling methods (DoE’s) required to collect samples
+of the model’s results across its parametric space (i.e., sets of the possible
+combinations of the <a href="LSD_faqs.html#modelsetting">initialization values</a>
+for <a href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a>). LSD supports several DoE
+strategies: <a href="#_Full_sampling_SA_1">full factorial</a>, <a
+href="#_MC_point_sampling">Monte Carlo sampled factorial</a>, <a
+href="#_EE_sampling_SA">elementary effects</a>, and <a href="#_NOLH_sampling_SA">near-orthogonal
+Latin hypercube</a>. The second group of SA tools is targeted on performing the
+advanced statistical analysis on the sampled data produced by LSD and is
+provided by means of the <a href="#_LSDsensitivity_R_package">LSDsensitivity R
+package</a>. </p>
+
+<p class=MsoNormal>The workflow for the complete SA process is relatively long
+and presents variations according to the type of SA being performed. Below are
+the minimum steps to perform SA on a working LSD model.</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l4 level1 lfo4'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>In <a href="LMM.html">LMM</a> create a no-window
+(command prompt) version of your model by selecting menu <span class=Cdigo><a
+href="LMM.html">Model&gt;Create 'No Window' Version</a></span>. This special
+version of the <a href="LSD_faqs.html#modelprogram">LSD model program</a> will
+be required to process your SA configurations as fast as possible, likely in
+parallel. Make sure to update (<a href="LSD_faqs.html#compiler">recompile</a>)
+the no-window version of your model before performing the SA every time you
+change your <a href="LSD_faqs.html#equationfile">equation file</a>.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l4 level1 lfo4'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>In
+LSD Browser make sure that all initialization values for Parameters and lagged
+Variables are set with the correct “calibration” (default) values (menu <span
+class=Cdigo><a href="menudata_init.html">Data&gt;Initial Values</a></span> or <span
+class=Cdigo>Initial Values</span> in the right mouse button context menu), that
+all the required result Variables are being saved (menu <span class=Cdigo><a
+href="browser.html#changeelement">Model&gt;Change</a></span> Element or <span
+class=Cdigo>Save</span> in the right mouse button context menu) and the number
+of desired Monte Carlo runs (if stochastic components are present) for each SA
+sample (point) is defined (menu <span class=Cdigo><a href="menurun.html">Run&gt;Simulation
+Settings</a></span>). </p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l4 level1 lfo4'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>Save your “calibration” set up in a baseline <span
+class=Cdigo>.lsd</span> <a href="LSD_faqs.html#modelsetting">model
+configuration</a> file (menu <span class=Cdigo><a href="menufile.html">File&gt;Save
+As</a></span>), preferably in a new folder inside your current model
+configuration folder (you can create a new folder while in the Save As dialog
+box). The SA process creates many files and it is recommended to keep them in a
+dedicated subdirectory.</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l4 level1 lfo4'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>(Re)load your baseline <span class=Cdigo>.lsd</span>
+configuration if it is not already loaded (menu <span class=Cdigo><a
+href="menufile.html">File&gt;Load</a></span>)</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l4 level1 lfo4'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>Define the Parameters and lagged Variables to be
+explored in the SA and their test values or the maximum/minimum ranges,
+according to the chosen sampling method, using the <a
+href="#_Configuring_values">SA data entry window</a>.</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l4 level1 lfo4'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>After choosing all values/ranges to test, save
+your exploration space definition as a <span class=Cdigo>.sa</span> sensitivity
+analysis file using the same base name and folder as your <span class=Cdigo>.lsd</span>
+baseline configuration (menu <span class=Cdigo><a href="menufile.html">File&gt;Save
+Sensitivity</a></span>).</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l4 level1 lfo4'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>7.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>With both <span class=Cdigo>.lsd</span> and <span
+class=Cdigo>.sa</span> files loaded (use menu <span class=Cdigo><a
+href="menufile.html">File&gt;Load</a></span> and <span class=Cdigo><a
+href="menufile.html">File&gt;Load Sensitivity</a></span> if required), select
+menu <span class=Cdigo>Data&gt;Sensitivity Analysis&gt;XXXX</span>, replacing
+XXXX by the desired SA type (see options below), check the proposed defaults,
+and modify the required configuration values, if required (the defaults are
+usually adequate). When you click <span class=Cdigo>OK</span>, several new <span
+class=Cdigo>.lsd</span> configuration files will be created in your baseline
+configuration subdirectory (those are the sample points to be explored in the
+SA exercise).</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:72.0pt;text-indent:-18.0pt;mso-list:l4 level2 lfo4'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+an out-of-sample additional set of sample points is required in a NOLH SA exercise,
+immediately after the previous step, select menu <span class=Cdigo>Data&gt;Sensitivity
+Analysis&gt;MC Range Sampling</span>, and adjust the defaults if required, to
+create the out-of-sample validation set (more <span class=Cdigo>.lsd</span>
+files will be created, for the additional sampling points).</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l4 level1 lfo4'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>8.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>Immediately after the previous step, select menu
+<span class=Cdigo><a href="menurun.html">Run&gt;Create/Start Parallel Batch</a></span>,
+accept using the just created configuration, adjust the number of cores (only
+if going to run in another machine), and decide if you want to start the
+(time-consuming) processing right now or later (in the current or in another
+machine).</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:72.0pt;text-indent:-18.0pt;mso-list:l4 level2 lfo4'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+running later in the same machine, you just have to execute the created script
+file (<span class=Cdigo>.bat</span> or <span class=Cdigo>.sh</span>) inside the
+subdirectory where your baseline <span class=Cdigo>.lsd</span> file was created.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:72.0pt;text-indent:-18.0pt;mso-list:l4 level2 lfo4'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+running in another machine, you have to (i) copy the entire model folder and
+subfolders to the new machine (the remaining LSD folders are not required),
+(ii) recompile LSD for the new platform, if required, and (iii) execute the
+script file (<span class=Cdigo>.bat</span> or <span class=Cdigo>.sh</span>) in
+the same subdirectory as your baseline <span class=Cdigo>.lsd</span> file.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:72.0pt;text-indent:-18.0pt;mso-list:l4 level2 lfo4'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>c.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>You
+can follow up the parallel batch processing by verifying the contents of the
+created <span class=Cdigo>.log</span> file(s) created in your baseline
+directory.</p>
+
+<p class=MsoNormal>As soon as all the LSD <span class=Cdigo>.res[.gz]</span> <a
+href="LSD_faqs.html#results">results files</a> are generated (check the <span
+class=Cdigo>.log</span> files), the produced SA data can be directly imported
+in R or any other data analysis package. Basic SA can be performed in LSD,
+using the <a href="menudata_res.html">Analysis of Results window tools</a> to
+load the results files from disk and compare results from different
+initialization configurations. </p>
+
+<p class=MsoNormal>When using R, more sophisticated, ready to use tools to
+perform Elementary Effects (EE) SA and Sobol variance decomposition (SVD) SA
+are available in the <a href="#_LSDsensitivity_R_package">LSDsensitivity R
+package</a> section below, including the follow up of this workflow.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_Configuring_values"></a><a name=entry></a>Configuring values</h1>
+
+<p class=MsoNormal>The first step to set up a sensitivity analysis (SA)
+consists in defining the elements (<a href="LSD_faqs.html#parameter">Parameters</a>
+and <a href="LSD_faqs.html#variable">lagged Variables</a>) and the respective <a
+href="LSD_faqs.html#modelsetting">initialization values</a> to be explored. Any
+model element requiring an initialization value can be included in a SA
+experiment. Any number of elements can be added to a SA experiment.</p>
+
+<p class=MsoNormal>Elements are included for SA by defining at least two
+different values in which each element should be explored. The definition of
+exploration values is done in the Sensitivity Analysis entry window, shown
+below. The SA window can be open by selecting the button <span class=Cdigo>Sensitivity</span>
+in the <a href="browser.html#changeelement">Change Element</a> window (double
+click on the element, or using the menu <span class=Cdigo>Model&gt;Change
+Element</span>, or selecting <span class=Cdigo>Change</span> in the context
+menu, or yet pressing <span class=Cdigo>Enter</span> when the element name is
+selected) or right-clicking on the element in the <a
+href="LSD_faqs.html#variable">Variables</a> and <a
+href="LSD_faqs.html#parameter">Parameters</a> list box and selecting <span
+class=Cdigo>Sensitivity</span> from the context menu.</p>
+
+<p align=center style='text-align:center'><span style='mso-no-proof:yes'><img
+border=0 width=407 height=357 id="_x0000_i1029" src="image/sa_entry.png"></span></p>
+
+<p class=MsoNormal>The top part of the SA window is occupied by the data entry
+area. Depending on the type of SA exercise to be performed, the user must enter
+here a set (<span class=Cdigo>Full</span> and <span class=Cdigo>MC Point
+Sampling</span> options) or a range (<span class=Cdigo>MC Range</span>, <span
+class=Cdigo>EE</span> and <span class=Cdigo>NOLH Sampling</span> options) of
+values. Value sets may contain from two to any number of integer or float
+values and the SA is performed considering each individual value. Value ranges
+consist of two integer or float values and the SA is done in the range defined
+by the two values (included). If more than two values are supplied for a value
+range, only the first two are used. The order of the values is not relevant.
+Float values should use the point (<span class=Cdigo>.</span>) as the decimal
+separator. Scientific notation float numbers are allowed (use the “<span
+class=Cdigo>E</span>” or “<span class=Cdigo>e</span>” prefix to indicate the 10
+exponent).</p>
+
+<p class=MsoNormal>Individual values can be separated using any combination of
+the most usual separators, including spaces, tabs, commas, semi-colons, colons,
+line-feeds etc.</p>
+
+<p class=MsoNormal>To simplify the entry of some specific value sets, the user
+can use the special <span class=Cdigo>=BEGIN:END@SAMPLES%TYPE</span> clause. It
+is interpreted by LSD as a set containing the number <span class=Cdigo>SAMPLES</span>
+of values. <span class=Cdigo>TYPE</span> can define two types of sampling sets,
+linear (<span class=Cdigo>L</span>) or random (<span class=Cdigo>R</span>).
+Linear sets start from the value given by <span class=Cdigo>BEGIN</span> and
+include the number <span class=Cdigo>SAMPLES</span> of values until <span
+class=Cdigo>END</span>. For instance, the clause <span class=Cdigo>=10:20@6%L</span>
+produces the sampling set <span class=Cdigo>10,12,14,16,18,20</span>. Random
+sets include a number <span class=Cdigo>SAMPLES</span> of random values between
+<span class=Cdigo>BEGIN</span> and <span class=Cdigo>END</span> (included). For
+example, the clause <span class=Cdigo>=0:1@5%R</span> may generate a sampling
+set like <span class=Cdigo>0.124,0.572,0.390,0.972,0.641</span> (float numbers
+have usually 15 significant digits). Multiple clauses, as well individual
+values, may be combined to compose the sampling set.</p>
+
+<p class=MsoNormal>It should be noted that only the test values included in the
+SA data area are used for producing the sampling sets. The current
+initialization value for the Parameter or lagged Variable <b style='mso-bidi-font-weight:
+normal'>IS NOT</b> automatically included in the SA. If required, the user
+should add it to the value set.</p>
+
+<p class=MsoNormal>There are three buttons and a checkbox under the SA data
+entry area:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l2 level1 lfo6'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'>Paste Clipboard</b></span>: (<i style='mso-bidi-font-style:normal'>shortcut</i>:
+<span class=Cdigo>Ctrl+V</span>) Insert the current system clipboard value at
+the cursor position. It is useful to transfer data from other applications
+(most separators accepted).</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l2 level1 lfo6'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'>Delete Values</b></span>: Delete all the current values in the data
+entry area. Useful for replacing the existing values.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l2 level1 lfo6'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'>Remove</b></span>: Delete all the current values and remove the element
+from the SA experiment. The SA window is also automatically closed.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l2 level1 lfo6'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'>Round to integer</b></span>: Force converting all values to the closest
+integer value, even if produced by clauses or being randomly generated inside a
+range. It is useful for specifying initialization values for elements assumed
+to take integers only.</p>
+
+<p class=MsoNormal>It should be noted that the values set for Parameters and
+lagged Variables SA <b style='mso-bidi-font-weight:normal'>ARE NOT</b> saved in
+the regular <span class=Cdigo>.lsd</span> <a href="LSD_faqs.html#modelsetting">model
+configuration</a> files, because each configuration can be tested under
+different SA strategies. To save SA test values, the user should use the menu
+option <span class=Cdigo><a href="menufile.html">File&gt;Save Sensitivity</a></span>
+and select a name for the SA configuration. Similarly, existing SA
+configuration data is not automatically loaded when the user loads a <span
+class=Cdigo>.lsd</span> configuration. The menu option <span class=Cdigo><a
+href="menufile.html">File&gt;Load Sensitivity</a></span> has to be used when
+required. Also notice that SA test values are lost whenever a model
+configuration file is (re)loaded or unloaded. Check <a href="menufile.html">here</a>
+for more details on LSD file operations.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_Full_sampling_SA"></a><span style='mso-fareast-font-family:"Times New Roman"'>Full
+sampling SA (online)<o:p></o:p></span></h1>
+
+<p class=MsoNormal>This command produces a full factorial design of experiment
+(DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA), where all combinations
+of the <a href="#_Configuring_values">configured test initialization values</a>
+for <a href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a> are explored. Differently
+from the other DoE methods, this one modifies the current <a
+href="LSD_faqs.html#modelstructure">model structure</a> to create a single <a
+href="LSD_faqs.html#modelsetting">model configuration</a> containing as many
+copies of the original model structure as necessary by the factorial
+combinatorics. It is appropriate to quickly analyze the SA of few elements
+without requiring more sophisticated batch/parallel processing.</p>
+
+<p class=MsoNormal>In the example <a href="#_SA_workflow">above</a>, LSD would
+generate 8 different instances of the entire model structure directly
+descending from the <span class=Cdigo>Root</span> Object, in a single model
+configuration. Of course, there will be now 8 instances of the <a
+href="LSD_faqs.html#object">Object(s)</a> containing the Parameters A and B,
+each copy including a different combination of their initialization values.</p>
+
+<p class=MsoNormal>Please note that the modified model structure is not saved
+or renamed. After creating the new structure, appropriate to run quick SA
+analysis online in the <a href="browser.html">LSD Browser</a>, the user most
+likely should save the modified model structure as a new model configuration
+(using menu option <span class=Cdigo><a href="menufile.html">File&gt;Save As</a></span>).
+Otherwise, the current configuration file would be overwritten by default when
+the generated SA configuration is run.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_Full_sampling_SA_1"></a><span style='mso-fareast-font-family:
+"Times New Roman"'>Full sampling SA (batch)<o:p></o:p></span></h1>
+
+<p class=MsoNormal>This command produces a full factorial design of experiment
+(DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA), where all combinations
+of the <a href="#_Configuring_values">configured test initialization values</a>
+for <a href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a> are explored. Differently
+from the <a href="#_Full_sampling_SA">online version</a>, the batch method
+creates multiple <span class=Cdigo>.lsd</span> <a
+href="LSD_faqs.html#modelsetting">model configuration</a> files, each one
+containing one copy of the original model structure configured as necessary by
+the factorial combinatorics. It is appropriate to perform the SA of larger
+number of elements or test values, benefiting from the acceleration provided by
+more sophisticated batch/parallel processing.</p>
+
+<p class=MsoNormal>In the example <a href="#_SA_workflow">above</a>, LSD would
+generate 8 different <span class=Cdigo>.lsd</span> configuration files with the
+same model structure. Each configuration file would contain different
+initialization values for the Parameters A and B, each including a different
+combination of their initialization values.</p>
+
+<p class=MsoNormal>Note that the user can mix the two versions of the full
+factorial design (<a href="#_Full_sampling_SA">online</a> and batch): firstly
+configuring a subset of the elements to include in the sensitivity analysis and
+using them to generate a single new (online) configuration, then configuring
+the remaining set of elements to perform the batch full SA.</p>
+
+<p class=MsoNormal>After executing this command, a certain number of <span
+class=Cdigo>.lsd</span> configuration files will be generated, as informed in
+the <a href="log.html">Log window</a>. Before the analysis can be concluded,
+they have to be run to produce <a href="LSD_faqs.html#results">simulation
+results</a>. Usually, the menu command <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
+Parallel Batch</a></span> is the more convenient way to run the entire set of
+configuration files. Please refer to the recommended <a href="#_SA_workflow">SA
+workflow</a> on how to proceed.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_MC_point_sampling"></a><a name=mcpoint></a>MC point sampling SA</h1>
+
+<p class=MsoNormal>This command produces a design of experiment (DoE) for <a
+href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting of a random
+fraction of a full factorial design (the Monte Carlo sample). A user-specified
+fraction of the combinations of the <a href="#_Configuring_values">configured
+test initialization values</a> for <a href="LSD_faqs.html#parameter">Parameters</a>
+and <a href="LSD_faqs.html#variable">lagged Variables</a> is explored. The
+selected combinations are taken randomly. The method creates multiple <span
+class=Cdigo>.lsd</span> <a href="LSD_faqs.html#modelsetting">model
+configuration</a> files each one containing one copy of the original model
+structure configured using the selected combination of values.</p>
+
+<p align=center style='text-align:center'><span style='mso-no-proof:yes'><img
+border=0 width=225 height=147 id="_x0000_i1028" src="image/sa_mc_point.png"></span></p>
+
+<p class=MsoNormal>The user specifies the Monte Carlo sample size as a
+percentage (0 to 100), in a dialog box like the one depicted above. Large
+sample sizes are only recommended when there are few elements and values for
+the SA. Note that LSD shows in the <a href="log.html">Log window</a> the total
+number of combinations in a full factorial design, over which the provided
+percentage is applied to calculate the target number of points to sample. The
+provided factor should be large enough to produce (in average) at least one
+sample. The final number of configurations produced may be somewhat smaller or
+larger than the target number.</p>
+
+<p class=MsoNormal>In the example <a href="#_SA_workflow">above</a>, if you set
+the MC sample size to 50%, LSD would generate, in average, 4 different <span
+class=Cdigo>.lsd</span> configuration files (out of the 8 possible) with the
+same model structure. Each configuration file would contain different
+combinations for the initialization values of the Parameters A and B.</p>
+
+<p class=MsoNormal>After executing this command, a certain number of <span
+class=Cdigo>.lsd</span> configuration files will be generated, as informed in
+the Log window. Before the analysis can be concluded, they have to be run to
+produce <a href="LSD_faqs.html#results">simulation results</a>. Usually, the
+menu command <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
+Parallel Batch</a></span> is the more convenient way to run the entire set of
+configuration files. Please refer to the recommended <a href="#_SA_workflow">SA
+workflow</a> on how to proceed.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_MC_range_sampling"></a><a name=mcrange></a>MC range sampling SA</h1>
+
+<p class=MsoNormal>This command produces a design of experiment (DoE) for <a
+href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting of a set of
+randomly selected sampling points (the Monte Carlo sample). The MC sample set
+is taken from the parametric space defined by the set of <a
+href="#_Configuring_values">configured test ranges</a> for the <a
+href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a> to be explored. The method
+creates multiple <span class=Cdigo>.lsd</span> <a
+href="LSD_faqs.html#modelsetting">model configuration</a> files each one
+containing one copy of the original model structure configured using the
+selected combination of values.</p>
+
+<p align=center style='text-align:center'><span style='mso-no-proof:yes'><img
+border=0 width=225 height=138 id="_x0000_i1027" src="image/sa_mc_range.png"></span></p>
+
+<p class=MsoNormal>The user specifies the Monte Carlo sample size as an integer
+number, in a dialog box like the one depicted above. Very large sample sizes are
+only recommended when there are few elements and values for the SA, as
+processing time grows linearly with this number. If a previous SA sample was
+just created, LSD will offer the checkbox option <span class=Cdigo>Append to
+existing configuration files</span>. If checked, this option will create the
+new <span class=Cdigo>.lsd</span> configurations as an additional SA sample
+set, typically used as an out-of-sample set for the statistical analysis (see
+the <a href="#_SA_workflow">SA workflow</a> for details).</p>
+
+<p class=MsoNormal>In the example <a href="#_SA_workflow">above</a>, we could
+define ranges instead of points to perform SA with Parameters A and B.
+Similarly to the initial configuration, we could use the range 1-7 for
+Parameter A and 1-2 for B, taking care of specifying them as integers in the <a
+href="#_Configuring_values">SA data entry window</a> if necessary. In this
+case, if you set the MC sample size to 4, LSD would generate 4 different <span
+class=Cdigo>.lsd</span> configuration files with the same model structure. Each
+configuration file would (likely) contain different initialization values for
+the Parameters A and B.</p>
+
+<p class=MsoNormal>After executing this command, a certain number of <span
+class=Cdigo>.lsd</span> configuration files will be generated, as informed in
+the Log window. Before the analysis can be concluded, they have to be run to
+produce <a href="LSD_faqs.html#results">simulation results</a>. Usually, the
+menu command <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
+Parallel Batch</a></span> is the more convenient way to run the entire set of
+configuration files. Please refer to the recommended <a href="#_SA_workflow">SA
+workflow</a> on how to proceed.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_EE_sampling_SA"></a><a name=ee></a>EE sampling SA</h1>
+
+<p class=MsoNormal>This command produces a design of experiment (DoE) for <a
+href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting of a set of
+sampling points following elementary effects (EE) trajectories, i.e., random
+one-at-a-time changes of the values for <a href="LSD_faqs.html#parameter">Parameters</a>
+and <a href="LSD_faqs.html#variable">lagged Variables</a>. The EE sample set is
+taken from the parametric space defined by the set of <a
+href="#_Configuring_values">configured test ranges</a> for the Parameters and
+lagged Variables to be explored. The method creates multiple <span class=Cdigo>.lsd</span>
+<a href="LSD_faqs.html#modelsetting">model configuration</a> files each one
+containing one copy of the original model structure configured using the
+selected combination of values.</p>
+
+<p class=MsoNormal>This method was proposed Max D. Morris (1991) as a
+preliminary step in SA (screening), before the application of more robust and
+time-consuming SA methods. The method was further enhanced by Campolongo,
+Cariboni and Saltelli (2007). The algorithm used was developed by Ruano, Ribes,
+Seco and Ferrer (2012). It may be useful to identify unimportant Parameters and
+lagged Variables, potentially allowing their removal from a more in-depth SA
+investigation, like the Sobol variance decomposition.</p>
+
+<p align=center style='text-align:center'><span style='mso-no-proof:yes'><img
+border=0 width=225 height=334 id="_x0000_i1026" src="image/sa_ee.png"></span></p>
+
+<p class=MsoNormal>The user specifies the settings for the EE algorithm in a
+dialog box like the one depicted above. The default values are usually adequate
+for most applications as a reasonable tradeoff between precision and execution
+time. The available options are:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo8'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'>Number of trajectories</b></span>: define how many times each Parameter
+or lagged variable under test will be changed. The higher the number of
+trajectories, the better of the parametric space is explored. The number of
+sampling points, with regard to this parameter, increases by a factor of the
+number of Parameters and lagged Variables under test plus 1. So, as simulation
+execution times increase linearly on this setting, large values may be
+unpractical.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo8'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'>Trajectories pool size</b></span>: specify the size of the pool of
+possible trajectories from which the trajectories to be used are selected.
+Increasing this number over the number of trajectories to explore allows the
+algorithm to pick the best trajectories in the pool to more efficiently cover
+the parametric space. As the creation of alternative trajectories can be time
+consuming in LSD for larger values, please wait until the command completes.
+This value does not affect the produced number of sampling points or the
+simulation execution times.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo8'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'>Number of levels</b></span>: set the number of levels (the grid size)
+to explore in each Parameter or lagged variable defined range of values (the
+extremes are always explored). It must be an even positive integer (&gt;1).
+Larger values imply in a finer exploration of the parametric space, at the cost
+of more sampling points required (a higher computation times).</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo8'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'>Jump size</b></span>: define the number of level units to increase the
+explored value for each Parameter or lagged variable for each new trajectory.
+It normally does not have to be changed.</p>
+
+<p class=MsoNormal>After executing this command, a certain number of <span
+class=Cdigo>.lsd</span> configuration files will be generated, as informed in
+the Log window. Before the analysis can be concluded, they have to be run to
+produce <a href="LSD_faqs.html#results">simulation results</a>. Usually, the
+menu command <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
+Parallel Batch</a></span> is the more convenient way to run the entire set of
+configuration files. Please refer to the recommended <a href="#_SA_workflow">SA
+workflow</a> on how to proceed.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_NOLH_sampling_SA"></a><a name=nolh></a>NOLH sampling SA</h1>
+
+<p class=MsoNormal>This command produces a design of experiment (DoE) for <a
+href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting of a set of
+sampling points from a near-orthogonal Latin hypercube (NOLH). The NOLH is
+specified from the parametric space defined by the set of <a
+href="#_Configuring_values">configured test ranges</a> for the <a
+href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a> to be explored. The method
+creates multiple <span class=Cdigo>.lsd</span> <a
+href="LSD_faqs.html#modelsetting">model configuration</a> files each one
+containing one copy of the original model structure configured using the
+selected combination of values.</p>
+
+<p class=MsoNormal>This method was proposed by Cioppa and Lucas (2007) as a
+very efficient DoE in terms of the required number of samples to explore the
+parametric space under SA. The NOLH tables used were developed by <span
+class=SpellE>Hélcio</span> Vieira Jr. (2012) and Susan Sanchez (2015). NOLH
+sample sets can be used to fit meta-modeling methods, like Kriging, for
+producing enough sampling points to perform Sobol variance decomposition, as
+proposed in the <a href="#_LSDsensitivity_R_package">LSDsensitivity R package</a>.</p>
+
+<p align=center style='text-align:center'><span style='mso-no-proof:yes'><img
+border=0 width=225 height=254 id="_x0000_i1025" src="image/sa_nolh.png"></span></p>
+
+<p class=MsoNormal>The user specifies a few settings for the NOLH algorithm in
+a dialog box like the one depicted above. The default values are usually adequate
+for most applications as a reasonable tradeoff between precision and execution
+time. The available options are:</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l1 level1 lfo8'><![if !supportLists]><span style='font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
+style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'>NOLH table</b></span>: define the predefined NOLH table to use. The
+number of factors of the table (columns) must be equal or larger than the number
+of Parameters and lagged Variables to explore in the SA. The first option
+(default) selects the smallest table supporting the number of test elements
+chosen by the user, producing the smallest sample set. It is recommended to use
+the largest table your computation time budget allows. If the number of factors
+is larger than supported by the internal tables, the message <span class=Cdigo>External
+only</span> is presented and the user must provide the NOLH table as an
+external file (see the <span class=Cdigo>External design file</span> option
+below).</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo8'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'>Extended number of samples</b></span>: when checked, this option
+increases the sampling density inside the hypercube, almost doubling the number
+of sampling points. This provides better sampling of the parametric space at
+the cost of duplicating the simulation execution time. Required when the output
+Variables being analyzed are very sensitive to some of the initialization
+values and more samples are needed to fully sampling them. Not all tables may
+support this option (in this case, this option is ignored).</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo8'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'>External design file</b></span>: when checked allows the user to supply
+the experimental design file to be used. It is normally required only when
+exploring very large number of factors in the SA. The provided file can be
+named in the text box below this option (the default name is <span class=Cdigo>NOLH.csv</span>).
+The file must be placed in the same subdirectory as the current <span
+class=Cdigo>.lsd</span> model configuration file. The file shall comply with
+the CSV (comma separated values) text format. The data should be organized as a
+table where each column is associated to a dimension (factor) in the NOLH and
+the lines provide the factor level (integer) for each sampling point. Empty
+lines are not allowed.</p>
+
+<p class=MsoNormal>After executing this command, a certain number of <span
+class=Cdigo>.lsd</span> configuration files will be generated, as informed in
+the Log window. Before the analysis can be concluded, they have to be run to
+produce <a href="LSD_faqs.html#results">simulation results</a>. Usually, the
+menu command <a href="menurun.html">Run&gt;Create/Start Parallel Batch</a> is
+the more convenient way to run the entire set of configuration files. Please
+refer to the recommended <a href="#_SA_workflow">SA workflow</a> on how to
+proceed.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_LSDsensitivity_R_package"></a>LSDsensitivity R package</h1>
+
+<p class=MsoNormal>The LSDsensitivity <a href="LSD_faqs.html#r">R package</a>
+provides tools to analyze simulated experiments created using LSD native
+methods to sample the configuration (factor) space of the simulation model
+using different design of experiments (DoE). The LSD-produced experimental
+design data can be transparently imported to R by using the function <span
+class=Cdigo>read.doe.lsd</span> (see the package help pages for details on all
+the package functions).</p>
+
+<p class=MsoNormal>The package offers two sensitivity analysis (SA) methods pre-configured
+for application on LSD simulations: Morris Elementary Effects (EE) (<span
+class=Cdigo>elementary.effects.lsd</span>) and Sobol Variance Decomposition
+(SVD) (<span class=Cdigo>sobol.decomposition.lsd</span>).</p>
+
+<p class=MsoNormal>EE (<span class=Cdigo>elementary.effects.lsd</span>) employs
+a simple one-factor-at-a-time (OAT) SA and is usually applied as an initial
+screening method while selecting relevant factors to a SVD global SA. EE
+requires an appropriate set of sample points (the DoE) which can be generated
+in LSD when menu option <span class=Cdigo>Data&gt;Sensitivity Analysis&gt;EE
+Sampling</span> is selected. Please make sure to take note of the DoE
+parameters used for the sampling, as they will be required for the
+configuration of your R analysis script.</p>
+
+<p class=MsoNormal>Due to its high computational cost, SVD (<span class=Cdigo>sobol.decomposition.lsd</span>)
+is usually performed over a meta-model fitted from the experimental data
+produced by the LSD original model. The meta-model can be fitted using
+different sampling strategies offered by LSD, being the option <span
+class=Cdigo>Data&gt;Sensitivity Analysis&gt;NOLH Sampling</span> (Near
+Orthogonal Latin Hypercube) usually the most efficient. Additionally to the set
+of samples used to fit the meta-model, it is recommended to also generate
+another set for the (out-of-sample) validation of the meta-model (<span
+class=Cdigo>Data&gt;Sensitivity Analysis&gt;MC Range Sampling</span> is the
+recommended option).</p>
+
+<p class=MsoNormal>The package offers two meta-modeling (MM) methods for using
+with SVD: Kriging and polynomial. Kriging <span class=Cdigo>kriging.model.lsd</span>)
+is offered for five different variance kernels (Matern 5/2, Matern 3/2,
+Gaussian, exponential, and power exponential) and two trend models (constant or
+first order polynomial) to choose, including auto-selection to the best fitting
+alternative. Polynomial meta-models of first or second order, with or without
+interactions, and auto-selection are also offered (<span class=Cdigo>polynomial.model.lsd</span>).
+Kriging is the recommended option in most cases.</p>
+
+<p class=MsoNormal>Additionally, the package offers tools for the graphical
+representation of the meta-models response surfaces (2D and 3D) (<span
+class=Cdigo>response.surface.lsd</span>), to predict meta-model response in
+specific points in the factor space (<span class=Cdigo>model.pred.lsd</span>),
+to identify maximum and minimum responses from a set of factors (<span
+class=Cdigo>model.limits.lsd</span>), and to find optimal parameter settings
+using the meta-model (<span class=Cdigo>model.optim.lsd</span>).</p>
+
+<p class=MsoNormal>The usual workflow in R to perform EE or SVD SA is the
+following (assuming <a href="#_SA_workflow">LSD SA workflow</a> is done):</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo10'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>Open R (or RStudio) and check you have the
+following packages installed and download them if required (if you install
+LSDsensitivity from CRAN or another online repository, and not from a file, all
+other dependency packages should be automatically downloaded):</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt'><span class=Cdigo>LSDsensitivity</span>,
+<span class=Cdigo>LSDinterface</span>, <span class=Cdigo>abind</span>, <span
+class=Cdigo>tseries</span>, <span class=Cdigo>car</span>, <span class=Cdigo>minqa</span>,
+<span class=Cdigo>nloptr</span>, <span class=Cdigo>Rcpp</span>, <span
+class=Cdigo>RcppEigen</span>, <span class=Cdigo>lme4</span>, <span class=Cdigo>SparseM</span>,
+<span class=Cdigo>MatrixModels</span>, <span class=Cdigo>pbkrtest</span>, <span
+class=Cdigo>quantreg</span>, <span class=Cdigo>DiceKriging</span>, <span
+class=Cdigo>kSamples</span>, <span class=Cdigo>SuppDists</span>, <span
+class=Cdigo>randtoolbox</span>, <span class=Cdigo>rngWELL</span>, <span
+class=Cdigo>rgenoud</span>, <span class=Cdigo>sensitivity</span>, <span
+class=Cdigo>xts</span>, <span class=Cdigo>TTR</span>, <span class=Cdigo>quadprog</span>,
+<span class=Cdigo>zoo</span>, <span class=Cdigo>quantmod</span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo10'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>For SVD SA, open the <span class=Cdigo>kriging-sobol-SA.R</span>
+example in RStudio or your text editor. For the use of a polynomial MM for the
+SVD analysis, open <span class=Cdigo>poly-sobol-SA.R</span> instead. For EE SA,
+open <span class=Cdigo>elementary-effects-SA.R</span>. All example SA scripts
+are included in the LSD installation directory under the subdirectory <span
+class=Cdigo>R/Example</span>.</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo10'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>Adjust the vector <span class=Cdigo>lsdVars</span>
+to contain all the LSD saved variables you want to use in your analysis (for
+performance reasons, do not include saved but unused variables), replacing the <span
+class=Cdigo>varX</span> dummies. </p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo10'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>Adjust the vector <span class=Cdigo>logVars</span>
+to contain all LSD variables (included in <span class=Cdigo>lsdVars</span>)
+that require to have the log value used in the analysis (let the vector empty,
+i.e., <span class=Cdigo>c( )</span>, if no log variable is required).</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo10'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>Include in the vector <span class=Cdigo>newVars</span>
+any new variable (not included in <span class=Cdigo>lsdVars</span>) that has to
+be added to the dataset (let the vector empty, i.e., <span class=Cdigo>c( )</span>,
+if no new variable is required).</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo10'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>If new variables are required, adapt the <span
+class=Cdigo>eval.vars</span> function to compute any new variable included in <span
+class=Cdigo>newVars</span> (use the commented example as a reference).</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo10'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>7.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>Adjust the arguments to the function <span
+class=Cdigo>read.doe.lsd</span> for the relative subdirectory of the LSD SA
+experiment data files (default is same as R working directory), the data files
+base name (the file name chosen for the baseline configuration without the <span
+class=Cdigo>.lsd</span> suffix) and the name of the variable to be used as
+reference for the sensitivity analysis (you have to run the script multiple
+times if there is more than one).</p>
+
+<p class=MsoListParagraph style='margin-left:35.7pt;text-indent:-17.85pt;
+mso-list:l0 level1 lfo10'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>8.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>Save the modified script, renaming if necessary,
+and run it in R (or click the <span class=Cdigo>Source</span> button in
+RScript), redirecting output to a file first if required.</p>
+
+<p class=MsoNormal>Two examples using the LSDsensitivity R package are
+available in a standard LSD installation: the Industrial Dynamics model and the
+Island Model. They can be loaded in <a href="modelbrowser.html">LMM Model
+Browser</a> and are found in the <span class=Cdigo>Examples/Literature</span>
+group.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span lang=PT-BR style='mso-ansi-language:PT-BR'><o:p>&nbsp;</o:p></span></p>
+
+</div>
+
+</body>
+
+</html>
