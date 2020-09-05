@@ -414,7 +414,7 @@ PUT_NODE
 ****************************************************/
 void put_node( int x, int y, char *str, bool sel )
 {
-	cmd( ".str.f.c create oval [ expr %d - $nsizeM / 2 ] [ expr %d + $vmarginM - $nsizeM / 2 ] [ expr %d + $nsizeM / 2 ] [ expr %d + $vmarginM + $nsizeM / 2 ]  -fill $colorsTheme(%s) -outline $colorsTheme(dfg) -tags %s", x, y, x, y, sel ? "hc" : "sfg", str );
+	cmd( ".str.f.c create oval [ expr %d - $nsizeM / 2 ] [ expr %d + $vmarginM - $nsizeM / 2 ] [ expr %d + $nsizeM / 2 ] [ expr %d + $vmarginM + $nsizeM / 2 ]  -fill $colorsTheme(%s) -outline $colorsTheme(dfg) -tags %s", x, y, x, y, sel ? "hc" : "isbg", str );
 }
 
 
@@ -445,7 +445,7 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 			if [ winfo exists .list ] { \
 				destroy .list \
 			}; \
-			toplevel .list -colormap .str -background $colorsTheme(bg); \
+			toplevel .list -background $colorsTheme(bg); \
 			wm transient .list .str; \
 			wm title .list \"\"; \
 			wm protocol .list WM_DELETE_WINDOW { }; \

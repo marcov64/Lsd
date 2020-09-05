@@ -290,20 +290,19 @@ cmd( "ttk::label .da.vars.lb.bh.ncas -text \"Cases = $numc\" " );
 cmd( "pack .da.vars.lb.bh.nvar .da.vars.lb.bh.pad .da.vars.lb.bh.ncas -side left" );
 cmd( "pack .da.vars.lb.bh" );
 
-
 // vertical toolbar
 cmd( "set f .da.vars.b" );
 cmd( "ttk::frame $f" );
 cmd( "ttk::label $f.pad1 -style boldSmall.TLabel" );
-cmd( "ttk::button $f.in -width [ expr $butWid - 3 ] -style Toolbutton -text \u25b6 -command { set choice 6 }" );
-cmd( "ttk::button $f.out -width [ expr $butWid - 3 ] -style Toolbutton -state disabled -text \u25c0 -command { set choice 7 }" );
-cmd( "ttk::button $f.sort -width [ expr $butWid - 3 ] -style Toolbutton -text \"Sort \u25b2\" -command { set choice 5 } -underline 0" );
-cmd( "ttk::button $f.sortdesc -width [ expr $butWid - 3 ] -style Toolbutton -text \"Sort \u25bc\" -command { set choice 38 } -underline 1" );
-cmd( "ttk::button $f.sortend -width [ expr $butWid - 3 ] -style Toolbutton -text \"Sort+\" -command { set choice 15 } -underline 2" );
-cmd( "ttk::button $f.unsort -width [ expr $butWid - 3 ] -style Toolbutton -text \"Unsort\" -command { set choice 14 } -underline 0" );
-cmd( "ttk::button $f.search -width [ expr $butWid - 3 ] -style Toolbutton -text Find... -command { set choice 39 } -underline 0" );
-cmd( "ttk::button $f.add -width [ expr $butWid - 3 ] -style Toolbutton -text \"Add...\" -command { set choice 24 } -underline 0" );
-cmd( "ttk::button $f.empty -width [ expr $butWid - 3 ] -style Toolbutton -text Clear -command { set choice 8 } -underline 0" );
+cmd( "ttk::button $f.in -width 5 -style Toolbutton -text \u25b6 -command { set choice 6 }" );
+cmd( "ttk::button $f.out -width 5 -style Toolbutton -state disabled -text \u25c0 -command { set choice 7 }" );
+cmd( "ttk::button $f.sort -width 5 -style Toolbutton -text \"Sort \u25b2\" -command { set choice 5 } -underline 0" );
+cmd( "ttk::button $f.sortdesc -width 5 -style Toolbutton -text \"Sort \u25bc\" -command { set choice 38 } -underline 1" );
+cmd( "ttk::button $f.sortend -width 5 -style Toolbutton -text \"Sort+\" -command { set choice 15 } -underline 2" );
+cmd( "ttk::button $f.unsort -width 5 -style Toolbutton -text \"Unsort\" -command { set choice 14 } -underline 0" );
+cmd( "ttk::button $f.search -width 5 -style Toolbutton -text Find... -command { set choice 39 } -underline 0" );
+cmd( "ttk::button $f.add -width 5 -style Toolbutton -text \"Add...\" -command { set choice 24 } -underline 0" );
+cmd( "ttk::button $f.empty -width 5 -style Toolbutton -text Clear -command { set choice 8 } -underline 0" );
 cmd( "ttk::label $f.pad2" );
 cmd( "pack $f.pad1 $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.search $f.add $f.empty $f.pad2 -padx 2 -pady 1 -fill y" );
 

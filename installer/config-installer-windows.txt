@@ -2,5 +2,5 @@
 Title="LSD 7.3"
 BeginPrompt="Do you want to install LSD 7.3?"
 ExecuteFile=".\gnu\bin\wish86.exe"
-ExecuteParameters=".\installer\setup.tcl"
+ExecuteParameters=".\src\installer.tcl"
 ;!@InstallEnd@!

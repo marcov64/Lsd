@@ -21,11 +21,11 @@
 # NEWTOP
 # Procedure to create top level new windows
 #************************************************
-proc newtop { w { name "" } { destroy { } } { par "." } } {
-	global RootLsd LsdSrc parWndLst grabLst noParLst logWndFn colorsTheme activeplot
+proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
+	global RootLsd parWndLst grabLst noParLst logWndFn colorsTheme activeplot
 
 	destroytop $w
-	toplevel $w -colormap $par -background $colorsTheme(bg)
+	toplevel $w -background $colorsTheme(bg)
 	
 	# try to prevent LSD to withdraw and grab windows focus when deiconify
 	if { $w in [ list .deb .lat .mm ] || ( [ info exists activeplot ] && [ string equal $w $activeplot ] ) } {
@@ -66,7 +66,10 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 	wm group $w .
 	wm title $w $name
 	wm protocol $w WM_DELETE_WINDOW $destroy
-	setglobkeys $w
+	
+	if { ! $noglobkeys } {
+		setglobkeys $w
+	}
 
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, grab:$grabLst)" }
 }
@@ -146,7 +149,11 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 				if [ info exists defaultPos ] {
 					set pos $defaultPos
 				} else {
-					set pos centerW
+					if [ winfo viewable [ winfo parent $w ] ] {
+						set pos centerW
+					} else {
+						set pos centerS
+					}
 				}
 			}
 
@@ -155,7 +162,11 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 				if [ info exists defaultPos ] {
 					set pos $defaultPos
 				} else {
-					set pos centerW
+					if [ winfo viewable [ winfo parent $w ] ] {
+						set pos centerW
+					} else {
+						set pos centerS
+					}
 				}
 			}
 
@@ -267,7 +278,7 @@ proc destroytop w {
 	}
 
 	# save main windows sizes/positions
-	if { $restoreWin && [ lsearch $wndLst $w ] >= 0 } {
+	if { [ info exists restoreWin ] && $restoreWin && [ lsearch $wndLst $w ] >= 0 } {
 		set curGeom [ geomtosave $w ]
 
 		if { $curGeom != "" } {
@@ -1028,6 +1039,7 @@ proc selectcell { can cell } {
 #************************************************
 proc okhelpcancel { w fr comOk comHelp comCancel } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
 	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
@@ -1048,6 +1060,7 @@ proc okhelpcancel { w fr comOk comHelp comCancel } {
 #************************************************
 proc okhelp { w fr comOk comHelp } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
 	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
@@ -1066,6 +1079,7 @@ proc okhelp { w fr comOk comHelp } {
 #************************************************
 proc okcancel { w fr comOk comCancel } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
 	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
@@ -1083,6 +1097,7 @@ proc okcancel { w fr comOk comCancel } {
 #************************************************
 proc helpcancel { w fr comHelp comCancel } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
 	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
@@ -1101,6 +1116,7 @@ proc helpcancel { w fr comHelp comCancel } {
 #************************************************
 proc ok { w fr comOk } {
 	global butWid butPad butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
@@ -1116,6 +1132,7 @@ proc ok { w fr comOk } {
 #************************************************
 proc cancel { w fr comCancel } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
 	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
@@ -1131,6 +1148,7 @@ proc cancel { w fr comCancel } {
 #************************************************
 proc Xcancel { w fr nameX comX comCancel } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	if { [ string length "$nameX" ] > $butWid } {
 		set Xwid [ string length "$nameX" ]
@@ -1153,6 +1171,7 @@ proc Xcancel { w fr nameX comX comCancel } {
 #************************************************
 proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	if { [ string length "$nameX" ] > $butWid } {
 		set Xwid [ string length "$nameX" ]
@@ -1180,6 +1199,7 @@ proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 #************************************************
 proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	if { [ string length "$nameX" ] > $butWid } {
 		set Xwid [ string length "$nameX" ]
@@ -1219,6 +1239,7 @@ proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
 #************************************************
 proc XYZokhelpcancel { w fr nameX nameY nameZ comX comY comZ comOk comHelp comCancel } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	if { [ string length "$nameX" ] > $butWid } {
 		set Xwid [ string length "$nameX" ]
@@ -1260,6 +1281,7 @@ proc XYZokhelpcancel { w fr nameX nameY nameZ comX comY comZ comOk comHelp comCa
 #************************************************
 proc donehelp { w fr comDone comHelp } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text Done -command $comDone
 	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
@@ -1278,6 +1300,7 @@ proc donehelp { w fr comDone comHelp } {
 #************************************************
 proc done { w fr comDone } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text Done -command $comDone
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
@@ -1293,6 +1316,7 @@ proc done { w fr comDone } {
 #************************************************
 proc comphelpdone { w fr comComp comHelp comDone } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.comp -width $butWid -text Compute -command $comComp
 	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
@@ -1313,6 +1337,7 @@ proc comphelpdone { w fr comComp comHelp comDone } {
 #************************************************
 proc findhelpdone { w fr comFind comHelp comDone } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.search -width $butWid -text Find -command $comFind
 	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
@@ -1333,6 +1358,7 @@ proc findhelpdone { w fr comFind comHelp comDone } {
 #************************************************
 proc save { w fr comSave } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text Save -command $comSave
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
@@ -1348,6 +1374,7 @@ proc save { w fr comSave } {
 # procedures to create standard button sets
 proc yesno { w fr comYes comNo } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.yes -width $butWid -text Yes -command $comYes
 	ttk::button $w.$fr.no -width $butWid -text No -command $comNo
@@ -1365,6 +1392,7 @@ proc yesno { w fr comYes comNo } {
 # procedures to create standard button sets
 proc yesnocancel { w fr comYes comNo comCancel } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.yes -width $butWid -text Yes -command $comYes
 	ttk::button $w.$fr.no -width $butWid -text No -command $comNo
@@ -1384,6 +1412,7 @@ proc yesnocancel { w fr comYes comNo comCancel } {
 #************************************************
 proc retrycancel { w fr comRetry comCancel } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.retry -width $butWid -text Retry -command $comRetry
 	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
@@ -1402,6 +1431,7 @@ proc retrycancel { w fr comRetry comCancel } {
 # procedures to create standard button sets
 proc abortretryignore { w fr comAbort comRetry comIgnore } {
 	global butWid butPad
+	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.abort -width $butWid -text Abort -command $comAbort
 	ttk::button $w.$fr.retry -width $butWid -text Retry -command $comRetry

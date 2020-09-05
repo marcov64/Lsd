@@ -119,27 +119,29 @@ For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
 
 IMPORTANT: from version 7.3 and higher, LSD supports only Windows 64-bit. If you must run LSD in a Windows 32-bit computer, please use the 7.2 version which can be downloaded from the same site indicated below. If you are unsure of the version of Windows in your computer, please check in "Windows > Settings > System > About > System type".
 
-To install LSD, simply unzip the LSD distribution file on the desired folder. In most cases "C:\" (the root of the hard disk) is the best option. The simplest way of doing is:
+To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-X-Y-Z.exe). Download it, double click on the installer file, and follow the instructions. The installer executable can be deleted after the installation.
+ 
+Alternatively, or in the case of problems using the installer, it is also possible to simply unzip a LSD distribution file archive on the desired folder. In most cases "C:\" (the root of the hard disk) is a good option. The steps to perform a manual installation are:
 
 1. In an internet browser, open the site https://github.com/marcov64/Lsd/releases , choose the desired release, and click on the respective "Source code (zip)" link to download the LSD distribution file.
 
-2. Open Windows Explorer and double-click on the downloaded LSD distribution file to open it (e.g., Lsd-7.3-master.zip).
+2. Open Windows Explorer and double-click on the downloaded LSD distribution file to open it (e.g., LSD-7.3-master.zip).
 
-3. Drag the single folder inside the distribution file (e.g., Lsd-7.3-master) to the desired location. The recommended is "C:\", normally labeled as "Local Disk (C:)" in Windows Explorer.
+3. Drag the single folder inside the distribution file (e.g., LSD-7.3-master) to the desired location. The recommended is "C:\", normally labeled as "Local Disk (C:)" in Windows Explorer.
 
 This will create the whole LSD folder structure. The distribution file may be deleted after installation.
 
-IMPORTANT: LSD cannot be installed within a folder (or having a parent folder) containing spaces in its name. For example, the directory "C:\Program Files\Lsd" cannot be used. If you installed LSD in such a location, simply move (drag) the whole LSD folder structure to an adequate place ("C:\" recommended).
+IMPORTANT: LSD cannot be installed within a folder (or having a parent folder) containing spaces in its name. For example, the directory "C:\Program Files\Lsd" cannot be used. If you installed LSD in such a location, simply move (or drag) the whole LSD folder structure to an adequate place ("C:\" recommended).
 
-To create a desktop link (icon) to run LSD/LMM, you simply double-click in Windows Explorer one of the following batch files available in the installation directory:
+To create a desktop link (icon) to run LSD/LMM, as well as an entry to the Windows Start Menu, you can simply double-click in Windows Explorer the following batch file available in the installation directory:
 
 add-shortcut-windows.bat
 
-After the desktop icon is created, double-clicking it opens LMM (LSD Model Manager) which allows to create new models, or select existing models. If you cannot create the LSD icon on your desktop following the steps above, you may still run LSD by double-clicking the file "run.bat" inside the LSD installation directory. Never invoke the file "lmm.exe" directly because it needs some environment variables to be set by "run.bat".
+After the desktop icon is created, double-clicking it opens LMM (LSD Model Manager) which allows to create new models, or select existing models. If you cannot create the LSD icon on your desktop, or an entry in Start Menu, following the steps above, you may still run LSD by double-clicking the file "run.bat" inside the LSD installation directory. Never invoke the file "lmm.exe" directly because it needs some environment variables to be set by "run.bat".
 
 GNUPLOT INSTALLATION:
 
-It is recommended, but not required, to install the Gnuplot graphical plotting application. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. The required Gnuplot installer (64-bit) can be downloaded from http://www.gnuplot.info . The step-by-step instructions to install Gnuplot are:
+It is recommended, but not required, to install the Gnuplot graphical plotting application. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. LSD installer usually detects when Gnuplot is missing and tries to install it automatically. If this is not possible, Gnuplot can be also installed manually. The required Gnuplot installer (64-bit) can be downloaded from http://www.gnuplot.info . The step-by-step instructions to install Gnuplot are:
 
 1. In an internet browser, open the site http://www.gnuplot.info, choose the desired version (the current stable one is recommended), click on the respective Release link, and on the files list choose gpXXX-win64-mingw.exe, where XXX is the current version number (currently, gp528-win64-mingw.exe), ensuring the 64-bit Windows version is selected.
 
@@ -149,7 +151,7 @@ It is recommended, but not required, to install the Gnuplot graphical plotting a
 
 4. In the "Select Additional Tasks", set the terminal type to "wxt", keep the proposed file associations, and MAKE SURE you select the "Add application directory to your PATH environment variable". If this option is not visible, you need to scroll down in the window to see it. Press "Next" and then "Install". When the installation is completed, press "Next" and "Finish".
 
-ATTENTION: If Gnuplot is not included in the Windows PATH environment variable, LSD will not be able to use Gnuplot. If this option is missing, Gnuplot must be installed again using the correct options as described above.
+ATTENTION: If Gnuplot is not included in the Windows PATH environment variable, LSD may not be able to use Gnuplot. If this option is missing, Gnuplot must be installed again using the correct options as described above.
 
 USING DIFFERENT COMPILERS (optional):
 
@@ -162,16 +164,16 @@ Cygwin compiler is easier to install as it does not require the user to deal wit
 4.2 macOS installation (10.10+ ONLY)
 ************************************
 
-LSD is only supported in mac computers as a native macOS (Aqua) application.
-
-To install LSD, simply unzip the LSD distribution file (e.g., Lsd-7.3-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
+To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-X-Y-Z.dmg). Download it, double click on the package file to mount it, double click on the LSD Installer application, and follow the instructions. The installer package can be deleted after the installation.
+ 
+To manually install LSD, simply unzip a LSD distribution file (e.g., LSD-7.3-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
 
 Next, open the Terminal application (located inside the Utilities app folder), and type the following commands (each line must be completed by pressing "Enter"):
 
 cd ~/Lsd-7.3-master
 ./add-shortcut-mac.sh
 
-After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD.
+After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD. A shortcut is also created in the computer Applications folder.
 
 Users of macOS Sierra (10.12) or newer MUST yet manually install the Apple Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required command line tools available in macOS. To install it, open the Terminal  and enter the following command:
 
@@ -181,17 +183,19 @@ Then, in the opened window, click on the "Install" button (do NOT click on the "
 
 It is recommended, but not required, to install multitail and Gnuplot applications. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. The easiest way to install Gnuplot is to use the Homebrew package manager for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
 
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
-After Homebrew installation finishes (details at http://brew.sh), you can install Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
+After Homebrew installation finishes (details at http://brew.sh), you can install multitail and Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
 
 brew install multitail gnuplot
 
 IN CASE OF PROBLEMS:
 
+LSD is only supported in mac computers as a native macOS (Aqua) application. There is no longer support for X11.
+
 If using macOS 10.12 (Sierra) or newer, you MUST use the "add-shortcut-mac.sh" command above to remove LMM and LSD from the system quarantine. Failing to do so will prevent from using LSD as a native macOS application.
 
-If you delete or cannot create the LSD desktop shortcut, you can still run the app named LMM located inside the LSD installation directory (double click it in Finder) to open LMM/LSD, or try to rerun the "add-shortcut-mac.sh" script to recreate the shortcut.
+If you delete or cannot create the LSD shortcuts, you can still run the app named LMM located inside the LSD installation directory (double click it in Finder) to open LMM/LSD, or try to rerun the "add-shortcut-mac.sh" script to recreate the shortcut.
 
 
 **********************

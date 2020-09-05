@@ -125,9 +125,9 @@ set rstepM		0.1		; # relative scaling factor step step
 set rfactM		0.3		; # horizontal range exponential factor
 set rinitM		750		; # horizontal initial width (4 root sons)
 set rincrM		100		; # horizontal width increase step
-set bhstepMwin	25		; # button horizontal step (Windows/Mac 8.6.9)
+set bhstepMwin	25		; # button horizontal step (Windows)
 set bhstepMlin	35		; # button horizontal step (Linux)
-set bhstepMmac	45		; # button horizontal step (Mac 8.6.10+)
+set bhstepMmac	27		; # button horizontal step (Mac)
 set bvstepMwin	26		; # button vertical step (Windows/Mac)
 set bvstepMlin	30		; # button vertical step (Linux)
 set borderMmac	10		; # additional open space to border (Mac 8.6.10+)
@@ -150,7 +150,7 @@ set pdigitsR	3	; # default precision digits
 set shiftR		20	; # new window shift
 
 # debug/data browse windows defaults
-set hsizeD		800		; # window width (pixels)
+set hsizeD		910		; # window width (pixels)
 set vsizeD		400		; # window minimum height (pixels)
 set vspcszD		5		; # line horizontal space size (pixels)
 set hnamshD		0.20	; # variable name horizontal share (1 column out of 2)
@@ -194,8 +194,7 @@ set deltaSizeWindows	2
 
 # OS specific default window buttons widths
 set butLinux	9
-set butMac		5
-set butMacTk869	8
+set butMac		7
 set butWindows	9
 
 # OS specific screen location offset adjustments
@@ -261,7 +260,7 @@ set themeTable(alt) 	   	{ all		ttk::theme::alt			"Alt"				0		1	 }
 set themeTable(clam) 	   	{ all		ttk::theme::clam		"Clam"				0		2	 }
 set themeTable(classic)    	{ all		ttk::theme::classic		"Classic"			0		1	 }
 set themeTable(default)    	{ all		ttk::theme::default		"Default"			0		3	 }
-set themeTable(aqua) 	   	{ mac		ttk::theme::aqua		"Aqua"				0		3	 }
+set themeTable(aqua) 	   	{ mac		ttk::theme::aqua		"Aqua"				0		0	 }
 set themeTable(vista)      	{ windows	ttk::theme::vista		"Vista"				0		4	 }
 set themeTable(winnative)  	{ windows	ttk::theme::winnative	"Windows Native"	0		2	 }
 set themeTable(awdark)     	{ all		awdark					"Adwaita Dark"		1		2	 }

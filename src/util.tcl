@@ -54,7 +54,7 @@ proc LsdEnv { sep } {
 	set tclV [ info patch ]
 	set gccV [ gccVersion ]
 	
-	return "Platform: $plat ($mach)${sep}OS: $os ($osV)${sep}Tcl/Tk: $tclV\nGCC: $gccV"
+	return "Platform: $plat ($mach)${sep}OS: $os ($osV)${sep}Tcl/Tk: $tclV\nCompiler: $gccV"
 }
 
 
@@ -104,6 +104,69 @@ proc gccVersion { } {
 	} else {
 		return $v
 	}
+}
+
+
+#************************************************
+# PROGRESSBOX
+# Show interruptible progress bar window while 
+# slow operations are running
+#************************************************
+proc progressbox { w tit max var { destroy { } } { par . } } {
+	
+	newtop $w $tit $destroy $par
+
+	ttk::frame $w.main
+	ttk::label $w.main.lab -text $tit
+	ttk::progressbar $w.main.scale -length 300 -maximum $max -variable {*}$var
+	ttk::label $w.main.info
+	pack $w.main.lab $w.main.scale $w.main.info -pady 5
+	pack $w.main -padx 10 -pady 10
+
+	cancel $w b $destroy
+
+	showtop $w
+	
+	return $w.main.info
+}
+
+
+#************************************************
+# WAITBOX
+# Show non-interruptible window while slow
+# external scripts are running
+#************************************************
+proc waitbox { w tit msg { steps "" } { timer no } { par . } } {
+	
+	newtop $w "$tit" { } $par 1
+
+	ttk::frame $w.main
+	ttk::label $w.main.msg -justify center -text "$msg"
+	pack $w.main.msg -pady 10
+	
+	if { $steps != "" } {
+		ttk::frame $w.main.steps -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]
+		ttk::label $w.main.steps.txt -text $steps
+		pack $w.main.steps.txt -padx 5 -pady 5
+		pack $w.main.steps -pady 10
+	}
+	
+	if { $timer } {
+		ttk::frame $w.main.time
+		ttk::label $w.main.time.lab -text "Elapsed time:"
+		ttk::label $w.main.time.val -style hl.TLabel
+		pack $w.main.time.lab $w.main.time.val -padx 5 -side left
+		pack $w.main.time -pady 10
+		set retVal $w.main.time.val
+	} else {
+		set retVal ""
+	}
+	
+	pack $w.main -padx 20 -pady 20
+	
+	showtop $w
+	
+	return $retVal
 }
 
 
@@ -337,31 +400,6 @@ proc comp_und { n1 n2 } {
 
 
 #************************************************
-# GET_SERIES
-# Set a byte array to hold data series that can be accessed from C
-# Based on code by Arjen Markus (http://wiki.tcl.tk/4179)
-#************************************************
-proc get_series { size data } {
-	upvar $data _data
-
-	set _data [ list ]
-	# Create a list with the correct number of integer elements
-	for { set i 0 } { $i < $size } { incr i } {
-	   lappend _data 0
-	}
-
-	# Convert the list to a byte array
-	set c_data [ intsToByteArray $_data ]
-
-	# Call the C routine - that will fill the byte array
-	upload_series $size $c_data
-
-	# Convert the byte array into an ordinary list
-	set _data [ byteArrayToInts $c_data ]
-}
-
-
-#************************************************
 # LISTTOBYTEARRAY
 # Generic routine to convert a list into a bytearray
 #************************************************
@@ -446,3 +484,28 @@ interp alias { } byteArrayToStrings { } byteArrayToList s
 interp alias { } byteArrayToInts    { } byteArrayToList i
 interp alias { } byteArrayToFloats  { } byteArrayToList f
 interp alias { } byteArrayToDoubles { } byteArrayToList d
+
+
+#************************************************
+# GET_SERIES
+# Set a byte array to hold data series that can be accessed from C
+# Based on code by Arjen Markus (http://wiki.tcl.tk/4179)
+#************************************************
+proc get_series { size data } {
+	upvar $data _data
+
+	set _data [ list ]
+	# Create a list with the correct number of integer elements
+	for { set i 0 } { $i < $size } { incr i } {
+	   lappend _data 0
+	}
+
+	# Convert the list to a byte array
+	set c_data [ intsToByteArray $_data ]
+
+	# Call the C routine - that will fill the byte array
+	upload_series $size $c_data
+
+	# Convert the byte array into an ordinary list
+	set _data [ byteArrayToInts $c_data ]
+}

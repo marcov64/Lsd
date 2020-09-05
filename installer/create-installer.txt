@@ -1,4 +1,4 @@
-To create Windows self-extracting package
+To create Windows .exe installer
 
 1. Get 7-Zip LZMA SDK at https://www.7-zip.org (ex. lzma1900.7z)
 2. Copy 7zr.exe and 7zSD.sfx to gnu\installer folder in LSD installation
@@ -6,3 +6,8 @@ To create Windows self-extracting package
 4. Modify config-installer-windows.txt extraction configuration if needed
 5. Add files/patterns to exclude to exclude-installer-windows.txt
 6. Run create-installer-windows.bat to create installer
+
+
+To create macOS DMG installer
+1. Add files/patterns to exclude to exclude-installer-mac.txt
+2. Run create-installer-mac.sh to create the installer

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	Copyright (c) 2005-2009 Daniel A. Steffen <das@users.sourceforge.net>
+	Copyright 2008-2009, Apple Inc.
+
+	See the file "license.terms" for information on usage and redistribution of
+	this file, and for a DISCLAIMER OF ALL WARRANTIES.
+-->
+<plist version="1.0">
+  <dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
+    <key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>*</string>
+			</array>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>text/plain</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>NSStringPboardType</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>TEXT</string>
+				<string>****</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+	</array>
+    <key>CFBundleExecutable</key>
+    <string>Wish</string>
+    <key>CFBundleGetInfoString</key>
+	<string>LSD Installer 7.3,
+	Copyright © Marco Valente,
+	Copyright © Marcelo C. Pereira</string>
+    <key>CFBundleIconFile</key>
+    <string>lsd.icns</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.marcov64.lsdi</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string><string>en_us</string>
+	</array>
+    <key>CFBundleName</key>
+    <string>LSD Installer</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>7.3</string>
+    <key>CFBundleSignature</key>
+    <string>LSDI</string>
+    <key>CFBundleVersion</key>
+    <string>7.3</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>10.10.0</string>
+    <key>LSRequiresCarbon</key>
+    <true/>
+    <key>NSHighResolutionCapable</key>
+    <string>True</string>
+  </dict>
+</plist>

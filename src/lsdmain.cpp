@@ -184,7 +184,7 @@ int lsdmain( int argn, char **argv )
 	strcpy( path, "" );
 	strcpy( tcl_dir, "" );
 	strcpy( simul_name, DEF_CONF_FILE );
-	exec_path = _getcwd( exec_path, MAX_PATH_LENGTH );
+	exec_path = getcwd( exec_path, MAX_PATH_LENGTH );
 	exec_file = clean_file( argv[ 0 ] );	// global pointer to the name of executable file
 	exec_path = clean_path( exec_path );	// global pointer to path of executable file
 
@@ -393,16 +393,30 @@ int lsdmain( int argn, char **argv )
 	choice = 1;
 	done = Tk_Init( inter );
 	if ( done == TCL_OK )
-		cmd( "if { ! [ catch { package present Tk 8.5 } ] && [ winfo exists . ] } { set choice 0 } { set choice 1 }" );
+		cmd( "if { ! [ catch { package present Tk 8.6 } ] && [ winfo exists . ] } { set choice 0 } { set choice 1 }" );
 	if ( choice )
 	{
-		sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.5+) and configuration or reinstall LSD\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
+		sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.6+) and configuration or reinstall LSD\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
 		log_tcl_error( "Start Tk", msg );
 		myexit( 7 );
 	}
 	tk_ok = true;
 	cmd( "tk appname lsd" );
+	cmd( "console hide" );
+	cmd( "wm withdraw ." );
 
+	if ( platform == MAC )
+	{
+		cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
+
+		// close console if open (usually only in Mac)
+		cmd( "foreach i [ winfo interps ] { \
+				if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { \
+					send $i \"destroy .\" \
+				} \
+			}" );
+	}
+	
 	cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
 	if ( choice )
 	{
@@ -546,18 +560,6 @@ int lsdmain( int argn, char **argv )
 				myexit( 200 );
 			}
 
-	if ( platform == MAC )
-	{
-		cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
-
-		// close console if open (usually only in Mac)
-		cmd( "foreach i [ winfo interps ] { \
-				if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { \
-					send $i \"wm iconify .; wm withdraw .; destroy .\" \
-				} \
-			}" );
-	}
-	
 	// create a Tcl command that calls the C discard_change function before killing LSD
 	Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 
@@ -591,7 +593,6 @@ int lsdmain( int argn, char **argv )
 	cmd( "set gpterm $gnuplotTerm" );
 
 	// set main window
-	cmd( "wm withdraw ." );
 	cmd( "wm title . \"LSD Browser\"" );
 	cmd( "wm protocol . WM_DELETE_WINDOW { if [ string equal [ discard_change ] ok ] { exit } }" ); 
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );

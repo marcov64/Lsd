@@ -33,7 +33,7 @@ proc isDarkTheme { } {
 	if [ string equal $CurPlatform mac ] {
 		if { ! [ string equal [ info patchlevel ] 8.6.9 ] } {
 			update
-			return tk::unsupported::MacWindowStyle isdark .
+			return [ tk::unsupported::MacWindowStyle isdark . ]
 		}
 	} elseif [ string equal $CurPlatform linux ] {
 		catch { exec gsettings get org.gnome.desktop.interface gtk-theme } results

@@ -15,7 +15,7 @@
 
 #**************************************************************
 # ADD-SHORTCUT-LINUX.SH
-# Add a shortcut to LSD LMM in the Linux Gnome desktop.
+# Add a shortcut to LSD LMM in the Linux Gnome desktop and apps.
 #**************************************************************
 
 if [ "$1" = "-h" ]; then
@@ -35,6 +35,8 @@ else
 			DESKTOP="$1"
   		fi
 	fi
+	
+	# create the shortcuts with absolute paths
 	sed 's:$LSDROOT:'"$LSDROOT"':g' "$LSDROOT/$TARGET" > "$DESKTOP"/"$TARGET"
 	chmod +x "$DESKTOP"/"$TARGET"
 	chmod +x "$LSDROOT/$EXEC"
@@ -44,7 +46,4 @@ else
 		mkdir -p ~/.local/share/applications
 	fi
 	cp -f "$DESKTOP"/"$TARGET" ~/.local/share/applications
-	
-	# remove Windows files
-	"$LSDROOT"/gnu/remove-unused.sh
 fi

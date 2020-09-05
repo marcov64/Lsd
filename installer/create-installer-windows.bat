@@ -18,7 +18,7 @@ rem  CREATE-INSTALLER-WINDOWS.BAT
 rem  Create LSD installer for Windows.
 rem *************************************************************
 
-set LSD_VER=7-3-beta
+set LSD_FILE_TAG=7-3-beta
 
 if "%1"=="/?" (
 	echo Create LSD installer for Windows
@@ -49,17 +49,17 @@ if "%1"=="" (
 set INST_DIR=%LSD_DIR%\installer
 
 del %INST_DIR%\LSD-archive-windows.7z >nul 2>&1
-del %INST_DIR%\LSD-installer-windows-%LSD_VER%.exe >nul 2>&1
+del %INST_DIR%\LSD-installer-windows-%LSD_FILE_TAG%.exe >nul 2>&1
 
 %INST_DIR%\7zr.exe a %INST_DIR%\LSD-archive-windows.7z %LSD_DIR%\* -x@exclude-installer-windows.txt -r -mx -mf=BCJ2
 
-copy /b %INST_DIR%\7zSD.sfx + %INST_DIR%\config-installer-windows.txt + %INST_DIR%\LSD-archive-windows.7z %INST_DIR%\LSD-installer-windows-%LSD_VER%.exe  >nul 2>&1
+copy /b %INST_DIR%\7zSD.sfx + %INST_DIR%\config-installer-windows.txt + %INST_DIR%\LSD-archive-windows.7z %INST_DIR%\LSD-installer-windows-%LSD_FILE_TAG%.exe  >nul 2>&1
 
 del %INST_DIR%\LSD-archive-windows.7z >nul 2>&1
 echo .
 
-if exist %INST_DIR%\LSD-installer-windows-%LSD_VER%.exe (
-	echo Self-extracting LSD package created: %INST_DIR%\LSD-installer-windows-%LSD_VER%.exe
+if exist %INST_DIR%\LSD-installer-windows-%LSD_FILE_TAG%.exe (
+	echo Self-extracting LSD package created: %INST_DIR%\LSD-installer-windows-%LSD_FILE_TAG%.exe
 ) else (
 	echo Error creating LSD installer
 )

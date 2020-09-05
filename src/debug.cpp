@@ -125,6 +125,13 @@ if ( ! strcmp( Tcl_GetVar( inter, "existMenu", 0 ), "0" ) ||
 cmd( "set existButtons [ expr [ winfo exists .deb.b ] ]" );
 if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 { 
+	cmd( "if [ string equal $CurPlatform mac ] { \
+			set butWidD [ expr $butWid - 1 ]; \
+			set butPadD [ expr $butPad - 6 ] \
+		} { \
+			set butWidD $butWid; \
+			set butPadD $butPad \
+		}" );
 	cmd( "destroy .deb.b" );
 
 	cmd( "ttk::frame .deb.b" );
@@ -132,17 +139,17 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	// first row of buttons (always shown)
 	cmd( "ttk::frame .deb.b.move" );
 
-	cmd( "ttk::button .deb.b.move.up -width $butWid -text Up -command { set choice 3 } -underline 0" );
-	cmd( "ttk::button .deb.b.move.down -width $butWid -text Down -command { set choice 6 } -underline 0" );
-	cmd( "ttk::button .deb.b.move.prev -width $butWid -text Previous -command { set choice 12 } -underline 0" );
-	cmd( "ttk::button .deb.b.move.broth -width $butWid -text Next -command { set choice 4 } -underline 0" );
-	cmd( "ttk::button .deb.b.move.hypern -width $butWid -text \"Next Type\" -command { set choice 5 } -underline 5" );
-	cmd( "ttk::button .deb.b.move.last -width $butWid -text Last -command { set choice 14 } -underline 0" );
-	cmd( "ttk::button .deb.b.move.search -width $butWid -text Find -command { set choice 10 } -underline 0" );
-	cmd( "ttk::button .deb.b.move.hook -width $butWid -text Hooks -command { set choice 21 } -underline 0" );
-	cmd( "ttk::button .deb.b.move.net -width $butWid -text Network -command { set choice 22 } -underline 3" );
+	cmd( "ttk::button .deb.b.move.up -width $butWidD -text Up -command { set choice 3 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.down -width $butWidD -text Down -command { set choice 6 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.prev -width $butWidD -text Previous -command { set choice 12 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.broth -width $butWidD -text Next -command { set choice 4 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.hypern -width $butWidD -text \"Next Type\" -command { set choice 5 } -underline 5" );
+	cmd( "ttk::button .deb.b.move.last -width $butWidD -text Last -command { set choice 14 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.search -width $butWidD -text Find -command { set choice 10 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.hook -width $butWidD -text Hooks -command { set choice 21 } -underline 0" );
+	cmd( "ttk::button .deb.b.move.net -width $butWidD -text Network -command { set choice 22 } -underline 3" );
 	
-	cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.hook .deb.b.move.net -padx $butPad -side left" );
+	cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.hook .deb.b.move.net -padx $butPadD -side left" );
 	
 	cmd( "bind .deb <KeyPress-u> { .deb.b.move.up invoke }; bind .deb <KeyPress-U> {  .deb.b.move.up invoke }" );
 	cmd( "bind .deb <Up> { .deb.b.move.up invoke }" );
@@ -168,11 +175,11 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 		
 		if ( mode == 1 )
 		{
-			cmd( "ttk::button .deb.b.act.run -width $butWid -text Run -command { set choice 2; set_c_var done_in 0 } -underline 0" );
-			cmd( "ttk::button .deb.b.act.until -width $butWid -text Until -command { set choice 16; set_c_var done_in 0 } -underline 3" );
-			cmd( "ttk::button .deb.b.act.ok -width $butWid -text Step -command { set choice 1; set_c_var done_in 3 } -underline 0" );
-			cmd( "ttk::button .deb.b.act.call -width $butWid -text Caller -command { set choice 9 } -underline 0" );
-			cmd( "ttk::button .deb.b.act.prn_v -width $butWid -text \"v\\\[...\\]\" -command { set choice 15 } -underline 0" );
+			cmd( "ttk::button .deb.b.act.run -width $butWidD -text Run -command { set choice 2; set_c_var done_in 0 } -underline 0" );
+			cmd( "ttk::button .deb.b.act.until -width $butWidD -text Until -command { set choice 16; set_c_var done_in 0 } -underline 3" );
+			cmd( "ttk::button .deb.b.act.ok -width $butWidD -text Step -command { set choice 1; set_c_var done_in 3 } -underline 0" );
+			cmd( "ttk::button .deb.b.act.call -width $butWidD -text Caller -command { set choice 9 } -underline 0" );
+			cmd( "ttk::button .deb.b.act.prn_v -width $butWidD -text \"v\\\[...\\]\" -command { set choice 15 } -underline 0" );
 			
 			cmd( "bind .deb <KeyPress-r> { .deb.b.act.run invoke }; bind .deb <KeyPress-R> { .deb.b.act.run invoke }" );
 			cmd( "bind .deb <KeyPress-i> { .deb.b.act.until invoke }; bind .deb <KeyPress-I> { .deb.b.act.until invoke }" );
@@ -181,8 +188,8 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 			cmd( "bind .deb <KeyPress-v> { .deb.b.act.prn_v invoke }; bind .deb <KeyPress-V> { .deb.b.act.prn_v invoke }" );
 		}
 		
-		cmd( "ttk::button .deb.b.act.an -width $butWid -text Analysis -command { set choice 11 } -underline 0" );
-		cmd( "ttk::button .deb.b.act.prn_stck -width $butWid -text Stack -command { set choice 13 } -underline 4" );
+		cmd( "ttk::button .deb.b.act.an -width $butWidD -text Analysis -command { set choice 11 } -underline 0" );
+		cmd( "ttk::button .deb.b.act.prn_stck -width $butWidD -text Stack -command { set choice 13 } -underline 4" );
 		
 		cmd( "bind .deb <KeyPress-a> { .deb.b.act.an invoke }; bind .deb <KeyPress-A> { .deb.b.act.an invoke }" );
 		cmd( "bind .deb <KeyPress-k> { .deb.b.act.prn_stck invoke }; bind .deb <KeyPress-K> { .deb.b.act.prn_stck invoke }" );
@@ -194,14 +201,14 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 		cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -padx 2 -side left" );
 		
 		if ( mode == 1 )
-			cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.call .deb.b.act.prn_v .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butPad -side left" );
+			cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.call .deb.b.act.prn_v .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butPadD -side left" );
 		else
 			cmd( "pack .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butPad -side left" );
 	
-		cmd( "pack .deb.b.move .deb.b.act -ipady [ expr $butPad / 2 ] -anchor e" );
+		cmd( "pack .deb.b.move .deb.b.act -ipady [ expr $butPadD / 2 ] -anchor e" );
 	}
 	else
-		cmd( "pack .deb.b.move -ipady [ expr $butPad / 2 ] -anchor e" );		
+		cmd( "pack .deb.b.move -ipady [ expr $butPadD / 2 ] -anchor e" );		
 }
 
 app_res = *res;
@@ -1257,7 +1264,7 @@ void deb_show( object *r )
 	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
 
 	cmd( "if { ! [ winfo exists .deb.tit ] } { \
-			set fntSz [ font metrics [ ttk::style lookup boldSmall.TLabel -font ] -linespace ]; \
+			set fntSz [ expr [ font metrics [ ttk::style lookup boldSmall.TLabel -font ] -linespace ] + 2 ]; \
 			ttk::frame .deb.tit -height [ expr $fntSz + $vspcszD ]; \
 			ttk::label .deb.tit.name1 -style boldSmall.TLabel -text Variable -anchor w; \
 			ttk::label .deb.tit.val1 -style hlBoldSmall.TLabel -text Value; \

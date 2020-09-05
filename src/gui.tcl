@@ -39,7 +39,7 @@ source "$RootLsd/$LsdSrc/theme.tcl" ;		# load LSD gui theming
 source "$RootLsd/$LsdSrc/dblclick.tcl" ;	# enhancements to double-click in text widgets
 
 # optional development tools
-set conWnd		true ;	# enable console window to be opened with CTRL+ALT+J
+set conWnd		false ;	# enable console window to be opened with CTRL+ALT+J
 set logWndFn	false ;	# enable window functions operation logging
 set testWnd		false ;	# enable coordinates test window
 
@@ -74,15 +74,12 @@ if [ string equal $CurPlatform mac ] {
 	set bvstepM $bvstepMwin
 	set corrX $corrXmac
 	set corrY $corrYmac
+	set butWid $butMac
+	set bhstepM $bhstepMmac
+	set borderMadj $borderMmac
 
 	if { [ string equal [ info patchlevel ] 8.6.9 ] } {
-		set butWid $butMacTk869
-		set bhstepM $bhstepMwin
 		set borderMadj 0
-	} else {
-		set butWid $butMac
-		set bhstepM $bhstepMmac
-		set borderMadj $borderMmac
 	}
 	
 } elseif [ string equal $CurPlatform linux ] {
@@ -162,7 +159,8 @@ foreach theme [ array names themeTable ] {
 set themeNames [ lsort $themeNames ]
 
 # try to set tk theme (ttk), falling back to the set default
-if { [ array names themeTable -exact $lsdTheme ] == "" || \
+if { ! [ info exists lsdTheme ] || \
+	 [ array names themeTable -exact $lsdTheme ] == "" || \
 	 [ catch { package require [ lindex $themeTable($lsdTheme) 1 ] } ] ||
 	 [ catch { ttk::style theme use $lsdTheme } ] } {
 	if { [ array names themeTable -exact $DefaultTheme ] == "" || \
@@ -175,20 +173,28 @@ if { [ array names themeTable -exact $lsdTheme ] == "" || \
 }
 
 # define dark mode based on theme except on mac system-managed native theme
-if { ! [ string equal $lsdTheme aqua ] } {
-	set darkTheme [ lindex $themeTable($lsdTheme) 3 ]
-} else {
+# also use special aqua theme-automatic colors
+if { [ string equal $lsdTheme aqua ] } {
 	set darkTheme [ isDarkTheme ]
+	set colorsTheme(bg) systemWindowBackgroundColor					; # non-entry light/dark text background
+	set colorsTheme(fg) systemTextColor								; # entry/non-entry dark text foreground
+	set colorsTheme(dbg) systemTextBackgroundColor					; # entry dark text background
+	set colorsTheme(ebg) systemTextBackgroundColor					; # entry light text background
+	set colorsTheme(efg) systemTextColor							; # entry light text foreground
+	set colorsTheme(sbg) systemSelectedTextBackgroundColor			; # selected text background
+	set colorsTheme(sfg) systemSelectedTextColor					; # selected text foreground
+} else {
+	set darkTheme [ lindex $themeTable($lsdTheme) 3 ]
+	set colorsTheme(bg) [ ttk::style lookup . -background ]			; # non-entry light/dark text background
+	set colorsTheme(fg) [ ttk::style lookup . -foreground ]			; # entry/non-entry dark text foreground
+	set colorsTheme(dbg) [ ttk::style lookup . -troughcolor ]		; # entry dark text background
+	set colorsTheme(ebg) [ ttk::style lookup . -fieldbackground ]	; # entry light text background
+	set colorsTheme(efg) [ ttk::style lookup . -insertcolor ]		; # entry light text foreground
+	set colorsTheme(sbg) [ ttk::style lookup . -selectbackground ]	; # selected text background
+	set colorsTheme(sfg) [ ttk::style lookup . -selectforeground ]	; # selected text foreground
 }
 
-# get basic data from set theme
-set colorsTheme(bg) [ ttk::style lookup . -background ]
-set colorsTheme(fg) [ ttk::style lookup . -foreground ]
-set colorsTheme(sbg) [ ttk::style lookup . -selectbackground ]
-set colorsTheme(sfg) [ ttk::style lookup . -selectforeground ]
-set colorsTheme(ebg) [ ttk::style lookup . -fieldbackground ]
-set colorsTheme(efg) [ ttk::style lookup . -insertcolor ]
-set colorsTheme(dbg) [ ttk::style lookup . -troughcolor ]
+# get remaining basic colors from set theme
 set colorsTheme(dfg) [ ttk::style lookup . -foreground disabled ]
 set colorsTheme(isbg) [ ttk::style lookup . -lightcolor ]
 set colorsTheme(hc) [ ttk::style lookup . -selectbackground ]
@@ -287,44 +293,44 @@ set posXstr 0
 set posYstr 0
 
 # load icon images
-image create photo lsdImg -file "$RootLsd/$LsdSrc/icons/lsd.png"
-image create photo lmmImg -file "$RootLsd/$LsdSrc/icons/lmm.png"
-image create photo newImg -file "$RootLsd/$LsdSrc/icons/new.png"
-image create photo openImg -file "$RootLsd/$LsdSrc/icons/open.png"
-image create photo saveImg -file "$RootLsd/$LsdSrc/icons/save.png"
-image create photo undoImg -file "$RootLsd/$LsdSrc/icons/undo.png"
-image create photo redoImg -file "$RootLsd/$LsdSrc/icons/redo.png"
-image create photo cutImg -file "$RootLsd/$LsdSrc/icons/cut.png"
-image create photo deleteImg -file "$RootLsd/$LsdSrc/icons/delete.png"
-image create photo copyImg -file "$RootLsd/$LsdSrc/icons/copy.png"
-image create photo pasteImg -file "$RootLsd/$LsdSrc/icons/paste.png"
-image create photo editImg -file "$RootLsd/$LsdSrc/icons/edit.png"
-image create photo findImg -file "$RootLsd/$LsdSrc/icons/find.png"
-image create photo replaceImg -file "$RootLsd/$LsdSrc/icons/replace.png"
-image create photo indentImg -file "$RootLsd/$LsdSrc/icons/indent.png"
-image create photo deindentImg -file "$RootLsd/$LsdSrc/icons/deindent.png"
-image create photo wrapImg -file "$RootLsd/$LsdSrc/icons/wrap.png"
-image create photo compileImg -file "$RootLsd/$LsdSrc/icons/compile.png"
-image create photo comprunImg -file "$RootLsd/$LsdSrc/icons/comprun.png"
-image create photo gdbImg -file "$RootLsd/$LsdSrc/icons/gdb.png"
-image create photo infoImg -file "$RootLsd/$LsdSrc/icons/info.png"
-image create photo descrImg -file "$RootLsd/$LsdSrc/icons/descr.png"
-image create photo equationImg -file "$RootLsd/$LsdSrc/icons/equation.png"
-image create photo extraImg -file "$RootLsd/$LsdSrc/icons/extra.png"
-image create photo setImg -file "$RootLsd/$LsdSrc/icons/set.png"
-image create photo hideImg -file "$RootLsd/$LsdSrc/icons/hide.png"
-image create photo helpImg -file "$RootLsd/$LsdSrc/icons/help.png"
-image create photo reloadImg -file "$RootLsd/$LsdSrc/icons/reload.png"
-image create photo structImg -file "$RootLsd/$LsdSrc/icons/struct.png"
-image create photo initImg -file "$RootLsd/$LsdSrc/icons/init.png"
-image create photo numberImg -file "$RootLsd/$LsdSrc/icons/number.png"
-image create photo runImg -file "$RootLsd/$LsdSrc/icons/run.png"
-image create photo dataImg -file "$RootLsd/$LsdSrc/icons/data.png"
-image create photo resultImg -file "$RootLsd/$LsdSrc/icons/result.png"
-image create photo errorDlgImg -file "$RootLsd/$LsdSrc/icons/error.png"
-image create photo infoDlgImg -file "$RootLsd/$LsdSrc/icons/information.png"
-image create photo questDlgImg -file "$RootLsd/$LsdSrc/icons/question.png"
-image create photo warnDlgImg -file "$RootLsd/$LsdSrc/icons/warning.png"
+catch { image create photo lsdImg -file "$RootLsd/$LsdSrc/icons/lsd.png" }
+catch { image create photo lmmImg -file "$RootLsd/$LsdSrc/icons/lmm.png" }
+catch { image create photo newImg -file "$RootLsd/$LsdSrc/icons/new.png" }
+catch { image create photo openImg -file "$RootLsd/$LsdSrc/icons/open.png" }
+catch { image create photo saveImg -file "$RootLsd/$LsdSrc/icons/save.png" }
+catch { image create photo undoImg -file "$RootLsd/$LsdSrc/icons/undo.png" }
+catch { image create photo redoImg -file "$RootLsd/$LsdSrc/icons/redo.png" }
+catch { image create photo cutImg -file "$RootLsd/$LsdSrc/icons/cut.png" }
+catch { image create photo deleteImg -file "$RootLsd/$LsdSrc/icons/delete.png" }
+catch { image create photo copyImg -file "$RootLsd/$LsdSrc/icons/copy.png" }
+catch { image create photo pasteImg -file "$RootLsd/$LsdSrc/icons/paste.png" }
+catch { image create photo editImg -file "$RootLsd/$LsdSrc/icons/edit.png" }
+catch { image create photo findImg -file "$RootLsd/$LsdSrc/icons/find.png" }
+catch { image create photo replaceImg -file "$RootLsd/$LsdSrc/icons/replace.png" }
+catch { image create photo indentImg -file "$RootLsd/$LsdSrc/icons/indent.png" }
+catch { image create photo deindentImg -file "$RootLsd/$LsdSrc/icons/deindent.png" }
+catch { image create photo wrapImg -file "$RootLsd/$LsdSrc/icons/wrap.png" }
+catch { image create photo compileImg -file "$RootLsd/$LsdSrc/icons/compile.png" }
+catch { image create photo comprunImg -file "$RootLsd/$LsdSrc/icons/comprun.png" }
+catch { image create photo gdbImg -file "$RootLsd/$LsdSrc/icons/gdb.png" }
+catch { image create photo infoImg -file "$RootLsd/$LsdSrc/icons/info.png" }
+catch { image create photo descrImg -file "$RootLsd/$LsdSrc/icons/descr.png" }
+catch { image create photo equationImg -file "$RootLsd/$LsdSrc/icons/equation.png" }
+catch { image create photo extraImg -file "$RootLsd/$LsdSrc/icons/extra.png" }
+catch { image create photo setImg -file "$RootLsd/$LsdSrc/icons/set.png" }
+catch { image create photo hideImg -file "$RootLsd/$LsdSrc/icons/hide.png" }
+catch { image create photo helpImg -file "$RootLsd/$LsdSrc/icons/help.png" }
+catch { image create photo reloadImg -file "$RootLsd/$LsdSrc/icons/reload.png" }
+catch { image create photo structImg -file "$RootLsd/$LsdSrc/icons/struct.png" }
+catch { image create photo initImg -file "$RootLsd/$LsdSrc/icons/init.png" }
+catch { image create photo numberImg -file "$RootLsd/$LsdSrc/icons/number.png" }
+catch { image create photo runImg -file "$RootLsd/$LsdSrc/icons/run.png" }
+catch { image create photo dataImg -file "$RootLsd/$LsdSrc/icons/data.png" }
+catch { image create photo resultImg -file "$RootLsd/$LsdSrc/icons/result.png" }
+catch { image create photo errorDlgImg -file "$RootLsd/$LsdSrc/icons/error.png" }
+catch { image create photo infoDlgImg -file "$RootLsd/$LsdSrc/icons/information.png" }
+catch { image create photo questDlgImg -file "$RootLsd/$LsdSrc/icons/question.png" }
+catch { image create photo warnDlgImg -file "$RootLsd/$LsdSrc/icons/warning.png" }
 
 # load and set console configuration
 if $conWnd {

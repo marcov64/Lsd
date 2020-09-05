@@ -505,7 +505,7 @@ bool valid_label( const char *lab );
 char *clean_file( char *file );
 char *clean_path( char *path );
 char *str_upr( char *s );
-const char *strsignal( int signum );
+const char *signal_name( int signum );
 double get_double( const char *tcl_var, double *var = NULL );
 int deb( object *r, object *c, char const *lab, double *res, bool interact = false );
 int get_int( const char *tcl_var, int *var = NULL );

@@ -434,7 +434,8 @@ char *clean_file( char *filename )
  ****************************************************/
 char *clean_path( char *filepath )
 {
-	int i, drvpos, pathpos, npref = 5;
+	int i, drvpos, pathpos;
+	const int npref = 5;
 	const char *pref[ npref ] = { "/cygdrive/", "/c/", "/d/", "/e/", "/f/" };
 	
 	if ( filepath == NULL )
@@ -442,7 +443,7 @@ char *clean_path( char *filepath )
 	
 	char temp[ strlen( filepath ) + 1 ];
 	
-	for ( i = 0; strncmp( filepath, pref[ i ], i < npref && strlen( pref[ i ] ) ); ++i );
+	for ( i = 0; strncmp( filepath, pref[ i ], strlen( pref[ i ] ) ) && i < npref; ++i );
 	
 	if ( i < npref )
 	{
@@ -593,9 +594,9 @@ void myexit( int v )
 
 
 /****************************************************
- STRSIGNAL
+ SIGNAL_NAME
  ****************************************************/
-const char *strsignal( int signum ) 
+const char *signal_name( int signum ) 
 { 
     int i;
     for ( i = 0; i < REG_SIG_NUM && signals[ i ] != signum; ++i );
@@ -629,7 +630,7 @@ void signal_handler( int signum )
 		case SIGINT:
 		case SIGTERM:
 #ifdef NW
-			sprintf( msg, "SIGINT/SIGTERM (%s)", strsignal( signum ) );
+			sprintf( msg, "SIGINT/SIGTERM (%s)", signal_name( signum ) );
 			break;
 #else
 			choice = 1;				// regular quit (checking for save)
@@ -652,26 +653,26 @@ void signal_handler( int signum )
 			break;
 			
 		case SIGABRT:
-			sprintf( msg, "SIGABRT (%s)", strsignal( signum ) );
+			sprintf( msg, "SIGABRT (%s)", signal_name( signum ) );
 			strcpy( msg2, "Maybe an invalid call to library or Tcl/Tk?" );		
 			break;
 
 		case SIGFPE:
-			sprintf( msg, "SIGFPE (%s)", strsignal( signum ) );
+			sprintf( msg, "SIGFPE (%s)", signal_name( signum ) );
 			strcpy( msg2, "Maybe a division by 0 or similar?" );
 		break;
 		
 		case SIGILL:
-			sprintf( msg, "SIGILL (%s)", strsignal( signum ) );
+			sprintf( msg, "SIGILL (%s)", signal_name( signum ) );
 			strcpy( msg2, "Maybe executing data?" );		
 		break;
 		
 		case SIGSEGV:
-			sprintf( msg, "SIGSEGV (%s)", strsignal( signum ) );
+			sprintf( msg, "SIGSEGV (%s)", signal_name( signum ) );
 			strcpy( msg2, "Maybe an invalid pointer?\n  Also ensure no group of objects has zero elements." );		
 		break;
 		default:
-			sprintf( msg, "Unknown signal (%s)", strsignal( signum ) );
+			sprintf( msg, "Unknown signal (%s)", signal_name( signum ) );
 			strcpy( msg2, "" );			
 	}
 
