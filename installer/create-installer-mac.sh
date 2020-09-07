@@ -19,7 +19,7 @@
 #**************************************************************
 
 LSD_VER_NUM="7.3"
-LSD_VER_TAG="beta"
+LSD_VER_TAG="beta-1"
 
 if [ "$1" = "-h" ]; then
 	echo "Create LSD installer for macOS"
@@ -47,7 +47,7 @@ LSD_VER="$LSD_VER_NUM-$LSD_VER_TAG"
 LSD_FILE_TAG="${LSD_VER//./-}"
 SRC_DIR="$LSD_DIR/src"
 INST_DIR="$LSD_DIR/installer/LSD Installer.app/Contents/Resources"
-EXC_LST="$( tr '\n' ' ' < "$LSD_DIR"/installer/exclude-installer-mac.txt )"
+EXC_LST="$( tr '\n' ' ' < $LSD_DIR/installer/exclude-installer-mac.txt )"
 
 # create zipped distribution package
 rm -f $LSD_DIR/installer/LSD-archive-mac.zip

@@ -443,7 +443,7 @@ char *clean_path( char *filepath )
 	
 	char temp[ strlen( filepath ) + 1 ];
 	
-	for ( i = 0; strncmp( filepath, pref[ i ], strlen( pref[ i ] ) ) && i < npref; ++i );
+	for ( i = 0; i < npref && strncmp( filepath, pref[ i ], strlen( pref[ i ] ) ); ++i );
 	
 	if ( i < npref )
 	{

@@ -97,8 +97,70 @@ proc fn_spaces { fn { par . } { mult 0 } } {
 }
 
 
+#************************************************
+# SED
+# Partial implementation of GNU sed in Tcl
+# Code by Emmanuel Frecon (https://wiki.tcl-lang.org/page/sed)
+# Extra option "e" (as in extract) and that will 
+# extract a particular (sub)group, or the text of 
+# the regular expression when no particular index 
+# is provided.
+#************************************************
+proc sed { script input } {
+	set sep [ string index $script 1 ]
+
+	foreach { cmd from to flag } [ split $script $sep ] break
+
+	switch -- $cmd {
+		"s" {
+				set cmd regsub
+				if { [ string first "g" $flag ] >= 0 } {
+                	lappend cmd -all
+            	}
+
+				if { [ string first "i" [ string tolower $flag ] ] >= 0 } {
+					lappend cmd -nocase
+				}
+
+				set idx [ regsub -all -- {[a-zA-Z]} $flag "" ]
+				if { [ string is integer -strict $idx ] } {
+					set cmd [ lreplace $cmd 0 0 regexp ]
+					lappend cmd -inline -indices -all -- $from $input
+					set res [ eval $cmd ]
+					set which [ lindex $res $idx ]
+					return [ string replace $input [ lindex $which 0 ] [ lindex $which 1 ] $to ]
+				}
+
+				# most generic case
+				lappend cmd -- $from $input $to
+				return [ eval $cmd ]
+			}
+
+		"e" {
+				set cmd regexp
+				if { $to == "" } { 
+					set to 0 
+				}
+
+				if { ! [ string is integer -strict $to ] } {
+					return -code error "No proper group identifier specified for extraction"
+            	}
+
+				lappend cmd -inline -- $from $input
+				return [ lindex [ eval $cmd ] $to ]
+			}
+
+		"y" {
+				return [ string map [ list $from $to ] $input ]
+			}
+	}
+
+	return -code error "Option not yet implemented"
+}
+
+
 #*************************************************************
-# FINDFILES.TCL
+# FINDFILES
 # Tcl procedure to list all files with a given pattern
 # within a directory subtree.
 # Based on code by Joseph Bui (https://stackoverflow.com/a/448573).

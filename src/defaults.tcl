@@ -61,10 +61,14 @@ set bordsize	2	; # width of windows borders
 set tbarsize	60	; # size in pixels of bottom taskbar (exclusion area)
 set hsizeL		800	; # LMM horizontal size in pixels
 set vsizeL		600	; # LMM vertical size in pixels
-set hsizeLmin	620	; # LMM minimum horizontal size in pixels
-set vsizeLmin	300	; # LMM minimum vertical size in pixels
-set hsizeB 		400	; # browser horizontal size in pixels
-set vsizeB		620	; # browser vertical size in pixels
+set hsizeLmin	800	; # LMM minimum horizontal size in pixels
+set vsizeLmin	550	; # LMM minimum vertical size in pixels
+set hsizeBmin	400	; # browser horizontal size in pixels
+set vsizeBmin	600	; # browser vertical size in pixels
+set hsizeGmin	700	; # log window minimum horizontal size in pixels
+set vsizeGmin	480	; # log window minimum vertical size in pixels
+set hsizeAmin	850	; # analysis of results window minimum horizontal size in pixels
+set vsizeAmin	520	; # analysis of results window minimum vertical size in pixels
 set hsizeM 		600	; # model structure horizontal size in pixels
 set vsizeM		400	; # model structure vertical size in pixels
 set hsizeNmin	300	; # objects numbers editor minimum horizontal size in pixels
@@ -193,7 +197,7 @@ set deltaSizeLinux		1
 set deltaSizeWindows	2
 
 # OS specific default window buttons widths
-set butLinux	9
+set butLinux	8
 set butMac		7
 set butWindows	9
 
@@ -201,7 +205,7 @@ set butWindows	9
 set corrXmac	0
 set corrYmac	0
 set corrXlinux	0
-set corrYlinux	-55
+set corrYlinux	-67
 set corrXwindows 0
 set corrYwindows 0
 

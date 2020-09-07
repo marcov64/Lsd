@@ -402,11 +402,11 @@ int lsdmain( int argn, char **argv )
 	}
 	tk_ok = true;
 	cmd( "tk appname lsd" );
-	cmd( "console hide" );
 	cmd( "wm withdraw ." );
 
 	if ( platform == MAC )
 	{
+		cmd( "console hide" );
 		cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
 
 		// close console if open (usually only in Mac)

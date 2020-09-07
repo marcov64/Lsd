@@ -136,11 +136,11 @@ int lsdmain( int argn, char **argv )
 	}
 	tk_ok = true;
 	cmd( "tk appname lmm" );
-	cmd( "console hide" );
 	cmd( "wm withdraw ." );
 
 	if ( platform == MAC )
 	{
+		cmd( "console hide" );
 		cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
 
 		// close console if open (usually only in Mac)
@@ -638,12 +638,12 @@ int lsdmain( int argn, char **argv )
 	cmd( "ttk::frame .f.hea.cur" );
 
 	cmd( "ttk::frame .f.hea.cur.line" );
-	cmd( "ttk::label .f.hea.cur.line.ln1 -text \"Ln: \"" );
+	cmd( "ttk::label .f.hea.cur.line.ln1 -text \"Ln:\"" );
 	cmd( "ttk::label .f.hea.cur.line.ln2 -width 4 -style hlBoldSmall.TLabel -text 1" );
 	cmd( "pack .f.hea.cur.line.ln1 .f.hea.cur.line.ln2 -side left" );
 
 	cmd( "ttk::frame .f.hea.cur.col" );
-	cmd( "ttk::label .f.hea.cur.col.col1 -text \"Col: \"" );
+	cmd( "ttk::label .f.hea.cur.col.col1 -text \"Col:\"" );
 	cmd( "ttk::label .f.hea.cur.col.col2 -width 3 -style hlBoldSmall.TLabel -text 1" );
 	cmd( "pack .f.hea.cur.col.col1 .f.hea.cur.col.col2 -side left" );
 

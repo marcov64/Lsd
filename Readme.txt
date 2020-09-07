@@ -22,6 +22,7 @@ Tcl/Tk 8.6 is copyrighted by the Regents of the University of California, and ot
 MSYS2 2.0, https://www.msys2.org
 Cygwin 3.1.6 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
 7-Zip LZMA SDK 19.0 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
+Makeself is copyrighted by Stephane Peter under GPL2, https://makeself.io
 Gnuplot 5.2.8 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
 Eigen 3.3.7 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
@@ -119,7 +120,7 @@ For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
 
 IMPORTANT: from version 7.3 and higher, LSD supports only Windows 64-bit. If you must run LSD in a Windows 32-bit computer, please use the 7.2 version which can be downloaded from the same site indicated below. If you are unsure of the version of Windows in your computer, please check in "Windows > Settings > System > About > System type".
 
-To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-X-Y-Z.exe). Download it, double click on the installer file, and follow the instructions. The installer executable can be deleted after the installation.
+To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-7-3-0.exe). Download it, double click on the installer file, and follow the instructions. The installer executable can be deleted after installation.
  
 Alternatively, or in the case of problems using the installer, it is also possible to simply unzip a LSD distribution file archive on the desired folder. In most cases "C:\" (the root of the hard disk) is a good option. The steps to perform a manual installation are:
 
@@ -135,7 +136,7 @@ IMPORTANT: LSD cannot be installed within a folder (or having a parent folder) c
 
 To create a desktop link (icon) to run LSD/LMM, as well as an entry to the Windows Start Menu, you can simply double-click in Windows Explorer the following batch file available in the installation directory:
 
-add-shortcut-windows.bat
+ add-shortcut-windows.bat
 
 After the desktop icon is created, double-clicking it opens LMM (LSD Model Manager) which allows to create new models, or select existing models. If you cannot create the LSD icon on your desktop, or an entry in Start Menu, following the steps above, you may still run LSD by double-clicking the file "run.bat" inside the LSD installation directory. Never invoke the file "lmm.exe" directly because it needs some environment variables to be set by "run.bat".
 
@@ -164,30 +165,30 @@ Cygwin compiler is easier to install as it does not require the user to deal wit
 4.2 macOS installation (10.10+ ONLY)
 ************************************
 
-To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-X-Y-Z.dmg). Download it, double click on the package file to mount it, double click on the LSD Installer application, and follow the instructions. The installer package can be deleted after the installation.
+To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-7-3-0.dmg). Download it, double click on the package file to mount it, double click on the LSD Installer application, and follow the instructions. The installer package can be deleted after installation.
  
 To manually install LSD, simply unzip a LSD distribution file (e.g., LSD-7.3-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
 
 Next, open the Terminal application (located inside the Utilities app folder), and type the following commands (each line must be completed by pressing "Enter"):
 
-cd ~/Lsd-7.3-master
-./add-shortcut-mac.sh
+ cd ~/Lsd-7.3-master
+ ./add-shortcut-mac.sh
 
 After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD. A shortcut is also created in the computer Applications folder.
 
 Users of macOS Sierra (10.12) or newer MUST yet manually install the Apple Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required command line tools available in macOS. To install it, open the Terminal  and enter the following command:
 
-xcode-select --install
+ xcode-select --install
 
 Then, in the opened window, click on the "Install" button (do NOT click on the "Get Xcode" button), accept the license and wait the installation to complete (you may have to reboot to finish the installation).
 
 It is recommended, but not required, to install multitail and Gnuplot applications. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. The easiest way to install Gnuplot is to use the Homebrew package manager for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
 
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
 After Homebrew installation finishes (details at http://brew.sh), you can install multitail and Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
 
-brew install multitail gnuplot
+ brew install multitail gnuplot
 
 IN CASE OF PROBLEMS:
 
@@ -202,49 +203,59 @@ If you delete or cannot create the LSD shortcuts, you can still run the app name
 4.3 Linux installation
 **********************
 
-To install LSD, simply unpack the LSD distribution file (e.g., Lsd-7.3-master.tar.gz) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using your file manager. This will create the whole directory structure.
+To install LSD, the simplest alternative is to use the installer script package (e.g. LSD-installer-linux-7-3-0.zip). Download, extract and execute it. If your file manager does not support extracting compressed files or executing scripts directly, open a terminal, and type:
 
-Alternatively, it is also possible to unpack the distribution file using the terminal using the command (".tar.gz" extension files only):
+ cd ~/Downloads
+ unzip LSD-installer-linux-7-3-0.sh
+ ./LSD-installer-linux-7-3-0.sh
 
-tar -xzf Lsd-7.3-master.tar.gz
+You may have to adjust the downloads directory according to your computer. When the LSD installer program opens, follow the instructions to install LSD and the required packages. The installer requires Tcl/Tk to be installed. This is the default in most distributions. The installer script will ask you to install Tcl/Tk if this is not the case. The installer package and script can be deleted after installation.
+
+Alternatively, or in the case of problems using the installer script, it is also possible to simply unpack the LSD distribution file (e.g., Lsd-7.3-master.tar.gz) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using your file manager or command line. This will create the whole directory structure. In terminal, you may use the command (".tar.gz" extension files only):
+
+ tar -xzf Lsd-7.3-master.tar.gz
 
 The distribution file may be deleted after installation.
 
-If you want to create a desktop link (icon) to run LSD/LMM, you can use the script available in the installation directory executing the command (Ubuntu and Gnome based distributions):
+If you want to create a desktop link (icon) to run LSD/LMM, you can use the script available in the installation directory executing the command (may work only in Gnome-based distributions):
 
-./add-shortcut-linux.sh
+ ./add-shortcut-linux.sh
 
 To use the LSD in Linux it is necessary to have the GNU gcc/g++ compiler (version 6.4+) with the standard packages, including zlib, Tcl/Tk 8.6, and GDB. Likely, you already have those installed on your computer but you may need to install the development version of these packages. Usually, you can use your distribution package manager to get the appropriate 'dev' package versions to your installation. Though not strictly necessary, it is also suggested to have the Gnuplot graphical package (for advanced graphics), preferably using Qt.
 
 In Debian or Ubuntu, to make sure you have the correct libraries you can use:
 
-sudo apt-get install build-essential gdb gnuplot-qt zlib1g-dev tcl8.6-dev tk8.6-dev multitail
+ sudo apt-get install build-essential gdb gnuplot-qt multitail zlib1g-dev tcl-dev tk-dev
 
 In Fedora, CentOS or Red Hat, the equivalent command is:
 
-sudo yum install gcc-c++ make gdb gnuplot zlib-devel tcl tk tcl-devel tk-devel multitail
+ sudo yum install gcc-c++ make gdb gnuplot multitail zlib-devel tcl tk tcl-devel tk-devel
+
+In Mandriva or Mageia:
+
+ sudo urpmi gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel
 
 IN CASE OF PROBLEMS:
 
 Please check your configuration has at least g++ version 6.4 installed (you may check it by issuing the command "g++ -v" in terminal). Ubuntu minimum supported version is 18.04 (older versions can be updated to use g++ 6.4 or newer but this is not the default configuration).
 
-Also make sure if Tcl/Tk version 8.6 is present (use the command "echo 'puts $tcl_version;exit 0' | tclsh" to get the installed version).
+Also make sure if Tcl/Tk version 8.6 or newer is present (use the command "echo 'puts $tcl_version;exit 0' | tclsh" to get the installed version).
 
 To run LMM from a system shell, please open a terminal in the installation directory (or use your graphical file browser) and execute:
 
-./lmm
+ ./run.sh
 
 If you get an error when trying to execute any of the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x FILENAME" in the installation directory, replacing FILENAME by the name of the corresponding file).
 
 You may need to recompile LMM if the included pre-compiled versions have problems with your Linux setup. Move in the LSD installation directory and use the command:
 
-make -f makefile.linux
+ make -f makefile.linux
 
 If the compilation fails, the most likely reason is the mis-specification of the locations of the files required for the compilation. The major problem is that Tcl/Tk may be installed in your systems in several different locations. The makefile contains a list of variables for the directory needed for the Tcl/Tk libraries and include files. For example, on some systems you have the Tcl/Tk library located in /usr/lib, or /usr/local/lib, or usr/share/lib, etc. Similarly, the include files may be located in different directories. The makefile lists the files you need to identify; check the location for those files and edit the makefile as appropriate for your system.
 
 It is also possible that Tcl/Tk requires further libraries besides those specified in the makefile. If you have errors even after having specified the correct path to the Tcl/Tk libraries, then find out where the file wish is located (using the command "whereis wish"), and then find out which libraries are used with the command:
 
-ldd /usr/bin/wish
+ ldd /usr/bin/wish
 
 If the system lists further libraries, add the appropriate option to the linker (e.g. -lieee to add the library libieee.a) in the makefile to the variable DUMMY.
 
@@ -269,15 +280,7 @@ Step-by-step procedure to install the Cygwing 64-bit compiler (an internet conne
 
 5. When all the required packages are marked for download, choose "Next", accept the proposed changes and proceed to download and install Cygwin. Please wait until the installer finishes (it may take a while) and close the installer when requested.
 
-6. In Windows Explorer, double click in the "add-cygwin64-to-path.bat" file (in LSD installation folder). A black empty window should briefly open and close, and the Windows 64-bit configuration is done. Otherwise, if there is an error message and the black window remains open, see the alternative steps below to fix the problem.
-
-IN CASE OF PROBLEMS:
-
-LSD requires Cygwin to be added to the Windows PATH environment variable. If the above instructions fail, please open a Windows Command Prompt in the LSD installation directory. To do so, press and hold shift while right clicking LSD folder in Windows Explorer, then select "Open command prompt here". On the Command Line, please type the command below and press "Enter". If the installation was done to a different path, please adjust the command to the correct Cygwin installation directory:
-
-add-cygwin64-to-path C:\cygwin64
-
-Alternatively, or if you have problems with the command above, you can use Windows GUI to add Cygwin to the PATH. In Windows open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, select "Path" and press "Edit..." (be carefull to NOT DELETE the existing text). Run across the lines to see if your Cygwin bin folder, i.e. "C:\cygwin64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, at the end of the "Variable value" field type ";" (next to the existing text) and add your Cygwin bin folder. Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your Cygwin bin folder in PATH.
+6. In Windows open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, select "Path" and press "Edit..." (be carefull to NOT DELETE the existing text). Run across the lines to see if your Cygwin bin folder, i.e. "C:\cygwin64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, at the end of the "Variable value" field type ";" (next to the existing text) and add your Cygwin bin folder. Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your Cygwin bin folder in PATH.
 
 
 ******************************************
@@ -292,22 +295,20 @@ Step-by-step procedure to install the MSYS2 64-bit compiler (an internet connect
 
 2. Open the MSYS2 shell and update MSYS2 using the command:
 
-pacman -Syu
+ pacman -Syu
 
 3. When instructed, close and re-open the MSYS2 shell, and update again:
 
-pacman -Su
+ pacman -Su
 
 4. Still in the shell, install the compiler and required tools:
 
-pacman -S mingw-w64-x86_64-make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb
+ pacman -S mingw-w64-x86_64-make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb
 
-5. Add the compiler to path, double clicking on "add-msys2-to-path.bat" file (in LSD installation folder) if MSYS2 was installed on the default path (C:\msys64). Otherwise, use the command below in the LSD installation folder (replacing PATH with the chosen installation folder):
-
-add-msys2-to-path PATH
+5. In Windows open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, select "Path" and press "Edit..." (be carefull to NOT DELETE the existing text). Run across the lines to see if your MSYS2 MinGW64 bin folder, i.e. "C:\msys64\mingw64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, at the end of the "Variable value" field type ";" (next to the existing text) and add your MSYS2 MinGW64 bin folder. Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your MSYS2 bin folder in PATH.
 
 SLOW GDB OPERATION: the GDB debugger can become very slow in Windows when the models are large. This is due to the Windows special handling of the heap (dynamic memory allocation) for programs being debugged. It is normally safe to disable this special handling by defining the folowing environment variable:
 
-_NO_DEBUG_HEAP=1
+ _NO_DEBUG_HEAP=1
 
 To define it, open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, press "New...", type "_NO_DEBUG_HEAP" as the variable name, and "1" as its value. Press "Ok" 3 times and you are done.

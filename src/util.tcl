@@ -112,7 +112,7 @@ proc gccVersion { } {
 # Show interruptible progress bar window while 
 # slow operations are running
 #************************************************
-proc progressbox { w tit max var { destroy { } } { par . } } {
+proc progressbox { w tit max var { destroy "" } { par . } } {
 	
 	newtop $w $tit $destroy $par
 
@@ -123,7 +123,9 @@ proc progressbox { w tit max var { destroy { } } { par . } } {
 	pack $w.main.lab $w.main.scale $w.main.info -pady 5
 	pack $w.main -padx 10 -pady 10
 
-	cancel $w b $destroy
+	if { $destroy != "" } {
+		cancel $w b $destroy
+	}
 
 	showtop $w
 	
@@ -137,6 +139,7 @@ proc progressbox { w tit max var { destroy { } } { par . } } {
 # external scripts are running
 #************************************************
 proc waitbox { w tit msg { steps "" } { timer no } { par . } } {
+	global frPadX frPadY
 	
 	newtop $w "$tit" { } $par 1
 
@@ -154,7 +157,7 @@ proc waitbox { w tit msg { steps "" } { timer no } { par . } } {
 	if { $timer } {
 		ttk::frame $w.main.time
 		ttk::label $w.main.time.lab -text "Elapsed time:"
-		ttk::label $w.main.time.val -style hl.TLabel
+		ttk::label $w.main.time.val -style hl.TLabel -text "00:00"
 		pack $w.main.time.lab $w.main.time.val -padx 5 -side left
 		pack $w.main.time -pady 10
 		set retVal $w.main.time.val

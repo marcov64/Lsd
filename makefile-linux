@@ -29,8 +29,8 @@ LSDROOT=.
 SRC=src
 SRC_DIR=$(LSDROOT)/$(SRC)/
 TCL_VERSION=8.6
-PATH_TCLTK_HEADER=        # path to tcl.h and tk.h
-PATH_TCLTK_LIB=           # path to libtclXXX.a and libtkXXX.a
+PATH_TCLTK_HEADER=/usr/include/tcl$(TCL_VERSION)
+PATH_TCLTK_LIB=/usr/lib/tcl$(TCL_VERSION)
 TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
 
 # OS command to delete files

@@ -67,27 +67,29 @@ proc updateTheme { } {
 	
 	if [ string equal $CurPlatform mac ] {
 		set DefaultTheme $themeMac
+
 	} elseif [ string equal $CurPlatform linux ] {
 		if [ isDarkTheme ] {
 			set DefaultTheme $themeLinuxDark
-			if [ string equal $lsdTheme $themeLinux ] {
+			if { ! [ info exists lsdTheme ] || [ string equal $lsdTheme $themeLinux ] } {
 				set lsdTheme $themeLinuxDark
 			}
 		} else {
 			set DefaultTheme $themeLinux
-			if [ string equal $lsdTheme $themeLinuxDark ] {
+			if { ! [ info exists lsdTheme ] || [ string equal $lsdTheme $themeLinuxDark ] } {
 				set lsdTheme $themeLinux
 			}
 		}
+
 	} elseif [ string equal $CurPlatform windows ] {
 		if [ isDarkTheme ] {
 			set DefaultTheme $themeWindowsDark
-			if [ string equal $lsdTheme $themeWindows ] {
+			if { ! [ info exists lsdTheme ] || [ string equal $lsdTheme $themeWindows ] } {
 				set lsdTheme $themeWindowsDark
 			}
 		} else {
 			set DefaultTheme $themeWindows
-			if [ string equal $lsdTheme $themeWindowsDark ] {
+			if { ! [ info exists lsdTheme ] || [ string equal $lsdTheme $themeWindowsDark ] } {
 				set lsdTheme $themeWindows
 			}
 		}

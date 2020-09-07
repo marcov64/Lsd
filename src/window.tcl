@@ -212,7 +212,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 
 		if { ! $noMinSize && ( $resizeX || $resizeY ) } {
 			update
-			wm minsize $w [ winfo width $w ] [ winfo height $w ]
+			wm minsize $w [ winfo reqwidth $w ] [ winfo reqheight $w ]
 		}
 
 		wm resizable $w $resizeX $resizeY
@@ -457,7 +457,7 @@ proc checkgeom { geom defGeom screenWidth screenHeight } {
 # Adjust main windows to default size & positions
 #************************************************
 proc sizetop { { w all } } {
-	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM hsizeD vsizeD corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom hfactM vfactM wndMenuHeight
+	global wndLst hsizeBmin vsizeBmin hsizeL vsizeL hsizeLmin vsizeLmin hsizeGmin vsizeGmin hsizeAmin vsizeAmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM hsizeD vsizeD corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom hfactM vfactM wndMenuHeight
 
 	update
 
@@ -485,9 +485,9 @@ proc sizetop { { w all } } {
 			switch $wnd {
 
 				.lsd {
-					set defGeom "${hsizeB}x$vsizeB+[ getx . topleftS ]+[ gety . topleftS ]"
+					set defGeom "${hsizeBmin}x${vsizeBmin}+[ getx . topleftS ]+[ gety . topleftS ]"
 					wm geometry . [ checkgeom $lsdGeom $defGeom $screenWidth $screenHeight ]
-					wm minsize . $hsizeB [ expr $vsizeB / 2 ]
+					wm minsize . $hsizeBmin $vsizeBmin
 				}
 
 				.lmm {
@@ -516,7 +516,7 @@ proc sizetop { { w all } } {
 				.log {
 					set defGeom "+[ getx .log bottomrightS ]+[ gety .log bottomrightS ]"
 					wm geometry .log [ checkgeom $logGeom $defGeom $screenWidth $screenHeight ]
-					wm minsize .log [ winfo width .log ] [ winfo height .log ]
+					wm minsize .log $hsizeGmin $vsizeGmin
 				}
 
 				.str {
@@ -537,7 +537,7 @@ proc sizetop { { w all } } {
 				.da {
 					set defGeom "+[ getx .da overM ]+[ gety .da overM ]"
 					wm geometry .da [ checkgeom $daGeom $defGeom $screenWidth $screenHeight ]
-					wm minsize .da [ winfo width .da ] [ winfo height .da ]
+					wm minsize .da $hsizeAmin $vsizeAmin
 					wm resizable .da 1 1
 				}
 
@@ -558,7 +558,7 @@ proc sizetop { { w all } } {
 				.lat {
 					set defGeom "+[ getx .lat centerS ]+[ gety .lat centerS ]"
 					wm geometry .lat [ checkgeom $latGeom $defGeom $screenWidth $screenHeight ]
-					wm minsize .lat [ winfo width .lat ] [ winfo height .lat ]
+					wm minsize .lat [ winfo reqwidth .lat ] [ winfo reqheight .lat ]
 					wm resizable .lat 0 0
 				}
 			}
@@ -765,7 +765,7 @@ proc getx { w pos } {
 
 	switch $pos {
 		centerS {
-			set hpos [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
+			set hpos [ expr [ winfo screenwidth $w ] / 2 + $corrX - [ winfo reqwidth $w ] / 2 ]
 		}
 		centerW {
 			set hpos [ expr [ winfo x $par ] + $corrX + [ winfo width $par ] / 2  - [ winfo reqwidth $w ] / 2 ]
@@ -826,7 +826,7 @@ proc gety { w pos } {
 
 	switch $pos {
 		centerS {
-			set vpos [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
+			set vpos [ expr [ winfo screenheight $w ] / 2 + $corrY - [ winfo reqheight $w ] / 2 ]
 		}
 		centerW {
 			set vpos [ expr [ winfo y $par ] + $corrY + [ winfo height $par ] / 2  - [ winfo reqheight $w ] / 2 ]
@@ -1694,8 +1694,10 @@ proc scroll_wheel_linux { delta w dir } {
 	set scrW [ find_scrollable $w ]
 	if { $scrW != "" } {
 		set wPos [ $scrW yview ]
+		set top [ lindex $wPos 0 ]
+		set bot [ lindex $wPos 1 ]
 		if { ( ! ( $top == 0.0 && $bot == 1.0 ) ) && \
-			 ( ( $dir > 0 && $top > 0.0 ) || ( $dir < 0 && $bot < 1.0 ) ) } {
+			 ( ( $dir < 0 && $top > 0.0 ) || ( $dir > 0 && $bot < 1.0 ) ) } {
 			$scrW yview scroll [ expr $dir * $sfmwheel ] units
 		}
 	}
