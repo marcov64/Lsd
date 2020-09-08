@@ -1,11 +1,13 @@
 *.git\
-installer\
 lwi\
-R\
+Rpkg\
 Manual\src\
 LMM.app\
 Work\*\
 trashbin\
+gnu\*\__pycache__\
+Example\*\*.o
+installer\*\
 src\LSD.app\
 src\compile-mac*
 src\installer-loader-linux.sh
@@ -18,8 +20,7 @@ SyncToy*
 lmm
 lmm_options.txt
 lsd.desktop
-lsd.exe
-lsdNW.exe
+lsd*.exe
 elements.txt
 makefile
 makefileNW

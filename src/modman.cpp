@@ -32,7 +32,7 @@ operation it does is to ... run a copy of itself followed by the parameter "kick
 is required because under Windows there are troubles launching external package from a "first
 instance" of a program.
 
-LMM reads all the directories that are not: Manual, gnu, installer, LMM.app, lwi, R and src as model
+LMM reads all the directories that are not: Manual, gnu, installer, LMM.app, lwi, Rpkg and src as model
 directories, where it expect to find certain files. At any given moment a model name is stored,
 together with its directory and the file shown.
 

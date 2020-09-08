@@ -129,6 +129,12 @@ proc progressbox { w tit max var { destroy "" } { par . } } {
 
 	showtop $w
 	
+	if { $par == "" } {
+		wm deiconify $w
+		raise $w
+		update
+	}
+	
 	return $w.main.info
 }
 
@@ -168,6 +174,12 @@ proc waitbox { w tit msg { steps "" } { timer no } { par . } } {
 	pack $w.main -padx 20 -pady 20
 	
 	showtop $w
+	
+	if { $par == "" } {
+		wm deiconify $w
+		raise $w
+		update
+	}
 	
 	return $retVal
 }

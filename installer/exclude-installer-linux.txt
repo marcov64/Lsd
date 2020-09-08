@@ -2,7 +2,7 @@
 ./gnu
 ./installer
 ./lwi
-./R
+./Rpkg
 ./Manual/src
 ./LMM.app
 ./Work

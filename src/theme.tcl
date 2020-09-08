@@ -471,6 +471,12 @@ proc ttk::messageBox_draw { name icon title parent message detail type default }
 	showtop $name centerW
 	wm protocol $name WM_DELETE_WINDOW "ttk::messageBox_exit $close"
 	
+	if { $parent == "" } {
+		wm deiconify $name
+		raise $name
+		update
+	}
+	
 	if [ winfo exists $name.bottom.$default ] {
 		$name.bottom.$default configure -default active
 		mousewarpto $name.bottom.$default

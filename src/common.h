@@ -109,7 +109,7 @@
 #define MODEL_INFO_DEFAULT { "(no name)", "1.0", "[ current_date ]", \
 							 "#", "#", "#", \
 							 "#", "#", "#" };
-#define LSD_DIR_NAME { "src", "gnu", "installer", "Manual", "LMM.app", "R", "lwi", "___" }
+#define LSD_DIR_NAME { "src", "gnu", "installer", "Manual", "LMM.app", "Rpkg", "lwi", "___" }
 #define LSD_WIN_NAME { "lsd", "log", "str", "da", "deb", "lat" }
 #define REG_SIG_CODE { SIGINT, SIGTERM, SIGABRT, SIGFPE, SIGILL, SIGSEGV }
 #define REG_SIG_NAME { "Interrupt signal", "Terminate signal", "Abort signal", \
