@@ -25,8 +25,8 @@ if "%1"=="/?" (
 	goto end
 )
 
-"%CD%\gnu\bin\Shortcut.exe" /f:"%USERPROFILE%\Desktop\LSD.lnk" /a:c /t:"%CD%\run.bat" /w:%CD% /r:7 /i:%CD%\src\icons\lsd.ico /d:"LSD Model Manager"
+"%CD%\gnu\bin\Shortcut.exe" /f:"%USERPROFILE%\Desktop\LSD.lnk" /a:c /t:"%CD%\run.bat" /w:%CD% /r:7 /i:%CD%\src\icons\lsd.ico /d:"LSD Model Manager" > nul
 
-copy "%USERPROFILE%\Desktop\LSD.lnk" "%AppData%\Microsoft\Windows\Start Menu\Programs"
+copy "%USERPROFILE%\Desktop\LSD.lnk" "%AppData%\Microsoft\Windows\Start Menu\Programs" > nul
 
 :end

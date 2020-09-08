@@ -79,28 +79,26 @@ proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
 # SETTOP
 # Show the window
 #************************************************
-proc settop { w { name no } { destroy no } { par no } } {
+proc settop { w { name no } { destroy no } { par no } { force no } } {
 	global parWndLst grabLst logWndFn
 
-	if { $par != no } {
+	if { $par != no && $par != "" } {
 		if { [ winfo viewable [ winfo toplevel $par ] ] } {
 			wm transient $w $par
 		}
 	}
+	
 	if { $name != no } {
 		wm title $w $name
 	}
+	
 	if { $destroy != no } {
 		wm protocol $w WM_DELETE_WINDOW $destroy
 	}
-	update
-	deiconifytop $w
+	
+	deiconifytop $w $force
 	raise $w
-	if { [ info exists buttonF ] && [ winfo exists $w.$buttonF.ok ] } {
-		focus $w.$buttonF.ok
-	} {
-		focus $w
-	}
+	focustop $w "" $force
 	update
 
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsettop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" }
@@ -123,7 +121,7 @@ proc settop { w { name no } { destroy no } { par no } } {
 # overM: over the main window (same top-left position)
 # current: keep current position
 #************************************************
-proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } { buttonF b } { noMinSize no } } {
+proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } { buttonF b } { noMinSize no } { force no } } {
 	global defaultPos hmargin vmargin bordsize tbarsize wndLst parWndLst grabLst noParLst logWndFn
 
 	# copy of applied geometry, if any
@@ -223,7 +221,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 	}
 
-	focustop $w
+	focustop $w "" $force
 
 	update
 
@@ -252,10 +250,10 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		grab release $w
 	}
 
-	if { [ info exists buttonF ] && [ winfo exists $w.$buttonF.ok ] } {
+	if { [ string length buttonF ] > 0 && [ winfo exists $w.$buttonF.ok ] } {
 		$w.$buttonF.ok configure -default active -state active
 		focus $w.$buttonF.ok
-	} elseif { [ info exists buttonF ] && [ winfo exists $w.$buttonF.r2.ok ] } {
+	} elseif { [ string length buttonF ] > 0 && [ winfo exists $w.$buttonF.r2.ok ] } {
 		$w.$buttonF.r2.ok configure -default active -state active
 		focus $w.$buttonF.r2.ok
 	} else {
@@ -457,7 +455,7 @@ proc checkgeom { geom defGeom screenWidth screenHeight } {
 # Adjust main windows to default size & positions
 #************************************************
 proc sizetop { { w all } } {
-	global wndLst hsizeBmin vsizeBmin hsizeL vsizeL hsizeLmin vsizeLmin hsizeGmin vsizeGmin hsizeAmin vsizeAmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM hsizeD vsizeD corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom hfactM vfactM wndMenuHeight
+	global wndLst hsizeBmin vsizeBmin hsizeL vsizeL hsizeLmin vsizeLmin hsizeGmin vsizeGmin hsizeAmin vsizeAmin hsizeDmin vsizeDmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom hfactM vfactM wndMenuHeight
 
 	update
 
@@ -542,16 +540,16 @@ proc sizetop { { w all } } {
 				}
 
 				.deb {
-					set defGeom "${hsizeD}x${vsizeD}+[ getx .deb topleftW ]+[ gety .deb topleftW ]"
+					set defGeom "${hsizeDmin}x${vsizeDmin}+[ getx .deb topleftW ]+[ gety .deb topleftW ]"
 					set n [ scan $debGeom "%dx%d+%d+%d" width height x y ]
 					if { $n < 4 } {
 						set debGeom $defGeom
 					} else {
-						set debGeom "${hsizeD}x[ expr max ( $height, $vsizeD ) ]+${x}+${y}"
+						set debGeom "${hsizeDmin}x[ expr max ( $height, $vsizeDmin ) ]+${x}+${y}"
 					}
 				
 					wm geometry .deb [ checkgeom $debGeom $defGeom $screenWidth $screenHeight ]
-					wm minsize .deb $hsizeD $vsizeD
+					wm minsize .deb $hsizeDmin $vsizeDmin
 					wm resizable .deb 0 1
 				}
 
@@ -610,13 +608,13 @@ proc resizetop { w sizeX { sizeY 0 } } {
 # Set focus to the given window only if a
 # LSD window has currently the system focus
 #************************************************
-proc focustop { w1 { w2 "" } } {
+proc focustop { w1 { w2 "" } { force no } } {
 
 	if [ winfo exists $w1 ] {
 		update
 		
 		set t1 [ winfo toplevel $w1 ]
-		deiconifytop $t1
+		deiconifytop $t1 $force
 		
 		if { $w2 != "" && [ winfo exists $w2 ] && [ winfo toplevel $w2 ] != $t1 } {
 			raise $t1 [ winfo toplevel $w2 ]
@@ -624,7 +622,11 @@ proc focustop { w1 { w2 "" } } {
 			raise $t1
 		}
 		
-		focus $w1
+		if { $force } {
+			focus -force $w1
+		} else {
+			focus $w1
+		}
 	}
 }
 
@@ -634,12 +636,12 @@ proc focustop { w1 { w2 "" } } {
 # Deiconify/map window if not yet viewable
 # In Windows, also requires LSD has the focus
 #************************************************
-proc deiconifytop { w } {
+proc deiconifytop { w { force no } } {
 	global CurPlatform
 
-	if { ! [ winfo viewable $w ] && \
+	if { $force || ( ! [ winfo viewable $w ] && \
 		 ( ! [ string equal $CurPlatform windows ] || \
-		   [ focus -displayof $w ] != "" ) } {
+		   [ focus -displayof $w ] != "" ) ) } {
 		wm deiconify $w
 	}
 }
@@ -1038,7 +1040,7 @@ proc selectcell { can cell } {
 # Procedure to create standard button set
 #************************************************
 proc okhelpcancel { w fr comOk comHelp comCancel } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
@@ -1049,8 +1051,8 @@ proc okhelpcancel { w fr comOk comHelp comCancel } {
 	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
 	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.ok $w.$fr.help $w.$fr.cancel -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.ok $w.$fr.help $w.$fr.cancel -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1059,7 +1061,7 @@ proc okhelpcancel { w fr comOk comHelp comCancel } {
 # Procedure to create standard button set
 #************************************************
 proc okhelp { w fr comOk comHelp } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
@@ -1068,8 +1070,8 @@ proc okhelp { w fr comOk comHelp } {
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
 	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.ok $w.$fr.help -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.ok $w.$fr.help -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1078,7 +1080,7 @@ proc okhelp { w fr comOk comHelp } {
 # Procedure to create standard button set
 #************************************************
 proc okcancel { w fr comOk comCancel } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
@@ -1086,8 +1088,8 @@ proc okcancel { w fr comOk comCancel } {
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
-	pack $w.$fr.ok $w.$fr.cancel -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.ok $w.$fr.cancel -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1096,7 +1098,7 @@ proc okcancel { w fr comOk comCancel } {
 # Procedure to create standard button set
 #************************************************
 proc helpcancel { w fr comHelp comCancel } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.help -width $butWid -text Help -command $comHelp
@@ -1105,8 +1107,8 @@ proc helpcancel { w fr comHelp comCancel } {
 	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
 	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.help $w.$fr.cancel -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.help $w.$fr.cancel -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1115,14 +1117,14 @@ proc helpcancel { w fr comHelp comCancel } {
 # Procedure to create standard button set
 #************************************************
 proc ok { w fr comOk } {
-	global butWid butPad butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text OK -command $comOk
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
-	pack $w.$fr.ok -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.ok -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1131,14 +1133,14 @@ proc ok { w fr comOk } {
 # Procedure to create standard button set
 #************************************************
 proc cancel { w fr comCancel } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.cancel -width $butWid -text Cancel -command $comCancel
 	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
-	pack $w.$fr.cancel -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.cancel -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1147,7 +1149,7 @@ proc cancel { w fr comCancel } {
 # Procedure to create standard button set
 #************************************************
 proc Xcancel { w fr nameX comX comCancel } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	if { [ string length "$nameX" ] > $butWid } {
@@ -1160,8 +1162,8 @@ proc Xcancel { w fr nameX comX comCancel } {
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
-	pack $w.$fr.ok $w.$fr.cancel -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.ok $w.$fr.cancel -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1170,7 +1172,7 @@ proc Xcancel { w fr nameX comX comCancel } {
 # Procedure to create standard button set
 #************************************************
 proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	if { [ string length "$nameX" ] > $butWid } {
@@ -1188,8 +1190,8 @@ proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
 	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.ok $w.$fr.x $w.$fr.help $w.$fr.cancel -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.ok $w.$fr.x $w.$fr.help $w.$fr.cancel -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1198,7 +1200,7 @@ proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 # Procedure to create standard button set
 #************************************************
 proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	if { [ string length "$nameX" ] > $butWid } {
@@ -1225,11 +1227,11 @@ proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
 	bind $w.$fr.r2.cancel <KeyPress-Return> "$w.$fr.r2.cancel invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.r2.cancel invoke"
 	bind $w <F1> "$w.$fr.r2.help invoke"
-	pack $w.$fr.r1.x $w.$fr.r1.y -padx $butPad -side left
-	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.cancel -padx $butPad -side left
+	pack $w.$fr.r1.x $w.$fr.r1.y -padx $butSpc -side left
+	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.cancel -padx $butSpc -side left
 	pack $w.$fr.r1 -anchor w
-	pack $w.$fr.r2 -pady $butPad
-	pack $w.$fr -side right
+	pack $w.$fr.r2 -pady $butSpc
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1238,7 +1240,7 @@ proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
 # Procedure to create standard button set
 #************************************************
 proc XYZokhelpcancel { w fr nameX nameY nameZ comX comY comZ comOk comHelp comCancel } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	if { [ string length "$nameX" ] > $butWid } {
@@ -1267,11 +1269,11 @@ proc XYZokhelpcancel { w fr nameX nameY nameZ comX comY comZ comOk comHelp comCa
 	bind $w.$fr.r2.cancel <KeyPress-Return> "$w.$fr.r2.cancel invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.r2.cancel invoke"
 	bind $w <F1> "$w.$fr.r2.help invoke"
-	pack $w.$fr.r1.x $w.$fr.r1.y $w.$fr.r1.z -padx $butPad -side left
-	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.cancel -padx $butPad -side left
+	pack $w.$fr.r1.x $w.$fr.r1.y $w.$fr.r1.z -padx $butSpc -side left
+	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.cancel -padx $butSpc -side left
 	pack $w.$fr.r1 -anchor w
-	pack $w.$fr.r2 -pady $butPad
-	pack $w.$fr -side right
+	pack $w.$fr.r2 -pady $butSpc
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1280,7 +1282,7 @@ proc XYZokhelpcancel { w fr nameX nameY nameZ comX comY comZ comOk comHelp comCa
 # Procedure to create standard button set
 #************************************************
 proc donehelp { w fr comDone comHelp } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text Done -command $comDone
@@ -1289,8 +1291,8 @@ proc donehelp { w fr comDone comHelp } {
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
 	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.ok $w.$fr.help -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.ok $w.$fr.help -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1299,14 +1301,14 @@ proc donehelp { w fr comDone comHelp } {
 # Procedure to create standard button set
 #************************************************
 proc done { w fr comDone } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text Done -command $comDone
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
-	pack $w.$fr.ok -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.ok -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1315,7 +1317,7 @@ proc done { w fr comDone } {
 # Procedure to create standard button set
 #************************************************
 proc comphelpdone { w fr comComp comHelp comDone } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.comp -width $butWid -text Compute -command $comComp
@@ -1326,8 +1328,8 @@ proc comphelpdone { w fr comComp comHelp comDone } {
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
 	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.comp $w.$fr.help $w.$fr.ok -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.comp $w.$fr.help $w.$fr.ok -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1336,7 +1338,7 @@ proc comphelpdone { w fr comComp comHelp comDone } {
 # Procedure to create standard button set
 #************************************************
 proc findhelpdone { w fr comFind comHelp comDone } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.search -width $butWid -text Find -command $comFind
@@ -1347,8 +1349,8 @@ proc findhelpdone { w fr comFind comHelp comDone } {
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
 	bind $w <F1> "$w.$fr.help invoke"
-	pack $w.$fr.search $w.$fr.help $w.$fr.ok -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.search $w.$fr.help $w.$fr.ok -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1357,13 +1359,13 @@ proc findhelpdone { w fr comFind comHelp comDone } {
 # Procedure to create standard button set
 #************************************************
 proc save { w fr comSave } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.ok -width $butWid -text Save -command $comSave
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	pack $w.$fr.ok -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.ok -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1373,15 +1375,15 @@ proc save { w fr comSave } {
 #************************************************
 # procedures to create standard button sets
 proc yesno { w fr comYes comNo } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.yes -width $butWid -text Yes -command $comYes
 	ttk::button $w.$fr.no -width $butWid -text No -command $comNo
 	bind $w.$fr.yes <KeyPress-Return> "$w.$fr.yes invoke"
 	bind $w.$fr.no <KeyPress-Return> "$w.$fr.no invoke"
-	pack $w.$fr.yes $w.$fr.no -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.yes $w.$fr.no -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1391,7 +1393,7 @@ proc yesno { w fr comYes comNo } {
 #************************************************
 # procedures to create standard button sets
 proc yesnocancel { w fr comYes comNo comCancel } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.yes -width $butWid -text Yes -command $comYes
@@ -1401,8 +1403,8 @@ proc yesnocancel { w fr comYes comNo comCancel } {
 	bind $w.$fr.no <KeyPress-Return> "$w.$fr.no invoke"
 	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
-	pack $w.$fr.yes $w.$fr.no $w.$fr.cancel -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.yes $w.$fr.no $w.$fr.cancel -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1411,7 +1413,7 @@ proc yesnocancel { w fr comYes comNo comCancel } {
 # Procedure to create standard button set
 #************************************************
 proc retrycancel { w fr comRetry comCancel } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.retry -width $butWid -text Retry -command $comRetry
@@ -1419,8 +1421,8 @@ proc retrycancel { w fr comRetry comCancel } {
 	bind $w.$fr.retry <KeyPress-Return> "$w.$fr.retry invoke"
 	bind $w.$fr.cancel <KeyPress-Return> "$w.$fr.cancel invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.cancel invoke"
-	pack $w.$fr.retry $w.$fr.cancel -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.retry $w.$fr.cancel -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 
@@ -1430,7 +1432,7 @@ proc retrycancel { w fr comRetry comCancel } {
 #************************************************
 # procedures to create standard button sets
 proc abortretryignore { w fr comAbort comRetry comIgnore } {
-	global butWid butPad
+	global butWid butSpc butPad
 	if [ string equal $w . ] { set w "" }
 	if { ! [ winfo exists $w.$fr ] } { ttk::frame $w.$fr }
 	ttk::button $w.$fr.abort -width $butWid -text Abort -command $comAbort
@@ -1440,8 +1442,8 @@ proc abortretryignore { w fr comAbort comRetry comIgnore } {
 	bind $w.$fr.retry <KeyPress-Return> "$w.$fr.retry invoke"
 	bind $w.$fr.ignore <KeyPress-Return> "$w.$fr.ignore invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ignore invoke"
-	pack $w.$fr.abort $w.$fr.retry $w.$fr.ignore -padx $butPad -pady $butPad -side left
-	pack $w.$fr -side right
+	pack $w.$fr.abort $w.$fr.retry $w.$fr.ignore -padx $butSpc -side left
+	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
 

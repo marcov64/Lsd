@@ -326,9 +326,7 @@ int lsdmain( int argn, char **argv )
 	Tcl_LinkVar( inter, "shigh", ( char * ) &shigh, TCL_LINK_INT );
 	cmd( "set shigh $shigh_temp" );		// restore correct value
 
-	// set main window
-	cmd( "wm title . \"LSD Model Manager\"" );
-	cmd( "wm protocol . WM_DELETE_WINDOW { set choice 1 }" );
+	// configure main window
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
 	cmd( "icontop . lmm" );
 	cmd( "sizetop .lmm" );
@@ -801,8 +799,6 @@ int lsdmain( int argn, char **argv )
 
 	cmd( "bind .f.t.t <F1> { set choice 34 }" );
 
-	// set advanced double-click behavior (dblclick.tcl) and also
-	// reset the word boundaries to fix weird double-click behavior on Windows
 	cmd( "setDoubleclickBinding .f.t.t" );
 	cmd( "set tcl_wordchars {\\w}" );
 	cmd( "set tcl_nonwordchars {\\W}" );
@@ -860,7 +856,8 @@ int lsdmain( int argn, char **argv )
 	else
 		choice = 33; 				// open model browser
 
-	cmd( "focustop .f.t.t" );
+	cmd( "settop . LMM { set choice 1 } no yes" );
+	cmd( "focus .f.t.t" );
 	cmd( "set keepfocus 0" );
 
 	loop:
@@ -1336,6 +1333,9 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "pack .l.l .l.p .l.r .l.c -padx 5 -pady 5" );
 
+		cmd( "ttk::frame .l.pad" );
+		cmd( "pack .l.pad -pady 5" );
+		
 		cmd( "ttk::frame .l.b1" );
 		cmd( "ttk::button .l.b1.repl -width $butWid -state disabled -text Replace -command { \
 				if { [ string length $cur ] > 0 } { \
@@ -1349,9 +1349,9 @@ int lsdmain( int argn, char **argv )
 				} \
 			}" );
 		cmd( "ttk::button .l.b1.all -width $butWid -state disabled -text \"Repl. All\" -command { set choice 4 }" );
-		cmd( "pack .l.b1.repl .l.b1.all -padx $butPad -side left" );
+		cmd( "pack .l.b1.repl .l.b1.all -padx $butSpc -side left" );
 
-		cmd( "pack .l.b1 -anchor e" );
+		cmd( "pack .l.b1 -padx $butPad -anchor e" );
 
 		cmd( "Xcancel .l b2 Find { \
 				if { $textsearch != \"\" } { \
@@ -4765,7 +4765,11 @@ int lsdmain( int argn, char **argv )
 		cmd( ".l.t.text insert end $a" );
 		cmd( "pack .l.t.yscroll -side right -fill y" );
 		cmd( "pack .l.t.text" );
+		cmd( "pack .l.t" );
 		cmd( "mouse_wheel .l.t.text" );
+
+		cmd( "ttk::frame .l.pad" );
+		cmd( "pack .l.pad -pady 5" );
 
 		cmd( "ttk::frame .l.d" );
 
@@ -4872,11 +4876,11 @@ int lsdmain( int argn, char **argv )
 					} \
 				} \
 			}" );
-		cmd( "pack .l.d.opt.debug .l.d.opt.ext .l.d.opt.def .l.d.opt.cle -padx $butPad -pady 5 -side left" );
+		cmd( "pack .l.d.opt.debug .l.d.opt.ext .l.d.opt.def .l.d.opt.cle -padx $butSpc -side left" );
 
-		cmd( "pack .l.d.opt" );
+		cmd( "pack .l.d.opt -padx $butPad" );
 
-		cmd( "pack .l.t .l.d -anchor e" );
+		cmd( "pack .l.d -anchor e" );
 
 		cmd( "okhelpcancel .l b { set choice 1 } { LsdHelp LMM.html#model_options } { set choice 2 }" );
 
@@ -6065,8 +6069,8 @@ void create_compresult_window( bool nw )
 			} \
 		}" );
 	cmd( "ttk::button .mm.b.close -width [ expr $butWid + 4 ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; focustop .f.t.t; set keepfocus 0 }" );
-	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx $butPad -pady $butPad -expand yes -fill x -side left" );
-	cmd( "pack .mm.b -side right" );
+	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx $butSpc -expand yes -fill x -side left" );
+	cmd( "pack .mm.b -padx $butPad -pady $butPad -side right" );
 
 	cmd( "bind .mm <p> { .mm.b.perr invoke }; bind .mm <P> { .mm.b.perr invoke }" );
 	cmd( "bind .mm.t.t <Up> { .mm.b.perr invoke; break }" );

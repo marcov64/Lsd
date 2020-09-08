@@ -259,7 +259,7 @@ proc findfiles { directory pattern { tails "" } } {
 # Chose models to compare dialog
 #************************************************
 proc choose_models { curdir curfile } {
-	global d1 d2 f1 f2 lmod ldir lgroup cgroup butWid butPad darkTheme
+	global d1 d2 f1 f2 lmod ldir lgroup cgroup butWid butPad butSpc darkTheme
 
 	set d1 "$curdir"
 	set d2 ""
@@ -355,7 +355,7 @@ proc choose_models { curdir curfile } {
 	ttk::frame .l.t.t.f1.m1.i
 	ttk::button .l.t.t.f1.m1.i.ins -width $butWid -text Select -command { select_model .l.t.l.l.l 1 }
 	ttk::button .l.t.t.f1.m1.i.brw -width $butWid -text "Browse" -command { browse_model 1 }
-	pack .l.t.t.f1.m1.i.ins .l.t.t.f1.m1.i.brw -padx $butPad -pady $butPad -side left
+	pack .l.t.t.f1.m1.i.ins .l.t.t.f1.m1.i.brw -padx $butSpc -pady $butPad -side left
 
 	pack .l.t.t.f1.m1.d .l.t.t.f1.m1.f .l.t.t.f1.m1.i 
 	pack .l.t.t.f1.l .l.t.t.f1.m1 -pady 3
@@ -370,7 +370,7 @@ proc choose_models { curdir curfile } {
 	ttk::frame .l.t.t.f2.m2.i
 	ttk::button .l.t.t.f2.m2.i.ins -width $butWid -text Select -command { select_model .l.t.l.l.l 2 }
 	ttk::button .l.t.t.f2.m2.i.brw -width $butWid -text "Browse" -command { browse_model 2 }
-	pack .l.t.t.f2.m2.i.ins .l.t.t.f2.m2.i.brw -padx $butPad -pady $butPad -side left
+	pack .l.t.t.f2.m2.i.ins .l.t.t.f2.m2.i.brw -padx $butSpc -pady $butPad -side left
 
 	pack .l.t.t.f2.m2.d .l.t.t.f2.m2.f .l.t.t.f2.m2.i
 	pack .l.t.t.f2.l .l.t.t.f2.m2 -pady 3
@@ -401,8 +401,8 @@ proc choose_models { curdir curfile } {
 	}
 	bind .l <KeyPress-Escape> { .l.b.cnc invoke }
 	bind .l <KeyPress-Return> { .l.b.cmp invoke }
-	pack .l.b.cmp .l.b.cnc -padx $butPad -pady $butPad -side left
-	pack .l.b -side right
+	pack .l.b.cmp .l.b.cnc -padx $butSpc -side left
+	pack .l.b -padx $butPad -pady $butPad -side right
 
 	showtop .l
 	pack propagate .l.t.l 0

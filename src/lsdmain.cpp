@@ -592,9 +592,7 @@ int lsdmain( int argn, char **argv )
 	cmd( "set small_character [ expr $dim_character - $deltaSize ]" );
 	cmd( "set gpterm $gnuplotTerm" );
 
-	// set main window
-	cmd( "wm title . \"LSD Browser\"" );
-	cmd( "wm protocol . WM_DELETE_WINDOW { if [ string equal [ discard_change ] ok ] { exit } }" ); 
+	// configure main window
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
 	cmd( "icontop . lsd" );
 	cmd( "sizetop .lsd" );
@@ -1352,8 +1350,8 @@ void create_logwindow( void )
 	cmd( "ttk::button $w.help -width $butWid -text Help -command {LsdHelp log.html} -underline 0" );
 	cmd( "ttk::button $w.copy -width $butWid -text Copy -command {tk_textCopy .log.text.text} -underline 0" );
 
-	cmd( "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx $butPad -pady $butPad -side left" );
-	cmd( "pack $w -side right" );
+	cmd( "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx $butSpc -side left" );
+	cmd( "pack $w -padx $butPad -pady $butPad -side right" );
 
 	cmd( "showtop .log none 1 1 0" );
 	set_shortcuts_log( ".log", "log.html" );

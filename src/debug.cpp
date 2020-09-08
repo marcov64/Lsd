@@ -126,11 +126,9 @@ cmd( "set existButtons [ expr [ winfo exists .deb.b ] ]" );
 if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 { 
 	cmd( "if [ string equal $CurPlatform mac ] { \
-			set butWidD [ expr $butWid - 1 ]; \
-			set butPadD [ expr $butPad - 6 ] \
+			set butWidD [ expr $butWid - 1 ] \
 		} { \
-			set butWidD $butWid; \
-			set butPadD $butPad \
+			set butWidD $butWid \
 		}" );
 	cmd( "destroy .deb.b" );
 
@@ -149,7 +147,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd( "ttk::button .deb.b.move.hook -width $butWidD -text Hooks -command { set choice 21 } -underline 0" );
 	cmd( "ttk::button .deb.b.move.net -width $butWidD -text Network -command { set choice 22 } -underline 3" );
 	
-	cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.hook .deb.b.move.net -padx $butPadD -side left" );
+	cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.hook .deb.b.move.net -padx $butSpc -side left" );
 	
 	cmd( "bind .deb <KeyPress-u> { .deb.b.move.up invoke }; bind .deb <KeyPress-U> {  .deb.b.move.up invoke }" );
 	cmd( "bind .deb <Up> { .deb.b.move.up invoke }" );
@@ -201,14 +199,19 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 		cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -padx 2 -side left" );
 		
 		if ( mode == 1 )
-			cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.call .deb.b.act.prn_v .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butPadD -side left" );
+			cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.call .deb.b.act.prn_v .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butSpc -side left" );
 		else
-			cmd( "pack .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butPad -side left" );
+			cmd( "pack .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butSpc -side left" );
 	
-		cmd( "pack .deb.b.move .deb.b.act -ipady [ expr $butPadD / 2 ] -anchor e" );
+
+		cmd( "ttk::frame .deb.b.pad" );
+		
+		cmd( "pack .deb.b.move -anchor e" );
+		cmd( "pack .deb.b.pad -pady $butSpc -anchor e" );
+		cmd( "pack .deb.b.act -anchor e" );
 	}
 	else
-		cmd( "pack .deb.b.move -ipady [ expr $butPadD / 2 ] -anchor e" );		
+		cmd( "pack .deb.b.move -anchor e" );		
 }
 
 app_res = *res;
@@ -264,7 +267,7 @@ while ( choice == 0 )
 	deb_show( r );
 	debLstObj = r;
 
-	cmd( "pack .deb.b -pady [ expr $butPad / 2 ] -side right -after .deb.cc" );
+	cmd( "pack .deb.b -padx $butPad -pady $butPad -side right -after .deb.cc" );
 
 	cmd( "if { $newDeb } { showtop .deb topleftW; set newDeb false } { focustop .deb }" );
 	cmd( "set debDone 1" );
@@ -1296,7 +1299,7 @@ void deb_show( object *r )
 			set lastDebSz { 0 0 }; \
 			set debDone 0; \
 			set fntWid [ font measure [ ttk::style lookup TLabel -font active TkDefaultFont ] 0 ]; \
-			set hcharszD [ expr int( ( $hsizeD - 15 ) / $fntWid ) ]; \
+			set hcharszD [ expr int( ( $hsizeDmin - 15 ) / $fntWid ) ]; \
 			set hnamszD [ expr round( $hnamshD * $hcharszD ) ]; \
 			set hvalszD [ expr round( $hvalshD * $hcharszD ) ]; \
 			set hupdszD [ expr round( $hupdshD * $hcharszD ) ]; \
@@ -1341,7 +1344,7 @@ void deb_show( object *r )
 	if ( r->v == NULL )
 	{
 		cmd( "$g.can create text 0 0" );	// reference to position message
-		cmd( "$g.can create text [ expr ( $hsizeD - 10 ) / 2 ] [ expr $vsizeD / 3 ] -text \"(no elements in object)\" -font [ ttk::style lookup boldSmall.TLabel -font ] -fill $colorsTheme(fg)" );
+		cmd( "$g.can create text [ expr ( $hsizeDmin - 10 ) / 2 ] [ expr $vsizeDmin / 3 ] -text \"(no elements in object)\" -font [ ttk::style lookup boldSmall.TLabel -font ] -fill $colorsTheme(fg)" );
 	}
 	else
 	{

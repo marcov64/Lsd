@@ -65,17 +65,12 @@ set hsizeLmin	800	; # LMM minimum horizontal size in pixels
 set vsizeLmin	550	; # LMM minimum vertical size in pixels
 set hsizeBmin	400	; # browser horizontal size in pixels
 set vsizeBmin	600	; # browser vertical size in pixels
-set hsizeGmin	700	; # log window minimum horizontal size in pixels
-set vsizeGmin	480	; # log window minimum vertical size in pixels
-set hsizeAmin	850	; # analysis of results window minimum horizontal size in pixels
-set vsizeAmin	520	; # analysis of results window minimum vertical size in pixels
 set hsizeM 		600	; # model structure horizontal size in pixels
 set vsizeM		400	; # model structure vertical size in pixels
 set hsizeNmin	300	; # objects numbers editor minimum horizontal size in pixels
-set vsizeNmin	550	; # objects numbers editor minimum vertical size in pixels
+set vsizeNmin	520	; # objects numbers editor minimum vertical size in pixels
 set hsizeImin	300	; # initial values editor minimum horizontal size in pixels
-set vsizeImin	200	; # initial values editor minimum vertical size in pixels
-set butPad 		10	; # padding area (X/Y) for buttons
+set vsizeImin	400	; # initial values editor minimum vertical size in pixels
 set frPadX		3	; # padding area (X) for frame borders
 set frPadY		2	; # padding area (Y) for frame borders
 
@@ -129,12 +124,6 @@ set rstepM		0.1		; # relative scaling factor step step
 set rfactM		0.3		; # horizontal range exponential factor
 set rinitM		750		; # horizontal initial width (4 root sons)
 set rincrM		100		; # horizontal width increase step
-set bhstepMwin	25		; # button horizontal step (Windows)
-set bhstepMlin	35		; # button horizontal step (Linux)
-set bhstepMmac	27		; # button horizontal step (Mac)
-set bvstepMwin	26		; # button vertical step (Windows/Mac)
-set bvstepMlin	30		; # button vertical step (Linux)
-set borderMmac	10		; # additional open space to border (Mac 8.6.10+)
 
 # runtime windows defaults
 set hsizeR		500	; # horizontal size in pixels
@@ -154,8 +143,6 @@ set pdigitsR	3	; # default precision digits
 set shiftR		20	; # new window shift
 
 # debug/data browse windows defaults
-set hsizeD		910		; # window width (pixels)
-set vsizeD		400		; # window minimum height (pixels)
 set vspcszD		5		; # line horizontal space size (pixels)
 set hnamshD		0.20	; # variable name horizontal share (1 column out of 2)
 set hvalshD		0.15	; # variable value horizontal share (1 column out of 2)
@@ -196,10 +183,27 @@ set deltaSizeMac		1
 set deltaSizeLinux		1
 set deltaSizeWindows	2
 
-# OS specific default window buttons widths
-set butLinux	8
-set butMac		7
-set butWindows	9
+# OS specific default window button width, spacing and padding
+set butWidMac		7 ; # button width in characters
+set butWidLinux		8
+set butWidWindows	9
+set butSpcMac		4 ; # button spacing in pixels
+set butSpcLinux		5
+set butSpcWindows	5
+set butPadMac 		10 ; # padding area (X/Y) for buttons in pixels
+set butPadLinux 	10
+set butPadWindows 	10
+
+# OS specific button spacing in model structure window
+set bhstepMac		27 ; # button horizontal step
+set bhstepLinux		35
+set bhstepWindows	25
+set bvstepMac		26 ; # button vertical step
+set bvstepLinux		30
+set bvstepWindows	26
+set bborderMac		10 ; # additional open space to border
+set bborderLinux	0
+set bborderWindows	0
 
 # OS specific screen location offset adjustments
 set corrXmac	0
@@ -208,6 +212,26 @@ set corrXlinux	0
 set corrYlinux	-67
 set corrXwindows 0
 set corrYwindows 0
+
+# OS specific minimum window sizes (horizontal & vertical)
+set hsizeGminMac		670	; # log window
+set vsizeGminMac		480
+set hsizeGminLinux		670
+set vsizeGminLinux		480
+set hsizeGminWindows	580
+set vsizeGminWindows	400
+set hsizeAminMac		850	; # analysis of results window
+set vsizeAminMac		520
+set hsizeAminLinux		850
+set vsizeAminLinux		520
+set hsizeAminWindows	720
+set vsizeAminWindows	460
+set hsizeDminMac		910	; # debugger/data browse window
+set vsizeDminMac		400
+set hsizeDminLinux		910
+set vsizeDminLinux		400
+set hsizeDminWindows	740
+set vsizeDminWindows	400
 
 # OS specific default model executable name
 set exeLinux 	"lsd"

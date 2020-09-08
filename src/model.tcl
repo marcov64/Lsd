@@ -276,8 +276,7 @@ proc showmodel pippo {
 			} 
 		}
 		
-		# call procedure to adjust geometry and block lmm window, if fresh new window
-		showtop .l
+		showtop .l centerW no no yes 0 0 "" no yes
 	}
 
 	.l.l.tit.n conf -text "$modelGroup"

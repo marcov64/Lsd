@@ -318,11 +318,7 @@ pack .dir -padx 10 -pady 10
 okcancel . b { set done 1 } { set done 2 }
 
 wm geometry . +[ getx . centerS ]+[ gety . centerS ]
-settop . "LSD Installer" { set done 2 }
-
-wm deiconify .
-raise .
-update
+settop . "LSD Installer" { set done 2 } "" yes
 
 set newInst 1
 
@@ -774,6 +770,7 @@ ttk::frame .b
 ttk::button .b.finish -width $butWid -text Finish -command { set done 2 }
 bind .b.finish <Return> { .b.finish invoke }
 bind . <Escape> { .b.finish invoke }
+
 if { [ llength $issues ] == 0 } {
 	ttk::button .b.run -width $butWid -text "Run Now" -command { set done 1 }
 	bind .b.run <Return> { .b.run invoke }
@@ -783,11 +780,10 @@ if { [ llength $issues ] == 0 } {
 	pack .b.finish -padx 10 -pady 10 -side left
 	focus .b.finish
 }
+
 pack .b -side right
 
-wm deiconify .
-raise .
-update
+settop . "LSD Installer" { set done 2 } "" yes
 
 set done 0
 tkwait variable done

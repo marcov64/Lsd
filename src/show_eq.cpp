@@ -143,7 +143,7 @@ void show_eq( char *lab, int *choice )
 				} \
 			}; \
 			pack $W.s.l $W.s.e -padx 5; \
-			pack $W.s.b -padx $butPad -pady $butPad; \
+			pack $W.s.b -padx $butPad -pady $butPad -side right; \
 			bind $W.s <KeyPress-Return> { $W.s.b invoke }; \
 			showtop $W.s centerW; \
 			$W.s.e selection range 0 end; \

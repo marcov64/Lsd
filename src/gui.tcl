@@ -71,15 +71,23 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultFont $fontMac
 	set DefaultFontSize $fontSizeMac
 	set deltaSize $deltaSizeMac
-	set bvstepM $bvstepMwin
+	set hsizeAmin $hsizeAminMac
+	set vsizeAmin $vsizeAminMac
+	set hsizeDmin $hsizeDminMac
+	set vsizeDmin $vsizeDminMac
+	set hsizeGmin $hsizeGminMac
+	set vsizeGmin $vsizeGminMac
 	set corrX $corrXmac
 	set corrY $corrYmac
-	set butWid $butMac
-	set bhstepM $bhstepMmac
-	set borderMadj $borderMmac
+	set butPad $butPadMac
+	set butSpc $butSpcMac
+	set butWid $butWidMac
+	set bhstepM $bhstepMac
+	set bvstepM $bvstepMac
+	set borderMadj $bborderMac
 
 	if { [ string equal [ info patchlevel ] 8.6.9 ] } {
-		set borderMadj 0
+		set borderMadj $bborderLinux
 	}
 	
 } elseif [ string equal $CurPlatform linux ] {
@@ -94,12 +102,20 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultFont $fontLinux
 	set DefaultFontSize $fontSizeLinux
 	set deltaSize $deltaSizeLinux
+	set hsizeAmin $hsizeAminLinux
+	set vsizeAmin $vsizeAminLinux
+	set hsizeDmin $hsizeDminLinux
+	set vsizeDmin $vsizeDminLinux
+	set hsizeGmin $hsizeGminLinux
+	set vsizeGmin $vsizeGminLinux
 	set corrX $corrXlinux
 	set corrY $corrYlinux
-	set butWid $butLinux
-	set bhstepM $bhstepMlin
-	set bvstepM $bvstepMlin
-	set borderMadj 0
+	set butPad $butPadLinux
+	set butSpc $butSpcLinux
+	set butWid $butWidLinux
+	set bhstepM $bhstepLinux
+	set bvstepM $bvstepLinux
+	set borderMadj $bborderLinux
 	
 } elseif [ string equal $CurPlatform windows ] {
 	set DefaultSysTerm $sysTermWindows
@@ -112,12 +128,20 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultFont $fontWindows
 	set DefaultFontSize $fontSizeWindows
 	set deltaSize $deltaSizeWindows
+	set hsizeAmin $hsizeAminWindows
+	set vsizeAmin $vsizeAminWindows
+	set hsizeDmin $hsizeDminWindows
+	set vsizeDmin $vsizeDminWindows
+	set hsizeGmin $hsizeGminWindows
+	set vsizeGmin $vsizeGminWindows
 	set corrX $corrXwindows
 	set corrY $corrYwindows
-	set butWid $butWindows
-	set bhstepM $bhstepMwin
-	set bvstepM $bvstepMwin
-	set borderMadj 0
+	set butPad $butPadWindows
+	set butSpc $butSpcWindows
+	set butWid $butWidWindows
+	set bhstepM $bhstepWindows
+	set bvstepM $bvstepWindows
+	set borderMadj $bborderWindows
 	
 	# inherit OS setting
 	set mouseWarp [ ismousesnapon $CurPlatform ]

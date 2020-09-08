@@ -747,22 +747,27 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 	cmd( "ttk::label .sens.lab.l2 -style hl.TLabel -text \"%s\"", s->label );
 	cmd( "pack .sens.lab.l1 .sens.lab.l2 -side left -padx 2" );
 
-	cmd( "ttk::label .sens.obs -text \"Paste of clipboard data is allowed, most separators are accepted\n\nUse a \'=BEGIN:END@SAMPLES%%TYPE\' clause to specify a number of samples within a range.\nSpaces are not allowed within clauses. TYPE values are \'L\' for linear and \'R\' for random samples.\"" );
-	cmd( "pack .sens.lab .sens.obs -pady 5" );
+	cmd( "ttk::label .sens.obs1 -text \"Paste of clipboard data is allowed, most separators are accepted\"" );
+	cmd( "ttk::label .sens.obs2 -text \"Use a \'=BEGIN:END@SAMPLES%%TYPE\' clause\nto specify a number of samples within a range.\nSpaces are not allowed within clauses.\nTYPE values are \'L\' for linear and \'R\' for random samples.\" -justify center" );
+	cmd( "pack .sens.lab .sens.obs1 .sens.obs2 -pady 5" );
 
 	cmd( "ttk::frame .sens.t" );
 	cmd( "ttk::scrollbar .sens.t.v_scroll -command \".sens.t.t yview\"" );
-	cmd( "ttk::text .sens.t.t -height 10 -width 60 -yscroll \".sens.t.v_scroll set\" -dark $darkTheme -style smallFixed.TText" ); 
+	cmd( "ttk::text .sens.t.t -height 8 -width 50 -yscroll \".sens.t.v_scroll set\" -dark $darkTheme -style smallFixed.TText" ); 
 	cmd( "pack .sens.t.t .sens.t.v_scroll -side left -fill y" ); 
 	cmd( "mouse_wheel .sens.t.t" );
+	cmd( "pack .sens.t" );
+	
+	cmd( "ttk::frame .sens.pad" );
+	cmd( "pack .sens.pad -pady 5" );
 
 	cmd( "ttk::frame .sens.fb" );
-	cmd( "ttk::button .sens.fb.paste -width [ expr $butWid + 3 ] -text \"Paste Clipboard\" -command { tk_textPaste .sens.t.t }" );
-	cmd( "ttk::button .sens.fb.del -width [ expr $butWid + 3 ] -text \"Delete Values\" -command { .sens.t.t delete 0.0 end }" );
-	cmd( "ttk::button .sens.fb.rem -width [ expr $butWid + 3 ] -text \"Remove\" -command { set choice 3 }" );
 	cmd( "ttk::checkbutton .sens.fb.int -variable integerV -text \"Round to integer\"" );
-	cmd( "pack .sens.fb.paste .sens.fb.del .sens.fb.rem .sens.fb.int -padx $butPad -pady $butPad -side left" );
-	cmd( "pack .sens.t .sens.fb" );
+	cmd( "ttk::button .sens.fb.paste -width [ expr $butWid ] -text \"Paste\" -command { tk_textPaste .sens.t.t }" );
+	cmd( "ttk::button .sens.fb.del -width [ expr $butWid ] -text \"Delete\" -command { .sens.t.t delete 0.0 end }" );
+	cmd( "ttk::button .sens.fb.rem -width [ expr $butWid ] -text \"Remove\" -command { set choice 3 }" );
+	cmd( "pack .sens.fb.int .sens.fb.paste .sens.fb.del .sens.fb.rem -padx $butSpc -side left" );
+	cmd( "pack .sens.fb -padx $butPad -anchor e" );
 
 	cmd( "okhelpcancel .sens fb2 { set choice 1 } { LsdHelp menudata_sa.html#entry } { set choice 2 }" );
 	cmd( "bind .sens.fb2.ok <KeyPress-Return> { set choice 1 }" );

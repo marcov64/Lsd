@@ -991,7 +991,7 @@ int browse( object *r, int *choice )
 		cmd( "pack .l -fill both -expand yes" );
 	}
 
-	cmd( "focustop ." );
+	cmd( "settop . \"LSD Browser\" { if [ string equal [ discard_change ] ok ] { exit } } no yes" );
 
 	main_cycle:
 	
@@ -1765,7 +1765,7 @@ case 6:
 	cmd( "ttk::button $T.b0.prop -width $butWid -text Rename -command { set useCurrObj yes; set choice 83 } -underline 0" );
 	cmd( "ttk::button $T.b0.num -width $butWid -text Number -command { set useCurrObj yes; set choice 33 } -underline 0" );
 	cmd( "ttk::button $T.b0.del -width $butWid -text Delete -command { set choice 74 } -underline 0" );
-	cmd( "pack $T.b0.prop $T.b0.num $T.b0.del -padx $butPad -side left" );
+	cmd( "pack $T.b0.prop $T.b0.num $T.b0.del -padx $butSpc -side left" );
 
 	cmd( "ttk::frame $T.b1" );
 	cmd( "ttk::checkbutton $T.b1.com -text \"Compute: force the computation of the variables in this object\" -variable to_compute -underline 1" );
@@ -1963,7 +1963,7 @@ case 83:
 break;
 
 
-// Edit variable name (defined in tcl $vname) and set debug/saving/plot flags
+// Edit variable (defined in tcl $vname) and set debug/saving/plot flags
 case 7:
 
 	redrawRoot = redrawStruc = true;	// force browser/structure redraw
@@ -2128,10 +2128,10 @@ case 7:
 	{
 		cmd( "bind $T <Control-g> \"$T.b0.upd invoke\"; bind $T <Control-G> \"$T.b0.upd invoke\"" );
 		
-		cmd( "pack $T.b0.prop $T.b0.upd $T.b0.mov $T.b0.del -padx $butPad -side left" );
+		cmd( "pack $T.b0.prop $T.b0.upd $T.b0.mov $T.b0.del -padx $butSpc -side left" );
 	}
 	else
-		cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx $butPad -side left" );
+		cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx $butSpc -side left" );
 
 	cmd( "ttk::frame $T.b1" );
 
@@ -2199,16 +2199,16 @@ case 7:
 	cmd( "pack $Td.f.int $Td.f.desc" );
 
 	cmd( "ttk::frame $Td.b" );
-	cmd( "ttk::button $Td.b.eq -width [ expr $butWid + 3 ] -text \"View Code\" -command { set done 3 } -underline 3" );
-	cmd( "ttk::button $Td.b.auto_doc -width [ expr $butWid + 3 ] -text \"Auto Descr.\" -command { set done 9 } -underline 0" );
-	cmd( "ttk::button $Td.b.us -width [ expr $butWid + 3 ] -text \"Using Element\" -command { set done 4 } -underline 0" );
-	cmd( "ttk::button $Td.b.using -width [ expr $butWid + 3 ] -text \"Elements Used\" -command { set done  7} -underline 0" );
+	cmd( "ttk::button $Td.b.eq -width [ expr $butWid + 4 ] -text \"View Code\" -command { set done 3 } -underline 3" );
+	cmd( "ttk::button $Td.b.auto_doc -width [ expr $butWid + 4 ] -text \"Auto Descr.\" -command { set done 9 } -underline 0" );
+	cmd( "ttk::button $Td.b.us -width [ expr $butWid + 4 ] -text \"Using Element\" -command { set done 4 } -underline 0" );
+	cmd( "ttk::button $Td.b.using -width [ expr $butWid + 4 ] -text \"Elements Used\" -command { set done  7} -underline 0" );
 	
 	if ( ! strcmp( cur_descr->type, "Parameter" ) )
-		cmd( "pack $Td.b.auto_doc $Td.b.us -padx $butPad -side left" );
+		cmd( "pack $Td.b.auto_doc $Td.b.us -padx $butSpc -side left" );
 	else
 	{
-		cmd( "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx $butPad -side left" );
+		cmd( "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx $butSpc -side left" );
 		cmd( "bind $T <Control-w> \"$Td.b.eq invoke\"; bind $T <Control-W> \"$Td.b.eq invoke\"" );
 		cmd( "bind $T <Control-e> \"$Td.b.using invoke\"; bind $T <Control-E> \"$Td.b.using invoke\"" );
 	}
@@ -2241,7 +2241,7 @@ case 7:
 		cmd( "ttk::frame $Td.b2" );
 		cmd( "ttk::button $Td.b2.setall -width [ expr $butWid + 3 ] -text \"Initial Values\" -command { set done 11 } -underline 1" );
 		cmd( "ttk::button $Td.b2.sens -width [ expr $butWid + 3 ] -text \"Sensitivity\" -command { set done 12 } -underline 5" );
-		cmd( "pack $Td.b2.setall $Td.b2.sens -padx $butPad -side left" );
+		cmd( "pack $Td.b2.setall $Td.b2.sens -padx $butSpc -side left" );
 		
 		cmd( "pack $Td.opt $Td.f $Td.b $Td.i $Td.b2 -pady 5" );
 	  
@@ -2852,25 +2852,25 @@ case 96:
 	cmd( "ttk::frame $T.f" );
 
 	cmd( "ttk::frame $T.f.c" );
-	cmd( "ttk::label $T.f.c.l2 -width 16 -anchor e -text \"Initial delay\"" );
+	cmd( "ttk::label $T.f.c.l2 -width 20 -anchor e -text \"Initial delay\"" );
 	cmd( "ttk::spinbox $T.f.c.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99999 } { set delay %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.c.e2 insert 0 $delay" ); 
 	cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "ttk::frame $T.f.a" );
-	cmd( "ttk::label $T.f.a.l -width 16 -anchor e -text \"Random delay range\"" );
+	cmd( "ttk::label $T.f.a.l -width 20 -anchor e -text \"Random delay range\"" );
 	cmd( "ttk::spinbox $T.f.a.e -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99999 } { set delay_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay_range; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.a.e insert 0 $delay_range" ); 
 	cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "ttk::frame $T.f.b" );
-	cmd( "ttk::label $T.f.b.l1 -width 16 -anchor e -text \"Period\"" );
+	cmd( "ttk::label $T.f.b.l1 -width 20 -anchor e -text \"Period\"" );
 	cmd( "ttk::spinbox $T.f.b.e1 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99999 } { set period %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.b.e1 insert 0 $period" ); 
 	cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "ttk::frame $T.f.d" );
-	cmd( "ttk::label $T.f.d.l2 -width 16 -anchor e -text \"Random period range\"" );
+	cmd( "ttk::label $T.f.d.l2 -width 20 -anchor e -text \"Random period range\"" );
 	cmd( "ttk::spinbox $T.f.d.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99999 } { set period_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period_range; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.d.e2 insert 0 $period_range" ); 
 	cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx 2 -pady 2" );

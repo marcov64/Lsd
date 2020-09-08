@@ -499,16 +499,16 @@ cmd( "pack .da.f -padx 5 -pady 5" );
 
 // button bar
 cmd( "ttk::frame .da.b" );
-cmd( "ttk::button .da.b.ts -width $butWid -text Plot -command { set choice 1 } -underline 0" );
-cmd( "ttk::button .da.b.dump -width $butWid -text \"Save Plot\" -command { set fromPlot 0; set choice 11 } -underline 2" );
-cmd( "ttk::button .da.b.sv -width $butWid -text \"Save Data\" -command { set choice 10 } -underline 3" );
-cmd( "ttk::button .da.b.sp -width $butWid -text \"Show Data\" -command { set choice 36 } -underline 5" );
-cmd( "ttk::button .da.b.st -width $butWid -text Statistics -command { set choice 12 } -underline 1" );
-cmd( "ttk::button .da.b.fr -width $butWid -text Histogram -command { set choice 32 } -underline 0" );
-cmd( "ttk::button .da.b.lat -width $butWid -text Lattice -command { set choice 23 } -underline 0" );
+cmd( "ttk::button .da.b.ts -width [ expr $butWid + 1 ] -text Plot -command { set choice 1 } -underline 0" );
+cmd( "ttk::button .da.b.dump -width [ expr $butWid + 1 ] -text \"Save Plot\" -command { set fromPlot 0; set choice 11 } -underline 2" );
+cmd( "ttk::button .da.b.sv -width [ expr $butWid + 1 ] -text \"Save Data\" -command { set choice 10 } -underline 3" );
+cmd( "ttk::button .da.b.sp -width [ expr $butWid + 1 ] -text \"Show Data\" -command { set choice 36 } -underline 5" );
+cmd( "ttk::button .da.b.st -width [ expr $butWid + 1 ] -text Statistics -command { set choice 12 } -underline 1" );
+cmd( "ttk::button .da.b.fr -width [ expr $butWid + 1 ] -text Histogram -command { set choice 32 } -underline 0" );
+cmd( "ttk::button .da.b.lat -width [ expr $butWid + 1 ] -text Lattice -command { set choice 23 } -underline 0" );
 
-cmd( "pack .da.b.ts .da.b.dump .da.b.sv .da.b.sp .da.b.st .da.b.fr .da.b.lat  -padx $butPad -pady $butPad -side left" );
-cmd( "pack .da.b -side right" );
+cmd( "pack .da.b.ts .da.b.dump .da.b.sv .da.b.sp .da.b.st .da.b.fr .da.b.lat -padx $butSpc -side left" );
+cmd( "pack .da.b -padx $butPad -pady $butPad -side right" );
 
 // top window shortcuts binding
 cmd( "bind .da <KeyPress-Escape> { set choice 2 }" );	// quit

@@ -127,12 +127,11 @@ proc progressbox { w tit max var { destroy "" } { par . } } {
 		cancel $w b $destroy
 	}
 
-	showtop $w
-	
+	# handle installer with main window withdrawn
 	if { $par == "" } {
-		wm deiconify $w
-		raise $w
-		update
+		showtop $w centerS no no no 0 0 b no yes
+	} else {
+		showtop $w centerW
 	}
 	
 	return $w.main.info
@@ -173,12 +172,11 @@ proc waitbox { w tit msg { steps "" } { timer no } { par . } } {
 	
 	pack $w.main -padx 20 -pady 20
 	
-	showtop $w
-	
+	# handle installer with main window withdrawn
 	if { $par == "" } {
-		wm deiconify $w
-		raise $w
-		update
+		showtop $w centerS no no no 0 0 "" no yes
+	} else {
+		showtop $w centerW
 	}
 	
 	return $retVal
