@@ -2086,8 +2086,8 @@ ran_gen_id = 5 : Mersenne-Twister with 64 bits resolution in [0,1)
 ran_gen_id = 6 : Lagged fibonacci with 24 bits resolution in [0,1)
 ran_gen_id = 7 : Lagged fibonacci with 48 bits resolution in [0,1)
 ****************************************************/
-
 int ran_gen_id = 2;					// ID of initial generator (DO NOT CHANGE)
+long idum = 0;						// Park-Miller default seed (legacy code only)
 
 #ifndef NP
 mutex parallel_rd;					// mutex locks for random generator operations
@@ -2109,6 +2109,7 @@ ranlux48 lf48;						// lagged fibonacci 48 bits generator
 
 void init_random( unsigned seed )
 {
+	idum = -seed;					// unused (legacy code only)
 	lc1.seed( seed );				// linear congruential (internal)
 	lc2.seed( seed );				// linear congruential (user)
 	mt32.seed( seed );				// Mersenne-Twister 32 bits

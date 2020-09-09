@@ -389,7 +389,7 @@ wm withdraw .
 # create progress bar window
 set n 0
 set nFiles [ llength $files ]
-set inst [ progressbox .inst "Installation progress" $nFiles n { set done 2 } "" ]
+set inst [ progressbox .inst "LSD Installer" "Installation progress" $nFiles n { set done 2 } "" ]
 
 foreach f $files {
 	try {

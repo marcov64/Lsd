@@ -88,11 +88,11 @@ proc settop { w { name no } { destroy no } { par no } { force no } } {
 		}
 	}
 	
-	if { $name != no } {
+	if { $name != no && $name != "" } {
 		wm title $w $name
 	}
 	
-	if { $destroy != no } {
+	if { $destroy != no && $destroy != "" } {
 		wm protocol $w WM_DELETE_WINDOW $destroy
 	}
 	
@@ -1229,8 +1229,8 @@ proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
 	bind $w <F1> "$w.$fr.r2.help invoke"
 	pack $w.$fr.r1.x $w.$fr.r1.y -padx $butSpc -side left
 	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.cancel -padx $butSpc -side left
-	pack $w.$fr.r1 -anchor w
-	pack $w.$fr.r2 -pady $butSpc
+	pack $w.$fr.r1 -pady $butSpc -anchor w
+	pack $w.$fr.r2 -pady $butSpc -anchor w
 	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
@@ -1271,8 +1271,8 @@ proc XYZokhelpcancel { w fr nameX nameY nameZ comX comY comZ comOk comHelp comCa
 	bind $w <F1> "$w.$fr.r2.help invoke"
 	pack $w.$fr.r1.x $w.$fr.r1.y $w.$fr.r1.z -padx $butSpc -side left
 	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.cancel -padx $butSpc -side left
-	pack $w.$fr.r1 -anchor w
-	pack $w.$fr.r2 -pady $butSpc
+	pack $w.$fr.r1 -pady $butSpc -anchor w
+	pack $w.$fr.r2 -pady $butSpc -anchor w
 	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
 
@@ -1455,7 +1455,7 @@ proc abortretryignore { w fr comAbort comRetry comIgnore } {
 proc mousewarpto w {
 	global mouseWarp curX curY
 	
-	update
+	update idletasks
 	if { $mouseWarp && [ winfo exists $w ] && [ winfo viewable $w ] } {
 		set wX [ expr [ winfo width $w ] / 2 ]
 		set wY [ expr [ winfo height $w ] / 2 ]
@@ -1473,12 +1473,12 @@ proc mousewarpto w {
 		# first move pointer to toplevel to bypass Tk bug
 		set t [ winfo toplevel $w ]
 		event generate $t <Motion> -warp 1 -x [ expr [ winfo width $t ] / 2 ] -y [ expr [ winfo height $t ] / 2 ]
-		update
+		update idletasks
 
 		# do it as required to bypass Tk bug (first warps just go to the dialog not the button)
 		for { set tries 0 } { ( $curX != $wX || $curY != $wY ) && $tries < 10 } { incr tries } {
 			event generate $w <Motion> -warp 1 -x $wX -y $wY
-			update
+			update idletasks
 		}
 		
 		bind $w <Motion> { }

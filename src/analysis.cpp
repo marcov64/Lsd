@@ -294,15 +294,15 @@ cmd( "pack .da.vars.lb.bh" );
 cmd( "set f .da.vars.b" );
 cmd( "ttk::frame $f" );
 cmd( "ttk::label $f.pad1 -style boldSmall.TLabel" );
-cmd( "ttk::button $f.in -width 5 -style Toolbutton -text \u25b6 -command { set choice 6 }" );
-cmd( "ttk::button $f.out -width 5 -style Toolbutton -state disabled -text \u25c0 -command { set choice 7 }" );
-cmd( "ttk::button $f.sort -width 5 -style Toolbutton -text \"Sort \u25b2\" -command { set choice 5 } -underline 0" );
-cmd( "ttk::button $f.sortdesc -width 5 -style Toolbutton -text \"Sort \u25bc\" -command { set choice 38 } -underline 1" );
-cmd( "ttk::button $f.sortend -width 5 -style Toolbutton -text \"Sort+\" -command { set choice 15 } -underline 2" );
-cmd( "ttk::button $f.unsort -width 5 -style Toolbutton -text \"Unsort\" -command { set choice 14 } -underline 0" );
-cmd( "ttk::button $f.search -width 5 -style Toolbutton -text Find... -command { set choice 39 } -underline 0" );
-cmd( "ttk::button $f.add -width 5 -style Toolbutton -text \"Add...\" -command { set choice 24 } -underline 0" );
-cmd( "ttk::button $f.empty -width 5 -style Toolbutton -text Clear -command { set choice 8 } -underline 0" );
+cmd( "ttk::button $f.in -width 6 -style Toolbutton -text \u25b6 -command { set choice 6 }" );
+cmd( "ttk::button $f.out -width 6 -style Toolbutton -state disabled -text \u25c0 -command { set choice 7 }" );
+cmd( "ttk::button $f.sort -width 6 -style Toolbutton -text \"Sort \u25b2\" -command { set choice 5 } -underline 0" );
+cmd( "ttk::button $f.sortdesc -width 6 -style Toolbutton -text \"Sort \u25bc\" -command { set choice 38 } -underline 1" );
+cmd( "ttk::button $f.sortend -width 6 -style Toolbutton -text \"Sort+\" -command { set choice 15 } -underline 2" );
+cmd( "ttk::button $f.unsort -width 6 -style Toolbutton -text \"Unsort\" -command { set choice 14 } -underline 0" );
+cmd( "ttk::button $f.search -width 6 -style Toolbutton -text Find... -command { set choice 39 } -underline 0" );
+cmd( "ttk::button $f.add -width 6 -style Toolbutton -text \"Add...\" -command { set choice 24 } -underline 0" );
+cmd( "ttk::button $f.empty -width 6 -style Toolbutton -text Clear -command { set choice 8 } -underline 0" );
 cmd( "ttk::label $f.pad2" );
 cmd( "pack $f.pad1 $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.search $f.add $f.empty $f.pad2 -padx 2 -pady 1 -fill y" );
 
@@ -444,12 +444,12 @@ cmd( "pack .da.f.h.v.ft .da.f.h.v.sc .da.f.h.v.y2 -anchor w -expand 1 -fill x" )
 // right options block
 cmd( "ttk::frame .da.f.h.tc -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 cmd( "ttk::radiobutton .da.f.h.tc.time -text \"Time series\" -variable tc -value 0 -command { if { $xy == 0 } { .da.f.h.v.y2.y2 conf -state normal }; if { $xy == 1 } { .da.f.tit.lp.line config -state normal; set line_point $linemodeP } }" );
-cmd( "ttk::radiobutton .da.f.h.tc.cross -text \"Cross-section\" -variable tc -value 1 -command { .da.f.h.v.y2.y2 deselect; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; if { $xy == 1 } { set line_point 2;  .da.f.tit.lp.line config -state disabled } }" );
+cmd( "ttk::radiobutton .da.f.h.tc.cross -text \"Cross-section\" -variable tc -value 1 -command { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; if { $xy == 1 } { set line_point 2;  .da.f.tit.lp.line config -state disabled } }" );
 cmd( "pack .da.f.h.tc.time .da.f.h.tc.cross -anchor w" );
 
 cmd( "ttk::frame .da.f.h.xy -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-cmd( "ttk::radiobutton .da.f.h.xy.seq -text \"Sequence\" -variable xy -value 0 -command { if { $tc == 0 } { .da.f.h.v.y2.y2 conf -state normal } { .da.f.h.v.y2.y2 deselect; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled }; set gnu 0; .da.f.tit.run.gnu conf -state disabled; .da.f.tit.run.watch conf -state normal; if { $tc == 1 } { .da.f.tit.lp.line config -state normal; set line_point $linemodeP } }" );
-cmd( "ttk::radiobutton .da.f.h.xy.xy -text \"XY plot\" -variable xy -value 1 -command { .da.f.h.v.y2.y2 deselect; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; .da.f.tit.run.gnu conf -state normal; set gnu 1; .da.f.tit.run.watch conf -state disabled; if { $tc == 1 } { set line_point 2;  .da.f.tit.lp.line config -state disabled } }" );
+cmd( "ttk::radiobutton .da.f.h.xy.seq -text \"Sequence\" -variable xy -value 0 -command { if { $tc == 0 } { .da.f.h.v.y2.y2 conf -state normal } { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled }; set gnu 0; .da.f.tit.run.gnu conf -state disabled; .da.f.tit.run.watch conf -state normal; if { $tc == 1 } { .da.f.tit.lp.line config -state normal; set line_point $linemodeP } }" );
+cmd( "ttk::radiobutton .da.f.h.xy.xy -text \"XY plot\" -variable xy -value 1 -command { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; .da.f.tit.run.gnu conf -state normal; set gnu 1; .da.f.tit.run.watch conf -state disabled; if { $tc == 1 } { set line_point 2;  .da.f.tit.lp.line config -state disabled } }" );
 cmd( "pack .da.f.h.xy.seq .da.f.h.xy.xy -anchor w" );
 
 // pack first horizontal group of controls
@@ -2317,19 +2317,20 @@ while ( true )
 					if ( strlen( path ) > 0 )
 						cmd( "cd \"$path\"" );
 				
-					cmd( "set lab [tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$path\" -filetypes {{{LSD result files} {%s}} {{LSD total files} {%s}} {{All files} {*}} }]", mc ? "s" : "(s)", extRes, extTot );
+					cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$path\" -filetypes {{{LSD result files} {%s}} {{LSD total files} {%s}} {{All files} {*}}} ]", mc ? "s" : "(s)", extRes, extTot );
 					cmd( "if { ! [ fn_spaces \"$lab\" .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
-					if ( *choice == 0 )
+					h = *choice;		// number of files
+					
+					if ( h == 0 )
 						break; 			// no file selected
 					
-					if ( mc && *choice == 1 )
+					if ( mc && h == 1 )
 					{
 						cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid number of results files\" -detail \"Monte Carlo experiment requires two or more files. Please adjust the number of simulation runs properly and regenerate the files.\"" );
 						plog( "\nError: invalid number of files\n" );
 						break;
 					}
 				
-					h = *choice;
 					var_names.resize( h );
 					
 					if ( mc )
@@ -2337,7 +2338,14 @@ while ( true )
 					else
 						k = true;
 				
-					for ( i = 0; i < h; ++i )  
+					if ( h > 1 )
+					{
+						cmd( "set fnum 0" );
+						cmd( "set numf %d", h );
+						cmd( "progressbox .da.pas \"Add Series\" \"Loading results files\" $numf fnum { set stop true } .da" );
+					}
+					
+					for ( i = 0, stop = false; i < h && ! stop; ++i )  
 					{
 						cmd( "set datafile [ lindex $lab %d ]", i );
 						app = ( char * ) Tcl_GetVar( inter, "datafile", 0 );
@@ -2352,18 +2360,28 @@ while ( true )
 							fclose( f );
 							++file_counter;
 							insert_data_file( gz, &num_var, &var_names[ i ], k );
+							
+							if ( h > 1 )
+							{
+								cmd( "set fnum %d", i + 1 );
+								cmd( ".da.pas.main.info configure -text \"Files done: $fnum of $numf ([ expr int( 100 * $fnum / $numf ) ]%%)\"" );
+								cmd( "update" );
+							}	
 						}
 						else
 							plog( "\nError: could not open file: %s\n", "", filename );
 					}
 					
+					if ( h > 1 )
+						cmd( "destroytop .da.pas" );
+					
 					if ( ! mc )
 						goto add_end;
 					
-					plog( "\nCreating MC series..." );
+					plog( "\nCreating MC series... " );
 					
 					m = num_var;
-					l = var_names[ 0 ].size( );
+					l = var_names[ 0 ].size( );	// number of series
 					
 					for ( i = 1; i < h; ++i )
 					{
@@ -2408,7 +2426,11 @@ while ( true )
 					else
 						var_num = 0;
 					
-					for ( j = 0; j < l; ++j )
+					cmd( "set snum 0" );
+					cmd( "set nums %d", l );
+					cmd( "progressbox .da.pas \"Add Series\" \"Creating MC Series\" $nums snum { set stop true } .da" );
+						
+					for ( j = 0, stop = false; j < l && ! stop; ++j )
 					{
 						cur_var.resize( h );
 						
@@ -2419,8 +2441,14 @@ while ( true )
 						cmd( "set vtag [ string replace [ lindex [ split \"%s\" ] 1 ] 0 3 ]", var_names[ 0 ][ j ].c_str( ) );
 						
 						create_series( choice, true, cur_var );
+						
+						cmd( "set snum %d", j + 1 );
+						cmd( ".da.pas.main.info configure -text \"Series done: $snum of $nums ([ expr int( 100 * $snum / $nums ) ]%%)\"" );
+						cmd( "update" );
 					}
 					
+					cmd( "destroytop .da.pas" );
+						
 					if ( ! k && num_var > m )
 					{
 						store *vs_new = new store[ num_var - m ];
@@ -2437,7 +2465,10 @@ while ( true )
 						file_counter = 0;
 					}
 					
-					plog( "Done\n" );
+					if ( stop )
+						plog( "Interrupted\n" );
+					else
+						plog( "Done\n" );
 					
 				add_end:
 					var_names.clear( );
@@ -7186,6 +7217,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
+				cmd( "destroytop .da.pas" );
 				error_hard( "invalid series data", 
 							"internal problem in LSD", 
 							"if error persists, please contact developers",

@@ -129,6 +129,7 @@ int series_saved = 0;		// number of series saved
 int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
 int stack_info = 0;			// LSD stack control
+int stop;					// activity interruption flag (Tcl boolean)
 int t;						// current time step
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
@@ -378,7 +379,8 @@ int lsdmain( int argn, char **argv )
 
 	// set variables and links in TCL interpreter
 	Tcl_LinkVar( inter, "choice", ( char * ) &choice, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "debug_flag", ( char * ) &debug_flag, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( inter, "stop", ( char * ) &stop, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "debug_flag", ( char * ) &debug_flag, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "when_debug", ( char * ) &when_debug, TCL_LINK_INT );
 
 	// test Tcl interpreter
@@ -653,6 +655,11 @@ int lsdmain( int argn, char **argv )
 		}
 	}
 
+	Tcl_UnlinkVar( inter, "choice" );
+	Tcl_UnlinkVar( inter, "stop" );
+	Tcl_UnlinkVar( inter, "debug_flag" );
+	Tcl_UnlinkVar( inter, "when_debug" );
+
 #else
 
 	run( );
@@ -666,6 +673,7 @@ int lsdmain( int argn, char **argv )
 	empty_blueprint( );
 	empty_description( );
 	root->delete_obj( );
+	
 	delete stacklog;
 	delete [ ] path;
 	delete [ ] rootLsd;

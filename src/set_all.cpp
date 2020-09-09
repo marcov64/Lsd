@@ -639,13 +639,10 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl )
 	sense *cs;
 	object *cur;
 	variable *cvar;
-
-	// reset random number generator 
-	init_random( seed );
-
+	
 	if ( s->next != NULL )
 	{
-		for ( i = 0; i < s->nvalues; ++i )
+		for ( i = 0; i < s->nvalues && ! stop; ++i )
 		{
 			s->i = i;
 			sensitivity_sequential( findex, s->next, probSampl );
@@ -654,10 +651,10 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl )
 		return;
 	}
 	
-	for ( i = 0; i < s->nvalues; ++i )
+	for ( i = 0; i < s->nvalues && ! stop; ++i )
 	{
 		s->i = i;
-		for ( nv = 1,cs = rsense; cs != NULL; cs = cs->next ) 
+		for ( nv = 1, cs = rsense; cs != NULL; cs = cs->next ) 
 		{
 			nv *= cs->nvalues;
 			cvar = root->search_var( root, cs->label );
@@ -677,10 +674,17 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl )
 		{
 			if ( ! save_configuration( *findex ) )
 			{
-				plog( " Aborted" );
+				plog( "Aborted\n" );
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
 				return;
 			}
+			
+			cmd( "set findex %d", *findex );
+			
+			if ( *findex == 1 || *findex % 10 == 0 )
+				cmd( ".psa.main.info configure -text \"Files done: $findex of $ptsSa ([ expr int( 100 * $findex / $ptsSa ) ]%%)\"" );
+			
+			cmd( "update" );
 			
 			*findex = *findex + 1;
 		}
@@ -1590,7 +1594,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 	if ( rsens == NULL )					// valid pointer?
 		typ = 0;							// trigger invalid design
 		
-	plog( "\nCreating design of experiments, it may take a while, please wait... " );
+	plog( "\nCreating design of experiments, please wait... " );
 	cmd( "focustop .log" );
 	
 	switch ( typ )
@@ -1859,9 +1863,14 @@ void sensitivity_doe( int *findex, design *doe )
 	object *cur;
 	variable *cvar;
 	
-	plog( "\nCreating design of experiments configuration files.\nIt may take a while, please wait..." );
+	plog( "\nCreating design of experiments configuration files... " );
 	
-	for ( i = 0; i < doe->n; i++ )				// run through all experiments
+	stop = false;
+	cmd( "set fnum 0" );
+	cmd( "set numf %d", doe->n );
+	cmd( "progressbox .psa \"Sensitivity Analysis\" \"Creating DoE configuration files\" $numf fnum { set stop true }" );
+	
+	for ( i = 0; i < doe->n && ! stop; ++i )	// run through all experiments
 	{
 		// set up the variables ( factors) with the experiment values
 		for ( j = 0; j < doe->k; j++ )			// run through all factors
@@ -1880,13 +1889,33 @@ void sensitivity_doe( int *findex, design *doe )
 		// generate a configuration file for the experiment
 		if ( ! save_configuration( *findex ) )
 		{
-			plog( " Aborted" );
+			plog( "Aborted\n" );
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
 			return;
 		}
 		
+		cmd( "set fnum %d", i + 1 );
+		
+		if ( i == 0 || ( i + 1 ) % 10 == 0 )
+			cmd( ".psa.main.info configure -text \"Files done: $fnum of $numf ([ expr int( 100 * $fnum / $numf ) ]%%)\"" );
+		
+		cmd( "update" );
+			
 		*findex = *findex + 1;
+		
 	}
 	
-	plog( "\nSensitivity analysis configurations produced: %d\n", "", findexSens - 1 );
+	cmd( "destroytop .psa" );
+	
+	if ( stop )
+		plog( "Interrupted\n" );
+	else
+		plog( "Done\n" );
+		
+	plog( "Sensitivity analysis configurations produced: %d\n", "", findexSens - 1 );
+		
+	if ( ! stop )
+		sensitivity_created( );					// explain user how to proceed
+	else
+		*findex = 0;							// don't consider for appending
 }

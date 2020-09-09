@@ -539,6 +539,7 @@ extern char equation_name[ ];			// equation file name
 extern char err_file[ ];				// error log file name
 extern char msg[ ];						// auxiliary Tcl buffer
 extern int choice;						// Tcl menu control variable (main window)
+extern int stop;						// activity interruption flag (Tcl boolean)
 extern lsdstack *stacklog;				// LSD stack
 
 // common constant string arrays (not visible to the users)

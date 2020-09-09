@@ -991,7 +991,7 @@ int browse( object *r, int *choice )
 		cmd( "pack .l -fill both -expand yes" );
 	}
 
-	cmd( "settop . \"LSD Browser\" { if [ string equal [ discard_change ] ok ] { exit } } no yes" );
+	cmd( "settop . no { if [ string equal [ discard_change ] ok ] { exit } } no yes" );
 
 	main_cycle:
 	
@@ -4384,23 +4384,22 @@ case 62:
 		plog( "\nSensitivity analysis space size: %ld", "", ptsSa );
 		
 		// Prevent running into too big sensitivity spaces (high computation times)
-		if ( ptsSa > MAX_SENS_POINTS )
-		{
-			plog( "\nWarning: sensitivity analysis space size is too big!" );
-			sensitivity_too_large( );		// ask user before proceeding
-			if ( *choice == 0 )
+		if ( ptsSa > max( 10, MAX_SENS_POINTS / 10 ) )
+			// ask user before proceeding
+			if ( sensitivity_too_large( ptsSa, choice ) )
 				break;
-		}
 		
 		for ( i = 1, cs = rsense; cs!=NULL; cs = cs->next )
 			i *= cs->nvalues;
 		cur = root->b->head;
 		root->add_n_objects2( cur->label, i - 1, cur );
 		
-		plog( "\nUpdating configuration, it may take a while, please wait..." );
+		plog( "\nUpdating configuration... " );
 		cmd( "focustop .log" );
+		
 		sensitivity_parallel( cur, rsense );
-		plog( " Done" );
+		
+		plog( "Done\n" );
 	
 		unsaved_change( true );				// signal unsaved change
 		redrawRoot = redrawStruc = true;	// force browser/structure redraw
@@ -4428,23 +4427,38 @@ case 63:
 		
 		// Prevent running into too big sensitivity spaces (high computation times)
 		if ( ptsSa > MAX_SENS_POINTS )
-		{
-			plog( "\nWarning: sensitivity analysis space size is too big!" );
-			sensitivity_too_large( );		// ask user before proceeding
-			if ( *choice == 0 )
+			// ask user before proceeding
+			if ( sensitivity_too_large( ptsSa, choice ) )
 				break;
-		}
 		
 		// save the current object & cursor position for quick reload
 		save_pos( r );
 		findexSens = 1;
 		
 		// create a design of experiment (DoE) for the sensitivity data
-		plog( "\nCreating design of experiments configuration files.\nIt may take a while, please wait... " );
+		plog( "\nCreating design of experiments configuration files... " );
 		cmd( "focustop .log" );
-		sensitivity_sequential( &findexSens, rsense );
-		plog( " Done\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );	
-		sensitivity_created( );				// explain user how to proceed
+
+		stop = false;
+		cmd( "set findex 0" );
+		cmd( "set ptsSa %d", ptsSa );
+		cmd( "progressbox .psa \"Creating DoE configuration files\" \"Creating DoE configuration files\" $ptsSa findex { set stop true }" );
+		
+		sensitivity_sequential( &findexSens, rsense, 1.0 );
+		
+		cmd( "destroytop .psa" );
+		
+		if ( stop )
+			plog( "Interrupted\n" );
+		else
+			plog( "Done\n" );
+		
+		plog( "Sensitivity analysis configurations produced: %d", "", findexSens - 1 );	
+		
+		if ( ! stop )
+			sensitivity_created( );			// explain user how to proceed
+		else
+			findexSens = 0;					// don't consider for appending
 		
 		// now reload the previously existing configuration
 		if ( ! load_prev_configuration( ) )
@@ -4454,12 +4468,7 @@ case 63:
 		}
 	
 		// restore pointed object and variable
-		n = restore_pos( r );
-		if ( n != r )
-		{
-			*choice = 0;
-			return n;
-		}
+		r = restore_pos( r );
 	}
 	else
 		sensitivity_undefined( );			// throw error
@@ -4523,26 +4532,42 @@ case 71:
 		}
 
 		// Prevent running into too big sensitivity space samples (high computation times)
-		if ((sizMC * maxMC) > MAX_SENS_POINTS )
-		{
-			plog( "\nWarning: sampled sensitivity analysis space size (%ld) is too big!", "", (long)(sizMC * maxMC) );
-			sensitivity_too_large( );		// ask user before proceeding
-			if (*choice == 0)
+		if ( ( sizMC * maxMC ) > MAX_SENS_POINTS )
+			// ask user before proceeding
+			if ( sensitivity_too_large( ( long ) ( sizMC * maxMC ), choice ) )
 				break;
-		}
 		
 		// save the current object & cursor position for quick reload
 		save_pos( r );
 
-		plog( "\nTarget sensitivity analysis sample size: %ld (%.1f%%)", "", (long)(sizMC * maxMC), 100 * sizMC );
+		plog( "\nTarget sensitivity analysis sample size: %ld (%.1f%%)", "", ( long ) ( sizMC * maxMC ), 100 * sizMC );
 		findexSens = 1;
 		
 		// create a design of experiment (DoE) for the sensitivity data
-		plog( "\nCreating design of experiments configuration files.\nIt may take a while, please wait... " );
+		plog( "\nCreating design of experiments configuration files... " );
 		cmd( "focustop .log" );
+
+		stop = false;
+		cmd( "set findex 0" );
+		cmd( "set ptsSa %ld", ( long ) ( sizMC * maxMC ) );
+		cmd( "progressbox .psa \"Creating DoE configuration files\" \"Creating DoE configuration files\" $ptsSa findex { set stop true }" );
+		
+		init_random( seed );				// reset random number generator 
 		sensitivity_sequential( &findexSens, rsense, sizMC );
-		plog( " Done\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );
-		sensitivity_created( );				// explain user how to proceed
+
+		cmd( "destroytop .psa" );
+		
+		if ( stop )
+			plog( "Interrupted\n" );
+		else
+			plog( "Done\n" );
+		
+		plog( "Sensitivity analysis configurations produced: %d", "", findexSens - 1 );	
+		
+		if ( ! stop )
+			sensitivity_created( );			// explain user how to proceed
+		else
+			findexSens = 0;					// don't consider for appending
 	
 		// now reload the previously existing configuration
 		if ( ! load_prev_configuration( ) )
@@ -4552,12 +4577,7 @@ case 71:
 		}
 		
 		// restore pointed object and variable
-		n = restore_pos( r );
-		if ( n != r )
-		{
-			*choice = 0;
-			return n;
-		}
+		r = restore_pos( r );
 	}
 	else
 		sensitivity_undefined( );			// throw error
@@ -4601,7 +4621,7 @@ case 72:
 		cmd( "ttk::frame .s.i" );
 		cmd( "ttk::label .s.i.l -text \"Design file name\"" );
 		cmd( "ttk::entry .s.i.e -width 20 -justify center -textvariable NOLHfile -state disabled" );
-		cmd( "ttk::label .s.i.w -text \"(file must be in the same folder\nas the configuration file; CSV\nformat with NO empty lines)\"" );
+		cmd( "ttk::label .s.i.w -justify center -text \"(file must be in the same folder\nas the configuration file; CSV\nformat with NO empty lines)\"" );
 		cmd( "pack .s.i.l .s.i.e .s.i.w" );
 		
 		cmd( "pack .s.o .s.e .s.d .s.i -padx 5 -pady 5" );
@@ -4650,15 +4670,12 @@ case 72:
 
 		// Prevent running into too big sensitivity space samples (high computation times)
 		if ( NOLHdoe -> n > MAX_SENS_POINTS )
-		{
-			plog( "\nWarning: sampled sensitivity analysis space size (%d) is too big!", "", NOLHdoe -> n );
-			sensitivity_too_large( );		// ask user before proceeding
-			if ( *choice == 0 )
+			// ask user before proceeding
+			if ( sensitivity_too_large( NOLHdoe -> n, choice ) )
 			{
 				delete NOLHdoe;
 				break;
 			}
-		}
 		
 		// save the current object & cursor position for quick reload
 		save_pos( r );
@@ -4666,9 +4683,8 @@ case 72:
 		
 		// create a design of experiment (DoE) for the sensitivity data
 		cmd( "focustop .log" );
-		sensitivity_doe( &findexSens, NOLHdoe );
-		sensitivity_created( );				// explain user how to proceed
 		
+		sensitivity_doe( &findexSens, NOLHdoe );
 		delete NOLHdoe;
 
 		// now reload the previously existing configuration
@@ -4679,18 +4695,16 @@ case 72:
 		}
 		
 		// restore pointed object and variable
-		n = restore_pos( r );
-		if ( n != r )
+		r = restore_pos( r );
+		
+		if ( findexSens > 0 )
 		{
-			*choice = 0;
-			return n;
+			cmd( "set answer [ ttk::messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Create out-of-main-sample set of samples?\" -detail \"An out-of-sample set allows for better meta-model selection and fit-quality evaluation.\n\nPress 'Yes' to create a Monte Carlo sample now or 'No' otherwise.\" ]" );
+			cmd( "switch $answer { yes { set choice 80 } no { set choice 0 } }" );
+			
+			if ( *choice != 0 )
+				return r;
 		}
-		
-		cmd( "set answer [ ttk::messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Create out-of-main-sample set of samples?\" -detail \"An out-of-sample set allows for better meta-model selection and fit-quality evaluation.\n\nPress 'Yes' to create a Monte Carlo sample now or 'No' otherwise.\" ]" );
-		cmd( "switch $answer { yes { set choice 80 } no { set choice 0 } }" );
-		
-		if ( *choice != 0 )
-			return r;
 	}
 	else
 		sensitivity_undefined( );			// throw error
@@ -4718,7 +4732,7 @@ case 80:
 		cmd( "newtop .s \"MC Range Sampling\" { set choice 2 }" );
 		
 		cmd( "ttk::frame .s.i" );
-		cmd( "ttk::label .s.i.l -text \"Monte Carlo sample size\nas number of samples\"" );
+		cmd( "ttk::label .s.i.l -justify center -text \"Monte Carlo sample size\nas number of samples\"" );
 		cmd( "ttk::spinbox .s.i.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set sizMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sizMC; return 0 } } -invalidcommand { bell } -justify center" );
 		cmd( ".s.i.e insert 0 $sizMC" ); 
 		cmd( "pack .s.i.l .s.i.e" );
@@ -4757,18 +4771,15 @@ case 80:
 		}
 
 		// Prevent running into too big sensitivity space samples (high computation times)
-		if ( sizMC  > MAX_SENS_POINTS )
-		{
-			plog( "\nWarning: sampled sensitivity analysis space size (%ld) is too big!", "", ( long )sizMC );
-			sensitivity_too_large( );		// ask user before proceeding
-			if ( *choice == 0 )
+		if ( sizMC > MAX_SENS_POINTS )
+			// ask user before proceeding
+			if ( sensitivity_too_large( ( long ) sizMC, choice ) )
 				break;
-		}
 		
 		// save the current object & cursor position for quick reload
 		save_pos( r );
 
-		// check if design file numberig should pick-up from previously generated files
+		// check if design file numbering should pick-up from previously generated files
 		if ( findexSens > 1 )
 		{
 			const char *applst = Tcl_GetVar( inter, "applst", 0 );
@@ -4781,8 +4792,6 @@ case 80:
 		// adjust a design of experiment (DoE) for the sensitivity data
 		design *rand_doe = new design( rsense, 2, "", findexSens, sizMC );
 		sensitivity_doe( &findexSens, rand_doe );
-		sensitivity_created( );				// explain user how to proceed
-
 		delete rand_doe;
 		
 		// now reload the previously existing configuration
@@ -4793,12 +4802,7 @@ case 80:
 		}
 		
 		// restore pointed object and variable
-		n = restore_pos( r );
-		if ( n != r )
-		{
-			*choice = 0;
-			return n;
-		}
+		r = restore_pos( r );
 	}
 	else
 		sensitivity_undefined( );			// throw error
@@ -4855,7 +4859,7 @@ case 81:
 		cmd( "ttk::label .s.j.l2 -text \"( \u0394\u00D7(p - 1) )\"" );
 		cmd( "pack .s.j.l1 .s.j.e4 .s.j.l2" );	
 		
-		cmd( "ttk::label .s.t -text \"(for details on setting Elementary Effects\nsampling parameters see Morris (1991),\nCampolongo et al. (2007) and Ruano et al. (2012))\"" );
+		cmd( "ttk::label .s.t -justify center -text \"(for details on setting Elementary Effects\nsampling parameters see Morris (1991),\nCampolongo et al. (2007) and Ruano et al. (2012))\"" );
 		
 		cmd( "pack .s.i .s.p .s.l .s.j .s.t -padx 5 -pady 5" );
 		
@@ -4892,13 +4896,10 @@ case 81:
 		}
 		
 		// Prevent running into too big sensitivity space samples (high computation times)
-		if ( nTraj * ( varSA + 1 )  > MAX_SENS_POINTS )
-		{
-			plog( "\nWarning: sampled sensitivity analysis space size (%ld) is too big!", "", (long)( nTraj * ( varSA + 1 ) ) );
-			sensitivity_too_large( );		// ask user before proceeding
-			if (*choice == 0)
+		if ( nTraj * ( varSA + 1 ) > MAX_SENS_POINTS )
+			// ask user before proceeding
+			if ( sensitivity_too_large( ( long ) ( nTraj * ( varSA + 1 ) ), choice ) )
 				break;
-		}
 		
 		// save the current object & cursor position for quick reload
 		save_pos( r );
@@ -4907,8 +4908,6 @@ case 81:
 		// adjust a design of experiment (DoE) for the sensitivity data
 		design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, jumpSz, nTraj );
 		sensitivity_doe( &findexSens, rand_doe );
-		sensitivity_created( );				// explain user how to proceed
-
 		delete rand_doe;
 		
 		// now reload the previously existing configuration
@@ -4919,12 +4918,7 @@ case 81:
 		}
 		
 		// restore pointed object and variable
-		n = restore_pos( r );
-		if ( n != r )
-		{
-			*choice = 0;
-			return n;
-		}
+		r = restore_pos( r );
 	}
 	else
 		sensitivity_undefined( );			// throw error
@@ -6943,9 +6937,11 @@ bool sort_listbox( int box, int order, object *r )
 /****************************************************
 SENSITIVITY_TOO_LARGE
 ****************************************************/
-void sensitivity_too_large( void )
+bool sensitivity_too_large( long numSaPts, int *choice )
 {
-	cmd( "set answer [ ttk::messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"The required number of configuration points to perform sensitivity analysis is likely too large to be processed in reasonable time.\n\nPress 'OK' if you want to continue anyway or 'Cancel' to abort the command now.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 0 } }" );
+	cmd( "set answer [ ttk::messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"The required  number (%ld) of configuration points to perform sensitivity analysis is likely too large to be processed in reasonable time.\n\nPress 'OK' if you want to continue anyway or 'Cancel' to abort the command now.\" ]; switch -- $answer { ok { set choice 0 } cancel { set choice 1 } }", numSaPts );
+	
+		return *choice;
 }
 
 

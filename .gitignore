@@ -11,6 +11,7 @@ SyncToy*
 *.tot.gz
 *.csv
 *.pdf
+*.pyc
 makefile
 makemessage.txt
 system_options.txt

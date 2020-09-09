@@ -856,7 +856,7 @@ int lsdmain( int argn, char **argv )
 	else
 		choice = 33; 				// open model browser
 
-	cmd( "settop . LMM { set choice 1 } no yes" );
+	cmd( "settop . no { set choice 1 } no yes" );
 	cmd( "focus .f.t.t" );
 	cmd( "set keepfocus 0" );
 

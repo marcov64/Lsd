@@ -112,12 +112,12 @@ proc gccVersion { } {
 # Show interruptible progress bar window while 
 # slow operations are running
 #************************************************
-proc progressbox { w tit max var { destroy "" } { par . } } {
+proc progressbox { w tit lab max var { destroy "" } { par . } } {
 	
 	newtop $w $tit $destroy $par
 
 	ttk::frame $w.main
-	ttk::label $w.main.lab -text $tit
+	ttk::label $w.main.lab -text $lab
 	ttk::progressbar $w.main.scale -length 300 -maximum $max -variable {*}$var
 	ttk::label $w.main.info
 	pack $w.main.lab $w.main.scale $w.main.info -pady 5
