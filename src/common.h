@@ -40,6 +40,7 @@
 #include <ctime>
 #include <csignal>
 #include <new>
+#include <string>
 #include <vector>
 #include <functional>
 #include <unordered_map>
@@ -82,15 +83,18 @@
 #define SIGMEM NSIG + 1					// out of memory signal
 #define SIGSTL NSIG + 2					// standard library exception signal
 
+// Special file names/locations in Windows
+#define TCL_LIB_VAR 	"TCL_LIBRARY"
+#define TCL_LIB_PATH 	"gnu/lib/tcl8.6"// must NOT use backslashes
+#define TCL_LIB_INIT 	"init.tcl"
+#define TCL_EXEC_PATH 	"gnu\\bin"		// must use (double) backslashes
+#define TCL_FIND_EXE	"@where wish86.exe > nul 2>&1"
+
 // Eigen library include command
 #define EIGEN "#define EIGENLIB"
 
 // constant string arrays
 #define LMM_OPTIONS_NUM 16
-#define MODEL_INFO_NUM 9
-#define LSD_DIR_NUM 8
-#define LSD_WIN_NUM MODEL_INFO_NUM - 3
-#define REG_SIG_NUM 6
 #define LMM_OPTIONS_NAME { "sysTerm", "HtmlBrowser", "fonttype", \
 						   "wish", "LsdSrc", "dim_character", \
 						   "tabsize", "wrap", "shigh", \
@@ -103,14 +107,22 @@
 							  "0", "0", "Work", \
 							  "$DefaultDbgExe", "1", "#", \
 							  "$DefaultTheme" }
+#define MODEL_INFO_NUM 9
 #define MODEL_INFO_NAME { "modelName", "modelVersion", "modelDate", \
 						  "lsdGeom", "logGeom", "strGeom", \
 						  "daGeom", "debGeom", "latGeom" }
 #define MODEL_INFO_DEFAULT { "(no name)", "1.0", "[ current_date ]", \
 							 "#", "#", "#", \
 							 "#", "#", "#" };
+#define LSD_DIR_NUM 8
 #define LSD_DIR_NAME { "src", "gnu", "installer", "Manual", "LMM.app", "Rpkg", "lwi", "___" }
+#define LSD_MIN_NUM 3
+#define LSD_MIN_FILES { "src/icons", "src/themes", "src/interf.cpp", "src/analysis.cpp" }
+#define WIN_COMP_NUM 2
+#define WIN_COMP_PATH { "mingw64\\bin", "cygwin64\\bin" }	// must use (double) backslashes
+#define LSD_WIN_NUM MODEL_INFO_NUM - 3
 #define LSD_WIN_NAME { "lsd", "log", "str", "da", "deb", "lat" }
+#define REG_SIG_NUM 6
 #define REG_SIG_CODE { SIGINT, SIGTERM, SIGABRT, SIGFPE, SIGILL, SIGSEGV }
 #define REG_SIG_NAME { "Interrupt signal", "Terminate signal", "Abort signal", \
 					   "Floating-point exception", "Illegal instruction", "Segmentation violation" }
@@ -501,9 +513,11 @@ extern int quit;						// simulation termination control flag
 bool get_bool( const char *tcl_var, bool *var = NULL );
 bool load_lmm_options( void );
 bool load_model_info( const char *path );
+bool set_env( bool set );
 bool valid_label( const char *lab );
 char *clean_file( char *file );
 char *clean_path( char *path );
+char *search_lsd_root( char *start_path );
 char *str_upr( char *s );
 const char *signal_name( int signum );
 double get_double( const char *tcl_var, double *var = NULL );
@@ -511,10 +525,12 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact = fal
 int get_int( const char *tcl_var, int *var = NULL );
 int lsdmain( int argn, char **argv );
 long get_long( const char *tcl_var, long *var = NULL );
+string win_path( string filepath );
 void check_option_files( bool sys );
 void clean_spaces( char *s );
 void cmd( const char *cm, ... );
 void handle_signals( void ( * handler )( int signum ) );
+void init_tcl_tk( const char *exec, const char *tcl_app_name );
 void clean_newlines( char *s );
 void log_tcl_error( const char *cm, const char *message );
 void myexit( int v );

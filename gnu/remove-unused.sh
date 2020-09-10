@@ -42,36 +42,15 @@ else
 	fi
 fi
 
-# MSYS2 libraries and make utility
-rm -f "$GNU_DIR/bin/make.exe" "$GNU_DIR/bin/rm.exe" "$GNU_DIR/bin/msys-2.0.dll" "$GNU_DIR/bin/msys-intl-8.dll" "$GNU_DIR/bin/msys-iconv-2.dll"
+# executables (gcc, Tcl/Tk, gdb, diff, multitail)
+rm -f $GNU_DIR/bin
 
-# g++ compiler
-rm -f "$GNU_DIR/bin/gcc.exe" "$GNU_DIR/bin/g++.exe" "$GNU_DIR/bin/windres.exe" "$GNU_DIR/bin/libwinpthread-1.dll" "$GNU_DIR/bin/libgcc_s_seh-1.dll" "$GNU_DIR/bin/libgmp-10.dll" "$GNU_DIR/bin/libstdc++-6.dll" "$GNU_DIR/bin/libzstd.dll" "$GNU_DIR/bin/zlib1.dll"
+# include files (gcc, Tcl/Tk, gdb)
+rm -f -R $GNU_DIR/include
 
-# Tcl/Tk framework
-rm -f "$GNU_DIR/bin/tclsh86.exe" "$GNU_DIR/bin/wish86.exe" "$GNU_DIR/bin/tcl86.dll" "$GNU_DIR/bin/tk86.dll"
+# library files (gcc, Tcl/Tk, gdb)
+rm -f -R $GNU_DIR/lib
 
-# gdb debugger
-rm -f "$GNU_DIR/bin/gdb.exe" "$GNU_DIR/bin/python3.8-config" "$GNU_DIR/bin/libpython3.8.dll" "$GNU_DIR/bin/libreadline8.dll" "$GNU_DIR/bin/libtermcap-0.dll" "$GNU_DIR/bin/libxxhash.dll"
+# other files (gcc, gdb, multitail)
+rm -f -R $GNU_DIR/share $GNU_DIR/x86_64-w64-mingw32 $GNU_DIR/etc $GNU_DIR/usr
 
-# diff compare tool
-rm -f "$GNU_DIR/bin/diff.exe" "$GNU_DIR/bin/libiconv-2.dll" "$GNU_DIR/bin/libintl-8.dll" "$GNU_DIR/bin/libsigsegv-2.dll"
-
-# include files (gcc and Tcl/Tk)
-rm -f -R "$GNU_DIR/include"
-
-# library files (gcc and Tcl/Tk)
-rm -f -R "$GNU_DIR/lib"
-
-# other files (gcc and gdb)
-rm -f -R "$GNU_DIR/share" "$GNU_DIR/x86_64-w64-mingw32" "$GNU_DIR/etc"
-
-# Cygwin libraries
-rm -f "$GNU_DIR/bin/cygwin1.dll" "$GNU_DIR/bin/cygncursesw-10.dll" "$GNU_DIR/bin/cygpanelw-10.dll"
-
-# multitail utility
-rm -f "$GNU_DIR/bin/multitail.exe" 
-rm -f -R "$GNU_DIR/usr"
-
-# 7-Zip compressing tool
-rm -f "$GNU_DIR/bin/7zr.exe" "$GNU_DIR/bin/7zSD.sfx"

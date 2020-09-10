@@ -1,4 +1,4 @@
-TARGET=lsd
+TARGET=LSD
 FUN=fun_market
 SWITCH_CC=-g
 

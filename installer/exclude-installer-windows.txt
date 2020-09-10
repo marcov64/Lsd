@@ -17,10 +17,10 @@ src\system_options.txt
 makefile-linux*
 makefile-mac*
 SyncToy*
-lmm
+LMM
 lmm_options.txt
-lsd.desktop
-lsd*.exe
+LSD.desktop
+LSD*.exe
 elements.txt
 makefile
 makefileNW

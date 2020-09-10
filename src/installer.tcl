@@ -361,7 +361,7 @@ while 1 {
 			continue
 		} else {
 			set newInst 0
-			file delete -force "$LsdRoot/$LsdSrc/system_options.txt" {*}[ glob -nocomplain -directory "$LsdRoot/$LsdSrc" *.o ]
+			file delete -force "$LsdRoot/lmm" "$LsdRoot/lmm.exe" "$LsdRoot/lmm64.exe" "$LsdRoot/run.bat" "$LsdRoot/run.sh" "$LsdRoot/$LsdSrc/system_options.txt" {*}[ glob -nocomplain -directory "$LsdRoot/$LsdSrc" *.o ] "$env(HOME)/Desktop/LSD.lnk" "$env(HOME)/Desktop/lsd.desktop"
 		}
 	}
 
@@ -795,9 +795,9 @@ tkwait variable done
 
 if { $done == 1 } {
 	if [ string equal $CurPlatform windows ] {
-		catch { exec $LsdRoot/run.bat & }
+		catch { exec $LsdRoot/LMM.exe & }
 	} elseif [ string equal $CurPlatform linux ] {
-		catch { exec $LsdRoot/run.sh & }
+		catch { exec $LsdRoot/LMM & }
 	} else {
 		catch { exec open -F -n $LsdRoot/LMM.app & }
 	}

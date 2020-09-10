@@ -98,67 +98,9 @@ int lsdmain( int argn, char **argv )
 	char *s, str[ 5 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], str2[ 6 * MAX_PATH_LENGTH ];
 	FILE *f;
 
-	// initialize the tcl interpreter
-	Tcl_FindExecutable( argv[0] );
-	inter = Tcl_CreateInterp( );
-	num = Tcl_Init( inter );
-	if ( num != TCL_OK )
-	{
-		sprintf( msg, "Tcl initialization directories not found, check the Tcl/Tk installation  and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
-		log_tcl_error( "Create Tcl interpreter", msg );
-		return 1;
-	}
-
-	// set variables and links in TCL interpreter
-	Tcl_SetVar( inter, "_LSD_VERSION_", _LSD_VERSION_, 0 );
-	Tcl_SetVar( inter, "_LSD_DATE_", _LSD_DATE_, 0 );
+	// initialize tcl/tk and set global bidirectional variables
+	init_tcl_tk( argv[ 0 ], "lmm" );
 	Tcl_LinkVar( inter, "choice", ( char * ) &choice, TCL_LINK_INT );
-
-	// test Tcl interpreter
-	cmd( "set choice 1234567890" );
-	Tcl_UpdateLinkedVar( inter, "choice" );
-	if ( choice != 1234567890 )
-	{
-		log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
-		return 2;
-	}
-
-	// initialize & test the tk application
-	choice = 1;
-	num = Tk_Init( inter );
-	if ( num == TCL_OK )
-		cmd( "if { ! [ catch { package present Tk 8.6 } ] && [ winfo exists . ] } { set choice 0 } { set choice 1 }" );
-	if ( choice )
-	{
-		sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.6+) and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
-		log_tcl_error( "Start Tk", msg );
-		return 3;
-	}
-	tk_ok = true;
-	cmd( "tk appname lmm" );
-	cmd( "wm withdraw ." );
-
-	if ( platform == MAC )
-	{
-		cmd( "console hide" );
-		cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
-
-		// close console if open (usually only in Mac)
-		cmd( "foreach i [ winfo interps ] { \
-				if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { \
-					send $i \"destroy .\" \
-				} \
-			}" );
-	}
-
-	// check installation directory for no spaces in name
-	cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
-	if ( choice )
-	{
-		log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
-		cmd( "ttk::messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the sources (src) directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
-		return 4;
-	}
 
 	// set system defaults in tcl
 	cmd( "set LMM_OPTIONS \"%s\"", LMM_OPTIONS );
@@ -5494,6 +5436,8 @@ int lsdmain( int argn, char **argv )
 	Tcl_UnlinkVar( inter, "recolor_all");
 	Tcl_UnlinkVar( inter, "shigh");
 
+	set_env( false );
+	
 	delete [ ] rootLsd;
 	delete [ ] exec_path;
 

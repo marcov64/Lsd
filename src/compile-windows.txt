@@ -4,18 +4,18 @@ TCL/TK (https://www.tcl.tk/software/tcltk/download.html):
 
 cd tclX.X.X/win and /tkX.X.X/win
 make distclean
-./configure --enable-threads --disable-symbols --enable-64bit CC=x86_64-w64-mingw32-gcc --prefix=/Lsd/gnu --exec-prefix=/Lsd/gnu --build=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32
+./configure --enable-threads --disable-symbols --enable-64bit CC=x86_64-w64-mingw32-gcc --prefix=/LSD/gnu --exec-prefix=/LSD/gnu --build=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32
 make
 make install
 
 MAKE (http://ftp.gnu.org/gnu/make):
 
-./configure CC=x86_64-w64-mingw32-gcc CFLAGS="-O2 -mthreads" --prefix=/Lsd/gnu --exec-prefix=/Lsd/gnu --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32
+./configure CC=x86_64-w64-mingw32-gcc CFLAGS="-O2 -mthreads" --prefix=/LSD/gnu --exec-prefix=/LSD/gnu --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32
 
 GDB (http://ftp.gnu.org/gnu/gdb/):
 (see sourceforge.net/p/gdbmingw/wiki/Build%20GDB%20under%20MSYS)
 
-./configure CC=x86_64-w64-mingw32-gcc CFLAGS="-O2 -mthreads" --prefix=/Lsd/gnu --exec-prefix=/Lsd/gnu --build=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32 --with-expat --disable-nls --disable-binutils --disable-gas --disable-ld --disable-gprof
+./configure CC=x86_64-w64-mingw32-gcc CFLAGS="-O2 -mthreads" --prefix=/LSD/gnu --exec-prefix=/LSD/gnu --build=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32 --with-expat --disable-nls --disable-binutils --disable-gas --disable-ld --disable-gprof
 make
 make install INSTALL_PROGRAM='install -s' -C gdb
 

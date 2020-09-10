@@ -6,5 +6,5 @@ Categories=Development;Simulation;IDE;
 Terminal=false
 Name=LMM
 Comment=Lsd Model Manager
-Exec=$LSDROOT/run.sh
+Exec=$LSDROOT/LMM
 Icon=$LSDROOT/src/icons/lsd.png

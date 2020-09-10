@@ -19,7 +19,7 @@
 #**************************************************************
 
 CC=g++	
-TARGET=lmm
+TARGET=LMM
 SWITCH_CC=-DLMM -DNP -Wno-unused-result -O3
 
 # from here you should not need to modify anything

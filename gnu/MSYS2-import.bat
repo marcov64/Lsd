@@ -52,6 +52,8 @@ if "%2"=="" (
 	echo No LSD FOLDER provided or found, aborting
 	pause
 	goto end
+) else (
+	set LSD_DIR="%2"
 )
 
 :import
@@ -72,17 +74,45 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\gcc.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\g++.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\windres.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libwinpthread-1.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libwinpthread-1.dll %LSD_DIR%\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgcc_s_seh-1.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgcc_s_seh-1.dll %LSD_DIR%\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgmp-10.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libstdc++-6.dll %LSD_DIR%\gnu\bin\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\include\c++ %LSD_DIR%\gnu\include\c++\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\share\gcc-%GCC_VER% %LSD_DIR%\gnu\share\gcc-%GCC_VER%\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\x86_64-w64-mingw32 %LSD_DIR%\gnu\x86_64-w64-mingw32\
+
+rem zlib library
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libzstd.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\zlib1.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\zlib1.dll %LSD_DIR%\
+XCOPY %OPT% %MSYS_DIR%\mingw64\include\zlib.h %LSD_DIR%\gnu\include\
+XCOPY %OPT% %MSYS_DIR%\mingw64\include\zconf.h %LSD_DIR%\gnu\include\
+XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libz.* %LSD_DIR%\gnu\lib\
 
 rem Tcl/Tk framework
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tclsh86.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\wish86.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tcl86.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tcl86.dll %LSD_DIR%\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk86.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk86.dll %LSD_DIR%\
+XCOPY %OPT% %MSYS_DIR%\mingw64\include\tcl*.* %LSD_DIR%\gnu\include\
+XCOPY %OPT% %MSYS_DIR%\mingw64\include\tk*.* %LSD_DIR%\gnu\include\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\include\tcl8.6 %LSD_DIR%\gnu\include\tcl8.6\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\include\tk8.6 %LSD_DIR%\gnu\include\tk8.6\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\include\X11 %LSD_DIR%\gnu\include\X11\
+XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtcl*.* %LSD_DIR%\gnu\lib\
+XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtk*.* %LSD_DIR%\gnu\lib\
+XCOPY %OPT% %MSYS_DIR%\mingw64\lib\tcl*.* %LSD_DIR%\gnu\lib\
+XCOPY %OPT% %MSYS_DIR%\mingw64\lib\tk*.* %LSD_DIR%\gnu\lib\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl8 %LSD_DIR%\gnu\lib\tcl8\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl8.6 %LSD_DIR%\gnu\lib\tcl8.6\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tk8.6 %LSD_DIR%\gnu\lib\tk8.6\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\dde1.4 %LSD_DIR%\gnu\lib\dde1.4\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\reg1.3 %LSD_DIR%\gnu\lib\reg1.3\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\thread2.8.5 %LSD_DIR%\gnu\lib\thread2.8.5\
 
 rem gdb debugger
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\gdb.exe %LSD_DIR%\gnu\bin\
@@ -91,43 +121,16 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libpython3.8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libreadline8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libtermcap-0.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libxxhash.dll %LSD_DIR%\gnu\bin\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\gcc %LSD_DIR%\gnu\lib\gcc\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\python3.8 %LSD_DIR%\gnu\lib\python3.8\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\share\gdb %LSD_DIR%\gnu\share\gdb\
+XCOPY %OPT% %MSYS_DIR%\mingw64\etc\gdbinit %LSD_DIR%\gnu\etc\
 
 rem diff compare tool
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\diff.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libiconv-2.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libintl-8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libsigsegv-2.dll %LSD_DIR%\gnu\bin\
-
-rem include files (gcc and Tcl/Tk)
-XCOPY %XOPT% %MSYS_DIR%\mingw64\include\c++ %LSD_DIR%\gnu\include\c++\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\include\tcl8.6 %LSD_DIR%\gnu\include\tcl8.6\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\include\tk8.6 %LSD_DIR%\gnu\include\tk8.6\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\include\X11 %LSD_DIR%\gnu\include\X11\
-XCOPY %OPT% %MSYS_DIR%\mingw64\include\tcl*.* %LSD_DIR%\gnu\include\
-XCOPY %OPT% %MSYS_DIR%\mingw64\include\tk*.* %LSD_DIR%\gnu\include\
-XCOPY %OPT% %MSYS_DIR%\mingw64\include\zlib.h %LSD_DIR%\gnu\include\
-XCOPY %OPT% %MSYS_DIR%\mingw64\include\zconf.h %LSD_DIR%\gnu\include\
-
-rem library files (gcc and Tcl/Tk)
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\gcc %LSD_DIR%\gnu\lib\gcc\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\python3.8 %LSD_DIR%\gnu\lib\python3.8\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl8 %LSD_DIR%\gnu\lib\tcl8\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl8.6 %LSD_DIR%\gnu\lib\tcl8.6\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tk8.6 %LSD_DIR%\gnu\lib\tk8.6\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\dde1.4 %LSD_DIR%\gnu\lib\dde1.4\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\reg1.3 %LSD_DIR%\gnu\lib\reg1.3\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\thread2.8.5 %LSD_DIR%\gnu\lib\thread2.8.5\
-XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtcl*.* %LSD_DIR%\gnu\lib\
-XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtk*.* %LSD_DIR%\gnu\lib\
-XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libz.* %LSD_DIR%\gnu\lib\
-XCOPY %OPT% %MSYS_DIR%\mingw64\lib\tcl*.* %LSD_DIR%\gnu\lib\
-XCOPY %OPT% %MSYS_DIR%\mingw64\lib\tk*.* %LSD_DIR%\gnu\lib\
-
-rem other files (gcc and gdb)
-XCOPY %XOPT% %MSYS_DIR%\mingw64\share\gcc-%GCC_VER% %LSD_DIR%\gnu\share\gcc-%GCC_VER%\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\share\gdb %LSD_DIR%\gnu\share\gdb\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\x86_64-w64-mingw32 %LSD_DIR%\gnu\x86_64-w64-mingw32\
-XCOPY %OPT% %MSYS_DIR%\mingw64\etc\gdbinit %LSD_DIR%\gnu\etc\
 
 rem remove unneeded python cache files (requires python 3.5+ on path)
 python3 -Bc "for p in __import__( 'pathlib' ).Path( '%LSD_DIR%\gnu' ).rglob( '*.py[co]' ) : p.unlink( )" > nul 2>&1

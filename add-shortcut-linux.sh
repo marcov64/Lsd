@@ -22,8 +22,8 @@ if [ "$1" = "-h" ]; then
 	echo "Add a shortcut to LSD LMM in the desktop"
 	echo "Usage: ./add-shortcut.sh [full path to desktop directory]"
 else
-	TARGET=lsd.desktop
-	EXEC=lmm
+	TARGET=LSD.desktop
+	EXEC=LMM
 	LSDROOT="$( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P )"
 	if [ -x "$(command -v xdg-user-dir)" ]; then
   		DESKTOP="$(xdg-user-dir DESKTOP)"

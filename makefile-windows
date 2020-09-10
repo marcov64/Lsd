@@ -20,8 +20,8 @@
 
 CC=g++
 WRC=windres
-TARGET=lmm
-SWITCH_CC=-DLMM -DNP -mthreads -mwindows -O3
+TARGET=LMM
+SWITCH_CC=-DLMM -DNP -O3 -mthreads -mwindows -static-libstdc++
 
 # from here you should not need to modify anything
 

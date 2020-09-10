@@ -234,9 +234,9 @@ set hsizeDminWindows	740
 set vsizeDminWindows	400
 
 # OS specific default model executable name
-set exeLinux 	"lsd"
+set exeLinux 	"LSD"
 set exeMac 		"LSD"
-set exeWindows 	"lsd"
+set exeWindows 	"LSD"
 
 # OS specific default system terminal
 set sysTermMac		"Terminal"	; # "Terminal", "xterm"

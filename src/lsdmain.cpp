@@ -210,7 +210,7 @@ int lsdmain( int argn, char **argv )
 	if ( exec_file == NULL || exec_path == NULL )
 	{
 		fprintf( stderr, "\nInvalid LSD executable name or path.\nThis is the No Window version of LSD.\nMake sure the LSD directory is not too deep into the disk directory tree (over %d chars).\n\n", MAX_PATH_LENGTH );
-		myexit( 1 );
+		myexit( 5 );
 	}
 	
 	if ( argn < 3 )
@@ -286,7 +286,7 @@ int lsdmain( int argn, char **argv )
 			}
 
 			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is the No Window version of LSD.\nCommand line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n'-z' for preventing the generation of compressed result file(s)\n\n", argv[ i ][ 0 ], argv[ i ][ 1 ] );
-			myexit( 2 );
+			myexit( 6 );
 		}
 	} 
 
@@ -307,7 +307,7 @@ int lsdmain( int argn, char **argv )
 	if ( f == NULL )
 	{
 		fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n\n", struct_file );
-		myexit( 3 );
+		myexit( 7 );
 	}
 	
 	fclose( f );
@@ -315,7 +315,7 @@ int lsdmain( int argn, char **argv )
 	if ( load_configuration( true ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is the no window version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n\n", struct_file );
-		myexit( 4 );
+		myexit( 8 );
 	}
 
 #ifndef NP
@@ -366,66 +366,12 @@ int lsdmain( int argn, char **argv )
 		max_threads = j;
 #endif	
 
-	// initialize the tcl interpreter
-	Tcl_FindExecutable( argv[ 0 ] ); 
-	inter = Tcl_CreateInterp( );
-	done = Tcl_Init( inter );
-	if ( done != TCL_OK )
-	{
-		sprintf( msg, "Tcl initialization directories not found, check the Tcl/Tk installation and configuration or reinstall LSD\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
-		log_tcl_error( "Create Tcl interpreter", msg );
-		myexit( 5 );
-	}
-
-	// set variables and links in TCL interpreter
+	// initialize tcl/tk and set global bidirectional variables
+	init_tcl_tk( argv[ 0 ], "lsd" );
 	Tcl_LinkVar( inter, "choice", ( char * ) &choice, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "stop", ( char * ) &stop, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "debug_flag", ( char * ) &debug_flag, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "when_debug", ( char * ) &when_debug, TCL_LINK_INT );
-
-	// test Tcl interpreter
-	cmd( "set choice 1234567890" );
-	if ( choice != 1234567890 )
-	{
-		log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
-		myexit( 6 );
-	}
-		
-	// initialize & test the tk application
-	choice = 1;
-	done = Tk_Init( inter );
-	if ( done == TCL_OK )
-		cmd( "if { ! [ catch { package present Tk 8.6 } ] && [ winfo exists . ] } { set choice 0 } { set choice 1 }" );
-	if ( choice )
-	{
-		sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.6+) and configuration or reinstall LSD\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
-		log_tcl_error( "Start Tk", msg );
-		myexit( 7 );
-	}
-	tk_ok = true;
-	cmd( "tk appname lsd" );
-	cmd( "wm withdraw ." );
-
-	if ( platform == MAC )
-	{
-		cmd( "console hide" );
-		cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
-
-		// close console if open (usually only in Mac)
-		cmd( "foreach i [ winfo interps ] { \
-				if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { \
-					send $i \"destroy .\" \
-				} \
-			}" );
-	}
-	
-	cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
-	if ( choice )
-	{
-		log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
-		cmd( "ttk::messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the \\src directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
-		myexit( 8 ); 
-	}
 
 	// set system defaults in tcl
 	cmd( "set LMM_OPTIONS \"%s\"", LMM_OPTIONS );
@@ -673,6 +619,8 @@ int lsdmain( int argn, char **argv )
 	empty_blueprint( );
 	empty_description( );
 	root->delete_obj( );
+	
+	set_env( false );
 	
 	delete stacklog;
 	delete [ ] path;

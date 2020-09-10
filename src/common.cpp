@@ -160,6 +160,256 @@ void update_model_info( void )
 
 
 /****************************************************
+ INIT_TCL_TK
+ initializes the Tcl/Tk environment
+ ****************************************************/
+void init_tcl_tk( const char *exec, const char *tcl_app_name )
+{
+	char *s;
+	int num, res;
+	
+	if ( ! set_env( true ) )
+	{
+		log_tcl_error( "Set environment variables", "Environment variable setup failed, Tcl/Tk may be unavailable" );
+		myexit( 2 );
+	}
+	
+	// initialize the tcl/tk interpreter
+	Tcl_FindExecutable( exec ); 
+	inter = Tcl_CreateInterp( );
+	num = Tcl_Init( inter );
+	if ( num != TCL_OK )
+	{
+		sprintf( msg, "Tcl initialization directories not found, check the Tcl/Tk installation  and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
+		log_tcl_error( "Create Tcl interpreter", msg );
+		myexit( 3 );
+	}
+
+	// set variables and links in TCL interpreter
+	Tcl_SetVar( inter, "_LSD_VERSION_", _LSD_VERSION_, 0 );
+	Tcl_SetVar( inter, "_LSD_DATE_", _LSD_DATE_, 0 );
+	Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
+
+	// test Tcl interpreter
+	cmd( "set res 1234567890" );
+	Tcl_UpdateLinkedVar( inter, "res" );
+	if ( res != 1234567890 )
+	{
+		log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
+		myexit( 3 );
+	}
+
+	// initialize & test the tk application
+	num = Tk_Init( inter );
+	if ( num == TCL_OK )
+		cmd( "if { ! [ catch { package present Tk 8.6 } ] && [ winfo exists . ] } { set res 0 } { set res 1 }" );
+	if ( res )
+	{
+		sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.6+) and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
+		log_tcl_error( "Start Tk", msg );
+		myexit( 3 );
+	}
+	
+	tk_ok = true;
+	cmd( "tk appname %s", tcl_app_name );
+	cmd( "wm withdraw ." );
+
+	// do not open/close terminal in mac
+	s = ( char * ) Tcl_GetVar( inter, "tcl_platform(os)", 0 );
+	if ( ! strcmp( s, "Darwin") )
+	{
+		cmd( "console hide" );
+		cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
+
+		// close console if open (usually only in Mac)
+		cmd( "foreach i [ winfo interps ] { \
+				if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { \
+					send $i \"destroy .\" \
+				} \
+			}" );
+	}
+
+	// check installation directory for no spaces in name
+	cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set res 1 } { set res 0 }" );
+	if ( res )
+	{
+		log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
+		cmd( "ttk::messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the sources (src) directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
+		myexit( 4 );
+	}
+	
+	Tcl_UnlinkVar( inter, "res" );
+}
+
+
+/****************************************************
+ SET_ENV
+ sets the required environment variables
+ it does nothing if the variables already exist
+ and Windows PATH has a compiler in it
+ ****************************************************/
+bool set_env( bool set )
+{
+	bool res = true;
+	char *file, *bat, *lsd_root, *path, *temp, *exec_path = NULL;
+	const char *compilers[ ] = WIN_COMP_PATH;
+	int i, st;
+	static char *lsd_root_env = NULL, *tcl_lib_env = NULL, *path_env = NULL;
+	struct stat info;
+	FILE *f;
+
+	if ( set )
+	{
+		lsd_root = getenv( "LSDROOT" );
+		
+		if ( lsd_root == NULL )
+		{
+			exec_path = new char[ MAX_PATH_LENGTH + 1 ];
+			exec_path = getcwd( exec_path, MAX_PATH_LENGTH );
+			exec_path = clean_path( exec_path );
+			
+			lsd_root = search_lsd_root( exec_path );
+			
+			if ( lsd_root != NULL )
+			{
+				delete [ ] lsd_root_env;
+				lsd_root_env = new char[ strlen( "LSDROOT" ) + strlen( lsd_root ) + 2 ];
+				sprintf( lsd_root_env, "LSDROOT=%s", lsd_root );
+
+				res = ! ( bool ) putenv( lsd_root_env );
+			}
+			else
+				res = false;
+		}
+		
+#ifdef _WIN32
+		path = getenv( "PATH" );
+		
+		if ( lsd_root != NULL && getenv( TCL_LIB_VAR ) == NULL )
+		{
+			lsd_root = clean_path( lsd_root );
+			
+			file = new char[ strlen( lsd_root ) + strlen( TCL_LIB_PATH ) + strlen( TCL_LIB_INIT ) + 3 ];
+			sprintf( file, "%s/%s/%s", lsd_root, TCL_LIB_PATH, TCL_LIB_INIT );
+			st = stat( file, &info );
+			delete [ ] file;
+			
+			if ( st == 0 )
+			{
+				delete [ ] tcl_lib_env;
+				tcl_lib_env = new char[ strlen( TCL_LIB_VAR ) + strlen( lsd_root ) + strlen( TCL_LIB_PATH ) + 3 ];
+				sprintf( tcl_lib_env, "%s=%s/%s", TCL_LIB_VAR, lsd_root, TCL_LIB_PATH );
+				
+				res = ! ( bool ) putenv( tcl_lib_env );
+			}
+			else
+				if ( system( TCL_FIND_EXE ) != 0 )
+					res = false;	// just stop if Tcl/Tk is not on path
+		}
+		
+		if ( lsd_root != NULL && path != NULL )
+		{
+			for ( i = 0, st = 1; i < WIN_COMP_NUM; ++i )
+				if ( strstr( path, compilers[ i ] ) != NULL )
+					st = 0;
+
+			delete [ ] path_env;
+			path_env = new char[ strlen( path ) + win_path( lsd_root ).size( ) + strlen( TCL_EXEC_PATH ) + 9 ];
+			
+			if ( st == 0 )
+				sprintf( path_env, "PATH=%s;%s\\%s", path, win_path( lsd_root ).c_str( ), TCL_EXEC_PATH );
+			else
+				sprintf( path_env, "PATH=%s\\%s;%s", win_path( lsd_root ).c_str( ), TCL_EXEC_PATH, path );
+			
+			putenv( path_env );
+		}
+#else
+		res = true;					// do not stop on linux/mac
+#endif
+		delete [ ] exec_path;
+	}
+	else
+	{
+		delete [ ] tcl_lib_env;
+		delete [ ] lsd_root_env;
+		delete [ ] path_env;
+	}
+	
+	return res;
+}
+
+
+/****************************************************
+ SEARCH_LSD_ROOT
+ searches LSD root directory upwards to the root
+ ****************************************************/
+char *search_lsd_root( char *start_path )
+{
+	bool miss;
+	const char *files[ ] = LSD_MIN_FILES;
+	char *file, *cur_dir, *last_dir, *orig_dir, *found = NULL;
+	int i, st;
+	struct stat info;
+
+	cur_dir = new char[ MAX_PATH_LENGTH + 1 ];
+	last_dir = new char[ MAX_PATH_LENGTH + 1 ];
+	orig_dir = new char[ MAX_PATH_LENGTH + 1 ];
+	orig_dir = getcwd( orig_dir, MAX_PATH_LENGTH );
+	
+	if ( orig_dir == NULL )
+		goto err;
+	
+	if ( chdir( start_path ) )
+		goto end;
+	
+	strcpy( last_dir, "" );
+	
+	do
+	{
+		cur_dir = getcwd( cur_dir, MAX_PATH_LENGTH );
+		cur_dir = clean_path( cur_dir );
+		
+		if ( cur_dir == NULL || ! strcmp( cur_dir, last_dir ) )
+			goto end;
+		
+		for ( i = 0, miss = false; i < LSD_MIN_NUM; ++i )
+		{
+			file = new char[ strlen( cur_dir ) + strlen( files[ i ] ) + 2 ];
+			sprintf( file, "%s/%s", cur_dir, files[ i ] );
+			st = stat( file, &info );
+			delete [ ] file;
+			
+			if ( st != 0 )
+			{
+				miss = true;
+				break;
+			}
+		}
+		
+		if ( ! miss )
+		{
+			strncpy( start_path, cur_dir, strlen( start_path ) );
+			found = start_path;
+			break;
+		}
+		
+		strcpy( last_dir, cur_dir );
+	}
+	while ( ! chdir( ".." ) );
+		
+	end:
+	chdir( orig_dir );
+	
+	err:
+	delete [ ] cur_dir;
+	delete [ ] last_dir;
+	delete [ ] orig_dir;
+	
+	return found;
+}
+  
+ 
+/****************************************************
  CMD
  ****************************************************/
 bool firstCall = true;
@@ -226,9 +476,9 @@ void log_tcl_error( const char *cm, const char *message )
 	err_path = exec_path;
 #endif
 
-	char fname[ strlen( err_path ) + strlen( err_file ) + 2 ];
+	char fname[ ( err_path != NULL ? strlen( err_path ) : 0 ) + strlen( err_file ) + 2 ];
 
-	if ( strlen( err_path ) > 0 )
+	if ( err_path != NULL && strlen( err_path ) > 0 )
 		sprintf( fname, "%s/%s", err_path, err_file );
 	else
 		sprintf( fname, "%s", err_file );
@@ -529,6 +779,24 @@ void clean_newlines( char *s )
 
 
 /****************************************************
+ WIN_PATH
+ convert linux path to Windows default, replacing / with \
+ ****************************************************/
+string win_path( string filepath )
+{
+	string winpath;
+	
+	for ( auto c : filepath )
+		if ( c == '/' )
+			winpath.push_back( '\\' );
+		else
+			winpath.push_back( c );
+		
+	return winpath;
+}
+
+
+/****************************************************
  STR_UPR
  convert string to upper case
  ****************************************************/
@@ -585,7 +853,7 @@ void myexit( int v )
 	if ( inter != NULL )
 	{
 		cmd( "if { ! [ catch { package present Tk } ] } { destroy . }" );
-		cmd( "LsdExit" );
+		cmd( "catch { LsdExit }" );
 		Tcl_Finalize( );
 	}
 #endif

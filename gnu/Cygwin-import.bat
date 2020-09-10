@@ -48,6 +48,8 @@ if "%2"=="" (
 	echo No LSD FOLDER provided or found, aborting
 	pause
 	goto end
+) else (
+	set LSD_DIR="%2"
 )
 
 :import
@@ -62,6 +64,6 @@ XCOPY %OPT% %CYG_DIR%\bin\cygpanelw-10.dll %LSD_DIR%\gnu\bin\
 
 rem multitail utility
 XCOPY %OPT% %CYG_DIR%\bin\multitail.exe %LSD_DIR%\gnu\bin\
-XCOPY %XOPT% %CYG_DIR%\usr\share\terminfo %LSD_DIR%\gnu\usr\share\terminfo\
+XCOPY %XOPT% %CYG_DIR%\usr\share\terminfo\78 %LSD_DIR%\gnu\usr\share\terminfo\78\
 
 :end
