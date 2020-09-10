@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.3 - December 2020
+	LSD 8.0 - December 2020
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -26,10 +26,10 @@
  *************************************************************/
 
 // LSD version strings, for About... boxes and code testing
-#define _LSD_MAJOR_ 7
-#define _LSD_MINOR_ 3
-#define _LSD_VERSION_ "7.3-beta"
-#define _LSD_DATE_ "August 31 2020"   // __DATE__
+#define _LSD_MAJOR_ 8
+#define _LSD_MINOR_ 0
+#define _LSD_VERSION_ "8.0-beta-1"
+#define _LSD_DATE_ "September 11 2020"   // __DATE__
 
 // standard libraries used
 #include <cstdlib>

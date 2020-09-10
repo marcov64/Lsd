@@ -1,7 +1,7 @@
 #!/bin/bash
 #**************************************************************
 #
-#	LSD 7.3 - December 2020
+#	LSD 8.0 - December 2020
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -43,6 +43,7 @@ else
 	fi
 fi
 
+README="Readme.txt"
 LSD_VER="$LSD_VER_NUM-$LSD_VER_TAG"
 LSD_FILE_TAG="${LSD_VER//./-}"
 INST_DIR="$LSD_DIR/installer"
@@ -62,11 +63,12 @@ $LSD_DIR $INST_DIR/LSD-installer-linux-$LSD_FILE_TAG.sh \
 # create compressed distribution file (to preserve permissions)
 rm -f $INST_DIR/LSD-installer-linux-$LSD_FILE_TAG.zip
 cd $INST_DIR
-zip -q -9 LSD-installer-linux-$LSD_FILE_TAG.zip LSD-installer-linux-$LSD_FILE_TAG.sh
+cp -f $LSD_DIR/$README $INST_DIR/
+zip -q -9 LSD-installer-linux-$LSD_FILE_TAG.zip LSD-installer-linux-$LSD_FILE_TAG.sh $README
 cd - > /dev/null
 
 # cleanup
-rm -f -R $LSD_DIR/Work.template $INST_DIR/LSD-installer-linux-$LSD_FILE_TAG.sh
+rm -f -R $LSD_DIR/Work.template $INST_DIR/LSD-installer-linux-$LSD_FILE_TAG.sh $INST_DIR/$README
 
 if [ -f "$INST_DIR/LSD-installer-linux-$LSD_FILE_TAG.zip" ]; then
 	echo "LSD installer package created: $INST_DIR/LSD-installer-linux-$LSD_FILE_TAG.zip"

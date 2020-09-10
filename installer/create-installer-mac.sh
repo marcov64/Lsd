@@ -1,7 +1,7 @@
 #!/bin/bash
 #**************************************************************
 #
-#	LSD 7.3 - December 2020
+#	LSD 8.0 - December 2020
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -43,6 +43,7 @@ else
 	fi
 fi
 
+README="Readme.txt"
 LSD_VER="$LSD_VER_NUM-$LSD_VER_TAG"
 LSD_FILE_TAG="${LSD_VER//./-}"
 SRC_DIR="$LSD_DIR/src"
@@ -67,6 +68,7 @@ rm -f -R /tmp/LSD_INSTALLER "$LSD_DIR/installer/LSD-installer-mac-$LSD_FILE_TAG.
 mkdir "/tmp/LSD_INSTALLER"
 mkdir "/tmp/LSD_INSTALLER/LSD Installer ($LSD_VER).app"
 cp -f -R "$LSD_DIR/installer/LSD Installer.app/"* "/tmp/LSD_INSTALLER/LSD Installer ($LSD_VER).app/"
+cp -f "$LSD_DIR/$README" "/tmp/LSD_INSTALLER/"
 
 hdiutil create /tmp/tmp.dmg -fs HFS+ -ov -quiet -volname "LSD Installer ($LSD_VER)" -srcfolder "/tmp/LSD_INSTALLER/"
 hdiutil convert /tmp/tmp.dmg -format UDBZ -o "$LSD_DIR/installer/LSD-installer-mac-$LSD_FILE_TAG.dmg" -quiet
