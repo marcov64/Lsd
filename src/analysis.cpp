@@ -1771,7 +1771,7 @@ while ( true )
 		case 24:
 			if ( *choice == 24 )
 			{
-				if ( actual_steps > 0 )
+				if ( num_var > 0 )
 				{
 					cmd( "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
 					cmd( "label .da.s.l -text \"Source of additional series\"" );
@@ -3852,18 +3852,19 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 
 		tag = new char [ strlen( vs[ i ].tag ) + 10 ];
 		sprintf( tag, "F_%d_%s", file_counter, vs[ i ].tag );
+		strncpy( vs[ i ].tag, tag, MAX_ELEM_LENGTH );
+		delete [ ] tag;
 
 		if ( vs[ i ].start != -1 )
-			sprintf( msg, "%s %s (%d-%d) #%d", vs[ i ].label, tag, vs[ i ].start, vs[ i ].end, i );
+			sprintf( msg, "%s %s (%d-%d) #%d", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, i );
 		else
 		{
-			sprintf( msg, "%s %s (0-%d) #%d", vs[ i ].label, tag, new_c - 1, i );
+			sprintf( msg, "%s %s (0-%d) #%d", vs[ i ].label, vs[ i ].tag, new_c - 1, i );
 			vs[ i ].start = 0;
 			vs[ i ].end = new_c - 1;
 			first_c = 0;
 		}
 		
-		delete [ ] tag;
 		var_names->push_back( msg );
 		vs[ i ].data = new double[ vs[ i ].end - vs[ i ].start + 1 ];
 	 
@@ -4233,7 +4234,7 @@ in the labels as a single string using the underscore '_' as joining character.
 */
 int sort_labels_down( const void *a, const void *b )
 {
-	int a_int, b_int, counter;
+	int a_int, b_int, counter_a, counter_b;
 	int diff;
 
 	// convert labels to lowercase for comparison
@@ -4266,25 +4267,49 @@ int sort_labels_down( const void *a, const void *b )
 	if ( diff != 0 )
 		return diff;
 	else
-		if ( ( ( store * ) a )->end != ( ( store * ) b)->end )
+		if ( ( ( store * ) a )->end != ( ( store * ) b )->end )
 			return ( ( store * ) b )->end - ( ( store * ) a )->end;
 		else
-			if ( ( ( store * ) a)->start != ( ( store * ) b )->start )
+			if ( ( ( store * ) a )->start != ( ( store * ) b )->start )
 				return ( ( store * ) a )->start - ( ( store * ) b )->start;
 			else
-				for ( counter = 0; ; )
+			{
+				a_sz = strlen( ( ( store * ) a )->tag );
+				b_sz = strlen( ( ( store * ) b )->tag );
+				a_str = new char [ a_sz + 1 ];
+				b_str = new char [ b_sz + 1 ];
+				strcpy( a_str, ( ( store * ) a )->tag );
+				strcpy( b_str, ( ( store * ) b )->tag );
+				
+				for ( a_int = b_int = 0, counter_a = counter_b = 0; 
+					  counter_a < a_sz && counter_b < b_sz; 
+					  ++counter_a, ++counter_b )
 				{
-					a_int = atoi( ( ( store * ) a )->tag + counter );
-					b_int = atoi( ( ( store * ) b )->tag + counter );
+					if ( isdigit( a_str[ counter_a ] ) && 
+						 isdigit( b_str[ counter_b ] ) )
+					{ 
+						a_int = atoi( a_str + counter_a );
+						b_int = atoi( b_str + counter_b );
+						
+						if ( a_int != b_int )
+							break;
+					}
 					
-					if ( a_int != b_int )
-						return a_int - b_int;
+					while ( a_str[ counter_a ] != '_' )
+						++counter_a;
 					
-					while ( ( ( store * ) a )->tag[ counter ] != '_' )
-						++counter;
-					
-					++counter;
+					while ( b_str[ counter_b ] != '_' )
+						++counter_b;
 				}
+				
+				delete [ ] a_str;
+				delete [ ] b_str;
+				
+				if ( a_int != b_int )
+					return a_int - b_int;
+				else
+					return a_sz - b_sz;
+			}
 }
 
 

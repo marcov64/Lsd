@@ -422,7 +422,7 @@ struct netLink							// individual outgoing link
 
 struct lsdstack
 {
-	char label[ MAX_ELEM_LENGTH ];
+	char label[ MAX_ELEM_LENGTH + 1 ];
 	int ns;
 	lsdstack *next;
 	lsdstack *prev;
@@ -431,8 +431,8 @@ struct lsdstack
 
 struct store
 {
-	char label[ MAX_ELEM_LENGTH ];
-	char tag[ MAX_ELEM_LENGTH ];
+	char label[ MAX_ELEM_LENGTH + 1 ];
+	char tag[ MAX_ELEM_LENGTH + 1 ];
 	double *data;
 	int end;
 	int rank;
