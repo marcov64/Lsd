@@ -383,11 +383,11 @@ proc upd_menu_visib { } {
 
 
 #************************************************
-# COMP_UND
+# COMP_UNDERLINE
 # Create special sort procedure to keep names 
 # starting with underline at the end
 #************************************************
-proc comp_und { n1 n2 } {
+proc comp_underline { n1 n2 } {
 
 	if [ string equal $n1 $n2 ] {
 		return 0
@@ -396,7 +396,8 @@ proc comp_und { n1 n2 } {
 	if { ! [ expr { [ string index $n1 0 ] == "_" && [ string index $n2 0 ] == "_" } ] } {
 		if { [ string index $n1 0 ] == "_" } {
 			return 1
-		} else
+		} 
+		
 		if { [ string index $n2 0 ] == "_" } {
 			return -1
 		}
@@ -406,7 +407,7 @@ proc comp_und { n1 n2 } {
 	
 	if [ string equal [ lindex $listn 0 ] $n1 ] {
 		return -1
-	} {
+	} else {
 		return 1
 	}
 }

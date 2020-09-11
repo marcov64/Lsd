@@ -1369,6 +1369,7 @@ while ( true )
 					app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 					strcpy( msg, app );
 					sscanf( msg, "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
+					
 					if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 					{
 						datum = vs[ k ].data;
@@ -1816,6 +1817,7 @@ while ( true )
 					app = ( char * ) Tcl_GetVar( inter, "res", 0 );
 					strcpy( msg, app );
 					sscanf( msg, "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
+					
 					if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 					{
 						datum = vs[ k ].data;
@@ -1917,7 +1919,7 @@ while ( true )
 			if ( *choice == 0 )
 				break;
 			
-			cmd( "set b [ lsort -command comp_und $a ]" );		// use special sort procedure to keep underscores at the end
+			cmd( "set b [ lsort -command comp_underline $a ]" );		// use special sort procedure to keep underscores at the end
 			cmd( ".da.vars.lb.f.v delete 0 end" );
 			cmd( "foreach i $b { insert_series .da.vars.lb.f.v \"$i\" }" );
 			
@@ -2167,7 +2169,7 @@ while ( true )
 		case 24:
 			if ( *choice == 24 )
 			{
-				if ( actual_steps > 0 )
+				if ( num_var > 0 )
 				{
 					cmd( "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
 					cmd( "ttk::label .da.s.l -text \"Source of additional series\"" );
@@ -3928,6 +3930,109 @@ void set_cs_data( int *choice )
 }
 
 
+/************************
+SORT_LABELS_DOWN
+************************/
+/*
+Sorting function for presenting variables' labels in a nice way.
+The variables are grouped according to:
+	1) their label ( increasing: A first z last)
+	2) time of their last occurrence ( decreasing: existing variable first)
+   	3) time of their first occurrence ( increasing: first born first)
+    4) LSD internal ID indexing system (used for the tag) ( increasing)
+The function is complicated for the point 4) by the fact that the tag is recorded
+in the labels as a single string using the underscore '_' as joining character.
+*/
+int sort_labels_down( const void *a, const void *b )
+{
+	int a_int, b_int, counter_a, counter_b;
+	int diff;
+
+	// convert labels to lowercase for comparison
+	int a_sz = strlen( ( ( store * ) a )->label );
+	int b_sz = strlen( ( ( store * ) b )->label );
+	char *a_str = new char [ a_sz + 1 ];
+	char *b_str = new char [ b_sz + 1 ];
+	
+	strcpy( a_str, ( ( store * ) a )->label );
+	strcpy( b_str, ( ( store * ) b )->label );
+	
+	for ( int i = 0; i < a_sz; ++i )
+		a_str[ i ] = tolower( a_str[ i ] );
+	
+	for ( int i = 0; i < b_sz; ++i )
+		b_str[ i ] = tolower( b_str[ i ] );
+	
+	// make names started with a underscore go to the end
+	if ( a_str[ 0 ] == '_' )
+		a_str[ 0 ] = '~';
+	
+	if ( b_str[ 0 ] == '_' )
+		b_str[ 0 ] = '~';
+
+	diff = strcmp( a_str, b_str );
+
+	delete [ ] a_str;
+	delete [ ] b_str;
+
+	if ( diff != 0 )
+		return diff;
+	else
+		if ( ( ( store * ) a )->end != ( ( store * ) b )->end )
+			return ( ( store * ) b )->end - ( ( store * ) a )->end;
+		else
+			if ( ( ( store * ) a )->start != ( ( store * ) b )->start )
+				return ( ( store * ) a )->start - ( ( store * ) b )->start;
+			else
+			{
+				a_sz = strlen( ( ( store * ) a )->tag );
+				b_sz = strlen( ( ( store * ) b )->tag );
+				a_str = new char [ a_sz + 1 ];
+				b_str = new char [ b_sz + 1 ];
+				strcpy( a_str, ( ( store * ) a )->tag );
+				strcpy( b_str, ( ( store * ) b )->tag );
+				
+				for ( a_int = b_int = 0, counter_a = counter_b = 0; 
+					  counter_a < a_sz && counter_b < b_sz; 
+					  ++counter_a, ++counter_b )
+				{
+					if ( isdigit( a_str[ counter_a ] ) && 
+						 isdigit( b_str[ counter_b ] ) )
+					{ 
+						a_int = atoi( a_str + counter_a );
+						b_int = atoi( b_str + counter_b );
+						
+						if ( a_int != b_int )
+							break;
+					}
+					
+					while ( a_str[ counter_a ] != '_' )
+						++counter_a;
+					
+					while ( b_str[ counter_b ] != '_' )
+						++counter_b;
+				}
+				
+				delete [ ] a_str;
+				delete [ ] b_str;
+				
+				if ( a_int != b_int )
+					return a_int - b_int;
+				else
+					return a_sz - b_sz;
+			}
+}
+
+
+/************************
+SORT_ON_END
+************************/
+void sort_on_end( store *app )
+{
+	qsort( ( void * ) app, num_var, sizeof( vs[ 0 ] ), sort_labels_down );
+}
+
+
 /***************************************************
 SORT_CS_DESC
 ****************************************************/
@@ -4317,18 +4422,19 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 
 		tag = new char [ strlen( vs[ i ].tag ) + 10 ];
 		sprintf( tag, "F_%d_%s", file_counter, vs[ i ].tag );
+		strncpy( vs[ i ].tag, tag, MAX_ELEM_LENGTH );
+		delete [ ] tag;
 
 		if ( vs[ i ].start != -1 )
-			sprintf( msg, "%s %s (%d-%d) #%d", vs[ i ].label, tag, vs[ i ].start, vs[ i ].end, i );
+			sprintf( msg, "%s %s (%d-%d) #%d", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, i );
 		else
 		{
-			sprintf( msg, "%s %s (0-%d) #%d", vs[ i ].label, tag, new_c - 1, i );
+			sprintf( msg, "%s %s (0-%d) #%d", vs[ i ].label, vs[ i ].tag, new_c - 1, i );
 			vs[ i ].start = 0;
 			vs[ i ].end = new_c - 1;
 			first_c = 0;
 		}
 		
-		delete [ ] tag;
 		var_names->push_back( msg );
 		vs[ i ].data = new double[ vs[ i ].end - vs[ i ].start + 1 ];
 	 
@@ -4672,85 +4778,6 @@ void statistics_cross( int *choice )
 	delete [ ] start;
 	delete [ ] end;
 	delete [ ] id;
-}
-
-
-/************************
-SORT_LABELS_DOWN
-************************/
-/*
-Sorting function for presenting variables' labels in a nice way.
-The variables are grouped according to:
-	1) their label ( increasing: A first z last)
-	2) time of their last occurrence ( decreasing: existing variable first)
-   	3) time of their first occurrence ( increasing: first born first)
-    4) LSD internal ID indexing system (used for the tag) ( increasing)
-The function is complicated for the point 4) by the fact that the tag is recorded
-in the labels as a single string using the underscore '_' as joining character.
-*/
-int sort_labels_down( const void *a, const void *b )
-{
-	int a_int, b_int, counter;
-	int diff;
-
-	// convert labels to lowercase for comparison
-	int a_sz = strlen( ( ( store * ) a )->label );
-	int b_sz = strlen( ( ( store * ) b )->label );
-	char *a_str = new char [ a_sz + 1 ];
-	char *b_str = new char [ b_sz + 1 ];
-	
-	strcpy( a_str, ( ( store * ) a )->label );
-	strcpy( b_str, ( ( store * ) b )->label );
-	
-	for ( int i = 0; i < a_sz; ++i )
-		a_str[ i ] = tolower( a_str[ i ] );
-	
-	for ( int i = 0; i < b_sz; ++i )
-		b_str[ i ] = tolower( b_str[ i ] );
-	
-	// make names started with a underscore go to the end
-	if ( a_str[ 0 ] == '_' )
-		a_str[ 0 ] = '~';
-	
-	if ( b_str[ 0 ] == '_' )
-		b_str[ 0 ] = '~';
-
-	diff = strcmp( a_str, b_str );
-
-	delete [ ] a_str;
-	delete [ ] b_str;
-
-	if ( diff != 0 )
-		return diff;
-	else
-		if ( ( ( store * ) a )->end != ( ( store * ) b)->end )
-			return ( ( store * ) b )->end - ( ( store * ) a )->end;
-		else
-			if ( ( ( store * ) a)->start != ( ( store * ) b )->start )
-				return ( ( store * ) a )->start - ( ( store * ) b )->start;
-			else
-				for ( counter = 0; ; )
-				{
-					a_int = atoi( ( ( store * ) a )->tag + counter );
-					b_int = atoi( ( ( store * ) b )->tag + counter );
-					
-					if ( a_int != b_int )
-						return a_int - b_int;
-					
-					while ( ( ( store * ) a )->tag[ counter ] != '_' )
-						++counter;
-					
-					++counter;
-				}
-}
-
-
-/************************
-SORT_ON_END
-************************/
-void sort_on_end( store *app )
-{
-	qsort( ( void * ) app, num_var, sizeof( vs[ 0 ] ), sort_labels_down );
 }
 
 

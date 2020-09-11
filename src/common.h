@@ -381,8 +381,8 @@ struct netLink							// individual outgoing link
 
 struct store
 {
-	char label[ MAX_ELEM_LENGTH ];
-	char tag[ MAX_ELEM_LENGTH ];
+	char label[ MAX_ELEM_LENGTH + 1 ];
+	char tag[ MAX_ELEM_LENGTH + 1 ];
 	double *data;
 	int end;
 	int rank;
@@ -428,7 +428,7 @@ struct design 							// design of experiment object
 
 struct lsdstack
 {
-	char label[ MAX_ELEM_LENGTH ];
+	char label[ MAX_ELEM_LENGTH + 1 ];
 	int ns;
 	lsdstack *next;
 	lsdstack *prev;
