@@ -926,8 +926,9 @@ int browse( object *r, int *choice )
 			cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%s} {%s} }", _LSD_VERSION_, _LSD_DATE_  );
 
 			// set shortcuts on open windows
-			set_shortcuts( ".", "browser.html" );
-			set_shortcuts( ".log", "log.html" );
+			cmd( "bind . <F1> { LsdHelp browser.html }" );
+			set_shortcuts( "." );
+			set_shortcuts( ".log" );
 
 			// Button bar
 			cmd( "destroy .bbar" );
@@ -6541,9 +6542,8 @@ int check_label( char *l, object *r )
 SET_SHORTCUTS
 Define keyboard shortcuts to menu items
 ****************************************************/
-void set_shortcuts( const char *window, const char *help )
+void set_shortcuts( const char *window )
 {
-	cmd( "bind %s <F1> { LsdHelp %s }", window, help  );
 	cmd( "bind %s <Control-l> { set choice 17 }; bind %s <Control-L> { set choice 17 }", window, window  );
 	cmd( "bind %s <Control-s> { set choice 18 }; bind %s <Control-S> { set choice 18 }", window, window  );
 	cmd( "bind %s <Control-e> { set choice 20 }; bind %s <Control-E> { set choice 20 }", window, window  );
@@ -7177,7 +7177,7 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 	// don't stop if simulation is running
 	if ( running )
 	{
-		cmd( "set answer [ ttk::messageBox -parent .log -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\" ]" );
+		cmd( "set answer [ ttk::messageBox -parent . -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\" ]" );
 		return false;
 	}
 	// nothing to save?

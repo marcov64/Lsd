@@ -137,7 +137,7 @@ vector < vector < string > > var_names;
 store *app_store;
 FILE *f;
 
-cover_browser( "Analysis of Results...", "Analysis of Results window is open", "Please exit Analysis of Results\nbefore using the LSD Browser." );
+cover_browser( "Analysis of Results...", "Please exit Analysis of Results\nbefore using the LSD Browser.", false );
 
 Tcl_LinkVar( inter, "cur_plot", ( char * ) &cur_plot, TCL_LINK_INT );
 Tcl_LinkVar( inter, "nv", ( char * ) &nv, TCL_LINK_INT );

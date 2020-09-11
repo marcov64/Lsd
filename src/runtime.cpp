@@ -238,7 +238,8 @@ void init_plot( int num, int id_sim )
 
 	cmd( "focustop .log" );
 
-	set_shortcuts_log( "$activeplot", "runtime.html" );
+	cmd( "bind $activeplot <F1> { LsdHelp runtime.html }" );
+	set_shortcuts_run( "$activeplot" );
 }
 
 

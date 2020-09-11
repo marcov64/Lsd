@@ -66,7 +66,6 @@ bool no_search;				// disable the standard variable search mechanism
 bool no_window = false;		// no-window command line job
 bool no_zero_instance = true;// flag to allow deleting last object instance
 bool non_var = false;		// flag to indicate INTERACT macro condition
-bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool pause_run;				// pause running simulation
 bool redrawRoot;			// control for redrawing root window (.)
@@ -177,7 +176,7 @@ worker *workers = NULL;		// multi-thread parallel worker data
 int lsdmain( int argn, char **argv )
 {
 	char *str;
-	int i, j = 0, len, done;
+	int i, j = 0, len;
 
 	path = new char[ strlen( "" ) + 1 ];
 	simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
@@ -504,7 +503,7 @@ int lsdmain( int argn, char **argv )
 			else
 			{
 				log_tcl_error( "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
-				cmd( "ttk::messageBox -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
 				myexit( 200 );
 			}
 
@@ -638,9 +637,8 @@ RUN
 *********************************/
 void run( void )
 {
-	bool one_dot, batch_sequential_loop = false;
-	char bar_done[ 2 * BAR_DONE_SIZE ];
-	int i, perc_done, last_done;
+	bool batch_sequential_loop = false;
+	int i, perc_done;
 	FILE *f;
 	clock_t start, end, last_update;
 	result *rf;					// pointer for results files (may be zipped or not)
@@ -665,12 +663,9 @@ void run( void )
 #endif	
 
 #ifndef NW
-	set_buttons_log( true );
-
 	prof.clear( );			// reset profiling times
 
-	cover_browser( "Running...", "The simulation is being executed", "Use the LSD Log window buttons to interact:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables" );
-	cmd( "focustop .log" );
+	cover_browser( "Running...", "Use the buttons to control the simulation:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables", true );
 #else
 	plog( "\nProcessing configuration file %s ...\n", "", struct_file );
 #endif
@@ -760,64 +755,14 @@ void run( void )
 		stack_info = 0;
 		use_nan = false;
 		no_search = false;
-		on_bar = false;
-		one_dot = true;
 		done_in = 0;
 		actual_steps = 0;
 		perc_done = 0;
-		last_done = -1;
-		strcpy( bar_done, "" );
 		wr_warn_cnt = 0;
 		start = last_update = clock( );
 
 		for ( t = 1; quit == 0 && t <= max_step; ++t )
 		{
-			// update the percentage done bar, if needed
-			if ( perc_done != last_done )
-			{
-				if ( perc_done % 10 == 0 )
-				{
-					char new_perc[ 10 ];
-					sprintf( new_perc, "%s%d%%", ! one_dot ? "." : "", perc_done );
-					strcat( bar_done, new_perc );
-					
-					// check if continuing existing bar or starting a new one
-					if ( fast_mode == 1 )
-					{
-						if ( on_bar )
-							plog( "%s%d%%", "bar", ! one_dot ? "." : "", perc_done );
-						else
-						{
-							on_bar = true;
-							plog( "\n%s", "bar", bar_done );
-						}
-					}	
-					
-					one_dot = false;
-				}
-				else
-					if ( perc_done % ( 100 / ( BAR_DONE_SIZE - 33 ) ) == 0 )
-					{
-						strcat( bar_done, "." );
-						
-						// check if continuing existing bar or starting a new one
-						if ( fast_mode == 1 )
-						{
-							if ( on_bar )
-								plog( ".", "bar" );
-							else
-							{
-								on_bar = true;
-								plog( "\n%s", "bar", bar_done );
-							}
-						}						
-						
-						one_dot = true;
-					}
-					
-				last_done = perc_done;
-			}
-			
 #ifndef NW 
 			// restart runtime variables color cycle
 			cur_plt = 0;
@@ -840,16 +785,13 @@ void run( void )
 			perc_done = ( 100 * t ) / max_step;
 			
 #ifndef NW
-			if ( fast_mode == 0 && ! cur_plt && ! pause_run )
-				plog( "\nSimulation %d of %d time step t = %d done (%d%%)", "", i, sim_num, t, perc_done );
-				
 			switch ( done_in )
 			{
 				case 1:			// Stop button in Log window / s/S key in Runtime window
 					if ( pause_run )
 					{
 						cmd( "wm title .log \"$origLogTit\"" );
-						cmd( ".log.but.pause conf -text Pause" );
+						cmd( ".b.r2.pause conf -text Pause" );
 					}
 					quit = 2;
 				break;
@@ -910,14 +852,14 @@ void run( void )
 					if ( pause_run )
 					{
 						cmd( "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
-						plog( "\nSimulation %d of %d paused at t = %d", "", i, sim_num, t );
-						cmd( ".log.but.pause conf -text Resume" );
+						plog( "\nSimulation %d of %d paused at case %d", "", i, sim_num, t );
+						cmd( ".b.r2.pause conf -text Resume" );
 					}
 					else
 					{
 						cmd( "wm title .log \"$origLogTit\"" );
-						plog( "\nSimulation %d of %d resumed at t = %d", "", i, sim_num, t );
-						cmd( ".log.but.pause conf -text Pause" );
+						plog( "\nSimulation %d of %d resumed at case %d", "", i, sim_num, t );
+						cmd( ".b.r2.pause conf -text Pause" );
 					}
 					break;
 
@@ -930,6 +872,9 @@ void run( void )
 			// perform scrolling if enabled
 			if ( ! pause_run && scrollB )
 				cmd( "if { [ winfo exist .plt%d ] && %d > [ expr $hsizeR * 0.8 ] } { $activeplot.c.c.cn xview scroll 1 units }", i, t );
+			
+			cmd( ".p.b2.b configure -value %d", t );
+			cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr int( 100 * %d / %d ) ]%% done)\"", min( t + 1, max_step ), max_step, t, max_step );
 
 			if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER )
 			{
@@ -944,16 +889,17 @@ void run( void )
 		running = false;
 		deb_log( false );			// close debug log file, if any
 		end = clock( );
-
-		if ( fast_mode == 1 && on_bar )
-			plog( "%s100%%", "bar", ! one_dot ? "." : "" );
+		
 		if ( fast_mode < 2 )
-			plog( "\nSimulation %d of %d %s at t = %d (%.2f sec.)\n", "", i, sim_num, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( end - start ) / CLOCKS_PER_SEC );
+			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", "", i, sim_num, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
 		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
 			quit = 0;
 		
 #ifndef NW 
+		cmd( ".p.b1.b configure -value %d", cur_sim );
+		cmd( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr int( 100 * %d / %d ) ]%% done)\"", min( cur_sim + 1, sim_num ), sim_num, cur_sim, sim_num  );
+		
 		cmd( "destroytop .deb" );
 		cmd( "update" );
 		reset_plot( i );
@@ -1054,11 +1000,10 @@ void run( void )
 	}
 
 	if ( fast_mode == 2 )
-		plog( "\nSimulation %d of %d finished at t = %d\n", "", i - 1, sim_num, t - 1 );
+		plog( "\nSimulation %d of %d finished at case %d\n", "", i - 1, sim_num, t - 1 );
 
 #ifndef NW 
 	uncover_browser( );
-	set_buttons_log( false );
 	show_prof_aggr( );
 	cmd( "focustop .log" );
 #endif
@@ -1266,64 +1211,6 @@ bool alloc_save_var( variable *v )
 
 
 /*********************************
-CREATE_LOGWINDOW
-*********************************/
-#ifndef NW
-void create_logwindow( void )
-{
-	if ( ! tk_ok )
-		myexit( 7 );
-
-	cmd( "newtop .log \"LSD Log\" { if [ string equal [ discard_change ] ok ] { exit } } \"\"" );
-
-	cmd( "set w .log.text" );
-	cmd( "ttk::frame $w" );
-	cmd( "ttk::scrollbar $w.scroll -command \"$w.text yview\"" );
-	cmd( "ttk::scrollbar $w.scrollx -command \"$w.text xview\" -orient hor" );
-	cmd( "ttk::text $w.text -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none -entry 0 -dark $darkTheme -style smallFixed.TText" );
-	cmd( "mouse_wheel $w.text" );
-	cmd( "$w.text configure -tabs {%s}", tabs  );
-
-	// Log window tags
-	cmd( "$w.text tag configure highlight -foreground $colorsTheme(hl)" );
-	cmd( "$w.text tag configure tabel" );
-	cmd( "$w.text tag configure series -tabs {2c 5c 8c}" );
-	cmd( "$w.text tag configure prof1 -tabs {5c 7.5c 9c 11.2c 13.2c 17.5c}" );
-	cmd( "$w.text tag configure prof2 -tabs {3c 6c 9c}" );
-
-	cmd( "pack $w.scroll -side right -fill y" );
-	cmd( "pack $w.text -expand yes -fill both" );
-	cmd( "pack $w.scrollx -side bottom -fill x" );
-	cmd( "pack $w -expand yes -fill both" );
-
-	cmd( "set w .log.but" );
-	cmd( "ttk::frame $w" );
-	cmd( "ttk::button $w.stop -width $butWid -text Stop -command {set_c_var done_in 1} -underline 0 -state disabled" );
-	cmd( "ttk::button $w.pause -width $butWid -text Pause -command {set_c_var done_in 9} -underline 0 -state disabled" );
-	cmd( "ttk::button $w.speed -width $butWid -text Fast -command {set_c_var done_in 2} -underline 0 -state disabled" );
-	cmd( "ttk::button $w.obs -width $butWid -text Observe -command {set_c_var done_in 4} -underline 0 -state disabled" );
-	cmd( "ttk::button $w.deb -width $butWid -text Debug -command {set_c_var done_in 3} -underline 0 -state disabled" );
-	cmd( "ttk::button $w.help -width $butWid -text Help -command {LsdHelp log.html} -underline 0" );
-	cmd( "ttk::button $w.copy -width $butWid -text Copy -command {tk_textCopy .log.text.text} -underline 0" );
-
-	cmd( "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx $butSpc -side left" );
-	cmd( "pack $w -padx $butPad -pady $butPad -side right" );
-
-	cmd( "showtop .log none 1 1 0" );
-	set_shortcuts_log( ".log", "log.html" );
-
-	// replace text widget default insert, delete and replace bindings, preventing the user to change it
-	cmd( "rename .log.text.text .log.text.text.internal" );
-	cmd( "proc .log.text.text { args } { switch -exact -- [lindex $args 0] { insert { } delete { } replace { } default { return [ eval .log.text.text.internal $args] } } }" );
-
-	cmd( "plog \"LSD Version %s (%s)\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License\nLSD is free software and comes with ABSOLUTELY NO WARRANTY\n[ LsdEnv {  } ]\n\"", _LSD_VERSION_, _LSD_DATE_ );
-
-	log_ok = true;
-}
-#endif
-
-
-/*********************************
 RESET_END
 *********************************/
 void reset_end( object *r )
@@ -1348,138 +1235,6 @@ void reset_end( object *r )
 				reset_end( cur );
 	}
 }
-
-
-/*********************************
-SET_SHORTCUTS_LOG
-*********************************/
-#ifndef NW
-void set_shortcuts_log( const char *window, const char *help )
-{
-	cmd( "bind %s <F1> { LsdHelp %s }", window, help  );
-	cmd( "bind %s <KeyPress-s> { .log.but.stop invoke }; bind %s <KeyPress-S> { .log.but.stop invoke }", window, window );
-	cmd( "bind %s <KeyPress-p> { .log.but.pause invoke }; bind %s <KeyPress-P> { .log.but.pause invoke }", window, window );
-	cmd( "bind %s <KeyPress-r> { .log.but.pause invoke }; bind %s <KeyPress-R> { .log.but.pause invoke }", window, window );
-	cmd( "bind %s <KeyPress-f> { .log.but.speed invoke }; bind %s <KeyPress-F> { .log.but.speed invoke }", window, window );
-	cmd( "bind %s <KeyPress-o> { .log.but.obs invoke }; bind %s <KeyPress-O> { .log.but.obs invoke }", window, window );
-	cmd( "bind %s <KeyPress-d> { .log.but.deb invoke }; bind %s <KeyPress-D> { .log.but.deb invoke }", window, window );
-	cmd( "bind %s <KeyPress-h> { .log.but.help invoke }; bind %s <KeyPress-H> { .log.but.help invoke }", window, window );
-	cmd( "bind %s <KeyPress-c> { .log.but.copy invoke }; bind %s <KeyPress-C> { .log.but.copy invoke }", window, window );
-	cmd( "bind %s <Control-c> { .log.but.copy invoke }; bind %s <Control-C> { .log.but.copy invoke }", window, window );
-	cmd( "bind %s <KeyPress-Escape> { focustop . }", window );
-}
-
-
-/*********************************
-SET_BUTTONS_LOG
-*********************************/
-void set_buttons_log( bool on )
-{
-	const char *state = ( char * ) ( on ? "normal" : "disabled" );
-		
-	cmd( ".log.but.stop configure -state %s", state );
-	cmd( ".log.but.pause configure -state %s", state );
-	cmd( ".log.but.speed configure -state %s", state );
-	cmd( ".log.but.obs configure -state %s", state );
-	cmd( ".log.but.deb configure -state %s", state );
-}
-
-
-/*********************************
-COVER_BROWSER
-*********************************/
-void cover_browser( const char *text1, const char *text2, const char *text3 )
-{
-	if ( brCovered )		// ignore if already covered
-		return;
-		
-	cmd( "set origMainTit [ wm title . ]; wm title . \"$origMainTit (DISABLED)\"" );
-	cmd( "destroy .bbar .m .l" );
-	
-	cmd( "ttk::frame .t" );
-	cmd( "ttk::label .t.l1 -text \"%s\" -style bold.TLabel", text1  );
-	cmd( "ttk::label .t.l2 -text \"\n%s\"", text2  );
-	cmd( "ttk::label .t.l3 -text \"\nInteraction with the LSD Browser is now disabled\" -style hl.TLabel" );
-	cmd( "ttk::label .t.l4 -justify left -text \"\n%s\"", text3  );
-	cmd( "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
-	cmd( "pack .t -fill both -expand yes -padx 10 -pady 10" );
-	cmd( "update" );
-	set_shortcuts_log( ".t", "runtime.html" );
-	
-	brCovered = true;
-	redrawRoot = false;
-}
-
-
-/*********************************
-UNCOVER_BROWSER
-*********************************/
-void uncover_browser( void )
-{
-	if ( ! brCovered || running )	// ignore if not covered or running
-		return;
-
-	cmd( "destroytop .deb" );
-	cmd( "destroy .t" );
-	cmd( "wm title . $origMainTit" );
-	cmd( "if { [ string equal [ wm state . ] normal ] } { focustop . }" );
-
-	brCovered = false;
-	redrawRoot = true;
-}
-
-
-/*********************************
-SHOW_PROF_AGGR
-*********************************/
-struct item
-{
-	const char *var, *obj;
-	unsigned int time;
-	unsigned int count;
-};
-
-bool comp_item( item& item1, item& item2 )
-{
-	int comp_str = strcmp( item1.obj, item2.obj );
-	if ( ! comp_str )
-		return item1.time > item2.time;
-	else
-		return comp_str < 0;
-}
-
-void show_prof_aggr( void )
-{
-	if ( ! prof_aggr_time )
-		return;
-
-	item elem;
-	list < item > vars;
-	list < item >::iterator it1;
-	variable *cv;
-	map < string, profile >::iterator it2;
-	
-	plog( "\nProfiling aggregated results:\n" );
-	plog( "\nObject\tElement\tTime (msec.)\tComputation count", "prof2" );
-	
-	for ( it2 = prof.begin(); it2 != prof.end(); ++it2 )
-	{
-		elem.var = it2->first.c_str( );
-		cv = root->search_var( NULL, elem.var );
-		elem.obj = ( cv == NULL ) ? NULL : cv->up->label;
-		elem.time = 1000 * it2->second.ticks / CLOCKS_PER_SEC;
-		elem.count = it2->second.comp;
-		vars.push_back( elem );
-	}
-	
-	vars.sort( comp_item );
-	
-	for ( it1 = vars.begin(); it1 != vars.end(); ++it1 )
-		plog( "\n%-12.12s\t%-12.12s\t%d\t%d", "prof2", it1->obj, it1->var, it1->time, it1->count );
-	
-	plog( "\n" );
-}
-#endif
 
 
 /*********************************
@@ -1539,6 +1294,246 @@ bool search_parallel( object *r )
 
 	return false;
 }
+
+
+#ifndef NW
+
+/*********************************
+CREATE_LOGWINDOW
+*********************************/
+void create_logwindow( void )
+{
+	if ( ! tk_ok )
+		myexit( 7 );
+
+	cmd( "newtop .log \"LSD Log\" { if [ string equal [ discard_change ] ok ] { exit } } \"\"" );
+
+	cmd( "set w .log.text" );
+	cmd( "ttk::frame $w" );
+	cmd( "ttk::scrollbar $w.scroll -command \"$w.text yview\"" );
+	cmd( "ttk::scrollbar $w.scrollx -command \"$w.text xview\" -orient hor" );
+	cmd( "ttk::text $w.text -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none -entry 0 -dark $darkTheme -style smallFixed.TText" );
+	cmd( "mouse_wheel $w.text" );
+	cmd( "$w.text configure -tabs {%s}", tabs  );
+	
+	// Log window tags
+	cmd( "$w.text tag configure highlight -foreground $colorsTheme(hl)" );
+	cmd( "$w.text tag configure tabel" );
+	cmd( "$w.text tag configure series -tabs {2c 5c 8c}" );
+	cmd( "$w.text tag configure prof1 -tabs {5c 7.5c 9c 11.2c 13.2c 17.5c}" );
+	cmd( "$w.text tag configure prof2 -tabs {3c 6c 9c}" );
+
+	// context menu (right mouse button)
+	cmd( "ttk::menu $w.text.menu -tearoff 0" );
+	cmd( "$w.text.menu add command -label Copy -underline 0 -accelerator Ctrl+C -command { tk_textCopy .log.text.text }" );		// entryconfig 0
+	cmd( "$w.text.menu add command -label Clear -accelerator Ctrl+Del -command { .log.text.text.internal delete 0.0 end }" );		// entryconfig 1
+	cmd( "$w.text.menu add separator" );	// entryconfig 2
+	cmd( "$w.text.menu add command -label Help -accelerator F1 -command { LsdHelp log.html }" );	// entryconfig 3
+
+	cmd( "pack $w.scroll -side right -fill y" );
+	cmd( "pack $w.text -expand yes -fill both" );
+	cmd( "pack $w.scrollx -side bottom -fill x" );
+	cmd( "pack $w -expand yes -fill both" );
+	
+	cmd( "bind .log.text.text <2> { \
+			tk_popup .log.text.text.menu %%X %%Y \
+		}" );	
+	cmd( "bind .log.text.text <3> { \
+			tk_popup .log.text.text.menu %%X %%Y \
+		}" );	
+
+	cmd( "showtop .log none 1 1 0" );
+	
+	cmd( "bind .log <F1> { .log.text.text.menu invoke 3 }" );
+	cmd( "bind .log <Escape> { focustop . }" );
+	cmd( "bind .log <Control-c> { .log.text.text.menu invoke 0 }; bind .log <Control-C> { .log.text.text.menu invoke 0 }" );
+	cmd( "bind .log <Control-Delete> { .log.text.text.menu invoke 1 }" );
+	
+	// replace text widget default insert, delete and replace bindings, preventing the user to change it
+	cmd( "rename .log.text.text .log.text.text.internal" );
+	cmd( "proc .log.text.text { args } { switch -exact -- [lindex $args 0] { insert { } delete { } replace { } default { return [ eval .log.text.text.internal $args] } } }" );
+
+	cmd( "plog \"LSD Version %s (%s)\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License\nLSD is free software and comes with ABSOLUTELY NO WARRANTY\n[ LsdEnv {  } ]\n\"", _LSD_VERSION_, _LSD_DATE_ );
+
+	log_ok = true;
+}
+
+
+/*********************************
+SET_SHORTCUTS_RUN
+*********************************/
+void set_shortcuts_run( const char *window )
+{
+	cmd( "bind %s <KeyPress-s> { .b.r2.stop invoke }; bind %s <KeyPress-S> { .b.r2.stop invoke }", window, window );
+	cmd( "bind %s <KeyPress-p> { .b.r2.pause invoke }; bind %s <KeyPress-P> { .b.r2.pause invoke }", window, window );
+	cmd( "bind %s <KeyPress-r> { .b.r2.pause invoke }; bind %s <KeyPress-R> { .b.r2.pause invoke }", window, window );
+	cmd( "bind %s <KeyPress-f> { .b.r2.speed invoke }; bind %s <KeyPress-F> { .b.r2.speed invoke }", window, window );
+	cmd( "bind %s <KeyPress-o> { .b.r2.obs invoke }; bind %s <KeyPress-O> { .b.r2.obs invoke }", window, window );
+	cmd( "bind %s <KeyPress-d> { .b.r2.deb invoke }; bind %s <KeyPress-D> { .b.r2.deb invoke }", window, window );
+}
+
+
+/*********************************
+DISABLE_BUTTONS_RUN
+*********************************/
+void disable_buttons_run( void )
+{
+	cmd( ".b.r2.stop configure -state disabled" );
+	cmd( ".b.r2.pause configure -state disabled" );
+	cmd( ".b.r2.speed configure -state disabled" );
+	cmd( ".b.r2.obs configure -state disabled" );
+	cmd( ".b.r2.deb configure -state disabled" );
+}
+
+
+/*********************************
+COVER_BROWSER
+*********************************/
+void cover_browser( const char *text1, const char *text2, bool run )
+{
+	if ( brCovered )		// ignore if already covered
+		return;
+		
+	cmd( "destroy .bbar .m .l" );
+	
+	cmd( "ttk::frame .t1" );
+	cmd( "ttk::label .t1.l1 -justify center -text \"%s\" -style bold.TLabel", text1  );
+	cmd( "pack .t1.l1 -pady 10 -expand yes -fill y" );
+	cmd( "pack .t1 -fill both -expand yes -padx 10 -pady 10" );
+	
+	if ( run )
+	{
+		cmd( "ttk::frame .p" );
+		cmd( "ttk::label .p.l -text \"Simulation progress\"" );
+		
+		cmd( "ttk::frame .p.b1" );
+		cmd( "ttk::progressbar .p.b1.b -maximum %d -value 0", sim_num );
+		cmd( "ttk::label .p.b1.i -text \"Simulation: 0 of %d (0%% done)\"", sim_num );
+		cmd( "pack .p.b1.b .p.b1.i -pady 5 -expand yes -fill x" );
+		
+		cmd( "ttk::frame .p.b2" );
+		cmd( "ttk::progressbar .p.b2.b -maximum %d -value 0", max_step );
+		cmd( "ttk::label .p.b2.i -text \"Case: 0 of %d (0%% done)\"", max_step );
+		cmd( "pack .p.b2.b .p.b2.i -pady 5 -expand yes -fill x" );
+		
+		if ( sim_num > 1 )
+			cmd( "pack .p.l .p.b1 .p.b2 -pady 10 -expand yes -fill x" );
+		else
+			cmd( "pack .p.l .p.b2 -pady 10 -expand yes -fill x" );
+
+		cmd( "pack .p -fill x -expand yes -padx 20 -pady 5" );
+	}
+	
+	cmd( "ttk::frame .t2" );
+	cmd( "ttk::label .t2.l1 -justify left -text \"\n%s\"", text2 );
+	cmd( "pack .t2.l1 -expand yes -fill y" );
+	cmd( "pack .t2 -fill both -expand yes -padx 10 -pady 10" );
+	
+	if ( run )
+	{
+		cmd( "ttk::frame .b" );
+		cmd( "ttk::frame .b.r2" );
+		cmd( "ttk::button .b.r2.stop -width $butWid -text Stop -command { set_c_var done_in 1 } -underline 0" );
+		cmd( "ttk::button .b.r2.pause -width $butWid -text Pause -command { set_c_var done_in 9 } -underline 0" );
+		cmd( "ttk::button .b.r2.speed -width $butWid -text Fast -command { set_c_var done_in 2 } -underline 0" );
+		cmd( "ttk::button .b.r2.obs -width $butWid -text Observe -command { set_c_var done_in 4 } -underline 0" );
+		cmd( "ttk::button .b.r2.deb -width $butWid -text Debug -command { set_c_var done_in 3 } -underline 0" );
+		cmd( "pack .b.r2.stop .b.r2.pause .b.r2.speed .b.r2.obs .b.r2.deb -padx $butSpc -side left" );
+		cmd( "pack .b.r2" );
+		cmd( "pack .b -padx $butPad -pady $butPad -side right" );
+
+		cmd( "bind . <F1> { LsdHelp runtime.html#buttons }" );
+		set_shortcuts_run( "." );
+		set_shortcuts_run( ".log" );
+	}
+	else
+	{
+		cmd( "set origMainTit [ wm title . ]" );
+		cmd( "wm title . \"$origMainTit (DISABLED)\"" );
+	}
+	
+	cmd( "update" );
+	
+	brCovered = true;
+	redrawRoot = false;
+}
+
+
+/*********************************
+UNCOVER_BROWSER
+*********************************/
+void uncover_browser( void )
+{
+	if ( ! brCovered || running )	// ignore if not covered or running
+		return;
+
+	cmd( "destroytop .deb" );
+	cmd( "destroy .t1 .p .t2 .b" );
+	
+	cmd( "if [ info exists origMainTit ] { \
+			wm title . $origMainTit; \
+			unset origMainTit \
+		}" );
+		
+	cmd( "if { [ string equal [ wm state . ] normal ] } { focustop . }" );
+
+	brCovered = false;
+	redrawRoot = true;
+}
+
+
+/*********************************
+SHOW_PROF_AGGR
+*********************************/
+struct item
+{
+	const char *var, *obj;
+	unsigned int time;
+	unsigned int count;
+};
+
+bool comp_item( item& item1, item& item2 )
+{
+	int comp_str = strcmp( item1.obj, item2.obj );
+	if ( ! comp_str )
+		return item1.time > item2.time;
+	else
+		return comp_str < 0;
+}
+
+void show_prof_aggr( void )
+{
+	if ( ! prof_aggr_time )
+		return;
+
+	item elem;
+	list < item > vars;
+	list < item >::iterator it1;
+	variable *cv;
+	map < string, profile >::iterator it2;
+	
+	plog( "\nProfiling aggregated results:\n" );
+	plog( "\nObject\tElement\tTime (msec.)\tComputation count", "prof2" );
+	
+	for ( it2 = prof.begin(); it2 != prof.end(); ++it2 )
+	{
+		elem.var = it2->first.c_str( );
+		cv = root->search_var( NULL, elem.var );
+		elem.obj = ( cv == NULL ) ? NULL : cv->up->label;
+		elem.time = 1000 * it2->second.ticks / CLOCKS_PER_SEC;
+		elem.count = it2->second.comp;
+		vars.push_back( elem );
+	}
+	
+	vars.sort( comp_item );
+	
+	for ( it1 = vars.begin(); it1 != vars.end(); ++it1 )
+		plog( "\n%-12.12s\t%-12.12s\t%d\t%d", "prof2", it1->obj, it1->var, it1->time, it1->count );
+	
+	plog( "\n" );
+}
+
+#endif
 
 
 /*******************************************

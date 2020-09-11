@@ -111,7 +111,8 @@ void show_graph( object *t )
 	cmd( ".str.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
 	cmd( ".str.f.c.v.a add command -label Object -command { set choice 3 }" );
 
-	set_shortcuts( ".str", "graphrep.html" );
+	cmd( "bind .str <F1> { LsdHelp graphrep.html }" );
+	set_shortcuts( ".str" );
 
 	cmd( "update" );
 }

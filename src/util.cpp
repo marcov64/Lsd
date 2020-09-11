@@ -84,12 +84,6 @@ void plog( char const *cm, char const *tag, ... )
 		if ( ! strcmp( tag, tags[ i ] ) )
 			tag_ok = true;
 	
-	// handle the "bar" pseudo tag
-	if ( ! strcmp( tag, "bar" ) )
-		tag_ok = true;
-	else
-		on_bar = false;
-	
 #ifndef NP
 	// abort if not running in main LSD thread
 	if ( this_thread::get_id( ) != main_thread )
@@ -175,7 +169,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 		cmd( "if [ winfo exists .deb ] { destroytop .deb }" );
 		deb_log( false );	// close any open debug log file
 		reset_plot( cur_sim );	// allow closing run-time plot
-		set_buttons_log( false );
+		disable_buttons_run( );
 
 		plog( "\n\nError detected at time %d", "highlight", t );
 		plog( "\n\nError: %s\nDetails: %s", "", boxTitle, logText );
@@ -1511,7 +1505,9 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 		}" );
 
 	cmd( "showtop .lat centerS no no no" );
-	set_shortcuts_log( ".lat", "lattice.html" );
+	
+	cmd( "bind .lat <F1> { LsdHelp lattice.html }" );
+	set_shortcuts_run( ".lat" );
 
 #endif
 

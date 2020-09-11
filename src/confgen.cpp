@@ -31,7 +31,6 @@ bool no_ptr_chk = false;	// disable user pointer checking
 bool no_saved = true;		// disable the usage of saved values as lagged ones
 bool no_search;				// disable the standard variable search mechanism
 bool no_zero_instance = true;// flag to allow deleting last object instance
-bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool running = false;		// simulation is running
 bool struct_loaded = false;	// a valid configuration file is loaded
