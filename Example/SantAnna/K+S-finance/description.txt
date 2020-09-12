@@ -35,6 +35,7 @@ Banks collect deposits from firms and evaluate the provision of loans on request
 
 The central bank fixes the prime interest rate using a single or dual mandate Taylor rule, depending on the policy set-up. A share of banks' deposits are held by the central bank as compulsory reserves (the public bonds market in the 2015 paper was not implemented; in practice government supplies an unlimited amount of bonds to banks). The interest rate structure is such that the prime rate stands between the interest rate on deposits, as the lower bound, the interest rate on bank reserves, and the rate on loans, as the upper bound. The latter are defined according to mark-down and mark-up rules on the prime, respectively. Central bank bails out the banking sector whenever the total net worth turns negative by absorbing the failed bank liabilities and injecting a fixed amount of new capital. As the model is stock-flow consistent: the bail-out costs correspond to an increase of government expenditure and, likely, to an increment of the public debt. As banks do not repay bail-out funds, the associated expenses worsen the conditions of public finance, potentially violating the set fiscal rules, thus triggering government expenditure cuts. However, as bail-outs repeat over time, the accumulated debt must be repaid to ensure a balanced public debt growth path. Hence the target tax rate is adjusted accordingly.
 
+The model is fully stock-and-flow consistent. Entrant firm's capital can be derived from a mix between bank debt and (shareholder) workers income, according to the configuration. When workers are also shareholders, government may be forced to bail-out them if accumulated (forced) savings get negative.
 
 Example configurations
 ======================
@@ -87,7 +88,7 @@ Government expenditure (parameter flagGovExp)
 ----------------------
 0 = minimum subsistency income (w0min) plus net interest and bail-outs
 1 = 0 plus growing fixed government expenditure
-2 = 1 plus unemployment benefit
+2 = 1 plus unemployment benefit instead of minimum subsistency income
 3 = 2 plus spend government superavit if no public debt
 
 Taxation (parameter flagTax)
@@ -140,6 +141,7 @@ B = number of heterogeneous banks (>=1)
 Lambda = multiple of net assets or sales for credit limit (>0)
 Lambda0 = credit limit initial absolute floor (>=0)
 NWb0 = initial net worth (equity) of bank (>0)
+PhiB = fraction of incumbent bank net wealth provided to bailed-out bank (0<PhiB<=1)
 Ut = target unemployment rate for Central Bank's Taylor rule (>0)
 alphaB = Pareto distribution shape parameter defining bank size heterogeneity (>= 1)
 betaB = bank sensitivity to financial fragility (>0)
