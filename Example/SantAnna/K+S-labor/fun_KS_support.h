@@ -275,7 +275,7 @@ void quit_worker( object *worker )
 	double Lscale = VS( worker->up, "Lscale" );	// labor scaling
 	
 	if ( VS( worker, "_employed" ) == 1 )		// sector 1?
-		INCRS( V_EXTS( worker->up->up, country, capSec ), "quits1", Lscale );
+		INCRS( V_EXTS( worker->up->up, countryE, capSec ), "quits1", Lscale );
 	else										// no: assume sector 2
 		INCRS( HOOKS( worker, FWRK )->up, "_quits2", Lscale );
 	
@@ -294,7 +294,7 @@ void move_worker( object *worker, object *vint, bool vint_learn )
 	if ( vint_learn )							// learning-by-vintage mode?
 	{											// worker has public skills
 		IDv = VS( vint, "_IDvint" );
-		sV = V_EXTS( vint->up->up, country, vintProd[ IDv ].sVp );
+		sV = V_EXTS( vint->up->up, countryE, vintProd[ IDv ].sVp );
 	}
 	else
 		sV = 1;
@@ -313,7 +313,6 @@ void move_worker( object *worker, object *vint, bool vint_learn )
 
 bool wo_asc_wrk( wageOffer e1, wageOffer e2 ) { return e1.workers < e2.workers; };
 bool wo_desc_off( wageOffer e1, wageOffer e2 ) { return e1.offer > e2.offer; };
-int rand_int( int max ) { return uniform_int( 0, max - 1 ); }
 
 void shuffle_offers( woLisT *offers )
 {
@@ -322,7 +321,7 @@ void shuffle_offers( woLisT *offers )
 	copy( offers->begin( ), offers->end( ), temp.begin( ) );
 	
 	// shuffle firms to choose hiring order
-	random_shuffle( temp.begin( ), temp.end( ), rand_int );
+	shuffle( temp.begin( ), temp.end( ), *random_engine );
 	
 	// and copy it back to a list
 	copy( temp.begin( ), temp.end( ), offers->begin( ) );
@@ -404,7 +403,7 @@ void order_applications( int order, appLisT *appls )
 		case 0:									// random order
 			// make a copy of list to a vector, shuffle, and copy back
 			copy( appls->begin( ), appls->end( ), temp.begin( ) );
-			random_shuffle( temp.begin( ), temp.end( ), rand_int );
+			shuffle( temp.begin( ), temp.end( ), *random_engine );
 			copy( temp.begin( ), temp.end( ), appls->begin( ) );
 			break;
 		case 1:									// higher wage first order
@@ -518,7 +517,7 @@ double fire_workers( object *firm, int mode, double xsCap, double *redCap )
 	object *cyccur, *wrk, *worker;
 	
 	object *cnt = firm->up->up;					// pointers to objects
-	object *lab = V_EXTS( cnt, country, labSup );
+	object *lab = V_EXTS( cnt, countryE, labSup );
 	
 	int i = 0;									// fired workers counter
 	int Tp = VS( lab, "Tp" );					// time for protected workers
@@ -664,7 +663,7 @@ double entry_firm1( object *sector, int n, bool newInd )
 		
 		// select associated bank and create hooks to/from it
 		IDb = VS( fin, "pickBank" );			// draw bank
-		bank = V_EXTS( sector->up, country, bankPtr [ IDb - 1 ] );// bank object
+		bank = V_EXTS( sector->up, countryE, bankPtr [ IDb - 1 ] );// bank object
 		WRITES( firm, "_bank1", IDb );
 		WRITE_HOOKS( firm, BANK, bank );		
 		cli = ADDOBJS( bank, "Cli1" );			// add to bank client list
@@ -708,8 +707,8 @@ double entry_firm1( object *sector, int n, bool newInd )
 			WRITELS( firm, "_qc1", 1, -1 );
 			
 			// initialize the map of vintage productivity and skills
-			WRITE_EXTS( sector->up, country, vintProd[ VNT( T - 1, ID1 ) ].sVp, sV );
-			WRITE_EXTS( sector->up, country, vintProd[ VNT( T - 1, ID1 ) ].sVavg, sV );
+			WRITE_EXTS( sector->up, countryE, vintProd[ VNT( T - 1, ID1 ) ].sVp, sV );
+			WRITE_EXTS( sector->up, countryE, vintProd[ VNT( T - 1, ID1 ) ].sVavg, sV );
 		}
 		else
 		{
@@ -789,8 +788,10 @@ double entry_firm2( object *sector, int n, bool newInd )
 	}
 	else
 	{
+		D20 = 0;								// compute later
 		Eavg = VS( sector, "Eavg" );			// average competitiveness
 		K = WHTAVES( sector, "_K", "_f2" );		// w. avg. capital in sector 2
+		N = 0;									// inventories
 		NW20 = WHTAVES( sector, "_NW2", "_f2" );// average wealth in sector 2
 		Q2u = VS( sector, "Q2u" );				// capacity utilization
 		f2 = 0;									// no market share
@@ -814,13 +815,13 @@ double entry_firm2( object *sector, int n, bool newInd )
 			firm = ADDOBJS( sector, "Firm2" );
 		
 		ADDHOOKS( firm, FIRM2HK );				// add object hooks
-		ADDEXTS( firm, firm2 );					// allocate extended data
+		ADDEXTS( firm, firm2E );				// allocate extended data
 		vint = SEARCHS( firm, "Vint" );			// remove empty vintage instance		
 		DELETE( vint );
 		
 		// select associated bank and create hooks to/from it
 		IDb = VS( fin, "pickBank" );			// draw bank
-		bank = V_EXTS( sector->up, country, bankPtr[ IDb - 1 ] );// bank object
+		bank = V_EXTS( sector->up, countryE, bankPtr[ IDb - 1 ] );// bank object
 		WRITES( firm, "_bank2", IDb );
 		WRITE_HOOKS( firm, BANK, bank );
 		cli = ADDOBJS( bank, "Cli2" );			// add to bank client list
@@ -982,8 +983,9 @@ double exit_firm2( object *firm, double *firesAcc )
 		DELETE( SHOOKS( firm1 ) );				// delete from firm client list
 	
 	// update firm map before removing LSD object
-	EXEC_EXTS( firm->up->up, country, firm2map, erase, ( int ) VS( firm, "_ID2" ) );
-		
+	EXEC_EXTS( firm->up->up, countryE, firm2map, erase, ( int ) VS( firm, "_ID2" ) );
+	
+	DELETE_EXTS( firm, firm2E );
 	DELETE( firm );
 
 	return max( liqVal, 0 );					// liquidation credit, if any

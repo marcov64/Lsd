@@ -810,12 +810,12 @@ else
 	// sort firm's candidate list according to the defined strategy
 	int hOrder = V( "_postChg" ) ? VS( GRANDPARENT, "flagHireOrder2Chg" ) : 
 								   VS( GRANDPARENT, "flagHireOrder2" );
-	order_applications( hOrder, & V_EXT( firm2, appl ) );
+	order_applications( hOrder, & V_EXT( firm2E, appl ) );
 
 	// search applications set (increasing wage requests) for enough workers
 	i = 0;									// workers counter
 	v[0] = 0;								// highest wage found
-	CYCLE_EXT( its, firm2, appl )			// run over enough applications
+	CYCLE_EXT( its, firm2E, appl )			// run over enough applications
 	{
 		if ( its->w > v[0] )				// new high wage request?
 			v[0] = its->w;					// i-th worker wage
@@ -863,7 +863,7 @@ wageOffer woData;
 woData.offer = v[0];
 woData.workers = VL( "_L2", 1 );
 woData.firm = p;
-EXEC_EXTS( GRANDPARENT, country, firm2wo, push_back, woData );
+EXEC_EXTS( GRANDPARENT, countryE, firm2wo, push_back, woData );
 
 RESULT( v[0] )
 
@@ -1091,15 +1091,15 @@ EQUATION( "_Q2e" )
 /*
 Effective output of firm in consumption-good sector
 */
-RESULT( V( "_life2cycle" ) > 0 ? min( V( "_Q2" ), SUM( "_Qvint" ) ) : 0 )
+RESULT( min( V( "_Q2" ), V( "_Q2p" ) ) )
 
 
 EQUATION( "_Q2p" )
 /*
-Potential production with current machines for a firm in 
+Potential production with current machines and workers for a firm in 
 consumption-good sector
 */
-RESULT( V( "_life2cycle" ) > 0 ? SUM( "_nVint" ) * VS( PARENT, "m2" ) : 0 )
+RESULT( V( "_life2cycle" ) > 0 ? SUM( "_Qvint" ) : 0 )
 
 
 EQUATION( "_Q2pe" )
@@ -1119,8 +1119,8 @@ EQUATION( "_Q2u" )
 /*
 Capacity utilization for a firm in consumption-good sector
 */
-RESULT( V( "_life2cycle" ) > 0 ? V( "_Q2e" ) / V( "_Q2p" ) :
-								 VLS( PARENT, "Q2u", 1 ) )
+v[1] = V( "_Q2p" );
+RESULT( v[1] > 0 ? V( "_Q2e" ) / v[1] : VLS( PARENT, "Q2u", 1 ) )
 
 
 EQUATION( "_S2" )
@@ -1252,6 +1252,9 @@ EQUATION( "_quits2" )
 Number of workers quitting jobs (not fired) in period for firm in sector 2
 Updated in 'hires1' and 'hires2'
 */
+
+if ( VS( GRANDPARENT, "flagGovExp" ) < 2 )		// unemployment benefit exists?
+	END_EQUATION( 0 );
 
 v[1] = VS( LABSUPL2, "wU" );					// unemployment benefit in t
 

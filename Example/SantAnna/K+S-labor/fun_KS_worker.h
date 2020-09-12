@@ -81,7 +81,7 @@ if ( h <= 0 )
 // apply to each queue, until all are done, skipping repeated firms
 firmSeT targetFirms;							// set of target firms
 firmSeT::iterator it;							// iterator to firm set
-dblVecT *weight = & V_EXTS( GRANDPARENT, country, firm2wgtd );// firms weights
+dblVecT *weight = & V_EXTS( GRANDPARENT, countryE, firm2wgtd );// firms weights
 i = 0; 											// number of iterations limiter
 j = weight->size( );							// number of operating firms
 h = min( h, k != 2 ? j : j - 1 );				// can't look for more than all
@@ -94,7 +94,7 @@ while ( ( int ) targetFirms.size( ) < h - 1 )
 	itd = upper_bound( weight->begin( ), weight->end( ), RND );
 
 	// target firm pointer
-	cur1 = V_EXTS( GRANDPARENT, country, firm2ptr[ itd - weight->begin( ) ] );
+	cur1 = V_EXTS( GRANDPARENT, countryE, firm2ptr[ itd - weight->begin( ) ] );
 	
 	if ( ( k != 2 || cur1 != cur ) && cur1 != NULL )// don't submit to employer		
 		targetFirms.insert( cur1 );				// add firm to targets list
@@ -113,12 +113,12 @@ applData.Te = VL( "_Te", 1 );
 applData.wrk = p;
 
 // apply to sector 1 queue
-EXEC_EXTS( GRANDPARENT, country, firm1appl, push_back, applData );
+EXEC_EXTS( GRANDPARENT, countryE, firm1appl, push_back, applData );
 											
 // insert worker application in the selected firms' queues (if any)
 for( i = 1, it = targetFirms.begin( ); it != targetFirms.end( ); ++i, ++it )
 	// add application to the job queue of corresponding firm in sector 2
-	EXEC_EXTS( ( *it ), firm2, appl, push_back, applData );
+	EXEC_EXTS( ( *it ), firm2E, appl, push_back, applData );
 
 RESULT( i )
 

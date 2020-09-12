@@ -217,8 +217,8 @@ for ( firmLisT::iterator itr = rank2.begin( ); itr != rank2.end( ); ++j, ++itr )
 }
 
 // sort the firm objects so credit is requested first by top ranking firms
-SORTS( CAPSECL1, "Firm1", "_pOrd1", "UP" );
-SORTS( CONSECL1, "Firm2", "_pOrd2", "UP" );
+SORTS( CAPSECL1, "Firm1", "_pOrd1", UP );
+SORTS( CONSECL1, "Firm2", "_pOrd2", UP );
 
 RESULT( h )
 
@@ -232,18 +232,18 @@ choosing a bank
 */
 
 // clear vectors
-EXEC_EXTS( PARENT, country, bankPtr, clear );
-EXEC_EXTS( PARENT, country, bankWgtd, clear );
+EXEC_EXTS( PARENT, countryE, bankPtr, clear );
+EXEC_EXTS( PARENT, countryE, bankWgtd, clear );
 
 // add-up market share
 i = 0;													// bank index in vector
 v[0] = v[1] = 0;										// cumulative market share
 CYCLE( cur, "Bank" )
 {
-	EXEC_EXTS( PARENT, country, bankPtr, push_back, cur );// pointer to bank
+	EXEC_EXTS( PARENT, countryE, bankPtr, push_back, cur );// pointer to bank
 	
 	v[1] += v[2] = max( VS( cur, "_fd" ), 0 );
-	EXEC_EXTS( PARENT, country, bankWgtd, push_back, v[2] );
+	EXEC_EXTS( PARENT, countryE, bankWgtd, push_back, v[2] );
 	
 	++i;
 }
@@ -251,8 +251,8 @@ CYCLE( cur, "Bank" )
 // rescale the shares to 1 (just in case) and accumulate them
 for ( j = 0; j < i; ++j )
 {
-	v[0] += V_EXTS( PARENT, country, bankWgtd[ j ] ) / v[1];
-	WRITE_EXTS( PARENT, country, bankWgtd[ j ], min( v[0], 1 ) );
+	v[0] += V_EXTS( PARENT, countryE, bankWgtd[ j ] ) / v[1];
+	WRITE_EXTS( PARENT, countryE, bankWgtd[ j ], min( v[0], 1 ) );
 }
 
 RESULT( i )
@@ -266,7 +266,7 @@ of banks
 
 //V( "banksMaps" );										// ensure vector updated
 
-dblVecT *weight = & V_EXTS( PARENT, country, bankWgtd );// bank weights
+dblVecT *weight = & V_EXTS( PARENT, countryE, bankWgtd );// bank weights
 
 // see which bank is in the RND position for accumulated market share
 // in practice, it draws banks with probability proportional to m.s.

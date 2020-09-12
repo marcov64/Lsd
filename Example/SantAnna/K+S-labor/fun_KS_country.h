@@ -76,34 +76,29 @@ v[2] = VS( LABSUPL0, "Ls" ) - VS( LABSUPL0, "L" );// unemployed workers
 
 v[0] = VS( LABSUPL0, "Gtrain" );				// worker training cost
 
-if ( i == 0 )									// work-or-die + min
-	// minimum income
-	v[0] += v[2] * VS( LABSUPL0, "w0min" );	
+if ( i < 2 )
+	v[0] += v[2] * VS( LABSUPL0, "w0min" );		// minimum income
 else
-{		
-	if ( i == 1 )								// growing g. expenditure
-		// do fixed public spending
-		v[0] += ( 1 + V( "gG" ) ) * ( CURRENT - VLS( LABSUPL0, "Gtrain", 1 ) );
-	else										// unemployment benefit
+	v[0] += v[2] * VS( LABSUPL0, "wU" );		// pay unemployment benefit
+	
+if ( i == 1 )									// growing gov. expenditure
+	v[0] += ( 1 + V( "gG" ) ) * ( CURRENT - VLS( LABSUPL0, "Gtrain", 1 ) );
+	
+if ( i == 3 )								// if government has an accumulated
+{											// surplus, it may spend it 
+	v[3] = VL( "Deb", 1 );
+	if ( v[3] < 0 )
 	{
-		// pay unemployment benefit
-		v[0] += v[2] * VS( LABSUPL0, "wU" );
-		
-		// if government has an accumulated surplus, it may spend it 
-		v[3] = VL( "Deb", 1 );
-		if ( i == 3 && v[3] < 0 )
+		v[4] = max( 0, - VL( "Def", 1 ) );	// limit to cur. superavit
+		if ( - v[3] > v[4] )
 		{
-			v[4] = max( 0, - VL( "Def", 1 ) );	// limit to cur. superavit
-			if ( - v[3] > v[4] )
-			{
-				v[0] += v[4];					// cap to current sup.
-				INCR( "Deb", v[4] );			// discount from surplus
-			}
-			else
-			{
-				v[0] += - v[3];					// spend all surplus
-				WRITE( "Deb", 0 );				// zero surplus
-			}
+			v[0] += v[4];					// cap to current sup.
+			INCR( "Deb", v[4] );			// discount from surplus
+		}
+		else
+		{
+			v[0] += - v[3];					// spend all surplus
+			WRITE( "Deb", 0 );				// zero surplus
 		}
 	}
 }
@@ -328,16 +323,16 @@ Initialize the K+S country object. It is run only once per country.
 PARAMETER;										// execute only once per country
 
 // create the new country as an extension to current 'Country' object
-ADDEXT_INIT( country );
+ADDEXT_INIT( countryE );
 
 // country-level pointers to speed-up the access to individual containers
-WRITE_EXT( country, capSec, SEARCH( "Capital" ) );
-WRITE_EXT( country, conSec, SEARCH( "Consumption" ) );
-WRITE_EXT( country, finSec, SEARCH( "Financial" ) );
-WRITE_EXT( country, labSup, SEARCH( "Labor" ) );
-WRITE_EXT( country, macSta, SEARCH( "Mac" ) );
-WRITE_EXT( country, secSta, SEARCH( "Sec" ) );
-WRITE_EXT( country, labSta, SEARCH( "Lab" ) );
+WRITE_EXT( countryE, capSec, SEARCH( "Capital" ) );
+WRITE_EXT( countryE, conSec, SEARCH( "Consumption" ) );
+WRITE_EXT( countryE, finSec, SEARCH( "Financial" ) );
+WRITE_EXT( countryE, labSup, SEARCH( "Labor" ) );
+WRITE_EXT( countryE, macSta, SEARCH( "Mac" ) );
+WRITE_EXT( countryE, secSta, SEARCH( "Sec" ) );
+WRITE_EXT( countryE, labSta, SEARCH( "Lab" ) );
 
 // pointer shortcuts the access to individual market containers
 cur1 = CAPSECL0;
@@ -415,10 +410,10 @@ double sV0 = ( V( "flagWorkerLBU" ) == 0 || V( "flagWorkerLBU" ) == 2 ) ?
 			 1 : VS( cur4, "sigma" );			// initial vintage skills
 
 // reserve space for country-level non-initialized vectors
-EXEC_EXT( country, firm2ptr, reserve, F2max );	// sector 2 firm objects
-EXEC_EXT( country, firm2wgtd, reserve, F2max );
-EXEC_EXT( country, bankPtr, reserve, B );		// bank objects
-EXEC_EXT( country, bankWgtd, reserve, B );
+EXEC_EXT( countryE, firm2ptr, reserve, F2max );	// sector 2 firm objects
+EXEC_EXT( countryE, firm2wgtd, reserve, F2max );
+EXEC_EXT( countryE, bankPtr, reserve, B );		// bank objects
+EXEC_EXT( countryE, bankWgtd, reserve, B );
 
 // reset serial ID counters for dynamic objects
 WRITES( cur1, "lastID1", 0 );

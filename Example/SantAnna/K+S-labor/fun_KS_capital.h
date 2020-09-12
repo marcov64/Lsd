@@ -17,9 +17,14 @@ Open job positions in capital-good sector
 
 v[1] = VS( LABSUPL1, "Ls" );					// available labor force
 v[2] = V( "L1dRD" );							// R&D labor demand in sector 1
-v[3] = V( "L1d" ) - v[2];						// production labor in sector 1
+v[3] = V( "L1d" );								// production labor in sector 1
 v[4] = VS( CONSECL1, "L2d" );					// production labor in sector 2
 v[5] = COUNT( "Wrk1" ) * VS( LABSUPL1, "Lscale" );// current workers
+
+v[2] = min( v[2], v[1] );						// ignore demand over total labor
+v[3] = min( v[3], v[1] );
+
+v[3] -= v[2];									// labor used in production
 
 // split possible labor shortage proportionally up to a limit (to avoid crashes)
 if ( ( v[3] + v[4] ) > ( v[1] - v[2] ) )
@@ -214,7 +219,7 @@ VS( LABSUPL1, "appl" );							// and applications are done
 v[1] = VS( LABSUPL1, "Lscale" );				// labor scaling
 
 j = ceil( V( "JO1" ) / v[1] );					// scaled open jobs in sector 1
-appLisT *appl = & V_EXTS( PARENT, country, firm1appl );
+appLisT *appl = & V_EXTS( PARENT, countryE, firm1appl );
 												// pointer to applications pool
 // get current top wage offered
 v[2] = VS( CONSECL1, "w2oMax" );
@@ -438,6 +443,9 @@ EQUATION( "quits1" )
 Number of workers quitting jobs (not fired) in period in capital-good sector
 Updated in 'hires1' and 'hires2'
 */
+
+if ( VS( PARENT, "flagGovExp" ) < 2 )			// unemployment benefit exists?
+	END_EQUATION( 0 );
 
 v[1] = VS( LABSUPL1, "wU" );					// unemployment benefit in t
 

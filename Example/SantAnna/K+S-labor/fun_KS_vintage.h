@@ -72,7 +72,7 @@ else
 		if ( h != 0 && h != 2 )					// learning by vintage mode?
 		{										// worker has public skills
 			i = V( "_IDvint" );
-			v[7] = V_EXTS( GRANDPARENT, country, vintProd[ i ].sVp );
+			v[7] = V_EXTS( GRANDPARENT, countryE, vintProd[ i ].sVp );
 		}
 		else
 			v[7] = 1;							// no skill factor

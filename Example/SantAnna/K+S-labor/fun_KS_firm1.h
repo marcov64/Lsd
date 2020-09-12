@@ -122,8 +122,8 @@ if ( h == 0 || h == 2 )							// no learning by using
 else
 	v[13] = VS( PARENT, "sigma" );
 
-WRITE_EXTS( GRANDPARENT, country, vintProd[ j ].sVp, v[13] );
-WRITE_EXTS( GRANDPARENT, country, vintProd[ j ].sVavg, v[13] );
+WRITE_EXTS( GRANDPARENT, countryE, vintProd[ j ].sVp, v[13] );
+WRITE_EXTS( GRANDPARENT, countryE, vintProd[ j ].sVavg, v[13] );
 
 RESULT( v[0] )
 
@@ -152,7 +152,7 @@ Number of new client firms in the period.
 Also creates the client-supplier connecting objects.
 */
 
-firmMapT firms = V_EXTS( GRANDPARENT, country, firm2map );// list with all firms
+firmMapT firms = V_EXTS( GRANDPARENT, countryE, firm2map );// list with all firms
 h = firms.size( );								// number of firms in sector 2
 k = V( "_HC" );									// number of historical clients
 j = V( "_ID1" );								// current firm ID

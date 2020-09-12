@@ -928,7 +928,7 @@ CYCLE( cur, "Wrk2" )
 if ( v[0] == 0 || v[1] == 0 )					// no worker hired or no prod.?
 {
 	j = VS( HOOK( TOPVINT ), "_IDvint" );		// current top vintage
-	v[0] = V_EXTS( GRANDPARENT, country, vintProd[ j ].sVp );
+	v[0] = V_EXTS( GRANDPARENT, countryE, vintProd[ j ].sVp );
 }												// assume public skills
 else
 	v[0] /= v[1];								// weighthed average

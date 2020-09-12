@@ -29,6 +29,9 @@
 
 // LSD and K+S macros and objects definition and support code
 #include <fun_head_fast.h>						// LSD definitions
+
+mt19937 *random_engine;							// pointer to LSD random engine
+
 #include "fun_KS_class.h"						// K+S class/macro definitions
 #include "fun_KS_support.h"						// K+S support C++ functions
 
@@ -66,8 +69,9 @@ PARAMETER;										// execute only once
 DEFAULT_RESULT( NAN );							// default equation result
 USE_ZERO_INSTANCE;								// allow zero-instance objects
 NO_SEARCH;										// don't perform variable search
+random_engine = ( mt19937 * ) RND_GENERATOR( 2 );// LSD source of randomness
 
-if ( cur_sim == 1 )								// first run only
+if ( RUN == 1 )									// first run only
 {
 #ifdef FASTMODE
 	if ( FASTMODE == 1 )						// set user selected log mode
@@ -196,8 +200,8 @@ void close_sim( void )
 	{
 		CYCLES( cur, cur1, "Consumption" )
 			CYCLES( cur1, cur2, "Firm2" )		// free Firm2 extensions
-				DELETE_EXTS( cur2, firm2 );
+				DELETE_EXTS( cur2, firm2E );
 
-		DELETE_EXTS( cur, country );			// reclaim allocated memory
+		DELETE_EXTS( cur, countryE );			// reclaim allocated memory
 	}
 }

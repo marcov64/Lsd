@@ -223,7 +223,7 @@ h = ( v[1] == 0 ) ? 0 : VS( PARENT, "flagHireSeq" );// firm hiring order
 v[2] = VS( LABSUPL1, "Lscale" );				// labor scaling
 
 // create pointer and sort wage offers list
-woLisT *offers = & V_EXTS( PARENT, country, firm2wo );
+woLisT *offers = & V_EXTS( PARENT, countryE, firm2wo );
 order_offers( h, offers );
 
 // firms hire employees according to the selected hiring order
@@ -237,7 +237,7 @@ for ( i = 0, itw = offers->begin( ); itw != offers->end( ); ++itw )
 		// sort firm's candidate list according to the defined strategy
 		int hOrder = VS( itw->firm, "_postChg" ) ? VS( PARENT, "flagHireOrder2Chg" ) : 
 												   VS( PARENT, "flagHireOrder2" );
-		order_applications( hOrder, & V_EXTS( itw->firm, firm2, appl ) );
+		order_applications( hOrder, & V_EXTS( itw->firm, firm2E, appl ) );
 	}
 	
 	// hire the ordered applications until queue is exhausted
@@ -246,10 +246,10 @@ for ( i = 0, itw = offers->begin( ); itw != offers->end( ); ++itw )
 	v[4] = DBL_MAX;								// minimum wage requested
 	cur = NULL;									// pointer to worker asking it
 
-	while ( j > 0 && EXEC_EXTS( itw->firm, firm2, appl, size ) > 0 )
+	while ( j > 0 && EXEC_EXTS( itw->firm, firm2E, appl, size ) > 0 )
 	{
 		// get the candidate worker object element and a pointer to it
-		const application candidate = EXEC_EXTS( itw->firm, firm2, appl, front );
+		const application candidate = EXEC_EXTS( itw->firm, firm2E, appl, front );
 
 		// candidate not yet hired in this period and offered wage ok?
 		v[5] = VS( candidate.wrk, "_employed" );
@@ -276,7 +276,7 @@ for ( i = 0, itw = offers->begin( ); itw != offers->end( ); ++itw )
 		}
 		
 		// remove worker from candidate queue
-		EXEC_EXTS( itw->firm, firm2, appl, pop_front );
+		EXEC_EXTS( itw->firm, firm2E, appl, pop_front );
 	}
 	
 	// try to hire at least one worker, at any wage
@@ -291,7 +291,7 @@ for ( i = 0, itw = offers->begin( ); itw != offers->end( ); ++itw )
 	}	
 	
 	WRITES( itw->firm, "_hires2", h * v[2] );	// update hires count for firm
-	EXEC_EXTS( itw->firm, firm2, appl, clear );	// clear application queue
+	EXEC_EXTS( itw->firm, firm2E, appl, clear );// clear application queue
 }
 
 offers->clear( );								// clear offers set
@@ -309,7 +309,7 @@ Also updates the map of vintage productivity and skill
 h = T0( VL( "oldVint", 1 ) );					// time of oldest vintage
 v[1] = VS( LABSUPL1, "Lscale" );				// workers to objects ratio
 
-vintMapT *vint = & EXTS( PARENT, country ).vintProd;// vintage map
+vintMapT *vint = & EXTS( PARENT, countryE ).vintProd;// vintage map
 vintMapT::iterator itm;
 
 // remove unused vintages from the map
@@ -334,8 +334,8 @@ CYCLES( LABSUPL1, cur, "Worker" )				// scan all workers
 	{
 		i = VS( cur1->up, "_IDvint" );			// vintage ID
 		v[2] = VLS( cur, "_sV", 1 ) * v[1];		// last skills (weighted)
-		EXTS( PARENT, country ).vintProd[ i ].sVavg += v[2];
-		EXTS( PARENT, country ).vintProd[ i ].workers += v[1];
+		EXTS( PARENT, countryE ).vintProd[ i ].sVavg += v[2];
+		EXTS( PARENT, countryE ).vintProd[ i ].workers += v[1];
 		v[0] += v[2];
 		v[2] += v[1];
 	}
@@ -851,9 +851,9 @@ Only to be called if firm objects in sector 2 are created or destroyed
 */
 
 // clear vectors
-EXEC_EXTS( PARENT, country, firm2map, clear );
-EXEC_EXTS( PARENT, country, firm2ptr, clear );
-EXEC_EXTS( PARENT, country, firm2wgtd, clear );
+EXEC_EXTS( PARENT, countryE, firm2map, clear );
+EXEC_EXTS( PARENT, countryE, firm2ptr, clear );
+EXEC_EXTS( PARENT, countryE, firm2wgtd, clear );
 
 v[1] = V( "f2min" );							// market exit threshold
 v[2] = max( 1 / VL( "F2", 1 ), 2 * v[1] );		// entrant bounded fair share
@@ -880,9 +880,9 @@ CYCLE( cur, "Firm2" )							// do for all firms in sector 2
 	// log transform market share
 	v[3] += v[5] = max( log( v[4] / v[1] + 1 ), 0 );		
 			   
-	EXEC_EXTS( PARENT, country, firm2wgtd, push_back, v[5] );
-	EXEC_EXTS( PARENT, country, firm2ptr, push_back, cur );// pointer to firm
-	EXEC_EXTS( PARENT, country, firm2map, insert, // save in firm's map
+	EXEC_EXTS( PARENT, countryE, firm2wgtd, push_back, v[5] );
+	EXEC_EXTS( PARENT, countryE, firm2ptr, push_back, cur );// pointer to firm
+	EXEC_EXTS( PARENT, countryE, firm2map, insert, // save in firm's map
 			   firmPairT( ( int ) VS( cur, "_ID2" ), cur ) );
 	
 	++i;
@@ -891,8 +891,8 @@ CYCLE( cur, "Firm2" )							// do for all firms in sector 2
 // rescale the transformed shares to 1 and accumulate them
 for ( v[6] = 0, j = 0; j < i; ++j )
 {
-	v[6] += V_EXTS( PARENT, country, firm2wgtd [ j ] ) / v[3];
-	WRITE_EXTS( PARENT, country, firm2wgtd[ j ], min( v[6], 1 ) );
+	v[6] += V_EXTS( PARENT, countryE, firm2wgtd [ j ] ) / v[3];
+	WRITE_EXTS( PARENT, countryE, firm2wgtd[ j ], min( v[6], 1 ) );
 }
 
 RESULT( i )
