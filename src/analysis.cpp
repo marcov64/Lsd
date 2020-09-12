@@ -2341,11 +2341,9 @@ while ( true )
 						k = true;
 				
 					if ( h > 1 )
-					{
-						cmd( "set fnum 0" );
-						cmd( "set numf %d", h );
-						cmd( "progressbox .da.pas \"Add Series\" \"Loading results files\" $numf fnum { set stop true } .da" );
-					}
+						cmd( "progressbox .da.pas \"Add Series\" \"Loading results files\" \"File\" %d { set stop true } .da \"Case\"", h );
+					else
+						cmd( "progressbox .da.pas \"Add Series\" \"Loading series\" \"\" 1 { set stop true } .da \"Case\"" );
 					
 					for ( i = 0, stop = false; i < h && ! stop; ++i )  
 					{
@@ -2364,22 +2362,25 @@ while ( true )
 							insert_data_file( gz, &num_var, &var_names[ i ], k );
 							
 							if ( h > 1 )
-							{
-								cmd( "set fnum %d", i + 1 );
-								cmd( ".da.pas.main.info configure -text \"Files done: $fnum of $numf ([ expr int( 100 * $fnum / $numf ) ]%%)\"" );
-								cmd( "update" );
-							}	
+								cmd( "prgboxupdate .da.pas %d", i + 1 );
 						}
 						else
 							plog( "\nError: could not open file: %s\n", "", filename );
 					}
 					
-					if ( h > 1 )
-						cmd( "destroytop .da.pas" );
+					cmd( "destroytop .da.pas" );
 					
 					if ( ! mc )
 						goto add_end;
 					
+					if ( stop )
+					{
+						delete [ ] vs;
+						vs = NULL;
+						num_var = max_c = file_counter = 0;
+						goto add_end;
+					}
+						
 					plog( "\nCreating MC series... " );
 					
 					m = num_var;
@@ -2396,8 +2397,7 @@ while ( true )
 							{
 								delete [ ] vs;
 								vs = NULL;
-								num_var = 0;
-								file_counter = 0;
+								num_var = max_c = file_counter = 0;
 							}
 							
 							goto add_end;
@@ -2414,8 +2414,7 @@ while ( true )
 								{
 									delete [ ] vs;
 									vs = NULL;
-									num_var = 0;
-									file_counter = 0;
+									num_var = max_c = file_counter = 0;
 								}
 							
 								goto add_end;
@@ -2428,9 +2427,7 @@ while ( true )
 					else
 						var_num = 0;
 					
-					cmd( "set snum 0" );
-					cmd( "set nums %d", l );
-					cmd( "progressbox .da.pas \"Add Series\" \"Creating MC Series\" $nums snum { set stop true } .da" );
+					cmd( "progressbox .da.pas \"Add Series\" \"Creating MC Series\" \"Series\" %d { set stop true } .da", l );
 						
 					for ( j = 0, stop = false; j < l && ! stop; ++j )
 					{
@@ -2444,9 +2441,7 @@ while ( true )
 						
 						create_series( choice, true, cur_var );
 						
-						cmd( "set snum %d", j + 1 );
-						cmd( ".da.pas.main.info configure -text \"Series done: $snum of $nums ([ expr int( 100 * $snum / $nums ) ]%%)\"" );
-						cmd( "update" );
+						cmd( "prgboxupdate .da.pas %d", j + 1 );
 					}
 					
 					cmd( "destroytop .da.pas" );
@@ -4312,7 +4307,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		fz = gzopen( filename, "rt" );
 
 	new_v = 0;
-	plog( "\nResults data from file %s (F_%d)\n", "", filename, file_counter );
+	plog( "\nResults data from file %s (F_%d) ", "", filename, file_counter );
 
 	if ( ! gz )
 		ch = ( char ) fgetc( f );
@@ -4337,7 +4332,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 
 	if ( ! header )
 	{
-		plog( "\nError: invalid header, aborting file load.\nCheck if '.tot' files where created with the -g option.\n" );
+		plog( "\nError: invalid header, aborting file load\nCheck if '.tot' files where created with the -g option\n" );
 		goto end;
 	}
 
@@ -4346,7 +4341,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	else
 		gzclose( fz );
 
-	plog( " %d series", "",  new_v );
+	plog( "%d series", "",  new_v );
 
 	if ( ! gz )
 		f = fopen( filename, "rt" );
@@ -4370,7 +4365,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	else
 		gzclose( fz );
 
-	plog( ", %d cases. Loading, please wait...", "", new_c - 1 );
+	cmd( ".da.pas.main.p2.scale configure -maximum %d", new_c - 1 );
 	cmd( "update" );
 
 	if ( *num_v == 0 )
@@ -4398,7 +4393,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	linbuf = new char[ linsiz ];
 	if ( linbuf == NULL )
 	{
-		plog( "\nError: not enough memory or invalid format, aborting file load.\n" );
+		plog( "\nError: not enough memory or invalid format, aborting file load\n" );
 		goto end;
 	}
 
@@ -4413,7 +4408,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	{
 		if ( tok == NULL )
 		{
-			plog( "\nError: invalid header, aborting file load.\n" );
+			plog( "\nError: invalid header, aborting file load\n" );
 			goto end;
 		}
 		
@@ -4461,7 +4456,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		{
 			if ( tok == NULL )
 			{
-				plog( "\nError: invalid data, aborting file load.\n" );
+				plog( "\nError: invalid data, aborting file load\n" );
 				num_c += ( j > 0 ? j - 1 : 0 ) > num_c ? ( j > 0 ? j - 1 : 0 ) : 0;
 				goto end;
 			}
@@ -4482,6 +4477,9 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 			
 			tok = strtok( NULL, "\t" );		// get next token, if any
 		}
+		
+		if ( ( j + 2 ) % 10 == 0 )
+			cmd( "prgboxupdate .da.pas \"\" %d", j + 1 );
 	}
 
 	*num_v += new_v;
@@ -4492,8 +4490,6 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		max_c = new_c; 
 	
 	min_c = max( first_c, showInit ? 0 : 1 );
-
-	plog( " Done" );
 
 	end:
 

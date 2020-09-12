@@ -4275,19 +4275,54 @@ case 92:
 			break;
 	}
 
-	cmd( "focustop .log" );
-	plog("\nWriting LaTex code. Please wait... " );
+	stop = false;
+	cmd( "progressbox .ptex \"Creating LaTex\" \"LaTex code generation steps\" \"Step\" 6 { set stop true }" );	
 
 	f = fopen( ch, "wt" );
+	
 	tex_report_head( f, table );
+	cmd( "prgboxupdate .ptex 1" );
+	
+	if ( stop )
+		goto end_latex;
+	
 	tex_report_struct( root, f, table );
+	cmd( "prgboxupdate .ptex 2" );
+	
+	if ( stop )
+		goto end_latex;
+	
 	tex_report_observe( root, f, table );
+	cmd( "prgboxupdate .ptex 3" );
+	
+	if ( stop )
+		goto end_latex;
+	
 	tex_report_init( root, f, table );
+	cmd( "prgboxupdate .ptex 4" );
+	
+	if ( stop )
+		goto end_latex;
+	
 	tex_report_initall( root, f, table );
+	cmd( "prgboxupdate .ptex 5" );
+	
+	if ( stop )
+		goto end_latex;
+	
 	tex_report_end( f );
+	cmd( "prgboxupdate .ptex 6" );
+	
+	end_latex:
+	
+	cmd( "destroytop .ptex" );
+	
 	fclose( f );
-
-	plog( "Done\nLaTex code saved in file: %s\n", "", ch );
+	
+	if ( stop )
+		remove( ch );
+	else
+		plog( "\nLaTex code saved in file: %s\n", "", ch );
 
 break;
 
@@ -4437,24 +4472,16 @@ case 63:
 		findexSens = 1;
 		
 		// create a design of experiment (DoE) for the sensitivity data
-		plog( "\nCreating design of experiments configuration files... " );
 		cmd( "focustop .log" );
 
 		stop = false;
-		cmd( "set findex 0" );
-		cmd( "set ptsSa %d", ptsSa );
-		cmd( "progressbox .psa \"Creating DoE configuration files\" \"Creating DoE configuration files\" $ptsSa findex { set stop true }" );
+		cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\"  %d { set stop true }", ptsSa );
 		
 		sensitivity_sequential( &findexSens, rsense, 1.0 );
 		
 		cmd( "destroytop .psa" );
 		
-		if ( stop )
-			plog( "Interrupted\n" );
-		else
-			plog( "Done\n" );
-		
-		plog( "Sensitivity analysis configurations produced: %d", "", findexSens - 1 );	
+		plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );	
 		
 		if ( ! stop )
 			sensitivity_created( );			// explain user how to proceed
@@ -4497,7 +4524,7 @@ case 71:
 		cmd( "newtop .s \"MC Point Sampling\" { set choice 2 }" );
 		
 		cmd( "ttk::frame .s.i" );
-		cmd( "ttk::label .s.i.l -text \"Monte Carlo sample size as\n%% of sensitivity space size\n(0 to 100)\"" );
+		cmd( "ttk::label .s.i.l -justify center -text \"Monte Carlo sample size as\n%% of sensitivity space size\n(0 to 100)\"" );
 		cmd( "ttk::entry .s.i.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 && $n <= 100 } { set sizMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sizMC; return 0 } } -invalidcommand { bell } -justify center" );
 		cmd( ".s.i.e insert 0 $sizMC" ); 
 		cmd( "pack .s.i.l .s.i.e" );
@@ -4545,25 +4572,17 @@ case 71:
 		findexSens = 1;
 		
 		// create a design of experiment (DoE) for the sensitivity data
-		plog( "\nCreating design of experiments configuration files... " );
 		cmd( "focustop .log" );
 
 		stop = false;
-		cmd( "set findex 0" );
-		cmd( "set ptsSa %ld", ( long ) ( sizMC * maxMC ) );
-		cmd( "progressbox .psa \"Creating DoE configuration files\" \"Creating DoE configuration files\" $ptsSa findex { set stop true }" );
+		cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\" %ld { set stop true }", ( long ) ( sizMC * maxMC ) );
 		
 		init_random( seed );				// reset random number generator 
 		sensitivity_sequential( &findexSens, rsense, sizMC );
 
 		cmd( "destroytop .psa" );
 		
-		if ( stop )
-			plog( "Interrupted\n" );
-		else
-			plog( "Done\n" );
-		
-		plog( "Sensitivity analysis configurations produced: %d", "", findexSens - 1 );	
+		plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );	
 		
 		if ( ! stop )
 			sensitivity_created( );			// explain user how to proceed

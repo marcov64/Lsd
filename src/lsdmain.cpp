@@ -638,7 +638,7 @@ RUN
 void run( void )
 {
 	bool batch_sequential_loop = false;
-	int i, perc_done;
+	int i;
 	FILE *f;
 	clock_t start, end, last_update;
 	result *rf;					// pointer for results files (may be zipped or not)
@@ -757,7 +757,6 @@ void run( void )
 		no_search = false;
 		done_in = 0;
 		actual_steps = 0;
-		perc_done = 0;
 		wr_warn_cnt = 0;
 		start = last_update = clock( );
 
@@ -782,8 +781,6 @@ void run( void )
 #endif
 				root->update( true, false );
 
-			perc_done = ( 100 * t ) / max_step;
-			
 #ifndef NW
 			switch ( done_in )
 			{

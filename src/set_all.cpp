@@ -679,12 +679,8 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl )
 				return;
 			}
 			
-			cmd( "set findex %d", *findex );
-			
-			if ( *findex == 1 || *findex % 10 == 0 )
-				cmd( ".psa.main.info configure -text \"Files done: $findex of $ptsSa ([ expr int( 100 * $findex / $ptsSa ) ]%%)\"" );
-			
-			cmd( "update" );
+			if ( ( *findex + 1 ) % 10 == 0 )
+				cmd( "prgboxupdate .psa %d", *findex );
 			
 			*findex = *findex + 1;
 		}
@@ -1248,6 +1244,8 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
     // Create r trajectories. Each trajectory contains k+1 parameter sets.
     // ( starts at a base point, and then changes one parameter at a time )
 	
+	cmd( "progressbox .psa \"Creating DoE\" \"Analyzing EE trajectories\" \"Trajectory\" %d", r );	
+	
 	for ( l = 0; l < r; ++l )
 	{
         // directions matrix DM - diagonal matrix of either +1 or -1
@@ -1289,7 +1287,11 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 		temp_1 = mat_mult_scal( temp_2, k + 1, k, 0.5, temp_1 );
 		temp_2 = mat_add_mat( temp_1, k + 1, k, X_base, temp_2 );
 		X = mat_ins_mat( X, r * ( k + 1 ), k, temp_2, k + 1, k, index_list );
+		
+		cmd( "prgboxupdate .psa %d", l + 1 );
 	}
+	
+	cmd( "destroytop .psa" );
 	
 	// deallocate all temporary matrices
 	mat_del( B, k + 1, k );
@@ -1322,6 +1324,9 @@ double **compute_distance_matrix( double **sample, int M, int k, double **DM )
 		   **input_2 = mat_new( k + 1, k );
 	
 	DM = mat_copy_scal( DM, M, M, 0 );
+	
+	cmd( "progressbox .psa \"Creating DoE\" \"Compute EE distance matrix\" \"Trajectory\" %d", M );
+	
 	for ( int i = 0 ; i < M; ++i )
 	{
 		input_1 = mat_ext_mat( input_1, k + 1, k, 
@@ -1335,8 +1340,12 @@ double **compute_distance_matrix( double **sample, int M, int k, double **DM )
 			DM[ i ][ j ] = DM[ j ][ i ] = 
 				mat_sum_dists( input_1, k + 1, k, input_2 );
 		}
+		
+		cmd( "prgboxupdate .psa %d", i + 1 );
 	}
 		
+	cmd( "destroytop .psa" );
+	
 	mat_del( input_1, k + 1, k );
 	mat_del( input_2, k + 1, k );
 	
@@ -1584,7 +1593,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 {
 	int i , j, kTab, doeRange, poolSz;
 	double **pool;
-	char *doefname, doeName[MAX_ELEM_LENGTH];
+	char *doefname, doeName[ MAX_ELEM_LENGTH + 1 ];
 	FILE *f;
 	sense *cs;
 	
@@ -1594,9 +1603,6 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 	if ( rsens == NULL )					// valid pointer?
 		typ = 0;							// trigger invalid design
 		
-	plog( "\nCreating design of experiments, please wait... " );
-	cmd( "focustop .log" );
-	
 	switch ( typ )
 	{
 		case 1:								// Near Orthogonal Latin Hypercube sampling
@@ -1863,12 +1869,8 @@ void sensitivity_doe( int *findex, design *doe )
 	object *cur;
 	variable *cvar;
 	
-	plog( "\nCreating design of experiments configuration files... " );
-	
 	stop = false;
-	cmd( "set fnum 0" );
-	cmd( "set numf %d", doe->n );
-	cmd( "progressbox .psa \"Sensitivity Analysis\" \"Creating DoE configuration files\" $numf fnum { set stop true }" );
+	cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\" %d { set stop true }", doe->n );
 	
 	for ( i = 0; i < doe->n && ! stop; ++i )	// run through all experiments
 	{
@@ -1894,25 +1896,15 @@ void sensitivity_doe( int *findex, design *doe )
 			return;
 		}
 		
-		cmd( "set fnum %d", i + 1 );
-		
-		if ( i == 0 || ( i + 1 ) % 10 == 0 )
-			cmd( ".psa.main.info configure -text \"Files done: $fnum of $numf ([ expr int( 100 * $fnum / $numf ) ]%%)\"" );
-		
-		cmd( "update" );
+		if ( ( i + 2 ) % 10 == 0 )
+			cmd( "prgboxupdate .psa %d", i + 1 );
 			
 		*findex = *findex + 1;
-		
 	}
 	
 	cmd( "destroytop .psa" );
 	
-	if ( stop )
-		plog( "Interrupted\n" );
-	else
-		plog( "Done\n" );
-		
-	plog( "Sensitivity analysis configurations produced: %d\n", "", findexSens - 1 );
+	plog( "\nSensitivity analysis configurations produced: %d\n", "", findexSens - 1 );
 		
 	if ( ! stop )
 		sensitivity_created( );					// explain user how to proceed

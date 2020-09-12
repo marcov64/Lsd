@@ -112,15 +112,38 @@ proc gccVersion { } {
 # Show interruptible progress bar window while 
 # slow operations are running
 #************************************************
-proc progressbox { w tit lab max var { destroy "" } { par . } } {
+proc progressbox { w tit lab elem1 { max1 1 } { destroy "" } { par . } { elem2 "" } { max2 1 } } {
 	
 	newtop $w $tit $destroy $par
 
 	ttk::frame $w.main
 	ttk::label $w.main.lab -text $lab
-	ttk::progressbar $w.main.scale -length 300 -maximum $max -variable {*}$var
-	ttk::label $w.main.info
-	pack $w.main.lab $w.main.scale $w.main.info -pady 5
+	pack $w.main.lab -pady 10
+	
+	ttk::frame $w.main.p1
+	ttk::progressbar $w.main.p1.scale -length 300 -maximum $max1
+	ttk::frame $w.main.p1.info
+	ttk::label $w.main.p1.info.elem -text "[ string totitle $elem1 ]:"
+	ttk::label $w.main.p1.info.val
+	pack $w.main.p1.info.elem $w.main.p1.info.val -padx 1 -side left
+	pack $w.main.p1.scale $w.main.p1.info -pady 2
+
+	if { $elem1 != "" } {
+		pack $w.main.p1 -pady 5
+	}
+		
+	ttk::frame $w.main.p2
+	ttk::progressbar $w.main.p2.scale -length 300 -maximum $max2
+	ttk::frame $w.main.p2.info
+	ttk::label $w.main.p2.info.elem -text "[ string totitle $elem2 ]:"
+	ttk::label $w.main.p2.info.val
+	pack $w.main.p2.info.elem $w.main.p2.info.val -padx 1 -side left
+	pack $w.main.p2.scale $w.main.p2.info -pady 2
+	
+	if { $elem2 != "" } {
+		pack $w.main.p2 -pady 5
+	}
+	
 	pack $w.main -padx 10 -pady 10
 
 	if { $destroy != "" } {
@@ -134,7 +157,40 @@ proc progressbox { w tit lab max var { destroy "" } { par . } } {
 		showtop $w centerW
 	}
 	
-	return $w.main.info
+	prgboxupdate $w 0 0
+	
+	if { $elem1 != "" } {
+		return $w.main.p1.info.val
+	} else {
+		return $w.main.p2.info.val
+	}
+}
+
+
+#************************************************
+# PRGBOXUPDATE
+# Updates an existing progressbox
+#************************************************
+proc prgboxupdate { w last1 { last2 "" } } {
+	
+	if { ! [ winfo exists $w.main.p1.info.val ] || ! [ winfo exists $w.main.p1.scale ] } {
+		return
+	}
+	
+	set max1 [ $w.main.p1.scale cget -maximum ]
+	set max2 [ $w.main.p2.scale cget -maximum ]
+	
+	if { $last1 != "" && [ string is integer -strict $last1 ] } {
+		$w.main.p1.scale configure -value $last1
+		$w.main.p1.info.val configure -text "[ expr min( $last1 + 1, $max1 ) ] of $max1 ([ expr int( 100 * $last1 / $max1 ) ]% done)"
+	}
+	
+	if { $last2 != "" && [ string is integer -strict $last2 ] } {
+		$w.main.p2.scale configure -value $last2
+		$w.main.p2.info.val configure -text "[ expr min( $last2 + 1, $max2 ) ] of $max2 ([ expr int( 100 * $last2 / $max2 ) ]% done)"
+	}
+	
+	update
 }
 
 

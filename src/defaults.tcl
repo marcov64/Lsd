@@ -219,7 +219,7 @@ set vsizeGminMac		480
 set hsizeGminLinux		670
 set vsizeGminLinux		480
 set hsizeGminWindows	580
-set vsizeGminWindows	400
+set vsizeGminWindows	360
 set hsizeAminMac		850	; # analysis of results window
 set vsizeAminMac		520
 set hsizeAminLinux		850
