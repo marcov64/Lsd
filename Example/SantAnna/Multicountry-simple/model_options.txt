@@ -1,0 +1,5 @@
+TARGET=LSD
+FUN=fun_multicountryJEDC_simple
+FUN_EXTRA=
+SWITCH_CC=-O3
+SWITCH_CC_LNK=
