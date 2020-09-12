@@ -86,7 +86,7 @@ Government expenditure (parameter flagGovExp)
 ----------------------
 0 = minimum subsistency income (w0min) plus net interest and bail-outs
 1 = 0 plus growing fixed government expenditure
-2 = 1 plus unemployment benefit
+2 = 1 plus unemployment benefit instead of minimum subsistency income
 3 = 2 plus spend government superavit if no public debt
 
 Taxation (parameter flagTax)
@@ -142,6 +142,7 @@ B = number of heterogeneous banks (>=1)
 Lambda = multiple of net assets or sales for credit limit (>0)
 Lambda0 = credit limit initial absolute floor (>=0)
 NWb0 = initial net worth (equity) of bank (>0)
+PhiB = fraction of incumbent bank net wealth provided to bailed-out bank (0<PhiB<=1)
 Ut = target unemployment rate for Central Bank's Taylor rule (>0)
 alphaB = Pareto distribution shape parameter defining bank size heterogeneity (>= 1)
 betaB = bank sensitivity to financial fragility (>0)

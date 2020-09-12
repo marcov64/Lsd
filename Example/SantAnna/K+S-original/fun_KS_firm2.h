@@ -799,8 +799,8 @@ EQUATION( "_Q2u" )
 /*
 Capacity utilization for a firm in consumption-good sector
 */
-RESULT( V( "_life2cycle" ) > 0 ? V( "_Q2e" ) / V( "_Q2p" ) :
-								 VLS( PARENT, "Q2u", 1 ) )
+v[1] = V( "_Q2p" );
+RESULT( v[1] > 0 ? V( "_Q2e" ) / v[1] : VLS( PARENT, "Q2u", 1 ) )
 
 
 EQUATION( "_S2" )

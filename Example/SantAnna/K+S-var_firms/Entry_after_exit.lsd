@@ -47,6 +47,7 @@ Label Root
 			Param: Lambda
 			Param: Lambda0
 			Param: NWb0
+			Param: PhiB
 			Param: Ut
 			Param: alphaB
 			Param: betaB
@@ -539,6 +540,7 @@ Param: B 0 n + n n	10
 Param: Lambda 0 n + n n	2
 Param: Lambda0 0 n + n n	1000
 Param: NWb0 0 n + n n	1000000
+Param: PhiB 0 n + n n	0.5
 Param: Ut 0 n + n n	0.05
 Param: alphaB 0 n + n n	10
 Param: betaB 0 n + n n	1
@@ -1208,6 +1210,14 @@ Initial net worth (equity) of banks
 (>0)
 _INIT_
 All 1 instances equal to 1e+006.
+END_DESCRIPTION
+
+Parameter_PhiB
+Fraction of incumbent bank net wealth provided to bailed-out bank 
+(0<PhiB<=1)
+
+_INIT_
+All 1 instances equal to 0.5.
 END_DESCRIPTION
 
 Parameter_Ut

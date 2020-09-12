@@ -75,33 +75,29 @@ v[2] = VS( LABSUPL0, "Ls" ) - VS( LABSUPL0, "L" );// unemployed workers
 
 v[0] = 0;										// wages accumulator
 
-if ( i == 0 )									// work-or-die + min
-	// minimum income
-	v[0] += v[2] * VS( LABSUPL0, "w0min" );	
+if ( i < 2 )									// work-or-die + min
+	v[0] += v[2] * VS( LABSUPL0, "w0min" );		// minimum income
 else
-{		
-	if ( i == 1 )								// growing g. expenditure
-		v[0] += ( 1 + V( "gG" ) ) * CURRENT;	// do fixed public spending
-	else										// unemployment benefit
+	v[0] += v[2] * VS( LABSUPL0, "wU" );		// pay unemployment benefit
+	
+if ( i == 1 )
+	v[0] += ( 1 + V( "gG" ) ) * CURRENT;
+
+if ( i == 3 )									// if government has accumulated 
+{												// surplus, it may spend it
+	v[3] = VL( "Deb", 1 );
+	if ( v[3] < 0 )
 	{
-		// pay unemployment benefit
-		v[0] += v[2] * VS( LABSUPL0, "wU" );
-		
-		// if government has an accumulated surplus, it may spend it 
-		v[3] = VL( "Deb", 1 );
-		if ( i == 3 && v[3] < 0 )
+		v[4] = max( 0, - VL( "Def", 1 ) );		// limit to cur. superavit
+		if ( - v[3] > v[4] )
 		{
-			v[4] = max( 0, - VL( "Def", 1 ) );	// limit to cur. superavit
-			if ( - v[3] > v[4] )
-			{
-				v[0] += v[4];					// cap to current sup.
-				INCR( "Deb", v[4] );			// discount from surplus
-			}
-			else
-			{
-				v[0] += - v[3];					// spend all surplus
-				WRITE( "Deb", 0 );				// zero surplus
-			}
+			v[0] += v[4];						// cap to current sup.
+			INCR( "Deb", v[4] );				// discount from surplus
+		}
+		else
+		{
+			v[0] += - v[3];						// spend all surplus
+			WRITE( "Deb", 0 );					// zero surplus
 		}
 	}
 }

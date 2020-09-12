@@ -86,7 +86,7 @@ Government expenditure (parameter flagGovExp)
 ----------------------
 0 = minimum subsistency income (w0min) plus net interest and bail-outs
 1 = 0 plus growing fixed government expenditure
-2 = 1 plus unemployment benefit
+2 = 1 plus unemployment benefit instead of minimum subsistency income
 3 = 2 plus spend government superavit if no public debt
 
 Taxation (parameter flagTax)

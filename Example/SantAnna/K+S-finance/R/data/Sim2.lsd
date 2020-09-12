@@ -47,6 +47,7 @@ Label Root
 			Param: Lambda
 			Param: Lambda0
 			Param: NWb0
+			Param: PhiB
 			Param: Ut
 			Param: alphaB
 			Param: betaB
@@ -519,6 +520,7 @@ Param: B 0 n + n n	10
 Param: Lambda 0 n + n n	2
 Param: Lambda0 0 n + n n	1000
 Param: NWb0 0 n + n n	1000000
+Param: PhiB 0 n + n n	0.5
 Param: Ut 0 n + n n	0.05
 Param: alphaB 0 n + n n	1.08
 Param: betaB 0 n + n n	1
@@ -594,7 +596,7 @@ Object: Capital C	1
 Param: Deb10ratio 0 n + n n	1
 Param: F1 0 n + n n	50
 Param: L1rdMax 0 n + n n	0.2
-Param: L1shortMax 0 n + n n	0.2
+Param: L1shortMax 0 n + n n	1
 Param: NW10 0 n + n n	10000
 Param: PPI0 0 n + n n	0
 Param: Phi3 0 n + n n	0.1
@@ -701,7 +703,7 @@ Param: e6 0 n + n n	1
 Param: e7 0 n + n n	0.3
 Param: e8 0 n + n n	0.3
 Param: eta 0 n + n n	19
-Param: f2min 0 n + n n	1e-005
+Param: f2min 0 n + n n	1e-05
 Param: iota 0 n + n n	0.1
 Param: kappaMax 0 n + n n	0.5
 Param: kappaMin 0 n + n n	0
@@ -1148,6 +1150,14 @@ Initial net worth (equity) of banks
 (>0)
 _INIT_
 All 1 instances equal to 1e+006.
+END_DESCRIPTION
+
+Parameter_PhiB
+Fraction of incumbent bank net wealth provided to bailed-out bank 
+(0<PhiB<=1)
+
+_INIT_
+All 1 instances equal to 0.5.
 END_DESCRIPTION
 
 Parameter_Ut
@@ -1608,7 +1618,7 @@ Parameter_L1shortMax
 Maximum labor shortage allowed in capital-good sector
 (0, 1)
 _INIT_
-All 1 instances equal to 0.2.
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_NW10
@@ -3406,7 +3416,6 @@ END_DESCRIPTION
 
 DOCUOBSERVE
 Root
-_postChg
 _A2
 _E
 _JO2

@@ -23,6 +23,39 @@ v[2] = VL( "_Loans", 1 );						// stock of non-defaulted loans
 RESULT( ( v[1] + v[2] ) > 0 ? v[1] / ( v[1] + v[2] ) : 0 )
 
 
+EQUATION( "_NWb" )
+/*
+Bank net worth (liquid assets)
+*/
+
+v[0] = CURRENT + V( "_PiB" );					// update net worth
+
+// government rescue bank when equity is below minimum
+// use fraction of weighted average bank market to adjust initial capital
+if ( v[0] < 0 )
+{
+	v[1] = VL( "_fB", 1 );						// bank market share
+	
+	// remove effect of this bank equity in the bank total average
+	v[2] = ( VLS( PARENT, "NWb", 1 ) - CURRENT ) / ( 1 - v[1] );
+	
+	// desired bank new capital after bailout
+	v[3] = VS( PARENT, "PhiB" ) * v[1] * v[2];
+
+	// ensure respecting the capital adequacy rate
+	v[4] = max( v[3], VS( PARENT, "tauB" ) * V( "_Loans" ) );
+
+	v[5] = - v[0] + v[4];						// government bailout
+	v[0] = v[4];								// assets after bailout
+	
+	WRITE( "_Gbail", v[5] );					// register bailout
+}
+else
+	WRITE( "_Gbail", 0 );						// no bailout	
+
+RESULT( v[0] )	
+
+
 EQUATION( "_TC" )
 /*
 Total credit supply provided by bank to firms.
@@ -124,31 +157,6 @@ CYCLE( cur, "Cli2" )							// sector 2 debt
 	v[0] += VS( SHOOKS( cur ), "_Deb2" );
 	
 RESULT( v[0] )
-
-
-EQUATION( "_NWb" )
-/*
-Bank net worth (liquid assets)
-*/
-
-v[0] = CURRENT + V( "_PiB" );					// update net worth
-
-// government rescue bank when equity is below minimum
-// use wages inflation to adjust initial capital
-if ( v[0] < 0 )
-{
-	v[1] = V( "_fd" ) * VS( PARENT, "NWb0" ) * 	// capital requirements
-		   VS( LABSUPL2, "w" ) / 1.0 +			// initial wage is 1
-		   VS( PARENT, "tauB" ) * V( "_Loans" );
-	v[2] = - v[0] + v[1];						// government bailout
-	v[0] = v[1];								// assets after bailout
-	
-	WRITE( "_Gbail", v[2] );					// register bailout
-}
-else
-	WRITE( "_Gbail", 0 );						// no bailout	
-
-RESULT( v[0] )	
 
 
 EQUATION( "_PiB" )
