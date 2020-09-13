@@ -27,7 +27,7 @@ if "%1"=="/?" (
 )
 
 if "%1"=="" (
-	if exist ..\lmm.exe (
+	if exist ..\LMM.exe (
 		set LSD_DIR=..
 		goto create
 	)
@@ -35,7 +35,7 @@ if "%1"=="" (
 	pause
 	goto end
 ) else (
-	if exist "%1"\lmm.exe (
+	if exist "%1"\LMM.exe (
 		set LSD_DIR="%1"
 		goto create
 	)

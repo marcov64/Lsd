@@ -63,7 +63,7 @@ set hsizeL		800	; # LMM horizontal size in pixels
 set vsizeL		600	; # LMM vertical size in pixels
 set hsizeLmin	800	; # LMM minimum horizontal size in pixels
 set vsizeLmin	550	; # LMM minimum vertical size in pixels
-set hsizeBmin	420	; # browser horizontal size in pixels
+set hsizeBmin	460	; # browser horizontal size in pixels
 set vsizeBmin	600	; # browser vertical size in pixels
 set hsizeM 		600	; # model structure horizontal size in pixels
 set vsizeM		400	; # model structure vertical size in pixels
@@ -217,7 +217,7 @@ set corrYwindows 0
 set hsizeGminMac		670	; # log window
 set vsizeGminMac		480
 set hsizeGminLinux		670
-set vsizeGminLinux		480
+set vsizeGminLinux		430
 set hsizeGminWindows	580
 set vsizeGminWindows	360
 set hsizeAminMac		850	; # analysis of results window
@@ -228,7 +228,7 @@ set hsizeAminWindows	720
 set vsizeAminWindows	460
 set hsizeDminMac		910	; # debugger/data browse window
 set vsizeDminMac		400
-set hsizeDminLinux		910
+set hsizeDminLinux		840
 set vsizeDminLinux		400
 set hsizeDminWindows	740
 set vsizeDminWindows	400

@@ -400,7 +400,7 @@ foreach f $files {
 	}
 	
 	incr n
-	if { $n % 20 == 0 } {
+	if { ( $n - 1 ) % 20 == 0 } {
 		prgboxupdate .inst $n
 	}
 	

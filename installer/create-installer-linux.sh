@@ -30,12 +30,12 @@ fi
 LSD_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd -P )"
 
 if [ -z "$1" ]; then
-	if [ ! -f "$LSD_DIR"/lmm ]; then
+	if [ ! -f "$LSD_DIR"/LMM ]; then
 		echo "No LSD FOLDER provided or found, aborting"
 		exit 1
 	fi
 else
-	if [ -f "$1"/lmm ]; then
+	if [ -f "$1"/LMM ]; then
 		LSD_DIR="$1"
 	else
 		echo "Provided LSD FOLDER not found, aborting"

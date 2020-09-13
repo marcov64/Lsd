@@ -1,4 +1,5 @@
 #!/usr/bin/env xdg-open
+
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -8,3 +9,4 @@ Name=LSD
 Comment=Lsd Model Manager
 Exec=$LSDROOT/LMM
 Icon=$LSDROOT/src/icons/lmm.png
+Name[en_US]=LSD

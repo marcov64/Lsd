@@ -1266,11 +1266,11 @@ void deb_show( object *r )
 			ttk::frame .deb.tit -height [ expr $fntSz + $vspcszD ]; \
 			ttk::label .deb.tit.name1 -style boldSmall.TLabel -text Variable -anchor w; \
 			ttk::label .deb.tit.val1 -style hlBoldSmall.TLabel -text Value; \
-			ttk::label .deb.tit.last1 -style boldSmall.TLabel -text \"Last update\"; \
+			ttk::label .deb.tit.last1 -style boldSmall.TLabel -text \"Updated\"; \
 			ttk::label .deb.tit.pad -style boldSmall.TLabel; \
 			ttk::label .deb.tit.name2 -style boldSmall.TLabel -text Variable -anchor w; \
 			ttk::label .deb.tit.val2 -style hlBoldSmall.TLabel -text Value; \
-			ttk::label .deb.tit.last2 -style boldSmall.TLabel -text \"Last update\"; \
+			ttk::label .deb.tit.last2 -style boldSmall.TLabel -text \"Updated\"; \
 			placeline { .deb.tit.name1 .deb.tit.val1 .deb.tit.last1 .deb.tit.pad .deb.tit.name2 .deb.tit.val2 .deb.tit.last2 } [ list $hnamshD $hvalshD $hupdshD $hpadshD $hnamshD $hvalshD $hupdshD ] 0 $fntSz; \
 			pack .deb.tit -anchor w -fill x -after .deb.v \
 		}" );
