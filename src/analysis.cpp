@@ -2873,37 +2873,12 @@ while ( true )
 		// help on Analysis of Result
 		case 41:
 			cmd( "LsdHelp menudata_res.html" );
-			
 			break;
 
 
 		// see model report
 		case 43:
-			sprintf( name_rep, "report_%s.html", simul_name );
-			cmd( "set choice [file exists %s]", name_rep );
-			if ( *choice == 0 )
-			{
-				cmd( "set answer [ ttk::messageBox -parent .da -message \"Model report not found\" -detail \"You may create a model report file from menu Model or press 'OK' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel ]" );
-				cmd( "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1} {set choice 0}" );
-				if ( *choice == 0 )
-					break;
-
-				// make sure there is a path set
-				cmd( "set path \"%s\"", path );
-				if ( strlen( path ) > 0 )
-					cmd( "cd \"$path\"" );
-
-				cmd( "set fname [tk_getOpenFile -parent .da -title \"Load Report File\" -defaultextension \".html\" -initialdir \"$path\" -filetypes {{{HTML files} {.html}} {{All files} {*}} }]" );
-				cmd( "if { $fname == \"\" || [ fn_spaces \"$fname\" .da ] } { set choice 0 } { set choice 1 }" );
-				if ( *choice == 0 )
-					break;
-			}
-			else
-				cmd( "set fname %s", name_rep );
-
-			if ( *choice == 1 ) // model report exists
-				cmd( "LsdHtml $fname" );
-			  
+			show_report( choice, ".da" );
 			break;
 
 

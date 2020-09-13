@@ -90,15 +90,15 @@ char *path = NULL;			// path of current configuration
 char *sens_file = NULL;		// current sensitivity analysis file
 char *simul_name = NULL;	// name of current simulation configuration
 char *struct_file = NULL;	// name of current configuration file
-char equation_name[ MAX_PATH_LENGTH ] = "";	// equation file name
-char error_hard_msg1[ TCL_BUFF_STR ];		// buffer for parallel worker title msg
-char error_hard_msg2[ TCL_BUFF_STR ];		// buffer for parallel worker log msg
-char error_hard_msg3[ TCL_BUFF_STR ];		// buffer for parallel worker box msg
-char lastObj[ MAX_ELEM_LENGTH ] = "";		// last shown object for quick reload
+char equation_name[ MAX_PATH_LENGTH + 1 ] = "";// equation file name
+char error_hard_msg1[ TCL_BUFF_STR ];	// buffer for parallel worker title msg
+char error_hard_msg2[ TCL_BUFF_STR ];	// buffer for parallel worker log msg
+char error_hard_msg3[ TCL_BUFF_STR ];	// buffer for parallel worker box msg
+char lastObj[ MAX_ELEM_LENGTH ] = "";	// last shown object for quick reload
 char lsd_eq_file[ MAX_FILE_SIZE + 1 ] = "";	// equations saved in configuration file
-char msg[ TCL_BUFF_STR ] = "";				// auxiliary Tcl buffer
-char name_rep[ MAX_PATH_LENGTH ] = "";		// documentation report file name
-char tcl_dir[ MAX_PATH_LENGTH ] = "";		// Tcl/Tk directory
+char msg[ TCL_BUFF_STR ] = "";			// auxiliary Tcl buffer
+char name_rep[ MAX_PATH_LENGTH + 1 ];	// documentation report file name
+char tcl_dir[ MAX_PATH_LENGTH + 1 ];	// Tcl/Tk directory
 description *descr = NULL;	// model description structure
 eq_mapT eq_map;				// fast equation look-up map
 int actual_steps = 0;		// number of executed time steps

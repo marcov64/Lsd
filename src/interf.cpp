@@ -3943,25 +3943,7 @@ break;
 // See model report
 case 44:
 
-	sprintf( name_rep, "report_%s.html", simul_name );
-	cmd( "set choice [ file exists %s ]", name_rep );
-	if ( *choice == 0 )
-	{
-		cmd( "set answer [ ttk::messageBox -parent . -message \"Model report not found\" -detail \"You may create a model report file from menu Model or press 'OK' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel ]" );
-		cmd( "if { [ string compare $answer ok ] == 0 } { set choice 0 } { set choice 1 }" );
-		if ( *choice == 1 )
-			break;
-
-		cmd( "set fname [ tk_getOpenFile -parent . -title \"Load Report File\" -defaultextension \".html\" -initialdir \"%s\" -filetypes { { {HTML files} {.html} } { {All files} {*} } } ]", exec_path );
-		cmd( "if { $fname == \"\" || [ fn_spaces \"$fname\" . ] } { set choice 0 } { set fname [ file tail $fname ]; set choice 1 }" );
-		if ( *choice == 0 )
-			break;
-	}
-	else
-		cmd( "set fname %s", name_rep );
-
-	if ( *choice == 1 ) 		// model report exists
-		cmd( "LsdHtml $fname" );
+	show_report( choice, "." );
   
 break;
 

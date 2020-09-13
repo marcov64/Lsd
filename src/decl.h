@@ -175,7 +175,7 @@ extern netLink *n_values[ ];
 #ifndef FUN
 
 // standalone internal C functions/procedures (not visible to the users)
-FILE *create_frames( char *t );
+FILE *create_frames( const char *path, const char *fname );
 FILE *search_data_ent( char *name, variable *v );
 FILE *search_data_str( char const *name, char const *init, char const *str );
 FILE *search_str( char const *name, char const *str );
@@ -345,6 +345,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag );
 void show_prof_aggr( void );
 void show_rep_initial( FILE *f, object *n, int *begin, FILE *frep );
 void show_rep_observe( FILE *f, object *n, int *begin, FILE *frep );
+void show_report( int *choice, const char *par_wnd );
 void show_save( object *n );
 void show_special_updat( object *n );
 void show_tmp_vars( object *r, bool update );
@@ -366,7 +367,7 @@ void update_bounds( void );
 void warn_distr( int *errCnt, bool *stopErr, const char *distr, const char *msg );
 void wipe_out( object *d );
 void write_list( FILE *frep, object *root, int flag_all, char const *prefix );
-void write_obj( object *r, FILE *frep );
+void write_obj( object *r, FILE *frep, int *elemDone );
 void write_str( object *r, FILE *frep, int dep, char const *prefix );
 void write_var( variable *v, FILE *frep );
 

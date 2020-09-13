@@ -100,8 +100,6 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk86.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk86.dll %LSD_DIR%\
 XCOPY %OPT% %MSYS_DIR%\mingw64\include\tcl*.* %LSD_DIR%\gnu\include\
 XCOPY %OPT% %MSYS_DIR%\mingw64\include\tk*.* %LSD_DIR%\gnu\include\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\include\tcl8.6 %LSD_DIR%\gnu\include\tcl8.6\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\include\tk8.6 %LSD_DIR%\gnu\include\tk8.6\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\include\X11 %LSD_DIR%\gnu\include\X11\
 XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtcl*.* %LSD_DIR%\gnu\lib\
 XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtk*.* %LSD_DIR%\gnu\lib\

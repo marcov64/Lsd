@@ -1163,14 +1163,9 @@ while ( choice == 0 )
 			choice = 0;
 			break;
 				
-		// Model Report
+		// model Report
 		case 44:
-			cmd( "set name_rep %s", name_rep );
-
-			cmd( "set choice [ file exists $name_rep ]" );
-
-			cmd( "if { $choice == 1 } { LsdHtml $name_rep }" );
-			cmd( "if { $choice == 0 } { ttk::messageBox -parent .deb -type ok -title Error -icon error -message \"Report file not available\" -detail \"You can create the report in menu Model.\" }" );
+			show_report( &choice, ".deb" );
 			choice = 0;
 			break;
 

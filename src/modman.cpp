@@ -58,6 +58,7 @@ used up to 88 options
 
 // auxiliary C procedures
 bool compile_run( bool run, bool nw = false );
+bool is_source_file( const char *fname );
 bool use_eigen( void );			// check is Eigen library is in use
 char *get_fun_name( char *str, bool nw = false );
 void check_option_files( bool sys = false );
@@ -67,6 +68,7 @@ void make_makefile( bool nw = false );
 
 // global variables
 bool tk_ok = false;				// control for tk_ready to operate
+bool sourcefile = false;		// current file type
 char *exec_path = NULL;			// path of executable file
 char *rootLsd = NULL;			// path of LSD root directory
 char err_file[ ] = "LMM.err";	// error log file name
@@ -94,13 +96,17 @@ const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 int lsdmain( int argn, char **argv )
 {
 	bool found, recolor = false;
-	int i, j, num, sourcefile = 0, recolor_all = 0, v_counter = 0;
+	int i, j, num, recolor_all = 0, v_counter = 0;
 	char *s, str[ 5 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], str2[ 6 * MAX_PATH_LENGTH ];
 	FILE *f;
 
 	// initialize tcl/tk and set global bidirectional variables
 	init_tcl_tk( argv[ 0 ], "lmm" );
+	Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "shigh", ( char * ) &shigh, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "choice", ( char * ) &choice, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( inter, "recolor_all", ( char * ) &recolor_all, TCL_LINK_BOOLEAN);
 
 	// set system defaults in tcl
 	cmd( "set LMM_OPTIONS \"%s\"", LMM_OPTIONS );
@@ -187,7 +193,6 @@ int lsdmain( int argn, char **argv )
 		return 7;
 	}
 		
-
 	// load/check configuration files
 	i = load_lmm_options( );
 	check_option_files( true );
@@ -259,14 +264,6 @@ int lsdmain( int argn, char **argv )
 	cmd( "set alignMode \"LMM\"" );
 	cmd( "set MakeExe \"$DefaultMakeExe\"" );
 	cmd( "set small_character [ expr $dim_character - $deltaSize ]" );
-
-	// TCL to C globally connected variables
-	cmd( "set shigh_temp $shigh" );
-	Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar( inter, "recolor_all", ( char * ) &recolor_all, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar( inter, "shigh", ( char * ) &shigh, TCL_LINK_INT );
-	cmd( "set shigh $shigh_temp" );		// restore correct value
 
 	// configure main window
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
@@ -777,22 +774,9 @@ int lsdmain( int argn, char **argv )
 			cmd( "set before [ .f.t.t get 1.0 end ]" );
 			cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 
-			cmd( "set s [ file extension \"$filetoload\" ]" );
-			s = ( char * ) Tcl_GetVar( inter, "s", 0 );
-			choice = 0;
-			if ( s[ 0 ] != '\0' )
-			{
-				strncpy( str, s, 999 );
-				if ( ! strcmp( str, ".cpp" ) || ! strcmp( str, ".c" ) || ! strcmp( str, ".C" ) || ! strcmp( str, ".CPP" ) || ! strcmp( str, ".Cpp" ) || ! strcmp( str, ".c++" ) || ! strcmp( str, ".C++" ) || ! strcmp( str, ".h" ) || ! strcmp( str, ".H" ) || ! strcmp( str, ".hpp" ) || ! strcmp( str, ".HPP" ) || ! strcmp( str, ".Hpp" ) )
-				{
-					sourcefile = 1;
-					recolor_all = true;
-				}
-				else
-					sourcefile = 0;
-			}
-	   }
-	   else
+			sourcefile = recolor_all = is_source_file( ( char * ) Tcl_GetVar( inter, "filetoload", 0 ) );
+		}
+		else
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" );
 	}
 	else
@@ -972,6 +956,7 @@ int lsdmain( int argn, char **argv )
 		}
 
 		sourcefile = 0;
+		
 		cmd( ".f.t.t edit reset" );
 		cmd( ".f.t.t mark set insert 1.0" );
 		cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
@@ -1866,22 +1851,13 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
 		cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
-
-		cmd( "set s [ file extension \"$filename\" ]" );
-		s = ( char * ) Tcl_GetVar( inter, "s", 0 );
-		if ( s[ 0 ] != '\0' )
+		
+		sourcefile = recolor_all = is_source_file( ( char * ) Tcl_GetVar( inter, "filename", 0 ) );
+		
+		if ( sourcefile )
 		{
-			strncpy( str, s, 499 );
-			if ( ! strcmp( str, ".cpp" ) || ! strcmp( str, ".c" ) || ! strcmp( str, ".C" ) || ! strcmp( str, ".CPP" ) || ! strcmp( str, ".Cpp" ) || ! strcmp( str, ".c++" ) || ! strcmp( str, ".C++" ) || ! strcmp( str, ".h" ) || ! strcmp( str, ".H" ) || ! strcmp( str, ".hpp" ) || ! strcmp( str, ".Hpp" ) || ! strcmp( str, ".h++" ) || ! strcmp( str, ".H++" ) )
-			{
-				cmd( ".f.t.t tag add bc \"1.0\"" );
-				cmd( ".f.t.t tag add fc \"1.0\"" );
-
-				sourcefile = 1;
-				recolor_all = true;
-			}
-			else
-				sourcefile = 0;
+			cmd( ".f.t.t tag add bc \"1.0\"" );
+			cmd( ".f.t.t tag add fc \"1.0\"" );
 		}
 
 		cmd( "unset -nocomplain ud udi rd rdi" );
@@ -5430,11 +5406,11 @@ int lsdmain( int argn, char **argv )
 		goto loop;
 	}
 
-	Tcl_UnlinkVar( inter, "choice");
 	Tcl_UnlinkVar( inter, "num");
+	Tcl_UnlinkVar( inter, "shigh");
+	Tcl_UnlinkVar( inter, "choice");
 	Tcl_UnlinkVar( inter, "tosave");
 	Tcl_UnlinkVar( inter, "recolor_all");
-	Tcl_UnlinkVar( inter, "shigh");
 
 	set_env( false );
 	
@@ -5442,6 +5418,23 @@ int lsdmain( int argn, char **argv )
 	delete [ ] exec_path;
 
 	return 0;
+}
+
+
+/*********************************
+ IS_SOURCE_FILE
+ *********************************/
+bool is_source_file( const char *fname )
+{
+	char *ext;
+	
+	cmd( "set ext \"[ file extension \"%s\" ]\"", fname );
+	ext = ( char * ) Tcl_GetVar( inter, "ext", 0 );
+
+	return ! strcmp( ext, ".cpp" ) || ! strcmp( ext, ".c" )   || ! strcmp( ext, ".C" )   || \
+		   ! strcmp( ext, ".CPP" ) || ! strcmp( ext, ".Cpp" ) || ! strcmp( ext, ".c++" ) || \
+		   ! strcmp( ext, ".C++" ) || ! strcmp( ext, ".h" )   || ! strcmp( ext, ".H" )   || \
+		   ! strcmp( ext, ".hpp" ) || ! strcmp( ext, ".HPP" ) || ! strcmp( ext, ".Hpp" );
 }
 
 
@@ -5458,7 +5451,7 @@ struct hit
 // color types (0-n) to Tk tags mapping
 const char *cTypes[ ] = { "comment1", "comment2", "cprep", "str", "lsdvar", "lsdmacro", "ctype", "ckword" };
 // regular expressions identifying colored text types
- const char *cRegex[ ] = {
+const char *cRegex[ ] = {
 	"/\[*].*\[*]/",		// each item define one different color
 	"//.*",
 	"^(\\s)*#\[^/]*",
@@ -5470,47 +5463,73 @@ const char *cTypes[ ] = { "comment1", "comment2", "cprep", "str", "lsdvar", "lsd
 };
 
 // count words in a string (used by color)
-int strwrds(char string[ ])
+int strwrds( char string[ ] )
 {
 	int i = 0, words = 0;
 	char lastC = '\0';
-	if (string == NULL) return 0;
-	while (isspace(string[ i ]) ) i++;
-	if (string[ i ] == '\0') return 0;
-	for ( ; string[ i ] != '\0'; lastC = string[i++])
-		if (isspace(string[ i ]) && ! isspace(lastC) ) words++;
-	if (isspace(lastC) ) return words;
-	else return words + 1;
+	
+	if ( string == NULL ) 
+		return 0;
+	
+	while ( isspace( string[ i ] ) ) 
+		++i;
+	
+	if ( string[ i ] == '\0' ) 
+		return 0;
+	
+	for ( ; string[ i ] != '\0'; lastC = string[ i++ ] )
+		if ( isspace( string[ i ] ) && ! isspace( lastC ) ) 
+			words++;
+		
+	if ( isspace( lastC ) ) 
+		return words;
+
+	return words + 1;
 }
 
 // map syntax highlight level to the number of color types to use
 #define ITEM_COUNT( ptrArray )  ( sizeof( ptrArray ) / sizeof( ptrArray[0] ) )
-int map_color(int hiLev)
+int map_color( int hiLev )
 {
-	if (hiLev == 0)
+	if ( ! sourcefile || hiLev == 0 )
 		return 0;
-	if (hiLev == 1)
+	
+	if ( hiLev == 1 )
 		return 4;
-	if (ITEM_COUNT(cTypes) > ITEM_COUNT(cRegex) )
-		return ITEM_COUNT(cRegex);
-	return ITEM_COUNT(cTypes);
+	
+	if ( ITEM_COUNT( cTypes ) > ITEM_COUNT( cRegex ) )
+		return ITEM_COUNT( cRegex );
+	
+	return ITEM_COUNT( cTypes );
 }
 
 // compare function for qsort to compare different color hits (used by color)
 int comphit(const void *p1, const void *p2)
 {
-	if (((hit*)p1)->iniLin < ((hit*)p2)->iniLin) return -1;
-	if (((hit*)p1)->iniLin > ((hit*)p2)->iniLin) return 1;
-	if (((hit*)p1)->iniCol < ((hit*)p2)->iniCol) return -1;
-	if (((hit*)p1)->iniCol > ((hit*)p2)->iniCol) return 1;
-	if (((hit*)p1)->type < ((hit*)p2)->type) return -1;
-	if (((hit*)p1)->type > ((hit*)p2)->type) return 1;
+	if ( ( ( hit * ) p1 )->iniLin < ( ( hit * ) p2 )->iniLin ) 
+		return -1;
+	
+	if ( ( ( hit * ) p1 )->iniLin > ( ( hit * ) p2 )->iniLin ) 
+		return 1;
+	
+	if ( ( ( hit * ) p1 )->iniCol < ( ( hit * ) p2 )->iniCol ) 
+		return -1;
+	
+	if ( ( ( hit * ) p1 )->iniCol > ( ( hit * ) p2 )->iniCol ) 
+		return 1;
+	
+	if ( ( ( hit * ) p1 )->type < ( ( hit * ) p2 )->type ) 
+		return -1;
+	
+	if ( ( ( hit * ) p1 )->type > ( ( hit * ) p2 )->type ) 
+		return 1;
+	
 	return 0;
 }
 
-/* New color routine, using new tcl/tk 8.5 search for all feature */
+// color routine
 #define TOT_COLOR ITEM_COUNT( cTypes )
-void color(int hiLev, long iniLin, long finLin)
+void color( int hiLev, long iniLin, long finLin )
 {
 	char *pcount, *ppos, *count[ TOT_COLOR ], *pos[ TOT_COLOR ], finStr[ 16 ], *s;
 	int i, maxColor, newCnt;
