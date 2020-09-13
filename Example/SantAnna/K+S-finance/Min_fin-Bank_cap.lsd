@@ -533,7 +533,7 @@ Param: kConst 0 n + n n	0
 Param: muDeb 0 n + n n	0.3
 Param: muRes 0 n + n n	-0.33
 Param: phiT 0 n + n n	0.4
-Param: piT 0 n + n n	0.02
+Param: piT 0 n + n n	0
 Param: rAdj 0 n + n n	0.005
 Param: rD 0 n + n n	0
 Param: rT 0 n + n n	0.01
@@ -703,7 +703,7 @@ Param: e6 0 n + n n	1
 Param: e7 0 n + n n	0.3
 Param: e8 0 n + n n	0.3
 Param: eta 0 n + n n	19
-Param: f2min 0 n + n n	1e-005
+Param: f2min 0 n + n n	1e-05
 Param: iota 0 n + n n	0.1
 Param: kappaMax 0 n + n n	0.5
 Param: kappaMin 0 n + n n	0
@@ -1155,7 +1155,6 @@ END_DESCRIPTION
 Parameter_PhiB
 Fraction of incumbent bank net wealth provided to bailed-out bank 
 (0<PhiB<=1)
-
 _INIT_
 All 1 instances equal to 0.5.
 END_DESCRIPTION
@@ -1248,7 +1247,7 @@ END_DESCRIPTION
 Parameter_piT
 Target inflation for Central Bank's Taylor rule
 _INIT_
-All 1 instances equal to 0.02.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_rAdj

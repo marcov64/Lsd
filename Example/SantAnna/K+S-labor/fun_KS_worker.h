@@ -303,7 +303,8 @@ else
 	v[2] = VS( PARENT, "psi2" );				// general prod. adjust. param.
 	v[3] = VS( PARENT, "psi3" );				// unemploym. adjust. parameter
 	v[4] = VS( PARENT, "psi4" );				// firm prod. adjust. parameter
-	v[5] = VLS( CONSECL2, "dCPIb", 1 );			// inflation variation
+	v[17] = VS( FINSECL2, "piT" );				// expected inflation
+	v[5] = VLS( CONSECL2, "dCPIb", 1 );			// current inflation
 	v[6] = VLS( GRANDPARENT, "dAb", 1 );		// general productivity variat.
 	v[7] = VLS( PARENT, "dUeB", 1 );			// unemployment variation
 	
@@ -332,7 +333,7 @@ else
 		v[2] = max( 1 - v[4], 0 );				// adjust general prod. effect
 
 	// adjust wage by composite index
-	v[9] = 1 + v[1] * v[5] + v[2] * v[6] + v[3] * v[7] + v[4] * v[8];
+	v[9] = 1 + v[17] + v[1] * ( v[5] - v[17] ) + v[2] * v[6] + v[3] * v[7] + v[4] * v[8];
 	v[0] = CURRENT * v[9];
 	
 	// labor sharing mode? (applicable only in sector 2, for non-entrants)

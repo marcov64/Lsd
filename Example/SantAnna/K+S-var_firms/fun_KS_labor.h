@@ -35,11 +35,12 @@ Notice 'psi1' and 'psi2' are exchanged in the original paper equation
 v[1] = V( "psi1" );								// inflation adjust. parameter
 v[2] = V( "psi2" );								// general prod. adjust. param.
 v[3] = V( "psi3" );								// unemploym. adjust. parameter
-v[5] = VLS( CONSECL1, "dCPIb", 1 );				// inflation variation
+v[4] = VS( FINSECL1, "piT" );					// expected inflation
+v[5] = VLS( CONSECL1, "dCPIb", 1 );				// current inflation
 v[6] = VLS( PARENT, "dAb", 1 );					// general productivity variat.
 v[7] = VL( "dUb", 1 );							// unemployment variation
 
-v[0] = CURRENT * ( 1 + v[1] * v[5] + v[2] * v[6] + v[3] * v[7] );
+v[0] = CURRENT * ( 1 + v[4] + v[1] * ( v[5] - v[4] ) + v[2] * v[6] + v[3] * v[7] );
 
 RESULT( max( v[0], V( "w0min" ) ) )				// ensure subsistence level
 
