@@ -5588,7 +5588,7 @@ case 68:
 				break;
 
 			case WINDOWS:
-				cmd( "catch { exec -- $sysTerm /k multitail %s --retry-all %s & }", lab, lab2 );
+				cmd( "catch { exec -- $sysTerm /k multitail %s %s & }", lab, lab2 );
 		}
 	}
 	

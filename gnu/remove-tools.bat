@@ -48,7 +48,7 @@ set OPT=/F/S/Q
 
 rem preserve files not in MSYS2/Cygwin
 MOVE %GNU_DIR%\bin\Shortcut.exe %GNU_DIR%\
-MOVE %GNU_DIR%\bin\Tail.exe %GNU_DIR%\
+MOVE %GNU_DIR%\bin\TailWin.exe %GNU_DIR%\
 MOVE %GNU_DIR%\bin\tclsh86.exe %GNU_DIR%\
 MOVE %GNU_DIR%\bin\wish86.exe %GNU_DIR%\
 MOVE %GNU_DIR%\bin\tcl86.dll %GNU_DIR%\
