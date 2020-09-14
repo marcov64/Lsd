@@ -5572,20 +5572,23 @@ case 68:
 		// number of columns
 		--j;
 		i = j > 4 ? ( j > 8 ? ( j > 12 ? 4 : 3 ) : 2 ) : 1;
+		if ( i == 1 )
+			strcpy( lab, "" );
+		else
+			sprintf( lab, "-s %d", i );
 		
 		switch( platform )
 		{
-				
 			case LINUX:
-				cmd( "catch { exec -- $sysTerm -e multitail -s %d --retry-all %s & }", i, lab2 );
+				cmd( "catch { exec -- $sysTerm -e multitail %s --retry-all %s & }", lab, lab2 );
 				break;
 
 			case MAC:
-				cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $path; clear; multitail -s %d --retry-all %s\\\"\" & } result", i, lab2 );
+				cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $path; clear; multitail %s --retry-all %s\\\"\" & } result", lab, lab2 );
 				break;
 
 			case WINDOWS:
-				cmd( "catch { exec -- $sysTerm /k multitail -s %d --retry-all %s & }", i, lab2 );
+				cmd( "catch { exec -- $sysTerm /k multitail %s --retry-all %s & }", lab, lab2 );
 		}
 	}
 	

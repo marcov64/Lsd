@@ -18,7 +18,7 @@
 # Create LSD installer for Linux.
 #**************************************************************
 
-LSD_VER_NUM="7.3"
+LSD_VER_NUM="8.0"
 LSD_VER_TAG="beta-1"
 
 if [ "$1" = "-h" ]; then

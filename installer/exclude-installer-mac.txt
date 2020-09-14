@@ -26,6 +26,7 @@
 '*.rc'
 '*.manifest'
 '*.exe'
+'*.dll'
 '*.bat'
 '*.gitignore'
 '*.err'

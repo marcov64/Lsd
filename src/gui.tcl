@@ -71,6 +71,8 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultFont $fontMac
 	set DefaultFontSize $fontSizeMac
 	set deltaSize $deltaSizeMac
+	set hsizeBmin $hsizeBminMac
+	set vsizeBmin $vsizeBminMac
 	set hsizeAmin $hsizeAminMac
 	set vsizeAmin $vsizeAminMac
 	set hsizeDmin $hsizeDminMac
@@ -102,6 +104,8 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultFont $fontLinux
 	set DefaultFontSize $fontSizeLinux
 	set deltaSize $deltaSizeLinux
+	set hsizeBmin $hsizeBminLinux
+	set vsizeBmin $vsizeBminLinux
 	set hsizeAmin $hsizeAminLinux
 	set vsizeAmin $vsizeAminLinux
 	set hsizeDmin $hsizeDminLinux
@@ -128,6 +132,8 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultFont $fontWindows
 	set DefaultFontSize $fontSizeWindows
 	set deltaSize $deltaSizeWindows
+	set hsizeBmin $hsizeBminWindows
+	set vsizeBmin $vsizeBminWindows
 	set hsizeAmin $hsizeAminWindows
 	set vsizeAmin $vsizeAminWindows
 	set hsizeDmin $hsizeDminWindows

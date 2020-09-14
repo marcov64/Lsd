@@ -324,7 +324,12 @@ proc ttk::messageBox { args } {
 	global CurPlatform
 	
 	if [ string equal $CurPlatform mac ] {
-		return [ tk_messageBox {*}$args ]
+		array set options $args
+		if { "-parent" in [ array names options ] && $options(-parent) == "" } {
+			array unset options "-parent"
+		}
+		
+		return [ tk_messageBox {*}[ array get options ] ]
 	}
 	
 	array set options [ concat { -default "" -detail "" -icon info -message "" -parent . -title "" -type ok } $args ]

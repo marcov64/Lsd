@@ -9,5 +9,5 @@ LIB=-lz -lpthread
 
 # Compiler options
 CC=g++
-GLOBAL_CC=-march=native -w
+GLOBAL_CC=-march=native -std=c++14 -w
 SSWITCH_CC=-fnon-call-exceptions -O3

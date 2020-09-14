@@ -604,6 +604,8 @@ int lsdmain( int argn, char **argv )
 	Tcl_UnlinkVar( inter, "stop" );
 	Tcl_UnlinkVar( inter, "debug_flag" );
 	Tcl_UnlinkVar( inter, "when_debug" );
+	
+	set_env( false );
 
 #else
 
@@ -618,8 +620,6 @@ int lsdmain( int argn, char **argv )
 	empty_blueprint( );
 	empty_description( );
 	root->delete_obj( );
-	
-	set_env( false );
 	
 	delete stacklog;
 	delete [ ] path;
@@ -1428,13 +1428,21 @@ void cover_browser( const char *text1, const char *text2, bool run )
 	
 	if ( run )
 	{
+		cmd( "if [ string equal $CurPlatform windows ] { \
+				set goWid $butWid \
+			} elseif [ string equal $CurPlatform linux ] { \
+				set goWid $butWid \
+			} { \
+				set goWid [ expr $butWid - 1 ] \
+			}" );
+			
 		cmd( "ttk::frame .b" );
 		cmd( "ttk::frame .b.r2" );
-		cmd( "ttk::button .b.r2.stop -width $butWid -text Stop -command { set_c_var done_in 1 } -underline 0" );
-		cmd( "ttk::button .b.r2.pause -width $butWid -text Pause -command { set_c_var done_in 9 } -underline 0" );
-		cmd( "ttk::button .b.r2.speed -width $butWid -text Fast -command { set_c_var done_in 2 } -underline 0" );
-		cmd( "ttk::button .b.r2.obs -width $butWid -text Observe -command { set_c_var done_in 4 } -underline 0" );
-		cmd( "ttk::button .b.r2.deb -width $butWid -text Debug -command { set_c_var done_in 3 } -underline 0" );
+		cmd( "ttk::button .b.r2.stop -width $goWid -text Stop -command { set_c_var done_in 1 } -underline 0" );
+		cmd( "ttk::button .b.r2.pause -width $goWid -text Pause -command { set_c_var done_in 9 } -underline 0" );
+		cmd( "ttk::button .b.r2.speed -width $goWid -text Fast -command { set_c_var done_in 2 } -underline 0" );
+		cmd( "ttk::button .b.r2.obs -width $goWid -text Observe -command { set_c_var done_in 4 } -underline 0" );
+		cmd( "ttk::button .b.r2.deb -width $goWid -text Debug -command { set_c_var done_in 3 } -underline 0" );
 		cmd( "pack .b.r2.stop .b.r2.pause .b.r2.speed .b.r2.obs .b.r2.deb -padx $butSpc -side left" );
 		cmd( "pack .b.r2" );
 		cmd( "pack .b -padx $butPad -pady $butPad -side right" );
