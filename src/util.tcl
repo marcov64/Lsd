@@ -235,6 +235,10 @@ proc waitbox { w tit msg { steps "" } { timer no } { par . } } {
 		showtop $w centerW
 	}
 	
+	# try to workaround Mac bug showing black frame
+	raise $w
+	focus $w.main
+	
 	return $retVal
 }
 

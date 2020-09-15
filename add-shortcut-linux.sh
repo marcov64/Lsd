@@ -36,6 +36,10 @@ else
   		fi
 	fi
 	
+	# remove existing shortcuts
+	rm -f "$DESKTOP"/"$TARGET" "$DESKTOP"/lsd.desktop
+	rm -f ~/.local/share/applications/"$TARGET" ~/.local/share/applications/lsd.desktop
+	
 	# create the shortcuts with absolute paths
 	sed 's:$LSDROOT:'"$LSDROOT"':g' "$LSDROOT/$TARGET" > "$DESKTOP"/"$TARGET"
 	chmod +x "$DESKTOP"/"$TARGET"

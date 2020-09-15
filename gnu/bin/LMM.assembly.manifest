@@ -1,0 +1,14 @@
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+	<assemblyIdentity 
+		type="win32" 
+		name="LMM.assembly" 
+		version="8.0.0.0" 
+		processorArchitecture="AMD64" 
+		publicKeyToken="257fa66c876581b9"
+	/> 
+    <file name="libgcc_s_seh-1.dll" hashalg="SHA1"/>
+    <file name="libwinpthread-1.dll" hashalg="SHA1"/>
+    <file name="tcl86.dll" hashalg="SHA1"/>
+    <file name="tk86.dll" hashalg="SHA1"/>
+    <file name="zlib1.dll" hashalg="SHA1"/>
+</assembly>

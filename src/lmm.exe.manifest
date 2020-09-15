@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?> 
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
 	<assemblyIdentity 
-		version="7.3.0.0" 
+		version="8.0.0.0" 
 		processorArchitecture="amd64" 
 		name="com.marcov64.lmm" 
 		type="win32" 
 	/> 
-	<description>LSD Model Manager (LMM) 7.3</description> 
+	<description>LSD Model Manager (LMM) 8.0</description> 
 	<trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
 		<security>
 			<requestedPrivileges>
@@ -39,6 +39,18 @@
 				version="6.0.0.0" 
 				processorArchitecture="amd64" 
 				publicKeyToken="6595b64144ccf1df" 
+				language="*" 
+			/> 
+		</dependentAssembly>
+	</dependency>
+	<dependency>
+		<dependentAssembly>
+			<assemblyIdentity 
+				type="win32" 
+				name="LMM.assembly" 
+				version="8.0.0.0" 
+				processorArchitecture="AMD64" 
+				publicKeyToken="257fa66c876581b9"
 				language="*" 
 			/> 
 		</dependentAssembly>

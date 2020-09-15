@@ -52,6 +52,12 @@
 #include <sys/stat.h>
 #include <zlib.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>	
+#endif
+
 // global constants
 #define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)
 #define MAX_PATH_LENGTH 500				// maximum path length

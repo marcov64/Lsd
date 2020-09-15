@@ -1,6 +1,6 @@
 ;!@Install@!UTF-8!
-Title="LSD 7.3"
-BeginPrompt="Do you want to install LSD 7.3?"
+Title="LSD Installer"
+BeginPrompt="Do you want to install LSD?"
 ExecuteFile=".\gnu\bin\wish86.exe"
 ExecuteParameters=".\src\installer.tcl"
 ;!@InstallEnd@!

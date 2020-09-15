@@ -5,6 +5,7 @@
 ./Rpkg
 ./Manual/src
 ./LMM.app
+./LMM.exe.config
 ./Work
 ./trashbin
 ./src/LSD.app

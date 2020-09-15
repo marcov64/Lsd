@@ -819,21 +819,15 @@ char *str_upr( char *s )
 /****************************************************
  MSLEEP
  ****************************************************/
+void msleep( unsigned msec )
+{
 #ifdef _WIN32
-#include <windows.h>
-void msleep( unsigned msec )
-{
 	Sleep( msec );
-	return;
-}
 #else
-#include <unistd.h>	
-void msleep( unsigned msec )
-{
 	usleep( msec * 1000 );
+#endif
 	return;
 }
-#endif
 
 
 /****************************************************

@@ -12,6 +12,7 @@
 'src/system_options-windows.txt'
 'src/system_options.txt'
 'LMM'
+'LMM.exe.config'
 'lmm_options.txt'
 'LSD.desktop'
 'add-shortcut-linux.sh'

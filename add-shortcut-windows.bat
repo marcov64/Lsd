@@ -1,4 +1,4 @@
-@echo off
+@ECHO off
 rem *************************************************************
 rem
 rem	 LSD 8.0 - December 2020
@@ -19,14 +19,21 @@ rem  Add a shortcut to LSD LMM in the Windows desktop and
 rem  Start menu program list.
 rem *************************************************************
 
-if "%1"=="/?" (
-	echo Add a shortcut to LSD LMM in the desktop
-	echo Usage: add-shortcut-windows
-	goto end
+IF "%1"=="/?" (
+	ECHO Add a shortcut to LSD LMM in the desktop
+	ECHO Usage: add-shortcut-windows
+	GOTO end
 )
 
-"%CD%\gnu\bin\Shortcut.exe" /f:"%USERPROFILE%\Desktop\LSD.lnk" /a:c /t:"%CD%\LMM.exe" /w:%CD% /r:7 /i:%CD%\src\icons\lmm.ico /d:"LSD Model Manager" > nul
+rem remove existing shortcuts
+ERASE /F "%USERPROFILE%\Desktop\LSD.lnk" > NUL 2>&1
+ERASE /F "%USERPROFILE%\Desktop\LMM.lnk" > NUL 2>&1
+ERASE /F "%APPDATA%\Microsoft\Windows\Start Menu\Programs\LSD.lnk" > NUL 2>&1
+ERASE /F "%APPDATA%\Microsoft\Windows\Start Menu\Programs\LMM.lnk" > NUL 2>&1
 
-copy "%USERPROFILE%\Desktop\LSD.lnk" "%AppData%\Microsoft\Windows\Start Menu\Programs" > nul
+rem create shortcuts in desktop and the user menu
+"%CD%\gnu\bin\Shortcut.exe" /f:"%USERPROFILE%\Desktop\LSD.lnk" /a:c /t:"%CD%\LMM.exe" /w:%CD% /r:7 /i:%CD%\src\icons\lmm.ico /d:"LSD Model Manager" > NUL 
+
+COPY "%USERPROFILE%\Desktop\LSD.lnk" "%APPDATA%\Microsoft\Windows\Start Menu\Programs" > NUL
 
 :end

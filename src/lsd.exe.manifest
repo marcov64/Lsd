@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?> 
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
 	<assemblyIdentity 
-		version="7.3.0.0" 
+		version="8.0.0.0" 
 		processorArchitecture="amd64" 
 		name="com.marcov64.lsd" 
 		type="win32" 
 	/> 
-	<description>LSD 7.3</description> 
+	<description>LSD 8.0</description> 
 	<trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
 		<security>
 			<requestedPrivileges>

@@ -4606,7 +4606,7 @@ int lsdmain( int argn, char **argv )
 					} \
 				}; \
 				if { ! [ string equal -nocase \"$modelDir\" \"$RootLsd\" ] } { \
-					set objs [ glob -nocomplain -directory \"$modelDir\" *.o src makefile* makemessage.txt lsd* *.exe *.app ]; \
+					set objs [ glob -nocomplain -directory \"$modelDir\" *.o src makefile* makemessage.txt lsd* *.exe* *.app ]; \
 					foreach i $objs { \
 						catch { \
 							file delete -force \"$i\" \

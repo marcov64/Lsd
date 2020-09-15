@@ -431,6 +431,9 @@ if { $n != $nFiles } {
 }
 
 
+set issues [ list ]
+
+
 #
 # add icons to desktop and program menu
 #
@@ -447,14 +450,17 @@ if [ string equal $CurPlatform windows ] {
 }
 
 if { $res } {
-	ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error configuring computer" -detail "The configuration of LSD installation failed ($result).\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'.\n\nExiting now."
-	if { $newInst } {
-		catch { file delete -force $LsdRoot }
+	if [ string equal [ ttk::messageBox -parent "" -type okcancel -default cancel -title Error -icon error -message "Cannot create LSD shortcuts" -detail "The creation of LSD program shortcuts failed ($result).\n\nDo you want to continue the installation?\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'." ] ok ] {
+	
+		lappend issues "LSD program shortcuts (add-shortcut-$CurPlatform)"
+	} else {
+		if { $newInst } {
+			catch { file delete -force $LsdRoot }
+		}
+		
+		exit 8
 	}
-	exit 8
 }
-
-set issues [ list ]
 
 
 #
@@ -481,7 +487,7 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 	
 	if [ string equal $CurPlatform windows ] {
 
-		set res [ catch { exec $filesDir/installer/$winGnuplot /SILENT /LOADINF=wgnuplot.inf /LOG=D:\wgnuplot.log } result ]
+		set res [ catch { exec $filesDir/installer/$winGnuplot /SILENT /LOADINF=wgnuplot.inf } result ]
 
 		if { $res } {
 			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "The installation of Gnuplot graphical terminal failed ($result).\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'."
