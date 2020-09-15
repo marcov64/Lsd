@@ -110,7 +110,7 @@ applData.w = v[5] = V( "_wR" );
 applData.s = v[6] = V( "_s" );
 applData.ws = v[5] / v[6]; 
 applData.Te = VL( "_Te", 1 );
-applData.wrk = p;
+applData.wrk = THIS;
 
 // apply to sector 1 queue
 EXEC_EXTS( GRANDPARENT, countryE, firm1appl, push_back, applData );
@@ -500,7 +500,7 @@ EQUATION( "_dQb" )
 Notional production (bounded) rate of change of worker
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( p, "_Q", VS( GRANDPARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "_Q", VS( GRANDPARENT, "mLim" ) ) )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/

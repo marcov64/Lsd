@@ -72,4 +72,4 @@ EQUATION( "dUb" )
 Notional unemployment (bounded) rate of change
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( p, "U", VS( PARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "U", VS( PARENT, "mLim" ) ) )

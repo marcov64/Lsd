@@ -284,6 +284,7 @@ bool no_ptr_chk = true;
 #define CONFIG ( ( const char * ) simul_name )
 #define PATH ( ( const char * ) path )
 #define CURRENT ( var->val[ 0 ] )
+#define THIS ( p )
 #define PARENT ( p->up )
 #define GRANDPARENT ( CHK_PTR_OBJ( p->up ) p->up->up )
 #define T ( ( double ) t )

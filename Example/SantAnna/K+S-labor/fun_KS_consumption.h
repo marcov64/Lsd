@@ -195,7 +195,7 @@ if ( F2 + k > F2max )
 	k = F2max - F2 + j;
 
 v[0] = k - j;									// net number of entrants
-v[2] += entry_firm2( p, k, false );				// add entrant-firm objects
+v[2] += entry_firm2( THIS, k, false );			// add entrant-firm objects
 
 INCR( "F2", v[0] );								// update the number of firms
 INCR( "fires2", v[1] );							// update fires
@@ -634,7 +634,7 @@ EQUATION( "dCPIb" )
 /*
 Consumer price index inflation (change) rate
 */
-RESULT( mov_avg_bound( p, "CPI", VS( PARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "CPI", VS( PARENT, "mLim" ) ) )
 
 
 EQUATION( "dNnom" )

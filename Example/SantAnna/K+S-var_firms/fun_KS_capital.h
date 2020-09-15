@@ -145,7 +145,7 @@ if ( F1 + k > F1max )
 	k = F1max - F1 + j;
 
 v[0] = k - j;									// net number of entrants
-v[1] += entry_firm1( p, k, false );				// add entrant-firm objects
+v[1] += entry_firm1( THIS, k, false );			// add entrant-firm objects
 
 i = INCR( "F1", v[0] );							// update the number of firms
 INCRS( PARENT, "cEntry", v[1] );				// account equity cost of entry

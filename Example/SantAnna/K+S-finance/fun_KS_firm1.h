@@ -51,7 +51,7 @@ if ( bernoulli( v[4] ) )						// imitation succeeded?
 	
 	v[5] = i = 0;								// inverse distance/firm accum.
 	CYCLES( PARENT, cur, "Firm1" )				// 1st run: abs. inv. distance
-		if ( cur == p )
+		if ( cur == THIS )
 			imiProb[ i++ ] = 0;					// can't self-imitate
 		else
 		{
@@ -167,7 +167,7 @@ for ( ; i > 0; --i )
 	targets.erase( targets.begin( ) + h );		// remove drawn firm from list
 
 	// create the brochure/client interconnected objects
-	send_brochure( j, p, client.first, client.second );
+	send_brochure( j, THIS, client.first, client.second );
 }
 
 RESULT( v[0] )
@@ -231,7 +231,7 @@ else
 			}
 	}
 	
-	update_debt1( p, v[9], v[8] );				// update firm debt
+	update_debt1( THIS, v[9], v[8] );			// update firm debt
 }
 
 // provision for revenues and expenses
@@ -293,12 +293,12 @@ if ( v[6] < 0 )									// must finance losses?
 		
 		if ( v[8] >= v[9] )						// can finance losses?
 		{
-			update_debt1( p, v[9], v[9] );		// finance all
+			update_debt1( THIS, v[9], v[9] );	// finance all
 			WRITE( "_NW1", 1 );					// minimum net wealth
 		}
 		else
 		{
-			update_debt1( p, v[8], v[8] );		// take what is possible
+			update_debt1( THIS, v[8], v[8] );	// take what is possible
 			INCR( "_NW1", v[6] - v[8] );		// let negative NW (bankruptcy exit)
 		}					
 	}
@@ -311,11 +311,11 @@ else											// pay debt with available cash
 	{
 		if ( v[6] > v[10] )						// can repay all debt and more
 		{
-			update_debt1( p, 0, - v[10] );		// zero debt
+			update_debt1( THIS, 0, - v[10] );	// zero debt
 			INCR( "_NW1", v[6] - v[10] );		// save the rest
 		}
 		else
-			update_debt1( p, 0, - v[6] );		// repay part of debt
+			update_debt1( THIS, 0, - v[6] );	// repay part of debt
 	}
 	else
 		INCR( "_NW1", v[6] );					// save all

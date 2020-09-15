@@ -114,7 +114,7 @@ CYCLE_SAFE( cur, "Firm1" )
 V( "f1rescale" );								// redistribute exiting m.s.
 
 // replace exiting firms by entrants
-v[1] += entry_firm1( p, j, false );				// add entrant-firm objects
+v[1] += entry_firm1( THIS, j, false );				// add entrant-firm objects
 
 INCRS( PARENT, "cEntry", v[1] );				// account equity cost of entry
 INCRS( PARENT, "cExit", v[2] );					// account exit credits

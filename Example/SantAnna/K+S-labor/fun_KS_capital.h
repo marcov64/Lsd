@@ -140,7 +140,7 @@ if ( F1 + k > F1max )
 	k = F1max - F1 + j;
 
 v[0] = k - j;									// net number of entrants
-v[1] += entry_firm1( p, k, false );				// add entrant-firm objects
+v[1] += entry_firm1( THIS, k, false );			// add entrant-firm objects
 
 i = INCR( "F1", v[0] );							// update the number of firms
 INCRS( PARENT, "cEntry", v[1] );				// account equity cost of entry
@@ -186,7 +186,7 @@ if ( j >= v[6] )
 	j = v[6] - 1;								// keep at least 1 scaled worker
 
 // order firing list
-order_workers( ( int ) VS( PARENT, "flagFireOrder1" ), OBJ_WRK1, p );
+order_workers( ( int ) VS( PARENT, "flagFireOrder1" ), OBJ_WRK1, THIS );
 
 // then check firing worker by worker in sector 1 pool
 i = 0;
@@ -245,7 +245,7 @@ while ( j > 0 && appl->size( ) > 0 )
 			quit_worker( candidate.wrk );
 
 		// flag hiring and set wage, employer and vintage to be used by worker
-		hire_worker( candidate.wrk, 1, p, v[2] );// set firm, vintage & wage
+		hire_worker( candidate.wrk, 1, THIS, v[2] );// set firm, vintage & wage
 		++i;									// scaled count hire
 		--j;									// adjust scaled labor demand
 	}
@@ -266,7 +266,7 @@ if ( j > 0 && i == 0 && cur != NULL )			// none hired but someone avail?
 	if ( VS( cur, "_employed" ) )				// quit job if needed
 		quit_worker( cur );
 	
-	hire_worker( cur, 1, p, v[3] );				// pay requested wage
+	hire_worker( cur, 1, THIS, v[3] );			// pay requested wage
 	++i;
 }	
 
@@ -413,7 +413,7 @@ EQUATION( "dA1b" )
 Notional productivity (bounded) rate of change in capital-good sector
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( p, "A1", VS( PARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "A1", VS( PARENT, "mLim" ) ) )
 
 
 EQUATION( "imi" )

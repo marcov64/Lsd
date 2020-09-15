@@ -155,12 +155,12 @@ else
 		v[3] = 1;								// keep minimum cash
 	}
 	
-	update_debt2( p, v[8], v[7] );				// update firm debt
+	update_debt2( THIS, v[8], v[7] );			// update firm debt
 }
 
 WRITE( "_NW2", v[3] );							// update the firm net worth
 
-send_order( p, floor( v[0] / v[4] ) );			// send order to machine supplier
+send_order( THIS, floor( v[0] / v[4] ) );		// send order to machine supplier
 
 RESULT( v[0] )
 
@@ -260,7 +260,7 @@ else
 		v[3] = 1;								// keep minimum cash
 	}
 	
-	update_debt2( p, v[8], v[7] );				// update firm debt
+	update_debt2( THIS, v[8], v[7] );			// update firm debt
 }
 
 // provision for wage expenses
@@ -329,12 +329,12 @@ else
 		v[3] = 1;								// keep minimum cash
 	}
 	
-	update_debt2( p, v[8], v[7] );				// update firm debt
+	update_debt2( THIS, v[8], v[7] );			// update firm debt
 }
 
 WRITE( "_NW2", v[3] );							// update the firm net worth
 
-send_order( p, floor( v[0] / v[4] ) );			// send order to machine supplier
+send_order( THIS, floor( v[0] / v[4] ) );		// send order to machine supplier
 
 RESULT( v[0] )
 
@@ -375,12 +375,12 @@ if ( v[6] < 0 )									// must finance losses?
 		
 		if ( v[8] >= v[9] )						// can finance losses?
 		{
-			update_debt2( p, v[9], v[9] );		// finance all
+			update_debt2( THIS, v[9], v[9] );	// finance all
 			WRITE( "_NW2", 1 );					// minimum net wealth
 		}
 		else
 		{
-			update_debt2( p, v[8], v[8] );		// take what is possible
+			update_debt2( THIS, v[8], v[8] );	// take what is possible
 			INCR( "_NW2", v[6] - v[8] );		// let negative NW (bankruptcy)
 		}					
 	}
@@ -393,11 +393,11 @@ else											// pay debt with available cash
 	{
 		if ( v[6] > v[10] )						// can repay all debt and more
 		{
-			update_debt2( p, 0, - v[10] );		// zero debt
+			update_debt2( THIS, 0, - v[10] );	// zero debt
 			INCR( "_NW2", v[6] - v[10] );		// save the rest
 		}
 		else
-			update_debt2( p, 0, - v[6] );		// repay part of debt
+			update_debt2( THIS, 0, - v[6] );	// repay part of debt
 	}
 	else
 		INCR( "_NW2", v[6] );					// save all
@@ -585,7 +585,7 @@ else											// no brochure received
 	i = VS( cur1, "_ID1" );
 	
 	// create the brochure/client interconnected objects
-	cur3 = send_brochure( i, cur1, V( "_ID2" ), p );
+	cur3 = send_brochure( i, cur1, V( "_ID2" ), THIS );
 }
 
 WRITE_HOOK( SUPPL, cur3 );						// pointer to current brochure
@@ -663,7 +663,7 @@ if ( v[2] + v[3] > 0 )
 	v[4] = floor( ( v[2] + v[3] ) / v[1] );		// total number of new machines
 
 	if ( v[4] > 0 )								// new machines to install?
-		add_vintage( p, v[4], SHOOKS( HOOK( SUPPL ) )->up, false );// create vint.
+		add_vintage( THIS, v[4], SHOOKS( HOOK( SUPPL ) )->up, false );
 }
 
 v[5] = max( VL( "_K", 1 ) + v[3] - V( "_Kd" ), 0 );// desired capital shrinkage
@@ -856,7 +856,7 @@ EQUATION( "_dA2b" )
 Notional productivity (bounded) rate of change of firm in consumption-good sector
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( p, "_A2", VS( GRANDPARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "_A2", VS( GRANDPARENT, "mLim" ) ) )
 
 
 EQUATION( "_dNnom" )

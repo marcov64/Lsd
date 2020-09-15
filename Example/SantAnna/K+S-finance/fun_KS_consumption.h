@@ -161,7 +161,7 @@ CYCLE_SAFE( cur, "Firm2" )
 V( "f2rescale" );								// redistribute exiting m.s.
 
 // replace exiting firms by entrants
-v[2] += entry_firm2( p, j, false );				// add entrant-firm objects
+v[2] += entry_firm2( THIS, j, false );			// add entrant-firm objects
 
 INCRS( PARENT, "cEntry", v[2] );				// account equity cost of entry
 INCRS( PARENT, "cExit", v[3] );					// account exit credits
@@ -428,7 +428,7 @@ EQUATION( "dCPIb" )
 /*
 Consumer price index inflation (change) rate
 */
-RESULT( mov_avg_bound( p, "CPI", VS( PARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "CPI", VS( PARENT, "mLim" ) ) )
 
 
 EQUATION( "dNnom" )
