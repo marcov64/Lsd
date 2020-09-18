@@ -27,9 +27,7 @@ require( tseries, warn.conflicts = FALSE, quietly = TRUE )
 require( gplots, warn.conflicts = FALSE, quietly = TRUE )
 require( plotrix, warn.conflicts = FALSE, quietly = TRUE )
 require( extrafont, warn.conflicts = FALSE, quietly = TRUE )
-
-# must be downloaded from http://www.commanster.eu/rcode.html
-#require( rmutil, warn.conflicts = FALSE, quietly = TRUE )
+require( rmutil, warn.conflicts = FALSE, quietly = TRUE )
 
 # subbotools location (leave blank in linux/Mac)
 if( tolower( .Platform$OS.type ) == "windows" ){

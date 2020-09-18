@@ -10,12 +10,12 @@ Example\*\*.o
 installer\*\
 src\LSD.app\
 src\compile-mac*
+src\makefile-linux*
+src\makefile-mac*
 src\installer-loader-linux.sh
 src\system_options-linux.txt
 src\system_options-mac.txt
 src\system_options.txt
-makefile-linux*
-makefile-mac*
 SyncToy*
 LMM
 lmm_options.txt

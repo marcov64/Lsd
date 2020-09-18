@@ -77,6 +77,8 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libwinpthread-1.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgcc_s_seh-1.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgmp-10.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libstdc++-6.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgsl-25.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgslcblas-0.dll %LSD_DIR%\gnu\bin\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\include\c++ %LSD_DIR%\gnu\include\c++\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\share\gcc-%GCC_VER% %LSD_DIR%\gnu\share\gcc-%GCC_VER%\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\x86_64-w64-mingw32 %LSD_DIR%\gnu\x86_64-w64-mingw32\

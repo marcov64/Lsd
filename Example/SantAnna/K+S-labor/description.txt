@@ -6,7 +6,7 @@ The K+S original code was developed by Andrea Roventini and other contributors.
 
 This is a full rewrite of the original "Schumpeter meeting Keynes" (K+S) model, plus the labor and finance extensions, to LSD. Differently from previous versions, the entire legacy part of the model was updated to regular LSD equations. There is no guarantee this version matches the results of previous versions exactly, due to intrinsic differences between programming approaches.
 
-LSD version 7.3 or higher is required. Download at: https://github.com/SantAnnaKS/LSD
+LSD version 8.0 or higher is required. Download at: https://github.com/SantAnnaKS/LSD
 
 
 Change log
@@ -14,10 +14,11 @@ Change log
 v5.1 - initial LSD-only version
 v5.1.1 (12/08/20) - use LSD C++11 pseudo-random generator engine
                     improve Bank capital bail-out rule (fraction PhiB of average bank size)
+                    update the wage equations to account for expected inflation (a la JEDC2015)
                     change capacity utilization measure to account for labor
                     fix flagGovExp operation for values less than 2 (minimum income)
                     fix L1shortMax value in example configurations
-                    
+
 
 Relevant references
 ===================

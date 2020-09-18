@@ -43,7 +43,6 @@ proc isDarkTheme { } {
 			}
 		}
 	} elseif [ string equal $CurPlatform windows ] {
-		package require registry
 		if { ! [ catch { set AppsUseLightTheme [ registry get HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize AppsUseLightTheme ] } ] } {
 			if { ! $AppsUseLightTheme } {
 				return 1

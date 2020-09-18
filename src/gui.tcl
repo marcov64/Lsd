@@ -122,6 +122,8 @@ if [ string equal $CurPlatform mac ] {
 	set borderMadj $bborderLinux
 	
 } elseif [ string equal $CurPlatform windows ] {
+	package require registry
+
 	set DefaultSysTerm $sysTermWindows
 	set systemTerm $sysTermWindows
 	set gnuplotTerm $gnuplotTermWindows

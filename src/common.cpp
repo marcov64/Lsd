@@ -251,7 +251,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 bool set_env( bool set )
 {
 	bool res = true;
-	char *file, *lsd_root, *path, *exec_path = NULL;
+	char *file, *lsd_root, *lsd_bin, *path, *exec_path = NULL;
 	const char *compilers[ ] = WIN_COMP_PATH;
 	int i, st;
 	static char *lsd_root_env = NULL, *tcl_lib_env = NULL, *path_env = NULL;
@@ -308,19 +308,29 @@ bool set_env( bool set )
 		
 		if ( lsd_root != NULL && path != NULL )
 		{
-			for ( i = 0, st = 1; i < WIN_COMP_NUM; ++i )
-				if ( strstr( path, compilers[ i ] ) != NULL )
-					st = 0;
-
-			delete [ ] path_env;
-			path_env = new char[ strlen( path ) + win_path( lsd_root ).size( ) + strlen( TCL_EXEC_PATH ) + 9 ];
+			// check if not already in path and add it in the adequate order
+			lsd_bin = new char[ win_path( lsd_root ).size( ) + strlen( TCL_EXEC_PATH ) + 2 ];
+			sprintf( lsd_bin, "%s\\%s", win_path( lsd_root ).c_str( ), TCL_EXEC_PATH );
 			
-			if ( st == 0 )
-				sprintf( path_env, "PATH=%s;%s\\%s", path, win_path( lsd_root ).c_str( ), TCL_EXEC_PATH );
-			else
-				sprintf( path_env, "PATH=%s\\%s;%s", win_path( lsd_root ).c_str( ), TCL_EXEC_PATH, path );
+			if ( strstr( path, lsd_bin ) == NULL )
+			{
+				// look for known 64-bit compilers
+				for ( i = 0, st = 1; i < WIN_COMP_NUM; ++i )
+					if ( strstr( path, compilers[ i ] ) != NULL )
+						st = 0;
+				
+				delete [ ] path_env;
+				path_env = new char[ strlen( path ) + strlen( lsd_bin ) + 7 ];
+				
+				if ( st == 0 )
+					sprintf( path_env, "PATH=%s;%s", path, lsd_bin );
+				else
+					sprintf( path_env, "PATH=%s;%s", lsd_bin, path );
+				
+				putenv( path_env );
+			}
 			
-			putenv( path_env );
+			delete [ ] lsd_bin;
 		}
 #else
 		res = true;					// do not stop on linux/mac

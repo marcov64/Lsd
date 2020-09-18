@@ -10,39 +10,42 @@
 #**************************************************************
 
 #**************************************************************
-# MAKEFILE-WINDOWS
-# Makefile for LMM in MS Windows 64-bit
+# MAKEFILE-MAC
+# Makefile for LMM in macOS.
 # In a command prompt (terminal) in Lsd root directory, use
-#  make -f makefile-windows
+#  make -f makefile-mac
 # to compile LMM program using the source files in
 # directory "src".
 #**************************************************************
 
 CC=g++
-WRC=windres
-TARGET=LMM
-SWITCH_CC=-DLMM -DNP -O3 -mthreads -mwindows -static-libstdc++
+TARGET=../LMM
+SWITCH_CC=-DLMM -DNP -Wno-unused-result -std=c++14 -mmacosx-version-min=10.10 -O3
 
 # from here you should not need to modify anything
 
-# using GCC and Tcl/Tk in the Lsd installation
-LSDROOT=.
+# using native compiler and Lsd supplied Tcl/Tk frameworks
+LSDROOT=..
 SRC=src
 SRC_DIR=$(LSDROOT)/$(SRC)/
-TCL_VERSION=86
-PATH_TCLTK_HEADER=$(LSDROOT)/gnu/include
-PATH_TCLTK_LIB=$(LSDROOT)/gnu/lib
-TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
+PATH_TCL_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/Headers
+PATH_TK_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/Headers
+PATH_TCLTK_LIB=$(SRC_DIR)LSD.app/Contents/Frameworks
+TCLTK_LIB=-framework Tcl -framework Tk
 
 # OS command to delete files
-RM=rm -f
+RM=rm -f -R
 
 # variable to search for the tcl and tk headers
-INCLUDE=-I$(PATH_TCLTK_HEADER) -I$(LSDROOT)/$(SRC)
+INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(LSDROOT)/$(SRC)
 
-$(TARGET).exe: $(SRC_DIR)modman.o $(SRC_DIR)common.o $(SRC_DIR)lmm_manifest.o
-	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common.o $(SRC_DIR)lmm_manifest.o \
-	-L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(TARGET)
+# adjust executable to use the provided Tcl/Tk frameworks
+TARGET_PKG=$(TARGET).app/Contents/MacOS/$(TARGET)
+
+$(TARGET_PKG): $(SRC_DIR)modman.o $(SRC_DIR)common.o 
+	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common.o \
+	-F$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(TARGET_PKG)
+	touch -c -f $(TARGET).app
 
 $(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLUDE)
@@ -50,9 +53,6 @@ $(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
 $(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o $(INCLUDE)
 
-$(SRC_DIR)lmm_manifest.o: $(SRC_DIR)lmm_manifest.rc $(SRC_DIR)lmm.exe.manifest
-	$(WRC) -i $(SRC_DIR)lmm_manifest.rc -o $(SRC_DIR)lmm_manifest.o $(INCLUDE)
-
 # delete object files
 clean:
-	$(RM) $(SRC_DIR)modman.o $(SRC_DIR)common.o $(SRC_DIR)lmm_manifest.o
+	$(RM) $(SRC_DIR)modman.o $(SRC_DIR)common.o

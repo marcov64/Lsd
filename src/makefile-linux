@@ -19,13 +19,13 @@
 #**************************************************************
 
 CC=g++	
-TARGET=LMM
+TARGET=../LMM
 SWITCH_CC=-DLMM -DNP -Wno-unused-result -O3
 
 # from here you should not need to modify anything
 
 # using OS native compiler and Tcl/Tk
-LSDROOT=.
+LSDROOT=..
 SRC=src
 SRC_DIR=$(LSDROOT)/$(SRC)/
 TCL_VERSION=8.6

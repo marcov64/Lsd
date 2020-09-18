@@ -92,7 +92,7 @@ icontop . lsd
 #
 
 if [ string equal $CurPlatform mac ] {
-	set notInstall [ concat $notInstall *.exe *.dll *.bat gnu/etc/* gnu/include/* gnu/lib/* gnu/share/* gnu/usr/* gnu/x86_64-w64-mingw32/* ]
+	set notInstall [ concat $notInstall *.exe *.dll *.bat gnu/* src/installer-loader-linux.sh ]
 	
 	# make sure PATH is complete
 	if { [ string first "/usr/local/bin" env(PATH) ] < 0 } {
@@ -265,7 +265,7 @@ foreach rem $notInstall {
 
 # check if bare minimum is there
 if { [ llength $files ] < 100 || [ string first Readme.txt $files ] < 0 || [ string first lsdmain.cpp $files ] < 0 || [ string first groupinfo.txt $files ] < 0 } {
-	ttk::messageBox -parent "" -type ok -title Error -icon error -message "Corrupt installation package" -detail "The installation package does not contain the required files to install LSD.\n\nPlease try to download again the installation package."
+	ttk::messageBox -parent "" -type ok -title Error -icon error -message "Corrupt installation package" -detail "The installation package does not contain the required files to install LSD.\n\nPlease try to download again the installation package.\n\nExiting now."
 	exit 4
 }
 
@@ -361,13 +361,17 @@ while 1 {
 			continue
 		} else {
 			set newInst 0
-			file delete -force "$LsdRoot/lmm" "$LsdRoot/lmm.exe" "$LsdRoot/lmm64.exe" "$LsdRoot/run.bat" "$LsdRoot/run.sh" "$LsdRoot/$LsdSrc/system_options.txt" {*}[ glob -nocomplain -directory "$LsdRoot/$LsdSrc" *.o ] "$env(HOME)/Desktop/lsd.desktop"
+			if [ catch { file delete -force "$LsdRoot/lmm" "$LsdRoot/lmm.exe" "$LsdRoot/lmm64.exe" "$LsdRoot/run.bat" "$LsdRoot/run.sh" "$LsdRoot/$LsdSrc/system_options.txt" {*}[ glob -nocomplain -directory "$LsdRoot/$LsdSrc" *.o ] "$env(HOME)/Desktop/lsd.desktop" } ] {
+				ttk::messageBox -type ok -title Error -icon error -message "Cannot remove old files" -detail "Cannot replace the existing LSD files by the upgraded ones.\n\nPlease try reinstalling after closing any open instance of LSD/LMM.\n\nExiting now."
+				
+				exit 5
+			}
 		}
 	}
 
 	if { $done == 2 } {
 		if [ string equal [ ttk::messageBox -type okcancel -title "Exit?" -icon info -default ok -message "Exit installation?" -detail "LSD installation is not complete.\n\nPress 'OK' to confirm exit." ] ok ] {
-			exit 5
+			exit 6
 		}
 	} else {
 		break
@@ -375,8 +379,8 @@ while 1 {
 }
 
 if { ! [ file exists "$LsdRoot" ] && [ catch { file mkdir "$LsdRoot" } ] } {
-	ttk::messageBox -type ok -title Error -icon error -message "Cannot create LSD directory" -detail "The chosen directory '$LsdRoot' could not be created.\nLSD subdirectory must be located in a directory where the user has write permission.\n\nPress 'OK' to abort installation."
-	exit 6
+	ttk::messageBox -type ok -title Error -icon error -message "Cannot create LSD directory" -detail "The chosen directory '$LsdRoot' could not be created.\nLSD subdirectory must be located in a directory where the user has write permission.\n\nExiting now."
+	exit 7
 }
 
 wm withdraw .
@@ -406,7 +410,9 @@ foreach f $files {
 	
 	if { $done == 2 } {
 		if [ string equal [ ttk::messageBox -parent "" -type okcancel -title "Exit?" -icon info -default ok -message "Exit installation?" -detail "LSD installation is not complete.\n\nPress 'OK' to confirm exit." ] ok ] {
-			exit 7
+			exit 8
+		} else {
+			set done 1
 		}
 	}
 }
@@ -427,11 +433,37 @@ if { $n != $nFiles } {
 	if { ! [ info exists result ] } {
 		set result "(no information)"
 	}
-	ttk::messageBox -parent "" -type ok -title Error -icon error -message "Incomplete installation" -detail "The installation could not install the required files to run LSD ($n out of $nFiles installed).\n\nError detail:\n$result\n\nPlease try reinstalling or download again the installation package."
+	ttk::messageBox -parent "" -type ok -title Error -icon error -message "Incomplete installation" -detail "The installation could not copy the required files to run LSD ([ expr $nFiles - $n ] files failed).\n\nError detail:\n$result\n\nPlease try reinstalling after closing any open instance of LSD/LMM or download again the installation package.\n\nExiting now."
+		
+	if { $newInst } {
+		catch { file delete -force $LsdRoot }
+	}
+			
+	exit 9
 }
 
 
 set issues [ list ]
+
+
+#
+# set LSD library folder in the user PATH environment variable in Windows
+#
+
+if [ string equal $CurPlatform windows ] {
+	if { ! [ add_user_path "$LsdRoot/gnu/bin" ] } {
+		if [ string equal [ ttk::messageBox -parent "" -type okcancel -default ok -title Error -icon error -message "Cannot add LSD to PATH" -detail "LSD libraries folder could not be added to the user PATH environment variable.\n\nYou may try to repeat the installation or manually add the folder '$LsdRoot/gnu/bin' to the PATH variable following the steps described in 'Readme.txt'.\n\nPress 'OK' if you want to continue the installation anyway or 'Cancel' to exit." ] ok ] {
+		
+			lappend issues "LSD libraries not in PATH (setx PATH \"%PATH%;$LsdRoot/gnu/bin\")"
+		} else {
+			if { $newInst } {
+				catch { file delete -force $LsdRoot }
+			}
+		
+			exit 10
+		}
+	}
+}
 
 
 #
@@ -450,15 +482,15 @@ if [ string equal $CurPlatform windows ] {
 }
 
 if { $res } {
-	if [ string equal [ ttk::messageBox -parent "" -type okcancel -default cancel -title Error -icon error -message "Cannot create LSD shortcuts" -detail "The creation of LSD program shortcuts failed ($result).\n\nDo you want to continue the installation?\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'." ] ok ] {
+	if [ string equal [ ttk::messageBox -parent "" -type okcancel -default cancel -title Error -icon error -message "Cannot create LSD shortcuts" -detail "The creation of LSD program shortcuts failed ($result).\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'.\n\nPress 'OK' if you want to continue the installation anyway or 'Cancel' to exit." ] ok ] {
 	
-		lappend issues "LSD program shortcuts (add-shortcut-$CurPlatform)"
+		lappend issues "LSD program shortcuts missing (add-shortcut-$CurPlatform)"
 	} else {
 		if { $newInst } {
 			catch { file delete -force $LsdRoot }
 		}
 		
-		exit 8
+		exit 11
 	}
 }
 
@@ -474,13 +506,13 @@ if [ info exists xcode ] {
 	destroytop .wait
 	if { $res } {
 		ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Xcode" -detail "The installation of Xcode command line tools failed ($result).\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'."
-		lappend issues "Xcode Command Line tools (xcode-select --install)"
+		lappend issues "Xcode Command Line tools missing (xcode-select --install)"
 	}
 }
 
 
 #
-# install Windows/macOS Gnuplot/multitail if required
+# install Windows/macOS Gnuplot/MultiTail if required
 #
 
 if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ info exists multitail ] ) } {
@@ -491,7 +523,7 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 
 		if { $res } {
 			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "The installation of Gnuplot graphical terminal failed ($result).\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'."
-			lappend issues "Windows Gnuplot ($winGnuplot)"
+			lappend issues "Windows Gnuplot not installed ($winGnuplot)"
 		}
 	}
 	
@@ -520,12 +552,12 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 			set pkgInsta "brew install multitail; "
 		}
 		
-		ttk::messageBox -parent "" -type ok -title "Tools Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to confirm installation of ${brewInstr}Gnuplot graphical terminal and/or multitail tool.\n\nA Terminal window will open and the interaction must be performed there."
-		set wait [ waitbox .wait "Installing..." "Installing ${brewInstr} Gnuplot graphical terminal\nand/or multitail tool.\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. if required, allow the Terminal access\n2. ${brewSteps}Terminal window will close/disable when done\n" 1 "" ]
+		ttk::messageBox -parent "" -type ok -title "Tools Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to confirm installation of ${brewInstr}Gnuplot graphical terminal and/or MultiTail tool.\n\nA Terminal window will open and the interaction must be performed there."
+		set wait [ waitbox .wait "Installing..." "Installing ${brewInstr} Gnuplot graphical terminal\nand/or MultiTail tool.\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. if required, allow the Terminal access\n2. ${brewSteps}Terminal window will close/disable when done\n" 1 "" ]
 
 		set scpt [ open "$env(TMPDIR)/install_homebrew.as" w ]
 		puts $scpt "tell application \"Terminal\""
-		set openMsg "clear; echo \\\"Installing ${brewMsg1}Gnuplot and/or multitail\\nPlease wait for this window to close/deactivate automatically.${brewMsg2}\\\"; "
+		set openMsg "clear; echo \\\"Installing ${brewMsg1}Gnuplot and/or MultiTail\\nPlease wait for this window to close/deactivate automatically.${brewMsg2}\\\"; "
 		set closeMsg "${pkgInsta}touch \$TMPDIR/brew-done.tmp; exit"
 		puts $scpt "\tdo script \"${openMsg}${brewInsta}${closeMsg}\""
 		puts $scpt "end tell"
@@ -560,10 +592,10 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 		if { $res } {
 			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "The installation of Gnuplot graphical terminal (and/or other associated tools) failed ($result).\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'."
 			if { $brewInsta != "" } {
-				lappend issues "Homebrew ($brewInsta)"
+				lappend issues "Homebrew not installed ($brewInsta)"
 			}
-			lappend issues "Gnuplot (brew gnuplot)"
-			lappend issues "multitail (brew multitail)"
+			lappend issues "Gnuplot not installed (brew gnuplot)"
+			lappend issues "MultiTail not installed (brew multitail)"
 		}
 	}
 }
@@ -586,7 +618,7 @@ if { [ string equal $CurPlatform linux ] && [ llength $linuxPkgMiss ] > 0 } {
 	
 	if { ! $found } {
 		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Cannot install required packages" -detail "The detection of the computer package manager failed and LSD cannot install the missing required packages.\n\nPlease check your distribution documentation on how to install the following missing packages:\n\n$linuxPkgMiss"
-		lappend issues "$linuxPkgMiss (unknown command)"
+		lappend issues "$linuxPkgMiss missing (unknown command)"
 
 	} else {
 		
@@ -648,7 +680,7 @@ if { [ string equal $CurPlatform linux ] && [ llength $linuxPkgMiss ] > 0 } {
 
 		if { $res } {
 			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing packages" -detail "The installation of required packages failed ($result).\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'."
-			lappend issues "$linuxPkgMiss\n(sudo $linuxPmCmd($pm) $lpack)"
+			lappend issues "$linuxPkgMiss missing (sudo $linuxPmCmd($pm) $lpack)"
 		}
 	}
 }
@@ -662,7 +694,7 @@ if [ string equal $CurPlatform linux ] {
 
 	if { [ llength $pathInclude ] > 1 || [ llength $pathLib ] > 1 } { 
 		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Complex include/lib paths" -detail "Your computer has a complex setup of multiple include and lib file paths which cannot be configured automatically.\n\nYou may have to manually adjust the correct paths to the include/lib files in '$linuxMkFile' before compiling LMM and in LSD System Options menu."
-		lappend issues "set-up include/lib paths (nano $linuxMkFile)"
+		lappend issues "include/lib paths not configured (nano $linuxMkFile)"
 	}
 
 	# update include/libs paths in makefile-linux and system_options-linux.txt
@@ -709,14 +741,14 @@ if [ string equal $CurPlatform linux ] {
 	
 	if { ! $found } {
 		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Cannot recompile LMM" -detail "The detection of Linux distribution failed and LSD Model Manager (LMM) was not recompiled for your computer.\n\nYou may try to use the installed precompiled LMM or do a manual compilation following the steps described in 'Readme.txt'.\nYou may have to adjust the paths to the include/lib files in '$linuxMkFile'."
-		lappend issues "compile LMM (make -f $linuxMkFile)"
+		lappend issues "Cannot recompile LMM (make -f $linuxMkFile)"
 
 	} elseif { ! [ string equal $pm $linuxDefPm ] } {
 
 		waitbox .wait "Compiling LMM..." "Compiling LSD Model Manager (LMM)\nfor your Linux distribution.\n\nPlease wait..." "" 0 ""
 
 		file copy -force "$LsdRoot/lmm" "/tmp/"
-		cd "$LsdRoot"
+		cd "$LsdRoot/$LsdSrc"
 
 		set res [ catch { exec make -f makefile-linux } result ]
 
@@ -725,7 +757,7 @@ if [ string equal $CurPlatform linux ] {
 
 		if { $res } {
 			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error compiling LMM" -detail "The compilation of LSD Model Manager (LMM) failed ($result).\n\nYou may try to do a manual compilation following the steps described in 'Readme.txt' and also may have to."
-			lappend issues "compile LMM (make -f $linuxMkFile)"
+			lappend issues "Cannot recompile LMM (make -f $linuxMkFile)"
 			file copy -force "/tmp/lmm" "/$LsdRoot/"
 		} else {
 			file delete -force "/tmp/lmm"
@@ -745,10 +777,29 @@ ttk::frame .end
 if { [ llength $issues ] == 0 } {
 	ttk::label .end.msg1 -text "LSD installation completed successfully."
 } else {
-	ttk::label .end.msg1 -justify center -text "LSD installation completed successfully,\nbut some pending issues remain.\nYou may try to repeat the installation or do a manual\ninstall following the steps described in 'Readme.txt'."
+	ttk::label .end.msg1 -justify center -text "LSD installation completed\nwith errors, some issues remain.\n\nYou may try to repeat the installation or do a manual\ninstall following the steps described in 'Readme.txt'."
+	
+	catch { 
+		set f [ open "$LsdRoot/installer.err" a ]
+		puts $f ""
+		puts $f "====================> [ clock format [ clock seconds ] -format "%Y-%m-%d %H:%M:%S" ]"
+		puts $f "LSD Installer completed with errors."
+		puts $f "The installation directory is '$LsdRoot'."
+		puts $f "Please check 'Readme.txt' for instructions on"
+		puts $f "how to solve the issues before using LSD."
+		puts $f ""
+		puts $f "Issue (failed command line operation):"
+		
+		foreach issue $issues {
+			puts $f ". $issue"
+		}
+		
+		close $f
+	}
 }
-ttk::label .end.msg2 -text "LSD/LMM can be run using the created desktop icon,\nor using the computer program menu."  -justify center
-ttk::label .end.msg3 -text "The installation directory is: $LsdRoot"
+
+ttk::label .end.msg2 -text "LSD/LMM can be run using the created desktop icon,\nor using the computer's program menu."  -justify center
+ttk::label .end.msg3 -text "The installation directory is '$LsdRoot'"
 pack .end.msg1 .end.msg2 .end.msg3 -pady 5
 
 if { [ llength $issues ] > 0 } {
@@ -758,12 +809,12 @@ if { [ llength $issues ] > 0 } {
 	ttk::frame .end.err2
 	set i 1
 	foreach issue $issues {
-		ttk::label .end.err2.t$i -text ". $issue"
+		ttk::label .end.err2.t$i -style hl.TLabel -text ". $issue"
 		pack .end.err2.t$i
 		incr i
 	}
 	
-	ttk::label .end.err3 -text "Please try to solve the issues before using LSD."
+	ttk::label .end.err3 -justify center -text "Please try to solve the issues before using LSD.\nThis list is saved in 'installer.err'"
 	pack .end.err1 .end.err2 .end.err3 -pady 5
 }
 

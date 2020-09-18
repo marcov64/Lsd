@@ -11,13 +11,13 @@
 ./src/LSD.app
 ./src/compile-mac*
 ./src/compile-windows*
+./src/makefile-mac*
+./src/makefile-windows*
 ./src/system_options-mac.txt
 ./src/system_options-windows.txt
 ./src/system_options.txt
 ./lmm_options.txt
 ./add-shortcut-mac.sh
-*makefile-mac*
-*makefile-windows*
 *elements.txt
 *makefile
 *makefileNW

@@ -108,6 +108,52 @@ proc gccVersion { } {
 
 
 #************************************************
+# ADD_USER_PATH
+# Add the directory to the user's permanent
+# PATH environment variable in Windows
+#************************************************
+proc add_user_path { path } {
+	global CurPlatform env
+
+	# only Windows
+	if { ! [ string equal $CurPlatform windows ] } {
+		return 0
+	}
+	
+	# check if not already in global (user + system) path
+	set pathList [ list ]
+	foreach part [ split $env(PATH) ";" ] {
+		set part [ file normalize $part ]
+		if { [ file exists $part ] && [ lsearch -exact $pathList $part ] < 0 } {
+			lappend pathList $part
+		}
+	}
+
+	if { [ catch { set path [ file normalize $path ] } ] || ! [ file exists $path ] } {
+		return 0
+	} 
+	
+	if { [ lsearch -exact $pathList $path ] >= 0 } {
+		return 1
+	}
+	
+	# add to the end of the user path
+	set path [ file nativename $path ]
+	set regPath "HKEY_CURRENT_USER\\Environment"
+	if { ! [ catch { set curPath [ registry get $regPath "Path" ] } ] } {
+		set curPath [ string trimright $curPath ";" ]
+
+		if { ! [ catch { registry set $regPath "Path" "$curPath;$path;" } ] } {
+			registry broadcast "Environment"
+			return 1
+		}
+	}
+	
+	return 0
+}
+
+
+#************************************************
 # PROGRESSBOX
 # Show interruptible progress bar window while 
 # slow operations are running
