@@ -1014,7 +1014,7 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, false, "conditional searching" );
+	cv = search_var_err( this, lab, no_search, true, "conditional searching" );
 	if ( cv == NULL )
 		return NULL;
 
@@ -1040,7 +1040,7 @@ double object::initturbo_cond( char const *lab )
 	variable *cv;
 	b_mapT::iterator bit;
 
-	cv = search_var_err( this, lab, false, false, "turbo conditional searching" );
+	cv = search_var_err( this, lab, no_search, true, "turbo conditional searching" );
 	if ( cv == NULL )
 		return 0;
 
@@ -1095,7 +1095,7 @@ object *object::turbosearch_cond( char const *lab, double value )
 	b_mapT::iterator bit;
 	o_mapT::iterator oit;
 
-	cv = search_var_err( this, lab, false, false, "turbo conditional searching" );
+	cv = search_var_err( this, lab, no_search, true, "turbo conditional searching" );
 	if ( cv == NULL )
 		return NULL;
 
