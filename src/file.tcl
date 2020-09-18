@@ -653,7 +653,7 @@ proc make_wait { } {
 # Start a makefile as a background task
 #************************************************
 proc make_background { target threads nw macPkg } {
-	global CurPlatform MakeExe RootLsd LsdGnu targetExe iniTime makePipe
+	global CurPlatform MakeExe RootLsd LsdGnu targetExe iniTime makePipe res
 
 	if { $nw } {
 		set makeSuffix "NW"
@@ -677,16 +677,27 @@ proc make_background { target threads nw macPkg } {
 
 	# handle Windows access to open executable and empty compilation windows
 	if [ string equal $CurPlatform windows ] {
-
+		
 		if [ file exists "$target$exeSuffix" ] {
-			close [ file tempfile targetTemp ]
-			file delete $targetTemp
-			set targetDir [ file dirname $targetTemp ]
-			file mkdir "$targetDir"
-			set targetTemp "$targetDir/$target.bak"
+			if [ catch {
+				close [ file tempfile targetTemp ]
+				file delete $targetTemp
+				set targetDir [ file dirname $targetTemp ]
+				file mkdir "$targetDir"
+				set targetTemp "$targetDir/$target.bak"
 
-			file rename -force "$target$exeSuffix" "$targetTemp"
-			file copy -force "$targetTemp" "$target$exeSuffix"
+				file rename -force "$target$exeSuffix" "$targetTemp"
+				file copy -force "$targetTemp" "$target$exeSuffix"
+			} msg ] {
+				catch {
+					set f [ open makemessage.txt w ]
+					puts $f $msg
+					close $f
+				}
+				
+				set res 0
+				return
+			}
 		}
 
 		set file [ open make.bat w ]
