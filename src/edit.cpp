@@ -352,8 +352,9 @@ int entry_new_objnum( object *c, const char *tag, int *choice )
 	cmd( "set conf 0" );
 	cmd( "set cfrom 1" );
 
-	cmd( "set T .inin.numinst" );
-	cmd( "newtop $T \"Number of Instances\" { set conf 1; set choice 2 } .inin" );
+	cmd( "if [ winfo exists .inin ] { set p .inin } { set p . }" );
+	cmd( "if { $p != \".\" } { set T $p.numinst } { set T .numinst }" );
+	cmd( "newtop $T \"Number of Instances\" { set conf 1; set choice 2 } $p" );
 
 	cmd( "ttk::frame $T.l" );
 
@@ -378,7 +379,7 @@ int entry_new_objnum( object *c, const char *tag, int *choice )
 	cmd( "ttk::frame $T.cp" );
 	cmd( "ttk::label $T.cp.l -text \"Copy from instance\"" );
 	cmd( "ttk::spinbox $T.cp.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invalidcommand { bell } -justify center", num, num );
-	cmd( "ttk::button $T.cp.compute -width $butWid -text Compute -command { set conf 1; set choice 3; .inin.numinst.cp.e selection range 0 end; focus .inin.numinst.cp.e }" );
+	cmd( "ttk::button $T.cp.compute -width $butWid -text Compute -command \"set conf 1; set choice 3; $T.cp.e selection range 0 end; focus $T.cp.e\"" );
 	cmd( "pack $T.cp.l $T.cp.e $T.cp.compute -side left -padx 2" );
 
 	cmd( "ttk::frame $T.ef" );
@@ -450,7 +451,7 @@ int entry_new_objnum( object *c, const char *tag, int *choice )
 
 	if ( *choice == 3 )
 	{
-		k = compute_copyfrom( c, choice, ".inin.numinst" );
+		k = compute_copyfrom( c, choice, "$T" );
 		if ( k > 0 )
 			cmd( "set cfrom %d", k );
 		
@@ -689,13 +690,14 @@ void chg_obj_num( object **c, int value, int level, int affected[ ], int *choice
 /***************************************************
 ELIMINATE_OBJ
 ****************************************************/
-void eliminate_obj( object **c, int actual, int desired , int *choice )
+void eliminate_obj( object **c, int actual, int desired, int *choice )
 {
 	int i, idx2, val2, last, *del;
 	object *cur, *cur1;
 
-	cmd( "set d .inin.delobj" );
-	cmd( "newtop $d \"Delete Instances\" { set choice 3 } .inin" );
+	cmd( "if [ winfo exists .inin ] { set p .inin } { set p . }" );
+	cmd( "if { $p != \".\" } { set d $p.delobj } { set d .delobj }" );
+	cmd( "newtop $d \"Delete Instances\" { set choice 3 } $p" );
 	cmd( "set conf 0" );
 
 	cmd( "ttk::frame $d.l" );
@@ -745,7 +747,7 @@ void eliminate_obj( object **c, int actual, int desired , int *choice )
 		del = new int[ actual - desired ];
 		cmd( "set conf 0" );
 
-		cmd( "newtop $d \"Choose Instances\" { set choice 2 } .inin" );
+		cmd( "newtop $d \"Choose Instances\" { set choice 2 } $p" );
 
 		cmd( "ttk::frame $d.l" );
 		cmd( "ttk::label $d.l.l1 -text \"Object:\"" );
