@@ -22,7 +22,7 @@ if [ "$1" = "-h" ]; then
 	echo "Add a shortcut to LSD LMM in the desktop"
 	echo "Usage: ./add-shortcut.sh [full path to desktop directory]"
 else
-	TARGET=LSD.desktop
+	TARGET="LSD Model Manager.desktop"
 	EXEC=LMM
 	LSDROOT="$( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P )"
 	if [ -x "$(command -v xdg-user-dir)" ]; then
@@ -37,17 +37,17 @@ else
 	fi
 	
 	# remove existing shortcuts
-	rm -f "$DESKTOP"/"$TARGET" "$DESKTOP"/lsd.desktop
-	rm -f ~/.local/share/applications/"$TARGET" ~/.local/share/applications/lsd.desktop
+	rm -f "$DESKTOP/$TARGET" "$DESKTOP"/lsd.desktop "$DESKTOP"/LSD.desktop
+	rm -f "~/.local/share/applications/$TARGET" ~/.local/share/applications/lsd.desktop ~/.local/share/applications/LSD.desktop
 	
 	# create the shortcuts with absolute paths
-	sed 's:$LSDROOT:'"$LSDROOT"':g' "$LSDROOT/$TARGET" > "$DESKTOP"/"$TARGET"
-	chmod +x "$DESKTOP"/"$TARGET"
+	sed 's:$LSDROOT:'"$LSDROOT"':g' "$LSDROOT/$TARGET" > "$DESKTOP/$TARGET"
+	chmod +x "$DESKTOP/$TARGET"
 	chmod +x "$LSDROOT/$EXEC"
 	
 	# also add icon to user window manager configuration
 	if [ ! -d "~/.local/share/applications" ]; then
 		mkdir -p ~/.local/share/applications
 	fi
-	cp -f "$DESKTOP"/"$TARGET" ~/.local/share/applications
+	cp -f "$DESKTOP/$TARGET" ~/.local/share/applications/
 fi

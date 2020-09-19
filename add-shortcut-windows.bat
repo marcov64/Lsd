@@ -32,8 +32,8 @@ ERASE /F "%APPDATA%\Microsoft\Windows\Start Menu\Programs\LSD.lnk" > NUL 2>&1
 ERASE /F "%APPDATA%\Microsoft\Windows\Start Menu\Programs\LMM.lnk" > NUL 2>&1
 
 rem create shortcuts in desktop and the user menu
-"%CD%\gnu\bin\Shortcut.exe" /f:"%USERPROFILE%\Desktop\LSD.lnk" /a:c /t:"%CD%\LMM.exe" /w:%CD% /r:7 /i:%CD%\src\icons\lmm.ico /d:"LSD Model Manager" > NUL 
+"%CD%\gnu\bin\Shortcut.exe" /f:"%USERPROFILE%\Desktop\LSD Model Manager.lnk" /a:c /t:"%CD%\LMM.exe" /w:%CD% /r:7 /i:%CD%\src\icons\lmm.ico /d:"LSD Model Manager" > NUL 
 
-COPY "%USERPROFILE%\Desktop\LSD.lnk" "%APPDATA%\Microsoft\Windows\Start Menu\Programs" > NUL
+COPY "%USERPROFILE%\Desktop\LSD Model Manager.lnk" "%APPDATA%\Microsoft\Windows\Start Menu\Programs" > NUL
 
 :end
