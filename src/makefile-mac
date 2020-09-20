@@ -19,7 +19,7 @@
 #**************************************************************
 
 CC=g++
-TARGET=../LMM
+TARGET=LMM
 SWITCH_CC=-DLMM -DNP -Wno-unused-result -std=c++14 -mmacosx-version-min=10.10 -O3
 
 # from here you should not need to modify anything
@@ -40,7 +40,7 @@ RM=rm -f -R
 INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(LSDROOT)/$(SRC)
 
 # adjust executable to use the provided Tcl/Tk frameworks
-TARGET_PKG=$(TARGET).app/Contents/MacOS/$(TARGET)
+TARGET_PKG=$(LSDROOT)/$(TARGET).app/Contents/MacOS/$(TARGET)
 
 $(TARGET_PKG): $(SRC_DIR)modman.o $(SRC_DIR)common.o 
 	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common.o \

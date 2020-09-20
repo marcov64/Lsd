@@ -1514,12 +1514,22 @@ proc ismousesnapon { platform } {
 # Read any entry widget (normal or disabled)
 #************************************************
 proc write_any { w val } {
-	if [ string equal [ $w cget -state ] disabled ] {
-		write_disabled $w $val
-	} else {
-		$w delete 0 end
-		$w insert 0 $val
+	if { ! [ winfo exists $w ] } {
+		return 0
 	}
+	
+	if [ string equal [ $w cget -state ] disabled ] {
+		return [ write_disabled $w $val ]
+	} else {
+		if [ catch {
+			$w delete 0 end
+			$w insert 0 $val
+		} ] {
+			return 0
+		}
+	}
+	
+	return 1
 }
 
 
@@ -1528,11 +1538,19 @@ proc write_any { w val } {
 # Update a disabled entry widget (do nothing if normal state)
 #************************************************
 proc write_disabled { w val } {
+	if { ! [ winfo exists $w ] } {
+		return 0
+	}
+	
 	if [ string equal [ $w cget -state ] disabled ] {
 		$w conf -state normal
 		write_any $w $val
 		$w conf -state disabled
+	} else {
+		return 0
 	}
+	
+	return 1
 }
 
 

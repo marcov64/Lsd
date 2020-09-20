@@ -352,7 +352,7 @@ void scan_used_lab( char *lab, int *choice )
 		cmd( "mouse_wheel $list.l.l" );
 
 		if ( caller != 1 )
-			cmd( "ttk::label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
+			cmd( "ttk::label $list.l3 -justify center -text \"(double-click to\nobserve the element)\"" );
 		else
 			cmd( "ttk::label $list.l3" );
 
@@ -462,7 +462,7 @@ void scan_using_lab( char *lab, int *choice )
 	cmd( "mouse_wheel $list.l.l" );
 
 	if ( caller != 1 )
-		cmd( "ttk::label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
+		cmd( "ttk::label $list.l3 -justify center -text \"(double-click to\nobserve the element)\"" );
 	else
 		cmd( "ttk::label $list.l3" );
 

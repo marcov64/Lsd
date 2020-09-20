@@ -1361,12 +1361,19 @@ SET_SHORTCUTS_RUN
 *********************************/
 void set_shortcuts_run( const char *window )
 {
-	cmd( "bind %s <KeyPress-s> { .b.r2.stop invoke }; bind %s <KeyPress-S> { .b.r2.stop invoke }", window, window );
-	cmd( "bind %s <KeyPress-p> { .b.r2.pause invoke }; bind %s <KeyPress-P> { .b.r2.pause invoke }", window, window );
-	cmd( "bind %s <KeyPress-r> { .b.r2.pause invoke }; bind %s <KeyPress-R> { .b.r2.pause invoke }", window, window );
-	cmd( "bind %s <KeyPress-f> { .b.r2.speed invoke }; bind %s <KeyPress-F> { .b.r2.speed invoke }", window, window );
-	cmd( "bind %s <KeyPress-o> { .b.r2.obs invoke }; bind %s <KeyPress-O> { .b.r2.obs invoke }", window, window );
-	cmd( "bind %s <KeyPress-d> { .b.r2.deb invoke }; bind %s <KeyPress-D> { .b.r2.deb invoke }", window, window );
+	int winExist;
+	
+	cmd( "set res [ winfo exists %s ]", window );
+	
+	if ( get_int( "res", &winExist ) )
+	{
+		cmd( "bind %s <KeyPress-s> { .b.r2.stop invoke }; bind %s <KeyPress-S> { .b.r2.stop invoke }", window, window );
+		cmd( "bind %s <KeyPress-p> { .b.r2.pause invoke }; bind %s <KeyPress-P> { .b.r2.pause invoke }", window, window );
+		cmd( "bind %s <KeyPress-r> { .b.r2.pause invoke }; bind %s <KeyPress-R> { .b.r2.pause invoke }", window, window );
+		cmd( "bind %s <KeyPress-f> { .b.r2.speed invoke }; bind %s <KeyPress-F> { .b.r2.speed invoke }", window, window );
+		cmd( "bind %s <KeyPress-o> { .b.r2.obs invoke }; bind %s <KeyPress-O> { .b.r2.obs invoke }", window, window );
+		cmd( "bind %s <KeyPress-d> { .b.r2.deb invoke }; bind %s <KeyPress-D> { .b.r2.deb invoke }", window, window );
+	}
 }
 
 
@@ -1450,6 +1457,7 @@ void cover_browser( const char *text1, const char *text2, bool run )
 		cmd( "bind . <F1> { LsdHelp runtime.html#buttons }" );
 		set_shortcuts_run( "." );
 		set_shortcuts_run( ".log" );
+		set_shortcuts_run( ".str" );
 	}
 	else
 	{

@@ -866,7 +866,7 @@ while ( true )
 					{
 						*choice = 0;
 						cmd( "newtop .da.a \"Save Plot\" { set choice 2 } .da" );
-						cmd( "ttk::label .da.a.l -text \"Select one plot from the \nPlots listbox before clicking 'OK'\"" );
+						cmd( "ttk::label .da.a.l -justify center -text \"Select one plot from the \nPlots listbox before clicking 'OK'\"" );
 						cmd( "pack .da.a.l -pady 10 -padx 5" );
 						cmd( "okhelpcancel .da.a b { set choice 1 } { LsdHelp menudata_res.html#postscript } { set choice 2 }" );
 						cmd( "showtop .da.a centerW 0 0 0" );
@@ -2019,7 +2019,7 @@ while ( true )
 			cmd( "ttk::frame .da.a.v" );
 			cmd( "ttk::label .da.a.v.l -text \"Series name (or part)\"" );
 			cmd( "ttk::entry .da.a.v.e -textvariable srchTxt -width 20 -justify center" );
-			cmd( "ttk::label .da.a.v.n -text \"(finds first instance only,\nuse 'F3' or 'Ctrl+N' to find others)\"" );
+			cmd( "ttk::label .da.a.v.n -justify center -text \"(finds first instance only,\nuse 'F3' or 'Ctrl+N' to find others)\"" );
 
 			cmd( "pack .da.a.v.l .da.a.v.e .da.a.v.n" );
 			cmd( "pack .da.a.v -pady 5 -padx 5" );
@@ -3804,7 +3804,7 @@ void set_cs_data( int *choice )
 	cmd( "pack $p.u.s.b -padx 5" );
 
 	cmd( "ttk::frame $p.u.s.r" );
-	cmd( "ttk::label $p.u.s.r.l -text \"Time step reference\nfor series sorting\"" );
+	cmd( "ttk::label $p.u.s.r.l -justify center -text \"Time step reference\nfor series sorting\"" );
 	cmd( "ttk::entry $p.u.s.r.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && ( $n in $list_times ) } { set res %%P; return 1 } { %%W delete 0 end; %%W insert 0 $res; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 	cmd( "write_disabled $p.u.s.r.e $res" );
 	cmd( "pack $p.u.s.r.l $p.u.s.r.e" );

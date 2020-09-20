@@ -20,7 +20,7 @@
 
 CC=g++
 WRC=windres
-TARGET=../LMM
+TARGET=LMM
 SWITCH_CC=-DLMM -DNP -O3 -mthreads -mwindows -static-libstdc++
 
 # from here you should not need to modify anything
@@ -40,7 +40,7 @@ RM=rm -f
 # variable to search for the tcl and tk headers
 INCLUDE=-I$(PATH_TCLTK_HEADER) -I$(LSDROOT)/$(SRC)
 
-$(TARGET).exe: $(SRC_DIR)modman.o $(SRC_DIR)common.o $(SRC_DIR)lmm_manifest.o
+$(LSDROOT)/$(TARGET).exe: $(SRC_DIR)modman.o $(SRC_DIR)common.o $(SRC_DIR)lmm_manifest.o
 	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common.o $(SRC_DIR)lmm_manifest.o \
 	-L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(TARGET)
 

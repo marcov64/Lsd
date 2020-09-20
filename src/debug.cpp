@@ -161,7 +161,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd( "bind .deb <KeyPress-w> { set choice 22 }; bind .deb <KeyPress-W> { set choice 22 }" );
 	cmd( "bind .deb <KeyPress-f> { .deb.b.move.search invoke }; bind .deb <KeyPress-F> { .deb.b.move.search invoke }" );
 	cmd( "bind .deb <KeyPress-p> { .deb.b.move.prev invoke }; bind .deb <KeyPress-P> { .deb.b.move.prev invoke }" );
-	cmd( "bind .deb <Left> {. deb.b.move.prev invoke }" );
+	cmd( "bind .deb <Left> { .deb.b.move.prev invoke }" );
 	cmd( "bind .deb <KeyPress-Escape> { set choice 7 }" );
 
 	// second row of buttons (if applicable)
@@ -233,21 +233,37 @@ while ( choice == 0 )
 				ttk::label .deb.v.v1.time1 -text \"Time step:\"; \
 				ttk::label .deb.v.v1.time2 -width 5 -anchor w -style hl.TLabel; \
 				ttk::label .deb.v.v1.val1 -text \"Value \"; \
-				ttk::entry .deb.v.v1.val2 -width 15 -validate key \
-				-justify center -state disabled -validatecommand { \
-					if [ string is double -strict %%P ] { \
-						set value %%P; \
+				ttk::entry .deb.v.v1.val2 -width 15 -justify center -state disabled -validate key -validatecommand { \
+					set n %%P; \
+					if [ regexp {^[0-9eE.+-]*$} \"$n\" ] { \
+						set value_temp $n; \
 						set value_change 1; \
 						return 1 \
 					} { \
 						%%W delete 0 end; \
-						if [ string is double -strict $value ] { \
-							%%W insert 0 [ format \"%%g\" $value ] \
+						if { $value_change } { \
+							%%W insert 0 $value_temp \
 						} { \
 							%%W insert 0 $value \
 						}; \
 						return 0 \
 					} \
+				}; \
+				bind .deb.v.v1.val2 <Left> { \
+					set c [ .deb.v.v1.val2 index insert ]; \
+					if { $c > 0 } { \
+						incr c -1; \
+						.deb.v.v1.val2 icursor $c \
+					}; \
+					break \
+				}; \
+				bind .deb.v.v1.val2 <Right> { \
+					set c [ .deb.v.v1.val2 index insert ]; \
+					if { $c < [ string length [ .deb.v.v1.val2 get ] ] } { \
+						incr c; \
+						.deb.v.v1.val2 icursor $c \
+					}; \
+					break \
 				}; \
 				ttk::label .deb.v.v1.obs -text \"\"; \
 				if { %d == 1 } { \
@@ -258,10 +274,9 @@ while ( choice == 0 )
 					pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 -side left \
 				} \
 			}", mode );
+
 		cmd( ".deb.v.v1.name2 conf -text \"%s\"", lab );
-		Tcl_LinkVar( inter, "time", ( char * ) &t, TCL_LINK_INT );
-		cmd( ".deb.v.v1.time2 conf -text \"$time      \"" );
-		Tcl_UnlinkVar( inter, "time" );
+		cmd( ".deb.v.v1.time2 conf -text \"%d      \"", t );
 	}
 
 	deb_show( r );
@@ -330,26 +345,19 @@ while ( choice == 0 )
 
 	asl = NULL;
 
-	debug_maincycle:
-
 	if ( mode == 1 )
 	{
 		cmd( "write_any .deb.b.act.stack.e $stack_flag" ); 
 		
 		if ( interact )
-		{	// write 3 time because of Tcl bug
-			cmd( "if [ string is double -strict $value ] { \
+			cmd( "if { ! $value_change } { \
 					.deb.v.v1.val2 configure -state normal; \
-					write_any .deb.v.v1.val2 [ format %%g $value ]; \
-					write_any .deb.v.v1.val2 [ format %%g $value ]; \
-					write_any .deb.v.v1.val2 [ format %%g $value ]; \
-					.deb.v.v1.val2 selection range 0 end; \
-					focus .deb.v.v1.val2; \
+					.deb.v.v1.val2 delete 0 end; \
+					catch { .deb.v.v1.val2 insert 0 [ format %%g $value ] }; \
 					bind .deb.v.v1.val2 <Return> { .deb.b.act.run invoke } \
-			}" );
-		}
+				}" );
 		else
-			cmd( "if [ string is double -strict $value ] { write_any .deb.v.v1.val2 [ format %%g $value ] }" ); 
+			cmd( "catch { write_any .deb.v.v1.val2 [ format %%g $value ] }" ); 
 	}
 
 	// resize the scrollbar if needed
@@ -358,30 +366,23 @@ while ( choice == 0 )
 
 	// debug command loop
 	while ( ! choice )
-	{
-		try
-		{
-			Tcl_DoOneEvent( 0 );
-		}
-		catch ( bad_alloc& ) 		// raise memory problems
-		{
-			throw;
-		}
-		catch ( ... )				// ignore the rest
-		{
-			goto debug_maincycle;
-		}
-	}   
+		Tcl_DoOneEvent( 0 );
 
 	if ( mode == 1 )
 	{
-		cmd( "if [ string is double -strict [ .deb.v.v1.val2 get ] ] { set value [ .deb.v.v1.val2 get ] }" ); 
-		cmd( "set stack_flag [ .deb.b.act.stack.e get ]" ); 
 		cmd( "bind .deb <KeyPress-g> { }; bind .deb <KeyPress-G> { }" );
-		i = choice;
-		cmd( "set choice $stack_flag" );
-		stack_info = choice;
-		choice = i;
+		cmd( "set stack_flag [ .deb.b.act.stack.e get ]" ); 
+		stack_info = get_int( "stack_flag", &stack_info );
+		
+		cmd( "if { $value_change } { \
+				if [ string is double -strict [ .deb.v.v1.val2 get ] ] { \
+					set value [ .deb.v.v1.val2 get ] \
+				} { \
+					catch { write_any .deb.v.v1.val2 [ format %%g $value ] }; \
+					ttk::messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid value\" -detail \"The entered value cannot be converted to a floating point number (with a dot decimal separator). The new value was ignored.\" \
+				}; \
+				set value_change 0 \
+			}" );
 	} 
 
 	switch ( choice )
@@ -1203,10 +1204,7 @@ while ( choice == 0 )
 	}
 }
 
-// only update if user typed a new valid value
-cmd( "if { $value_change == 0 } { set value %lf }", *res );
 *res = app_res;
-
 non_var = false;
 
 Tcl_UnlinkVar( inter, "value" );
@@ -1449,7 +1447,7 @@ void show_tmp_vars( object *r, bool update )
 		cmd( "pack $in.n.t -expand yes -fill both" );
 		cmd( "pack $in.n -expand yes -fill both" );
 		
-		cmd( "ttk::label $in.l3 -text \"(double-click name to\nchange to object)\"" );
+		cmd( "ttk::label $in.l3 -justify center -text \"(double-click name to\nchange to object)\"" );
 		cmd( "pack $in.l3 -pady 5" );
 
 		cmd( "showtop $in topleftW 0 1 0" );
@@ -1588,7 +1586,7 @@ void show_tmp_vars( object *r, bool update )
 					}
 			}
 			
-			if ( n > 0 )
+			if ( n == 0 )
 				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"(unknown)\"" );
 		}
 		
@@ -1733,7 +1731,7 @@ void show_neighbors( object *r, bool update )
 		cmd( "pack $N.n.t -expand yes -fill both" );
 		cmd( "pack $N.n -expand yes -fill both" );
 		
-		cmd( "ttk::label $N.l4 -text \"(double-click ID to\nchange to node)\"" );
+		cmd( "ttk::label $N.l4 -justify center -text \"(double-click ID to\nchange to node)\"" );
 		cmd( "pack $N.l4 -pady 5" );
 		
 		cmd( "showtop $N topleftW 0 1 0" );

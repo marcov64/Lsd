@@ -4037,7 +4037,7 @@ case 50:
 	cmd( "ttk::combobox .srch.i.e -width 20 -textvariable bidi -justify center -values $modElem" );
 	cmd( "pack .srch.i.l .srch.i.e" );
 
-	cmd( "ttk::label .srch.o -text \"(type the initial letters of the\nname, LSD will complete it)\"" );
+	cmd( "ttk::label .srch.o -justify center -text \"(type the initial letters of the\nname, LSD will complete it)\"" );
 	cmd( "pack .srch.i .srch.o -padx 5 -pady 5" );
 	cmd( "pack .srch.i" );
 
@@ -5330,17 +5330,17 @@ case 68:
 	cmd( "pack .s.t.l .s.t.e" );
 		
 	cmd( "ttk::frame .s.c" );
-	cmd( "ttk::label .s.c.l -text \"Number of parallel\nLSD processes\"" );
+	cmd( "ttk::label .s.c.l -justify center -text \"Number of parallel\nLSD processes\"" );
 	cmd( "ttk::spinbox .s.c.e -width 5 -from 1 -to 99 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".s.c.e insert 0 $cores" ); 
-	cmd( "ttk::label .s.c.w -text \"(a number higher than the\nnumber of processors/cores\nis not recommended)\"" );
+	cmd( "ttk::label .s.c.w -justify center -text \"(a number higher than the\nnumber of processors/cores\nis not recommended)\"" );
 	cmd( "pack .s.c.l .s.c.e .s.c.w" );
 	
 	cmd( "ttk::frame .s.p" );
-	cmd( "ttk::label .s.p.l -text \"Number of threads\nper LSD process\"" );
+	cmd( "ttk::label .s.p.l -justify center -text \"Number of threads\nper LSD process\"" );
 	cmd( "ttk::spinbox .s.p.e -width 5 -from 1 -to 99 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99 } { set threads %%P; return 1 } { %%W delete 0 end; %%W insert 0 $threads; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".s.p.e insert 0 $threads" ); 
-	cmd( "ttk::label .s.p.w -text \"(a number higher than 1\nis only useful when parallel\ncomputation is enabled)\"" );
+	cmd( "ttk::label .s.p.w -justify center -text \"(a number higher than 1\nis only useful when parallel\ncomputation is enabled)\"" );
 	cmd( "pack .s.p.l .s.p.e .s.p.w" );
 	
 	cmd( "ttk::frame .s.o" );
@@ -5876,7 +5876,7 @@ case 88:
 	cmd( "pack $TT.l.l $TT.l.n -padx 2" );
 
 	cmd( "ttk::frame $TT.v" );
-	cmd( "ttk::label $TT.v.l -text \"Object representing\nthe network nodes\"" );
+	cmd( "ttk::label $TT.v.l -justify center -text \"Object representing\nthe network nodes\"" );
 
 	cmd( "ttk::frame $TT.v.t" );
 	cmd( "ttk::scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );
@@ -5953,7 +5953,7 @@ case 89:
 	cmd( "newtop $TT \"Save Network\" { set choice 2 }" );
 
 	cmd( "ttk::frame $TT.v" );
-	cmd( "ttk::label $TT.v.l -text \"Object containing\nthe network nodes\"" );
+	cmd( "ttk::label $TT.v.l -justify center -text \"Object containing\nthe network nodes\"" );
 
 	cmd( "ttk::frame $TT.v.t" );
 	cmd( "ttk::scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );
@@ -6045,7 +6045,7 @@ case 93:
 	cmd( "newtop $TT \"Unload Network\" { set choice 2 }" );
 
 	cmd( "ttk::frame $TT.v" );
-	cmd( "ttk::label $TT.v.l -text \"Object containing\nthe network nodes\"" );
+	cmd( "ttk::label $TT.v.l -justify center -text \"Object containing\nthe network nodes\"" );
 
 	cmd( "ttk::frame $TT.v.t" );
 	cmd( "ttk::scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );

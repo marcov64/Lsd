@@ -5194,7 +5194,7 @@ int lsdmain( int argn, char **argv )
 			cmd( "$e.l.l insert end \"(none)\"" );
 
 		cmd( "ttk::label $e.l3 -text \"(double-click to show the file)\"" );
-		cmd( "ttk::label $e.l4 -text \"Extra files are added using\n'Model Options' in menu 'Model'\"" );
+		cmd( "ttk::label $e.l4 -justify center -text \"Extra files are added using\n'Model Options' in menu 'Model'\"" );
 
 		cmd( "pack $e.lf $e.l $e.l3 $e.l4 -pady 5 -padx 5" );
 

@@ -251,11 +251,8 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 bool set_env( bool set )
 {
 	bool res = true;
-	char *file, *lsd_root, *lsd_bin, *path, *exec_path = NULL;
-	const char *compilers[ ] = WIN_COMP_PATH;
-	int i, st;
+	char *lsd_root, *exec_path = NULL;
 	static char *lsd_root_env = NULL, *tcl_lib_env = NULL, *path_env = NULL;
-	struct stat info;
 
 	if ( set )
 	{
@@ -282,6 +279,11 @@ bool set_env( bool set )
 		}
 		
 #ifdef _WIN32
+		char *file, *lsd_bin, *path;
+		const char *compilers[ ] = WIN_COMP_PATH;
+		int i, st;
+		struct stat info;
+		
 		path = getenv( "PATH" );
 		
 		if ( lsd_root != NULL && getenv( TCL_LIB_VAR ) == NULL )

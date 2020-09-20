@@ -29,7 +29,7 @@
 #define _LSD_MAJOR_ 8
 #define _LSD_MINOR_ 0
 #define _LSD_VERSION_ "8.0-beta-1"
-#define _LSD_DATE_ "September 11 2020"   // __DATE__
+#define _LSD_DATE_ "September 18 2020"   // __DATE__
 
 // standard libraries used
 #include <cstdlib>
