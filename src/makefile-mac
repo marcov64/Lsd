@@ -45,7 +45,7 @@ TARGET_PKG=$(LSDROOT)/$(TARGET).app/Contents/MacOS/$(TARGET)
 $(TARGET_PKG): $(SRC_DIR)modman.o $(SRC_DIR)common.o 
 	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common.o \
 	-F$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(TARGET_PKG)
-	touch -c -f $(TARGET).app
+	touch -c -f $(LSDROOT)/$(TARGET).app
 
 $(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLUDE)

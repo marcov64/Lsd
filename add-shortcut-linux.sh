@@ -22,7 +22,7 @@ if [ "$1" = "-h" ]; then
 	echo "Add a shortcut to LSD LMM in the desktop"
 	echo "Usage: ./add-shortcut.sh [full path to desktop directory]"
 else
-	TARGET="LSD Model Manager.desktop"
+	TARGET="LMM.desktop"
 	EXEC=LMM
 	LSDROOT="$( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P )"
 	if [ -x "$(command -v xdg-user-dir)" ]; then
@@ -43,7 +43,10 @@ else
 	# create the shortcuts with absolute paths
 	sed 's:$LSDROOT:'"$LSDROOT"':g' "$LSDROOT/$TARGET" > "$DESKTOP/$TARGET"
 	chmod +x "$DESKTOP/$TARGET"
-	chmod +x "$LSDROOT/$EXEC"
+
+	if command -v gio &> /dev/null; then
+		gio set "$DESKTOP/$TARGET" "metadata::trusted" true
+	fi
 	
 	# also add icon to user window manager configuration
 	if [ ! -d "~/.local/share/applications" ]; then

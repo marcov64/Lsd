@@ -42,7 +42,7 @@ INCLUDE=-I$(PATH_TCLTK_HEADER) -I$(LSDROOT)/$(SRC)
 
 $(LSDROOT)/$(TARGET).exe: $(SRC_DIR)modman.o $(SRC_DIR)common.o $(SRC_DIR)lmm_manifest.o
 	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common.o $(SRC_DIR)lmm_manifest.o \
-	-L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(TARGET)
+	-L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(LSDROOT)/$(TARGET)
 
 $(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLUDE)

@@ -18,8 +18,8 @@ src\system_options-mac.txt
 src\system_options.txt
 SyncToy*
 LMM
+LMM.desktop
 lmm_options.txt
-LSD.desktop
 LSD*.exe
 elements.txt
 makefile
