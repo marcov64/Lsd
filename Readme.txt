@@ -25,6 +25,7 @@ Cygwin 3.1.6 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
 Makeself is copyrighted by Stephane Peter under GPL2, https://makeself.io
 Gnuplot 5.2.8 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
 Eigen 3.3.7 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
+subbotools 1.3 is copyrighted by Giulio Bottazzi under GPL2, http://cafim.sssup.it/~giulio/software/subbotools
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest.nps.edu
 seticon/osxconutils is copyrighted by Sveinbjorn Thordarson, https://sveinbjorn.org/osxiconutils
@@ -118,17 +119,17 @@ For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
 4.1 Windows installation (64-bit ONLY)
 **************************************
 
-IMPORTANT: from version 7.3 and higher, LSD supports only Windows 64-bit. If you must run LSD in a Windows 32-bit computer, please use the 7.2 version which can be downloaded from the same site indicated below. If you are unsure of the version of Windows in your computer, please check in "Windows > Settings > System > About > System type".
+IMPORTANT: from version 8.0 and higher, LSD supports only Windows 64-bit. If you must run LSD in a Windows 32-bit computer, please use the 7.2 version which can be downloaded from the same site indicated below. If you are unsure of the version of Windows in your computer, please check in "Windows > Settings > System > About > System type".
 
-To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-7-3-0.exe). Download it, double click on the installer file, and follow the instructions. The installer executable can be deleted after installation.
+To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-8-0-stable-1.exe). Download it, double-click on the installer file, and follow the instructions. The installer executable can be deleted after the installation.
  
 Alternatively, or in the case of problems using the installer, it is also possible to simply unzip a LSD distribution file archive on the desired folder. In most cases "C:\" (the root of the hard disk) is a good option. The steps to perform a manual installation are:
 
 1. In an internet browser, open the site https://github.com/marcov64/Lsd/releases , choose the desired release, and click on the respective "Source code (zip)" link to download the LSD distribution file.
 
-2. Open Windows Explorer and double-click on the downloaded LSD distribution file to open it (e.g., LSD-7.3-master.zip).
+2. Open Windows Explorer and double-click on the downloaded LSD distribution file to open it (e.g., LSD-8.0-master.zip).
 
-3. Drag the single folder inside the distribution file (e.g., LSD-7.3-master) to the desired location. The recommended is "C:\", normally labeled as "Local Disk (C:)" in Windows Explorer.
+3. Drag the single folder inside the distribution file (e.g., LSD-8.0-master) to the desired location. The recommended is "C:\", normally labeled as "Local Disk (C:)" in Windows Explorer.
 
 This will create the whole LSD folder structure. The distribution file may be deleted after installation.
 
@@ -165,13 +166,15 @@ Cygwin compiler is easier to install as it does not require the user to deal wit
 4.2 macOS installation (10.10+ ONLY)
 ************************************
 
-To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-7-3-0.dmg). Download it, double click on the package file to mount it, double click on the LSD Installer application, and follow the instructions. The installer package can be deleted after installation.
+To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-8-0-stable-1.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, and follow the instructions. The installer package can be unmounted and deleted after the installation.
  
-To manually install LSD, simply unzip a LSD distribution file (e.g., LSD-7.3-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
+IMPORTANT: please pay attention to the Terminal windows opened by the installer. They may require your interaction, according to the instructions of the installer. Do not close any Terminal window which is not inactive. If the Terminal window is closed or interrupted by accident, please cancel the installation and restart.
+
+To manually install LSD, simply unzip a LSD distribution file (e.g., LSD-8.0-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
 
 Next, open the Terminal application (located inside the Utilities app folder), and type the following commands (each line must be completed by pressing "Enter"):
 
- cd ~/Lsd-7.3-master
+ cd ~/Lsd-8.0-master
  ./add-shortcut-mac.sh
 
 After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD. A shortcut is also created in the computer Applications folder.
@@ -203,17 +206,17 @@ If you delete or cannot create the LSD shortcuts, you can still run the app name
 4.3 Linux installation
 **********************
 
-To install LSD, the simplest alternative is to use the installer script package (e.g. LSD-installer-linux-7-3-0.zip). Download, extract and execute it. If your file manager does not support extracting compressed files or executing scripts directly, open a terminal, and type:
+To install LSD, the simplest alternative is to use the installer script package (e.g. LSD-installer-linux-8-0-stable-1.zip). Download, extract and execute it. If your file manager does not support extracting compressed files or executing scripts directly, open a terminal, and type (replacing the X's with the actual values):
 
  cd ~/Downloads
- unzip LSD-installer-linux-7-3-0.sh
- ./LSD-installer-linux-7-3-0.sh
+ unzip LSD-installer-linux-8-X-xxxx-X.sh
+ ./LSD-installer-linux-8-X-xxxx-X.sh
 
-You may have to adjust the downloads directory according to your computer. When the LSD installer program opens, follow the instructions to install LSD and the required packages. The installer requires Tcl/Tk to be installed. This is the default in most distributions. The installer script will ask you to install Tcl/Tk if this is not the case. The installer package and script can be deleted after installation.
+You may have to adjust the download directory according to your computer. When the LSD installer program opens, follow the instructions to install LSD and the required packages. The installer requires Tcl/Tk to be installed. This is the default in most distributions. The installer script will ask you to install Tcl/Tk if this is not the case. The installer package and script can be deleted after the installation.
 
-Alternatively, or in the case of problems using the installer script, it is also possible to simply unpack the LSD distribution file (e.g., Lsd-7.3-master.tar.gz) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using your file manager or command line. This will create the whole directory structure. In terminal, you may use the command (".tar.gz" extension files only):
+Alternatively, or in the case of problems using the installer script, it is also possible to simply unpack the LSD distribution file (e.g., Lsd-8.0-master.tar.gz) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using your file manager or command line. This will create the whole directory structure. In terminal, you may use the command (".tar.gz" extension files only):
 
- tar -xzf Lsd-7.3-master.tar.gz
+ tar -xzf Lsd-8.0-master.tar.gz
 
 The distribution file may be deleted after installation.
 

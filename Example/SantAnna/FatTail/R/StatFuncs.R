@@ -11,7 +11,6 @@ subboMinSample <- 50           # minimum sample size in Subbotin fits (significa
 subboBlimit <- 0               # maximum limit for b to be considered valid (0=no limit)
 useSubbotools <- TRUE          # use Subbotools (T) or normalp package (F)
 useASubbotin <- TRUE           # use symmetric (=F) or asymmetric Subbotin (=T)
-subbotoolsFolder <- "subbotools-1.3.0\\"  # subbotools location (leave blank in linux)
 useALaplace <- TRUE            # use symmetric (=F) or asymmetric Laplace (=T)
 nBins  <- 20                   # number of bins to use in histograms
 nSample <- 50                  # sample size for goodness of fit tests
@@ -29,9 +28,6 @@ require( LaplacesDemon, warn.conflicts = FALSE, quietly = TRUE )
 require( normalp, warn.conflicts = FALSE, quietly = TRUE )
 require( robustbase, warn.conflicts = FALSE, quietly = TRUE )
 require( minpack.lm, warn.conflicts = FALSE, quietly = TRUE )
-
-if( .Platform$OS.type == "unix" )
-  subbotoolsFolder <- ""
 
 
 # ==== Evaluation function to compute and add the Subbotin b to data ====
@@ -344,8 +340,8 @@ exec_subbofit <- function( x, type  = "symmetric" ) {
 
   cat( "Running external SubboFit on a MC run ... " )
 
-  outStr <- system2( paste0( subbotoolsFolder, command ), args = "-O 3",
-                     input = as.character( x ), stdout = TRUE, stderr = FALSE )
+  outStr <- system2( command, args = "-O 3", input = as.character( x ), 
+                     stdout = TRUE, stderr = FALSE )
   try( subboFit <- scan( textConnection ( outStr ), quiet = TRUE ), silent = TRUE )
 
   if( type == "asymmetric" )

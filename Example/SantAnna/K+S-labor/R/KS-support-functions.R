@@ -30,13 +30,6 @@ suppressPackageStartupMessages( require( np, warn.conflicts = FALSE, quietly = T
 suppressPackageStartupMessages( require( extrafont, warn.conflicts = FALSE, quietly = TRUE ) )
 invisible( capture.output( require( mFilter, warn.conflicts = FALSE, quietly = TRUE ) ) )
 
-# subbotools location (leave blank in linux/Mac)
-if( tolower( .Platform$OS.type ) == "windows" ){
-  subbotoolsFolder <- "subbotools-1.3.0\\"
-} else{
-  subbotoolsFolder <- ""
-}
-
 # remove warnings for support functions
 # !diagnostics suppress = paramp
 
@@ -169,8 +162,8 @@ exec_subbofit <- function( x, type  = "symmetric" ) {
 
   cat( "", as.character( Sys.time( ) ), "->", type, "subbofit, n =", length( x ), "... " )
 
-  outStr <- system2( paste0( subbotoolsFolder, command ), args = "-O 3",
-                     input = as.character( x ), stdout = TRUE, stderr = FALSE )
+  outStr <- system2( command, args = "-O 3", input = as.character( x ), 
+                     stdout = TRUE, stderr = FALSE )
   try( subboFit <- sapply( scan( textConnection ( outStr ), what = character( ), quiet = TRUE ),
                            as.numeric, silent = TRUE ),
        silent = TRUE )
