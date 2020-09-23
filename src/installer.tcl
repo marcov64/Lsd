@@ -451,6 +451,8 @@ set issues [ list ]
 #
 
 if [ string equal $CurPlatform windows ] {
+	set res [ catch { set compPath [ exec where g++ ] } ]
+	
 	if { ! [ add_user_path "$LsdRoot/gnu/bin" ] } {
 		if [ string equal [ ttk::messageBox -parent "" -type okcancel -default ok -title Error -icon error -message "Cannot add LSD to PATH" -detail "LSD libraries folder could not be added to the user PATH environment variable.\n\nYou may try to repeat the installation or manually add the folder '$LsdRoot/gnu/bin' to the PATH variable following the steps described in 'Readme.txt'.\n\nPress 'OK' if you want to continue the installation anyway or 'Cancel' to exit." ] ok ] {
 		
@@ -462,6 +464,11 @@ if [ string equal $CurPlatform windows ] {
 		
 			exit 10
 		}
+	# if a compiler exists and is ahead on path, warn user
+	} elseif { $res == 0 } {
+		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Another C++ compiler already set" -detail "There is another C++ compiler already installed ('$compPath'). LSD will use it but it is not guaranteed this compiler is adequately configured to support LSD.\n\nCheck in 'Readme.txt' the required steps to properly configure your external compiler or remove/uninstall it before using LSD.\n\nInstallation will continue but you may have to fix this problem so LSD can work reliably."
+
+			lappend issues "External compiler maybe not configured (unknown)"
 	}
 }
 

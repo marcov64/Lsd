@@ -54,6 +54,8 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#undef DELETE
+#undef THIS
 #else
 #include <unistd.h>	
 #endif
