@@ -157,9 +157,9 @@ ATTENTION: If Gnuplot is not included in the Windows PATH environment variable, 
 
 USING DIFFERENT COMPILERS (optional):
 
-It is possible to use the GNU 64-bit C++ compiler you already have in your computer. Indeed, LSD by default uses any compiler already installed in the computer. Only in case of none being available LSD uses its embedded compiler. However, the user may want to install and manage its own compiler. LSD supports any version of GNU 64-bit C++ compiler supporting C++11 standard (Cygwin or MSYS2 mingw-w64-x86_64 versions are both fine).
+It is possible to use the GNU 64-bit C++ compiler you already have in your computer. Indeed, LSD by default uses any compiler already installed in the computer. Only in case of none being available LSD uses its embedded compiler. However, the user may want to install and manage its own compiler. Or the compiler may need to be upgraded or have all the required optional libraries installed. LSD supports any version of GNU 64-bit C++ compiler supporting C++11 standard (Cygwin or MSYS2 mingw-w64-x86_64 versions are both fine), but requires also Tcl/Tk 8.6 and zlib 1.2 libraries to be installed with it.
 
-Cygwin compiler is easier to install as it does not require the user to deal with a command prompt. MSYS2 compiler installer is recommended only for advanced users and requires the use of the bash terminal. Instructions for installing both are available at the end of this document.
+Cygwin compiler is easier to install as it does not require the user to deal with a command prompt. MSYS2 compiler installer is recommended only for advanced users and requires the use of the bash terminal. Instructions for installing both are available at the end of this document. If they are already installed, the instructions can be also followed to make sure the installation is complete.
 
 
 ************************************
@@ -270,7 +270,7 @@ IMPORTANT: if you modified the makefile to compile LMM, the same changes need to
 5.1 Cygwin compiler installation (optional)
 *******************************************
 
-The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64"). If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, four non-default packages are REQUIRED by LSD (gcc-core, mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Lastly, Cygwin must be added to the PATH environment variable (not done by the installer).
+The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64") or to the existing Cygwin directory in case of an update. If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, four non-default packages are REQUIRED by LSD (gcc-core, mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Alternatively, the pure-Cygwin, non-MinGW 64-bit gcc compiler can be also used, if matched with the corresponding Tcl/Tk and zlib libraries. Lastly, Cygwin must be added to the PATH environment variable (not done by the installer).
 
 Step-by-step procedure to install the Cygwing 64-bit compiler (an internet connection is required):
 
@@ -291,13 +291,13 @@ Step-by-step procedure to install the Cygwing 64-bit compiler (an internet conne
 5.2 MSYS2 compiler installation (optional)
 ******************************************
 
-Please note that MSYS2 compiler is NOT required if the above instructions for installing Cygwin compiler were already performed.
+Please note that MSYS2 compiler is NOT required (or recommended) if the above instructions for installing Cygwin compiler were already performed. If performing an update over an existing MSYS2 installation, it is recommended to uninstall the previous version before proceeding. If an on-place update is performed, without removing the existing version, start on step 2 below.
 
 Step-by-step procedure to install the MSYS2 64-bit compiler (an internet connection is required):
 
-1. Download and install the MSYS2 64-bit installer from https://www.msys2.org.
+1. Download and execute the MSYS2 64-bit installer from https://www.msys2.org.
 
-2. Open the MSYS2 shell and update MSYS2 using the command:
+2. Open the MSYS2 shell (icon on Start Menu) and update MSYS2 using the command:
 
  pacman -Syu
 
