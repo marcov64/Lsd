@@ -354,6 +354,9 @@ catch { image create photo hideImg -file "$RootLsd/$LsdSrc/icons/hide.png" }
 catch { image create photo helpImg -file "$RootLsd/$LsdSrc/icons/help.png" }
 catch { image create photo reloadImg -file "$RootLsd/$LsdSrc/icons/reload.png" }
 catch { image create photo structImg -file "$RootLsd/$LsdSrc/icons/struct.png" }
+catch { image create photo addvarImg -file "$RootLsd/$LsdSrc/icons/addvar.png" }
+catch { image create photo addparImg -file "$RootLsd/$LsdSrc/icons/addpar.png" }
+catch { image create photo addobjImg -file "$RootLsd/$LsdSrc/icons/addobj.png" }
 catch { image create photo initImg -file "$RootLsd/$LsdSrc/icons/init.png" }
 catch { image create photo numberImg -file "$RootLsd/$LsdSrc/icons/number.png" }
 catch { image create photo runImg -file "$RootLsd/$LsdSrc/icons/run.png" }

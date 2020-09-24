@@ -939,6 +939,9 @@ int browse( object *r, int *choice )
 			cmd( "ttk::button .bbar.save -image saveImg -style Toolbutton -command { set choice 18 }" );
 			cmd( "ttk::button .bbar.struct -image structImg -style Toolbutton -command { set strWindowOn [ expr ! $strWindowOn ]; set choice 70 } -state $strWindowB" );
 			cmd( "ttk::button .bbar.find -image findImg -style Toolbutton -command { set choice 50 }" );
+			cmd( "ttk::button .bbar.addvar -image addvarImg -style Toolbutton -command { set param 0; set choice 2 }" );
+			cmd( "ttk::button .bbar.addpar -image addparImg -style Toolbutton -command { set param 1; set choice 2 }" );
+			cmd( "ttk::button .bbar.addobj -image addobjImg -style Toolbutton -command { set choice 3 }" );
 			cmd( "ttk::button .bbar.init -image initImg -style Toolbutton -command { set choice 21 }" );
 			cmd( "ttk::button .bbar.number -image numberImg -style Toolbutton -command { set choice 19 }" );
 			cmd( "ttk::button .bbar.set -image setImg -style Toolbutton -command { set choice 22 }" );
@@ -947,7 +950,7 @@ int browse( object *r, int *choice )
 			cmd( "ttk::button .bbar.result -image resultImg -style Toolbutton -command { set choice 26 }" );
 			cmd( "ttk::label .bbar.tip -textvariable ttip -style graySmall.TLabel -width 17 -anchor w" );
 
-			cmd( "bind .bbar.open <Enter> { set ttip \"Open...\" }" );
+			cmd( "bind .bbar.open <Enter> { set ttip \"Load...\" }" );
 			cmd( "bind .bbar.open <Leave> { set ttip \"\" }" );
 			cmd( "bind .bbar.reload <Enter> { set ttip \"Reload\" }" );
 			cmd( "bind .bbar.reload <Leave> { set ttip \"\" }" );
@@ -957,6 +960,12 @@ int browse( object *r, int *choice )
 			cmd( "bind .bbar.struct <Leave> { set ttip \"\" }" );
 			cmd( "bind .bbar.find <Enter> { set ttip \"Find element...\" }" );
 			cmd( "bind .bbar.find <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.addvar <Enter> { set ttip \"Add variable...\" }" );
+			cmd( "bind .bbar.addvar <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.addpar <Enter> { set ttip \"Add parameter...\" }" );
+			cmd( "bind .bbar.addpar <Leave> { set ttip \"\" }" );
+			cmd( "bind .bbar.addobj <Enter> { set ttip \"Add object...\" }" );
+			cmd( "bind .bbar.addobj <Leave> { set ttip \"\" }" );
 			cmd( "bind .bbar.init <Enter> { set ttip \"Initial values...\" }" );
 			cmd( "bind .bbar.init <Leave> { set ttip \"\" }" );
 			cmd( "bind .bbar.number <Enter> { set ttip \"Num. objects...\" }" );
@@ -970,7 +979,7 @@ int browse( object *r, int *choice )
 			cmd( "bind .bbar.result <Enter> { set ttip \"Analysis...\" }" );
 			cmd( "bind .bbar.result <Leave> { set ttip \"\" }" );
 
-			cmd( "pack .bbar.open .bbar.reload .bbar.save .bbar.struct .bbar.find .bbar.init .bbar.number .bbar.set .bbar.run .bbar.data .bbar.result .bbar.tip -side left" );
+			cmd( "pack .bbar.open .bbar.reload .bbar.save .bbar.struct .bbar.find .bbar.addvar .bbar.addpar .bbar.addobj .bbar.init .bbar.number .bbar.set .bbar.run .bbar.data .bbar.result .bbar.tip -side left" );
 			cmd( "pack .bbar -padx 3 -anchor w -fill x" );
 		}
 
@@ -1749,7 +1758,9 @@ case 6:
 	{
 		add_description( lab_old, "Object", "(no description available)" );
 		cur_descr = search_description( lab_old );
-	} 
+	}
+	
+	skip_next_obj( r, &num );
 	  
 	cmd( "set to_compute %d", r->to_compute ? 1 : 0 );
 
@@ -1757,10 +1768,18 @@ case 6:
 	cmd( "newtop $T \"Change Object\" { set choice 2 }" );
 
 	cmd( "ttk::frame $T.h" );
+	
+	cmd( "ttk::frame $T.h.o" );
+	cmd( "ttk::label $T.h.o.lab -text \"Object:\"" );
+	cmd( "ttk::label $T.h.o.ent -style hl.TLabel -text $lab" );
+	cmd( "pack $T.h.o.lab $T.h.o.ent -side left -padx 2" );
 
-	cmd( "ttk::label $T.h.lab_ent -text \"Object:\"" );
-	cmd( "ttk::label $T.h.ent_var -style hl.TLabel -text $lab" );
-	cmd( "pack $T.h.lab_ent $T.h.ent_var -side left -padx 2" );
+	cmd( "ttk::frame $T.h.i" );
+	cmd( "ttk::label $T.h.i.lab -text \"Number of instances:\"" );
+	cmd( "ttk::label $T.h.i.ent -style hl.TLabel -text %d", num );
+	cmd( "pack $T.h.i.lab $T.h.i.ent -side left -padx 2" );
+	
+	cmd( "pack $T.h.o $T.h.i" );
 
 	cmd( "ttk::frame $T.b0" );
 	cmd( "ttk::button $T.b0.prop -width $butWid -text Rename -command { set useCurrObj yes; set choice 83 } -underline 0" );
