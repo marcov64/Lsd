@@ -140,6 +140,10 @@ proc setstyles { } {
 	# label widget styles
 	ttk::style configure TLabel -anchor center
 	ttk::style configure hl.TLabel -foreground $colorsTheme(hl)
+	ttk::style configure sel.TLabel -foreground $colorsTheme(sfg) \
+		-background $colorsTheme(sbg)
+	ttk::style configure selHl.TLabel -foreground $colorsTheme(hl) \
+		-background $colorsTheme(sbg)
 	ttk::style configure bold.TLabel \
 		-font [ font create -weight bold ]
 	ttk::style configure hlBold.TLabel -foreground $colorsTheme(hl) \

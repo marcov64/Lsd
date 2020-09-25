@@ -4062,7 +4062,7 @@ case 50:
 
 	cmd( "okcancel .srch b { set choice 1 } { set choice 2 }" );
 
-	cmd( "bind .srch.i.e <KeyPress-Return> { set choice 1 }" );
+	cmd( "bind .srch.i.e <KeyPress-Return> { set choice 1; break }" );
 	cmd( "bind .srch.i.e <KeyRelease> { \
 			if { %%N < 256 && [ info exists modElem ] } { \
 				set b [ .srch.i.e index insert ]; \

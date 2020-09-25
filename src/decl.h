@@ -253,7 +253,7 @@ void create_maverag( int *choice );
 void create_series( int *choice, bool mc, vector < string > var_names );
 void create_table_init( object *r, FILE *frep );
 void dataentry_sensitivity( int *choice, sense *s, int nval = 0 );
-void deb_show( object *r );
+void deb_show( object *r, const char *hl_var );
 void delete_bridge( object *d );
 void disable_buttons_run( void );
 void draw_buttons( void );

@@ -58,6 +58,7 @@ set modcolorD	SlateGray3	; # color of model label (dark mode)
 set hmargin		20	; # horizontal right margin from the screen borders
 set vmargin		20	; # vertical margins from the screen borders
 set bordsize	2	; # width of windows borders
+set vmenusize	20	; # height of system menu bar
 set tbarsize	60	; # size in pixels of bottom taskbar (exclusion area)
 set hsizeL		800	; # LMM horizontal size in pixels
 set vsizeL		600	; # LMM vertical size in pixels

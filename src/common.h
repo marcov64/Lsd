@@ -111,7 +111,7 @@
 						   "lsdTheme" }
 #define LMM_OPTIONS_DEFAULT { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", \
 							  "$DefaultWish", "src", "$DefaultFontSize", \
-							  "2", "1", "2", \
+							  "4", "1", "2", \
 							  "0", "0", "Work", \
 							  "$DefaultDbgExe", "1", "#", \
 							  "$DefaultTheme" }
@@ -529,7 +529,7 @@ char *search_lsd_root( char *start_path );
 char *str_upr( char *s );
 const char *signal_name( int signum );
 double get_double( const char *tcl_var, double *var = NULL );
-int deb( object *r, object *c, char const *lab, double *res, bool interact = false );
+int deb( object *r, object *c, char const *lab, double *res, bool interact = false, const char *hl_var = "" );
 int get_int( const char *tcl_var, int *var = NULL );
 int lsdmain( int argn, char **argv );
 long get_long( const char *tcl_var, long *var = NULL );
