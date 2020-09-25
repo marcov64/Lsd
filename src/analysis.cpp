@@ -2437,7 +2437,7 @@ while ( true )
 							cur_var[ i ] = var_names[ i ][ j ];
 						
 						cmd( "set vname [ lindex [ split \"%s\" ] 0 ]", var_names[ 0 ][ j ].c_str( ) );
-						cmd( "set vtag [ string replace [ lindex [ split \"%s\" ] 1 ] 0 3 ]", var_names[ 0 ][ j ].c_str( ) );
+						cmd( "set ftag [ string replace [ lindex [ split \"%s\" ] 1 ] 0 3 ]", var_names[ 0 ][ j ].c_str( ) );
 						
 						create_series( choice, true, cur_var );
 						
@@ -7015,7 +7015,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 		cmd( "set thflt 0" );
 		cmd( "set bido 1" );
 		cmd( "set bidi 1" );
-		cmd( "set vtag 1" );
+		cmd( "set ftag 1" );
 		cmd( "set confi 95" );
 
 		cmd( "newtop .da.s \"New Series Options\" { set choice 2 } .da" );
@@ -7084,7 +7084,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 
 		cmd( "ttk::frame .da.s.t" );
 		cmd( "ttk::label .da.s.t.tnv -text \"New series tag\"" );
-		cmd( "ttk::entry .da.s.t.tv -width 20 -textvariable vtag -justify center" );
+		cmd( "ttk::entry .da.s.t.tv -width 20 -textvariable ftag -justify center" );
 		cmd( "pack .da.s.t.tnv .da.s.t.tv" );
 
 		cmd( "pack .da.s.o .da.s.f .da.s.i .da.s.n .da.s.t -padx 5 -pady 5" );
@@ -7241,7 +7241,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 	{
 		lapp = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 		strcpy( vs[ num_var ].label, lapp );
-		lapp = ( char * ) Tcl_GetVar( inter, "vtag", 0 );
+		lapp = ( char * ) Tcl_GetVar( inter, "ftag", 0 );
 		sprintf( vs[ num_var ].tag, "%s_%s", mc ? "MC" : "C", lapp );
 		vs[ num_var ].rank = var_num;
 			
