@@ -79,6 +79,8 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 	if ( mode == 2 )
 		cover_browser( "Data Browser...", "Please exit Data Browser\nbefore using the LSD Browser.", false );
+	else
+		set_buttons_run( false );
 
 	cmd( "set deb .deb" );
 	cmd( "if { ! [ winfo exists .deb ] } { \
@@ -500,6 +502,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				switch ( mode )
 				{
 					case 1:		// prevent changing run parameters when only data browse was called
+						set_buttons_run( true );
 						quit = 1;
 						debug_flag = false;
 						break;
@@ -509,7 +512,10 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 						break;
 
 					case 3:
-						cmd( "focustop .log" );
+						cmd( "focustop ." );
+						
+					default:
+						set_buttons_run( true );
 				}
 
 				break;
@@ -952,6 +958,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				for ( cur = r; cur->up != NULL; cur = cur->up );
 				reset_end( cur );
 				analysis( &choice );
+				cmd( "focustop .deb" );
 				
 				choice = 0;
 				redraw = false;
@@ -1010,6 +1017,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			// show v[...] variables 
 			case 15:
 				show_tmp_vars( r, false );
+				cmd( "focustop .deb" );
 
 				choice = 0;
 				redraw = false;
@@ -1301,6 +1309,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			// Network
 			case 22:
 				show_neighbors( r, false );
+				cmd( "focustop .deb" );
 				
 				choice = 0;
 				redraw = false;

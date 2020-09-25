@@ -255,7 +255,6 @@ void create_table_init( object *r, FILE *frep );
 void dataentry_sensitivity( int *choice, sense *s, int nval = 0 );
 void deb_show( object *r, const char *hl_var );
 void delete_bridge( object *d );
-void disable_buttons_run( void );
 void draw_buttons( void );
 void draw_obj( object *t, object *sel, int level = 0, int center = 0, int from = 0, bool zeroinst = false );
 void edit_data( object *root, int *choice, char *obj_name );
@@ -324,6 +323,7 @@ void sensitivity_sequential( int *findexSens, sense *s, double probSampl = 1.0 )
 void sensitivity_undefined( void );
 void set_all( int *choice, object *original, char *lab, int lag );
 void set_blueprint( object *container, object *r );
+void set_buttons_run( bool enable );
 void set_cs_data( int *choice );
 void set_lab_tit( variable *var );
 void set_obj_number( object *r, int *choice );

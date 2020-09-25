@@ -1378,15 +1378,27 @@ void set_shortcuts_run( const char *window )
 
 
 /*********************************
-DISABLE_BUTTONS_RUN
+SET_BUTTONS_RUN
 *********************************/
-void disable_buttons_run( void )
+void set_buttons_run( bool enable )
 {
-	cmd( ".b.r2.stop configure -state disabled" );
-	cmd( ".b.r2.pause configure -state disabled" );
-	cmd( ".b.r2.speed configure -state disabled" );
-	cmd( ".b.r2.obs configure -state disabled" );
-	cmd( ".b.r2.deb configure -state disabled" );
+	char state[ 9 ];
+	int res;
+	
+	cmd( "set res [ winfo exists .b.r2.stop ]" );
+	if ( ! get_int( "res", &res ) )
+		return;
+	
+	if ( enable )
+		strcpy( state, "normal" );
+	else
+		strcpy( state, "disabled" );
+	
+	cmd( ".b.r2.stop configure -state %s", state );
+	cmd( ".b.r2.pause configure -state %s", state );
+	cmd( ".b.r2.speed configure -state %s", state );
+	cmd( ".b.r2.obs configure -state %s", state );
+	cmd( ".b.r2.deb configure -state %s", state );
 }
 
 
