@@ -28,7 +28,7 @@ if ( V( "_tVint" ) < T - VS( GRANDPARENT, "eta" ) )// out of technical life?
 	END_EQUATION( - V( "_nVint" ) );			// scrap if not in use
 
 VS( PARENT, "_supplier" );						// ensure supplier is selected
-cur = SHOOKS( HOOKS( PARENT, SUPPL ) )->up;		// pointer to supplier
+cur = PARENTS( SHOOKS( HOOKS( PARENT, SUPPL ) ) );// pointer to supplier
 v[1] = VS( LABSUPL3, "w" );						// firm wage
 
 // unit cost advantage of new machines

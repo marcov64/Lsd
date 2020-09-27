@@ -135,7 +135,7 @@ Effective expansion investment of firm in consumption-good sector
 
 V( "_Q2" );										// make sure production decided
 V( "_supplier" );								// ensure supplier is selected
-cur = SHOOKS( HOOK( SUPPL ) )->up;				// pointer to new supplier
+cur = PARENTS( SHOOKS( HOOK( SUPPL ) ) );		// pointer to new supplier
 
 v[1] = V( "_EId" );								// desired expansion investment
 
@@ -319,7 +319,7 @@ if ( v[1] == 0 )
 v[2] = V( "_cred2" );							// available credit
 v[3] = V( "_NW2" );								// net worth (cash available)
 v[4] = VS( PARENT, "m2" );						// machine output per period
-v[5] = VS( SHOOKS( HOOK( SUPPL ) )->up, "_p1" );// new machine price
+v[5] = VS( PARENTS( SHOOKS( HOOK( SUPPL ) ) ), "_p1" );// new machine price
 
 v[6] = v[5] * v[1] / v[4];						// substitution investment cost
 
@@ -549,7 +549,7 @@ CYCLE( cur, "Vint" )							// choose vintages to use
 if ( v[6] == 0 )								// no machine?
 {
 	V( "_supplier" );							// ensure supplier is selected
-	cur1 = SHOOKS( HOOK( SUPPL ) )->up;			// pointer to supplier
+	cur1 = PARENTS( SHOOKS( HOOK( SUPPL ) ) );	// pointer to supplier
 	
 	v[6] = 1;									// 1 notional machine
 	v[7] = v[8] = VS( cur1, "_Atau" );			// new machines productivity
@@ -708,7 +708,7 @@ i = 0;
 cur2 = cur3 = NULL;
 CYCLE( cur, "Broch" )							// use brochures to find supplier
 {
-	cur1 = SHOOKS( cur )->up;					// pointer to supplier object	
+	cur1 = PARENTS( SHOOKS( cur ) );			// pointer to supplier object	
 	
 	// compare price to productivity ratios
 	v[2] = VS( cur1, "_p1" ) / VS( cur1, "_Atau" );
@@ -876,7 +876,7 @@ Canceled investment of firm in consumption-good sector
 */
 
 cur = HOOK( SUPPL );							// pointer to current supplier
-VS( SHOOKS( cur )->up, "_Q1e" );				// make sure supplier produced
+VS( PARENTS( SHOOKS( cur ) ), "_Q1e" );			// make sure supplier produced
 
 v[1] = VS( SHOOKS( cur ), "_nCan" );			// canceled machine number
 k = VS( SHOOKS( cur ), "_tOrd" );				// time of canceled order
@@ -886,7 +886,7 @@ if ( k == T && v[1] > 0 )
 	v[2] = VS( PARENT, "m2" );					// machine output per period
 	v[3] = V( "_SI" ) / v[2];					// machines to substitute
 	v[4] = V( "_EI" ) / v[2];					// machines to expand
-	v[5] = VS( SHOOKS( cur )->up, "_p1" );		// machine price
+	v[5] = VS( PARENTS( SHOOKS( cur ) ), "_p1" );// machine price
 	
 	if ( v[1] > v[3] )							// no space for substitution?
 	{

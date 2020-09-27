@@ -49,6 +49,7 @@ bool no_ptr_chk = false;
 #define CHK_PTR_DBL( O ) chk_ptr( O ) ? bad_ptr_dbl( O, __FILE__, __LINE__ ) :
 #define CHK_PTR_LNK( O ) chk_ptr( O ) ? bad_ptr_lnk( O, __FILE__, __LINE__ ) :
 #define CHK_PTR_OBJ( O ) chk_ptr( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
+#define CHK_PTR_POBJ( O ) chk_ptr( O ) || chk_ptr( O->up ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
 #define CHK_PTR_VOID( O ) chk_ptr( O ) ? bad_ptr_void( O, __FILE__, __LINE__ ) :
 #define CHK_OBJ_OBJ( O ) chk_obj( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
 #define CHK_HK_OBJ( O, X ) chk_hook( O, X ) ? no_hook_obj( O, X, __FILE__, __LINE__ ) :
@@ -65,6 +66,7 @@ bool no_ptr_chk = true;
 #define CHK_PTR_DBL( O )
 #define CHK_PTR_LNK( O )
 #define CHK_PTR_OBJ( O )
+#define CHK_PTR_POBJ( O )
 #define CHK_PTR_VOID( O )
 #define CHK_OBJ_OBJ( O )
 #define CHK_HK_OBJ( O, X )
@@ -285,8 +287,12 @@ bool no_ptr_chk = true;
 #define PATH ( ( const char * ) path )
 #define CURRENT ( var->val[ 0 ] )
 #define THIS ( p )
+#define NEXT ( p->next )
+#define NEXTS( O ) ( CHK_PTR_OBJ( O ) O->next )
 #define PARENT ( p->up )
-#define GRANDPARENT ( CHK_PTR_OBJ( p->up ) p->up->up )
+#define PARENTS( O ) ( CHK_PTR_OBJ( O ) O->up )
+#define GRANDPARENT ( CHK_PTR_POBJ( p ) p->up->up )
+#define GRANDPARENTS( O ) ( CHK_PTR_POBJ( O ) O->up->up )
 #define T ( ( double ) t )
 #define LAST_T ( ( double ) max_step )
 #define RUN ( ( double ) cur_sim )

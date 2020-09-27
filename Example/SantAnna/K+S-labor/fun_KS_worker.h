@@ -24,7 +24,7 @@ k = V( "_employed" );							// employment status
 i = 1;											// assume pre-change firm
 if ( k == 2 )									// employed in sector 2?
 {												// handle post-change
-	cur = HOOK( FWRK )->up;						// pointer to employer
+	cur = PARENTS( HOOK( FWRK ) );				// pointer to employer
 	if ( VS( cur, "_postChg" ) )				// employer of post-change type?
 	{
 		v[1] = VS( PARENT, "omega" );			// # firms to queue for employed
@@ -195,7 +195,7 @@ switch ( ( int ) V( "_employed" ) )				// employment status
 		break;
 	case 2:										// sector 2
 		if ( V( "_Te" ) == 0 )					// just hired in firm?
-			v[0] = VLS( HOOK( FWRK )->up, "_sT2min", 1 );// firm minimum skills
+			v[0] = VLS( PARENTS( HOOK( FWRK ) ), "_sT2min", 1 );// firm minimum skills
 		else									// already working, just increase
 			v[0] = CURRENT  * ( 1 + VS( PARENT, "tauT" ) );
 }
@@ -260,7 +260,7 @@ v[14] = VS( GRANDPARENT, "flagHeterWage" );		// heterogeneous wage mode
 i = 1;											// assume pre-change firm
 if ( h == 2 )									// employed in sector 2?
 {												// handle post-change
-	cur = HOOK( FWRK )->up;						// pointer to employer in sec. 2
+	cur = PARENTS( HOOK( FWRK ) );				// pointer to employer in sec. 2
 	
 	if ( VS( cur, "_postChg" ) )				// employer of post-change type?
 	{
@@ -434,10 +434,10 @@ Bonus received in the period by worker
 if ( V( "_employed" ) != 2 )					// unemployed or sector 1?
 	END_EQUATION( 0 );							// no bonus
 
-VS( HOOK( FWRK )->up, "_Tax2" );				// ensure bonus is computed
+VS( PARENTS( HOOK( FWRK ) ), "_Tax2" );			// ensure bonus is computed
 
-v[1] = VS( HOOK( FWRK )->up, "_W2" );			// total wages paid by firm
-v[2] = VS( HOOK( FWRK )->up, "_B2" );			// total bonuses paid by firm
+v[1] = VS( PARENTS( HOOK( FWRK ) ), "_W2" );	// total wages paid by firm
+v[2] = VS( PARENTS( HOOK( FWRK ) ), "_B2" );	// total bonuses paid by firm
 
 RESULT( v[1] > 0 ? V( "_w" ) * v[2] / v[1] : 0 )// bonus share
 
@@ -457,7 +457,7 @@ Production with current worker skills and vintage
 if ( HOOK( VWRK ) == NULL )						// disalloc., unempl. or sec. 1?
     END_EQUATION( 0 );							// no production
 	
-RESULT( V( "_s" ) * VS( HOOK( VWRK )->up, "_Avint" ) )
+RESULT( V( "_s" ) * VS( PARENTS( HOOK( VWRK ) ), "_Avint" ) )
 
 
 EQUATION( "_Te" )

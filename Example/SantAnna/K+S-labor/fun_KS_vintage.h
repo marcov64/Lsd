@@ -21,7 +21,7 @@ if ( V( "_tVint" ) < T - VS( GRANDPARENT, "eta" ) )// out of technical life?
 	END_EQUATION( - V( "_nVint" ) )				// scrap if not in use
 	
 VS( PARENT, "_supplier" );						// ensure supplier is selected
-cur = SHOOKS( HOOKS( PARENT, SUPPL ) )->up;		// pointer to supplier
+cur = PARENTS( SHOOKS( HOOKS( PARENT, SUPPL ) ) );// pointer to supplier
 v[1] = VLS( PARENT, "_w2avg", 1 );				// average firm wage
 
 // unit cost advantage of new machines
@@ -41,7 +41,7 @@ EQUATION( "_dLdVint" )
 Additional labor required for required utilization of vintage
 */
 
-h = VS( GRANDPARENT->up, "flagWorkerLBU" );		// worker-level learning mode
+h = VS( PARENTS( GRANDPARENT ), "flagWorkerLBU" );// worker-level learning mode
 v[1] = V( "_Avint" ) * VS( LABSUPL3, "Lscale" );// vintage notional productivity
 v[2] = V( "_toUseVint" ) * VS( GRANDPARENT, "m2" );	// machine required capacity
 

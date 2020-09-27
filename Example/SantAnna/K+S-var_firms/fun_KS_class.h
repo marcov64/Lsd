@@ -65,7 +65,7 @@ struct country
 #define LABSUPL0 V_EXT( country, labSup )
 #define LABSUPL1 V_EXTS( PARENT, country, labSup )
 #define LABSUPL2 V_EXTS( GRANDPARENT, country, labSup )
-#define LABSUPL3 V_EXTS( GRANDPARENT->up, country, labSup )
+#define LABSUPL3 V_EXTS( PARENTS( GRANDPARENT ), country, labSup )
 #define FINSECL0 V_EXT( country, finSec )
 #define FINSECL1 V_EXTS( PARENT, country, finSec )
 #define FINSECL2 V_EXTS( GRANDPARENT, country, finSec )

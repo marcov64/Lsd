@@ -171,11 +171,11 @@ double scrap_vintage( object *vint )
 {
 	double RS;
 	
-	if ( vint->next != NULL )					// don't remove last vintage
+	if ( NEXTS( vint ) != NULL )				// don't remove last vintage
 	{
 		// remove as previous vintage from next vintage
-		if ( SHOOKS( vint->next ) == vint )
-			WRITE_SHOOKS( vint->next, NULL );
+		if ( SHOOKS( NEXTS( vint ) ) == vint )
+			WRITE_SHOOKS( NEXTS( vint ), NULL );
 		
 		RS = abs( VS( vint, "_RS" ) );					
 		DELETE( vint );							// delete vintage
@@ -201,9 +201,9 @@ double entry_firm1( object *sector, int n, bool newInd )
 		   equity = 0;
 	int ID1, IDb;
 	object *firm, *bank, *cli, 
-		   *cons = SEARCHS( sector->up, "Consumption" ), 
-		   *fin = SEARCHS( sector->up, "Financial" ),
-		   *lab = SEARCHS( sector->up, "Labor" );
+		   *cons = SEARCHS( PARENTS( sector ), "Consumption" ), 
+		   *fin = SEARCHS( PARENTS( sector ), "Financial" ),
+		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
 	
 	double Deb10ratio = VS( sector, "Deb10ratio" );// bank fin. to equity ratio
 	double Phi3 = VS( sector, "Phi3" );			// lower support for wealth share
@@ -254,7 +254,7 @@ double entry_firm1( object *sector, int n, bool newInd )
 		
 		// select associated bank and create hooks to/from it
 		IDb = VS( fin, "pickBank" );			// draw bank
-		bank = V_EXTS( sector->up, country, bankPtr [ IDb - 1 ] );// bank object
+		bank = V_EXTS( PARENTS( sector ), country, bankPtr [ IDb - 1 ] );// bank object
 		WRITES( firm, "_bank1", IDb );
 		WRITE_HOOKS( firm, BANK, bank );		
 		cli = ADDOBJS( bank, "Cli1" );			// add to bank client list
@@ -327,9 +327,9 @@ double entry_firm2( object *sector, int n, bool newInd )
 		   f2posChg, life2cycle, p2, mult, equity = 0;
 	int ID2, IDb, nMach, nVint, tVint, t2ent;
 	object *firm, *bank, *cli, *cur, *suppl, *broch, *vint,
-		   *cap = SEARCHS( sector->up, "Capital" ), 
-		   *fin = SEARCHS( sector->up, "Financial" ),
-		   *lab = SEARCHS( sector->up, "Labor" );
+		   *cap = SEARCHS( PARENTS( sector ), "Capital" ), 
+		   *fin = SEARCHS( PARENTS( sector ), "Financial" ),
+		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
 
 	double Deb20ratio = VS( sector, "Deb20ratio" );// bank fin. to equity ratio
 	double Phi1 = VS( sector, "Phi1" );			// lower support for K share
@@ -394,7 +394,7 @@ double entry_firm2( object *sector, int n, bool newInd )
 		
 		// select associated bank and create hooks to/from it
 		IDb = VS( fin, "pickBank" );			// draw bank
-		bank = V_EXTS( sector->up, country, bankPtr[ IDb - 1 ] );// bank object
+		bank = V_EXTS( PARENTS( sector ), country, bankPtr[ IDb - 1 ] );// bank object
 		WRITES( firm, "_bank2", IDb );
 		WRITE_HOOKS( firm, BANK, bank );
 		cli = ADDOBJS( bank, "Cli2" );			// add to bank client list
@@ -556,7 +556,7 @@ double exit_firm2( object *firm, double *firesAcc )
 		DELETE( SHOOKS( firm1 ) );				// delete from firm client list
 	
 	// update firm map before removing LSD object
-	EXEC_EXTS( firm->up->up, country, firm2map, erase, ( int ) VS( firm, "_ID2" ) );
+	EXEC_EXTS( GRANDPARENTS( firm ), country, firm2map, erase, ( int ) VS( firm, "_ID2" ) );
 		
 	DELETE( firm );
 

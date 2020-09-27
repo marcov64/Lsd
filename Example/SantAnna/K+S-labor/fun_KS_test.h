@@ -329,14 +329,14 @@ CYCLES( LABSUPL1, cur, "Worker" )
 	{
 		v[6] += VS( cur, "_w" ) * Lscale;
 
-		if ( HOOKS( cur, FWRK )->up == Capital )
+		if ( PARENTS( HOOKS( cur, FWRK ) ) == Capital )
 			++v[7];
 		else
 		{
 			++v[8];
 			
 			if ( HOOKS( cur, VWRK ) != NULL && 
-				 HOOKS( cur, FWRK )->up != HOOKS( cur, VWRK )->up->up )
+				 PARENTS( HOOKS( cur, FWRK ) ) != GRANDPARENTS( HOOKS( cur, VWRK ) ) )
 				VintErr.push_back( cur );
 		}
 	}

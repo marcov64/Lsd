@@ -107,7 +107,7 @@ struct firm2E									// extensions to Firm2 object
 #define LABSUPL0 V_EXT( countryE, labSup )
 #define LABSUPL1 V_EXTS( PARENT, countryE, labSup )
 #define LABSUPL2 V_EXTS( GRANDPARENT, countryE, labSup )
-#define LABSUPL3 V_EXTS( GRANDPARENT->up, countryE, labSup )
+#define LABSUPL3 V_EXTS( PARENTS( GRANDPARENT ), countryE, labSup )
 #define FINSECL0 V_EXT( countryE, finSec )
 #define FINSECL1 V_EXTS( PARENT, countryE, finSec )
 #define FINSECL2 V_EXTS( GRANDPARENT, countryE, finSec )

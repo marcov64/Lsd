@@ -519,9 +519,9 @@ if ( RND < V( "epsilon" ) )
 {
 	LOG( "\n Agent=%.0lf exploring from x=%d y=%d", v[2], i, j );	
 	
-	WRITE( "_Qlast", VLS( SHOOK, "_Qminer", 1 ) );	// save last output 
+	WRITE( "_Qlast", VLS( SHOOK, "_Qminer", 1 ) );// save last output 
 		
-	if ( COUNTS( SHOOK->up, "Miner" ) > 1 )		// don't delete last object instance
+	if ( COUNTS( PARENTS( SHOOK ), "Miner" ) > 1 )// don't delete last object instance
 		DELETE( SHOOK );						// or delete associated Miner object
 	else
 	{
@@ -537,7 +537,7 @@ if ( RND < V( "epsilon" ) )
 }
 
 // a miner evaluates becoming an imitator
-if ( VS( SHOOK, "_cBest" ) > VLS( SHOOK->up, "_c", 1 ) )
+if ( VS( SHOOK, "_cBest" ) > VLS( PARENTS( SHOOK ), "_c", 1 ) )
 {
 	LOG( "\n Agent=%.0lf imitating from x=%d y=%d to x=%.0lf y=%.0lf", 
 		 v[2], i, j, VS( SHOOK, "_xBest" ), VS( SHOOK, "_yBest" ) );	
@@ -545,7 +545,7 @@ if ( VS( SHOOK, "_cBest" ) > VLS( SHOOK->up, "_c", 1 ) )
 	WRITE( "_xTarget", VS( SHOOK, "_xBest" ) );	// coordinates of new target island
 	WRITE( "_yTarget", VS( SHOOK, "_yBest" ) );
 	
-	if ( COUNTS( SHOOK->up, "Miner" ) > 1 )		// don't delete last object instance
+	if ( COUNTS( PARENTS( SHOOK ), "Miner" ) > 1 )// don't delete last object instance
 		DELETE( SHOOK );						// or delete associated Miner object
 	else
 	{
@@ -604,7 +604,7 @@ void neighborhood( object *knownIsland, double rho, double minSgnPrb )
 	y = VS( SHOOKS( knownIsland ), "_yIsland" );
 	
 	// run over all known islands to create network links
-	CYCLES( knownIsland->up, cur, "KnownIsland" )
+	CYCLES( PARENTS( knownIsland ), cur, "KnownIsland" )
 		// check if the link already exists (no link to self)
 		if ( cur != knownIsland && SEARCH_LINKS( knownIsland, V_NODEIDS( cur ) ) == NULL )
 		{

@@ -332,7 +332,7 @@ CYCLES( LABSUPL1, cur, "Worker" )				// scan all workers
 	cur1 = HOOKS( cur, VWRK );					// pointer to vintage bridge
 	if ( cur1 != NULL )							// discard disalloc. unempl. s.1
 	{
-		i = VS( cur1->up, "_IDvint" );			// vintage ID
+		i = VS( PARENTS( cur1 ), "_IDvint" );	// vintage ID
 		v[2] = VLS( cur, "_sV", 1 ) * v[1];		// last skills (weighted)
 		EXTS( PARENT, countryE ).vintProd[ i ].sVavg += v[2];
 		EXTS( PARENT, countryE ).vintProd[ i ].workers += v[1];

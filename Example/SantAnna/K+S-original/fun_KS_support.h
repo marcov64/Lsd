@@ -149,11 +149,11 @@ double scrap_vintage( object *vint )
 {
 	double RS;
 	
-	if ( vint->next != NULL )					// don't remove last vintage
+	if ( NEXTS( vint ) != NULL )				// don't remove last vintage
 	{
 		// remove as previous vintage from next vintage
-		if ( SHOOKS( vint->next ) == vint )
-			WRITE_SHOOKS( vint->next, NULL );
+		if ( SHOOKS( NEXTS( vint ) ) == vint )
+			WRITE_SHOOKS( NEXTS( vint ), NULL );
 		
 		RS = abs( VS( vint, "_RS" ) );					
 		DELETE( vint );							// delete vintage
@@ -179,8 +179,8 @@ double entry_firm1( object *sector, int n, bool newInd )
 		   equity = 0;
 	int ID1;
 	object *firm, *cli, 
-		   *cons = SEARCHS( sector->up, "Consumption" ), 
-		   *lab = SEARCHS( sector->up, "Labor" );
+		   *cons = SEARCHS( PARENTS( sector ), "Consumption" ), 
+		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
 	
 	double Deb10ratio = VS( sector, "Deb10ratio" );// bank fin. to equity ratio
 	double Phi3 = VS( sector, "Phi3" );			// lower support for wealth share
@@ -291,8 +291,8 @@ double entry_firm2( object *sector, int n, bool newInd )
 		   f2posChg, life2cycle, p2, mult, equity = 0;
 	int ID2, nMach, nVint, tVint, t2ent;
 	object *firm, *cli, *cur, *suppl, *broch, *vint,
-		   *cap = SEARCHS( sector->up, "Capital" ), 
-		   *lab = SEARCHS( sector->up, "Labor" );
+		   *cap = SEARCHS( PARENTS( sector ), "Capital" ), 
+		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
 
 	double Deb20ratio = VS( sector, "Deb20ratio" );// bank fin. to equity ratio
 	double Phi1 = VS( sector, "Phi1" );			// lower support for K share
@@ -465,7 +465,7 @@ double entry_firm2( object *sector, int n, bool newInd )
 double exit_firm1( object *firm )
 {
 	double liqVal = VS( firm, "_NW1" ) - VS( firm, "_Deb1" );
-	object *firm2, *fin = SEARCHS( firm->up->up, "Financial" );
+	object *firm2, *fin = SEARCHS( GRANDPARENTS( firm ), "Financial" );
 	
 	if ( liqVal < 0 )							// account bank losses, if any
 	{
@@ -487,7 +487,7 @@ double exit_firm1( object *firm )
 double exit_firm2( object *firm, double *firesAcc )
 {
 	double fires, liqVal = VS( firm, "_NW2" ) - VS( firm, "_Deb2" );
-	object *firm1, *fin = SEARCHS( firm->up->up, "Financial" );
+	object *firm1, *fin = SEARCHS( GRANDPARENTS( firm ), "Financial" );
 
 	// fire all workers
 	*firesAcc += fires = VS( firm, "_L2" );
@@ -502,7 +502,7 @@ double exit_firm2( object *firm, double *firesAcc )
 		DELETE( SHOOKS( firm1 ) );				// delete from firm client list
 	
 	// update firm map before removing LSD object
-	EXEC_EXTS( firm->up->up, country, firm2map, erase, ( int ) VS( firm, "_ID2" ) );
+	EXEC_EXTS( GRANDPARENTS( firm ), country, firm2map, erase, ( int ) VS( firm, "_ID2" ) );
 		
 	DELETE( firm );
 

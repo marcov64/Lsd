@@ -152,7 +152,7 @@ void add_vintage( object *firm, double nMach, bool newInd )
 	WRITE_SHOOKS( vint, HOOKS( firm, TOPVINT ) );// save previous vintage
 	WRITE_HOOKS( firm, TOPVINT, vint );			// save pointer to top vintage
 	
-	suppl = SHOOKS( HOOKS( firm, SUPPL ) )->up;	// pointer to supplier
+	suppl = PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) );// pointer to supplier
 	_Avint = VS( suppl, "_Atau" );
 	_pVint = VS( suppl, "_p1" );
 	WRITES( vint, "_IDvint", VNT( T, VS( suppl, "_ID1" ) ) );// vintage ID
@@ -175,15 +175,15 @@ double scrap_vintage( object *vint )
 	double RS;
 	object *cur;
 	
-	if ( vint->next != NULL )					// don't remove last vintage
+	if ( NEXTS( vint ) != NULL )				// don't remove last vintage
 	{
 		// move all workers out from this vintage
 		CYCLES( vint, cur, "WrkV" )
 			WRITE_HOOKS( SHOOKS( cur ), VWRK, NULL );
 		
 		// remove as previous vintage from next vintage
-		if ( SHOOKS( vint->next ) == vint )
-			WRITE_SHOOKS( vint->next, NULL );
+		if ( SHOOKS( NEXTS( vint ) ) == vint )
+			WRITE_SHOOKS( NEXTS( vint ), NULL );
 		
 		RS = abs( VS( vint, "_RS" ) );					
 		DELETE( vint );							// delete vintage
@@ -212,9 +212,9 @@ void hire_worker( object *worker, int sec, object *firm, double wage )
 	WRITES( worker, "_CQ", 0 );					// no cumulated production yet
 	WRITES( worker, "_w", wage );	
 	
-	flagWorkerLBU = VS( worker->up->up, "flagWorkerLBU" );
+	flagWorkerLBU = VS( GRANDPARENTS( worker ), "flagWorkerLBU" );
 	if ( flagWorkerLBU != 0 && flagWorkerLBU != 2 )
-		WRITES( worker, "_sV", VS( worker->up, "sigma" ) );// public skills
+		WRITES( worker, "_sV", VS( PARENTS( worker ), "sigma" ) );// public skills
 	else
 		WRITES( worker, "_sV", 1 );
 
@@ -272,12 +272,12 @@ void fire_worker( object *worker )
 
 void quit_worker( object *worker )
 {
-	double Lscale = VS( worker->up, "Lscale" );	// labor scaling
+	double Lscale = VS( PARENTS( worker ), "Lscale" );// labor scaling
 	
 	if ( VS( worker, "_employed" ) == 1 )		// sector 1?
-		INCRS( V_EXTS( worker->up->up, countryE, capSec ), "quits1", Lscale );
+		INCRS( V_EXTS( GRANDPARENTS( worker ), countryE, capSec ), "quits1", Lscale );
 	else										// no: assume sector 2
-		INCRS( HOOKS( worker, FWRK )->up, "_quits2", Lscale );
+		INCRS( PARENTS( HOOKS( worker, FWRK ) ), "_quits2", Lscale );
 	
 	fire_worker( worker );						// register fire
 }
@@ -294,7 +294,7 @@ void move_worker( object *worker, object *vint, bool vint_learn )
 	if ( vint_learn )							// learning-by-vintage mode?
 	{											// worker has public skills
 		IDv = VS( vint, "_IDvint" );
-		sV = V_EXTS( vint->up->up, countryE, vintProd[ IDv ].sVp );
+		sV = V_EXTS( GRANDPARENTS( vint ), countryE, vintProd[ IDv ].sVp );
 	}
 	else
 		sV = 1;
@@ -516,12 +516,12 @@ double fire_workers( object *firm, int mode, double xsCap, double *redCap )
 	int Te;
 	object *cyccur, *wrk, *worker;
 	
-	object *cnt = firm->up->up;					// pointers to objects
+	object *cnt = GRANDPARENTS( firm );			// pointers to objects
 	object *lab = V_EXTS( cnt, countryE, labSup );
 	
 	int i = 0;									// fired workers counter
 	int Tp = VS( lab, "Tp" );					// time for protected workers
-	double w2avg = VLS( firm->up, "w2avg", 1 );	// average wage
+	double w2avg = VLS( PARENTS( firm ), "w2avg", 1 );// average wage
 	double Lscale = VS( lab, "Lscale" );		// labor scale
 	
 	*redCap = 0;								// reduced capacity accumulator
@@ -606,9 +606,9 @@ double entry_firm1( object *sector, int n, bool newInd )
 		   sV, w1avg, mult, equity = 0;
 	int ID1, IDb;
 	object *firm, *bank, *cli, 
-		   *cons = SEARCHS( sector->up, "Consumption" ), 
-		   *fin = SEARCHS( sector->up, "Financial" ),
-		   *lab = SEARCHS( sector->up, "Labor" );
+		   *cons = SEARCHS( PARENTS( sector ), "Consumption" ), 
+		   *fin = SEARCHS( PARENTS( sector ), "Financial" ),
+		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
 	
 	double Deb10ratio = VS( sector, "Deb10ratio" );// bank fin. to equity ratio
 	double Phi3 = VS( sector, "Phi3" );			// lower support for wealth share
@@ -663,7 +663,7 @@ double entry_firm1( object *sector, int n, bool newInd )
 		
 		// select associated bank and create hooks to/from it
 		IDb = VS( fin, "pickBank" );			// draw bank
-		bank = V_EXTS( sector->up, countryE, bankPtr [ IDb - 1 ] );// bank object
+		bank = V_EXTS( PARENTS( sector ), countryE, bankPtr [ IDb - 1 ] );// bank object
 		WRITES( firm, "_bank1", IDb );
 		WRITE_HOOKS( firm, BANK, bank );		
 		cli = ADDOBJS( bank, "Cli1" );			// add to bank client list
@@ -707,8 +707,8 @@ double entry_firm1( object *sector, int n, bool newInd )
 			WRITELS( firm, "_qc1", 1, -1 );
 			
 			// initialize the map of vintage productivity and skills
-			WRITE_EXTS( sector->up, countryE, vintProd[ VNT( T - 1, ID1 ) ].sVp, sV );
-			WRITE_EXTS( sector->up, countryE, vintProd[ VNT( T - 1, ID1 ) ].sVavg, sV );
+			WRITE_EXTS( PARENTS( sector ), countryE, vintProd[ VNT( T - 1, ID1 ) ].sVp, sV );
+			WRITE_EXTS( PARENTS( sector ), countryE, vintProd[ VNT( T - 1, ID1 ) ].sVavg, sV );
 		}
 		else
 		{
@@ -742,11 +742,11 @@ double entry_firm2( object *sector, int n, bool newInd )
 		   life2cycle, p2, q2, w2avg, w2realAvg, cash, mult, equity = 0;
 	int ID2, IDb, t2ent;
 	object *firm, *bank, *cli, *suppl, *broch, *vint, *wrk,
-		   *cap = SEARCHS( sector->up, "Capital" ), 
-		   *fin = SEARCHS( sector->up, "Financial" ),
-		   *lab = SEARCHS( sector->up, "Labor" );
+		   *cap = SEARCHS( PARENTS( sector ), "Capital" ), 
+		   *fin = SEARCHS( PARENTS( sector ), "Financial" ),
+		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
 
-	bool AllFirmsChg = VS( sector->up, "flagAllFirmsChg" );// change at once?
+	bool AllFirmsChg = VS( PARENTS( sector ), "flagAllFirmsChg" );// change at once?
 	bool f2critChg = VS( sector, "f2critChg" );	// critical change thresh. met?
 	double Deb20ratio = VS( sector, "Deb20ratio" );// bank fin. to equity ratio
 	double Phi1 = VS( sector, "Phi1" );			// lower support for K share
@@ -758,7 +758,7 @@ double entry_firm2( object *sector, int n, bool newInd )
 	double m2 = VS( sector, "m2" );				// machine output per period
 	double u = VS( sector, "u" );				// desired capital utilization
 	double sV = VS( lab, "sAvg" );				// initial worker skills
-	int TregChg = VS( sector->up, "TregChg" ); 	// time for regime change
+	int TregChg = VS( PARENTS( sector ), "TregChg" );// time for regime change
 
 	if ( newInd )
 	{
@@ -821,7 +821,7 @@ double entry_firm2( object *sector, int n, bool newInd )
 		
 		// select associated bank and create hooks to/from it
 		IDb = VS( fin, "pickBank" );			// draw bank
-		bank = V_EXTS( sector->up, countryE, bankPtr[ IDb - 1 ] );// bank object
+		bank = V_EXTS( PARENTS( sector ), countryE, bankPtr[ IDb - 1 ] );// bank object
 		WRITES( firm, "_bank2", IDb );
 		WRITE_HOOKS( firm, BANK, bank );
 		cli = ADDOBJS( bank, "Cli2" );			// add to bank client list
@@ -983,7 +983,7 @@ double exit_firm2( object *firm, double *firesAcc )
 		DELETE( SHOOKS( firm1 ) );				// delete from firm client list
 	
 	// update firm map before removing LSD object
-	EXEC_EXTS( firm->up->up, countryE, firm2map, erase, ( int ) VS( firm, "_ID2" ) );
+	EXEC_EXTS( GRANDPARENTS( firm ), countryE, firm2map, erase, ( int ) VS( firm, "_ID2" ) );
 	
 	DELETE_EXTS( firm, firm2E );
 	DELETE( firm );
