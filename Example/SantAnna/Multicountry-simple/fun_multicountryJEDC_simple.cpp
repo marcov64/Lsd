@@ -1,6 +1,6 @@
 //#define NO_POINTER_INIT	// uncomment to disable pointer checking
 
-#include "fun_head.h"
+#include "fun_head_fast.h"
 
 MODELBEGIN
 
