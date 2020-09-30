@@ -3098,7 +3098,8 @@ double object::write( char const *lab, double value, int time, int lag )
 
 		if ( lag == 0 )
 		{
-			cv->val[ 0 ] = value;
+			eff_lag = 0;
+			eff_time = time;
 
 			// choose next update step for special updating variables
 			if ( cv->period > 1 || cv->period_range > 0 )
@@ -3111,10 +3112,16 @@ double object::write( char const *lab, double value, int time, int lag )
 		else
 		{
 			// handle rewriting already computed values
-			if ( time >= t || cv->last_update <= time )
-				eff_lag = lag - ( t - cv->last_update );	// first write in time
+			if ( time >= t || time >= cv->last_update )
+			{
+				eff_lag = lag - ( t - cv->last_update );	// first write in time t
+				eff_time = time - lag;
+			}
 			else
-				eff_lag = lag - ( t - time );				// rewrite in time
+			{
+				eff_lag = lag - ( t - time );				// rewrite as t-h in time t
+				eff_time = t - lag;
+			}
 
 			if ( eff_lag < 0 || eff_lag > cv->num_lag )
 			{
@@ -3124,13 +3131,12 @@ double object::write( char const *lab, double value, int time, int lag )
 							true );
 				return NAN;
 			}
-
-			cv->val[ eff_lag ] = value;
 		}
 
+		cv->val[ eff_lag ] = value;
 		cv->last_update = time;
-		eff_time = time - lag;
-		if ( eff_time >= cv->start && eff_time <= cv->end && ( cv->save || cv->savei ) )
+		
+		if ( ( cv->save || cv->savei ) && eff_time >= cv->start && eff_time <= cv->end )
 			cv->data[ eff_time - cv->start ] = value;
 	}
 
