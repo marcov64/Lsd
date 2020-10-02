@@ -228,7 +228,7 @@ div.WordSection1
 
 </head>
 
-<body lang=PT-BR link=blue vlink=purple>
+<body lang=PT-BR link=blue vlink=purple style='word-wrap:break-word'>
 
 <div class=WordSection1>
 
@@ -401,8 +401,8 @@ class=Cdigo><span lang=EN-US>_</span></span><span lang=EN-US>).</span></p>
 <p class=MsoNormal><span lang=EN-US>The Objects in the list can also be
 right-clicked to open the associated context menu. This menu offers shortcuts
 to the most common commands addressing the chosen Object. All the options
-available in the context menu are shortcuts to the most used options in the
-main menu (see <a href="#_Editing_Objects_1">below</a>).</span></p>
+available in the context menu are shortcuts to the most used options in the main
+menu (see <a href="#_Editing_Objects_1">below</a>).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Additionally to the names, the LSD Browser
 also shows the number of instances of each Object type as in </span><span
@@ -570,7 +570,8 @@ select the menu option </span><span class=Cdigo><span lang=EN-US>Model&gt;Change
 Object</span></span><span lang=EN-US>, or </span><span class=Cdigo><span
 lang=EN-US>Change</span></span><span lang=EN-US> in the (right-click) context
 menu, or press </span><span class=Cdigo><span lang=EN-US>Ctrl+Enter</span></span><span
-lang=EN-US> to open the Change Object window. </span></p>
+lang=EN-US>, or double-click in the LSD Model Structure to open the Change
+Object window. </span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
 border=0 width=358 height=290 src="image/object_options.png"></span></p>
@@ -752,11 +753,11 @@ Settings</a></span></span><span lang=EN-US>.</span></p>
 lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Parallel</span></b></span><span
 lang=EN-US>: (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+P</span></span><span
-lang=EN-US>) (Variables only) Check to perform parallel processing when
-computing the <a href="LSD_faqs.html#equation">Equation</a> for multiple
-instances of this Variable in brother <a href="LSD_faqs.html#object">Object</a>
-copies. Beware that not all multi-instanced Variables can or should be
-processed in parallel, to avoid deadlocks because of the particular <a
+lang=EN-US>) (Variables only) Check to perform parallel processing when computing
+the <a href="LSD_faqs.html#equation">Equation</a> for multiple instances of
+this Variable in brother <a href="LSD_faqs.html#object">Object</a> copies.
+Beware that not all multi-instanced Variables can or should be processed in
+parallel, to avoid deadlocks because of the particular <a
 href="LSD_faqs.html#modelstructure">model structure</a> and to save the OS
 overhead of creating new processing threads for computationally-light
 Equations. To identify the Variables which may provide parallelization gains,
@@ -955,11 +956,11 @@ updating</span></h3>
 
 <p class=MsoNormal><span lang=EN-US>By default, every <a
 href="LSD_faqs.html#variable">Variable</a> in any <a href="LSD_faqs.html#object">Object
-instance</a> in the <a href="LSD_faqs.html#modelstructure">model structure</a> is
-recomputed every time step in the simulation. This is the desired behavior in
-most cases. However, some Variables may demand the recalculation process takes
-place at longer periods or only after a certain number of time steps from the
-beginning of the simulation or from the time the Object containing it was
+instance</a> in the <a href="LSD_faqs.html#modelstructure">model structure</a>
+is recomputed every time step in the simulation. This is the desired behavior
+in most cases. However, some Variables may demand the recalculation process
+takes place at longer periods or only after a certain number of time steps from
+the beginning of the simulation or from the time the Object containing it was
 created.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Clicking on the Updating button opens the

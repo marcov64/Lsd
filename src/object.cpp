@@ -3082,54 +3082,62 @@ double object::write( char const *lab, double value, int time, int lag )
 	}
 	else
 	{
-		if ( lag < 0 || lag > cv->num_lag )
+		if ( lag < 0 || ( cv->param != 1 && lag > cv->num_lag ) || ( cv->param == 1 && lag > 1 ) )
 		{
-			sprintf( msg, "invalid lag (%d) for variable '%s'", lag, lab );
+			sprintf( msg, "invalid lag (%d) for %s '%s'", cv->param != 1 ? "variable" : "parameter", lag, lab );
 			error_hard( msg, "invalid write operation",
 						"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 						false );
 			return NAN;
 		}
-
-		// if not yet calculated this time step, adjust lagged values
-		if ( time >= t && lag == 0 && cv->last_update < t )
-			for ( i = 0; i < cv->num_lag; ++i )
-				cv->val[ cv->num_lag - i ] = cv->val[ cv->num_lag - i - 1 ];
-
-		if ( lag == 0 )
+		
+		if ( cv->param == 1 )
 		{
 			eff_lag = 0;
 			eff_time = time;
-
-			// choose next update step for special updating variables
-			if ( cv->period > 1 || cv->period_range > 0 )
-			{
-				cv->next_update = t + cv->period;
-				if ( cv->period_range > 0 )
-					cv->next_update += rnd_int( 0, cv->period_range );
-			}
 		}
 		else
 		{
-			// handle rewriting already computed values
-			if ( time >= t || time >= cv->last_update )
+			// if not yet calculated this time step, adjust lagged values
+			if ( time >= t && lag == 0 && cv->last_update < t )
+				for ( i = 0; i < cv->num_lag; ++i )
+					cv->val[ cv->num_lag - i ] = cv->val[ cv->num_lag - i - 1 ];
+
+			if ( lag == 0 )
 			{
-				eff_lag = lag - ( t - cv->last_update );	// first write in time t
-				eff_time = time - lag;
+				eff_lag = 0;
+				eff_time = time;
+
+				// choose next update step for special updating variables
+				if ( cv->period > 1 || cv->period_range > 0 )
+				{
+					cv->next_update = t + cv->period;
+					if ( cv->period_range > 0 )
+						cv->next_update += rnd_int( 0, cv->period_range );
+				}
 			}
 			else
 			{
-				eff_lag = lag - ( t - time );				// rewrite as t-h in time t
-				eff_time = t - lag;
-			}
+				// handle rewriting already computed values
+				if ( time >= t || time >= cv->last_update )
+				{
+					eff_lag = lag - ( t - cv->last_update );	// first write in time t
+					eff_time = time - lag;
+				}
+				else
+				{
+					eff_lag = lag - ( t - time );				// rewrite as t-h in time t
+					eff_time = t - lag;
+				}
 
-			if ( eff_lag < 0 || eff_lag > cv->num_lag )
-			{
-				sprintf( msg, "invalid update time (%d) and lag (%d) for variable '%s'", time, lag, lab );
-				error_hard( msg, "invalid write operation",
-							"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
-							true );
-				return NAN;
+				if ( eff_lag < 0 || eff_lag > cv->num_lag )
+				{
+					sprintf( msg, "invalid update time (%d) and lag (%d) for variable '%s'", time, lag, lab );
+					error_hard( msg, "invalid write operation",
+								"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
+								true );
+					return NAN;
+				}
 			}
 		}
 

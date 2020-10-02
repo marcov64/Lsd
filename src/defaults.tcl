@@ -63,7 +63,7 @@ set tbarsize	60	; # size in pixels of bottom taskbar (exclusion area)
 set hsizeL		800	; # LMM horizontal size in pixels
 set vsizeL		600	; # LMM vertical size in pixels
 set hsizeLmin	800	; # LMM minimum horizontal size in pixels
-set vsizeLmin	550	; # LMM minimum vertical size in pixels
+set vsizeLmin	600	; # LMM minimum vertical size in pixels
 set hsizeM 		600	; # model structure horizontal size in pixels
 set vsizeM		400	; # model structure vertical size in pixels
 set hsizeNmin	300	; # objects numbers editor minimum horizontal size in pixels
