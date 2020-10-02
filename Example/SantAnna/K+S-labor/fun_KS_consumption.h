@@ -20,7 +20,7 @@ k = V( "F2" );									// number of firms
 v[1] = V( "D2d" );								// real demand
 
 // create and fill temporary share and supply vectors & initialize firm demand
-dblVecT f2( k ), sup2( k ), dem2( k );
+dblVecT f2( k ), sup2( k );
 
 j = 0;
 CYCLE( cur, "Firm2" )
@@ -44,20 +44,20 @@ while ( v[1] > 0.01 )
 		{	
 			if ( sup2[ j ] > 0 )				// product to supply?
 			{
-				dem2[ j ] = v[1] * f2[ j ];		// firm demand allocation
+				v[4] = v[1] * f2[ j ];			// firm demand allocation
 			
-				if ( dem2[ j ] <= sup2[ j ] )	// can supply all demanded?
+				if ( v[4] <= sup2[ j ] )		// can supply all demanded?
 				{
-					INCRS( cur, "_D2", dem2[ j ] );// supply all demanded
-					v[0] += dem2[ j ];			// accumulate to total demand
-					v[2] -= dem2[ j ];			// discount from desired demand
+					INCRS( cur, "_D2", v[4] );	// supply all demanded
+					v[0] += v[4];				// accumulate to total demand
+					v[2] -= v[4];				// discount from desired demand
 					v[3] += f2[ j ];			// save share yet to allocate
-					sup2[ j ] -= dem2[ j ];		// make supplied unavailable
+					sup2[ j ] -= v[4];			// make supplied unavailable
 				}
 				else
 				{
 					if ( i == 0 )				// unsatisfied demand metric
-						WRITES( cur, "_l2", dem2[ j ] - sup2[ j ] );
+						WRITES( cur, "_l2", v[4] - sup2[ j ] );
 
 					INCRS( cur, "_D2", sup2[ j ] );// supply all available
 					v[0] += sup2[ j ];			// accumulate to total demand
