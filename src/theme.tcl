@@ -273,7 +273,7 @@ proc ttk::menu { w args } {
 				-activebackground sbg \
 				-activeforeground sfg \
 				-disabledforeground dfg \
-				-selectcolor ebg 
+				-selectcolor efg 
 }
 
 
