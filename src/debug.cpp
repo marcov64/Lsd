@@ -402,7 +402,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 		{
 			cmd( "bind .deb <KeyPress-g> { }; bind .deb <KeyPress-G> { }" );
 			cmd( "set stack_flag [ .deb.b.act.stack.e get ]" ); 
-			stack_info = get_int( "stack_flag", &stack_info );
+			stack_info = get_int( "stack_flag" );
 			
 			cmd( "if { $value_change } { \
 					if [ string is double -strict [ .deb.v.v1.val2 get ] ] { \
@@ -714,8 +714,8 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 					if ( choice == 1 )
 					{
-						get_int( "cond", &cv->deb_cond );
-						get_double( "cond_val", &cv->deb_cnd_val );
+						cv->deb_cond = get_int( "cond" );
+						cv->deb_cnd_val = get_double( "cond_val" );
 					}
 				}
 
@@ -1250,7 +1250,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 					if ( choice == 1 )
 					{
-						get_int( "hook", &i );
+						i = get_int( "hook" );
 						
 						if ( ! checked[ i ] )
 						{
@@ -1318,7 +1318,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			// double-click (change to) network node
 			case 23:
 				ch1 = ( char * ) Tcl_GetVar( inter, "nodeLab", 0 );
-				get_long( "nodeId", & node );
+				node = get_long( "nodeId" );
 				cur = root->search_node_net( ( const char * ) ch1, node );
 				if ( cur != NULL )
 					choice = deb( cur, c, lab, res, interact );
@@ -1333,7 +1333,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			// double-click (change to) object pointer
 			case 24:
 				ch1 = ( char * ) Tcl_GetVar( inter, "objLab", 0 );
-				get_int( "objNum", & i );
+				i = get_int( "objNum" );
 				cur = root->search( ( const char * ) ch1 );
 				for ( j = 1; j != i && cur != NULL; ++j, cur = cur->hyper_next( ) );
 				if ( cur != NULL )

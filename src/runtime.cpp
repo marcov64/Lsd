@@ -261,8 +261,8 @@ void plot_rt( variable *v )
 	int height, p_digits;
 	double value, scale, zero_lim;
 	
-	height = get_int( "vsizeR", &height );
-	p_digits = get_int( "pdigitsR", &p_digits );
+	height = get_int( "vsizeR" );
+	p_digits = get_int( "pdigitsR" );
 	
 	// limit the number of run-time plot variables
 	if ( cur_plt > 100 )

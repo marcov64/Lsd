@@ -1361,11 +1361,9 @@ SET_SHORTCUTS_RUN
 *********************************/
 void set_shortcuts_run( const char *window )
 {
-	int winExist;
-	
 	cmd( "set res [ winfo exists %s ]", window );
 	
-	if ( get_int( "res", &winExist ) )
+	if ( get_bool( "res" ) )
 	{
 		cmd( "bind %s <KeyPress-s> { .b.r2.stop invoke }; bind %s <KeyPress-S> { .b.r2.stop invoke }", window, window );
 		cmd( "bind %s <KeyPress-p> { .b.r2.pause invoke }; bind %s <KeyPress-P> { .b.r2.pause invoke }", window, window );
@@ -1383,10 +1381,9 @@ SET_BUTTONS_RUN
 void set_buttons_run( bool enable )
 {
 	char state[ 9 ];
-	int res;
 	
 	cmd( "set res [ winfo exists .b.r2.stop ]" );
-	if ( ! get_int( "res", &res ) )
+	if ( ! get_bool( "res" ) )
 		return;
 	
 	if ( enable )

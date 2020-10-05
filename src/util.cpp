@@ -695,7 +695,7 @@ FILE *search_all_sources( char *str )
 	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
 	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set res [ llength $source_files ]" );
-	get_int( "res", & nfiles );
+	nfiles = get_int( "res" );
 	
 	for ( i = 0; i < nfiles; ++i )
 	{
@@ -1450,10 +1450,10 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 		
 #ifndef NW
 
-	get_int( "hsizeLat", & hsize );			// 400
-	get_int( "vsizeLat", & vsize );			// 400
-	get_int( "hsizeLatMax", & hsizeMax );	// 1024
-	get_int( "vsizeLatMax", & vsizeMax );	// 1024
+	hsize = get_int( "hsizeLat" );			// 400
+	vsize = get_int( "vsizeLat" );			// 400
+	hsizeMax = get_int( "hsizeLatMax" );	// 1024
+	vsizeMax = get_int( "vsizeLatMax" );	// 1024
 
 	pixW = floor( pixW ) > 0 ? floor( pixW ) : hsize;
 	pixH = floor( pixH ) > 0 ? floor( pixH ) : vsize;

@@ -72,6 +72,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	value1 = cv->val [ lag ];					// preload the existing value of the first object
 	value2 = 0;
 	cmd( "set value 1" ); 						// method
+	cmd( "set fill 0" );
 	cmd( "set to_all 1" );
 	cmd( "set step_in 1" );
 	cmd( "set cases_from 1" );
@@ -331,14 +332,14 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	if ( *choice == 2 )
 		return;
 
-	get_int( "step_in", &step_in );
-	get_int( "fill", &fill );
-	get_int( "to_all", &to_all );
-	get_int( "cases_from", &cases_from );
-	get_int( "cases_to", &cases_to );
-	get_int( "use_seed", &use_seed );
-	get_int( "rnd_seed", &rnd_seed );
-	get_int( "update_d", &update_d );
+	step_in = get_int( "step_in" );
+	fill = get_int( "fill" );
+	to_all = get_int( "to_all" );
+	cases_from = get_int( "cases_from" );
+	cases_to = get_int( "cases_to" );
+	use_seed = get_int( "use_seed" );
+	rnd_seed = get_int( "rnd_seed" );
+	update_d = get_int( "update_d" );
 
 	if ( use_seed )
 		init_random( ( unsigned ) rnd_seed );

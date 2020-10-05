@@ -549,7 +549,7 @@ void write_var( variable *v, FILE *frep )
 	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
 	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set res [ llength $source_files ]" );
-	get_int( "res", &nfiles );
+	nfiles = get_int( "res" );
 		
 	for ( one = false, k = 0; k < nfiles; ++k )
 	{
@@ -783,7 +783,7 @@ void find_using( object *r, variable *v, FILE *frep, bool *found )
 	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
 	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set res [ llength $source_files ]" );
-	get_int( "res", &nfiles );
+	nfiles = get_int( "res" );
 	
 	// first check if variable has a dummy equation and abort if so
 	for ( i = 0; i < nfiles; ++i )

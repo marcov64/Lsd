@@ -464,8 +464,8 @@ int entry_new_objnum( object *c, const char *tag, int *choice )
 	if ( *choice == 2 )
 		return 2;
 	
-	cfrom = get_int( "cfrom", &cfrom );
-	num = get_int( "num", &num );
+	cfrom = get_int( "cfrom" );
+	num = get_int( "num" );
 	
 	cmd( "set choice [ lindex [ split $affect . ] 0 ]" );
 	j = *choice;

@@ -365,7 +365,7 @@ void scan_used_lab( char *lab, int *choice )
 	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
 	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set res [ llength $source_files ]" );
-	get_int( "res", & nfiles );
+	nfiles = get_int( "res" );
 	
 	cmd( "unset -nocomplain list_used" );
 

@@ -191,12 +191,12 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 	variable *cv;
 	bridge *cb;
 
-	get_double( "hfactM", &h_fact );
-	get_double( "vfactM", &v_fact );
-	get_double( "rfactM", &range_fact );
-	get_int( "rinitM", &range_init );
-	get_int( "rincrM", &range_incr );
-	get_int( "vstepM", &step_level );
+	h_fact = get_double( "hfactM" );
+	v_fact = get_double( "vfactM" );
+	range_fact = get_double( "rfactM" );
+	range_init = get_int( "rinitM" );
+	range_incr = get_int( "rincrM" );
+	step_level = get_int( "vstepM" );
 	step_level = round( step_level * v_fact );
 	
 	// element list to appear on the left of the window
@@ -318,7 +318,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 	else
 	{
 		cmd( ".str.f.c delete all" );
-		get_int( "borderM", &level );
+		level = get_int( "borderM" );
 		center = 0;
 	}
 	

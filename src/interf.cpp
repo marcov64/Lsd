@@ -1194,7 +1194,7 @@ case 2:
 	Tcl_LinkVar( inter, "done", ( char * ) &done, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
 	
-	get_int( "param", & param );
+	param = get_int( "param" );
 	cmd( "set num 0" );
 	cmd( "set lab \"\"" );
 	cmd( "set initValEn 0" );
@@ -3755,8 +3755,8 @@ case 33:
 	if ( *choice == 2 )
 		goto endinst;
 
-	k = get_int( "cfrom", &k );
-	num = get_int( "num", &num );
+	k = get_int( "cfrom" );
+	num = get_int( "num" );
 	for ( i = 0, cur = r->up; cur != NULL; ++i, cur = cur->up ); 
 
 	chg_obj_num( &r, num, i, NULL, choice, k );
@@ -5395,12 +5395,11 @@ case 68:
 	if ( *choice == 2 )
 		break;
 	
-	get_int( "cores", & param );
-	get_int( "threads", & nature );
+	param = get_int( "cores" );
 	if ( param < 1 || param > SRV_MAX_CORES ) 
 		param = min( max_threads, SRV_MAX_CORES );
 	
-	get_int( "threads", & nature );
+	nature = get_int( "threads" );
 	if ( nature < 1 || nature > SRV_MAX_CORES ) 
 		nature = min( max_threads, SRV_MAX_CORES );
 	
@@ -6595,7 +6594,6 @@ CONTROL_TOCOMPUTE
 ****************************************************/
 void control_tocompute( object *r, char *l )
 {
-	int res;
 	bridge *cb;
 	object *cur;
 	variable *cv;
@@ -6606,9 +6604,8 @@ void control_tocompute( object *r, char *l )
 		{
 			cmd( "set res [ ttk::messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, l );
 			cmd( "if [ string equal $res cancel ] { set res 1 } { set res 0 }" );
-			get_int( "res", &res );
 			
-			if ( res == 1 )
+			if ( get_int( "res" ) == 1 )
 				return;
 		}
 	}
@@ -7037,7 +7034,6 @@ Open a clean configuration, either the current or not
 ****************************************************/
 bool open_configuration( object *&r, bool reload )
 {
-	int choice;
 	char *lab1, *lab2;
 	
 	if ( reload )
@@ -7047,8 +7043,8 @@ bool open_configuration( object *&r, bool reload )
 //		cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"$path\" -initialfile \"%s.lsd\" -filetypes { { {LSD model file} {.lsd} } } ]", simul_name );
         cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model file} {.lsd} } } ]");
 		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ]; set choice 0 } { set choice 2 }" );
-		get_int( "choice", &choice );
-		if ( choice == 2 )
+
+		if ( get_int( "choice" ) == 2 )
 			return false;
 
 		lab1 = ( char * ) Tcl_GetVar( inter, "path", 0 );

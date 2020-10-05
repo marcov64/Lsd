@@ -2336,7 +2336,7 @@ while ( true )
 					var_names.resize( h );
 					
 					if ( mc )
-						k = get_int( "keepSeries", & k );
+						k = get_int( "keepSeries" );
 					else
 						k = true;
 				
@@ -3564,7 +3564,7 @@ void plot_cross( int *choice )
 	int i, j, k, nt, new_nv, *list_times, *pos, *start, *end, *id, *erase;
 
 	cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
-	get_int( "nt", & nt );
+	nt = get_int( "nt" );
 	
 	if ( nv < 2 || nt <= 0 )
 	{
@@ -3587,7 +3587,7 @@ void plot_cross( int *choice )
 	for ( i = 0; i < nt; ++i )
 	{
 		cmd( "set k [ lindex $list_times %d ]", i );
-		get_int( "k", & k );
+		k = get_int( "k" );
 		list_times[ i ] = k;
 	}
 	
@@ -5922,9 +5922,9 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	}
 
 	// get graphical configuration from Tk ( file defaults.tcl )
-	get_int( "hsizePxy", & hsize );			// 640
-	get_int( "vsizePxy", & vsize );			// 450
-	get_int( "sbordsizeP", & sbordsize );	// 0
+	hsize = get_int( "hsizePxy" );			// 640
+	vsize = get_int( "vsizePxy" );			// 450
+	sbordsize = get_int( "sbordsizeP" );	// 0
 
 
 	// generate tk canvas filling routine using Gnuplot
@@ -6047,18 +6047,18 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	if ( *choice == 1 )
 	{
 		cmd( "set res [ expr int( $cmx * [ lindex $lim 0 ] / 1000.0 ) ]" );
-		get_int( "res", &lim[ 0 ] );
+		lim[ 0 ] = get_int( "res" );
 		cmd( "set res [ expr int( $cmx * [ lindex $lim 1 ] / 1000.0 ) ]" );
-		get_int( "res", &lim[ 1 ] );
+		lim[ 1 ] = get_int( "res" );
 		cmd( "set res [ expr int( $cmy * [ lindex $lim 2 ] / 1000.0 ) ]" );
-		get_int( "res", &lim[ 2 ] );
+		lim[ 2 ] = get_int( "res" );
 		cmd( "set res [ expr int( $cmy * [ lindex $lim 3 ] / 1000.0 ) ]" );
-		get_int( "res", &lim[ 3 ] );
+		lim[ 3 ] = get_int( "res" );
 		
 		for ( i = 0; i < 4; ++i )
 		{	
 			cmd( "set res [ lindex $rang %d ]", i );
-			get_double( "res", &rang[ i ] );
+			rang[ i ] = get_double( "res" );
 
 			if ( is_inf( lim[ i ] ) || is_nan( lim[ i ] ) || is_inf( rang[ i ] ) || is_nan( rang[ i ] ) )
 				rang[ i ] = lim[ i ] = 0;
@@ -6204,9 +6204,9 @@ void plot_lattice( int *choice )
 	}
 
 	// lattice window size
-	get_int( "hsizeLat", & hsize );			// 400
-	get_int( "vsizeLat", & vsize );			// 400
-	get_double( "cscaleLat", & cscale );	// 1.0
+	hsize = get_int( "hsizeLat" );			// 400
+	vsize = get_int( "vsizeLat" );			// 400
+	cscale = get_double( "cscaleLat" );		// 1.0
 
 	// find column number suggestion
 	tot = time_cross == 1 ? nv : max_c - min_c + 1;
@@ -7112,9 +7112,9 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 			return;
 		}
 		
-		flt = get_int( "flt", & flt );
-		thflt = get_double( "thflt", & thflt );
-		cs_long = get_int( "bido", & cs_long );
+		flt = get_int( "flt" );
+		thflt = get_double( "thflt" );
+		cs_long = get_int( "bido" );
 		sel_series = nv;
 		var_num = num_var;
 	}
@@ -7126,8 +7126,8 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 		sel_series = var_names.size( );
 	}
 	
-	confi = get_int( "confi", & confi );
-	type_series = get_int( "bidi", & type_series );
+	confi = get_int( "confi" );
+	type_series = get_int( "bidi" );
 	new_series = 1;
 	z_crit = 0;
 	
@@ -7498,8 +7498,8 @@ void create_maverag( int *choice )
 		return;
 	}
 
-	get_int( "bido", &flt );
-	get_int( "ma_type", &ma_type );
+	flt = get_int( "bido" );
+	ma_type = get_int( "ma_type" );
 	
 	// adjust to odd number, if required
 	if ( flt < 2 )
@@ -8321,9 +8321,9 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	}
 	
 	// get graphical configuration from Tk ( file defaults.tcl )
-	get_int( "hsizeP", & hsize );			// 600
-	get_int( "vsizeP", & vsize );			// 300
-	get_int( "tbordsizeP", & tbordsize );	// 5
+	hsize = get_int( "hsizeP" );			// 600
+	vsize = get_int( "vsizeP" );			// 300
+	tbordsize = get_int( "tbordsizeP" );	// 5
 
 	// select gray scale or color range				
 	color = allblack ? 1001 : 0;
@@ -8359,10 +8359,10 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	plot_canvas( type, nv, start, end, str, tag, choice );
 	
 	// get graphical configuration real canvas
-	get_int( "hcanvasP", & hcanvas );
-	get_int( "vcanvasP", & vcanvas );
-	get_int( "hbordsizeP", & hbordsize );
-	get_int( "lheightP", & lheight );
+	hcanvas = get_int( "hcanvasP" );
+	vcanvas = get_int( "vcanvasP" );
+	hbordsize = get_int( "hbordsizeP" );
+	lheight = get_int( "lheightP" );
 
 	// calculate screen plot values for all series
 	x1 = hbordsize - 1;
@@ -8686,13 +8686,13 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	plot_canvas( type, 1, start, end, str, tag, choice );
 	
 	// get graphical configuration from Tk ( file defaults.tcl )
-	get_int( "hsizeP", & hsize );			// 600
-	get_int( "vsizeP", & vsize );			// 300
-	get_int( "hcanvasP", & hcanvas );
-	get_int( "vcanvasP", & vcanvas );
-	get_int( "tbordsizeP", & tbordsize );	// 5
-	get_int( "hbordsizeP", & hbordsize );
-	get_int( "lheightP", & lheight );		// 15
+	hsize = get_int( "hsizeP" );			// 600
+	vsize = get_int( "vsizeP" );			// 300
+	hcanvas = get_int( "hcanvasP" );
+	vcanvas = get_int( "vcanvasP" );
+	tbordsize = get_int( "tbordsizeP" );	// 5
+	hbordsize = get_int( "hbordsizeP" );
+	lheight = get_int( "lheightP");			// 15
 
 	// select gray or color			
 	color = allblack ? 1001 : 0;	
@@ -8909,17 +8909,17 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	double yVal, cminy2, cmaxy2;
 	
 	// get graphical configuration from Tk ( file defaults.tcl )
-	get_int( "hsizeP", & hsize );			// 600
-	get_int( "vsizeP", & vsize );			// 300
-	get_int( "hmbordsizeP", & hbordsize );	// 40
-	get_int( "tbordsizeP", & tbordsize );	// 5
-	get_int( "bbordsizeP", & bbordsize );	// 90
-	get_int( "sbordsizeP", & sbordsize );	// 0
-	get_int( "htmarginP", & htmargin );		// 4
-	get_int( "vtmarginP", & vtmargin );		// 5
-	get_int( "hticksP", & hticks );			// 3
-	get_int( "vticksP", & vticks );			// 3
-	get_int( "lheightP", & lheight );		// 15
+	hsize = get_int( "hsizeP" );			// 600
+	vsize = get_int( "vsizeP" );			// 300
+	hbordsize = get_int( "hmbordsizeP" );	// 40
+	tbordsize = get_int( "tbordsizeP"	);	// 5
+	bbordsize = get_int( "bbordsizeP"	);	// 90
+	sbordsize = get_int( "sbordsizeP"	);	// 0
+	htmargin = get_int( "htmarginP" );		// 4
+	vtmargin = get_int( "vtmarginP" );		// 5
+	hticks = get_int( "hticksP" );			// 3
+	vticks = get_int( "vticksP" );			// 3
+	lheight = get_int( "lheightP" );		// 15
 
 	// define type-specific parameters
 	switch ( type )
@@ -9166,7 +9166,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 		{
 			cmd( "set app [ font measure $fontP \"%s\"]", txtLab );
 			cmd( "if { [ expr $xlabel + $app] > %d } { set xlabel %d; incr ylabel %d }", hcanvas - htmargin, htmargin, lheight );
-			get_int( "ylabel", & h );
+			h = get_int( "ylabel" );
 			if ( h > tbordsize + vsize + bbordsize - 2 * lheight )
 				break;
 			cmd( "$p create text $xlabel $ylabel -font $fontP -anchor nw -text \"%s\" -tag { txt%d text legend } -fill $c%d", txtLab, i, ( color < 1100 ) ? color : 0 );

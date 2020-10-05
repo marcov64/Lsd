@@ -578,11 +578,21 @@ bool valid_label( const char *lab )
  ***************************************************/
 bool get_bool( const char *tcl_var, bool *var )
 {
+	char *string;
 	int intvar;
-	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%d", & intvar );
+	
+	string = ( char * ) Tcl_GetVar( inter, tcl_var, 0 );
+	if ( string == NULL )
+	{
+		log_tcl_error( "Invalid Tcl variable name", "Internal LSD error (get_bool). If the problem persists, please contact developers" );
+		return *var;
+	}
+		
+	sscanf( string, "%d", &intvar );
 	if ( var != NULL )
 		*var = intvar ? true : false;
-	return ( intvar ? true : false );
+	
+	return intvar ? true : false;
 }
 
 
@@ -591,10 +601,20 @@ bool get_bool( const char *tcl_var, bool *var )
  ***************************************************/
 int get_int( const char *tcl_var, int *var )
 {
+	char *string;
 	int intvar;
-	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%d", & intvar );
+	
+	string = ( char * ) Tcl_GetVar( inter, tcl_var, 0 );
+	if ( string == NULL )
+	{
+		log_tcl_error( "Invalid Tcl variable name", "Internal LSD error (get_int). If the problem persists, please contact developers" );
+		return *var;
+	}
+		
+	sscanf( string, "%d", &intvar );
 	if ( var != NULL )
 		*var = intvar;
+	
 	return intvar;
 }
 
@@ -604,10 +624,20 @@ int get_int( const char *tcl_var, int *var )
  ***************************************************/
 long get_long( const char *tcl_var, long *var )
 {
+	char *string;
 	long longvar;
-	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%ld", & longvar );
+	
+	string = ( char * ) Tcl_GetVar( inter, tcl_var, 0 );
+	if ( string == NULL )
+	{
+		log_tcl_error( "Invalid Tcl variable name", "Internal LSD error (get_long). If the problem persists, please contact developers" );
+		return *var;
+	}
+		
+	sscanf( string, "%ld", &longvar );
 	if ( var != NULL )
 		*var = longvar;
+	
 	return longvar;
 }
 
@@ -617,10 +647,20 @@ long get_long( const char *tcl_var, long *var )
  ***************************************************/
 double get_double( const char *tcl_var, double *var )
 {
+	char *string;
 	double dblvar;
-	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%lf", & dblvar );
+	
+	string = ( char * ) Tcl_GetVar( inter, tcl_var, 0 );
+	if ( string == NULL )
+	{
+		log_tcl_error( "Invalid Tcl variable name", "Internal LSD error (get_double). If the problem persists, please contact developers" );
+		return *var;
+	}
+		
+	sscanf( string, "%lf", &dblvar );
 	if ( var != NULL )
 		*var = dblvar;
+	
 	return dblvar;
 }
 
