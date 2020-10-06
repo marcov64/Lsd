@@ -121,6 +121,8 @@ For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
 
 IMPORTANT: from version 8.0 and higher, LSD supports only Windows 64-bit. If you must run LSD in a Windows 32-bit computer, please use the 7.2 version which can be downloaded from the same site indicated below. If you are unsure of the version of Windows in your computer, please check in "Windows > Settings > System > About > System type".
 
+ANTIVIRUS BAD BEHAVIOR: many third-party anti-virus software consider LSD operation suspicious because it creates executable files and deals with tools, like compilers, which do not belong to the regular user universe. This wrong assumption can break LSD operation in many aspects and usually cannot be fixed reliably, so using LSD together with these tools is NOT SUPPORTED. LSD is tested and fully works with the embedded Windows anti-virus (Defender), which is unfortunately disabled when a third-party anti-virus is installed by the user. According to specialized media tests, Windows Defender is considered an excellent anti-virus, in particular when compared to the free alternatives, so using it instead of the alternatives should not create any problem. However, if you cannot remove your current third-party anti-virus (and enable Windows Defender), you still have the option to run LSD inside a virtual machine like VirtualBox or VMware (but with reduced performance).
+
 To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-8-0-stable-1.exe). Download it, double-click on the installer file, and follow the instructions. The installer executable can be deleted after the installation.
  
 Alternatively, or in the case of problems using the installer, it is also possible to simply unzip a LSD distribution file archive on the desired folder. In most cases "C:\" (the root of the hard disk) is a good option. The steps to perform a manual installation are:
@@ -139,7 +141,7 @@ To create a desktop link (icon) to run LSD/LMM, as well as an entry to the Windo
 
  add-shortcut-windows.bat
 
-After the desktop icon is created, double-clicking it opens LMM (LSD Model Manager) which allows to create new models, or select existing models. If you cannot create the LSD icon on your desktop, or an entry in Start Menu, following the steps above, you may still run LSD by double-clicking the file "run.bat" inside the LSD installation directory. Never invoke the file "lmm.exe" directly because it needs some environment variables to be set by "run.bat".
+After the desktop icon is created, double-clicking it opens LMM (LSD Model Manager) which allows to create new models, or select existing models. If you cannot create the LSD icon on your desktop, or an entry in Start Menu, following the steps above, you may still run LSD by double-clicking the file "LMM.exe" inside the LSD installation directory.
 
 GNUPLOT INSTALLATION:
 
