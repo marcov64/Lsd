@@ -461,6 +461,9 @@ int browse( object *r, int *choice )
 					event generate .l.v.c.var_name <F8> \
 				}" );
 			cmd( "bind .l.v.c.var_name <KeyRelease> { \
+					if { ( %%s & 0x20004 ) != 0 } { \
+						return \
+					}; \
 					set kk %%K; \
 					if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } { \
 						if [ string equal $kk underscore ] { \
@@ -692,6 +695,9 @@ int browse( object *r, int *choice )
 					event generate .l.s.c.son_name <F5> \
 				}" );
 			cmd( "bind .l.s.c.son_name <KeyRelease> { \
+					if { ( %%s & 0x20004 ) != 0 } { \
+						return \
+					}; \
 					set kk %%K; \
 					if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } { \
 						if [ string equal $kk underscore ] { \

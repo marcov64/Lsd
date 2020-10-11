@@ -317,6 +317,9 @@ proc choose_models { curdir curfile } {
 		break
 	}
 	bind .l.t.l.l.l <KeyRelease> {
+		if { ( %s & 0x20004 ) != 0 } {
+			return
+		}
 		set key %K
 		if { [ string length $key ] == 1 && [ string is alpha -strict $key ] } {
 			set start [ expr [ .l.t.l.l.l curselection ] + 1 ]

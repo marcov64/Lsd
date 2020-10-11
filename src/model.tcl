@@ -196,6 +196,9 @@ proc showmodel pippo {
 		bind .l <Return> { .l.m.file invoke 0 }
 		
 		bind .l <KeyRelease> {
+			if { ( %s & 0x20004 ) != 0 } {
+				return
+			}
 			set kk %K
 			if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } {
 				if [ string equal $kk underscore ] {

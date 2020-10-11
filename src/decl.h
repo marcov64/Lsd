@@ -363,6 +363,7 @@ void tex_report_struct( object *r, FILE *f, bool table = true );
 void uncover_browser( void );
 void unload_configuration ( bool full );
 void unlink_cells( object *r, char *lab );
+void unset_shortcuts_run( const char *window );
 void update_bounds( void );
 void warn_distr( int *errCnt, bool *stopErr, const char *distr, const char *msg );
 void wipe_out( object *d );

@@ -1365,12 +1365,31 @@ void set_shortcuts_run( const char *window )
 	
 	if ( get_bool( "res" ) )
 	{
-		cmd( "bind %s <KeyPress-s> { .b.r2.stop invoke }; bind %s <KeyPress-S> { .b.r2.stop invoke }", window, window );
-		cmd( "bind %s <KeyPress-p> { .b.r2.pause invoke }; bind %s <KeyPress-P> { .b.r2.pause invoke }", window, window );
-		cmd( "bind %s <KeyPress-r> { .b.r2.pause invoke }; bind %s <KeyPress-R> { .b.r2.pause invoke }", window, window );
-		cmd( "bind %s <KeyPress-f> { .b.r2.speed invoke }; bind %s <KeyPress-F> { .b.r2.speed invoke }", window, window );
-		cmd( "bind %s <KeyPress-o> { .b.r2.obs invoke }; bind %s <KeyPress-O> { .b.r2.obs invoke }", window, window );
-		cmd( "bind %s <KeyPress-d> { .b.r2.deb invoke }; bind %s <KeyPress-D> { .b.r2.deb invoke }", window, window );
+		cmd( "bind %s <KeyPress-s> { catch { .b.r2.stop invoke } }; bind %s <KeyPress-S> { catch { .b.r2.stop invoke } }", window, window );
+		cmd( "bind %s <KeyPress-p> { catch { .b.r2.pause invoke } }; bind %s <KeyPress-P> { catch { .b.r2.pause invoke } }", window, window );
+		cmd( "bind %s <KeyPress-r> { catch { .b.r2.pause invoke } }; bind %s <KeyPress-R> { catch { .b.r2.pause invoke } }", window, window );
+		cmd( "bind %s <KeyPress-f> { catch { .b.r2.speed invoke } }; bind %s <KeyPress-F> { catch { .b.r2.speed invoke } }", window, window );
+		cmd( "bind %s <KeyPress-o> { catch { .b.r2.obs invoke } }; bind %s <KeyPress-O> { catch { .b.r2.obs invoke } }", window, window );
+		cmd( "bind %s <KeyPress-d> { catch { .b.r2.deb invoke } }; bind %s <KeyPress-D> { catch { .b.r2.deb invoke } }", window, window );
+	}
+}
+
+
+/*********************************
+UNSET_SHORTCUTS_RUN
+*********************************/
+void unset_shortcuts_run( const char *window )
+{
+	cmd( "set res [ winfo exists %s ]", window );
+	
+	if ( get_bool( "res" ) )
+	{
+		cmd( "bind %s <KeyPress-s> { }; bind %s <KeyPress-S> { }", window, window );
+		cmd( "bind %s <KeyPress-p> { }; bind %s <KeyPress-P> { }", window, window );
+		cmd( "bind %s <KeyPress-r> { }; bind %s <KeyPress-R> { }", window, window );
+		cmd( "bind %s <KeyPress-f> { }; bind %s <KeyPress-F> { }", window, window );
+		cmd( "bind %s <KeyPress-o> { }; bind %s <KeyPress-O> { }", window, window );
+		cmd( "bind %s <KeyPress-d> { }; bind %s <KeyPress-D> { }", window, window );
 	}
 }
 
@@ -1489,6 +1508,10 @@ void uncover_browser( void )
 	if ( ! brCovered || running )	// ignore if not covered or running
 		return;
 
+	unset_shortcuts_run( "." );
+	unset_shortcuts_run( ".log" );
+	unset_shortcuts_run( ".str" );
+		
 	cmd( "destroytop .deb" );
 	cmd( "destroy .t1 .p .t2 .b" );
 	

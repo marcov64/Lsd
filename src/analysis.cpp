@@ -252,6 +252,9 @@ cmd( "mouse_wheel $f.v" );
 cmd( "bind $f.v <Return> { .da.vars.b.in invoke; break }" );
 cmd( "bind $f.v <space> { set res [ .da.vars.lb.f.v get active ]; set choice 30; break }" );
 cmd( "bind $f.v <KeyRelease> { \
+		if { ( %%s & 0x20004 ) != 0 } { \
+			return \
+		}; \
 		set kk %%K; \
 		if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } { \
 			if [ string equal $kk underscore ] { \
@@ -324,6 +327,9 @@ cmd( "bind $f.v <BackSpace> { .da.vars.b.out invoke; break }" );
 cmd( "bind $f.v <Return> { .da.b.ts invoke; break }" );
 cmd( "bind $f.v <space> { set res [ .da.vars.ch.f.v get active ]; set choice 33; break }" );
 cmd( "bind $f.v <KeyRelease> { \
+		if { ( %%s & 0x20004 ) != 0 } { \
+			return \
+		}; \
 		set kk %%K; \
 		if { [ string equal $kk underscore ] || ( [ string length $kk ] == 1 && [ string is alpha -strict $kk ] ) } { \
 			if [ string equal $kk underscore ] { \
@@ -363,6 +369,9 @@ cmd( "mouse_wheel $f.v" );
 cmd( "bind $f.v <Return> { set it [ selection get ]; set choice 3; break }" );
 cmd( "bind .da <Delete> { set n_it [ .da.vars.pl.f.v curselection ]; if { $n_it != \"\" } { set it [ selection get ]; set choice 20 }; break }" );
 cmd( "bind $f.v <KeyRelease> { \
+		if { ( %%s & 0x20004 ) != 0 } { \
+			return \
+		}; \
 		set kk %%K; \
 		if { [ string length $kk ] == 1 && [ string is digit -strict $kk ] } { \
 			set ll %%W; \
