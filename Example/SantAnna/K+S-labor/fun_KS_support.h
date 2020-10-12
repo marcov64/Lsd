@@ -321,7 +321,7 @@ void shuffle_offers( woLisT *offers )
 	copy( offers->begin( ), offers->end( ), temp.begin( ) );
 	
 	// shuffle firms to choose hiring order
-	shuffle( temp.begin( ), temp.end( ), *random_engine );
+	shuffle( temp.begin( ), temp.end( ), random_engine );
 	
 	// and copy it back to a list
 	copy( temp.begin( ), temp.end( ), offers->begin( ) );
@@ -403,7 +403,7 @@ void order_applications( int order, appLisT *appls )
 		case 0:									// random order
 			// make a copy of list to a vector, shuffle, and copy back
 			copy( appls->begin( ), appls->end( ), temp.begin( ) );
-			shuffle( temp.begin( ), temp.end( ), *random_engine );
+			shuffle( temp.begin( ), temp.end( ), random_engine );
 			copy( temp.begin( ), temp.end( ), appls->begin( ) );
 			break;
 		case 1:									// higher wage first order

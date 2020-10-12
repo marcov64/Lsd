@@ -49,7 +49,7 @@ This Readme.txt file contains five sections:
 2. LSD distribution content
 3. Hints on the use of LSD
 4. Installing LSD (Windows, macOS and Linux)
-5. Optional compilers in Windows (Cygwin and MSYS2)
+5. Optional compilers in Windows (MSYS2 and Cygwin)
 
 
 ***************
@@ -159,9 +159,7 @@ ATTENTION: If Gnuplot is not included in the Windows PATH environment variable, 
 
 USING DIFFERENT COMPILERS (optional):
 
-It is possible to use the GNU 64-bit C++ compiler you already have in your computer. Indeed, LSD by default uses any compiler already installed in the computer. Only in case of none being available LSD uses its embedded compiler. However, the user may want to install and manage its own compiler. Or the compiler may need to be upgraded or have all the required optional libraries installed. LSD supports any version of GNU 64-bit C++ compiler supporting C++11 standard (Cygwin or MSYS2 mingw-w64-x86_64 versions are both fine), but requires also Tcl/Tk 8.6 and zlib 1.2 libraries to be installed with it.
-
-Cygwin compiler is easier to install as it does not require the user to deal with a command prompt. MSYS2 compiler installer is recommended only for advanced users and requires the use of the bash terminal. Instructions for installing both are available at the end of this document. If they are already installed, the instructions can be also followed to make sure the installation is complete.
+It is possible to use LSD with a C++ compiler already installed in your computer. However, in this case the user must install and configure the compiler to ensure it has all the required optional libraries. LSD supports any version of GNU 64-bit C++ compiler (GCC) supporting C++14 (or more recent) standard. Cygwin and MSYS2 mingw-w64-x86_64 versions are both fine, but they require Tcl/Tk 8.6 and zlib 1.2 libraries to be installed. Cygwin compiler is sometwhat easier to install as it does not require the user to deal with a command prompt. MSYS2 compiler usually releases new versions earlier. Instructions for installing both are available at the end of this document. Even if they are already installed, the instructions can be also followed to make sure the installation is complete and LSD is configured to use it.
 
 
 ************************************
@@ -268,32 +266,11 @@ If the system lists further libraries, add the appropriate option to the linker 
 IMPORTANT: if you modified the makefile to compile LMM, the same changes need to be made to the makefiles used to generate the LSD Model programs. You need to make these changes only once using LMM. Use the menu item System Compilation Options in menu Model. You will have to fill the same variables as in the makefile used to compile LMM, which must be set to the same values.
 
 
-*******************************************
-5.1 Cygwin compiler installation (optional)
-*******************************************
-
-The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64") or to the existing Cygwin directory in case of an update. If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, four non-default packages are REQUIRED by LSD (gcc-core, mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Alternatively, the pure-Cygwin, non-MinGW 64-bit gcc compiler can be also used, if matched with the corresponding Tcl/Tk and zlib libraries. Lastly, Cygwin must be added to the PATH environment variable (not done by the installer).
-
-Step-by-step procedure to install the Cygwing 64-bit compiler (an internet connection is required):
-
-1. In an internet browser, open the site https://www.cygwin.com and find the link to download the Cygwin installer file for Windows 64-bit (setup-x86_64.exe).
-
-2. In Windows Explorer, double click the downloaded "setup-x86_64.exe" installer file.
-
-3. When the installer opens, choose "Install from Internet", accept the proposed root install directory (C:\cygwin64), press "Next", opt for installing for "All Users", press "Next", accept the proposed local package directory (C:\cygwin64), "Next" again, select "Direct Connection", press "Next", choose any of the offered download sites (one closer to your location will just provide faster downloads), and "Next".
-
-4. When the "Select Packages" window opens, click on the View option list, choose "Full" (to see the list with all packages), type the name of each required package in the Search box, find the EXACT name in the packages list (do not use partial matches), and on the "New" column change the option from "Skip" to the latest available version (the one with the higher number). Repeat this process for each of the six required packages: "gcc-core", "mingw64-x86_64-gcc-g++", "mingw64-x86_64-zlib", "make", "gdb", and "multitail".
-
-5. When all the required packages are marked for download, choose "Next", accept the proposed changes and proceed to download and install Cygwin. Please wait until the installer finishes (it may take a while) and close the installer when requested.
-
-6. In Windows open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, select "Path" and press "Edit..." (be carefull to NOT DELETE the existing text). Run across the lines to see if your Cygwin bin folder, i.e. "C:\cygwin64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, at the end of the "Variable value" field type ";" (next to the existing text) and add your Cygwin bin folder. Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your Cygwin bin folder in PATH.
-
-
 ******************************************
-5.2 MSYS2 compiler installation (optional)
+5.1 MSYS2 compiler installation (optional)
 ******************************************
 
-Please note that MSYS2 compiler is NOT required (or recommended) if the above instructions for installing Cygwin compiler were already performed. If performing an update over an existing MSYS2 installation, it is recommended to uninstall the previous version before proceeding. If an on-place update is performed, without removing the existing version, start on step 2 below.
+Please note that MSYS2 compiler is NOT required (or recommended) if the above instructions for installing LSD were already performed, as LSD already embeds an up-to-date MSYS2 Windows compiler. If performing an update over an existing MSYS2 installation, it is recommended to uninstall the previous version before proceeding. If an on-place update is performed, without removing the existing version, start on step 2 below.
 
 Step-by-step procedure to install the MSYS2 64-bit compiler (an internet connection is required):
 
@@ -311,10 +288,46 @@ Step-by-step procedure to install the MSYS2 64-bit compiler (an internet connect
 
  pacman -S mingw-w64-x86_64-make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb
 
-5. In Windows open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, select "Path" and press "Edit..." (be carefull to NOT DELETE the existing text). Run across the lines to see if your MSYS2 MinGW64 bin folder, i.e. "C:\msys64\mingw64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, at the end of the "Variable value" field type ";" (next to the existing text) and add your MSYS2 MinGW64 bin folder. Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your MSYS2 bin folder in PATH.
+5. Press "Windows" and "R" keys together, type the command "sysdm.cpl" in the "Run" dialog box and press "Enter". In the "System Properties" window, go to the "Advanced" tab and click on button "Environment Variables...". In the "System variables" list, select "Path" and press "Edit...". Run across the lines to see if your MSYS2 MinGW64 bin folder, i.e. "C:\msys64\mingw64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, click on "New" and type MSYS2 MinGW64 binary folder, i.e. "C:\msys64\mingw64\bin". Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your MSYS2 MinGW64 bin folder in PATH.
+
+6. Open LSD LMM and choose menu "Model" > "System Options...". Edit the following entries to the values shown bellow:
+
+ PATH_HEADER=.
+ PATH_LIB=.
+
 
 SLOW GDB OPERATION: the GDB debugger can become very slow in Windows when the models are large. This is due to the Windows special handling of the heap (dynamic memory allocation) for programs being debugged. It is normally safe to disable this special handling by defining the folowing environment variable:
 
  _NO_DEBUG_HEAP=1
 
 To define it, open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, press "New...", type "_NO_DEBUG_HEAP" as the variable name, and "1" as its value. Press "Ok" 3 times and you are done.
+
+
+*******************************************
+5.2 Cygwin compiler installation (optional)
+*******************************************
+
+Please note that Cygwin compiler is NOT required (or recommended) if the above instructions for installing LSD were already performed, as LSD already embeds an up-to-date compiler for Windows. 
+
+The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64") or to the existing Cygwin directory in case of an update. If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, five non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Alternatively, the pure-Cygwin, non-MinGW 64-bit gcc compiler can be also used, if matched with the corresponding Tcl/Tk and zlib libraries. Lastly, Cygwin main and compiler binary subdirectories must be added to the PATH environment variable (not done by the installer).
+
+Step-by-step procedure to install the Cygwing 64-bit compiler (an internet connection is required):
+
+1. In an internet browser, open the site https://www.cygwin.com and find the link to download the Cygwin installer file for Windows 64-bit (setup-x86_64.exe).
+
+2. In Windows Explorer, double click the downloaded "setup-x86_64.exe" installer file.
+
+3. When the installer opens, choose "Install from Internet", accept the proposed root install directory (C:\cygwin64), press "Next", opt for installing for "All Users", press "Next", accept the proposed local package directory (C:\cygwin64), "Next" again, select "Direct Connection", press "Next", choose any of the offered download sites (one closer to your location will just provide faster downloads), and "Next".
+
+4. When the "Select Packages" window opens, click on the View option list, choose "Full" (to see the list with all packages), type the name of each required package in the Search box, find the EXACT name in the packages list (do not use partial matches), and on the "New" column change the option from "Skip" to the latest available version (the one with the higher number). Repeat this process for each of the five required packages: "mingw64-x86_64-gcc-g++", "mingw64-x86_64-zlib", "make", "gdb", and "multitail".
+
+5. When all the required packages are marked for download, choose "Next", accept the proposed changes and proceed to download and install Cygwin. Please wait until the installer finishes (it may take a while) and close the installer when requested.
+
+6. Press "Windows" and "R" keys together, type the command "sysdm.cpl" in the "Run" dialog box and press "Enter". In the "System Properties" window, go to the "Advanced" tab and click on button "Environment Variables...". In the "System variables" list, select "Path" and press "Edit...". Run across the lines to see if your Cygwin two bin folders, i.e. "C:\cygwin64\bin" and "C:\cygwin64\usr\x86_64-w64-mingw32\sys-root\mingw\bin", are already there. If Yes, just press "Cancel" 3 times. If not, click on "New" and type Cygwin main binary folder, i.e. "C:\cygwin64\bin", then press "New" again and type the compiler binary folder, i.e."C:\cygwin64\usr\x86_64-w64-mingw32\sys-root\mingw\bin". Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your Cygwin bin folder in PATH.
+
+7. Open LSD LMM and choose menu "Model" > "System Options...". Edit the following entries to the values shown bellow:
+
+ PATH_HEADER=.
+ PATH_LIB=.
+ WRC=x86_64-w64-mingw32-windres
+ CC=x86_64-w64-mingw32-g++

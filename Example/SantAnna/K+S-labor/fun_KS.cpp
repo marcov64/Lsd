@@ -30,7 +30,7 @@
 // LSD and K+S macros and objects definition and support code
 #include <fun_head_fast.h>						// LSD definitions
 
-mt19937 *random_engine;							// pointer to LSD random engine
+mt19937_64 random_engine;						// K+S random engine (!= LSD)
 
 #include "fun_KS_class.h"						// K+S class/macro definitions
 #include "fun_KS_support.h"						// K+S support C++ functions
@@ -69,7 +69,9 @@ PARAMETER;										// execute only once
 DEFAULT_RESULT( NAN );							// default equation result
 USE_ZERO_INSTANCE;								// allow zero-instance objects
 NO_SEARCH;										// don't perform variable search
-random_engine = ( mt19937 * ) RND_GENERATOR( 2 );// LSD source of randomness
+RND_GENERATOR( 2 );								// LSD source of randomness
+
+random_engine.seed( RND_SEED );					// sync seeds between engines
 
 if ( RUN == 1 )									// first run only
 {

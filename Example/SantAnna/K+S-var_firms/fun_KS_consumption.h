@@ -49,10 +49,10 @@ while ( v[1] > 0.01 )
 				if ( v[4] <= sup2[ j ] )		// can supply all demanded?
 				{
 					INCRS( cur, "_D2", v[4] );	// supply all demanded
-					v[0] += dem2[ j ];			// accumulate to total demand
-					v[2] -= dem2[ j ];			// discount from desired demand
+					v[0] += v[4];				// accumulate to total demand
+					v[2] -= v[4];				// discount from desired demand
 					v[3] += f2[ j ];			// save share yet to allocate
-					sup2[ j ] -= dem2[ j ];		// make supplied unavailable
+					sup2[ j ] -= v[4];			// make supplied unavailable
 				}
 				else
 				{
