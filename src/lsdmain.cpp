@@ -1401,7 +1401,7 @@ void set_buttons_run( bool enable )
 {
 	char state[ 9 ];
 	
-	cmd( "set res [ winfo exists .b.r2.stop ]" );
+	cmd( "set res [ winfo exists .b.r2 ]" );
 	if ( ! get_bool( "res" ) )
 		return;
 	
@@ -1410,11 +1410,11 @@ void set_buttons_run( bool enable )
 	else
 		strcpy( state, "disabled" );
 	
-	cmd( ".b.r2.stop configure -state %s", state );
-	cmd( ".b.r2.pause configure -state %s", state );
-	cmd( ".b.r2.speed configure -state %s", state );
-	cmd( ".b.r2.obs configure -state %s", state );
-	cmd( ".b.r2.deb configure -state %s", state );
+	cmd( "catch { .b.r2.stop configure -state %s }", state );
+	cmd( "catch { .b.r2.pause configure -state %s }", state );
+	cmd( "catch { .b.r2.speed configure -state %s }", state );
+	cmd( "catch { .b.r2.obs configure -state %s }", state );
+	cmd( "catch { .b.r2.deb configure -state %s }", state );
 }
 
 

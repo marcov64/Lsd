@@ -79,8 +79,8 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 	if ( mode == 2 )
 		cover_browser( "Data Browser...", "Please exit Data Browser\nbefore using the LSD Browser.", false );
-	else
-		set_buttons_run( false );
+
+	set_buttons_run( false );
 
 	cmd( "set deb .deb" );
 	cmd( "if { ! [ winfo exists .deb ] } { \
@@ -422,6 +422,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				if ( t >= max_step )
 				{
 					cmd( "destroytop .deb" );
+					set_buttons_run( true );
 					debug_flag = false;
 				}
 				break;
@@ -429,6 +430,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			// Run
 			case 2:
 				cmd( "destroytop .deb" );
+				set_buttons_run( true );
 				if ( ! non_var )
 					debug_flag = false;
 
@@ -497,12 +499,12 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				}
 
 				cmd( "destroytop .deb" );
+				set_buttons_run( true );
 				choice = 1;
 				
 				switch ( mode )
 				{
 					case 1:		// prevent changing run parameters when only data browse was called
-						set_buttons_run( true );
 						quit = 1;
 						debug_flag = false;
 						break;
@@ -513,9 +515,6 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 					case 3:
 						cmd( "focustop ." );
-						
-					default:
-						set_buttons_run( true );
 				}
 
 				break;
@@ -1060,6 +1059,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 					debug_flag = false;
 					cmd( "if { $tdebug > %d } { set when_debug $tdebug } { set when_debug %d }", t, t + 1 );
 					cmd( "destroytop .deb" );
+					set_buttons_run( true );
 				}
 				else
 					choice = 0;

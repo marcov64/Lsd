@@ -3321,62 +3321,67 @@ case 22:
 	Tcl_LinkVar( inter, "prof_aggr_time", ( char * ) &prof_aggr_time, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "parallel_disable", ( char * ) &parallel_disable, TCL_LINK_BOOLEAN );
 
+	cmd( "set tw 28" );					// text label width
+	
 	cmd( "set T .simset" );
 	cmd( "newtop $T \"Simulation Settings\" { set choice 2 }" );
 
 	cmd( "ttk::frame $T.f" );
 
 	cmd( "ttk::frame $T.f.c" );
-	cmd( "ttk::label $T.f.c.l2 -width 25 -anchor e -text \"Simulation steps\"" );
+	cmd( "ttk::label $T.f.c.l2 -width $tw -anchor e -text \"Simulation steps\"" );
 	cmd( "ttk::spinbox $T.f.c.e2 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99999 } { set max_step %%P; return 1 } { %%W delete 0 end; %%W insert 0 $max_step; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.c.e2 insert 0 $max_step" ); 
 	cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "ttk::frame $T.f.a" );
-	cmd( "ttk::label $T.f.a.l -width 25 -anchor e -text \"Number of simulation runs\"" );
+	cmd( "ttk::label $T.f.a.l -width $tw -anchor e -text \"Number of simulation runs\"" );
 	cmd( "ttk::spinbox $T.f.a.e -width 7 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set sim_num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sim_num; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.a.e insert 0 $sim_num" ); 
 	cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "ttk::frame $T.f.b" );
-	cmd( "ttk::label $T.f.b.l1 -width 25 -anchor e -text \"Random numbers initial seed\"" );
+	cmd( "ttk::label $T.f.b.l1 -width $tw -anchor e -text \"Random numbers initial seed\"" );
 	cmd( "ttk::spinbox $T.f.b.e1 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99999 } { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.b.e1 insert 0 $seed" ); 
 	cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "ttk::frame $T.f.d" );
-	cmd( "ttk::label $T.f.d.l2 -width 25 -anchor e -text \"Start debugger at step (0:none)\"" );
+	cmd( "ttk::label $T.f.d.l2 -width $tw -anchor e -text \"Start debugger at step (0:none)\"" );
 	cmd( "ttk::spinbox $T.f.d.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99999 } { set when_debug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $when_debug; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.d.e2 insert 0 $when_debug" ); 
 	cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "ttk::frame $T.f.e" );
-	cmd( "ttk::label $T.f.e.l2 -width 25 -anchor e -text \"Profile up to stack level (0:none)\"" );
+	cmd( "ttk::label $T.f.e.l2 -width $tw -anchor e -text \"Profile up to stack level (0:none)\"" );
 	cmd( "ttk::spinbox $T.f.e.e2 -width 7 -from 0 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99 } { set stack_info %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_info; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.e.e2 insert 0 $stack_info" ); 
 	cmd( "pack $T.f.e.l2 $T.f.e.e2 -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "ttk::frame $T.f.f" );
-	cmd( "ttk::label $T.f.f.l2 -width 25 -anchor e -text \"Profile minimum time (0:all)\"" );
+	cmd( "ttk::label $T.f.f.l2 -width $tw -anchor e -text \"Profile minimum time (0:all)\"" );
 	cmd( "ttk::spinbox $T.f.f.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99999 } { set prof_min_msecs %%P; return 1 } { %%W delete 0 end; %%W insert 0 $prof_min_msecs; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$T.f.f.e2 insert 0 $prof_min_msecs" ); 
 	cmd( "pack $T.f.f.l2 $T.f.f.e2 -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "pack $T.f.c $T.f.a $T.f.b $T.f.d $T.f.e $T.f.f -anchor w" );
 
-	cmd( "ttk::checkbutton $T.f.obs -text \"Profile observed variables only\" -variable prof_obs_only" );
-	cmd( "ttk::checkbutton $T.f.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
+	cmd( "ttk::frame $T.c" );
+	
+	cmd( "ttk::checkbutton $T.c.obs -text \"Profile observed variables only\" -variable prof_obs_only" );
+	cmd( "ttk::checkbutton $T.c.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
 
 #ifndef NP
-	cmd( "ttk::checkbutton $T.f.npar -text \"Disable parallel computation\" -variable parallel_disable" );
+	cmd( "ttk::checkbutton $T.c.npar -text \"Disable parallel computation\" -variable parallel_disable" );
 	if ( ! search_parallel( root ) || max_threads < 2 )
-		cmd( "$T.f.npar configure -state disabled" );
-	cmd( "pack $T.f.obs $T.f.aggr $T.f.npar -anchor w" );
+		cmd( "$T.c.npar configure -state disabled" );
+	cmd( "pack $T.c.obs $T.c.aggr $T.c.npar -anchor w" );
 #else
-	cmd( "pack $T.f.obs $T.f.aggr -anchor w" );
+	cmd( "pack $T.c.obs $T.c.aggr -anchor w" );
 #endif
 
-	cmd( "pack $T.f -padx 5 -pady 5" );
+	cmd( "pack $T.f $T.c -padx 5 -pady 5" );
+	
 	cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#simsetting } { set choice 2 }" );
 	cmd( "bind $T.f.c.e2 <KeyPress-Return> {focus $T.f.a.e; $T.f.a.e selection range 0 end}" );
 	cmd( "bind $T.f.a.e <KeyPress-Return> {focus $T.f.b.e1; $T.f.b.e1 selection range 0 end}" );
