@@ -136,15 +136,17 @@ Searches for the object having the variable lab. From that object, it considers
 the whole group of object of the same type as the one found, and searches the
 maximum value of the variables lab with lag lag there contained
 
-- double sum( char *lab, int lag );
-Searches for the object having the variable lab. From that object, it considers
+- double sum( char const *lab1, int lag, bool cond, char const *lab2, char const *lop, double value );
+Searches for the object having the variable lab1. From that object, it considers
 the whole group of object of the same type as the one found, and returns
-the sum of all the variables lab with lag lag in that group.
+the sum of all the variables lab with lag lag in that group. If cond is true, 
+only objects satisfying the logical condition 'V( "lab2" ) lop value' will be 
+considered form summing. lab2 should be in the same object as lab1 or be the same 
+as lab1.
 
-- double whg_av( char *lab, char *lab2, int lag );
+- double whg_av( char *lab1, char *lab2, int lag );
 Same as sum, but it adds up the product between variables lab and lab2 for each
-object. WARNING: if lab and lab2 are not in the same object, the results are
-messy
+object. lab and lab2 must be in the same object.
 
 - void lsdqsort( char *obj, char *var, char *dir );
 Sorts the Objects whose label is obj according to the values of their
@@ -2203,103 +2205,177 @@ double object::recal( char const *lab )
 
 /****************************************************
 SUM (*)
-Compute the sum of Variables or Parameters lab with lag lag.
+Compute the sum of Variables or Parameters lab1 with lag lag.
+If cond is true check if expression 'V("lab2") lop value'
+is true before adding each instance of the object.
 The sum is computed over the elements in a single branch of the model.
 ****************************************************/
-double object::sum( char const *lab, int lag )
+double object::sum( char const *lab1, int lag, bool cond, char const *lab2, char const *lop, double value )
 {
+	int n, lopc;
 	double tot;
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, true, "summing" );
+	cv = search_var_err( this, lab1, no_search, true, "summing" );
 	if ( cv == NULL )
 		return NAN;
 
+	if ( cond )
+	{	
+		lopc = logic_op_code( lop, "summing" );
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "summing" ) == NULL )
+			return NAN;
+	}
+	else
+		lopc = -1;
+	
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( tot = 0; cur != NULL; cur = go_brother( cur ) )
-		tot += cur->cal( this, lab, lag );
+	for ( tot = n = 0; cur != NULL; cur = go_brother( cur ) )
+		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		{
+			tot += cur->cal( this, lab1, lag );
+			++n;
+		}
 
-	return tot;
+	if ( n > 0 )
+		return tot;
+	else
+		return NAN;
 }
 
 
 /****************************************************
 OVERALL_MAX (*)
-Compute the maximum of lab, considering only the Objects in a single branch of the model.
+Compute the maximum of lab1, considering only the 
+objects in a single branch of the model.
+If cond is true check if expression 'V("lab2") lop value'
+is true before considering each instance of the object.
 ****************************************************/
-double object::overall_max( char const *lab, int lag )
+double object::overall_max( char const *lab1, int lag, bool cond, char const *lab2, char const *lop, double value )
 {
+	int n, lopc;
 	double tot, temp;
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, true, "maximizing" );
+	cv = search_var_err( this, lab1, no_search, true, "maximizing" );
 	if ( cv == NULL )
 		return NAN;
 
+	if ( cond )
+	{	
+		lopc = logic_op_code( lop, "maximizing" );
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "maximizing" ) == NULL )
+			return NAN;
+	}
+	else
+		lopc = -1;
+	
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( tot = -DBL_MAX; cur != NULL; cur = go_brother( cur ) )
-		if ( tot < ( temp = cur->cal( this, lab, lag ) ) )
-			tot = temp;
+	for ( tot = -DBL_MAX, n = 0; cur != NULL; cur = go_brother( cur ) )
+		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		{
+			if ( tot < ( temp = cur->cal( this, lab1, lag ) ) )
+				tot = temp;
+			++n;
+		}
 
-	return tot;
+	if ( n > 0 )
+		return tot;
+	else
+		return NAN;
 }
 
 
 /****************************************************
 OVERALL_MIN (*)
-Compute the minimum of lab, considering only the Objects in a single branch of the model.
+Compute the minimum of lab1, considering only the 
+objects in a single branch of the model.
+If cond is true check if expression 'V("lab2") lop value'
+is true before considering each instance of the object.
 ****************************************************/
-double object::overall_min( char const *lab, int lag )
+double object::overall_min( char const *lab1, int lag, bool cond, char const *lab2, char const *lop, double value )
 {
+	int n, lopc;
 	double tot, temp;
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, true, "minimizing" );
+	cv = search_var_err( this, lab1, no_search, true, "minimizing" );
 	if ( cv == NULL )
 		return NAN;
 
+	if ( cond )
+	{	
+		lopc = logic_op_code( lop, "minimizing" );
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "minimizing" ) == NULL )
+			return NAN;
+	}
+	else
+		lopc = -1;
+	
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( tot = DBL_MAX; cur != NULL; cur = go_brother( cur ) )
-		if ( tot > ( temp = cur->cal( this, lab, lag ) ) )
-			tot = temp;
+	for ( tot = DBL_MAX, n = 0; cur != NULL; cur = go_brother( cur ) )
+		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		{
+			if ( tot > ( temp = cur->cal( this, lab1, lag ) ) )
+				tot = temp;
+			++n;
+		}
 
-	return tot;
+	if ( n > 0 )
+		return tot;
+	else
+		return NAN;
 }
 
 
 /****************************************************
 AV (*)
-Compute the average of lab
+Compute the average of lab1.
+If cond is true check if expression 'V("lab2") lop value'
+is true before considering each instance of the object.
 ****************************************************/
-double object::av( char const *lab, int lag )
+double object::av( char const *lab1, int lag, bool cond, char const *lab2, char const *lop, double value )
 {
-	int n;
+	int n, lopc;
 	double tot;
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, true, "averaging" );
+	cv = search_var_err( this, lab1, no_search, true, "averaging" );
 	if ( cv == NULL )
 		return NAN;
 
+	if ( cond )
+	{	
+		lopc = logic_op_code( lop, "averaging" );
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "averaging" ) == NULL )
+			return NAN;
+	}
+	else
+		lopc = -1;
+	
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( n = 0, tot = 0; cur != NULL; cur = go_brother( cur ), ++n )
-		tot += cur->cal( this, lab, lag );
+	for ( tot = n = 0; cur != NULL; cur = go_brother( cur ) )
+		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		{
+			tot += cur->cal( this, lab1, lag );
+			++n;
+		}
 
 	if ( n > 0 )
 		return tot / n;
@@ -2310,54 +2386,73 @@ double object::av( char const *lab, int lag )
 
 /****************************************************
 WHG_AV (*)
-Compute the weighted average of lab
+Compute the weighted average (or product sum) of lab1 and lab2.
+If cond is true check if expression 'V("lab3") lop value'
+is true before considering each instance of the object.
 ****************************************************/
-double object::whg_av( char const *weight, char const *lab, int lag )
+double object::whg_av( char const *lab1, char const *lab2, int lag, bool cond, char const *lab3, char const *lop, double value )
 {
-	double tot, c1, c2;
+	int n, lopc;
+	double tot;
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, weight, no_search, true, "weighted averaging" );
+	cv = search_var_err( this, lab1, no_search, true, "weighted averaging" );
 	if ( cv == NULL )
 		return NAN;
 
-	cv = search_var_err( this, lab, no_search, true, "weighted averaging" );
+	cv = search_var_err( this, lab2, no_search, true, "weighted averaging" );
 	if ( cv == NULL )
 		return NAN;
 
+	if ( cond )
+	{	
+		lopc = logic_op_code( lop, "weighted averaging" );
+		if ( lopc < 0 || search_var_err( this, lab3, no_search, true, "weighted averaging" ) == NULL )
+			return NAN;
+	}
+	else
+		lopc = -1;
+	
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( tot = 0; cur != NULL; cur = go_brother( cur ) )
-	{
-		c1 = cur->cal( this, weight, lag );
-		c2 = cur->cal( this, lab, lag );
-		tot += c1 * c2;
-	}
+	for ( tot = n = 0; cur != NULL; cur = go_brother( cur ) )
+		if ( ! cond || check_cond( cur->cal( this, lab3, lag ), lopc, value ) )
+		{
+			tot += cur->cal( this, lab1, lag ) * cur->cal( this, lab2, lag );
+			++n;
+		}
 
-	return tot;
+	if ( n > 0 )
+		return tot;
+	else
+		return NAN;
 }
 
 
 /****************************************************
 MED (*)
-Compute the median of lab
+Compute the median of lab1.
+If cond is true check if expression 'V("lab2") lop value'
+is true before considering each instance of the object.
 ****************************************************/
-double object::med( char const *lab, int lag )
+double object::med( char const *lab1, int lag, bool cond, char const *lab2, char const *lop, double value )
 {
-	return perc( lab, lag, 0.5 );
+	return perc( lab1, 0.5, lag, cond, lab2, lop, value );
 }
 
 
 /****************************************************
 PERC (*)
-Compute the percentile p of lab
+Compute the percentile p of lab1.
+If cond is true check if expression 'V("lab2") lop value'
+is true before considering each instance of the object.
 ****************************************************/
-double object::perc( char const *lab, int lag, double p )
+double object::perc( char const *lab1, double p, int lag, bool cond, char const *lab2, char const *lop, double value )
 {
-	int n, floor_x;
+	int n, lopc, floor_x;
 	double x, vx, vx1, tmp;
 	object *cur;
 	variable *cv;
@@ -2373,17 +2468,30 @@ double object::perc( char const *lab, int lag, double p )
 		return NAN;
 	}
 
-	cv = search_var_err( this, lab, no_search, true, "calculating percentile" );
+	cv = search_var_err( this, lab1, no_search, true, "calculating percentile" );
 	if ( cv == NULL )
 		return NAN;
 
+	if ( cond )
+	{	
+		lopc = logic_op_code( lop, "calculating percentile" );
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "calculating percentile" ) == NULL )
+			return NAN;
+	}
+	else
+		lopc = -1;
+	
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
 	// copy selected data series to vector
-	for ( n = 0; cur != NULL; cur = go_brother( cur ), ++n )
-		vals.push_back( cur->cal( this, lab, lag ) );
+	for ( n = 0; cur != NULL; cur = go_brother( cur ) )
+		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		{
+			vals.push_back( cur->cal( this, lab1, lag ) );
+			++n;
+		}
 
 	if ( n > 0 )
 	{
@@ -2404,28 +2512,41 @@ double object::perc( char const *lab, int lag, double p )
 
 /****************************************************
 SD (*)
-Compute the (population) standard deviation of lab
+Compute the (population) standard deviation of lab1.
+If cond is true check if expression 'V("lab2") lop value'
+is true before considering each instance of the object.
 ****************************************************/
-double object::sd( char const *lab, int lag )
+double object::sd( char const *lab1, int lag, bool cond, char const *lab2, char const *lop, double value )
 {
-	int n;
+	int n, lopc;
 	double x, tot, tot2;
 	object *cur;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, true, "calculating s.d." );
+	cv = search_var_err( this, lab1, no_search, true, "calculating s.d." );
 	if ( cv == NULL )
 		return NAN;
 
+	if ( cond )
+	{	
+		lopc = logic_op_code( lop, "calculating s.d." );
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "calculating s.d." ) == NULL )
+			return NAN;
+	}
+	else
+		lopc = -1;
+	
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( n = 0, tot = 0, tot2 = 0; cur != NULL; cur = go_brother( cur ), ++n )
-	{
-		tot += x = cur->cal( this, lab, lag );
-		tot2 += x * x;
-	}
+	for ( tot = tot2 = n = 0; cur != NULL; cur = go_brother( cur ) )
+		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		{
+			tot += x = cur->cal( this, lab1, lag );
+			tot2 += x * x;
+			++n;
+		}
 
 	if ( n > 0 )
 		return sqrt( tot2 / n - pow( tot / n, 2 ) );
@@ -2436,52 +2557,80 @@ double object::sd( char const *lab, int lag )
 
 /****************************************************
 COUNT (*)
-Count the number of object lab instances below this
+Count the number of object lab1 instances below this.
+If cond is true check if expression 'V("lab2") lop value'
+is true before considering each instance of the object.
 ****************************************************/
-double object::count( char const *lab )
+double object::count( char const *lab1, int lag, bool cond, char const *lab2, char const *lop, double value )
 {
-	int count;
+	int n, lopc;
 	object *cur;
 
-	cur = search_err( lab, no_search, "counting" );
+	cur = search_err( lab1, no_search, "counting" );
 
 	if ( cur == NULL )
 		return 0;
 
-	for ( count = 0; cur != NULL; cur = go_brother( cur ), ++count );
+	if ( cond )
+	{	
+		lopc = logic_op_code( lop, "counting" );
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "counting" ) == NULL )
+			return NAN;
+	}
+	else
+		lopc = -1;
+	
+	for ( n = 0; cur != NULL; cur = go_brother( cur ) )
+		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+			++n;
 
-	return count;
+	return n;
 }
 
 
 /****************************************************
 COUNT_ALL (*)
-Count the number of all object lab instances below
-and besides the current object type (include siblings)
+Count the number of all object lab1 instances below
+and besides the current object type (include siblings).
+If cond is true check if expression 'V("lab2") lop value'
+is true before considering each instance of the object.
 ****************************************************/
-double object::count_all( char const *lab )
+double object::count_all( char const *lab1, int lag, bool cond, char const *lab2, char const *lop, double value )
 {
-	int count;
+	int n, lopc;
 	object *cur;
 
 	if ( up->b->head != NULL )
-		cur = up->b->head->search_err( lab, no_search, "counting" );// pick always first instance
+		cur = up->b->head->search_err( lab1, no_search, "counting" );// pick always first instance
 	else
-		cur = search_err( lab, no_search, "counting" );	// count from here (bad)
+		cur = search_err( lab1, no_search, "counting" );	// count from here (bad)
 
 	if ( cur == NULL )
 		return 0;
 
-	for ( count = 0; cur != NULL; cur = cur->hyper_next( lab ), ++count );
+	if ( cond )
+	{	
+		lopc = logic_op_code( lop, "counting" );
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "counting" ) == NULL )
+			return NAN;
+	}
+	else
+		lopc = -1;
+	
+	for ( n = 0; cur != NULL; cur = cur->hyper_next( lab1 ) )
+		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+			++n;
 
-	return count;
+	return n;
 }
 
 
 /****************************************************
 STAT (*)
-Compute some basic statistics of a group of Variables or Paramters with lab lab
-and storing the results in a vector of double.
+Compute some basic statistics of a group of Variables or 
+Paramters with label lab1 and storing the results in a vector of double.
+If cond is true check if expression 'V("lab2") lop value'
+is true before considering each instance of the object.
 Return the number of element instances counted (same as r[ 0 ]).
 
 r[ 0 ]=num;
@@ -2493,9 +2642,9 @@ r[ 5 ]=median
 r[ 6 ]=standard deviation
 
 ****************************************************/
-double object::stat( char const *lab, double *r )
+double object::stat( char const *lab1, double *r, int lag, bool cond, char const *lab2, char const *lop, double value )
 {
-	int n;
+	int n, lopc;
 	double val, r_temp[ 7 ];
 	object *cur;
 	variable *cv;
@@ -2504,7 +2653,7 @@ double object::stat( char const *lab, double *r )
 	if ( r == NULL )
 		r = r_temp;
 
-	cv = search_var_err( this, lab, no_search, true, "calculating statistics" );
+	cv = search_var_err( this, lab1, no_search, true, "calculating statistics" );
 	if ( cv == NULL || cv->up == NULL )
 	{
 		r[ 0 ] = 0;
@@ -2512,25 +2661,36 @@ double object::stat( char const *lab, double *r )
 		return 0;
 	}
 
+	if ( cond )
+	{	
+		lopc = logic_op_code( lop, "calculating statistics" );
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "calculating statistics" ) == NULL )
+			return NAN;
+	}
+	else
+		lopc = -1;
+	
 	cur = cv->up;
 	r[ 1 ] =  r[ 2 ] = 0;
 	r[ 3 ] = DBL_MIN;
 	r[ 4 ] = DBL_MAX;
 
-	for ( n = 0; cur != NULL; cur = go_brother( cur ), ++n )
-	{
-		val = cur->cal( lab, 0 );
-		r[ 1 ] += val;
-		r[ 2 ] += val * val;
+	for ( n = 0; cur != NULL; cur = go_brother( cur ) )
+		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		{
+			val = cur->cal( lab1, lag );
+			r[ 1 ] += val;
+			r[ 2 ] += val * val;
 
-		if ( val > r[ 3 ] )
-			r[ 3 ] = val;
+			if ( val > r[ 3 ] )
+				r[ 3 ] = val;
 
-		if ( val < r[ 4 ] )
-			r[ 4 ] = val;
+			if ( val < r[ 4 ] )
+				r[ 4 ] = val;
 
-		vals.push_back( val );
-	}
+			vals.push_back( val );
+			++n;
+		}
 
 	r[ 0 ] = n;
 
@@ -3084,7 +3244,7 @@ double object::write( char const *lab, double value, int time, int lag )
 	{
 		if ( lag < 0 || ( cv->param != 1 && lag > cv->num_lag ) || ( cv->param == 1 && lag > 1 ) )
 		{
-			sprintf( msg, "invalid lag (%d) for %s '%s'", cv->param != 1 ? "variable" : "parameter", lag, lab );
+			sprintf( msg, "invalid lag (%d) for %s '%s'", lag, cv->param != 1 ? "variable" : "parameter", lab );
 			error_hard( msg, "invalid write operation",
 						"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 						false );
@@ -3397,4 +3557,53 @@ double object::interact( char const *text, double v, double *tv, int i, int j,
 #else
 	return v;
 #endif
+}
+
+
+/****************************************************
+LOGIC_OP_CODE
+Check for valid relational operator and return 
+operator code for CHECK_COND
+****************************************************/
+const unordered_map < string, int > logic_ops = { { "==", 0 }, { "!=", 1 }, { ">", 2 }, { ">=", 3 }, { "<", 4 }, { "<=", 5 } };
+
+int logic_op_code( char const *lop, char const *errmsg )
+{
+	auto lopp = logic_ops.find( lop );
+	
+	if ( lopp != logic_ops.end( ) )
+		return lopp->second;
+	
+	sprintf( msg, "cannot compare with '%s' for %s", lop, errmsg );
+	error_hard( msg, "invalid logical relational operator",
+				"use a valid operator (== != > >= < <=)" );
+	
+	return -1;
+}
+
+
+/****************************************************
+CHECK_COND
+Check if logical condition defined by the logical
+operator code and the two values is true 
+****************************************************/
+bool check_cond( double val1, int lopc, double val2 )
+{
+	switch ( lopc )
+	{
+		case 0:
+			return val1 == val2;
+		case 1:
+			return val1 != val2;
+		case 2:
+			return val1 > val2;
+		case 3:
+			return val1 >= val2;
+		case 4:
+			return val1 < val2;
+		case 5:
+			return val1 <= val2;
+		default:
+			return false;
+	}
 }

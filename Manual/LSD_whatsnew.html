@@ -86,7 +86,7 @@ div.WordSection1
 
 </head>
 
-<body lang=PT-BR link=blue vlink=purple>
+<body lang=PT-BR link=blue vlink=purple style='word-wrap:break-word'>
 
 <div class=WordSection1>
 
@@ -143,6 +143,17 @@ Values</span></a></span><span lang=EN-US> and </span><span class=Cdigo><span
 lang=EN-US><a href="menudata_objn.html">Data&gt;Number of Objects</a></span></span><span
 lang=EN-US> windows. Interruptible progress boxes for slow operations.  Mouse
 snapping to default buttons (optional).</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Improved data aggregation Macros</span></b><span
+lang=EN-US>. All Macros performing computations over multiple Object instances
+may now operate conditionally, allowing for much finer control of data aggregation
+(see for instance </span><span class=Cdigo><span lang=EN-US><a
+href="LSD_macros.html#SUM">SUM_CND(…)</a></span></span><span lang=EN-US> for
+details). Any Variable or Parameter contained in an Object instance may be used
+to control its inclusion in aggregated statistics, including lagged values.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -243,11 +254,11 @@ improvements and changes:</span></p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US><a href="browser.html#updating">Variable
-update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be
-updated/recomputed under arbitrary time schemes, deterministic or random. The
-modeler can now configure update periods larger than 1, including an initial
-“sleep” for any Variable. Both period and initial times can be set as a fixed
-number or a uniform random draw from a modeler-defined range.</span></p>
+update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be updated/recomputed
+under arbitrary time schemes, deterministic or random. The modeler can now
+configure update periods larger than 1, including an initial “sleep” for any
+Variable. Both period and initial times can be set as a fixed number or a
+uniform random draw from a modeler-defined range.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -390,8 +401,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US>. Significant search speed-up of larger models by the allocation of
 high-performance dynamic memory maps to sets of Object instances (bridges),
 Variables and Parameters. It replaces linked-list sequential searching in most
-situations at the expense of slightly higher memory footprint. It affects both user
-generated searches and internal LSD element look ups. User searches (</span><span
+situations at the expense of slightly higher memory footprint. It affects both
+user generated searches and internal LSD element look ups. User searches (</span><span
 class=Cdigo><span lang=EN-US>TSEARCH_CND(…)</span></span><span lang=EN-US>)
 require the user explicitly initialize the map structure (</span><span
 class=Cdigo><span lang=EN-US>INIT_TSEARCH_CND(…)</span></span><span lang=EN-US>),
@@ -437,9 +448,9 @@ hypercubes</a> is now possible without using external files.</span></p>
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New example models.</span></b><span
-lang=EN-US> New <a href="modelbrowser.html#groups">examples</a> on industrial dynamics,
-market dynamics, consumer networks, and macroeconomics, including in-depth
-sensitivity analysis.</span></p>
+lang=EN-US> New <a href="modelbrowser.html#groups">examples</a> on industrial
+dynamics, market dynamics, consumer networks, and macroeconomics, including
+in-depth sensitivity analysis.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -468,9 +479,9 @@ number (</span><span class=Cdigo><span lang=EN-US>SEARCH_INST(…)</span></span><s
 lang=EN-US>). Option to disable/enable the automatic search of Variables and
 Parameters (</span><span class=Cdigo><span lang=EN-US>NO_SEARCH</span></span><span
 lang=EN-US>/</span><span class=Cdigo><span lang=EN-US>USE_SEARCH</span></span><span
-lang=EN-US>). New <a href="LSD_macros.html#DEBUG">debug-control macros</a> allow
-finer control of the LSD Debugger activation and log file creation. Please
-refer to the <a href="LSD_macros.html">LSD Macros</a> documentation.</span></p>
+lang=EN-US>). New <a href="LSD_macros.html#DEBUG">debug-control macros</a>
+allow finer control of the LSD Debugger activation and log file creation.
+Please refer to the <a href="LSD_macros.html">LSD Macros</a> documentation.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -496,9 +507,9 @@ lang=EN-US> Macro documentation.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Improved Gnuplot support</span></b><span
 lang=EN-US>. Automatic usage of default plotting terminals, supporting
-contemporaneous options like Qt and wxt. Updated system terminal options,
-shared with LMM. WARNING: the old Windows 32-bit version of Gnuplot was removed
-from LSD, now users in all platforms must install Gnuplot, please refer to </span><span
+contemporaneous options like Qt and wxt. Updated system terminal options, shared
+with LMM. WARNING: the old Windows 32-bit version of Gnuplot was removed from
+LSD, now users in all platforms must install Gnuplot, please refer to </span><span
 class=Cdigo><span lang=EN-US><a href="../Readme.txt">Readme.txt</a></span></span><span
 lang=EN-US> for details.</span></p>
 
@@ -640,8 +651,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>New unsaved configuration indicator.</span></b><span
 lang=EN-US> All LSD windows now show configuration name and save status (‘</span><span
 class=Cdigo><span lang=EN-US>*</span></span><span lang=EN-US>’ in title bar
-when unsaved changes are present). Unsaved changes warning dialog in all potential
-data loss situations.</span></p>
+when unsaved changes are present). Unsaved changes warning dialog in all
+potential data loss situations.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -771,8 +782,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>New network functions and macros.</span></b><span
 lang=EN-US> Added command for the creation and manipulation of a network from
 Equations. Network is formed by brother Objects and several standard network
-templates (random, Small World, Power-Law, etc.) are available for quick and
-automatic network creation.</span></p>
+templates (random, Small World, Power-Law, etc.) are available for quick and automatic
+network creation.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -852,8 +863,8 @@ their code when running large models.</span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New interfaces to assign initial values and
-number of objects. </span></b><span lang=EN-US>It is possible to easily initialize
-large models with sophisticated data structures.</span></p>
+number of objects. </span></b><span lang=EN-US>It is possible to easily
+initialize large models with sophisticated data structures.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US

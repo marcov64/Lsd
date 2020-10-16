@@ -186,7 +186,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 	bool sp_upd, fit_wid;
 	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_ELEM_LENGTH ];
 	double h_fact, v_fact, range_fact;
-	int h, i, j, k, step_level, step_type, begin, count, max_wid, range_init, range_incr;
+	int h, i, j, k, step_level, step_type, begin, count, max_wid, range_init;
 	object *cur;
 	variable *cv;
 	bridge *cb;
@@ -195,7 +195,6 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 	v_fact = get_double( "vfactM" );
 	range_fact = get_double( "rfactM" );
 	range_init = get_int( "rinitM" );
-	range_incr = get_int( "rincrM" );
 	step_level = get_int( "vstepM" );
 	step_level = round( step_level * v_fact );
 	

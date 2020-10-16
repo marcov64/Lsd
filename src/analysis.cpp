@@ -8914,7 +8914,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 {
 	bool tOk, y2on;
 	char *txtValue, *txtCase, *txtLine, txtLab[ 2 * MAX_ELEM_LENGTH ];
-	int h, i, color, hsize, vsize, hbordsize, tbordsize, bbordsize, sbordsize, htmargin, vtmargin, hticks, vticks, lheight, hcanvas, vcanvas, nLine;
+	int h, i, color, hsize, vsize, hbordsize, tbordsize, bbordsize, sbordsize, htmargin, hticks, vticks, lheight, hcanvas, vcanvas, nLine;
 	double yVal, cminy2, cmaxy2;
 	
 	// get graphical configuration from Tk ( file defaults.tcl )
@@ -8925,7 +8925,6 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	bbordsize = get_int( "bbordsizeP"	);	// 90
 	sbordsize = get_int( "sbordsizeP"	);	// 0
 	htmargin = get_int( "htmarginP" );		// 4
-	vtmargin = get_int( "vtmarginP" );		// 5
 	hticks = get_int( "hticksP" );			// 3
 	vticks = get_int( "vticksP" );			// 3
 	lheight = get_int( "lheightP" );		// 15
