@@ -128,6 +128,7 @@ r = interest rate (>0)
 
 Capital market parameters (object Capital)
 -------------------------
+Deb10ratio = debt-to-equity initial ratio in capital-good sector (0=only equity)
 F1 = number of firms in capital-good sector (>0)
 L1rdMax = Maximum share of workers in R&D (0-1)
 L1shortMax = maximum labor shortage allowed in capital-good sector (0-1)
@@ -148,6 +149,7 @@ zeta1/zeta2 = average productivity gain of R&D expense in innovation/imitation (
 
 Consumer market parameters (object Consumption)
 --------------------------
+Deb20ratio = debt-to-equity initial ratio in consumer-good sector (0=only equity)
 F2 = number of firms in consumption-good sector (>0)
 K0 = average initial capital stock of firm in consumption-good sector (>0)
 NW20 = average initial net worth of firm in consumption-good sector (>=0)

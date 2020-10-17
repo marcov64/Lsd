@@ -773,8 +773,8 @@ double entry_firm2( object *sector, int n, bool newInd )
 		// fair share of initial steady state demand
 		D20 = ( ( SIr0 / m1 + RD0 ) * ( 1 - phi ) + VS( lab, "Ls0" ) * phi ) / 
 			  ( mu20 + phi ) / n;
-		  
-		Eavg = 1;								// initial competitiveness
+		Eavg = ( VS( sector, "omega1" ) + VS( sector, "omega2" ) + 
+				 VS( sector, "omega3" ) ) / 2;	// initial competitiveness
 		K = K0;									// initial capital in sector 2
 		N = iota * D20;							// initial inventories
 		NW20 = VS( sector, "NW20" );			// initial wealth in sector 2
