@@ -28,12 +28,10 @@ if ( t == 1 )
 			cur2 = SHOOKS( cur2 );
 		}
 	}
+	
 	CYCLE( cur, "country" )
-	{
 		CYCLES( cur, cur1, "sector" )
-		{
 			CYCLES( cur1, cur2, "firm" )
-			{
 				CYCLES( cur2, cur3, "comp" )
 				{
 					cur4 = SEARCH_CND( "Id_country", VS( cur3, "Id_comp" ) );
@@ -44,9 +42,6 @@ if ( t == 1 )
 					if ( VS( cur3, "Id_comp" ) != VS( cur, "Id_country" ) )
 					WRITELLS( cur3, "ff", 0, t, 0 );*/
 				}
-			}
-		}
-	}
 }
 
 RESULT( 1 )
@@ -78,11 +73,8 @@ EQUATION( "Y" )
 // Nominal GDP
 
 v[0] = 0;
-
 CYCLE( cur, "sector" )
-{
-	v[0] = v[0] + WHTAVES( cur, "y", "p" );
-}
+	v[0] += WHTAVES( cur, "y", "p" );
 
 RESULT( v[0] )
 
@@ -112,9 +104,7 @@ EQUATION( "L" )
 
 v[0] = 0;
 CYCLE( cur, "sector" )
-{
-	v[0] = v[0] + SUMS( cur, "l" );
-}
+	v[0] += SUMS( cur, "l" );
 
 RESULT( v[0] )
 
@@ -124,10 +114,7 @@ EQUATION( "AvgProd" )
 
 v[0] = 0;
 CYCLE( cur, "sector" )
-{
-	v[1] = VS( cur, "AvgProd_s" ) * ( VS( cur, "Fs" ) / SUM( "Fs" ) );
-	v[0] = v[0] + v[1];
-}
+	v[0] += VS( cur, "AvgProd_s" ) * ( VS( cur, "Fs" ) / SUM( "Fs" ) );
 
 RESULT( v[0] )
 
@@ -140,7 +127,7 @@ RESULT( VL( "G", 1 ) + VL( "TOT_WAGE", 1 ) )
 
 EQUATION( "TOT_WAGE" )
 // total wages
-RESULT( V( "W" ) *V( "L" ) )
+RESULT( V( "W" ) * V( "L" ) )
 
 
 EQUATION( "G" )  
@@ -160,14 +147,12 @@ v[0] = 0;
 v[1] = 0;
 v[2] = 0;
 CYCLE( cur, "sector" )
-{
 	CYCLES( cur, cur1, "firm" )
 	{
-		v[0] = v[0] + VS( cur1, "exp" );
-		v[1] = v[1] + VS( cur1, "int" );
-		v[2] = v[2] + VS( cur1, "exc_dem" );
+		v[0] += VS( cur1, "exp" );
+		v[1] += VS( cur1, "int" );
+		v[2] += VS( cur1, "exc_dem" );
 	}
-}
 
 // export in nominal terms
 WRITE( "EXP", v[0] * V( "e" ) );
@@ -190,10 +175,7 @@ EQUATION( "Pindex" )
 
 v[0] = 0;
 CYCLE( cur, "sector" )
-{
-	v[1] = WHTAVES( cur, "p", "f" ) / SUM( "Fs" );
-	v[0] = v[0] + v[1];
-}
+	v[0] += WHTAVES( cur, "p", "f" ) / SUM( "Fs" );
 
 RESULT( v[0] )
 
@@ -215,7 +197,7 @@ CYCLE( cur, "firm" )
 		if ( VS( cur1, "Id_comp" ) != V( "Id_country" ) && 
 			 VS( cur1, "ff" ) > V( "f_min" ) * 1.05 )
 		{
-			v[0] = v[0] + 1;
+			++v[0];
 			break;
 		}
 
@@ -235,10 +217,9 @@ CYCLE( cur,"sector " )
 {
 	CYCLES( cur, cur1,"firm" )
 	{
-		//v[1] = VS( cur1, "p" ) * ( VS( cur1, "D" ) - VS( cur1, "y" ) );
-		//v[1] = VS( cur1, "p" ) * max( 0, VS( cur1, "y" ) - VS( cur1, "D" ) );
-		v[1] = VS( cur1,"p" ) * max( 0,VS( cur1,"D" )-VS( cur1,"y" ) );
-		v[0] = v[0] + v[1];
+		//v[0] += VS( cur1, "p" ) * ( VS( cur1, "D" ) - VS( cur1, "y" ) );
+		//v[0] += VS( cur1, "p" ) * max( 0, VS( cur1, "y" ) - VS( cur1, "D" ) );
+		v[0] += VS( cur1,"p" ) * max( 0,VS( cur1,"D" )-VS( cur1,"y" ) );
 	}
 }
 
@@ -256,10 +237,7 @@ EQUATION( "Ys_r" )
 
 v[0] = 0;
 CYCLE( cur, "firm" )
-{
-	v[1] = V( "p_0" ) * VS( cur, "y" ) * V( "e_0" );
-	v[0] = v[0] + v[1];
-}
+	v[0] += V( "p_0" ) * VS( cur, "y" ) * V( "e_0" );
 
 RESULT( v[0] )
 
@@ -301,7 +279,7 @@ CYCLE( cur, "country" )
 					v[3] = 1 / ( VS( cur4, "p" ) * ( 1 + V( "tau" ) ) * v[2] / v[0] );   
 
 				//v[3] = 0; // activate in case of autarky (replace the previous line)
-				v[1] = v[1] + v[3] * VLS( cur5, "ff", 1 );
+				v[1] += v[3] * VLS( cur5, "ff", 1 );
 			}
 		}
 		WRITES( cur1, "Ehat", v[1] );  // weighted average of fitness
@@ -312,18 +290,8 @@ RESULT( 1 )
 
 
 EQUATION( "m_min_int" )  
-// minum mark up level in the sector (to be used for initializing new firms)
-
-cur = SEARCH( "firm" );
-v[0] = VS( cur, "m" );
-
-CYCLE( cur, "firm" )
-{
-	if ( VS( cur, "m" ) < v[0] )
-		v[0] = VS( cur, "m" );
-}
-
-RESULT( v[0] )
+// minimum mark up level in the sector (to be used for initializing new firms)
+RESULT( MIN( "m" ) )
 
 
 EQUATION( "a_max_int" )  
@@ -333,17 +301,7 @@ RESULT( MAXL( "a", 1 ) )
 
 EQUATION( "sales_min_int" )  
 // minimum value of sales in the sector within country
-
-cur = SEARCH( "firm" );
-v[0] = VLS( cur, "sales", 1 );
-
-CYCLE( cur, "firm" )
-{
-	if ( VLS( cur, "sales", 1 ) < v[0] )
-		v[0] = VLS( cur, "sales", 1 );
-}
-
-RESULT( v[0] )
+RESULT( MINL( "sales", 1 ) )
 
 
 EQUATION( "min_max_tot" )  
@@ -396,11 +354,8 @@ EQUATION( "Imitation" )
 V( "min_max_tot" );
 
 CYCLE( cur, "country" )
-{
 	CYCLES( cur, cur1, "sector" )
-	{
 		CYCLES( cur1, cur2, "firm" )
-		{
 			if ( RND < VS( cur2, "prob_im" ) && 
 				 VLS( cur2, "a", 1 ) != VS( cur1, "a_max" ) 
 				 && VLS( cur2, "a", 1 ) != VS( cur1, "a_max_int" ) )
@@ -419,8 +374,8 @@ CYCLE( cur, "country" )
 														    VLS( cur2, "a", 1 ) ) );
 							else
 								WRITES( cur4, "prob", 1 / ( V( "Im_penalty" ) * 
-													  ( VLS( cur4, "a", 1 ) - 
-													  VLS( cur2, "a", 1 ) ) ) );
+														  ( VLS( cur4, "a", 1 ) - 
+															VLS( cur2, "a", 1 ) ) ) );
 						}
 						else
 							WRITES( cur4, "prob", 0 );
@@ -438,9 +393,6 @@ CYCLE( cur, "country" )
 			}
 			else
 				WRITES( cur2, "a_im", 0 );
-		}
-	}
-}
 
 RESULT( 1 )
 
@@ -517,11 +469,9 @@ EQUATION( "f" )
 
 v[0] = 0;
 CYCLE( cur, "comp" )
-{
-	v[0] = v[0] + VS( cur, "ff" ) * ( VS( PARENTS( SHOOKS( cur ) ), "expenditure" ) * 
-				  V( "dshare" ) * VS( PARENTS( SHOOKS( cur ) ), "e" ) ) / 
-				  ( V( "Cw" ) * V( "dshare" ) );
-}
+	v[0] += VS( cur, "ff" ) * ( VS( PARENTS( SHOOKS( cur ) ), "expenditure" ) * 
+			V( "dshare" ) * VS( PARENTS( SHOOKS( cur ) ), "e" ) ) / 
+			( V( "Cw" ) * V( "dshare" ) );
 
 RESULT( v[0] )								// weighted average
 //RESULT( SUM( "ff" ) / V( "n_country ") )	// unweighted average
@@ -539,7 +489,6 @@ WRITE( "d_int", 0 );
 WRITE( "d_est", 0 );
 
 CYCLE( cur, "comp" )
-{
 	if ( V( "Id_country" ) == VS( PARENTS( SHOOKS( cur ) ), "Id_country" ) )
 	{
 		WRITE( "d_int", VS( PARENTS( SHOOKS( cur ) ), "expenditure" ) * 
@@ -551,7 +500,6 @@ CYCLE( cur, "comp" )
 					   V( "dshare" ) * VS( PARENTS( SHOOKS( cur ) ), "e" ) / V( "e" ) * 
 					   VS( cur, "ff" ) );
 	}
-}
 
 RESULT( ( V( "d_int" ) + V( "d_est" ) ) / V( "p" ) )
 
@@ -627,9 +575,7 @@ V( "min_max_tot" );
 V( "Expsh" );
 
 CYCLE( cur, "sector" )
-{
 	CYCLES( cur, cur1, "firm" )
-	{
 		if ( VS( cur1, "f" ) < V( "f_min" ) )
 		{
 			v[0] = beta( V( "alpha1" ), V( "beta1" ) );
@@ -677,8 +623,7 @@ CYCLE( cur, "sector" )
 				WRITELS( cur2, "ff", V( "f_min" ), t );*/
 			}
 		}
-	}
-}
+
 RESULT( 1 )
 
 

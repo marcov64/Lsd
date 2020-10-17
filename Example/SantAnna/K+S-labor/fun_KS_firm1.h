@@ -346,26 +346,19 @@ RESULT( ( 1 + VS( PARENT, "mu1" ) ) * V( "_c1" ) )
 
 /*============================ SUPPORT EQUATIONS =============================*/
 
+EQUATION( "_BC" )
+/*
+Number of buying clients for firm in capital-good sector
+*/
+RESULT( COUNT_CND( "Cli", "_tOrd", "==", T ) )
+
+
 EQUATION( "_D1" )
 /*
 Potential demand (orders) received by a firm in capital-good sector
 */
-
 VS( CONSECL2, "Id" );							// make sure all orders are sent
-
-j = v[0] = 0;									// machine/active customer count
-CYCLE( cur, "Cli" )
-{
-	if ( VS( cur, "_tOrd" ) == T )				// order in this period?
-	{
-		v[0] += VS( cur, "_nOrd" );
-		++j;
-	}
-}
-
-WRITE( "_BC", j );
-
-RESULT( v[0] )
+RESULT( V( "_BC" ) > 0 ? SUM_CND( "_nOrd", "_tOrd", "==", T ) : 0 )
 
 
 EQUATION( "_HC" )
@@ -537,12 +530,6 @@ RESULT( v[0] )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
-
-EQUATION_DUMMY( "_BC", "" )
-/*
-Number of buying clients for firm in capital-good sector
-Updated in '_D1'
-*/
 
 EQUATION_DUMMY( "_Btau", "" )
 /*

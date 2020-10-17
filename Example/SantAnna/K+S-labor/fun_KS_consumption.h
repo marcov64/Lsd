@@ -669,15 +669,9 @@ EQUATION( "f2posChg" )
 Joint market share hold by all firms of post-change type in consumption-good 
 sector
 */
-
 V( "CPI" );										// ensure m.s. are updated
-
-v[0] = 0;										// market share accumulator
-CYCLE( cur, "Firm2" )
-	if ( VS( cur, "_postChg" ) )				// is a post-change firm?
-		v[0] += VS( cur, "_f2" );
-
-RESULT( v[0] )
+v[0] = SUM_CND( "_f2", "_postChg", "!=", 0 )
+RESULT( ! isnan( v[0] ) ? v[0] : 0 )
 
 
 EQUATION( "fires2" )
