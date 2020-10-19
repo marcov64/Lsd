@@ -144,7 +144,7 @@ only objects satisfying the logical condition 'V( "lab2" ) lop value' will be
 considered form summing. lab2 should be in the same object as lab1 or be the same 
 as lab1.
 
-- double whg_av( char *lab1, char *lab2, int lag );
+- double whg_av( char *lab1, char *lab2, int lag, bool cond, char const *lab2, char const *lop, double value );
 Same as sum, but it adds up the product between variables lab and lab2 for each
 object. lab and lab2 must be in the same object.
 
@@ -163,7 +163,7 @@ it must be the address of the parent of this.
 - void delete_obj( void ) ;
 eliminate the object, keeping in order the chain list.
 
-- void stat( char *lab, double *v );
+- void stat( char *lab, double *v, int lag, bool cond, char const *lab2, char const *lop, double value );
 Reports some statistics on the values of variable named lab contained
 in one group of object descending from the this. The results are stored in the
 vector v, with the following order:

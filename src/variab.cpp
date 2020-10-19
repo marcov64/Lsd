@@ -275,7 +275,7 @@ double variable::cal( object *caller, int lag )
 	double app;
 
 	if ( param == 1 )
-		return val[ 0 ];					//it is a parameter, ignore lags
+		return val[ 0 ];				// it's a parameter, ignore lags
 	
 #ifndef NP
 	// prepare mutex for variables and functions updated in multiple threads
@@ -284,6 +284,13 @@ double variable::cal( object *caller, int lag )
 
 	if ( param == 0 )					// it's a variable
 	{
+		// invalid lag or value not saved yet
+		if ( lag > num_lag && ( no_saved || ! ( save || savei ) || t - lag < start ) )
+		{
+			eff_lag = lag;
+			goto error;
+		}
+		
 		// effective lag for variables (compatible with older versions)
 		eff_lag = ( last_update < t ) ? lag - 1 : lag;
 
