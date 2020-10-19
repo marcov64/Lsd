@@ -253,7 +253,7 @@ int lsdmain( int argn, char **argv )
 	// Tcl global variables
 	cmd( "set choice 0" );
 	cmd( "set recolor \"\"" );
-	cmd( "set docase 0" );
+	cmd( "set docase 1" );
 	cmd( "set dirsearch \"-forwards\"" );
 	cmd( "set lfind [ list ]");
 	cmd( "set lfindsize 0" );
@@ -1108,8 +1108,6 @@ int lsdmain( int argn, char **argv )
 	/* Find a text pattern in the text */
 	if ( choice == 11 )
 	{
-		cmd( "set docase 1" );
-		cmd( "set dirsearch \"-forwards\"" );
 		cmd( "set endsearch end" );
 		cmd( "set curcounter $lfindsize" );
 		cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
@@ -1232,8 +1230,6 @@ int lsdmain( int argn, char **argv )
 	/* Find and replace a text pattern in the text */
 	if ( choice == 21 )
 	{
-		cmd( "set docase 1" );
-		cmd( "set dirsearch \"-forwards\"" );
 		cmd( "set endsearch end" );
 		cmd( "set curcounter $lfindsize" );
 		cmd( "set cur \"\"" );
