@@ -523,7 +523,7 @@ Var: Deb 1 s + n n	0
 Var: Def 1 s + n n	0
 Var: G 1 s + n n	0
 Var: GDP 1 s + n n	0
-Var: GDPnom 0 s + n n
+Var: GDPnom 1 s + n n	0
 Var: Sav 0 s + n n
 Var: SavAcc 0 s + n n
 Var: Tax 1 s + n n	0
@@ -562,10 +562,10 @@ Func: banksMaps 0 n + n n
 Func: pickBank 0 n + n n
 Var: Cl 0 s + n n
 Var: Depo 1 s + n n	0
-Var: DivB 0 n + n n
+Var: DivB 1 n + n n	0
 Var: Gbail 1 s + n n	0
 Var: Loans 0 s + n n
-Var: NWb 0 s + n n
+Var: NWb 1 s + n n	0
 Var: PiB 0 s + n n
 Var: TaxB 1 n + n n	0
 Var: cScores 0 n + n n
@@ -609,7 +609,7 @@ Var: L 0 s + n n
 Var: Ls 1 s + n n	0
 Var: U 4 s + n p	0	0	0	0
 Var: dUb 1 s + n n	0
-Var: w 1 s + n n	1
+Var: w 1 s + n n	0
 Var: wU 0 s + n n
 
 Object: Capital C	1
@@ -644,7 +644,7 @@ Func: f1rescale 0 n + n n
 Var: A1 4 s + n n	1	1	1	1
 Var: D1 0 s + n n
 Var: Deb1 1 s + n n	0
-Var: Div1 0 n + n n
+Var: Div1 1 n + n n	0
 Var: F1 1 s + n n	0
 Var: JO1 0 n + n n
 Var: L1 1 s + n n	0
@@ -731,7 +731,7 @@ Param: e6 0 n + n n	1
 Param: e7 0 n + n n	0.3
 Param: e8 0 n + n n	0.3
 Param: eta 0 n + n n	19
-Param: f2min 0 n + n n	1e-005
+Param: f2min 0 n + n n	1e-05
 Param: iota 0 n + n n	0.1
 Param: kappaMax 0 n + n n	0.5
 Param: kappaMin 0 n + n n	0
@@ -748,7 +748,7 @@ Var: A2 1 s + n n	1
 Var: CI 0 s + n n
 Var: CPI 4 s + n n	1	1	1	1
 Var: Deb2 1 s + n n	0
-Var: Div2 0 n + n n
+Var: Div2 1 n + n n	0
 Var: D2 0 s + n n
 Var: D2d 0 s + n n
 Var: D2e 0 s + n n
@@ -776,7 +776,7 @@ Var: SI 0 s + n n
 Var: S2 0 s + n n
 Var: Tax2 0 n + n n
 Var: W2 0 s + n n
-Var: c2 0 s + n n
+Var: c2 1 s + n n	0
 Var: c2e 0 s + n n
 Var: dCPI 1 s + n n	0
 Var: dCPIb 1 s + n n	0
@@ -1074,7 +1074,7 @@ All 1 instances equal to 0.15.
 END_DESCRIPTION
 
 Variable_A
-Overall productivity
+Overall labor productivity
 _INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION
@@ -1112,7 +1112,7 @@ END_DESCRIPTION
 Variable_GDPnom
 Gross domestic product in nominal (monetary) terms
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_Sav
@@ -1215,7 +1215,6 @@ END_DESCRIPTION
 Parameter_PhiB
 Fraction of incumbent bank net wealth provided to bailed-out bank 
 (0<PhiB<=1)
-
 _INIT_
 All 1 instances equal to 0.5.
 END_DESCRIPTION
@@ -1367,7 +1366,7 @@ END_DESCRIPTION
 Variable_DivB
 Total dividends paid by banks
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_Gbail
@@ -1385,7 +1384,7 @@ END_DESCRIPTION
 Variable_NWb
 Total banking sector net worth (liquid assets)
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_PiB
@@ -1638,7 +1637,7 @@ END_DESCRIPTION
 Variable_w
 Centralized wage imposed to all workers
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_wU
@@ -1848,7 +1847,7 @@ _INIT_
 END_DESCRIPTION
 
 Variable_A1
-Productivity of capital-good sector
+Labor productivity of capital-good sector
 _INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION
@@ -1868,7 +1867,7 @@ END_DESCRIPTION
 Variable_Div1
 Total dividends paid by firms in capital-good sector
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_F1
@@ -2031,13 +2030,13 @@ _INIT_
 END_DESCRIPTION
 
 Variable__Atau
-Productivity of the current vintage of machines when employed for production
+Labor productivity of new vintage of machine when employed for production
 _INIT_
 All 20 instances equal to 1.
 END_DESCRIPTION
 
 Variable__Btau
-Productivity of labor in producing the current vintage of machines
+Labor productivity of new vintage of machine when employed for production
 _INIT_
 All 20 instances equal to 1.
 END_DESCRIPTION
@@ -2486,7 +2485,7 @@ _INIT_
 END_DESCRIPTION
 
 Variable_A2
-Productivity of consumption-good sector
+Machine-level weighted-average labor productivity of consumption-good sector
 _INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION
@@ -2512,7 +2511,7 @@ END_DESCRIPTION
 Variable_Div2
 Total dividends paid by firms in consumption-good sector
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_D2
@@ -2682,7 +2681,7 @@ END_DESCRIPTION
 Variable_c2
 Planned average unit cost in consumption-good sector
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_c2e
@@ -2790,13 +2789,13 @@ _INIT_
 END_DESCRIPTION
 
 Variable__A2
-Productivity of firm in consumption-good sector
+Machine-level average labor productivity of firm in consumption-good sector
 _INIT_
 All 200 instances equal to 0.
 END_DESCRIPTION
 
 Variable__A2e
-Effective productivity of firm in consumption-good sector
+Machine-level effective productivity of firm in consumption-good sector
 _INIT_
 
 END_DESCRIPTION
@@ -3088,7 +3087,7 @@ _INIT_
 END_DESCRIPTION
 
 Parameter__Avint
-Machine vintage notional productivity
+Machine vintage notional labor productivity
 _INIT_
 All 200 instances equal to 1.
 END_DESCRIPTION
@@ -3364,7 +3363,7 @@ All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_dA
-Overall productivity (log) growth rate
+Overall labor productivity growth rate
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -3376,7 +3375,7 @@ _INIT_
 END_DESCRIPTION
 
 Variable_A2sd
-Standard deviation of productivity in consumption-good sector
+Standard deviation of machine-level log labor productivity of firms in consumption-good sector
 _INIT_
 
 END_DESCRIPTION

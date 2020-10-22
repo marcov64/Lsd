@@ -218,7 +218,7 @@ double entry_firm1( object *sector, int n, bool newInd )
 	
 	if ( newInd )
 	{
-		Atau = Btau = AtauMax = BtauMax = 1;
+		Atau = Btau = AtauMax = BtauMax = INIPROD;// initial productivities
 		NW10 = VS( sector, "NW10" ); 			// initial wealth in sector 1
 		f1 = 1.0 / n;							// fair share
 		
@@ -339,7 +339,7 @@ double entry_firm2( object *sector, int n, bool newInd )
 	double mu20 = VS( sector, "mu20" );			// initial mark-up in sector 2
 	double m1 = VS( cap, "m1" );				// worker output per period
 	double m2 = VS( sector, "m2" );				// machine output per period
-	double p10 = ( 1 + mu1 ) / m1;				// initial price of machines
+	double p10 = ( 1 + mu1 ) * INIWAGE / ( INIPROD * m1 );// initial mach. price
 	double u = VS( sector, "u" );				// desired capital utilization
 	double w = VS( lab, "w" );					// current wage
 	int eta = VS( sector, "eta" );				// technical life of machines
@@ -351,10 +351,11 @@ double entry_firm2( object *sector, int n, bool newInd )
 		double phi = VS( fin, "phi" );			// unemployment benefit rate
 		double SIr0 = n * ceil( K0 / m2 ) / eta;// substitution real investment
 		double RD0 = VS( cap, "nu" ) * SIr0 * p10;// initial R&D expense
-		D20 = ( ( SIr0 / m1 + RD0 ) * ( 1 - phi ) + VS( lab, "Ls0" ) * phi ) / 
-			  ( mu20 + phi ) / n;
+		D20 = ( ( SIr0 * INIWAGE / ( INIPROD * m1 ) + RD0 ) * ( 1 - phi ) + 
+				VS( lab, "Ls0" ) * INIWAGE * phi ) / 
+			  ( mu20 + phi ) * ( INIWAGE / INIPROD ) / n;
 		
-		Eavg = 1;								// initial competitiveness
+		Eavg = ( VS( sector, "omega1" ) + VS( sector, "omega2" ) ) / 2;// compet.
 		K = K0;									// initial capital in sector 2
 		N = iota * D20;							// initial inventories
 		NW20 = VS( sector, "NW20" );			// initial wealth in sector 2

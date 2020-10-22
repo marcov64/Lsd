@@ -46,7 +46,7 @@ RESULT( ( VS( CAPSECL2, "W1" ) + VS( CONSECL2, "W2" ) +
 
 EQUATION( "dA" )
 /*
-Overall productivity growth rate
+Overall labor productivity growth rate
 */
 v[1] = VLS( GRANDPARENT, "A", 1 );
 RESULT( v[1] > 0 ? VS( GRANDPARENT, "A" ) / v[1] - 1 : 0 )
@@ -152,7 +152,8 @@ RESULT( SUMS( CAPSECL2, "_cred1c" ) )
 
 EQUATION( "A2sd" )
 /*
-Standard deviation of log productivity of firms in consumption-good sector
+Standard deviation of machine-level log labor productivity of firms in 
+consumption-good sector
 */
 
 v[1] = VS( CONSECL2, "A2" );					// average productivity
@@ -288,7 +289,7 @@ RESULT( VS( LABSUPL2, "w" )  / VS( CONSECL2, "CPI" ) )
 
 EQUATION( "_A2e" )
 /*
-Effective productivity of firm in consumption-good sector
+Machine-level effective productivity of firm in consumption-good sector
 */
 i = V( "_L2" );
 RESULT( i > 0 ? V( "_Q2e" ) / i : CURRENT )

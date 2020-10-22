@@ -12,7 +12,7 @@
 
 EQUATION( "_Atau" )
 /*
-Productivity of the new vintage of machines when employed for production
+Labor productivity of new vintage of machine when employed for production
 Also updates '_Btau'
 */
 
@@ -533,7 +533,7 @@ RESULT( v[0] )
 
 EQUATION_DUMMY( "_Btau", "" )
 /*
-Productivity of labor in producing the new vintage of machines
+Labor productivity when producing the new vintage of machines
 Updated in '_Atau'
 */
 

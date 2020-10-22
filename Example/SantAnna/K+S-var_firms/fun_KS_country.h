@@ -125,7 +125,7 @@ RESULT( ROUND( v[0], 0, 0.001 ) )				// avoid rounding errors on zero
 
 EQUATION( "A" )
 /*
-Overall productivity
+Overall labor productivity
 */
 RESULT( ( VS( CAPSECL0, "A1" ) * VS( CAPSECL0, "L1" ) + 
 		  VS( CONSECL0, "A2" ) * VS( CONSECL0, "L2" ) ) / VS( LABSUPL0, "L" ) )
@@ -197,7 +197,8 @@ if ( i >= 1 )									// tax workers' income?
 	v[1] += VS( CAPSECL0, "W1" ) + VS( CONSECL0, "W2" );
 
 if ( i >= 2 )									// tax capitalists' income?
-	v[1] += VS( CAPSECL0, "Div1" ) + VS( CONSECL0, "Div2" ) + VS( FINSECL0, "DivB" );
+	v[1] += VLS( CAPSECL0, "Div1", 1 ) + VLS( CONSECL0, "Div2", 1 ) + 
+			VLS( FINSECL0, "DivB", 1 );
 
 // compute household's taxes plus firms' taxes
 v[0] = v[1] * V( "tr" ) + VS( CAPSECL0, "Tax1" ) + VS( CONSECL0, "Tax2" ) + 
@@ -321,8 +322,10 @@ int F20 = VS( cur2, "F20" );					// initial firms in sector 2
 int F2max = VS( cur2, "F2max" );				// max firms in sector 2
 int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 
-double p10 = ( 1 + mu1 ) / m1;					// initial price sector 1
-double p20 = 1 + mu20;							// initial price sector 2
+double c10 = INIWAGE / ( INIPROD * m1 );		// initial cost in sector 1
+double c20 = INIWAGE / INIPROD;					// initial cost in sector 2
+double p10 = ( 1 + mu1 ) * c10;					// initial price sector 1
+double p20 = ( 1 + mu20 ) * c20;				// initial price sector 2
 double G0 = V( "gG" ) * Ls0;					// initial public spending
 
 // reserve space for country-level non-initialized vectors
@@ -341,11 +344,14 @@ WRITELS( cur1, "PPI", p10, -1 );
 WRITELS( cur1, "PPI0", p10, -1 );
 WRITELS( cur2, "CPI", p20, -1 );
 WRITELS( cur2, "F2", F20, -1 );
+WRITELS( cur2, "c2", c20, -1 );
+WRITELS( cur3, "NWb", NWb0, -1 );
 WRITELS( cur3, "phi", phiT, -1 );
 WRITELS( cur3, "r", rT, -1 );
 WRITELS( cur3, "rDeb", rT, -1 );				// interest rate structure 
 WRITELS( cur3, "rRes", rT, -1 );				// to be defined later
 WRITELS( cur4, "Ls", Ls0, -1 );
+WRITELS( cur4, "w", INIWAGE, -1 );
 
 // create banks' objects and set initial values
 k = 1;											// initial bank ID

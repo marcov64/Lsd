@@ -129,7 +129,7 @@ RESULT( ( double ) j / F1 )
 
 EQUATION( "A1" )
 /*
-Productivity of capital-good sector
+Labor productivity of capital-good sector
 */
 V( "PPI" );										// ensure m.s. are updated
 RESULT( V( "Q1e" ) > 0 ? WHTAVE( "_Btau", "_f1" ) : CURRENT )

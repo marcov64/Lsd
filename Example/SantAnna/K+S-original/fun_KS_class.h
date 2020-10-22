@@ -37,14 +37,20 @@ struct country
 };
 
 
+/*======================= INITIAL NOTIONAL DEFINITIONS =======================*/
+
+#define INIPROD		1					// initial notional machine productivity
+#define INIWAGE		1					// initial notional wage
+
+
 /*========================= HOOK-RELATED DEFINITIONS =========================*/
 
 // number of dynamic hooks per object type
-#define FIRM2HK 2			// Firm2
+#define FIRM2HK		2					// Firm2
 
 // dynamic hook name to number
-#define SUPPL 0				// from Firm2 to Broch (in Firm2)
-#define TOPVINT 1			// from Firm2 to Vint (in Firm2)
+#define SUPPL		0					// from Firm2 to Broch (in Firm2)
+#define TOPVINT		1					// from Firm2 to Vint (in Firm2)
 
 
 /*======================= OBJECT-LOCATION DEFINITIONS ========================*/

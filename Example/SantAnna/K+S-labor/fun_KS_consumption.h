@@ -359,7 +359,7 @@ RESULT( v[2] > 0 ? v[0] / v[2] : 0 )
 
 EQUATION( "A2" )
 /*
-Productivity of consumption-good sector
+Machine-level weighted-average labor productivity of consumption-good sector
 */
 V( "CPI" );										// ensure m.s. are updated
 RESULT( WHTAVE( "_A2", "_f2" ) )
@@ -367,7 +367,8 @@ RESULT( WHTAVE( "_A2", "_f2" ) )
 
 EQUATION( "A2p" )
 /*
-Potential notional productivity of consumption-good sector
+Machine-level weighted-average labor potential productivity of consumption-good 
+sector
 */
 V( "CPI" );										// ensure m.s. are updated
 RESULT( WHTAVE( "_A2p", "_f2" ) )
