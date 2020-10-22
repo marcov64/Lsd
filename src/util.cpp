@@ -223,7 +223,6 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 	cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
 
 	cmd( "showtop .cazzo centerW" );
-	
 	cmd( "mousewarpto .cazzo.b.ok" );
 	
 	if ( parallel_mode || fast_mode != 0 )

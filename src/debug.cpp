@@ -626,6 +626,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				cmd( "showtop $e" );
 				cmd( "focus $e.v.l0.e" );
 				cmd( "$e.v.l0.e selection range 0 end" );
+				cmd( "mousewarpto $e.b.ok" );
 
 				choice = 0;
 				while ( choice == 0 )
@@ -700,7 +701,6 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 					cmd( "bind $cb.v.e <Return> { set choice 1 }" );
 
 					cmd( "showtop $cb" );
-
 					cmd( "mousewarpto $cb.b.ok" );
 
 					choice = 0;
@@ -1044,6 +1044,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				cmd( "showtop $t" );
 				cmd( "$t.t.val selection range 0 end" );
 				cmd( "focus $t.t.val" );
+				cmd( "mousewarpto $t.b.ok" );
 
 				choice = 0;
 				while ( choice == 0 )

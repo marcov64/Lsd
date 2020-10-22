@@ -1827,6 +1827,7 @@ case 6:
 	cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#ChangeObjName } { set choice 2 }" );
 
 	cmd( "showtop $T topleftW" );
+	cmd( "mousewarpto $T.b.ok" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -2293,6 +2294,7 @@ case 7:
 	cmd( "bind $T <Control-u> \"$Td.b.us invoke\"; bind $T <Control-U> \"$Td.b.us invoke\"" );
 
 	cmd( "showtop $T topleftW" );
+	cmd( "mousewarpto $T.b.ok" );
 
 	cycle_var:
 
@@ -2492,6 +2494,7 @@ case 76:
 		cmd( "showtop $T" );
 		cmd( "focus $T.n.e" );
 		cmd( "$T.n.e selection range 0 end" );
+		cmd( "mousewarpto $T.b.ok" );
 
 		*choice = 0;
 	}
@@ -2730,6 +2733,7 @@ case 78:
 		cmd( "showtop $T" );
 		cmd( "$T.i.e selection range 0 end" );
 		cmd( "focus $T.i.e" );
+		cmd( "mousewarpto $T.b.ok" );
 		
 		*choice = -1;
 		while ( *choice == -1 )			// wait for user action
@@ -2915,6 +2919,7 @@ case 96:
 	cmd( "showtop $T" );
 	cmd( "$T.f.c.e2 selection range 0 end" );
 	cmd( "focus $T.f.c.e2" );
+	cmd( "mousewarpto $T.b.ok" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -3098,7 +3103,6 @@ case 1:
 	cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#run } { set choice 2 }" );
 
 	cmd( "showtop $T" );
-	
 	cmd( "mousewarpto $T.b.ok" );
 
 	*choice = 0;
@@ -3383,16 +3387,17 @@ case 22:
 	cmd( "pack $T.f $T.c -padx 5 -pady 5" );
 	
 	cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#simsetting } { set choice 2 }" );
-	cmd( "bind $T.f.c.e2 <KeyPress-Return> {focus $T.f.a.e; $T.f.a.e selection range 0 end}" );
-	cmd( "bind $T.f.a.e <KeyPress-Return> {focus $T.f.b.e1; $T.f.b.e1 selection range 0 end}" );
-	cmd( "bind $T.f.b.e1 <KeyPress-Return> {focus $T.f.d.e2; $T.f.d.e2 selection range 0 end}" );
-	cmd( "bind $T.f.d.e2 <KeyPress-Return> {focus $T.f.e.e2; $T.f.e.e2 selection range 0 end}" );
-	cmd( "bind $T.f.e.e2 <KeyPress-Return> {focus $T.f.f.e2; $T.f.f.e2 selection range 0 end}" );
-	cmd( "bind $T.f.f.e2 <KeyPress-Return>  {focus $T.b.ok}" );
+	cmd( "bind $T.f.c.e2 <KeyPress-Return> { focus $T.f.a.e; $T.f.a.e selection range 0 end }" );
+	cmd( "bind $T.f.a.e <KeyPress-Return> { focus $T.f.b.e1; $T.f.b.e1 selection range 0 end }" );
+	cmd( "bind $T.f.b.e1 <KeyPress-Return> { focus $T.f.d.e2; $T.f.d.e2 selection range 0 end }" );
+	cmd( "bind $T.f.d.e2 <KeyPress-Return> { focus $T.f.e.e2; $T.f.e.e2 selection range 0 end }" );
+	cmd( "bind $T.f.e.e2 <KeyPress-Return> { focus $T.f.f.e2; $T.f.f.e2 selection range 0 end }" );
+	cmd( "bind $T.f.f.e2 <KeyPress-Return>  { focus $T.b.ok }" );
 
 	cmd( "showtop $T" );
 	cmd( "$T.f.c.e2 selection range 0 end" );
 	cmd( "focus $T.f.c.e2" );
+	cmd( "mousewarpto $T.b.ok" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -3730,6 +3735,7 @@ case 33:
 	cmd( "bind $T.e.e.e <Return> { set choice 1 }" );
 
 	cmd( "showtop $T" );
+	cmd( "mousewarpto $T.b.ok" );
 
 	i = 1;
 
@@ -3865,6 +3871,7 @@ case 37:
 	cmd( "showtop .n" );
 	cmd( "focus .n.n.e" );
 	cmd( ".n.n.e selection range 0 end" );  
+	cmd( "mousewarpto .n.b.ok" );
 
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
@@ -3947,9 +3954,10 @@ case 43:
 
 	cmd( "pack .warn.m -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .warn f { set choice 1 } { LsdHelp menumodel.html#auto_docu } { set choice 2 }" );
+	cmd( "okhelpcancel .warn b { set choice 1 } { LsdHelp menumodel.html#auto_docu } { set choice 2 }" );
 
 	cmd( "showtop .warn" );
+	cmd( "mousewarpto .warn.b.ok" );
 
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
@@ -4031,11 +4039,12 @@ case 48:
 	cmd( "bind .a.v_num2 <Return> { set choice 1 }" );
 	cmd( "pack .a.l2 .a.v_num2 -padx 5" );
 
-	cmd( "okXhelpcancel .a f Default { set temp_var mozilla } { set choice 1 } { LsdHelp LSD_macros.html#V } { set choice 2 }" );
+	cmd( "okXhelpcancel .a b Default { set temp_var mozilla } { set choice 1 } { LsdHelp LSD_macros.html#V } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.v_num2" );
 	cmd( ".a.v_num2 selection range 0 end" );
+	cmd( "mousewarpto .a.b.ok" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -4550,6 +4559,7 @@ case 71:
 		cmd( "showtop .s" );
 		cmd( "focus .s.i.e" );
 		cmd( ".s.i.e selection range 0 end" );
+		cmd( "mousewarpto .s.b.ok" );
 
 		*choice = 0;
 		while ( *choice == 0 )
@@ -4661,6 +4671,7 @@ case 72:
 		cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#nolh } { set choice 2 }" );
 		
 		cmd( "showtop .s" );
+		cmd( "mousewarpto .s.b.ok" );
 		
 		*choice = 0;
 		while ( *choice == 0 )
@@ -4782,6 +4793,7 @@ case 80:
 		cmd( "showtop .s" );
 		cmd( "focus .s.i.e" );
 		cmd( ".s.i.e selection range 0 end" );
+		cmd( "mousewarpto .s.b.ok" );
 		
 		*choice = 0;
 		while ( *choice == 0 )
@@ -4900,6 +4912,7 @@ case 81:
 		cmd( "showtop .s" );
 		cmd( ".s.i.e1 selection range 0 end" );
 		cmd( "focus .s.i.e1" );
+		cmd( "mousewarpto .s.b.ok" );
 		
 		*choice = 0;
 		while ( *choice == 0 )
@@ -5388,6 +5401,7 @@ case 68:
 	cmd( "showtop .s" );
 	cmd( "focus .s.c.e" );
 	cmd( ".s.c.e selection range 0 end" );
+	cmd( "mousewarpto .s.b.ok" );
 	
 	*choice = 0;
 	while ( *choice == 0 )
@@ -5784,6 +5798,7 @@ case 69:
 	cmd( "okhelpcancel $b b { set choice 1 } { LsdHelp menurun.html#batch } { set choice 2 }" );
 	
 	cmd( "showtop $b" );
+	cmd( "mousewarpto $b.b.ok" );
 	
 	*choice = 0;
 	while ( *choice == 0 )

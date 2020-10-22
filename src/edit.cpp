@@ -420,6 +420,7 @@ int entry_new_objnum( object *c, const char *tag, int *choice )
 	cmd( "bind $T.e.e <Return> { set conf 1; set choice 1 }" );
 
 	cmd( "showtop $T" );
+	cmd( "mousewarpto $T.b.ok" );
 
 	j = 1;
 	 
@@ -542,7 +543,6 @@ int compute_copyfrom( object *c, int *choice, const char *parWnd )
 	cmd( "comphelpdone $cc b { set cconf 1; set choice 2 } { LsdHelp menudata_objn.html#compute } { set cconf 1; set choice 1 }" );
 
 	cmd( "showtop $cc" );
-
 	cmd( "mousewarpto $cc.b.comp" );
 
 	res = i;
@@ -722,7 +722,6 @@ void eliminate_obj( object **c, int actual, int desired, int *choice )
 	cmd( "helpcancel $d b2 { LsdHelp menudata_objn.html#pick_remove } { set choice 3 }" );
 
 	cmd( "showtop $d" );
-
 	cmd( "mousewarpto $d.b.last" );
 
 	*choice = 0;

@@ -162,6 +162,7 @@ void report( int *choice, object *r )
 	cmd( "okXhelpcancel .w b Search { set res [ tk_getSaveFile -parent .w -title \"Existing Report File\" -filetypes { { {HTML files} {.html} } } -initialdir \"%s\" ]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }", exec_path );
 
 	cmd( "showtop .w topleftW" );
+	cmd( "mousewarpto .w.b.ok" );
 
 	here_create_report:
 

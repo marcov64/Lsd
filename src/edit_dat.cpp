@@ -172,6 +172,7 @@ void edit_data( object *r, int *choice, char *lab )
 	}
 
 	cmd( "showtop .inid topleftW 1 1" );
+	cmd( "mousewarpto .inid.b.ok" );
 	cmd( "wm minsize .inid $hsizeImin $vsizeImin" );
 	cmd( "pack propagate .inid 0" );
 	cmd( "set iniDone 1" );

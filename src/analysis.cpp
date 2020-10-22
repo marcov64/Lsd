@@ -879,6 +879,8 @@ while ( true )
 						cmd( "pack .da.a.l -pady 10 -padx 5" );
 						cmd( "okhelpcancel .da.a b { set choice 1 } { LsdHelp menudata_res.html#postscript } { set choice 2 }" );
 						cmd( "showtop .da.a centerW 0 0 0" );
+						cmd( "mousewarpto .da.a.b.ok" );
+						
 						while ( *choice == 0 )
 							Tcl_DoOneEvent( 0 );
 						cmd( "destroytop .da.a" );
@@ -950,6 +952,7 @@ while ( true )
 			cmd( "pack .da.file.l .da.file.col .da.file.pos .da.file.dim .da.file.lab -pady 5 -padx 5" );
 			cmd( "okhelpcancel .da.file b { set choice 1 } { LsdHelp menudata_res.html#postscript } { set choice 2 }" );
 			cmd( "showtop .da.file" );
+			cmd( "mousewarpto .da.file.b.ok" );
 
 			*choice = 0;
 			while ( *choice == 0 )
@@ -2241,18 +2244,21 @@ while ( true )
 			switch ( *choice )
 			{
 				case 4:
-					create_series( choice, false, cur_var );
-					cmd( "selectinlist .da.vars.lb.f.v end" );
+					if ( create_series( choice, false, cur_var ) )
+						cmd( "selectinlist .da.vars.lb.f.v end" );
+					
 					break;
 
 				case 5:
-					create_maverag( choice );
-					cmd( "selectinlist .da.vars.lb.f.v end" );
+					if ( create_maverag( choice ) )
+						cmd( "selectinlist .da.vars.lb.f.v end" );
+					
 					break;
 				
 				case 0:
-					add_unsaved( choice );
-					cmd( "selectinlist .da.vars.lb.f.v end" );
+					if ( add_unsaved( choice ) )
+						cmd( "selectinlist .da.vars.lb.f.v end" );
+					
 					break;
 					
 				case 3:
@@ -2528,6 +2534,7 @@ while ( true )
 			cmd( "okXhelpcancel .da.a b  { Default } { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#gpoptions } { set choice 2 }" );
 
 			cmd( "showtop .da.a" );
+			cmd( "mousewarpto .da.a.b.ok" );
 
 			gpoptions:
 			
@@ -2601,6 +2608,7 @@ while ( true )
 
 			cmd( "okXhelpcancel .da.a b Default { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#colors } { set choice 2 }" );
 			cmd( "showtop .da.a" );
+			cmd( "mousewarpto .da.a.b.ok" );
 
 			set_col:
 			
@@ -2766,6 +2774,7 @@ while ( true )
 
 			cmd( "showtop .da.s" );
 			cmd( "focus .da.s.x.e1; .da.s.x.e1 selection range 0 end" );
+			cmd( "mousewarpto .da.s.b.ok" );
 
 			set_plot:
 			
@@ -2853,6 +2862,7 @@ while ( true )
 
 			cmd( "showtop .da.s" );
 			cmd( "focus .da.s.s.e; .da.s.s.e selection range 0 end" );
+			cmd( "mousewarpto .da.s.b.ok" );
 
 			set_lattice:
 			*choice = 0;
@@ -2955,6 +2965,7 @@ while ( true )
 			cmd( "showtop $wid current" );
 			cmd( "focus $wid.l.e" );
 			cmd( "$wid.l.e selection range 0 end" );
+			cmd( "mousewarpto $wid.b.ok" );
 			
 			*choice = 0;
 			while ( ! *choice )
@@ -3082,6 +3093,7 @@ while ( true )
 			cmd( "showtop $wid current" );
 			cmd( "focus $wid.l.e" );
 			cmd( "$wid.l.e selection range 0 end" );
+			cmd( "mousewarpto $wid.b.ok" );
 		 
 			// enable most options for non-dotted lines
 			cmd( "if { ! $dots } { $wid.l.e  configure -state normal; $wid.c.e  configure -state normal; $wid.fall.font  configure -state normal }" );
@@ -3274,6 +3286,7 @@ while ( true )
 			cmd( "showtop $wid current" );
 			cmd( "focus $wid.l.e" );
 			cmd( "$wid.l.e selection range 0 end" );
+			cmd( "mousewarpto $wid.b.ok" );
 			
 			*choice = 0;
 			while ( ! *choice )
@@ -3880,6 +3893,7 @@ void set_cs_data( int *choice )
 
 	cmd( "showtop $p centerW no no yes 0 0 .da.s.fb.r1.add" );
 	cmd( ".da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e" );
+	cmd( "mousewarpto $p.fb.ok" );
 
 	*choice = 0;
 	while ( ! *choice )
@@ -5413,9 +5427,9 @@ void plot_cs_xy( int *choice )
 	cmd( "bind .da.s.v.e <KeyPress-Return> { focus .da.s.b.ok }" );
 
 	cmd( "showtop .da.s" );
-
 	cmd( "focus .da.s.i.e" );
 	cmd( ".da.s.i.e selection range 0 end" );
+	cmd( "mousewarpto .da.s.b.ok" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -5756,6 +5770,7 @@ void plot_phase_diagram( int *choice )
 
 	cmd( "showtop .da.s" );
 	cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
+	cmd( "mousewarpto .da.s.b.ok" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -6263,6 +6278,7 @@ void plot_lattice( int *choice )
 	cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
 		
 	cmd( "showtop .da.s" );
+	cmd( "mousewarpto .da.s.b.ok" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -6586,6 +6602,7 @@ void histograms( int *choice )
 
 	cmd( "showtop .da.s" );
 	cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
+	cmd( "mousewarpto .da.s.b.ok" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -6834,6 +6851,7 @@ void histograms_cs( int *choice )
 
 	cmd( "showtop .da.s" );
 	cmd( "focus .da.s.t.e; .da.s.t.e selection range 0 end" );
+	cmd( "mousewarpto .da.s.b.ok" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -7001,9 +7019,9 @@ CREATE_SERIES
 // Confidence level  0.80      0.81      0.82      0.83      0.84      0.85      0.86      0.87      0.88      0.89      0.90      0.91      0.92      0.93      0.94      0.95       0.96      0.97      0.98      0.99
 double z_star[ ] = { 1.281552, 1.310579, 1.340755, 1.372204, 1.405072, 1.439531, 1.475791, 1.514102, 1.554774, 1.598193, 1.644854, 1.695398, 1.750686, 1.811911, 1.880794, 1.959964,  2.053749, 2.170090, 2.326348, 2.575829 };
 
-void create_series( int *choice, bool mc, vector < string > var_names )
+bool create_series( int *choice, bool mc, vector < string > var_names )
 {
-	bool first;
+	bool first, done = true;
 	char *lapp, **str, **tag;
 	double nmax = 0, nmin = 0, nmean, nvar, nn, sum, prod, thflt, z_crit, **data;
 	int i, j, k, flt, cs_long, type_series, new_series, sel_series, confi, *start, *end, *id;
@@ -7014,7 +7032,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 		if ( nv == 0 )
 		{
 			cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-			return;
+			return false;
 		}
 
 		if ( logs )
@@ -7106,6 +7124,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 		cmd( "showtop .da.s" );
 		cmd( "focus .da.s.n.nv" );
 		cmd( ".da.s.n.nv selection range 0 end" );
+		cmd( "mousewarpto .da.s.b.ok" );
 		 
 		*choice = 0;
 		while ( *choice == 0 )
@@ -7118,7 +7137,7 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 		if ( *choice == 2 )
 		{
 			*choice = 0;
-			return;
+			return false;
 		}
 		
 		flt = get_int( "flt" );
@@ -7235,15 +7254,26 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 	}
 
 	if ( autom_x || min_c >= max_c )
-		for ( i = 0; i < sel_series; ++i )
+	{
+		// differently from normal, pick just cases covering all series
+		min_c = max( start[ 0 ], showInit ? 0 : 1 );
+		max_c = end[ 0 ];
+		for ( i = 1; i < sel_series; ++i )
 		{
-			if ( i == 0 )
-				min_c = max_c = max( start[ i ], showInit ? 0 : 1 );
-			if ( start[ i ] < min_c )
-				min_c = max( start[ i ], showInit ? 0 : 1 );
-			if ( end[ i ] > max_c )
-				max_c = end[ i ] > num_c ? num_c : end[ i ];
+			if ( start[ i ] > min_c )
+				min_c = start[ i ];
+			if ( end[ i ] < max_c )
+				max_c = end[ i ];
 		}
+		
+		if ( min_c >= max_c )
+		{
+			cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Series cases do not overlap\" -detail \"Two or more series in the Series Selected listbox have no common cases (time steps). Please use manual case selection if this is the desired behavior.\"" );
+			
+			done = false;
+			goto end_new_series;
+		}
+	}
 
 	// handle creation of multiple series
 	for ( k = 0; k < new_series; ++k, ++num_var, ++var_num )
@@ -7433,6 +7463,8 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 		}
 	}
 
+	end_new_series:
+	
 	for ( i = 0; i < sel_series; ++i )
 	{
 		delete [ ] str[ i ];
@@ -7445,13 +7477,15 @@ void create_series( int *choice, bool mc, vector < string > var_names )
 	delete [ ] start;
 	delete [ ] end;
 	delete [ ] id;
+	
+	return done;
 }
 
 
 /***************************************************
 CREATE_MAVERAG
 ****************************************************/
-void create_maverag( int *choice )
+bool create_maverag( int *choice )
 {
 	char *lapp, **str, **tag;
 	double xapp, **data;
@@ -7461,7 +7495,7 @@ void create_maverag( int *choice )
 	if ( nv == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-		return;
+		return false;
 	}
 
 	if ( logs )
@@ -7493,6 +7527,7 @@ void create_maverag( int *choice )
 	cmd( "showtop .da.s" );
 	cmd( "focus .da.s.o.th" );
 	cmd( ".da.s.o.th selection range 0 end" );
+	cmd( "mousewarpto .da.s.b.ok" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -7504,7 +7539,7 @@ void create_maverag( int *choice )
 	if ( *choice == 2 )
 	{
 		*choice = 0;
-		return;
+		return false;
 	}
 
 	flt = get_int( "bido" );
@@ -7515,7 +7550,7 @@ void create_maverag( int *choice )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid moving average period\" -detail \"Please choose a period larger than one time step.\"" );
 		*choice = 0;
-		return;
+		return false;
 	}
 
 	if ( ma_type == 1 && flt % 2 == 0 )
@@ -7649,20 +7684,22 @@ void create_maverag( int *choice )
 	delete [ ] start;
 	delete [ ] end;
 	delete [ ] id;
+	
+	return true;
 }
 
 
 /***************************************************
 ADD_UNSAVED
 ****************************************************/
-void add_unsaved( int *choice )
+bool add_unsaved( int *choice )
 {
 	char *lab;
 	
 	if ( actual_steps == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Simulation not run\" -detail \"Select menu option Run>Run before using this option.\"" );
-		return;
+		return false;
 	}
 
 	cmd( "set bidi \"\"" );
@@ -7712,17 +7749,19 @@ void add_unsaved( int *choice )
 	cmd( "destroytop .da.s" );
 	
 	if( *choice == 2 )
-		return;
+		return false;
 	
 	cmd( "set choice [ lsearch $modElem $bidi ]" );
 	if( *choice < 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid element name\" -detail \"There is no element in the model structure with the given name.\"" );
-		return;
+		return false;
 	}
 	
 	lab = ( char * ) Tcl_GetVar( inter, "bidi", 0 );
 	insert_data_mem( root, &num_var, lab );
+	
+	return true;
 }
 
 	
