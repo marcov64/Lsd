@@ -100,12 +100,13 @@ void show_eq( char *lab, int *choice )
 			if ( is_equation_header( c1_lab, c2_lab, updt_in ) )
 				if ( ! strcmp( c2_lab, lab ) )
 					done = true;
+				
+		if ( ! done )
+			fclose( f );
 	}
 
 	if ( ! done )
 	{
-		if ( f != NULL )
-			fclose( f );
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Equation not found\" -detail \"Equation for '%s' not found (check the spelling or equation file name).\"", lab  );
 		return;
 	}
@@ -412,6 +413,7 @@ void scan_used_lab( char *lab, int *choice )
 					}
 				}
 			}
+			
 			fclose( f );
 		}
 	}

@@ -715,6 +715,8 @@ FILE *search_all_sources( char *str )
 		
 		if ( ! strncmp( got, str, strlen( str ) ) )
 			return f;
+		
+		fclose( f );
 	}
 	
 	return NULL;
@@ -817,6 +819,7 @@ void get_var_descr( char const *lab, char *descr, int descr_len )
 	}
 	
 	if ( f != NULL )
+	{
 		while ( done != 1 )
 		{
 			fgets( str1, MAX_LINE_SIZE, f );
@@ -864,7 +867,9 @@ void get_var_descr( char const *lab, char *descr, int descr_len )
 					done = 1;
 			}
 		}
-
+		
+		fclose( f );
+	}
 	descr[ j ] = '\0';
 }
 
