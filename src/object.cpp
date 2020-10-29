@@ -173,7 +173,7 @@ v[ 2 ]=variance
 v[ 3 ]=max
 v[ 4 ]=min
 
-- void write( char *lab, double value, int time )
+- void write( char *lab, double value, int time, int lag )
 Assign the value value to the variable lab, resulting as if this was the
 value at gloabal time time. It does not make a search looking for lab. Lab
 must be a variable of this.
@@ -3304,8 +3304,15 @@ double object::write( char const *lab, double value, int time, int lag )
 		cv->val[ eff_lag ] = value;
 		cv->last_update = time;
 		
-		if ( ( cv->save || cv->savei ) && eff_time >= cv->start && eff_time <= cv->end )
-			cv->data[ eff_time - cv->start ] = value;
+		if ( cv->save || cv->savei )
+		{
+			if ( eff_time >= cv->start && eff_time <= cv->end )
+				cv->data[ eff_time - cv->start ] = value;
+			else
+				// handle special initial case
+				if ( time == 0 && cv->start == 0 )
+					cv->data[ 0 ] = value;
+		}
 	}
 
 	return value;
