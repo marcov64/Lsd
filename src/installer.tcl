@@ -46,7 +46,7 @@ set linuxDefPm "apt"
 set linuxInclude [ list "/usr/include" "/usr/local/include" "/usr/include/tcl8.6" "/usr/local/include/tcl8.6" ]
 set linuxLib [ list "/usr/lib" "/usr/local/lib" "/usr/lib/x86_64-linux-gnu" "/usr/local/lib/x86_64-linux-gnu" ]
 set linuxMkFile "makefile-linux"
-set	linuxOptFile "$LsdSrc/system_options-linux.txt"
+set linuxOptFile "system_options-linux.txt"
 
 set inclPkg	[ list	zlib	tcl			tk			]
 set include	[ list	zlib.h	tcl.h		tk.h		]
@@ -637,7 +637,7 @@ if { [ string equal $CurPlatform linux ] && [ llength $linuxPkgMiss ] > 0 } {
 		}
 	
 		ttk::messageBox -parent "" -type ok -title "Package Installation" -icon info -message "User interaction required" -detail "The next step of installation will try to install missing required packages. The user must confirm the installation.\n\nPlease use the same terminal window where this installer was launched. Do not close or interrupt it before installation is complete."
-		set wait [ waitbox .wait "Installing..." "Installing packages\n${lpack}.\n\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. go to the installer terminal window\n2. enter your passord\n3. confirm installation" 1 "" ]
+		set wait [ waitbox .wait "Installing..." "Installing packages\n${lpack}.\n\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. go to the installer terminal window\n2. enter your password if asked\n3. confirm installation" 1 "" ]
 
 		set scpt [ open "/tmp/install_packages.sh" w ]
 		puts $scpt "#!/bin/bash"
@@ -705,8 +705,8 @@ if [ string equal $CurPlatform linux ] {
 	}
 
 	# update include/libs paths in makefile-linux and system_options-linux.txt
-	set mkFile [ open "$LsdRoot/$linuxMkFile" r ]
-	set soFile [ open "$LsdRoot/$linuxOptFile" r ]
+	set mkFile [ open "$LsdRoot/$LsdSrc/$linuxMkFile" r ]
+	set soFile [ open "$LsdRoot/$LsdSrc/$linuxOptFile" r ]
 	set mk [ read $mkFile ]
 	set so [ read $soFile ]
 	close $mkFile
@@ -722,8 +722,8 @@ if [ string equal $CurPlatform linux ] {
 		set so [ sed "s|[ lindex $linuxLib 0 ]|[ lindex $pathLib 0 ]" $so ]
 	}
 
-	set mkFile [ open "$LsdRoot/$linuxMkFile" w ]
-	set soFile [ open "$LsdRoot/$linuxOptFile" w ]
+	set mkFile [ open "$LsdRoot/$LsdSrc/$linuxMkFile" w ]
+	set soFile [ open "$LsdRoot/$LsdSrc/$linuxOptFile" w ]
 	puts -nonewline $mkFile $mk
 	puts -nonewline $soFile $so
 	close $mkFile
