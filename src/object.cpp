@@ -3092,8 +3092,15 @@ double object::write( char const *lab, double value, int time, int lag )
 		cv->val[ eff_lag ] = value;
 		cv->last_update = time;
 		
-		if ( ( cv->save || cv->savei ) && eff_time >= cv->start && eff_time <= cv->end )
-			cv->data[ eff_time - cv->start ] = value;
+		if ( cv->save || cv->savei )
+		{
+			if ( eff_time >= cv->start && eff_time <= cv->end )
+				cv->data[ eff_time - cv->start ] = value;
+			else
+				// handle special initial case
+				if ( time == 0 && cv->start == 0 )
+					cv->data[ 0 ] = value;
+		}
 	}
 
 	return value;
