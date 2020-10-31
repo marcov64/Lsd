@@ -5991,21 +5991,24 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "ttk::frame $w.b" );
 
 	cmd( "ttk::frame $w.b.c" );
-
+	
 	cmd( "ttk::frame $w.b.c.case" );
+	
+	cmd( "set labWid 15; set datWid 30" );
+
 	if ( logs )
-		cmd( "ttk::label $w.b.c.case.l -text \"log(X) value:\" -width 11 -anchor e" );
+		cmd( "ttk::label $w.b.c.case.l -text \"log(X) value:\" -width $labWid -anchor e" );
 	else
-		cmd( "ttk::label $w.b.c.case.l -text \"X value:\" -width 11 -anchor e" );
-	cmd( "ttk::label $w.b.c.case.v -text \"\" -style hl.TLabel -width 20 -anchor w" );
+		cmd( "ttk::label $w.b.c.case.l -text \"X value:\" -width $labWid -anchor e" );
+	cmd( "ttk::label $w.b.c.case.v -text \"\" -style hl.TLabel -width $datWid -anchor w" );
 	cmd( "pack $w.b.c.case.l $w.b.c.case.v -side left -anchor w" );
 
 	cmd( "ttk::frame $w.b.c.y" );
 	if ( logs )
-		cmd( "ttk::label $w.b.c.y.l -text \"log(Y) value:\" -width 11 -anchor e" );
+		cmd( "ttk::label $w.b.c.y.l -text \"log(Y) value:\" -width $labWid -anchor e" );
 	else
-		cmd( "ttk::label $w.b.c.y.l -text \"Y value:\" -width 11 -anchor e" );
-	cmd( "ttk::label $w.b.c.y.v1 -text \"\" -style hl.TLabel -width 20 -anchor w" );
+		cmd( "ttk::label $w.b.c.y.l -text \"Y value:\" -width $labWid -anchor e" );
+	cmd( "ttk::label $w.b.c.y.v1 -text \"\" -style hl.TLabel -width $datWid -anchor w" );
 	cmd( "pack $w.b.c.y.l $w.b.c.y.v1 -side left -anchor w" );
 
 	cmd( "pack $w.b.c.case $w.b.c.y -anchor w" );
@@ -8490,12 +8493,14 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 						else
 							y[ k ] = yVal;
 							
-						// constrain to canvas virtual limits
-						y[ k ] = min( max( y[ k ], cminy ), cmaxy );
-						// scale to the canvas physical y range
-						y[ k ] = round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
-						// save to visual vertical line buffer
-						pdataY[ k ][ j ] = ( int ) round( y[ k ] );
+						if ( line_point == 1 || ( y[ k ] >= cminy && y[ k ] <= cmaxy ) )
+						{
+							// constrain to canvas virtual limits
+							y[ k ] = min( max( y[ k ], cminy ), cmaxy );
+							// scale to the canvas physical y range and save to visual vertical line buffer
+							pdataY[ k ][ j ] = ( int ) round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
+						}
+						
 						// restart averaging
 						y[ k ] = 0;
 					}
@@ -8508,10 +8513,12 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 							y[ k ] = yVal * h;			// suppose from the beginning of x1
 						else
 						{	// just plot as usual
-							y[ k ] = yVal;
-							y[ k ] = min( max( y[ k ], cminy ), cmaxy );
-							y[ k ] = round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
-							pdataY[ k ][ j ] = ( int ) round( y[ k ] );
+							if ( line_point == 1 || ( yVal >= cminy && yVal <= cmaxy ) )
+							{
+								y[ k ] = min( max( yVal, cminy ), cmaxy );
+								pdataY[ k ][ j ] = ( int ) round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
+							}
+							
 							y[ k ] = 0;
 						}
 					}
@@ -9058,26 +9065,26 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	
 	// adjust horizontal text space usage
 	if ( y2on )							
-		cmd( "set datWid 26; if [ string equal $CurPlatform windows ] { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
+		cmd( "set labWid 15; set datWid 30; if [ string equal $CurPlatform windows ] { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
 	else
-		cmd( "set datWid 20; if [ string equal $CurPlatform windows ] { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
+		cmd( "set labWid 15; set datWid 25; if [ string equal $CurPlatform windows ] { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
 	
 	// adjust vertical text adjustment
 	cmd( "if [ string equal $CurPlatform linux ] { set pad3 0 } { if [ string equal $CurPlatform mac ] { set pad3 3 } { set pad3 -3 } }" );
 	
 	cmd( "ttk::frame $w.b.c.case" );
-	cmd( "ttk::label $w.b.c.case.l -text \"%s:\" -width 11 -anchor e", txtCase );
+	cmd( "ttk::label $w.b.c.case.l -text \"%s:\" -width $labWid -anchor e", txtCase );
 	cmd( "ttk::label $w.b.c.case.v -text \"\" -style hl.TLabel -width $datWid -anchor w" );
 	cmd( "pack $w.b.c.case.l $w.b.c.case.v -side left -anchor w" );
 
 	cmd( "ttk::frame $w.b.c.y" );
-	cmd( "ttk::label $w.b.c.y.l -text \"%s:\" -width 11 -anchor e", txtValue );
+	cmd( "ttk::label $w.b.c.y.l -text \"%s:\" -width $labWid -anchor e", txtValue );
 	cmd( "ttk::label $w.b.c.y.v1 -text \"\" -style hl.TLabel -width [ expr $datWid / 2 ] -anchor w" );
 	cmd( "ttk::label $w.b.c.y.v2 -text \"\" -style hl.TLabel -width [ expr $datWid / 2 ] -anchor w" );
 	cmd( "pack $w.b.c.y.l $w.b.c.y.v1 $w.b.c.y.v2 -side left -anchor w" );
 
 	cmd( "ttk::frame $w.b.c.var" );
-	cmd( "ttk::label $w.b.c.var.l -text \"%s:\" -width 11 -anchor e", txtLine );
+	cmd( "ttk::label $w.b.c.var.l -text \"%s:\" -width $labWid -anchor e", txtLine );
 	cmd( "ttk::label $w.b.c.var.v -text \"\" -style hl.TLabel -width $datWid -anchor w" );
 	cmd( "pack $w.b.c.var.l $w.b.c.var.v -side left -anchor w" );
 
