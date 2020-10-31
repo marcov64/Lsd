@@ -8056,13 +8056,15 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 							y[ k ] /= h;
 						else
 							y[ k ] = yVal;
-							
-						// constrain to canvas virtual limits
-						y[ k ] = min( max( y[ k ], cminy ), cmaxy );
-						// scale to the canvas physical y range
-						y[ k ] = round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
-						// save to visual vertical line buffer
-						pdataY[ k ][ j ] = ( int ) round( y[ k ] );
+
+						if ( line_point == 1 || ( y[ k ] >= cminy && y[ k ] <= cmaxy ) )
+						{
+							// constrain to canvas virtual limits
+							y[ k ] = min( max( y[ k ], cminy ), cmaxy );
+							// scale to the canvas physical y range and save to visual vertical line buffer
+							pdataY[ k ][ j ] = ( int ) round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
+						}
+						
 						// restart averaging
 						y[ k ] = 0;
 					}
@@ -8075,10 +8077,12 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 							y[ k ] = yVal * h;			// suppose from the beginning of x1
 						else
 						{	// just plot as usual
-							y[ k ] = yVal;
-							y[ k ] = min( max( y[ k ], cminy ), cmaxy );
-							y[ k ] = round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
-							pdataY[ k ][ j ] = ( int ) round( y[ k ] );
+							if ( line_point == 1 || ( yVal >= cminy && yVal <= cmaxy ) )
+							{
+								y[ k ] = min( max( yVal, cminy ), cmaxy );
+								pdataY[ k ][ j ] = ( int ) round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
+							}
+							
 							y[ k ] = 0;
 						}
 					}
