@@ -8360,7 +8360,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 			
 		case CRSSECT:
 			nLine = *end;
-			iniCase = 1;
+			iniCase = 0;
 			endCase = nv - 1;
 			break;
 			
@@ -8459,7 +8459,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 					if ( data[ i ] == NULL )
 						continue;
 					
-					yVal = data[ i ][ k - start[ i ] ];
+					yVal = data[ i ][ k ];
 					tOk = true;
 					
 					break;
