@@ -336,6 +336,7 @@ void shift_desc( int direction, char *dlab, object *r );
 void shift_var( int direction, char *vlab, object *r );
 void show_cells( object *r, char *lab );
 void show_debug( object *n );
+void show_descr( char *lab, int *choice );
 void show_eq( char *lab, int *choice );
 void show_graph( object *t );
 void show_initial( object *n );

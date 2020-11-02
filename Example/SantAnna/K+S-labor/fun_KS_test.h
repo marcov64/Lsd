@@ -1137,6 +1137,7 @@ if ( T == v[1] )
 }
 
 double Lscale = VS( LABSUPL1, "Lscale" );		// labor scale
+double eta = VS( CONSECL1, "eta" );				// machine technical life
 double iota = VS( CONSECL1, "iota" );			// production slack
 double m2 = VS( CONSECL1, "m2" );				// machine scale
 double mu20 = VS( CONSECL1, "mu20" );			// initial mark-up
@@ -1196,7 +1197,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 		if ( VS( cur1, "_IDvint" ) < h )
 			IDerr.push_back( cur1 );
 		
-		if ( VS( cur1, "_tVint" ) < h || VS( cur1, "_tVint" ) > T )
+		if ( VS( cur1, "_tVint" ) < h - eta - 1 || VS( cur1, "_tVint" ) > T )
 			tVintErr.push_back( cur1 );
 		
 		if ( i < 0 || i > _L2 )

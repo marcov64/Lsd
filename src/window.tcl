@@ -1229,7 +1229,7 @@ proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
 	bind $w <F1> "$w.$fr.r2.help invoke"
 	pack $w.$fr.r1.x $w.$fr.r1.y -padx $butSpc -side left
 	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.cancel -padx $butSpc -side left
-	pack $w.$fr.r1 -pady $butSpc -anchor w
+	pack $w.$fr.r1 -pady $butSpc -anchor e
 	pack $w.$fr.r2 -pady $butSpc -anchor w
 	pack $w.$fr -padx $butPad -pady $butPad -side right
 }
@@ -1271,7 +1271,7 @@ proc XYZokhelpcancel { w fr nameX nameY nameZ comX comY comZ comOk comHelp comCa
 	bind $w <F1> "$w.$fr.r2.help invoke"
 	pack $w.$fr.r1.x $w.$fr.r1.y $w.$fr.r1.z -padx $butSpc -side left
 	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.cancel -padx $butSpc -side left
-	pack $w.$fr.r1 -pady $butSpc -anchor w
+	pack $w.$fr.r1 -pady $butSpc -anchor e
 	pack $w.$fr.r2 -pady $butSpc -anchor w
 	pack $w.$fr -padx $butPad -pady $butPad -side right
 }

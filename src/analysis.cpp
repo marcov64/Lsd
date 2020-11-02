@@ -275,6 +275,8 @@ cmd( "bind $f.v <Button-2> { .da.vars.lb.f.v selection clear 0 end;.da.vars.lb.f
 cmd( "bind $f.v <Button-3> { event generate .da.vars.lb.f.v <Button-2> -x %%x -y %%y }" );
 cmd( "bind $f.v <Shift-Button-2> { .da.vars.lb.f.v selection clear 0 end;.da.vars.lb.f.v selection set @%%x,%%y; set res [ selection get ]; set choice 16 }" );
 cmd( "bind $f.v <Shift-Button-3> { event generate .da.vars.lb.f.v <Shift-Button-2> -x %%x -y %%y }" );
+cmd( "bind $f.v <Control-Button-2> { .da.vars.lb.f.v selection clear 0 end;.da.vars.lb.f.v selection set @%%x,%%y; set res [ selection get ]; set choice 19 }" );
+cmd( "bind $f.v <Control-Button-3> { event generate .da.vars.lb.f.v <Control-Button-2> -x %%x -y %%y }" );
 
 // add time series in memory to listbox
 cmd( "set DaModElem [ list ]" );
@@ -346,8 +348,12 @@ cmd( "bind $f.v <KeyRelease> { \
 		} \
 	}" );
 cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.ch.f.v <BackSpace> }" );
-cmd( "bind $f.v <Button-2> {.da.vars.ch.f.v selection clear 0 end;.da.vars.ch.f.v selection set @%%x,%%y; set res [selection get]; set choice 33}" );
+cmd( "bind $f.v <Button-2> { .da.vars.ch.f.v selection clear 0 end;.da.vars.ch.f.v selection set @%%x,%%y; set res [ selection get ]; set choice 33 }" );
 cmd( "bind $f.v <Button-3> { event generate .da.vars.ch.f.v <Button-2> -x %%x -y %%y }" );
+cmd( "bind $f.v <Shift-Button-2> { .da.vars.ch.f.v selection clear 0 end;.da.vars.ch.f.v selection set @%%x,%%y; set res [ selection get ]; set choice 16 }" );
+cmd( "bind $f.v <Shift-Button-3> { event generate .da.vars.ch.f.v <Shift-Button-2> -x %%x -y %%y }" );
+cmd( "bind $f.v <Control-Button-2> { .da.vars.ch.f.v selection clear 0 end;.da.vars.ch.f.v selection set @%%x,%%y; set res [ selection get ]; set choice 19 }" );
+cmd( "bind $f.v <Control-Button-3> { event generate .da.vars.ch.f.v <Control-Button-2> -x %%x -y %%y }" );
 
 cmd( "ttk::label .da.vars.ch.sel -text \"Series = [ .da.vars.ch.f.v size ]\"" );
 cmd( "pack .da.vars.ch.sel" );
@@ -814,14 +820,24 @@ while ( true )
 			break;
 		   
 		   
-		// show the equation for the selected variable
+		// show the equation for the selected element
 		case 16:
-			cmd( "set a [split $res]; set b [lindex $a 0]" );
+			cmd( "set a [ split $res ]; set b [ lindex $a 0 ]" );
 			app = ( char * ) Tcl_GetVar( inter, "b", 0 );
 			
 			*choice = 2;	// point .da window as parent for the following window
-			
 			show_eq( app, choice );
+			
+			break;
+
+
+		// show the description for the selected element
+		case 19:
+			cmd( "set a [ split $res ]; set b [ lindex $a 0 ]" );
+			app = ( char * ) Tcl_GetVar( inter, "b", 0 );
+			
+			*choice = 2;	// point .da window as parent for the following window
+			show_descr( app, choice );
 			
 			break;
 
@@ -1196,7 +1212,7 @@ while ( true )
 			cmd( "pack .da.a.c.o .da.a.c.v -anchor w -side left -ipadx 5" );
 			cmd( "pack .da.a.tit .da.a.q .da.a.c -expand yes -fill x -padx 5 -pady 5" );
 
-			cmd( "okhelpcancel .da.a b { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
+			cmd( "XYokhelpcancel .da.a b Description Equation { set choice 3 } { set choice 4 } { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
 			cmd( "showtop .da.a topleftW 0 0" );
 			cmd( "mousewarpto .da.a.b.ok" );
 
@@ -1211,6 +1227,22 @@ while ( true )
 			if ( *choice == 2 )
 			{
 				cmd( "destroytop .da.a" );
+				break;
+			}
+			
+			if ( *choice == 3 )
+			{
+				cmd( "destroytop .da.a" );
+				*choice = 2;	// point .da window as parent for the following window
+				show_descr( ( char * ) Tcl_GetVar( inter, "b", 0 ), choice );
+				break;
+			}
+
+			if ( *choice == 4 )
+			{
+				cmd( "destroytop .da.a" );
+				*choice = 2;	// point .da window as parent for the following window
+				show_eq( ( char * ) Tcl_GetVar( inter, "b", 0 ), choice );
 				break;
 			}
 
@@ -1628,7 +1660,7 @@ while ( true )
 			cmd( "pack .da.a.s.b" );
 			cmd( "pack .da.a.tit .da.a.q .da.a.c .da.a.s -expand yes -fill x -padx 5 -pady 5" );
 
-			cmd( "okhelpcancel .da.a b { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
+			cmd( "XYokhelpcancel .da.a b Description Equation { set choice 3 } { set choice 4 } { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
 			cmd( "showtop .da.a topleftW 0 0" );
 			cmd( "mousewarpto .da.a.b.ok" );
 
@@ -1643,6 +1675,22 @@ while ( true )
 			if ( *choice == 2 )
 			{
 				cmd( "destroytop .da.a" );
+				break;
+			}
+
+			if ( *choice == 3 )
+			{
+				cmd( "destroytop .da.a" );
+				*choice = 2;	// point .da window as parent for the following window
+				show_descr( ( char * ) Tcl_GetVar( inter, "b", 0 ), choice );
+				break;
+			}
+
+			if ( *choice == 4 )
+			{
+				cmd( "destroytop .da.a" );
+				*choice = 2;	// point .da window as parent for the following window
+				show_eq( ( char * ) Tcl_GetVar( inter, "b", 0 ), choice );
 				break;
 			}
 
@@ -6584,20 +6632,24 @@ void histograms( int *choice )
 		if ( ! is_nan( data[ i - start ] ) && is_finite( data[ i - start ] ) )
 			++j;
 
+	cmd( "set bidi %d", j < 25 ? j : 25 );
+	cmd( "set norm 0" );
+	cmd( "set stat 0" );
+	
 	cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -text \"Number of classes/bins\"" );
-	cmd( "set bidi %d", j < 25 ? j : 25 );
-	cmd( "ttk::entry .da.s.i.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::spinbox .da.s.i.e -width 5 -from $minc -to $maxc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= $minc && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.i.e insert 0 $bidi" ); 
 	cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
 
-	cmd( "set norm 0" );
-	cmd( "ttk::checkbutton .da.s.norm -text \"Fit a Normal\" -variable norm" );
-	cmd( "set stat 0" );
-	cmd( "ttk::checkbutton .da.s.st -text \"Show statistics\" -variable stat" );
-	cmd( "pack .da.s.i .da.s.norm .da.s.st -pady 5" );
+	cmd( "ttk::frame .da.s.o" );
+	cmd( "ttk::checkbutton .da.s.o.norm -text \"Fit a Normal\" -variable norm" );
+	cmd( "ttk::checkbutton .da.s.o.st -text \"Show statistics\" -variable stat" );
+	cmd( "pack .da.s.o.norm .da.s.o.st -anchor w" );
+
+	cmd( "pack .da.s.i .da.s.o -pady 10" );
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#histogram } { set choice 2 }" );
 
@@ -6825,27 +6877,31 @@ void histograms_cs( int *choice )
 			data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "histogram" );
 	}
 
+	cmd( "set time %d", end[ 0 ] );
+	cmd( "set bidi %d", nv < 25 ? nv : 25 );
+	cmd( "set norm 0" );
+	cmd( "set stat 0" );
+	
 	cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.t" );
 	cmd( "ttk::label .da.s.t.l -text \"Cross-section time step\"" );
-	cmd( "set time %d", end[ 0 ] );
-	cmd( "ttk::entry .da.s.t.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $numc } { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::spinbox .da.s.t.e -width 5 -from 0 -to $numc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= $numc } { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.t.e insert 0 $time" ); 
 	cmd( "pack .da.s.t.l .da.s.t.e -side left -padx 2" );
 
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -text \"Number of classes/bins\"" );
-	cmd( "set bidi %d", nv < 25 ? nv : 25 );
-	cmd( "ttk::entry .da.s.i.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center", nv, nv );
 	cmd( ".da.s.i.e insert 0 $bidi" ); 
 	cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
 
-	cmd( "set norm 0" );
-	cmd( "ttk::checkbutton .da.s.norm -text \"Fit a Normal\" -variable norm" );
-	cmd( "set stat 0" );
-	cmd( "ttk::checkbutton .da.s.st -text \"Show statistics\" -variable stat" );
-	cmd( "pack .da.s.t .da.s.i .da.s.norm .da.s.st -pady 5" );
+	cmd( "ttk::frame .da.s.o" );
+	cmd( "ttk::checkbutton .da.s.o.norm -text \"Fit a Normal\" -variable norm" );
+	cmd( "ttk::checkbutton .da.s.o.st -text \"Show statistics\" -variable stat" );
+	cmd( "pack .da.s.o.norm .da.s.o.st -anchor w" );
+	
+	cmd( "pack .da.s.t .da.s.i .da.s.o -pady 10" );
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#histogram } { set choice 2 }" );
 

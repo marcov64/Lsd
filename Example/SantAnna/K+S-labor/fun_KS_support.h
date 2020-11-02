@@ -140,7 +140,7 @@ void send_order( object *firm, double nMach )
 
 void add_vintage( object *firm, double nMach, bool newInd )
 {
-	double _Avint, _pVint;
+	double _Avint, _pVint, _tVint;
 	object *vint, *suppl, *wrk;
 	
 	// create object, only recalculate in t if new industry
@@ -155,6 +155,13 @@ void add_vintage( object *firm, double nMach, bool newInd )
 	suppl = PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) );// pointer to supplier
 	_Avint = VS( suppl, "_Atau" );
 	_pVint = VS( suppl, "_p1" );
+	
+	// distribute machine ages at t=1 to spread initial technical substitution
+	if ( T == 1 )
+		_tVint = T - ( uniform_int( 1, VS( PARENTS( firm ), "eta" ) ) + 1 );
+	else
+		_tVint = T;
+		
 	WRITES( vint, "_IDvint", VNT( T, VS( suppl, "_ID1" ) ) );// vintage ID
 	WRITES( vint, "_Avint", _Avint );			// vintage notional productivity
 	WRITES( vint, "_AeVint", _Avint );			// vintage effective product.

@@ -2009,7 +2009,7 @@ case 7:
 	sscanf( lab1, "%99s", lab_old );
 	cv = r->search_var( NULL, lab_old );
 
-	cur_descr=search_description( lab_old );
+	cur_descr = search_description( lab_old );
 	if ( cur_descr == NULL )
 	{
 		if ( cv->param == 0 )
@@ -2019,7 +2019,7 @@ case 7:
 		if ( cv->param == 2 )
 			add_description( lab_old, "Function", "(no description available)" );  
 		plog( "\nWarning: description for '%s' not found. New one created.", "", lab_old );
-		cur_descr=search_description( lab_old );
+		cur_descr = search_description( lab_old );
 	} 
 
 	Tcl_LinkVar( inter, "done", ( char * ) &done, TCL_LINK_INT );
