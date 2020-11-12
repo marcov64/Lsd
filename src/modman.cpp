@@ -1404,7 +1404,7 @@ int lsdmain( int argn, char **argv )
 			cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f $dirname/$filename -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $dirname/$filename:$line\nrun\n\" }" );
 			cmd( "catch { set f [ open break.$breakExt w ]; puts $f $breakTxt; close $f }" );
 
-			cmd( "if [ string equal -nocase $DbgExe lldb ] { set cmdbreak \"-sbreak.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
+			cmd( "if [ string equal -nocase $DbgExe lldb ] { set cmdbreak \"-s break.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
 		}
 		else
 			cmd( "if [ string equal -nocase $DbgExe gdb ] { set cmdbreak \"--args\" } { set cmdbreak \"\" }" );
