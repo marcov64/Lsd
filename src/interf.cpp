@@ -2911,10 +2911,10 @@ case 96:
 
 	cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp browser.html#updating } { set choice 2 }" );
 
-	cmd( "bind $T.f.c.e2 <KeyPress-Return> {focus $T.f.a.e; $T.f.a.e selection range 0 end}" );
-	cmd( "bind $T.f.a.e <KeyPress-Return> {focus $T.f.b.e1; $T.f.b.e1 selection range 0 end}" );
-	cmd( "bind $T.f.b.e1 <KeyPress-Return> {focus $T.f.d.e2; $T.f.d.e2 selection range 0 end}" );
-	cmd( "bind $T.f.d.e2 <KeyPress-Return> {focus $T.f.e.e2; $T.f.e.e2 selection range 0 end}" );
+	cmd( "bind $T.f.c.e2 <KeyPress-Return> { focus $T.f.a.e; $T.f.a.e selection range 0 end }" );
+	cmd( "bind $T.f.a.e <KeyPress-Return> { focus $T.f.b.e1; $T.f.b.e1 selection range 0 end }" );
+	cmd( "bind $T.f.b.e1 <KeyPress-Return> { focus $T.f.d.e2; $T.f.d.e2 selection range 0 end }" );
+	cmd( "bind $T.f.d.e2 <KeyPress-Return> { focus $T.f.e.e2; $T.f.e.e2 selection range 0 end }" );
 	
 	cmd( "showtop $T" );
 	cmd( "$T.f.c.e2 selection range 0 end" );
@@ -4122,7 +4122,7 @@ case 55:
 	{
 		for ( i = 0, cv1 = cv->up->v; cv1 != cv; cv1 = cv1->next, ++i );
 		cmd( "set listfocus 1; set itemfocus %d", i );
-		redrawRoot = true;			// request browser redraw
+		redrawRoot = redrawStruc = true;			// request browser redraw
 		return cv->up;
 	}
 	else
@@ -4391,7 +4391,7 @@ case 60:
 	shift_desc( -1, lab_old, r );
 
 	unsaved_change( true );		// signal unsaved change
-	redrawRoot = true;			// request browser redraw
+	redrawRoot = redrawStruc = true;	// request browser redraw
 
 break;
 
@@ -4407,7 +4407,7 @@ case 61:
 	shift_desc( 1, lab_old, r );
 
 	unsaved_change( true );		// signal unsaved change
-	redrawRoot = true;			// request browser redraw
+	redrawRoot = redrawStruc = true;	// request browser redraw
 
 break;
 
