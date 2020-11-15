@@ -584,11 +584,11 @@ object *object::search_err( char const *lab, bool no_search, char const *errmsg 
 	if ( cur == NULL )
 	{	// check if it is not a zero-instance object
 		cur = blueprint->search( lab );				// current object in blueprint
-		if ( cur == NULL )
+		if ( cur == NULL || ( no_search && strcmp( cur->up->label, this->label ) ) )
 		{
-			sprintf( msg, "object '%s' is missing for %s", lab, errmsg );
+			sprintf( msg, "object '%s' is missing for %s%s", lab, errmsg, no_search && cur != NULL ? " (NO_SEARCH enabled!)" : "" );
 			error_hard( msg, "object not found",
-						"create variable or parameter in model structure" );
+						"create object in model structure" );
 		}
 
 		if ( no_zero_instance )
