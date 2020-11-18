@@ -675,7 +675,9 @@ void run( void )
 	for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
 	{
 		running = true;		// signal simulation is running
-		cur_sim = i;	 	// Update the global variable holding information on the current run in the set of runs
+		cur_sim = i;	 	// update the current run in the set of runs
+		actual_steps = 0;	// no steps performed yet
+
 		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed (sorry Nadia!)
 
 #ifndef NO_WINDOW
@@ -758,7 +760,6 @@ void run( void )
 		on_bar = false;
 		one_dot = true;
 		done_in = 0;
-		actual_steps = 0;
 		perc_done = 0;
 		last_done = -1;
 		strcpy( bar_done, "" );

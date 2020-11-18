@@ -321,6 +321,7 @@ bridge::~bridge( void )
 	for ( cur = head; cur != NULL; cur = cur1 )
 	{
 		cur1 = cur->next;
+		collect_cemetery( cur );
 		cur->empty( );
 		delete cur;
 	}

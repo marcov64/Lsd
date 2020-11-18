@@ -1105,7 +1105,7 @@ void collect_cemetery( object *o )
 		nv = cv->next;						// pointer to next variable
 		
 		// need to save?
-		if ( running && ( cv->save == true || cv->savei == true ) )
+		if ( ( cv->save == true || cv->savei == true ) && running && actual_steps > 0 )
 		{
 			if ( cv->savei )
 				save_single( cv );			// update file
