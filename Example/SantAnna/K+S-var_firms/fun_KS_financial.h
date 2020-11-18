@@ -76,7 +76,7 @@ v[0] = CURRENT;											// last period rate
 v[1] = V( "rAdj" );										// rate adjustment step
 
 // Taylor rule
-v[2] = V( "rT" ) + V( "gammaPi" ) * ( VLS( CONSECL1, "dCPI", 1 ) - V( "piT" ) ) + 
+v[2] = V( "rT" ) + V( "gammaPi" ) * ( VLS( CONSECL1, "dCPIb", 1 ) - V( "piT" ) ) + 
 	   V( "gammaU" ) * ( V( "Ut" ) - VLS( LABSUPL1, "U", 1 ) );
 
 if ( abs( v[2] - v[0] ) > v[1] )						// smooth rate adjustment
