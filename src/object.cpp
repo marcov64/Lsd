@@ -324,6 +324,7 @@ bridge::~bridge( void )
 	for ( cur = head; cur != NULL; cur = cur1 )
 	{
 		cur1 = cur->next;
+		cur->collect_cemetery( );
 		cur->empty( );
 		delete cur;
 	}
@@ -1881,6 +1882,7 @@ void object::empty( void )
 	bridge *cb, *cb1;
 	variable *cv, *cv1;
 	
+	// remove variables if cemetery collection was not called before
 	for ( cv = v; cv != NULL; cv = cv1 )
 	{
 		cv1 = cv->next;
@@ -1891,10 +1893,10 @@ void object::empty( void )
 	v = NULL;
 	v_map.clear( );
 
-	for ( cb = b; cb != NULL; cb = cb1 )	// delete sons
+	for ( cb = b; cb != NULL; cb = cb1 )	// delete son bridges
 	{
 		cb1 = cb->next;
-		delete cb;
+		delete cb;				// bridge destructor delete the rest
 	}
 
 	b = NULL;
@@ -1948,6 +1950,7 @@ void object::collect_cemetery( void )
 	}
 	
 	v = NULL;
+	v_map.clear( );
 }
 
 
