@@ -12,7 +12,7 @@
 
 EQUATION( "_Atau" )
 /*
-Productivity of the new vintage of machines when employed for production.
+Labor productivity of new vintage of machine when employed for production
 Also updates '_Btau'.
 */
 
@@ -333,26 +333,19 @@ RESULT( ( 1 + VS( PARENT, "mu1" ) ) * V( "_c1" ) )
 
 /*============================ SUPPORT EQUATIONS =============================*/
 
+EQUATION( "_BC" )
+/*
+Number of buying clients for firm in capital-good sector
+*/
+RESULT( COUNT_CND( "Cli", "_tOrd", "==", T ) )
+
+
 EQUATION( "_D1" )
 /*
 Potential demand (orders) received by a firm in capital-good sector
 */
-
 VS( CONSECL2, "Id" );							// make sure all orders are sent
-
-j = v[0] = 0;									// machine/active customer count
-CYCLE( cur, "Cli" )
-{
-	if ( VS( cur, "_tOrd" ) == T )				// order in this period?
-	{
-		v[0] += VS( cur, "_nOrd" );
-		++j;
-	}
-}
-
-WRITE( "_BC", j );
-
-RESULT( v[0] )
+RESULT( V( "_BC" ) > 0 ? SUM_CND( "_nOrd", "_tOrd", "==", T ) : 0 )
 
 
 EQUATION( "_HC" )
@@ -421,7 +414,8 @@ EQUATION( "_L1rd" )
 /*
 R&D labor employed by firm in capital-good sector
 */
-RESULT( V( "_L1dRD" ) * VS( PARENT, "L1rd" ) / VS( PARENT, "L1dRD" ) )
+v[1] = VS( PARENT, "L1dRD" );
+RESULT( v[1] > 0 ? ceil( V( "_L1dRD" ) * VS( PARENT, "L1rd" ) / v[1] ) : 0 )
 
 
 EQUATION( "_Pi1" )
@@ -447,7 +441,8 @@ if ( v[1] >= v[2] )
 v[3] = V( "_L1rd" );							// effective R&D workers
 v[4] = V( "_L1dRD" );							// desired R&D workers
 
-v[5] = 1 - ( v[1] - v[3] ) / ( v[2] - v[4] );	// adjustment factor
+// adjustment factor
+v[5] = v[2] > v[4] ? 1 - ( v[1] - v[3] ) / ( v[2] - v[4] ) : 1;	
 
 // adjust all pending orders, supplying at least one machine
 CYCLE( cur, "Cli" )
@@ -505,15 +500,9 @@ RESULT( max( V( "_Deb1max" ) - V( "_Deb1" ), 0 ) )
 
 /*============================= DUMMY EQUATIONS ==============================*/
 
-EQUATION_DUMMY( "_BC", "" )
-/*
-Number of buying clients for firm in capital-good sector
-Updated in '_D1'
-*/
-
 EQUATION_DUMMY( "_Btau", "" )
 /*
-Productivity of labor in producing the new vintage of machines
+Labor productivity of new vintage of machine when employed for production
 Updated in '_Atau'
 */
 

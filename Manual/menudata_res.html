@@ -1063,7 +1063,7 @@ div.WordSection1
 
 </head>
 
-<body lang=PT-BR link=blue vlink=purple>
+<body lang=PT-BR link=blue vlink=purple style='word-wrap:break-word'>
 
 <div class=WordSection1>
 
@@ -1149,8 +1149,7 @@ like R, which are fully supported by LSD.</span></p>
 
 <h2><span lang=EN-US>Quick reference</span></h2>
 
-<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span lang=EN-US>&nbsp;
-</span></p>
+<p class=MsoNormal style='margin:0cm'><span lang=EN-US>&nbsp; </span></p>
 
 <div align=center>
 
@@ -1684,7 +1683,11 @@ while keeping the </span><span class=Cdigo><span lang=EN-US>Shift</span></span><
 lang=EN-US> key pressed opens a window showing the <a
 href="LSD_faqs.html#equation">Equation</a> for the associated <a
 href="LSD_faqs.html#variable">Variable</a>, if available. This operation has no
-effect on series associated with <a href="LSD_faqs.html#parameter">Parameters</a>.</span></p>
+effect on series associated with <a href="LSD_faqs.html#parameter">Parameters</a>.
+Clicking with the right button while keeping the </span><span class=Cdigo><span
+lang=EN-US>Ctrl</span></span><span lang=EN-US> key pressed opens a window
+showing the description of the associated Variable or Parameter, if available.
+These options can be also accessed in the context menu (right click).</span></p>
 
 <p class=MsoNormal><a name=summary></a><span lang=EN-US>Below the list box
 there is the indicator </span><span class=Cdigo><span lang=EN-US>Series = XX</span></span><span
@@ -2080,11 +2083,11 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><span class=Cdigo><b><span lang=EN-US>Existing unsaved element</span></b></span><span
 lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+B</span></span><span
 lang=EN-US>): include the values from elements not <a
-href="browser.html#changeelement">marked for saving</a> but still in the
-computer memory. This includes <a href="LSD_faqs.html#parameter">Parameters</a>
-(single last values) and <a href="LSD_faqs.html#variable">Variables</a> (last
-and <a href="browser.html#change_nature">configured lagged values</a>). All
-values are presented at the time of the <a href="LSD_faqs.html#simulationrun">last
+href="browser.html#changeelement">marked for saving</a> but still in the computer
+memory. This includes <a href="LSD_faqs.html#parameter">Parameters</a> (single
+last values) and <a href="LSD_faqs.html#variable">Variables</a> (last and <a
+href="browser.html#change_nature">configured lagged values</a>). All values are
+presented at the time of the <a href="LSD_faqs.html#simulationrun">last
 update/computation</a>. Not changed Parameters are presented at time 0 (zero),
 which requires the explicit <a href="#xscaling">selection of the case</a> (0)
 to be shown. Single period elements are plotted as points, adjusting the <a
@@ -2143,9 +2146,9 @@ all the time steps chosen, according to the order in the <a
 href="#_Series_selected">Series selected</a> list box.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The new series can be computed as the
-average, sum, product, inverse (1/x), count, maximum, minimum, variance,
-standard deviation and confidence interval (at the specified confidence level)
-of the series. Select the desired type accordingly.</span></p>
+average, sum, product, inverse (1/x), count, maximum, minimum, variance, standard
+deviation and confidence interval (at the specified confidence level) of the
+series. Select the desired type accordingly.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>Count</span></span><span lang=EN-US> option produces a maximum value
@@ -2206,9 +2209,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US>: use the arithmetic average of the defined past period (t, t - 1,…,
 t - (p – 1), p is the selected period) to define every time step of each time
 series being created (one for each of the series in the <a
-href="#_Series_selected">Series selected</a> list box). By construction, the
-created time series are back-shifted in time with regards to the original
-series.</span></p>
+href="#_Series_selected">Series selected</a> list box). By construction, the created
+time series are back-shifted in time with regards to the original series.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><a name=empty></a><a
@@ -2257,7 +2259,7 @@ indexes</a>. This command is helpful when the user needs to operate on many
 series with the same name.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=225 height=356 src="image/add_batch.png"></span></p>
+border=0 width=214 height=361 src="image/add_batch.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>There are four possible criteria for
 selecting the time series:</span></p>
@@ -2307,6 +2309,13 @@ lang=EN-US>Case</span></span><span lang=EN-US>). The user must also indicate
 the name of the other series (</span><span class=Cdigo><span lang=EN-US>Label</span></span><span
 lang=EN-US>), a logical criterion, and the </span><span class=Cdigo><span
 lang=EN-US>Comparison value</span></span><span lang=EN-US> to be used. </span></p>
+
+<p class=MsoNormal><span lang=EN-US>Additionally, this dialog box offers
+buttons for accessing the Equation code, for Variables, and the textual
+description, if available. There are also mouse shortcuts for these commands: </span><span
+class=Cdigo><span lang=EN-US>Ctrl+Right Button</span></span><span lang=EN-US>
+(Equation) and </span><span class=Cdigo><span lang=EN-US>Shift+Right Button</span></span><span
+lang=EN-US> (Description).</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -2419,12 +2428,12 @@ First series in Y2 axis</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>Check the </span><span class=Cdigo><span
 lang=EN-US>Y2</span></span><span lang=EN-US> </span><span class=Cdigo><span
-lang=EN-US>axis</span></span><span lang=EN-US> option to enable the secondary vertical
-axis scale (Y2) when <a href="#ts_cs">plotting time series</a> on the right
-side of the <a href="#graph">plot window</a>. In this case, some of the series
-in the <a href="#_Series_selected">Series selected</a> list box will be plotted
-along the primary vertical scale (Y), while others (see next) will use the
-secondary one (Y2). This option is ignored for <a href="#ts_cs">cross-section
+lang=EN-US>axis</span></span><span lang=EN-US> option to enable the secondary
+vertical axis scale (Y2) when <a href="#ts_cs">plotting time series</a> on the
+right side of the <a href="#graph">plot window</a>. In this case, some of the
+series in the <a href="#_Series_selected">Series selected</a> list box will be
+plotted along the primary vertical scale (Y), while others (see next) will use
+the secondary one (Y2). This option is ignored for <a href="#ts_cs">cross-section
 plots</a>. Y2 always use self-scaling (from series values) but the primary
 scale (Y) can still be <a href="#scaling">manually set</a>.</span></p>
 
@@ -2462,8 +2471,8 @@ to the total number of selected series.</span></p>
 <h1><a name="_Plot_format_options"></a><span lang=EN-US>Plot format options</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
-lang=EN-US><a href="#timeseries">Plot</a></span></span><span lang=EN-US>
-command has several alternatives to present the data in the time series in the <a
+lang=EN-US><a href="#timeseries">Plot</a></span></span><span lang=EN-US> command
+has several alternatives to present the data in the time series in the <a
 href="#_Series_selected">Series selected</a> list box.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -2928,8 +2937,8 @@ pressed.</span></p>
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=410 height=297 src="image/ex3dsurface.jpg"></span></p>
 
-<p class=MsoNormal><span lang=EN-US>To save Gnuplot plots to file the user
-click on the diskette icon in the Gnuplot toolbar. The plot is saved using the
+<p class=MsoNormal><span lang=EN-US>To save Gnuplot plots to file the user click
+on the diskette icon in the Gnuplot toolbar. The plot is saved using the
 enhanced metafile format (</span><span class=Cdigo><span lang=EN-US>.emf</span></span><span
 lang=EN-US>). If a different format is required, open the produced file in any
 graphical software and save the image in your preferred format.</span></p>
@@ -3119,10 +3128,9 @@ class=Cdigo><span lang=EN-US>Lines</span></span><span lang=EN-US> is selected,
 the default, the data points are connected by lines and not directly
 represented in the plot. If </span><span class=Cdigo><span lang=EN-US>Points</span></span><span
 lang=EN-US> is chosen, a marker is drawn at each point. According to the
-option, the size or type of the data point markers or the width of the data
-lines is controlled by the content of </span><span class=Cdigo><span
-lang=EN-US><a href="#point_size">Point size</a></span></span><span lang=EN-US>
-field. </span></p>
+option, the size or type of the data point markers or the width of the data lines
+is controlled by the content of </span><span class=Cdigo><span lang=EN-US><a
+href="#point_size">Point size</a></span></span><span lang=EN-US> field. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Note that for graphs using a large number
 of values, with more horizontal points than the screen resolution, the lines
@@ -3313,8 +3321,8 @@ unchecking this option. This is not recommended for LSD-format files, however,
 because they can be directly read in gzip format by LSD and R, without
 decompression, speeding up data reading.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>When text-format files are selected, a
-second dialog box with additional options is presented:</span></p>
+<p class=MsoNormal><span lang=EN-US>When text-format files are selected, a second
+dialog box with additional options is presented:</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=225 height=430 src="image/save_data_txt.png"></span></p>
@@ -3665,9 +3673,9 @@ if the <a href="browser.html">LSD Browser</a> is not closed).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The Gnuplot submenu deals with commands
 involving the Gnuplot package. The submenu option </span><span class=Cdigo><span
-lang=EN-US><a href="#_Gnuplot&gt;Open">Open</a></span></span><span lang=EN-US> launches
-the Gnuplot interactive window (usually not required for basic usage). The
-submenu entry </span><span class=Cdigo><span lang=EN-US><a
+lang=EN-US><a href="#_Gnuplot&gt;Open">Open</a></span></span><span lang=EN-US>
+launches the Gnuplot interactive window (usually not required for basic usage).
+The submenu entry </span><span class=Cdigo><span lang=EN-US><a
 href="#_Gnuplot&gt;Options">Options</a></span></span><span lang=EN-US> allows
 changing the specific settings used by LSD when plotting with Gnuplot. See
 below the details on the two entries.</span></p>
@@ -3738,8 +3746,8 @@ lang=EN-US>: select the appropriate terminal to execute Gnuplot. LSD normally
 recognizes the operating system in use and set the value for this field
 accordingly. The default option (blank) uses the default terminal configured in
 Gnuplot. There may be different terminal alternatives, according to the
-operating system and gnuplot versions. Recent versions of Gnuplot for Windows can
-use a </span><span class=Cdigo><span lang=EN-US>wxt</span></span><span
+operating system and gnuplot versions. Recent versions of Gnuplot for Windows
+can use a </span><span class=Cdigo><span lang=EN-US>wxt</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>qt</span></span><span
 lang=EN-US> terminal for improved options (old versions use the </span><span
 class=Cdigo><span lang=EN-US>windows</span></span><span lang=EN-US> terminal).

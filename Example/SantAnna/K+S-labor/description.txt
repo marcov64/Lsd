@@ -1,4 +1,4 @@
-Labor- and finance-augmented K+S Model (version 5.1.1)
+Labor- and finance-augmented K+S Model (version 5.1.2)
 ======================================================
 
 This version copyright by Marcelo C. Pereira.
@@ -18,6 +18,9 @@ v5.1.1 (12/08/20) - use LSD C++11 pseudo-random generator engine
                     change capacity utilization measure to account for labor
                     fix flagGovExp operation for values less than 2 (minimum income)
                     fix L1shortMax value in example configurations
+v5.1.2 (01/11/20) - fix lag definition and initialization of some variables
+                    fix lagged values for taxes
+                    improve initial age distribution of machines for technical deprecation
 
 
 Relevant references

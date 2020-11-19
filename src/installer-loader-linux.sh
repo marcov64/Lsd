@@ -42,7 +42,7 @@ if [ "$TCL_VER" == "no" ]; then
 			COM="sudo yum install tcl tk"
 		else 
 			if [ -x "$( command -v dnf )" ]; then 
-				COM="sudo dnf install tcl tk-"
+				COM="sudo dnf install tcl tk"
 			else
 				if [ -x "$( command -v zypper )" ]; then 
 					COM="sudo zypper install tcl tk"
@@ -71,7 +71,7 @@ if [ "$TCL_VER" == "no" ]; then
 		read -p "Do you want to try to install Tcl/Tk now? (Y/n)" -n 1 -r
 		echo
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
-			echo "Please enter your password and accept the installation"
+			echo "Please enter your password if asked and accept the installation"
 			echo
 			eval "$COM"
 			if [ "$?" == "0" ]; then

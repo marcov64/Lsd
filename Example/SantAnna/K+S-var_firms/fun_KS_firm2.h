@@ -925,7 +925,7 @@ RESULT( v[0] )
 
 EQUATION_DUMMY( "_A2", "" )
 /*
-Productivity expected for firm in consumption-good sector
+Machine-level average labor productivity of firm in consumption-good sector
 Updated in '_c2'
 */
 

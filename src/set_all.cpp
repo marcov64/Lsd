@@ -267,6 +267,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "set err \"\"" );
 
 	cmd( "showtop .sa topleftW" );
+	cmd( "mousewarpto .sa.b.ok" );
 
 	here_setall:
 
@@ -791,6 +792,7 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 
 	cmd( "showtop .sens topleftW" );
 	cmd( "focus .sens.t.t" );
+	cmd( "mousewarpto .sens.fb2.ok" );
 
 	*choice = 0;
 

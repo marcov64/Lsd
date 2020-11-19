@@ -140,7 +140,7 @@ void send_order( object *firm, double nMach )
 
 void add_vintage( object *firm, double nMach, bool newInd )
 {
-	double _Avint, _pVint;
+	double _Avint, _pVint, _tVint;
 	object *vint, *suppl, *wrk;
 	
 	// create object, only recalculate in t if new industry
@@ -155,6 +155,13 @@ void add_vintage( object *firm, double nMach, bool newInd )
 	suppl = PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) );// pointer to supplier
 	_Avint = VS( suppl, "_Atau" );
 	_pVint = VS( suppl, "_p1" );
+	
+	// distribute machine ages at t=1 to spread initial technical substitution
+	if ( T == 1 )
+		_tVint = T - ( uniform_int( 1, VS( PARENTS( firm ), "eta" ) ) + 1 );
+	else
+		_tVint = T;
+		
 	WRITES( vint, "_IDvint", VNT( T, VS( suppl, "_ID1" ) ) );// vintage ID
 	WRITES( vint, "_Avint", _Avint );			// vintage notional productivity
 	WRITES( vint, "_AeVint", _Avint );			// vintage effective product.
@@ -622,11 +629,11 @@ double entry_firm1( object *sector, int n, bool newInd )
 	
 	if ( newInd )
 	{
-		Atau = Btau = AtauMax = BtauMax = 1;
+		Atau = Btau = AtauMax = BtauMax = INIPROD;// initial productivities
 		NW10 = VS( sector, "NW10" ); 			// initial wealth in sector 1
 		f1 = 1.0 / n;							// fair share
 		sV = VS( lab, "sAvg" );					// initial worker skills
-		w1avg = 1;								// initial wage
+		w1avg = INIWAGE;						// initial notional wage
 		
 		// initial demand expectation, assuming all sector 2 firms, 
 		// 1/eta replacement factor and fair share in sector 1
@@ -759,20 +766,21 @@ double entry_firm2( object *sector, int n, bool newInd )
 	double u = VS( sector, "u" );				// desired capital utilization
 	double sV = VS( lab, "sAvg" );				// initial worker skills
 	int TregChg = VS( PARENTS( sector ), "TregChg" );// time for regime change
+	int eta = VS( sector, "eta" );				// technical life of machines
 
 	if ( newInd )
 	{
 		double K0 = VS( sector, "K0" );			// initial capital in sector 2
 		double mu1 = VS( cap, "mu1" );			// mark-up in sector 1
 		double m1 = VS( cap, "m1" );			// worker output per period
+		double p10 = ( 1 + mu1 ) * INIWAGE / ( INIPROD * m1 );// mach. price
 		double phi = VS( fin, "phi" );			// unemployment benefit rate
-		double p10 = ( 1 + mu1 ) / m1;			// initial price of machines
-		double SIr0 = n * ceil( K0 / m2 ) / VS( sector, "eta");// subst. r. inv.
+		double SIr0 = n * ceil( K0 / m2 ) / eta;// substitution real investment
 		double RD0 = VS( cap, "nu" ) * SIr0 * p10;// initial R&D expense
-		
-		// fair share of initial steady state demand
-		D20 = ( ( SIr0 / m1 + RD0 ) * ( 1 - phi ) + VS( lab, "Ls0" ) * phi ) / 
-			  ( mu20 + phi ) / n;
+
+		D20 = ( ( SIr0 * INIWAGE / ( INIPROD * m1 ) + RD0 ) * ( 1 - phi ) + 
+				VS( lab, "Ls0" ) * INIWAGE * phi ) / 
+			  ( mu20 + phi ) * ( INIWAGE / INIPROD ) / n;// share of s.s. demand
 		Eavg = ( VS( sector, "omega1" ) + VS( sector, "omega2" ) + 
 				 VS( sector, "omega3" ) ) / 2;	// initial competitiveness
 		K = K0;									// initial capital in sector 2
@@ -784,7 +792,7 @@ double entry_firm2( object *sector, int n, bool newInd )
 		life2cycle = 3;							// start as incumbent
 		q2 = 1;									// initial quality
 		t2ent = 0;								// entered before t=1
-		w2avg = w2realAvg = 1;					// initial wage
+		w2avg = w2realAvg = INIWAGE;			// initial notional wage
 	}
 	else
 	{

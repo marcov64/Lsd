@@ -223,7 +223,6 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 	cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
 
 	cmd( "showtop .cazzo centerW" );
-	
 	cmd( "mousewarpto .cazzo.b.ok" );
 	
 	if ( parallel_mode || fast_mode != 0 )
@@ -716,6 +715,8 @@ FILE *search_all_sources( char *str )
 		
 		if ( ! strncmp( got, str, strlen( str ) ) )
 			return f;
+		
+		fclose( f );
 	}
 	
 	return NULL;
@@ -818,6 +819,7 @@ void get_var_descr( char const *lab, char *descr, int descr_len )
 	}
 	
 	if ( f != NULL )
+	{
 		while ( done != 1 )
 		{
 			fgets( str1, MAX_LINE_SIZE, f );
@@ -865,7 +867,9 @@ void get_var_descr( char const *lab, char *descr, int descr_len )
 					done = 1;
 			}
 		}
-
+		
+		fclose( f );
+	}
 	descr[ j ] = '\0';
 }
 

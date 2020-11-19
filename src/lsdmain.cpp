@@ -675,8 +675,10 @@ void run( void )
 	for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
 	{
 		running = true;		// signal simulation is running
-		cur_sim = i;	 	// Update the global variable holding information on the current run in the set of runs
-		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed (sorry Nadia!)
+		cur_sim = i;	 	// update the current run in the set of runs
+		actual_steps = 0;	// no steps performed yet
+		
+		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed 
 
 #ifndef NW
 		prepare_plot( root, i );
@@ -756,7 +758,6 @@ void run( void )
 		use_nan = false;
 		no_search = false;
 		done_in = 0;
-		actual_steps = 0;
 		wr_warn_cnt = 0;
 		start = last_update = clock( );
 

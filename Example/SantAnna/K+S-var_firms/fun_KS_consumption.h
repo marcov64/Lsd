@@ -210,7 +210,7 @@ RESULT( v[0] )
 
 EQUATION( "A2" )
 /*
-Productivity of consumption-good sector
+Machine-level weighted-average labor productivity of consumption-good sector
 */
 V( "CPI" );										// ensure m.s. are updated
 RESULT( WHTAVE( "_A2", "_f2" ) )

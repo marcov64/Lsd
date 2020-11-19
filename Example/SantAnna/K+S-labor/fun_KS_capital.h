@@ -279,7 +279,7 @@ RESULT( i * v[1] )
 
 EQUATION( "A1" )
 /*
-Productivity of capital-good sector
+Labor productivity of capital-good sector
 */
 V( "PPI" );										// ensure m.s. are updated
 RESULT( WHTAVE( "_Btau", "_f1" ) )

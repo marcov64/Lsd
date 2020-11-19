@@ -333,12 +333,12 @@ proc invert_color { color } {
 # CHECK_SYS_OPT
 # Check (best guess) if system option configuration is valid for the platform
 #************************************************
-set winYes [ list "86" "WRC" "windres" "-ltcl" "-ltk" "-lz" "-mthreads" "-mwindows" ]
-set winNo  [ list "-framework" "-lpthread" ]
-set linuxYes [ list "8.6" "-ltcl" "-ltk" "-lz" "-lpthread" ]
-set linuxNo  [ list "WRC" "windres" "-framework" "-mthreads" "-mwindows" ]
-set macYes [ list "-framework" "-lz" "-lpthread" ]
-set macNo  [ list "86" "8.6" "WRC" "windres" "-mthreads" "-mwindows" ]
+set winYes [ list "86" "-ltcl" "-ltk" "-lz" "-mthreads" "-mwindows" "LSDROOT" "SRC" "PATH_TCLTK_HEADER" "PATH_TCLTK_LIB" "TCLTK_LIB" "PATH_HEADER" "PATH_LIB" "LIB" "WRC" "CC" "GLOBAL_CC" "SSWITCH_CC" ]
+set winNo  [ list "-framework" "-lpthread" "EXT" "PATH_TCL_HEADER" "PATH_TK_HEADER" "PATH_TCL_LIB" "PATH_TK_LIB" "TCL_LIB" "LIBS" ]
+set linuxYes [ list "8.6" "-ltcl" "-ltk" "-lz" "-lpthread" "LSDROOT" "SRC" "PATH_TCLTK_HEADER" "PATH_TCLTK_LIB" "TCLTK_LIB" "PATH_HEADER" "PATH_LIB" "LIB" "CC" "GLOBAL_CC" "SSWITCH_CC" ]
+set linuxNo  [ list "windres" "-framework" "-mthreads" "-mwindows" "PATH_TCL_HEADER" "PATH_TK_HEADER" "PATH_TCL_LIB" "PATH_TK_LIB" "TCL_LIB" "LIBS" "WRC" ]
+set macYes [ list "-framework" "-lz" "-lpthread" "LSDROOT" "SRC" "PATH_TCL_HEADER" "PATH_TK_HEADER" "PATH_TCLTK_LIB" "TCLTK_LIB" "PATH_HEADER" "PATH_LIB" "LIB" "CC" "GLOBAL_CC" "SSWITCH_CC" ]
+set macNo  [ list "86" "8.6" "windres" "-mthreads" "-mwindows" "PATH_TCLTK_HEADER" "PATH_TCL_LIB" "PATH_TK_LIB" "TCL_LIB" "LIBS" "WRC" ]
 
 proc check_sys_opt { } {
 	global RootLsd LsdSrc CurPlatform winYes winNo winYes winNo linuxYes linuxNo macYes macNo SYSTEM_OPTIONS

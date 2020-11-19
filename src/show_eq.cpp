@@ -48,7 +48,7 @@ void show_eq( char *lab, int *choice )
 	bool done;
 	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], c3_lab[ MAX_LINE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ], updt_in[ MAX_ELEM_LENGTH + 1 ], *app, *fname;
 	int i, k, bra, start, printing_var = 0, comment_line = 0, temp_var = 0;
-	FILE *f;
+	FILE *f1, *f2;
 
 	cmd( "if [ string compare [ info command .eq_%s ] .eq_%s ] { set ex yes } { set ex no }", lab, lab );
 	app= ( char * ) Tcl_GetVar( inter, "ex", 0 );
@@ -60,9 +60,10 @@ void show_eq( char *lab, int *choice )
 	cmd( "switch %d { 0 { set parWnd . } 1 { set parWnd .chgelem } 2 { set parWnd .da } 3 { set parWnd .deb } }", *choice );
 
 	start:
+	
 	fname = equation_name;
 	sprintf( full_name, "%s/%s", exec_path, fname );
-	if ( ( f = fopen( full_name, "r" ) ) == NULL )
+	if ( ( f1 = fopen( full_name, "r" ) ) == NULL )
 	{
 		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to search it.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }", equation_name  );
 		cmd( "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir \"%s\" -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ]; if [ fn_spaces \"$res\" . ] { set res \"\" } { set res [ file tail $res ] } }", exec_path );
@@ -81,7 +82,7 @@ void show_eq( char *lab, int *choice )
 			return;
 	}
 	else
-		fclose( f );
+		fclose( f1 );
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
@@ -93,26 +94,28 @@ void show_eq( char *lab, int *choice )
 		cmd( "set brr [ lindex $source_files %d ]", k );
 		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
 		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
-		if ( ( f = fopen( fname, "r" ) ) == NULL )
+		if ( ( f2 = fopen( fname, "r" ) ) == NULL )
 			continue;
 		
-		while ( ! done && fgets( c1_lab, MAX_LINE_SIZE - 1, f ) != NULL )
+		while ( ! done && fgets( c1_lab, MAX_LINE_SIZE - 1, f2 ) != NULL )
 			if ( is_equation_header( c1_lab, c2_lab, updt_in ) )
 				if ( ! strcmp( c2_lab, lab ) )
 					done = true;
+				
+		if ( ! done )
+			fclose( f2 );
 	}
 
 	if ( ! done )
 	{
-		if ( f != NULL )
-			fclose( f );
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Equation not found\" -detail \"Equation for '%s' not found (check the spelling or equation file name).\"", lab  );
+		cmd( "ttk::messageBox -parent $parWnd -type ok -icon error -title Error -message \"Equation not found\" -detail \"Equation for '%s' not found (check the spelling or equation file name).\"", lab  );
 		return;
 	}
 
 	cmd( "set w .eq_%s", lab );
 	cmd( "set s \"\"" );
-	cmd( "newtop $w \"'%s' %s Equation (%s)\" { destroytop .eq_%s } $parWnd", lab, eq_dum ? "Dummy" : "", fname, lab );
+	
+	cmd( "newtop $w \"'%s' %s Equation (%s)\" { destroytop .eq_%s; focus $parWnd } $parWnd", lab, eq_dum ? "Dummy" : "", fname, lab );
 
 	cmd( "ttk::frame $w.f" );
 	cmd( "ttk::scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
@@ -148,7 +151,7 @@ void show_eq( char *lab, int *choice )
 			showtop $W.s centerW; \
 			$W.s.e selection range 0 end; \
 			focus $W.s.e \
-		} { LsdHelp equation.html } { destroytop .eq_%s }", lab, lab  );
+		} { LsdHelp equation.html } { destroytop .eq_%s; focus $parWnd }", lab, lab  );
 	cmd( "bind .eq_%s <Control-f> { .eq_%s.b.search invoke }; bind .eq_%s <Control-F> { .eq_%s.b.search invoke }", lab, lab, lab, lab );
 	cmd( "bind .eq_%s <F3> { \
 			set W .eq_%s; \
@@ -297,22 +300,23 @@ void show_eq( char *lab, int *choice )
 													}
 		}
 	}
-	while ( ( bra > 1 || start == 1 ) && fgets( c1_lab, MAX_LINE_SIZE, f ) != NULL  );
+	while ( ( bra > 1 || start == 1 ) && fgets( c1_lab, MAX_LINE_SIZE, f2 ) != NULL  );
 	
-	fclose( f );
+	fclose( f2 );
 
 	cmd( ".eq_%s.f.text mark set insert 1.0", lab );
 
-	cmd( "bind .eq_%s.f.text <KeyPress-Prior> {.eq_%s.f.text yview scroll -1 pages}", lab, lab );
-	cmd( "bind .eq_%s.f.text <KeyPress-Next> {.eq_%s.f.text yview scroll 1 pages}", lab, lab );
-	cmd( "bind .eq_%s.f.text <KeyPress-Up> {.eq_%s.f.text yview scroll -1 units}", lab, lab );
-	cmd( "bind .eq_%s.f.text <KeyPress-Down> {.eq_%s.f.text yview scroll 1 units}", lab, lab );
-	cmd( "bind .eq_%s.f.text <KeyPress-Left> {.eq_%s.f.text xview scroll -1 units}", lab, lab );
-	cmd( "bind .eq_%s.f.text <KeyPress-Right> {.eq_%s.f.text xview scroll 1 units}", lab, lab );
+	cmd( "bind .eq_%s.f.text <KeyPress-Prior> { .eq_%s.f.text yview scroll -1 pages }", lab, lab );
+	cmd( "bind .eq_%s.f.text <KeyPress-Next> { .eq_%s.f.text yview scroll 1 pages }", lab, lab );
+	cmd( "bind .eq_%s.f.text <KeyPress-Up> { .eq_%s.f.text yview scroll -1 units }", lab, lab );
+	cmd( "bind .eq_%s.f.text <KeyPress-Down> { .eq_%s.f.text yview scroll 1 units }", lab, lab );
+	cmd( "bind .eq_%s.f.text <KeyPress-Left> { .eq_%s.f.text xview scroll -1 units }", lab, lab );
+	cmd( "bind .eq_%s.f.text <KeyPress-Right> { .eq_%s.f.text xview scroll 1 units }", lab, lab );
 
 	cmd( "bind .eq_%s.f.text <Double-1> {.eq_%s.f.text tag remove sel 1.0 end; set a @%%x,%%y; .eq_%s.f.text tag add sel \"$a wordstart\" \"$a wordend\"; set res [.eq_%s.f.text get sel.first sel.last]; set choice 29 }", lab, lab, lab, lab );
 
 	cmd( "showtop $w centerW 1 1" );
+	cmd( "mousewarpto $w.b.cancel" );
 
 	cmd( ".eq_%s.f.text conf -state disabled", lab );
 }
@@ -411,6 +415,7 @@ void scan_used_lab( char *lab, int *choice )
 					}
 				}
 			}
+			
 			fclose( f );
 		}
 	}
@@ -430,6 +435,7 @@ void scan_used_lab( char *lab, int *choice )
 		cmd( "$list.l.l insert end \"(never used)\"" );
 
 	cmd( "showtop $list" );
+	cmd( "mousewarpto $list.b.ok" );
 }
 
 
@@ -483,4 +489,53 @@ void scan_using_lab( char *lab, int *choice )
 		cmd( "$list.l.l insert end \"(none)\"" );
 
 	cmd( "showtop $list" );
+	cmd( "mousewarpto $list.b.ok" );
+}
+
+
+/****************************************************
+SHOW_DESCR
+****************************************************/
+void show_descr( char *lab, int *choice )
+{
+	int i;
+	description *descr;
+	variable *cv;
+	
+	// define the correct parent window
+	cmd( "switch %d { 0 { set parWnd . } 1 { set parWnd .chgelem } 2 { set parWnd .da } 3 { set parWnd .deb } }", *choice );
+	
+	cv = root->search_var( NULL, lab );
+	descr = search_description( lab );
+	
+	if ( cv == NULL || descr == NULL || ! strcmp( descr->text, "(no description available)" ) )
+	{
+		cmd( "ttk::messageBox -parent $parWnd -type ok -icon warning -title Warning -message \"Description not available\" -detail \"A description for '%s' was not yet created. You may create one in LSD Browser with menu 'Model' > 'Change Element'.\"", lab  );
+		return;
+	}
+
+	cmd( "set w .desc_%s", lab );
+
+	cmd( "newtop $w \"Element '%s' in Object '%s'\" { destroytop .desc_%s; focus $parWnd } $parWnd", lab, cv->up->label );
+
+	cmd( "ttk::frame $w.f" );
+	cmd( "ttk::scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
+	cmd( "ttk::text $w.f.text -wrap word -width 60 -height 8 -yscrollcommand \"$w.f.yscroll set\" -entry 0 -dark $darkTheme -style smallFixed.TText" );
+	cmd( "mouse_wheel $w.f.text" );
+	cmd( "pack $w.f.yscroll -side right -fill y" );
+	cmd( "pack $w.f.text -expand yes -fill both" );
+	cmd( "pack $w.f -expand yes -fill both" );
+	
+	for ( i = 0; descr->text[ i ] != '\0'; ++i )
+		if ( descr->text[ i ] != '[' && descr->text[ i ] != ']' && descr->text[ i ] != '{' && descr->text[ i ] != '}' && descr->text[ i ] != '\"' && descr->text[ i ] != '\\')
+			cmd( "$w.f.text insert end \"%c\"", descr->text[ i ] );
+		else
+			cmd( "$w.f.text insert end \"\\%c\"", descr->text[ i ] );
+
+	cmd( "$w.f.text conf -state disabled" );
+	
+	cmd( "done $w b { destroytop .desc_%s; focus $parWnd }", lab );
+
+	cmd( "showtop $w centerW 1 1" );
+	cmd( "mousewarpto $w.b.ok" );
 }

@@ -173,7 +173,7 @@ v[ 2 ]=variance
 v[ 3 ]=max
 v[ 4 ]=min
 
-- void write( char *lab, double value, int time )
+- void write( char *lab, double value, int time, int lag )
 Assign the value value to the variable lab, resulting as if this was the
 value at gloabal time time. It does not make a search looking for lab. Lab
 must be a variable of this.
@@ -324,6 +324,7 @@ bridge::~bridge( void )
 	for ( cur = head; cur != NULL; cur = cur1 )
 	{
 		cur1 = cur->next;
+		cur->collect_cemetery( );
 		cur->empty( );
 		delete cur;
 	}
@@ -584,11 +585,11 @@ object *object::search_err( char const *lab, bool no_search, char const *errmsg 
 	if ( cur == NULL )
 	{	// check if it is not a zero-instance object
 		cur = blueprint->search( lab );				// current object in blueprint
-		if ( cur == NULL )
+		if ( cur == NULL || ( no_search && strcmp( cur->up->label, this->label ) ) )
 		{
-			sprintf( msg, "object '%s' is missing for %s", lab, errmsg );
+			sprintf( msg, "object '%s' is missing for %s%s", lab, errmsg, no_search && cur != NULL ? " (NO_SEARCH enabled!)" : "" );
 			error_hard( msg, "object not found",
-						"create variable or parameter in model structure" );
+						"create object in model structure" );
 		}
 
 		if ( no_zero_instance )
@@ -1881,6 +1882,7 @@ void object::empty( void )
 	bridge *cb, *cb1;
 	variable *cv, *cv1;
 	
+	// remove variables if cemetery collection was not called before
 	for ( cv = v; cv != NULL; cv = cv1 )
 	{
 		cv1 = cv->next;
@@ -1891,10 +1893,10 @@ void object::empty( void )
 	v = NULL;
 	v_map.clear( );
 
-	for ( cb = b; cb != NULL; cb = cb1 )	// delete sons
+	for ( cb = b; cb != NULL; cb = cb1 )	// delete son bridges
 	{
 		cb1 = cb->next;
-		delete cb;
+		delete cb;				// bridge destructor delete the rest
 	}
 
 	b = NULL;
@@ -1925,7 +1927,7 @@ void object::collect_cemetery( void )
 		cv1 = cv->next;						// pointer to next variable
 		
 		// need to save?
-		if ( running && ( cv->save == true || cv->savei == true ) )
+		if ( ( cv->save == true || cv->savei == true ) && running && actual_steps > 0 )
 		{
 			if ( cv->savei )
 				save_single( cv );			// update file
@@ -1948,6 +1950,7 @@ void object::collect_cemetery( void )
 	}
 	
 	v = NULL;
+	v_map.clear( );
 }
 
 
@@ -3304,8 +3307,15 @@ double object::write( char const *lab, double value, int time, int lag )
 		cv->val[ eff_lag ] = value;
 		cv->last_update = time;
 		
-		if ( ( cv->save || cv->savei ) && eff_time >= cv->start && eff_time <= cv->end )
-			cv->data[ eff_time - cv->start ] = value;
+		if ( cv->save || cv->savei )
+		{
+			if ( eff_time >= cv->start && eff_time <= cv->end )
+				cv->data[ eff_time - cv->start ] = value;
+			else
+				// handle special initial case
+				if ( time == 0 && cv->start == 0 )
+					cv->data[ 0 ] = value;
+		}
 	}
 
 	return value;

@@ -78,20 +78,26 @@ struct firm2E									// extensions to Firm2 object
 };
 
 
+/*======================= INITIAL NOTIONAL DEFINITIONS =======================*/
+
+#define INIPROD		1		// initial notional machine productivity
+#define INIWAGE		1		// initial notional wage
+
+
 /*========================= HOOK-RELATED DEFINITIONS =========================*/
 
 // number of dynamic hooks per object type
-#define FIRM1HK 2			// Firm1
-#define FIRM2HK 4			// Firm2
-#define WORKERHK 2			// Worker
+#define FIRM1HK		2		// Firm1
+#define FIRM2HK		4		// Firm2
+#define WORKERHK	2		// Worker
 
 // dynamic hook name to number
-#define BANK 0				// from Firm1/Firm2 to Bank
-#define BCLIENT 1			// from Firm1/Firm2 to Cli1/Cli2 (in Bank)
-#define SUPPL 2				// from Firm2 to Broch (in Firm2)
-#define TOPVINT 3			// from Firm2 to Vint (in Firm2)
-#define FWRK 0				// from Worker to Wkr1/Wrkr2 (in Capital/Firm2)
-#define VWRK 1				// from Worker to WrkV (in Vint in Firm2)
+#define BANK		0		// from Firm1/Firm2 to Bank
+#define BCLIENT		1		// from Firm1/Firm2 to Cli1/Cli2 (in Bank)
+#define SUPPL		2		// from Firm2 to Broch (in Firm2)
+#define TOPVINT		3		// from Firm2 to Vint (in Firm2)
+#define FWRK		0		// from Worker to Wkr1/Wrkr2 (in Capital/Firm2)
+#define VWRK		1		// from Worker to WrkV (in Vint in Firm2)
 
 
 /*======================= OBJECT-LOCATION DEFINITIONS ========================*/

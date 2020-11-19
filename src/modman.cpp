@@ -1536,7 +1536,6 @@ int lsdmain( int argn, char **argv )
 		cmd( "bind .a <Down> { .a.f.r2 invoke }" );
 
 		cmd( "showtop .a" );
-
 		cmd( "mousewarpto .a.b.ok" );
 
 		choice = 0;
@@ -1975,6 +1974,7 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "showtop .a" );
 		cmd( "focus .a.r.cal" );
+		cmd( "mousewarpto .a.b.ok" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -2053,6 +2053,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "showtop .a" );
 		cmd( "focus .a.e.e.e1.e" );
 		cmd( ".a.e.e.e1.e selection range 0 end" );
+		cmd( "mousewarpto .a.b.ok" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -3047,6 +3048,7 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "showtop .a" );
 		cmd( "focus .a.f.r1" );
+		cmd( "mousewarpto .a.b.ok" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -4495,7 +4497,6 @@ int lsdmain( int argn, char **argv )
 		cmd( "bind .a.mver.e <Return> { focus .a.b.ok }" );
 
 		cmd( "showtop .a" );
-		
 		cmd( "mousewarpto .a.b.ok" );
 
 		choice = 0;
@@ -4613,6 +4614,7 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "showtop .l" );
 		cmd( "focus .l.t.text" );
+		cmd( "mousewarpto .l.b.ok" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -4805,6 +4807,7 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "showtop .l" );
 		cmd( "focus .l.t.text" );
+		cmd( "mousewarpto .l.b.ok" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -5010,6 +5013,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "showtop .a" );
 		cmd( "focus .a.f.c1.num.v" );
 		cmd( ".a.f.c1.num.v selection range 0 end" );
+		cmd( "mousewarpto .a.b.ok" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -5197,6 +5201,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "okcancel $e b { set choice 1 } { set choice 2 }" );
 
 		cmd( "showtop $e" );
+		cmd( "mousewarpto $e.b.ok" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -6047,6 +6052,7 @@ void create_compresult_window( bool nw )
 	cmd( "bind .mm.b.close <KeyPress-Return> { .mm.b.close invoke }" );
 
 	cmd( "showtop .mm lefttoW no no no" );
+	cmd( "mousewarpto .mm.b.gerr" );
 
 	cmd( "if [ file exists \"$modelDir/makemessage.txt\" ] { set file [open \"$modelDir/makemessage.txt\"]; .mm.t.t insert end [read $file]; close $file } { .mm.t.t insert end \"(no compilation errors)\" }" );
 	cmd( ".mm.t.t mark set insert \"1.0\"" );

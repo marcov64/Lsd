@@ -539,6 +539,7 @@ proc medit i {
 	showtop .l.e
 	.l.e.n.n selection range 0 end
 	focus .l.e.n.n
+	mousewarpto .l.e.b.ok
 }
 
 

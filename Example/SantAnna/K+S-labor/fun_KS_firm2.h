@@ -810,19 +810,19 @@ else
 	order_applications( hOrder, & V_EXT( firm2E, appl ) );
 
 	// search applications set (increasing wage requests) for enough workers
-	i = 0;									// workers counter
-	v[0] = 0;								// highest wage found
-	CYCLE_EXT( its, firm2E, appl )			// run over enough applications
+	i = 0;										// workers counter
+	v[0] = 0;									// highest wage found
+	CYCLE_EXT( its, firm2E, appl )				// run over enough applications
 	{
-		if ( its->w > v[0] )				// new high wage request?
-			v[0] = its->w;					// i-th worker wage
+		if ( its->w > v[0] )					// new high wage request?
+			v[0] = its->w;						// i-th worker wage
 			
 		if ( ++i >= j )
-			break;							// stop when enough workers
+			break;								// stop when enough workers
 	}
 	
-	if ( v[0] == 0 )						// no worker in queue
-		v[0] = CURRENT;						// keep current offer
+	if ( v[0] == 0 )							// no worker in queue
+		v[0] = CURRENT;							// keep current offer
 }
 
 // check for abnormal change
@@ -1377,13 +1377,14 @@ RESULT( v[0] )
 
 EQUATION_DUMMY( "_A2", "" )
 /*
-Productivity expected for firm in consumption-good sector
+Machine-level average labor productivity of firm in consumption-good sector
 Updated in '_c2'
 */
 
 EQUATION_DUMMY( "_A2p", "_c2" )
 /*
-Productivity potential for firm in consumption-good sector
+Machine-level average potential labor productivity of firm in consumption-good 
+sector
 Updated in '_c2'
 */
 

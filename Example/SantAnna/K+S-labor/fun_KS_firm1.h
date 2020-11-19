@@ -12,7 +12,7 @@
 
 EQUATION( "_Atau" )
 /*
-Productivity of the new vintage of machines when employed for production
+Labor productivity of new vintage of machine when employed for production
 Also updates '_Btau'
 */
 
@@ -420,7 +420,8 @@ EQUATION( "_L1rd" )
 /*
 R&D labor employed by firm in capital-good sector
 */
-RESULT( ceil( V( "_L1dRD" ) * VS( PARENT, "L1rd" ) / VS( PARENT, "L1dRD" ) ) )
+v[1] = VS( PARENT, "L1dRD" );
+RESULT( v[1] > 0 ? ceil( V( "_L1dRD" ) * VS( PARENT, "L1rd" ) / v[1] ) : 0 )
 
 
 EQUATION( "_Pi1" )
@@ -456,7 +457,8 @@ if ( v[1] >= v[2] || VS( GRANDPARENT, "flagMachDeliv" ) == 0 )
 v[3] = V( "_L1rd" );							// effective R&D workers
 v[4] = V( "_L1dRD" );							// desired R&D workers
 
-v[5] = 1 - ( v[1] - v[3] ) / ( v[2] - v[4] );	// adjustment factor
+// adjustment factor
+v[5] = v[2] > v[4] ? 1 - ( v[1] - v[3] ) / ( v[2] - v[4] ) : 1;	
 
 // adjust all pending orders, supplying at least one machine
 CYCLE( cur, "Cli" )
@@ -533,7 +535,7 @@ RESULT( v[0] )
 
 EQUATION_DUMMY( "_Btau", "" )
 /*
-Productivity of labor in producing the new vintage of machines
+Labor productivity when producing the new vintage of machines
 Updated in '_Atau'
 */
 

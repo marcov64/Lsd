@@ -47,7 +47,7 @@ RESULT( ( VS( CAPSECL2, "W1" ) + VS( CONSECL2, "W2" ) +
 
 EQUATION( "dA" )
 /*
-Overall productivity growth rate
+Overall labor productivity growth rate
 */
 v[1] = VLS( GRANDPARENT, "A", 1 );
 RESULT( v[1] > 0 ? VS( GRANDPARENT, "A" ) / v[1] - 1 : 0 )
@@ -240,124 +240,63 @@ RESULT( i > 0 ? v[0] / i : 0 )
 
 EQUATION( "A2posChg" )
 /*
-Average productivity of post-change firms in consumption-good sector
+Machine-level weighted-average labor productivity of post-change firms in 
+consumption-good sector
 */
-
-v[0] = v[1] = 0;								// productivity/output accum.
-CYCLES( CONSECL2, cur, "Firm2" )
-	if ( VS( cur, "_postChg" ) )				// pre-change?
-	{
-		v[2] = VS( cur, "_A2" );
-		v[3] = VS( cur, "_Q2" );
-		if ( is_finite( v[2] ) && is_finite( v[3] ) )
-		{
-			v[0] += v[2] * v[3];
-			v[1] += v[3];
-		}
-	}
-
-RESULT( v[1] > 0 ? v[0] / v[1] : 0 )			// sum (prod*output)/output
+v[1] = SUM_CNDS( CONSECL2, "_Q2", "_postChg", "!=", 0 );
+RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_A2", "_Q2", "_postChg", "!=", 0 ) / 
+				   v[1] : 0 )
 
 
 EQUATION( "A2preChg" )
 /*
-Average productivity of pre-change firms in consumption-good sector
+Machine-level weighted-average labor productivity of pre-change firms in 
+consumption-good sector
 */
-
-v[0] = v[1] = 0;								// productivity/output accum.
-CYCLES( CONSECL2, cur, "Firm2" )
-	if ( ! VS( cur, "_postChg" ) )				// pre-change?
-	{
-		v[2] = VS( cur, "_A2" );
-		v[3] = VS( cur, "_Q2" );
-		if ( is_finite( v[2] ) && is_finite( v[3] ) )
-		{
-			v[0] += v[2] * v[3];
-			v[1] += v[3];
-		}
-	}
-
-RESULT( v[1] > 0 ? v[0] / v[1] : 0 )			// sum (prod*output)/output
+v[1] = SUM_CNDS( CONSECL2, "_Q2", "_postChg", "==", 0 );
+RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_A2", "_Q2", "_postChg", "==", 0 ) / 
+				   v[1] : 0 )
 
 
 EQUATION( "A2sd" )
 /*
-Standard deviation of log productivity of firms in consumption-good sector
+Standard deviation of machine-level log labor productivity of firms in 
+consumption-good sector
+Also updates 'A2sdPreChg', 'A2sdPosChg'
 */
 
-v[1] = VS( CONSECL2, "A2" );					// average productivity
-if ( v[1] <= 0 )
-	END_EQUATION( 0 );							// probably no production yet
+v[1] = VS( CONSECL2, "A2" );					// average productivities
+v[2] = VS( SECSTAL2, "A2preChg" );
+v[3] = VS( SECSTAL2, "A2posChg" );
 
-v[1] = log( v[1] + 1 );							// average log productivity
+v[1] = ( v[1] >= 0 ) ? log( v[1] + 1 ) : 0;		// average log productivities
+v[2] = ( v[2] >= 0 ) ? log( v[2] + 1 ) : 0;
+v[3] = ( v[3] >= 0 ) ? log( v[3] + 1 ) : 0;
 
-i = 0;											// valid cases count
-v[0] = 0;										// square difference accumulator
+v[0] = v[4] = v[5] = i = j = k = 0;
 CYCLES( CONSECL2, cur, "Firm2" )
 {
-	v[2] = VS( cur, "_A2" );
-	if ( is_finite( v[2] ) && v[2] > 0 )
+	v[6] = VS( cur, "_A2" );
+	if ( v[6] < 0 )
+		continue;
+
+	v[0] += pow( log( v[6] + 1 ) - v[1], 2 );
+	++i;
+	
+	if ( ! VS( cur, "_postChg" ) )				// pre-change?
 	{
-		v[0] += pow( log( v[2] + 1 ) - v[1], 2 );
-		++i;
+		v[4] += pow( log( v[6] + 1 ) - v[2], 2 );
+		++j;
+	}
+	else
+	{
+		v[5] += pow( log( v[6] + 1 ) - v[3], 2 );
+		++k;
 	}
 }
 
-RESULT( i > 0 ? sqrt( v[0] / i ) : 0 )
-
-
-EQUATION( "A2sdPosChg" )
-/*
-Standard deviation of log productivity of post-change firms in consumption-good 
-sector
-*/
-
-v[1] = VS( SECSTAL2, "A2posChg" );				// average productivity
-if ( v[1] <= 0 )
-	END_EQUATION( 0 );							// probably no firm left
-
-v[1] = log( v[1] + 1 );
-
-i = 0;											// valid cases count
-v[0] = 0;										// square difference accumulator
-CYCLES( CONSECL2, cur, "Firm2" )
-	if ( VS( cur, "_postChg" ) )				// post-change?
-	{
-		v[2] = VS( cur, "_A2" );
-		if ( is_finite( v[2] ) && v[2] > 0 )
-		{
-			v[0] += pow( log( v[2] + 1 ) - v[1], 2 );
-			++i;
-		}
-	}
-
-RESULT( i > 0 ? sqrt( v[0] / i ) : 0 )
-
-
-EQUATION( "A2sdPreChg" )
-/*
-Standard deviation of log productivity of pre-change firms in consumption-good 
-sector
-*/
-
-v[1] = VS( SECSTAL2, "A2preChg" );				// average productivity
-if ( v[1] <= 0 )
-	END_EQUATION( 0 );							// probably no firm left
-
-v[1] = log( v[1] + 1 );
-
-i = 0;											// valid cases count
-v[0] = 0;										// square difference accumulator
-CYCLES( CONSECL2, cur, "Firm2" )
-	if ( ! VS( cur, "_postChg" ) )				// pre-change?
-	{
-		v[2] = VS( cur, "_A2" );
-		if ( is_finite( v[2] ) && v[2] > 0 )
-		{
-			v[0] += pow( log( v[2] + 1 ) - v[1], 2 );
-			++i;
-		}
-	}
+WRITE( "A2sdPreChg", j > 0 ? sqrt( v[4] / j ) : 0 );
+WRITE( "A2sdPosChg", k > 0 ? sqrt( v[5] / k ) : 0 );
 
 RESULT( i > 0 ? sqrt( v[0] / i ) : 0 )
 
@@ -784,7 +723,7 @@ RESULT( v[4] / VS( CONSECL2, "CPI" ) )
 
 EQUATION( "_A2e" )
 /*
-Effective productivity of firm in consumption-good sector
+Machine-level effective productivity of firm in consumption-good sector
 */
 i = V( "_L2" );
 RESULT( i > 0 ? V( "_Q2e" ) / i : CURRENT )
@@ -846,6 +785,20 @@ RESULT( V( "_w" ) / VS( CONSECL2, "CPI" ) )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
+
+EQUATION_DUMMY( "A2sdPosChg", "A2sd" )
+/*
+Standard deviation of machine-level log labor productivity of post-change firms 
+in consumption-good sector
+Updated in 'A2sd'
+*/
+
+EQUATION_DUMMY( "A2sdPreChg", "A2sd" )
+/*
+Standard deviation of machine-level log labor productivity of pre-change firms 
+in consumption-good sector
+Updated in 'A2sd'
+*/
 
 EQUATION_DUMMY( "Gini", "" )
 /*
