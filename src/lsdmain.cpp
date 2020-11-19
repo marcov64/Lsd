@@ -831,7 +831,10 @@ void run( void )
 			// only update if simulation not paused
 			if ( ! pause_run )
 #endif
+			{
+				actual_steps = t;
 				root->update( true, false );
+			}
 
 			perc_done = ( 100 * t ) / max_step;
 			
@@ -935,7 +938,6 @@ void run( void )
 #endif
 		}	// end of for t
 
-		actual_steps = max( t - 1, 1 );
 		unsavedData = true;			// flag unsaved simulation results
 		running = false;
 		deb_log( false );			// close debug log file, if any
