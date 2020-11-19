@@ -253,7 +253,6 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 	{
 		// do run( ) cleanup
 		empty_stack( );
-		actual_steps = t;
 		unsavedData = true;				// flag unsaved simulation results
 		running = false;
 		

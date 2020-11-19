@@ -953,7 +953,6 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 			// Analysis
 			case 11:
-				actual_steps = t;
 				for ( cur = r; cur->up != NULL; cur = cur->up );
 				reset_end( cur );
 				analysis( &choice );
