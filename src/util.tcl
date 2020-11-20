@@ -299,6 +299,26 @@ proc round_N { float N } {
 
 
 #************************************************
+# FORMATFLOAT
+# Nice format of floats with N significant 
+# digits without losing precision
+#************************************************
+proc formatfloat { float { N 6 } } {
+	set prec 1e-12
+	set fmt "%.${N}g"
+	
+	set fmtFlt [ format $fmt $float ]
+	if { abs( $fmtFlt - $float ) < $prec } { 
+		return $fmtFlt
+	} elseif { abs( $float - int( $float ) ) < $prec } {
+		return [ expr int( $float ) ]
+	} else {
+		return $float
+	}
+}
+
+
+#************************************************
 # CURRENT_DATE
 # Current date in the default date format
 #************************************************

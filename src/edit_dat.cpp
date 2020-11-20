@@ -352,7 +352,7 @@ void link_cells( object *r, char *lab )
 				Tcl_LinkVar( inter, ch1, ( char * ) &( cv->val[ 0 ] ), TCL_LINK_DOUBLE );
 				
 				cmd( "ttk::entry $w.c%d_v%sp -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set p%s_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${p%s_%d}; return 0 } } -invalidcommand { bell }", i, cv->label, cv->label, i, cv->label, i, cv->label, i );
-				cmd( "$w.c%d_v%sp insert 0 [ format %%.4g ${p%s_%d} ]", i, cv->label, cv->label, i );
+				cmd( "$w.c%d_v%sp insert 0 [ formatfloat ${p%s_%d} ]", i, cv->label, cv->label, i );
 				cmd( "grid $w.c%d_v%sp -row %d -column [ expr 2 + %d ] -padx 1", i, cv->label, k, i );
 				cmd( "mouse_wheel $w.c%d_v%sp", i, cv->label );
 				
@@ -398,7 +398,7 @@ void link_cells( object *r, char *lab )
 					Tcl_LinkVar( inter, ch1, ( char * ) &( cv->val[ j ] ), TCL_LINK_DOUBLE );
 					
 					cmd( "ttk::entry $w.c%d_v%s_%d -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set v%s_%d_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${v%s_%d_%d}; return 0 } } -invalidcommand { bell }", i, cv->label, j, cv->label, i, j, cv->label, i, j, cv->label, i, j );
-					cmd( "$w.c%d_v%s_%d insert 0 [ format %%.4g ${v%s_%d_%d} ]", i, cv->label, j, cv->label, i, j );
+					cmd( "$w.c%d_v%s_%d insert 0 [ formatfloat ${v%s_%d_%d} ]", i, cv->label, j, cv->label, i, j );
 					cmd( "grid $w.c%d_v%s_%d -row %d -column [ expr 2 + %d ] -padx 1", i, cv->label, j, k, i );
 					cmd( "mouse_wheel $w.c%d_v%s_%d", i, cv->label, j );
 
@@ -488,13 +488,13 @@ void show_cells( object *r, char *lab )
 			if ( cv->param == 1 )
 			{
 				cmd( "$w.c%d_v%sp delete 0 end", i, cv->label );
-				cmd( "$w.c%d_v%sp insert 0 [ format %%.4g ${p%s_%d} ]", i, cv->label, cv->label, i );
+				cmd( "$w.c%d_v%sp insert 0 [ formatfloat ${p%s_%d} ]", i, cv->label, cv->label, i );
 			}
 			else
 				for ( j = 0; j < cv->num_lag; ++j )
 				{
 					cmd( "$w.c%d_v%s_%d delete 0 end", i, cv->label, j );
-					cmd( "$w.c%d_v%s_%d insert 0 [ format %%.4g ${v%s_%d_%d} ]", i, cv->label, j, cv->label, i, j );
+					cmd( "$w.c%d_v%s_%d insert 0 [ formatfloat ${v%s_%d_%d} ]", i, cv->label, j, cv->label, i, j );
 				}
 }
 
