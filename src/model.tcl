@@ -213,17 +213,54 @@ proc showmodel pippo {
 					selectinlist $ll $ff
 				}
 			}
+			
+			break
 		}
 
+		bind .l <Up> {
+			set app [ .l.l.l curselection ]
+			.l.t.text conf -state normal
+			.l.t.text delete 0.0 end
+			.l.t.text insert end "[ lindex $lmd $app ]"
+			.l.t.text conf -state disable 
+		}
+
+		bind .l <Down> {
+			set app [ .l.l.l curselection ]
+			.l.t.text conf -state normal
+			.l.t.text delete 0.0 end
+			.l.t.text insert end "[ lindex $lmd $app ]"
+			.l.t.text conf -state disable 
+		}
+		
+		bind .l <Home> { 
+			set app 0
+			selectinlist .l.l.l $app
+			.l.t.text conf -state normal
+			.l.t.text delete 0.0 end
+			.l.t.text insert end "[ lindex $lmd $app ]"
+			.l.t.text conf -state disable
+			break 
+		}
+		
+		bind .l <End> { 
+			set app end
+			selectinlist .l.l.l $app
+			.l.t.text conf -state normal
+			.l.t.text delete 0.0 end
+			.l.t.text insert end "[ lindex $lmd $app ]"
+			.l.t.text conf -state disable
+			break 
+		}
+		
 		bind .l.l.l <Double-Button-1> { set dblclk 1; .l.m.file invoke 0 } 
 
 		bind .l.l.l <Button-1> {
 			set dblclk 0
 			after 200
 			if { ! $dblclk } {
-				.l.l.l selection clear 0 end
-				.l.l.l selection set [ .l.l.l nearest %y ]
-				set app [ .l.l.l curselection ]
+				set app [ .l.l.l nearest %y ]
+				selectinlist .l.l.l $app
 				.l.t.text conf -state normal
 				.l.t.text delete 0.0 end
 				.l.t.text insert end "[ lindex $lmd $app ]"
@@ -253,30 +290,6 @@ proc showmodel pippo {
 		
 		bind .l.l.l <Button-3> {
 			event generate .l.l.l <2> -x %x -y %y 
-		}
-		
-		bind .l <Up> {
-			if { [ .l.l.l curselection ] > 0 } {
-				set app [ expr [ .l.l.l curselection ] - 1 ]
-				.l.l.l selection clear 0 end
-				.l.l.l selection set $app
-				.l.t.text conf -state normal
-				.l.t.text delete 0.0 end
-				.l.t.text insert end "[ lindex $lmd $app ]"
-				.l.t.text conf -state disable 
-			} 
-		}
-
-		bind .l <Down> {
-			if { [ .l.l.l curselection ] < [ expr [ .l.l.l size ] - 1 ] } {
-				set app [ expr [ .l.l.l curselection ] + 1 ]
-				.l.l.l selection clear 0 end
-				.l.l.l selection set $app
-				.l.t.text conf -state normal
-				.l.t.text delete 0.0 end
-				.l.t.text insert end "[ lindex $lmd $app ]"
-				.l.t.text conf -state disable
-			} 
 		}
 		
 		showtop .l centerW no no yes 0 0 "" no yes

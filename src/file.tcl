@@ -335,6 +335,16 @@ proc choose_models { curdir curfile } {
 	}
 	bind .l.t.l.l.l <Up> { .l.t.l.gt.t configure -text [ lindex $lgroup [ .l.t.l.l.l curselection ] ] }
 	bind .l.t.l.l.l <Down> { .l.t.l.gt.t configure -text [ lindex $lgroup [ .l.t.l.l.l curselection ] ] }
+	bind .l.t.l.l.l <Home> { 
+		selectinlist .l.t.l.l.l 0
+		.l.t.l.gt.t configure -text [ lindex $lgroup [ .l.t.l.l.l curselection ] ] 
+		break
+	}
+	bind .l.t.l.l.l <End> { 
+		selectinlist .l.t.l.l.l end
+		.l.t.l.gt.t configure -text [ lindex $lgroup [ .l.t.l.l.l curselection ] ] 
+		break
+	}
 
 	ttk::frame .l.t.l.gt
 	ttk::label .l.t.l.gt.l -text "Selected model in group"

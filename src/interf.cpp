@@ -479,6 +479,14 @@ int browse( object *r, int *choice )
 						} \
 					} \
 				}" );
+			cmd( "bind .l.v.c.var_name <Home> { \
+					selectinlist .l.v.c.var_name 0; \
+					break \
+				}" );
+			cmd( "bind .l.v.c.var_name <End> { \
+					selectinlist .l.v.c.var_name end; \
+					break \
+				}" );
 		}
 		
 		cmd( "bind .l.v.c.var_name <Button-1> { \
@@ -712,6 +720,14 @@ int browse( object *r, int *choice )
 							selectinlist $ll $ff \
 						} \
 					} \
+				}" );
+			cmd( "bind .l.s.c.son_name <Home> { \
+					selectinlist .l.s.c.son_name 0; \
+					break \
+				}" );
+			cmd( "bind .l.s.c.son_name <End> { \
+					selectinlist .l.s.c.son_name end; \
+					break \
 				}" );
 		}
 
@@ -2647,6 +2663,9 @@ case 79:
 	cmd( "pack $TT.l $TT.v -padx 5 -pady 5" );
 
 	cmd( "okcancel $TT b { set choice 1 } { set choice 2 }" );	// insert ok button
+	
+	cmd( "bind $TT.v.t.lb <Home> { selectinlist .objs.v.t.lb 0; break }" );
+	cmd( "bind $TT.v.t.lb <End> { selectinlist .objs.v.t.lb end; break }" );
 	cmd( "bind $TT.v.t.lb <Double-1> { set choice 1 }" );
 
 	cmd( "showtop $TT" );
@@ -5933,6 +5952,9 @@ case 88:
 	cmd( "pack $TT.l $TT.v -padx 5 -pady 5" );
 
 	cmd( "okcancel $TT b { set choice 1 } { set choice 2 }" );	// insert ok button
+	
+	cmd( "bind $TT.v.t.lb <Home> { selectinlist .objs.v.t.lb 0; break }" );
+	cmd( "bind $TT.v.t.lb <End> { selectinlist .objs.v.t.lb end; break }" );
 	cmd( "bind $TT.v.t.lb <Double-1> { set choice 1 }" );
 
 	cmd( "showtop $TT" );
@@ -6019,6 +6041,9 @@ case 89:
 	cmd( "pack $TT.v -padx 5 -pady 5" );
 
 	cmd( "okcancel $TT b { set choice 1 } { set choice 2 }" );	// insert ok button
+	
+	cmd( "bind $TT.v.t.lb <Home> { selectinlist .objs.v.t.lb 0; break }" );
+	cmd( "bind $TT.v.t.lb <End> { selectinlist .objs.v.t.lb end; break }" );
 	cmd( "bind $TT.v.t.lb <Double-1> { set choice 1 }" );
 
 	cmd( "showtop $TT" );
@@ -6111,6 +6136,9 @@ case 93:
 	cmd( "pack $TT.v -padx 5 -pady 5" );
 
 	cmd( "okcancel $TT b { set choice 1 } { set choice 2 }" );	// insert ok button
+	
+	cmd( "bind $TT.v.t.lb <Home> { selectinlist .objs.v.t.lb 0 }" );
+	cmd( "bind $TT.v.t.lb <End> { selectinlist .objs.v.t.lb end }" );
 	cmd( "bind $TT.v.t.lb <Double-1> { set choice 1 }" );
 
 	cmd( "showtop $TT" );

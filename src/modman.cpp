@@ -5186,6 +5186,9 @@ int lsdmain( int argn, char **argv )
 		cmd( "ttk::listbox $e.l.l -listvariable extra_files -width 30 -height 15 -selectmode single -yscroll \"$e.l.v_scroll set\" -dark $darkTheme" );
 		cmd( "pack $e.l.l $e.l.v_scroll -side left -fill y" );
 		cmd( "mouse_wheel $e.l.l" );
+		
+		cmd( "bind $e.l.l <Home> { selectinlist .extra.l.l 0 }" );
+		cmd( "bind $e.l.l <End> { selectinlist .extra.l.l end }" );
 
 		cmd( "set choice [ $e.l.l size ]" );
 		if ( choice > 0 )

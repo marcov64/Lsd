@@ -970,6 +970,7 @@ proc selectinlist { w pos { foc 0 } } {
 		$w selection set $pos
 		$w activate $pos
 		$w see $pos
+		$w xview moveto 0
 		
 		if { $foc } {
 			focus $w
@@ -1484,6 +1485,8 @@ proc mousewarpto w {
 		bind $w <Motion> { }
 		unset curX curY
 	}
+	
+	update
 }
 
 

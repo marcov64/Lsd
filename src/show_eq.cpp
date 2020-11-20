@@ -355,6 +355,9 @@ void scan_used_lab( char *lab, int *choice )
 		cmd( "pack $list.l.l  $list.l.v_scroll -side left -fill y" );
 		cmd( "mouse_wheel $list.l.l" );
 
+		cmd( "bind $list.l.l <Home> \"selectinlist $list.l.l 0; break\"" );
+		cmd( "bind $list.l.l <End> \"selectinlist $list.l.l end; break\"" );
+
 		if ( caller != 1 )
 			cmd( "ttk::label $list.l3 -justify center -text \"(double-click to\nobserve the element)\"" );
 		else
@@ -466,6 +469,9 @@ void scan_using_lab( char *lab, int *choice )
 	cmd( "ttk::listbox $list.l.l -width 25 -selectmode single -yscroll \".listusing_%s.l.v_scroll set\" -dark $darkTheme", lab );
 	cmd( "pack $list.l.l $list.l.v_scroll -side left -fill y" );
 	cmd( "mouse_wheel $list.l.l" );
+
+	cmd( "bind $list.l.l <Home> \"selectinlist $list.l.l 0; break\"" );
+	cmd( "bind $list.l.l <End> \"selectinlist $list.l.l end; break\"" );
 
 	if ( caller != 1 )
 		cmd( "ttk::label $list.l3 -justify center -text \"(double-click to\nobserve the element)\"" );

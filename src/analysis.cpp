@@ -270,6 +270,8 @@ cmd( "bind $f.v <KeyRelease> { \
 			} \
 		} \
 	}" );
+cmd( "bind $f.v <Home> { selectinlist .da.vars.lb.f.v 0; break }" );
+cmd( "bind $f.v <End> { selectinlist .da.vars.lb.f.v end; break }" );
 cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.lb.f.v <Return> }" );
 cmd( "bind $f.v <Button-2> { .da.vars.lb.f.v selection clear 0 end;.da.vars.lb.f.v selection set @%%x,%%y; set res [ selection get ]; set choice 30 } " );
 cmd( "bind $f.v <Button-3> { event generate .da.vars.lb.f.v <Button-2> -x %%x -y %%y }" );
@@ -347,6 +349,8 @@ cmd( "bind $f.v <KeyRelease> { \
 			} \
 		} \
 	}" );
+cmd( "bind $f.v <Home> { selectinlist .da.vars.ch.f.v 0; break }" );
+cmd( "bind $f.v <End> { selectinlist .da.vars.ch.f.v end; break }" );
 cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.ch.f.v <BackSpace> }" );
 cmd( "bind $f.v <Button-2> { .da.vars.ch.f.v selection clear 0 end;.da.vars.ch.f.v selection set @%%x,%%y; set res [ selection get ]; set choice 33 }" );
 cmd( "bind $f.v <Button-3> { event generate .da.vars.ch.f.v <Button-2> -x %%x -y %%y }" );
@@ -390,6 +394,8 @@ cmd( "bind $f.v <KeyRelease> { \
 			} \
 		} \
 	}" );
+cmd( "bind $f.v <Home> { selectinlist .da.vars.pl.f.v 0; break }" );
+cmd( "bind $f.v <End> { selectinlist .da.vars.pl.f.v end; break }" );
 cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.pl.f.v <Return> }" );
 cmd( "bind $f.v <Button-2> { .da.vars.pl.f.v selection clear 0 end; .da.vars.pl.f.v selection set @%%x,%%y; set it [ selection get ]; set n_it [ .da.vars.pl.f.v curselection ]; set choice 20 }" );
 cmd( "bind $f.v <Button-3> { event generate .da.vars.pl.f.v <Button-2> -x %%x -y %%y }" );
