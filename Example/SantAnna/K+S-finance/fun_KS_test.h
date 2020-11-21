@@ -640,7 +640,7 @@ check_error( Q2err.size( ) > 0, "NO-PROD-FIRMS", Q2err.size( ), & errors );
 LOG( "\n   & JO2=%g L2d=%g L2=%g", 
 	 JO2, L2d, L2 );
 
-check_error( L2d > L2 || L2d < JO2 || L2 > Ls, "INCONSISTENT-LABOR", 0, & errors );
+check_error( L2d < JO2 || L2 > Ls, "INCONSISTENT-LABOR", 0, & errors );
 
 check_error( L2err.size( ) > 0, "NO-LABOR-PRODUCING", L2err.size( ), & errors ); 
 
