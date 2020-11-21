@@ -228,7 +228,7 @@ div.WordSection1
 
 </head>
 
-<body lang=PT-BR link=blue vlink=purple>
+<body lang=PT-BR link=blue vlink=purple style='word-wrap:break-word'>
 
 <div class=WordSection1>
 
@@ -680,8 +680,8 @@ lang=EN-US> for Linux.</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Debugger</span></b><span lang=EN-US>: the
-debugger command to use, normally </span><span class=Cdigo><span lang=EN-US>gdb</span></span><span
+</span></span><b><span lang=EN-US>Debugger</span></b><span lang=EN-US>: the debugger
+command to use, normally </span><span class=Cdigo><span lang=EN-US>gdb</span></span><span
 lang=EN-US> in Windows and Linux and </span><span class=Cdigo><span lang=EN-US>lldb</span></span><span
 lang=EN-US> in macOS.</span></p>
 
@@ -1140,10 +1140,10 @@ easier reading.</span></p>
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><a
-  name="_Larger_Font"></a><a name=lfont></a><a name=wrap></a><a name=LsdScript></a><span
-  lang=EN-US>&nbsp;</span><span style='font-size:10.0pt;color:black'><a
-  href="#top"><span style='color:red;text-decoration:none'>&#9650;Top</span></a></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><a name=LsdScript></a><a
+  name=wrap></a><a name=lfont></a><a name="_Larger_Font"></a><span lang=EN-US>&nbsp;</span><span
+  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
+  text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -1279,9 +1279,9 @@ name=run></a><a name="_Compile_and_Run"></a> </span></p>
 <h2><span lang=EN-US>Compile and Run </span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcuts</span></i><span lang=EN-US>: </span><span
-class=Cdigo><span lang=EN-US>Ctrl+r</span></span><span lang=EN-US> or click the
-on the second yellow lightning icon on the tool bar, the one with the green
-arrow.</span></p>
+class=Cdigo>F5</span><span lang=EN-US>, </span><span class=Cdigo><span
+lang=EN-US>Ctrl+r</span></span><span lang=EN-US> or click the on the second
+yellow lightning icon on the tool bar, the one with the green arrow.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Compile, if necessary, and execute the <a
 href="LSD_faqs.html#modelprogram">LSD model program</a>. LSD checks that all
@@ -1312,6 +1312,7 @@ Compilation Results</a>.</span></p>
 <h2><a name="_Recompile_Model"></a><span lang=EN-US>Recompile</span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcuts</span></i><span lang=EN-US>: </span><span
+class=Cdigo><span lang=EN-US>F6</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>Ctrl+p</span></span><span lang=EN-US> or click the
 on the first yellow lightning icon on the tool bar.</span></p>
 
@@ -1327,6 +1328,7 @@ irrespective to the usual LSD checks and/or defer its execution.</span></p>
 lang=EN-US>GDB/LLDB Debugger </span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcuts</span></i><span lang=EN-US>: </span><span
+class=Cdigo><span lang=EN-US>F7</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>Ctrl+g</span></span><span lang=EN-US> or click the
 on the white window with a green arrow icon on the tool bar.</span></p>
 
@@ -1347,8 +1349,8 @@ when explicitly directed to do so. </span></p>
 href="LSD_faqs.html#c">C++</a> debuggers. Therefore, they know nothing of LSD
 Equations, Objects, etc., except for their (complicate) technical
 representations. The debugger permits, for example, to investigate line by line
-the execution of an equation. However, this means that one has also to follow line-by-line
-a lot of non-interesting technical code. </span></p>
+the execution of an equation. However, this means that one has also to follow
+line-by-line a lot of non-interesting technical code. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>LSD modelers may find more useful the LSD
 Debugger: it follows the simulation at the level of individual Equations. When
@@ -1362,9 +1364,9 @@ the cause of an error. See the <a href="debug.html">LSD Debugger help page</a>.
 <p class=MsoNormal><span lang=EN-US>However, GDB/LLDB may be still useful in
 case of some hard problems. The LSD model program in GDB/LLDB runs as usual
 (slightly slower, if anything) but the user can interrupt the program at any
-point, check the value of any variable, and make the program proceed by single
-steps. It is usually useful to focus on one Equation at a time and see the
-behavior of the program while executing it. </span></p>
+point, check the value of any variable, and make the program proceed by single steps.
+It is usually useful to focus on one Equation at a time and see the behavior of
+the program while executing it. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Below, some basic GDB commands are
 presented (LLDB commands are similar but not the same, please check the LLDB
@@ -1717,8 +1719,8 @@ href="LSD_faqs.html#modelprogram">LSD model program</a>. The modeler writes in
 this file the code for the Equations in separated blocks whose order is of no
 importance. There are two possibilities to code one equation: the <a
 href="LSD_macros.html">LSD macro language</a> &nbsp;and using the (now
-deprecated) LSD C++ <a href="LSD_functions.html">functions</a> (recommended
-only for the maintenance of old models). Check this <a href="model_writing.html">tutorial</a>
+deprecated) LSD C++ <a href="LSD_functions.html">functions</a> (recommended only
+for the maintenance of old models). Check this <a href="model_writing.html">tutorial</a>
 on how to create your first model.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The equation file shown in LMM should be
@@ -1924,9 +1926,9 @@ the table below. </span></p>
 
 </div>
 
-<p class=MsoNormal><span lang=EN-US style='color:white'>Other than manually </span><span
-lang=EN-US>modifying the model option entries, the dialog box offers options
-for quickly modify the configuration:</span></p>
+<p class=MsoNormal><span lang=EN-US style='color:white'>Other than manually
+modifying the model option entries, the dialog box offers options for quickly
+modify the configuration:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
@@ -1945,8 +1947,8 @@ lang=EN-US> button</span></b><span lang=EN-US>: add extra source files to the
 model. Adding files here do not add the corresponding </span><span class=Cdigo><span
 lang=EN-US>#include</span></span><span lang=EN-US> lines to your main <a
 href="LSD_faqs.html#equationfile">equation file</a>. Please check the
-discussion <a href="#_Show_Extra_Files">here</a> about the use of extra source
-files in your model. </span></p>
+discussion <a href="#_Show_Extra_Files">here</a> about the use of extra source files
+in your model. </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
@@ -1960,8 +1962,8 @@ default values. Also removes all extra files from the configuration.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Clean Obj</span></b></span><b><span
 lang=EN-US>. button</span></b><span lang=EN-US>: erases all intermediate
-(object) compiler files from LSD and the current model. Does not change the
-model options. It can be used to fix some rare compiler inconsistency problems.</span></p>
+(object) compiler files from LSD and the current model. Does not change the model
+options. It can be used to fix some rare compiler inconsistency problems.</span></p>
 
 <h2><a name=description></a><a name=modelinfo></a><a name="compilation_options"></a><a
 name="_System_Options"></a><span lang=EN-US>System Options </span></h2>
@@ -2141,8 +2143,8 @@ installed in case of Linux computers) </span></p>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-ltcl$(TCL_VERSION)
   -ltk$(TCL_VERSION)</span></span><span lang=EN-US style='color:black'><br>
   (Windows/Linux)</span></p>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-framework Tcl -framework
-  Tk</span></span><span lang=EN-US style='color:black'><br>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-framework Tcl
+  -framework Tk</span></span><span lang=EN-US style='color:black'><br>
   (macOS)</span></p>
   </td>
   <td width="42%" style='width:42.3%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>

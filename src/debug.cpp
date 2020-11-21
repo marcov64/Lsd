@@ -164,7 +164,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 		
 		cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.hook .deb.b.move.net -padx $butSpc -side left" );
 		
-		cmd( "bind .deb <KeyPress-u> { .deb.b.move.up invoke }; bind .deb <KeyPress-U> {  .deb.b.move.up invoke }" );
+		cmd( "bind .deb <KeyPress-u> { .deb.b.move.up invoke }; bind .deb <KeyPress-U> { .deb.b.move.up invoke }" );
 		cmd( "bind .deb <Up> { .deb.b.move.up invoke }" );
 		cmd( "bind .deb <KeyPress-n> { .deb.b.move.broth invoke }; bind .deb <KeyPress-N> { .deb.b.move.broth invoke }" );
 		cmd( "bind .deb <Right> { .deb.b.move.broth invoke }" );
@@ -194,10 +194,10 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				cmd( "ttk::button .deb.b.act.call -width $butWidD -text Caller -command { set choice 9 } -underline 0" );
 				cmd( "ttk::button .deb.b.act.prn_v -width $butWidD -text \"v\\\[...\\]\" -command { set choice 15 } -underline 0" );
 				
-				cmd( "bind .deb <KeyPress-r> { .deb.b.act.run invoke }; bind .deb <KeyPress-R> { .deb.b.act.run invoke }" );
-				cmd( "bind .deb <KeyPress-i> { .deb.b.act.until invoke }; bind .deb <KeyPress-I> { .deb.b.act.until invoke }" );
-				cmd( "bind .deb <KeyPress-s> { .deb.b.act.ok invoke }; bind .deb <KeyPress-S> { .deb.b.act.ok invoke }" );
-				cmd( "bind .deb <KeyPress-c> { .deb.b.act.call invoke }; bind .deb <KeyPress-C> { .deb.b.act.call invoke }" );
+				cmd( "bind .deb <KeyPress-r> { .deb.b.act.run invoke }; bind .deb <KeyPress-R> { .deb.b.act.run invoke }; bind .deb <F5> { .deb.b.act.run invoke }" );
+				cmd( "bind .deb <KeyPress-i> { .deb.b.act.until invoke }; bind .deb <KeyPress-I> { .deb.b.act.until invoke }; bind .deb <F7> { .deb.b.act.until invoke }" );
+				cmd( "bind .deb <KeyPress-s> { .deb.b.act.ok invoke }; bind .deb <KeyPress-S> { .deb.b.act.ok invoke }; bind .deb <F8> { .deb.b.act.ok invoke }" );
+				cmd( "bind .deb <KeyPress-c> { .deb.b.act.call invoke }; bind .deb <KeyPress-C> { .deb.b.act.call invoke }; bind .deb <F6> { .deb.b.act.call invoke }" );
 				cmd( "bind .deb <KeyPress-v> { .deb.b.act.prn_v invoke }; bind .deb <KeyPress-V> { .deb.b.act.prn_v invoke }" );
 			}
 			

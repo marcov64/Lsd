@@ -228,7 +228,7 @@ div.WordSection1
 
 </head>
 
-<body lang=PT-BR link=blue vlink=purple>
+<body lang=PT-BR link=blue vlink=purple style='word-wrap:break-word'>
 
 <div class=WordSection1>
 
@@ -472,8 +472,8 @@ width=304 height=19 src="image/inst_debugger.png"></span></p>
 width=666 height=31 src="image/browse_debugger.png"></span></p>
 
 <ul type=disc>
- <li class=MsoNormal><span lang=EN-US>The <a href="#simulation">simulation
-     control buttons</a> (not available in the Data Browser):</span></li>
+ <li class=MsoNormal><span lang=EN-US>The <a href="#control">simulation control
+     buttons</a> (not available in the Data Browser):</span></li>
 </ul>
 
 <p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US><img border=0
@@ -625,7 +625,8 @@ connecting the current Object to its neighbors in the network, if any. This
 button is disabled if the Object is not configured as a network node. Clicking
 this button while the network links window is open closes it.</span></p>
 
-<h2><a name="_Object_content"></a><span lang=EN-US>Simulation control buttons </span></h2>
+<h2><a name="_Object_content"></a><a name=control></a><span lang=EN-US>Simulation
+control buttons </span></h2>
 
 <p class=MsoNormal style='margin:0cm'><span lang=EN-US>These buttons control
 the flow of the <a href="LSD_faqs.html#simulationrun">simulation run</a> during
@@ -636,11 +637,12 @@ Browser</a> window.</span></p>
 36.0pt;text-indent:-18.0pt'><a name=run></a><span lang=EN-US style='font-size:
 10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Run</span></b></span><span
-lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>R</span></span><span
-lang=EN-US>): continues the simulation closing the <a href="#operate">Debugger</a>
-window and leaving <a href="#activate">debug mode</a>. Therefore, the
-simulation is no longer interrupted until a <a href="#cond">conditional break</a>
-is met, or buttons </span><span class=Cdigo><span lang=EN-US>Debug</span></span><span
+lang=EN-US> (<i>shortcuts</i>: </span><span class=Cdigo><span lang=EN-US>R</span></span>,
+<span class=Cdigo><span lang=EN-US>F5</span></span><span lang=EN-US>):
+continues the simulation closing the <a href="#operate">Debugger</a> window and
+leaving <a href="#activate">debug mode</a>. Therefore, the simulation is no
+longer interrupted until a <a href="#cond">conditional break</a> is met, or
+buttons </span><span class=Cdigo><span lang=EN-US>Debug</span></span><span
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>Pause</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>Stop</span></span><span
 lang=EN-US> are pressed in the <a href="log.html">Log</a> window.</span></p>
@@ -649,7 +651,8 @@ lang=EN-US> are pressed in the <a href="log.html">Log</a> window.</span></p>
 36.0pt;text-indent:-18.0pt'><a name=until></a><span lang=EN-US
 style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Until</span></b></span><span
-lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>I</span></span><span
+lang=EN-US> (<i>shortcuts</i>: </span><span class=Cdigo><span lang=EN-US>I</span></span><span
+lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>F7</span></span><span
 lang=EN-US>): ask for a time step and normally continue the simulation until
 there, when debug mode is reactivated, causing for the simulation to be
 interrupted at the first <a href="LSD_faqs.html#variable">Variable</a> to be
@@ -659,7 +662,8 @@ debugged. </span></p>
 36.0pt;text-indent:-18.0pt'><a name=step></a><span lang=EN-US style='font-size:
 10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Step</span></b></span><span
-lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>S</span></span><span
+lang=EN-US> (<i>shortcuts</i>: </span><span class=Cdigo><span lang=EN-US>S</span></span><span
+lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>F8</span></span><span
 lang=EN-US>): continues the simulation, remaining in debug mode, until another
 Variable to be debugged is updated, either in the same or in a subsequent time
 step. </span></p>
@@ -668,7 +672,8 @@ step. </span></p>
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-size:10.0pt;
 font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Caller</span></b></span><span
-lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>C</span></span><span
+lang=EN-US> (<i>shortcuts</i>: </span><span class=Cdigo><span lang=EN-US>C</span></span><span
+lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>F6</span></span><span
 lang=EN-US>): move the Debugger window to the <a href="LSD_faqs.html#object">Object</a>
 containing the Variable which requested the computation of the current
 Variable. If the Variable computation was not triggered by any Equation (LSD
@@ -683,9 +688,9 @@ lang=EN-US>): show the set of intermediate values used in the Variable’s <a
 href="LSD_faqs.html#equation">Equation</a>. These temporary values may be used
 to re-construct the internal computation of the Variable just executed. Please
 note that only the temporary variables effectively used in the Equation have
-meaningful values, all others show useless data. These values may not be reliable
-in case the Debugger was activated because of a conditional break. Clicking
-this button while the intermediate values window is open closes it.</span></p>
+meaningful values, all others show useless data. These values may not be
+reliable in case the Debugger was activated because of a conditional break.
+Clicking this button while the intermediate values window is open closes it.</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><a name=printstack></a><span lang=EN-US
@@ -754,9 +759,9 @@ been updated.</span></p>
 element name activates the </span><span class=Cdigo><span lang=EN-US><a
 href="menudata_init.html#setall">Set All<span style='font-family:"Arial",sans-serif'>
 command</span></a></span></span><span lang=EN-US>. The </span><span
-class=Cdigo><span lang=EN-US>Set All</span></span><span lang=EN-US> command recognizes
-the <a href="LSD_faqs.html#object">instance</a> of the Object currently
-selected, and allows the change of a single branch in the <a
+class=Cdigo><span lang=EN-US>Set All</span></span><span lang=EN-US> command
+recognizes the <a href="LSD_faqs.html#object">instance</a> of the Object
+currently selected, and allows the change of a single branch in the <a
 href="LSD_faqs.html#modelstructure">model structure</a>. This can be used
 before running a simulation or at any one time during a <a
 href="LSD_faqs.html#simulationrun">simulation run</a>. The last update time of
@@ -1063,8 +1068,8 @@ and    <i>Y</i> = G(<i>X</i>) </span></p>
 <p class=MsoNormal><span lang=EN-US>Of course, it is necessary that either F(.)
 or G(.) use a lagged value, otherwise the set of two equations is not
 computable (a kind of “egg-and-chicken” problem). Similar errors are common
-even in mildly complex models, when a long chain of equations reciprocal computations
-can hinder the source of the error. </span></p>
+even in mildly complex models, when a long chain of equations reciprocal
+computations can hinder the source of the error. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Model writers can make use of the stack log
 provided, on request, by LSD. At a significant cost to speed, when the value

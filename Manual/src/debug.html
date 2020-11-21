@@ -24,16 +24,16 @@ w\:* {behavior:url(#default#VML);}
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>20</o:Revision>
-  <o:TotalTime>548</o:TotalTime>
+  <o:Revision>21</o:Revision>
+  <o:TotalTime>555</o:TotalTime>
   <o:Created>2018-03-16T19:40:00Z</o:Created>
-  <o:LastSaved>2020-09-25T21:29:00Z</o:LastSaved>
-  <o:Pages>1</o:Pages>
-  <o:Words>4559</o:Words>
-  <o:Characters>24620</o:Characters>
+  <o:LastSaved>2020-11-21T21:43:00Z</o:LastSaved>
+  <o:Pages>12</o:Pages>
+  <o:Words>4561</o:Words>
+  <o:Characters>24632</o:Characters>
   <o:Lines>205</o:Lines>
   <o:Paragraphs>58</o:Paragraphs>
-  <o:CharactersWithSpaces>29121</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>29135</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -43,7 +43,7 @@ target="debug_arquivos/props008.xml">
 <link rel=colorSchemeMapping href="debug_arquivos/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
-  <w:Zoom>110</w:Zoom>
+  <w:View>Print</w:View>
   <w:SpellingState>Clean</w:SpellingState>
   <w:GrammarState>Clean</w:GrammarState>
   <w:TrackMoves>false</w:TrackMoves>
@@ -1834,7 +1834,8 @@ table.Tabelanormal
  </o:shapelayout></xml><![endif]-->
 </head>
 
-<body lang=PT-BR link=blue vlink=purple style='tab-interval:36.0pt'>
+<body lang=PT-BR link=blue vlink=purple style='tab-interval:36.0pt;word-wrap:
+break-word'>
 
 <div class=WordSection1>
 
@@ -1973,8 +1974,8 @@ window, when applicable.<o:p></o:p></span></p>
 <h1><a name="_The_debugging_process"></a><span lang=EN-US style='mso-ansi-language:
 EN-US'>The debugging <span class=GramE>process</span><o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The first
-step to start the debugging procedure is to set one or more <a
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The first step
+to start the debugging procedure is to set one or more <a
 href="LSD_faqs.html#variable">Variables</a> for debugging before a <a
 href="LSD_faqs.html#simulationrun">simulation run</a> (see <a
 href="browser.html#changeelement">here</a> how). Next, still before running the
@@ -1990,21 +1991,20 @@ href="menurun.html#run">start</a> the simulation run using menu </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Run&gt;Run</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>. <o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After
-finishing the computation of any of the marked Variables, the simulation is
-interrupted, the <a href="#operate">Debugger window</a> is opened, and the
-contents of the <a href="LSD_faqs.html#object">Object</a> <a
-href="LSD_faqs.html#object">instance</a> containing the computed Variable is
-presented. At this point, the user can browse through the model's Objects using
-the <a href="#browse">browsing buttons</a>. Analyzing the values of the
-Variables and <a href="LSD_faqs.html#parameter">Parameters</a> it is possible
-to check if the value returned by the <a href="LSD_faqs.html#equation">Equation</a>
-is the expected one. The user can also refer to the values of the temporary
-variables </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'><a href="#v"><span class=GramE><span style='color:gray;text-decoration:
-none;text-underline:none'>v[</span></span><span style='color:gray;text-decoration:
-none;text-underline:none'>…]</span></a></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> just computed by the current Equation’s code. <o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After finishing
+the computation of any of the marked Variables, the simulation is interrupted,
+the <a href="#operate">Debugger window</a> is opened, and the contents of the <a
+href="LSD_faqs.html#object">Object</a> <a href="LSD_faqs.html#object">instance</a>
+containing the computed Variable is presented. At this point, the user can
+browse through the model's Objects using the <a href="#browse">browsing buttons</a>.
+Analyzing the values of the Variables and <a href="LSD_faqs.html#parameter">Parameters</a>
+it is possible to check if the value returned by the <a
+href="LSD_faqs.html#equation">Equation</a> is the expected one. The user can
+also refer to the values of the temporary variables </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'><a href="#v"><span style='color:
+gray;text-decoration:none;text-underline:none'>v[…]</span></a></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> just computed by the current
+Equation’s code. <o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The modeler
 can still control the Variables that started to be computed but could not be
@@ -2161,7 +2161,7 @@ lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 <ul type=disc>
  <li class=MsoNormal style='mso-list:l7 level1 lfo6;tab-stops:list 36.0pt'><span
      lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
-     EN-US'>The <a href="#simulation">simulation control buttons</a> (not
+     EN-US'>The <a href="#control">simulation control buttons</a> (not
      available in the Data Browser):<o:p></o:p></span></li>
 </ul>
 
@@ -2365,8 +2365,9 @@ network, if any. This button is disabled if the Object is not configured as a
 network node. Clicking this button while the network links window is open
 closes it.<o:p></o:p></span></p>
 
-<h2><a name="_Object_content"></a><span lang=EN-US style='mso-fareast-font-family:
-"Times New Roman";mso-ansi-language:EN-US'>Simulation control buttons <o:p></o:p></span></h2>
+<h2><a name="_Object_content"></a><a name=control></a><span lang=EN-US
+style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN-US'>Simulation
+control buttons <o:p></o:p></span></h2>
 
 <p class=MsoNormal style='margin:0cm'><span lang=EN-US style='mso-ansi-language:
 EN-US'>These buttons control the flow of the <a
@@ -2382,8 +2383,9 @@ mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
 Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
 style='mso-ansi-language:EN-US'>Run</span></b></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>R</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcuts</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>R</span></span>, <span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>F5</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>): continues the simulation closing the <a
 href="#operate">Debugger</a> window and leaving <a href="#activate">debug mode</a>.
 Therefore, the simulation is no longer interrupted until a <a href="#cond">conditional
@@ -2404,8 +2406,10 @@ mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
 Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
 style='mso-ansi-language:EN-US'>Until</span></b></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+style='mso-ansi-language:EN-US'> (<i>shortcuts</i>: </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>I</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>F7</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>): ask for a time step and normally continue
 the simulation until there, when debug mode is reactivated, causing for the
 simulation to be interrupted at the first <a href="LSD_faqs.html#variable">Variable</a>
@@ -2419,8 +2423,10 @@ mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
 Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
 style='mso-ansi-language:EN-US'>Step</span></b></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+style='mso-ansi-language:EN-US'> (<i>shortcuts</i>: </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>S</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>F8</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>): continues the simulation, remaining in debug
 mode, until another Variable to be debugged is updated, either in the same or
 in a subsequent time step. <o:p></o:p></span></p>
@@ -2432,8 +2438,10 @@ mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
 EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
 style='mso-ansi-language:EN-US'>Caller</span></b></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+style='mso-ansi-language:EN-US'> (<i>shortcuts</i>: </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>C</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>F6</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>): move the Debugger window to the <a
 href="LSD_faqs.html#object">Object</a> containing the Variable which requested
 the computation of the current Variable. If the Variable computation was not
@@ -2450,13 +2458,13 @@ style='mso-ansi-language:EN-US'>v[…]</span></b></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>V</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>): show the set of intermediate values used in
-the Variable’s <a href="LSD_faqs.html#equation">Equation</a>. These temporary
-values may be used to re-construct the internal computation of the Variable
-just executed. Please note that only the temporary variables effectively used
-in the Equation have meaningful values, all others show useless data. These
-values may not be reliable in case the Debugger was activated because of a
-conditional break. Clicking this button while the intermediate values window is
-open closes it.<o:p></o:p></span></p>
+the Variable’s <a href="LSD_faqs.html#equation">Equation</a>. These temporary values
+may be used to re-construct the internal computation of the Variable just
+executed. Please note that only the temporary variables effectively used in the
+Equation have meaningful values, all others show useless data. These values may
+not be reliable in case the Debugger was activated because of a conditional
+break. Clicking this button while the intermediate values window is open closes
+it.<o:p></o:p></span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><a
@@ -2518,8 +2526,7 @@ mso-ansi-language:EN-US'>Object content <o:p></o:p></span></h2>
 href="#top">Debugger</a> and the <a href="menudata_brow.html">Data Browser</a>
 windows, a two-column list shows the <a href="LSD_faqs.html#variable">Variables</a>
 and <a href="LSD_faqs.html#parameter">Parameters</a> contained in the <a
-href="LSD_faqs.html#object">Object</a> shown. In each column, a line <span
-class=GramE>shows</span>: <o:p></o:p></span></p>
+href="LSD_faqs.html#object">Object</a> shown. In each column, a line shows: <o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
 mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
@@ -2555,9 +2562,9 @@ class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
 href="menudata_init.html#setall">Set All<span style='font-family:"Arial",sans-serif'>
 command</span></a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'>.
 The </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Set
-All</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> command
-recognizes the <a href="LSD_faqs.html#object">instance</a> of the Object
-currently selected, and allows the change of a single branch in the <a
+All</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> command recognizes
+the <a href="LSD_faqs.html#object">instance</a> of the Object currently
+selected, and allows the change of a single branch in the <a
 href="LSD_faqs.html#modelstructure">model structure</a>. This can be used
 before running a simulation or at any one time during a <a
 href="LSD_faqs.html#simulationrun">simulation run</a>. The last update time of
@@ -2761,9 +2768,9 @@ in the current (shown) <a href="LSD_faqs.html#object">Object</a>. After a
 successful search, the Debugger highlights this element and adjusts the window
 scroll position to make it visible, if necessary.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Note that
-the Find Element window is endowed with auto-completion: while you type, the
-entry box proposes the first element with the typed initial letters, if any.<o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Note that the
+Find Element window is endowed with auto-completion: while you type, the entry
+box proposes the first element with the typed initial letters, if any.<o:p></o:p></span></p>
 
 <h2><a name="_Find_Object_Containing"></a><span lang=EN-US style='mso-ansi-language:
 EN-US'>Find Object Containing<o:p></o:p></span></h2>
@@ -2914,9 +2921,9 @@ the time step and go to 1<o:p></o:p></span></p>
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This cycle
 starts with the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>Root</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
-Object, and proceeds, recursively, for each of its descendant, their own descendants
-and so on. Note that the Equation for a Variable can be computed under three
-circumstances: <o:p></o:p></span></p>
+Object, and proceeds, recursively, for each of its descendant, their own
+descendants and so on. Note that the Equation for a Variable can be computed
+under three circumstances: <o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
 mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
@@ -2953,10 +2960,10 @@ style='mso-spacerun:yes'>   </span></span><span
 style='mso-spacerun:yes'> </span>and<span style='mso-spacerun:yes'>    </span><i>Y</i>
 = G(<i>X</i>) <o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Of course,
-it is necessary that either F(.) or G(.) use a lagged value, otherwise the set
-of two equations is not computable (a kind of “egg-and-chicken” problem).
-Similar errors are common even in mildly complex <span class=GramE>models, when</span>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Of course, it
+is necessary that either F(.) or G(.) use a lagged value, otherwise the set of
+two equations is not computable (a kind of “egg-and-chicken” problem). Similar
+errors are common even in mildly complex <span class=GramE>models, when</span>
 a long chain of equations reciprocal computations can hinder the source of the
 error. <o:p></o:p></span></p>
 
@@ -3095,8 +3102,8 @@ EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>The
 Variable in whose equation it was requested is </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>VarTwo</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> (this field is not present if the
-Variable was computed by the simulation manager)<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> (this field is not present if the Variable
+was computed by the simulation manager)<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
 profiler log provides the exact scheduling used by the simulation manager to

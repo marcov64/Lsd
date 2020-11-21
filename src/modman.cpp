@@ -399,9 +399,9 @@ int lsdmain( int argn, char **argv )
 	cmd( "set w .m.model" );
 	cmd( "ttk::menu $w -tearoff 0" );
 	cmd( ".m add cascade -label Model -menu $w -underline 0" );
-	cmd( "$w add command -label \"Compile and Run...\" -state disabled -underline 0 -command { set choice 2 } -accelerator Ctrl+r" );	// entryconfig 0
-	cmd( "$w add command -label \"Recompile\" -state disabled -underline 0 -command { set choice 6 } -accelerator Ctrl+p" );	// entryconfig 1
-	cmd( "$w add command -label \"[ string toupper $DbgExe ] Debugger\" -state disabled -underline 0 -command { set choice 13 } -accelerator Ctrl+g" );	// entryconfig 2
+	cmd( "$w add command -label \"Compile and Run...\" -state disabled -underline 0 -command { set choice 2 } -accelerator F5" );	// entryconfig 0
+	cmd( "$w add command -label \"Recompile\" -state disabled -underline 0 -command { set choice 6 } -accelerator F6" );	// entryconfig 1
+	cmd( "$w add command -label \"[ string toupper $DbgExe ] Debugger\" -state disabled -underline 0 -command { set choice 13 } -accelerator F7" );	// entryconfig 2
 	cmd( "$w add command -label \"Create 'No Window' Version\" -underline 8 -state disabled -command { set choice 62 }" );	// entryconfig 3
 	cmd( "$w add command -label \"Model Info...\" -underline 6 -state disabled -command { set choice 44 }" );	// entryconfig 4
 	cmd( "$w add separator" );	// entryconfig 5
@@ -626,15 +626,15 @@ int lsdmain( int argn, char **argv )
 	cmd( "bind .f.t.t <Control-f> { set choice 11 }; bind .f.t.t <Control-F> { set choice 11 }" );
 	cmd( "bind .f.t.t <Control-s> { .m.file invoke 2 }" );
 	cmd( "bind .f.t.t <Control-a> { set choice 4 }" );
-	cmd( "bind .f.t.t <Control-r> { set choice 2 }; bind .f.t.t <Control-R> { set choice 2 }" );
+	cmd( "bind .f.t.t <Control-r> { set choice 2 }; bind .f.t.t <Control-R> { set choice 2 }; bind .f.t.t <F5> { set choice 2 }" );
+	cmd( "bind .f.t.t <Control-p> { set choice 6; break }; bind .f.t.t <Control-P> { set choice 6; break }; bind .f.t.t <F6> { set choice 6 }" );
+	cmd( "bind .f.t.t <Control-g> { set choice 13 }; bind .f.t.t <Control-G> { set choice 13 }; bind .f.t.t <F7> { set choice 13 }" );
 	cmd( "bind .f.t.t <Control-e> { set choice 8 }" );
 	cmd( "bind .f.t.t <Control-j> { set choice 70 }" );
 	cmd( "bind .f.t.t <Control-o> { if { $showFileCmds } { set choice 8; break } { break } }" );
 	cmd( "bind .f.t.t <Control-q> { set choice 1 }; bind .f.t.t <Control-Q> { set choice 1 }" );
-	cmd( "bind .f.t.t <Control-p> { set choice 6; break }; bind .f.t.t <Control-P> { set choice 6; break }" );
 	cmd( "bind .f.t.t <Control-u> { set choice 32 }" );
 	cmd( "bind .f.t.t <Control-m> { set choice 17 }" );
-	cmd( "bind .f.t.t <Control-g> { set choice 13 }; bind .f.t.t <Control-G> { set choice 13 }" );
 	cmd( "bind .f.t.t <Control-d> { set choice 5; break }" );
 	cmd( "bind .f.t.t <Control-b> { set choice 33; break }; bind .f.t.t <Control-B> { set choice 33; break }" );
 	cmd( "bind .f.t.t <Control-minus> { .m.edit invoke 23 }" );
