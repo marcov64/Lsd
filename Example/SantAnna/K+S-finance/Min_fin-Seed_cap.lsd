@@ -502,7 +502,7 @@ Var: Deb 1 s + n n	0
 Var: Def 1 s + n n	0
 Var: G 1 s + n n	0
 Var: GDP 1 s + n n	0
-Var: GDPnom 0 s + n n
+Var: GDPnom 1 s + n n	0
 Var: Sav 0 s + n n
 Var: SavAcc 0 s + n n
 Var: Tax 1 s + n n	0
@@ -540,7 +540,7 @@ Func: banksMaps 0 n + n n
 Func: pickBank 0 n + n n
 Var: Cl 0 s + n n
 Var: Depo 1 s + n n	0
-Var: DivB 0 n + n n
+Var: DivB 1 n + n n	0
 Var: Gbail 1 s + n n	0
 Var: Loans 0 s + n n
 Var: NWb 0 s + n n
@@ -620,7 +620,7 @@ Func: f1rescale 0 n + n n
 Var: A1 4 s + n n	1	1	1	1
 Var: D1 0 s + n n
 Var: Deb1 1 s + n n	0
-Var: Div1 0 n + n n
+Var: Div1 1 n + n n	0
 Var: JO1 0 n + n n
 Var: L1 1 s + n n	0
 Var: L1d 0 s + n n
@@ -701,7 +701,7 @@ Param: e6 0 n + n n	1
 Param: e7 0 n + n n	0.3
 Param: e8 0 n + n n	0.3
 Param: eta 0 n + n n	19
-Param: f2min 0 n + n n	1e-005
+Param: f2min 0 n + n n	1e-05
 Param: iota 0 n + n n	0.1
 Param: kappaMax 0 n + n n	0.5
 Param: kappaMin 0 n + n n	0
@@ -718,7 +718,7 @@ Var: A2 1 s + n n	1
 Var: CI 0 s + n n
 Var: CPI 4 s + n n	1	1	1	1
 Var: Deb2 1 s + n n	0
-Var: Div2 0 n + n n
+Var: Div2 1 n + n n	0
 Var: D2 0 s + n n
 Var: D2d 0 s + n n
 Var: D2e 0 s + n n
@@ -744,7 +744,7 @@ Var: SI 0 s + n n
 Var: S2 0 s + n n
 Var: Tax2 0 n + n n
 Var: W2 0 s + n n
-Var: c2 0 s + n n
+Var: c2 1 s + n n	0
 Var: c2e 0 s + n n
 Var: dCPI 1 s + n n	0
 Var: dCPIb 1 s + n n	0
@@ -1050,7 +1050,7 @@ END_DESCRIPTION
 Variable_GDPnom
 Gross domestic product in nominal (monetary) terms
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_Sav
@@ -1297,7 +1297,7 @@ END_DESCRIPTION
 Variable_DivB
 Total dividends paid by banks
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_Gbail
@@ -1607,7 +1607,6 @@ END_DESCRIPTION
 Parameter_L1shortMax
 Maximum labor shortage allowed in capital-good sector
 (0, 1)
-
 _INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION
@@ -1785,7 +1784,7 @@ END_DESCRIPTION
 Variable_Div1
 Total dividends paid by firms in capital-good sector
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_JO1
@@ -2391,7 +2390,7 @@ END_DESCRIPTION
 Variable_Div2
 Total dividends paid by firms in consumption-good sector
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_D2
@@ -2549,7 +2548,7 @@ END_DESCRIPTION
 Variable_c2
 Planned average unit cost in consumption-good sector
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_c2e
