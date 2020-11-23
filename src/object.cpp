@@ -3281,16 +3281,22 @@ void collect_inst( object *r, o_setT &list )
 {
 	bridge *cb;
 	object *cur;
+	pair < o_setT::iterator, bool > res;
 
 	// collect own address
-	auto res = list.emplace( r );
+#ifdef CPP11
+	res = list.emplace( r );
+#else
+	res = list.insert( r );
+#endif
+
 	if ( ! res.second )
 	{
 		sprintf( msg, "object '%s' cannot be collected for pointer checking", r->label );
 		error_hard( msg, "out of memory or LSD internal error", "free some memory or disable pointer checking by defining 'NO_POINTER_CHECK'" );
 		return;
 	}
-
+	
 	// search among descendants
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL; cur = cur->next )
