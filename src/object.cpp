@@ -3495,9 +3495,10 @@ void collect_inst( object *r, o_setT &list )
 {
 	bridge *cb;
 	object *cur;
+	pair < o_setT::iterator, bool > res;
 	
 	// collect own address
-	auto res = list.emplace( r );
+	res = list.emplace( r );
 	if ( ! res.second )
 	{
 		sprintf( msg, "object '%s' cannot be collected for pointer checking", r->label );

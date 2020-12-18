@@ -149,18 +149,18 @@ CYCLE( cur, "Cli" )								// remove historical clients
 	firms.erase( ( int ) VS( cur, "_IDc" ) );
 	
 i = ceil( VS( PARENT, "gamma" ) * k );			// new clients in period
-i = v[0] = min( max( i, 1 ), min( h - k, firms.size( ) ) );// between [1, F2 - HC]
+i = min( max( i, 1 ), min( h - k, firms.size( ) ) );// between [1, F2 - HC]
 
 v[1] = max( 1, ceil( h / VS( PARENT, "F1" ) ) );// firm fair share
 
 if ( k + i < v[1] )								// ensure at least fair share
-	i = v[0] = v[1] - k;
+	i = v[1] - k;
 
 // build vector of all target firms (not yet clients)
 vector < firmPairT > targets( firms.begin( ), firms.end( ) );
 
 // draw new clients from target list, updating the list after each draw
-for ( ; i > 0; --i )
+for ( v[0] = 0; i > 0 && targets.size( ) > 0; --i, ++v[0] )
 {
 	h = uniform_int( 0, targets.size( ) - 1 );	// draw a index in the list
 	firmPairT client = targets[ h ];			// retrieve drawn map pair
