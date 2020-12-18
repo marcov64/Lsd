@@ -75,7 +75,7 @@ object *initParent = NULL;			// parent of new variable initial setting
 
 
 // list of choices that are bad with existing run data
-int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
+int badChoices[ ] = { 1, 2, 3, 6, 7, 12, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
@@ -884,6 +884,7 @@ int browse( object *r, int *choice )
 			cmd( "$w add separator" );
 
 			cmd( "$w add command -label \"Analysis of Results...\" -command { set choice 26 } -underline 0 -accelerator Ctrl+A" );
+			cmd( "$w add command -label \"Analysis of MC Experiment...\" -command { set choice 12 } -underline 0" );
 			cmd( "$w add command -label \"Data Browse...\" -command { set choice 34 } -underline 5 -accelerator Ctrl+B" );
 
 			cmd( "set w .m.data.setsens" );
@@ -3486,16 +3487,17 @@ case 24:
 	return n;
 
 
-// NOT USED
-case 25:
+// Enter the analysis of results module for Monte Carlo analysis
+case 12:
 
+	analysis( choice, true );
+	
 break;
-
 
 // Enter the analysis of results module
 case 26:
 
-	analysis( choice );
+	analysis( choice, false );
 
 break;
 

@@ -19,10 +19,6 @@ Contains the routines to manage the data analysis module.
 The main functions contained here are:
 
 - void analysis( int *choice )
-Makes an initialization and then there is the main cycle in
-read_data
-
-- void read_data( int *choice );                            
 Builds the managemen window, setting all the bindings, and enters in a cycle
 from which can make several choices:
 
@@ -115,20 +111,9 @@ store *vs = NULL;
 /***************************************************
 ANALYSIS
 ****************************************************/
-void analysis( int *choice )
+void analysis( int *choice, bool mc )
 {
-	*choice = 0;
-	while ( *choice == 0 )
-		read_data( choice );
-}
-
-
-/***************************************************
-READ_DATA
-****************************************************/
-void read_data( int *choice )
-{
-bool gz, mc;
+bool gz;
 char *app, dirname[ MAX_PATH_LENGTH + 1 ], str1[ MAX_ELEM_LENGTH + 1 ], str2[ MAX_ELEM_LENGTH + 1 ], str3[ MAX_ELEM_LENGTH + 1 ];
 double *datum, compvalue;
 int h, i, j, k, l, m, p, r;
@@ -560,7 +545,7 @@ cmd( "bind .da <Control-m> { set choice 47 }; bind .da <Control-M> { set choice 
 Tcl_SetVar( inter, "running", running ? "1" : "0", 0 );
 cmd( "if $running { showtop .da overM } { showtop .da overM 1 1 0 }" );
 
-if ( num_var == 0 )
+if ( ! mc && num_var == 0 )
 {
 	if ( first_run )
 		cmd( "ttk::messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"There are no series available\" -detail \"Click on button 'Add...' to load series from results files.\n\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"" );
@@ -637,8 +622,8 @@ while ( true )
 	cmd( ".da.vars.ch.sel conf -text \"Series = [ .da.vars.ch.f.v size ]\"" );
 	cmd( ".da.vars.pl.plot conf -text \"Plots = [ .da.vars.pl.f.v size ]\"" );
 
-	// analysis command loop
-	*choice = 0;
+	// analysis command loop (enter loading MC experiment if needed)
+	*choice = mc ? 25 : 0;
 	while ( ! *choice )
 		Tcl_DoOneEvent( 0 );
 
@@ -677,9 +662,7 @@ while ( true )
 		// Exit
 		case 2:
 			cmd( "if { [ .da.vars.pl.f.v size ] != 0 } { set answer [ ttk::messageBox -parent .da -type okcancel -title Confirmation -icon question -default ok -message \"Exit Analysis of Results?\" -detail \"All the plots and series created and not saved will be lost.\"] } { set answer ok }" );
-			app = ( char * ) Tcl_GetVar( inter, "answer", 0 );
-
-			cmd( "if { [ string compare $answer ok ] == 0 } { } { set choice 0 }" );
+			cmd( "if { ! [ string equal $answer ok ] } { set choice 0 }" );
 			if ( *choice == 0 )
 				break;
 
@@ -715,6 +698,7 @@ while ( true )
 
 			cmd( "catch { set a [ glob -nocomplain plotxy_* ] }" ); // remove directories
 			cmd( "foreach b $a { catch { file delete -force $b } }" );
+			
 			return;
 		  
 		 
@@ -2219,7 +2203,13 @@ while ( true )
 
 		// Add existing variables (no saved)
 		case 45: 
-			cmd( "set bidi 0" );
+			if ( *choice == 45 )
+				cmd( "set bidi 0" );
+			
+		// Insert MC series from disk
+		case 25: 
+			if ( *choice == 25 )
+				cmd( "set bidi 3" );
 			
 		// Add new series from existing ones
 		case 46:
@@ -2292,8 +2282,8 @@ while ( true )
 				if ( *choice == 2 )
 					break;
 			}
-				
-			mc = false;
+			
+			// process the proper case
 			cmd( "set choice $bidi" );
 			switch ( *choice )
 			{
@@ -2376,7 +2366,7 @@ while ( true )
 					Tcl_UnlinkVar( inter, "confi" );
 
 					if ( *choice == 2 )
-						break;
+						goto add_end;
 					
 				case 1:
 					gz = false;
@@ -2393,13 +2383,13 @@ while ( true )
 					h = *choice;		// number of files
 					
 					if ( h == 0 )
-						break; 			// no file selected
+						goto add_end; 	// no file selected
 					
 					if ( mc && h == 1 )
 					{
 						cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid number of results files\" -detail \"Monte Carlo experiment requires two or more files. Please adjust the number of simulation runs properly and regenerate the files.\"" );
 						plog( "\nError: invalid number of files\n" );
-						break;
+						goto add_end;
 					}
 				
 					var_names.resize( h );
@@ -2440,14 +2430,14 @@ while ( true )
 					cmd( "destroytop .da.pas" );
 					
 					if ( ! mc )
-						goto add_end;
+						goto add_clear;
 					
 					if ( stop )
 					{
 						delete [ ] vs;
 						vs = NULL;
 						num_var = max_c = file_counter = 0;
-						goto add_end;
+						goto add_clear;
 					}
 						
 					plog( "\nCreating MC series... " );
@@ -2469,7 +2459,7 @@ while ( true )
 								num_var = max_c = file_counter = 0;
 							}
 							
-							goto add_end;
+							goto add_clear;
 						}
 						
 						for ( j = 0; j < l; ++j )
@@ -2486,7 +2476,7 @@ while ( true )
 									num_var = max_c = file_counter = 0;
 								}
 							
-								goto add_end;
+								goto add_clear;
 							}
 						}
 					}
@@ -2536,12 +2526,17 @@ while ( true )
 					else
 						plog( "Done\n" );
 					
-				add_end:
+					add_clear:
+					
 					var_names.clear( );
 					cur_var.clear( );
 					
 					cmd( "selectinlist .da.vars.lb.f.v 0" );
 			}
+			
+			add_end:
+			
+			mc = false;
 
 		break;
 
