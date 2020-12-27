@@ -345,7 +345,7 @@ EQUATION( "_D1" )
 Potential demand (orders) received by a firm in capital-good sector
 */
 VS( CONSECL2, "Id" );							// make sure all orders are sent
-RESULT( V( "_BC" ) > 0 ? SUM_CND( "_nOrd", "_tOrd", "==", T ) : 0 )
+RESULT( SUM_CND( "_nOrd", "_tOrd", "==", T ) )
 
 
 EQUATION( "_HC" )

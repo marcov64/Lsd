@@ -1011,7 +1011,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 
 WRITE( "_oldVint", h );
 
-RESULT( h > 0 ? SUM( "_nVint" ) * v[1] : 0 )	// handle zero capital entrant
+RESULT( SUM( "_nVint" ) * v[1] )
 
 
 EQUATION( "_L2" )
@@ -1096,7 +1096,7 @@ EQUATION( "_Q2p" )
 Potential production with current machines and workers for a firm in 
 consumption-good sector
 */
-RESULT( V( "_life2cycle" ) > 0 ? SUM( "_Qvint" ) : 0 )
+RESULT( SUM( "_Qvint" ) )
 
 
 EQUATION( "_Q2pe" )

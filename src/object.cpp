@@ -2222,13 +2222,13 @@ double object::sum( char const *lab1, int lag, bool cond, char const *lab2, char
 
 	cv = search_var_err( this, lab1, no_search, true, "summing" );
 	if ( cv == NULL )
-		return NAN;
+		return 0;
 
 	if ( cond )
 	{	
 		lopc = logic_op_code( lop, "summing" );
 		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "summing" ) == NULL )
-			return NAN;
+			return 0;
 	}
 	else
 		lopc = -1;
@@ -2244,10 +2244,7 @@ double object::sum( char const *lab1, int lag, bool cond, char const *lab2, char
 			++n;
 		}
 
-	if ( n > 0 )
-		return tot;
-	else
-		return NAN;
+	return tot;
 }
 
 
@@ -2402,17 +2399,17 @@ double object::whg_av( char const *lab1, char const *lab2, int lag, bool cond, c
 
 	cv = search_var_err( this, lab1, no_search, true, "weighted averaging" );
 	if ( cv == NULL )
-		return NAN;
+		return 0;
 
 	cv = search_var_err( this, lab2, no_search, true, "weighted averaging" );
 	if ( cv == NULL )
-		return NAN;
+		return 0;
 
 	if ( cond )
 	{	
 		lopc = logic_op_code( lop, "weighted averaging" );
 		if ( lopc < 0 || search_var_err( this, lab3, no_search, true, "weighted averaging" ) == NULL )
-			return NAN;
+			return 0;
 	}
 	else
 		lopc = -1;
@@ -2428,10 +2425,7 @@ double object::whg_av( char const *lab1, char const *lab2, int lag, bool cond, c
 			++n;
 		}
 
-	if ( n > 0 )
-		return tot;
-	else
-		return NAN;
+	return tot;
 }
 
 
