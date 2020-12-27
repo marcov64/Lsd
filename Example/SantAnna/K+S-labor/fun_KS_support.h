@@ -138,7 +138,7 @@ void send_order( object *firm, double nMach )
 
 // add new vintage to the capital stock of a firm in equation 'K' and 'initCountry'
 
-void add_vintage( object *firm, double nMach, bool newInd )
+void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 {
 	double _Avint, _pVint, _tVint;
 	object *vint, *suppl, *wrk;
@@ -177,7 +177,7 @@ void add_vintage( object *firm, double nMach, bool newInd )
 // scrap (remove) vintage from capital stock in equation 'K'
 // return -1 if last vintage (not removed but shrank to 1 machine)
 
-double scrap_vintage( object *vint )
+double scrap_vintage( variable *var, object *vint )
 {
 	double RS;
 	object *cur;
@@ -253,7 +253,7 @@ void hire_worker( object *worker, int sec, object *firm, double wage )
 // update a worker after firing in equations 'fires1', '_fires2', 'entry2exit', 
 // 'quits1', 'retires1', '_quits2', '_retires2' 
 
-void fire_worker( object *worker )
+void fire_worker( variable *var, object *worker )
 {
 	WRITES( worker, "_employed", 0 );			// register fire
 	WRITES( worker, "_Te", 0 );
@@ -277,7 +277,7 @@ void fire_worker( object *worker )
 
 // perform worker quitting from current firm in equations 'hires1', 'hires2'
 
-void quit_worker( object *worker )
+void quit_worker( variable *var, object *worker )
 {
 	double Lscale = VS( PARENTS( worker ), "Lscale" );// labor scaling
 	
@@ -286,7 +286,7 @@ void quit_worker( object *worker )
 	else										// no: assume sector 2
 		INCRS( PARENTS( HOOKS( worker, FWRK ) ), "_quits2", Lscale );
 	
-	fire_worker( worker );						// register fire
+	fire_worker( var, worker );					// register fire
 }
 
 
@@ -517,7 +517,8 @@ void order_workers( int order, int obj, object *firm )
 #define MODE_IPROT 4							// fire non protected workers
 #define MODE_EXIT 5								// fire all when firm exiting
 
-double fire_workers( object *firm, int mode, double xsCap, double *redCap )
+double fire_workers( variable *var, object *firm, int mode, double xsCap, 
+					 double *redCap )
 {
 	bool fire;
 	int Te;
@@ -592,7 +593,7 @@ double fire_workers( object *firm, int mode, double xsCap, double *redCap )
 
 		if ( fire )								// if marked, process firing
 		{
-			fire_worker( worker );				// register fire
+			fire_worker( var, worker );				// register fire
 			*redCap += VLS( worker, "_Q", 1 ) * Lscale;// pot. fired capacity
 			++i;								// scaled equivalent fires
 		}
@@ -607,11 +608,11 @@ double fire_workers( object *firm, int mode, double xsCap, double *redCap )
 // add and configure entrant capital-good firm object(s) and required hooks 
 // in equations 'entry1exit' and 'initCountry'
 
-double entry_firm1( object *sector, int n, bool newInd )
+double entry_firm1( variable *var, object *sector, int n, bool newInd )
 {
 	double Atau, AtauMax, Btau, BtauMax, D10, L1rd, NW1, NW10, RD0, c1, f1, p1, 
 		   sV, w1avg, mult, equity = 0;
-	int ID1, IDb;
+	int ID1, IDb, t1ent;
 	object *firm, *bank, *cli, 
 		   *cons = SEARCHS( PARENTS( sector ), "Consumption" ), 
 		   *fin = SEARCHS( PARENTS( sector ), "Financial" ),
@@ -633,6 +634,7 @@ double entry_firm1( object *sector, int n, bool newInd )
 		NW10 = VS( sector, "NW10" ); 			// initial wealth in sector 1
 		f1 = 1.0 / n;							// fair share
 		sV = VS( lab, "sAvg" );					// initial worker skills
+		t1ent = 0;								// entered before t=1
 		w1avg = INIWAGE;						// initial notional wage
 		
 		// initial demand expectation, assuming all sector 2 firms, 
@@ -648,6 +650,7 @@ double entry_firm1( object *sector, int n, bool newInd )
 					VS( sector, "PPI" ) / VS( sector, "PPI0" ) );
 		f1 = 0;									// no market share
 		sV = 1;									// worker skills
+		t1ent = T;								// entered now
 		w1avg = VS( sector, "w1avg" );			// average wage in sector 1
 
 		// initial demand is the expected machine replacement under fair share
@@ -702,17 +705,16 @@ double entry_firm1( object *sector, int n, bool newInd )
 
 		// initialize variables
 		WRITES( firm, "_ID1", ID1 );
-		WRITES( firm, "_t1ent", T );
+		WRITES( firm, "_t1ent", t1ent );
+		WRITELLS( firm, "_Deb1", NW1 * Deb10ratio, t1ent, 1 );
+		WRITELLS( firm, "_L1rd", L1rd, t1ent, 1 );
+		WRITELLS( firm, "_NW1", NW1, t1ent, 1 );
+		WRITELLS( firm, "_RD", RD0, t1ent, 1 );
+		WRITELLS( firm, "_f1", f1, t1ent, 1 );
+		WRITELLS( firm, "_qc1", 1, t1ent, 1 );
 		
 		if ( newInd )
 		{
-			WRITELS( firm, "_Deb1", NW1 * Deb10ratio, -1 );
-			WRITELS( firm, "_L1rd", L1rd, -1 );
-			WRITELS( firm, "_NW1", NW1, -1 );
-			WRITELS( firm, "_RD", RD0, -1 );
-			WRITELS( firm, "_f1", f1, -1 );
-			WRITELS( firm, "_qc1", 1, -1 );
-			
 			// initialize the map of vintage productivity and skills
 			WRITE_EXTS( PARENTS( sector ), countryE, vintProd[ VNT( T - 1, ID1 ) ].sVp, sV );
 			WRITE_EXTS( PARENTS( sector ), countryE, vintProd[ VNT( T - 1, ID1 ) ].sVavg, sV );
@@ -742,7 +744,7 @@ double entry_firm1( object *sector, int n, bool newInd )
 // add and configure entrant consumer-good firm object(s) and required hooks 
 // in equations 'entry2exit' and 'initCountry'
 
-double entry_firm2( object *sector, int n, bool newInd )
+double entry_firm2( variable *var, object *sector, int n, bool newInd )
 {
 	bool postChg;
 	double A2, D20, D2e, Eavg, K, Kd, N, NW2, NW20, Q2u, c2, f2, f2posChg, 
@@ -889,28 +891,28 @@ double entry_firm2( object *sector, int n, bool newInd )
 		WRITES( firm, "_t2ent", t2ent );
 		WRITES( firm, "_life2cycle", life2cycle );		
 		WRITES( firm, "_postChg", postChg );
-		
+		WRITELLS( firm, "_Deb2", cash * Deb20ratio, t2ent, 1 );
+		WRITELLS( firm, "_f2", f2, t2ent, 1 );
+		WRITELLS( firm, "_f2", f2, t2ent, 2 );
+		WRITELLS( firm, "_mu2", mu20, t2ent, 1 );
+		WRITELLS( firm, "_p2", p2, t2ent, 1 );
+		WRITELLS( firm, "_qc2", 1, t2ent, 1 );
+		WRITELLS( firm, "_s2avg", sV, t2ent, 1 );
+	
+		for ( int i = 1; i <= 4; ++i )
+		{
+			WRITELLS( firm, "_D2", D2e, t2ent, i );
+			WRITELLS( firm, "_D2d", D2e, t2ent, i );
+		}
+	
 		if ( newInd )
 		{
-			WRITELS( firm, "_Deb2", cash * Deb20ratio, -1 );
-			WRITELS( firm, "_K", Kd, -1 );
-			WRITELS( firm, "_N", N, -1 );
-			WRITELS( firm, "_NW2", NW2, -1 );
-			WRITELS( firm, "_f2", f2, -1 );
-			WRITELS( firm, "_f2", f2, -1 );
-			WRITELS( firm, "_mu2", mu20, -1 );
-			WRITELS( firm, "_p2", p2, -1 );
-			WRITELS( firm, "_qc2", 1, -1 );
-			WRITELS( firm, "_s2avg", sV, -1 );
+			WRITELLS( firm, "_K", Kd, t2ent, 1 );
+			WRITELLS( firm, "_N", N, t2ent, 1 );
+			WRITELLS( firm, "_NW2", NW2, t2ent, 1 );
 			
-			for ( int i = 1; i <= 4; ++i )
-			{
-				WRITELS( firm, "_D2", D2e, - i );
-				WRITELS( firm, "_D2d", D2e, - i );
-			}
-	
 			// add first machine vintage
-			add_vintage( firm, Kd / m2, newInd );
+			add_vintage( var, firm, Kd / m2, newInd );
 		}
 		else
 		{
@@ -942,7 +944,7 @@ double entry_firm2( object *sector, int n, bool newInd )
 
 // remove capital-good firm object and exiting hooks in equation 'entry1exit'
 
-double exit_firm1( object *firm )
+double exit_firm1( variable *var, object *firm )
 {
 	double liqVal = VS( firm, "_NW1" ) - VS( firm, "_Deb1" );
 	object *bank, *firm2;
@@ -967,7 +969,7 @@ double exit_firm1( object *firm )
 
 // remove consumer-good firm object and exiting hooks in equation 'entry2exit'
 
-double exit_firm2( object *firm, double *firesAcc )
+double exit_firm2( variable *var, object *firm, double *firesAcc )
 {
 	double fires, liqVal = VS( firm, "_NW2" ) - VS( firm, "_Deb2" );
 	object *bank, *firm1;
@@ -975,7 +977,7 @@ double exit_firm2( object *firm, double *firesAcc )
 	WRITES( firm, "_life2cycle", 4 );	// mark as exiting firm
 	
 	// fire all workers
-	*firesAcc += fires = fire_workers( firm, MODE_EXIT, 0, &fires );
+	*firesAcc += fires = fire_workers( var, firm, MODE_EXIT, 0, &fires );
 	INCRS( firm, "_fires2", fires );
 	
 	if ( liqVal < 0 )							// account bank losses, if any

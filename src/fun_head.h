@@ -84,7 +84,7 @@ bool no_ptr_chk = true;
 
 #define EQ_BEGIN \
 	double res = def_res; \
-	object *p = var->up, *c = caller, app; \
+	object *p = var->up, *c = caller; \
 	int h, i, j, k; \
 	double v[ USER_D_VARS ]; \
 	object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cyccur, *cyccur2, *cyccur3; \
@@ -151,6 +151,7 @@ bool no_ptr_chk = true;
 		if ( quit == 2 ) \
 			return def_res; \
 		variable *var = this; \
+		object app; \
 		EQ_BEGIN
 		
 #define MODELEND \
@@ -475,7 +476,7 @@ bool no_ptr_chk = true;
 #define ADDNOBJ_EXL( X, Y, Z, L ) ( p->add_n_objects2( ( char * ) X, Y, Z, L ) )
 #define ADDNOBJ_EXS( O, X, Y, Z ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( ( char * ) X, Y, Z ) )
 #define ADDNOBJ_EXLS( O, X, Y, Z, L ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( ( char * ) X, Y, Z, L ) )
-#define DELETE( O ) ( CHK_PTR_VOID( O ) O->delete_obj( ) )
+#define DELETE( O ) ( CHK_PTR_VOID( O ) O->delete_obj( var ) )
 
 #define SORT( X, Y, Z ) ( p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z ) )
 #define SORTS( O, X, Y, Z ) ( CHK_PTR_OBJ( O ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z ) )

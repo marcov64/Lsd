@@ -262,11 +262,11 @@ struct object
 	void add_var_from_example( variable *example );
 	void chg_lab( char const *lab );
 	void chg_var_lab( char const *old, char const *n );
-	void collect_cemetery( void );
+	void collect_cemetery( variable *caller = NULL );
 	void delete_link_net( netLink *ptr );
 	void delete_net( char const *lab );
 	void delete_node_net( void );
-	void delete_obj( void );
+	void delete_obj( variable *caller = NULL );
 	void delete_var( char const *lab );
 	void empty( void );
 	void emptyturbo( void );			// remove turbo search structure
@@ -323,8 +323,8 @@ struct variable
 
 	double cal( object *caller, int lag );
 	double fun( object *caller );
-	int init( object *_up, char const *_label, int _num_lag, double *val, int _save );
-	void empty( void );
+	int init( object *_up, const char *_label, int _num_lag, double *val, int _save );
+	void empty( bool no_lock = false );
 };
 
 struct bridge

@@ -627,7 +627,7 @@ switch ( fRule )
 	case 2:										// only fire if firm downsizing
 		// production being reduced and extra capacity is expected?
 		if ( V( "_dQ2d" ) < 0 && v[1] > 0 )		// workers have to be fired?
-			v[0] = fire_workers( THIS, MODE_ADJ, v[1], &v[2] );
+			v[0] = fire_workers( var, THIS, MODE_ADJ, v[1], &v[2] );
 		else
 			v[0] = 0;
 		break;
@@ -635,24 +635,24 @@ switch ( fRule )
 	case 3:										// only fire if firm at losses
 		// production being reduced and extra capacity is expected?
 		if ( VL( "_Pi2", 1 ) < 0 && v[1] > 0 )	// workers have to be fired?
-			v[0] = fire_workers( THIS, MODE_ADJ, v[1], &v[2] );
+			v[0] = fire_workers( var, THIS, MODE_ADJ, v[1], &v[2] );
 		else
 			v[0] = 0;
 		break;
 		
 	case 4:										// fire if payback is achieved
 		// fire insufficient payback workers
-		v[0] = fire_workers( THIS, MODE_PBACK, v[1], &v[2] );
+		v[0] = fire_workers( var, THIS, MODE_PBACK, v[1], &v[2] );
 		break;
 		
 	case 5:										// fire when contract ends
 		// fire all workers with finished contracts
-		v[0] = fire_workers( THIS, MODE_ALL, v[1], &v[2] );
+		v[0] = fire_workers( var, THIS, MODE_ALL, v[1], &v[2] );
 		break;
 		
 	case 6:										// reg. 5 until t=T, then reg. Y
 		// fire non needed, non stable workers
-		v[0] = fire_workers( THIS, MODE_IPROT, v[1], &v[2] );
+		v[0] = fire_workers( var, THIS, MODE_IPROT, v[1], &v[2] );
 }
 
 RESULT( v[0] )
@@ -940,7 +940,7 @@ if ( v[2] + v[3] > 0 )
 	v[4] = floor( ( v[2] + v[3] ) / v[1] );		// total number of new machines
 
 	if ( v[4] > 0 )								// new machines to install?
-		add_vintage( THIS, v[4], false );		// create vintage
+		add_vintage( var, THIS, v[4], false );	// create vintage
 }
 
 v[5] = max( VL( "_K", 1 ) + v[3] - V( "_Kd" ), 0 );// desired capital shrinkage
@@ -968,7 +968,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 			}
 			else								// scrap entire vintage
 			{
-				if ( scrap_vintage( cur ) >= 0 )// not last vintage?
+				if ( scrap_vintage( var, cur ) >= 0 )// not last vintage?
 				{
 					v[6] -= v[8];
 					continue;					// don't consider for old vint.
@@ -993,7 +993,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 		}
 		else									// scrap entire vintage
 		{
-			if ( scrap_vintage( cur ) >= 0 )	// not last vintage?
+			if ( scrap_vintage( var, cur ) >= 0 )// not last vintage?
 			{
 				v[7] -= v[8];
 				continue;						// don't consider for old vint.
@@ -1259,7 +1259,7 @@ h = 0;
 CYCLE_SAFE( cur, "Wrk2" )
 	if ( VS( SHOOKS( cur ), "_w" ) <= v[1] )	// under unemp. benefit?
 	{
-		fire_worker( SHOOKS( cur ) );
+		fire_worker( var, SHOOKS( cur ) );
 		++h;
 	}
 
@@ -1278,7 +1278,7 @@ h = 0;
 CYCLE_SAFE( cur, "Wrk2" )
 	if ( VS( SHOOKS( cur ), "_age" ) == 1 )		// is a "reborn"?
 	{
-		fire_worker( SHOOKS( cur ) );
+		fire_worker( var, SHOOKS( cur ) );
 		++h;
 	}
 

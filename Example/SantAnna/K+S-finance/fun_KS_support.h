@@ -167,7 +167,7 @@ object *add_vintage( object *firm, double nMach, object *suppl, bool newInd )
 // scrap (remove) vintage from capital stock in equation 'K'
 // return -1 if last vintage (not removed but shrank to 1 machine)
 
-double scrap_vintage( object *vint )
+double scrap_vintage( variable *var, object *vint )
 {
 	double RS;
 	
@@ -195,11 +195,11 @@ double scrap_vintage( object *vint )
 // add and configure entrant capital-good firm object(s) and required hooks 
 // in equations 'entry1exit' and 'initCountry'
 
-double entry_firm1( object *sector, int n, bool newInd )
+double entry_firm1( variable *var, object *sector, int n, bool newInd )
 {
 	double Atau, AtauMax, Btau, BtauMax, D10, NW1, NW10, RD0, c1, f1, p1, mult, 
 		   equity = 0;
-	int ID1, IDb;
+	int ID1, IDb, t1ent;
 	object *firm, *bank, *cli, 
 		   *cons = SEARCHS( PARENTS( sector ), "Consumption" ), 
 		   *fin = SEARCHS( PARENTS( sector ), "Financial" ),
@@ -221,6 +221,7 @@ double entry_firm1( object *sector, int n, bool newInd )
 		Atau = Btau = AtauMax = BtauMax = INIPROD;// initial productivities
 		NW10 = VS( sector, "NW10" ); 			// initial wealth in sector 1
 		f1 = 1.0 / n;							// fair share
+		t1ent = 0;								// entered before t=1
 		
 		// initial demand expectation, assuming all sector 2 firms, 
 		// 1/eta replacement factor and fair share in sector 1
@@ -234,6 +235,7 @@ double entry_firm1( object *sector, int n, bool newInd )
 		NW10 = max( WHTAVES( sector, "_NW1", "_f1" ), VS( sector, "NW10" ) * 
 					VS( sector, "PPI" ) / VS( sector, "PPI0" ) );
 		f1 = 0;									// no market share
+		t1ent = T;								// entered now
 		
 		// initial demand equal to 1 machine per client under fair share entry
 		D10 = VS( cons, "F2" ) / VS( sector, "F1" );
@@ -285,18 +287,15 @@ double entry_firm1( object *sector, int n, bool newInd )
 
 		// initialize variables
 		WRITES( firm, "_ID1", ID1 );
-		WRITES( firm, "_t1ent", T );
+		WRITES( firm, "_t1ent", t1ent );
+		WRITELLS( firm, "_Deb1", NW1 * Deb10ratio, t1ent, 1 );
+		WRITELLS( firm, "_L1rd", RD0 / w, t1ent, 1 );
+		WRITELLS( firm, "_NW1", NW1, t1ent, 1 );
+		WRITELLS( firm, "_RD", RD0, t1ent, 1 );
+		WRITELLS( firm, "_f1", f1, t1ent, 1 );
+		WRITELLS( firm, "_qc1", 1, t1ent, 1 );
 		
-		if ( newInd )
-		{
-			WRITELS( firm, "_Deb1", NW1 * Deb10ratio, -1 );
-			WRITELS( firm, "_L1rd", RD0 / w, -1 );
-			WRITELS( firm, "_NW1", NW1, -1 );
-			WRITELS( firm, "_RD", RD0, -1 );
-			WRITELS( firm, "_f1", f1, -1 );
-			WRITELS( firm, "_qc1", 1, -1 );
-		}
-		else
+		if ( ! newInd )
 		{
 			WRITES( firm, "_Atau", Atau );
 			WRITES( firm, "_Btau", Btau );
@@ -321,7 +320,7 @@ double entry_firm1( object *sector, int n, bool newInd )
 // add and configure entrant consumer-good firm object(s) and required hooks 
 // in equations 'entry2exit' and 'initCountry'
 
-double entry_firm2( object *sector, int n, bool newInd )
+double entry_firm2( variable *var, object *sector, int n, bool newInd )
 {
 	double A2, D20, D2e, Eavg, Inom, K, Kd, N, NW2, NW2f, NW20, Q2u, c2, f2, 
 		   f2posChg, life2cycle, p2, mult, equity = 0;
@@ -466,24 +465,24 @@ double entry_firm2( object *sector, int n, bool newInd )
 		WRITES( firm, "_ID2", ID2 );
 		WRITES( firm, "_t2ent", t2ent );
 		WRITES( firm, "_life2cycle", life2cycle );		
+		WRITELLS( firm, "_Deb2", NW2 * Deb20ratio, t2ent, 1 );
+		WRITELLS( firm, "_f2", f2, t2ent, 1 );
+		WRITELLS( firm, "_f2", f2, t2ent, 2 );
+		WRITELLS( firm, "_mu2", mu20, t2ent, 1 );
+		WRITELLS( firm, "_p2", p2, t2ent, 1 );
+		WRITELLS( firm, "_qc2", 1, t2ent, 1 );
+		
+		for ( int i = 1; i <= 4; ++i )
+		{
+			WRITELLS( firm, "_D2", D2e, t2ent, i );
+			WRITELLS( firm, "_D2d", D2e, t2ent, i );
+		}
 		
 		if ( newInd )
 		{
-			WRITELS( firm, "_Deb2", NW2 * Deb20ratio, -1 );
-			WRITELS( firm, "_K", Kd, -1 );
-			WRITELS( firm, "_N", N, -1 );
-			WRITELS( firm, "_NW2", NW2f, -1 );
-			WRITELS( firm, "_f2", f2, -1 );
-			WRITELS( firm, "_f2", f2, -1 );
-			WRITELS( firm, "_mu2", mu20, -1 );
-			WRITELS( firm, "_p2", p2, -1 );
-			WRITELS( firm, "_qc2", 1, -1 );
-			
-			for ( int i = 1; i <= 4; ++i )
-			{
-				WRITELS( firm, "_D2", D2e, - i );
-				WRITELS( firm, "_D2d", D2e, - i );
-			}
+			WRITELLS( firm, "_K", Kd, t2ent, 1 );
+			WRITELLS( firm, "_N", N, t2ent, 1 );
+			WRITELLS( firm, "_NW2", NW2f, t2ent, 1 );
 		}
 		else
 		{
@@ -511,7 +510,7 @@ double entry_firm2( object *sector, int n, bool newInd )
 
 // remove capital-good firm object and exiting hooks in equation 'entry1exit'
 
-double exit_firm1( object *firm )
+double exit_firm1( variable *var, object *firm )
 {
 	double liqVal = VS( firm, "_NW1" ) - VS( firm, "_Deb1" );
 	object *bank, *firm2;
@@ -536,7 +535,7 @@ double exit_firm1( object *firm )
 
 // remove consumer-good firm object and exiting hooks in equation 'entry2exit'
 
-double exit_firm2( object *firm, double *firesAcc )
+double exit_firm2( variable *var, object *firm, double *firesAcc )
 {
 	double fires, liqVal = VS( firm, "_NW2" ) - VS( firm, "_Deb2" );
 	object *bank, *firm1;

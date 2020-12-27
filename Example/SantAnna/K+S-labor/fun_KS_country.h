@@ -474,8 +474,8 @@ DELETE( cur );
 cur = SEARCHS( cur2, "Firm2" );					// remove empty firm instance
 DELETE( cur );
 
-v[1] = entry_firm1( cur1, F10, true );			// add capital-good firms
-v[1] += entry_firm2( cur2, F20, true );			// add consumer-good firms
+v[1] = entry_firm1( var, cur1, F10, true );		// add capital-good firms
+v[1] += entry_firm2( var, cur2, F20, true );	// add consumer-good firms
 
 WRITE( "cEntry", v[1] );						// save equity cost of entry
 

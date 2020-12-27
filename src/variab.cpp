@@ -239,22 +239,22 @@ int variable::init( object *_up, char const *_label, int _num_lag, double *v, in
 /****************************************************
 EMPTY
 ****************************************************/
-void variable::empty( void ) 
+void variable::empty( bool no_lock ) 
 {
-	if ( running )
-	{
 #ifndef NP
+	if ( running && ! no_lock )
+	{
 		// prevent concurrent use by more than one thread
 		lock_guard < mutex > lock( parallel_comp );
-#endif	
-			
-		if ( label == NULL || val == NULL )
-		{
-			sprintf( msg, "failure while deallocating variable %s", label );
-			error_hard( msg, "internal problem in LSD", 
-						"if error persists, please contact developers", true );
-			return;
-		}
+	}
+#endif
+
+	if ( running && ( label == NULL || val == NULL ) )
+	{
+		sprintf( msg, "failure while deallocating variable %s", label );
+		error_hard( msg, "internal problem in LSD", 
+					"if error persists, please contact developers", true );
+		return;
 	}
 
 	delete [ ] label;
@@ -540,7 +540,7 @@ double variable::cal( object *caller, int lag )
 	
 	// if there is a pending deletion, try to do it now
 	if ( wait_delete != NULL )
-		wait_delete->delete_obj( );
+		wait_delete->delete_obj( this );
 
 	return val[ 0 ];	// by default the requested value is the last one, not yet computed
 
@@ -651,7 +651,7 @@ void worker::cal_worker( void )
 				
 				// if there is a pending object deletion, try to do it now
 				if ( wait_delete != NULL )
-					wait_delete->delete_obj( );
+					wait_delete->delete_obj( var );
 			}
 			
 		end:

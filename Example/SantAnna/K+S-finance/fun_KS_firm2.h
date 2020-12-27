@@ -691,7 +691,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 			}
 			else								// scrap entire vintage
 			{
-				if ( scrap_vintage( cur ) >= 0 )// not last vintage?
+				if ( scrap_vintage( var, cur ) >= 0 )// not last vintage?
 				{
 					v[6] -= v[8];
 					continue;					// don't consider for old vint.
@@ -716,7 +716,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 		}
 		else									// scrap entire vintage
 		{
-			if ( scrap_vintage( cur ) >= 0 )	// not last vintage?
+			if ( scrap_vintage( var, cur ) >= 0 )// not last vintage?
 			{
 				v[7] -= v[8];
 				continue;						// don't consider for old vint.

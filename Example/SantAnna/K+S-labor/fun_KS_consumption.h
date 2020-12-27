@@ -157,7 +157,7 @@ CYCLE_SAFE( cur, "Firm2" )
 		if ( h > 0 || i != k )					// firm must exit?
 		{
 			// account liquidation credit due to public, if any
-			v[3] += exit_firm2( cur, & v[1] );	// delete object and liq. val.
+			v[3] += exit_firm2( var, cur, & v[1] );// delete object and liq. val.
 			
 			++j;								// count exits
 		}
@@ -195,7 +195,7 @@ if ( F2 + k > F2max )
 	k = F2max - F2 + j;
 
 v[0] = k - j;									// net number of entrants
-v[2] += entry_firm2( THIS, k, false );			// add entrant-firm objects
+v[2] += entry_firm2( var, THIS, k, false );		// add entrant-firm objects
 
 INCR( "F2", v[0] );								// update the number of firms
 INCR( "fires2", v[1] );							// update fires
@@ -259,7 +259,7 @@ for ( i = 0, itw = offers->begin( ); itw != offers->end( ); ++itw )
 			{
 				// already employed? First quit current job
 				if ( v[5] )
-					quit_worker( candidate.wrk );
+					quit_worker( var, candidate.wrk );
 
 				// flag hiring and set wage, employer and vintage to be used by worker
 				hire_worker( candidate.wrk, 2, itw->firm, itw->offer );
@@ -283,7 +283,7 @@ for ( i = 0, itw = offers->begin( ); itw != offers->end( ); ++itw )
 	if ( j > 0 && h == 0 && cur != NULL )		// none hired but someone avail?
 	{
 		if ( VS( cur, "_employed" ) )			// quit job if needed
-			quit_worker( cur );
+			quit_worker( var, cur );
 		
 		hire_worker( cur, 2, itw->firm, v[4] );	// pay requested wage
 		++i;

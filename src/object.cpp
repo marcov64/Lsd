@@ -1772,7 +1772,7 @@ Remove the object from the model
 Before killing the Variables data to be saved are stored
 in the "cemetery", a linked chain storing data to be analyzed.
 ****************************************************/
-void object::delete_obj( void )
+void object::delete_obj( variable *caller )
 {
 	object *cur = this;
 	bridge *cb;
@@ -1823,7 +1823,7 @@ void object::delete_obj( void )
 	}
 
 	// collect required variables BEFORE removing instances (bridge)
-	collect_cemetery( );
+	collect_cemetery( caller );
 
 	// find the bridge
 	if ( up != NULL )
@@ -1918,7 +1918,7 @@ COLLECT_CEMETERY
 Processes variables from an object required to go to cemetery
 Also destroy variables not requiring saving
 ***************************************************/
-void object::collect_cemetery( void )
+void object::collect_cemetery( variable *caller )
 {
 	variable *cv, *cv1;
 	
@@ -1944,7 +1944,7 @@ void object::collect_cemetery( void )
 		}
 		else
 		{
-			cv->empty( );					// detroy the ones not requiring saving
+			cv->empty( cv == caller );		// disable lock if emptying caller
 			delete cv;
 		}
 	}

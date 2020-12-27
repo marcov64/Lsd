@@ -93,7 +93,7 @@ CYCLE_SAFE( cur, "Firm1" )
 		if ( h > 0 || i != k )					// firm must exit?
 		{
 			// account liquidation credit due to public, if any
-			v[2] += exit_firm1( cur );			// delete object and liq. val.
+			v[2] += exit_firm1( var, cur );		// delete object and liq. val.
 			++j;								// count exits
 		}
 		else
@@ -114,7 +114,7 @@ CYCLE_SAFE( cur, "Firm1" )
 V( "f1rescale" );								// redistribute exiting m.s.
 
 // replace exiting firms by entrants
-v[1] += entry_firm1( THIS, j, false );				// add entrant-firm objects
+v[1] += entry_firm1( var, THIS, j, false );		// add entrant-firm objects
 
 INCRS( PARENT, "cEntry", v[1] );				// account equity cost of entry
 INCRS( PARENT, "cExit", v[2] );					// account exit credits
