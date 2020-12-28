@@ -229,7 +229,7 @@ Label Root
 					Var: _LdVint
 					Var: _Lvint
 					Var: _Qvint
-					Var: _RS
+					Var: _RSvint
 
 				}
 
@@ -821,7 +821,7 @@ Param: _toUseVint 0 n + n n	0
 Var: _LdVint 0 n + n n
 Var: _Lvint 0 n + n n
 Var: _Qvint 0 n + n n
-Var: _RS 0 n + n n
+Var: _RSvint 0 n + n n
 
 Object: Stats C	1
 Param: testCtIni 0 n + n n	1
@@ -1774,10 +1774,8 @@ END_DESCRIPTION
 
 Variable_A1
 Labor productivity of capital-good sector
-
 _INIT_
 All 1 instances equal to 1.
-
 END_DESCRIPTION
 
 Variable_D1
@@ -2662,7 +2660,6 @@ END_DESCRIPTION
 
 Variable__A2e
 Machine-level effective productivity of firm in consumption-good sector
-
 _INIT_
 
 END_DESCRIPTION
@@ -2955,10 +2952,8 @@ END_DESCRIPTION
 
 Parameter__Avint
 Machine vintage notional labor productivity
-
 _INIT_
 All 200 instances equal to 1.
-
 END_DESCRIPTION
 
 Parameter__IDvint
@@ -3010,7 +3005,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable__RS
+Variable__RSvint
 Number of machines to scrap according to the scrapping rule
 Positive: machines still in technical life
 Negative: machines out of technical life

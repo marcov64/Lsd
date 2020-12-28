@@ -332,7 +332,7 @@ Label Root
 					Param: _toUseVint
 					Var: _AeVint
 					Var: _Qvint
-					Var: _RS
+					Var: _RSvint
 					Var: _dLdVint
 
 				}
@@ -1231,7 +1231,7 @@ Param: _tVint 0 n + n n	0
 Param: _toUseVint 0 n + n n	0
 Var: _AeVint 1 n + n n	1
 Var: _Qvint 0 n + n n
-Var: _RS 0 n + n n
+Var: _RSvint 0 n + n n
 Var: _dLdVint 0 n + n n
 
 Object: WrkV C	1
@@ -3034,10 +3034,8 @@ END_DESCRIPTION
 
 Variable_A1
 Labor productivity of capital-good sector
-
 _INIT_
 All 1 instances equal to 1.
-
 END_DESCRIPTION
 
 Variable_D1
@@ -4609,10 +4607,8 @@ END_DESCRIPTION
 
 Parameter__Avint
 Machine vintage notional labor productivity
-
 _INIT_
 All 200 instances equal to 1.
-
 END_DESCRIPTION
 
 Parameter__IDvint
@@ -4648,10 +4644,8 @@ END_DESCRIPTION
 
 Variable__AeVint
 Effective machine-level labor productivity of vintage
-
 _INIT_
 All 200 instances equal to 1.
-
 END_DESCRIPTION
 
 Variable__Qvint
@@ -4660,7 +4654,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable__RS
+Variable__RSvint
 Number of machines to scrap according to the scrapping rule
 Positive: machines still in technical life
 Negative: machines out of technical life
@@ -4942,35 +4936,30 @@ END_DESCRIPTION
 
 Variable_A2posChg
 Machine-level weighted-average labor productivity of post-change firms in consumption-good sector
-
 _INIT_
 
 END_DESCRIPTION
 
 Variable_A2preChg
 Machine-level weighted-average labor productivity of pre-change firms in consumption-good sector
-
 _INIT_
 
 END_DESCRIPTION
 
 Variable_A2sd
 Standard deviation of machine-level log labor productivity of firms in consumption-good sector
-
 _INIT_
 
 END_DESCRIPTION
 
 Variable_A2sdPosChg
 Standard deviation of machine-level log labor productivity of post-change firms in consumption-good sector
-
 _INIT_
 
 END_DESCRIPTION
 
 Variable_A2sdPreChg
 Standard deviation of machine-level log labor productivity of pre-change firms in consumption-good sector
-
 _INIT_
 
 END_DESCRIPTION

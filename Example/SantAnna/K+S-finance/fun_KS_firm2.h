@@ -675,7 +675,7 @@ j = T + 1;										// oldest vintage so far
 h = 0;											// oldest vintage ID
 CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 {
-	v[8] = VS( cur, "_RS" );					// number of machines to scrap
+	v[8] = VS( cur, "_RSvint" );				// number of machines to scrap
 	
 	if ( v[8] < 0 )								// end-of-life vintage to scrap?
 	{
@@ -830,7 +830,7 @@ v[1] = VS( PARENT, "m2" );						// machine output per period
 v[2] = 0;										// scrapped machine accumulator
 CYCLE( cur1, "Vint" )							// search last vintage to scrap
 {
-	v[3] = VS( cur1, "_RS" );					// number of machines to scrap 
+	v[3] = VS( cur1, "_RSvint" );				// number of machines to scrap 
 	
 	if ( v[3] == 0 )							// nothing else to do
 		break;

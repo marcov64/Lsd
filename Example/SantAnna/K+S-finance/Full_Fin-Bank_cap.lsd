@@ -229,7 +229,7 @@ Label Root
 					Var: _LdVint
 					Var: _Lvint
 					Var: _Qvint
-					Var: _RS
+					Var: _RSvint
 
 				}
 
@@ -821,7 +821,7 @@ Param: _toUseVint 0 n + n n	0
 Var: _LdVint 0 n + n n
 Var: _Lvint 0 n + n n
 Var: _Qvint 0 n + n n
-Var: _RS 0 n + n n
+Var: _RSvint 0 n + n n
 
 Object: Stats C	1
 Param: testCtIni 0 n + n n	1
@@ -3005,7 +3005,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable__RS
+Variable__RSvint
 Number of machines to scrap according to the scrapping rule
 Positive: machines still in technical life
 Negative: machines out of technical life

@@ -17,7 +17,7 @@ Labor required for desired utilization of vintage
 RESULT( V( "_toUseVint" ) * VS( GRANDPARENT, "m2" ) / V( "_Avint" ) )
 
 
-EQUATION( "_RS" )
+EQUATION( "_RSvint" )
 /*
 Number of machines to scrap in vintage of firm in consumption-good sector
 Positive values indicate non-economical machines but still in technical life

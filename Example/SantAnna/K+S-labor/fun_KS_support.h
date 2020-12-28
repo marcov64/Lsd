@@ -192,7 +192,7 @@ double scrap_vintage( variable *var, object *vint )
 		if ( SHOOKS( NEXTS( vint ) ) == vint )
 			WRITE_SHOOKS( NEXTS( vint ), NULL );
 		
-		RS = abs( VS( vint, "_RS" ) );					
+		RS = abs( VS( vint, "_RSvint" ) );					
 		DELETE( vint );							// delete vintage
 	}
 	else
