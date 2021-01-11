@@ -775,14 +775,18 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		double K0 = VS( sector, "K0" );			// initial capital in sector 2
 		double mu1 = VS( cap, "mu1" );			// mark-up in sector 1
 		double m1 = VS( cap, "m1" );			// worker output per period
-		double p10 = ( 1 + mu1 ) * INIWAGE / ( INIPROD * m1 );// mach. price
 		double phi = VS( fin, "phi" );			// unemployment benefit rate
+		double c10 = INIWAGE / ( INIPROD * m1 );// initial unit cost in sector 1
+		double c20 = INIWAGE / INIPROD;			// initial unit cost in sector 2
+		double p10 = ( 1 + mu1 ) * c10;			// initial machine price
+		double trW = VS( PARENTS( sector ), "flagTax" ) > 0 ? 
+					 VS( PARENTS( sector ), "tr" ) : 0;// tax rate on wages
 		double SIr0 = n * ceil( K0 / m2 ) / eta;// substitution real investment
 		double RD0 = VS( cap, "nu" ) * SIr0 * p10;// initial R&D expense
 
-		D20 = ( ( SIr0 * INIWAGE / ( INIPROD * m1 ) + RD0 ) * ( 1 - phi ) + 
+		D20 = ( ( SIr0 * c10 + RD0 ) * ( 1 - phi - trW ) + 
 				VS( lab, "Ls0" ) * INIWAGE * phi ) / 
-			  ( mu20 + phi ) * ( INIWAGE / INIPROD ) / n;// share of s.s. demand
+			  ( mu20 + phi + trW ) * c20 / n;	// share of steady state demand
 		Eavg = ( VS( sector, "omega1" ) + VS( sector, "omega2" ) + 
 				 VS( sector, "omega3" ) ) / 2;	// initial competitiveness
 		K = K0;									// initial capital in sector 2

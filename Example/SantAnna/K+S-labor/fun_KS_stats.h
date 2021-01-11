@@ -377,6 +377,14 @@ else
 RESULT( v[0] )
 
 
+EQUATION( "RS2" )
+/*
+Machine (planned) scrapping rate in consumption-good sector
+*/
+RESULT( T > 1 ? SUMS( CONSECL2, "_RS2" ) / 
+		( VLS( CONSECL2, "K", 1 ) / VS( CONSECL2, "m2" ) ) : 0 )
+
+
 EQUATION( "age2avg" )
 /*
 Average age of firms in consumption-good sector
@@ -727,6 +735,18 @@ Machine-level effective productivity of firm in consumption-good sector
 */
 i = V( "_L2" );
 RESULT( i > 0 ? V( "_Q2e" ) / i : CURRENT )
+
+
+EQUATION( "_RS2" )
+/*
+Number of machines to scrap of firm in consumption-good sector
+*/
+
+v[0] = 0;
+CYCLE( cur, "Vint" )
+	v[0] += abs( VS( cur, "_RSvint" ) );
+	
+RESULT( v[0] )
 
 
 EQUATION( "_sT2avg" )

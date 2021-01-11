@@ -141,7 +141,7 @@ void send_order( object *firm, double nMach )
 object *add_vintage( object *firm, double nMach, object *suppl, bool newInd )
 {
 	double _Avint, _pVint;
-	object *vint, *wrk;
+	object *vint;
 	
 	// create object, only recalculate in t if new industry
 	if ( newInd )
@@ -338,22 +338,26 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 	double mu20 = VS( sector, "mu20" );			// initial mark-up in sector 2
 	double m1 = VS( cap, "m1" );				// worker output per period
 	double m2 = VS( sector, "m2" );				// machine output per period
-	double p10 = ( 1 + mu1 ) * INIWAGE / ( INIPROD * m1 );// initial mach. price
 	double u = VS( sector, "u" );				// desired capital utilization
 	double w = VS( lab, "w" );					// current wage
 	int eta = VS( sector, "eta" );				// technical life of machines
 
+	double c10 = INIWAGE / ( INIPROD * m1 );	// initial unit cost in sector 1
+	double p10 = ( 1 + mu1 ) * c10;				// initial machine price
+
 	if ( newInd )
 	{
-		// fair share of initial steady state demand
 		double K0 = VS( sector, "K0" );			// initial capital in sector 2
 		double phi = VS( fin, "phi" );			// unemployment benefit rate
+		double c20 = INIWAGE / INIPROD;			// initial unit cost sec. 2
+		double trW = VS( PARENTS( sector ), "flagTax" ) > 0 ? 
+					 VS( PARENTS( sector ), "tr" ) : 0;// tax rate on wages
 		double SIr0 = n * ceil( K0 / m2 ) / eta;// substitution real investment
 		double RD0 = VS( cap, "nu" ) * SIr0 * p10;// initial R&D expense
-		D20 = ( ( SIr0 * INIWAGE / ( INIPROD * m1 ) + RD0 ) * ( 1 - phi ) + 
-				VS( lab, "Ls0" ) * INIWAGE * phi ) / 
-			  ( mu20 + phi ) * ( INIWAGE / INIPROD ) / n;
 		
+		D20 = ( ( SIr0 * c10 + RD0 ) * ( 1 - phi - trW ) + 
+				VS( lab, "Ls0" ) * INIWAGE * phi ) / 
+			  ( mu20 + phi + trW ) * c20 / n;	// share of steady state demand
 		Eavg = ( VS( sector, "omega1" ) + VS( sector, "omega2" ) ) / 2;// compet.
 		K = K0;									// initial capital in sector 2
 		N = iota * D20;							// initial inventories

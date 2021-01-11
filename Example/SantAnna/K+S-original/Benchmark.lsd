@@ -197,6 +197,7 @@ Label Root
 				Var: _Q2p
 				Var: _Q2pe
 				Var: _Q2u
+				Var: _RS2
 				Var: _SI
 				Var: _SId
 				Var: _S2
@@ -319,6 +320,7 @@ Label Root
 				Var: HP2
 				Var: NCavg
 				Var: RD
+				Var: RS2
 				Var: age1avg
 				Var: age2avg
 				Var: cred1c
@@ -656,6 +658,7 @@ Var: _Q2e 2 s + n n	0	0
 Var: _Q2p 0 n + n N
 Var: _Q2pe 0 n + n N
 Var: _Q2u 0 n + n n
+Var: _RS2 0 n + n n
 Var: _SI 0 n + n n
 Var: _SId 0 n + n n
 Var: _S2 1 n + n n	0
@@ -735,6 +738,7 @@ Var: HP1 0 s + n n
 Var: HP2 0 s + n n
 Var: NCavg 0 s + n n
 Var: RD 0 s + n n
+Var: RS2 0 s + n n
 Var: age1avg 0 s + n n
 Var: age2avg 0 s + n n
 Var: cred1c 0 s + n n
@@ -2308,6 +2312,11 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable__RS2
+Number of machines to scrap of firm in consumption-good sector
+
+END_DESCRIPTION
+
 Variable__SI
 Effective substitution investment of firm in consumption-good sector
 _INIT_
@@ -2784,6 +2793,11 @@ END_DESCRIPTION
 Variable_RD
 R&D expenditure of capital-good sector
 _INIT_
+
+END_DESCRIPTION
+
+Variable_RS2
+Machine (planned) scrapping rate in consumption-good sector
 
 END_DESCRIPTION
 

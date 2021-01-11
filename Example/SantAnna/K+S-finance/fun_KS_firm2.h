@@ -483,8 +483,8 @@ CYCLE( cur, "Vint" )							// choose vintages to use
 	}
 	else
 	{
-		v[5] = 0;								// no more machine not to use
 		v[10] = v[8] - v[5];					// machines to use in vintage
+		v[5] = 0;								// no more machine not to use
 	}
 	
 	WRITES( cur, "_toUseVint", v[10] );			// number mach. to try to use
