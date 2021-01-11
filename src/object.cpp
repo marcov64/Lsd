@@ -310,7 +310,7 @@ bridge::bridge( const bridge &b )
 
 bridge::~bridge( void )
 {
-	object *cur, *cur1;
+	object *cur, *cnext;
 
 	if ( copy )
 		return;					// don't empty copy bridges
@@ -321,9 +321,9 @@ bridge::~bridge( void )
 		delete mn;
 	}
 
-	for ( cur = head; cur != NULL; cur = cur1 )
+	for ( cur = head; cur != NULL; cur = cnext )
 	{
-		cur1 = cur->next;
+		cnext = cur->next;
 		cur->collect_cemetery( );
 		cur->empty( );
 		delete cur;
@@ -396,7 +396,7 @@ void object::update( bool recurse, bool user )
 {
 	bool deleted = false;
 	bridge *cb, *cb1;
-	object *cur, *cur1;
+	object *cur, *cnext;
 	variable *cv;
 
 	del_flag = & deleted;			// register feedback channel
@@ -432,9 +432,9 @@ void object::update( bool recurse, bool user )
 		{
 			cb1 = cb->next;
 			if ( cb->head != NULL && cb->head->to_compute )
-				for ( cur = cb->head; ! deleted && cur != NULL; cur = cur1 )
+				for ( cur = cb->head; ! deleted && cur != NULL; cur = cnext )
 				{
-					cur1 = cur->next;
+					cnext = cur->next;
 					cur->update( true, user );
 				}
 		}
@@ -1014,15 +1014,17 @@ Return NULL if not found.
 object *object::search_var_cond( char const *lab, double value, int lag )
 {
 	double res;
-	object *cur;
+	object *cur, *cnext;
 	variable *cv;
 
 	cv = search_var_err( this, lab, no_search, true, "conditional searching" );
 	if ( cv == NULL )
 		return NULL;
 
-	for ( cur = cv->up; cur != NULL; no_search ? cur = cur->next : cur = cur->hyper_next(  ) )
+	for ( cur = cv->up; cur != NULL; cur = cnext )
 	{
+		cnext = no_search ? cur->next : cur->hyper_next( );	// allow object suicide
+		
 		res = cur->cal( lab, lag );
 		if ( res == value )
 			return cur;
@@ -1039,7 +1041,7 @@ Generate the data structure required to use the turbosearch with condition.
 double object::initturbo_cond( char const *lab )
 {
 	bridge *cb;
-	object *cur;
+	object *cur, *cnext;
 	variable *cv;
 	b_mapT::iterator bit;
 
@@ -1074,8 +1076,11 @@ double object::initturbo_cond( char const *lab )
 	cb->o_map.clear( );						// remove any existing mapping
 
 	// fill the map with the object values
-	for ( cur = cb->head; cur != NULL; cur = cur->next )
+	for ( cur = cb->head; cur != NULL; cur = cnext )
+	{
+		cnext = cur->next;					// allow object suicide
 		cb->o_map.insert( o_pairT ( cur->cal( lab, 0 ), cur ) );
+	}
 
 	// register the name of variable for which the map is set
 	cb->search_var = new char [ strlen( lab ) + 1 ];
@@ -2217,7 +2222,7 @@ double object::sum( char const *lab1, int lag, bool cond, char const *lab2, char
 {
 	int n, lopc;
 	double tot;
-	object *cur;
+	object *cur, *cnext;
 	variable *cv;
 
 	cv = search_var_err( this, lab1, no_search, true, "summing" );
@@ -2237,12 +2242,16 @@ double object::sum( char const *lab1, int lag, bool cond, char const *lab2, char
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( tot = n = 0; cur != NULL; cur = go_brother( cur ) )
+	for ( tot = n = 0; cur != NULL; cur = cnext )
+	{
+		cnext = go_brother( cur );				// allow object suicide
+		
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			tot += cur->cal( this, lab1, lag );
 			++n;
 		}
+	}
 
 	return tot;
 }
@@ -2259,7 +2268,7 @@ double object::overall_max( char const *lab1, int lag, bool cond, char const *la
 {
 	int n, lopc;
 	double tot, temp;
-	object *cur;
+	object *cur, *cnext;
 	variable *cv;
 
 	cv = search_var_err( this, lab1, no_search, true, "maximizing" );
@@ -2279,13 +2288,17 @@ double object::overall_max( char const *lab1, int lag, bool cond, char const *la
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( tot = -DBL_MAX, n = 0; cur != NULL; cur = go_brother( cur ) )
+	for ( tot = -DBL_MAX, n = 0; cur != NULL; cur = cnext )
+	{
+		cnext = go_brother( cur );				// allow object suicide
+		
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			if ( tot < ( temp = cur->cal( this, lab1, lag ) ) )
 				tot = temp;
 			++n;
 		}
+	}
 
 	if ( n > 0 )
 		return tot;
@@ -2305,7 +2318,7 @@ double object::overall_min( char const *lab1, int lag, bool cond, char const *la
 {
 	int n, lopc;
 	double tot, temp;
-	object *cur;
+	object *cur, *cnext;
 	variable *cv;
 
 	cv = search_var_err( this, lab1, no_search, true, "minimizing" );
@@ -2325,13 +2338,17 @@ double object::overall_min( char const *lab1, int lag, bool cond, char const *la
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( tot = DBL_MAX, n = 0; cur != NULL; cur = go_brother( cur ) )
+	for ( tot = DBL_MAX, n = 0; cur != NULL; cur = cnext )
+	{
+		cnext = go_brother( cur );				// allow object suicide
+		
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			if ( tot > ( temp = cur->cal( this, lab1, lag ) ) )
 				tot = temp;
 			++n;
 		}
+	}
 
 	if ( n > 0 )
 		return tot;
@@ -2350,7 +2367,7 @@ double object::av( char const *lab1, int lag, bool cond, char const *lab2, char 
 {
 	int n, lopc;
 	double tot;
-	object *cur;
+	object *cur, *cnext;
 	variable *cv;
 
 	cv = search_var_err( this, lab1, no_search, true, "averaging" );
@@ -2370,12 +2387,16 @@ double object::av( char const *lab1, int lag, bool cond, char const *lab2, char 
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( tot = n = 0; cur != NULL; cur = go_brother( cur ) )
+	for ( tot = n = 0; cur != NULL; cur = cnext )
+	{
+		cnext = go_brother( cur );				// allow object suicide
+		
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			tot += cur->cal( this, lab1, lag );
 			++n;
 		}
+	}
 
 	if ( n > 0 )
 		return tot / n;
@@ -2394,7 +2415,7 @@ double object::whg_av( char const *lab1, char const *lab2, int lag, bool cond, c
 {
 	int n, lopc;
 	double tot;
-	object *cur;
+	object *cur, *cnext;
 	variable *cv;
 
 	cv = search_var_err( this, lab1, no_search, true, "weighted averaging" );
@@ -2418,12 +2439,16 @@ double object::whg_av( char const *lab1, char const *lab2, int lag, bool cond, c
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( tot = n = 0; cur != NULL; cur = go_brother( cur ) )
+	for ( tot = n = 0; cur != NULL; cur = cnext )
+	{
+		cnext = go_brother( cur );				// allow object suicide
+		
 		if ( ! cond || check_cond( cur->cal( this, lab3, lag ), lopc, value ) )
 		{
 			tot += cur->cal( this, lab1, lag ) * cur->cal( this, lab2, lag );
 			++n;
 		}
+	}
 
 	return tot;
 }
@@ -2451,7 +2476,7 @@ double object::perc( char const *lab1, double p, int lag, bool cond, char const 
 {
 	int n, lopc, floor_x;
 	double x, vx, vx1, tmp;
-	object *cur;
+	object *cur, *cnext;
 	variable *cv;
 	vector < double > vals;
 
@@ -2483,12 +2508,16 @@ double object::perc( char const *lab1, double p, int lag, bool cond, char const 
 		cur = ( cur->up )->search( cur->label );
 
 	// copy selected data series to vector
-	for ( n = 0; cur != NULL; cur = go_brother( cur ) )
+	for ( n = 0; cur != NULL; cur = cnext )
+	{
+		cnext = go_brother( cur );				// allow object suicide
+		
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			vals.push_back( cur->cal( this, lab1, lag ) );
 			++n;
 		}
+	}
 
 	if ( n > 0 )
 	{
@@ -2517,7 +2546,7 @@ double object::sd( char const *lab1, int lag, bool cond, char const *lab2, char 
 {
 	int n, lopc;
 	double x, tot, tot2;
-	object *cur;
+	object *cur, *cnext;
 	variable *cv;
 
 	cv = search_var_err( this, lab1, no_search, true, "calculating s.d." );
@@ -2537,13 +2566,17 @@ double object::sd( char const *lab1, int lag, bool cond, char const *lab2, char 
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
-	for ( tot = tot2 = n = 0; cur != NULL; cur = go_brother( cur ) )
+	for ( tot = tot2 = n = 0; cur != NULL; cur = cnext )
+	{
+		cnext = go_brother( cur );				// allow object suicide
+		
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			tot += x = cur->cal( this, lab1, lag );
 			tot2 += x * x;
 			++n;
 		}
+	}
 
 	if ( n > 0 )
 		return sqrt( tot2 / n - pow( tot / n, 2 ) );
@@ -2561,7 +2594,7 @@ is true before considering each instance of the object.
 double object::count( char const *lab1, int lag, bool cond, char const *lab2, char const *lop, double value )
 {
 	int n, lopc;
-	object *cur;
+	object *cur, *cnext;
 
 	cur = search_err( lab1, no_search, "counting" );
 
@@ -2577,9 +2610,13 @@ double object::count( char const *lab1, int lag, bool cond, char const *lab2, ch
 	else
 		lopc = -1;
 	
-	for ( n = 0; cur != NULL; cur = go_brother( cur ) )
+	for ( n = 0; cur != NULL; cur = cnext )
+	{
+		cnext = go_brother( cur );				// allow object suicide
+		
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 			++n;
+	}
 
 	return n;
 }
@@ -2595,7 +2632,7 @@ is true before considering each instance of the object.
 double object::count_all( char const *lab1, int lag, bool cond, char const *lab2, char const *lop, double value )
 {
 	int n, lopc;
-	object *cur;
+	object *cur, *cnext;
 
 	if ( up->b->head != NULL )
 		cur = up->b->head->search_err( lab1, no_search, "counting" );// pick always first instance
@@ -2614,9 +2651,13 @@ double object::count_all( char const *lab1, int lag, bool cond, char const *lab2
 	else
 		lopc = -1;
 	
-	for ( n = 0; cur != NULL; cur = cur->hyper_next( lab1 ) )
+	for ( n = 0; cur != NULL; cur = cnext )
+	{
+		cnext = cur->hyper_next( lab1 );				// allow object suicide
+		
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 			++n;
+	}
 
 	return n;
 }
@@ -2643,7 +2684,7 @@ double object::stat( char const *lab1, double *r, int lag, bool cond, char const
 {
 	int n, lopc;
 	double val, r_temp[ 7 ];
-	object *cur;
+	object *cur, *cnext;
 	variable *cv;
 	vector < double > vals;
 
@@ -2672,7 +2713,10 @@ double object::stat( char const *lab1, double *r, int lag, bool cond, char const
 	r[ 3 ] = DBL_MIN;
 	r[ 4 ] = DBL_MAX;
 
-	for ( n = 0; cur != NULL; cur = go_brother( cur ) )
+	for ( n = 0; cur != NULL; cur = cnext )
+	{
+		cnext = go_brother( cur );				// allow object suicide
+		
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			val = cur->cal( lab1, lag );
@@ -2688,6 +2732,7 @@ double object::stat( char const *lab1, double *r, int lag, bool cond, char const
 			vals.push_back( val );
 			++n;
 		}
+	}
 
 	r[ 0 ] = n;
 
@@ -2738,7 +2783,7 @@ int sort_function_down( const void *a, const void *b )
 {
 	if ( qsort_lab != NULL )		// variable defined?
 	{
-		if ( ( *( object ** ) a )->cal( qsort_lab, 0) > ( *( object ** ) b )->cal( qsort_lab, 0 ) )
+		if ( ( *( object ** ) a )->cal( qsort_lab, 0 ) > ( *( object ** ) b )->cal( qsort_lab, 0 ) )
 			return -1;
 		else
 			return 1;
@@ -2886,7 +2931,7 @@ int sort_function_up_two( const void *a, const void *b )
 		if ( x > y )
 			return 1;
 		else
-			if ( (* ( object ** ) a )->cal( qsort_lab_secondary, 0 ) < ( *( object ** ) b )->cal( qsort_lab_secondary, 0) )
+			if ( ( * ( object ** ) a )->cal( qsort_lab_secondary, 0 ) < ( *( object ** ) b )->cal( qsort_lab_secondary, 0) )
 				return -1;
 			else
 				return 1;
@@ -3016,7 +3061,7 @@ to the values of their Variables or Parameters lv
 object *object::draw_rnd( char const *lo, char const *lv, int lag )
 {
 	double a, b;
-	object *cur, *cur1;
+	object *cur, *cur1, *cnext;
 	variable *cv;
 
 	cv = search_var_err( this, lv, no_search, true, "random drawing" );
@@ -3025,8 +3070,11 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 
 	cur1 = cur = cv->up;
 
-	for ( a = 0; cur != NULL; cur = cur->next )
+	for ( a = 0; cur != NULL; cur = cnext )
+	{
+		cnext = cur->next;						// allow object suicide
 		a += cur->cal( lv, lag );
+	}
 
 	if ( is_nan( a ) || is_inf( a ) )
 	{
@@ -3053,8 +3101,9 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 	while ( b == a ); 	// avoid ran1 == 1
 
 	a = cur1->cal( lv, lag );
-	for ( cur = cur1, cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cur1->next )
+	for ( cur = cur1, cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cnext )
 	{
+		cnext = cur1->next;						// allow object suicide
 		a += cur1->cal( lv, lag );
 		cur = cur1;
 	}
@@ -3111,7 +3160,7 @@ Same as draw_rnd but faster, assuming the sum of the probabilities to be tot
 object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 {
 	double a, b;
-	object *cur, *cur1;
+	object *cur, *cur1, *cnext;
 	variable *cv;
 
 	if ( tot <= 0 )
@@ -3130,9 +3179,11 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 	cur1 = cur = cv->up;
 
 	b = ran1( ) * tot;
+	cnext = cur1->next;
 	a = cur1->cal( lv, lag );
-	for ( cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cur1->next )
+	for ( cur1 = cnext; a <= b && cur1 != NULL; cur1 = cnext )
 	{
+		cnext = cur1->next;				// allow object suicide
 		a += cur1->cal( lv, lag );
 		cur = cur1;
 	}

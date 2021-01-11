@@ -927,7 +927,7 @@ void run( void )
 						sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - 1, docsv ? "csv" : "res" );
 
 					if ( fast_mode < 2 )
-						plog( "Saving results in file %s%s... ", "", msg, dozip ? ".gz" : "" );
+						plog( "Saving results to file %s%s... ", "", msg, dozip ? ".gz" : "" );
 
 					rf = new result( msg, "wt", dozip, docsv );	// create results file object
 					rf->title( root, 1 );						// write header
@@ -951,7 +951,7 @@ void run( void )
 				}
 
 				if ( fast_mode < 2 && i == sim_num )		// print only for last
-					plog( "\nSaving totals in file %s%s... ", "", msg, dozip ? ".gz" : "" );
+					plog( "\nSaving totals to file %s%s... ", "", msg, dozip ? ".gz" : "" );
 
 				if ( i == 1 && grandTotal && ! add_to_tot )
 				{

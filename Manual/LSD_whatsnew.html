@@ -180,6 +180,18 @@ location in code.</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Object instance “suicide” support. </span></b><span
+lang=EN-US>Equations invoking the Macro </span><span class=Cdigo><span
+lang=EN-US><a href="LSD_macros.html#DELETE">DELETE(…)</a></span></span><span
+lang=EN-US> for removing the Object instance containing the Variable under
+computation is now supported in all operations where this may make sense,
+including brotherhood-chain operations like </span><span class=Cdigo><a
+href="LSD_macros.html#SUM"><span lang=EN-US>SUM(…)</span></a></span><span
+lang=EN-US>.</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Support for true random number generator</span></b><span
 lang=EN-US>. If the hardware offers a truly random, non-deterministic random
 number generator, LSD can use it to all available <a
@@ -195,8 +207,8 @@ generator is used.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New example models.</span></b><span
 lang=EN-US> New <a href="modelbrowser.html#groups">examples</a> on
-macroeconomics models (Sant’Anna’s Multi-country simple and UFRJ Micro-Macro
-finance- and government augmented ).</span></p>
+macroeconomics models (Sant’Anna’s Multi-country simple and climate-augmented
+K+S, and UFRJ Micro-Macro finance- and government augmented).</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -229,8 +241,8 @@ version 7.2.</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>New embedded binaries and bug fixes</span><span
-lang=EN-US>.</span></p>
+</span></span><span lang=EN-US>New embedded Tcl/Tk 8.6.11 and other embedded
+binaries, bug fixes.</span></p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'><span lang=EN-US>&nbsp;</span></p>
 
@@ -433,8 +445,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>Standard C++11 random library. </span></b><span
 lang=EN-US>Use the new powerful random number generator facilities included in
 the C++ library, which may be significantly faster, and add several <a
-href="LSD_macros.html#randomdraw">new distributions</a> to draw from (thanks
-Frederik for the suggestion).</span></p>
+href="LSD_macros.html#randomdraw">new distributions</a> to draw from (thanks Frederik
+for the suggestion).</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -507,9 +519,9 @@ lang=EN-US> Macro documentation.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Improved Gnuplot support</span></b><span
 lang=EN-US>. Automatic usage of default plotting terminals, supporting
-contemporaneous options like Qt and wxt. Updated system terminal options, shared
-with LMM. WARNING: the old Windows 32-bit version of Gnuplot was removed from
-LSD, now users in all platforms must install Gnuplot, please refer to </span><span
+contemporaneous options like Qt and wxt. Updated system terminal options,
+shared with LMM. WARNING: the old Windows 32-bit version of Gnuplot was removed
+from LSD, now users in all platforms must install Gnuplot, please refer to </span><span
 class=Cdigo><span lang=EN-US><a href="../Readme.txt">Readme.txt</a></span></span><span
 lang=EN-US> for details.</span></p>
 
@@ -517,9 +529,9 @@ lang=EN-US> for details.</span></p>
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Smart features</span></b><span lang=EN-US>.
-Automatic detection of problems in system options (platform mismatch) and
-smarter defaults in LMM. Automatic Variable and Parameter name filling during
-model structure definition in LSD Browser.</span></p>
+Automatic detection of problems in system options (platform mismatch) and smarter
+defaults in LMM. Automatic Variable and Parameter name filling during model
+structure definition in LSD Browser.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -642,8 +654,8 @@ options for plots. </span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Pause/resume run controls.</span></b><span
-lang=EN-US> Simulation runs can be paused resumed asynchronously at any time
-(no preset breakpoint required), including full debugger support.</span></p>
+lang=EN-US> Simulation runs can be paused resumed asynchronously at any time (no
+preset breakpoint required), including full debugger support.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -651,8 +663,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>New unsaved configuration indicator.</span></b><span
 lang=EN-US> All LSD windows now show configuration name and save status (‘</span><span
 class=Cdigo><span lang=EN-US>*</span></span><span lang=EN-US>’ in title bar
-when unsaved changes are present). Unsaved changes warning dialog in all
-potential data loss situations.</span></p>
+when unsaved changes are present). Unsaved changes warning dialog in all potential
+data loss situations.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -782,8 +794,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>New network functions and macros.</span></b><span
 lang=EN-US> Added command for the creation and manipulation of a network from
 Equations. Network is formed by brother Objects and several standard network
-templates (random, Small World, Power-Law, etc.) are available for quick and automatic
-network creation.</span></p>
+templates (random, Small World, Power-Law, etc.) are available for quick and
+automatic network creation.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US

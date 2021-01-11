@@ -15,16 +15,16 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>64</o:Revision>
-  <o:TotalTime>898</o:TotalTime>
+  <o:Revision>67</o:Revision>
+  <o:TotalTime>924</o:TotalTime>
   <o:Created>2018-04-14T19:11:00Z</o:Created>
-  <o:LastSaved>2020-10-16T00:30:00Z</o:LastSaved>
+  <o:LastSaved>2021-01-11T15:55:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>3367</o:Words>
-  <o:Characters>18184</o:Characters>
-  <o:Lines>151</o:Lines>
+  <o:Words>3430</o:Words>
+  <o:Characters>18528</o:Characters>
+  <o:Lines>154</o:Lines>
   <o:Paragraphs>43</o:Paragraphs>
-  <o:CharactersWithSpaces>21508</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>21915</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -32,7 +32,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <link rel=colorSchemeMapping href="LSD_whatsnew_arquivos/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
-  <w:Zoom>110</w:Zoom>
+  <w:Zoom>120</w:Zoom>
   <w:TrackMoves>false</w:TrackMoves>
   <w:TrackFormatting/>
   <w:HyphenationZone>21</w:HyphenationZone>
@@ -1443,9 +1443,9 @@ style='mso-ansi-language:EN-US'>. All Macros performing computations over
 multiple Object instances may now operate conditionally, allowing for much
 finer control of data aggregation (see for instance </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'><a href="LSD_macros.html#SUM">SUM_CND(…)</a></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> for details). Any Variable or Parameter
-contained in an Object instance may be used to control its inclusion in
-aggregated statistics, including lagged values.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> for details). Any Variable or
+Parameter contained in an Object instance may be used to control its inclusion
+in aggregated statistics, including lagged values.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1484,6 +1484,22 @@ lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-fon
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
+EN-US'>Object instance “suicide” support. </span></b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Equations invoking the Macro </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
+href="LSD_macros.html#DELETE">DELETE(…)</a></span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> for removing the Object instance containing
+the Variable under computation is now supported in all operations where this
+may make sense, including brotherhood-chain operations like </span><span
+class=Cdigo><a href="LSD_macros.html#SUM"><span lang=EN-US style='mso-ansi-language:
+EN-US'>SUM(…)</span></a></span><span lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>Support for true random number generator</span></b><span lang=EN-US
 style='mso-ansi-language:EN-US'>. If the hardware offers a truly random,
 non-deterministic random number generator, LSD can use it to all available <a
@@ -1503,8 +1519,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>New example models.</span></b><span lang=EN-US style='mso-ansi-language:
 EN-US'> New <a href="modelbrowser.html#groups">examples</a> on macroeconomics
-models (Sant’Anna’s Multi-country simple and UFRJ Micro-Macro finance- and
-government augmented ).<o:p></o:p></span></p>
+models (Sant’Anna’s Multi-country simple and climate-augmented K+S, and UFRJ
+Micro-Macro finance- and government augmented).<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1550,8 +1566,8 @@ lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-fon
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US;
-mso-bidi-font-weight:bold'>New embedded binaries and bug fixes</span><span
-lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
+mso-bidi-font-weight:bold'>New embedded Tcl/Tk 8.6.11 and other embedded
+binaries, bug fixes.</span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'><span lang=EN-US
 style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
@@ -1610,8 +1626,7 @@ EN-US'>Automatic description for new Variable/Function</span></b><span
 lang=EN-US style='mso-ansi-language:EN-US'>. When <a
 href="menumodel.html#AddAVar">adding new Variables and Functions</a> using the
 name list, <a name="_Hlk11434818">any existing description text (comments)
-existing in the equation file(s) is used to fill the Description field
-automatically</a>.<o:p></o:p></span></p>
+existing in the equation file(s) is used to fill the Description field automatically</a>.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1657,8 +1672,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>Model structure size control.</span></b><span lang=EN-US
 style='mso-ansi-language:EN-US'> The graphical model representation in the <a
-href="graphrep.html">LSD Model Structure</a> window can have the space distribution
-of the Objects finely controlled, including an automatic fit option.<o:p></o:p></span></p>
+href="graphrep.html">LSD Model Structure</a> window can have the space
+distribution of the Objects finely controlled, including an automatic fit
+option.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1856,9 +1872,9 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>New example models.</span></b><span lang=EN-US style='mso-ansi-language:
-EN-US'> New <a href="modelbrowser.html#groups">examples</a> on industrial dynamics,
-market dynamics, consumer networks, and macroeconomics, including in-depth
-sensitivity analysis.<o:p></o:p></span></p>
+EN-US'> New <a href="modelbrowser.html#groups">examples</a> on industrial
+dynamics, market dynamics, consumer networks, and macroeconomics, including
+in-depth sensitivity analysis.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -2054,9 +2070,9 @@ EN-US'>Integration with R.</span></b><span lang=EN-US style='mso-ansi-language:
 EN-US'> Two advanced R packages available on CRAN (LSDinterface and
 LSDsensitivity). Transparent use of LSD Object-oriented hierarchical data in R
 (multidimensional arrays). Parallel multi-core reading of multiple results
-files. Automatic handling of compressed results files. Advanced tools for
-sensitivity analysis and the study of response surfaces of simulation models
-(Morris Elementary Effects, Sobol Decomposition, Kriging Meta-modelling etc.).<o:p></o:p></span></p>
+files. Automatic handling of compressed results files. Advanced tools for sensitivity
+analysis and the study of response surfaces of simulation models (Morris
+Elementary Effects, Sobol Decomposition, Kriging Meta-modelling etc.).<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -2288,8 +2304,8 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>New and revised example models.</span></b><span lang=EN-US
-style='mso-ansi-language:EN-US'> New examples on industrial dynamics and consumer
-networks.<o:p></o:p></span></p>
+style='mso-ansi-language:EN-US'> New examples on industrial dynamics and
+consumer networks.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-left:35.7pt;text-indent:-17.85pt;
 mso-list:l1 level1 lfo4'><![if !supportLists]><span lang=EN-US
