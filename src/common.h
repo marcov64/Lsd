@@ -215,6 +215,7 @@ struct object
 	double stat( char const *lab1, double *v = NULL, int lag = 0, bool cond = false, char const *lab2 = "", char const *lop = "", double value = NAN );
 	double stats_net( char const *lab, double *r );
 	double sum( char const *lab1, int lag = 0, bool cond = false, char const *lab2 = "", char const *lop = "", double value = NAN );
+	double to_delete( void );
 	double whg_av( char const *lab1, char const *lab2, int lag = 0, bool cond = false, char const *lab3 = "", char const *lop = "", double value = NAN );
 	double write( char const *lab, double value, int time, int lag = 0 );
 	double write_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, bool append = false );

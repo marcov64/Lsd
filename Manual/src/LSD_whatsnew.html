@@ -15,16 +15,16 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>67</o:Revision>
-  <o:TotalTime>924</o:TotalTime>
+  <o:Revision>68</o:Revision>
+  <o:TotalTime>926</o:TotalTime>
   <o:Created>2018-04-14T19:11:00Z</o:Created>
-  <o:LastSaved>2021-01-11T15:55:00Z</o:LastSaved>
+  <o:LastSaved>2021-01-11T21:36:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>3430</o:Words>
-  <o:Characters>18528</o:Characters>
-  <o:Lines>154</o:Lines>
-  <o:Paragraphs>43</o:Paragraphs>
-  <o:CharactersWithSpaces>21915</o:CharactersWithSpaces>
+  <o:Words>3451</o:Words>
+  <o:Characters>18641</o:Characters>
+  <o:Lines>155</o:Lines>
+  <o:Paragraphs>44</o:Paragraphs>
+  <o:CharactersWithSpaces>22048</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -32,7 +32,6 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <link rel=colorSchemeMapping href="LSD_whatsnew_arquivos/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
-  <w:Zoom>120</w:Zoom>
   <w:TrackMoves>false</w:TrackMoves>
   <w:TrackFormatting/>
   <w:HyphenationZone>21</w:HyphenationZone>
@@ -1459,8 +1458,8 @@ href="LSD_macros.html#T">RUN</a></span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> informs the current run number in a multi-run
 simulation execution. </span><span class=Cdigo><a href="LSD_macros.html#T"><span
 lang=EN-US style='mso-ansi-language:EN-US'>LAST_RUN</span></a></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> provides the total number of runs
-configured for the current simulation. </span><span class=Cdigo><a
+lang=EN-US style='mso-ansi-language:EN-US'> provides the total number of runs configured
+for the current simulation. </span><span class=Cdigo><a
 href="LSD_macros.html#THIS"><span lang=EN-US style='mso-ansi-language:EN-US'>THIS</span></a></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> points to the current Object under
 computation. </span><span class=Cdigo><a href="LSD_macros.html#THIS"><span
@@ -1476,7 +1475,10 @@ href="LSD_faqs.html#modelstructure"><span lang=EN-US style='mso-ansi-language:
 EN-US'>model structure</span></a><span lang=EN-US style='mso-ansi-language:
 EN-US'> without using the C++ complex pointer syntax with the important benefit
 of full pointer checking by default, preventing obscure crashes and providing
-identification of problem location in code.<o:p></o:p></span></p>
+identification of problem location in code. </span><span class=Cdigo><a
+href="LSD_macros.html#DELETING">DELETING</a></span><span style='mso-ansi-language:
+EN-US'> <span lang=EN-US>allows checking for deferred Object deletions due to
+Variables still computing.<o:p></o:p></span></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1552,13 +1554,13 @@ lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-fon
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
-lang=EN-US style='mso-ansi-language:EN-US'>Removed support for legacy
-platforms.</span></b><span lang=EN-US style='mso-ansi-language:EN-US'> Windows
-32-bit and Mac OS X (10.09 and below) are no longer supported by LSD. This was
-done because of the small base of those platforms nowadays (computers typically
-10-year old or more), and the possibility of adding new features not supported
-on them. Also, Tcl/Tk version 8.6 is now the minimum requirement in Linux.
-Users of these legacy platforms may still use LSD version 7.2.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'>Removed support for legacy platforms.</span></b><span
+lang=EN-US style='mso-ansi-language:EN-US'> Windows 32-bit and Mac OS X (10.09
+and below) are no longer supported by LSD. This was done because of the small
+base of those platforms nowadays (computers typically 10-year old or more), and
+the possibility of adding new features not supported on them. Also, Tcl/Tk
+version 8.6 is now the minimum requirement in Linux. Users of these legacy
+platforms may still use LSD version 7.2.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1597,11 +1599,11 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'><a href="browser.html#updating">Variable update</a> time control.</span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'> LSD Variables can now be
-updated/recomputed under arbitrary time schemes, deterministic or random. The
-modeler can now configure update periods larger than 1, including an initial
-“sleep” for any Variable. Both period and initial times can be set as a fixed
-number or a uniform random draw from a modeler-defined range.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> LSD Variables can now be updated/recomputed
+under arbitrary time schemes, deterministic or random. The modeler can now
+configure update periods larger than 1, including an initial “sleep” for any
+Variable. Both period and initial times can be set as a fixed number or a
+uniform random draw from a modeler-defined range.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1626,7 +1628,8 @@ EN-US'>Automatic description for new Variable/Function</span></b><span
 lang=EN-US style='mso-ansi-language:EN-US'>. When <a
 href="menumodel.html#AddAVar">adding new Variables and Functions</a> using the
 name list, <a name="_Hlk11434818">any existing description text (comments)
-existing in the equation file(s) is used to fill the Description field automatically</a>.<o:p></o:p></span></p>
+existing in the equation file(s) is used to fill the Description field
+automatically</a>.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1820,14 +1823,14 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
 lang=EN-US style='mso-ansi-language:EN-US'>Pointer checking</span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'>. By default, LSD now checks all
-pointers used in Macros for validity. As this may have performance impact for
-some models, new Macros (</span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>USE_POINTER_CHECK</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>NO_POINTER_CHECK</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>) are available for the modeler
-control <a href="LSD_macros.html#POINTER_CHECK">pointer checking</a>.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'>. By default, LSD now checks all pointers
+used in Macros for validity. As this may have performance impact for some
+models, new Macros (</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>USE_POINTER_CHECK</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'> and </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>NO_POINTER_CHECK</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'>) are available for the modeler control <a
+href="LSD_macros.html#POINTER_CHECK">pointer checking</a>.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -1974,9 +1977,9 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>Smart features</span></b><span lang=EN-US style='mso-ansi-language:EN-US'>.
-Automatic detection of problems in system options (platform mismatch) and
-smarter defaults in LMM. Automatic Variable and Parameter name filling during
-model structure definition in LSD Browser.<o:p></o:p></span></p>
+Automatic detection of problems in system options (platform mismatch) and smarter
+defaults in LMM. Automatic Variable and Parameter name filling during model
+structure definition in LSD Browser.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -2003,9 +2006,9 @@ other small improvements and bug fixes.<o:p></o:p></span></p>
 <h1><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Version 7.0 (Apr 2018)<o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The new
-version maintains the compatibility with all the models built with previous
-versions of LSD (some optimizations require C++11 and </span><span class=Cdigo><span
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The new version
+maintains the compatibility with all the models built with previous versions of
+LSD (some optimizations require C++11 and </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>fun_head_fast.h</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>). Main changes:<o:p></o:p></span></p>
 
@@ -2070,9 +2073,9 @@ EN-US'>Integration with R.</span></b><span lang=EN-US style='mso-ansi-language:
 EN-US'> Two advanced R packages available on CRAN (LSDinterface and
 LSDsensitivity). Transparent use of LSD Object-oriented hierarchical data in R
 (multidimensional arrays). Parallel multi-core reading of multiple results
-files. Automatic handling of compressed results files. Advanced tools for sensitivity
-analysis and the study of response surfaces of simulation models (Morris
-Elementary Effects, Sobol Decomposition, Kriging Meta-modelling etc.).<o:p></o:p></span></p>
+files. Automatic handling of compressed results files. Advanced tools for
+sensitivity analysis and the study of response surfaces of simulation models
+(Morris Elementary Effects, Sobol Decomposition, Kriging Meta-modelling etc.).<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -2085,8 +2088,8 @@ style='mso-ansi-language:EN-US'> New button bars. New context menus
 (right-clicks on lists). Automatic windows positioning. Fully hierarchical
 window system management (properly block of unavailable windows and buttons
 etc.). System-wide consistent windows decorations, buttons and organization.
-In-session persistent windows sizes. Unnecessary window redraws eliminated.
-Faster debugger interface. Easy to change defaults (</span><span class=Cdigo><span
+In-session persistent windows sizes. Unnecessary window redraws eliminated. Faster
+debugger interface. Easy to change defaults (</span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>windows.tcl</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>). New accelerator keys in LSD Log
 window. Support of larger structures in the LSD Model Structure window. <o:p></o:p></span></p>
@@ -2333,8 +2336,8 @@ of small bug fixes and improvements.<o:p></o:p></span></p>
 mso-ansi-language:EN-US'>Version 6.4 (Nov 2015)<o:p></o:p></span></h1>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The new
-version maintains the compatibility with all the models built with previous
-versions of LSD. There are several improvements:<o:p></o:p></span></p>
+version maintains the compatibility with all the models built with previous versions
+of LSD. There are several improvements:<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -2510,9 +2513,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>Stricter error catching.</span></b><span lang=EN-US style='mso-ansi-language:
 EN-US'> The number of errors spotted by LSD model programs is vastly increased.
-Moreover, detailed information is provided when an error occurs. For example,
-among other things, the system controls the amount of memory required to save
-the results, and indicated when it is not sufficient, leaving to the user the
+Moreover, detailed information is provided when an error occurs. For example, among
+other things, the system controls the amount of memory required to save the
+results, and indicated when it is not sufficient, leaving to the user the
 decision on whether to reduce the model dimension, simulation length, or amount
 of data to save.<o:p></o:p></span></p>
 

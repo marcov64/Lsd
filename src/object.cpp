@@ -1998,6 +1998,18 @@ void empty_cemetery( void )
 
 
 /****************************************************
+TO_DELETE (*)
+Check if the object is scheduled for deletion
+Objects are only deleted when all variables
+under computation in it finish computation
+****************************************************/
+double object::to_delete( void )
+{
+	return wait_delete == this;
+}
+
+
+/****************************************************
 DELETE_VAR
 Remove the variable from the object
 ****************************************************/
