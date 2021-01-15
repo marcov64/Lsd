@@ -2259,9 +2259,9 @@ indexes</a>. This command is helpful when the user needs to operate on many
 series with the same name.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=214 height=361 src="image/add_batch.png"></span></p>
+border=0 width=214 height=390 src="image/add_batch.png"></span></p>
 
-<p class=MsoNormal><span lang=EN-US>There are four possible criteria for
+<p class=MsoNormal><span lang=EN-US>There are five possible criteria for
 selecting the time series:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -2275,7 +2275,7 @@ contained.</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Select by series' tags</span></b></span><span
+</span></span><span class=Cdigo><b><span lang=EN-US>Select by series tags</span></b></span><span
 lang=EN-US>: series are selected according to specified tag, composed by as
 many index fields as the position in the <a href="LSD_faqs.html#modelstructure">model
 structure</a> of the <a href="LSD_faqs.html#object">Object type</a> containing
@@ -2289,6 +2289,14 @@ lang=EN-US>Root</span></span><span lang=EN-US> level is not used because it
 always has only one copy). Filling all the index fields will select one exact specific
 instance. Filling just some index fields will select all the series respecting
 the conditions specified.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Select by series cases</span></b></span><span
+lang=EN-US>: select series according to their initial and final cases (time
+steps). Only series starting at or later and finishing at or earlier the
+specified values will be selected.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -2753,15 +2761,15 @@ lang=EN-US> are checked and the command </span><span class=Cdigo><span
 lang=EN-US><a href="#timeseries">Plot</a></span></span><span lang=EN-US> is
 used, some specific options are required before a scatter plot can be
 generated. The scatter plot is built with points generated from data in the <a
-href="#_Series_selected">selected series</a> at a specific time step (case).
-LSD extracts from each time series just one value, at the specified time step.
-A 2D plot is composed by points where the X-axis values come from a set of
-series (the independent variables) and the Y-axis values are produced by the
-remaining series (the dependent variables). A 3D plot is made of the X and
-Y-axis values coming from a set of variables (the independent variables) and
-the Z-axis values, from the remaining series (the dependent variables) These
-values are re-arranged to generated 2 or more variables: one or two independent
-ones (for 2D or 3D plots, respectively), and one or more dependent variables.</span></p>
+href="#_Series_selected">selected series</a> at a specific time step (case). LSD
+extracts from each time series just one value, at the specified time step. A 2D
+plot is composed by points where the X-axis values come from a set of series
+(the independent variables) and the Y-axis values are produced by the remaining
+series (the dependent variables). A 3D plot is made of the X and Y-axis values
+coming from a set of variables (the independent variables) and the Z-axis
+values, from the remaining series (the dependent variables) These values are
+re-arranged to generated 2 or more variables: one or two independent ones (for
+2D or 3D plots, respectively), and one or more dependent variables.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
 border=0 width=225 height=288 src="image/cd3Dcs.png"></span></p>
@@ -2854,8 +2862,8 @@ provide the Y values to plot. The graph will therefore contain two sets of
 points defined by the 2000 points with coordinates { (X<sup>1</sup>(k), X<sup>2001</sup>(k)),
 (X<sup>2</sup>(k), X<sup>2002</sup>(k)), ..., (X<sup>2000</sup>(k), X<sup>4000</sup>(k))
 } for the first series and { (X<sup>1</sup>(k), X<sup>4001</sup>(k)), (X<sup>2</sup>(k),
-X<sup>4002</sup>(k)), ..., (X<sup>2000</sup>(k), X<sup>6000</sup>(k))
-}&nbsp;for the second.</span></p>
+X<sup>4002</sup>(k)), ..., (X<sup>2000</sup>(k), X<sup>6000</sup>(k)) }&nbsp;for
+the second.</span></p>
 
 <h2><a name=3dTime></a><a name="_3D_plot_options"></a><span lang=EN-US>3D plot
 options </span></h2>
@@ -2868,8 +2876,8 @@ entries in the <a href="#_Series_selected">Series selected</a> list box, the </s
 class=Cdigo><span lang=EN-US><a href="#timeseries">Plot</a></span></span><span
 lang=EN-US> command will offer the option to produce a 3-dimensional plot. By
 default, a 3D plot considers the first two series in the list box as the
-independent variables, plotted on the horizontal XY plane, and the subsequent
-series, as the dependent variables, plotted on the vertical Z axis. Alternative
+independent variables, plotted on the horizontal XY plane, and the subsequent series,
+as the dependent variables, plotted on the vertical Z axis. Alternative
 definitions for the data used for the XY plane are available.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img

@@ -554,7 +554,7 @@ if ( ! mc && num_var == 0 )
 }
 else
 {
-	if ( sim_num > 1 )
+	if ( ! mc && sim_num > 1 )
 	  cmd( "ttk::messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"Only series from last run are loaded\" -detail \"Click on button 'Add...' to load series from saved simulation results. You can use 'Ctrl' and 'Shift' keys to select multiple files at once. Avoid selecting the results file from last run, as data is already loaded and would be duplicated.\"" );  
 	
 	cmd( "selectinlist .da.vars.lb.f.v 0 1" );
@@ -1017,7 +1017,9 @@ while ( true )
 			cmd( "set c [ lindex $a 1 ]" ); // get the tag value
 			cmd( "set ntag [ llength [ split $c {_} ] ]" );
 			cmd( "set ssys 2" );
-			cmd( "if { ! [ info exist tvar ] } { set tvar $maxc }" );
+			cmd( "if { ! [ info exist ca1 ] || ! [ string is integer -strict $ca1 ] } { set ca1 0 }" );
+			cmd( "if { ! [ info exist ca2 ] || ! [ string is integer -strict $ca2 ] } { set ca2 $maxc }" );
+			cmd( "if { ! [ info exist tvar ] || ! [ string is integer -strict $tvar ] } { set tvar $maxc }" );
 			cmd( "if { ! [ info exist cond ] } { set cond 1 }" );
 
 			cmd( "newtop .da.a \"Select Series\" { set choice 2 } .da" );
@@ -1027,12 +1029,16 @@ while ( true )
 			cmd( "ttk::label .da.a.tit.s -text \"$b\" -style hl.TLabel" );
 			cmd( "pack .da.a.tit.l .da.a.tit.s" );
 			cmd( "ttk::frame .da.a.q -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+			
+			// select all
 			cmd( "ttk::frame .da.a.q.f1" );
 			cmd( "ttk::radiobutton .da.a.q.f1.c -text \"Select all\" -variable ssys -value 2 -command { \
 					for { set x 0 } { $x < $ntag } { incr x } { \
 						.da.a.q.f.l.e$x conf -state disabled \
 					}; \
 					.da.a.q.f2.f.e conf -state disabled; \
+					.da.a.q.f4.l.e1 conf -state disabled; \
+					.da.a.q.f4.l.e2 conf -state disabled; \
 					.da.a.c.v.t.e2 conf -state disabled; \
 					.da.a.c.v.c.e conf -state disabled; \
 					.da.a.c.o.eq conf -state disabled; \
@@ -1044,7 +1050,7 @@ while ( true )
 				}" );
 			cmd( "bind .da.a.q.f1.c <Return> { \
 					.da.a.q.f1.c invoke; \
-					focus .da.a.b.ok \
+					focus .da.a.b.r2.ok \
 				}" );
 			cmd( "bind .da.a.q.f1.c <Down> { \
 					focus .da.a.q.f.c; \
@@ -1052,12 +1058,16 @@ while ( true )
 				}" );
 			cmd( "pack .da.a.q.f1.c" );
 			cmd( "pack .da.a.q.f1 -anchor w" );
+			
+			// select tags
 			cmd( "ttk::frame .da.a.q.f" );
-			cmd( "ttk::radiobutton .da.a.q.f.c -text \"Select by series' tags\" -variable ssys -value 1 -command { \
+			cmd( "ttk::radiobutton .da.a.q.f.c -text \"Select by series tags\" -variable ssys -value 1 -command { \
 					for { set x 0 } { $x < $ntag } { incr x } { \
 						.da.a.q.f.l.e$x conf -state normal \
 					}; \
 					.da.a.q.f2.f.e conf -state disabled; \
+					.da.a.q.f4.l.e1 conf -state disabled; \
+					.da.a.q.f4.l.e2 conf -state disabled; \
 					.da.a.c.v.t.e2 conf -state disabled; \
 					.da.a.c.v.c.e conf -state disabled; \
 					.da.a.c.o.eq conf -state normal; \
@@ -1076,8 +1086,8 @@ while ( true )
 					.da.a.q.f.l.e0 selection range 0 end \
 				}" );
 			cmd( "bind .da.a.q.f.c <Down> { \
-					focus .da.a.q.f3.s; \
-					.da.a.q.f3.s invoke \
+					focus .da.a.q.f4.c; \
+					.da.a.q.f4.c invoke \
 				}" );
 			cmd( "pack .da.a.q.f.c -anchor w" );
 			cmd( "ttk::frame .da.a.q.f.l" );
@@ -1096,15 +1106,65 @@ while ( true )
 					.da.a.q.f.l.e[ expr $x + 1 ] selection range 0 end } ]; \
 					bind .da.a.q.f.l.e$x <KeyRelease> { .da.a.q.f.c invoke } }; \
 					incr x -1; \
-					bind .da.a.q.f.l.e$x <Return> { focus .da.a.b.ok }" );
+					bind .da.a.q.f.l.e$x <Return> { focus .da.a.b.r2.ok }" );
 			cmd( "pack .da.a.q.f.l -anchor w -padx 25" );
 			cmd( "pack .da.a.q.f -anchor w" );
+		
+			// select cases
+			cmd( "ttk::frame .da.a.q.f4" );
+			cmd( "ttk::radiobutton .da.a.q.f4.c -text \"Select by series cases\" -variable ssys -value 5 -command { \
+					for { set x 0 } { $x < $ntag } { incr x } { \
+						.da.a.q.f.l.e$x conf -state disabled \
+					}; \
+					.da.a.q.f2.f.e conf -state disabled; \
+					.da.a.q.f4.l.e1 conf -state normal; \
+					.da.a.q.f4.l.e2 conf -state normal; \
+					.da.a.c.v.t.e2 conf -state disabled; \
+					.da.a.c.v.c.e conf -state disabled; \
+					.da.a.c.o.eq conf -state disabled; \
+					.da.a.c.o.dif conf -state disabled; \
+					.da.a.c.o.geq conf -state disabled; \
+					.da.a.c.o.g conf -state disabled; \
+					.da.a.c.o.seq conf -state disabled; \
+					.da.a.c.o.s conf -state disabled \
+				}" );
+			cmd( "bind .da.a.q.f4.c <Up> { \
+					focus .da.a.q.f.c; \
+					.da.a.q.f.c invoke \
+				}" );
+			cmd( "bind .da.a.q.f4.c <Return> { \
+					.da.a.q.f4.c invoke; \
+					focus .da.a.b.r2.ok \
+				}" );
+			cmd( "bind .da.a.q.f4.c <Down> { \
+					focus .da.a.q.f3.s; \
+					.da.a.q.f3.s invoke \
+				}" );
+			cmd( "pack .da.a.q.f4.c -anchor w" );
+			
+			cmd( "ttk::frame .da.a.q.f4.l" );
+			cmd( "ttk::entry .da.a.q.f4.l.e1 -width 5 -textvariable ca1 -justify center -state disabled" );
+			cmd( "ttk::label .da.a.q.f4.l.s -text to" );
+			cmd( "ttk::entry .da.a.q.f4.l.e2 -width 5 -textvariable ca2 -justify center -state disabled" );
+			cmd( "pack .da.a.q.f4.l.e1 .da.a.q.f4.l.s .da.a.q.f4.l.e2 -padx 2 -side left" );
+			cmd( "bind .da.a.q.f4.l.e1 <Return> { \
+					focus .da.a.q.f4.l.e2; \
+					.da.a.q.f4.l.e2 selection range 0 end \
+				}" );
+			cmd( "bind .da.a.q.f4.l.e2 <Return> { focus .da.a.b.r2.ok }" );
+			cmd( "pack .da.a.q.f4.l -anchor w -padx 25" );
+			
+			cmd( "pack .da.a.q.f4 -anchor w" );
+			
+			// select by values
 			cmd( "ttk::frame .da.a.q.f3" );
 			cmd( "ttk::radiobutton .da.a.q.f3.s -text \"Select by series values\" -variable ssys -value 3 -command { \
 					for { set x 0 } { $x < $ntag } { incr x } { \
 						.da.a.q.f.l.e$x conf -state disabled \
 					}; \
 					.da.a.q.f2.f.e conf -state disabled; \
+					.da.a.q.f4.l.e1 conf -state disabled; \
+					.da.a.q.f4.l.e2 conf -state disabled; \
 					.da.a.c.v.t.e2 conf -state normal; \
 					.da.a.c.v.c.e conf -state normal; \
 					.da.a.c.o.eq conf -state normal; \
@@ -1115,8 +1175,8 @@ while ( true )
 					.da.a.c.o.s conf -state normal \
 				}" );
 			cmd( "bind .da.a.q.f3.s <Up> { \
-					focus .da.a.q.f.c; \
-					.da.a.q.f.c invoke \
+					focus .da.a.q.f4.c; \
+					.da.a.q.f4.c invoke \
 				}" );
 			cmd( "bind .da.a.q.f3.s <Return> { \
 					focus .da.a.c.v.c.e; \
@@ -1128,12 +1188,16 @@ while ( true )
 				}" );
 			cmd( "pack .da.a.q.f3.s -anchor w" );
 			cmd( "pack .da.a.q.f3 -anchor w" );
+			
+			// select by values from other series
 			cmd( "ttk::frame .da.a.q.f2" );
 			cmd( "ttk::radiobutton .da.a.q.f2.s -text \"Select by values from another series\" -variable ssys -value 4 -command { \
 					for { set x 0 } { $x < $ntag } { incr x } { \
 						.da.a.q.f.l.e$x conf -state disabled \
 					}; \
 					.da.a.q.f2.f.e conf -state normal; \
+					.da.a.q.f4.l.e1 conf -state disabled; \
+					.da.a.q.f4.l.e2 conf -state disabled; \
 					.da.a.c.v.t.e2 conf -state normal; \
 					.da.a.c.v.c.e conf -state normal; \
 					.da.a.c.o.eq conf -state normal; \
@@ -1176,6 +1240,7 @@ while ( true )
 			cmd( "pack .da.a.q.f2.f.l .da.a.q.f2.f.e -anchor w -side left" );
 			cmd( "pack .da.a.q.f2.f -anchor w -padx 22" );
 			cmd( "pack .da.a.q.f2 -anchor w" );
+			
 			cmd( "ttk::frame .da.a.c -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 			cmd( "ttk::frame .da.a.c.o" );
 			cmd( "ttk::radiobutton .da.a.c.o.eq -text \"Equal (=)\" -variable cond -value 1 -state disabled" );
@@ -1196,7 +1261,7 @@ while ( true )
 			cmd( "ttk::label .da.a.c.v.t.t -text \"Case\"" );
 			cmd( "ttk::entry .da.a.c.v.t.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set tvar %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tvar; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 			cmd( "write_any .da.a.c.v.t.e2 $tvar" ); 
-			cmd( "bind .da.a.c.v.t.e2 <Return> {focus .da.a.b.ok}" );
+			cmd( "bind .da.a.c.v.t.e2 <Return> { focus .da.a.b.r2.ok }" );
 			cmd( "pack .da.a.c.v.t.t .da.a.c.v.t.e2" );
 			cmd( "pack .da.a.c.v.c .da.a.c.v.t -ipady 10" );
 			cmd( "pack .da.a.c.o .da.a.c.v -anchor w -side left -ipadx 5" );
@@ -1204,7 +1269,7 @@ while ( true )
 
 			cmd( "XYokhelpcancel .da.a b Description Equation { set choice 3 } { set choice 4 } { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
 			cmd( "showtop .da.a topleftW 0 0" );
-			cmd( "mousewarpto .da.a.b.ok" );
+			cmd( "mousewarpto .da.a.b.r2.ok" );
 
 			*choice = 0;
 			while ( *choice == 0 )
@@ -1239,6 +1304,7 @@ while ( true )
 			cmd( "if { [ .da.vars.ch.f.v get 0 ] == \"\" } { set tit \"\" }" );
 			cmd( "set choice $ssys" );
 			
+			// select all
 			if ( *choice == 2 )
 			{
 				cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
@@ -1250,6 +1316,21 @@ while ( true )
 				cmd( "if { \"$tit\" == \"\" } { set tit [ .da.vars.ch.f.v get 0 ] }" );
 			}
 			 
+			// select cases
+			if ( *choice == 5 )
+			{
+				cmd( "if { ! [ string is integer -strict $ca1 ] } { set ca1 0 }" );
+				cmd( "if { ! [ string is integer -strict $ca2 ] } { set ca2 $maxc }" );
+				cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
+				cmd( "foreach i $tot { \
+					if { [ lindex [ split $i ] 0 ] == \"$b\" && [ scan [ lindex [ split $i ] 2 ] \"(%%d-%%d)\" d e ] == 2 && $d >= $ca1 && $e <= $ca2 } { \
+							insert_series .da.vars.ch.f.v \"$i\" \
+					} \
+				}" );
+				cmd( "if { \"$tit\" == \"\" } { set tit [ .da.vars.ch.f.v get 0 ] }" );
+			}
+			 
+			// select tags
 			if ( *choice == 1 )
 			{
 				cmd( "set choice $cond" );
@@ -1378,6 +1459,7 @@ while ( true )
 				*choice = 0;
 			}
 
+			// select by values or by values from other series
 			if ( *choice == 3 || *choice == 4 )
 			{
 				l = *choice;
@@ -1461,7 +1543,9 @@ while ( true )
 			cmd( "set c [ lindex $a 1 ]" ); //get the tag value
 			cmd( "set ntag [ llength [ split $c {_} ] ]" );
 			cmd( "set ssys 2" );
-			cmd( "if { ! [ info exist tvar ] } { set tvar $maxc }" );
+			cmd( "if { ! [ info exist ca1 ] || ! [ string is integer -strict $ca1 ] } { set ca1 0 }" );
+			cmd( "if { ! [ info exist ca2 ] || ! [ string is integer -strict $ca2 ] } { set ca2 $maxc }" );
+			cmd( "if { ! [ info exist tvar ] || ! [ string is integer -strict $tvar ] } { set tvar $maxc }" );
 			cmd( "if { ! [ info exist cond ] } { set cond 1 }" );
 			cmd( "if { ! [ info exist selOnly ] } { set selOnly 0 }" );
 
@@ -1472,12 +1556,16 @@ while ( true )
 			cmd( "ttk::label .da.a.tit.s -text \"$b\" -style hl.TLabel" );
 			cmd( "pack .da.a.tit.l .da.a.tit.s" );
 			cmd( "ttk::frame .da.a.q -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+			
+			// unselect all
 			cmd( "ttk::frame .da.a.q.f1" );
 			cmd( "ttk::radiobutton .da.a.q.f1.c -text \"Unselect all\" -variable ssys -value 2 -command { \
 					for { set x 0 } { $x < $ntag } { incr x } { \
 						.da.a.q.f.l.e$x conf -state disabled \
 					}; \
 					.da.a.q.f2.f.e conf -state disabled; \
+					.da.a.q.f4.l.e1 conf -state disabled; \
+					.da.a.q.f4.l.e2 conf -state disabled; \
 					.da.a.c.v.t.e2 conf -state disabled; \
 					.da.a.c.v.c.e conf -state disabled; \
 					.da.a.c.o.eq conf -state disabled; \
@@ -1489,7 +1577,7 @@ while ( true )
 				}" );
 			cmd( "bind .da.a.q.f1.c <Return> { \
 					.da.a.q.f1.c invoke; \
-					focus .da.a.b.ok \
+					focus .da.a.b.r2.ok \
 				}" );
 			cmd( "bind .da.a.q.f1.c <Down> { \
 					focus .da.a.q.f.c; \
@@ -1497,12 +1585,16 @@ while ( true )
 				}" );
 			cmd( "pack .da.a.q.f1.c" );
 			cmd( "pack .da.a.q.f1 -anchor w" );
+			
+			// unselect tags
 			cmd( "ttk::frame .da.a.q.f" );
-			cmd( "ttk::radiobutton .da.a.q.f.c -text \"Unselect by series' tags\" -variable ssys -value 1 -command { \
+			cmd( "ttk::radiobutton .da.a.q.f.c -text \"Unselect by series tags\" -variable ssys -value 1 -command { \
 					for { set x 0 } { $x < $ntag } { incr x } { \
 						.da.a.q.f.l.e$x conf -state normal \
 					}; \
 					.da.a.q.f2.f.e conf -state disabled; \
+					.da.a.q.f4.l.e1 conf -state disabled; \
+					.da.a.q.f4.l.e2 conf -state disabled; \
 					.da.a.c.v.t.e2 conf -state disabled; \
 					.da.a.c.v.c.e conf -state disabled; \
 					.da.a.c.o.eq conf -state normal; \
@@ -1521,8 +1613,8 @@ while ( true )
 					.da.a.q.f.l.e0 selection range 0 end \
 				}" );
 			cmd( "bind .da.a.q.f.c <Down> { \
-					focus .da.a.q.f3.s; \
-					.da.a.q.f3.s invoke \
+					focus .da.a.q.f4.c; \
+					.da.a.q.f4.c invoke \
 				}" );
 			cmd( "pack .da.a.q.f.c -anchor w" );
 			cmd( "ttk::frame .da.a.q.f.l" );
@@ -1541,15 +1633,65 @@ while ( true )
 					.da.a.q.f.l.e[ expr $x + 1 ] selection range 0 end } ]; \
 					bind .da.a.q.f.l.e$x <KeyRelease> { .da.a.q.f.c invoke } }; \
 					incr x -1; \
-					bind .da.a.q.f.l.e$x <Return> { focus .da.a.b.ok }" );
+					bind .da.a.q.f.l.e$x <Return> { focus .da.a.b.r2.ok }" );
 			cmd( "pack .da.a.q.f.l -anchor w -padx 25" );
 			cmd( "pack .da.a.q.f -anchor w" );
+		
+			// unselect cases
+			cmd( "ttk::frame .da.a.q.f4" );
+			cmd( "ttk::radiobutton .da.a.q.f4.c -text \"Unselect by series cases\" -variable ssys -value 5 -command { \
+					for { set x 0 } { $x < $ntag } { incr x } { \
+						.da.a.q.f.l.e$x conf -state disabled \
+					}; \
+					.da.a.q.f2.f.e conf -state disabled; \
+					.da.a.q.f4.l.e1 conf -state normal; \
+					.da.a.q.f4.l.e2 conf -state normal; \
+					.da.a.c.v.t.e2 conf -state disabled; \
+					.da.a.c.v.c.e conf -state disabled; \
+					.da.a.c.o.eq conf -state disabled; \
+					.da.a.c.o.dif conf -state disabled; \
+					.da.a.c.o.geq conf -state disabled; \
+					.da.a.c.o.g conf -state disabled; \
+					.da.a.c.o.seq conf -state disabled; \
+					.da.a.c.o.s conf -state disabled \
+				}" );
+			cmd( "bind .da.a.q.f4.c <Up> { \
+					focus .da.a.q.f.c; \
+					.da.a.q.f.c invoke \
+				}" );
+			cmd( "bind .da.a.q.f4.c <Return> { \
+					.da.a.q.f4.c invoke; \
+					focus .da.a.b.r2.ok \
+				}" );
+			cmd( "bind .da.a.q.f4.c <Down> { \
+					focus .da.a.q.f3.s; \
+					.da.a.q.f3.s invoke \
+				}" );
+			cmd( "pack .da.a.q.f4.c -anchor w" );
+			
+			cmd( "ttk::frame .da.a.q.f4.l" );
+			cmd( "ttk::entry .da.a.q.f4.l.e1 -width 5 -textvariable ca1 -justify center -state disabled" );
+			cmd( "ttk::label .da.a.q.f4.l.s -text to" );
+			cmd( "ttk::entry .da.a.q.f4.l.e2 -width 5 -textvariable ca2 -justify center -state disabled" );
+			cmd( "pack .da.a.q.f4.l.e1 .da.a.q.f4.l.s .da.a.q.f4.l.e2 -padx 2 -side left" );
+			cmd( "bind .da.a.q.f4.l.e1 <Return> { \
+					focus .da.a.q.f4.l.e2; \
+					.da.a.q.f4.l.e2 selection range 0 end \
+				}" );
+			cmd( "bind .da.a.q.f4.l.e2 <Return> { focus .da.a.b.r2.ok }" );
+			cmd( "pack .da.a.q.f4.l -anchor w -padx 25" );
+			
+			cmd( "pack .da.a.q.f4 -anchor w" );
+			
+			// unselect by values
 			cmd( "ttk::frame .da.a.q.f3" );
 			cmd( "ttk::radiobutton .da.a.q.f3.s -text \"Unselect by series values\" -variable ssys -value 3 -command { \
 					for { set x 0 } { $x < $ntag } { incr x } { \
 						.da.a.q.f.l.e$x conf -state disabled \
 					}; \
 					.da.a.q.f2.f.e conf -state disabled; \
+					.da.a.q.f4.l.e1 conf -state disabled; \
+					.da.a.q.f4.l.e2 conf -state disabled; \
 					.da.a.c.v.t.e2 conf -state normal; \
 					.da.a.c.v.c.e conf -state normal; \
 					.da.a.c.o.eq conf -state normal; \
@@ -1560,8 +1702,8 @@ while ( true )
 					.da.a.c.o.s conf -state normal \
 				}" );
 			cmd( "bind .da.a.q.f3.s <Up> { \
-					focus .da.a.q.f.c; \
-					.da.a.q.f.c invoke \
+					focus .da.a.q.f4.c; \
+					.da.a.q.f4.c invoke \
 				}" );
 			cmd( "bind .da.a.q.f3.s <Return> { \
 					focus .da.a.c.v.c.e; \
@@ -1573,12 +1715,16 @@ while ( true )
 				}" );
 			cmd( "pack .da.a.q.f3.s -anchor w" );
 			cmd( "pack .da.a.q.f3 -anchor w" );
+			
+			// unselect by values from other series
 			cmd( "ttk::frame .da.a.q.f2" );
 			cmd( "ttk::radiobutton .da.a.q.f2.s -text \"Unselect by values from another series\" -variable ssys -value 4 -command { \
 					for { set x 0 } { $x < $ntag } { incr x } { \
 						.da.a.q.f.l.e$x conf -state disabled \
 					}; \
 					.da.a.q.f2.f.e conf -state normal; \
+					.da.a.q.f4.l.e1 conf -state disabled; \
+					.da.a.q.f4.l.e2 conf -state disabled; \
 					.da.a.c.v.t.e2 conf -state normal; \
 					.da.a.c.v.c.e conf -state normal; \
 					.da.a.c.o.eq conf -state normal; \
@@ -1641,7 +1787,7 @@ while ( true )
 			cmd( "ttk::label .da.a.c.v.t.t -text \"Case\"" );
 			cmd( "ttk::entry .da.a.c.v.t.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set tvar %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tvar; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 			cmd( "write_any .da.a.c.v.t.e2 $tvar" ); 
-			cmd( "bind .da.a.c.v.t.e2 <Return> {focus .da.a.b.ok}" );
+			cmd( "bind .da.a.c.v.t.e2 <Return> { focus .da.a.b.r2.ok }" );
 			cmd( "pack .da.a.c.v.t.t .da.a.c.v.t.e2" );
 			cmd( "pack .da.a.c.v.c .da.a.c.v.t -ipady 10" );
 			cmd( "pack .da.a.c.o .da.a.c.v -anchor w -side left -ipadx 5" );
@@ -1652,7 +1798,7 @@ while ( true )
 
 			cmd( "XYokhelpcancel .da.a b Description Equation { set choice 3 } { set choice 4 } { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
 			cmd( "showtop .da.a topleftW 0 0" );
-			cmd( "mousewarpto .da.a.b.ok" );
+			cmd( "mousewarpto .da.a.b.r2.ok" );
 
 			*choice = 0;
 			while ( *choice == 0 )
@@ -1687,6 +1833,7 @@ while ( true )
 			cmd( ".da.vars.ch.f.v selection clear 0 end" );
 			cmd( "set choice $ssys" );
 
+			// unselect all
 			if ( *choice == 2 )
 			{
 				 cmd( "set tot [ .da.vars.ch.f.v get 0 end ]" );
@@ -1699,6 +1846,22 @@ while ( true )
 					}" );
 			}
 			 
+			// unselect cases
+			if ( *choice == 5 )
+			{
+				cmd( "if { ! [ string is integer -strict $ca1 ] } { set ca1 0 }" );
+				cmd( "if { ! [ string is integer -strict $ca2 ] } { set ca2 $maxc }" );
+				 cmd( "set tot [ .da.vars.ch.f.v get 0 end ]" );
+				 cmd( "set myc 0" );
+				 cmd( "foreach i $tot { \
+					if { [ lindex [ split $i ] 0 ] == \"$b\" && [ scan [ lindex [ split $i ] 2 ] \"(%%d-%%d)\" d e ] == 2 && $d >= $ca1 && $e <= $ca2 } { \
+						.da.vars.ch.f.v selection set $myc \
+					}; \
+					incr myc \
+				}" );
+			}
+			 
+			// unselect tags
 			if ( *choice == 1 )
 			{
 				cmd( "set choice $cond" );
@@ -1842,6 +2005,7 @@ while ( true )
 				*choice = 0;
 			}
 
+			// unselect by values or by values from other series
 			if ( *choice == 3 || *choice == 4 )
 			{
 				l = *choice;
