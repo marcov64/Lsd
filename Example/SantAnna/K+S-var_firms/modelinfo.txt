@@ -1,3 +1,3 @@
-K+S (var. firm number)
-0.3
+K+S (var. firms)
+0.3.1
 01 January, 2018

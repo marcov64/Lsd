@@ -184,7 +184,7 @@ invisible( gc( verbose = FALSE ) )
 CI     <- 0.95   # desired confidence interval
 nBins  <- 15     # number of bins to use in histograms
 outLim <- 0.001  # outlier percentile (0=don't remove outliers)
-warmUp <- 300    # number of "warm-up" runs
+warmUp <- 200    # number of "warm-up" runs
 nTstat <- -1     # last period to consider for statistics (-1=all)
 
 repName <- ""    # report files base name (if "" same baseName)

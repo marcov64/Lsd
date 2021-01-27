@@ -37,11 +37,11 @@ if ( V( "_life2cycle" ) < 3 )					// entrant?
 	// myopic-optimistic expectations
 	END_EQUATION( max( VL( "_D2d", 1 ), CURRENT ) );
 
-v[9] = VS( PARENT, "e0" );						// animal spirits parameter
 k = VS( GRANDPARENT, "flagExpect" );			// expectation form
 j = ( k == 0 || k > 4 ) ? 1 : ( k == 1 ) ? 4 : 2;// req. number of data periods
 
 // compute the mix between fulfilled and potential demand (orders)
+v[9] = VS( PARENT, "e0" );						// animal spirits parameter
 for ( i = 1; i <= j; ++i )
 {
 	v[10] = VL( "_D2", i );

@@ -146,27 +146,29 @@ CYCLE( cur, "Firm2" )
 }	
 
 // quit candidate firms exit, except the best one if all going to quit
-i = j = 0;										// firm counters
+v[7] = i = j = 0;								// firm counters
 CYCLE_SAFE( cur, "Firm2" )
 {
 	if ( quit[ i ] )
 	{
 		if ( h > 0 || i != k )					// firm must exit?
 		{
-			// account liquidation credit due to public, if any
-			v[3] += exit_firm2( var, cur, & v[1] );// delete object and liq. val.
-			
 			++j;								// count exits
+			if ( VS( cur, "_NW2" ) < 0 )		// count bankruptcies
+				++v[7];
+
+			// account liquidation credit due to public, if any
+			v[3] += exit_firm2( var, cur, & v[1] );// del obj & collect liq. val.
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
 			{
 				// new equity required
-				v[7] = NW20u + VS( cur, "_Deb2" ) - VS( cur, "_NW2" );
-				v[2] += v[7];					// accumulate "entry" equity cost
+				v[8] = NW20u + VS( cur, "_Deb2" ) - VS( cur, "_NW2" );
+				v[2] += v[8];					// accumulate "entry" equity cost
 				
 				WRITES( cur, "_Deb2", 0 );		// reset debt
-				INCRS( cur, "_NW2", v[7] );		// add new equity
+				INCRS( cur, "_NW2", v[8] );		// add new equity
 			}
 	}
 
@@ -176,10 +178,10 @@ CYCLE_SAFE( cur, "Firm2" )
 V( "f2rescale" );								// redistribute exiting m.s.
 
 // compute the potential number of entrants
-v[8] = ( MC2_1 == 0 ) ? 0 : MC2 / MC2_1 - 1;// change in market conditions
+v[9] = ( MC2_1 == 0 ) ? 0 : MC2 / MC2_1 - 1;// change in market conditions
 
 k = max( 0, ceil( F2 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
-						 omicron * min( max( v[8], x2inf ), x2sup ) ) ) );
+						 omicron * min( max( v[9], x2inf ), x2sup ) ) ) );
 				 
 // apply return-to-the-average stickiness random shock to the number of entrants
 k -= min( RND * stick * ( ( double ) ( F2 - j ) / F20 - 1 ) * F20, k );
@@ -199,6 +201,7 @@ INCRS( PARENT, "cEntry", v[2] );				// account equity cost of entry
 INCRS( PARENT, "cExit", v[3] );					// account exit credits
 WRITE( "exit2", ( double ) j / F2 );
 WRITE( "entry2", ( double ) k / F2 );
+WRITES( SECSTAL1, "exit2fail", v[7] / F2 );
 
 V( "f2rescale" );								// redistribute entrant m.s.
 V( "firm2maps" );								// update firm mapping vectors
@@ -564,11 +567,5 @@ Updated in 'entry2exit'
 EQUATION_DUMMY( "exit2", "entry2exit" )
 /*
 Rate of exiting firms in consumption-good sector
-Updated in 'entry2exit'
-*/
-
-EQUATION_DUMMY( "exit2fail", "entry2exit" )
-/*
-Rate of bankrupt firms in consumption-good sector
 Updated in 'entry2exit'
 */

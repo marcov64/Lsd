@@ -3,7 +3,7 @@
 	K+S LSD MODEL (SFC version)
 	-------------
 	
-	VERSION: 0.1 - original JEDC2010 model plus stock-flow consistency (SFC)
+	VERSION: 0.1.1 - original JEDC2010 model plus stock-flow consistency (SFC)
 
 	This is the topmost code file for the K+S coded in LSD. 
 	It contains only the scheduling equations 'runCountry' and 'timeStep',

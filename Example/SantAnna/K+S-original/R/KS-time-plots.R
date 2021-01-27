@@ -174,6 +174,40 @@ time_plots <- function( mcData, Adata, mdata, Mdata, Sdata, nExp, nSize, nTsteps
               leg2 = c( "Gov. debt" ) )
 
 
+  # ------ Credit demand and supply in GDP terms ------
+
+  exps <- min <- max <- lo <- hi <- list( )
+  # select data to plot
+  for( k in 1 : nExp ){
+    # MC averages
+    exps[[ k ]] <- list( Adata[[ k ]]$CD[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ],
+                         Adata[[ k ]]$CS[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
+    # minimum and maximum MC runs
+    min[[ k ]] <- list( mdata[[ k ]]$CD[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ],
+                        mdata[[ k ]]$CS[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
+    max[[ k ]] <- list( Mdata[[ k ]]$CD[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ],
+                        Mdata[[ k ]]$CS[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
+    # MC confidence interval
+    lo[[ k ]] <- list( Adata[[ k ]]$CD[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] -
+                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$CD[ TmaskPlot ] /
+                         Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ),
+                       Adata[[ k ]]$CS[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] -
+                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$CS[ TmaskPlot ] /
+                         Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ) )
+    hi[[ k ]] <- list( Adata[[ k ]]$CD[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] +
+                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$CD[ TmaskPlot ] /
+                         Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ),
+                       Adata[[ k ]]$CS[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] +
+                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$CS[ TmaskPlot ] /
+                         Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ) )
+  }
+
+  plot_lists( exps, min, max, lo, hi, leg = legends, col = colors,
+              lty = lTypes, xlab = "Time", ylab = "Effective total firm credit demand and bank credit supply over GDP",
+              tit = "Credit demand and supply flow on GDP", subtit = paste( "MC runs =", nSize ),
+              leg2 = c( "Demand", "Supply" ) )
+
+
   # ------ Unemployment and vacancy rates ------
 
   exps <- min <- max <- lo <- hi <- list( )
@@ -233,30 +267,21 @@ time_plots <- function( mcData, Adata, mdata, Mdata, Sdata, nExp, nSize, nTsteps
   exps <- min <- max <- lo <- hi <- list( )
   # select data to plot
   for( k in 1 : nExp ){
-    SWreal <- sqrt( Sdata[[ k ]]$W1 ^ 2 + Sdata[[ k ]]$W2 ^ 2 ) / Adata[[ k ]]$CPI # very crude approximation
-    AWreal <- MWreal <- mWreal <- vector( "numeric", length = nTsteps )
-    for( i in 1 : nTsteps ) {
-      if( is.finite( Adata[[ k ]]$CPI[ i ] ) && Adata[[ k ]]$CPI[ i ] != 0 ) {
-        AWreal[ i ] <- ( Adata[[ k ]]$W1[ i ] + Adata[[ k ]]$W2[ i ] ) / Adata[[ k ]]$CPI[ i ]
-        MWreal[ i ] <- ( Mdata[[ k ]]$W1[ i ] + Mdata[[ k ]]$W2[ i ] ) / Adata[[ k ]]$CPI[ i ]
-        mWreal[ i ] <- ( mdata[[ k ]]$W1[ i ] + mdata[[ k ]]$W2[ i ] ) / Adata[[ k ]]$CPI[ i ]
-      } else {
-        AWreal[ i ] <- NA
-        MWreal[ i ] <- NA
-        mWreal[ i ] <- NA
-      }
-    }
+    Aw <- Adata[[ k ]]$W1 + Adata[[ k ]]$W2
+    Mw <- Mdata[[ k ]]$W1 + Mdata[[ k ]]$W2
+    mw <- mdata[[ k ]]$W1 + mdata[[ k ]]$W2
+    Sw <- sqrt( Sdata[[ k ]]$W1 ^ 2 + Sdata[[ k ]]$W2 ^ 2 ) # very crude approximation
     # MC averages
-    exps[[ k ]] <- list( AWreal[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
+    exps[[ k ]] <- list( Aw[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
     # minimum and maximum MC runs
-    min[[ k ]] <- list( mWreal[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
-    max[[ k ]] <- list( MWreal[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
+    min[[ k ]] <- list( mw[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
+    max[[ k ]] <- list( Mw[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
     # MC confidence interval
-    lo[[ k ]] <- list( AWreal[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] -
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * SWreal[ TmaskPlot ] /
+    lo[[ k ]] <- list( Aw[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] -
+                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sw[ TmaskPlot ] /
                          Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ) )
-    hi[[ k ]] <- list( AWreal[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] +
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * SWreal[ TmaskPlot ] /
+    hi[[ k ]] <- list( Aw[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] +
+                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sw[ TmaskPlot ] /
                          Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ) )
   }
 

@@ -25,16 +25,21 @@ Label Root
 				}
 
 				Param: _IDb
-				Param: _fd
+				Param: _fD
+				Var: _BD
 				Var: _BadDeb
 				Var: _Bda
+				Var: _Bonds
 				Var: _Cl
 				Var: _Depo
 				Var: _DivB
+				Var: _ExRes
 				Var: _Gbail
 				Var: _Loans
+				Var: _LoansCB
 				Var: _NWb
 				Var: _PiB
+				Var: _Res
 				Var: _TC
 				Var: _TC1free
 				Var: _TC2free
@@ -44,40 +49,52 @@ Label Root
 			}
 
 			Param: B
+			Param: DebRule
+			Param: DefPrule
+			Param: EqB0
 			Param: Lambda
 			Param: Lambda0
-			Param: NWb0
 			Param: PhiB
+			Param: Trule
 			Param: Ut
 			Param: alphaB
 			Param: betaB
 			Param: dB
-			Param: debRule
-			Param: defRule
+			Param: deltaB
+			Param: deltaDeb
 			Param: gammaPi
 			Param: gammaU
 			Param: kConst
+			Param: muBonds
+			Param: muD
 			Param: muDeb
 			Param: muRes
-			Param: phiT
 			Param: piT
 			Param: rAdj
-			Param: rD
 			Param: rT
+			Param: rhoBonds
 			Param: tauB
+			Param: thetaBonds
 			Func: banksMaps
 			Func: pickBank
+			Var: BD
+			Var: BS
+			Var: Bonds
 			Var: Cl
 			Var: Depo
+			Var: DepoG
 			Var: DivB
 			Var: Gbail
 			Var: Loans
+			Var: LoansCB
 			Var: NWb
 			Var: PiB
+			Var: Res
 			Var: TaxB
 			Var: cScores
-			Var: phi
 			Var: r
+			Var: rBonds
+			Var: rD
 			Var: rDeb
 			Var: rRes
 
@@ -88,6 +105,7 @@ Label Root
 		{
 			Param: Ls0
 			Param: delta
+			Param: phi
 			Param: psi1
 			Param: psi2
 			Param: psi3
@@ -122,10 +140,13 @@ Label Root
 				Param: _bank1
 				Param: _pOrd1
 				Param: _t1ent
-				Func: _cred1
+				Func: _CS1a
 				Var: _Atau
 				Var: _Btau
 				Var: _BC
+				Var: _CD1
+				Var: _CD1c
+				Var: _CS1
 				Var: _D1
 				Var: _Deb1
 				Var: _Deb1max
@@ -146,7 +167,7 @@ Label Root
 				Var: _Tax1
 				Var: _W1
 				Var: _c1
-				Var: _cred1c
+				Var: _cTau
 				Var: _f1
 				Var: _imi
 				Var: _inn
@@ -201,6 +222,7 @@ Label Root
 			Var: entry1exit
 			Var: imi
 			Var: inn
+			Var: p1avg
 
 		}
 
@@ -229,7 +251,7 @@ Label Root
 					Var: _LdVint
 					Var: _Lvint
 					Var: _Qvint
-					Var: _RS
+					Var: _RSvint
 
 				}
 
@@ -237,10 +259,13 @@ Label Root
 				Param: _bank2
 				Param: _pOrd2
 				Param: _t2ent
-				Func: _cred2
+				Func: _CS2a
 				Var: _A2
 				Var: _A2e
+				Var: _CD2
+				Var: _CD2c
 				Var: _CI
+				Var: _CS2
 				Var: _D2
 				Var: _D2d
 				Var: _D2e
@@ -264,6 +289,7 @@ Label Root
 				Var: _Q2p
 				Var: _Q2pe
 				Var: _Q2u
+				Var: _RS2
 				Var: _SI
 				Var: _SId
 				Var: _S2
@@ -272,7 +298,6 @@ Label Root
 				Var: _alloc2
 				Var: _c2
 				Var: _c2e
-				Var: _cred2c
 				Var: _dA2b
 				Var: _dNnom
 				Var: _f2
@@ -288,7 +313,6 @@ Label Root
 
 			Param: Deb20ratio
 			Param: F2
-			Param: K0
 			Param: NW20
 			Param: Phi1
 			Param: Phi2
@@ -366,8 +390,10 @@ Label Root
 			Son: Mac
 			Label Mac
 			{
+				Var: CD
+				Var: CDc
+				Var: CS
 				Var: Creal
-				Var: DebGDP
 				Var: DefGDP
 				Var: GDI
 				Var: TC
@@ -379,10 +405,19 @@ Label Root
 			Label Sec
 			{
 				Var: A2sd
+				Var: AtauAvg
+				Var: BtauAvg
 				Var: Bda
 				Var: Bfail
 				Var: BadDeb
 				Var: BadDebAcc
+				Var: CD1
+				Var: CD1c
+				Var: CD2
+				Var: CD2c
+				Var: CS1
+				Var: CS2
+				Var: ExRes
 				Var: HCavg
 				Var: HHb
 				Var: HH1
@@ -392,10 +427,9 @@ Label Root
 				Var: HP2
 				Var: NCavg
 				Var: RD
+				Var: RS2
 				Var: age1avg
 				Var: age2avg
-				Var: cred1c
-				Var: cred2c
 				Var: dN
 				Var: exit1fail
 				Var: exit2fail
@@ -456,7 +490,10 @@ Label Root
 		Var: A
 		Var: C
 		Var: Deb
+		Var: DebGDP
 		Var: Def
+		Var: DefP
+		Var: DefPgdp
 		Var: G
 		Var: GDP
 		Var: GDPnom
@@ -488,7 +525,7 @@ Var: runCountry 0 n + n n
 Object: Country C	1
 Param: flagAddWorkers 0 n + n n	0
 Param: flagCons 0 n + n n	1
-Param: flagCreditRule 0 n + n n	1
+Param: flagCreditRule 0 n + n n	2
 Param: flagExpect 0 n + n n	0
 Param: flagFiscalRule 0 n + n n	4
 Param: flagGovExp 0 n + n n	2
@@ -500,10 +537,13 @@ Param: tr 0 n + n n	0.1
 Var: A 4 s + n n	1	1	1	1
 Var: C 0 s + n n
 Var: Deb 1 s + n n	0
+Var: DebGDP 1 s + n n	0
 Var: Def 1 s + n n	0
+Var: DefP 0 s + n n
+Var: DefPgdp 1 s + n n	0
 Var: G 1 s + n n	0
 Var: GDP 1 s + n n	0
-Var: GDPnom 0 s + n n
+Var: GDPnom 1 s + n n	1
 Var: Sav 0 s + n n
 Var: SavAcc 0 s + n n
 Var: Tax 1 s + n n	0
@@ -517,55 +557,72 @@ Var: timeStep 0 n + n n
 
 Object: Financial C	1
 Param: B 0 n + n n	10
+Param: DebRule 0 n + n n	0.6
+Param: DefPrule 0 n + n n	0.03
+Param: EqB0 0 n + n n	1
 Param: Lambda 0 n + n n	2
-Param: Lambda0 0 n + n n	1000
-Param: NWb0 0 n + n n	1000000
+Param: Lambda0 0 n + n n	0
 Param: PhiB 0 n + n n	0.5
-Param: Ut 0 n + n n	0.05
-Param: alphaB 0 n + n n	1.08
+Param: Trule 0 n + n n	100
+Param: Ut 0 n + n n	0.015
+Param: alphaB 0 n + n n	0.8
 Param: betaB 0 n + n n	1
 Param: dB 0 n + n n	0
-Param: debRule 0 n + n n	0.6
-Param: defRule 0 n + n n	0.03
+Param: deltaB 0 n + n n	0.33
+Param: deltaDeb 0 n + n n	0.05
 Param: gammaPi 0 n + n n	1.1
 Param: gammaU 0 n + n n	1.1
 Param: kConst 0 n + n n	0.1
+Param: muBonds 0 n + n n	0.6
+Param: muD 0 n + n n	1
 Param: muDeb 0 n + n n	0.3
-Param: muRes 0 n + n n	-0.33
-Param: phiT 0 n + n n	0.4
+Param: muRes 0 n + n n	0.33
 Param: piT 0 n + n n	0.02
-Param: rAdj 0 n + n n	0.005
-Param: rD 0 n + n n	0
+Param: rAdj 0 n + n n	0.0025
 Param: rT 0 n + n n	0.025
+Param: rhoBonds 0 n + n n	0.04
 Param: tauB 0 n + n n	0.08
+Param: thetaBonds 0 n + n n	12
 Func: banksMaps 0 n + n n
 Func: pickBank 0 n + n n
+Var: BD 1 s + n n	0
+Var: BS 0 s + n n
+Var: Bonds 1 s + n n	0
 Var: Cl 0 s + n n
 Var: Depo 1 s + n n	0
-Var: DivB 0 n + n n
+Var: DepoG 1 s + n n	0
+Var: DivB 1 n + n n	0
 Var: Gbail 1 s + n n	0
 Var: Loans 0 s + n n
-Var: NWb 0 s + n n
+Var: LoansCB 1 s + n n	0
+Var: NWb 1 s + n n	0
 Var: PiB 0 s + n n
+Var: Res 1 s + n n	0
 Var: TaxB 1 n + n n	0
 Var: cScores 0 n + n n
-Var: phi 1 s + n n	0
 Var: r 1 s + n n	0
-Var: rDeb 1 n + n n	0
-Var: rRes 1 n + n n	0
+Var: rBonds 1 s + n n	0
+Var: rD 1 s + n n	0
+Var: rDeb 1 s + n n	0
+Var: rRes 1 s + n n	0
 
 Object: Bank C	1
 Param: _IDb 0 n + n n	0
-Param: _fd 0 n + n n	0
+Param: _fD 0 n + n n	0
+Var: _BD 0 n + n n
 Var: _BadDeb 1 n + n n	0
 Var: _Bda 1 n + n n	0
+Var: _Bonds 1 n + n n	0
 Var: _Cl 0 n + n n
 Var: _Depo 1 n + n n	0
 Var: _DivB 0 n + n n
+Var: _ExRes 1 n + n n	0
 Var: _Gbail 0 n + n n
 Var: _Loans 1 n + n n	0
+Var: _LoansCB 1 n + n n	0
 Var: _NWb 1 n + n n	0
 Var: _PiB 0 n + n N
+Var: _Res 1 n + n n	0
 Var: _TC 0 n + n n
 Var: _TC1free 0 n + n n
 Var: _TC2free 0 n + n n
@@ -581,15 +638,16 @@ Param: _IDc2 0 n + n n	0
 Object: Labor C	1
 Param: Ls0 0 n + n n	250000
 Param: delta 0 n + n n	0
-Param: psi1 0 n + n n	0
+Param: phi 0 n + n n	0.4
+Param: psi1 0 n + n n	0.05
 Param: psi2 0 n + n n	1
-Param: psi3 0 n + n n	0
+Param: psi3 0 n + n n	-0.05
 Param: w0min 0 n + n n	1
 Var: L 0 s + n n
 Var: Ls 1 s + n n	0
 Var: U 4 s + n p	0	0	0	0
 Var: dUb 1 s + n n	0
-Var: w 1 s + n n	1
+Var: w 1 s + n n	0
 Var: wU 0 s + n n
 
 Object: Capital C	1
@@ -597,7 +655,7 @@ Param: Deb10ratio 0 n + n n	1
 Param: F1 0 n + n n	50
 Param: L1rdMax 0 n + n n	0.2
 Param: L1shortMax 0 n + n n	1
-Param: NW10 0 n + n n	10000
+Param: NW10 0 n + n n	1000
 Param: PPI0 0 n + n n	0
 Param: Phi3 0 n + n n	0.1
 Param: Phi4 0 n + n n	0.9
@@ -609,7 +667,7 @@ Param: d1 0 n + n n	0
 Param: gamma 0 n + n n	0.5
 Param: lastID1 0 n + n n	0
 Param: m1 0 n + n n	0.1
-Param: mu1 0 n + n n	0.04
+Param: mu1 0 n + n n	0.08
 Param: n1 0 n + n n	4
 Param: nu 0 n + n n	0.04
 Param: x1inf 0 n + n n	-0.15
@@ -619,10 +677,10 @@ Param: xi 0 n + n n	0.5
 Param: zeta1 0 n + n n	0.3
 Param: zeta2 0 n + n n	0.3
 Func: f1rescale 0 n + n n
-Var: A1 4 s + n n	1	1	1	1
+Var: A1 1 s + n n	0
 Var: D1 0 s + n n
 Var: Deb1 1 s + n n	0
-Var: Div1 0 n + n n
+Var: Div1 1 n + n n	0
 Var: JO1 0 n + n n
 Var: L1 1 s + n n	0
 Var: L1d 0 s + n n
@@ -639,16 +697,20 @@ Var: W1 0 s + n n
 Var: entry1exit 0 s + n n
 Var: imi 0 s + n n
 Var: inn 0 s + n n
+Var: p1avg 1 s + n n	0
 
 Object: Firm1 C	1
 Param: _ID1 0 n + n n	0
 Param: _bank1 0 n + n n	0
 Param: _pOrd1 0 n + n n	0
 Param: _t1ent 0 n + n n	0
-Func: _cred1 0 n + n n
+Func: _CS1a 0 n + n n
 Var: _Atau 1 n + n n	1
 Var: _Btau 1 s + n n	1
 Var: _BC 7 n + n n	0	0	0	0	0	0	0
+Var: _CD1 0 n + n n
+Var: _CD1c 0 n + n n
+Var: _CS1 0 n + n n
 Var: _D1 0 n + n N
 Var: _Deb1 1 n + n n	0
 Var: _Deb1max 0 n + n n
@@ -669,11 +731,11 @@ Var: _S1 1 n + n n	0
 Var: _Tax1 0 n + n n
 Var: _W1 1 n + n n	0
 Var: _c1 0 n + n n
-Var: _cred1c 0 n + n n
+Var: _cTau 1 n + n n	0
 Var: _f1 1 n + n n	0
 Var: _imi 0 n + n n
 Var: _inn 0 n + n n
-Var: _p1 0 n + n n
+Var: _p1 1 n + n n	0
 Var: _qc1 1 n + n n	0
 
 Object: Cli C	1
@@ -686,23 +748,22 @@ Param: _tSel 0 n + n n	0
 Object: Consumption C	1
 Param: Deb20ratio 0 n + n n	1
 Param: F2 0 n + n n	200
-Param: K0 0 n + n n	1200
-Param: NW20 0 n + n n	10000
+Param: NW20 0 n + n n	1000
 Param: Phi1 0 n + n n	0.1
 Param: Phi2 0 n + n n	0.9
 Param: b 0 n + n n	3
 Param: chi 0 n + n n	1
 Param: d2 0 n + n n	0
-Param: e0 0 n + n n	1
-Param: e1 0 n + n n	1
-Param: e2 0 n + n n	1
-Param: e3 0 n + n n	1
-Param: e4 0 n + n n	1
+Param: e0 0 n + n n	0.25
+Param: e1 0 n + n n	0.4
+Param: e2 0 n + n n	0.4
+Param: e3 0 n + n n	0
+Param: e4 0 n + n n	0
 Param: e5 0 n + n n	0.5
 Param: e6 0 n + n n	1
 Param: e7 0 n + n n	0.3
 Param: e8 0 n + n n	0.3
-Param: eta 0 n + n n	19
+Param: eta 0 n + n n	20
 Param: f2min 0 n + n n	1e-05
 Param: iota 0 n + n n	0.1
 Param: kappaMax 0 n + n n	0.5
@@ -716,11 +777,11 @@ Param: u 0 n + n n	0.75
 Param: upsilon 0 n + n n	0.04
 Func: f2rescale 0 n + n n
 Func: firm2maps 0 n + n n
-Var: A2 1 s + n n	1
+Var: A2 0 s + n n
 Var: CI 0 s + n n
 Var: CPI 4 s + n n	1	1	1	1
 Var: Deb2 1 s + n n	0
-Var: Div2 0 n + n n
+Var: Div2 1 n + n n	0
 Var: D2 0 s + n n
 Var: D2d 0 s + n n
 Var: D2e 0 s + n n
@@ -746,7 +807,7 @@ Var: SI 0 s + n n
 Var: S2 0 s + n n
 Var: Tax2 0 n + n n
 Var: W2 0 s + n n
-Var: c2 0 s + n n
+Var: c2 1 s + n n	0
 Var: c2e 0 s + n n
 Var: dCPI 1 s + n n	0
 Var: dCPIb 1 s + n n	0
@@ -761,10 +822,13 @@ Param: _ID2 0 n + n n	0
 Param: _bank2 0 n + n n	0
 Param: _pOrd2 0 n + n n	0
 Param: _t2ent 0 n + n n	0
-Func: _cred2 0 n + n n
+Func: _CS2a 0 n + n n
 Var: _A2 4 s + n n	1	0	0	0
 Var: _A2e 0 n + n n
+Var: _CD2 0 n + n n
+Var: _CD2c 0 n + n n
 Var: _CI 0 n + n n
+Var: _CS2 0 n + n n
 Var: _D2 4 n + n n	0	0	0	0
 Var: _D2d 4 n + n n	0	0	0	0
 Var: _D2e 1 n + n n	0
@@ -777,7 +841,7 @@ Var: _EId 0 n + n n
 Var: _JO2 0 n + n n
 Var: _K 1 n + n n	0
 Var: _Kd 0 n + n n
-Var: _L2 1 s + n n	0
+Var: _L2 1 n + n n	0
 Var: _L2d 0 n + n n
 Var: _N 1 n + n n	0
 Var: _NW2 1 n + n n	0
@@ -788,6 +852,7 @@ Var: _Q2e 2 s + n n	0	0
 Var: _Q2p 0 n + n N
 Var: _Q2pe 0 n + n N
 Var: _Q2u 0 n + n n
+Var: _RS2 0 n + n n
 Var: _SI 0 n + n n
 Var: _SId 0 n + n n
 Var: _S2 1 n + n n	0
@@ -796,10 +861,9 @@ Var: _W2 1 n + n N	0
 Var: _alloc2 0 n + n n
 Var: _c2 0 n + n N
 Var: _c2e 0 n + n n
-Var: _cred2c 0 n + n n
 Var: _dA2b 1 n + n n	0
 Var: _dNnom 0 n + n n
-Var: _f2 2 s + n N	0	0
+Var: _f2 2 n + n N	0	0
 Var: _l2 1 n + n n	0
 Var: _life2cycle 0 n + n n
 Var: _mu2 1 n + n n	0
@@ -821,7 +885,7 @@ Param: _toUseVint 0 n + n n	0
 Var: _LdVint 0 n + n n
 Var: _Lvint 0 n + n n
 Var: _Qvint 0 n + n n
-Var: _RS 0 n + n n
+Var: _RSvint 0 n + n n
 
 Object: Stats C	1
 Param: testCtIni 0 n + n n	1
@@ -851,8 +915,10 @@ Var: test1firm 0 n + n n
 Var: test2firm 0 n + n n
 
 Object: Mac C	1
+Var: CD 0 s + n n
+Var: CDc 0 s + n n
+Var: CS 0 s + n n
 Var: Creal 0 s + n n
-Var: DebGDP 0 s + n n
 Var: DefGDP 0 s + n n
 Var: GDI 0 s + n n
 Var: TC 0 s + n n
@@ -860,10 +926,19 @@ Var: dA 0 s + n n
 
 Object: Sec C	1
 Var: A2sd 0 s + n n
+Var: AtauAvg 0 s + n n
+Var: BtauAvg 0 s + n n
 Var: Bda 0 s + n n
 Var: Bfail 0 s + n p
 Var: BadDeb 0 s + n n
 Var: BadDebAcc 0 n + n n
+Var: CD1 0 s + n n
+Var: CD1c 0 s + n n
+Var: CD2 0 s + n n
+Var: CD2c 0 s + n n
+Var: CS1 0 s + n n
+Var: CS2 0 s + n n
+Var: ExRes 0 s + n n
 Var: HCavg 0 s + n n
 Var: HHb 0 s + n n
 Var: HH1 0 s + n n
@@ -873,10 +948,9 @@ Var: HP1 0 s + n n
 Var: HP2 0 s + n n
 Var: NCavg 0 s + n n
 Var: RD 0 s + n n
+Var: RS2 0 s + n n
 Var: age1avg 0 s + n n
 Var: age2avg 0 s + n n
-Var: cred1c 0 s + n n
-Var: cred2c 0 s + n n
 Var: dN 0 s + n n
 Var: exit1fail 0 s + n n
 Var: exit2fail 0 s + n n
@@ -891,7 +965,7 @@ Var: wReal 0 s + n n
 
 SIM_NUM 5
 SEED 1
-MAX_STEP 600
+MAX_STEP 500
 EQUATION fun_KS.cpp
 MODELREPORT modelreport.html
 
@@ -941,7 +1015,7 @@ Bank total credit supply rule
 0 = no bank-level credit limit (firm-level prudential limit still apply)
 1 = Basel-like bank capital adequacy rule
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 2.
 END_DESCRIPTION
 
 Parameter_flagExpect
@@ -1014,7 +1088,7 @@ All 1 instances equal to 0.1.
 END_DESCRIPTION
 
 Variable_A
-Overall productivity
+Overall labor productivity
 _INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION
@@ -1031,8 +1105,26 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable_DebGDP
+Government debt on GDP ratio
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Variable_Def
-Government current deficit (negative if superavit)
+Government total deficit (negative if surplus)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_DefP
+Government primary deficit (negative if surplus)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_DefPgdp
+Government primary deficit on GDP ratio
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -1052,7 +1144,7 @@ END_DESCRIPTION
 Variable_GDPnom
 Gross domestic product in nominal (monetary) terms
 _INIT_
-
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Variable_Sav
@@ -1131,6 +1223,27 @@ _INIT_
 All 1 instances equal to 10.
 END_DESCRIPTION
 
+Parameter_DebRule
+Maximum government debt on GDP ratio for fiscal rule
+(>0)
+_INIT_
+All 1 instances equal to 0.6.
+END_DESCRIPTION
+
+Parameter_DefPrule
+Maximum government primary deficit on GDP ratio for fiscal rule
+(>0)
+_INIT_
+All 1 instances equal to 0.03.
+END_DESCRIPTION
+
+Parameter_EqB0
+initial equity of bank as multiple of firms net worth
+(>0)
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
 Parameter_Lambda
 Prudential credit limit as a multiple of sales or net worth (liquid assets), whichever is higher
 (>0)
@@ -1142,37 +1255,36 @@ Parameter_Lambda0
 Credit limit absolute floor
 (>=0)
 _INIT_
-All 1 instances equal to 1000.
-END_DESCRIPTION
-
-Parameter_NWb0
-Initial net worth (equity) of banks
-(>0)
-_INIT_
-All 1 instances equal to 1e+006.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_PhiB
-Fraction of incumbent bank net wealth provided to bailed-out bank 
+Fraction of incumbent bank equity provided to bailed-out bank 
 (0<PhiB<=1)
-
 _INIT_
 All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_Trule
+Time to start enforcing fiscal rules
+(>=1)
+_INIT_
+All 1 instances equal to 100.
 END_DESCRIPTION
 
 Parameter_Ut
 Target unemployment rate for Central Bank's Taylor rule
 (>0)
 _INIT_
-All 1 instances equal to 0.05.
+All 1 instances equal to 0.015.
 END_DESCRIPTION
 
 Parameter_alphaB
 Pareto distribution shape parameter defining bank size heterogeneity
 80/20 pareto rule is achieved by alphaB = 1.161
-(>= 1)
+(>0)
 _INIT_
-All 1 instances equal to 1.08.
+All 1 instances equal to 0.8.
 END_DESCRIPTION
 
 Parameter_betaB
@@ -1189,18 +1301,18 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter_debRule
-Maximum government debt on GDP ratio for fiscal rule
-(>0)
+Parameter_deltaB
+Desired share of outstanding firm debt to pay in period
+[0, 1]
 _INIT_
-All 1 instances equal to 0.6.
+All 1 instances equal to 0.33.
 END_DESCRIPTION
 
-Parameter_defRule
-Maximum government deficit on GDP ratio for fiscal rule
+Parameter_deltaDeb
+Share of government debt to pay when debt fiscal rule is binding
 (>0)
 _INIT_
-All 1 instances equal to 0.03.
+All 1 instances equal to 0.05.
 END_DESCRIPTION
 
 Parameter_gammaPi
@@ -1224,6 +1336,19 @@ _INIT_
 All 1 instances equal to 0.1.
 END_DESCRIPTION
 
+Parameter_muBonds
+Sovereign bonds mark-down over central bank rate r
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_muD
+Bank spread (mark-down) on deposits (over central bank rate r)
+(>=0)
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
 Parameter_muDeb
 Bank spread (mark-up) on debt (over central bank rate r)
 (>=0)
@@ -1232,17 +1357,10 @@ All 1 instances equal to 0.3.
 END_DESCRIPTION
 
 Parameter_muRes
-Central bank spread (mark-up) on reserves (to central bank rate r)
-(>0)
+Central bank spread (mark-down) on reserves (over central bank rate r)
+(>=0)
 _INIT_
-All 1 instances equal to -0.33.
-END_DESCRIPTION
-
-Parameter_phiT
-Unemployment benefit rate target as share of average wage
-(>0)
-_INIT_
-All 1 instances equal to 0.4.
+All 1 instances equal to 0.33.
 END_DESCRIPTION
 
 Parameter_piT
@@ -1255,14 +1373,7 @@ Parameter_rAdj
 Prime rate and unemployment benefit adjustment step 
 (>0)
 _INIT_
-All 1 instances equal to 0.005.
-END_DESCRIPTION
-
-Parameter_rD
-Interest rate paid on bank deposits
-(>=0)
-_INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0.0025.
 END_DESCRIPTION
 
 Parameter_rT
@@ -1272,11 +1383,25 @@ _INIT_
 All 1 instances equal to 0.025.
 END_DESCRIPTION
 
+Parameter_rhoBonds
+Sovereign bonds risk premium
+(>=0)
+_INIT_
+All 1 instances equal to 0.04.
+END_DESCRIPTION
+
 Parameter_tauB
 Minimum bank capital adequacy rate
 [0-1]
 _INIT_
 All 1 instances equal to 0.08.
+END_DESCRIPTION
+
+Parameter_thetaBonds
+Average maturity periods of sovereign bonds
+(>0)
+_INIT_
+All 1 instances equal to 12.
 END_DESCRIPTION
 
 Function_banksMaps
@@ -1292,6 +1417,24 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_BD
+Sovereign bond demand from banks
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_BS
+Sovereign bond supply from government
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Bonds
+Total sovereign bonds stock hold by financial sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Variable_Cl
 Total number of firm clients (customers) of the banking sector
 _INIT_
@@ -1304,10 +1447,16 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable_DepoG
+Government deposits at central bank (accumulated surpluses)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Variable_DivB
 Total dividends paid by banks
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_Gbail
@@ -1322,16 +1471,28 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_LoansCB
+Total liquidity loans from central bank to banking sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Variable_NWb
 Total banking sector net worth (liquid assets)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_PiB
+Bank gross profits (losses) before dividends/taxes
 _INIT_
 
 END_DESCRIPTION
 
-Variable_PiB
-Bank profits (before tax)
+Variable_Res
+Total reserves at the central bank of financial sector
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_TaxB
@@ -1346,15 +1507,21 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_phi
-Unemployment benefit as share of average nominal wage
+Variable_r
+Interest (prime) rate set by Central Bank
+Defined according to Taylor rule
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Variable_r
-Interest (prime) rate set by Central Bank
-Defined according to Taylor rule
+Variable_rBonds
+Interest rate paid by government bonds to finance public debt
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_rD
+Interest rate paid on bank deposits
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -1383,10 +1550,16 @@ _INIT_
 All 10 instances equal to 0.
 END_DESCRIPTION
 
-Parameter__fd
+Parameter__fD
 Desired market share for bank
 _INIT_
 All 10 instances equal to 0.
+END_DESCRIPTION
+
+Variable__BD
+Sovereign bonds demand by bank
+_INIT_
+
 END_DESCRIPTION
 
 Variable__BadDeb
@@ -1401,6 +1574,12 @@ Ratio between accumulated bad debt and total bank assets
 Loans in default over the stock of loans
 _INIT_
 All 10 instances equal to 0.
+END_DESCRIPTION
+
+Variable__Bonds
+Sovereign bonds stock hold by bank
+_INIT_
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable__Cl
@@ -1421,6 +1600,12 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable__ExRes
+Bank excess reserves (free cash)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Variable__Gbail
 Government bailout funds to bank
 _INIT_
@@ -1433,6 +1618,12 @@ _INIT_
 All 10 instances equal to 0.
 END_DESCRIPTION
 
+Variable__LoansCB
+Liquidity loans from central bank to bank
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Variable__NWb
 Bank net worth (liquid assets)
 _INIT_
@@ -1443,6 +1634,12 @@ Variable__PiB
 Bank profits (or losses)
 _INIT_
 
+END_DESCRIPTION
+
+Variable__Res
+Bank reserves
+_INIT_
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable__TC
@@ -1523,11 +1720,18 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Parameter_phi
+Unemployment benefit rate as share of average wage
+(>0)
+_INIT_
+All 1 instances equal to 0.4.
+END_DESCRIPTION
+
 Parameter_psi1
 Share of inflation passed to wages (psi2 in paper)
 [0, 1]
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0.05.
 END_DESCRIPTION
 
 Parameter_psi2
@@ -1541,7 +1745,7 @@ Parameter_psi3
 Elasticity of wages to the unemployment rate
 (>=0)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to -0.05.
 END_DESCRIPTION
 
 Parameter_w0min
@@ -1578,7 +1782,7 @@ END_DESCRIPTION
 Variable_w
 Centralized wage imposed to all workers
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_wU
@@ -1625,7 +1829,7 @@ Parameter_NW10
 Average initial net worth of firm in capital-good sector
 (>=0)
 _INIT_
-All 1 instances equal to 10000.
+All 1 instances equal to 1000.
 END_DESCRIPTION
 
 Parameter_PPI0
@@ -1708,7 +1912,7 @@ Parameter_mu1
 Mark-up of firms in the capital-good sector
 (>0)
 _INIT_
-All 1 instances equal to 0.04.
+All 1 instances equal to 0.08.
 END_DESCRIPTION
 
 Parameter_n1
@@ -1774,9 +1978,9 @@ _INIT_
 END_DESCRIPTION
 
 Variable_A1
-Productivity of capital-good sector
+Labor productivity of capital-good sector
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_D1
@@ -1794,7 +1998,7 @@ END_DESCRIPTION
 Variable_Div1
 Total dividends paid by firms in capital-good sector
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_JO1
@@ -1893,6 +2097,12 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_p1avg
+Average price charged in capital-good sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Object_Firm1
 Capital-good firm object
 
@@ -1926,20 +2136,20 @@ _INIT_
 All 20 instances equal to 0.
 END_DESCRIPTION
 
-Function__cred1
-Bank credit available (new debt) to firm in capital-good sector
+Function__CS1a
+Bank credit supply available (new debt) to firm in capital-good sector
 _INIT_
 
 END_DESCRIPTION
 
 Variable__Atau
-Productivity of the current vintage of machines when employed for production
+Labor productivity of new vintage of machine when employed for production
 _INIT_
 All 20 instances equal to 1.
 END_DESCRIPTION
 
 Variable__Btau
-Productivity of labor in producing the current vintage of machines
+Labor productivity of new vintage of machine when employed for production
 _INIT_
 All 20 instances equal to 1.
 END_DESCRIPTION
@@ -1948,6 +2158,24 @@ Variable__BC
 Number of buying clients for firm in capital-good sector
 _INIT_
 All 20 instances equal to 0.
+END_DESCRIPTION
+
+Variable__CD1
+Credit demand for firm in capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable__CD1c
+Credit demand constraint for firm in capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable__CS1
+Credit supplied to firm in capital-good sector
+_INIT_
+
 END_DESCRIPTION
 
 Variable__D1
@@ -2070,10 +2298,10 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable__cred1c
-Credit constraint for firm in capital-good sector
+Variable__cTau
+Planned (expected) unit production cost of machine when employed for production
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable__f1
@@ -2097,7 +2325,7 @@ END_DESCRIPTION
 Variable__p1
 Price of good of firm in capital-good sector
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable__qc1
@@ -2165,18 +2393,11 @@ _INIT_
 All 1 instances equal to 200.
 END_DESCRIPTION
 
-Parameter_K0
-Average initial capital stock of firm in consumption-good sector
-(>0)
-_INIT_
-All 1 instances equal to 1200.
-END_DESCRIPTION
-
 Parameter_NW20
 Average initial net worth of firm in consumption-good sector
 (>=0)
 _INIT_
-All 1 instances equal to 10000.
+All 1 instances equal to 1000.
 END_DESCRIPTION
 
 Parameter_Phi1
@@ -2218,35 +2439,35 @@ Parameter_e0
 Weight of potential demand on firm expectations ("animal spirits")
 [0, 1]
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.25.
 END_DESCRIPTION
 
 Parameter_e1
 Weight of t-1 demand on myopic expectations
 [0, 1]
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.4.
 END_DESCRIPTION
 
 Parameter_e2
 Weight of t-2 demand on myopic expectations
 [0, 1]
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.4.
 END_DESCRIPTION
 
 Parameter_e3
 Weight of t-3 demand on myopic expectations
 [0, 1]
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_e4
 Weight of t-4 demand on myopic expectations
 [0, 1]
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_e5
@@ -2281,7 +2502,7 @@ Parameter_eta
 Technical life time of machines
 (>1)
 _INIT_
-All 1 instances equal to 19.
+All 1 instances equal to 20.
 END_DESCRIPTION
 
 Parameter_f2min
@@ -2374,7 +2595,7 @@ _INIT_
 END_DESCRIPTION
 
 Variable_A2
-Productivity of consumption-good sector
+Machine-level weighted-average labor productivity of consumption-good sector
 _INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION
@@ -2400,7 +2621,7 @@ END_DESCRIPTION
 Variable_Div2
 Total dividends paid by firms in consumption-good sector
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_D2
@@ -2558,7 +2779,7 @@ END_DESCRIPTION
 Variable_c2
 Planned average unit cost in consumption-good sector
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_c2e
@@ -2647,26 +2868,44 @@ _INIT_
 All 200 instances equal to 0.
 END_DESCRIPTION
 
-Function__cred2
-Bank credit available (new debt) to firm in consumer-good sector
+Function__CS2a
+Bank credit supply available (new debt) to firm in consumer-good sector
 _INIT_
 
 END_DESCRIPTION
 
 Variable__A2
-Productivity of firm in consumption-good sector
+Machine-level average labor productivity of firm in consumption-good sector
 _INIT_
 All 200 instances equal to 0.
 END_DESCRIPTION
 
 Variable__A2e
-Effective productivity of firm in consumption-good sector
+Machine-level effective productivity of firm in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable__CD2
+Credit demand for firm in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable__CD2c
+Credit demand constraint for firm in consumer-good sector
 _INIT_
 
 END_DESCRIPTION
 
 Variable__CI
 Canceled investment of firm in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable__CS2
+Credit supplied to firm in consumption-good sector
 _INIT_
 
 END_DESCRIPTION
@@ -2809,6 +3048,12 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable__RS2
+Number of machines to scrap of firm in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
 Variable__SI
 Effective substitution investment of firm in consumption-good sector
 _INIT_
@@ -2853,12 +3098,6 @@ END_DESCRIPTION
 
 Variable__c2e
 Effective average unit cost of firm in consumption-good sector
-_INIT_
-
-END_DESCRIPTION
-
-Variable__cred2c
-Credit constraint for firm in consumer-good sector
 _INIT_
 
 END_DESCRIPTION
@@ -2952,7 +3191,7 @@ _INIT_
 END_DESCRIPTION
 
 Parameter__Avint
-Machine vintage notional productivity
+Machine vintage notional labor productivity
 _INIT_
 All 200 instances equal to 1.
 END_DESCRIPTION
@@ -3006,7 +3245,7 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable__RS
+Variable__RSvint
 Number of machines to scrap according to the scrapping rule
 Positive: machines still in technical life
 Negative: machines out of technical life
@@ -3197,14 +3436,26 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_Creal
-Real aggregated consumption
+Variable_CD
+Total credit demand
 _INIT_
 
 END_DESCRIPTION
 
-Variable_DebGDP
-Government debt on GDP ratio
+Variable_CDc
+Total credit demand constraint
+_INIT_
+
+END_DESCRIPTION
+
+Variable_CS
+Total credit supplied
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Creal
+Real aggregated consumption
 _INIT_
 
 END_DESCRIPTION
@@ -3212,7 +3463,7 @@ END_DESCRIPTION
 Variable_DefGDP
 Government deficit on GDP ratio
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_GDI
@@ -3228,7 +3479,7 @@ All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_dA
-Overall productivity (log) growth rate
+Overall labor productivity growth rate
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -3240,7 +3491,19 @@ _INIT_
 END_DESCRIPTION
 
 Variable_A2sd
-Standard deviation of productivity in consumption-good sector
+Standard deviation of machine-level log labor productivity of firms in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_AtauAvg
+Average labor productivity of machines supplied by capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_BtauAvg
+Average labor productivity of machines produced by capital-good sector
 _INIT_
 
 END_DESCRIPTION
@@ -3268,6 +3531,48 @@ END_DESCRIPTION
 Variable_BadDebAcc
 Bank accumulated losses from bad debt
 Can be negative because of proceedings from healthy exiting firms
+_INIT_
+
+END_DESCRIPTION
+
+Variable_CD1
+Total credit demand of firms in capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_CD1c
+Total credit demand constraint of firms in capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_CD2
+Total credit demand of firms in consumer-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_CD2c
+Total credit demand constraint of firms in consumer-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_CS1
+Total credit supplied to firms in capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_CS2
+Total credit supplied to firms in consumer-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_ExRes
+Excess reserves (free cash) hold by financial sector
 _INIT_
 
 END_DESCRIPTION
@@ -3326,6 +3631,12 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_RS2
+Machine (planned) scrapping rate in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
 Variable_age1avg
 Average age of firms in capital-good sector
 _INIT_
@@ -3334,18 +3645,6 @@ END_DESCRIPTION
 
 Variable_age2avg
 Average age of firm in consumption-good sector
-_INIT_
-
-END_DESCRIPTION
-
-Variable_cred1c
-Total credit constraint of firms in capital-good sector
-_INIT_
-
-END_DESCRIPTION
-
-Variable_cred2c
-Total credit constraint of firms in consumer-good sector
 _INIT_
 
 END_DESCRIPTION
@@ -3432,6 +3731,7 @@ END_DOCUOBSERVE
 
 
 DOCUINITIAL
+Root
 
 END_DOCUINITIAL
 
@@ -3442,7 +3742,7 @@ EQ_FILE
 	K+S LSD MODEL (including finance extensions)
 	-------------
 	
-	VERSION: 0.2 - decentralized financial sector and monetary/fiscal policies
+	VERSION: 0.2.1 - decentralized financial sector and monetary/fiscal policies
 
 	This is the topmost code file for the K+S coded in LSD. 
 	It contains only the scheduling equations 'runCountry' and 'timeStep',

@@ -52,3 +52,6 @@ It is capped by the machines physical capacity
 */
 VS( PARENT, "_alloc2" );						// ensure allocation is done
 RESULT( V( "_Avint" ) * V( "_Lvint" ) )
+
+
+/*============================= DUMMY EQUATIONS ==============================*/

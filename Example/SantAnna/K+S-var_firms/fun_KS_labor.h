@@ -49,7 +49,7 @@ EQUATION( "wU" )
 /*
 Unemployment benefit ("wage") paid by government
 */
-RESULT( VS( FINSECL1, "phi" ) * V( "w" ) )	// fraction of wage
+RESULT( V( "phi" ) * V( "w" ) )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/

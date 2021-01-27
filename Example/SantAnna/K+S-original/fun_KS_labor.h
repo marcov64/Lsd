@@ -48,7 +48,7 @@ EQUATION( "wU" )
 /*
 Unemployment benefit ("wage") paid by government
 */
-RESULT( V( "phi" ) * V( "w" ) )					// fraction of wage
+RESULT( V( "phi" ) * V( "w" ) )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
@@ -73,3 +73,9 @@ Notional unemployment (bounded) rate of change
 Used for wages adjustment only
 */
 RESULT( mov_avg_bound( THIS, "U", VS( PARENT, "mLim" ) ) )
+
+
+/*========================== SUPPORT LSD FUNCTIONS ===========================*/
+
+
+/*============================= DUMMY EQUATIONS ==============================*/

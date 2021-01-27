@@ -151,7 +151,7 @@ invisible( gc( verbose = FALSE ) )
 CI     <- 0.95      # desired confidence interval
 outLim <- 0.10      # outlier percentile (0=don't remove outliers)
 limOutl<- 0.10      # quantile extreme limits (0=none)
-warmUp <- 300       # number of "warm-up" time steps
+warmUp <- 200       # number of "warm-up" time steps
 nTstat <- -1        # last period to consider for statistics (-1=all)
 csBeg  <- 300       # beginning step for cross-section regressions
 csEnd  <- 307       # last step for cross-section regressions

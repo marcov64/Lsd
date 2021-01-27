@@ -59,8 +59,13 @@ void update_debt1( object *firm, double desired, double loan )
 {
 	INCRS( firm, "_Deb1", loan );				// increment firm's debt stock
 
-	if ( loan > 0 && desired > loan )			// ignore loan repayment
-		INCRS( firm, "_cred1c", desired - loan );// credit constraint
+	if ( desired > 0 )							// ignore loan repayment
+	{
+		INCRS( firm, "_CD1", desired );			// desired credit
+		INCRS( firm, "_CD1c", desired - loan );	// credit constraint
+		INCRS( firm, "_CS1", loan );			// supplied credit
+	}
+
 }
 
 
@@ -70,8 +75,13 @@ void update_debt2( object *firm, double desired, double loan )
 {
 	INCRS( firm, "_Deb2", loan );				// increment firm's debt stock
 	
-	if ( loan > 0 && desired > loan )			// ignore loan repayment
-		INCRS( firm, "_cred2c", desired - loan );// credit constraint
+	if ( desired > 0 )							// ignore loan repayment
+	{
+		INCRS( firm, "_CD2", desired );			// desired credit
+		INCRS( firm, "_CD2c", desired - loan );	// credit constraint
+		INCRS( firm, "_CS2", loan );			// supplied credit
+	}
+
 }
 
 
@@ -175,8 +185,8 @@ double scrap_vintage( variable *var, object *vint )
 
 double entry_firm1( variable *var, object *sector, int n, bool newInd )
 {
-	double Atau, AtauMax, Btau, BtauMax, D10, NW1, NW10, RD0, c1, f1, p1, mult, 
-		   equity = 0;
+	double Atau, AtauMax, Btau, BtauMax, D10, NW1, NW10, RD0, c1, cTau, f1, p1, 
+		   mult, equity = 0;
 	int ID1, t1ent;
 	object *firm, *cli, 
 		   *cons = SEARCHS( PARENTS( sector ), "Consumption" ), 
@@ -195,15 +205,21 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 	
 	if ( newInd )
 	{
-		Atau = Btau = AtauMax = BtauMax = INIPROD;// initial productivities
+		double F2 = VS( cons, "F2" );
+		double m2 = VS( cons, "m2" );			// machine output per period
+
+		Atau = AtauMax = INIPROD;				// initial productivities to use
+		Btau = BtauMax = ( 1 + mu1 ) * Atau / ( m1 * m2 );// and build machines
 		NW10 = VS( sector, "NW10" ); 			// initial wealth in sector 1
 		f1 = 1.0 / n;							// fair share
 		t1ent = 0;								// entered before t=1
 		
-		// initial demand expectation, assuming all sector 2 firms, 
-		// 1/eta replacement factor and fair share in sector 1
-		D10 = ceil( VS( cons, "K0" ) / VS( cons, "m2" ) ) / VS( cons, "eta" ) * 
-			  VS( cons, "F2" ) / n;
+		// initial demand expectation, assuming all sector 2 firms, 1/eta 
+		// replacement factor and fair share in sector 1 and full employment
+		double p20 = ( 1 + VS( cons, "mu20" ) ) * INIWAGE / INIPROD;
+		double K0 = ceil( VS( lab, "Ls0" ) * INIWAGE / p20 / F2 / m2 ) * m2;
+		
+		D10 = F2 * K0 / m2 / VS( cons, "eta" ) / n;
 	}
 	else
 	{
@@ -244,6 +260,7 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 		
 		// initial cost, price and net wealth to pay at least for initial R&D
 		c1 = w / ( Btau * m1 );					// unit cost
+		cTau = w / Atau;						// unit cost for clients
 		p1 = ( 1 + mu1 ) * c1;					// unit price
 		RD0 = nu * D10 * p1;					// R&D expense
 		mult = newInd ? 1 : uniform( Phi3, Phi4 );// NW multiple
@@ -253,11 +270,15 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 		// initialize variables
 		WRITES( firm, "_ID1", ID1 );
 		WRITES( firm, "_t1ent", t1ent );
+		WRITELLS( firm, "_Atau", Atau, t1ent, 1 );
+		WRITELLS( firm, "_Btau", Btau, t1ent, 1 );
 		WRITELLS( firm, "_Deb1", NW1 * Deb10ratio, t1ent, 1 );
 		WRITELLS( firm, "_L1rd", RD0 / w, t1ent, 1 );
 		WRITELLS( firm, "_NW1", NW1, t1ent, 1 );
 		WRITELLS( firm, "_RD", RD0, t1ent, 1 );
+		WRITELLS( firm, "_cTau", cTau, t1ent, 1 );
 		WRITELLS( firm, "_f1", f1, t1ent, 1 );
+		WRITELLS( firm, "_p1", p1, t1ent, 1 );
 		
 		if ( ! newInd )
 		{
@@ -268,12 +289,13 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 			WRITES( firm, "_NW1", NW1 );
 			WRITES( firm, "_RD", RD0 );
 			WRITES( firm, "_c1", c1 );
+			WRITES( firm, "_cTau", cTau );
 			WRITES( firm, "_p1", p1 );
 			
 			// compute variables requiring calculation in t 
 			RECALCS( firm, "_Deb1max" );		// prudential credit limit
 			RECALCS( firm, "_NC" );				// set initial clients
-			VS( firm, "_cred1" );				// update available credit
+			VS( firm, "_CS1a" );				// update credit supply
 		}
 	}
 	
@@ -305,27 +327,31 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 	double w = VS( lab, "w" );					// current wage
 	int eta = VS( sector, "eta" );				// technical life of machines
 
-	double c10 = INIWAGE / ( INIPROD * m1 );	// initial unit cost in sector 1
+	double Btau0 = ( 1 + mu1 ) * INIPROD / ( m1 * m2 );// initial sector 1 prod.
+	double c10 = INIWAGE / ( Btau0 * m1 );		// initial unit cost in sector 1
 	double p10 = ( 1 + mu1 ) * c10;				// initial machine price
 
 	if ( newInd )
 	{
-		double K0 = VS( sector, "K0" );			// initial capital in sector 2
 		double phi = VS( lab, "phi" );			// unemployment benefit rate
 		double c20 = INIWAGE / INIPROD;			// initial unit cost sec. 2
+		double p20 = ( 1 + mu20 ) * c20;
 		double trW = VS( PARENTS( sector ), "flagTax" ) > 0 ? 
 					 VS( PARENTS( sector ), "tr" ) : 0;// tax rate on wages
-		double SIr0 = n * ceil( K0 / m2 ) / eta;// substitution real investment
+		double K0 = ceil( VS( lab, "Ls0" ) * INIWAGE / 
+						  p20 / n / m2 ) * m2;	// full employment K required
+		double SIr0 = n * K0 / m2 / eta;		// substitution real investment
 		double RD0 = VS( cap, "nu" ) * SIr0 * p10;// initial R&D expense
 
+		// initial steady state demand under fair share
 		D20 = ( ( SIr0 * c10 + RD0 ) * ( 1 - phi - trW ) + 
 				VS( lab, "Ls0" ) * INIWAGE * phi ) / 
-			  ( mu20 + phi + trW ) * c20 / n;	// share of steady state demand
+			  ( mu20 + phi + trW ) * c20 / n;
 		Eavg = ( VS( sector, "omega1" ) + VS( sector, "omega2" ) ) / 2;// compet.
 		K = K0;									// initial capital in sector 2
 		N = iota * D20;							// initial inventories
 		NW20 = VS( sector, "NW20" );			// initial wealth in sector 2
-		Q2u = u;								// initial capacity utilization
+		Q2u = 1;								// initial capacity utilization
 		f2 = 1.0 / n;							// fair share
 		f2posChg = 0;							// m.s. of post-change firms
 		life2cycle = 1;							// start as incumbent
@@ -360,7 +386,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		DELETE( vint );
 		
 		// draw current machine supplier and create hooks to/from it
-		suppl = RNDDRAW_FAIRS( cap, "Firm1" );	// draw a supplier
+		suppl = RNDDRAWS( cap, "Firm1", "_Atau" );// try to draw good supplier
 		INCRS( suppl, "_NC", 1 );
 		cli = ADDOBJS( suppl, "Cli" );			// add to supplier client list
 		WRITES( cli, "_IDc", ID2 );				// update object
@@ -422,6 +448,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		WRITES( firm, "_ID2", ID2 );
 		WRITES( firm, "_t2ent", t2ent );
 		WRITES( firm, "_life2cycle", life2cycle );		
+		WRITELLS( firm, "_A2", A2, t2ent, 1 );
 		WRITELLS( firm, "_Deb2", NW2 * Deb20ratio, t2ent, 1 );
 		WRITELLS( firm, "_f2", f2, t2ent, 1 );
 		WRITELLS( firm, "_f2", f2, t2ent, 2 );
@@ -456,7 +483,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 
 			// compute variables requiring calculation in t 
 			RECALCS( firm, "_Deb2max" );		// prudential credit limit
-			VS( firm, "_cred2" );				// update available credit
+			VS( firm, "_CS2a" );				// update credit supply
 		}
 	}
 

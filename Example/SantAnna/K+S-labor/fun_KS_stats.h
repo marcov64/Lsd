@@ -826,6 +826,18 @@ Gini index including workers all income and firm owners net cash flows
 Updated in 'wAvg'
 */
 
+EQUATION_DUMMY( "exit1fail", "" )
+/*
+Rate of bankrupt firms in capital-good sector
+Updated in 'entry1exit'
+*/
+
+EQUATION_DUMMY( "exit2fail", "" )
+/*
+Rate of bankrupt firms in consumption-good sector
+Updated in 'entry2exit'
+*/
+
 EQUATION_DUMMY( "wAvgReal", "wAvg" )
 /*
 Real average wage (CPI adjusted)

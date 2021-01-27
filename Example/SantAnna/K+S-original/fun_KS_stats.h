@@ -10,6 +10,27 @@
 
 /*========================= COUNTRY-LEVEL STATS ==============================*/
 
+EQUATION( "CD" )
+/*
+Total credit demand
+*/
+RESULT( VS( SECSTAL2, "CD1" ) + VS( SECSTAL2, "CD2" ) )
+
+
+EQUATION( "CDc" )
+/*
+Total credit demand constraint
+*/
+RESULT( VS( SECSTAL2, "CD1c" ) + VS( SECSTAL2, "CD2c" ) )
+
+
+EQUATION( "CS" )
+/*
+Total credit supplied
+*/
+RESULT( VS( SECSTAL2, "CS1" ) + VS( SECSTAL2, "CS2" ) )
+
+
 EQUATION( "Creal" )
 /*
 Real aggregated consumption
@@ -21,7 +42,7 @@ EQUATION( "DebGDP" )
 /*
 Government debt on GDP ratio
 */
-v[1] = VS( GRANDPARENT, "GDP" );
+v[1] = VS( GRANDPARENT, "GDPnom" );
 RESULT( v[1] > 0 ? VS( GRANDPARENT, "Deb" ) / v[1] : CURRENT )
 
 
@@ -29,19 +50,18 @@ EQUATION( "DefGDP" )
 /*
 Government deficit on GDP ratio
 */
-v[1] = VS( GRANDPARENT, "GDP" );
+v[1] = VS( GRANDPARENT, "GDPnom" );
 RESULT( v[1] > 0 ? VS( GRANDPARENT, "Def" ) / v[1] : CURRENT )
 
 
 EQUATION( "GDI" )
 /*
-Gross domestic income (real terms)
+Gross domestic income (nominal terms)
 */
-RESULT( ( VS( CAPSECL2, "W1" ) + VS( CONSECL2, "W2" ) +
-		  VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) + 
-		  VS( GRANDPARENT, "G" ) - VS( GRANDPARENT, "Tax" ) + 
-		  VS( CAPSECL2, "PPI" ) * VS( CONSECL2, "SI" ) / VS( CONSECL2, "m2" ) ) / 
-		  VS( CONSECL2, "CPI" ) )
+RESULT( VS( CAPSECL2, "W1" ) + VS( CONSECL2, "W2" ) +
+		VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) + 
+		VS( GRANDPARENT, "G" ) - VS( GRANDPARENT, "Tax" ) + 
+		VS( CAPSECL2, "PPI" ) * VS( CONSECL2, "SI" ) / VS( CONSECL2, "m2" ) )
 
 
 EQUATION( "dA" )
@@ -56,7 +76,7 @@ RESULT( v[1] > 0 ? VS( GRANDPARENT, "A" ) / v[1] - 1 : 0 )
 
 EQUATION( "BadDebAcc" )
 /*
-Bank accumulated losses from bad debt
+Accumulated losses from bad debt in financial sector
 */
 RESULT( CURRENT + VS( FINSECL2, "BadDeb" ) )
 
@@ -75,6 +95,41 @@ RESULT( ( v[1] + v[2] ) > 0 ? v[1] / ( v[1] + v[2] ) : 0 )
 
 
 /*======================= CAPITAL-GOOD SECTOR STATS ==========================*/
+
+EQUATION( "AtauAvg" )
+/*
+Average labor productivity of machines supplied by capital-good sector
+*/
+RESULT( AVES( CAPSECL2, "_Atau" ) )
+
+
+EQUATION( "BtauAvg" )
+/*
+Average labor productivity of machines produced by capital-good sector
+*/
+RESULT( AVES( CAPSECL2, "_Btau" ) )
+
+
+EQUATION( "CD1" )
+/*
+Total credit demand of firms in capital-good sector
+*/
+RESULT( SUMS( CAPSECL2, "_CD1" ) )
+
+
+EQUATION( "CD1c" )
+/*
+Total credit demand constraint of firms in capital-good sector
+*/
+RESULT( SUMS( CAPSECL2, "_CD1c" ) )
+
+
+EQUATION( "CS1" )
+/*
+Total credit supplied to firms in capital-good sector
+*/
+RESULT( SUMS( CAPSECL2, "_CS1" ) )
+
 
 EQUATION( "HCavg" )
 /*
@@ -141,13 +196,6 @@ CYCLES( CAPSECL2, cur, "Firm1" )
 RESULT( v[0] / VS( CAPSECL2, "F1" ) )
 
 
-EQUATION( "cred1c" )
-/*
-Total credit constraint of firms in capital-good sector
-*/
-RESULT( SUMS( CAPSECL2, "_cred1c" ) )
-
-
 /*======================= CONSUMER-GOOD SECTOR STATS =========================*/
 
 EQUATION( "A2sd" )
@@ -175,6 +223,27 @@ CYCLES( CONSECL2, cur, "Firm2" )
 }
 
 RESULT( i > 0 ? sqrt( v[0] / i ) : 0 )
+
+
+EQUATION( "CD2" )
+/*
+Total credit demand of firms in consumer-good sector
+*/
+RESULT( SUMS( CONSECL2, "_CD2" ) )
+
+
+EQUATION( "CD2c" )
+/*
+Total credit demand constraint of firms in consumer-good sector
+*/
+RESULT( SUMS( CONSECL2, "_CD2c" ) )
+
+
+EQUATION( "CS2" )
+/*
+Total credit supplied to firms in consumer-good sector
+*/
+RESULT( SUMS( CONSECL2, "_CS2" ) )
 
 
 EQUATION( "HH2" )
@@ -220,8 +289,9 @@ EQUATION( "RS2" )
 /*
 Machine (planned) scrapping rate in consumption-good sector
 */
-RESULT( T > 1 ? SUMS( CONSECL2, "_RS2" ) / 
-		( VLS( CONSECL2, "K", 1 ) / VS( CONSECL2, "m2" ) ) : 0 )
+v[1] = VLS( CONSECL2, "K", 1 );
+RESULT( T > 1 && v[1] > 0 ? SUMS( CONSECL2, "_RS2" ) / 
+		( v[1] / VS( CONSECL2, "m2" ) ) : 0 )
 
 
 EQUATION( "age2avg" )
@@ -234,13 +304,6 @@ CYCLES( CONSECL2, cur, "Firm2" )
 	v[0] += T - VS( cur, "_t2ent" ) + 1;
 	
 RESULT( v[0] / VS( CONSECL2, "F2" ) )
-
-
-EQUATION( "cred2c" )
-/*
-Total credit constraint of firms in consumer-good sector
-*/
-RESULT( SUMS( CONSECL2, "_cred2c" ) )
 
 
 EQUATION( "dN" )
@@ -316,3 +379,15 @@ RESULT( v[0] )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
+
+EQUATION_DUMMY( "exit1fail", "" )
+/*
+Rate of bankrupt firms in capital-good sector
+Updated in 'entry1exit'
+*/
+
+EQUATION_DUMMY( "exit2fail", "" )
+/*
+Rate of bankrupt firms in consumption-good sector
+Updated in 'entry2exit'
+*/

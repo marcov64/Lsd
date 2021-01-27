@@ -13,11 +13,23 @@
 EQUATION( "_Atau" )
 /*
 Labor productivity of new vintage of machine when employed for production
-Also updates '_Btau'.
+Also updates '_Btau'
 */
 
-double Btau = VL( "_Btau", 1 );					// previous period productivity
+double Ainn, Binn, Aimi, Bimi, cImi, cInn, pImi, pInn;
+
+double Atau = CURRENT;							// previous period productivity
+double Btau = VL( "_Btau", 1 );
+double b = VS( CONSECL2, "b" );					// payback period
+double cTau = VL( "_cTau", 1 );					// cur. op. cost. w/ exist. tech.
+double m1 = VS( PARENT, "m1" );					// modularity in sector 1
+double m2 = VS( CONSECL2, "m2" );				// machine modularity in sector 2
+double mu1 = VS( PARENT, "mu1" );				// mark-up in sector 1
+double pTau = VL( "_p1", 1 );					// current price w/ exist. tech.
+double w = VS( LABSUPL2, "w" );					// current wage
 double xi = VS( PARENT, "xi" );					// share of R&D for innovation
+	
+cImi = cInn = pImi = pInn = DBL_MAX;			// assume innov./imit. failure
 
 // normalized workers on R&D of the firm
 double L1rdN = VL( "_L1rd", 1 ) * VS( LABSUPL2, "Ls0" ) / VLS( LABSUPL2, "Ls", 1 );
@@ -33,40 +45,51 @@ if ( bernoulli( v[1] ) )						// innovation succeeded?
 	double beta1 = VS( PARENT, "beta1" );		// beta distrib. beta parameter
 	
 	// new final productivity (A) from innovation
-	v[2] = CURRENT * ( 1 + x1inf + beta( alpha1, beta1 ) * ( x1sup - x1inf ) );
+	Ainn = Atau * ( 1 + x1inf + beta( alpha1, beta1 ) * ( x1sup - x1inf ) );
 	
 	// new production productivity (B) from innovation
-	v[3] = Btau * ( 1 + x1inf + beta( alpha1, beta1 ) * ( x1sup - x1inf ) );
+	Binn = Btau * ( 1 + x1inf + beta( alpha1, beta1 ) * ( x1sup - x1inf ) );
+	
+	// price and operating cost of new machine
+	pInn = ( 1 + mu1 ) * w / Binn / m1;
+	cInn = w / Ainn;
 }
-else
-	v[2] = v[3] = 0;							// innovation failure
 
 // imitation process (success probability)
-v[4] = 1 - exp( - VS( PARENT, "zeta2" ) * ( 1 - xi ) * L1rdN ); 
+v[2] = 1 - exp( - VS( PARENT, "zeta2" ) * ( 1 - xi ) * L1rdN ); 
 
-if ( bernoulli( v[4] ) )						// imitation succeeded?
+if ( bernoulli( v[2] ) )						// imitation succeeded?
 {
+	double c2avg = VLS( CONSECL2, "c2", 1 );	// average machine operating cost
+	double p1avg = VLS( PARENT, "p1avg", 1 );	// average machine cost
+	
 	k = VS( PARENT, "F1" );						// number of firms in sector 1
 	dblVecT imiProb( k );						// vector for tech distance
 	
-	v[5] = i = 0;								// inverse distance/firm accum.
+	v[3] = i = 0;								// inverse distance/firm accum.
 	CYCLES( PARENT, cur, "Firm1" )				// 1st run: abs. inv. distance
 		if ( cur == THIS )
 			imiProb[ i++ ] = 0;					// can't self-imitate
 		else
 		{
-			v[6] = sqrt( pow( VLS( cur, "_Btau", 1 ) - Btau, 2 ) +
-						 pow( VLS( cur, "_Atau", 1 ) - CURRENT, 2 ) );
-			v[5] += imiProb[ i++ ] = ( v[6] > 0 ) ? 1 / v[6] : 0;
+			// price and operating cost of firm candidate for imitation
+			double p = ( 1 + mu1 ) * w / VLS( cur, "_Btau", 1 ) / m1;
+			double c = w / VLS( cur, "_Atau", 1 );
+				   
+			// euclidian distance in 2-dimensional mean-standardized space
+			v[4] = sqrt( pow( ( p - pTau ) / p1avg, 2 ) +
+						 pow( ( c - cTau ) / c2avg, 2 ) );
+
+			v[3] += imiProb[ i++ ] = ( v[4] > 0 ) ? 1 / v[4] : 0;
 		}
 
-	if ( v[5] > 0 )
+	if ( v[3] > 0 )
 	{
-		v[7] = i = 0;							// probabilities/firm accum.
+		v[5] = i = 0;							// probabilities/firm accum.
 		CYCLES( PARENT, cur, "Firm1" )			// 2nd run: cumulative imi. prob.
 		{
-			v[7] += imiProb[ i ] / v[5];		// normalize to add up to 1
-			imiProb[ i++ ] = v[7];
+			v[5] += imiProb[ i ] / v[3];		// normalize to add up to 1
+			imiProb[ i++ ] = v[5];
 		}
 			
 		// draw a firm to imitate according to the distance probabilities
@@ -76,49 +99,49 @@ if ( bernoulli( v[4] ) )						// imitation succeeded?
 		{
 			cur = TSEARCHS( PARENT, "Firm1", j + 1 );// get pointer to firm
 			
-			v[8] = VLS( cur, "_Atau", 1 );		// get imitated firm productivities
-			v[9] = VLS( cur, "_Btau", 1 );
+			Aimi = VLS( cur, "_Atau", 1 );		// get imitated firm productivities
+			Bimi = VLS( cur, "_Btau", 1 );
+			
+			// price and operating cost of new machine
+			pImi = ( 1 + mu1 ) * w / Bimi / m1;
+			cImi = w / Aimi;
 		}
-		else
-			v[8] = v[9] = 0;					// imitation failure
 	}
-	else
-		v[8] = v[9] = 0;						// imitation failure
 }
-else
-	v[8] = v[9] = 0;							// imitation failure
 
 // select best option between the three options (current/innovation/imitation)
-v[0] = CURRENT;									// current technology
-v[10] = Btau;
-v[11] = v[12] = 0;
+v[6] = v[7] = 0;								// innovation/imitation flags
 
-if ( v[2] * v[3] > v[0] * v[10] )				// is innovation better?
+// is innovation ownership unit cost lower than current tech for client?
+if ( pInn / m2 + cInn * b < pTau / m2 + cTau * b )
 {
-	v[0] = v[2];								// new Atau
-	v[10] = v[3];								// new Btau
-	v[11] = 1;									// innovation succeeded
-	v[12] = 0;									// no imitation
+	pTau = pInn;								// use it
+	cTau = cInn;
+	Atau = Ainn;
+	Btau = Binn;
+	v[6] = 1;									// innovation succeeded
 }
 
-if ( v[8] * v[9] > v[0] * v[10] )				// is imitation better (yet)?
+// is imitation ownership unit cost even lower?
+if ( pImi / m2 + cImi * b < pTau / m2 + cTau * b )
 {
-	v[0] = v[8];
-	v[10] = v[9];
-	v[11] = 0;									// no innovation
-	v[12] = 1;									// imitation succeeded
+	Atau = Aimi;
+	Btau = Bimi;
+	v[6] = 0;									// no innovation
+	v[7] = 1;									// imitation succeeded
 }
 
-WRITE( "_Btau", v[10] );
-WRITE( "_inn", v[11] );
-WRITE( "_imi", v[12] );
+WRITE( "_Btau", Btau );
+WRITE( "_inn", v[6] );
+WRITE( "_imi", v[7] );
 
-RESULT( v[0] )
+RESULT( Atau )
 
 
 EQUATION( "_Deb1max" )
 /*
 Prudential maximum bank debt of firm in capital-good sector
+Also updates '_CD1', '_CD1c', '_CS1'
 */
 
 // maximum debt allowed to firm, considering net worth and operating margin
@@ -129,7 +152,9 @@ v[5] = VS( FINSECL2, "Lambda" ) * max( VL( "_NW1", 1 ),
 v[0] = max( v[5], VS( FINSECL2, "Lambda0" ) * VLS( PARENT, "PPI", 1 ) / 
 				  VS( PARENT, "PPI0" ) );
 			
-WRITE( "_cred1c", 0 );							// reset constraint for period
+WRITE( "_CD1", 0 );								// reset total credit demand
+WRITE( "_CD1c", 0 );							// reset constraint for period
+WRITE( "_CS1", 0 );								// reset total credit supplied
 
 RESULT( v[0] )
 		
@@ -176,10 +201,11 @@ RESULT( v[0] )
 EQUATION( "_Q1" )
 /*
 Planed production for a firm in capital-good sector
+Also updates '_CD1', '_CD1c', '_CS1'
 */
 
 v[1] = V( "_D1" );								// potential production (orders)
-v[2] = V( "_cred1" );							// available credit
+v[2] = V( "_CS1a" );							// available credit supply
 v[3] = VL( "_NW1", 1 );							// net worth (cash available)
 v[4] = V( "_c1" );								// unit cost
 v[5] = V( "_p1" );								// machine price
@@ -260,7 +286,7 @@ RESULT( v[0] )
 EQUATION( "_Tax1" )
 /*
 Total tax paid by firm in capital-good sector
-Also updates final net wealth on period
+Also updates '_Div1', '_NW1', '_CD1', '_CD1c', '_CS1'
 */
 
 v[1] = V( "_Pi1" );								// firm profit in period
@@ -288,7 +314,7 @@ if ( v[6] < 0 )									// must finance losses?
 		INCR( "_NW1", v[6] );					// draw from net wealth
 	else
 	{
-		v[8] = V( "_cred1" );					// available credit
+		v[8] = V( "_CS1a" );					// available credit supply
 		v[9] = - v[6] - v[7] + 1;				// desired finance
 		
 		if ( v[8] >= v[9] )						// can finance losses?
@@ -479,6 +505,13 @@ V( "_Atau" );									// ensure innovation process ok
 RESULT( VS( LABSUPL2, "w" ) / ( V( "_Btau" ) * VS( PARENT, "m1" ) ) )
 
 
+EQUATION( "_cTau" )
+/*
+Planned (expected) unit production cost of machine when employed for production
+*/
+RESULT( VS( LABSUPL2, "w" ) / V( "_Atau" ) )
+
+
 EQUATION( "_f1" )
 /*
 Market share of firm in capital-good sector
@@ -490,9 +523,9 @@ RESULT( v[1] > 0 ? V( "_Q1e" ) / v[1] : CURRENT )
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/
 
-EQUATION( "_cred1" )
+EQUATION( "_CS1a" )
 /*
-Bank credit available (new debt) to firm in capital-good sector
+Bank credit supply available (new debt) to firm in capital-good sector
 Function called multiple times in single time step
 */
 RESULT( max( V( "_Deb1max" ) - V( "_Deb1" ), 0 ) )
@@ -504,6 +537,24 @@ EQUATION_DUMMY( "_Btau", "" )
 /*
 Labor productivity of new vintage of machine when employed for production
 Updated in '_Atau'
+*/
+
+EQUATION_DUMMY( "_CD1", "" )
+/*
+Credit demand for firm in capital-good sector
+Updated in '_Deb1max', '_Q1', '_Tax1'
+*/
+
+EQUATION_DUMMY( "_CD1c", "" )
+/*
+Credit demand constraint for firm in capital-good sector
+Updated in '_Deb1max', '_Q1', '_Tax1'
+*/
+
+EQUATION_DUMMY( "_CS1", "" )
+/*
+Credit supplied to firm in capital-good sector
+Updated in '_Deb1max', '_Q1', '_Tax1'
 */
 
 EQUATION_DUMMY( "_Deb1", "" )
@@ -521,13 +572,7 @@ Updated in '_Tax1'
 EQUATION_DUMMY( "_NW1", "" )
 /*
 Net wealth (free cash) of firm in capital-good sector
-Updated in '_Q1' and '_Tax1'
-*/
-
-EQUATION_DUMMY( "_cred1c", "" )
-/*
-Credit constraint for firm in capital-good sector
-Updated in '_Deb1max', '_Q1'
+Updated in '_Q1', '_Tax1'
 */
 
 EQUATION_DUMMY( "_imi", "" )

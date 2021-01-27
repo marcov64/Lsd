@@ -73,12 +73,10 @@ Government expenditure (exogenous demand)
 i = V( "flagGovExp" );							// type of govt. exped.
 v[2] = VS( LABSUPL0, "Ls" ) - VS( LABSUPL0, "L" );// unemployed workers
 
-v[0] = 0;										// wages accumulator
-
 if ( i < 2 )									// work-or-die + min
-	v[0] += v[2] * VS( LABSUPL0, "w0min" );		// minimum income
+	v[0] = v[2] * VS( LABSUPL0, "w0min" );		// minimum income
 else
-	v[0] += v[2] * VS( LABSUPL0, "wU" );		// pay unemployment benefit
+	v[0] = v[2] * VS( LABSUPL0, "wU" );			// pay unemployment benefit
 	
 if ( i == 1 )
 	v[0] += ( 1 + V( "gG" ) ) * CURRENT;
@@ -88,16 +86,16 @@ if ( i == 3 )									// if government has accumulated
 	v[3] = VL( "Deb", 1 );
 	if ( v[3] < 0 )
 	{
-		v[4] = max( 0, - VL( "Def", 1 ) );		// limit to cur. superavit
+		v[4] = max( 0, - VL( "Def", 1 ) );		// limit to current surplus
 		if ( - v[3] > v[4] )
 		{
-			v[0] += v[4];						// cap to current sup.
-			INCR( "Deb", v[4] );				// discount from surplus
+			v[0] += v[4];
+			INCR( "Deb", v[4] );				// discount from debt
 		}
 		else
 		{
 			v[0] += - v[3];						// spend all surplus
-			WRITE( "Deb", 0 );					// zero surplus
+			WRITE( "Deb", 0 );					// zero debt
 		}
 	}
 }
@@ -139,7 +137,7 @@ RESULT( CURRENT + V( "Def" ) )
 
 EQUATION( "Def" )
 /*
-Government current deficit (negative if superavit)
+Government total deficit (negative if surplus)
 */
 RECALC( "Deb" );								// force update if updated in 'C'
 RESULT( V( "G" ) + VLS( FINSECL0, "r", 1 ) * VL( "Deb", 1 ) - VL( "Tax", 1 ) )
@@ -167,6 +165,7 @@ Residual nominal consumption in period (forced savings in currency terms)
 
 // unfilled demand=forced savings
 v[0] = V( "C" ) + V( "G" ) - VS( CONSECL0, "D2" ) * VS( CONSECL0, "CPI" );
+v[0] = ROUND( v[0], 0, 0.001 );					// avoid rounding errors on zero
 
 V( "SavAcc" );									// ensure up-to-date before
 INCR( "SavAcc", v[0] );							// updating accumulated
@@ -229,8 +228,6 @@ WRITE( "cExit", 0 );
 
 v[0] = VS( CAPSECL0, "entry1exit" ) + VS( CONSECL0, "entry2exit" );
 
-RECALCS( FINSECL0, "BadDeb" );					// update bad debt after exits
-
 RESULT( v[0] )
 
 
@@ -286,6 +283,7 @@ WRITES( cur2, "m2", max( 1, ceil( VS( cur2, "m2" ) ) ) );
 
 // prepare data required to set initial conditions
 double m1 = VS( cur1, "m1" );					// labor output factor
+double m2 = VS( cur2, "m2" );					// machine output factor
 double mu1 = VS( cur1, "mu1" );					// mark-up in sector 1
 double mu20 = VS( cur2, "mu20" );				// initial mark-up in sector 2
 double w0min = VS( cur4, "w0min" );				// absolute/initial minimum wage
@@ -293,7 +291,8 @@ int F1 = VS( cur1, "F1" );						// number of firms in sector 1
 int F2 = VS( cur2, "F2" );						// number of firms in sector 2
 int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 
-double c10 = INIWAGE / ( INIPROD * m1 );		// initial cost in sector 1
+double Btau0 = ( 1 + mu1 ) * INIPROD / ( m1 * m2 );// initial prod. in sector 1
+double c10 = INIWAGE / ( Btau0 * m1 );			// initial cost in sector 1
 double c20 = INIWAGE / INIPROD;					// initial cost in sector 2
 double p10 = ( 1 + mu1 ) * c10;					// initial price sector 1
 double p20 = ( 1 + mu20 ) * c20;				// initial price sector 2
@@ -308,6 +307,7 @@ WRITES( cur2, "lastID2", 0 );
 
 // initialize lagged variables depending on parameters
 WRITEL( "G", G0, -1 );
+WRITELS( cur1, "A1", Btau0, -1 );
 WRITELS( cur1, "PPI", p10, -1 );
 WRITELS( cur1, "PPI0", p10, -1 );
 WRITELS( cur2, "CPI", p20, -1 );
@@ -322,12 +322,12 @@ cur = SEARCHS( cur2, "Firm2" );					// remove empty firm instance
 DELETE( cur );
 
 v[1] = entry_firm1( var, cur1, F1, true );		// add capital-good firms
+INIT_TSEARCHTS( cur1, "Firm1", k - 1 );			// prepare turbo search indexing
+
 v[1] += entry_firm2( var, cur2, F2, true );		// add consumer-good firms
+VS( cur2, "firm2maps" );						// update the mapping vectors
 
 WRITE( "cEntry", v[1] );						// save equity cost of entry
-
-INIT_TSEARCHTS( cur1, "Firm1", k - 1 );			// prepare turbo search indexing
-VS( cur2, "firm2maps" );						// update the mapping vectors
 
 // set bank initial assets according to existing loans to firms
 v[2] = v[3] = 0;								// loans and deposits accumulator

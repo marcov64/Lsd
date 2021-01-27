@@ -1,16 +1,31 @@
-Finance-augmented K+S Model (version 0.2)
-=========================================
+Finance-augmented K+S Model (version 0.2.1)
+===========================================
 
 This version copyright by Marcelo C. Pereira.
 The original finance-augmented K+S code was developed by Andrea Roventini, Mauro Napoletano, and Tania Treibich.
 
-This is a full rewrite of the original "Schumpeter meeting Keynes" (K+S) model, plus the finance extensions. Differently from original versions, the entire the model was recoded into regular LSD equations. The only intended change was ensuring stock-and-flow consistency in firm entry process. There is no guarantee this version matches the results of original version exactly, due to intrinsic differences between programming approaches.
+This is a full rewrite of the original "Schumpeter meeting Keynes" (K+S) model, plus the finance extensions. Differently from original versions, the entire the model was recoded into regular LSD equations. The main intended changes was ensuring stock-and-flow consistency in firm entry process. There is no guarantee this version matches the results of original version exactly, due to intrinsic differences between programming approaches, some minor improvements, and bug fixes.
+
+
+Change log
+==========
+v0.2                - initial LSD-only version
+v0.2.1 (01/02/2021) - unify new machine selection criteria (=scrapping rule)
+                      normalize values used to compute imitation euclidean distance
+                      increase sector 1 mark-up in all configurations to avoid exit spiral
+                      improve bank excess reserves and net worth computation and bail-out
+                      improve fiscal rules handling
+                      add bond market (muBonds, thetaBonds, rhoBonds)
+                      add intermediate bank capital restriction rule (flagCreditRule=1)
+                      add debt repayment control (deltaB)
+                      update configurations closer to papers' settings
 
 
 Relevant references
 ===================
 
 Dosi, G., G. Fagiolo, and A. Roventini (2010). Schumpeter meeting Keynes: A policy-friendly model of endogenous growth and business cycles. Journal of Economic Dynamics and Control 34:1748-1767.
+Dosi, G., G. Fagiolo, M. Napoletano, and A. Roventini (2013). Income distribution, credit and fiscal policies in an agent-based Keynesian model. Journal of Economic Dynamics and Control 37:1598-1625.
 Dosi, G., G. Fagiolo, M. Napoletano, A. Roventini, and T. Treibich (2015). Fiscal and monetary policies in complex evolving economies. Journal of Economic Dynamics and Control 52:166-189.
 
 
@@ -41,13 +56,17 @@ Example configurations
 
 The model come with some ready-to-use configuration files (.lsd extension), illustrating the baseline in the original 2015 paper and two experiments:
 
-Base_fin-Bank_cap.lsd = same set-up employed in the baseline configuration of the original 2015 paper, with inflation-target Taylor rule, no fiscal rule, and entrant firm capital provided by banks (loans)
+Baseline.lsd = same set-up employed in the baseline configuration of the original 2015 paper, with inflation-target Taylor rule, no fiscal rule
 
-Full_fin-Bank_cap.lsd = configuration with all finance options enabled, including inflation- and unemployment-target Taylor rule, fiscal-compact fiscal rule, and entrant firm capital provided by banks (loans)
+Full_finance.lsd = configuration with all financal options enabled, including inflation- and unemployment-target Taylor rule, soft fiscal-compact rule, and bonds-spread adjustment
 
-Min_fin-Bank_cap.lsd = minimal finance configuration, similar to the original 2010 paper model and entrant firm capital provided by banks (loans)
+Min_finance.lsd = minimal financal configuration, similar to the 2013 paper
 
-Please refer to the original 2010/2015 papers (reference above) for details.
+Min_finance-Seed_capital.lsd = minimal financal configuration, similar to the 2013 paper model but with entrant firm capital provided by workers (stock equity)
+
+No_finance-Benchmark_v1.lsd = no financial market and limits, similar configuration to the 2010 paper model (v0.1.1)
+
+Please refer to the original 2010/2013/2015 papers (reference above) for details.
 
 
 R analysis scripts
@@ -67,9 +86,9 @@ KS-elementary-effects-SA.R = Morris elementary effects sensitivity analysis of t
 
 KS-kriging-sobol-SA.R = global Sobol variance-based sensitivity analysis using a Kriging meta-model, including alternative meta-model kernels selection, meta-model estimation and validation, Sobol variance decomposition for direct and interactive effects, and surface response plotting (2D and 3D) of top-influential factors
 
-Other support scripts exist in the R subdirectory and are required by the above scripts. The scripts are configured to use the R subdirectory as the R working directory. Please add all the data required for the analysis (including LSD configuration files) in subdirectories inside the R working directory (the default is 'data'). There is a set of preconfigured test configurations (Sim1-Sim6.lsd in the data subdirectory) which can be executed in LSD and analyzed by the R scripts without any change. Subdiretctories 'ee' and 'sobol' contain test configurations for sensitivity analysis scripts.
+Other support scripts exist in the R subdirectory and are required by the above scripts. The scripts are configured to use the R subdirectory as the R working directory. Please add all the data required for the analysis (including LSD configuration files) in subdirectories inside the R working directory (the default is 'data'). There is a set of preconfigured test configurations (Sim1-Sim2.lsd in the data subdirectory) which can be executed in LSD and analyzed by the R scripts without any change. Subdiretctories 'ee' and 'sobol' contain test configurations for sensitivity analysis scripts. The sample test configurations are configured for speed but the number of Monte Carlo experiments (runs) is insufficient for reliable inference.
 
-The R scripts require the following R packages (and dependencies) to be installed from the standard repositories: LSDsensitivity, tseries, normalp, nortest, mFilter, np, matrixStats, gplots, rmutil, plotrix, extrafont.
+The R scripts require the following R packages (and dependencies) to be installed from the standard repositories: LSDsensitivity, tseries, normalp, nortest, mFilter, np, matrixStats, gplots, rmutil, plotrix, extrafont. 8GB or more of available memory is required to run some of the reports.
 
 
 Model control flags
@@ -98,7 +117,8 @@ Taxation (parameter flagTax)
 Bank total credit supply rule (parameter flagCreditRule)
 -----------------------------
 0 = no bank-level credit limit (firm-level prudential limit still apply)
-1 = Basel-like bank capital adequacy rule
+1 = deposits multiplier credit limit but no capital adequacy rule or bank bail-out
+2 = Basel-like bank capital adequacy rule and bank bail-out if net worth is negative
 
 Government fiscal rule (parameter flagFiscalRule)
 ----------------------
@@ -137,27 +157,32 @@ tr = tax rate (>=0)
 Financial market parameters (object Financial)
 ---------------------------
 B = number of heterogeneous banks (>=1)
+DebRule = maximum government debt on GDP ratio for fiscal rule (>0)
+DefPrule = maximum government primary deficit on GDP ratio for fiscal rule (>0)
+EqB0 = initial equity of bank as multiple of firms net worth (>0)
 Lambda = multiple of net assets or sales for credit limit (>0)
 Lambda0 = credit limit initial absolute floor (>=0)
-NWb0 = initial net worth (equity) of bank (>0)
-PhiB = fraction of incumbent bank net wealth provided to bailed-out bank (0<PhiB<=1)
+PhiB = fraction of incumbent bank net worth provided to bailed-out bank (0<PhiB<=1)
+Trule = time to start enforcing fiscal rules (>=1)
 Ut = target unemployment rate for Central Bank's Taylor rule (>0)
-alphaB = Pareto distribution shape parameter defining bank size heterogeneity (>= 1)
+alphaB = Pareto distribution shape parameter defining bank size heterogeneity (>0)
 betaB = bank sensitivity to financial fragility (>0)
 dB = dividend rate on net profits for bank (>=0)
-debRule = maximum government debt on GDP ratio for fiscal rule (>0)
-defRule = maximum government deficit on GDP ratio for fiscal rule (>0)
+deltaB = desired share of outstanding firm debt to pay in period (0<deltaB<=1)
+deltaDeb = share of government debt to pay when debt fiscal rule is binding (>0)
 gammaPi = Central Bank's Taylor rule sensitivity to target inflation (>=0)
 gammaU = Central Bank's Taylor rule sensitivity to target unemployment (>=0)
 kConst = interest rate scaling parameter for firms debt by credit class (>0)
+muBonds = sovereign bonds mark-down over central bank rate r
+muD = bank spread (mark-up) on deposits (over Central Bank rate r) (<=0)
 muDeb = bank spread (mark-up) on debt (over Central Bank rate r) (>=0)
-muRes = Central Bank spread (mark-up) on reserves (>0)
-phiT = unemployment benefit target as a share of average wage (>0)
+muRes = Central Bank spread (mark-up) on reserves (<=0)
 piT = target inflation rate by Central Bank's Taylor rule (>0)
 rAdj = prime rate and unemployment benefit adjustment step (>0)
-rD = interest rate paid on bank deposits (>=0)
 rT = target interest (prime) rate set by Central Bank (>0)
+rhoBonds = sovereign bonds risk premium (>=0)
 tauB = minimum bank capital adequacy rate (0-1)
+thetaBonds = average maturity periods of sovereign bonds (>0)
 
 Capital market parameters (object Capital)
 -------------------------
@@ -182,9 +207,8 @@ zeta1/zeta2 = average productivity gain of R&D expense in innovation/imitation (
 
 Consumer market parameters (object Consumption)
 --------------------------
-Deb20ratio = debt-to-equity initial ratio in consumer-good sector (0=only equity)
+Deb20ratio = debt-to-equity initial ratio in consumption-good sector (0=only equity)
 F2 = number of firms in consumption-good sector (>0)
-K0 = average initial capital stock of firm in consumption-good sector (>0)
 NW20 = average initial net worth of firm in consumption-good sector (>=0)
 Phi1/Phi2 = lower/upper support for consumption-good entrant net wealth share (0<Phi1<Phi2<=1)
 b = number of pay-back periods (minus 1) for machine scrapping (>1)
@@ -210,6 +234,7 @@ Labor supply parameters (object Labor)
 -----------------------
 Ls0 = initial number of workers in labor market (labor supply) (>1)
 delta = labor force growth rate (>=0)
+phi = unemployment benefit as a share of average wage (>0)
 psi1 = share of inflation passed to wages (psi2 on 2010 paper) (0-1)
 psi2 = elasticity of wages to aggregate productivity growth (psi1 on paper) (>=0)
 psi3 = elasticity of wages to the unemployment rate (>=0)

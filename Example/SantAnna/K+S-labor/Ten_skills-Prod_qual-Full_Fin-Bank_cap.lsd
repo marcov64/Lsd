@@ -567,6 +567,8 @@ Label Root
 				Var: cred1c
 				Var: cred2c
 				Var: dN
+				Var: exit1fail
+				Var: exit2fail
 				Var: mu2avg
 				Var: nBrochAvg
 				Var: noWrk2
@@ -1306,6 +1308,8 @@ Var: age2avg 0 s + n n
 Var: cred1c 0 s + n n
 Var: cred2c 0 s + n n
 Var: dN 0 s + n n
+Var: exit1fail 0 s + n n
+Var: exit2fail 0 s + n n
 Var: mu2avg 0 s + n p
 Var: nBrochAvg 0 s + n n
 Var: noWrk2 0 s + n n
@@ -5094,6 +5098,16 @@ END_DESCRIPTION
 Variable_dN
 Change in total inventories (real terms)
 _INIT_
+
+END_DESCRIPTION
+
+Variable_exit1fail
+Rate of bankrupt firms in capital-good sector
+
+END_DESCRIPTION
+
+Variable_exit2fail
+Rate of bankrupt firms in consumption-good sector
 
 END_DESCRIPTION
 

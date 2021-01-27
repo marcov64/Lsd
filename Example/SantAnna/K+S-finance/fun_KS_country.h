@@ -72,14 +72,14 @@ Government expenditure (exogenous demand)
 */
 
 i = V( "flagGovExp" );							// type of govt. exped.
+j = V( "flagFiscalRule" );						// fiscal rule to apply
+
 v[2] = VS( LABSUPL0, "Ls" ) - VS( LABSUPL0, "L" );// unemployed workers
 
-v[0] = 0;										// wages accumulator
-
 if ( i < 2 )									// work-or-die + min
-	v[0] += v[2] * VS( LABSUPL0, "w0min" );		// minimum income
+	v[0] = v[2] * VS( LABSUPL0, "w0min" );		// minimum income
 else
-	v[0] += v[2] * VS( LABSUPL0, "wU" );		// pay unemployment benefit
+	v[0] = v[2] * VS( LABSUPL0, "wU" );			// pay unemployment benefit
 	
 if ( i == 1 )
 	v[0] += ( 1 + V( "gG" ) ) * CURRENT;
@@ -89,21 +89,46 @@ if ( i == 3 )									// if government has accumulated
 	v[3] = VL( "Deb", 1 );
 	if ( v[3] < 0 )
 	{
-		v[4] = max( 0, - VL( "Def", 1 ) );		// limit to cur. superavit
+		v[4] = max( 0, - VL( "Def", 1 ) );		// limit to current surplus
 		if ( - v[3] > v[4] )
 		{
-			v[0] += v[4];						// cap to current sup.
-			INCR( "Deb", v[4] );				// discount from surplus
+			v[0] += v[4];
+			INCR( "Deb", v[4] );				// discount from debt
 		}
 		else
 		{
 			v[0] += - v[3];						// spend all surplus
-			WRITE( "Deb", 0 );					// zero surplus
+			WRITE( "Deb", 0 );					// zero debt
 		}
+		
+		END_EQUATION( v[0] );					// don't apply fiscal rules
 	}
 }
 
-RESULT( v[0] )
+// apply fiscal rule if soft balanced budget rule not binding, after warm-up
+if ( ( j == 1 || j == 3 || ( j > 0 && VL( "dGDP", 1 ) > 0 ) ) && 
+	 T >= VS( FINSECL0, "Trule" ) )
+{
+	v[5] = VS( FINSECL0, "DebRule" );			// primary deficit rule limit
+	v[6] = VS( FINSECL0, "DefPrule" );			// primary deficit rule limit
+	v[7] = VL( "Tax", 1 );						// tax income
+	v[8] = VL( "Deb", 1 );						// public debt
+	v[9] = VL( "GDPnom", 1 );					// current GDP in nominal terms
+
+	if ( j > 2 && v[8] / v[9] > v[5] )			// debt rule applies?
+	{
+		// desired surplus
+		v[10] = - VS( FINSECL0, "deltaDeb" ) * ( v[8] / v[9] - v[5] ) * v[8];
+		
+		if ( v[0] - v[7] > v[10] )				// expected surplus not enough?
+			v[0] = v[7] + v[10];				// adjust to the desired surplus	
+	}
+	else
+		if ( v[0] - v[7] > v[6] * v[9] )		// deficit rule applies?
+			v[0] = v[7] + v[6] * v[9];			// apply limit
+}
+
+RESULT( max( v[0], 0 ) )
 
 
 EQUATION( "SavAcc" )
@@ -134,25 +159,44 @@ RESULT( ( VS( CAPSECL0, "A1" ) * VS( CAPSECL0, "L1" ) +
 EQUATION( "Deb" )
 /*
 Accumulated government debt
+Includes the operational result of central bank (interest paid on reserves
+less the interest accrued on liquidity lines)
 */
-RESULT( CURRENT + V( "Def" ) )
+RESULT( CURRENT + V( "Def" ) + 
+		VS( FINSECL0, "rRes" ) * VLS( FINSECL0, "Res", 1 ) -
+		VS( FINSECL0, "r" ) * VLS( FINSECL0, "LoansCB", 1 ) )
+
+
+EQUATION( "DebGDP" )
+/*
+Government debt on GDP ratio
+*/
+v[1] = V( "GDPnom" );
+RESULT( v[1] > 0 ? V( "Deb" ) / v[1] : CURRENT )
 
 
 EQUATION( "Def" )
 /*
-Government current deficit (negative if superavit)
+Government total deficit (negative if surplus)
 */
+RESULT( V( "DefP" ) + VLS( FINSECL0, "Gbail", 1 ) + 
+		VS( FINSECL0, "rBonds" ) * VLS( FINSECL0, "Bonds", 1 ) )
 
-// interest paid on public debt
-v[1] = VLS( FINSECL0, "r", 1 ) * VL( "Deb", 1 );		
 
-// interest paid by central bank on bank reserves
-v[2] = VLS( FINSECL0, "rRes", 1 ) * VLS( FINSECL0, "Depo", 1 );
+EQUATION( "DefP" )
+/*
+Government primary deficit (negative if surplus)
+*/
+RECALC( "Deb" );								// ensure debt update next
+RESULT( V( "G" ) - VL( "Tax", 1 ) )
 
-// force debt update, as it may have been already updated in 'C'
-RECALC( "Deb" );					
 
-RESULT( V( "G" ) + v[1] + v[2] + VLS( FINSECL0, "Gbail", 1 ) - VL( "Tax", 1 ) )
+EQUATION( "DefPgdp" )
+/*
+Government primary deficit on GDP ratio
+*/
+v[1] = V( "GDPnom" );
+RESULT( v[1] > 0 ? V( "DefP" ) / v[1] : CURRENT )
 
 
 EQUATION( "GDP" )
@@ -177,11 +221,12 @@ Residual nominal consumption in period (forced savings in currency terms)
 
 // unfilled demand=forced savings
 v[0] = V( "C" ) + V( "G" ) - VS( CONSECL0, "D2" ) * VS( CONSECL0, "CPI" );
+v[0] = ROUND( v[0], 0, 0.001 );					// avoid rounding errors on zero
 
 V( "SavAcc" );									// ensure up-to-date before
 INCR( "SavAcc", v[0] );							// updating accumulated
 
-RESULT( v[0] )
+RESULT( v[0] )				
 
 
 EQUATION( "Tax" )
@@ -300,24 +345,35 @@ if ( VS( cur1, "F1" ) < 1 || VS( cur2, "F2" ) < 1 ||  VS( cur3, "B" ) < 1 )
 WRITES( cur2, "m2", max( 1, ceil( VS( cur2, "m2" ) ) ) );
 
 // prepare data required to set initial conditions
-double NWb0 = VS( cur3, "NWb0" );				// initial banks capital
+double EqB0 = VS( cur3, "EqB0" );				// initial bank equity multiple
+double NW10 = VS( cur1, "NW10" );				// initial net worth in sector 1
+double NW20 = VS( cur2, "NW20" );				// initial net worth in sector 2
 double alphaB = VS( cur3, "alphaB" );			// bank size distrib. parameter
 double m1 = VS( cur1, "m1" );					// labor output factor
+double m2 = VS( cur2, "m2" );					// machine output factor
 double mu1 = VS( cur1, "mu1" );					// mark-up in sector 1
 double mu20 = VS( cur2, "mu20" );				// initial mark-up in sector 2
-double phiT = VS( cur3, "phiT" );				// unemployed benefit rate target
+double muBonds = VS( cur3, "muBonds" );			// interest mark-down on g. bonds
+double muD = VS( cur3, "muD" );					// interest mark-down on deposits
+double muDeb = VS( cur3, "muDeb" );				// interest mark-up on debt
+double muRes = VS( cur3, "muRes" );				// interest mark-down on reserves
 double rT = VS( cur3, "rT" );					// prime rate target
-double tauB = VS( cur3, "tauB" );				// capital adequacy rate
+double tauB = VS( cur3, "tauB" );				// minimum capital adequacy rate
 double w0min = VS( cur4, "w0min" );				// absolute/initial minimum wage
 int B = VS( cur3, "B" );						// number of banks
 int F1 = VS( cur1, "F1" );						// number of firms in sector 1
 int F2 = VS( cur2, "F2" );						// number of firms in sector 2
 int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 
-double c10 = INIWAGE / ( INIPROD * m1 );		// initial cost in sector 1
+double Btau0 = ( 1 + mu1 ) * INIPROD / ( m1 * m2 );// initial prod. in sector 1
+double c10 = INIWAGE / ( Btau0 * m1 );			// initial cost in sector 1
 double c20 = INIWAGE / INIPROD;					// initial cost in sector 2
 double p10 = ( 1 + mu1 ) * c10;					// initial price sector 1
 double p20 = ( 1 + mu20 ) * c20;				// initial price sector 2
+double rBonds = rT * ( 1 - muBonds );			// initial interest on g. bonds
+double rD = rT * ( 1 - muD );					// initial interest on deposits
+double rDeb = rT * ( 1 + muDeb );				// initial interest on debt
+double rRes = rT * ( 1 - muRes );				// initial interest on reserves
 double G0 = V( "gG" ) * Ls0;					// initial public spending
 
 // reserve space for country-level non-initialized vectors
@@ -331,15 +387,16 @@ WRITES( cur2, "lastID2", 0 );
 
 // initialize lagged variables depending on parameters
 WRITEL( "G", G0, -1 );
+WRITELS( cur1, "A1", Btau0, -1 );
 WRITELS( cur1, "PPI", p10, -1 );
 WRITELS( cur1, "PPI0", p10, -1 );
 WRITELS( cur2, "CPI", p20, -1 );
 WRITELS( cur2, "c2", c20, -1 );
-WRITELS( cur3, "NWb", NWb0, -1 );
-WRITELS( cur3, "phi", phiT, -1 );
 WRITELS( cur3, "r", rT, -1 );
-WRITELS( cur3, "rDeb", rT, -1 );				// interest rate structure 
-WRITELS( cur3, "rRes", rT, -1 );				// to be defined later
+WRITELS( cur3, "rBonds", rBonds, -1 );
+WRITELS( cur3, "rD", rD, -1 );
+WRITELS( cur3, "rDeb", rDeb, -1 );
+WRITELS( cur3, "rRes", rRes, -1 );
 WRITELS( cur4, "Ls", Ls0, -1 );
 WRITELS( cur4, "w", INIWAGE, -1 );
 
@@ -349,10 +406,11 @@ i = 0;											// bank clients accumulator
 ADDNOBJLS( cur3, "Bank", B - 1, 0 );			// new objects recalculate in t
 CYCLES( cur3, cur, "Bank" )
 {
-	i += j = pareto( 1, alphaB );				// draw the number of clients
+	// draw the number of clients from a bounded Pareto distr.
+	i += j = floor( bpareto( alphaB, 2, ( F1 + F2 ) / 2 ) );
 	
 	WRITES( cur, "_IDb", k );			
-	WRITES( cur, "_fd", j );
+	WRITES( cur, "_fD", j );
 	
 	cur5 = SEARCHS( cur, "Cli1" );				// remove empty client instances
 	cur6 = SEARCHS( cur, "Cli2" );
@@ -363,7 +421,7 @@ CYCLES( cur3, cur, "Bank" )
 }
 
 CYCLES( cur3, cur, "Bank" )
-	WRITES( cur, "_fd", VS( cur, "_fd" ) / i );	// adjust desired market shares
+	WRITES( cur, "_fD", VS( cur, "_fD" ) / i );	// adjust desired market shares
 
 VS( cur3, "banksMaps" );						// update the mapping vectors
 
@@ -374,38 +432,49 @@ cur = SEARCHS( cur2, "Firm2" );					// remove empty firm instance
 DELETE( cur );
 
 v[1] = entry_firm1( var, cur1, F1, true );		// add capital-good firms
+INIT_TSEARCHTS( cur1, "Firm1", k - 1 );			// prepare turbo search indexing
+
 v[1] += entry_firm2( var, cur2, F2, true );		// add consumer-good firms
+VS( cur2, "firm2maps" );						// update the mapping vectors
 
 WRITE( "cEntry", v[1] );						// save equity cost of entry
 
-INIT_TSEARCHTS( cur1, "Firm1", k - 1 );			// prepare turbo search indexing
-VS( cur2, "firm2maps" );						// update the mapping vectors
-
 // set banks initial assets according to existing loans to firms
+v[2] = 0;										// capital accumulator
 CYCLES( cur3, cur, "Bank" )
 {
-	h = VS( cur, "_IDb" );						// bank ID
-	v[10] = VS( cur, "_fd" );					// desired market share
-	v[11] = v[12] = 0;							// loans and deposits accumulator
+	v[3] = v[4] = 0;							// loans and deposits accumulator
 	
 	CYCLES( cur, cur5, "Cli1" )
 	{
-		v[11] += VLS( SHOOKS( cur5 ), "_Deb1", 1 );// firm debt
-		v[12] += VLS( SHOOKS( cur5 ), "_NW1", 1 );// firm net wealth
+		v[3] += VLS( SHOOKS( cur5 ), "_Deb1", 1 );// firm debt
+		v[4] += VLS( SHOOKS( cur5 ), "_NW1", 1 );// firm net wealth
 	}
 
 	CYCLES( cur, cur6, "Cli2" )
 	{
-		v[11] += VLS( SHOOKS( cur6 ), "_Deb2", 1 );// firm debt
-		v[12] += VLS( SHOOKS( cur6 ), "_NW2", 1 );// firm net wealth
+		v[3] += VLS( SHOOKS( cur6 ), "_Deb2", 1 );// firm debt
+		v[4] += VLS( SHOOKS( cur6 ), "_NW2", 1 );// firm net wealth
 	}
+	
+	if ( v[4] > 0 )								// bank has clients?
+		v[5] = EqB0 * v[4];						// bank initial tier 1 capital
+	else
+		v[5] = EqB0 * ( F1 * NW10 + F2 * NW20 ) * VS( cur, "_fD" );// use proxy
 
-	WRITELS( cur, "_Loans",  v[11], -1 );		// bank loans
-	WRITELS( cur, "_Depo",  v[12], -1 );		// bank deposits
+	v[6] = tauB * v[4];							// part on required reserves
+	v[2] += v[7] = v[3] + v[5] - v[4];			// and net worth
+		
+	WRITELS( cur, "_Loans",  v[3], -1 );		// bank loans
+	WRITELS( cur, "_Res", v[6], -1 );			// bank reserves at central bank
+	WRITELS( cur, "_ExRes", v[5] - v[6], -1 );	// bank shareholder equity
+	WRITELS( cur, "_Depo",  v[4], -1 );			// bank deposits/reserves
+	WRITELS( cur, "_NWb", v[7], -1 );			// bank net worth
 	WRITELS( cur, "_BadDeb",  0, -1 );			// no bad debt
 	WRITELS( cur, "_Bda",  0, -1 );				// no fragility
-	WRITELS( cur, "_NWb", v[10] * NWb0 + tauB * v[11], -1 );// bank capital
 }
+
+WRITELS( cur3, "NWb", v[2], -1 );
 
 RESULT( 1 )
 

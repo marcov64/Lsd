@@ -3,7 +3,7 @@
 	K+S LSD MODEL (including finance extensions and variable number of firms)
 	-------------
 	
-	VERSION: 0.3 - independent entry and exit of firms in both sectors
+	VERSION: 0.3.1 - independent entry and exit of firms in both sectors
 
 	This is the topmost code file for the K+S coded in LSD. 
 	It contains only the scheduling equations 'runCountry' and 'timeStep',
@@ -157,7 +157,7 @@ v[10] = VS( CONSECL0, "Tax2" );					// tax paid by sector 2
 // government collects taxes and decide about expenditure, public deficit or
 // superavit form and its financed by public debt
 
-v[11] = V( "Def" );								// public deficit
+v[11] = V( "Def" );								// public total deficit
 
 // macro variables are computed by simple aggregation of micro-level data
 

@@ -94,27 +94,29 @@ CYCLE( cur, "Firm1" )
 }	
 
 // quit candidate firms exit, except the best one if all going to quit
-i = j = 0;										// firm counters
+v[6] = i = j = 0;								// firm counters
 CYCLE_SAFE( cur, "Firm1" )
 {
 	if ( quit[ i ] )
 	{
 		if ( h > 0 || i != k )					// firm must exit?
 		{
+			++j;								// count exits
+			if ( VS( cur, "_NW1" ) < 0 )		// count bankruptcies
+				++v[6];
+			
 			// account liquidation credit due to public, if any
 			v[2] += exit_firm1( var, cur );		// delete object and liq. val.
-			
-			++j;								// count exits
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
 			{
 				// new equity required
-				v[6] = NW10u + VS( cur, "_Deb1" ) - VS( cur, "_NW1" );
-				v[1] += v[6];					// accumulate "entry" equity cost
+				v[7] = NW10u + VS( cur, "_Deb1" ) - VS( cur, "_NW1" );
+				v[1] += v[7];					// accumulate "entry" equity cost
 				
 				WRITES( cur, "_Deb1", 0 );		// reset debt
-				INCRS( cur, "_NW1", v[6] );		// add new equity
+				INCRS( cur, "_NW1", v[7] );		// add new equity
 			}
 	}
 
@@ -124,10 +126,10 @@ CYCLE_SAFE( cur, "Firm1" )
 V( "f1rescale" );								// redistribute exiting m.s.
 
 // compute the potential number of entrants
-v[7] = ( MC1_1 == 0 ) ? 0 : MC1 / MC1_1 - 1;// change in market conditions
+v[8] = ( MC1_1 == 0 ) ? 0 : MC1 / MC1_1 - 1;// change in market conditions
 
 k = max( 0, ceil( F1 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
-						 omicron * min( max( v[7], x2inf ), x2sup ) ) ) );
+						 omicron * min( max( v[8], x2inf ), x2sup ) ) ) );
 				 
 // apply return-to-the-average stickiness random shock to the number of entrants
 k -= min( RND * stick * ( ( double ) ( F1 - j ) / F10 - 1 ) * F10, k );
@@ -147,6 +149,7 @@ INCRS( PARENT, "cEntry", v[1] );				// account equity cost of entry
 INCRS( PARENT, "cExit", v[2] );					// account exit credits
 WRITE( "exit1", ( double ) j / F1 );
 WRITE( "entry1", ( double ) k / F1 );
+WRITES( SECSTAL1, "exit1fail", v[6] / F1 );
 
 V( "f1rescale" );								// redistribute entrant m.s.
 INIT_TSEARCHT( "Firm1", i );					// prepare turbo search indexing
@@ -566,11 +569,5 @@ Updated in 'entry1exit'
 EQUATION_DUMMY( "exit1", "entry1exit" )
 /*
 Rate of exiting firms in capital-good sector
-Updated in 'entry1exit'
-*/
-
-EQUATION_DUMMY( "exit1fail", "entry1exit" )
-/*
-Rate of bankrupt firms in capital-good sector
 Updated in 'entry1exit'
 */

@@ -3,7 +3,7 @@
 	K+S LSD MODEL (including finance extensions)
 	-------------
 	
-	VERSION: 0.2 - decentralized financial sector and monetary/fiscal policies
+	VERSION: 0.2.1 - decentralized financial sector and monetary/fiscal policies
 
 	This is the topmost code file for the K+S coded in LSD. 
 	It contains only the scheduling equations 'runCountry' and 'timeStep',
@@ -157,7 +157,7 @@ v[10] = VS( CONSECL0, "Tax2" );					// tax paid by sector 2
 // government collects taxes and decide about expenditure, public deficit or
 // superavit form and its financed by public debt
 
-v[11] = V( "Def" );								// public deficit
+v[11] = V( "Def" );								// public total deficit
 
 // macro variables are computed by simple aggregation of micro-level data
 

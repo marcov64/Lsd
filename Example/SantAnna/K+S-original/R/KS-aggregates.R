@@ -21,7 +21,7 @@ expVal <- c( "Benchmark", "High opportunities & capabilities" )   # case paramet
 # Aggregated variables to use
 logVars <- c( "GDP", "GDPnom", "D2", "G", "Tax", "Deb", "Def", "dN", "I", "EI",
               "A", "S1", "S2", "Deb1", "Deb2", "NW1", "NW2", "W1", "W2", "wReal",
-              "BadDeb", "Loans" )
+              "BadDeb", "Loans", "CD", "CS" )
 aggrVars <- append( logVars, c( "dGDP", "dCPI", "dA", "dw", "CPI", "Q2u",
                                 "entry1exit", "entry2exit", "imi", "inn",
                                 "HH1", "HH2", "mu2avg", "U", "V", "Bda" ) )

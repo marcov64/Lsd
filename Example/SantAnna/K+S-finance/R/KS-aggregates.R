@@ -19,13 +19,13 @@ nKeep <- -1                           # number of time steps to keep (-1=all)
 expVal <- c( "Baseline", "Taylor rule (pi,U) & Fiscal Compact" )   # case parameter values
 
 # Aggregated variables to use
-logVars <- c( "GDP", "GDPnom", "D2", "G", "Gbail", "Tax", "Deb", "Def", "dN",
-              "I", "EI", "A", "S1", "S2", "Deb1", "Deb2", "NWb", "NW1", "NW2",
-              "W1", "W2", "wReal", "BadDeb", "TC", "Loans" )
+logVars <- c( "GDP", "GDPnom", "D2", "G", "Gbail", "Tax", "Deb", "Def", "DefP",
+              "dN", "I", "EI", "A", "S1", "S2", "Deb1", "Deb2", "NWb", "NW1",
+              "NW2", "W1", "W2", "wReal", "BadDeb", "TC", "Loans", "CD", "CS" )
 aggrVars <- append( logVars, c( "dGDP", "dCPI", "dA", "dw", "CPI", "Q2u",
                                 "entry1exit", "entry2exit", "imi", "inn",
-                                "HH1", "HH2", "mu2avg", "U", "V",
-                                "r", "Bda", "Bfail" ) )
+                                "HH1", "HH2", "mu2avg", "U", "V", "r", "Bda",
+                                "Bfail" ) )
 
 # Variables to test for stationarity and ergodicity
 statErgo.vars <- c( "dGDP", "dA", "dw", "V", "U", "mu2avg", "HH1", "HH2" )

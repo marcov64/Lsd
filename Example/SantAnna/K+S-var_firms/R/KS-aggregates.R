@@ -19,9 +19,9 @@ nKeep <- -1                           # number of time steps to keep (-1=all)
 expVal <- c( "Free entry", "Entry after exit" )   # case parameter values
 
 # Aggregated variables to use
-logVars <- c( "GDP", "GDPnom", "D2", "G", "Gbail", "Tax", "Deb", "Def", "dN",
-              "I", "EI", "A", "S1", "S2", "Deb1", "Deb2", "NWb", "NW1", "NW2",
-              "W1", "W2", "wReal", "BadDeb", "TC", "Loans" )
+logVars <- c( "GDP", "GDPnom", "D2", "G", "Gbail", "Tax", "Deb", "Def", "DefP",
+              "dN", "I", "EI", "A", "S1", "S2", "Deb1", "Deb2", "NWb", "NW1",
+              "NW2", "W1", "W2", "wReal", "BadDeb", "TC", "Loans", "CD", "CS" )
 aggrVars <- append( logVars, c( "dGDP", "dCPI", "dA", "dw", "CPI", "Q2u",
                                 "F1", "F2", "entry1", "entry2", "exit1", "exit2",
                                 "imi", "inn", "HH1", "HH2", "mu2avg", "U", "V",

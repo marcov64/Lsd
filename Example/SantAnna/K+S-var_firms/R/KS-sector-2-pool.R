@@ -185,7 +185,7 @@ invisible( gc( verbose = FALSE ) )
 CI     <- 0.95      # desired confidence interval
 nBins  <- 15        # number of bins to use in histograms
 outLim <- 0.10      # outlier percentile (0=don't remove outliers)
-warmUp <- 300       # number of "warm-up" time steps
+warmUp <- 200       # number of "warm-up" time steps
 nTstat <- -1        # last period to consider for statistics (-1=all)
 limOutl<- 0.10      # quantile extreme limits (0=none)
 
