@@ -104,6 +104,8 @@ double beta( double alpha, double beta );				// draw from a beta distribution
 double betacdf( double alpha, double beta, double x );	// beta cumulative distribution function
 double betacf( double a, double b, double x );			// beta distribution function
 double binomial( double p, double t );					// draw from a binomial distribution
+double bpareto( double alpha, double low, double high );// draw from bounded pareto
+double bparetocdf( double alpha, double low, double high, double x );
 double build_obj_list( bool set_list );					// build the object list for pointer checking
 double cauchy( double a, double b );					// draw from a Cauchy distribution
 double chi_squared( double n );							// draw from a chi-squared distribution

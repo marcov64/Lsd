@@ -1889,6 +1889,26 @@ double paretocdf( double mu, double alpha, double x )
 
 
 /***************************************************
+BPARETOCDF
+Bounded Pareto cumulative distribution function
+***************************************************/
+double bparetocdf( double alpha, double low, double high, double x )
+{
+	if ( alpha <= 0 || low <= 0 || low >= high )
+	{
+		plog( "\nWarning: bad alpha, low or high in function: bparetocdf" );
+		return 0.0;
+	}
+	
+	if ( x < low )
+		return 0.0;
+	else
+		return ( 1 - pow( low, alpha ) * pow( x, - alpha ) ) /
+			   ( 1 - pow( low / high, alpha ) ) ;
+}
+
+
+/***************************************************
 NORMCDF
 Normal cumulative distribution function
 ***************************************************/
@@ -2585,6 +2605,25 @@ double pareto( double mu, double alpha )
 	}
 
 	return mu / pow( 1 - ran1( ), 1 / alpha );
+}
+
+
+/****************************************************
+BPARETO
+****************************************************/
+double bpareto( double alpha, double low, double high )
+{
+	static bool paretStopErr;
+	
+	if ( alpha <= 0 || low <= 0 || low >= high )
+	{
+		warn_distr( & paretErrCnt, & paretStopErr, "bpareto", "non-positive alpha parameter or bounds or invalid bounds" );
+		return max( low, 0 );
+	}
+
+	return pow( pow( low, alpha ) / 
+				( ran1( ) * ( pow( low / high, alpha ) - 1 ) + 1 ), 
+				1 / alpha );
 }
 
 
