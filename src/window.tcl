@@ -512,7 +512,7 @@ proc sizetop { { w all } } {
 				}
 
 				.log {
-					set defGeom "+[ getx .log bottomrightS ]+[ gety .log bottomrightS ]"
+					set defGeom "+[ expr $screenWidth - $hmargin - $bordsize - $hsizeGmin ]+[ gety .log bottomrightS ]"
 					wm geometry .log [ checkgeom $logGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .log $hsizeGmin $vsizeGmin
 				}
@@ -785,7 +785,7 @@ proc getx { w pos } {
 			set hpos [ expr [ winfo x $par ] + $corrX ]
 		}
 		bottomrightS {
-			set hpos [ expr [ winfo screenwidth $w ] - $hmargin - [ winfo reqwidth $w ] ]
+			set hpos [ expr [ winfo screenwidth $w ] - $hmargin - 2 * $bordsize - [ winfo reqwidth $w ] ]
 		}
 		righttoW {
 			set hpos [ expr [ winfo x $par ] + $corrX + $hmargin + [ winfo width $par ] + 2 * $bordsize ]
