@@ -542,7 +542,7 @@ double variable::cal( object *caller, int lag )
 	if ( wait_delete != NULL )
 		wait_delete->delete_obj( this );
 
-	return val[ 0 ];	// by default the requested value is the last one, not yet computed
+	return app;	// by default the requested value is the last one, not yet computed
 
 	error:
 	
