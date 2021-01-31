@@ -361,9 +361,6 @@ double m2 = VS( cur2, "m2" );					// machine output factor
 double mu1 = VS( cur1, "mu1" );					// mark-up in sector 1
 double mu20 = VS( cur2, "mu20" );				// initial mark-up in sector 2
 double muBonds = VS( cur3, "muBonds" );			// interest mark-down on g. bonds
-double muD = VS( cur3, "muD" );					// interest mark-down on deposits
-double muDeb = VS( cur3, "muDeb" );				// interest mark-up on debt
-double muRes = VS( cur3, "muRes" );				// interest mark-down on reserves
 double rT = VS( cur3, "rT" );					// prime rate target
 double tauB = VS( cur3, "tauB" );				// minimum capital adequacy rate
 double w0min = VS( cur4, "w0min" );				// absolute/initial minimum wage
@@ -379,9 +376,6 @@ double c20 = INIWAGE / INIPROD;					// initial cost in sector 2
 double p10 = ( 1 + mu1 ) * c10;					// initial price sector 1
 double p20 = ( 1 + mu20 ) * c20;				// initial price sector 2
 double rBonds = rT * ( 1 - muBonds );			// initial interest on g. bonds
-double rD = rT * ( 1 - muD );					// initial interest on deposits
-double rDeb = rT * ( 1 + muDeb );				// initial interest on debt
-double rRes = rT * ( 1 - muRes );				// initial interest on reserves
 double G0 = V( "gG" ) * Ls0;					// initial public spending
 
 // reserve space for country-level non-initialized vectors
@@ -399,14 +393,12 @@ WRITELS( cur1, "A1", Btau0, -1 );
 WRITELS( cur1, "F1", F10, -1 );
 WRITELS( cur1, "PPI", p10, -1 );
 WRITELS( cur1, "PPI0", p10, -1 );
+WRITELS( cur1, "p1avg", p10, -1 );
 WRITELS( cur2, "CPI", p20, -1 );
 WRITELS( cur2, "F2", F20, -1 );
 WRITELS( cur2, "c2", c20, -1 );
 WRITELS( cur3, "r", rT, -1 );
 WRITELS( cur3, "rBonds", rBonds, -1 );
-WRITELS( cur3, "rD", rD, -1 );
-WRITELS( cur3, "rDeb", rDeb, -1 );
-WRITELS( cur3, "rRes", rRes, -1 );
 WRITELS( cur4, "Ls", Ls0, -1 );
 WRITELS( cur4, "w", INIWAGE, -1 );
 
@@ -442,7 +434,7 @@ cur = SEARCHS( cur2, "Firm2" );					// remove empty firm instance
 DELETE( cur );
 
 v[1] = entry_firm1( var, cur1, F10, true );		// add capital-good firms
-INIT_TSEARCHTS( cur1, "Firm1", k - 1 );			// prepare turbo search indexing
+INIT_TSEARCHTS( cur1, "Firm1", F10 );			// prepare turbo search indexing
 
 v[1] += entry_firm2( var, cur2, F20, true );	// add consumer-good firms
 VS( cur2, "firm2maps" );						// update the mapping vectors

@@ -140,7 +140,8 @@ EQUATION( "Def" )
 Government total deficit (negative if surplus)
 */
 RECALC( "Deb" );								// force update if updated in 'C'
-RESULT( V( "G" ) + VLS( FINSECL0, "r", 1 ) * VL( "Deb", 1 ) - VL( "Tax", 1 ) )
+RESULT( V( "G" ) + VLS( FINSECL0, "r", 1 ) * max( VL( "Deb", 1 ), 0 ) - 
+		VL( "Tax", 1 ) )
 
 
 EQUATION( "GDP" )
@@ -310,6 +311,7 @@ WRITEL( "G", G0, -1 );
 WRITELS( cur1, "A1", Btau0, -1 );
 WRITELS( cur1, "PPI", p10, -1 );
 WRITELS( cur1, "PPI0", p10, -1 );
+WRITELS( cur1, "p1avg", p10, -1 );
 WRITELS( cur2, "CPI", p20, -1 );
 WRITELS( cur2, "c2", c20, -1 );
 WRITELS( cur4, "Ls", Ls0, -1 );
@@ -322,7 +324,7 @@ cur = SEARCHS( cur2, "Firm2" );					// remove empty firm instance
 DELETE( cur );
 
 v[1] = entry_firm1( var, cur1, F1, true );		// add capital-good firms
-INIT_TSEARCHTS( cur1, "Firm1", k - 1 );			// prepare turbo search indexing
+INIT_TSEARCHTS( cur1, "Firm1", F1 );			// prepare turbo search indexing
 
 v[1] += entry_firm2( var, cur2, F2, true );		// add consumer-good firms
 VS( cur2, "firm2maps" );						// update the mapping vectors

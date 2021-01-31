@@ -622,9 +622,9 @@ Var: TaxB 1 n + n n	0
 Var: cScores 0 n + n n
 Var: r 1 s + n n	0
 Var: rBonds 1 s + n n	0
-Var: rD 1 s + n n	0
-Var: rDeb 1 s + n n	0
-Var: rRes 1 s + n n	0
+Var: rD 0 s + n n
+Var: rDeb 0 s + n n
+Var: rRes 0 s + n n
 
 Object: Bank C	1
 Param: _IDb 0 n + n n	0

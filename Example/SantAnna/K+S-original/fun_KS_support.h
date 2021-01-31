@@ -251,7 +251,7 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 
 		if ( ! newInd )
 		{
-			// initial technological (imitation from best firm)
+			// initial labor productivity (imitation from best firm)
 			Atau = beta( alpha2, beta2 );		// draw A from Beta(alpha,beta)
 			Atau *= AtauMax * ( 1 + x5 );		// fraction of top firm
 			Btau = beta( alpha2, beta2 );		// draw B from Beta(alpha,beta)
@@ -424,7 +424,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 					continue;
 					
 				vint = add_vintage( firm, nVint, cur, newInd );// add vintage
-				WRITES( vint, "_Avint", 1 );	// adjust vintage productivity
+				WRITES( vint, "_Avint", INIPROD );// adjust vintage productivity
 				WRITES( vint, "_pVint", p10 );	// adjust vintage price
 				WRITES( vint, "_tVint", 1 - tVint );// and age
 				Inom += VS( cur, "_p1" ) * nVint;// investment required
