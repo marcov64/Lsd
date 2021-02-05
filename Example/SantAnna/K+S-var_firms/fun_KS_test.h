@@ -179,13 +179,20 @@ if ( T == v[1] )
 // scan banks for severe problems
 objVecT TCerr;									// vector to save TC error banks
 int errors = 0;									// error counter
-k = v[4] = v[5] = v[6] = v[7] = 0;				// accumulators
+k = v[4] = v[5] = v[6] = v[7] = v[8] = v[9] = 0;// accumulators
+v[10] = v[11] = v[12] = 0;
+
 CYCLES( FINSECL1, cur, "Bank" )
 {
 	v[4] += COUNTS( cur, "Cli1" );
 	v[5] += COUNTS( cur, "Cli2" );
 	v[6] += VS( cur, "_Cl" );
 	v[7] += VS( cur, "_fB" );
+	v[8] += VS( cur, "_Bonds" );
+	v[9] += VS( cur, "_Depo" );
+	v[10] += VS( cur, "_Loans" );
+	v[11] += VS( cur, "_LoansCB" );
+	v[12] += VS( cur, "_Res" );
 	
 	if ( VS( cur, "_TC1free" ) + VS( cur, "_TC2free" ) > 
 		 ( 1 + TOL / 10 ) * VS( cur, "_TC" ) )
@@ -194,19 +201,28 @@ CYCLES( FINSECL1, cur, "Bank" )
 	++k;
 }
 
+double BD = VS( FINSECL1, "BD" );
+double BS = VS( FINSECL1, "BS" );
+double Bonds = VS( FINSECL1, "Bonds" );
 double Cl = VS( FINSECL1, "Cl" );
 double Depo = VS( FINSECL1, "Depo" );
+double DepoG = VS( FINSECL1, "DepoG" );
 double DivB = VS( FINSECL1, "DivB" );
 double Gbail = VS( FINSECL1, "Gbail" );
 double Loans = VS( FINSECL1, "Loans" );
+double LoansCB = VS( FINSECL1, "LoansCB" );
 double NWb = VS( FINSECL1, "NWb" );
 double PiB = VS( FINSECL1, "PiB" );
+double Res = VS( FINSECL1, "Res" );
 double TaxB = VS( FINSECL1, "TaxB" );
 double r = VS( FINSECL1, "r" );
 double rBonds = VS( FINSECL1, "rBonds" );
 double rD = VS( FINSECL1, "rD" );
 double rDeb = VS( FINSECL1, "rDeb" );
 double rRes = VS( FINSECL1, "rRes" );
+
+double BS_1 = VLS( FINSECL1, "BS", 1 );
+double BD_1 = VLS( FINSECL1, "BD", 1 );
 
 double CD = VS( MACSTAL1, "CD" );
 double CDc = VS( MACSTAL1, "CDc" );
@@ -218,6 +234,9 @@ double BadDeb = VS( SECSTAL1, "BadDeb" );
 double HHb = VS( SECSTAL1, "HHb" );
 double HPb = VS( SECSTAL1, "HPb" );
 
+double Deb = VS( PARENT, "Deb" );
+double Def = VS( PARENT, "Def" );
+double Def_1 = VLS( PARENT, "Def", 1 );
 double SavAcc = VS( PARENT, "SavAcc" );
 
 double F1 = VS( CAPSECL1, "F1" );
@@ -230,18 +249,48 @@ double NW2 = VS( CONSECL1, "NW2" );
 double entry2 = VS( CONSECL1, "entry2" );
 double exit2 = VS( CONSECL1, "exit2" );
 
-double nonNeg[ ] = { CD, CDc, CS, Depo, DivB, Gbail, Loans, TaxB, Bda, Bfail, 
-					 BadDeb, HHb, HPb, SavAcc, NW1, NW2, rBonds, rD, rRes };
+double nonNeg[ ] = { BS, Bonds, CD, CDc, CS, Depo, DepoG, DivB, Gbail, Loans, 
+					 LoansCB, Res, TaxB, Bda, Bfail, BadDeb, HHb, HPb, SavAcc, 
+					 NW1, NW2, rBonds, rD, rRes };
 double posit[ ] = { Cl, r, rDeb, F1, F2 };
-double finite[ ] = { TC, PiB, NW1, NW2, entry1, exit1, entry2, exit2 };
+double finite[ ] = { BD, Deb, TC, PiB, NW1, NW2, entry1, exit1, entry2, exit2 };
 
 dblVecT all ( nonNeg, END_ARR( nonNeg ) ); 
 all.insert( all.end( ), posit, END_ARR( posit ) );
 all.insert( all.end( ), finite, END_ARR( finite ) );
 
+// interest rate structure
+LOG( "\n  $$$ (t=%g) rD=%.2g rRes=%.2g rBonds=%.2g r=%.2g rDeb=%.2g", 
+	 T, rD, rRes, rBonds, r, rDeb, Depo, Loans );
+
+check_error( rD > rRes || rD > rBonds || rRes > r || rBonds > r || r > rDeb, 
+			 "INCONSISTENT-INTEREST-STRUCTURE", 0, & errors );
+
+// central bank
+LOG( "\n   $$ Res=%.3g LoansCB=%.3g BondsCB=%.3g DepoG=%.3g Gbail=%.3g", 
+	 Res, LoansCB, BS - BD, DepoG, Gbail );
+
+check_error( Res > Depo || round( Res ) != round( v[12] ), 
+			 "INCONSISTENT-RESERVES", 0, & errors );
+
+check_error( round( LoansCB ) != round ( v[11] ) || LoansCB > Res, 
+			 "INCONSISTENT-CB-LOANS", 0, & errors );
+
+// government bonds and debt
+LOG( "\n   $$ BS=%.3g BD=%.3g BSnew=%.3g Def_1=%.3g Bonds=%.3g", 
+	 BS, BD, BS - BS_1 + BD_1, Def_1, Bonds );
+
+check_error( Deb < Bonds - DepoG + Def, "INCONSISTENT-GOV-DEBT", 0, & errors );
+
+check_error( floor( BS - BS_1 + BD_1 ) > max( Def_1, 0 ) || 
+			 floor( BD ) > BS || floor( BD ) > Bonds ||
+			 round( Bonds ) != round( v[8] ) || 
+			 ( BS - BS_1 + BD_1 > TOL && DepoG > TOL ), 
+			 "INCONSISTENT-BONDS", 0, & errors );
+
 // bank customers and crisis/bail-outs
-LOG( "\n  $$$ (t=%g) #Bank=%d #Client1=%g #Client2=%g Bfail=%g Gbail=%.3g", 
-	 T, k, v[4], v[5], Bfail, Gbail );
+LOG( "\n   $$ #Bank=%d #Client1=%g #Client2=%g Bfail=%g", 
+	 k, v[4], v[5], Bfail );
 	 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
@@ -266,12 +315,8 @@ check_error( F1 * ( 1 - entry1 + exit1 ) + F2 * ( 1 - entry2 + exit2 ) >
 check_error( v[7] < 1 - TOL / 10 || v[7] > 1 + TOL / 10, 
 			 "INCONSISTENT-SHARES", 0, & errors );
 
-// interest rate structure
-LOG( "\n   $$ rD=%.2g rRes=%.2g rBonds=%.2g r=%.2g rDeb=%.2g", 
-	 rD, rRes, rBonds, r, rDeb, Depo, Loans );
-
-check_error( rD > rRes || rD > rBonds || rRes > r || rBonds > r || r > rDeb, 
-			 "INCONSISTENT-INTEREST-STRUCTURE", 0, & errors );
+check_error( round( Depo ) != round( v[9] ) || round( Loans ) != round( v[10] ), 
+			 "INCONSISTENT-BANK-ACCOUNTS", 0, & errors );
 
 // bank assets and liabilities, credit dynamic
 LOG( "\n   $$ Depo=%.3g Loans=%.3g CD=%.3g CS=%.3g CDc=%.3g", 
