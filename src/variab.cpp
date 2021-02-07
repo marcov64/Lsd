@@ -540,7 +540,12 @@ double variable::cal( object *caller, int lag )
 	
 	// if there is a pending deletion, try to do it now
 	if ( wait_delete != NULL )
+	{
+		if ( guard.owns_lock( ) )
+			guard.unlock( );					// release lock
+			
 		wait_delete->delete_obj( this );
+	}
 
 	return app;	// by default the requested value is the last one, not yet computed
 
@@ -571,7 +576,7 @@ void worker::cal_worker( void )
 		running = true;
 		
 		// update object map and register all signal handlers
-		unique_lock< mutex > lock_map( thr_ptr_lock );
+		unique_lock < mutex > lock_map( thr_ptr_lock );
 		thr_id = this_thread::get_id( );
 		thr_ptr[ thr_id ] = this;
 		lock_map.unlock( );
@@ -582,13 +587,13 @@ void worker::cal_worker( void )
 		while ( running )
 		{
 			// wait for variable calculation message
-			unique_lock< mutex > lock_worker( lock );
+			unique_lock < mutex > lock_worker( lock );
 			run.wait( lock_worker, [ this ]{ return ! free; }  );
 			
 			// exit if shutdown or continue if already updated
 			if ( running && var != NULL && var->last_update < t )
 			{	// prevent parallel computation of the same variable
-				lock_guard < mutex > lock_var( var->parallel_comp );
+				unique_lock < mutex > guard_var( var->parallel_comp );
 				
 				// recheck if not computed during lock
 				if ( var->last_update >= t )			
@@ -651,7 +656,10 @@ void worker::cal_worker( void )
 				
 				// if there is a pending object deletion, try to do it now
 				if ( wait_delete != NULL )
+				{
+					guard_var.unlock( );					// release lock
 					wait_delete->delete_obj( var );
+				}
 			}
 			
 		end:
