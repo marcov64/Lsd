@@ -259,6 +259,15 @@ all.insert( all.end( ), finite, END_ARR( finite ) );
 LOG( "\n  $$$ (t=%g) rD=%.2g rRes=%.2g rBonds=%.2g r=%.2g rDeb=%.2g", 
 	 T, rD, rRes, rBonds, r, rDeb, Depo, Loans );
 
+for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
+	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
+	
+for ( i = 0; i < LEN_ARR( posit ); ++i )
+	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
+
+for ( itd = all.begin( ); itd != all.end( ); ++itd )
+	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+
 check_error( rD > rRes || rD > rBonds || rRes > r || rBonds > r || r > rDeb, 
 			 "INCONSISTENT-INTEREST-STRUCTURE", 0, & errors );
 
@@ -288,15 +297,6 @@ check_error( floor( BS - BS_1 + BD_1 ) > max( Def_1, 0 ) ||
 LOG( "\n   $$ #Bank=%d #Client1=%g #Client2=%g Bfail=%g", 
 	 k, v[4], v[5], Bfail );
 	 
-for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
-	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
-	
-for ( i = 0; i < LEN_ARR( posit ); ++i )
-	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
-
-for ( itd = all.begin( ); itd != all.end( ); ++itd )
-	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
-
 check_error( F1 != v[4], "INCONSISTENT-CLIENT1", 0, & errors );
 
 check_error( F2 != v[5], "INCONSISTENT-CLIENT2", 0, & errors );
