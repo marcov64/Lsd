@@ -276,7 +276,7 @@ if ( actual_steps > 0 )
 }
 
 cmd( "ttk::frame .da.vars.lb.bh" );
-cmd( "ttk::label .da.vars.lb.bh.nvar -text \"Series = %d\"", num_var  );
+cmd( "ttk::label .da.vars.lb.bh.nvar -text \"Series = %d\"", num_var );
 cmd( "ttk::label .da.vars.lb.bh.pad -width 4" );
 cmd( "ttk::label .da.vars.lb.bh.ncas -text \"Cases = $numc\" " );
 cmd( "pack .da.vars.lb.bh.nvar .da.vars.lb.bh.pad .da.vars.lb.bh.ncas -side left" );
@@ -440,7 +440,7 @@ cmd( "ttk::checkbutton .da.f.h.v.y2.y2 -text \"Y2 axis\" -variable y2 -command {
 
 cmd( "ttk::frame .da.f.h.v.y2.f" );
 cmd( "ttk::label .da.f.h.v.y2.f.l -text \"First series in Y2 axis\"" );
-cmd( "ttk::entry .da.f.h.v.y2.f.e -width 4 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set num_y2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num_y2; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
+cmd( "ttk::spinbox .da.f.h.v.y2.f.e -width 4 -from 2 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n > 1 } { set num_y2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num_y2; return 0 } } -invalidcommand { bell } -justify center -state disabled", num_var );
 cmd( "pack .da.f.h.v.y2.f.l .da.f.h.v.y2.f.e -ipadx 5 -side left" );
 
 cmd( "pack .da.f.h.v.y2.logs .da.f.h.v.y2.pad .da.f.h.v.y2.y2 .da.f.h.v.y2.f -side left -padx 5 -expand 1 -fill x" );
