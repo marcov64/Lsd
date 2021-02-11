@@ -16,8 +16,13 @@ Labor productivity of new vintage of machine when employed for production
 Also updates '_Btau'
 */
 
-double Btau = VL( "_Btau", 1 );					// previous period productivity
+double Ainn, Binn, Aimi, Bimi;
+
+double Atau = CURRENT;							// previous period productivities
+double Btau = VL( "_Btau", 1 );
 double xi = VS( PARENT, "xi" );					// share of R&D for innovation
+
+Ainn = Binn = Aimi = Bimi = 0;					// assume innov./imit. failure
 
 // normalized workers on R&D of the firm
 double L1rdN = VL( "_L1rd", 1 ) * VS( LABSUPL2, "Ls0" ) / VLS( LABSUPL2, "Ls", 1 );
@@ -33,40 +38,38 @@ if ( bernoulli( v[1] ) )						// innovation succeeded?
 	double beta1 = VS( PARENT, "beta1" );		// beta distrib. beta parameter
 	
 	// new final productivity (A) from innovation
-	v[2] = CURRENT * ( 1 + x1inf + beta( alpha1, beta1 ) * ( x1sup - x1inf ) );
+	Ainn = Atau * ( 1 + x1inf + beta( alpha1, beta1 ) * ( x1sup - x1inf ) );
 	
 	// new production productivity (B) from innovation
-	v[3] = Btau * ( 1 + x1inf + beta( alpha1, beta1 ) * ( x1sup - x1inf ) );
+	Binn = Btau * ( 1 + x1inf + beta( alpha1, beta1 ) * ( x1sup - x1inf ) );
 }
-else
-	v[2] = v[3] = 0;							// innovation failure
 
 // imitation process (success probability)
-v[4] = 1 - exp( - VS( PARENT, "zeta2" ) * ( 1 - xi ) * L1rdN ); 
+v[2] = 1 - exp( - VS( PARENT, "zeta2" ) * ( 1 - xi ) * L1rdN ); 
 
-if ( bernoulli( v[4] ) )						// imitation succeeded?
+if ( bernoulli( v[2] ) )						// imitation succeeded?
 {
 	k = VS( PARENT, "F1" );						// number of firms in sector 1
 	dblVecT imiProb( k );						// vector for tech distance
 	
-	v[5] = i = 0;								// inverse distance/firm accum.
+	v[3] = i = 0;								// inverse distance/firm accum.
 	CYCLES( PARENT, cur, "Firm1" )				// 1st run: abs. inv. distance
 		if ( cur == THIS )
 			imiProb[ i++ ] = 0;					// can't self-imitate
 		else
 		{
-			v[6] = sqrt( pow( VLS( cur, "_Btau", 1 ) - Btau, 2 ) +
-						 pow( VLS( cur, "_Atau", 1 ) - CURRENT, 2 ) );
-			v[5] += imiProb[ i++ ] = ( v[6] > 0 ) ? 1 / v[6] : 0;
+			v[4] = sqrt( pow( VLS( cur, "_Atau", 1 ) - Atau, 2 ) +
+						 pow( VLS( cur, "_Btau", 1 ) - Btau, 2 ) );
+			v[3] += imiProb[ i++ ] = ( v[4] > 0 ) ? 1 / v[4] : 0;
 		}
 
-	if ( v[5] > 0 )
+	if ( v[3] > 0 )
 	{
-		v[7] = i = 0;							// probabilities/firm accum.
+		v[5] = i = 0;							// probabilities/firm accum.
 		CYCLES( PARENT, cur, "Firm1" )			// 2nd run: cumulative imi. prob.
 		{
-			v[7] += imiProb[ i ] / v[5];		// normalize to add up to 1
-			imiProb[ i++ ] = v[7];
+			v[5] += imiProb[ i ] / v[3];		// normalize to add up to 1
+			imiProb[ i++ ] = v[5];
 		}
 			
 		// draw a firm to imitate according to the distance probabilities
@@ -76,56 +79,50 @@ if ( bernoulli( v[4] ) )						// imitation succeeded?
 		{
 			cur = TSEARCHS( PARENT, "Firm1", j + 1 );// get pointer to firm
 			
-			v[8] = VLS( cur, "_Atau", 1 );		// get imitated firm productivities
-			v[9] = VLS( cur, "_Btau", 1 );
+			Aimi = VLS( cur, "_Atau", 1 );		// get imitated firm productivities
+			Bimi = VLS( cur, "_Btau", 1 );
 		}
-		else
-			v[8] = v[9] = 0;					// imitation failure
 	}
-	else
-		v[8] = v[9] = 0;						// imitation failure
 }
-else
-	v[8] = v[9] = 0;							// imitation failure
 
 // select best option between the three options (current/innovation/imitation)
-v[0] = CURRENT;									// current technology
-v[10] = Btau;
-v[11] = v[12] = 0;
+v[6] = v[7] = 0;
 
-if ( v[2] * v[3] > v[0] * v[10] )				// is innovation better?
+// is innovation combined productivity higher than current technology?
+if ( Ainn * Binn > Atau * Btau )
 {
-	v[0] = v[2];								// new Atau
-	v[10] = v[3];								// new Btau
-	v[11] = 1;									// innovation succeeded
-	v[12] = 0;									// no imitation
+	Atau = Ainn;								// use it
+	Btau = Binn;
+	v[6] = 1;									// innovation succeeded
+	v[7] = 0;									// no imitation
 }
 
-if ( v[8] * v[9] > v[0] * v[10] )				// is imitation better (yet)?
+// is imitation combined productivity even higher?
+if ( Aimi * Bimi > Atau * Btau )
 {
-	v[0] = v[8];
-	v[10] = v[9];
-	v[11] = 0;									// no innovation
-	v[12] = 1;									// imitation succeeded
+	Atau = Aimi;
+	Btau = Bimi;
+	v[6] = 0;									// no innovation
+	v[7] = 1;									// imitation succeeded
 }
 
-WRITE( "_Btau", v[10] );
-WRITE( "_inn", v[11] );
-WRITE( "_imi", v[12] );
+WRITE( "_Btau", Btau );
+WRITE( "_inn", v[6] );
+WRITE( "_imi", v[7] );
 
 // add entry to the map of vintage productivity and skill
 i = V( "_ID1" );								// firm ID
 j = VNT( T, i );								// vintage ID
 h = VS( GRANDPARENT, "flagWorkerLBU" );			// learning mode
 if ( h == 0 || h == 2 )							// no learning by using
-	v[13] = 1;									// maximum skills
+	v[8] = 1;									// maximum skills
 else
-	v[13] = VS( PARENT, "sigma" );
+	v[8] = VS( PARENT, "sigma" );
 
-WRITE_EXTS( GRANDPARENT, countryE, vintProd[ j ].sVp, v[13] );
-WRITE_EXTS( GRANDPARENT, countryE, vintProd[ j ].sVavg, v[13] );
+WRITE_EXTS( GRANDPARENT, countryE, vintProd[ j ].sVp, v[8] );
+WRITE_EXTS( GRANDPARENT, countryE, vintProd[ j ].sVavg, v[8] );
 
-RESULT( v[0] )
+RESULT( Atau )
 
 
 EQUATION( "_Deb1max" )

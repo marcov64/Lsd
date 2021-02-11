@@ -359,7 +359,7 @@ RESULT( v[0] )
 EQUATION( "_Tax2" )
 /*
 Tax paid by firm in consumption-good sector
-Also updates final net wealth on period
+Also updates '_B2', '_Div2', '_NW2'
 */
 
 v[1] = V( "_Pi2" );								// firm profit in period

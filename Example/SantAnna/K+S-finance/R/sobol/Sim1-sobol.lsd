@@ -652,7 +652,7 @@ Var: wU 0 s + n n
 
 Object: Capital C	1
 Param: Deb10ratio 0 n + n n	1
-Param: F1 0 n + n n	50
+Param: F1 0 s + n n	50
 Param: L1rdMax 0 n + n n	0.2
 Param: L1shortMax 0 n + n n	1
 Param: NW10 0 n + n n	1000
@@ -747,7 +747,7 @@ Param: _tSel 0 n + n n	0
 
 Object: Consumption C	1
 Param: Deb20ratio 0 n + n n	1
-Param: F2 0 n + n n	200
+Param: F2 0 s + n n	200
 Param: NW20 0 n + n n	1000
 Param: Phi1 0 n + n n	0.1
 Param: Phi2 0 n + n n	0.9
@@ -3256,7 +3256,6 @@ END_DESCRIPTION
 Object_Stats
 Statistics-only variables
 Computation of this object may be disabled to speed-up model without effect on model results
-
 _INIT_
 
 END_DESCRIPTION

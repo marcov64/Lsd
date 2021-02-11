@@ -88,7 +88,7 @@ KS-kriging-sobol-SA.R = global Sobol variance-based sensitivity analysis using a
 
 Other support scripts exist in the R subdirectory and are required by the above scripts. The scripts are configured to use the R subdirectory as the R working directory. Please add all the data required for the analysis (including LSD configuration files) in subdirectories inside the R working directory (the default is 'data'). There is a set of preconfigured test configurations (Sim1-Sim2.lsd in the data subdirectory) which can be executed in LSD and analyzed by the R scripts without any change. Subdiretctories 'ee' and 'sobol' contain test configurations for sensitivity analysis scripts. The sample test configurations are configured for speed but the number of Monte Carlo experiments (runs) is insufficient for reliable inference.
 
-The R scripts require the following R packages (and dependencies) to be installed from the standard repositories: LSDsensitivity, tseries, normalp, nortest, mFilter, np, matrixStats, gplots, rmutil, plotrix, extrafont. 8GB or more of available memory is required to run some of the reports.
+The R scripts require the following R packages (and dependencies) to be installed from the standard repositories: LSDsensitivity, tseries, normalp, nortest, mFilter, np, matrixStats, gplots, corrplot, rmutil, plotrix, extrafont. 8GB or more of available memory is required to run some of the reports.
 
 
 Model control flags

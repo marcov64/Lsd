@@ -18,12 +18,14 @@ def.digits <- 4                # default number of digits after comma for printi
 
 # ==== Required libraries (order is relevant!) ====
 
+require( abind, warn.conflicts = FALSE, quietly = TRUE )
 require( normalp, warn.conflicts = FALSE, quietly = TRUE )
 require( rmutil, warn.conflicts = FALSE, quietly = TRUE )
 require( nortest, warn.conflicts = FALSE, quietly = TRUE )
 require( gplots, warn.conflicts = FALSE, quietly = TRUE )
 require( plotrix, warn.conflicts = FALSE, quietly = TRUE )
 require( parallel, warn.conflicts = FALSE, quietly = TRUE )
+suppressPackageStartupMessages( require( corrplot, warn.conflicts = FALSE, quietly = TRUE ) )
 suppressPackageStartupMessages( require( matrixStats, warn.conflicts = FALSE, quietly = TRUE ) )
 suppressPackageStartupMessages( require( tseries, warn.conflicts = FALSE, quietly = TRUE ) )
 suppressPackageStartupMessages( require( np, warn.conflicts = FALSE, quietly = TRUE ) )
@@ -36,40 +38,143 @@ suppressPackageStartupMessages( require( mFilter, warn.conflicts = FALSE, quietl
 
 # ==== Basic functions ====
 
-# test if all elements in a matrix/dataframe row are NA
+#
+# ====== function [] = all.NA ======
+#
+# Test if all elements in a matrix/dataframe row are NA
+#
+# Output:
+#   TRUE if all elements are NA
+#
+# Input:
+#   x : vector/matrix/data frame to test
+#
+
 all.NA <- function( x ) {
   apply( x, 1, function( x ) all( is.na( x ) ) )
 }
 
-# expand is.nan to handle data frames
+
+#
+# ====== function [] = is.nan.data.frame ======
+#
+# Expand is.nan to handle data frames
+#
+# Output:
+#   TRUE/FALSE vector/matrix/data frame
+#
+# Input:
+#   x : vector/matrix/data frame to test
+#
+
 is.nan.data.frame <- function( x ) {
   do.call( cbind, lapply( x, is.nan ) )
 }
 
+
+#
+# ====== function [] = logNA ======
+#
 # Redefine log with NA instead of -Inf
-logNA <- function(x){
-  try( y <- log(x), silent = TRUE )
-  y[!is.finite(y)] <- NA
-  return(y)
+#
+# Output:
+#   log vector/matrix/data frame
+#
+# Input:
+#   x : vector/matrix/data frame to take log
+#
+
+logNA <- function( x ) {
+  x[ x <= 0 ] <- NA
+  return( log( x ) )
 }
 
+
+#
+# ====== function [] = log0 ======
+#
 # Redefine log with zero floor
-log0 <- function(x){
-  try( y <- log(x), silent = TRUE )
-  y[y < 0] <- 0
-  y[!is.finite(y)] <- 0
-  return(y)
+#
+# Output:
+#   log vector/matrix/data frame
+#
+# Input:
+#   x : vector/matrix/data frame to take log
+#
+
+log0 <- function( x ) {
+  y <- logNA( x )
+  y[ is.na( y ) ] <- 0
+  return( y )
 }
 
-# Redefine t-test with critCorr to use 0 in case of NaN
-t.test0 <- function( x, mu = 0, conf.level = 0.95 ){
+
+#
+# ====== function [] = logX ======
+#
+# Flexible log function
+#
+# Output:
+#   (log) vector/matrix/data frame
+#
+# Input:
+#   x : vector/matrix/data frame to take log if type > 0
+#   type : 0=no log, 1=regular log, 2=log0, 3=logNA
+#
+
+logX <- function( x, type ) {
+  if( type == 1 )
+    logX <- log( x )
+  else
+    if( type == 2 )
+      logX <- log0( x )
+    else
+      if( type == 3 )
+        logX <- logNA( x )
+      else
+        logX <- x
+}
+
+
+#
+# ====== function [] = t.test0 ======
+#
+# Redefine t-test with to use 0 in case of NaN
+#
+# Output:
+#   t-test p-value
+#
+# Input:
+#   x : vector of data to test
+#   mu: average to test against
+#   conf.level: confidence level
+#
+
+t.test0 <- function( x, mu = 0, conf.level = 0.95 ) {
   x[ is.nan( x ) ] <- 0
+
+  if( sd( x, na.rm = TRUE ) < 1e-12 )
+    return( 0 )
+
   return( t.test( x, mu = mu, alternative = "greater",
-                  conf.level = conf.level )$p.value )
+                  conf.level = conf.level, na.action = "na.omit" )$p.value )
 }
 
+
+#
+# ====== function [] = se ======
+#
 # Standard error for a sample
-se <- function( x, na.rm = TRUE ){
+#
+# Output:
+#   standard error
+#
+# Input:
+#   x : vector of data to use
+#   na.rm: remove NAs if TRUE
+#
+
+se <- function( x, na.rm = TRUE ) {
   if( na.rm )
     n <- length( x[ ! is.na( x ) ] )
   else
@@ -78,7 +183,22 @@ se <- function( x, na.rm = TRUE ){
   return( sd( x, na.rm = na.rm ) / sqrt( n ) )
 }
 
+
+#
+# ====== function [] = fmt ======
+#
 # Rounding and formatting numbers for tables
+#
+# Output:
+#   formatted table
+#
+# Input:
+#   x : vector/matrix/data frame to format
+#   digits: number of decimal digits
+#   signif: number of significant digits
+#   scipen: R scientific notation parameter
+#
+
 fmt <- function( x, digits = def.digits, signif = NULL, scipen = NA ) {
   if( is.numeric( x ) ) {
     return( format( round( x, digits = digits ),
@@ -93,7 +213,71 @@ fmt <- function( x, digits = def.digits, signif = NULL, scipen = NA ) {
   stop( "Cannot format non-numeric data" )
 }
 
+
+#
+# ====== function [] = light_color ======
+#
+# Provide a lighter version of color
+#
+# Output:
+#   corresponding lighter color
+#
+# Input:
+#   color: color to use
+#   factor: 0= black / 1=white
+#   name = optional name for saving the color
+#
+
+light_color <- function( color, factor = 0.7, name = NULL ) {
+  if ( factor > 1 || factor < 0 )
+    return( color )
+  c <- col2rgb(color)
+  c <- c + ( 255 - c ) * factor
+  light_color <- rgb( t( c ), maxColorValue = 255, names = name )
+  invisible( light_color )
+}
+
+
+#
+# ====== function [] = transp_color ======
+#
+# Provide a transparent version of color
+#
+# Output:
+#   corresponding transparent color
+#
+# Input:
+#   color: color to use
+#   factor: level of transparency
+#   name = optional name for saving the color
+#
+
+transp_color <- function( color, factor = 0.5, name = NULL ) {
+  rgb <- col2rgb( color )
+  transp_color <- rgb( rgb[ 1 ], rgb[ 2 ], rgb[ 3 ], maxColorValue = 255,
+                       alpha = ( 1  - factor ) * 255, names = name )
+  invisible( transp_color )
+}
+
+
+#
+# ====== function [] = findYlim ======
+#
 # Define plot window y limits
+#
+# Output:
+#   two-value vector mith minimum and maximum values for y axis
+#
+# Input:
+#   yMin: minimum value in data
+#   yMax: maximum value in data
+#   zero: limit bottom margin to zero if TRUE
+#
+# Environment:
+#   botMargin: bottom margin of plot area
+#   topMargin: top margin of plot area
+#
+
 findYlim <- function( yMin, yMax, zero = FALSE ) {
   ylim <- c( yMin - botMargin * ( yMax - yMin ),
              yMax + topMargin * ( yMax - yMin ) )
@@ -107,7 +291,21 @@ findYlim <- function( yMin, yMax, zero = FALSE ) {
   return( ylim )
 }
 
+
+#
+# ====== function [] = nCores ======
+#
 # Determine the number of cores to use
+# Bounded to the number of cores available
+#
+# Output:
+#   valid number of cores to use
+#
+# Input:
+#   cores: desired number of cores to use
+#   nStats: maximum number of statistics to compute in parallel
+#
+
 nCores <- function( cores = 0, nStats = 0 ) {
 
   # find the maximum useful number of cores ( <= num. cores )
@@ -128,8 +326,19 @@ nCores <- function( cores = 0, nStats = 0 ) {
   return( nc )
 }
 
-# Test if all strings in a vector are contained in another vector,
-# returning the missing values or an empty string if none
+
+#
+# ====== function [] = notIn ======
+#
+# Test if all strings in a vector are contained in another vector
+#
+# Output:
+#   missing values or an empty string if none
+#
+# Input:
+#   a, b: two vectors of strings
+#
+
 notIn <- function( a, b ) {
   res <- c( )
   for( x in a )
@@ -839,8 +1048,12 @@ plot_laplace <- function( x, xlab = "", ylab = "", tit, subtit = "",
 #  Time series plot of multiple experiments
 #
 # Input:
-#   exps: list of lists of experiments containing 1 or more series each to plot
-#	  min, max, CIlo, CIhi: lists of lists of experiments min, max and confidence limits (1:1 with exps)
+#   avg: list of variable names to plot
+#	  Adata, mdata, Mdata, Sdata: lists of lists of experiments averages,
+#       min, max and std. dev. (all with the same dimensions)
+#   nMC: number of Monte Carlo runs
+#   CI: confidence for confidence interval
+#   log, log0: log or zero-bounded log to be applied on series
 #   mrk: plot vertical dotted lin in timestep (only if >0)
 #	  leg: vector of experiment names
 #	  col, lty: vectors of experiments colors and line types
@@ -849,15 +1062,18 @@ plot_laplace <- function( x, xlab = "", ylab = "", tit, subtit = "",
 #	  leg2: legends fot type of plots
 #
 
-plot_lists <- function( exps, min = NA, max = NA, CIlo = NA, CIhi = NA,
+plot_lists <- function( vars, Adata, mdata, Mdata, Sdata, mask = NULL,
+                        nMC = NULL, CI = 0.95, log = FALSE, log0 = FALSE,
                         mrk = -1, xlab = "", ylab = "", tit = "", subtit = "",
-                        leg = NULL, leg2 = NULL, col = NULL, lty = NULL ){
+                        leg = NULL, leg2 = NULL, col = NULL, lty = NULL ) {
 
-  # All experiments in the same plot
-  nExp <- length( exps )
-  nPlots <- length( exps[[ 1 ]] )
+  nVar <- length( vars )
+  nExp <- length( Adata )
+  zCI <- qnorm( 1 - ( 1 - CI ) / 2 )
 
   # fill default values
+  if( is.null( mask ) )
+    mask <- 1 : length( Adata[[ 1 ]][[ 1 ]] )
   if( is.null( leg ) )
     leg <- 1 : nExp
   if( is.null( leg2 ) )
@@ -867,17 +1083,47 @@ plot_lists <- function( exps, min = NA, max = NA, CIlo = NA, CIhi = NA,
   if( is.null( lty ) )
     lty <- rep( "solid", nExp )
 
+  # prepare all time series
+  avg <- min <- max <- CIlo <- CIhi <- list( )
+  for( k in 1 : nExp ) {
+
+    avg[[ k ]] <- min[[ k ]] <- max[[ k ]] <- CIlo[[ k ]] <- CIhi[[ k ]] <- list( )
+    for( j in 1 : nVar ) {
+      avg[[ k ]][[ j ]] <- Adata[[ k ]][ mask, vars[ j ] ]
+      min[[ k ]][[ j ]] <- mdata[[ k ]][ mask, vars[ j ] ]
+      max[[ k ]][[ j ]] <- Mdata[[ k ]][ mask, vars[ j ] ]
+      e <- zCI * Sdata[[ k ]][ mask, vars[ j ] ] / sqrt( nMC )
+      CIlo[[ k ]][[ j ]] <- avg[[ k ]][[ j ]] - e
+      CIhi[[ k ]][[ j ]] <- avg[[ k ]][[ j ]] + e
+
+      # apply logs if required
+      if( log ) {
+        avg[[ k ]][[ j ]] <- log( avg[[ k ]][[ j ]] )
+        min[[ k ]][[ j ]] <- log( min[[ k ]][[ j ]] )
+        max[[ k ]][[ j ]] <- log( max[[ k ]][[ j ]] )
+        CIlo[[ k ]][[ j ]] <- log( CIlo[[ k ]][[ j ]] )
+        CIhi[[ k ]][[ j ]] <- log( CIhi[[ k ]][[ j ]] )
+      } else if( log0 ) {
+        avg[[ k ]][[ j ]] <- log0( avg[[ k ]][[ j ]] )
+        min[[ k ]][[ j ]] <- log0( min[[ k ]][[ j ]] )
+        max[[ k ]][[ j ]] <- log0( max[[ k ]][[ j ]] )
+        CIlo[[ k ]][[ j ]] <- log0( CIlo[[ k ]][[ j ]] )
+        CIhi[[ k ]][[ j ]] <- log0( CIhi[[ k ]][[ j ]] )
+      }
+    }
+  }
+
   # find y and x limits
   yMax <- xMax <- -Inf
   yMin <- xMin <- Inf
-  xM <- xm <- yM <- ym <- array( dim = c( nExp, nPlots ) )
+  xM <- xm <- yM <- ym <- array( dim = c( nExp, nVar ) )
 
   for( k in 1 : nExp )
-    for( j in 1 : length( exps[[k]] ) ){
+    for( j in 1 : length( avg[[k]] ) ){
       # find first and last valid times
       xM[k,j] <- xm[k,j] <- 1
-      for( i in 1 : length( exps[[k]][[j]] ) ){
-        if( is.finite( exps[[k]][[j]][i] ) ){
+      for( i in 1 : length( avg[[k]][[j]] ) ){
+        if( is.finite( avg[[k]][[j]][i] ) ){
           xM[k,j] <- i
         } else {
           if( xM[k,j] == 1 ){
@@ -886,8 +1132,8 @@ plot_lists <- function( exps, min = NA, max = NA, CIlo = NA, CIhi = NA,
         }
       }
 
-      yM[k,j] <- max( exps[[k]][[j]], na.rm = TRUE )
-      ym[k,j] <- min( exps[[k]][[j]], na.rm = TRUE )
+      yM[k,j] <- max( avg[[k]][[j]], na.rm = TRUE )
+      ym[k,j] <- min( avg[[k]][[j]], na.rm = TRUE )
       yMax = max( yMax, yM[k,j] )
       yMin = min( yMin, ym[k,j] )
       xMax = max( xMax, xM[k,j] )
@@ -905,23 +1151,23 @@ plot_lists <- function( exps, min = NA, max = NA, CIlo = NA, CIhi = NA,
   else
     sub <- subtit
 
-  plot( x = c( xMin : xMax ), y = exps[[1]][[1]][ xMin : xMax ], type = "l",
+  plot( x = c( xMin : xMax ), y = avg[[1]][[1]][ xMin : xMax ], type = "l",
         main = title, sub = paste( "(", sub, ")" ), xlab = xlab, ylab = ylab,
         col = col[1], lty = lty[1], ylim = ylim )
 
   if( nExp > 1 )
     for( k in 2 : nExp )
-      lines( x = c( xm[k,1] : xM[k,1] ), y = exps[[k]][[1]][ xm[k,1] : xM[k,1] ],
+      lines( x = c( xm[k,1] : xM[k,1] ), y = avg[[k]][[1]][ xm[k,1] : xM[k,1] ],
              col = col[k], lty = lty[k] )
 
-  if( nPlots > 1 )
+  if( nVar > 1 )
     for( k in 1 : nExp )
-      for( j in 2 : nPlots )
+      for( j in 2 : nVar )
         if( lty[ 1 ] == lty[ length( lty ) ] )
-          lines( x = c( xm[k,j] : xM[k,j] ), y = exps[[k]][[j]][ xm[k,j] : xM[k,j] ],
+          lines( x = c( xm[k,j] : xM[k,j] ), y = avg[[k]][[j]][ xm[k,j] : xM[k,j] ],
                  col = col[k], lty = j )
         else
-          lines( x = c( xm[k,j] : xM[k,j] ), y = exps[[k]][[j]][ xm[k,j] : xM[k,j] ],
+          lines( x = c( xm[k,j] : xM[k,j] ), y = avg[[k]][[j]][ xm[k,j] : xM[k,j] ],
                  col = col[k], lty = lty[k], lwd = j )
 
   # plot regime transition mark
@@ -930,13 +1176,13 @@ plot_lists <- function( exps, min = NA, max = NA, CIlo = NA, CIhi = NA,
 
   legend( x = "topleft", legend = leg, inset = 0.03, cex = 0.8,
           lty = lty, lwd = 2, col = col )
-  if( nPlots > 1 )
+  if( nVar > 1 )
     if( lty[ 1 ] == lty[ length( lty ) ] )
       legend( x = "topright", legend = leg2, inset = 0.03,
               cex = 0.8, lty = 1 : 6, lwd = 2 )
     else
       legend( x = "topright", legend = leg2, inset = 0.03,
-              cex = 0.8, lty = 1, lwd = 1 : nPlots )
+              cex = 0.8, lty = 1, lwd = 1 : nVar )
 
   # Each experiment averages with confidence and max/min intervals
 
@@ -955,14 +1201,14 @@ plot_lists <- function( exps, min = NA, max = NA, CIlo = NA, CIhi = NA,
     subTitle <- as.expression( bquote( paste( "( ", .(CI * 100),
                                               "% confidence band in gray, min/max values in light gray / ",
                                               .(sub), " )" ) ) )
-    plot( x = c( xMin : xMax ), y = exps[[k]][[1]][ xMin : xMax ], type = "l",
+    plot( x = c( xMin : xMax ), y = avg[[k]][[1]][ xMin : xMax ], type = "l",
           main = title, sub = subTitle, xlab = xlab, ylab = ylab, ylim = ylim )
 
     # Plot max/min area first for all series in experiment
     if( length( min ) == nExp && length( max ) == nExp )
-      for( j in 1 : length( exps[[k]] ) )
-        if( length( min[[k]][[j]] ) == length( exps[[k]][[j]] ) &&
-            length( max[[k]][[j]] ) == length( exps[[k]][[j]] ) )
+      for( j in 1 : length( avg[[k]] ) )
+        if( length( min[[k]][[j]] ) == length( avg[[k]][[j]] ) &&
+            length( max[[k]][[j]] ) == length( avg[[k]][[j]] ) )
           polygon( c( xm[k,j] : xM[k,j], xM[k,j] : xm[k,j] ),
                    c( pmin( max[[k]][[j]][ xm[k,j] : xM[k,j] ], ylim[ 2 ], na.rm = TRUE ),
                       rev( pmax( min[[k]][[j]][ xm[k,j] : xM[k,j] ], ylim[ 1 ], na.rm = TRUE ) ) ),
@@ -970,23 +1216,23 @@ plot_lists <- function( exps, min = NA, max = NA, CIlo = NA, CIhi = NA,
 
     # Then plot confidence interval area for all series
     if( length( CIlo ) == nExp && length( CIhi ) == nExp )
-      for( j in 1 : length( exps[[k]] ) )
-        if( length( CIhi[[k]][[j]] ) == length( exps[[k]][[j]] ) &&
-            length( CIlo[[k]][[j]] ) == length( exps[[k]][[j]] ) )
+      for( j in 1 : length( avg[[k]] ) )
+        if( length( CIhi[[k]][[j]] ) == length( avg[[k]][[j]] ) &&
+            length( CIlo[[k]][[j]] ) == length( avg[[k]][[j]] ) )
           polygon( c( xm[k,j] : xM[k,j], xM[k,j] : xm[k,j] ),
                    c( pmin( CIhi[[k]][[j]][ xm[k,j] : xM[k,j] ], ylim[ 2 ], na.rm = TRUE ),
                       rev( pmax( CIlo[[k]][[j]][ xm[k,j] : xM[k,j] ], ylim[ 1 ], na.rm = TRUE ) ) ),
                    col = "gray70", border = NA )
 
     # And finally plot the series lines, on top of all
-    for( j in 1 : length( exps[[k]] ) )
-		lines( x = c( xm[k,j] : xM[k,j] ), y = exps[[k]][[j]][ xm[k,j] : xM[k,j] ], lty = j )
+    for( j in 1 : length( avg[[k]] ) )
+		lines( x = c( xm[k,j] : xM[k,j] ), y = avg[[k]][[j]][ xm[k,j] : xM[k,j] ], lty = j )
 
     # plot regime transition mark
     if( mrk > 0 )
       lines( x = c( mrk, mrk ), y = ylim, lty = 3, col = "black" )
 
-    if( nPlots > 1 )
+    if( nVar > 1 )
       legend( x = "topright", inset = 0.03, cex = 0.8, legend = leg2,
              lty = c( 1 : 5 ), lwd = 2, col = "black" )
   }
@@ -1285,6 +1531,72 @@ plot_epanechnikov <- function( lFit, ekOrd = 4, CI = 0.95, xlab = "", ylab = "",
 
 
 #
+# ====== function [] = plot_histo ======
+# Output:
+#   Plot stacked histogram/density at selected times
+#
+# Input:
+#   times: vector of time cross-sections to use
+#	  data: Monte Carlo experiment table (time x mc)
+#   bins: number of bins in histogram
+#   log: take log of variable (0=no log, 1=log, 2=log0)
+#   labVar: text label for variable
+#   bw.adj: smoothing bandwidth adjustment
+#   leg: vector of text legends to each cross-section
+#   tit, subtit: title/subtitle of the plot
+#
+
+plot_histo <- function( times, data, bins = 10, log = 0, labVar = NULL,
+                        bw.adj = 1, leg = NULL, tit = "", subtit = "" ) {
+
+  nCS <- length( times )
+  cs <- logX( data[ times, ], log )
+
+  if( is.null( labVar ) )
+    labVar <- var
+  if( is.null( leg ) || length( leg ) != nCS )
+    leg <- rep( "", nCS )
+
+  # find histogram limits
+  xMin <- min( cs, na.rm = TRUE )
+  xMax <- max( cs, na.rm = TRUE )
+
+  # define bin breaks
+  breaks <- c( )
+  incr <- ( xMax - xMin ) / bins
+  for( i in 0 : bins )
+    breaks <- c( breaks, xMin + i * incr )
+
+  yMax <- 0
+  for( i in 1 : nCS )
+    yMax <- max( yMax, density( cs[ i, ], bw = "SJ", adjust = bw.adj,
+                                na.rm = TRUE )$y,
+                 hist( cs[ i, ], breaks = breaks, plot = FALSE )$density )
+
+  # change the output format but save existing conf to restore at end
+  oldPar <- par( )
+  par( mfrow = c( nCS, 1 ), oma = c( 2.5, 2, 3.5, 2 ), mar = c( 4, 4, 0, 2 ) )
+
+  # plot all
+  for( i in 1 : nCS ) {
+    h <- hist( cs[ i, ], prob = TRUE, breaks = breaks, col = NULL,
+               main = "", xlab = paste0( labVar, " (", leg[ i ], ")" ),
+               xlim = c( xMin, xMax ), ylim = c( 0, 1.1 * yMax ) )
+    d <- density( cs[ i, ], bw = "SJ", adjust = bw.adj, na.rm = TRUE )
+    polygon( d, col = transp_color( "gray", 0.7 ) )
+    xAvg <- mean( cs[ i, ], na.rm = TRUE )
+    yAvg <- 1.1 * max( h$density, d$y )
+    lines( c( xAvg, xAvg ), c( 0, yAvg ), type = "l", lty = "dotted" )
+  }
+
+  mtext( tit, outer = TRUE, cex = 1.2, font = 2, padj = -1 )
+  mtext( subtit, side = 1, outer = TRUE, padj = 2 )
+
+  par( mfrow = oldPar$mfrow, oma = oldPar$oma, mar = oldPar$mar )
+}
+
+
+#
 # ====== function [] = size_bins ======
 # Output:
 #   Statistic bins grouped by firm size s
@@ -1358,4 +1670,273 @@ size_bins <- function( s, sLag, g, bins = 30, outLim = 0 ) {
   }
 
   return( list( s1avg = s1avg, s2avg = s2avg, sLagAvg = sLagAvg, gAvg = gAvg, gSD = gSD ) )
+}
+
+
+#
+# ====== function [] = growth_stats ======
+# Output:
+#   Growth statistics table
+#
+# Input:
+#   vars: vector of variable names to include in table
+#	  data: Monte Carlo experiment dataset (time x vars x mc)
+#   labVars: optional vector of text label for variables
+#	  mask: vector of (continuous) range of time steps to use
+#	  pl, pu: BK-filter lower/upper band-pass period parameter
+#	  nfix: BK-filter order (selectivity)
+#   CI: confidence level
+#
+
+growth_stats <- function( vars, data, labVars = NULL, mask = NULL,
+                          pl = 6, pu = 32, nfix = 12, CI = 0.95 ) {
+  nVar <- length( vars )
+  nTsteps <- nrow( data )
+  nSize <- dim( data )[ 3 ]
+
+  if( is.null( labVars ) || length( labVars ) != nVar )
+    labVars <- vars
+  if( is.null( mask ) || max( mask ) - min( mask ) + 1 > nTsteps )
+    mask <- c( 1 : nTsteps )
+
+  meanPer <- nfix
+  maskBpf <- ( nfix + 1 ) : ( max( mask ) - min( mask ) + 1 - nfix )
+
+  # create the stats table
+  tab <- matrix( nrow = 13, ncol = nVar )
+  colnames( tab ) <- labVars
+  rownames( tab ) <- c( "avg. growth rate", " (s.e.)",
+                        "ADF test (logs)", " (s.e.)", " (p-val.)", " (s.e.)",
+                        "ADF test (bpf)", " (s.e.)", " (p-val.)", " (s.e.)",
+                        " s.d. (bpf)", " (s.e.)",
+                        paste0( " relative s.d. (", vars[ 1 ], ")" ) )
+
+  # fill the table
+  for( i in 1 : nVar ) {
+    gVar <- sVar <- rep( NA, nSize )
+    dVar <- dfVar <- list( )
+    for( j in 1 : nSize ) {
+
+      # MC average growth rates
+      start <- mean( log0( data[ mask[ 1 : meanPer ], vars[ i ], j ] ),
+                     na.rm = TRUE )
+      end <- mean( log0( data[ mask[ ( length( mask ) - meanPer + 1 ) :
+                                       length( mask ) ], vars[ i ], j ] ),
+                     na.rm = TRUE )
+      gVar[ j ] <- ( end - start ) / ( max( mask ) - min( mask ) + 2 - meanPer )
+
+      # Baxter-King filter
+      fVar <- bkfilter( log0( data[ mask, vars[ i ], j ] ),
+                        pl = pl, pu = pu, nfix = nfix )
+
+      # Augmented Dickey-Fuller tests (unit roots) & standard deviations
+      dVar[[ j ]] <- suppressWarnings( adf.test( log0( data[ mask, vars[ i ], j ] ) ) )
+      dfVar[[ j ]] <- suppressWarnings( adf.test( fVar$cycle[ maskBpf, 1 ] ) )
+      sVar[ j ] <- sd( fVar$cycle[ maskBpf, 1 ] )
+    }
+
+
+    if( i == 1 )
+      sRef <- sVar
+
+    tab[ , i ] <- c( mean( gVar ),
+                    sd( gVar ) / sqrt( nSize ),
+                    mean( unname( sapply( dVar, `[[`, "statistic" ) ) ),
+                    sd( unname( sapply( dVar, `[[`, "statistic" ) ) ) / sqrt( nSize ),
+                    mean( unname( sapply( dVar, `[[`, "p.value" ) ) ),
+                    sd( unname( sapply( dVar, `[[`, "p.value" ) ) ) / sqrt( nSize ),
+                    mean( unname( sapply( dfVar, `[[`, "statistic" ) ) ),
+                    sd( unname( sapply( dfVar, `[[`, "statistic" ) ) ) / sqrt( nSize ),
+                    mean( unname( sapply( dfVar, `[[`, "p.value" ) ) ),
+                    sd( unname( sapply( dfVar, `[[`, "p.value" ) ) ) / sqrt( nSize ),
+                    mean( sVar ),
+                    sd( sVar ) / sqrt( nSize ),
+                    mean( sVar ) / mean( sRef ) )
+  }
+
+  return( tab )
+}
+
+
+#
+# ====== function [] = corr_table ======
+# Output:
+#   list with MC correlation, standard errors and p-value tables (vars x vars)
+#
+# Input:
+#   vars: vector of variable names to include in table
+#	  data: Monte Carlo experiment dataset (time x vars x mc)
+#   logVars: vector of variables to take log (0=no log, 1=log, 2=log0)
+#   labVars: optional vector of text label for variables
+#	  mask: vector of (continuous) range of time steps to use
+#	  pl, pu: BK-filter lower/upper band-pass period parameter
+#	  nfix: BK-filter order (selectivity)
+#   CI: confidence level
+#   plot: plot a heatmap fo the table
+#   tit, subtit: title/subtitle of the plot
+#
+
+corr_table <- function( vars, data, logVars = NULL, labVars = NULL,
+                        mask = NULL, pl = 6, pu = 32, nfix = 12, CI = 0.95,
+                        plot = FALSE, tit = "", subtit = "" ) {
+
+  nVar <- length( vars )
+  nTsteps <- nrow( data )
+  nSize <- dim( data )[ 3 ]
+
+  if( is.null( labVars ) || length( labVars ) != nVar )
+    labVars <- vars
+  if( is.null( logVars ) || length( logVars ) != nVar )
+    logVars <- rep( 0, nVar )
+  if( is.null( mask ) || max( mask ) - min( mask ) + 1 > nTsteps )
+    mask <- c( 1 : nTsteps )
+
+  maskBpf <- ( nfix + 1 ) : ( max( mask ) - min( mask ) + 1 - nfix )
+  nTstat <- max( maskBpf ) - min( maskBpf ) + 1
+
+  corr <- pval <- array( dim = c( nVar, nVar, nSize ),
+                         dimnames = list( labVars, labVars,
+                                          dimnames( data )[[ 3 ]] ) )
+
+  # BK-filter each MC var and build the filtered series matrices
+  for( j in 1 : nSize ) {
+    mat <- matrix( nrow = nTstat, ncol = nVar )
+    for( i in 1 : nVar ) {
+      mat[ , i ] <- bkfilter( logX( data[ mask, vars[ i ], j ],
+                                    logVars[ i ] ),
+                              pl = pl, pu = pu, nfix = nfix )$cycle[ maskBpf, 1 ]
+
+      for( h in 1 : i )
+        pval[ i, h, j ] <- pval[ h, i, j ] <- suppressWarnings(
+          cor.test( mat[ , i ], mat[ , h ], conf.level = CI )$p.value )
+    }
+
+    corr[ , , j ] <- suppressWarnings( cor( mat ) )
+  }
+
+  mean <- apply( corr, 1 : 2, mean, na.rm = TRUE )
+  se <- apply( corr, 1 : 2, se, na.rm = TRUE )
+  p.value <- apply( pval, 1 : 2, mean, na.rm = TRUE )
+  mean[ is.nan( mean ) ] <- 0
+  se[ is.nan( se ) ] <- 0
+  p.value[ is.nan( p.value ) ] <- 0
+
+  if( plot ) {
+    corrplot( round( mean, 2 ), p.mat = p.value, sig.level = 1 - CI,
+              method = "color", type = "lower", title = tit, cl.pos = "n",
+              diag = FALSE, mar = c( 2, 2, 2, 2 ), addCoef.col = "black",
+              tl.col = "black", tl.srt = 45, insig = "blank" )
+
+    title( sub = subtit )
+
+    invisible( list( mean = mean, se = se, p.value = p.value ) )
+
+  } else
+    return( list( mean = mean, se = se, p.value = p.value ) )
+}
+
+
+#
+# ====== function [] = corr_struct ======
+# Output:
+#   Correlation structure table
+#
+# Input:
+#   ref: reference variable to use
+#   vars: vector of variable names to include in table
+#	  data: Monte Carlo experiment dataset (time x vars x mc)
+#   logRef: take log of reference variable (0=no log, 1=log, 2=log0)
+#   logVars: vector of variables to take log (0=no log, 1=log, 2=log0)
+#   labRef: optional text label for reference variable
+#   labVars: optional vector of text label for variables
+#	  mask: vector of (continuous) range of time steps to use
+#   lags: correlation lags to use
+#	  pl, pu: BK-filter lower/upper band-pass period parameter
+#	  nfix: BK-filter order (selectivity)
+#   CI: confidence level
+#
+
+corr_struct <- function( ref, vars, data, logRef = 0, logVars = NULL,
+                         labRef = NULL, labVars = NULL, mask = NULL,
+                         lags = 4, pl = 6, pu = 32, nfix = 12, CI = 0.95 ) {
+  nVar <- length( vars )
+  nTsteps <- nrow( data )
+  nSize <- dim( data )[ 3 ]
+  nCols <- 2 * lags + 1
+
+  if( is.null( labRef ) )
+    labRef <- ref
+  if( is.null( labVars ) || length( labVars ) != nVar )
+    labVars <- vars
+  if( is.null( logVars ) || length( logVars ) != nVar )
+    logVars <- rep( 0, nVar )
+  if( is.null( mask ) || max( mask ) - min( mask ) + 1 > nTsteps )
+    mask <- c( 1 : nTsteps )
+
+  # Calculates the critical correlation limit for significance (under heroic assumptions!)
+  maskBpf <- ( nfix + 1 ) : ( max( mask ) - min( mask ) + 1 - nfix )
+  nTstat <- max( maskBpf ) - min( maskBpf ) + 1
+  critCorr <- qnorm( 1 - ( 1 - CI ) / 2 ) / sqrt( nTstat )
+
+  # compute the correlation structure for each BK-filtered var and MC
+  cRef <- fRef <- list( )
+  for( j in 1 : nSize ) {
+    fRef[[ j ]] <- bkfilter( logX( data[ mask, ref, j ], logRef ),
+                             pl = pl, pu = pu, nfix = nfix )
+    cRef[[ j ]] <- ccf( fRef[[ j ]]$cycle[ maskBpf, 1 ],
+                        fRef[[ j ]]$cycle[ maskBpf, 1 ],
+                        lag.max = lags, plot = FALSE, na.action = na.pass )
+  }
+
+  cVars <- list( )
+  for( i in 1 : nVar ) {
+    cVars[[ i ]] <- list( )
+    for( j in 1 : nSize ) {
+      fVar <- bkfilter( logX( data[ mask, vars[ i ], j ], logVars[ i ] ),
+                        pl = pl, pu = pu, nfix = nfix )
+      cVars[[ i ]][[ j ]] <- ccf( fRef[[ j ]]$cycle[ maskBpf, 1 ],
+                                  fVar$cycle[ maskBpf, 1 ],
+                                  lag.max = lags, plot = FALSE, na.action = na.pass )
+    }
+  }
+
+  # apply t-test to the mean lag results to test significance (H0: lag < critCorr)
+  pRef <- rep( NA, nCols )
+  for( k in 1 : nCols )
+    if( k != lags + 1 )    # no autocorrelation at lag 0
+      pRef[ k ] <- t.test0( abs( unname( sapply( cRef, `[[`, "acf" ) )[ k, ] ),
+                            critCorr, CI )
+
+  pVars <- list( )
+  for( i in 1 : nVar ) {
+    pVars[[ i ]] <- rep( NA, nCols )
+    for( k in 1 : nCols )
+      pVars[[ i ]][ k ] <- t.test0( abs( unname( sapply( cVars[[ i ]],
+                                                         `[[`, "acf" ) )[ k, ] ),
+                                    critCorr, CI )
+  }
+
+  # mount the stats table
+  tab <- matrix( nrow = 3 * ( nVar + 1 ), ncol = nCols )
+  colnames( tab ) <- cRef[[ 1 ]]$lag
+
+  tab[ 1, ] <- colMeans( t( unname( sapply( cRef, `[[`, "acf" ) ) ),
+                            na.rm = TRUE )
+  tab[ 2, ] <- colSds( t ( unname( sapply( cRef, `[[`, "acf" ) ) ),
+                          na.rm = TRUE ) / sqrt( nSize )
+  tab[ 3, ] <- pRef
+  rowNames <- c( labRef, " (s.e.)", " (p-val.)" )
+
+  for( i in 1 : nVar ) {
+    tab[ i * 3 + 1, ] <- colMeans( t( unname( sapply( cVars[[ i ]], `[[`, "acf" ) ) ),
+                           na.rm = TRUE )
+    tab[ i * 3 + 2, ] <- colSds( t ( unname( sapply( cVars[[ i ]], `[[`, "acf" ) ) ),
+                         na.rm = TRUE ) / sqrt( nSize )
+    tab[ i * 3 + 3, ] <- pVars[[ i ]]
+    rowNames <- c( rowNames, labVars[ i ], " (s.e.)", " (p-val.)" )
+  }
+
+  rownames( tab ) <- rowNames
+
+  return( tab )
 }

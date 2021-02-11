@@ -479,7 +479,7 @@ Var: wU 0 s + n n
 
 Object: Capital C	1
 Param: Deb10ratio 0 n + n n	1
-Param: F1 0 n + n n	50
+Param: F1 0 s + n n	50
 Param: L1rdMax 0 n + n n	0.2
 Param: L1shortMax 0 n + n n	1
 Param: NW10 0 n + n n	1000
@@ -573,7 +573,7 @@ Param: _tSel 0 n + n n	0
 
 Object: Consumption C	1
 Param: Deb20ratio 0 n + n n	1
-Param: F2 0 n + n n	200
+Param: F2 0 s + n n	200
 Param: NW20 0 n + n n	1000
 Param: Phi1 0 n + n n	0.1
 Param: Phi2 0 n + n n	0.9
@@ -2770,6 +2770,7 @@ END_DESCRIPTION
 
 Variable_CS
 Total credit supplied
+_INIT_
 
 END_DESCRIPTION
 
@@ -2867,11 +2868,13 @@ END_DESCRIPTION
 
 Variable_CS1
 Total credit supplied to firms in capital-good sector
+_INIT_
 
 END_DESCRIPTION
 
 Variable_CS2
 Total credit supplied to firms in consumer-good sector
+_INIT_
 
 END_DESCRIPTION
 

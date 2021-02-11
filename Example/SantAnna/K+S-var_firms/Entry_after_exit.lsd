@@ -719,7 +719,7 @@ Var: S1 0 s + n n
 Var: Tax1 0 n + n n
 Var: W1 0 s + n n
 Var: entry1 0 s + n n
-Var: entry1exit 0 n + n n
+Var: entry1exit 0 s + n n
 Var: exit1 0 s + n n
 Var: imi 0 s + n n
 Var: inn 0 s + n n
@@ -843,7 +843,7 @@ Var: dCPI 1 s + n n	0
 Var: dCPIb 1 s + n n	0
 Var: dNnom 0 s + n n
 Var: entry2 0 s + n n
-Var: entry2exit 0 n + n n
+Var: entry2exit 0 s + n n
 Var: exit2 0 s + n p
 Var: l2avg 1 s + n n	0
 Var: oldVint 1 n + n n	1
