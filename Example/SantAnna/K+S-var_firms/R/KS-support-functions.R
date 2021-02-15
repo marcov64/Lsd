@@ -208,7 +208,7 @@ fmt <- function( x, digits = def.digits, signif = NULL, scipen = NA ) {
     for( i in 1 : ncol( x ) )
       if( is.numeric( x[ , i ] ) )
         x[ , i ] <- round( x[ , i ], digits = digits )
-      return( format( x, nsmall = digits, digits = signif, scientific = scipen ) )
+    return( format( x, nsmall = digits, digits = signif, scientific = scipen ) )
   }
   stop( "Cannot format non-numeric data" )
 }
@@ -371,7 +371,7 @@ exec_subbofit <- function( x, type  = "symmetric" ) {
 
   cat( "", as.character( Sys.time( ) ), "->", type, "subbofit, n =", length( x ), "... " )
 
-  outStr <- system2( command, args = "-O 3", input = as.character( x ), 
+  outStr <- system2( command, args = "-O 3", input = as.character( x ),
                      stdout = TRUE, stderr = FALSE )
   try( subboFit <- sapply( scan( textConnection ( outStr ), what = character( ), quiet = TRUE ),
                            as.numeric, silent = TRUE ),
@@ -1434,6 +1434,9 @@ plot_recovery <- function( x, growth, strt, dur, per, mask, warm = 0, mrk = -1,
 plot_lin <- function( x, y, xlab = "", ylab = "", tit, subtit = "",
                       invleg = FALSE ) {
 
+  x[ ! is.finite( x ) ] <- NA
+  y[ ! is.finite( y ) ] <- NA
+
   plot( x, y, type = "p", pch = 1,
         main = tit, sub = subtit, xlab = xlab, ylab = ylab )
 
@@ -1825,7 +1828,7 @@ corr_table <- function( vars, data, logVars = NULL, labVars = NULL,
     corrplot( round( mean, 2 ), p.mat = p.value, sig.level = 1 - CI,
               method = "color", type = "lower", title = tit, cl.pos = "n",
               diag = FALSE, mar = c( 2, 2, 2, 2 ), addCoef.col = "black",
-              tl.col = "black", tl.srt = 45, insig = "blank" )
+              tl.col = "black", number.cex = 0.7, tl.srt = 45, insig = "blank" )
 
     title( sub = subtit )
 

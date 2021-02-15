@@ -4,7 +4,7 @@ phi 0 2 f: 0 1
 b 0 2 f: 1 10
 mu20 0 2 f: 0.1 0.5
 omega2 0 2 f: 0.2 5
-Lambda0 0 2 f: 0 100000
+Lambda 0 2 f: 1 4
 u 0 2 f: 0.5 1
 rT 0 2 f: 0.005 0.05
 F2min 0 2 i: 100 200

@@ -5830,9 +5830,9 @@ bool compile_run( bool run, bool nw )
 	cmd( "newtop .t \"Please Wait\" \"\" $parWnd" );
 
 	if ( nw )
-		cmd( "ttk::label .t.l1 -style bold.TLabel -text \"Compiling 'No Window' model...\"" );
+		cmd( "ttk::label .t.l1 -style bold.TLabel -justify center -text \"Compiling 'No Window' model...\"" );
 	else
-		cmd( "ttk::label .t.l1 -style bold.TLabel -text \"Compiling model...\"" );
+		cmd( "ttk::label .t.l1 -style bold.TLabel -justify center -text \"Compiling model...\"" );
 
 	if ( run )
 		cmd( "ttk::label .t.l2 -justify center -text \"Just recompiling equation file(s) changes.\nOn success, the new model program will be launched.\nOn failure, a new window will show the compilation errors.\"" );

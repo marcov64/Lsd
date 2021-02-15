@@ -257,7 +257,7 @@ all.insert( all.end( ), finite, END_ARR( finite ) );
 
 // interest rate structure
 LOG( "\n  $$$ (t=%g) rD=%.2g rRes=%.2g rBonds=%.2g r=%.2g rDeb=%.2g", 
-	 T, rD, rRes, rBonds, r, rDeb, Depo, Loans );
+	 T, rD, rRes, rBonds, r, rDeb );
 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );

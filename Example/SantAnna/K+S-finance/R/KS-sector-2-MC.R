@@ -38,11 +38,13 @@ library( abind, verbose = FALSE, quietly = TRUE )
 # Function to read one experiment data (to be parallelized)
 readExp <- function( exper ) {
   if( nExp > 1 ) {
-    myFiles <- list.files( path = folder, pattern = paste0( baseName, exper, "_[0-9]+.res"),
-                          full.names = TRUE )
+    myFiles <- list.files( path = folder, 
+                           pattern = paste0( baseName, exper, "_[0-9]+.res"),
+                           full.names = TRUE )
   } else {
-    myFiles <- list.files( path = folder, pattern = paste0( baseName, "_[0-9]+.res"),
-                          full.names = TRUE )
+    myFiles <- list.files( path = folder, 
+                           pattern = paste0( baseName, "_[0-9]+.res"),
+                           full.names = TRUE )
   }
 
   if( length( myFiles ) < 1 )

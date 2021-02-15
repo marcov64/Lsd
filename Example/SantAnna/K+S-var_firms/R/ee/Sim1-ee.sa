@@ -5,7 +5,6 @@ muD 0 2 f: 0.5 1
 muDeb 0 2 f: 0.1 0.5
 muRes 0 2 f: 0.5 1
 Lambda 0 2 f: 1 4
-Lambda0 0 2 f: 0 100000
 PhiB 0 2 f: 0.1 1
 deltaB 0 2 f: 0.1 1
 phi 0 2 f: 0 1
