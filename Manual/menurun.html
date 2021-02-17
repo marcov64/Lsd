@@ -228,7 +228,7 @@ div.WordSection1
 
 </head>
 
-<body lang=PT-BR link=blue vlink=purple>
+<body lang=PT-BR link=blue vlink=purple style='word-wrap:break-word'>
 
 <div class=WordSection1>
 
@@ -242,8 +242,8 @@ div.WordSection1
  style='width:69.48%'>
  <tr>
   <td width=343 style='width:257.1pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
-  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><img width=321
-  height=397 src="image/menurun.png"></p>
+  <p class=MsoNormal style='margin:0cm'><img width=321 height=397
+  src="image/menurun.png"></p>
   </td>
   <td width=206 valign=top style='width:154.85pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
@@ -340,9 +340,9 @@ lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If there are multiple simulation runs
 configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
-Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation
-message (see example below), telling how the results data will be handled and
-providing some options to the user. </span></p>
+Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation message
+(see example below), telling how the results data will be handled and providing
+some options to the user. </span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=225 height=368 src="image/summary_run.png"></span></p>
@@ -558,7 +558,7 @@ lang=EN-US> (Windows) or </span><span class=Cdigo><span lang=EN-US>XXXX.sh</span
 lang=EN-US> (Linux/macOS) in the same subdirectory as the selected
 configuration files. In Windows, a double click in this file on the file
 Explorer is sufficient to start the batch. In Linux/macOS the user typically
-has to open a terminal window and use the command </span><span class=Cdigo><span
+must open a terminal window and use the command </span><span class=Cdigo><span
 lang=EN-US>YYYY/XXXX.sh</span></span><span lang=EN-US>, where </span><span
 class=Cdigo><span lang=EN-US>YYYY</span></span><span lang=EN-US> is the
 configurations subdirectory and </span><span class=Cdigo><span lang=EN-US>XXXX</span></span><span
@@ -571,9 +571,9 @@ lang=EN-US> before usage.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Because the parallel simulation run is
 performed independently from LSD, the execution progress cannot be shown in the
-Log window and no <a href="runtime.html">Run-time Plot</a> window is created. This
-way, the user can continue to interact with LSD while the simulation is being
-executed or even close it. </span></p>
+Log window and no <a href="runtime.html">Run-time Plot</a> window is created.
+This way, the user can continue to interact with LSD while the simulation is
+being executed or even close it. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>To use this command, the user must first
 create a no-window (command prompt) version of the model in <a href="LMM.html">LMM</a>
@@ -696,8 +696,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><span class=Cdigo><b><span lang=EN-US>Comma-separated text format
 (.csv)</span></b></span><span lang=EN-US>: if checked, all produced files will
 be saved in comma-separated text format (extension </span><span class=Cdigo><span
-lang=EN-US>.csv</span></span><span lang=EN-US>), which can be imported by
-almost any data application. Please note that </span><span class=Cdigo><span
+lang=EN-US>.csv</span></span><span lang=EN-US>), which can be imported by almost
+any data application. Please note that </span><span class=Cdigo><span
 lang=EN-US>.csv</span></span><span lang=EN-US> files do not contain the same
 level of detail as native LSD </span><span class=Cdigo><span lang=EN-US>.res</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>.tot</span></span><span
@@ -819,8 +819,8 @@ when LSD ask if the script should be run. If you are creating the </span><span
 class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> files to be
 run in a Linux server, for instance, now copy the entire model folder to the
 server (including the </span><span class=Cdigo><span lang=EN-US>src</span></span><span
-lang=EN-US> subfolder), open a server terminal window in the copied model directory,
-recompile the LSD No Window executable (</span><span class=Cdigo><span
+lang=EN-US> subfolder), open a server terminal window in the copied model
+directory, recompile the LSD No Window executable (</span><span class=Cdigo><span
 lang=EN-US>make -f makefileNW</span></span><span lang=EN-US>), adjust the
 script properties (</span><span class=Cdigo><span lang=EN-US>chmod +x SCRIPT.sh</span></span><span
 lang=EN-US>, replacing </span><span class=Cdigo><span lang=EN-US>SCRIPT</span></span><span
@@ -1073,16 +1073,20 @@ lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"
 </span></span><span lang=EN-US><a href="#_Show_Elements_to_6">Show Elements to
 Sensitivity Analysis</a></span></p>
 
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US><a href="#_Show_Elements_Unused">Show Elements
+Unused</a></span></p>
+
 <h2><a name=showsave></a><a name=sobs></a><a name="_Show_Elements_to"></a><a
 name=sinit></a><span lang=EN-US>Show Elements to Save</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>Print in the <a href="LSD_windows.html#log">LSD
 Log</a> the list of the <a href="LSD_faqs.html#variable">Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a> whose values will be saved during
-the <a href="LSD_faqs.html#simulationrun">simulation run</a> for later
-analysis. These are the elements with the <a href="browser.html#variables">option</a>
-</span><span class=Cdigo><span lang=EN-US>Save</span></span><span lang=EN-US>
-set on.</span></p>
+the <a href="LSD_faqs.html#simulationrun">simulation run</a> for later analysis.
+These are the elements with the <a href="browser.html#variables">option</a> </span><span
+class=Cdigo><span lang=EN-US>Save</span></span><span lang=EN-US> set on.</span></p>
 
 <h2><a name="_Show_Elements_to_2"></a><span lang=EN-US>Show Elements to Plot</span></h2>
 
@@ -1157,6 +1161,17 @@ href="LSD_faqs.html#sa">sensitivity analysis</a> options. These are the
 elements with the <a href="browser.html#variables">option</a> </span><span
 class=Cdigo><span lang=EN-US>Sensitivity</span></span><span lang=EN-US>
 configured to define a set or a range of values for the sensitivity analysis.</span></p>
+
+<h2><a name="_Show_Elements_Unused"></a><span lang=EN-US>Show Elements Unused</span></h2>
+
+<p class=MsoNormal><span lang=EN-US>Print in the <a href="LSD_windows.html#log">LSD
+Log</a> the list of the <a href="LSD_faqs.html#variable">Variables</a>, <a
+href="LSD_faqs.html#parameter">Parameters</a> and <a href="LSD_faqs.html#object">Objects</a>
+which are apparently not used in the <a href="LSD_faqs.html#equationfile">equation
+file(s)</a>. Notice that only elements explicitly used in <a
+href="LSD_faqs.html#macro">LSD Macros</a> are considered, so elements whose
+names are indirectly passed to the Macros (using a C++ string variable, for
+instance) may be incorrectly detected as unused.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

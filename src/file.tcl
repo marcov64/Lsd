@@ -1061,6 +1061,10 @@ set progObj [ list ]
 set missVar [ list ]
 set missPar [ list ]
 set missObj [ list ]
+set unusVar [ list ]
+set unusFun [ list ]
+set unusPar [ list ]
+set unusObj [ list ]
 
 proc read_elem_file { path } {
 	global progVar progPar progObj
@@ -1079,6 +1083,7 @@ proc read_elem_file { path } {
 	close $f
 
 	upd_miss_elem
+	upd_unus_elem
 }
 
 
@@ -1109,6 +1114,44 @@ proc upd_miss_elem { } {
 	set missVar [ lsort -dictionary $missVar ]
 	set missPar [ lsort -dictionary $missPar ]
 	set missObj [ lsort -dictionary $missObj ]
+}
+
+
+#************************************************
+# UPD_UNUS_ELEM
+# Update the unused elements list, considering the elements currently in the model structure
+#************************************************
+proc upd_unus_elem { } {
+	global modVar modFun modPar modObj progVar progPar progObj unusVar unusFun unusPar unusObj
+
+	if [ info exists modVar ] {
+		set unusVar [ remove_elem $modVar $progVar ]
+	} else {
+		set unusVar [ list ]
+	}
+
+	if [ info exists modFun ] {
+		set unusFun [ remove_elem $modFun $progVar ]
+	} else {
+		set unusFun [ list ]
+	}
+
+	if [ info exists modPar ] {
+		set unusPar [ remove_elem $modPar $progPar ]
+	} else {
+		set unusPar [ list ]
+	}
+
+	if [ info exists modObj ] {
+		set unusObj [ remove_elem $modObj $progObj ]
+	} else {
+		set unusObj [ list ]
+	}
+
+	set unusVar [ lsort -dictionary $unusVar ]
+	set unusFun [ lsort -dictionary $unusFun ]
+	set unusPar [ lsort -dictionary $unusPar ]
+	set unusObj [ lsort -dictionary $unusObj ]
 }
 
 

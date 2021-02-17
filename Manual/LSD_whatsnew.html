@@ -136,21 +136,22 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>Other interface improvements</span></b><span
 lang=EN-US>. Several small usability improvements. Tabbed interface for <a
 href="runtime.html">Run-time</a> and <a href="menudata_res.html">Analysis of
-Results</a> plot windows. Quick-search keys on all list boxes. Improvements to
-the <a href="debug.html">Debugger</a> / <a href="debug.html">Data Browser</a>, </span><span
-class=Cdigo><a href="menudata_init.html"><span lang=EN-US>Data&gt;Initial
-Values</span></a></span><span lang=EN-US> and </span><span class=Cdigo><span
-lang=EN-US><a href="menudata_objn.html">Data&gt;Number of Objects</a></span></span><span
-lang=EN-US> windows. Interruptible progress boxes for slow operations.  Mouse
-snapping to default buttons (optional).</span></p>
+Results</a> plot windows. Quick-search keys on all list boxes. Auto-detection
+of model Object names. List of elements unused in equation file(s).
+Improvements to the <a href="debug.html">Debugger</a> / <a href="debug.html">Data
+Browser</a>, </span><span class=Cdigo><a href="menudata_init.html"><span
+lang=EN-US>Data&gt;Initial Values</span></a></span><span lang=EN-US> and </span><span
+class=Cdigo><span lang=EN-US><a href="menudata_objn.html">Data&gt;Number of
+Objects</a></span></span><span lang=EN-US> windows. Interruptible progress
+boxes for slow operations.  Mouse snapping to default buttons (optional). </span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Improved data aggregation Macros</span></b><span
 lang=EN-US>. All Macros performing computations over multiple Object instances
-may now operate conditionally, allowing for much finer control of data aggregation
-(see for instance </span><span class=Cdigo><span lang=EN-US><a
+may now operate conditionally, allowing for much finer control of data
+aggregation (see for instance </span><span class=Cdigo><span lang=EN-US><a
 href="LSD_macros.html#SUM">SUM_CND(…)</a></span></span><span lang=EN-US> for
 details). Any Variable or Parameter contained in an Object instance may be used
 to control its inclusion in aggregated statistics, including lagged values.</span></p>
@@ -161,8 +162,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>New Macros.</span></b><span lang=EN-US> </span><span
 class=Cdigo><span lang=EN-US><a href="LSD_macros.html#T">RUN</a></span></span><span
 lang=EN-US> informs the current run number in a multi-run simulation execution.
-</span><span class=Cdigo><a href="LSD_macros.html#T"><span lang=EN-US>LAST_RUN</span></a></span><span
-lang=EN-US> provides the total number of runs configured for the current
+</span><span class=Cdigo><a href="LSD_macros.html#T"><span lang=EN-US>LAST_RUN</span></a></span>
+<span lang=EN-US>provides the total number of runs configured for the current
 simulation. </span><span class=Cdigo><a href="LSD_macros.html#THIS"><span
 lang=EN-US>THIS</span></a></span><span lang=EN-US> points to the current Object
 under computation. </span><span class=Cdigo><a href="LSD_macros.html#THIS"><span
@@ -186,8 +187,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US>Equations invoking the Macro </span><span class=Cdigo><span
 lang=EN-US><a href="LSD_macros.html#DELETE">DELETE(…)</a></span></span><span
 lang=EN-US> for removing the Object instance containing the Variable under
-computation is now supported in all operations where this may make sense, including
-brotherhood-chain operations like </span><span class=Cdigo><a
+computation is now supported in all operations where this may make sense,
+including brotherhood-chain operations like </span><span class=Cdigo><a
 href="LSD_macros.html#SUM"><span lang=EN-US>SUM(…)</span></a></span><span
 lang=EN-US>.</span></p>
 
@@ -278,11 +279,11 @@ improvements and changes:</span></p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US><a href="browser.html#updating">Variable
-update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be updated/recomputed
-under arbitrary time schemes, deterministic or random. The modeler can now
-configure update periods larger than 1, including an initial “sleep” for any
-Variable. Both period and initial times can be set as a fixed number or a
-uniform random draw from a modeler-defined range.</span></p>
+update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be
+updated/recomputed under arbitrary time schemes, deterministic or random. The
+modeler can now configure update periods larger than 1, including an initial
+“sleep” for any Variable. Both period and initial times can be set as a fixed
+number or a uniform random draw from a modeler-defined range.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -603,9 +604,10 @@ templates in LMM.</span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Advanced sensitivity analysis.</span></b><span
-lang=EN-US> Monte Carlo (by range or points), Elementary Effects and Near-orthogonal
-Latin Hypercube sampling tools (Design of Experiments). External DoE file
-import. Full integration with R advanced sensitivity analysis package.</span></p>
+lang=EN-US> Monte Carlo (by range or points), Elementary Effects and
+Near-orthogonal Latin Hypercube sampling tools (Design of Experiments).
+External DoE file import. Full integration with R advanced sensitivity analysis
+package.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -665,8 +667,8 @@ options for plots. </span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Pause/resume run controls.</span></b><span
-lang=EN-US> Simulation runs can be paused resumed asynchronously at any time (no
-preset breakpoint required), including full debugger support.</span></p>
+lang=EN-US> Simulation runs can be paused resumed asynchronously at any time
+(no preset breakpoint required), including full debugger support.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -674,8 +676,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>New unsaved configuration indicator.</span></b><span
 lang=EN-US> All LSD windows now show configuration name and save status (‘</span><span
 class=Cdigo><span lang=EN-US>*</span></span><span lang=EN-US>’ in title bar
-when unsaved changes are present). Unsaved changes warning dialog in all potential
-data loss situations.</span></p>
+when unsaved changes are present). Unsaved changes warning dialog in all
+potential data loss situations.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -941,8 +943,7 @@ distribution should be solved.</span></p>
 
 <p class=MsoListParagraph style='margin-left:35.7pt;text-indent:-17.85pt'><span
 lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>Other minor bug fixes and documentation
-improvements.</span></p>
+</span></span><span lang=EN-US>Other minor bug fixes and documentation improvements.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
 

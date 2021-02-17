@@ -924,6 +924,7 @@ int browse( object *r, int *choice )
 			cmd( "$w add command -label Parallelize -underline 0 -command { set choice 86 }" );
 			cmd( "$w add command -label \"Special Updating\" -underline 8 -command { set choice 97 }" );
 			cmd( "$w add command -label \"Sensitivity Analysis\" -underline 1 -command { set choice 66 }" );
+			cmd( "$w add command -label Unused -underline 1 -command { set choice 56 }" );
 			
 			cmd( "set w .m.run.rem" );
 			cmd( "ttk::menu $w -tearoff 0" );
@@ -1569,6 +1570,7 @@ case 3:
 		}
 		
 		r->add_obj( lab, 1, 1 );
+		
 		cmd( "set text_description [.addobj.d.f.text get 1.0 end]" );  
 		cmd( "if { $text_description==\"\\n\" || $text_description==\"\" } { set text_description \"(no description available)\" }" );
 		lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
@@ -1616,6 +1618,10 @@ case 32:
 	else
 		cur2 = NULL;
 
+	// read the lists of variables/functions, parameters and objects in model program 
+	// from disk, if needed, or just update the missing elements lists
+	cmd( "if { [ llength $missObj ] == 0 } { read_elem_file %s } { upd_miss_elem }", exec_path );
+
 	Tcl_LinkVar( inter, "done", ( char * ) &done, TCL_LINK_INT );
 
 	if ( r->up == NULL )
@@ -1640,7 +1646,7 @@ case 32:
 
 	cmd( "ttk::frame $T.f" );
 	cmd( "ttk::label $T.f.lab_ent -text \"Object name\"" );
-	cmd( "ttk::entry $T.f.ent_var -width 20 -textvariable lab -justify center" );
+	cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missObj" );
 	cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
 	cmd( "bind $T.f.ent_var <KeyPress-Return> {focus $T.b.ok}" );
 
@@ -1669,12 +1675,13 @@ case 32:
 	if ( done == 1 )
 	{
 		lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
-		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
+		strncpy( lab, lab1, MAX_ELEM_LENGTH - 1 );
+		if ( strlen( lab ) == 0 )
 			goto here_endparent;
 	
-		sscanf( lab1, "%99s", lab );
 		for ( cur = r; cur->up != NULL; cur = cur->up );
-		done = check_label( lab1, cur ); // check that the label does not exist already
+		
+		done = check_label( lab, cur ); // check that the label does not exist already
 		if ( done == 1 )
 		{
 			cmd( "ttk::messageBox -parent .inspar -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
@@ -1707,10 +1714,11 @@ case 32:
 
 	here_endparent:
 
+	cmd( "destroytop .inspar" );
+	
 	if ( cur2 != NULL )			// restore original current object
 		r = cur2;
 
-	cmd( "destroytop .inspar" );
 	Tcl_UnlinkVar( inter, "done" );
 	cmd( "unset done" );
 
@@ -3655,6 +3663,27 @@ case 97:
 	lcount = 0;
 	show_special_updat( root );
 	if ( lcount == 0 )
+		plog( "(none)\n" );
+
+break;
+
+
+// elements/objects in configuration but unused in equation file
+case 56:
+
+	// read the lists of variables/functions, parameters and objects in model program 
+	// from disk, if needed, or just update the missing elements lists
+	cmd( "if { [ llength $unusVar ] == 0 || [ llength $unusFun ] == 0 || [ llength $unusPar ] == 0 || [ llength $unusObj ] == 0 } { read_elem_file %s } { upd_unus_elem }", exec_path );
+
+	plog( "\n\nElements/objects apparently unused in equation file:\n" );
+	
+	cmd( "foreach var $unusVar { plog \"Variable :\t\"; plog \"$var\n\" highlight }" );
+	cmd( "foreach fun $unusFun { plog \"Function :\t\"; plog \"$fun\n\" highlight }" );
+	cmd( "foreach par $unusPar { plog \"Parameter:\t\"; plog \"$par\n\" highlight }" );
+	cmd( "foreach obj $unusObj { plog \"Object   :\t\"; plog \"$obj\n\" highlight }" );
+	
+	cmd( "set res [ expr [ llength $unusVar ] + [ llength $unusFun ] + [ llength $unusPar ] + [ llength $unusObj ] ]" );
+	if ( get_int( "res" ) == 0 )
 		plog( "(none)\n" );
 
 break;

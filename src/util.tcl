@@ -476,8 +476,8 @@ proc upd_cursor { } {
 # Tcl/Tk version of C "plog" function to 
 # show a string in the LSD Log window
 #************************************************
-proc plog cm {
-	.log.text.text.internal insert end $cm
+proc plog { cm { tag "" } } {
+	.log.text.text.internal insert end $cm $tag
 	.log.text.text.internal see end
 }
 
