@@ -385,6 +385,7 @@ proc showmodel pippo {
 	.l.t.text insert end "[ lindex $lmd 0 ]"
 	.l.t.text conf -state disable
 	.l.l.l selection set 0
+	focus .l.l.l
 
 	cd $curdir
 	

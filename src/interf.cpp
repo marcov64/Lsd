@@ -7096,36 +7096,38 @@ bool open_configuration( object *&r, bool reload )
 {
 	char *lab1, *lab2;
 	
-	if ( reload )
-		save_pos( r );					// save current position when reloading
-	else
+	if ( ! reload )
 	{									// ask user the file to use, if not reloading
-//		cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"$path\" -initialfile \"%s.lsd\" -filetypes { { {LSD model file} {.lsd} } } ]", simul_name );
-        cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model file} {.lsd} } } ]");
+        cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model file} {.lsd} } } ]" );
 		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ]; set choice 0 } { set choice 2 }" );
 
-		if ( get_int( "choice" ) == 2 )
-			return false;
+		if ( get_int( "choice" ) == 0 )
+		{
+			lab1 = ( char * ) Tcl_GetVar( inter, "path", 0 );
+			lab2 = ( char * ) Tcl_GetVar( inter, "res", 0 );
+			if ( lab1 == NULL || lab2 == NULL || strlen( lab2 ) == 0 )
+				return false;
+			
+			delete [ ] path;
+			path = new char[ strlen( lab1 ) + 1 ];
+			strcpy( path, lab1 );
+			
+			delete [ ] simul_name;
+			simul_name = new char[ strlen( lab2 ) + 1 ];
+			strcpy( simul_name, lab2 );
 
-		lab1 = ( char * ) Tcl_GetVar( inter, "path", 0 );
-		lab2 = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		if ( lab1 == NULL || lab2 == NULL || strlen( lab2 ) == 0 )
-			return false;
-		
-		delete [ ] path;
-		path = new char[ strlen( lab1 ) + 1 ];
-		strcpy( path, lab1 );
-		
-		delete [ ] simul_name;
-		simul_name = new char[ strlen( lab2 ) + 1 ];
-		strcpy( simul_name, lab2 );
-
-		if ( strlen( path ) > 0 )
-			cmd( "cd $path" );	
-		
-		cmd( "set listfocus 1; set itemfocus 0" ); 	// point for first var in listbox
-		strcpy( lastObj, "" );					// disable last object for reload
+			if ( strlen( path ) > 0 )
+				cmd( "cd $path" );	
+			
+			cmd( "set listfocus 1; set itemfocus 0" ); 	// point for first var in listbox
+			strcpy( lastObj, "" );					// disable last object for reload
+		}
+		else
+			reload = true;					// try to reload if use cancel load
 	}
+	
+	if ( reload )
+		save_pos( r );						// save current position when reloading
 
 	redrawRoot = redrawStruc = true;		// force browser/structure redraw
 		
