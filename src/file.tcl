@@ -772,30 +772,43 @@ proc get_source_files { path } {
 # CREATE_ELEM_FILE
 # Produce the element list file (elements.txt) to be used in LSD browser
 #************************************************
-# list of commands to search for parameters (X=number of macro arguments, Y=position of parameter)
-set cmds_1_1 [ list V SUM MAX MIN AVE MED SD STAT RECALC LAST_CALC INIT_TSEARCH_CND ]
-set cmds_2_1 [ list VL SUML MAXL MINL AVEL MEDL WHTAVE SDL SEARCH_CND TSEARCH_CND WRITE INCR MULT V_CHEAT ]
-set cmds_2_2 [ list VS SUMS MAXS MINS AVES MEDS WHTAVE SDS STATS RNDDRAW RECALCS LAST_CALCS INIT_TSEARCH_CNDS ]
-set cmds_3_1 [ list WRITEL SEARCH_CNDL V_CHEATL ]
-set cmds_3_2 [ list VLS SUMLS MAXLS MINLS AVELS MEDLS WHTAVES SDLS SEARCH_CNDS TSEARCH_CNDS RNDDRAWL RNDDRAW_TOT WRITES INCRS MULTS SORT V_CHEATS ]
-set cmds_3_3 [ list WHTAVES RNDDRAWS ]
-set cmds_4_1 [ list WRITELL SUM_CND MAX_CND MIN_CND AVE_CND MED_CND SD_CND STAT_CND ]
-set cmds_4_2 [ list WHTAVELS WRITELS SEARCH_CNDLS RNDDRAW_TOTL SORT2 V_CHEATLS SUM_CND MAX_CND MIN_CND AVE_CND MED_CND SD_CND COUNT_CND COUNT_ALL_CND STAT_CND ]
-set cmds_4_3 [ list WHTAVELS RNDDRAWLS RNDDRAW_TOTS SORTS SORT2 ]
-set cmds_5_1 [ list SUM_CNDL MAX_CNDL MIN_CNDL AVE_CNDL WHTAVE_CND MED_CNDL PERC_CND SD_CNDL STAT_CNDL ]
-set cmds_5_2 [ list WRITELLS SUM_CNDS SUM_CNDL MAX_CNDS MAX_CNDL MIN_CNDL AVE_CNDL WHTAVE_CND MED_CNDS MED_CNDL SD_CNDS SD_CNDL COUNT_CNDL COUNT_ALL_CNDL STAT_CNDS STAT_CNDL ]
-set cmds_5_3 [ list RNDDRAW_TOTLS SORT2S SUM_CNDS MAX_CNDS MIN_CNDS AVE_CNDS WHTAVE_CND MED_CNDS PERC_CND SD_CNDS COUNT_CNDS COUNT_ALL_CNDS STAT_CNDS ]
-set cmds_5_4 [ list SORT2S ]
-set cmds_6_1 [ list WHTAVE_CNDL PERC_CNDL ]
-set cmds_6_2 [ list SUM_CNDLS MAX_CNDLS MIN_CNDLS AVE_CNDLS WHTAVE_CNDS WHTAVE_CNDL MED_CNDLS PERC_CNDS SD_CNDLS STAT_CNDLS ]
-set cmds_6_3 [ list SUM_CNDLS MAX_CNDLS MIN_CNDLS AVE_CNDLS WHTAVE_CNDS WHTAVE_CNDL MED_CNDLS PERC_CNDL SD_CNDLS COUNT_CNDLS COUNT_ALL_CNDLS STAT_CNDLS ]
-set cmds_6_4 [ list WHTAVE_CNDS PERC_CNDS ]
-set cmds_7_2 [ list WHTAVE_CNDLS PERC_CNDLS ]
-set cmds_7_3 [ list WHTAVE_CNDLS ]
-set cmds_7_4 [ list WHTAVE_CNDLS PERC_CNDLS ]
+# list of commands to search for parameters and objects 
+# (X_Y : X=number of macro arguments, Y=position of parameter/object)
+set cmdp_1_1 [ list V SUM MAX MIN AVE MED SD STAT RECALC LAST_CALC INIT_TSEARCH_CND ]
+set cmdp_2_1 [ list VL SUML MAXL MINL AVEL MEDL WHTAVE SDL SEARCH_CND TSEARCH_CND WRITE INCR MULT V_CHEAT ]
+set cmdp_2_2 [ list VS SUMS MAXS MINS AVES MEDS WHTAVE SDS STATS RNDDRAW RECALCS LAST_CALCS INIT_TSEARCH_CNDS ]
+set cmdp_3_1 [ list WRITEL SEARCH_CNDL V_CHEATL ]
+set cmdp_3_2 [ list VLS SUMLS MAXLS MINLS AVELS MEDLS WHTAVES SDLS SEARCH_CNDS TSEARCH_CNDS RNDDRAWL RNDDRAW_TOT WRITES INCRS MULTS SORT V_CHEATS ]
+set cmdp_3_3 [ list WHTAVES RNDDRAWS ]
+set cmdp_4_1 [ list WRITELL SUM_CND MAX_CND MIN_CND AVE_CND MED_CND SD_CND STAT_CND ]
+set cmdp_4_2 [ list WHTAVELS WRITELS SEARCH_CNDLS RNDDRAW_TOTL SORT2 V_CHEATLS SUM_CND MAX_CND MIN_CND AVE_CND MED_CND SD_CND COUNT_CND COUNT_ALL_CND STAT_CND ]
+set cmdp_4_3 [ list WHTAVELS RNDDRAWLS RNDDRAW_TOTS SORTS SORT2 ]
+set cmdp_5_1 [ list SUM_CNDL MAX_CNDL MIN_CNDL AVE_CNDL WHTAVE_CND MED_CNDL PERC_CND SD_CNDL STAT_CNDL ]
+set cmdp_5_2 [ list WRITELLS SUM_CNDS SUM_CNDL MAX_CNDS MAX_CNDL MIN_CNDL AVE_CNDL WHTAVE_CND MED_CNDS MED_CNDL SD_CNDS SD_CNDL COUNT_CNDL COUNT_ALL_CNDL STAT_CNDS STAT_CNDL ]
+set cmdp_5_3 [ list RNDDRAW_TOTLS SORT2S SUM_CNDS MAX_CNDS MIN_CNDS AVE_CNDS WHTAVE_CND MED_CNDS PERC_CND SD_CNDS COUNT_CNDS COUNT_ALL_CNDS STAT_CNDS ]
+set cmdp_5_4 [ list SORT2S ]
+set cmdp_6_1 [ list WHTAVE_CNDL PERC_CNDL ]
+set cmdp_6_2 [ list SUM_CNDLS MAX_CNDLS MIN_CNDLS AVE_CNDLS WHTAVE_CNDS WHTAVE_CNDL MED_CNDLS PERC_CNDS SD_CNDLS STAT_CNDLS ]
+set cmdp_6_3 [ list SUM_CNDLS MAX_CNDLS MIN_CNDLS AVE_CNDLS WHTAVE_CNDS WHTAVE_CNDL MED_CNDLS PERC_CNDL SD_CNDLS COUNT_CNDLS COUNT_ALL_CNDLS STAT_CNDLS ]
+set cmdp_6_4 [ list WHTAVE_CNDS PERC_CNDS ]
+set cmdp_7_2 [ list WHTAVE_CNDLS PERC_CNDLS ]
+set cmdp_7_3 [ list WHTAVE_CNDLS ]
+set cmdp_7_4 [ list WHTAVE_CNDLS PERC_CNDLS ]
+
+set cmdo_1_1 [ list COUNT COUNT_ALL SEARCH RNDDRAW_FAIR ADDOBJ DELETE_NET SHUFFLE_NET INIT_TSEARCH ]
+set cmdo_2_1 [ list RNDDRAW ADDOBJL ADDNOBJ ADDOBJ_EX LOAD_NET SAVE_NET SNAP_NET TSEARCH INIT_TSEARCHT ]
+set cmdo_2_2 [ list COUNTS COUNT_ALLS SEARCHS RNDDRAW_FAIRS CYCLE CYCLE_SAFE ADDOBJS DELETE_NETS SHUFFLE_NETS INIT_TSEARCHS ]
+set cmdo_3_1 [ list RNDDRAWL RNDDRAW_TOT ADDNOBJL ADDOBJ_EXL ADDNOBJ_EX SORT ]
+set cmdo_3_2 [ list RNDDRAWS ADDOBJLS ADDNOBJS ADDOBJ_EXS LOAD_NETS SAVE_NETS SNAP_NETS TSEARCHS INIT_TSEARCHTS ]
+set cmdo_3_3 [ list CYCLES CYCLE_SAFES ]
+set cmdo_4_1 [ list COUNT_CND COUNT_ALL_CND RNDDRAW_TOTL ADDNOBJ_EXL SORT2 ]
+set cmdo_4_2 [ list RNDDRAWLS RNDDRAW_TOTS ADDNOBJLS ADDOBJ_EXLS ADDNOBJ_EXS SORTS ]
+set cmdo_5_1 [ list COUNT_CNDL COUNT_ALL_CNDL INIT_NET ]
+set cmdo_5_2 [ list COUNT_CNDS COUNT_ALL_CNDS RNDDRAW_TOTLS ADDNOBJ_EXLS SORT2S ]
+set cmdo_6_2 [ list COUNT_CNDLS COUNT_ALL_CNDLS INIT_NETS ]
 
 proc create_elem_file { path } {
-	global exeTime cmds_1_1 cmds_2_1 cmds_2_2 cmds_3_1 cmds_3_2 cmds_3_3 cmds_4_1 cmds_4_2 cmds_4_3 cmds_5_1 cmds_5_2 cmds_5_3 cmds_5_4 cmds_6_1 cmds_6_2 cmds_6_3 cmds_6_4 cmds_7_2 cmds_7_3 cmds_7_4
+	global exeTime cmdp_1_1 cmdp_2_1 cmdp_2_2 cmdp_3_1 cmdp_3_2 cmdp_3_3 cmdp_4_1 cmdp_4_2 cmdp_4_3 cmdp_5_1 cmdp_5_2 cmdp_5_3 cmdp_5_4 cmdp_6_1 cmdp_6_2 cmdp_6_3 cmdp_6_4 cmdp_7_2 cmdp_7_3 cmdp_7_4 cmdo_1_1 cmdo_2_1 cmdo_2_2 cmdo_3_1 cmdo_3_2 cmdo_3_3 cmdo_4_1 cmdo_4_2 cmdo_5_1 cmdo_5_2 cmdo_6_2
 
 	# don't recreate if executable file was not changed
 	if { [ file exists "$path/elements.txt" ] && [ info exists exeTime ] } {
@@ -813,6 +826,7 @@ proc create_elem_file { path } {
 
 	set vars [ list ]
 	set pars [ list ]
+	set objs [ list ]
 
 	foreach fname $files {
 		if { ! [ file exists "$path/$fname" ] } {
@@ -823,134 +837,204 @@ proc create_elem_file { path } {
 		set text [ read -nonewline $f ]
 		close $f
 
-		set eqs [ regexp -all -inline -- {EQUATION[ \t]*\([ \t]*\"(\w+)\"[ \t]*\)} $text ]
+		# get variable names
+		set eqs [ regexp -all -inline -- {EQUATION[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?\)} $text ]
 		foreach { eq var } $eqs {
 			lappend vars $var
 		}
 
-		set eqs [ regexp -all -inline -- {EQUATION_DUMMY[ \t]*\([ \t]*\"(\w+)\"[ \t]*,[ \t]*\"\w*\"[ \t]*\)} $text ]
+		set eqs [ regexp -all -inline -- {EQUATION_DUMMY[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?,[ \t]*?\"\w*\"[ \t]*?\)} $text ]
 		foreach { eq var } $eqs {
 			lappend vars $var
 		}
 
-		foreach cmd $cmds_1_1 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([ \t]*\"(\w+)\"[ \t]*\)} ] $text ]
+		# get parameter names
+		foreach cmd $cmdp_1_1 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_2_1 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([ \t]*\"(\w+)\"[ \t]*,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_2_1 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_2_2 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[ \t]*\"(\w+)\"[ \t]*\)} ] $text ]
+		foreach cmd $cmdp_2_2 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[ \t]*?\"(\w+)\"[ \t]*?\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_3_1 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_3_1 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_3_2 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_3_2 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_3_3 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[^;]+,[ \t]*\"(\w+)\"[ \t]*\)} ] $text ]
+		foreach cmd $cmdp_3_3 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[^;]+,[ \t]*?\"(\w+)\"[ \t]*?\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_4_1 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_4_1 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_4_2 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_4_2 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_4_3 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_4_3 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_5_1 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_5_1 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_5_2 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_5_2 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_5_3 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_5_3 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_5_4 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[^;]+,[^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_5_4 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[^;]+,[^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_6_1 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+,[^;]+,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_6_1 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_6_2 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_6_2 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_6_3 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_6_3 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_6_4 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[^;]+,[^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_6_4 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[^;]+,[^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_7_2 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+,[^;]+,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_7_2 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_7_3 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_7_3 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
 			}
 		}
-		foreach cmd $cmds_7_4 {
-			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*\([^;]+,[^;]+,[^;]+,[ \t]*\"(\w+)\"[ \t]*,[^;]+,[^;]+,[^;]+\)} ] $text ]
+		foreach cmd $cmdp_7_4 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[^;]+,[^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+\)} ] $text ]
 			foreach { call par } $calls {
 				lappend pars $par
+			}
+		}
+		
+		# get object names
+		foreach cmd $cmdo_1_1 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?\)} ] $text ]
+			foreach { call obj } $calls {
+				lappend objs $obj
+			}
+		}
+		foreach cmd $cmdo_2_1 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?,[^;]+\)} ] $text ]
+			foreach { call obj } $calls {
+				lappend objs $obj
+			}
+		}
+		foreach cmd $cmdo_2_2 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[ \t]*?\"(\w+)\"[ \t]*?\)} ] $text ]
+			foreach { call obj } $calls {
+				lappend objs $obj
+			}
+		}
+		foreach cmd $cmdo_3_1 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+\)} ] $text ]
+			foreach { call obj } $calls {
+				lappend objs $obj
+			}
+		}
+		foreach cmd $cmdo_3_2 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+\)} ] $text ]
+			foreach { call obj } $calls {
+				lappend objs $obj
+			}
+		}
+		foreach cmd $cmdo_3_3 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[^;]+,[ \t]*?\"(\w+)\"[ \t]*?\)} ] $text ]
+			foreach { call obj } $calls {
+				lappend objs $obj
+			}
+		}
+		foreach cmd $cmdo_4_1 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+\)} ] $text ]
+			foreach { call obj } $calls {
+				lappend objs $obj
+			}
+		}
+		foreach cmd $cmdo_4_2 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+\)} ] $text ]
+			foreach { call obj } $calls {
+				lappend objs $obj
+			}
+		}
+		foreach cmd $cmdo_5_1 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+,[^;]+\)} ] $text ]
+			foreach { call obj } $calls {
+				lappend objs $obj
+			}
+		}
+		foreach cmd $cmdo_5_2 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+\)} ] $text ]
+			foreach { call obj } $calls {
+				lappend objs $obj
+			}
+		}
+		foreach cmd $cmdo_6_2 {
+			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([^;]+,[ \t]*?\"(\w+)\"[ \t]*?,[^;]+,[^;]+,[^;]+,[^;]+\)} ] $text ]
+			foreach { call obj } $calls {
+				lappend objs $obj
 			}
 		}
 	}
@@ -958,9 +1042,10 @@ proc create_elem_file { path } {
 	set vars [ lsort -dictionary -unique $vars ]
 	set pars [ remove_elem $pars $vars ]
 	set pars [ lsort -dictionary $pars ]
+	set objs [ lsort -dictionary -unique $objs ]
 
 	set f [ open "$path/elements.txt" w ]
-	puts -nonewline $f "$vars\n$pars"
+	puts -nonewline $f "$vars\n$pars\n$objs"
 	close $f
 }
 
@@ -972,21 +1057,25 @@ proc create_elem_file { path } {
 # Lists to hold the elements in model program and the ones missing in model
 set progVar [ list ]
 set progPar [ list ]
+set progObj [ list ]
 set missVar [ list ]
 set missPar [ list ]
+set missObj [ list ]
 
 proc read_elem_file { path } {
-	global progVar progPar
+	global progVar progPar progObj
 
 	if { ! [ file exists "$path/elements.txt" ] } {
 		set progVar [ list ]
 		set progPar [ list ]
+		set progObj [ list ]
 		return
 	}
 
 	set f [ open "$path/elements.txt" r ]
 	set progVar [ split [ gets $f ] ]
 	set progPar [ split [ gets $f ] ]
+	set progObj [ split [ gets $f ] ]
 	close $f
 
 	upd_miss_elem
@@ -998,11 +1087,12 @@ proc read_elem_file { path } {
 # Update the missing elements list, considering the elements already in the model structure
 #************************************************
 proc upd_miss_elem { } {
-	global modObj modElem progVar progPar missPar missVar
+	global modObj modElem progVar progPar progObj missPar missVar missObj
 
 	if [ info exists modElem ] {
 		set missVar [ remove_elem $progVar $modElem ]
 		set missPar [ remove_elem $progPar $modElem ]
+		set missObj [ remove_elem $progObj $modElem ]
 	} else {
 		set missVar $progVar
 		set missPar $progPar
@@ -1011,10 +1101,14 @@ proc upd_miss_elem { } {
 	if [ info exists modObj ] {
 		set missVar [ remove_elem $missVar $modObj ]
 		set missPar [ remove_elem $missPar $modObj ]
+		set missObj [ remove_elem $progObj $modObj ]
+	} else {
+		set missObj $progObj
 	}
 
 	set missVar [ lsort -dictionary $missVar ]
 	set missPar [ lsort -dictionary $missPar ]
+	set missObj [ lsort -dictionary $missObj ]
 }
 
 

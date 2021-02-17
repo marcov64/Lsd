@@ -1210,7 +1210,7 @@ case 2:
 	else
 		cur2 = NULL;
 	
-	// read the lists of variables/functions and parameters in model program 
+	// read the lists of variables/functions, parameters and objects in model program 
 	// from disk, if needed, or just update the missing elements lists
 	cmd( "if { [ llength $missVar ] == 0 || [ llength $missPar ] == 0 } { read_elem_file %s } { upd_miss_elem }", exec_path );
 
@@ -1498,6 +1498,10 @@ case 3:
 	else
 		cur2 = NULL;
 
+	// read the lists of variables/functions, parameters and objects in model program 
+	// from disk, if needed, or just update the missing elements lists
+	cmd( "if { [ llength $missObj ] == 0 } { read_elem_file %s } { upd_miss_elem }", exec_path );
+
 	Tcl_LinkVar( inter, "done", ( char * ) &done, TCL_LINK_INT );
 
 	cmd( "set lab \"\"" );
@@ -1512,7 +1516,7 @@ case 3:
 
 	cmd( "ttk::frame $T.f" );
 	cmd( "ttk::label $T.f.lab_ent -text \"Object name\"" );
-	cmd( "ttk::entry $T.f.ent_var -width 20 -textvariable lab -justify center" );
+	cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missObj" );
 	cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
 	cmd( "bind $T.f.ent_var <KeyPress-Return> {focus $T.b.ok}" );
 
