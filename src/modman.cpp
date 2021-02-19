@@ -1108,7 +1108,7 @@ int lsdmain( int argn, char **argv )
 	/* Find a text pattern in the text */
 	if ( choice == 11 )
 	{
-		cmd( "set endsearch end" );
+		cmd( "if [ string equal $dirsearch \"-backwards\" ] { set endsearch 1.0 } { set endsearch end }" );
 		cmd( "set curcounter $lfindsize" );
 		cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
 
@@ -1230,7 +1230,7 @@ int lsdmain( int argn, char **argv )
 	/* Find and replace a text pattern in the text */
 	if ( choice == 21 )
 	{
-		cmd( "set endsearch end" );
+		cmd( "if [ string equal $dirsearch \"-backwards\" ] { set endsearch 1.0 } { set endsearch end }" );
 		cmd( "set curcounter $lfindsize" );
 		cmd( "set cur \"\"" );
 		cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
