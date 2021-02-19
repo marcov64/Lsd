@@ -309,7 +309,7 @@ for( k in 1 : nExp ) { # Experiment k
   corr_table( c( "GDP", "D2", "I", "CPI", "A", "U", "wReal", "mu2avg", "r",
                  "DebGDP", "TC", "Loans", "BadDeb" ),
               mcData[[1]], plot = TRUE,
-              logVars = c( 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 2, 1, 1 ),
+              logVars = c( 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 2, 2, 2 ),
               mask = TmaskStat, pl = lowP, pu = highP, nfix = bpfK,
               tit = paste( "Pearson correlation coefficients (", legends[ k ], ")" ),
               subtit = paste0( "( insignificant values at ", ( 1 - CI ) * 100,

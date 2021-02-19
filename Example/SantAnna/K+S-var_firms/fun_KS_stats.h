@@ -93,20 +93,9 @@ EQUATION( "Bfail" )
 /*
 Rate of failing banks
 */
-
 VS( FINSECL2, "NWb" );							// make sure it is updated
-
-// add-up failed banks
-i = j = 0;										// bank/fail counters
-CYCLES( FINSECL2, cur, "Bank" )
-{
-	if ( VS( cur, "_Gbail" ) > 0 )
-		++j;
-	
-	++i;
-}
-
-RESULT( ( double ) j / i )
+RESULT( COUNT_CNDS( FINSECL2, "Bank", "_Gbail", ">", 0 ) / 
+		COUNTS( FINSECL2, "Bank" ) )
 
 
 EQUATION( "ExRes" )
@@ -120,20 +109,9 @@ EQUATION( "HHb" )
 /*
 Normalized Herfindahl-Hirschman index for financial sector
 */
-
-v[1] = i = 0;									// index accumulator & counter
-CYCLES( FINSECL2, cur, "Bank" )
-{
-	v[1] += pow( VS( cur, "_fB" ), 2 );
-	++i;
-}
-
-if ( i > 1 )
-	v[0] = max( 0, ( v[1] - 1.0 / i ) / ( 1 - 1.0 / i ) );// normalize HHI
-else
-	v[0] = 1;
-	
-RESULT( v[0] )
+i = COUNTS( FINSECL2, "Bank" );
+RESULT( i > 1 ? max( 0, ( WHTAVES( FINSECL2, "_fB", "_fB" ) - 1.0 / i ) / 
+						( 1 - 1.0 / i ) ) : 1 )
 
 
 EQUATION( "HPb" )
@@ -208,20 +186,9 @@ EQUATION( "HH1" )
 /*
 Normalized Herfindahl-Hirschman index for capital-good sector
 */
-
-v[1] = i = 0;									// index accumulator & counter
-CYCLES( CAPSECL2, cur, "Firm1" )
-{
-	v[1] += pow( VS( cur, "_f1" ), 2 );			// add the squared market shares
-	++i;
-}
-
-if ( i > 1 )
-	v[0] = ( v[1] - 1.0 / i ) / ( 1 - 1.0 / i );// normalize HHI
-else
-	v[0] = 1;
-	
-RESULT( v[0] )
+i = COUNTS( CAPSECL2, "Firm1" );
+RESULT( i > 1 ? max( 0, ( WHTAVES( CAPSECL2, "_f1", "_f1" ) - 1.0 / i ) / 
+						( 1 - 1.0 / i ) ) : 1 )
 
 
 EQUATION( "HP1" )
@@ -254,12 +221,7 @@ EQUATION( "age1avg" )
 /*
 Average age of firms in capital-good sector
 */
-
-v[0] = 0;										// firm age accumulator
-CYCLES( CAPSECL2, cur, "Firm1" )
-	v[0] += T - VS( cur, "_t1ent" ) + 1;
-	
-RESULT( v[0] / VS( CAPSECL2, "F1" ) )
+RESULT( T - AVES( CAPSECL2, "_t1ent" ) )
 
 
 /*======================= CONSUMER-GOOD SECTOR STATS =========================*/
@@ -316,20 +278,9 @@ EQUATION( "HH2" )
 /*
 Normalized Herfindahl-Hirschman index for consumption-good sector
 */
-
-v[1] = j = 0;									// index accumulator & counter
-CYCLES( CONSECL2, cur, "Firm2" )
-{
-	v[1] += pow( VS( cur, "_f2" ), 2 );			// add the squared market shares
-	++j;
-}
-
-if ( j > 1 )
-	v[0] = ( v[1] - 1.0 / j ) / ( 1 - 1.0 / j );// normalize HHI
-else
-	v[0] = 1;
-	
-RESULT( v[0] )
+i = COUNTS( CONSECL2, "Firm2" );
+RESULT( i > 1 ? max( 0, ( WHTAVES( CONSECL2, "_f2", "_f2" ) - 1.0 / i ) / 
+						( 1 - 1.0 / i ) ) : 1 )
 
 
 EQUATION( "HP2" )
@@ -364,12 +315,7 @@ EQUATION( "age2avg" )
 /*
 Average age of firms in consumption-good sector
 */
-
-v[0] = 0;										// firm age accumulator
-CYCLES( CONSECL2, cur, "Firm2" )
-	v[0] += T - VS( cur, "_t2ent" ) + 1;
-	
-RESULT( v[0] / VS( CONSECL2, "F2" ) )
+RESULT( T - AVES( CONSECL2, "_t2ent" ) )
 
 
 EQUATION( "dN" )

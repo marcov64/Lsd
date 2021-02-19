@@ -297,6 +297,8 @@ double c10 = INIWAGE / ( Btau0 * m1 );			// initial cost in sector 1
 double c20 = INIWAGE / INIPROD;					// initial cost in sector 2
 double p10 = ( 1 + mu1 ) * c10;					// initial price sector 1
 double p20 = ( 1 + mu20 ) * c20;				// initial price sector 2
+double Eavg0 = ( VS( cur2, "omega1" ) + VS( cur2, "omega2" ) ) / 2;	
+												// initial competitiveness
 double G0 = V( "gG" ) * Ls0;					// initial public spending
 
 // reserve space for country-level non-initialized vectors
@@ -307,12 +309,14 @@ WRITES( cur1, "lastID1", 0 );
 WRITES( cur2, "lastID2", 0 );
 
 // initialize lagged variables depending on parameters
+WRITEL( "A", INIPROD, -1 );
 WRITEL( "G", G0, -1 );
 WRITELS( cur1, "A1", Btau0, -1 );
 WRITELS( cur1, "PPI", p10, -1 );
 WRITELS( cur1, "PPI0", p10, -1 );
 WRITELS( cur1, "p1avg", p10, -1 );
 WRITELS( cur2, "CPI", p20, -1 );
+WRITELS( cur2, "Eavg", Eavg0, -1 );
 WRITELS( cur2, "c2", c20, -1 );
 WRITELS( cur4, "Ls", Ls0, -1 );
 WRITELS( cur4, "w", INIWAGE, -1 );

@@ -55,3 +55,9 @@ RESULT( V( "_Avint" ) * V( "_Lvint" ) )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
+
+EQUATION_DUMMY( "_Lvint", "" )
+/*
+Labor available for operation of vintage
+Updated in '_alloc2'
+*/

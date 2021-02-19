@@ -497,7 +497,7 @@ all.insert( all.end( ), posit, END_ARR( posit ) );
 all.insert( all.end( ), finite, END_ARR( finite ) );
 
 // innovation, productivity
-LOG( "\n  ^^ (t=%g) F1=%.3g inn=%.3g imi=%g A1=%.3g D1=%.3g Q1=%.3g Q1e=%.3g", 
+LOG( "\n  ^^ (t=%g) F1=%g inn=%.3g imi=%.3g A1=%.3g D1=%.3g Q1=%.3g Q1e=%.3g", 
 	 T, F1, inn, imi, A1, D1, Q1, Q1e );
 	 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )

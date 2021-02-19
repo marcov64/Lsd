@@ -250,13 +250,6 @@ V( "CI" );										// ensure cancellations acct'd
 RESULT( SUM( "_EI" ) )	
 
 
-EQUATION( "F2" )
-/*
-Number of firms in consumption-good sector
-*/
-RESULT( COUNT( "Firm2" ) )
-
-
 EQUATION( "I" )
 /*
 Total (real) investment in consumption-good sector
