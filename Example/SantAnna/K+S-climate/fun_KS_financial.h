@@ -192,6 +192,7 @@ RESULT( SUM( "_Cl" ) )
 EQUATION( "Depo" )
 /*
 Total banking sector deposits
+Net deposits from exiting and entering firms in period not considered
 */
 RESULT( SUM( "_Depo" ) )								// sum-up banks deposits
 
@@ -215,6 +216,7 @@ RESULT( SUM( "_Gbail" ) )								// sum-up banks bailouts
 EQUATION( "Loans" )
 /*
 Total banking sector loans (non-defaulted)
+Net loans to exiting and entering firms in period not considered
 */
 RESULT( SUM( "_Loans" ) )
 

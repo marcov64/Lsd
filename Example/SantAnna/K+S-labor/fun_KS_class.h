@@ -82,6 +82,7 @@ struct firm2E									// extensions to Firm2 object
 
 #define INIPROD		1		// initial notional machine productivity
 #define INIWAGE		1		// initial notional wage
+#define INISKILL	1			// initial notional worker skills
 
 
 /*========================= HOOK-RELATED DEFINITIONS =========================*/

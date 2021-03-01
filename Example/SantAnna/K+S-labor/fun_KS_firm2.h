@@ -13,6 +13,7 @@
 EQUATION( "_Deb2max" )
 /*
 Prudential maximum bank debt of firm in consumer-good sector
+Also updates '_CD2', '_CD2c', '_CS2'
 */
 
 // maximum debt allowed to firm, considering net worth and operating margin
@@ -23,7 +24,9 @@ v[5] = VS( FINSECL2, "Lambda" ) * max( VL( "_NW2", 1 ),
 v[0] = max( v[5], VS( FINSECL2, "Lambda0" ) * VLS( CAPSECL2, "PPI", 1 ) / 
 				  VS( CAPSECL2, "PPI0" ) );
 
-WRITE( "_cred2c", 0 );							// reset constraint for period
+WRITE( "_CD2", 0 );								// reset total credit demand
+WRITE( "_CD2c", 0 );							// reset constraint for period
+WRITE( "_CS2", 0 );								// reset total credit supplied
 
 RESULT( v[0] )
 		
@@ -128,6 +131,7 @@ RESULT( v[7] * ( 1 - v[10] ) + v[8] * ( 1 - v[11] ) + v[9] * v[12] )
 EQUATION( "_EI" )
 /*
 Effective expansion investment of firm in consumption-good sector
+Also updates '_NW2', '_CD2', 'CD2c', 'CS2'
 */
 
 V( "_Q2" );										// make sure production decided
@@ -139,7 +143,7 @@ v[1] = V( "_EId" );								// desired expansion investment
 if ( v[1] == 0 )
 	END_EQUATION( 0 );							// nothing to do
 
-v[2] = V( "_cred2" );							// available credit
+v[2] = V( "_CS2a" );							// available credit supply
 v[3] = V( "_NW2" );								// net worth (cash available)
 v[4] = VS( PARENT, "m2" );						// machine output per period
 v[5] = VS( cur, "_p1" );						// new machine price
@@ -236,6 +240,7 @@ RESULT( max( ( 1 + VS( PARENT, "iota" ) ) * V( "_D2e" ) - VL( "_N", 1 ), 0 ) /
 EQUATION( "_Q2" )
 /*
 Planned production for a firm in consumption-good sector
+Also updates '_NW2', '_CD2', 'CD2c', 'CS2'
 */
 
 v[1] = V( "_Q2d" );								// desired production
@@ -243,7 +248,7 @@ v[1] = V( "_Q2d" );								// desired production
 if ( v[1] == 0 )
 	END_EQUATION( 0 );							// nothing to do
 
-v[2] = V( "_cred2" );							// available credit
+v[2] = V( "_CS2a" );							// available credit supply
 v[3] = VL( "_NW2", 1 );							// net worth (cash available)
 v[4] = V( "_c2" );								// expected unit cost
 v[5] = VS( PARENT, "m2" );						// machine output per period
@@ -304,6 +309,7 @@ RESULT( min( v[1], VL( "_K", 1 ) ) )
 EQUATION( "_SI" )
 /*
 Effective substitution investment of firm in consumption-good sector
+Also updates '_NW2', '_CD2', 'CD2c', 'CS2'
 */
 
 V( "_EI" );										// make sure expansion done
@@ -313,7 +319,7 @@ v[1] = V( "_SId" );								// desired substitution invest.
 if ( v[1] == 0 )
 	END_EQUATION( 0 );							// nothing to do
 
-v[2] = V( "_cred2" );							// available credit
+v[2] = V( "_CS2a" );							// available credit supply
 v[3] = V( "_NW2" );								// net worth (cash available)
 v[4] = VS( PARENT, "m2" );						// machine output per period
 v[5] = VS( PARENTS( SHOOKS( HOOK( SUPPL ) ) ), "_p1" );// new machine price
@@ -359,7 +365,7 @@ RESULT( v[0] )
 EQUATION( "_Tax2" )
 /*
 Tax paid by firm in consumption-good sector
-Also updates '_B2', '_Div2', '_NW2'
+Also updates '_B2', '_Div2', '_NW2', '_CD2', 'CD2c', 'CS2'
 */
 
 v[1] = V( "_Pi2" );								// firm profit in period
@@ -398,7 +404,7 @@ if ( v[6] < 0 )									// must finance losses?
 		INCR( "_NW2", v[6] );					// draw from net wealth
 	else
 	{
-		v[8] = V( "_cred2" );					// available credit
+		v[8] = V( "_CS2a" );					// available credit supply
 		v[9] = - v[6] - v[7] + 1;				// desired finance
 		
 		if ( v[8] >= v[9] )						// can finance losses?
@@ -415,17 +421,17 @@ if ( v[6] < 0 )									// must finance losses?
 }
 else											// pay debt with available cash
 {
-	v[10] = V( "_Deb2" );						// current debt
+	v[10] = V( "_Deb2" ) * VS( FINSECL2, "deltaB" );// desired debt repayment
 	
-	if ( v[10] > 0 )							// has debt?
+	if ( v[10] > 0 )							// something to repay?
 	{
-		if ( v[6] > v[10] )						// can repay all debt and more
+		if ( v[6] > v[10] )						// can repay desired and more
 		{
-			update_debt2( THIS, 0, - v[10] );	// zero debt
+			update_debt2( THIS, 0, - v[10] );	// repay desired
 			INCR( "_NW2", v[6] - v[10] );		// save the rest
 		}
 		else
-			update_debt2( THIS, 0, - v[6] );	// repay part of debt
+			update_debt2( THIS, 0, - v[6] );	// repay what is possible
 	}
 	else
 		INCR( "_NW2", v[6] );					// save all
@@ -436,7 +442,7 @@ RESULT( v[0] )
 
 EQUATION( "_alloc2" )
 /*
-Allocate unallocated workers to vintages, prioritizing newer vintages
+Allocate workers to vintages, prioritizing newer vintages
 */
 
 cur = HOOK( TOPVINT );							// start with top vintage
@@ -504,6 +510,7 @@ RESULT( i * VS( LABSUPL2, "Lscale" ) )
 EQUATION( "_c2" )
 /*
 Planned average unit cost of firm in consumption-good sector
+Considers only used machines, differently from original K+S
 Also updates '_A2', '_A2p'
 */
 
@@ -553,7 +560,7 @@ if ( v[6] == 0 )								// no machine?
 	v[0] = v[4] / v[7];							// machine unit cost
 }
 
-WRITE( "_A2p", v[7] / v[6] );					// potential notional product.
+WRITE( "_A2p", v[7] / v[6] );					// potential productivity
 WRITE( "_A2", v[8] / v[6] );					// expected productivity
 
 RESULT( v[0] / v[6] )
@@ -565,7 +572,7 @@ Market share of firm in consumption-good sector
 It is computed using a replicator equation over the relative competitiveness 
 of the firm
 Because of entrants, market shares may add-up to more than one, so 'f2rescale'
-must be used before '_f2' is used
+must be used before '_f2' is used, by calling 'CPI'
 */
 
 v[1] = VS( PARENT, "f2min" );						// minimum share to stay
@@ -700,18 +707,22 @@ Also set firm 'hook' pointers to supplier firm object
 
 VS( CAPSECL2, "inn" );							// ensure innovation is done and
 												// brochures distributed
-v[1] = DBL_MAX;									// supplier price/cost ratio
+v[1] = VS( PARENT, "m2" );						// machine modularity
+v[2] = V( "_postChg" ) ? VS( PARENT, "bChg" ) : VS( PARENT, "b" );// req payback
+v[3] = VL( "_w2avg", 1 );						// average firm wage
+												
+v[4] = DBL_MAX;									// supplier price/cost ratio
 i = 0;
 cur2 = cur3 = NULL;
 CYCLE( cur, "Broch" )							// use brochures to find supplier
 {
 	cur1 = PARENTS( SHOOKS( cur ) );			// pointer to supplier object	
 	
-	// compare price to productivity ratios
-	v[2] = VS( cur1, "_p1" ) / VS( cur1, "_Atau" );
-	if ( v[2] < v[1] )							// best so far?
+	// compare total machine unit cost (acquisition + operation for payback period)
+	v[5] = VS( cur1, "_p1" ) / v[1] + v[2] * v[3] / VS( cur1, "_Atau" );
+	if ( v[5] < v[4] )							// best so far?
 	{
-		v[1] = v[2];							// save current best supplier
+		v[4] = v[5];							// save current best supplier
 		i = VS( cur1, "_ID1" );					// supplier ID
 		cur2 = SHOOKS( cur );					// own entry on supplier list
 		cur3 = cur;								// best supplier brochure
@@ -723,7 +734,7 @@ if ( cur2 != NULL && cur3 != NULL )
 	WRITES( cur2, "_tSel", T );					// update selection time
 else											// no brochure received
 {
-	cur1 = RNDDRAW_FAIRS( CAPSECL2, "Firm1" );	// draw new supplier
+	cur1 = RNDDRAWS( CAPSECL2, "Firm1", "_Atau" );// try draw new good supplier
 	i = VS( cur1, "_ID1" );
 	
 	// create the brochure/client interconnected objects
@@ -772,14 +783,10 @@ if ( k == 0 )									// wage premium mode?
 			v[5] = VLS( PARENT, "dCPIb", 1 );	// inflation variation
 			v[6] = VLS( GRANDPARENT, "dAb", 1 );// general productivity var.
 			v[7] = VLS( LABSUPL2, "dUeB", 1 );	// unemployment variation
+			v[12] = VL( "_L2vac", 1 );			// previous vacancy rate
 			
 			// notional productivity variation (firm), consider entrants
 			v[8] = ( h == 0 ) ? 0 : VL( "_dA2b", 1 );
-			
-			// negative product. floor?
-			if ( VS( GRANDPARENT, "flagNegProdWage" ) == 1 )
-				v[8] = max( 0, v[8] );			// apply limit if enabled
-			v[12] = VL( "_L2vac", 1 );			// previous vacancy rate
 			
 			// make sure total productivity effect is bounded to 1
 			if ( ( v[2] + v[4] ) > 1 )
@@ -907,6 +914,7 @@ EQUATION( "_D2d" )
 /*
 Desired (potential) demand for firm in consumption-good sector
 */
+VS( PARENT, "CPI" );							// ensure m.s. updated
 RESULT( V( "_f2" ) * VS( PARENT, "D2d" ) )
 
 
@@ -1069,14 +1077,14 @@ RESULT( v[1] > 0 ? V( "_Pi2" ) / v[1] : 0 )		// ignore no capital firms
 
 EQUATION( "_Pi2" )
 /*
-Profit of firm in consumption-good sector
+Profit of firm (before taxes) in consumption-good sector
 */
 
 v[1] = V( "_S2" ) - V( "_W2" );					// gross operating margin
 v[2] = VS( FINSECL2, "rD" ) * VL( "_NW2", 1 );	// financial income
 
 // firm effective interest rate on debt
-v[3] = VLS( FINSECL2, "rDeb", 1 ) * ( 1 + ( VL( "_qc2", 1 ) - 1 ) * 
+v[3] = VS( FINSECL2, "rDeb" ) * ( 1 + ( VL( "_qc2", 1 ) - 1 ) * 
 	   VS( FINSECL2, "kConst" ) ); 
 
 v[4] = v[3] * VL( "_Deb2", 1 );					// interest to pay
@@ -1180,7 +1188,8 @@ EQUATION( "_dA2b" )
 Notional productivity (bounded) rate of change of firm in consumption-good sector
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "_A2", VS( GRANDPARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "_A2", VS( GRANDPARENT, "mLim" ), 
+					   VS( GRANDPARENT, "mPer" ) ) )
 
 
 EQUATION( "_dNnom" )
@@ -1290,9 +1299,8 @@ EQUATION( "_sT2min" )
 Minimum workers tenure skills of a firm in consumption-good sector
 */
 
-i = VS( GRANDPARENT, "flagWorkerLBU" );			// worker-level learning mode
-if ( i == 0 || i == 1 )							// no learning by tenure mode?
-	END_EQUATION( 1 );							// skills = 1
+if ( VS( GRANDPARENT, "flagWorkerLBU" ) <= 1 )	// no learning by tenure mode?
+	END_EQUATION( INISKILL );
 	
 v[0] = DBL_MAX;									// current minimum
 CYCLE( cur, "Wrk2" )
@@ -1312,7 +1320,7 @@ Weighted average workers compound skills of a firm in consumption-good sector
 */
 
 if ( VS( GRANDPARENT, "flagWorkerLBU" ) == 0 )	// no learning ?
-	END_EQUATION( 1 );							// skills = 1
+	END_EQUATION( INISKILL );
 	
 v[0] = i = 0;									// accumulators
 CYCLE( cur, "Wrk2" )
@@ -1321,7 +1329,7 @@ CYCLE( cur, "Wrk2" )
 	++i;
 }
 
-RESULT( i > 0 ? v[0] / i : 1 )					// handle the no worker case
+RESULT( i > 0 ? v[0] / i : INISKILL )			// handle the no worker case
 
 
 EQUATION( "_w2avg" )
@@ -1348,9 +1356,9 @@ RESULT( V( "_w2avg" ) / VS( PARENT, "CPI" ) )
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/
 
-EQUATION( "_cred2" )
+EQUATION( "_CS2a" )
 /*
-Bank credit available (new debt) to firm in consumer-good sector
+Bank credit supply available (new debt) to firm in consumer-good sector
 Function called multiple times in single time step
 */
 
@@ -1394,6 +1402,24 @@ Bonus paid by firm in consumption-good sector
 Updated in '_Tax2'
 */
 
+EQUATION_DUMMY( "_CD2", "" )
+/*
+Credit demand for firm in consumption-good sector
+Updated in '_Deb2max', '_Q2', '_EI', '_SI', '_Tax2'
+*/
+
+EQUATION_DUMMY( "_CD2c", "" )
+/*
+Credit demand constraint for firm in consumption-good sector
+Updated in '_Deb2max', '_Q2', '_EI', '_SI', '_Tax2'
+*/
+
+EQUATION_DUMMY( "_CS2", "" )
+/*
+Credit supplied to firm in consumption-good sector
+Updated in '_Deb2max', '_Q2', '_EI', '_SI', '_Tax2'
+*/
+
 EQUATION_DUMMY( "_D2", "D2" )
 /*
 Demand fulfilled by firm in consumption-good sector
@@ -1403,7 +1429,7 @@ Updated in 'D2'
 EQUATION_DUMMY( "_Deb2", "" )
 /*
 Stock of bank debt of firm in consumption-good sector
-Updated in '_Q2', '_EI', '_SI', '_Pi2' and '_Tax2'
+Updated in '_Q2', '_EI', '_SI', '_Pi2', '_Tax2'
 */
 
 EQUATION_DUMMY( "_Div2", "" )
@@ -1415,13 +1441,7 @@ Updated in '_Tax2'
 EQUATION_DUMMY( "_NW2", "" )
 /*
 Net wealth (free cash) of firm in consumption-good sector
-Updated in '_Q2', '_EI', '_SI' and '_Tax2'
-*/
-
-EQUATION_DUMMY( "_cred2c", "" )
-/*
-Credit constraint for firm in consumption-good sector
-Updated in '_Deb2max', '_Q2', '_EI' and '_SI'
+Updated in '_Q2', '_EI', '_SI', '_Tax2'
 */
 
 EQUATION_DUMMY( "_hires2", "hires2" )

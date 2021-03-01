@@ -239,15 +239,17 @@ double Def = VS( PARENT, "Def" );
 double Def_1 = VLS( PARENT, "Def", 1 );
 double SavAcc = VS( PARENT, "SavAcc" );
 
+double Deb1 = VS( CAPSECL1, "Deb1" );
 double F1 = VS( CAPSECL1, "F1" );
 double NW1 = VS( CAPSECL1, "NW1" );
 
+double Deb2 = VS( CONSECL1, "Deb2" );
 double F2 = VS( CONSECL1, "F2" );
 double NW2 = VS( CONSECL1, "NW2" );
 
-double nonNeg[ ] = { BS, Bonds, CD, CDc, CS, Depo, DepoG, DivB, Gbail, Loans, 
-					 LoansCB, Res, TaxB, Bda, Bfail, BadDeb, HHb, HPb, SavAcc, 
-					 NW1, NW2, rBonds, rD, rRes };
+double nonNeg[ ] = { BS, Bonds, CD, CDc, CS, Deb1, Deb2, Depo, DepoG, DivB, 
+					 Gbail, Loans, LoansCB, Res, TaxB, Bda, Bfail, BadDeb, 
+					 HHb, HPb, SavAcc, NW1, NW2, rBonds, rD, rRes };
 double posit[ ] = { Cl, r, rDeb, F1, F2 };
 double finite[ ] = { BD, Deb, TC, PiB, NW1, NW2 };
 
@@ -278,7 +280,7 @@ LOG( "\n   $$ Res=%.3g LoansCB=%.3g BondsCB=%.3g DepoG=%.3g Gbail=%.3g",
 check_error( Res > Depo || round( Res ) != round( v[12] ), 
 			 "INCONSISTENT-RESERVES", 0, & errors );
 
-check_error( round( LoansCB ) != round ( v[11] ) || LoansCB > Res, 
+check_error( round( LoansCB ) != round ( v[11] ), 
 			 "INCONSISTENT-CB-LOANS", 0, & errors );
 
 // government bonds and debt
@@ -307,16 +309,16 @@ check_error( F1 + F2 != Cl || v[6] != Cl,
 check_error( v[7] < 1 - TOL / 10 || v[7] > 1 + TOL / 10, 
 			 "INCONSISTENT-SHARES", 0, & errors );
 
-check_error( round( Depo ) != round( v[9] ) || round( Loans ) != round( v[10] ), 
-			 "INCONSISTENT-BANK-ACCOUNTS", 0, & errors );
-
 // bank assets and liabilities, credit dynamic
 LOG( "\n   $$ Depo=%.3g Loans=%.3g CD=%.3g CS=%.3g CDc=%.3g", 
 	 Depo, Loans, CD, CS, CDc );
 
-check_error( NW1 + NW2 + SavAcc > ( 1 + TOL / 2 ) * Depo ||
-			 NW1 + NW2 + SavAcc < ( 1 - TOL / 10 ) * Depo, 
-			 "INCONSISTENT-DEPOSITS", 0, & errors );
+check_error( round( Depo ) != round( v[9] ) || round( Loans ) != round( v[10] ),
+			 "INCONSISTENT-BANK-ACCOUNTS", 0, & errors );
+
+// try to account for deposits from loans of entrant firms (very crude)
+check_error( abs( NW1 + NW2 + SavAcc - Depo - Deb1 - Deb2 + Loans ) / Depo > TOL, 
+			 "LARGE-DEPO-LOANS-GAP", 0, & errors );
 
 check_error( CS > CD || CDc > CD, "INCONSISTENT-FINANCE", 0, & errors );
 

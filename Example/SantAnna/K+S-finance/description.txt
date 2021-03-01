@@ -151,7 +151,7 @@ Country-level parameters (object Country)
 ------------------------
 Crec = unfilled past consumption recover limit as fraction of current consumption (>0)
 gG = growth rate of fixed public expenditure (>=0)
-mLim = multiple limit on delta variation on sensitive calculations (>=0, 0=no limit)
+mLim = absolute cap on moving-average growth calculation (>=0, 0=no limit)
 tr = tax rate (>=0)
 
 Financial market parameters (object Financial)

@@ -271,7 +271,7 @@ EQUATION( "dAb" )
 Notional overall productivity (bounded) rate of change
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "A", V( "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "A", V( "mLim" ), V( "mPer" ) ) )
 
 
 EQUATION( "dGDP" )

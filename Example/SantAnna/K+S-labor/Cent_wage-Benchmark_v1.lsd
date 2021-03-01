@@ -53,6 +53,7 @@ Label Root
 			Param: DefPrule
 			Param: EqB0
 			Param: Lambda
+			Param: LambdaChg
 			Param: Lambda0
 			Param: PhiB
 			Param: Trule
@@ -69,11 +70,14 @@ Label Root
 			Param: muD
 			Param: muDeb
 			Param: muRes
+			Param: muResChg
 			Param: piT
 			Param: rAdj
 			Param: rT
+			Param: rTchg
 			Param: rhoBonds
 			Param: tauB
+			Param: tauBchg
 			Param: thetaBonds
 			Func: banksMaps
 			Func: pickBank
@@ -103,18 +107,90 @@ Label Root
 		Son: Labor
 		Label Labor
 		{
+			Son: Worker
+			Label Worker
+			{
+				Param: _ID
+				Param: _wfull
+				Var: _B
+				Var: _CQ
+				Var: _Q
+				Var: _Tc
+				Var: _Te
+				Var: _Tu
+				Var: _age
+				Var: _appl
+				Var: _dQb
+				Var: _discouraged
+				Var: _employed
+				Var: _s
+				Var: _sT
+				Var: _sV
+				Var: _searchProb
+				Var: _w
+				Var: _wR
+				Var: _wReal
+				Var: _wRes
+				Var: _wS
+
+			}
+
+			Param: Gamma
+			Param: GammaCost
 			Param: Ls0
+			Param: Lscale
+			Param: Tc
+			Param: Tp
+			Param: Tr
+			Param: Ts
+			Param: TsChg
 			Param: delta
+			Param: epsilon
+			Param: kappa
+			Param: lambda
+			Param: omega
+			Param: omegaPosChg
+			Param: omegaPreChg
+			Param: omegaU
 			Param: phi
+			Param: phiChg
 			Param: psi1
 			Param: psi2
 			Param: psi3
+			Param: psi4
+			Param: psi5
+			Param: psi6
+			Param: rho
+			Param: sigma
+			Param: tauG
+			Param: tauT
+			Param: tauU
+			Param: theta
 			Param: w0min
+			Param: wCap
+			Var: Gtrain
 			Var: L
 			Var: Ls
+			Var: Ltrain
+			Var: TeAvg
 			Var: U
-			Var: dUb
-			Var: w
+			Var: Ue
+			Var: Us
+			Var: appl
+			Var: dUeB
+			Var: sAvg
+			Var: sTavg
+			Var: sTmax
+			Var: sTmin
+			Var: sTsd
+			Var: sVavg
+			Var: sVsd
+			Var: searchProb
+			Var: wAvg
+			Var: wAvgEmp
+			Var: wCent
+			Var: wLogSDemp
+			Var: wMinPol
 			Var: wU
 
 		}
@@ -152,7 +228,6 @@ Label Root
 				Var: _Deb1max
 				Var: _Div1
 				Var: _HC
-				Var: _JO1
 				Var: _L1
 				Var: _L1d
 				Var: _L1dRD
@@ -167,12 +242,19 @@ Label Root
 				Var: _Tax1
 				Var: _W1
 				Var: _c1
-				Var: _cTau
 				Var: _f1
 				Var: _imi
 				Var: _inn
 				Var: _p1
 				Var: _qc1
+
+			}
+
+			Son: Wrk1
+			Label Wrk1
+			{
+				Param: _IDw1
+				Param: _key1
 
 			}
 
@@ -226,8 +308,15 @@ Label Root
 			Var: entry1
 			Var: entry1exit
 			Var: exit1
+			Var: dA1b
+			Var: fires1
+			Var: hires1
 			Var: imi
 			Var: inn
+			Var: quits1
+			Var: retires1
+			Var: sT1min
+			Var: w1avg
 			Var: p1avg
 
 		}
@@ -248,26 +337,43 @@ Label Root
 				Son: Vint
 				Label Vint
 				{
+					Son: WrkV
+					Label WrkV
+					{
+						Param: _IDwV
+
+					}
+
 					Param: _Avint
 					Param: _IDvint
 					Param: _nVint
 					Param: _pVint
 					Param: _tVint
 					Param: _toUseVint
-					Var: _LdVint
-					Var: _Lvint
+					Var: _AeVint
 					Var: _Qvint
 					Var: _RSvint
+					Var: _dLdVint
+
+				}
+
+				Son: Wrk2
+				Label Wrk2
+				{
+					Param: _IDw2
+					Param: _key2
 
 				}
 
 				Param: _ID2
 				Param: _bank2
 				Param: _pOrd2
+				Param: _postChg
 				Param: _t2ent
 				Func: _CS2a
 				Var: _A2
-				Var: _A2e
+				Var: _A2p
+				Var: _B2
 				Var: _CD2
 				Var: _CD2c
 				Var: _CI
@@ -286,9 +392,11 @@ Label Root
 				Var: _Kd
 				Var: _L2
 				Var: _L2d
+				Var: _L2vac
 				Var: _N
 				Var: _NW2
 				Var: _Pi2
+				Var: _Pi2rate
 				Var: _Q2
 				Var: _Q2d
 				Var: _Q2e
@@ -306,14 +414,25 @@ Label Root
 				Var: _c2e
 				Var: _dA2b
 				Var: _dNnom
+				Var: _dQ2d
 				Var: _f2
+				Var: _fires2
+				Var: _hires2
 				Var: _l2
 				Var: _life2cycle
 				Var: _mu2
 				Var: _oldVint
 				Var: _p2
+				Var: _q2
 				Var: _qc2
+				Var: _quits2
+				Var: _retires2
+				Var: _s2avg
+				Var: _sT2min
 				Var: _supplier
+				Var: _w2avg
+				Var: _w2o
+				Var: _w2realAvg
 
 			}
 
@@ -325,9 +444,11 @@ Label Root
 			Param: Phi1
 			Param: Phi2
 			Param: b
+			Param: bChg
 			Param: chi
 			Param: d2
 			Param: e0
+			Param: e0Chg
 			Param: e1
 			Param: e2
 			Param: e3
@@ -336,21 +457,30 @@ Label Root
 			Param: e6
 			Param: e7
 			Param: e8
+			Param: ent2HldPer
+			Param: ent2HldShr
 			Param: eta
 			Param: f2min
+			Param: f2minPosChg
+			Param: f2trdChg
 			Param: iota
 			Param: kappaMax
 			Param: kappaMin
 			Param: lastID2
 			Param: m2
 			Param: mu20
+			Param: mu20Chg
+			Param: n2
 			Param: omega1
 			Param: omega2
+			Param: omega3
 			Param: u
 			Param: upsilon
 			Func: f2rescale
 			Func: firm2maps
 			Var: A2
+			Var: A2p
+			Var: B2
 			Var: CI
 			Var: CPI
 			Var: Deb2
@@ -373,6 +503,7 @@ Label Root
 			Var: N
 			Var: NW2
 			Var: Pi2
+			Var: Pi2rateAvg
 			Var: Q2
 			Var: Q2d
 			Var: Q2e
@@ -390,9 +521,27 @@ Label Root
 			Var: entry2
 			Var: entry2exit
 			Var: exit2
+			Var: f2critChg
+			Var: f2posChg
+			Var: fires2
+			Var: hires2
 			Var: l2avg
+			Var: l2max
+			Var: l2min
 			Var: oldVint
 			Var: p2avg
+			Var: p2max
+			Var: p2min
+			Var: q2avg
+			Var: q2max
+			Var: q2min
+			Var: quits2
+			Var: retires2
+			Var: sV2avg
+			Var: w2avg
+			Var: w2oAvg
+			Var: w2oMax
+			Var: w2realAvg
 
 		}
 
@@ -408,6 +557,7 @@ Label Root
 				Var: Creal
 				Var: DefGDP
 				Var: GDI
+				Var: Gini
 				Var: TC
 				Var: dA
 
@@ -416,9 +566,13 @@ Label Root
 			Son: Sec
 			Label Sec
 			{
+				Var: A2posChg
+				Var: A2preChg
 				Var: A2sd
+				Var: A2sdPosChg
+				Var: A2sdPreChg
 				Var: AtauAvg
-				Var: BtauAvg
+				Var: B2payers
 				Var: Bda
 				Var: Bfail
 				Var: BadDeb
@@ -437,9 +591,9 @@ Label Root
 				Var: HPb
 				Var: HP1
 				Var: HP2
-				Var: NCavg
 				Var: RD
 				Var: RS2
+				Var: NCavg
 				Var: age1avg
 				Var: age2avg
 				Var: dN
@@ -447,16 +601,51 @@ Label Root
 				Var: exit2fail
 				Var: mu2avg
 				Var: nBrochAvg
+				Var: noWrk2
+				Var: q2posChg
+				Var: q2preChg
+				Var: s1avg
+				Var: s2avg
+				Var: BtauAvg
 
 			}
 
 			Son: Lab
 			Label Lab
 			{
+				Var: Lent
+				Var: Lexit
+				Var: L1ent
+				Var: L1exit
+				Var: L1v
+				Var: L2ent
+				Var: L2exit
 				Var: L2larg
+				Var: L2v
+				Var: TuAvg
 				Var: V
 				Var: dw
-				Var: wReal
+				Var: part
+				Var: w2avgLarg
+				Var: w2oMin
+				Var: w2realPosChg
+				Var: w2realPreChg
+				Var: wAvgReal
+				Var: wAvgRealEmp
+				Var: wGini
+				Var: wLogSD
+				Var: wMax
+				Var: wMaxEmp
+				Var: wMin
+				Var: wMinEmp
+				Var: wrAvg
+				Var: wrLogSD
+				Var: wrMax
+				Var: wrMin
+				Var: wsAvg
+				Var: wsLogSD
+				Var: wsMax
+				Var: wsMin
 
 			}
 
@@ -489,18 +678,48 @@ Label Root
 		}
 
 		Param: flagAddWorkers
+		Param: flagAllFirmsChg
 		Param: flagCons
 		Param: flagCreditRule
 		Param: flagExpect
+		Param: flagFireOrder1
+		Param: flagFireOrder1Chg
+		Param: flagFireOrder2
+		Param: flagFireOrder2Chg
+		Param: flagFireRule
+		Param: flagFireRuleChg
 		Param: flagFiscalRule
 		Param: flagGovExp
+		Param: flagHeterWage
+		Param: flagHireOrder1
+		Param: flagHireOrder1Chg
+		Param: flagHireOrder2
+		Param: flagHireOrder2Chg
+		Param: flagHireSeq
+		Param: flagHireSeqChg
+		Param: flagIndexMinWage
+		Param: flagIndexMinWageChg
+		Param: flagIndexWage
+		Param: flagIndexWageChg
+		Param: flagLearn1
+		Param: flagSearchDisc
+		Param: flagSearchMode
+		Param: flagSearchModeChg
 		Param: flagTax
+		Param: flagWageOffer
+		Param: flagWageOfferChg
+		Param: flagWagePremium
+		Param: flagWorkerLBU
+		Param: flagWorkerSkProd
 		Param: Crec
+		Param: TregChg
 		Param: gG
 		Param: mLim
+		Param: mPer
 		Param: omicron
 		Param: stick
 		Param: tr
+		Param: trChg
 		Param: x2inf
 		Param: x2sup
 		Var: A
@@ -522,6 +741,7 @@ Label Root
 		Var: dGDP
 		Var: entryExit
 		Var: initCountry
+		Var: regChg
 		Var: timeStep
 
 	}
@@ -540,18 +760,48 @@ Var: runCountry 0 n + n n
 
 Object: Country C	1
 Param: flagAddWorkers 0 n + n n	0
+Param: flagAllFirmsChg 0 n + n n	0
 Param: flagCons 0 n + n n	1
 Param: flagCreditRule 0 n + n n	0
 Param: flagExpect 0 n + n n	0
+Param: flagFireOrder1 0 n + n n	0
+Param: flagFireOrder1Chg 0 n + n n	0
+Param: flagFireOrder2 0 n + n n	0
+Param: flagFireOrder2Chg 0 n + n n	0
+Param: flagFireRule 0 n + n n	2
+Param: flagFireRuleChg 0 n + n n	2
 Param: flagFiscalRule 0 n + n n	0
 Param: flagGovExp 0 n + n n	2
+Param: flagHeterWage 0 n + n n	0
+Param: flagHireOrder1 0 n + n n	0
+Param: flagHireOrder1Chg 0 n + n n	0
+Param: flagHireOrder2 0 n + n n	0
+Param: flagHireOrder2Chg 0 n + n n	0
+Param: flagHireSeq 0 n + n n	0
+Param: flagHireSeqChg 0 n + n n	0
+Param: flagIndexMinWage 0 n + n n	0
+Param: flagIndexMinWageChg 0 n + n n	0
+Param: flagIndexWage 0 n + n n	1
+Param: flagIndexWageChg 0 n + n n	1
+Param: flagLearn1 0 n + n n	0
+Param: flagSearchDisc 0 n + n n	0
+Param: flagSearchMode 0 n + n n	1
+Param: flagSearchModeChg 0 n + n n	1
 Param: flagTax 0 n + n n	0
+Param: flagWageOffer 0 n + n n	0
+Param: flagWageOfferChg 0 n + n n	1
+Param: flagWagePremium 0 n + n n	0
+Param: flagWorkerLBU 0 n + n n	0
+Param: flagWorkerSkProd 0 n + n n	0
 Param: Crec 0 n + n n	0.2
+Param: TregChg 0 n + n n	0
 Param: gG 0 n + n n	0.005
 Param: mLim 0 n + n n	1
+Param: mPer 0 n + n n	1
 Param: omicron 0 n + n n	0.5
 Param: stick 0 n + n n	1
 Param: tr 0 n + n n	0.1
+Param: trChg 0 n + n n	0.1
 Param: x2inf 0 n + n n	-0.15
 Param: x2sup 0 n + n n	0.15
 Var: A 4 s + n n	0	0	0	0
@@ -573,6 +823,7 @@ Var: dAb 1 s + n n	0
 Var: dGDP 1 s + n n	0
 Var: entryExit 0 n + n n
 Var: initCountry 0 n + n n
+Var: regChg 0 n + n n
 Var: timeStep 0 n + n n
 
 Object: Financial C	1
@@ -581,6 +832,7 @@ Param: DebRule 0 n + n n	0.6
 Param: DefPrule 0 n + n n	0.03
 Param: EqB0 0 n + n n	1
 Param: Lambda 0 n + n n	2
+Param: LambdaChg 0 n + n n	2
 Param: Lambda0 0 n + n n	0
 Param: PhiB 0 n + n n	0.5
 Param: Trule 0 n + n n	100
@@ -597,11 +849,14 @@ Param: muBonds 0 n + n n	0
 Param: muD 0 n + n n	1
 Param: muDeb 0 n + n n	0
 Param: muRes 0 n + n n	1
+Param: muResChg 0 n + n n	1
 Param: piT 0 n + n n	0
 Param: rAdj 0 n + n n	0.0025
 Param: rT 0 n + n n	0.01
+Param: rTchg 0 n + n n	0.01
 Param: rhoBonds 0 n + n n	0
 Param: tauB 0 n + n n	0.08
+Param: tauBchg 0 n + n n	0.08
 Param: thetaBonds 0 n + n n	12
 Func: banksMaps 0 n + n n
 Func: pickBank 0 n + n n
@@ -634,11 +889,11 @@ Var: _BadDeb 1 n + n n	0
 Var: _Bda 1 n + n n	0
 Var: _Bonds 1 n + n n	0
 Var: _Cl 0 n + n n
-Var: _Depo 1 n + n n	0
+Var: _Depo 1 n + n N	0
 Var: _DivB 0 n + n n
 Var: _ExRes 1 n + n n	0
 Var: _Gbail 0 n + n n
-Var: _Loans 1 n + n n	0
+Var: _Loans 1 n + n N	0
 Var: _LoansCB 1 n + n n	0
 Var: _NWb 1 n + n n	0
 Var: _PiB 0 n + n N
@@ -656,19 +911,87 @@ Object: Cli2 C	1
 Param: _IDc2 0 n + n n	0
 
 Object: Labor C	1
+Param: Gamma 0 n + n n	0
+Param: GammaCost 0 n + n n	0.1
 Param: Ls0 0 n + n n	250000
+Param: Lscale 0 n + n n	50
+Param: Tc 0 n + n n	1
+Param: Tp 0 n + n n	0
+Param: Tr 0 n + n n	120
+Param: Ts 0 n + n n	0
+Param: TsChg 0 n + n n	0
 Param: delta 0 n + n n	0
-Param: phi 0 n + n n	0.4
+Param: epsilon 0 n + n n	0.02
+Param: kappa 0 n + n n	1
+Param: lambda 0 n + n n	0.1
+Param: omega 0 n + n n	0
+Param: omegaPosChg 0 n + n n	0
+Param: omegaPreChg 0 n + n n	0
+Param: omegaU 0 n + n n	10
+Param: phi 1 n + n n	0.4
+Param: phiChg 0 n + n n	0.4
 Param: psi1 0 n + n n	0
 Param: psi2 0 n + n n	1
 Param: psi3 0 n + n n	0
+Param: psi4 0 n + n n	0.5
+Param: psi5 0 n + n n	0
+Param: psi6 0 n + n n	0
+Param: rho 0 n + n n	1
+Param: sigma 0 n + n n	0.5
+Param: tauG 0 n + n n	0
+Param: tauT 0 n + n n	0.01
+Param: tauU 0 n + n n	0.01
+Param: theta 0 n + n n	0
 Param: w0min 0 n + n n	1
+Param: wCap 0 n + n n	11
+Var: Gtrain 1 s + n n	0
 Var: L 0 s + n n
 Var: Ls 1 s + n n	0
-Var: U 4 s + n p	0	0	0	0
-Var: dUb 1 s + n n	0
-Var: w 1 s + n n	0
+Var: Ltrain 0 s + n n
+Var: TeAvg 1 s + n n	0
+Var: U 0 s + n p
+Var: Ue 4 s + n n	0	0	0	0
+Var: Us 0 n + n n
+Var: appl 0 s + n n
+Var: dUeB 1 s + n n	0
+Var: sAvg 1 s + n n	0
+Var: sTavg 1 s + n n	0
+Var: sTmax 0 n + n n
+Var: sTmin 1 n + n n	0
+Var: sTsd 0 n + n n
+Var: sVavg 0 s + n n
+Var: sVsd 0 n + n n
+Var: searchProb 0 n + n n
+Var: wAvg 1 s + n n	0
+Var: wAvgEmp 1 s + n n	0
+Var: wCent 1 s + n n	0
+Var: wLogSDemp 0 s + n n
+Var: wMinPol 1 s + n n	0
 Var: wU 0 s + n n
+
+Object: Worker C	1
+Param: _ID 0 n + n n	0
+Param: _wfull 0 n + n n	0
+Var: _B 0 n + n n
+Var: _CQ 1 n + n n	0
+Var: _Q 4 n + n n	0	0	0	0
+Var: _Tc 0 n + n n
+Var: _Te 1 n + n n	0
+Var: _Tu 0 s + n n
+Var: _age 0 n + n n
+Var: _appl 0 n + n n
+Var: _dQb 0 n + n n
+Var: _discouraged 0 n + n n
+Var: _employed 0 n + n n
+Var: _s 0 s + n N
+Var: _sT 1 n + n n	0
+Var: _sV 1 n + n n	0
+Var: _searchProb 0 n + n n
+Var: _w 8 n + n N	0	0	0	0	0	0	0	0
+Var: _wR 1 n + n n	0
+Var: _wReal 0 s + n n
+Var: _wRes 0 n + n n
+Var: _wS 0 n + n n
 
 Object: Capital C	1
 Param: Deb10ratio 0 n + n n	1
@@ -699,7 +1022,7 @@ Param: xi 0 n + n n	0.5
 Param: zeta1 0 n + n n	0.3
 Param: zeta2 0 n + n n	0.3
 Func: f1rescale 0 n + n n
-Var: A1 1 s + n n	0
+Var: A1 4 s + n n	0	0	0	0
 Var: D1 0 s + n n
 Var: Deb1 1 s + n n	0
 Var: Div1 1 n + n n	0
@@ -721,8 +1044,15 @@ Var: W1 0 s + n n
 Var: entry1 0 s + n n
 Var: entry1exit 0 s + n n
 Var: exit1 0 s + n n
+Var: dA1b 1 s + n n	0
+Var: fires1 0 s + n n
+Var: hires1 0 s + n n
 Var: imi 0 s + n n
 Var: inn 0 s + n n
+Var: quits1 0 s + n n
+Var: retires1 0 s + n n
+Var: sT1min 1 n + n n	0
+Var: w1avg 1 s + n n	0
 Var: p1avg 1 s + n n	0
 
 Object: Firm1 C	1
@@ -733,7 +1063,7 @@ Param: _t1ent 0 n + n n	0
 Func: _CS1a 0 n + n n
 Var: _Atau 1 n + n n	0
 Var: _Btau 1 s + n n	0
-Var: _BC 7 n + n n	0	0	0	0	0	0	0
+Var: _BC 7 n + n N	0	0	0	0	0	0	0
 Var: _CD1 0 n + n n
 Var: _CD1c 0 n + n n
 Var: _CS1 0 n + n n
@@ -742,8 +1072,7 @@ Var: _Deb1 1 n + n n	0
 Var: _Deb1max 0 n + n n
 Var: _Div1 0 n + n n
 Var: _HC 0 n + n n
-Var: _JO1 0 n + n n
-Var: _L1 1 n + n n	0
+Var: _L1 0 n + n n
 Var: _L1d 0 n + n n
 Var: _L1dRD 0 n + n n
 Var: _L1rd 1 n + n n	0
@@ -757,7 +1086,6 @@ Var: _S1 1 n + n n	0
 Var: _Tax1 0 n + n n
 Var: _W1 1 n + n n	0
 Var: _c1 0 n + n n
-Var: _cTau 1 n + n n	0
 Var: _f1 1 n + n n	0
 Var: _imi 0 n + n n
 Var: _inn 0 n + n n
@@ -771,6 +1099,10 @@ Param: _nOrd 0 n + n n	0
 Param: _tOrd 0 n + n n	0
 Param: _tSel 0 n + n n	0
 
+Object: Wrk1 C	1
+Param: _IDw1 0 n + n n	0
+Param: _key1 0 n + n n	0
+
 Object: Consumption C	1
 Param: Deb20ratio 0 n + n n	1
 Param: F20 0 n + n n	200
@@ -780,9 +1112,11 @@ Param: NW20 0 n + n n	1000
 Param: Phi1 0 n + n n	0.1
 Param: Phi2 0 n + n n	0.9
 Param: b 0 n + n n	3
+Param: bChg 0 n + n n	3
 Param: chi 0 n + n n	1
 Param: d2 0 n + n n	0
 Param: e0 0 n + n n	0.25
+Param: e0Chg 0 n + n n	0.25
 Param: e1 0 n + n n	1
 Param: e2 0 n + n n	1
 Param: e3 0 n + n n	1
@@ -791,21 +1125,30 @@ Param: e5 0 n + n n	0.5
 Param: e6 0 n + n n	1
 Param: e7 0 n + n n	0.3
 Param: e8 0 n + n n	0.3
+Param: ent2HldPer 0 n + n n	100
+Param: ent2HldShr 0 n + n n	0.5
 Param: eta 0 n + n n	19
 Param: f2min 0 n + n n	1e-05
+Param: f2minPosChg 0 n + n n	0
+Param: f2trdChg 0 n + n n	0
 Param: iota 0 n + n n	0.1
 Param: kappaMax 0 n + n n	0.5
 Param: kappaMin 0 n + n n	0
 Param: lastID2 0 n + n n	0
 Param: m2 0 n + n n	40
-Param: mu20 0 n + n n	0.3
+Param: mu20 0 n + n n	0.225
+Param: mu20Chg 0 n + n n	0.225
+Param: n2 0 n + n n	1
 Param: omega1 0 n + n n	1
 Param: omega2 0 n + n n	1
+Param: omega3 0 n + n n	0
 Param: u 0 n + n n	0.75
 Param: upsilon 0 n + n n	0.04
 Func: f2rescale 0 n + n n
 Func: firm2maps 0 n + n n
 Var: A2 0 s + n n
+Var: A2p 0 s + n n
+Var: B2 1 s + n n	0
 Var: CI 0 s + n n
 Var: CPI 4 s + n n	0	0	0	0
 Var: Deb2 1 s + n n	0
@@ -828,6 +1171,7 @@ Var: MC2 1 s + n n	0
 Var: N 1 s + n n	0
 Var: NW2 1 s + n n	0
 Var: Pi2 0 s + n n
+Var: Pi2rateAvg 1 n + n n	0
 Var: Q2 0 s + n n
 Var: Q2d 0 s + n n
 Var: Q2e 0 s + n n
@@ -845,18 +1189,38 @@ Var: dNnom 0 s + n n
 Var: entry2 0 s + n n
 Var: entry2exit 0 s + n n
 Var: exit2 0 s + n p
-Var: l2avg 1 s + n n	0
+Var: f2critChg 0 n + n n
+Var: f2posChg 0 s + n p
+Var: fires2 0 s + n n
+Var: hires2 0 s + n n
+Var: l2avg 0 s + n n
+Var: l2max 1 n + n n	0
+Var: l2min 1 n + n n	0
 Var: oldVint 1 n + n n	0
 Var: p2avg 0 s + n n
+Var: p2max 0 n + n n
+Var: p2min 0 n + n n
+Var: q2avg 1 s + n n	0
+Var: q2max 0 n + n n
+Var: q2min 0 n + n n
+Var: quits2 0 s + n n
+Var: retires2 0 s + n n
+Var: sV2avg 0 n + n n
+Var: w2avg 1 n + n n	0
+Var: w2oAvg 1 s + n n	0
+Var: w2oMax 0 n + n n
+Var: w2realAvg 0 n + n n
 
 Object: Firm2 C	1
 Param: _ID2 0 n + n n	0
 Param: _bank2 0 n + n n	0
 Param: _pOrd2 0 n + n n	0
+Param: _postChg 0 s + n n	0
 Param: _t2ent 0 n + n n	0
 Func: _CS2a 0 n + n n
 Var: _A2 4 s + n n	0	0	0	0
-Var: _A2e 0 n + n n
+Var: _A2p 0 n + n n
+Var: _B2 0 n + n n
 Var: _CD2 0 n + n n
 Var: _CD2c 0 n + n n
 Var: _CI 0 n + n n
@@ -873,20 +1237,22 @@ Var: _EId 0 n + n n
 Var: _JO2 0 n + n n
 Var: _K 1 n + n n	0
 Var: _Kd 0 n + n n
-Var: _L2 1 n + n n	0
+Var: _L2 1 s + n n	0
 Var: _L2d 0 n + n n
+Var: _L2vac 1 n + n n	0
 Var: _N 1 n + n n	0
 Var: _NW2 1 n + n n	0
-Var: _Pi2 0 n + n n
+Var: _Pi2 1 n + n n	0
+Var: _Pi2rate 0 n + n n
 Var: _Q2 0 n + n n
 Var: _Q2d 0 n + n n
 Var: _Q2e 2 s + n n	0	0
-Var: _Q2p 0 n + n N
+Var: _Q2p 0 n + n n
 Var: _Q2pe 0 n + n N
 Var: _Q2u 0 n + n n
 Var: _RS2 0 n + n n
 Var: _SI 0 n + n n
-Var: _SId 0 n + n n
+Var: _SId 0 n + n N
 Var: _S2 1 n + n n	0
 Var: _Tax2 0 n + n n
 Var: _W2 1 n + n N	0
@@ -895,14 +1261,25 @@ Var: _c2 0 n + n N
 Var: _c2e 0 n + n n
 Var: _dA2b 1 n + n n	0
 Var: _dNnom 0 n + n n
-Var: _f2 2 n + n N	0	0
+Var: _dQ2d 0 n + n n
+Var: _f2 2 s + n N	0	0
+Var: _fires2 0 n + n N
+Var: _hires2 0 n + n n
 Var: _l2 1 n + n n	0
 Var: _life2cycle 0 n + n n
 Var: _mu2 1 n + n n	0
 Var: _oldVint 0 n + n n
 Var: _p2 1 n + n n	0
+Var: _q2 0 n + n N
 Var: _qc2 1 n + n n	0
+Var: _quits2 0 n + n N
+Var: _retires2 0 n + n N
+Var: _s2avg 1 s + n N	0
+Var: _sT2min 1 n + n N	0
 Var: _supplier 0 n + n n
+Var: _w2avg 1 n + n N	0
+Var: _w2o 1 n + n n	0
+Var: _w2realAvg 0 s + n n
 
 Object: Broch N	1
 Param: _IDs 0 n + n n	0
@@ -914,10 +1291,17 @@ Param: _nVint 0 n + n n	0
 Param: _pVint 0 n + n n	0
 Param: _tVint 0 n + n n	0
 Param: _toUseVint 0 n + n n	0
-Var: _LdVint 0 n + n n
-Var: _Lvint 0 n + n n
+Var: _AeVint 1 n + n n	0
 Var: _Qvint 0 n + n n
 Var: _RSvint 0 n + n n
+Var: _dLdVint 0 n + n n
+
+Object: WrkV C	1
+Param: _IDwV 0 n + n n	0
+
+Object: Wrk2 C	1
+Param: _IDw2 0 n + n n	0
+Param: _key2 0 n + n n	0
 
 Object: Stats C	1
 Param: testCtIni 0 n + n n	1
@@ -953,13 +1337,18 @@ Var: CS 0 s + n n
 Var: Creal 0 s + n n
 Var: DefGDP 0 s + n n
 Var: GDI 0 s + n n
+Var: Gini 0 s + n n
 Var: TC 0 s + n n
 Var: dA 0 s + n n
 
 Object: Sec C	1
+Var: A2posChg 0 s + n n
+Var: A2preChg 0 s + n n
 Var: A2sd 0 s + n n
+Var: A2sdPosChg 0 s + n n
+Var: A2sdPreChg 0 s + n n
 Var: AtauAvg 0 s + n n
-Var: BtauAvg 0 s + n n
+Var: B2payers 0 s + n n
 Var: Bda 0 s + n n
 Var: Bfail 0 s + n p
 Var: BadDeb 0 s + n n
@@ -978,9 +1367,9 @@ Var: HH2 0 s + n n
 Var: HPb 0 s + n n
 Var: HP1 0 s + n n
 Var: HP2 0 s + n n
-Var: NCavg 0 s + n n
 Var: RD 0 s + n n
 Var: RS2 0 s + n n
+Var: NCavg 0 s + n n
 Var: age1avg 0 s + n n
 Var: age2avg 0 s + n n
 Var: dN 0 s + n n
@@ -988,12 +1377,47 @@ Var: exit1fail 0 s + n n
 Var: exit2fail 0 s + n n
 Var: mu2avg 0 s + n p
 Var: nBrochAvg 0 s + n n
+Var: noWrk2 0 s + n n
+Var: q2posChg 0 s + n n
+Var: q2preChg 0 s + n n
+Var: s1avg 0 s + n n
+Var: s2avg 0 s + n n
+Var: BtauAvg 0 s + n n
 
 Object: Lab C	1
-Var: L2larg 0 s + n n
+Var: Lent 0 s + n n
+Var: Lexit 0 s + n n
+Var: L1ent 0 n + n n
+Var: L1exit 0 n + n n
+Var: L1v 0 n + n n
+Var: L2ent 0 n + n n
+Var: L2exit 0 n + n n
+Var: L2larg 0 n + n n
+Var: L2v 0 n + n n
+Var: TuAvg 0 s + n n
 Var: V 0 s + n p
 Var: dw 0 s + n n
-Var: wReal 0 s + n n
+Var: part 0 s + n n
+Var: w2avgLarg 0 n + n n
+Var: w2oMin 0 n + n n
+Var: w2realPosChg 0 s + n n
+Var: w2realPreChg 0 s + n n
+Var: wAvgReal 0 s + n n
+Var: wAvgRealEmp 0 n + n n
+Var: wGini 0 s + n n
+Var: wLogSD 0 s + n n
+Var: wMax 0 n + n n
+Var: wMaxEmp 0 n + n n
+Var: wMin 0 n + n n
+Var: wMinEmp 0 n + n n
+Var: wrAvg 0 s + n n
+Var: wrLogSD 0 s + n n
+Var: wrMax 0 n + n n
+Var: wrMin 0 n + n n
+Var: wsAvg 0 s + n n
+Var: wsLogSD 0 n + n n
+Var: wsMax 0 n + n n
+Var: wsMin 0 n + n n
 
 SIM_NUM 1
 SEED 1
@@ -1029,7 +1453,14 @@ Parameter_flagAddWorkers
 Additional (migrant) workers on full employment
 0 = vegetative worker population growth (as per parameter delta)
 1 = additional growth (delta+1%) during full employment (Ue<1%) periods
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
 
+Parameter_flagAllFirmsChg
+Capital-good sector firm-specific regime change
+0 = only a fraction of new firms at t=TregChg change
+1 = all firms change at t=TregChg
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -1063,6 +1494,67 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Parameter_flagFireOrder1
+Firing order in capital-good sector
+0 = random order
+1 = higher wage workers first
+2 = lower wage workers first
+3 = higher skills workers first (requires flagWorkerLBU=1 to be meaningful)
+4 = lower skills workers first (requires flagWorkerLBU=1 to be meaningful)
+5 = higher payback period workers first
+6 = lower payback period workers first
+7 = old hired workers first
+8 = recent hired workers first
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagFireOrder1Chg
+Firing order in capital-good sector after regime change
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagFireOrder2
+Firing order in consumption-good sector
+0 = random order
+1 = higher wage workers first
+2 = lower wage workers first
+3 = higher skills workers first (requires flagWorkerLBU=1 to be meaningful)
+4 = lower skills workers first (requires flagWorkerLBU=1 to be meaningful)
+5 = higher payback period workers first
+6 = lower payback period workers first
+7 = old hired workers first
+8 = recent hired workers first
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagFireOrder2Chg
+Firing order in consumption-good sector after regime change
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagFireRule
+Consumption-good sector firing rule operation
+0 = never fires (always except for retirement) ("Japanese mode")
+1 = never fires with sharing ("German mode")
+2 = only fire if firm downsizing ("French mode")
+3 = only fire if firm is at losses ("Italian mode")
+4 = fire if payback is achieved ("American mode")
+5 = always fire when contract ends ("Brazilian mode")
+6 = regime 5 until t=T and then regime Y ("increasing protection")
+_INIT_
+All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_flagFireRuleChg
+Consumption-good sector firing rule operation after regime change
+_INIT_
+All 3 instances equal to 2.
+END_DESCRIPTION
+
 Parameter_flagFiscalRule
 Government fiscal rule
 0 = no fiscal rule (fixed unemployment benefit rate)
@@ -1084,11 +1576,184 @@ _INIT_
 All 1 instances equal to 2.
 END_DESCRIPTION
 
+Parameter_flagHeterWage
+Wage indexation heterogeneity
+0 = firm and worker level homogeneous (economy productivity indexes wages)
+1 = firm-level heterogeneity only (firms productivity index wages)
+2 = worker-level heterogeneity (positive workers productivity index wages)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagHireOrder1
+Hiring order in capital-good sector
+0 = random order
+1 = higher wage workers first
+2 = lower wage workers first
+3 = higher skills workers first (requires flagWorkerLBU=1 to be meaningful)
+4 = lower skills workers first (requires flagWorkerLBU=1 to be meaningful)
+5 = higher payback period workers first
+6 = lower payback period workers first
+7 = old hired workers first
+8 = recent hired workers first
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagHireOrder1Chg
+Hiring order in capital-good sector after regime change
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagHireOrder2
+Hiring order in consumption-good sector
+0 = random order
+1 = higher wage workers first
+2 = lower wage workers first
+3 = higher skills workers first (requires flagWorkerLBU=1 to be meaningful)
+4 = lower skills workers first (requires flagWorkerLBU=1 to be meaningful)
+5 = higher payback period workers first
+6 = lower payback period workers first
+7 = old hired workers first
+8 = recent hired workers first
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagHireOrder2Chg
+Hiring order in consumption-good sector after regime change
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagHireSeq
+Consumption-good sector hiring sequence
+0 = firms hire workers in random order
+1 = firms offering higher wages  first
+2 = firms without workers hire first then random order
+3 = firms without workers hire first then higher wages order
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagHireSeqChg
+Consumption-good sector hiring sequence after regime change
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagIndexMinWage
+Minimum wage indexation
+0 = no minimum wage adjustment
+1 = periodic minimum wage adjustment (value in ]0,1] to weight indexation)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagIndexMinWageChg
+Minimum wage indexation after regime change
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagIndexWage
+Wage indexation
+0 = no wage adjustment during employment
+1 = periodic wage adjustment (according to flagHeterWages)
+2 = current wage offer replication to existing workers (consumption-good sector only)
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_flagIndexWageChg
+Wage indexation after regime change
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_flagLearn1
+Worker-level learning in capital-good sector
+0 = no learning, preserve skills
+1 = no learning, reducing skills (like unemployed)
+2 = learning, increasing skills (like consumption-good sector)
+3 = learning with minimum skills
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagSearchDisc
+Job search discouragement
+0 = always search
+1 = global search probability (aggregate unemployment)
+2 = individual search probability (individual unemployment)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagSearchMode
+Job search mode
+0 = always search
+1 = search only if unemployed
+2 = search if wage is below average
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_flagSearchModeChg
+Job search mode after regime change
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
 Parameter_flagTax
 Taxation
 0 = taxes on firm profit only
 1 = taxes on firm profit and worker income (wage/bonus)
 2 = taxes on firm profits and worker and capitalist income
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagWageOffer
+Wage offer mode
+0 = propose wage premium (don't consider requested wages)
+1 = propose lowest possible wage based on workers' requested wages
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagWageOfferChg
+Wage offer mode after regime change
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_flagWagePremium
+Wage premium mode
+0 = no premium (keep current wage)
+1 = indexation mechanism (WP1)
+2 = endogenous mechanism (WP2)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagWorkerLBU
+Worker-level learning cumulativeness
+0 = no worker-level learning
+1 = worker-level learning-by-using-vintage
+2 = worker-level learning-by-tenure
+3 = worker-level learning-by-using-vintage & learning-by-tenure
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagWorkerSkProd
+Worker skills effect on productivity in consumption-good sector
+0 = no effect of worker skills on productivity (firm-level skills not affected)
+1 = only worker vintage skills affect productivity
+2 = only worker tenure skills affect productivity
+3 = both worker vintage & tenure skills affect productivity
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -1100,6 +1765,14 @@ _INIT_
 All 1 instances equal to 0.2.
 END_DESCRIPTION
 
+Parameter_TregChg
+Regime change period (new policies introduction)
+If set to zero, there is no regime change
+(>=0)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Parameter_gG
 Growth rate of fixed public expenditure
 (>=0)
@@ -1108,8 +1781,16 @@ All 1 instances equal to 0.005.
 END_DESCRIPTION
 
 Parameter_mLim
-Maximum absolute growth rate on sensitive calculations
-(>=0, 0=no limit)_INIT_
+Absolute cap on moving-average growth calculation
+(>=0, 0=no limit)
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_mPer
+Number of periods on moving-average calculation
+(>=1)
+_INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION
 
@@ -1129,6 +1810,13 @@ END_DESCRIPTION
 
 Parameter_tr
 Tax rate
+(>=0)
+_INIT_
+All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_trChg
+Tax rate after regime change
 (>=0)
 _INIT_
 All 1 instances equal to 0.1.
@@ -1265,6 +1953,13 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_regChg
+Current labor market regime (pre- or post-change)
+It is 0 before a regime change and 1 afterwards
+_INIT_
+
+END_DESCRIPTION
+
 Variable_timeStep
 Optional scheduling of equations
 _INIT_
@@ -1308,6 +2003,12 @@ END_DESCRIPTION
 Parameter_Lambda
 Credit limit as a multiple of sales or net worth
 (>0)
+_INIT_
+All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_LambdaChg
+Credit limit as a multiple of sales or net worth after regime change
 _INIT_
 All 1 instances equal to 2.
 END_DESCRIPTION
@@ -1424,6 +2125,13 @@ _INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION
 
+Parameter_muResChg
+Central bank spread (mark-down) on reserves after regime change
+([0,1])
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
 Parameter_piT
 Target inflation for central bank's Taylor rule
 (>0)
@@ -1441,6 +2149,12 @@ END_DESCRIPTION
 Parameter_rT
 Target prime interest rate set by central bank
 (>0)
+_INIT_
+All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_rTchg
+Target prime interest rate set by central bank after regime change
 (>0)
 _INIT_
 All 1 instances equal to 0.01.
@@ -1456,7 +2170,13 @@ END_DESCRIPTION
 Parameter_tauB
 Minimum bank capital adequacy rate
 (]0,1[)
+_INIT_
+All 1 instances equal to 0.08.
+END_DESCRIPTION
 
+Parameter_tauBchg
+Minimum bank capital adequacy rate after regime change
+(]0,1[)
 _INIT_
 All 1 instances equal to 0.08.
 END_DESCRIPTION
@@ -1507,6 +2227,7 @@ END_DESCRIPTION
 
 Variable_Depo
 Total deposits on financial sector
+Net deposits from exiting and entering firms in period not considered
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -1531,6 +2252,7 @@ END_DESCRIPTION
 
 Variable_Loans
 Total loans (not defaulted) from financial sector
+Net loans to exiting and entering firms in period not considered
 _INIT_
 
 END_DESCRIPTION
@@ -1652,6 +2374,7 @@ END_DESCRIPTION
 
 Variable__Depo
 Deposits on bank
+Net deposits from exiting and entering firms in period not considered
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -1676,6 +2399,7 @@ END_DESCRIPTION
 
 Variable__Loans
 Loans (not defaulted) from bank
+Net loans to exiting and entering firms in period not considered
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -1768,11 +2492,68 @@ _INIT_
 
 END_DESCRIPTION
 
+Parameter_Gamma
+Share of unemployed workers covered by government-supplied training
+([0,1])
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_GammaCost
+Share of average wage cost per worker of government-supplied training
+(>=0)
+_INIT_
+All 1 instances equal to 0.1.
+END_DESCRIPTION
+
 Parameter_Ls0
 Initial number of workers in labor market
 (>1)
 _INIT_
 All 1 instances equal to 250000.
+END_DESCRIPTION
+
+Parameter_Lscale
+Scale of one Worker object in model (number of workers per object)
+If number of objects is set in LSD, the value is self-filled
+(>=1)
+_INIT_
+All 1 instances equal to 50.
+END_DESCRIPTION
+
+Parameter_Tc
+Work contract term (periods)
+(>=1)
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_Tp
+Number of periods after firing is not allowed
+(>=0, 0=no protection)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_Tr
+Number of periods a worker stay in firm before retiring
+(>=0, 0=no retirement)
+_INIT_
+All 1 instances equal to 120.
+END_DESCRIPTION
+
+Parameter_Ts
+Number of past periods (memory) to define requested wage
+([0,4], 0=no memory)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_TsChg
+Number of past periods to define requested wage after regime change
+([0,4], 0=no memory)
+_INIT_
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_delta
@@ -1782,27 +2563,149 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Parameter_epsilon
+Minimum wage increment to change jobs ("menu cost")
+(>0)
+_INIT_
+All 1 instances equal to 0.02.
+END_DESCRIPTION
+
+Parameter_kappa
+Overall intensity for job searching of discouraged workers
+(>0)
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_lambda
+Individual intensity for job searching of discouraged workers 
+(>0)
+_INIT_
+All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_omega
+Average number of job applications by employed worker
+(>0)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_omegaPosChg
+Average number of job applications by employed worker in post-change-type firms after regime change
+(>0)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_omegaPreChg
+Average number of job applications by employed worker in pre-change-type firms after regime change
+(>0)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_omegaU
+Average number of job applications by unemployed worker
+(>0)
+_INIT_
+All 1 instances equal to 10.
+END_DESCRIPTION
+
 Parameter_phi
 Unemployment benefit as share of average nominal wage
-(>0)
+(>=0)
+_INIT_
+All 1 instances equal to 0.4.
+END_DESCRIPTION
+
+Parameter_phiChg
+Unemployment benefit as share of average nominal wage after regime change
+(>=0)
 _INIT_
 All 1 instances equal to 0.4.
 END_DESCRIPTION
 
 Parameter_psi1
-Share of inflation passed to wages([0,1])
+Share of inflation passed to wages
+([0,1])
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_psi2
-Elasticity of wages to aggregate productivity growth(>=0)
+Elasticity of wages to aggregate productivity growth
+(>=0)
 _INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_psi3
 Elasticity of wages to the unemployment rate
+(<=0)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_psi4
+Elasticity of wages to firm productivity growth
+(>=0)
+_INIT_
+All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_psi5
+Elasticity of wages to firm past vacancy rate
+Only applicable when firms do not use wage requested information
+(>=0)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_psi6
+Share of firm free cash flow paid as bonus in top consumption-good firms
+([0,1])
+_INIT_
+All 1 instances equal to 0.2.
+END_DESCRIPTION
+
+Parameter_rho
+Labor sharing parameter for flagFireRule=1
+([0,1])
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_sigma
+Degree of learning-by-doing on public skill level
+([0,1])
+_INIT_
+All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_tauG
+Learning factor for workers under government-supplied training
+(>=0)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_tauT
+Tenure learning factor for employed workers
+(>=0)
+_INIT_
+All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_tauU
+Skills deterioration rate for unemployed workers
+(>=0)
+_INIT_
+All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_theta
+Share of extra capacity (slack) when hiring
 (>=0)
 _INIT_
 All 1 instances equal to 0.
@@ -1812,7 +2715,20 @@ Parameter_w0min
 Social benefit absolute floor (subsistence)
 (>0)
 _INIT_
-All 1 instances equal to 0.5.
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_wCap
+Wage change multiple cap on offers, requests and adjustments
+(>=0, 0=no cap)
+_INIT_
+All 1 instances equal to 11.
+END_DESCRIPTION
+
+Variable_Gtrain
+Government expenditure on unemployed workers training
+_INIT_
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_L
@@ -1827,27 +2743,280 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Variable_U
-Unemployment rate (including discouraged workers)
+Variable_Ltrain
+Number of unemployed workers on government training
+_INIT_
+
+END_DESCRIPTION
+
+Variable_TeAvg
+Average tenure period
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Variable_dUb
-Unemployment (bounded) rate of change
+Variable_U
+Unemployment rate (including discouraged workers)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Ue
+Effective unemployment rate (excluding discouraged workers)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_Us
+Short-term (up to 1 period) unemployment rate
+_INIT_
+
+END_DESCRIPTION
+
+Variable_appl
+Total job applications
+_INIT_
+
+END_DESCRIPTION
+
+Variable_dUeB
+Effective unemployment (bounded) rate of change
 Used for wages adjustment only, 4 period moving average
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Variable_w
-Centralized wage
+Variable_sAvg
+Average worker compound (tenure+vintage) skills
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_sTavg
+Average worker tenure skills
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_sTmax
+Maximum worker tenure skills
+_INIT_
+
+END_DESCRIPTION
+
+Variable_sTmin
+Minimum worker tenure skills
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_sTsd
+Standard deviation of worker tenure skills
+_INIT_
+
+END_DESCRIPTION
+
+Variable_sVavg
+Average worker vintage skills
+_INIT_
+
+END_DESCRIPTION
+
+Variable_sVsd
+Standard deviation of worker vintage skills
+_INIT_
+
+END_DESCRIPTION
+
+Variable_searchProb
+Overall probability of unemployed searching for job
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wAvg
+Average income of workers
+Include unemployment benefits and bonuses
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_wAvgEmp
+Average income of employed workers
+Exclude unemployment benefits but include bonuses
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_wCent
+Centralized wage if flagHeterWage=0
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_wLogSDemp
+Standard deviation of log wage of employed workers
+Exclude unemployment benefits but include bonuses
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wMinPol
+Minimum wage imposed by government policy
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_wU
 Unemployment benefit paid by government
+_INIT_
+
+END_DESCRIPTION
+
+Object_Worker
+Individual worker object
+May represent a group of workers if 'Lscale' is different than 1
+
+HOOK(0): to firm bridge object (Wrk1/Wrk2 in Capital/Firm2)
+HOOK(1): to vintage bridge object (Vint in Firm2)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter__ID
+Sequential ID of worker
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__wfull
+Pre-sharing full wage of worker if flagFireRule=1
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__B
+Bonus received by worker
+_INIT_
+
+END_DESCRIPTION
+
+Variable__CQ
+Cumulated output in current technology of worker
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__Q
+Output of worker
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__Tc
+Periods of employment contract of worker
+Worker cannot be fired before end of contract
+_INIT_
+
+END_DESCRIPTION
+
+Variable__Te
+Tenure periods in current firm of worker
+(0 if just hired)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__Tu
+Periods of unemployment (0 if employed) of worker
+_INIT_
+
+END_DESCRIPTION
+
+Variable__age
+Working age of worker
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__appl
+Job applications submitted by worker
+_INIT_
+
+END_DESCRIPTION
+
+Variable__dQb
+Production (bounded) rate of change of worker
+_INIT_
+
+END_DESCRIPTION
+
+Variable__discouraged
+Unemployed discouragement (1) to search for job of worker
+_INIT_
+
+END_DESCRIPTION
+
+Variable__employed
+Indicate employment state of worker
+0 = unemployed
+1 = capital-good firm
+2 = consumption-good firm
+_INIT_
+
+END_DESCRIPTION
+
+Variable__s
+Compound skills of worker
+Normalized to [0,1] range
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__sT
+Tenure skills of worker
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__sV
+Vintage skills of worker
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__searchProb
+Individual probability of searching for job when unemployed of worker
+_INIT_
+
+END_DESCRIPTION
+
+Variable__w
+Nominal (money terms) income of worker
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__wR
+Requested wage (to accept job offer) of worker
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__wReal
+Real income of worker
+_INIT_
+
+END_DESCRIPTION
+
+Variable__wRes
+Reservation wage of worker
+_INIT_
+
+END_DESCRIPTION
+
+Variable__wS
+Satisfying wage of worker
 _INIT_
 
 END_DESCRIPTION
@@ -2183,6 +3352,24 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_dA1b
+Labor productivity (bounded) rate of change in capital-good sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_fires1
+Total workers fired in capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_hires1
+Total workers hired in capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
 Variable_imi
 Rate of firms successfully imitating in capital-good sector
 _INIT_
@@ -2193,6 +3380,30 @@ Variable_inn
 Rate of firms successfully innovating in capital-good sector
 _INIT_
 
+END_DESCRIPTION
+
+Variable_quits1
+Total workers quitting (not fired) in capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_retires1
+Total workers retiring in capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_sT1min
+Minimum worker tenure skills in capital-good sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_w1avg
+Average wage paid in capital-good sector
+_INIT_
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_p1avg
@@ -2306,12 +3517,6 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable__JO1
-Open job positions of firm in capital-good sector
-_INIT_
-
-END_DESCRIPTION
-
 Variable__L1
 Labor employed by capital-good firm
 _INIT_
@@ -2396,12 +3601,6 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable__cTau
-Planned (expected) unit production cost of machine when employed for production
-_INIT_
-All 1 instances equal to 0.
-END_DESCRIPTION
-
 Variable__f1
 Market share of capital-good firm
 _INIT_
@@ -2423,7 +3622,7 @@ END_DESCRIPTION
 Variable__p1
 Price of machine of capital-good firm
 _INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable__qc1
@@ -2466,6 +3665,26 @@ END_DESCRIPTION
 
 Parameter__tSel
 Last time was selected by client
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Object_Wrk1
+Workers in capital-good sector
+
+SHOOK: employed worker (Worker)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter__IDw1
+Sequential ID of worker in capital-good sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__key1
+Key value used for sorting of worker
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -2532,6 +3751,13 @@ _INIT_
 All 1 instances equal to 3.
 END_DESCRIPTION
 
+Parameter_bChg
+Number of pay-back periods before machine scrapping after regime change
+(>1)
+_INIT_
+All 1 instances equal to 3.
+END_DESCRIPTION
+
 Parameter_chi
 Replicator dynamics selectivity coefficient in consumption-good sector
 (>0)
@@ -2549,7 +3775,13 @@ END_DESCRIPTION
 Parameter_e0
 Weight of potential demand on expectations (animal spirits)
 ([0,1])
+_INIT_
+All 1 instances equal to 0.25.
+END_DESCRIPTION
 
+Parameter_e0Chg
+Weight of potential demand on expectations after regime change
+([0,1])
 _INIT_
 All 1 instances equal to 0.25.
 END_DESCRIPTION
@@ -2610,6 +3842,20 @@ _INIT_
 All 1 instances equal to 0.3.
 END_DESCRIPTION
 
+Parameter_ent2HldPer
+Periods after TregChg to hold fixed proportion of pre/post-change entrants in consumption-good sector
+(>=0)
+_INIT_
+All 1 instances equal to 100.
+END_DESCRIPTION
+
+Parameter_ent2HldShr
+Share of post-change entrants during ent2HldPer period in consumption-good sector
+([0,1])
+_INIT_
+All 1 instances equal to 0.5.
+END_DESCRIPTION
+
 Parameter_eta
 Technical lifetime of machines
 (>1)
@@ -2622,6 +3868,20 @@ Minimum market share to stay in consumption-good sector
 ([0,1[)
 _INIT_
 All 1 instances equal to 1e-05.
+END_DESCRIPTION
+
+Parameter_f2minPosChg
+Absolute minimum probability of new post-change-type firm in consumption-good sector
+([0,1])
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_f2trdChg
+Minimum market share of post-change-type firms in consumption-good sector
+([0,1], 0=all firms equal)
+_INIT_
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_iota
@@ -2662,7 +3922,21 @@ Parameter_mu20
 Initial mark-up in consumption-good sector
 (>0)
 _INIT_
-All 1 instances equal to 0.3.
+All 1 instances equal to 0.225.
+END_DESCRIPTION
+
+Parameter_mu20Chg
+Initial mark-up in consumption-good sector after regime change
+(>0)
+_INIT_
+All 1 instances equal to 0.225.
+END_DESCRIPTION
+
+Parameter_n2
+Number of periods for evaluating market share in consumption-good sector 
+(1-5)
+_INIT_
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_omega1
@@ -2675,10 +3949,15 @@ END_DESCRIPTION
 Parameter_omega2
 Competitiveness weight of unfilled demand in consumption-good sector
 (>=0)
-
-(>=0)
 _INIT_
 All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_omega3
+Competitiveness weight of quality in consumption-good sector
+(>=0)
+_INIT_
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_u
@@ -2712,6 +3991,18 @@ Variable_A2
 Machine-level weighted-average labor productivity of consumption-good sector
 _INIT_
 All 1 instances equal to 1.
+END_DESCRIPTION
+
+Variable_A2p
+Machine-level weighted-average labor potential productivity of consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_B2
+Total bonuses paid by consumption-good sector
+_INIT_
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_CI
@@ -2846,6 +4137,12 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_Pi2rateAvg
+Weighted average profit rate in consumption-good sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Variable_Q2
 Total planned (real) output before constraints of consumption-good sector
 _INIT_
@@ -2948,8 +4245,44 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_f2critChg
+Threshold reached (1) for joint market share of post-change firms
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_f2posChg
+Joint market share hold by post-change firms in consumption-good sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_fires2
+Total workers fired in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_hires2
+Total workers hired in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
 Variable_l2avg
 Weighted average unfilled demand in consumption-good sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_l2max
+Maximum unfilled demand in consumption-good sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_l2min
+Minimum unfilled demand in consumption-good sector
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -2962,6 +4295,78 @@ END_DESCRIPTION
 
 Variable_p2avg
 Weighted average price in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_p2max
+Maximum price in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_p2min
+Minimum price in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_q2avg
+Weighted average quality in consumption-good sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_q2max
+Maximum quality in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_q2min
+Minimum quality in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_quits2
+Total workers quitting (not fired) in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_retires2
+Workers retiring in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_sV2avg
+Average vintage skills in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_w2avg
+Average wage paid in consumption-good sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_w2oAvg
+Average wage offered in consumption-good sector
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_w2oMax
+Highest wage offered in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_w2realAvg
+Weighted real average wage paid by consumption-good sector
 _INIT_
 
 END_DESCRIPTION
@@ -2995,6 +4400,12 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Parameter__postChg
+Post-change (1) consumption-good firm
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Parameter__t2ent
 Period of entry of consumption-good firm
 _INIT_
@@ -3013,8 +4424,14 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Variable__A2e
-Machine-level average effective productivity of consumption-good firm
+Variable__A2p
+Machine-level average potential labor productivity of consumption-good firm
+_INIT_
+
+END_DESCRIPTION
+
+Variable__B2
+Bonus paid by consumption-good firm
 _INIT_
 
 END_DESCRIPTION
@@ -3127,6 +4544,12 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable__L2vac
+Labor vacancy rate of consumption-good firm
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Variable__N
 Inventories (real terms) of consumption-good firm
 _INIT_
@@ -3141,6 +4564,13 @@ END_DESCRIPTION
 
 Variable__Pi2
 Profits (before tax) of consumption-good firm
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__Pi2rate
+Profit rate of consumption-good firm
+Profits over total capital
 _INIT_
 
 END_DESCRIPTION
@@ -3247,10 +4677,28 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable__dQ2d
+Desired output change of consumption-good firm
+_INIT_
+
+END_DESCRIPTION
+
 Variable__f2
 Market share of consumption-good firm
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__fires2
+Workers fired by consumption-good firm
+_INIT_
+
+END_DESCRIPTION
+
+Variable__hires2
+Workers hired by consumption-good firm
+_INIT_
+
 END_DESCRIPTION
 
 Variable__l2
@@ -3287,14 +4735,62 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable__q2
+Quality of good of consumption-good firm
+_INIT_
+
+END_DESCRIPTION
+
 Variable__qc2
 Credit class of consumption-good firm (1,2,3,4)
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable__quits2
+Workers quitting job (not fired) of consumption-good firm
+_INIT_
+
+END_DESCRIPTION
+
+Variable__retires2
+Workers retiring of consumption-good firm
+_INIT_
+
+END_DESCRIPTION
+
+Variable__s2avg
+Weighted average worker compound skills of consumption-good firm
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__sT2min
+Minimum tenure worker skills of consumption-good firm
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
 Variable__supplier
 Machine supplier ID of consumption-good firm
+_INIT_
+
+END_DESCRIPTION
+
+Variable__w2avg
+Average wage paid by consumption-good firm
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__w2o
+Wage offered by consumption-good firm
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__w2realAvg
+Average real wage paid by consumption-good firm
 _INIT_
 
 END_DESCRIPTION
@@ -3358,16 +4854,10 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Variable__LdVint
-Labor required for full utilization of vintage
+Variable__AeVint
+Effective machine-level labor productivity of vintage
 _INIT_
-
-END_DESCRIPTION
-
-Variable__Lvint
-Labor available for operation of vintage
-_INIT_
-
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable__Qvint
@@ -3380,6 +4870,46 @@ Variable__RSvint
 Machines to scrap in vintage
 Positive: still in technical life
 Negative: out of technical life
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__dLdVint
+Additional labor required for full utilization of vintage
+_INIT_
+
+END_DESCRIPTION
+
+Object_WrkV
+Workers using vintage object
+
+SHOOK: operating worker (Worker)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter__IDwV
+ID of worker using vintage
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Object_Wrk2
+Workers in consumption-good firm object
+
+SHOOK: employed worker (Worker)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter__IDw2
+ID of worker in consumption-good firm
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter__key2
+Key value used for sorting of worker
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -3603,6 +5133,13 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_Gini
+Gini index 
+Include wages, unemployment benefits and bonuses, and firm owners net cash flows
+_INIT_
+
+END_DESCRIPTION
+
 Variable_TC
 Total credit supply provided by financial sector
 _INIT_
@@ -3621,8 +5158,32 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_A2posChg
+Machine-level weighted-average labor productivity of post-change firms in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_A2preChg
+Machine-level weighted-average labor productivity of pre-change firms in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
 Variable_A2sd
 Standard deviation of machine-level log labor productivity of consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_A2sdPosChg
+Standard deviation of machine-level log labor productivity of post-change firms in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_A2sdPreChg
+Standard deviation of machine-level log labor productivity of pre-change firms in consumption-good sector
 _INIT_
 
 END_DESCRIPTION
@@ -3633,8 +5194,8 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_BtauAvg
-Average labor productivity of machines produced by capital-good sector
+Variable_B2payers
+Number of bonus-paying firms in consumption-good sector
 _INIT_
 
 END_DESCRIPTION
@@ -3748,12 +5309,6 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_NCavg
-Number of new clients of capital-good firms
-_INIT_
-
-END_DESCRIPTION
-
 Variable_RD
 R&D expenditure of capital-good sector
 _INIT_
@@ -3762,6 +5317,12 @@ END_DESCRIPTION
 
 Variable_RS2
 Machine (desired) scrapping rate in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_NCavg
+Number of new clients of capital-good firms
 _INIT_
 
 END_DESCRIPTION
@@ -3808,14 +5369,113 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_noWrk2
+Share of operating firms with no worker in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_q2posChg
+Weighted average quality of post-change firms in consumption-good sector
+Weighted by output
+_INIT_
+
+END_DESCRIPTION
+
+Variable_q2preChg
+Weighted average quality of pre-change firms in consumption-good sector
+Weighted by output
+_INIT_
+
+END_DESCRIPTION
+
+Variable_s1avg
+Average workers compound skills in capital-good sector
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Variable_s2avg
+Average workers compound skills in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_BtauAvg
+Average labor productivity of machines produced by capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
 Object_Lab
 Labor supply statistics
 _INIT_
 
 END_DESCRIPTION
 
+Variable_Lent
+Entry rate of workers in labor market
+Hires over total labor supply
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Lexit
+Exit rate of workers in labor market
+Fires plus quits over labor employed
+_INIT_
+
+END_DESCRIPTION
+
+Variable_L1ent
+Entry rate of labor in capital-good sector
+Hires over labor employed
+_INIT_
+
+END_DESCRIPTION
+
+Variable_L1exit
+Exit rate of labor in capital-good sector
+Fires+quits over labor employed
+_INIT_
+
+END_DESCRIPTION
+
+Variable_L1v
+Vacancy rate of labor in capital-good sector
+Unfilled positions over labor employed
+_INIT_
+
+END_DESCRIPTION
+
+Variable_L2ent
+Entry rate of labor in consumption-good sector
+Hires over labor employed
+_INIT_
+
+END_DESCRIPTION
+
+Variable_L2exit
+Exit rate of labor in consumption-good sector
+Fires+quits over labor employed
+_INIT_
+
+END_DESCRIPTION
+
 Variable_L2larg
 Number of workers of largest firm in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_L2v
+Labor vacancy rate in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_TuAvg
+Average number of periods of unemployment
 _INIT_
 
 END_DESCRIPTION
@@ -3832,8 +5492,130 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_wReal
-Centralized real wage
+Variable_part
+Participation rate of workers
+_INIT_
+
+END_DESCRIPTION
+
+Variable_w2avgLarg
+Average wage paid by largest firm in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_w2oMin
+Lowest wage offered in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_w2realPosChg
+Weighted average real wage paid by post-change firms in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_w2realPreChg
+Weighted average real wage paid by pre-change firms in consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wAvgReal
+Real average income of workers
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wAvgRealEmp
+Real average income of employed workers
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wGini
+Income Gini index of workers
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wLogSD
+Standard deviation of log income of workers
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wMax
+Highest income of workers
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wMaxEmp
+Highest income of employed workers
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wMin
+Lowest income of workers
+Include unemployment benefits and bonuses
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wMinEmp
+Lowest income of employed workers
+Exclude unemployment benefits but include bonuses
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wrAvg
+Average requested wage
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wrLogSD
+Requested log wage standard deviation
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wrMax
+Highest requested wage
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wrMin
+Lowest requested wage
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wsAvg
+Average satisfying wage
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wsLogSD
+Satisfying log wage standard deviation
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wsMax
+Highest satisfying wage
+_INIT_
+
+END_DESCRIPTION
+
+Variable_wsMin
+Lowest fascinating wage
 _INIT_
 
 END_DESCRIPTION
@@ -3841,23 +5623,36 @@ END_DESCRIPTION
 
 DOCUOBSERVE
 Root
+_postChg
 _A2
+_A2p
 _E
 _JO2
 _L2
 _L2d
+_L2vac
 _Q2p
 _Q2pe
 _Q2u
 _W2
 _dA2b
+_dQ2d
 _f2
+_fires2
+_hires2
+_q2
+_quits2
+_retires2
+_s2avg
+_sT2min
+_w2avg
+_w2o
+_w2realAvg
 
 END_DOCUOBSERVE
 
 
 DOCUINITIAL
-Root
 
 END_DOCUINITIAL
 
@@ -3865,10 +5660,10 @@ END_DOCUINITIAL
 EQ_FILE
 /******************************************************************************
 
-	K+S LSD MODEL (including finance extensions and variable number of firms)
-	-------------
+	MAIN K+S LSD MODEL (including labor and finance extensions)
+	------------------
 	
-	VERSION: 0.3.1 - independent entry and exit of firms in both sectors
+	VERSION: 5.1 - Full LSD version
 
 	This is the topmost code file for the K+S coded in LSD. 
 	It contains only the scheduling equations 'runCountry' and 'timeStep',
@@ -3888,7 +5683,9 @@ EQ_FILE
 
 // define variables to use in equations
 #define EQ_USER_VARS dblVecT::iterator itd, itd1; \
-					 objVecT::iterator ito, ito1;// general purpose iterators
+					 objVecT::iterator ito, ito1; \
+					 appLisT::iterator its, its1; \
+					 woLisT::iterator itw, itw1;// general purpose iterators
 
 // LSD and K+S macros and objects definition and support code
 #include <fun_head_fast.h>						// LSD definitions
@@ -3911,6 +5708,7 @@ MODELBEGIN
 #include "fun_KS_firm2.h"						// Firm2 objects equations
 #include "fun_KS_vintage.h"						// Vint objects equations
 #include "fun_KS_labor.h"						// Labor object equations
+#include "fun_KS_worker.h"						// Worker objects equations
 #include "fun_KS_stats.h"						// statistics only equations
 #include "fun_KS_test.h"						// test only equations
 
@@ -4022,7 +5820,7 @@ v[10] = VS( CONSECL0, "Tax2" );					// tax paid by sector 2
 // government collects taxes and decide about expenditure, public deficit or
 // superavit form and its financed by public debt
 
-v[11] = V( "Def" );								// public total deficit
+v[11] = V( "Def" );								// public deficit
 
 // macro variables are computed by simple aggregation of micro-level data
 
@@ -4052,10 +5850,16 @@ MODELEND
 
 void close_sim( void )
 {
-	object *cur;
+	object *cur, *cur1, *cur2;
 	
 	CYCLES( root, cur, "Country" )				// scan all country objects
+	{
+		CYCLES( cur, cur1, "Consumption" )
+			CYCLES( cur1, cur2, "Firm2" )		// free Firm2 extensions
+				DELETE_EXTS( cur2, firm2 );
+
 		DELETE_EXTS( cur, country );			// reclaim allocated memory
+	}
 }
 
 END_EQ_FILE

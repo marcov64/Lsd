@@ -197,10 +197,12 @@ RESULT( COUNT( "Cli1" ) + COUNT( "Cli2" ) )
 
 EQUATION( "_Depo" )
 /*
-Bank reserves (deposits on Central Bank)
+Bank deposits
+Net deposits from exiting and entering firms in period not considered
 */
 
 VS( GRANDPARENT, "Sav" );						// ensure savings are calculated
+V( "_Loans" );									// ensure all transactions done
 
 v[0] = V( "_fD" ) * VS( GRANDPARENT, "SavAcc" );// workers deposits
 
@@ -216,7 +218,11 @@ RESULT( max( v[0], 0 ) )
 EQUATION( "_Loans" )
 /*
 Bank loans (non-defaulted)
+Net loans to exiting and entering firms in period not considered
 */
+
+VS( CAPSECL2, "Tax1" );							// ensure transactions are done
+VS( CONSECL2, "Tax2" );
 
 v[0] = 0;										// accumulator
 

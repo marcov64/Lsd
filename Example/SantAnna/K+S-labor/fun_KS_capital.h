@@ -106,7 +106,7 @@ CYCLE_SAFE( cur, "Firm1" )
 				++v[6];
 			
 			// account liquidation credit due to public, if any
-			v[2] += exit_firm1( var, cur );		// delete object and liq. val.
+			v[2] += exit_firm1( var, cur );		// del obj & collect liq. value
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
@@ -285,7 +285,7 @@ EQUATION( "A1" )
 Labor productivity of capital-good sector
 */
 V( "PPI" );										// ensure m.s. are updated
-RESULT( WHTAVE( "_Btau", "_f1" ) )
+RESULT( V( "Q1e" ) > 0 ? WHTAVE( "_Btau", "_f1" ) : CURRENT )
 
 
 EQUATION( "D1" )
@@ -336,7 +336,7 @@ RESULT( SUM( "_L1d" ) )
 
 EQUATION( "L1dRD" )
 /*
-Total R&D labor demand from firms in capital-good sector
+R&D labor demand from firms in capital-good sector
 */
 RESULT( SUM( "_L1dRD" ) )
 
@@ -416,7 +416,7 @@ EQUATION( "dA1b" )
 Notional productivity (bounded) rate of change in capital-good sector
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "A1", VS( PARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "A1", VS( PARENT, "mLim" ), VS( PARENT, "mPer" ) ) )
 
 
 EQUATION( "imi" )
@@ -439,6 +439,14 @@ learning-by-doing skills are updated
 */
 V( "imi" );										// ensure innovation is done
 RESULT( SUM( "_inn" ) / V( "F1" ) )
+
+
+EQUATION( "p1avg" )
+/*
+Weighted average price charged in capital-good sector
+*/
+v[1] = V( "Q1e" );
+RESULT( v[1] > 0 ? WHTAVE( "_p1", "_Q1e" ) / v[1] : CURRENT )
 
 
 EQUATION( "quits1" )

@@ -33,7 +33,7 @@ v[0] = V( "delta" );							// population growth rate
 // growing workforce and demand is higher than labor supply?
 if ( VS( PARENT, "flagAddWorkers" ) == 1 && 
 	 VS( CAPSECL1, "L1d" ) + VS( CONSECL1, "L2d" ) > h )
-	v[0] += 0.02;								// lump grow in labor supply
+	v[0] += 0.01;								// lump grow in labor supply
 	
 j = h * ( 1 + v[0] );							// grow population
 
@@ -42,6 +42,11 @@ v[3] = V( "Tc" );								// contract term
 v[4] = V( "sigma" );							// public vintage skills
 v[5] = VS( PARENT, "flagWorkerLBU" );			// learning mode
 	
+if ( v[5] == 1 || v[5] == 3 )					// vintage skills in use?
+	v[6] = v[4];								// get public skills
+else
+	v[6] = INISKILL;
+
 for ( ; h < j ; h += v[1] ) 					// add missing workers
 {	
 	cur = ADDOBJL( "Worker", T - 1 );			// insert object to be updated
@@ -55,13 +60,8 @@ for ( ; h < j ; h += v[1] ) 					// add missing workers
 	for ( i = 1; i <= 8; ++i )					// lagged wage memory
 		WRITELLS( cur, "_w", v[2], T - 1, i );
 	
-	if ( v[5] == 1 || v[5] == 3 )				// vintage skills in use?
-		v[6] = v[4];							// get public skills
-	else
-		v[6] = 1;
-	
-	WRITES( cur, "_sV", v[6] );
-	WRITES( cur, "_s", v[6] );
+	WRITELLS( cur, "_sV", v[6], T - 1, 1 );
+	WRITELLS( cur, "_sT", INISKILL, T - 1, 1 );
 }
 
 RESULT( h )
@@ -100,7 +100,9 @@ if ( VS( PARENT, "flagHeterWage" ) == 0 )
 	v[6] = VLS( PARENT, "dAb", 1 );				// general productivity variat.
 	v[7] = VL( "dUeB", 1 );						// unemployment variation
 
-	v[0] = CURRENT * ( 1 + v[4] + v[1] * ( v[5] - v[4] ) + v[2] * v[6] + v[3] * v[7] );
+	v[0] = CURRENT * ( 1 + v[4] + v[1] * ( v[5] - v[4] ) + v[2] * v[6] + 
+					   v[3] * v[7] );
+	v[0] = max( v[0], V( "wMinPol" ) );			// adjust to minimum if needed
 }
 else
 	v[0] = VL( "wAvg", 1 );						// simply equal to mkt avg
@@ -136,7 +138,7 @@ EQUATION( "wU" )
 /*
 Unemployment benefit ("wage") paid by government
 */
-RESULT( VS( FINSECL1, "phi" ) * VL( "wAvgEmp", 1 ) )// fraction of last avg wage
+RESULT( V( "phi" ) * VL( "wAvgEmp", 1 ) )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
@@ -182,11 +184,15 @@ CYCLE( cur, "Worker" )
 	else
 		k += VS( cur, "_Te" );					// add time in job
 
+v[3] = v[1] - ( h - j ) * v[2];					// long-term unemployed workers
+v[4] = v[1] - h * v[2];							// employed workers
+v[5] = v[1] - i * v[2];							// non-discouraged total workers
+
 WRITE( "U", h * v[2] / v[1] );
-WRITE( "Us", j * v[2] / ( v[1] - ( h - j ) ) );
-WRITE( "TeAvg", k / ( v[1] - h ) );
+WRITE( "Us", v[3] > 0 ? j * v[2] / v[3] : 1 );
+WRITE( "TeAvg", v[4] > 0 ? k * v[2] / v[4] : 0 );
 	
-RESULT( ( h - i ) * v[2] / ( v[1] - i ) )
+RESULT( v[5] > 0 ? ( h - i ) * v[2] / v[5] : 1 )
 
 
 EQUATION( "appl" )
@@ -201,7 +207,7 @@ EQUATION( "dUeB" )
 Notional unemployment (bounded) rate of change
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "Ue", VS( PARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "Ue", VS( PARENT, "mLim" ), VS( PARENT, "mPer" ) ) )
 
 
 EQUATION( "sAvg" )
@@ -218,7 +224,7 @@ Also updates:
 
 h = VS( PARENT, "flagWorkerLBU" );				// learning-by-use mode
 if ( h == 0 )									// no worker-level learning?
-	END_EQUATION( 1 );
+	END_EQUATION( INISKILL );
 	
 v[0] = v[1] = v[2] = v[3] = v[4] = i = 0;		// accumulators
 v[5] = 0;										// current maximum
@@ -250,6 +256,8 @@ CYCLE( cur, "Worker" )
 	}
 }
 
+v[0] /= i;
+
 if ( h >= 2 )
 {
 	WRITE( "sTavg", v[1] / i );
@@ -259,10 +267,11 @@ if ( h >= 2 )
 }
 else
 {
-	WRITE( "sTavg", 1 );
+	v[0] = INISKILL;
+	WRITE( "sTavg", INISKILL );
 	WRITE( "sTsd", 0 );
-	WRITE( "sTmax", 1 );
-	WRITE( "sTmin", 1 );
+	WRITE( "sTmax", INISKILL );
+	WRITE( "sTmin", INISKILL );
 }
 	
 if ( h == 1 || h == 3 )
@@ -272,11 +281,12 @@ if ( h == 1 || h == 3 )
 }
 else
 {
-	WRITE( "sVavg", 1 );
+	v[0] = INISKILL;
+	WRITE( "sVavg", INISKILL );
 	WRITE( "sVsd", 0 );
 }
 	
-RESULT( v[0] / i )
+RESULT( v[0] )
 
 
 EQUATION( "wAvg" )

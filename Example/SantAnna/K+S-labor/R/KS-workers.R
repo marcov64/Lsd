@@ -13,14 +13,15 @@
 folder   <- "data"                    # data files folder
 baseName <- "Sim"                     # data files base name (same as .lsd file)
 nExp <- 2                             # number of experiments
-iniDrop <- 0                          # initial time steps to drop from analysis (0=none)
+iniDrop <- 0                          # initial time steps to drop (0=none)
 nKeep <- -1                           # number of time steps to keep (-1=all)
 
 expVal <- c( "Fordist", "Competitive" )   # case parameter values
 
 # Worker-level variables to use
 workerVar <- c( "_wReal", "_s", "_Tu" )
-addWorkerVar <- c( "normRW", "normSK", "normTU", "normRWgrow", "normSKgrow", "normTUgrow" )
+addWorkerVar <- c( "normRW", "normSK", "normTU", "normRWgrow", "normSKgrow",
+                   "normTUgrow" )
 
 
 # ==== Process LSD result files ====
@@ -41,10 +42,12 @@ nVar <- length( newWorkerVar )          # number of variables (worker-level)
 # Function to read one experiment data (to be parallelized)
 readExp <- function( exper ) {
   if( nExp > 1 ) {
-    myFiles <- list.files( path = folder, pattern = paste0( baseName, exper, "_[0-9]+.res" ),
+    myFiles <- list.files( path = folder,
+                           pattern = paste0( baseName, exper, "_[0-9]+.res" ),
                            full.names = TRUE )
   } else {
-    myFiles <- list.files( path = folder, pattern = paste0( baseName, "_[0-9]+.res" ),
+    myFiles <- list.files( path = folder,
+                           pattern = paste0( baseName, "_[0-9]+.res" ),
                            full.names = TRUE )
   }
 

@@ -13,7 +13,7 @@
 folder   <- "data"                    # data files folder
 baseName <- "Sim"                     # data files base name (same as .lsd file)
 nExp <- 2                             # number of experiments
-iniDrop <- 0                          # initial time steps to drop from analysis (0=none)
+iniDrop <- 0                          # initial time steps to drop (0=none)
 nKeep <- -1                           # number of time steps to keep (-1=all)
 
 expVal <- c( "Fordist", "Competitive" )   # case parameter values
@@ -41,10 +41,12 @@ library( abind, verbose = FALSE, quietly = TRUE )
 # Function to read one experiment data (to be parallelized)
 readExp <- function( exper ) {
   if( nExp > 1 ) {
-    myFiles <- list.files( path = folder, pattern = paste0( baseName, exper, "_[0-9]+.res"),
+    myFiles <- list.files( path = folder,
+                           pattern = paste0( baseName, exper, "_[0-9]+.res"),
                           full.names = TRUE )
   } else {
-    myFiles <- list.files( path = folder, pattern = paste0( baseName, "_[0-9]+.res"),
+    myFiles <- list.files( path = folder,
+                           pattern = paste0( baseName, "_[0-9]+.res"),
                           full.names = TRUE )
   }
 
@@ -436,10 +438,12 @@ for( k in 1 : nExp ){
                        ncol = 10, byrow = TRUE )
   colnames( key.stats ) <- c( "N.Output(log)", "N.Prod.(log)", "N.R.Wage(log)",
                               "N.Skills(log)", "Output Gr.", "N.Output Gr.",
-                              "N.Prod.Gr.", "N.R.Wage Gr.", "N.Skills Gr.", "Exit Rate" )
-  rownames( key.stats ) <- c( "average", " (s.e.)", " (s.d.)", "Subbotin b", " a", " m", "Jarque-Bera X2",
-                              " (p-val.)", "Lilliefors D", " (p-val.)", "Anderson-Darling A", " (p-val.)",
-                              "autocorr. t-1", "autocorr. t-2" )
+                              "N.Prod.Gr.", "N.R.Wage Gr.", "N.Skills Gr.",
+                              "Exit Rate" )
+  rownames( key.stats ) <- c( "average", " (s.e.)", " (s.d.)", "Subbotin b",
+                              " a", " m", "Jarque-Bera X2", " (p-val.)",
+                              "Lilliefors D", " (p-val.)", "Anderson-Darling A",
+                              " (p-val.)", "autocorr. t-1", "autocorr. t-2" )
 
   textplot( formatC( key.stats, digits = sDigits, format = "g" ), cmar = 1.0 )
   title <- paste( "Pooled firm-level statistics (", legends[ k ], ")" )

@@ -705,6 +705,7 @@ Label Root
 		Param: Crec
 		Param: gG
 		Param: mLim
+		Param: mPer
 		Param: omicron
 		Param: stick
 		Param: tr
@@ -762,6 +763,7 @@ Param: flagTax 0 n + n n	0
 Param: Crec 0 n + n n	0.2
 Param: gG 0 n + n n	0.005
 Param: mLim 0 n + n n	1
+Param: mPer 0 n + n n	1
 Param: omicron 0 n + n n	0.5
 Param: stick 0 n + n n	1
 Param: tr 0 n + n n	0.1
@@ -1543,8 +1545,18 @@ All 1 instances equal to 0.005.
 END_DESCRIPTION
 
 Parameter_mLim
-Maximum absolute growth rate on sensitive calculations
+Absolute cap on moving-average growth calculation
 (>=0, 0=no limit)
+
+_INIT_
+All 1 instances equal to 1.
+
+END_DESCRIPTION
+
+Parameter_mPer
+Number of periods on moving-average calculation
+(>=1)
+
 _INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION

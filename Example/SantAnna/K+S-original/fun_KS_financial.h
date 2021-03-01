@@ -21,6 +21,7 @@ RESULT( 0 )
 EQUATION( "Depo" )
 /*
 Total banking sector deposits
+Net deposits from exiting and entering firms in period not considered
 */
 VS( PARENT, "Sav" );							// ensure savings are calculated
 RESULT( VS( PARENT, "SavAcc" ) + SUMS( CAPSECL1, "_NW1" ) + 
@@ -30,5 +31,6 @@ RESULT( VS( PARENT, "SavAcc" ) + SUMS( CAPSECL1, "_NW1" ) +
 EQUATION( "Loans" )
 /*
 Total banking sector loans (non-defaulted)
+Net loans to exiting and entering firms in period not considered
 */
 RESULT( SUMS( CAPSECL1, "_Deb1" ) + SUMS( CONSECL1, "_Deb2" ) )

@@ -16,7 +16,7 @@
 folder   <- "sobol"                   # data files folder
 baseName <- "Sim1-sobol"              # data files base name (same as .lsd file)
 varName <- "U"                        # analysis variable name
-iniDrop <- 100                        # initial time steps to drop from analysis (0=none)
+iniDrop <- 100                        # initial time steps to drop (0=none)
 nKeep <- -1                           # number of time steps to keep (-1=all)
 onlyCross <- FALSE                    # use only cross validation to select model
 

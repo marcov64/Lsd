@@ -925,7 +925,8 @@ EQUATION( "_dA2b" )
 Notional productivity (bounded) rate of change of firm in consumption-good sector
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "_A2", VS( GRANDPARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "_A2", VS( GRANDPARENT, "mLim" ), 
+					   VS( GRANDPARENT, "mPer" ) ) )
 
 
 EQUATION( "_dNnom" )

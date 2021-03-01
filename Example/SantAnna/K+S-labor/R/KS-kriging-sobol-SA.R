@@ -16,7 +16,7 @@
 folder   <- "sobol"                   # data files folder
 baseName <- "Sim1-sobol"              # data files base name (same as .lsd file)
 varName <- "U"                        # analysis variable name
-iniDrop <- 300                        # initial time steps to drop from analysis (0=none)
+iniDrop <- 100                        # initial time steps to drop (0=none)
 nKeep <- -1                           # number of time steps to keep (-1=all)
 onlyCross <- FALSE                    # use only cross validation to select model
 
@@ -45,20 +45,20 @@ plotH <- 7       					            # plot window height
 
 # 3D surfaces visualization control
 grid3d <- 25                          # density for 3D wireframe plots
-theta3d <- 40                         # horizontal view angle
+theta3d <- 220                        # horizontal view angle
 phi3d <- 30                           # vertical view angle
 
 
 # ==== Aggregated variables to consider ====
 
 # Aggregated variables to use
-logVars <- c( "GDP", "EI", "C", "I", "Deb1", "Deb2", "NWb", "NW1", "NW2", "S1",
+logVars <- c( "GDP", "C", "I", "EI", "Deb1", "Deb2", "NWb", "NW1", "NW2", "S1",
               "S2", "A", "wAvg", "G", "Gbail", "Gtrain", "Tax", "Deb", "Def",
               "Loans", "W1", "W2", "B2" )
 aggrVars <- append( logVars, c( "dGDP", "dCPI", "Q2u", "F1", "F2", "entry1",
-                                "entry2", "exit1", "exit2", "f2posChg", "imi",
-                                "inn", "r", "U", "Ue", "TeAvg", "sTavg",
-                                "sVavg", "CPI", "q2avg" ) )
+                                "entry2", "exit1", "exit2", "imi", "inn", "r",
+                                "CPI", "U", "Ue", "TeAvg", "f2posChg", "sTavg",
+                                "sVavg", "q2avg" ) )
 newVars <- c( "freq_FE", "cris_llh", "GDP_sd" )
 
 

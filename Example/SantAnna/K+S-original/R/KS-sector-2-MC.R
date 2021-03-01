@@ -13,7 +13,7 @@
 folder   <- "data"                    # data files folder
 baseName <- "Sim"                     # data files base name (same as .lsd file)
 nExp <- 2                             # number of experiments
-iniDrop <- 0                          # initial time steps to drop from analysis (0=none)
+iniDrop <- 0                          # initial time steps to drop (0=none)
 nKeep <- -1                           # number of time steps to keep (-1=all)
 
 expVal <- c( "Benchmark", "High opportunities & capabilities" )   # case parameter values
@@ -342,7 +342,7 @@ for( k in 1 : nExp ){             # do for each experiment
 
   textplot( formatC( key.stats, digits = sDigits, format = "g" ), cmar = 1.0 )
   title <- paste( "Monte Carlo firm-level statistics (", legends[ k ], ")" )
-  subTitle <- paste( eval( bquote( paste0( "( Sample size = ", nFirms[ k ],
+  subTitle <- paste( eval( bquote( paste0( "( Sample size = ", nFirms,
                                            " firms / MC runs = ", nSize,
                                         " / Period = ", warmUp + 1, "-",
                                         nTstat, " )" ) ) ),

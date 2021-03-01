@@ -59,9 +59,9 @@ The model come with some ready-to-use configuration files (.lsd extension), illu
 
 Free_entry.lsd = similar set-up employed in the 2015 paper model (baseline configuration) but allowing the firm entry process to be independent from exits from the market, so producing a variable number of firms
 
-Entry_after_exit.lsd = same set-up employed in the original 2015 paper model (baseline configuration) where firm market entry only occurs after another firm exits, so maintaining a constant number of firms
+Fix_entry-Baseline_v2.lsd = fixed number of firms, same set-up employed in the original 2015 paper model (baseline configuration)
 
-No_finance-Benchmark_v1.lsd = fixed number of firms, no financial market and limits, similar configuration to the 2010 paper model (v0.1.1)
+Fix_entry-No_fin-Benchmark_v1.lsd = fixed number of firms, no financial market and limits, similar configuration to the 2010 paper model (v0.1.1)
 
 Please refer to the original 2010/2015 papers (reference above) for details.
 
@@ -148,7 +148,8 @@ Country-level parameters (object Country)
 ------------------------
 Crec = unfilled past consumption recover limit as fraction of current consumption (>0)
 gG = growth rate of fixed public expenditure (>=0)
-mLim = multiple limit on delta variation on sensitive calculations (>=0, 0=no limit)
+mLim = absolute cap on moving-average growth calculation (>=0, 0=no limit)
+mPer = number of periods on moving-average growth calculation (>=1)
 omicron = sensitivity of entry to market conditions (liquid assets vs. debt ratio) ([0,1])
 stick = stickiness of the number of firms (return to average) (>=0)
 tr = tax rate (>=0)

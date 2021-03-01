@@ -189,11 +189,14 @@ double Bda = VS( SECSTAL1, "Bda" );
 
 double SavAcc = VS( PARENT, "SavAcc" );
 
+double Deb1 = VS( CAPSECL1, "Deb1" );
 double NW1 = VS( CAPSECL1, "NW1" );
 
+double Deb2 = VS( CONSECL1, "Deb2" );
 double NW2 = VS( CONSECL1, "NW2" );
 
-double nonNeg[ ] = { CD, CDc, CS, Depo, Loans, BadDeb, Bda, SavAcc, NW1, NW2 };
+double nonNeg[ ] = { CD, CDc, CS, Deb1, Deb2, Depo, Loans, BadDeb, Bda, 
+					 SavAcc, NW1, NW2 };
 double posit[ ] = { };
 double finite[ ] = { NW1, NW2 };
 
@@ -201,7 +204,7 @@ dblVecT all ( nonNeg, END_ARR( nonNeg ) );
 all.insert( all.end( ), posit, END_ARR( posit ) );
 all.insert( all.end( ), finite, END_ARR( finite ) );
 
-// interest rat structure and bank assets and liabilities
+// interest rate structure and bank assets and liabilities
 LOG( "\n  $$$ (t=%g) Depo=%.3g Loans=%.3g BadDeb=%.3g", T, Depo, Loans, BadDeb );
 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
@@ -213,8 +216,9 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 for ( itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
-check_error( round( Depo ) > round( NW1 + NW2 + SavAcc ), 
-			 "INCONSISTENT-DEPOSITS", 0, & errors );
+// try to account for deposits from loans of entrant firms (very crude)
+check_error( abs( NW1 + NW2 + SavAcc - Depo - Deb1 - Deb2 + Loans ) / Depo > TOL, 
+			 "LARGE-DEPO-LOANS-GAP", 0, & errors );
 
 check_error( CS > CD || CDc > CD, "INCONSISTENT-FINANCE", 0, & errors );
 

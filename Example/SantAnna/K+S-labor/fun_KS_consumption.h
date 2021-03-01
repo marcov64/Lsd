@@ -161,7 +161,7 @@ CYCLE_SAFE( cur, "Firm2" )
 				++v[7];
 
 			// account liquidation credit due to public, if any
-			v[3] += exit_firm2( var, cur, & v[1] );// delete object and liq. val.
+			v[3] += exit_firm2( var, cur, & v[1] );// del obj & collect liq. val.
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
@@ -205,6 +205,7 @@ INCRS( PARENT, "cEntry", v[2] );				// account equity cost of entry
 INCRS( PARENT, "cExit", v[3] );					// account exit credits
 WRITE( "exit2", ( double ) j / F2 );
 WRITE( "entry2", ( double ) k / F2 );
+WRITES( SECSTAL1, "exit2fail", v[7] / F2 );
 
 V( "f2rescale" );								// redistribute entrant m.s.
 V( "firm2maps" );								// update firm mapping vectors
@@ -637,7 +638,7 @@ EQUATION( "dCPIb" )
 /*
 Consumer price index inflation (change) rate
 */
-RESULT( mov_avg_bound( THIS, "CPI", VS( PARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "CPI", VS( PARENT, "mLim" ), VS( PARENT, "mPer" ) ) )
 
 
 EQUATION( "dNnom" )

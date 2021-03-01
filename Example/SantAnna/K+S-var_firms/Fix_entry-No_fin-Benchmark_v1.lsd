@@ -498,6 +498,7 @@ Label Root
 		Param: Crec
 		Param: gG
 		Param: mLim
+		Param: mPer
 		Param: omicron
 		Param: stick
 		Param: tr
@@ -541,7 +542,7 @@ Var: runCountry 0 n + n n
 Object: Country C	1
 Param: flagAddWorkers 0 n + n n	0
 Param: flagCons 0 n + n n	1
-Param: flagCreditRule 0 n + n n	2
+Param: flagCreditRule 0 n + n n	0
 Param: flagExpect 0 n + n n	0
 Param: flagFiscalRule 0 n + n n	0
 Param: flagGovExp 0 n + n n	2
@@ -549,6 +550,7 @@ Param: flagTax 0 n + n n	0
 Param: Crec 0 n + n n	0.2
 Param: gG 0 n + n n	0.005
 Param: mLim 0 n + n n	1
+Param: mPer 0 n + n n	1
 Param: omicron 0 n + n n	0.5
 Param: stick 0 n + n n	1
 Param: tr 0 n + n n	0.1
@@ -576,7 +578,7 @@ Var: initCountry 0 n + n n
 Var: timeStep 0 n + n n
 
 Object: Financial C	1
-Param: B 0 n + n n	10
+Param: B 0 n + n n	1
 Param: DebRule 0 n + n n	0.6
 Param: DefPrule 0 n + n n	0.03
 Param: EqB0 0 n + n n	1
@@ -588,18 +590,18 @@ Param: Ut 0 n + n n	0.015
 Param: alphaB 0 n + n n	0.8
 Param: betaB 0 n + n n	1
 Param: dB 0 n + n n	0
-Param: deltaB 0 n + n n	0.33
+Param: deltaB 0 n + n n	1
 Param: deltaDeb 0 n + n n	0.05
-Param: gammaPi 0 n + n n	1.1
+Param: gammaPi 0 n + n n	0
 Param: gammaU 0 n + n n	0
-Param: kConst 0 n + n n	0.1
-Param: muBonds 0 n + n n	0.6
+Param: kConst 0 n + n n	0
+Param: muBonds 0 n + n n	1
 Param: muD 0 n + n n	1
-Param: muDeb 0 n + n n	0.3
-Param: muRes 0 n + n n	0.33
-Param: piT 0 n + n n	0.02
+Param: muDeb 0 n + n n	0
+Param: muRes 0 n + n n	1
+Param: piT 0 n + n n	0
 Param: rAdj 0 n + n n	0.0025
-Param: rT 0 n + n n	0.025
+Param: rT 0 n + n n	0.01
 Param: rhoBonds 0 n + n n	0
 Param: tauB 0 n + n n	0.08
 Param: thetaBonds 0 n + n n	12
@@ -659,9 +661,9 @@ Object: Labor C	1
 Param: Ls0 0 n + n n	250000
 Param: delta 0 n + n n	0
 Param: phi 0 n + n n	0.4
-Param: psi1 0 n + n n	0.05
+Param: psi1 0 n + n n	0
 Param: psi2 0 n + n n	1
-Param: psi3 0 n + n n	-0.05
+Param: psi3 0 n + n n	0
 Param: w0min 0 n + n n	1
 Var: L 0 s + n n
 Var: Ls 1 s + n n	0
@@ -783,22 +785,22 @@ Param: b 0 n + n n	3
 Param: chi 0 n + n n	1
 Param: d2 0 n + n n	0
 Param: e0 0 n + n n	0.25
-Param: e1 0 n + n n	0.4
-Param: e2 0 n + n n	0.4
-Param: e3 0 n + n n	0
-Param: e4 0 n + n n	0
+Param: e1 0 n + n n	1
+Param: e2 0 n + n n	1
+Param: e3 0 n + n n	1
+Param: e4 0 n + n n	1
 Param: e5 0 n + n n	0.5
 Param: e6 0 n + n n	1
 Param: e7 0 n + n n	0.3
 Param: e8 0 n + n n	0.3
-Param: eta 0 n + n n	20
+Param: eta 0 n + n n	19
 Param: f2min 0 n + n n	1e-05
 Param: iota 0 n + n n	0.1
 Param: kappaMax 0 n + n n	0.5
 Param: kappaMin 0 n + n n	0
 Param: lastID2 0 n + n n	0
 Param: m2 0 n + n n	40
-Param: mu20 0 n + n n	0.2
+Param: mu20 0 n + n n	0.3
 Param: omega1 0 n + n n	1
 Param: omega2 0 n + n n	1
 Param: u 0 n + n n	0.75
@@ -1049,7 +1051,7 @@ Bank total credit supply rule
 1 = deposits multiplier credit limit but no capital adequacy rule or bank bail-out
 2 = Basel-like bank capital adequacy rule and bank bail-out if net worth is negative
 _INIT_
-All 1 instances equal to 2.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_flagExpect
@@ -1108,9 +1110,16 @@ All 1 instances equal to 0.005.
 END_DESCRIPTION
 
 Parameter_mLim
-Maximum absolute growth rate on sensitive calculations
+Absolute cap on moving-average growth calculation
 (>=0, 0=no limit)_INIT_
 All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_mPer
+Number of periods on moving-average calculation
+(>=1)
+_INIT_
+All 1 instances equal to 4.
 END_DESCRIPTION
 
 Parameter_omicron
@@ -1281,7 +1290,7 @@ Parameter_B
 Number of heterogeneous banks
 (>=1)
 _INIT_
-All 1 instances equal to 10.
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_DebRule
@@ -1365,7 +1374,7 @@ Parameter_deltaB
 Desired share of outstanding firm debt to pay in period
 (]0,1])
 _INIT_
-All 1 instances equal to 0.33.
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_deltaDeb
@@ -1379,7 +1388,7 @@ Parameter_gammaPi
 Central bank Taylor rule sensitivity to target inflation
 (>=0)
 _INIT_
-All 1 instances equal to 1.1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_gammaU
@@ -1393,14 +1402,14 @@ Parameter_kConst
 Interest rate ramping parameter for firms debt by credit class
 (>=0)
 _INIT_
-All 1 instances equal to 0.1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_muBonds
 Sovereign bonds spread (mark-down from central bank prime rate)
 ([0,1])
 _INIT_
-All 1 instances equal to 0.6.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_muD
@@ -1414,21 +1423,21 @@ Parameter_muDeb
 Bank spread (mark-up) on debt (over central bank prime rate)
 (>=0)
 _INIT_
-All 1 instances equal to 0.3.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_muRes
 Central bank spread (mark-down) on reserves (from central bank prime rate)
 ([0,1])
 _INIT_
-All 1 instances equal to 0.33.
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_piT
 Target inflation for central bank's Taylor rule
 (>0)
 _INIT_
-All 1 instances equal to 0.02.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_rAdj
@@ -1443,7 +1452,7 @@ Target prime interest rate set by central bank
 (>0)
 (>0)
 _INIT_
-All 1 instances equal to 0.025.
+All 1 instances equal to 0.01.
 END_DESCRIPTION
 
 Parameter_rhoBonds
@@ -1792,7 +1801,7 @@ END_DESCRIPTION
 Parameter_psi1
 Share of inflation passed to wages([0,1])
 _INIT_
-All 1 instances equal to 0.05.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_psi2
@@ -1805,7 +1814,7 @@ Parameter_psi3
 Elasticity of wages to the unemployment rate
 (>=0)
 _INIT_
-All 1 instances equal to -0.05.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_w0min
@@ -1869,7 +1878,7 @@ Parameter_F10
 Initial number of firms in capital-good sector
 (1<=F1min<=F10<=F1max)
 _INIT_
-All 1 instances equal to 20.
+All 1 instances equal to 50.
 END_DESCRIPTION
 
 Parameter_F1max
@@ -2558,28 +2567,28 @@ Parameter_e1
 Weight of t-1 demand on myopic expectations
 ([0,1])
 _INIT_
-All 1 instances equal to 0.4.
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_e2
 Weight of t-2 demand on myopic expectations
 ([0,1])
 _INIT_
-All 1 instances equal to 0.4.
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_e3
 Weight of t-3 demand on myopic expectations
 ([0,1])
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_e4
 Weight of t-4 demand on myopic expectations
 ([0,1])
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_e5
@@ -2614,7 +2623,7 @@ Parameter_eta
 Technical lifetime of machines
 (>1)
 _INIT_
-All 1 instances equal to 20.
+All 1 instances equal to 19.
 END_DESCRIPTION
 
 Parameter_f2min
@@ -2662,7 +2671,7 @@ Parameter_mu20
 Initial mark-up in consumption-good sector
 (>0)
 _INIT_
-All 1 instances equal to 0.2.
+All 1 instances equal to 0.3.
 END_DESCRIPTION
 
 Parameter_omega1

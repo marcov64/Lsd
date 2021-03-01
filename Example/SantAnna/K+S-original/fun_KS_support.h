@@ -445,7 +445,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		
 		// initial equity must pay initial capital and wages
 		p1 = newInd ? p10 : VS( suppl, "_p1" );
-		NW2 = p1 * Kd / m2 + NW2f;
+		NW2 = newInd ? NW2f : p1 * Kd / m2 + NW2f;
 		equity += NW2 * ( 1 - Deb20ratio );		// accumulated equity (all firms)
 		
 		// initialize variables

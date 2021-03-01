@@ -166,7 +166,7 @@ v[10] = VS( CONSECL0, "Tax2" );					// tax paid by sector 2
 // government collects taxes and decide about expenditure, public deficit or
 // superavit form and its financed by public debt
 
-v[11] = V( "Def" );								// public deficit
+v[11] = V( "Def" );								// public total deficit
 
 // macro variables are computed by simple aggregation of micro-level data
 
