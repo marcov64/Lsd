@@ -7152,7 +7152,10 @@ bool open_configuration( object *&r, bool reload )
 			strcpy( lastObj, "" );					// disable last object for reload
 		}
 		else
-			reload = true;					// try to reload if use cancel load
+			if ( struct_loaded )
+				reload = true;				// try to reload if use cancel load
+			else
+				return false;
 	}
 	
 	if ( reload )

@@ -30,12 +30,9 @@ inline bool chk_ptr( object *ptr )
 	if ( ptr == NULL )
 		return true;
 	
-	if ( no_ptr_chk )
+	if ( no_ptr_chk || obj_list.find( ptr ) != obj_list.end( ) )
 		return false;
-	
-	if ( obj_list.find( ptr ) != obj_list.end( ) )
-		return false;
-	
+		
 	return true;
 }
 
@@ -65,10 +62,7 @@ inline bool chk_hook( object *ptr, unsigned num )
 	if ( ptr == NULL )
 		return true;
 	
-	if ( no_ptr_chk )
-		return false;
-	
-	if ( num < ptr->hooks.size( ) )
+	if ( no_ptr_chk || num < ptr->hooks.size( ) )
 		return false;
 	
 	return true;
