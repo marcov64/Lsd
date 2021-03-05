@@ -124,6 +124,8 @@ FILE *f;
 
 cover_browser( "Analysis of Results...", "Please exit Analysis of Results\nbefore using the LSD Browser.", false );
 
+cmd( "destroytop .dap" );
+
 Tcl_LinkVar( inter, "cur_plot", ( char * ) &cur_plot, TCL_LINK_INT );
 Tcl_LinkVar( inter, "nv", ( char * ) &nv, TCL_LINK_INT );
 Tcl_LinkVar( inter, "avgSmpl", ( char * ) &avgSmpl, TCL_LINK_BOOLEAN );
@@ -173,6 +175,7 @@ cmd( "set showInit $showInitP" );
 cmd( "set list_times [ list ]" );
 cmd( "set gpdgrid3d \"$gnuplotGrid3D\"" );
 cmd( "set gpoptions \"$gnuplotOptions\"" );
+cmd( "set moving false" );
 
 cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change( ) ? "*" : " ", simul_name );
 
@@ -454,8 +457,8 @@ cmd( "ttk::radiobutton .da.f.h.tc.cross -text \"Cross-section\" -variable tc -va
 cmd( "pack .da.f.h.tc.time .da.f.h.tc.cross -anchor w" );
 
 cmd( "ttk::frame .da.f.h.xy -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-cmd( "ttk::radiobutton .da.f.h.xy.seq -text \"Sequence\" -variable xy -value 0 -command { if { $tc == 0 } { .da.f.h.v.y2.y2 conf -state normal } { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled }; set gnu 0; .da.f.tit.run.gnu conf -state disabled; .da.f.tit.run.watch conf -state normal; if { $tc == 1 } { .da.f.tit.lp.line config -state normal; set line_point $linemodeP } }" );
-cmd( "ttk::radiobutton .da.f.h.xy.xy -text \"XY plot\" -variable xy -value 1 -command { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; .da.f.tit.run.gnu conf -state normal; set gnu 1; .da.f.tit.run.watch conf -state disabled; if { $tc == 1 } { set line_point 2;  .da.f.tit.lp.line config -state disabled } }" );
+cmd( "ttk::radiobutton .da.f.h.xy.seq -text \"Sequence\" -variable xy -value 0 -command { if { $tc == 0 } { .da.f.h.v.y2.y2 conf -state normal } { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled }; .da.f.tit.run.gnu conf -state disabled; .da.f.tit.run.watch conf -state normal; if { $tc == 1 } { .da.f.tit.lp.line config -state normal; set line_point $linemodeP } }" );
+cmd( "ttk::radiobutton .da.f.h.xy.xy -text \"XY plot\" -variable xy -value 1 -command { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; .da.f.tit.run.gnu conf -state normal; .da.f.tit.run.watch conf -state disabled; if { $tc == 1 } { set line_point 2;  .da.f.tit.lp.line config -state disabled } }" );
 cmd( "pack .da.f.h.xy.seq .da.f.h.xy.xy -anchor w" );
 
 // pack first horizontal group of controls
@@ -669,6 +672,7 @@ while ( true )
 			delete [ ] vs;
 			vs = NULL;
 
+			cmd( "destroytop .dap" );
 			cmd( "destroytop .da" );
 			uncover_browser( );
 				
@@ -913,7 +917,7 @@ while ( true )
 			if ( ! *choice )
 				break;
 			
-			cmd( "set choice [ winfo exists .da.f.new$a ]" );
+			cmd( "set choice [ winfo exists $daptab.tab$a ]" );
 
 			if ( *choice == 0 )
 			{
@@ -925,7 +929,7 @@ while ( true )
 
 			cmd( "ttk::frame .da.file.l" );
 			cmd( "ttk::label .da.file.l.l1 -text \"Settings for plot\"" );
-			cmd( "ttk::label .da.file.l.l2 -style hl.TLabel -text \"($a) $b\"" );
+			cmd( "ttk::label .da.file.l.l2 -style hl.TLabel -text \"$a) $b\"" );
 			cmd( "pack .da.file.l.l1 .da.file.l.l2" );
 
 			cmd( "set cm \"color\"" );
@@ -992,7 +996,7 @@ while ( true )
 					cmd( "set heightpost %d", plot_l[ *choice ] );
 				else
 				{
-					cmd( "set str [ .da.f.new$a.f.plots conf -height ]" );
+					cmd( "set str [ $daptab.tab$a.c.f.plots conf -height ]" );
 					cmd( "scan $str \"%%s %%s %%s %%s %%d\" trash1 trash2 trash3 trash4 heighpost" );
 				} 
 			}
@@ -1000,7 +1004,7 @@ while ( true )
 				cmd( "if { $heightpost == 1 } { set heightpost %d } { set heightpost %d }", plot_l[ *choice ], plot_nl[ *choice ] );
 
 			cmd( "if { ! [ info exists zoomLevel%d ] } { set zoomLevel%d 1.0 }", *choice, *choice );
-			cmd( ".da.f.new$a.f.plots postscript -x 0 -y 0 -height [ expr round( $heightpost * $zoomLevel%d) ] -width [ expr round( %d * $zoomLevel%d) ] -pagewidth $dd -rotate $res -colormode $cm -file \"$fn\"", *choice, plot_w[ *choice ], *choice );
+			cmd( "$daptab.tab$a.c.f.plots postscript -x 0 -y 0 -height [ expr round( $heightpost * $zoomLevel%d) ] -width [ expr round( %d * $zoomLevel%d) ] -pagewidth $dd -rotate $res -colormode $cm -file \"$fn\"", *choice, plot_w[ *choice ], *choice );
 			cmd( "plog \"\nPlot saved: $fn\n\"" );
 
 			break;
@@ -2098,16 +2102,42 @@ while ( true )
 			if ( *choice == 0 )
 				break;
 			
-			cmd( "scan $it %%d)%%s a b" );
-			cmd( "if [ winfo exists .da.f.new$a ] { destroytop .da.f.new$a; .da.vars.pl.f.v delete $n_it } { .da.vars.pl.f.v delete $n_it }" );
+			cmd( "scan $it %%d) a" );
+			cmd( "if [ winfo exists $daptab.tab$a ] { \
+					if [ istoplevel $daptab.tab$a ] { \
+						destroytop $daptab.tab$a \
+					} else { \
+						if { \"$daptab.tab$a\" in [ $daptab tabs ] } { \
+							$daptab forget $daptab.tab$a; \
+						}; \
+						destroy $daptab.tab$a \
+					} \
+				}" );
+			cmd( ".da.vars.pl.f.v delete $n_it" );
+				
+			update_more_tab( ".dap" );
 
 			break;
 
 
 		// Raise the clicked plot
 		case 3:
-			cmd( "scan $it %%d)%%s a b" );
-			cmd( "if [ winfo exists .da.f.new$a ] { focustop .da.f.new$a; set choice 0 } { set choice 1 }" );
+			cmd( "scan $it %%d) a" );
+			cmd( "if [ winfo exists $daptab.tab$a ] { \
+					if [ istoplevel $daptab.tab$a ] { \
+						focustop $daptab.tab$a \
+					} else { \
+						if { \"$daptab.tab$a\" ni [ $daptab tabs ] } { \
+							$daptab forget 1; \
+							$daptab add $daptab.tab$a -text [ string range [ lindex [ split $it ] 1 ] 0 %d ] \
+						}; \
+						$daptab select $daptab.tab$a; \
+						focustop $daptab; \
+						set choice 0 \
+					} \
+				} else { \
+					set choice 1 \
+				}", MAX_TAB_LEN - 1 );
 			if ( *choice == 1 )
 			{
 				getcwd( dirname, MAX_PATH_LENGTH - 1 );
@@ -3265,7 +3295,7 @@ while ( true )
 			
 			cmd( "ttk::frame $wid.l" );
 			cmd( "ttk::label $wid.l.t -text \"Width\"" );
-			cmd( "ttk::entry $wid.l.e -textvariable iwidth -width 5 -justify center -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 && $n < 100 } { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invalidcommand { bell }" );
+			cmd( "ttk::spinbox $wid.l.e -textvariable iwidth -width 5 -from 1.0 -to 10.0 -justify center -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 && $n < 100 } { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invalidcommand { bell }" );
 			cmd( "pack $wid.l.t $wid.l.e -padx 2 -side left" );
 			
 			cmd( "ttk::frame $wid.c" );
@@ -3383,7 +3413,7 @@ while ( true )
 			i = *choice;
 			
 			cmd( "bind $ccanvas <B1-Motion> { \
-					set ccanvas .da.f.new%d.f.plots; \
+					set ccanvas $daptab.tab%d.c.f.plots; \
 					if [ info exists cl ] { \
 						$ccanvas delete $cl\
 					}; \
@@ -3393,7 +3423,7 @@ while ( true )
 				}", i );
 			
 			cmd( "bind $ccanvas <Shift-B1-Motion> { \
-					set ccanvas .da.f.new%d.f.plots; \
+					set ccanvas $daptab.tab%d.c.f.plots; \
 					if [ info exists cl ] { \
 						$ccanvas delete $cl\
 					}; \
@@ -3408,10 +3438,10 @@ while ( true )
 				}", i );
 				
 			cmd( "bind $ccanvas <ButtonRelease-1> { \
-					set ccanvas .da.f.new%d.f.plots; \
+					set ccanvas $daptab.tab%d.c.f.plots; \
 					$ccanvas dtag selected; \
 					bind $ccanvas <B1-Motion> {\
-						set ccanvas .da.f.new%d.f.plots; \
+						set ccanvas $daptab.tab%d.c.f.plots; \
 						if $moving { \
 							$ccanvas move current [ expr [ $ccanvas canvasx %%%%x ] - $hereX ] \
 								[ expr [ $ccanvas canvasy %%%%y ] - $hereY ]; \
@@ -3423,7 +3453,7 @@ while ( true )
 					bind $ccanvas <ButtonRelease-1> { set moving false }; \
 					if [ info exists cl ] { \
 						$ccanvas bind $cl <1> \" \
-							set ccanvas .da.f.new%d.f.plots; \
+							set ccanvas $daptab.tab%d.c.f.plots; \
 							$ccanvas dtag selected; \
 							$ccanvas addtag selected withtag $cl; \
 							$ccanvas raise selected; \
@@ -3431,12 +3461,12 @@ while ( true )
 							set hereY %%%%y \
 						\"; \
 						$ccanvas bind $cl <ButtonRelease-1> { \
-							.da.f.new%d.f.plots dtag selected \
+							$daptab.tab%d.c.f.plots dtag selected \
 						}; \
 						$ccanvas bind $cl <B1-Motion> { \
 							set ax %%%%x; \
 							set ay %%%%y; \
-							.da.f.new%d.f.plots move selected [ expr $ax - $hereX ] [ expr $ay - $hereY ]; \
+							$daptab.tab%d.c.f.plots move selected [ expr $ax - $hereX ] [ expr $ay - $hereY ]; \
 							set hereX $ax; \
 							set hereY $ay \
 						}; \
@@ -3454,6 +3484,8 @@ while ( true )
 			cmd( "set icolor2 [ $ccanvas itemcget current -fill ]" );
 			cmd( "set widthall 0" );
 			cmd( "set colorall 0" );
+			
+			cmd( "if { ! [ string is double -strict $iwidth ] } { set iwidth 0.0 }" );
 			
 			cmd( "set wid $ccanvas.a" );
 			cmd( "newtop $wid \"Edit Bar\" { set choice 2 } $ccanvas" );
@@ -3473,7 +3505,7 @@ while ( true )
 			
 			cmd( "ttk::frame $wid.l" );
 			cmd( "ttk::label $wid.l.t -text \"Outline width\"" );
-			cmd( "ttk::entry $wid.l.e -textvariable iwidth -width 5 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 } { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invalidcommand { bell }" );
+			cmd( "ttk::spinbox $wid.l.e -textvariable iwidth -width 5 -from 0.0 -to 10.0 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n >= 0 } { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invalidcommand { bell }" );
 			cmd( "ttk::label $wid.l.l -text \" color\"" );
 			cmd( "ttk::style configure icolor1.TButton -foreground [ invert_color $icolor1 ] -background $icolor1" );
 			cmd( "ttk::button $wid.l.color -width 5 -text Set -style icolor1.TButton -command { \
@@ -5963,12 +5995,12 @@ void plot_phase_diagram( int *choice )
 					maxy = data[ i ][ j - start[ i ] ];
 			}
 		
-	cmd( "newtop .da.s \"Lags Selection\" { set choice 2 } .da" );
+	cmd( "newtop .da.s \"Lag Selection\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -text \"Number of lags\"" );
 	cmd( "set bidi 1" );
-	cmd( "ttk::entry .da.s.i.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $maxc } } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to $maxc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.i.e insert 0 $bidi" ); 
 	cmd( "pack .da.s.i.l .da.s.i.e" );
 
@@ -6181,11 +6213,10 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 		
 	cmd( "file delete plot.file; file rename plot_clean.file plot.file" );
 
-	// create plot window & canvas
-	cmd( "set w .da.f.new%d", n );			// plot window
-	cmd( "set p $w.f.plots" );				// plot canvas
+	// create plot notepad window, tab & canvas
+	add_da_plot_tab( ".dap", n );    		// plot tab window
 
-	cmd( "newtop $w $tit \"wm withdraw $w\" \"\"" );
+	cmd( "set p $w.f.plots" );				// plot canvas
 
 	cmd( "ttk::frame $w.f" );
 	cmd( "ttk::scrollbar $w.f.vs -command \"$p yview\"" );
@@ -6233,14 +6264,18 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
-	cmd( "ttk::button $w.b.s.save -width $butWid -text Save -command { set it \"%d) $tit\"; set fromPlot 1; set choice 11 } -state disabled -underline 0", n );
-	cmd( "ttk::button $w.b.s.gnu -width $butWid -text Gnuplot -command { \
+	cmd( "ttk::button $w.b.s.save -width $butWid -text Save -state disabled -command { \
+			set it \"%d) $tit\"; \
+			set fromPlot 1; \
+			set choice 11 \
+		}", n );
+	cmd( "ttk::button $w.b.s.gnu -width $butWid -text Gnuplot -state disabled -command { \
 			set oldpath [pwd]; \
 			cd plotxy_%d; \
 			open_gnuplot gnuplot.gp; \
 			cd $oldpath; \
-		} -state disabled -underline 0", n );
-	cmd( "pack $w.b.s.save $w.b.s.gnu -pady 5" );
+		}", n );
+	cmd( "pack $w.b.s.save $w.b.s.gnu -pady 4" );
 
 	cmd( "ttk::label $w.b.pad -width 6" );
 
@@ -6248,16 +6283,15 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "ttk::label $w.b.z.l -text Zoom" );
 
 	cmd( "ttk::frame $w.b.z.b" );
-	cmd( "ttk::button $w.b.z.b.p -width 3 -text + -command { scale_canvas .da.f.new%d.f.plots \"+\" zoomLevel%d } -state disabled", n, n );
-	cmd( "ttk::button $w.b.z.b.m -width 3 -text - -command { scale_canvas .da.f.new%d.f.plots \"-\" zoomLevel%d } -state disabled", n, n  );
-	cmd( "pack $w.b.z.b.p $w.b.z.b.m" );
+	cmd( "ttk::button $w.b.z.b.p -width 3 -text + -command { scale_canvas $daptab.tab%d.c.f.plots \"+\" zoomLevel%d } -state disabled", n, n );
+	cmd( "ttk::button $w.b.z.b.m -width 3 -text - -command { scale_canvas $daptab.tab%d.c.f.plots \"-\" zoomLevel%d } -state disabled", n, n  );
+	cmd( "pack $w.b.z.b.p $w.b.z.b.m -pady 4" );
 
-	cmd( "pack  $w.b.z.l $w.b.z.b -side left -padx 2 -pady 2" );
+	cmd( "pack  $w.b.z.l $w.b.z.b -side left -padx 2" );
 
-	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -expand no -padx 10 -pady 5 -side left" );
-	cmd( "pack $w.b -side right -expand no" );
+	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -padx 10 -pady 5 -side left" );
+	cmd( "pack $w.b -side right" );
 
-	cmd( "showtop $w current yes yes no" ); 
 	cmd( "$p xview moveto 0; $p yview moveto 0" );
 	cmd( "set zoomLevel%d 1.0", n );
 
@@ -6318,7 +6352,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "bind $p <Motion> { \
 			set zoom $zoomLevel%d; \
 			set series $series%d; \
-			set w .da.f.new%d; \
+			set w $daptab.tab%d.c; \
 			set llim [ expr %d * $zoom ]; \
 			set rlim [ expr %d * $zoom ]; \
 			set tlim [ expr %d * $zoom ]; \
@@ -6331,16 +6365,11 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 			} \
 		}", n, n, n, lim[ 0 ], lim[ 1 ], lim[ 2 ], lim[ 3 ], rang[ 1 ], rang[ 0 ], rang[ 0 ], rang[ 3 ], rang[ 2 ], rang[ 2 ] );
 
-	// window bindings (return to Analysis, insert text, insert line )
-	cmd( "bind $w <Escape> \"wm withdraw $w\"" );
-	cmd( "bind $w <s> { $w.b.s.save invoke }; bind $w <S> { $w.b.s.save invoke }" );
-	cmd( "bind $w <g> { $w.b.s.gnu invoke }; bind $w <G> { $w.b.s.gnu invoke }" );
-	cmd( "bind $w <plus> { $w.b.z.b.p invoke }" );
-	cmd( "bind $w <minus> { $w.b.z.b.m invoke }" );
+	// window bindings (return to Analysis, insert text, insert line)
 	cmd( "bind $p <Double-Button-1> { focustop .da }" );
 
 	cmd( "bind $p <Shift-1> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; \
 			set LY %%Y; \
 			set hereX [ $ccanvas canvasx %%x ]; \
@@ -6349,7 +6378,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 		}", n );
 		
 	cmd( "bind $p <Control-1> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set ncanvas %d; \
 			set hereX [ $ccanvas canvasx %%x ]; \
 			set hereY [ $ccanvas canvasy %%y ]; \
@@ -6359,7 +6388,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 
 	// moving and editing lines and text
 	cmd( "bind $p <Button-1> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set type [ $ccanvas gettags current ]; \
 			if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
 				set moving true; \
@@ -6371,7 +6400,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 			} \
 		}", cur_plot );
 	cmd( "bind $p <B1-Motion> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			if $moving { \
 				$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
 					[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
@@ -6382,7 +6411,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
 
 	cmd( "bind $p <Button-2> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; set LY %%Y; \
 			set type [ $ccanvas gettags current ]; \
 			set curitem [ $ccanvas find withtag current ]; \
@@ -6401,7 +6430,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 				} \
 			} \
 		}", cur_plot );
-	cmd( "bind $p <Button-3> { event generate .da.f.new%d.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
+	cmd( "bind $p <Button-3> { event generate $daptab.tab%d.c.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
 
 	// save plot info
 	type_plot[ n ] = GNUPLOT; 	// Gnuplot plot
@@ -6444,8 +6473,8 @@ void plot_lattice( int *choice )
 	}
 
 	// lattice window size
-	hsize = get_int( "hsizeLat" );			// 400
-	vsize = get_int( "vsizeLat" );			// 400
+	hsize = get_int( "hsizeLat" );			// 420
+	vsize = get_int( "vsizeLat" );			// 420
 	cscale = get_double( "cscaleLat" );		// 1.0
 
 	// find column number suggestion
@@ -6548,7 +6577,6 @@ void plot_lattice( int *choice )
 			data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "lattice" );
 	}
 
-
 	// define lattice configuration
 	cmd( "set choice $bidi" );
 	ncol = *choice;
@@ -6593,17 +6621,32 @@ void plot_lattice( int *choice )
 	hi = vsize / nlin;
 	le = hsize / ncol;
 
-	cmd( "set w .da.f.new%d", cur_plot );
-	cmd( "newtop $w $tit { wm withdraw .da.f.new%d } \"\"", cur_plot );
+	add_da_plot_tab( ".dap", cur_plot );    // plot tab window
 
 	cmd( "ttk::frame $w.f -width %d -height %d", ncol * le, nlin * hi );
-	cmd( "pack $w.f" );
-
 	cmd( "set p $w.f.plots" );
 	cmd( "ttk::canvas $p -width %d -height %d -entry 0 -dark $darkTheme", ncol * le, nlin * hi );
-	cmd( "pack $p" );
+	cmd( "pack $p -anchor c" );
+	cmd( "pack $w.f" );
+	
+	// add buttons bottom bar
+	cmd( "ttk::frame $w.b -width %d", ncol * le );
 
-	cmd( "showtop $w current yes yes no" );
+	cmd( "ttk::frame $w.b.o" );
+	cmd( "ttk::label $w.b.o.l1 -text \"Right-click: edit properties\"" );
+	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: insert text\"" );
+	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: insert line\"" );
+	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
+
+	cmd( "ttk::frame $w.b.s" );
+	cmd( "ttk::button $w.b.s.save -width $butWid -text Save -command { set it \"$cur_plot) $tit\"; set fromPlot 1; set choice 11 }" );
+	cmd( "ttk::button $w.b.s.det -width $butWid -text Detach -command { detach_tab $daptab tab%d c.b.s.det .da %d }", cur_plot, MAX_TAB_LEN - 1 );
+	cmd( "pack $w.b.s.save $w.b.s.det -pady 4" );
+	
+	cmd( "ttk::label $w.b.pad -width 30" );
+
+	cmd( "pack $w.b.o $w.b.pad $w.b.s -padx 10 -pady 5 -side left" );
+	cmd( "pack $w.b" );
 
 	for ( j = 0; j < nlin; ++j )
 		for ( i = 0; i < ncol; ++i )
@@ -6619,12 +6662,11 @@ void plot_lattice( int *choice )
 			   ( int ) color, grid ? point_size : 0.0 );
 		}
 
-	// window bindings (return to Analysis, insert text, insert line )
-	cmd( "bind $w <Escape> \"wm withdraw $w\"" );
+	// window bindings (return to Analysis, insert text, insert line)
 	cmd( "bind $p <Double-Button-1> { focustop .da }" );
-
+	
 	cmd( "bind $p <Shift-1> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; \
 			set LY %%Y; \
 			set hereX [ $ccanvas canvasx %%x ]; \
@@ -6633,7 +6675,7 @@ void plot_lattice( int *choice )
 		}", cur_plot );
 		
 	cmd( "bind $p <Control-1> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set ncanvas %d; \
 			set hereX [ $ccanvas canvasx %%x ]; \
 			set hereY [ $ccanvas canvasy %%y ]; \
@@ -6643,7 +6685,7 @@ void plot_lattice( int *choice )
 
 	// moving and editing lines and text
 	cmd( "bind $p <Button-1> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set type [ $ccanvas gettags current ]; \
 			if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
 				set moving true; \
@@ -6655,7 +6697,7 @@ void plot_lattice( int *choice )
 			} \
 		}", cur_plot );
 	cmd( "bind $p <B1-Motion> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			if $moving { \
 				$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
 					[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
@@ -6666,7 +6708,7 @@ void plot_lattice( int *choice )
 	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
 
 	cmd( "bind $p <Button-2> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; set LY %%Y; \
 			set type [ $ccanvas gettags current ]; \
 			set curitem [ $ccanvas find withtag current ]; \
@@ -6685,7 +6727,7 @@ void plot_lattice( int *choice )
 				set choice 26 \
 			} \
 		}", cur_plot );
-	cmd( "bind $p <Button-3> { event generate .da.f.new%d.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
+	cmd( "bind $p <Button-3> { event generate $daptab.tab%d.c.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
 
 	// save plot info
 	type_plot[ cur_plot ] = LATTICE;
@@ -8791,13 +8833,17 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	
 	if	( *choice == 2 ) 			// Button STOP pressed
 	{
-		cmd( "destroytop $w" );
+		cmd( "$daptab forget $daptab.tab%d", cur_plot );
+		cmd( "destroy $daptab.tab%d", cur_plot );
+		cmd( "if { [ $daptab index end ] == 0 } { \
+				wm withdraw [ winfo toplevel $daptab ] \
+			}" );
 		return;
 	}
 	
 	// enable/disable buttons
 	cmd( "$w.b.s.save configure -state normal" );
-	cmd( "$w.b.s.stop configure -state disabled" );
+	cmd( "$w.b.s.det configure -state normal -text Detach" );
 	cmd( "$w.b.z.b.p configure -state normal" );
 	cmd( "$w.b.z.b.m configure -state normal" );
 
@@ -8810,7 +8856,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	if ( y2on )
 		cmd( "bind $p <Motion> { \
 				set zoom $zoomLevel%d; \
-				set w .da.f.new%d; \
+				set w $daptab.tab%d.c; \
 				set llim [ expr %d * $zoom ]; \
 				set rlim [ expr %d * $zoom ]; \
 				set tlim [ expr %d * $zoom ]; \
@@ -8828,7 +8874,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 				set type %d; \
 				set zoom $zoomLevel%d; \
 				set series $series%d; \
-				set w .da.f.new%d; \
+				set w $daptab.tab%d.c; \
 				set llim [ expr %d * $zoom ]; \
 				set rlim [ expr %d * $zoom ]; \
 				set tlim [ expr %d * $zoom ]; \
@@ -8858,22 +8904,16 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 				break;
 		}
 			
-		cmd( "$p bind p%d <Enter> { .da.f.new%d.b.c.var.v configure -text \"%s\" }", i, cur_plot, txtLab );
-		cmd( "$p bind p%d <Leave> { .da.f.new%d.b.c.var.v configure -text \"\" }", i, cur_plot );
+		cmd( "$p bind p%d <Enter> { $daptab.tab%d.c.b.c.var.v configure -text \"%s\" }", i, cur_plot, txtLab );
+		cmd( "$p bind p%d <Leave> { $daptab.tab%d.c.b.c.var.v configure -text \"\" }", i, cur_plot );
 
-		cmd( "$p bind txt%d <Enter> { .da.f.new%d.b.c.var.v configure -text \"%s\" }", i,cur_plot, txtLab );
-		cmd( "$p bind txt%d <Leave> { .da.f.new%d.b.c.var.v configure -text \"\" }", i, cur_plot );
+		cmd( "$p bind txt%d <Enter> { $daptab.tab%d.c.b.c.var.v configure -text \"%s\" }", i,cur_plot, txtLab );
+		cmd( "$p bind txt%d <Leave> { $daptab.tab%d.c.b.c.var.v configure -text \"\" }", i, cur_plot );
 	}
 
-	// window bindings (return to Analysis, insert text, insert line )
-	cmd( "bind $w <Escape> \"wm withdraw $w\"" );
-	cmd( "bind $w <s> { $w.b.s.save invoke }; bind $w <S> { $w.b.s.save invoke }" );
-	cmd( "bind $w <plus> { $w.b.z.b.p invoke }" );
-	cmd( "bind $w <minus> { $w.b.z.b.m invoke }" );
-	cmd( "bind $p <Double-Button-1> { focustop .da }" );
-	
+	// window bindings (insert text, insert line)
 	cmd( "bind $p <Shift-1> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; \
 			set LY %%Y; \
 			set hereX [ $ccanvas canvasx %%x ]; \
@@ -8882,7 +8922,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 		}", cur_plot );
 		
 	cmd( "bind $p <Control-1> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set ncanvas %d; \
 			set hereX [ $ccanvas canvasx %%x ]; \
 			set hereY [ $ccanvas canvasy %%y ]; \
@@ -8892,7 +8932,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 
 	// moving and editing lines and text
 	cmd( "bind $p <Button-1> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set type [ $ccanvas gettags current ]; \
 			if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
 				set moving true; \
@@ -8904,7 +8944,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 			} \
 		}", cur_plot );
 	cmd( "bind $p <B1-Motion> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			if $moving { \
 				$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
 					[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
@@ -8915,7 +8955,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
 	
 	cmd( "bind $p <Button-2> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; set LY %%Y; \
 			set type [ $ccanvas gettags current ]; \
 			set curitem [ $ccanvas find withtag current ]; \
@@ -8934,7 +8974,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 				} \
 			} \
 		}", cur_plot );
-	cmd( "bind $p <Button-3> { event generate .da.f.new%d.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
+	cmd( "bind $p <Button-3> { event generate $daptab.tab%d.c.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
 	
 	// save plot info
 	type_plot[ cur_plot ] = type; 					// plot type
@@ -9002,7 +9042,11 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 
 	if	( *choice == 2 ) 			// Button STOP pressed
 	{
-		cmd( "destroytop $w" );
+		cmd( "$daptab forget $daptab.tab%d", cur_plot );
+		cmd( "destroy $daptab.tab%d", cur_plot );
+		cmd( "if { [ $daptab index end ] == 0 } { \
+				wm withdraw [ winfo toplevel $daptab ] \
+			}" );
 		return;
 	}
 
@@ -9046,7 +9090,7 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	
 	// enable/disable buttons
 	cmd( "$w.b.s.save configure -state normal" );
-	cmd( "$w.b.s.stop configure -state disabled" );
+	cmd( "$w.b.s.det configure -state normal -text Detach" );
 	cmd( "$w.b.z.b.p configure -state normal" );
 	cmd( "$w.b.z.b.m configure -state normal" );
 
@@ -9058,7 +9102,7 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	// update cursor indicators at bottom window
 	cmd( "bind $p <Motion> { \
 			set zoom $zoomLevel%d; \
-			set w .da.f.new%d; \
+			set w $daptab.tab%d.c; \
 			set llim [ expr %d * $zoom ]; \
 			set rlim [ expr %d * $zoom ]; \
 			set tlim [ expr %d * $zoom ]; \
@@ -9085,22 +9129,16 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 				break;
 		}
 			
-		cmd( "$p bind p%d <Enter> { .da.f.new%d.b.c.var.v configure -text \"%s\" }", i, cur_plot, txtLab );
-		cmd( "$p bind p%d <Leave> { .da.f.new%d.b.c.var.v configure -text \"\" }", i, cur_plot );
+		cmd( "$p bind p%d <Enter> { $daptab.tab%d.c.b.c.var.v configure -text \"%s\" }", i, cur_plot, txtLab );
+		cmd( "$p bind p%d <Leave> { $daptab.tab%d.c.b.c.var.v configure -text \"\" }", i, cur_plot );
 
-		cmd( "$p bind txt%d <Enter> { .da.f.new%d.b.c.var.v configure -text \"%s\" }", i,cur_plot, txtLab );
-		cmd( "$p bind txt%d <Leave> { .da.f.new%d.b.c.var.v configure -text \"\" }", i, cur_plot );
+		cmd( "$p bind txt%d <Enter> { $daptab.tab%d.c.b.c.var.v configure -text \"%s\" }", i,cur_plot, txtLab );
+		cmd( "$p bind txt%d <Leave> { $daptab.tab%d.c.b.c.var.v configure -text \"\" }", i, cur_plot );
 	}
 
-	// window bindings (return to Analysis, insert text, insert line )
-	cmd( "bind $w <Escape> \"wm withdraw $w\"" );
-	cmd( "bind $w <s> { $w.b.s.save invoke }; bind $w <S> { $w.b.s.save invoke }" );
-	cmd( "bind $w <plus> { $w.b.z.b.p invoke }" );
-	cmd( "bind $w <minus> { $w.b.z.b.m invoke }" );
-	cmd( "bind $p <Double-Button-1> { focustop .da }" );
-	
+	// window bindings (insert text, insert line)
 	cmd( "bind $p <Shift-1> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; \
 			set LY %%Y; \
 			set hereX [ $ccanvas canvasx %%x ]; \
@@ -9109,7 +9147,7 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 		}", cur_plot );
 		
 	cmd( "bind $p <Control-1> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set ncanvas %d; \
 			set hereX [ $ccanvas canvasx %%x ]; \
 			set hereY [ $ccanvas canvasy %%y ]; \
@@ -9119,7 +9157,7 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 
 	// moving and editing lines and text
 	cmd( "bind $p <Button-1> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set type [ $ccanvas gettags current ]; \
 			if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
 				set moving true; \
@@ -9131,7 +9169,7 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 			} \
 		}", cur_plot );
 	cmd( "bind $p <B1-Motion> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			if $moving { \
 				$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
 					[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
@@ -9142,7 +9180,7 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
 	
 	cmd( "bind $p <Button-2> { \
-			set ccanvas .da.f.new%d.f.plots; \
+			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; set LY %%Y; \
 			set type [ $ccanvas gettags current ]; \
 			set curitem [ $ccanvas find withtag current ]; \
@@ -9161,7 +9199,7 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 				set choice 26 \
 			} \
 		}", cur_plot );
-	cmd( "bind $p <Button-3> { event generate .da.f.new%d.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
+	cmd( "bind $p <Button-3> { event generate $daptab.tab%d.c.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
 
 	// save plot info
 	type_plot[ cur_plot ] = type; 					// plot type
@@ -9261,12 +9299,11 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	vcanvas = vsize + tbordsize + bbordsize;
 	cmd( "set hcanvasP %d; set vcanvasP %d", hcanvas, vcanvas );
 	
-	// create plot window & canvas
-	cmd( "set w .da.f.new%d", cur_plot );	// plot window
+	// create plot notepad window, tab & canvas
+	add_da_plot_tab( ".dap", cur_plot );    // plot tab window
+	
 	cmd( "set p $w.f.plots" );				// plot canvas
 	
-	cmd( "newtop $w $tit \"wm withdraw $w\" \"\"" );
-
 	cmd( "ttk::frame $w.f" );
 	cmd( "ttk::scrollbar $w.f.vs -command \"$p yview\"" );
 	cmd( "ttk::scrollbar $w.f.hs -orient horiz -command \"$p xview\"" );
@@ -9318,38 +9355,43 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
-	cmd( "ttk::button $w.b.s.save -width $butWid -text Save -command { set it \"$cur_plot) $tit\"; set fromPlot 1; set choice 11 } -state disabled -underline 0" );
-	cmd( "ttk::button $w.b.s.stop -width $butWid -text Stop -command { set choice 2 } -state disabled -underline 0" );
-	cmd( "pack $w.b.s.save $w.b.s.stop -pady 5" );
+	cmd( "ttk::button $w.b.s.save -width $butWid -text Save -state disabled -command { \
+			set it \"$cur_plot) $tit\"; \
+			set fromPlot 1; \
+			set choice 11 \
+		}" );
+	cmd( "ttk::button $w.b.s.det -width $butWid -text Detach -state disabled -command { \
+			if { [ $daptab.tab%d.c.b.s.det cget -text ] eq \"Stop\" } { \
+				set choice 2 \
+			} else { \
+				detach_tab $daptab tab%d c.b.s.det .da %d \
+			} \
+		}", cur_plot, cur_plot, MAX_TAB_LEN - 1	);
+	cmd( "pack $w.b.s.save $w.b.s.det -pady 4" );
 
 	cmd( "ttk::frame $w.b.z" );
 	cmd( "ttk::label $w.b.z.l -text Zoom" );
 
 	cmd( "ttk::frame $w.b.z.b" );
-	cmd( "ttk::button $w.b.z.b.p -width 3 -text + -command { scale_canvas .da.f.new%d.f.plots \"+\" zoomLevel%d } -state disabled", cur_plot, cur_plot );
-	cmd( "ttk::button $w.b.z.b.m -width 3 -text - -command { scale_canvas .da.f.new%d.f.plots \"-\" zoomLevel%d } -state disabled", cur_plot, cur_plot  );
-	cmd( "pack $w.b.z.b.p $w.b.z.b.m" );
+	cmd( "ttk::button $w.b.z.b.p -width 3 -text + -command { scale_canvas $daptab.tab%d.c.f.plots \"+\" zoomLevel%d } -state disabled", cur_plot, cur_plot );
+	cmd( "ttk::button $w.b.z.b.m -width 3 -text - -command { scale_canvas $daptab.tab%d.c.f.plots \"-\" zoomLevel%d } -state disabled", cur_plot, cur_plot  );
+	cmd( "pack $w.b.z.b.p $w.b.z.b.m -pady 4" );
 
-	cmd( "pack  $w.b.z.l $w.b.z.b -side left -padx 2 -pady 2" );
+	cmd( "pack  $w.b.z.l $w.b.z.b -side left -padx 2" );
 
 	cmd( "ttk::label $w.b.pad -width $pad1" );
 
-	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -expand no -padx $pad2 -pady 5 -side left" );
-	cmd( "pack $w.b -side right -expand no" );
+	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -padx $pad2 -pady 5 -side left" );
+	cmd( "pack $w.b -side right" );
 
-	if ( watch )
-	{	
-		cmd( "$w.b.s.stop configure -state normal" );
-		cmd( "bind $w <s> { $w.b.s.stop invoke }; bind $w <S> { $w.b.s.stop invoke }" );
-		cmd( "bind $w <Escape> { $w.b.s.stop invoke }" );
-	}
-
-	cmd( "showtop $w current yes yes no" );
+	cmd( "bind $p <Double-Button-1> { focustop .da }" );
 	
+	if ( watch )
+		cmd( "$w.b.s.det configure -state normal -text Stop" );
+
 	// hack to bring the new plot to the foreground during debugging in macOS
 	cmd( "if { $running && [ string equal [ tk windowingsystem ] aqua ] } { \
-			wm transient $w .da; \
-			wm transient $w \
+			wm transient .dap \
 		}" );
 	
 	cmd( "$p xview moveto 0; $p yview moveto 0" );
@@ -9453,6 +9495,154 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 		cmd( "$p create text $xlabel $ylabel -fill $colorsTheme(fg) -font $fontP -anchor nw -text \"(%d more...)\"", nLine - i );
 
 	cmd( "update" );	
+}
+
+
+/*******************************************************
+ ADD_DA_PLOT_TAB
+ add new plot tab to data analysis notepad
+ *******************************************************/
+void add_da_plot_tab( const char *w, int id_plot )
+{
+	char *tt;
+	int n;
+		
+	// create notebook, if not exists
+	cmd( "set w %s", w );
+	cmd( "set daptab $w.pad" );
+	cmd( "if { ! [ winfo exists $daptab ] } { \
+			newtop $w \"%s%s - LSD Plots\" \"wm withdraw $w\" \"\"; \
+			wm transient $w .da; \
+			ttk::notebook $daptab; \
+			pack $daptab -expand yes -fill both; \
+			ttk::notebook::enableTraversal $daptab; \
+			showtop $w; \
+			bind $w <F1> { LsdHelp menudata_res.html#graph }; \
+			bind $w <Escape> \"wm withdraw $w\"; \
+		} else { \
+			settop $w \
+		}", unsaved_change( ) ? "*" : " ", simul_name );
+		
+	// create tab frame with heading
+	cmd( "set t $daptab.tab%d", id_plot );
+	cmd( "if [ winfo exists $t ] { \
+			if { $t in [ $daptab  tabs ] } { \
+				$daptab forget $t \
+			}; \
+			destroy $t \
+		}" );
+	cmd( "ttk::labelframe $t -text \"%d) $tit\"", id_plot );
+	cmd( "pack $t" );
+
+	// create content frame (for moving when detaching)
+	cmd( "set w $t.c" );
+	cmd( "ttk::frame $w" );
+	cmd( "pack $w -expand yes -fill both" );
+	
+	cmd( "set tt [ string range [ lindex [ split $tit ] 0 ] 0 %d ]", MAX_TAB_LEN - 1 );
+	
+	cmd( "set n [ .da.vars.pl.f.v size ]" );
+	n = get_int( "n" ) + 1;
+	
+	if ( n <= MAX_PLOT_TABS )
+	{
+		cmd( "$daptab add $t -text \"$tt\"" );
+		cmd( "$daptab select $t" );
+		
+		cmd( "if { \"$daptab.more\" in [ $daptab tabs ] } { \
+				$daptab forget $daptab.more; \
+				destroy $daptab.more \
+			}" );
+	}
+	
+	if ( n == MAX_PLOT_TABS + 1 )
+	{
+		cmd( "ttk::frame $daptab.more" );
+		cmd( "pack $daptab.more" );
+		cmd( "$daptab insert 0 $daptab.more -text \"More...\" -underline 0" );
+	}
+	
+	if ( n > MAX_PLOT_TABS ) 
+	{
+		cmd( "$daptab forget 1" );
+		cmd( "$daptab add $t -text \"$tt\"" );
+		cmd( "$daptab select $t" );
+		
+		cmd( "set addplot \"%d) $tit\"", id_plot );
+		update_more_tab( w, true );
+	}
+}
+
+
+/*******************************************************
+ UPDATE_MORE_TAB
+ update the plots index tab, if it exists
+ *******************************************************/
+void update_more_tab( const char *w, bool adding )
+{
+	char *tt;
+	int i, j, k, m, n, cols;
+	
+	if ( platform == MAC )
+		cols = 3;
+	else
+		cols = 4;
+	
+	cmd( "if { [ info exists daptab ] && [ winfo exists $daptab.more ] } { \
+			set _tmp 1 \
+		} else { \
+			set _tmp 0 \
+		}" );
+		
+	if ( ! get_bool( "_tmp" ) )
+		return;
+	
+	cmd( "set plotlist [ .da.vars.pl.f.v get 0 end ]" );
+	
+	if ( adding )
+		cmd( "lappend plotlist \"$addplot\"" );
+	
+	cmd( "set n [ llength $plotlist ]" );
+	n = get_int( "n" );
+	
+	cmd( "destroy $daptab.more.b");
+	cmd( "ttk::frame $daptab.more.b");
+	
+	for ( i = 0; cols * i + 1 <= n; ++i )
+	{
+		cmd( "ttk::frame $daptab.more.b.l%d", i );
+		
+		for ( j = 1; j <= cols && cols * i + j <= n; ++j )
+		{
+			k = cols * i + j;
+			
+			cmd( "set t [ lindex $plotlist %d ]", k - 1 );
+			cmd( "set m [ string trim [ lindex [ split $t ] 0 ] \")\" ]" );
+			cmd( "set tt [ string range [ lindex [ split $t ] 1 ] 0 %d ]", MAX_TAB_LEN - 1 );
+			m = get_int( "m" );
+			tt = get_str( "tt" );
+			
+			cmd( "ttk::button $daptab.more.b.l%d.b%d -width -1 -text $t -command { \
+					set _w $daptab.tab%d; \
+					if [ istoplevel $_w ] { \
+						focustop $_w \
+					} else { \
+						if { $_w ni [ $daptab tabs ] } { \
+							if { [ $daptab index end ] >= %d } { \
+								$daptab forget 1 \
+							}; \
+							$daptab add $_w -text \"%s\" \
+						}; \
+						$daptab select $_w \
+					} \
+				}", i, k, m, MAX_PLOT_TABS, tt );
+			cmd( "pack $daptab.more.b.l%d.b%d -side left -padx 2", i, k );
+		}
+		
+		cmd( "pack $daptab.more.b.l%d -anchor w -pady 2", i );
+	}
+	
+	cmd( "pack $daptab.more.b -padx 20 -pady 20" );
 }
 
 

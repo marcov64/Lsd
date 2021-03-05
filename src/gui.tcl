@@ -35,6 +35,7 @@ package require Tk 8.6
 lappend auto_path "$RootLsd/$LsdSrc/themes"
 source "$RootLsd/$LsdSrc/defaults.tcl" ;	# load LSD defaults
 source "$RootLsd/$LsdSrc/window.tcl" ;		# load LSD gui management
+source "$RootLsd/$LsdSrc/wgtclone.tcl" ;	# load LSD widget cloning tools
 source "$RootLsd/$LsdSrc/theme.tcl" ;		# load LSD gui theming
 source "$RootLsd/$LsdSrc/dblclick.tcl" ;	# enhancements to double-click in text widgets
 
@@ -77,6 +78,8 @@ if [ string equal $CurPlatform mac ] {
 	set vsizeAmin $vsizeAminMac
 	set hsizeDmin $hsizeDminMac
 	set vsizeDmin $vsizeDminMac
+	set hsizePmin $hsizePminMac
+	set vsizePmin $vsizePminMac
 	set hsizeGmin $hsizeGminMac
 	set vsizeGmin $vsizeGminMac
 	set corrX $corrXmac
@@ -110,6 +113,8 @@ if [ string equal $CurPlatform mac ] {
 	set vsizeAmin $vsizeAminLinux
 	set hsizeDmin $hsizeDminLinux
 	set vsizeDmin $vsizeDminLinux
+	set hsizePmin $hsizePminLinux
+	set vsizePmin $vsizePminLinux
 	set hsizeGmin $hsizeGminLinux
 	set vsizeGmin $vsizeGminLinux
 	set corrX $corrXlinux
@@ -140,6 +145,8 @@ if [ string equal $CurPlatform mac ] {
 	set vsizeAmin $vsizeAminWindows
 	set hsizeDmin $hsizeDminWindows
 	set vsizeDmin $vsizeDminWindows
+	set hsizePmin $hsizePminWindows
+	set vsizePmin $vsizePminWindows
 	set hsizeGmin $hsizeGminWindows
 	set vsizeGmin $vsizeGminWindows
 	set corrX $corrXwindows
@@ -310,7 +317,7 @@ if [ info exists alignMode ] {
 # lists to hold the windows parents stacks and exceptions to the parent mgmt.
 set parWndLst [ list ]
 set grabLst [ list ]
-set noParLst [ list .log .str .plt .lat .tst ]
+set noParLst [ list .log .str .lat .plt .dap .tst ]
 
 # list of windows with predefined sizes & positions
 set wndLst [ list .lmm .lsd .log .str .da .deb .lat .plt .dap ]

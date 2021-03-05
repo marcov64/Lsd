@@ -570,6 +570,13 @@ proc sizetop { { w all } } {
 					wm minsize .plt [ winfo reqwidth .plt ] [ winfo reqheight .plt ]
 					wm resizable .plt 0 0
 				}
+				
+				.dap {
+					set defGeom "+[ getx .dap centerS ]+[ gety .dap centerS ]"
+					wm geometry .dap [ checkgeom $dapGeom $defGeom $screenWidth $screenHeight ]
+					wm minsize .dap $hsizePmin $vsizePmin
+					wm resizable .dap 1 1
+				}
 			}
 		}
 	}
@@ -2031,6 +2038,74 @@ proc init_canvas_colors { } {
 			}
 		}
 	}
+}
+
+
+#************************************************
+# DETACH_TAB
+# Detach/reattach a plot tab/window
+#************************************************
+proc detach_tab { nb tab but da maxLen } {
+
+	if { [ $nb.$tab.$but cget -text ] eq "Attach" } {
+		
+		set tt [ wm title $nb.$tab ]
+		
+		destroy .tmp
+		ttk::frame .tmp
+		set tmp [ clone_widget $nb.$tab.c .tmp ]
+		update idletasks
+		destroytop $nb.$tab
+		
+		ttk::labelframe $nb.$tab -text "$tt"
+		pack $nb.$tab
+		set new [ clone_widget .tmp.c $nb.$tab ]
+		update idletasks
+		destroy .tmp
+		
+		$nb.$tab.$but configure -text Detach
+		pack $new -expand yes -fill both
+		$nb add $nb.$tab -text [ string range [ lindex [ split $tt ] 1 ] 0 $maxLen ]
+		$nb select $nb.$tab 
+		focustop $nb
+		
+	} else {
+	
+		set tt [ $nb.$tab cget -text ]
+		
+		$nb forget $nb.$tab
+		
+		if { [ $nb index end ] == 0 } {
+			wm withdraw [ winfo toplevel $nb ]
+		}
+			
+		destroy .tmp
+		ttk::frame .tmp
+		set tmp [ clone_widget $nb.$tab.c .tmp ]
+		update idletasks
+		destroy $nb.$tab
+		
+		newtop $nb.$tab "$tt" "$nb.$tab.$but invoke" ""
+		wm transient $nb.$tab $da
+		set new [ clone_widget $tmp $nb.$tab ]
+		update idletasks
+		pack $new -expand yes -fill both
+		destroy .tmp
+		
+		$nb.$tab.$but configure -text Attach
+		showtop $nb.$tab current yes yes no
+		bind $nb.$tab <F1> { LsdHelp menudata_res.html#graph }
+		bind $nb.$tab <Escape> "$nb.$tab.$but invoke"
+	}
+}
+
+
+#************************************************
+# ISTOPLEVEL
+# Check if widget is a toplevel window
+#************************************************
+proc istoplevel { w } {
+	return [ string equal $w [ winfo toplevel $w ] ]
 }
 
 

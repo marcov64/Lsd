@@ -48,6 +48,8 @@ Relevant flags (when defined):
 #define MAX_SENS_POINTS 999				// default warning threshold for sensitivity analysis
 #define MAX_COLS 100					// max numbers of columns in init. editor
 #define MAX_PLOTS 1000					// max numbers of plots in analysis
+#define MAX_PLOT_TABS 10				// max number of plot tabs to show
+#define MAX_TAB_LEN 10					// max length of plot tab title
 #define MAX_CORES 0						// maximum number of cores to use (0=auto )
 #define SRV_MIN_CORES 12				// minimum number of cores to consider a server
 #define SRV_MAX_CORES 64				// maximum number of cores to use in a server
@@ -228,6 +230,7 @@ object *skip_next_obj( object *t );
 object *skip_next_obj( object *t, int *count );
 void NOLH_clear( void );
 void add_cemetery( variable *v );
+void add_da_plot_tab( const char *w, int id_plot );
 void add_description( char const *lab, char const *type, char const *text );
 void add_rt_plot_tab( const char *w, int id_sim );
 void analysis( int *choice, bool mc = false );
@@ -372,6 +375,7 @@ void unload_configuration ( bool full );
 void unlink_cells( object *r, char *lab );
 void unset_shortcuts_run( const char *window );
 void update_bounds( void );
+void update_more_tab( const char *w, bool adding = false );
 void warn_distr( int *errCnt, bool *stopErr, const char *distr, const char *msg );
 void wipe_out( object *d );
 void write_list( FILE *frep, object *root, int flag_all, char const *prefix );

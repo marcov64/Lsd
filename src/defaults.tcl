@@ -73,6 +73,12 @@ set hsizeAminLinux		850
 set vsizeAminLinux		520
 set hsizeAminWindows	720
 set vsizeAminWindows	460
+set hsizePminMac		800	; # analysis of results plot window
+set vsizePminMac		600
+set hsizePminLinux		800
+set vsizePminLinux		600
+set hsizePminWindows	720
+set vsizePminWindows	540
 set hsizeDminMac		942	; # debugger/data browse window
 set vsizeDminMac		400
 set hsizeDminLinux		840
@@ -93,12 +99,12 @@ set hsizeImin	300	; # initial values editor minimum horizontal size in pixels
 set vsizeImin	400	; # initial values editor minimum vertical size in pixels
 set hsizeP 		600	; # default plot (time series) horizontal size in pixels
 set vsizeP		300	; # default plot (time series) vertical size in pixels
-set hsizePxy	640	; # default plot (XY) horizontal size in pixels
-set vsizePxy	450	; # default plot (XY) vertical size in pixels
+set hsizePxy	700	; # default plot (XY) horizontal size in pixels
+set vsizePxy	400	; # default plot (XY) vertical size in pixels
 set hsizeLatMax	1024; # maximum lattice horizontal size in pixels
 set vsizeLatMax	1024; # maximum lattice vertical size in pixels
-set hsizeLat	400	; # default lattice horizontal size in pixels
-set vsizeLat	400	; # default lattice vertical size in pixels
+set hsizeLat	420	; # default lattice horizontal size in pixels
+set vsizeLat	420	; # default lattice vertical size in pixels
 set hsizeR		500	; # horizontal size in pixels
 set vsizeR		300	; # vertical size in pixels
 
