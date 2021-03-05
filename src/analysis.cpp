@@ -164,7 +164,6 @@ gnu = false;
 watch = true;
 
 cmd( "set y2 0" );
-cmd( "set y2 0" );
 cmd( "set allblack $grayscaleP" );
 cmd( "set grid $gridP" );
 cmd( "set point_size $pointsizeP" );
@@ -2110,7 +2109,10 @@ while ( true )
 						if { \"$daptab.tab$a\" in [ $daptab tabs ] } { \
 							$daptab forget $daptab.tab$a; \
 						}; \
-						destroy $daptab.tab$a \
+						destroy $daptab.tab$a; \
+						if { [ $daptab index end ] == 0 } { \
+							wm withdraw [ winfo toplevel $daptab ] \
+						} \
 					} \
 				}" );
 			cmd( ".da.vars.pl.f.v delete $n_it" );
@@ -3835,7 +3837,7 @@ void plot_cross( int *choice )
 	
 	if ( nv < 2 || nt <= 0 )
 	{
-		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"No series/time steps selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one time step (case ).\"" );
+		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"No series/cases selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one case (time step).\"" );
 		*choice = 2;
 		return;
 	}
@@ -4034,20 +4036,20 @@ void set_cs_data( int *choice )
 	cmd( "set list_times $list_times_new" );
 
 	cmd( "set p .da.s" );
-	cmd( "newtop $p \"Cross Section Time Steps\" { set choice 2 } .da" );
+	cmd( "newtop $p \"Cross Section Cases\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame $p.u" );
 
 	cmd( "ttk::frame $p.u.i" );
 
 	cmd( "ttk::frame $p.u.i.e" );
-	cmd( "ttk::label $p.u.i.e.l -text \"Time step to add\"" );
+	cmd( "ttk::label $p.u.i.e.l -text \"Case to add\"" );
 	cmd( "ttk::entry $p.u.i.e.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= $minc && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$p.u.i.e.e insert 0 $bidi" );
 	cmd( "pack $p.u.i.e.l $p.u.i.e.e" );
 	 
 	cmd( "ttk::frame $p.u.i.lb" );
-	cmd( "ttk::label $p.u.i.lb.l -text \"Selected time steps\"" );
+	cmd( "ttk::label $p.u.i.lb.l -text \"Selected cases\"" );
 
 	cmd( "ttk::frame $p.u.i.lb.lb" );
 	cmd( "ttk::scrollbar $p.u.i.lb.lb.v_scroll -command \".da.s.u.i.lb.lb.lb yview\"" );
@@ -4071,7 +4073,7 @@ void set_cs_data( int *choice )
 	cmd( "pack $p.u.s.b -padx 5" );
 
 	cmd( "ttk::frame $p.u.s.r" );
-	cmd( "ttk::label $p.u.s.r.l -justify center -text \"Time step reference\nfor series sorting\"" );
+	cmd( "ttk::label $p.u.s.r.l -justify center -text \"Case reference\nfor series sorting\"" );
 	cmd( "ttk::entry $p.u.s.r.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && ( $n in $list_times ) } { set res %%P; return 1 } { %%W delete 0 end; %%W insert 0 $res; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 	cmd( "write_disabled $p.u.s.r.e $res" );
 	cmd( "pack $p.u.s.r.l $p.u.s.r.e" );
@@ -4147,13 +4149,13 @@ void set_cs_data( int *choice )
 	if ( *choice == 2 )
 		goto end;
 
-	cmd( "if { [ .da.s.u.i.lb.lb.lb size ] == 0 } { ttk::messageBox -parent .da.s -type ok -title Error -icon error -message \"No time step selected\" -detail \"At least one case/time step must be selected. Please try again.\"; set choice 2 }" );
+	cmd( "if { [ .da.s.u.i.lb.lb.lb size ] == 0 } { ttk::messageBox -parent .da.s -type ok -title Error -icon error -message \"No case selected\" -detail \"At least one case (time step) must be selected. Please try again.\"; set choice 2 }" );
 
 	if ( *choice == 2 )
 		goto end;
 
 	cmd( "set res [ $p.u.s.r.e get ]" );
-	cmd( "if { $dir != 0 && [ lsearch $list_times $res ] < 0 } { ttk::messageBox -parent .da.s -type ok -title Warning -icon warning -message \"Invalid time step reference selected\" -detail \"The selected time step reference is not one of the selected for the cross-section( s), no sorting will be performed.\"; set dir 0 }" );
+	cmd( "if { $dir != 0 && [ lsearch $list_times $res ] < 0 } { ttk::messageBox -parent .da.s -type ok -title Warning -icon warning -message \"Invalid case reference selected\" -detail \"The selected case (time step) reference is not one of the selected for the cross-section(s), no sorting will be performed.\"; set dir 0 }" );
 	cmd( "set num_t [ llength $list_times ]" );
 	*choice = 0;
 
@@ -4889,7 +4891,7 @@ void statistics_cross( int *choice )
 
 	if ( nv < 2 || nt <= 0 )
 	{
-		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Not enough series selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one time step (case ).\"" );
+		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Not enough series selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one case (time step).\"" );
 		*choice = 2;
 		return;
 	}
@@ -5612,7 +5614,7 @@ void plot_cs_xy( int *choice )
 	cmd( "newtop .da.s \"XY Plot Options\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.i" );
-	cmd( "ttk::label .da.s.i.l -text \"Time step\"" );
+	cmd( "ttk::label .da.s.i.l -text \"Case\"" );
 	cmd( "ttk::entry .da.s.i.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.i.e insert 0 $bidi" ); 
 	cmd( "pack .da.s.i.l .da.s.i.e" );
@@ -5645,8 +5647,8 @@ void plot_cs_xy( int *choice )
 
 	cmd( "set numv 1" );
 	cmd( "ttk::frame .da.s.v" );
-	cmd( "ttk::label .da.s.v.l -text \"Number of dependent variables\"" );
-	cmd( "ttk::entry .da.s.v.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set numv %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numv; return 0 } } -invalidcommand { bell } -justify center", nv );
+	cmd( "ttk::label .da.s.v.l -text \Dependent variables\"" );
+	cmd( "ttk::spinbox .da.s.v.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set numv %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numv; return 0 } } -invalidcommand { bell } -justify center", nv, nv );
 	cmd( ".da.s.v.e insert 0 $numv" ); 
 	cmd( "ttk::label .da.s.v.n -text \"Block length: $blength\"" );
 	cmd( "pack .da.s.v.l .da.s.v.e .da.s.v.n" );
@@ -5998,7 +6000,7 @@ void plot_phase_diagram( int *choice )
 	cmd( "newtop .da.s \"Lag Selection\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.i" );
-	cmd( "ttk::label .da.s.i.l -text \"Number of lags\"" );
+	cmd( "ttk::label .da.s.i.l -text \"Lags\"" );
 	cmd( "set bidi 1" );
 	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to $maxc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.i.e insert 0 $bidi" ); 
@@ -6493,16 +6495,16 @@ void plot_lattice( int *choice )
 	cmd( "newtop .da.s \"Lattice Options\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.t" );
-	cmd( "ttk::label .da.s.t.l -width 25 -anchor e -text \"Cross-section time step\"" );
+	cmd( "ttk::label .da.s.t.l -width 22 -anchor e -text \"Cross-section case\"" );
 	cmd( "set time %d", num_c );
 	cmd( "ttk::entry .da.s.t.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $numc } { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.t.e insert 0 $time" ); 
 	cmd( "pack .da.s.t.l .da.s.t.e -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "ttk::frame .da.s.i" );
-	cmd( "ttk::label .da.s.i.l -width 25 -anchor e -text \"Number of data columns\"" );
+	cmd( "ttk::label .da.s.i.l -width 22 -anchor e -text \"Data columns\"" );
 	cmd( "set bidi %d", ncol );
-	cmd( "ttk::entry .da.s.i.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center", num_c );
 	cmd( ".da.s.i.e insert 0 $bidi" ); 
 	cmd( "pack .da.s.i.l .da.s.i.e -side left -anchor w -padx 2 -pady 2" );
 
@@ -6553,7 +6555,7 @@ void plot_lattice( int *choice )
 		// check if series has data for all selected cases (cross-section only )
 		if ( time_cross == 1 && ( time < start[ i ] || time > end[ i ] ) )
 		{
-			cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid time step\" -detail \"One or more of the series do not have a value associated to the selected cross-section time step.\"" );
+			cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid case\" -detail \"One or more of the series do not have a value associated to the selected cross-section case (time step).\"" );
 			*choice = 2;
 			
 			for ( j = i + 1; j < nv; ++j )		// indicate non allocated positions
@@ -6612,7 +6614,7 @@ void plot_lattice( int *choice )
 
 	if ( nlin * ncol != tot )
 	{
-		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of columns\" -detail \"The number of columns must be an exact divisor of the number (%d) of time steps (time series) or selected variables (cross section).\"", tot );
+		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of columns\" -detail \"The number of columns must be an exact divisor of the number (%d) of cases/time steps (time series) or selected variables (cross section).\"", tot );
 		*choice = 2;
 		goto end2;
 	}
@@ -6846,7 +6848,7 @@ void histograms( int *choice )
 	cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.i" );
-	cmd( "ttk::label .da.s.i.l -text \"Number of classes/bins\"" );
+	cmd( "ttk::label .da.s.i.l -text \"Classes/bins\"" );
 	cmd( "ttk::spinbox .da.s.i.e -width 5 -from $minc -to $maxc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= $minc && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.i.e insert 0 $bidi" ); 
 	cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
@@ -6904,14 +6906,14 @@ void histograms( int *choice )
 
 	if ( cases == 0 )
 	{
-		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no valid data for the chosen time step cases.\"" );
+		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no valid data for the chosen cases (time steps).\"" );
 		*choice = 2;
 		goto end;
 	}
 
 	if ( mx - mn <= 0 )
 	{
-		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no data variation for the chosen time step cases.\"" );
+		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no data variation for the chosen cases (time steps).\"" );
 		*choice = 2;
 		goto end;
 	}
@@ -7092,13 +7094,13 @@ void histograms_cs( int *choice )
 	cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.t" );
-	cmd( "ttk::label .da.s.t.l -text \"Cross-section time step\"" );
-	cmd( "ttk::spinbox .da.s.t.e -width 5 -from 0 -to $numc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= $numc } { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::label .da.s.t.l -text \"Cross-section case\"" );
+	cmd( "ttk::entry .da.s.t.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= $numc } { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.t.e insert 0 $time" ); 
 	cmd( "pack .da.s.t.l .da.s.t.e -side left -padx 2" );
 
 	cmd( "ttk::frame .da.s.i" );
-	cmd( "ttk::label .da.s.i.l -text \"Number of classes/bins\"" );
+	cmd( "ttk::label .da.s.i.l -text \"Classes/bins\"" );
 	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center", nv, nv );
 	cmd( ".da.s.i.e insert 0 $bidi" ); 
 	cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
@@ -7160,7 +7162,7 @@ void histograms_cs( int *choice )
 
 	if ( cases == 0 )
 	{
-		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series have no valid data in the chosen time step.\"" );
+		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series have no valid data in the chosen cases (time steps).\"" );
 		*choice = 2;
 		goto end;
 	}
@@ -7358,7 +7360,7 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		cmd( "ttk::radiobutton .da.s.i.r.ci.c -text \"Confidence interval (3 series)\" -variable bidi -value 6 -command { .da.s.i.r.ci.p configure -state normal; set tailname \"\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end }" );
 		cmd( "ttk::label .da.s.i.r.ci.x -text @" );
 		cmd( "ttk::label .da.s.i.r.ci.perc -text %%" );
-		cmd( "ttk::entry .da.s.i.r.ci.p -width 3 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 80 && $n <= 99 } { set confi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $confi; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
+		cmd( "ttk::spinbox .da.s.i.r.ci.p -width 5 -from 80 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 80 && $n <= 99 } { set confi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $confi; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 		cmd( "write_disabled .da.s.i.r.ci.p $confi" ); 
 		cmd( "pack .da.s.i.r.ci.c .da.s.i.r.ci.x .da.s.i.r.ci.p .da.s.i.r.ci.perc -side left" );
 
@@ -7773,15 +7775,15 @@ bool create_maverag( int *choice )
 	cmd( "newtop .da.s \"Moving Average Period\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.o" );
-	cmd( "ttk::label .da.s.o.l -text \"Number of time steps\"" );
-	cmd( "ttk::entry .da.s.o.th -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $numc } { set bido %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bido; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::label .da.s.o.l -text \"Period (cases)\"" );
+	cmd( "ttk::spinbox .da.s.o.th -width 5 -from 1 -to $numc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $numc } { set bido %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bido; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.o.th insert 0 $bido" ); 
 	cmd( "pack .da.s.o.l .da.s.o.th" );
 	
 	cmd( "ttk::frame .da.s.t -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 	cmd( "ttk::radiobutton .da.s.t.s -variable ma_type -value 0 -text \"Simple moving average\"" );
 	cmd( "ttk::radiobutton .da.s.t.c -variable ma_type -value 1 -text \"Central moving average\"" );
-	cmd( "pack .da.s.t.s .da.s.t.c  -achor w" );
+	cmd( "pack .da.s.t.s .da.s.t.c -anchor w" );
 
 	cmd( "pack .da.s.o .da.s.t -padx 5 -pady 5" );
 
@@ -7814,7 +7816,7 @@ bool create_maverag( int *choice )
 	// adjust to odd number, if required
 	if ( flt < 2 )
 	{
-		cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid moving average period\" -detail \"Please choose a period larger than one time step.\"" );
+		cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid moving average period\" -detail \"Please choose a period larger than one case (time step).\"" );
 		*choice = 0;
 		return false;
 	}
@@ -7822,7 +7824,7 @@ bool create_maverag( int *choice )
 	if ( ma_type == 1 && flt % 2 == 0 )
 	{
 		++flt;
-		plog( "\nRounding up the period to %d for an odd number of time steps\n", "", flt );
+		plog( "\nRounding up the period to %d for an odd number of cases (time steps)\n", "", flt );
 	}
 
 	data = new double *[ nv ];
@@ -8188,8 +8190,8 @@ void save_datazip( int *choice )
 		cmd( "pack .da.lab.c.l .da.lab.c.del" );
 
 		cmd( "ttk::frame .da.lab.e" );
-		cmd( "ttk::label .da.lab.e.l -text \"Column width (10-80 chars)\"" );
-		cmd( "ttk::entry .da.lab.e.ecol -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 10 && $n <= 80 } { set numcol %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numcol; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
+		cmd( "ttk::label .da.lab.e.l -text \"Column width (chars)\"" );
+		cmd( "ttk::spinbox .da.lab.e.ecol -width 5 -from 10 -to 80 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 10 && $n <= 80 } { set numcol %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numcol; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 		cmd( "write_disabled .da.lab.e.ecol $numcol" );
 		cmd( "pack .da.lab.e.l .da.lab.e.ecol" );
 
@@ -8647,7 +8649,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	if ( avgSmpl && ! avgSmplMsg && step < 1 )
 	{
 		if ( type == TSERIES )
-			cmd( "set answer [ ttk::messageBox -parent .da -title Warning -icon warning -type yesno -default yes -message \"Disable Y values averaging?\" -detail \"The number of time steps to plot is larger than the physical plot width. To compute the Y values, LSD averages data from multiple time steps.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
+			cmd( "set answer [ ttk::messageBox -parent .da -title Warning -icon warning -type yesno -default yes -message \"Disable Y values averaging?\" -detail \"The number of cases (time steps) to plot is larger than the physical plot width. To compute the Y values, LSD averages data from multiple cases.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
 		else
 			cmd( "set answer [ ttk::messageBox -parent .da -title Warning -icon warning -type yesno -default yes -message \"Disable series values averaging?\" -detail \"The number of series to plot is larger than the physical plot width. To compute the presented values, LSD averages data from multiple series.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
 			
