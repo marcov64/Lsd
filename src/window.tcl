@@ -401,6 +401,10 @@ proc geomtosave { { w . } } {
 				.deb {
 					set realHeight [ expr $height + $contentsTop - $decorationTop - ( $wndMenuHeight + 20 ) ]
 				}
+				.plt -
+				.dap {
+					set realHeight [ expr $height ]
+				}
 				default {
 					set realHeight [ expr $height + $contentsTop - $decorationTop - $wndMenuHeight ]
 				}
@@ -455,7 +459,7 @@ proc checkgeom { geom defGeom screenWidth screenHeight } {
 # Adjust main windows to default size & positions
 #************************************************
 proc sizetop { { w all } } {
-	global wndLst hsizeBmin vsizeBmin hsizeL vsizeL hsizeLmin vsizeLmin hsizeGmin vsizeGmin hsizeAmin vsizeAmin hsizeDmin vsizeDmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom hfactM vfactM wndMenuHeight
+	global wndLst hsizeBmin vsizeBmin hsizeL vsizeL hsizeLmin vsizeLmin hsizeGmin vsizeGmin hsizeAmin vsizeAmin hsizePmin vsizePmin hsizeDmin vsizeDmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom pltGeom dapGeom hfactM vfactM wndMenuHeight
 
 	update
 
@@ -558,6 +562,13 @@ proc sizetop { { w all } } {
 					wm geometry .lat [ checkgeom $latGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .lat [ winfo reqwidth .lat ] [ winfo reqheight .lat ]
 					wm resizable .lat 0 0
+				}
+				
+				.plt {
+					set defGeom "+[ getx .plt righttoM ]+[ gety .plt righttoM ]"
+					wm geometry .plt [ checkgeom $pltGeom $defGeom $screenWidth $screenHeight ]
+					wm minsize .plt [ winfo reqwidth .plt ] [ winfo reqheight .plt ]
+					wm resizable .plt 0 0
 				}
 			}
 		}
@@ -793,8 +804,8 @@ proc getx { w pos } {
 		lefttoW {
 			set hpos [ expr [ winfo x $par ] + $corrX - $hmargin - [ winfo reqwidth $w ] + 2 * $bordsize ]
 		}
-		righttoMshift {
-			set hpos [ expr [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] - 2 * $bordsize + $shiftW ]
+		righttoM {
+			set hpos [ expr [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] - 2 * $bordsize ]
 		}
 		default {
 			set hpos [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
@@ -854,8 +865,8 @@ proc gety { w pos } {
 		lefttoW {
 			set vpos [ expr [ winfo y $par ] + $corrY ]
 		}
-		righttoMshift {
-			set vpos [ expr [ winfo y . ] + $corrY + $shiftW ]
+		righttoM {
+			set vpos [ expr [ winfo y . ] + $corrY ]
 		}
 		default {
 			set vpos [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]

@@ -115,13 +115,15 @@
 							  "0", "0", "Work", \
 							  "$DefaultDbgExe", "1", "#", \
 							  "$DefaultTheme" }
-#define MODEL_INFO_NUM 9
+#define MODEL_INFO_NUM 11
 #define MODEL_INFO_NAME { "modelName", "modelVersion", "modelDate", \
 						  "lsdGeom", "logGeom", "strGeom", \
-						  "daGeom", "debGeom", "latGeom" }
+						  "daGeom", "debGeom", "latGeom", \
+						  "pltGeom", "dapGeom" }
 #define MODEL_INFO_DEFAULT { "(no name)", "1.0", "[ current_date ]", \
 							 "#", "#", "#", \
-							 "#", "#", "#" };
+							 "#", "#", "#", \
+							 "#", "#" };
 #define LSD_DIR_NUM 8
 #define LSD_DIR_NAME { "src", "gnu", "installer", "Manual", "LMM.app", "Rpkg", "lwi", "___" }
 #define LSD_MIN_NUM 3
@@ -129,7 +131,7 @@
 #define WIN_COMP_NUM 2
 #define WIN_COMP_PATH { "mingw64\\bin", "cygwin64\\bin" }	// must use (double) backslashes
 #define LSD_WIN_NUM MODEL_INFO_NUM - 3
-#define LSD_WIN_NAME { "lsd", "log", "str", "da", "deb", "lat" }
+#define LSD_WIN_NAME { "lsd", "log", "str", "da", "deb", "lat", "plt", "dap" }
 #define REG_SIG_NUM 6
 #define REG_SIG_CODE { SIGINT, SIGTERM, SIGABRT, SIGFPE, SIGILL, SIGSEGV }
 #define REG_SIG_NAME { "Interrupt signal", "Terminate signal", "Abort signal", \
@@ -526,6 +528,7 @@ bool set_env( bool set );
 bool valid_label( const char *lab );
 char *clean_file( char *file );
 char *clean_path( char *path );
+char *get_str( const char *tcl_var, char *var = NULL, int var_size = 0 );
 char *search_lsd_root( char *start_path );
 char *str_upr( char *s );
 const char *signal_name( int signum );

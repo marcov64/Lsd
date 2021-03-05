@@ -313,7 +313,7 @@ set grabLst [ list ]
 set noParLst [ list .log .str .plt .lat .tst ]
 
 # list of windows with predefined sizes & positions
-set wndLst [ list .lmm .lsd .log .str .da .deb .lat ]
+set wndLst [ list .lmm .lsd .log .str .da .deb .lat .plt .dap ]
 set wndMenuHeight 0
 
 # text line default canvas height & minimum horizontal border width

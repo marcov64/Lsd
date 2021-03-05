@@ -664,6 +664,34 @@ double get_double( const char *tcl_var, double *var )
 	return dblvar;
 }
 
+
+/***************************************************
+ GET_STR
+ ***************************************************/
+char *get_str( const char *tcl_var, char *var, int var_size )
+{
+	char *strvar;
+	
+	strvar = ( char * ) Tcl_GetVar( inter, tcl_var, 0 );
+	if ( strvar == NULL )
+	{
+		log_tcl_error( "Invalid Tcl variable name", "Internal LSD error (get_str). If the problem persists, please contact developers" );
+		return var;
+	}
+		
+	if ( var != NULL )
+	{
+		if ( var_size > 0 )
+			strncpy( var, strvar, var_size - 1 );
+		else
+			strcpy( var, strvar );
+			
+		return var;
+	}
+	else
+		return strvar;
+}
+
 #else
 
 void cmd( const char *cm, ... ) { }

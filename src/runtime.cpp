@@ -20,7 +20,7 @@ The main functions contained here are:
 
 - void prepare_plot( object *r, int id_sim )
 Checks is there are LSD variables to plot. If not, returns immediately. Otherwise
-initiliaze the run time globale variables. Namely, the vector of the labels for
+initialize the run time global variables. Namely, the vector of the labels for
 the variables of plot. The plot window is initialized according to the id_sim name
 
 - void count( object *r, int *i );
@@ -29,7 +29,6 @@ Recursive function that increments i of one for any variable to plot.
 - void assign( object *r, int *i, char *lab );
 Create a list of Variables to plot and create the list of labels (adding
 the indexes if necessary) to be used in the plot.
-
 
 - void init_plot( int i, int id_sim );
 create the canvas for the plot, the lines, button, labels, etc.
@@ -59,6 +58,7 @@ void prepare_plot( object *r, int id_sim )
 	ymax = ymin = 0;
 	strcpy( lab, "" );
 	count( r, &i );
+	
 	if ( i == 0 )
 		return;
 	
@@ -67,7 +67,39 @@ void prepare_plot( object *r, int id_sim )
 	old_val = new double [ i ];
 	i = 0;
 	assign( r, &i, lab );
+	
+	add_rt_plot_tab( ".plt", id_sim );
 	init_plot( i, id_sim );
+}
+
+
+/**************************************
+RESET_PLOT
+**************************************/
+void reset_plot( void )
+{
+	cmd( "if [ winfo exists $activeplot ] { \
+			if [ string equal [ $rtptab tab $activeplot -state ] hidden ] { \
+				$rtptab add $activeplot \
+			}; \
+			$activeplot.fond.go conf -state disabled; \
+			$activeplot.fond.shift conf -state disabled; \
+			$rtptab select $activeplot \
+		}" );
+}
+
+
+/**************************************
+CLEAR_PLOT
+**************************************/
+void clear_plot( void )
+{
+	cmd( "if { [ winfo exists $rtptab ] } { \
+			set tabs [ $rtptab tabs ]; \
+			foreach tab $tabs { \
+				$rtptab forget $tab \
+			} \
+		}" );
 }
 
 
@@ -129,22 +161,100 @@ void assign( object *r, int *i, char *lab )
 
 
 /**************************************
+ADD_RT_PLOT_TAB
+**************************************/
+void add_rt_plot_tab( const char *w, int id_sim )
+{
+	int i, j, k, cols, tabs = 10;
+		
+	if ( platform == MAC )
+		cols = 5;
+	else
+		cols = 10;
+	
+	cmd( "set w %s", w );
+	cmd( "set rtptab $w.pad" );
+	cmd( "if { ! [ winfo exists $rtptab ] } { \
+			newtop $w \"%s%s - LSD Run-time Plots\" \"set_c_var done_in 5; destroytop $w\" \"\"; \
+			wm transient $w .; \
+			ttk::notebook $rtptab; \
+			pack $rtptab; \
+			ttk::notebook::enableTraversal $rtptab; \
+			showtop $w; \
+			bind $w <F1> { LsdHelp runtime.html } \
+		}", unsaved_change( ) ? "*" : " ", simul_name );
+		
+	set_shortcuts_run( "$w" );
+		
+	cmd( "set activeplot $rtptab.tab%d", id_sim );
+	cmd( "if [ winfo exists $activeplot ] { \
+			if { $activeplot in [ $rtptab  tabs ] } { \
+				$rtptab forget $activeplot \
+			}; \
+			destroy $activeplot \
+		}" );
+	cmd( "ttk::frame $activeplot" );
+	cmd( "pack $activeplot" );
+	
+	if ( id_sim < tabs )
+		cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 4", id_sim );
+		
+	if ( id_sim == tabs )
+		cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 5", id_sim );
+		
+	if ( id_sim <= tabs )
+		cmd( "$rtptab select $activeplot" );
+	
+	if ( id_sim == tabs + 1 )
+	{
+		cmd( "ttk::frame $rtptab.more" );
+		cmd( "pack $rtptab.more" );
+		cmd( "$rtptab insert 0 $rtptab.more -text \"More...\" -underline 0" );
+	}
+	
+	if ( id_sim > tabs ) 
+	{
+		cmd( "$rtptab forget 1" );
+		cmd( "$rtptab add $activeplot -text \"Run %d\"", id_sim );
+		cmd( "$rtptab select $activeplot" );
+		
+		cmd( "destroy $rtptab.more.b");
+		cmd( "ttk::frame $rtptab.more.b");
+		
+		for ( i = 0; cols * i + 1 <= id_sim; ++i )
+		{
+			cmd( "ttk::frame $rtptab.more.b.l%d", i );
+			
+			for ( j = 1; j <= cols && cols * i + j <= id_sim; ++j )
+			{
+				k = cols * i + j;
+				cmd( "set b [ expr $butWid - %d ]", k > 99 ? 2 : 3 );
+				cmd( "ttk::button $rtptab.more.b.l%d.b%d -width $b -text \"Run %d\" -command { \
+						if { \"$rtptab.tab%d\" ni [ $rtptab tabs ] } { \
+							if { [ $rtptab index end ] >= %d } { \
+								$rtptab forget 1 \
+							}; \
+							$rtptab add $rtptab.tab%d -text \"Run %d\" \
+						}; \
+						$rtptab select $rtptab.tab%d \
+					}", i, k, k, k, tabs, k, k, k );
+				cmd( "pack $rtptab.more.b.l%d.b%d -side left -padx 2", i, k );
+			}
+			
+			cmd( "pack $rtptab.more.b.l%d -anchor w -pady 2", i );
+		}
+		
+		cmd( "pack $rtptab.more.b -padx 20 -pady 20" );
+	}
+}
+
+
+/**************************************
 INIT_PLOT
 **************************************/
 void init_plot( int num, int id_sim )
 {
 	cmd( "if { %d > $hsizeR } { set plot_step 1 } { set plot_step [ expr $hsizeR / %d.0 ] }", max_step, max_step );
-	
-	cmd( "set scrollB 1" );
-	scrollB = 1;
-
-	cmd( "set activeplot .plt%d", id_sim );
-
-	cmd( "destroytop $activeplot" );
-
-	cmd( "newtop $activeplot \"\" { set_c_var done_in 5 } \"\"" );
-	cmd( "wm transient $activeplot ." );
-	cmd( "wm title $activeplot \"%s%s(%d) - LSD Run-time Plot\"", unsaved_change() ? "*" : " ", simul_name, id_sim  );
 	
 	cmd( "ttk::frame $activeplot.c" );
 	
@@ -206,6 +316,7 @@ void init_plot( int num, int id_sim )
 	cmd( "ttk::canvas $activeplot.fond -width [ expr $sclhsizeR + $hsizeR + 2 * $cvhmarginR ] -height $botvsizeR -entry 0 -dark $darkTheme" );
 
 	// controls
+	cmd( "set scrollB %d", scrollB );
 	cmd( "ttk::checkbutton $activeplot.fond.shift -text Scroll -variable scrollB -command { set_c_var done_in 8 }" );	
 	cmd( "if [ string equal $CurPlatform windows ] { \
 			set centerB Center; \
@@ -235,20 +346,14 @@ void init_plot( int num, int id_sim )
 		
 	cmd( "pack $activeplot.fond -expand yes -fill both -pady 7" );
 	
-	cmd( "set shiftW [ expr %d * $shiftR ]", id_sim - 1 );	// calculate window shift position
-	cmd( "showtop  $activeplot righttoMshift no no no" );
-	
 	if ( fast_mode > 0 )
 	{
-		cmd( "wm withdraw $activeplot" );
 		cmd( "$activeplot.fond.go conf -state disabled" );
 		cmd( "$activeplot.fond.shift conf -state disabled" );
+		cmd( "$rtptab hide $activeplot" );
 	}
 
 	cmd( "focustop .log" );
-
-	cmd( "bind $activeplot <F1> { LsdHelp runtime.html }" );
-	set_shortcuts_run( "$activeplot" );
 }
 
 
@@ -340,11 +445,25 @@ void plot_rt( variable *v )
 
 
 /**************************************
-RESET_PLOT
+CENTER_PLOT
 **************************************/
-void reset_plot( int run )
+void center_plot( void )
 {
-	// allow for run-time plot window destruction
-	cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.fond.go conf -state disabled; .plt%d.fond.shift conf -state disabled }", 
-		 run, run, run, run );
+	cmd( "if { [ winfo exists $activeplot ] && %d > [ expr $hsizeR / 2 ] } { \
+			set newpos [ expr %lf - [ expr  [ expr $hsizeR / 2 ] / %lf ] ]; \
+			$activeplot.c.c.cn xview moveto $newpos \
+		}", t, t / ( double ) max_step, ( double ) max_step );
+}
+
+
+/**************************************
+SCROLL_PLOT
+**************************************/
+void scroll_plot( void )
+{
+	if ( scrollB )
+		cmd( "if { [ winfo exists $activeplot ] && %d > [ expr $hsizeR * 0.8 ] } { $activeplot.c.c.cn xview scroll 1 units }", t );
+	
+	cmd( ".p.b2.b configure -value %d", t );
+	cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr int( 100 * %d / %d ) ]%% done)\"", min( t + 1, max_step ), max_step, t, max_step );
 }

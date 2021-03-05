@@ -854,8 +854,7 @@ void unload_configuration ( bool full )
 	
 	if ( ! running )
 	{
-		cmd( "set a [ split [ winfo children . ] ]" );	// remove run-time plot windows
-		cmd( "foreach i $a { if [ string match .plt* $i ] { destroytop $i } }" );
+		cmd( "destroytop .plt" );				// remove run-time plot window
 		cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );	// delete temporary files
 	}
 #endif

@@ -72,7 +72,7 @@ bool redrawRoot;			// control for redrawing root window (.)
 bool redrawStruc;			// control for redrawing model structure window
 bool running = false;		// simulation is running
 bool save_alt_path = false;	// alternate save path flag
-bool scrollB;				// scroll box state in current runtime plot
+bool scrollB = true;		// scroll box state in current runtime plot
 bool struct_loaded = false;	// a valid configuration file is loaded
 bool tk_ok = false;			// control for tk ready to operate
 bool unsavedData = false;	// flag unsaved simulation results
@@ -800,10 +800,6 @@ void run( void )
 				case 2:			// Fast button in Log window / f/F key in Runtime window
 					set_fast( 1 );
 					debug_flag = false;
-					cmd( "set a [ split [ winfo children . ] ]" );
-					cmd( "foreach i $a { if [ string match .plt* $i ] { wm withdraw $i } }" );
-					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.fond.go conf -state disabled }", i, i );
-					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.fond.shift conf -state disabled }", i, i );
 					break;
 
 				case 3:			// Debug button in Log window / d/D key in Runtime window
@@ -813,7 +809,7 @@ void run( void )
 						debug_flag = true;
 						cmd( "focustop .deb" );
 					}
-					else			// if paused, just call the data browser
+					else		// if paused, just call the data browser
 					{
 						double useless = 0;
 						deb( root, NULL, "Paused by User", &useless );
@@ -822,33 +818,25 @@ void run( void )
 
 				case 4:			// Observe button in Log window / o/O key in Runtime window
 					set_fast( 0 );
-					cmd( "set a [ split [ winfo children . ] ]" );
-					cmd( "foreach i $a { if [ string match .plt* $i ] { focustop $i } }" );
-					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.fond.go conf -state normal }", i, i );
-					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.fond.shift conf -state normal }", i, i );
 					break;
 				 
 				// plot window DELETE_WINDOW button handler
 				case 5:
 					if ( pause_run )
 						cmd( "wm title .log \"$origLogTit\"" );
-					cmd( "destroytop .plt%d", i );
 					quit = 2;
 					break;
 
 				// runtime plot events
-				case 7:  		// Center button
-					cmd( "if { [ winfo exist .plt%d ] && %d > [ expr $hsizeR / 2 ] } { \
-							set newpos [ expr %lf - [ expr  [ expr $hsizeR / 2 ] / %lf ] ]; \
-							$activeplot.c.c.cn xview moveto $newpos \
-						}", i, t, t / ( double ) max_step, ( double ) max_step );
+				case 7:  		// center button
+					center_plot( );
 					break;
 
-				case 8: 		// Scroll checkbox
+				case 8: 		// scroll checkbox
 					scrollB = ! scrollB;
 					break;
 
-				case 9: 		// Pause simulation
+				case 9: 		// pause simulation
 					pause_run = ! pause_run;
 					if ( pause_run )
 					{
@@ -871,12 +859,9 @@ void run( void )
 			done_in = 0;
 
 			// perform scrolling if enabled
-			if ( ! pause_run && scrollB )
-				cmd( "if { [ winfo exist .plt%d ] && %d > [ expr $hsizeR * 0.8 ] } { $activeplot.c.c.cn xview scroll 1 units }", i, t );
+			if ( ! pause_run )
+				scroll_plot( );
 			
-			cmd( ".p.b2.b configure -value %d", t );
-			cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr int( 100 * %d / %d ) ]%% done)\"", min( t + 1, max_step ), max_step, t, max_step );
-
 			if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER )
 			{
 				cmd( "update" );
@@ -902,7 +887,7 @@ void run( void )
 		
 		cmd( "destroytop .deb" );
 		cmd( "update" );
-		reset_plot( i );
+		reset_plot( );
 #endif
 		// run user closing function, reporting error appropriately
 		user_exception = true;
@@ -1062,6 +1047,22 @@ void set_fast( int level )
 		level = 2;
 	if ( level < 0 )
 		level = 0;
+		
+#ifndef NW
+	if ( fast && level == 0 )
+		cmd( "if [ winfo exists $activeplot ] { \
+				$rtptab select $activeplot; \
+				$activeplot.fond.go conf -state normal; \
+				$activeplot.fond.shift conf -state normal \
+			}" );
+			
+	if ( ! fast && level > 0 )
+		cmd( "if [ winfo exists $activeplot ] { \
+				$activeplot.fond.go conf -state disabled; \
+				$activeplot.fond.shift conf -state disabled; \
+				$rtptab hide $activeplot \
+			}" );
+#endif
 	
 	// remove the variables stack when switching to any fast mode
 	if ( fast_mode == 0 && level > 0 )

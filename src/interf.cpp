@@ -3692,8 +3692,7 @@ break;
 // Close all Runtime Plots
 case 40:
 
-	cmd( "set a [ split [ winfo children . ] ]" );
-	cmd( " foreach i $a {if [ string match .plt* $i ] {destroytop $i}}" );
+	cmd( "destroytop .plt" );
 
 break;
 
@@ -7247,8 +7246,8 @@ UNSAVED_CHANGE
 Read or set the UnsavedChange flag and update windows titles accordingly
 ****************************************************/
 bool unsavedChange = false;		// control for unsaved changes in configuration
-#define WND_NUM 8				// number of windows to update (in wndName)
-const char *wndName[ ] = { ".", ".log", ".str", ".inid", ".inin", ".da", ".deb", ".lat" };
+#define WND_NUM 10				// number of windows to update (in wndName)
+const char *wndName[ ] = { ".", ".log", ".str", ".inid", ".inin", ".da", ".deb", ".lat", ".plt", ".dap" };
 
 bool unsaved_change( bool val )
 {
@@ -7265,9 +7264,6 @@ bool unsaved_change( bool val )
 		{
 			cmd( "if [ winfo exist %s ] { wm title %s \"%s[ string range [ wm title %s ] 1 end ]\" }", wndName[ i ], wndName[ i ], chgMark, wndName[ i ]  );
 		}
-		// handle (possibly multiple) run-time plot windows
-		cmd( "set a [ split [ winfo children . ] ]" );
-		cmd( "foreach i $a { if [ string match .plt* $i ] { wm title $i \"%s[ string range [ wm title $i ] 1 end ]\" } }", chgMark  );
 #endif
 	}
 	

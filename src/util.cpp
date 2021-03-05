@@ -168,7 +168,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 	{
 		cmd( "if [ winfo exists .deb ] { destroytop .deb }" );
 		deb_log( false );	// close any open debug log file
-		reset_plot( cur_sim );	// allow closing run-time plot
+		reset_plot( );		// show & disable run-time plot
 		set_buttons_run( false );
 
 		plog( "\n\nError detected at time %d", "highlight", t );
