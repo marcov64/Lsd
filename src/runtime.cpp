@@ -74,36 +74,6 @@ void prepare_plot( object *r, int id_sim )
 
 
 /**************************************
-RESET_PLOT
-**************************************/
-void reset_plot( void )
-{
-	cmd( "if [ winfo exists $activeplot ] { \
-			if [ string equal [ $rtptab tab $activeplot -state ] hidden ] { \
-				$rtptab add $activeplot \
-			}; \
-			$activeplot.fond.go conf -state disabled; \
-			$activeplot.fond.shift conf -state disabled; \
-			$rtptab select $activeplot \
-		}" );
-}
-
-
-/**************************************
-CLEAR_PLOT
-**************************************/
-void clear_plot( void )
-{
-	cmd( "if { [ winfo exists $rtptab ] } { \
-			set tabs [ $rtptab tabs ]; \
-			foreach tab $tabs { \
-				$rtptab forget $tab \
-			} \
-		}" );
-}
-
-
-/**************************************
 COUNT
 **************************************/
 void count( object *r, int *i )
@@ -445,11 +415,53 @@ void plot_rt( variable *v )
 
 
 /**************************************
+RESET_PLOT
+**************************************/
+void reset_plot( void )
+{
+	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] } { \
+			if [ string equal [ $rtptab tab $activeplot -state ] hidden ] { \
+				$rtptab add $activeplot \
+			}; \
+			$activeplot.fond.go conf -state disabled; \
+			$activeplot.fond.shift conf -state disabled; \
+			$rtptab select $activeplot \
+		}" );
+}
+
+
+/**************************************
+ENABLE_PLOT
+**************************************/
+void enable_plot( void )
+{
+	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] } { \
+			$rtptab select $activeplot; \
+			$activeplot.fond.go conf -state normal; \
+			$activeplot.fond.shift conf -state normal \
+		}" );
+}
+
+
+/**************************************
+DISABLE_PLOT
+**************************************/
+void disable_plot( void )
+{
+	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] } { \
+			$activeplot.fond.go conf -state disabled; \
+			$activeplot.fond.shift conf -state disabled; \
+			$rtptab hide $activeplot \
+		}" );
+}
+
+
+/**************************************
 CENTER_PLOT
 **************************************/
 void center_plot( void )
 {
-	cmd( "if { [ winfo exists $activeplot ] && %d > [ expr $hsizeR / 2 ] } { \
+	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && %d > [ expr $hsizeR / 2 ] } { \
 			set newpos [ expr %lf - [ expr  [ expr $hsizeR / 2 ] / %lf ] ]; \
 			$activeplot.c.c.cn xview moveto $newpos \
 		}", t, t / ( double ) max_step, ( double ) max_step );
@@ -462,7 +474,7 @@ SCROLL_PLOT
 void scroll_plot( void )
 {
 	if ( scrollB )
-		cmd( "if { [ winfo exists $activeplot ] && %d > [ expr $hsizeR * 0.8 ] } { $activeplot.c.c.cn xview scroll 1 units }", t );
+		cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && %d > [ expr $hsizeR * 0.8 ] } { $activeplot.c.c.cn xview scroll 1 units }", t );
 	
 	cmd( ".p.b2.b configure -value %d", t );
 	cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr int( 100 * %d / %d ) ]%% done)\"", min( t + 1, max_step ), max_step, t, max_step );

@@ -156,6 +156,7 @@ typedef vector < object * > o_vecT;
 typedef unordered_map < string, eq_funcT > eq_mapT;
 typedef unordered_map < string, bridge * > b_mapT;
 typedef unordered_map < double, object * > o_mapT;
+typedef unordered_map < string, string > p_mapT;
 typedef unordered_map < string, variable * > v_mapT;
 typedef unordered_set < object * > o_setT;
 

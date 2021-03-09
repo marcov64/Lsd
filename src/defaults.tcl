@@ -153,7 +153,7 @@ set hvalshD		0.15; # variable value horizontal share (1 column out of 2)
 set hupdshD		0.10; # variable last update horizontal share (1 column out of 2)
 set hpadshD		0.10; # column pad horizontal share (1 column)
 
-# plot windows margins and defaults
+# analysis of results windows margins and defaults
 set hmbordsizeP	40	; # minimum width of plot horizontal (left/right) border area (for legends)
 set tbordsizeP	5	; # width of plot top border area (for legends)
 set bbordsizeP	90	; # width of plot bottom border area (for legends)
@@ -167,6 +167,7 @@ set pdigitsP	3	; # default precision digits
 set pointsizeP	1.0	; # default size of points/lines (<1:./=1:x<=2:+/>2:round)
 set maxzoomP	4.0	; # maximum zoom magnification factor in plots
 set minzoomP	0.5	; # minimum zoom shrinking factor in plots
+set parAll	"(all)"	; # string used for selecting all series parents
 
 # lattice defaults
 set cscaleLat	1.0	; # default color scale (1:1.0)

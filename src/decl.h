@@ -260,10 +260,12 @@ void create( void );
 void create_form( int num, char const *title, char const *prefix, FILE *frep );
 void create_initial_values( object *r, FILE *frep );
 void create_logwindow( void );
+void create_par_map( object *r );
 void create_table_init( object *r, FILE *frep );
 void dataentry_sensitivity( int *choice, sense *s, int nval = 0 );
 void deb_show( object *r, const char *hl_var );
 void delete_bridge( object *d );
+void disable_plot( void );
 void draw_buttons( void );
 void draw_obj( object *t, object *sel, int level = 0, int center = 0, int from = 0, bool zeroinst = false );
 void edit_data( object *root, int *choice, char *obj_name );
@@ -275,6 +277,7 @@ void empty_description( void );
 void empty_lattice( void );
 void empty_sensitivity( sense *cs );
 void empty_stack( void );
+void enable_plot( void );
 void file_name( char *name );
 void fill_list_par( object *r, int flag_all );
 void fill_list_var( object *r, int flag_all, int flag_init );
@@ -361,7 +364,6 @@ void show_special_updat( object *n );
 void show_tmp_vars( object *r, bool update );
 void sort_cs_asc( char **s,char **t, double **v, int nv, int nt, int c );
 void sort_cs_desc( char **s,char **t, double **v, int nv, int nt, int c );
-void sort_on_end( store *app );
 void statistics( int *choice );
 void statistics_cross( int *choice );
 void tex_report_end( FILE *f );
@@ -465,6 +467,8 @@ extern map< thread::id, worker * > thr_ptr;	// worker thread pointers
 
 // Tcl/Tk specific definitions (for the windowed version only)
 #ifndef NW
+
+extern p_mapT par_map;			// variable to parent name map for AoR
 
 // C to TCL interface functions
 int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );

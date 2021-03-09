@@ -136,14 +136,15 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>Other interface improvements</span></b><span
 lang=EN-US>. Several small usability improvements. Tabbed interface for <a
 href="runtime.html">Run-time</a> and <a href="menudata_res.html">Analysis of
-Results</a> plot windows. Quick-search keys on all list boxes. Auto-detection
-of model Object names. List of elements unused in equation file(s).
-Improvements to the <a href="debug.html">Debugger</a> / <a href="debug.html">Data
-Browser</a>, </span><span class=Cdigo><a href="menudata_init.html"><span
-lang=EN-US>Data&gt;Initial Values</span></a></span><span lang=EN-US> and </span><span
-class=Cdigo><span lang=EN-US><a href="menudata_objn.html">Data&gt;Number of
-Objects</a></span></span><span lang=EN-US> windows. Interruptible progress
-boxes for slow operations.  Mouse snapping to default buttons (optional). </span></p>
+Results</a> plot windows. Series filtering in <a href="menudata_res.html">Analysis
+of Results</a>. Quick-search keys on all list boxes. Auto-detection of model
+Object names. List of elements unused in equation file(s). Improvements to the <a
+href="debug.html">Debugger</a> / <a href="debug.html">Data Browser</a>, </span><span
+class=Cdigo><a href="menudata_init.html"><span lang=EN-US>Data&gt;Initial
+Values</span></a></span><span lang=EN-US> and </span><span class=Cdigo><span
+lang=EN-US><a href="menudata_objn.html">Data&gt;Number of Objects</a></span></span><span
+lang=EN-US> windows. Interruptible progress boxes for slow operations.  Mouse
+snapping to default buttons (optional). </span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -162,8 +163,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>New Macros.</span></b><span lang=EN-US> </span><span
 class=Cdigo><span lang=EN-US><a href="LSD_macros.html#T">RUN</a></span></span><span
 lang=EN-US> informs the current run number in a multi-run simulation execution.
-</span><span class=Cdigo><a href="LSD_macros.html#T"><span lang=EN-US>LAST_RUN</span></a></span>
-<span lang=EN-US>provides the total number of runs configured for the current
+</span><span class=Cdigo><a href="LSD_macros.html#T"><span lang=EN-US>LAST_RUN</span></a></span><span
+lang=EN-US> provides the total number of runs configured for the current
 simulation. </span><span class=Cdigo><a href="LSD_macros.html#THIS"><span
 lang=EN-US>THIS</span></a></span><span lang=EN-US> points to the current Object
 under computation. </span><span class=Cdigo><a href="LSD_macros.html#THIS"><span
@@ -280,10 +281,10 @@ improvements and changes:</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US><a href="browser.html#updating">Variable
 update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be
-updated/recomputed under arbitrary time schemes, deterministic or random. The
-modeler can now configure update periods larger than 1, including an initial
-“sleep” for any Variable. Both period and initial times can be set as a fixed
-number or a uniform random draw from a modeler-defined range.</span></p>
+updated/recomputed under arbitrary time schemes, deterministic or random. The modeler
+can now configure update periods larger than 1, including an initial “sleep”
+for any Variable. Both period and initial times can be set as a fixed number or
+a uniform random draw from a modeler-defined range.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -498,15 +499,15 @@ lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>EXTS(…)</span></span><spa
 lang=EN-US>), and execute extension C++ objects methods (</span><span
 class=Cdigo><span lang=EN-US>DO_EXT(…)</span></span><span lang=EN-US>). Create <a
 href="LSD_macros.html#EQUATION_DUMMY">dummy Equations</a> (</span><span
-class=Cdigo><span lang=EN-US>EQUATION_DUMMY(…)</span></span><span lang=EN-US>)
-for Variables only updated by other Variables. Search for Object instance
-number (</span><span class=Cdigo><span lang=EN-US>SEARCH_INST(…)</span></span><span
-lang=EN-US>). Option to disable/enable the automatic search of Variables and
-Parameters (</span><span class=Cdigo><span lang=EN-US>NO_SEARCH</span></span><span
-lang=EN-US>/</span><span class=Cdigo><span lang=EN-US>USE_SEARCH</span></span><span
-lang=EN-US>). New <a href="LSD_macros.html#DEBUG">debug-control macros</a>
-allow finer control of the LSD Debugger activation and log file creation.
-Please refer to the <a href="LSD_macros.html">LSD Macros</a> documentation.</span></p>
+class=Cdigo><span lang=EN-US>EQUATION_DUMMY(…)</span></span><span lang=EN-US>) for
+Variables only updated by other Variables. Search for Object instance number (</span><span
+class=Cdigo><span lang=EN-US>SEARCH_INST(…)</span></span><span lang=EN-US>).
+Option to disable/enable the automatic search of Variables and Parameters (</span><span
+class=Cdigo><span lang=EN-US>NO_SEARCH</span></span><span lang=EN-US>/</span><span
+class=Cdigo><span lang=EN-US>USE_SEARCH</span></span><span lang=EN-US>). New <a
+href="LSD_macros.html#DEBUG">debug-control macros</a> allow finer control of
+the LSD Debugger activation and log file creation. Please refer to the <a
+href="LSD_macros.html">LSD Macros</a> documentation.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -567,8 +568,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 <h1><span lang=EN-US>Version 7.0 (Apr 2018)</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>The new version maintains the compatibility
-with all the models built with previous versions of LSD (some optimizations
-require C++11 and </span><span class=Cdigo><span lang=EN-US>fun_head_fast.h</span></span><span
+with all the models built with previous versions of LSD (some optimizations require
+C++11 and </span><span class=Cdigo><span lang=EN-US>fun_head_fast.h</span></span><span
 lang=EN-US>). Main changes:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -643,9 +644,9 @@ and version control support.</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Icon access</span></b><span lang=EN-US>.
-Scripts for automatic creation of desktop icons to access LMM in all platforms
-(see <a href="../Readme.txt">Readme.txt</a> for details). </span></p>
+</span></span><b><span lang=EN-US>Icon access</span></b><span lang=EN-US>. Scripts
+for automatic creation of desktop icons to access LMM in all platforms (see <a
+href="../Readme.txt">Readme.txt</a> for details). </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -938,12 +939,13 @@ or amount of data to save.</span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Smoother installation and run under Linux.</span></b><span
-lang=EN-US> A number of problems of compatibility with different Linux
-distribution should be solved.</span></p>
+lang=EN-US> A number of problems of compatibility with different Linux distribution
+should be solved.</span></p>
 
 <p class=MsoListParagraph style='margin-left:35.7pt;text-indent:-17.85pt'><span
 lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>Other minor bug fixes and documentation improvements.</span></p>
+</span></span><span lang=EN-US>Other minor bug fixes and documentation
+improvements.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
 

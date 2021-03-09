@@ -290,6 +290,422 @@ proc waitbox { w tit msg { steps "" } { timer no } { par . } } {
 
 
 #************************************************
+# INIT_SERIES
+# Initialize the main AoR series listbox control 
+# data structures
+#************************************************
+proc init_series { fltcb serlb sern casn sellb seln pltlb pltn } {
+	global parAll serPar parChg parFlt serSel serList parList serOrd serNext serParDict serNdict fltCbox serLbox selLbox pltLbox serNlab casNlab selNlab pltNlab DaModElem DaModPar
+
+	set parChg 0
+	set parFlt $parAll
+	set serPar "$parAll (0)"
+	set serSel 0
+	set serOrd none
+	set fltCbox $fltcb
+	set serLbox $serlb
+	set selLbox $sellb
+	set pltLbox $pltlb
+	set serNlab $sern
+	set casNlab $casn
+	set selNlab $seln
+	set pltNlab $pltn
+	
+	set serList [ list ]
+	set parList [ list "$parAll (0)" ]
+	set serNext [ list ]
+	set DaModElem [ list ]
+	set DaModPar [ list $parAll ]
+	
+	set serParDict [ dict create ]
+	set serNdict [ dict create ]
+}
+
+
+#************************************************
+# STAT_SERIES
+# Updates the main AoR series listboxes stats
+#************************************************
+proc stat_series { } {
+	global fltCbox serLbox selLbox pltLbox serNlab casNlab selNlab pltNlab numc
+	
+	$serNlab configure -text [ $serLbox size ]
+	$casNlab configure -text $numc
+	$selNlab configure -text [ $selLbox size ]
+	$pltNlab configure -text [ $pltLbox size ]
+			
+	if { [ $fltCbox current ] < 0 } {
+		$fltCbox configure -values [ update_parent ]
+	}
+				
+}
+
+
+#************************************************
+# UPDATE_PARENT
+# Generate the AoR drop-down list of parents
+#************************************************
+proc update_parent { } {
+	global parAll serPar parChg parList serSel serParDict serNdict serLbox DaModPar
+	
+	set serSel [ lindex [ $serLbox curselection ] 0 ]
+	
+	if { $parChg } {
+		set parList [ list ]
+		foreach par $DaModPar {
+			if { $par eq $parAll } {
+				set vars [ dict keys $serParDict ]
+			} else {
+				set vars [ dict keys [ dict filter $serParDict value $par ] ]
+			}
+			
+			set n 0
+			foreach var $vars  {
+				incr n [ dict get $serNdict $var ]
+			}
+				
+			lappend parList "$par ($n)"
+			
+			if { [ lindex $serPar 0 ] eq $par } {
+				set serPar "$par ($n)"
+			}
+		}
+		
+		set parChg 0
+	}
+	
+	return $parList
+}
+
+
+#************************************************
+# FILTER_SERIES
+# Filter the main AoR series listbox to show  
+# just series from one parent/source
+#************************************************
+proc filter_series { { par "" } } {
+	global parAll serPar parFlt parList serSel serList serParDict fltCbox serLbox
+	
+	if { $par eq "" } {
+		set par [ lindex $serPar 0 ]
+	} else {
+		set i 0
+		set found 0
+		foreach p $parList {
+			if { [ lindex $p 0 ] eq $par } {
+				set found 1
+				set $serPar "$p"
+				$fltCbox current $i
+				break
+			}
+			
+			incr i
+		}
+		
+		if { ! $found } {
+			return
+		}
+	}
+	
+	if { $par ne $parFlt } {
+		$serLbox delete 0 end
+		
+		foreach ser $serList {
+			if { $par eq $parAll || $par eq [ dict get $serParDict [ lindex $ser 0 ] ] } {
+				insert_series $serLbox $ser
+			}
+		}
+
+		set parFlt $par
+		set serSel 0
+		set serOrd none
+		stat_series
+	}
+
+	selectinlist $serLbox $serSel 1
+}
+
+
+#************************************************
+# SEARCH_SERIES
+# Search for series to the main AoR series listbox, 
+# expanding the selection if not in current parent
+#************************************************
+proc search_series { { text "" } } {
+	global parAll parFlt serList serParDict serNext serLbox
+
+	if { [ string length $text ] > 0 } {
+		set serNext [ list ]
+	}
+	
+	if { [ llength $serNext ] == 0 && [ string length $text ] > 0 } {
+	
+		if [ dict exists $serParDict $text ] {
+			set matches [ list $text ]
+		} else {
+			set matches [ lsearch -all -inline [ dict keys $serParDict ] "*$text*" ]
+			
+			if { [ llength $matches ] == 0 } {
+				set matches [ lsearch -all -inline -nocase [ dict keys $serParDict ] "*$text*" ]
+			}
+		}
+		
+		if { [ llength $matches ] == 0 } {
+			return 0
+		}
+		
+		foreach ser $matches {
+			foreach serlin $serList {
+				if { $ser eq [ lindex $serlin 0 ] } {
+					lappend serNext $serlin
+				}
+			}
+		}
+	}
+	
+	if { [ llength $serNext ] == 0 } {
+		return 0
+	}
+		
+	set serlin [ lindex $serNext 0 ]
+	set serNext [ lrange $serNext 1 end ]
+	set par [ dict get $serParDict [ lindex $serlin 0 ] ]
+
+	if { $parFlt ne $par } {
+		filter_series $par
+	}
+	
+	selectinlist $serLbox [ lsearch -exact [ $serLbox get 0 end ] $serlin ] 1
+	
+	return 1
+}
+
+
+#************************************************
+# ADD_SERIES
+# Add new series to the main AoR series listbox, 
+# updating the lists/dictionary
+#************************************************
+proc add_series { ser par } {
+	global parAll serPar parChg parFlt serList serParDict serNdict serLbox DaModElem DaModPar
+	
+	if { $parFlt ne $parAll } {
+		filter_series $parAll
+	}
+	
+	lappend serList "$ser"
+	insert_series $serLbox "$ser"
+	
+	set nam [ lindex $ser 0 ]
+	dict incr serNdict $nam
+	
+	if { ! [ dict exists $serParDict $nam ] } {
+		set par [ file tail $par ]
+	
+		dict set serParDict $nam $par
+		lappend DaModElem $nam
+		
+		if { [ lsearch -exact $DaModPar $par ] < 0 } {
+			lappend DaModPar $par
+		}
+	}
+	
+	set parChg 1
+}
+
+
+#************************************************
+# INSERT_SERIES
+# Append series to an AoR listbox, coloring the 
+# entry according to the origin of the series
+#************************************************
+proc insert_series { lbox ser { pos end } } {
+	global colorsTheme
+
+	set orig [ lindex [ split [ lindex [ split $ser ] 1 ] _ ] 0 ]
+	switch $orig {
+		U {
+			set color $colorsTheme(var)
+		}
+		C {
+			set color $colorsTheme(lvar)
+		}
+		F {
+			set color $colorsTheme(fun)
+		}
+		MC {
+			set color $colorsTheme(lfun)
+		}
+		default {
+			set color ""
+		}
+	}
+
+	$lbox insert $pos "$ser"
+	
+	if { $color != "" } {
+		$lbox itemconfigure $pos -fg $color
+	}
+}
+
+
+#************************************************
+# SORT_SERIES
+# Sort series to an AoR listbox, according to
+# the selected criterion, if different
+#************************************************
+proc sort_series { lbox ord } {
+	global parAll parFlt serList serOrd serLbox selLbox
+	
+	if { ( $lbox eq $serLbox && $serOrd ne $ord ) || $lbox eq $selLbox } {
+		set ss [ $lbox get 0 end ]
+		if { [ llength $ss ] > 1 } {
+			switch -glob $ord {
+				inc* {
+					set ss [ lsort -command comp_und_inc $ss ]
+				}
+				dec* {
+					set ss [ lsort -command comp_und_dec $ss ]
+				}
+				rev* {
+					set ss [ lreverse $ss ]
+				}
+				nice {
+					set ss [ lsort -command comp_nice $ss ]
+				}
+				none -
+				default {
+					if { $lbox eq $serLbox && $parFlt eq $parAll } {
+						set ss $serList
+					} else { 
+						set ss [ lsort -command comp_rank $ss ]
+					}
+					
+					set ord none
+				}
+			}
+			
+			$lbox delete 0 end
+			foreach s $ss {
+				insert_series $lbox "$s"
+			}
+			
+			if { $lbox eq $serLbox } {
+				set serOrd $ord
+				set serSel 0
+				selectinlist $serLbox $serSel 1
+			}
+		}
+	}
+	
+	focus $lbox
+}
+
+
+#************************************************
+# COMP_RANK
+# Special sort procedure to sort according 
+# series unique rank (serial creation number)
+#************************************************
+proc comp_rank { a b } {
+	scan $a "%*s %*s %*s #%d" ar
+	scan $b "%*s %*s %*s #%d" br
+if { ! [ info exists ar ] } { tk_messageBox -message "$a\n$b" }
+	return [ expr $ar - $br ]
+}
+
+
+#************************************************
+# COMP_NICE
+# Special sort procedure to sort according to:
+# 1) name (increasing: A first z last, underscored at end)
+# 2) time of last occurrence (decreasing: last updated first)
+# 3) time of first occurrence (increasing: older first)
+# 4) rank (increasing)
+#************************************************
+proc comp_nice { a b } {
+
+	scan $a "%s %*s (%d-%d) #%d" an ab ae ar
+	scan $b "%s %*s (%d-%d) #%d" bn bb be br
+	
+	set d [ comp_und_inc $an $bn ]
+	if { $d != 0 } {
+		return $d
+	}
+	
+	if { $ae != $be } {
+		return [ expr $be - $ae ]
+	}
+	
+	if { $ab != $bb } {
+		return [ expr $ab - $bb ]
+	}
+	
+	return [ expr $ar - $br ]
+}
+
+
+#************************************************
+# COMP_UND_INC
+# Special increasing sort procedure to keep names 
+# starting with underline(s) at the end
+#************************************************
+proc comp_und_inc { a b } {
+
+	if { [ string index $a 0 ] ne "_" } {
+		if { [ string index $b 0 ] ne "_" } {
+			return [ str_comp_dict $a $b ]
+		} else {
+			return -1
+		}
+	} 
+	
+	if { [ string index $b 0 ] eq "_" } {
+		return [ comp_und_inc [ string range $a 1 end ] [ string range $b 1 end ] ]
+	}
+		
+	return 1
+}
+
+
+#************************************************
+# COMP_UND_DEC
+# Special decreasing sort procedure to keep names 
+# starting with underline(s) at the end
+#************************************************
+proc comp_und_dec { a b } {
+
+	if { $a eq $b } {
+		return 0
+	}
+	
+	if { [ string index $a 0 ] ne "_" } {
+		if { [ string index $b 0 ] ne "_" } {
+			return [ expr - [ str_comp_dict $a $b ] ]
+		} else {
+			return -1
+		}
+	} 
+	
+	if { [ string index $b 0 ] eq "_" } {
+		return [ comp_und_dec [ string range $a 1 end ] [ string range $b 1 end ] ]
+	}
+		
+	return 1
+}
+
+
+#************************************************
+# STR_COMP_DICT
+# Compare two strings as in lsort -dictionary
+# in increasing order
+#************************************************
+proc str_comp_dict { a b } {
+    dict get {1 0  {0 1} -1  {1 0} 1} [ lsort -indices -dictionary -unique [ list $a $b ] ]
+}
+
+
+#************************************************
 # ROUND_N
 # Round float to N decimal positions
 #************************************************
@@ -505,37 +921,6 @@ proc upd_menu_visib { } {
 	}
 	
 	set prevlistfocus $listfocus
-}
-
-
-#************************************************
-# COMP_UNDERLINE
-# Create special sort procedure to keep names 
-# starting with underline at the end
-#************************************************
-proc comp_underline { n1 n2 } {
-
-	if [ string equal $n1 $n2 ] {
-		return 0
-	}
-	
-	if { ! [ expr { [ string index $n1 0 ] == "_" && [ string index $n2 0 ] == "_" } ] } {
-		if { [ string index $n1 0 ] == "_" } {
-			return 1
-		} 
-		
-		if { [ string index $n2 0 ] == "_" } {
-			return -1
-		}
-	}
-	
-	set listn [ lsort -dictionary [ list $n1 $n2 ] ]
-	
-	if [ string equal [ lindex $listn 0 ] $n1 ] {
-		return -1
-	} else {
-		return 1
-	}
 }
 
 

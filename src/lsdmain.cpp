@@ -160,6 +160,7 @@ int i_values[ 4 ];			// user temporary variables copy
 double d_values[ USER_D_VARS ];
 object *o_values[ 10 ];
 netLink *n_values[ 10 ];
+p_mapT par_map;				// variable to parent name map for AoR
 Tcl_Interp *inter = NULL;	// global Tcl interpreter in LSD
 #endif
 
@@ -681,6 +682,7 @@ void run( void )
 		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed 
 
 #ifndef NW
+		par_map.clear( );	// restart variable to parent name map for AoR
 		prepare_plot( root, i );
 #endif
 		if ( fast_mode < 2 )
@@ -1050,18 +1052,10 @@ void set_fast( int level )
 		
 #ifndef NW
 	if ( fast && level == 0 )
-		cmd( "if [ winfo exists $activeplot ] { \
-				$rtptab select $activeplot; \
-				$activeplot.fond.go conf -state normal; \
-				$activeplot.fond.shift conf -state normal \
-			}" );
-			
+		enable_plot( );
+		
 	if ( ! fast && level > 0 )
-		cmd( "if [ winfo exists $activeplot ] { \
-				$activeplot.fond.go conf -state disabled; \
-				$activeplot.fond.shift conf -state disabled; \
-				$rtptab hide $activeplot \
-			}" );
+		disable_plot( );
 #endif
 	
 	// remove the variables stack when switching to any fast mode
@@ -1124,10 +1118,18 @@ bool alloc_save_mem( object *r )
 	bridge *cb;
 	object *cur;
 	variable *cv;
-
+	
 	// for each variable set the data saving support
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{ 
+		if ( ( cv->num_lag > 0 || cv->param == 1 ) && cv->data_loaded == '-' )
+		{
+			sprintf( msg, "%s '%s' in object '%s' has not been initialized", cv->param == 1 ? "parameter" : "variable", cv->label, r->label );
+			error_hard( msg, "required initialization values missing", "select the object and choose menu 'Data'/'Initial Values'" );
+			
+			toquit = 2;
+		}
+		
 		cv->last_update = 0;
 
 		// choose next update step for special updating variables
@@ -1140,14 +1142,11 @@ bool alloc_save_mem( object *r )
 		
 		if ( cv->save || cv->savei )
 			alloc_save_var( cv );
-
-		if ( ( cv->num_lag > 0 || cv->param == 1 ) && cv->data_loaded == '-' )
-		{
-			sprintf( msg, "%s '%s' in object '%s' has not been initialized", cv->param == 1 ? "parameter" : "variable", cv->label, r->label );
-			error_hard( msg, "required initialization values missing", "select the object and choose menu 'Data'/'Initial Values'" );
 			
-			toquit = 2;
-		}
+#ifndef NW 
+		// variable to parent name map for AoR
+		par_map.insert( make_pair < string, string > ( cv->label, r->label ) );		
+#endif
 	}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )

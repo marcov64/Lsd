@@ -1088,24 +1088,11 @@ int browse( object *r, int *choice )
 	cmd( "if $strWindowOn { set strWindowB active } { set strWindowB normal }" );
 	cmd( "set useCurrObj yes" );	// flag to select among the current or the clicked object
 
-	*choice = 0;
+	*choice = choice_g = 0;
 
 	// main command loop
-	while ( ! *choice  && ! choice_g )
-	{
-		try
-		{
-			Tcl_DoOneEvent( 0 );
-		}
-		catch ( bad_alloc& ) 		// raise memory problems
-		{
-			throw;
-		}
-		catch ( ... )				// ignore the rest
-		{
-			goto main_cycle;
-		}
-	}   
+	while ( ! *choice && ! choice_g )
+		Tcl_DoOneEvent( 0 );
 
 	// coming from the structure window
 	if ( choice_g )	

@@ -99,7 +99,7 @@ div.WordSection1
 
 </head>
 
-<body lang=PT-BR link=blue vlink=purple>
+<body lang=PT-BR link=blue vlink=purple style='word-wrap:break-word'>
 
 <div class=WordSection1>
 
@@ -108,9 +108,9 @@ div.WordSection1
 <p class=MsoTitle><span lang=EN-US>LSD Run-time Plot and Controls</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-width=475 height=364 src="image/runtime.png"></span></p>
+width=475 height=373 src="image/runtime.png"></span></p>
 
-<p class=MsoNormal><span lang=EN-US>The LSD Run-time Plot window is
+<p class=MsoNormal><span lang=EN-US>The LSD Run-time Plots window is
 automatically created during the <a href="LSD_faqs.html#simulationrun">simulation
 run</a> to show the dynamic plotting of the time series of selected <a
 href="LSD_faqs.html#variable">Variables</a> (or even <a
@@ -125,7 +125,9 @@ sized according to the <a href="LSD_faqs.html#simulationrun">number of steps</a>
 set for the simulation (horizontal dimension) and to maximum and the minimum
 values of the plotted Variables (vertical dimension). Note that the <i>y</i>-axis
 dynamic rescaling slightly overshoots the maximum and minimum values to
-mitigate excessive rescaling operations.</span></p>
+mitigate excessive rescaling operations. Simulations with multiple runs are
+organized as a “notebook”, with each run presented in separate “tab”. Tabs on
+the top of the window can be clicked to quickly switch among runs’ results. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Users should select carefully which
 Variables’ time series to shown during the run-time:</span></p>
@@ -159,8 +161,8 @@ the plot area scrolls at each time step. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>The button </span><span class=Cdigo><span
 lang=EN-US>Center</span></span><span lang=EN-US> centers the plot area on the
-current simulation run time step. It is useful only for simulations lasting more
-than 500 time steps.</span></p>
+current simulation run time step. It is useful only for simulations lasting
+more than 500 time steps.</span></p>
 
 <h2><span lang=EN-US>Performance considerations</span></h2>
 

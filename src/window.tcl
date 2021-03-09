@@ -1598,46 +1598,6 @@ proc update_title_bar { } {
 
 
 #************************************************
-# INSERT_SERIES
-# Append series to a listbox, coloring the entry
-# according to the origin of the series
-#************************************************
-proc insert_series { lbox ser { pos end } } {
-	global colorsTheme
-
-	set orig [ lindex [ split [ lindex [ split $ser ] 1 ] _ ] 0 ]
-
-	switch $orig {
-		U {
-			set color $colorsTheme(var)
-		}
-
-		C {
-			set color $colorsTheme(lvar)
-		}
-
-		F {
-			set color $colorsTheme(fun)
-		}
-
-		MC {
-			set color $colorsTheme(lfun)
-		}
-
-		default {
-			set color ""
-		}
-	}
-
-	$lbox insert $pos "$ser"
-	
-	if { $color != "" } {
-		$lbox itemconfigure $pos -fg $color
-	}
-}
-
-
-#************************************************
 # SETWRAP
 # Procedure to adjust text wrapping
 #************************************************

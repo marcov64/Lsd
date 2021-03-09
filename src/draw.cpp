@@ -415,7 +415,7 @@ PUT_NODE
 ****************************************************/
 void put_node( int x, int y, char *str, bool sel )
 {
-	cmd( ".str.f.c create oval [ expr %d - $nsizeM / 2 ] [ expr %d + $vmarginM - $nsizeM / 2 ] [ expr %d + $nsizeM / 2 ] [ expr %d + $vmarginM + $nsizeM / 2 ]  -fill $colorsTheme(%s) -outline $colorsTheme(dfg) -tags %s", x, y, x, y, sel ? "hc" : "isbg", str );
+	cmd( ".str.f.c create oval [ expr %d - $nsizeM / 2 ] [ expr %d + $vmarginM - $nsizeM / 2 ] [ expr %d + $nsizeM / 2 ] [ expr %d + $vmarginM + $nsizeM / 2 ] -fill $colorsTheme(%s) -outline $colorsTheme(dfg) -tags %s", x, y, x, y, sel ? "hc" : "isbg", str );
 }
 
 
