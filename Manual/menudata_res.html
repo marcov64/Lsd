@@ -1392,14 +1392,15 @@ class=Cdigo><span lang=EN-US><a href="#statistics">Statistics</a></span></span><
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US><a href="#_Histogram">Histogram</a></span></span><span
 lang=EN-US>, etc.</span></p>
 
-<h2><a name=graph></a><a name="_The_plot_window"></a><span lang=EN-US>The plot
+<h2><a name=graph></a><a name="_The_plot_window"></a><span lang=EN-US>The Plots
 window</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>The plots produced with the command <a
-href="#timeseries">Plot </a>are created in independent windows and are endowed
-with features which simplify their use and analysis. Some features may be not
-available for all types of plots and plots produced by <a href="#Gnuplot">Gnuplot</a>
-have a different set of features (see Gnuplot documentation). </span></p>
+href="#timeseries">Plot </a>are created by default in a single notebook window,
+with tabs on the top to easily switch among them, and are endowed with features
+which simplify their use and analysis. Some features may be not available for
+all types of plots and plots produced by <a href="#Gnuplot">Gnuplot</a> have a
+different set of features (see Gnuplot documentation). </span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
 border=0 width=602 height=460 src="image/example_graph.png"></span></p>
@@ -1412,13 +1413,23 @@ href="#_Series_in_logs">linear</a> <a href="#scaling">primary automatic scale</a
 series, no <a href="#watch">grid lines</a>, 3 significant digits <a
 href="#_Precision">precision</a>, points of <a href="#point_size">size</a> 1
 and <a href="#lines_points">lines</a> connecting them, and automatically <a
-href="#title">named</a> after the first series selected. Multiple plots are
-automatically organized as a “notebook”, with tabs on the top to easily switch
-among plots. In the example, there are 3 tabs, being the tab showing Variable
-“InstallBase” the current one.</span></p>
+href="#title">named</a> after the first series selected. In this example, there
+are 3 plot tabs available, being the tab showing Variable </span><span
+class=Cdigo><span lang=EN-US>InstallBase</span></span><span lang=EN-US> the one
+in focus.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>The plot window offers seven command button
-types, presenting four at a time:</span></p>
+<p class=MsoNormal><span lang=EN-US>Tabs on the top of the LSD Plots notebook
+can be clicked to quickly switch among plots. The notebook can show up to 10
+separate tabs at once. Tab names are also truncated to 10 characters. When the
+number of plots is larger than 10, the tab set will contain just the last 10
+plots plus the tab </span><span class=Cdigo><span lang=EN-US>More…</span></span><span
+lang=EN-US>. Clicking on </span><span class=Cdigo><span lang=EN-US>More…</span></span><span
+lang=EN-US> will open a list of buttons which give access to all plots,
+attached to the notebook or not, similarly to the <a href="#graphs">Plots list
+box</a>.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>The plot tab/window offers seven command
+button types, presenting four or two at a time:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -1436,49 +1447,49 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US>: during the time required to plot complex data, it allows to stop
 the current plotting job. When there is too much data to be plotted, LSD may
 take a while to fill the plot window. Whenever this happens, the user has the
-option to interrupt the process, regaining control to LSD controls. After the
-plot is complete, the button is renamed to </span><span class=Cdigo><b><span
-lang=EN-US>Detach</span></b></span><span lang=EN-US> or </span><span
-class=Cdigo><b><span lang=EN-US>Gnuplot</span></b></span><span lang=EN-US> 
-(see below).</span></p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Detach</span></b></span><span
-lang=EN-US>: after the plot is fully draw, this button detaches the selected
-plot tab from the LSD Plots notebook, creating an independent window for it.
-This option is not available for <a href="#_Gnuplot">Gnuplot</a> plots (see
-alternative below).</span></p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Attach</span></b></span><span
-lang=EN-US>: in a detached plot window, after </span><span class=Cdigo><b><span
-lang=EN-US>Detach</span></b></span><span lang=EN-US> was used, this button
-allows (re) attaching the plot back to the LSD Plots notebook. This option is
-not available for <a href="#_Gnuplot">Gnuplot</a> plots (see alternative
+option to interrupt the process, regaining control to LSD controls. This button
+is only available when the </span><span class=Cdigo><a href="#_Watch"><span
+lang=EN-US>Watch</span></a></span><span lang=EN-US> option is ticked (the
+default). After the plot is complete, this button changes to </span><span
+class=Cdigo><b><span lang=EN-US>Detach</span></b></span><span lang=EN-US> or </span><span
+class=Cdigo><b><span lang=EN-US>Gnuplot</span></b></span><span lang=EN-US> (see
 below).</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Detach</span></b></span><span
+lang=EN-US>: after the plot is fully draw, this button allows detaching the
+selected plot tab from the LSD Plots notebook, creating an independent window
+for it. This option is not available for <a href="#_Gnuplot">Gnuplot</a> plots
+(see alternative below).</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Attach</span></b></span><span
+lang=EN-US>: in a detached plot window, not in the LSD Plots notebook, this
+button allows attaching the plot back to the notebook. This option is not
+available for <a href="#_Gnuplot">Gnuplot</a> windows (see alternative below).</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Gnuplot</span></b></span><span
-lang=EN-US>: open the current plot using <a href="#_Gnuplot">Gnuplot</a>. The
-plot tab is not removed from the LSD Plots notebook. This option is not
-available for <a href="#ts_cs">time series</a> <a href="#seq_xy">sequential</a>
-(non-Gnuplot) plots.</span></p>
+lang=EN-US>: open the current plot using the <a href="#_Gnuplot">Gnuplot</a>
+application. The plot tab is not removed from the LSD Plots notebook. This
+option is not available for non-Gnuplot plots.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Zoom +</span></b></span><span
 lang=EN-US> / </span><span class=Cdigo><b><span lang=EN-US>-</span></b></span><span
-lang=EN-US>: set the zoom level in the current window. Please note that the
+lang=EN-US>: set the zoom level in the current tab or window. This option is
+not available for <a href="#_Lattice_1">lattice plots</a>. Please note that the
 scroll bars become active when the user zooms in, so the part of the plot being
 zoomed can be easily controlled. The user can also enlarge or maximize the
-window to view a larger part of a zoomed plot.</span></p>
+notebook or independent window to view a larger part of a zoomed plot.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The plot window is sensitive to the mouse
 position: the bottom-left part of the window presents the case (time step)
@@ -1527,45 +1538,54 @@ to adjust the position of existing series labels or added lines around the
 plot.</span></p>
 
 <p class=MsoNormal><a name=y2example></a><span lang=EN-US>The following example
-shows a fancy <a href="#y2axis">two-scale</a> (detached) plot with added title,
-arrows, labels and edited, repositioned and recolored series labels. </span></p>
+shows a fancy <a href="#y2axis">two-scale</a> plot in a detached window with
+added title, arrows, labels and edited, repositioned and recolored series
+labels. </span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
 border=0 width=590 height=422 src="image/ex_piccolo.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>Frequently, during an AR session, the user
 produces quite many plots, and the computer screen becomes easily crowded. To
-move among the different plot windows, three features are available: </span></p>
+move among the different plot tabs and windows, four features are available: </span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Close plot windows</span></b><span
-lang=EN-US>: plots can be closed (click the X on the title bar) and easily
-reopened later.</span></p>
+</span></span><b><span lang=EN-US>Select plot tab in notebook</span></b><span
+lang=EN-US>: plots in notebook can be selected by clicking in the corresponding
+tab.</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Close plot individual plot windows</span></b><span
+lang=EN-US>: plots in detached windows can be closed (click the X on the title
+bar) and easily reopened later (see below).</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Double click on <a href="#graphs">Plots list
-box</a></span></b><span lang=EN-US>: reopen and/or bring to the foreground any
+box</a></span></b><span lang=EN-US>: bring to the foreground and/or reopen any
 produced plot during the current AR session.</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Double click on a plot</span></b><span
 lang=EN-US>: bring the main Analysis of Results windows to the foreground. The
-user must double click in any empty part of the white plot “canvas”.</span></p>
+user must double click in any empty part of the plot canvas. Sometimes the plot
+windows have to be moved to allow access to the entire Analysis of Results
+window.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>All the plots produced during an AR session
 are cataloged in the <a href="#graphs">Plots list box</a>. A double click in
-any of the list items immediately brings the respective plot window to the
+any of the list items immediately brings the respective plot tab/window to the
 foreground, reopening it if needed. A left click on any item in the list
 removes it. Please note that items in the Plots list box are not saved when the
 AR window is closed. Only items explicitly saved to file, using the </span><span
 class=Cdigo><span lang=EN-US><a href="#postscript">Save Plot</a></span></span><span
 lang=EN-US> and </span><span class=Cdigo><span lang=EN-US><a href="#save">Save
 Data</a></span></span><span lang=EN-US> buttons, are preserved after the AR
-session is terminated (even if the <a href="browser.html">LSD Browser</a> is
-not closed).</span></p>
+session is terminated even if the <a href="browser.html">LSD Browser</a> is not
+closed.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -1648,19 +1668,21 @@ is located in the eleventh instance of an <a href="LSD_faqs.html#object">Object<
 at the second level of the model structure, which, in turn, descends from the
 first Object instance at the first level of the structure tree (a son of the </span><span
 class=Cdigo><span lang=EN-US>Root</span></span><span lang=EN-US> Object). The
-time series has data from time step 30 until 200, that is, the Object where
-this Variable is contained was created at time step 30 and lasted up to the 200<sup>th</sup>
+time series has data from time step 30 until 200, that is, the Object where this
+Variable is contained was created at time step 30 and lasted up to the 200<sup>th</sup>
 step. The time series unique serial number is 65.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The order of the series in the list box
-reflects the <a href="LSD_faqs.html#modelstructure">model structure</a>, and
-therefore elements saved from the same <a href="LSD_faqs.html#object">Object
-type</a> are listed sequentially. For large models it may be useful to <a
-href="#sort">sort the series</a> available or filter the series presented. The
-top row of this box has a drop-down selector allowing to choose Variables from
-specific Objects to be listed. For data loaded from disk, Object-based
-filtering is available only if the corresponding configuration is loaded,
-otherwise Variables can be filtered only according to the files they come from.</span></p>
+reflects the <a href="LSD_faqs.html#modelstructure">model structure</a>, and therefore
+elements saved from the same <a href="LSD_faqs.html#object">Object type</a> are
+listed sequentially. For large models it may be useful to filter and/or <a
+href="#sort">sort the series</a> presented. The top row of this box is a drop-down
+selector allowing to choose Variables from specific Objects to be listed. The
+filter list contains only Objects in the model structure which contain elements
+with series available for analysis plus entries for series added by the user
+(created or loaded from file). For series loaded from data files, Object-based
+filtering is available only if the corresponding configuration file is loaded,
+otherwise series can be filtered only by the name of the files they came from.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Time series in the list box must be
 highlighted before they can be added to the <a href="#_Series_selected">Series
@@ -1669,8 +1691,8 @@ series. For highlighting:</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>Click on any one series to highlight it and
-unmark any other.</span></p>
+</span></span><span lang=EN-US>Click on any one series to highlight it and unmark
+any other.</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1698,7 +1720,7 @@ Series selected list box.</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>Press </span><span class=Cdigo>Ctrl+A</span><span
+</span></span><span lang=EN-US>Press </span><span class=Cdigo><span lang=EN-US>Ctrl+A</span></span><span
 lang=EN-US> to select all series in the current list box.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>For adding the highlighted series to the <a
@@ -1788,8 +1810,8 @@ class=Cdigo><span lang=EN-US>Delete</span></span><span lang=EN-US> key. </span><
 box are not saved when the AR window is closed. Only items explicitly saved to
 file, using the </span><span class=Cdigo><span lang=EN-US><a href="#postscript">Save
 Plot</a></span></span><span lang=EN-US> and </span><span class=Cdigo><span
-lang=EN-US><a href="#save">Save Data</a></span></span><span lang=EN-US> buttons,
-are preserved after the AR session is terminated (even if the <a
+lang=EN-US><a href="#save">Save Data</a></span></span><span lang=EN-US>
+buttons, are preserved after the AR session is terminated (even if the <a
 href="browser.html">LSD Browser</a> is not closed).</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
@@ -1844,7 +1866,7 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US><a href="#batch_sel">Filter instances</a></span></p>
+</span></span><span lang=EN-US><a href="#batch_sel">Select instances</a></span></p>
 
 <h2><a name=in></a><a name="_&#9658;"></a><a name="_&#9658;_button"></a><span
 lang=EN-US>&#9658; button </span></h2>
@@ -1868,17 +1890,17 @@ series in the <a href="#_Series_selected">Series selected</a> list box, if any.
 
 <h2><a name=sort></a><a name="_Sort_buttons"></a><span lang=EN-US>Sort buttons </span></h2>
 
-<p class=MsoNormal><span lang=EN-US>The items in the <a href="#Vars__Available">Series
-available</a> list box are sorted according to the position of the <a
-href="LSD_faqs.html#object">Object instance</a> containing the associated <a
-href="LSD_faqs.html#variable">Variables</a> and <a
+<p class=MsoNormal><span lang=EN-US>When an AR session begins, the items in the
+<a href="#Vars__Available">Series available</a> list box are sorted according
+to the position of the <a href="LSD_faqs.html#object">Object instance</a>
+containing the associated <a href="LSD_faqs.html#variable">Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a> in the <a
 href="LSD_faqs.html#modelstructure">model structure</a>, starting from the
 highest level Objects. If the <a href="LSD_faqs.html#results">simulation
 results</a> contain many elements saved, it is convenient to sort the entries
 in the <a href="#Vars__Available">Series available</a> list box for easier
 access to the desired series. Also, when there are many instances (copies) of
-the same element, it may is useful to list together all the series of elements
+the same element, it may be useful to list together all the series of elements
 of the same type. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>There are four options to modify the order
@@ -1920,17 +1942,27 @@ series with the same names placing first the series from Objects still existing
 at the simulation end or the time it was interrupted or paused, if any.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Unsort </span></b></span>(<i>shortcut</i>:
-<span class=Cdigo>Ctrl+U</span>): restore the original order of the list
-entries, according to the series serial numbers (KK <a href="#Vars__Available">here</a>).</p>
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Unsort </span></b></span><span
+lang=EN-US>(<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+U</span></span><span
+lang=EN-US>): restore the original order of the list entries, according to the
+series serial numbers (KK </span><a href="#Vars__Available"><span lang=EN-US>here</span></a><span
+lang=EN-US>).</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>(<i>shortcut</i>: </span><span class=Cdigo><span
-lang=EN-US>Ctrl+I</span></span><span lang=EN-US>): invert the order of the
-series in the Series Selected list box. There is no button for this option.</span></p>
+</span></span><i><span lang=EN-US>shortcut</span></i><span lang=EN-US>: </span><span
+class=Cdigo><span lang=EN-US>Ctrl+I</span></span><span lang=EN-US>: invert the
+order of the series in the Series Selected list box. There is no corresponding
+button for this option.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>Sorting can be used together with
+filtering, by selecting, first, a subset of the available series to be
+presented in the Series available list box, and then, second, choosing the
+desired ordering option. Every time a new filtering subset is selected, series
+are organized back to their initial (</span><span class=Cdigo><span lang=EN-US>Unsort</span></span><span
+lang=EN-US>) order.</span></p>
 
 <h2><a name="_Find"></a><a name=find></a><span lang=EN-US>Find</span></h2>
 
@@ -1940,7 +1972,12 @@ class=Cdigo><span lang=EN-US>Ctrl+F</span></span><span lang=EN-US>.</span></p>
 <p class=MsoNormal><span lang=EN-US>Find the first occurrence of a series in
 the <a href="#Vars__Available">Series available</a> list box, asking for the
 name of the desired time series, or just part of it (see example below). If
-found, the corresponding series entry is highlighted.</span></p>
+found, the corresponding series entry is highlighted. Search is performed first
+for an exact match. If no series matches exactly, a new (case sensitive) search
+is done for the entered text as part of the name of one or more series. If none
+is found, it relaxes the requirement for case sensitivity. In any scenario, if
+more than one series matches the search criteria, the first instance found is
+selected in the Series available list box.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=225 height=143 src="image/find_series.png"></span></p>
@@ -1948,7 +1985,11 @@ width=225 height=143 src="image/find_series.png"></span></p>
 <p class=MsoNormal><span lang=EN-US>If more instances are to be found, user may
 press one the </span><span class=Cdigo><span lang=EN-US>F3</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>Ctrl+N</span></span><span
-lang=EN-US> keys repeatedly.</span></p>
+lang=EN-US> keys repeatedly. The search is always performed among all the
+available series irrespective of the series shown in the Series available list
+box. If the found series is not in the <a href="#Vars__Available">current
+filtered subset</a>, the filter is automatically updated to the <a
+href="LSD_faqs.html#object">Object</a> containing the series.</span></p>
 
 <h2><a name="add_series"></a><a name="_Add"></a><span lang=EN-US>Add </span></h2>
 
@@ -1997,10 +2038,11 @@ class=Cdigo><span lang=EN-US>Ctrl</span></span><span lang=EN-US> or the </span><
 class=Cdigo><span lang=EN-US>Shift</span></span><span lang=EN-US> keys to
 select multiple individual or a range of files, respectively. The consolidated
 series will be marked by a </span><span class=Cdigo><span lang=EN-US>MC</span></span><span
-lang=EN-US> signature at the beginning of the variable tag. MC automatic data
+lang=EN-US> signature at the beginning of the variable tag and can be subset by
+MC-specific <a href="#Vars__Available">filtering targets</a>. MC automatic data
 consolidation can only be performed when all results files have exactly the
 same elements saved, for the same number of cases (time steps). If data from
-elements in stochastically-created Objects is present, LSD cannot automatically
+elements in randomly-created Objects is present, LSD cannot automatically
 consolidate the data using this option.</span></p>
 
 <p class=MsoNormal><a name=createmc></a><span lang=EN-US>When </span><span
@@ -2016,8 +2058,8 @@ border=0 width=225 height=275 src="image/add_mc_series.png"></span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Average only</span></b></span><span
 lang=EN-US>: each series in the results files will be averaged among every
-simulation time step, producing the MC mean series for all saved elements (</span><span
-class=Cdigo><span lang=EN-US>_avg</span></span><span lang=EN-US> suffix). </span></p>
+simulation time step, producing the MC mean series for all saved elements (no
+suffix, uses parent information for filtering, if configuration is loaded). </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -2171,14 +2213,13 @@ href="#_Series_selected">Series selected</a> list box.</span></p>
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Calculate over cases</span></b></span><span
-lang=EN-US>: the new series will have as many time steps as the number of
-series selected. Each time step value for the new series is computed
-elaborating over the values for each of the series selected across all their
-time steps. For example, when choosing </span><span class=Cdigo><span
-lang=EN-US>Average</span></span><span lang=EN-US> each time step t in the new
-series value will be computed as the average value of the series number t over
-all the time steps chosen, according to the order in the <a
-href="#_Series_selected">Series selected</a> list box.</span></p>
+lang=EN-US>: the new series will have as many time steps as the number of series
+selected. Each time step value for the new series is computed elaborating over
+the values for each of the series selected across all their time steps. For
+example, when choosing </span><span class=Cdigo><span lang=EN-US>Average</span></span><span
+lang=EN-US> each time step t in the new series value will be computed as the average
+value of the series number t over all the time steps chosen, according to the
+order in the <a href="#_Series_selected">Series selected</a> list box.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The new series can be computed as the
 average, sum, product, inverse (1/x), count, maximum, minimum, variance,
@@ -2281,7 +2322,7 @@ highlighting all labels in the list and pressing <a href="#out">button &#9668;</
 It does not affect any of the already created <a href="#graph">plot windows</a>.</span></p>
 
 <h2><a name="batch_sel"></a><a name="_Context_menu"></a><a
-name="_Filter_instances"></a><span lang=EN-US>Filter instances </span></h2>
+name="_Filter_instances"></a><span lang=EN-US>Select instances </span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>: </span><span
 class=Cdigo><span lang=EN-US>Space</span></span><span lang=EN-US> or right
@@ -2406,8 +2447,8 @@ series in Y2 axis</span></a></span></p>
 cases / From case / to case</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
-lang=EN-US>Use all cases</span></span><span lang=EN-US> option sets commands
-(e.g., </span><span class=Cdigo><span lang=EN-US><a href="#timeseries">Plot</a></span></span><span
+lang=EN-US>Use all cases</span></span><span lang=EN-US> option sets commands (e.g.,
+</span><span class=Cdigo><span lang=EN-US><a href="#timeseries">Plot</a></span></span><span
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US><a href="#statistics">Statistics</a></span></span><span
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US><a href="#save">Save
 Data</a></span></span><span lang=EN-US>, </span><span class=Cdigo><span
@@ -2472,12 +2513,12 @@ First series in Y2 axis</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>Check the </span><span class=Cdigo><span
 lang=EN-US>Y2</span></span><span lang=EN-US> </span><span class=Cdigo><span
-lang=EN-US>axis</span></span><span lang=EN-US> option to enable the secondary vertical
-axis scale (Y2) when <a href="#ts_cs">plotting time series</a> on the right
-side of the <a href="#graph">plot window</a>. In this case, some of the series
-in the <a href="#_Series_selected">Series selected</a> list box will be plotted
-along the primary vertical scale (Y), while others (see next) will use the
-secondary one (Y2). This option is ignored for <a href="#ts_cs">cross-section
+lang=EN-US>axis</span></span><span lang=EN-US> option to enable the secondary
+vertical axis scale (Y2) when <a href="#ts_cs">plotting time series</a> on the
+right side of the <a href="#graph">plot window</a>. In this case, some of the
+series in the <a href="#_Series_selected">Series selected</a> list box will be
+plotted along the primary vertical scale (Y), while others (see next) will use
+the secondary one (Y2). This option is ignored for <a href="#ts_cs">cross-section
 plots</a>. Y2 always use self-scaling (from series values) but the primary
 scale (Y) can still be <a href="#scaling">manually set</a>.</span></p>
 
@@ -2515,8 +2556,8 @@ to the total number of selected series.</span></p>
 <h1><a name="_Plot_format_options"></a><span lang=EN-US>Plot format options</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
-lang=EN-US><a href="#timeseries">Plot</a></span></span><span lang=EN-US> command
-has several alternatives to present the data in the time series in the <a
+lang=EN-US><a href="#timeseries">Plot</a></span></span><span lang=EN-US>
+command has several alternatives to present the data in the time series in the <a
 href="#_Series_selected">Series selected</a> list box.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -2797,15 +2838,15 @@ lang=EN-US> are checked and the command </span><span class=Cdigo><span
 lang=EN-US><a href="#timeseries">Plot</a></span></span><span lang=EN-US> is
 used, some specific options are required before a scatter plot can be
 generated. The scatter plot is built with points generated from data in the <a
-href="#_Series_selected">selected series</a> at a specific time step (case). LSD
-extracts from each time series just one value, at the specified time step. A 2D
-plot is composed by points where the X-axis values come from a set of series
-(the independent variables) and the Y-axis values are produced by the remaining
-series (the dependent variables). A 3D plot is made of the X and Y-axis values
-coming from a set of variables (the independent variables) and the Z-axis
-values, from the remaining series (the dependent variables) These values are
-re-arranged to generated 2 or more variables: one or two independent ones (for
-2D or 3D plots, respectively), and one or more dependent variables.</span></p>
+href="#_Series_selected">selected series</a> at a specific time step (case).
+LSD extracts from each time series just one value, at the specified time step.
+A 2D plot is composed by points where the X-axis values come from a set of
+series (the independent variables) and the Y-axis values are produced by the
+remaining series (the dependent variables). A 3D plot is made of the X and
+Y-axis values coming from a set of variables (the independent variables) and
+the Z-axis values, from the remaining series (the dependent variables) These
+values are re-arranged to generated 2 or more variables: one or two independent
+ones (for 2D or 3D plots, respectively), and one or more dependent variables.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
 border=0 width=225 height=288 src="image/cd3Dcs.png"></span></p>
@@ -2898,8 +2939,8 @@ provide the Y values to plot. The graph will therefore contain two sets of
 points defined by the 2000 points with coordinates { (X<sup>1</sup>(k), X<sup>2001</sup>(k)),
 (X<sup>2</sup>(k), X<sup>2002</sup>(k)), ..., (X<sup>2000</sup>(k), X<sup>4000</sup>(k))
 } for the first series and { (X<sup>1</sup>(k), X<sup>4001</sup>(k)), (X<sup>2</sup>(k),
-X<sup>4002</sup>(k)), ..., (X<sup>2000</sup>(k), X<sup>6000</sup>(k)) }&nbsp;for
-the second.</span></p>
+X<sup>4002</sup>(k)), ..., (X<sup>2000</sup>(k), X<sup>6000</sup>(k))
+}&nbsp;for the second.</span></p>
 
 <h2><a name=3dTime></a><a name="_3D_plot_options"></a><span lang=EN-US>3D plot
 options </span></h2>
@@ -2912,8 +2953,8 @@ entries in the <a href="#_Series_selected">Series selected</a> list box, the </s
 class=Cdigo><span lang=EN-US><a href="#timeseries">Plot</a></span></span><span
 lang=EN-US> command will offer the option to produce a 3-dimensional plot. By
 default, a 3D plot considers the first two series in the list box as the
-independent variables, plotted on the horizontal XY plane, and the subsequent series,
-as the dependent variables, plotted on the vertical Z axis. Alternative
+independent variables, plotted on the horizontal XY plane, and the subsequent
+series, as the dependent variables, plotted on the vertical Z axis. Alternative
 definitions for the data used for the XY plane are available.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
@@ -2981,8 +3022,8 @@ pressed.</span></p>
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=410 height=297 src="image/ex3dsurface.jpg"></span></p>
 
-<p class=MsoNormal><span lang=EN-US>To save Gnuplot plots to file the user click
-on the diskette icon in the Gnuplot toolbar. The plot is saved using the
+<p class=MsoNormal><span lang=EN-US>To save Gnuplot plots to file the user
+click on the diskette icon in the Gnuplot toolbar. The plot is saved using the
 enhanced metafile format (</span><span class=Cdigo><span lang=EN-US>.emf</span></span><span
 lang=EN-US>). If a different format is required, open the produced file in any
 graphical software and save the image in your preferred format.</span></p>
@@ -3091,12 +3132,11 @@ evaluation of the data values.</span></p>
 LSD draws the <a href="#graph">plot windows</a> in an interactive mode,
 allowing the user to interrupt the drawing process by clicking on the </span><span
 class=Cdigo><span lang=EN-US><a href="#graph">Stop</a></span></span><span
-lang=EN-US> button (or pressing the </span><span class=Cdigo><span lang=EN-US>S</span></span><span
-lang=EN-US> key). If unchecked, the plot is created in background, increasing
+lang=EN-US> button. If unchecked, the plot is created in background, increasing
 slightly the drawing speed but preventing the process to be stopped by the user
 (the </span><span class=Cdigo><span lang=EN-US>Stop</span></span><span
-lang=EN-US> button is grayed and remains inactive). Also, the user cannot
-access other LSD windows during the plot drawing. </span></p>
+lang=EN-US> button is unavailable). Also, if this option is not marked, the
+user cannot access other LSD windows during the plot drawing. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>Watch</span></span><span lang=EN-US> option is relevant only for
@@ -3136,7 +3176,7 @@ lang=EN-US>.</span></p>
 <p class=MsoNormal><span lang=EN-US>The field defines how many significant
 digits, or the precision, should be used to represent the values in the <a
 href="#graph">plot window</a> as well in data presented in the <a
-href="log.html">Log window</a>. The default is to use 4 significant digits. Any
+href="log.html">Log window</a>. The default is to use 3 significant digits. Any
 values between 1 and 8 may be selected. This setting does not affect the
 internal (saved) values for the time series, the data computations, or the
 values saved to file when using the </span><span class=Cdigo><span lang=EN-US><a
@@ -3240,7 +3280,7 @@ class=Cdigo><span lang=EN-US>Ctrl+P</span></span><span lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>Plot</span></span><span lang=EN-US> button creates a new <a
-href="#graph">plot window</a> presenting the data from the series listed in <a
+href="#graph">plot tab</a> presenting the data from the series listed in <a
 href="#_Series_selected">Series selected list box</a> according to the chosen <a
 href="#_Data_selection_options">data selection options</a> and <a
 href="#_Plot_format_options">plot format options</a>. Several plot type can be
@@ -3315,7 +3355,14 @@ lang=EN-US>), LSD requests the subdirectory and the file name to be used. The
 image file is saved in the encapsulated Postscript (</span><span class=Cdigo><span
 lang=EN-US>.eps</span></span><span lang=EN-US> extension). This is a high
 quality, vector-based format which is accepted by most text and image software
-packages. </span></p>
+packages, like Latex, OpenOffice etc. Microsoft Office blocked access to
+encapsulated Postscript files for security reasons, so file-format conversion
+is required in this case. Conversion to a supported vector-based format, like
+EMF or SVG, is recommended for quality reasons. Conversion to raster-based
+formats, like JPEG or PNG, should be avoided. When conversion is needed, the
+use of an external utility is necessary. For basic needs, there are many
+websites offering conversion from encapsulated Postscript to any format. For
+advanced applications, there are tools like Inkscape.</span></p>
 
 <h2><a name=save></a><a name="_Save_Data"></a><span lang=EN-US>Save Data </span></h2>
 
@@ -3360,11 +3407,11 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US>: mark to produce gzip compressed files (</span><span class=Cdigo><span
 lang=EN-US>.gz</span></span><span lang=EN-US> extension), potentially saving
 significant disk space. This is the default configuration. Text-format
-compressed files may require decompressing before usage with most software
-applications, so the user may prefer to directly produce uncompressed files
-unchecking this option. This is not recommended for LSD-format files, however,
-because they can be directly read in gzip format by LSD and R, without
-decompression, speeding up data reading.</span></p>
+compressed files may require decompressing before usage with most software applications,
+so the user may prefer to directly produce uncompressed files unchecking this
+option. This is not recommended for LSD-format files, however, because they can
+be directly read in gzip format by LSD and R, without decompression, speeding
+up data reading.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>When text-format files are selected, a
 second dialog box with additional options is presented:</span></p>
@@ -3456,8 +3503,8 @@ columns.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Column width</span></b></span><span
 lang=EN-US>: (only available if </span><span class=Cdigo><span lang=EN-US>Fixed
-width</span></span><span lang=EN-US> is checked) set the width of every data column
-in the file. Default width is 16 characters, the minimum is 10, and the
+width</span></span><span lang=EN-US> is checked) set the width of every data
+column in the file. Default width is 16 characters, the minimum is 10, and the
 maximum, 80. If elements are shorter than the specified width, labels are
 padded with spaces and numbers are filled with trailing zeros. If longer, they
 are truncated.</span></p>
@@ -3497,10 +3544,10 @@ the data in the Log window.</span></p>
 <p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>: </span><span
 class=Cdigo><span lang=EN-US>Ctrl+T</span></span><span lang=EN-US>.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>This command computes a few descriptive
-statistics on the time series in the <a href="#_Series_selected">Series
-selected list box</a> and present them in the <a href="log.html">Log window</a>.
-If </span><span class=Cdigo><span lang=EN-US><a href="#ts_cs">Time series</a></span></span><span
+<p class=MsoNormal><span lang=EN-US>This command computes a few descriptive statistics
+on the time series in the <a href="#_Series_selected">Series selected list box</a>
+and present them in the <a href="log.html">Log window</a>. If </span><span
+class=Cdigo><span lang=EN-US><a href="#ts_cs">Time series</a></span></span><span
 lang=EN-US> is checked, the time steps to be considered in the computation are
 defined by the <a href="#xscaling">cases selection option</a>. Alternatively,
 when </span><span class=Cdigo><span lang=EN-US><a href="#ts_cs">Cross-section</a></span></span><span
@@ -3526,9 +3573,9 @@ lang=EN-US>.</span></p>
 in a <a href="#graph">plot window</a>, from the series in the <a
 href="#_Series_selected">Series selected list box</a>. If </span><span
 class=Cdigo><span lang=EN-US><a href="#ts_cs">Time series</a></span></span><span
-lang=EN-US> is checked, a single time series should be included in the
-selection list and the time steps to be considered in the histogram are defined
-by the <a href="#xscaling">cases selection option</a>. Conversely, when </span><span
+lang=EN-US> is checked, a single time series should be included in the selection
+list and the time steps to be considered in the histogram are defined by the <a
+href="#xscaling">cases selection option</a>. Conversely, when </span><span
 class=Cdigo><span lang=EN-US><a href="#ts_cs">Cross-section</a></span></span><span
 lang=EN-US> is selected, the histogram is calculated across two or more of the
 selected series using a single time step chosen by the user as a cross-section.
@@ -3606,16 +3653,18 @@ value).</span></p>
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=578 height=458 src="image/lattice_plot.png"></span></p>
 
-<p class=MsoNormal><span lang=EN-US>The example above presents a 20×10 lattice
-(20 rows and 10 columns) sample. The quick color change in the upper part of
-the plot indicates an almost random pattern of change in the data values.
-However, the lower part of the lattice suggests a reduction in the frequency of
-the data values change (notice the repeated color cells).</span></p>
+<p class=MsoNormal><span lang=EN-US>The example above presents a 25×20 lattice
+(25 rows and 20 columns) sample. The quick color change all over the plot
+indicates an almost random pattern of change in the data values. Lattice tab or
+window has two buttons (</span><span class=Cdigo><span lang=EN-US>Save</span></span><span
+lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>Detach</span></span><span
+lang=EN-US>/</span><span class=Cdigo><span lang=EN-US>Attach</span></span><span
+lang=EN-US>), common to <a href="#graph">all plots</a>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If </span><span class=Cdigo><span
-lang=EN-US><a href="#ts_cs">Time series</a></span></span><span lang=EN-US> is
-checked, a single time series should be included in the selection list and the
-time steps to be included in the lattice matrix are defined by the <a
+lang=EN-US><a href="#ts_cs">Time series</a></span></span><span lang=EN-US> is checked,
+a single time series should be included in the selection list and the time
+steps to be included in the lattice matrix are defined by the <a
 href="#xscaling">cases selection option</a>. The time series values are split
 in the selected </span><span class=Cdigo><span lang=EN-US>Number of data
 columns</span></span><span lang=EN-US> (the m dimension, see below) and used to
@@ -3718,9 +3767,9 @@ buttons, are preserved after the Analysis of Results session is terminated
 
 <p class=MsoNormal><span lang=EN-US>The Gnuplot submenu deals with commands
 involving the Gnuplot package. The submenu option </span><span class=Cdigo><span
-lang=EN-US><a href="#_Gnuplot&gt;Open">Open</a></span></span><span lang=EN-US>
-launches the Gnuplot interactive window (usually not required for basic usage).
-The submenu entry </span><span class=Cdigo><span lang=EN-US><a
+lang=EN-US><a href="#_Gnuplot&gt;Open">Open</a></span></span><span lang=EN-US> launches
+the Gnuplot interactive window (usually not required for basic usage). The
+submenu entry </span><span class=Cdigo><span lang=EN-US><a
 href="#_Gnuplot&gt;Options">Options</a></span></span><span lang=EN-US> allows
 changing the specific settings used by LSD when plotting with Gnuplot. See
 below the details on the two entries.</span></p>

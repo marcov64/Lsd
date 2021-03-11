@@ -119,7 +119,6 @@ double *datum, compvalue;
 int h, i, j, k, l, m, p, r;
 vector < string > cur_var;
 vector < vector < string > > var_names;
-store *app_store;
 FILE *f;
 
 cover_browser( "Analysis of Results...", "Please exit Analysis of Results\nbefore using the LSD Browser.", false );
@@ -969,9 +968,9 @@ while ( true )
 			cmd( "ttk::frame .da.file.opt.pos -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 			cmd( "ttk::radiobutton .da.file.opt.pos.p1 -text \"Landscape\" -variable res -value 0" );
 			cmd( "ttk::radiobutton .da.file.opt.pos.p2 -text \"Portrait\" -variable res -value 1" );
-			cmd( "pack .da.file.opt.pos.p1 .da.file.opt.pos.p2 -side left -ipadx 15" );
+			cmd( "pack .da.file.opt.pos.p1 .da.file.opt.pos.p2 -side left -ipadx 5" );
 			
-			cmd( "pack .da.file.opt.col .da.file.opt.pos -fill x  -pady 5" );
+			cmd( "pack .da.file.opt.col .da.file.opt.pos -pady 5" );
 
 			cmd( "ttk::frame .da.file.dim" );
 			cmd( "ttk::label .da.file.dim.l1 -text \"Dimension\"" );
@@ -5488,7 +5487,7 @@ void plot_cs_xy( int *choice )
 
 	cmd( "set numv 1" );
 	cmd( "ttk::frame .da.s.v" );
-	cmd( "ttk::label .da.s.v.l -text \Dependent variables\"" );
+	cmd( "ttk::label .da.s.v.l -text \"Dependent variables\"" );
 	cmd( "ttk::spinbox .da.s.v.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set numv %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numv; return 0 } } -invalidcommand { bell } -justify center", nv, nv );
 	cmd( ".da.s.v.e insert 0 $numv" ); 
 	cmd( "ttk::label .da.s.v.n -text \"Block length: $blength\"" );
@@ -9352,7 +9351,6 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
  *******************************************************/
 void add_da_plot_tab( const char *w, int id_plot )
 {
-	char *tt;
 	int n;
 		
 	// create notebook, if not exists

@@ -17,6 +17,31 @@ CONFGEN.CPP
 Execute the lsd_confgen command line utility.
 
 Generates new configurations from a base one.
+
+The input CSV file defines the elements to change (parameters 
+or variables' initial conditions) in the rows and the different 
+configurations in the columns. 
+
+First column contain the element names and optional lag number 
+for variables. Lags, if specified, must be separated by spaces 
+from variable name and be always negative integers (-1:first lag, 
+-2:second,...). If a lag is not specified, it is assumed as 
+the first lag (-1). Subsequent columns contain the values to be 
+used for elements in each configuration file to be generated 
+(1 column = 1 configuration).
+
+A first header (column names) row is compulsory and must contain 
+the same number of columns as the other rows but its values are 
+not used.
+
+Example of a CSV file changing the value of one parameter (K), 
+two lagged values of a variable (A), and generating two
+configurations:
+
+Elem, Cfg1, Cfg2
+K   , 1   , 2
+A   , 3   , 4
+A -2, 5   , 6
 *************************************************************/
 
 #include "decl.h"
