@@ -206,7 +206,7 @@ search_var( caller, label )
 that returns a variable whose name is label and then calls the method
 cal() for that variable (see variable::cal), that returns the desired value.
 
-- int init( object *_up, char *_label );
+- void init( object *_up, char *_label, bool _to_compute );
 Initialization for an object. Assigns _up to up and creates the label
 
 - void update( bool recurse ) ;
@@ -228,9 +228,8 @@ Add a new object type in the model as descendant of current one
  and initialize its name. It makes num copies
 of it. This is NOT to be used to make more instances of existing objects.
 
-- void insert_parent_obj( char *lab );
-Creates a new type of object that has the current one as descendant
-and occupies the previous position of this in the chain of its (former) parent
+- void move_obj( char *lab );
+Move the current object as descendant to a new parent
 
 - object *search( char *lab );
 Explores one branch of the model to find for an object whose label is lab.
@@ -339,13 +338,13 @@ bridge::~bridge( void )
 INIT
 Set the basics for a newly created object
 ****************************************************/
-int object::init( object *_up, char const *lab )
+void object::init( object *_up, char const *lab, bool _to_compute )
 {
 	up = _up;
 	v = NULL;
 	v_map.clear( );
 	next = NULL;
-	to_compute = true;
+	to_compute = _to_compute;
 	label = new char[ strlen( lab ) + 1 ];
 	strcpy( label, lab );
 	b = NULL;
@@ -358,8 +357,6 @@ int object::init( object *_up, char const *lab )
 	lstCntUpd = 0; 				// counter never updated
 	del_flag = NULL;			// address of flag to signal deletion
 	deleting = false;			// not being deleted
-
-	return 0;
 }
 
 
@@ -486,8 +483,9 @@ object *skip_next_obj( object *tr )
 
 /****************************************************
 HYPER_NEXT
-Return the next Object in the model with the label lab. The Object is searched
-in the whole model, including different branches
+Return the next Object in the model with the label 
+lab. The Object is searched in the whole model, 
+including different branches
 ****************************************************/
 object *object::hyper_next( char const *lab )
 {
@@ -510,6 +508,23 @@ object *object::hyper_next( char const *lab )
 object *object::hyper_next( void )
 {
 	return hyper_next( label );
+}
+
+
+/****************************************************
+HYPER_COUNT
+Return the total number of Object instances in the 
+model with the label lab. The Object is searched
+in the whole model, including different branches
+****************************************************/
+int hyper_count( char const *lab )
+{
+	int n;
+	object *cur;
+	
+	for ( n = 0, cur = root->search( lab ); cur != NULL; ++n, cur = cur->hyper_next( ) );
+		
+	return n;
 }
 
 
@@ -1313,112 +1328,137 @@ void object::add_obj( char const *lab, int num, int propagate )
 
 
 /****************************************************
-INSERT_PARENT_OBJ
-Insert a new parent in the model structure. The this object is placed below
-the new (otherwise empty) Object
+MOVE_OBJ
+Move object in the model structure. The lab object 
+is placed below the provided dest object
 ****************************************************/
-void object::insert_parent_obj( char const *lab )
+void move_obj( char const *lab, char const *dest )
 {
-	bridge *cb, *cb1, *newb;
-	object *cur, *cur1, *newo;
-
-	if ( up != NULL )
+	bridge *cb, *cb1, *mb, *nb;
+	object *cur, *cur1, *d, *no, *o, *s;
+	variable *cv;
+	
+	o = root->search( lab );		// pick first model instances
+	d = root->search( dest );
+	
+	if ( o == NULL || d == NULL || o->search( dest ) != NULL )
 	{
-		cur1 = up->hyper_next( up->label );
-
-		if ( cur1 != NULL )
-		{	// implement the change to all (old) parents in the model
-			cur = cur1->search( label );
-			cur->insert_parent_obj( lab );
+		sprintf( msg, "cannot move object '%s'", lab );
+		error_hard( msg, "missing/invalid source or destination object",
+					"choose valid object names\nand non-nested destination",
+					true );
+		return;
+	}
+	
+	// move bridges from source parent instances to destination parent instances
+	s = o->up;
+	while ( s != NULL || d != NULL )
+	{
+		if ( s != NULL )
+		{
+			// find bridge to object being copied in source parent
+			for ( cb1 = NULL, cb = s->b; cb != NULL && strcmp( cb->blabel, lab ) != 0; cb1 = cb, cb = cb->next );
+			
+			// remove from the source parent's bridge linked list
+			if ( cb1 == NULL )	// head of list?
+				s->b = cb->next;
+			else
+				cb1->next = cb->next;
+			
+			mb = cb;
+			mb->next = NULL;	// moved object bridge enters at the end of the new parent list
+				
+			s->b_map.erase( lab );	// update speedup maps
+			s = s->hyper_next( );	// next source parent
 		}
-	}
+		else	// handle the case last object instance has to be cloned to fill
+		{		// additional instances of destination parent
+			// clone last object bridge to insert it on unmatched destination parents
+			nb = new bridge( lab );
+			if ( nb == NULL )
+			{
+				sprintf( msg, "cannot allocate memory for moving object '%s'", lab );
+				error_hard( msg, "out of memory",
+							"if there is memory available and the error persists,\nplease contact developers",
+							true );
+				return;
+			}
+			
+			// clone object instances and add them to the cloned bridge
+			for ( cur = mb->head, cur1 = NULL; cur != NULL; cur = cur->next )
+			{
+				no = new object;
+				
+				if ( no == NULL )
+				{
+					sprintf( msg, "cannot allocate memory for moving instance(s) of object '%s'", lab );
+					error_hard( msg, "out of memory",
+								"if there is memory available and the error persists,\nplease contact developers",
+								true );
+					return;
+				}
 
-	newo = new object;
-	if ( newo == NULL )
-	{
-		sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", lab );
-		error_hard( msg, "out of memory",
-					"if there is memory available and the error persists,\nplease contact developers",
-					true );
-		return;
-	}
+				// update linked list of object instances in bridge
+				if ( cur1 == NULL )
+					nb->head = no;
+				else
+					cur1->next = no;
 
-	newo->init( up, lab );
+				cur1 = no;
+				
+				// clone object instance, variables and descending objects
+				cur1->init( d, lab, cur->to_compute );
+					
+				for ( cv = cur->v; cv != NULL; cv = cv->next )
+					cur1->add_var_from_example( cv );
 
-	newb = new bridge( lab );
-	if ( newb == NULL )
-	{
-		sprintf( msg, "cannot allocate memory for adding object '%s'", lab );
-		error_hard( msg, "out of memory",
-					"if there is memory available and the error persists,\nplease contact developers",
-					true );
-		return;
-	}
-
-	newb->head = newo;
-
-	if ( up == NULL )			// root?
-	{	// insert new parent below root
-		newo->up = this;
-		newo->b = b;
-		newo->b_map = b_map;	// new object will have the bridges of this object
-		newo->v = v;
-		b = newb;
-		v = NULL;
-
-		// adjust old sons of root to sons of the new object
-		for ( cb = newo->b; cb != NULL; cb = cb->next )
-			for ( cur = cb->head; cur != NULL; cur = cur->next )
-				cur->up = newo;
-
-		// clear bridge of root and add single added new object
-		b_map.clear( );
-		b_map.insert( b_pairT ( lab, newb ) );
-	}
-	else
-	{	// insert new parent over this object
-
-		// remove this object's bridge from parent's map
-		up->b_map.erase( label );
-		up->b_map.insert( b_pairT ( lab, newb ) );
-
-		// find the predecessor of current object's bridge, if any
-		for ( cb1 = NULL, cb = up->b; strcmp( cb->blabel, label ); cb1 = cb, cb = cb->next );
-
-		if ( cb1 == NULL )
-			up->b = newb;		// the current replaced object is the first bridge
-		else
-			cb1->next = newb;	// the replaced object is in between, cb1 is the preceding bridge
-
-		newb->next = cb->next;	// new bridge continues chain of siblings
-		cb->next = NULL; 		// replaced object becomes single son/bridge
-
-		newo->b = cb;			// new object acquire sons/bridges of replaced
-		newo->b_map.insert( b_pairT ( label, cb ) );
-
-		// adjust old sons of replaced to sons of the new object
-		for ( cur = cb->head; cur != NULL; cur = cur->next )
-			cur->up = newo;
+				copy_descendant( cur, cur1 );
+			}
+			
+			mb = nb;	// bridge clone to move
+		}
+		
+		if ( d != NULL )
+		{
+			// find tail of bridge list in destination parent
+			for ( cb1 = NULL, cb = d->b; cb != NULL; cb1 = cb, cb = cb->next );
+			
+			// add moved object to the end of destination's bridge list
+			if ( cb1 == NULL )	// head of list?
+				d->b = mb;
+			else
+				cb1->next = mb;
+			
+			// adjust instances of moved object to the new parent
+			for ( cur = mb->head; cur != NULL; cur = cur->next )
+				cur->up = d;
+				
+			d->b_map.insert( b_pairT ( lab, mb ) );	// update speedup maps
+			d = d->hyper_next( );					// next destination parent
+		}
+		else	// handle the case last object instances in source parent must be
+				// deleted because there are no more instances in destination
+			delete mb;		// delete unmatched object instances and the bridge
 	}
 }
-
-
+	
+	
 /****************************************************
 REPLICATE
 ****************************************************/
-void object::replicate( int num, int propagate )
+void object::replicate( int num, bool propagate )
 {
 	object *cur, *cur1;
 	variable *cv;
 	int i, usl;
 
-	if ( propagate == 1 )
+	if ( propagate )
 		cur = hyper_next( label );
 	else
 		cur = NULL;
 
 	if ( cur != NULL )
-		cur->replicate( num, 1 );
+		cur->replicate( num, true );
 
 	skip_next_obj( this, &usl );
 	for ( cur = this, i = 1; i < usl; cur = cur->next, ++i );
@@ -1436,8 +1476,7 @@ void object::replicate( int num, int propagate )
 			return;
 		}
 
-		cur->next->init( up, label );
-		cur->next->to_compute = to_compute;
+		cur->next->init( up, label, to_compute );
 		cur->next->next = cur1;
 		cur->to_compute = to_compute;
 
@@ -1495,8 +1534,7 @@ void copy_descendant( object *from, object *to )
 		return;
 	}
 
-	to->b->head->init( to, cur->label );
-	to->b->head->to_compute = cur->to_compute;
+	to->b->head->init( to, cur->label, cur->to_compute );
 
 	// copy variables of head object
 	for ( cv = cur->v; cv != NULL; cv = cv->next )
@@ -1536,8 +1574,7 @@ void copy_descendant( object *from, object *to )
 			return;
 		}
 
-		cb->head->init( to, cur->label );
-		cb->head->to_compute = cur->to_compute;
+		cb->head->init( to, cur->label, cur->to_compute );
 
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			cb->head->add_var_from_example( cv );
@@ -1683,8 +1720,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 		}
 
 		// insert the descending objects in the newly created objects
-		cb1 = NULL;
-		for ( cb = ex->b; cb != NULL; cb = cb->next )
+		for ( cb1 = NULL, cb = ex->b; cb != NULL; cb = cb->next )
 		{
 			if ( cb1 == NULL )
 				cb1 = cur->b = new bridge( cb->blabel );

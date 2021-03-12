@@ -656,7 +656,7 @@ double init_lattice( double pixW = 0, double pixH = 0, double nrow = 100, double
 					 char const lrow[ ] = "y", char const lcol[ ] = "x", char const lvar[ ] = "", 
 					 object *p = NULL, int init_color = -0xffffff );
 double poidev( double xm, long *idum_loc = NULL );
-int deb( object *r, object *c, char const *lab, double *res, bool interact = false );
+int deb( object *r, object *c, char const *lab, double *res, bool interact = false, const char *hl_var = "" );
 object *go_brother( object *c );
 void cmd( const char *cm, ... );
 #define FUNCTION( X ) \

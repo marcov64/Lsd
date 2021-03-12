@@ -217,7 +217,7 @@ bool object::load_param( char *file_name, int repl, FILE *f )
 		if ( fscanf( f, "\t%d", &num ) != 1 )
 			return false;
 		cur->to_compute = to_compute;
-		cur->replicate( num, 0 );
+		cur->replicate( num );
 		for ( ; go_brother( cur ) != NULL; cur = cur->next );
 	}
 

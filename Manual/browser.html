@@ -401,8 +401,8 @@ class=Cdigo><span lang=EN-US>_</span></span><span lang=EN-US>).</span></p>
 <p class=MsoNormal><span lang=EN-US>The Objects in the list can also be
 right-clicked to open the associated context menu. This menu offers shortcuts
 to the most common commands addressing the chosen Object. All the options
-available in the context menu are shortcuts to the most used options in the main
-menu (see <a href="#_Editing_Objects_1">below</a>).</span></p>
+available in the context menu are shortcuts to the most used options in the
+main menu (see <a href="#_Editing_Objects_1">below</a>).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Additionally to the names, the LSD Browser
 also shows the number of instances of each Object type as in </span><span
@@ -579,7 +579,7 @@ border=0 width=358 height=290 src="image/object_options.png"></span></p>
 <p class=MsoNormal><span lang=EN-US>The top part of the Change Object window
 indicates the name of the <a href="LSD_faqs.html#object">Object</a>. </span></p>
 
-<p class=MsoNormal><span lang=EN-US>Next, there are three action buttons (and
+<p class=MsoNormal><span lang=EN-US>Next, there are four action buttons (and
 the respective shortcut keys):</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -600,10 +600,30 @@ of this Object (see details <a href="menudata_objn.html">here</a>).</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Move</span></b></span><span
+lang=EN-US>: (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+M</span></span><span
+lang=EN-US>) Move the Object and its descendants to a different parent Object.
+The destination parent Object cannot be one of the descendants of this Object.
+When the total number of instances of the destination parent (all over the
+model) is smaller than the number of instances of the source parent,
+initialization data from the excess instances of this Object are lost.
+Conversely, if the number of instances of the destination parent is larger than
+the source parent, the missing Object instances will be cloned from the last
+available instance. In these case, please check the <a href="menudata_init.html">initial
+values</a> of the elements in the moved Option after this operation to make
+sure the desired values are still in place.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Delete</span></b></span><span
 lang=EN-US>: (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+D</span></span><span
 lang=EN-US>) After confirmation, deletes the object (all instances) from the <a
 href="LSD_faqs.html#modelsetting">model configuration</a>.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>These four actions can also be performed
+using the (right-click) context menu of the target Object on the Descending
+Objects list box and on the LSD Model Structure Window.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Below, there is one option: </span></p>
 
@@ -665,7 +685,7 @@ border=0 width=356 height=485 src="image/variable_options.png"></span></p>
 name of the Variable or Parameter and the <a href="LSD_faqs.html#object">Object
 type</a> where it is contained. </span></p>
 
-<p class=MsoNormal><span lang=EN-US>Next, there are three action buttons (and
+<p class=MsoNormal><span lang=EN-US>Next, there are four action buttons (and
 the respective shortcut keys):</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -753,11 +773,11 @@ Settings</a></span></span><span lang=EN-US>.</span></p>
 lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Parallel</span></b></span><span
 lang=EN-US>: (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+P</span></span><span
-lang=EN-US>) (Variables only) Check to perform parallel processing when computing
-the <a href="LSD_faqs.html#equation">Equation</a> for multiple instances of
-this Variable in brother <a href="LSD_faqs.html#object">Object</a> copies.
-Beware that not all multi-instanced Variables can or should be processed in
-parallel, to avoid deadlocks because of the particular <a
+lang=EN-US>) (Variables only) Check to perform parallel processing when
+computing the <a href="LSD_faqs.html#equation">Equation</a> for multiple
+instances of this Variable in brother <a href="LSD_faqs.html#object">Object</a>
+copies. Beware that not all multi-instanced Variables can or should be
+processed in parallel, to avoid deadlocks because of the particular <a
 href="LSD_faqs.html#modelstructure">model structure</a> and to save the OS
 overhead of creating new processing threads for computationally-light
 Equations. To identify the Variables which may provide parallelization gains,
@@ -765,12 +785,12 @@ please check the </span><span class=Cdigo><span lang=EN-US>Show aggregated
 profiling times</span></span><span lang=EN-US> option in </span><span
 class=Cdigo><span lang=EN-US><a href="menurun.html#simsetting">Run&gt;Simulation
 Settings</a></span></span><span lang=EN-US>. It is recommended to enable
-parallel processing of one Variable at a time, starting with the computationally-heavy
-ones, to make sure that the variable can be (logically) computed in parallel.
-If, because of the model structure, changing one Variable instance affects the
-computation of another instance of the same Variable, directly or indirectly,
-such Variable calculation cannot be parallelized and will throw a deadlock
-error. <br>
+parallel processing of one Variable at a time, starting with the
+computationally-heavy ones, to make sure that the variable can be (logically)
+computed in parallel. If, because of the model structure, changing one Variable
+instance affects the computation of another instance of the same Variable,
+directly or indirectly, such Variable calculation cannot be parallelized and
+will throw a deadlock error. <br>
 WARNING: only Variables that are computationally intensive should have this
 option enabled or this may end up slowing down the <a
 href="LSD_faqs.html#simulationrun">simulation run</a>.</span></p>
@@ -819,8 +839,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'>:</span></span><span
 lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+A</span></span><span
 lang=EN-US>) Provide (or add) an automatic description text for the element,
-indication in which Variable Equations it is used. If the element is a Variable,
-LSD also scans the <a href="LSD_faqs.html#equationfile">equation file</a>
+indication in which Variable Equations it is used. If the element is a
+Variable, LSD also scans the <a href="LSD_faqs.html#equationfile">equation file</a>
 looking for a comment section in the beginning of the respective Equation. If
 found, this section is copied in the </span><span class=Cdigo><span lang=EN-US>Description</span></span><span
 lang=EN-US> box.</span></p>
@@ -956,11 +976,11 @@ updating</span></h3>
 
 <p class=MsoNormal><span lang=EN-US>By default, every <a
 href="LSD_faqs.html#variable">Variable</a> in any <a href="LSD_faqs.html#object">Object
-instance</a> in the <a href="LSD_faqs.html#modelstructure">model structure</a>
-is recomputed every time step in the simulation. This is the desired behavior
-in most cases. However, some Variables may demand the recalculation process
-takes place at longer periods or only after a certain number of time steps from
-the beginning of the simulation or from the time the Object containing it was
+instance</a> in the <a href="LSD_faqs.html#modelstructure">model structure</a> is
+recomputed every time step in the simulation. This is the desired behavior in
+most cases. However, some Variables may demand the recalculation process takes
+place at longer periods or only after a certain number of time steps from the
+beginning of the simulation or from the time the Object containing it was
 created.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Clicking on the Updating button opens the
@@ -1018,8 +1038,8 @@ are marked with the “</span><span class=Cdigo><span lang=EN-US>§</span></span><s
 lang=EN-US>” symbol in the <a href="#_Variables_and_Parameters">Variables and
 Parameters list box</a>. The list containing all Variables for which a
 non-default updating scheme is set can be obtained using the menu command </span><span
-class=Cdigo><span lang=EN-US><a href="menurun.html#showprop">Run&gt;Show
-Elements to&gt;Special Updating</a></span></span><span lang=EN-US>.</span></p>
+class=Cdigo><span lang=EN-US><a href="menurun.html#showprop">Run&gt;Show Elements
+to&gt;Special Updating</a></span></span><span lang=EN-US>.</span></p>
 
 <p class=MsoNormal><i><span lang=EN-US>Warning</span></i><span lang=EN-US>:
 using special updating configurations is only supported in LSD version 7.1.1
@@ -1040,7 +1060,7 @@ lang=EN-US> in the (right-click) context menu of the target <a
 href="LSD_faqs.html#variable">Variable</a> or <a href="LSD_faqs.html#parameter">Parameter</a>
 to move it to a different <a href="LSD_faqs.html#object">Object</a>. After
 moving the element to the new Object, the element is removed from the current
-Object. All initialization data and options associated with the element is
+Object. All initialization data and options associated with the element are
 moved together. </span></p>
 
 <p class=MsoNormal><i><span lang=EN-US>WARNING: </span></i><span lang=EN-US>changing

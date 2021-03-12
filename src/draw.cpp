@@ -95,11 +95,11 @@ void show_graph( object *t )
 
 	cmd( "ttk::menu .str.f.c.v -tearoff 0" );
 	cmd( ".str.f.c.v add command -label \"Make Current\" -command { set choice 4 }" );
-	cmd( ".str.f.c.v add command -label \"Insert Parent\" -command { set choice 32 }" );
 	cmd( ".str.f.c.v add separator" );
 	cmd( ".str.f.c.v add command -label Change -command { set choice 6 }" );
 	cmd( ".str.f.c.v add command -label Rename -command { set choice 83 }" );
 	cmd( ".str.f.c.v add command -label Number -command { set choice 33 }" );
+	cmd( ".str.f.c.v add command -label Move -command { set choice 32 }" );
 	cmd( ".str.f.c.v add command -label Delete -command { set choice 74 }" );
 	cmd( ".str.f.c.v add separator" );
 	cmd( ".str.f.c.v add cascade -label Add -menu .str.f.c.v.a" );

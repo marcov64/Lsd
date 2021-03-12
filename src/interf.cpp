@@ -79,7 +79,7 @@ int badChoices[ ] = { 1, 2, 3, 6, 7, 12, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36,
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
-int redoChoices[ ] = { 33, 55, 74, 75, 76, 77, 78, 79, 80, 83, 96 };
+int redoChoices[ ] = { 32, 33, 55, 74, 75, 76, 77, 78, 79, 80, 83, 96 };
 #define NUM_REDO_CHOICES ( sizeof( redoChoices ) / sizeof( redoChoices[ 0 ] ) )
 
 // comparison function for bsearch and qsort
@@ -556,14 +556,14 @@ int browse( object *r, int *choice )
 		cmd( "ttk::menu .l.s.c.son_name.v -tearoff 0" );
 		cmd( ".l.s.c.son_name.v add command -label \"Select\" -command { set choice 4 }" );	// entryconfig 0
 		cmd( ".l.s.c.son_name.v add command -label \"Parent\" -command { set choice 5 }" );	// entryconfig 1
-		cmd( ".l.s.c.son_name.v add command -label \"Insert Parent\" -command { set choice 32 }" );	// entryconfig 2
-		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 3
-		cmd( ".l.s.c.son_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 60 } }" );	// entryconfig 4
-		cmd( ".l.s.c.son_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus < [ expr [ .l.s.c.son_name size ] - 1 ] } { incr itemfocus }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 61 } }" );	// entryconfig 5
-		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 6
-		cmd( ".l.s.c.son_name.v add command -label Change -command { set choice 6 }" );	// entryconfig 7
-		cmd( ".l.s.c.son_name.v add command -label Rename -command { set choice 83 }" );	// entryconfig 8
-		cmd( ".l.s.c.son_name.v add command -label Number -command { set choice 33 }" );	// entryconfig 9
+		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 2
+		cmd( ".l.s.c.son_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 60 } }" );	// entryconfig 3
+		cmd( ".l.s.c.son_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus < [ expr [ .l.s.c.son_name size ] - 1 ] } { incr itemfocus }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 61 } }" );	// entryconfig 4
+		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 5
+		cmd( ".l.s.c.son_name.v add command -label Change -command { set choice 6 }" );	// entryconfig 6
+		cmd( ".l.s.c.son_name.v add command -label Rename -command { set choice 83 }" );	// entryconfig 7
+		cmd( ".l.s.c.son_name.v add command -label Number -command { set choice 33 }" );	// entryconfig 8
+		cmd( ".l.s.c.son_name.v add command -label Move -command { set choice 32 }" );	// entryconfig 9
 		cmd( ".l.s.c.son_name.v add command -label Delete -command { set choice 74 }" );	// entryconfig 10
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 11
 		cmd( ".l.s.c.son_name.v add cascade -label Add -menu .l.s.c.son_name.v.a" );	// entryconfig 12=14
@@ -625,14 +625,14 @@ int browse( object *r, int *choice )
 						set useCurrObj no; \
 						set nocomp [ expr ! [ get_obj_conf $vname comp ] ]; \
 						if { $itemfocus == 0 } { \
+							.l.s.c.son_name.v entryconfig 3 -state disabled \
+						} { \
+							.l.s.c.son_name.v entryconfig 3 -state normal \
+						}; \
+						if { $itemfocus == [ expr [ .l.s.c.son_name size ] - 1 ] } { \
 							.l.s.c.son_name.v entryconfig 4 -state disabled \
 						} { \
 							.l.s.c.son_name.v entryconfig 4 -state normal \
-						}; \
-						if { $itemfocus == [ expr [ .l.s.c.son_name size ] - 1 ] } { \
-							.l.s.c.son_name.v entryconfig 5 -state disabled \
-						} { \
-							.l.s.c.son_name.v entryconfig 5 -state normal \
 						}; \
 						tk_popup .l.s.c.son_name.v %%X %%Y \
 					} \
@@ -839,8 +839,7 @@ int browse( object *r, int *choice )
 			cmd( "$w add command -label \"Add Variable...\" -underline 4 -accelerator Ctrl+V -command { set param 0; set choice 2 }" );
 			cmd( "$w add command -label \"Add Parameter...\" -underline 4 -accelerator Ctrl+P -command { set param 1; set choice 2 }" );
 			cmd( "$w add command -label \"Add Function...\" -underline 5 -accelerator Ctrl+N -command { set param 2; set choice 2 }" );
-			cmd( "$w add command -label \"Add Descending Object...\" -underline 4 -accelerator Ctrl+D -command { set choice 3 }" );
-			cmd( "$w add command -label \"Add Parent Object...\" -underline 5 -command { set choice 32 }" );
+			cmd( "$w add command -label \"Add Object...\" -underline 4 -accelerator Ctrl+D -command { set choice 3 }" );
 			
 			cmd( "$w add separator" );
 			
@@ -1584,7 +1583,7 @@ case 3:
 break;
 
 
-// Insert a parent Object just above the current or pointed object (defined in tcl $vname)
+// move object (defined in tcl $vname)
 case 32:
 
 	// check if current or pointed object and save current if needed
@@ -1605,110 +1604,83 @@ case 32:
 	else
 		cur2 = NULL;
 
-	// read the lists of variables/functions, parameters and objects in model program 
-	// from disk, if needed, or just update the missing elements lists
-	cmd( "if { [ llength $missObj ] == 0 } { read_elem_file %s } { upd_miss_elem }", exec_path );
-
-	Tcl_LinkVar( inter, "done", ( char * ) &done, TCL_LINK_INT );
-
 	if ( r->up == NULL )
 	{
-		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -title Error -icon error -message \"Cannot insert a parent of Root\" -detail \"Press 'OK' if you want the new object to be a descendant of Root and contain all current descendants from Root.\" ]; if [ string equal -nocase $answer ok ] { set done 1 } { set done 2 }" );
-		if ( done == 2 )
-			goto here_endparent;
-		done = 0;
-	}
+		cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Cannot move 'Root' object\" -detail \"Consider, if appropriate, moving its descendants, one at a time.\"" );
+		goto endmove;
+	} 
+		
+	cmd( "set TT .objs" );
+	cmd( "newtop $TT \"Move\" { set choice 2 }" );
 
-	cmd( "set lab \"\"" );
+	cmd( "ttk::frame $TT.l" );
+	cmd( "ttk::label $TT.l.l -text \"Object:\"" );
+	cmd( "ttk::label $TT.l.n -style hl.TLabel -text \"%s\"", lab_old );
+	cmd( "pack $TT.l.l $TT.l.n -side left -padx 2" );
 
-	cmd( "set T .inspar" );
-	cmd( "newtop $T \"Add Parent\" { set done 2 }" );
+	cmd( "ttk::frame $TT.v" );
+	cmd( "ttk::label $TT.v.l -text \"Move to\"" );
 
-	cmd( "ttk::frame $T.l" );
-	cmd( "ttk::label $T.l.l1 -text \"New parent to:\"" );
-	cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
-	cmd( "ttk::label $T.l.l3 -text \"descending from:\"" );
-	cmd( "ttk::label $T.l.l4 -text \"%s\" -style hl.TLabel", r->up == NULL ? "(none)" : r->up->label );
-	cmd( "pack $T.l.l1 $T.l.l2 $T.l.l3 $T.l.l4 -side left -padx 2" );
+	cmd( "ttk::frame $TT.v.t" );
+	cmd( "ttk::scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );
+	cmd( "ttk::listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\" -dark $darkTheme" );
+	cmd( "pack $TT.v.t.lb $TT.v.t.v_scroll -side left -fill y" );
+	cmd( "mouse_wheel $TT.v.t.lb" );
+	insert_object( "$TT.v.t.lb", root, false, r );
+	cmd( "pack $TT.v.l $TT.v.t" );
 
-	cmd( "ttk::frame $T.f" );
-	cmd( "ttk::label $T.f.lab_ent -text \"Object name\"" );
-	cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missObj" );
-	cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
-	cmd( "bind $T.f.ent_var <KeyPress-Return> {focus $T.b.ok}" );
+	cmd( "pack $TT.l $TT.v -padx 5 -pady 5" );
 
-	cmd( "set w $T.d" );
-	cmd( "ttk::frame $w" );
-	cmd( "ttk::label $w.lab -text \"Description\"" );
-	cmd( "ttk::frame $w.f" );
-	cmd( "ttk::scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-	cmd( "ttk::text $w.f.text -wrap word -width 60 -height 6 -yscrollcommand \"$w.f.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
-	cmd( "pack $w.f.yscroll -side right -fill y" );
-	cmd( "pack $w.f.text -expand yes -fill both" );
-	cmd( "mouse_wheel $w.f.text" );
-	cmd( "pack $w.lab $w.f" );
-
-	cmd( "pack $T.l $T.f $w -pady 5" );
-	cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#InsertAParent } { set done 2 }" );
-
-	cmd( "showtop $T topleftW" );
-	cmd( "focus $T.f.ent_var; $T.f.ent_var selection range 0 end" );
-
-	here_newparent:
+	cmd( "okcancel $TT b { set choice 1 } { set choice 2 }" );	// insert ok button
 	
-	while ( done == 0 )
+	cmd( "bind $TT.v.t.lb <Home> { selectinlist .objs.v.t.lb 0; break }" );
+	cmd( "bind $TT.v.t.lb <End> { selectinlist .objs.v.t.lb end; break }" );
+	cmd( "bind $TT.v.t.lb <Double-1> { set choice 1 }" );
+
+	cmd( "showtop $TT" );
+	cmd( "$TT.v.t.lb selection set 0" );
+	cmd( "focus $TT.v.t.lb" );
+	
+	*choice = 0;
+	
+	cmd( "if { [ $TT.v.t.lb size ] == 0 } { ttk::messageBox -parent . -type ok -title Error -icon error -message \"Cannot move single 'Root' descendant\" -detail \"Consider, if appropriate, creating additional objects under 'Root' before moving this one.\"; set choice 2 }" );
+	
+	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	if ( done == 1 )
-	{
-		lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
-		strncpy( lab, lab1, MAX_ELEM_LENGTH - 1 );
-		if ( strlen( lab ) == 0 )
-			goto here_endparent;
-	
-		for ( cur = r; cur->up != NULL; cur = cur->up );
-		
-		done = check_label( lab, cur ); // check that the label does not exist already
-		if ( done == 1 )
-		{
-			cmd( "ttk::messageBox -parent .inspar -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
-			cmd( "focus .inspar.f.ent_var; .inspar.f.ent_var selection range 0 end" );
-			done = 0;
-			goto here_newparent;
-		}
-	   
-		if ( done == 2 )
-		{
-			cmd( "ttk::messageBox -parent .inspar -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
-			cmd( "focus .inspar.f.ent_var; .inspar.f.ent_var selection range 0 end" );
-			done = 0;
-			goto here_newparent;
-		}
+	cmd( "if { $choice != 2 } { set movelabel [ .objs.v.t.lb get [ .objs.v.t.lb curselection ] ] }" );
+	cmd( "destroytop .objs" );
 
-		r->insert_parent_obj( lab );
-		if ( r->up != NULL )
-			r = r->up;
+	if ( *choice == 2 )
+		goto endmove;
+
+	lab1 = ( char * ) Tcl_GetVar( inter, "movelabel", 0 );
+	if ( lab1 == NULL || strlen( lab1 ) == 0 )
+		goto endmove;
+		
+	i = hyper_count( r->up->label );
+	j = hyper_count( lab1 );
+	
+	if ( i != j )
+	{
+		cmd( "if { %d < %d } { set msg \"the last instance of '$vname' being replicated %d times\" } { set msg \"the last %d unmatched instances of '$vname' being deleted\" }", i, j, j - i, i - j );
+		cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -title Warning -icon warning -message \"Different number of parents' instances\" -detail \"The original parent object '%s' has a different number of instances (%d) than the desired new parent '%s' (%d). Copying object '$vname' to parent '%s' will result in $msg.\" ]", r->up->label, i, lab1, j, lab1 );
+		cmd( "switch $answer { yes { set choice 1 } no { set choice 2 } }" );
+		
+		if( *choice == 2 )
+			goto endmove;
 	}
 
-	cmd( "set text_description [ .inspar.d.f.text get 1.0 end ]" );  
-	cmd( "if { $text_description==\"\\n\" || $text_description==\"\" } { set text_description \"(no description available)\" }" );
-	lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
-	add_description( lab, "Object", lab1 );
-	cmd( "lappend modObj %s", lab );
+	move_obj( lab_old, lab1 );
 
 	unsaved_change( true );		// signal unsaved change
 	redrawRoot = redrawStruc = true;	// force browser/structure redraw
 
-	here_endparent:
-
-	cmd( "destroytop .inspar" );
+	endmove:
 	
-	if ( cur2 != NULL )			// restore original current object
+	if ( cur2 != NULL )					// restore original current object
 		r = cur2;
-
-	Tcl_UnlinkVar( inter, "done" );
-	cmd( "unset done" );
-
+		
 break;
 
 
@@ -1806,8 +1778,9 @@ case 6:
 	cmd( "ttk::frame $T.b0" );
 	cmd( "ttk::button $T.b0.prop -width $butWid -text Rename -command { set useCurrObj yes; set choice 83 } -underline 0" );
 	cmd( "ttk::button $T.b0.num -width $butWid -text Number -command { set useCurrObj yes; set choice 33 } -underline 0" );
+	cmd( "ttk::button $T.b0.mov -width $butWid -text Move -command { set useCurrObj yes; set choice 32 } -underline 0" );
 	cmd( "ttk::button $T.b0.del -width $butWid -text Delete -command { set choice 74 } -underline 0" );
-	cmd( "pack $T.b0.prop $T.b0.num $T.b0.del -padx $butSpc -side left" );
+	cmd( "pack $T.b0.prop $T.b0.num $T.b0.mov $T.b0.del -padx $butSpc -side left" );
 
 	cmd( "ttk::frame $T.b1" );
 	cmd( "ttk::checkbutton $T.b1.com -text \"Compute: force the computation of the variables in this object\" -variable to_compute -underline 1" );
@@ -1837,6 +1810,7 @@ case 6:
 
 	cmd( "bind $T <Control-r> \"$T.b0.prop invoke\"; bind $T <Control-R> \"$T.b0.prop invoke\"" );
 	cmd( "bind $T <Control-n> \"$T.b0.num invoke\"; bind $T <Control-N> \"$T.b0.num invoke\"" );
+	cmd( "bind $T <Control-m> \"$T.b0.mov invoke\"; bind $T <Control-M> \"$T.b0.mov invoke\"" );
 	cmd( "bind $T <Control-d> \"$T.b0.del invoke\"; bind $T <Control-D> \"$T.b0.del invoke\"" );
 	cmd( "bind $T <Control-o> \"$T.b1.com invoke\"; bind $T <Control-O> \"$T.b1.com invoke\"" );
 
@@ -3736,7 +3710,7 @@ case 33:
 
 	if ( r->up == NULL )
 	{
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Cannot create copies of 'Root' object\" -detail \"Consider, if necessary, to add a new parent object here: all the elements will be moved in the newly created object, which can be multiplied in many copies.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Cannot create instances of 'Root' object\" -detail \"Consider, if necessary, to add a new object here and moving all descendants of 'Root' to it. this new object can, then, be multiplied in many instances.\"" );
 		goto endinst;
 	}
 
@@ -6700,23 +6674,25 @@ void control_tocompute( object *r, char *l )
 /****************************************************
 INSERT_OBJECT
 ****************************************************/
-void insert_object( const char *w, object *r, bool netOnly )
+void insert_object( const char *w, object *r, bool netOnly, object *above )
 {
 	bridge *cb;
 	object *cur;
 
-	if ( ! netOnly || r->node != NULL )
+	if ( ( above == NULL || above->up == NULL || ( strcmp( r->label, above->label ) != 0 && strcmp( r->label, above->up->label ) != 0 ) ) &&
+		 ( ! netOnly || r->node != NULL ) )
 		cmd( "%s insert end %s", w, r->label );
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
-	{
-		if ( cb->head == NULL )
-			cur = blueprint->search( cb->blabel );
-		else
-			cur = cb->head; 
-		
-		insert_object( w, cur, netOnly );
-	}
+		if ( above == NULL || strcmp( cb->blabel, above->label ) != 0 )
+		{
+			if ( cb->head == NULL )
+				cur = blueprint->search( cb->blabel );
+			else
+				cur = cb->head; 
+			
+			insert_object( w, cur, netOnly, above );
+		}
 }
 
 

@@ -222,7 +222,6 @@ struct object
 	double whg_av( char const *lab1, char const *lab2, int lag = 0, bool cond = false, char const *lab3 = "", char const *lop = "", double value = NAN );
 	double write( char const *lab, double value, int time, int lag = 0 );
 	double write_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, bool append = false );
-	int init( object *_up, char const *_label );
 	long init_circle_net( char const *lab, long numNodes, long outDeg );
 	long init_connect_net( char const *lab, long numNodes );
 	long init_discon_net( char const *lab, long numNodes );
@@ -274,10 +273,10 @@ struct object
 	void delete_var( char const *lab );
 	void empty( void );
 	void emptyturbo( void );			// remove turbo search structure
-	void insert_parent_obj( char const *lab );
+	void init( object *_up, char const *_label, bool _to_compute = true );
 	void name_node_net( char const *nodeName );
 	void recreate_maps( void );
-	void replicate( int num, int propagate );
+	void replicate( int num, bool propagate = false );
 	void save_param( FILE *f );
 	void save_struct( FILE *f, char const *tab );
 	void search_inst( object *obj, long *pos, long *checked );
@@ -327,8 +326,8 @@ struct variable
 
 	double cal( object *caller, int lag );
 	double fun( object *caller );
-	int init( object *_up, const char *_label, int _num_lag, double *val, int _save );
 	void empty( bool no_lock = false );
+	void init( object *_up, const char *_label, int _num_lag, double *val, int _save );
 };
 
 struct bridge
