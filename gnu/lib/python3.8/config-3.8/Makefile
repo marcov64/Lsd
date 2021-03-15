@@ -28,9 +28,9 @@ MODLIBS=           $(LOCALMODLIBS) $(BASEMODLIBS)
 
 # === Variables set by configure
 VERSION=	3.8
-srcdir=		../Python-3.8.6
-VPATH=		../Python-3.8.6
-abs_srcdir=	/c/_/M/mingw-w64-python/src/build-x86_64/../Python-3.8.6
+srcdir=		../Python-3.8.8
+VPATH=		../Python-3.8.8
+abs_srcdir=	/c/_/M/mingw-w64-python/src/build-x86_64/../Python-3.8.8
 abs_builddir=	/c/_/M/mingw-w64-python/src/build-x86_64
 
 
@@ -39,6 +39,7 @@ CXX=		x86_64-w64-mingw32-c++
 MAINCC=		$(CC)
 LINKCC=		$(PURIFY) $(MAINCC)
 AR=		ar
+WINDRES=	windres
 READELF=	readelf
 SOABI=		cpython-38
 LDVERSION=	$(VERSION)$(ABIFLAGS)
@@ -85,13 +86,13 @@ CONFIGURE_CFLAGS=	-march=x86-64 -mtune=generic -O2 -pipe -fwrapv -D__USE_MINGW_A
 # CFLAGS_NODIST is used for building the interpreter and stdlib C extensions.
 # Use it when a compiler flag should _not_ be part of the distutils CFLAGS
 # once Python is installed (Issue #21121).
-CONFIGURE_CFLAGS_NODIST= -flto -fuse-linker-plugin -ffat-lto-objects -flto-partition=none -g -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers -Werror=implicit-function-declaration
+CONFIGURE_CFLAGS_NODIST= -flto -fuse-linker-plugin -ffat-lto-objects -flto-partition=none -g -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers -Wstrict-prototypes -Werror=implicit-function-declaration
 # LDFLAGS_NODIST is used in the same manner as CFLAGS_NODIST.
 # Use it when a linker flag should _not_ be part of the distutils LDFLAGS
 # once Python is installed (bpo-35257)
 CONFIGURE_LDFLAGS_NODIST= -flto -fuse-linker-plugin -ffat-lto-objects -flto-partition=none -g
 CONFIGURE_CPPFLAGS=	-I$(srcdir)/PC -D__USE_MINGW_ANSI_STDIO=1 -ID:/a/_temp/msys/msys64/mingw64/include/ncurses  -I.
-CONFIGURE_LDFLAGS=	-pipe -Wl,--dynamicbase,--high-entropy-va,--nxcompat,--default-image-base-high -s 
+CONFIGURE_LDFLAGS=	-pipe -Wl,--dynamicbase,--high-entropy-va,--nxcompat,--default-image-base-high
 # Avoid assigning CFLAGS, LDFLAGS, etc. so users can use them on the
 # command line to append to these values without stomping the pre-set
 # values.
@@ -139,9 +140,9 @@ exec_prefix=	${prefix}
 datarootdir=    ${prefix}/share
 
 # Locations needed for semi-native fixup of sysconfig.
-srcdir_b2h=		C:/_/M/mingw-w64-python/src/Python-3.8.6
-VPATH_b2h=		C:/_/M/mingw-w64-python/src/Python-3.8.6
-abs_srcdir_b2h=		C:/_/M/mingw-w64-python/src/Python-3.8.6
+srcdir_b2h=		C:/_/M/mingw-w64-python/src/Python-3.8.8
+VPATH_b2h=		C:/_/M/mingw-w64-python/src/Python-3.8.8
+abs_srcdir_b2h=		C:/_/M/mingw-w64-python/src/Python-3.8.8
 abs_builddir_b2h=	C:/_/M/mingw-w64-python/src/build-x86_64
 prefix_b2h=		D:/a/_temp/msys/msys64/mingw64
 
@@ -200,9 +201,9 @@ RUNSHARED=
 ENSUREPIP=      no
 
 # OpenSSL options for setup.py so sysconfig can pick up AC_SUBST() vars.
-OPENSSL_INCLUDES=-ID:/a/_temp/msys/msys64/mingw64/include
-OPENSSL_LIBS=-lssl -lcrypto
-OPENSSL_LDFLAGS=-LD:/a/_temp/msys/msys64/mingw64/lib
+OPENSSL_INCLUDES=-ID:/a/_temp/msys/msys64/mingw64/include 
+OPENSSL_LIBS=-lssl -lcrypto 
+OPENSSL_LDFLAGS=-LD:/a/_temp/msys/msys64/mingw64/lib 
 
 # Modes for directories, executables and data files created by the
 # install process.  Default to user-only-writable for all file types.
@@ -211,7 +212,7 @@ EXEMODE=	755
 FILEMODE=	644
 
 # configure script arguments
-CONFIG_ARGS=	 '--prefix=/mingw64' '--host=x86_64-w64-mingw32' '--build=x86_64-w64-mingw32' '--enable-shared' '--with-nt-threads' '--with-system-expat' '--with-system-ffi' '--with-system-libmpdec' '--without-ensurepip' '--without-c-locale-coercion' '--enable-loadable-sqlite-extensions' '--enable-optimizations' '--with-lto' 'OPT=' 'build_alias=x86_64-w64-mingw32' 'host_alias=x86_64-w64-mingw32' 'CFLAGS=-march=x86-64 -mtune=generic -O2 -pipe -fwrapv -D__USE_MINGW_ANSI_STDIO=1 -D_WIN32_WINNT=0x0601 -DNDEBUG ' 'LDFLAGS=-pipe -Wl,--dynamicbase,--high-entropy-va,--nxcompat,--default-image-base-high -s ' 'CPPFLAGS=-D__USE_MINGW_ANSI_STDIO=1 -ID:/a/_temp/msys/msys64/mingw64/include/ncurses ' 'PKG_CONFIG_PATH=/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig'
+CONFIG_ARGS=	 '--prefix=/mingw64' '--host=x86_64-w64-mingw32' '--build=x86_64-w64-mingw32' '--enable-shared' '--with-nt-threads' '--with-system-expat' '--with-system-ffi' '--with-system-libmpdec' '--without-ensurepip' '--without-c-locale-coercion' '--enable-loadable-sqlite-extensions' '--enable-optimizations' '--with-lto' 'OPT=' 'build_alias=x86_64-w64-mingw32' 'host_alias=x86_64-w64-mingw32' 'CFLAGS=-march=x86-64 -mtune=generic -O2 -pipe -fwrapv -D__USE_MINGW_ANSI_STDIO=1 -D_WIN32_WINNT=0x0601 -DNDEBUG ' 'LDFLAGS=-pipe -Wl,--dynamicbase,--high-entropy-va,--nxcompat,--default-image-base-high' 'CPPFLAGS=-D__USE_MINGW_ANSI_STDIO=1 -ID:/a/_temp/msys/msys64/mingw64/include/ncurses ' 'PKG_CONFIG_PATH=/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig'
 
 
 # Subdirectories with code
@@ -589,13 +590,13 @@ pythonnt_rc.h:
 	@echo '#define PYTHON_DLL_NAME "$(DLLLIBRARY)"' >> $@
 
 python_exe.o: pythonnt_rc.h $(srcdir)/PC/python_exe.rc
-	windres -I$(srcdir)/Include -I$(srcdir)/PC -I. $(srcdir)/PC/python_exe.rc $@
+	$(WINDRES) -I$(srcdir)/Include -I$(srcdir)/PC -I. $(srcdir)/PC/python_exe.rc $@
 
 pythonw_exe.o: pythonnt_rc.h $(srcdir)/PC/pythonw_exe.rc
-	windres -I$(srcdir)/Include -I$(srcdir)/PC -I. $(srcdir)/PC/pythonw_exe.rc $@
+	$(WINDRES) -I$(srcdir)/Include -I$(srcdir)/PC -I. $(srcdir)/PC/pythonw_exe.rc $@
 
 python_nt.o: pythonnt_rc.h $(srcdir)/PC/python_nt.rc
-	windres -I$(srcdir)/Include -I$(srcdir)/PC -I. $(srcdir)/PC/python_nt.rc $@
+	$(WINDRES) -I$(srcdir)/Include -I$(srcdir)/PC -I. $(srcdir)/PC/python_nt.rc $@
 
 $(BUILDPYTHONW): Programs/python.o $(LIBRARY) $(LDLIBRARY) $(PY3LIBRARY) pythonw_exe.o
 	$(LINKCC) $(PY_CORE_LDFLAGS) $(LINKFORSHARED) -municode -mwindows -o $@ Programs/python.o $(BLDLIBRARY) $(LIBS) $(MODLIBS) $(SYSLIBS) pythonw_exe.o

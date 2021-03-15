@@ -105,7 +105,7 @@ XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl8.6 %LSD_DIR%\gnu\lib\tcl8.6\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tk8.6 %LSD_DIR%\gnu\lib\tk8.6\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\dde1.4 %LSD_DIR%\gnu\lib\dde1.4\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\reg1.3 %LSD_DIR%\gnu\lib\reg1.3\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\thread2.8.5 %LSD_DIR%\gnu\lib\thread2.8.5\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\thread2.8.6 %LSD_DIR%\gnu\lib\thread2.8.6\
 
 rem gdb debugger
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\gdb.exe %LSD_DIR%\gnu\bin\
