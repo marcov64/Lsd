@@ -246,7 +246,7 @@ else
 		v[0] = min( max( v[0], 0 ), v[1] );		// positive but up to D1
 		
 		v[8] = v[2];							// finance what is possible
-		v[9] = v[6] - v[3] + 1;					// desired credit
+		v[9] = v[7] - v[3] + 1;					// desired credit
 	
 		if ( v[0] == 0 )
 		{

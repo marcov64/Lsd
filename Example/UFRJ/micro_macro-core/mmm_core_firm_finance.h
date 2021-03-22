@@ -32,7 +32,7 @@ EQUATION("Firm_Available_Financial_Assets")
 Firm's available financial assets to spend in investment expenses. It's the diference between desired stock of financial assets and the currest stock. If the difference is positive, there are available financial assets that can be sold to pay for investment expenses. If the value is negative, firm must buy more financial assets to reach the desired amount, reducing the available total funds for investment.
 */
 	v[0]=VL("Firm_Capital",1);
-	v[1]=V("desired_financial_rate");
+	v[1]=V("sector_desired_financial_rate");
 	v[2]=VL("Firm_Stock_Financial_Assets",1);
 	v[3]=v[2]-(v[1]*v[0]);//can be positive or negative
 RESULT(v[3])
@@ -43,7 +43,7 @@ EQUATION("Firm_Available_Debt")
 Firm's available debt or available external funds depends on the difference between desired stock of debt and current stock of debt. If currest stock of debt is greater than desired, the firm must repay some debt reducing the amount of external funds for investment. If the currest amount is smaller than desired, that difference is available to the firm as external finance, but that does not mean that the firm will increase effective debt by this amount.
 */
 	v[0]=VL("Firm_Capital",1);
-	v[1]=V("desired_debt_rate");
+	v[1]=V("sector_desired_debt_rate");
 	v[2]=VL("Firm_Stock_Debt",1);
 	v[3]=VL("Firm_Stock_Financial_Assets",1);
 	v[4]=v[1]*(v[0]+v[3])-v[2];//can be negative or positive value 
@@ -79,7 +79,7 @@ EQUATION("Firm_Avg_Debt_Rate")
 /*
 Firm's avg debt rate of the last investment period
 */
-	v[0]=V("investment_period");
+	v[0]=V("sector_investment_period");
 	v[3]=0;																				//initializes the sum
 	for (v[1]=1; v[1]<=v[0]; v[1]=v[1]+1)												//from 0 to investment period-1 lags
 		{

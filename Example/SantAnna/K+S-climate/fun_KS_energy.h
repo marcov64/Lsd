@@ -60,13 +60,6 @@ if ( bernoulli( v[4] ) )						// dirty innovation succeeded?
 		v[0] = v[11];							// adopt technology
 		v[1] = v[12];
 		v[15] = 1;								// signal innovation
-		
-//		
-//		
-//LOG( "\n(t=%g) AtauDE=%.4g emTauDE=%.4g RDde=%.4g", T, v[0], v[1], v[2] * v[3] );
-//
-//
-
 	}
 	else
 		v[15] = 0;								// no innovation
@@ -256,13 +249,6 @@ if ( bernoulli( v[4] ) )						// green innovation succeeded?
 	{
 		v[0] = v[9];							// adopt technology
 		v[10] = 1;								// signal innovation
-		
-//		
-//		
-//LOG( "\n(t=%g) ICtauGE=%.4g RDge=%.4g", T, v[0], v[2] * v[3] );
-//
-//
-
 	}
 	else
 		v[10] = 0;								// no innovation

@@ -201,68 +201,42 @@ RESULT( v[0] )
 EQUATION( "_Q1" )
 /*
 Planed production for a firm in capital-good sector
-Also updates '_CD1', '_CD1c', '_CS1'
 */
 
 v[1] = V( "_D1" );								// potential production (orders)
 v[2] = V( "_CS1a" );							// available credit supply
 v[3] = VL( "_NW1", 1 );							// net worth (cash available)
 v[4] = V( "_c1" );								// unit cost
-v[5] = V( "_p1" );								// machine price
-v[6] = V( "_RD" );								// R&D costs still to pay
 
-v[7] = v[1] * ( v[4] - v[5] ) + v[6];			// cash flow to fulfill orders
+v[5] = v[1] * ( v[4] - V( "_p1" ) ) + V( "_RD" );// cash flow to fulfill orders
 
-if ( v[7] < 0 || v[7] <= v[3] - 1 )				// firm can self-finance?
-{
+if ( v[5] < 0 || v[5] <= v[3] - 1 )				// firm can self-finance?
 	v[0] = v[1];								// plan the desired output
-	v[3] -= v[7];								// remove flow from cash
-}
 else
-{
-	if ( v[7] <= v[3] - 1 + v[2] )				// possible to finance all?
-	{
+	if ( v[5] <= v[3] - 1 + v[2] )				// possible to finance all?
 		v[0] = v[1];							// plan the desired output
-		v[8] = v[9] = v[7] - v[3] + 1;			// finance the difference
-		v[3] = 1;								// keep minimum cash
-	}
 	else										// credit constrained firm
 	{
 		// produce as much as the available finance allows
-		v[0] = floor( ( v[3] - 1 - v[7] + v[2] ) / v[4] );// max possible
+		v[0] = floor( ( v[3] - 1 - v[5] + v[2] ) / v[4] );// max possible
 		v[0] = min( max( v[0], 0 ), v[1] );		// positive but up to D1
 		
-		v[8] = v[2];							// finance what is possible
-		v[9] = v[6] - v[3] + 1;					// desired credit
-	
 		if ( v[0] == 0 )
-		{
-			v[10] = 1;							// all orders canceled
-			v[3] -= v[6] - v[2];				// let negative NW (bankruptcy)
-		}
+			v[6] = 1;							// all orders canceled
 		else
-		{
-			v[10] = 1 - v[0] / v[1];			// machine shortage factor
-			v[3] = 1;							// keep minimum cash
-		}
+			v[6] = 1 - v[0] / v[1];				// machine shortage factor
 		
 		// shrink or cancel all exceeding orders
 		CYCLE( cur, "Cli" )
 			if ( VS( cur, "_tOrd" ) == T )		// order in this period?
 			{
-				if ( v[10] == 1 )				// bankruptcy?
+				if ( v[6] == 1 )				// bankruptcy?
 					INCRS( cur, "_nCan", VS( cur, "_nOrd" ) );
 				else
-					INCRS( cur, "_nCan", floor( VS( cur, "_nOrd" ) * v[10] ) );
+					INCRS( cur, "_nCan", floor( VS( cur, "_nOrd" ) * v[6] ) );
 			}
 	}
 	
-	update_debt1( THIS, v[9], v[8] );			// update firm debt
-}
-
-// provision for revenues and expenses
-WRITE( "_NW1", v[3] );							// update the firm net worth
-
 RESULT( v[0] )
 
 
@@ -302,16 +276,13 @@ else
 
 WRITE( "_Div1", v[4] );							// save period dividends
 
-// compute free cash flow
-v[6] = v[1] - v[0] - v[4];
-
-// remove from net wealth the provision for revenues and expenses
-v[7] = INCR( "_NW1", V( "_Q1" ) * ( V( "_c1" ) - V( "_p1" ) ) + V( "_RD" ) );
+v[6] = v[1] - v[0] - v[4];						// free cash flow
+v[7] = VL( "_NW1", 1 );							// current net worth
 
 if ( v[6] < 0 )									// must finance losses?
 {
 	if ( v[7] >= - v[6] + 1 )					// can cover losses with reserves?
-		INCR( "_NW1", v[6] );					// draw from net wealth
+		INCR( "_NW1", v[6] );					// draw from net worth
 	else
 	{
 		v[8] = V( "_CS1a" );					// available credit supply
@@ -320,12 +291,12 @@ if ( v[6] < 0 )									// must finance losses?
 		if ( v[8] >= v[9] )						// can finance losses?
 		{
 			update_debt1( THIS, v[9], v[9] );	// finance all
-			WRITE( "_NW1", 1 );					// minimum net wealth
+			WRITE( "_NW1", 1 );					// minimum net worth
 		}
 		else
 		{
-			update_debt1( THIS, v[8], v[8] );	// take what is possible
-			INCR( "_NW1", v[6] - v[8] );		// let negative NW (bankruptcy exit)
+			update_debt1( THIS, v[9], v[8] );	// take what is possible
+			INCR( "_NW1", v[6] - v[8] );		// let negative NW (bankruptcy)
 		}					
 	}
 }
@@ -446,7 +417,7 @@ RESULT( v[1] > 0 ? ceil( V( "_L1dRD" ) * VS( PARENT, "L1rd" ) / v[1] ) : 0 )
 
 EQUATION( "_Pi1" )
 /*
-Profit of firm (before taxes) in capital-good sector
+Profit (before taxes) of firm in capital-good sector
 */
 
 v[1] = V( "_S1" ) - V( "_W1" );					// gross operating margin
@@ -568,25 +539,25 @@ Updated in '_Atau'
 EQUATION_DUMMY( "_CD1", "" )
 /*
 Credit demand for firm in capital-good sector
-Updated in '_Deb1max', '_Q1', '_Tax1'
+Updated in '_Deb1max', '_Tax1'
 */
 
 EQUATION_DUMMY( "_CD1c", "" )
 /*
 Credit demand constraint for firm in capital-good sector
-Updated in '_Deb1max', '_Q1', '_Tax1'
+Updated in '_Deb1max', '_Tax1'
 */
 
 EQUATION_DUMMY( "_CS1", "" )
 /*
 Credit supplied to firm in capital-good sector
-Updated in '_Deb1max', '_Q1', '_Tax1'
+Updated in '_Deb1max', '_Tax1'
 */
 
 EQUATION_DUMMY( "_Deb1", "" )
 /*
 Stock of bank debt of firm in capital-good sector
-Updated in '_Q1', '_Tax1'
+Updated in '_Tax1'
 */
 
 EQUATION_DUMMY( "_Div1", "" )
@@ -597,8 +568,8 @@ Updated in '_Tax1'
 
 EQUATION_DUMMY( "_NW1", "" )
 /*
-Net wealth (free cash) of firm in capital-good sector
-Updated in '_Q1', '_Tax1'
+Net worth of firm in capital-good sector
+Updated in '_Tax1'
 */
 
 EQUATION_DUMMY( "_imi", "" )

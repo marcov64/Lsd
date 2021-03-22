@@ -248,9 +248,8 @@ double scrap_vintage( variable *var, object *vint )
 
 double entry_firm1( variable *var, object *sector, int n, bool newInd )
 {
-	double AtauEE, AtauEEavg, AtauEF, AtauEFavg, AtauLP, AtauLPmax, BtauEE, 
-		   BtauEEavg, BtauEF, BtauEFavg, BtauLP, BtauLPmax, D10, NW1, NW10, RD0, 
-		   c1, cTau, f1, p1, mult, equity = 0;
+	double AtauEE, AtauEF, AtauLP, AtauLPmax, BtauEE, BtauEF, BtauLP, BtauLPmax, 
+		   D10, NW1, NW10, RD0, c1, cTau, f1, p1, mult, equity = 0;
 	int ID1, IDb, t1ent;
 	object *firm, *bank, *cli, 
 		   *cons = SEARCHS( PARENTS( sector ), "Consumption" ), 
@@ -276,8 +275,8 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 		double F20 = VS( cons, "F20" );
 		double m2 = VS( cons, "m2" );			// machine output per period
 
-		AtauEE = BtauEE = AtauEEavg = BtauEEavg = INIEEFF;// initial products.
-		AtauEF = BtauEF = AtauEFavg = BtauEFavg = INIEFRI;
+		AtauEE = BtauEE = INIEEFF;				// initial products.
+		AtauEF = BtauEF = INIEFRI;
 		AtauLP = AtauLPmax = INIPROD;
 		BtauLP = BtauLPmax = ( 1 + mu1 ) * AtauLP / ( m1 * m2 );
 
@@ -294,11 +293,11 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 	}
 	else
 	{
-		AtauEEavg = AVES( sector, "_AtauEE" );	// best machine energy efficiency
-		AtauEFavg = AVES( sector, "_AtauEF" );	// best machine envir. friendl.
+		AtauEE = AVES( sector, "_AtauEE" );		// best machine energy efficiency
+		AtauEF = AVES( sector, "_AtauEF" );		// best machine envir. friendl.
 		AtauLPmax = MAXS( sector, "_AtauLP" );	// best machine lab. productivity
-		BtauEEavg = AVES( sector, "_BtauEE" );	// best energy effic. in sector 1
-		BtauEFavg = AVES( sector, "_BtauEF" );	// best env. friend. in sector 1
+		BtauEE = AVES( sector, "_BtauEE" );		// best energy effic. in sector 1
+		BtauEF = AVES( sector, "_BtauEF" );		// best env. friend. in sector 1
 		BtauLPmax = MAXS( sector, "_BtauLP" );	// best productivity in sector 1
 		NW10 = max( WHTAVES( sector, "_NW1", "_f1" ), VS( sector, "NW10" ) * 
 					VS( sector, "PPI" ) / VS( sector, "PPI0" ) );
@@ -343,12 +342,6 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 			AtauLP *= AtauLPmax * ( 1 + x5 );	// fraction of top firm
 			BtauLP = beta( alpha2, beta2 );		// draw B from Beta(alpha,beta)
 			BtauLP *= BtauLPmax * ( 1 + x5 );	// fraction of top firm
-			
-			// initial energy parameters follow the average
-			AtauEE = AtauEEavg;
-			BtauEE = BtauEEavg;
-			AtauEF = AtauEFavg;
-			BtauEF = BtauEFavg;
 		}
 		
 		// initial cost, price and net wealth

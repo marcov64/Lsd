@@ -1,6 +1,6 @@
-MICRO-MACRO MULTISECTORAL MODEL (ver. 2.9-core)
+MICRO-MACRO MULTISECTORAL MODEL (ver. 2.9_core)
 
-***********************************************
+*********************************************************************************************************************************************
 
 This is a new simplified and stylized version of the model created by Dweck (2006) and used in Dweck, Vianna and Barbosa (2018). 
 Coded by Matheus Vianna.
@@ -41,7 +41,7 @@ Version 2.9:
 --All variables and parameters were renamed to better organizations and identification.
 --Minor Bug Fixes.
 
-**********************************************************************************************
+*********************************************************************************************************************************************
 
 ORIGIN:
 
@@ -94,7 +94,7 @@ TIMELINE OF EVENTS:
 10. R&D: the innovation and diffusion (imitation) processes follow closely those 2 stage processes proposed by Nelson & Winter (1982, ch. 12). Technological search by any firm is accomplished through process and product R&D. 
 11. Entry and Exit: firms can exit because of small market share of high debt rate. The total number of firms is not constant, but entry only occurs in case of exit. The possibility of entry of a new firm is limited to an exit caused by financial problems.
 
-**********************************************************************************************
+***************************************************************************************************************************************************************
 
 HOW TO READ THE CODE:
 
@@ -122,7 +122,7 @@ All the code is generalized for changes in those parameters.
 "class_period"
 "government_period"
 
-**********************************************************************************************
+*********************************************************************************************************************************************
 
 MODEL PARAMETERS:
 
@@ -212,7 +212,7 @@ External Sector:
 "exchange_rate_growth":											exchange rate growth	
 "external_income_growth":										external income growth
 
-**********************************************************************************************
+*********************************************************************************************************************************************
 
 Some Configurations:
 Sim1: baseline

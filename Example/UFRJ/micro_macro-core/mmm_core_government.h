@@ -33,19 +33,10 @@ RESULT(v[0])
 
 
 EQUATION("Total_Income_Taxes")
-/*
-Stores the value of the function
-*/
-	v[0]=V("Income_Taxes_Function");
-RESULT(v[0])
-
+RESULT(SUM("Class_Taxation"))
 
 EQUATION("Total_Indirect_Taxes")
-/*
-Stores the value of the function
-*/
-	v[0]=V("Indirect_Taxes_Function");
-RESULT(v[0])
+RESULT(SUM("Sector_Taxation"))
 
 
 EQUATION("Total_Taxes")
@@ -74,7 +65,7 @@ Defined as the government stock of public debt in the last period multipyed by t
 */
 	v[0]=VL("Government_Debt",1);
 	v[1]=V("Basic_Interest_Rate");
-	v[2]=v[0]*v[1];
+	v[2]=max(0,v[0]*v[1]);
 RESULT(v[2])
 
 
@@ -95,7 +86,7 @@ Defined as the stock of debt in the last period plus current government deficit
 */
 	v[0]=VL("Government_Debt",1);
 	v[1]=V("Government_Deficit");
-	v[2]=max(0,v[0]+v[1]);
+	v[2]=v[0]+v[1];
 RESULT(v[2])
 
 

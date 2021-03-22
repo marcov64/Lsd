@@ -422,9 +422,9 @@ CYCLES( cur3, cur, "Bank" )
 VS( cur3, "banksMaps" );						// update the mapping vectors
 
 // create firms' objects and set initial values
-cur = SEARCHS( cur1, "Firm1" );					// remove empty firm instance
+cur = SEARCHS( cur1, "Firm1" );					// remove empty firm instances
 DELETE( cur );
-cur = SEARCHS( cur2, "Firm2" );					// remove empty firm instance
+cur = SEARCHS( cur2, "Firm2" );
 DELETE( cur );
 
 v[1] = entry_firm1( var, cur1, F1, true );		// add capital-good firms

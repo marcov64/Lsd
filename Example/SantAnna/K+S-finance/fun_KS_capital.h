@@ -13,7 +13,6 @@
 EQUATION( "L1" )
 /*
 Work force (labor) size employed by capital-good sector
-Updates 'L1rd'
 */
 
 v[1] = VS( LABSUPL1, "Ls" );					// available labor force
@@ -41,10 +40,11 @@ RESULT( v[2] + ( v[3] - v[2] ) * v[6] )
 
 EQUATION( "entry1exit" )
 /*
-Rate of entry-exit of firms in the capital-good sector
-Perform entry and exit of firms 
+Rate of entry-exit of firms in capital-good sector
+Perform entry and exit of firms in the capital-good sector
 All relevant aggregate variables in sector must be computed before existing
 firms are deleted, so all active firms in period are considered
+Also updates 'cEntry', 'cExit', 'exit1fail'
 */
 
 VS( CONSECL1, "K" );							// ensure canceled orders acct'd

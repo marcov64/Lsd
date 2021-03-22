@@ -3636,7 +3636,7 @@ case 56:
 	// from disk, if needed, or just update the missing elements lists
 	cmd( "if { [ llength $unusVar ] == 0 || [ llength $unusFun ] == 0 || [ llength $unusPar ] == 0 || [ llength $unusObj ] == 0 } { read_elem_file %s } { upd_unus_elem }", exec_path );
 
-	plog( "\n\nElements/objects apparently unused in equation file(s):\n" );
+	plog( "\n\nElements/objects apparently unused/missing in equation file(s):\n" );
 	
 	cmd( "foreach var $unusVar { plog \"Variable :\t\"; plog \"$var\n\" highlight }" );
 	cmd( "foreach fun $unusFun { plog \"Function :\t\"; plog \"$fun\n\" highlight }" );

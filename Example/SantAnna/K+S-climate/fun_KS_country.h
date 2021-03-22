@@ -401,7 +401,7 @@ int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 
 double Btau0 = ( 1 + mu1 ) * INIPROD / ( m1 * m2 );// initial prod. in sector 1
 double ICge0 = VS( cur5, "bE" ) * pF / Ade0;	// initial green plants cost
-double pE0 = fGE0 == 0 ? muE : muE + pF / Ade0;	// initial energy price
+double pE0 = INIWAGE * muE + ( fGE0 == 1 ? 0 : pF / Ade0 );// init. energy price
 double c10 = ( INIWAGE / Btau0 + ( pE0 + trCO2 * INIEFRI ) / INIEEFF ) / m1;
 												// initial unit cost in sector 1
 double c20 = INIWAGE / INIPROD + ( pE0 + trCO2 * INIEFRI ) / INIEEFF;

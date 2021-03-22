@@ -350,12 +350,12 @@ RESULT( v[0] )
 
 EQUATION_DUMMY( "exit1fail", "" )
 /*
-Rate of bankrupt firms in capital-good sector
+Rate of exiting bankrupt firms in capital-good sector
 Updated in 'entry1exit'
 */
 
 EQUATION_DUMMY( "exit2fail", "" )
 /*
-Rate of bankrupt firms in consumption-good sector
+Rate of exiting bankrupt firms in consumption-good sector
 Updated in 'entry2exit'
 */

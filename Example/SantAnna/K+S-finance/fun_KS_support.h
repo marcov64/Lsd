@@ -64,7 +64,7 @@ bool rank_desc_NWtoS( firmRank e1, firmRank e2 )
 }
 
 
-// update firm debt in equation 'Q1', '_Tax1'
+// update firm debt in equation '_Tax1'
 
 void update_debt1( object *firm, double desired, double loan )
 {
@@ -86,7 +86,7 @@ void update_debt1( object *firm, double desired, double loan )
 }
 
 
-// update firm debt in equations '_Q2', '_EI', '_SI', '_Tax2'
+// update firm debt in equations '_EI', '_SI', '_Tax2'
 
 void update_debt2( object *firm, double desired, double loan )
 {
@@ -570,13 +570,11 @@ double exit_firm1( variable *var, object *firm )
 
 // remove consumer-good firm object and exiting hooks in equation 'entry2exit'
 
-double exit_firm2( variable *var, object *firm, double *firesAcc )
+double exit_firm2( variable *var, object *firm )
 {
 	double fires, liqVal = VS( firm, "_NW2" ) - VS( firm, "_Deb2" );
 	object *bank, *firm1;
 
-	// fire all workers
-	*firesAcc += fires = VS( firm, "_L2" );
 	
 	if ( liqVal < 0 )							// account bank losses, if any
 	{
