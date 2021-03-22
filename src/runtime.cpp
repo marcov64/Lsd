@@ -135,12 +135,27 @@ ADD_RT_PLOT_TAB
 **************************************/
 void add_rt_plot_tab( const char *w, int id_sim )
 {
-	int i, j, k, cols, tabs = 10;
+	int i, j, k, cols, dbut, tabs;
 		
-	if ( platform == MAC )
-		cols = 5;
-	else
-		cols = 10;
+	switch ( platform )
+	{
+		case WINDOWS:
+			tabs = 10;
+			cols = 10;
+			dbut = 2;
+			break;
+		case LINUX:
+			tabs = 9;
+			cols = 8;
+			dbut = 3;
+			break;
+		default:
+		case MAC:
+			tabs = 8;
+			cols = 5;
+			dbut = 2;
+			break;
+	}
 	
 	cmd( "set w %s", w );
 	cmd( "set rtptab $w.pad" );
@@ -198,7 +213,7 @@ void add_rt_plot_tab( const char *w, int id_sim )
 			for ( j = 1; j <= cols && cols * i + j <= id_sim; ++j )
 			{
 				k = cols * i + j;
-				cmd( "set b [ expr $butWid - %d ]", k > 99 ? 2 : 3 );
+				cmd( "set b [ expr $butWid - ( %d ) ]", k > 99 ? dbut : dbut - 1 );
 				cmd( "ttk::button $rtptab.more.b.l%d.b%d -width $b -text \"Run %d\" -command { \
 						if { \"$rtptab.tab%d\" ni [ $rtptab tabs ] } { \
 							if { [ $rtptab index end ] >= %d } { \

@@ -56,9 +56,9 @@ set modcolorD	SlateGray3	; # color of model label (dark mode)
 
 # OS specific minimum window sizes (horizontal & vertical) (must be even numbers)
 set hsizeBminMac		520	; # browser window
-set vsizeBminMac		700
+set vsizeBminMac		600
 set hsizeBminLinux		460
-set vsizeBminLinux		650
+set vsizeBminLinux		600
 set hsizeBminWindows	420
 set vsizeBminWindows	600
 set hsizeGminMac		670	; # log window
@@ -70,13 +70,13 @@ set vsizeGminWindows	360
 set hsizeAminMac		860	; # analysis of results window
 set vsizeAminMac		500
 set hsizeAminLinux		850
-set vsizeAminLinux		520
+set vsizeAminLinux		530
 set hsizeAminWindows	720
 set vsizeAminWindows	460
 set hsizePminMac		800	; # analysis of results plot window
 set vsizePminMac		600
-set hsizePminLinux		800
-set vsizePminLinux		600
+set hsizePminLinux		720
+set vsizePminLinux		550
 set hsizePminWindows	720
 set vsizePminWindows	540
 set hsizeDminMac		942	; # debugger/data browse window
