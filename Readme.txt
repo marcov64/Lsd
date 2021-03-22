@@ -1,6 +1,6 @@
 **************************************************************
 
-	LSD 8.0 - December 2020
+	LSD 8.0 - March 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -19,12 +19,12 @@ LSD includes third party software under the license of the copyright owners:
 
 GCC 10.2 is copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
 Tcl/Tk 8.6 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
-MSYS2 2.0, https://www.msys2.org
-Cygwin 3.1.6 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
+MSYS2 3.1.7, https://www.msys2.org
+Cygwin 3.1.7 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
 7-Zip LZMA SDK 19.0 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
-Makeself is copyrighted by Stephane Peter under GPL2, https://makeself.io
-Gnuplot 5.2.8 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
-Eigen 3.3.7 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
+Makeself 2.4.3 is copyrighted by Stephane Peter under GPL2, https://makeself.io
+Gnuplot 5.4.1 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
+Eigen 3.3.9 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
 subbotools 1.3 is copyrighted by Giulio Bottazzi under GPL2, http://cafim.sssup.it/~giulio/software/subbotools
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest.nps.edu

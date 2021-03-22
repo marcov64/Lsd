@@ -3,7 +3,7 @@ To configure for embedded TclTk in macOS
 
 TCL/TK (https://www.tcl.tk/software/tcltk/download.html):
 
-Extract tclX.X.X and tkX.X.X subdirectories under a common directory (i.e., /Users/Marcelo/TclTk).
+Extract tclX.X.X and tkX.X.X subdirectories under a common directory (i.e., /Users/Marcelo/TclTk). Remove old versions before compilation.
 
 To build, use the scripts in both tclX.X.X/macosx and tkX.X.X/macosx, in this order:
 
@@ -20,4 +20,4 @@ In both LMM.app/Contents and src/LSD.app/Contents, remove the Frameworks subfold
 
 Copy the Frameworks subfolder from Applications/Utilities/Wish.app/Contents, into both LMM.app/Contents and src/LSD.app/Contents.
 
-Copy to src/LSD.app/Contents/Framework the MISSING header and library items from build/tcl/Tcl.Framework and build/tk/Tk.Framework, being careful to not overwrite the existing files (Headers and PrivateHeaders folders, libtclstubX.X.a, libtkstubX.X.a, and respective link files). Copy link files ONLY after copying real files/folders.
+Copy to src/LSD.app/Contents/Frameworks the MISSING header and library items from build/tcl/Tcl.Framework and build/tk/Tk.Framework, being careful to not overwrite the existing files (Headers and PrivateHeaders folders, libtclstubX.X.a, libtkstubX.X.a, and respective link files). Copy link files ONLY after copying real files/folders.

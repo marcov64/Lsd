@@ -1,6 +1,6 @@
 #*************************************************************
 #
-#	LSD 8.0 - December 2020
+#	LSD 8.0 - March 2021
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -112,7 +112,7 @@ proc gccVersion { } {
 # Add the directory to the user's permanent
 # PATH environment variable in Windows
 #************************************************
-proc add_user_path { path } {
+proc add_user_path { path { end 1 } } {
 	global CurPlatform env
 
 	# only Windows
@@ -137,13 +137,19 @@ proc add_user_path { path } {
 		return 1
 	}
 	
-	# add to the end of the user path
 	set path [ file nativename $path ]
 	set regPath "HKEY_CURRENT_USER\\Environment"
 	if { ! [ catch { set curPath [ registry get $regPath "Path" ] } ] } {
 		set curPath [ string trimright $curPath ";" ]
 
-		if { ! [ catch { registry set $regPath "Path" "$curPath;$path;" } ] } {
+		# add to the end or beginning of the user path
+		if { $end } {
+			set newPath "$curPath;$path;"
+		} else {
+			set newPath "$path;$curPath;"
+		}
+		
+		if { ! [ catch { registry set $regPath "Path" "$newPath" } ] } {
 			registry broadcast "Environment"
 			return 1
 		}

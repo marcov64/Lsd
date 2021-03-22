@@ -1,7 +1,7 @@
 @ECHO off
 rem *************************************************************
 rem
-rem	 LSD 8.0 - December 2020
+rem	 LSD 8.0 - March 2021
 rem	 written by Marco Valente, Universita' dell'Aquila
 rem	 and by Marcelo Pereira, University of Campinas
 rem

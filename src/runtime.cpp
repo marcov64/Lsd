@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - December 2020
+	LSD 8.0 - March 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -140,7 +140,7 @@ void add_rt_plot_tab( const char *w, int id_sim )
 	switch ( platform )
 	{
 		case WINDOWS:
-			tabs = 10;
+			tabs = 12;
 			cols = 10;
 			dbut = 2;
 			break;

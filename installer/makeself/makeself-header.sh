@@ -14,7 +14,7 @@ SHA="$SHAsum"
 TMPROOT=\${TMPDIR:=/tmp}
 USER_PWD="\$PWD"
 export USER_PWD
-ARCHIVE_DIR=`dirname \$0`
+ARCHIVE_DIR=\`dirname "\$0"\`
 export ARCHIVE_DIR
 
 label="$LABEL"
@@ -25,6 +25,7 @@ licensetxt="$LICENSE"
 helpheader='$HELPHEADER'
 targetdir="$archdirname"
 filesizes="$filesizes"
+totalsize="$totalsize"
 keep="$KEEP"
 nooverwrite="$NOOVERWRITE"
 quiet="n"
@@ -96,9 +97,14 @@ MS_dd()
 {
     blocks=\`expr \$3 / 1024\`
     bytes=\`expr \$3 % 1024\`
-    dd if="\$1" ibs=\$2 skip=1 obs=1024 conv=sync 2> /dev/null | \\
-    { test \$blocks -gt 0 && dd ibs=1024 obs=1024 count=\$blocks ; \\
-      test \$bytes  -gt 0 && dd ibs=1 obs=1024 count=\$bytes ; } 2> /dev/null
+    # Test for ibs, obs and conv feature
+    if dd if=/dev/zero of=/dev/null count=1 ibs=512 obs=512 conv=sync 2> /dev/null; then
+        dd if="\$1" ibs=\$2 skip=1 obs=1024 conv=sync 2> /dev/null | \\
+        { test \$blocks -gt 0 && dd ibs=1024 obs=1024 count=\$blocks ; \\
+          test \$bytes  -gt 0 && dd ibs=1 obs=1024 count=\$bytes ; } 2> /dev/null
+    else
+        dd if="\$1" bs=\$2 skip=1 2> /dev/null
+    fi
 }
 
 MS_dd_Progress()
@@ -201,6 +207,11 @@ MS_Check()
 		MS_Printf "Verifying archive integrity..."
     fi
     offset=\`head -n "\$skip" "\$1" | wc -c | tr -d " "\`
+    fsize=\`cat "\$1" | wc -c | tr -d " "\`
+    if test \$totalsize -ne \`expr \$fsize - \$offset\`; then
+        echo " Unexpected archive size." >&2
+        exit 2
+    fi
     verb=\$2
     i=1
     for s in \$filesizes
@@ -337,7 +348,7 @@ do
 	    echo Encryption: $ENCRYPT
 	fi
 	echo Date of packaging: $DATE
-	echo Built with Makeself version $MS_VERSION on $OSTYPE
+	echo Built with Makeself version $MS_VERSION
 	echo Build command was: "$MS_COMMAND"
 	if test x"\$script" != x; then
 	    echo Script run after extraction:
@@ -366,6 +377,7 @@ do
 	echo NOOVERWRITE=$NOOVERWRITE
 	echo COMPRESS=$COMPRESS
 	echo filesizes=\"\$filesizes\"
+    echo totalsize=\"\$totalsize\"
 	echo CRCsum=\"\$CRCsum\"
 	echo MD5sum=\"\$MD5sum\"
 	echo SHAsum=\"\$SHAsum\"

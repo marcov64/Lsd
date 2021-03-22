@@ -1,7 +1,7 @@
 #!/bin/bash
 #**************************************************************
 #
-#	LSD 8.0 - December 2020
+#	LSD 8.0 - March 2021
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -19,7 +19,7 @@
 #**************************************************************
 
 LSD_VER_NUM="8.0"
-LSD_VER_TAG="beta-1"
+LSD_VER_TAG="beta-2"
 
 if [ "$1" = "-h" ]; then
 	echo "Create LSD installer for Linux"

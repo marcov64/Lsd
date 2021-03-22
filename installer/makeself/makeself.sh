@@ -70,15 +70,16 @@
 # - 2.4.0 : Optional support for SHA256 checksums in archives.
 # - 2.4.2 : Add support for threads for several compressors. (M. Limber)
 #           Added zstd support.
+# - 2.4.3 : Make explicit POSIX tar archives for increased compatibility.
 #
-# (C) 1998-2020 by Stephane Peter <megastep@megastep.org>
+# (C) 1998-2021 by Stephane Peter <megastep@megastep.org>
 #
 # This software is released under the terms of the GNU GPL version 2 and above
 # Please read the license at http://www.gnu.org/copyleft/gpl.html
 # Self-extracting archives created with this script are explictly NOT released under the term of the GPL
 #
 
-MS_VERSION=2.4.2
+MS_VERSION=2.4.3
 MS_COMMAND="$0"
 unset CDPATH
 
@@ -97,8 +98,8 @@ fi
 
 MS_Usage()
 {
-    echo "Usage: $0 [params] archive_dir file_name label startup_script [args]"
-    echo "params can be one or more of the following :"
+    echo "Usage: $0 [args] archive_dir file_name label startup_script [script_args]"
+    echo "args can be one or more of the following :"
     echo "    --version | -v     : Print out Makeself version number and exit"
     echo "    --help | -h        : Print out this help message"
     echo "    --tar-quietly      : Suppress verbose output from the tar command"
@@ -173,10 +174,13 @@ MS_Usage()
 }
 
 # Default settings
-if type gzip > /dev/null 2>&1; then
+if type gzip >/dev/null 2>&1; then
     COMPRESS=gzip
+elif type compress >/dev/null 2>&1; then
+    COMPRESS=compress
 else
-    COMPRESS=Unix
+    echo "ERROR: missing commands: gzip, compress" >&2
+    MS_Usage
 fi
 ENCRYPT=n
 PASSWD=""
@@ -251,7 +255,7 @@ do
 	shift
 	;;
     --compress)
-	COMPRESS=Unix
+	COMPRESS=compress
 	shift
 	;;
     --base64)
@@ -444,7 +448,7 @@ archname="$2"
 if test "$QUIET" = "y" || test "$TAR_QUIETLY" = "y"; then
     if test "$TAR_ARGS" = "rvf"; then
 	    TAR_ARGS="rf"
-    elif test "$TAR_ARGS" = "rvhf";then
+    elif test "$TAR_ARGS" = "rvhf"; then
 	    TAR_ARGS="rhf"
     fi
 fi
@@ -461,6 +465,7 @@ if test "$APPEND" = y; then
 	    exit 1
     else
 	    eval "$OLDENV"
+	    OLDSKIP=`expr $SKIP + 1`
     fi
 else
     if test "$KEEP" = n -a $# = 3; then
@@ -550,9 +555,9 @@ gpg-asymmetric)
     GUNZIP_CMD="gpg --yes -d"
     ENCRYPT="gpg"
     ;;
-Unix)
-    GZIP_CMD="compress -cf"
-    GUNZIP_CMD="exec 2>&-; uncompress -c || test \\\$? -eq 2 || gzip -cd"
+compress)
+    GZIP_CMD="compress -fc"
+    GUNZIP_CMD="(type compress >/dev/null 2>&1 && compress -fcd || gzip -cd)"
     ;;
 none)
     GZIP_CMD="cat"
@@ -587,22 +592,21 @@ if test -f "$HEADER"; then
 	archname="$tmpfile"
 	# Generate a fake header to count its lines
 	SKIP=0
-    . "$HEADER"
-    SKIP=`cat "$tmpfile" |wc -l`
+	. "$HEADER"
+	SKIP=`cat "$tmpfile" |wc -l`
 	# Get rid of any spaces
 	SKIP=`expr $SKIP`
 	rm -f "$tmpfile"
-    if test "$QUIET" = "n";then
-    	echo "Header is $SKIP lines long" >&2
-    fi
-
+	if test "$QUIET" = "n"; then
+		echo "Header is $SKIP lines long" >&2
+	fi
 	archname="$oldarchname"
 else
     echo "Unable to open header file: $HEADER" >&2
     exit 1
 fi
 
-if test "$QUIET" = "n";then 
+if test "$QUIET" = "n"; then
     echo
 fi
 
@@ -629,13 +633,29 @@ fi
 tmparch="${TMPDIR:-/tmp}/mkself$$.tar"
 (
     if test "$APPEND" = "y"; then
-        tail -n "+$OLDSKIP" "$archname" | $GUNZIP_CMD > "$tmparch"
+        tail -n "+$OLDSKIP" "$archname" | eval "$GUNZIP_CMD" > "$tmparch"
     fi
     cd "$archdir"
-    find . ! -type d -o -links 2 \
+    # "Determining if a directory is empty"
+    # https://www.etalabs.net/sh_tricks.html
+    find . \
+        \( \
+        ! -type d \
+        -o \
+        \( -links 2 -exec sh -c '
+            is_empty () (
+                cd "$1"
+                set -- .[!.]* ; test -f "$1" && return 1
+                set -- ..?* ; test -f "$1" && return 1
+                set -- * ; test -f "$1" && return 1
+                return 0
+            )
+            is_empty "$0"' {} \; \
+        \) \
+        \) -print \
         | LC_ALL=C sort \
         | sed 's/./\\&/g' \
-        | xargs tar $TAR_EXTRA -$TAR_ARGS "$tmparch"
+        | xargs tar $TAR_EXTRA --posix -$TAR_ARGS "$tmparch"
 ) || {
     echo "ERROR: failed to create temporary archive: $tmparch"
     rm -f "$tmparch" "$tmpfile"
@@ -666,12 +686,12 @@ md5sum=00000000000000000000000000000000
 crcsum=0000000000
 
 if test "$NOCRC" = y; then
-	if test "$QUIET" = "n";then
+	if test "$QUIET" = "n"; then
 		echo "skipping crc at user request"
 	fi
 else
 	crcsum=`CMD_ENV=xpg4 cksum < "$tmpfile" | sed -e 's/ /Z/' -e 's/	/Z/' | cut -dZ -f1`
-	if test "$QUIET" = "n";then
+	if test "$QUIET" = "n"; then
 		echo "CRC: $crcsum"
 	fi
 fi
@@ -693,7 +713,7 @@ if test "$SHA256" = y; then
 	fi
 fi
 if test "$NOMD5" = y; then
-	if test "$QUIET" = "n";then
+	if test "$QUIET" = "n"; then
 		echo "Skipping md5sum at user request"
 	fi
 else
@@ -710,15 +730,21 @@ else
 			MD5_ARG="-a md5"
 		fi
 		md5sum=`eval "$MD5_PATH $MD5_ARG" < "$tmpfile" | cut -b-32`
-		if test "$QUIET" = "n";then
+		if test "$QUIET" = "n"; then
 			echo "MD5: $md5sum"
 		fi
 	else
-		if test "$QUIET" = "n";then
+		if test "$QUIET" = "n"; then
 			echo "MD5: none, MD5 command not found"
 		fi
 	fi
 fi
+
+totalsize=0
+for size in $fsize;
+do
+    totalsize=`expr $totalsize + $size`
+done
 
 if test "$APPEND" = y; then
     mv "$archname" "$archname".bak || exit
@@ -735,7 +761,7 @@ if test "$APPEND" = y; then
 
     chmod +x "$archname"
     rm -f "$archname".bak
-    if test "$QUIET" = "n";then
+    if test "$QUIET" = "n"; then
     	echo "Self-extractable archive \"$archname\" successfully updated."
     fi
 else
@@ -748,12 +774,12 @@ else
     . "$HEADER"
 
     # Append the compressed tar data after the stub
-    if test "$QUIET" = "n";then
+    if test "$QUIET" = "n"; then
     	echo
     fi
     cat "$tmpfile" >> "$archname"
     chmod +x "$archname"
-    if test "$QUIET" = "n";then
+    if test "$QUIET" = "n"; then
     	echo Self-extractable archive \"$archname\" successfully created.
     fi
 fi
