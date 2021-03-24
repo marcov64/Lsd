@@ -351,6 +351,15 @@ void plot_rt( variable *v )
 	int height, p_digits;
 	double value, scale, zero_lim;
 	
+	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot.c.c.cn ] } { \
+			set e 1 \
+		} { \
+			set e 0 \
+		}" );
+	
+	if ( ! get_bool( "e" ) )
+		return;
+	
 	height = get_int( "vsizeR" );
 	p_digits = get_int( "pdigitsR" );
 	
