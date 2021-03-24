@@ -28,6 +28,7 @@ set LsdDir LSD
 set LsdSrc src
 set winGnuplot "gp541-win64-mingw.exe"
 set winRoot "C:/"
+set winDLL [ list libwinpthread-1.dll libgcc_s_seh-1.dll libstdc++-6.dll tcl86.dll tk86.dll zlib1.dll ]
 set linuxPkg 		[ list	g++ 				make	gdb		gnuplot		multitail	zlib			tcl				tk				]
 set linuxTyp 		[ list	exe 				exe 	exe		exe			exe			lib				lib				lib				]
 set linuxPmPkg(apt)	[ list	build-essential 	make	gdb		gnuplot-qt	multitail	zlib1g-dev		tcl-dev			tk-dev			]
@@ -451,8 +452,7 @@ set issues [ list ]
 #
 
 if [ string equal $CurPlatform windows ] {
-	set res [ catch { set compPath [ exec where g++ ] } ]
-	
+
 	if { ! [ add_user_path "$LsdRoot/gnu/bin" ] } {
 		if [ string equal [ ttk::messageBox -parent "" -type okcancel -default ok -title Error -icon error -message "Cannot add LSD to PATH" -detail "LSD libraries folder could not be added to the user PATH environment variable.\n\nYou may try to repeat the installation or manually add the folder '$LsdRoot/gnu/bin' to the PATH variable following the steps described in 'Readme.txt'.\n\nPress 'OK' if you want to continue the installation anyway or 'Cancel' to exit." ] ok ] {
 		
@@ -464,11 +464,53 @@ if [ string equal $CurPlatform windows ] {
 		
 			exit 10
 		}
-	# if a compiler exists and is ahead on path, warn user
-	} elseif { $res == 0 } {
-		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Another C++ compiler already set" -detail "There is another C++ compiler already installed ('$compPath'). LSD will use it but it is not guaranteed this compiler is adequately configured to support LSD.\n\nCheck in 'Readme.txt' the required steps to properly configure your external compiler or remove/uninstall it before using LSD.\n\nInstallation will continue but you may have to fix this problem so LSD can work reliably."
+	}
 
-			lappend issues "External compiler maybe not configured (unknown)"
+	# if another compiler exists and is ahead on path, warn user
+	if { ! [ catch { set res [ exec where g++ ] } ] } {
+	
+		set existGCC [ list ]
+		set msgGCC ""
+		foreach f [ split $res ] {
+			if { [ file dirname $f ] eq "$LsdRoot/gnu/bin" } {
+				break
+			} else {
+				set existGCC [ lappend existGCC $f ]
+				set msgGCC "$msgGCC\n$f"
+			}	
+		}
+		
+		if { [ llength $existGCC ] > 0 } {
+			ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Potentially unsupported C++ compiler installed" -detail "There is another C++ compiler already installed:\n$msgGCC\n\nLSD will use it but it is not guaranteed this compiler is updated and configured to support LSD.\n\nCheck in 'Readme.txt' the required steps to properly configure your external compiler or remove/uninstall it before using LSD.\n\nInstallation will continue but you may have to fix this problem so LSD can work reliably."
+
+			foreach comp $existGCC {
+				lappend issues "External compiler maybe not configured (del $comp)"
+			}
+		}
+	}
+	
+	# if required libraries exist ahead on path, warn user
+	set existDLL [ list ]
+	set msgDLL ""
+	foreach dll $winDLL {
+		if { ! [ catch { set res [ exec where $dll ] } ] } {
+			foreach f [ split $res ] {
+				if { [ file dirname $f ] eq "$LsdRoot/gnu/bin" } {
+					break
+				} else {
+					set existDLL [ lappend existDLL $f ]
+					set msgDLL "$msgDLL\n$f"
+				}
+			}
+		}
+	}
+
+	if { [ llength $existDLL ] > 0 } {
+		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Potentially conflicting libraries installed" -detail "There are libraries used by LSD already installed:\n$msgDLL\n\nLSD will use them but it is not guaranteed they are updated and compatible to support LSD.\n\nYou may want to remove or update them before using LSD.\n\nInstallation will continue but you may have to fix this problem so LSD can work reliably."
+
+		foreach dll $existDLL {
+			lappend issues "External library maybe not updated (del $dll)"
+		}
 	}
 }
 
@@ -784,7 +826,7 @@ ttk::frame .end
 if { [ llength $issues ] == 0 } {
 	ttk::label .end.msg1 -text "LSD installation completed successfully."
 } else {
-	ttk::label .end.msg1 -justify center -text "LSD installation completed\nwith errors, some issues remain.\n\nYou may try to repeat the installation or do a manual\ninstall following the steps described in 'Readme.txt'."
+	ttk::label .end.msg1 -justify center -text "LSD installation completed\nwith warnings, some issues remain.\n\nYou may try to repeat the installation or do a manual\ninstall following the steps described in 'Readme.txt'."
 	
 	catch { 
 		set f [ open "$LsdRoot/installer.err" a ]
