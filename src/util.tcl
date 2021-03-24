@@ -390,7 +390,7 @@ proc update_parent { } {
 # just series from one parent/source
 #************************************************
 proc filter_series { { par "" } } {
-	global parAll serPar parFlt parList serSel serList serParDict fltCbox serLbox
+	global parAll serPar parFlt parList serSel serList serOrd serParDict fltCbox serLbox
 	
 	if { $par eq "" } {
 		set par [ lindex $serPar 0 ]
