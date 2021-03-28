@@ -164,7 +164,7 @@ if(t == 1)
     ABMAT_ADD_COMP("nHouseholds","histothouseholds")
     ABMAT_ADD_COMP("Capacity","histothouseholds")
 
-    ABMAT_ADD_COND("yield","maizeZone")
+//    ABMAT_ADD_COND("yield","maizeZone")
 //    ABMAT_ADD_PSTATIC("
     
 }
