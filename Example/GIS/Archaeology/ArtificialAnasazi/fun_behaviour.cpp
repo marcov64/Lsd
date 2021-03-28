@@ -33,14 +33,14 @@ if (!ANY_GISS(farm))
     error_hard("\nERROR!", "check lastharvest", "Farm is not in GIS");
 }
 
-if (!SAME_GIS(farm))
+if (!SAME_GIS_WHERE(farm))
 {
     error_hard("\nERROR!", "check lastharvest", "Farm is not in same GIS as household");
 }
 
 object* patch = SEARCH_POSITION_GRIDS(farm, "Land_Patch");
 
-if (!SAME_GISS(farm, patch))
+if (!SAME_GISS_WHERE(farm, patch))
 {
     error_hard("\nERROR!", "check lastharvest", "Farm is not in same GIS as the land");
 }

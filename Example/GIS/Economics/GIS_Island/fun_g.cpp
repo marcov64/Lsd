@@ -274,7 +274,7 @@ double Productivity=0;
 
 if (V("_known")==1){
 		cur1=SEARCH_POSITION_XY("Island",x,y);
-    v[1] = COUNT_POSITIONS(cur1,"Agent");
+    v[1] = COUNT_POSITION_WHERE("Agent",cur1);
 	}
 else
 END_EQUATION(0);
@@ -295,7 +295,7 @@ Output of miner.
 double indiOP=0;
 cur=SEARCH_POSITION_XY("Island",POSITION_X,POSITION_Y);
 if (cur!=NULL){
-	 indiOP=VS(cur, "_s" ) * pow( COUNT_POSITIONS(cur, "Agent" ), V ("alpha" ) - 1 ) * V( "_activeMiner" );
+	 indiOP=VS(cur, "_s" ) * pow( COUNT_POSITION_WHERE("Agent", cur ), V ("alpha" ) - 1 ) * V( "_activeMiner" );
 //PLOG("\nin _Qminer %g %g on ID %g %g",POSITION_X,POSITION_Y,V("_OnIslandID"),indiOP);
 }
 
@@ -476,7 +476,7 @@ CYCLE_LINKS(cur1,curl){
 	//PLOG("\n cycling links");
 		cur = LINKTO( curl );
 		//PLOG("\n x and y is %g %g with agents %g",POSITION_XS(cur),POSITION_YS(cur),COUNT_POSITIONS(cur,"Agent"));				// object connected
-  	receivedPrb=(COUNT_POSITIONS(cur,"Agent")/total_miner)*V_LINK(curl);
+  	receivedPrb=(COUNT_POSITION_WHERE("Agent",cur)/total_miner)*V_LINK(curl);
 		//PLOG("\n recieved prb %g with value of link  %g with total miner%g ",receivedPrb,V_LINK(curl),total_miner);
 		if (RND <receivedPrb){
 			productivity=VLS(cur,"_c",1);
