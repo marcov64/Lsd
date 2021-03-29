@@ -13,7 +13,6 @@
 EQUATION( "L1" )
 /*
 Work force (labor) size employed by capital-good sector
-Updates 'L1rd'
 */
 
 v[1] = VS( LABSUPL1, "Ls" );					// available labor force
@@ -41,16 +40,18 @@ RESULT( v[2] + ( v[3] - v[2] ) * v[6] )
 
 EQUATION( "MC1" )
 /*
-Market conditions index for entry in capital-good sector
+Market entry conditions index in capital-good sector
 */
 RESULT( log( max( VL( "NW1", 1 ), 0 ) + 1 ) - log( VL( "Deb1", 1 ) + 1 ) )
 
 
 EQUATION( "entry1exit" )
 /*
+Net (number of) entrant firms in capital-good sector
 Perform entry and exit of firms in the capital-good sector
 All relevant aggregate variables in sector must be computed before existing
 firms are deleted, so all active firms in period are considered
+Also updates 'F1', 'cEntry', 'cExit', 'exit1', 'entry1', 'exit1fail'
 */
 
 VS( CONSECL1, "K" );							// ensure canceled orders acct'd
@@ -132,7 +133,7 @@ CYCLE_SAFE( cur, "Firm1" )
 V( "f1rescale" );								// redistribute exiting m.s.
 
 // compute the potential number of entrants
-v[8] = ( MC1_1 == 0 ) ? 0 : MC1 / MC1_1 - 1;// change in market conditions
+v[8] = ( MC1_1 == 0 ) ? 0 : MC1 / MC1_1 - 1;	// change in market conditions
 
 k = max( 0, ceil( F1 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
 						 omicron * min( max( v[8], x2inf ), x2sup ) ) ) );

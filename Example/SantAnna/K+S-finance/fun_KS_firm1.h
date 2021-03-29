@@ -201,42 +201,71 @@ RESULT( v[0] )
 EQUATION( "_Q1" )
 /*
 Planed production for a firm in capital-good sector
+Also updates '_CD1', '_CD1c', '_CS1'
 */
 
 v[1] = V( "_D1" );								// potential production (orders)
+
+if ( v[1] <= 0 )
+	END_EQUATION( 0 );							// nothing to do
+
 v[2] = V( "_CS1a" );							// available credit supply
 v[3] = VL( "_NW1", 1 );							// net worth (cash available)
 v[4] = V( "_c1" );								// unit cost
+v[5] = V( "_p1" );								// machine price
+v[6] = V( "_RD" );								// R&D costs still to pay
 
-v[5] = v[1] * ( v[4] - V( "_p1" ) ) + V( "_RD" );// cash flow to fulfill orders
+v[7] = v[1] * ( v[4] - v[5] ) + v[6];			// cash flow to fulfill orders
 
-if ( v[5] < 0 || v[5] <= v[3] - 1 )				// firm can self-finance?
+if ( v[7] < 0 || v[7] <= v[3] - 1 )				// firm can self-finance?
+{
 	v[0] = v[1];								// plan the desired output
+	v[3] -= v[7];								// remove flow from cash
+}
 else
-	if ( v[5] <= v[3] - 1 + v[2] )				// possible to finance all?
+{
+	if ( v[7] <= v[3] - 1 + v[2] )				// possible to finance all?
+	{
 		v[0] = v[1];							// plan the desired output
+		v[8] = v[9] = v[7] - v[3] + 1;			// finance the difference
+		v[3] = 1;								// keep minimum cash
+	}
 	else										// credit constrained firm
 	{
-		// produce as much as the available finance allows
-		v[0] = floor( ( v[3] - 1 - v[5] + v[2] ) / v[4] );// max possible
-		v[0] = min( max( v[0], 0 ), v[1] );		// positive but up to D1
+		// produce as much as the available finance allows, positive but up to D1
+		v[0] = min( max( floor( ( v[3] - 1 - v[7] + v[2] ) / v[4] ), 0 ), v[1] );		
+		v[9] = v[7] - v[3] + 1;					// desired credit
 		
 		if ( v[0] == 0 )
-			v[6] = 1;							// all orders canceled
+		{
+			v[8] = 0;							// no finance
+			v[10] = 1;							// all orders canceled
+			v[3] -= v[6] - v[2];				// let negative NW (bankruptcy)
+		}
 		else
-			v[6] = 1 - v[0] / v[1];				// machine shortage factor
+		{
+			v[7] = v[0] * ( v[4] - v[5] ) + v[6];// reduced cash flow
+			v[8] = v[7] - v[3] + 1;				// finance what is possible
+			v[10] = 1 - v[0] / v[1];			// machine shortage factor
+			v[3] = 1;							// keep minimum cash
+		}
 		
 		// shrink or cancel all exceeding orders
 		CYCLE( cur, "Cli" )
 			if ( VS( cur, "_tOrd" ) == T )		// order in this period?
 			{
-				if ( v[6] == 1 )				// bankruptcy?
+				if ( v[10] == 1 )				// bankruptcy?
 					INCRS( cur, "_nCan", VS( cur, "_nOrd" ) );
 				else
-					INCRS( cur, "_nCan", floor( VS( cur, "_nOrd" ) * v[6] ) );
+					INCRS( cur, "_nCan", floor( VS( cur, "_nOrd" ) * v[10] ) );
 			}
 	}
 	
+	update_debt1( THIS, v[9], v[8] );			// update debt (desired/granted)
+}
+
+WRITE( "_NW1", v[3] );							// update the firm net worth
+
 RESULT( v[0] )
 
 
@@ -277,7 +306,9 @@ else
 WRITE( "_Div1", v[4] );							// save period dividends
 
 v[6] = v[1] - v[0] - v[4];						// free cash flow
-v[7] = VL( "_NW1", 1 );							// current net worth
+
+// net worth after reversing provisioned expected costs in '_Q1'
+v[7] = INCR( "_NW1", V( "_Q1" ) * ( V( "_c1" ) - V( "_p1" ) ) + V( "_RD" ) );
 
 if ( v[6] < 0 )									// must finance losses?
 {
@@ -539,25 +570,25 @@ Updated in '_Atau'
 EQUATION_DUMMY( "_CD1", "" )
 /*
 Credit demand for firm in capital-good sector
-Updated in '_Deb1max', '_Tax1'
+Updated in '_Deb1max', '_Q1', '_Tax1'
 */
 
 EQUATION_DUMMY( "_CD1c", "" )
 /*
 Credit demand constraint for firm in capital-good sector
-Updated in '_Deb1max', '_Tax1'
+Updated in '_Deb1max', '_Q1', '_Tax1'
 */
 
 EQUATION_DUMMY( "_CS1", "" )
 /*
 Credit supplied to firm in capital-good sector
-Updated in '_Deb1max', '_Tax1'
+Updated in '_Deb1max', '_Q1', '_Tax1'
 */
 
 EQUATION_DUMMY( "_Deb1", "" )
 /*
 Stock of bank debt of firm in capital-good sector
-Updated in '_Tax1'
+Updated in '_Q1', '_Tax1'
 */
 
 EQUATION_DUMMY( "_Div1", "" )
@@ -569,7 +600,7 @@ Updated in '_Tax1'
 EQUATION_DUMMY( "_NW1", "" )
 /*
 Net worth of firm in capital-good sector
-Updated in '_Tax1'
+Updated in '_Q1', '_Tax1'
 */
 
 EQUATION_DUMMY( "_imi", "" )

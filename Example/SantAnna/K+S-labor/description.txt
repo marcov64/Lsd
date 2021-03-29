@@ -18,8 +18,9 @@ v5.1.1 (12/08/20) - use LSD C++11 pseudo-random generator engine
                     change capacity utilization measure to account for labor
                     fix flagGovExp operation for values less than 2 (minimum income)
                     fix L1shortMax value in example configurations
-v5.1.2 (01/03/21) - fix lag definition and initialization of some variables
+v5.1.2 (01/04/21) - fix lag definition and initialization of some variables
                     fix lagged values for taxes
+                    fix firm finance statistics
                     unify new machine selection criteria (=scrapping rule)
                     normalize values used to compute imitation euclidean distance
                     improve bank excess reserves and net worth computation and bail-out

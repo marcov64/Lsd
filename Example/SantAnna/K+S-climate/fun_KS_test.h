@@ -600,7 +600,7 @@ check_error( floor( SIeD ) > SIe, "INCONSISTENT-CAPITAL", 0, & errors );
 LOG( "\n   E RDe=%.3g Ce=%.3g Se=%.3g TaxE=%.3g PiE=%.3g NWe=%.3g", 
 	 RDe, Ce, Se, TaxE, PiE, NWe );
 
-check_error( RDe > Ce ||Ce > Se || TaxE > Se || PiE > Se, 
+check_error( RDe > Ce || Ce > Se || TaxE > Se || PiE > Se, 
 			 "INCONSISTENT-COST", 0, & errors );
 
 if ( T == v[2] )

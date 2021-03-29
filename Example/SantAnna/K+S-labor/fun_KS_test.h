@@ -251,9 +251,9 @@ double NW2 = VS( CONSECL1, "NW2" );
 double entry2 = VS( CONSECL1, "entry2" );
 double exit2 = VS( CONSECL1, "exit2" );
 
-double nonNeg[ ] = { BS, Bonds, CD, CDc, CS, Depo, DepoG, DivB, Gbail, Loans, 
-					 LoansCB, Res, TaxB, Bda, Bfail, BadDeb, HHb, HPb, SavAcc, 
-					 NW1, NW2, rBonds, rD, rRes };
+double nonNeg[ ] = { BS, Bonds, CD, CDc, CS, Deb1, Deb2, Depo, DepoG, DivB, 
+					 Gbail, Loans, LoansCB, Res, TaxB, Bda, Bfail, BadDeb, 
+					 HHb, HPb, SavAcc, NW1, NW2, rBonds, rD, rRes };
 double posit[ ] = { Cl, r, rDeb, F1, F2 };
 double finite[ ] = { BD, Deb, TC, PiB, NW1, NW2, entry1, exit1, entry2, exit2 };
 

@@ -143,7 +143,7 @@ RESULT( v[0] )
 
 EQUATION( "_TC1free" )
 /*
-Minimum bank total credit supply to firms in sector 1
+Minimum bank total credit supply to firms in capital-good sector
 Updated in 'update_debt1' support function
 */
 
@@ -162,7 +162,7 @@ RESULT( v[0] )
 
 EQUATION( "_TC2free" )
 /*
-Maximum bank total credit supply to firms in sector 2
+Maximum bank total credit supply to firms in consumption-good sector
 */
 
 if ( VS( GRANDPARENT, "flagCreditRule" ) > 0 )

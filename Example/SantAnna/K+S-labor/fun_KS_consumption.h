@@ -87,16 +87,18 @@ RESULT( v[0] )
 
 EQUATION( "MC2" )
 /*
-Market conditions index for entry in consumer-good sector
+Market entry conditions index in consumer-good sector
 */
 RESULT( log( max( VL( "NW2", 1 ), 0 ) + 1 ) - log( VL( "Deb2", 1 ) + 1 ) )
 
 
 EQUATION( "entry2exit" )
 /*
+Net (number of) entrant firms in consumer-good sector
 Perform entry and exit of firms in the consumer-good sector
 All relevant aggregate variables in sector must be computed before existing
 firms are deleted, so all active firms in period are considered
+Also updates 'F2', 'cEntry', 'cExit', 'exit2', 'entry2', 'exit2fail'
 */
 
 SUM( "_D2d" );									// desired demand before chg
@@ -181,7 +183,7 @@ CYCLE_SAFE( cur, "Firm2" )
 V( "f2rescale" );								// redistribute exiting m.s.
 
 // compute the potential number of entrants
-v[9] = ( MC2_1 == 0 ) ? 0 : MC2 / MC2_1 - 1;// change in market conditions
+v[9] = ( MC2_1 == 0 ) ? 0 : MC2 / MC2_1 - 1;	// change in market conditions
 
 k = max( 0, ceil( F2 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
 						 omicron * min( max( v[9], x2inf ), x2sup ) ) ) );

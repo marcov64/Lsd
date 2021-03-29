@@ -17,11 +17,11 @@ Also updates '_CD2', '_CD2c', '_CS2'
 */
 
 // maximum debt allowed to firm, considering net worth and operating margin
-v[5] = VS( FINSECL2, "Lambda" ) * max( VL( "_NW2", 1 ), 
+v[1] = VS( FINSECL2, "Lambda" ) * max( VL( "_NW2", 1 ), 
 									   VL( "_S2", 1 ) - VL( "_C2", 1 ) );
 		   
 // apply an absolute floor to maximum debt prudential limit
-v[0] = max( v[5], VS( FINSECL2, "Lambda0" ) * VLS( CAPSECL2, "PPI", 1 ) / 
+v[0] = max( v[1], VS( FINSECL2, "Lambda0" ) * VLS( CAPSECL2, "PPI", 1 ) / 
 				  VS( CAPSECL2, "PPI0" ) );
 
 WRITE( "_CD2", 0 );								// reset total credit demand
@@ -120,57 +120,9 @@ EQUATION( "_EI" )
 Effective expansion investment of firm in consumption-good sector
 Also updates '_NW2', '_CD2', 'CD2c', 'CS2'
 */
-
 V( "_Q2" );										// make sure production decided
 V( "_supplier" );								// ensure supplier is selected
-cur = PARENTS( SHOOKS( HOOK( SUPPL ) ) );		// pointer to new supplier
-
-v[1] = V( "_EId" );								// desired expansion investment
-
-if ( v[1] == 0 )
-	END_EQUATION( 0 );							// nothing to do
-
-v[2] = V( "_CS2a" );							// available credit supply
-v[3] = V( "_NW2" );								// net worth (cash available)
-v[4] = VS( PARENT, "m2" );						// machine output per period
-v[5] = VS( cur, "_p1" );						// new machine price
-
-v[6] = v[5] * v[1] / v[4];						// expansion investment cost
-
-if ( v[6] <= v[3] - 1 )							// can invest with own funds?
-{
-	v[0] = v[1];								// expand as planned
-	v[3] -= v[6];								// remove machines cost from cash
-}
-else
-{
-	if ( v[6] <= v[3] - 1 + v[2] )				// possible to finance all?
-	{
-		v[0] = v[1];							// expand as planned
-		v[7] = v[8] = v[6] - v[3] + 1;			// finance the difference
-		v[3] = 1;								// keep minimum cash
-	}
-	else										// credit constrained firm
-	{
-		// invest as much as the available finance allows, rounded to # machines
-		v[0] = max( floor( ( v[3] - 1 + v[2] ) / v[5] ) * v[4], 0 );
-		
-		if ( v[0] == 0 )
-			END_EQUATION( 0 );					// nothing to do
-
-		v[7] = v[2];							// take all credit available
-		v[8] = v[6] - v[3] + 1;					// desired credit
-		v[3] = 1;								// keep minimum cash
-	}
-	
-	update_debt2( THIS, v[8], v[7] );			// update firm debt
-}
-
-WRITE( "_NW2", v[3] );							// update the firm net worth
-
-send_order( THIS, floor( v[0] / v[4] ) );		// send order to machine supplier
-
-RESULT( v[0] )
+RESULT( invest( THIS, V( "_EId" ) ) )
 
 
 EQUATION( "_EId" )
@@ -232,7 +184,7 @@ Also updates '_NW2', '_CD2', 'CD2c', 'CS2'
 
 v[1] = V( "_Q2d" );								// desired production
 
-if ( v[1] == 0 )
+if ( v[1] <= 0 )
 	END_EQUATION( 0 );							// nothing to do
 
 v[2] = V( "_CS2a" );							// available credit supply
@@ -245,7 +197,7 @@ v[6] = v[1] * v[4];								// cost of desired production
 if ( v[6] <= v[3] - 1 )							// firm can self-finance?
 {
 	v[0] = v[1];								// plan the desired output
-	v[3] -= v[6];								// remove cost (wages) from cash
+	v[3] -= v[6];								// remove wage cost from cash
 }
 else
 {
@@ -257,22 +209,23 @@ else
 	}
 	else										// credit constrained firm
 	{
-		// produce as much as the available finance allows
-		v[0] = max( ( v[3] - 1 + v[2] ) / v[4], 0 ); // positive production only
-		v[0] = floor( v[0] / v[5] ) * v[5];		// round to the # of machines
+		// produce as much as the available finance allows, rounded # machines
+		v[0] = floor( max( ( v[3] - 1 + v[2] ) / v[4], 0 ) / v[5] ) * v[5];
+		v[8] = v[6] - v[3] + 1;					// desired credit
 		
 		if ( v[0] == 0 )
-			END_EQUATION( 0 );					// nothing to do
-
-		v[7] = v[2];							// take all credit available
-		v[8] = v[6] - v[3] + 1;					// desired credit
+			v[7] = 0;							// no finance
+		else
+		{
+			v[6] = v[0] * v[4];					// reduced production cost
+			v[7] = v[6] - v[3] + 1;				// finance the difference
 		v[3] = 1;								// keep minimum cash
 	}
+	}
 	
-	update_debt2( THIS, v[8], v[7] );			// update firm debt
+	update_debt2( THIS, v[8], v[7] );			// update debt (desired/granted)
 }
 
-// provision for wage expenses
 WRITE( "_NW2", v[3] );							// update the firm net worth
 
 RESULT( v[0] )
@@ -298,61 +251,14 @@ EQUATION( "_SI" )
 Effective substitution investment of firm in consumption-good sector
 Also updates '_NW2', '_CD2', 'CD2c', 'CS2'
 */
-
 V( "_EI" );										// make sure expansion done
-
-v[1] = V( "_SId" );								// desired substitution invest.
-
-if ( v[1] == 0 )
-	END_EQUATION( 0 );							// nothing to do
-
-v[2] = V( "_CS2a" );							// available credit supply
-v[3] = V( "_NW2" );								// net worth (cash available)
-v[4] = VS( PARENT, "m2" );						// machine output per period
-v[5] = VS( PARENTS( SHOOKS( HOOK( SUPPL ) ) ), "_p1" );// new machine price
-
-v[6] = v[5] * v[1] / v[4];						// substitution investment cost
-
-if ( v[6] <= v[3] - 1 )							// can invest with own funds?
-{
-	v[0] = v[1];								// substitute as planned
-	v[3] -= v[6];								// remove machines cost from cash
-}
-else
-{
-	if ( v[6] <= v[3] - 1 + v[2] )				// possible to finance all?
-	{
-		v[0] = v[1];							// substitute as planned
-		v[7] = v[8] = v[6] - v[3] + 1;			// finance the difference
-		v[3] = 1;								// keep minimum cash
-	}
-	else										// credit constrained firm
-	{
-		// invest as much as the available finance allows, rounded to # machines
-		v[0] = max( floor( ( v[3] - 1 + v[2] ) / v[5] ) * v[4], 0 );
-		
-		if ( v[0] == 0 )
-			END_EQUATION( 0 );					// nothing to do
-
-		v[7] = v[2];							// take all credit available
-		v[8] = v[6] - v[3] + 1;					// desired credit
-		v[3] = 1;								// keep minimum cash
-	}
-	
-	update_debt2( THIS, v[8], v[7] );			// update firm debt
-}
-
-WRITE( "_NW2", v[3] );							// update the firm net worth
-
-send_order( THIS, floor( v[0] / v[4] ) );		// send order to machine supplier
-
-RESULT( v[0] )
+RESULT( invest( THIS, V( "_SId" ) ) )
 
 
 EQUATION( "_Tax2" )
 /*
 Tax paid by firm in consumption-good sector
-Also updates '_B2', '_Div2', '_NW2', '_CD2', 'CD2c', 'CS2'
+Also updates '_Div2', '_NW2', '_CD2', 'CD2c', 'CS2'
 */
 
 v[1] = V( "_Pi2" );								// firm profit in period
@@ -368,16 +274,15 @@ else
 
 WRITE( "_Div2", v[4] );							// save period dividends
 
-// compute free cash flow
-v[6] = v[1] - v[0] - v[4];
+v[6] = v[1] - v[0] - v[4];						// free cash flow
 
-// remove from net wealth the provision for wages
+// net worth after reversing provisioned expected production cost in '_Q2'
 v[7] = INCR( "_NW2", V( "_Q2" ) * V( "_c2" ) );
 
 if ( v[6] < 0 )									// must finance losses?
 {
 	if ( v[7] >= - v[6] + 1 )					// can cover losses with reserves?
-		INCR( "_NW2", v[6] );					// draw from net wealth
+		INCR( "_NW2", v[6] );					// draw from net worth
 	else
 	{
 		v[8] = V( "_CS2a" );					// available credit supply
@@ -386,11 +291,11 @@ if ( v[6] < 0 )									// must finance losses?
 		if ( v[8] >= v[9] )						// can finance losses?
 		{
 			update_debt2( THIS, v[9], v[9] );	// finance all
-			WRITE( "_NW2", 1 );					// minimum net wealth
+			WRITE( "_NW2", 1 );					// minimum net worth
 		}
 		else
 		{
-			update_debt2( THIS, v[8], v[8] );	// take what is possible
+			update_debt2( THIS, v[9], v[8] );	// take what is possible
 			INCR( "_NW2", v[6] - v[8] );		// let negative NW (bankruptcy)
 		}					
 	}
@@ -1040,7 +945,7 @@ Updated in '_Tax2'
 
 EQUATION_DUMMY( "_NW2", "" )
 /*
-Net wealth (free cash) of firm in consumption-good sector
+Net worth of firm in consumption-good sector
 Updated in '_Q2', '_EI', '_SI', '_Tax2'
 */
 

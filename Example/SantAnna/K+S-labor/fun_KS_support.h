@@ -62,12 +62,10 @@ bool rank_desc_NWtoS( firmRank e1, firmRank e2 )
 }
 
 
-// update firm debt in equation 'Q1', '_Tax1'
+// update firm debt in equation '_Q1', '_Tax1'
 
 void update_debt1( object *firm, double desired, double loan )
 {
-	INCRS( firm, "_Deb1", loan );				// increment firm's debt stock
-
 	if ( desired > 0 )							// ignore loan repayment
 	{
 		INCRS( firm, "_CD1", desired );			// desired credit
@@ -75,12 +73,17 @@ void update_debt1( object *firm, double desired, double loan )
 		INCRS( firm, "_CS1", loan );			// supplied credit
 	}
 	
-	object *bank = HOOKS( firm, BANK );			// firm's bank
-	double TC1free = VS( bank, "_TC1free" );	// available credit firm's bank
+	if ( loan != 0 )
+	{
+		INCRS( firm, "_Deb1", loan );			// increment firm's debt stock
 
-	// if credit limit active, adjust bank's available credit
-	if ( TC1free > -0.1 )
-		WRITES( bank, "_TC1free", max( TC1free - loan, 0 ) );
+		object *bank = HOOKS( firm, BANK );		// firm's bank
+		double TC1free = VS( bank, "_TC1free" );// available credit firm's bank
+
+		// if credit limit active, adjust bank's available credit
+		if ( TC1free > -0.1 )
+			WRITES( bank, "_TC1free", max( TC1free - loan, 0 ) );
+	}
 }
 
 
@@ -88,8 +91,6 @@ void update_debt1( object *firm, double desired, double loan )
 
 void update_debt2( object *firm, double desired, double loan )
 {
-	INCRS( firm, "_Deb2", loan );				// increment firm's debt stock
-	
 	if ( desired > 0 )							// ignore loan repayment
 	{
 		INCRS( firm, "_CD2", desired );			// desired credit
@@ -97,12 +98,17 @@ void update_debt2( object *firm, double desired, double loan )
 		INCRS( firm, "_CS2", loan );			// supplied credit
 	}
 	
-	object *bank = HOOKS( firm, BANK );			// firm's bank
-	double TC2free = VS( bank, "_TC2free" );	// available credit at firm's bank
+	if ( loan != 0 )
+	{
+		INCRS( firm, "_Deb2", loan );			// increment firm's debt stock
 	
-	// if credit limit active, adjust bank's available credit
-	if ( TC2free > -0.1 )
-		WRITES( bank, "_TC2free", max( TC2free - loan, 0 ) );
+		object *bank = HOOKS( firm, BANK );		// firm's bank
+		double TC2free = VS( bank, "_TC2free" );// available credit at firm's bank
+	
+		// if credit limit active, adjust bank's available credit
+		if ( TC2free > -0.1 )
+			WRITES( bank, "_TC2free", max( TC2free - loan, 0 ) );
+	}
 }
 
 
@@ -145,37 +151,130 @@ void send_order( object *firm, double nMach )
 }
 
 
+// perform investment according to available funding in equations '_EI', '_SI'
+
+double invest( object *firm, double desired )
+{
+	double invest, invCost, loan, loanDes;
+	
+	if ( desired <= 0 )
+		return 0;
+		
+	double m2 = VS( PARENTS( firm ), "m2" );	// machine output per period
+	double _CS2a = VS( firm, "_CS2a" );			// available credit supply
+	double _NW2 = VS( firm, "_NW2" );			// net worth (cash available)
+	double _p1 = VS( PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) ), "_p1" );
+
+	invCost = _p1 * desired / m2;				// desired investment cost
+
+	if ( invCost <= _NW2 - 1 )					// can invest with own funds?
+	{
+		invest = desired;						// invest as planned
+		_NW2 -= invCost;						// remove machines cost from cash
+	}
+	else
+	{
+		if ( invCost <= _NW2 - 1 + _CS2a )		// possible to finance all?
+		{
+			invest = desired;					// invest as planned
+			loan = loanDes = invCost - _NW2 + 1;// finance the difference
+			_NW2 = 1;							// keep minimum cash
+		}
+		else									// credit constrained firm
+		{
+			// invest as much as the available finance allows, rounded # machines
+			invest = max( floor( ( _NW2 - 1 + _CS2a ) / _p1 ) * m2, 0 );
+			loanDes = invCost - _NW2 + 1;		// desired credit
+			
+			if ( invest == 0 )
+				loan = 0;						// no finance
+			else
+			{
+				invCost = _p1 * invest / m2;	// reduced investment cost
+				loan = invCost - _NW2 + 1;		// finance the difference
+				_NW2 = 1;						// keep minimum cash
+			}
+		}
+
+		update_debt2( firm, loanDes, loan );	// update debt (desired/granted)
+	}
+
+	if ( invest > 0 )
+	{
+		WRITES( firm, "_NW2", _NW2 );			// update the firm net worth
+		send_order( firm, round( invest / m2 ) );// order to machine supplier
+	}
+
+	return invest;
+}
+
+
 // add new vintage to the capital stock of a firm in equation 'K' and 'initCountry'
 
 void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 {
 	double _Avint, _pVint;
-	object *suppl, *vint, *wrk;
+	int _ageVint, _nMach, _nVint;
+	object *cap, *cons, *cur, *suppl, *vint, *wrk;
 
 	suppl = PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) );// current supplier
-	nMach = floor( nMach );						// integer number of machines
-	_Avint = VS( suppl, "_Atau" );
-	_pVint = VS( suppl, "_p1" );
+	_nMach = floor( nMach );					// integer number of machines
 	
-	// create object, only recalculate in t if new industry
+	// at t=1 firms have a mix of machines: old to new, many suppliers
 	if ( newInd )
-		vint = ADDOBJLS( firm, "Vint", T - 1 );	// recalculate in t=1
-	else
-		vint = ADDOBJS( firm, "Vint" );			// just recalculate in next t
+	{
+		cap = SEARCHS( GRANDPARENTS( firm ), "Capital" ); 
+		cons = SEARCHS( GRANDPARENTS( firm ), "Consumption" );
 		
-	WRITE_SHOOKS( vint, HOOKS( firm, TOPVINT ) );// save previous vintage
-	WRITE_HOOKS( firm, TOPVINT, vint );			// save pointer to top vintage
+		_ageVint = VS( cons, "eta" ) + 1;		// age of oldest machine
+		_nVint = ceil( nMach / _ageVint );		// machines per vintage
+		_Avint = INIPROD;						// initial product. in sector 2
+		_pVint = VLS( cap, "p1avg", 1 );		// initial machine price
+	}
+	else
+	{
+		_ageVint = 1 - T;
+		_nVint = _nMach;
+		_Avint = VS( suppl, "_Atau" );
+		_pVint = VS( suppl, "_p1" );
+	}
 	
-	WRITES( vint, "_IDvint", VNT( T, VS( suppl, "_ID1" ) ) );// vintage ID
-	WRITES( vint, "_Avint", _Avint );			// vintage notional productivity
-	WRITES( vint, "_AeVint", _Avint );			// vintage effective product.
-	WRITES( vint, "_nVint", nMach );			// number of machines in vintage
-	WRITES( vint, "_pVint", _pVint );			// price of machines in vintage
-	WRITES( vint, "_tVint", T );				// vintage build time
-	WRITELLS( vint, "_AeVint", _Avint, T, 1 );	// lagged value
+	while ( _nMach > 0 )
+	{
+		if ( newInd )
+		{
+			cur = RNDDRAW_FAIRS( cap, "Firm1" );// draw another supplier
+			if ( cur == suppl )					// don't use current supplier
+				continue;
+				
+			vint = ADDOBJLS( firm, "Vint", T - 1 );// recalculate in t=1
+		}
+		else
+		{
+			cur = suppl;						// just use current supplier
+		vint = ADDOBJS( firm, "Vint" );			// just recalculate in next t
+		}
+		
+		WRITE_SHOOKS( vint, HOOKS( firm, TOPVINT ) );// save previous vintage
+		WRITE_HOOKS( firm, TOPVINT, vint );			// save pointer to top vintage
 	
-	wrk = SEARCHS( vint, "WrkV" );				// remove empty worker object
-	DELETE( wrk );
+		WRITES( vint, "_IDvint", VNT( T, VS( cur, "_ID1" ) ) );// vintage ID
+		WRITES( vint, "_Avint", _Avint );		// vintage productivity
+		WRITES( vint, "_AeVint", _Avint );		// vintage effective product.
+		WRITES( vint, "_nVint", _nVint );		// number of machines in vintage
+		WRITES( vint, "_pVint", _pVint );		// price of machines in vintage
+		WRITES( vint, "_tVint", 1 - _ageVint );	// vintage build time
+		WRITELLS( vint, "_AeVint", _Avint, T, 1 );// lagged value
+	
+		wrk = SEARCHS( vint, "WrkV" );			// remove empty worker object
+		DELETE( wrk );
+		
+		_nMach -= _nVint;
+		--_ageVint;
+	
+		if ( _ageVint > 0 && _nMach % _ageVint == 0 )// exact ratio missing?
+			_nVint = _nMach / _ageVint;			// adjust machines per vintage
+	}
 }
 
 
@@ -185,13 +284,13 @@ void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 double scrap_vintage( variable *var, object *vint )
 {
 	double RS;
-	object *cur;
+	object *wrk;
 	
 	if ( NEXTS( vint ) != NULL )				// don't remove last vintage
 	{
 		// move all workers out from this vintage
-		CYCLES( vint, cur, "WrkV" )
-			WRITE_HOOKS( SHOOKS( cur ), VWRK, NULL );
+		CYCLES( vint, wrk, "WrkV" )
+			WRITE_HOOKS( SHOOKS( wrk ), VWRK, NULL );
 		
 		// remove as previous vintage from next vintage
 		if ( SHOOKS( NEXTS( vint ) ) == vint )
@@ -898,7 +997,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		NW2f = max( NW2f, mult * NW20 );
 		
 		// initial equity must pay initial capital and wages
-		NW2 = VS( suppl, "_p1" ) * Kd / m2 + NW2f;
+		NW2 = newInd ? NW2f : VS( suppl, "_p1" ) * Kd / m2 + NW2f;
 		equity += NW2 * ( 1 - Deb20ratio );		// accumulated equity (all firms)
 
 		// initialize variables
@@ -928,7 +1027,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		{
 			WRITELLS( firm, "_K", Kd, t2ent, 1 );
 			WRITELLS( firm, "_N", N, t2ent, 1 );
-			WRITELLS( firm, "_NW2", NW2f, t2ent, 1 );
+			WRITELLS( firm, "_NW2", NW2, t2ent, 1 );
 			
 			add_vintage( var, firm, Kd / m2, newInd );// first machine vintages
 		}

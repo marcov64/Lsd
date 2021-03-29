@@ -111,10 +111,10 @@ v[2] = V( "rT" ) + V( "gammaPi" ) * ( VLS( CONSECL1, "dCPIb", 1 ) - V( "piT" ) )
 		
 // smooth rate adjustment
 if ( abs( v[2] - v[0] ) > 2 * v[1] )					
-	v[0] += ( v[2] > v[0] ) ? 2 * v[1] : - 2 * v[1];	// big adjustment
+	v[0] += ( v[2] > v[0] ) ? 2 * v[1] : - 2 * v[1];// big adjustment
 else
 	if ( abs( v[2] - v[0] ) > v[1] )
-		v[0] += ( v[2] > v[0] ) ? v[1] : - v[1];		// small adjustment
+		v[0] += ( v[2] > v[0] ) ? v[1] : - v[1];// small adjustment
 
 RESULT( max( v[0], 0 ) )
 
@@ -138,7 +138,7 @@ if ( v[2] > 0 )
 		v[0] += ( v[3] > v[0] ) ? 2 * v[1] : - 2 * v[1];// big adjustment
 	else
 		if ( abs( v[3] - v[0] ) > v[1] )
-			v[0] += ( v[3] > v[0] ) ? v[1] : - v[1];	// small adjustment
+			v[0] += ( v[3] > v[0] ) ? v[1] : - v[1];// small adjustment
 }
 
 RESULT( max( v[0], 0 ) )

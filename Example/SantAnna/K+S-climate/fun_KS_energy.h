@@ -3,7 +3,7 @@
 	ENERGY OBJECT EQUATIONS
 	-----------------------
 
-	Equations that are specific to the energy sector object in the 
+	Equations that are specific to the Energy sector object in the 
 	K+S LSD model are coded below.
  
  ******************************************************************************/

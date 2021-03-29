@@ -577,12 +577,16 @@ Label Root
 				Var: Bfail
 				Var: BadDeb
 				Var: BadDebAcc
+				Var: BtauAvg
 				Var: CD1
 				Var: CD1c
 				Var: CD2
 				Var: CD2c
 				Var: CS1
 				Var: CS2
+				Var: Deb1max
+				Var: Deb2max
+				Var: EId
 				Var: ExRes
 				Var: HCavg
 				Var: HHb
@@ -591,9 +595,10 @@ Label Root
 				Var: HPb
 				Var: HP1
 				Var: HP2
+				Var: NCavg
 				Var: RD
 				Var: RS2
-				Var: NCavg
+				Var: SId
 				Var: age1avg
 				Var: age2avg
 				Var: dN
@@ -606,7 +611,6 @@ Label Root
 				Var: q2preChg
 				Var: s1avg
 				Var: s2avg
-				Var: BtauAvg
 
 			}
 
@@ -1352,13 +1356,17 @@ Var: B2payers 0 s + n n
 Var: Bda 0 s + n n
 Var: Bfail 0 s + n p
 Var: BadDeb 0 s + n n
-Var: BadDebAcc 0 n + n n
+Var: BadDebAcc 0 s + n n
+Var: BtauAvg 0 s + n n
 Var: CD1 0 s + n n
 Var: CD1c 0 s + n n
 Var: CD2 0 s + n n
 Var: CD2c 0 s + n n
 Var: CS1 0 s + n n
 Var: CS2 0 s + n n
+Var: Deb1max 0 s + n n
+Var: Deb2max 0 s + n n
+Var: EId 0 s + n n
 Var: ExRes 0 s + n n
 Var: HCavg 0 s + n n
 Var: HHb 0 s + n n
@@ -1367,9 +1375,10 @@ Var: HH2 0 s + n n
 Var: HPb 0 s + n n
 Var: HP1 0 s + n n
 Var: HP2 0 s + n n
+Var: NCavg 0 s + n n
 Var: RD 0 s + n n
 Var: RS2 0 s + n n
-Var: NCavg 0 s + n n
+Var: SId 0 s + n n
 Var: age1avg 0 s + n n
 Var: age2avg 0 s + n n
 Var: dN 0 s + n n
@@ -1382,7 +1391,6 @@ Var: q2posChg 0 s + n n
 Var: q2preChg 0 s + n n
 Var: s1avg 0 s + n n
 Var: s2avg 0 s + n n
-Var: BtauAvg 0 s + n n
 
 Object: Lab C	1
 Var: Lent 0 s + n n
@@ -2227,6 +2235,7 @@ END_DESCRIPTION
 
 Variable_Depo
 Total deposits on financial sector
+Net deposits from exiting and entering firms in period not considered
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -2251,6 +2260,7 @@ END_DESCRIPTION
 
 Variable_Loans
 Total loans (not defaulted) from financial sector
+Net loans to exiting and entering firms in period not considered
 _INIT_
 
 END_DESCRIPTION
@@ -2372,6 +2382,7 @@ END_DESCRIPTION
 
 Variable__Depo
 Deposits on bank
+Net deposits from exiting and entering firms in period not considered
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -2396,6 +2407,7 @@ END_DESCRIPTION
 
 Variable__Loans
 Loans (not defaulted) from bank
+Net loans to exiting and entering firms in period not considered
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -5221,6 +5233,12 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_BtauAvg
+Average labor productivity of machines produced by capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
 Variable_CD1
 Total credit demand of capital-good sector
 _INIT_
@@ -5253,6 +5271,24 @@ END_DESCRIPTION
 
 Variable_CS2
 Total credit supplied to consumption-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Deb1max
+Total maximum prudential credit supplied to firms in capital-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Deb2max
+Total maximum prudential credit supplied to firms in consumer-good sector
+_INIT_
+
+END_DESCRIPTION
+
+Variable_EId
+Total desired expansion investment in consumption-good sector
 _INIT_
 
 END_DESCRIPTION
@@ -5305,6 +5341,12 @@ _INIT_
 
 END_DESCRIPTION
 
+Variable_NCavg
+Number of new clients of capital-good firms
+_INIT_
+
+END_DESCRIPTION
+
 Variable_RD
 R&D expenditure of capital-good sector
 _INIT_
@@ -5317,8 +5359,8 @@ _INIT_
 
 END_DESCRIPTION
 
-Variable_NCavg
-Number of new clients of capital-good firms
+Variable_SId
+Total desired substitution investment in consumption-good sector
 _INIT_
 
 END_DESCRIPTION
@@ -5393,12 +5435,6 @@ END_DESCRIPTION
 
 Variable_s2avg
 Average workers compound skills in consumption-good sector
-_INIT_
-
-END_DESCRIPTION
-
-Variable_BtauAvg
-Average labor productivity of machines produced by capital-good sector
 _INIT_
 
 END_DESCRIPTION

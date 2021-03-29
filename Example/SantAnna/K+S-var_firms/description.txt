@@ -10,7 +10,8 @@ This is a full rewrite of the original "Schumpeter meeting Keynes" (K+S) model, 
 Change log
 ==========
 v0.3                - initial LSD-only version
-v0.3.1 (01/02/2021) - unify new machine selection criteria (=scrapping rule)
+v0.3.1 (01/04/2021) - fix firm finance statistics
+                      unify new machine selection criteria (=scrapping rule)
                       normalize values used to compute imitation euclidean distance
                       increase sector 1 mark-up in all configurations to avoid exit spiral
                       improve bank excess reserves and net worth computation and bail-out

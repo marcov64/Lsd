@@ -175,6 +175,13 @@ Total credit supplied to firms in capital-good sector
 RESULT( SUMS( CAPSECL2, "_CS1" ) )
 
 
+EQUATION( "Deb1max" )
+/*
+Total maximum prudential credit supplied to firms in capital-good sector
+*/
+RESULT( SUMS( CAPSECL2, "_Deb1max" ) )
+
+
 EQUATION( "HCavg" )
 /*
 Number of historical clients of capital-good firms
@@ -376,6 +383,20 @@ Total credit supplied to firms in consumer-good sector
 RESULT( SUMS( CONSECL2, "_CS2" ) )
 
 
+EQUATION( "Deb2max" )
+/*
+Total maximum prudential credit supplied to firms in consumer-good sector
+*/
+RESULT( SUMS( CONSECL2, "_Deb2max" ) )
+
+
+EQUATION( "EId" )
+/*
+Total desired expansion investment in consumption-good sector
+*/
+RESULT( SUMS( CONSECL2, "_EId" ) )
+
+
 EQUATION( "HH2" )
 /*
 Normalized Herfindahl-Hirschman index for consumption-good sector
@@ -452,6 +473,13 @@ Machine (planned) scrapping rate in consumption-good sector
 v[1] = VLS( CONSECL2, "K", 1 );
 RESULT( T > 1 && v[1] > 0 ? SUMS( CONSECL2, "_RS2" ) / 
 		( v[1] / VS( CONSECL2, "m2" ) ) : 0 )
+
+
+EQUATION( "SId" )
+/*
+Total desired substitution investment in consumption-good sector
+*/
+RESULT( SUMS( CONSECL2, "_SId" ) )
 
 
 EQUATION( "age2avg" )
@@ -889,13 +917,13 @@ Updated in 'wAvg'
 
 EQUATION_DUMMY( "exit1fail", "" )
 /*
-Rate of bankrupt firms in capital-good sector
+Rate of exiting bankrupt firms in capital-good sector
 Updated in 'entry1exit'
 */
 
 EQUATION_DUMMY( "exit2fail", "" )
 /*
-Rate of bankrupt firms in consumption-good sector
+Rate of exiting bankrupt firms in consumption-good sector
 Updated in 'entry2exit'
 */
 

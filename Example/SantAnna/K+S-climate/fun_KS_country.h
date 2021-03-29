@@ -261,7 +261,7 @@ if ( i >= 2 )									// tax capitalists' income?
 
 // compute household's taxes plus firms' taxes
 v[0] = v[1] * V( "tr" ) + VS( CAPSECL0, "Tax1" ) + VS( CONSECL0, "Tax2" ) + 
-	   VS( FINSECL0, "TaxB" ) + VS( ENESECL0, "TaxE" );
+	   VS( ENESECL0, "TaxE" ) + VS( FINSECL0, "TaxB" );
 
 RESULT( v[0] )
 
@@ -475,9 +475,9 @@ CYCLES( cur3, cur, "Bank" )
 VS( cur3, "banksMaps" );						// update the mapping vectors
 
 // create firms' objects and set initial values
-cur = SEARCHS( cur1, "Firm1" );					// remove empty firm instance
+cur = SEARCHS( cur1, "Firm1" );					// remove empty firm instances
 DELETE( cur );
-cur = SEARCHS( cur2, "Firm2" );					// remove empty firm instance
+cur = SEARCHS( cur2, "Firm2" );
 DELETE( cur );
 
 v[1] = entry_firm1( var, cur1, F10, true );		// add capital-good firms
