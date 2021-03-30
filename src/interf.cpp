@@ -3731,7 +3731,7 @@ case 33:
 
 	cmd( "ttk::frame $T.e.e" );
 	cmd( "ttk::label $T.e.e.l -text \"Number of instances\"" );
-	cmd( "ttk::spinbox $T.e.e.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::spinbox $T.e.e.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "pack $T.e.e.l $T.e.e.e -side left -padx 2" );
 
 	cmd( "ttk::label $T.e.l -text \"(all groups of this object will be affected)\"" );
