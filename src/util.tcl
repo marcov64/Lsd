@@ -108,11 +108,11 @@ proc gccVersion { } {
 
 
 #************************************************
-# ADD_USER_PATH
-# Add the directory to the user's permanent
+# ADD_WIN_PATH
+# Add the directory to the permanent
 # PATH environment variable in Windows
 #************************************************
-proc add_user_path { path { end 1 } } {
+proc add_win_path { path { prof user } { pos end } } {
 	global CurPlatform env
 
 	# only Windows
@@ -133,24 +133,32 @@ proc add_user_path { path { end 1 } } {
 		return 0
 	} 
 	
-	if { [ lsearch -exact $pathList $path ] >= 0 } {
+	set i [ lsearch -exact $pathList $path ]
+	if { ( $pos eq "end" && $i >= 0 ) || ( $pos ne "end" && $i == 0 ) } {
 		return 1
 	}
 	
+	if { $prof eq "user" } {
+		set regPath "HKEY_CURRENT_USER\\Environment"
+	} elseif { $prof eq "system" } {
+		set regPath "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
+	} else {
+		return 0
+	}
+	
 	set path [ file nativename $path ]
-	set regPath "HKEY_CURRENT_USER\\Environment"
 	if { ! [ catch { set curPath [ registry get $regPath "Path" ] } ] } {
 		set curPath [ string trimright $curPath ";" ]
 
-		# add to the end or beginning of the user path
-		if { $end } {
+		# add to the end or beginning of the path
+		if { $pos eq "end" } {
 			set newPath "$curPath;$path;"
 		} else {
 			set newPath "$path;$curPath;"
 		}
 		
 		if { ! [ catch { registry set $regPath "Path" "$newPath" } ] } {
-			registry broadcast "Environment"
+			registry broadcast $regPath
 			return 1
 		}
 	}

@@ -453,24 +453,10 @@ set issues [ list ]
 
 if [ string equal $CurPlatform windows ] {
 
-	if { ! [ add_user_path "$LsdRoot/gnu/bin" ] } {
-		if [ string equal [ ttk::messageBox -parent "" -type okcancel -default ok -title Error -icon error -message "Cannot add LSD to PATH" -detail "LSD libraries folder could not be added to the user PATH environment variable.\n\nYou may try to repeat the installation or manually add the folder '$LsdRoot/gnu/bin' to the PATH variable following the steps described in 'Readme.txt'.\n\nPress 'OK' if you want to continue the installation anyway or 'Cancel' to exit." ] ok ] {
-		
-			lappend issues "LSD libraries not in PATH (setx PATH \"%PATH%;$LsdRoot/gnu/bin\")"
-		} else {
-			if { $newInst } {
-				catch { file delete -force $LsdRoot }
-			}
-		
-			exit 10
-		}
-	}
-
-	# if another compiler exists and is ahead on path, warn user
+	# check if another compiler exists and is ahead on path
+	set existGCC [ list ]
+	set msgGCC ""
 	if { ! [ catch { set res [ exec where g++ ] } ] } {
-	
-		set existGCC [ list ]
-		set msgGCC ""
 		foreach f [ split $res ] {
 			if { [ file dirname $f ] eq "$LsdRoot/gnu/bin" } {
 				break
@@ -479,17 +465,9 @@ if [ string equal $CurPlatform windows ] {
 				set msgGCC "$msgGCC\n$f"
 			}	
 		}
-		
-		if { [ llength $existGCC ] > 0 } {
-			ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Potentially unsupported C++ compiler installed" -detail "There is another C++ compiler already installed:\n$msgGCC\n\nLSD will use it but it is not guaranteed this compiler is updated and configured to support LSD.\n\nCheck in 'Readme.txt' the required steps to properly configure your external compiler or remove/uninstall it before using LSD.\n\nInstallation will continue but you may have to fix this problem so LSD can work reliably."
-
-			foreach comp $existGCC {
-				lappend issues "External compiler maybe not configured (del $comp)"
-			}
-		}
 	}
 	
-	# if required libraries exist ahead on path, warn user
+	# check if required libraries exist ahead on path
 	set existDLL [ list ]
 	set msgDLL ""
 	foreach dll $winDLL {
@@ -504,8 +482,46 @@ if [ string equal $CurPlatform windows ] {
 			}
 		}
 	}
+	
+	# add LSD to user PATH environment variable if no conflict exists or 
+	# ask about changing the system PATH if potential conflicts exist
+	set sysPath 0
+	if { [ llength $existGCC ] == 0 && [ llength $existDLL ] == 0 } {
+		set res [ add_win_path "$LsdRoot/gnu/bin" user end ]
+	} else {
+		if [ string equal [ ttk::messageBox -parent "" -type yesno -default yes -title Warning -icon warning -message "Potentially conflicting software installed" -detail "Software components included in LSD are already installed in the computer.\n\nYou may want to set the software components included in LSD as the new system default. If not, LSD will use the existing software components but it is not guaranteed they are compatible with LSD.\n\nPress 'Yes' to set LSD components as the system default, or 'No' to continue the installation anyway." ] yes ] {
+				set res [ add_win_path "$LsdRoot/gnu/bin" system begin ]
+				set sysPath 1
+			} else {
+				set res [ add_win_path "$LsdRoot/gnu/bin" user begin ]
+			}
+	}
+	
+	if { ! $res } {
+		if [ string equal [ ttk::messageBox -parent "" -type okcancel -default ok -title Error -icon error -message "Cannot add LSD to PATH" -detail "LSD libraries folder could not be added to the user PATH environment variable.\n\nYou may try to repeat the installation or manually add the folder '$LsdRoot/gnu/bin' to the PATH variable following the steps described in 'Readme.txt'.\n\nPress 'OK' if you want to continue the installation anyway or 'Cancel' to exit." ] ok ] {
+			if { $sysPath } {
+				lappend issues "LSD libraries not in PATH (setx PATH \"%PATH%;$LsdRoot/gnu/bin /m\")"
+			} else {
+				lappend issues "LSD libraries not in PATH (setx PATH \"%PATH%;$LsdRoot/gnu/bin\")"
+			}
+		} else {
+			if { $newInst } {
+				catch { file delete -force $LsdRoot }
+			}
+		
+			exit 10
+		}
+	}
 
-	if { [ llength $existDLL ] > 0 } {
+	if { ! $sysPath && [ llength $existGCC ] > 0 } {
+		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Potentially unsupported C++ compiler installed" -detail "There is another C++ compiler already installed:\n$msgGCC\n\nLSD will use it but it is not guaranteed this compiler is updated and configured to support LSD.\n\nCheck in 'Readme.txt' the required steps to properly configure your external compiler or remove/uninstall it before using LSD.\n\nInstallation will continue but you may have to fix this problem so LSD can work reliably."
+
+		foreach comp $existGCC {
+			lappend issues "External compiler maybe not configured (del $comp)"
+		}
+	}
+	
+	if { ! $sysPath && [ llength $existDLL ] > 0 } {
 		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Potentially conflicting libraries installed" -detail "There are libraries used by LSD already installed:\n$msgDLL\n\nLSD will use them but it is not guaranteed they are updated and compatible to support LSD.\n\nYou may want to remove or update them before using LSD.\n\nInstallation will continue but you may have to fix this problem so LSD can work reliably."
 
 		foreach dll $existDLL {

@@ -32,7 +32,7 @@ if "%1"=="" (
 		goto create
 	)
 	echo No LSD FOLDER provided or found, aborting
-	pause
+	pause > nul
 	goto end
 ) else (
 	if exist "%1"\LMM.exe (
@@ -40,7 +40,7 @@ if "%1"=="" (
 		goto create
 	)
 	echo Provided LSD FOLDER not found, aborting
-	pause
+	pause > nul
 	goto end
 )
 

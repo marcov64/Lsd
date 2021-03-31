@@ -30,16 +30,18 @@ IF "%1"=="/?" (
 	GOTO end
 )
 
-NET SESSION >nul 2>&1
+rem check for admin privilege
+fsutil dirty query %systemdrive% > nul
+
 IF NOT %ERRORLEVEL% EQU 0 (
     ECHO This command require to be run as administrator, aborting!
-	PAUSE
+	PAUSE > NUL
 	GOTO end
 )
 
 if "%1"=="" (
-	if exist "%~dp0\gnu\bin\tcl86.dll" (
-		set GNU_DIR="%~dp0\gnu\bin"
+	if exist "%~dp0gnu\bin\tcl86.dll" (
+		set GNU_DIR="%~dp0gnu\bin"
 		goto install
 	)
 ) else (
@@ -50,17 +52,20 @@ if "%1"=="" (
 )
 
 echo No FOLDER provided or found, aborting
-pause
+pause > nul
 goto end
 
 :install
 setlocal
 set ok=0
-for /f "skip=2 tokens=3*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v PATH') do if [%%b]==[] ( 
-		setx PATH "%GNU_DIR%;%%~a" /m && set ok=1 
+for /f "skip=2 tokens=3*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v PATH') do (
+	if [%%b]==[] ( 
+		setx PATH "%GNU_DIR%;%%~a" /m > nul && set ok=1 
 	) else ( 
-		setx PATH "%GNU_DIR%;%%~a %%~b" /m && set ok=1 
+		setx PATH "%GNU_DIR%;%%~a %%~b" /m > nul && set ok=1 
 	)
-if "%ok%" == "0" setx PATH "%GNU_DIR%" /m
+)
+
+if "%ok%" == "0" setx PATH "%GNU_DIR%" /m > nul
 endlocal
 :end
