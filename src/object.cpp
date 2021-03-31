@@ -148,7 +148,7 @@ as lab1.
 Same as sum, but it adds up the product between variables lab and lab2 for each
 object. lab and lab2 must be in the same object.
 
-- void lsdqsort( char *obj, char *var, char *dir );
+- void lsdqsort( char *obj, char *var, char *dir, int lag );
 Sorts the Objects whose label is obj according to the values of their
 variable var. The direction of sorting can be UP or DOWN. The method
 is just an interface for sort_asc and sort_desc below.
@@ -270,6 +270,7 @@ see file.cpp
 
 char *qsort_lab;
 char *qsort_lab_secondary;
+int qsort_lag;
 object *globalcur;
 
 #ifndef NP
@@ -1334,7 +1335,7 @@ is placed below the provided dest object
 ****************************************************/
 void move_obj( char const *lab, char const *dest )
 {
-	bridge *cb, *cb1, *mb, *nb;
+	bridge *cb, *cb1, *mb = NULL, *nb;
 	object *cur, *cur1, *d, *no, *o, *s;
 	variable *cv;
 	
@@ -2814,7 +2815,7 @@ int sort_function_up( const void *a, const void *b )
 {
 	if ( qsort_lab != NULL )		// variable defined?
 	{
-		if ( ( *( object ** ) a )->cal( qsort_lab, 0 ) < ( *( object ** ) b )->cal(qsort_lab, 0 ) )
+		if ( ( *( object ** ) a )->cal( qsort_lab, qsort_lag ) < ( *( object ** ) b )->cal( qsort_lab, qsort_lag ) )
 			return -1;
 		else
 			return 1;
@@ -2831,7 +2832,7 @@ int sort_function_down( const void *a, const void *b )
 {
 	if ( qsort_lab != NULL )		// variable defined?
 	{
-		if ( ( *( object ** ) a )->cal( qsort_lab, 0 ) > ( *( object ** ) b )->cal( qsort_lab, 0 ) )
+		if ( ( *( object ** ) a )->cal( qsort_lab, qsort_lag ) > ( *( object ** ) b )->cal( qsort_lab, qsort_lag ) )
 			return -1;
 		else
 			return 1;
@@ -2844,7 +2845,7 @@ int sort_function_down( const void *a, const void *b )
 		return 1;
 }
 
-object *object::lsdqsort( char const *obj, char const *var, char const *direction )
+object *object::lsdqsort( char const *obj, char const *var, char const *direction, int lag )
 {
 	char dir[ 6 ];
 	int num, i;
@@ -2932,6 +2933,7 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 	strncpy( dir, direction, 5 );
 	str_upr( dir );
 
+	qsort_lag = lag;
 	qsort_lab = ( char * ) var;
 
 	if ( ! strcmp( dir, "UP" ) )
@@ -2970,8 +2972,8 @@ int sort_function_up_two( const void *a, const void *b )
 {
 	double x, y;
 
-	x = ( *( object ** ) a )->cal( qsort_lab, 0 );
-	y = ( *( object ** ) b )->cal( qsort_lab, 0 );
+	x = ( *( object ** ) a )->cal( qsort_lab, qsort_lag );
+	y = ( *( object ** ) b )->cal( qsort_lab, qsort_lag );
 
 	if ( x < y )
 		return -1;
@@ -2979,7 +2981,7 @@ int sort_function_up_two( const void *a, const void *b )
 		if ( x > y )
 			return 1;
 		else
-			if ( ( * ( object ** ) a )->cal( qsort_lab_secondary, 0 ) < ( *( object ** ) b )->cal( qsort_lab_secondary, 0) )
+			if ( ( * ( object ** ) a )->cal( qsort_lab_secondary, qsort_lag ) < ( *( object ** ) b )->cal( qsort_lab_secondary, qsort_lag ) )
 				return -1;
 			else
 				return 1;
@@ -2989,8 +2991,8 @@ int sort_function_down_two( const void *a, const void *b )
 {
 	double x, y;
 
-	x = ( *( object ** ) a )->cal( qsort_lab, 0 );
-	y = ( *( object ** ) b )->cal( qsort_lab, 0 );
+	x = ( *( object ** ) a )->cal( qsort_lab, qsort_lag );
+	y = ( *( object ** ) b )->cal( qsort_lab, qsort_lag );
 
 	if ( x > y )
 		return -1;
@@ -2998,13 +3000,13 @@ int sort_function_down_two( const void *a, const void *b )
 		if ( x < y )
 			return 1;
 		else
-			if ( ( *( object ** ) a )->cal( qsort_lab_secondary, 0 ) > ( *( object ** ) b )->cal( qsort_lab_secondary, 0 ) )
+			if ( ( *( object ** ) a )->cal( qsort_lab_secondary, qsort_lag ) > ( *( object ** ) b )->cal( qsort_lab_secondary, qsort_lag ) )
 				return -1;
 			else
 				return 1;
 }
 
-object *object::lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction )
+object *object::lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction, int lag )
 {
 	char dir[ 6 ];
 	int num, i;
@@ -3070,11 +3072,12 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 	strncpy( dir, direction, 5 );
 	str_upr( dir );
 
+	qsort_lag = lag;
 	qsort_lab = ( char * ) var1;
 	qsort_lab_secondary = ( char * ) var2;
 
 	if ( ! strcmp( dir, "UP" ) )
-		qsort( ( void * )mylist, num, sizeof( mylist[ 0 ] ), sort_function_up_two );
+		qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_up_two );
 	else
 		if ( ! strcmp( dir, "DOWN" ) )
 			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_down_two );

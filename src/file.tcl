@@ -276,8 +276,10 @@ proc choose_models { curdir curfile } {
 		set moddir($mod) $dir
 		set modgroup($mod) $group
 	}
+	
 	set lmod [ lsort -dictionary $lmod ]
-	unset ldir lgroup
+	set ldir ""
+	set lgroup ""
 	foreach mod $lmod {
 		lappend ldir $moddir($mod)
 		lappend lgroup $modgroup($mod)
@@ -449,7 +451,7 @@ proc list_models { } {
 		lappend lgroup $cgroup
 	}
 
-	set dirs [ glob -nocomplain -type d * ]
+	set dirs [ glob -nocomplain -types d * ]
 
 	foreach i $dirs {
 		set flag 0

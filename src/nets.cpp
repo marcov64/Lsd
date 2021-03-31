@@ -596,7 +596,7 @@ object *object::shuffle_nodes_net( char const *lab )
 		cur1->node->id = iId;
 	}
 
-	lsdqsort( lab, NULL, "UP" );					// sort according to shuffled IDs
+	lsdqsort( lab, NULL, "UP", 0 );					// sort according to shuffled IDs
 	
 	return search( lab );
 }

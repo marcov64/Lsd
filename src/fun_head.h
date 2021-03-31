@@ -481,10 +481,14 @@ bool no_ptr_chk = true;
 #define DELETING ( p->to_delete( ) )
 #define DELETINGS( O ) ( CHK_PTR_DBL( O ) O->to_delete( ) )
 
-#define SORT( X, Y, Z ) ( p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z ) )
-#define SORTS( O, X, Y, Z ) ( CHK_PTR_OBJ( O ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z ) )
-#define SORT2( X, Y, Z, W ) ( p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z, ( char * ) W ) )
-#define SORT2S( O, X, Y, Z, W ) ( CHK_PTR_OBJ( O ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z, ( char * ) W ) )
+#define SORT( X, Y, Z ) ( p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z, 0 ) )
+#define SORTL( X, Y, Z, L ) ( p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z, L ) )
+#define SORTS( O, X, Y, Z ) ( CHK_PTR_OBJ( O ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z, 0 ) )
+#define SORTLS( O, X, Y, Z, L ) ( CHK_PTR_OBJ( O ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z, L ) )
+#define SORT2( X, Y, Z, W ) ( p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z, ( char * ) W ), 0 )
+#define SORT2L( X, Y, Z, W, L ) ( p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z, ( char * ) W, L ) )
+#define SORT2S( O, X, Y, Z, W ) ( CHK_PTR_OBJ( O ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z, ( char * ) W, 0 ) )
+#define SORT2LS( O, X, Y, Z, W, L ) ( CHK_PTR_OBJ( O ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z, ( char * ) W, L ) )
 
 #define HOOK( X ) ( CHK_HK_OBJ( p, X ) p->hooks[ X ] )
 #define HOOKS( O, X ) ( CHK_PTR_OBJ( O ) CHK_HK_OBJ( O, X ) O->hooks[ X ] )

@@ -180,7 +180,10 @@ complex pointer syntax with the important benefit of full pointer checking by
 default, preventing obscure crashes and providing identification of problem
 location in code. </span><span class=Cdigo><a href="LSD_macros.html#DELETING"><span
 lang=EN-US>DELETING</span></a></span><span lang=EN-US> allows checking for
-deferred Object deletions due to Variables still computing.</span></p>
+deferred Object deletions due to Variables still computing. </span><span
+class=Cdigo><a href="LSD_macros.html#SORT"><span lang=EN-US>SORTL(…)</span><span
+lang=EN-US style='font-family:"Arial",sans-serif'>/</span><span lang=EN-US>SORT2L(…)</span></a></span><span
+lang=EN-US> allow sorting Object instances by lagged Variable values.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -281,11 +284,11 @@ improvements and changes:</span></p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US><a href="browser.html#updating">Variable
-update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be updated/recomputed
-under arbitrary time schemes, deterministic or random. The modeler can now
-configure update periods larger than 1, including an initial “sleep” for any
-Variable. Both period and initial times can be set as a fixed number or a
-uniform random draw from a modeler-defined range.</span></p>
+update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be
+updated/recomputed under arbitrary time schemes, deterministic or random. The
+modeler can now configure update periods larger than 1, including an initial
+“sleep” for any Variable. Both period and initial times can be set as a fixed
+number or a uniform random draw from a modeler-defined range.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -500,15 +503,15 @@ lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>EXTS(…)</span></span><spa
 lang=EN-US>), and execute extension C++ objects methods (</span><span
 class=Cdigo><span lang=EN-US>DO_EXT(…)</span></span><span lang=EN-US>). Create <a
 href="LSD_macros.html#EQUATION_DUMMY">dummy Equations</a> (</span><span
-class=Cdigo><span lang=EN-US>EQUATION_DUMMY(…)</span></span><span lang=EN-US>) for
-Variables only updated by other Variables. Search for Object instance number (</span><span
-class=Cdigo><span lang=EN-US>SEARCH_INST(…)</span></span><span lang=EN-US>).
-Option to disable/enable the automatic search of Variables and Parameters (</span><span
-class=Cdigo><span lang=EN-US>NO_SEARCH</span></span><span lang=EN-US>/</span><span
-class=Cdigo><span lang=EN-US>USE_SEARCH</span></span><span lang=EN-US>). New <a
-href="LSD_macros.html#DEBUG">debug-control macros</a> allow finer control of
-the LSD Debugger activation and log file creation. Please refer to the <a
-href="LSD_macros.html">LSD Macros</a> documentation.</span></p>
+class=Cdigo><span lang=EN-US>EQUATION_DUMMY(…)</span></span><span lang=EN-US>)
+for Variables only updated by other Variables. Search for Object instance
+number (</span><span class=Cdigo><span lang=EN-US>SEARCH_INST(…)</span></span><span
+lang=EN-US>). Option to disable/enable the automatic search of Variables and
+Parameters (</span><span class=Cdigo><span lang=EN-US>NO_SEARCH</span></span><span
+lang=EN-US>/</span><span class=Cdigo><span lang=EN-US>USE_SEARCH</span></span><span
+lang=EN-US>). New <a href="LSD_macros.html#DEBUG">debug-control macros</a>
+allow finer control of the LSD Debugger activation and log file creation.
+Please refer to the <a href="LSD_macros.html">LSD Macros</a> documentation.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -569,8 +572,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 <h1><span lang=EN-US>Version 7.0 (Apr 2018)</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>The new version maintains the compatibility
-with all the models built with previous versions of LSD (some optimizations require
-C++11 and </span><span class=Cdigo><span lang=EN-US>fun_head_fast.h</span></span><span
+with all the models built with previous versions of LSD (some optimizations
+require C++11 and </span><span class=Cdigo><span lang=EN-US>fun_head_fast.h</span></span><span
 lang=EN-US>). Main changes:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:

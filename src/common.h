@@ -249,8 +249,8 @@ struct object
 	object *lat_left( void );
 	object *lat_right( void );
 	object *lat_up( void );
-	object *lsdqsort( char const *obj, char const *var, char const *direction );
-	object *lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
+	object *lsdqsort( char const *obj, char const *var, char const *direction, int lag = 0 );
+	object *lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction, int lag = 0 );
 	object *search( char const *lab, bool no_search = false );
 	object *search_err( char const *lab, bool no_search, char const *errmsg );
 	object *search_node_net( char const *lab, long id ); 
