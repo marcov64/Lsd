@@ -123,7 +123,7 @@ IMPORTANT: from version 8.0 and higher, LSD supports only Windows 64-bit. If you
 
 ANTIVIRUS BAD BEHAVIOR: many third-party anti-virus software consider LSD operation suspicious because it creates executable files and deals with tools, like compilers, which do not belong to the regular user universe. This wrong assumption can break LSD operation in many aspects and usually cannot be fixed reliably, so using LSD together with these tools is NOT SUPPORTED. LSD is tested and fully works with the embedded Windows Security anti-virus, which is unfortunately disabled when a third-party anti-virus is installed by the user. According to specialized media tests, Windows anti-virus is considered an excellent option, in particular when compared to the free alternatives, so using it instead should not create any problem. However, if you cannot remove your current third-party anti-virus (and enable Windows Security), you still have the option to run LSD inside a virtual machine like VirtualBox or VMware (but with reduced performance).
 
-To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-8-0-stable-1.exe). Download it, double-click on the installer file, and follow the instructions. The installer executable can be deleted after the installation.
+To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-8-0-stable-1.exe). Download it, double-click on the installer file, and follow the instructions. The installer executable can be deleted after the installation. According to your configuration, express authorization must be provided before downloading and running the LSD installer. This is normal.
  
 Alternatively, or in the case of problems using the installer, it is also possible to simply unzip a LSD distribution file archive on the desired folder. In most cases "C:\" (the root of the hard disk) is a good option. The steps to perform a manual installation are:
 
@@ -139,7 +139,7 @@ IMPORTANT: LSD cannot be installed within a folder (or having a parent folder) c
 
 To create a desktop link (icon) to run LSD/LMM, as well as an entry to the Windows Start Menu, you can simply double-click in Windows Explorer the following batch file available in the installation directory:
 
- add-shortcut-windows.bat
+ add-shortcut-windows[.bat]
 
 After the desktop icon is created, double-clicking it opens LMM (LSD Model Manager) which allows to create new models, or select existing models. If you cannot create the LSD icon on your desktop, or an entry in Start Menu, following the steps above, you may still run LSD by double-clicking the file "LMM.exe" inside the LSD installation directory.
 
@@ -156,6 +156,14 @@ It is recommended, but not required, to install the Gnuplot graphical plotting a
 4. In the "Select Additional Tasks", set the terminal type to "wxt", keep the proposed file associations, and MAKE SURE you select the "Add application directory to your PATH environment variable". If this option is not visible, you need to scroll down in the window to see it. Press "Next" and then "Install". When the installation is completed, press "Next" and "Finish".
 
 ATTENTION: If Gnuplot is not included in the Windows PATH environment variable, LSD may not be able to use Gnuplot. If this option is missing, Gnuplot must be installed again using the correct options as described above.
+
+FIXING COMPILATION ERRORS:
+
+Some free software packages have the bad habit of installing old copies of libraries required by LSD on the system PATH, which may prevent successful compilation and operation of LSD. The installer tries to detect and inform about possible sources of problems, which may have to be fixed before LSD can be run reliably. Alternatively, the user may force LSD libraries into the system PATH, which is NOT done by the installer. To do so, open Windows Explorer, navigate to the folder where LSD was installed, right-click on the file:
+
+ set-system-path-windows[.bat]
+ 
+and choose the "Run as administrator" option. This will force LSD libraries to be used system-wide, which may break other software which relies on older versions of the libraries.
 
 USING DIFFERENT COMPILERS (optional):
 
