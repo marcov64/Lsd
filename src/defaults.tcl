@@ -62,7 +62,7 @@ set vsizeBminLinux		600
 set hsizeBminWindows	420
 set vsizeBminWindows	600
 set hsizeGminMac		670	; # log window
-set vsizeGminMac		430
+set vsizeGminMac		360
 set hsizeGminLinux		670
 set vsizeGminLinux		430
 set hsizeGminWindows	620
