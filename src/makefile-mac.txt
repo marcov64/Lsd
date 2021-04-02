@@ -32,7 +32,9 @@ $(TARGET).app/Contents/Info.plist
 	touch -c -f $(TARGET).app
 
 # create macOS package
-$(TARGET).app/Contents/Info.plist: $(SRC_DIR)LSD.app/Contents/Info.plist
+$(TARGET).app/Contents/Info.plist: $(SRC_DIR)LSD.app/Contents/Info.plist \
+$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/libtclstub8.6.a \
+$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/libtkstub8.6.a
 	$(RM) LSD-APP-DUMMY $(TARGET).app
 	cp -R $(SRC_DIR)LSD.app LSD-APP-DUMMY
 	mv LSD-APP-DUMMY $(TARGET).app

@@ -7,14 +7,18 @@ Extract tclX.X.X and tkX.X.X subdirectories under a common directory (i.e., /Use
 
 To build, use the scripts in both tclX.X.X/macosx and tkX.X.X/macosx, in this order:
 
-export CFLAGS="-mmacosx-version-min=10.10"
+cd TclTk
 
-./configure --enable-threads --enable-framework # tcl
-./configure --enable-threads --enable-framework --enable-aqua # tk
+ver="X.X.X"
 
-make deploy
+CFLAGS="-arch x86_64 -mmacosx-version-min=10.10"
+export CFLAGS
 
-make install-embedded INSTALL_ROOT=/Users/Marcelo/TclTk/
+make -C tcl${ver}/macosx deploy
+make -C tk${ver}/macosx deploy
+
+make -C tcl${ver}/macosx install-embedded INSTALL_ROOT=/Users/Marcelo/TclTk/
+make -C tk${ver}/macosx install-embedded INSTALL_ROOT=/Users/Marcelo/TclTk/
 
 In both LMM.app/Contents and src/LSD.app/Contents, remove the Frameworks subfolder.
 

@@ -1351,7 +1351,7 @@ void create_logwindow( void )
 	
 	// replace text widget default insert, delete and replace bindings, preventing the user to change it
 	cmd( "rename .log.text.text .log.text.text.internal" );
-	cmd( "proc .log.text.text { args } { switch -exact -- [lindex $args 0] { insert { } delete { } replace { } default { return [ eval .log.text.text.internal $args] } } }" );
+	cmd( "proc .log.text.text { args } { switch -exact -- [ lindex $args 0 ] { insert { } delete { } replace { } default { return [ eval .log.text.text.internal $args] } } }" );
 
 	cmd( "plog \"LSD Version %s (%s)\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License\nLSD is free software and comes with ABSOLUTELY NO WARRANTY\n[ LsdEnv {  } ]\n\"", _LSD_VERSION_, _LSD_DATE_ );
 

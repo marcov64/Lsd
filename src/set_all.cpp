@@ -774,6 +774,10 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 	cmd( "okhelpcancel .sens fb2 { set choice 1 } { LsdHelp menudata_sa.html#entry } { set choice 2 }" );
 	cmd( "bind .sens.fb2.ok <KeyPress-Return> { set choice 1 }" );
 
+	cmd( "showtop .sens topleftW" );
+	cmd( "mousewarpto .sens.fb2.ok" );
+
+	// insert text only now to workaround Tk 8.6.11 bug in mac
 	if ( s->entryOk )	// is there valid data from a previous data entry?
 	{
 		sss = new char[ 26 * s->nvalues + 1];	// allocate space for string
@@ -790,9 +794,7 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 		delete [ ] sss;
 	}
 
-	cmd( "showtop .sens topleftW" );
 	cmd( "focus .sens.t.t" );
-	cmd( "mousewarpto .sens.fb2.ok" );
 
 	*choice = 0;
 

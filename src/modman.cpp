@@ -4568,9 +4568,8 @@ int lsdmain( int argn, char **argv )
 		cmd( "newtop .l \"System Options\" { set choice 2 }" );
 
 		cmd( "ttk::frame .l.t" );
-		cmd( "ttk::scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-		cmd( "ttk::text .l.t.text -wrap word -width 70 -height 20 -yscrollcommand \".l.t.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
-		cmd( ".l.t.text insert end $a" );
+		cmd( "ttk::scrollbar .l.t.yscroll -command { .l.t.text yview }" );
+		cmd( "ttk::text .l.t.text -wrap word -width 70 -height 20 -yscrollcommand { .l.t.yscroll set } -dark $darkTheme -style smallFixed.TText" );
 		cmd( "pack .l.t.yscroll -side right -fill y" );
 		cmd( "pack .l.t.text" );
 		cmd( "mouse_wheel .l.t.text" );
@@ -4612,8 +4611,11 @@ int lsdmain( int argn, char **argv )
 			} { set choice 1 } { LsdHelp LMM.html#compilation_options } { set choice 2 }" );
 
 		cmd( "showtop .l" );
-		cmd( "focus .l.t.text" );
 		cmd( "mousewarpto .l.b.ok" );
+		
+		// insert text only now to workaround Tk 8.6.11 bug in mac
+		cmd( ".l.t.text insert end $a" );
+		cmd( "focus .l.t.text" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -4675,9 +4677,8 @@ int lsdmain( int argn, char **argv )
 		cmd( "newtop .l \"Model Options\" { set choice 2 }" );
 
 		cmd( "ttk::frame .l.t" );
-		cmd( "ttk::scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-		cmd( "ttk::text .l.t.text -wrap word -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
-		cmd( ".l.t.text insert end $a" );
+		cmd( "ttk::scrollbar .l.t.yscroll -command { .l.t.text yview }" );
+		cmd( "ttk::text .l.t.text -wrap word -width 70 -height 16 -yscrollcommand { .l.t.yscroll set } -dark $darkTheme -style smallFixed.TText" );
 		cmd( "pack .l.t.yscroll -side right -fill y" );
 		cmd( "pack .l.t.text" );
 		cmd( "pack .l.t" );
@@ -4805,8 +4806,11 @@ int lsdmain( int argn, char **argv )
 
 
 		cmd( "showtop .l" );
-		cmd( "focus .l.t.text" );
 		cmd( "mousewarpto .l.b.ok" );
+
+		// insert text only now to workaround Tk 8.6.11 bug in mac
+		cmd( ".l.t.text insert end $a" );
+		cmd( "focus .l.t.text" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -6056,7 +6060,7 @@ void create_compresult_window( bool nw )
 	cmd( "showtop .mm lefttoW no no no" );
 	cmd( "mousewarpto .mm.b.gerr" );
 
-	cmd( "if [ file exists \"$modelDir/makemessage.txt\" ] { set file [open \"$modelDir/makemessage.txt\"]; .mm.t.t insert end [read $file]; close $file } { .mm.t.t insert end \"(no compilation errors)\" }" );
+	cmd( "if [ file exists \"$modelDir/makemessage.txt\" ] { set file [ open \"$modelDir/makemessage.txt\" ]; .mm.t.t insert end [ read -nonewline $file ]; close $file } { .mm.t.t insert end \"(no compilation errors)\" }" );
 	cmd( ".mm.t.t mark set insert \"1.0\"" );
 	cmd( ".mm.b.ferr invoke" );
 

@@ -203,16 +203,17 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 	num = Tk_Init( inter );
 	if ( num == TCL_OK )
 		cmd( "if { ! [ catch { package present Tk 8.6 } ] && [ winfo exists . ] } { set res 0 } { set res 1 }" );
-	if ( res )
+	
+	if ( num != TCL_OK || res )
 	{
 		sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.6+) and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
 		log_tcl_error( "Start Tk", msg );
 		myexit( 3 );
 	}
 	
-	tk_ok = true;
-	cmd( "tk appname %s", tcl_app_name );
 	cmd( "wm withdraw ." );
+	cmd( "tk appname %s", tcl_app_name );
+	tk_ok = true;
 
 	// do not open/close terminal in mac
 	s = ( char * ) Tcl_GetVar( inter, "tcl_platform(os)", 0 );

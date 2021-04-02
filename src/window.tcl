@@ -199,6 +199,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 				} else {
 					set gm +$x+$y
 				}
+				
 				wm geometry $w $gm
 			}
 		} else {
@@ -221,6 +222,8 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 	}
 
+	wm maxsize $w [ winfo vrootwidth $w ] [ winfo vrootheight $w ]
+	
 	focustop $w "" $force
 
 	update
@@ -490,6 +493,7 @@ proc sizetop { { w all } } {
 					set defGeom "${hsizeBmin}x${vsizeBmin}+[ getx . topleftS ]+[ gety . topleftS ]"
 					wm geometry . [ checkgeom $lsdGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize . $hsizeBmin $vsizeBmin
+					wm maxsize . [ winfo vrootwidth . ] [ winfo vrootheight . ]
 				}
 
 				.lmm {
@@ -513,12 +517,14 @@ proc sizetop { { w all } } {
 
 					wm geometry . [ checkgeom $lmmGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize . $hsizeLmin $vsizeLmin
+					wm maxsize . [ winfo vrootwidth . ] [ winfo vrootheight . ]
 				}
 
 				.log {
 					set defGeom "+[ expr $screenWidth - $hmargin - $bordsize - $hsizeGmin ]+[ gety .log bottomrightS ]"
 					wm geometry .log [ checkgeom $logGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .log $hsizeGmin $vsizeGmin
+					wm maxsize .log [ winfo vrootwidth .log ] [ winfo vrootheight .log ]
 				}
 
 				.str {
@@ -534,12 +540,14 @@ proc sizetop { { w all } } {
 					}
 
 					wm minsize .str [ expr $hsizeM / 2 ] [ expr $vsizeM / 2 ]
+					wm maxsize .str [ winfo vrootwidth .str ] [ winfo vrootheight .str ]
 				}
 
 				.da {
 					set defGeom "+[ getx .da overM ]+[ gety .da overM ]"
 					wm geometry .da [ checkgeom $daGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .da $hsizeAmin $vsizeAmin
+					wm maxsize .da [ winfo vrootwidth .da ] [ winfo vrootheight .da ]
 					wm resizable .da 1 1
 				}
 
@@ -554,6 +562,7 @@ proc sizetop { { w all } } {
 				
 					wm geometry .deb [ checkgeom $debGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .deb $hsizeDmin $vsizeDmin
+					wm maxsize .deb [ winfo vrootwidth .deb ] [ winfo vrootheight .deb ]
 					wm resizable .deb 0 1
 				}
 
@@ -561,6 +570,7 @@ proc sizetop { { w all } } {
 					set defGeom "+[ getx .lat centerS ]+[ gety .lat centerS ]"
 					wm geometry .lat [ checkgeom $latGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .lat [ winfo reqwidth .lat ] [ winfo reqheight .lat ]
+					wm maxsize .lat [ winfo vrootwidth .lat ] [ winfo vrootheight .lat ]
 					wm resizable .lat 0 0
 				}
 				
@@ -568,6 +578,7 @@ proc sizetop { { w all } } {
 					set defGeom "+[ getx .plt righttoM ]+[ gety .plt righttoM ]"
 					wm geometry .plt [ checkgeom $pltGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .plt [ winfo reqwidth .plt ] [ winfo reqheight .plt ]
+					wm maxsize .plt [ winfo vrootwidth .plt ] [ winfo vrootheight .plt ]
 					wm resizable .plt 0 0
 				}
 				
@@ -575,6 +586,7 @@ proc sizetop { { w all } } {
 					set defGeom "+[ getx .dap centerS ]+[ gety .dap centerS ]"
 					wm geometry .dap [ checkgeom $dapGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .dap $hsizePmin $vsizePmin
+					wm maxsize .dap [ winfo vrootwidth .dap ] [ winfo vrootheight .dap ]
 					wm resizable .dap 1 1
 				}
 			}
@@ -1511,7 +1523,6 @@ proc mousewarpto w {
 #************************************************
 # ISMOUSESNAPON
 # Check for a system mouse auto-snap mode
-# In Linux, only GTK themes are detected
 #************************************************
 proc ismousesnapon { platform } {
 	if [ string equal $platform mac ] {

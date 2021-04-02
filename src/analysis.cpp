@@ -2687,7 +2687,6 @@ while ( true )
 			cmd( "ttk::frame .da.a.o" );
 			cmd( "ttk::label .da.a.o.l -text \"Other options\"" );
 			cmd( "ttk::text .da.a.o.t -height 10 -width 50 -dark $darkTheme -style smallFixed.TText" );
-			cmd( ".da.a.o.t insert end \"$gpoptions\"" );
 			cmd( "pack .da.a.o.l .da.a.o.t" );
 
 			cmd( "pack .da.a.l .da.a.st .da.a.t .da.a.d .da.a.o -pady 5 -padx 5" );
@@ -2695,6 +2694,10 @@ while ( true )
 
 			cmd( "showtop .da.a" );
 			cmd( "mousewarpto .da.a.b.ok" );
+
+			// insert text only now to workaround Tk 8.6.11 bug in mac
+			cmd( ".da.a.o.t insert end \"$gpoptions\"" );
+			cmd( "focus .da.a.o.t" );
 
 			gpoptions:
 			

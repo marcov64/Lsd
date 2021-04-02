@@ -297,13 +297,17 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				cmd( ".deb.v.v1.time2 conf -text \"%d      \"", t );
 			}
 
-			// populate the element list
-			deb_show( r, hl_var );
+			// create the element list
+			deb_show( r );
 			debLstObj = r;
 
 			cmd( "pack .deb.b -padx $butPad -pady $butPad -side right -after .deb.cc" );
 
 			cmd( "if { $newDeb } { showtop .deb topleftW; set newDeb false } { focustop .deb }" );
+			
+			// populate the element list only now to workaround Tk 8.6.11 bug in mac
+			deb_fill( r, hl_var );
+			
 			cmd( "set debDone 1" );
 			cmd( "event generate .deb <Configure>" );	// resize canvas as window is mapped now
 
@@ -1425,12 +1429,8 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 /*******************************************
 DEB_SHOW
 ********************************************/
-void deb_show( object *r, const char *hl_var )
+void deb_show( object *r )
 {
-	char ch[ 2 * MAX_ELEM_LENGTH ];
-	variable *ap_v;
-	int i;
-
 	// fix the top frame before proceeding
 	cmd( "if { ! [ winfo exists .deb.v ] } { \
 			ttk::frame .deb.v \
@@ -1463,10 +1463,6 @@ void deb_show( object *r, const char *hl_var )
 				set choice 17 \
 			}" );
 	}
-
-	strcpy( ch, "" );
-	attach_instance_number( ch, r );
-	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
 
 	cmd( "if { ! [ winfo exists .deb.tit ] } { \
 			set fntSz [ expr [ font metrics [ ttk::style lookup boldSmall.TLabel -font ] -linespace ] + 2 ]; \
@@ -1511,38 +1507,55 @@ void deb_show( object *r, const char *hl_var )
 			grid $g.can $g.scroll -sticky nsew; \
 			mouse_wheel $g.can; \
 			pack .deb.cc -anchor w -expand 1 -fill both -after .deb.tit; \
-			bind .deb <Configure> { \
-				if { ! [ info exists debConfRun ] } { \
-					set debConfRun 1; \
-					set debSz [ list [ winfo width .deb ] [ winfo height .deb ] ]; \
-					if { $debSz != $lastDebSz || ( $debDone == 1 && ! [ info exists debButHgt ] ) } { \
-						update; \
-						set lastDebSz $debSz; \
-						set canBbox [ $g.can bbox all ]; \
-						if { $debDone == 1 } { \
-							set desWid [ winfo width .deb.cc ]; \
-							set desHgt [ winfo height .deb.cc ]; \
-							if { ! [ info exists debButHgt ] } { \
-								set debButHgt [ expr [ lindex $debSz 1 ] - $desHgt ]; \
-							} elseif { $debButHgt > [ expr [ lindex $debSz 1 ] - $desHgt ] } { \
-								set desHgt [ expr [ lindex $debSz 1 ] - $debButHgt ] \
-							}; \
-							$g configure -width $desWid -height $desHgt; \
-							$g.can configure -scrollregion $canBbox \
-						} { \
-							set desWid [ expr max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ], 400 ) ]; \
-							set desHgt [ expr max( [ lindex $canBbox 3 ] - [ lindex $canBbox 1 ], 250 ) ]; \
-							unset -nocomplain debButHgt \
-						}; \
-					} elseif { $debDone == 2 } { \
-						set debDone 1; \
-						$g.can configure -scrollregion [ $g.can bbox all ] \
-					}; \
-					unset debConfRun \
-				} \
-			} \
 		}", r == debLstObj ? 1 : 0 );
+}
 
+
+/*******************************************
+DEB_FILL
+********************************************/
+void deb_fill( object *r, const char *hl_var )
+{
+	char ch[ 2 * MAX_ELEM_LENGTH ];
+	variable *ap_v;
+	int i;
+	
+	cmd( "bind .deb <Configure> { \
+			if { ! [ info exists debConfRun ] } { \
+				set debConfRun 1; \
+				set debSz [ list [ winfo width .deb ] [ winfo height .deb ] ]; \
+				if { $debSz != $lastDebSz || ( $debDone == 1 && ! [ info exists debButHgt ] ) } { \
+					update; \
+					set lastDebSz $debSz; \
+					set canBbox [ $g.can bbox all ]; \
+					if { $debDone == 1 } { \
+						set desWid [ winfo width .deb.cc ]; \
+						set desHgt [ winfo height .deb.cc ]; \
+						if { ! [ info exists debButHgt ] } { \
+							set debButHgt [ expr [ lindex $debSz 1 ] - $desHgt ]; \
+						} elseif { $debButHgt > [ expr [ lindex $debSz 1 ] - $desHgt ] } { \
+							set desHgt [ expr [ lindex $debSz 1 ] - $debButHgt ] \
+						}; \
+						$g configure -width $desWid -height $desHgt; \
+						$g.can configure -scrollregion $canBbox \
+					} { \
+						set desWid [ expr max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ], 400 ) ]; \
+						set desHgt [ expr max( [ lindex $canBbox 3 ] - [ lindex $canBbox 1 ], 250 ) ]; \
+						unset -nocomplain debButHgt \
+					}; \
+				} elseif { $debDone == 2 } { \
+					set debDone 1; \
+					$g.can configure -scrollregion [ $g.can bbox all ] \
+				}; \
+				unset debConfRun \
+			} \
+		}" );
+
+	strcpy( ch, "" );
+	attach_instance_number( ch, r );
+	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
+
+	cmd( "set g .deb.cc.grid" );
 	cmd( "set lastHl \"\"" );
 	cmd( "set curElem [ list ]" );
 	cmd( "array unset debElem" );
@@ -1677,6 +1690,7 @@ void show_tmp_vars( object *r, bool update )
 
 		cmd( "showtop $in topleftW 0 1 0" );
 		cmd( "wm minsize $in [ winfo reqwidth $in ] [ expr $vsizeDmin + $vmenusize ]" );
+		cmd( "wm maxsize $in [ winfo vrootwidth $in ] [ winfo vrootheight $in ]" );
 		cmd( "wm geometry $in [ winfo reqwidth $in ]x[ expr [ winfo height .deb ] + $vmenusize ]" );
 
 		cmd( "$in.n.t tag configure bold -font [ ttk::style lookup boldSmallProp.TText -font ]" );
@@ -1987,6 +2001,7 @@ void show_neighbors( object *r, bool update )
 		
 		cmd( "showtop $N topleftW 0 1 0" );
 		cmd( "wm minsize $N [ winfo reqwidth $N ] [ expr $vsizeDmin + $vmenusize ]" );
+		cmd( "wm maxsize $N [ winfo vrootwidth $N ] [ winfo vrootheight $N ]" );
 		cmd( "wm geometry $N [ winfo reqwidth $N ]x[ expr [ winfo height .deb ] + $vmenusize ]" );
 		
 		cmd( "if { ! [ winfo exists .deb.val ] } { align $N .deb } { align $N .deb.val }" );

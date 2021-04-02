@@ -501,7 +501,6 @@ proc medit i {
 	ttk::frame .l.e.t.t
 	ttk::scrollbar .l.e.t.t.yscroll -command ".l.e.t.t.text yview"
 	ttk::text .l.e.t.t.text -wrap word -width 60 -height 20 -yscrollcommand ".l.e.t.t.yscroll set" -dark $darkTheme -style smallFixed.TText
-	.l.e.t.t.text insert end "[ lindex $lmd $i ]"
 	pack .l.e.t.t.yscroll -side right -fill y
 	pack .l.e.t.t.text
 	mouse_wheel .l.e.t.t.text
@@ -551,9 +550,12 @@ proc medit i {
 	}
 
 	showtop .l.e
+	mousewarpto .l.e.b.ok
+	
+	# insert text only now to workaround Tk 8.6.11 bug in mac
+	.l.e.t.t.text insert end "[ lindex $lmd $i ]"
 	.l.e.n.n selection range 0 end
 	focus .l.e.n.n
-	mousewarpto .l.e.b.ok
 }
 
 
@@ -606,7 +608,6 @@ proc mpaste i {
 	ttk::frame .l.p.t.t
 	ttk::scrollbar .l.p.t.t.yscroll -command ".l.p.t.t.text yview"
 	ttk::text .l.p.t.t.text -wrap word -width 60 -height 20 -yscrollcommand ".l.p.t.t.yscroll set" -dark $darkTheme -style smallFixed.TText
-	.l.p.t.t.text insert end "$copydscr"
 	pack .l.p.t.t.yscroll -side right -fill y
 	pack .l.p.t.t.text
 	mouse_wheel .l.p.t.t.text
@@ -621,6 +622,10 @@ proc mpaste i {
 	bind .l.p.d.d <Return> { focus .l.p.t.t.text; .l.p.t.t.text mark set insert 1.0 }
 
 	showtop .l.p
+	mousewarpto .l.p.b.ok
+	
+	# insert text only now to workaround Tk 8.6.11 bug in mac
+	.l.p.t.t.text insert end "$copydscr"
 	.l.p.n.n selection range 0 end
 	focus .l.p.n.n
 

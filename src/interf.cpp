@@ -1797,13 +1797,6 @@ case 6:
 	cmd( "pack $w.f.text -anchor w -expand yes -fill both" );
 	cmd( "mouse_wheel $w.f.text" );
 
-	for ( i = 0; cur_descr->text[ i ] != ( char ) NULL; ++i )
-		if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\' )
-			cmd( "$w.f.text insert end \"%c\"", cur_descr->text[ i ] );
-		else
-			cmd( "$w.f.text insert end \"\\%c\"", cur_descr->text[ i ] );
-
-	cmd( "$w.f.text delete \"end - 1 char\"" );
 	cmd( "pack $w.int $w.f -fill x -expand yes" );
 
 	cmd( "pack $T.h $T.b0 $T.b1 $w -pady 5" );
@@ -1818,6 +1811,15 @@ case 6:
 
 	cmd( "showtop $T topleftW" );
 	cmd( "mousewarpto $T.b.ok" );
+
+	// insert text only now to workaround Tk 8.6.11 bug in mac
+	for ( i = 0; cur_descr->text[ i ] != ( char ) NULL; ++i )
+		if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\' )
+			cmd( "$w.f.text insert end \"%c\"", cur_descr->text[ i ] );
+		else
+			cmd( "$w.f.text insert end \"\\%c\"", cur_descr->text[ i ] );
+
+	cmd( "$w.f.text delete \"end - 1 char\"" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -2205,14 +2207,6 @@ case 7:
 	cmd( "pack $Td.f.desc.text -anchor w -expand yes -fill both" );
 	cmd( "mouse_wheel $Td.f.desc.text" );
 	
-	for ( i = 0; cur_descr->text[ i ] != '\0'; ++i )
-		if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\')
-			cmd( "$Td.f.desc.text insert end \"%c\"", cur_descr->text[ i ] );
-		else
-			cmd( "$Td.f.desc.text insert end \"\\%c\"", cur_descr->text[ i ] );
-
-	cmd( "$Td.f.desc.text delete \"end - 1 char\"" );
-
 	cmd( "pack $Td.f.int $Td.f.desc" );
 
 	cmd( "ttk::frame $Td.b" );
@@ -2242,17 +2236,6 @@ case 7:
 		cmd( "pack $Td.i.desc.text -anchor w -expand yes -fill both" );
 		cmd( "mouse_wheel $Td.i.desc.text" );
 
-		if ( cur_descr->init != NULL )
-		{
-			for ( i = 0; cur_descr->init[ i ] != '\0'; ++i )
-				if ( cur_descr->init[ i ] != '[' && cur_descr->init[ i ] != ']' && cur_descr->init[ i ] != '{' && cur_descr->init[ i ] != '}' && cur_descr->init[ i ] != '\"' && cur_descr->text[ i ] != '\\')
-					cmd( "$Td.i.desc.text insert end \"%c\"", cur_descr->init[ i ] );
-				else
-					cmd( "$Td.i.desc.text insert end \"\\%c\"", cur_descr->init[ i ] );
-	  
-			cmd( "$Td.i.desc.text delete \"end - 1 char\"" );
-		}
-		
 		cmd( "pack $Td.i.int $Td.i.desc" );
 	  
 		cmd( "ttk::frame $Td.b2" );
@@ -2286,6 +2269,26 @@ case 7:
 	cmd( "showtop $T topleftW" );
 	cmd( "mousewarpto $T.b.ok" );
 
+	// insert text only now to workaround Tk 8.6.11 bug in mac
+	for ( i = 0; cur_descr->text[ i ] != '\0'; ++i )
+		if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\')
+			cmd( "$Td.f.desc.text insert end \"%c\"", cur_descr->text[ i ] );
+		else
+			cmd( "$Td.f.desc.text insert end \"\\%c\"", cur_descr->text[ i ] );
+
+	cmd( "$Td.f.desc.text delete \"end - 1 char\"" );
+
+	if ( ( cv->param == 1 || cv->num_lag > 0 ) && cur_descr->init != NULL )
+	{
+		for ( i = 0; cur_descr->init[ i ] != '\0'; ++i )
+			if ( cur_descr->init[ i ] != '[' && cur_descr->init[ i ] != ']' && cur_descr->init[ i ] != '{' && cur_descr->init[ i ] != '}' && cur_descr->init[ i ] != '\"' && cur_descr->text[ i ] != '\\')
+				cmd( "$Td.i.desc.text insert end \"%c\"", cur_descr->init[ i ] );
+			else
+				cmd( "$Td.i.desc.text insert end \"\\%c\"", cur_descr->init[ i ] );
+  
+		cmd( "$Td.i.desc.text delete \"end - 1 char\"" );
+	}
+	
 	cycle_var:
 
 	done = 0;

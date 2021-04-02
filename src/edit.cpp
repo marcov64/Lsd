@@ -130,8 +130,9 @@ void set_obj_number( object *r, int *choice )
 		
 		if ( notShown )
 		{
-			cmd( "showtop .inin topleftW 1 1 1 [ expr max( $ininWid + 10, $hsizeNmin ) ] [ expr max( $ininHgt + 110, $vsizeNmin ) ]" );
+			cmd( "showtop .inin topleftW 1 1 1 [ expr max( $ininWid + 10, $hsizeNmin ) ] [ expr max( $ininHgt + 110, $vsizeNmin ) ]" );			
 			cmd( "wm minsize .inin $hsizeNmin $vsizeNmin" );
+			cmd( "wm maxsize .inin [ winfo vrootwidth .inin ] [ winfo vrootheight .inin ]" );
 			notShown = false;
 		}
 		
