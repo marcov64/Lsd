@@ -212,17 +212,7 @@ if { ! [ info exists lsdTheme ] || \
 if { [ string equal $lsdTheme aqua ] } {
 	set darkTheme [ isDarkTheme ]
 
-	# handle background color bug in Big Sur
-	if { [ lindex [ split $tcl_platform(osVersion) . ] 0 ] > 19 } {
-		if { $darkTheme } {
-			set colorsTheme(bg) #323232
-		} else {
-			set colorsTheme(bg) #f6f6f6
-		}
-	} else {
-		set colorsTheme(bg) systemWindowBackgroundColor				; # non-entry light/dark text background
-	}
-
+	set colorsTheme(bg) systemWindowBackgroundColor					; # non-entry light/dark text background
 	set colorsTheme(fg) systemTextColor								; # entry/non-entry dark text foreground
 	set colorsTheme(dbg) systemTextBackgroundColor					; # entry dark text background
 	set colorsTheme(ebg) systemTextBackgroundColor					; # entry light text background

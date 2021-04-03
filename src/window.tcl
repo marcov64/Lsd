@@ -22,13 +22,19 @@
 # Procedure to create top level new windows
 #************************************************
 proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
-	global RootLsd parWndLst grabLst noParLst logWndFn colorsTheme activeplot
+	global CurPlatform RootLsd parWndLst grabLst noParLst logWndFn colorsTheme activeplot
 
 	destroytop $w
 	toplevel $w -background $colorsTheme(bg)
-	
+
+	# workaround for bug in Tk 8.6.11
+	if { [ string equal $CurPlatform mac ] } { 
+		wm attributes $w -alpha 0
+		update
+	}
+
 	# try to prevent LSD to withdraw and grab windows focus when deiconify
-	if { $w in [ list .deb .lat .mm ] || ( [ info exists activeplot ] && [ string equal $w $activeplot ] ) } {
+	if { $w in [ list .deb .lat .mm ] } {
 		if { [ focus -displayof . ] != "" } {
 			wm withdraw $w
 		}
@@ -66,6 +72,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
 	wm group $w .
 	wm title $w $name
 	wm protocol $w WM_DELETE_WINDOW $destroy
+	wm attributes $w -alpha 1
 	
 	if { ! $noglobkeys } {
 		setglobkeys $w
@@ -223,9 +230,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	}
 
 	wm maxsize $w [ winfo vrootwidth $w ] [ winfo vrootheight $w ]
-	
 	focustop $w "" $force
-
 	update
 
 	# grab focus, if required, updating the grabbing list
@@ -263,6 +268,8 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		focus $w
 	}
 
+	update
+	
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], minsize:[wm minsize $w], primdisp:[ primdisp [ winfo parent $w ] ], parWndLst:$parWndLst, grab:$grabLst)" }
 }
 
@@ -658,6 +665,8 @@ proc focustop { w1 { w2 "" } { force no } } {
 			focus $w1
 		}
 	}
+	
+	update
 }
 
 
@@ -674,6 +683,8 @@ proc deiconifytop { w { force no } } {
 		   [ focus -displayof $w ] != "" ) ) } {
 		wm deiconify $w
 	}
+	
+	update
 }
 
 
@@ -763,6 +774,7 @@ proc align { w1 w2 { side R } } {
 	} else {
 		set g [ expr $c + $f + $hmargin ]
 	}
+	
 	wm geometry $w1 +$g+$d
 	update
 
@@ -911,16 +923,19 @@ proc gety { w pos } {
 # call parameters are: container window, menu name, widgets names
 #************************************************
 proc disable_window { w m { args "" } } {
+	
 	if [ winfo exist $w.$m ] {
 		for { set i 0 } { $i <= [ $w.$m index last ] } { incr i } {
 			$w.$m entryconfig $i -state disabled
 		}
 	}
+	
 	foreach i $args {
 		if [ winfo exists $w.$i ] {
 			tk busy hold $w.$i
 		}
 	}
+	
 	update
 }
 
@@ -931,16 +946,19 @@ proc disable_window { w m { args "" } } {
 # call parameters are: container window, menu name, widgets names
 #************************************************
 proc enable_window { w m { args "" } } {
+	
 	if [ winfo exist $w.$m ] {
 		for { set i 0 } { $i <= [ $w.$m index last ] } { incr i } {
 			$w.$m entryconfig $i -state normal
 		}
 	}
+	
 	foreach i $args {
 		if [ winfo exists $w.$i ] {
 			tk busy forget $w.$i
 		}
 	}
+	
 	update
 }
 

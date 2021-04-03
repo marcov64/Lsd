@@ -14,13 +14,13 @@
 	<key>CFBundleExecutable</key>
 	<string>Tk</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Tk AQUA 8.6.10,
-Copyright © 1989-2019 Tcl Core Team,
-Copyright © 2002-2019 Daniel A. Steffen,
-	Copyright © 1989-2019 Contributors,
-	Copyright © 2011-2019 Kevin Walzer/WordTech
+	<string>Tk AQUA 8.6.11,
+Copyright © 1989-2021 Tcl Core Team,
+Copyright © 2002-2021 Daniel A. Steffen,
+	Copyright © 1989-2021 Contributors,
+	Copyright © 2011-2021 Kevin Walzer/WordTech
 	Communications LLC,
-	Copyright © 2014-2019 Marc Culler,
+	Copyright © 2014-2021 Marc Culler,
 Copyright © 2001-2009 Apple Inc.,
 Copyright © 2001-2002 Jim Ingham &amp; Ian Reid</string>
 	<key>CFBundleIdentifier</key>
@@ -32,10 +32,10 @@ Copyright © 2001-2002 Jim Ingham &amp; Ian Reid</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
-	<string>8.6.10</string>
+	<string>8.6.11</string>
 	<key>CFBundleSignature</key>
 	<string>Tk  </string>
 	<key>CFBundleVersion</key>
-	<string>8.6.10</string>
+	<string>8.6.11</string>
 </dict>
 </plist>

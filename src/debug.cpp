@@ -298,15 +298,12 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			}
 
 			// create the element list
-			deb_show( r );
+			deb_show( r, hl_var );
 			debLstObj = r;
 
 			cmd( "pack .deb.b -padx $butPad -pady $butPad -side right -after .deb.cc" );
 
 			cmd( "if { $newDeb } { showtop .deb topleftW; set newDeb false } { focustop .deb }" );
-			
-			// populate the element list only now to workaround Tk 8.6.11 bug in mac
-			deb_fill( r, hl_var );
 			
 			cmd( "set debDone 1" );
 			cmd( "event generate .deb <Configure>" );	// resize canvas as window is mapped now
@@ -1429,8 +1426,12 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 /*******************************************
 DEB_SHOW
 ********************************************/
-void deb_show( object *r )
+void deb_show( object *r, const char *hl_var )
 {
+	char ch[ 2 * MAX_ELEM_LENGTH ];
+	variable *ap_v;
+	int i;
+	
 	// fix the top frame before proceeding
 	cmd( "if { ! [ winfo exists .deb.v ] } { \
 			ttk::frame .deb.v \
@@ -1478,6 +1479,10 @@ void deb_show( object *r )
 			pack .deb.tit -anchor w -fill x -after .deb.v \
 		}" );
 
+	strcpy( ch, "" );
+	attach_instance_number( ch, r );
+	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
+
 	// create single top frame to grid, where the values table can be built
 	// and a canvas to hold the table so it can be scrollable
 	cmd( "set g .deb.cc.grid" );
@@ -1507,53 +1512,37 @@ void deb_show( object *r )
 			grid $g.can $g.scroll -sticky nsew; \
 			mouse_wheel $g.can; \
 			pack .deb.cc -anchor w -expand 1 -fill both -after .deb.tit; \
-		}", r == debLstObj ? 1 : 0 );
-}
-
-
-/*******************************************
-DEB_FILL
-********************************************/
-void deb_fill( object *r, const char *hl_var )
-{
-	char ch[ 2 * MAX_ELEM_LENGTH ];
-	variable *ap_v;
-	int i;
-	
-	cmd( "bind .deb <Configure> { \
-			if { ! [ info exists debConfRun ] } { \
-				set debConfRun 1; \
-				set debSz [ list [ winfo width .deb ] [ winfo height .deb ] ]; \
-				if { $debSz != $lastDebSz || ( $debDone == 1 && ! [ info exists debButHgt ] ) } { \
-					update; \
-					set lastDebSz $debSz; \
-					set canBbox [ $g.can bbox all ]; \
-					if { $debDone == 1 } { \
-						set desWid [ winfo width .deb.cc ]; \
-						set desHgt [ winfo height .deb.cc ]; \
-						if { ! [ info exists debButHgt ] } { \
-							set debButHgt [ expr [ lindex $debSz 1 ] - $desHgt ]; \
-						} elseif { $debButHgt > [ expr [ lindex $debSz 1 ] - $desHgt ] } { \
-							set desHgt [ expr [ lindex $debSz 1 ] - $debButHgt ] \
+			bind .deb <Configure> { \
+				if { ! [ info exists debConfRun ] } { \
+					set debConfRun 1; \
+					set debSz [ list [ winfo width .deb ] [ winfo height .deb ] ]; \
+					if { $debSz != $lastDebSz || ( $debDone == 1 && ! [ info exists debButHgt ] ) } { \
+						update; \
+						set lastDebSz $debSz; \
+						set canBbox [ $g.can bbox all ]; \
+						if { $debDone == 1 } { \
+							set desWid [ winfo width .deb.cc ]; \
+							set desHgt [ winfo height .deb.cc ]; \
+							if { ! [ info exists debButHgt ] } { \
+								set debButHgt [ expr [ lindex $debSz 1 ] - $desHgt ]; \
+							} elseif { $debButHgt > [ expr [ lindex $debSz 1 ] - $desHgt ] } { \
+								set desHgt [ expr [ lindex $debSz 1 ] - $debButHgt ] \
+							}; \
+							$g configure -width $desWid -height $desHgt; \
+							$g.can configure -scrollregion $canBbox \
+						} { \
+							set desWid [ expr max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ], 400 ) ]; \
+							set desHgt [ expr max( [ lindex $canBbox 3 ] - [ lindex $canBbox 1 ], 250 ) ]; \
+							unset -nocomplain debButHgt \
 						}; \
-						$g configure -width $desWid -height $desHgt; \
-						$g.can configure -scrollregion $canBbox \
-					} { \
-						set desWid [ expr max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ], 400 ) ]; \
-						set desHgt [ expr max( [ lindex $canBbox 3 ] - [ lindex $canBbox 1 ], 250 ) ]; \
-						unset -nocomplain debButHgt \
+					} elseif { $debDone == 2 } { \
+						set debDone 1; \
+						$g.can configure -scrollregion [ $g.can bbox all ] \
 					}; \
-				} elseif { $debDone == 2 } { \
-					set debDone 1; \
-					$g.can configure -scrollregion [ $g.can bbox all ] \
-				}; \
-				unset debConfRun \
+					unset debConfRun \
+				} \
 			} \
-		}" );
-
-	strcpy( ch, "" );
-	attach_instance_number( ch, r );
-	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
+		}", r == debLstObj ? 1 : 0 );
 
 	cmd( "set g .deb.cc.grid" );
 	cmd( "set lastHl \"\"" );
