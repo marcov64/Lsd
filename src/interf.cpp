@@ -2208,12 +2208,12 @@ case 7:
 	cmd( "mouse_wheel $Td.f.desc.text" );
 	
 	cmd( "pack $Td.f.int $Td.f.desc" );
-
+	
 	cmd( "ttk::frame $Td.b" );
-	cmd( "ttk::button $Td.b.eq -width [ expr $butWid + 4 ] -text \"View Code\" -command { set done 3 } -underline 3" );
-	cmd( "ttk::button $Td.b.auto_doc -width [ expr $butWid + 4 ] -text \"Auto Descr.\" -command { set done 9 } -underline 0" );
-	cmd( "ttk::button $Td.b.us -width [ expr $butWid + 4 ] -text \"Using Element\" -command { set done 4 } -underline 0" );
-	cmd( "ttk::button $Td.b.using -width [ expr $butWid + 4 ] -text \"Elements Used\" -command { set done  7} -underline 0" );
+	cmd( "ttk::button $Td.b.eq -width [ expr $butWid + 1 ] -text \"View Code\" -command { set done 3 } -underline 3" );
+	cmd( "ttk::button $Td.b.auto_doc -width [ expr $butWid + 1 ] -text \"Auto Descr.\" -command { set done 9 } -underline 0" );
+	cmd( "ttk::button $Td.b.us -width [ expr $butWid + 1 ] -text \"Using Elem.\" -command { set done 4 } -underline 0" );
+	cmd( "ttk::button $Td.b.using -width [ expr $butWid + 1 ] -text \"Elem. Used\" -command { set done  7} -underline 0" );
 	
 	if ( ! strcmp( cur_descr->type, "Parameter" ) )
 		cmd( "pack $Td.b.auto_doc $Td.b.us -padx $butSpc -side left" );
@@ -2239,8 +2239,8 @@ case 7:
 		cmd( "pack $Td.i.int $Td.i.desc" );
 	  
 		cmd( "ttk::frame $Td.b2" );
-		cmd( "ttk::button $Td.b2.setall -width [ expr $butWid + 3 ] -text \"Initial Values\" -command { set done 11 } -underline 1" );
-		cmd( "ttk::button $Td.b2.sens -width [ expr $butWid + 3 ] -text \"Sensitivity\" -command { set done 12 } -underline 5" );
+		cmd( "ttk::button $Td.b2.setall -width [ expr $butWid + 2 ] -text \"Initial Values\" -command { set done 11 } -underline 1" );
+		cmd( "ttk::button $Td.b2.sens -width [ expr $butWid + 2 ] -text \"Sensitivity\" -command { set done 12 } -underline 5" );
 		cmd( "pack $Td.b2.setall $Td.b2.sens -padx $butSpc -side left" );
 		
 		cmd( "pack $Td.opt $Td.f $Td.b $Td.i $Td.b2 -pady 5" );

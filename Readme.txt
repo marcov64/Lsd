@@ -209,6 +209,20 @@ If using macOS 10.12 (Sierra) or newer, you MUST use the "add-shortcut-mac.sh" c
 
 If you delete or cannot create the LSD shortcuts, you can still run the app named LMM located inside the LSD installation directory (double click it in Finder) to open LMM/LSD, or try to rerun the "add-shortcut-mac.sh" script to recreate the shortcut.
 
+AUTOMATION ACCESS:
+
+LSD needs to control external programs to automate operation. The first time it needs automation access, a macOS (10.14+) popup will request the user to allow it, please click on OK. If user denies automation access once, macOS will not ask again for authorization and will silently block all further LSD operations, curtailing LSD capabilities and preventing some operations. To force the system to ask again for authorization (all programs) please use the following command on the Terminal:
+
+ tccutil reset AppleEvents
+
+Authorized programs can be checked at System Preferences > Security & Privacy > Privacy > Automation.
+
+DARK MODE:
+
+Dark Mode is partly supported only in macOS 10.14 (Mojave) and 10.15 (Catalina) only. macOS 11.0 (Big Sur) Dark Mode is not supported by the Tcl/Tk version used by LSD. In this case, if the default Aqua theme is used, LMM will offer to switch to Light Mode every time it is invoked. If the user prefers to keep Dark Mode, a workaround is to use the Black theme (LMM menu File > Options > Interface theme).
+
+Dark Mode requires automation access to work, please see above.
+
 
 **********************
 4.3 Linux installation
