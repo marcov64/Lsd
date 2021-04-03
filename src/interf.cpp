@@ -2210,10 +2210,10 @@ case 7:
 	cmd( "pack $Td.f.int $Td.f.desc" );
 	
 	cmd( "ttk::frame $Td.b" );
-	cmd( "ttk::button $Td.b.eq -width [ expr $butWid + 1 ] -text \"View Code\" -command { set done 3 } -underline 3" );
-	cmd( "ttk::button $Td.b.auto_doc -width [ expr $butWid + 1 ] -text \"Auto Descr.\" -command { set done 9 } -underline 0" );
-	cmd( "ttk::button $Td.b.us -width [ expr $butWid + 1 ] -text \"Using Elem.\" -command { set done 4 } -underline 0" );
-	cmd( "ttk::button $Td.b.using -width [ expr $butWid + 1 ] -text \"Elem. Used\" -command { set done  7} -underline 0" );
+	cmd( "ttk::button $Td.b.eq -width [ expr $butWid + 2 ] -text \"View Code\" -command { set done 3 } -underline 3" );
+	cmd( "ttk::button $Td.b.auto_doc -width [ expr $butWid + 2 ] -text \"Auto Descr.\" -command { set done 9 } -underline 0" );
+	cmd( "ttk::button $Td.b.us -width [ expr $butWid + 2 ] -text \"Using Elem.\" -command { set done 4 } -underline 0" );
+	cmd( "ttk::button $Td.b.using -width [ expr $butWid + 2 ] -text \"Elem. Used\" -command { set done  7} -underline 0" );
 	
 	if ( ! strcmp( cur_descr->type, "Parameter" ) )
 		cmd( "pack $Td.b.auto_doc $Td.b.us -padx $butSpc -side left" );
