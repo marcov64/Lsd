@@ -64,7 +64,7 @@ set vsizeBminWindows	600
 set hsizeGminMac		670	; # log window
 set vsizeGminMac		360
 set hsizeGminLinux		670
-set vsizeGminLinux		430
+set vsizeGminLinux		400
 set hsizeGminWindows	620
 set vsizeGminWindows	360
 set hsizeAminMac		860	; # analysis of results window
@@ -75,8 +75,8 @@ set hsizeAminWindows	720
 set vsizeAminWindows	460
 set hsizePminMac		860	; # analysis of results plot window
 set vsizePminMac		580
-set hsizePminLinux		720
-set vsizePminLinux		550
+set hsizePminLinux		730
+set vsizePminLinux		560
 set hsizePminWindows	720
 set vsizePminWindows	540
 set hsizeDminMac		942	; # debugger/data browse window
@@ -94,7 +94,7 @@ set vsizeLmin	600	; # LMM minimum vertical size in pixels
 set hsizeM 		600	; # model structure horizontal size in pixels
 set vsizeM		360	; # model structure vertical size in pixels
 set hsizeNmin	300	; # objects numbers editor minimum horizontal size in pixels
-set vsizeNmin	520	; # objects numbers editor minimum vertical size in pixels
+set vsizeNmin	550	; # objects numbers editor minimum vertical size in pixels
 set hsizeImin	300	; # initial values editor minimum horizontal size in pixels
 set vsizeImin	400	; # initial values editor minimum vertical size in pixels
 set hsizeP 		600	; # default plot (time series) horizontal size in pixels
