@@ -142,7 +142,7 @@ void show_eq( char *lab, int *choice )
 					$W.f.text mark set insert \"$cur1 + $length char\"; \
 					focus $W.f.text; \
 					$W.f.text see $cur1; \
-					update \
+					update idletasks \
 				} \
 			}; \
 			pack $W.s.l $W.s.e -padx 5; \
@@ -163,7 +163,7 @@ void show_eq( char *lab, int *choice )
 				$W.f.text mark set insert \"$cur1 + $length char\"; \
 				focus $W.f.text; \
 				$W.f.text see $cur1; \
-				update \
+				update idletasks \
 			} \
 		}", lab, lab );
 
@@ -179,7 +179,6 @@ void show_eq( char *lab, int *choice )
 	cmd( "showtop $w centerW 1 1" );
 	cmd( "mousewarpto $w.b.cancel" );
 
-	// insert text only now to workaround Tk 8.6.11 bug in mac
 	cmd( ".eq_%s.f.text tag conf vars -foreground $colorsTheme(str)", lab );
 	cmd( ".eq_%s.f.text tag conf comment_line -foreground $colorsTheme(comm)", lab );
 	cmd( ".eq_%s.f.text tag conf temp_var -foreground $colorsTheme(vlsd)", lab );
@@ -537,7 +536,6 @@ void show_descr( char *lab, int *choice )
 	cmd( "showtop $w centerW 1 1" );
 	cmd( "mousewarpto $w.b.ok" );
 	
-	// insert text only now to workaround Tk 8.6.11 bug in mac
 	for ( i = 0; descr->text[ i ] != '\0'; ++i )
 		if ( descr->text[ i ] != '[' && descr->text[ i ] != ']' && descr->text[ i ] != '{' && descr->text[ i ] != '}' && descr->text[ i ] != '\"' && descr->text[ i ] != '\\')
 			cmd( "$w.f.text insert end \"%c\"", descr->text[ i ] );

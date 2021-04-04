@@ -31,24 +31,9 @@ proc isDarkTheme { } {
 	global tcl_platform CurPlatform darkThemeSuffixes
 
 	if [ string equal $CurPlatform mac ] {
-		update
+		update idletasks
 		if [ tk::unsupported::MacWindowStyle isdark . ] {
 			return 1
-		}
-
-		# handle bugs in Tk in later versions of macOS
-		if { [ tk appname ] eq "lmm" } {
-			catch { exec osascript -e "tell application \"System Events\" to tell appearance preferences to get dark mode" } result
-
-			if { $result eq "true" } {
-				set answer [ tk_messageBox -type yesno -default yes -icon warning -title Warning -message "Dark mode not supported" -detail "Due to constant changes in macOS, LSD cannot handle dark mode correctly. Alternatively, you can choose a non-Aqua theme, like 'Black', in LMM menu 'File > Options > Interface theme'.\n\nPress 'Yes' to change to light mode now or 'No' to continue in dark mode." ]
-				
-				if { $answer eq "yes" } {
-					catch { exec osascript -e "tell application \"System Events\" to tell appearance preferences to set dark mode to not dark mode" }
-				} else {
-					return 1
-				}
-			}
 		}
 	} elseif [ string equal $CurPlatform linux ] {
 		catch { exec gsettings get org.gnome.desktop.interface gtk-theme } results

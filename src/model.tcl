@@ -389,7 +389,7 @@ proc showmodel pippo {
 
 	cd $curdir
 	
-	update
+	update idletasks
 }
 
 
@@ -552,7 +552,6 @@ proc medit i {
 	showtop .l.e
 	mousewarpto .l.e.b.ok
 	
-	# insert text only now to workaround Tk 8.6.11 bug in mac
 	.l.e.t.t.text insert end "[ lindex $lmd $i ]"
 	.l.e.n.n selection range 0 end
 	focus .l.e.n.n
@@ -624,7 +623,6 @@ proc mpaste i {
 	showtop .l.p
 	mousewarpto .l.p.b.ok
 	
-	# insert text only now to workaround Tk 8.6.11 bug in mac
 	.l.p.t.t.text insert end "$copydscr"
 	.l.p.n.n selection range 0 end
 	focus .l.p.n.n

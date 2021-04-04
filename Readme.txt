@@ -217,12 +217,6 @@ LSD needs to control external programs to automate operation. The first time it 
 
 Authorized programs can be checked at System Preferences > Security & Privacy > Privacy > Automation.
 
-DARK MODE:
-
-Dark Mode is partly supported only in macOS 10.14 (Mojave) and 10.15 (Catalina) only. macOS 11.0 (Big Sur) Dark Mode is not supported by the Tcl/Tk version used by LSD. In this case, if the default Aqua theme is used, LMM will offer to switch to Light Mode every time it is invoked. If the user prefers to keep Dark Mode, a workaround is to use the Black theme (LMM menu File > Options > Interface theme).
-
-Dark Mode requires automation access to work, please see above.
-
 
 **********************
 4.3 Linux installation

@@ -866,6 +866,8 @@ void run( void )
 			
 			if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER )
 			{
+				cmd( ".p.b2.b configure -value %d", t );
+				cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr int( 100 * %d / %d ) ]%% done)\"", min( t + 1, max_step ), max_step, t, max_step );
 				cmd( "update" );
 				last_update = clock( );
 			}
@@ -1496,7 +1498,7 @@ void cover_browser( const char *text1, const char *text2, bool run )
 		cmd( "wm title . \"$origMainTit (DISABLED)\"" );
 	}
 	
-	cmd( "update" );
+	cmd( "update idletasks" );
 	
 	brCovered = true;
 	redrawRoot = false;

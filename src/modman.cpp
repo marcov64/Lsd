@@ -788,7 +788,7 @@ int lsdmain( int argn, char **argv )
 
 	loop:
 
-	cmd( "if { ! $keepfocus } { focus .f.t.t; update } { set keepfocus 0 }" );
+	cmd( "if { ! $keepfocus } { focus .f.t.t; update idletasks } { set keepfocus 0 }" );
 
 	// update file save status in titlebar and cursor position in info bar
 	cmd( "update_title_bar" );
@@ -1151,7 +1151,7 @@ int lsdmain( int argn, char **argv )
 						destroytop .find; \
 						focus .f.t.t; \
 						set keepfocus 0; \
-						update \
+						update idletasks \
 					} else { \
 						.find.l.e selection range 0 end; \
 						bell \
@@ -1217,7 +1217,7 @@ int lsdmain( int argn, char **argv )
 					.f.t.t mark set insert \"$cur + $length char\"; \
 					.f.t.t see $cur; \
 					upd_cursor; \
-					update \
+					update idletasks \
 				} else { \
 					bell \
 				} \
@@ -1298,7 +1298,7 @@ int lsdmain( int argn, char **argv )
 						}; \
 						.f.t.t see $cur; \
 						upd_cursor; \
-						update; \
+						update idletasks; \
 						.l.b1.repl conf -state normal; \
 						.l.b1.all conf -state normal \
 					} else { \
@@ -4613,7 +4613,6 @@ int lsdmain( int argn, char **argv )
 		cmd( "showtop .l" );
 		cmd( "mousewarpto .l.b.ok" );
 		
-		// insert text only now to workaround Tk 8.6.11 bug in mac
 		cmd( ".l.t.text insert end $a" );
 		cmd( "focus .l.t.text" );
 
@@ -4808,7 +4807,6 @@ int lsdmain( int argn, char **argv )
 		cmd( "showtop .l" );
 		cmd( "mousewarpto .l.b.ok" );
 
-		// insert text only now to workaround Tk 8.6.11 bug in mac
 		cmd( ".l.t.text insert end $a" );
 		cmd( "focus .l.t.text" );
 
@@ -5890,21 +5888,24 @@ bool compile_run( bool run, bool nw )
 
 		if ( run )							// no problem - execute
 		{
-			// create the element list file in background
-			cmd( "after 0 { create_elem_file $modelDir }; update" );
+			// create the element list file in background and try to open 10 times every 50 ms
+			cmd( "after 0 { create_elem_file $modelDir }" );
+			cmd( "update" );
+			cmd( "set n 10" );
+			cmd( "set result \"\"" );
 
 			switch ( platform )
 			{
 				case LINUX:
-					cmd( "catch { exec ./%s & } result", str + 7 );
+					cmd( "while { [ catch { exec ./%s & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
 					break;
 					
 				case MAC:
-					cmd( "catch { exec open -F -n ./%s.app & } result", str + 7 );
+					cmd( "while { [ catch { exec open -F -n ./%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
 					break;
 					
 				case WINDOWS:
-					cmd( "catch { exec %s.exe & } result", str + 7 );
+					cmd( "while { [ catch { exec %s.exe & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
 					break;
 			}
 		}
@@ -6067,7 +6068,7 @@ void create_compresult_window( bool nw )
 	cmd( ".mm.t.t configure -state disabled" );
 	cmd( "focustop .mm.t.t" );
 	cmd( "set keepfocus 1" );
-	cmd( "update" );
+	cmd( "update idletasks" );
 }
 
 

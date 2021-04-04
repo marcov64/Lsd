@@ -909,10 +909,6 @@ int browse( object *r, int *choice )
 			cmd( "$w add cascade -label \"Show Elements to\" -underline 17 -menu $w.show" );
 			cmd( "$w add cascade -label \"Remove Flags to\" -underline 15 -menu $w.rem" );
 
-			cmd( "$w add separator" );
-			
-			cmd( "$w add command -label \"Close Run-time Plots\" -command { set choice 40 } -underline 0" );
-
 			cmd( "set w .m.run.show" );
 			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( "$w add command -label Save -underline 0 -command { set choice 39 }" );
@@ -1812,7 +1808,6 @@ case 6:
 	cmd( "showtop $T topleftW" );
 	cmd( "mousewarpto $T.b.ok" );
 
-	// insert text only now to workaround Tk 8.6.11 bug in mac
 	for ( i = 0; cur_descr->text[ i ] != ( char ) NULL; ++i )
 		if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\' )
 			cmd( "$w.f.text insert end \"%c\"", cur_descr->text[ i ] );
@@ -2269,7 +2264,6 @@ case 7:
 	cmd( "showtop $T topleftW" );
 	cmd( "mousewarpto $T.b.ok" );
 
-	// insert text only now to workaround Tk 8.6.11 bug in mac
 	for ( i = 0; cur_descr->text[ i ] != '\0'; ++i )
 		if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\')
 			cmd( "$Td.f.desc.text insert end \"%c\"", cur_descr->text[ i ] );
@@ -3649,14 +3643,6 @@ case 56:
 	cmd( "set res [ expr [ llength $unusVar ] + [ llength $unusFun ] + [ llength $unusPar ] + [ llength $unusObj ] ]" );
 	if ( get_int( "res" ) == 0 )
 		plog( "(none)\n" );
-
-break;
-
-
-// Close all Runtime Plots
-case 40:
-
-	cmd( "destroytop .plt" );
 
 break;
 

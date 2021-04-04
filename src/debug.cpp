@@ -1465,6 +1465,10 @@ void deb_show( object *r, const char *hl_var )
 			}" );
 	}
 
+	strcpy( ch, "" );
+	attach_instance_number( ch, r );
+	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
+
 	cmd( "if { ! [ winfo exists .deb.tit ] } { \
 			set fntSz [ expr [ font metrics [ ttk::style lookup boldSmall.TLabel -font ] -linespace ] + 2 ]; \
 			ttk::frame .deb.tit -height [ expr $fntSz + $vspcszD ]; \
@@ -1478,10 +1482,6 @@ void deb_show( object *r, const char *hl_var )
 			placeline { .deb.tit.name1 .deb.tit.val1 .deb.tit.last1 .deb.tit.pad .deb.tit.name2 .deb.tit.val2 .deb.tit.last2 } [ list $hnamshD $hvalshD $hupdshD $hpadshD $hnamshD $hvalshD $hupdshD ] 0 $fntSz; \
 			pack .deb.tit -anchor w -fill x -after .deb.v \
 		}" );
-
-	strcpy( ch, "" );
-	attach_instance_number( ch, r );
-	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
 
 	// create single top frame to grid, where the values table can be built
 	// and a canvas to hold the table so it can be scrollable
@@ -1517,7 +1517,7 @@ void deb_show( object *r, const char *hl_var )
 					set debConfRun 1; \
 					set debSz [ list [ winfo width .deb ] [ winfo height .deb ] ]; \
 					if { $debSz != $lastDebSz || ( $debDone == 1 && ! [ info exists debButHgt ] ) } { \
-						update; \
+						update idletasks; \
 						set lastDebSz $debSz; \
 						set canBbox [ $g.can bbox all ]; \
 						if { $debDone == 1 } { \
@@ -1544,7 +1544,6 @@ void deb_show( object *r, const char *hl_var )
 			} \
 		}", r == debLstObj ? 1 : 0 );
 
-	cmd( "set g .deb.cc.grid" );
 	cmd( "set lastHl \"\"" );
 	cmd( "set curElem [ list ]" );
 	cmd( "array unset debElem" );
@@ -1679,7 +1678,6 @@ void show_tmp_vars( object *r, bool update )
 
 		cmd( "showtop $in topleftW 0 1 0" );
 		cmd( "wm minsize $in [ winfo reqwidth $in ] [ expr $vsizeDmin + $vmenusize ]" );
-		cmd( "wm maxsize $in [ winfo vrootwidth $in ] [ winfo vrootheight $in ]" );
 		cmd( "wm geometry $in [ winfo reqwidth $in ]x[ expr [ winfo height .deb ] + $vmenusize ]" );
 
 		cmd( "$in.n.t tag configure bold -font [ ttk::style lookup boldSmallProp.TText -font ]" );
@@ -1990,7 +1988,6 @@ void show_neighbors( object *r, bool update )
 		
 		cmd( "showtop $N topleftW 0 1 0" );
 		cmd( "wm minsize $N [ winfo reqwidth $N ] [ expr $vsizeDmin + $vmenusize ]" );
-		cmd( "wm maxsize $N [ winfo vrootwidth $N ] [ winfo vrootheight $N ]" );
 		cmd( "wm geometry $N [ winfo reqwidth $N ]x[ expr [ winfo height .deb ] + $vmenusize ]" );
 		
 		cmd( "if { ! [ winfo exists .deb.val ] } { align $N .deb } { align $N .deb.val }" );

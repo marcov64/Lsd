@@ -432,6 +432,7 @@ void plot_rt( variable *v )
 	cmd( "set y2 [ expr floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) ]", old_val[ cur_plt ], ymin, ymax, ymin );
 
 	cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", cur_plt );
+	cmd( "update idletasks" );
 	
 	old_val[ cur_plt ] = v->val[ 0 ];
 	++cur_plt;
@@ -449,7 +450,8 @@ void reset_plot( void )
 			}; \
 			$activeplot.fond.go conf -state disabled; \
 			$activeplot.fond.shift conf -state disabled; \
-			$rtptab select $activeplot \
+			$rtptab select $activeplot; \
+			update idletasks \
 		}" );
 }
 
@@ -462,7 +464,8 @@ void enable_plot( void )
 	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] } { \
 			$rtptab select $activeplot; \
 			$activeplot.fond.go conf -state normal; \
-			$activeplot.fond.shift conf -state normal \
+			$activeplot.fond.shift conf -state normal; \
+			update idletasks \
 		}" );
 }
 
@@ -475,7 +478,8 @@ void disable_plot( void )
 	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] } { \
 			$activeplot.fond.go conf -state disabled; \
 			$activeplot.fond.shift conf -state disabled; \
-			$rtptab hide $activeplot \
+			$rtptab hide $activeplot; \
+			update idletasks \
 		}" );
 }
 
@@ -487,7 +491,8 @@ void center_plot( void )
 {
 	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && %d > [ expr $hsizeR / 2 ] } { \
 			set newpos [ expr %lf - [ expr  [ expr $hsizeR / 2 ] / %lf ] ]; \
-			$activeplot.c.c.cn xview moveto $newpos \
+			$activeplot.c.c.cn xview moveto $newpos; \
+			update idletasks \
 		}", t, t / ( double ) max_step, ( double ) max_step );
 }
 
@@ -499,7 +504,4 @@ void scroll_plot( void )
 {
 	if ( scrollB )
 		cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && %d > [ expr $hsizeR * 0.8 ] } { $activeplot.c.c.cn xview scroll 1 units }", t );
-	
-	cmd( ".p.b2.b configure -value %d", t );
-	cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr int( 100 * %d / %d ) ]%% done)\"", min( t + 1, max_step ), max_step, t, max_step );
 }

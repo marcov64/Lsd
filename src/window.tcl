@@ -30,7 +30,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
 	# workaround for bug in Tk 8.6.11
 	if { [ string equal $CurPlatform mac ] } { 
 		wm attributes $w -alpha 0
-		update
+		update idletasks
 	}
 
 	# try to prevent LSD to withdraw and grab windows focus when deiconify
@@ -106,7 +106,7 @@ proc settop { w { name no } { destroy no } { par no } { force no } } {
 	deiconifytop $w $force
 	raise $w
 	focustop $w "" $force
-	update
+	update idletasks
 
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsettop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" }
 }
@@ -145,7 +145,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 			$w configure -height $sizeY
 		}
 
-		update
+		update idletasks
 
 		if { ! [ string equal $pos current ] } {
 
@@ -217,7 +217,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 
 		if { ! $noMinSize && ( $resizeX || $resizeY ) } {
-			update
+			update idletasks
 			wm minsize $w [ winfo reqwidth $w ] [ winfo reqheight $w ]
 		}
 
@@ -231,7 +231,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 
 	wm maxsize $w [ winfo vrootwidth $w ] [ winfo vrootheight $w ]
 	focustop $w "" $force
-	update
+	update idletasks
 
 	# grab focus, if required, updating the grabbing list
 	if { $grab && $w != "." && [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
@@ -268,7 +268,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		focus $w
 	}
 
-	update
+	update idletasks
 	
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], minsize:[wm minsize $w], primdisp:[ primdisp [ winfo parent $w ] ], parWndLst:$parWndLst, grab:$grabLst)" }
 }
@@ -319,7 +319,7 @@ proc destroytop w {
 		focus [ winfo parent $w ]
 	}
 	destroy $w
-	update
+	update idletasks
 
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\ndestroytop (w:$w, parWndLst:$parWndLst, grab:$grabLst)" }
 }
@@ -471,7 +471,7 @@ proc checkgeom { geom defGeom screenWidth screenHeight } {
 proc sizetop { { w all } } {
 	global wndLst hsizeBmin vsizeBmin hsizeL vsizeL hsizeLmin vsizeLmin hsizeGmin vsizeGmin hsizeAmin vsizeAmin hsizePmin vsizePmin hsizeDmin vsizeDmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom pltGeom dapGeom hfactM vfactM wndMenuHeight
 
-	update
+	update idletasks
 
 	if { [ string equal $w .lsd ] || [ string equal $w .lmm ] } {
 
@@ -600,7 +600,7 @@ proc sizetop { { w all } } {
 		}
 	}
 
-	update
+	update idletasks
 
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" }
 }
@@ -634,7 +634,7 @@ proc resizetop { w sizeX { sizeY 0 } } {
 		}
 	}
 	
-	update
+	update idletasks
 
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nresizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" }
 }
@@ -648,7 +648,7 @@ proc resizetop { w sizeX { sizeY 0 } } {
 proc focustop { w1 { w2 "" } { force no } } {
 
 	if [ winfo exists $w1 ] {
-		update
+		update idletasks
 		
 		set t1 [ winfo toplevel $w1 ]
 		deiconifytop $t1 $force
@@ -666,7 +666,7 @@ proc focustop { w1 { w2 "" } { force no } } {
 		}
 	}
 	
-	update
+	update idletasks
 }
 
 
@@ -684,7 +684,7 @@ proc deiconifytop { w { force no } } {
 		wm deiconify $w
 	}
 	
-	update
+	update idletasks
 }
 
 
@@ -776,7 +776,7 @@ proc align { w1 w2 { side R } } {
 	}
 	
 	wm geometry $w1 +$g+$d
-	update
+	update idletasks
 
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nalign w1:$w1 w2:$w2 (w1 width:$a, w1 height:$b, w2 x:$c, w2 y:$d, w2 width:$e)" }
 }
@@ -936,7 +936,7 @@ proc disable_window { w m { args "" } } {
 		}
 	}
 	
-	update
+	update idletasks
 }
 
 
@@ -959,7 +959,7 @@ proc enable_window { w m { args "" } } {
 		}
 	}
 	
-	update
+	update idletasks
 }
 
 
@@ -1024,7 +1024,7 @@ proc selectinlist { w pos { foc 0 } } {
 			focus $w
 		}
 		
-		update
+		update idletasks
 	}
 }
 
@@ -1534,7 +1534,7 @@ proc mousewarpto w {
 		unset curX curY
 	}
 	
-	update
+	update idletasks
 }
 
 

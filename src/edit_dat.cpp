@@ -90,7 +90,7 @@ void edit_data( object *r, int *choice, char *lab )
 				set iniConfRun 1; \
 				set iniSz [ list [ winfo width .inid ] [ winfo height .inid ] ]; \
 				if { $iniSz != $lastIniSz } { \
-					update; \
+					update idletasks; \
 					set lastIniSz $iniSz; \
 					set canBbox [ $g.can bbox all ]; \
 					if { $iniDone } { \
@@ -165,7 +165,7 @@ void edit_data( object *r, int *choice, char *lab )
 		cmd( ".inid.err conf -text \"OBJECTS NOT SHOWN! (> %d)\" -style hl.TLabel", MAX_COLS );
 		if ( ! iniShowOnce )
 		{
-			cmd( "update" );
+			cmd( "update idletasks" );
 			cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Too many objects to edit\" -detail \"LSD Initial Values editor can show only the first %d objects' values. Please use the 'Set All' button to define values for objects beyond those.\" ", MAX_COLS );
 			iniShowOnce = true;
 		}
@@ -180,7 +180,7 @@ void edit_data( object *r, int *choice, char *lab )
 
 	editloop:
 	
-	cmd( "update" );
+	cmd( "update idletasks" );
 	cmd( "if { [ info exists lastFocus ] && $lastFocus != \"\" && [ winfo exists $lastFocus ] } { focus $lastFocus; $lastFocus selection range 0 end; unset lastFocus }" );
 
 	// editor main command loop

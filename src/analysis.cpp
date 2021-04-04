@@ -2695,7 +2695,6 @@ while ( true )
 			cmd( "showtop .da.a" );
 			cmd( "mousewarpto .da.a.b.ok" );
 
-			// insert text only now to workaround Tk 8.6.11 bug in mac
 			cmd( ".da.a.o.t insert end \"$gpoptions\"" );
 			cmd( "focus .da.a.o.t" );
 
@@ -4450,7 +4449,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		gzclose( fz );
 
 	cmd( ".da.pas.main.p2.scale configure -maximum %d", new_c - 1 );
-	cmd( "update" );
+	cmd( "update idletasks" );
 
 	if ( *num_v == 0 )
 		vs = new store[ new_v ];
@@ -6335,38 +6334,47 @@ void plot_lattice( int *choice )
 	str = new char *[ nv ];
 	tag = new char *[ nv ];
 
+	cmd( "set time %d", num_c );
+	cmd( "set bidi %d", ncol );
+	cmd( "set cscale [ format %%.2f %lf ]", cscale );
+
 	cmd( "newtop .da.s \"Lattice Options\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.t" );
 	cmd( "ttk::label .da.s.t.l -width 22 -anchor e -text \"Cross-section case\"" );
-	cmd( "set time %d", num_c );
 	cmd( "ttk::entry .da.s.t.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $numc } { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.t.e insert 0 $time" ); 
 	cmd( "pack .da.s.t.l .da.s.t.e -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -width 22 -anchor e -text \"Data columns\"" );
-	cmd( "set bidi %d", ncol );
 	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center", num_c );
 	cmd( ".da.s.i.e insert 0 $bidi" ); 
 	cmd( "pack .da.s.i.l .da.s.i.e -side left -anchor w -padx 2 -pady 2" );
 
+	cmd( "ttk::frame .da.s.s" );
+	cmd( "ttk::label .da.s.s.l -width 22 -anchor e -text \"Color scale\"" );
+	cmd( "ttk::entry .da.s.s.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 } { set cscale %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cscale; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( ".da.s.s.e insert 0 $cscale" ); 
+	cmd( "pack .da.s.s.l .da.s.s.e -side left -anchor w -padx 2 -pady 2" );
+
 	if ( time_cross == 1 )
 	{
-		cmd( "pack .da.s.t .da.s.i -anchor w -padx 5 -pady 5" );
-		cmd( "bind .da.s.t.e <KeyPress-Return> {focus .da.s.i.e; .da.s.i.e selection range 0 end}" );
+		cmd( "pack .da.s.t .da.s.i .da.s.s -anchor w -padx 5 -pady 5" );
+		cmd( "bind .da.s.t.e <KeyPress-Return> { focus .da.s.i.e; .da.s.i.e selection range 0 end }" );
 		cmd( "focus .da.s.t.e; .da.s.t.e selection range 0 end" );
 	}
 	else
 	{
-		cmd( "pack .da.s.i -anchor w -padx 5 -pady 5" );
+		cmd( "pack .da.s.i .da.s.s -anchor w -padx 5 -pady 5" );
 		cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
 	}
 
+	cmd( "bind .da.s.i.e <KeyPress-Return> { focus .da.s.s.e; .da.s.s.e selection range 0 end }" );
+	cmd( "bind .da.s.s.e <KeyPress-Return> { set choice 1 }" );
+		
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#lattice } { set choice 2 }" );
 
-	cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
-		
 	cmd( "showtop .da.s" );
 	cmd( "mousewarpto .da.s.b.ok" );
 
@@ -6374,8 +6382,9 @@ void plot_lattice( int *choice )
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set bidi [ .da.s.i.e get ]" ); 
 	cmd( "set time [ .da.s.t.e get ]" ); 
+	cmd( "set bidi [ .da.s.i.e get ]" ); 
+	cmd( "set cscale [ .da.s.s.e get ]" ); 
 	cmd( "destroytop .da.s" );
 
 	if ( *choice == 2 )
@@ -6465,6 +6474,7 @@ void plot_lattice( int *choice )
 	// draw lattice
 	hi = vsize / nlin;
 	le = hsize / ncol;
+	cscale = get_double( "cscale" );
 
 	add_da_plot_tab( ".dap", cur_plot );    // plot tab window
 
@@ -6506,6 +6516,8 @@ void plot_lattice( int *choice )
 			   i * le, j * hi, ( i + 1 ) * le, ( j + 1 ) * hi, j, i, 
 			   ( int ) color, grid ? point_size : 0.0 );
 		}
+
+	cmd( "update idletasks" );
 
 	// window bindings (return to Analysis, insert text, insert line)
 	cmd( "bind $p <Double-Button-1> { focustop .da }" );
@@ -9344,7 +9356,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	if ( i < nLine )
 		cmd( "$p create text $xlabel $ylabel -fill $colorsTheme(fg) -font $fontP -anchor nw -text \"(%d more...)\"", nLine - i );
 
-	cmd( "update" );	
+	cmd( "update idletasks" );	
 }
 
 

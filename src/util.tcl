@@ -250,7 +250,7 @@ proc prgboxupdate { w last1 { last2 "" } } {
 		$w.main.p2.info.val configure -text "[ expr min( $last2 + 1, $max2 ) ] of $max2 ([ expr int( 100 * $last2 / $max2 ) ]% done)"
 	}
 	
-	update
+	update idletasks
 }
 
 
