@@ -2,8 +2,6 @@
 #
 #
 
-package provide awlight 7.6
-
 set ap [file normalize [file dirname [info script]]]
 if { $ap ni $::auto_path } {
   lappend ::auto_path $ap
@@ -36,31 +34,34 @@ namespace eval ::ttk::theme::awlight {
   proc setDerivedColors { } {
     variable colors
 
-    set colors(bg.button) $colors(bg.dark)
-    set colors(bg.tab.active) $colors(bg.dark)
-    set colors(bg.tab.border) $colors(bg.light)
-    set colors(bg.tab.disabled) $colors(bg.dark)
-    set colors(bg.tab.inactive) $colors(bg.dark)
-    set colors(bg.tab.selected) $colors(bg.dark)
+    set colors(button) $colors(bg.dark)
+    set colors(button.active) $colors(bg.light)
+    set colors(tab.active) $colors(bg.dark)
+    set colors(border.tab) $colors(bg.light)
+    set colors(tab.disabled) $colors(bg.dark)
+    set colors(tab.inactive) $colors(bg.dark)
+    set colors(tab.selected) $colors(bg.dark)
     set colors(button.anchor) {}
     set colors(button.padding) {5 3}
     set colors(entrybg.bg) $colors(bg.lightest)
     set colors(entry.padding) {5 1}
-    set colors(graphics.color.spin.arrow) #000000
-    set colors(graphics.color.spin.bg) $colors(bg.bg)
-    set colors(graphics.color.tree.arrow) #000000
-    set colors(graphics.color.grip) #ffffff
+    set colors(arrow.color) #000000
+    set colors(scrollbar.color.grip) #ffffff
+    set colors(spinbox.color.bg) $colors(bg.bg)
     set colors(notebook.tab.focusthickness) 5
-    set colors(selectbg.bg) $colors(graphics.color)
+    set colors(select.bg) $colors(graphics.color)
     set colors(tab.use.topbar) true
+    set colors(tree.arrow.selected) #ffffff
     set colors(trough.color) $colors(bg.lightest)
   }
 
   proc init { } {
-    ::ttk::awthemes::init awlight
+    set theme awlight
+    set version 7.9
+    ::ttk::awthemes::init $theme
+    package provide $theme $version
+    package provide ttk::theme::${theme} $version
   }
 
   init
 }
-
-

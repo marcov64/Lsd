@@ -1,5 +1,5 @@
 #
 # Tcl package index file
 #
-package ifneeded tksvg 0.3 \
-    [list load [file join $dir libtksvg0.3.so] tksvg]
+package ifneeded tksvg 0.7 \
+    [list load [file join $dir libtksvg0.7.so] tksvg]

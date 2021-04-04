@@ -1,6 +1,7 @@
 #!/usr/bin/tclsh
 #
 # Copyright 2012-2018 Brad Lanam Walnut Creek CA USA
+# Copyright 2020 Brad Lanam Pleasant Hill CA
 #
 # Algorithms from:
 # http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript

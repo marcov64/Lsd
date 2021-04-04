@@ -5,25 +5,193 @@ The following files are needed:
   pkgIndex.tcl            - package index
   awarc.tcl               - scalable arc theme
   awblack.tcl             - scalable black theme
+  awclearlooks.tcl        - scalable clearlooks theme
   awdark.tcl              - awdark theme
   awlight.tcl             - awlight theme
   awwinxpblue.tcl         - scalable winxpblue theme
   awbreeze.tcl            - scalable breeze theme
   awtemplate.tcl          - example file to start a new theme
   i/                      - images
+  LICENSE                 - zlib/libpng LICENSE
 
 Demonstration scripts:
-  demottk.tcl, demoscaled.tcl
+  demottk.tcl, demoscaled.tcl, demoscaledb.tcl
 
 Try:
   # application scaling
-  tclsh demottk.tcl winxpblue -fontscale 1.2
+  tclsh demottk.tcl awwinxpblue -fontscale 1.2
   # tk scaling only
-  tclsh demottk.tcl winxpblue -ttkscale 2.0
+  tclsh demottk.tcl awwinxpblue -ttkscale 2.0
   # user with high dpi, smaller font
-  tclsh demottk.tcl winxpblue -ttkscale 2.0 -fontscale 0.7
+  tclsh demottk.tcl awwinxpblue -ttkscale 2.0 -fontscale 0.7
+
   # scaled styling
-  tclsh demoscaled.tcl winxpblue
+  tclsh demoscaled.tcl awdark
+
+  # multiple scaled styling, alternate colors
+  # Colors are shared between all styles, they do not each have
+  # their own set of colors.  Only a few colors used in the graphics
+  # can be changed safely.
+  tclsh demoscaledb.tcl awdark
+
+  # original no-tksvg version of awdark/awlight
+  tclsh demottk.tcl -notksvg awdark
+
+  # option db testing
+  echo "*TkTheme: awdark" | xrdb -merge -
+  TCLLIBPATH=$(pwd) tclsh demottk.tcl -optionnone -optiondflt awdark
+
+To load other theme files, use the -autopath option to
+adjust the ::auto_path variable:
+
+  # loads the original awwinxpblue
+  tclsh demottk.tcl winxpblue -notksvg -autopath $HOME/mystuff
+  # loads the scalable awwinxpblue when -notksvg is not present
+  tclsh demottk.tcl awwinxpblue -autopath $HOME/mystuff
+
+demottk.tcl options:
+  -accentcolor        Change the accent color (awthemes).
+  -autopath           Set ::auto_path.
+  -background         Set the background color using 'setBackgroundColor'
+                      (awthemes).
+  -focuscolor         Set the graphics and focus color using
+                      'setHighlightColor' (awthemes).
+  -fontscale          Change the font scaling factor (awthemes).
+  -fontsize           Set the initial font size.
+  -foreground         Set the foreground color (awthemes).
+  -macstyles          Turn on some of the new styles available in the
+                      mac_styles branch.
+  -nocbt              Do not load checkButtonToggle.
+  -noflex             Do not load flexmenu.
+  -notable            Do not load or use tablelist.
+  -notksvg            Do not load or use tksvg.
+  -optiondb           Use the -optiondb method for setMenuColors,
+                      setListboxColors and setTextColors.
+  -optiondflt         Let the *TkTheme option db setting determine the theme.
+  -optionnone         Use the internal optiondb settings (9.6.0).
+  -sizegrip           Replace the sizegrip with the svg version.
+                      True for the aqua theme (requires tksvg).
+  -styledemo          A demonstration of changing widget styles (awthemes).
+                      Changes the progressbar and scale widget styles, turns
+                      off the scrollbar grip and arrows.
+  -ttkscale           Set the the [tk scaling] factor.
+
+10.3.0  2021-03-22
+   - Add awbreezedark by Bartek Jasicki
+   - Add active.color color for use by some widget themes.
+   - Internal changes to support active color.
+   - Fixed checkbutton width issues.
+   - Cleaned up treeview chevron widget theme.
+
+10.2.1 (2021-02-11)
+   - Set text area -insertbackground so that the cursor has the proper color.
+
+10.2.0 (2021-01-02)
+   - Add 'getScaleFactor' procedure so that the user can scale
+     their images appropriately.
+
+10.1.2 (2020-12-20)
+   - Menus: add support for menu foreground (menu.fg).
+   - Option database initialization: Do not initialize the menu colors
+     on Windows.  Using 'setMenuColors' on Windows leaves the top menubar
+     a light color, and the menu colors dark with a large border.
+     Use: ::ttk::theme::${theme}::setMenuColors -optiondb
+     to apply anyways.
+   - setTextColors: Set text foreground colors appropriately.
+   - Toolbutton: set selected color.
+   - Menus: add support for menu relief (menu.relief).  Default to 'raised'.
+     Always keep the borderwidth set to 1, unscaled.
+   - Menus: change background color for menus to a darker color.
+   - Listbox: change -activestyle to none.
+
+10.1.1
+10.1.0
+   - Development releases.  Not intended for public release.
+
+10.0.0 (2020-12-2)
+   - option database is always updated.  The text widget colors will
+     default to -entry.
+   - add ttk::theme::<theme> package names so that the option db can
+     be used to set the theme and the old setTheme and ttk::themes
+     procedures may be used.
+   - Breaking change:
+     Theme name changes to prevent conflicts with the originals.
+     arc -> awarc, black -> awblack, breeze -> awbreeze,
+     clearlooks -> awclearlooks, winxpblue -> awwinxpblue.
+     Required due to the addition of the ttk::theme::<theme> package names.
+   - Added manual page.
+
+9.5.1.1 (2020-11-16)
+   - update licensing information
+
+9.5.1 (2020-11-10)
+   - progressbar/rect-bord: fix: set trough image border.
+   - setMenuColors: add ability to set the option database.
+   - setTextColors: add ability to set the option database.
+   - setListboxColors: add ability to set the option database.
+   - setMenuColors: change selectColor to use fg.fg (for option database).
+   - setTextColors: add -background option.
+   - setTextColors: deprecate -dark option.
+
+9.5.0 (2020-10-29)
+   - Fix so that multiple scaled styles will work.
+   - Change so that scaled styles can have (a few of) their own colors.
+   - Code cleanup
+
+9.4.2 (2020-10-23)
+   - Renamed internal color names.
+     This may break backwards compatibility for anyone using
+     'setThemeColors' or 'getColor'.
+   - removed 'setThemeGroupColor' function.
+   - Fix so that a missing or incorrect widget style will fallback
+     to 'none' and use the parent theme's style.
+   - breeze, arc: fix active vertical scale handle.
+   - Added $::themeutils::awversion to allow version checks.
+   - Fix scalable themes so that they will fail to load if tksvg is
+     not present.
+   - Improve scaling/layout of combobox/solid-bg.
+   - demottk.tcl: added 'package require' as a method to load the themes.
+   - clean demo code before production releases.
+
+9.4.1 (2020-10-16)
+   - fix mkpkgidx.sh script for clearlooks theme.
+
+9.4.0 (2020-10-16)
+   - added scalable clearlooks theme.
+   - scrollbar style: Fix so that a separate scrollbar slider style
+     can be set, but still uses the progressbar/ directory.
+   - arrow/solid, arrow/solid-bg, combobox/solid-bg: reduce arrow height.
+   - treeview heading: improve colors.
+   - setTextColors: set background color appropriately if the widget
+     is in a normal state.
+   - awdark/awlight: no tksvg: improved/fixed arrow colors.
+   - arc: improved some colors. fixed tab height.
+   - renamed scale/rect-bord-circle to scale/rect-bord-grip.  clean up.
+   - progressbar/rect-bord: clean up.
+   - combobox/rounded: new widget style.
+   - progressbar/rect-diag: new widget style.
+   - button/roundedrect-gradient: new widget style.
+   - scale/rect-narrow: new scale/scale-trough widget style.
+   - demottk.tcl: beta: added a tablelist tab if tablelist 6.11+ is available.
+   - demottk.tcl: added an '-autopath' option.
+
+9.3.2 (2020-10-5)
+   - setListboxColors: Fixed to properly set colors on
+     removal/reinstantiation of a listbox.
+   - Minor code cleanup.
+   - setTextColors: Removed configuration of border width.
+
+9.3.1 (2020-9-17)
+   - Remove debug.
+
+9.3 (2020-9-17)
+   - Fixed inappropriate toolbutton width setting.
+
+9.2.4 (2020-8-14)
+   - remove unneeded options for scrollbar
+
+9.2.3 (2020-7-17)
+   - remove focus ring from treeview selection.
 
 9.2.2 (2020-6-6)
    - fix: settextcolors: background color.

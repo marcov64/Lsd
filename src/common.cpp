@@ -212,6 +212,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 	}
 	
 	cmd( "wm withdraw ." );
+	cmd( "wm update idletasks" );
 	cmd( "tk appname %s", tcl_app_name );
 	tk_ok = true;
 

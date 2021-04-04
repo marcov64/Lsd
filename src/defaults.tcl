@@ -199,7 +199,7 @@ set themeMac			"aqua"		; # native macOS theme
 set themeLinux			"awlight"	; # Adwaita light theme
 set themeLinuxDark		"awdark"	; # Adwaita dark theme
 set themeWindows		"vista"		; # native Windows light theme
-set themeWindowsDark	"black"		; # Windows dark theme
+set themeWindowsDark	"awblack"	; # Windows dark theme
 set darkThemeSuffixes	[ list dark black obscure ]; # words identifying Linux dark themes
 
 # OS specific monospaced font name
@@ -293,44 +293,51 @@ set diffFile2name		"-L"		; # option for naming second file
 set diffOptions			"-lsd"		; # other options
 
 # known themes table and associated parameters
-# theme list elements:		0:plat		1:pkg name				2:full name			3:dark	4:tbpad
-set themeTable(alt) 	   	{ all		ttk::theme::alt			"Alt"				0		1	 }
-set themeTable(clam) 	   	{ all		ttk::theme::clam		"Clam"				0		2	 }
-set themeTable(classic)    	{ all		ttk::theme::classic		"Classic"			0		1	 }
-set themeTable(default)    	{ all		ttk::theme::default		"Default"			0		3	 }
-set themeTable(aqua) 	   	{ mac		ttk::theme::aqua		"Aqua"				0		0	 }
-set themeTable(vista)      	{ windows	ttk::theme::vista		"Vista"				0		4	 }
-set themeTable(winnative)  	{ windows	ttk::theme::winnative	"Windows Native"	0		2	 }
-set themeTable(awdark)     	{ all		awdark					"Adwaita Dark"		1		2	 }
-set themeTable(awlight)    	{ all		awlight					"Adwaita Light"		0		2	 }
-set themeTable(aquablue)   	{ all		ttk::theme::aquablue 	"Aqua Blue"			0		-7	 }
-set themeTable(blueelegance) { all		ttk::theme::blueelegance "Blue Elegance"	0		3	 }
-set themeTable(sriv)       	{ all		ttk::theme::sriv     	"Sriv"				0		1	 }
-set themeTable(waldorf)	   	{ all		ttk::theme::waldorf	 	"Waldorf"			0		-7	 }
-set themeTable(aquativo)   	{ all		ttk::theme::aquativo 	"Aquativo"			0		2	 }
-set themeTable(arc)			{ all		ttk::theme::arc    	 	"Arc"				0		-1	 }
-set themeTable(black)      	{ all		ttk::theme::black    	"Black"				1		2	 }
-set themeTable(blue)   	   	{ all		ttk::theme::blue   	 	"Blue"				0		2	 }
-set themeTable(breeze)     	{ all		ttk::theme::breeze   	"Breeze"			0		1	 }
-set themeTable(clearlooks) 	{ all		ttk::theme::clearlooks	"Clearlooks"		0		-7	 }
-set themeTable(elegance)   	{ all		ttk::theme::elegance 	"Elegance"			0		3	 }
-set themeTable(equilux)    	{ all		ttk::theme::equilux  	"Equilux"			1		-1	 }
-set themeTable(itft1)      	{ all		ttk::theme::itft1    	"ITFT1"				0		2	 }
-set themeTable(keramik)    	{ all		ttk::theme::keramik  	"Keramik"			0		2	 }
-set themeTable(keramik_alt)	{ all		ttk::theme::keramik_alt	"Keramik Alt"		0		2	 }
-set themeTable(kroc)   	   	{ all		ttk::theme::kroc   	 	"Kroc"				0		2	 }
-set themeTable(plastik)    	{ all		ttk::theme::plastik  	"Plastik"			0		0	 }
-set themeTable(scidblue)   	{ all		ttk::theme::scid 		"Scid Blue"			0		-10	 }
-set themeTable(scidgreen)  	{ all		ttk::theme::scid		"Scid Green"		0		-10	 }
-set themeTable(scidgrey)   	{ all		ttk::theme::scid 		"Scid Grey"			0		-10	 }
-set themeTable(scidmint)   	{ all		ttk::theme::scid 		"Scid Mint"			0		-10	 }
-set themeTable(scidpink)   	{ all		ttk::theme::scid 		"Scid Pink"			0		-10	 }
-set themeTable(scidpurple) 	{ all		ttk::theme::scid		"Scid Purple"		0		-10	 }
-set themeTable(scidsand)   	{ all		ttk::theme::scid 		"Scid Sand"			0		-10	 }
-set themeTable(smog)       	{ all		ttk::theme::smog     	"Smog"				0		3	 }
-set themeTable(winxpblue)  	{ all		ttk::theme::winxpblue	"Windows XP Blue"	0		2	 }
-set themeTable(ubuntu)	   	{ all		ttk::theme::ubuntu	 	"Radiance"			0		-10	 }
-set themeTable(yaru)	   	{ all		ttk::theme::yaru	 	"Yaru"				0		0	 }
+# theme list elements:		0:plat		1:pkg name				2:full name			3:dark	4:tbph	5:tbpv
+set themeTable(alt) 	   	{ all		ttk::theme::alt			"Alt"				0		1	 	1	}
+set themeTable(clam) 	   	{ all		ttk::theme::clam		"Clam"				0		2	 	2	}
+set themeTable(classic)    	{ all		ttk::theme::classic		"X11 Classic"		0		1	 	1	}
+set themeTable(default)    	{ all		ttk::theme::default		"Default"			0		3	 	3	}
+set themeTable(aqua) 	   	{ mac		ttk::theme::aqua		"macOS Aqua"		0		0	 	0	}
+set themeTable(vista)      	{ windows	ttk::theme::vista		"Windows Vista"		0		4	 	4	}
+set themeTable(winnative)  	{ windows	ttk::theme::winnative	"Windows NT"		0		2	 	2	}
+set themeTable(awarc)		{ all		awarc		    	 	"Arc"				0		-4	 	-3	}
+set themeTable(awblack)    	{ all		awblack    				"Black"				1		2		3	}
+set themeTable(awdark)     	{ all		awdark					"Adwaita Dark"		1		2	 	2	}
+set themeTable(awlight)    	{ all		awlight					"Adwaita Light"		0		2	 	2	}
+set themeTable(awbreeze)   	{ all		awbreeze 			  	"Breeze"			0		-6	 	-3	}
+set themeTable(awbreezedark) { all		awbreezedark			"Breeze Dark"		1		-6	 	-3	}
+set themeTable(awclearlooks) { all		awclearlooks			"Clearlooks"		0		0	 	0	}
+set themeTable(awwinxpblue) { all		awwinxpblue				"XP Blue"			0		2	 	2	}
+set themeTable(aquablue)   	{ all		ttk::theme::aquablue 	"Aqua Blue"			0		-7	 	-7	}
+set themeTable(equilux)    	{ all		ttk::theme::equilux  	"Equilux"			1		0	 	0	}
+set themeTable(keramik_alt)	{ all		ttk::theme::keramik_alt	"Keramik Alt"		0		2	 	2	}
+set themeTable(ubuntu)	   	{ all		ttk::theme::ubuntu	 	"Radiance"			0		-10	 	-10	}
+set themeTable(scidblue)   	{ all		ttk::theme::scid 		"Scid Blue"			0		-10	 	-10	}
+set themeTable(scidgreen)  	{ all		ttk::theme::scid		"Scid Green"		0		-10	 	-10	}
+set themeTable(scidgrey)   	{ all		ttk::theme::scid 		"Scid Grey"			0		-10	 	-10	}
+set themeTable(scidmint)   	{ all		ttk::theme::scid 		"Scid Mint"			0		-10	 	-10	}
+set themeTable(scidpink)   	{ all		ttk::theme::scid 		"Scid Pink"			0		-10	 	-10	}
+set themeTable(scidpurple) 	{ all		ttk::theme::scid		"Scid Purple"		0		-10	 	-10	}
+set themeTable(scidsand)   	{ all		ttk::theme::scid 		"Scid Sand"			0		-10	 	-10	}
+set themeTable(waldorf)	   	{ all		ttk::theme::waldorf	 	"Waldorf"			0		-7	 	-7	}
+set themeTable(yaru)	   	{ all		ttk::theme::yaru	 	"Yaru"				0		0	 	0	}
+
+#set themeTable(arc)			{ all		ttk::theme::arc    	 	"Arc (old)"			0		0		0	}
+#set themeTable(aquativo)   	{ all		ttk::theme::aquativo 	"Aquativo (broken)"	0		2	 	2	}
+#set themeTable(black)      	{ all		ttk::theme::black    	"Black (old)"		1		2	 	2	}
+#set themeTable(blue)   	   	{ all		ttk::theme::blue   	 	"Blue (broken)"		0		2	 	2	}
+#set themeTable(blueelegance) { all		ttk::theme::blueelegance "Blue Elegance (broken)" 0	3	 	3	}
+#set themeTable(breeze)     	{ all		ttk::theme::breeze   	"Breeze (old)"		0		1		1	}
+#set themeTable(clearlooks) 	{ all		ttk::theme::clearlooks	"Clearlooks (old)"	0		-7		-7	}
+#set themeTable(elegance)   	{ all		ttk::theme::elegance 	"Elegance (broken)"	0		3	 	3	}
+#set themeTable(itft1)      	{ all		ttk::theme::itft1    	"ITFT1 (broken)"	0		2	 	2	}
+#set themeTable(keramik)    	{ all		ttk::theme::keramik  	"Keramik (broken)"	0		2	 	2	}
+#set themeTable(kroc)   	   	{ all		ttk::theme::kroc   	 	"Kroc (broken)"		0		2	 	2	}
+#set themeTable(plastik)    	{ all		ttk::theme::plastik  	"Plastik (broken)"	0		0	 	0	}
+#set themeTable(smog)       	{ all		ttk::theme::smog     	"Smog (broken)"		0		3	 	3	}
+#set themeTable(sriv)       	{ all		ttk::theme::sriv     	"Sriv (broken)"		0		1	 	1	}
+#set themeTable(winxpblue)  	{ all		ttk::theme::winxpblue	"XP Blue (old)"		0		2		2	}
 
 # list of all Tk named colors
 set allcolors {

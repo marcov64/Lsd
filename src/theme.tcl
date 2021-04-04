@@ -106,11 +106,13 @@ proc setstyles { } {
 	
 	# toolbutton widget styles
 	if { [ array names themeTable -exact $lsdTheme ] != "" } {
-		set tbpad [ lindex $themeTable($lsdTheme) 4 ]
+		set tbpadh [ lindex $themeTable($lsdTheme) 4 ]
+		set tbpadv [ lindex $themeTable($lsdTheme) 5 ]
 	} else {
-		set tbpad 3
+		set tbpadh 3
+		set tbpadv 3
 	}
-	ttk::style configure Toolbutton -anchor center -padding "$tbpad $tbpad"
+	ttk::style configure Toolbutton -anchor center -padding "$tbpadh $tbpadv"
 	ttk::style configure bold.Toolbutton \
 		-font [ font create -weight bold ]
 	ttk::style configure hlBold.Toolbutton -anchor w -foreground $colorsTheme(hl) \
@@ -120,7 +122,8 @@ proc setstyles { } {
 		-font [ list disabled [ font create -size $small_character ] ] 
 	
 	# button widget styles
-	ttk::style configure center.TButton -anchor center -width -1
+	ttk::style configure TButton -anchor center
+	ttk::style configure center.TButton -width -1
 	ttk::style configure small.TButton -padding 0 \
 		-font [ font create -size $small_character ]
 

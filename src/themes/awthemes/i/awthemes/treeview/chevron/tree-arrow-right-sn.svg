@@ -14,7 +14,7 @@
    viewBox="0 0 12 12"
    version="1.1"
    id="svg8"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
    sodipodi:docname="tree-arrow-right-n.svg">
   <defs
      id="defs2" />
@@ -25,7 +25,7 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="22.762314"
+     inkscape:zoom="49.333333"
      inkscape:cx="5.9999958"
      inkscape:cy="5.9999982"
      inkscape:document-units="px"
@@ -36,14 +36,14 @@
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:window-width="1166"
-     inkscape:window-height="527"
-     inkscape:window-x="363"
-     inkscape:window-y="342"
+     inkscape:window-height="863"
+     inkscape:window-x="51"
+     inkscape:window-y="104"
      inkscape:window-maximized="0"
      units="px"
      inkscape:pagecheckerboard="true"
      showguides="true"
-     showborder="false" />
+     showborder="true" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -70,13 +70,14 @@
        style="opacity:1;fill:#ffffff;fill-opacity:0;stroke:none;stroke-width:0;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:normal" />
     <g
        aria-label="›"
-       transform="scale(0.85674298,1.1672112)"
-       style="font-style:normal;font-weight:normal;font-size:26.282444px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:_GCARR_;fill-opacity:1;stroke:#003c74;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       transform="matrix(0.85674298,0,0,0.86357856,-249.62623,32.683343)"
+       style="font-style:normal;font-weight:normal;font-size:26.282444px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#0000aa;fill-opacity:1;stroke:#003c74;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="text817">
       <path
-         d="m -148.54838,101.14821 6.01878,5.36429 v 1.05232 l -6.01878,5.36429 v -2.45115 l 3.8628,-3.4393 -3.8628,-3.4393 z"
+         d="m 142.81815,100.9364 6.01878,5.36429 v 1.05232 l -6.01878,5.36429 v -2.45114 l 3.8628,-3.43931 -3.8628,-3.4393 z"
          style="fill:_GCARR_;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         id="path815" />
+         id="path815"
+         inkscape:connector-curvature="0" />
     </g>
   </g>
 </svg>

@@ -27,7 +27,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
 	destroytop $w
 	toplevel $w -background $colorsTheme(bg)
 
-	# workaround for bug in Tk 8.6.11
+	# workaround for bug in Tk 8.6.11 (must update before withdrawing)
 	if { [ string equal $CurPlatform mac ] } { 
 		wm attributes $w -alpha 0
 		update idletasks
@@ -42,6 +42,8 @@ proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
 		wm withdraw $w
 	}
 
+	update idletasks
+	
 	if { $par != "" } {
 		if { $par != "." } {
 			if { [ winfo viewable [ winfo toplevel $par ] ] } {
@@ -1504,7 +1506,8 @@ proc abortretryignore { w fr comAbort comRetry comIgnore } {
 proc mousewarpto w {
 	global mouseWarp curX curY
 	
-	update idletasks
+	update
+	
 	if { $mouseWarp && [ winfo exists $w ] && [ winfo viewable $w ] } {
 		set wX [ expr [ winfo width $w ] / 2 ]
 		set wY [ expr [ winfo height $w ] / 2 ]

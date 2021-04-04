@@ -14,8 +14,8 @@
    viewBox="0 0 24 24"
    version="1.1"
    id="svg8"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="entry-n.svg">
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="entry-n-base.svg">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -25,24 +25,24 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="19.347826"
-     inkscape:cx="12"
-     inkscape:cy="12.000003"
+     inkscape:zoom="24.624999"
+     inkscape:cx="11.999997"
+     inkscape:cy="11.999999"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     units="px"
-     inkscape:window-width="1023"
-     inkscape:window-height="659"
-     inkscape:window-x="51"
-     inkscape:window-y="174"
-     inkscape:window-maximized="0"
+     inkscape:pagecheckerboard="true"
      showborder="false"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:pagecheckerboard="true" />
+     inkscape:window-width="1163"
+     inkscape:window-height="896"
+     inkscape:window-x="210"
+     inkscape:window-y="59"
+     inkscape:window-maximized="0"
+     units="px" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -51,7 +51,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -59,14 +59,14 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(2.8038268,-279.79053)">
+     transform="translate(205.86246,6.3041937)">
     <rect
-       style="fill:_FIELDBG_;opacity:1;fill-opacity:1;stroke:_BORD_;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="rect814"
-       width="23"
-       height="23"
-       x="-2.3038268"
-       y="280.29053"
-       ry="4.0" />
+       style="opacity:1;fill:_FIELDBG_;fill-opacity:1;stroke:_BORD_;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       id="rect815"
+       width="23.000004"
+       height="23.000002"
+       x="-205.36246"
+       y="-5.8041949"
+       ry="1.5837563" />
   </g>
 </svg>
