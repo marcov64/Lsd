@@ -114,6 +114,8 @@ void show_graph( object *t )
 
 	cmd( "bind .str <F1> { LsdHelp graphrep.html }" );
 	set_shortcuts( ".str" );
+	
+	cmd( "if { [ winfo exists .plt ] } { lower .str .plt }" );
 
 	cmd( "update idletasks" );
 }

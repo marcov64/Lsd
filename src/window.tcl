@@ -33,15 +33,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
 		update idletasks
 	}
 
-	# try to prevent LSD to withdraw and grab windows focus when deiconify
-	if { $w in [ list .deb .lat .mm ] } {
-		if { [ focus -displayof . ] != "" } {
-			wm withdraw $w
-		}
-	} elseif { $par == "" || [ focus -displayof $par ] != "" } {
-		wm withdraw $w
-	}
-
+	wm withdraw $w
 	update idletasks
 	
 	if { $par != "" } {
@@ -80,7 +72,9 @@ proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
 		setglobkeys $w
 	}
 
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, grab:$grabLst)" }
+	if { $logWndFn && [ info procs plog ] != "" } { 
+		plog "\nnewtop (w:$w, master:[ wm transient $w ], parWndLst:$parWndLst, grab:$grabLst)"
+	}
 }
 
 
@@ -110,7 +104,9 @@ proc settop { w { name no } { destroy no } { par no } { force no } } {
 	focustop $w "" $force
 	update idletasks
 
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsettop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" }
+	if { $logWndFn && [ info procs plog ] != "" } { 
+		plog "\nsettop (w:$w, master:[ wm transient $w ], pos:([ winfo x $w ],[ winfo y $w ]), size:[ winfo width $w ]x[ winfo height $w ], parWndLst:$parWndLst, grab:$grabLst)" 
+	}
 }
 
 
@@ -272,7 +268,9 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 
 	update idletasks
 	
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], minsize:[wm minsize $w], primdisp:[ primdisp [ winfo parent $w ] ], parWndLst:$parWndLst, grab:$grabLst)" }
+	if { $logWndFn && [ info procs plog ] != "" } { 
+		plog "\nshowtop (w:$w, master:[ wm transient $w ], pos:([ winfo x $w ],[ winfo y $w ]), size:[ winfo width $w ]x[ winfo height $w ], minsize:[ wm minsize $w ], primdisp:[ primdisp [ winfo parent $w ] ], parWndLst:$parWndLst, grab:$grabLst)" 
+	}
 }
 
 
@@ -314,16 +312,20 @@ proc destroytop w {
 			set parWndLst [ lreplace $parWndLst 0 0 ]
 		}
 	}
+	
 	# handle different window default focus on destroy
 	if [ info exists defaultFocus ] {
 		focus $defaultFocus
 	} else {
 		focus [ winfo parent $w ]
 	}
+	
 	destroy $w
 	update idletasks
 
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\ndestroytop (w:$w, parWndLst:$parWndLst, grab:$grabLst)" }
+	if { $logWndFn && [ info procs plog ] != "" } { 
+		plog "\ndestroytop (w:$w, parWndLst:$parWndLst, grab:$grabLst)" 
+	}
 }
 
 
@@ -604,7 +606,9 @@ proc sizetop { { w all } } {
 
 	update idletasks
 
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" }
+	if { $logWndFn && [ info procs plog ] != "" } { 
+		plog "\nsizetop (w:$w, master:[ wm transient $w ], pos:([ winfo x $w ],[ winfo y $w ]), size:[ winfo width $w ]x[ winfo height $w ], parWndLst:$parWndLst, grab:$grabLst)"
+	}
 }
 
 
@@ -638,7 +642,9 @@ proc resizetop { w sizeX { sizeY 0 } } {
 	
 	update idletasks
 
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nresizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" }
+	if { $logWndFn && [ info procs plog ] != "" } { 
+		plog "\nresizetop (w:$w, master:[ wm transient $w ], pos:([ winfo x $w ],[ winfo y $w ]), size:[ winfo width $w ]x[ winfo height $w ], parWndLst:$parWndLst, grab:$grabLst)"
+	}
 }
 
 
@@ -675,14 +681,10 @@ proc focustop { w1 { w2 "" } { force no } } {
 #************************************************
 # DEICONIFYTOP
 # Deiconify/map window if not yet viewable
-# In Windows, also requires LSD has the focus
 #************************************************
 proc deiconifytop { w { force no } } {
-	global CurPlatform
 
-	if { $force || ( ! [ winfo viewable $w ] && \
-		 ( ! [ string equal $CurPlatform windows ] || \
-		   [ focus -displayof $w ] != "" ) ) } {
+	if { $force || ! [ winfo viewable $w ] } {
 		wm deiconify $w
 	}
 	
@@ -780,7 +782,9 @@ proc align { w1 w2 { side R } } {
 	wm geometry $w1 +$g+$d
 	update idletasks
 
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nalign w1:$w1 w2:$w2 (w1 width:$a, w1 height:$b, w2 x:$c, w2 y:$d, w2 width:$e)" }
+	if { $logWndFn && [ info procs plog ] != "" } { 
+		plog "\nalign w1:$w1 w2:$w2 (w1 width:$a, w1 height:$b, w2 x:$c, w2 y:$d, w2 width:$e)"
+	}
 }
 
 
@@ -970,7 +974,7 @@ proc enable_window { w m { args "" } } {
 # Set global key mappings in all windows
 #************************************************
 proc setglobkeys { w { chkChg 1 } } {
-	global conWnd grabLst parWndLst logWndFn
+	global conWnd grabLst
 
 	# soft/hard exit (check for unsaved changes or not)
 	if { $chkChg } {

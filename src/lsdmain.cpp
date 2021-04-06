@@ -1524,8 +1524,10 @@ void uncover_browser( void )
 			wm title . $origMainTit; \
 			unset origMainTit \
 		}" );
-		
-	cmd( "if { [ string equal [ wm state . ] normal ] } { focustop . }" );
+	
+	cmd( "if { [ string equal [ wm state . ] normal ] } { \
+			focustop . \
+		}" );
 
 	brCovered = false;
 	redrawRoot = true;

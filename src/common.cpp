@@ -212,7 +212,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 	}
 	
 	cmd( "wm withdraw ." );
-	cmd( "wm update idletasks" );
+	cmd( "update idletasks" );
 	cmd( "tk appname %s", tcl_app_name );
 	tk_ok = true;
 
@@ -229,6 +229,8 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 					send $i \"destroy .\" \
 				} \
 			}" );
+			
+		cmd( "update idletasks" );
 	}
 
 	// check installation directory for no spaces in name
