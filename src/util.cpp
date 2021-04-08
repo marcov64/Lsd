@@ -1499,10 +1499,10 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 	
 	cmd( "for { set i 1 } { $i <= $rows } { incr i } { \
 			for { set j 1 } { $j <= $columns } { incr j } { \
-				set x1 [ expr ( $j - 1 ) * $dimW ]; \
-				set y1 [ expr ( $i - 1 ) * $dimH ]; \
-				set x2 [ expr $j * $dimW ]; \
-				set y2 [ expr $i * $dimH ]; \
+				set x1 [ expr { ( $j - 1 ) * $dimW } ]; \
+				set y1 [ expr { ( $i - 1 ) * $dimH } ]; \
+				set x2 [ expr { $j * $dimW } ]; \
+				set y2 [ expr { $i * $dimH } ]; \
 				.lat.c create rectangle $x1 $y1 $x2 $y2 -outline \"\" -tags c${i}_${j} \
 			} \
 		}" );

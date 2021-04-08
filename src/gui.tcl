@@ -321,7 +321,7 @@ set wndLst [ list .lmm .lsd .log .str .da .deb .lat .plt .dap ]
 set wndMenuHeight 0
 
 # text line default canvas height & minimum horizontal border width
-set lheightP [ expr int( [ font actual $fontP -size ] * [ tk scaling ] ) + $vtmarginP ]
+set lheightP [ expr { int( [ font actual $fontP -size ] * [ tk scaling ] ) + $vtmarginP } ]
 set hbordsizeP	$hmbordsizeP
 
 # current position of structure window

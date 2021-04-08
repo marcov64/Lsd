@@ -137,11 +137,11 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 	}
 
 	// avoid redrawing the buttons if they already exist
-	cmd( "set existButtons [ expr [ winfo exists .deb.b ] ]" );
+	cmd( "set existButtons [ winfo exists .deb.b ]" );
 	if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	{ 
 		cmd( "if [ string equal $CurPlatform mac ] { \
-				set butWidD [ expr $butWid - 1 ] \
+				set butWidD [ expr { $butWid - 1 } ] \
 			} { \
 				set butWidD $butWid \
 			}" );
@@ -1470,8 +1470,8 @@ void deb_show( object *r, const char *hl_var )
 	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
 
 	cmd( "if { ! [ winfo exists .deb.tit ] } { \
-			set fntSz [ expr [ font metrics [ ttk::style lookup boldSmall.TLabel -font ] -linespace ] + 2 ]; \
-			ttk::frame .deb.tit -height [ expr $fntSz + $vspcszD ]; \
+			set fntSz [ expr { [ font metrics [ ttk::style lookup boldSmall.TLabel -font ] - linespace ] + 2 } ]; \
+			ttk::frame .deb.tit -height [ expr { $fntSz + $vspcszD } ]; \
 			ttk::label .deb.tit.name1 -style boldSmall.TLabel -text Variable -anchor w; \
 			ttk::label .deb.tit.val1 -style hlBoldSmall.TLabel -text Value; \
 			ttk::label .deb.tit.last1 -style boldSmall.TLabel -text \"Updated\"; \
@@ -1502,11 +1502,11 @@ void deb_show( object *r, const char *hl_var )
 			set lastDebSz { 0 0 }; \
 			set debDone 0; \
 			set fntWid [ font measure [ ttk::style lookup TLabel -font active TkDefaultFont ] 0 ]; \
-			set hcharszD [ expr int( ( $hsizeDmin - 15 ) / $fntWid ) ]; \
-			set hnamszD [ expr round( $hnamshD * $hcharszD ) ]; \
-			set hvalszD [ expr round( $hvalshD * $hcharszD ) ]; \
-			set hupdszD [ expr round( $hupdshD * $hcharszD ) ]; \
-			set hpadszD [ expr round( $hpadshD * $hcharszD ) - 1 ]; \
+			set hcharszD [ expr { int( ( $hsizeDmin - 15 ) / $fntWid ) } ]; \
+			set hnamszD [ expr { round( $hnamshD * $hcharszD ) } ]; \
+			set hvalszD [ expr { round( $hvalshD * $hcharszD ) } ]; \
+			set hupdszD [ expr { round( $hupdshD * $hcharszD ) } ]; \
+			set hpadszD [ expr { round( $hpadshD * $hcharszD ) - 1 } ]; \
 			ttk::canvas $g.can -yscrollcommand { .deb.cc.grid.scroll set } -entry 0 -dark $darkTheme; \
 			ttk::scrollbar $g.scroll -command { .deb.cc.grid.can yview }; \
 			grid $g.can $g.scroll -sticky nsew; \
@@ -1524,15 +1524,15 @@ void deb_show( object *r, const char *hl_var )
 							set desWid [ winfo width .deb.cc ]; \
 							set desHgt [ winfo height .deb.cc ]; \
 							if { ! [ info exists debButHgt ] } { \
-								set debButHgt [ expr [ lindex $debSz 1 ] - $desHgt ]; \
-							} elseif { $debButHgt > [ expr [ lindex $debSz 1 ] - $desHgt ] } { \
-								set desHgt [ expr [ lindex $debSz 1 ] - $debButHgt ] \
+								set debButHgt [ expr { [ lindex $debSz 1 ] - $desHgt } ]; \
+							} elseif { $debButHgt > [ expr { [ lindex $debSz 1 ] - $desHgt } ] } { \
+								set desHgt [ expr { [ lindex $debSz 1 ] - $debButHgt } ] \
 							}; \
 							$g configure -width $desWid -height $desHgt; \
 							$g.can configure -scrollregion $canBbox \
 						} { \
-							set desWid [ expr max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ], 400 ) ]; \
-							set desHgt [ expr max( [ lindex $canBbox 3 ] - [ lindex $canBbox 1 ], 250 ) ]; \
+							set desWid [ expr { max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ], 400 ) } ]; \
+							set desHgt [ expr { max( [ lindex $canBbox 3 ] - [ lindex $canBbox 1 ], 250 ) } ]; \
 							unset -nocomplain debButHgt \
 						}; \
 					} elseif { $debDone == 2 } { \
@@ -1551,7 +1551,7 @@ void deb_show( object *r, const char *hl_var )
 	if ( r->v == NULL )
 	{
 		cmd( "$g.can create text 0 0" );	// reference to position message
-		cmd( "$g.can create text [ expr ( $hsizeDmin - 10 ) / 2 ] [ expr $vsizeDmin / 3 ] -text \"(no elements in object)\" -font [ ttk::style lookup boldSmall.TLabel -font ] -fill $colorsTheme(fg)" );
+		cmd( "$g.can create text [ expr { ( $hsizeDmin - 10 ) / 2 } ] [ expr { $vsizeDmin / 3 } ] -text \"(no elements in object)\" -font [ ttk::style lookup boldSmall.TLabel -font ] -fill $colorsTheme(fg)" );
 	}
 	else
 	{
@@ -1595,7 +1595,7 @@ void deb_show( object *r, const char *hl_var )
 				cmd( "ttk::label $w.e$i.pad -width $hpadszD" );
 			
 				cmd( "grid $w.e$i.pad $w.e$i.name $w.e$i.val $w.e$i.last" );
-				cmd( "grid $w.e$i -column 1 -row [ expr int( ( $i - 1 ) / 2 ) ]" );
+				cmd( "grid $w.e$i -column 1 -row [ expr { int( ( $i - 1 ) / 2 ) } ]" );
 				cmd( "mouse_wheel $w.e$i.pad" );
 			}
 			else
@@ -1619,7 +1619,7 @@ void deb_show( object *r, const char *hl_var )
 		cmd( "set curElem [ lsort [ array names debElem ] ]" );
 		cmd( "if { [ string length \"%s\" ] > 0 && [ lsearch -exact $curElem %s ] >= 0 } { \
 				set lastHl [ lindex $debElem(%s) 1 ]; \
-				set hlPos [ expr ceil( [ lindex $debElem(%s) 0 ] / 2 ) / ceil( [ array size debElem ] / 2 ) ]; \
+				set hlPos [ expr { ceil( [ lindex $debElem(%s) 0 ] / 2 ) / ceil( [ array size debElem ] / 2 ) } ]; \
 				$lastHl.name configure -style sel.TLabel; \
 				$lastHl.val configure -style selHl.TLabel; \
 				$lastHl.last configure -style sel.TLabel \
@@ -1677,8 +1677,8 @@ void show_tmp_vars( object *r, bool update )
 		cmd( "pack $in.l3 -pady 5" );
 
 		cmd( "showtop $in topleftW 0 1 0" );
-		cmd( "wm minsize $in [ winfo reqwidth $in ] [ expr $vsizeDmin + $vmenusize ]" );
-		cmd( "wm geometry $in [ winfo reqwidth $in ]x[ expr [ winfo height .deb ] + $vmenusize ]" );
+		cmd( "wm minsize $in [ winfo reqwidth $in ] [ expr { $vsizeDmin + $vmenusize } ]" );
+		cmd( "wm geometry $in [ winfo reqwidth $in ]x[ expr { [ winfo height .deb ] + $vmenusize } ]" );
 
 		cmd( "$in.n.t tag configure bold -font [ ttk::style lookup boldSmallProp.TText -font ]" );
 
@@ -1987,8 +1987,8 @@ void show_neighbors( object *r, bool update )
 		cmd( "pack $N.l4 -pady 5" );
 		
 		cmd( "showtop $N topleftW 0 1 0" );
-		cmd( "wm minsize $N [ winfo reqwidth $N ] [ expr $vsizeDmin + $vmenusize ]" );
-		cmd( "wm geometry $N [ winfo reqwidth $N ]x[ expr [ winfo height .deb ] + $vmenusize ]" );
+		cmd( "wm minsize $N [ winfo reqwidth $N ] [ expr { $vsizeDmin + $vmenusize } ]" );
+		cmd( "wm geometry $N [ winfo reqwidth $N ]x[ expr { [ winfo height .deb ] + $vmenusize } ]" );
 		
 		cmd( "if { ! [ winfo exists .deb.val ] } { align $N .deb } { align $N .deb.val }" );
 	}

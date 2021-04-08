@@ -177,8 +177,8 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 				set x [ getx $w $pos ]
 				set y [ gety $w $pos ]
 				
-				set maxHgt [ expr [ winfo screenwidth $w ] - $x - 2 * $bordsize - $hmargin ]
-				set maxWid [ expr [ winfo screenheight $w ] - $y- 2 * $bordsize - $vmargin - $tbarsize ]
+				set maxHgt [ expr { [ winfo screenwidth $w ] - $x - 2 * $bordsize - $hmargin } ]
+				set maxWid [ expr { [ winfo screenheight $w ] - $y- 2 * $bordsize - $vmargin - $tbarsize } ]
 				if { $sizeX > $maxHgt } {
 					set sizeX $maxHgt
 					$w configure -width $sizeX
@@ -195,8 +195,8 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 			if { ! [ string equal "" $x ] && ! [ string equal "" $y ] } {
 
 				if { [ string equal $pos coverW ] } {
-					set sizeX [ expr [ winfo width [ winfo parent $w ] ] + 10 ]
-					set sizeY [ expr [ winfo height [ winfo parent $w ] ] + 30 ]
+					set sizeX [ expr { [ winfo width [ winfo parent $w ] ] + 10 } ]
+					set sizeY [ expr { [ winfo height [ winfo parent $w ] ] + 30 } ]
 				}
 
 				if { ! [ string equal $pos xy ]	&& $sizeX != 0 && $sizeY != 0 } {
@@ -300,7 +300,7 @@ proc destroytop w {
 			set igrab [ lsearch -glob $grabLst "$w *" ]
 			if { $igrab >= 0 } {
 				grab release $w
-				set grabPar [ string range [ lindex $grabLst $igrab ] [ expr [ string first " " [ lindex $grabLst $igrab ] ] + 1 ] end ]
+				set grabPar [ string range [ lindex $grabLst $igrab ] [ expr { [ string first " " [ lindex $grabLst $igrab ] ] + 1 } ] end ]
 				if { $grabPar != "" } {
 					focustop $grabPar
 					grab set $grabPar
@@ -342,13 +342,13 @@ proc geomtop { { w . } } {
 	set contentsLeft [ winfo rootx $w ]
 
 	# measure left edge, and assume all edges except top are the same thickness
-	set decorationThickness [ expr $contentsLeft - $decorationLeft ]
+	set decorationThickness [ expr { $contentsLeft - $decorationLeft } ]
 
 	# find titlebar plus menubar thickness
-	set menubarThickness [ expr $contentsTop - $decorationTop ]
+	set menubarThickness [ expr { $contentsTop - $decorationTop } ]
 
 	# compute real values
-	incr width [ expr 2 * $decorationThickness ]
+	incr width [ expr { 2 * $decorationThickness } ]
 	incr height $decorationThickness
 	incr height $menubarThickness
 
@@ -389,13 +389,13 @@ proc geomtosave { { w . } } {
 			switch $w {
 				.da -
 				.deb {
-					set realY [ expr $decorationTop + $contentsLeft - $decorationLeft + 8 ]
+					set realY [ expr { $decorationTop + $contentsLeft - $decorationLeft + 8 } ]
 				}
 				.lat {
-					set realY [ expr $decorationTop + $contentsLeft - $decorationLeft ]
+					set realY [ expr { $decorationTop + $contentsLeft - $decorationLeft } ]
 				}
 				default {
-					set realY [ expr $decorationTop + $contentsLeft - $decorationLeft - 2 ]
+					set realY [ expr { $decorationTop + $contentsLeft - $decorationLeft - 2 } ]
 				}
 			}
 		}
@@ -403,7 +403,7 @@ proc geomtosave { { w . } } {
 		mac {
 			set realX $decorationLeft
 			set realY $decorationTop
-			set realHeight [ expr $height + $contentsTop - $decorationTop - $wndMenuHeight ]
+			set realHeight [ expr { $height + $contentsTop - $decorationTop - $wndMenuHeight } ]
 		}
 
 		windows {
@@ -413,14 +413,14 @@ proc geomtosave { { w . } } {
 			switch $w {
 				.da -
 				.deb {
-					set realHeight [ expr $height + $contentsTop - $decorationTop - ( $wndMenuHeight + 20 ) ]
+					set realHeight [ expr { $height + $contentsTop - $decorationTop - ( $wndMenuHeight + 20 ) } ]
 				}
 				.plt -
 				.dap {
-					set realHeight [ expr $height ]
+					set realHeight [ expr { $height } ]
 				}
 				default {
-					set realHeight [ expr $height + $contentsTop - $decorationTop - $wndMenuHeight ]
+					set realHeight [ expr { $height + $contentsTop - $decorationTop - $wndMenuHeight } ]
 				}
 			}
 		}
@@ -451,8 +451,8 @@ proc checkgeom { geom defGeom screenWidth screenHeight } {
 		if { $n < 4 } {
 			return $defGeom
 		} else {
-			set centerX [ expr $decorationLeft + $width / 2 ]
-			set centerY [ expr $decorationTop + $height / 2 ]
+			set centerX [ expr { $decorationLeft + $width / 2 } ]
+			set centerY [ expr { $decorationTop + $height / 2 } ]
 
 			if { $centerX < 0 || $centerX > $screenWidth || $centerY < 0 || $centerY > $screenHeight } {
 				return $defGeom
@@ -486,7 +486,7 @@ proc sizetop { { w all } } {
 			set curGeom [ wm geometry . ]
 			scan $curGeom "%dx%d+%d+%d" width height decorationLeft decorationTop
 			set contentsTop [ winfo rooty . ]
-			set wndMenuHeight [ expr $contentsTop - $decorationTop ]
+			set wndMenuHeight [ expr { $contentsTop - $decorationTop } ]
 		}
 	} else {
 		set realW $w
@@ -509,20 +509,20 @@ proc sizetop { { w all } } {
 
 				.lmm {
 					if { $screenWidth < ( $hsizeL + 2 * $bordsize ) } {
-						set W [ expr $screenWidth - 2 * $bordsize ]
+						set W [ expr { $screenWidth - 2 * $bordsize } ]
 					} else {
 						set W $hsizeL
 					}
-					set H [ expr $screenHeight - $tbarsize - 2 * $vmargin - 2 * $bordsize ]
+					set H [ expr { $screenHeight - $tbarsize - 2 * $vmargin - 2 * $bordsize } ]
 					if { $H < $vsizeL } {
-						set H [ expr $screenHeight - $tbarsize - 2 * $bordsize ]
+						set H [ expr { $screenHeight - $tbarsize - 2 * $bordsize } ]
 					}
 					if { $screenWidth < ( $hsizeL + 2 * $bordsize + $hmargin ) } {
 						set X 0
 					} else {
-						set X [ expr $screenWidth - $hmargin - $bordsize - $W ]
+						set X [ expr { $screenWidth - $hmargin - $bordsize - $W } ]
 					}
-					set Y [ expr ( $screenHeight - $tbarsize ) / 2 - $bordsize - $H / 2 ]
+					set Y [ expr { ( $screenHeight - $tbarsize ) / 2 - $bordsize - $H / 2 } ]
 
 					set defGeom "${W}x$H+$X+$Y"
 
@@ -532,15 +532,15 @@ proc sizetop { { w all } } {
 				}
 
 				.log {
-					set defGeom "+[ expr $screenWidth - $hmargin - $bordsize - $hsizeGmin ]+[ gety .log bottomrightS ]"
+					set defGeom "+[ expr { $screenWidth - $hmargin - $bordsize - $hsizeGmin } ]+[ gety .log bottomrightS ]"
 					wm geometry .log [ checkgeom $logGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .log $hsizeGmin $vsizeGmin
 					wm maxsize .log [ winfo vrootwidth .log ] [ winfo vrootheight .log ]
 				}
 
 				.str {
-					set posXstr [ expr [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] - 2 * $bordsize ]
-					set posYstr [ expr [ winfo y . ] + $corrY ]
+					set posXstr [ expr { [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] - 2 * $bordsize } ]
+					set posYstr [ expr { [ winfo y . ] + $corrY } ]
 					set defGeom "${hsizeM}x${vsizeM}+${posXstr}+${posYstr}"
 
 					# handle the extra scaling parameters
@@ -550,7 +550,7 @@ proc sizetop { { w all } } {
 						scan [ lindex $geom 1 ] "%f+%f" hfactM vfactM
 					}
 
-					wm minsize .str [ expr $hsizeM / 2 ] [ expr $vsizeM / 2 ]
+					wm minsize .str [ expr { $hsizeM / 2 } ] [ expr { $vsizeM / 2 } ]
 					wm maxsize .str [ winfo vrootwidth .str ] [ winfo vrootheight .str ]
 				}
 
@@ -568,7 +568,7 @@ proc sizetop { { w all } } {
 					if { $n < 4 } {
 						set debGeom $defGeom
 					} else {
-						set debGeom "${hsizeDmin}x[ expr max ( $height, $vsizeDmin ) ]+${x}+${y}"
+						set debGeom "${hsizeDmin}x[ expr { max ( $height, $vsizeDmin ) } ]+${x}+${y}"
 					}
 				
 					wm geometry .deb [ checkgeom $debGeom $defGeom $screenWidth $screenHeight ]
@@ -626,11 +626,11 @@ proc resizetop { w sizeX { sizeY 0 } } {
 		set sizeY [ winfo height $w ]
 	}
 	
-	set sizeX [ expr min( $sizeX, [ winfo screenwidth $w ] - [ winfo rootx $w ] - 2 * $bordsize - $hmargin ) ]
-	set sizeY [ expr min( $sizeY, [ winfo screenheight $w ] - [ winfo rooty $w ] - 2 * $bordsize - $vmargin - $tbarsize ) ]
+	set sizeX [ expr { min( $sizeX, [ winfo screenwidth $w ] - [ winfo rootx $w ] - 2 * $bordsize - $hmargin ) } ]
+	set sizeY [ expr { min( $sizeY, [ winfo screenheight $w ] - [ winfo rooty $w ] - 2 * $bordsize - $vmargin - $tbarsize ) } ]
 	
-	set newMinX [ expr min( [ lindex [ wm minsize $w ] 0 ], $sizeX ) ]
-	set newMinY [ expr min( [ lindex [ wm minsize $w ] 1 ], $sizeY ) ]
+	set newMinX [ expr { min( [ lindex [ wm minsize $w ] 0 ], $sizeX ) } ]
+	set newMinY [ expr { min( [ lindex [ wm minsize $w ] 1 ], $sizeY ) } ]
 	if { $newMinX != [ lindex [ wm minsize $w ] 0 ] || $newMinY != [ lindex [ wm minsize $w ] 1 ] } {
 		wm minsize $w $newMinX $newMinY
 	}
@@ -754,7 +754,7 @@ proc placeline { slvLst widLst y hgt { relX 1 } { relY 0 } } {
 	foreach w $slvLst wid $widLst {
 		place $w {*}$xCmd $curX {*}$widCmd $wid {*}$yCmd {*}$hgtCmd
 		
-		set curX [ expr $curX + $wid ]
+		set curX [ expr { $curX + $wid } ]
 	}
 }
 
@@ -768,15 +768,15 @@ proc align { w1 w2 { side R } } {
 
 	set a [ winfo width $w1 ]
 	set b [ winfo height $w1 ]
-	set c [ expr [ winfo x $w2 ] + $corrX ]
-	set d [ expr [ winfo y $w2 ] + $corrY ]
+	set c [ expr { [ winfo x $w2 ] + $corrX } ]
+	set d [ expr { [ winfo y $w2 ] + $corrY } ]
 	set e [ winfo width $w1 ]
 	set f [ winfo width $w2 ]
 
 	if { $side == "L" } {
-		set g [ expr $c - $e - $hmargin ]
+		set g [ expr { $c - $e - $hmargin } ]
 	} else {
-		set g [ expr $c + $f + $hmargin ]
+		set g [ expr { $c + $f + $hmargin } ]
 	}
 	
 	wm geometry $w1 +$g+$d
@@ -815,37 +815,37 @@ proc getx { w pos } {
 
 	switch $pos {
 		centerS {
-			set hpos [ expr [ winfo screenwidth $w ] / 2 + $corrX - [ winfo reqwidth $w ] / 2 ]
+			set hpos [ expr { [ winfo screenwidth $w ] / 2 + $corrX - [ winfo reqwidth $w ] / 2 } ]
 		}
 		centerW {
-			set hpos [ expr [ winfo x $par ] + $corrX + [ winfo width $par ] / 2  - [ winfo reqwidth $w ] / 2 ]
+			set hpos [ expr { [ winfo x $par ] + $corrX + [ winfo width $par ] / 2  - [ winfo reqwidth $w ] / 2 } ]
 		}
 		topleftS {
-			set hpos [ expr $hmargin + $corrX ]
+			set hpos [ expr { $hmargin + $corrX } ]
 		}
 		topleftW {
-			set hpos [ expr [ winfo x $par ] + $corrX + 10 ]
+			set hpos [ expr { [ winfo x $par ] + $corrX + 10 } ]
 		}
 		overM {
-			set hpos [ expr [ winfo x . ] + $corrX ]
+			set hpos [ expr { [ winfo x . ] + $corrX } ]
 		}
 		coverW {
-			set hpos [ expr [ winfo x $par ] + $corrX ]
+			set hpos [ expr { [ winfo x $par ] + $corrX } ]
 		}
 		bottomrightS {
-			set hpos [ expr [ winfo screenwidth $w ] - $hmargin - 2 * $bordsize - [ winfo reqwidth $w ] ]
+			set hpos [ expr { [ winfo screenwidth $w ] - $hmargin - 2 * $bordsize - [ winfo reqwidth $w ] } ]
 		}
 		righttoW {
-			set hpos [ expr [ winfo x $par ] + $corrX + $hmargin + [ winfo width $par ] + 2 * $bordsize ]
+			set hpos [ expr { [ winfo x $par ] + $corrX + $hmargin + [ winfo width $par ] + 2 * $bordsize } ]
 		}
 		lefttoW {
-			set hpos [ expr [ winfo x $par ] + $corrX - $hmargin - [ winfo reqwidth $w ] + 2 * $bordsize ]
+			set hpos [ expr { [ winfo x $par ] + $corrX - $hmargin - [ winfo reqwidth $w ] + 2 * $bordsize } ]
 		}
 		righttoM {
-			set hpos [ expr [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] - 2 * $bordsize ]
+			set hpos [ expr { [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] - 2 * $bordsize } ]
 		}
 		default {
-			set hpos [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
+			set hpos [ expr { [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 } ]
 		}
 	}
 
@@ -853,8 +853,8 @@ proc getx { w pos } {
 		if { $hpos < $corrX } {
 			return $corrX
 		}
-		if { $hpos > [ expr [ winfo screenwidth $par ] - [ winfo reqwidth $w ] / 2 ] } {
-			return [ expr [ winfo x $par ] + $corrX + $hmargin + 2 * $bordsize ]
+		if { $hpos > [ expr { [ winfo screenwidth $par ] - [ winfo reqwidth $w ] / 2 } ] } {
+			return [ expr { [ winfo x $par ] + $corrX + $hmargin + 2 * $bordsize } ]
 		}
 	}
 
@@ -876,37 +876,37 @@ proc gety { w pos } {
 
 	switch $pos {
 		centerS {
-			set vpos [ expr [ winfo screenheight $w ] / 2 + $corrY - [ winfo reqheight $w ] / 2 ]
+			set vpos [ expr { [ winfo screenheight $w ] / 2 + $corrY - [ winfo reqheight $w ] / 2 } ]
 		}
 		centerW {
-			set vpos [ expr [ winfo y $par ] + $corrY + [ winfo height $par ] / 2  - [ winfo reqheight $w ] / 2 ]
+			set vpos [ expr { [ winfo y $par ] + $corrY + [ winfo height $par ] / 2  - [ winfo reqheight $w ] / 2 } ]
 		}
 		topleftS {
-			set vpos [ expr $vmargin + $corrY ]
+			set vpos [ expr { $vmargin + $corrY } ]
 		}
 		topleftW {
-			set vpos [ expr [ winfo y $par ] + $corrY + 30 ]
+			set vpos [ expr { [ winfo y $par ] + $corrY + 30 } ]
 		}
 		overM {
-			set vpos [ expr [ winfo y . ] + $corrY ]
+			set vpos [ expr { [ winfo y . ] + $corrY } ]
 		}
 		coverW {
-			set vpos [ expr [ winfo y $par ] + $corrY ]
+			set vpos [ expr { [ winfo y $par ] + $corrY } ]
 		}
 		bottomrightS {
-			set vpos [ expr [ winfo screenheight $w ] - $vmargin - $tbarsize - [ winfo reqheight $w ] ]
+			set vpos [ expr { [ winfo screenheight $w ] - $vmargin - $tbarsize - [ winfo reqheight $w ] } ]
 		}
 		righttoW {
-			set vpos [ expr [ winfo y $par ] + $corrY ]
+			set vpos [ expr { [ winfo y $par ] + $corrY } ]
 		}
 		lefttoW {
-			set vpos [ expr [ winfo y $par ] + $corrY ]
+			set vpos [ expr { [ winfo y $par ] + $corrY } ]
 		}
 		righttoM {
-			set vpos [ expr [ winfo y . ] + $corrY ]
+			set vpos [ expr { [ winfo y . ] + $corrY } ]
 		}
 		default {
-			set vpos [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
+			set vpos [ expr { [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 } ]
 		}
 	}
 
@@ -914,8 +914,8 @@ proc gety { w pos } {
 		if { $vpos < $corrY } {
 			return $corrY
 		}
-		if { $vpos > [ expr [ winfo screenheight $par ] - [ winfo reqheight $w ] / 2 ] } {
-			return [ expr [ winfo y $par ] + $corrY ]
+		if { $vpos > [ expr { [ winfo screenheight $par ] - [ winfo reqheight $w ] / 2 } ] } {
+			return [ expr { [ winfo y $par ] + $corrY } ]
 		}
 	}
 
@@ -994,7 +994,7 @@ proc setglobkeys { w { chkChg 1 } } {
 		bind $w <Control-Alt-j> {
 			# remove existing grabs
 			if [ info exists grabLst ] {
-				set lastGrab [ expr [ llength $grabLst ] - 1 ]
+				set lastGrab [ expr { [ llength $grabLst ] - 1 } ]
 				if { $lastGrab >= 0 } {
 					grab release [ lindex [ lindex $grabLst $lastGrab ] 0 ]
 					set grabLst [ list ]
@@ -1015,7 +1015,7 @@ proc setglobkeys { w { chkChg 1 } } {
 proc selectinlist { w pos { foc 0 } } {
 	if { [ winfo exists $w ] && [ string equal -nocase [ winfo class $w ] listbox ] && [ $w size ] > 0 } {
 		if [ string is integer -strict $pos ] {
-			set pos [ expr max( min( $pos, [ $w size ] - 1 ), 0 ) ]
+			set pos [ expr { max( min( $pos, [ $w size ] - 1 ), 0 ) } ]
 		} elseif { ! ( $pos in [ list active end ] ) } {
 			return
 		}
@@ -1055,25 +1055,25 @@ proc canvassee { c w } { \
 	set bb [ $c bbox all ]; \
 	set xv [ $c xview ]; \
 	set yv [ $c yview ]; \
-	set cw [ expr [ lindex $bb 2 ] - [ lindex $bb 0 ] ]; \
-	set ch [ expr [ lindex $bb 3 ] - [ lindex $bb 1 ] ]; \
-	set xmi [ expr [ lindex $bb 0 ] + [ lindex $xv 0 ] * $cw ]; \
-	set xma [ expr [ lindex $bb 0 ] + [ lindex $xv 1 ] * $cw ]; \
-	set ymi [ expr [ lindex $bb 1 ] + [ lindex $yv 0 ] * $ch ]; \
-	set yma [ expr [ lindex $bb 1 ] + [ lindex $yv 1 ] * $ch ]; \
-	set wx [ expr [ $c canvasx [ winfo x $w ] ] - $xmi ]; \
-	set wy [ expr [ $c canvasy [ winfo y $w ] ] - $ymi ]; \
+	set cw [ expr { [ lindex $bb 2 ] - [ lindex $bb 0 ] } ]; \
+	set ch [ expr { [ lindex $bb 3 ] - [ lindex $bb 1 ] } ]; \
+	set xmi [ expr { [ lindex $bb 0 ] + [ lindex $xv 0 ] * $cw } ]; \
+	set xma [ expr { [ lindex $bb 0 ] + [ lindex $xv 1 ] * $cw } ]; \
+	set ymi [ expr { [ lindex $bb 1 ] + [ lindex $yv 0 ] * $ch } ]; \
+	set yma [ expr { [ lindex $bb 1 ] + [ lindex $yv 1 ] * $ch } ]; \
+	set wx [ expr { [ $c canvasx [ winfo x $w ] ] - $xmi } ]; \
+	set wy [ expr { [ $c canvasy [ winfo y $w ] ] - $ymi } ]; \
 	set ww [ winfo width $w ]; \
 	set wh [ winfo height $w ]; \
 	if { $wx < $xmi } { \
-		$c xview moveto [ expr [ lindex $xv 0 ] + ( $wx - $xmi ) / $cw ] \
-	} elseif { [ expr $wx + $ww ] > $xma } { \
-		$c xview moveto [ expr [ lindex $xv 0 ] + ( $wx + $ww - $xma ) / $cw ] \
+		$c xview moveto [ expr { [ lindex $xv 0 ] + ( $wx - $xmi ) / $cw } ] \
+	} elseif { [ expr { $wx + $ww } ] > $xma } { \
+		$c xview moveto [ expr { [ lindex $xv 0 ] + ( $wx + $ww - $xma ) / $cw } ] \
 	}; \
 	if { $wy < $ymi } { \
-		$c yview moveto [ expr [ lindex $yv 0 ] + ( $wy - $ymi ) / $ch ] \
-	} elseif { [ expr $wy + $wh ] > $yma } { \
-		$c yview moveto [ expr [ lindex $yv 0 ] + ( $wy + $wh - $yma ) / $ch ] \
+		$c yview moveto [ expr { [ lindex $yv 0 ] + ( $wy - $ymi ) / $ch } ] \
+	} elseif { [ expr { $wy + $wh } ] > $yma } { \
+		$c yview moveto [ expr { [ lindex $yv 0 ] + ( $wy + $wh - $yma ) / $ch } ] \
 	}; \
 } \
 
@@ -1513,8 +1513,8 @@ proc mousewarpto w {
 	update
 	
 	if { $mouseWarp && [ winfo exists $w ] && [ winfo viewable $w ] } {
-		set wX [ expr [ winfo width $w ] / 2 ]
-		set wY [ expr [ winfo height $w ] / 2 ]
+		set wX [ expr { [ winfo width $w ] / 2 } ]
+		set wY [ expr { [ winfo height $w ] / 2 } ]
 		set curX 0
 		set curY 0
 		
@@ -1528,7 +1528,7 @@ proc mousewarpto w {
 		
 		# first move pointer to toplevel to bypass Tk bug
 		set t [ winfo toplevel $w ]
-		event generate $t <Motion> -warp 1 -x [ expr [ winfo width $t ] / 2 ] -y [ expr [ winfo height $t ] / 2 ]
+		event generate $t <Motion> -warp 1 -x [ expr { [ winfo width $t ] / 2 } ] -y [ expr { [ winfo height $t ] / 2 } ]
 		update idletasks
 
 		# do it as required to bypass Tk bug (first warps just go to the dialog not the button)
@@ -1681,8 +1681,8 @@ proc mouse_wheel { w } {
 proc scroll_wheel_windows { delta w } {
 	global winmwscale sfmwheel
 	
-	if { [ expr abs( $delta ) ] < $winmwscale } { 
-		set winmwscale [ expr abs( $delta ) ]
+	if { [ expr { abs( $delta ) } ] < $winmwscale } { 
+		set winmwscale [ expr { abs( $delta ) } ]
 		if { $winmwscale <= 0 } { 
 			set winmwscale 1
 		}
@@ -1695,7 +1695,7 @@ proc scroll_wheel_windows { delta w } {
 		set bot [ lindex $wPos 1 ]
 		if { ( ! ( $top == 0.0 && $bot == 1.0 ) ) && \
 			 ( ( $delta > 0 && $top > 0.0 ) || ( $delta < 0 && $bot < 1.0 ) ) } {
-			$scrW yview scroll [ expr -1 * $sfmwheel * $delta / $winmwscale ] units
+			$scrW yview scroll [ expr { -1 * $sfmwheel * $delta / $winmwscale } ] units
 		}
 	}
 }
@@ -1715,7 +1715,7 @@ proc scroll_wheel_mac { delta w } {
 		set bot [ lindex $wPos 1 ]
 		if { ( ! ( $top == 0.0 && $bot == 1.0 ) ) && \
 			 ( ( $delta > 0 && $top > 0.0 ) || ( $delta < 0 && $bot < 1.0 ) ) } {
-			$scrW yview scroll [ expr -1 * $sfmwheel * $delta ] units
+			$scrW yview scroll [ expr { -1 * $sfmwheel * $delta } ] units
 		}
 	}
 }
@@ -1735,7 +1735,7 @@ proc scroll_wheel_linux { delta w dir } {
 		set bot [ lindex $wPos 1 ]
 		if { ( ! ( $top == 0.0 && $bot == 1.0 ) ) && \
 			 ( ( $dir < 0 && $top > 0.0 ) || ( $dir > 0 && $bot < 1.0 ) ) } {
-			$scrW yview scroll [ expr $dir * $sfmwheel ] units
+			$scrW yview scroll [ expr { $dir * $sfmwheel } ] units
 		}
 	}
 }
@@ -1786,21 +1786,21 @@ proc scale_canvas { c type ratio } {
 	upvar $ratio finalRatio
 
     if { $type == "+" } {
-        set ratio [ expr sqrt( 2.0 ) ]
+        set ratio [ expr { sqrt( 2.0 ) } ]
     } else {
-        set ratio [ expr 1.0 / sqrt( 2.0 ) ]
+        set ratio [ expr { 1.0 / sqrt( 2.0 ) } ]
     }
 
 	set sro [ $c cget -scrollregion ]
 
-	set newH [ expr ( [ lindex $sro 3 ] - [ lindex $sro 1 ] ) * $ratio ]
-	set origH [ expr $vsizeP + $tbordsizeP + $bbordsizeP ]
-	set newRatio [ expr $newH / $origH ]
+	set newH [ expr { ( [ lindex $sro 3 ] - [ lindex $sro 1 ] ) * $ratio } ]
+	set origH [ expr { $vsizeP + $tbordsizeP + $bbordsizeP } ]
+	set newRatio [ expr { $newH / $origH } ]
 
 	if { $newRatio < $maxzoomP && $newRatio > $minzoomP } {
 		set srn [ list ]
 		for { set i 0 } { $i < 4 } { incr i } {
-			lappend srn [ expr round( [ lindex $sro $i ] * $ratio ) ]
+			lappend srn [ expr { round( [ lindex $sro $i ] * $ratio ) } ]
 		}
 		$c configure -scrollregion $srn
 		$c scale all 0 0 $ratio $ratio
@@ -1817,29 +1817,29 @@ proc canvas_axis { c type grid hticks { y2 0 } } {
 	global hsizeP vsizeP hbordsizeP tbordsizeP vticksP colorsTheme
 
 	# x-axis, ticks & x-grid
-	$c create line $hbordsizeP $tbordsizeP [ expr $hbordsizeP + $hsizeP ] $tbordsizeP -width 1 -fill $colorsTheme(dfg) -tag p
-	$c create line $hbordsizeP [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $colorsTheme(dfg) -tag p
+	$c create line $hbordsizeP $tbordsizeP [ expr { $hbordsizeP + $hsizeP } ] $tbordsizeP -width 1 -fill $colorsTheme(dfg) -tag p
+	$c create line $hbordsizeP [ expr { $tbordsizeP + $vsizeP } ] [ expr { $hbordsizeP + $hsizeP } ] [ expr { $tbordsizeP + $vsizeP } ] -width 1 -fill $colorsTheme(dfg) -tag p
 
 	if { $type == 0 || $type == 4 || $type == 5 } {
-		for { set i 0 } { $i < [ expr $hticks + 2 ] } { incr i } {
-			if { $grid && $i > 0 && $i < [ expr $hticks + 1 ] } {
-				$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + 1 ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP - 1 ] -fill $colorsTheme(bg) -width 1 -tags {g p}
+		for { set i 0 } { $i < [ expr { $hticks + 2 } ] } { incr i } {
+			if { $grid && $i > 0 && $i < [ expr { $hticks + 1 } ] } {
+				$c create line [ expr { $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) } ] [ expr { $tbordsizeP + 1 } ] [ expr { $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) } ] [ expr { $tbordsizeP + $vsizeP - 1 } ] -fill $colorsTheme(bg) -width 1 -tags {g p}
 			}
-			$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) ] [ expr $tbordsizeP + $vsizeP + 5 ] -fill $colorsTheme(dfg) -width 1 -tags p
+			$c create line [ expr { $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) } ] [ expr { $tbordsizeP + $vsizeP } ] [ expr { $hbordsizeP + round( $i * $hsizeP / ( $hticks + 1 ) ) } ] [ expr { $tbordsizeP + $vsizeP + 5 } ] -fill $colorsTheme(dfg) -width 1 -tags p
 		}
 	}
 
 	# y-axis, ticks & y-grid
-	$c create line $hbordsizeP $tbordsizeP $hbordsizeP [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $colorsTheme(dfg) -tag p
-	$c create line [ expr $hbordsizeP + $hsizeP ]  $tbordsizeP [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $colorsTheme(dfg) -tag p
+	$c create line $hbordsizeP $tbordsizeP $hbordsizeP [ expr { $tbordsizeP + $vsizeP } ] -width 1 -fill $colorsTheme(dfg) -tag p
+	$c create line [ expr { $hbordsizeP + $hsizeP } ]  $tbordsizeP [ expr { $hbordsizeP + $hsizeP } ] [ expr { $tbordsizeP + $vsizeP } ] -width 1 -fill $colorsTheme(dfg) -tag p
 
-	for { set i 0 } { $i < [ expr $vticksP + 2 ] } { incr i } {
-		if { $grid && $i > 0 && $i < [ expr $vticksP + 1 ] } {
-			$c create line [ expr $hbordsizeP + 1 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] [ expr $hbordsizeP + $hsizeP - 1 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $colorsTheme(bg) -width 1 -tags {g p}
+	for { set i 0 } { $i < [ expr { $vticksP + 2 } ] } { incr i } {
+		if { $grid && $i > 0 && $i < [ expr { $vticksP + 1 } ] } {
+			$c create line [ expr { $hbordsizeP + 1 } ] [ expr { $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) } ] [ expr { $hbordsizeP + $hsizeP - 1 } ] [ expr { $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) } ] -fill $colorsTheme(bg) -width 1 -tags {g p}
 		}
-		$c create line [ expr $hbordsizeP - 5 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] $hbordsizeP [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $colorsTheme(dfg) -width 1 -tag p
+		$c create line [ expr { $hbordsizeP - 5 } ] [ expr { $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) } ] $hbordsizeP [ expr { $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) } ] -fill $colorsTheme(dfg) -width 1 -tag p
 		if $y2 {
-			$c create line [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] [ expr $hbordsizeP + $hsizeP + 5 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $colorsTheme(dfg) -width 1 -tag p
+			$c create line [ expr { $hbordsizeP + $hsizeP } ] [ expr { $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) } ] [ expr { $hbordsizeP + $hsizeP + 5 } ] [ expr { $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) } ] -fill $colorsTheme(dfg) -width 1 -tag p
 		}
 	}
 }
@@ -1856,7 +1856,7 @@ proc plot_bars { c x1 y1 x2 y2 { tags "" } { fill "" } { width 1 } } {
 		set fill $colorsTheme(bg)
 	}
 	
-	set size [ expr min( [ llength $x1 ], [ llength $y1 ], [ llength $x2 ], [ llength $y2 ]  ) ]
+	set size [ expr { min( [ llength $x1 ], [ llength $y1 ], [ llength $x2 ], [ llength $y2 ]  ) } ]
 	lappend tags bar series
 
 	for { set i 0 } { $i < $size } { incr i } {
@@ -1880,7 +1880,7 @@ proc plot_bars { c x1 y1 x2 y2 { tags "" } { fill "" } { width 1 } } {
 proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
 	global smoothP splstepsP
 
-	set size [ expr min( [ llength $x ], [ llength $y ] ) ]
+	set size [ expr { min( [ llength $x ], [ llength $y ] ) } ]
 	set xy [ list ]
 	set tagsdots $tags
 	lappend tags line series
@@ -1905,11 +1905,11 @@ proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
 						set xi [ lindex $xy 0 ]
 						set yi [ lindex $xy 1 ]
 						# x
-						$c create line [ expr $xi + 2 ] [ expr $yi + 2 ] \
-							[ expr $xi - 3 ] [ expr $yi - 3 ] \
+						$c create line [ expr { $xi + 2 } ] [ expr { $yi + 2 } ] \
+							[ expr { $xi - 3 } ] [ expr { $yi - 3 } ] \
 							-width 1 -fill $fill -tags $tagsdots
-						$c create line [ expr $xi + 2 ] [ expr $yi - 2 ] \
-							[ expr $xi - 3 ] [ expr $yi + 3 ] \
+						$c create line [ expr { $xi + 2 } ] [ expr { $yi - 2 } ] \
+							[ expr { $xi - 3 } ] [ expr { $yi + 3 } ] \
 							-width 1 -fill $fill -tags $tagsdots
 					}
 				}
@@ -1927,11 +1927,11 @@ proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
 			set xi [ lindex $xy 0 ]
 			set yi [ lindex $xy 1 ]
 			# x
-			$c create line [ expr $xi + 2 ] [ expr $yi + 2 ] \
-				[ expr $xi - 3 ] [ expr $yi - 3 ] \
+			$c create line [ expr { $xi + 2 } ] [ expr { $yi + 2 } ] \
+				[ expr { $xi - 3 } ] [ expr { $yi - 3 } ] \
 				-width 1 -fill $fill -tags $tagsdots
-			$c create line [ expr $xi + 2 ] [ expr $yi - 2 ] \
-				[ expr $xi - 3 ] [ expr $yi + 3 ] \
+			$c create line [ expr { $xi + 2 } ] [ expr { $yi - 2 } ] \
+				[ expr { $xi - 3 } ] [ expr { $yi + 3 } ] \
 				-width 1 -fill $fill -tags $tagsdots
 		}
 	}
@@ -1946,7 +1946,7 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 	
 	lappend tagsdots dots series
 
-	set size [ expr min( [ llength $x ], [ llength $y ] ) ]
+	set size [ expr { min( [ llength $x ], [ llength $y ] ) } ]
 
 	for { set i 0 } { $i < $size } { incr i } {
 		set xi [ lindex $x $i ]
@@ -1954,27 +1954,27 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 		if { $xi >= 0 && $yi >= 0 } {
 			if { $width < 1 } {
 				# small point
-				$c create oval [ expr $xi - 1 ] [ expr $yi - 1 ] \
-					[ expr $xi + 1 ] [ expr $yi + 1 ] -fill $fill \
+				$c create oval [ expr { $xi - 1 } ] [ expr { $yi - 1 } ] \
+					[ expr { $xi + 1 } ] [ expr { $yi + 1 } ] -fill $fill \
 					-width 0 -outline [ $c cget -background ] -tags $tagsdots
 			} elseif { $width == 1 } {
 				# x
-				$c create line [ expr $xi + 2 ] [ expr $yi + 2 ] \
-					[ expr $xi - 3 ] [ expr $yi - 3 ] \
+				$c create line [ expr { $xi + 2 } ] [ expr { $yi + 2 } ] \
+					[ expr { $xi - 3 } ] [ expr { $yi - 3 } ] \
 					-width 1 -fill $fill -tags $tagsdots
-				$c create line [ expr $xi + 2 ] [ expr $yi - 2 ] \
-					[ expr $xi - 3 ] [ expr $yi + 3 ] \
+				$c create line [ expr { $xi + 2 } ] [ expr { $yi - 2 } ] \
+					[ expr { $xi - 3 } ] [ expr { $yi + 3 } ] \
 					-width 1 -fill $fill -tags $tagsdots
 			} elseif { $width <= 2 } {
 				# +
-				$c create line [ expr $xi + 3 ] $yi [ expr $xi - 4 ] $yi \
+				$c create line [ expr { $xi + 3 } ] $yi [ expr { $xi - 4 } ] $yi \
 					-width 1 -fill $fill -tags $tagsdots
-				$c create line $xi [ expr $yi + 3 ] $xi [ expr $yi - 4 ] \
+				$c create line $xi [ expr { $yi + 3 } ] $xi [ expr { $yi - 4 } ] \
 					-width 1 -fill $fill -tags $tagsdots
 			} else {
 				# filled circle
-				$c create oval [ expr $xi - $width / 2 ] [ expr $yi - $width / 2 ] \
-					[ expr $xi + $width / 2 ] [ expr $yi + $width / 2 ] -fill $fill \
+				$c create oval [ expr { $xi - $width / 2 } ] [ expr { $yi - $width / 2 } ] \
+					[ expr { $xi + $width / 2 } ] [ expr { $yi + $width / 2 } ] -fill $fill \
 					-width 0 -outline [ $c cget -background ] -tags $tagsdots
 			}
 		}
@@ -2001,11 +2001,11 @@ proc init_canvas_colors { } {
 	}
 
 	# load remaining colors
-	set n [ expr $i + [ llength $unusedcolors ] ]
+	set n [ expr { $i + [ llength $unusedcolors ] } ]
 	for { } { $i < $n } { incr i } {
 		# pick random color
 		set m [ llength $unusedcolors ]
-		set j [ expr min( int( rand( ) * $m ), $m - 1 ) ]
+		set j [ expr { min( int( rand( ) * $m ), $m - 1 ) } ]
 		set color [ lindex $unusedcolors $j ]
 		set ::c$i $color
 

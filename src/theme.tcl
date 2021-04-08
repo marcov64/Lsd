@@ -340,7 +340,7 @@ proc ttk::messageBox { args } {
 	
 	array set options [ concat { -default "" -detail "" -icon info -message "" -parent . -title "" -type ok } $args ]
 
-	set name [ string cat .msgBox_ [ expr int( rand( ) * 10000 ) ] ]
+	set name [ string cat .msgBox_ [ expr { int( rand( ) * 10000 ) } ] ]
 	
 	foreach { option parameter } [ array get options ] {
 		switch $option {

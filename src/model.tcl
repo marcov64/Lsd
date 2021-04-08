@@ -205,7 +205,7 @@ proc showmodel pippo {
 					set kk _
 				}
 				set ll %W
-				set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] "${kk}*" ]
+				set ff [ lsearch -start [ expr { [ $ll curselection ] + 1 } ] -nocase [ $ll get 0 end ] "${kk}*" ]
 				if { $ff == -1 } {
 					set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] "${kk}*" ]
 				}
@@ -438,7 +438,7 @@ proc mdelete i {
 		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ lindex $ldn $i ])?" ]
 
 		if { $answer == "yes" } {
-			set modelDir [ string range [ lindex $ldn $i ] 0 [ expr [ string last / [ lindex $ldn $i ] ] - 1 ] ] 
+			set modelDir [ string range [ lindex $ldn $i ] 0 [ expr { [ string last / [ lindex $ldn $i ] ] - 1 } ] ] 
 			if { ! [ file exists "$RootLsd/trashbin" ] } {
 				file mkdir "$RootLsd/trashbin"
 			}
@@ -450,7 +450,7 @@ proc mdelete i {
 				puts $f "Folder containing deleted models.\n"
 				close $f
 			}
-			set modelName [ string range [ lindex $ldn $i ] [ expr [ string last / [ lindex $ldn $i ] ] + 1 ] end ]
+			set modelName [ string range [ lindex $ldn $i ] [ expr { [ string last / [ lindex $ldn $i ] ] + 1 } ] end ]
 			if { [ file exists "$RootLsd/trashbin/$modelName" ] } {
 				catch { file delete -force "$RootLsd/trashbin/$modelName" }
 			}

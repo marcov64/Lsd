@@ -130,7 +130,7 @@ void set_obj_number( object *r, int *choice )
 		
 		if ( notShown )
 		{
-			cmd( "showtop .inin topleftW 1 1 1 [ expr max( $ininWid + 10, $hsizeNmin ) ] [ expr max( $ininHgt + 110, $vsizeNmin ) ]" );			
+			cmd( "showtop .inin topleftW 1 1 1 [ expr { max( $ininWid + 10, $hsizeNmin ) } ] [ expr { max( $ininHgt + 110, $vsizeNmin ) } ]" );			
 			cmd( "wm minsize .inin $hsizeNmin $vsizeNmin" );
 			cmd( "wm maxsize .inin [ winfo vrootwidth .inin ] [ winfo vrootheight .inin ]" );
 			notShown = false;
@@ -261,8 +261,8 @@ void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int 
 			
 			cmd( "$t insert end \\n" );
 			
-			cmd( "set ininWid [ expr max( $ininWid, [ winfo reqwidth $t.but$idx ] + [ winfo reqwidth $t.ind$idx ] + [ winfo reqwidth $t.lab$idx ] + [ winfo reqwidth $t.val$idx ] + [ winfo reqwidth $t.tag$idx ] ) ]" );
-			cmd( "set ininHgt [ expr $ininHgt + max( [ winfo reqheight $t.but$idx ], [ winfo reqheight $t.ind$idx ], [ winfo reqheight $t.lab$idx ], [ winfo reqheight $t.val$idx ], [ winfo reqheight $t.tag$idx ] ) ]" );
+			cmd( "set ininWid [ expr { max( $ininWid, [ winfo reqwidth $t.but$idx ] + [ winfo reqwidth $t.ind$idx ] + [ winfo reqwidth $t.lab$idx ] + [ winfo reqwidth $t.val$idx ] + [ winfo reqwidth $t.tag$idx ] ) } ]" );
+			cmd( "set ininHgt [ expr { $ininHgt + max( [ winfo reqheight $t.but$idx ], [ winfo reqheight $t.ind$idx ], [ winfo reqheight $t.lab$idx ], [ winfo reqheight $t.val$idx ], [ winfo reqheight $t.tag$idx ] ) } ]" );
 
 			if ( level >= max_depth && cb->head->b != NULL )
 				hid_level = true;
@@ -773,7 +773,7 @@ void eliminate_obj( object **c, int actual, int desired, int *choice )
 		{
 			do
 			{
-				cmd( "$d.t.tit1 configure -text \"([ expr $idx2 - 1 ] instance(s) done, %d to do)\"", actual - desired - idx2 + 1 );
+				cmd( "$d.t.tit1 configure -text \"([ expr { $idx2 - 1 } ] instance(s) done, %d to do)\"", actual - desired - idx2 + 1 );
 				cmd( "write_any $d.t.e $val2" );
 				cmd( "$d.t.e selection range 0 end" );
 				cmd( "focus $d.t.e" );

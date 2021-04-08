@@ -200,7 +200,7 @@ cmd( "$w add command -label \"Colors...\" -command { set choice 21 } -underline 
 cmd( "$w add command -label \"Plot Parameters...\" -command { set choice 22 } -underline 0" );
 cmd( "$w add command -label \"Lattice Parameters...\" -command { set choice 44 } -underline 0" );
 cmd( "$w add checkbutton -label \"Average Y Values\" -variable avgSmpl -underline 8" );
-cmd( "$w add checkbutton -label \"Show Initial Values\" -variable showInit -underline 5 -command { if { $showInit } { set a 0 } { set a 1 }; set minc [ expr max( $firstc, $a ) ]; write_any .da.f.h.v.ft.from.mnc $minc }" );
+cmd( "$w add checkbutton -label \"Show Initial Values\" -variable showInit -underline 5 -command { if { $showInit } { set a 0 } { set a 1 }; set minc [ expr { max( $firstc, $a ) } ]; write_any .da.f.h.v.ft.from.mnc $minc }" );
 
 cmd( "set w .da.m.help" );
 cmd( "ttk::menu $w -tearoff 0" );
@@ -252,7 +252,7 @@ cmd( "bind $f.v <KeyRelease> { \
 				set kk _ \
 			}; \
 			set ll %%W; \
-			set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
+			set ff [ lsearch -start [ expr { [ $ll curselection ] + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 			if { $ff == -1 } { \
 				set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
 			}; \
@@ -323,7 +323,7 @@ cmd( "bind $f.v <KeyRelease> { \
 				set kk _ \
 			}; \
 			set ll %%W; \
-			set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
+			set ff [ lsearch -start [ expr { [ $ll curselection ] + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 			if { $ff == -1 } { \
 				set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
 			}; \
@@ -371,7 +371,7 @@ cmd( "bind $f.v <KeyRelease> { \
 		set kk %%K; \
 		if { [ string length $kk ] == 1 && [ string is digit -strict $kk ] } { \
 			set ll %%W; \
-			set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
+			set ff [ lsearch -start [ expr { [ $ll curselection ] + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 			if { $ff == -1 } { \
 				set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
 			}; \
@@ -509,13 +509,13 @@ cmd( "pack .da.f -padx 5 -pady 5" );
 
 // button bar
 cmd( "ttk::frame .da.b" );
-cmd( "ttk::button .da.b.ts -width [ expr $butWid + 1 ] -text Plot -command { set choice 1 } -underline 0" );
-cmd( "ttk::button .da.b.dump -width [ expr $butWid + 1 ] -text \"Save Plot\" -command { set fromPlot 0; set choice 11 } -underline 2" );
-cmd( "ttk::button .da.b.sv -width [ expr $butWid + 1 ] -text \"Save Data\" -command { set choice 10 } -underline 3" );
-cmd( "ttk::button .da.b.sp -width [ expr $butWid + 1 ] -text \"Show Data\" -command { set choice 36 } -underline 5" );
-cmd( "ttk::button .da.b.st -width [ expr $butWid + 1 ] -text Statistics -command { set choice 12 } -underline 1" );
-cmd( "ttk::button .da.b.fr -width [ expr $butWid + 1 ] -text Histogram -command { set choice 32 } -underline 0" );
-cmd( "ttk::button .da.b.lat -width [ expr $butWid + 1 ] -text Lattice -command { set choice 23 } -underline 0" );
+cmd( "ttk::button .da.b.ts -width [ expr { $butWid + 1 } ] -text Plot -command { set choice 1 } -underline 0" );
+cmd( "ttk::button .da.b.dump -width [ expr { $butWid + 1 } ] -text \"Save Plot\" -command { set fromPlot 0; set choice 11 } -underline 2" );
+cmd( "ttk::button .da.b.sv -width [ expr { $butWid + 1 } ] -text \"Save Data\" -command { set choice 10 } -underline 3" );
+cmd( "ttk::button .da.b.sp -width [ expr { $butWid + 1 } ] -text \"Show Data\" -command { set choice 36 } -underline 5" );
+cmd( "ttk::button .da.b.st -width [ expr { $butWid + 1 } ] -text Statistics -command { set choice 12 } -underline 1" );
+cmd( "ttk::button .da.b.fr -width [ expr { $butWid + 1 } ] -text Histogram -command { set choice 32 } -underline 0" );
+cmd( "ttk::button .da.b.lat -width [ expr { $butWid + 1 } ] -text Lattice -command { set choice 23 } -underline 0" );
 
 cmd( "pack .da.b.ts .da.b.dump .da.b.sv .da.b.sp .da.b.st .da.b.fr .da.b.lat -padx $butSpc -side left" );
 cmd( "pack .da.b -padx $butPad -pady $butPad -side right" );
@@ -1132,8 +1132,8 @@ while ( true )
 						pack .da.a.q.f.l.s$x -padx 2 -side left \
 					}; \
 					pack .da.a.q.f.l.e$x -side left; \
-					bind .da.a.q.f.l.e$x <Return> [ subst -nocommand { focus .da.a.q.f.l.e[ expr $x + 1 ]; \
-					.da.a.q.f.l.e[ expr $x + 1 ] selection range 0 end } ]; \
+					bind .da.a.q.f.l.e$x <Return> [ subst -nocommand { focus .da.a.q.f.l.e[ expr { $x + 1 } ]; \
+					.da.a.q.f.l.e[ expr { $x + 1 } ] selection range 0 end } ]; \
 					bind .da.a.q.f.l.e$x <KeyRelease> { .da.a.q.f.c invoke } }; \
 					incr x -1; \
 					bind .da.a.q.f.l.e$x <Return> { focus .da.a.b.r2.ok }" );
@@ -1659,8 +1659,8 @@ while ( true )
 						pack .da.a.q.f.l.s$x -padx 2 -side left \
 					}; \
 					pack .da.a.q.f.l.e$x -side left; \
-					bind .da.a.q.f.l.e$x <Return> [ subst -nocommand { focus .da.a.q.f.l.e[ expr $x + 1 ]; \
-					.da.a.q.f.l.e[ expr $x + 1 ] selection range 0 end } ]; \
+					bind .da.a.q.f.l.e$x <Return> [ subst -nocommand { focus .da.a.q.f.l.e[ expr { $x + 1 } ]; \
+					.da.a.q.f.l.e[ expr { $x + 1 } ] selection range 0 end } ]; \
 					bind .da.a.q.f.l.e$x <KeyRelease> { .da.a.q.f.c invoke } }; \
 					incr x -1; \
 					bind .da.a.q.f.l.e$x <Return> { focus .da.a.b.r2.ok }" );
@@ -2107,7 +2107,7 @@ while ( true )
 			cmd( "if { ! $selOnly } { \
 					set steps 0; \
 					foreach i [ .da.vars.ch.f.v curselection ] { \
-						.da.vars.ch.f.v delete [ expr $i - $steps ]; \
+						.da.vars.ch.f.v delete [ expr { $i - $steps } ]; \
 						incr steps \
 					} \
 				} { \
@@ -2298,7 +2298,7 @@ while ( true )
 		// remove the vars. selected from the variables to plot
 		case 7:
 			cmd( "set steps 0" );
-			cmd( "foreach i [ .da.vars.ch.f.v curselection ] { .da.vars.ch.f.v delete [ expr $i - $steps ]; incr steps }" );
+			cmd( "foreach i [ .da.vars.ch.f.v curselection ] { .da.vars.ch.f.v delete [ expr { $i - $steps } ]; incr steps }" );
 			cmd( "if { [ .da.vars.ch.f.v size ] == 0 } { set tit \"\" } { set tit [ .da.vars.ch.f.v get 0 ] }" );
 			
 			break;
@@ -2801,7 +2801,7 @@ while ( true )
 						cmd( "set c$n_col $a" );
 						cmd( "if { $n_col >= 10 } { \
 								set fr 2; \
-								set n_col [ expr $n_col - 10 ] \
+								set n_col [ expr { $n_col - 10 } ] \
 							} { \
 								set fr 1 \
 							}" );
@@ -3348,7 +3348,7 @@ while ( true )
 					}; \
 					set ax [ $ccanvas canvasx %%x ]; \
 					set ay [ $ccanvas canvasy %%y ]; \
-					if { [ expr abs( $ax - $hereX ) ] > [ expr abs( $ay - $hereY ) ] } { \
+					if { [ expr { abs( $ax - $hereX ) } ] > [ expr { abs( $ay - $hereY ) } ] } { \
 						set ay $hereY \
 					} { \
 						set ax $hereX \
@@ -3362,8 +3362,8 @@ while ( true )
 					bind $ccanvas <B1-Motion> {\
 						set ccanvas $daptab.tab%d.c.f.plots; \
 						if $moving { \
-							$ccanvas move current [ expr [ $ccanvas canvasx %%%%x ] - $hereX ] \
-								[ expr [ $ccanvas canvasy %%%%y ] - $hereY ]; \
+							$ccanvas move current [ expr { [ $ccanvas canvasx %%%%x ] - $hereX } ] \
+								[ expr { [ $ccanvas canvasy %%%%y ] - $hereY } ]; \
 							set hereX [ $ccanvas canvasx %%%%x ]; \
 							set hereY [ $ccanvas canvasy %%%%y ] \
 						} \
@@ -3385,7 +3385,7 @@ while ( true )
 						$ccanvas bind $cl <B1-Motion> { \
 							set ax %%%%x; \
 							set ay %%%%y; \
-							$daptab.tab%d.c.f.plots move selected [ expr $ax - $hereX ] [ expr $ay - $hereY ]; \
+							$daptab.tab%d.c.f.plots move selected [ expr { $ax - $hereX } ] [ expr { $ay - $hereY } ]; \
 							set hereX $ax; \
 							set hereY $ay \
 						}; \
@@ -3504,7 +3504,7 @@ while ( true )
 void update_bounds( void )
 {
 	if ( isfinite( miny ) )
-		cmd( "write_any .da.f.h.v.sc.min.min [ format \"%%.[ expr $pdigits ]g\" $miny ]" );
+		cmd( "write_any .da.f.h.v.sc.min.min [ format \"%%.${pdigits}g\" $miny ]" );
 	else
 	{
 		cmd( "write_any .da.f.h.v.sc.min.min -Infinity" );
@@ -3512,7 +3512,7 @@ void update_bounds( void )
 	}
 	
 	if ( isfinite( maxy ) )
-		cmd( "write_any .da.f.h.v.sc.max.max [ format \"%%.[ expr $pdigits ]g\" $maxy ]" );
+		cmd( "write_any .da.f.h.v.sc.max.max [ format \"%%.${pdigits}g\" $maxy ]" );
 	else
 	{
 		cmd( "write_any .da.f.h.v.sc.max.max Infinity" );
@@ -4013,7 +4013,7 @@ void set_cs_data( int *choice )
 	cmd( "bind $p.u.i.e.e <Control-t> { set sto [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-T> { set sto [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }" );
 	cmd( "bind $p.u.i.e.e <Control-s> { set sskip [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-S> { set sskip [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }" );
 	cmd( "bind $p.u.i.e.e <Control-z> { \
-			if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer -strict $sfrom ] && [ string is integer -strict $sto ] && [ expr $sto - $sfrom ] > 0 } { \
+			if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer -strict $sfrom ] && [ string is integer -strict $sto ] && [ expr { $sto - $sfrom } ] > 0 } { \
 				if { ! [ info exists sskip ] } { \
 					set sskip 1 \
 				}; \
@@ -4023,7 +4023,7 @@ void set_cs_data( int *choice )
 			}; \
 			.da.s.u.i.e.e selection range 0 end \
 		}; bind $p.u.i.e.e <Control-Z> { \
-			if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer -strict $sfrom ] && [ string is integer -strict $sto ] && [ expr $sto - $sfrom ] > 0 } { \
+			if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer -strict $sfrom ] && [ string is integer -strict $sto ] && [ expr { $sto - $sfrom } ] > 0 } { \
 				if { ! [ info exists sskip ] } { \
 					set sskip 1 \
 				}; \
@@ -4048,7 +4048,7 @@ void set_cs_data( int *choice )
 		} { \
 			set sel [ .da.s.u.i.lb.lb.lb curselection ]; \
 			if { [ llength $sel ] > 0 } { \
-				.da.s.u.i.lb.lb.lb delete [ lindex $sel 0 ] [ lindex $sel [ expr [ llength $sel ] - 1 ] ]; \
+				.da.s.u.i.lb.lb.lb delete [ lindex $sel 0 ] [ lindex $sel [ expr { [ llength $sel ] - 1 } ] ]; \
 				.da.s.u.i.e.e selection range 0 end; \
 				focus .da.s.u.i.e.e \
 			} \
@@ -5499,15 +5499,15 @@ void plot_cs_xy( int *choice )
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#3dCrossSection } { set choice 2 }" );
 
-	cmd( "bind .da.s.v.e <KeyRelease> { set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.v.e <KeyRelease> { set blength [ expr { $nnvar / ( $numv + $ndim - 1 ) } ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
 	cmd( "set nnvar %d", nv );
-	cmd( "bind .da.s.v.e <Return> { set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
-	cmd( "bind .da.s.v.e <Tab> { set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
-	cmd( "bind .da.s.d.r.2d <Return> { set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
-	cmd( "bind .da.s.d.r.2d <ButtonRelease-1> { set ndim 2; set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
-	cmd( "bind .da.s.d.r.3d <ButtonRelease-1> { set ndim 3; set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
-	cmd( "bind .da.s.d.r.2d <Down> { .da.s.d.r.3d invoke; focus .da.s.d.r.3d; set ndim 3; set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
-	cmd( "bind .da.s.d.r.3d <Up> { .da.s.d.r.2d invoke; focus .da.s.d.r.2d; set ndim 2; set blength [ expr $nnvar / ( $numv + $ndim - 1 ) ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.v.e <Return> { set blength [ expr { $nnvar / ( $numv + $ndim - 1 ) } ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.v.e <Tab> { set blength [ expr { $nnvar / ( $numv + $ndim - 1 ) } ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.d.r.2d <Return> { set blength [ expr { $nnvar / ( $numv + $ndim - 1 ) } ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.d.r.2d <ButtonRelease-1> { set ndim 2; set blength [ expr { $nnvar / ( $numv + $ndim - 1 ) } ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.d.r.3d <ButtonRelease-1> { set ndim 3; set blength [ expr { $nnvar / ( $numv + $ndim - 1 ) } ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.d.r.2d <Down> { .da.s.d.r.3d invoke; focus .da.s.d.r.3d; set ndim 3; set blength [ expr { $nnvar / ( $numv + $ndim - 1 ) } ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
+	cmd( "bind .da.s.d.r.3d <Up> { .da.s.d.r.2d invoke; focus .da.s.d.r.2d; set ndim 2; set blength [ expr { $nnvar / ( $numv + $ndim - 1 ) } ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
 	cmd( "bind .da.s <KeyPress-Return> { set choice 1 }" );
 	cmd( "bind .da.s <KeyPress-Escape> { set choice 2 }" );
 	cmd( "bind .da.s.i.e <KeyPress-Return> { if { $ndim == 2 } { focus .da.s.d.r.2d } { focus .da.s.d.r.3d } }" );
@@ -5538,7 +5538,7 @@ void plot_cs_xy( int *choice )
 	cmd( "set choice $bidi" );
 	time_sel = *choice;
 
-	cmd( "set blength [ expr $nnvar / ($numv + $ndim-1 )]" );
+	cmd( "set blength [ expr { $nnvar / ( $numv + $ndim - 1 ) } ]" );
 	cmd( "set choice $blength" );
 
 	block_length = *choice;
@@ -6153,9 +6153,9 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "catch { rename gnuplot \"\" }" );
 
 	// canvas plot limits (canvas & series)
-	cmd( "set cmx [ expr [ winfo width $p ] - 2 * [ $p cget -border ] - 2 * [ $p cget -highlightthickness ] ]" );
+	cmd( "set cmx [ expr { [ winfo width $p ] - 2 * [ $p cget -border ] - 2 * [ $p cget -highlightthickness ] } ]" );
 	cmd( "if { $cmx <= 1 } { set cmx [ $p cget -width ] }" );
-	cmd( "set cmy [ expr [ winfo height $p ] - 2 * [ $p cget -border ] - 2 * [ $p cget -highlightthickness ] ]" );
+	cmd( "set cmy [ expr { [ winfo height $p ] - 2 * [ $p cget -border ] - 2 * [ $p cget -highlightthickness ] } ]" );
 	cmd( "if { $cmy <= 1 } { set cmy [ $p cget -height ] }" );
 	cmd( "unset -nocomplain lim rang" );
 	cmd( "catch { set lim [ gnuplot_plotarea ] }" );
@@ -6164,13 +6164,13 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	
 	if ( *choice == 1 )
 	{
-		cmd( "set res [ expr int( $cmx * [ lindex $lim 0 ] / 1000.0 ) ]" );
+		cmd( "set res [ expr { int( $cmx * [ lindex $lim 0 ] / 1000.0 ) } ]" );
 		lim[ 0 ] = get_int( "res" );
-		cmd( "set res [ expr int( $cmx * [ lindex $lim 1 ] / 1000.0 ) ]" );
+		cmd( "set res [ expr { int( $cmx * [ lindex $lim 1 ] / 1000.0 ) } ]" );
 		lim[ 1 ] = get_int( "res" );
-		cmd( "set res [ expr int( $cmy * [ lindex $lim 2 ] / 1000.0 ) ]" );
+		cmd( "set res [ expr { int( $cmy * [ lindex $lim 2 ] / 1000.0 ) } ]" );
 		lim[ 2 ] = get_int( "res" );
-		cmd( "set res [ expr int( $cmy * [ lindex $lim 3 ] / 1000.0 ) ]" );
+		cmd( "set res [ expr { int( $cmy * [ lindex $lim 3 ] / 1000.0 ) } ]" );
 		lim[ 3 ] = get_int( "res" );
 		
 		for ( i = 0; i < 4; ++i )
@@ -6197,15 +6197,15 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 			set zoom $zoomLevel%d; \
 			set series $series%d; \
 			set w $daptab.tab%d.c; \
-			set llim [ expr %d * $zoom ]; \
-			set rlim [ expr %d * $zoom ]; \
-			set tlim [ expr %d * $zoom ]; \
-			set blim [ expr %d * $zoom ]; \
+			set llim [ expr { %d * $zoom } ]; \
+			set rlim [ expr { %d * $zoom } ]; \
+			set tlim [ expr { %d * $zoom } ]; \
+			set blim [ expr { %d * $zoom } ]; \
 			set cx [ $w.f.plots canvasx %%x ]; \
 			set cy [ $w.f.plots canvasy %%y ]; \
-			if { $cx >= $llim && $cx <= $rlim && $cy >= $tlim && $cy <= $blim && [ expr $rlim - $llim ] > 0 && [ expr $blim - $tlim ] > 0 } { \
-				$w.b.c.case.v configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $cx - $llim ) * ( %lf - %lf ) / ( $rlim - $llim ) + %lf ] ]; \
-				$w.b.c.y.v1 configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ] ]; \
+			if { $cx >= $llim && $cx <= $rlim && $cy >= $tlim && $cy <= $blim && [ expr { $rlim - $llim } ] > 0 && [ expr { $blim - $tlim } ] > 0 } { \
+				$w.b.c.case.v configure -text [ format \"%%%%.${pdigits}g\" [ expr { ( $cx - $llim ) * ( %lf - %lf ) / ( $rlim - $llim ) + %lf } ] ]; \
+				$w.b.c.y.v1 configure -text [ format \"%%%%.${pdigits}g\" [ expr { ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf } ] ]; \
 			} \
 		}", n, n, n, lim[ 0 ], lim[ 1 ], lim[ 2 ], lim[ 3 ], rang[ 1 ], rang[ 0 ], rang[ 0 ], rang[ 3 ], rang[ 2 ], rang[ 2 ] );
 
@@ -6246,8 +6246,8 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "bind $p <B1-Motion> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
 			if $moving { \
-				$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
-					[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
+				$ccanvas move current [ expr { [ $ccanvas canvasx %%x ] - $hereX } ] \
+					[ expr { [ $ccanvas canvasy %%y ] - $hereY } ]; \
 				set hereX [ $ccanvas canvasx %%x ]; \
 				set hereY [ $ccanvas canvasy %%y ] \
 			} \
@@ -6556,8 +6556,8 @@ void plot_lattice( int *choice )
 	cmd( "bind $p <B1-Motion> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
 			if $moving { \
-				$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
-					[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
+				$ccanvas move current [ expr { [ $ccanvas canvasx %%x ] - $hereX } ] \
+					[ expr { [ $ccanvas canvasy %%y ] - $hereY } ]; \
 				set hereX [ $ccanvas canvasx %%x ]; \
 				set hereY [ $ccanvas canvasy %%y ] \
 			} \
@@ -8719,16 +8719,16 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 		cmd( "bind $p <Motion> { \
 				set zoom $zoomLevel%d; \
 				set w $daptab.tab%d.c; \
-				set llim [ expr %d * $zoom ]; \
-				set rlim [ expr %d * $zoom ]; \
-				set tlim [ expr %d * $zoom ]; \
-				set blim [ expr %d * $zoom ]; \
+				set llim [ expr { %d * $zoom } ]; \
+				set rlim [ expr { %d * $zoom } ]; \
+				set tlim [ expr { %d * $zoom } ]; \
+				set blim [ expr { %d * $zoom } ]; \
 				set cx [ $w.f.plots canvasx %%x ]; \
 				set cy [ $w.f.plots canvasy %%y ]; \
 				if { $cx >= $llim && $cx <= $rlim && $cy >= $tlim && $cy <= $blim } { \
-					$w.b.c.case.v configure -text [ expr int( ( $cx - $llim ) * ( %d - %d) / ( $rlim - $llim ) + %d) ]; \
-					$w.b.c.y.v1 configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ] ]; \
-					$w.b.c.y.v2 configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ] ] \
+					$w.b.c.case.v configure -text [ expr { int( ( $cx - $llim ) * ( %d - %d) / ( $rlim - $llim ) + %d) } ]; \
+					$w.b.c.y.v1 configure -text [ format \"%%%%.${pdigits}g\" [ expr { ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf } ] ]; \
+					$w.b.c.y.v2 configure -text [ format \"%%%%.${pdigits}g\" [ expr { ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf } ] ] \
 				} \
 			}", cur_plot, cur_plot, hbordsize, hbordsize + hsize, tbordsize, tbordsize + vsize, endCase, iniCase, iniCase, maxy, miny, miny, maxy2, miny2, miny2 );
 	else
@@ -8737,20 +8737,20 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 				set zoom $zoomLevel%d; \
 				set series $series%d; \
 				set w $daptab.tab%d.c; \
-				set llim [ expr %d * $zoom ]; \
-				set rlim [ expr %d * $zoom ]; \
-				set tlim [ expr %d * $zoom ]; \
-				set blim [ expr %d * $zoom ]; \
+				set llim [ expr { %d * $zoom } ]; \
+				set rlim [ expr { %d * $zoom } ]; \
+				set tlim [ expr { %d * $zoom } ]; \
+				set blim [ expr { %d * $zoom } ]; \
 				set cx [ $w.f.plots canvasx %%x ]; \
 				set cy [ $w.f.plots canvasy %%y ]; \
 				if { $cx >= $llim && $cx <= $rlim && $cy >= $tlim && $cy <= $blim } { \
-					set case  [ expr int( ( $cx - $llim ) * ( %d - %d) / ( $rlim - $llim ) + %d) ]; \
+					set case  [ expr { int( ( $cx - $llim ) * ( %d - %d) / ( $rlim - $llim ) + %d) } ]; \
 					if { $type == 0 } { \
 						$w.b.c.case.v configure -text $case \
 					} elseif { $type == 1 } { \
-						$w.b.c.case.v configure -text \"[ lindex $series $case ] (#[ expr $case + 1 ])\" \
+						$w.b.c.case.v configure -text \"[ lindex $series $case ] (#[ expr { $case + 1 } ])\" \
 					}; \
-					$w.b.c.y.v1 configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ] ]; \
+					$w.b.c.y.v1 configure -text [ format \"%%%%.${pdigits}g\" [ expr { ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf } ] ]; \
 				} \
 			}", type, cur_plot, cur_plot, cur_plot, hbordsize, hbordsize + hsize, tbordsize, tbordsize + vsize, endCase, iniCase, iniCase, maxy, miny, miny );
 
@@ -8808,8 +8808,8 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	cmd( "bind $p <B1-Motion> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
 			if $moving { \
-				$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
-					[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
+				$ccanvas move current [ expr { [ $ccanvas canvasx %%x ] - $hereX } ] \
+					[ expr { [ $ccanvas canvasy %%y ] - $hereY } ]; \
 				set hereX [ $ccanvas canvasx %%x ]; \
 				set hereY [ $ccanvas canvasy %%y ] \
 			} \
@@ -8965,16 +8965,16 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	cmd( "bind $p <Motion> { \
 			set zoom $zoomLevel%d; \
 			set w $daptab.tab%d.c; \
-			set llim [ expr %d * $zoom ]; \
-			set rlim [ expr %d * $zoom ]; \
-			set tlim [ expr %d * $zoom ]; \
-			set blim [ expr %d * $zoom ]; \
+			set llim [ expr { %d * $zoom } ]; \
+			set rlim [ expr { %d * $zoom } ]; \
+			set tlim [ expr { %d * $zoom } ]; \
+			set blim [ expr { %d * $zoom } ]; \
 			set cx [ $w.f.plots canvasx %%x ]; \
 			set cy [ $w.f.plots canvasy %%y ]; \
 			if { $cx >= $llim && $cx <= $rlim && $cy >= $tlim && $cy <= $blim } { \
-				$w.b.c.case.v configure -text [ expr min( 1 + int( ( $cx - $llim ) * %d / ( $rlim - $llim ) ), %d) ]; \
-				$w.b.c.y.v1 configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ] ]; \
-				$w.b.c.y.v2 configure -text \"( n=[ expr int( ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ) ] )\" \
+				$w.b.c.case.v configure -text [ expr { min( 1 + int( ( $cx - $llim ) * %d / ( $rlim - $llim ) ), %d ) } ]; \
+				$w.b.c.y.v1 configure -text [ format \"%%%%.${pdigits}g\" [ expr { ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf } ] ]; \
+				$w.b.c.y.v2 configure -text \"( n=[ expr { int( ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ) } ] )\" \
 			} \
 		}", cur_plot, cur_plot, hbordsize, hbordsize + hsize, tbordsize, tbordsize + vsize, num_bins, num_bins, maxy, miny, miny, maxy * cases, miny * cases, miny * cases );
 
@@ -9033,8 +9033,8 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	cmd( "bind $p <B1-Motion> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
 			if $moving { \
-				$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
-					[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
+				$ccanvas move current [ expr { [ $ccanvas canvasx %%x ] - $hereX } ] \
+					[ expr { [ $ccanvas canvasy %%y ] - $hereY } ]; \
 				set hereX [ $ccanvas canvasx %%x ]; \
 				set hereY [ $ccanvas canvasy %%y ] \
 			} \
@@ -9199,8 +9199,8 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 
 	cmd( "ttk::frame $w.b.c.y" );
 	cmd( "ttk::label $w.b.c.y.l -text \"%s:\" -width $labWid -anchor e", txtValue );
-	cmd( "ttk::label $w.b.c.y.v1 -text \"\" -style hl.TLabel -width [ expr $datWid / 2 ] -anchor w" );
-	cmd( "ttk::label $w.b.c.y.v2 -text \"\" -style hl.TLabel -width [ expr $datWid / 2 ] -anchor w" );
+	cmd( "ttk::label $w.b.c.y.v1 -text \"\" -style hl.TLabel -width [ expr { $datWid / 2 } ] -anchor w" );
+	cmd( "ttk::label $w.b.c.y.v2 -text \"\" -style hl.TLabel -width [ expr { $datWid / 2 } ] -anchor w" );
 	cmd( "pack $w.b.c.y.l $w.b.c.y.v1 $w.b.c.y.v2 -side left -anchor w" );
 
 	cmd( "ttk::frame $w.b.c.var" );
@@ -9277,17 +9277,17 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	{
 		case TSERIES:
 			for ( i = 0; i < hticks + 2; ++i )
-				cmd( "$p create text %d [ expr %d + $pad3 ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %d -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, min_c + ( int ) floor( i * ( double ) ( max_c - min_c ) / ( hticks + 1 ) ) );
+				cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %d -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, min_c + ( int ) floor( i * ( double ) ( max_c - min_c ) / ( hticks + 1 ) ) );
 			break;
 			
 		case CRSSECT:
-			cmd( "$p create text %d [ expr %d + $pad3 ] -fill $colorsTheme(dfg) -font $fontP -anchor nw -text \"%d series\" -tag { p text }", hbordsize, vsize + lheight, nv );
+			cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor nw -text \"%d series\" -tag { p text }", hbordsize, vsize + lheight, nv );
 			break;
 			
 		case HISTOGR:
 		case HISTOCS:
 			for ( i = 0; i < hticks + 2; ++i )
-				cmd( "$p create text %d [ expr %d + $pad3 ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %.*g -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, pdigits, bins[ 0 ].lowb + i * ( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) / ( hticks + 1 ) );
+				cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %.*g -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, pdigits, bins[ 0 ].lowb + i * ( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) / ( hticks + 1 ) );
 			break;			
 	}
 
@@ -9311,7 +9311,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 
 	// series labels
 	cmd( "set xlabel $htmarginP" ); 
-	cmd( "set ylabel [ expr $tbordsizeP + $vsizeP + 2 * $lheightP ]" );
+	cmd( "set ylabel [ expr { $tbordsizeP + $vsizeP + 2 * $lheightP } ]" );
 	color = allblack ? 1001 : 0;		// select gray scale or color range
 	
 	for ( i = 0; i < nLine; ++i, ++color )
@@ -9344,12 +9344,12 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 		if ( tOk )
 		{
 			cmd( "set app [ font measure $fontP \"%s\"]", txtLab );
-			cmd( "if { [ expr $xlabel + $app] > %d } { set xlabel %d; incr ylabel %d }", hcanvas - htmargin, htmargin, lheight );
+			cmd( "if { [ expr { $xlabel + $app } ] > %d } { set xlabel %d; incr ylabel %d }", hcanvas - htmargin, htmargin, lheight );
 			h = get_int( "ylabel" );
 			if ( h > tbordsize + vsize + bbordsize - 2 * lheight )
 				break;
 			cmd( "$p create text $xlabel $ylabel -font $fontP -anchor nw -text \"%s\" -tag { txt%d text legend } -fill $c%d", txtLab, i, ( color < 1100 ) ? color : 0 );
-			cmd( "set xlabel [ expr $xlabel + $app + $htmarginP ]" );
+			cmd( "set xlabel [ expr { $xlabel + $app + $htmarginP } ]" );
 		}
 	}
 
@@ -9770,7 +9770,7 @@ int shrink_gnufile( void )
 			j = strcspn( str, "]" );
 			strncpy( str1, str + i, j - i + 1 );
 			str1[ j - i + 1 ] = '\0';
-			sscanf( str1, "[expr $cmx * %d /1000]", &x1 );
+			sscanf( str1, "[ expr { $cmx * %d / 1000 } ]", &x1 );
 		
 			i = strcspn( str + j + 1, "[" );
 			i += j + 1;
@@ -9778,7 +9778,7 @@ int shrink_gnufile( void )
 			j += i + 1;
 			strncpy( str2, str + i, j - i + 1 );
 			str2[ j - i + 1 ]='\0';
-			sscanf( str2, "[expr $cmy * %d /1000]", &x2 );
+			sscanf( str2, "[ expr { $cmy * %d / 1000 } ]", &x2 );
 		
 			i = strcspn( str + j + 1, "[" );
 			i += j + 1;
@@ -9786,7 +9786,7 @@ int shrink_gnufile( void )
 			j += i + 1;
 			strncpy( str3, str + i, j - i + 1 );
 			str3[ j - i + 1 ] = '\0';
-			sscanf( str3, "[expr $cmx * %d /1000]", &x3 );
+			sscanf( str3, "[ expr { $cmx * %d / 1000 } ]", &x3 );
 		
 			i = strcspn( str + j + 1, "[" );
 			i += j + 1;
@@ -9794,7 +9794,7 @@ int shrink_gnufile( void )
 			j += i + 1;
 			strncpy( str4, str + i, j - i + 1 );
 			str4[ j - i + 1 ] = '\0';
-			sscanf( str4, "[expr $cmy * %d /1000]", &x4 );
+			sscanf( str4, "[ expr { $cmy * %d / 1000 } ]", &x4 );
 			
 			// if new data are stored, then add it to the cleaned file
 			if ( store( x1, x2, x3, x4 ) == 1 )

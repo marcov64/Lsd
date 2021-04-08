@@ -765,9 +765,9 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 
 	cmd( "ttk::frame .sens.fb" );
 	cmd( "ttk::checkbutton .sens.fb.int -variable integerV -text \"Round to integer\"" );
-	cmd( "ttk::button .sens.fb.paste -width [ expr $butWid ] -text \"Paste\" -command { tk_textPaste .sens.t.t }" );
-	cmd( "ttk::button .sens.fb.del -width [ expr $butWid ] -text \"Delete\" -command { .sens.t.t delete 0.0 end }" );
-	cmd( "ttk::button .sens.fb.rem -width [ expr $butWid ] -text \"Remove\" -command { set choice 3 }" );
+	cmd( "ttk::button .sens.fb.paste -width $butWid -text Paste -command { tk_textPaste .sens.t.t }" );
+	cmd( "ttk::button .sens.fb.del -width $butWid -text Delete -command { .sens.t.t delete 0.0 end }" );
+	cmd( "ttk::button .sens.fb.rem -width $butWid -text Remove -command { set choice 3 }" );
 	cmd( "pack .sens.fb.int .sens.fb.paste .sens.fb.del .sens.fb.rem -padx $butSpc -side left" );
 	cmd( "pack .sens.fb -padx $butPad -anchor e" );
 

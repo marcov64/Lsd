@@ -80,7 +80,7 @@ proc log_tcl_error { errorInfo message } {
 # set main window
 set fonttype $DefaultFontSize
 set dim_character $DefaultFontSize
-set small_character [ expr $dim_character - $deltaSize ]
+set small_character [ expr { $dim_character - $deltaSize } ]
 
 setstyles
 setglobkeys . 0
@@ -149,7 +149,7 @@ if [ string equal $CurPlatform mac ] {
 				# try to get just the base 'include' directory
 				set base [ string first include $include ]
 				if { $base >=0 } {
-					set include [ string range $include 0 [ expr $base + [ string length include ] - 1 ] ]
+					set include [ string range $include 0 [ expr { $base + [ string length include ] - 1 } ] ]
 				}
 
 				lappend pathInclude $include
@@ -175,7 +175,7 @@ if [ string equal $CurPlatform mac ] {
 				# try to get just the base 'lib' directory
 				set base [ string first lib $lib ]
 				if { $base >=0 } {
-					set lib [ string range $lib 0 [ expr $base + [ string length lib ] - 1 ] ]
+					set lib [ string range $lib 0 [ expr { $base + [ string length lib ] - 1 } ] ]
 				}
 
 				lappend pathLib $lib
@@ -434,7 +434,7 @@ if { $n != $nFiles } {
 	if { ! [ info exists result ] } {
 		set result "(no information)"
 	}
-	ttk::messageBox -parent "" -type ok -title Error -icon error -message "Incomplete installation" -detail "The installation could not copy the required files to run LSD ([ expr $nFiles - $n ] files failed).\n\nError detail:\n$result\n\nPlease try reinstalling after closing any open instance of LSD/LMM or download again the installation package.\n\nExiting now."
+	ttk::messageBox -parent "" -type ok -title Error -icon error -message "Incomplete installation" -detail "The installation could not copy the required files to run LSD ([ expr { $nFiles - $n } ] files failed).\n\nError detail:\n$result\n\nPlease try reinstalling after closing any open instance of LSD/LMM or download again the installation package.\n\nExiting now."
 		
 	if { $newInst } {
 		catch { file delete -force $LsdRoot }
@@ -636,7 +636,7 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 			set timeout 1800
 			set elapsed 0
 			while { ! [ file exists "$env(TMPDIR)/brew-done.tmp" ] && $elapsed < $timeout } {
-				$wait configure -text [ format "%02d:%02d" [ expr int( $elapsed / 60 ) ] [ expr $elapsed % 60 ] ]
+				$wait configure -text [ format "%02d:%02d" [ expr { int( $elapsed / 60 ) } ] [ expr { $elapsed % 60 } ] ]
 				update
 				after 1000
 				incr elapsed
@@ -721,7 +721,7 @@ if { [ string equal $CurPlatform linux ] && [ llength $linuxPkgMiss ] > 0 } {
 			set timeout 1800
 			set elapsed 0
 			while { ! [ file exists "/tmp/pack-install-done.tmp" ] && ! [ file exists "/tmp/pack-install-fail.tmp" ] && $elapsed < $timeout } {
-				$wait configure -text [ format "%02d:%02d" [ expr int( $elapsed / 60 ) ] [ expr $elapsed % 60 ] ]
+				$wait configure -text [ format "%02d:%02d" [ expr { int( $elapsed / 60 ) } ] [ expr { $elapsed % 60 } ] ]
 				update
 				after 1000
 				incr elapsed

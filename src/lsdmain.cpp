@@ -473,13 +473,13 @@ int lsdmain( int argn, char **argv )
 	choice = 0;
 
 	// load native Tk procedures for graphical user interface management
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/gui.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/gui.tcl\" } err0x01 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0100, 0x01 );
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/gui.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/gui.tcl\" } err0x01 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0100, 0x01 );
 
 	// load native Tcl procedures for general utilities
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/file.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/file.tcl\" } err0x02 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0200, 0x02 );
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/file.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/file.tcl\" } err0x02 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0200, 0x02 );
 
 	// load additional native Tcl procedures for external files handling
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/util.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/util.tcl\" } err0x04 ] { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0400, 0x04 );
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/util.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/util.tcl\" } err0x04 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0400, 0x04 );
 
 	if ( choice != 0 )
 	{
@@ -537,7 +537,7 @@ int lsdmain( int argn, char **argv )
 	i = load_model_info( exec_path );
 	
 	// Tcl global variables
-	cmd( "set small_character [ expr $dim_character - $deltaSize ]" );
+	cmd( "set small_character [ expr { $dim_character - $deltaSize } ]" );
 	cmd( "set gpterm $gnuplotTerm" );
 
 	// configure main window
@@ -867,7 +867,7 @@ void run( void )
 			if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER )
 			{
 				cmd( ".p.b2.b configure -value %d", t );
-				cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr int( 100 * %d / %d ) ]%% done)\"", min( t + 1, max_step ), max_step, t, max_step );
+				cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( t + 1, max_step ), max_step, t, max_step );
 				cmd( "update" );
 				last_update = clock( );
 			}
@@ -887,7 +887,7 @@ void run( void )
 		
 #ifndef NW 
 		cmd( ".p.b1.b configure -value %d", cur_sim );
-		cmd( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr int( 100 * %d / %d ) ]%% done)\"", min( cur_sim + 1, sim_num ), sim_num, cur_sim, sim_num  );
+		cmd( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( cur_sim + 1, sim_num ), sim_num, cur_sim, sim_num  );
 		
 		cmd( "destroytop .deb" );
 		cmd( "update" );
@@ -1473,7 +1473,7 @@ void cover_browser( const char *text1, const char *text2, bool run )
 			} elseif [ string equal $CurPlatform linux ] { \
 				set goWid $butWid \
 			} { \
-				set goWid [ expr $butWid - 1 ] \
+				set goWid [ expr { $butWid - 1 } ] \
 			}" );
 			
 		cmd( "ttk::frame .b" );

@@ -213,7 +213,7 @@ void add_rt_plot_tab( const char *w, int id_sim )
 			for ( j = 1; j <= cols && cols * i + j <= id_sim; ++j )
 			{
 				k = cols * i + j;
-				cmd( "set b [ expr $butWid - ( %d ) ]", k > 99 ? dbut : dbut - 1 );
+				cmd( "set b [ expr { $butWid - ( %d ) } ]", k > 99 ? dbut : dbut - 1 );
 				cmd( "ttk::button $rtptab.more.b.l%d.b%d -width $b -text \"Run %d\" -command { \
 						if { \"$rtptab.tab%d\" ni [ $rtptab tabs ] } { \
 							if { [ $rtptab index end ] >= %d } { \
@@ -239,16 +239,16 @@ INIT_PLOT
 **************************************/
 void init_plot( int num, int id_sim )
 {
-	cmd( "if { %d > $hsizeR } { set plot_step 1 } { set plot_step [ expr $hsizeR / %d.0 ] }", max_step, max_step );
+	cmd( "if { %d > $hsizeR } { set plot_step 1 } { set plot_step [ expr { $hsizeR / %d.0 } ] }", max_step, max_step );
 	
 	cmd( "ttk::frame $activeplot.c" );
 	
 	// vertical scale values
-	cmd( "ttk::canvas $activeplot.c.yscale -width $sclhsizeR -height [ expr $vsizeR + $sclvmarginR + $botvmarginR ] -entry 0 -dark $darkTheme" );
+	cmd( "ttk::canvas $activeplot.c.yscale -width $sclhsizeR -height [ expr { $vsizeR + $sclvmarginR + $botvmarginR } ] -entry 0 -dark $darkTheme" );
 
-	cmd( "$activeplot.c.yscale create text $sclhsizeR [ expr max( $sclvmarginR, 10 ) ] -anchor e -justify right -text \"\" -fill $colorsTheme(dfg) -tag ymax" );
-	cmd( "$activeplot.c.yscale create text $sclhsizeR [ expr $sclvmarginR + $vsizeR / 2 ] -anchor e -justify right -text \"\" -fill $colorsTheme(dfg) -tag medy" );
-	cmd( "$activeplot.c.yscale create text $sclhsizeR [ expr $sclvmarginR + $vsizeR ] -anchor e -justify right -text \"\" -fill $colorsTheme(dfg) -tag ymin" );
+	cmd( "$activeplot.c.yscale create text $sclhsizeR [ expr { max( $sclvmarginR, 10 ) } ] -anchor e -justify right -text \"\" -fill $colorsTheme(dfg) -tag ymax" );
+	cmd( "$activeplot.c.yscale create text $sclhsizeR [ expr { $sclvmarginR + $vsizeR / 2 } ] -anchor e -justify right -text \"\" -fill $colorsTheme(dfg) -tag medy" );
+	cmd( "$activeplot.c.yscale create text $sclhsizeR [ expr { $sclvmarginR + $vsizeR } ] -anchor e -justify right -text \"\" -fill $colorsTheme(dfg) -tag ymin" );
 	
 	cmd( "pack $activeplot.c.yscale -side left -anchor nw" );
 	
@@ -256,7 +256,7 @@ void init_plot( int num, int id_sim )
 	cmd( "ttk::frame $activeplot.c.c  " );
 	cmd( "set p $activeplot.c.c.cn" );
 	cmd( "ttk::scrollbar $activeplot.c.c.hscroll -orient horiz -command \"$p xview\"" );
-	cmd( "ttk::canvas $p -width [ expr $hsizeR + 2 * $cvhmarginR ] -height [ expr $vsizeR + $sclvmarginR + $botvmarginR ] -scrollregion \"0 0 %d [ expr $vsizeR + $sclvmarginR + $botvmarginR ]\" -xscrollcommand \"$activeplot.c.c.hscroll set\" -xscrollincrement 1 -yscrollincrement 1 -dark $darkTheme", max_step );
+	cmd( "ttk::canvas $p -width [ expr { $hsizeR + 2 * $cvhmarginR } ] -height [ expr { $vsizeR + $sclvmarginR + $botvmarginR } ] -scrollregion \"0 0 %d [ expr { $vsizeR + $sclvmarginR + $botvmarginR } ]\" -xscrollcommand \"$activeplot.c.c.hscroll set\" -xscrollincrement 1 -yscrollincrement 1 -dark $darkTheme", max_step );
 	cmd( "pack $activeplot.c.c.hscroll -side bottom -expand yes -fill x" );
 	cmd( "mouse_wheel $p" );
 	
@@ -267,27 +267,27 @@ void init_plot( int num, int id_sim )
 			} else { \
 				set color $colorsTheme(dfg) \
 			}; \
-			$p create line [ expr $cvhmarginR - $ticmarginR ] [ expr $sclvmarginR + $vsizeR * $i / $vticksR ] [ expr $cvhmarginR ] [ expr $sclvmarginR + $vsizeR * $i / $vticksR ] -fill $colorsTheme(dfg); \
-			$p create line [ expr $cvhmarginR ] [ expr $sclvmarginR + $vsizeR * $i / $vticksR ] [ expr $cvhmarginR + %d * $plot_step ] [ expr $sclvmarginR + $vsizeR * $i / $vticksR ] -fill $color \
+			$p create line [ expr { $cvhmarginR - $ticmarginR } ] [ expr { $sclvmarginR + $vsizeR * $i / $vticksR } ] [ expr { $cvhmarginR } ] [ expr { $sclvmarginR + $vsizeR * $i / $vticksR } ] -fill $colorsTheme(dfg); \
+			$p create line [ expr { $cvhmarginR } ] [ expr { $sclvmarginR + $vsizeR * $i / $vticksR } ] [ expr { $cvhmarginR + %d * $plot_step } ] [ expr { $sclvmarginR + $vsizeR * $i / $vticksR } ] -fill $color \
 		}", max_step );
 
 	// vertical grid lines
-	cmd( "set k [ expr $vsizeR + $sclvmarginR ]" );
-	cmd( "for { set i 0; set j $cvhmarginR; set u -1 } { $j <= [ expr $cvhmarginR + %d * $plot_step ] } { incr i; set j [ expr $j + $hsizeR / $hticksR ] } { \
+	cmd( "set k [ expr { $vsizeR + $sclvmarginR } ]" );
+	cmd( "for { set i 0; set j $cvhmarginR; set u -1 } { $j <= [ expr { $cvhmarginR + %d * $plot_step } ] } { incr i; set j [ expr { $j + $hsizeR / $hticksR } ] } { \
 			if { $plot_step > 1 } { \
-				set l [ expr %d * $i / $hticksR ] \
+				set l [ expr { %d * $i / $hticksR } ] \
 			} else { \
-				set l [ expr $j - $cvhmarginR ] \
+				set l [ expr { $j - $cvhmarginR } ] \
 			}; \
-			if { $j > $cvhmarginR && $j < [ expr $cvhmarginR + %d * $plot_step ] } { \
+			if { $j > $cvhmarginR && $j < [ expr { $cvhmarginR + %d * $plot_step } ] } { \
 				set color $colorsTheme(bg) \
 			} else { \
 				set color $colorsTheme(dfg) \
 			}; \
 			$p create line $j $sclvmarginR $j $k -fill $color; \
-			$p create line $j $k $j [ expr $k + $ticmarginR ] -fill  $colorsTheme(dfg); \
+			$p create line $j $k $j [ expr { $k + $ticmarginR } ] -fill  $colorsTheme(dfg); \
 			if { $l > $u } { \
-				$p create text $j [ expr $k + $ticmarginR ] -text $l -anchor n -fill $colorsTheme(dfg); \
+				$p create text $j [ expr { $k + $ticmarginR } ] -text $l -anchor n -fill $colorsTheme(dfg); \
 				set u $l \
 			} \
 	}	", max_step, max_step, max_step );
@@ -298,7 +298,7 @@ void init_plot( int num, int id_sim )
 	cmd( "$p xview moveto 0" );
 	
 	// bottom part
-	cmd( "ttk::canvas $activeplot.fond -width [ expr $sclhsizeR + $hsizeR + 2 * $cvhmarginR ] -height $botvsizeR -entry 0 -dark $darkTheme" );
+	cmd( "ttk::canvas $activeplot.fond -width [ expr { $sclhsizeR + $hsizeR + 2 * $cvhmarginR } ] -height $botvsizeR -entry 0 -dark $darkTheme" );
 
 	// controls
 	cmd( "set scrollB %d", scrollB );
@@ -315,13 +315,13 @@ void init_plot( int num, int id_sim )
 		}" );
 	cmd( "ttk::button $activeplot.fond.go -width $goWid -text $centerB -command { set_c_var done_in 7 }" );
 
-	cmd( "$activeplot.fond create window [ expr $sclhsizeR / 2 ] [ expr $botvsizeR / 4 - 5 ] -window $activeplot.fond.shift" );
-	cmd( "$activeplot.fond create window [ expr $sclhsizeR / 2 ] [ expr 3 * $botvsizeR / 4 - 2 ] -window $activeplot.fond.go" );
+	cmd( "$activeplot.fond create window [ expr { $sclhsizeR / 2 } ] [ expr { $botvsizeR / 4 - 5 } ] -window $activeplot.fond.shift" );
+	cmd( "$activeplot.fond create window [ expr { $sclhsizeR / 2 } ] [ expr { 3 * $botvsizeR / 4 - 2 } ] -window $activeplot.fond.go" );
 	
 	// labels
-	cmd( "for { set i 0; set j 0; set k 0 } { $i < [ expr min( %d, $linlabR * $lablinR ) ] } { incr i } { \
-			$activeplot.fond create text [ expr $sclhsizeR + $sclvmarginR + $j * $hsizeR / $lablinR ] [ expr $k * $linvsizeR ] -anchor nw -text [ lindex $tp $i ] -fill [ set c$i ]; \
-			if { $j < [ expr $lablinR - 1 ] } { \
+	cmd( "for { set i 0; set j 0; set k 0 } { $i < [ expr { min( %d, $linlabR * $lablinR ) } ] } { incr i } { \
+			$activeplot.fond create text [ expr { $sclhsizeR + $sclvmarginR + $j * $hsizeR / $lablinR } ] [ expr { $k * $linvsizeR } ] -anchor nw -text [ lindex $tp $i ] -fill [ set c$i ]; \
+			if { $j < [ expr { $lablinR - 1 } ] } { \
 				incr j \
 			} else { \
 				incr k; \
@@ -426,10 +426,10 @@ void plot_rt( variable *v )
 		return;
 	}
 
-	cmd( "set x1 [ expr floor( $cvhmarginR + %d * $plot_step ) ]", t );
-	cmd( "set x2 [ expr floor( $cvhmarginR + ( %d - 1 ) * $plot_step ) ]", t );
-	cmd( "set y1 [ expr floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) ]", v->val[ 0 ], ymin, ymax, ymin );
-	cmd( "set y2 [ expr floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) ]", old_val[ cur_plt ], ymin, ymax, ymin );
+	cmd( "set x1 [ expr { floor( $cvhmarginR + %d * $plot_step ) } ]", t );
+	cmd( "set x2 [ expr { floor( $cvhmarginR + ( %d - 1 ) * $plot_step ) } ]", t );
+	cmd( "set y1 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", v->val[ 0 ], ymin, ymax, ymin );
+	cmd( "set y2 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", old_val[ cur_plt ], ymin, ymax, ymin );
 
 	cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", cur_plt );
 	cmd( "update idletasks" );
@@ -489,8 +489,8 @@ CENTER_PLOT
 **************************************/
 void center_plot( void )
 {
-	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && %d > [ expr $hsizeR / 2 ] } { \
-			set newpos [ expr %lf - [ expr  [ expr $hsizeR / 2 ] / %lf ] ]; \
+	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && %d > [ expr { $hsizeR / 2 } ] } { \
+			set newpos [ expr { %lf - $hsizeR / 2 / %lf } ]; \
 			$activeplot.c.c.cn xview moveto $newpos; \
 			update idletasks \
 		}", t, t / ( double ) max_step, ( double ) max_step );
@@ -503,5 +503,5 @@ SCROLL_PLOT
 void scroll_plot( void )
 {
 	if ( scrollB )
-		cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && %d > [ expr $hsizeR * 0.8 ] } { $activeplot.c.c.cn xview scroll 1 units }", t );
+		cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && %d > [ expr { $hsizeR * 0.8 } ] } { $activeplot.c.c.cn xview scroll 1 units }", t );
 }

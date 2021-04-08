@@ -83,7 +83,7 @@ void show_graph( object *t )
 	
 	cmd( "set hrsizeM [ winfo width .str ]" );
 	cmd( "set vrsizeM [ winfo height .str ]" );
-	cmd( ".str.f.c xview scroll [ expr - int ( $hrsizeM / 2 ) ] units" );
+	cmd( ".str.f.c xview scroll [ expr { - int ( $hrsizeM / 2 ) } ] units" );
 	
 	draw_buttons( );
 	
@@ -133,32 +133,32 @@ void draw_buttons( void )
 	cmd( "set cy2 [ .str.f.c canvasy [ winfo height .str ] ]" );
 	
 	cmd( "if { $n == 4 } { \
-			set hratioM [ expr ( $cx2 - $cx1 ) / ( $x2 - $x1 + 2 * $borderM ) ]; \
-			set vratioM [ expr ( $cy2 - $cy1 ) / ( $y2 - $y1 + 2 * $borderM ) ] \
+			set hratioM [ expr { ( $cx2 - $cx1 ) / ( $x2 - $x1 + 2 * $borderM ) } ]; \
+			set vratioM [ expr { ( $cy2 - $cy1 ) / ( $y2 - $y1 + 2 * $borderM ) } ] \
 		} { \
 			set hratioM 1; \
 			set vratioM 1 \
 		}" );
 	
 	cmd( "ttk::button .str.f.c.hplus -text \"\u25B6\" -width 2 -style bold.Toolbutton -command { \
-			set hfactM [ round_N [ expr $hfactM + $rstepM ] 2 ]; \
+			set hfactM [ round_N [ expr { $hfactM + $rstepM } ] 2 ]; \
 			set choice_g 70 \
 		}" );
 	cmd( "ttk::button .str.f.c.hminus -text \"\u25C0\" -width 2 -style bold.Toolbutton -command { \
-			set hfactM [ round_N [ expr max( [ expr $hfactM - $rstepM ], $hfactMmin ) ] 2 ]; \
+			set hfactM [ round_N [ expr { max( $hfactM - $rstepM, $hfactMmin ) } ] 2 ]; \
 			set choice_g 70 \
 		}" );
 	cmd( "ttk::button .str.f.c.vplus -text \"\u25BC\" -width 2 -style Toolbutton -command { \
-			set vfactM [ round_N [ expr $vfactM + $rstepM ] 2 ]; \
+			set vfactM [ round_N [ expr { $vfactM + $rstepM } ] 2 ]; \
 			set choice_g 70 \
 		}" );
 	cmd( "ttk::button .str.f.c.vminus -text \"\u25B2\" -width 2 -style Toolbutton -command { \
-			set vfactM [ round_N [ expr max( [ expr $vfactM - $rstepM ], $vfactMmin ) ] 2 ]; \
+			set vfactM [ round_N [ expr { max( $vfactM - $rstepM, $vfactMmin ) } ] 2 ]; \
 			set choice_g 70 \
 		}" );
 	cmd( "ttk::button .str.f.c.auto -text \"A\" -width 2 -style bold.Toolbutton -command { \
-			set hfactM [ round_N [ expr $hfactM * $hratioM ] 2 ]; \
-			set vfactM [ round_N [ expr $vfactM * $vratioM ] 2 ]; \
+			set hfactM [ round_N [ expr { $hfactM * $hratioM } ] 2 ]; \
+			set vfactM [ round_N [ expr { $vfactM * $vratioM } ] 2 ]; \
 			set choice_g 70 \
 		}" );
 		
@@ -169,14 +169,14 @@ void draw_buttons( void )
 	cmd( "bind .str <Control-a> { invoke .str.f.c.auto }; bind .str <Control-A> { invoke .str.f.c.auto }" );
 	cmd( "bind .str <Alt-a> { invoke .str.f.c.auto }; bind .str <Alt-A> { invoke .str.f.c.auto }" );
 		
-	cmd( "set colM [ expr $cx2 - $borderM - $borderMadj ]" );
-	cmd( "set rowM [ expr $cy2 - $borderM ]" );
+	cmd( "set colM [ expr { $cx2 - $borderM - $borderMadj } ]" );
+	cmd( "set rowM [ expr { $cy2 - $borderM } ]" );
 	
 	cmd( ".str.f.c create window $colM $rowM -window .str.f.c.auto" );
-	cmd( ".str.f.c create window [ expr $colM - $bhstepM ] $rowM -window .str.f.c.hplus" );
-	cmd( ".str.f.c create window [ expr $colM - 2 * $bhstepM ] $rowM -window .str.f.c.hminus" );
-	cmd( ".str.f.c create window $colM [ expr $rowM - $bvstepM ] -window .str.f.c.vplus" );
-	cmd( ".str.f.c create window $colM [ expr $rowM - 2 * $bvstepM ] -window .str.f.c.vminus" );
+	cmd( ".str.f.c create window [ expr { $colM - $bhstepM } ] $rowM -window .str.f.c.hplus" );
+	cmd( ".str.f.c create window [ expr { $colM - 2 * $bhstepM } ] $rowM -window .str.f.c.hminus" );
+	cmd( ".str.f.c create window $colM [ expr { $rowM - $bvstepM } ] -window .str.f.c.vplus" );
+	cmd( ".str.f.c create window $colM [ expr { $rowM - 2 * $bvstepM } ] -window .str.f.c.vminus" );
 }
 
 
@@ -417,7 +417,7 @@ PUT_NODE
 ****************************************************/
 void put_node( int x, int y, char *str, bool sel )
 {
-	cmd( ".str.f.c create oval [ expr %d - $nsizeM / 2 ] [ expr %d + $vmarginM - $nsizeM / 2 ] [ expr %d + $nsizeM / 2 ] [ expr %d + $vmarginM + $nsizeM / 2 ] -fill $colorsTheme(%s) -outline $colorsTheme(dfg) -tags %s", x, y, x, y, sel ? "hc" : "isbg", str );
+	cmd( ".str.f.c create oval [ expr { %d - $nsizeM / 2 } ] [ expr { %d + $vmarginM - $nsizeM / 2 } ] [ expr { %d + $nsizeM / 2 } ] [ expr { %d + $vmarginM + $nsizeM / 2 } ] -fill $colorsTheme(%s) -outline $colorsTheme(dfg) -tags %s", x, y, x, y, sel ? "hc" : "isbg", str );
 }
 
 
@@ -426,7 +426,7 @@ PUT_LINE
 ****************************************************/
 void put_line( int x1, int y1, int x2 )
 {
-    cmd( ".str.f.c create line %d [ expr round ( %d - $vstepM * $vfactM + $vmarginM + $nsizeM / 2 ) ] %d [ expr round ( %d + $nsizeM / 2 ) ] -fill $colorsTheme(dfg)", x1, y1, x2, y1 );
+    cmd( ".str.f.c create line %d [ expr { round ( %d - $vstepM * $vfactM + $vmarginM + $nsizeM / 2 ) } ] %d [ expr { round ( %d + $nsizeM / 2 ) } ] -fill $colorsTheme(dfg)", x1, y1, x2, y1 );
 }
 
 
@@ -439,9 +439,9 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 
 	// text for node numerosity (handle single "1" differently to displace from line)
 	if ( ! strcmp( n, "1" ) )
-		cmd( ".str.f.c create text [ expr %d - 2 ] [ expr %d + 2 * $vmarginM + 1 ] -text \"%s\" -fill $colorsTheme(fg) -tags %s", x, y, n, str2 );
+		cmd( ".str.f.c create text [ expr { %d - 2 } ] [ expr { %d + 2 * $vmarginM + 1 } ] -text \"%s\" -fill $colorsTheme(fg) -tags %s", x, y, n, str2 );
 	else
-		cmd( ".str.f.c create text %d [ expr %d + 2 * $vmarginM + 1 ] -text \"%s\" -fill $colorsTheme(fg) -tags %s", x, y, n, str2 );
+		cmd( ".str.f.c create text %d [ expr { %d + 2 * $vmarginM + 1 } ] -text \"%s\" -fill $colorsTheme(fg) -tags %s", x, y, n, str2 );
 
 	cmd( ".str.f.c bind %s <Enter> { \
 			set res_g %s; \

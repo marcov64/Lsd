@@ -74,11 +74,11 @@ proc gccVersion { } {
 	close $f
 	
 	set p [ string first "CC=" [ string toupper $a ] ]
-	if { $p < 0 || [ string index $a [ expr $p - 1 ] ] == "_" } {
+	if { $p < 0 || [ string index $a [ expr { $p - 1 } ] ] == "_" } {
 		return "(invalid system options)"
 	}
 	
-	set p [ expr $p + [ string length "CC=" ] ]
+	set p [ expr { $p + [ string length "CC=" ] } ]
 	set e [ string first "\n" $a $p ]
 	if { $e < 0 } {
 		set e end
@@ -242,12 +242,12 @@ proc prgboxupdate { w last1 { last2 "" } } {
 	
 	if { $last1 != "" && [ string is integer -strict $last1 ] } {
 		$w.main.p1.scale configure -value $last1
-		$w.main.p1.info.val configure -text "[ expr min( $last1 + 1, $max1 ) ] of $max1 ([ expr int( 100 * $last1 / $max1 ) ]% done)"
+		$w.main.p1.info.val configure -text "[ expr { min( $last1 + 1, $max1 ) } ] of $max1 ([ expr { int( 100 * $last1 / $max1 ) } ]% done)"
 	}
 	
 	if { $last2 != "" && [ string is integer -strict $last2 ] } {
 		$w.main.p2.scale configure -value $last2
-		$w.main.p2.info.val configure -text "[ expr min( $last2 + 1, $max2 ) ] of $max2 ([ expr int( 100 * $last2 / $max2 ) ]% done)"
+		$w.main.p2.info.val configure -text "[ expr { min( $last2 + 1, $max2 ) } ] of $max2 ([ expr { int( 100 * $last2 / $max2 ) } ]% done)"
 	}
 	
 	update idletasks
@@ -625,7 +625,7 @@ proc comp_rank { a b } {
 	scan $a "%*s %*s %*s #%d" ar
 	scan $b "%*s %*s %*s #%d" br
 if { ! [ info exists ar ] } { tk_messageBox -message "$a\n$b" }
-	return [ expr $ar - $br ]
+	return [ expr { $ar - $br } ]
 }
 
 
@@ -648,14 +648,14 @@ proc comp_nice { a b } {
 	}
 	
 	if { $ae != $be } {
-		return [ expr $be - $ae ]
+		return [ expr { $be - $ae } ]
 	}
 	
 	if { $ab != $bb } {
-		return [ expr $ab - $bb ]
+		return [ expr { $ab - $bb } ]
 	}
 	
-	return [ expr $ar - $br ]
+	return [ expr { $ar - $br } ]
 }
 
 
@@ -695,7 +695,7 @@ proc comp_und_dec { a b } {
 	
 	if { [ string index $a 0 ] ne "_" } {
 		if { [ string index $b 0 ] ne "_" } {
-			return [ expr - [ str_comp_dict $a $b ] ]
+			return [ expr { - [ str_comp_dict $a $b ] } ]
 		} else {
 			return -1
 		}
@@ -715,7 +715,7 @@ proc comp_und_dec { a b } {
 # in increasing order
 #************************************************
 proc str_comp_dict { a b } {
-    dict get {1 0  {0 1} -1  {1 0} 1} [ lsort -indices -dictionary -unique [ list $a $b ] ]
+	dict get {1 0  {0 1} -1  {1 0} 1} [ lsort -indices -dictionary -unique [ list $a $b ] ]
 }
 
 
@@ -724,7 +724,7 @@ proc str_comp_dict { a b } {
 # Round float to N decimal positions
 #************************************************
 proc round_N { float N } {
-	return [ expr round( $float * pow( 10, $N ) ) / pow( 10, $N ) ]
+	return [ expr { round( $float * pow( 10, $N ) ) / pow( 10, $N ) } ]
 }
 
 
@@ -741,7 +741,7 @@ proc formatfloat { float { N 6 } } {
 	if { abs( $fmtFlt - $float ) < $prec } { 
 		return $fmtFlt
 	} elseif { abs( $float - int( $float ) ) < $prec } {
-		return [ expr int( $float ) ]
+		return [ expr { int( $float ) } ]
 	} else {
 		return $float
 	}
@@ -771,11 +771,11 @@ proc invert_color { color } {
 		return $colorsTheme(fg)
 	}
 	
-    set rgbInvert [ list [ expr 65535 - [ lindex $rgbColor 0 ] ] \
-						 [ expr 65535 - [ lindex $rgbColor 1 ] ] \
-						 [ expr 65535 - [ lindex $rgbColor 2 ] ] ]
+	set rgbInvert [ list [ expr { 65535 - [ lindex $rgbColor 0 ] } ] \
+						 [ expr { 65535 - [ lindex $rgbColor 1 ] } ] \
+						 [ expr { 65535 - [ lindex $rgbColor 2 ] } ] ]
 						 
-    return [ format "#%04x%04x%04x" {*}$rgbInvert ]
+	return [ format "#%04x%04x%04x" {*}$rgbInvert ]
 }
 
 
@@ -897,7 +897,7 @@ proc upd_color { { force 0 } } {
 #************************************************
 proc upd_cursor { } {
 	.f.hea.cur.line.ln2 configure -text [ lindex [ split [ .f.t.t index insert ] . ] 0 ]
-	.f.hea.cur.col.col2 configure -text [ expr 1 + [ lindex [ split [ .f.t.t index insert ] . ] 1 ] ]
+	.f.hea.cur.col.col2 configure -text [ expr { 1 + [ lindex [ split [ .f.t.t index insert ] . ] 1 ] } ]
 }
 
 

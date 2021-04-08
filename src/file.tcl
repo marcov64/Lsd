@@ -228,7 +228,7 @@ proc findfiles { directory pattern { tails "" } } {
 			set that [ list ]
 			
 			foreach fil $this {
-				if [ string equal $directory "[ string range $fil 0 [ expr $basLgt - 1 ] ]" ] {
+				if [ string equal $directory "[ string range $fil 0 [ expr { $basLgt - 1 } ] ]" ] {
 					lappend that "[ string range $fil $basLgt end ]"
 				} else {
 					error "Internal error in 'findfiles'"
@@ -324,7 +324,7 @@ proc choose_models { curdir curfile } {
 		}
 		set key %K
 		if { [ string length $key ] == 1 && [ string is alpha -strict $key ] } {
-			set start [ expr [ .l.t.l.l.l curselection ] + 1 ]
+			set start [ expr { [ .l.t.l.l.l curselection ] + 1 } ]
 			set first [ lsearch -start $start -nocase $lmod "${key}*" ]
 			if { $first == -1 } {
 				set first [ lsearch -start 0 -nocase $lmod "${key}*" ]
@@ -445,7 +445,7 @@ proc list_models { } {
 			set mod "$mod (v. $ver)"
 		}
 		if { [ lsearch $lmod $mod ] >= 0 } {
-			set mod "$mod                                                                                                           #[ expr int( rand( ) * 1000 ) ]"
+			set mod "$mod                                                                                                           #[ expr { int( rand( ) * 1000 ) } ]"
 		}
 		lappend lmod "$mod"
 		lappend lgroup $cgroup
@@ -744,17 +744,17 @@ proc get_source_files { path } {
 	set options [ read -nonewline $f ]
 	close $f
 
-	set ini [ expr [ string first "FUN=" "$options" ] + 4 ]
-	set end [ expr $ini + [ string first "\n" [ string range "$options" $ini end ] ] - 1 ]
+	set ini [ expr { [ string first "FUN=" "$options" ] + 4 } ]
+	set end [ expr { $ini + [ string first "\n" [ string range "$options" $ini end ] ] - 1 } ]
 	set files [ list "[ string trim [ lindex [ split [ string range "$options" $ini $end ] ] 0 ] ].cpp" ]
 
 	if { [ llength $files ] != 1 } {
 		return [ list ]
 	}
 
-	set ini [ expr [ string first "FUN_EXTRA=" "$options" ] + 10 ]
+	set ini [ expr { [ string first "FUN_EXTRA=" "$options" ] + 10 } ]
 	if { $ini != -1 } {
-		set end [ expr $ini + [ string first "\n" [ string range "$options" $ini end ] ] - 1 ]
+		set end [ expr { $ini + [ string first "\n" [ string range "$options" $ini end ] ] - 1 } ]
 		set extra [ string trim [ string range "$options" $ini $end ] ]
 		regsub -all { +} $extra { } extra
 		set extra [ split $extra " \t" ]

@@ -260,7 +260,7 @@ int browse( object *r, int *choice )
 		cmd( ".l.v.c.var_name.v add checkbutton -label \"Parallel (&)\" -state disabled -variable parallel -command { set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; set choice 95 }" );	// entryconfig 7
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 8
 		cmd( ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 9
-		cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 10
+		cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr { [ .l.v.c.var_name size ] - 1 } ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 10
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 11
 		cmd( ".l.v.c.var_name.v add command -label Move -command { set choice 79 }" );	// entryconfig 12
 		cmd( ".l.v.c.var_name.v add command -label Delete -command { set choice 76 }" );	// entryconfig 13
@@ -335,7 +335,7 @@ int browse( object *r, int *choice )
 						if { $itemfocus == 0 } { \
 							.l.v.c.var_name.v entryconfig 9 -state disabled \
 						}; \
-						if { $itemfocus == [ expr [ .l.v.c.var_name size ] - 1 ] } { \
+						if { $itemfocus == [ expr { [ .l.v.c.var_name size ] - 1 } ] } { \
 							.l.v.c.var_name.v entryconfig 10 -state disabled \
 						}; \
 						tk_popup .l.v.c.var_name.v %%X %%Y \
@@ -359,7 +359,7 @@ int browse( object *r, int *choice )
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ]; \
-					if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { \
+					if { $itemfocus < [ expr { [ .l.v.c.var_name size ] - 1 } ] } { \
 						incr itemfocus \
 					}; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
@@ -414,7 +414,7 @@ int browse( object *r, int *choice )
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
-						set save [ expr ! [ get_var_conf $vname save ] ]; \
+						set save [ expr { ! [ get_var_conf $vname save ] } ]; \
 						set ctxMenuCmd \"set_var_conf $vname save $save\"; \
 						set choice 95 \
 					} \
@@ -426,7 +426,7 @@ int browse( object *r, int *choice )
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
-						set plot [ expr ! [ get_var_conf $vname plot ] ]; \
+						set plot [ expr { ! [ get_var_conf $vname plot ] } ]; \
 						set ctxMenuCmd \"set_var_conf $vname plot $plot\"; \
 						set choice 95 \
 					} \
@@ -439,7 +439,7 @@ int browse( object *r, int *choice )
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color $colorsTheme(par) ] } { \
-						set num [ expr ! [ get_var_conf $vname debug ] ]; \
+						set num [ expr { ! [ get_var_conf $vname debug ] } ]; \
 						set ctxMenuCmd \"set_var_conf $vname debug $num\"; \
 						set choice 95 \
 					} \
@@ -452,7 +452,7 @@ int browse( object *r, int *choice )
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color $colorsTheme(par) ] && ! [ string equal $color $colorsTheme(lfun) ] && ! [ string equal $color $colorsTheme(fun) ] } { \
-						set parallel [ expr ! [ get_var_conf $vname parallel ] ]; \
+						set parallel [ expr { ! [ get_var_conf $vname parallel ] } ]; \
 						set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; \
 						set choice 95 \
 					} \
@@ -470,7 +470,7 @@ int browse( object *r, int *choice )
 							set kk _ \
 						}; \
 						set ll %%W; \
-						set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
+						set ff [ lsearch -start [ expr { [ $ll curselection ] + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 						if { $ff == -1 } { \
 							set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
 						}; \
@@ -550,7 +550,7 @@ int browse( object *r, int *choice )
 			}
 		}	
 
-		cmd( "ttk::label .l.s.lab -text \"Descending objects ([ expr $app - $upObjItem ])\"" );
+		cmd( "ttk::label .l.s.lab -text \"Descending objects ([ expr { $app - $upObjItem } ])\"" );
 
 		// objects panel context menu (right mouse button)
 		cmd( "ttk::menu .l.s.c.son_name.v -tearoff 0" );
@@ -558,7 +558,7 @@ int browse( object *r, int *choice )
 		cmd( ".l.s.c.son_name.v add command -label \"Parent\" -command { set choice 5 }" );	// entryconfig 1
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 2
 		cmd( ".l.s.c.son_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 60 } }" );	// entryconfig 3
-		cmd( ".l.s.c.son_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus < [ expr [ .l.s.c.son_name size ] - 1 ] } { incr itemfocus }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 61 } }" );	// entryconfig 4
+		cmd( ".l.s.c.son_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus < [ expr { [ .l.s.c.son_name size ] - 1 } ] } { incr itemfocus }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 61 } }" );	// entryconfig 4
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 5
 		cmd( ".l.s.c.son_name.v add command -label Change -command { set choice 6 }" );	// entryconfig 6
 		cmd( ".l.s.c.son_name.v add command -label Rename -command { set choice 83 }" );	// entryconfig 7
@@ -568,7 +568,7 @@ int browse( object *r, int *choice )
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 11
 		cmd( ".l.s.c.son_name.v add cascade -label Add -menu .l.s.c.son_name.v.a" );	// entryconfig 12=14
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 13
-		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -command { set ctxMenuCmd \"set_obj_conf $vname comp [ expr ! $nocomp ]\"; set choice 95 }" );	// entryconfig 14
+		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -command { set ctxMenuCmd \"set_obj_conf $vname comp [ expr { ! $nocomp } ]\"; set choice 95 }" );	// entryconfig 14
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 15
 		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );	// entryconfig 16
 		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );	// entryconfig 17
@@ -623,13 +623,13 @@ int browse( object *r, int *choice )
 					set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
 					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set useCurrObj no; \
-						set nocomp [ expr ! [ get_obj_conf $vname comp ] ]; \
+						set nocomp [ expr { ! [ get_obj_conf $vname comp ] } ]; \
 						if { $itemfocus == 0 } { \
 							.l.s.c.son_name.v entryconfig 3 -state disabled \
 						} { \
 							.l.s.c.son_name.v entryconfig 3 -state normal \
 						}; \
-						if { $itemfocus == [ expr [ .l.s.c.son_name size ] - 1 ] } { \
+						if { $itemfocus == [ expr { [ .l.s.c.son_name size ] - 1 } ] } { \
 							.l.s.c.son_name.v entryconfig 4 -state disabled \
 						} { \
 							.l.s.c.son_name.v entryconfig 4 -state normal \
@@ -658,7 +658,7 @@ int browse( object *r, int *choice )
 					set itemfocus [ .l.s.c.son_name curselection ]; \
 					set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
 					if { ! ( $upObjItem && $itemfocus == 0 ) } { \
-						if { $itemfocus < [ expr [ .l.s.c.son_name size ] - 1 ] } { \
+						if { $itemfocus < [ expr { [ .l.s.c.son_name size ] - 1 } ] } { \
 							incr itemfocus \
 						}; \
 						if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
@@ -694,7 +694,7 @@ int browse( object *r, int *choice )
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
 					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
-						set nocomp [ expr ! [ get_obj_conf $vname comp ] ]; \
+						set nocomp [ expr { ! [ get_obj_conf $vname comp ] } ]; \
 						set ctxMenuCmd \"set_obj_conf $vname comp $nocomp\"; \
 						set choice 95 \
 					} \
@@ -712,7 +712,7 @@ int browse( object *r, int *choice )
 							set kk _ \
 						}; \
 						set ll %%W; \
-						set ff [ lsearch -start [ expr [ $ll curselection ] + 1 ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
+						set ff [ lsearch -start [ expr { [ $ll curselection ] + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 						if { $ff == -1 } { \
 							set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
 						}; \
@@ -956,7 +956,7 @@ int browse( object *r, int *choice )
 			cmd( "ttk::button .bbar.open -image openImg -style Toolbutton -command { set choice 17 }" );
 			cmd( "ttk::button .bbar.reload -image reloadImg -style Toolbutton -command { set choice 38 }" );
 			cmd( "ttk::button .bbar.save -image saveImg -style Toolbutton -command { set choice 18 }" );
-			cmd( "ttk::button .bbar.struct -image structImg -style Toolbutton -command { set strWindowOn [ expr ! $strWindowOn ]; set choice 70 } -state $strWindowB" );
+			cmd( "ttk::button .bbar.struct -image structImg -style Toolbutton -command { set strWindowOn [ expr { ! $strWindowOn } ]; set choice 70 } -state $strWindowB" );
 			cmd( "ttk::button .bbar.find -image findImg -style Toolbutton -command { set choice 50 }" );
 			cmd( "ttk::button .bbar.addvar -image addvarImg -style Toolbutton -command { set param 0; set choice 2 }" );
 			cmd( "ttk::button .bbar.addpar -image addparImg -style Toolbutton -command { set param 1; set choice 2 }" );
@@ -1037,7 +1037,7 @@ int browse( object *r, int *choice )
 				set itemfocus 0 \
 			} { \
 				if { $itemfocus >= [ .l.v.c.var_name size ] } { \
-					set itemfocus [ expr [ .l.v.c.var_name size ] - 1 ] \
+					set itemfocus [ expr { [ .l.v.c.var_name size ] - 1 } ] \
 				} \
 			}; \
 			if { [ lindex [ .l.s.c.son_name yview ] 0 ] != $itemfirst } { \
@@ -1045,7 +1045,7 @@ int browse( object *r, int *choice )
 			}; \
 			if { [ .l.v.c.var_name curselection ] != $itemfocus } { \
 				.l.v.c.var_name selection set $itemfocus; \
-				if { $itemfocus < [ expr [ lindex [ .l.v.c.var_name yview ] 0 ] * [ .l.v.c.var_name size ] ] || $itemfocus >= [ expr [ lindex [ .l.v.c.var_name yview ] 1 ] * [ .l.v.c.var_name size ] ] } { \
+				if { $itemfocus < [ expr { [ lindex [ .l.v.c.var_name yview ] 0 ] * [ .l.v.c.var_name size ] } ] || $itemfocus >= [ expr { [ lindex [ .l.v.c.var_name yview ] 1 ] * [ .l.v.c.var_name size ] } ] } { \
 					.l.v.c.var_name see $itemfocus \
 				}; \
 				set itemfirst [ lindex [ .l.v.c.var_name yview ] 0 ] \
@@ -1060,7 +1060,7 @@ int browse( object *r, int *choice )
 				set itemfocus 0 \
 			} { \
 				if { $itemfocus >= [ .l.s.c.son_name size ] } { \
-					set itemfocus [ expr [ .l.s.c.son_name size ] - 1 ] \
+					set itemfocus [ expr { [ .l.s.c.son_name size ] - 1 } ] \
 				} \
 			}; \
 			if { [ lindex [ .l.s.c.son_name yview ] 0 ] != $itemfirst } { \
@@ -1068,7 +1068,7 @@ int browse( object *r, int *choice )
 			}; \
 			if { [ .l.s.c.son_name curselection ] != $itemfocus } { \
 				.l.s.c.son_name selection set $itemfocus; \
-				if { $itemfocus < [ expr [ lindex [ .l.s.c.son_name yview ] 0 ] * [ .l.s.c.son_name size ] ] || $itemfocus >= [ expr [ lindex [ .l.s.c.son_name yview ] 1 ] * [ .l.s.c.son_name size ] ] } { \
+				if { $itemfocus < [ expr { [ lindex [ .l.s.c.son_name yview ] 0 ] * [ .l.s.c.son_name size ] } ] || $itemfocus >= [ expr { [ lindex [ .l.s.c.son_name yview ] 1 ] * [ .l.s.c.son_name size ] } ] } { \
 					.l.s.c.son_name see $itemfocus \
 				}; \
 				set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ] \
@@ -2205,10 +2205,10 @@ case 7:
 	cmd( "pack $Td.f.int $Td.f.desc" );
 	
 	cmd( "ttk::frame $Td.b" );
-	cmd( "ttk::button $Td.b.eq -width [ expr $butWid + 2 ] -text \"View Code\" -command { set done 3 } -underline 3" );
-	cmd( "ttk::button $Td.b.auto_doc -width [ expr $butWid + 2 ] -text \"Auto Descr.\" -command { set done 9 } -underline 0" );
-	cmd( "ttk::button $Td.b.us -width [ expr $butWid + 2 ] -text \"Using Elem.\" -command { set done 4 } -underline 0" );
-	cmd( "ttk::button $Td.b.using -width [ expr $butWid + 2 ] -text \"Elem. Used\" -command { set done  7} -underline 0" );
+	cmd( "ttk::button $Td.b.eq -width [ expr { $butWid + 2 } ] -text \"View Code\" -command { set done 3 } -underline 3" );
+	cmd( "ttk::button $Td.b.auto_doc -width [ expr { $butWid + 2 } ] -text \"Auto Descr.\" -command { set done 9 } -underline 0" );
+	cmd( "ttk::button $Td.b.us -width [ expr { $butWid + 2 } ] -text \"Using Elem.\" -command { set done 4 } -underline 0" );
+	cmd( "ttk::button $Td.b.using -width [ expr { $butWid + 2 } ] -text \"Elem. Used\" -command { set done  7} -underline 0" );
 	
 	if ( ! strcmp( cur_descr->type, "Parameter" ) )
 		cmd( "pack $Td.b.auto_doc $Td.b.us -padx $butSpc -side left" );
@@ -2234,8 +2234,8 @@ case 7:
 		cmd( "pack $Td.i.int $Td.i.desc" );
 	  
 		cmd( "ttk::frame $Td.b2" );
-		cmd( "ttk::button $Td.b2.setall -width [ expr $butWid + 2 ] -text \"Initial Values\" -command { set done 11 } -underline 1" );
-		cmd( "ttk::button $Td.b2.sens -width [ expr $butWid + 2 ] -text \"Sensitivity\" -command { set done 12 } -underline 5" );
+		cmd( "ttk::button $Td.b2.setall -width [ expr { $butWid + 2 } ] -text \"Initial Values\" -command { set done 11 } -underline 1" );
+		cmd( "ttk::button $Td.b2.sens -width [ expr { $butWid + 2 } ] -text \"Sensitivity\" -command { set done 12 } -underline 5" );
 		cmd( "pack $Td.b2.setall $Td.b2.sens -padx $butSpc -side left" );
 		
 		cmd( "pack $Td.opt $Td.f $Td.b $Td.i $Td.b2 -pady 5" );
@@ -3191,7 +3191,7 @@ case 73:
 	{
 		cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
 
-		cmd( "if { [ string length $bah ] > 0 } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ];if { $last > 0 } { set res [ string range $res 0 $last ] } } { set done 2 }" );
+		cmd( "if { [ string length $bah ] > 0 } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .lsd $res ] - 1 } ]; if { $last > 0 } { set res [ string range $res 0 $last ] } } { set done 2 }" );
 		if ( done == 2 )
 			goto save_end;
 
@@ -3640,7 +3640,7 @@ case 56:
 	cmd( "foreach par $unusPar { plog \"Parameter:\t\"; plog \"$par\n\" highlight }" );
 	cmd( "foreach obj $unusObj { plog \"Object   :\t\"; plog \"$obj\n\" highlight }" );
 	
-	cmd( "set res [ expr [ llength $unusVar ] + [ llength $unusFun ] + [ llength $unusPar ] + [ llength $unusObj ] ]" );
+	cmd( "set res [ expr { [ llength $unusVar ] + [ llength $unusFun ] + [ llength $unusPar ] + [ llength $unusObj ] } ]" );
 	if ( get_int( "res" ) == 0 )
 		plog( "(none)\n" );
 
@@ -4882,7 +4882,7 @@ case 81:
 		cmd( "ttk::label .s.i.l1 -text \"Number of trajectories (r)\"" );
 		cmd( "ttk::spinbox .s.i.e1 -width 5 -from 1 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 99 } { set nTraj %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nTraj; return 0 } } -invalidcommand { bell } -justify center" );
 		cmd( ".s.i.e1 insert 0 $nTraj" ); 
-		cmd( "ttk::label .s.i.l2 -text \"([expr $varSA + 1]\u00D7r samples to create)\"" );
+		cmd( "ttk::label .s.i.l2 -text \"([ expr { $varSA + 1 } ]\u00D7r samples to create)\"" );
 		cmd( "pack .s.i.l1 .s.i.e1 .s.i.l2" );	
 		
 		cmd( "ttk::frame .s.p" );
@@ -5006,7 +5006,7 @@ case 64:
 
 	// open dialog box to get file name & folder
 	cmd( " set bah [ tk_getOpenFile -parent . -title \"Load Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile \"$res\" -initialdir \"$path\"  -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
-	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .sa $res ] -1 ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
+	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .sa $res ] - 1 } ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
 	if ( *choice == 2 )
 		break;
 	
@@ -5057,7 +5057,7 @@ case 65:
 	// open dialog box to get file name & folder
 	*choice = 0;
 	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir \"$path\" -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
-	cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ]; set last [ expr [ string last .sa $res ] - 1 ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
+	cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ]; set last [ expr { [ string last .sa $res ] - 1 } ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
 	if ( *choice == 2 )
 		break;
 	lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
@@ -5327,7 +5327,7 @@ case 68:
 		if ( fSeq )								// file sequence?
 		{
 			cmd( "set bah [ tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple no ]" );
-			cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ]; set numpos [ expr [ string last _ $res ] + 1 ]; if { $numpos > 0 } { set choice [ expr [ string range $res $numpos end ] ]; set res [ string range $res 0 [ expr $numpos - 2 ] ] } { plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0 } } { set choice 0 }" );
+			cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .lsd $res ] - 1 } ]; set res [ string range $res 0 $last ]; set numpos [ expr { [ string last _ $res ] + 1 } ]; if { $numpos > 0 } { set choice [ expr { [ string range $res $numpos end ] } ]; set res [ string range $res 0 [ expr { $numpos - 2 } ] ] } { plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0 } } { set choice 0 }" );
 			if ( *choice == 0 )
 				break;
 			ffirst = *choice;
@@ -5350,7 +5350,7 @@ case 68:
 		else									// bunch of files?
 		{
 			cmd( "set bah [ tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple yes ]" );
-			cmd( "set choice [ llength $bah ]; if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . 1 ] } { set res [ lindex $bah 0 ]; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ]; set numpos [ expr [ string last _ $res ] + 1 ]; if { $numpos > 0 } { set res [ string range $res 0 [ expr $numpos - 2 ] ] } }" );
+			cmd( "set choice [ llength $bah ]; if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . 1 ] } { set res [ lindex $bah 0 ]; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .lsd $res ] - 1 } ]; set res [ string range $res 0 $last ]; set numpos [ expr { [ string last _ $res ] + 1 } ]; if { $numpos > 0 } { set res [ string range $res 0 [ expr { $numpos - 2 } ] ] } }" );
 			if ( *choice == 0 )
 				break;
 			ffirst = 1;
@@ -5551,7 +5551,7 @@ case 68:
 			}
 			else
 			{	// get the selected file names, one by one
-				cmd( "set res3 [ lindex $bah %d ]; set res3 [ file tail $res3 ]; set last [ expr [ string last .lsd $res3 ] - 1 ]; set res3 [ string range $res3 0 $last ]", j - 1  );
+				cmd( "set res3 [ lindex $bah %d ]; set res3 [ file tail $res3 ]; set last [ expr { [ string last .lsd $res3 ] - 1 } ]; set res3 [ string range $res3 0 $last ]", j - 1  );
 				strncpy( out_file, ( char * ) Tcl_GetVar( inter, "res3", 0 ), MAX_PATH_LENGTH - 1 );
 				
 				sprintf( lab_old, "%s.log", out_file );
@@ -5750,7 +5750,7 @@ case 69:
 	cmd( "ttk::label $b.f4.l1 -text \"Totals file (last steps)\"" );
 	cmd( "ttk::label $b.f4.l2 -style hl.TLabel -text \"$totFile.$totExt$zipExt\"" );
 	
-	cmd( "set choice [ expr [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] ]", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
+	cmd( "set choice [ expr { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } ]", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
 	cmd( "ttk::label $b.f4.l3 -text \"\n\"", *choice ? "(WARNING: existing files in destination\nfolder will be overwritten)" : "" );
 	cmd( "pack $b.f4.l1 $b.f4.l2 $b.f4.l3" );
 	
@@ -5889,7 +5889,7 @@ case 88:
 
 	cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Network Structure File\"  -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } { {All files} {*} } } ]" );
 	*choice = 0;
-	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr $posExt + 1 ] end ]; set netFile [ string range $netFile 0 [ expr $posExt - 1 ] ] } { set netExt \"\" } } { set choice 2 }" );
+	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr { $posExt + 1 } ] end ]; set netFile [ string range $netFile 0 [ expr { $posExt - 1 } ] ] } { set netExt \"\" } } { set choice 2 }" );
 	if ( *choice == 2 )
 		break;
 
@@ -6061,7 +6061,7 @@ case 89:
 	cmd( "set bah \"%s\"", simul_name );
 	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Network Structure File\"  -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
 	*choice = 0;
-	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr $posExt + 1 ] end ]; set netFile [ string range $netFile 0 [ expr $posExt - 1 ] ] } { set netExt \"\" } } { set choice 2 }" );
+	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr { $posExt + 1 } ] end ]; set netFile [ string range $netFile 0 [ expr { $posExt - 1 } ] ] } { set netExt \"\" } } { set choice 2 }" );
 	if ( *choice == 2 )
 		break;
 
@@ -6623,7 +6623,7 @@ void set_shortcuts( const char *window )
 	cmd( "bind %s <Control-b> { set choice 34 }; bind %s <Control-B> { set choice 34 }", window, window  );
 	cmd( "bind %s <Control-z> { set choice 37 }; bind %s <Control-Z> { set choice 37 }", window, window  );
 	cmd( "bind %s <Control-w> { set choice 38 }; bind %s <Control-W> { set choice 38 }", window, window  );
-	cmd( "bind %s <Control-Tab> { set strWindowOn [ expr ! $strWindowOn ]; set choice 70 }", window  );
+	cmd( "bind %s <Control-Tab> { set strWindowOn [ expr { ! $strWindowOn } ]; set choice 70 }", window  );
 }
 
 
@@ -7079,7 +7079,7 @@ bool open_configuration( object *&r, bool reload )
 	if ( ! reload )
 	{									// ask user the file to use, if not reloading
         cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model file} {.lsd} } } ]" );
-		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ]; set choice 0 } { set choice 2 }" );
+		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .lsd $res ] - 1 } ]; set res [ string range $res 0 $last ]; set choice 0 } { set choice 2 }" );
 
 		if ( get_int( "choice" ) == 0 )
 		{

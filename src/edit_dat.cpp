@@ -95,13 +95,13 @@ void edit_data( object *r, int *choice, char *lab )
 					set canBbox [ $g.can bbox all ]; \
 					if { $iniDone } { \
 						set maxWid [ lindex $iniSz 0 ]; \
-						set maxHgt [ expr [ lindex $iniSz 1 ] - 110 ] \
+						set maxHgt [ expr { [ lindex $iniSz 1 ] - 110 } ] \
 					} { \
-						set maxWid [ expr [ winfo screenwidth .inid ] - [ getx .inid topleftW ] - 2 * $bordsize - $hmargin ]; \
-						set maxHgt [ expr [ winfo screenheight .inid ] - [ gety .inid topleftW ] - 2 * $bordsize - $vmargin - $tbarsize - 110 ] \
+						set maxWid [ expr { [ winfo screenwidth .inid ] - [ getx .inid topleftW ] - 2 * $bordsize - $hmargin } ]; \
+						set maxHgt [ expr { [ winfo screenheight .inid ] - [ gety .inid topleftW ] - 2 * $bordsize - $vmargin - $tbarsize - 110 } ] \
 					}; \
-					set desWid [ expr min( max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ] + [ winfo width $g.ys ], [ lindex $iniSz 0 ] ), $maxWid ) ]; \
-					set desHgt [ expr min( max( [ lindex $canBbox 3 ] - [ lindex $canBbox 1 ] + [ winfo height $g.xs ], 40 ), $maxHgt ) ]; \
+					set desWid [ expr { min( max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ] + [ winfo width $g.ys ], [ lindex $iniSz 0 ] ), $maxWid ) } ]; \
+					set desHgt [ expr { min( max( [ lindex $canBbox 3 ] - [ lindex $canBbox 1 ] + [ winfo height $g.xs ], 40 ), $maxHgt ) } ]; \
 					$g configure -width $desWid -height $desHgt; \
 					$g.can configure -scrollregion $canBbox \
 				}; \
@@ -275,7 +275,7 @@ void set_title( object *c, char *lab, char *tag, int *incr )
 		cmd( "set titheader_%d \"%s\"", *incr , ch2 );
 
 		cmd( "ttk::label $w.c%d_tit -text ${titheader_%d} -style boldSmall.TLabel", *incr ,*incr );
-		cmd( "grid $w.c%d_tit -row 0 -column [ expr 2 + %d ] ", *incr, *incr );
+		cmd( "grid $w.c%d_tit -row 0 -column [ expr { 2 + %d } ] ", *incr, *incr );
 		cmd( "mouse_wheel $w.c%d_tit", *incr );
 		
 		if ( strlen( tag ) == 0 )
@@ -354,7 +354,7 @@ void link_cells( object *r, char *lab )
 				
 				cmd( "ttk::entry $w.c%d_v%sp -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set p%s_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${p%s_%d}; return 0 } } -invalidcommand { bell }", i, cv->label, cv->label, i, cv->label, i, cv->label, i );
 				cmd( "$w.c%d_v%sp insert 0 [ formatfloat ${p%s_%d} ]", i, cv->label, cv->label, i );
-				cmd( "grid $w.c%d_v%sp -row %d -column [ expr 2 + %d ] -padx 1", i, cv->label, k, i );
+				cmd( "grid $w.c%d_v%sp -row %d -column [ expr { 2 + %d } ] -padx 1", i, cv->label, k, i );
 				cmd( "mouse_wheel $w.c%d_v%sp", i, cv->label );
 				
 				cmd( "bind $w.c%d_v%sp <Button-1> { selectcell $g.can $w.c%d_v%sp; break }", i, cv->label, i, cv->label );
@@ -400,7 +400,7 @@ void link_cells( object *r, char *lab )
 					
 					cmd( "ttk::entry $w.c%d_v%s_%d -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set v%s_%d_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${v%s_%d_%d}; return 0 } } -invalidcommand { bell }", i, cv->label, j, cv->label, i, j, cv->label, i, j, cv->label, i, j );
 					cmd( "$w.c%d_v%s_%d insert 0 [ formatfloat ${v%s_%d_%d} ]", i, cv->label, j, cv->label, i, j );
-					cmd( "grid $w.c%d_v%s_%d -row %d -column [ expr 2 + %d ] -padx 1", i, cv->label, j, k, i );
+					cmd( "grid $w.c%d_v%s_%d -row %d -column [ expr { 2 + %d } ] -padx 1", i, cv->label, j, k, i );
 					cmd( "mouse_wheel $w.c%d_v%s_%d", i, cv->label, j );
 
 					cmd( "bind  $w.c%d_v%s_%d <Button-1> { selectcell $g.can $w.c%d_v%s_%d; break }", i, cv->label, j, i, cv->label, j );
