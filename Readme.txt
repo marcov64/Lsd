@@ -201,6 +201,10 @@ After Homebrew installation finishes (details at http://brew.sh), you can instal
 
  brew install multitail gnuplot
 
+INACTIVE TERMINAL WINDOWS:
+
+As LSD accesses external programs, inactive Terminal windows may be left open in the computer desktop. To prevent this default behavior, the user can change the Terminal aplication configuration. In Terminal, open menu "Preferences > Profiles > Shell" and set options "When the shell exists" to "Close if the shell exited cleanly", and "Ask before closing" to "Never".
+
 IN CASE OF PROBLEMS:
 
 LSD is only supported in mac computers as a native macOS (Aqua) application. There is no longer support for X11.

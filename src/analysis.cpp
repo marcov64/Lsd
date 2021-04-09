@@ -884,7 +884,7 @@ while ( true )
 			break;
 
 
-		// create the postscript for a plot
+		// save plot to file
 		case 11:
 			cmd( "set choice $fromPlot" );
 			if ( ! *choice )
@@ -945,10 +945,11 @@ while ( true )
 				break;  
 			}
 
-			cmd( "set cm color" );
-			cmd( "set res 0" );
-			cmd( "set dim 270" );
-			cmd( "set heightpost 1" );
+			cmd( "if { ! [ info exists pltSavFmt ] } { set pltSavFmt svg }" );
+			cmd( "if { ! [ info exists pltSavCmod ] } { set pltSavCmod color }" );
+			cmd( "if { ! [ info exists pltSavRes ] } { set pltSavRes 0 }" );
+			cmd( "if { ! [ info exists pltSavDim ] } { set pltSavDim 270 }" );
+			cmd( "if { ! [ info exists pltSavLeg ] } { set pltSavLeg 1 }" );
 			
 			cmd( "newtop .da.file \"Save Plot\" { set choice 2 } .da" );
 
@@ -959,27 +960,51 @@ while ( true )
 
 			cmd( "ttk::frame .da.file.opt" );
 			
+			cmd( "ttk::frame .da.file.opt.fmt -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+			cmd( "ttk::radiobutton .da.file.opt.fmt.p1 -text SVG -variable pltSavFmt -value svg -command { \
+					.da.file.opt.pos.p1 configure -state disabled; \
+					.da.file.opt.pos.p2 configure -state disabled;  \
+					.da.file.dim.n configure -state disabled  \
+				}" );
+			cmd( "ttk::radiobutton .da.file.opt.fmt.p2 -text Postscript -variable pltSavFmt -value eps -command { \
+					.da.file.opt.pos.p1 configure -state normal; \
+					.da.file.opt.pos.p2 configure -state normal;  \
+					.da.file.dim.n configure -state normal  \
+				}" );
+			cmd( "pack .da.file.opt.fmt.p1 .da.file.opt.fmt.p2 -side left -ipadx 5" );
+			
 			cmd( "ttk::frame .da.file.opt.col -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-			cmd( "ttk::radiobutton .da.file.opt.col.r1 -text \"Color\" -variable cm -value color" );
-			cmd( "ttk::radiobutton .da.file.opt.col.r2 -text \"Grayscale\" -variable cm -value gray" );
-			cmd( "ttk::radiobutton .da.file.opt.col.r3 -text \"Mono\" -variable cm -value mono" );
+			cmd( "ttk::radiobutton .da.file.opt.col.r1 -text Color -variable pltSavCmod -value color" );
+			cmd( "ttk::radiobutton .da.file.opt.col.r2 -text Grayscale -variable pltSavCmod -value gray" );
+			cmd( "ttk::radiobutton .da.file.opt.col.r3 -text Mono -variable pltSavCmod -value mono" );
 			cmd( "pack .da.file.opt.col.r1 .da.file.opt.col.r2 .da.file.opt.col.r3 -side left -ipadx 5" );
 
 			cmd( "ttk::frame .da.file.opt.pos -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-			cmd( "ttk::radiobutton .da.file.opt.pos.p1 -text \"Landscape\" -variable res -value 0" );
-			cmd( "ttk::radiobutton .da.file.opt.pos.p2 -text \"Portrait\" -variable res -value 1" );
+			cmd( "ttk::radiobutton .da.file.opt.pos.p1 -text Landscape -variable pltSavRes -value 0" );
+			cmd( "ttk::radiobutton .da.file.opt.pos.p2 -text Portrait -variable pltSavRes -value 1" );
 			cmd( "pack .da.file.opt.pos.p1 .da.file.opt.pos.p2 -side left -ipadx 5" );
 			
-			cmd( "pack .da.file.opt.col .da.file.opt.pos -pady 5" );
+			cmd( "pack .da.file.opt.fmt .da.file.opt.col .da.file.opt.pos -pady 5" );
 
 			cmd( "ttk::frame .da.file.dim" );
-			cmd( "ttk::label .da.file.dim.l1 -text \"Dimension\"" );
-			cmd( "ttk::entry .da.file.dim.n -width 4 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set dim %%P; return 1 } { %%W delete 0 end; %%W insert 0 $dim; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.file.dim.n insert 0 $dim" );
-			cmd( "ttk::label .da.file.dim.l2 -text \"( mm@96DPI)\"" );
+			cmd( "ttk::label .da.file.dim.l1 -text Dimension" );
+			cmd( "ttk::entry .da.file.dim.n -width 4 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set pltSavDim %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pltSavDim; return 0 } } -invalidcommand { bell } -justify center" );
+			cmd( ".da.file.dim.n insert 0 $pltSavDim" );
+			cmd( "ttk::label .da.file.dim.l2 -text \"(mm@96DPI)\"" );
 			cmd( "pack .da.file.dim.l1 .da.file.dim.n .da.file.dim.l2 -side left" );
 
-			cmd( "ttk::checkbutton .da.file.lab -text \"Include series legends\" -variable heightpost -onvalue 1 -offvalue 0" );
+			cmd( "ttk::checkbutton .da.file.lab -text \"Include series legends\" -variable pltSavLeg -onvalue 1 -offvalue 0" );
+			
+			cmd( "if [ string equal $pltSavFmt eps ] { \
+					.da.file.opt.pos.p1 configure -state normal; \
+					.da.file.opt.pos.p2 configure -state normal;  \
+					.da.file.dim.n configure -state normal  \
+				} else { \
+					.da.file.opt.pos.p1 configure -state disabled; \
+					.da.file.opt.pos.p2 configure -state disabled;  \
+					.da.file.dim.n configure -state disabled  \
+				}" );
+
 			cmd( "set choice $a" );
 			if ( plot_l[ *choice ] == plot_nl[ *choice ] )
 				cmd( ".da.file.lab conf -state disabled" );
@@ -993,7 +1018,7 @@ while ( true )
 			while ( *choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			cmd( "set dim [ .da.file.dim.n get ]" ); 
+			cmd( "set pltSavDim [ .da.file.dim.n get ]" ); 
 			cmd( "destroytop .da.file" );
 
 			if ( *choice == 2 )
@@ -1004,33 +1029,55 @@ while ( true )
 			if ( strlen( path ) > 0 )
 				cmd( "cd \"$path\"" );
 
-			cmd( "set fn \"$b.eps\"" );
-			cmd( "set fn [ tk_getSaveFile -parent .da -title \"Save Plot File\" -defaultextension .eps -initialfile $fn -initialdir \"$path\" -filetypes { { {Encapsulated Postscript} {.eps} } { {All files} {*} } } ]; if { [ string length $fn ] == 0 } { set choice 2 }" );
+			cmd( "if [ string equal $pltSavFmt eps ] { \
+					set t \"Encapsulated Postscript\" \
+				} else { \
+					set t \"Scalable Vector Graphics\" \
+				}" );
+					
+			cmd( "set fn [ tk_getSaveFile -parent .da -title \"Save Plot File\" -defaultextension .$pltSavFmt -initialfile $b.$pltSavFmt -initialdir \"$path\" -filetypes { { {Scalable Vector Graphics} {.svg} } { {Encapsulated Postscript} {.eps} } { {All files} {*} } } -typevariable t ]; if { [ string length $fn ] == 0 } { set choice 2 }" );
 			
 			if ( *choice == 2 )
 				break;
 
-			cmd( "set dd \"\"" );
-			cmd( "append dd $dim m" );
-			cmd( "set fn [ file nativename $fn ]" ); //return the name in the platform specific format
+			cmd( "set dd ${pltSavDim}m" );
+			cmd( "set fn [ file nativename $fn ]" );
+			cmd( "set e [ string trimleft [ file extension $fn ] . ]" );
+			cmd( "if { $e in [ list svg eps ] } { set pltSavFmt $e }" );
+			
+			cmd( "set bb [ $daptab.tab$a.c.f.plots bbox all ]" );
+			cmd( "set x0 [ expr { [ lindex $bb 0 ] - 2 * $tbordsizeP } ]" );
+			cmd( "set y0 [ expr { [ lindex $bb 1 ] - 2 * $tbordsizeP } ]" );
+			cmd( "set x1 [ expr { [ lindex $bb 2 ] + 4 * $tbordsizeP } ]" );
 
-			cmd( "set choice $a" );
-			if ( plot_l[ *choice ] == plot_nl[ *choice ] )	// no labels?
+			cmd( "set choice $pltSavLeg" );
+			if ( *choice == 0 )				// remove legends, if any
 			{
-				if ( plot_l[ *choice ] > 0 )
-					cmd( "set heightpost %d", plot_l[ *choice ] );
-				else
+				// check for valid boundary values
+				cmd( "set choice $a" );
+				if ( plot_l[ *choice ] > 0 && plot_l[ *choice ] > plot_nl[ *choice ] )
 				{
-					cmd( "set str [ $daptab.tab$a.c.f.plots conf -height ]" );
-					cmd( "scan $str \"%%s %%s %%s %%s %%d\" trash1 trash2 trash3 trash4 heighpost" );
-				} 
+					cmd( "set y1 [ expr { %d + [ font metric \"$fontP\" -descent ] } ]", plot_nl[ *choice ] );
+					cmd( "if [ info exists zoomLevel%d ] { \
+						set y1 [ expr { $y1 * $zoomLevel%d } ] \
+					}", *choice, *choice );
+					
+					cmd( "if [ string equal $pltSavFmt eps ] { \
+							set y1 [ expr { $y1 + 2 * $tbordsizeP } ] \
+						} else { \
+							set y1 [ expr { $y1 + 4 * $tbordsizeP } ] \
+						}" );
+				}
 			}
 			else
-				cmd( "if { $heightpost == 1 } { set heightpost %d } { set heightpost %d }", plot_l[ *choice ], plot_nl[ *choice ] );
-
-			cmd( "if { ! [ info exists zoomLevel%d ] } { set zoomLevel%d 1.0 }", *choice, *choice );
+				cmd( "set y1 [ expr { [ lindex $bb 3 ] + 4 * $tbordsizeP } ]" );
 			
-			cmd( "$daptab.tab$a.c.f.plots postscript -x 0 -y 0 -height [ expr round( $heightpost * $zoomLevel%d) ] -width [ expr round( %d * $zoomLevel%d) ] -pagewidth $dd -rotate $res -colormode $cm -file \"$fn\"", *choice, plot_w[ *choice ], *choice );
+			cmd( "if [ string equal $pltSavFmt eps ] { \
+					$daptab.tab$a.c.f.plots postscript -x $x0 -y $y0 -width [ expr { $x1 - $x0 } ] -height [ expr { $y1 - $y0 } ] -pagewidth $dd -rotate $pltSavRes -colormode $pltSavCmod -file \"$fn\" \
+				} else { \
+					canvas2svg $daptab.tab$a.c.f.plots \"$fn\" \"$x0 $y0 $x1 $y1\" $pltSavCmod %s \
+				}", simul_name );
+				
 			cmd( "plog \"\nPlot saved: $fn\n\"" );
 
 			break;

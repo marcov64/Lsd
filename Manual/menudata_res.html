@@ -2556,8 +2556,8 @@ to the total number of selected series.</span></p>
 <h1><a name="_Plot_format_options"></a><span lang=EN-US>Plot format options</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
-lang=EN-US><a href="#timeseries">Plot</a></span></span><span lang=EN-US>
-command has several alternatives to present the data in the time series in the <a
+lang=EN-US><a href="#timeseries">Plot</a></span></span><span lang=EN-US> command
+has several alternatives to present the data in the time series in the <a
 href="#_Series_selected">Series selected</a> list box.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -3306,7 +3306,7 @@ lang=EN-US><a href="#timeseries">Plot</a></span></span><span lang=EN-US>
 command and be listed in the <a href="#graphs">Plots list box</a>. If the plot
 is not already highlighted in the Plots list box, a dialog box asks the user to
 select one before proceeding. This command is equivalent to pressing the button
-</span><span class=Cdigo><span lang=EN-US>Plot</span></span><span lang=EN-US>
+</span><span class=Cdigo><span lang=EN-US>Save</span></span><span lang=EN-US>
 in the corresponding plot window.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Before the plot is saved to file, the user
@@ -3314,13 +3314,29 @@ must confirm or change the plot settings in the Save Plot dialog box, as in the
 example below.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=196 height=213 src="image/save_plot.png"></span></p>
+width=196 height=243 src="image/save_plot.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The following options are available: </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span class=Cdigo><span
+style='font-family:Symbol;color:windowtext'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><span class=Cdigo><b><span lang=EN-US>SVG</span></b></span><span
+class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'>
+/ </span></span><span class=Cdigo><b><span lang=EN-US>Postscript</span></b></span><span
+class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'>:
+define the file format between two options: Scalable Vector Graphics (SVG), the
+default, or Encapsulated Postscript (EPS). SVG format (</span></span><span
+class=Cdigo><span lang=EN-US>.svg</span></span><span class=Cdigo><span
+lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'> extension)
+is a standard internet format accepted by most modern software. EPS format</span></span><span
+lang=EN-US> (</span><span class=Cdigo><span lang=EN-US>.eps</span></span><span
+lang=EN-US> extension) is an older format, accepted by a more limited number of
+software packages.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Color</span></b></span><span
 lang=EN-US> / </span><span class=Cdigo><b><span lang=EN-US>Grayscale</span></b></span><span
 lang=EN-US> / </span><span class=Cdigo><b><span lang=EN-US>Mono</span></b></span><span
@@ -3332,7 +3348,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><span class=Cdigo><b><span lang=EN-US>Landscape</span></b></span><span
 lang=EN-US> / </span><span class=Cdigo><b><span lang=EN-US>Portrait</span></b></span><span
 lang=EN-US>: choose to save the image in horizontal or vertical orientation,
-respectively.</span></p>
+respectively. This option is only available when the Encapsulated Postscript
+(EPS) format is selected (see above).</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -3340,7 +3357,9 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><span class=Cdigo><b><span lang=EN-US>Dimension</span></b></span><span
 lang=EN-US>: define the width (in millimeters) of the picture assuming a 96 DPI
 (dots per inch) resolution for the output device. Default is 270 mm. Higher
-resolution devices will show an image proportionally smaller.</span></p>
+resolution devices will show an image proportionally smaller. This option is
+only available when the Encapsulated Postscript (EPS) format is selected (see
+above).</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -3351,18 +3370,16 @@ plot. Uncheck this option to be able to add the legends later.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>After confirming the plot image settings
 (press </span><span class=Cdigo><span lang=EN-US>OK</span></span><span
-lang=EN-US>), LSD requests the subdirectory and the file name to be used. The
-image file is saved in the encapsulated Postscript (</span><span class=Cdigo><span
-lang=EN-US>.eps</span></span><span lang=EN-US> extension). This is a high
-quality, vector-based format which is accepted by most text and image software
-packages, like Latex, OpenOffice etc. Microsoft Office blocked access to
-encapsulated Postscript files for security reasons, so file-format conversion
-is required in this case. Conversion to a supported vector-based format, like
-EMF or SVG, is recommended for quality reasons. Conversion to raster-based
-formats, like JPEG or PNG, should be avoided. When conversion is needed, the
-use of an external utility is necessary. For basic needs, there are many
-websites offering conversion from encapsulated Postscript to any format. For
-advanced applications, there are tools like Inkscape.</span></p>
+lang=EN-US>), LSD requests the disk directory and the file name to be used. </span></p>
+
+<p class=MsoNormal><span lang=EN-US>The image file is always saved in high
+quality, vector-based formats which are accepted by most text and image
+software packages, like LaTex, OpenOffice, Microsoft Office (SVG only), Chrome,
+Firefox, etc. Format conversion to raster-based formats, like JPEG or PNG,
+should be avoided. When format conversion is needed, the use of an external
+utility is necessary. For basic needs, there are many websites offering
+conversion from SVG and EPS to any format. For advanced conversion controls,
+there are free tools like Inkscape.</span></p>
 
 <h2><a name=save></a><a name="_Save_Data"></a><span lang=EN-US>Save Data </span></h2>
 
@@ -3407,11 +3424,11 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US>: mark to produce gzip compressed files (</span><span class=Cdigo><span
 lang=EN-US>.gz</span></span><span lang=EN-US> extension), potentially saving
 significant disk space. This is the default configuration. Text-format
-compressed files may require decompressing before usage with most software applications,
-so the user may prefer to directly produce uncompressed files unchecking this
-option. This is not recommended for LSD-format files, however, because they can
-be directly read in gzip format by LSD and R, without decompression, speeding
-up data reading.</span></p>
+compressed files may require decompressing before usage with most software
+applications, so the user may prefer to directly produce uncompressed files
+unchecking this option. This is not recommended for LSD-format files, however,
+because they can be directly read in gzip format by LSD and R, without
+decompression, speeding up data reading.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>When text-format files are selected, a
 second dialog box with additional options is presented:</span></p>
@@ -3485,9 +3502,9 @@ lang=EN-US> option allows specifying any column-delimiter, like commas,
 semicolons, spaces etc. (see the </span><span class=Cdigo><span lang=EN-US>Custom
 delimiter</span></span><span lang=EN-US> option below), and providing support
 for importing the file in virtually any package. The </span><span class=Cdigo><span
-lang=EN-US>Fixed width</span></span><span lang=EN-US> option creates
-fixed-width columns, where each column contains exactly the same number of
-characters (see the </span><span class=Cdigo><span lang=EN-US>Column width</span></span><span
+lang=EN-US>Fixed width</span></span><span lang=EN-US> option creates fixed-width
+columns, where each column contains exactly the same number of characters (see
+the </span><span class=Cdigo><span lang=EN-US>Column width</span></span><span
 lang=EN-US> option below). </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -3544,10 +3561,10 @@ the data in the Log window.</span></p>
 <p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>: </span><span
 class=Cdigo><span lang=EN-US>Ctrl+T</span></span><span lang=EN-US>.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>This command computes a few descriptive statistics
-on the time series in the <a href="#_Series_selected">Series selected list box</a>
-and present them in the <a href="log.html">Log window</a>. If </span><span
-class=Cdigo><span lang=EN-US><a href="#ts_cs">Time series</a></span></span><span
+<p class=MsoNormal><span lang=EN-US>This command computes a few descriptive
+statistics on the time series in the <a href="#_Series_selected">Series
+selected list box</a> and present them in the <a href="log.html">Log window</a>.
+If </span><span class=Cdigo><span lang=EN-US><a href="#ts_cs">Time series</a></span></span><span
 lang=EN-US> is checked, the time steps to be considered in the computation are
 defined by the <a href="#xscaling">cases selection option</a>. Alternatively,
 when </span><span class=Cdigo><span lang=EN-US><a href="#ts_cs">Cross-section</a></span></span><span
@@ -3573,9 +3590,9 @@ lang=EN-US>.</span></p>
 in a <a href="#graph">plot window</a>, from the series in the <a
 href="#_Series_selected">Series selected list box</a>. If </span><span
 class=Cdigo><span lang=EN-US><a href="#ts_cs">Time series</a></span></span><span
-lang=EN-US> is checked, a single time series should be included in the selection
-list and the time steps to be considered in the histogram are defined by the <a
-href="#xscaling">cases selection option</a>. Conversely, when </span><span
+lang=EN-US> is checked, a single time series should be included in the
+selection list and the time steps to be considered in the histogram are defined
+by the <a href="#xscaling">cases selection option</a>. Conversely, when </span><span
 class=Cdigo><span lang=EN-US><a href="#ts_cs">Cross-section</a></span></span><span
 lang=EN-US> is selected, the histogram is calculated across two or more of the
 selected series using a single time step chosen by the user as a cross-section.
@@ -3662,9 +3679,9 @@ lang=EN-US>/</span><span class=Cdigo><span lang=EN-US>Attach</span></span><span
 lang=EN-US>), common to <a href="#graph">all plots</a>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If </span><span class=Cdigo><span
-lang=EN-US><a href="#ts_cs">Time series</a></span></span><span lang=EN-US> is checked,
-a single time series should be included in the selection list and the time
-steps to be included in the lattice matrix are defined by the <a
+lang=EN-US><a href="#ts_cs">Time series</a></span></span><span lang=EN-US> is
+checked, a single time series should be included in the selection list and the
+time steps to be included in the lattice matrix are defined by the <a
 href="#xscaling">cases selection option</a>. The time series values are split
 in the selected </span><span class=Cdigo><span lang=EN-US>Number of data
 columns</span></span><span lang=EN-US> (the m dimension, see below) and used to
@@ -3767,9 +3784,9 @@ buttons, are preserved after the Analysis of Results session is terminated
 
 <p class=MsoNormal><span lang=EN-US>The Gnuplot submenu deals with commands
 involving the Gnuplot package. The submenu option </span><span class=Cdigo><span
-lang=EN-US><a href="#_Gnuplot&gt;Open">Open</a></span></span><span lang=EN-US> launches
-the Gnuplot interactive window (usually not required for basic usage). The
-submenu entry </span><span class=Cdigo><span lang=EN-US><a
+lang=EN-US><a href="#_Gnuplot&gt;Open">Open</a></span></span><span lang=EN-US>
+launches the Gnuplot interactive window (usually not required for basic usage).
+The submenu entry </span><span class=Cdigo><span lang=EN-US><a
 href="#_Gnuplot&gt;Options">Options</a></span></span><span lang=EN-US> allows
 changing the specific settings used by LSD when plotting with Gnuplot. See
 below the details on the two entries.</span></p>

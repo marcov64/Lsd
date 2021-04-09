@@ -14,8 +14,8 @@
 
 #*************************************************************
 # WGTCLONE.TCL
-# Collection of procedures to clone, move, copy, serialize
-# Tk widgets.
+# Collection of procedures to clone, move, copy, save,
+# serialize Tk widgets.
 #
 # Based on code by Cjolly 
 # https://stackoverflow.com/questions/6285648
@@ -365,4 +365,231 @@ proc dump_canvas { w } {
 	}
 
 	return [ join $res \n ]
+}
+
+
+
+#************************************************
+# CANVAS2SVG
+# Dump canvas contents into file
+# Based on code by Richard Suchenwirth 
+# (https://wiki.tcl-lang.org/page/Canvas+to+SVG)
+#************************************************
+proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
+
+	if { ! [ winfo exists $c ] || [ winfo class $c ] ne "Canvas" || ! [ file writable $fn ] } {
+		error "Invalid canvas window or file"
+	}
+	
+	lassign [ concat $v 0 0 0 0 ] vx0 vy0 vx1 vy1
+	set wid [ expr { $vx1 - $vx0 } ]
+	set hgt [ expr { $vy1 - $vy0 } ]
+	
+	set bbox [ $c bbox all ]
+	
+	if { $wid <= 0 } {
+		set vx0 [ lindex $bb 0 ]
+		set vx1 [ lindex $bb 2 ]
+		set wid [ expr { $vx1 - $vx0 } ]
+	}
+	
+	if { $hgt <= 0 } {
+		set vy0 [ lindex $bb 1 ]
+		set vy1 [ lindex $bb 3 ]
+		set hgt [ expr { $vy1 - $vy0 } ]
+	}
+	
+	lassign [ format "%.1f %.1f %.1f %.1f %.1f %.1f" $vx0 $vy0 $vx1 $vy1 $wid $hgt ] vx0 vy0 vx1 vy1 wid hgt
+	
+	set res "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
+	append res "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"
+	append res "<svg xmlns=\"http://www.w3.org/2000/svg\"  version=\"1.1\" width=\"$wid\" height=\"$hgt\" viewBox=\"$vx0 $vy0 $vx1 $vy1\">\n"
+	append res "\t<desc>LSD Plot - $desc</desc>\n"
+
+	foreach item [ $c find all ] {
+		set type [ $c type $item ]
+		set atts ""
+		unset -nocomplain fill outline dash width
+
+		foreach  { x0 y0 x1 y1 } [ concat [ $c coords $item ] 0 0 ] break
+		lassign [ format "%.1f %.1f %.1f %.1f" $x0 $y0 $x1 $y1 ] x0 y0 x1 y1
+
+		catch { set fill [ rgb2xcolor [ $c itemcget $item -fill ] $cm ] }
+		catch { set outline [ rgb2xcolor [ $c itemcget $item -outline ] $cm ] }
+		catch { set dash [ dasharray [ $c itemcget $item -dash ] ] }
+		catch { set width [ expr { round( [ $c itemcget $item -width ] ) } ] }
+		
+		if { $width == 0 } {
+			set outline none
+		}
+		
+		set pts { }
+		foreach { x y } [ $c coords $item ] {
+			lassign [ format "%.1f %.1f" $x $y ] x y
+			lappend pts "$x,$y"
+		}
+		
+		switch -- $type {
+			line {
+				set type polyline
+				append atts [ att points [ join $pts ] ]
+				append atts [ att fill none #000000 ]
+				append atts [ att stroke $fill none ]
+				append atts [ att stroke-width $width 1 ]
+				append atts [ att stroke-dasharray $dash none ]
+			}
+			
+			oval {
+				set type ellipse
+				append atts [ att cx [ format "%.1f" [ expr { double( $x0 + $x1 ) / 2 } ] ] ]
+				append atts [ att cy [ format "%.1f" [ expr { double( $y0 + $y1 ) / 2 } ] ] ]
+				append atts [ att rx [ format "%.1f" [ expr { double( $x1 - $x0 ) / 2 } ] ] ]
+				append atts [ att ry [ format "%.1f" [ expr { double( $y1 - $y0 ) / 2 } ] ] ]
+				append atts [ att fill $fill #000000 ][ att stroke $outline none ]
+				append atts [ att stroke-width $width 1 ]
+				append atts [ att stroke-dasharray $dash none ]
+			}
+			
+			polygon {
+				append atts [ att points [ join $pts ] ]
+				append atts [ att fill $fill #000000 ][ att stroke $outline none ]
+				append atts [ att stroke-width $width 1 ]
+				append atts [ att stroke-dasharray $dash none ]
+			}
+			
+			rectangle {
+				set type rect
+				append atts [ att x $x0 ][ att y $y0 ]
+				append atts [ att width  [ expr { $x1 - $x0 } ] ]
+				append atts [ att height [ expr { $y1 - $y0 } ] ]
+				append atts [ att fill $fill #000000 ][ att stroke $outline none ]
+				append atts [ att stroke-width $width 1 ]
+				append atts [ att stroke-dasharray $dash none ]
+			}
+			
+			text {
+				set text [ $c itemcget $item -text ]
+				set f [ $c itemcget $item -font ]
+				set anchor [ $c itemcget $item -anchor ]
+				
+				if { "n" in [ split $anchor "" ] } {
+					#append atts [ att dominant-baseline text-before-edge ]
+					set y0 [ expr { $y0 + [ font metric "$f" -ascent ] } ]
+				} elseif { $anchor in { w center e } } {
+					#append atts [ att dominant-baseline middle ]
+					set y0 [ expr { $y0 + ( [ font metric "$f" -ascent ] - [ font metric "$f" -descent ] ) / 2 } ]
+				}
+				
+				append atts [ att x $x0 ][ att y $y0 ][ att fill $fill #000000 ]
+				append atts [ att font-family [ lindex $f 0 ] ]
+				append atts [ att font-size [ lindex $f 1 ]pt ]
+				
+				if { "e" in [ split $anchor "" ] } {
+					append atts [ att text-anchor end ]
+				} elseif { $anchor in { n c s } } {
+					append atts [ att text-anchor middle ]
+				}
+				
+				if { "bold" in $f } {
+					append atts [ att font-weight bold ]
+				}
+				
+				if { "italic" in $f } { 
+					append atts [ att font-style italic ]
+				}
+			}
+			
+			default { 
+				error "$type not dumpable to SVG" 
+			}
+		}
+		
+		append res "\t<$type$atts"
+		
+		if { $type eq "text" } {
+			append res ">$text</$type>\n"
+		} else {
+			append res " />\n"
+		}
+	}
+	
+	append res "</svg>"
+	
+	set f [ open $fn w ]
+	puts $f $res
+	close $f
+}
+
+proc att { name value { default - } } {
+	if { $value eq "" && $default ne "-" } {
+		set value $default
+	}
+	
+	if { $value != $default } {
+		return " $name=\"$value\""
+	}
+}
+
+proc dasharray { pattern } {
+	if { $pattern == "" } {
+		return none
+	}
+	
+	switch -- $pattern {
+		". " {
+			return "3,3"
+		}
+	
+		"- " {
+			return "10,3"
+		}
+	
+		"-." {
+			return "10,3,3,3"
+		}
+	
+		"-.." {
+			return "10,3,3,3,3,3"
+		}
+	
+		default {
+			return none
+		}
+	}
+}
+
+proc rgb2xcolor { rgb { cm color } } {
+	if { $rgb == "" } {
+		return none
+	}
+	
+	foreach { r g b } [ winfo rgb . $rgb ] break
+	set col [ format #%02x%02x%02x [ expr { $r / 256 } ] [ expr { $g / 256 } ] [ expr { $b / 256 } ] ]
+	
+	if { [ isDarkTheme ] && $col eq "#ffffff" } {
+		set col #000000 
+	}
+	
+	if { $cm eq "gray" } {
+		if { $r == $g && $g == $b } {
+			return $col
+		} else {
+			set ylin [ expr { 0.2126 * $r / 65536 + 0.7152 * $g / 65536 + 0.0722 * $b / 65536 } ]
+			if { $ylin <= 0.0031308 } {
+				set y [ expr { round( 12.92 * $ylin * 256 ) } ]
+			} else {
+				set y [ expr { round( ( 1.055 * pow( $ylin, 1 / 2.4 ) - 0.055 ) * 256 ) } ]
+			}
+
+			return [ format #%02x%02x%02x $y $y $y ]
+		}
+	} elseif { $cm eq "mono" } {
+		if { $col eq "#ffffff" } {
+			return #ffffff
+		} else {
+			return #000000
+		}
+	} else {
+		return $col
+	}
 }
