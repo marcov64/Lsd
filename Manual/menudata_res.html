@@ -1403,7 +1403,7 @@ all types of plots and plots produced by <a href="#Gnuplot">Gnuplot</a> have a
 different set of features (see Gnuplot documentation). </span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=602 height=460 src="image/example_graph.png"></span></p>
+border=0 width=580 height=460 src="image/example_graph.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The example above is a typical time series
 plot showing 10 series associated with <a href="LSD_faqs.html#variable">Variables</a>,
@@ -1501,26 +1501,35 @@ that the case values correspond to the <i>complete</i> number of time steps to
 the left of the cursor and so always a rounded-down integer.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Plots can be manually improved by the
-addition of new elements and the modification of the existing ones:</span></p>
+addition of new elements and the modification of the existing ones, by using
+the right-click context menu on the desired location or the corresponding
+shortcuts:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Right click on series and axis labels</span></b><span
-lang=EN-US>: to edit the text,&nbsp;font, size, style and color.</span></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Right click on plotted lines</span></b><span
-lang=EN-US>: to edit the width, color and dash pattern.</span></p>
+</span></span><span class=Cdigo><b><span lang=EN-US>Properties</span></b></span><b><span
+lang=EN-US> </span></b><span lang=EN-US>(<i>shortcut</i>: </span><span
+class=Cdigo><span lang=EN-US>Alt+click</span></span><span lang=EN-US>)</span><span
+lang=EN-US>: in text elements, to edit the text,&nbsp;font, size, style and
+color, or in line or pattern elements, to edit the width, color and dash
+pattern.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Click with </span></b><span class=Cdigo><b><span
-lang=EN-US>Shift</span></b></span><b><span lang=EN-US> pressed</span></b><span
-lang=EN-US>: to create a new label at the mouse position. The label properties
-can be edited with a right click.</span></p>
+</span></span><span class=Cdigo><b><span lang=EN-US>Delete</span></b></span><span
+lang=EN-US>: to delete the element.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Add Text</span></b></span><b><span
+lang=EN-US> </span></b><span lang=EN-US>(<i>shortcut</i>: </span><span
+class=Cdigo><span lang=EN-US>Shift+click</span></span><span lang=EN-US>)</span><span
+lang=EN-US>: to create a new text label centered at the mouse position. The new
+text can have its properties edited using the </span><span class=Cdigo><span
+lang=EN-US>Properties</span></span><span lang=EN-US> menu.</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1528,7 +1537,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 class=Cdigo><b><span lang=EN-US>Ctrl</span></b></span><b><span lang=EN-US>
 pressed</span></b><span lang=EN-US>: to create a new line from the initial
 mouse position to the position where the drag ends. The new line can have its
-properties edited with a right click, including adding arrow heads.</span></p>
+properties edited using the </span><span class=Cdigo><span lang=EN-US>Properties</span></span><span
+lang=EN-US> menu, including adding arrow heads.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -1543,7 +1553,7 @@ added title, arrows, labels and edited, repositioned and recolored series
 labels. </span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=590 height=422 src="image/ex_piccolo.png"></span></p>
+border=0 width=590 height=456 src="image/ex_piccolo.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>Frequently, during an AR session, the user
 produces quite many plots, and the computer screen becomes easily crowded. To
@@ -1668,21 +1678,22 @@ is located in the eleventh instance of an <a href="LSD_faqs.html#object">Object<
 at the second level of the model structure, which, in turn, descends from the
 first Object instance at the first level of the structure tree (a son of the </span><span
 class=Cdigo><span lang=EN-US>Root</span></span><span lang=EN-US> Object). The
-time series has data from time step 30 until 200, that is, the Object where this
-Variable is contained was created at time step 30 and lasted up to the 200<sup>th</sup>
+time series has data from time step 30 until 200, that is, the Object where
+this Variable is contained was created at time step 30 and lasted up to the 200<sup>th</sup>
 step. The time series unique serial number is 65.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The order of the series in the list box
-reflects the <a href="LSD_faqs.html#modelstructure">model structure</a>, and therefore
-elements saved from the same <a href="LSD_faqs.html#object">Object type</a> are
-listed sequentially. For large models it may be useful to filter and/or <a
-href="#sort">sort the series</a> presented. The top row of this box is a drop-down
-selector allowing to choose Variables from specific Objects to be listed. The
-filter list contains only Objects in the model structure which contain elements
-with series available for analysis plus entries for series added by the user
-(created or loaded from file). For series loaded from data files, Object-based
-filtering is available only if the corresponding configuration file is loaded,
-otherwise series can be filtered only by the name of the files they came from.</span></p>
+reflects the <a href="LSD_faqs.html#modelstructure">model structure</a>, and
+therefore elements saved from the same <a href="LSD_faqs.html#object">Object
+type</a> are listed sequentially. For large models it may be useful to filter
+and/or <a href="#sort">sort the series</a> presented. The top row of this box
+is a drop-down selector allowing to choose Variables from specific Objects to
+be listed. The filter list contains only Objects in the model structure which
+contain elements with series available for analysis plus entries for series added
+by the user (created or loaded from file). For series loaded from data files,
+Object-based filtering is available only if the corresponding configuration
+file is loaded, otherwise series can be filtered only by the name of the files
+they came from.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Time series in the list box must be
 highlighted before they can be added to the <a href="#_Series_selected">Series
@@ -1691,8 +1702,8 @@ series. For highlighting:</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>Click on any one series to highlight it and unmark
-any other.</span></p>
+</span></span><span lang=EN-US>Click on any one series to highlight it and
+unmark any other.</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -3668,7 +3679,7 @@ of the time series data is used for computation and 0 is not a valid data
 value).</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=578 height=458 src="image/lattice_plot.png"></span></p>
+width=585 height=458 src="image/lattice_plot.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The example above presents a 25×20 lattice
 (25 rows and 20 columns) sample. The quick color change all over the plot

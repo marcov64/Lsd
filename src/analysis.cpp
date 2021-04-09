@@ -925,7 +925,6 @@ while ( true )
 				
 				cmd( "set it [ .da.vars.pl.f.v get $iti ]" );
 			}
-
 			
 			cmd( "set choice [ info exists it ]" );
 			if ( ! *choice )
@@ -6149,17 +6148,17 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "pack $w.b.c.case $w.b.c.y -anchor w" );
 
 	cmd( "ttk::frame $w.b.o" );
-	cmd( "ttk::label $w.b.o.l1 -text \"Right-click: edit properties\"" );
-	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: insert text\"" );
-	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: insert line\"" );
+	cmd( "ttk::label $w.b.o.l1 -text \"Alt-click: properties\"" );
+	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: add text\"" );
+	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: add line\"" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
 	cmd( "ttk::button $w.b.s.save -width $butWid -text Save -state disabled -command { \
-			set it \"%d) $tit\"; \
+			set it \"%d) %s\"; \
 			set fromPlot 1; \
 			set choice 11 \
-		}", n );
+		}", n, ( char * ) Tcl_GetVar( inter, "tit", 0 ) );
 	cmd( "ttk::button $w.b.s.gnu -width $butWid -text Gnuplot -state disabled -command { \
 			set oldpath [pwd]; \
 			cd plotxy_%d; \
@@ -6256,72 +6255,10 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 			} \
 		}", n, n, n, lim[ 0 ], lim[ 1 ], lim[ 2 ], lim[ 3 ], rang[ 1 ], rang[ 0 ], rang[ 0 ], rang[ 3 ], rang[ 2 ], rang[ 2 ] );
 
-	// window bindings (return to Analysis, insert text, insert line)
-	cmd( "bind $p <Double-Button-1> { focustop .da }" );
-
-	cmd( "bind $p <Shift-1> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set LX %%X; \
-			set LY %%Y; \
-			set hereX [ $ccanvas canvasx %%x ]; \
-			set hereY [ $ccanvas canvasy %%y ]; \
-			set choice 27 \
-		}", n );
-		
-	cmd( "bind $p <Control-1> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set ncanvas %d; \
-			set hereX [ $ccanvas canvasx %%x ]; \
-			set hereY [ $ccanvas canvasy %%y ]; \
-			unset -nocomplain cl; \
-			set choice 28 \
-		}", n, n );
-
-	// moving and editing lines and text
-	cmd( "bind $p <Button-1> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set type [ $ccanvas gettags current ]; \
-			if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
-				set moving true; \
-				set hereX [ $ccanvas canvasx %%x ]; \
-				set hereY [ $ccanvas canvasy %%y ]; \
-				$ccanvas raise current \
-			} { \
-				set moving false \
-			} \
-		}", cur_plot );
-	cmd( "bind $p <B1-Motion> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			if $moving { \
-				$ccanvas move current [ expr { [ $ccanvas canvasx %%x ] - $hereX } ] \
-					[ expr { [ $ccanvas canvasy %%y ] - $hereY } ]; \
-				set hereX [ $ccanvas canvasx %%x ]; \
-				set hereY [ $ccanvas canvasy %%y ] \
-			} \
-		}", cur_plot );
-	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
-
-	cmd( "bind $p <Button-2> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set LX %%X; set LY %%Y; \
-			set type [ $ccanvas gettags current ]; \
-			set curitem [ $ccanvas find withtag current ]; \
-			if { [ lsearch $type line ] >= 0 || [ lsearch $type dots ] >= 0 } { \
-				if { [ lsearch $type series ] >= 0 } { \
-					set cline [ lindex $type 0 ]; \
-					set draw false \
-				} { \
-					set cline current; \
-					set draw true \
-				}; \
-				set choice 31 \
-			} { \
-				if { [ lsearch $type text ] >= 0 } { \
-					set choice 26 \
-				} \
-			} \
-		}", cur_plot );
-	cmd( "bind $p <Button-3> { event generate $daptab.tab%d.c.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
+	// create context menu and common bindings
+	canvas_binds( n );
+	
+	cmd( "update idletasks" );
 
 	// save plot info
 	type_plot[ n ] = GNUPLOT; 	// Gnuplot plot
@@ -6525,25 +6462,31 @@ void plot_lattice( int *choice )
 
 	add_da_plot_tab( ".dap", cur_plot );    // plot tab window
 
-	cmd( "ttk::frame $w.f -width %d -height %d", ncol * le, nlin * hi );
+	cmd( "ttk::frame $w.f -width %d -height %d", ncol * le + 1, nlin * hi + 1 );
 	cmd( "set p $w.f.plots" );
-	cmd( "ttk::canvas $p -width %d -height %d -entry 0 -dark $darkTheme", ncol * le, nlin * hi );
+	cmd( "ttk::canvas $p -width %d -height %d -entry 0 -dark $darkTheme", ncol * le + 1, nlin * hi + 1 );
 	cmd( "pack $p -anchor c" );
 	cmd( "pack $w.f" );
 	
 	// add buttons bottom bar
-	cmd( "ttk::frame $w.b -width %d", ncol * le );
+	cmd( "ttk::frame $w.b -width %d", ncol * le + 1 );
 
 	cmd( "ttk::frame $w.b.o" );
-	cmd( "ttk::label $w.b.o.l1 -text \"Right-click: edit properties\"" );
-	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: insert text\"" );
-	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: insert line\"" );
+	cmd( "ttk::label $w.b.o.l1 -text \"Alt-click: properties\"" );
+	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: add text\"" );
+	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: add line\"" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
-	cmd( "ttk::button $w.b.s.save -width $butWid -text Save -command { set it \"$cur_plot) $tit\"; set fromPlot 1; set choice 11 }" );
-	cmd( "ttk::button $w.b.s.det -width $butWid -text Detach -command { detach_tab $daptab tab%d c.b.s.det .da %d }", cur_plot, MAX_TAB_LEN - 1 );
-	cmd( "pack $w.b.s.save $w.b.s.det -pady 4" );
+	cmd( "ttk::button $w.b.s.save -width $butWid -text Save -command { \
+			set it \"%d) %s\"; \
+			set fromPlot 1; \
+			set choice 11 \
+		}", cur_plot, ( char * ) Tcl_GetVar( inter, "tit", 0 ) );
+	cmd( "ttk::button $w.b.s.det -width $butWid -text Detach -command { \
+			detach_tab $daptab tab%d c.b.s.det .da %d \
+		}", cur_plot, MAX_TAB_LEN - 1 );
+	cmd( "pack $w.b.s.save $w.b.s.det -pady 3" );
 	
 	cmd( "ttk::label $w.b.pad -width 30" );
 
@@ -6564,80 +6507,16 @@ void plot_lattice( int *choice )
 			   ( int ) color, grid ? point_size : 0.0 );
 		}
 
-	cmd( "update idletasks" );
-
-	// window bindings (return to Analysis, insert text, insert line)
-	cmd( "bind $p <Double-Button-1> { focustop .da }" );
+	// create context menu and common bindings
+	canvas_binds( cur_plot );
 	
-	cmd( "bind $p <Shift-1> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set LX %%X; \
-			set LY %%Y; \
-			set hereX [ $ccanvas canvasx %%x ]; \
-			set hereY [ $ccanvas canvasy %%y ]; \
-			set choice 27 \
-		}", cur_plot );
-		
-	cmd( "bind $p <Control-1> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set ncanvas %d; \
-			set hereX [ $ccanvas canvasx %%x ]; \
-			set hereY [ $ccanvas canvasy %%y ]; \
-			unset -nocomplain cl; \
-			set choice 28 \
-		}", cur_plot, cur_plot );
-
-	// moving and editing lines and text
-	cmd( "bind $p <Button-1> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set type [ $ccanvas gettags current ]; \
-			if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
-				set moving true; \
-				set hereX [ $ccanvas canvasx %%x ]; \
-				set hereY [ $ccanvas canvasy %%y ]; \
-				$ccanvas raise current \
-			} { \
-				set moving false \
-			} \
-		}", cur_plot );
-	cmd( "bind $p <B1-Motion> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			if $moving { \
-				$ccanvas move current [ expr { [ $ccanvas canvasx %%x ] - $hereX } ] \
-					[ expr { [ $ccanvas canvasy %%y ] - $hereY } ]; \
-				set hereX [ $ccanvas canvasx %%x ]; \
-				set hereY [ $ccanvas canvasy %%y ] \
-			} \
-		}", cur_plot );
-	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
-
-	cmd( "bind $p <Button-2> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set LX %%X; set LY %%Y; \
-			set type [ $ccanvas gettags current ]; \
-			set curitem [ $ccanvas find withtag current ]; \
-			if { [ lsearch $type line ] >= 0 || [ lsearch $type dots ] >= 0 } { \
-				if { [ lsearch $type series ] >= 0 } { \
-					set cline [ lindex $type 0 ]; \
-					set draw false \
-				} { \
-					set cline current; \
-					set draw true \
-				}; \
-				set choice 31 \
-			} elseif { [ lsearch $type bar ] >= 0 } { \
-				set choice 42 \
-			} elseif { [ lsearch $type text ] >= 0 } { \
-				set choice 26 \
-			} \
-		}", cur_plot );
-	cmd( "bind $p <Button-3> { event generate $daptab.tab%d.c.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
+	cmd( "update idletasks" );
 
 	// save plot info
 	type_plot[ cur_plot ] = LATTICE;
-	plot_w[ cur_plot ] = ncol * le;	// plot width
-	plot_l[ cur_plot ] = nlin * hi;
-	plot_nl[ cur_plot ] = nlin * hi;  
+	plot_w[ cur_plot ] = ncol * le + 1;	// plot width
+	plot_l[ cur_plot ] = nlin * hi + 1;
+	plot_nl[ cur_plot ] = nlin * hi + 1;  
 
 	end2:
 	
@@ -8820,75 +8699,10 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 		cmd( "$p bind txt%d <Leave> { $daptab.tab%d.c.b.c.var.v configure -text \"\" }", i, cur_plot );
 	}
 
-	// window bindings (insert text, insert line)
-	cmd( "bind $p <Shift-1> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set LX %%X; \
-			set LY %%Y; \
-			set hereX [ $ccanvas canvasx %%x ]; \
-			set hereY [ $ccanvas canvasy %%y ]; \
-			set choice 27 \
-		}", cur_plot );
-		
-	cmd( "bind $p <Control-1> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set ncanvas %d; \
-			set hereX [ $ccanvas canvasx %%x ]; \
-			set hereY [ $ccanvas canvasy %%y ]; \
-			unset -nocomplain cl; \
-			set choice 28 \
-		}", cur_plot, cur_plot );
-
-	// moving and editing lines and text
-	cmd( "bind $p <Button-1> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set type [ $ccanvas gettags current ]; \
-			if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
-				set moving true; \
-				set hereX [ $ccanvas canvasx %%x ]; \
-				set hereY [ $ccanvas canvasy %%y ]; \
-				$ccanvas raise current \
-			} { \
-				set moving false \
-			} \
-		}", cur_plot );
-	cmd( "bind $p <B1-Motion> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			if $moving { \
-				$ccanvas move current [ expr { [ $ccanvas canvasx %%x ] - $hereX } ] \
-					[ expr { [ $ccanvas canvasy %%y ] - $hereY } ]; \
-				set hereX [ $ccanvas canvasx %%x ]; \
-				set hereY [ $ccanvas canvasy %%y ] \
-			} \
-		}", cur_plot );
-	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
-	
-	cmd( "bind $p <Button-2> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set LX %%X; set LY %%Y; \
-			set type [ $ccanvas gettags current ]; \
-			set curitem [ $ccanvas find withtag current ]; \
-			if { [ lsearch $type line ] >= 0 || [ lsearch $type dots ] >= 0 } { \
-				if { [ lsearch $type series ] >= 0 } { \
-					set cline [ lindex $type 0 ]; \
-					set draw false \
-				} { \
-					set cline current; \
-					set draw true \
-				}; \
-				set choice 31 \
-			} { \
-				if { [ lsearch $type text ] >= 0 } { \
-					set choice 26 \
-				} \
-			} \
-		}", cur_plot );
-	cmd( "bind $p <Button-3> { event generate $daptab.tab%d.c.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
-	
 	// save plot info
 	type_plot[ cur_plot ] = type; 					// plot type
 	plot_w[ cur_plot ] = hcanvas;					// plot width
-	plot_nl[ cur_plot ] = tbordsize + vsize + lheight ; // height of plot without labels  
+	plot_nl[ cur_plot ] = tbordsize + vsize + lheight; // height of plot without labels  
 	plot_l[ cur_plot ] = vcanvas; 					// height of plot with labels
 
 	*choice = 0;
@@ -9045,71 +8859,6 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 		cmd( "$p bind txt%d <Leave> { $daptab.tab%d.c.b.c.var.v configure -text \"\" }", i, cur_plot );
 	}
 
-	// window bindings (insert text, insert line)
-	cmd( "bind $p <Shift-1> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set LX %%X; \
-			set LY %%Y; \
-			set hereX [ $ccanvas canvasx %%x ]; \
-			set hereY [ $ccanvas canvasy %%y ]; \
-			set choice 27 \
-		}", cur_plot );
-		
-	cmd( "bind $p <Control-1> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set ncanvas %d; \
-			set hereX [ $ccanvas canvasx %%x ]; \
-			set hereY [ $ccanvas canvasy %%y ]; \
-			unset -nocomplain cl; \
-			set choice 28 \
-		}", cur_plot, cur_plot );
-
-	// moving and editing lines and text
-	cmd( "bind $p <Button-1> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set type [ $ccanvas gettags current ]; \
-			if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
-				set moving true; \
-				set hereX [ $ccanvas canvasx %%x ]; \
-				set hereY [ $ccanvas canvasy %%y ]; \
-				$ccanvas raise current \
-			} { \
-				set moving false \
-			} \
-		}", cur_plot );
-	cmd( "bind $p <B1-Motion> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			if $moving { \
-				$ccanvas move current [ expr { [ $ccanvas canvasx %%x ] - $hereX } ] \
-					[ expr { [ $ccanvas canvasy %%y ] - $hereY } ]; \
-				set hereX [ $ccanvas canvasx %%x ]; \
-				set hereY [ $ccanvas canvasy %%y ] \
-			} \
-		}", cur_plot );
-	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
-	
-	cmd( "bind $p <Button-2> { \
-			set ccanvas $daptab.tab%d.c.f.plots; \
-			set LX %%X; set LY %%Y; \
-			set type [ $ccanvas gettags current ]; \
-			set curitem [ $ccanvas find withtag current ]; \
-			if { [ lsearch $type line ] >= 0 || [ lsearch $type dots ] >= 0 } { \
-				if { [ lsearch $type series ] >= 0 } { \
-					set cline [ lindex $type 0 ]; \
-					set draw false \
-				} { \
-					set cline current; \
-					set draw true \
-				}; \
-				set choice 31 \
-			} elseif { [ lsearch $type bar ] >= 0 } { \
-				set choice 42 \
-			} elseif { [ lsearch $type text ] >= 0 } { \
-				set choice 26 \
-			} \
-		}", cur_plot );
-	cmd( "bind $p <Button-3> { event generate $daptab.tab%d.c.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
-
 	// save plot info
 	type_plot[ cur_plot ] = type; 					// plot type
 	plot_w[ cur_plot ] = hcanvas;					// plot width
@@ -9258,17 +9007,17 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	cmd( "pack $w.b.c.case $w.b.c.y $w.b.c.var -anchor w" );
 
 	cmd( "ttk::frame $w.b.o" );
-	cmd( "ttk::label $w.b.o.l1 -text \"Right-click: edit properties\"" );
-	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: insert text\"" );
-	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: insert line\"" );
+	cmd( "ttk::label $w.b.o.l1 -text \"Alt-click: properties\"" );
+	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: add text\"" );
+	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: add line\"" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
 	cmd( "ttk::button $w.b.s.save -width $butWid -text Save -state disabled -command { \
-			set it \"$cur_plot) $tit\"; \
+			set it \"%d) %s\"; \
 			set fromPlot 1; \
 			set choice 11 \
-		}" );
+		}", cur_plot, ( char * ) Tcl_GetVar( inter, "tit", 0 ) );
 	cmd( "ttk::button $w.b.s.det -width $butWid -text Detach -state disabled -command { \
 			if { [ $daptab.tab%d.c.b.s.det cget -text ] eq \"Stop\" } { \
 				set choice 2 \
@@ -9293,8 +9042,6 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -padx $pad2 -pady 5 -side left" );
 	cmd( "pack $w.b -side right" );
 
-	cmd( "bind $p <Double-Button-1> { focustop .da }" );
-	
 	if ( watch )
 		cmd( "$w.b.s.det configure -state normal -text Stop" );
 
@@ -9403,7 +9150,126 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	if ( i < nLine )
 		cmd( "$p create text $xlabel $ylabel -fill $colorsTheme(fg) -font $fontP -anchor nw -text \"(%d more...)\"", nLine - i );
 
+	// create context menu and common bindings
+	canvas_binds( cur_plot );
+	
 	cmd( "update idletasks" );	
+}
+
+
+/*******************************************************
+ CANVAS_BINDS
+ create canvas context menu and common bindings 
+ *******************************************************/
+void canvas_binds( int n )
+{
+	cmd( "set p $daptab.tab%d.c.f.plots", n );		// plot canvas
+
+	// context menu
+	cmd( "ttk::menu $p.v -tearoff 0" );
+	cmd( "$p.v add command -label Properties -command { event generate $daptab.tab%d.c.f.plots <Alt-1> -x $menuX -y $menuY }", n );
+	cmd( "$p.v add command -label Delete -command { \
+			set ccanvas $daptab.tab%d.c.f.plots; \
+			if { $menuSel ne \"\" } { \
+				$ccanvas delete $menuSel \
+			} \
+		}", n );
+	cmd( "$p.v add command -label \"Add Text\" -command { event generate $daptab.tab%d.c.f.plots <Shift-1> -x $menuX -y $menuY }", n );
+	cmd( "$p.v add separator" );
+	cmd( "$p.v add command -label Help -accelerator F1 -command { LsdHelp menudata_res.html#graph }" );
+	
+	// canvas bindings
+	cmd( "bind $p <Button-2> { \
+			set ccanvas $daptab.tab%d.c.f.plots; \
+			set menuX %%x; \
+			set menuY %%y; \
+			set menuSel \"\"; \
+			set type [ $ccanvas gettags current ]; \
+			set curitem [ $ccanvas find withtag current ]; \
+			if { [ lsearch $type line ] >= 0 || [ lsearch $type dots ] >= 0 } { \
+				if { [ lsearch $type series ] >= 0 } { \
+					set menuSel [ lindex $type 0 ] \
+				} { \
+					set menuSel $curitem \
+				} \
+			} elseif { [ lsearch $type bar ] >= 0 || [ lsearch $type text ] >= 0 } { \
+				set menuSel $curitem \
+			}; \
+			if { $menuSel eq \"\" } { \
+				$ccanvas.v entryconfig 0 -state disabled; \
+				$ccanvas.v entryconfig 1 -state disabled \
+			} { \
+				$ccanvas.v entryconfig 0 -state normal; \
+				$ccanvas.v entryconfig 1 -state normal \
+			}; \
+			tk_popup $ccanvas.v %%X %%Y \
+		}", n );
+	cmd( "bind $p <Button-3> { event generate $daptab.tab%d.c.f.plots <Button-2> -x %%x -y %%y }", n );
+	
+	cmd( "bind $p <Double-Button-1> { focustop .da }" );
+	
+	cmd( "bind $p <Alt-1> { \
+			set ccanvas $daptab.tab%d.c.f.plots; \
+			set LX %%X; set LY %%Y; \
+			set type [ $ccanvas gettags current ]; \
+			set curitem [ $ccanvas find withtag current ]; \
+			if { [ lsearch $type line ] >= 0 || [ lsearch $type dots ] >= 0 } { \
+				if { [ lsearch $type series ] >= 0 } { \
+					set cline [ lindex $type 0 ]; \
+					set draw false \
+				} { \
+					set cline current; \
+					set draw true \
+				}; \
+				set choice 31 \
+			} elseif { [ lsearch $type bar ] >= 0 } { \
+				set choice 42 \
+			} elseif { [ lsearch $type text ] >= 0 } { \
+				set choice 26 \
+			} \
+		}", n );
+
+	cmd( "bind $p <Shift-1> { \
+			set ccanvas $daptab.tab%d.c.f.plots; \
+			set LX %%X; \
+			set LY %%Y; \
+			set hereX [ $ccanvas canvasx %%x ]; \
+			set hereY [ $ccanvas canvasy %%y ]; \
+			set choice 27 \
+		}", n );
+		
+	cmd( "bind $p <Control-1> { \
+			set ccanvas $daptab.tab%d.c.f.plots; \
+			set ncanvas %d; \
+			set hereX [ $ccanvas canvasx %%x ]; \
+			set hereY [ $ccanvas canvasy %%y ]; \
+			unset -nocomplain cl; \
+			set choice 28 \
+		}", n, n );
+
+	cmd( "bind $p <Button-1> { \
+			set ccanvas $daptab.tab%d.c.f.plots; \
+			set type [ $ccanvas gettags current ]; \
+			if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
+				set moving true; \
+				set hereX [ $ccanvas canvasx %%x ]; \
+				set hereY [ $ccanvas canvasy %%y ]; \
+				$ccanvas raise current \
+			} { \
+				set moving false \
+			} \
+		}", n );
+	cmd( "bind $p <B1-Motion> { \
+			set ccanvas $daptab.tab%d.c.f.plots; \
+			if $moving { \
+				$ccanvas move current [ expr { [ $ccanvas canvasx %%x ] - $hereX } ] \
+					[ expr { [ $ccanvas canvasy %%y ] - $hereY } ]; \
+				set hereX [ $ccanvas canvasx %%x ]; \
+				set hereY [ $ccanvas canvasy %%y ] \
+			} \
+		}", n );
+	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
+	
 }
 
 

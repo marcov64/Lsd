@@ -470,19 +470,19 @@ proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
 			text {
 				set text [ $c itemcget $item -text ]
 				set f [ $c itemcget $item -font ]
-				set anchor [ $c itemcget $item -anchor ]
+				set anchor [ string map "center c" [ $c itemcget $item -anchor ] ]
 				
 				if { "n" in [ split $anchor "" ] } {
 					#append atts [ att dominant-baseline text-before-edge ]
-					set y0 [ expr { $y0 + [ font metric "$f" -ascent ] } ]
-				} elseif { $anchor in { w center e } } {
+					set y0 [ expr { $y0 + [ font metric $f -ascent ] } ]
+				} elseif { $anchor in { w c e } } {
 					#append atts [ att dominant-baseline middle ]
-					set y0 [ expr { $y0 + ( [ font metric "$f" -ascent ] - [ font metric "$f" -descent ] ) / 2 } ]
+					set y0 [ expr { $y0 + ( [ font metric $f -ascent ] - [ font metric $f -descent ] ) / 2 } ]
 				}
 				
 				append atts [ att x $x0 ][ att y $y0 ][ att fill $fill #000000 ]
-				append atts [ att font-family [ lindex $f 0 ] ]
-				append atts [ att font-size [ lindex $f 1 ]pt ]
+				append atts [ att font-family [ font actual $f -family ] ]
+				append atts [ att font-size [ font actual $f -size ]pt ]
 				
 				if { "e" in [ split $anchor "" ] } {
 					append atts [ att text-anchor end ]
@@ -490,11 +490,11 @@ proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
 					append atts [ att text-anchor middle ]
 				}
 				
-				if { "bold" in $f } {
+				if { [ font actual $f -weight ] eq "bold" } {
 					append atts [ att font-weight bold ]
 				}
 				
-				if { "italic" in $f } { 
+				if { [ font actual $f -slant ] eq "italic" } { 
 					append atts [ att font-style italic ]
 				}
 			}
@@ -515,9 +515,9 @@ proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
 	
 	append res "</svg>"
 	
-	set f [ open $fn w ]
-	puts $f $res
-	close $f
+	set file [ open $fn w ]
+	puts $file $res
+	close $file
 }
 
 proc att { name value { default - } } {

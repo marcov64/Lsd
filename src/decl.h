@@ -240,6 +240,7 @@ void assign( object *r, int *idx, char *lab );
 void attach_instance_number( char *ch, object *r );
 void auto_document( int *choice, char const *lab, char const *which, bool append = false );
 void autofill_descr( object *o );
+void canvas_binds( int n );
 void center_plot( void );
 void change_descr_lab( char const *lab_old, char const *lab, char const *type, char const *text, char const *init );
 void change_descr_lab( char const *lab_old, char const *lab, char const *type, char const *text, char const *init );

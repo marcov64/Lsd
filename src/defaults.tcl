@@ -161,7 +161,7 @@ set sbordsizeP	0	; # width of plot scroll border area
 set htmarginP	4	; # horizontal margin for legends text in plots
 set vtmarginP	2	; # vertical margin for legends text in plots
 set grayscaleP	0	; # default color mode for plots (0=color)
-set gridP		0	; # defaut grid mode (0=no grid)
+set gridP		1	; # defaut grid mode (0=no grid)
 set linemodeP	1	; # default line mode (1:lines/2:points)
 set pdigitsP	3	; # default precision digits
 set pointsizeP	1.0	; # default size of points/lines (<1:./=1:x<=2:+/>2:round)
