@@ -853,9 +853,6 @@ void run( void )
 						cmd( ".b.r2.pause conf -text Pause" );
 					}
 					break;
-
-				default:
-				break;
 			}
 
 			done_in = 0;

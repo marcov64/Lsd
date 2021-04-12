@@ -432,7 +432,6 @@ void plot_rt( variable *v )
 	cmd( "set y2 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", old_val[ cur_plt ], ymin, ymax, ymin );
 
 	cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", cur_plt );
-	cmd( "update idletasks" );
 	
 	old_val[ cur_plt ] = v->val[ 0 ];
 	++cur_plt;

@@ -1470,7 +1470,7 @@ void deb_show( object *r, const char *hl_var )
 	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
 
 	cmd( "if { ! [ winfo exists .deb.tit ] } { \
-			set fntSz [ expr { [ font metrics [ ttk::style lookup boldSmall.TLabel -font ] - linespace ] + 2 } ]; \
+			set fntSz [ expr { [ font metrics [ ttk::style lookup boldSmall.TLabel -font ] -linespace ] + 2 } ]; \
 			ttk::frame .deb.tit -height [ expr { $fntSz + $vspcszD } ]; \
 			ttk::label .deb.tit.name1 -style boldSmall.TLabel -text Variable -anchor w; \
 			ttk::label .deb.tit.val1 -style hlBoldSmall.TLabel -text Value; \
