@@ -177,14 +177,15 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 				set x [ getx $w $pos ]
 				set y [ gety $w $pos ]
 				
-				set maxHgt [ expr { [ winfo screenwidth $w ] - $x - 2 * $bordsize - $hmargin } ]
-				set maxWid [ expr { [ winfo screenheight $w ] - $y- 2 * $bordsize - $vmargin - $tbarsize } ]
-				if { $sizeX > $maxHgt } {
-					set sizeX $maxHgt
+				set maxWid [ expr { [ winfo vrootwidth $w ] - $x - 2 * $bordsize - $hmargin } ]
+				set maxHgt [ expr { [ winfo vrootheight $w ] - $y- 2 * $bordsize - $vmargin - $tbarsize } ]
+					
+				if { $maxWid > 0 && $sizeX > $maxWid } {
+					set sizeX $maxWid
 					$w configure -width $sizeX
 				}
-				if { $sizeY > $maxWid } {
-					set sizeY $maxWid
+				if { $maxHgt > 0 && $sizeY > $maxHgt } {
+					set sizeY $maxHgt
 					$w configure -height $sizeY
 				}
 			} else {
@@ -492,8 +493,8 @@ proc sizetop { { w all } } {
 		set realW $w
 	}
 
-	set screenWidth [ winfo screenwidth $realW ]
-	set screenHeight [ winfo screenheight $realW ]
+	set screenWidth [ winfo vrootwidth $realW ]
+	set screenHeight [ winfo vrootheight $realW ]
 
 	foreach wnd $wndLst {
 		if { ! [ string compare $w all ] || ! [ string compare $w $wnd ] } {
@@ -626,8 +627,8 @@ proc resizetop { w sizeX { sizeY 0 } } {
 		set sizeY [ winfo height $w ]
 	}
 	
-	set sizeX [ expr { min( $sizeX, [ winfo screenwidth $w ] - [ winfo rootx $w ] - 2 * $bordsize - $hmargin ) } ]
-	set sizeY [ expr { min( $sizeY, [ winfo screenheight $w ] - [ winfo rooty $w ] - 2 * $bordsize - $vmargin - $tbarsize ) } ]
+	set sizeX [ expr { min( $sizeX, [ winfo vrootwidth $w ] - [ winfo rootx $w ] - 2 * $bordsize - $hmargin ) } ]
+	set sizeY [ expr { min( $sizeY, [ winfo vrootheight $w ] - [ winfo rooty $w ] - 2 * $bordsize - $vmargin - $tbarsize ) } ]
 	
 	set newMinX [ expr { min( [ lindex [ wm minsize $w ] 0 ], $sizeX ) } ]
 	set newMinY [ expr { min( [ lindex [ wm minsize $w ] 1 ], $sizeY ) } ]
