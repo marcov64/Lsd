@@ -260,6 +260,7 @@ void count_save( object *n, int *count );
 void cover_browser( const char *text1, const char *text2, bool run );
 void create( void );
 void create_form( int num, char const *title, char const *prefix, FILE *frep );
+void create_float_list( object *t );
 void create_initial_values( object *r, FILE *frep );
 void create_logwindow( void );
 void create_par_map( object *r );

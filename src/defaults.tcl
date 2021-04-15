@@ -169,6 +169,10 @@ set maxzoomP	4.0	; # maximum zoom magnification factor in plots
 set minzoomP	0.5	; # minimum zoom shrinking factor in plots
 set parAll	"(all)"	; # string used for selecting all series parents
 
+# tool tips (balloons) defaults
+set ttipdelay	500	; # time before showing tool tips
+set ttipfade	1	; # enable fade-out of tool tips
+
 # lattice defaults
 set cscaleLat	1.0	; # default color scale (1:1.0)
 

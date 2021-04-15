@@ -296,6 +296,16 @@ cmd( "ttk::button $f.empty -width 6 -style Toolbutton -text Clear -command { set
 cmd( "ttk::label $f.pad2" );
 cmd( "pack $f.pad1 $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.search $f.add $f.empty $f.pad2 -padx 2 -pady 1 -fill y" );
 
+cmd( "tooltip::tooltip $f.in \"Add highlighted series to seleced\"" );
+cmd( "tooltip::tooltip $f.out \"Remove highlighted selected series\"" );
+cmd( "tooltip::tooltip $f.sort \"Sort in alphabetical order\"" );
+cmd( "tooltip::tooltip $f.sortdesc \"Sort in inverse alphabetical order\"" );
+cmd( "tooltip::tooltip $f.sortend \"Sort in alphabetical & time order\"" );
+cmd( "tooltip::tooltip $f.unsort \"Restore original order\"" );
+cmd( "tooltip::tooltip $f.search \"Find...\"" );
+cmd( "tooltip::tooltip $f.add \"Add new series...\"" );
+cmd( "tooltip::tooltip $f.empty \"Remove all selected series\"" );
+
 // selected series listbox
 cmd( "ttk::frame .da.vars.ch" );
 cmd( "ttk::label .da.vars.ch.th -text \"Series selected\" -style boldSmall.TLabel" );
@@ -3530,7 +3540,7 @@ while ( true )
 
 		// MODEL STRUCTURE ACTIONS
 
-		// select parent filter
+		// select parent filter from model structure graph
 		case 29:
 			cmd( "filter_series $res_g" );
 			break;

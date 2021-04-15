@@ -107,7 +107,6 @@ void create( void )
 	cmd( "set itemfocus 0" );
 	cmd( "set itemfirst 0" );
 	cmd( "set c \"\"" );
-	cmd( "if $strWindowOn { set strWindowB active } { set strWindowB normal }" );
 
 	// restore previous object and cursor position in browser, if any
 	cur = restore_pos( root );
@@ -769,13 +768,10 @@ int browse( object *r, int *choice )
 
 		cmd( "ttk::frame .l.p.tit" );
 		cmd( "ttk::label .l.p.tit.lab -text \"Current object:\" -width 15 -anchor w" );
-		cmd( "ttk::button .l.p.tit.but -width -1 -text \" %s \" -style hlBold.Toolbutton %s", r->label, r->up == NULL ? "" : "-command { set ttip \"\"; set choice 6 }" );
+		cmd( "ttk::button .l.p.tit.but -width -1 -text \" %s \" -style hlBold.Toolbutton", r->label );
 
 		if ( r->up != NULL ) 
-		{
-			cmd( "bind .l.p.tit.but <Enter> { set ttip \"Change...\" }" );
-			cmd( "bind .l.p.tit.but <Leave> { set ttip \"\" }" );
-		}
+			cmd( "tooltip::tooltip .l.p.tit.but \"Change...\"" );
 		else
 			cmd( ".l.p.tit.but configure -state disabled" );
 
@@ -956,7 +952,7 @@ int browse( object *r, int *choice )
 			cmd( "ttk::button .bbar.open -image openImg -style Toolbutton -command { set choice 17 }" );
 			cmd( "ttk::button .bbar.reload -image reloadImg -style Toolbutton -command { set choice 38 }" );
 			cmd( "ttk::button .bbar.save -image saveImg -style Toolbutton -command { set choice 18 }" );
-			cmd( "ttk::button .bbar.struct -image structImg -style Toolbutton -command { set strWindowOn [ expr { ! $strWindowOn } ]; set choice 70 } -state $strWindowB" );
+			cmd( "ttk::button .bbar.struct -image structImg -style Toolbutton -command { set choice 70 }" );
 			cmd( "ttk::button .bbar.find -image findImg -style Toolbutton -command { set choice 50 }" );
 			cmd( "ttk::button .bbar.addvar -image addvarImg -style Toolbutton -command { set param 0; set choice 2 }" );
 			cmd( "ttk::button .bbar.addpar -image addparImg -style Toolbutton -command { set param 1; set choice 2 }" );
@@ -967,38 +963,27 @@ int browse( object *r, int *choice )
 			cmd( "ttk::button .bbar.run -image runImg -style Toolbutton -command { set choice 1 }" );
 			cmd( "ttk::button .bbar.data -image dataImg -style Toolbutton -command { set choice 34 }" );
 			cmd( "ttk::button .bbar.result -image resultImg -style Toolbutton -command { set choice 26 }" );
-			cmd( "ttk::label .bbar.tip -textvariable ttip -style graySmall.TLabel -width 17 -anchor w" );
 
-			cmd( "bind .bbar.open <Enter> { set ttip \"Load...\" }" );
-			cmd( "bind .bbar.open <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.reload <Enter> { set ttip \"Reload\" }" );
-			cmd( "bind .bbar.reload <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.save <Enter> { set ttip \"Save\" }" );
-			cmd( "bind .bbar.save <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.struct <Enter> { if $strWindowOn { set ttip \"Hide structure\" } { set ttip \"Show structure\" } }" );
-			cmd( "bind .bbar.struct <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.find <Enter> { set ttip \"Find element...\" }" );
-			cmd( "bind .bbar.find <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.addvar <Enter> { set ttip \"Add variable...\" }" );
-			cmd( "bind .bbar.addvar <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.addpar <Enter> { set ttip \"Add parameter...\" }" );
-			cmd( "bind .bbar.addpar <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.addobj <Enter> { set ttip \"Add object...\" }" );
-			cmd( "bind .bbar.addobj <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.init <Enter> { set ttip \"Initial values...\" }" );
-			cmd( "bind .bbar.init <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.number <Enter> { set ttip \"Num. objects...\" }" );
-			cmd( "bind .bbar.number <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.set <Enter> { set ttip \"Settings...\" }" );
-			cmd( "bind .bbar.set <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.run <Enter> { set ttip \"Run\" }" );
-			cmd( "bind .bbar.run <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.data <Enter> { set ttip \"Data browse...\" }" );
-			cmd( "bind .bbar.data <Leave> { set ttip \"\" }" );
-			cmd( "bind .bbar.result <Enter> { set ttip \"Analysis...\" }" );
-			cmd( "bind .bbar.result <Leave> { set ttip \"\" }" );
+			cmd( "tooltip::tooltip .bbar.open \"Load...\"" );
+			cmd( "tooltip::tooltip .bbar.reload \"Reload\"" );
+			cmd( "tooltip::tooltip .bbar.save \"Save\"" );
+			cmd( "if { $strWindowOn } { \
+					tooltip::tooltip .bbar.struct \"Hide Structure\" \
+				} else { \
+					tooltip::tooltip .bbar.struct \"Show Sstructure\" \
+				}" );
+			cmd( "tooltip::tooltip .bbar.find \"Find Element...\"" );
+			cmd( "tooltip::tooltip .bbar.addvar \"Add Variable...\"" );
+			cmd( "tooltip::tooltip .bbar.addpar \"Add Parameter...\"" );
+			cmd( "tooltip::tooltip .bbar.addobj \"Add Object...\"" );
+			cmd( "tooltip::tooltip .bbar.init \"Initial Values...\"" );
+			cmd( "tooltip::tooltip .bbar.number \"Number of Objects...\"" );
+			cmd( "tooltip::tooltip .bbar.set \"Settings...\"" );
+			cmd( "tooltip::tooltip .bbar.run \"Run\"" );
+			cmd( "tooltip::tooltip .bbar.data \"Data Browse...\"" );
+			cmd( "tooltip::tooltip .bbar.result \"Analysis of Results...\"" );
 
-			cmd( "pack .bbar.open .bbar.reload .bbar.save .bbar.struct .bbar.find .bbar.addvar .bbar.addpar .bbar.addobj .bbar.init .bbar.number .bbar.set .bbar.run .bbar.data .bbar.result .bbar.tip -side left" );
+			cmd( "pack .bbar.open .bbar.reload .bbar.save .bbar.struct .bbar.find .bbar.addvar .bbar.addpar .bbar.addobj .bbar.init .bbar.number .bbar.set .bbar.run .bbar.data .bbar.result -side left" );
 			cmd( "pack .bbar -padx 3 -anchor w -fill x" );
 		}
 
@@ -1080,7 +1065,6 @@ int browse( object *r, int *choice )
 		}" );
 
 	cmd( "upd_menu_visib" );		// update active menu options
-	cmd( "if $strWindowOn { set strWindowB active } { set strWindowB normal }" );
 	cmd( "set useCurrObj yes" );	// flag to select among the current or the clicked object
 
 	*choice = choice_g = 0;
@@ -6172,6 +6156,13 @@ break;
 // toggle the state of the model structure windows, refresh window
 case 70:
 
+	strWindowOn = strWindowOn ? 0 : 1;
+	
+	if ( strWindowOn )			
+		cmd( "tooltip::tooltip .bbar.struct \"Hide structure\"" );
+	else
+		cmd( "tooltip::tooltip .bbar.struct \"Show structure\"" );
+			
 	redrawStruc = true;
 
 break;
@@ -6623,7 +6614,7 @@ void set_shortcuts( const char *window )
 	cmd( "bind %s <Control-b> { set choice 34 }; bind %s <Control-B> { set choice 34 }", window, window  );
 	cmd( "bind %s <Control-z> { set choice 37 }; bind %s <Control-Z> { set choice 37 }", window, window  );
 	cmd( "bind %s <Control-w> { set choice 38 }; bind %s <Control-W> { set choice 38 }", window, window  );
-	cmd( "bind %s <Control-Tab> { set strWindowOn [ expr { ! $strWindowOn } ]; set choice 70 }", window  );
+	cmd( "bind %s <Control-Tab> { set choice 70 }", window  );
 }
 
 

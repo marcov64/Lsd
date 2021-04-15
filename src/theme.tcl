@@ -157,6 +157,11 @@ proc setstyles { } {
 		-font [ font create -size $small_character -weight bold ]
 	ttk::style configure graySmall.TLabel -foreground gray \
 		-font [ font create -size $small_character ]
+	ttk::style configure var.TLabel -foreground $colorsTheme(var)
+	ttk::style configure lvar.TLabel -foreground $colorsTheme(lvar)
+	ttk::style configure par.TLabel -foreground $colorsTheme(par)
+	ttk::style configure fun.TLabel -foreground $colorsTheme(fun)
+	ttk::style configure lfun.TLabel -foreground $colorsTheme(lfun)
 }
 
 

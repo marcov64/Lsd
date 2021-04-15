@@ -126,7 +126,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 		cmd( "$w add command -label \"Using LSD Models Tutorial\" -underline 0 -command { LsdHelp model_using.html }" );
 		cmd( "$w add command -label \"Writing LSD Models Tutorial\" -underline 0 -command { LsdHelp model_writing.html }" );
 		cmd( "$w add separator" );
-		cmd( "$w add command -label \"Model Report\" -underline 0 -command { set choice 44 }" );
+		cmd( "$w add command -label \"Model Report\" -underline 0 -command { set choice 27 }" );
 		cmd( "$w add separator" );
 		cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%s} {%s} .deb }", _LSD_VERSION_, _LSD_DATE_ ); 
 		cmd( ".deb configure -menu .deb.m" );
@@ -286,8 +286,8 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 						ttk::label .deb.v.v1.obs -text \"\"; \
 						if { %d == 1 } { \
 							pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 .deb.v.v1.obs -side left; \
-							bind .deb <KeyPress-g> { set choice 77 }; \
-							bind .deb <KeyPress-G> { set choice 77 } \
+							bind .deb <KeyPress-g> { set choice 28 }; \
+							bind .deb <KeyPress-G> { set choice 28 } \
 						} { \
 							pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 -side left \
 						} \
@@ -395,9 +395,17 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 		
 		redraw = true;
 		
-		// debug command loop
-		while ( ! choice )
+		// debugger command loop 
+		choice_g = 0;
+		while ( ! choice && ! choice_g )
 			Tcl_DoOneEvent( 0 );
+
+		// coming from the structure window
+		if ( choice_g )
+		{
+			choice = 26;					// change the current object
+			cmd( "focus .deb" );
+		}
 
 		if ( mode == 1 )
 		{
@@ -1348,7 +1356,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				break;
 
 			// right-click (set all) on multi-instanced parameter or variable
-			case 29:
+			case 25:
 				ch1 = ( char * )Tcl_GetVar( inter, "res", 0 );
 				strcpy( ch, ch1 );
 				set_all( &choice, r, ch, 0 );
@@ -1356,8 +1364,24 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				choice = 0;
 				break;
 					
+			// select current parent from model structure graph
+			case 26:
+				ch1 = ( char * )Tcl_GetVar( inter, "res_g", 0 );
+				cur = root->search( ( const char * ) ch1 );
+				
+				// handle zero instanced objects
+				if ( cur != NULL )
+					choice = deb( cur, c, lab, res, interact );
+				else
+				{
+					choice = 0;
+					redraw = false;
+				}
+
+				break;
+
 			// model Report
-			case 44:
+			case 27:
 				show_report( &choice, ".deb" );
 				
 				choice = 0;
@@ -1365,7 +1389,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				break;
 
 			// Debug variable under computation CTRL+G
-			case 77: 
+			case 28: 
 				if ( asl == NULL && stacklog != NULL )
 				{
 					asl = stacklog;
@@ -1609,7 +1633,7 @@ void deb_show( object *r, const char *hl_var )
 			cmd( "mouse_wheel $w.e$i.last" );
 
 			cmd( "bind $w.e$i.name <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", ap_v->label );
-			cmd( "bind $w.e$i.name <Button-2> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 29 }", ap_v->label );
+			cmd( "bind $w.e$i.name <Button-2> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 25 }", ap_v->label );
 			cmd( "bind $w.e$i.name <Button-3> { event generate .deb.cc.grid.can.f.e$i.name <Button-2> -x %%x -y %%y }" );
 		}
 

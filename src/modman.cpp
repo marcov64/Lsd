@@ -414,7 +414,13 @@ int lsdmain( int argn, char **argv )
 	cmd( "$w add command -label \"Model Options...\" -underline 4 -state disabled -command { set choice 48 }" );	// entryconfig 12
 	cmd( "$w add command -label \"System Options...\" -underline 0 -command { set choice 47 }" );	// entryconfig 13
 	cmd( "$w add separator" );	// entryconfig 14
-	cmd( "$w add check -label \"Auto-hide LMM\" -variable autoHide -underline 0" );	// entryconfig 15
+	cmd( "$w add check -label \"Auto-hide LMM\" -variable autoHide -underline 0 -command { \
+			if { $autoHide } { \
+				tooltip::tooltip .bbar.hide \"Not Auto-hide LMM\" \
+			} else { \
+				tooltip::tooltip .bbar.hide \"Auto-hide LMM\" \
+			} \
+		}" );	// entryconfig 15
 
 	cmd( "set w .m.help" );
 	cmd( "ttk::menu $w -tearoff 0" );
@@ -444,10 +450,12 @@ int lsdmain( int argn, char **argv )
 	cmd( "ttk::button .bbar.indent -image indentImg -style Toolbutton -command { set choice 42 }" );
 	cmd( "ttk::button .bbar.deindent -image deindentImg -style Toolbutton -command { set choice 43 }" );
 	cmd( "ttk::button .bbar.wrap -image wrapImg -style Toolbutton -command { \
-			if { $wrap == 0 } { \
-				set wrap 1 \
-			} { \
-				set wrap 0 \
+			if { $wrap } { \
+				set wrap 0; \
+				tooltip::tooltip .bbar.wrap \"Wrap\" \
+			} else { \
+				set wrap 1; \
+				tooltip::tooltip .bbar.wrap \"Unwrap\" \
 			}; \
 			setwrap .f.t.t $wrap \
 		}" );
@@ -459,62 +467,49 @@ int lsdmain( int argn, char **argv )
 	cmd( "ttk::button .bbar.equation -image equationImg -style Toolbutton -command { set choice 8 }" );
 	cmd( "ttk::button .bbar.extra -image extraImg -style Toolbutton -command { set choice 70 }" );
 	cmd( "ttk::button .bbar.set -image setImg -style Toolbutton -command { set choice 48 }" );
-	cmd( "ttk::button .bbar.hide -image hideImg -style Toolbutton -command { set autoHide [ expr { ! $autoHide } ] }" );
-	cmd( "ttk::button .bbar.help -image helpImg -style Toolbutton -command { LsdHelp LSD_macros.html }" );
-	cmd( "ttk::label .bbar.tip -textvariable ttip -width 30 -style graySmall.TLabel -anchor w" );
-
-	cmd( "bind .bbar.open <Enter> { set ttip \"Browse models...\" }" );
-	cmd( "bind .bbar.open <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.save <Enter> { set ttip \"Save model\" }" );
-	cmd( "bind .bbar.save <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.undo <Enter> { set ttip \"Undo\" }" );
-	cmd( "bind .bbar.undo <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.redo <Enter> { set ttip \"Redo\" }" );
-	cmd( "bind .bbar.redo <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.cut <Enter> { set ttip \"Cut\" }" );
-	cmd( "bind .bbar.cut <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.copy <Enter> { set ttip \"Copy\" }" );
-	cmd( "bind .bbar.copy <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.paste <Enter> { set ttip \"Paste\" }" );
-	cmd( "bind .bbar.paste <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.find <Enter> { set ttip \"Find...\" }" );
-	cmd( "bind .bbar.find <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.replace <Enter> { set ttip \"Replace...\" }" );
-	cmd( "bind .bbar.replace <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.indent <Enter> { set ttip \"Indent selection\" }" );
-	cmd( "bind .bbar.indent <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.deindent <Enter> { set ttip \"De-indent selection\" }" );
-	cmd( "bind .bbar.deindent <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.wrap <Enter> { set ttip \"Wrap lines\" }" );
-	cmd( "bind .bbar.wrap <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.compile <Enter> { set ttip \"Recompile model\" }" );
-	cmd( "bind .bbar.compile <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.comprun <Enter> { set ttip \"Compile and run model...\" }" );
-	cmd( "bind .bbar.comprun <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.gdb <Enter> { set ttip \"Run in [ string toupper $DbgExe ] debugger\" }" );
-	cmd( "bind .bbar.gdb <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.info <Enter> { set ttip \"Model information...\" }" );
-	cmd( "bind .bbar.info <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.descr <Enter> { set ttip \"Show description\" }" );
-	cmd( "bind .bbar.descr <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.equation <Enter> { set ttip \"Show equations\" }" );
-	cmd( "bind .bbar.equation <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.extra <Enter> { set ttip \"Show extra files...\" }" );
-	cmd( "bind .bbar.extra <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.set <Enter> { set ttip \"Model compilation options...\" }" );
-	cmd( "bind .bbar.set <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.hide <Enter> { \
-			if $autoHide { \
-				set ttip \"Not auto-hide LMM\" \
-			} { \
-				set ttip \"Auto-hide LMM\" \
+	cmd( "ttk::button .bbar.hide -image hideImg -style Toolbutton -command { \
+			if { $autoHide } { \
+				set autoHide 0; \
+				tooltip::tooltip .bbar.hide \"Auto-hide LMM\" \
+			} else { \
+				set autoHide 1; \
+				tooltip::tooltip .bbar.hide \"Not Auto-hide LMM\" \
 			} \
 		}" );
-	cmd( "bind .bbar.hide <Leave> { set ttip \"\" }" );
-	cmd( "bind .bbar.help <Enter> { set ttip \"Help on macros for LSD equations\" }" );
-	cmd( "bind .bbar.help <Leave> { set ttip \"\" }" );
+	cmd( "ttk::button .bbar.help -image helpImg -style Toolbutton -command { LsdHelp LSD_macros.html }" );
 
-	cmd( "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.wrap .bbar.compile .bbar.comprun .bbar.gdb .bbar.info .bbar.descr .bbar.equation .bbar.extra .bbar.set .bbar.hide .bbar.help .bbar.tip -side left" );
+	cmd( "tooltip::tooltip .bbar.open \"Browse Models...\"" );
+	cmd( "tooltip::tooltip .bbar.save \"Save Model\"" );
+	cmd( "tooltip::tooltip .bbar.undo \"Undo\"" );
+	cmd( "tooltip::tooltip .bbar.redo \"Redo\"" );
+	cmd( "tooltip::tooltip .bbar.cut \"Cut\"" );
+	cmd( "tooltip::tooltip .bbar.copy \"Copy\"" );
+	cmd( "tooltip::tooltip .bbar.paste \"Paste\"" );
+	cmd( "tooltip::tooltip .bbar.find \"Find...\"" );
+	cmd( "tooltip::tooltip .bbar.replace \"Replace...\"" );
+	cmd( "tooltip::tooltip .bbar.indent \"Indent\"" );
+	cmd( "tooltip::tooltip .bbar.deindent \"De-indent\"" );
+	cmd( "if { $wrap } { \
+			tooltip::tooltip .bbar.wrap \"Unwrap\" \
+		} else { \
+			tooltip::tooltip .bbar.wrap \"Wrap\" \
+		}" );
+	cmd( "tooltip::tooltip .bbar.compile \"Recompile\"" );
+	cmd( "tooltip::tooltip .bbar.comprun \"Compile and Run...\"" );
+	cmd( "tooltip::tooltip .bbar.gdb \"[ string toupper $DbgExe ] Debugger\"" );
+	cmd( "tooltip::tooltip .bbar.info \"Model Info...\"" );
+	cmd( "tooltip::tooltip .bbar.descr \"Show Description\"" );
+	cmd( "tooltip::tooltip .bbar.equation \"Show Equations\"" );
+	cmd( "tooltip::tooltip .bbar.extra \"Show Extra Files...\"" );
+	cmd( "tooltip::tooltip .bbar.set \"Model Options...\"" );
+	cmd( "tooltip::tooltip .bbar.help \"Help on Macros for LSD Equations\"" );
+	cmd( "if { $autoHide } { \
+			tooltip::tooltip .bbar.hide \"Not Auto-hide LMM\" \
+		} else { \
+			tooltip::tooltip .bbar.hide \"Auto-hide LMM\" \
+		}" );
+
+	cmd( "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.wrap .bbar.compile .bbar.comprun .bbar.gdb .bbar.info .bbar.descr .bbar.equation .bbar.extra .bbar.set .bbar.hide .bbar.help -side left" );
 	cmd( "pack .bbar -padx 3 -anchor w -fill x" );
 
 	cmd( "ttk::frame .f" );
