@@ -94,7 +94,7 @@ div.WordSection1
 
 <p class=MsoTitle><span lang=EN-US>What’s new in LSD</span></p>
 
-<h1><span lang=EN-US>Version 8.0 (Beta)</span></h1>
+<h1><span lang=EN-US>Version 8.0</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>The version introduces an improved user
 interface and other improvements:</span></p>
@@ -118,6 +118,14 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US>. When using the default themes, LSD will automatically switch to
 the appropriate light/dark default, according to the computer’s system
 settings.</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Tool tips on tool bars and list boxes</span></b><span
+lang=EN-US>. Information about commands in tool bars and buttons and about
+model elements can obtained by simply hovering with the mouse over the
+corresponding items.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -249,20 +257,20 @@ unlimited memory.</span></p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Fully-formed Windows executables</span></b><span
-lang=EN-US>. LSD executables in Windows can now run on any location in the computer
-storage, given Tcl/Tk and GCC (from MSYS2 or Cygwin) are included in the PATH
-variable. This was already the case in Linux and macOS versions.</span></p>
+lang=EN-US>. LSD executables in Windows can now run on any location in the
+computer storage, given Tcl/Tk and GCC (from MSYS2 or Cygwin) are included in
+the PATH variable. This was already the case in Linux and macOS versions.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Removed support for legacy platforms.</span></b><span
-lang=EN-US> Windows 32-bit and Mac OS X (10.09 and below) are no longer supported
-by LSD. This was done because of the small base of those platforms nowadays
-(computers typically 10-year old or more), and the possibility of adding new
-features not supported on them. Also, Tcl/Tk version 8.6 is now the minimum
-requirement in Linux. Users of these legacy platforms may still use LSD version
-7.2.</span></p>
+lang=EN-US> Windows 32-bit and Mac OS X (10.09 and below) are no longer
+supported by LSD. This was done because of the small base of those platforms
+nowadays (computers typically 10-year old or more), and the possibility of
+adding new features not supported on them. Also, Tcl/Tk version 8.6 is now the
+minimum requirement in Linux. Users of these legacy platforms may still use LSD
+version 7.2.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -292,11 +300,11 @@ improvements and changes:</span></p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US><a href="browser.html#updating">Variable
-update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be
-updated/recomputed under arbitrary time schemes, deterministic or random. The
-modeler can now configure update periods larger than 1, including an initial
-“sleep” for any Variable. Both period and initial times can be set as a fixed
-number or a uniform random draw from a modeler-defined range.</span></p>
+update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be updated/recomputed
+under arbitrary time schemes, deterministic or random. The modeler can now
+configure update periods larger than 1, including an initial “sleep” for any
+Variable. Both period and initial times can be set as a fixed number or a
+uniform random draw from a modeler-defined range.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -544,10 +552,10 @@ lang=EN-US> Macro documentation.</span></p>
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Improved Gnuplot support</span></b><span
-lang=EN-US>. Automatic usage of default plotting terminals, supporting contemporaneous
-options like Qt and wxt. Updated system terminal options, shared with LMM.
-WARNING: the old Windows 32-bit version of Gnuplot was removed from LSD, now
-users in all platforms must install Gnuplot, please refer to </span><span
+lang=EN-US>. Automatic usage of default plotting terminals, supporting
+contemporaneous options like Qt and wxt. Updated system terminal options,
+shared with LMM. WARNING: the old Windows 32-bit version of Gnuplot was removed
+from LSD, now users in all platforms must install Gnuplot, please refer to </span><span
 class=Cdigo><span lang=EN-US><a href="../Readme.txt">Readme.txt</a></span></span><span
 lang=EN-US> for details.</span></p>
 
@@ -641,8 +649,8 @@ lang=EN-US> New button bars. New context menus (right-clicks on lists).
 Automatic windows positioning. Fully hierarchical window system management
 (properly block of unavailable windows and buttons etc.). System-wide
 consistent windows decorations, buttons and organization. In-session persistent
-windows sizes. Unnecessary window redraws eliminated. Faster debugger interface.
-Easy to change defaults (</span><span class=Cdigo><span lang=EN-US>windows.tcl</span></span><span
+windows sizes. Unnecessary window redraws eliminated. Faster debugger
+interface. Easy to change defaults (</span><span class=Cdigo><span lang=EN-US>windows.tcl</span></span><span
 lang=EN-US>). New accelerator keys in LSD Log window. Support of larger
 structures in the LSD Model Structure window. </span></p>
 
@@ -761,8 +769,8 @@ including save to disk. Revised lattice windows. New lattice color options
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New pseudorandom number generator.</span></b><span
-lang=EN-US> A new (default) Mersenne-Twister generator included (old
-Parks-Miler still available as option).</span></p>
+lang=EN-US> A new (default) Mersenne-Twister generator included (old Parks-Miler
+still available as option).</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
