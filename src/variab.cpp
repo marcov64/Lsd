@@ -539,9 +539,10 @@ double variable::cal( object *caller, int lag )
 	// if there is a pending deletion, try to do it now
 	if ( wait_delete != NULL )
 	{
+#ifndef NP
 		if ( guard.owns_lock( ) )
 			guard.unlock( );					// release lock
-			
+#endif			
 		wait_delete->delete_obj( this );
 	}
 
