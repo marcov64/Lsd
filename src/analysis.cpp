@@ -71,7 +71,7 @@ used case 47
 
 bool avgSmplMsg;
 bool first_run = true;
-char filename[ MAX_PATH_LENGTH ];
+char filename[ MAX_PATH_LENGTH + 1 ];
 double maxy, maxy2;
 double miny, miny2;
 double point_size;
@@ -7552,6 +7552,7 @@ CREATE_MAVERAG
 ****************************************************/
 bool create_maverag( int *choice )
 {
+	bool done = true;
 	char *lapp, **str, **tag;
 	double xapp, **data;
 	int h, i, j, k, flt, ma_type, *start, *end, *id;
@@ -7573,7 +7574,7 @@ bool create_maverag( int *choice )
 
 	cmd( "ttk::frame .da.s.o" );
 	cmd( "ttk::label .da.s.o.l -text \"Period (cases)\"" );
-	cmd( "ttk::spinbox .da.s.o.th -width 5 -from 1 -to $numc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $numc } { set bido %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bido; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::spinbox .da.s.o.th -width 5 -from 2 -to $numc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n > 1 && $n <= $numc } { set bido %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bido; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.o.th insert 0 $bido" ); 
 	cmd( "pack .da.s.o.l .da.s.o.th" );
 	
@@ -7602,10 +7603,7 @@ bool create_maverag( int *choice )
 	cmd( "destroytop .da.s" );
 
 	if ( *choice == 2 )
-	{
-		*choice = 0;
 		return false;
-	}
 
 	flt = get_int( "bido" );
 	ma_type = get_int( "ma_type" );
@@ -7614,7 +7612,6 @@ bool create_maverag( int *choice )
 	if ( flt < 2 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid moving average period\" -detail \"Please choose a period larger than one case (time step).\"" );
-		*choice = 0;
 		return false;
 	}
 
@@ -7631,6 +7628,31 @@ bool create_maverag( int *choice )
 	str = new char *[ nv ];
 	tag = new char *[ nv ];
 
+	// prepare for errors and early exit
+	for ( i = 0; i < nv; ++i )
+	{
+		str[ i ] = NULL;
+		tag[ i ] = NULL;
+	}
+	
+	// check for too short series
+	for ( i = 0; i < nv; ++i )
+	{
+		str[ i ] = new char[ MAX_ELEM_LENGTH ];
+		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+
+		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
+		lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		sscanf( lapp, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
+		if ( end[ i ] - start[ i ] + 1 < flt )
+		{
+			cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Insufficient series cases\" -detail \"Series '%s' has less cases (%d) than the requested moving average period (%d). Please choose a longer series or a shorter moving average period.\"", lapp, end[ i ] - start[ i ] + 1, flt );
+			done = false;
+			goto end_mvavg;			
+		}
+	}
+		
 	app = new store[ nv + num_var ];
 	for ( i = 0; i < num_var; ++i )
 	{
@@ -7650,14 +7672,10 @@ bool create_maverag( int *choice )
 
 	for ( i = 0; i < nv; ++i )
 	{
-		str[ i ] = new char[ MAX_ELEM_LENGTH ];
-		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		strcpy( msg, lapp );
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( ( char * ) Tcl_GetVar( inter, "res", 0 ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 
 		sprintf( vs[ num_var + i ].label, "%s_%cma%d", str[ i ], ma_type == 0 ? 's' : 'c', flt );
 		sprintf( vs[ num_var + i ].tag, "C_%s", tag[ i ] );
@@ -7736,6 +7754,8 @@ bool create_maverag( int *choice )
 	cmd( "update_parent" );
 	num_var += nv; 
 
+	end_mvavg:
+	
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
@@ -7749,7 +7769,7 @@ bool create_maverag( int *choice )
 	delete [ ] end;
 	delete [ ] id;
 	
-	return true;
+	return done;
 }
 
 
@@ -7779,7 +7799,7 @@ bool add_unsaved( int *choice )
 	
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -text \"Element name (or part)\"" );
-	cmd( "ttk::combobox .da.s.i.e -width 20 -justify center -values $unSavElem -validate focusout -validatecommand { set n %%P; if { $n in $unSavElem } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell }" );
+	cmd( "ttk::combobox .da.s.i.e -width 20 -justify center -values $unSavElem -validate focusout -validatecommand { set n %%P; if { $n in $unSavElem } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } }" );
 	cmd( "write_any .da.s.i.e $bidi" );
 	cmd( "pack .da.s.i.l .da.s.i.e" );
 	cmd( "pack .da.s.i -pady 5 -padx 5" );
