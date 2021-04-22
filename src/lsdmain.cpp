@@ -369,6 +369,7 @@ int lsdmain( int argn, char **argv )
 	// initialize tcl/tk and set global bidirectional variables
 	init_tcl_tk( argv[ 0 ], "lsd" );
 	Tcl_LinkVar( inter, "choice", ( char * ) &choice, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "choice_g", ( char * ) &choice_g, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "stop", ( char * ) &stop, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "debug_flag", ( char * ) &debug_flag, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "when_debug", ( char * ) &when_debug, TCL_LINK_INT );
@@ -602,6 +603,7 @@ int lsdmain( int argn, char **argv )
 	}
 
 	Tcl_UnlinkVar( inter, "choice" );
+	Tcl_UnlinkVar( inter, "choice_g" );
 	Tcl_UnlinkVar( inter, "stop" );
 	Tcl_UnlinkVar( inter, "debug_flag" );
 	Tcl_UnlinkVar( inter, "when_debug" );

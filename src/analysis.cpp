@@ -696,10 +696,7 @@ while ( true )
 
 	// coming from the structure window
 	if ( choice_g )
-	{
-		*choice = 29;					// change the parent filter
-		cmd( "focus .da.vars.lb.f.v" );
-	}
+		*choice = 29;
 
 	// update linked variables with values in entry boxes
 	cmd( "if [ string is double [ .da.f.h.v.sc.min.min get ] ] { set miny [ .da.f.h.v.sc.min.min get ] }" );
@@ -3581,9 +3578,31 @@ while ( true )
 
 		// MODEL STRUCTURE ACTIONS
 
-		// select parent filter from model structure graph
 		case 29:
-			cmd( "filter_series $res_g" );
+		
+			switch ( choice_g )
+			{
+				// redraw model structure graph
+				case 23:
+				
+					show_graph( );
+					cmd( "focustop .da" );
+					
+					break;
+					
+					
+				// select parent filter from model structure graph
+				case 24:
+				
+					cmd( "focus .da.vars.lb.f.v" );
+					cmd( "if { [ info exists res_g ] } { filter_series $res_g }" );
+					
+					break;
+					
+				default:
+					break;
+			}
+		
 			break;
 
 		default:

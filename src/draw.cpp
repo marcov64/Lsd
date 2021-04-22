@@ -44,26 +44,34 @@ float level_factor[ MAX_LEVEL ];
 int range;
 int range_type;
 
-
 /****************************************************
 SHOW_GRAPH
 ****************************************************/
 void show_graph( object *t )
 {
 	object *top;
-
+	static object *last_t = NULL;
+	
 	if ( ! struct_loaded || ! strWindowOn )		// model structure window is deactivated?
 	{
 		cmd( "destroytop .str" );
 		return;
 	}
 	
+	if ( t == NULL )
+		if ( last_t == NULL )
+			t = root;
+		else
+			t = last_t;
+	else
+		last_t = t;
+
 	for ( top = t; top->up != NULL; top = top->up );
 
 	cmd( "set strExist [ winfo exists .str ]" );
 	if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only if needed
 	{
-		cmd( "newtop .str \"\" { set strWindowOn 0; set choice 70 } \"\"" );
+		cmd( "newtop .str \"\" { set strWindowOn 0; set choice 23 } \"\"" );
 		cmd( "wm transient .str ." );
 		cmd( "sizetop .str" );
 	}
@@ -87,8 +95,8 @@ void show_graph( object *t )
 	
 	draw_buttons( );
 	
-	cmd( "bind .str.f.c <Configure> { if { $hrsizeM != [ winfo width .str ] || $vrsizeM != [ winfo height .str ] } { set choice_g 70 } }" );
-	cmd( "bind .str.f.c <Button-1> { if [ info exists res_g ] { set choice_g 24 } }" );
+	cmd( "bind .str.f.c <Configure> { if { $hrsizeM != [ winfo width .str ] || $vrsizeM != [ winfo height .str ] } { set choice_g 23 } }" );
+	cmd( "bind .str.f.c <Button-1> { if { [ info exists res_g ] } { set choice_g 24 } }" );
 	cmd( "bind .str.f.c <Double-Button-1> { if { [ info exists res_g ] && [ winfo exists .m ] } { destroy .list; set choice 6 } }" );
 	cmd( "bind .str.f.c <Button-2> { if { [ info exists res_g ] && [ winfo exists .m ] } { destroy .list; set vname $res_g; set useCurrObj no; tk_popup .str.f.c.v %%X %%Y } }" );
 	cmd( "bind .str.f.c <Button-3> { event generate .str.f.c <Button-2> -x %%x -y %%y }" );
@@ -142,24 +150,24 @@ void draw_buttons( void )
 	
 	cmd( "ttk::button .str.f.c.hplus -text \"\u25B6\" -width 2 -style bold.Toolbutton -command { \
 			set hfactM [ round_N [ expr { $hfactM + $rstepM } ] 2 ]; \
-			set choice_g 70 \
+			set choice_g 23 \
 		}" );
 	cmd( "ttk::button .str.f.c.hminus -text \"\u25C0\" -width 2 -style bold.Toolbutton -command { \
 			set hfactM [ round_N [ expr { max( $hfactM - $rstepM, $hfactMmin ) } ] 2 ]; \
-			set choice_g 70 \
+			set choice_g 23 \
 		}" );
 	cmd( "ttk::button .str.f.c.vplus -text \"\u25BC\" -width 2 -style Toolbutton -command { \
 			set vfactM [ round_N [ expr { $vfactM + $rstepM } ] 2 ]; \
-			set choice_g 70 \
+			set choice_g 23 \
 		}" );
 	cmd( "ttk::button .str.f.c.vminus -text \"\u25B2\" -width 2 -style Toolbutton -command { \
 			set vfactM [ round_N [ expr { max( $vfactM - $rstepM, $vfactMmin ) } ] 2 ]; \
-			set choice_g 70 \
+			set choice_g 23 \
 		}" );
 	cmd( "ttk::button .str.f.c.auto -text \"A\" -width 2 -style bold.Toolbutton -command { \
 			set hfactM [ round_N [ expr { $hfactM * $hratioM } ] 2 ]; \
 			set vfactM [ round_N [ expr { $vfactM * $vratioM } ] 2 ]; \
-			set choice_g 70 \
+			set choice_g 23 \
 		}" );
 		
 	cmd( "bind .str <Control-plus> { invoke .str.f.c.hplus }" );

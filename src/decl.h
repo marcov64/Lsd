@@ -352,7 +352,7 @@ void show_cells( object *r, char *lab );
 void show_debug( object *n );
 void show_descr( char *lab, int *choice );
 void show_eq( char *lab, int *choice );
-void show_graph( object *t );
+void show_graph( object *t = NULL );
 void show_initial( object *n );
 void show_neighbors( object *r, bool update );
 void show_observe( object *n );

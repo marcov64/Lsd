@@ -94,7 +94,6 @@ void create( void )
 	object *cur;
 
 	Tcl_LinkVar( inter, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "choice_g", ( char * ) &choice_g, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "actual_steps", ( char * ) &actual_steps, TCL_LINK_INT );
 
 	// sort the list of choices with existing run data to use later
@@ -156,7 +155,6 @@ void create( void )
 	}
 
 	Tcl_UnlinkVar( inter, "strWindowOn" );
-	Tcl_UnlinkVar( inter, "choice_g" );
 	Tcl_UnlinkVar( inter, "actual_steps" );
 }
 
@@ -6189,11 +6187,20 @@ case 70:
 
 	strWindowOn = strWindowOn ? 0 : 1;
 	
-	if ( strWindowOn )			
+	if ( strWindowOn )
+	{
 		cmd( "tooltip::tooltip .bbar.struct \"Hide structure\"" );
+		redrawStruc = true;
+	}
 	else
 		cmd( "tooltip::tooltip .bbar.struct \"Show structure\"" );
-			
+
+break;
+
+
+// refresh structure windows
+case 23:
+
 	redrawStruc = true;
 
 break;

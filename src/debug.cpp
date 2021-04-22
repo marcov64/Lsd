@@ -426,10 +426,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 		// coming from the structure window
 		if ( choice_g )
-		{
-			choice = 26;					// change the current object
-			cmd( "focus .deb" );
-		}
+			choice = 26;
 
 		if ( mode == 1 )
 		{
@@ -1388,22 +1385,6 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				choice = 0;
 				break;
 					
-			// select current parent from model structure graph
-			case 26:
-				ch1 = ( char * )Tcl_GetVar( inter, "res_g", 0 );
-				cur = root->search( ( const char * ) ch1 );
-				
-				// handle zero instanced objects
-				if ( cur != NULL )
-					choice = deb( cur, c, lab, res, interact );
-				else
-				{
-					choice = 0;
-					redraw = false;
-				}
-
-				break;
-
 			// model Report
 			case 27:
 				show_report( &choice, ".deb" );
@@ -1454,11 +1435,55 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 						}
 					}
 				}  
+				
 				break;  
 				
+
+			// MODEL STRUCTURE ACTIONS
+
+			case 26:
+			
+				switch ( choice_g )
+				{
+					// redraw model structure graph
+					case 23:
+					
+						show_graph( );
+						cmd( "focustop .deb" );
+						
+						choice = 0;
+						redraw = false;
+						
+						break;
+						
+						
+					// select parent filter from model structure graph
+					case 24:
+					
+						cmd( "focustop .deb" );
+						cur = root->search( ( char * )Tcl_GetVar( inter, "res_g", 0 ) );
+						
+						// handle zero instanced objects
+						if ( cur != NULL )
+							choice = deb( cur, c, lab, res, interact );
+						else
+						{
+							choice = 0;
+							redraw = false;
+						}
+						
+						break;
+						
+					default:
+						choice = 0;
+						redraw = false;
+				}
+
+				break;
+
 			default:
-				redraw = false;
 				choice = 0;
+				redraw = false;
 		}
 	}
 
