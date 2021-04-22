@@ -168,15 +168,23 @@ void draw_buttons( void )
 	cmd( "bind .str <Alt-minus> { invoke .str.f.c.vminus }" );
 	cmd( "bind .str <Control-a> { invoke .str.f.c.auto }; bind .str <Control-A> { invoke .str.f.c.auto }" );
 	cmd( "bind .str <Alt-a> { invoke .str.f.c.auto }; bind .str <Alt-A> { invoke .str.f.c.auto }" );
-		
+	
 	cmd( "set colM [ expr { $cx2 - $borderM - $borderMadj } ]" );
 	cmd( "set rowM [ expr { $cy2 - $borderM } ]" );
 	
-	cmd( ".str.f.c create window $colM $rowM -window .str.f.c.auto" );
-	cmd( ".str.f.c create window [ expr { $colM - $bhstepM } ] $rowM -window .str.f.c.hplus" );
-	cmd( ".str.f.c create window [ expr { $colM - 2 * $bhstepM } ] $rowM -window .str.f.c.hminus" );
-	cmd( ".str.f.c create window $colM [ expr { $rowM - $bvstepM } ] -window .str.f.c.vplus" );
-	cmd( ".str.f.c create window $colM [ expr { $rowM - 2 * $bvstepM } ] -window .str.f.c.vminus" );
+	cmd( "set a [ .str.f.c create window $colM $rowM -window .str.f.c.auto -tags tooltip ]" );
+	cmd( "set b [ .str.f.c create window [ expr { $colM - $bhstepM } ] $rowM -window .str.f.c.hplus -tags tooltip ]" );
+	cmd( "set c [ .str.f.c create window [ expr { $colM - 2 * $bhstepM } ] $rowM -window .str.f.c.hminus -tags tooltip ]" );
+	cmd( "set d [ .str.f.c create window $colM [ expr { $rowM - $bvstepM } ] -window .str.f.c.vplus -tags tooltip ]" );
+	cmd( "set e [ .str.f.c create window $colM [ expr { $rowM - 2 * $bvstepM } ] -window .str.f.c.vminus -tags tooltip ]" );
+		
+	cmd( "update idletasks" );
+	
+	cmd( "tooltip::tooltip .str.f.c -item $a \"Automatic adjustment\"" );
+	cmd( "tooltip::tooltip .str.f.c -item $b \"Increase horizontal spacing\"" );
+	cmd( "tooltip::tooltip .str.f.c -item $c \"Decrease horizontal spacing\"" );
+	cmd( "tooltip::tooltip .str.f.c -item $d \"Increase vertical spacing\"" );
+	cmd( "tooltip::tooltip .str.f.c -item $e \"Decrease vertical spacing\"" );
 }
 
 
@@ -192,12 +200,7 @@ void create_float_list( object *t )
 	cmd( "set tlist_%s [ list ]", t->label );
 	cmd( "set slist_%s [ list ]", t->label );
 
-	if ( t->v == NULL )
-	{
-		cmd( "lappend tlist_%s \"(no elements)\"", t->label );
-		cmd( "lappend slist_%s TLabel", t->label );
-	}
-	else
+	if ( t->v != NULL )
 		for ( cv = t->v; cv != NULL; cv = cv->next )
 		{
 			// special updating scheme?
@@ -214,19 +217,19 @@ void create_float_list( object *t )
 				if ( cv->num_lag == 0 )
 				{
 					cmd( "lappend tlist_%s \"%s (V$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s var.TLabel", t->label );
+					cmd( "lappend slist_%s tvar.TLabel", t->label );
 				}
 				else
 				{
 					cmd( "lappend tlist_%s \"%s (V_%d$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s lvar.TLabel", t->label );
+					cmd( "lappend slist_%s tlvar.TLabel", t->label );
 				}
 			}
 			
 			if ( cv->param == 1 )
 			{
 				cmd( "lappend tlist_%s \"%s (P$varFlags)\"", t->label, cv->label );
-				cmd( "lappend slist_%s par.TLabel", t->label );
+				cmd( "lappend slist_%s tpar.TLabel", t->label );
 			}
 			
 			if ( cv->param == 2 )
@@ -234,12 +237,12 @@ void create_float_list( object *t )
 				if ( cv->num_lag == 0 )
 				{
 					cmd( "lappend tlist_%s \"%s (F$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s fun.TLabel", t->label );
+					cmd( "lappend slist_%s tfun.TLabel", t->label );
 				}
 				else
 				{
 					cmd( "lappend tlist_%s \"%s (F_%d$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s lfun.TLabel", t->label );
+					cmd( "lappend slist_%s tlfun.TLabel", t->label );
 				}
 			}
 		}
@@ -252,7 +255,7 @@ DRAW_OBJ
 void draw_obj( object *t, object *sel, int level, int center, int from, bool zeroinst )
 {
 	bool fit_wid;
-	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_ELEM_LENGTH ];
+	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_LINE_SIZE ];
 	double h_fact, v_fact, range_fact;
 	int h, i, j, k, step_level, step_type, begin, count, max_wid, range_init;
 	object *cur;
@@ -326,8 +329,8 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 				}
 				
 				skip_next_obj( cur, &count );
-				sprintf( str, "%s%d", strlen( ch1 ) > 0 ? " " : "", count );
-				strcat( ch1, str );
+				snprintf( str, MAX_LINE_SIZE, "%s%d", strlen( ch1 ) > 0 ? " " : "", count );
+				strncat( ch1, str, MAX_LINE_SIZE - 2 );
 				
 				for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group
 			}
@@ -482,38 +485,31 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 				after cancel $res_g_id \
 			}; \
 			destroy .list; \
-			set res_g_id [ after $ttipdelay { \
-				destroy .list; \
-				toplevel .list -background $colorsTheme(bg) -class Tooltip; \
-				wm withdraw .list; \
-				wm transient .list .str; \
-				wm title .list \"\"; \
-				wm protocol .list WM_DELETE_WINDOW { }; \
-				ttk::frame .list.b -borderwidth 1 -relief solid; \
-				ttk::frame .list.b.h; \
-				ttk::label .list.b.h.l -text \"Object:\"; \
-				ttk::label .list.b.h.n -style hl.TLabel -text $res_g; \
-				pack .list.b.h.l .list.b.h.n -side left -padx 2; \
-				ttk::frame .list.b.l; \
-				set res_g_i 1; \
-				foreach res_g_t $tlist_%s res_g_s $slist_%s { \
-					ttk::label .list.b.l.e$res_g_i -text \"$res_g_t\" -style $res_g_s; \
-					pack .list.b.l.e$res_g_i -anchor w; \
-					incr res_g_i \
-				}; \
-				pack .list.b.h .list.b.l -padx 2 -pady 2; \
-				pack .list.b; \
-				update idletasks; \
-				wm geometry .list +[ expr { %%X + 5 } ]+[ expr { %%Y + 5 } ]; \
-				wm overrideredirect .list 1; \
-				wm attributes .list -topmost 1; \
-				wm state .list normal; \
-				update idletasks \
-			} ] \
-		}", str2, str2, str2, str2 );
+			if { [ llength $tlist_%s ] > 0 } { \
+				set res_g_id [ after $ttipdelay { \
+					destroy .list; \
+					toplevel .list -class Tooltip -background $colorsTheme(ttip) -borderwidth 0 -highlightthickness 1 -highlightbackground $colorsTheme(fg); \
+					wm withdraw .list; \
+					set res_g_i 0; \
+					foreach res_g_t $tlist_%s res_g_s $slist_%s { \
+						ttk::label .list.e$res_g_i -text \"$res_g_t\" -style $res_g_s -background $colorsTheme(ttip); \
+						pack .list.e$res_g_i -anchor w -ipadx 1; \
+						incr res_g_i \
+					}; \
+					update idletasks; \
+					wm geometry .list +[ expr { %%X + 5 } ]+[ expr { %%Y + 5 } ]; \
+					wm overrideredirect .list 1; \
+					wm attributes .list -topmost 1; \
+					wm state .list normal; \
+					update idletasks \
+				} ] \
+			} \
+		}", str2, str2, str2, str2, str2 );
 
 	cmd( ".str.f.c bind %s <Leave> { \
-			after cancel $res_g_id; \
+			if { [ info exists res_g_id ] } { \
+				after cancel $res_g_id \
+			}; \
 			unset -nocomplain res_g res_g_id; \
 			destroy .list \
 		}", str2 );

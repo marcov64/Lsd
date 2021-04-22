@@ -22,7 +22,7 @@ set defcolorsL	{ black red green #d0d000 #fb46bc blue DeepSkyBlue1 RoyalBlue1 Pa
 set defcolorsD	{ white tomato green yellow2 pink "steel blue" DeepSkyBlue1 RoyalBlue1 PaleTurquoise2 cyan aquamarine DarkSeaGreen1 chartreuse1 OliveDrab khaki3 LightGoldenrod4 sienna1 chocolate4 firebrick3 orange1 salmon3 }
 
 set hlcolorL	red			; # general highlight color
-set hlcolorD	tomato			; # general highlight color
+set hlcolorD	tomato		; # general highlight color
 set commcolorL	green4		; # color of comments (light mode)
 set commcolorD	DarkOliveGreen3	; # color of comments (dark mode)
 set strcolorL	blue4		; # color of strings (light mode)
@@ -32,7 +32,7 @@ set prepcolorD	tan1		; # color of C preprocessor (dark mode)
 set typecolorL	DarkViolet	; # color of C type (light mode)
 set typecolorD	Cyan3		; # color of C type (dark mode)
 set kwrdcolorL	purple4		; # color of C keyword (light mode)
-set kwrdcolorD	"medium orchid"	; # color of C keyword (dark mode)
+set kwrdcolorD	MediumOrchid; # color of C keyword (dark mode)
 set vlsdcolorL	red4		; # color of LSD variable (light mode)
 set vlsdcolorD	tomato		; # color of LSD variable (dark mode)
 set mlsdcolorL	DodgerBlue4	; # color of LSD macro (light mode)
@@ -42,17 +42,19 @@ set parcolorD	white		; # color of parameter label (dark mode)
 set varcolorL	blue		; # color of variable label (light mode)
 set varcolorD	tan1		; # color of variable label (dark mode)
 set lvarcolorL	purple		; # color of lagged variable label (light mode)
-set lvarcolorD	DarkOliveGreen3	; # color of lagged variable label (dark mode)
+set lvarcolorD	DarkOliveGreen3; # color of lagged variable label (dark mode)
 set funcolorL	firebrick	; # color of function label (light mode)
 set funcolorD	RoyalBlue	; # color of function label (dark mode)
 set lfuncolorL	tomato		; # color of lagged function label (light mode)
-set lfuncolorD	"medium orchid"	; # color of lagged function label (dark mode)
+set lfuncolorD	MediumOrchid; # color of lagged function label (dark mode)
 set objcolorL	red			; # color of object label (light mode)
 set objcolorD	tomato		; # color of object label (dark mode)
 set grpcolorL	red			; # color of model group label (light mode)
 set grpcolorD	tomato		; # color of model group label (dark mode)
 set modcolorL	blue		; # color of model label (light mode)
 set modcolorD	SlateGray3	; # color of model label (dark mode)
+set ttipcolorL	LightYellow	; # color of tooltip background (light mode)
+set ttipcolorD	SteelBlue4	; # color of tooltip background (dark mode)
 
 # OS specific minimum window sizes (horizontal & vertical) (must be even numbers)
 set hsizeBminMac		520	; # browser window
@@ -171,7 +173,7 @@ set parAll	"(all)"	; # string used for selecting all series parents
 
 # tool tips (balloons) defaults
 set ttipdelay	500	; # time before showing tool tips
-set ttipfade	1	; # enable fade-out of tool tips
+set ttipfade	0	; # enable fade-out of tool tips
 
 # lattice defaults
 set cscaleLat	1.0	; # default color scale (1:1.0)

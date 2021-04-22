@@ -288,6 +288,8 @@ proc showmodel pippo {
 		showtop .l centerW no no yes 0 0 "" no yes
 	}
 
+	tooltip::tooltip clear .l.l.l*
+
 	.l.l.tit.n conf -text "$modelGroup"
 
 	set curdir [ pwd ]
@@ -315,6 +317,8 @@ proc showmodel pippo {
 		lappend lmn "$upgroup"
 		lappend group -1
 		.l.l.l insert end "$upSymbol"
+		
+		tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] "$upgroup"
 	}
 
 	set dir [ lsort -dictionary [ glob -nocomplain -type d * ] ]
@@ -341,6 +345,8 @@ proc showmodel pippo {
 			lappend group 1
 			.l.l.l insert end "$groupSymbol$app"
 			.l.l.l itemconf end -fg $colorsTheme(grp)
+			
+			tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] "[ file nativename $pippo/$i ]"
 		}
 	}
 
@@ -372,6 +378,8 @@ proc showmodel pippo {
 			lappend group 0
 			.l.l.l insert end "$app1 (v. $app2)"				 
 			.l.l.l itemconf end -fg $colorsTheme(mod)
+			
+			tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] "[ file nativename $pippo/$i ]"
 		}
 	}
 

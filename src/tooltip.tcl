@@ -13,7 +13,7 @@
 
 
 package require Tk 8.4
-package require msgcat
+#package require msgcat
 
 #------------------------------------------------------------------------
 # PROCEDURE
@@ -295,7 +295,8 @@ proc ::tooltip::show {w msg {i {}}} {
     set b $G(TOPLEVEL)
     # Use late-binding msgcat (lazy translation) to support programs
     # that allow on-the-fly l10n changes
-    $b.label configure -text [::msgcat::mc $msg] -justify left
+    #$b.label configure -text [::msgcat::mc $msg] -justify left
+    $b.label configure -text $msg -justify left
     update idletasks
     set screenw [winfo screenwidth $w]
     set screenh [winfo screenheight $w]
@@ -415,6 +416,13 @@ proc ::tooltip::listitemTip {w x y} {
 
     set G(LAST) -1
     set item [$w index @$x,$y]
+	set bbox [ $w bbox $item ]
+	if { [ llength $bbox ] < 4 || \
+		 $x > [ expr { [ lindex $bbox 0 ] + [ lindex $bbox 2 ] } ] || \
+		 $y > [ expr { [ lindex $bbox 1 ] + [ lindex $bbox 3 ] } ] } {
+		hide
+		return
+	}
     if {$G(enabled) && [info exists tooltip($w,$item)]} {
 	set G(AFTERID) [after $G(DELAY) \
 		[namespace code [list show $w $tooltip($w,$item) cursor]]]
@@ -427,6 +435,13 @@ proc ::tooltip::listitemMotion {w x y} {
     variable G
     if {$G(enabled)} {
         set item [$w index @$x,$y]
+		set bbox [ $w bbox $item ]
+		if { [ llength $bbox ] < 4 || \
+			 $x > [ expr { [ lindex $bbox 0 ] + [ lindex $bbox 2 ] } ] || \
+			 $y > [ expr { [ lindex $bbox 1 ] + [ lindex $bbox 3 ] } ] } {
+			set item [ $w index end ]
+			hide
+		}
         if {$item ne $G(LAST)} {
             set G(LAST) $item
             after cancel $G(AFTERID)
@@ -463,8 +478,10 @@ proc ::tooltip::itemTip {w args} {
 
 proc ::tooltip::enableCanvas {w args} {
     if {[string match *itemTip* [$w bind all <Enter>]]} { return }
-    $w bind all <Enter> +[namespace code [list itemTip $w]]
+#    $w bind all <Enter> +[namespace code [list itemTip $w]]
     $w bind all <Leave>	+[namespace code [list hide 1]] ; # fade ok
+    $w bind tooltip <Enter> +[namespace code [list itemTip $w]]
+    $w bind tooltip <Leave>	+[namespace code [list hide 1]] ; # fade ok
     $w bind all <Any-KeyPress> +[namespace code hide]
     $w bind all <Any-Button> +[namespace code hide]
 }

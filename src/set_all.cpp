@@ -180,6 +180,15 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "bind .sa.m.f1.rd.i.r7 <Return> {.sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
 
 	cmd( "pack .sa.m.f1.rd.i.r1 .sa.m.f1.rd.i.r9 .sa.m.f1.rd.i.r2 .sa.m.f1.rd.i.r4 .sa.m.f1.rd.i.r3 .sa.m.f1.rd.i.r8 .sa.m.f1.rd.i.r5 .sa.m.f1.rd.i.r7 -anchor w" );
+	
+	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r1 \"Every instance set to the same Value\"" );
+	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r9 \"Linear range from Minimum to Maximum\"" );
+	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r2 \"From Start plus Increasing for each instance\"" );
+	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r4 \"From Start in each group plus Increasing for each instance\"" );
+	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r3 \"Uniform random real draw from Minimum to Maximum\"" );
+	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r8 \"Uniform random integer draw from Minimum to Maximum\"" );
+	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r5 \"Random draw from normal distribution with Mean and Standard deviation\"" );
+	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r7 \"Read initialization data from disk file\"" );
 
 	cmd( "pack .sa.m.f1.rd.l .sa.m.f1.rd.i" );
 
@@ -203,11 +212,18 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "ttk::checkbutton .sa.m.f2.s.i.l.f -text \"Fill-in\" -variable fill" );
 	cmd( "pack  .sa.m.f2.s.i.l.a .sa.m.f2.s.i.l.f -padx 5 -side left" );
 	cmd( "pack  .sa.m.f2.s.i.l -pady 2" );
+	
+	cmd( "tooltip::tooltip .sa.m.f2.s.i.l.a \"Number of instances to skip from initializing\"" );
+	cmd( "tooltip::tooltip .sa.m.f2.s.i.l.f \"Fill intermediate instances with same value\"" );
 
 	cmd( "ttk::frame .sa.m.f2.s.i.sel -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 	cmd( "ttk::radiobutton .sa.m.f2.s.i.sel.all -text \"Apply to all instances\" -variable to_all -value 1 -command { .sa.m.f2.s.i.sel2.c.to conf -state disabled; .sa.m.f2.s.i.sel2.c.from conf -state disabled; bind .sa.m.f2.s.i.sel2.c.from <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { } }" );
 	cmd( "ttk::radiobutton .sa.m.f2.s.i.sel.sel -text \"Apply to a range of instances\" -variable to_all -value 0 -command { .sa.m.f2.s.i.sel2.c.to conf -state normal; .sa.m.f2.s.i.sel2.c.from conf -state normal; bind .sa.m.f2.s.i.sel2.c.from <Button-3> { set choice 9 }; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { set choice 10 }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> { set choice 9 }; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { set choice 10 } }" );
 	cmd( "pack .sa.m.f2.s.i.sel.all .sa.m.f2.s.i.sel.sel -anchor w" );
+	
+	cmd( "tooltip::tooltip .sa.m.f2.s.i.sel.all \"Apply initialization to all instances\"" );
+	cmd( "tooltip::tooltip .sa.m.f2.s.i.sel.sel \"Apply initialization to a range of instances\"" );
+
 	cmd( "pack .sa.m.f2.s.i.sel -pady 2" );
 
 	cmd( "ttk::frame .sa.m.f2.s.i.sel2" );
@@ -222,6 +238,8 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "ttk::label .sa.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
 	cmd( "pack .sa.m.f2.s.i.sel2.c .sa.m.f2.s.i.sel2.obs" );
 	cmd( "pack .sa.m.f2.s.i.sel2 -pady 2" );
+	
+	cmd( "tooltip::tooltip .sa.m.f2.s.i.sel2 \"Select first and last instance to initialize\"" );
 
 	cmd( "pack .sa.m.f2.s.tit .sa.m.f2.s.i" );
 
@@ -242,12 +260,17 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "pack .sa.m.f2.rnd.i.le.f .sa.m.f2.rnd.i.le.s -side left -padx 5" );
 
 	cmd( "pack .sa.m.f2.rnd.i.le -pady 2" );
+	
+	cmd( "tooltip::tooltip .sa.m.f2.rnd.i.le.f \"Ensure the generator starts from a known condition\"" );
+	cmd( "tooltip::tooltip .sa.m.f2.rnd.i.le.s \"Choose the random number generator seed\"" );
 
 	cmd( "pack .sa.m.f2.rnd.l .sa.m.f2.rnd.i" );
 
-	cmd( "ttk::checkbutton .sa.m.f2.ud -text \"Update initialization comments\" -variable update_d" );
+	cmd( "ttk::frame .sa.m.f2.ud" );
+	cmd( "ttk::checkbutton .sa.m.f2.ud.c -text \"Update initialization description\" -variable update_d" );
+	cmd( "pack .sa.m.f2.ud.c" );
 
-	cmd( "pack .sa.m.f2.s .sa.m.f2.rnd .sa.m.f2.ud -anchor w -expand yes -fill x" );
+	cmd( "pack .sa.m.f2.s .sa.m.f2.rnd .sa.m.f2.ud -expand yes -fill x" );
 
 	cmd( "pack .sa.m.f1 .sa.m.f2 -side left -expand yes -fill both -padx 5 -pady 5" );
 	cmd( "pack .sa.head .sa.m -pady 5" );
@@ -534,18 +557,18 @@ void set_all( int *choice, object *original, char *lab, int lag )
 		if ( to_all )
 			if ( step_in > 1 )
 				if ( cd->init != NULL )
-					sprintf( msg, "%s\n%d instances %s%s.", cd->init, j, action, ch );
+					sprintf( msg, "%s\n%d instances %s%s", cd->init, j, action, ch );
 				else
-					sprintf( msg, "%d instances %s%s.", j, action, ch );
+					sprintf( msg, "%d instances %s%s", j, action, ch );
 			else
-				sprintf( msg, "All %d instances %s%s.", j, action, ch );
+				sprintf( msg, "All %d instances %s%s", j, action, ch );
 		else
 			if ( cd->init != NULL )
-				sprintf( msg, "%s\nInstances from %d to %d %s%s.", cd->init, cases_from, cases_to, action, ch );
+				sprintf( msg, "%s\nInstances from %d to %d %s%s", cd->init, cases_from, cases_to, action, ch );
 			else
-				sprintf( msg, "Instances from %d to %d %s%s.", cases_from, cases_to, action, ch );  
+				sprintf( msg, "Instances from %d to %d %s%s", cases_from, cases_to, action, ch );  
 								
-		change_descr_lab( lab, "", "", "", msg );
+		change_description( lab, NULL, -1, NULL, msg );
 	}
 	
 	unsaved_change( true );				// signal unsaved change
@@ -770,6 +793,11 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 	cmd( "ttk::button .sens.fb.rem -width $butWid -text Remove -command { set choice 3 }" );
 	cmd( "pack .sens.fb.int .sens.fb.paste .sens.fb.del .sens.fb.rem -padx $butSpc -side left" );
 	cmd( "pack .sens.fb -padx $butPad -anchor e" );
+	
+	cmd( "tooltip::tooltip .sens.fb.int \"Force rounding to integer values\"" );
+	cmd( "tooltip::tooltip .sens.fb.paste \"Insert the content of clipboard\"" );
+	cmd( "tooltip::tooltip .sens.fb.del \"Delete all current values\"" );
+	cmd( "tooltip::tooltip .sens.fb.rem \"Remove variable from sensitivity analysis\"" );
 
 	cmd( "okhelpcancel .sens fb2 { set choice 1 } { LsdHelp menudata_sa.html#entry } { set choice 2 }" );
 	cmd( "bind .sens.fb2.ok <KeyPress-Return> { set choice 1 }" );

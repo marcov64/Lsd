@@ -229,6 +229,8 @@ cmd( "ttk::label .da.vars.lb.th -text \"Series available\" -style boldSmall.TLab
 cmd( "ttk::combobox .da.vars.lb.flt -state readonly -textvariable serPar -postcommand { .da.vars.lb.flt configure -values [ update_parent ] }" );
 cmd( "pack .da.vars.lb.th .da.vars.lb.flt -fill x" );
 
+cmd( "tooltip::tooltip .da.vars.lb.flt \"Filter series to show\"" );
+
 cmd( "bind .da.vars.lb.flt <<ComboboxSelected>> { filter_series }" );
 
 cmd( "set f .da.vars.lb.f" );
@@ -431,6 +433,8 @@ cmd( "pack  .da.f.h.v.ft.to.maxc .da.f.h.v.ft.to.mxc -ipadx 5 -side left" );
 
 cmd( "pack .da.f.h.v.ft.auto .da.f.h.v.ft.from .da.f.h.v.ft.to -side left -padx 5 -expand 1 -fill x" );
 
+cmd( "tooltip::tooltip .da.f.h.v.ft \"Choose cases (time steps) to use\"" );
+
 cmd( "ttk::frame .da.f.h.v.sc" );			// scaling/limits options
 
 cmd( "ttk::checkbutton .da.f.h.v.sc.auto -text \"Y self-scaling\" -variable auto -command { if { $auto } { .da.f.h.v.sc.max.max conf -state disabled; .da.f.h.v.sc.min.min conf -state disabled } { .da.f.h.v.sc.max.max conf -state normal; .da.f.h.v.sc.min.min conf -state normal } }" );
@@ -447,6 +451,10 @@ cmd( "pack .da.f.h.v.sc.max.lmax .da.f.h.v.sc.max.max -ipadx 5 -side left" );
 
 cmd( "pack .da.f.h.v.sc.auto .da.f.h.v.sc.min .da.f.h.v.sc.max -side left -padx 5 -expand 1 -fill x" );
 
+cmd( "tooltip::tooltip .da.f.h.v.sc.auto \"Automatic vertical axis limits\"" );
+cmd( "tooltip::tooltip .da.f.h.v.sc.min \"Minimum (lower) vertical axis limit\"" );
+cmd( "tooltip::tooltip .da.f.h.v.sc.max \"Maximum (upper) vertical axis limit\"" );
+
 cmd( "ttk::frame .da.f.h.v.y2" );			// log and 2nd y axis
 cmd( "ttk::checkbutton .da.f.h.v.y2.logs -text \"Series in logs\" -variable logs" );
 cmd( "ttk::label .da.f.h.v.y2.pad" );
@@ -461,16 +469,26 @@ cmd( "pack .da.f.h.v.y2.logs .da.f.h.v.y2.pad .da.f.h.v.y2.y2 .da.f.h.v.y2.f -si
 
 cmd( "pack .da.f.h.v.ft .da.f.h.v.sc .da.f.h.v.y2 -anchor w -expand 1 -fill x" );
 
+cmd( "tooltip::tooltip .da.f.h.v.y2.logs \"Use log values of series\"" );
+cmd( "tooltip::tooltip .da.f.h.v.y2.y2 \"Enable secondary vertical scale\"" );
+cmd( "tooltip::tooltip .da.f.h.v.y2.f \"First series to use secondary scale\"" );
+
 // right options block
 cmd( "ttk::frame .da.f.h.tc -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 cmd( "ttk::radiobutton .da.f.h.tc.time -text \"Time series\" -variable tc -value 0 -command { if { $xy == 0 } { .da.f.h.v.y2.y2 conf -state normal }; if { $xy == 1 } { .da.f.tit.lp.line config -state normal; set line_point $linemodeP } }" );
 cmd( "ttk::radiobutton .da.f.h.tc.cross -text \"Cross-section\" -variable tc -value 1 -command { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; if { $xy == 1 } { set line_point 2;  .da.f.tit.lp.line config -state disabled } }" );
 cmd( "pack .da.f.h.tc.time .da.f.h.tc.cross -anchor w" );
 
+cmd( "tooltip::tooltip .da.f.h.tc.time \"Longitudinal plot (cases in x axis)\"" );
+cmd( "tooltip::tooltip .da.f.h.tc.cross \"Cross-section plot (series in x axis)\"" );
+
 cmd( "ttk::frame .da.f.h.xy -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 cmd( "ttk::radiobutton .da.f.h.xy.seq -text \"Sequence\" -variable xy -value 0 -command { if { $tc == 0 } { .da.f.h.v.y2.y2 conf -state normal } { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled }; .da.f.tit.run.gnu conf -state disabled; .da.f.tit.run.watch conf -state normal; if { $tc == 1 } { .da.f.tit.lp.line config -state normal; set line_point $linemodeP } }" );
 cmd( "ttk::radiobutton .da.f.h.xy.xy -text \"XY plot\" -variable xy -value 1 -command { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; .da.f.tit.run.gnu conf -state normal; .da.f.tit.run.watch conf -state disabled; if { $tc == 1 } { set line_point 2;  .da.f.tit.lp.line config -state disabled } }" );
 cmd( "pack .da.f.h.xy.seq .da.f.h.xy.xy -anchor w" );
+
+cmd( "tooltip::tooltip .da.f.h.xy.seq \"Regular plot (cases and series in axes)\"" );
+cmd( "tooltip::tooltip .da.f.h.xy.xy \"Scatter plot (series in both axes)\"" );
 
 // pack first horizontal group of controls
 cmd( "pack .da.f.h.v .da.f.h.tc .da.f.h.xy -padx 20 -side left -expand 1 -fill x" );
@@ -483,32 +501,47 @@ cmd( "ttk::label .da.f.tit.t.l -text Title" );
 cmd( "ttk::entry .da.f.tit.t.e -textvariable tit -width 35 -justify center" );
 cmd( "pack .da.f.tit.t.l .da.f.tit.t.e -ipadx 5 -side left" );
 
+cmd( "tooltip::tooltip .da.f.tit.t \"Title (name) to use in plot tab/window\"" );
+
 cmd( "ttk::frame .da.f.tit.chk" );			// golor/grid options
 
 cmd( "ttk::checkbutton .da.f.tit.chk.allblack -text \"No colors\" -variable allblack" );
 cmd( "ttk::checkbutton .da.f.tit.chk.grid -text \"Grids\" -variable grid" );
 cmd( "pack .da.f.tit.chk.allblack .da.f.tit.chk.grid -anchor w" );
 
+cmd( "tooltip::tooltip .da.f.tit.chk.allblack \"Gray scale plots only\"" );
+cmd( "tooltip::tooltip .da.f.tit.chk.grid \"Show grid lines on plots\"" );
+
 cmd( "ttk::frame .da.f.tit.run" );			// watch/gnuplot options 
 cmd( "ttk::checkbutton .da.f.tit.run.watch -text Watch -variable watch" );
 cmd( "ttk::checkbutton .da.f.tit.run.gnu -text Gnuplot -variable gnu -state disabled" );
 cmd( "pack .da.f.tit.run.watch .da.f.tit.run.gnu -anchor w" );
+
+cmd( "tooltip::tooltip .da.f.tit.run.watch \"Enable plotting to be interrupted\"" );
+cmd( "tooltip::tooltip .da.f.tit.run.gnu \"Open plot in Gnuplot\"" );
 
 cmd( "ttk::frame .da.f.tit.pr" );			// precision positions
 cmd( "ttk::label .da.f.tit.pr.l -text \"Precision\"" );
 cmd( "ttk::spinbox .da.f.tit.pr.e -width 2 -from 0 -to 9 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 9 } { set pdigits %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pdigits; return 0 } } -invalidcommand { bell } -justify center" );
 cmd( "pack .da.f.tit.pr.l .da.f.tit.pr.e" );
 
+cmd( "tooltip::tooltip .da.f.tit.pr \"Number of significant digits to use\"" );
+
 cmd( "ttk::frame .da.f.tit.ps" );			// point size
 cmd( "ttk::label .da.f.tit.ps.l -text \"Point size\"" );
 cmd( "ttk::spinbox .da.f.tit.ps.e -width 4 -from 0.2 -to 9.8 -increment 0.2 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n >= 0.2 && $n <= 9.8 } { set point_size %%P; return 1 } { %%W delete 0 end; %%W insert 0 $point_size; return 0 } } -invalidcommand { bell } -justify center" );
 cmd( "pack .da.f.tit.ps.l .da.f.tit.ps.e" );
+
+cmd( "tooltip::tooltip .da.f.tit.ps \"Size/width of data points/lines\"" );
 
 // line/points option
 cmd( "ttk::frame .da.f.tit.lp -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 cmd( "ttk::radiobutton .da.f.tit.lp.line -text \"Lines\" -variable line_point -value 1" );
 cmd( "ttk::radiobutton .da.f.tit.lp.point -text \"Points\" -variable line_point -value 2" );
 cmd( "pack .da.f.tit.lp.line .da.f.tit.lp.point -anchor w" );
+
+cmd( "tooltip::tooltip .da.f.tit.lp.line \"Connect data points with lines\"" );
+cmd( "tooltip::tooltip .da.f.tit.lp.point \"Represent data points with markers\"" );
 
 // pack second horizontal group of controls
 cmd( "pack .da.f.tit.t .da.f.tit.chk .da.f.tit.run .da.f.tit.pr .da.f.tit.ps .da.f.tit.lp -padx 10 -pady 5 -side left -expand 1 -fill x" );
@@ -529,6 +562,14 @@ cmd( "ttk::button .da.b.lat -width [ expr { $butWid + 1 } ] -text Lattice -comma
 
 cmd( "pack .da.b.ts .da.b.dump .da.b.sv .da.b.sp .da.b.st .da.b.fr .da.b.lat -padx $butSpc -side left" );
 cmd( "pack .da.b -padx $butPad -pady $butPad -side right" );
+
+cmd( "tooltip::tooltip .da.b.ts \"Plot selected series\"" );
+cmd( "tooltip::tooltip .da.b.dump \"Save selected plot to file\"" );
+cmd( "tooltip::tooltip .da.b.sv \"Save selected series to file\"" );
+cmd( "tooltip::tooltip .da.b.sp \"Show selected series data\"" );
+cmd( "tooltip::tooltip .da.b.st \"Statistics from selected series\"" );
+cmd( "tooltip::tooltip .da.b.fr \"Histogram from selected series\"" );
+cmd( "tooltip::tooltip .da.b.lat \"Lattice from selected series\"" );
 
 // top window shortcuts binding
 cmd( "bind .da <KeyPress-Escape> { set choice 2 }" );	// quit

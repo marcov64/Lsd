@@ -179,10 +179,6 @@ if [ string equal $CurPlatform mac ] {
 	}
 }
 
-# set tool tips (balloons)
-tooltip::tooltip delay $ttipdelay
-tooltip::tooltip fade $ttipfade
-
 # detect and update OS-dependent current/default theme configurations
 updateTheme
 
@@ -285,6 +281,7 @@ if { $darkTheme } {
 	set colorsTheme(obj) $objcolorD
 	set colorsTheme(grp) $grpcolorD
 	set colorsTheme(mod) $modcolorD
+	set colorsTheme(ttip) $ttipcolorD
 } else {
 	set defcolors $defcolorsL
 	set colorsTheme(hl) $hlcolorL
@@ -303,7 +300,14 @@ if { $darkTheme } {
 	set colorsTheme(obj) $objcolorL
 	set colorsTheme(grp) $grpcolorL
 	set colorsTheme(mod) $modcolorL
+	set colorsTheme(ttip) $ttipcolorL
 }
+
+# set tool tips (balloons)
+set tooltip::labelOpts [ list -background $colorsTheme(ttip) -foreground $colorsTheme(fg) \
+	 -borderwidth 0 -highlightthickness 1 -highlightbackground $colorsTheme(fg) ]
+tooltip::tooltip delay $ttipdelay
+tooltip::tooltip fade $ttipfade
 
 # Variable 'alignMode' configure special, per module (LMM, LSD), settings
 unset -nocomplain defaultPos defaultFocus

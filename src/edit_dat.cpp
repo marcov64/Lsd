@@ -95,10 +95,10 @@ void edit_data( object *r, int *choice, char *lab )
 					set canBbox [ $g.can bbox all ]; \
 					if { $iniDone } { \
 						set maxWid [ lindex $iniSz 0 ]; \
-						set maxHgt [ expr { [ lindex $iniSz 1 ] - 110 } ] \
+						set maxHgt [ expr { [ lindex $iniSz 1 ] - 75 } ] \
 					} { \
 						set maxWid [ expr { [ winfo screenwidth .inid ] - [ getx .inid topleftW ] - 2 * $bordsize - $hmargin } ]; \
-						set maxHgt [ expr { [ winfo screenheight .inid ] - [ gety .inid topleftW ] - 2 * $bordsize - $vmargin - $tbarsize - 110 } ] \
+						set maxHgt [ expr { [ winfo screenheight .inid ] - [ gety .inid topleftW ] - 2 * $bordsize - $vmargin - $tbarsize - 75 } ] \
 					}; \
 					set desWid [ expr { min( max( [ lindex $canBbox 2 ] - [ lindex $canBbox 0 ] + [ winfo width $g.ys ], [ lindex $iniSz 0 ] ), $maxWid ) } ]; \
 					set desHgt [ expr { min( max( [ lindex $canBbox 3 ] - [ lindex $canBbox 1 ] + [ winfo height $g.xs ], 40 ), $maxHgt ) } ]; \
@@ -149,10 +149,8 @@ void edit_data( object *r, int *choice, char *lab )
 
 	cmd( "pack .inid.t -expand 1 -fill both" );
 	
-	cmd( "set inidMsg \"\"" );
-	cmd( "ttk::label .inid.msg -width 45 -textvariable inidMsg" );
 	cmd( "ttk::label .inid.err -text \"\"" );
-	cmd( "pack .inid.msg .inid.err -padx 5 -pady 5" );
+	cmd( "pack .inid.err -padx 5 -pady 5" );
 
 	cmd( "donehelp .inid b { set choice 1 } { LsdHelp menudata_init.html }" );
 
@@ -312,14 +310,15 @@ void link_cells( object *r, char *lab )
 			cmd( "ttk::label $w.tit_t%s -text %s", cv1->label, ch1 );
 			cmd( "grid $w.tit_t%s -row %d -sticky w -padx { 2 5 }", cv1->label, k );
 			cmd( "mouse_wheel $w.tit_t%s", cv1->label );
-			cmd( "bind $w.tit_t%s <Enter> { set inidMsg \"Parameter '%s' in '%s'\" }", cv1->label, cv1->label, cur1->label );
-			cmd( "bind $w.tit_t%s <Leave> { set inidMsg \"\" }", cv1->label );
 			cmd( "ttk::label $w.typ_t%s -text (P) -style hl.TLabel", cv1->label );
 			cmd( "grid $w.typ_t%s -row %d -column 1 -padx 1", cv1->label, k );
 			cmd( "mouse_wheel $w.typ_t%s", cv1->label );
 			cmd( "ttk::button $w.t%s -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set choice 2; set var_name %s; set lag %d; set position $w.tit_t%s; set lastFocus [ focus -displayof $w ] }", cv1->label, cv1->label, j, cv1->label );
 			cmd( "grid $w.t%s -row %d -column 2", cv1->label, k );
 			cmd( "mouse_wheel $w.t%s", cv1->label );
+			
+			cmd( "tooltip::tooltip $w.tit_t%s \"Parameter '%s'\nin object '%s'\"", cv1->label, cv1->label, cur1->label );
+			cmd( "tooltip::tooltip $w.t%s \"Set all or a subset of\n'%s' instances\"", cv1->label, cv1->label );
 		}
 		else
 		{ 
@@ -330,8 +329,6 @@ void link_cells( object *r, char *lab )
 				
 				cmd( "ttk::label $w.tit_t%s_%d -text %s", cv1->label, j, ch1 );
 				cmd( "grid $w.tit_t%s_%d -row %d -sticky w -padx { 2 5 }", cv1->label, j, k );
-				cmd( "bind $w.tit_t%s_%d <Enter> { set inidMsg \"Variable '%s' (lag %d) in '%s'\" }", cv1->label, j, cv1->label, j + 1, cur1->label );
-				cmd( "bind $w.tit_t%s_%d <Leave> { set inidMsg \"\" }", cv1->label, j );
 				cmd( "mouse_wheel $w.tit_t%s_%d", cv1->label, j );
 				cmd( "ttk::label $w.typ_t%s_%d -text (V_%d) -style hl.TLabel", cv1->label, j, j + 1 );
 				cmd( "grid $w.typ_t%s_%d -row %d -column 1 -padx 1", cv1->label, j, k );
@@ -339,6 +336,9 @@ void link_cells( object *r, char *lab )
 				cmd( "ttk::button $w.t%s_%d -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set choice 2; set var_name %s; set lag %d; set position $w.tit_t%s_%d; set lastFocus [ focus -displayof $w ] }", cv1->label, j, cv1->label, j, cv1->label, j );
 				cmd( "grid $w.t%s_%d -row %d -column 2", cv1->label, j, k );
 				cmd( "mouse_wheel $w.t%s_%d", cv1->label, j );
+			
+				cmd( "tooltip::tooltip $w.tit_t%s_%d \"Variable '%s' (lag %d)\nin object '%s'\"", cv1->label, j, cv1->label, j + 1, cur1->label );
+				cmd( "tooltip::tooltip $w.t%s_%d \"Set all or a subset of\n'%s' instances\"", cv1->label, j, cv1->label );
 			}
 		}
 
@@ -356,6 +356,12 @@ void link_cells( object *r, char *lab )
 				cmd( "$w.c%d_v%sp insert 0 [ formatfloat ${p%s_%d} ]", i, cv->label, cv->label, i );
 				cmd( "grid $w.c%d_v%sp -row %d -column [ expr { 2 + %d } ] -padx 1", i, cv->label, k, i );
 				cmd( "mouse_wheel $w.c%d_v%sp", i, cv->label );
+				
+				cmd( "if { $tag_%d ne \"\" } { \
+						tooltip::tooltip $w.c%d_v%sp \"Parameter '%s'\ninstance $tag_%d\" \
+					} else { \
+						tooltip::tooltip $w.c%d_v%sp \"Parameter '%s'\" \
+					}", i, i, cv->label, cv->label, i, i, cv->label, cv->label );
 				
 				cmd( "bind $w.c%d_v%sp <Button-1> { selectcell $g.can $w.c%d_v%sp; break }", i, cv->label, i, cv->label );
 				
@@ -375,14 +381,6 @@ void link_cells( object *r, char *lab )
 					cmd( "bind $w.c%d_v%sp <Shift-Tab> { break }", i, cv->label );
 				}
 				
-				cmd( "bind $w.c%d_v%sp <FocusIn> { \
-						if { $tag_%d != \"\" } { \
-							set inidMsg \"Parameter '%s' (instance $tag_%d)\" \
-						} { \
-							set inidMsg \"Parameter '%s'\" \
-						} \
-					}", i, cv->label, i, cv->label, i, cv->label );
-				cmd( "bind $w.c%d_v%sp <FocusOut> { set inidMsg \"\" }", i, cv->label );
 				sprintf( previous, "$w.c%d_v%sp", i, cv->label );
 				
 				if ( ! lastFocus )
@@ -402,6 +400,12 @@ void link_cells( object *r, char *lab )
 					cmd( "$w.c%d_v%s_%d insert 0 [ formatfloat ${v%s_%d_%d} ]", i, cv->label, j, cv->label, i, j );
 					cmd( "grid $w.c%d_v%s_%d -row %d -column [ expr { 2 + %d } ] -padx 1", i, cv->label, j, k, i );
 					cmd( "mouse_wheel $w.c%d_v%s_%d", i, cv->label, j );
+					
+					cmd( "if { $tag_%d ne \"\" } { \
+							tooltip::tooltip $w.c%d_v%s_%d \"Variable '%s' (lag %d)\ninstance $tag_%d\" \
+						} else { \
+							tooltip::tooltip $w.c%d_v%s_%d \"Variable '%s' (lag %d)\ninstance $tag_%d\" \
+						}", i, i, cv->label, j, cv->label, j + 1, i, i, cv->label, j, cv->label, j + 1 );
 
 					cmd( "bind  $w.c%d_v%s_%d <Button-1> { selectcell $g.can $w.c%d_v%s_%d; break }", i, cv->label, j, i, cv->label, j );
 					
@@ -421,14 +425,6 @@ void link_cells( object *r, char *lab )
 						cmd( "bind  $w.c%d_v%s_%d <Shift-Tab> { break }", i, cv->label, j );
 					}
 					
-					cmd( "bind $w.c%d_v%s_%d <FocusIn> { \
-							if { $tag_%d != \"\" } { \
-								set inidMsg \"Variable '%s' (lag %d) (instance $tag_%d)\" \
-							} { \
-								set inidMsg \"Variable '%s' (lag %d)\" \
-							} \
-						}", i, cv->label, j, i, cv->label, j + 1, i, cv->label, j + 1 );
-					cmd( "bind $w.c%d_v%s_%d <FocusOut> { set inidMsg \"\" }", i, cv->label, j );
 					sprintf( previous, "$w.c%d_v%s_%d", i, cv->label, j );
 					
 					if ( ! lastFocus )

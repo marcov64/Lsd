@@ -164,6 +164,16 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 		
 		cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.hook .deb.b.move.net -padx $butSpc -side left" );
 		
+		cmd( "tooltip::tooltip .deb.b.move.up \"Move to parent object\"" );
+		cmd( "tooltip::tooltip .deb.b.move.down \"Move to first descendant\"" );
+		cmd( "tooltip::tooltip .deb.b.move.prev \"Move to preceding instance\"" );
+		cmd( "tooltip::tooltip .deb.b.move.broth \"Move to next instance\"" );
+		cmd( "tooltip::tooltip .deb.b.move.hypern \"Move to next object\"" );
+		cmd( "tooltip::tooltip .deb.b.move.last \"Move to last instance\"" );
+		cmd( "tooltip::tooltip .deb.b.move.search \"Find variable/parameter\"" );
+		cmd( "tooltip::tooltip .deb.b.move.hook \"Available hook pointers\"" );
+		cmd( "tooltip::tooltip .deb.b.move.net \"Existing network links\"" );
+
 		cmd( "bind .deb <KeyPress-u> { .deb.b.move.up invoke }; bind .deb <KeyPress-U> { .deb.b.move.up invoke }" );
 		cmd( "bind .deb <Up> { .deb.b.move.up invoke }" );
 		cmd( "bind .deb <KeyPress-n> { .deb.b.move.broth invoke }; bind .deb <KeyPress-N> { .deb.b.move.broth invoke }" );
@@ -194,6 +204,12 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				cmd( "ttk::button .deb.b.act.call -width $butWidD -text Caller -command { set choice 9 } -underline 0" );
 				cmd( "ttk::button .deb.b.act.prn_v -width $butWidD -text \"v\\\[...\\]\" -command { set choice 15 } -underline 0" );
 				
+				cmd( "tooltip::tooltip .deb.b.act.run \"Continue simulation to end\"" );
+				cmd( "tooltip::tooltip .deb.b.act.until \"Continue simulation to given time step\"" );
+				cmd( "tooltip::tooltip .deb.b.act.ok \"Continue simulation to next time step\"" );
+				cmd( "tooltip::tooltip .deb.b.act.call \"Move to caller object\"" );
+				cmd( "tooltip::tooltip .deb.b.act.prn_v \"Show/hide intermediate values\"" );
+
 				cmd( "bind .deb <KeyPress-r> { .deb.b.act.run invoke }; bind .deb <KeyPress-R> { .deb.b.act.run invoke }; bind .deb <F5> { .deb.b.act.run invoke }" );
 				cmd( "bind .deb <KeyPress-i> { .deb.b.act.until invoke }; bind .deb <KeyPress-I> { .deb.b.act.until invoke }; bind .deb <F7> { .deb.b.act.until invoke }" );
 				cmd( "bind .deb <KeyPress-s> { .deb.b.act.ok invoke }; bind .deb <KeyPress-S> { .deb.b.act.ok invoke }; bind .deb <F8> { .deb.b.act.ok invoke }" );
@@ -204,6 +220,9 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			cmd( "ttk::button .deb.b.act.an -width $butWidD -text Analysis -command { set choice 11 } -underline 0" );
 			cmd( "ttk::button .deb.b.act.prn_stck -width $butWidD -text Stack -command { set choice 13 } -underline 4" );
 			
+			cmd( "tooltip::tooltip .deb.b.act.an \"Open Analysis of Results\"" );
+			cmd( "tooltip::tooltip .deb.b.act.prn_stck \"Show computation stack\"" );
+
 			cmd( "bind .deb <KeyPress-a> { .deb.b.act.an invoke }; bind .deb <KeyPress-A> { .deb.b.act.an invoke }" );
 			cmd( "bind .deb <KeyPress-k> { .deb.b.act.prn_stck invoke }; bind .deb <KeyPress-K> { .deb.b.act.prn_stck invoke }" );
 			
@@ -212,6 +231,8 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			cmd( "ttk::spinbox .deb.b.act.stack.e -width 3 -from 0 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99 } { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( ".deb.b.act.stack.e insert 0 $stack_flag" ); 
 			cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -padx 2 -side left" );
+			
+			cmd( "tooltip::tooltip .deb.b.act.stack \"Maximum level of computation stack\"" );
 			
 			if ( mode == 1 )
 				cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.call .deb.b.act.prn_v .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butSpc -side left" );
@@ -247,7 +268,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 						ttk::frame .deb.v; \
 						ttk::frame .deb.v.v1; \
 						ttk::label .deb.v.v1.name1 -text \"Variable:\"; \
-						ttk::label .deb.v.v1.name2 -width 20 -anchor w -style hl.TLabel -text \"\"; \
+						ttk::label .deb.v.v1.name2 -width 20 -anchor w -style hl.TLabel; \
 						ttk::label .deb.v.v1.time1 -text \"Time step:\"; \
 						ttk::label .deb.v.v1.time2 -width 5 -anchor w -style hl.TLabel; \
 						ttk::label .deb.v.v1.val1 -text \"Value \"; \
@@ -303,7 +324,10 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 			cmd( "pack .deb.b -padx $butPad -pady $butPad -side right -after .deb.cc" );
 
-			cmd( "if { $newDeb } { showtop .deb topleftW; set newDeb false } { focustop .deb }" );
+			cmd( "if { $newDeb } { \
+					showtop .deb topleftW; \
+					set newDeb false \
+				}" );
 			
 			cmd( "set debDone 1" );
 			cmd( "event generate .deb <Configure>" );	// resize canvas as window is mapped now
@@ -360,9 +384,6 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				cmd( ".deb.b.move.net configure -state normal" );
 			}
 			
-			ch[ 0 ] = '\0';
-			attach_instance_number( ch, r );
-
 			asl = NULL;
 
 			if ( mode == 1 )
@@ -380,7 +401,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 					cmd( "catch { write_any .deb.v.v1.val2 [ format %%g $value ] }" ); 
 			}
 
-			// resize the scrollbar if needed and ajust position
+			// resize the scrollbar if needed and adjust position
 			cmd( "set debDone 2" );
 			cmd( "event generate .deb <Configure>" );
 			cmd( "if { $lastHl != \"\" } { \
@@ -392,6 +413,9 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				}" );
 			cmd( "unset -nocomplain lstDebPos" );
 		}
+		
+		cmd( "update idletasks" );
+		cmd( "after idle { focustop .deb }" );		// wait before focus because of Tk bug
 		
 		redraw = true;
 		
@@ -1452,7 +1476,7 @@ DEB_SHOW
 ********************************************/
 void deb_show( object *r, const char *hl_var )
 {
-	char ch[ 2 * MAX_ELEM_LENGTH ];
+	char ch[ MAX_LINE_SIZE + 1 ], ch1[ MAX_LINE_SIZE + 1 ];
 	variable *ap_v;
 	int i;
 	
@@ -1463,7 +1487,7 @@ void deb_show( object *r, const char *hl_var )
 	cmd( "if { ! [ winfo exists .deb.v.v2 ] } { \
 			ttk::frame .deb.v.v2; \
 			ttk::label .deb.v.v2.obj -text \"Level:object(instance): \"; \
-			ttk::label .deb.v.v2.instance -style hl.TLabel -text \"\"; \
+			ttk::label .deb.v.v2.instance -style hl.TLabel; \
 			pack .deb.v.v2.obj .deb.v.v2.instance -side left; \
 			if [ winfo exists .deb.v.v1 ] { \
 				pack .deb.v.v1 .deb.v.v2 -padx 5 -pady 5 -anchor w \
@@ -1490,8 +1514,16 @@ void deb_show( object *r, const char *hl_var )
 	}
 
 	strcpy( ch, "" );
-	attach_instance_number( ch, r );
-	cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
+	strcpy( ch1, "" );
+	attach_instance_number( ch, ch1, r, MAX_LINE_SIZE );
+	cmd( "set a \"%s\"", ch );
+	cmd( "set b [ ttk::style lookup TLabel -font active TkDefaultFont ]" );
+	cmd( "set c [ expr { $hsizeDmin - [ font measure $b [ .deb.v.v2.obj configure -text ] ] } ]" );
+	cmd( "while { [ font measure $b $a ] > $c && [ string first | $a ] >= 0 } { \
+			set a \"...[ string range $a [ string first | $a ]+1 end ]\" \
+		}" );
+	cmd( ".deb.v.v2.instance config -text \"$a\""  );
+	cmd( "tooltip::tooltip .deb.v.v2 [ string range \"%s\" 0 end-1 ]", ch1 );
 
 	cmd( "if { ! [ winfo exists .deb.tit ] } { \
 			set fntSz [ expr { [ font metrics [ ttk::style lookup boldSmall.TLabel -font ] -linespace ] + 2 } ]; \
@@ -2069,7 +2101,7 @@ ATTACH_INSTANCE_NUMBER
 ********************************************/
 int depth;
 
-void attach_instance_number( char *ch, object *r )
+void attach_instance_number( char *outh, char *outv, object *r, int outSz )
 {
 	object *cur;
 	int i = 1, j = 1;
@@ -2077,7 +2109,7 @@ void attach_instance_number( char *ch, object *r )
 	if ( r == NULL )
 		return;
 	
-	attach_instance_number( ch, r->up );
+	attach_instance_number( outh, outv, r->up, outSz );
 
 	if ( r->up != NULL )
 		for ( cur = r->up->search( r->label ); cur != NULL; cur = go_brother( cur ) )
@@ -2091,5 +2123,9 @@ void attach_instance_number( char *ch, object *r )
 		sprintf( msg, "%d:%s (1/1) ", depth = 1, r->label );
 	else
 		sprintf( msg, " |  %d:%s (%d/%d) ", ++depth, r->label, j, i - 1 );
-	strncat( ch, msg, 2 * MAX_ELEM_LENGTH - 1 - strlen( ch ) );
+	
+	strncat( outh, msg, outSz - 1 - strlen( outh ) );
+	
+	sprintf( msg, "%s (%d/%d)\n", r->label, j, r->up == NULL ? 1 : i - 1 );
+	strncat( outv, msg, outSz - 1 - strlen( outv ) );	
 }

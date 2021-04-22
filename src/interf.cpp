@@ -1156,7 +1156,7 @@ case 11:
 break;
 
 
-// Add a Variable to the current or the pointed object (defined in tcl $vname)
+// Add an element to the current or the pointed object (defined in tcl $vname)
 case 2:
 
 	// check if current or pointed object and save current if needed
@@ -1208,6 +1208,9 @@ case 2:
 			cmd( "ttk::spinbox $T.f.ent_num -width 3 -from 0 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99 } { set num %%P; if { $num > 0 } { $T.b.x configure -state normal } { $T.b.x configure -state disabled }; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -command { if { [ $T.f.ent_num get ] > 0 } { $T.b.x configure -state normal } { $T.b.x configure -state disabled } } -invalidcommand { bell } -justify center" );
 			cmd( "write_any $T.f.ent_num $num" );
 			cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left -padx 2" );
+			
+			cmd( "tooltip::tooltip $T.f.ent_num \"Maximum lag used in equations\"" );
+
 			cmd( "bind $T.f.ent_var <KeyRelease> { \
 					if { %%N < 256 } { \
 						set b [ .addelem.f.ent_var index insert ]; \
@@ -1312,6 +1315,9 @@ case 2:
 	cmd( "pack $T.l $T.f $T.d -pady 5" );
 	
 	cmd( "okXhelpcancel $T b \"Initial Values\" { set done 3 } { set done 1 } { LsdHelp $help } { set done 2 }" );
+	
+	cmd( "tooltip::tooltip $T.b.x \"Save and set initial value for element\"" );
+
 	cmd( "if { ! $initValEn } { $T.b.x configure -state disabled }" );
 
 	cmd( "showtop $T topleftW" );
@@ -1443,7 +1449,7 @@ case 2:
 break;
 
 
-// Add a Descendent type to the current or the pointed object (defined in tcl $vname)
+// Add a Descendent object to the current or the pointed object (defined in tcl $vname)
 // and assigns the number of its instances.
 case 3:
 
@@ -1761,6 +1767,11 @@ case 6:
 	cmd( "ttk::button $T.b0.mov -width $butWid -text Move -command { set useCurrObj yes; set choice 32 } -underline 0" );
 	cmd( "ttk::button $T.b0.del -width $butWid -text Delete -command { set choice 74 } -underline 0" );
 	cmd( "pack $T.b0.prop $T.b0.num $T.b0.mov $T.b0.del -padx $butSpc -side left" );
+
+	cmd( "tooltip::tooltip $T.b0.prop \"Change name\"" );
+	cmd( "tooltip::tooltip $T.b0.num \"Change number of instances (copies)\"" );
+	cmd( "tooltip::tooltip $T.b0.mov \"Move to another parent object\"" );
+	cmd( "tooltip::tooltip $T.b0.del \"Remove object\"" );
 
 	cmd( "ttk::frame $T.b1" );
 	cmd( "ttk::checkbutton $T.b1.com -text \"Compute: force the computation of the variables in this object\" -variable to_compute -underline 1" );
@@ -2127,9 +2138,14 @@ case 7:
 		cmd( "bind $T <Control-g> \"$T.b0.upd invoke\"; bind $T <Control-G> \"$T.b0.upd invoke\"" );
 		
 		cmd( "pack $T.b0.prop $T.b0.upd $T.b0.mov $T.b0.del -padx $butSpc -side left" );
+		cmd( "tooltip::tooltip $T.b0.upd \"Define special update timing\"" );
 	}
 	else
 		cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx $butSpc -side left" );
+	
+	cmd( "tooltip::tooltip $T.b0.prop \"Change name, type or lags\"" );
+	cmd( "tooltip::tooltip $T.b0.mov \"Move to another object\"" );
+	cmd( "tooltip::tooltip $T.b0.del \"Remove element\"" );
 
 	cmd( "ttk::frame $T.b1" );
 
@@ -2189,8 +2205,8 @@ case 7:
 	cmd( "pack $Td.f.int $Td.f.desc" );
 	
 	cmd( "ttk::frame $Td.b" );
-	cmd( "ttk::button $Td.b.eq -width [ expr { $butWid + 2 } ] -text \"View Code\" -command { set done 3 } -underline 3" );
-	cmd( "ttk::button $Td.b.auto_doc -width [ expr { $butWid + 2 } ] -text \"Auto Descr.\" -command { set done 9 } -underline 0" );
+	cmd( "ttk::button $Td.b.eq -width [ expr { $butWid + 2 } ] -text \"Equation\" -command { set done 3 } -underline 1" );
+	cmd( "ttk::button $Td.b.auto_doc -width [ expr { $butWid + 2 } ] -text \"Auto Desc.\" -command { set done 9 } -underline 0" );
 	cmd( "ttk::button $Td.b.us -width [ expr { $butWid + 2 } ] -text \"Using Elem.\" -command { set done 4 } -underline 0" );
 	cmd( "ttk::button $Td.b.using -width [ expr { $butWid + 2 } ] -text \"Elem. Used\" -command { set done  7} -underline 0" );
 	
@@ -2199,14 +2215,19 @@ case 7:
 	else
 	{
 		cmd( "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx $butSpc -side left" );
-		cmd( "bind $T <Control-w> \"$Td.b.eq invoke\"; bind $T <Control-W> \"$Td.b.eq invoke\"" );
+		cmd( "bind $T <Control-q> \"$Td.b.eq invoke\"; bind $T <Control-Q> \"$Td.b.eq invoke\"" );
 		cmd( "bind $T <Control-e> \"$Td.b.using invoke\"; bind $T <Control-E> \"$Td.b.using invoke\"" );
 	}
+
+	cmd( "tooltip::tooltip $Td.b.eq \"Show variable's equation code\"" );
+	cmd( "tooltip::tooltip $Td.b.auto_doc \"Get description from equation file\"" );
+	cmd( "tooltip::tooltip $Td.b.us \"List all variables using this element\"" );
+	cmd( "tooltip::tooltip $Td.b.using \"List all variables and parameters used\"" );
 
 	if ( cv->param == 1 || cv->num_lag > 0 )
 	{
 		cmd( "ttk::frame $Td.i" );
-		cmd( "ttk::label $Td.i.int -text \"Comments on initial values\"" );
+		cmd( "ttk::label $Td.i.int -text \"Initial values\"" );
 
 		cmd( "ttk::frame $Td.i.desc" );
 		cmd( "ttk::scrollbar $Td.i.desc.yscroll -command \"$Td.i.desc.text yview\"" );
@@ -2224,6 +2245,9 @@ case 7:
 		
 		cmd( "pack $Td.opt $Td.f $Td.b $Td.i $Td.b2 -pady 5" );
 	  
+		cmd( "tooltip::tooltip $Td.b2.setall \"Set initial value(s) of this element\"" );
+		cmd( "tooltip::tooltip $Td.b2.sens \"Set sensitivity analysis values for this element \"" );
+	
 		cmd( "bind $T <Control-n> \"$Td.b2.setall invoke\"; bind $T <Control-N> \"$Td.b2.setall invoke\"" );
 		cmd( "bind $T <Control-t> \"$Td.b2.sens invoke\"; bind $T <Control-T> \"$Td.b2.sens invoke\"" );
 
@@ -2233,7 +2257,7 @@ case 7:
 
 	cmd( "pack $Td -pady 5" );
 
-	cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#variables } { set done 2 }" );
+	cmd( "okhelpcancel $T b { set done 1 } { LsdHelp browser.html#changeelement } { set done 2 }" );
 
 	cmd( "bind $T <Control-r> \"$T.b0.prop invoke\"; bind $T <Control-R> \"$T.b0.prop invoke\"" );
 	cmd( "bind $T <Control-m> \"$T.b0.mov invoke\"; bind $T <Control-M> \"$T.b0.mov invoke\"" );
@@ -2441,6 +2465,8 @@ case 76:
 		cmd( "$T.n.lag insert 0 $numlag" ); 
 		cmd( "if { $nature != 0 } { $T.n.lag configure -state disabled }" );
 		cmd( "pack $T.n.var $T.n.e $T.n.sp $T.n.l $T.n.lag -side left -padx 2" );
+		
+		cmd( "tooltip::tooltip $T.n.lag \"Maximum lag used in equations\"" );
 
 		cmd( "ttk::frame $T.v" );
 		cmd( "ttk::label $T.v.l -text \"Type\"" );
@@ -2882,6 +2908,11 @@ case 96:
 	cmd( "pack $T.f.c $T.f.a $T.f.b $T.f.d -anchor w" );
 
 	cmd( "pack $T.h $T.f -padx 5 -pady 5" );
+	
+	cmd( "tooltip::tooltip $T.f.c \"First time step to compute the variable\"" );
+	cmd( "tooltip::tooltip $T.f.a \"Maximum time step for uniform random first computation\"" );
+	cmd( "tooltip::tooltip $T.f.b \"Period between computations of variable\"" );
+	cmd( "tooltip::tooltip $T.f.d \"Maximum period for uniform random periodic computation\"" );
 
 	cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp browser.html#updating } { set choice 2 }" );
 

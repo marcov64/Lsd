@@ -97,10 +97,6 @@ void set_obj_number( object *r, int *choice )
 	cmd( "pack $f -fill both -expand yes" );
 	cmd( "mouse_wheel $t" );
 
-	cmd( "set ininMsg \"\"" );
-	cmd( "ttk::label .inin.msglab -textvariable ininMsg" );
-	cmd( "pack .inin.msglab -pady 5" );
-  
 	cmd( "ttk::frame .inin.l" );
 	cmd( "ttk::label .inin.l.tmd -text \"Show level:\"" );
 	cmd( "ttk::label .inin.l.emd -width 2 -style hl.TLabel" );
@@ -108,6 +104,8 @@ void set_obj_number( object *r, int *choice )
 	cmd( "ttk::button .inin.l.pl -width 2 -text \"+\" -command { if { $hid_level } { incr max_depth; set choice 4 } }" );
 	cmd( "pack .inin.l.tmd .inin.l.emd .inin.l.mn .inin.l.pl -side left" );
 	cmd( "pack .inin.l -anchor e -padx 10 -pady 5" );
+	
+	cmd( "tooltip::tooltip .inin.l \"Maximum depth in object\ntree structure to show\"" );
 
 	cmd( "donehelp .inin b { set choice 1; set result -1 } { LsdHelp menudata_objn.html }" );
 	  
@@ -120,7 +118,6 @@ void set_obj_number( object *r, int *choice )
 	{
 		cmd( "$t configure -state normal" );
 		cmd( "$t delete 0.0 end" );
-		cmd( "set ininMsg \"\"" );
 		
 		idx = 0;
 		hid_level = false;
@@ -266,14 +263,12 @@ void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int 
 
 			if ( level >= max_depth && cb->head->b != NULL )
 				hid_level = true;
+			
+			cmd( "tooltip::tooltip $t.but$idx \"Set the number of instances\nof object '%s'\"", cb->head->label );
+			cmd( "tooltip::tooltip $t.ind$idx \"Object '%s'\nat level %d\"", cb->head->label, level );
+			cmd( "tooltip::tooltip $t.lab$idx \"Click to change initial values\nof object '%s'\"", cb->head->label );
 
 			cmd( "bind $t.lab$idx <Button-1> { set obj_name %s; set choice 3 }", cb->head->label );
-			cmd( "bind $t.ind$idx <Enter> { set ininMsg \"'%s' at level %d\" }", cb->head->label, level );
-			cmd( "bind $t.ind$idx <Leave> { set ininMsg \"\" }" );
-			cmd( "bind $t.but$idx <Enter> { set ininMsg \"Change number of instances '%s'\" }", cb->head->label );
-			cmd( "bind $t.but$idx <Leave> { set ininMsg \"\" }" );
-			cmd( "bind $t.lab$idx <Enter> { set ininMsg \"Click to change initial values of '%s'\" }", cb->head->label );
-			cmd( "bind $t.lab$idx <Leave> { set ininMsg \"\" }" );
 		}
 		
 		if ( max_depth < 1 || level < max_depth )
@@ -382,6 +377,8 @@ int entry_new_objnum( object *c, const char *tag, int *choice )
 	cmd( "ttk::spinbox $T.cp.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invalidcommand { bell } -justify center", num, num );
 	cmd( "ttk::button $T.cp.compute -width $butWid -text Compute -command \"set conf 1; set choice 3; $T.cp.e selection range 0 end; focus $T.cp.e\"" );
 	cmd( "pack $T.cp.l $T.cp.e $T.cp.compute -side left -padx 2" );
+	
+	cmd( "tooltip::tooltip $T.cp.compute \"Define the effective instance to copy\"" );
 
 	cmd( "ttk::frame $T.ef" );
 	cmd( "ttk::label $T.ef.l -text \"Modify groups\"" );

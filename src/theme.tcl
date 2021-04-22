@@ -157,11 +157,22 @@ proc setstyles { } {
 		-font [ font create -size $small_character -weight bold ]
 	ttk::style configure graySmall.TLabel -foreground gray \
 		-font [ font create -size $small_character ]
-	ttk::style configure var.TLabel -foreground $colorsTheme(var)
-	ttk::style configure lvar.TLabel -foreground $colorsTheme(lvar)
-	ttk::style configure par.TLabel -foreground $colorsTheme(par)
-	ttk::style configure fun.TLabel -foreground $colorsTheme(fun)
-	ttk::style configure lfun.TLabel -foreground $colorsTheme(lfun)
+	
+	# tooltip widgets styles (model structure only)
+	set tfam [ font actual [ ttk::style lookup TLabel -font ] -family ]
+	set tsize [ expr { [ font actual [ ttk::style lookup TLabel -font ] -size ] - 1 } ]
+	set tfont [ font create -family "$tfam" -size $tsize ]
+	ttk::style configure tooltip.TFrame	-background $colorsTheme(ttip)
+	ttk::style configure tvar.TLabel -font $tfont -foreground $colorsTheme(var) \
+		-background $colorsTheme(ttip)
+	ttk::style configure tlvar.TLabel -font $tfont -foreground $colorsTheme(lvar) \
+		-background $colorsTheme(ttip)
+	ttk::style configure tpar.TLabel -font $tfont -foreground $colorsTheme(par) \
+		-background $colorsTheme(ttip)
+	ttk::style configure tfun.TLabel -font $tfont -foreground $colorsTheme(fun) \
+		-background $colorsTheme(ttip)
+	ttk::style configure tlfun.TLabel -font $tfont -foreground $colorsTheme(lfun) \
+		-background $colorsTheme(ttip)
 }
 
 

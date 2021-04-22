@@ -589,6 +589,8 @@ int lsdmain( int argn, char **argv )
 	cmd( "pack .f.t.vs -side right -fill y" );
 	cmd( "pack .f.t.t -expand yes -fill both" );
 	cmd( "pack .f.t.hs -fill x" );
+	
+	cmd( "tooltip::tooltip .f.hea.cur \"Go to Line...\"" );
 
 	// redefine bindings to better support new syntax highlight routine
 	cmd( "bind .f.t.t <KeyPress> { sav_cur_ini }" );
@@ -4605,6 +4607,8 @@ int lsdmain( int argn, char **argv )
 				} \
 			} { set choice 1 } { LsdHelp LMM.html#compilation_options } { set choice 2 }" );
 
+		cmd( "tooltip::tooltip .l.b.x \"Reset all options to defaults\"" );
+		
 		cmd( "showtop .l" );
 		cmd( "mousewarpto .l.b.ok" );
 		
@@ -4787,6 +4791,11 @@ int lsdmain( int argn, char **argv )
 				} \
 			}" );
 		cmd( "pack .l.d.opt.debug .l.d.opt.ext .l.d.opt.def .l.d.opt.cle -padx $butSpc -side left" );
+		
+		cmd( "tooltip::tooltip .l.d.opt.debug \"Enable using GDB/LLDB debugger\"" );
+		cmd( "tooltip::tooltip .l.d.opt.ext \"Add extra source code files\"" );
+		cmd( "tooltip::tooltip .l.d.opt.def \"Reset all options to defaults\"" );
+		cmd( "tooltip::tooltip .l.d.opt.cle \"Delete all intermediary files\"" );
 
 		cmd( "pack .l.d.opt -padx $butPad" );
 
@@ -5006,6 +5015,8 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "okXhelpcancel .a b Default { set_defaults } { set choice 1 } { LsdHelp LMM.html#SystemOpt } { set choice 2 }" );
 
+		cmd( "tooltip::tooltip .a.b.x \"Reset all options to defaults\"" );
+		
 		cmd( "showtop .a" );
 		cmd( "focus .a.f.c1.num.v" );
 		cmd( ".a.f.c1.num.v selection range 0 end" );
@@ -5959,6 +5970,8 @@ void create_compresult_window( bool nw )
 	cmd( "pack .mm.i.f .mm.i.l .mm.i.c -padx 10 -pady 5 -side left" );
 	cmd( "pack .mm.i" );
 
+	cmd( "tooltip::tooltip .mm.i \"File, line and column of error\"" );
+	
 	cmd( "ttk::frame .mm.b" );
 
 	cmd( "ttk::button .mm.b.perr -width [ expr { $butWid + 4 } ] -text \"Previous Error\" -underline 0 -command { \
@@ -6037,6 +6050,11 @@ void create_compresult_window( bool nw )
 	cmd( "ttk::button .mm.b.close -width [ expr { $butWid + 4 } ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; focustop .f.t.t; set keepfocus 0 }" );
 	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx $butSpc -expand yes -fill x -side left" );
 	cmd( "pack .mm.b -padx $butPad -pady $butPad -side right" );
+	
+	cmd( "tooltip::tooltip .mm.b.perr \"Show previous error line\"" );
+	cmd( "tooltip::tooltip .mm.b.gerr \"Edit error line in LMM\"" );
+	cmd( "tooltip::tooltip .mm.b.ferr \"Show next error line\"" );
+	cmd( "tooltip::tooltip .mm.b.close \"Close this window\"" );
 
 	cmd( "bind .mm <p> { .mm.b.perr invoke }; bind .mm <P> { .mm.b.perr invoke }" );
 	cmd( "bind .mm.t.t <Up> { .mm.b.perr invoke; break }" );

@@ -237,7 +237,7 @@ void add_rt_plot_tab( const char *w, int id_sim );
 void analysis( int *choice, bool mc = false );
 void ancestors( object *r, FILE *f, bool html = true );
 void assign( object *r, int *idx, char *lab );
-void attach_instance_number( char *ch, object *r );
+void attach_instance_number( char *outh, char *outv, object *r, int outSz );
 void auto_document( int *choice, char const *lab, char const *which, bool append = false );
 void autofill_descr( object *o );
 void canvas_binds( int n );
