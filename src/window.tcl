@@ -35,7 +35,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
 
 	wm withdraw $w
 	update idletasks
-	
+
 	if { $par != "" } {
 		if { $par != "." } {
 			if { [ winfo viewable [ winfo toplevel $par ] ] } {
@@ -176,7 +176,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 			if { ! [ string equal $pos xy ]	} {
 				set x [ getx $w $pos ]
 				set y [ gety $w $pos ]
-				
+
 				set maxWid [ expr { [ winfo vrootwidth $w ] - $x - 2 * $bordsize - $hmargin } ]
 				set maxHgt [ expr { [ winfo vrootheight $w ] - $y- 2 * $bordsize - $vmargin - $tbarsize } ]
 					
@@ -1850,11 +1850,15 @@ proc canvas_axis { c type grid hticks { y2 0 } } {
 # PLOT_BARS
 # plot color filled bars
 #************************************************
-proc plot_bars { c x1 y1 x2 y2 { tags "" } { fill "" } { width 1 } } {
+proc plot_bars { c x1 y1 x2 y2 { tags "" } { fill "" } { width 1 } { outline "" } } {
 	global colorsTheme
 	
 	if { $fill == "" } {
 		set fill $colorsTheme(bg)
+	}
+	
+	if { $outline == "" } {
+		set outline $colorsTheme(fg)
 	}
 	
 	set size [ expr { min( [ llength $x1 ], [ llength $y1 ], [ llength $x2 ], [ llength $y2 ]  ) } ]
@@ -1868,7 +1872,7 @@ proc plot_bars { c x1 y1 x2 y2 { tags "" } { fill "" } { width 1 } } {
 		set y2i [ lindex $y2 $i ]
 		if { $x1i != $x2i && $y1i != $y2i } {
 			# plot bar
-			$c create rect $x1i $y1i $x2i $y2i -width $width -fill $fill -tags $tags
+			$c create rectangle $x1i $y1i $x2i $y2i -fill $fill -width $width -outline $outline -tags $tags
 		}
 	}
 }

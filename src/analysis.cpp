@@ -6583,7 +6583,7 @@ void plot_lattice( int *choice )
 			if ( is_nan( color ) || ! is_finite( color ) )
 			  color = 0;
 
-			cmd( "plot_bars $p %d %d %d %d p%d_%d $c%d %lf", 
+			cmd( "plot_bars $p %d %d %d %d p%d_%d $c%d %lf $colorsTheme(dfg)", 
 			   i * le, j * hi, ( i + 1 ) * le, ( j + 1 ) * hi, j, i, 
 			   ( int ) color, grid ? point_size : 0.0 );
 		}
