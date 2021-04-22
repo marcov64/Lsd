@@ -2466,14 +2466,31 @@ case 76:
 		for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 		{ 
 			cv = cur->search_var( NULL, lab_old );
-			cv->num_lag = numlag;
-			delete [ ] cv->val;
+			
+			if ( cv == NULL )
+				continue;
+			
+			double *old_val = cv->val;
 			cv->val = new double[ numlag + 1 ];
-			for ( i = 0; i < numlag + 1; ++i )
+			
+			for ( i = 0; i <= numlag; ++i )
 				cv->val[ i ] = 0;
+			
+			// avoid reseting initial values if not required
+			if ( ( cv->param == 1 && numlag > 0 ) || ( nature == 1 && cv->num_lag > 0 ) )				
+				cv->val[ 0 ] = old_val[ 0 ];		// parameter <-> lagged variable
+			else
+				if ( cv->num_lag > 0 && numlag > 0 )// x-lags variable to y-lags variable?
+					for ( i = 0; i < min( cv->num_lag, numlag ); ++i )
+						cv->val[ i ] = old_val[ i ];
+			
+			delete [ ] old_val;
+			cv->num_lag = numlag;
 			cv->param = nature;
+			
 			if ( cv->param == 1 || cv->num_lag > 0 )
 				cv->data_loaded = '-';
+			
 			if ( cv->param != 0 )
 			{
 				cv->parallel = false;
