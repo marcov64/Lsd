@@ -100,7 +100,7 @@ void object::save_param( FILE *f )
 	int i, count = 0;
 	char ch, ch1, ch2;
 	bridge *cb;
-	description *cur_descr;
+	description *cd;
 	object *cur;
 	variable *cv, *cv1;
 
@@ -135,8 +135,8 @@ void object::save_param( FILE *f )
 			}
 		else
 		{	// avoid marking as to initialize for elements not worth it
-			cur_descr = search_description( cv->label );
-			cur_descr->initial = 'n';
+			cd = search_description( cv->label );
+			cd->initial = 'n';
 		}
 
 		ch1 = cv->save ? 's' : 'n';
@@ -390,109 +390,74 @@ LOAD_DESCRIPTION
 ******************************************************************************/
 bool load_description( char *msg, FILE *f )
 {
-	int j;
-	char type[ 20 ], label[ MAX_ELEM_LENGTH ], str[ 10 * MAX_LINE_SIZE ], str1[ 10 * MAX_LINE_SIZE ];
-	description *app;
+	int j, type, ctype;
+	char label[ MAX_ELEM_LENGTH ], text[ 10 * MAX_LINE_SIZE + 1 ], init[ 10 * MAX_LINE_SIZE + 1 ], str[ 10 * MAX_LINE_SIZE + 1 ];
+	variable *cv;
 
 	label[ MAX_ELEM_LENGTH - 1 ] = '\0';
+	strcpy( text, "" );
+	strcpy( init, "" );
+	
 	if ( strncmp( msg, "Object", 6 ) == 0 )
 	{
-		strcpy(type, "Object");
-		strncpy(label, msg+7, MAX_ELEM_LENGTH-1);
+		type = 4;
+		strncpy( label, msg + 7, MAX_ELEM_LENGTH - 1 );
 	} 
 	else
-		if (strncmp( msg, "Variable", 8) == 0 )
+		if ( strncmp( msg, "Variable", 8 ) == 0 )
 		{
-			strcpy( type, "Variable" );
+			type = 0;
 			strncpy( label, msg + 9, MAX_ELEM_LENGTH - 1 );
 		} 
 		else
 			if ( strncmp( msg, "Parameter", 9 ) == 0 )
 			{
-				strcpy( type, "Parameter" );
+				type = 1;
 				strncpy( label, msg + 10, MAX_ELEM_LENGTH - 1 );
 			} 
 			else
 				if ( strncmp( msg, "Function", 6 ) == 0 )
 				{
-					strcpy( type, "Function" );
+					type = 2;
 					strncpy( label, msg + 9, MAX_ELEM_LENGTH - 1 );
 				} 
 				else
 					return false;
-	 
-	if ( descr == NULL )
-		app = descr = new description;
-	else  
-	{
-		for ( app = descr; app->next != NULL; app = app->next );
-		app->next = new description;
-		app = app->next;
-	} 
+				
+	// check correct type and ignore orphan entries			
+	if ( root->search( label ) != NULL )
+		ctype = 4;
+	else
+		if ( ( cv = root->search_var( NULL, label ) ) != NULL )
+			ctype = cv->param;
+		else
+			ctype = -1;
 	
-	app->next = NULL;
-	app->text = app->init = NULL;
-	app->label = new char[ strlen( label ) + 1 ];
-	strcpy( app->label, label );
-	app->type = new char[ strlen( type ) + 1 ];
-	strcpy( app->type, type );
-
-	strcpy( str1, "" );
+	if ( ctype < 0 )
+		return true;			// ignore orphan (old LSD bug)
+	else
+		type = ctype;			// silently fix wrong type (old LSD bug)
+	 
 	fgets( str, MAX_LINE_SIZE, f );		// skip first newline character
-	for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) && strncmp( str, "_INIT_", 6 ) && strlen( str1 ) < 9 *MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
-		strcat( str1, str );
+	for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) && strncmp( str, "_INIT_", 6 ) && strlen( text ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
+		strcat( text, str );
 
 	if ( strncmp( str, "END_DESCRIPTION", 15 ) && strncmp( str, "_INIT_", 6 ) )
 		return false;
 
-	clean_newlines( str1 );
-
-	app->text = new char[ strlen( str1 ) + 1 ];
-	strcpy( app->text, str1 );
-
 	if ( ! strncmp( str, "_INIT_", 6 ) )
 	{
-		strcpy( str1, "" );
-		for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) && strlen( str1 ) < 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
-			strcat( str1, str );
+		for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) && strlen( init ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
+			strcat( init, str );
 
 		if ( strncmp( str, "END_DESCRIPTION", 15 ) )
 			return false;
-
-		clean_newlines( str1 );
-		app->init = new char[ strlen( str1 ) + 1 ];
-		strcpy( app->init, str1 );
 	}
-	else
-	{
-		app->init = new char[ 1 ];
-		strcpy( app->init, "" );
-	}
-	app->initial = 'n';
-	app->observe = 'n';  
 
+	add_description( label, type, text, init );
+	
 	return true;
 } 
-
-
-/*****************************************************************************
-EMPTY_DESCR
-******************************************************************************/
-void empty_description( void )
-{
-	description *cur, *cur1;
-	
-	for ( cur1 = descr; cur1 != NULL; cur1 = cur )
-	{
-		cur = cur1->next;
-		delete [ ] cur1->label;
-		delete [ ] cur1->type;
-		delete [ ] cur1->text;
-		delete [ ] cur1->init;
-		delete cur1;
-	}
-	descr = NULL;
-}
 
 
 /*****************************************************************************
@@ -505,14 +470,8 @@ void save_description( object *r, FILE *f )
 	description *cd;
 
 	cd = search_description( r->label );
-	if ( cd == NULL )
-	{
-		add_description( r->label, "Object", "(no description available)" );
-		plog( "\nWarning: description for '%s' not found. New one created.", "", r->label );
-		cd = search_description( r->label );
-	} 
 
-	if ( cd->init == NULL )     
+	if ( strwsp( cd->init ) )     
 		fprintf( f, "%s_%s\n%s\nEND_DESCRIPTION\n\n", cd->type, cd->label, cd->text );
 	else
 		fprintf( f, "%s_%s\n%s\n_INIT_\n%s\nEND_DESCRIPTION\n\n", cd->type, cd->label, cd->text, cd->init );
@@ -520,96 +479,16 @@ void save_description( object *r, FILE *f )
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
-		if ( cd == NULL )
-		{
-			if ( cv->param == 0 )
-				add_description( cv->label, "Variable", "(no description available)" );
-			if ( cv->param == 1 )
-				add_description( cv->label, "Parameter", "(no description available)" );  
-			if ( cv->param == 2 )
-				add_description( cv->label, "Function", "(no description available)" );
-			
-			add_description( cv->label, "Object", "(no description available)" );
-			plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
-			cd = search_description( cv->label );
-		} 
 
-		if ( cd->init == NULL )     
+		if ( ( cv->param != 1 && cv->num_lag == 0 ) || strwsp( cd->init ) )     
 			fprintf( f, "%s_%s\n%s\nEND_DESCRIPTION\n\n", cd->type, cd->label, cd->text );
 		else
 			fprintf( f, "%s_%s\n%s\n_INIT_\n%s\nEND_DESCRIPTION\n\n", cd->type, cd->label, cd->text, cd->init );
-	   
 	}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 		if ( cb->head != NULL )
 			save_description( cb->head, f );
-}
-
-
-/*****************************************************************************
-RESET_BLUEPRINT
-	reset the current blueprint
-******************************************************************************/
-void reset_blueprint( object *r )
-{
-	empty_blueprint( );
-	blueprint = new object;
-	blueprint->init( NULL, "Root" );
-	set_blueprint( blueprint, r );
-}
-
-
-/*****************************************************************************
-EMPTY_BLUEPRINT
-	remove the current blueprint
-******************************************************************************/
-void empty_blueprint( void )
-{
-	if ( blueprint == NULL )
-		return;
-
-	blueprint->empty( );
-	blueprint->delete_obj( );
-	blueprint = NULL;
-}
-
-
-/*****************************************************************************
-SET_BLUEPRINT
-	copy the naked structure of the model into another object, called blueprint, 
-	to be used for adding objects without example
-******************************************************************************/
-void set_blueprint( object *container, object *r )
-{
-	bridge *cb, *cb1;
-	object *cur, *cur1;
-	variable *cv;
-	
-	if ( r == NULL )
-		return;
-
-	for ( cv = r->v; cv != NULL; cv = cv->next )
-		container->add_var_from_example( cv );
-	
-	delete [ ] container->label;
-	
-	container->label = new char[ strlen( r->label ) + 1 ];
-	strcpy( container->label, r->label );
-
-	for ( cb = r->b; cb != NULL; cb = cb->next )
-	{
-		if ( cb->head == NULL )
-			continue;
-		
-		cur1 = cb->head;
-		container->add_obj( cur1->label, 1, 0 );
-		
-		for ( cb1 = container->b; strcmp( cb1->blabel, cb->blabel ); cb1 = cb1->next );
-		
-		cur = cb1->head;
-		set_blueprint( cur, cur1 );
-	}
 }
 
 
@@ -624,8 +503,8 @@ int load_configuration( bool reload, bool quick )
 	int i, j = 0, load = 0;
 	char msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
 	object *cur;
-	variable *cur_var, *cur_var1;
-	description *cur_descr;
+	variable *cv, *cv1;
+	description *cd;
 	FILE *f, *g;
 	
 	unload_configuration( false );				// unload current
@@ -744,17 +623,17 @@ int load_configuration( bool reload, bool quick )
 	fscanf( f, "%999s", msg );  
 	for ( j = 0; strcmp( msg, "END_DOCUOBSERVE" ) && j < MAX_FILE_TRY; ++j )
 	{
-		cur_descr = search_description( msg );
-		if ( cur_descr != NULL )
+		cd = search_description( msg );
+		if ( cd != NULL )
 		{
-			cur_descr->observe = 'y';
-			cur_var = root->search_var( NULL, msg );
-			if ( cur_var != NULL )
-				for ( cur = cur_var->up; cur != NULL; cur = cur->hyper_next( cur_var->up->label ) )
+			cd->observe = 'y';
+			cv = root->search_var( NULL, msg );
+			if ( cv != NULL )
+				for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cv->up->label ) )
 				{
-					cur_var1 = cur->search_var( NULL, cur_var->label );
-					if ( cur_var1 != NULL )
-						cur_var1->observe = true;
+					cv1 = cur->search_var( NULL, cv->label );
+					if ( cv1 != NULL )
+						cv1->observe = true;
 				}
 		}
 		fscanf( f, "%999s", msg );
@@ -776,9 +655,9 @@ int load_configuration( bool reload, bool quick )
 	fscanf( f, "%999s", msg );  
 	for ( j = 0; strcmp( msg, "END_DOCUINITIAL" ) && j < MAX_FILE_TRY; ++j )
 	{
-		cur_descr = search_description( msg );
-		if ( cur_descr != NULL )
-			cur_descr->initial = 'y';
+		cd = search_description( msg );
+		if ( cd != NULL )
+			cd->initial = 'y';
 		fscanf( f, "%999s", msg );
 	}
 	
@@ -832,7 +711,7 @@ void unload_configuration ( bool full )
 	root->delete_obj( );
 	root = new object;
 	root->init( NULL, "Root" );
-	add_description( "Root", "Object", "(no description available)" );      
+	add_description( "Root" );      
 	reset_blueprint( NULL );
 
 	empty_cemetery( );							// garbage collection
@@ -933,7 +812,7 @@ bool save_configuration( int findex )
 	bool save_ok = false;
 	int delta, indexDig;
 	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file = NULL;
-	description *cur_descr;
+	description *cd;
 	FILE *f; 
 	
 	delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
@@ -995,15 +874,15 @@ bool save_configuration( int findex )
 	save_description( root, f );
 	
 	fprintf( f, "\nDOCUOBSERVE\n" );
-	for ( cur_descr = descr; cur_descr != NULL; cur_descr = cur_descr->next )
-		if ( cur_descr->observe == 'y' )   
-			fprintf( f, "%s\n", cur_descr->label );
+	for ( cd = descr; cd != NULL; cd = cd->next )
+		if ( cd->observe == 'y' )   
+			fprintf( f, "%s\n", cd->label );
 	fprintf( f, "\nEND_DOCUOBSERVE\n\n" );
 	
 	fprintf( f, "\nDOCUINITIAL\n" );
-	for ( cur_descr = descr; cur_descr != NULL; cur_descr = cur_descr->next )
-		if ( cur_descr->initial == 'y' )     
-			fprintf( f, "%s\n", cur_descr->label );
+	for ( cd = descr; cd != NULL; cd = cd->next )
+		if ( cd->initial == 'y' )     
+			fprintf( f, "%s\n", cd->label );
 	fprintf( f, "\nEND_DOCUINITIAL\n\n" );
 	
 	save_eqfile( f );

@@ -1200,14 +1200,7 @@ void create_table_init( object *r, FILE *frep )
 	write_list( frep, r, 0, "" );
 
 	cd = search_description( r->label );
-	if ( cd == NULL )
-	{
-		add_description( r->label, "Object", "(no description available)" );
-		plog( "\nWarning: description for '%s' not found. New one created.", "", r->label );
-		cd = search_description( r->label );
-	} 
-
-	if ( cd != NULL && cd->text != NULL && ! strstr( cd->text, "(no description available)" ) )
+	if ( has_descr_text ( cd ) )
 	{
 		fprintf( frep, "<i>Description:</i><BR>\n" );
 		
@@ -1263,21 +1256,10 @@ void create_table_init( object *r, FILE *frep )
 			}
 	   
 			cd = search_description( cv->label );
-			if ( cd == NULL )
-			{
-				if ( cv->param == 0 )
-					add_description( cv->label, "Variable", "(no description available)" );
-				if ( cv->param == 1 )
-					add_description( cv->label, "Parameter", "(no description available)" );  
-				if ( cv->param == 2 )
-					add_description( cv->label, "Function", "(no description available)" );  
-				plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
-				cd = search_description( cv->label );
-			} 
 
 			fprintf( frep, "<td> " );
 			bool desc_text = false;
-			if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+			if ( has_descr_text ( cd ) )
 				for ( i = 0; cd->text[ i ] != '\0'; ++i )
 				{
 					desc_text = true;
@@ -1610,18 +1592,6 @@ void show_rep_observe( FILE *f, object *n, int *begin, FILE *frep )
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
-		if (cd == NULL )
-		{
-			if ( cv->param == 0 )
-				add_description( cv->label, "Variable", "(no description available)" );
-			if ( cv->param == 1 )
-				add_description( cv->label, "Parameter", "(no description available)" );  
-			if ( cv->param == 2 )
-				add_description( cv->label, "Function", "(no description available)" );  
-			plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
-			cd = search_description( cv->label );
-		} 
-
 		if ( cd->observe == 'y' )
 		{
 			if ( *begin == 1 )
@@ -1653,7 +1623,7 @@ void show_rep_observe( FILE *f, object *n, int *begin, FILE *frep )
 			
 			fprintf( f, "<td>" ); 
 			
-			if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+			if ( has_descr_text ( cd ) )
 				for ( i = 0; cd->text[ i ] != '\0'; ++i )
 				{
 					switch ( cd->text[ i ] )
@@ -1698,20 +1668,6 @@ void show_rep_initial( FILE *f, object *n, int *begin, FILE *frep )
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
-		if ( cd == NULL )
-		{
-			if ( cv->param == 0 )
-				add_description( cv->label, "Variable", "(no description available)" );
-			if ( cv->param == 1 )
-				add_description( cv->label, "Parameter", "(no description available)" );  
-			if ( cv->param == 2 )
-				add_description( cv->label, "Function", "(no description available)" );  
-			
-			plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
-			
-			cd = search_description( cv->label );
-		} 
-
 		if ( cd->initial == 'y' )
 		{
 			if ( *begin == 1 )
@@ -1743,7 +1699,7 @@ void show_rep_initial( FILE *f, object *n, int *begin, FILE *frep )
 			fprintf( f, "<td>" ); 
 			
 			bool desc_text = false;
-			if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+			if ( has_descr_text ( cd ) )
 				for ( i = 0; cd->text[ i ] != '\0'; ++i )
 				{
 					desc_text = true;
@@ -1961,7 +1917,7 @@ void tex_report_struct( object *r, FILE *f, bool table )
 	}
 
 	cd = search_description( r->label );
-	if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+	if ( has_descr_text ( cd ) )
 		fprintf( f, "\\emph{Description:}\n\n\\detokenize{%s}\n\n", cd->text );
 
 	if ( r->v != NULL )
@@ -2008,7 +1964,7 @@ void tex_report_struct( object *r, FILE *f, bool table )
 		
 		bool desc_text = false;
 		cd = search_description( cv->label );
-		if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+		if ( has_descr_text ( cd ) )
 		{
 			if ( ! table )
 				fprintf( f, ": " );
@@ -2082,7 +2038,7 @@ void tex_report_observe( object *r, FILE *f, bool table )
 					fprintf( f, "Parameter & " );
 				if ( cv->param == 2 )
 					fprintf( f, "Function & " );
-				if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+				if ( has_descr_text ( cd ) )
 					tex_fprintf( f, cd->text );
 				fprintf( f, "\\\\ \n  \\hline \n" ); 
 			} 
@@ -2157,7 +2113,7 @@ void tex_report_init( object *r, FILE *f, bool table )
 					fprintf( f, "Function & " );
 		  
 				bool desc_text = false;
-				if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+				if ( has_descr_text ( cd ) )
 				{
 					desc_text = true;
 					tex_fprintf( f, cd->text );

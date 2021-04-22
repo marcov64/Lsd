@@ -836,31 +836,6 @@ void clean_spaces( char *s )
 }
 
 
-/***************************************************
- CLEAN_NEWLINES
- ***************************************************/
-void clean_newlines( char *s )
-{
-	int i, len;
-	
-	if ( s == NULL )
-		return;
-	
-	len = strlen( s );
-
-	char d[ len + 1 ];
-
-	for ( i = 0; s[ i ] == '\n' && i < len; ++i );
-
-	strcpy( d, s + i );
-	strcpy( s, d );
-
-	for ( i = strlen( s ) - 1; s[ i ] == '\n' && i >= 0; --i );
-	
-	s[ i + 1 ] = '\0';
-}
-
-
 /****************************************************
  WIN_PATH
  convert linux path to Windows default, replacing / with \
@@ -880,28 +855,200 @@ string win_path( string filepath )
 
 
 /****************************************************
- STR_UPR
+ STRUPR
  convert string to upper case
  ****************************************************/
-char *str_upr( char *s )
-{
-	unsigned char *p = ( unsigned char * ) s;
-
+#ifndef GCCLIBS
+char *strupr( char *s )
+{ 
 	if ( s == NULL )
 		return NULL;
 	
-	while ( *p )
+	for ( unsigned char *p = ( unsigned char * ) s; *p; ++p )
+		*p = toupper( *p ); 
+	
+	return s;
+}
+#endif
+
+
+/***************************************************
+ STRWSP
+ check for a string of just whitespace
+ ***************************************************/
+bool strwsp( const char *str )
+{
+	if ( str == NULL )
+		return true;
+
+	while ( isspace( ( unsigned char ) *str ) ) 
+		++str;
+
+	if ( *str == '\0' )  		// all spaces?
+		return true;
+
+	return false;
+}
+
+
+/***************************************************
+ STRTRIM
+ trim whitespace from the beginning/end of string
+ ***************************************************/
+int strtrim( char *out, const char *str, int outSz )
+{
+	char *end;
+	int size;
+
+	if ( str == NULL || outSz <= 0 )
+		return 0;
+
+	while ( isspace( ( unsigned char ) *str ) ) 
+		++str;
+
+	if ( *str == '\0' )  		// all spaces?
 	{
-		*p = toupper( *p );
-		++p;
+		out[ 0 ] = '\0';
+		return 1;
 	}
 
-	return s;
+	end = ( char * ) str + strlen( str ) - 1;
+	while ( end > str && isspace( ( unsigned char ) *end ) ) 
+		--end;
+	++end;
+
+	size = ( end - str ) < outSz - 1 ? ( end - str ) : outSz - 1;
+
+	memcpy( out, str, size );
+	out[ size ] = '\0';
+
+	return size;
+}
+
+
+/***************************************************
+ STRWRAP
+ insert line breaks in string to wrap text at given width
+ based on code from ulf.astrom@gmail.com
+ ***************************************************/
+int strwrap( char *out, const char *str, int outSz, int wid )
+{
+	int i, lines, tlen, len, pos, close_word, open_word;
+
+	if ( str == NULL )
+		return 0;
+
+	tlen = strlen( str );
+
+	if ( tlen == 0 || wid <= 0 )
+		return 0;
+
+	lines = pos = 0;
+	while ( pos < tlen && outSz > 0 )
+	{
+		if ( str[ pos ] == '\n' )
+		{
+			len = 0;
+			goto end_line;
+		}
+
+		if ( pos + wid > tlen )
+			wid = tlen - pos;
+
+		len = wid;
+		close_word = 0;
+		while ( str[ pos + len + close_word ] != '\0' && ! isspace( str[ pos + len + close_word ] ) )
+			++close_word;
+
+		open_word = 0;
+		while ( str[ pos + len ] != '\0' && ! isspace( str[ pos + len ] ) )
+		{
+			--len;
+			++open_word;
+
+			if ( open_word + close_word > wid * 0.8 )
+			{
+				len = wid;
+				break;
+			}
+		}
+
+		for ( i = 0; i < len; ++i )
+		{
+			if ( str[ pos + i ] == '\n' )
+			{
+				len = i;
+				break;
+			}
+		}
+
+		end_line:
+		
+		++lines;
+		
+		if ( len > outSz - 1 )
+			len = outSz - 1;
+		
+		if ( len > 0 )
+		{
+			strncpy( out, str + pos, len );
+			out += len;
+			outSz -= len;
+		}
+		
+		out[ 0 ] = '\n';
+		++out;
+		--outSz;
+
+		if ( len == wid )
+			--len;
+
+		pos += len + 1;
+	}
+
+	*( out - 1 ) = '\0';
+	
+	return lines;
+}
+
+
+/***************************************************
+ STRTCL
+ convert a string to proper Tcl format
+ ***************************************************/
+char *strtcl( char *out, char const *text, int outSz )
+{
+	int i, j;
+	
+	if ( out == NULL )
+		return NULL;
+	
+	if ( text == NULL )
+		j = 0;
+	else
+	{
+		for ( i = j = 0; text[ i ] != '\0' && j < outSz - 1; ++i )
+			if ( text[ i ] != '[' && text[ i ] != ']' && text[ i ] != '{' && text[ i ] != '}' && text[ i ] != '\"' && text[ i ] != '\\' && text[ i ] != '$' )
+				out[ j++ ] = text[ i ];
+			else
+			{
+				out[ j++ ] = '\\';
+				out[ j++ ] = text[ i ];
+			}
+
+		for ( i = 1; i <= j && isspace( ( unsigned char ) out[ j - i ] ); ++i )
+			out[ j - i ] = '\0';
+	}
+	
+	out[ j ] = '\0';
+	
+	return out;
 }
 
 
 /****************************************************
  MSLEEP
+ stop execution for a given period
  ****************************************************/
 void msleep( unsigned msec )
 {

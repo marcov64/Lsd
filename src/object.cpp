@@ -2931,7 +2931,7 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 	}
 
 	strncpy( dir, direction, 5 );
-	str_upr( dir );
+	strupr( dir );
 
 	qsort_lag = lag;
 	qsort_lab = ( char * ) var;
@@ -3070,7 +3070,7 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 	}
 
 	strncpy( dir, direction, 5 );
-	str_upr( dir );
+	strupr( dir );
 
 	qsort_lag = lag;
 	qsort_lab = ( char * ) var1;

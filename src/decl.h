@@ -67,7 +67,7 @@ Relevant flags (when defined):
 #define SENS_SEP " ,;|/#\t\n"			// sensitivity data valid separators
 #define USER_D_VARS 1000				// number of user double variables
 #define UPD_PER 0.2						// update period during simulation run in s
-
+#define NO_DESCR ""						// no description available text
 
 // define PI for C++11
 #ifndef M_PI
@@ -190,6 +190,7 @@ bool check_cond( double val1, int lopc, double val2 );
 bool contains( FILE *f, char *lab, int len );
 bool create_maverag( int *choice );
 bool create_series( int *choice, bool mc, vector < string > var_names );
+bool has_descr_text( description *d );
 bool is_equation_header( char *line, char *var, char *updt_in );
 bool load_description( char *msg, FILE *f );
 bool load_prev_configuration( void );
@@ -203,7 +204,9 @@ bool unsaved_change( bool );
 bool unsaved_change( void );
 char *NOLH_valid_tables( int k, char* ch );
 char *upload_eqfile( void );
-description *search_description( char *lab );
+description *add_description( char const *lab, int type = 4, char const *text = NULL, char const *init = NULL, char initial = 'n', char observe = 'n' );
+description *change_description( char const *lab_old, char const *lab = NULL, int type = -1, char const *text = NULL, char const *init = NULL, char initial = '\0', char observe = '\0' );
+description *search_description( const char *lab, bool add_missing = true );
 double lower_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
 double upper_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
 double *log_data( double *data, int start, int end, int ser, const char *err_msg );
@@ -232,20 +235,14 @@ object *skip_next_obj( object *t, int *count );
 void NOLH_clear( void );
 void add_cemetery( variable *v );
 void add_da_plot_tab( const char *w, int id_plot );
-void add_description( char const *lab, char const *type, char const *text );
 void add_rt_plot_tab( const char *w, int id_sim );
 void analysis( int *choice, bool mc = false );
 void ancestors( object *r, FILE *f, bool html = true );
 void assign( object *r, int *idx, char *lab );
 void attach_instance_number( char *outh, char *outv, object *r, int outSz );
 void auto_document( int *choice, char const *lab, char const *which, bool append = false );
-void autofill_descr( object *o );
 void canvas_binds( int n );
 void center_plot( void );
-void change_descr_lab( char const *lab_old, char const *lab, char const *type, char const *text, char const *init );
-void change_descr_lab( char const *lab_old, char const *lab, char const *type, char const *text, char const *init );
-void change_descr_text( char *lab );
-void change_init_text( char *lab );
 void chg_obj_num( object **c, int value, int all, int pippo[ ], int *choice, int cfrom );
 void clean_debug( object *n );
 void clean_parallel( object *n );
@@ -320,6 +317,7 @@ void put_text( char *str, char *num, int x, int y, char *str2);
 void read_eq_filename( char *s );
 void report( int *choice, object *r );
 void reset_blueprint( object *r );
+void reset_description( object *r );
 void reset_end( object *r );
 void reset_plot( void );
 void run( void );

@@ -128,14 +128,6 @@ object->draw_link_net( )
 
 #include "decl.h"
 
-// enable linux code
-#ifndef GCCLIBS
-char *strupr( char *s )
-{ char *p = s; for ( ; *p; ++p ) *p = toupper( *p ); return s; }
-#define GCCLIBS			
-#endif
-
-
 /****************************************************
 NETLINK
 	Initialize new link, at the end of linked list.

@@ -152,7 +152,7 @@ int lsdmain( int argn, char **argv )
 
 	root = new object;
 	root->init( NULL, "Root" );
-	add_description( "Root", "Object", "(no description available)" );
+	add_description( "Root" );
 	reset_blueprint( NULL );
 
 	if ( load_configuration( true ) != 0 )

@@ -1121,7 +1121,7 @@ OPERATE
 object *operate( object *r, int *choice )
 {
 bool saveAs, delVar, renVar, table;
-char observe, initial, *lab1, *lab2, *lab3, *lab4, lab[ TCL_BUFF_STR ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ];
+char observe, initial, *lab1, *lab2, *lab3, *lab4, lab[ TCL_BUFF_STR ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ TCL_BUFF_STR + 1 ];
 int sl, done = 0, num, i, j, k, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, temp[ 10 ];
 long nLinks;
 double fake = 0;
@@ -1131,7 +1131,7 @@ object *n, *cur, *cur1, *cur2;
 variable *cv, *cv1;
 result *rf;					// pointer for results files (may be zipped or not)
 sense *cs;
-description *cur_descr;
+description *cd;
 struct stat stExe, stMod;
 
 if ( ! redrawReq )
@@ -1363,23 +1363,16 @@ case 2:
 			if ( done == 0 )
 			{
 				cmd( "set text_description [ .addelem.d.f.text get 1.0 end ]" );
-				cmd( "if { $text_description==\"\\n\" } { set text_description \"(no description available)\" }" );
-				lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
-				if ( param == 1 )
-				{
-					add_description( lab, "Parameter", lab1 );
-					cmd( "lappend modPar %s", lab );
-				}
+				add_description( lab, param, ( char * ) Tcl_GetVar( inter, "text_description", 0 ) );
+				
 				if ( param == 0 )
-				{
-					add_description( lab, "Variable", lab1 );
 					cmd( "lappend modVar %s", lab );
-				}
+
+				if ( param == 1 )
+					cmd( "lappend modPar %s", lab );
+				
 				if ( param == 2 )
-				{
-					add_description( lab, "Function", lab1 );
 					cmd( "lappend modFun %s", lab );
-				}
 				
 				cmd( "lappend modElem %s", lab );
 
@@ -1541,10 +1534,8 @@ case 3:
 		
 		r->add_obj( lab, 1, 1 );
 		
-		cmd( "set text_description [.addobj.d.f.text get 1.0 end]" );  
-		cmd( "if { $text_description==\"\\n\" || $text_description==\"\" } { set text_description \"(no description available)\" }" );
-		lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
-		add_description( lab, "Object", lab1 );
+		cmd( "set text_description [ .addobj.d.f.text get 1.0 end ]" );  
+		add_description( lab, 4, ( char * ) Tcl_GetVar( inter, "text_description", 0 ) );
 		cmd( "lappend modObj %s", lab );
 		
 		// update focus memory
@@ -1731,13 +1722,7 @@ case 6:
 		break;
 	}
 
-	cur_descr = search_description( lab_old );
-	if ( cur_descr == NULL )
-	{
-		add_description( lab_old, "Object", "(no description available)" );
-		cur_descr = search_description( lab_old );
-	}
-	
+	cd = search_description( lab_old );
 	skip_next_obj( r, &num );
 	  
 	cmd( "set to_compute %d", r->to_compute ? 1 : 0 );
@@ -1801,13 +1786,7 @@ case 6:
 	cmd( "showtop $T topleftW" );
 	cmd( "mousewarpto $T.b.ok" );
 
-	for ( i = 0; cur_descr->text[ i ] != ( char ) NULL; ++i )
-		if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\' )
-			cmd( "$w.f.text insert end \"%c\"", cur_descr->text[ i ] );
-		else
-			cmd( "$w.f.text insert end \"\\%c\"", cur_descr->text[ i ] );
-
-	cmd( "$w.f.text delete \"end - 1 char\"" );
+	cmd( "$w.f.text insert end \"%s\"", strtcl( buf_descr, cd->text, TCL_BUFF_STR ) );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -1821,9 +1800,7 @@ case 6:
 
 		// save description changes
 		cmd( "set text_description \"[ .objprop.desc.f.text get 1.0 end ]\"" );
-		change_descr_text( lab_old );
-		lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
-		add_description( lab, "Object", lab1 );
+		change_description( lab_old, NULL, -1, ( char * ) Tcl_GetVar( inter, "text_description", 0 ) );
 
 		cmd( "set choice $to_compute" );
 
@@ -1947,7 +1924,7 @@ case 83:
 					goto here_newname;
 				}
 				
-				change_descr_lab( cur->label, lab, "", "", "" );
+				change_description( cur->label, lab );
 				cur->chg_lab( lab );
 			}
 			else
@@ -1986,21 +1963,10 @@ case 7:
 	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) || ! strcmp( lab1, "(none)" ) )		
 		break;
+	
 	sscanf( lab1, "%99s", lab_old );
 	cv = r->search_var( NULL, lab_old );
-
-	cur_descr = search_description( lab_old );
-	if ( cur_descr == NULL )
-	{
-		if ( cv->param == 0 )
-			add_description( lab_old, "Variable", "(no description available)" );
-		if ( cv->param == 1 )
-			add_description( lab_old, "Parameter", "(no description available)" );  
-		if ( cv->param == 2 )
-			add_description( lab_old, "Function", "(no description available)" );  
-		plog( "\nWarning: description for '%s' not found. New one created.", "", lab_old );
-		cur_descr = search_description( lab_old );
-	} 
+	cd = search_description( lab_old );
 
 	Tcl_LinkVar( inter, "done", ( char * ) &done, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "debug", ( char * ) &num, TCL_LINK_BOOLEAN );
@@ -2015,8 +1981,8 @@ case 7:
 	savei = cv->savei;
 	parallel = cv->parallel;
 
-	cmd( "set observe %d", cur_descr->observe=='y'?1:0 );
-	cmd( "set initial %d", cur_descr->initial=='y'?1:0 );
+	cmd( "set observe %d", cd->observe == 'y' ? 1 : 0 );
+	cmd( "set initial %d", cd->initial == 'y' ? 1 : 0 );
 	cmd( "set vname %s", lab_old );
 
 	cmd( "set T .chgelem" );
@@ -2171,7 +2137,7 @@ case 7:
 			cmd( "bind $T <Control-d> \"$T.b1.deb invoke\"; bind $T <Control-D> \"$T.b1.deb invoke\"" );
 			cmd( "bind $T <Control-p> \"$T.b1.par invoke\"; bind $T <Control-P> \"$T.b1.par invoke\"" );
 	}
-
+	
 	cmd( "pack $T.h $T.b0 $T.b1 -pady 5" );
 
 	cmd( "set Td $T.desc" );
@@ -2208,7 +2174,7 @@ case 7:
 	cmd( "ttk::button $Td.b.us -width [ expr { $butWid + 2 } ] -text \"Using Elem.\" -command { set done 4 } -underline 0" );
 	cmd( "ttk::button $Td.b.using -width [ expr { $butWid + 2 } ] -text \"Elem. Used\" -command { set done  7} -underline 0" );
 	
-	if ( ! strcmp( cur_descr->type, "Parameter" ) )
+	if ( ! strcmp( cd->type, "Parameter" ) )
 		cmd( "pack $Td.b.auto_doc $Td.b.us -padx $butSpc -side left" );
 	else
 	{
@@ -2270,25 +2236,11 @@ case 7:
 	cmd( "showtop $T topleftW" );
 	cmd( "mousewarpto $T.b.ok" );
 
-	for ( i = 0; cur_descr->text[ i ] != '\0'; ++i )
-		if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\')
-			cmd( "$Td.f.desc.text insert end \"%c\"", cur_descr->text[ i ] );
-		else
-			cmd( "$Td.f.desc.text insert end \"\\%c\"", cur_descr->text[ i ] );
+	cmd( "$Td.f.desc.text insert end \"%s\"", strtcl( buf_descr, cd->text, TCL_BUFF_STR ) );
 
-	cmd( "$Td.f.desc.text delete \"end - 1 char\"" );
+	if ( cv->param == 1 || cv->num_lag > 0 )
+		cmd( "$Td.i.desc.text insert end \"%s\"", strtcl( buf_descr, cd->init, TCL_BUFF_STR ) );
 
-	if ( ( cv->param == 1 || cv->num_lag > 0 ) && cur_descr->init != NULL )
-	{
-		for ( i = 0; cur_descr->init[ i ] != '\0'; ++i )
-			if ( cur_descr->init[ i ] != '[' && cur_descr->init[ i ] != ']' && cur_descr->init[ i ] != '{' && cur_descr->init[ i ] != '}' && cur_descr->init[ i ] != '\"' && cur_descr->text[ i ] != '\\')
-				cmd( "$Td.i.desc.text insert end \"%c\"", cur_descr->init[ i ] );
-			else
-				cmd( "$Td.i.desc.text insert end \"\\%c\"", cur_descr->init[ i ] );
-  
-		cmd( "$Td.i.desc.text delete \"end - 1 char\"" );
-	}
-	
 	cycle_var:
 
 	done = 0;
@@ -2307,18 +2259,12 @@ case 7:
 	if ( done == 9 ) 
 	{
 		cmd( "set text_description \"[ .chgelem.desc.f.desc.text get 1.0 end ]\"" );
-		change_descr_text( lab_old );
+		change_description( lab_old, NULL, -1, ( char * ) Tcl_GetVar( inter, "text_description", 0 ) );
 	  
 		auto_document( choice, lab_old, "ALL", true );
 		cmd( ".chgelem.desc.f.desc.text delete 1.0 end" );
+		cmd( ".chgelem.desc.f.desc.text insert end \"%s\"", strtcl( buf_descr, cd->text, TCL_BUFF_STR ) );
 
-		for ( i = 0; cur_descr->text[ i ] != '\0'; ++i )
-			if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\')
-				cmd( ".chgelem.desc.f.desc.text insert end \"%c\"", cur_descr->text[ i ] );
-			else
-				cmd( ".chgelem.desc.f.desc.text insert end \"\\%c\"", cur_descr->text[ i ] );
-		  
-		cmd( ".chgelem.desc.f.desc.text delete \"end - 1 char\"" );
 		unsaved_change( true );		// signal unsaved change
 	}
 
@@ -2336,8 +2282,8 @@ case 7:
 		*choice == 1 ? observe = 'y' : observe = 'n';
 		cmd( "set choice $initial" );
 		*choice == 1 ? initial = 'y' : initial = 'n';
-		cur_descr->initial = initial;
-		cur_descr->observe = observe;
+		cd->initial = initial;
+		cd->observe = observe;
 	   
 		for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 		{
@@ -2350,12 +2296,13 @@ case 7:
 		   cv->observe = ( observe == 'y' ) ? true : false;
 		}
 		  
-		cmd( "set text_description \"[.chgelem.desc.f.desc.text get 1.0 end]\"" );
-		change_descr_text( lab_old );
+		cmd( "set text_description \"[ .chgelem.desc.f.desc.text get 1.0 end ]\"" );
+		change_description( lab_old, NULL, -1, ( char * ) Tcl_GetVar( inter, "text_description", 0 ) );
+		
 		if ( cv->param == 1 || cv->num_lag > 0 )
 		{
-			cmd( "set text_description \"[.chgelem.desc.i.desc.text get 1.0 end]\"" );
-			change_init_text( lab_old );
+			cmd( "set text_description \"[ .chgelem.desc.i.desc.text get 1.0 end ]\"" );
+			change_description( lab_old, NULL, -1, NULL, ( char * ) Tcl_GetVar( inter, "text_description", 0 ) );
 		}
 	  
 		unsaved_change( true );		// signal unsaved change
@@ -2497,7 +2444,8 @@ case 76:
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "if [ winfo exists .prop ] { if { $nature == 0 } { set numlag [ .prop.n.lag get ] }; destroytop .prop }" );
+	cmd( "if [ winfo exists .prop ] { if { $nature == 0 } { set numlag [ .prop.n.lag get ] } }" );
+	cmd( "destroytop .prop" );
 
 	if ( *choice == 2 )
 		goto here_endprop;
@@ -2510,12 +2458,10 @@ case 76:
 
 	if ( ! delVar && ( nature != cv->param || numlag != cv->num_lag ) )
 	{
-		if ( nature == 0 )
-			change_descr_lab( lab_old, "", "Variable", "", "" );
-		if ( nature == 1 )
-			change_descr_lab( lab_old, "", "Parameter", "", "" );
-		if ( nature == 2 )
-			change_descr_lab( lab_old, "", "Function", "", "" );
+		if ( nature != 1 && numlag == 0 )
+			change_description( lab_old, NULL, nature, NULL, "" );
+		else
+			change_description( lab_old, NULL, nature );		
 
 		for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 		{ 
@@ -2587,7 +2533,7 @@ case 76:
 			if ( cv->param == 2 )
 				cmd( "lappend modFun %s", lab );
 			
-			change_descr_lab( lab_old, lab, "", "", "" );
+			change_description( lab_old, lab );
 		}
 		
 		for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
@@ -4030,15 +3976,8 @@ case 44:
 break;
 
 
-// Save descriptions
+// (empty)
 case 45:
-
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
-	strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
-
-	change_descr_text( lab );
-
-	unsaved_change( true );		// signal unsaved change
 
 break;
 
@@ -6298,7 +6237,7 @@ void show_observe( object *n )
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
-		if ( cd != NULL && cd->observe=='y' )
+		if ( cd->observe=='y' )
 		{
 			if ( cv->param == 1 )
 				plog( "Object: %s \tParameter:\t", "", n->label );
@@ -6326,7 +6265,7 @@ SHOW_INITIAL
 ****************************************************/
 void show_initial( object *n )
 {
-	int i;
+	char buf_descr[ TCL_BUFF_STR + 1 ];
 	bridge *cb;
 	object *co;
 	description *cd;
@@ -6335,7 +6274,7 @@ void show_initial( object *n )
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
-		if ( cd != NULL && cd->initial == 'y' )
+		if ( cd->initial == 'y' )
 		{
 			if ( cv->param == 1 )
 				plog( "Object: %s \tParameter:\t", "", n->label );
@@ -6356,30 +6295,9 @@ void show_initial( object *n )
 				}
 			}
 			else
-			{
-				for ( i = 0; cd->init[ i ] != 0; ++i )
-				{
-					switch ( cd->init[ i ] )
-					{
-						case '[': 
-							plog( "\\\[" );
-							break;
-						case ']': 
-							plog( "]" );
-							break;
-						case '"': 
-							plog( "\\\"" );
-							break;
-						case '{': 
-							plog( "\{" );
-							break;
-						default: 
-							plog( "%c", "", cd->init[ i ] );
-							break;          
-					}
-				}
-			} 
-			plog("\n" );
+				plog( "%s", "", strtcl( buf_descr, cd->init, TCL_BUFF_STR ) );
+
+			plog( "\n" );
 		}
 	}
 
@@ -6598,7 +6516,7 @@ void wipe_out( object *d )
 
 	cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", d->label );
 
-	change_descr_lab( d->label, "", "", "", "" );
+	change_description( d->label );
 
 	for ( cv = d->v; cv != NULL; cv = cv->next )
 	{
@@ -6608,7 +6526,7 @@ void wipe_out( object *d )
 		cmd( "if [ info exists modPar ] { set pos [ lsearch -exact $modPar %s ]; if { $pos >= 0 } { set modPar [ lreplace $modPar $pos $pos ] } }", cv->label );
 		cmd( "if [ info exists modFun ] { set pos [ lsearch -exact $modFun %s ]; if { $pos >= 0 } { set modFun [ lreplace $modFun $pos $pos ] } }", cv->label );
 
-		change_descr_lab( cv->label, "" , "", "", "" );
+		change_description( cv->label );
 	}
 
 	cur = d->hyper_next( d->label );
@@ -7191,7 +7109,7 @@ bool open_configuration( object *&r, bool reload )
 		case 7:
 		case 8:									// problem from MODELREPORT section
 		case 9:									// problem from DESCRIPTION section
-			autofill_descr( r );
+			reset_description( r );
 			
 		case 10:								// problem from DOCUOBSERVE section
 		case 11:
