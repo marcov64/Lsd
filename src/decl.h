@@ -458,6 +458,7 @@ extern object *blueprint;   	// LSD blueprint (effective model in use )
 extern object *currObj;			// pointer to current object in browser
 extern object *wait_delete;		// LSD object waiting for deletion
 extern o_setT obj_list;			// list with all existing LSD objects
+extern s_vecT res_list;			// list of results files last saved
 extern sense *rsense;       	// LSD sensitivity analysis structure
 extern variable *cemetery;  	// LSD saved data from deleted objects
 extern variable *last_cemetery;	// LSD last saved data from deleted objects

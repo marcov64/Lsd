@@ -140,6 +140,7 @@ object *currObj = NULL;		// pointer to current object in browser
 object *root = NULL;		// LSD root object
 object *wait_delete = NULL;	// LSD object waiting for deletion
 o_setT obj_list;			// set with all existing LSD objects
+s_vecT res_list;			// list of results files last saved
 sense *rsense = NULL;		// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data from deleted objects
 variable *last_cemetery = NULL;	// LSD last saved data from deleted objects
@@ -674,6 +675,7 @@ void run( void )
 #endif
 
 	set_fast( 0 );			// should always start on OBSERVE and switch to FAST later
+	res_list.clear( );		// empty list of saved results files
 
 	for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
 	{
@@ -914,8 +916,13 @@ void run( void )
 					else
 						sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - 1, docsv ? "csv" : "res" );
 
+					if ( dozip )
+						strcat( msg, ".gz" );
+					
+					res_list.push_back( msg );
+					
 					if ( fast_mode < 2 )
-						plog( "Saving results to file %s%s... ", "", msg, dozip ? ".gz" : "" );
+						plog( "Saving results to file %s... ", "", msg );
 
 					rf = new result( msg, "wt", dozip, docsv );	// create results file object
 					rf->title( root, 1 );						// write header

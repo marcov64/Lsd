@@ -75,7 +75,7 @@ object *initParent = NULL;			// parent of new variable initial setting
 
 
 // list of choices that are bad with existing run data
-int badChoices[ ] = { 1, 2, 3, 6, 7, 12, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
+int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
@@ -3472,7 +3472,35 @@ case 24:
 
 // Enter the analysis of results module for Monte Carlo analysis
 case 12:
+	// accept analysis after run only if MC data was just produced
+	if ( actual_steps > 0 && res_list.size( ) <= 1 )
+	{
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid data for Monte Carlo analysis\" -detail \"Last simulation run did not produce adequate data to perform a Monte Carlo experiment analysis.\n\nPlease reload or unload your configuration and select the appropriate results files, or execute a multi-run configuration before using this option.\"" );
+		break;
+	}
 
+	// check if MC results were not just created
+	if ( res_list.size( ) > 1 )
+	{
+		cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -icon question -default yes -title \"Results Available\" -message \"Use set of results last created?\" -detail \"A set of results files was previously created and can be used to perform the Monte Carlo experiment analysis.\n\nAny configuration or results not saved will be discarded.\n\nPress 'Yes' to confirm, 'No' to select a different set of files, or 'Cancel' to abort.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" ); 
+	
+		if ( *choice == 2 )
+			break;
+		
+		if ( *choice == 0 )
+			res_list.clear( );
+	}
+	else
+		if ( ! discard_change( ) )		// check for unsaved configuration changes
+			break;
+	
+	// remove existing results from memory before proceeding
+	if ( ! open_configuration( r, true ) )
+	{
+		unload_configuration( true );
+		r = root;
+	}
+	
 	analysis( choice, true );
 	
 break;

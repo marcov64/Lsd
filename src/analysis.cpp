@@ -2523,7 +2523,7 @@ while ( true )
 					cmd( "newtop .da.s \"Monte Carlo Series Options\" { set choice 2 } .da" );
 
 					cmd( "ttk::frame .da.s.i" );
-					cmd( "ttk::label .da.s.i.l -text \"Mode\"" );
+					cmd( "ttk::label .da.s.i.l -text \"Series to create\"" );
 
 					cmd( "ttk::frame .da.s.i.r -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 					cmd( "ttk::radiobutton .da.s.i.r.m -text \"Average only\" -variable bidi -value 1 -command { .da.s.ci.p configure -state disabled }" );
@@ -2574,29 +2574,35 @@ while ( true )
 						goto add_end;
 					
 				case 1:
-					gz = false;
-					const char extRes[ ] = ".res .res.gz";
-					const char extTot[ ] = ".tot .tot.gz";
-
-					// make sure there is a path set
-					cmd( "set path \"%s\"", path );
-					if ( strlen( path ) > 0 )
-						cmd( "cd \"$path\"" );
 				
-					cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$path\" -filetypes {{{LSD result files} {%s}} {{LSD total files} {%s}} {{All files} {*}}} ]", mc ? "s" : "(s)", extRes, extTot );
-					cmd( "if { ! [ fn_spaces \"$lab\" .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
-					h = *choice;		// number of files
-					
-					if ( h == 0 )
-						goto add_end; 	// no file selected
-					
-					if ( mc && h == 1 )
+					// check if MC results were not just created
+					if ( ! mc || res_list.size( ) <= 1 )
 					{
-						cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid number of results files\" -detail \"Monte Carlo experiment requires two or more files. Please adjust the number of simulation runs properly and regenerate the files.\"" );
-						plog( "\nError: invalid number of files\n" );
-						goto add_end;
+						const char extRes[ ] = ".res .res.gz";
+						const char extTot[ ] = ".tot .tot.gz";
+
+						// make sure there is a path set
+						cmd( "set path \"%s\"", path );
+						if ( strlen( path ) > 0 )
+							cmd( "cd \"$path\"" );
+					
+						cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$path\" -filetypes {{{LSD result files} {%s}} {{LSD total files} {%s}} {{All files} {*}}} ]", mc ? "s" : "(s)", extRes, extTot );
+						cmd( "if { ! [ fn_spaces \"$lab\" .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
+						h = *choice;		// number of files
+						
+						if ( h == 0 )
+							goto add_end; 	// no file selected
+						
+						if ( mc && h == 1 )
+						{
+							cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid number of results files\" -detail \"Monte Carlo experiment requires two or more files. Please adjust the number of simulation runs properly and regenerate the files.\"" );
+							plog( "\nError: invalid number of files\n" );
+							goto add_end;
+						}
 					}
-				
+					else
+						h = res_list.size( );
+					
 					var_names.resize( h );
 					
 					if ( mc )
@@ -2609,11 +2615,16 @@ while ( true )
 					else
 						cmd( "progressbox .da.pas \"Add Series\" \"Loading series\" \"\" 1 { set stop true } .da \"Case\"" );
 					
-					for ( i = 0, stop = false; i < h && ! stop; ++i )  
+					for ( i = 0, stop = gz = false; i < h && ! stop; ++i )  
 					{
-						cmd( "set datafile [ lindex $lab %d ]", i );
-						app = ( char * ) Tcl_GetVar( inter, "datafile", 0 );
-						strcpy( filename, app );
+						if ( ! mc || res_list.size( ) <= 1 )
+						{
+							cmd( "set datafile [ lindex $lab %d ]", i );
+							strncpy( filename, ( char * ) Tcl_GetVar( inter, "datafile", 0 ), MAX_PATH_LENGTH );
+						}
+						else
+							strncpy( filename, res_list[ i ].c_str( ), MAX_PATH_LENGTH );
+						
 						if ( strlen( filename ) > 3 && ! strcmp( &filename[ strlen( filename ) - 3 ], ".gz" ) )
 							gz = true;
 

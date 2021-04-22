@@ -153,6 +153,7 @@ typedef pair < string, bridge * > b_pairT;
 typedef pair < double, object * > o_pairT;
 typedef pair < string, variable * > v_pairT;
 typedef vector < object * > o_vecT;
+typedef vector < string > s_vecT;
 typedef unordered_map < string, eq_funcT > eq_mapT;
 typedef unordered_map < string, bridge * > b_mapT;
 typedef unordered_map < double, object * > o_mapT;
