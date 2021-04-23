@@ -1625,12 +1625,6 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 	dimH = pixH / rows;
 	dimW = pixW / columns;
 
-	// create the window with the lattice, roughly 600 pixels as maximum dimension
-	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" { destroytop .lat } \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
-
-	cmd( "bind .lat <Button-2> { .lat.b.ok invoke }" );
-	cmd( "bind .lat <Button-3> { event generate .lat <Button-2> -x %%x -y %%y }" );
-
 	char init_color_string[ 32 ];		// the final string to be used to define tk color to use
 
 	if ( init_color < 0 && ( - init_color ) <= 0xffffff )		// RGB mode selected?
@@ -1642,6 +1636,9 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 		cmd( "if { ! [ info exist c%d ] } { set c%d $colorsTheme(bg) }", init_color, init_color  );
 	}
 			
+	// create the window with the lattice, roughly 600 pixels as maximum dimension
+	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" { destroytop .lat } \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
+
 	cmd( "ttk::canvas .lat.c -height %d -width %d -entry 0 -dark $darkTheme", ( unsigned int ) pixH, ( unsigned int ) pixW );
 	
 	if ( init_color != 1001 )
@@ -1649,7 +1646,25 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 
 	cmd( "pack .lat.c" );
 
-	cmd( "save .lat b { set b \"%s.eps\"; set a [ tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -initialdir \"%s\" -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } } ]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name, path );
+	cmd( "save .lat b { \
+			if { ! [ info exists pltSavFmt ] } { \
+				set pltSavFmt svg \
+			}; \
+			set a [ tk_getSaveFile -parent .lat -title \"Save Lattice to File\" -defaultextension .$pltSavFmt -initialfile %s.$pltSavFmt -initialdir \"%s\" -filetypes { { {Scalable Vector Graphics} {.svg} } { {Encapsulated Postscript} {.eps} } { {All files} {*} } } -typevariable t ]; \
+			if { [ string length $a ] != 0 } { \
+				set a [ file nativename $a ]; \
+				set b [ string trimleft [ file extension $a ] . ]; \
+				if { $b in [ list svg eps ] } { \
+					set pltSavFmt $b \
+				}; \
+				if [ string equal $pltSavFmt eps ] { \
+					.lat.c postscript -colormode color -file \"$a\" \
+				} else { \
+					canvas2svg .lat.c \"$a\" \
+				}; \
+				plog \"\nPlot saved: $a\n\" \
+			} \
+		}", simul_name, path, simul_name );
 
 	cmd( "set rows %d", rows );
 	cmd( "set columns %d", columns );
@@ -1670,6 +1685,8 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 	
 	cmd( "tooltip::tooltip .lat.b.ok \"Save plot to file\"" );
 
+	cmd( "bind .lat <Button-2> { .lat.b.ok invoke }" );
+	cmd( "bind .lat <Button-3> { event generate .lat <Button-2> -x %%x -y %%y }" );
 	cmd( "bind .lat <F1> { LsdHelp lattice.html }" );
 	set_shortcuts_run( ".lat" );
 

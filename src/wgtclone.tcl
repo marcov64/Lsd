@@ -377,15 +377,21 @@ proc dump_canvas { w } {
 #************************************************
 proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
 
+	catch { set file [ open $fn w ] }
+	catch { close $file }
+	
 	if { ! [ winfo exists $c ] || [ winfo class $c ] ne "Canvas" || ! [ file writable $fn ] } {
 		error "Invalid canvas window or file"
 	}
 	
 	lassign [ concat $v 0 0 0 0 ] vx0 vy0 vx1 vy1
-	set wid [ expr { $vx1 - $vx0 } ]
-	set hgt [ expr { $vy1 - $vy0 } ]
+
+	if { [ catch { set wid [ expr { $vx1 - $vx0 } ] } ] || \
+		 [ catch { set hgt [ expr { $vy1 - $vy0 } ] } ] } {
+		error "Invalid canvas region"
+	}
 	
-	set bbox [ $c bbox all ]
+	set bb [ $c bbox all ]
 	
 	if { $wid <= 0 } {
 		set vx0 [ lindex $bb 0 ]
