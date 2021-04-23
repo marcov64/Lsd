@@ -1043,6 +1043,7 @@ proc selectinlist { w pos { foc 0 } } {
 #************************************************
 proc addtolist { w text } {
 	$w insert end "$text"
+	tooltip::tooltip $w -item [ expr { [ $w index end ] - 1 } ] "Click to show plot\nRight-click to delete"
 	selectinlist $w end
 }
 

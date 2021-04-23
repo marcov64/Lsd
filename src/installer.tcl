@@ -321,6 +321,8 @@ okcancel . b { set done 1 } { set done 2 }
 wm geometry . +[ getx . centerS ]+[ gety . centerS ]
 settop . "LSD Installer" { set done 2 } "" yes
 
+tooltip::tooltip .dir.choice.but.browse "Choose a different\ninstallation directory"
+
 set newInst 1
 
 
@@ -889,12 +891,14 @@ ttk::frame .b
 ttk::button .b.finish -width $butWid -text Finish -command { set done 2 }
 bind .b.finish <Return> { .b.finish invoke }
 bind . <Escape> { .b.finish invoke }
+tooltip::tooltip .b.finish "Close LSD installer"
 
 if { [ llength $issues ] == 0 } {
 	ttk::button .b.run -width $butWid -text "Run Now" -command { set done 1 }
 	bind .b.run <Return> { .b.run invoke }
 	pack .b.run .b.finish -padx 10 -pady 10 -side left
 	focus .b.run
+	tooltip::tooltip .b.run "Close installer and launch LSD"
 } else {
 	pack .b.finish -padx 10 -pady 10 -side left
 	focus .b.finish

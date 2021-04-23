@@ -95,7 +95,7 @@ namespace eval ::tooltip {
     # The extra ::hide call in <Enter> is necessary to catch moving to
     # child widgets where the <Leave> event won't be generated
     bind Tooltip <Enter> [namespace code {
-	#tooltip::hide
+	tooltip::hide
 	variable tooltip
 	variable G
 	set G(LAST) -1
@@ -298,6 +298,7 @@ proc ::tooltip::show {w msg {i {}}} {
     #$b.label configure -text [::msgcat::mc $msg] -justify left
     $b.label configure -text $msg -justify left
     update idletasks
+	after 50
     set screenw [winfo screenwidth $w]
     set screenh [winfo screenheight $w]
     set reqw [winfo reqwidth $b]

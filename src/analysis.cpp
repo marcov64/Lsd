@@ -1394,6 +1394,9 @@ while ( true )
 			cmd( "XYokhelpcancel .da.a b Description Equation { set choice 3 } { set choice 4 } { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
 			cmd( "showtop .da.a topleftW 0 0" );
 			cmd( "mousewarpto .da.a.b.r2.ok" );
+			
+			cmd( "tooltip::tooltip .da.a.b.r1.x \"Variable/Parameter textual description\"" );
+			cmd( "tooltip::tooltip .da.a.b.r1.y \"Variable equation code\"" );
 
 			*choice = 0;
 			while ( *choice == 0 )
@@ -1923,6 +1926,9 @@ while ( true )
 			cmd( "XYokhelpcancel .da.a b Description Equation { set choice 3 } { set choice 4 } { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
 			cmd( "showtop .da.a topleftW 0 0" );
 			cmd( "mousewarpto .da.a.b.r2.ok" );
+
+			cmd( "tooltip::tooltip .da.a.b.r1.x \"Variable/Parameter textual description\"" );
+			cmd( "tooltip::tooltip .da.a.b.r1.y \"Variable equation code\"" );
 
 			*choice = 0;
 			while ( *choice == 0 )
@@ -2520,7 +2526,7 @@ while ( true )
 					cmd( "set bidi 1" );
 					cmd( "set keepSeries 0" );
 
-					cmd( "newtop .da.s \"Monte Carlo Series Options\" { set choice 2 } .da" );
+					cmd( "newtop .da.s \"Monte Carlo Options\" { set choice 2 } .da" );
 
 					cmd( "ttk::frame .da.s.i" );
 					cmd( "ttk::label .da.s.i.l -text \"Series to create\"" );
@@ -2561,6 +2567,8 @@ while ( true )
 					cmd( "showtop .da.s" );
 					cmd( "mousewarpto .da.s.b.ok" );
 					 
+					cmd( "tooltip::tooltip .da.s.s.k \"Preserve original series\nafter computing MC series\"" );
+
 					*choice = 0;
 					while ( *choice == 0 )
 						Tcl_DoOneEvent( 0 );
