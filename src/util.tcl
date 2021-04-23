@@ -309,7 +309,7 @@ proc waitbox { w tit msg { steps "" } { timer no } { par . } } {
 # data structures
 #************************************************
 proc init_series { fltcb serlb sern casn sellb seln pltlb pltn } {
-	global parAll serPar parChg parFlt serSel serList parList serOrd serNext serParDict serNdict fltCbox serLbox selLbox pltLbox serNlab casNlab selNlab pltNlab DaModElem DaModPar
+	global parAll serPar parChg parFlt serSel serList parList serOrd serNext serParDict serNdict serDescrDict fltCbox serLbox selLbox pltLbox serNlab casNlab selNlab pltNlab DaModElem DaModPar
 
 	set parChg 0
 	set parFlt $parAll
@@ -333,6 +333,9 @@ proc init_series { fltcb serlb sern casn sellb seln pltlb pltn } {
 	
 	set serParDict [ dict create ]
 	set serNdict [ dict create ]
+	set serDescrDict [ dict create ]
+	
+	tooltip::tooltip clear ${serlb}*
 }
 
 
@@ -351,7 +354,6 @@ proc stat_series { } {
 	if { [ $fltCbox current ] < 0 } {
 		$fltCbox configure -values [ update_parent ]
 	}
-				
 }
 
 
@@ -423,6 +425,7 @@ proc filter_series { { par "" } } {
 	
 	if { $par ne $parFlt } {
 		$serLbox delete 0 end
+		tooltip::tooltip clear ${serLbox}*
 		
 		foreach ser $serList {
 			if { $par eq $parAll || $par eq [ dict get $serParDict [ lindex $ser 0 ] ] } {
@@ -534,9 +537,12 @@ proc add_series { ser par } {
 # entry according to the origin of the series
 #************************************************
 proc insert_series { lbox ser { pos end } } {
-	global colorsTheme
+	global colorsTheme serDescrDict
 
-	set orig [ lindex [ split [ lindex [ split $ser ] 1 ] _ ] 0 ]
+	set serSplit [ split $ser ]
+	set name [ lindex $serSplit 0 ]
+	set orig [ lindex [ split [ lindex $serSplit 1 ] _ ] 0 ]
+	
 	switch $orig {
 		U {
 			set color $colorsTheme(var)
@@ -559,6 +565,10 @@ proc insert_series { lbox ser { pos end } } {
 	
 	if { $color != "" } {
 		$lbox itemconfigure $pos -fg $color
+	}
+
+	if { [ dict exists $serDescrDict $name ] } {
+		tooltip::tooltip $lbox -item [ expr { [ $lbox index end ] - 1 } ] [ dict get $serDescrDict $name ]
 	}
 }
 
@@ -600,6 +610,8 @@ proc sort_series { lbox ord } {
 			}
 			
 			$lbox delete 0 end
+			tooltip::tooltip clear ${lbox}*
+			
 			foreach s $ss {
 				insert_series $lbox "$s"
 			}

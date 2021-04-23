@@ -49,7 +49,7 @@ command from user. The available actions are
 9) observe the object from which this equation was triggered, if any.
 10) Search for an Object containing a specific Variable with a specific value
 
-- void deb_show( object *r, const char *hl_var )
+- void deb_show( object *r, const char *hl_var, int mode )
 fill in all the content of the object.
 *************************************************************/
 
@@ -319,7 +319,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			}
 
 			// create the element list
-			deb_show( r, hl_var );
+			deb_show( r, hl_var, mode );
 			debLstObj = r;
 
 			cmd( "pack .deb.b -padx $butPad -pady $butPad -side right -after .deb.cc" );
@@ -618,7 +618,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 					cmd( "ttk::entry $e.v.l%d.e -width 15 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set val%d %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val%d; return 0 } } -invalidcommand { bell } -justify center", i, i, i );
 					cmd( "$e.v.l%d.e insert 0 $val%d", i, i ); 
 
-					cmd( "ttk::button $e.v.l$i.sa -width 5 -text \"Set All\" -command { set sa %i; set choice 10 }", i );
+					cmd( "ttk::button $e.v.l$i.sa -width -1 -text \"Set All\" -command { set sa %i; set choice 10 }", i );
 					cmd( "pack $e.v.l$i.l $e.v.l$i.e $e.v.l$i.sa -side left -padx 2" );
 					cmd( "pack $e.v.l$i" );
 				}
@@ -1499,11 +1499,11 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 /*******************************************
 DEB_SHOW
 ********************************************/
-void deb_show( object *r, const char *hl_var )
+void deb_show( object *r, const char *hl_var, int mode )
 {
 	char ch[ MAX_LINE_SIZE + 1 ], ch1[ MAX_LINE_SIZE + 1 ];
 	variable *ap_v;
-	int i;
+	int i, j;
 	
 	// fix the top frame before proceeding
 	cmd( "if { ! [ winfo exists .deb.v ] } { \
@@ -1688,10 +1688,46 @@ void deb_show( object *r, const char *hl_var )
 			cmd( "mouse_wheel $w.e$i.name" );
 			cmd( "mouse_wheel $w.e$i.val" );
 			cmd( "mouse_wheel $w.e$i.last" );
+			
+			set_ttip_descr( "$w.e$i.name", ap_v->label );
+			
+			if ( mode != 2 && ap_v->num_lag > 0 )
+			{
+				cmd( "set lvals \"\"" );
+				for ( j = 1; j <= ap_v->num_lag; ++j )
+				{
+					if ( is_nan( ap_v->val[ j ] ) )
+						cmd( "set val NAN" );
+					else
+						if ( is_inf( ap_v->val[ j ] ) )
+							cmd( "set val %sINFINITY", ap_v->val[ j ] < 0 ? "-" : "" );
+						else
+							if ( ap_v->val[ j ] != 0 && fabs( ap_v->val[ j ] ) < SIG_MIN )
+								cmd( "set val  ~0" );
+							else
+								cmd( "set val %g", ap_v->val[ j ] );
+							
+					cmd( "append lvals \"L%d  $val\n\"", j );
+				}
+				
+				cmd( "tooltip::tooltip $w.e$i.val [ string range $lvals 0 end-1 ]" );
+			}
+			
+			if ( ap_v->num_lag > 0 )
+				cmd( "tooltip::tooltip $w.e$i.last \"%d lag%s\"", ap_v->num_lag, ap_v->num_lag > 1 ? "s" : "" );
+			else
+				if ( ap_v->param != 1 )
+					cmd( "tooltip::tooltip $w.e$i.last \"No lag\"" );
 
 			cmd( "bind $w.e$i.name <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", ap_v->label );
+			cmd( "bind $w.e$i.val <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", ap_v->label );
+			cmd( "bind $w.e$i.last <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", ap_v->label );
 			cmd( "bind $w.e$i.name <Button-2> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 25 }", ap_v->label );
+			cmd( "bind $w.e$i.val <Button-2> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 25 }", ap_v->label );
+			cmd( "bind $w.e$i.last <Button-2> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 25 }", ap_v->label );
 			cmd( "bind $w.e$i.name <Button-3> { event generate .deb.cc.grid.can.f.e$i.name <Button-2> -x %%x -y %%y }" );
+			cmd( "bind $w.e$i.val <Button-3> { event generate .deb.cc.grid.can.f.e$i.val <Button-2> -x %%x -y %%y }" );
+			cmd( "bind $w.e$i.last <Button-3> { event generate .deb.cc.grid.can.f.e$i.last <Button-2> -x %%x -y %%y }" );
 		}
 
 		cmd( "set debConfChg 1" );

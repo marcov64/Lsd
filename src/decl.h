@@ -203,6 +203,7 @@ bool sort_listbox( int box, int order, object *r );
 bool unsaved_change( bool );
 bool unsaved_change( void );
 char *NOLH_valid_tables( int k, char* ch );
+char *fmt_ttip_descr( char *out, description *d, int outSz );
 char *upload_eqfile( void );
 description *add_description( char const *lab, int type = 4, char const *text = NULL, char const *init = NULL, char initial = 'n', char observe = 'n' );
 description *change_description( char const *lab_old, char const *lab = NULL, int type = -1, char const *text = NULL, char const *init = NULL, char initial = '\0', char observe = '\0' );
@@ -263,7 +264,7 @@ void create_logwindow( void );
 void create_par_map( object *r );
 void create_table_init( object *r, FILE *frep );
 void dataentry_sensitivity( int *choice, sense *s, int nval = 0 );
-void deb_show( object *r, const char *hl_var );
+void deb_show( object *r, const char *hl_var, int mode );
 void delete_bridge( object *d );
 void disable_plot( void );
 void draw_buttons( void );
@@ -344,6 +345,7 @@ void set_obj_number( object *r, int *choice );
 void set_shortcuts( const char *window );
 void set_shortcuts_run( const char *window );
 void set_title( object *c, char *lab, char *tag, int *incr );
+void set_ttip_descr( const char *w, const char *lab, int it = -1 );
 void shift_desc( int direction, char *dlab, object *r );
 void shift_var( int direction, char *vlab, object *r );
 void show_cells( object *r, char *lab );
@@ -379,6 +381,7 @@ void unload_configuration ( bool full );
 void unlink_cells( object *r, char *lab );
 void unset_shortcuts_run( const char *window );
 void update_bounds( void );
+void update_descr_dict( void );
 void update_more_tab( const char *w, bool adding = false );
 void warn_distr( int *errCnt, bool *stopErr, const char *distr, const char *msg );
 void wipe_out( object *d );
@@ -471,7 +474,7 @@ extern map< thread::id, worker * > thr_ptr;	// worker thread pointers
 // Tcl/Tk specific definitions (for the windowed version only)
 #ifndef NW
 
-extern p_mapT par_map;			// variable to parent name map for AoR
+extern p_mapT par_map;			// element to parent name map for AoR
 
 // C to TCL interface functions
 int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );

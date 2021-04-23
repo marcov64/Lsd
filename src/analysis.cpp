@@ -601,10 +601,10 @@ Tcl_SetVar( inter, "running", running ? "1" : "0", 0 );
 cmd( "if $running { showtop .da overM } { showtop .da overM 1 1 0 }" );
 
 // add time series in memory to listbox
+update_descr_dict( );
 if ( actual_steps > 0 )
 {
 	insert_data_mem( root, &num_var );
-	
 	min_c = max( first_c, showInit ? 0 : 1 );
 	max_c = num_c;
 } 
@@ -4320,6 +4320,19 @@ double *log_data( double *data, int start, int end, int ser, const char *err_msg
 
 
 /***************************************************
+UPDATE_DESCR_DICT
+****************************************************/
+void update_descr_dict( void )
+{
+	char desc[ MAX_LINE_SIZE + 1 ];				
+	description *cd;
+	
+	for ( cd = descr; cd != NULL; cd = cd->next )
+		cmd( "dict set serDescrDict %s \"%s\"", cd->label, fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1 ) );
+}
+
+
+/***************************************************
 INSERT_DATA_MEM
 ****************************************************/
 void insert_data_mem( object *r, int *num_v, char *lab )
@@ -4364,7 +4377,7 @@ void create_par_map( object *r )
 	variable *cv;
 	
 	for ( cv = r->v; cv != NULL; cv = cv->next )
-		par_map.insert( make_pair < string, string > ( cv->label, r->label ) );		
+		par_map.insert( make_pair < string, string > ( cv->label, r->label ) );
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL; cur = go_brother( cur ) )
@@ -4645,6 +4658,10 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	 
 		if ( keep_vars )
 		{
+			cmd( "if { ! [ dict exists serDescrDict %s ] } { \
+					dict set serDescrDict %s \"Loaded from file\n[ file nativename %s ]\" \
+				}", vs[ i ].label, vs[ i ].label, filename );
+			
 			if ( par_map.find( vs[ i ].label ) == par_map.end( ) )
 				cmd( "add_series \"%s\" %s", msg, filename );
 			else
@@ -7564,6 +7581,10 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 					
 			}
 		}
+
+		cmd( "if { ! [ dict exists serDescrDict %s ] } { \
+				dict set serDescrDict %s \"%s\" \
+			}", vs[ num_var ].label, vs[ num_var ].label, mc ? "Monte Carlo series" : "Created from other series" );
 		
 		if ( mc && new_series == 1 && par_map.find( vs[ num_var ].label ) != par_map.end( ) )
 			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank, par_map[ vs[ num_var ].label ].c_str( ) ); 
@@ -7818,6 +7839,10 @@ bool create_maverag( int *choice )
 					vs[ num_var + i ].data[ j - vs[ num_var + i ].start ] = xapp;     
 			}
 		}
+
+		cmd( "if { ! [ dict exists serDescrDict %s ] } { \
+				dict set serDescrDict %s \"Moving average (%d) from '%s'\" \
+			}", vs[ num_var + i ].label, vs[ num_var + i ].label, flt, str[ i ] );
 		
 		cmd( "add_series \"%s %s (%d-%d) #%d\" \"(added)\"", vs[ num_var + i ].label, vs[ num_var + i ].tag, vs[ num_var + i ].start, vs[ num_var + i ].end, vs[ num_var + i ].rank ); 
 	}

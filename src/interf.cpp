@@ -165,7 +165,7 @@ BROWSE
 int browse( object *r, int *choice )
 {
 	bool done, sp_upd;
-	int num;
+	int i, num;
 	bridge *cb;
 	variable *cv;
 
@@ -183,15 +183,14 @@ int browse( object *r, int *choice )
 		cmd( "ttk::scrollbar .l.v.c.v_scroll -command \".l.v.c.var_name yview\"" );
 		cmd( "ttk::listbox .l.v.c.var_name -selectmode browse -yscroll \".l.v.c.v_scroll set\" -dark $darkTheme" );
 		cmd( "mouse_wheel .l.v.c.var_name" );
+		cmd( "tooltip::tooltip clear .l.v.c.var_name*" );
 
 		// populate the variables panel
 		if ( r->v == NULL )
 			cmd( ".l.v.c.var_name insert end \"(none)\"; set nVar 0" );
 		else
 		{
-			cmd( "set app 0" );
-			
-			for ( cv = r->v; cv != NULL; cv = cv->next )
+			for ( cv = r->v, i = 0; cv != NULL; cv = cv->next, ++i )
 			{
 				// special updating scheme?
 				if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 ) )
@@ -208,19 +207,19 @@ int browse( object *r, int *choice )
 					if ( cv->num_lag == 0 )
 					{
 						cmd( ".l.v.c.var_name insert end \"%s (V$varFlags)\"", cv->label );
-						cmd( ".l.v.c.var_name itemconf $app -fg $colorsTheme(var)" );
+						cmd( ".l.v.c.var_name itemconf %d -fg $colorsTheme(var)", i );
 					}
 					else
 					{
 						cmd( ".l.v.c.var_name insert end \"%s (V_%d$varFlags)\"", cv->label, cv->num_lag );
-						cmd( ".l.v.c.var_name itemconf $app -fg $colorsTheme(lvar)" );
+						cmd( ".l.v.c.var_name itemconf %d -fg $colorsTheme(lvar)", i );
 					}
 				}
 				
 				if ( cv->param == 1 )
 				{
 					cmd( ".l.v.c.var_name insert end \"%s (P$varFlags)\"", cv->label );
-					cmd( ".l.v.c.var_name itemconf $app -fg $colorsTheme(par)" );
+					cmd( ".l.v.c.var_name itemconf %d -fg $colorsTheme(par)", i );
 				}
 				
 				if ( cv->param == 2 )
@@ -228,16 +227,16 @@ int browse( object *r, int *choice )
 					if ( cv->num_lag == 0 )
 					{
 						cmd( " .l.v.c.var_name insert end \"%s (F$varFlags)\"", cv->label );
-						cmd( ".l.v.c.var_name itemconf $app -fg $colorsTheme(fun)" );
+						cmd( ".l.v.c.var_name itemconf %d -fg $colorsTheme(fun)", i );
 					}
 					else
 					{
 						cmd( ".l.v.c.var_name insert end \"%s (F_%d$varFlags)\"", cv->label, cv->num_lag );
-						cmd( ".l.v.c.var_name itemconf $app -fg $colorsTheme(lfun)" );
+						cmd( ".l.v.c.var_name itemconf %d -fg $colorsTheme(lfun)", i );
 					}
 				}
-
-				cmd( "incr app" );
+				
+				set_ttip_descr( ".l.v.c.var_name", cv->label, i );
 			}
 			
 			cmd( "set nVar [ .l.v.c.var_name size ]" );
@@ -510,25 +509,26 @@ int browse( object *r, int *choice )
 		cmd( "ttk::scrollbar .l.s.c.v_scroll -command \".l.s.c.son_name yview\"" );
 		cmd( "ttk::listbox .l.s.c.son_name -selectmode browse -yscroll \".l.s.c.v_scroll set\" -dark $darkTheme" );
 		cmd( "mouse_wheel .l.s.c.son_name" );
+		cmd( "tooltip::tooltip clear .l.s.c.son_name*" );
 
 		// populate the objects panel
 		if ( r->up != NULL )
 		{
 			cmd( ".l.s.c.son_name insert end \"$upSymbol\"" );
 			cmd( "set upObjItem 1" );
-			cmd( "set app 1" );
+			i = 1;
 		}
 		else
 		{
 			cmd( "set upObjItem 0" );
-			cmd( "set app 0" );
+			i = 0;
 		}
 		
 		if ( r->up == NULL && r->b == NULL )
 			cmd( ".l.s.c.son_name insert end \"(none)\"" );
 		else
 		{
-			for ( cb = r->b; cb != NULL; cb = cb->next )
+			for ( cb = r->b; cb != NULL; cb = cb->next, ++i )
 			{
 				if ( cb->head != NULL )
 				{
@@ -542,12 +542,13 @@ int browse( object *r, int *choice )
 				}
 				
 				cmd( ".l.s.c.son_name insert end \"%s (#%d%s)\"", cb->blabel, num, done ? "" : "-" );
-				cmd( ".l.s.c.son_name itemconf $app -fg $colorsTheme(obj)" );
-				cmd( "incr app" );
+				cmd( ".l.s.c.son_name itemconf %d -fg $colorsTheme(obj)", i );
+				
+				set_ttip_descr( ".l.s.c.son_name", cb->blabel, i );
 			}
 		}	
 
-		cmd( "ttk::label .l.s.lab -text \"Descending objects ([ expr { $app - $upObjItem } ])\"" );
+		cmd( "ttk::label .l.s.lab -text \"Descending objects ([ expr { %d - $upObjItem } ])\"", i );
 
 		// objects panel context menu (right mouse button)
 		cmd( "ttk::menu .l.s.c.son_name.v -tearoff 0" );
@@ -766,7 +767,7 @@ int browse( object *r, int *choice )
 
 		cmd( "ttk::frame .l.p.tit" );
 		cmd( "ttk::label .l.p.tit.lab -text \"Current object:\" -width 15 -anchor w" );
-		cmd( "ttk::button .l.p.tit.but -width -1 -text \" %s \" -style hlBold.Toolbutton", r->label );
+		cmd( "ttk::button .l.p.tit.but -width -1 -text \" %s \" -style hlBold.Toolbutton %s", r->label, r->up == NULL ? "" : "-command { set choice 6 }" );
 
 		if ( r->up != NULL ) 
 			cmd( "tooltip::tooltip .l.p.tit.but \"Change...\"" );

@@ -832,6 +832,60 @@ bool has_descr_text( description *d )
 
 #ifndef NW
 
+/***************************************************
+FMT_TTIP_DESCR
+***************************************************/
+char *fmt_ttip_descr( char *out, description *d, int outSz )
+{
+	char out1[ outSz ];		
+	
+	if ( out == NULL || outSz <= 0 )
+		return NULL;
+	
+	if ( has_descr_text ( d ) ) 
+		strtrim( out, d->text, outSz );
+	else
+		out[ 0 ] = '\0';
+	
+	if ( d != NULL && d->init != NULL && strlen( d->init ) > 0 ) 
+	{
+		if ( strlen( out ) > 0 )
+			strncat( out, "\n\n", outSz - strlen( out ) - 1 );
+		
+		strtrim( out1, d->init, outSz );
+		strncat( out, out1, outSz - strlen( out ) - 1 );
+	}
+		
+	if ( strlen( out ) > 0 )
+	{
+		strwrap( out1, out, outSz - 1, 60 );
+		strtcl( out, out1, outSz - 1 );
+	}
+	
+	return out;
+}
+
+
+/***************************************************
+SET_TTIP_DESCR
+***************************************************/
+void set_ttip_descr( const char *w, const char *lab, int it )
+{
+	char desc[ MAX_LINE_SIZE + 1 ];				
+	description *cd;
+
+	// add tooltip only if element has description
+	cd = search_description( lab, false );
+	if ( cd != NULL && strlen( fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1 ) ) > 0 )
+	{
+		if ( it >= 0 )			// listbox?
+			cmd( "tooltip::tooltip %s -item %d \"%s\"", w, it, desc );
+		else
+			cmd( "tooltip::tooltip %s \"%s\"", w, desc );
+	}
+}
+
+
 /****************************************************
 SEARCH_ALL_SOURCES
 ****************************************************/

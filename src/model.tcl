@@ -52,6 +52,10 @@ proc showmodel pippo {
 		.l.l.l delete 0 end
 		.l.t.text conf -state normal
 		.l.t.text delete 1.0 end
+		
+		# close tool tip if still showing
+		tooltip::tooltip disable
+		tooltip::tooltip enable
 	} else { 
 		newtop .l "LSD Model Browser" { .l.m.file invoke 2 }
 		
