@@ -543,6 +543,8 @@ int compute_copyfrom( object *c, int *choice, const char *parWnd )
 	cmd( "showtop $cc" );
 	cmd( "mousewarpto $cc.b.comp" );
 
+	cmd( "tooltip::tooltip $cc.b.comp \"Evaluate the global instance number\"" );
+
 	res = i;
 
 	ccompute:
@@ -714,7 +716,7 @@ void eliminate_obj( object **c, int actual, int desired, int *choice )
 	cmd( "ttk::frame $d.b" );
 	cmd( "ttk::button $d.b.last -width $butWid -text Last -command { set choice 1 }" );
 	cmd( "ttk::button $d.b.choose -width $butWid -text Choose -command { set choice 2 }" );
-	cmd( "pack $d.b.last $d.b.choose -padx 10 -side left" );
+	cmd( "pack $d.b.last $d.b.choose -padx $butSpc -side left" );
 	cmd( "pack $d.b" );
 
 	cmd( "helpcancel $d b2 { LsdHelp menudata_objn.html#pick_remove } { set choice 3 }" );

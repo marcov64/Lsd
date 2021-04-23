@@ -1043,7 +1043,7 @@ proc selectinlist { w pos { foc 0 } } {
 #************************************************
 proc addtolist { w text } {
 	$w insert end "$text"
-	tooltip::tooltip $w -item [ expr { [ $w index end ] - 1 } ] "Click to show plot\nRight-click to delete"
+	tooltip::tooltip $w -item [ expr { [ $w index end ] - 1 } ] "Double-click to show\nRight-click to delete"
 	selectinlist $w end
 }
 
@@ -2047,9 +2047,9 @@ proc init_canvas_colors { } {
 # DETACH_TAB
 # Detach/reattach a plot tab/window
 #************************************************
-proc detach_tab { nb tab but da maxLen } {
+proc detach_tab { nb tab but1 but2 da maxLen } {
 
-	if { [ $nb.$tab.$but cget -text ] eq "Attach" } {
+	if { [ $nb.$tab.$but1 cget -text ] eq "Attach" } {
 		
 		set tt [ wm title $nb.$tab ]
 		
@@ -2065,7 +2065,10 @@ proc detach_tab { nb tab but da maxLen } {
 		update idletasks
 		destroy .tmp
 		
-		$nb.$tab.$but configure -text Detach
+		$nb.$tab.$but1 configure -text Detach
+		tooltip::tooltip $nb.$tab.$but1 "Move to independent window"
+		tooltip::tooltip $nb.$tab.$but2 "Save plot to file"
+		
 		pack $new -expand yes -fill both
 		$nb add $nb.$tab -text [ string range [ lindex [ split $tt ] 1 ] 0 $maxLen ]
 		$nb select $nb.$tab 
@@ -2087,17 +2090,20 @@ proc detach_tab { nb tab but da maxLen } {
 		update idletasks
 		destroy $nb.$tab
 		
-		newtop $nb.$tab "$tt" "$nb.$tab.$but invoke" ""
+		newtop $nb.$tab "$tt" "$nb.$tab.$but1 invoke" ""
 		wm transient $nb.$tab $da
 		set new [ clone_widget $tmp $nb.$tab ]
 		update idletasks
 		pack $new -expand yes -fill both
 		destroy .tmp
 		
-		$nb.$tab.$but configure -text Attach
+		$nb.$tab.$but1 configure -text Attach
+		tooltip::tooltip $nb.$tab.$but1 "Move back to main plot window"
+		tooltip::tooltip $nb.$tab.$but2 "Save plot to file"
+		
 		showtop $nb.$tab current yes yes no
 		bind $nb.$tab <F1> { LsdHelp menudata_res.html#graph }
-		bind $nb.$tab <Escape> "$nb.$tab.$but invoke"
+		bind $nb.$tab <Escape> "$nb.$tab.$but1 invoke"
 	}
 }
 

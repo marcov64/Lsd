@@ -1061,6 +1061,17 @@ while ( true )
 			cmd( "showtop .da.file" );
 			cmd( "mousewarpto .da.file.b.ok" );
 
+			cmd( "tooltip::tooltip .da.file.opt.fmt.p1 \"Scalable Vector Graphics format\"" );
+			cmd( "tooltip::tooltip .da.file.opt.fmt.p2 \"Encapsulated Postscript (EPS) format\"" );
+			cmd( "tooltip::tooltip .da.file.opt.col.r1 \"All colors\"" );
+			cmd( "tooltip::tooltip .da.file.opt.col.r2 \"Gray tones only\"" );
+			cmd( "tooltip::tooltip .da.file.opt.col.r3 \"Black and white only\"" );
+			cmd( "tooltip::tooltip .da.file.opt.pos.p1 \"Horizontal orientation\n(Postscript only)\"" );
+			cmd( "tooltip::tooltip .da.file.opt.pos.p2 \"Vertical orientation\n(Postscript only)\"" );
+			cmd( "tooltip::tooltip .da.file.dim.n \"Page width\n(Postscript only)\"" );
+			cmd( "tooltip::tooltip .da.file.lab \"Show names of series\"" );
+
+
 			*choice = 0;
 			while ( *choice == 0 )
 				Tcl_DoOneEvent( 0 );
@@ -1082,7 +1093,7 @@ while ( true )
 					set t \"Scalable Vector Graphics\" \
 				}" );
 					
-			cmd( "set fn [ tk_getSaveFile -parent .da -title \"Save Plot File\" -defaultextension .$pltSavFmt -initialfile $b.$pltSavFmt -initialdir \"$path\" -filetypes { { {Scalable Vector Graphics} {.svg} } { {Encapsulated Postscript} {.eps} } { {All files} {*} } } -typevariable t ]; if { [ string length $fn ] == 0 } { set choice 2 }" );
+			cmd( "set fn [ tk_getSaveFile -parent .da -title \"Save Plot to File\" -defaultextension .$pltSavFmt -initialfile $b.$pltSavFmt -initialdir \"$path\" -filetypes { { {Scalable Vector Graphics} {.svg} } { {Encapsulated Postscript} {.eps} } { {All files} {*} } } -typevariable t ]; if { [ string length $fn ] == 0 } { set choice 2 }" );
 			
 			if ( *choice == 2 )
 				break;
@@ -1395,8 +1406,8 @@ while ( true )
 			cmd( "showtop .da.a topleftW 0 0" );
 			cmd( "mousewarpto .da.a.b.r2.ok" );
 			
-			cmd( "tooltip::tooltip .da.a.b.r1.x \"Variable/Parameter textual description\"" );
-			cmd( "tooltip::tooltip .da.a.b.r1.y \"Variable equation code\"" );
+			cmd( "tooltip::tooltip .da.a.b.r1.x \"Show textual description\"" );
+			cmd( "tooltip::tooltip .da.a.b.r1.y \"Show equation code\"" );
 
 			*choice = 0;
 			while ( *choice == 0 )
@@ -4095,7 +4106,7 @@ void set_cs_data( int *choice )
 	cmd( "set list_times $list_times_new" );
 
 	cmd( "set p .da.s" );
-	cmd( "newtop $p \"Cross Section Cases\" { set choice 2 } .da" );
+	cmd( "newtop $p \"Cross-section Cases\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame $p.u" );
 
@@ -4133,7 +4144,7 @@ void set_cs_data( int *choice )
 
 	cmd( "ttk::frame $p.u.s.r" );
 	cmd( "ttk::label $p.u.s.r.l -justify center -text \"Case reference\nfor series sorting\"" );
-	cmd( "ttk::entry $p.u.s.r.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && ( $n in $list_times ) } { set res %%P; return 1 } { %%W delete 0 end; %%W insert 0 $res; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
+	cmd( "ttk::entry $p.u.s.r.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && ( $n in $list_times ) } { set res %%P; return 1 } { %%W delete 0 end; %%W insert 0 $res; return 0 } } -justify center -state disabled" );
 	cmd( "write_disabled $p.u.s.r.e $res" );
 	cmd( "pack $p.u.s.r.l $p.u.s.r.e" );
 	cmd( "pack $p.u.s.r -pady 10" );
@@ -4200,6 +4211,10 @@ void set_cs_data( int *choice )
 	cmd( "showtop $p centerW no no yes 0 0 .da.s.fb.r1.add" );
 	cmd( ".da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e" );
 	cmd( "mousewarpto $p.fb.ok" );
+
+	cmd( "tooltip::tooltip $p.fb.r1.x \"Add case to selected\"" );
+	cmd( "tooltip::tooltip $p.fb.r1.y \"Remove case from selected\"" );
+	cmd( "tooltip::tooltip $p.fb.r1.z \"Remove all selected cases\"" );
 
 	*choice = 0;
 	while ( ! *choice )
@@ -5045,7 +5060,7 @@ void plot_gnu( int *choice )
 		cmd( "ttk::frame .da.s.t.d -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 		cmd( "if { ! [ info exists ndim ] } { set ndim 2 }" );
 		cmd( "ttk::radiobutton .da.s.t.d.2d -text \"2D plot\" -variable ndim -value 2 -command { .da.s.d.o.a configure -state disabled; .da.s.d.o.c configure -state disabled; .da.s.d.o.b configure -state disabled; .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled; set box 0; set gridd 0; set pm3d 0 }" );
-		cmd( "ttk::radiobutton .da.s.t.d.3d -text \"3D plot \" -variable ndim -value 3 -command { .da.s.d.o.a configure -state normal; .da.s.d.o.c configure -state normal; .da.s.d.o.b configure -state normal; .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
+		cmd( "ttk::radiobutton .da.s.t.d.3d -text \"3D plot \" -variable ndim -value 3 -command { .da.s.d.o.a configure -state normal; .da.s.d.o.c configure -state normal; .da.s.d.o.b configure -state normal; if { $gnu } { .da.s.o.g configure -state normal; .da.s.o.p configure -state normal } }" );
 		cmd( "pack .da.s.t.d.2d .da.s.t.d.3d -anchor w" );
 
 		cmd( "pack .da.s.t.l .da.s.t.d" );
@@ -5065,6 +5080,7 @@ void plot_gnu( int *choice )
 		cmd( "ttk::frame .da.s.o" );
 		cmd( "ttk::checkbutton .da.s.o.g -text \"Use gridded data\" -variable gridd" );
 		cmd( "ttk::checkbutton .da.s.o.p -text \"Render 3D surface\" -variable pm3d" );
+		cmd( "if { ! $gnu } { .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled } { .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
 		cmd( "pack .da.s.o.g .da.s.o.p" );
 
 		cmd( "pack .da.s.t .da.s.d .da.s.o -padx 5 -pady 5" );
@@ -5075,6 +5091,9 @@ void plot_gnu( int *choice )
 
 		cmd( "showtop .da.s" );
 		cmd( "mousewarpto .da.s.b.ok" );
+
+		cmd( "tooltip::tooltip .da.s.o.g \"Supported only in Gnuplot\"" );
+		cmd( "tooltip::tooltip .da.s.o.p \"Supported only in Gnuplot\"" );
 
 		*choice = 0;
 		while ( *choice == 0 )
@@ -5618,8 +5637,8 @@ void plot_cs_xy( int *choice )
 
 	cmd( "ttk::frame .da.s.d.r -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 	cmd( "if { ! [ info exists ndim ] } { set ndim 2 }" );
-	cmd( "ttk::radiobutton .da.s.d.r.2d -text \"2D plot\" -variable ndim -value 2 -command  { .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled; set gridd 0; set pm3d 0 }" );
-	cmd( "ttk::radiobutton .da.s.d.r.3d -text \"3D plot\" -variable ndim -value 3 -command  { .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
+	cmd( "ttk::radiobutton .da.s.d.r.2d -text \"2D plot\" -variable ndim -value 2 -command  { .da.s.o.opt.g configure -state disabled; .da.s.o.opt.p configure -state disabled; set gridd 0; set pm3d 0 }" );
+	cmd( "ttk::radiobutton .da.s.d.r.3d -text \"3D plot\" -variable ndim -value 3 -command  { if { $gnu } { .da.s.o.opt.g configure -state normal; .da.s.o.opt.p configure -state normal } }" );
 	cmd( "pack .da.s.d.r.2d .da.s.d.r.3d -anchor w" );
 
 	cmd( "pack .da.s.d.l .da.s.d.r" );
@@ -5629,7 +5648,7 @@ void plot_cs_xy( int *choice )
 	cmd( "ttk::frame .da.s.o.opt" );
 	cmd( "ttk::checkbutton .da.s.o.opt.g -text \"Use gridded data\" -variable gridd" );
 	cmd( "ttk::checkbutton .da.s.o.opt.p -text \"Render 3D surface\" -variable pm3d" );
-	cmd( "if { $ndim == 2 } { .da.s.o.opt.g configure -state disabled; .da.s.o.opt.p configure -state disabled; set gridd 0; set pm3d 0 } { .da.s.o.opt.g configure -state normal; .da.s.o.opt.p configure -state normal }" );
+	cmd( "if { $ndim == 2 || ! $gnu } { .da.s.o.opt.g configure -state disabled; .da.s.o.opt.p configure -state disabled; set gridd 0; set pm3d 0 } { .da.s.o.opt.g configure -state normal; .da.s.o.opt.p configure -state normal }" );
 	cmd( "pack .da.s.o.opt.g .da.s.o.opt.p -anchor w" );
 	cmd( "pack .da.s.o.l .da.s.o.opt" );
 
@@ -5644,12 +5663,17 @@ void plot_cs_xy( int *choice )
 	cmd( "ttk::label .da.s.v.l -text \"Dependent variables\"" );
 	cmd( "ttk::spinbox .da.s.v.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set numv %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numv; return 0 } } -invalidcommand { bell } -justify center", nv, nv );
 	cmd( ".da.s.v.e insert 0 $numv" ); 
+	cmd( "if { ! $gnu } { .da.s.v.e configure -state disabled } { .da.s.v.e configure -state normal }" );
 	cmd( "ttk::label .da.s.v.n -text \"Block length: $blength\"" );
 	cmd( "pack .da.s.v.l .da.s.v.e .da.s.v.n" );
 
 	cmd( "pack .da.s.i .da.s.d .da.s.o .da.s.v -padx 5 -pady 5" );
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#3dCrossSection } { set choice 2 }" );
+	
+	cmd( "tooltip::tooltip .da.s.o.opt.g \"Supported only in Gnuplot\"" );
+	cmd( "tooltip::tooltip .da.s.o.opt.p \"Supported only in Gnuplot\"" );
+	cmd( "tooltip::tooltip .da.s.v \"Number of groups/surfaces\nSupported only in Gnuplot\"" );
 
 	cmd( "bind .da.s.v.e <KeyRelease> { set blength [ expr { $nnvar / ( $numv + $ndim - 1 ) } ]; .da.s.v.n conf -text \"Block length: $blength\" }" );
 	cmd( "set nnvar %d", nv );
@@ -6468,6 +6492,8 @@ void plot_lattice( int *choice )
 	cmd( "showtop .da.s" );
 	cmd( "mousewarpto .da.s.b.ok" );
 
+	cmd( "tooltip::tooltip .da.s.s.l \"Data multiplier values\"" );
+
 	*choice = 0;
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
@@ -6590,7 +6616,7 @@ void plot_lattice( int *choice )
 			set choice 11 \
 		}", cur_plot, ( char * ) Tcl_GetVar( inter, "tit", 0 ) );
 	cmd( "ttk::button $w.b.s.det -width $butWid -text Detach -command { \
-			detach_tab $daptab tab%d c.b.s.det .da %d \
+			detach_tab $daptab tab%d c.b.s.det c.b.s.save .da %d \
 		}", cur_plot, MAX_TAB_LEN - 1 );
 	cmd( "pack $w.b.s.save $w.b.s.det -pady 3" );
 	
@@ -6612,6 +6638,9 @@ void plot_lattice( int *choice )
 			   i * le, j * hi, ( i + 1 ) * le, ( j + 1 ) * hi, j, i, 
 			   ( int ) color, grid ? point_size : 0.0 );
 		}
+
+	cmd( "tooltip::tooltip $w.b.s.save \"Save plot to file\"" );
+	cmd( "tooltip::tooltip $w.b.s.det \"Move to independent window\"" );
 
 	// create context menu and common bindings
 	canvas_binds( cur_plot );
@@ -8768,6 +8797,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	cmd( "$w.b.s.det configure -state normal -text Detach" );
 	cmd( "$w.b.z.b.p configure -state normal" );
 	cmd( "$w.b.z.b.m configure -state normal" );
+	cmd( "tooltip::tooltip $w.b.s.det \"Move to independent window\"" );
 
 	// raise axis, legends & draws to the front and lower grid to the back
 	cmd( "$p raise p" );
@@ -8950,6 +8980,7 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	cmd( "$w.b.s.det configure -state normal -text Detach" );
 	cmd( "$w.b.z.b.p configure -state normal" );
 	cmd( "$w.b.z.b.m configure -state normal" );
+	cmd( "tooltip::tooltip $w.b.s.det \"Move to independent window\"" );
 
 	// raise axis, legends & draws to the front and lower grid to the back
 	cmd( "$p raise p" );
@@ -9156,7 +9187,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			if { [ $daptab.tab%d.c.b.s.det cget -text ] eq \"Stop\" } { \
 				set choice 2 \
 			} else { \
-				detach_tab $daptab tab%d c.b.s.det .da %d \
+				detach_tab $daptab tab%d c.b.s.det c.b.s.save .da %d \
 			} \
 		}", cur_plot, cur_plot, MAX_TAB_LEN - 1	);
 	cmd( "pack $w.b.s.save $w.b.s.det -pady 4" );
@@ -9176,8 +9207,15 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -padx $pad2 -pady 5 -side left" );
 	cmd( "pack $w.b -side right" );
 
+	cmd( "tooltip::tooltip $w.b.s.save \"Save plot to file\"" );
+	
 	if ( watch )
+	{
 		cmd( "$w.b.s.det configure -state normal -text Stop" );
+		cmd( "tooltip::tooltip $w.b.s.det \"Cancel plot rendering\"" );
+	}
+	else
+		cmd( "tooltip::tooltip $w.b.s.det \"Move to independent window\"" );
 
 	// hack to bring the new plot to the foreground during debugging in macOS
 	cmd( "if { $running && [ string equal [ tk windowingsystem ] aqua ] } { \

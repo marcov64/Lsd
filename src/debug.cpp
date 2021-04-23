@@ -517,7 +517,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			case 7:
 				if ( mode == 1 )
 				{
-					cmd( "set answer [ ttk::messageBox -parent .deb -type okcancel -default cancel -icon warning -title Warning -message \"Stop simulation\" -detail \"Quitting the simulation run.\nPress 'OK' to confirm.\" ]; if [ string equal $answer ok ] { set choice 0 } { set choice 1 }" );
+					cmd( "set answer [ ttk::messageBox -parent .deb -type okcancel -default ok -icon warning -title Warning -message \"Stop simulation\" -detail \"Quitting the simulation run.\nPress 'OK' to confirm.\" ]; if [ string equal $answer ok ] { set choice 0 } { set choice 1 }" );
 				} 
 				else
 					choice = 0; 
@@ -621,6 +621,11 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 					cmd( "ttk::button $e.v.l$i.sa -width -1 -text \"Set All\" -command { set sa %i; set choice 10 }", i );
 					cmd( "pack $e.v.l$i.l $e.v.l$i.e $e.v.l$i.sa -side left -padx 2" );
 					cmd( "pack $e.v.l$i" );
+					
+					if ( i == 0 )
+						cmd( "tooltip::tooltip $e.v.l$i.sa \"Set all or a subset of\n'$res' instances\"" );
+					else
+						cmd( "tooltip::tooltip $e.v.l$i.sa \"Set all or a subset of\n'$res' instances (lag %d)\"", i );
 				}
 
 				if ( cv->param == 1 )
@@ -648,6 +653,10 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 					cmd( "ttk::button $e.b1.exec -width $butWid -text Update -command { set choice 9 }" );
 					cmd( "pack $e.b1.eq $e.b1.cond $e.b1.exec -padx $butSpc -side left" );
 					cmd( "pack $e.b1 -padx $butPad" );	
+
+					cmd( "tooltip::tooltip $e.b1.eq \"Show equation code\"" );
+					cmd( "tooltip::tooltip $e.b1.cond \"Define conditional break\"" );
+					cmd( "tooltip::tooltip $e.b1.exec \"Force variable update\"" );
 				}
 
 				cmd( "donehelp $e b { set choice 1 } { LsdHelp debug.html#content }" );
@@ -732,6 +741,8 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 					cmd( "showtop $cb" );
 					cmd( "mousewarpto $cb.b.ok" );
+
+					cmd( "tooltip::tooltip $cb.v.e \"Value to use with condition\"" );
 
 					choice = 0;
 					while ( choice == 0 )
@@ -1707,7 +1718,7 @@ void deb_show( object *r, const char *hl_var, int mode )
 							else
 								cmd( "set val %g", ap_v->val[ j ] );
 							
-					cmd( "append lvals \"L%d  $val\n\"", j );
+					cmd( "append lvals \"%d:  $val\n\"", j );
 				}
 				
 				cmd( "tooltip::tooltip $w.e$i.val [ string range $lvals 0 end-1 ]" );
@@ -2187,6 +2198,6 @@ void attach_instance_number( char *outh, char *outv, object *r, int outSz )
 	
 	strncat( outh, msg, outSz - 1 - strlen( outh ) );
 	
-	sprintf( msg, "%s (%d/%d)\n", r->label, j, r->up == NULL ? 1 : i - 1 );
+	sprintf( msg, "%d:%s (%d/%d)\n", depth, r->label, j, r->up == NULL ? 1 : i - 1 );
 	strncat( outv, msg, outSz - 1 - strlen( outv ) );	
 }

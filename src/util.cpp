@@ -1668,6 +1668,8 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 
 	cmd( "showtop .lat centerS no no no" );
 	
+	cmd( "tooltip::tooltip .lat.b.ok \"Save plot to file\"" );
+
 	cmd( "bind .lat <F1> { LsdHelp lattice.html }" );
 	set_shortcuts_run( ".lat" );
 

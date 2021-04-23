@@ -511,23 +511,22 @@ int browse( object *r, int *choice )
 		cmd( "mouse_wheel .l.s.c.son_name" );
 		cmd( "tooltip::tooltip clear .l.s.c.son_name*" );
 
-		// populate the objects panel
 		if ( r->up != NULL )
 		{
 			cmd( ".l.s.c.son_name insert end \"$upSymbol\"" );
-			cmd( "set upObjItem 1" );
+			cmd( "tooltip::tooltip .l.s.c.son_name -item 0 \"%s\"", r->up->label );
 			i = 1;
 		}
 		else
-		{
-			cmd( "set upObjItem 0" );
 			i = 0;
-		}
+
+		cmd( "set upObjItem %d", i );
 		
 		if ( r->up == NULL && r->b == NULL )
 			cmd( ".l.s.c.son_name insert end \"(none)\"" );
 		else
 		{
+			// populate the objects panel
 			for ( cb = r->b; cb != NULL; cb = cb->next, ++i )
 			{
 				if ( cb->head != NULL )
