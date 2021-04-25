@@ -265,6 +265,14 @@ int lsdmain( int argn, char **argv )
 	cmd( "set MakeExe \"$DefaultMakeExe\"" );
 	cmd( "set small_character [ expr { $dim_character - $deltaSize } ]" );
 
+	cmd( "set modelGroup \"\"" );
+	cmd( "set modelName \"(no model)\"" );
+	cmd( "set modelVersion \"\"" );
+	cmd( "set fileName \"(no name)\"" );
+	cmd( "set groupDir \"[ pwd ]\"" );
+	cmd( "set modelDir \"[ pwd ]\"" );
+	cmd( "set fileDir \"[ pwd ]\"" );
+
 	// configure main window
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
 	cmd( "icontop . lmm" );
@@ -281,13 +289,13 @@ int lsdmain( int argn, char **argv )
 	cmd( "$w add command -label \"New Model/Group...\" -underline 0 -command { set choice 14 }" );	// entryconfig 0
 	cmd( "$w add command -label \"Browse Models...\" -underline 0 -command { set choice 33 } -accelerator Ctrl+b" );	// entryconfig 1
 	cmd( "$w add command -label \"Save Model\" -underline 0 -state disabled -command { \
-			if { [ string length \"$filename\" ] > 0 } { \
-				if [ file exist \"$dirname/$filename\" ] { \
+			if { [ string length \"$fileName\" ] > 0 } { \
+				if [ file exist \"$fileDir/$fileName\" ] { \
 					catch { \
-						file copy -force \"$dirname/$filename\" \"$dirname/[ file rootname \"$filename\" ].bak\" \
+						file copy -force \"$fileDir/$fileName\" \"$fileDir/[ file rootname \"$fileName\" ].bak\" \
 					} \
 				}; \
-				set f [ open \"$dirname/$filename\" w ]; \
+				set f [ open \"$fileDir/$fileName\" w ]; \
 				puts -nonewline $f [ .f.t.t get 0.0 end ]; \
 				close $f; \
 				set before [ .f.t.t get 0.0 end ]; \
@@ -303,13 +311,13 @@ int lsdmain( int argn, char **argv )
 	cmd( "if { $showFileCmds } { $w add command -label \"Open Text File...\" -command { set choice 15 } -underline 0 -accelerator Ctrl+o }" );		// entryconfig (8)
 	cmd( "if { $showFileCmds == 1 } { \
 			$w add command -label \"Save Text File\" -command { \
-				if { [ string length \"$filename\" ] > 0 } { \
-					if [ file exist \"$dirname/$filename\" ] { \
+				if { [ string length \"$fileName\" ] > 0 } { \
+					if [ file exist \"$fileDir/$fileName\" ] { \
 						catch { \
-							file copy -force \"$dirname/$filename\" \"$dirname/[ file rootname \"$filename\" ].bak\" \
+							file copy -force \"$fileDir/$fileName\" \"$fileDir/[ file rootname \"$fileName\" ].bak\" \
 						} \
 					}; \
-					set f [ open \"$dirname/$filename\" w ]; \
+					set f [ open \"$fileDir/$fileName\" w ]; \
 					puts -nonewline $f [ .f.t.t get 0.0 end ]; \
 					close $f; \
 					set before [ .f.t.t get 0.0 end ]; \
@@ -539,34 +547,34 @@ int lsdmain( int argn, char **argv )
 
 	cmd( "ttk::frame .f.hea.info.grp" );
 	cmd( "ttk::label .f.hea.info.grp.tit -text \"Group: \"" );
-	cmd( "ttk::label .f.hea.info.grp.dat -text \"$modelGroup\" -style hl.TLabel" );
+	cmd( "ttk::label .f.hea.info.grp.dat -style hl.TLabel" );
 	cmd( "pack .f.hea.info.grp.tit .f.hea.info.grp.dat -side left" );
 
 	cmd( "ttk::label .f.hea.info.pad1 -width 2" );
 
 	cmd( "ttk::frame .f.hea.info.mod" );
 	cmd( "ttk::label .f.hea.info.mod.tit -text \"Model: \"" );
-	cmd( "ttk::label .f.hea.info.mod.dat -text \"(no model)\" -style hl.TLabel" );
+	cmd( "ttk::label .f.hea.info.mod.dat -style hl.TLabel" );
 	cmd( "pack .f.hea.info.mod.tit .f.hea.info.mod.dat -side left" );
 
 	cmd( "ttk::label .f.hea.info.pad2 -width 2" );
 
 	cmd( "ttk::frame .f.hea.info.ver" );
 	cmd( "ttk::label .f.hea.info.ver.tit -text \"Version: \"" );
-	cmd( "ttk::label .f.hea.info.ver.dat -text \"\" -style hl.TLabel" );
+	cmd( "ttk::label .f.hea.info.ver.dat -style hl.TLabel" );
 	cmd( "pack .f.hea.info.ver.tit .f.hea.info.ver.dat -side left" );
 
 	cmd( "ttk::label .f.hea.info.pad3 -width 2" );
 
 	cmd( "ttk::frame .f.hea.info.file" );
 	cmd( "ttk::label .f.hea.info.file.tit -text \"File: \"" );
-	cmd( "ttk::label .f.hea.info.file.dat -text \"(no file)\" -style hl.TLabel" );
+	cmd( "ttk::label .f.hea.info.file.dat -style hl.TLabel" );
 	cmd( "pack .f.hea.info.file.tit .f.hea.info.file.dat -side left" );
 
 	cmd( "pack .f.hea.info.grp .f.hea.info.pad1 .f.hea.info.mod .f.hea.info.pad2 .f.hea.info.ver .f.hea.info.pad3 .f.hea.info.file -side left" );
 
 	cmd( "pack .f.hea.info -side left -anchor w -expand yes" );
-
+	
 	cmd( "ttk::frame .f.hea.cur" );
 
 	cmd( "ttk::frame .f.hea.cur.line" );
@@ -747,11 +755,6 @@ int lsdmain( int argn, char **argv )
 	cmd( "pack .f.t.t -expand yes -fill both" );
 	cmd( "pack .f.t.hs -fill x" );
 
-	cmd( "set filename \"(no name)\"" );
-	cmd( "set dirname \"[ pwd ]\"" );
-	cmd( "set modelDir \"[ pwd ]\"" );
-	cmd( "set groupdir \"[ pwd ]\"" );
-
 	cmd( ".f.t.t tag remove sel 1.0 end" );
 	cmd( ".f.t.t mark set insert 1.0" );
 	cmd( "set before [ .f.t.t get 1.0 end ]" );
@@ -766,11 +769,10 @@ int lsdmain( int argn, char **argv )
 			cmd( ".f.t.t edit reset" );
 			cmd( "close $file" );
 			cmd( ".f.t.t mark set insert 1.0" );
-			cmd( "set filename \"[ file tail \"$filetoload\" ]\"" );
-			cmd( "set dirname [ file dirname \"$filetoload\" ]" );
+			cmd( "set fileName \"[ file tail \"$filetoload\" ]\"" );
+			cmd( "set fileDir [ file dirname \"$filetoload\" ]" );
 			cmd( "set before [ .f.t.t get 1.0 end ]" );
-			cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
-
+			
 			sourcefile = recolor_all = is_source_file( ( char * ) Tcl_GetVar( inter, "filetoload", 0 ) );
 		}
 		else
@@ -787,13 +789,10 @@ int lsdmain( int argn, char **argv )
 
 	cmd( "if { ! $keepfocus } { focus .f.t.t; update idletasks } { set keepfocus 0 }" );
 
-	// update file save status in titlebar and cursor position in info bar
-	cmd( "update_title_bar" );
-
 	// start recolor if needed
 	if ( recolor_all )				// all text?
 	{
-		cmd( "sav_cur_ini; sav_cur_end; upd_cursor" );	// save data for recolor
+		cmd( "sav_cur_ini; sav_cur_end" );	// save data for recolor
 		color( shigh, 0, 0 );		// set color types (all text)
 	}
 	else
@@ -802,6 +801,9 @@ int lsdmain( int argn, char **argv )
 
 	recolor_all = recolor = false;
 
+	// update status in title and info bars
+	cmd( "upd_bars" );
+	
 	// main command loop
 	while ( ! choice )
 	{
@@ -819,8 +821,8 @@ int lsdmain( int argn, char **argv )
 		}
 	}
 
-	// update file save status in titlebar
-	cmd( "update_title_bar" );
+	// update status in title and info bars
+	cmd( "upd_bars" );
 
 	// verify if saving before command is necessary
 	if ( choice == 1 || choice == 2 || choice == 3 || choice == 5 || choice == 6 || choice == 8 || choice == 13 || choice == 14 || choice == 15 || choice == 33 || choice == 39 || choice == 41 || choice == 58 || choice == 71 )
@@ -883,9 +885,8 @@ int lsdmain( int argn, char **argv )
 		sourcefile = 0;
 
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
-		cmd( "set filename makefile" );
+		cmd( "set fileName makefile" );
 		cmd( ".f.t.t mark set insert 1.0" );
-		cmd( ".f.hea.info.file.dat conf -text \"makefile\"" );
 		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );
 
 		choice = 0;
@@ -895,19 +896,18 @@ int lsdmain( int argn, char **argv )
 	/* Save the file currently shown */
 	if ( choice == 4 )
 	{
-		cmd( "set curfilename [tk_getSaveFile -parent . -title \"Save File\" -initialfile $filename -initialdir $dirname]" );
+		cmd( "set curfilename [ tk_getSaveFile -parent . -title \"Save File\" -initialfile $fileName -initialdir $fileDir ]" );
 		s = ( char * ) Tcl_GetVar( inter, "curfilename", 0 );
 
 		if ( s != NULL && strcmp( s, "" ) )
 		{
-			cmd( "if [ file exist \"$dirname/$filename\" ] { file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\" }" );
+			cmd( "if [ file exist \"$fileDir/$fileName\" ] { file copy -force \"$fileDir/$fileName\" \"$fileDir/[file rootname \"$fileName\"].bak\" }" );
 			cmd( "set file [ open \"$curfilename\" w ]" );
 			cmd( "puts -nonewline $file [ .f.t.t get 0.0 end ]" );
 			cmd( "close $file" );
 			cmd( "set before [ .f.t.t get 0.0 end ]" );
-			cmd( "set dirname [ file dirname \"$curfilename\" ]" );
-			cmd( "set filename [ file tail \"$curfilename\" ]" );
-			cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
+			cmd( "set fileDir [ file dirname \"$curfilename\" ]" );
+			cmd( "set fileName [ file tail \"$curfilename\" ]" );
 		}
 
 		choice = 0;
@@ -926,14 +926,14 @@ int lsdmain( int argn, char **argv )
 			goto loop;
 		}
 
-		cmd( "set dirname \"$modelDir\"" );
-		cmd( "set filename $DESCRIPTION" );
+		cmd( "set fileDir \"$modelDir\"" );
+		cmd( "set fileName $DESCRIPTION" );
 
 		cmd( ".f.t.t delete 0.0 end" );
-		cmd( "set choice 0; if { [ file exists \"$dirname/$filename\" ] } { set choice 1; if { [ file size \"$dirname/$filename\" ] <= 2 } { set choice 0; file delete \"$dirname/$filename\" } }" );
+		cmd( "set choice 0; if { [ file exists \"$fileDir/$fileName\" ] } { set choice 1; if { [ file size \"$fileDir/$fileName\" ] <= 2 } { set choice 0; file delete \"$fileDir/$fileName\" } }" );
 		if ( choice == 1 )
 		{
-			cmd( "set file [ open \"$dirname/$DESCRIPTION\" r ]" );
+			cmd( "set file [ open \"$fileDir/$DESCRIPTION\" r ]" );
 			cmd( ".f.t.t insert end [ read -nonewline $file ]" );
 			cmd( "close $file" );
 			cmd( "set before [ .f.t.t get 1.0 end ]" );
@@ -944,7 +944,7 @@ int lsdmain( int argn, char **argv )
 			cmd( " if [ string equal $answer yes ] { set choice 1 } { set choice 2 } " );
 			if ( choice == 2 )
 			{
-				cmd( " set filename \"\" " );
+				cmd( " set fileName \"\" " );
 				cmd( "set before [ .f.t.t get 0.0 end ]" );
 				choice = 8;		// load equations file
 				goto loop;
@@ -956,7 +956,6 @@ int lsdmain( int argn, char **argv )
 		
 		cmd( ".f.t.t edit reset" );
 		cmd( ".f.t.t mark set insert 1.0" );
-		cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 
 		cmd( "unset -nocomplain ud udi rd rdi" );
 		cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
@@ -1006,12 +1005,12 @@ int lsdmain( int argn, char **argv )
 			goto loop;
 		}
 
-		cmd( "set oldfile \"$filename\"" );
-		cmd( "set olddir \"$dirname\"" );
-		cmd( "set filename \"%s\"", s );
-		cmd( "set dirname \"$modelDir\"" );
-		cmd( "if [ file exist \"$dirname/$filename\" ] { \
-				set file [ open \"$dirname/$filename\" r ]; \
+		cmd( "set oldfile \"$fileName\"" );
+		cmd( "set olddir \"$fileDir\"" );
+		cmd( "set fileName \"%s\"", s );
+		cmd( "set fileDir \"$modelDir\"" );
+		cmd( "if [ file exist \"$fileDir/$fileName\" ] { \
+				set file [ open \"$fileDir/$fileName\" r ]; \
 				.f.t.t delete 1.0 end; \
 				.f.t.t insert end [ read -nonewline $file ]; \
 				close $file; \
@@ -1019,8 +1018,8 @@ int lsdmain( int argn, char **argv )
 				.f.t.t tag remove sel 1.0 end; \
 				set choice 1 \
 			} { \
-				set filename \"$oldfile\"; \
-				set dirname \"$olddir\"; \
+				set fileName \"$oldfile\"; \
+				set fileDir \"$olddir\"; \
 				ttk::messageBox -parent . -title Error -icon error -type ok -message \"Equation file not found\" -detail \"If equation file has been renamed, update the 'FUN' field in menu 'Model', 'Model Options'.\"; \
 				set choice 0 \
 			}" );
@@ -1030,7 +1029,7 @@ int lsdmain( int argn, char **argv )
 			goto loop;
 
 		// handle the opening of files from the compilation error window
-		cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$modelDir/$filename\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
+		cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$modelDir/$fileName\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
 				.f.t.t tag add sel $errlin.0 $errlin.end; \
 				if { [ info exists errcol ] && $errcol != \"\" && [ string is integer -strict $errcol ] } { \
 					.f.t.t see $errlin.$errcol; \
@@ -1045,7 +1044,6 @@ int lsdmain( int argn, char **argv )
 		cmd( "upd_cursor" );
 
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
-		cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 		cmd( ".f.t.t tag add bc \"1.0\"" );
 		cmd( ".f.t.t tag add fc \"1.0\"" );
 		cmd( "unset -nocomplain ud udi rd rdi" );
@@ -1398,7 +1396,7 @@ int lsdmain( int argn, char **argv )
 		if ( choice == 58 )
 		{
 			cmd( "scan $vmenuInsert %%d.%%d line col" );
-			cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f $dirname/$filename -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $dirname/$filename:$line\nrun\n\" }" );
+			cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f $fileDir/$fileName -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $fileDir/$fileName:$line\nrun\n\" }" );
 			cmd( "catch { set f [ open break.$breakExt w ]; puts $f $breakTxt; close $f }" );
 
 			cmd( "if [ string equal -nocase $DbgExe lldb ] { set cmdbreak \"-sbreak.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
@@ -1433,7 +1431,7 @@ int lsdmain( int argn, char **argv )
 
 			case MAC:
 				cmd( "if [ string equal $cmdbreak \"--args\" ] { set cmdbreak \"\" }" );
-				sprintf( msg, "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s\\\"\" & } result", str1, str1 );
+				sprintf( msg, "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $fileDir; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s\\\"\" & } result", str1, str1 );
 				break;
 
 			case WINDOWS:
@@ -1492,16 +1490,15 @@ int lsdmain( int argn, char **argv )
 		cmd( "destroytop .mm" );	// close compilation results, if open
 
 		// prevent creating new groups in LSD directory
-		cmd( "if { [ string equal $groupdir [ pwd ] ] && [ file exists \"$groupdir/$LsdNew/$GROUP_INFO\" ] } \
+		cmd( "if { [ string equal $groupDir [ pwd ] ] && [ file exists \"$groupDir/$LsdNew/$GROUP_INFO\" ] } \
 				{	set answer [ ttk::messageBox -parent . -type okcancel -title Warning \
 					-icon warning -default ok -message \"Invalid parent group\" \
 					-detail \"Cannot create group/model in the Root group. Press 'OK' to change to the '$LsdNew' group before proceeding.\" ]; \
 					if [ string equal $answer ok ] { \
-						set groupdir \"$groupdir/$LsdNew\"; \
-						set f [ open \"$groupdir/$GROUP_INFO\" r ]; \
+						set groupDir \"$groupDir/$LsdNew\"; \
+						set f [ open \"$groupDir/$GROUP_INFO\" r ]; \
 						set modelGroup \"[ gets $f ]\"; \
 						close $f; \
-						.f.hea.info.grp.dat conf -text \"$modelGroup\"; \
 						set choice 1 \
 					} else { \
 						set choice 0 \
@@ -1612,7 +1609,7 @@ int lsdmain( int argn, char **argv )
 			}
 
 			// control for existing directory
-			cmd( "if [ file exists \"$groupdir/$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+			cmd( "if [ file exists \"$groupDir/$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupDir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 			if ( choice == 3 )
 			{
 				cmd( "focus .a.mdir.e" );
@@ -1620,9 +1617,9 @@ int lsdmain( int argn, char **argv )
 				goto here_newgroup;
 			}
 
-			cmd( "file mkdir \"$groupdir/$mdir\"" );
-			cmd( "cd \"$groupdir/$mdir\"" );
-			cmd( "set groupdir \"$groupdir/$mdir\"" );
+			cmd( "file mkdir \"$groupDir/$mdir\"" );
+			cmd( "cd \"$groupDir/$mdir\"" );
+			cmd( "set groupDir \"$groupDir/$mdir\"" );
 			cmd( "set f [ open $GROUP_INFO w ]; puts -nonewline $f \"$mname\"; close $f" );
 			cmd( "set f [ open $DESCRIPTION w ]; puts -nonewline $f \"[ .a.tdes.e get 0.0 end ]\"; close $f" );
 			cmd( "set modelGroup \"$mname\"" );
@@ -1631,7 +1628,7 @@ int lsdmain( int argn, char **argv )
 			//end of creation of a new group
 		}
 		else
-			cmd( "cd \"$groupdir\"" );	// if no group is created, move in the current group
+			cmd( "cd \"$groupDir\"" );	// if no group is created, move in the current group
 
 		// create a new model
 		cmd( "set mname \"New model\"" );
@@ -1699,7 +1696,7 @@ int lsdmain( int argn, char **argv )
 		}
 
 		// control for existing directory
-		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupDir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 		if ( choice == 3 )
 		{
 			cmd( "focus .a.mdir.e" );
@@ -1762,16 +1759,13 @@ int lsdmain( int argn, char **argv )
 		cmd( "destroytop .a" );
 
 		// create a new empty model
-		cmd( "set dirname $groupdir/$mdir" );
-		cmd( "set modelDir $groupdir/$mdir" );
+		cmd( "set fileDir $groupDir/$mdir" );
+		cmd( "set modelDir $groupDir/$mdir" );
 		cmd( "set modelName $mname" );
 		cmd( "set modelVersion $mver" );
 		cmd( "set modelDate \"\"" );
-		cmd( ".f.hea.info.mod.dat conf -text \"$modelName\"" );
-		cmd( ".f.hea.info.ver.dat conf -text \"$modelVersion\"" );
-		cmd( ".f.hea.info.grp.dat conf -text \"$modelGroup\"" );
 
-		cmd( "file mkdir \"$dirname\"" );
+		cmd( "file mkdir \"$fileDir\"" );
 
 		// create the empty equation file
 		cmd( "file copy \"$RootLsd/$LsdSrc/fun_base.cpp\" \"$modelDir/fun_$mdir.cpp\"" );
@@ -1807,7 +1801,7 @@ int lsdmain( int argn, char **argv )
 	{
 		if ( choice == 15 )
 		{
-			cmd( "set brr [ tk_getOpenFile -parent . -title \"Load Text File\" -initialdir $dirname ]" );
+			cmd( "set brr [ tk_getOpenFile -parent . -title \"Load Text File\" -initialdir $fileDir ]" );
 			cmd( "if { [ string length $brr ] == 0 } { set choice 0 } { set choice 1 }" );
 			if ( choice == 0 )
 				goto loop;
@@ -1818,8 +1812,8 @@ int lsdmain( int argn, char **argv )
 			goto loop;
 
 		cmd( ".f.t.t delete 1.0 end" );
-		cmd( "set dirname [ file dirname \"$brr\" ]" );
-		cmd( "set filename [ file tail \"$brr\" ]" );
+		cmd( "set fileDir [ file dirname \"$brr\" ]" );
+		cmd( "set fileName [ file tail \"$brr\" ]" );
 		cmd( "set file [ open \"$brr\" r ]" );
 		cmd( ".f.t.t insert end [ read -nonewline $file ]" );
 		cmd( "close $file" );
@@ -1827,7 +1821,7 @@ int lsdmain( int argn, char **argv )
 		cmd( ".f.t.t tag remove sel 1.0 end" );
 
 		// handle the opening of files from the compilation error window
-		cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$dirname/$filename\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
+		cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$fileDir/$fileName\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
 				.f.t.t tag add sel $errlin.0 $errlin.end; \
 				if { [ info exists errcol ] && $errcol != \"\" && [ string is integer -strict $errcol ] } { \
 					.f.t.t see $errlin.$errcol; \
@@ -1840,11 +1834,9 @@ int lsdmain( int argn, char **argv )
 				.f.t.t mark set insert 1.0 \
 			}" );
 		cmd( "upd_cursor" );
-
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
-		cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 		
-		sourcefile = recolor_all = is_source_file( ( char * ) Tcl_GetVar( inter, "filename", 0 ) );
+		sourcefile = recolor_all = is_source_file( ( char * ) Tcl_GetVar( inter, "fileName", 0 ) );
 		
 		if ( sourcefile )
 		{
@@ -4196,12 +4188,13 @@ int lsdmain( int argn, char **argv )
 		Tcl_LinkVar( inter, "choiceSM", ( char * ) & num, TCL_LINK_INT );
 		num = 0;
 
-		cmd( "showmodel $groupdir" );
+		cmd( "showmodel $groupDir" );
 
 		while ( num == 0 )
 			Tcl_DoOneEvent( 0 );
 
 		cmd( "destroytop .l" );
+		cmd( "tooltip::hide" );
 		cmd( "bind .f.t.t <Enter> { }" );
 		cmd( "focustop .f.t.t" );
 
@@ -4214,18 +4207,14 @@ int lsdmain( int argn, char **argv )
 			goto loop;
 		}
 
-		cmd( "set groupdir [ lindex $lrn 0 ]" );	// the group dir is the same for every element
+		cmd( "set groupDir [ lindex $lrn 0 ]" );	// the group dir is the same for every element
 		if ( choice == 14 )
 			goto loop; 								// create a new model/group
 
 		cmd( "set modelDir [ lindex $ldn $result ]" );
-		cmd( "set dirname $modelDir" );
+		cmd( "set fileDir $modelDir" );
 
 		load_model_info( ( char * ) Tcl_GetVar( inter, "modelDir", 0 ) );
-
-		cmd( ".f.hea.info.grp.dat conf -text \"$modelGroup\"" );
-		cmd( ".f.hea.info.mod.dat conf -text \"$modelName\"" );
-		cmd( ".f.hea.info.ver.dat conf -text \"$modelVersion\"" );
 
 		cmd( ".m.file entryconf 2 -state normal" );
 		cmd( ".m.file entryconf 3 -state normal" );
@@ -4252,7 +4241,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "set oldModelVersion $modelVersion" );
 		cmd( "set mname $modelName" );
 		cmd( "set mver $modelVersion" );
-		cmd( "set mdir $dirname" );
+		cmd( "set mdir $fileDir" );
 
 		cmd( "newtop .a \"Save Model As...\" { set choice 2 }" );
 
@@ -4319,7 +4308,7 @@ int lsdmain( int argn, char **argv )
 		}
 
 		// control for existing directory
-		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupDir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 		if ( choice == 3 )
 		{
 			cmd( "focus .a.mdir.e" );
@@ -4364,14 +4353,12 @@ int lsdmain( int argn, char **argv )
 		cmd( "destroytop .a" );
 
 		// create a new copycat model
-		cmd( "file copy \"$dirname\" \"$mdir\"" );
-		cmd( "set dirname \"$mdir\"" );
+		cmd( "file copy \"$fileDir\" \"$mdir\"" );
+		cmd( "set fileDir \"$mdir\"" );
 		cmd( "set modelDir \"$mdir\"" );
 		cmd( "set modelName \"$mname\"" );
 		cmd( "set modelVersion \"$mver\"" );
 		cmd( "set modelDate \"\"" );
-		cmd( ".f.hea.info.mod.dat conf -text \"$modelName\"" );
-		cmd( ".f.hea.info.ver.dat conf -text \"$modelVersion\"" );
 
 		// create the model info file
 		update_model_info( );
@@ -4507,9 +4494,6 @@ int lsdmain( int argn, char **argv )
 			cmd( "set modelVersion $mver" );
 			cmd( "if { [ string is print -strict $mdate ] } { set modelDate \"$mdate\" } { set modelDate \"[ current_date ]\" }" );
 
-			cmd( ".f.hea.info.mod.dat conf -text \"$modelName\"" );
-			cmd( ".f.hea.info.ver.dat conf -text \"$modelVersion\"" );
-
 			// update the model info file
 			update_model_info( );
 		}
@@ -4523,10 +4507,9 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( ".f.t.t delete 1.0 end" );
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
-		cmd( "set filename newfile.txt" );
-		cmd( "set dirname [ pwd ]" );
+		cmd( "set fileName newfile.txt" );
+		cmd( "set fileDir [ pwd ]" );
 		cmd( ".f.t.t mark set insert 1.0" );
-		cmd( ".f.hea.info.file.dat conf -text \"$filename\"" );
 		cmd( "unset -nocomplain ud udi rd rdi" );
 		cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
 		cmd( "lappend udi [ .f.t.t index insert ]" );
@@ -5260,7 +5243,7 @@ int lsdmain( int argn, char **argv )
 			goto loop;				// insufficient data to show error
 
 		// check if file is already loaded
-		cmd( "if { [ string equal \"$errfil\" \"[ file normalize \"$dirname/$filename\" ]\" ] } { \
+		cmd( "if { [ string equal \"$errfil\" \"[ file normalize \"$fileDir/$fileName\" ]\" ] } { \
 				set choice 1 \
 			} { \
 				set choice 0 \
@@ -6096,9 +6079,9 @@ bool discard_change( void )
 		return true;					// yes: simply discard configuration
 
 	// ask for confirmation
-	cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save current file?\" -detail \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\" ]" );
+	cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save current file?\" -detail \"Recent changes to file '$fileName' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\" ]" );
 	cmd( "if [ string equal $answer yes ] { \
-			set curfile [ file join \"$dirname\" \"$filename\" ]; \
+			set curfile [ file join \"$fileDir\" \"$fileName\" ]; \
 			set file [ open \"$curfile\" w ]; \
 			puts -nonewline $file [ .f.t.t get 0.0 end ]; \
 			close $file; \

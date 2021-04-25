@@ -1652,6 +1652,7 @@ void deb_show( object *r, const char *hl_var, int mode )
 		// single frame ($w=.deb.cc.grid.can.f) in canvas to hold all cells
 		cmd( "set w $g.can.f" );
 		cmd( "destroy $w" );
+		cmd( "tooltip::tooltip clear ${w}*" );
 		cmd( "ttk::frame $w" );
 		cmd( "$g.can create window 0 0 -window $w -anchor nw" );
 		
@@ -1700,7 +1701,7 @@ void deb_show( object *r, const char *hl_var, int mode )
 			cmd( "mouse_wheel $w.e$i.val" );
 			cmd( "mouse_wheel $w.e$i.last" );
 			
-			set_ttip_descr( "$w.e$i.name", ap_v->label );
+			set_ttip_descr( "$w.e$i.name", ap_v->label, -1, false );
 			
 			if ( mode != 2 && ap_v->num_lag > 0 )
 			{

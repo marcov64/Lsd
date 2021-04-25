@@ -835,7 +835,7 @@ bool has_descr_text( description *d )
 /***************************************************
 FMT_TTIP_DESCR
 ***************************************************/
-char *fmt_ttip_descr( char *out, description *d, int outSz )
+char *fmt_ttip_descr( char *out, description *d, int outSz, bool init )
 {
 	char out1[ outSz ];		
 	
@@ -847,7 +847,7 @@ char *fmt_ttip_descr( char *out, description *d, int outSz )
 	else
 		out[ 0 ] = '\0';
 	
-	if ( d != NULL && d->init != NULL && strlen( d->init ) > 0 ) 
+	if ( init && d != NULL && d->init != NULL && strlen( d->init ) > 0 ) 
 	{
 		if ( strlen( out ) > 0 )
 			strncat( out, "\n\n", outSz - strlen( out ) - 1 );
@@ -869,14 +869,14 @@ char *fmt_ttip_descr( char *out, description *d, int outSz )
 /***************************************************
 SET_TTIP_DESCR
 ***************************************************/
-void set_ttip_descr( const char *w, const char *lab, int it )
+void set_ttip_descr( const char *w, const char *lab, int it, bool init )
 {
 	char desc[ MAX_LINE_SIZE + 1 ];				
 	description *cd;
 
 	// add tooltip only if element has description
 	cd = search_description( lab, false );
-	if ( cd != NULL && strlen( fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1 ) ) > 0 )
+	if ( cd != NULL && strlen( fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1, init ) ) > 0 )
 	{
 		if ( it >= 0 )			// listbox?
 			cmd( "tooltip::tooltip %s -item %d \"%s\"", w, it, desc );

@@ -4351,7 +4351,7 @@ void update_descr_dict( void )
 	description *cd;
 	
 	for ( cd = descr; cd != NULL; cd = cd->next )
-		cmd( "dict set serDescrDict %s \"%s\"", cd->label, fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1 ) );
+		cmd( "dict set serDescrDict %s \"%s\"", cd->label, fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1, false ) );
 }
 
 

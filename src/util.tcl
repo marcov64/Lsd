@@ -934,6 +934,68 @@ proc upd_cursor { } {
 
 
 #************************************************
+# UPD_BARS
+# Update LMM main window title and info bars
+#************************************************
+proc upd_bars { } {
+	global tosave before modelGroup modelName modelVersion fileName groupDir modelDir fileDir
+
+	if { [ winfo exists .f.t.t ] } {
+		set after [ .f.t.t get 1.0 end ]
+	} else {
+		set after $before
+	}
+	
+	# update title bar
+	if { $before ne $after } {
+		set tosave 1
+		wm title . "*$fileName - LMM"
+	} else {
+		set tosave 0
+		wm title . "  $fileName - LMM"
+	}
+	
+	# update model information
+	if { $modelGroup ne [ .f.hea.info.grp.dat configure -text ] } {
+		.f.hea.info.grp.dat configure -text "$modelGroup"
+		
+		if { [ file exists "$groupDir" ] } {
+			tooltip::tooltip .f.hea.info.grp.dat [ file nativename "$groupDir" ]
+		} else {
+			tooltip::tooltip clear .f.hea.info.grp.dat
+		}
+	}
+	
+	if { $modelName ne [ .f.hea.info.mod.dat configure -text ] } {
+		.f.hea.info.mod.dat configure -text "$modelName"
+			
+		if { [ file exists "$modelDir" ] } {
+			tooltip::tooltip .f.hea.info.mod.dat [ file nativename "$modelDir" ]
+		} else {
+			tooltip::tooltip clear .f.hea.info.mod.dat
+		}
+	}
+	
+	if { $modelVersion ne [ .f.hea.info.ver.dat configure -text ] } {
+		.f.hea.info.ver.dat configure -text "$modelVersion"
+	}
+		
+	if { $fileName ne [ .f.hea.info.file.dat configure -text ] } {
+		.f.hea.info.file.dat configure -text "$fileName"
+		
+		if { [ file exists "$fileDir/$fileName" ] } {
+			tooltip::tooltip .f.hea.info.file.dat [ file nativename "$fileDir/$fileName" ]
+		} else {
+			tooltip::tooltip clear .f.hea.info.file.dat
+		}
+	}
+	
+	# update cursor position
+	upd_cursor
+}
+
+
+#************************************************
 # PLOG
 # Tcl/Tk version of C "plog" function to 
 # show a string in the LSD Log window

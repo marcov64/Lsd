@@ -1614,28 +1614,6 @@ proc write_disabled { w val } {
 
 
 #************************************************
-# UPDATE_TITLE_BAR
-# Update LMM main window title bar according to file save status
-#************************************************
-proc update_title_bar { } {
-	global tosave before filename
-
-	if [ winfo exists .f.t.t ] {
-		set after [ .f.t.t get 1.0 end ]
-	} else {
-		set after $before
-	}
-	if [ string compare $before $after ] {
-		set tosave 1
-		wm title . "*$filename - LMM"
-	} else {
-		set tosave 0
-		wm title . "  $filename - LMM"
-	}
-}
-
-
-#************************************************
 # SETWRAP
 # Procedure to adjust text wrapping
 #************************************************

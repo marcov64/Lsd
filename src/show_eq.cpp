@@ -190,6 +190,8 @@ void show_eq( char *lab, int *choice )
 
 	cmd( "showtop $w centerW 1 1" );
 	cmd( "mousewarpto $w.b.cancel" );
+	
+	cmd( "tooltip::tooltip $w.b.search \"Search for text\"" );
 
 	cmd( "$w.f.text tag conf vars -foreground $colorsTheme(str)" );
 	cmd( "$w.f.text tag conf comment_line -foreground $colorsTheme(comm)" );
