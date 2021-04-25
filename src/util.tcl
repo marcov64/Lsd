@@ -792,6 +792,26 @@ proc invert_color { color } {
 
 
 #************************************************
+# RGB_24_COLOR
+# Convert a Tk color to 24-bit RGB
+#************************************************
+
+proc rgb_24_color { color } {
+	global colorsTheme
+
+	if [ catch { set rgbColor [ winfo rgb . $color ] } ] {
+		return $colorsTheme(fg)
+	}
+
+	set rgb8 [ list [ expr { [ lindex $rgbColor 0 ] / 256 } ] \
+					[ expr { [ lindex $rgbColor 1 ] / 256 } ] \
+					[ expr { [ lindex $rgbColor 2 ] / 256 } ] ]
+
+	return [ format "#%02x%02x%02x" {*}$rgb8 ]
+}
+
+
+#************************************************
 # CHECK_SYS_OPT
 # Check (best guess) if system option configuration is valid for the platform
 #************************************************

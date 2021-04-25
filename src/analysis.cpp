@@ -5039,7 +5039,7 @@ void plot_gnu( int *choice )
 {
 	bool done;
 	char *app, **str, **tag, str1[ 50 ], str2[ 100 ], str3[ 10 ], dirname[ MAX_PATH_LENGTH ];
-	double **data;
+	double temp, maxx, minx, **data;
 	int i, j, box, ndim, gridd, *start, *end, *id, nanv = 0;
 	FILE *f, *f2;
 
@@ -5176,6 +5176,7 @@ void plot_gnu( int *choice )
 		autom = true;
 
 	if ( autom )
+	{
 		for ( done = false, i = 1; i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
@@ -5191,7 +5192,29 @@ void plot_gnu( int *choice )
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )	// ignore NaNs
 					maxy = data[ i ][ j - start[ i ] ];
 			}
-	   
+			
+		// condition the max and min values 
+		temp = lower_bound( miny, maxy, MARG, MARG_CONST, pdigits );
+		maxy = upper_bound( miny, maxy, MARG, MARG_CONST, pdigits );
+		miny = temp;
+	}
+	
+	// check x series max/mins to allow splines
+	for ( done = false, j = min_c; j <= max_c; ++j )
+	{
+		if ( ! done && start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) )	// ignore NaNs
+		{
+			minx = maxx = data[ 0 ][ j - start[ 0 ] ];
+			done = true;
+		}
+		
+		if ( start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] < minx )	// ignore NaNs
+			minx = data[ 0 ][ j - start[ 0 ] ];
+			
+		if ( start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] > maxx )	// ignore NaNs
+			maxx = data[ 0 ][ j - start[ 0 ] ];
+	}
+	
 	cmd( "set dirxy plotxy_%d", cur_plot );
 	cmd( "file mkdir $dirxy" );
 	getcwd( dirname, MAX_PATH_LENGTH - 1 );
@@ -5346,8 +5369,9 @@ void plot_gnu( int *choice )
 
 	if ( grid )
 	{
-		fprintf( f, "set grid\n" );
-		fprintf( f2, "set grid\n" );
+		cmd( "set gridcolor [ rgb_24_color $colorsTheme(bg) ]" );
+		fprintf( f, "set grid linecolor \"%s\"\n", ( char * ) Tcl_GetVar( inter, "gridcolor", 0 ) );
+		fprintf( f2, "set grid linecolor \"%s\"\n", ( char * ) Tcl_GetVar( inter, "gridcolor", 0 ) );
 	}
 
 	if ( line_point == 2 )
@@ -5383,7 +5407,7 @@ void plot_gnu( int *choice )
 		fprintf( f2, "%s", msg );
 	} 
 
-	if ( line_point == 1 && ndim == 2 )
+	if ( line_point == 1 && ndim == 2 && maxx > minx )
 		sprintf( str1, "smooth csplines" );
 	else
 		if ( line_point == 1 && ndim > 2 )
@@ -5531,7 +5555,7 @@ void plot_cs_xy( int *choice )
 {
 	bool done;
 	char *app, **str, **tag, str1[ TCL_BUFF_STR ], str2[ 5 * MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
-	double **data, previous_row;
+	double temp, maxx, minx, **data, previous_row;
 	int i, j, time_sel, block_length, ndim, *start, *end, *id;
 	FILE *f, *f2;
 
@@ -5606,6 +5630,7 @@ void plot_cs_xy( int *choice )
 		autom = true;
 	
 	if ( autom )
+	{
 		for ( done = false, i = 1; i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
@@ -5621,7 +5646,29 @@ void plot_cs_xy( int *choice )
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )	// ignore NaNs
 					maxy = data[ i ][ j - start[ i ] ];
 			}
+			
+		// condition the max and min values 
+		temp = lower_bound( miny, maxy, MARG, MARG_CONST, pdigits );
+		maxy = upper_bound( miny, maxy, MARG, MARG_CONST, pdigits );
+		miny = temp;
+	}
 
+	// check x series max/mins to allow splines
+	for ( done = false, j = min_c; j <= max_c; ++j )
+	{
+		if ( ! done && start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) )	// ignore NaNs
+		{
+			minx = maxx = data[ 0 ][ j - start[ 0 ] ];
+			done = true;
+		}
+		
+		if ( start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] < minx )	// ignore NaNs
+			minx = data[ 0 ][ j - start[ 0 ] ];
+			
+		if ( start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] > maxx )	// ignore NaNs
+			maxx = data[ 0 ][ j - start[ 0 ] ];
+	}
+	
 	cmd( "set bidi %d", end[ 0 ] );
 
 	cmd( "newtop .da.s \"XY Plot Options\" { set choice 2 } .da" );
@@ -5782,8 +5829,9 @@ void plot_cs_xy( int *choice )
 
 	if ( grid )
 	{
-		fprintf( f, "set grid\n" );
-		fprintf( f2, "set grid\n" );
+		cmd( "set gridcolor [ rgb_24_color $colorsTheme(bg) ]" );
+		fprintf( f, "set grid linecolor \"%s\"\n", ( char * ) Tcl_GetVar( inter, "gridcolor", 0 ) );
+		fprintf( f2, "set grid linecolor \"%s\"\n", ( char * ) Tcl_GetVar( inter, "gridcolor", 0 ) );
 	}
 
 	if ( line_point == 2 )
@@ -5798,7 +5846,7 @@ void plot_cs_xy( int *choice )
 	}
 	else
 	{
-		if ( ndim == 2 )
+		if ( ndim == 2 && maxx > minx )
 			sprintf( str2, "smooth csplines " );
 		else
 			sprintf( str2, "with lines " ); 
@@ -5926,7 +5974,7 @@ void plot_phase_diagram( int *choice )
 {
 	bool done;
 	char *app, **str, **tag, str1[ 50 ], str2[ 100 ], str3[ 100 ], dirname[ MAX_PATH_LENGTH ];
-	double **data;
+	double temp, maxdelta, **data;
 	int i, j, nlags, *start, *end, *id;
 	FILE *f, *f2;
 
@@ -5999,6 +6047,7 @@ void plot_phase_diagram( int *choice )
 		autom = true;
 
 	if ( autom )
+	{
 		for ( done = false, i = 0; i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
@@ -6014,6 +6063,12 @@ void plot_phase_diagram( int *choice )
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )		// ignore NaNs
 					maxy = data[ i ][ j - start[ i ] ];
 			}
+			
+		// condition the max and min values 
+		temp = lower_bound( miny, maxy, MARG, MARG_CONST, pdigits );
+		maxy = upper_bound( miny, maxy, MARG, MARG_CONST, pdigits );
+		miny = temp;
+	}
 		
 	cmd( "newtop .da.s \"Lag Selection\" { set choice 2 } .da" );
 
@@ -6067,11 +6122,16 @@ void plot_phase_diagram( int *choice )
 	 
 	fprintf( f, "\n" );
 
-	for ( j = min_c; j <= max_c - nlags; ++j )
+	for ( maxdelta = 0, j = min_c; j <= max_c - nlags; ++j )
 	{
 		for ( i = 0; i <= nlags; ++i )
 			if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
+			{
 				fprintf( f, "%lf\t", data[ 0 ][ j + i - start[ 0 ] ] );
+				
+				if ( i > 0 )
+					maxdelta = max( maxdelta, data[ 0 ][ j + i - start[ 0 ] ] - data[ 0 ][ j + i - 1 - start[ 0 ] ] );
+			}
 
 		fprintf( f, "\n" );
 	}
@@ -6089,8 +6149,9 @@ void plot_phase_diagram( int *choice )
 
 	if ( grid )
 	{
-		fprintf( f, "set grid\n" );
-		fprintf( f2, "set grid\n" );
+		cmd( "set gridcolor [ rgb_24_color $colorsTheme(bg) ]" );
+		fprintf( f, "set grid linecolor \"%s\"\n", ( char * ) Tcl_GetVar( inter, "gridcolor", 0 ) );
+		fprintf( f2, "set grid linecolor \"%s\"\n", ( char * ) Tcl_GetVar( inter, "gridcolor", 0 ) );
 	}
 
 	if ( line_point == 2 )
@@ -6114,7 +6175,7 @@ void plot_phase_diagram( int *choice )
 		fprintf( f2, "set arrow from %.*g,%.*g to %.*g,%.*g lt -1\n", pdigits, miny, pdigits, miny, pdigits, maxy, pdigits, maxy );
 	}
 
-	if ( line_point == 1 )
+	if ( line_point == 1 && maxdelta > 0 )
 		sprintf( str1, "smooth csplines" );
 	else
 		strcpy( str1, "" );

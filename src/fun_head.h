@@ -656,6 +656,9 @@ bool no_ptr_chk = true;
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
 #ifndef FAST_LOOKUP
 
+#include <tk.h>
+extern Tcl_Interp *inter;
+
 double init_lattice( double pixW = 0, double pixH = 0, double nrow = 100, double ncol = 100, 
 					 char const lrow[ ] = "y", char const lcol[ ] = "x", char const lvar[ ] = "", 
 					 object *p = NULL, int init_color = -0xffffff );
@@ -663,6 +666,7 @@ double poidev( double xm, long *idum_loc = NULL );
 int deb( object *r, object *c, char const *lab, double *res, bool interact = false, const char *hl_var = "" );
 object *go_brother( object *c );
 void cmd( const char *cm, ... );
+
 #define FUNCTION( X ) \
 	if ( ! strcmp( label, X ) ) { \
 		last_update--; \

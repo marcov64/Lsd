@@ -1650,7 +1650,12 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 			if { ! [ info exists pltSavFmt ] } { \
 				set pltSavFmt svg \
 			}; \
-			set a [ tk_getSaveFile -parent .lat -title \"Save Lattice to File\" -defaultextension .$pltSavFmt -initialfile %s.$pltSavFmt -initialdir \"%s\" -filetypes { { {Scalable Vector Graphics} {.svg} } { {Encapsulated Postscript} {.eps} } { {All files} {*} } } -typevariable t ]; \
+			if { [ string equal $pltSavFmt eps ] } { \
+				set c \"Encapsulated Postscript\" \
+			} else { \
+				set c \"Scalable Vector Graphics\" \
+			}; \
+			set a [ tk_getSaveFile -parent .lat -title \"Save Lattice to File\" -defaultextension .$pltSavFmt -initialfile %s.$pltSavFmt -initialdir \"%s\" -filetypes { { {Scalable Vector Graphics} {.svg} } { {Encapsulated Postscript} {.eps} } { {All files} {*} } } -typevariable c ]; \
 			if { [ string length $a ] != 0 } { \
 				set a [ file nativename $a ]; \
 				set b [ string trimleft [ file extension $a ] . ]; \

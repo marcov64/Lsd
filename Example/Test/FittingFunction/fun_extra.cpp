@@ -178,7 +178,7 @@ if(v[0]>v[1] || t==1)
    v[9]=v[3]*(v[8]/(v[4]+v[8]));
    
    cur->write("best_value",v[9],0);
-   cur->write("err_best-true",v[9]-values[(int)v[5]-1],0);
+   cur->write("err_best_true",v[9]-values[(int)v[5]-1],0);
    cur=cur->next;
    } 
   res=1;
