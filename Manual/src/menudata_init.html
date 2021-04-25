@@ -24,10 +24,10 @@ w\:* {behavior:url(#default#VML);}
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>15</o:Revision>
-  <o:TotalTime>970</o:TotalTime>
+  <o:Revision>16</o:Revision>
+  <o:TotalTime>971</o:TotalTime>
   <o:Created>2018-03-31T23:08:00Z</o:Created>
-  <o:LastSaved>2021-04-19T21:03:00Z</o:LastSaved>
+  <o:LastSaved>2021-04-24T23:55:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
   <o:Words>2141</o:Words>
   <o:Characters>11562</o:Characters>
@@ -42,6 +42,7 @@ w\:* {behavior:url(#default#VML);}
 href="menudata_init_arquivos/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
+  <w:GrammarState>Clean</w:GrammarState>
   <w:TrackMoves>false</w:TrackMoves>
   <w:TrackFormatting/>
   <w:HyphenationZone>21</w:HyphenationZone>
@@ -1146,6 +1147,9 @@ span.Cdigo
 	mso-hansi-font-family:"Courier New";
 	mso-bidi-font-family:"Courier New";
 	color:gray;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
 .MsoChpDefault
 	{mso-style-type:export-only;
 	mso-default-props:yes;
@@ -1435,7 +1439,7 @@ Values Editor<o:p></o:p></span></p>
  <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
   <td width=520 style='width:389.9pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
   <p class=MsoNormal><a name=initvalues></a><span style='mso-no-proof:yes'><img
-  width=700 height=345 id="_x0000_i1026" src="image/init_data.png"></span><span
+  width=709 height=345 id="_x0000_i1026" src="image/init_data.png"></span><span
   style='mso-fareast-font-family:"Times New Roman"'><o:p></o:p></span></p>
   </td>
   <td width=165 valign=top style='width:123.7pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
@@ -1488,7 +1492,8 @@ type</a> at one, for all its <a href="LSD_faqs.html#object">instances</a>. The
 Object type shown is the current one in the <a href="browser.html">LSD Browser</a>.
 <o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>A LSD <a
+<p class=MsoNormal><span class=GramE><span lang=EN-US style='mso-ansi-language:
+EN-US'>A</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> LSD <a
 href="LSD_faqs.html#model">simulation model</a> needs initialization values to
 start a <a href="LSD_faqs.html#simulationrun">simulation run</a>. Initial
 values must be assigned to Parameters and lagged Variables. In the latter case,
@@ -1592,11 +1597,11 @@ required. Therefore, there may be many copies of an Object under the same name,
 each containing the corresponding instances of the Object’s <a
 href="LSD_faqs.html#parameter">Parameters</a> and <a
 href="LSD_faqs.html#variable">Variables</a>. This may create a problem when
-referring to one particular instance when necessary. Since any instance of an
-Object type is identical to every other instance, except for the values of
-Parameters and Variables, the easiest way to differentiate them is using their
-relative position in the <a href="LSD_faqs.html#modelstructure">model structure</a>.
-<o:p></o:p></span></p>
+referring to one <span class=GramE>particular instance</span> when necessary.
+Since any instance of an Object type is identical to every other instance,
+except for the values of Parameters and Variables, the easiest way to
+differentiate them is using their relative position in the <a
+href="LSD_faqs.html#modelstructure">model structure</a>. <o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>A model in
 LSD is structured as a hierarchy: on top is placed Object </span><span
@@ -1608,15 +1613,16 @@ The automatic instance numbering assigns an (increasing) integer number to each
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Market</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> (as son of </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Root</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>), containing the Object types </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Supply</span></span><b><span
-lang=EN-US style='mso-ansi-language:EN-US'> </span></b><span lang=EN-US
-style='mso-ansi-language:EN-US'>and </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>Demand</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> (as grandsons of </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>Root</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>), the first of which contains Object type </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Producer</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>), containing the Object <span
+class=GramE>types</span> </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Supply</span></span><b><span lang=EN-US
+style='mso-ansi-language:EN-US'> </span></b><span lang=EN-US style='mso-ansi-language:
+EN-US'>and </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>Demand</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+(as grandsons of </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>Root</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>),
+the first of which contains Object type </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>Producer</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> (grand-grandson of </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Root</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>). The number identifying an
@@ -1679,8 +1685,8 @@ contains more than 100 instances, it is necessary to use the </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a href="#setall"><span
 style='color:gray;text-decoration:none;text-underline:none'>Set All</span></a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> button, available in the beginning
-of the lines, as described <a href="#setall">below</a>. Alternatively, users
-can also manually initialize data, without the 100 instances limit, using the <a
+of the lines, as described <a href="#setall">below</a>. Alternatively, users can
+also manually initialize data, without the 100 instances limit, using the <a
 href="menudata_brow.html">LSD Data Browser</a> interface. <o:p></o:p></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
@@ -1739,11 +1745,11 @@ lang=EN-US style='mso-ansi-language:EN-US'>Initialization data</span></b><span
 lang=EN-US style='mso-ansi-language:EN-US;mso-bidi-font-weight:bold'>: define
 the numerical<b> </b></span><span lang=EN-US style='mso-ansi-language:EN-US'>values
 to be used by the chosen initialization method. Depending on the method, these
-values have different meaning and some methods require a single value. In the
-example above, for the </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>Equal to</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> method just a single value (to assign to all
-elements) is required.<o:p></o:p></span></p>
+values have different <span class=GramE>meaning</span> and some methods require
+a single value. In the example above, for the </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>Equal to</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> method just a single value (to
+assign to all elements) is required.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -1780,10 +1786,10 @@ initialization methods, the user can check </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>Reset the generator</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> and then chooses a specific integer
 </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Seed</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>, in order to replicate exactly the
-same initialization sequence. This setting does not affect the pseudorandom
-seed during the <a href="LSD_faqs.html#simulationrun">simulation run</a> (unless
-the initialization is performed during a debug break).<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'>, <span class=GramE>in order to</span>
+replicate exactly the same initialization sequence. This setting does not
+affect the pseudorandom seed during the <a href="LSD_faqs.html#simulationrun">simulation
+run</a> (unless the initialization is performed during a debug break).<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -1814,11 +1820,11 @@ lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-fon
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
-normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Equal to</span></b></span><span
-class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext;
-mso-ansi-language:EN-US'>:</span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'> the inserted data value is assigned to every selected instance of the
-element in the model.<o:p></o:p></span></p>
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Equal <span
+class=GramE>to<span style='font-family:"Arial",sans-serif;color:windowtext;
+font-weight:normal'>:</span></span></span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> the inserted data value is assigned to every
+selected instance of the element in the model.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 12.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -1837,15 +1843,16 @@ to initialize, increasing values are assigned so the very first element is set
 to </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Minimum</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, the last one to </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Maximum</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>, and the intermediate values to
-equally-spaced increasing values. For example, if the model contains 100
-elements, </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>Minimum</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> =
-</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>1</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>Maximum</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> = </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>100</span></span><span lang=EN-US
+lang=EN-US style='mso-ansi-language:EN-US'>, and the intermediate values to <span
+class=GramE>equally-spaced</span> increasing values. For example, if the model
+contains 100 elements, </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Minimum</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> = </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>1</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Maximum</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> = </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>100</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>, then the sequence of elements will be set to:
 </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>1</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span
@@ -1909,7 +1916,7 @@ contains also many </span><span class=Cdigo><span lang=EN-US style='mso-ansi-lan
 EN-US'>Market</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
 instances, and therefore many groups of </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>Firm</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> instances (each group is a brotherhoods
+style='mso-ansi-language:EN-US'> instances (each group is a <span class=GramE>brotherhoods</span>
 descending from the same </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>Market</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>). When initializing a Parameter in </span><span
@@ -1936,13 +1943,13 @@ style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>3</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>… When the initialization reaches the first
 instance of Object </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>Firm</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> contained
-in the second </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>Market</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
-instance, the sequence begins with </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>1</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>2</span></span><span lang=EN-US
+EN-US'>Firm</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+contained in the second </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Market</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> instance, the sequence begins with </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>1</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>2</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>3</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>… again.<o:p></o:p></span></p>
@@ -2042,9 +2049,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
 normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Fill-in</span></b></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>: if checked, the chosen
-initialization method will fill also the intermediate instances with the
-current values. For example, suppose using the</span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'> Increasing</span></span><span
+initialization method will <span class=GramE>fill also</span> the intermediate
+instances with the current values. For example, suppose using the</span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'> Increasing</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> method and setting </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Start</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> = </span><span class=Cdigo><span
@@ -2108,7 +2115,8 @@ normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Apply to all instances<
 lang=EN-US style='mso-ansi-language:EN-US'>: if marked, the initialization is
 applied to all instances in the model, given the </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>Apply every</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> option restrictions. <o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> option <span class=GramE>restrictions</span>.
+<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-left:35.7pt;text-indent:-17.85pt;
 mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
@@ -2128,28 +2136,28 @@ the selected initialization method. For example, suppose the model contains 10
 Object </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Market</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> instances, each containing 20
 instances of Object </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>Firm</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>. In order
-to initialize a Parameter in </span><span class=Cdigo><span lang=EN-US
+EN-US'>Firm</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>. In
+order to initialize a Parameter in </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>Firm</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>, limiting to the instances of </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Firm</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> in the second </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Market</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, the user needs to insert </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>From</span></span><span
+class=GramE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>From</span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> = </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>21</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>to</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> = </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>40</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>. Clicking on the </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>From</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>/</span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>to</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> field entries with the right button of the mouse,
-the user can select the ordinal number of the Object instances by indicating
-the ordinal numbers of parent Object. See <a
+style='mso-ansi-language:EN-US'>. Clicking on the </span><span class=GramE><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>From</span></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>/</span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>to</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> field entries with the right button of the
+mouse, the user can select the ordinal number of the Object instances by
+indicating the ordinal numbers of parent Object. See <a
 href="menudata_objn.html#SelectionInstance">here</a> for details on this last
 option.<o:p></o:p></span></p>
 
