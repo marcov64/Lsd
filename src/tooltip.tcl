@@ -356,7 +356,8 @@ proc ::tooltip::menuMotion {w} {
 	variable tooltip
 
         # Menu events come from a funny path, map to the real path.
-        set m [string map {"#" "."} [winfo name $w]]
+        #set m [string map {"#" "."} [winfo name $w]]
+        set m [string map {"#" "."} "[winfo parent $w].[winfo name $w]"]
 	set cur [$w index active]
 
 	# The next two lines (all uses of LAST) are necessary until the

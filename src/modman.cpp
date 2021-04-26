@@ -130,11 +130,11 @@ int lsdmain( int argn, char **argv )
 		}
 		msg[ i ] = '\0';
 		cmd( "set filetoload \"%s\"", msg );
-		cmd( "if { ! [ file pathtype \"$filetoload\" ] == \"absolute\" } { set filetoload \"[ pwd ]/$filetoload\" }" );
+		cmd( "if { ! [ file pathtype \"$filetoload\" ] eq \"absolute\" } { set filetoload \"[ pwd ]/$filetoload\" }" );
 	}
 
 	// prepare to use exec path to find LSD directory
-	cmd( "if { [ info nameofexecutable ] != \"\" } { set path [ file dirname [ info nameofexecutable ] ] } { set path \"[ pwd ]\" }" );
+	cmd( "if { [ info nameofexecutable ] ne \"\" } { set path [ file dirname [ info nameofexecutable ] ] } { set path \"[ pwd ]\" }" );
 	s = ( char * ) Tcl_GetVar( inter, "path", 0 );
 	if ( s != NULL && strlen( s ) > 0 )
 	{
@@ -709,20 +709,36 @@ int lsdmain( int argn, char **argv )
 
 	cmd( "ttk::menu .v.i -tearoff 0" );
 	cmd( ".v.i add command -label \"EQUATION\" -command { set choice 25 } -accelerator Ctrl+E" );
-	cmd( ".v.i add command -label \"V(...)\" -command { set choice 26 } -accelerator Ctrl+V" );
-	cmd( ".v.i add command -label \"CYCLE(...)\" -command { set choice 27 } -accelerator Ctrl+C" );
-	cmd( ".v.i add command -label \"SUM(...)\" -command { set choice 56 } -accelerator Ctrl+U" );
-	cmd( ".v.i add command -label \"INCR(...)\" -command { set choice 40 } -accelerator Ctrl+I" );
-	cmd( ".v.i add command -label \"MULT(...)\" -command { set choice 45 } -accelerator Ctrl+M" );
-	cmd( ".v.i add command -label \"SEARCH(...)\" -command { set choice 55 } -accelerator Ctrl+A" );
-	cmd( ".v.i add command -label \"SEARCH_CND(...)\" -command { set choice 30 } -accelerator Ctrl+S" );
-	cmd( ".v.i add command -label \"SORT(...)\" -command { set choice 31 } -accelerator Ctrl+T" );
-	cmd( ".v.i add command -label \"RNDDRAW(...)\" -command { set choice 54 } -accelerator Ctrl+N" );
-	cmd( ".v.i add command -label \"WRITE(...)\" -command { set choice 29 } -accelerator Ctrl+W" );
-	cmd( ".v.i add command -label \"ADDOBJ(...)\" -command { set choice 52 } -accelerator Ctrl+O" );
-	cmd( ".v.i add command -label \"DELETE(...)\" -command { set choice 53 } -accelerator Ctrl+D" );
+	cmd( ".v.i add command -label \"V\" -command { set choice 26 } -accelerator Ctrl+V" );
+	cmd( ".v.i add command -label \"CYCLE\" -command { set choice 27 } -accelerator Ctrl+C" );
+	cmd( ".v.i add command -label \"SUM\" -command { set choice 56 } -accelerator Ctrl+U" );
+	cmd( ".v.i add command -label \"INCR\" -command { set choice 40 } -accelerator Ctrl+I" );
+	cmd( ".v.i add command -label \"MULT\" -command { set choice 45 } -accelerator Ctrl+M" );
+	cmd( ".v.i add command -label \"SEARCH\" -command { set choice 55 } -accelerator Ctrl+A" );
+	cmd( ".v.i add command -label \"SEARCH_CND\" -command { set choice 30 } -accelerator Ctrl+S" );
+	cmd( ".v.i add command -label \"SORT\" -command { set choice 31 } -accelerator Ctrl+T" );
+	cmd( ".v.i add command -label \"RNDDRAW\" -command { set choice 54 } -accelerator Ctrl+N" );
+	cmd( ".v.i add command -label \"WRITE\" -command { set choice 29 } -accelerator Ctrl+W" );
+	cmd( ".v.i add command -label \"ADDOBJ\" -command { set choice 52 } -accelerator Ctrl+O" );
+	cmd( ".v.i add command -label \"DELETE\" -command { set choice 53 } -accelerator Ctrl+D" );
 	cmd( ".v.i add command -label \"Network macros\" -command { set choice 72 } -accelerator Ctrl+K" );
 	cmd( ".v.i add command -label \"Math functions\" -command { set choice 51 } -accelerator Ctrl+H" );
+	
+	cmd( "tooltip::tooltip .v.i -index 0 \"Add a new LSD equation\"" );
+	cmd( "tooltip::tooltip .v.i -index 1 \"Request the value of a variable or parameter\"" );
+	cmd( "tooltip::tooltip .v.i -index 2 \"Add cycle over a set of object instances\"" );
+	cmd( "tooltip::tooltip .v.i -index 3 \"Sum of a variable over a set of object instances\"" );
+	cmd( "tooltip::tooltip .v.i -index 4 \"Increment the value of a variable or parameter\"" );
+	cmd( "tooltip::tooltip .v.i -index 5 \"Multiply the value of a variable or parameter\"" );
+	cmd( "tooltip::tooltip .v.i -index 6 \"Search for the first instance of an object\"" );
+	cmd( "tooltip::tooltip .v.i -index 7 \"Conditional search for specific object instance\"" );
+	cmd( "tooltip::tooltip .v.i -index 8 \"Sort a set of object instances\"" );
+	cmd( "tooltip::tooltip .v.i -index 9 \"Randomly draw an object instance\"" );
+	cmd( "tooltip::tooltip .v.i -index 10 \"Write a value to a variable or parameter\"" );
+	cmd( "tooltip::tooltip .v.i -index 11 \"Add a new object instance\"" );
+	cmd( "tooltip::tooltip .v.i -index 12 \"Delete an object instance\"" );
+	cmd( "tooltip::tooltip .v.i -index 13 \"More macros to operate on LSD networks\"" );
+	cmd( "tooltip::tooltip .v.i -index 14 \"Common mathematical and statistical functions\"" );
 
 	cmd( "bind .f.t.t <Control-E> { set choice 25 }" );
 	cmd( "bind .f.t.t <Control-V> { set choice 26; break }" );
@@ -846,7 +862,7 @@ int lsdmain( int argn, char **argv )
 	// Run the model
 	if ( choice == 2 || choice == 6 )
 	{
-		cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
+		cmd( "if { \"[ check_sys_opt ]\" ne \"\" } { if { [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
 
 		if ( choice != 0 )
 		{
@@ -1031,7 +1047,7 @@ int lsdmain( int argn, char **argv )
 		// handle the opening of files from the compilation error window
 		cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$modelDir/$fileName\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
 				.f.t.t tag add sel $errlin.0 $errlin.end; \
-				if { [ info exists errcol ] && $errcol != \"\" && [ string is integer -strict $errcol ] } { \
+				if { [ info exists errcol ] && $errcol ne \"\" && [ string is integer -strict $errcol ] } { \
 					.f.t.t see $errlin.$errcol; \
 					.f.t.t mark set insert $errlin.$errcol \
 				} else { \
@@ -1072,7 +1088,7 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "okcancel .search_line b { \
 				set line [ .search_line.l.e get ]; \
-				if { $line != \"\" && [ string is integer -strict $line ] && $line >= 0 } { \
+				if { $line ne \"\" && [ string is integer -strict $line ] && $line >= 0 } { \
 					.f.t.t tag remove sel 1.0 end; \
 					.f.t.t see $line.0; \
 					.f.t.t mark set insert $line.0; \
@@ -1124,7 +1140,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "pack .find.l .find.r .find.c -padx 5 -pady 5" );
 
 		cmd( "Xcancel .find b Find { \
-				if { $textsearch != \"\" } { \
+				if { $textsearch ne \"\" } { \
 					incr lfindsize; \
 					set curcounter [ expr { $lfindsize - 1 } ]; \
 					lappend lfind \"$textsearch\"; \
@@ -1196,7 +1212,7 @@ int lsdmain( int argn, char **argv )
 		else
 			cmd( "set dirsearch \"-backwards\"; set endsearch 1.0" );
 
-		cmd( "if { $textsearch != \"\" } { \
+		cmd( "if { $textsearch ne \"\" } { \
 				.f.t.t tag remove sel 1.0 end; \
 				set cur [ .f.t.t index insert ]; \
 					if { $docase } { \
@@ -1272,7 +1288,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "pack .l.b1 -padx $butPad -anchor e" );
 
 		cmd( "Xcancel .l b2 Find { \
-				if { $textsearch != \"\" } { \
+				if { $textsearch ne \"\" } { \
 					incr lfindsize; \
 					set curcounter [ expr { $lfindsize - 1 } ]; \
 					lappend lfind \"$textsearch\"; \
@@ -1823,7 +1839,7 @@ int lsdmain( int argn, char **argv )
 		// handle the opening of files from the compilation error window
 		cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$fileDir/$fileName\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
 				.f.t.t tag add sel $errlin.0 $errlin.end; \
-				if { [ info exists errcol ] && $errcol != \"\" && [ string is integer -strict $errcol ] } { \
+				if { [ info exists errcol ] && $errcol ne \"\" && [ string is integer -strict $errcol ] } { \
 					.f.t.t see $errlin.$errcol; \
 					.f.t.t mark set insert $errlin.$errcol \
 				} else { \
@@ -1890,9 +1906,9 @@ int lsdmain( int argn, char **argv )
 		while ( num != 0 && choice != 0 )
 		{
 			cmd( "set a [ .f.t.t search $direction \"\\{\" $cur $terminal ]" );
-			cmd( "if { $a == \"\" } { set a [ .f.t.t index $terminal ] }" );
+			cmd( "if { $a eq \"\" } { set a [ .f.t.t index $terminal ] }" );
 			cmd( "set b [ .f.t.t search $direction \"\\}\" $cur $terminal ]" );
-			cmd( "if { $b == \"\" } { set b [.f.t.t index $terminal] }" );
+			cmd( "if { $b eq \"\" } { set b [.f.t.t index $terminal] }" );
 			cmd( "if { $a == $b } { set choice 0 }" );
 			if ( choice == 0 )
 				goto loop;
@@ -1918,26 +1934,26 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( "set res 26" );
 
-		cmd( "newtop .a \"Insert LSD macro\" { set choice 2 }" );
+		cmd( "newtop .a \"Add LSD macro\" { set choice 2 }" );
 
 		cmd( "ttk::label .a.tit -text \"Available LSD macros\"" );
 
 		cmd( "ttk::frame .a.r -borderwidth 1 -relief solid" );
-		cmd( "ttk::radiobutton .a.r.equ -text \"EQUATION - insert a new LSD equation\" -underline 0 -variable res -value 25" );
-		cmd( "ttk::radiobutton .a.r.cal -text \"V(...) - request the value of a variable\" -underline 0 -variable res -value 26" );
-		cmd( "ttk::radiobutton .a.r.for -text \"CYCLE - insert a cycle over a group of objects\" -underline 0 -variable res -value 27" );
-		cmd( "ttk::radiobutton .a.r.sum -text \"SUM - compute the sum of a variable over a set of objects\" -underline 1 -variable res -value 56" );
-		cmd( "ttk::radiobutton .a.r.incr -text \"INCR - increment the value of a parameter\" -underline 0 -variable res -value 40" );
-		cmd( "ttk::radiobutton .a.r.mult -text \"MULT - multiply the value of a parameter\" -underline 0 -variable res -value 45" );
-		cmd( "ttk::radiobutton .a.r.sear -text \"SEARCH - search the first instance an object type\" -underline 2 -variable res -value 55" );
-		cmd( "ttk::radiobutton .a.r.scnd -text \"SEARCH_CND - conditional search a specific object\" -underline 0 -variable res -value 30" );
-		cmd( "ttk::radiobutton .a.r.lqs -text \"SORT - sort a group of objects\" -underline 3 -variable res -value 31" );
-		cmd( "ttk::radiobutton .a.r.rndo -text \"RNDDRAW - draw an object\" -underline 1 -variable res -value 54" );
-		cmd( "ttk::radiobutton .a.r.wri -text \"WRITE - overwrite a variable or parameter with a new value\" -underline 0 -variable res -value 29" );
-		cmd( "ttk::radiobutton .a.r.addo -text \"ADDOBJ - add a new object\" -underline 3 -variable res -value 52" );
-		cmd( "ttk::radiobutton .a.r.delo -text \"DELETE - delete an object\" -underline 0 -variable res -value 53" );
+		cmd( "ttk::radiobutton .a.r.equ -text \"EQUATION - add a new LSD equation\" -underline 0 -variable res -value 25" );
+		cmd( "ttk::radiobutton .a.r.cal -text \"V - request the value of a variable or parameter\" -underline 0 -variable res -value 26" );
+		cmd( "ttk::radiobutton .a.r.for -text \"CYCLE - add a cycle over a set of object instances\" -underline 0 -variable res -value 27" );
+		cmd( "ttk::radiobutton .a.r.sum -text \"SUM - sum of a variable over a set of object instances\" -underline 1 -variable res -value 56" );
+		cmd( "ttk::radiobutton .a.r.incr -text \"INCR - increment the value of a variable or parameter\" -underline 0 -variable res -value 40" );
+		cmd( "ttk::radiobutton .a.r.mult -text \"MULT - multiply the value of a variable or parameter\" -underline 0 -variable res -value 45" );
+		cmd( "ttk::radiobutton .a.r.sear -text \"SEARCH - search for the first instance of an object\" -underline 2 -variable res -value 55" );
+		cmd( "ttk::radiobutton .a.r.scnd -text \"SEARCH_CND - conditional search for specific object instance\" -underline 0 -variable res -value 30" );
+		cmd( "ttk::radiobutton .a.r.lqs -text \"SORT - sort a set of object instances\" -underline 3 -variable res -value 31" );
+		cmd( "ttk::radiobutton .a.r.rndo -text \"RNDDRAW - randomly draw an object instance\" -underline 1 -variable res -value 54" );
+		cmd( "ttk::radiobutton .a.r.wri -text \"WRITE - write a value to a variable or parameter\" -underline 0 -variable res -value 29" );
+		cmd( "ttk::radiobutton .a.r.addo -text \"ADDOBJ - add a new object instance\" -underline 3 -variable res -value 52" );
+		cmd( "ttk::radiobutton .a.r.delo -text \"DELETE - delete an object instance\" -underline 0 -variable res -value 53" );
 		cmd( "ttk::radiobutton .a.r.net -text \"Network macros\" -underline 6 -variable res -value 72" );
-		cmd( "ttk::radiobutton .a.r.math -text \"Mathematical functions\" -underline 12 -variable res -value 51" );
+		cmd( "ttk::radiobutton .a.r.math -text \"Mathematical and statistical functions\" -underline 11 -variable res -value 51" );
 
 		cmd( "pack .a.r.equ .a.r.cal .a.r.for .a.r.sum .a.r.incr .a.r.mult .a.r.sear .a.r.scnd .a.r.lqs .a.r.rndo .a.r.wri .a.r.addo .a.r.delo .a.r.net .a.r.math -anchor w" );
 		cmd( "pack .a.tit .a.r -padx 5 -pady 5" );
@@ -1984,12 +2000,12 @@ int lsdmain( int argn, char **argv )
 	// insert a math function
 	if ( choice == 51 )
 	{
-		cmd( "set value1 \"0\"" );
-		cmd( "set value2 \"1\"" );
+		cmd( "set value1 0" );
+		cmd( "set value2 1" );
 		cmd( "set res 9" );
 		cmd( "set str {uniform($value1, $value2)}" );
 
-		cmd( "newtop .a \"Math Functions\" { set choice 2 }" );
+		cmd( "newtop .a \"Mathematical Functions\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.e" );
 		cmd( "ttk::label .a.e.l -text \"Function parameter(s)\"" );
@@ -2120,13 +2136,14 @@ int lsdmain( int argn, char **argv )
 		cmd( "set v_num %d", v_counter );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_lag 0" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
-		cmd( "newtop .a \"Insert 'V(...)' Command\" { set choice 2 }" );
+		cmd( "newtop .a \"Insert 'V' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.v" );
 		cmd( "ttk::label .a.v.l -text \"Number v\\\[x\\] to assign to\"" );
-		cmd( "ttk::entry .a.v.e -width 2 -textvariable v_num -justify center" );
+		cmd( "ttk::spinbox .a.v.e -width 3 -from 0 -to 99 -justify center" );
+		cmd( ".a.v.e set $v_num" );
 		cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "pack .a.v.l .a.v.e" );
 
@@ -2138,7 +2155,8 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "ttk::frame .a.l" );
 		cmd( "ttk::label .a.l.l -text \"Lag to use\"" );
-		cmd( "ttk::entry .a.l.e -width 2 -textvariable v_lag -justify center" );
+		cmd( "ttk::spinbox .a.l.e -width 3 -from 0 -to 99 -justify center" );
+		cmd( ".a.l.e set $v_lag" );
 		cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 		cmd( "pack .a.l.l .a.l.e" );
 
@@ -2160,6 +2178,8 @@ int lsdmain( int argn, char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
+		cmd( "set v_num [ .a.v.e get ]" ); 
+		cmd( "set v_lag [ .a.l.e get ]" ); 
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2170,16 +2190,16 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
 
-		cmd( "if { $v_lag == 0 && $v_obj == \"p\" } { .f.t.t insert insert \"V(\\\"$v_label\\\")\" }" );
-		cmd( "if { $v_lag != 0 && $v_obj == \"p\" } { .f.t.t insert insert \"VL(\\\"$v_label\\\", $v_lag)\" }" );
-		cmd( "if { $v_lag == 0 && $v_obj != \"p\" } { .f.t.t insert insert \"VS($v_obj, \\\"$v_label\\\")\" }" );
-		cmd( "if { $v_lag != 0 && $v_obj != \"p\" && [ string is integer -strict $v_lag ] } { .f.t.t insert insert \"VLS($v_obj, \\\"$v_label\\\", $v_lag)\" }" );
+		cmd( "if { $v_lag == 0 && $v_obj eq \"THIS\" } { .f.t.t insert insert \"V(\\\"$v_label\\\")\" }" );
+		cmd( "if { $v_lag != 0 && $v_obj eq \"THIS\" } { .f.t.t insert insert \"VL(\\\"$v_label\\\", $v_lag)\" }" );
+		cmd( "if { $v_lag == 0 && $v_obj ne \"THIS\" } { .f.t.t insert insert \"VS($v_obj, \\\"$v_label\\\")\" }" );
+		cmd( "if { $v_lag != 0 && $v_obj ne \"THIS\" } { .f.t.t insert insert \"VLS($v_obj, \\\"$v_label\\\", $v_lag)\" }" );
 
-		cmd( "if { $v_num != \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
 
-		cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
+		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
 		
 		if ( num != -1 )
 			v_counter = ++num;
@@ -2195,7 +2215,7 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( "set v_label \"\"" );
 		cmd( "set v_obj cur" );
-		cmd( "set v_par p" );
+		cmd( "set v_par THIS" );
 
 		cmd( "newtop .a \"Insert 'CYCLE' Command\" { set choice 2 }" );
 
@@ -2239,7 +2259,7 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_par == \"p\" } { .f.t.t insert insert \"CYCLE($v_obj, \\\"$v_label\\\")\\n\" } { .f.t.t insert insert \"CYCLES($v_par, $v_obj, \\\"$v_label\\\")\\n\" }" );
+		cmd( "if { $v_par eq \"THIS\" } { .f.t.t insert insert \"CYCLE($v_obj, \\\"$v_label\\\")\\n\" } { .f.t.t insert insert \"CYCLES($v_par, $v_obj, \\\"$v_label\\\")\\n\" }" );
 
 		cmd( "set in [ .f.t.t index insert ]" );
 		cmd( "scan $in %%d.%%d line col" );
@@ -2278,13 +2298,14 @@ int lsdmain( int argn, char **argv )
 		cmd( "set v_num %d", v_counter );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_val 1" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'INCR' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.v" );
 		cmd( "ttk::label .a.v.l -text \"Number v\\\[x\\] to assign the result after increment\"" );
-		cmd( "ttk::entry .a.v.e -width 2 -textvariable v_num -justify center" );
+		cmd( "ttk::spinbox .a.v.e -width 3 -from 0 -to 99 -justify center" );
+		cmd( ".a.v.e set $v_num" );
 		cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "pack .a.v.l .a.v.e" );
 
@@ -2318,6 +2339,7 @@ int lsdmain( int argn, char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
+		cmd( "set v_num [ .a.v.e get ]" ); 
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2328,12 +2350,12 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
-		cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"INCRS($v_obj, \\\"$v_label\\\", $v_val)\" } { .f.t.t insert insert \"INCR(\\\"$v_label\\\", $v_val)\" }" );
+		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"INCRS($v_obj, \\\"$v_label\\\", $v_val)\" } { .f.t.t insert insert \"INCR(\\\"$v_label\\\", $v_val)\" }" );
 
-		cmd( "if { $v_num != \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
 
-		cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
+		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
 		
 		if ( num != -1 )
 			v_counter = ++num;
@@ -2350,13 +2372,14 @@ int lsdmain( int argn, char **argv )
 		cmd( "set v_num %d", v_counter );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_val 1" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'MULT' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.v" );
 		cmd( "ttk::label .a.v.l -text \"Number v\\\[x\\] to assign the result after multiplication\"" );
-		cmd( "ttk::entry .a.v.e -width 2 -textvariable v_num -justify center" );
+		cmd( "ttk::spinbox .a.v.e -width 3 -from 0 -to 99 -justify center" );
+		cmd( ".a.v.e set $v_num" );
 		cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "pack .a.v.l .a.v.e" );
 
@@ -2390,6 +2413,7 @@ int lsdmain( int argn, char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
+		cmd( "set v_num [ .a.v.e get ]" ); 
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2400,12 +2424,12 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
-		cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"MULTS($v_obj, \\\"$v_label\\\", $v_val)\" } { .f.t.t insert insert \"MULT(\\\"$v_label\\\", $v_val)\" }" );
+		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"MULTS($v_obj, \\\"$v_label\\\", $v_val)\" } { .f.t.t insert insert \"MULT(\\\"$v_label\\\", $v_val)\" }" );
 
-		cmd( "if { $v_num != \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
 
-		cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
+		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
 		
 		if ( num != -1 )
 			v_counter = ++num;
@@ -2422,7 +2446,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "set v_num 0" );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_lag T" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'WRITE' Command\" { set choice 2 }" );
 
@@ -2440,7 +2464,7 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "ttk::frame .a.l" );
 		cmd( "ttk::label .a.l.l -text \"Time step appearing as latest computation\"" );
-		cmd( "ttk::entry .a.l.e -width 15 -textvariable v_lag -justify center" );
+		cmd( "ttk::entry .a.l.e -width 5 -textvariable v_lag -justify center" );
 		cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 		cmd( "pack .a.l.l .a.l.e" );
 
@@ -2472,10 +2496,10 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_obj == \"p\" && ( $v_lag == \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITE(\\\"$v_label\\\", $v_num);\" }" );
-		cmd( "if { $v_obj == \"p\" && $v_lag != \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\", $v_num, $v_lag);\" }" );
-		cmd( "if { $v_obj != \"p\" && ( $v_lag == \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITES($v_obj, \\\"$v_label\\\", $v_num);\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_lag != \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITELS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\" }" );
+		cmd( "if { $v_obj eq \"THIS\" && ( $v_lag eq \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITE(\\\"$v_label\\\", $v_num);\" }" );
+		cmd( "if { $v_obj eq \"THIS\" && $v_lag ne \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\", $v_num, $v_lag);\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && ( $v_lag eq \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITES($v_obj, \\\"$v_label\\\", $v_num);\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && $v_lag ne \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITELS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\" }" );
 
 		cmd( ".f.t.t see insert" );
 
@@ -2490,7 +2514,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "set v_num 0" );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_lag 0" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'SEARCH_CND' Command\" { set choice 2 }" );
 
@@ -2514,7 +2538,8 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "ttk::frame .a.l" );
 		cmd( "ttk::label .a.l.l -text \"Lag to use\"" );
-		cmd( "ttk::entry .a.l.e -width 2 -textvariable v_lag -justify center" );
+		cmd( "ttk::spinbox .a.l.e -width 3 -from 0 -to 99 -justify center" );
+		cmd( ".a.l.e set $v_lag" );
 		cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 		cmd( "pack .a.l.l .a.l.e" );
 
@@ -2536,6 +2561,7 @@ int lsdmain( int argn, char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
+		cmd( "set v_lag [ .a.l.e get ]" ); 
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2546,10 +2572,10 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_obj == \"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CND(\\\"$v_label\\\", $v_num);\" }" );
-		cmd( "if { $v_obj == \"p\" && [ string is integer -strict $v_lag ] && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDL(\\\"$v_label\\\", $v_num, $v_lag);\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDS($v_obj, \\\"$v_label\\\", $v_num);\" }" );
-		cmd( "if { $v_obj != \"p\" && [ string is integer -strict $v_lag ] && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDLS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\" }" );
+		cmd( "if { $v_obj eq \"THIS\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CND(\\\"$v_label\\\", $v_num);\" }" );
+		cmd( "if { $v_obj eq \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDL(\\\"$v_label\\\", $v_num, $v_lag);\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDS($v_obj, \\\"$v_label\\\", $v_num);\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDLS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\" }" );
 
 		cmd( ".f.t.t see insert" );
 
@@ -2560,9 +2586,10 @@ int lsdmain( int argn, char **argv )
 	// insert a SORT macro
 	if ( choice == 31 )
 	{
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 		cmd( "set v_obj0 \"\"" );
 		cmd( "set v_label \"\"" );
+		cmd( "set v_lag 0" );
 		cmd( "set v_direction 1" );
 
 		cmd( "newtop .a \"Insert 'SORT' Command\" { set choice 2 }" );
@@ -2583,8 +2610,16 @@ int lsdmain( int argn, char **argv )
 		cmd( "ttk::label .a.s.l -text \"Sorting direction\"" );
 		cmd( "ttk::radiobutton .a.s.u -text Increasing -variable v_direction -value 1" );
 		cmd( "ttk::radiobutton .a.s.d -text Decreasing -variable v_direction -value 2" );
-		cmd( "bind .a.s <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
+		cmd( "bind .a.s <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
 		cmd( "pack .a.s.l .a.s.u .a.s.d" );
+
+		cmd( "ttk::frame .a.l" );
+		cmd( "ttk::label .a.l.l -text \"Lag to use\"" );
+		cmd( "ttk::spinbox .a.l.e -width 3 -from 0 -to 99 -justify center" );
+		cmd( ".a.l.e set $v_lag" );
+		cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
+		cmd( "pack .a.l.l .a.l.e" );
+
 
 		cmd( "ttk::frame .a.o" );
 		cmd( "ttk::label .a.o.l -text \"Parent object\"" );
@@ -2592,7 +2627,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.d .a.n .a.s .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.d .a.n .a.s .a.l .a.o -padx 5 -pady 5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SORT } { set choice 2 }" );
 
@@ -2604,6 +2639,7 @@ int lsdmain( int argn, char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
+		cmd( "set v_lag [ .a.l.e get ]" ); 
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2620,8 +2656,10 @@ int lsdmain( int argn, char **argv )
 		else
 		  cmd( "set direction \"DOWN\"" );
 
-		cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SORT(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\");\" }" );
-		cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SORTS($v_obj, \\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\");\" }" );
+		cmd( "if { $v_lag == 0 && $v_obj eq \"THIS\" } { .f.t.t insert insert \"SORT(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\");\" }" );
+		cmd( "if { $v_lag == 0 && $v_obj ne \"THIS\" } { .f.t.t insert insert \"SORTS($v_obj, \\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\");\" }" );
+		cmd( "if { $v_lag != 0 && $v_obj eq \"THIS\" } { .f.t.t insert insert \"SORTL(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\", $v_lag);\" }" );
+		cmd( "if { $v_lag != 0 && $v_obj ne \"THIS\" } { .f.t.t insert insert \"SORTLS($v_obj, \\\"$v_obj0\\\", \\\"$v_label\\\", \\\"$direction\\\", $v_lag);\" }" );
 
 		cmd( ".f.t.t see insert" );
 
@@ -2634,9 +2672,9 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( "set v_obj0 cur" );
 		cmd( "set v_label \"\"" );
-		cmd( "set numobj \"1\"" );
+		cmd( "set numobj 1" );
 		cmd( "set v_num \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'ADDOBJ' Command\" { set choice 2 }" );
 
@@ -2692,22 +2730,22 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $numobj == \"1\" } { set choice 1 } { set choice 0 }" );
-		cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
+		cmd( "if { $numobj == 1 } { set choice 1 } { set choice 0 }" );
+		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
 		if ( choice  == 1 )
 		{
-		cmd( "if { $v_obj == \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\" }" );
-		cmd( "if { $v_obj == \"p\" && $v_num != \"\" } { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj, \\\"$v_label\\\");\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num != \"\" } { .f.t.t insert insert \"ADDOBJ_EXS($v_obj, \\\"$v_label\\\", $v_num);\" }" );
+		cmd( "if { $v_obj eq \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\" }" );
+		cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj, \\\"$v_label\\\");\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDOBJ_EXS($v_obj, \\\"$v_label\\\", $v_num);\" }" );
 		}
 		else
 		{
-		cmd( "if { $v_obj == \"p\" && $v_num != \"\" } { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
-		cmd( "if { $v_obj != \"p\" && $v_num != \"\" } { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
-		cmd( "if { $v_obj == \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\"; set choice -3 }" );
-		cmd( "if { $v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\"; set choice -3 }" );
+		cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
+		cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
+		cmd( "if { $v_obj eq \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\"; set choice -3 }" );
+		cmd( "if { $v_obj ne \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\"; set choice -3 }" );
 		}
 
 		cmd( ".f.t.t see insert" );
@@ -2767,7 +2805,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "set v_label \"\"" );
 		cmd( "set v_lag 0" );
 		cmd( "set v_tot \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'RNDDRAW' Command\" { set choice 2 }" );
 
@@ -2791,7 +2829,8 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "ttk::frame .a.l" );
 		cmd( "ttk::label .a.l.l -text \"Lag to use\"" );
-		cmd( "ttk::entry .a.l.e -width 2 -textvariable v_lag -justify center" );
+		cmd( "ttk::spinbox .a.l.e -width 3 -from 0 -to 99 -justify center" );
+		cmd( ".a.l.e set $v_lag" );
 		cmd( "bind .a.l.e <Return> { focus .a.t.e; .a.t.e selection range 0 end }" );
 		cmd( "pack .a.l.l .a.l.e" );
 
@@ -2819,6 +2858,7 @@ int lsdmain( int argn, char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
+		cmd( "set v_lag [ .a.l.e get ]" ); 
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2829,23 +2869,23 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_tot == \"\" } { set choice 1 } { set choice 2 }" );
+		cmd( "if { $v_tot eq \"\" } { set choice 1 } { set choice 2 }" );
 
 		if ( choice == 1 )
 		 {
-		  cmd( "if { $v_obj == \"p\" && $v_lag == 0 && $v_label != \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW(\\\"$v_num\\\", \\\"$v_label\\\");\" }" );
-		  cmd( "if { $v_obj == \"p\" && $v_lag == 0 && $v_label == \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIR(\\\"$v_num\\\");\" }" );
-		  cmd( "if { $v_obj == \"p\" && $v_lag != 0 && [ string is integer -strict $v_lag ] } { .f.t.t insert insert \"$v_obj0 = RNDDRAWL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\" }" );
-		  cmd( "if { $v_obj != \"p\" && $v_lag == 0 && $v_label != \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAWS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\");\" }" );
-		  cmd( "if { $v_obj != \"p\" && $v_lag == 0 && $v_label == \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIRS($v_obj, \\\"$v_num\\\");\" }" );
-		  cmd( "if { $v_obj != \"p\" && $v_lag != 0 && [ string is integer -strict $v_lag ] } { .f.t.t insert insert \"$v_obj0 = RNDDRAWLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\" }" );
+		  cmd( "if { $v_obj eq \"THIS\" && $v_lag == 0 && $v_label ne \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW(\\\"$v_num\\\", \\\"$v_label\\\");\" }" );
+		  cmd( "if { $v_obj eq \"THIS\" && $v_lag == 0 && $v_label eq \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIR(\\\"$v_num\\\");\" }" );
+		  cmd( "if { $v_obj eq \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAWL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\" }" );
+		  cmd( "if { $v_obj ne \"THIS\" && $v_lag == 0 && $v_label ne \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAWS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\");\" }" );
+		  cmd( "if { $v_obj ne \"THIS\" && $v_lag == 0 && $v_label eq \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIRS($v_obj, \\\"$v_num\\\");\" }" );
+		  cmd( "if { $v_obj ne \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAWLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\" }" );
 		 }
 		else
 		 {
-		  cmd( "if { $v_obj == \"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOT(\\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\" }" );
-		  cmd( "if { $v_obj == \"p\" && $v_lag != 0 && [ string is integer -strict $v_lag ] } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\" }" );
-		  cmd( "if { $v_obj != \"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOTS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\" }" );
-		  cmd( "if { $v_obj != \"p\" && $v_lag != 0 && [ string is integer -strict $v_lag ] } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\" }" );
+		  cmd( "if { $v_obj eq \"THIS\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOT(\\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\" }" );
+		  cmd( "if { $v_obj eq \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\" }" );
+		  cmd( "if { $v_obj ne \"THIS\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOTS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\" }" );
+		  cmd( "if { $v_obj ne \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\" }" );
 		 }
 
 		cmd( ".f.t.t see insert" );
@@ -2859,7 +2899,7 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( "set v_obj0 cur" );
 		cmd( "set v_label \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'SEARCH' Command\" { set choice 2 }" );
 
@@ -2903,7 +2943,7 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"$v_obj0 = SEARCH(\\\"$v_label\\\");\" } { .f.t.t insert insert \"$v_obj0 = SEARCHS($v_obj, \\\"$v_label\\\");\" }" );
+		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"$v_obj0 = SEARCH(\\\"$v_label\\\");\" } { .f.t.t insert insert \"$v_obj0 = SEARCHS($v_obj, \\\"$v_label\\\");\" }" );
 
 		cmd( ".f.t.t see insert" );
 
@@ -2917,13 +2957,14 @@ int lsdmain( int argn, char **argv )
 		cmd( "set v_num %d", v_counter );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_lag 0" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'SUM' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.v" );
 		cmd( "ttk::label .a.v.l -text \"Number v\\\[x\\] to assign the result\"" );
-		cmd( "ttk::entry .a.v.e -width 2 -textvariable v_num -justify center" );
+		cmd( "ttk::spinbox .a.v.e -width 3 -from 0 -to 99 -justify center" );
+		cmd( ".a.v.e set $v_num" );
 		cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "pack .a.v.l .a.v.e" );
 
@@ -2935,7 +2976,8 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "ttk::frame .a.l" );
 		cmd( "ttk::label .a.l.l -text \"Lag to use\"" );
-		cmd( "ttk::entry .a.l.e -width 2 -textvariable v_lag -justify center" );
+		cmd( "ttk::spinbox .a.l.e -width 3 -from 0 -to 99 -justify center" );
+		cmd( ".a.l.e set $v_lag" );
 		cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 		cmd( "pack .a.l.l .a.l.e" );
 
@@ -2957,6 +2999,8 @@ int lsdmain( int argn, char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
+		cmd( "set v_num [ .a.v.e get ]" ); 
+		cmd( "set v_lag [ .a.l.e get ]" ); 
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2967,16 +3011,16 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
 
-		cmd( "if { $v_lag == 0 && $v_obj == \"p\" } { .f.t.t insert insert \"SUM(\\\"$v_label\\\")\" }" );
-		cmd( "if { $v_lag != 0 && [ string is integer -strict $v_lag ] && $v_obj == \"p\" } { .f.t.t insert insert \"SUML(\\\"$v_label\\\", $v_lag)\" }" );
-		cmd( "if { $v_lag == 0 && $v_obj != \"p\" } { .f.t.t insert insert \"SUMS($v_obj, \\\"$v_label\\\")\" }" );
-		cmd( "if { $v_lag != 0 && [ string is integer -strict $v_lag ] && $v_obj != \"p\" } { .f.t.t insert insert \"SUMLS($v_obj, \\\"$v_label\\\", $v_lag)\" }" );
+		cmd( "if { $v_lag == 0 && $v_obj eq \"THIS\" } { .f.t.t insert insert \"SUM(\\\"$v_label\\\")\" }" );
+		cmd( "if { $v_lag != 0 && $v_obj eq \"THIS\" } { .f.t.t insert insert \"SUML(\\\"$v_label\\\", $v_lag)\" }" );
+		cmd( "if { $v_lag == 0 && $v_obj ne \"THIS\" } { .f.t.t insert insert \"SUMS($v_obj, \\\"$v_label\\\")\" }" );
+		cmd( "if { $v_lag != 0 && $v_obj ne \"THIS\" } { .f.t.t insert insert \"SUMLS($v_obj, \\\"$v_label\\\", $v_lag)\" }" );
 
-		cmd( "if { $v_num != \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
 
-		cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
+		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
 		
 		if ( num != -1 )
 			v_counter = ++num;
@@ -3007,9 +3051,9 @@ int lsdmain( int argn, char **argv )
 		cmd( "ttk::radiobutton .a.f.r7 -text \"WRITE - set the values of a node or link\" -variable res -value 79 -underline 0" );
 		cmd( "ttk::radiobutton .a.f.r8 -text \"CYCLE - cycle through links\" -variable res -value 80 -underline 0" );
 		cmd( "ttk::radiobutton .a.f.r9 -text \"SEARCH - search for a node or link\" -variable res -value 81 -underline 1" );
-		cmd( "ttk::radiobutton .a.f.r10 -text \"LINK - get objects connected by link\" -variable res -value 82 -underline 3" );
+		cmd( "ttk::radiobutton .a.f.r10 -text \"LINK - get nodes connected by link\" -variable res -value 82 -underline 3" );
 		cmd( "ttk::radiobutton .a.f.r11 -text \"SHUFFLE - shuffle nodes in a network\" -variable res -value 83 -underline 1" );
-		cmd( "ttk::radiobutton .a.f.r12 -text \"RNDDRAW - random draw a node or link\" -variable res -value 84 -underline 0" );
+		cmd( "ttk::radiobutton .a.f.r12 -text \"RNDDRAW - randomly draw a node or link\" -variable res -value 84 -underline 0" );
 		cmd( "ttk::radiobutton .a.f.r13 -text \"DELETE - delete a network, node or link\" -variable res -value 85 -underline 0" );
 		cmd( "ttk::radiobutton .a.f.r14 -text \"STAT - statistics about a network or node\" -variable res -value 86 -underline 1" );
 
@@ -3066,7 +3110,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "set v_net [ lindex $netListLong 0 ]" );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_num 2" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 		cmd( "set v_par1 \"\"" );
 		cmd( "set v_par2 \"\"" );
 
@@ -3075,7 +3119,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "ttk::frame .a.d" );
 		cmd( "ttk::label .a.d.l -text \"Type of network to create\"" );
 		cmd( "ttk::combobox .a.d.e -width 30 -textvariable v_net -justify center -values $netListLong" );
-		cmd( "bind .a.d.e <<ComboboxSelected>> { set a [ lindex [ lindex $netListPar [ .a.d.e current ] ] 0 ]; if { $a == \"\" } { set a \"(unused)\"; .a.p1.e configure -state disabled } { .a.p1.e configure -state normal }; .a.p1.l configure -text $a; set a [ lindex [ lindex $netListPar [ .a.d.e current ] ] 1 ]; if { $a == \"\" } { set a \"(unused)\"; .a.p2.e configure -state disabled } { .a.p2.e configure -state normal }; .a.p2.l configure -text $a }" );
+		cmd( "bind .a.d.e <<ComboboxSelected>> { set a [ lindex [ lindex $netListPar [ .a.d.e current ] ] 0 ]; if { $a eq \"\" } { set a \"(unused)\"; .a.p1.e configure -state disabled } { .a.p1.e configure -state normal }; .a.p1.l configure -text $a; set a [ lindex [ lindex $netListPar [ .a.d.e current ] ] 1 ]; if { $a eq \"\" } { set a \"(unused)\"; .a.p2.e configure -state disabled } { .a.p2.e configure -state normal }; .a.p2.l configure -text $a }" );
 		cmd( "bind .a.d.e <Return> { focus .a.x.e; .a.x.e selection range 0 end }" );
 		cmd( "pack .a.d.l .a.d.e" );
 
@@ -3132,16 +3176,16 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_par1 == \"\" } { set v_par1 0 }" );
-		cmd( "if { $v_par2 == \"\" } { set v_par2 0 }" );
+		cmd( "if { $v_par1 eq \"\" } { set v_par1 0 }" );
+		cmd( "if { $v_par2 eq \"\" } { set v_par2 0 }" );
 
-		cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\" }" );
-		cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\" }" );
-		cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\" }" );
+		cmd( "if { $v_obj eq \"THIS\" && [ llength [ lindex $netListPar $res ] ] == 2 } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\" }" );
+		cmd( "if { $v_obj eq \"THIS\" && [ llength [ lindex $netListPar $res ] ] == 1 } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\" }" );
+		cmd( "if { $v_obj eq \"THIS\" && [ llength [ lindex $netListPar $res ] ] == 0 } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\" }" );
 
-		cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\" }" );
-		cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\" }" );
-		cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && [ llength [ lindex $netListPar $res ] ] == 2 } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && [ llength [ lindex $netListPar $res ] ] == 1 } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && [ llength [ lindex $netListPar $res ] ] == 0 } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\" }" );
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3153,7 +3197,7 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( "set v_net \"\"" );
 		cmd( "set v_label \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'LOAD_NET' Command\" { set choice 2 }" );
 
@@ -3197,8 +3241,8 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"LOAD_NET(\\\"$v_label\\\", \\\"$v_net\\\");\" }" );
-		cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"LOAD_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\" }" );
+		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"LOAD_NET(\\\"$v_label\\\", \\\"$v_net\\\");\" }" );
+		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"LOAD_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\" }" );
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3210,7 +3254,7 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( "set v_net \"\"" );
 		cmd( "set v_label \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'SAVE_NET' Command\" { set choice 2 }" );
 
@@ -3254,8 +3298,8 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SAVE_NET(\\\"$v_label\\\", \\\"$v_net\\\");\" }" );
-		cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SAVE_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\" }" );
+		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"SAVE_NET(\\\"$v_label\\\", \\\"$v_net\\\");\" }" );
+		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"SAVE_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\" }" );
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3267,7 +3311,7 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( "set v_net \"\"" );
 		cmd( "set v_label \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'SNAP_NET' Command\" { set choice 2 }" );
 
@@ -3311,8 +3355,8 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SNAP_NET(\\\"$v_label\\\", \\\"$v_net\\\");\" }" );
-		cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SNAP_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\" }" );
+		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"SNAP_NET(\\\"$v_label\\\", \\\"$v_net\\\");\" }" );
+		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"SNAP_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\" }" );
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3326,7 +3370,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "set v_obj0 cur" );
 		cmd( "set v_num \"\"" );
 		cmd( "set v_label \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'ADDNODE/LINK' Command\" { set choice 2 }" );
 
@@ -3390,22 +3434,22 @@ int lsdmain( int argn, char **argv )
 		cmd( "set a [ .f.t.t index insert ]" );
 
 		cmd( "set choice $v_type" );
-		cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
+		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
 		if ( choice == 0 )
 		{
-			cmd( "if { $v_obj == \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODE($v_num, \\\"$v_label\\\")\" }" );
-			cmd( "if { $v_obj != \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODES($v_obj, $v_num, \\\"$v_label\\\")\" }" );
+			cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDNODE($v_num, \\\"$v_label\\\")\" }" );
+			cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDNODES($v_obj, $v_num, \\\"$v_label\\\")\" }" );
 		}
 		else
 		{
-			cmd( "if { $v_obj == \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDLINK($v_label)\" }" );
-			cmd( "if { $v_obj == \"p\" && $v_num != \"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKW($v_label, $v_num)\" }" );
-			cmd( "if { $v_obj != \"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDLINKS($v_obj, $v_label)\" }" );
-			cmd( "if { $v_obj != \"p\" && $v_num != \"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKWS($v_obj, $v_label, $v_num)\" }" );
+			cmd( "if { $v_obj eq \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDLINK($v_label)\" }" );
+			cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDLINKW($v_label, $v_num)\" }" );
+			cmd( "if { $v_obj ne \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDLINKS($v_obj, $v_label)\" }" );
+			cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDLINKWS($v_obj, $v_label, $v_num)\" }" );
 		}
 
-		cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \";\" }" );
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3417,7 +3461,7 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( "set v_type 0" );
 		cmd( "set v_num %d", v_counter );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'V_NODE/LINK' Command\" { set choice 2 }" );
 
@@ -3475,27 +3519,27 @@ int lsdmain( int argn, char **argv )
 		switch ( choice )
 		{
 			case 0:
-				cmd( "if { $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
-				cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"V_NODEID()\" }" );
-				cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"V_NODEIDS($v_obj)\" }" );
+				cmd( "if { $v_num ne \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+				cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"V_NODEID()\" }" );
+				cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"V_NODEIDS($v_obj)\" }" );
 
-				cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
+				cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
 				
 				if ( num != -1 )
 					v_counter = ++num;
 				break;
 
 			case 1:
-				cmd( "if { $v_num != \"\" } { .f.t.t insert insert \"$v_num = \" }" );
-				cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"V_NODENAME()\" }" );
-				cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"V_NODENAMES($v_obj)\" }" );
+				cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \"$v_num = \" }" );
+				cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"V_NODENAME()\" }" );
+				cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"V_NODENAMES($v_obj)\" }" );
 				break;
 
 			case 2:
-				cmd( "if { $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+				cmd( "if { $v_num ne \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
 				cmd( ".f.t.t insert insert \"V_LINK($v_obj)\"" );
 
-				cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
+				cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
 				
 				if ( num != -1 )
 					v_counter = ++num;
@@ -3505,7 +3549,7 @@ int lsdmain( int argn, char **argv )
 				break;
 		}
 
-		cmd( "if { $v_num != \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3517,7 +3561,7 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( "set v_type 0" );
 		cmd( "set v_num \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'WRITE_NODE/LINK' Command\" { set choice 2 }" );
 
@@ -3575,17 +3619,17 @@ int lsdmain( int argn, char **argv )
 		switch ( choice )
 		{
 			case 0:
-				cmd( "if { $v_obj == \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEID($v_num);\" }" );
-				cmd( "if { $v_obj != \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEIDS($v_obj, $v_num);\" }" );
+				cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"WRITE_NODEID($v_num);\" }" );
+				cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"WRITE_NODEIDS($v_obj, $v_num);\" }" );
 				break;
 
 			case 1:
-				cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"WRITE_NODENAME(\\\"$v_num\\\");\" }" );
-				cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"WRITE_NODENAMES($v_obj, \\\"$v_num\\\");\" }" );
+				cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"WRITE_NODENAME(\\\"$v_num\\\");\" }" );
+				cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"WRITE_NODENAMES($v_obj, \\\"$v_num\\\");\" }" );
 				break;
 
 			case 2:
-				cmd( "if { $v_num != \"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"WRITE_LINK($v_obj, $v_num);\" }" );
+				cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \"WRITE_LINK($v_obj, $v_num);\" }" );
 				break;
 
 			default:
@@ -3639,8 +3683,8 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"CYCLE_LINK($v_obj)\\n\" }" );
-		cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"CYCLE_LINKS($v_par, $v_obj)\\n\" }" );
+		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"CYCLE_LINK($v_obj)\\n\" }" );
+		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"CYCLE_LINKS($v_par, $v_obj)\\n\" }" );
 
 		cmd( "set in [ .f.t.t index insert ]" );
 		cmd( "scan $in %%d.%%d line col" );
@@ -3680,7 +3724,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "set v_obj0 cur" );
 		cmd( "set v_num 0" );
 		cmd( "set v_label \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'SEARCH_NODE/LINK' Command\" { set choice 2 }" );
 
@@ -3744,20 +3788,20 @@ int lsdmain( int argn, char **argv )
 		cmd( "set a [ .f.t.t index insert ]" );
 
 		cmd( "set choice $v_type" );
-		cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
+		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
 		if ( choice == 0 )
 		{
-			cmd( "if { $v_obj == \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_NODE(\\\"$v_label\\\", $v_num)\" }" );
-			cmd( "if { $v_obj != \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_NODES($v_obj, \\\"$v_label\\\", $v_num)\" }" );
+			cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"SEARCH_NODE(\\\"$v_label\\\", $v_num)\" }" );
+			cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"SEARCH_NODES($v_obj, \\\"$v_label\\\", $v_num)\" }" );
 		}
 		else
 		{
-			cmd( "if { $v_obj == \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_LINK($v_num)\" }" );
-			cmd( "if { $v_obj != \"p\" && $v_num != \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_LINKS($v_obj, $v_num)\" }" );
+			cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"SEARCH_LINK($v_num)\" }" );
+			cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"SEARCH_LINKS($v_obj, $v_num)\" }" );
 		}
 
-		cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \";\" }" );
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3820,14 +3864,14 @@ int lsdmain( int argn, char **argv )
 		cmd( "set a [ .f.t.t index insert ]" );
 
 		cmd( "set choice $v_type" );
-		cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
+		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
 		if ( choice == 0 )
 			cmd( ".f.t.t insert insert \"LINKTO($v_obj)\" }" );
 		else
 			cmd( ".f.t.t insert insert \"LINKFROM($v_obj)\" }" );
 
-		cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \";\" }" );
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3838,7 +3882,7 @@ int lsdmain( int argn, char **argv )
 	if ( choice == 83 )
 	{
 		cmd( "set v_label \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'SHUFFLE_NET' Command\" { set choice 2 }" );
 
@@ -3876,8 +3920,8 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"SHUFFLE_NET(\\\"$v_label\\\");\" }" );
-		cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"SHUFFLE_NETS($v_obj, \\\"$v_label\\\");\" }" );
+		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"SHUFFLE_NET(\\\"$v_label\\\");\" }" );
+		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"SHUFFLE_NETS($v_obj, \\\"$v_label\\\");\" }" );
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3889,7 +3933,7 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( "set v_type 0" );
 		cmd( "set v_label \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 		cmd( "set v_obj0 cur" );
 
 		cmd( "newtop .a \"Insert 'RNDDRAW_NODE/LINK' Command\" { set choice 2 }" );
@@ -3948,20 +3992,20 @@ int lsdmain( int argn, char **argv )
 		cmd( "set a [ .f.t.t index insert ]" );
 
 		cmd( "set choice $v_type" );
-		cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
+		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
 		if ( choice == 0 )
 		{
-			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"RNDDRAW_NODE(\\\"$v_label\\\")\" }" );
-			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"RNDDRAW_NODES($v_obj, \\\"$v_label\\\")\" }" );
+			cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"RNDDRAW_NODE(\\\"$v_label\\\")\" }" );
+			cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"RNDDRAW_NODES($v_obj, \\\"$v_label\\\")\" }" );
 		}
 		else
 		{
-			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"RNDDRAW_LINK()\" }" );
-			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"RNDDRAW_LINKS($v_obj)\" }" );
+			cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"RNDDRAW_LINK()\" }" );
+			cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"RNDDRAW_LINKS($v_obj)\" }" );
 		}
 
-		cmd( "if { $v_obj0 != \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \";\" }" );
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3973,7 +4017,7 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( "set v_type 0" );
 		cmd( "set v_label \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'DELETE_NET/NODE/LINK' Command\" { set choice 2 }" );
 
@@ -4031,13 +4075,13 @@ int lsdmain( int argn, char **argv )
 		switch ( choice )
 		{
 			case 0:
-				cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"DELETE_NET(\\\"$v_label\\\");\" }" );
-				cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"DELETE_NETS($v_obj, \\\"$v_label\\\");\" }" );
+				cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"DELETE_NET(\\\"$v_label\\\");\" }" );
+				cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"DELETE_NETS($v_obj, \\\"$v_label\\\");\" }" );
 				break;
 
 			case 1:
-				cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"DELETE_NODE();\" }" );
-				cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"DELETE_NODES($v_obj);\" }" );
+				cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"DELETE_NODE();\" }" );
+				cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"DELETE_NODES($v_obj);\" }" );
 				break;
 
 			case 2:
@@ -4058,7 +4102,7 @@ int lsdmain( int argn, char **argv )
 	{
 		cmd( "set v_type 0" );
 		cmd( "set v_label \"\"" );
-		cmd( "set v_obj p" );
+		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'STAT_NET/NODE' Command\" { set choice 2 }" );
 
@@ -4113,13 +4157,13 @@ int lsdmain( int argn, char **argv )
 
 		if ( choice == 0 )
 		{
-			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"STAT_NET(\\\"$v_label\\\");\" }" );
-			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"STAT_NETS($v_obj, \\\"$v_label\\\");\" }" );
+			cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"STAT_NET(\\\"$v_label\\\");\" }" );
+			cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"STAT_NETS($v_obj, \\\"$v_label\\\");\" }" );
 		}
 		else
 		{
-				cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"STAT_NODE();\" }" );
-				cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"STAT_NODES($v_obj);\" }" );
+				cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"STAT_NODE();\" }" );
+				cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"STAT_NODES($v_obj);\" }" );
 		}
 		cmd( ".f.t.t see insert" );
 
@@ -4160,9 +4204,9 @@ int lsdmain( int argn, char **argv )
 		while ( num != 0 && choice != 0 )
 		{
 			cmd( "set a [ .f.t.t search $direction \"\\(\" $cur $terminal ]" );
-			cmd( "if { $a == \"\" } { set a [ .f.t.t index $terminal ] }" );
+			cmd( "if { $a eq \"\" } { set a [ .f.t.t index $terminal ] }" );
 			cmd( "set b [ .f.t.t search $direction \"\\)\" $cur $terminal ]" );
-			cmd( "if { $b == \"\" } { set b [ .f.t.t index $terminal ] }" );
+			cmd( "if { $b eq \"\" } { set b [ .f.t.t index $terminal ] }" );
 			cmd( "if { $a == $b } { set choice 0 }" );
 			if ( choice == 0 )
 				goto loop;
@@ -4405,7 +4449,7 @@ int lsdmain( int argn, char **argv )
 		for ( ; i <= num; ++i )
 		{
 			cmd( "set c [.f.t.t get %d.0]", i );
-			cmd( "if { $c == \" \" } { set choice 1 } { set choice 0 }" );
+			cmd( "if { $c eq \" \" } { set choice 1 } { set choice 0 }" );
 			if ( choice == 1 )
 				cmd( ".f.t.t delete %d.0 ", i );
 		}
@@ -4726,14 +4770,14 @@ int lsdmain( int argn, char **argv )
 					set pos [ string first \"FUN_EXTRA=\" $a ]; \
 				}; \
 				set fun_extra [ tk_getOpenFile -parent .l -title \"Select Additional Source Files\" -multiple yes -initialdir \"$modelDir\" -filetypes { { {C++ header files} {.h .hpp .h++} } { {C++ source files} {.c .cpp .c++} } { {All files} {*} } } ]; \
-				if { $fun_extra == \"\" } { \
+				if { $fun_extra eq \"\" } { \
 					return \
 				}; \
 				set extra_files [ list ]; \
 				foreach x $fun_extra { \
 					set dirlen [ string length $modelDir ]; \
 					if { [ string equal -length $dirlen $modelDir $x ] } { \
-						if { [ string index $x $dirlen ] == \"/\" || [ string index $x $dirlen ] == \"\\\\\" } {  \
+						if { [ string index $x $dirlen ] eq \"/\" || [ string index $x $dirlen ] eq \"\\\\\" } {  \
 							incr dirlen; \
 						}; \
 						lappend extra_files [ string range $x $dirlen end ] \
@@ -5044,7 +5088,7 @@ int lsdmain( int argn, char **argv )
 	// generate the no window distribution
 	if ( choice == 62 )
 	{
-		cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
+		cmd( "if { \"[ check_sys_opt ]\" ne \"\" } { if { [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
 		if ( choice == 0 )
 			goto loop;
 
@@ -5074,49 +5118,16 @@ int lsdmain( int argn, char **argv )
 		goto loop;
 	}
 
-	// Adjust context menu for LSD macros
+	// (empty)
 	if ( choice == 68 )
 	{
-		cmd( "destroy .v.i" );
-		cmd( "ttk::menu .v.i -tearoff 0" );
-		cmd( ".v.i add command -label \"EQUATION\" -command { set choice 25 } -accelerator Ctrl+E" );
-		cmd( ".v.i add command -label \"V(...)\" -command { set choice 26 } -accelerator Ctrl+V" );
-		cmd( ".v.i add command -label \"CYCLE(...)\" -command { set choice 27 } -accelerator Ctrl+C" );
-		cmd( ".v.i add command -label \"SUM(...)\" -command { set choice 56 } -accelerator Ctrl+U" );
-		cmd( ".v.i add command -label \"INCR(...)\" -command { set choice 40 } -accelerator Ctrl+I" );
-		cmd( ".v.i add command -label \"MULT(...)\" -command { set choice 45 } -accelerator Ctrl+M" );
-		cmd( ".v.i add command -label \"SEARCH(...)\" -command { set choice 55 } -accelerator Ctrl+A" );
-		cmd( ".v.i add command -label \"SEARCH_CND(...)\" -command { set choice 30 } -accelerator Ctrl+S" );
-		cmd( ".v.i add command -label \"SORT(...)\" -command { set choice 31 } -accelerator Ctrl+T" );
-		cmd( ".v.i add command -label \"RNDDRAW(...)\" -command { set choice 54 } -accelerator Ctrl+N" );
-		cmd( ".v.i add command -label \"WRITE(...)\" -command { set choice 29 } -accelerator Ctrl+W" );
-		cmd( ".v.i add command -label \"ADDOBJ(...)\" -command { set choice 52 } -accelerator Ctrl+O" );
-		cmd( ".v.i add command -label \"DELETE(...)\" -command { set choice 53 } -accelerator Ctrl+D" );
-		cmd( ".v.i add command -label \"Network macros\" -command { set choice 72 } -accelerator Ctrl+K" );
-		cmd( ".v.i add command -label \"Math functions\" -command { set choice 51 } -accelerator Ctrl+H" );
 		choice = 0;
 		goto loop;
 	}
 
-	// Adjust context menu for LSD C++
+	// (empty)
 	if ( choice == 69 )
 	{
-		cmd( "destroy .v.i" );
-		cmd( "ttk::menu .v.i -tearoff 0" );
-		cmd( ".v.i add command -label \"LSD equation/function\" -command { set choice 25 } -accelerator Ctrl+E" );
-		cmd( ".v.i add command -label \"cal(...)\" -command { set choice 26 } -accelerator Ctrl+V" );
-		cmd( ".v.i add command -label \"for ( ; ; )\" -command { set choice 27 } -accelerator Ctrl+C" );
-		cmd( ".v.i add command -label \"sum(...)\" -command { set choice 56 } -accelerator Ctrl+U" );
-		cmd( ".v.i add command -label \"increment(...)\" -command { set choice 40 } -accelerator Ctrl+I" );
-		cmd( ".v.i add command -label \"multiply(...)\" -command { set choice 45 } -accelerator Ctrl+M" );
-		cmd( ".v.i add command -label \"search(...)\" -command { set choice 55 } -accelerator Ctrl+A" );
-		cmd( ".v.i add command -label \"search_var_cond(...)\" -command { set choice 30 } -accelerator Ctrl+S" );
-		cmd( ".v.i add command -label \"lsdqsort(...)\" -command { set choice 31 } -accelerator Ctrl+T" );
-		cmd( ".v.i add command -label \"draw_rnd\" -command { set choice 54 } -accelerator Ctrl+N" );
-		cmd( ".v.i add command -label \"write(...)\" -command { set choice 29 } -accelerator Ctrl+W" );
-		cmd( ".v.i add command -label \"add_n_objects2\" -command { set choice 52 } -accelerator Ctrl+O" );
-		cmd( ".v.i add command -label \"delete_obj\" -command { set choice 53 } -accelerator Ctrl+D" );
-		cmd( ".v.i add command -label \"Math functions\" -command { set choice 51 } -accelerator Ctrl+H" );
 		choice = 0;
 		goto loop;
 	}
@@ -5160,7 +5171,7 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set fun_extra [ split [ string trim \"%s\" ] \" \t\" ]", str + 10 );
 		cmd( "set extra_files [ list ]" );
-		cmd( "foreach x $fun_extra { if { [ string trim $x ] != \"\" && ( [ file exists \"$x\" ] || [ file exists \"$modelDir/$x\" ] ) } { lappend extra_files \"$x\" } }" );
+		cmd( "foreach x $fun_extra { if { [ string trim $x ] ne \"\" && ( [ file exists \"$x\" ] || [ file exists \"$modelDir/$x\" ] ) } { lappend extra_files \"$x\" } }" );
 		cmd( "set brr \"\"" );
 		cmd( "set e .extra" );
 
@@ -5203,7 +5214,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "set i [ $e.l.l curselection ]" );
 		cmd( "destroytop $e" );
 
-		cmd( "if { $i == \"\" } { set brr \"\" } { set brr [ lindex $extra_files $i ] }" );
+		cmd( "if { $i eq \"\" } { set brr \"\" } { set brr [ lindex $extra_files $i ] }" );
 		s = ( char * ) Tcl_GetVar( inter, "brr", 0 );
 
 		if ( choice == 1 && strlen( s ) > 0 )
@@ -5223,13 +5234,13 @@ int lsdmain( int argn, char **argv )
 		// check if file exists and normalize name for comparisons
 		cmd( "if { [ file exists \"$errfil\" ] } { \
 				set errfil \"[ file normalize \"$errfil\" ]\" \
-			} elseif { $errfil != \"\" && [ file exists \"$modelDir/$errfil\" ] } { \
+			} elseif { $errfil ne \"\" && [ file exists \"$modelDir/$errfil\" ] } { \
 				set errfil \"[ file normalize \"$modelDir/$errfil\" ]\" \
 			} else { \
 				set errfil \"\" \
 			}" );
 
-		cmd( "if { $errfil == \"\" } { \
+		cmd( "if { $errfil eq \"\" } { \
 					set choice 0 \
 				} { \
 					if [ string equal -nocase [ file tail \"$errfil\" ] \"fun_head.h\" ] { \
@@ -5277,7 +5288,7 @@ int lsdmain( int argn, char **argv )
 				{	// search error file in the extra files list
 					cmd( "foreach x $fun_extra { \
 							set x \"[ string trim $x ]\"; \
-							if { $x != \"\" } { \
+							if { $x ne \"\" } { \
 								if { [ file exists \"$x\" ] } { \
 									set x \"[ file normalize \"$x\" ]\" \
 								} elseif { [ file exists \"$modelDir/$x\" ] } { \
@@ -5285,7 +5296,7 @@ int lsdmain( int argn, char **argv )
 								} else { \
 									set x \"\" \
 								}; \
-								if { $x != \"\" && [ string equal \"$errfil\" \"$x\" ] } { \
+								if { $x ne \"\" && [ string equal \"$errfil\" \"$x\" ] } { \
 									set choice 71; \
 									break \
 								} \
@@ -5306,10 +5317,10 @@ int lsdmain( int argn, char **argv )
 
 		if ( choice == 1 )
 		{	// file already loaded, just point error
-			cmd( "if { [ info exists errlin ] && $errlin != \"\" && [ string is integer -strict $errlin ] } { \
+			cmd( "if { [ info exists errlin ] && $errlin ne \"\" && [ string is integer -strict $errlin ] } { \
 					.f.t.t tag remove sel 1.0 end; \
 					.f.t.t tag add sel $errlin.0 $errlin.end; \
-					if { [ info exists errcol ] && $errcol != \"\" && [ string is integer -strict $errcol ] } { \
+					if { [ info exists errcol ] && $errcol ne \"\" && [ string is integer -strict $errcol ] } { \
 						.f.t.t see $errlin.[ expr { $errcol - 1 } ]; \
 						.f.t.t mark set insert $errlin.[ expr { $errcol - 1 } ] \
 					} else { \
@@ -5343,15 +5354,15 @@ int lsdmain( int argn, char **argv )
 						set newPosIni [ .f.t.t search -backwards /* $curPosIni 1.0 ]; \
 						set curPosIni $newPosIni \
 					} else { \
-						if { \"$curPosIni linestart\" != \"\" && [ .f.t.t search -backwards */ $curPosIni \"$curPosIni linestart\" ] != \"\" } { \
+						if { \"$curPosIni linestart\" ne \"\" && [ .f.t.t search -backwards */ $curPosIni \"$curPosIni linestart\" ] ne \"\" } { \
 							set comIni [ .f.t.t search -backwards /* $curPosIni ]; \
-							if { $comIni != \"\" } { \
+							if { $comIni ne \"\" } { \
 								set curPosIni $comIni \
 							} \
 						}; \
-						if { \"$curPosFin lineend\" != \"\" && [ .f.t.t search /* $curPosFin \"$curPosFin lineend\" ] != \"\" } { \
+						if { \"$curPosFin lineend\" ne \"\" && [ .f.t.t search /* $curPosFin \"$curPosFin lineend\" ] ne \"\" } { \
 							set comFin [ .f.t.t search */ $curPosFin ]; \
-							if { $comFin != \"\" } { \
+							if { $comFin ne \"\" } { \
 								set curPosFin $comFin \
 							} \
 						} \
@@ -5665,7 +5676,7 @@ void check_option_files( bool sys )
 		if ( ! exists )
 		{
 			cmd( "set dir [ glob -nocomplain \"$modelDir/fun_*.cpp\" ]" );
-			cmd( "if { $dir != \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
+			cmd( "if { $dir ne \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
 			cmd( "set a \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
 			cmd( "set f [ open \"$modelDir/$MODEL_OPTIONS\" w ]" );
 			cmd( "puts -nonewline $f $a" );
@@ -5975,13 +5986,13 @@ void create_compresult_window( bool nw )
 					set errfil \"[ lindex $errdat 0 ]\"; \
 					set idxfil 1 \
 				}; \
-				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
+				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errlin [ lindex $errdat $idxfil ] \
 				} else { \
 					set errlin  \"\" \
 				}; \
 				incr idxfil; \
-				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
+				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errcol [ lindex $errdat $idxfil ] \
 				} else { \
 					set errcol \"\" \
@@ -6014,13 +6025,13 @@ void create_compresult_window( bool nw )
 					set errfil \"[ lindex $errdat 0 ]\"; \
 					set idxfil 1 \
 				}; \
-				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
+				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errlin [ lindex $errdat $idxfil ] \
 				} else { \
 					set errlin  \"\" \
 				}; \
 				incr idxfil; \
-				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
+				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errcol [ lindex $errdat $idxfil ] \
 				} else { \
 					set errcol \"\" \
