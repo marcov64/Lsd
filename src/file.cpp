@@ -439,18 +439,18 @@ bool load_description( char *msg, FILE *f )
 		type = ctype;			// silently fix wrong type (old LSD bug)
 	 
 	fgets( str, MAX_LINE_SIZE, f );		// skip first newline character
-	for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) && strncmp( str, "_INIT_", 6 ) && strlen( text ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
+	for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, END_DESCR, strlen( END_DESCR ) ) && strncmp( str, BEG_INIT, strlen( BEG_INIT ) ) && strlen( text ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
 		strcat( text, str );
 
-	if ( strncmp( str, "END_DESCRIPTION", 15 ) && strncmp( str, "_INIT_", 6 ) )
+	if ( strncmp( str, END_DESCR, strlen( END_DESCR ) ) && strncmp( str, BEG_INIT, strlen( BEG_INIT ) ) )
 		return false;
 
-	if ( ! strncmp( str, "_INIT_", 6 ) )
+	if ( ! strncmp( str, BEG_INIT, strlen( BEG_INIT ) ) )
 	{
-		for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) && strlen( init ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
+		for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, END_DESCR, strlen( END_DESCR ) ) && strlen( init ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
 			strcat( init, str );
 
-		if ( strncmp( str, "END_DESCRIPTION", 15 ) )
+		if ( strncmp( str, END_DESCR, strlen( END_DESCR ) ) )
 			return false;
 	}
 
@@ -472,18 +472,18 @@ void save_description( object *r, FILE *f )
 	cd = search_description( r->label );
 
 	if ( strwsp( cd->init ) )     
-		fprintf( f, "%s_%s\n%s\nEND_DESCRIPTION\n\n", cd->type, cd->label, cd->text );
+		fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, END_DESCR );
 	else
-		fprintf( f, "%s_%s\n%s\n_INIT_\n%s\nEND_DESCRIPTION\n\n", cd->type, cd->label, cd->text, cd->init );
+		fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, BEG_INIT, cd->init, END_DESCR );
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
 
 		if ( ( cv->param != 1 && cv->num_lag == 0 ) || strwsp( cd->init ) )     
-			fprintf( f, "%s_%s\n%s\nEND_DESCRIPTION\n\n", cd->type, cd->label, cd->text );
+			fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, END_DESCR );
 		else
-			fprintf( f, "%s_%s\n%s\n_INIT_\n%s\nEND_DESCRIPTION\n\n", cd->type, cd->label, cd->text, cd->init );
+			fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, BEG_INIT, cd->init, END_DESCR );
 	}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )

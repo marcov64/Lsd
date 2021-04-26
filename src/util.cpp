@@ -602,11 +602,12 @@ description *search_description( const char *lab, bool add_missing )
 /***************************************************
 ADD_DESCRIPTION
 ***************************************************/
-#define LEGACY_NO_DESCR "(no description available)" // legacy description (do not change)
+const char *kwords[ ] = { BEG_INIT, END_DESCR };
 
 description *add_description( char const *lab, int type, char const *text, char const *init, char initial, char observe )
 {
-	char ltype [ MAX_ELEM_LENGTH + 1 ];
+	char *str, ltype [ MAX_ELEM_LENGTH + 1 ];
+	int i, j;
 	description *cd;
 
 	if ( search_description( lab, false ) != NULL )	// already exists?
@@ -646,6 +647,14 @@ description *add_description( char const *lab, int type, char const *text, char 
 	
 	if ( ! strwsp( text ) && strstr( text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( text, NO_DESCR ) == NULL ) )
 	{
+		for ( i = 0; i < 2; ++i )
+		{
+			str = strstr( text, kwords[ i ] );
+			if ( str != NULL )
+				for( j = 0; j < strlen( kwords[ i ] ); ++j, ++str )
+					*str = tolower( *str );
+		}
+		
 		cd->text = new char [ strlen( text ) + 1 ]; 
 		strtrim( cd->text, text, strlen( text ) + 1 );
 	}
@@ -657,6 +666,11 @@ description *add_description( char const *lab, int type, char const *text, char 
 	
 	if ( ! strwsp( init ) )
 	{
+		str = strstr( init, kwords[ 1 ] );
+		if ( str != NULL )
+			for( j = 0; j < strlen( kwords[ 1 ] ); ++j, ++str )
+				*str = tolower( *str );
+		
 		cd->init = new char [ strlen( init ) + 1 ]; 
 		strtrim( cd->init, init, strlen( init ) + 1 );
 	}
@@ -675,7 +689,8 @@ CHANGE_DESCRIPTION
 ***************************************************/
 description *change_description( char const *lab_old, char const *lab, int type, char const *text, char const *init, char initial, char observe )
 {
-	char ltype [ MAX_ELEM_LENGTH + 1 ];
+	char *str, ltype [ MAX_ELEM_LENGTH + 1 ];
+	int i, j;
 	description *cd, *cd1;
 
 	for ( cd = descr; cd != NULL; cd = cd->next )
@@ -740,6 +755,14 @@ description *change_description( char const *lab_old, char const *lab, int type,
 
 				if ( ! strwsp( text ) && strstr( text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( text, NO_DESCR ) == NULL ) )
 				{
+					for ( i = 0; i < 2; ++i )
+					{
+						str = strstr( text, kwords[ i ] );
+						if ( str != NULL )
+							for( j = 0; j < strlen( kwords[ i ] ); ++j, ++str )
+								*str = tolower( *str );
+					}
+		
 					cd->text = new char [ strlen( text ) + 1 ]; 
 					strtrim( cd->text, text, strlen( text ) + 1 );
 				}
@@ -756,6 +779,11 @@ description *change_description( char const *lab_old, char const *lab, int type,
 
 				if ( ! strwsp( init ) )
 				{
+					str = strstr( init, kwords[ 1 ] );
+					if ( str != NULL )
+						for( j = 0; j < strlen( kwords[ 1 ] ); ++j, ++str )
+							*str = tolower( *str );
+		
 					cd->init = new char [ strlen( init ) + 1 ]; 
 					strtrim( cd->init, init, strlen( init ) + 1 );
 				}

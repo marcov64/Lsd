@@ -68,6 +68,9 @@ Relevant flags (when defined):
 #define USER_D_VARS 1000				// number of user double variables
 #define UPD_PER 0.2						// update period during simulation run in s
 #define NO_DESCR ""						// no description available text
+#define LEGACY_NO_DESCR "(no description available)" // legacy description (do not change)
+#define BEG_INIT "_INIT_"				// initial values description section begin keyword
+#define END_DESCR "END_DESCRIPTION"		// description section end keyword
 
 // define PI for C++11
 #ifndef M_PI
