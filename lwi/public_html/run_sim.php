@@ -24,7 +24,7 @@ $session_short_id = substr( $session_id, -6 );
 
 $lsd_config = "../lwi.lsd";
 $confgen_exec = "../lsd_confgen";
-$lsd_exec = "../lsd_gnuNW";
+$lsd_exec = "../lsdNW";
 $nice_enable = true;
 $nice_level = 10;
 $max_cores = 4;

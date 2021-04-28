@@ -260,6 +260,8 @@ In Mandriva or Mageia:
 
  sudo urpmi gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel
 
+If installing to a server (no desktop), please remove gnuplot/gnuplot-qt from the above commands to prevent the full desktop stack to be installed, which is not usually adequate for a server.
+
 IN CASE OF PROBLEMS:
 
 Please check your configuration has at least g++ version 6.4 installed (you may check it by issuing the command "g++ -v" in terminal). Ubuntu minimum supported version is 18.04 (older versions can be updated to use g++ 6.4 or newer but this is not the default configuration).
