@@ -892,6 +892,41 @@ bool strwsp( const char *str )
 
 
 /***************************************************
+ STRCLN
+ trim whitespace from the beginning/end of string
+ and convert line ends to LF only (unix-like)
+ ***************************************************/
+int strcln( char *out, const char *str, int outSz )
+{
+	char buf[ strlen( str ) + 1 ];
+	strlf( buf, str, strlen( str ) + 1 );
+	return strtrim( out, buf, outSz );
+}
+
+
+/***************************************************
+ STRLF
+ replace CR-LF pairs with LF only on C string
+ ***************************************************/
+int strlf( char *out, const char *str, int outSz )
+{
+	int i, j;
+	
+	for ( i = j = 0; str[ j ] != '\0' && i < outSz - 1; ++i, ++j )
+		if ( str[ j ] == '\r' )
+			if ( str[ j + 1 ] == '\n' )
+				++j;
+			else
+				out[ i ] = '\n';
+		else
+			out[ i ] = str[ j ];
+	
+	out[ i ] = '\0';
+	
+	return i;
+}
+
+/***************************************************
  STRTRIM
  trim whitespace from the beginning/end of string
  ***************************************************/
@@ -940,7 +975,7 @@ int strwrap( char *out, const char *str, int outSz, int wid )
 
 	tlen = strlen( str );
 
-	if ( tlen == 0 || wid <= 0 )
+	if ( tlen == 0 || wid <= 0 || outSz <= 0 )
 		return 0;
 
 	lines = pos = 0;
@@ -1028,6 +1063,10 @@ char *strtcl( char *out, char const *text, int outSz )
 	else
 	{
 		for ( i = j = 0; text[ i ] != '\0' && j < outSz - 1; ++i )
+		{
+			if ( text[ i ] == '\r' && text[ i + 1 ] == '\n' )
+				continue;				// convert CR-LF to LF
+			
 			if ( text[ i ] != '[' && text[ i ] != ']' && text[ i ] != '{' && text[ i ] != '}' && text[ i ] != '\"' && text[ i ] != '\\' && text[ i ] != '$' )
 				out[ j++ ] = text[ i ];
 			else
@@ -1035,7 +1074,8 @@ char *strtcl( char *out, char const *text, int outSz )
 				out[ j++ ] = '\\';
 				out[ j++ ] = text[ i ];
 			}
-
+		}
+		
 		for ( i = 1; i <= j && isspace( ( unsigned char ) out[ j - i ] ); ++i )
 			out[ j - i ] = '\0';
 	}

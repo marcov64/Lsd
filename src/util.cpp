@@ -624,7 +624,7 @@ description *add_description( char const *lab, int type, char const *text, char 
 
 	cd->next = NULL;
 	cd->label = new char [ strlen( lab ) + 1 ];
-	strtrim( cd->label, lab, strlen( lab ) + 1 );
+	strcln( cd->label, lab, strlen( lab ) + 1 );
 	
 	switch ( type )
 	{
@@ -656,12 +656,12 @@ description *add_description( char const *lab, int type, char const *text, char 
 		}
 		
 		cd->text = new char [ strlen( text ) + 1 ]; 
-		strtrim( cd->text, text, strlen( text ) + 1 );
+		strcln( cd->text, text, strlen( text ) + 1 );
 	}
 	else
 	{
 		cd->text = new char[ strlen( NO_DESCR ) + 1 ]; 
-		strtrim( cd->text, NO_DESCR, strlen( NO_DESCR ) + 1 );
+		strcln( cd->text, NO_DESCR, strlen( NO_DESCR ) + 1 );
 	}
 	
 	if ( ! strwsp( init ) )
@@ -672,7 +672,7 @@ description *add_description( char const *lab, int type, char const *text, char 
 				*str = tolower( *str );
 		
 		cd->init = new char [ strlen( init ) + 1 ]; 
-		strtrim( cd->init, init, strlen( init ) + 1 );
+		strcln( cd->init, init, strlen( init ) + 1 );
 	}
 	else
 		cd->init = NULL;
@@ -722,7 +722,7 @@ description *change_description( char const *lab_old, char const *lab, int type,
 			{
 				delete [ ] cd->label;
 				cd->label = new char [ strlen( lab ) + 1 ];
-				strtrim( cd->label, lab, strlen( lab ) + 1 );
+				strcln( cd->label, lab, strlen( lab ) + 1 );
 			}
 			
 			if ( type >= 0 )
@@ -764,12 +764,12 @@ description *change_description( char const *lab_old, char const *lab, int type,
 					}
 		
 					cd->text = new char [ strlen( text ) + 1 ]; 
-					strtrim( cd->text, text, strlen( text ) + 1 );
+					strcln( cd->text, text, strlen( text ) + 1 );
 				}
 				else
 				{
 					cd->text = new char[ strlen( NO_DESCR ) + 1 ]; 
-					strtrim( cd->text, NO_DESCR, strlen( NO_DESCR ) + 1 );
+					strcln( cd->text, NO_DESCR, strlen( NO_DESCR ) + 1 );
 				}
 			} 
 			
@@ -785,7 +785,7 @@ description *change_description( char const *lab_old, char const *lab, int type,
 							*str = tolower( *str );
 		
 					cd->init = new char [ strlen( init ) + 1 ]; 
-					strtrim( cd->init, init, strlen( init ) + 1 );
+					strcln( cd->init, init, strlen( init ) + 1 );
 				}
 				else
 					cd->init = NULL;
@@ -871,16 +871,16 @@ char *fmt_ttip_descr( char *out, description *d, int outSz, bool init )
 		return NULL;
 	
 	if ( has_descr_text ( d ) ) 
-		strtrim( out, d->text, outSz );
+		strcln( out, d->text, outSz );
 	else
 		out[ 0 ] = '\0';
 	
 	if ( init && d != NULL && d->init != NULL && strlen( d->init ) > 0 ) 
 	{
 		if ( strlen( out ) > 0 )
-			strncat( out, "\n\n", outSz - strlen( out ) - 1 );
+			strncat( out, "\n\u2500\u2500\u2500\n", outSz - strlen( out ) - 1 );
 		
-		strtrim( out1, d->init, outSz );
+		strcln( out1, d->init, outSz );
 		strncat( out, out1, outSz - strlen( out ) - 1 );
 	}
 		

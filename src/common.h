@@ -539,6 +539,8 @@ double get_double( const char *tcl_var, double *var = NULL );
 int deb( object *r, object *c, char const *lab, double *res, bool interact = false, const char *hl_var = "" );
 int get_int( const char *tcl_var, int *var = NULL );
 int lsdmain( int argn, char **argv );
+int strcln( char *out, const char *str, int outSz );
+int strlf( char *out, const char *str, int outSz );
 int strtrim( char *out, const char *str, int outSz );
 int strwrap( char *out, const char *str, int outSz, int wid );
 long get_long( const char *tcl_var, long *var = NULL );

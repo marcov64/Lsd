@@ -317,7 +317,9 @@ void link_cells( object *r, char *lab )
 			cmd( "grid $w.t%s -row %d -column 2", cv1->label, k );
 			cmd( "mouse_wheel $w.t%s", cv1->label );
 			
-			cmd( "tooltip::tooltip $w.tit_t%s \"Parameter '%s'\nin object '%s'\"", cv1->label, cv1->label, cur1->label );
+			cmd( "set tit $w.tit_t%s", cv1->label );
+			set_ttip_descr( ( char * ) Tcl_GetVar( inter, "tit", 0 ), cv1->label, -1, false );
+			cmd( "tooltip::tooltip $w.typ_t%s \"Parameter '%s'\nin object '%s'\"", cv1->label, cv1->label, cur1->label );
 			cmd( "tooltip::tooltip $w.t%s \"Set all or a subset of\n'%s' instances\"", cv1->label, cv1->label );
 		}
 		else
@@ -337,7 +339,9 @@ void link_cells( object *r, char *lab )
 				cmd( "grid $w.t%s_%d -row %d -column 2", cv1->label, j, k );
 				cmd( "mouse_wheel $w.t%s_%d", cv1->label, j );
 			
-				cmd( "tooltip::tooltip $w.tit_t%s_%d \"Variable '%s' (lag %d)\nin object '%s'\"", cv1->label, j, cv1->label, j + 1, cur1->label );
+				cmd( "set tit $w.tit_t%s_%d", cv1->label, j );
+				set_ttip_descr( ( char * ) Tcl_GetVar( inter, "tit", 0 ), cv1->label, -1, false );
+				cmd( "tooltip::tooltip $w.typ_t%s_%d \"Variable '%s' (lag %d)\nin object '%s'\"", cv1->label, j, cv1->label, j + 1, cur1->label );
 				cmd( "tooltip::tooltip $w.t%s_%d \"Set all or a subset of\n'%s' instances\"", cv1->label, j, cv1->label );
 			}
 		}
@@ -357,11 +361,11 @@ void link_cells( object *r, char *lab )
 				cmd( "grid $w.c%d_v%sp -row %d -column [ expr { 2 + %d } ] -padx 1", i, cv->label, k, i );
 				cmd( "mouse_wheel $w.c%d_v%sp", i, cv->label );
 				
-				cmd( "if { $tag_%d ne \"\" } { \
+				cmd( "if { [ info exists tag_%d ] && $tag_%d ne \"\" } { \
 						tooltip::tooltip $w.c%d_v%sp \"Parameter '%s'\ninstance $tag_%d\" \
 					} else { \
 						tooltip::tooltip $w.c%d_v%sp \"Parameter '%s'\" \
-					}", i, i, cv->label, cv->label, i, i, cv->label, cv->label );
+					}", i, i, i, cv->label, cv->label, i, i, cv->label, cv->label );
 				
 				cmd( "bind $w.c%d_v%sp <Button-1> { selectcell $g.can $w.c%d_v%sp; break }", i, cv->label, i, cv->label );
 				
@@ -401,11 +405,11 @@ void link_cells( object *r, char *lab )
 					cmd( "grid $w.c%d_v%s_%d -row %d -column [ expr { 2 + %d } ] -padx 1", i, cv->label, j, k, i );
 					cmd( "mouse_wheel $w.c%d_v%s_%d", i, cv->label, j );
 					
-					cmd( "if { $tag_%d ne \"\" } { \
+					cmd( "if { [ info exists tag_%d ] && $tag_%d ne \"\" } { \
 							tooltip::tooltip $w.c%d_v%s_%d \"Variable '%s' (lag %d)\ninstance $tag_%d\" \
 						} else { \
-							tooltip::tooltip $w.c%d_v%s_%d \"Variable '%s' (lag %d)\ninstance $tag_%d\" \
-						}", i, i, cv->label, j, cv->label, j + 1, i, i, cv->label, j, cv->label, j + 1 );
+							tooltip::tooltip $w.c%d_v%s_%d \"Variable '%s' (lag %d)\" \
+						}", i, i, i, cv->label, j, cv->label, j + 1, i, i, cv->label, j, cv->label, j + 1 );
 
 					cmd( "bind  $w.c%d_v%s_%d <Button-1> { selectcell $g.can $w.c%d_v%s_%d; break }", i, cv->label, j, i, cv->label, j );
 					
