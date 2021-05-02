@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" href="lsd_favicon.ico">
+        <link rel="icon" href="favicon.ico">
         <link rel="stylesheet" href="w3.css">
         <link rel="stylesheet" href="lwi.css">
         <!-- PHP & JS functions -->
@@ -439,19 +439,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <div class="w3-main w3-light-grey w3-padding-16" style="max-width: 1220px; margin-left: 210px; padding-right: 30px; padding-left: 30px">
 
 <!-- ### LWI ### ADD YOUR COPYRIGHT LINK HERE -->
-            <p class="w3-left">Copyright © 2018 <a href="http://www.labsimdev.org" title="LSD Website" target="_blank" class="w3-hover-opacity">LSD Team</a></p>
+            <p class="w3-left">Copyright © 2021 <a href="https://www.labsimdev.org" title="LSD Website" target="_blank" class="w3-hover-opacity">LSD Team</a></p>
 <!-- ### LWI ### DON'T CHANGE FROM HERE -->
 
             <p class="w3-right">Powered by 
-                <a href="http://www.chartjs.org/" title="Chart.js" target="_blank" class="w3-hover-opacity">Chart.js</a>, 
+                <a href="https://www.chartjs.org/" title="Chart.js" target="_blank" class="w3-hover-opacity">Chart.js</a>, 
                 <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-opacity">w3.css</a>, 
-                <a href="http://www.labsimdev.org" title="LSD" target="_blank" class="w3-hover-opacity">LSD</a>
+                <a href="https://www.labsimdev.org" title="LSD" target="_blank" class="w3-hover-opacity">LSD</a>
             </p>
-            <p style="margin-top: 70px"><strong>Disclaimer</strong>: The information and views set out in this software are those of the author(s) and do not necessarily reflect the official opinion of the European Commission. The Commission does not guarantee the accuracy of the data included in this study. Neither the Commission nor any person acting on the Commission’s behalf may be held responsible for the use which may be made of the information contained therein.</p>
+            <p style="margin-top: 70px"><strong>Disclaimer</strong>: The information and views set out in this software are those of the author(s) and do not necessarily reflect the official opinion of the LSD Team. The LSD Team does not guarantee the accuracy of the data provided. Neither LSD Team nor any person acting on the Team’s behalf may be held responsible for the use which may be made of the information contained therein.</p>
             
 <!-- ### LWI ### ADD YOUR COPYRIGHT AND WARRANTY MESSAGES HERE -->
-            <p><strong>Copyright Notice</strong>: This Model is property of the LSD Team. The Model is protected by copyright laws, trademark and design rights. Any unauthorized use of the Model will be considered a violation of the owner’s intellectual property rights. The Model may not be copied, distributed, published or used in any way, in whole or in part, without prior written agreement from the owners, except as otherwise allowed by the agreed Conditions of Use.</p>
-            <p><strong>No Warranties</strong>: this site, the associated model and its results are provided “as is” without any express or implied warranty of any kind including warranties of non-infringement of intellectual property or fitness for any particular purpose. In no event shall the owners or its suppliers and partners be liable for any damages whatsoever (including, without limitation, damages for loss of profits or loss of information) arising out of the use of or inability to use the information provided on this site, even if the owners or its suppliers and partners have been advised of the possibility of such damages. Because some jurisdictions prohibit the exclusion or limitation of liability for incidental or consequential damages, some of the above limitations may not apply to you.</p>
+            <p><strong>Copyright Notice</strong>: This Model is property of the respective authors. The Model is protected by copyright laws, trademark and design rights. Any unauthorized use of the Model will be considered a violation of the authors’ intellectual property rights. The Model may not be copied, distributed, published or used in any way, in whole or in part, without prior written agreement from the authors, except as otherwise allowed by the agreed Conditions of Use.</p>
+            <p><strong>No Warranties</strong>: this site, the associated model and its results are provided “as is” without any express or implied warranty of any kind including warranties of non-infringement of intellectual property or fitness for any particular purpose. In no event shall the authors or its suppliers and partners be liable for any damages whatsoever (including, without limitation, damages for loss of profits or loss of information) arising out of the use of or inability to use the information provided on this site, even if the authors or its suppliers and partners have been advised of the possibility of such damages. Because some jurisdictions prohibit the exclusion or limitation of liability for incidental or consequential damages, some of the above limitations may not apply to you.</p>
 <!-- ### LWI ### DON'T CHANGE FROM HERE -->
         
         </div>
