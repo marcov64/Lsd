@@ -779,8 +779,8 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 					cmd( "set choice $sa" );
 					i = choice;
-					choice = 0;
-
+					
+					choice = 3;	// point .deb window as parent for the set_all window
 					set_all( &choice, r, ch, i );
 				} 
 
@@ -1391,6 +1391,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			case 25:
 				ch1 = ( char * )Tcl_GetVar( inter, "res", 0 );
 				strcpy( ch, ch1 );
+				choice = 3;	// point .deb window as parent for the set_all window
 				set_all( &choice, r, ch, 0 );
 				
 				choice = 0;

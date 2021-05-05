@@ -193,6 +193,7 @@ void edit_data( object *r, int *choice, char *lab )
 		if ( Tcl_GetVar( inter, "var_name", 0 ) != NULL )
 		{
 			strcpy( ch, ( char * ) Tcl_GetVar( inter, "var_name", 0 ) );
+			*choice = 4;	// point .inid window as parent for the set_all window
 			set_all( choice, first, ch, lag );
 			show_cells( r, lab );
 		}

@@ -81,230 +81,238 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "set use_seed 0" );
 	cmd( "set update_d 1" );
 
-	cmd( "newtop .sa \"Set All Objects Initialization\" { set choice 2 }" );
+	// define the correct parent window
+	cmd( "switch %d { 0 { set parWnd . } 3 { set parWnd .deb } 4 { set parWnd .inid } default { set parWnd . } }", *choice );
+	cmd( "if { [ string equal $parWnd . ] } { \
+			set _w .sa \
+		} else { \
+			set _w $parWnd.sa \
+		}" );
+		
+	cmd( "newtop $_w \"Set All Objects Initialization\" { set choice 2 } $parWnd" );
 
-	cmd( "ttk::frame .sa.head" );					// heading
-	cmd( "ttk::label .sa.head.lg -text \"Set initial values for\"" );
+	cmd( "ttk::frame $_w.head" );					// heading
+	cmd( "ttk::label $_w.head.lg -text \"Set initial values for\"" );
 
-	cmd( "ttk::frame .sa.head.l" );
+	cmd( "ttk::frame $_w.head.l" );
 	if ( cv->param != 0 )
 	{
 		if ( cv->param == 2 )
-			cmd( "ttk::label .sa.head.l.c -text \"Function: \"" );
+			cmd( "ttk::label $_w.head.l.c -text \"Function: \"" );
 		else
-			cmd( "ttk::label .sa.head.l.c -text \"Parameter: \"" );
+			cmd( "ttk::label $_w.head.l.c -text \"Parameter: \"" );
 		
-		cmd( "ttk::label .sa.head.l.n -text \"%s\" -style hl.TLabel", lab  );
-		cmd( "pack .sa.head.l.c .sa.head.l.n -side left" );
+		cmd( "ttk::label $_w.head.l.n -text \"%s\" -style hl.TLabel", lab  );
+		cmd( "pack $_w.head.l.c $_w.head.l.n -side left" );
 	}
 	else
 	{
-		cmd( "ttk::label .sa.head.l.c -text \"Variable: \"" );
-		cmd( "ttk::label .sa.head.l.n1 -text \"%s  \" -style hl.TLabel", lab );
-		cmd( "ttk::label .sa.head.l.n2 -text \"\\[  lag \"" );
-		cmd( "ttk::label .sa.head.l.n3 -text \"%d\" -style hl.TLabel", t - cv->last_update + lag + 1  );
-		cmd( "ttk::label .sa.head.l.n4 -text \"\\]\"" );
-		cmd( "pack .sa.head.l.c .sa.head.l.n1 .sa.head.l.n2 .sa.head.l.n3 .sa.head.l.n4 -side left" );
+		cmd( "ttk::label $_w.head.l.c -text \"Variable: \"" );
+		cmd( "ttk::label $_w.head.l.n1 -text \"%s  \" -style hl.TLabel", lab );
+		cmd( "ttk::label $_w.head.l.n2 -text \"\\[  lag \"" );
+		cmd( "ttk::label $_w.head.l.n3 -text \"%d\" -style hl.TLabel", t - cv->last_update + lag + 1  );
+		cmd( "ttk::label $_w.head.l.n4 -text \"\\]\"" );
+		cmd( "pack $_w.head.l.c $_w.head.l.n1 $_w.head.l.n2 $_w.head.l.n3 $_w.head.l.n4 -side left" );
 	}
 
-	cmd( "ttk::frame .sa.head.lo" );
-	cmd( "ttk::label .sa.head.lo.l -text \"Contained in object: \"" );
-	cmd( "ttk::label .sa.head.lo.o -text \"%s\" -style hl.TLabel", cv->up->label  );
-	cmd( "pack .sa.head.lo.l .sa.head.lo.o -side left" );
+	cmd( "ttk::frame $_w.head.lo" );
+	cmd( "ttk::label $_w.head.lo.l -text \"Contained in object: \"" );
+	cmd( "ttk::label $_w.head.lo.o -text \"%s\" -style hl.TLabel", cv->up->label  );
+	cmd( "pack $_w.head.lo.l $_w.head.lo.o -side left" );
 
-	cmd( "pack .sa.head.lg .sa.head.l .sa.head.lo" );
+	cmd( "pack $_w.head.lg $_w.head.l $_w.head.lo" );
 
-	cmd( "ttk::frame .sa.m" );			
+	cmd( "ttk::frame $_w.m" );			
 
-	cmd( "ttk::frame .sa.m.f1" );					// left column
+	cmd( "ttk::frame $_w.m.f1" );					// left column
 
-	cmd( "ttk::frame .sa.m.f1.val" );
-	cmd( "ttk::label .sa.m.f1.val.l -text \"Initialization data\"" );
+	cmd( "ttk::frame $_w.m.f1.val" );
+	cmd( "ttk::label $_w.m.f1.val.l -text \"Initialization data\"" );
 
-	cmd( "ttk::frame .sa.m.f1.val.i" );
+	cmd( "ttk::frame $_w.m.f1.val.i" );
 
-	cmd( "ttk::frame .sa.m.f1.val.i.l1" );
-	cmd( "ttk::label .sa.m.f1.val.i.l1.l1 -text \"Equal to\"" );
-	cmd( "ttk::entry .sa.m.f1.val.i.l1.e1 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value1; set err .sa.m.f1.val.i.l1.e1; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( "pack .sa.m.f1.val.i.l1.l1 .sa.m.f1.val.i.l1.e1" );
+	cmd( "ttk::frame $_w.m.f1.val.i.l1" );
+	cmd( "ttk::label $_w.m.f1.val.i.l1.l1 -text \"Equal to\"" );
+	cmd( "ttk::entry $_w.m.f1.val.i.l1.e1 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value1; set err $_w.m.f1.val.i.l1.e1; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "pack $_w.m.f1.val.i.l1.l1 $_w.m.f1.val.i.l1.e1" );
 
-	cmd( "ttk::frame .sa.m.f1.val.i.l2" );
-	cmd( "ttk::label .sa.m.f1.val.i.l2.l2 -text \"(none)\"" );
-	cmd( "ttk::entry .sa.m.f1.val.i.l2.e2 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; set err .sa.m.f1.val.i.l2.e2; set choice 1; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-	cmd( "pack .sa.m.f1.val.i.l2.l2 .sa.m.f1.val.i.l2.e2" );
+	cmd( "ttk::frame $_w.m.f1.val.i.l2" );
+	cmd( "ttk::label $_w.m.f1.val.i.l2.l2 -text \"(none)\"" );
+	cmd( "ttk::entry $_w.m.f1.val.i.l2.e2 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; set err $_w.m.f1.val.i.l2.e2; set choice 1; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
+	cmd( "pack $_w.m.f1.val.i.l2.l2 $_w.m.f1.val.i.l2.e2" );
 
-	cmd( "pack .sa.m.f1.val.i.l1 .sa.m.f1.val.i.l2 -expand yes -fill x  -ipadx 5 -ipady 2" );
+	cmd( "pack $_w.m.f1.val.i.l1 $_w.m.f1.val.i.l2 -expand yes -fill x  -ipadx 5 -ipady 2" );
 
-	cmd( "pack .sa.m.f1.val.l .sa.m.f1.val.i" );
+	cmd( "pack $_w.m.f1.val.l $_w.m.f1.val.i" );
 
-	cmd( "ttk::frame .sa.m.f1.rd" );
-	cmd( "ttk::label .sa.m.f1.rd.l -text \"Initialization method\"" );
+	cmd( "ttk::frame $_w.m.f1.rd" );
+	cmd( "ttk::label $_w.m.f1.rd.l -text \"Initialization method\"" );
 
-	cmd( "ttk::frame .sa.m.f1.rd.i -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r1 -text \"Equal to\" -variable res -value 1 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Value\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"(none)\"; .sa.m.f1.val.i.l2.e2 conf -state disabled; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
-	cmd( "bind .sa.m.f1.rd.i.r1 <Down> {focus .sa.m.f1.rd.i.r9; .sa.m.f1.rd.i.r9 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r1 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+	cmd( "ttk::frame $_w.m.f1.rd.i -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+	cmd( "ttk::radiobutton $_w.m.f1.rd.i.r1 -text \"Equal to\" -variable res -value 1 -command { $_w.m.f1.val.i.l1.l1 conf -text \"Value\"; $_w.m.f1.val.i.l1.e1 conf -state normal; $_w.m.f1.val.i.l2.l2 conf -text \"(none)\"; $_w.m.f1.val.i.l2.e2 conf -state disabled; $_w.m.f2.s.i.l.a.e conf -state normal; $_w.m.f2.s.i.l.f conf -state normal; set use_seed 0; $_w.m.f2.rnd.i.le.f conf -state disabled; $_w.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
+	cmd( "bind $_w.m.f1.rd.i.r1 <Down> { focus $_w.m.f1.rd.i.r9; $_w.m.f1.rd.i.r9 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r1 <Return> { $_w.m.f1.val.i.l1.e1 selection range 0 end; focus $_w.m.f1.val.i.l1.e1 }" );
 
-	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r9 -text \"Range\" -variable res -value 9 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
-	cmd( "bind .sa.m.f1.rd.i.r9 <Down> {focus .sa.m.f1.rd.i.r2; .sa.m.f1.rd.i.r2 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r9 <Up> {focus .sa.m.f1.rd.i.r1; .sa.m.f1.rd.i.r1 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r9 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+	cmd( "ttk::radiobutton $_w.m.f1.rd.i.r9 -text \"Range\" -variable res -value 9 -command { $_w.m.f1.val.i.l1.l1 conf -text \"Minimum\"; $_w.m.f1.val.i.l1.e1 conf -state normal; $_w.m.f1.val.i.l2.l2 conf -text \"Maximum\"; $_w.m.f1.val.i.l2.e2 conf -state normal; $_w.m.f2.s.i.l.a.e conf -state normal; $_w.m.f2.s.i.l.f conf -state normal; set use_seed 0; $_w.m.f2.rnd.i.le.f conf -state disabled; $_w.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
+	cmd( "bind $_w.m.f1.rd.i.r9 <Down> { focus $_w.m.f1.rd.i.r2; $_w.m.f1.rd.i.r2 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r9 <Up> { focus $_w.m.f1.rd.i.r1; $_w.m.f1.rd.i.r1 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r9 <Return> { $_w.m.f1.val.i.l1.e1 selection range 0 end; focus $_w.m.f1.val.i.l1.e1 }" );
 
-	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r2 -text \"Increasing\" -variable res -value 2 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Start\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Step\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
-	cmd( "bind .sa.m.f1.rd.i.r2 <Down> {focus .sa.m.f1.rd.i.r4; .sa.m.f1.rd.i.r4 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r2 <Up> {focus .sa.m.f1.rd.i.r9; .sa.m.f1.rd.i.r9 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r2 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+	cmd( "ttk::radiobutton $_w.m.f1.rd.i.r2 -text \"Increasing\" -variable res -value 2 -command { $_w.m.f1.val.i.l1.l1 conf -text \"Start\"; $_w.m.f1.val.i.l1.e1 conf -state normal; $_w.m.f1.val.i.l2.l2 conf -text \"Step\"; $_w.m.f1.val.i.l2.e2 conf -state normal; $_w.m.f2.s.i.l.a.e conf -state normal; $_w.m.f2.s.i.l.f conf -state normal; set use_seed 0; $_w.m.f2.rnd.i.le.f conf -state disabled; $_w.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
+	cmd( "bind $_w.m.f1.rd.i.r2 <Down> { focus $_w.m.f1.rd.i.r4; $_w.m.f1.rd.i.r4 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r2 <Up> { focus $_w.m.f1.rd.i.r9; $_w.m.f1.rd.i.r9 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r2 <Return> { $_w.m.f1.val.i.l1.e1 selection range 0 end; focus $_w.m.f1.val.i.l1.e1 }" );
 
-	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r4 -text \"Increasing (groups)\" -variable res -value 4 -command {.sa.m.f1.val.i.l1.l1 conf -text \"Start\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Step\"; .sa.m.f1.val.i.l2.e2 conf -state normal; set step_in 1; .sa.m.f2.s.i.l.a.e conf -state disabled; .sa.m.f2.s.i.l.f conf -state disabled; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
-	cmd( "bind .sa.m.f1.rd.i.r4 <Up> {focus .sa.m.f1.rd.i.r2; .sa.m.f1.rd.i.r2 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r4 <Down> {focus .sa.m.f1.rd.i.r3; .sa.m.f1.rd.i.r3 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r4 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+	cmd( "ttk::radiobutton $_w.m.f1.rd.i.r4 -text \"Increasing (groups)\" -variable res -value 4 -command { $_w.m.f1.val.i.l1.l1 conf -text \"Start\"; $_w.m.f1.val.i.l1.e1 conf -state normal; $_w.m.f1.val.i.l2.l2 conf -text \"Step\"; $_w.m.f1.val.i.l2.e2 conf -state normal; set step_in 1; $_w.m.f2.s.i.l.a.e conf -state disabled; $_w.m.f2.s.i.l.f conf -state disabled; set use_seed 0; $_w.m.f2.rnd.i.le.f conf -state disabled; $_w.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
+	cmd( "bind $_w.m.f1.rd.i.r4 <Up> { focus $_w.m.f1.rd.i.r2; $_w.m.f1.rd.i.r2 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r4 <Down> { focus $_w.m.f1.rd.i.r3; $_w.m.f1.rd.i.r3 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r4 <Return> { $_w.m.f1.val.i.l1.e1 selection range 0 end; focus $_w.m.f1.val.i.l1.e1 }" );
 
-	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r3 -text \"Random (uniform)\" -variable res -value 3 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; .sa.m.f2.rnd.i.le.f conf -state normal }" );
-	cmd( "bind .sa.m.f1.rd.i.r3 <Up> {focus .sa.m.f1.rd.i.r4; .sa.m.f1.rd.i.r4 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r3 <Down> {focus .sa.m.f1.rd.i.r8; .sa.m.f1.rd.i.r8 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r3 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+	cmd( "ttk::radiobutton $_w.m.f1.rd.i.r3 -text \"Random (uniform)\" -variable res -value 3 -command { $_w.m.f1.val.i.l1.l1 conf -text \"Minimum\"; $_w.m.f1.val.i.l1.e1 conf -state normal; $_w.m.f1.val.i.l2.l2 conf -text \"Maximum\"; $_w.m.f1.val.i.l2.e2 conf -state normal; $_w.m.f2.s.i.l.a.e conf -state normal; $_w.m.f2.s.i.l.f conf -state normal; $_w.m.f2.rnd.i.le.f conf -state normal }" );
+	cmd( "bind $_w.m.f1.rd.i.r3 <Up> { focus $_w.m.f1.rd.i.r4; $_w.m.f1.rd.i.r4 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r3 <Down> { focus $_w.m.f1.rd.i.r8; $_w.m.f1.rd.i.r8 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r3 <Return> { $_w.m.f1.val.i.l1.e1 selection range 0 end; focus $_w.m.f1.val.i.l1.e1 }" );
 
-	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r8 -text \"Random integer (uniform)\" -variable res -value 8 -command { .sa.m.f1.val.i.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; .sa.m.f2.rnd.i.le.f conf -state normal }" );
-	cmd( "bind .sa.m.f1.rd.i.r8 <Up> {focus .sa.m.f1.rd.i.r3; .sa.m.f1.rd.i.r3 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r8 <Down> {focus .sa.m.f1.rd.i.r5; .sa.m.f1.rd.i.r5 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r8 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+	cmd( "ttk::radiobutton $_w.m.f1.rd.i.r8 -text \"Random integer (uniform)\" -variable res -value 8 -command { $_w.m.f1.val.i.l1.l1 conf -text \"Minimum\"; $_w.m.f1.val.i.l1.e1 conf -state normal; $_w.m.f1.val.i.l2.l2 conf -text \"Maximum\"; $_w.m.f1.val.i.l2.e2 conf -state normal; $_w.m.f2.s.i.l.a.e conf -state normal; $_w.m.f2.s.i.l.f conf -state normal; $_w.m.f2.rnd.i.le.f conf -state normal }" );
+	cmd( "bind $_w.m.f1.rd.i.r8 <Up> { focus $_w.m.f1.rd.i.r3; $_w.m.f1.rd.i.r3 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r8 <Down> { focus $_w.m.f1.rd.i.r5; $_w.m.f1.rd.i.r5 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r8 <Return> { $_w.m.f1.val.i.l1.e1 selection range 0 end; focus $_w.m.f1.val.i.l1.e1 }" );
 
-	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r5 -text \"Random (normal)\" -variable res -value 5 -command {.sa.m.f1.val.i.l1.l1 conf -text \"Mean\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Std. deviation\"; .sa.m.f1.val.i.l2.e2 conf -state normal; .sa.m.f2.s.i.l.a.e conf -state normal; .sa.m.f2.s.i.l.f conf -state normal; .sa.m.f2.rnd.i.le.f conf -state normal }" );
-	cmd( "bind .sa.m.f1.rd.i.r5 <Up> {focus .sa.m.f1.rd.i.r8; .sa.m.f1.rd.i.r8 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r5 <Down> {focus .sa.m.f1.rd.i.r7; .sa.m.f1.rd.i.r7 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r5 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+	cmd( "ttk::radiobutton $_w.m.f1.rd.i.r5 -text \"Random (normal)\" -variable res -value 5 -command { $_w.m.f1.val.i.l1.l1 conf -text \"Mean\"; $_w.m.f1.val.i.l1.e1 conf -state normal; $_w.m.f1.val.i.l2.l2 conf -text \"Std. deviation\"; $_w.m.f1.val.i.l2.e2 conf -state normal; $_w.m.f2.s.i.l.a.e conf -state normal; $_w.m.f2.s.i.l.f conf -state normal; $_w.m.f2.rnd.i.le.f conf -state normal }" );
+	cmd( "bind $_w.m.f1.rd.i.r5 <Up> { focus $_w.m.f1.rd.i.r8; $_w.m.f1.rd.i.r8 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r5 <Down> { focus $_w.m.f1.rd.i.r7; $_w.m.f1.rd.i.r7 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r5 <Return> { $_w.m.f1.val.i.l1.e1 selection range 0 end; focus $_w.m.f1.val.i.l1.e1 }" );
 
-	cmd( "ttk::radiobutton .sa.m.f1.rd.i.r7 -text \"Import from data file\" -variable res -value 7 -command { .sa.m.f1.val.i.l1.l1 conf -text \"(none)\"; .sa.m.f1.val.i.l1.e1 conf -state disabled; .sa.m.f1.val.i.l2.l2 conf -text \"(none)\"; .sa.m.f1.val.i.l2.e2 conf -state disabled; set step_in 1; .sa.m.f2.s.i.l.a.e conf -state disabled; .sa.m.f2.s.i.l.f conf -state disabled; set use_seed 0; .sa.m.f2.rnd.i.le.f conf -state disabled; .sa.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
-	cmd( "bind .sa.m.f1.rd.i.r7 <Up> {focus .sa.m.f1.rd.i.r5; .sa.m.f1.rd.i.r5 invoke}" );
-	cmd( "bind .sa.m.f1.rd.i.r7 <Return> {.sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
+	cmd( "ttk::radiobutton $_w.m.f1.rd.i.r7 -text \"Import from data file\" -variable res -value 7 -command { $_w.m.f1.val.i.l1.l1 conf -text \"(none)\"; $_w.m.f1.val.i.l1.e1 conf -state disabled; $_w.m.f1.val.i.l2.l2 conf -text \"(none)\"; $_w.m.f1.val.i.l2.e2 conf -state disabled; set step_in 1; $_w.m.f2.s.i.l.a.e conf -state disabled; $_w.m.f2.s.i.l.f conf -state disabled; set use_seed 0; $_w.m.f2.rnd.i.le.f conf -state disabled; $_w.m.f2.rnd.i.le.s.e1 conf -state disabled }" );
+	cmd( "bind $_w.m.f1.rd.i.r7 <Up> { focus $_w.m.f1.rd.i.r5; $_w.m.f1.rd.i.r5 invoke }" );
+	cmd( "bind $_w.m.f1.rd.i.r7 <Return> { $_w.m.f1.val.i.l1.e1 selection range 0 end; focus $_w.m.f1.val.i.l1.e1 }" );
 
-	cmd( "pack .sa.m.f1.rd.i.r1 .sa.m.f1.rd.i.r9 .sa.m.f1.rd.i.r2 .sa.m.f1.rd.i.r4 .sa.m.f1.rd.i.r3 .sa.m.f1.rd.i.r8 .sa.m.f1.rd.i.r5 .sa.m.f1.rd.i.r7 -anchor w" );
+	cmd( "pack $_w.m.f1.rd.i.r1 $_w.m.f1.rd.i.r9 $_w.m.f1.rd.i.r2 $_w.m.f1.rd.i.r4 $_w.m.f1.rd.i.r3 $_w.m.f1.rd.i.r8 $_w.m.f1.rd.i.r5 $_w.m.f1.rd.i.r7 -anchor w" );
 	
-	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r1 \"Every instance set to the same Value\"" );
-	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r9 \"Linear range from Minimum to Maximum\"" );
-	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r2 \"From Start plus Increasing for each instance\"" );
-	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r4 \"From Start in each group plus Increasing for each instance\"" );
-	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r3 \"Uniform random real draw from Minimum to Maximum\"" );
-	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r8 \"Uniform random integer draw from Minimum to Maximum\"" );
-	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r5 \"Random draw from normal distribution with Mean and Standard deviation\"" );
-	cmd( "tooltip::tooltip .sa.m.f1.rd.i.r7 \"Read initialization data from disk file\"" );
+	cmd( "tooltip::tooltip $_w.m.f1.rd.i.r1 \"Every instance set to the same Value\"" );
+	cmd( "tooltip::tooltip $_w.m.f1.rd.i.r9 \"Linear range from Minimum to Maximum\"" );
+	cmd( "tooltip::tooltip $_w.m.f1.rd.i.r2 \"From Start plus Increasing for each instance\"" );
+	cmd( "tooltip::tooltip $_w.m.f1.rd.i.r4 \"From Start in each group plus Increasing for each instance\"" );
+	cmd( "tooltip::tooltip $_w.m.f1.rd.i.r3 \"Uniform random real draw from Minimum to Maximum\"" );
+	cmd( "tooltip::tooltip $_w.m.f1.rd.i.r8 \"Uniform random integer draw from Minimum to Maximum\"" );
+	cmd( "tooltip::tooltip $_w.m.f1.rd.i.r5 \"Random draw from normal distribution with Mean and Standard deviation\"" );
+	cmd( "tooltip::tooltip $_w.m.f1.rd.i.r7 \"Read initialization data from disk file\"" );
 
-	cmd( "pack .sa.m.f1.rd.l .sa.m.f1.rd.i" );
+	cmd( "pack $_w.m.f1.rd.l $_w.m.f1.rd.i" );
 
-	cmd( "pack .sa.m.f1.val .sa.m.f1.rd -expand yes -fill x -padx 5 -pady 5" );
+	cmd( "pack $_w.m.f1.val $_w.m.f1.rd -expand yes -fill x -padx 5 -pady 5" );
 
-	cmd( "ttk::frame .sa.m.f2" );					// right column
+	cmd( "ttk::frame $_w.m.f2" );					// right column
 
-	cmd( "ttk::frame .sa.m.f2.s" );
-	cmd( "ttk::label .sa.m.f2.s.tit -text \"Object instance selection\"" );
+	cmd( "ttk::frame $_w.m.f2.s" );
+	cmd( "ttk::label $_w.m.f2.s.tit -text \"Object instance selection\"" );
 
-	cmd( "ttk::frame .sa.m.f2.s.i" );
+	cmd( "ttk::frame $_w.m.f2.s.i" );
 
-	cmd( "ttk::frame .sa.m.f2.s.i.l" );
+	cmd( "ttk::frame $_w.m.f2.s.i.l" );
 
-	cmd( "ttk::frame .sa.m.f2.s.i.l.a" );
-	cmd( "ttk::label .sa.m.f2.s.i.l.a.l -text \"Apply every\"" );
-	cmd( "ttk::spinbox .sa.m.f2.s.i.l.a.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; set err .sa.m.f2.s.i.l.a.e; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( "ttk::label .sa.m.f2.s.i.l.a.l1 -text \"instance( s)\"" );
-	cmd( "pack .sa.m.f2.s.i.l.a.l .sa.m.f2.s.i.l.a.e .sa.m.f2.s.i.l.a.l1 -side left -padx 1" );
+	cmd( "ttk::frame $_w.m.f2.s.i.l.a" );
+	cmd( "ttk::label $_w.m.f2.s.i.l.a.l -text \"Apply every\"" );
+	cmd( "ttk::spinbox $_w.m.f2.s.i.l.a.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; set err $_w.m.f2.s.i.l.a.e; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::label $_w.m.f2.s.i.l.a.l1 -text \"instance( s)\"" );
+	cmd( "pack $_w.m.f2.s.i.l.a.l $_w.m.f2.s.i.l.a.e $_w.m.f2.s.i.l.a.l1 -side left -padx 1" );
 
-	cmd( "ttk::checkbutton .sa.m.f2.s.i.l.f -text \"Fill-in\" -variable fill" );
-	cmd( "pack  .sa.m.f2.s.i.l.a .sa.m.f2.s.i.l.f -padx 5 -side left" );
-	cmd( "pack  .sa.m.f2.s.i.l -pady 2" );
+	cmd( "ttk::checkbutton $_w.m.f2.s.i.l.f -text \"Fill-in\" -variable fill" );
+	cmd( "pack  $_w.m.f2.s.i.l.a $_w.m.f2.s.i.l.f -padx 5 -side left" );
+	cmd( "pack  $_w.m.f2.s.i.l -pady 2" );
 	
-	cmd( "tooltip::tooltip .sa.m.f2.s.i.l.a \"Number of instances to skip from initializing\"" );
-	cmd( "tooltip::tooltip .sa.m.f2.s.i.l.f \"Fill intermediate instances with same value\"" );
+	cmd( "tooltip::tooltip $_w.m.f2.s.i.l.a \"Number of instances to skip from initializing\"" );
+	cmd( "tooltip::tooltip $_w.m.f2.s.i.l.f \"Fill intermediate instances with same value\"" );
 
-	cmd( "ttk::frame .sa.m.f2.s.i.sel -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-	cmd( "ttk::radiobutton .sa.m.f2.s.i.sel.all -text \"Apply to all instances\" -variable to_all -value 1 -command { .sa.m.f2.s.i.sel2.c.to conf -state disabled; .sa.m.f2.s.i.sel2.c.from conf -state disabled; bind .sa.m.f2.s.i.sel2.c.from <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { } }" );
-	cmd( "ttk::radiobutton .sa.m.f2.s.i.sel.sel -text \"Apply to a range of instances\" -variable to_all -value 0 -command { .sa.m.f2.s.i.sel2.c.to conf -state normal; .sa.m.f2.s.i.sel2.c.from conf -state normal; bind .sa.m.f2.s.i.sel2.c.from <Button-3> { set choice 9 }; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { set choice 10 }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> { set choice 9 }; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { set choice 10 } }" );
-	cmd( "pack .sa.m.f2.s.i.sel.all .sa.m.f2.s.i.sel.sel -anchor w" );
+	cmd( "ttk::frame $_w.m.f2.s.i.sel -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+	cmd( "ttk::radiobutton $_w.m.f2.s.i.sel.all -text \"Apply to all instances\" -variable to_all -value 1 -command { $_w.m.f2.s.i.sel2.c.to conf -state disabled; $_w.m.f2.s.i.sel2.c.from conf -state disabled; bind $_w.m.f2.s.i.sel2.c.from <Button-3> { }; bind $_w.m.f2.s.i.sel2.c.to <Button-3> { }; bind $_w.m.f2.s.i.sel2.c.from <Button-2> { }; bind $_w.m.f2.s.i.sel2.c.to <Button-2> { } }" );
+	cmd( "ttk::radiobutton $_w.m.f2.s.i.sel.sel -text \"Apply to a range of instances\" -variable to_all -value 0 -command { $_w.m.f2.s.i.sel2.c.to conf -state normal; $_w.m.f2.s.i.sel2.c.from conf -state normal; bind $_w.m.f2.s.i.sel2.c.from <Button-3> { set choice 9 }; bind $_w.m.f2.s.i.sel2.c.to <Button-3> { set choice 10 }; bind $_w.m.f2.s.i.sel2.c.from <Button-2> { set choice 9 }; bind $_w.m.f2.s.i.sel2.c.to <Button-2> { set choice 10 } }" );
+	cmd( "pack $_w.m.f2.s.i.sel.all $_w.m.f2.s.i.sel.sel -anchor w" );
 	
-	cmd( "tooltip::tooltip .sa.m.f2.s.i.sel.all \"Apply initialization to all instances\"" );
-	cmd( "tooltip::tooltip .sa.m.f2.s.i.sel.sel \"Apply initialization to a range of instances\"" );
+	cmd( "tooltip::tooltip $_w.m.f2.s.i.sel.all \"Apply initialization to all instances\"" );
+	cmd( "tooltip::tooltip $_w.m.f2.s.i.sel.sel \"Apply initialization to a range of instances\"" );
 
-	cmd( "pack .sa.m.f2.s.i.sel -pady 2" );
+	cmd( "pack $_w.m.f2.s.i.sel -pady 2" );
 
-	cmd( "ttk::frame .sa.m.f2.s.i.sel2" );
+	cmd( "ttk::frame $_w.m.f2.s.i.sel2" );
 
-	cmd( "ttk::frame .sa.m.f2.s.i.sel2.c" );
-	cmd( "ttk::label .sa.m.f2.s.i.sel2.c.lfrom -text \"From\"" );
-	cmd( "ttk::spinbox .sa.m.f2.s.i.sel2.c.from -width 5 -from 1 -to 9999 -state disabled -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; set err .sa.m.f2.s.i.sel2.c.from; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( "ttk::label .sa.m.f2.s.i.sel2.c.lto -text \"to\"" );
-	cmd( "ttk::spinbox .sa.m.f2.s.i.sel2.c.to -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; set err .sa.m.f2.s.i.sel2.c.to; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( "pack .sa.m.f2.s.i.sel2.c.lfrom .sa.m.f2.s.i.sel2.c.from .sa.m.f2.s.i.sel2.c.lto .sa.m.f2.s.i.sel2.c.to -side left -pady 1" );
+	cmd( "ttk::frame $_w.m.f2.s.i.sel2.c" );
+	cmd( "ttk::label $_w.m.f2.s.i.sel2.c.lfrom -text \"From\"" );
+	cmd( "ttk::spinbox $_w.m.f2.s.i.sel2.c.from -width 5 -from 1 -to 9999 -state disabled -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; set err $_w.m.f2.s.i.sel2.c.from; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "ttk::label $_w.m.f2.s.i.sel2.c.lto -text \"to\"" );
+	cmd( "ttk::spinbox $_w.m.f2.s.i.sel2.c.to -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; set err $_w.m.f2.s.i.sel2.c.to; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "pack $_w.m.f2.s.i.sel2.c.lfrom $_w.m.f2.s.i.sel2.c.from $_w.m.f2.s.i.sel2.c.lto $_w.m.f2.s.i.sel2.c.to -side left -pady 1" );
 
-	cmd( "ttk::label .sa.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
-	cmd( "pack .sa.m.f2.s.i.sel2.c .sa.m.f2.s.i.sel2.obs" );
-	cmd( "pack .sa.m.f2.s.i.sel2 -pady 2" );
+	cmd( "ttk::label $_w.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
+	cmd( "pack $_w.m.f2.s.i.sel2.c $_w.m.f2.s.i.sel2.obs" );
+	cmd( "pack $_w.m.f2.s.i.sel2 -pady 2" );
 	
-	cmd( "tooltip::tooltip .sa.m.f2.s.i.sel2 \"Select first and last instance to initialize\"" );
+	cmd( "tooltip::tooltip $_w.m.f2.s.i.sel2 \"Select first and last instance to initialize\"" );
 
-	cmd( "pack .sa.m.f2.s.tit .sa.m.f2.s.i" );
+	cmd( "pack $_w.m.f2.s.tit $_w.m.f2.s.i" );
 
-	cmd( "pack .sa.m.f2.s" );
+	cmd( "pack $_w.m.f2.s" );
 
-	cmd( "ttk::frame .sa.m.f2.rnd" );
-	cmd( "ttk::label .sa.m.f2.rnd.l -text \"Random number generator\"" );
+	cmd( "ttk::frame $_w.m.f2.rnd" );
+	cmd( "ttk::label $_w.m.f2.rnd.l -text \"Random number generator\"" );
 
-	cmd( "ttk::frame .sa.m.f2.rnd.i" );
+	cmd( "ttk::frame $_w.m.f2.rnd.i" );
 
-	cmd( "ttk::frame .sa.m.f2.rnd.i.le" );
-	cmd( "ttk::checkbutton .sa.m.f2.rnd.i.le.f -text \"Reset the generator\" -variable use_seed -state disabled -command { if $use_seed { .sa.m.f2.rnd.i.le.s.e1 conf -state normal } { .sa.m.f2.rnd.i.le.s.e1 conf -state disabled } }" );
-	cmd( "ttk::frame .sa.m.f2.rnd.i.le.s" );
-	cmd( "ttk::label .sa.m.f2.rnd.i.le.s.l1 -text \"Seed\"" );
-	cmd( "ttk::spinbox .sa.m.f2.rnd.i.le.s.e1 -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; set err .sa.m.f2.rnd.i.le.s.e1; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( "pack .sa.m.f2.rnd.i.le.s.l1 .sa.m.f2.rnd.i.le.s.e1 -side left -padx 1" );
+	cmd( "ttk::frame $_w.m.f2.rnd.i.le" );
+	cmd( "ttk::checkbutton $_w.m.f2.rnd.i.le.f -text \"Reset the generator\" -variable use_seed -state disabled -command { if $use_seed { $_w.m.f2.rnd.i.le.s.e1 conf -state normal } { $_w.m.f2.rnd.i.le.s.e1 conf -state disabled } }" );
+	cmd( "ttk::frame $_w.m.f2.rnd.i.le.s" );
+	cmd( "ttk::label $_w.m.f2.rnd.i.le.s.l1 -text \"Seed\"" );
+	cmd( "ttk::spinbox $_w.m.f2.rnd.i.le.s.e1 -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= 9999 } { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; set err $_w.m.f2.rnd.i.le.s.e1; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
+	cmd( "pack $_w.m.f2.rnd.i.le.s.l1 $_w.m.f2.rnd.i.le.s.e1 -side left -padx 1" );
 
-	cmd( "pack .sa.m.f2.rnd.i.le.f .sa.m.f2.rnd.i.le.s -side left -padx 5" );
+	cmd( "pack $_w.m.f2.rnd.i.le.f $_w.m.f2.rnd.i.le.s -side left -padx 5" );
 
-	cmd( "pack .sa.m.f2.rnd.i.le -pady 2" );
+	cmd( "pack $_w.m.f2.rnd.i.le -pady 2" );
 	
-	cmd( "tooltip::tooltip .sa.m.f2.rnd.i.le.f \"Ensure the generator starts from a known condition\"" );
-	cmd( "tooltip::tooltip .sa.m.f2.rnd.i.le.s \"Choose the random number generator seed\"" );
+	cmd( "tooltip::tooltip $_w.m.f2.rnd.i.le.f \"Ensure the generator starts from a known condition\"" );
+	cmd( "tooltip::tooltip $_w.m.f2.rnd.i.le.s \"Choose the random number generator seed\"" );
 
-	cmd( "pack .sa.m.f2.rnd.l .sa.m.f2.rnd.i" );
+	cmd( "pack $_w.m.f2.rnd.l $_w.m.f2.rnd.i" );
 
-	cmd( "ttk::frame .sa.m.f2.ud" );
-	cmd( "ttk::checkbutton .sa.m.f2.ud.c -text \"Update initialization description\" -variable update_d" );
-	cmd( "pack .sa.m.f2.ud.c" );
+	cmd( "ttk::frame $_w.m.f2.ud" );
+	cmd( "ttk::checkbutton $_w.m.f2.ud.c -text \"Update initialization description\" -variable update_d" );
+	cmd( "pack $_w.m.f2.ud.c" );
 
-	cmd( "pack .sa.m.f2.s .sa.m.f2.rnd .sa.m.f2.ud -expand yes -fill x" );
+	cmd( "pack $_w.m.f2.s $_w.m.f2.rnd $_w.m.f2.ud -expand yes -fill x" );
 
-	cmd( "pack .sa.m.f1 .sa.m.f2 -side left -expand yes -fill both -padx 5 -pady 5" );
-	cmd( "pack .sa.head .sa.m -pady 5" );
+	cmd( "pack $_w.m.f1 $_w.m.f2 -side left -expand yes -fill both -padx 5 -pady 5" );
+	cmd( "pack $_w.head $_w.m -pady 5" );
 
-	cmd( "okhelpcancel .sa b { set choice 1 } { LsdHelp menudata_init.html#setall } { set choice 2 }" );
+	cmd( "okhelpcancel $_w b { set choice 1 } { LsdHelp menudata_init.html#setall } { set choice 2 }" );
 
-	cmd( "bind .sa.m.f1.rd.i <Return> {  if [ string equal [ .sa.m.f1.val.i.l2.e2 cget -state ] normal ] { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1 } }" );
-	cmd( "bind .sa.m.f1.val.i.l1.e1 <Return> { if [ string equal [ .sa.m.f1.val.i.l2.e2 cget -state ] normal ] { focus .sa.m.f1.val.i.l2.e2; .sa.m.f1.val.i.l2.e2 selection range 0 end } { set choice 1 } }" );
-	cmd( "bind .sa.m.f1.val.i.l2.e2 <Return> { set choice 1 }" );
-	cmd( "bind .sa.m.f2.s.i.l.a.e <Return> {focus .sa.m.f2.s.i.sel.all; .sa.m.f2.s.i.sel.all invoke}" );
-	cmd( "bind .sa.m.f2.s.i.sel.all <Return> {focus .sa.b.ok}" );
-	cmd( "bind .sa.m.f2.s.i.sel.sel <Return> {focus .sa.m.f2.s.i.sel2.c.from; .sa.m.f2.s.i.sel2.c.from selection range 0 end }" );
-	cmd( "bind .sa.m.f2.s.i.sel2.c.from <Return> {focus .sa.m.f2.s.i.sel2.c.to; .sa.m.f2.s.i.sel2.c.from selection range 0 end }" );
-	cmd( "bind .sa.m.f2.s.i.sel2.c.to <Return> {focus .sa.b.ok}" );
-	cmd( "bind .sa.m.f2.rnd.i.le.s.e1 <Return> {focus .sa.b.ok}" );
+	cmd( "bind $_w.m.f1.rd.i <Return> { if [ string equal [ $_w.m.f1.val.i.l2.e2 cget -state ] normal ] { $_w.m.f1.val.i.l1.e1 selection range 0 end; focus $_w.m.f1.val.i.l1.e1 } }" );
+	cmd( "bind $_w.m.f1.val.i.l1.e1 <Return> { if [ string equal [ $_w.m.f1.val.i.l2.e2 cget -state ] normal ] { focus $_w.m.f1.val.i.l2.e2; $_w.m.f1.val.i.l2.e2 selection range 0 end } { set choice 1 } }" );
+	cmd( "bind $_w.m.f1.val.i.l2.e2 <Return> { set choice 1 }" );
+	cmd( "bind $_w.m.f2.s.i.l.a.e <Return> { focus $_w.m.f2.s.i.sel.all; $_w.m.f2.s.i.sel.all invoke }" );
+	cmd( "bind $_w.m.f2.s.i.sel.all <Return> { focus $_w.b.ok }" );
+	cmd( "bind $_w.m.f2.s.i.sel.sel <Return> { focus $_w.m.f2.s.i.sel2.c.from; $_w.m.f2.s.i.sel2.c.from selection range 0 end }" );
+	cmd( "bind $_w.m.f2.s.i.sel2.c.from <Return> { focus $_w.m.f2.s.i.sel2.c.to; $_w.m.f2.s.i.sel2.c.from selection range 0 end }" );
+	cmd( "bind $_w.m.f2.s.i.sel2.c.to <Return> { focus $_w.b.ok }" );
+	cmd( "bind $_w.m.f2.rnd.i.le.s.e1 <Return> { focus $_w.b.ok }" );
 	
 	cmd( "set err \"\"" );
 
-	cmd( "showtop .sa topleftW" );
-	cmd( "mousewarpto .sa.b.ok" );
+	cmd( "showtop $_w centerW" );
+	cmd( "mousewarpto $_w.b.ok" );
 
 	here_setall:
 
 	// update current linked variables values
-	cmd( "write_any .sa.m.f1.val.i.l1.e1 $value1" ); 
-	cmd( "write_any .sa.m.f1.val.i.l2.e2 $value2" );
-	cmd( "write_any .sa.m.f2.s.i.l.a.e $step_in" ); 
-	cmd( "write_any .sa.m.f2.s.i.sel2.c.from $cases_from" ); 
-	cmd( "write_any .sa.m.f2.s.i.sel2.c.to $cases_to" ); 
-	cmd( "write_any .sa.m.f2.rnd.i.le.s.e1 $rnd_seed" ); 
+	cmd( "write_any $_w.m.f1.val.i.l1.e1 $value1" ); 
+	cmd( "write_any $_w.m.f1.val.i.l2.e2 $value2" );
+	cmd( "write_any $_w.m.f2.s.i.l.a.e $step_in" ); 
+	cmd( "write_any $_w.m.f2.s.i.sel2.c.from $cases_from" ); 
+	cmd( "write_any $_w.m.f2.s.i.sel2.c.to $cases_to" ); 
+	cmd( "write_any $_w.m.f2.rnd.i.le.s.e1 $rnd_seed" ); 
 	
 	if ( selFocus )
 	{
-		cmd( "if { $err == \"\" } { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1 } { $err selection range 0 end; focus $err; set err \"\" }" );
+		cmd( "if { $err == \"\" } { $_w.m.f1.val.i.l1.e1 selection range 0 end; focus $_w.m.f1.val.i.l1.e1 } { $err selection range 0 end; focus $err; set err \"\" }" );
 		selFocus = false;
 	}
 
@@ -315,7 +323,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	if ( *choice == 9 )
 	{
 		// search instance from
-		i = compute_copyfrom( original, choice, ".sa" );
+		i = compute_copyfrom( original, choice, "$_w" );
 		cmd( "set cases_from %d", i );
 		goto here_setall;
 	}
@@ -323,21 +331,21 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	if ( *choice == 10 )
 	{
 		// search instance to
-		i = compute_copyfrom( original, choice, ".sa" );
+		i = compute_copyfrom( original, choice, "$_w" );
 		cmd( "set cases_to %d", i );
 		goto here_setall;
 	}
 
 	// save current linked variables values before closing
-	cmd( "if [ string is double -strict [ .sa.m.f1.val.i.l1.e1 get ] ] { set value1 [ .sa.m.f1.val.i.l1.e1 get ] } { set err .sa.m.f1.val.i.l1.e1 }" );
-	cmd( "if [ string is double -strict [ .sa.m.f1.val.i.l2.e2 get ] ] { set value2 [ .sa.m.f1.val.i.l2.e2 get ] } { set err .sa.m.f1.val.i.l2.e2 }" ); 
-	cmd( "if { [ string is integer -strict [ .sa.m.f2.s.i.l.a.e get ] ] && [ .sa.m.f2.s.i.l.a.e get ] > 0 } { set step_in [ .sa.m.f2.s.i.l.a.e get ] } { set err .sa.m.f2.s.i.l.a.e }" ); 
-	cmd( "if { [ string is integer -strict [ .sa.m.f2.s.i.sel2.c.from get ] ] && [ .sa.m.f2.s.i.sel2.c.from get ] > 0 } { set cases_from [ .sa.m.f2.s.i.sel2.c.from get ] } { set err .sa.m.f2.s.i.sel2.c.from }" ); 
-	cmd( "if { [ string is integer -strict [ .sa.m.f2.s.i.sel2.c.to get ] ] && [ .sa.m.f2.s.i.sel2.c.to get ] > $cases_from } { set cases_to [ .sa.m.f2.s.i.sel2.c.to get ] } { set err .sa.m.f2.s.i.sel2.c.to }" ); 
-	cmd( "if { [ string is integer -strict [ .sa.m.f2.rnd.i.le.s.e1 get ] ] && [ .sa.m.f2.rnd.i.le.s.e1 get ] > 0 } { set rnd_seed [ .sa.m.f2.rnd.i.le.s.e1 get ] } { set err .sa.m.f2.rnd.i.le.s.e1 }" ); 
+	cmd( "if [ string is double -strict [ $_w.m.f1.val.i.l1.e1 get ] ] { set value1 [ $_w.m.f1.val.i.l1.e1 get ] } { set err $_w.m.f1.val.i.l1.e1 }" );
+	cmd( "if [ string is double -strict [ $_w.m.f1.val.i.l2.e2 get ] ] { set value2 [ $_w.m.f1.val.i.l2.e2 get ] } { set err $_w.m.f1.val.i.l2.e2 }" ); 
+	cmd( "if { [ string is integer -strict [ $_w.m.f2.s.i.l.a.e get ] ] && [ $_w.m.f2.s.i.l.a.e get ] > 0 } { set step_in [ $_w.m.f2.s.i.l.a.e get ] } { set err $_w.m.f2.s.i.l.a.e }" ); 
+	cmd( "if { [ string is integer -strict [ $_w.m.f2.s.i.sel2.c.from get ] ] && [ $_w.m.f2.s.i.sel2.c.from get ] > 0 } { set cases_from [ $_w.m.f2.s.i.sel2.c.from get ] } { set err $_w.m.f2.s.i.sel2.c.from }" ); 
+	cmd( "if { [ string is integer -strict [ $_w.m.f2.s.i.sel2.c.to get ] ] && [ $_w.m.f2.s.i.sel2.c.to get ] > $cases_from } { set cases_to [ $_w.m.f2.s.i.sel2.c.to get ] } { set err $_w.m.f2.s.i.sel2.c.to }" ); 
+	cmd( "if { [ string is integer -strict [ $_w.m.f2.rnd.i.le.s.e1 get ] ] && [ $_w.m.f2.rnd.i.le.s.e1 get ] > 0 } { set rnd_seed [ $_w.m.f2.rnd.i.le.s.e1 get ] } { set err $_w.m.f2.rnd.i.le.s.e1 }" ); 
 
 	cmd( "if { $err != \"\" } { \
-			ttk::messageBox -parent .sa -title Error -icon error -type ok -message \"Invalid value\" -detail \"Values must be numeric only and decimal numbers must use the point ('.') as the decimal separator. Choose a different value and try again.\"; \
+			ttk::messageBox -parent $_w -title Error -icon error -type ok -message \"Invalid value\" -detail \"Values must be numeric only and decimal numbers must use the point ('.') as the decimal separator. Choose a different value and try again.\"; \
 			set choice 0 \
 		}" );
 		
@@ -347,7 +355,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 		goto here_setall;
 	}
 	
-	cmd( "destroytop .sa" );
+	cmd( "destroytop $_w" );
 
 	Tcl_UnlinkVar( inter, "value1" );
 	Tcl_UnlinkVar( inter, "value2" );
@@ -531,7 +539,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 				}
 			
 			if ( cur != NULL || kappa == EOF )
-				cmd( "ttk::messageBox -parent .sa -title Error -icon error -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", l );
+				cmd( "ttk::messageBox -parent $_w -title Error -icon error -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", l );
 			
 			sprintf( action, "set with data from file %s", l );
 			break;
