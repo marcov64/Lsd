@@ -4582,7 +4582,7 @@ int lsdmain( int argn, char **argv )
 		if ( choice == 1 )
 		{
 			cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" r ]" );
-			cmd( "set a [ read -nonewline $f ]" );
+			cmd( "set a [ string trim [ read -nonewline $f ] ]" );
 			cmd( "close $f" );
 			choice = 0;
 		}
@@ -4608,7 +4608,7 @@ int lsdmain( int argn, char **argv )
 				.l.t.text delete 1.0 end; \
 				if [ file exists \"$RootLsd/$LsdSrc/system_options-$CurPlatform.txt\" ] { \
 					set file [ open \"$RootLsd/$LsdSrc/system_options-$CurPlatform.txt\" r ]; \
-					set a [ read -nonewline $file ]; \
+					set a [ string trim [ read -nonewline $file ] ]; \
 					close $file \
 				} { \
 					set a \"File $DefaultSysOpt is missing\nPlease reinstall LSD\" \
@@ -4649,7 +4649,7 @@ int lsdmain( int argn, char **argv )
 		if ( choice == 1 )
 		{
 			cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
-			cmd( "puts -nonewline $f [ .l.t.text get 1.0 end ]" );
+			cmd( "puts -nonewline $f [ string trim [ .l.t.text get 1.0 end ] ]" );
 			cmd( "close $f" );
 			choice = 46; 	//go to create makefile
 		}
@@ -4680,7 +4680,7 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set b \"%s\"", s );
 		cmd( "set f [ open $MODEL_OPTIONS r ]" );
-		cmd( "set a [ read -nonewline $f ]" );
+		cmd( "set a [ string trim [ read -nonewline $f ] ]" );
 		cmd( "close $f" );
 
 		cmd( "set gcc_conf \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=\"" );
@@ -4758,7 +4758,7 @@ int lsdmain( int argn, char **argv )
 						} \
 					}; \
 					.l.t.text delete 1.0 end; \
-					.l.t.text insert end \"[ string trim $a ]\n\" \
+					.l.t.text insert end \"[ string trim $a ]\" \
 				} \
 			}" );
 		cmd( "ttk::button .l.d.opt.ext -width $butWid -text \"Add Extra\" -command { \
@@ -4792,7 +4792,7 @@ int lsdmain( int argn, char **argv )
 					set a [ string replace $a $pos1 $pos1 \" $extra_files\n\" ] \
 				}; \
 				.l.t.text delete 1.0 end; \
-				.l.t.text insert end \"[ string trim $a ]\n\" \
+				.l.t.text insert end \"[ string trim $a ]\" \
 			}" );
 		cmd( "ttk::button .l.d.opt.def -width $butWid -text \"Default\" -command { \
 				if { $debug == 0 } { \
@@ -4848,7 +4848,7 @@ int lsdmain( int argn, char **argv )
 		if ( choice == 1 )
 		{
 			cmd( "set f [ open $MODEL_OPTIONS w ]" );
-			cmd( "puts -nonewline $f [.l.t.text get 1.0 end]" );
+			cmd( "puts -nonewline $f [ string trim [ .l.t.text get 1.0 end ] ]" );
 			cmd( "close $f" );
 			choice = 46;		//go to create makefile
 		}
