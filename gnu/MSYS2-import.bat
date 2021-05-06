@@ -58,7 +58,12 @@ if "%2"=="" (
 
 :import
 
-set GCC_VER=10.2.0
+set GCC_VER=10.3.0
+set TCL_VER=8.6
+set DDE_VER=1.4
+set REG_VER=1.3
+set THREAD_VER=2.8.6
+set PYTHON_VER=3.8
 set OPT=/D/Q/Y
 set XOPT=%OPT%/S
 
@@ -89,10 +94,10 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\include\zconf.h %LSD_DIR%\gnu\include\
 XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libz.* %LSD_DIR%\gnu\lib\
 
 rem Tcl/Tk framework
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tclsh86.exe %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\wish86.exe %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tcl86.dll %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk86.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tclsh*.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\wish*.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tcl*.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk*.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\include\tcl*.* %LSD_DIR%\gnu\include\
 XCOPY %OPT% %MSYS_DIR%\mingw64\include\tk*.* %LSD_DIR%\gnu\include\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\include\X11 %LSD_DIR%\gnu\include\X11\
@@ -101,21 +106,21 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtk*.* %LSD_DIR%\gnu\lib\
 XCOPY %OPT% %MSYS_DIR%\mingw64\lib\tcl*.* %LSD_DIR%\gnu\lib\
 XCOPY %OPT% %MSYS_DIR%\mingw64\lib\tk*.* %LSD_DIR%\gnu\lib\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl8 %LSD_DIR%\gnu\lib\tcl8\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl8.6 %LSD_DIR%\gnu\lib\tcl8.6\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tk8.6 %LSD_DIR%\gnu\lib\tk8.6\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\dde1.4 %LSD_DIR%\gnu\lib\dde1.4\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\reg1.3 %LSD_DIR%\gnu\lib\reg1.3\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\thread2.8.6 %LSD_DIR%\gnu\lib\thread2.8.6\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl%TCL_VER% %LSD_DIR%\gnu\lib\tcl%TCL_VER%\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tk%TCL_VER% %LSD_DIR%\gnu\lib\tk%TCL_VER%\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\dde%DDE_VER% %LSD_DIR%\gnu\lib\dde%DDE_VER%\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\reg%REG_VER% %LSD_DIR%\gnu\lib\reg%REG_VER%\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\thread%THREAD_VER% %LSD_DIR%\gnu\lib\thread%THREAD_VER%\
 
 rem gdb debugger
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\gdb.exe %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\python3.8-config %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libpython3.8.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\python%PYTHON_VER%-config %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libpython%PYTHON_VER%.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libreadline8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libtermcap-0.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libxxhash.dll %LSD_DIR%\gnu\bin\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\gcc %LSD_DIR%\gnu\lib\gcc\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\python3.8 %LSD_DIR%\gnu\lib\python3.8\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\python%PYTHON_VER% %LSD_DIR%\gnu\lib\python%PYTHON_VER%\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\share\gdb %LSD_DIR%\gnu\share\gdb\
 XCOPY %OPT% %MSYS_DIR%\mingw64\etc\gdbinit %LSD_DIR%\gnu\etc\
 
