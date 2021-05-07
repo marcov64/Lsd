@@ -2730,6 +2730,7 @@ case 78:
 		
 		*choice = 0;					// set top window as parent
 		set_all( choice, cur, cv->label, lag );
+		redrawRoot = true;				// redraw is needed to show new value tip
 		
 		if ( initVal )
 		{
@@ -2743,7 +2744,7 @@ case 78:
 			{
 				initVal = false;
 				initParent = NULL;
-				redrawRoot = redrawStruc = true;	// redraw is needed to show new element
+				redrawStruc = true;		// redraw is needed to show new element
 			}
 		}
 	}
@@ -3261,6 +3262,7 @@ case 21:
 
 	edit_data( n, choice, r->label );
 
+	redrawRoot = true;
 	unsaved_change( true );			// signal unsaved change
 
 	if ( cur2 != NULL )				// restore original current object
