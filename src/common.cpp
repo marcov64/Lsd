@@ -912,14 +912,14 @@ int strlf( char *out, const char *str, int outSz )
 {
 	int i, j;
 	
-	for ( i = j = 0; str[ j ] != '\0' && i < outSz - 1; ++i, ++j )
+	for ( i = j = 0; str[ j ] != '\0' && i < outSz - 1; ++j )
 		if ( str[ j ] == '\r' )
 			if ( str[ j + 1 ] == '\n' )
 				++j;
 			else
-				out[ i ] = '\n';
+				out[ i++ ] = '\n';
 		else
-			out[ i ] = str[ j ];
+			out[ i++ ] = str[ j ];
 	
 	out[ i ] = '\0';
 	
@@ -952,7 +952,7 @@ int strtrim( char *out, const char *str, int outSz )
 		--end;
 	++end;
 
-	size = ( end - str ) < outSz - 1 ? ( end - str ) : outSz - 1;
+	size = ( end - str ) < outSz ? ( end - str ) : outSz;
 
 	memcpy( out, str, size );
 	out[ size ] = '\0';
