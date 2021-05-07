@@ -368,8 +368,6 @@ void link_cells( object *r, char *lab )
 						tooltip::tooltip $w.c%d_v%sp \"Parameter '%s'\" \
 					}", i, i, i, cv->label, cv->label, i, i, cv->label, cv->label );
 				
-				cmd( "bind $w.c%d_v%sp <Button-1> { selectcell $g.can $w.c%d_v%sp; break }", i, cv->label, i, cv->label );
-				
 				if ( strlen( previous ) != 0 )
 				{
 					cmd( "bind %s <Return> { selectcell $g.can $w.c%d_v%sp }", previous, i, cv->label );
@@ -412,8 +410,6 @@ void link_cells( object *r, char *lab )
 							tooltip::tooltip $w.c%d_v%s_%d \"Variable '%s' (lag %d)\" \
 						}", i, i, i, cv->label, j, cv->label, j + 1, i, i, cv->label, j, cv->label, j + 1 );
 
-					cmd( "bind  $w.c%d_v%s_%d <Button-1> { selectcell $g.can $w.c%d_v%s_%d; break }", i, cv->label, j, i, cv->label, j );
-					
 					if ( strlen( previous ) != 0 )
 					{
 						cmd( "bind %s <Return> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->label, j );
