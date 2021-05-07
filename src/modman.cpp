@@ -6101,7 +6101,7 @@ bool discard_change( void )
 			puts -nonewline $file [ .f.t.t get 0.0 end ]; \
 			close $file; \
 			set before [ .f.t.t get 0.0 end ]; \
-			update_title_bar; \
+			upd_bars; \
 			set ans 1; \
 		} elseif [ string equal $answer cancel ] { \
 			set ans 0; \
