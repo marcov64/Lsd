@@ -1636,8 +1636,12 @@ int lsdmain( int argn, char **argv )
 			cmd( "file mkdir \"$groupDir/$mdir\"" );
 			cmd( "cd \"$groupDir/$mdir\"" );
 			cmd( "set groupDir \"$groupDir/$mdir\"" );
-			cmd( "set f [ open $GROUP_INFO w ]; puts -nonewline $f \"$mname\"; close $f" );
-			cmd( "set f [ open $DESCRIPTION w ]; puts -nonewline $f \"[ .a.tdes.e get 0.0 end ]\"; close $f" );
+			cmd( "set f [ open $GROUP_INFO w ]" );
+			cmd( "puts -nonewline $f \"$mname\"" );
+			cmd( "close $f" );
+			cmd( "set f [ open $DESCRIPTION w ]" );
+			cmd( "puts -nonewline $f \"[ .a.tdes.e get 0.0 end ]\"" );
+			cmd( "close $f" );
 			cmd( "set modelGroup \"$mname\"" );
 
 			cmd( "destroytop .a" );
@@ -4582,7 +4586,7 @@ int lsdmain( int argn, char **argv )
 		if ( choice == 1 )
 		{
 			cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" r ]" );
-			cmd( "set a [ string trim [ read -nonewline $f ] ]" );
+			cmd( "set a [ string trim [ read $f ] ]" );
 			cmd( "close $f" );
 			choice = 0;
 		}
@@ -4608,7 +4612,7 @@ int lsdmain( int argn, char **argv )
 				.l.t.text delete 1.0 end; \
 				if [ file exists \"$RootLsd/$LsdSrc/system_options-$CurPlatform.txt\" ] { \
 					set file [ open \"$RootLsd/$LsdSrc/system_options-$CurPlatform.txt\" r ]; \
-					set a [ string trim [ read -nonewline $file ] ]; \
+					set a [ string trim [ read $file ] ]; \
 					close $file \
 				} { \
 					set a \"File $DefaultSysOpt is missing\nPlease reinstall LSD\" \
@@ -4649,7 +4653,7 @@ int lsdmain( int argn, char **argv )
 		if ( choice == 1 )
 		{
 			cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
-			cmd( "puts -nonewline $f [ string trim [ .l.t.text get 1.0 end ] ]" );
+			cmd( "puts $f [ string trim [ .l.t.text get 1.0 end ] ]" );
 			cmd( "close $f" );
 			choice = 46; 	//go to create makefile
 		}
@@ -4680,7 +4684,7 @@ int lsdmain( int argn, char **argv )
 
 		cmd( "set b \"%s\"", s );
 		cmd( "set f [ open $MODEL_OPTIONS r ]" );
-		cmd( "set a [ string trim [ read -nonewline $f ] ]" );
+		cmd( "set a [ string trim [ read $f ] ]" );
 		cmd( "close $f" );
 
 		cmd( "set gcc_conf \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=\"" );
@@ -4848,7 +4852,7 @@ int lsdmain( int argn, char **argv )
 		if ( choice == 1 )
 		{
 			cmd( "set f [ open $MODEL_OPTIONS w ]" );
-			cmd( "puts -nonewline $f [ string trim [ .l.t.text get 1.0 end ] ]" );
+			cmd( "puts $f [ string trim [ .l.t.text get 1.0 end ] ]" );
 			cmd( "close $f" );
 			choice = 46;		//go to create makefile
 		}
@@ -5642,21 +5646,21 @@ void make_makefile( bool nw )
 	check_option_files( );
 
 	cmd( "set f [ open \"$modelDir/$MODEL_OPTIONS\" r ]" );
-	cmd( "set a [ read -nonewline $f ]" );
+	cmd( "set a [ string trim [ read $f ] ]" );
 	cmd( "close $f" );
 
 	cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" r ]" );
-	cmd( "set d [ read -nonewline $f ]" );
+	cmd( "set d [ string trim [ read $f ] ]" );
 	cmd( "close $f" );
 
 	cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile-%s.txt\" r ]", nw ? "NW" : ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 ) );
 	
-	cmd( "set b [ read -nonewline $f ]" );
+	cmd( "set b [ string trim [ read $f ] ]" );
 	cmd( "close $f" );
 
-	cmd( "set c \"# Model compilation options\\n$a\\n\\n# System compilation options\\n$d\\nLSDROOT=$RootLsd\\n\\n# Body of makefile%s (from makefile_%s.txt)\\n$b\"", nw ? "NW" : "", nw ? "NW" : ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 ) );
+	cmd( "set c \"# Model compilation options\\n$a\\n\\n# System compilation options\\n$d\\n\\n# Body of makefile%s (from makefile_%s.txt)\\n$b\"", nw ? "NW" : "", nw ? "NW" : ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 ) );
 	cmd( "set f [ open \"$modelDir/makefile%s\" w ]", nw ? "NW" : "" );
-	cmd( "puts -nonewline $f $c" );
+	cmd( "puts $f $c" );
 	cmd( "close $f" );
 }
 
@@ -5679,7 +5683,7 @@ void check_option_files( bool sys )
 			cmd( "if { $dir ne \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
 			cmd( "set a \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
 			cmd( "set f [ open \"$modelDir/$MODEL_OPTIONS\" w ]" );
-			cmd( "puts -nonewline $f $a" );
+			cmd( "puts $f $a" );
 			cmd( "close $f" );
 		}
 	}
@@ -5690,10 +5694,10 @@ void check_option_files( bool sys )
 		cmd( "if [ string equal $tcl_platform(platform) windows ] { set sysfile \"system_options-windows.txt\" } elseif [ string equal $tcl_platform(os) Darwin ] { set sysfile \"system_options-mac.txt\" } else { set sysfile \"system_options-linux.txt\" }" );
 		cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
 		cmd( "set f1 [ open \"$RootLsd/$LsdSrc/$sysfile\" r ]" );
-		cmd( "puts -nonewline $f \"# LSD options\n\"" );
-		cmd( "puts -nonewline $f \"LSDROOT=$RootLsd\n\"" );
-		cmd( "puts -nonewline $f \"SRC=$LsdSrc\n\n\"" );
-		cmd( "puts -nonewline $f [ read $f1 ]" );
+		cmd( "puts $f \"# LSD options\"" );
+		cmd( "puts $f \"LSDROOT=$RootLsd\"" );
+		cmd( "puts $f \"SRC=$LsdSrc\n\"" );
+		cmd( "puts $f [ string trim [ read $f1 ] ]" );
 		cmd( "close $f" );
 		cmd( "close $f1" );
 	}
