@@ -68,7 +68,6 @@ void edit_data( object *r, int *choice, char *lab )
 
 	first = r->search( lab );
 	cmd( "set cwidth 11" );
-	cmd( "set position 1.0" );
 	
 	cmd( "newtop .inid \"%s%s - LSD Initial Values Editor\" { set choice 1 }", unsaved_change( ) ? "*" : " ", simul_name );
 
@@ -314,7 +313,7 @@ void link_cells( object *r, char *lab )
 			cmd( "ttk::label $w.typ_t%s -text (P) -style hl.TLabel", cv1->label );
 			cmd( "grid $w.typ_t%s -row %d -column 1 -padx 1", cv1->label, k );
 			cmd( "mouse_wheel $w.typ_t%s", cv1->label );
-			cmd( "ttk::button $w.t%s -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set choice 2; set var_name %s; set lag %d; set position $w.tit_t%s; set lastFocus [ focus -displayof $w ] }", cv1->label, cv1->label, j, cv1->label );
+			cmd( "ttk::button $w.t%s -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set var_name %s; set lag %d; set lastFocus $w.c1_v%sp; set choice 2 }", cv1->label, cv1->label, j, cv1->label );
 			cmd( "grid $w.t%s -row %d -column 2", cv1->label, k );
 			cmd( "mouse_wheel $w.t%s", cv1->label );
 			
@@ -336,7 +335,7 @@ void link_cells( object *r, char *lab )
 				cmd( "ttk::label $w.typ_t%s_%d -text (V_%d) -style hl.TLabel", cv1->label, j, j + 1 );
 				cmd( "grid $w.typ_t%s_%d -row %d -column 1 -padx 1", cv1->label, j, k );
 				cmd( "mouse_wheel $w.typ_t%s_%d", cv1->label, j );
-				cmd( "ttk::button $w.t%s_%d -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set choice 2; set var_name %s; set lag %d; set position $w.tit_t%s_%d; set lastFocus [ focus -displayof $w ] }", cv1->label, j, cv1->label, j, cv1->label, j );
+				cmd( "ttk::button $w.t%s_%d -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set var_name %s; set lag %d; set lastFocus $w.c1_v%s_%d; set choice 2 }", cv1->label, j, cv1->label, j, cv1->label, j );
 				cmd( "grid $w.t%s_%d -row %d -column 2", cv1->label, j, k );
 				cmd( "mouse_wheel $w.t%s_%d", cv1->label, j );
 			
