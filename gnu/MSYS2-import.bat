@@ -94,23 +94,23 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\include\zconf.h %LSD_DIR%\gnu\include\
 XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libz.* %LSD_DIR%\gnu\lib\
 
 rem Tcl/Tk framework
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tclsh*.exe %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\wish*.exe %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tcl*.dll %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk*.dll %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\include\tcl*.* %LSD_DIR%\gnu\include\
-XCOPY %OPT% %MSYS_DIR%\mingw64\include\tk*.* %LSD_DIR%\gnu\include\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\include\X11 %LSD_DIR%\gnu\include\X11\
-XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtcl*.* %LSD_DIR%\gnu\lib\
-XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtk*.* %LSD_DIR%\gnu\lib\
-XCOPY %OPT% %MSYS_DIR%\mingw64\lib\tcl*.* %LSD_DIR%\gnu\lib\
-XCOPY %OPT% %MSYS_DIR%\mingw64\lib\tk*.* %LSD_DIR%\gnu\lib\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl8 %LSD_DIR%\gnu\lib\tcl8\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl%TCL_VER% %LSD_DIR%\gnu\lib\tcl%TCL_VER%\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tk%TCL_VER% %LSD_DIR%\gnu\lib\tk%TCL_VER%\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\dde%DDE_VER% %LSD_DIR%\gnu\lib\dde%DDE_VER%\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\reg%REG_VER% %LSD_DIR%\gnu\lib\reg%REG_VER%\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\thread%THREAD_VER% %LSD_DIR%\gnu\lib\thread%THREAD_VER%\
+rem XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tclsh*.exe %LSD_DIR%\gnu\bin\
+rem XCOPY %OPT% %MSYS_DIR%\mingw64\bin\wish*.exe %LSD_DIR%\gnu\bin\
+rem XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tcl*.dll %LSD_DIR%\gnu\bin\
+rem XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk*.dll %LSD_DIR%\gnu\bin\
+rem XCOPY %OPT% %MSYS_DIR%\mingw64\include\tcl*.* %LSD_DIR%\gnu\include\
+rem XCOPY %OPT% %MSYS_DIR%\mingw64\include\tk*.* %LSD_DIR%\gnu\include\
+rem XCOPY %XOPT% %MSYS_DIR%\mingw64\include\X11 %LSD_DIR%\gnu\include\X11\
+rem XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtcl*.* %LSD_DIR%\gnu\lib\
+rem XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtk*.* %LSD_DIR%\gnu\lib\
+rem XCOPY %OPT% %MSYS_DIR%\mingw64\lib\tcl*.* %LSD_DIR%\gnu\lib\
+rem XCOPY %OPT% %MSYS_DIR%\mingw64\lib\tk*.* %LSD_DIR%\gnu\lib\
+rem XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl8 %LSD_DIR%\gnu\lib\tcl8\
+rem XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl%TCL_VER% %LSD_DIR%\gnu\lib\tcl%TCL_VER%\
+rem XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tk%TCL_VER% %LSD_DIR%\gnu\lib\tk%TCL_VER%\
+rem XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\dde%DDE_VER% %LSD_DIR%\gnu\lib\dde%DDE_VER%\
+rem XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\reg%REG_VER% %LSD_DIR%\gnu\lib\reg%REG_VER%\
+rem XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\thread%THREAD_VER% %LSD_DIR%\gnu\lib\thread%THREAD_VER%\
 
 rem gdb debugger
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\gdb.exe %LSD_DIR%\gnu\bin\
