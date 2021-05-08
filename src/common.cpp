@@ -914,10 +914,10 @@ int strlf( char *out, const char *str, int outSz )
 	
 	for ( i = j = 0; str[ j ] != '\0' && i < outSz - 1; ++j )
 		if ( str[ j ] == '\r' )
-			if ( str[ j + 1 ] == '\n' )
-				++j;
-			else
+		{
+			if ( str[ j + 1 ] != '\n' )
 				out[ i++ ] = '\n';
+		}
 		else
 			out[ i++ ] = str[ j ];
 	
