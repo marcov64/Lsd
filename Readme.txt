@@ -298,7 +298,7 @@ Please note that MSYS2 compiler is NOT required (or recommended) if the above in
 
 Step-by-step procedure to install the MSYS2 64-bit compiler (an internet connection is required):
 
-1. Download and execute the MSYS2 64-bit installer from https://www.msys2.org.
+1. Download and execute the MSYS2 64-bit installer from https://www.msys2.org, accepting the default installation directory ("c:\msys64") to prevent warnings in LSD
 
 2. Open the MSYS2 shell (icon on Start Menu) and update MSYS2 using the command:
 
@@ -333,7 +333,7 @@ To define it, open "Control Panel", sequentially select "System and Security", "
 
 Please note that Cygwin compiler is NOT required (or recommended) if the above instructions for installing LSD were already performed, as LSD already embeds an up-to-date compiler for Windows. 
 
-The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64") or to the existing Cygwin directory in case of an update. If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, five non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Alternatively, the pure-Cygwin, non-MinGW 64-bit gcc compiler can be also used, if matched with the corresponding Tcl/Tk and zlib libraries. Lastly, Cygwin main and compiler binary subdirectories must be added to the PATH environment variable (not done by the installer).
+The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Install Cygwin to the default directory ("C:\cygwin64") to prevent warnings in LSD. If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, five non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Alternatively, the pure-Cygwin, non-MinGW 64-bit gcc compiler can be also used, if matched with the corresponding Tcl/Tk and zlib libraries. Lastly, Cygwin main and compiler binary subdirectories must be added to the PATH environment variable (not done by the installer).
 
 Step-by-step procedure to install the Cygwing 64-bit compiler (an internet connection is required):
 

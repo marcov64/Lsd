@@ -298,6 +298,22 @@ set diffFile1name		"-L"		; # option for naming first file
 set diffFile2name		"-L"		; # option for naming second file
 set diffOptions			"-lsd"		; # other options
 
+# other software dependencies and required packages
+set winGCC	[ list \\msys64\\mingw64\\bin\\g++.exe \\cygwin64\\bin\\g++.exe \\cygwin64\\usr\\x86_64-w64-mingw32\\bin\\g++.exe ]
+set winDLL 	[ list libwinpthread-1.dll libgcc_s_seh-1.dll libstdc++-6.dll tcl86.dll tk86.dll zlib1.dll ]
+set winTcl	[ list \\msys64\\mingw64\\bin\\tcl86.dll ]
+set winTk	[ list \\msys64\\mingw64\\bin\\tk86.dll ]
+
+set linuxPkg 		[ list	g++ 				make	gdb		gnuplot		multitail	zlib			tcl				tk				]
+set linuxTyp 		[ list	exe 				exe 	exe		exe			exe			lib				lib				lib				]
+set linuxInclude	[ list "/usr/include" "/usr/local/include" "/usr/include/tcl8.6" "/usr/local/include/tcl8.6" ]
+set linuxLib 		[ list "/usr/lib" "/usr/local/lib" "/usr/lib/x86_64-linux-gnu" "/usr/local/lib/x86_64-linux-gnu" ]
+
+set inclPkg		[ list	zlib	tcl			tk			]
+set inclFile	[ list	zlib.h	tcl.h		tk.h		]
+set libPkg		[ list	zlib	tcl			tk			]
+set libFile		[ list	libz.a	libtcl8.6.a	libtk8.6.a	]
+
 # known themes table and associated parameters
 # theme list elements:		0:plat		1:pkg name				2:full name			3:dark	4:tbph	5:tbpv
 set themeTable(alt) 	   	{ all		ttk::theme::alt			"Alt"				0		1	 	1	}
