@@ -801,6 +801,26 @@ int lsdmain( int argn, char **argv )
 	cmd( "focus .f.t.t" );
 	cmd( "set keepfocus 0" );
 
+	// check required components for compilation
+	cmd( "check_components" );
+	if ( platform == LINUX && Tcl_GetVar( inter, "linuxMissing", 0 ) != NULL )
+	{
+		log_tcl_error( "C++ compiler and/or tools unavailable", "g++, make and zlib packages must be installed for model compilation" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"C++ compiler and/or tools unavailable\" -detail \"g++, make and zlib packages must be installed for model compilation.\n\nSee 'Readme.txt' for details on how to install them manually, or run the LSD installer again and make sure the indicated steps are fully performed.\"" );
+	}
+	else
+		if ( platform == MAC && Tcl_GetVar( inter, "xcode", 0 ) != NULL )
+		{
+			log_tcl_error( "C++ compiler unavailable", "Xcode command line tools must be installed for model compilation" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"C++ compiler unavailable\" -detail \"Xcode command line tools must be installed for model compilation.\n\nSee 'Readme.txt' for details on how to install it manually, or run the LSD installer again and make sure the indicated steps are fully performed.\"" );
+		}
+		else
+			if ( platform == WINDOWS && Tcl_GetVar( inter, "winConflict", 0 ) != NULL )
+			{
+				log_tcl_error( "Potentially conflicting software installed", "Software components included in LSD were also installed by another package" );
+				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Potentially conflicting software installed\" -detail \"Software components included in LSD were also installed by another package.\n\nIf you have compilation problems, please check 'Readme.txt' for details on how to adjust the PATH environment variable manually, or run the LSD installer again and make sure accepting LSD components to be the system default.\"" );
+			}
+
 	loop:
 
 	cmd( "if { ! $keepfocus } { focus .f.t.t; update idletasks } { set keepfocus 0 }" );

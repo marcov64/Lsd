@@ -69,6 +69,190 @@ proc LsdHtml a {
 
 
 #************************************************
+# CHECK_COMPONENTS
+# Checks if required external software components
+# are available and on the proper versions
+#************************************************
+proc check_components { } {
+	global CurPlatform RootLsd winGCC winDLL winTcl winTk linuxPkg linuxTyp inclPkg inclFile libPkg libFile linuxMissing xcode gnuplot multitail linuxPkgMiss linuxInclude linuxLib pathInclude pathLib existGCC existDLL msgGCC msgDLL winConflict
+	
+	if { $CurPlatform eq "mac" } {
+	
+		if [ catch { exec which g++ } ] {
+			set xcode 1
+		}
+		if [ catch { exec which gnuplot } ] {
+			set gnuplot 1
+		}	
+		if [ catch { exec which multitail } ] {
+			set multitail 1
+		}
+		
+	} elseif { $CurPlatform eq "linux" } {
+	
+		set linuxPkgMiss [ list ]
+		set i 0
+		foreach pkg $linuxPkg {
+			if [ string equal [ lindex $linuxTyp $i ] exe ] {
+				if [ catch { exec which $pkg } ] {
+					lappend linuxPkgMiss $pkg
+				}
+			}
+			incr i
+		}
+		
+		if { [ lsearch $linuxPkgMiss g++ ] >= 0 || [ lsearch $linuxPkgMiss make ] >= 0 || [ lsearch $linuxPkgMiss zlib ] >= 0 } { 
+			set linuxMissing 1
+		}
+
+		# try to detect missing headers
+		set pathInclude [ list ]
+		foreach file $inclFile pkg $inclPkg {
+			set found 0
+			foreach include $linuxInclude {
+				if [ file exists $include/$file ] {
+					set found 1
+
+					# try to get just the base 'include' directory
+					set base [ string first include $include ]
+					if { $base >= 0 } {
+						set include [ string range $include 0 [ expr { $base + [ string length $include ] - 1 } ] ]
+					}
+
+					lappend pathInclude $include
+					break
+				}
+			}
+
+			if { ! $found && [ lsearch -exact $linuxPkgMiss $pkg ] < 0 } {
+				lappend linuxPkgMiss $pkg
+			}
+		}
+
+		set pathInclude [ lsort -unique $pathInclude ] 
+
+		# try to detect missing libraries
+		set pathLib [ list ]
+		foreach file $libFile pkg $libPkg {
+			set found 0
+			foreach lib $linuxLib {
+				if [ file exists $lib/$file ] {
+					set found 1
+
+					# try to get just the base 'lib' directory
+					set base [ string first lib $lib ]
+					if { $base >= 0 } {
+						set lib [ string range $lib 0 [ expr { $base + [ string length $lib ] - 1 } ] ]
+					}
+
+					lappend pathLib $libPath
+					break
+				}
+			}
+
+			if { ! $found && [ lsearch -exact $linuxPkgMiss $pkg ] < 0 } {
+				lappend linuxPkgMiss $pkg
+			}
+		}
+
+		set pathLib [ lsort -unique $pathLib ] 
+
+	} elseif { $CurPlatform eq "windows" } {
+	
+		# check if another compiler exists and is ahead on path
+		set existGCC [ list ]
+		set msgGCC ""
+		if { ! [ catch { set res [ exec where g++ ] } ] } {
+			foreach f [ split $res ] {
+				if { [ file dirname $f ] eq "$RootLsd/gnu/bin" } {
+					break
+				} else {
+					set existGCC [ lappend existGCC $f ]
+					set msgGCC "$msgGCC\n$f"
+				}	
+			}
+		}
+		
+		# check for a proper compiler
+		if { [ llength $existGCC ] > 0 } {
+			set ok 0
+			set gcc [ lindex $existGCC 0 ]
+			foreach path $winGCC {
+				if { [ string first [ string tolower $path ] [ string tolower $gcc ] ] >= 0 } {
+					set ok 1
+				}
+			}
+			
+			if { ! $ok } {
+				set winConflict 1
+			}
+		}
+		
+		# check if required libraries exist ahead on path
+		set existDLL [ list ]
+		set msgDLL ""
+		foreach dll $winDLL {
+			if { ! [ catch { set res [ exec where $dll ] } ] } {
+				foreach f [ split $res ] {
+					if { [ file dirname $f ] eq "$RootLsd/gnu/bin" } {
+						break
+					} else {
+						set existDLL [ lappend existDLL $f ]
+						set msgDLL "$msgDLL\n$f"
+					}
+				}
+			}
+		}
+		
+		# check for a proper Tcl/Tk
+		if { [ llength $existDLL ] > 0 } {
+			set ok 1
+			foreach dll $existDLL {
+				if { [ string first tcl [ string tolower $dll ] ] >= 0 } {
+					set ok 0
+					foreach path $winTcl {
+						if { [ string first [ string tolower $path ] [ string tolower $dll ] ] >= 0 } {
+							set ok 1
+						}
+					}
+					
+					break
+				}
+			}
+			
+			if { $ok } {
+				foreach dll $existDLL {
+					if { [ string first tk [ string tolower $dll ] ] >= 0 } {
+						set ok 0
+						foreach path $winTk {
+						if { [ string first [ string tolower $path ] [ string tolower $dll ] ] >= 0 } {
+								set ok 1
+							}
+						}
+						
+						break
+					}
+				}
+			}
+			
+			if { ! $ok } {
+				set winConflict 1
+			}
+		}
+	
+		if { [ catch { exec where wgnuplot.exe } ] && ! [ file exists "C:/Program Files/gnuplot/bin/wgnuplot.exe" ] } {
+			set gnuplot 1
+		}
+	
+	} else {
+		return 0
+	}
+	
+	return 1
+}
+
+
+#************************************************
 # FN_SPACES
 # Checks is a filename has spaces
 # Set 'mult' to one if multiple file names are allowed
