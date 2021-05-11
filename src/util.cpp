@@ -649,7 +649,7 @@ description *add_description( char const *lab, int type, char const *text, char 
 	{
 		for ( i = 0; i < 2; ++i )
 		{
-			str = strstr( text, kwords[ i ] );
+			str = ( char * ) strstr( text, kwords[ i ] );
 			if ( str != NULL )
 				for( j = 0; j < strlen( kwords[ i ] ); ++j, ++str )
 					*str = tolower( *str );
@@ -666,7 +666,7 @@ description *add_description( char const *lab, int type, char const *text, char 
 	
 	if ( ! strwsp( init ) )
 	{
-		str = strstr( init, kwords[ 1 ] );
+		str = ( char * ) strstr( init, kwords[ 1 ] );
 		if ( str != NULL )
 			for( j = 0; j < strlen( kwords[ 1 ] ); ++j, ++str )
 				*str = tolower( *str );
@@ -757,7 +757,7 @@ description *change_description( char const *lab_old, char const *lab, int type,
 				{
 					for ( i = 0; i < 2; ++i )
 					{
-						str = strstr( text, kwords[ i ] );
+						str = ( char * ) strstr( text, kwords[ i ] );
 						if ( str != NULL )
 							for( j = 0; j < strlen( kwords[ i ] ); ++j, ++str )
 								*str = tolower( *str );
@@ -779,7 +779,7 @@ description *change_description( char const *lab_old, char const *lab, int type,
 
 				if ( ! strwsp( init ) )
 				{
-					str = strstr( init, kwords[ 1 ] );
+					str = ( char * ) strstr( init, kwords[ 1 ] );
 					if ( str != NULL )
 						for( j = 0; j < strlen( kwords[ 1 ] ); ++j, ++str )
 							*str = tolower( *str );
