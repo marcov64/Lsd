@@ -651,7 +651,7 @@ description *add_description( char const *lab, int type, char const *text, char 
 		{
 			str = ( char * ) strstr( text, kwords[ i ] );
 			if ( str != NULL )
-				for( j = 0; j < strlen( kwords[ i ] ); ++j, ++str )
+				for( j = 0; j < ( int ) strlen( kwords[ i ] ); ++j, ++str )
 					*str = tolower( *str );
 		}
 		
@@ -668,7 +668,7 @@ description *add_description( char const *lab, int type, char const *text, char 
 	{
 		str = ( char * ) strstr( init, kwords[ 1 ] );
 		if ( str != NULL )
-			for( j = 0; j < strlen( kwords[ 1 ] ); ++j, ++str )
+			for( j = 0; j < ( int ) strlen( kwords[ 1 ] ); ++j, ++str )
 				*str = tolower( *str );
 		
 		cd->init = new char [ strlen( init ) + 1 ]; 
@@ -759,7 +759,7 @@ description *change_description( char const *lab_old, char const *lab, int type,
 					{
 						str = ( char * ) strstr( text, kwords[ i ] );
 						if ( str != NULL )
-							for( j = 0; j < strlen( kwords[ i ] ); ++j, ++str )
+							for( j = 0; j < ( int ) strlen( kwords[ i ] ); ++j, ++str )
 								*str = tolower( *str );
 					}
 		
@@ -781,7 +781,7 @@ description *change_description( char const *lab_old, char const *lab, int type,
 				{
 					str = ( char * ) strstr( init, kwords[ 1 ] );
 					if ( str != NULL )
-						for( j = 0; j < strlen( kwords[ 1 ] ); ++j, ++str )
+						for( j = 0; j < ( int ) strlen( kwords[ 1 ] ); ++j, ++str )
 							*str = tolower( *str );
 		
 					cd->init = new char [ strlen( init ) + 1 ]; 
@@ -906,11 +906,37 @@ void set_ttip_descr( const char *w, const char *lab, int it, bool init )
 	cd = search_description( lab, false );
 	if ( cd != NULL && strlen( fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1, init ) ) > 0 )
 	{
-		if ( it >= 0 )			// listbox?
+		if ( it >= 0 )			// listbox/canvas?
 			cmd( "tooltip::tooltip %s -item %d \"%s\"", w, it, desc );
 		else
 			cmd( "tooltip::tooltip %s \"%s\"", w, desc );
 	}
+}
+
+
+/***************************************************
+TCL_SET_TTIP_DESCR
+***************************************************/
+int Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+{
+	int it, init;
+	
+	if ( argc < 3 || argc > 5 )		// require 4 parameters: widget name, variable name text, item number (opt) and init text flag (opt)
+		return TCL_ERROR;
+		
+	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL || 
+		 ! strcmp( argv[ 1 ], "" ) || ! strcmp( argv[ 2 ], "" ) )
+		return TCL_ERROR;
+	
+	if ( argc < 4 || argv[ 3 ] == NULL || sscanf( argv[ 3 ], "%d", & it ) == 0 )
+		it = -1;
+	
+	if ( argc < 5 || argv[ 4 ] == NULL || sscanf( argv[ 4 ], "%d", & init ) == 0 || init < 0 || init > 1 )
+		init = 1;
+	
+	set_ttip_descr( argv[ 1 ], argv[ 2 ], it, init ? true : false );
+	
+	return TCL_OK;
 }
 
 

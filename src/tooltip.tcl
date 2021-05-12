@@ -480,7 +480,7 @@ proc ::tooltip::itemTip {w args} {
 
 proc ::tooltip::enableCanvas {w args} {
     if {[string match *itemTip* [$w bind all <Enter>]]} { return }
-#    $w bind all <Enter> +[namespace code [list itemTip $w]]
+    $w bind all <Enter> +[namespace code [list itemTip $w]]
     $w bind all <Leave>	+[namespace code [list hide 1]] ; # fade ok
     $w bind tooltip <Enter> +[namespace code [list itemTip $w]]
     $w bind tooltip <Leave>	+[namespace code [list hide 1]] ; # fade ok

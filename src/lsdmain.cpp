@@ -526,6 +526,9 @@ int lsdmain( int argn, char **argv )
 	// create a Tcl command to get LSD variable description from equation file(s)
 	Tcl_CreateCommand( inter, "get_var_descr", Tcl_get_var_descr, NULL, NULL );
 
+	// create a Tcl command to set tooltip from LSD variable description
+	Tcl_CreateCommand( inter, "set_ttip_descr", Tcl_set_ttip_descr, NULL, NULL );
+
 	// create Tcl command to upload series data
 	Tcl_CreateObjCommand( inter, "upload_series", Tcl_upload_series, NULL, NULL );
 
