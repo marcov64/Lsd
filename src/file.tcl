@@ -23,47 +23,46 @@
 #************************************************
 proc LsdExit { } {
 	global RootLsd
-	if { [ file exists $RootLsd/Manual/temp.html ] } {
-		file delete -force $RootLsd/Manual/temp.html
-	}
 
-	if { [ file exists temp.html ] } {
-		file delete -force temp.html
-	}
 }
 
 
 #************************************************
 # LSDHELP
 #************************************************
-proc LsdHelp a {
-	global HtmlBrowser CurPlatform RootLsd
-	set here [ pwd ]
-	set f [ open $RootLsd/Manual/temp.html w ]
-	puts $f "<meta http-equiv=\"Refresh\" content=\"0;url=$a\">"
-	close $f
-	set b "[ file nativename $RootLsd/Manual/temp.html ]"
-	if { ! [ string equal $CurPlatform windows ] } {
-		exec $HtmlBrowser $b &
-	} {
-		exec cmd.exe /c start $b &
-	}
+proc LsdHelp { fn } {
+	global RootLsd
+	
+	LsdHtml "$RootLsd/Manual" "$fn"
 }
 
 
 #************************************************
 # LSDHTML
 #************************************************
-proc LsdHtml a {
+proc LsdHtml { dir fn } {
 	global HtmlBrowser CurPlatform
-	set f [ open temp.html w ]
-	puts $f "<meta http-equiv=\"Refresh\" content=\"0;url=$a\">"
-	close $f
-	set b "temp.html"
-	if { ! [ string equal $CurPlatform windows ] } {
-		exec $HtmlBrowser $b &
-	} {
-		exec cmd.exe /c start $b &
+	
+	if { $dir eq "" } {
+		set fqn "$fn"
+	} else {
+		set fqn "$dir/$fn"
+	}
+	
+	if { [ file exists "$fqn" ] } {
+
+		set fqn [ file nativename "$fqn" ]
+		
+		if { $CurPlatform ne "windows" } {
+			exec $HtmlBrowser "$fqn" &
+		} {
+			exec cmd.exe /c start "$fqn" &
+		}
+		
+		return 1
+		
+	} else {
+		return 0
 	}
 }
 

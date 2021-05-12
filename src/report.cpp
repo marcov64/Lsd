@@ -43,7 +43,6 @@ and also the whole set of variables and parameters used in the its own equation.
 #define TEX_BOTTOM 2.5
 
 bool table;
-char path_rep[ MAX_PATH_LENGTH + 1 ];
 int code;
 int desc;
 int extra;
@@ -422,7 +421,7 @@ void report( int *choice, object *r )
 		else
 			plog( "\nReport saved in file: %s\n", "", name_rep );
 		
-		cmd( "LsdHtml \"%s\"", name_rep );
+		cmd( "LsdHtml \"%s\" \"%s\"", path_rep, name_rep );
 	}
 
 	end:
@@ -439,25 +438,26 @@ SHOW_REPORT
 **********************************/
 void show_report( int *choice, const char *par_wnd )
 {
-	cmd( "set choice [ file exists \"%s\" ]", name_rep );
+	cmd( "set choice [ LsdHtml \"%s\" \"%s\" ]", path_rep, name_rep );
 	
 	if ( *choice == 0 )
 	{
-		cmd( "set answer [ ttk::messageBox -parent %s -message \"Model report not found\" -detail \"You may create a model report file from menu Model or press 'OK' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel ]", par_wnd );
+		cmd( "set answer [ ttk::messageBox -parent %s -message \"Model report not found\" -detail \"You may create a model report file from menu Model or press 'OK' to look for another report file.\" -type okcancel -title Warning -icon warning -default cancel ]", par_wnd );
 		cmd( "set choice [ string equal $answer ok ]" );
 		if ( *choice == 0 )
 			return;
 
-		cmd( "catch { cd \"%s\" }", path );
-
-		cmd( "set fname [ tk_getOpenFile -parent %s -title \"Load Report File\" -defaultextension \".html\" -initialdir \"$path\" -filetypes {{{HTML files} {.html}} {{All files} {*}} } ]", par_wnd );
+		if ( strlen( path_rep ) > 0 )
+			cmd( "set fname [ tk_getOpenFile -parent %s -title \"Load Report File\" -defaultextension \".html\" -initialdir \"%s\" -filetypes { {{HTML files} {.html}} } ]", par_wnd, path_rep );
+		else
+			cmd( "set fname [ tk_getOpenFile -parent %s -title \"Load Report File\" -defaultextension \".html\" -filetypes { {{HTML files} {.html}} } ]", par_wnd );
+			
 		cmd( "if { $fname == \"\" || [ fn_spaces \"$fname\" %s ] } { set choice 0 } { set choice 1 }", par_wnd );
 		if ( *choice == 0 )
 			return;
-	}
 
-	cmd( "set fname \"%s\"", name_rep );
-	cmd( "LsdHtml $fname" );
+		cmd( "LsdHtml \"\" \"$fname\"" );
+	}
 }
 
 

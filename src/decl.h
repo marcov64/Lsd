@@ -427,6 +427,7 @@ extern char lastObj[ ];			// last shown object for quick reload
 extern char lsd_eq_file[ ];		// equations saved in configuration file
 extern char name_rep[ ];		// documentation report file name
 extern char nonavail[ ];		// string for unavailable values
+extern char path_rep[ ];		// documentation report file path
 extern description *descr;		// model description structure
 extern double ymax;				// runtime plot max limit
 extern double ymin;				// runtime plot min limit

@@ -3835,6 +3835,14 @@ case 36:
 break;
 
 
+// See model report
+case 44:
+
+	show_report( choice, "." );
+  
+break;
+
+
 // Save result
 case 37:
 
@@ -3984,14 +3992,6 @@ case 43:
 
 	unsaved_change( true );		// signal unsaved change
 
-break;
-
-
-// See model report
-case 44:
-
-	show_report( choice, "." );
-  
 break;
 
 

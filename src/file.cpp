@@ -732,10 +732,7 @@ void unload_configuration ( bool full )
 	cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );	// no elements in model structure
 	
 	if ( ! running )
-	{
 		cmd( "destroytop .plt" );				// remove run-time plot window
-		cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );	// delete temporary files
-	}
 #endif
 
 	if ( full )									// full unload? (no new config?)

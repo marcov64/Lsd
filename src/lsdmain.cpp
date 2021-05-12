@@ -98,6 +98,7 @@ char lastObj[ MAX_ELEM_LENGTH + 1 ] = "";	// last shown object for quick reload
 char lsd_eq_file[ MAX_FILE_SIZE + 1 ] = "";	// equations saved in configuration file
 char msg[ TCL_BUFF_STR + 1 ] = "";			// auxiliary Tcl buffer
 char name_rep[ MAX_PATH_LENGTH + 1 ];		// documentation report file name
+char path_rep[ MAX_PATH_LENGTH + 1 ];		// documentation report file path
 char tcl_dir[ MAX_PATH_LENGTH + 1 ];		// Tcl/Tk directory
 description *descr = NULL;	// model description structure
 eq_mapT eq_map;				// fast equation look-up map
@@ -561,6 +562,7 @@ int lsdmain( int argn, char **argv )
 	eq_file = upload_eqfile( );
 	strcpy( lsd_eq_file, "" );
 	sprintf( name_rep, "report_%s.html", simul_name );
+	strcpy( path_rep, "" );
 
 	// fix model configuration file
 	if ( i == 0 )
