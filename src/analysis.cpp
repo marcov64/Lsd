@@ -9350,6 +9350,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 					tOk = true;
 				else
 					tOk = false;
+				
 				sprintf( txtLab, "%s_%s", str[ i ], tag[ i ] );
 				break;
 				
@@ -9375,8 +9376,11 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			h = get_int( "ylabel" );
 			if ( h > tbordsize + vsize + bbordsize - 2 * lheight )
 				break;
-			cmd( "$p create text $xlabel $ylabel -font $fontP -anchor nw -text \"%s\" -tag { txt%d text legend } -fill $c%d", txtLab, i, ( color < 1100 ) ? color : 0 );
+			cmd( "set it [ $p create text $xlabel $ylabel -font $fontP -anchor nw -text \"%s\" -tag { txt%d text legend } -fill $c%d ]", txtLab, i, ( color < 1100 ) ? color : 0 );
 			cmd( "set xlabel [ expr { $xlabel + $app + $htmarginP } ]" );
+			
+			if ( type == TSERIES )
+				cmd( "set_ttip_descr $p \"%s\" $it 0", str[ i ] );
 		}
 	}
 
