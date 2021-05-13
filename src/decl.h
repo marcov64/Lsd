@@ -289,7 +289,7 @@ void find_lags( object *r );
 void find_using( object *r, variable *v, FILE *frep, bool *found );
 void get_sa_limits( object *r, FILE *out, const char *sep );
 void get_saved( object *n, FILE *out, const char *sep, bool all_var = false );
-void get_var_descr( char const *lab, char *descr, int descr_len );
+void get_var_descr( char const *lab, char *desc, int descr_len );
 void histograms( int *choice );
 void histograms_cs( int *choice );
 void init_map( void );

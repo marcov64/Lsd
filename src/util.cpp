@@ -1002,7 +1002,7 @@ void return_where_used( char *lab, char s[ ] )
 /***************************************************
 GET_VAR_DESCR
 ***************************************************/
-void get_var_descr( char const *lab, char *descr, int descr_len )
+void get_var_descr( char const *lab, char *desc, int descr_len )
 {
 	char str[ 2 * MAX_ELEM_LENGTH ], str1[ MAX_LINE_SIZE + 1 ], str2[ descr_len ];
 	int i, j = 0, done = -1;
@@ -1083,7 +1083,7 @@ void get_var_descr( char const *lab, char *descr, int descr_len )
 	}
 	
 	str2[ j ] = '\0';
-	strcln( descr, str2, descr_len );
+	strcln( desc, str2, descr_len );
 }
 
 

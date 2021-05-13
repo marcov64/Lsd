@@ -8051,7 +8051,7 @@ int numcol = 16;
 void save_datazip( int *choice )
 {
 	char *app, **str, **tag, delimiter[ 10 ], misval[ 10 ], labprefix[ MAX_ELEM_LENGTH ];
-	const char *descr, *ext;
+	const char *desc, *ext;
 	double **data;
 	int i, j, fr, typelab, del, type_res, *start, *end, *id, headprefix = 0;
 	FILE *fsave = NULL;
@@ -8060,8 +8060,8 @@ void save_datazip( int *choice )
 
 	const char str0[ ] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000";
 	const char strsp[ ] = "                                                                                ";
-	const char descrRes[ ] = "LSD Result File";
-	const char descrTxt[ ] = "Text File";
+	const char descRes[ ] = "LSD Result File";
+	const char descTxt[ ] = "Text File";
 	const char extResZip[ ] = ".res.gz";
 	const char extTxtZip[ ] = ".txt.gz";
 	const char extRes[ ] = ".res";
@@ -8236,7 +8236,7 @@ void save_datazip( int *choice )
 
 	if ( type_res == 4 )
 	{
-		descr = descrTxt;
+		desc = descTxt;
 		if ( ! dozip )
 			ext = extTxt;
 		else
@@ -8244,7 +8244,7 @@ void save_datazip( int *choice )
 	}
 	else
 	{
-		descr = descrRes;
+		desc = descRes;
 		if ( ! dozip )
 			ext = extRes;
 		else
@@ -8256,7 +8256,7 @@ void save_datazip( int *choice )
 	if ( strlen( path ) > 0 )
 		cmd( "cd \"$path\"" );
 
-	cmd( "set bah [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }  } ]", ext, descr, ext );
+	cmd( "set bah [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }  } ]", ext, desc, ext );
 	app = ( char * ) Tcl_GetVar( inter, "bah", 0 );
 	strcpy( msg, app );
 
@@ -9385,7 +9385,10 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	}
 
 	if ( i < nLine )
-		cmd( "$p create text $xlabel $ylabel -fill $colorsTheme(fg) -font $fontP -anchor nw -text \"(%d more...)\"", nLine - i );
+	{
+		cmd( "set it [ $p create text $xlabel $ylabel -fill $colorsTheme(fg) -font $fontP -anchor nw -text \"(%d more...)\" ]", nLine - i );
+		cmd( "tooltip::tooltip $p -item  $it \"%d series labels not presented\"", nLine - i );
+	}
 
 	// create context menu and common bindings
 	canvas_binds( cur_plot );
@@ -9529,7 +9532,7 @@ void add_da_plot_tab( const char *w, int id_plot )
 			ttk::notebook::enableTraversal $daptab; \
 			showtop $w; \
 			bind $w <F1> { LsdHelp menudata_res.html#graph }; \
-			bind $w <Escape> \"wm withdraw $w\"; \
+			bind $w <Escape> \"wm withdraw $w\" \
 		} else { \
 			settop $w \
 		}", unsaved_change( ) ? "*" : " ", simul_name );

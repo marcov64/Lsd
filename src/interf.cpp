@@ -7282,20 +7282,20 @@ equation file(s) from Tcl
 ****************************************************/
 int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
 {
-	char vname[ MAX_ELEM_LENGTH ], descr[ 10 * MAX_LINE_SIZE ];
+	char vname[ MAX_ELEM_LENGTH ], desc[ 10 * MAX_LINE_SIZE ];
 	
 	if ( argc != 2 )						// require 1 parameter: variable name
 		return TCL_ERROR;
 	
 	if ( argv[ 1 ] == NULL || strlen( argv[ 1 ] ) == 0 )
-		strcpy( descr, "" );				// empty name: do nothing
+		strcpy( desc, "" );				// empty name: do nothing
 	else
 	{
 		sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
-		get_var_descr( vname, descr, 10 * MAX_LINE_SIZE );
+		get_var_descr( vname, desc, 10 * MAX_LINE_SIZE );
 	}
 	
-	Tcl_SetResult( inter, descr, TCL_VOLATILE );
+	Tcl_SetResult( inter, desc, TCL_VOLATILE );
 	return TCL_OK;		
 }
 

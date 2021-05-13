@@ -606,6 +606,7 @@ int load_configuration( bool reload, bool quick )
 		goto endLoad;
 	}  
 	
+	empty_description( );						// remove existing descriptions
 	i = fscanf( f, "%999s", msg );				// should be the first description   
 	for ( j = 0; strcmp( msg, "DOCUOBSERVE" ) && i == 1 && j < MAX_FILE_TRY; ++j )
 	{ 
@@ -701,13 +702,12 @@ endLoad:
 /*****************************************************************************
 UNLOAD_CONFIGURATION
 	Unload the current configuration
-	If reload is true, just the model data is unloaded
+	If full is false, just the model data is unloaded
 	Returns: pointer to root object
 ******************************************************************************/
 void unload_configuration ( bool full )
 {
-	empty_blueprint( );						// remove current model structure
-	empty_description( );
+	empty_blueprint( );							// remove current model structure
 	root->delete_obj( );
 	root = new object;
 	root->init( NULL, "Root" );
@@ -737,6 +737,8 @@ void unload_configuration ( bool full )
 
 	if ( full )									// full unload? (no new config?)
 	{
+		empty_description( );					// remove element descriptions
+		
 		delete [ ] path;						// reset current path
 		path = new char[ strlen( exec_path ) + 1 ];
 		strcpy( path, exec_path );

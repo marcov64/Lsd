@@ -321,6 +321,8 @@ proc destroytop w {
 		focus [ winfo parent $w ]
 	}
 	
+	tooltip::tooltip clear $w.*
+	
 	destroy $w
 	update idletasks
 
