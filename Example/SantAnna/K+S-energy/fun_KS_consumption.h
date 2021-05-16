@@ -183,7 +183,7 @@ V( "f2rescale" );								// redistribute exiting m.s.
 v[8] = ( MC2_1 == 0 ) ? 0 : MC2 / MC2_1 - 1;	// change in market conditions
 
 k = max( 0, round( F2 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
-						 omicron * min( max( v[8], x2inf ), x2sup ) ) ) );
+						  omicron * min( max( v[8], x2inf ), x2sup ) ) ) );
 				 
 // apply return-to-the-average stickiness random shock to the number of entrants
 k -= min( RND * stick * ( ( double ) ( F2 - j ) / F20 - 1 ) * F20, k );
@@ -355,7 +355,8 @@ EQUATION( "L2" )
 /*
 Work force (labor) size employed by consumption-good sector
 */
-v[1] = VS( LABSUPL1, "Ls" ) - VS( CAPSECL1, "L1" );// available labor force
+v[1] = VS( LABSUPL1, "Ls" ) - VS( ENESECL1, "Le" ) - VS( CAPSECL1, "L1" );
+												// available labor force
 v[2] = V( "L2d" );								// desired workers in sector 2
 RESULT( min( v[2], v[1] ) )						// pick up to available
 

@@ -10,27 +10,31 @@
 
 /*============================== KEY EQUATIONS ===============================*/
 
-EQUATION( "JO1" )
+EQUATION( "L1" )
 /*
-Open job positions in capital-good sector
+Work force (labor) size employed by capital-good sector
 */
 
-v[1] = VS( LABSUPL1, "Ls" );					// available labor force
-v[2] = V( "L1dRD" );							// R&D labor demand in sector 1
-v[3] = V( "L1d" );								// production labor in sector 1
-v[4] = VS( CONSECL1, "L2d" );					// production labor in sector 2
-v[5] = COUNT( "Wrk1" ) * VS( LABSUPL1, "Lscale" );// current workers
+v[1] = VS( LABSUPL1, "Ls" ) - VS( ENESECL1, "Le" );// available labor force
+v[2] = V( "L1rd" );								// R&D labor in sector 1
+v[3] = V( "L1d" );								// desired workers in sector 1
+v[4] = VS( CONSECL1, "L2d" );					// desired workers in sector 2
+v[5] = V( "L1shortMax" );						// max shortage allowed in sector
 
-v[2] = min( v[2], v[1] );						// ignore demand over total labor
-v[3] = min( v[3], v[1] );
+v[3] = min( v[3], v[1] );						// ignore demand over total labor
+v[4] = min( v[4], v[1] );
 
-v[3] -= v[2];									// labor used in production
+if ( v[1] - v[2] < v[3] + v[4] )				// labor shortage?
+{
+	v[6] = ( v[1] - v[2] ) / ( v[3] + v[4] );	// shortage factor
+	
+	if ( v[6] < 1 - v[5] )						// over cap?
+		v[6] = 1 - v[5];						// shortage on cap
+}
+else
+	v[6] = 1;									// no shortage
 
-// split possible labor shortage proportionally up to a limit (to avoid crashes)
-if ( ( v[3] + v[4] ) > ( v[1] - v[2] ) )
-	v[3] *= max( ( v[1] - v[2] ) / ( v[3] + v[4] ), 1 - V( "L1shortMax" ) );
-
-RESULT( max( ceil( v[2] + v[3] - v[5] ), 0 ) )	// hires scaled and rounded up
+RESULT( v[2] + ( v[3] - v[2] ) * v[6] )
 
 
 EQUATION( "MC1" )
@@ -131,7 +135,7 @@ V( "f1rescale" );								// redistribute exiting m.s.
 v[8] = ( MC1_1 == 0 ) ? 0 : MC1 / MC1_1 - 1;	// change in market conditions
 
 k = max( 0, round( F1 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
-						 omicron * min( max( v[8], x2inf ), x2sup ) ) ) );
+						  omicron * min( max( v[8], x2inf ), x2sup ) ) ) );
 				 
 // apply return-to-the-average stickiness random shock to the number of entrants
 k -= min( RND * stick * ( ( double ) ( F1 - j ) / F10 - 1 ) * F10, k );
@@ -159,127 +163,6 @@ INIT_TSEARCHT( "Firm1", i );					// prepare turbo search indexing
 RESULT( v[0] )
 
 
-EQUATION( "fires1" )
-/*
-Number of workers fired in capital-good sector
-Process required firing
-*/
-
-V( "retires1" );								// process retirements
-VS( CONSECL1, "retires2" );
-V( "quits1" );									// process quits
-VS( CONSECL1, "quits2" );
-
-v[1] = VS( LABSUPL1, "Lscale" );				// labor scaling
-v[2] = VS( LABSUPL1, "Ls" );					// available labor force
-v[3] = V( "L1dRD" );							// R&D labor demand in sector 1
-v[4] = V( "L1d" ) - v[3];						// production labor in sector 1
-v[5] = VS( CONSECL1, "L2d" );					// production labor in sector 2
-v[6] = COUNT( "Wrk1" );							// current workers (scaled)
-
-// split possible labor shortage proportionally up to a limit (to avoid crashes)
-if ( ( v[4] + v[5] ) > ( v[2] - v[3] ) )
-	v[4] *= max( ( v[2] - v[3] ) / ( v[4] + v[5] ), 1 - V( "L1shortMax" ) );
-
-// fires in sector 1, scaled-down and rounded-up
-j = v[6] - ceil( ( v[4] + v[3] ) / v[1] );
-
-if ( j <= 0 )									// nobody to fire?
-	END_EQUATION( 0 );
-
-if ( j >= v[6] )
-	j = v[6] - 1;								// keep at least 1 scaled worker
-
-// order firing list
-order_workers( ( int ) VS( PARENT, "flagFireOrder1" ), OBJ_WRK1, THIS );
-
-// then check firing worker by worker in sector 1 pool
-i = 0;
-CYCLE_SAFE( cur, "Wrk1" )
-	if ( i < j )
-	{
-		cur1 = SHOOKS( cur );					// pointer to Worker object
-		if ( VLS( cur1, "_Te", 1 ) + 1 < VS( cur1, "_Tc" ) )// contract not over?
-			continue;							// go to next worker
-		
-		fire_worker( var, cur1 );				// register fire
-		++i;									// scaled equivalent fires
-	}
-	else
-		break;
-
-RESULT( i * v[1] )
-
-
-EQUATION( "hires1" )
-/*
-Number of workers hired by firms in capital-good sector
-Start the labor market hiring all workers needed in capital-good sector
-*/
-
-V( "fires1" );									// make sure firing is done
-VS( CONSECL1, "fires2" );						// in both sectors
-VS( LABSUPL1, "appl" );							// and applications are done
-
-v[1] = VS( LABSUPL1, "Lscale" );				// labor scaling
-
-j = ceil( V( "JO1" ) / v[1] );					// scaled open jobs in sector 1
-appLisT *appl = & V_EXTS( PARENT, countryE, firm1appl );
-												// pointer to applications pool
-// get current top wage offered
-v[2] = VS( CONSECL1, "w2oMax" );
-
-// sort sector 1 candidate list according to the defined mode
-order_applications( ( int ) VS( PARENT, "flagHireOrder1" ), appl );
-
-// hire the ordered applications until queue is exhausted
-i = 0;											// counter to hired workers
-v[3] = DBL_MAX;									// minimum wage requested
-cur = NULL;										// pointer to worker asking it
-
-while ( j > 0 && appl->size( ) > 0 )
-{
-	// get the candidate worker object element and a pointer to it
-	const application candidate = appl->front( );
-
-	// offered wage ok (ignore very small differences)?
-	if ( ROUND( candidate.w, v[2], 0.01 ) <= v[2] )
-	{
-		// already employed? First quit current job
-		if ( VS( candidate.wrk, "_employed" ) )
-			quit_worker( var, candidate.wrk );
-
-		// flag hiring and set wage, employer and vintage to be used by worker
-		hire_worker( candidate.wrk, 1, THIS, v[2] );// set firm, vintage & wage
-		++i;									// scaled count hire
-		--j;									// adjust scaled labor demand
-	}
-	else
-		if ( candidate.w < v[3] )
-		{
-			v[3] = candidate.w;
-			cur = candidate.wrk;
-		}
-	
-	// remove worker from candidate queue
-	appl->pop_front();
-}
-
-// try to hire at least one worker, at any wage
-if ( j > 0 && i == 0 && cur != NULL )			// none hired but someone avail?
-{
-	if ( VS( cur, "_employed" ) )				// quit job if needed
-		quit_worker( var, cur );
-	
-	hire_worker( cur, 1, THIS, v[3] );			// pay requested wage
-	++i;
-}	
-
-appl->clear( );									// clear job application queue
-
-RESULT( i * v[1] )
-
-
 /*============================ SUPPORT EQUATIONS =============================*/
 
 EQUATION( "A1" )
@@ -287,7 +170,7 @@ EQUATION( "A1" )
 Labor productivity of capital-good sector
 */
 V( "PPI" );										// ensure m.s. are updated
-RESULT( V( "Q1e" ) > 0 ? WHTAVE( "_Btau", "_f1" ) : CURRENT )
+RESULT( V( "Q1e" ) > 0 ? WHTAVE( "_BtauLP", "_f1" ) : CURRENT )
 
 
 EQUATION( "D1" )
@@ -312,6 +195,20 @@ V( "Tax1" );									// ensure dividends are computed
 RESULT( SUM( "_Div1" ) )
 
 
+EQUATION( "Em1" )
+/*
+Total CO2 (carbon) emissions produced by firms in capital-good sector
+*/
+RESULT( SUM( "_Em1" ) )
+
+
+EQUATION( "En1" )
+/*
+Total energy consumed by firms in capital-good sector
+*/
+RESULT( SUM( "_En1" ) )
+
+
 EQUATION( "F1" )
 /*
 Number of firms in capital-good sector
@@ -319,13 +216,11 @@ Number of firms in capital-good sector
 RESULT( COUNT( "Firm1" ) )
 
 
-EQUATION( "L1" )
+EQUATION( "JO1" )
 /*
-Work force (labor) size employed by capital-good sector
-Result is scaled according to the defined scale
+Open job positions in capital-good sector
 */
-VS( CONSECL1, "hires2" );						// ensure hires are done
-RESULT( COUNT( "Wrk1" ) * VS( LABSUPL1, "Lscale" ) )
+RESULT( SUM( "_JO1" ) )
 
 
 EQUATION( "L1d" )
@@ -347,8 +242,7 @@ EQUATION( "L1rd" )
 /*
 Total R&D labor employed by firms in capital-good sector
 */
-RESULT( min( V( "L1dRD" ), 
-		min( V( "L1" ), round( VS( LABSUPL1, "Ls" ) * V( "L1rdMax" ) ) ) ) )
+RESULT( min( V( "L1dRD" ), VS( LABSUPL1, "Ls" ) * V( "L1rdMax" ) ) )
 
 
 EQUATION( "NW1" )
@@ -405,20 +299,7 @@ EQUATION( "W1" )
 /*
 Total wages paid by firms in capital-good sector
 */
-
-v[0] = 0;										// wage accumulator
-CYCLE( cur, "Wrk1" )
-	v[0] += VS( SHOOKS( cur ), "_w" );			// go through all workers
-
-RESULT( v[0] * VS( LABSUPL1, "Lscale" ) )		// consider labor scaling
-
-
-EQUATION( "dA1b" )
-/*
-Notional productivity (bounded) rate of change in capital-good sector
-Used for wages adjustment only
-*/
-RESULT( mov_avg_bound( THIS, "A1", VS( PARENT, "mLim" ), VS( PARENT, "mPer" ) ) )
+RESULT( SUM( "_W1" ) )
 
 
 EQUATION( "imi" )
@@ -427,9 +308,8 @@ Imitation success rate in capital-good sector
 Also ensures all innovation/imitation is done, brochures are distributed and
 learning-by-doing skills are updated
 */
-SUM( "_Atau" );									// ensure innovation is done
+SUM( "_AtauLP" );								// ensure innovation is done
 SUM( "_NC" );									// ensure brochures distributed
-VS( CONSECL1, "sV2avg" );						// ensure vintage skills updt'd
 RESULT( SUM( "_imi" ) / V( "F1" ) )
 
 
@@ -445,92 +325,9 @@ RESULT( SUM( "_inn" ) / V( "F1" ) )
 
 EQUATION( "p1avg" )
 /*
-Weighted average price charged in capital-good sector
+Average price charged in capital-good sector
 */
-v[1] = V( "Q1e" );
-RESULT( v[1] > 0 ? WHTAVE( "_p1", "_Q1e" ) / v[1] : CURRENT )
-
-
-EQUATION( "quits1" )
-/*
-Number of workers quitting jobs (not fired) in period in capital-good sector
-Updated in 'hires1' and 'hires2'
-*/
-
-if ( VS( PARENT, "flagGovExp" ) < 2 )			// unemployment benefit exists?
-	END_EQUATION( 0 );
-
-v[1] = VS( LABSUPL1, "wU" );					// unemployment benefit in t
-
-i = 0;
-CYCLE_SAFE( cur, "Wrk1" )
-	if ( VS( SHOOKS( cur ), "_w" ) <= v[1] )	// wage under unemp. benefit?
-	{
-		fire_worker( var, SHOOKS( cur ) );		// register quit
-		++i;									// scaled equivalent fires
-	}
-
-RESULT( i * VS( LABSUPL1, "Lscale" ) )
-
-
-EQUATION( "retires1" )
-/*
-Workers retiring (not fired) in capital-good sector
-*/
-
-if ( VS( LABSUPL1, "Tr" ) == 0 )				// retirement disabled?
-	END_EQUATION( 0 )
-
-i = 0;
-CYCLE_SAFE( cur, "Wrk1" )
-	if ( VS( SHOOKS( cur ), "_age" ) == 1 )		// is a "reborn"?
-	{
-		fire_worker( var, SHOOKS( cur ) );		// register retirement
-		++i;									// scaled equivalent fires
-	}
-
-RESULT( i * VS( LABSUPL1, "Lscale" ) )
-
-
-EQUATION( "sT1min" )
-/*
-Minimum workers tenure skills in capital-good sector
-*/
-
-i = VS( PARENT, "flagWorkerLBU" );				// worker-level learning mode
-if ( i == 0 || i == 1 )							// no tenure learning?
-	END_EQUATION( 1 );							// skills = 1
-	
-v[0] = DBL_MAX;									// current minimum
-CYCLE( cur, "Wrk1" )
-{
-	v[1] = VS( SHOOKS( cur ), "_sT" );			// worker current tenure skills
-	if ( v[1] < v[0] )
-		v[0] = v[1];							// save minimum					
-}
-
-RESULT( v[0] < DBL_MAX ? v[0] : 1 )
-
-
-EQUATION( "w1avg" )
-/*
-Average wage paid by firms in capital-good sector
-*/
-
-v[1] = V( "L1" );								// workers in sector 1
-
-if ( v[1] == 0 )
-	v[0] =  VS( CONSECL1, "w2avg" );			// use sector 2 wage as proxy
-else
-{
-	v[0] = 0;									// wage accumulator
-	CYCLE( cur, "Wrk1" )
-		v[0] += VS( SHOOKS( cur ), "_w" );
-	
-	v[0] *= VS( LABSUPL1, "Lscale" ) / v[1];	// compute average
-}
-
-RESULT( v[0] > 0 ? v[0] : CURRENT )
+RESULT( AVE( "_p1" ) )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/

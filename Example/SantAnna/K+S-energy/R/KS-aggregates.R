@@ -12,25 +12,27 @@
 
 folder   <- "data"                    # data files folder
 baseName <- "Sim"                     # data files base name (same as .lsd file)
-nExp <- 3                             # number of experiments
+nExp <- 2                             # number of experiments
 iniDrop <- 0                          # initial time steps to drop (0=none)
 nKeep <- -1                           # number of time steps to keep (-1=all)
 
-expVal <- c( "Baseline", "LP shocks", "LP+EF shocks" )   # case parameter values
+expVal <- c( "Baseline", "Monopolistic power" )   # case parameter values
 
 # Aggregated variables to use
 logVars <- c( "GDP", "GDPnom", "D2", "G", "Gbail", "Tax", "Deb", "Def", "DefP",
-              "dN", "I", "EI", "A", "A1", "A2", "S1", "S2", "Deb1", "Deb2",
-              "NWb", "NW1", "NW2", "W1", "W2", "wReal", "BadDeb", "TC", "Loans",
-              "CD", "CS", "Aee", "Aef", "Em", "Em1", "Em2", "EmE", "En" )
+              "dN", "I", "EI", "A", "A1", "A2", "Ade", "Se", "S1", "S2", "DebE",
+              "Deb1", "Deb2", "NWb", "NWe", "NW1", "NW2", "We", "W1", "W2",
+              "wReal", "BadDeb", "TC", "Loans", "CD", "CS", "Aee", "Aef", "Em",
+              "EmE", "Em1", "Em2", "En" )
 aggrVars <- append( logVars, c( "dGDP", "dCPI", "dA", "dw", "CPI", "Q2u",
-                                "F1", "F2", "entry1", "entry2", "entry1exit",
-                                "entry2exit", "exit1", "exit2", "exit1fail",
-                                "exit2fail", "imi", "inn", "HH1", "HH2",
-                                "mu2avg", "U", "V", "r", "Bda", "Bfail",
-                                "DebGDP", "DefGDP", "DefPgdp", "CO2a", "EnGDP",
-                                "Tm", "dEm", "dEn","fGE", "fKge", "pE",
-                                "shockAavg" ) )
+                                "Fe", "F1", "F2", "entryE", "entry1", "entry2",
+                                "entryEexit", "entry1exit", "entry2exit",
+                                "exitE", "exit1", "exit2", "exitEfail",
+                                "exit1fail", "exit2fail", "imi", "inn", "innDE",
+                                "innGE", "HHe", "HH1", "HH2", "muEavg", "mu2avg",
+                                "U", "V", "r", "Bda", "Bfail", "DebGDP",
+                                "DefGDP", "DefPgdp", "CO2a", "EnGDP","Tm", "dEm",
+                                "dEn","fGE", "fKge", "pE", "shockAavg" ) )
 
 
 # ==== Process LSD result files ====
@@ -377,11 +379,11 @@ for( k in 1 : nExp ) { # Experiment k
             tit = paste( "Shimer puzzle (", legends[ k ], ")" ),
             subtit = paste( "(", bpfMsg, "/ MC runs =", nSize, ")" ) )
 
-  plot_bpf( list( log0( Adata[[ k ]]$GDP ), Adata[[ k ]]$entry1exit,
-                  Adata[[ k ]]$entry2exit ),
+  plot_bpf( list( log0( Adata[[ k ]]$GDP ), Adata[[ k ]]$entryEexit,
+                  Adata[[ k ]]$entry1exit, Adata[[ k ]]$entry2exit ),
             pl = lowP, pu = highP, nfix = bpfK, mask = TmaskPlot,
             resc = c( 0.5, NA ), col = colors, lty = lTypes,
-            leg = c( "GDP", "Net entry (capital)",
+            leg = c( "GDP", "Net entry (energy)", "Net entry (capital)",
             "Net entry (consumption)" ),
             xlab = "Time", ylab = "Filtered series (rescaled)",
             tit = paste( "Net entry and business cycle (", legends[ k ], ")" ),
@@ -392,9 +394,9 @@ for( k in 1 : nExp ) { # Experiment k
   #
 
   corr_table( c( "GDP", "D2", "I", "CPI", "A", "U", "wReal", "mu2avg", "r",
-                 "DebGDP", "TC", "Loans", "BadDeb", "entry1exit", "entry2exit",
-                 "En", "Em", "Tm" ), mcData[[1]], plot = TRUE,
-              logVars = c( 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 2, 2, 2, 0, 0, 1, 0, 0 ),
+                 "DebGDP", "TC", "Loans", "BadDeb", "entryEexit", "entry1exit",
+                 "entry2exit", "En", "Em", "Tm" ), mcData[[1]], plot = TRUE,
+              logVars = c( 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 2, 2, 2, 0, 0, 0, 1, 0, 0 ),
               mask = TmaskStat, pl = lowP, pu = highP, nfix = bpfK,
               tit = paste( "Pearson correlation coefficients (", legends[ k ], ")" ),
               subtit = paste0( "( insignificant values at ", ( 1 - CI ) * 100,
@@ -403,8 +405,8 @@ for( k in 1 : nExp ) { # Experiment k
               labVars = c( "GDP", "Consumption", "Investment", "Cons. price",
                            "L. productivity", "Unemployment", "Wage", "Mark-up",
                            "Interest", "Gov. debt", "Credit supply", "Loans",
-                           "Bad debt", "Net entry K", "Net entry C", "Energy dem.",
-                           "Emissions", "Temperature" ) )
+                           "Bad debt", "Net entry E", "Net entry K", "Net entry C",
+                           "Energy dem.", "Emissions", "Temperature" ) )
 
   #
   # ---- Correlation structure tables ----
@@ -413,29 +415,40 @@ for( k in 1 : nExp ) { # Experiment k
   # add additional composed variables to dataset
   newVar <- dim( mcData[[ k ]] )[[ 2 ]] + 1
   mcData[[ k ]] <- abind( mcData[[ k ]],
-                          mcData[[ k ]][ , "Deb1", ] + mcData[[ k ]][ , "Deb2", ],
-                          ( mcData[[ k ]][ , "NW1", ] + mcData[[ k ]][ , "NW2", ] ) /
-                            ( mcData[[ k ]][ , "S1", ] + mcData[[ k ]][ , "S2", ] ),
-                          mcData[[ k ]][ , "exit1fail", ] * mcData[[ k ]][ , "F1", ] +
+                          mcData[[ k ]][ , "DebE", ] +
+                            mcData[[ k ]][ , "Deb1", ] +
+                            mcData[[ k ]][ , "Deb2", ],
+                          ( mcData[[ k ]][ , "NWe", ] +
+                              mcData[[ k ]][ , "NW1", ] +
+                              mcData[[ k ]][ , "NW2", ] ) /
+                            ( mcData[[ k ]][ , "Se", ] +
+                                mcData[[ k ]][ , "S1", ] +
+                                mcData[[ k ]][ , "S2", ] ),
+                          mcData[[ k ]][ , "exitEfail", ] * mcData[[ k ]][ , "Fe", ] +
+                            mcData[[ k ]][ , "exit1fail", ] * mcData[[ k ]][ , "F1", ] +
                             mcData[[ k ]][ , "exit2fail", ] * mcData[[ k ]][ , "F2", ],
-                          mcData[[ k ]][ , "entry1", ] * mcData[[ k ]][ , "F1", ] +
+                          mcData[[ k ]][ , "entryE", ] * mcData[[ k ]][ , "Fe", ] +
+                            mcData[[ k ]][ , "entry1", ] * mcData[[ k ]][ , "F1", ] +
                             mcData[[ k ]][ , "entry2", ] * mcData[[ k ]][ , "F2", ],
-                          mcData[[ k ]][ , "entry1exit", ] +
+                          mcData[[ k ]][ , "entryEexit", ] +
+                            mcData[[ k ]][ , "entry1exit", ] +
                             mcData[[ k ]][ , "entry2exit", ],
                           along = 2 )
   dimnames( mcData[[ k ]] )[[ 2 ]][ seq( newVar, newVar - 1 + 5 ) ] <-
-    c( "Deb12", "NWS12", "exit12fail", "entry12", "netEntr12" )
+    c( "DebE12", "NWe12", "exitE12fail", "entryE12", "netEntrE12" )
 
   corr.struct.1 <- corr_struct( "GDP", c( "D2", "I", "EI", "dN", "U", "A",
-                                          "mu2avg", "Deb12", "NWS12", "exit12fail" ),
+                                          "muEavg", "mu2avg", "DebE12", "NWe12",
+                                          "exitE12fail" ),
                                 mcData[[ k ]], labRef = "GDP (output)",
                                 labVars = c( "Consumption", "Investment",
                                              "Net investment", "Change in inventories",
                                              "Unemployment rate", "Productivity",
-                                             "Mark-up (sector 2)", "Total firm debt",
+                                             "Mark-up (energy)", "Mark-up (consumption)",
+                                             "Total firm debt",
                                              "Liquidity-to-sales ratio",
                                              "Bankruptcy rate" ),
-                                logVars = c( 1, 1, 1, 2, 0, 1, 0, 2, 2, 0 ),
+                                logVars = c( 1, 1, 1, 2, 0, 1, 0, 0, 2, 2, 0 ),
                                 logRef = 2, mask = TmaskStat, lags = lags,
                                 pl = lowP, pu = highP, nfix = bpfK, CI = CI )
 
@@ -449,7 +462,7 @@ for( k in 1 : nExp ) { # Experiment k
                      testMsg, sep = "\n" )
   title( main = title, sub = subTitle )
 
-  corr.struct.2 <- corr_struct( "GDP", c( "D2", "I", "A", "entry12", "netEntr12",
+  corr.struct.2 <- corr_struct( "GDP", c( "D2", "I", "A", "entryE12", "netEntrE12",
                                           "wReal", "U", "V", "En", "Em" ),
                                 mcData[[ k ]], labRef = "GDP (output)",
                                 labVars = c( "Consumption", "Investment",
@@ -492,9 +505,10 @@ for( k in 1 : nExp ) { # Experiment k
   #
 
   statErgo <- ergod.test.lsd( mcData[[ k ]][ TmaskStat, , ], signif = 1 - CI,
-                              vars = c( "dGDP", "dA", "dw", "V", "U", "mu2avg",
-                                        "HH1", "HH2", "entry1", "entry2", "Tm",
-                                        "dEm", "dEn", "fGE" ) )
+                              vars = c( "dGDP", "dA", "dw", "V", "U", "muEavg",
+                                        "mu2avg", "HHe", "HH1", "HH2", "entryE",
+                                        "entry1", "entry2", "Tm", "dEm", "dEn",
+                                        "fGE" ) )
 
   textplot( statErgo, cmar = 1 )
 
