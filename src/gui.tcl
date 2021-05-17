@@ -304,6 +304,9 @@ if { $darkTheme } {
 }
 
 # set tool tips (balloons)
+set ttfam [ font actual [ ttk::style lookup TLabel -font ] -family ]
+set ttsize [ expr { [ font actual [ ttk::style lookup TLabel -font ] -size ] - 1 } ]
+set ttfont [ font create -family "$ttfam" -size $ttsize ]
 set tooltip::labelOpts [ list -background $colorsTheme(ttip) -foreground $colorsTheme(fg) \
 	 -borderwidth 0 -highlightthickness 1 -highlightbackground $colorsTheme(fg) ]
 tooltip::tooltip delay $ttipdelay

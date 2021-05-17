@@ -223,19 +223,19 @@ void create_float_list( object *t )
 				if ( cv->num_lag == 0 )
 				{
 					cmd( "lappend tlist_%s \"%s (V$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s tvar.TLabel", t->label );
+					cmd( "lappend slist_%s var", t->label );
 				}
 				else
 				{
 					cmd( "lappend tlist_%s \"%s (V_%d$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s tlvar.TLabel", t->label );
+					cmd( "lappend slist_%s lvar", t->label );
 				}
 			}
 			
 			if ( cv->param == 1 )
 			{
 				cmd( "lappend tlist_%s \"%s (P$varFlags)\"", t->label, cv->label );
-				cmd( "lappend slist_%s tpar.TLabel", t->label );
+				cmd( "lappend slist_%s par", t->label );
 			}
 			
 			if ( cv->param == 2 )
@@ -243,12 +243,12 @@ void create_float_list( object *t )
 				if ( cv->num_lag == 0 )
 				{
 					cmd( "lappend tlist_%s \"%s (F$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s tfun.TLabel", t->label );
+					cmd( "lappend slist_%s fun", t->label );
 				}
 				else
 				{
 					cmd( "lappend tlist_%s \"%s (F_%d$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s tlfun.TLabel", t->label );
+					cmd( "lappend slist_%s lfun", t->label );
 				}
 			}
 		}
@@ -495,19 +495,31 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 				set res_g_id [ after $ttipdelay { \
 					destroy .list; \
 					toplevel .list -class Tooltip -background $colorsTheme(ttip) -borderwidth 0 -highlightthickness 1 -highlightbackground $colorsTheme(fg); \
+					if { $CurPlatform eq \"mac\" } { \
+						tk::unsupported::MacWindowStyle style .list help none \
+					} else { \
+						wm overrideredirect .list 1 \
+					}; \
+					catch { wm attributes .list -topmost 1 }; \
+					catch { wm attributes .list -alpha 0.99 }; \
+					wm positionfrom .list program; \
 					wm withdraw .list; \
 					set res_g_i 0; \
 					foreach res_g_t $tlist_%s res_g_s $slist_%s { \
-						ttk::label .list.e$res_g_i -text \"$res_g_t\" -style $res_g_s -background $colorsTheme(ttip); \
+						label .list.e$res_g_i -text \"$res_g_t\" -font $ttfont -foreground $colorsTheme($res_g_s) -background $colorsTheme(ttip); \
 						pack .list.e$res_g_i -anchor w -ipadx 1; \
 						incr res_g_i \
 					}; \
 					update idletasks; \
+					if { $CurPlatform eq \"mac\" } { \
+						set __focus__ [ focus ] \
+					}; \
 					wm geometry .list +[ expr { %%X + 5 } ]+[ expr { %%Y + 5 } ]; \
-					wm overrideredirect .list 1; \
-					wm attributes .list -topmost 1; \
-					wm state .list normal; \
-					update idletasks \
+					deiconify .list; \
+					catch { raise .list }; \
+					if { $CurPlatform eq \"mac\" } { \
+						after idle { focus -force $__focus__ } \
+					} \
 				} ] \
 			} \
 		}", str2, str2, str2, str2, str2 );
