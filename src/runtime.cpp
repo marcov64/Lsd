@@ -458,7 +458,7 @@ void reset_plot( void )
 			tooltip::tooltip clear $activeplot.fond.go; \
 			tooltip::tooltip clear $activeplot.fond.shift; \
 			$rtptab select $activeplot; \
-			update idletasks \
+			update \
 		}" );
 }
 
@@ -472,7 +472,7 @@ void enable_plot( void )
 			$rtptab select $activeplot; \
 			$activeplot.fond.go conf -state normal; \
 			$activeplot.fond.shift conf -state normal; \
-			update idletasks \
+			update \
 		}" );
 }
 
@@ -486,7 +486,7 @@ void disable_plot( void )
 			$activeplot.fond.go conf -state disabled; \
 			$activeplot.fond.shift conf -state disabled; \
 			$rtptab hide $activeplot; \
-			update idletasks \
+			update \
 		}" );
 }
 

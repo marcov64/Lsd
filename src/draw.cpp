@@ -125,7 +125,7 @@ void show_graph( object *t )
 	
 	cmd( "if { [ winfo exists .plt ] } { lower .str .plt }" );
 
-	cmd( "update idletasks" );
+	cmd( "update" );
 }
 
 
@@ -186,8 +186,6 @@ void draw_buttons( void )
 	cmd( "set d [ .str.f.c create window $colM [ expr { $rowM - $bvstepM } ] -window .str.f.c.vplus -tags tooltip ]" );
 	cmd( "set e [ .str.f.c create window $colM [ expr { $rowM - 2 * $bvstepM } ] -window .str.f.c.vminus -tags tooltip ]" );
 		
-	cmd( "update idletasks" );
-	
 	cmd( "tooltip::tooltip .str.f.c -item $a \"Automatic adjustment\"" );
 	cmd( "tooltip::tooltip .str.f.c -item $b \"Increase horizontal spacing\"" );
 	cmd( "tooltip::tooltip .str.f.c -item $c \"Decrease horizontal spacing\"" );

@@ -58,9 +58,10 @@ set macZip [ file normalize "$scptDir/../Package/LSD-archive-mac.zip" ]
 #
 
 # load support tools
-source "$scptDir/$LsdSrc/gui.tcl"
-source "$scptDir/$LsdSrc/file.tcl"
-source "$scptDir/$LsdSrc/util.tcl"
+set RootLsd "$scptDir"
+source "$RootLsd/$LsdSrc/gui.tcl"
+source "$RootLsd/$LsdSrc/file.tcl"
+source "$RootLsd/$LsdSrc/util.tcl"
 
 # register the Tcl error handler
 proc log_tcl_error { errorInfo message } {
@@ -773,7 +774,7 @@ bind .b.finish <Return> { .b.finish invoke }
 bind . <Escape> { .b.finish invoke }
 tooltip::tooltip .b.finish "Close LSD installer"
 
-if { [ llength $issues ] == 0 } {
+if { [ llength $issues ] == 0 && ( ! [ info exists sysPath ] || ! $sysPath ) } {
 	ttk::button .b.run -width $butWid -text "Run Now" -command { set done 1 }
 	bind .b.run <Return> { .b.run invoke }
 	pack .b.run .b.finish -padx 10 -pady 10 -side left

@@ -162,7 +162,6 @@ void edit_data( object *r, int *choice, char *lab )
 		cmd( ".inid.err conf -text \"OBJECTS NOT SHOWN! (> %d)\" -style hl.TLabel", MAX_COLS );
 		if ( ! iniShowOnce )
 		{
-			cmd( "update idletasks" );
 			cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Too many objects to edit\" -detail \"LSD Initial Values editor can show only the first %d objects' values. Please use the 'Set All' button to define values for objects beyond those.\" ", MAX_COLS );
 			iniShowOnce = true;
 		}

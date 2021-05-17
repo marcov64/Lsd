@@ -823,7 +823,7 @@ int lsdmain( int argn, char **argv )
 
 	loop:
 
-	cmd( "if { ! $keepfocus } { focus .f.t.t; update idletasks } { set keepfocus 0 }" );
+	cmd( "if { ! $keepfocus } { focus .f.t.t; update } { set keepfocus 0 }" );
 
 	// start recolor if needed
 	if ( recolor_all )				// all text?
@@ -6099,7 +6099,7 @@ void create_compresult_window( bool nw )
 	cmd( ".mm.t.t configure -state disabled" );
 	cmd( "focustop .mm.t.t" );
 	cmd( "set keepfocus 1" );
-	cmd( "update idletasks" );
+	cmd( "update" );
 }
 
 

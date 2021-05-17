@@ -393,7 +393,7 @@ proc showmodel pippo {
 
 	cd $curdir
 	
-	update idletasks
+	update
 }
 
 

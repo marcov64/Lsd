@@ -158,7 +158,7 @@ proc add_win_path { path { prof user } { pos end } } {
 		}
 		
 		if { ! [ catch { registry set $regPath "Path" "$newPath" } ] } {
-			registry broadcast $regPath
+			registry broadcast "Environment"
 			return 1
 		}
 	}
@@ -250,7 +250,7 @@ proc prgboxupdate { w last1 { last2 "" } } {
 		$w.main.p2.info.val configure -text "[ expr { min( $last2 + 1, $max2 ) } ] of $max2 ([ expr { int( 100 * $last2 / $max2 ) } ]% done)"
 	}
 	
-	update idletasks
+	update
 }
 
 

@@ -1509,7 +1509,7 @@ void cover_browser( const char *text1, const char *text2, bool run )
 		cmd( "wm title . \"$origMainTit (DISABLED)\"" );
 	}
 	
-	cmd( "update idletasks" );
+	cmd( "update" );
 	
 	brCovered = true;
 	redrawRoot = false;
