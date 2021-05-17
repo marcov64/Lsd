@@ -515,7 +515,7 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 						set __focus__ [ focus ] \
 					}; \
 					wm geometry .list +[ expr { %%X + 5 } ]+[ expr { %%Y + 5 } ]; \
-					deiconify .list; \
+					wm deiconify .list; \
 					catch { raise .list }; \
 					if { $CurPlatform eq \"mac\" } { \
 						after idle { focus -force $__focus__ } \
