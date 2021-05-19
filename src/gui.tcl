@@ -92,6 +92,10 @@ if [ string equal $CurPlatform mac ] {
 	set bvstepM $bvstepMac
 	set borderMadj $bborderMac
 	
+	# enable Ctrl+click as replacement for right-shift
+	bind all <Control-ButtonPress-1> { 
+		event generate %W <ButtonPress-2> -x %x -y %y -rootx %X -rooty %Y -button 2
+	}
 } elseif [ string equal $CurPlatform linux ] {
 	set DefaultSysTerm $sysTermLinux
 	set systemTerm $sysTermLinux

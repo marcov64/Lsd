@@ -254,7 +254,11 @@ cmd( "bind $f.v <KeyRelease> { \
 				set kk _ \
 			}; \
 			set ll %%W; \
-			set ff [ lsearch -start [ expr { [ $ll curselection ] + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
+			set ss [ $ll curselection ]; \
+			if { [ llength $ss ] > 1 } { \
+				return \
+			}; \
+			set ff [ lsearch -start [ expr { $ss + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 			if { $ff == -1 } { \
 				set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
 			}; \
@@ -335,7 +339,11 @@ cmd( "bind $f.v <KeyRelease> { \
 				set kk _ \
 			}; \
 			set ll %%W; \
-			set ff [ lsearch -start [ expr { [ $ll curselection ] + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
+			set ss [ $ll curselection ]; \
+			if { [ llength $ss ] > 1 } { \
+				return \
+			}; \
+			set ff [ lsearch -start [ expr { $ss + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 			if { $ff == -1 } { \
 				set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
 			}; \
@@ -6339,9 +6347,9 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "pack $w.b.c.case $w.b.c.y -anchor w" );
 
 	cmd( "ttk::frame $w.b.o" );
-	cmd( "ttk::label $w.b.o.l1 -text \"Alt-click: properties\"" );
-	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: add text\"" );
-	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: add line\"" );
+	cmd( "ttk::label $w.b.o.l1 -text \"%s+click: properties\"", platform == MAC ? "Ctrl" : "Alt" );
+	cmd( "ttk::label $w.b.o.l2 -text \"Shift+click: add text\"" );
+	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == MAC ? "Cmd" : "Ctrl" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
@@ -6665,9 +6673,9 @@ void plot_lattice( int *choice )
 	cmd( "ttk::frame $w.b -width %d", ncol * le + 1 );
 
 	cmd( "ttk::frame $w.b.o" );
-	cmd( "ttk::label $w.b.o.l1 -text \"Alt-click: properties\"" );
-	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: add text\"" );
-	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: add line\"" );
+	cmd( "ttk::label $w.b.o.l1 -text \"%s+click: properties\"", platform == MAC ? "Ctrl" : "Alt" );
+	cmd( "ttk::label $w.b.o.l2 -text \"Shift+click: add text\"" );
+	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == MAC ? "Cmd" : "Ctrl" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
@@ -9233,9 +9241,9 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	cmd( "pack $w.b.c.case $w.b.c.y $w.b.c.var -anchor w" );
 
 	cmd( "ttk::frame $w.b.o" );
-	cmd( "ttk::label $w.b.o.l1 -text \"Alt-click: properties\"" );
-	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: add text\"" );
-	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: add line\"" );
+	cmd( "ttk::label $w.b.o.l1 -text \"%s+click: properties\"", platform == MAC ? "Ctrl" : "Alt" );
+	cmd( "ttk::label $w.b.o.l2 -text \"Shift+click: add text\"" );
+	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == MAC ? "Cmd" : "Ctrl" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
@@ -9448,7 +9456,7 @@ void canvas_binds( int n )
 	
 	cmd( "bind $p <Double-Button-1> { focustop .da }" );
 	
-	cmd( "bind $p <Alt-1> { \
+	cmd( "bind $p <Alt-Button-1> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; set LY %%Y; \
 			set type [ $ccanvas gettags current ]; \
@@ -9469,7 +9477,7 @@ void canvas_binds( int n )
 			} \
 		}", n );
 
-	cmd( "bind $p <Shift-1> { \
+	cmd( "bind $p <Shift-Button-1> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; \
 			set LY %%Y; \
@@ -9478,14 +9486,14 @@ void canvas_binds( int n )
 			set choice 27 \
 		}", n );
 		
-	cmd( "bind $p <Control-1> { \
+	cmd( "bind $p <%s-Button-1> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
 			set ncanvas %d; \
 			set hereX [ $ccanvas canvasx %%x ]; \
 			set hereY [ $ccanvas canvasy %%y ]; \
 			unset -nocomplain cl; \
 			set choice 28 \
-		}", n, n );
+		}", platform == MAC ? "Command" : "Control", n, n );
 
 	cmd( "bind $p <Button-1> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
