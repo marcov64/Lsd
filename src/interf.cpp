@@ -1924,6 +1924,10 @@ case 83:
 					goto here_newname;
 				}
 				
+				// update element list
+				cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", cur->label  );
+				cmd( "lappend modObj %s", lab );
+
 				change_description( cur->label, lab );
 				cur->chg_lab( lab );
 			}

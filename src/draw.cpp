@@ -494,6 +494,7 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 			if { [ llength $tlist_%s ] > 0 } { \
 				set res_g_id [ after $ttipdelay { \
 					destroy .list; \
+					tooltip::hide; \
 					toplevel .list -class Tooltip -background $colorsTheme(ttip) -borderwidth 0 -highlightthickness 1 -highlightbackground $colorsTheme(fg); \
 					if { $CurPlatform eq \"mac\" } { \
 						tk::unsupported::MacWindowStyle style .list help none \
