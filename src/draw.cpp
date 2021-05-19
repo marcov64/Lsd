@@ -102,23 +102,23 @@ void show_graph( object *t )
 	cmd( "bind .str.f.c <Button-3> { event generate .str.f.c <Button-2> -x %%x -y %%y }" );
 
 	cmd( "ttk::menu .str.f.c.v -tearoff 0" );
-	cmd( ".str.f.c.v add command -label \"Make Current\" -command { set choice 4 }" );
+	cmd( ".str.f.c.v add command -label \"Make Current\" -accelerator Enter -command { set choice 4 }" );
 	cmd( ".str.f.c.v add separator" );
-	cmd( ".str.f.c.v add command -label Change -command { set choice 6 }" );
-	cmd( ".str.f.c.v add command -label Rename -command { set choice 83 }" );
+	cmd( ".str.f.c.v add command -label Change -accelerator \"Ctrl+Enter\" -command { set choice 6 }" );
+	cmd( ".str.f.c.v add command -label Rename -accelerator F2 -command { set choice 83 }" );
 	cmd( ".str.f.c.v add command -label Number -command { set choice 33 }" );
 	cmd( ".str.f.c.v add command -label Move -command { set choice 32 }" );
-	cmd( ".str.f.c.v add command -label Delete -command { set choice 74 }" );
+	cmd( ".str.f.c.v add command -label Delete -accelerator Del -command { set choice 74 }" );
 	cmd( ".str.f.c.v add separator" );
 	cmd( ".str.f.c.v add cascade -label Add -menu .str.f.c.v.a" );
 	cmd( ".str.f.c.v add separator" );
-	cmd( ".str.f.c.v add command -label \"Initial Values\" -command { set choice 21 }" );
-	cmd( ".str.f.c.v add command -label \"Browse Data\" -command { set choice 34 }" );
+	cmd( ".str.f.c.v add command -label \"Initial Values\" -accelerator \"Ctrl+I\" -command { set choice 21 }" );
+	cmd( ".str.f.c.v add command -label \"Browse Data\" -accelerator \"Ctrl+B\" -command { set choice 34 }" );
 	cmd( "ttk::menu .str.f.c.v.a -tearoff 0" );
-	cmd( ".str.f.c.v.a add command -label Variable -command { set choice 2; set param 0 }" );
-	cmd( ".str.f.c.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
-	cmd( ".str.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
-	cmd( ".str.f.c.v.a add command -label Object -command { set choice 3 }" );
+	cmd( ".str.f.c.v.a add command -label Variable -accelerator \"Ctrl+V\" -command { set choice 2; set param 0 }" );
+	cmd( ".str.f.c.v.a add command -label Parameter -accelerator \"Ctrl+P\" -command { set choice 2; set param 1 }" );
+	cmd( ".str.f.c.v.a add command -label Function -accelerator \"Ctrl+N\" -command { set choice 2; set param 2 }" );
+	cmd( ".str.f.c.v.a add command -label Object -accelerator \"Ctrl+D\" -command { set choice 3 }" );
 
 	cmd( "bind .str <F1> { LsdHelp graphrep.html }" );
 	set_shortcuts( ".str" );

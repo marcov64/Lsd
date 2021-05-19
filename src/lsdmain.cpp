@@ -1348,10 +1348,10 @@ void create_logwindow( void )
 	cmd( "pack $w.scrollx -side bottom -fill x" );
 	cmd( "pack $w -expand yes -fill both" );
 	
-	cmd( "bind .log.text.text <2> { \
+	cmd( "bind .log.text.text <Button-2> { \
 			tk_popup .log.text.text.menu %%X %%Y \
 		}" );	
-	cmd( "bind .log.text.text <3> { \
+	cmd( "bind .log.text.text <Button-3> { \
 			tk_popup .log.text.text.menu %%X %%Y \
 		}" );	
 

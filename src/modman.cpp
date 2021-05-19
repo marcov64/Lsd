@@ -350,12 +350,12 @@ int lsdmain( int argn, char **argv )
 		} -underline 2 -accelerator Ctrl+y" );	// entryconfig 1
 	cmd( "$w add separator" );	// entryconfig 2
 	// collect information to focus recoloring
+	cmd( "$w add command -label Copy -command { tk_textCopy .f.t.t } -underline 0 -accelerator Ctrl+c" );	// entryconfig 34
 	cmd( "$w add command -label Cut -command { \
 			sav_cur_ini; \
 			tk_textCut .f.t.t; \
 			upd_color \
-		} -underline 1 -accelerator Ctrl+x" );	// entryconfig 3
-	cmd( "$w add command -label Copy -command { tk_textCopy .f.t.t } -underline 0 -accelerator Ctrl+c" );	// entryconfig 4
+		} -underline 1 -accelerator Ctrl+x" );	// entryconfig 4
 	cmd( "$w add command -label Paste -command { \
 			sav_cur_ini; \
 			tk_textPaste .f.t.t; \
@@ -402,7 +402,7 @@ int lsdmain( int argn, char **argv )
 	cmd( "$w add separator" );	// entryconfig 24
 	// add option to ajust syntax highlighting (word coloring)
 	cmd( "$w add check -label \"Wrap/Unwrap\" -variable wrap -command { setwrap .f.t.t $wrap } -underline 1 -accelerator Ctrl+w " );
-	cmd( "$w add command -label \"Insert LSD Macro...\" -command { set choice 28 } -underline 0 -accelerator Ctrl+i" );
+	cmd( "$w add command -label \"LSD Macros...\" -command { set choice 28 } -underline 0 -accelerator Ctrl+i" );
 
 	cmd( "set w .m.model" );
 	cmd( "ttk::menu $w -tearoff 0" );
@@ -692,20 +692,20 @@ int lsdmain( int argn, char **argv )
 			set vmenuInsert [ .f.t.t index insert ]; \
 			tk_popup .v %%X %%Y \
 		}" );
-	cmd( ".v add command -label \"Copy\" -command { .m.edit invoke 4 }" );
-	cmd( ".v add command -label \"Cut\" -command { .m.edit invoke 3 }" );
-	cmd( ".v add command -label \"Paste\" -command { .m.edit invoke 5 }" );
+	cmd( ".v add command -label \"Copy\" -accelerator Ctrl+c -command { .m.edit invoke 4 }" );
+	cmd( ".v add command -label \"Cut\" -accelerator Ctrl+x -command { .m.edit invoke 3 }" );
+	cmd( ".v add command -label \"Paste\" -accelerator Ctrl+p -command { .m.edit invoke 5 }" );
 
 	cmd( ".v add separator" );
-	cmd( ".v add cascade -label \"LSD Macro\" -menu .v.i" );
-	cmd( ".v add command -label \"Indent Selection\" -command { set choice 42 }" );
-	cmd( ".v add command -label \"De-indent Selection\" -command { set choice 43 }" );
+	cmd( ".v add cascade -label \"LSD Macros\" -accelerator Ctrl+i -menu .v.i" );
+	cmd( ".v add command -label \"Indent\" -accelerator Ctrl+> -command { set choice 42 }" );
+	cmd( ".v add command -label \"De-indent\" -accelerator Ctrl+< -command { set choice 43 }" );
 	cmd( ".v add command -label \"Place Break & Run [ string toupper $DbgExe ]\" -command { set choice 58 }" );
 
 	cmd( ".v add separator" );
-	cmd( ".v add command -label \"Find...\" -command { set choice 11 }" );
-	cmd( ".v add command -label \"Match \\\{ \\}\" -command { set choice 17 }" );
-	cmd( ".v add command -label \"Match \\\( \\)\" -command { set choice 32 }" );
+	cmd( ".v add command -label \"Find...\" -accelerator Ctrl+f -command { set choice 11 }" );
+	cmd( ".v add command -label \"Match \\\{ \\}\" -accelerator Ctrl+m -command { set choice 17 }" );
+	cmd( ".v add command -label \"Match \\\( \\)\" -accelerator Ctrl+u -command { set choice 32 }" );
 
 	cmd( "ttk::menu .v.i -tearoff 0" );
 	cmd( ".v.i add command -label \"EQUATION\" -command { set choice 25 } -accelerator Ctrl+E" );
