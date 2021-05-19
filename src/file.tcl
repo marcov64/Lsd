@@ -144,7 +144,7 @@ proc check_components { } {
 						set lib [ string range $lib 0 [ expr { $base + [ string length $lib ] - 1 } ] ]
 					}
 
-					lappend pathLib $libPath
+					lappend pathLib $lib
 					break
 				}
 			}

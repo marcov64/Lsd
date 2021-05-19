@@ -507,7 +507,7 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 					wm withdraw .list; \
 					set res_g_i 0; \
 					foreach res_g_t $tlist_%s res_g_s $slist_%s { \
-						label .list.e$res_g_i -text \"$res_g_t\" -font $ttfont -foreground $colorsTheme($res_g_s) -background $colorsTheme(ttip); \
+						label .list.e$res_g_i -text \"$res_g_t\" -font \"$ttfont\" -foreground $colorsTheme($res_g_s) -background $colorsTheme(ttip); \
 						pack .list.e$res_g_i -anchor w -ipadx 1; \
 						incr res_g_i \
 					}; \
