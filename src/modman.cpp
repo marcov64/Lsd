@@ -350,12 +350,12 @@ int lsdmain( int argn, char **argv )
 		} -underline 2 -accelerator Ctrl+y" );	// entryconfig 1
 	cmd( "$w add separator" );	// entryconfig 2
 	// collect information to focus recoloring
-	cmd( "$w add command -label Copy -command { tk_textCopy .f.t.t } -underline 0 -accelerator Ctrl+c" );	// entryconfig 34
 	cmd( "$w add command -label Cut -command { \
 			sav_cur_ini; \
 			tk_textCut .f.t.t; \
 			upd_color \
-		} -underline 1 -accelerator Ctrl+x" );	// entryconfig 4
+		} -underline 1 -accelerator Ctrl+x" );	// entryconfig 3
+	cmd( "$w add command -label Copy -command { tk_textCopy .f.t.t } -underline 0 -accelerator Ctrl+c" );	// entryconfig 4
 	cmd( "$w add command -label Paste -command { \
 			sav_cur_ini; \
 			tk_textPaste .f.t.t; \
@@ -692,9 +692,10 @@ int lsdmain( int argn, char **argv )
 			set vmenuInsert [ .f.t.t index insert ]; \
 			tk_popup .v %%X %%Y \
 		}" );
-	cmd( ".v add command -label \"Copy\" -accelerator Ctrl+c -command { .m.edit invoke 4 }" );
 	cmd( ".v add command -label \"Cut\" -accelerator Ctrl+x -command { .m.edit invoke 3 }" );
+	cmd( ".v add command -label \"Copy\" -accelerator Ctrl+c -command { .m.edit invoke 4 }" );
 	cmd( ".v add command -label \"Paste\" -accelerator Ctrl+p -command { .m.edit invoke 5 }" );
+	cmd( ".v add command -label \"Delete\" -accelerator Del -command { .m.edit invoke 6 }" );
 
 	cmd( ".v add separator" );
 	cmd( ".v add cascade -label \"LSD Macros\" -accelerator Ctrl+i -menu .v.i" );
