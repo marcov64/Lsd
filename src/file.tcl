@@ -73,7 +73,7 @@ proc LsdHtml { dir fn } {
 # are available and on the proper versions
 #************************************************
 proc check_components { } {
-	global CurPlatform RootLsd winGCC winDLL winTcl winTk linuxPkg linuxTyp inclPkg inclFile libPkg libFile linuxMissing xcode gnuplot multitail linuxPkgMiss linuxInclude linuxLib pathInclude pathLib existGCC existDLL msgGCC msgDLL winConflict
+	global CurPlatform RootLsd winGCC winDLL winTcl winTk linuxPkg linuxTyp inclPkg inclFile libPkg libFile linuxMissing xcode gnuplot multitail linuxPkgMiss linuxInclude linuxLib pathInclude pathLib existGCC existDLL msgGCC msgDLL winConflict gccInclude gccLib
 	
 	if { $CurPlatform eq "mac" } {
 	
@@ -104,22 +104,34 @@ proc check_components { } {
 			set linuxMissing 1
 		}
 
+		# detect default paths
+		gccPaths
+
 		# try to detect missing headers
 		set pathInclude [ list ]
 		foreach file $inclFile pkg $inclPkg {
 			set found 0
-			foreach include $linuxInclude {
+			foreach include $gccInclude {
 				if [ file exists $include/$file ] {
 					set found 1
-
-					# try to get just the base 'include' directory
-					set base [ string first include $include ]
-					if { $base >= 0 } {
-						set include [ string range $include 0 [ expr { $base + [ string length $include ] - 1 } ] ]
-					}
-
-					lappend pathInclude $include
 					break
+				}
+			}
+			
+			if { ! $found } {
+				foreach include $linuxInclude {
+					if [ file exists $include/$file ] {
+						set found 1
+
+						# try to get just the base 'include' directory
+						set base [ string first include $include ]
+						if { $base >= 0 } {
+							set include [ string range $include 0 [ expr { $base + [ string length include ] - 1 } ] ]
+						}
+
+						lappend pathInclude $include
+						break
+					}
 				}
 			}
 
@@ -134,18 +146,27 @@ proc check_components { } {
 		set pathLib [ list ]
 		foreach file $libFile pkg $libPkg {
 			set found 0
-			foreach lib $linuxLib {
+			foreach lib $gccLib {
 				if [ file exists $lib/$file ] {
 					set found 1
-
-					# try to get just the base 'lib' directory
-					set base [ string first lib $lib ]
-					if { $base >= 0 } {
-						set lib [ string range $lib 0 [ expr { $base + [ string length $lib ] - 1 } ] ]
-					}
-
-					lappend pathLib $lib
 					break
+				}
+			}
+			
+			if { ! $found } {
+				foreach lib $linuxLib {
+					if [ file exists $lib/$file ] {
+						set found 1
+
+						# try to get just the base 'lib' directory
+						set base [ string first lib $lib ]
+						if { $base >= 0 } {
+							set lib [ string range $lib 0 [ expr { $base + [ string length lib ] - 1 } ] ]
+						}
+
+						lappend pathLib $lib
+						break
+					}
 				}
 			}
 

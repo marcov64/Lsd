@@ -63,7 +63,7 @@ proc LsdEnv { sep } {
 # Get GCC compiler version string
 #************************************************
 proc gccVersion { } {
-	global RootLsd LsdSrc SYSTEM_OPTIONS
+	global RootLsd LsdSrc SYSTEM_OPTIONS gccCmd
 	
 	if { ! [ file exists "$RootLsd/$LsdSrc/$SYSTEM_OPTIONS" ] } {
 		return "(system options missing)"
@@ -84,12 +84,12 @@ proc gccVersion { } {
 		set e end
 	}
 	
-	set cc [ string trim [ string range $a $p $e ] ]
-	if { [ string length $cc ] == 0 } {
+	set gccCmd [ string trim [ string range $a $p $e ] ]
+	if { [ string length $gccCmd ] == 0 } {
 		return "(invalid system options)"
 	}
 	
-	if { [ catch { exec $cc --version } r ] && ( ! [ info exists r ] || [ string length $r ] == 0 ) } {
+	if { [ catch { exec $gccCmd --version } r ] && ( ! [ info exists r ] || [ string length $r ] == 0 ) } {
 		return "(cannot run compiler)"
 	}
 	
@@ -103,6 +103,62 @@ proc gccVersion { } {
 		return "(unknown compiler version)"
 	} else {
 		return $v
+	}
+}
+
+
+#************************************************
+# GCCPATHS
+# Get GCC compiler default paths to include
+# and library files
+#************************************************
+proc gccPaths { } {
+	global gccCmd linuxPkg gccInclude gccLib
+	
+	if { ! [ info exists gccCmd ] } {
+		set gccCmd [ lindex $linuxPkg 0 ]
+	}
+	
+	set gccInclude [ list ]
+	set gccLib [ list ]
+	
+	catch { exec echo | $gccCmd -v -x c++ - -fsyntax-only } incl
+	
+	set i 0
+	set found 0
+	set incl [ split $incl \n ]
+	foreach line $incl {
+		incr i
+		if { [ string match "#include <...> search starts here*" $line ] } {
+			set found 1
+			break
+		}
+		if { [ string match "LIBRARY_PATH=*" $line ] } {
+			set found 2
+			break
+		}
+	}
+	
+	if { $found == 1 } {
+		while { $i < [ llength $incl ] && ! [ string match "End of search list*" [ lindex $incl $i ] ] } {
+			lappend gccInclude [ file normalize [ string trim [ lindex $incl $i ] ] ]
+			incr i
+		}
+		
+		while { $i < [ llength $incl ] } {
+			if { [ string match "LIBRARY_PATH=*" [ lindex $incl $i ] ] } {
+				set found 2
+				break
+			}
+			incr i
+		}
+	}
+	
+	if { $found == 2 } {
+		set libs [ string range [ lindex $incl $i ] [ string length "LIBRARY_PATH=" ] end ]
+		foreach lib [ split $libs : ] {
+			lappend gccLib [ file normalize $lib ]
+		}
 	}
 }
 

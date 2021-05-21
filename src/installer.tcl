@@ -29,7 +29,7 @@ set LsdSrc src
 set winGnuplot "gp541-win64-mingw.exe"
 set winRoot "C:/"
 
-set linuxPmPkg(apt)	[ list	build-essential 	make	gdb		gnuplot-qt	multitail	zlib1g-dev		tcl-dev			tk-dev			]
+set linuxPmPkg(apt)	[ list	build-essential 	make	gdb		gnuplot		multitail	zlib1g-dev		tcl-dev			tk-dev			]
 set linuxPmPkg(yum)	[ list	gcc-c++ 			make	gdb		gnuplot		multitail	zlib-devel		tcl-devel		tk-devel		]
 set linuxPmPkg(dnf)	[ list	gcc-c++ 			make	gdb		gnuplot		multitail	zlib-devel		tcl-devel		tk-devel		]
 set linuxPmPkg(zyp)	[ list	gcc-c++ 			make	gdb		gnuplot		multitail	zlib-devel		tcl-devel		tk-devel		]
