@@ -3868,7 +3868,7 @@ case 37:
 	timeinfo = localtime( &rawtime );
 	strftime ( ftime, 80, "%Y%m%d-%H%M%S", timeinfo );
 
-	cmd( "set lab \"result_%s_%s\"", simul_name, ftime );
+	cmd( "set lab \"%s_%s\"", simul_name, ftime );
 	  
 	// choose a name
 	cmd( "newtop .n \"Save Results\" { set choice 2 }" );
@@ -3912,24 +3912,37 @@ case 37:
 
 	lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
 	strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
+	
 	if ( saveConf )
 	{
-		plog( "\nLSD configuration file: %s.lsd", "", lab );
-		cmd( "file copy -force %s.lsd %s.lsd", simul_name, lab );
+		if ( strlen( path ) == 0 )
+		{
+			cmd( "file copy -force %s.lsd %s.lsd", simul_name, lab );
+			plog( "\nSaved configuration to file %s.lsd", "", lab );
+		}
+		else
+		{
+			cmd( "file copy -force %s/%s.lsd %s/%s.lsd", path, simul_name, path, lab );
+			plog( "\nSaved configuration to file %s/%s.lsd", "", path, lab );
+		}
 	}
-
-	plog( "\nLSD results file: %s.%s%s\nSaving data...", "", lab, docsv ? "csv" : "res", dozip ? ".gz" : "" );
 
 	if ( strlen( path ) == 0 )
 		sprintf( msg, "%s.%s", lab, docsv ? "csv" : "res" );
 	else
 		sprintf( msg, "%s/%s.%s", path, lab, docsv ? "csv" : "res" );
 		
+	if ( dozip )
+		strcat( msg, ".gz" );
+					
+	plog( "\nSaving results to file %s... ", "", msg );
+
 	rf = new result( msg, "wt", dozip, docsv );	// create results file object
-	rf->title( root, 1 );							// write header
-	rf->data( root, 0, actual_steps );				// write all data
+	rf->title( root, 1 );						// write header
+	rf->data( root, 0, actual_steps );			// write all data
 	delete rf;									// close file and delete object
-	plog( " Done\n" );
+	
+	plog( "Done\n" );
 
 	unsavedData = false;						// no unsaved simulation results
 

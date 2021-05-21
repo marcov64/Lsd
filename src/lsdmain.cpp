@@ -950,8 +950,11 @@ void run( void )
 					sprintf( msg, "%s%s%s.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, docsv ? "csv" : "tot" );
 				}
 
+				if ( dozip )
+					strcat( msg, ".gz" );
+					
 				if ( fast_mode < 2 && i == sim_num )		// print only for last
-					plog( "\nSaving totals to file %s%s... ", "", msg, dozip ? ".gz" : "" );
+					plog( "\nSaving totals to file %s... ", "", msg );
 
 				if ( i == 1 && grandTotal && ! add_to_tot )
 				{
