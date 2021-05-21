@@ -227,7 +227,7 @@ void create_float_list( object *t )
 				}
 				else
 				{
-					cmd( "lappend tlist_%s \"%s (V_%d$varFlags)\"", t->label, cv->label );
+					cmd( "lappend tlist_%s \"%s (V_%d$varFlags)\"", t->label, cv->label, cv->num_lag );
 					cmd( "lappend slist_%s lvar", t->label );
 				}
 			}
@@ -247,7 +247,7 @@ void create_float_list( object *t )
 				}
 				else
 				{
-					cmd( "lappend tlist_%s \"%s (F_%d$varFlags)\"", t->label, cv->label );
+					cmd( "lappend tlist_%s \"%s (F_%d$varFlags)\"", t->label, cv->label, cv->num_lag );
 					cmd( "lappend slist_%s lfun", t->label );
 				}
 			}
