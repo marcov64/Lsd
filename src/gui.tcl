@@ -96,6 +96,11 @@ if [ string equal $CurPlatform mac ] {
 	bind all <Control-ButtonPress-1> { 
 		event generate %W <ButtonPress-2> -x %x -y %y -rootx %X -rooty %Y -button 2
 	}
+		
+	# ensure homebrew local executables are on PATH
+	if { [ string first "/usr/local/bin" "$env(PATH)" ] < 0 } {
+		set env(PATH) "/usr/local/bin:$env(PATH)"
+	}
 } elseif [ string equal $CurPlatform linux ] {
 	set DefaultSysTerm $sysTermLinux
 	set systemTerm $sysTermLinux

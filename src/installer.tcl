@@ -478,8 +478,8 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 	if [ string equal $CurPlatform mac ] {
 		# check if Homebrew is installed and install if not
 		set res 0
-		if [ catch { exec which brewXX } ] {
-			set brewInsta "/bin/bash -c \\\"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)\\\"; "
+		if [ catch { exec which brew } ] {
+			set brewInsta "/bin/bash -c \\\"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\\\"; "
 			set brewInstr "Homebrew package manager, \\n"
 			set brewSteps "in Terminal type your password and press <Return> twice\n3. "
 			set brewMsg1 "Homebrew, "
