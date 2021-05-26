@@ -72,6 +72,7 @@ bool redrawRoot;			// control for redrawing root window (.)
 bool redrawStruc;			// control for redrawing model structure window
 bool running = false;		// simulation is running
 bool save_alt_path = false;	// alternate save path flag
+bool save_ok = true;		// control if saving model configuration is possible
 bool scrollB = true;		// scroll box state in current runtime plot
 bool struct_loaded = false;	// a valid configuration file is loaded
 bool tk_ok = false;			// control for tk ready to operate
@@ -687,6 +688,7 @@ void run( void )
 		running = true;		// signal simulation is running
 		cur_sim = i;	 	// update the current run in the set of runs
 		actual_steps = 0;	// no steps performed yet
+		save_ok = true;		// valid structure to save
 		
 		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed 
 

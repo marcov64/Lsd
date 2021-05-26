@@ -3151,7 +3151,10 @@ case 73:
 
 	if ( actual_steps > 0 )
 	{ 
-		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Configuration is the final state of a simulation run\" -detail \"Press 'OK' to save it anyway or 'Cancel' to abort saving.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } }" );
+		if ( save_ok )
+			cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Configuration is the final state of a simulation run\" -detail \"Press 'OK' to save it anyway%s or 'Cancel' to abort saving.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } }", saveAs ? "" : " under a different name" );
+		else
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration cannot be saved\" -detail \"Current configuration is the final state of a simulation run which has an incomplete structure that cannot be reliably saved.\n\nThis is due to the usage of USE_ZERO_INSTANCE macro, which allowed zero-instance objects in the current model structure.\"; set done 2" );
 
 		if ( done == 2 )
 		{
@@ -3159,7 +3162,8 @@ case 73:
 			cmd( "unset done" );
 			break;
 		}
-		saveAs = true;	// require file name to save
+		
+		saveAs = true;		// require file name to save
 	 }
 
 	done = 0;
@@ -3170,7 +3174,13 @@ case 73:
 
 	if ( saveAs )			// only asks file name if instructed to or necessary
 	{
-		cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
+		if ( actual_steps > 0 )
+		{
+			cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
+			cmd( "if { [ string equal -nocase [ file normalize $bah ] [ file normalize \"$path/$res.lsd\" ] ] && [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Overwrite existing configuration?\" -detail \"The original model configuration will be overwritten by the final state of the simulation run and, therefore, lost.\n\nPress 'OK' if you are sure or 'Cancel' to abort saving.\" ] eq \"cancel\" } { set bah \"\" }" );
+		}
+		else
+			cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
 
 		cmd( "if { [ string length $bah ] > 0 } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .lsd $res ] - 1 } ]; if { $last > 0 } { set res [ string range $res 0 $last ] } } { set done 2 }" );
 		if ( done == 2 )

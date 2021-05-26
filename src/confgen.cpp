@@ -58,6 +58,7 @@ bool no_search;				// disable the standard variable search mechanism
 bool no_zero_instance = true;// flag to allow deleting last object instance
 bool parallel_mode;			// parallel mode (multithreading) status
 bool running = false;		// simulation is running
+bool save_ok = true;		// control if saving model configuration is possible
 bool struct_loaded = false;	// a valid configuration file is loaded
 bool unsavedData = false;	// flag unsaved simulation results
 bool unsavedSense = false;	// control for unsaved changes in sensitivity data

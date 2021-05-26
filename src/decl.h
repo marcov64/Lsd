@@ -410,6 +410,7 @@ extern bool non_var;			// flag to indicate INTERACT macro condition
 extern bool redrawRoot;			// control for redrawing root window (.)
 extern bool redrawStruc;		// control for redrawing model structure window
 extern bool running;			// simulation is running
+extern bool save_ok;			// control if saving model configuration is possible
 extern bool scrollB;			// scroll check box state in current runtime plot
 extern bool struct_loaded;		// a valid configuration file is loaded
 extern bool unsavedData;		// control for unsaved simulation results

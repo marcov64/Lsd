@@ -717,6 +717,7 @@ void unload_configuration ( bool full )
 	empty_cemetery( );							// garbage collection
 	empty_sensitivity( rsense ); 				// discard sensitivity analysis data
 	
+	save_ok = true;								// valid structure to save
 	unsavedData = false;						// no unsaved simulation results
 	unsavedSense = false;						// no sensitivity data to save
 	rsense = NULL;								// no sense data 

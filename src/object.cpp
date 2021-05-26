@@ -1891,6 +1891,7 @@ void object::delete_obj( variable *caller )
 				}
 
 				cb->head = NULL;
+				save_ok = false;		// model structure can no longer be saved
 			}
 		}
 		else
