@@ -153,7 +153,8 @@ logX <- function( x, type ) {
 t.test0 <- function( x, mu = 0, conf.level = 0.95 ) {
   x[ is.nan( x ) ] <- 0
 
-  if( sd( x, na.rm = TRUE ) < 1e-12 )
+  sdx <- sd( x, na.rm = TRUE )
+  if( is.na( sdx ) || sdx < 1e-12 )
     return( 0 )
 
   return( t.test( x, mu = mu, alternative = "greater",
@@ -1099,11 +1100,11 @@ plot_lists <- function( vars, Adata, mdata, Mdata, Sdata, mask = NULL,
 
       # apply logs if required
       if( log ) {
-        avg[[ k ]][[ j ]] <- log( avg[[ k ]][[ j ]] )
-        min[[ k ]][[ j ]] <- log( min[[ k ]][[ j ]] )
-        max[[ k ]][[ j ]] <- log( max[[ k ]][[ j ]] )
-        CIlo[[ k ]][[ j ]] <- log( CIlo[[ k ]][[ j ]] )
-        CIhi[[ k ]][[ j ]] <- log( CIhi[[ k ]][[ j ]] )
+        avg[[ k ]][[ j ]] <- logNA( avg[[ k ]][[ j ]] )
+        min[[ k ]][[ j ]] <- logNA( min[[ k ]][[ j ]] )
+        max[[ k ]][[ j ]] <- logNA( max[[ k ]][[ j ]] )
+        CIlo[[ k ]][[ j ]] <- logNA( CIlo[[ k ]][[ j ]] )
+        CIhi[[ k ]][[ j ]] <- logNA( CIhi[[ k ]][[ j ]] )
       } else if( log0 ) {
         avg[[ k ]][[ j ]] <- log0( avg[[ k ]][[ j ]] )
         min[[ k ]][[ j ]] <- log0( min[[ k ]][[ j ]] )
@@ -1382,7 +1383,7 @@ plot_xy <- function( x, y, quant = 0.25, xlab = "",
 plot_recovery <- function( x, growth, strt, dur, per, mask, warm = 0, mrk = -1,
                            xlab = "", ylab = "", tit = "", subtit = "" ) {
 
-  y <- log( x[ mask ] )    # log GDP series
+  y <- log0( x[ mask ] )    # log GDP series
 
   yMin <- min( y, na.rm = TRUE )
   yMax <- max( y, na.rm = TRUE )
@@ -1584,8 +1585,9 @@ plot_histo <- function( times, data, bins = 10, log = 0, labVar = NULL,
 
   yMax <- 0
   for( i in 1 : nCS )
-    yMax <- max( yMax, density( cs[ i, ], bw = "SJ", adjust = bw.adj,
+    yMax <- max( yMax, tryCatch( density( cs[ i, ], bw = "SJ", adjust = bw.adj,
                                 na.rm = TRUE )$y,
+                                error = function( cond ) return( NA ) ),
                  hist( cs[ i, ], breaks = breaks, plot = FALSE )$density )
 
   # change the output format but save existing conf to restore at end
@@ -1594,14 +1596,18 @@ plot_histo <- function( times, data, bins = 10, log = 0, labVar = NULL,
 
   # plot all
   for( i in 1 : nCS ) {
-    h <- hist( cs[ i, ], prob = TRUE, breaks = breaks, col = NULL,
-               main = "", xlab = paste0( labVar, " (", leg[ i ], ")" ),
-               xlim = c( xMin, xMax ), ylim = c( 0, 1.1 * yMax ) )
-    d <- density( cs[ i, ], bw = "SJ", adjust = bw.adj, na.rm = TRUE )
-    polygon( d, col = transp_color( "gray", 0.7 ) )
-    xAvg <- mean( cs[ i, ], na.rm = TRUE )
-    yAvg <- 1.1 * max( h$density, d$y )
-    lines( c( xAvg, xAvg ), c( 0, yAvg ), type = "l", lty = "dotted" )
+    if( ! is.na( yMax ) ) {
+      h <- hist( cs[ i, ], prob = TRUE, breaks = breaks, col = NULL,
+                 main = "", xlab = paste0( labVar, " (", leg[ i ], ")" ),
+                 xlim = c( xMin, xMax ), ylim = c( 0, 1.1 * yMax ) )
+      d <- density( cs[ i, ], bw = "SJ", adjust = bw.adj, na.rm = TRUE )
+      polygon( d, col = transp_color( "gray", 0.7 ) )
+      xAvg <- mean( cs[ i, ], na.rm = TRUE )
+      yAvg <- 1.1 * max( h$density, d$y )
+      lines( c( xAvg, xAvg ), c( 0, yAvg ), type = "l", lty = "dotted" )
+    } else {
+      textplot( "Insufficient data to plot", cex = 1.0 )
+    }
   }
 
   mtext( tit, outer = TRUE, cex = 1.2, font = 2, padj = -1 )
@@ -1686,7 +1692,7 @@ size_bins <- function( s, sLag, g, bins = 30, outLim = 0 ) {
     # calculate average of size (t/t-1), growth rate and SD of growth for each bin
     s2avg <- append( s2avg, mean( set[ , 1 ] ) )
     gAvg <- append( gAvg, mean( set[ , 3 ] ) )
-    gSD <- append( gSD, log( sd( set[ , 3 ] ) ) )
+    gSD <- append( gSD, logNA( sd( set[ , 3 ] ) ) )
   }
 
   return( list( s1avg = s1avg, s2avg = s2avg, sLagAvg = sLagAvg, gAvg = gAvg, gSD = gSD ) )
@@ -1827,8 +1833,8 @@ corr_table <- function( vars, data, logVars = NULL, labVars = NULL,
                               pl = pl, pu = pu, nfix = nfix )$cycle[ maskBpf, 1 ]
 
       for( h in 1 : i )
-        pval[ i, h, j ] <- pval[ h, i, j ] <- suppressWarnings(
-          cor.test( mat[ , i ], mat[ , h ], conf.level = CI )$p.value )
+        pval[ i, h, j ] <- pval[ h, i, j ] <- tryCatch( suppressWarnings(
+          cor.test( mat[ , i ], mat[ , h ], conf.level = CI )$p.value ), error = function( cond ) return( 1 ) )
     }
 
     corr[ , , j ] <- suppressWarnings( cor( mat ) )
