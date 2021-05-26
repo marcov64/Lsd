@@ -175,6 +175,7 @@ extern int i_values[ ];					// user temporary variables copy
 extern double d_values[ ];
 extern object *o_values[ ];
 extern netLink *n_values[ ];
+extern FILE *f_values[ ];
 #endif
 
 

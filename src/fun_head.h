@@ -137,6 +137,7 @@ bool no_ptr_chk = true;
 		n_values[ 7 ] = curl7; \
 		n_values[ 8 ] = curl8; \
 		n_values[ 9 ] = curl9; \
+		f_values[ 0 ] = f; \
 	};
 #else
 #define DEBUG_CODE

@@ -5208,7 +5208,7 @@ void plot_gnu( int *choice )
 	}
 	
 	// check x series max/mins to allow splines
-	for ( done = false, j = min_c; j <= max_c; ++j )
+	for ( minx = maxx = 0, done = false, j = min_c; j <= max_c; ++j )
 	{
 		if ( ! done && start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) )	// ignore NaNs
 		{
@@ -5662,7 +5662,7 @@ void plot_cs_xy( int *choice )
 	}
 
 	// check x series max/mins to allow splines
-	for ( done = false, j = min_c; j <= max_c; ++j )
+	for ( minx = maxx = 0, done = false, j = min_c; j <= max_c; ++j )
 	{
 		if ( ! done && start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) )	// ignore NaNs
 		{

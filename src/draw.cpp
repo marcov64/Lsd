@@ -261,7 +261,7 @@ DRAW_OBJ
 void draw_obj( object *t, object *sel, int level, int center, int from, bool zeroinst )
 {
 	bool fit_wid;
-	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_LINE_SIZE ];
+	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_LINE_SIZE + 1 ];
 	double h_fact, v_fact, range_fact;
 	int h, i, j, k, step_level, step_type, begin, count, max_wid, range_init;
 	object *cur;
@@ -336,7 +336,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 				
 				skip_next_obj( cur, &count );
 				snprintf( str, MAX_LINE_SIZE, "%s%d", strlen( ch1 ) > 0 ? " " : "", count );
-				strncat( ch1, str, MAX_LINE_SIZE - 2 );
+				strncat( ch1, str, MAX_LINE_SIZE );
 				
 				for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group
 			}

@@ -163,6 +163,7 @@ int i_values[ 4 ];			// user temporary variables copy
 double d_values[ USER_D_VARS ];
 object *o_values[ 10 ];
 netLink *n_values[ 10 ];
+FILE *f_values[ 1 ];
 p_mapT par_map;				// variable to parent name map for AoR
 Tcl_Interp *inter = NULL;	// global Tcl interpreter in LSD
 #endif
