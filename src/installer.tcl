@@ -424,9 +424,43 @@ if [ string equal $CurPlatform windows ] {
 } elseif [ string equal $CurPlatform linux ] {
 	set res [ catch { exec $RootLsd/add-shortcut-linux.sh } result ]
 } else {
-	ttk::messageBox -parent "" -type ok -title "Password" -icon info -message "Password required" -detail "The next step of installation will require the password of a user with administrator rights.\n\nThis is required so LSD can be installed out of the macOS quarantine zone for new executable files."
-	update
-	set res [ catch { exec osascript -e "do shell script \"$RootLsd/add-shortcut-mac.sh 2>&1 /dev/nul\" with administrator privileges" } result ]
+	ttk::messageBox -parent "" -type ok -title "LSD Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to provide the system password.\n\nA Terminal window will open and the interaction must be performed there.\n\nThis is required so LSD can be installed out of the macOS quarantine zone for new executable files."
+	set wait [ waitbox .wait "Installing..." "Installing LSD" "1. type the macOS user password and press <Return>\n2. if required, allow the Terminal to control Finder\n3. Terminal window will close/disable when done\n" 1 "" ]
+	
+	set scpt [ open "$env(TMPDIR)/add_shortcut.as" w ]
+	puts $scpt "tell application \"Terminal\""
+	set openMsg "clear; echo \\\"Installing LSD\\nPlease wait for this window to close/deactivate automatically.\\nType your password and press <Return>:\\\"; "
+	set shortcutInsta "/bin/bash -c \\\"${RootLsd}/add-shortcut-mac.sh 2>&1 /dev/nul\\\"; "
+	set closeMsg "touch \$TMPDIR/shortcut-done.tmp; exit"
+	puts $scpt "\tdo script \"${openMsg}${shortcutInsta}${closeMsg}\""
+	puts $scpt "end tell"
+	close $scpt
+	exec chmod +x "$env(TMPDIR)/add_shortcut.as"
+
+	file delete -force "$env(TMPDIR)/shortcut-done.tmp"
+	set res [ catch { exec osascript "$env(TMPDIR)/add_shortcut.as" } ]
+	
+	if { ! $res } {
+		set timeout 1800
+		set elapsed 0
+		while { ! [ file exists "$env(TMPDIR)/shortcut-done.tmp" ] && $elapsed < $timeout } {
+			$wait configure -text [ format "%02d:%02d" [ expr { int( $elapsed / 60 ) } ] [ expr { $elapsed % 60 } ] ]
+			update
+			after 1000
+			incr elapsed
+		}
+		
+		if { $elapsed >= $timeout } {
+			set res 1
+			set result timeout
+		}
+
+	} else {
+		set result $res
+	}
+	
+	file delete -force "$env(TMPDIR)/add_shortcut.as" "$env(TMPDIR)/shortcut-done.tmp"
+	destroytop .wait
 }
 
 if { $res } {
@@ -480,7 +514,7 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 		set res 0
 		if [ catch { exec which brew } ] {
 			set brewInsta "/bin/bash -c \\\"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\\\"; "
-			set brewInstr "Homebrew package manager, \\n"
+			set brewInstr "Homebrew package manager, "
 			set brewSteps "in Terminal type your password and press <Return> twice\n3. "
 			set brewMsg1 "Homebrew, "
 			set brewMsg2 "\\nType your password and press <Return> twice:"
