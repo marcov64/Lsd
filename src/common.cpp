@@ -952,7 +952,7 @@ int strtrim( char *out, const char *str, int outSz )
 		--end;
 	++end;
 
-	size = ( end - str ) < outSz ? ( end - str ) : outSz;
+	size = ( end - str ) < outSz ? ( end - str ) : outSz - 1;
 
 	memcpy( out, str, size );
 	out[ size ] = '\0';
