@@ -4465,7 +4465,7 @@ case 62:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );// number of variables to test
-		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
 		long ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
 		plog( "\nSensitivity analysis space size: %ld", "", ptsSa );
 		
@@ -4507,7 +4507,7 @@ case 63:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );// number of variables to test
-		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
 		long ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
 		plog( "\nSensitivity analysis space size: %ld", "", ptsSa );
 		
@@ -4563,7 +4563,7 @@ case 71:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );// number of variables to test
-		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
 		long maxMC = num_sensitivity_points( rsense );	// total number of points in sensitivity space
 		plog( "\nSensitivity analysis space size: %ld", "", maxMC );
 
@@ -4665,7 +4665,7 @@ case 72:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );	// number of variables to test
-		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
 		lab1 = NOLH_valid_tables( varSA, ch );
 
 		cmd( "set extdoe 0" );	// flag for using external DoE file
@@ -4793,7 +4793,7 @@ case 80:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );	// number of variables to test
-		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
 
 		// get the number of Monte Carlo samples to produce
 		int sizMC = 10;
@@ -4892,7 +4892,7 @@ case 81:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );	// number of variables to test
-		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
 
 		// get the number of Monte Carlo samples to produce
 		int nLevels = 4, jumpSz = 2, nTraj = 10, nSampl = 100;

@@ -408,6 +408,7 @@ extern bool iniShowOnce;		// prevent repeating warning on # of columns
 extern bool log_ok;				// control for log window available
 extern bool message_logged;		// new message posted in log window
 extern bool non_var;			// flag to indicate INTERACT macro condition
+extern bool on_bar;				// flag to indicate bar is being draw in log window
 extern bool redrawRoot;			// control for redrawing root window (.)
 extern bool redrawStruc;		// control for redrawing model structure window
 extern bool running;			// simulation is running

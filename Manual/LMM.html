@@ -366,8 +366,8 @@ lang=EN-US> in a line) are highlighted in green. </span></p>
 programming code is the automatic indentation. When a new line is inserted
 (pressing the key </span><span class=Cdigo><span lang=EN-US>Enter</span></span><span
 lang=EN-US>), the editor fills the beginning of the new line with as many
-spaces/tabs as in the previous line, facilitating the standard programming
-indented style. </span></p>
+spaces/tabs as in the previous line, facilitating the standard programming indented
+style. </span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -434,9 +434,9 @@ yellow folder icon on the tool bar.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Browse the <a href="LSD_faqs.html#model">LSD
 models</a> available on your computer using the <a
-href="LSD_windows.html#modelbrowser">LSD Model Browser</a>. The models are usually
-organized in groups containing related models. After installation, there are
-two main groups created: </span><span class=Cdigo><span lang=EN-US>Example
+href="LSD_windows.html#modelbrowser">LSD Model Browser</a>. The models are
+usually organized in groups containing related models. After installation,
+there are two main groups created: </span><span class=Cdigo><span lang=EN-US>Example
 Models</span></span><span lang=EN-US> and </span><span class=Cdigo><span
 lang=EN-US>Work in Progress</span></span><span lang=EN-US>. In the first group
 you find several ready-to-run example models (see the <a href="model_using.html">tutorial</a>
@@ -677,8 +677,8 @@ lang=EN-US> for Linux.</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Debugger</span></b><span lang=EN-US>: the
-debugger command to use, normally </span><span class=Cdigo><span lang=EN-US>gdb</span></span><span
+</span></span><b><span lang=EN-US>Debugger</span></b><span lang=EN-US>: the debugger
+command to use, normally </span><span class=Cdigo><span lang=EN-US>gdb</span></span><span
 lang=EN-US> in Windows and Linux and </span><span class=Cdigo><span lang=EN-US>lldb</span></span><span
 lang=EN-US> in macOS.</span></p>
 
@@ -1137,10 +1137,10 @@ easier reading.</span></p>
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><a
-  name="_Larger_Font"></a><a name=lfont></a><a name=wrap></a><a name=LsdScript></a><span
-  lang=EN-US>&nbsp;</span><span style='font-size:10.0pt;color:black'><a
-  href="#top"><span style='color:red;text-decoration:none'>&#9650;Top</span></a></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><a name=LsdScript></a><a
+  name=wrap></a><a name=lfont></a><a name="_Larger_Font"></a><span lang=EN-US>&nbsp;</span><span
+  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
+  text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -1352,8 +1352,8 @@ line-by-line a lot of non-interesting technical code. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>LSD modelers may find more useful the LSD
 Debugger: it follows the simulation at the level of individual Equations. When
-one Variable, marked to be debugged, is computed, the LSD debugger interrupts the
-simulation, shows the value produced in the equation, the values of the </span><span
+one Variable, marked to be debugged, is computed, the LSD debugger interrupts
+the simulation, shows the value produced in the equation, the values of the </span><span
 class=Cdigo><span lang=EN-US>v[n]</span></span><span lang=EN-US> temporary
 values, the model’s elements values, etc., permitting to find, most of times,
 the cause of an error. See the <a href="debug.html">LSD Debugger help page</a>.
@@ -1362,9 +1362,9 @@ the cause of an error. See the <a href="debug.html">LSD Debugger help page</a>.
 <p class=MsoNormal><span lang=EN-US>However, GDB/LLDB may be still useful in
 case of some hard problems. The LSD model program in GDB/LLDB runs as usual
 (slightly slower, if anything) but the user can interrupt the program at any
-point, check the value of any variable, and make the program proceed by single
-steps. It is usually useful to focus on one Equation at a time and see the
-behavior of the program while executing it. </span></p>
+point, check the value of any variable, and make the program proceed by single steps.
+It is usually useful to focus on one Equation at a time and see the behavior of
+the program while executing it. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Below, some basic GDB commands are
 presented (LLDB commands are similar but not the same, please check the LLDB
@@ -1695,6 +1695,13 @@ files (like some statistical packages)</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>-</span>b</b></span><span
+lang=EN-US>: display a text progress bar showing the percentage of time steps
+completed on the standard output while simulation is running</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>-c MAX_CORES</span></b></span><span
 lang=EN-US>: define the maximum number of CPU (virtual) cores to use, replacing
 the default of using all the available cores. Do not use a number larger than
@@ -1703,8 +1710,8 @@ processing</span></p>
 
 <h2><a name="_Model_Info"></a><span lang=EN-US>Model Info </span></h2>
 
-<p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>: click
-the on i blue icon on the tool bar.</span></p>
+<p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>:
+click the on i blue icon on the tool bar.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Show summary information about the model
 and allow the edition of the name and version: </span></p>
@@ -1960,15 +1967,15 @@ the table below. </span></p>
   </td>
   <td style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span lang=EN-US>Any optional </span><a
-  href="LSD_faqs.html#compiler"><span lang=EN-US>compiler</span></a> <span
-  lang=EN-US>switch can be added to this entry. The default </span><span
-  class=Cdigo><span lang=EN-US>-ggdb3</span></span><span lang=EN-US> option
-  includes full (external) debugging information. The default </span><span
-  class=Cdigo><span lang=EN-US>-O0</span></span><span lang=EN-US> prevents code
-  optimization to ensure a better debugging experience. Options </span><span
-  class=Cdigo><span lang=EN-US>-O3</span></span><span lang=EN-US> turns on full
-  compiler optimization, slowing down compiler speed but generating faster
-  code. See the documentation for the GCC compiler for further options. The </span><span
+  href="LSD_faqs.html#compiler"><span lang=EN-US>compiler</span></a><span
+  lang=EN-US> switch can be added to this entry. The default </span><span
+  class=Cdigo><span lang=EN-US>-ggdb3</span></span><span lang=EN-US> option includes
+  full (external) debugging information. The default </span><span class=Cdigo><span
+  lang=EN-US>-O0</span></span><span lang=EN-US> prevents code optimization to
+  ensure a better debugging experience. Options </span><span class=Cdigo><span
+  lang=EN-US>-O3</span></span><span lang=EN-US> turns on full compiler
+  optimization, slowing down compiler speed but generating faster code. See the
+  documentation for the GCC compiler for further options. The </span><span
   class=Cdigo><span lang=EN-US>Debug</span></span><span lang=EN-US> checkbox
   can be used to switch among the debug on/off states.</span></p>
   </td>
@@ -1990,8 +1997,8 @@ the table below. </span></p>
 </div>
 
 <p class=MsoNormal><span lang=EN-US style='color:white'>Other than manually
-modifying the model option entries, the dialog box offers options for quickly
-modify the configuration:</span></p>
+modifying the </span><span lang=EN-US>model option entries, the dialog box
+offers options for quickly modify the configuration:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
@@ -2354,11 +2361,11 @@ the most common problems.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>These options are used to create the make
 file used to compile the <a href="LSD_faqs.html#modelprogram">LSD model program</a>.
-Besides the <a href="LSD_faqs.html#equation">Equations</a>’ code, compiling a
-model program requires the exact name and location of several system files.
-This information is not standard on all operating systems and versions.
-Generally, the default values proposed should suit most cases, and are applied
-by using the </span><span class=Cdigo><span lang=EN-US>Default</span></span><span
+Besides the <a href="LSD_faqs.html#equation">Equations</a>’ code, compiling a model
+program requires the exact name and location of several system files. This
+information is not standard on all operating systems and versions. Generally,
+the default values proposed should suit most cases, and are applied by using
+the </span><span class=Cdigo><span lang=EN-US>Default</span></span><span
 lang=EN-US> button, which automatically detects the current operating system
 (among Windows, Linux, and macOS). The details about the compiler and the
 associated tools are described for each operating system in <a
@@ -2436,10 +2443,10 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 <p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>: </span><span
 class=Cdigo><span lang=EN-US>F1</span></span><span lang=EN-US>.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Access the <a href="#_top">LMM manual</a>
-(this document) in the configured web browser. If the browser is already open,
-the help page may show as an additional window or tab, according to the web
-browser configuration.</span></p>
+<p class=MsoNormal><span lang=EN-US>Access the <a href="#_top">LMM manual</a> (this
+document) in the configured web browser. If the browser is already open, the
+help page may show as an additional window or tab, according to the web browser
+configuration.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>From any help page you can navigate the
 entire LSD documentation using the top navigation bar.</span></p>
@@ -2451,9 +2458,9 @@ equations</span></h2>
 click the on the blue question mark icon on the tool bar.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Access the <a href="LSD_macros.html">LSD
-macro language reference</a> in the configured web browser. If the browser is already
-open, the help page may show as an additional window or tab, according to the
-web browser configuration.</span></p>
+macro language reference</a> in the configured web browser. If the browser is
+already open, the help page may show as an additional window or tab, according
+to the web browser configuration.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>From any help page you can navigate the
 entire LSD documentation using the top navigation bar.</span></p>

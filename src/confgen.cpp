@@ -56,6 +56,7 @@ bool no_ptr_chk = false;	// disable user pointer checking
 bool no_saved = true;		// disable the usage of saved values as lagged ones
 bool no_search;				// disable the standard variable search mechanism
 bool no_zero_instance = true;// flag to allow deleting last object instance
+bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool running = false;		// simulation is running
 bool save_ok = true;		// control if saving model configuration is possible
@@ -120,6 +121,11 @@ const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 bool change_configuration( object *root, int findex );
 int load_confs_csv( char *config );
 
+// command line strings
+const char lsdCmdMsg[ ] = "This is the LSD Configuration Generator.";
+const char lsdCmdDsc[ ] = "It creates new LSD configuration file(s) (.lsd) based on changed parameters\nor variables initial values described in a comma separated text file (.csv).\nEach changed element should take one line. First column must contain the\nparameter or variable name. Second (and additional) column(s) must contain\nthe values to apply in the new configuration. First line (header) is required\nand considered for the number of columns only. One configuration is generated\nfor each column with values, sequentially numbered.\n";
+const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd' the original configuration file to use as base\n'-c CONFIG.csv' comma separated text file with new configuration values\n'-o FILE_BASE_NAME' base name (no extension) to save new configuration file(s)\n";
+
 
 /*********************************
  LSDMAIN
@@ -136,7 +142,7 @@ int lsdmain( int argn, char **argv )
 
 	if ( argn < 7 )
 	{
-		fprintf( stderr, "\nThis is LSD Configuration Generator.\nIt creates new LSD configuration file(s) (.lsd) based on changed parameters\nor variables initial values described in a comma separated text file (.csv).\nEach changed element should take one line. First column must contain the\nparameter or variable name. Second (and additional) column(s) must contain\nthe values to apply in the new configuration. First line (header) is required\nand considered for the number of columns only. One configuration is generated\nfor each column with values, sequentially numbered.\n\nCommand line options:\n'-f FILENAME.lsd' the original configuration file to use as base\n'-c CONFIG.csv' comma separated text file with new configuration values\n'-o FILE_BASE_NAME' base name (no extension) to save new configuration file(s)\n\n" );
+		fprintf( stderr, "\n%s\n%s\n%s\n", lsdCmdMsg, lsdCmdDsc, lsdCmdHlp );
 		myexit( 1 );
 	}
 	else
@@ -165,21 +171,21 @@ int lsdmain( int argn, char **argv )
 				continue;
 			}
 
-			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is LSD Configuration Generator.\n\nCommand line options:\n'-f FILENAME.lsd' the original configuration file to use as base\n'-c CONFIG.csv' comma separated text file with new configuration values\n'-o FILE_BASE_NAME' base name (no extension) to save new configuration file(s)\n\n", argv[ i ][ 0 ], argv[ i ][ 1 ] );
+			fprintf( stderr, "\nOption '%c%c' not recognized.\n%s\n%s\n", argv[ i ][ 0 ], argv[ i ][ 1 ], lsdCmdMsg, lsdCmdHlp );
 			myexit( 2 );
 		}
 	}
 
 	if ( struct_file == NULL )
 	{
-		fprintf( stderr, "\nNo original configuration file provided.\nThis is LSD Configuration Generator.\nSpecify a -f FILENAME.lsd to use as a base for the new configuration files.\n\n" );
+		fprintf( stderr, "\nNo original configuration file provided.\n%s\nSpecify a -f FILENAME.lsd to use as a base for the new configuration files.\n\n", lsdCmdMsg );
 		myexit( 3 );
 	}
 
 	f = fopen( struct_file, "r" );
 	if ( f == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Configuration Generator.\nSpecify an existing -f FILENAME.lsd base configuration file.\n\n", struct_file );
+		fprintf( stderr, "\nFile '%s' not found.\n%s\nSpecify an existing -f FILENAME.lsd base configuration file.\n\n", struct_file, lsdCmdMsg );
 		myexit( 4 );
 	}
 	fclose( f );
@@ -195,7 +201,7 @@ int lsdmain( int argn, char **argv )
 	f = fopen( config_file, "r" );
 	if ( f == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Configuration Generator.\nSpecify an existing -c CONFIG.csv to use as the new configuration values.\n\n", config_file );
+		fprintf( stderr, "\nFile '%s' not found.\n%s\nSpecify an existing -c CONFIG.csv to use as the new configuration values.\n\n", config_file, lsdCmdMsg );
 		myexit( 4 );
 	}
 	fclose( f );
@@ -215,14 +221,14 @@ int lsdmain( int argn, char **argv )
 
 	if ( load_configuration( true ) != 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Configuration Generator.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n\n", struct_file );
+		fprintf( stderr, "\nFile '%s' is invalid.\n%s\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n\n", struct_file, lsdCmdMsg );
 		myexit( 5 );
 	}
 
 	confs = load_confs_csv( config_file );
 	if ( confs == 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Configuration Generator.\nSpecify a -c CONFIG.csv with a valid comma separated format.\n\n", config_file );
+		fprintf( stderr, "\nFile '%s' is invalid.\n%s\nSpecify a -c CONFIG.csv with a valid comma separated format.\n\n", config_file, lsdCmdMsg );
 		myexit( 6 );
 	}
 
@@ -230,13 +236,13 @@ int lsdmain( int argn, char **argv )
 	{
 		if ( ! change_configuration( root, i ) )
 		{
-			fprintf( stderr, "\nInvalid parameter or variable name.\nThis is LSD Configuration Generator.\nCheck if the spelling of the names of parameters and variables is exactly the\nsame as in the original configuration.\n\n" );
+			fprintf( stderr, "\nInvalid parameter or variable name.\n%s\nCheck if the spelling of the names of parameters and variables is exactly the\nsame as in the original configuration.\n\n", lsdCmdMsg );
 			myexit( 7 );
 		}
 
 		if ( ! save_configuration( confs == 1 ? 0 : i ) )
 		{
-			fprintf( stderr, "\nFile '%s.lsd' cannot be saved.\nThis is LSD Configuration Generator.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n\n", simul_name  );
+			fprintf( stderr, "\nFile '%s.lsd' cannot be saved.\n%s\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n\n", simul_name, lsdCmdMsg  );
 			myexit( 8 );
 		}
 	}
