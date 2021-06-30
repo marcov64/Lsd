@@ -656,8 +656,11 @@ bool no_ptr_chk = true;
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
 #ifndef FAST_LOOKUP
 
-#include <tk.h>
-extern Tcl_Interp *inter;
+// Tcl/Tk specific definitions (for the windowed version only)
+#ifndef NW
+	#include <tk.h>
+	extern Tcl_Interp *inter;
+#endif
 
 double init_lattice( double pixW = 0, double pixH = 0, double nrow = 100, double ncol = 100, 
 					 char const lrow[ ] = "y", char const lcol[ ] = "x", char const lvar[ ] = "", 
