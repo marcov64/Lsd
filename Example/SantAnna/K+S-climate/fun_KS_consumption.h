@@ -182,7 +182,7 @@ V( "f2rescale" );								// redistribute exiting m.s.
 // compute the potential number of entrants
 v[8] = ( MC2_1 == 0 ) ? 0 : MC2 / MC2_1 - 1;	// change in market conditions
 
-k = max( 0, ceil( F2 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
+k = max( 0, round( F2 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
 						 omicron * min( max( v[8], x2inf ), x2sup ) ) ) );
 				 
 // apply return-to-the-average stickiness random shock to the number of entrants

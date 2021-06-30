@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - March 2021
+	LSD 8.0 - May 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -28,8 +28,8 @@
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 8
 #define _LSD_MINOR_ 0
-#define _LSD_VERSION_ "8.0-beta-2"
-#define _LSD_DATE_ "March 22 2020"   // __DATE__
+#define _LSD_VERSION_ "8.0-beta-3"
+#define _LSD_DATE_ "May 17 2021"   // __DATE__
 
 // standard libraries used
 #include <cstdlib>

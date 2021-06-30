@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - March 2021
+	LSD 8.0 - May 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -318,9 +318,13 @@ void init_plot( int num, int id_sim )
 	cmd( "$activeplot.fond create window [ expr { $sclhsizeR / 2 } ] [ expr { $botvsizeR / 4 - 5 } ] -window $activeplot.fond.shift" );
 	cmd( "$activeplot.fond create window [ expr { $sclhsizeR / 2 } ] [ expr { 3 * $botvsizeR / 4 - 2 } ] -window $activeplot.fond.go" );
 	
+	cmd( "tooltip::tooltip $activeplot.fond.shift \"Automatic scrolling\"" );
+	cmd( "tooltip::tooltip $activeplot.fond.go \"Center plot in current time step\"" );
+	
 	// labels
 	cmd( "for { set i 0; set j 0; set k 0 } { $i < [ expr { min( %d, $linlabR * $lablinR ) } ] } { incr i } { \
-			$activeplot.fond create text [ expr { $sclhsizeR + $sclvmarginR + $j * $hsizeR / $lablinR } ] [ expr { $k * $linvsizeR } ] -anchor nw -text [ lindex $tp $i ] -fill [ set c$i ]; \
+			set it [ $activeplot.fond create text [ expr { $sclhsizeR + $sclvmarginR + $j * $hsizeR / $lablinR } ] [ expr { $k * $linvsizeR } ] -anchor nw -text [ lindex $tp $i ] -fill [ set c$i ] ]; \
+			set_ttip_descr $activeplot.fond [ lindex $tp $i ] $it 0; \
 			if { $j < [ expr { $lablinR - 1 } ] } { \
 				incr j \
 			} else { \
@@ -335,6 +339,8 @@ void init_plot( int num, int id_sim )
 	{
 		cmd( "$activeplot.fond.go conf -state disabled" );
 		cmd( "$activeplot.fond.shift conf -state disabled" );
+		cmd( "tooltip::tooltip clear $activeplot.fond.go" );
+		cmd( "tooltip::tooltip clear $activeplot.fond.shift" );
 		cmd( "$rtptab hide $activeplot" );
 	}
 
@@ -449,8 +455,10 @@ void reset_plot( void )
 			}; \
 			$activeplot.fond.go conf -state disabled; \
 			$activeplot.fond.shift conf -state disabled; \
+			tooltip::tooltip clear $activeplot.fond.go; \
+			tooltip::tooltip clear $activeplot.fond.shift; \
 			$rtptab select $activeplot; \
-			update idletasks \
+			update \
 		}" );
 }
 
@@ -464,7 +472,7 @@ void enable_plot( void )
 			$rtptab select $activeplot; \
 			$activeplot.fond.go conf -state normal; \
 			$activeplot.fond.shift conf -state normal; \
-			update idletasks \
+			update \
 		}" );
 }
 
@@ -478,7 +486,7 @@ void disable_plot( void )
 			$activeplot.fond.go conf -state disabled; \
 			$activeplot.fond.shift conf -state disabled; \
 			$rtptab hide $activeplot; \
-			update idletasks \
+			update \
 		}" );
 }
 

@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - March 2021
+	LSD 8.0 - May 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -39,6 +39,7 @@ Relevant flags (when defined):
 #include "decl.h"
 
 // some program defaults
+bool dobar = false;			// output a progress bar to the log/standard output
 bool grandTotal = false;	// flag to produce or not grand total in batch processing
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
 char err_file[ ] = "LSD.err";// error log file name
@@ -66,12 +67,14 @@ bool no_search;				// disable the standard variable search mechanism
 bool no_window = false;		// no-window command line job
 bool no_zero_instance = true;// flag to allow deleting last object instance
 bool non_var = false;		// flag to indicate INTERACT macro condition
+bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool pause_run;				// pause running simulation
 bool redrawRoot;			// control for redrawing root window (.)
 bool redrawStruc;			// control for redrawing model structure window
 bool running = false;		// simulation is running
 bool save_alt_path = false;	// alternate save path flag
+bool save_ok = true;		// control if saving model configuration is possible
 bool scrollB = true;		// scroll box state in current runtime plot
 bool struct_loaded = false;	// a valid configuration file is loaded
 bool tk_ok = false;			// control for tk ready to operate
@@ -98,6 +101,7 @@ char lastObj[ MAX_ELEM_LENGTH + 1 ] = "";	// last shown object for quick reload
 char lsd_eq_file[ MAX_FILE_SIZE + 1 ] = "";	// equations saved in configuration file
 char msg[ TCL_BUFF_STR + 1 ] = "";			// auxiliary Tcl buffer
 char name_rep[ MAX_PATH_LENGTH + 1 ];		// documentation report file name
+char path_rep[ MAX_PATH_LENGTH + 1 ];		// documentation report file path
 char tcl_dir[ MAX_PATH_LENGTH + 1 ];		// Tcl/Tk directory
 description *descr = NULL;	// model description structure
 eq_mapT eq_map;				// fast equation look-up map
@@ -161,6 +165,7 @@ int i_values[ 4 ];			// user temporary variables copy
 double d_values[ USER_D_VARS ];
 object *o_values[ 10 ];
 netLink *n_values[ 10 ];
+FILE *f_values[ 1 ];
 p_mapT par_map;				// variable to parent name map for AoR
 Tcl_Interp *inter = NULL;	// global Tcl interpreter in LSD
 #endif
@@ -170,6 +175,10 @@ map < thread::id, worker * > thr_ptr;	// worker thread pointers
 thread::id main_thread;		// LSD main thread ID
 worker *workers = NULL;		// multi-thread parallel worker data
 #endif
+
+// command line strings
+const char lsdCmdMsg[ ] = "This is the No Window version of LSD.";
+const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-b' for showing a progress bar\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n";
 
 
 /*********************************
@@ -210,13 +219,13 @@ int lsdmain( int argn, char **argv )
 
 	if ( exec_file == NULL || exec_path == NULL )
 	{
-		fprintf( stderr, "\nInvalid LSD executable name or path.\nThis is the No Window version of LSD.\nMake sure the LSD directory is not too deep into the disk directory tree (over %d chars).\n\n", MAX_PATH_LENGTH );
+		fprintf( stderr, "\nInvalid LSD executable name or path.\n%s\nMake sure the LSD directory is not too deep into the disk directory tree (over %d chars).\n\n", lsdCmdMsg, MAX_PATH_LENGTH );
 		myexit( 5 );
 	}
 	
 	if ( argn < 3 )
 	{
-		fprintf( stderr, "\nThis is the No Window version of LSD.\nCommand line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n\n" );
+		fprintf( stderr, "\n%s\n%s\n", lsdCmdMsg, lsdCmdHlp );
 		myexit( 0 );
 	}
 	else
@@ -266,11 +275,18 @@ int lsdmain( int argn, char **argv )
 				printf( "Grand total file requested ('-g'), please don't run another instance of 'lsdNW' in this folder!\n\n" );
 				continue;
 			}
-			// read -g parameter : don't create compressed result files
+			// read -z parameter : don't create compressed result files
 			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'z' )
 			{
 				i--; 					// no parameter for this option
 				dozip = false;
+				continue;
+			}
+			// read -b parameter : show a progress bar
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'b' )
+			{
+				i--; 					// no parameter for this option
+				dobar = true;
 				continue;
 			}
 			// change the path for the output of result files
@@ -286,7 +302,7 @@ int lsdmain( int argn, char **argv )
 				continue;
 			}
 
-			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is the No Window version of LSD.\nCommand line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n'-z' for preventing the generation of compressed result file(s)\n\n", argv[ i ][ 0 ], argv[ i ][ 1 ] );
+			fprintf( stderr, "\nOption '%c%c' not recognized.\n%s\n%s\n", argv[ i ][ 0 ], argv[ i ][ 1 ], lsdCmdMsg, lsdCmdHlp );
 			myexit( 6 );
 		}
 	} 
@@ -525,6 +541,9 @@ int lsdmain( int argn, char **argv )
 	// create a Tcl command to get LSD variable description from equation file(s)
 	Tcl_CreateCommand( inter, "get_var_descr", Tcl_get_var_descr, NULL, NULL );
 
+	// create a Tcl command to set tooltip from LSD variable description
+	Tcl_CreateCommand( inter, "set_ttip_descr", Tcl_set_ttip_descr, NULL, NULL );
+
 	// create Tcl command to upload series data
 	Tcl_CreateObjCommand( inter, "upload_series", Tcl_upload_series, NULL, NULL );
 
@@ -561,6 +580,7 @@ int lsdmain( int argn, char **argv )
 	eq_file = upload_eqfile( );
 	strcpy( lsd_eq_file, "" );
 	sprintf( name_rep, "report_%s.html", simul_name );
+	strcpy( path_rep, "" );
 
 	// fix model configuration file
 	if ( i == 0 )
@@ -641,8 +661,9 @@ RUN
 *********************************/
 void run( void )
 {
-	bool batch_sequential_loop = false;
-	int i;
+	bool one_dot, batch_sequential_loop = false;
+	char bar_done[ 2 * BAR_DONE_SIZE ], new_perc[ 10 ];
+	int i, perc_done, last_done;
 	FILE *f;
 	clock_t start, end, last_update;
 	result *rf;					// pointer for results files (may be zipped or not)
@@ -682,6 +703,7 @@ void run( void )
 		running = true;		// signal simulation is running
 		cur_sim = i;	 	// update the current run in the set of runs
 		actual_steps = 0;	// no steps performed yet
+		save_ok = true;		// valid structure to save
 		
 		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed 
 
@@ -763,12 +785,56 @@ void run( void )
 		stack_info = 0;
 		use_nan = false;
 		no_search = false;
+		one_dot = true;
+		on_bar = false;
 		done_in = 0;
+		perc_done = 0;
+		last_done = -1;
+		strcpy( bar_done, "" );
 		wr_warn_cnt = 0;
 		start = last_update = clock( );
 
 		for ( t = 1; quit == 0 && t <= max_step; ++t )
 		{
+			// update the percentage done bar, if needed
+			if ( dobar && perc_done != last_done )
+			{
+				if ( perc_done % 10 == 0 )
+				{
+					sprintf( new_perc, "%s%d%%", ! one_dot ? "." : "", perc_done );
+					strcat( bar_done, new_perc );
+					
+					// check if continuing existing bar or starting a new one
+					if ( on_bar )
+						plog( "%s%d%%", "bar", ! one_dot ? "." : "", perc_done );
+					else
+					{
+						on_bar = true;
+						plog( "\n%s", "bar", bar_done );
+					}
+					
+					one_dot = false;
+				}
+				else
+					if ( perc_done % ( 100 / ( BAR_DONE_SIZE - 33 ) ) == 0 )
+					{
+						strcat( bar_done, "." );
+						
+						// check if continuing existing bar or starting a new one
+						if ( on_bar )
+							plog( ".", "bar" );
+						else
+						{
+							on_bar = true;
+							plog( "\n%s", "bar", bar_done );
+						}
+					
+						one_dot = true;
+					}
+					
+				last_done = perc_done;
+			}
+			
 #ifndef NW 
 			// restart runtime variables color cycle
 			cur_plt = 0;
@@ -791,6 +857,8 @@ void run( void )
 				root->update( true, false );
 			}
 
+			perc_done = ( 100 * t ) / max_step;
+			
 #ifndef NW
 			switch ( done_in )
 			{
@@ -880,6 +948,9 @@ void run( void )
 		deb_log( false );			// close debug log file, if any
 		end = clock( );
 		
+		if ( dobar && on_bar )
+			plog( "%s100%%", "bar", ! one_dot ? "." : "" );
+
 		if ( fast_mode < 2 )
 			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", "", i, sim_num, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
@@ -945,8 +1016,11 @@ void run( void )
 					sprintf( msg, "%s%s%s.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, docsv ? "csv" : "tot" );
 				}
 
+				if ( dozip )
+					strcat( msg, ".gz" );
+					
 				if ( fast_mode < 2 && i == sim_num )		// print only for last
-					plog( "\nSaving totals to file %s%s... ", "", msg, dozip ? ".gz" : "" );
+					plog( "\nSaving totals to file %s... ", "", msg );
 
 				if ( i == 1 && grandTotal && ! add_to_tot )
 				{
@@ -1343,10 +1417,10 @@ void create_logwindow( void )
 	cmd( "pack $w.scrollx -side bottom -fill x" );
 	cmd( "pack $w -expand yes -fill both" );
 	
-	cmd( "bind .log.text.text <2> { \
+	cmd( "bind .log.text.text <Button-2> { \
 			tk_popup .log.text.text.menu %%X %%Y \
 		}" );	
-	cmd( "bind .log.text.text <3> { \
+	cmd( "bind .log.text.text <Button-3> { \
 			tk_popup .log.text.text.menu %%X %%Y \
 		}" );	
 
@@ -1504,7 +1578,7 @@ void cover_browser( const char *text1, const char *text2, bool run )
 		cmd( "wm title . \"$origMainTit (DISABLED)\"" );
 	}
 	
-	cmd( "update idletasks" );
+	cmd( "update" );
 	
 	brCovered = true;
 	redrawRoot = false;

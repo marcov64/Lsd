@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - March 2021
+	LSD 8.0 - May 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -175,6 +175,7 @@ extern int i_values[ ];					// user temporary variables copy
 extern double d_values[ ];
 extern object *o_values[ ];
 extern netLink *n_values[ ];
+extern FILE *f_values[ ];
 #endif
 
 
@@ -289,7 +290,7 @@ void find_lags( object *r );
 void find_using( object *r, variable *v, FILE *frep, bool *found );
 void get_sa_limits( object *r, FILE *out, const char *sep );
 void get_saved( object *n, FILE *out, const char *sep, bool all_var = false );
-void get_var_descr( char const *lab, char *descr, int descr_len );
+void get_var_descr( char const *lab, char *desc, int descr_len );
 void histograms( int *choice );
 void histograms_cs( int *choice );
 void init_map( void );
@@ -407,9 +408,11 @@ extern bool iniShowOnce;		// prevent repeating warning on # of columns
 extern bool log_ok;				// control for log window available
 extern bool message_logged;		// new message posted in log window
 extern bool non_var;			// flag to indicate INTERACT macro condition
+extern bool on_bar;				// flag to indicate bar is being draw in log window
 extern bool redrawRoot;			// control for redrawing root window (.)
 extern bool redrawStruc;		// control for redrawing model structure window
 extern bool running;			// simulation is running
+extern bool save_ok;			// control if saving model configuration is possible
 extern bool scrollB;			// scroll check box state in current runtime plot
 extern bool struct_loaded;		// a valid configuration file is loaded
 extern bool unsavedData;		// control for unsaved simulation results
@@ -427,6 +430,7 @@ extern char lastObj[ ];			// last shown object for quick reload
 extern char lsd_eq_file[ ];		// equations saved in configuration file
 extern char name_rep[ ];		// documentation report file name
 extern char nonavail[ ];		// string for unavailable values
+extern char path_rep[ ];		// documentation report file path
 extern description *descr;		// model description structure
 extern double ymax;				// runtime plot max limit
 extern double ymin;				// runtime plot min limit
@@ -486,6 +490,7 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_set_c_var( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
+int Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST ov[ ] );
 
 #endif

@@ -443,7 +443,7 @@ EQUATION( "_L1rd" )
 R&D labor employed by firm in capital-good sector
 */
 v[1] = VS( PARENT, "L1dRD" );
-RESULT( v[1] > 0 ? ceil( V( "_L1dRD" ) * VS( PARENT, "L1rd" ) / v[1] ) : 0 )
+RESULT( v[1] > 0 ? V( "_L1dRD" ) * VS( PARENT, "L1rd" ) / v[1] : 0 )
 
 
 EQUATION( "_Pi1" )

@@ -59,4 +59,5 @@ $(SRC_DIR)util.o: $(SRC_DIR)util.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 
 # remove compiled files
 clean:
-	$(RM) $(SRC_DIR)*.o $(TARGET)
+	$(RM) $(SRC_DIR)common.o $(SRC_DIR)confgen.o $(SRC_DIR)file.o $(SRC_DIR)object.o \
+	$(SRC_DIR)variab.o $(SRC_DIR)nets.o $(SRC_DIR)util.o

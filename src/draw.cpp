@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - March 2021
+	LSD 8.0 - May 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -102,30 +102,30 @@ void show_graph( object *t )
 	cmd( "bind .str.f.c <Button-3> { event generate .str.f.c <Button-2> -x %%x -y %%y }" );
 
 	cmd( "ttk::menu .str.f.c.v -tearoff 0" );
-	cmd( ".str.f.c.v add command -label \"Make Current\" -command { set choice 4 }" );
+	cmd( ".str.f.c.v add command -label \"Make Current\" -accelerator Enter -command { set choice 4 }" );
 	cmd( ".str.f.c.v add separator" );
-	cmd( ".str.f.c.v add command -label Change -command { set choice 6 }" );
-	cmd( ".str.f.c.v add command -label Rename -command { set choice 83 }" );
+	cmd( ".str.f.c.v add command -label Change -accelerator \"Ctrl+Enter\" -command { set choice 6 }" );
+	cmd( ".str.f.c.v add command -label Rename -accelerator F2 -command { set choice 83 }" );
 	cmd( ".str.f.c.v add command -label Number -command { set choice 33 }" );
 	cmd( ".str.f.c.v add command -label Move -command { set choice 32 }" );
-	cmd( ".str.f.c.v add command -label Delete -command { set choice 74 }" );
+	cmd( ".str.f.c.v add command -label Delete -accelerator Del -command { set choice 74 }" );
 	cmd( ".str.f.c.v add separator" );
 	cmd( ".str.f.c.v add cascade -label Add -menu .str.f.c.v.a" );
 	cmd( ".str.f.c.v add separator" );
-	cmd( ".str.f.c.v add command -label \"Initial Values\" -command { set choice 21 }" );
-	cmd( ".str.f.c.v add command -label \"Browse Data\" -command { set choice 34 }" );
+	cmd( ".str.f.c.v add command -label \"Initial Values\" -accelerator \"Ctrl+I\" -command { set choice 21 }" );
+	cmd( ".str.f.c.v add command -label \"Browse Data\" -accelerator \"Ctrl+B\" -command { set choice 34 }" );
 	cmd( "ttk::menu .str.f.c.v.a -tearoff 0" );
-	cmd( ".str.f.c.v.a add command -label Variable -command { set choice 2; set param 0 }" );
-	cmd( ".str.f.c.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
-	cmd( ".str.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
-	cmd( ".str.f.c.v.a add command -label Object -command { set choice 3 }" );
+	cmd( ".str.f.c.v.a add command -label Variable -accelerator \"Ctrl+V\" -command { set choice 2; set param 0 }" );
+	cmd( ".str.f.c.v.a add command -label Parameter -accelerator \"Ctrl+P\" -command { set choice 2; set param 1 }" );
+	cmd( ".str.f.c.v.a add command -label Function -accelerator \"Ctrl+N\" -command { set choice 2; set param 2 }" );
+	cmd( ".str.f.c.v.a add command -label Object -accelerator \"Ctrl+D\" -command { set choice 3 }" );
 
 	cmd( "bind .str <F1> { LsdHelp graphrep.html }" );
 	set_shortcuts( ".str" );
 	
 	cmd( "if { [ winfo exists .plt ] } { lower .str .plt }" );
 
-	cmd( "update idletasks" );
+	cmd( "update" );
 }
 
 
@@ -186,8 +186,6 @@ void draw_buttons( void )
 	cmd( "set d [ .str.f.c create window $colM [ expr { $rowM - $bvstepM } ] -window .str.f.c.vplus -tags tooltip ]" );
 	cmd( "set e [ .str.f.c create window $colM [ expr { $rowM - 2 * $bvstepM } ] -window .str.f.c.vminus -tags tooltip ]" );
 		
-	cmd( "update idletasks" );
-	
 	cmd( "tooltip::tooltip .str.f.c -item $a \"Automatic adjustment\"" );
 	cmd( "tooltip::tooltip .str.f.c -item $b \"Increase horizontal spacing\"" );
 	cmd( "tooltip::tooltip .str.f.c -item $c \"Decrease horizontal spacing\"" );
@@ -225,19 +223,19 @@ void create_float_list( object *t )
 				if ( cv->num_lag == 0 )
 				{
 					cmd( "lappend tlist_%s \"%s (V$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s tvar.TLabel", t->label );
+					cmd( "lappend slist_%s var", t->label );
 				}
 				else
 				{
-					cmd( "lappend tlist_%s \"%s (V_%d$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s tlvar.TLabel", t->label );
+					cmd( "lappend tlist_%s \"%s (V_%d$varFlags)\"", t->label, cv->label, cv->num_lag );
+					cmd( "lappend slist_%s lvar", t->label );
 				}
 			}
 			
 			if ( cv->param == 1 )
 			{
 				cmd( "lappend tlist_%s \"%s (P$varFlags)\"", t->label, cv->label );
-				cmd( "lappend slist_%s tpar.TLabel", t->label );
+				cmd( "lappend slist_%s par", t->label );
 			}
 			
 			if ( cv->param == 2 )
@@ -245,12 +243,12 @@ void create_float_list( object *t )
 				if ( cv->num_lag == 0 )
 				{
 					cmd( "lappend tlist_%s \"%s (F$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s tfun.TLabel", t->label );
+					cmd( "lappend slist_%s fun", t->label );
 				}
 				else
 				{
-					cmd( "lappend tlist_%s \"%s (F_%d$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s tlfun.TLabel", t->label );
+					cmd( "lappend tlist_%s \"%s (F_%d$varFlags)\"", t->label, cv->label, cv->num_lag );
+					cmd( "lappend slist_%s lfun", t->label );
 				}
 			}
 		}
@@ -263,7 +261,7 @@ DRAW_OBJ
 void draw_obj( object *t, object *sel, int level, int center, int from, bool zeroinst )
 {
 	bool fit_wid;
-	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_LINE_SIZE ];
+	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_LINE_SIZE + 1 ];
 	double h_fact, v_fact, range_fact;
 	int h, i, j, k, step_level, step_type, begin, count, max_wid, range_init;
 	object *cur;
@@ -338,7 +336,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 				
 				skip_next_obj( cur, &count );
 				snprintf( str, MAX_LINE_SIZE, "%s%d", strlen( ch1 ) > 0 ? " " : "", count );
-				strncat( ch1, str, MAX_LINE_SIZE - 2 );
+				strncat( ch1, str, MAX_LINE_SIZE );
 				
 				for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group
 			}
@@ -496,20 +494,33 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 			if { [ llength $tlist_%s ] > 0 } { \
 				set res_g_id [ after $ttipdelay { \
 					destroy .list; \
+					tooltip::hide; \
 					toplevel .list -class Tooltip -background $colorsTheme(ttip) -borderwidth 0 -highlightthickness 1 -highlightbackground $colorsTheme(fg); \
+					if { $CurPlatform eq \"mac\" } { \
+						tk::unsupported::MacWindowStyle style .list help none \
+					} else { \
+						wm overrideredirect .list 1 \
+					}; \
+					catch { wm attributes .list -topmost 1 }; \
+					catch { wm attributes .list -alpha 0.99 }; \
+					wm positionfrom .list program; \
 					wm withdraw .list; \
 					set res_g_i 0; \
 					foreach res_g_t $tlist_%s res_g_s $slist_%s { \
-						ttk::label .list.e$res_g_i -text \"$res_g_t\" -style $res_g_s -background $colorsTheme(ttip); \
+						label .list.e$res_g_i -text \"$res_g_t\" -font \"$ttfont\" -foreground $colorsTheme($res_g_s) -background $colorsTheme(ttip); \
 						pack .list.e$res_g_i -anchor w -ipadx 1; \
 						incr res_g_i \
 					}; \
 					update idletasks; \
+					if { $CurPlatform eq \"mac\" } { \
+						set __focus__ [ focus ] \
+					}; \
 					wm geometry .list +[ expr { %%X + 5 } ]+[ expr { %%Y + 5 } ]; \
-					wm overrideredirect .list 1; \
-					wm attributes .list -topmost 1; \
-					wm state .list normal; \
-					update idletasks \
+					wm deiconify .list; \
+					catch { raise .list }; \
+					if { $CurPlatform eq \"mac\" } { \
+						after idle { focus -force $__focus__ } \
+					} \
 				} ] \
 			} \
 		}", str2, str2, str2, str2, str2 );

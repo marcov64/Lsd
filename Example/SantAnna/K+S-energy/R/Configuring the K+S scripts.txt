@@ -1,0 +1,31 @@
+The R scripts on this folder can be used to analyze the K+S model results produced by LSD when running the simulations.
+
+The available R scripts are described in the model's "description.txt" file in the parent folder.
+
+All R scripts are based on Monte Carlo (MC) techniques so each model configuration require data from several simulation runs to be analyzed. There is no fixed rules on how many runs are required to produce robust statistical results, but there are some rules of thumb in the case of K+S model:
+
+ . Scripts code test: a bare minimum of 3-5 runs is required but the produced results are useless for any model analysis.
+ . Qualitative scenario comparison: a minimum of 10-20 runs is required to differentiate qualitative model behavior under different configurations but most quantitative statistical measures are still unreliable.
+ . Quantitative scenario comparison: a minimum of 50-100 is required for most variables to be properly evaluated in statistical terms but some high MC dispersion variables may require mode (rule of thumb: check when confidence intervals stop narrowing when adding more MC runs).
+ . Sensitivity analysis screening: a minimum of 5-10 runs per sampled point in factorial space is recommended for variables with narrow MC dispersion
+ . Sensitivity analysis statistics: a minimum of 10-20 runs per sampled point in factorial space is recommended for variables with narrow MC dispersion
+
+The R scripts depend on the current "working directory" correctly set in R. They assume the working directory is ALWAYS set to the same folder where the scripts are. Use "getwd()" at the console to check and "setwd( new-dir )" to change the working directory. The easiest way to ensure this is to create an Rstudio project based on the (existing) R scripts directory. This also ensures you don't have to set it every time you start Rstudio.
+
+Statistical analysis scripts, like "KS-aggregates.R", can analyze files from a single MC experiment (one ".lsd" configuration file) or analyze and compare different MC experiments (each one in a separated ".lsd" configuration file). Sensitivity analysis scripts, like "KS-kriging-sobol-SA.R" must use data from a single LSD configuration (".lsd" file).
+
+LSD results files (".res.gz" extension) must be not renamed, as they are already produced using the naming conventions expected by the R scripts, as well the remaining ancillary files used by sensitivity analysis scripts. Additionally, when comparing multiple experiments, the names of all involved LSD corresponding configuration files MUST share the same base name, that is, the filenames must differentiate only by a integer sequential suffix (e.g, "config1.lsd", "config2.lsd", etc.). Experiments to be compared must also have the same set of saved variables and number of time steps.
+
+All LSD configuration, results and ancillary files MUST be stored in the same folder/directory. For convenience, it is easier to have the LSD data folder as a subfolder of the R working directory, where the R scripts are. You can generate your LSD results files directly in that subfolder, so no file copying is ever needed. Just save your LSD configuration (.lsd file) to that subfolder BEFORE starting the simulation runs. Keep results files from MC experiments to be compared in the same subfolder, otherwise you may create several subfolders in the R working directory to keep your data organized.
+
+The R scripts may have to be changed according to the type of LSD data files to be processed. All scripts have two critical variables to point to where/which data must be used:
+ . "folder" (default is "data"): must have the relative path of your data FROM the R working directory, that is, the folder where the scripts are. It must NOT include the full path to the working directory. For instance, if the working directory is "C:\Users\Marcelo\LSD\Work\Test\R" and the data to be analyzed is in "C:\Users\Marcelo\LSD\Work\Test\R\my-exp", you must set "folder" to (just) "my-exp" (folder <- "my-exp").
+ . "baseName" (default is "Sim"): if a single configuration (experiment) is being analyzed, it must define the FULL name of the LSD configuration used to produce the data. For instance, if your configuration file is "my-conf.lsd", you must set "baseName" to (just) "my-conf" (baseName <- "my-conf"). If analysis is for a set of experiments (see also "nExp" below), it must define the part of the configuration file name that does not change (before the integer suffix). For instance, if you have two configuration files named "my-conf1.lsd" and "my-conf2.lsd", you also must set "baseName" to (just) "my-conf" (baseName <- "my-conf").
+ 
+The R statistical scripts also have a third critical variable to set:
+ . "nExp": if a single configuration (experiment) is being analyzed, it must be set to 1. Otherwise, it must be set to the number of experiments to be compared in the same report(s). Experiment numbering must start from 1 and be sequential (e.g., "my-conf1.lsd", "my-conf2.lsd", etc.).
+
+The scripts for sensitivity analysis also have a third critical variable:
+ . "varName" (default is "U"): defines the name of the K+S model variable to be used for sensitivity analysis. For instance, if you want to check the sensitivity of the GDP growth rate, you must set "varName" to "dGDP" (varName <- "dGDP")
+ 
+Other R script variables are available for optional adjustments, like discarding initial/final time steps from analysis ("iniDrop"/"nKeep"), naming experiments ("expVal"), define initial period for plots and statistics ("warmUpPlot"/"warmUpStat"), removing outliers from analysis ("remOutl"), among many others. Check the comments on the scripts for the description of all adjustable parameters.

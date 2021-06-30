@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - March 2021
+	LSD 8.0 - May 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -254,7 +254,11 @@ cmd( "bind $f.v <KeyRelease> { \
 				set kk _ \
 			}; \
 			set ll %%W; \
-			set ff [ lsearch -start [ expr { [ $ll curselection ] + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
+			set ss [ $ll curselection ]; \
+			if { [ llength $ss ] > 1 } { \
+				return \
+			}; \
+			set ff [ lsearch -start [ expr { $ss + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 			if { $ff == -1 } { \
 				set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
 			}; \
@@ -335,7 +339,11 @@ cmd( "bind $f.v <KeyRelease> { \
 				set kk _ \
 			}; \
 			set ll %%W; \
-			set ff [ lsearch -start [ expr { [ $ll curselection ] + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
+			set ss [ $ll curselection ]; \
+			if { [ llength $ss ] > 1 } { \
+				return \
+			}; \
+			set ff [ lsearch -start [ expr { $ss + 1 } ] -nocase [ $ll get 0 end ] \"${kk}*\" ]; \
 			if { $ff == -1 } { \
 				set ff [ lsearch -start 0 -nocase [ $ll get 0 end ] \"${kk}*\" ] \
 			}; \
@@ -5200,7 +5208,7 @@ void plot_gnu( int *choice )
 	}
 	
 	// check x series max/mins to allow splines
-	for ( done = false, j = min_c; j <= max_c; ++j )
+	for ( minx = maxx = 0, done = false, j = min_c; j <= max_c; ++j )
 	{
 		if ( ! done && start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) )	// ignore NaNs
 		{
@@ -5654,7 +5662,7 @@ void plot_cs_xy( int *choice )
 	}
 
 	// check x series max/mins to allow splines
-	for ( done = false, j = min_c; j <= max_c; ++j )
+	for ( minx = maxx = 0, done = false, j = min_c; j <= max_c; ++j )
 	{
 		if ( ! done && start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) )	// ignore NaNs
 		{
@@ -6339,9 +6347,9 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "pack $w.b.c.case $w.b.c.y -anchor w" );
 
 	cmd( "ttk::frame $w.b.o" );
-	cmd( "ttk::label $w.b.o.l1 -text \"Alt-click: properties\"" );
-	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: add text\"" );
-	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: add line\"" );
+	cmd( "ttk::label $w.b.o.l1 -text \"%s+click: properties\"", platform == MAC ? "Ctrl" : "Alt" );
+	cmd( "ttk::label $w.b.o.l2 -text \"Shift+click: add text\"" );
+	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == MAC ? "Cmd" : "Ctrl" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
@@ -6665,9 +6673,9 @@ void plot_lattice( int *choice )
 	cmd( "ttk::frame $w.b -width %d", ncol * le + 1 );
 
 	cmd( "ttk::frame $w.b.o" );
-	cmd( "ttk::label $w.b.o.l1 -text \"Alt-click: properties\"" );
-	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: add text\"" );
-	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: add line\"" );
+	cmd( "ttk::label $w.b.o.l1 -text \"%s+click: properties\"", platform == MAC ? "Ctrl" : "Alt" );
+	cmd( "ttk::label $w.b.o.l2 -text \"Shift+click: add text\"" );
+	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == MAC ? "Cmd" : "Ctrl" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
@@ -8051,7 +8059,7 @@ int numcol = 16;
 void save_datazip( int *choice )
 {
 	char *app, **str, **tag, delimiter[ 10 ], misval[ 10 ], labprefix[ MAX_ELEM_LENGTH ];
-	const char *descr, *ext;
+	const char *desc, *ext;
 	double **data;
 	int i, j, fr, typelab, del, type_res, *start, *end, *id, headprefix = 0;
 	FILE *fsave = NULL;
@@ -8060,8 +8068,8 @@ void save_datazip( int *choice )
 
 	const char str0[ ] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000";
 	const char strsp[ ] = "                                                                                ";
-	const char descrRes[ ] = "LSD Result File";
-	const char descrTxt[ ] = "Text File";
+	const char descRes[ ] = "LSD Result File";
+	const char descTxt[ ] = "Text File";
 	const char extResZip[ ] = ".res.gz";
 	const char extTxtZip[ ] = ".txt.gz";
 	const char extRes[ ] = ".res";
@@ -8236,7 +8244,7 @@ void save_datazip( int *choice )
 
 	if ( type_res == 4 )
 	{
-		descr = descrTxt;
+		desc = descTxt;
 		if ( ! dozip )
 			ext = extTxt;
 		else
@@ -8244,7 +8252,7 @@ void save_datazip( int *choice )
 	}
 	else
 	{
-		descr = descrRes;
+		desc = descRes;
 		if ( ! dozip )
 			ext = extRes;
 		else
@@ -8256,7 +8264,7 @@ void save_datazip( int *choice )
 	if ( strlen( path ) > 0 )
 		cmd( "cd \"$path\"" );
 
-	cmd( "set bah [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }  } ]", ext, descr, ext );
+	cmd( "set bah [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }  } ]", ext, desc, ext );
 	app = ( char * ) Tcl_GetVar( inter, "bah", 0 );
 	strcpy( msg, app );
 
@@ -9233,9 +9241,9 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	cmd( "pack $w.b.c.case $w.b.c.y $w.b.c.var -anchor w" );
 
 	cmd( "ttk::frame $w.b.o" );
-	cmd( "ttk::label $w.b.o.l1 -text \"Alt-click: properties\"" );
-	cmd( "ttk::label $w.b.o.l2 -text \"Shift-click: add text\"" );
-	cmd( "ttk::label $w.b.o.l3 -text \"Ctrl-click: add line\"" );
+	cmd( "ttk::label $w.b.o.l1 -text \"%s+click: properties\"", platform == MAC ? "Ctrl" : "Alt" );
+	cmd( "ttk::label $w.b.o.l2 -text \"Shift+click: add text\"" );
+	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == MAC ? "Cmd" : "Ctrl" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
@@ -9350,6 +9358,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 					tOk = true;
 				else
 					tOk = false;
+				
 				sprintf( txtLab, "%s_%s", str[ i ], tag[ i ] );
 				break;
 				
@@ -9375,13 +9384,19 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			h = get_int( "ylabel" );
 			if ( h > tbordsize + vsize + bbordsize - 2 * lheight )
 				break;
-			cmd( "$p create text $xlabel $ylabel -font $fontP -anchor nw -text \"%s\" -tag { txt%d text legend } -fill $c%d", txtLab, i, ( color < 1100 ) ? color : 0 );
+			cmd( "set it [ $p create text $xlabel $ylabel -font $fontP -anchor nw -text \"%s\" -tag { txt%d text legend } -fill $c%d ]", txtLab, i, ( color < 1100 ) ? color : 0 );
 			cmd( "set xlabel [ expr { $xlabel + $app + $htmarginP } ]" );
+			
+			if ( type == TSERIES )
+				cmd( "set_ttip_descr $p \"%s\" $it 0", str[ i ] );
 		}
 	}
 
 	if ( i < nLine )
-		cmd( "$p create text $xlabel $ylabel -fill $colorsTheme(fg) -font $fontP -anchor nw -text \"(%d more...)\"", nLine - i );
+	{
+		cmd( "set it [ $p create text $xlabel $ylabel -fill $colorsTheme(fg) -font $fontP -anchor nw -text \"(%d more...)\" ]", nLine - i );
+		cmd( "tooltip::tooltip $p -item  $it \"%d series labels not presented\"", nLine - i );
+	}
 
 	// create context menu and common bindings
 	canvas_binds( cur_plot );
@@ -9441,7 +9456,7 @@ void canvas_binds( int n )
 	
 	cmd( "bind $p <Double-Button-1> { focustop .da }" );
 	
-	cmd( "bind $p <Alt-1> { \
+	cmd( "bind $p <Alt-Button-1> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; set LY %%Y; \
 			set type [ $ccanvas gettags current ]; \
@@ -9462,7 +9477,7 @@ void canvas_binds( int n )
 			} \
 		}", n );
 
-	cmd( "bind $p <Shift-1> { \
+	cmd( "bind $p <Shift-Button-1> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; \
 			set LY %%Y; \
@@ -9471,14 +9486,14 @@ void canvas_binds( int n )
 			set choice 27 \
 		}", n );
 		
-	cmd( "bind $p <Control-1> { \
+	cmd( "bind $p <%s-Button-1> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
 			set ncanvas %d; \
 			set hereX [ $ccanvas canvasx %%x ]; \
 			set hereY [ $ccanvas canvasy %%y ]; \
 			unset -nocomplain cl; \
 			set choice 28 \
-		}", n, n );
+		}", platform == MAC ? "Command" : "Control", n, n );
 
 	cmd( "bind $p <Button-1> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
@@ -9525,7 +9540,7 @@ void add_da_plot_tab( const char *w, int id_plot )
 			ttk::notebook::enableTraversal $daptab; \
 			showtop $w; \
 			bind $w <F1> { LsdHelp menudata_res.html#graph }; \
-			bind $w <Escape> \"wm withdraw $w\"; \
+			bind $w <Escape> \"wm withdraw $w\" \
 		} else { \
 			settop $w \
 		}", unsaved_change( ) ? "*" : " ", simul_name );

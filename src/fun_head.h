@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - March 2021
+	LSD 8.0 - May 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -137,6 +137,7 @@ bool no_ptr_chk = true;
 		n_values[ 7 ] = curl7; \
 		n_values[ 8 ] = curl8; \
 		n_values[ 9 ] = curl9; \
+		f_values[ 0 ] = f; \
 	};
 #else
 #define DEBUG_CODE
@@ -290,6 +291,7 @@ bool no_ptr_chk = true;
 #define PATH ( ( const char * ) path )
 #define CURRENT ( var->val[ 0 ] )
 #define THIS ( p )
+#define CALLER ( c )
 #define NEXT ( p->next )
 #define NEXTS( O ) ( CHK_PTR_OBJ( O ) O->next )
 #define PARENT ( p->up )

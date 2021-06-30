@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - March 2021
+	LSD 8.0 - May 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -606,6 +606,7 @@ int load_configuration( bool reload, bool quick )
 		goto endLoad;
 	}  
 	
+	empty_description( );						// remove existing descriptions
 	i = fscanf( f, "%999s", msg );				// should be the first description   
 	for ( j = 0; strcmp( msg, "DOCUOBSERVE" ) && i == 1 && j < MAX_FILE_TRY; ++j )
 	{ 
@@ -701,13 +702,12 @@ endLoad:
 /*****************************************************************************
 UNLOAD_CONFIGURATION
 	Unload the current configuration
-	If reload is true, just the model data is unloaded
+	If full is false, just the model data is unloaded
 	Returns: pointer to root object
 ******************************************************************************/
 void unload_configuration ( bool full )
 {
-	empty_blueprint( );						// remove current model structure
-	empty_description( );
+	empty_blueprint( );							// remove current model structure
 	root->delete_obj( );
 	root = new object;
 	root->init( NULL, "Root" );
@@ -717,6 +717,7 @@ void unload_configuration ( bool full )
 	empty_cemetery( );							// garbage collection
 	empty_sensitivity( rsense ); 				// discard sensitivity analysis data
 	
+	save_ok = true;								// valid structure to save
 	unsavedData = false;						// no unsaved simulation results
 	unsavedSense = false;						// no sensitivity data to save
 	rsense = NULL;								// no sense data 
@@ -732,14 +733,13 @@ void unload_configuration ( bool full )
 	cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );	// no elements in model structure
 	
 	if ( ! running )
-	{
 		cmd( "destroytop .plt" );				// remove run-time plot window
-		cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );	// delete temporary files
-	}
 #endif
 
 	if ( full )									// full unload? (no new config?)
 	{
+		empty_description( );					// remove element descriptions
+		
 		delete [ ] path;						// reset current path
 		path = new char[ strlen( exec_path ) + 1 ];
 		strcpy( path, exec_path );
@@ -1061,4 +1061,483 @@ bool save_sensitivity( FILE *f )
 	}
 	
 	return ! ferror( f );
+}
+
+
+/****************************************************
+GET_SAVED
+****************************************************/
+void get_saved( object *n, FILE *out, const char *sep, bool all_var )
+{
+	int i, sl;
+	char *lab;
+	bridge *cb;
+	description *cd;
+	object *co;
+	variable *cv;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		if ( cv->save || all_var )
+		{
+			// get element description
+			cd = search_description( cv->label, false );
+			if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
+			{
+				// select just the first description line
+				lab = new char[ sl + 1 ];
+				strcpy( lab, cd->text );
+				for ( i = 0; i < sl; ++i )
+					if ( lab[ i ] == '\n' || lab[ i ] == '\r' )
+					{
+						lab[ i ] = '\0';
+						break;
+					}
+			}
+			else
+				lab = NULL;
+		
+			fprintf( out, "%s%s%s%s%s%s%s\n", cv->label, sep, cv->param ? "parameter" : "variable", sep, n->label, sep, lab != NULL ? lab : "" );
+		}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head; 
+		get_saved( co, out, sep, all_var );
+	}
+}
+
+
+/****************************************************
+GET_SA_LIMITS
+****************************************************/
+void get_sa_limits( object *r, FILE *out, const char *sep )
+{
+	int i, sl;
+	char *lab;
+	variable *cv;
+	description *cd;
+	sense *cs;
+	
+	for ( cs = rsense; cs != NULL; cs = cs->next )
+	{
+		// get current value (first object)
+		cv = r->search_var( NULL, cs->label );
+		
+		// get element description
+		cd = search_description( cs->label, false );
+		if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
+		{
+			// select just the first description line
+			lab = new char[ sl + 1 ];
+			strcpy( lab, cd->text );
+			for ( i = 0; i < sl; ++i )
+				if ( lab[ i ] == '\n' || lab[ i ] == '\r' )
+				{
+					lab[ i ] = '\0';
+					break;
+				}
+		}
+		else
+			lab = NULL;
+		
+		// find max and min values
+		double min = HUGE_VAL, max = - HUGE_VAL;
+		for ( i = 0; cs->v != NULL &&  i < cs->nvalues; ++i )
+			if ( cs->v[ i ] < min )
+				min = cs->v[ i ];
+			else
+				if ( cs->v[ i ] > max )
+					max = cs->v[ i ];
+
+		fprintf( out, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s\"%s\"\n", cs->label, sep, cs->param == 1 ? "parameter" : "variable", sep, cs->param == 1 ? 0 : cs->lag + 1, sep, cs->integer ? "integer" : "real", sep, cv != NULL ? cv->val[ cs->lag ] : NAN, sep, min, sep, max, sep, lab != NULL ? lab : "" );	
+		
+		delete [ ] lab;
+	}
+}
+
+
+/***************************************************
+SAVE_EQFILE
+***************************************************/
+void save_eqfile( FILE *f )
+{
+	if ( strlen( lsd_eq_file ) == 0 )
+		strcpy( lsd_eq_file, eq_file );
+	 
+	fprintf( f, "\nEQ_FILE\n" );
+	fprintf( f, "%s", lsd_eq_file );
+	fprintf( f, "\nEND_EQ_FILE\n" );
+}
+
+
+#ifndef NW
+
+/***************************************************
+READ_EQ_FILENAME
+***************************************************/
+void read_eq_filename( char *s )
+{
+	char lab[ MAX_PATH_LENGTH ];
+	FILE *f;
+
+	sprintf( lab, "%s/%s", exec_path, MODEL_OPTIONS );
+	f = fopen( lab, "r" );
+	
+	if ( f == NULL )
+	{
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"File not found\" -detail \"File '$MODEL_OPTIONS' missing, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
+		return;
+	}
+	
+	fscanf( f, "%499s", lab );
+	for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%499s", lab ) != EOF && i < MAX_FILE_TRY; ++i );    
+	fclose( f );
+	if ( strncmp( lab, "FUN=", 4 ) != 0 )
+	{
+		cmd( "ttk::messageBox -parent . -type ok -title -title Error -icon error -message \"File corrupted\" -detail \"File '$MODEL_OPTIONS' has invalid contents, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
+		return;
+	}
+
+	strcpy( s, lab + 4 );
+	strcat( s, ".cpp" );
+
+	return;
+}
+
+
+/***************************************************
+COMPARE_EQFILE
+***************************************************/
+int compare_eqfile( void )
+{
+	char *s, lab[ MAX_PATH_LENGTH + 1 ];
+	int i = MAX_FILE_SIZE;
+	FILE *f;
+
+	read_eq_filename( lab );
+	f = fopen( lab, "r" );
+	s = new char[ i + 1 ];
+	while ( fgets( msg, MAX_LINE_SIZE, f ) != NULL )
+	{
+		i -= strlen( msg );
+		if ( i < 0 )
+			break;
+		strcat( s, msg );
+	}
+	fclose( f );  
+	
+	if ( strcmp( s, lsd_eq_file ) == 0 )
+		i = 0;
+	else
+		i = 1;
+	delete [ ] s;
+
+	return i;
+}
+
+
+/***************************************************
+UPLOAD_EQFILE
+***************************************************/
+char *upload_eqfile( void )
+{
+	//load into the string eq_file the equation file
+	char s[ MAX_PATH_LENGTH + 1 ], *eq;
+	int i;
+	FILE *f;
+
+	Tcl_LinkVar( inter, "eqfiledim", ( char * ) &i, TCL_LINK_INT );
+
+	read_eq_filename( s );
+	cmd( "set eqfiledim [ file size %s ]", s );
+
+	Tcl_UnlinkVar( inter, "eqfiledim" );
+
+	eq = new char[ i + 1 ];
+	eq[ 0 ] = '\0';
+	f = fopen( s, "r");
+	while ( fgets( msg, MAX_LINE_SIZE, f ) != NULL )
+	{
+		i -= strlen( msg );
+		if ( i < 0 )
+			break;
+		strcat( eq, msg );
+	}
+	
+	fclose( f );
+	return eq;
+}
+
+#endif
+
+
+/***************************************************
+RESULT
+Methods for results file saving (class result)
+***************************************************/
+
+/***************************************************
+DATA
+Saves data to file in the specified period
+***************************************************/
+void result::data( object *root, int initstep, int endtstep )
+{
+	// don't include initialization (t=0) in .csv format
+	initstep = ( docsv && initstep < 1 ) ? 1 : initstep;
+	// adjust for 1 time step if needed
+	endtstep = ( endtstep == 0 ) ? initstep : endtstep;
+	
+	for ( int i = initstep; i <= endtstep; i++ )
+	{
+		firstCol = true;
+		
+		data_recursive( root, i );		// output one data line
+		
+		if ( dozip )					// and change line
+			gzprintf( fz, "\n" );
+		else
+			fprintf( f, "\n" );
+	}
+}
+
+void result::data_recursive( object *r, int i )
+{
+	bridge *cb;
+	object *cur;
+	variable *cv;
+
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+	{
+		if ( cv->save == 1 )
+		{
+			if ( cv->start <= i && cv->end >= i && ! is_nan( cv->data[ i - cv->start ] ) )
+			{
+				if ( dozip )
+				{
+					if ( docsv )
+						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
+					else
+						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
+					else
+						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
+				}
+			}
+			else
+			{
+				if ( dozip )		// save NaN as n/a
+				{
+					if ( docsv )
+						gzprintf( fz, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
+					else
+						gzprintf( fz, "%s\t", nonavail );
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
+					else
+						fprintf( f, "%s\t", nonavail );
+				}
+			}
+			
+			firstCol = false;
+		}
+	}
+	 
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			continue;
+		
+		cur = cb->head;
+		if ( cur->to_compute )
+			for ( ; cur != NULL; cur = cur->next )
+				data_recursive( cur, i );
+	}
+
+	if ( r->up == NULL )
+	{
+		for ( cv = cemetery; cv != NULL; cv = cv->next )
+		{
+			if ( cv->start <= i && cv->end >= i && ! is_nan( cv->data[ i - cv->start ] ) )
+			{
+				if ( dozip )
+				{
+					if ( docsv )
+						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
+					else
+						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
+					else
+						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
+				}
+			}
+			else					// save NaN as n/a
+			{
+				if ( dozip )
+				{
+					if ( docsv )
+						gzprintf( fz, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
+					else
+						gzprintf( fz, "%s\t", nonavail );
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
+					else
+						fprintf(f, "%s\t", nonavail );
+				}
+			}
+						
+			firstCol = false;
+		}
+	}
+}
+
+
+/***************************************************
+TITLE
+Saves header to file
+***************************************************/
+void result::title( object *root, int flag )
+{
+	firstCol = true;
+	
+	title_recursive( root, flag );		// output header
+		
+	if ( dozip )						// and change line
+		gzprintf( fz, "\n" );
+	else
+		fprintf( f, "\n" );
+}
+
+void result::title_recursive( object *r, int header )
+{
+	bool single = false;
+	bridge *cb;
+	object *cur;
+	variable *cv;
+
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+	{
+		if ( cv->save == 1 )
+		{
+			set_lab_tit( cv );
+			if ( ( ! strcmp( cv->lab_tit, "1" ) || ! strcmp( cv->lab_tit, "1_1" ) || ! strcmp( cv->lab_tit, "1_1_1" ) || ! strcmp( cv->lab_tit, "1_1_1_1" ) ) && cv->up->hyper_next( ) == NULL )
+				single = true;					// prevent adding suffix to single objects
+			
+			if ( header )
+			{
+				if ( dozip )
+				{
+					if ( docsv )
+						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
+					else
+						gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
+					else
+						fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
+				}
+			}
+			else
+			{
+				if ( dozip )
+				{
+					if ( docsv )
+						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
+					else
+						gzprintf( fz, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
+					else
+						fprintf( f, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
+				}
+			}
+			
+			firstCol = false;
+		}
+	}
+	 
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			continue;
+		
+		cur = cb->head;
+		if ( cur->to_compute )
+		{
+			for ( ; cur != NULL; cur = cur->next )
+			title_recursive( cur, header );
+		} 
+	} 
+
+	if ( r->up == NULL )
+	{
+		for ( cv = cemetery; cv != NULL; cv = cv->next )
+		{
+			if ( dozip )
+			{
+				if ( docsv )
+					gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
+				else
+					gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
+			}
+			else
+			{
+				if ( docsv )
+					fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
+				else
+					fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
+			}
+			
+			firstCol = false;
+		}
+	}
+}
+
+/***************************************************
+CONSTRUCTOR
+Open the appropriate file for saving the results
+***************************************************/
+result::result( char const *fname, char const *fmode, bool dozip, bool docsv )
+{
+	this->docsv = docsv;
+	this->dozip = dozip;		// save local class flag
+	if ( dozip )
+		fz = gzopen( fname, fmode );
+	else
+		f = fopen( fname, fmode );
+}
+
+
+/***************************************************
+DESTRUCTOR
+Close the results file
+***************************************************/
+result::~result( void )
+{
+	if ( dozip )
+		gzclose( fz );
+	else
+		fclose( f );
 }

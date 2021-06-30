@@ -1,6 +1,6 @@
 #*************************************************************
 #
-#	LSD 8.0 - March 2021
+#	LSD 8.0 - May 2021
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -157,22 +157,6 @@ proc setstyles { } {
 		-font [ font create -size $small_character -weight bold ]
 	ttk::style configure graySmall.TLabel -foreground gray \
 		-font [ font create -size $small_character ]
-	
-	# tooltip widgets styles (model structure only)
-	set tfam [ font actual [ ttk::style lookup TLabel -font ] -family ]
-	set tsize [ expr { [ font actual [ ttk::style lookup TLabel -font ] -size ] - 1 } ]
-	set tfont [ font create -family "$tfam" -size $tsize ]
-	ttk::style configure tooltip.TFrame	-background $colorsTheme(ttip)
-	ttk::style configure tvar.TLabel -font $tfont -foreground $colorsTheme(var) \
-		-background $colorsTheme(ttip)
-	ttk::style configure tlvar.TLabel -font $tfont -foreground $colorsTheme(lvar) \
-		-background $colorsTheme(ttip)
-	ttk::style configure tpar.TLabel -font $tfont -foreground $colorsTheme(par) \
-		-background $colorsTheme(ttip)
-	ttk::style configure tfun.TLabel -font $tfont -foreground $colorsTheme(fun) \
-		-background $colorsTheme(ttip)
-	ttk::style configure tlfun.TLabel -font $tfont -foreground $colorsTheme(lfun) \
-		-background $colorsTheme(ttip)
 }
 
 

@@ -1,6 +1,6 @@
 #*************************************************************
 #
-#	LSD 8.0 - March 2021
+#	LSD 8.0 - May 2021
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -72,12 +72,12 @@ proc showmodel pippo {
 				showmodel [ lindex $ldn $result ]
 			} 
 		}
-		$m add command -label "New Model/Group..." -underline 0  -accelerator Insert -command { 
+		$m add command -label "New Model/Group..." -underline 0  -accelerator Ins -command { 
 			set result -1
 			set memory 0
 			set choiceSM 14
 		} 
-		$m add command -label Quit -underline 0 -accelerator Escape -command {
+		$m add command -label Quit -underline 0 -accelerator Esc -command {
 			set result -1
 			set memory 0
 			set choiceSM 2 
@@ -105,7 +105,7 @@ proc showmodel pippo {
 				mpaste $result 
 			} 
 		}
-		$m add command -label "Delete..." -underline 0 -accelerator Delete -command {
+		$m add command -label "Delete..." -underline 0 -accelerator Del -command {
 			set result [ .l.l.l curselection ]
 			if { [ lindex $group $result ] != -1 } { 
 				mdelete $result 
@@ -160,13 +160,13 @@ proc showmodel pippo {
 		pack .l.l.l -expand yes -fill both
 		
 		ttk::menu .l.l.l.m -tearoff 0
-		.l.l.l.m  add command -label Select -command { .l.m.file invoke 0 }
-		.l.l.l.m  add command -label New -command { .l.m.file invoke 1 }
+		.l.l.l.m  add command -label Select -accelerator Enter -command { .l.m.file invoke 0 }
+		.l.l.l.m  add command -label New -accelerator Ins -command { .l.m.file invoke 1 }
 		.l.l.l.m  add separator
-		.l.l.l.m  add command -label Edit -command { .l.m.edit invoke 0 }
-		.l.l.l.m  add command -label Copy -command { .l.m.edit invoke 1 }
-		.l.l.l.m  add command -label Paste -state disabled -command { .l.m.edit invoke 2 }
-		.l.l.l.m  add command -label Delete -command { .l.m.edit invoke 3 }
+		.l.l.l.m  add command -label Edit -accelerator Ctrl+E -command { .l.m.edit invoke 0 }
+		.l.l.l.m  add command -label Copy -accelerator Ctrl+C -command { .l.m.edit invoke 1 }
+		.l.l.l.m  add command -label Paste -accelerator Ctrl+V -state disabled -command { .l.m.edit invoke 2 }
+		.l.l.l.m  add command -label Delete -accelerator Del -command { .l.m.edit invoke 3 }
 
 		ttk::frame .l.t
 		ttk::label .l.t.tit -text Description
@@ -393,7 +393,7 @@ proc showmodel pippo {
 
 	cd $curdir
 	
-	update idletasks
+	update
 }
 
 

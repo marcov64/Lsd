@@ -254,7 +254,8 @@ for( k in 1 : nExp ) {
   table[ 7, k ] <- Adata[[ k ]]$CO2a[ nTstat ]
   table[ 8, k ] <- Adata[[ k ]]$Tm[ nTstat ]
 
-  mcData.ge <- mcData[[ k ]][ , , which( mcData[[ k ]][ nTstat, "fGE", ] > geTrsh ) ]
+  mcData.ge <- mcData[[ k ]][ , , which( mcData[[ k ]][ nTstat, "fGE", ] > geTrsh ),
+                              drop = FALSE ]
   table[ 9, k ] <- dim( mcData.ge )[ 3 ]
   table[ 10, k ] <- mean( mcData.ge[ TmaskStat, "dGDP", ], na.rm = TRUE )
   table[ 11, k ] <- mean( mcData.ge[ TmaskStat, "U", ], na.rm = TRUE )
@@ -264,7 +265,8 @@ for( k in 1 : nExp ) {
   table[ 15, k ] <- mean( mcData.ge[ nTstat, "CO2a", ], na.rm = TRUE )
   table[ 16, k ] <- mean( mcData.ge[ nTstat, "Tm", ], na.rm = TRUE )
 
-  mcData.de <- mcData[[ k ]][ , , which( mcData[[ k ]][ nTstat, "fGE", ] <= geTrsh ) ]
+  mcData.de <- mcData[[ k ]][ , , which( mcData[[ k ]][ nTstat, "fGE", ] <= geTrsh ),
+                              drop = FALSE ]
   table[ 17, k ] <- dim( mcData.de )[ 3 ]
   table[ 18, k ] <- mean( mcData.de[ TmaskStat, "dGDP", ], na.rm = TRUE )
   table[ 19, k ] <- mean( mcData.de[ TmaskStat, "U", ], na.rm = TRUE )

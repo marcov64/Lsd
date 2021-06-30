@@ -1,6 +1,6 @@
 #*************************************************************
 #
-#	LSD 8.0 - March 2021
+#	LSD 8.0 - May 2021
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -92,6 +92,15 @@ if [ string equal $CurPlatform mac ] {
 	set bvstepM $bvstepMac
 	set borderMadj $bborderMac
 	
+	# enable Ctrl+click as replacement for right-shift
+	bind all <Control-ButtonPress-1> { 
+		event generate %W <ButtonPress-2> -x %x -y %y -rootx %X -rooty %Y -button 2
+	}
+		
+	# ensure homebrew local executables are on PATH
+	if { [ string first "/usr/local/bin" "$env(PATH)" ] < 0 } {
+		set env(PATH) "/usr/local/bin:$env(PATH)"
+	}
 } elseif [ string equal $CurPlatform linux ] {
 	set DefaultSysTerm $sysTermLinux
 	set systemTerm $sysTermLinux
@@ -304,6 +313,11 @@ if { $darkTheme } {
 }
 
 # set tool tips (balloons)
+if { [ catch { set ttfam [ font actual [ ttk::style lookup TLabel -font ] -family ] } ] || [ catch { set ttsize [ expr { [ font actual [ ttk::style lookup TLabel -font ] -size ] - 1 } ] } ] } {
+	set ttfam [ font actual TkDefaultFont -family ]
+	set ttsize [ expr { [ font actual TkDefaultFont -size ] - 1 } ]
+}
+set ttfont [ font create -family "$ttfam" -size $ttsize ]
 set tooltip::labelOpts [ list -background $colorsTheme(ttip) -foreground $colorsTheme(fg) \
 	 -borderwidth 0 -highlightthickness 1 -highlightbackground $colorsTheme(fg) ]
 tooltip::tooltip delay $ttipdelay

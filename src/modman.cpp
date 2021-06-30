@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - March 2021
+	LSD 8.0 - May 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -402,7 +402,7 @@ int lsdmain( int argn, char **argv )
 	cmd( "$w add separator" );	// entryconfig 24
 	// add option to ajust syntax highlighting (word coloring)
 	cmd( "$w add check -label \"Wrap/Unwrap\" -variable wrap -command { setwrap .f.t.t $wrap } -underline 1 -accelerator Ctrl+w " );
-	cmd( "$w add command -label \"Insert LSD Macro...\" -command { set choice 28 } -underline 0 -accelerator Ctrl+i" );
+	cmd( "$w add command -label \"LSD Macros...\" -command { set choice 28 } -underline 0 -accelerator Ctrl+i" );
 
 	cmd( "set w .m.model" );
 	cmd( "ttk::menu $w -tearoff 0" );
@@ -692,20 +692,21 @@ int lsdmain( int argn, char **argv )
 			set vmenuInsert [ .f.t.t index insert ]; \
 			tk_popup .v %%X %%Y \
 		}" );
-	cmd( ".v add command -label \"Copy\" -command { .m.edit invoke 4 }" );
-	cmd( ".v add command -label \"Cut\" -command { .m.edit invoke 3 }" );
-	cmd( ".v add command -label \"Paste\" -command { .m.edit invoke 5 }" );
+	cmd( ".v add command -label \"Cut\" -accelerator Ctrl+x -command { .m.edit invoke 3 }" );
+	cmd( ".v add command -label \"Copy\" -accelerator Ctrl+c -command { .m.edit invoke 4 }" );
+	cmd( ".v add command -label \"Paste\" -accelerator Ctrl+p -command { .m.edit invoke 5 }" );
+	cmd( ".v add command -label \"Delete\" -accelerator Del -command { .m.edit invoke 6 }" );
 
 	cmd( ".v add separator" );
-	cmd( ".v add cascade -label \"LSD Macro\" -menu .v.i" );
-	cmd( ".v add command -label \"Indent Selection\" -command { set choice 42 }" );
-	cmd( ".v add command -label \"De-indent Selection\" -command { set choice 43 }" );
+	cmd( ".v add cascade -label \"LSD Macros\" -accelerator Ctrl+i -menu .v.i" );
+	cmd( ".v add command -label \"Indent\" -accelerator Ctrl+> -command { set choice 42 }" );
+	cmd( ".v add command -label \"De-indent\" -accelerator Ctrl+< -command { set choice 43 }" );
 	cmd( ".v add command -label \"Place Break & Run [ string toupper $DbgExe ]\" -command { set choice 58 }" );
 
 	cmd( ".v add separator" );
-	cmd( ".v add command -label \"Find...\" -command { set choice 11 }" );
-	cmd( ".v add command -label \"Match \\\{ \\}\" -command { set choice 17 }" );
-	cmd( ".v add command -label \"Match \\\( \\)\" -command { set choice 32 }" );
+	cmd( ".v add command -label \"Find...\" -accelerator Ctrl+f -command { set choice 11 }" );
+	cmd( ".v add command -label \"Match \\\{ \\}\" -accelerator Ctrl+m -command { set choice 17 }" );
+	cmd( ".v add command -label \"Match \\\( \\)\" -accelerator Ctrl+u -command { set choice 32 }" );
 
 	cmd( "ttk::menu .v.i -tearoff 0" );
 	cmd( ".v.i add command -label \"EQUATION\" -command { set choice 25 } -accelerator Ctrl+E" );
@@ -801,9 +802,29 @@ int lsdmain( int argn, char **argv )
 	cmd( "focus .f.t.t" );
 	cmd( "set keepfocus 0" );
 
+	// check required components for compilation
+	cmd( "check_components" );
+	if ( platform == LINUX && Tcl_GetVar( inter, "linuxMissing", 0 ) != NULL )
+	{
+		log_tcl_error( "C++ compiler and/or tools unavailable", "g++, make and zlib packages must be installed for model compilation" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"C++ compiler and/or tools unavailable\" -detail \"g++, make and zlib packages must be installed for model compilation.\n\nSee 'Readme.txt' for details on how to install them manually, or run the LSD installer again and make sure the indicated steps are fully performed.\"" );
+	}
+	else
+		if ( platform == MAC && Tcl_GetVar( inter, "xcode", 0 ) != NULL )
+		{
+			log_tcl_error( "C++ compiler unavailable", "Xcode command line tools must be installed for model compilation" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"C++ compiler unavailable\" -detail \"Xcode command line tools must be installed for model compilation.\n\nSee 'Readme.txt' for details on how to install it manually, or run the LSD installer again and make sure the indicated steps are fully performed.\"" );
+		}
+		else
+			if ( platform == WINDOWS && Tcl_GetVar( inter, "winConflict", 0 ) != NULL )
+			{
+				log_tcl_error( "Potentially conflicting software installed", "Software components included in LSD were also installed by another package" );
+				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Potentially conflicting software installed\" -detail \"Software components included in LSD were also installed by another package.\n\nIf you have compilation problems, please check 'Readme.txt' for details on how to adjust the PATH environment variable manually, or run the LSD installer again and make sure accepting LSD components to be the system default.\"" );
+			}
+
 	loop:
 
-	cmd( "if { ! $keepfocus } { focus .f.t.t; update idletasks } { set keepfocus 0 }" );
+	cmd( "if { ! $keepfocus } { focus .f.t.t; update } { set keepfocus 0 }" );
 
 	// start recolor if needed
 	if ( recolor_all )				// all text?
@@ -5466,7 +5487,7 @@ const char *cRegex[ ] = {
 	"^(\\s)*#\[^/]*",
 	"\\\"\[^\\\"]*\\\"",
 	"v\\[\[0-9]{1,3}]|curl?\[1-9]?|root|up|next|hook",
-	"MODEL(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|FUNCTION|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM(_CND)?L?S?|COUNT(_ALL|_CNDL?|_ALL_CNDL?|_HOOK)?S?|STAT(_CND)?L?S?|STAT_(NETS?|NODES?)|(WHT)?AVE(_CND)?L?S?|MED(_CND)?L?S?|PERC(_CND)?L?S?|SD(_CND)?L?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAX(_CND)?L?S?|MIN(_CND)?L?S?|HOOKS?|SHOOKS?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|ARG_EXTS?|LAT|HOOKS?|SHOOKS?)|SEARCH(_CNDL?|_INST|_NODE|_LINK)?S?|SEARCHS?|TSEARCH(_CND)?S?|SORT2?L?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?|EXT_INITS?|HOOKS?)|DELETE|DELETE_(EXTS?|NETS?|NODES?|LINKS?)|DELETINGS?|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?T?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_POINTER_CHECK|(USE|NO)_SAVED|(USE|NO)_SEARCH|(USE|NO)_ZERO_INSTANCE|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|LAST_CALCS?|RECALCS?|UPDATE(S|_RECS?)?|DEFAULT_RESULT|THIS|NEXTS?|(GRAND)?PARENTS?|UP|DOWN|RUN|abs|min|max|round(_digits)?|(sq|cb)rt|pow|exp|log(10)?|fact|(t|l)?gamma|a?sin|a?cos|a?tan|pi|is_(finite|inf|nan)|uniform(_int)?|l?norm(cdf)?|poisson(cdf)?|beta(cdf)?|alapl(cdf)?|unifcdf|gammacdf|close_sim",
+	"MODEL(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|FUNCTION|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM(_CND)?L?S?|COUNT(_ALL|_CNDL?|_ALL_CNDL?|_HOOK)?S?|STAT(_CND)?L?S?|STAT_(NETS?|NODES?)|(WHT)?AVE(_CND)?L?S?|MED(_CND)?L?S?|PERC(_CND)?L?S?|SD(_CND)?L?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAX(_CND)?L?S?|MIN(_CND)?L?S?|HOOKS?|SHOOKS?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|ARG_EXTS?|LAT|HOOKS?|SHOOKS?)|SEARCH(_CNDL?|_INST|_NODE|_LINK)?S?|SEARCHS?|TSEARCH(_CND)?S?|SORT2?L?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?|EXT_INITS?|HOOKS?)|DELETE|DELETE_(EXTS?|NETS?|NODES?|LINKS?)|DELETINGS?|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?T?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_POINTER_CHECK|(USE|NO)_SAVED|(USE|NO)_SEARCH|(USE|NO)_ZERO_INSTANCE|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|LAST_CALCS?|RECALCS?|UPDATE(S|_RECS?)?|DEFAULT_RESULT|THIS|CALLER|NEXTS?|(GRAND)?PARENTS?|UP|DOWN|RUN|abs|min|max|round(_digits)?|(sq|cb)rt|pow|exp|log(10)?|fact|(t|l)?gamma|a?sin|a?cos|a?tan|pi|is_(finite|inf|nan)|uniform(_int)?|l?norm(cdf)?|poisson(cdf)?|beta(cdf)?|alapl(cdf)?|unifcdf|gammacdf|close_sim",
 	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
 	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 };
@@ -6079,7 +6100,7 @@ void create_compresult_window( bool nw )
 	cmd( ".mm.t.t configure -state disabled" );
 	cmd( "focustop .mm.t.t" );
 	cmd( "set keepfocus 1" );
-	cmd( "update idletasks" );
+	cmd( "update" );
 }
 
 

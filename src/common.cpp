@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - March 2021
+	LSD 8.0 - May 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -914,10 +914,10 @@ int strlf( char *out, const char *str, int outSz )
 	
 	for ( i = j = 0; str[ j ] != '\0' && i < outSz - 1; ++j )
 		if ( str[ j ] == '\r' )
-			if ( str[ j + 1 ] == '\n' )
-				++j;
-			else
+		{
+			if ( str[ j + 1 ] != '\n' )
 				out[ i++ ] = '\n';
+		}
 		else
 			out[ i++ ] = str[ j ];
 	
@@ -952,7 +952,7 @@ int strtrim( char *out, const char *str, int outSz )
 		--end;
 	++end;
 
-	size = ( end - str ) < outSz ? ( end - str ) : outSz;
+	size = ( end - str ) < outSz ? ( end - str ) : outSz - 1;
 
 	memcpy( out, str, size );
 	out[ size ] = '\0';
@@ -1172,7 +1172,7 @@ void signal_handler( int signum )
 		case SIGWINCH:
 #ifndef NW
 			cmd( "sizetop all" );	// readjust windows size/positions
-			cmd( "update idletasks" );
+			cmd( "update" );
 #endif
 			return;
 #endif

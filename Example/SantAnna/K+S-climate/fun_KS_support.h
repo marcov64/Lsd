@@ -66,6 +66,8 @@ bool rank_desc_NWtoS( firmRank e1, firmRank e2 )
 
 void update_debt1( object *firm, double desired, double loan )
 {
+	double newDebt;
+	
 	if ( desired > 0 )							// ignore loan repayment
 	{
 		INCRS( firm, "_CD1", desired );			// desired credit
@@ -75,7 +77,9 @@ void update_debt1( object *firm, double desired, double loan )
 	
 	if ( loan != 0 )
 	{
-		INCRS( firm, "_Deb1", loan );			// increment firm's debt stock
+		newDebt = INCRS( firm, "_Deb1", loan );	// increment firm's debt stock
+		if ( newDebt < 0.001 )
+			WRITES( firm, "_Deb1", 0 );			// write-off very small debt
 
 		object *bank = HOOKS( firm, BANK );		// firm's bank
 		double TC1free = VS( bank, "_TC1free" );// available credit firm's bank
@@ -91,6 +95,8 @@ void update_debt1( object *firm, double desired, double loan )
 
 void update_debt2( object *firm, double desired, double loan )
 {
+	double newDebt;
+	
 	if ( desired > 0 )							// ignore loan repayment
 	{
 		INCRS( firm, "_CD2", desired );			// desired credit
@@ -100,7 +106,9 @@ void update_debt2( object *firm, double desired, double loan )
 	
 	if ( loan != 0 )
 	{
-		INCRS( firm, "_Deb2", loan );			// increment firm's debt stock
+		newDebt = INCRS( firm, "_Deb2", loan );	// increment firm's debt stock
+		if ( newDebt < 0.001 )
+			WRITES( firm, "_Deb2", 0 );			// write-off very small debt
 	
 		object *bank = HOOKS( firm, BANK );		// firm's bank
 		double TC2free = VS( bank, "_TC2free" );// available credit at firm's bank

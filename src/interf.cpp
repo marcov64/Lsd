@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - March 2021
+	LSD 8.0 - May 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -246,20 +246,20 @@ int browse( object *r, int *choice )
 
 		// variables panel context menu (right mouse button)
 		cmd( "ttk::menu .l.v.c.var_name.v -tearoff 0" );
-		cmd( ".l.v.c.var_name.v add command -label Change -command { set choice 7 }" );	// entryconfig 0
-		cmd( ".l.v.c.var_name.v add command -label Properties -command { set choice 75 }" );	// entryconfig 1
+		cmd( ".l.v.c.var_name.v add command -label Change -accelerator Enter -command { set choice 7 }" );	// entryconfig 0
+		cmd( ".l.v.c.var_name.v add command -label Properties -accelerator F2 -command { set choice 75 }" );	// entryconfig 1
 		cmd( ".l.v.c.var_name.v add command -label \"Updating (\u00A7)\" -state disabled -command { set choice 96 }" );	// entryconfig 2
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 3
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Save (+)\" -variable save -command { set ctxMenuCmd \"set_var_conf $vname save $save\"; set choice 95 }" );	// entryconfig 4
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Run Plot (*)\" -variable plot -command { set ctxMenuCmd \"set_var_conf $vname plot $plot\"; set choice 95 }" );	// entryconfig 5
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Debug (!)\" -state disabled -variable num -command { set ctxMenuCmd \"set_var_conf $vname debug $num\"; set choice 95 }" );	// entryconfig 6
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Parallel (&)\" -state disabled -variable parallel -command { set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; set choice 95 }" );	// entryconfig 7
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Save (+)\" -variable save -accelerator F5 -command { set ctxMenuCmd \"set_var_conf $vname save $save\"; set choice 95 }" );	// entryconfig 4
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Run Plot (*)\" -variable plot -accelerator F6 -command { set ctxMenuCmd \"set_var_conf $vname plot $plot\"; set choice 95 }" );	// entryconfig 5
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Debug (!)\" -state disabled -variable num -accelerator F7 -command { set ctxMenuCmd \"set_var_conf $vname debug $num\"; set choice 95 }" );	// entryconfig 6
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Parallel (&)\" -state disabled -variable parallel -accelerator F8 -command { set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; set choice 95 }" );	// entryconfig 7
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 8
-		cmd( ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 9
-		cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr { [ .l.v.c.var_name size ] - 1 } ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 10
+		cmd( ".l.v.c.var_name.v add command -label \"Move Up\" -accelerator \"Ctrl+\u2191\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 9
+		cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -accelerator \"Ctrl+\u2193\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr { [ .l.v.c.var_name size ] - 1 } ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 10
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 11
 		cmd( ".l.v.c.var_name.v add command -label Move -command { set choice 79 }" );	// entryconfig 12
-		cmd( ".l.v.c.var_name.v add command -label Delete -command { set choice 76 }" );	// entryconfig 13
+		cmd( ".l.v.c.var_name.v add command -label Delete -accelerator Del -command { set choice 76 }" );	// entryconfig 13
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 14
 		cmd( ".l.v.c.var_name.v add command -label Equation -state disabled -command { set choice 29 }" );	// entryconfig 15
 		cmd( ".l.v.c.var_name.v add command -label Using -state disabled -command { set choice 46 }" );	// entryconfig 16
@@ -551,29 +551,29 @@ int browse( object *r, int *choice )
 
 		// objects panel context menu (right mouse button)
 		cmd( "ttk::menu .l.s.c.son_name.v -tearoff 0" );
-		cmd( ".l.s.c.son_name.v add command -label \"Select\" -command { set choice 4 }" );	// entryconfig 0
-		cmd( ".l.s.c.son_name.v add command -label \"Parent\" -command { set choice 5 }" );	// entryconfig 1
+		cmd( ".l.s.c.son_name.v add command -label \"Select\" -accelerator Enter -command { set choice 4 }" );	// entryconfig 0
+		cmd( ".l.s.c.son_name.v add command -label \"Parent\" -accelerator Back -command { set choice 5 }" );	// entryconfig 1
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 2
-		cmd( ".l.s.c.son_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 60 } }" );	// entryconfig 3
-		cmd( ".l.s.c.son_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus < [ expr { [ .l.s.c.son_name size ] - 1 } ] } { incr itemfocus }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 61 } }" );	// entryconfig 4
+		cmd( ".l.s.c.son_name.v add command -label \"Move Up\" -accelerator \"Ctrl+\u2191\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 60 } }" );	// entryconfig 3
+		cmd( ".l.s.c.son_name.v add command -label \"Move Down\" -accelerator \"Ctrl+\u2193\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus < [ expr { [ .l.s.c.son_name size ] - 1 } ] } { incr itemfocus }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 61 } }" );	// entryconfig 4
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 5
-		cmd( ".l.s.c.son_name.v add command -label Change -command { set choice 6 }" );	// entryconfig 6
-		cmd( ".l.s.c.son_name.v add command -label Rename -command { set choice 83 }" );	// entryconfig 7
+		cmd( ".l.s.c.son_name.v add command -label Change -accelerator \"Ctrl+Enter\" -command { set choice 6 }" );	// entryconfig 6
+		cmd( ".l.s.c.son_name.v add command -label Rename -accelerator F2 -command { set choice 83 }" );	// entryconfig 7
 		cmd( ".l.s.c.son_name.v add command -label Number -command { set choice 33 }" );	// entryconfig 8
 		cmd( ".l.s.c.son_name.v add command -label Move -command { set choice 32 }" );	// entryconfig 9
-		cmd( ".l.s.c.son_name.v add command -label Delete -command { set choice 74 }" );	// entryconfig 10
+		cmd( ".l.s.c.son_name.v add command -label Delete -accelerator Del -command { set choice 74 }" );	// entryconfig 10
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 11
 		cmd( ".l.s.c.son_name.v add cascade -label Add -menu .l.s.c.son_name.v.a" );	// entryconfig 12=14
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 13
-		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -command { set ctxMenuCmd \"set_obj_conf $vname comp [ expr { ! $nocomp } ]\"; set choice 95 }" );	// entryconfig 14
+		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -accelerator F5 -command { set ctxMenuCmd \"set_obj_conf $vname comp [ expr { ! $nocomp } ]\"; set choice 95 }" );	// entryconfig 14
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 15
-		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );	// entryconfig 16
-		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );	// entryconfig 17
+		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -accelerator \"Ctrl+I\" -command { set choice 21 }" );	// entryconfig 16
+		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -accelerator \"Ctrl+B\" -command { set choice 34 }" );	// entryconfig 17
 		cmd( "ttk::menu .l.s.c.son_name.v.a -tearoff 0" );
-		cmd( ".l.s.c.son_name.v.a add command -label Variable -command { set choice 2; set param 0 }" );
-		cmd( ".l.s.c.son_name.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
-		cmd( ".l.s.c.son_name.v.a add command -label Function -command { set choice 2; set param 2 }" );
-		cmd( ".l.s.c.son_name.v.a add command -label Object -command { set choice 3 }" );
+		cmd( ".l.s.c.son_name.v.a add command -label Variable -accelerator \"Ctrl+V\" -command { set choice 2; set param 0 }" );
+		cmd( ".l.s.c.son_name.v.a add command -label Parameter -accelerator \"Ctrl+P\" -command { set choice 2; set param 1 }" );
+		cmd( ".l.s.c.son_name.v.a add command -label Function -accelerator \"Ctrl+N\" -command { set choice 2; set param 2 }" );
+		cmd( ".l.s.c.son_name.v.a add command -label Object -accelerator \"Ctrl+D\" -command { set choice 3 }" );
 
 		// objects panel bindings
 		if ( r->up != NULL || r->b != NULL )
@@ -1924,6 +1924,10 @@ case 83:
 					goto here_newname;
 				}
 				
+				// update element list
+				cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", cur->label  );
+				cmd( "lappend modObj %s", lab );
+
 				change_description( cur->label, lab );
 				cur->chg_lab( lab );
 			}
@@ -3147,7 +3151,10 @@ case 73:
 
 	if ( actual_steps > 0 )
 	{ 
-		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Configuration is the final state of a simulation run\" -detail \"Press 'OK' to save it anyway or 'Cancel' to abort saving.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } }" );
+		if ( save_ok )
+			cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Configuration is the final state of a simulation run\" -detail \"Press 'OK' to save it anyway%s or 'Cancel' to abort saving.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } }", saveAs ? "" : " under a different name" );
+		else
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration cannot be saved\" -detail \"Current configuration is the final state of a simulation run which has an incomplete structure that cannot be reliably saved.\n\nThis is due to the usage of USE_ZERO_INSTANCE macro, which allowed zero-instance objects in the current model structure.\"; set done 2" );
 
 		if ( done == 2 )
 		{
@@ -3155,7 +3162,8 @@ case 73:
 			cmd( "unset done" );
 			break;
 		}
-		saveAs = true;	// require file name to save
+		
+		saveAs = true;		// require file name to save
 	 }
 
 	done = 0;
@@ -3166,7 +3174,13 @@ case 73:
 
 	if ( saveAs )			// only asks file name if instructed to or necessary
 	{
-		cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
+		if ( actual_steps > 0 )
+		{
+			cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
+			cmd( "if { [ string equal -nocase [ file normalize $bah ] [ file normalize \"$path/$res.lsd\" ] ] && [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Overwrite existing configuration?\" -detail \"The original model configuration will be overwritten by the final state of the simulation run and, therefore, lost.\n\nPress 'OK' if you are sure or 'Cancel' to abort saving.\" ] eq \"cancel\" } { set bah \"\" }" );
+		}
+		else
+			cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
 
 		cmd( "if { [ string length $bah ] > 0 } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .lsd $res ] - 1 } ]; if { $last > 0 } { set res [ string range $res 0 $last ] } } { set done 2 }" );
 		if ( done == 2 )
@@ -3835,6 +3849,14 @@ case 36:
 break;
 
 
+// See model report
+case 44:
+
+	show_report( choice, "." );
+  
+break;
+
+
 // Save result
 case 37:
 
@@ -3856,7 +3878,7 @@ case 37:
 	timeinfo = localtime( &rawtime );
 	strftime ( ftime, 80, "%Y%m%d-%H%M%S", timeinfo );
 
-	cmd( "set lab \"result_%s_%s\"", simul_name, ftime );
+	cmd( "set lab \"%s_%s\"", simul_name, ftime );
 	  
 	// choose a name
 	cmd( "newtop .n \"Save Results\" { set choice 2 }" );
@@ -3900,24 +3922,37 @@ case 37:
 
 	lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
 	strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
+	
 	if ( saveConf )
 	{
-		plog( "\nLSD configuration file: %s.lsd", "", lab );
-		cmd( "file copy -force %s.lsd %s.lsd", simul_name, lab );
+		if ( strlen( path ) == 0 )
+		{
+			cmd( "file copy -force %s.lsd %s.lsd", simul_name, lab );
+			plog( "\nSaved configuration to file %s.lsd", "", lab );
+		}
+		else
+		{
+			cmd( "file copy -force %s/%s.lsd %s/%s.lsd", path, simul_name, path, lab );
+			plog( "\nSaved configuration to file %s/%s.lsd", "", path, lab );
+		}
 	}
-
-	plog( "\nLSD results file: %s.%s%s\nSaving data...", "", lab, docsv ? "csv" : "res", dozip ? ".gz" : "" );
 
 	if ( strlen( path ) == 0 )
 		sprintf( msg, "%s.%s", lab, docsv ? "csv" : "res" );
 	else
 		sprintf( msg, "%s/%s.%s", path, lab, docsv ? "csv" : "res" );
 		
+	if ( dozip )
+		strcat( msg, ".gz" );
+					
+	plog( "\nSaving results to file %s... ", "", msg );
+
 	rf = new result( msg, "wt", dozip, docsv );	// create results file object
-	rf->title( root, 1 );							// write header
-	rf->data( root, 0, actual_steps );				// write all data
+	rf->title( root, 1 );						// write header
+	rf->data( root, 0, actual_steps );			// write all data
 	delete rf;									// close file and delete object
-	plog( " Done\n" );
+	
+	plog( "Done\n" );
 
 	unsavedData = false;						// no unsaved simulation results
 
@@ -3984,14 +4019,6 @@ case 43:
 
 	unsaved_change( true );		// signal unsaved change
 
-break;
-
-
-// See model report
-case 44:
-
-	show_report( choice, "." );
-  
 break;
 
 
@@ -4438,7 +4465,7 @@ case 62:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );// number of variables to test
-		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
 		long ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
 		plog( "\nSensitivity analysis space size: %ld", "", ptsSa );
 		
@@ -4480,7 +4507,7 @@ case 63:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );// number of variables to test
-		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
 		long ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
 		plog( "\nSensitivity analysis space size: %ld", "", ptsSa );
 		
@@ -4536,7 +4563,7 @@ case 71:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );// number of variables to test
-		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
 		long maxMC = num_sensitivity_points( rsense );	// total number of points in sensitivity space
 		plog( "\nSensitivity analysis space size: %ld", "", maxMC );
 
@@ -4638,7 +4665,7 @@ case 72:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );	// number of variables to test
-		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
 		lab1 = NOLH_valid_tables( varSA, ch );
 
 		cmd( "set extdoe 0" );	// flag for using external DoE file
@@ -4766,7 +4793,7 @@ case 80:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );	// number of variables to test
-		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
 
 		// get the number of Monte Carlo samples to produce
 		int sizMC = 10;
@@ -4865,7 +4892,7 @@ case 81:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );	// number of variables to test
-		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
 
 		// get the number of Monte Carlo samples to produce
 		int nLevels = 4, jumpSz = 2, nTraj = 10, nSampl = 100;
@@ -7282,20 +7309,20 @@ equation file(s) from Tcl
 ****************************************************/
 int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
 {
-	char vname[ MAX_ELEM_LENGTH ], descr[ 10 * MAX_LINE_SIZE ];
+	char vname[ MAX_ELEM_LENGTH ], desc[ 10 * MAX_LINE_SIZE ];
 	
 	if ( argc != 2 )						// require 1 parameter: variable name
 		return TCL_ERROR;
 	
 	if ( argv[ 1 ] == NULL || strlen( argv[ 1 ] ) == 0 )
-		strcpy( descr, "" );				// empty name: do nothing
+		strcpy( desc, "" );				// empty name: do nothing
 	else
 	{
 		sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
-		get_var_descr( vname, descr, 10 * MAX_LINE_SIZE );
+		get_var_descr( vname, desc, 10 * MAX_LINE_SIZE );
 	}
 	
-	Tcl_SetResult( inter, descr, TCL_VOLATILE );
+	Tcl_SetResult( inter, desc, TCL_VOLATILE );
 	return TCL_OK;		
 }
 
