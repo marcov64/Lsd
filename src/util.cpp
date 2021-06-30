@@ -649,10 +649,10 @@ description *add_description( char const *lab, int type, char const *text, char 
 	{
 		for ( i = 0; i < 2; ++i )
 		{
-			str = strstr( text, kwords[ i ] );
-			if ( str != NULL )
+			const char * strTmp = strstr( text, kwords[ i ] );
+			if ( strTmp != NULL )
 				for( j = 0; j < strlen( kwords[ i ] ); ++j, ++str )
-					*str = tolower( *str );
+					*str = tolower( *(strTmp + j) );
 		}
 		
 		cd->text = new char [ strlen( text ) + 1 ]; 
@@ -666,10 +666,10 @@ description *add_description( char const *lab, int type, char const *text, char 
 	
 	if ( ! strwsp( init ) )
 	{
-		str = strstr( init, kwords[ 1 ] );
-		if ( str != NULL )
-			for( j = 0; j < strlen( kwords[ 1 ] ); ++j, ++str )
-				*str = tolower( *str );
+		const char * strTmp = strstr( text, kwords[ i ] );
+			if ( strTmp != NULL )
+				for( j = 0; j < strlen( kwords[ i ] ); ++j, ++str )
+					*str = tolower( *(strTmp + j) );
 		
 		cd->init = new char [ strlen( init ) + 1 ]; 
 		strcln( cd->init, init, strlen( init ) + 1 );
@@ -757,10 +757,10 @@ description *change_description( char const *lab_old, char const *lab, int type,
 				{
 					for ( i = 0; i < 2; ++i )
 					{
-						str = strstr( text, kwords[ i ] );
-						if ( str != NULL )
+						const char * strTmp = strstr( text, kwords[ i ] );
+						if ( strTmp != NULL )
 							for( j = 0; j < strlen( kwords[ i ] ); ++j, ++str )
-								*str = tolower( *str );
+								*str = tolower( *(strTmp + j) );
 					}
 		
 					cd->text = new char [ strlen( text ) + 1 ]; 
@@ -779,10 +779,10 @@ description *change_description( char const *lab_old, char const *lab, int type,
 
 				if ( ! strwsp( init ) )
 				{
-					str = strstr( init, kwords[ 1 ] );
-					if ( str != NULL )
-						for( j = 0; j < strlen( kwords[ 1 ] ); ++j, ++str )
-							*str = tolower( *str );
+					const char * strTmp = strstr( text, kwords[ i ] );
+					if ( strTmp != NULL )
+						for( j = 0; j < strlen( kwords[ i ] ); ++j, ++str )
+							*str = tolower( *(strTmp + j) );
 		
 					cd->init = new char [ strlen( init ) + 1 ]; 
 					strcln( cd->init, init, strlen( init ) + 1 );
