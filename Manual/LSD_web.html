@@ -175,12 +175,11 @@ href="#_LSD_web_interface">using the web interface</a>.</span></p>
 <h1><a name="_Introduction"></a><span class=Ttulo1Char><span lang=EN-US>Introduction</span></span></h1>
 
 <p><span lang=EN-US>This manual presents the user-friendly, web-based interface
-to LSD (LWI). LWI makes a basic subset of the LSD tools available for web
+to LSD (LWI). LWI makes a basic subset of the LSD tools available to web
 browser users, allowing the configuration, execution, and analysis of results
-produced by LSD models and the export of such data. <a
-href="#_LSD_web_interface">LWI web front-end</a> is compatible with any
-computer platform equipped with a modern HTML5 browser and can be made available
-in closed (intranet) or open (internet) networks. </span></p>
+produced by LSD models. <a href="#_LSD_web_interface">LWI user front-end</a> is
+compatible with any computer platform equipped with a modern HTML5 browser and
+can be made available in closed (intranet) or open (internet) networks. </span></p>
 
 <p><span lang=EN-US>As a web interface to existing LSD models, LWI does not add
 new functionalities to them. However, it allows a simplified access to LSD
@@ -262,9 +261,9 @@ please visit <a href="http://php.net">http://php.net</a>. </span></p>
 <p><span lang=EN-US>The LWI server typically operates on non-critical and
 non-sensitive data. On top of that, there is no long-term data storage of user
 data. Also, the level of user access to the server is minimal, exclusively done
-through HTTP (web pages) and PHP (simulation configuration results files). This
-should alleviate the security requirements when the server is used exclusively
-for LWI.</span></p>
+through HTTP/HTTPS (web pages) and PHP (simulation configuration results
+files). This should alleviate the security requirements when the server is used
+exclusively for LWI.</span></p>
 
 <h2><a name="_Server_setup"></a><span lang=EN-US>Server setup</span></h2>
 
@@ -272,7 +271,7 @@ for LWI.</span></p>
 default installation options. The instructions require a server supporting a
 bash-like shell, typically any Linux distribution or a recent Microsoft Windows
 10+ version with the Windows Subsystem for Linux (WSL) installed. In the
-instructions below Ubuntu 16.04 LTS and CentOS 7.4 servers are used as examples
+instructions below Ubuntu 18.04 LTS and CentOS 7.4 servers are used as examples
 but the installation steps can be adapted for installation on any server
 platform and distribution.</span></p>
 
@@ -283,15 +282,14 @@ software following the appropriate instructions for the selected distribution. <
 version of Microsoft Windows Server. Both Apache and PHP can be installed in
 Microsoft Windows servers in two modes: native Windows or using the Windows
 Subsystem for Linux (WSL). For the unification of the setup instructions, WSL
-mode was chosen. However, the steps to setup using native mode are quite similar
-and easily adaptable and should be the preferred approach in most cases. A
-regular Windows 10 desktop (build 1709 or newer) may be used to deploy a test
-server (small capacity) following the same instructions. Please enable WSL <i>before</i>
-proceeding.</span></p>
+mode is preferred. However, the steps to setup using native mode are quite
+similar and easily adaptable and should be the preferred approach in most
+cases. A regular Windows 10 desktop (build 1709 or newer) may be used to deploy
+a test server (small capacity) following the same instructions. Please enable
+WSL <i>before</i> proceeding.</span></p>
 
 <p><span lang=EN-US>Recent macOS computers (version 10.13 or newer) already
-come bundled with pre-configured versions of Apache and PHP. macOS is not
-supported for production servers.</span></p>
+come bundled with pre-configured versions of Apache and PHP. </span></p>
 
 <h2><a name="_Apache_and_PHP"></a><span lang=EN-US>Apache and PHP installation
 and configuration</span></h2>
@@ -320,13 +318,13 @@ packages individually using the bash terminal:</span></p>
 <h2><a name="_LWI_installation_and"></a><span lang=EN-US>LWI installation and
 configuration</span></h2>
 
-<p><span lang=EN-US>Now we have to install LWI files in the web server. LWI
-files are stored in a single subdirectory tree, inside the directory used by
-the HTTP server to host the website files. In the case of an Apache on Ubuntu,
-Windows WSL or CentOS configuration, the HTTP server directory for the website
-is </span><span class=Cdigo><span lang=EN-US>/var/www</span></span><span
-lang=EN-US>. This location may be different according to the adopted
-combination of HTTP server and operating system/distribution.</span></p>
+<p><span lang=EN-US>Now we must install LWI files in the web server. LWI files
+are stored in a single subdirectory tree, inside the directory used by the HTTP
+server to host the website files. In the case of an Apache on Ubuntu, Windows
+WSL or CentOS configuration, the HTTP server directory for the website is </span><span
+class=Cdigo><span lang=EN-US>/var/www</span></span><span lang=EN-US>. This
+location may be different according to the adopted combination of HTTP server
+and operating system/distribution.</span></p>
 
 <p><span lang=EN-US>Each LWI installation supports a single <a
 href="LSD_faqs_arquivos#model">LSD model</a> under a unique baseline <a
@@ -369,12 +367,13 @@ subdirectory holds the session-related, temporary user files
 deleted periodically. The user/group associated to the HTTP and the PHP server
 (</span><span class=Cdigo><span lang=EN-US>www-data</span></span><span
 lang=EN-US> in Ubuntu, </span><span class=Cdigo><span lang=EN-US>apache</span></span><span
-lang=EN-US> in CentOS, etc.) must have read-write to the entire </span><span
+lang=EN-US> in CentOS, etc.) must have read-access to the entire </span><span
 class=Cdigo><span lang=EN-US>lwi</span></span><span lang=EN-US> subdirectory
-tree (the default configuration).</span></p>
+tree plus read-write access to <i>both</i> </span><span class=Cdigo>tmp</span><span
+lang=EN-US> subdirectories (the default configuration).</span></p>
 
 <p><span lang=EN-GB>The provided files must yet be set with all required file
-permissions/ownership for a typical setup. Usually it is enough to adjust the
+permissions/ownership for a typical setup. Usually, it is enough to adjust the
 ownership. For Ubuntu and Windows use:</span></p>
 
 <p><span class=Cdigo><span lang=EN-US>sudo chown -R www-data:www-data
@@ -428,8 +427,8 @@ the files </span><span class=Cdigo><span lang=EN-US>lwi.conf</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>vhost.conf</span></span><span
 lang=EN-US> to your needs.</span></p>
 
-<p><span lang=EN-US>In macOS the setup is more complicated. Edit the Apache
-webserver configuration file in </span><span class=Cdigo><span lang=EN-US>nano</span></span><span
+<p><span lang=EN-US>In macOS the setup is more complicated. Edit the Apache webserver
+configuration file in </span><span class=Cdigo><span lang=EN-US>nano</span></span><span
 lang=EN-US> (text editor) to enable PHP and use LWI as the default website:</span></p>
 
 <p><span class=Cdigo><span lang=IT>sudo nano /etc/apache2/httpd.conf</span></span></p>
@@ -497,18 +496,17 @@ lang=EN-US>) must be configured in the server.</span></p>
 
 <h2><a name="_Server_maintenance"></a><span lang=EN-US>Server maintenance</span></h2>
 
-<p><span lang=EN-US>The LWI server usually requires no particular maintenance
-care if set up properly. Except for the points discussed below, for all
-maintenance tasks on the LWI server, like backups, software updating, security
-audits, storage clean-up etc., please follow the usual (basic) standard web
-server guidelines.</span></p>
+<p><span lang=EN-US>The LWI server usually requires no maintenance care if set
+up properly. Except for the points discussed below, for all maintenance tasks
+on the LWI server, like backups, software updating, security audits, storage
+clean-up etc., please follow the usual (basic) standard web server guidelines.</span></p>
 
 <p><span lang=EN-US>The only special maintenance task in a LWI server is to
 manage temporary storage utilization. This is important as, per the default LWI
 installation, over time the server may accumulate temporary files from the user
 sessions. If nothing is done, the server may eventually run out of storage
-space, even if at a very slow pace. The LWI server accumulates temporary files
-in just two subdirectories:</span></p>
+space, even if at a slow pace. The LWI server accumulates temporary files in
+just two subdirectories:</span></p>
 
 <p><span class=Cdigo><span lang=EN-US>/var/www/lwi/tmp<br>
 /var/www/lwi/public_html/tmp</span></span></p>
@@ -520,9 +518,9 @@ lang=EN-US> with the appropriate subdirectory.</span></p>
 <p><span lang=EN-US>LWI temporary files are used/valid only while the
 corresponding user sessions are active and cannot be retrieved by the users
 after that. As PHP sessions are usually configured to last less than 24 hours
-(the default is 3 hours), it is recommended that files older than 2 days to be
-permanently deleted. In most Linux configurations, the temporary file clean up
-can be performed automatically using a </span><span class=Cdigo><span
+(the default is 24 minutes), it is recommended that files older than 2 days to
+be permanently deleted. In most Linux configurations, the temporary file clean
+up can be performed automatically using a </span><span class=Cdigo><span
 lang=EN-US>cron</span></span><span lang=EN-US> job. Of course, other similar
 tools can be used, in any platform. To configure a </span><span class=Cdigo><span
 lang=EN-US>cron</span></span><span lang=EN-US> job, please first create the
@@ -629,10 +627,11 @@ command </span><span class=Cdigo><span lang=EN-US><a href="LMM.html#nowindow">Mo
 lang=EN-US>. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Please note that the model program must be
-generated in a computer using the same operating system version as the LWI server
-(or in the server itself). If this is not possible (e.g., it is a headless
-server), it is possible to compile the ‘No Window’ model program using a
-terminal session in the server, see the instructions <a href="LMM.html#nowindow">here</a>.</span></p>
+generated in a computer using the same operating system version as the LWI
+server (or in the server itself). If this is not possible (e.g., it is a
+headless server), it is possible to compile the ‘No Window’ model program using
+a terminal session in the server, see the instructions <a
+href="LMM.html#nowindow">here</a>.</span></p>
 
 <h2><span lang=EN-US>Selecting the Parameters and Variables to configure</span></h2>
 
@@ -698,7 +697,7 @@ configuration</span></h2>
 <p class=MsoNormal><span lang=EN-US>When all the required configuration files
 are ready (</span><span class=Cdigo><span lang=EN-US>lwi.lsd</span></span><span
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>lwi.sa</span></span><span
-lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>lsd_gnuNW[.exe]</span></span><span
+lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>lsdNW[.exe]</span></span><span
 lang=EN-US>) in the <a href="LSD_faqs.html#modelhome">model home directory</a>,
 copy them to the base subdirectory of LWI in the server. For Ubuntu,
 Windows/WSL and CentOS, use the following terminal commands (see <a
@@ -709,7 +708,7 @@ structure):</span></p>
 lang=EN-US>cd ~/Lsd/Work/[YOUR_MODEL_PATH]<br>
 sudo cp lwi.lsd /var/www/lwi<br>
 sudo cp lwi.sa /var/www/lwi<br>
-sudo cp lsd_gnuNW /var/www/lwi</span></span></p>
+sudo cp lsdNW /var/www/lwi</span></span></p>
 
 <p class=MsoNormal><span lang=EN-US>These three files will replace the previous
 model and configuration used by LWI. Finally, reload the web server so it can
@@ -773,12 +772,20 @@ COPYRIGHT LINK HERE --&gt;</span></span></p>
 style='font-family:Symbol;color:windowtext'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><span lang=EN-US>Copyright and no-warranties messages.
 Define your copyright conditions and limit responsibilities following the mark:<br>
-</span><span class=Cdigo><span lang=EN-US>&lt;!-- ### LWI ### ADD YOUR COPYRIGHT
-AND WARRANTY MESSAGES HERE --&gt;</span></span></p>
+</span><span class=Cdigo><span lang=EN-US>&lt;!-- ### LWI ### ADD YOUR
+COPYRIGHT AND WARRANTY MESSAGES HERE --&gt;</span></span></p>
 
 <p class=MsoNormal><span lang=EN-US>Be careful on not changing the contents
-outside the comment-mark regions. Please reload the web server after any change
-(follow the instructions <a href="#_Installing_the_new">above</a>).</span></p>
+outside the comment-mark regions. </span></p>
+
+<p class=MsoNormal><span lang=EN-US>Another relevant file is </span><span
+class=Cdigo><span lang=EN-US>lwi/defaults.php</span></span><span lang=EN-US>.
+It contains several server parameters which may require changes for specific
+applications. The default values are adequate only for small, dedicated
+servers. E-mail addresses for the Contact panel are also adjusted in this file.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>Please reload the web server after any
+change (follow the instructions <a href="#_Installing_the_new">above</a>).</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -818,10 +825,10 @@ series.</span></p>
 <h2><a name="_Why_LSD?"></a><a name="_Navigation_Panel"></a><span lang=EN-US>Navigation
 panel</span></h2>
 
-<p class=MsoNormal><span lang=EN-US>LWI is organized in several interaction
-areas or “cards”, which can be scrolled or directly reached using the
-Navigation panel. When initiating a new LWI session, the Navigation Panel is
-presented together with the Welcome area. In devices with a narrow screen, like
+<p class=MsoNormal><span lang=EN-US>LWI is organized in several interaction areas
+or “cards”, which can be scrolled or directly reached using the Navigation
+panel. When initiating a new LWI session, the Navigation Panel is presented
+together with the Welcome area. In devices with a narrow screen, like
 smartphones, the user has to click in the “</span><span style='font-family:
 "MS Gothic"'>&#9776;</span><span lang=EN-US>” symbol to open the Navigation
 panel.</span></p>
@@ -854,12 +861,12 @@ the user and the LSD web server administrator.</span></p>
 lang=EN-US>Configuration area</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>The Configuration area allows the user to
-control many of its parameters, initial conditions and general simulation
+control many of its parameters, initial conditions, and general simulation
 settings. Each set of values to all the required parameters, initial conditions
 and simulation settings is defined as one <i>model configuration</i>. Every
 time the user initiates a new LWI session, the default model configuration is
 automatically loaded. From the Configuration page, the user can change any
-value, load a saved configuration or save the current configuration to her
+value, load a saved configuration, or save the current configuration to her
 device.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Configuration values can be of two types:
@@ -881,7 +888,7 @@ For instance, the user can change parameters to modify simulated agent’s
 behavioral rules or the applicable market rules. Simulation settings are values
 defining the execution of the simulation model. </span></p>
 
-<p class=MsoNormal><span lang=EN-US>At any moment the user has the option to
+<p class=MsoNormal><span lang=EN-US>At any moment, the user has the option to
 download the current model configuration. The downloaded configuration is saved
 to the user’s computer disk/storage as it is not possible to save it in the LWI
 server. It is important to regularly save any changes made to the default
@@ -922,7 +929,7 @@ divided in two subareas: the Status box and the command buttons.</span></p>
 model execution at the remote server. As soon as the user finishes the
 configuration of the model in the <a href="#_Configuration_area">Configuration
 area</a>, it is possible to start the execution by clicking on </span><span
-class=Cdigo><span lang=EN-US>Start</span></span><span lang=EN-US>. At any time
+class=Cdigo><span lang=EN-US>Start</span></span><span lang=EN-US>. At any time,
 the user may interrupt the simulation by clicking on the </span><span
 class=Cdigo><span lang=EN-US>Abort</span></span><span lang=EN-US> button.
 Stopping the execution before the Status box shows </span><span class=Cdigo><span
@@ -962,21 +969,42 @@ has the option to restrict the range of time steps to use in the analysis, by
 changing the default values in the Selected Time Steps box.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The Scale box provide configuration to the
-scaling of the vertical axis of time series plots. The Automatic option uses
-auto scaling to plot the entire data range present in the series. The Manual
-option allows the user to select the minimum and maximum values for the
-vertical axis plot. The Log option uses a logarithmic scale for the vertical
-axis and applies the natural logarithm to the results for the other options.</span></p>
+scaling of the vertical axis of time series plots. The </span><span
+class=Cdigo>Auto</span><span lang=EN-US> option uses auto scaling to plot the
+entire data range present in the series. The </span><span class=Cdigo>Manual</span><span
+lang=EN-US> option allows the user to select the minimum and maximum values for
+the vertical axis plot. The </span><span class=Cdigo><span lang=EN-US>Log</span></span><span
+lang=EN-US> option uses a logarithmic scale (natural base) for the vertical
+plot axis, descriptive statistics and data table, instead of a linear one (</span><span
+class=Cdigo><span lang=EN-US>Linear</span></span><span lang=EN-US> option).</span></p>
+
+<p class=MsoNormal><span lang=EN-US>The MC-band options provide extra
+information for multi-run simulation plots. MC-bands are only available when </span><span
+class=Cdigo><span lang=EN-US>numRuns</span></span><span lang=EN-US>, in
+Configuration section, is set to more than one run (at least 10 runs are
+recommended for sensible results). The </span><span class=Cdigo><span
+lang=EN-US>Confidence</span></span><span lang=EN-US> option add a standard 95%
+confidence interval band to each series selected to plot. The </span><span
+class=Cdigo><span lang=EN-US>Max-min</span></span><span lang=EN-US> option a
+band from the minimum to the maximum values obtained in the set of simulation
+runs.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Clicking on </span><span class=Cdigo><span
 lang=EN-US>Statistics</span></span><span lang=EN-US> button creates a new
 browser window showing some descriptive statistics for the selected time
-series, including the mean, the standard deviation and minimum and maximum
-values. Clicking on </span><span class=Cdigo><span lang=EN-US>Data</span></span><span
-lang=EN-US> button creates a new browser window containing a table with the
-selected time series in the columns and the time step values in the rows. At
-least one and up to 15 series can be selected at a time. However, multiple data
-windows may be open at any time.</span></p>
+series, including the mean, the standard deviation, the minimum and maximum
+values, the number of observations, and the Monte Carlo standard error (when
+the number of simulation runs is larger than one). If </span><span class=Cdigo><span
+lang=EN-US>Log</span></span><span lang=EN-US> is selected, log values (natural
+base) are used in computations. </span></p>
+
+<p class=MsoNormal><span lang=EN-US>Clicking on </span><span class=Cdigo><span
+lang=EN-US>Data</span></span><span lang=EN-US> button creates a new browser
+window containing a table with the selected time series in the columns and the
+time step values in the rows. If </span><span class=Cdigo><span lang=EN-US>Log</span></span><span
+lang=EN-US> is selected, log values (natural base) are presented. At least one
+and up to 15 series can be selected at a time. However, multiple data windows
+may be open at any time.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Clicking on </span><span class=Cdigo><span
 lang=EN-US>Plot</span></span><span lang=EN-US> button creates a new browser
@@ -987,31 +1015,34 @@ may be open at a time.</span></p>
 
 <h2><a name="_Export_page"></a><span lang=EN-US>Export area</span></h2>
 
-<p class=MsoNormal><span lang=EN-US>After a LSD simulation is successfully
-executed, the user can download the entire results data as a text-formatted
-file in comma-separated format (.csv). This file can be directly imported in
-any numerical analysis software, like spreadsheets or statistical packages. The
-Export area is composed by the Information boxes and the command buttons. The
-information boxes summarize the details about the available data which can be
-downloaded.</span></p>
+<p class=MsoNormal><span lang=EN-US>After an LSD simulation is successfully
+executed, the user can download the entire results data as (compressed) text
+file(s) in CSV (comma-separated values) format. This file can be directly
+imported in any numerical analysis software, like spreadsheets or statistical
+packages. The Export area is composed by the Information boxes and the command
+buttons. The information boxes summarize the details about the available data
+which can be downloaded.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>As soon as the simulation execution is
 finished, the results data file can be downloaded to the user’s computer
 disk/storage. It is not possible to permanently save simulation results in the
-LWI server so it is important to save relevant results before they are
+LWI server, so it is important to save relevant results before they are
 irreversibly lost whenever the user session expires or is reset (by clicking on
 </span><span class=Cdigo><span lang=EN-US>Reset Session</span></span><span
 lang=EN-US> in the Reset area or closing the browser). To download the
 available results, simply click on </span><span class=Cdigo><span lang=EN-US>Download</span></span><span
 lang=EN-US>. A dialog window may open, depending on the browser used, asking
-for the destination of the data file. Results files have the “.csv” extension.</span></p>
+for the destination of the data file. Results files have the </span><span
+class=Cdigo><span lang=EN-US>.csv</span></span><span lang=EN-US> extension by
+default and may be grouped inside a single compressed file with </span><span
+class=Cdigo><span lang=EN-US>.zip</span></span><span lang=EN-US> extension.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>LWI results data files are comma-separated
 values text files (CSV format). Columns contain single variables while lines
 represent variables values at each time step. However, the first line has a
 special meaning, being the first time step values located in the second line
 and so on. The first line contains the columns headers with the names of the
-variables below.</span></p>
+variables in each column.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
