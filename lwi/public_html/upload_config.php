@@ -1,7 +1,7 @@
-<?php include '../filter_config.php'; ?>
+<?php require '../filter_config.php'; ?>
 <!DOCTYPE html>
 <!--
-Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
+Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

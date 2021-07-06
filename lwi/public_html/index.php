@@ -1,7 +1,7 @@
-<?php include '../script.php'; ?>
+<?php require '../script.php'; ?>
 <!DOCTYPE html>
 <!--
-Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
+Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -86,10 +86,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <div class="w3-container" style="margin-top: 30px">
                     
 <!-- ### LWI ### ADD YOUR WELCOME MESSAGE HERE -->
-                    <p>This is a web-based interface to LSD (LWI). LWI makes a basic subset of the LSD tools available for web browser users, allowing the configuration, execution, and analysis of results produced by LSD models and the export of such data. LWI web front-end is compatible with any computer platform equipped with a modern HTML5 browser.</p>
+                    <p>This is LSD Web Interface (LWI). LWI makes a basic subset of LSD tools available to web browser users, allowing the configuration, execution, and analysis of results produced by LSD models. LWI user front-end is compatible with any computer platform equipped with a modern HTML5 browser.</p>
                     <p>If you are interested in learning more about LSD or download a full copy of it, please check the <a href="http://www.labsimdev.org" title="LSD" target="_blank" class="w3-hover-opacity">LSD website</a>.</p>
-                    <p>LWI requires that users are at least familiar with the model being simulated. The user is supposed to have at least some basic knowledge of the model structure and its main parameters and variables to fully profit from LWI.</p>
-                    <p>LWI is organized in several interaction cards, available below. The user can scroll across the cards or use the Navigation panel to reach the cards directly. When initiating a new LWI session, the Navigation Panel is presented together with the Welcome card. In devices with a narrow screen, like smartphones, the user has to click in the “☰” symbol to open the Navigation panel. Help buttons in all cards leads the user to the associated help card.</p>
+                    <p>LWI requires that users are familiar with the model being simulated. The user is supposed to have some knowledge of the model structure and its main parameters and variables to fully profit from LWI.</p>
+                    <p>LWI is organized in several interaction cards, available below. The user can scroll across the cards or use the Navigation panel (if available) to reach the cards directly. When initiating a new LWI session, the Navigation Panel is presented together with the Welcome card. In devices with a narrow screen, like smartphones, the user has to click in the “☰” symbol to open the Navigation panel. Help buttons in all cards leads the user to the associated content on the help card.</p>
 <!-- ### LWI ### DON'T CHANGE FROM HERE -->
                     
                 </div>
@@ -138,15 +138,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 <td><b>timeSteps</b></td>
                                 <td>Number of time steps to perform the simulation</td>
                                 <td>integer</td>
-                                <td>10-1000</td>
+                                <td>10-10000</td>
                                 <td>
-                                    <input name="timeSteps" id="_timeSteps_" class="w3-input w3-border" type="number" min="10" max="1000" value="100" required></td>
+                                    <input name="timeSteps" id="_timeSteps_" class="w3-input w3-border" type="number" min="10" max="10000" value="100" required></td>
                                 <td>
                                     <button onclick="document.getElementById( '_timeSteps_' ).value = '100'; return false;" class="w3-button w3-blue w3-hover-black">Reset</button></td>
                             </tr>
                             <tr>
+                                <td><b>numRuns</b></td>
+                                <td>Number of times to repeat the simulation (Monte Carlo experiment)</td>
+                                <td>integer</td>
+                                <td>1-100</td>
+                                <td>
+                                    <input name="numRuns" id="_numRuns_" class="w3-input w3-border" type="number" min="1" max="100" value="1" required></td>
+                                <td>
+                                    <button onclick="document.getElementById( '_numRuns_' ).value = '1'; return false;" class="w3-button w3-blue w3-hover-black">Reset</button></td>
+                            </tr>
+                            <tr>
                                 <td><b>rndSeed</b></td>
-                                <td>seed to be used to initialize the pseudorandom number generator</td>
+                                <td>First seed to be used to initialize the pseudorandom number generator</td>
                                 <td>integer</td>
                                 <td>1-</td>
                                 <td>
@@ -219,17 +229,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <div class="w3-container" style="margin-top: 50px">
                         <div class="w3-row-padding w3-grayscale">
                             <div class="w3-col m5 w3-margin-bottom">
-                                <div class="w3-light-grey">
-                                    <div class="w3-container">
-                                        <h3 class="w3-opacity">Time step range</h3>
+                                <div class="w3-row m5 w3-margin-bottom">
+                                    <div class="w3-light-grey">
                                         <div class="w3-container">
-                                            <div class="w3-section">
-                                                <label>Begin</label>
-                                                <input class="w3-input w3-border" type="number" name="_begin_" id="_begin_" min="1" max="1000" value="1" required>
+                                            <h3 class="w3-opacity">Time step range</h3>
+                                            <div class="w3-container">
+                                                <div class="w3-section">
+                                                    <label>Begin</label>
+                                                    <input class="w3-input w3-border" type="number" name="_begin_" id="_begin_" min="1" max="1000" value="1" required>
+                                                </div>
+                                                <div class="w3-section">
+                                                    <label>End</label>
+                                                    <input class="w3-input w3-border" type="number" name="_end_" id="_end_" min="1" max="1000" value="1000" required>
+                                                </div>
                                             </div>
-                                            <div class="w3-section">
-                                                <label>End</label>
-                                                <input class="w3-input w3-border" type="number" name="_end_" id="_end_" min="1" max="1000" value="1000" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                 <div class="w3-row m5 w3-margin-bottom">
+                                   <div class="w3-light-grey">
+                                        <div class="w3-container">
+                                            <h3 class="w3-opacity">MC plot bands</h3>
+                                            <div class="w3-container">
+                                                <div class="w3-section">
+                                                    <input class="w3-check" type="checkbox" name="_CI_" id="_CI_" value="1" checked>
+                                                    <label>Confidence</label>
+                                                </div>
+                                                <div class="w3-section">
+                                                    <input class="w3-check" type="checkbox" name="_MM_" id="_MM_" value="1">
+                                                    <label>Max-min</label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -243,7 +272,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                             <div class="w3-container">
                                                 <p>
                                                     <input onclick="document.getElementById( '_min_' ).disabled = true; document.getElementById( '_max_' ).disabled = true" class="w3-radio" type="radio" name="_auto_" id="_auto_" value="1" checked>
-                                                    <label>Automatic</label>
+                                                    <label>Auto</label>
                                                 </p>
                                                 <p>
                                                     <input onclick="document.getElementById( '_min_' ).disabled = false; document.getElementById( '_max_' ).disabled = false" class="w3-radio" type="radio" name="_auto_" id="_auto_" value="0">
@@ -259,7 +288,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                                 </p>
                                                 <p>
                                                     <input class="w3-radio" type="radio" name="_linear_" id="_linear_" value="0">
-                                                    <label>Logarithmic</label>
+                                                    <label>Log</label>
                                                 </p>
                                             </div>
                                         </div>
@@ -267,11 +296,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                             <div class="w3-container">
                                                 <div class="w3-section">
                                                     <label>Minimum</label>
-                                                    <input class="w3-input w3-border" name="_min_" id="_min_" type="number" value="0" required disabled="">
+                                                    <input class="w3-input w3-border" name="_min_" id="_min_" type="number" value="0.0" step="0.01" required disabled="">
                                                 </div>
                                                 <div class="w3-section">
                                                     <label>Maximum</label>
-                                                    <input class="w3-input w3-border" name="_max_" id="_max_" type="number" value="1" required disabled>
+                                                    <input class="w3-input w3-border" name="_max_" id="_max_" type="number" value="1.0" step="0.01" required disabled>
                                                 </div>
                                             </div>
                                         </div>
@@ -353,60 +382,61 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <h1 class="w3-xxxlarge w3-text-blue"><b>Help</b></h1>
 
                 <h2 class="w3-xxlarge w3-text-blue" id="help-configuration">Configuration section</h2>
-                <p>The Configuration section allows the user to control many of its parameters, initial conditions and general simulation settings. From now on, each set of values to all the required parameters, initial conditions and simulation settings is defined as one model configuration. Every time the user initiates a new LSD web interface (LWI) session, the default model configuration is automatically loaded. From the Configuration section, the user can change any value, load a saved configuration or save the current configuration to disk.</p>
-                <p>Configuration values can be of three types: real (floating point) numbers, integer numbers and discrete options (like yes/no). All values have predefined ranges (maximum and minimums or a set of options) and the user is not allowed to input values outside such ranges (an error message is produced). Below you have a description of the available configuration options.</p>
+                <p>The Configuration section allows the user to control many of its parameters, initial conditions and general simulation settings. From now on, each set of values to all the required parameters, initial conditions and simulation settings is defined as one model configuration. Every time the user initiates a new LSD web interface (LWI) session, the default model configuration is automatically loaded. From the Configuration section, the user can change any value, load a saved configuration or save the current configuration to her computer.</p>
+                <p>Configuration values can be of three types: real (floating point) numbers, integer numbers and discrete options (like yes/no). All values have predefined ranges (maximum and minimums or a set of options) and the user is not allowed to input values outside such ranges (an error message is produced).</p>
                 <p>Please note that not all combinations of configuration values may be adequate for the proper model operation. If unexpected results are obtained after changing several values at once, please try to restore some of them to the default configuration (by pressing the Default button besides any changed value) and execute the simulation again.</p>
                 <h3 class="w3-xlarge w3-text-blue">Model parameters</h3>
-                <p>Model parameters are predefined and fixed values that are used to compute the model equations. For instance, the user can change parameters to modify simulated agent’s behavioural rules or the applicable market rules.</p>
+                <p>Model parameters are predefined and fixed values that are used to compute the model equations. For instance, the user can change parameters to modify simulated agent’s behavioural rules or the applicable institutional rules.</p>
                 <h3 class="w3-xlarge w3-text-blue">Initial conditions</h3>
                 <p>Model initial conditions are the values assumed for variables which lagged values are required by the computation of model equations when the simulation starts.</p>
                 <h3 class="w3-xlarge w3-text-blue">Simulation settings</h3>
-                <p>Simulation settings are values defining the operation of the simulation.</p>
+                <p>Simulation settings are values defining the operation of the simulation. <strong>timeSteps</strong> control the simulation time span. <strong>numRuns</strong> define how many times the simulation is run (repeated), which allows the analysis of the results as a Monte Carlo experiment.  <strong>rndSeed</strong> controls the initialization of the pseudo-random number generator (PRNG). When multiple simulation runs are set, the PRNG seed is increased by one each time.</p>
                 <h3 class="w3-xlarge w3-text-blue">Saving the current configuration</h3>
                 <p>At any moment while in the Configuration section, the user has the option to save the current configuration. The configuration is always saved to the user’s computer disk/storage as it is not possible to save it in the LWI server. It is important to regularly save any changes made to the default configuration, as any unsaved information is irreversibly lost whenever the user session expires or is reset (by clicking on <strong>Reset Session</strong> in Reset section).</p>
-                <p>To save the current configuration, simply click on <strong>Save Configuration</strong> in Configuration section. A dialog window will open, asking for the name and the destination folder of the configuration file. Configuration files have the “.ks” extension by default.</p>
+                <p>To save the current configuration, simply click on <strong>Download</strong> in Configuration section. A dialog window will open, asking for the name and the destination folder of the configuration file. Configuration files have CSV (comma-separated values) format and “.csv” extension.</p>
                 <h3 class="w3-xlarge w3-text-blue">Loading an existing configuration</h3>
-                <p>An existing configuration file, previously saved using the <strong>Save Configuration</strong> option, can be loaded at any time, by clicking on <strong>Load Configuration</strong> in Configuration section. A dialog window will ask for the file containing the saved configuration, assuming the default “.ks” extension.</p>
+                <p>An existing configuration file, previously saved using the <strong>Download</strong> option, can be loaded at any time, by clicking on <strong>Upload</strong> in Configuration section. A dialog window will ask for the file containing the saved configuration, assuming the default “.csv” extension.</p>
                 <h3 class="w3-xlarge w3-text-blue">Resetting all configuration values to the defaults</h3>
-                <p>Clicking <strong>Reset All to Defaults</strong> replaces the current configuration values with the default ones. Be careful to use it if you have configuration changes to be saved, as the existing values are lost. If required, click on <strong>Save Configuration</strong> before using this option.</p>
-
+                <p>Clicking <strong>Reset All</strong> replaces the current configuration values with the default ones. Be careful to use it if you have configuration changes to be saved, as the existing values are lost. If required, click on <strong>Download</strong> before using this option.</p>
+                
                 <h2 class="w3-xxlarge w3-text-blue" id="help-execution">Execution section</h2>
-                <p>The Execution section controls the execution of the simulation model in the LWI server. Model execution can take from a few seconds to several minutes, according to the selected configuration, in particular the chosen number of simulation time steps.</p>
+                <p>The Execution section controls the execution of the simulation model in the LWI server. Model execution can take from a few seconds to several minutes, according to the selected configuration, in particular the chosen numbers of simulation time steps and runs.</p>
                 <h3 class="w3-xlarge w3-text-blue">Starting a simulation run</h3>
-                <p>As soon as the user finishes the configuration of the model in the Configuration section, it is possible to start the execution by clicking on <strong>Start Execution</strong> in the Execution section.</p>
+                <p>As soon as the user finishes the configuration of the model in the Configuration section, it is possible to start the execution by clicking on <strong>Start</strong> in the Execution section.</p>
                 <h3 class="w3-xlarge w3-text-blue">Stopping an unfinished simulation run</h3>
-                <p>At any time the user may interrupt the simulation by clicking in <strong>Abort Execution</strong> in the Execution section. Stopping the execution before the Status box shows “Simulation completed” aborts the simulation and no data is saved for analysis.</p>
+                <p>At any time the user may interrupt the simulation by clicking in <strong>Abort</strong> in the Execution section. Stopping the execution before the Status box shows “Simulation completed” aborts the simulation and no data is saved for analysis.</p>
                 <h3 class="w3-xlarge w3-text-blue">Checking the status of a running simulation</h3>
                 <p>While the execution is going on, “Simulation running” is show in the Status box in the Execution section, together with the elapsed time. User can execute only one simulation instance at a time.</p>
-                <h3 class="w3-xlarge w3-text-blue">Viewing the error log</h3>
-                <p>If there is any error preventing the simulation execution to complete, the Status box will show “Simulation failed” and the execution will be aborted and no data is saved for analysis. User can click on <strong>View Error Log</strong> in Execution section to check the causes of the failure.</p>
+                <h3 class="w3-xlarge w3-text-blue">Viewing the simulation log</h3>
+                <p>If there is any error preventing the simulation execution to complete, the Status box will show “Simulation failed” and the execution will be aborted and no data is saved for analysis. User can click on <strong>Log</strong> in Execution section to check the causes of the failure.</p>
 
                 <h2 class="w3-xxlarge w3-text-blue" id="help-analysis">Analysis section</h2>
                 <p>After the execution of the simulation model, when status box in the Execution section shows “Simulation completed”, the produced simulation time series will be available in the Analysis section.</p>
                 <h3 class="w3-xlarge w3-text-blue">The time series list</h3>
-                <p>The user can select one or more series in time series list to be used when using the command buttons. Clicking once selects the time series and an additional click unselects it.</p>
+                <p>The user can select one or more series in time series list to be used when using the command buttons. Clicking once selects the time series and an additional click deselects it.</p>
                 <h3 class="w3-xlarge w3-text-blue">The time steps range selector</h3>
                 <p>By default the commands in the Analysis section operate over all simulation time steps, from <em>t = 1</em> to the number of time steps defined in the Configuration section. The user has the option to restrict the range of time steps to use in the analysis, by changing the default values in the Selected Time Steps box.</p>
                 <h3 class="w3-xlarge w3-text-blue">The scale options</h3>
-                <p>The Scale box provide configuration to the scaling of the vertical axis of time series plots. The Automatic option uses auto scaling to show the entire data range present in the series. The Manual option allows the user to select the minimum and maximum values for the vertical axis. The Log option uses a logarithmic scale (natural base) for the vertical axis.</p>
+                <p>The Scale box provide configuration to the scaling of the vertical axis of time series plots. The <strong>Auto</strong> option uses auto scaling to show the entire data range present in the series. The <strong>Manual</strong> option allows the user to select the minimum and maximum values for the vertical axis. The <strong>Log</strong> option uses a logarithmic scale (natural base) for the vertical plot axis, descriptive statistics and data table, instead of a linear one (<strong>Linear</strong> option).</p>
+                <h3 class="w3-xlarge w3-text-blue">The Monte Carlo (MC) plot bands</h3>
+                <p>The MC-band options provide extra information for multi-run simulation plots. MC-bands are only available when <strong>numRuns</strong>, in Configuration section, is set to more than one run (at least 10 runs are recommended for sensible results). The <strong>Confidence</strong> option add a standard 95% confidence interval band to each series selected to plot. The <strong>Max-min</strong> option a band from the minimum to the maximum values obtained in the set of simulation runs.</p>
                 <h3 class="w3-xlarge w3-text-blue">Showing descriptive statistics</h3>
-                <p>Clicking on <strong>Statistics</strong> in Analysis section creates a new browser window showing some descriptive statistics for the selected time series, including the mean, the standard deviation and minimum and maximum values.</p>
+                <p>Clicking on <strong>Statistics</strong> in Analysis section creates a new browser window showing some descriptive statistics for the selected time series, including the mean, the standard deviation, the minimum and maximum values, the number of observations, and the Monte Carlo standard error (when the number of simulation runs is larger than one). If <strong>Log</strong> is selected, log values (natural base) are used in computations.</p>
                 <h3 class="w3-xlarge w3-text-blue">Creating data tables</h3>
-                <p>Clicking on <strong>Data Table</strong> in Analysis section creates a new browser window containing a table with the selected time series in the columns and the time step values in the rows.</p>
+                <p>Clicking on <strong>Data</strong> in Analysis section creates a new browser window containing a table with the selected time series in the columns and the time step values in the rows. If <strong>Log</strong> is selected, log values (natural base) are presented. At least one and up to 15 series can be selected at a time. However, multiple data windows may be open at any time.</p>
                 <h3 class="w3-xlarge w3-text-blue">Plotting time series</h3>
-                <p>Clicking on <strong>Plot</strong> in Analysis section creates a new browser window with the selected time series plots. The horizontal axis represents the simulation time steps and the vertical axis, the selected series values.</p>
+                <p>Clicking on <strong>Plot</strong> in Analysis section creates a new browser window with the selected time series plots. The horizontal axis represents the simulation time steps and the vertical axis, the selected series values. At least one and up to 15 series can be selected at a time. However, multiple data windows may be open at any time.</p>
 
                 <h2 class="w3-xxlarge w3-text-blue" id="help-export">Export section</h2>
-                <p>After a LWI simulation is successfully executed, the user can download the entire results data as a compressed, text-formatted file. This file can be easily imported in any numerical analysis software, like spreadsheets or statistical packages.</p>
+                <p>After an LWI simulation is successfully executed, the user can download the entire results data as (compressed) text file(s) in CSV (comma-separated values) format. CSV-formatted files can be easily imported in any numerical analysis software, like spreadsheets or statistical packages. File is compressed (zip format) only when there are results from more than one simulation run.</p>
                 <h3 class="w3-xlarge w3-text-blue">Saving the current configuration</h3>
-                <p>As soon as simulation execution is finished, the results data file can be downloaded to the user’s computer disk/storage. It is not possible to permanently save simulation results in the LWI server so it is important to save relevant results before they are irreversibly lost whenever the user session expires or is reset (by clicking on <strong>Reset Session</strong> in the Navigation Panel).</p>
-                <p>To download any available results data, simply click on <strong>Download</strong> in Export section. A dialog window will open, asking for the name and the destination folder of the data file. Results files have the “.res.gz” extension by default.</p>
+                <p>As soon as simulation execution is finished, the results data file can be downloaded to the user’s computer. It is not possible to permanently save simulation results in the LWI server, so it is important to save relevant results before they are irreversibly lost whenever the user session expires or is reset (by clicking on <strong>Reset Session</strong> in Reset section).</p>
+                <p>To download any available results data, simply click on <strong>Download</strong> in Export section. A dialog window will open, asking for the name and the destination folder of the data file(s). Results files have the “.csv” extension by default and may be grouped inside a single compressed file with “.zip” extension.</p>
                 <h3 class="w3-xlarge w3-text-blue">The LWI data export format</h3>
-                <p>LWI results data files are gzip compressed to save disk space and download time. It can be easily decompressed by several tools. In the Windows environment, a good free compressor/decompressor is 7zip. Linux machines usually have native support for gzip. Some statistical packages, like R, can read gzip compressed files directly, without the need of previous decompression.</p>
-                <p>Uncompressed “.res” files are tab-separated text files. Columns contain single variables while lines represent variables values at each time step. However, the first 2 lines have a special meaning, being the first time step values located in the third line and so on. The second line contains any initial value for lagged variables (or “NA” otherwise). The first line contains the columns headers with a special format: “NAME XX_XX_..._XX (START END)”. “NAME” is the name of the variable, “XX_XX_..._XX” holds structure information (can be discarded for aggregated variables) and “(START END)” tells the initial and the last time steps recorded in the file for that variable.</p>
-                <p>The reading of LWI results data files in R statistical software can be entirely automated by the use of package “LSDinterface”, available as a regular R package in CRAN.</p>
-
-                <h2 class="w3-xxlarge w3-text-blue" id="help-reset">Reset Session section</h2>
+                <p>LWI results data files may be zip compressed to allow downloading multiple files. Zip files can be easily decompressed in any platform.</p>
+                <p>Uncompressed CSV files are comma-separated text files. Columns contain single variables while lines represent variables values at each time step. However, the first line has a special meaning, being the first time step values located in the second line and so on. The first line contains the columns headers with the names of the variables in each column.</p>
+ 
+                <h2 class="w3-xxlarge w3-text-blue" id="help-reset">Reset section</h2>
                 <p>The <strong>Reset Session</strong> button discards any changes made by the user, including configurations, running simulations or results data, and initiates a new LWI session. All configuration values entered by the user is lost. Any executing simulation is aborted and the results, lost.</p>
 
             </div>

@@ -1,7 +1,7 @@
 <?php
 
 /* 
- * Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
+ * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,11 +47,11 @@ function filter_config( $config ) {
         
         // handle meta-parameters and regular elements
         if ( $name_clean == "_timeSteps_" ) {
-            $value_clean = min( max( filter_var( $value, FILTER_SANITIZE_NUMBER_INT ), 100 ), 1000 );
+            $value_clean = min( max( filter_var( $value, FILTER_SANITIZE_NUMBER_INT ), 10 ), 10000 );
         } elseif ( $name_clean == "_rndSeed_" ) {
             $value_clean = max( filter_var( $value, FILTER_SANITIZE_NUMBER_INT ), 1 );
         } elseif ( $name_clean == "_numRuns_" ) {
-            $value_clean = min( max( filter_var( $value, FILTER_SANITIZE_NUMBER_INT ), 1 ), 1 );
+            $value_clean = min( max( filter_var( $value, FILTER_SANITIZE_NUMBER_INT ), 1 ), 100 );
         } else {
             if ( ! isset ( $config_init[ $name_clean ] ) ) {
                 continue;
@@ -122,3 +122,29 @@ function error_handler( $errno, $errstr ) {
 }
 
 set_error_handler( "error_handler" );
+
+// get size of a set of files
+function get_size( $files ) {
+    if ( $files != false && count( $files ) > 0 ) {
+        $size = 0;
+        $num = 0;
+        foreach ( $files as $f ) {
+            if ( file_exists( $f ) ) {
+                $size += filesize( $f );
+                ++$num;
+            }
+        }
+        
+        if ( $size > 0 ) {
+            if ( $num > 1 ) {
+                return number_format( $size / 1024, 1 ) . " kB  [" . $num . " file(s)]";
+            } else {
+                return number_format( $size / 1024, 1 ) . " kB";
+            }
+        } else {
+            return "-";
+        }
+    } else {
+        return "-";
+    }
+}

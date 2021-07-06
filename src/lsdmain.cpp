@@ -698,6 +698,13 @@ void run( void )
 	set_fast( 0 );			// should always start on OBSERVE and switch to FAST later
 	res_list.clear( );		// empty list of saved results files
 
+	// prepare progress bar
+	one_dot = true;
+	on_bar = false;
+	perc_done = 0;
+	last_done = -1;
+	strcpy( bar_done, "" );
+
 	for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
 	{
 		running = true;		// signal simulation is running
@@ -785,12 +792,7 @@ void run( void )
 		stack_info = 0;
 		use_nan = false;
 		no_search = false;
-		one_dot = true;
-		on_bar = false;
 		done_in = 0;
-		perc_done = 0;
-		last_done = -1;
-		strcpy( bar_done, "" );
 		wr_warn_cnt = 0;
 		start = last_update = clock( );
 
@@ -857,7 +859,7 @@ void run( void )
 				root->update( true, false );
 			}
 
-			perc_done = ( 100 * t ) / max_step;
+			perc_done = min( 100 * ( ( i - 1 ) + ( double ) t / max_step ) / sim_num, 100 );
 			
 #ifndef NW
 			switch ( done_in )
@@ -949,7 +951,7 @@ void run( void )
 		end = clock( );
 		
 		if ( dobar && on_bar )
-			plog( "%s100%%", "bar", ! one_dot ? "." : "" );
+			plog( "%s%d%%", "bar", ! one_dot ? "." : "", perc_done );
 
 		if ( fast_mode < 2 )
 			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", "", i, sim_num, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( end - start ) / CLOCKS_PER_SEC );

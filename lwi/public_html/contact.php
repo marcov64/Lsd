@@ -1,7 +1,7 @@
 <?php
 
 /* 
- * Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
+ * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// set the correct e-mail addresses below
-$lwi_admin = "lwi_admin@localhost";
-$reply_to = "webmaster@localhost";
-$subject = "LWI user feedback";
-
+include '../defaults.php';
 
 if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
 

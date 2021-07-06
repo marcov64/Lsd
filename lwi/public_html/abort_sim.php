@@ -1,7 +1,7 @@
 <?php
 
 /* 
- * Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
+ * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,11 @@
 $session_id = preg_replace( "/[^\da-z]/i", "", filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_STRING ) );
 $session_short_id = substr( $session_id, -6 );
 
-$filename_conf = "../tmp/run-" . $session_short_id . ".lsd";
+require '../defaults.php';
+
+$filename_conf = $config_pref . "run-" . $session_short_id . ".lsd";
 
 if ( file_exists( $filename_conf ) ) {
-    $filename_abort = "../tmp/run-" . $session_short_id . ".abt";
+    $filename_abort = $config_pref . "run-" . $session_short_id . ".abt";
     touch( $filename_abort );
 }
