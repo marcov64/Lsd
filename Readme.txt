@@ -254,11 +254,11 @@ In Debian or Ubuntu, to make sure you have the correct libraries you can use:
 
 In Fedora, CentOS or Red Hat, the equivalent command is:
 
- sudo yum install gcc-c++ make gdb gnuplot multitail zlib-devel tcl tk tcl-devel tk-devel
+ sudo yum install gcc-c++ make gdb gnuplot multitail zlib-devel tcl tk tcl-devel tk-devel xterm
 
 In Mandriva or Mageia:
 
- sudo urpmi gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel
+ sudo urpmi gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel xterm
 
 If installing to a server (no desktop), please remove gnuplot/gnuplot-qt from the above commands to prevent the full desktop stack to be installed, which is not usually adequate for a server.
 

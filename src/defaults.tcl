@@ -304,8 +304,8 @@ set winDLL 	[ list libwinpthread-1.dll libgcc_s_seh-1.dll libstdc++-6.dll tcl86.
 set winTcl	[ list \\msys64\\mingw64\\bin\\tcl86.dll ]
 set winTk	[ list \\msys64\\mingw64\\bin\\tk86.dll ]
 
-set linuxPkg 		[ list	g++ 				make	gdb		gnuplot		multitail	zlib			tcl				tk				]
-set linuxTyp 		[ list	exe 				exe 	exe		exe			exe			lib				lib				lib				]
+set linuxPkg 		[ list	g++ 				make	gdb		gnuplot		xterm	multitail	zlib			tcl				tk				]
+set linuxTyp 		[ list	exe 				exe 	exe		exe			exe		exe			lib				lib				lib				]
 set linuxInclude	[ list "/usr/include" "/usr/local/include" "/usr/include/tcl8.6" "/usr/local/include/tcl8.6" ]
 set linuxLib 		[ list "/usr/lib" "/usr/local/lib" "/usr/lib/x86_64-linux-gnu" "/usr/local/lib/x86_64-linux-gnu" ]
 
