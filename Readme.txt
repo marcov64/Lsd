@@ -250,7 +250,7 @@ To use the LSD in Linux it is necessary to have the GNU gcc/g++ compiler (versio
 
 In Debian or Ubuntu, to make sure you have the correct libraries you can use:
 
- sudo apt-get install build-essential gdb gnuplot-qt multitail zlib1g-dev tcl-dev tk-dev
+ sudo apt-get install build-essential gdb gnuplot-qt multitail zlib1g-dev tcl-dev tk-dev xterm
 
 In Fedora, CentOS or Red Hat, the equivalent command is:
 
