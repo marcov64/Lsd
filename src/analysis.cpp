@@ -6347,9 +6347,9 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "pack $w.b.c.case $w.b.c.y -anchor w" );
 
 	cmd( "ttk::frame $w.b.o" );
-	cmd( "ttk::label $w.b.o.l1 -text \"%s+click: properties\"", platform == MAC ? "Ctrl" : "Alt" );
+	cmd( "ttk::label $w.b.o.l1 -text \"%s+click: properties\"", platform == _MAC_ ? "Ctrl" : "Alt" );
 	cmd( "ttk::label $w.b.o.l2 -text \"Shift+click: add text\"" );
-	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == MAC ? "Cmd" : "Ctrl" );
+	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == _MAC_ ? "Cmd" : "Ctrl" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
@@ -6673,9 +6673,9 @@ void plot_lattice( int *choice )
 	cmd( "ttk::frame $w.b -width %d", ncol * le + 1 );
 
 	cmd( "ttk::frame $w.b.o" );
-	cmd( "ttk::label $w.b.o.l1 -text \"%s+click: properties\"", platform == MAC ? "Ctrl" : "Alt" );
+	cmd( "ttk::label $w.b.o.l1 -text \"%s+click: properties\"", platform == _MAC_ ? "Ctrl" : "Alt" );
 	cmd( "ttk::label $w.b.o.l2 -text \"Shift+click: add text\"" );
-	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == MAC ? "Cmd" : "Ctrl" );
+	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == _MAC_ ? "Cmd" : "Ctrl" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
@@ -9241,9 +9241,9 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	cmd( "pack $w.b.c.case $w.b.c.y $w.b.c.var -anchor w" );
 
 	cmd( "ttk::frame $w.b.o" );
-	cmd( "ttk::label $w.b.o.l1 -text \"%s+click: properties\"", platform == MAC ? "Ctrl" : "Alt" );
+	cmd( "ttk::label $w.b.o.l1 -text \"%s+click: properties\"", platform == _MAC_ ? "Ctrl" : "Alt" );
 	cmd( "ttk::label $w.b.o.l2 -text \"Shift+click: add text\"" );
-	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == MAC ? "Cmd" : "Ctrl" );
+	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == _MAC_ ? "Cmd" : "Ctrl" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "ttk::frame $w.b.s" );
@@ -9493,7 +9493,7 @@ void canvas_binds( int n )
 			set hereY [ $ccanvas canvasy %%y ]; \
 			unset -nocomplain cl; \
 			set choice 28 \
-		}", platform == MAC ? "Command" : "Control", n, n );
+		}", platform == _MAC_ ? "Command" : "Control", n, n );
 
 	cmd( "bind $p <Button-1> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
@@ -9605,7 +9605,7 @@ void update_more_tab( const char *w, bool adding )
 	char *tt;
 	int i, j, k, m, n, cols;
 	
-	if ( platform == MAC )
+	if ( platform == _MAC_ )
 		cols = 3;
 	else
 		cols = 4;

@@ -1,6 +1,6 @@
 #**************************************************************
 #
-#	LSD 7.3 - December 2020
+#	LSD 8.0 - May 2021
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -20,7 +20,7 @@
 
 CC=g++	
 TARGET=LMM
-SWITCH_CC=-DLMM -DNP -Wno-unused-result -O3
+SWITCH_CC=-D_LMM_ -D_NP_ -Wno-unused-result -O3
 
 # from here you should not need to modify anything
 

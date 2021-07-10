@@ -1,6 +1,6 @@
 #**************************************************************
 #
-#	LSD 8.0 - December 2020
+#	LSD 8.0 - May 2021
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -16,7 +16,7 @@
 
 CC=g++	
 TARGET=lsd_getlimits
-SWITCH_CC=-DNW -DNP -Wno-unused-result -O3
+SWITCH_CC=-D_NW_ -D_NP_ -Wno-unused-result -O3
 
 # from here you should not need to modify anything
 

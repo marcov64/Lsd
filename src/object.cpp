@@ -273,7 +273,7 @@ char *qsort_lab_secondary;
 int qsort_lag;
 object *globalcur;
 
-#ifndef NP
+#ifndef _NP_
 mutex parallel_obj_list;		// mutex lock for parallel object list manipulation
 #endif
 
@@ -406,7 +406,7 @@ void object::update( bool recurse, bool user )
 
 		if ( cv->param == 0 && cv->last_update < t )
 		{
-#ifndef NP
+#ifndef _NP_
 			if ( parallel_ready && cv->parallel && ! cv->dummy )
 				parallel_update( cv, this );
 			else
@@ -418,7 +418,7 @@ void object::update( bool recurse, bool user )
 		{
 			if ( cv->save || cv->savei )
 				cv->data[ t - cv->start ] = cv->val[ 0 ];
-#ifndef NW
+#ifndef _NW_
 			if ( ! user && cv->plot == 1 )
 				plot_rt( cv );
 #endif
@@ -760,7 +760,7 @@ double object::initturbo( char const *lab, double tot = 0 )
 	if ( tot <= 0 )				// if size not informed, compute it
 		for ( tot = 0, cur = this->search( lab ); cur != NULL; ++tot, cur = go_brother( cur ) );
 
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent initialization by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
 #endif
@@ -1083,7 +1083,7 @@ double object::initturbo_cond( char const *lab )
 		return 0;
 	}
 
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent initialization by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
 #endif
@@ -1176,7 +1176,7 @@ variable *object::add_empty_var( char const *lab )
 					true );
 	}
 
-#ifndef NW
+#ifndef _NW_
 	if ( ! valid_label( lab ) )
 	{
 		plog( "\nWarning: invalid variable name '%s', please rename", "", lab );
@@ -1274,7 +1274,7 @@ void object::add_obj( char const *lab, int num, int propagate )
 	bridge *cb;
 	object *cur, *cur1;
 	
-#ifndef NW
+#ifndef _NW_
 	if ( ! valid_label( lab ) )
 	{
 		plog( "\nWarning: invalid object name '%s', please rename", "", lab );
@@ -1635,7 +1635,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 		return NULL;
 	}
 
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent additions by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
 #endif
@@ -1684,7 +1684,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 		{
-#ifndef NP
+#ifndef _NP_
 			// prevent concurrent use by more than one thread
 			lock_guard < mutex > lock( cv->parallel_comp );
 #endif
@@ -1764,7 +1764,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 		// update object list for user pointer checking
 		if ( ! no_ptr_chk )
 		{
-#ifndef NP
+#ifndef _NP_
 			// prevent concurrent update by more than one thread
 			lock_guard < mutex > lock( parallel_obj_list );
 #endif
@@ -1823,7 +1823,7 @@ void object::delete_obj( variable *caller )
 		return;					// ignore deleting null object
 
 	{							// create context for lock
-#ifndef NP
+#ifndef _NP_
 		// prevent concurrent deletion by more than one thread
 		lock_guard < mutex > lock( parallel_comp );
 #endif
@@ -1857,7 +1857,7 @@ void object::delete_obj( variable *caller )
 	// update object list for user pointer checking
 	if ( ! no_ptr_chk )
 	{
-#ifndef NP
+#ifndef _NP_
 		// prevent concurrent update by more than one thread
 		lock_guard < mutex > lock( parallel_obj_list );
 #endif
@@ -2194,7 +2194,7 @@ double object::cal( object *caller, char const *lab, int lag, bool force_search 
 	if ( cv == NULL )
 		return NAN;
 
-#ifndef NP
+#ifndef _NP_
 	if ( lag == 0 && parallel_ready && cv->parallel && cv->last_update < t && ! cv->dummy )
 		parallel_update( cv, this, caller );
 #endif
@@ -2212,7 +2212,7 @@ double object::cal( object *caller, char const *lab, int lag )
 	if ( cv == NULL )
 		return NAN;
 
-#ifndef NP
+#ifndef _NP_
 	if ( lag == 0 && parallel_ready && cv->parallel && cv->last_update < t && ! cv->dummy )
 		parallel_update( cv, this, caller );
 #endif
@@ -2915,7 +2915,7 @@ object *object::lsdqsort( char const *obj, char const *var, char const *directio
 		return NULL;
 	}
 
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent sorting by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
 #endif
@@ -3054,7 +3054,7 @@ object *object::lsdqsort( char const *obj, char const *var1, char const *var2, c
 		return NULL;
 	}
 
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent sorting by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
 #endif
@@ -3287,7 +3287,7 @@ double object::write( char const *lab, double value, int time, int lag )
 			return NAN;
 		}
 
-#ifndef NP
+#ifndef _NP_
 		if ( cv->parallel_comp.try_lock( ) )
 			cv->parallel_comp.unlock( );
 		else
@@ -3301,7 +3301,7 @@ double object::write( char const *lab, double value, int time, int lag )
 #endif
 	}
 
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent use by more than one thread
 	lock_guard < mutex > lock( cv->parallel_comp );
 #endif
@@ -3564,7 +3564,7 @@ Build the object list for user pointer checking
 ****************************************************/
 double build_obj_list( bool set_list )
 {
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent update by more than one thread
 	lock_guard < mutex > lock( parallel_obj_list );
 #endif
@@ -3623,7 +3623,7 @@ double object::interact( char const *text, double v, double *tv, int i, int j,
 						 netLink *curl4, netLink *curl5, netLink *curl6,
 						 netLink *curl7, netLink *curl8, netLink *curl9 )
 {
-#ifndef NW
+#ifndef _NW_
 	int n;
 	double app = v;
 

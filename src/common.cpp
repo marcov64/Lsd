@@ -18,17 +18,17 @@
  
  Relevant flags (when defined):
  
- - LMM: Model Manager executable
- - FUN: user model equation file
- - NW: No Window executable
- - NP: no parallel (multi-task) processing
- - NT: no signal trapping (better when debugging in GDB)
+ - _LMM_: Model Manager executable
+ - _FUN_: user model equation file
+ - _NW_: No Window executable
+ - _NP_: no parallel (multi-task) processing
+ - _NT_: no signal trapping (better when debugging in GDB)
  *************************************************************/
 
 #include "common.h"
 
 // Tcl/Tk-dependent modules
-#ifndef NW
+#ifndef _NW_
 
 /*********************************
  LOAD_LMM_OPTIONS
@@ -126,7 +126,7 @@ void update_model_info( void )
 {
 	int i;
 	
-#ifdef LMM
+#ifdef _LMM_
 	// set undefined parameters to defaults
 	for ( i = 0; i < MODEL_INFO_NUM; ++i )
 	{
@@ -431,7 +431,7 @@ bool firstCall = true;
 
 void cmd( const char *cm, ... )
 {
-#ifndef NP
+#ifndef _NP_
 	// abort if not running in main LSD thread
 	if ( this_thread::get_id( ) != main_thread )
 		return;
@@ -466,7 +466,7 @@ void cmd( const char *cm, ... )
 		if ( code != TCL_OK )
 		{
 			log_tcl_error( cm, Tcl_GetStringResult( inter ) );
-#ifdef LMM
+#ifdef _LMM_
 			if ( tk_ok )
 				cmd( "ttk::messageBox -type ok -title Error -icon error -message \"Tcl error\" -detail \"More information in file '%s/%s'.\"", rootLsd, err_file );
 #endif
@@ -485,7 +485,7 @@ void log_tcl_error( const char *cm, const char *message )
 	struct tm *timeinfo;
 	char *err_path, ftime[ 80 ];
 	
-#ifdef LMM
+#ifdef _LMM_
 	err_path = rootLsd;
 #else
 	err_path = exec_path;
@@ -501,7 +501,7 @@ void log_tcl_error( const char *cm, const char *message )
 	f = fopen( fname, "a" );
 	if ( f == NULL )
 	{
-#ifdef LMM
+#ifdef _LMM_
 		if ( tk_ok )
 			cmd( "ttk::messageBox -type ok -title Error -icon error -message \"Log file write error\" -detail \"Cannot write to log file: '%s/%s'\nCheck write permissions.\"", err_path, err_file );
 		else
@@ -524,7 +524,7 @@ void log_tcl_error( const char *cm, const char *message )
 	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, message );
 	fclose( f );
 	
-#ifndef LMM
+#ifndef _LMM_
 	plog( "\nInternal LSD error. See file '%s'\n", "", fname );
 #endif
 }
@@ -710,7 +710,7 @@ int main( int argn, char **argv )
 {
 	int res = 0;
 
-#ifndef NT
+#ifndef _NT_
 	// register all signal handlers
 	handle_signals( signal_handler );
 
@@ -719,7 +719,7 @@ int main( int argn, char **argv )
 #endif
 		res = lsdmain( argn, argv );
 		
-#ifndef NT
+#ifndef _NT_
 	}
 	catch ( bad_alloc& )	// out of memory conditions
 	{
@@ -1108,12 +1108,12 @@ void msleep( unsigned msec )
 void myexit( int v )
 {
 	fflush( stderr );
-#ifndef NP
+#ifndef _NP_
 	// stop multi-thread workers, if needed
 	delete [ ] workers;
 #endif
 
-#ifndef NW
+#ifndef _NW_
 	if ( inter != NULL )
 	{
 		cmd( "if { ! [ catch { package present Tk } ] } { destroy . }" );
@@ -1161,7 +1161,7 @@ void signal_handler( int signum )
 	{
 		case SIGINT:
 		case SIGTERM:
-#ifdef NW
+#ifdef _NW_
 			sprintf( msg, "SIGINT/SIGTERM (%s)", signal_name( signum ) );
 			break;
 #else
@@ -1170,7 +1170,7 @@ void signal_handler( int signum )
 #endif
 #ifdef SIGWINCH
 		case SIGWINCH:
-#ifndef NW
+#ifndef _NW_
 			cmd( "sizetop all" );	// readjust windows size/positions
 			cmd( "update" );
 #endif
@@ -1208,16 +1208,16 @@ void signal_handler( int signum )
 			strcpy( msg2, "" );			
 	}
 
-#ifndef NW
+#ifndef _NW_
 
-#ifndef LMM
+#ifndef _LMM_
 	if ( ! user_exception )
 #endif
 	{
 		strcpy( msg2, "There is an internal LSD error\n  If error persists, please contact developers" );
 		strcpy( msg3, "LSD will close now..." );
 	}
-#ifndef LMM
+#ifndef _LMM_
 	else
 	{
 		strcpy( msg3, "Additional information may be obtained running the simulation using the 'Model'/'GDB Debugger' menu option" );
@@ -1244,7 +1244,7 @@ void signal_handler( int signum )
 	
 	cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s:\n  %s\n\n%s\"", msg, msg2, msg3 );
 	
-#ifndef LMM
+#ifndef _LMM_
 	if ( user_exception )
 	{
 		if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL && 

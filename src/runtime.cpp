@@ -139,18 +139,18 @@ void add_rt_plot_tab( const char *w, int id_sim )
 		
 	switch ( platform )
 	{
-		case WINDOWS:
+		case _WIN_:
 			tabs = 12;
 			cols = 10;
 			dbut = 2;
 			break;
-		case LINUX:
+		case _LIN_:
 			tabs = 9;
 			cols = 8;
 			dbut = 3;
 			break;
 		default:
-		case MAC:
+		case _MAC_:
 			tabs = 8;
 			cols = 5;
 			dbut = 2;

@@ -3357,7 +3357,7 @@ case 22:
 	cmd( "ttk::checkbutton $T.c.obs -text \"Profile observed variables only\" -variable prof_obs_only" );
 	cmd( "ttk::checkbutton $T.c.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
 
-#ifndef NP
+#ifndef _NP_
 	cmd( "ttk::checkbutton $T.c.npar -text \"Disable parallel computation\" -variable parallel_disable" );
 	if ( ! search_parallel( root ) || max_threads < 2 )
 		cmd( "$T.c.npar configure -state disabled" );
@@ -5284,7 +5284,7 @@ case 68:
 
 	// check for existing NW executable
 	sprintf( ch, "%s/lsdNW", exec_path );			// form full executable name
-	if ( platform == WINDOWS )
+	if ( platform == _WIN_ )
 		strcat( ch, ".exe" );							// add Windows ending
 
 	if ( ( f = fopen( ch, "rb" ) ) == NULL ) 
@@ -5651,15 +5651,15 @@ case 68:
 		
 		switch( platform )
 		{
-			case LINUX:
+			case _LIN_:
 				cmd( "catch { exec -- $sysTerm -e multitail %s --retry-all %s & }", lab, lab2 );
 				break;
 
-			case MAC:
+			case _MAC_:
 				cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $path; clear; multitail %s --retry-all %s\\\"\" & } result", lab, lab2 );
 				break;
 
-			case WINDOWS:
+			case _WIN_:
 				cmd( "catch { exec -- $sysTerm /k multitail %s %s & }", lab, lab2 );
 		}
 	}
@@ -5684,7 +5684,7 @@ case 69:
 
 	// check for existing NW executable
 	sprintf( lab, "%s/lsdNW", exec_path );				// form full executable name
-	if ( platform == WINDOWS )
+	if ( platform == _WIN_ )
 		strcat( lab, ".exe" );							// add Windows ending
 
 	if ( ( f = fopen( lab, "rb" ) ) == NULL ) 
@@ -5880,15 +5880,15 @@ case 69:
 		switch( platform )
 		{
 				
-			case LINUX:
+			case _LIN_:
 				cmd( "catch { exec $sysTerm -e tail -F %s.log & }", simul_name );
 			 	break;
 			
-			case MAC:
+			case _MAC_:
 				cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $path; clear; tail -F %s.log\\\"\" & } result", simul_name );
 				break;
 
-			case WINDOWS:
+			case _WIN_:
 				cmd( "catch { exec $sysTerm /k tail -F %s.log & }", simul_name );
 		}
 	
@@ -7228,7 +7228,7 @@ bool unsaved_change( bool val )
 	{
 		unsavedChange = val;
 		
-#ifndef NW
+#ifndef _NW_
 		char chgMark[ ] = "\0\0";
 		chgMark[ 0 ] = unsavedChange ? '*' : ' ';
 

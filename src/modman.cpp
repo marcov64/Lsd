@@ -226,13 +226,13 @@ int lsdmain( int argn, char **argv )
 
 	s = ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 );
 	if ( ! strcmp( s, "linux" ) )
-		platform = LINUX;
+		platform = _LIN_;
 	else
 		if ( ! strcmp( s, "mac" ) )
-			platform = MAC;
+			platform = _MAC_;
 		else
 			if ( ! strcmp( s, "windows" ) )
-				platform = WINDOWS;
+				platform = _WIN_;
 			else
 			{
 				log_tcl_error( "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
@@ -804,19 +804,19 @@ int lsdmain( int argn, char **argv )
 
 	// check required components for compilation
 	cmd( "check_components" );
-	if ( platform == LINUX && Tcl_GetVar( inter, "linuxMissing", 0 ) != NULL )
+	if ( platform == _LIN_ && Tcl_GetVar( inter, "linuxMissing", 0 ) != NULL )
 	{
 		log_tcl_error( "C++ compiler and/or tools unavailable", "g++, make and zlib packages must be installed for model compilation" );
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"C++ compiler and/or tools unavailable\" -detail \"g++, make and zlib packages must be installed for model compilation.\n\nSee 'Readme.txt' for details on how to install them manually, or run the LSD installer again and make sure the indicated steps are fully performed.\"" );
 	}
 	else
-		if ( platform == MAC && Tcl_GetVar( inter, "xcode", 0 ) != NULL )
+		if ( platform == _MAC_ && Tcl_GetVar( inter, "xcode", 0 ) != NULL )
 		{
 			log_tcl_error( "C++ compiler unavailable", "Xcode command line tools must be installed for model compilation" );
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"C++ compiler unavailable\" -detail \"Xcode command line tools must be installed for model compilation.\n\nSee 'Readme.txt' for details on how to install it manually, or run the LSD installer again and make sure the indicated steps are fully performed.\"" );
 		}
 		else
-			if ( platform == WINDOWS && Tcl_GetVar( inter, "winConflict", 0 ) != NULL )
+			if ( platform == _WIN_ && Tcl_GetVar( inter, "winConflict", 0 ) != NULL )
 			{
 				log_tcl_error( "Potentially conflicting software installed", "Software components included in LSD were also installed by another package" );
 				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Potentially conflicting software installed\" -detail \"Software components included in LSD were also installed by another package.\n\nIf you have compilation problems, please check 'Readme.txt' for details on how to adjust the PATH environment variable manually, or run the LSD installer again and make sure accepting LSD components to be the system default.\"" );
@@ -1462,16 +1462,16 @@ int lsdmain( int argn, char **argv )
 
 		switch( platform )
 		{
-			case LINUX:
+			case _LIN_:
 				sprintf( msg, "catch { exec $sysTerm -e $DbgExe $cmdbreak %s & } result", str1 );
 				break;
 
-			case MAC:
+			case _MAC_:
 				cmd( "if [ string equal $cmdbreak \"--args\" ] { set cmdbreak \"\" }" );
 				sprintf( msg, "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $fileDir; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s\\\"\" & } result", str1, str1 );
 				break;
 
-			case WINDOWS:
+			case _WIN_:
 				strcat( str1, ".exe" );
 				sprintf( msg, "catch { exec $sysTerm /c $DbgExe $cmdbreak %s & } result", str1 );
 				break;
@@ -1490,7 +1490,7 @@ int lsdmain( int argn, char **argv )
 		{
 			sprintf( str2, "%s/%s", s, str );
 			
-			if ( platform == MAC )
+			if ( platform == _MAC_ )
 				sprintf( str, "%s/%s.app/Contents/MacOS/%s", s, str1, str1 );
 			else
 				sprintf( str, "%s/%s", s, str1 );
@@ -5921,15 +5921,15 @@ bool compile_run( bool run, bool nw )
 
 			switch ( platform )
 			{
-				case LINUX:
+				case _LIN_:
 					cmd( "while { [ catch { exec ./%s & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
 					break;
 					
-				case MAC:
+				case _MAC_:
 					cmd( "while { [ catch { exec open -F -n ./%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
 					break;
 					
-				case WINDOWS:
+				case _WIN_:
 					cmd( "while { [ catch { exec %s.exe & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
 					break;
 			}

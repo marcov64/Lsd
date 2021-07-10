@@ -18,11 +18,11 @@
  
  Relevant flags (when defined):
  
- - LMM: Model Manager executable
- - FUN: user model equation file
- - NW: No Window executable
- - NP: no parallel (multi-task) processing
- - NT: no signal trapping (better when debugging in GDB)
+ - _LMM_: Model Manager executable
+ - _FUN_: user model equation file
+ - _NW_: No Window executable
+ - _NP_: no parallel (multi-task) processing
+ - _NT_: no signal trapping (better when debugging in GDB)
  *************************************************************/
 
 // LSD version strings, for About... boxes and code testing
@@ -69,9 +69,9 @@
 #define MAX_FILE_TRY 100000				// max number of lines to read from files
 
 // platform codes
-#define LINUX	1
-#define MAC		2
-#define WINDOWS	3
+#define _LIN_	1
+#define _MAC_		2
+#define _WIN_	3
 
 // Choose directory/file separator
 #define foldersep( dir ) ( dir[ 0 ] == '\0' ? "" : "/" )
@@ -182,7 +182,7 @@ struct object
 	b_mapT b_map;						// fast lookup map to object bridges
 	v_mapT v_map;						// fast lookup map to variables
 
-#ifndef NP
+#ifndef _NP_
 	mutex parallel_comp;				// mutex lock for parallel computations
 #endif
 
@@ -316,7 +316,7 @@ struct variable
 	object *up;
 	variable *next;
 	
-#ifndef NP
+#ifndef _NP_
 	mutex parallel_comp;				// mutex lock for parallel computation
 #endif
 
@@ -477,7 +477,7 @@ struct profile							// profiled variable object
 	profile( ) { ticks = 0; comp = 0; };	// constructor
 };
 
-#ifndef NP
+#ifndef _NP_
 struct worker							// multi-thread parallel worker data structure
 {
 	bool free;
@@ -519,7 +519,7 @@ extern int quit;						// simulation termination control flag
 
 
 // prevent exposing internals in users' fun_xxx.cpp
-#ifndef FUN
+#ifndef _FUN_
 
 // common standalone internal C functions/procedures (not visible to the users)
 bool get_bool( const char *tcl_var, bool *var = NULL );
@@ -557,7 +557,7 @@ void signal_handler( int signum );
 void update_lmm_options( bool justLmmGeom = false );
 void update_model_info( void );
 
-#ifdef LMM
+#ifdef _LMM_
 bool discard_change( void );
 #else
 bool discard_change( bool checkSense = true, bool senseOnly = false, const char title[ ] = "" );
@@ -586,13 +586,13 @@ extern const char *wnd_names[ ];		// LSD main windows' names
 extern const int signals[ ];			// handled system signal numbers
 
 // multi-threading control 
-#ifndef NP
+#ifndef _NP_
 extern thread::id main_thread;			// LSD main thread ID
 extern worker *workers;					// multi-thread parallel worker data
 #endif
 
 // Tcl/Tk specific definitions (for the windowed version only)
-#ifndef NW
+#ifndef _NW_
 
 #include <tk.h>
 

@@ -18,7 +18,7 @@ This file contains all the macros required by the
 model's equation file.
 *************************************************************/
 
-#define FUN												// comment this line to access internal LSD functions
+#define _FUN_											// comment this line to access internal LSD functions
 
 #if defined( EIGENLIB ) && __cplusplus >= 201103L		// required C++11
 #include <Eigen/Eigen>									// Eigen linear algebra library
@@ -107,7 +107,7 @@ bool no_ptr_chk = true;
 		error_hard( msg, "invalid equation result", "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation", true ); \
 	}
 
-#ifndef NW
+#ifndef _NW_
 #define DEBUG_CODE \
 	if ( debug_flag ) \
 	{ \
@@ -658,7 +658,7 @@ bool no_ptr_chk = true;
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
 #ifndef FAST_LOOKUP
 
-#ifndef NW
+#ifndef _NW_
 #include <tk.h>
 extern Tcl_Interp *inter;
 #endif

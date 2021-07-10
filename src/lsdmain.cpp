@@ -30,10 +30,10 @@ Prepare variables to store saved data.
 
 Relevant flags (when defined):
 
-- FUN: user model equation file
-- NW: No Window executable
-- NP: no parallel (multi-task) processing
-- NT: no signal trapping (better when debugging in GDB)
+- _FUN_: user model equation file
+- _NW_: No Window executable
+- _NP_: no parallel (multi-task) processing
+- _NT_: no signal trapping (better when debugging in GDB)
 *************************************************************/
 
 #include "decl.h"
@@ -160,7 +160,7 @@ const char *wnd_names[ LSD_WIN_NUM ] = LSD_WIN_NAME;
 const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
 // conditional variables
-#ifndef NW
+#ifndef _NW_
 int i_values[ 4 ];			// user temporary variables copy
 double d_values[ USER_D_VARS ];
 object *o_values[ 10 ];
@@ -170,7 +170,7 @@ p_mapT par_map;				// variable to parent name map for AoR
 Tcl_Interp *inter = NULL;	// global Tcl interpreter in LSD
 #endif
 
-#ifndef NP
+#ifndef _NP_
 map < thread::id, worker * > thr_ptr;	// worker thread pointers
 thread::id main_thread;		// LSD main thread ID
 worker *workers = NULL;		// multi-thread parallel worker data
@@ -199,7 +199,7 @@ int lsdmain( int argn, char **argv )
 	exec_file = clean_file( argv[ 0 ] );	// global pointer to the name of executable file
 	exec_path = clean_path( exec_path );	// global pointer to path of executable file
 
-#ifndef NP
+#ifndef _NP_
 	main_thread = this_thread::get_id( );
 	max_threads = ( MAX_CORES <= 0 ) ? thread::hardware_concurrency( ) : MAX_CORES;
 #else
@@ -211,7 +211,7 @@ int lsdmain( int argn, char **argv )
 	add_description( "Root" );
 	reset_blueprint( NULL );
 
-#ifdef NW
+#ifdef _NW_
 	
 	no_window = true;
 	findex = 1;
@@ -335,7 +335,7 @@ int lsdmain( int argn, char **argv )
 		myexit( 8 );
 	}
 
-#ifndef NP
+#ifndef _NP_
 	if ( j > 0 && j < max_threads )
 		max_threads = j;
 #endif	
@@ -378,7 +378,7 @@ int lsdmain( int argn, char **argv )
 		}
 	}
 
-#ifndef NP
+#ifndef _NP_
 	if ( j > 0 && j < max_threads )
 		max_threads = j;
 #endif	
@@ -512,13 +512,13 @@ int lsdmain( int argn, char **argv )
 
 	str = ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 );
 	if ( ! strcmp( str, "linux" ) )
-		platform = LINUX;
+		platform = _LIN_;
 	else
 		if ( ! strcmp( str, "mac" ) )
-			platform = MAC;
+			platform = _MAC_;
 		else
 			if ( ! strcmp( str, "windows" ) )
-				platform = WINDOWS;
+				platform = _WIN_;
 			else
 			{
 				log_tcl_error( "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
@@ -601,7 +601,7 @@ int lsdmain( int argn, char **argv )
 	strcpy( stacklog->label, "LSD Simulation Manager" );
 	stack = 0;
 
-#ifndef NW
+#ifndef _NW_
 
 	while ( 1 )
 	{
@@ -668,7 +668,7 @@ void run( void )
 	clock_t start, end, last_update;
 	result *rf;					// pointer for results files (may be zipped or not)
 
-#ifndef NP
+#ifndef _NP_
 	// check if there are parallel computing variables
 	if ( parallel_disable || max_threads < 2 )
 		parallel_mode = parallel_ready = false;
@@ -687,7 +687,7 @@ void run( void )
 	parallel_mode = false;
 #endif	
 
-#ifndef NW
+#ifndef _NW_
 	prof.clear( );			// reset profiling times
 
 	cover_browser( "Running...", "Use the buttons to control the simulation:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables", true );
@@ -714,7 +714,7 @@ void run( void )
 		
 		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed 
 
-#ifndef NW
+#ifndef _NW_
 		par_map.clear( );	// restart variable to parent name map for AoR
 		prepare_plot( root, i );
 #endif
@@ -731,7 +731,7 @@ void run( void )
 		{
 			if ( load_configuration( true ) != 0 )
 			{
-#ifndef NW 
+#ifndef _NW_ 
 				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
 #else
@@ -746,7 +746,7 @@ void run( void )
 		if ( i > 1 )
 			if ( load_configuration( true, true ) != 0 )
 			{
-#ifndef NW 
+#ifndef _NW_ 
 				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
 #else
@@ -764,7 +764,7 @@ void run( void )
 
 		if ( ! alloc_save_mem( root ) )
 		{
-#ifndef NW 
+#ifndef _NW_ 
 			log_tcl_error( "Memory allocation", "Not enough memory, too many series saved for the memory available" );
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, max_step );
 #else
@@ -837,7 +837,7 @@ void run( void )
 				last_done = perc_done;
 			}
 			
-#ifndef NW 
+#ifndef _NW_ 
 			// restart runtime variables color cycle
 			cur_plt = 0;
 
@@ -861,7 +861,7 @@ void run( void )
 
 			perc_done = min( 100 * ( ( i - 1 ) + ( double ) t / max_step ) / sim_num, 100 );
 			
-#ifndef NW
+#ifndef _NW_
 			switch ( done_in )
 			{
 				case 1:			// Stop button in Log window / s/S key in Runtime window
@@ -959,7 +959,7 @@ void run( void )
 		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
 			quit = 0;
 		
-#ifndef NW 
+#ifndef _NW_ 
 		cmd( ".p.b1.b configure -value %d", cur_sim );
 		cmd( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( cur_sim + 1, sim_num ), sim_num, cur_sim, sim_num  );
 		
@@ -1073,13 +1073,13 @@ void run( void )
 	if ( fast_mode == 2 )
 		plog( "\nSimulation %d of %d finished at case %d\n", "", i - 1, sim_num, t - 1 );
 
-#ifndef NW 
+#ifndef _NW_ 
 	uncover_browser( );
 	show_prof_aggr( );
 	cmd( "focustop .log" );
 #endif
 
-#ifndef NP
+#ifndef _NP_
 	// stop multi-thread workers
 	delete [ ] workers;
 	workers = NULL;
@@ -1093,7 +1093,7 @@ void run( void )
 SET_VAR
 *********************************/
 // function to set a c variable when not in a Tcl idle loop (hardcoded vars only)
-#ifndef NW   
+#ifndef _NW_   
 int Tcl_set_c_var( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ];
@@ -1134,7 +1134,7 @@ void set_fast( int level )
 	if ( level < 0 )
 		level = 0;
 		
-#ifndef NW
+#ifndef _NW_
 	if ( fast && level == 0 )
 		enable_plot( );
 		
@@ -1182,7 +1182,7 @@ void empty_stack( void )
 	}
 	else
 	{
-#ifndef NW 
+#ifndef _NW_ 
 		log_tcl_error( "Internal error", "LSD trace stack corrupted" );	
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Internal LSD error\" -detail \"The LSD trace stack is corrupted.\nLSD will close now.\"" );
 #else
@@ -1227,7 +1227,7 @@ bool alloc_save_mem( object *r )
 		if ( cv->save || cv->savei )
 			alloc_save_var( cv );
 			
-#ifndef NW 
+#ifndef _NW_ 
 		// variable to parent name map for AoR
 		par_map.insert( make_pair < string, string > ( cv->label, r->label ) );		
 #endif
@@ -1380,7 +1380,7 @@ bool search_parallel( object *r )
 }
 
 
-#ifndef NW
+#ifndef _NW_
 
 /*********************************
 CREATE_LOGWINDOW
@@ -1679,7 +1679,7 @@ debugger
 ********************************************/
 void deb_log( bool on, int time )
 { 
-#ifndef NW  
+#ifndef _NW_  
 	// check if should turn off
 	if ( ! on || parallel_mode || fast_mode != 0 )
 	{

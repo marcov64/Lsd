@@ -18,10 +18,10 @@ Global definitions among all LSD C++ modules
 
 Relevant flags (when defined):
 
-- FUN: user model equation file
-- NW: No Window executable
-- NP: no parallel (multi-task) processing
-- NT: no signal trapping (better when debugging in GDB)
+- _FUN_: user model equation file
+- _NW_: No Window executable
+- _NP_: no parallel (multi-task) processing
+- _NT_: no signal trapping (better when debugging in GDB)
 *************************************************************/
 
 // common definitions for LMM and LSD
@@ -170,7 +170,7 @@ extern int t;
 extern unsigned seed;
 extern object *root;
 
-#ifndef NW
+#ifndef _NW_
 extern int i_values[ ];					// user temporary variables copy
 extern double d_values[ ];
 extern object *o_values[ ];
@@ -180,7 +180,7 @@ extern FILE *f_values[ ];
 
 
 // prevent exposing internals in users' fun_xxx.cpp
-#ifndef FUN
+#ifndef _FUN_
 
 // standalone internal C functions/procedures (not visible to the users)
 FILE *create_frames( const char *path, const char *fname );
@@ -394,7 +394,7 @@ void write_obj( object *r, FILE *frep, int *elemDone );
 void write_str( object *r, FILE *frep, int dep, char const *prefix );
 void write_var( variable *v, FILE *frep );
 
-#ifndef NP
+#ifndef _NP_
 void parallel_update( variable *v, object* p, object *caller = NULL );
 #endif
 
@@ -473,13 +473,13 @@ extern variable *last_cemetery;	// LSD last saved data from deleted objects
 extern void *random_engine;		// current random number generator engine
 
 // multi-threading control 
-#ifndef NP
+#ifndef _NP_
 extern atomic< bool > parallel_ready;	// flag to indicate multitasking is available
 extern map< thread::id, worker * > thr_ptr;	// worker thread pointers
 #endif
 
 // Tcl/Tk specific definitions (for the windowed version only)
-#ifndef NW
+#ifndef _NW_
 
 extern p_mapT par_map;			// element to parent name map for AoR
 
