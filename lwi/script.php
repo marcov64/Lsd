@@ -34,25 +34,45 @@ $session_short_id = substr( session_id( ), -6 );
 
 // check if configuration files are up to date and update if required
 function check_config( ) {
-    global $lsd_config, $sa_config, $input_config, $output_config, $limits_exec, $saved_exec;
+    global $config_pref, $output_pref, $lsd_config, $sa_config, $input_config, $output_config, $limits_exec, $saved_exec;
+	
+	if ( ! touch( $config_pref . "test.tmp" ) ) {
+        die( "Cannot write to '" . $config_pref . "*'" );
+	}
+	
+	unlink( $config_pref . "test.tmp" );
+    
+	if ( ! touch( $output_pref . "test.tmp" ) ) {
+        die( "Cannot write to '" . $output_pref . "*'" );
+	}
+	
+	unlink( $output_pref . "test.tmp" );
     
     if ( ! file_exists( $lsd_config ) ) {
-        return;
+        die( "LSD configuration file missing" );
     }
         
     if ( ! file_exists( $output_config ) || ( file_exists( $output_config ) && filemtime( $output_config ) < filemtime( $lsd_config ) ) ) {
         if ( file_exists( $saved_exec ) ) {
-            exec( $saved_exec . " -f " . $lsd_config . " -o " . $output_config, $shell_out, $shell_err );
-        }
+            if ( ! exec( $saved_exec . " -f " . $lsd_config . " -o " . $output_config, $shell_out, $shell_err ) ) {
+				die( "'lsd_getsaved' failed" );
+			}
+        } else {
+			die( "'lsd_getsaved' not found" );
+		}
     }
 
     if ( ! file_exists( $sa_config ) ) {
-        return;
+        die( "LSD sensitivity analysis file missing" );
     }
         
     if ( ! file_exists( $input_config ) || ( file_exists( $input_config ) && filemtime( $input_config ) < max( filemtime( $lsd_config ), filemtime( $sa_config ) ) ) ) {
         if ( file_exists( $limits_exec ) ) {
-            exec( $limits_exec . " -f " . $lsd_config . " -s " . $sa_config . " -o " . $input_config, $shell_out, $shell_err );
+            if ( ! exec( $limits_exec . " -f " . $lsd_config . " -s " . $sa_config . " -o " . $input_config, $shell_out, $shell_err ) ) {
+				die( "'lsd_getlimits' failed" );
+			}
+        } else {
+			die( "'lsd_getlimits' not found" );
         }
     }
 }
