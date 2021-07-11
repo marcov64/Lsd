@@ -54,8 +54,9 @@ function check_config( ) {
         
     if ( ! file_exists( $output_config ) || ( file_exists( $output_config ) && filemtime( $output_config ) < filemtime( $lsd_config ) ) ) {
         if ( file_exists( $saved_exec ) ) {
-            if ( ! exec( $saved_exec . " -f " . $lsd_config . " -o " . $output_config, $shell_out, $shell_err ) ) {
-				die( "'lsd_getsaved' failed" );
+            exec( $saved_exec . " -f " . $lsd_config . " -o " . $output_config, $shell_out, $shell_err );
+			if ( $shell_err !== 0 ) {
+				die( "'lsd_getsaved' failed: " . implode( " ", $shell_out ) . " (" . $shell_err . ")" );
 			}
         } else {
 			die( "'lsd_getsaved' not found" );
@@ -68,8 +69,9 @@ function check_config( ) {
         
     if ( ! file_exists( $input_config ) || ( file_exists( $input_config ) && filemtime( $input_config ) < max( filemtime( $lsd_config ), filemtime( $sa_config ) ) ) ) {
         if ( file_exists( $limits_exec ) ) {
-            if ( ! exec( $limits_exec . " -f " . $lsd_config . " -s " . $sa_config . " -o " . $input_config, $shell_out, $shell_err ) ) {
-				die( "'lsd_getlimits' failed" );
+            exec( $limits_exec . " -f " . $lsd_config . " -s " . $sa_config . " -o " . $input_config, $shell_out, $shell_err );
+			if ( $shell_err !== 0 ) {
+				die( "'lsd_getlimits' failed: " . implode( " ", $shell_out ) . " (" . $shell_err . ")" );
 			}
         } else {
 			die( "'lsd_getlimits' not found" );

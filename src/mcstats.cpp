@@ -282,7 +282,7 @@ int lsdmain( int argn, char **argv )
 			maxv = DBL_MIN;
 			minv = DBL_MAX;
 			for ( i = 0; i < files; ++i )
-				if ( ! isnan( mcdata( i, j, k ) ) )
+				if ( isfinite( mcdata( i, j, k ) ) )
 				{
 					sum += mcdata( i, j, k );
 					sumsq += pow( mcdata( i, j, k ), 2 );
@@ -347,7 +347,10 @@ void save_csv( const char *base, const char *suffix, vector < string > header, v
 	for ( j = 0; j < rows - 1; ++j )
 	{
 		for ( k = 0; k < cols; ++k )
-			fprintf( f, "%s%g", k > 0 ? "," : "", data( j, k ) );
+			if ( isfinite( data( j, k ) ) )
+				fprintf( f, "%s%g", k > 0 ? "," : "", data( j, k ) );
+			else
+				fprintf( f, "%s%s", k > 0 ? "," : "", nonavail );
 		
 		fprintf( f, "\n" );
 	}
