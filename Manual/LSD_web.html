@@ -297,11 +297,11 @@ and configuration</span></h2>
 <p><span lang=EN-US>For Ubuntu and Windows WSL servers, install the required
 packages individually using the bash terminal:</span></p>
 
-<p><span class=Cdigo><span lang=EN-US>sudo apt install apache2 php</span></span></p>
+<p><span class=Cdigo><span lang=EN-US>sudo apt install apache2 php zip</span></span></p>
 
 <p><span lang=EN-US>On CentOS, the installation command is:</span></p>
 
-<p><span class=Cdigo><span lang=EN-US>sudo yum install httpd php</span></span></p>
+<p><span class=Cdigo><span lang=EN-US>sudo yum install httpd php zip</span></span></p>
 
 <p><span lang=EN-US>macOS servers already come with the packages installed.</span></p>
 
@@ -369,8 +369,8 @@ deleted periodically. The user/group associated to the HTTP and the PHP server
 lang=EN-US> in Ubuntu, </span><span class=Cdigo><span lang=EN-US>apache</span></span><span
 lang=EN-US> in CentOS, etc.) must have read-access to the entire </span><span
 class=Cdigo><span lang=EN-US>lwi</span></span><span lang=EN-US> subdirectory
-tree plus read-write access to <i>both</i> </span><span class=Cdigo>tmp</span><span
-lang=EN-US> subdirectories (the default configuration).</span></p>
+tree plus read-write access to <i>both</i> </span><span class=Cdigo><span
+lang=EN-US>tmp</span></span><span lang=EN-US> subdirectories (the default configuration).</span></p>
 
 <p><span lang=EN-GB>The provided files must yet be set with all required file
 permissions/ownership for a typical setup. Usually, it is enough to adjust the
@@ -437,8 +437,8 @@ lang=EN-US> (text editor) to enable PHP and use LWI as the default website:</spa
 lang=EN-US>, search (</span><span class=Cdigo><span lang=EN-US>CTRL+W</span></span><span
 lang=EN-US>) for the line starting with </span><span class=Cdigo><span
 lang=EN-US>#LoadModule php7_module</span></span><span lang=EN-US> and delete
-the </span><span class=Cdigo><span lang=EN-US>#</span></span><span lang=EN-US>
-character from it, uncommenting the line.</span></p>
+the </span><span class=Cdigo><span lang=EN-US>#</span></span><span lang=EN-US> character
+from it, uncommenting the line.</span></p>
 
 <p><span lang=EN-US>Still in </span><span class=Cdigo><span lang=EN-US>nano</span></span><span
 lang=EN-US>, please search (</span><span class=Cdigo><span lang=EN-US>CTRL+W</span></span><span
@@ -546,8 +546,7 @@ configuration, if needed.</span></p>
 <p><span class=Cdigo><span lang=EN-US>chmod a+x lwi-cleanup</span></span></p>
 
 <p><span lang=EN-US>Finally, copy the script file to the </span><span
-class=Cdigo><span lang=EN-US>cron</span></span><span lang=EN-US> daily
-directory:</span></p>
+class=Cdigo><span lang=EN-US>cron</span></span><span lang=EN-US> daily directory:</span></p>
 
 <p><span class=Cdigo><span lang=EN-US>sudo cp lwi-cleanup /etc/cron.daily</span></span></p>
 
@@ -597,10 +596,10 @@ baseline simulation model executable</span></h2>
 <p class=MsoNormal><span lang=EN-US>The first step of making a <a
 href="LSD_faqs.html#model">LSD simulation model</a> available for use with LWI
 is to create a baseline <a href="LSD_faqs.html#modelsetting">configuration file</a>
-(</span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US>
-extension) using the <a href="browser.html">LSD Browser</a>. The baseline
-configuration is automatically loaded whenever a LWI user <a href="#_Why_LSD?">starts
-a session</a> or <a href="#_Configuration_page">reset it to the defaults</a>. </span></p>
+(</span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> extension)
+using the <a href="browser.html">LSD Browser</a>. The baseline configuration is
+automatically loaded whenever a LWI user <a href="#_Why_LSD?">starts a session</a>
+or <a href="#_Configuration_page">reset it to the defaults</a>. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Please ensure that the chosen configuration
 is robust to multiple simulation runs, using different <a
@@ -609,9 +608,9 @@ href="#_LSD_web_interface">LWI user sessions</a> to crash. Also ensure the
 configuration is set for a <a href="menurun.html#simsetting">single simulation
 run</a> (if multiple runs are set, just the last one will be presented). Save
 your configuration file in the LSD Browser with the name </span><span
-class=Cdigo><span lang=EN-US>lwi.lsd</span></span><span lang=EN-US>. using the
-menu command </span><span class=Cdigo><span lang=EN-US><a
-href="menufile.html#save">File&gt;Save As</a></span></span><span lang=EN-US>.</span></p>
+class=Cdigo><span lang=EN-US>lwi.lsd</span></span><span lang=EN-US>. using the menu
+command </span><span class=Cdigo><span lang=EN-US><a href="menufile.html#save">File&gt;Save
+As</a></span></span><span lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The second step is to produce a ‘No Window’
 version of the <a href="LSD_faqs.html#modelprogram">LSD model program</a>. This
@@ -627,11 +626,10 @@ command </span><span class=Cdigo><span lang=EN-US><a href="LMM.html#nowindow">Mo
 lang=EN-US>. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Please note that the model program must be
-generated in a computer using the same operating system version as the LWI
-server (or in the server itself). If this is not possible (e.g., it is a
-headless server), it is possible to compile the ‘No Window’ model program using
-a terminal session in the server, see the instructions <a
-href="LMM.html#nowindow">here</a>.</span></p>
+generated in a computer using the same operating system version as the LWI server
+(or in the server itself). If this is not possible (e.g., it is a headless
+server), it is possible to compile the ‘No Window’ model program using a
+terminal session in the server, see the instructions <a href="LMM.html#nowindow">here</a>.</span></p>
 
 <h2><span lang=EN-US>Selecting the Parameters and Variables to configure</span></h2>
 
@@ -825,10 +823,10 @@ series.</span></p>
 <h2><a name="_Why_LSD?"></a><a name="_Navigation_Panel"></a><span lang=EN-US>Navigation
 panel</span></h2>
 
-<p class=MsoNormal><span lang=EN-US>LWI is organized in several interaction areas
-or “cards”, which can be scrolled or directly reached using the Navigation
-panel. When initiating a new LWI session, the Navigation Panel is presented
-together with the Welcome area. In devices with a narrow screen, like
+<p class=MsoNormal><span lang=EN-US>LWI is organized in several interaction
+areas or “cards”, which can be scrolled or directly reached using the
+Navigation panel. When initiating a new LWI session, the Navigation Panel is
+presented together with the Welcome area. In devices with a narrow screen, like
 smartphones, the user has to click in the “</span><span style='font-family:
 "MS Gothic"'>&#9776;</span><span lang=EN-US>” symbol to open the Navigation
 panel.</span></p>
@@ -970,10 +968,11 @@ changing the default values in the Selected Time Steps box.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The Scale box provide configuration to the
 scaling of the vertical axis of time series plots. The </span><span
-class=Cdigo>Auto</span><span lang=EN-US> option uses auto scaling to plot the
-entire data range present in the series. The </span><span class=Cdigo>Manual</span><span
-lang=EN-US> option allows the user to select the minimum and maximum values for
-the vertical axis plot. The </span><span class=Cdigo><span lang=EN-US>Log</span></span><span
+class=Cdigo><span lang=EN-US>Auto</span></span><span lang=EN-US> option uses
+auto scaling to plot the entire data range present in the series. The </span><span
+class=Cdigo><span lang=EN-US>Manual</span></span><span lang=EN-US> option
+allows the user to select the minimum and maximum values for the vertical axis
+plot. The </span><span class=Cdigo><span lang=EN-US>Log</span></span><span
 lang=EN-US> option uses a logarithmic scale (natural base) for the vertical
 plot axis, descriptive statistics and data table, instead of a linear one (</span><span
 class=Cdigo><span lang=EN-US>Linear</span></span><span lang=EN-US> option).</span></p>
