@@ -65,9 +65,11 @@ function filter_config( $config ) {
             } else {
                 $value_clean = filter_var( $value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION );
             }
-            if ( ! $value_clean ) {
+            
+            if ( ! $value_clean && $value_clean !== "0" ) {
                 continue;
             }
+            
             $value_clean = min( max( $value_clean, $min ), $max );
         }
         $config_clean[ $name_clean ] = $value_clean;

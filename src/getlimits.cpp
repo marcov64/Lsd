@@ -21,6 +21,18 @@ Lists all initial values ranges and configuration.
 
 #include "decl.h"
 
+// limits and description for simulation settings
+#define MIN_STEP 10
+#define MAX_STEP 10000
+#define DESC_STEP "Number of time steps to perform the simulation"
+#define MIN_RUNS 1
+#define MAX_RUNS 100
+#define DESC_RUNS "Number of times to repeat the simulation (Monte Carlo experiment)"
+#define MIN_SEED 1
+#define MAX_SEED 999999
+#define DESC_SEED "First seed to be used to initialize the pseudorandom number generator"
+
+
 #define SEP	",;\t"			// column separators to use
 
 
@@ -206,11 +218,30 @@ int lsdmain( int argn, char **argv )
 
 		// write .csv header
 		fprintf( f, "Name%sType%sLag%sFormat%sValue%sMinimum%sMaximum%sDescription\n", sep, sep, sep, sep, sep, sep, sep );
+		
+		// write all parameters and initial conditions
 		get_sa_limits( root, f, sep );
+		
+		// write simulation setting
+		fprintf( f, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n", 
+				 sep, sep, sep, sep, max_step, sep, MIN_STEP, sep, MAX_STEP, sep, DESC_STEP );
+		fprintf( f, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n", 
+				 sep, sep, sep, sep, sim_num, sep, MIN_RUNS, sep, MAX_RUNS, sep, DESC_RUNS );
+		fprintf( f, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n", 
+				 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
+		
 		fclose( f );
 	}
 	else	// send to stdout
+	{
 		get_sa_limits( root, stdout, "\t" );
+		fprintf( stdout, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n", 
+				 sep, sep, sep, sep, max_step, sep, MIN_STEP, sep, MAX_STEP, sep, DESC_STEP );
+		fprintf( stdout, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n", 
+				 sep, sep, sep, sep, sim_num, sep, MIN_RUNS, sep, MAX_RUNS, sep, DESC_RUNS );
+		fprintf( stdout, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n", 
+				 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
+	}
 
 	empty_sensitivity( rsense );
 	empty_blueprint( );

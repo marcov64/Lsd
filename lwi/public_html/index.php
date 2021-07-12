@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <html>
     <head>
         <title>LSD Web Interface</title>
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" href="favicon.ico">
@@ -39,8 +39,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <nav class="w3-sidebar w3-blue w3-collapse w3-top w3-large w3-padding" style="z-index: 3; width: 210px; font-weight: bold;" id="mySidebar">
             <br>
             <div class="w3-container">
-                <!--<img alt="" class="auto-style1" src="lsd.png" />-->
-                <img alt="" class="auto-style1" src="lsd.png" style="width:129px; height:89px;" />
+                <a href="https://www.labsimdev.org" title="LSD" target="_blank" class="w3-hover-opacity">
+					<img alt="" class="auto-style1" src="lsd.png" style="width:129px; height:89px;" />
+				</a>
                 <h3 class="w3-padding-16">
                     
 <!-- ### LWI ### ADD THE LONG NAME OF YOUR MODEL HERE -->
@@ -134,36 +135,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 <td><em>Range</em></td>
                                 <td><em>Value</em></td>
                             </thead>
-                            <tr>
-                                <td><b>timeSteps</b></td>
-                                <td>Number of time steps to perform the simulation</td>
-                                <td>integer</td>
-                                <td>10-10000</td>
-                                <td>
-                                    <input name="timeSteps" id="_timeSteps_" class="w3-input w3-border" type="number" min="10" max="10000" value="100" required></td>
-                                <td>
-                                    <button onclick="document.getElementById( '_timeSteps_' ).value = '100'; return false;" class="w3-button w3-blue w3-hover-black">Reset</button></td>
-                            </tr>
-                            <tr>
-                                <td><b>numRuns</b></td>
-                                <td>Number of times to repeat the simulation (Monte Carlo experiment)</td>
-                                <td>integer</td>
-                                <td>1-100</td>
-                                <td>
-                                    <input name="numRuns" id="_numRuns_" class="w3-input w3-border" type="number" min="1" max="100" value="1" required></td>
-                                <td>
-                                    <button onclick="document.getElementById( '_numRuns_' ).value = '1'; return false;" class="w3-button w3-blue w3-hover-black">Reset</button></td>
-                            </tr>
-                            <tr>
-                                <td><b>rndSeed</b></td>
-                                <td>First seed to be used to initialize the pseudorandom number generator</td>
-                                <td>integer</td>
-                                <td>1-</td>
-                                <td>
-                                    <input name="rndSeed" id="_rndSeed_" class="w3-input w3-border" type="number" min="1" max="" value="1" required></td>
-                                <td>
-                                    <button onclick="document.getElementById( '_rndSeed_' ).value = '1'; return false;" class="w3-button w3-blue w3-hover-black">Reset</button></td>
-                            </tr>
+                            <?php read_config( "setting" ); ?>
                         </table>
                     </div>
                     <?php write_config( ); ?>
