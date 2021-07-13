@@ -367,7 +367,6 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
         $series_lo = $series_hi = array ( );
         foreach( $series as $var => $ts ) {
             $series_lo[ $var ] = $series_hi[ $var ] = array ( );
-            $min_pos = -1;
             for ( $i = 0; $i < $steps; ++$i ) {
                 $x = $series_se[ $var ][ $i ];
                 
@@ -376,22 +375,17 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
                     $series_hi[ $var ][ $i ] = "N/A";
                     $series_lo[ $var ][ $i ] = "N/A";
                 } else {
-                    if ( $min_pos < 0 && $ts[ $i ] > 0 ) {
-                        $min_pos = $x;
-                    }
-                    
                     $ci_range = t95cl( $mc_runs - 1 ) * $x;
                     $series_hi[ $var ][ $i ] = $ts[ $i ] + $ci_range;
                     
                     if ( ! $linear && $script === "show_plot.php" && $ts[ $i ] <= $ci_range ) {
-                        if ( $min_pos > 0 ) {
-                            $series_lo[ $var ][ $i ] = $min_pos;
-                        } else {
-                            $series_lo[ $var ][ $i ] = PHP_FLOAT_MIN;
+                        if ( isset ( $series_min[ $var ][ $i ] ) && $series_min[ $var ][ $i ] > 0 ) {
+                            $series_lo[ $var ][ $i ] = $series_min[ $var ][ $i ];
+						} else {
+                            $series_lo[ $var ][ $i ] = $ts[ $i ] / 1000;
                         }
                     } else {
                         $series_lo[ $var ][ $i ] = $ts[ $i ] - $ci_range;
-                        $min_pos = min( $min_pos, $series_lo[ $var ][ $i ] ); 
                     }
                 }
             }
