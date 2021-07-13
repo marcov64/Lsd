@@ -91,7 +91,7 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
     }
 
     // flag that task is running
-    $filename_flag = $flag_pref . "run-" . $session_short_id . ".flag";
+    $filename_flag = $flag_pref . "run-" . $session_short_id . sprintf( "-%02u%02u%02u", getdate( )[ "hours" ], getdate( )[ "minutes" ], getdate( )[ "seconds" ] ) . ".flag";
     touch( $filename_flag );
 
     // make sure the .abort semaphore file doesn't exist
