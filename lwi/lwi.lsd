@@ -133,7 +133,7 @@ Var: Fission 0 n + n n
 Var: s 1 n + n n	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625	0.0625
 Var: Inn_mean 0 n + n n
 
-SIM_NUM 1
+SIM_NUM 10
 SEED 1
 MAX_STEP 1000
 EQUATION fun_nw04.cpp
@@ -332,7 +332,8 @@ END_DESCRIPTION
 
 Parameter_Fiss
 Probability of fission
-sincefiss * ms is lambda in a Poisson distribution
+since
+fiss * ms is lambda in a Poisson distribution
 that determines whether fission takes place
 'Fiss' appears in the equation for: Fission.
 _INIT_

@@ -302,7 +302,7 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
             for ( $i = $first; $i < $last; ++$i ) {
                 $x = $ts[ $i ];
                 
-                if ( $x == "N/A" || ! is_finite( $x ) ) {
+                if ( ! is_float( $x ) || ! is_finite( $x ) ) {
                     continue;
                 }
                 
@@ -344,7 +344,7 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
                 for ( $i = $first; $i < $last; ++$i ) {
                     $x = $ts[ $i ];
                     
-                    if ( $x == "N/A" || ! is_finite( $x ) ) {
+                    if ( ! is_float( $x ) || ! is_finite( $x ) ) {
                         continue;
                     }
                     
@@ -363,20 +363,36 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
 
     // compute confidence bands
     if ( $script === "show_plot.php" && isset ( $series_se ) ) {
-        
+
         $series_lo = $series_hi = array ( );
         foreach( $series as $var => $ts ) {
             $series_lo[ $var ] = $series_hi[ $var ] = array ( );
+            $min_pos = -1;
             for ( $i = 0; $i < $steps; ++$i ) {
                 $x = $series_se[ $var ][ $i ];
-
-                if ( $x == "N/A" || ! is_finite( $x ) ) {
-                    $series_lo[ $var ][ $i ] = "N/A";
+                
+                if ( ! is_float( $x ) || ! is_finite( $x ) || 
+                     ! is_float( $ts[ $i ] ) || ! is_finite( $ts[ $i ] ) ) {
                     $series_hi[ $var ][ $i ] = "N/A";
+                    $series_lo[ $var ][ $i ] = "N/A";
                 } else {
+                    if ( $min_pos < 0 && $ts[ $i ] > 0 ) {
+                        $min_pos = $x;
+                    }
+                    
                     $ci_range = t95cl( $mc_runs - 1 ) * $x;
-                    $series_lo[ $var ][ $i ] = $ts[ $i ] - $ci_range;
                     $series_hi[ $var ][ $i ] = $ts[ $i ] + $ci_range;
+                    
+                    if ( ! $linear && $script === "show_plot.php" && $ts[ $i ] <= $ci_range ) {
+                        if ( $min_pos > 0 ) {
+                            $series_lo[ $var ][ $i ] = $min_pos;
+                        } else {
+                            $series_lo[ $var ][ $i ] = PHP_FLOAT_MIN;
+                        }
+                    } else {
+                        $series_lo[ $var ][ $i ] = $ts[ $i ] - $ci_range;
+                        $min_pos = min( $min_pos, $series_lo[ $var ][ $i ] ); 
+                    }
                 }
             }
         }

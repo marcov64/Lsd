@@ -295,7 +295,7 @@ int lsdmain( int argn, char **argv )
 			{
 				me( j, k ) = sum / n;
 				me( j, k ) = fabs( me( j, k ) ) > 2 * DBL_MIN ? me( j, k ) : 0;
-				se( j, k ) = ( sumsq / n - pow( me( j, k ), 2 ) ) / sqrt( n );
+				se( j, k ) = sqrt( ( n * sumsq - pow( sum, 2 ) ) / ( n * ( n - 1 ) ) ) / sqrt( n );
 				se( j, k ) = fabs( se( j, k ) ) > 2 * DBL_MIN ? se( j, k ) : 0;
 				mx( j, k ) = fabs( maxv ) > 2 * DBL_MIN ? maxv : 0;
 				mn( j, k ) = fabs( minv ) > 2 * DBL_MIN ? minv : 0;
