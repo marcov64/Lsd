@@ -25,5 +25,5 @@ array_map( 'unlink', glob( $output_pref . "*-" . $session_short_id . "*.*" ) );
 array_map( 'unlink', glob( $config_pref . "*-" . $session_short_id . "*.*" ) );
 
 // reset the session
-session_start( );
+session_start( [ 'cookie_lifetime' => 86400, 'cookie_secure' => true, 'cookie_samesite' => "None" ] );
 session_regenerate_id( );

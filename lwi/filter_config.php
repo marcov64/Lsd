@@ -25,14 +25,14 @@ class config_class {
 function filter_config( $config ) {
     
     // open and close session as fast as possible
-    //session_start( );
+    //session_start( [ 'cookie_lifetime' => 86400, 'cookie_secure' => true, 'cookie_samesite' => "None" ] );
     //$config_init = $_SESSION[ "config_init" ];
     //session_write_close( );
 
     // dirty solution to avoid always blocking behavior
     if ( ! session_readonly( ) ) {
         // workaround of workaround for Mac servers
-        session_start( );
+        session_start( [ 'cookie_lifetime' => 86400, 'cookie_secure' => true, 'cookie_samesite' => "None" ] );
         session_write_close( );
     }
     $config_init = $_SESSION[ "config_init" ];

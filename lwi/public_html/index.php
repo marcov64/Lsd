@@ -25,7 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <link rel="icon" href="favicon.ico">
         <link rel="stylesheet" href="w3.css">
         <link rel="stylesheet" href="lwi.css">
-        <!-- PHP & JS functions -->
+		<!-- trick to prevent FF blinking -->
+		<script>/**/</script>
         <?php 
             check_config( );
         ?>
@@ -33,6 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <script defer="true" src="script.js"></script>
         <noscript>Error: Javascript scripting is disabled</noscript>
     </head>
+	
     <body onload="check_html5( )">
         <div id="blackout"></div>
         <!-- Sidebar/menu -->
@@ -224,7 +226,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                             <h3 class="w3-opacity">MC plot bands</h3>
                                             <div class="w3-container">
                                                 <div class="w3-section">
-                                                    <input class="w3-check" type="checkbox" name="_CI_" id="_CI_" value="1" checked>
+                                                    <input class="w3-check" type="checkbox" name="_CI_" id="_CI_" value="1">
                                                     <label>Confidence</label>
                                                 </div>
                                                 <div class="w3-section">

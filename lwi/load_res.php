@@ -301,15 +301,19 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
             $ma = -INF;
             for ( $i = $first; $i < $last; ++$i ) {
                 $x = $ts[ $i ];
-                if ( $x == "N/A" ) {
+                
+                if ( $x == "N/A" || ! is_finite( $x ) ) {
                     continue;
                 }
+                
                 ++$n;
                 $sum += $x;
                 $sqsum += $x * $x;
+                
                 if ( $x < $mi ) {
                     $mi = $x;
                 }
+                
                 if ( $x > $ma ) {
                     $ma = $x;
                 }
@@ -339,9 +343,11 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
                 $n = $sum = 0;
                 for ( $i = $first; $i < $last; ++$i ) {
                     $x = $ts[ $i ];
-                    if ( $x == "N/A" ) {
+                    
+                    if ( $x == "N/A" || ! is_finite( $x ) ) {
                         continue;
                     }
+                    
                     ++$n;
                     $sum += $x;
                 }
@@ -362,9 +368,16 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
         foreach( $series as $var => $ts ) {
             $series_lo[ $var ] = $series_hi[ $var ] = array ( );
             for ( $i = 0; $i < $steps; ++$i ) {
-                $ci_range = t95cl( $mc_runs - 1 ) * $series_se[ $var ][ $i ];
-                $series_lo[ $var ][ $i ] = $ts[ $i ] - $ci_range;
-                $series_hi[ $var ][ $i ] = $ts[ $i ] + $ci_range;
+                $x = $series_se[ $var ][ $i ];
+
+                if ( $x == "N/A" || ! is_finite( $x ) ) {
+                    $series_lo[ $var ][ $i ] = "N/A";
+                    $series_hi[ $var ][ $i ] = "N/A";
+                } else {
+                    $ci_range = t95cl( $mc_runs - 1 ) * $x;
+                    $series_lo[ $var ][ $i ] = $ts[ $i ] - $ci_range;
+                    $series_hi[ $var ][ $i ] = $ts[ $i ] + $ci_range;
+                }
             }
         }
     }
