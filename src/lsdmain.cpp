@@ -61,6 +61,7 @@ bool error_hard_thread;		// flag to error_hard() called in worker thread
 bool fast;					// safe copy of fast_mode flag
 bool log_ok = false;		// control for log window available
 bool message_logged = false;// new message posted in log window
+bool meta_par_in[ META_PAR_NUM ];// flag meta parameter for simulation settings found
 bool no_more_memory = false;// memory overflow when setting data save structure	
 bool no_saved = true;		// disable the usage of saved values as lagged ones
 bool no_search;				// disable the standard variable search mechanism

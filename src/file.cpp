@@ -1113,14 +1113,19 @@ void get_saved( object *n, FILE *out, const char *sep, bool all_var )
 /****************************************************
 GET_SA_LIMITS
 ****************************************************/
+const char *meta_par_name[ META_PAR_NUM ] = META_PAR_NAME;
+
 void get_sa_limits( object *r, FILE *out, const char *sep )
 {
 	int i, sl;
-	char *lab;
+	char *lab, type[ 10 ];
 	variable *cv;
 	description *cd;
 	sense *cs;
 	
+	for ( i = 0; i < META_PAR_NUM; ++i )
+		meta_par_in[ i ] = false;
+
 	for ( cs = rsense; cs != NULL; cs = cs->next )
 	{
 		// get current value (first object)
@@ -1151,8 +1156,24 @@ void get_sa_limits( object *r, FILE *out, const char *sep )
 			else
 				if ( cs->v[ i ] > max )
 					max = cs->v[ i ];
+					
+		// check meta-parameters
+		if ( cs->param == 1 )
+		{
+			strcpy( type, "parameter" );
+			
+			for ( i = 0; i < META_PAR_NUM; ++i )
+				if ( ! strcmp( cs->label, meta_par_name[ i ] ) )
+				{
+					strcpy( type, "setting" );
+					meta_par_in[ i ] = true;
+					break;
+				}
+		}
+		else
+			strcpy( type, "variable" );
 
-		fprintf( out, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s\"%s\"\n", cs->label, sep, cs->param == 1 ? "parameter" : "variable", sep, cs->param == 1 ? 0 : cs->lag + 1, sep, cs->integer ? "integer" : "real", sep, cv != NULL ? cv->val[ cs->lag ] : NAN, sep, min, sep, max, sep, lab != NULL ? lab : "" );	
+		fprintf( out, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s\"%s\"\n", cs->label, sep, type, sep, cs->param == 1 ? 0 : cs->lag + 1, sep, cs->integer ? "integer" : "real", sep, cv != NULL ? cv->val[ cs->lag ] : NAN, sep, min, sep, max, sep, lab != NULL ? lab : "" );	
 		
 		delete [ ] lab;
 	}

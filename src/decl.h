@@ -72,6 +72,10 @@ Relevant flags (when defined):
 #define BEG_INIT "_INIT_"				// initial values description section begin keyword
 #define END_DESCR "END_DESCRIPTION"		// description section end keyword
 
+// define meta-parameter names for LWI getlimits
+#define META_PAR_NUM 3
+#define META_PAR_NAME { "_timeSteps_", "_numRuns_", "_rndSeed_" }
+
 // define PI for C++11
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
@@ -407,6 +411,7 @@ extern bool ignore_eq_file;		// control of configuration files equation updating
 extern bool iniShowOnce;		// prevent repeating warning on # of columns
 extern bool log_ok;				// control for log window available
 extern bool message_logged;		// new message posted in log window
+extern bool meta_par_in[ ];		// flag meta variables for simulation settings found
 extern bool non_var;			// flag to indicate INTERACT macro condition
 extern bool on_bar;				// flag to indicate bar is being draw in log window
 extern bool redrawRoot;			// control for redrawing root window (.)

@@ -26,6 +26,7 @@ Lists all variables being saved in a configuration.
 
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
 bool message_logged = false;// new message posted in log window
+bool meta_par_in[ META_PAR_NUM ];// flag meta parameter for simulation settings found
 bool no_more_memory = false;// memory overflow when setting data save structure
 bool no_ptr_chk = false;	// disable user pointer checking
 bool no_saved = true;		// disable the usage of saved values as lagged ones
