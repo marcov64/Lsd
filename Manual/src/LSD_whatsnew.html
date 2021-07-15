@@ -15,16 +15,16 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>77</o:Revision>
-  <o:TotalTime>947</o:TotalTime>
+  <o:Revision>78</o:Revision>
+  <o:TotalTime>961</o:TotalTime>
   <o:Created>2018-04-14T19:11:00Z</o:Created>
-  <o:LastSaved>2021-04-24T23:34:00Z</o:LastSaved>
+  <o:LastSaved>2021-07-15T19:04:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>3611</o:Words>
-  <o:Characters>19501</o:Characters>
-  <o:Lines>162</o:Lines>
-  <o:Paragraphs>46</o:Paragraphs>
-  <o:CharactersWithSpaces>23066</o:CharactersWithSpaces>
+  <o:Words>3688</o:Words>
+  <o:Characters>19918</o:Characters>
+  <o:Lines>165</o:Lines>
+  <o:Paragraphs>47</o:Paragraphs>
+  <o:CharactersWithSpaces>23559</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -753,8 +753,7 @@ p.MsoTitle, li.MsoTitle, div.MsoTitle
 	color:#254061;
 	font-weight:bold;}
 a:link, span.MsoHyperlink
-	{mso-style-noshow:yes;
-	mso-style-priority:99;
+	{mso-style-priority:99;
 	color:blue;
 	text-decoration:underline;
 	text-underline:single;}
@@ -1370,7 +1369,7 @@ break-word'>
 in LSD<o:p></o:p></span></p>
 
 <h1><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-US'>Version 8.0 (May 2021)<o:p></o:p></span></h1>
+mso-ansi-language:EN-US'>Version 8.0 (September 2021)<o:p></o:p></span></h1>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The version
 introduces an improved user interface and other improvements:<o:p></o:p></span></p>
@@ -1382,13 +1381,14 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>Interface themes</span></b><span lang=EN-US style='mso-ansi-language:
-EN-US'>. LSD interface may now be configured according to many predefined themes,
-including dark ones. This provides a refresh on the classic LSD interface while
-allowing the customization of LSD appearance to the needs of different users,
-monitors and platforms. The desired theme may be chosen in LMM </span><span
-class=Cdigo><a href="LMM.html#options"><span lang=EN-US style='mso-ansi-language:
-EN-US'>File&gt;Options</span></a></span><span lang=EN-US style='mso-ansi-language:
-EN-US'> menu and it will be applied the next time LMM or LSD Browser is open.<o:p></o:p></span></p>
+EN-US'>. LSD interface may now be configured according to many predefined
+themes, including dark ones. This provides a refresh on the classic LSD
+interface while allowing the customization of LSD appearance to the needs of
+different users, monitors and platforms. The desired theme may be chosen in LMM
+</span><span class=Cdigo><a href="LMM.html#options"><span lang=EN-US
+style='mso-ansi-language:EN-US'>File&gt;Options</span></a></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> menu and it will be applied the
+next time LMM or LSD Browser is open.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1466,14 +1466,32 @@ lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-fon
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
+EN-US'>Parallel batch execution of multi-run simulations.</span></b><span
+lang=EN-US style='mso-ansi-language:EN-US'> When <a href="menurun.html#batch">executing
+a ‘No Window’ batch</a> of a model with a <a href="menurun.html#simsetting">number
+of simulation runs</a> larger than one, LSD will automatically offer to execute
+the runs in parallel, using up to the number of available (virtual) cores. This
+feature is also available when using the <a href="LMM.html#nowindow">command-line
+version of the model</a> (</span><span class=SpellE><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>lsdNW</span></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> option </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>-c</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>).<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>Improved data aggregation Macros</span></b><span lang=EN-US
 style='mso-ansi-language:EN-US'>. All Macros performing computations over
 multiple Object instances may now operate conditionally, allowing for much
 finer control of data aggregation (see for instance </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'><a href="LSD_macros.html#SUM">SUM_CND(…)</a></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> for details). Any Variable or Parameter
-contained in an Object instance may be used to control its inclusion in
-aggregated statistics, including lagged values.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> for details). Any Variable or
+Parameter contained in an Object instance may be used to control its inclusion
+in aggregated statistics, including lagged values.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1537,8 +1555,8 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>Support for true random number generator</span></b><span lang=EN-US
-style='mso-ansi-language:EN-US'>. If the hardware offers a truly random,
-non-deterministic random number generator, LSD can use it to all available <a
+style='mso-ansi-language:EN-US'>. If the hardware offers a truly random, non-deterministic
+random number generator, LSD can use it to all available <a
 href="LSD_macros.html#randomdraw">random draw types</a>. This is NOT the
 default simulation configuration, however, the Macro </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'><a
@@ -1592,7 +1610,7 @@ lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-fon
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
-EN-US'>Fully formed Windows executables</span></b><span lang=EN-US
+EN-US'>Fully-formed Windows executables</span></b><span lang=EN-US
 style='mso-ansi-language:EN-US'>. LSD executables in Windows can now run on any
 location in the computer storage, given <span class=SpellE>Tcl</span>/Tk and
 GCC (from MSYS2 or Cygwin) are included in the PATH variable. This was already
@@ -1651,11 +1669,11 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'><a href="browser.html#updating">Variable update</a> time control.</span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'> LSD Variables can now be updated/recomputed
-under arbitrary time schemes, deterministic or random. The modeler can now
-configure update periods larger than 1, including an initial “sleep” for any
-Variable. Both period and initial times can be set as a fixed number or a
-uniform random draw from a modeler-defined range.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> LSD Variables can now be
+updated/recomputed under arbitrary time schemes, deterministic or random. The
+modeler can now configure update periods larger than 1, including an initial
+“sleep” for any Variable. Both period and initial times can be set as a fixed
+number or a uniform random draw from a modeler-defined range.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1727,9 +1745,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>Model structure size control.</span></b><span lang=EN-US
 style='mso-ansi-language:EN-US'> The graphical model representation in the <a
-href="graphrep.html">LSD Model Structure</a> window can have the space
-distribution of the Objects finely controlled, including an automatic fit
-option.<o:p></o:p></span></p>
+href="graphrep.html">LSD Model Structure</a> window can have the space distribution
+of the Objects finely controlled, including an automatic fit option.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1893,9 +1910,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
 lang=EN-US style='mso-ansi-language:EN-US'><a href="LSD_macros.html#eigen">Eigen
 library</a>.</span></b><span lang=EN-US style='mso-ansi-language:EN-US'> A
-powerful library for executing linear algebra in Equations code, including native
-C++ support to matrix and vector containers, numerical solvers, and related
-algorithms.<o:p></o:p></span></p>
+powerful library for executing linear algebra in Equations code, including
+native C++ support to matrix and vector containers, numerical solvers, and
+related algorithms.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -1976,8 +1993,8 @@ lang=EN-US style='mso-ansi-language:EN-US'>NO_SEARCH</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>/</span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>USE_SEARCH</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>). New <a
-href="LSD_macros.html#DEBUG">debug-control macros</a> allow finer control of the
-LSD Debugger activation and log file creation. Please refer to the <a
+href="LSD_macros.html#DEBUG">debug-control macros</a> allow finer control of
+the LSD Debugger activation and log file creation. Please refer to the <a
 href="LSD_macros.html">LSD Macros</a> documentation.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
@@ -2060,10 +2077,10 @@ other small improvements and bug fixes.<o:p></o:p></span></p>
 <h1><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Version 7.0 (Apr 2018)<o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The new version
-maintains the compatibility with all the models built with previous versions of
-LSD (some optimizations require C++11 and </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>fun_head_fast.h</span></span></span><span
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The new
+version maintains the compatibility with all the models built with previous
+versions of LSD (some optimizations require C++11 and </span><span
+class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>fun_head_fast.h</span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>). Main changes:<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -2139,10 +2156,10 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>Renewed graphical interface.</span></b><span lang=EN-US
-style='mso-ansi-language:EN-US'> New button bars. New context menus (right-clicks
-on lists). Automatic windows positioning. Fully hierarchical window system
-management (properly block of unavailable windows and buttons etc.).
-System-wide consistent windows decorations, buttons and organization.
+style='mso-ansi-language:EN-US'> New button bars. New context menus
+(right-clicks on lists). Automatic windows positioning. Fully hierarchical
+window system management (properly block of unavailable windows and buttons
+etc.). System-wide consistent windows decorations, buttons and organization.
 In-session persistent windows sizes. Unnecessary window redraws eliminated.
 Faster debugger interface. Easy to change defaults (</span><span class=SpellE><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>windows.tcl</span></span></span><span
@@ -2212,8 +2229,8 @@ EN-US'>New unsaved configuration indicator.</span></b><span lang=EN-US
 style='mso-ansi-language:EN-US'> All LSD windows now show configuration name
 and save status (‘</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>*</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>’ in
-title bar when unsaved changes are present). Unsaved changes warning dialog in all
-potential data loss situations.<o:p></o:p></span></p>
+title bar when unsaved changes are present). Unsaved changes warning dialog in
+all potential data loss situations.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -2391,9 +2408,9 @@ of small bug fixes and improvements.<o:p></o:p></span></p>
 <h1><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Version 6.4 (Nov 2015)<o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The new version
-maintains the compatibility with all the models built with previous versions of
-LSD. There are several improvements:<o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The new
+version maintains the compatibility with all the models built with previous
+versions of LSD. There are several improvements:<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span

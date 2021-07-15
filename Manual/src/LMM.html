@@ -24,16 +24,16 @@ w\:* {behavior:url(#default#VML);}
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>30</o:Revision>
-  <o:TotalTime>192</o:TotalTime>
+  <o:Revision>33</o:Revision>
+  <o:TotalTime>213</o:TotalTime>
   <o:Created>2018-04-14T18:32:00Z</o:Created>
-  <o:LastSaved>2021-06-14T23:15:00Z</o:LastSaved>
+  <o:LastSaved>2021-07-15T19:37:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>8330</o:Words>
-  <o:Characters>44984</o:Characters>
-  <o:Lines>374</o:Lines>
+  <o:Words>8366</o:Words>
+  <o:Characters>45177</o:Characters>
+  <o:Lines>376</o:Lines>
   <o:Paragraphs>106</o:Paragraphs>
-  <o:CharactersWithSpaces>53208</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>53437</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -43,7 +43,6 @@ target="LMM_arquivos/props008.xml">
 <link rel=colorSchemeMapping href="LMM_arquivos/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
-  <w:Zoom>110</w:Zoom>
   <w:SpellingState>Clean</w:SpellingState>
   <w:GrammarState>Clean</w:GrammarState>
   <w:TrackMoves>false</w:TrackMoves>
@@ -669,7 +668,7 @@ target="LMM_arquivos/props008.xml">
 	mso-font-charset:0;
 	mso-generic-font-family:roman;
 	mso-font-pitch:variable;
-	mso-font-signature:3 0 0 0 1 0;}
+	mso-font-signature:-536869121 1107305727 33554432 0 415 0;}
 @font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;
@@ -3360,10 +3359,11 @@ or multiple configurations. <o:p></o:p></span></p>
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The first
 setup uses a single configuration file possibly executing many <span
 class=GramE>simulation</span> runs under different pseudo-random generator
-seeds. The terminal command line (for a configuration named </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>XXXXX</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> and the current directory set to
-the model home) is:<o:p></o:p></span></p>
+seeds, sequentially (the default) or in parallel. The terminal command line
+(for a configuration named </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>XXXXX</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> and the current directory set to the model
+home) is:<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Windows:</span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'> <span
@@ -3473,10 +3473,15 @@ style='mso-ansi-language:EN-US'>-z</span></b></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>: disable the generation of compressed (</span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.<span
 class=SpellE>gz</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'>) result file(s), which produces larger (.res<span class=GramE>, .tot</span>,
-.csv) files that can be directly open in text editors and imported in legacy
-software which does not support smaller/faster compressed files (like some
-statistical packages)<o:p></o:p></span></p>
+EN-US'>) result file(s), which produces larger (</span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>.res</span></span><span class=GramE><span
+lang=EN-US style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>.tot</span></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>.csv</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>) files that can be directly open in text
+editors and imported in legacy software which does not support smaller/faster
+compressed files (like some statistical packages)<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l2 level1 lfo10'><![if !supportLists]><span
@@ -3484,7 +3489,7 @@ lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-fon
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
-style='mso-ansi-language:EN-US'>-</span>b</b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>-b</span></b></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>: display a text progress bar showing the
 percentage of time steps completed on the standard output while simulation is
 running<o:p></o:p></span></p>
@@ -3495,11 +3500,16 @@ lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-fon
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
-style='mso-ansi-language:EN-US'>-c MAX_CORES</span></b></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>: define the maximum number of CPU (virtual)
-cores to use, replacing the default of using all the available cores. Do not
-use a number larger than the real number of (virtual) cores of the computer, as
-this will slow down <span class=GramE>processing</span><o:p></o:p></span></p>
+style='mso-ansi-language:EN-US'>-c MAX_THREADS[:MAX_RUNS]</span></b></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>: define the maximum number of parallel
+threads to use by each simulation run, replacing the default of using one
+thread per available (virtual) core. It is also possible to define a maximum
+number of simultaneous parallel runs, other that the default (one). Do not use
+a number </span><span class=Cdigo><b><span lang=EN-US style='mso-ansi-language:
+EN-US'>MAX_THREADS</span></b></span> x <span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>MAX_RUNS</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> larger than the real number of (virtual) cores
+of the computer, as this will just slow down processing.<o:p></o:p></span></p>
 
 <h2><a name="_Model_Info"></a><span lang=EN-US style='mso-fareast-font-family:
 "Times New Roman";mso-ansi-language:EN-US'>Model Info <o:p></o:p></span></h2>
@@ -3588,8 +3598,8 @@ part of description text is automatically shown by the <a
 href="LSD_windows.html#modelbrowser">LSD Model Browser</a> and open when a
 model is loaded in LMM, it is important to have at least the basic model
 information included in the beginning of this document. Modelers are also
-encouraged to include details about how to set-up and experiment with the model,
-including a self-explanatory list of the available <a
+encouraged to include details about how to set-up and experiment with the
+model, including a self-explanatory list of the available <a
 href="LSD_faqs.html#modelsetting">model configuration files</a>.<o:p></o:p></span></p>
 
 <h2><a name=eqution></a><a name="_Show_Equations"></a><span lang=EN-US
@@ -3824,14 +3834,14 @@ model. Each of the required entries is described in the table below. <o:p></o:p>
   <td style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Any
   optional </span><a href="LSD_faqs.html#compiler"><span lang=EN-US
-  style='mso-ansi-language:EN-US'>compiler</span></a><span style='mso-ansi-language:
-  EN-US'> <span lang=EN-US>switch can be added to this entry. The default </span></span><span
-  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>-ggdb3</span></span><span
-  lang=EN-US style='mso-ansi-language:EN-US'> option includes full (external)
-  debugging information. The default </span><span class=Cdigo><span lang=EN-US
-  style='mso-ansi-language:EN-US'>-O0</span></span><span lang=EN-US
-  style='mso-ansi-language:EN-US'> prevents code optimization to ensure a
-  better debugging experience. Options </span><span class=Cdigo><span
+  style='mso-ansi-language:EN-US'>compiler</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> switch can be added to this entry. The
+  default </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>-ggdb3</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> option
+  includes full (external) debugging information. The default </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>-O0</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'> prevents code optimization to
+  ensure a better debugging experience. Options </span><span class=Cdigo><span
   lang=EN-US style='mso-ansi-language:EN-US'>-O3</span></span><span lang=EN-US
   style='mso-ansi-language:EN-US'> turns on full compiler optimization, slowing
   down compiler speed but generating faster code. See the documentation for the
@@ -3859,9 +3869,9 @@ model. Each of the required entries is described in the table below. <o:p></o:p>
 </div>
 
 <p class=MsoNormal><span lang=EN-US style='color:white;mso-color-alt:windowtext;
-mso-ansi-language:EN-US'>Other than manually modifying the model option
-entries, the dialog box offers options for quickly modify the configuration:</span><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+mso-ansi-language:EN-US'>Other than manually modi</span><span lang=EN-US
+style='mso-ansi-language:EN-US'>fying the model option entries, the dialog box
+offers options for quickly modify the configuration:<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt;mso-list:l0 level1 lfo4'><![if !supportLists]><span
@@ -4361,15 +4371,15 @@ lang=EN-US style='mso-ansi-language:EN-US'>: click the on the white window with
 a down green arrow icon on the tool bar.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>When this
-toggle option is on (ticked), the <a href="#editor">LMM window</a> is automatically
-minimized after a successful <a href="LSD_faqs.html#compiler">compilation</a>
+toggle option is on (ticked), the <a href="#editor">LMM window</a> is
+automatically minimized after a successful <a href="LSD_faqs.html#compiler">compilation</a>
 while executing the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'><a href="#_Compile_and_Run"><span style='color:gray;text-decoration:
 none;text-underline:none'>Model&gt;Compile and Run</span></a></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> menu option (or the equivalent shortcuts).
-This way, the <a href="LSD_faqs.html#modelprogram">LSD model program</a>
-windows can fully use the computer desktop space without closing LMM. LMM
-window can be easily restored using the operating system task bar (or
+lang=EN-US style='mso-ansi-language:EN-US'> menu option (or the equivalent
+shortcuts). This way, the <a href="LSD_faqs.html#modelprogram">LSD model
+program</a> windows can fully use the computer desktop space without closing
+LMM. LMM window can be easily restored using the operating system task bar (or
 equivalent).<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This is a
@@ -4392,8 +4402,8 @@ LMM <a href="#_Options">Options</a>.<a name="_Equation_Coding_Style"></a> <o:p><
 mso-ansi-language:EN-US'>Menu Help<o:p></o:p></span></h1>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The Help
-menu contains three groups of entries, the first two offering useful entry points
-to the LSD documentation: <o:p></o:p></span></p>
+menu contains three groups of entries, the first two offering useful entry
+points to the LSD documentation: <o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt;mso-list:l0 level1 lfo4'><![if !supportLists]><span
@@ -4538,8 +4548,8 @@ of a simple LSD simulation model.<o:p></o:p></span></p>
 <h2><a name="_About_LMM"></a><span lang=EN-US style='mso-fareast-font-family:
 "Times New Roman";mso-ansi-language:EN-US'>About LSD<o:p></o:p></span></h2>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Present technical
-details about LSD, the computer platform in use, the operating system<a
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Present
+technical details about LSD, the computer platform in use, the operating system<a
 name="_Hlk25529838">, the </a><span class=SpellE><span style='mso-bookmark:
 _Hlk25529838'>Tcl</span></span><span style='mso-bookmark:_Hlk25529838'>/Tk
 support libraries, and the C++ compiler in use</span>. It can be useful when

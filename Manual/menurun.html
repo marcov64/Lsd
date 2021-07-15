@@ -340,9 +340,9 @@ lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If there are multiple simulation runs
 configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
-Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation
-message (see example below), telling how the results data will be handled and
-providing some options to the user. </span></p>
+Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation message
+(see example below), telling how the results data will be handled and providing
+some options to the user. </span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=196 height=334 src="image/summary_run.png"></span></p>
@@ -443,8 +443,10 @@ lang=EN-US>, after the simulation is run, to close all the opened windows.</span
 a <a href="LSD_faqs.html#simulationrun">simulation run</a> batch in which,
 differently from the </span><span class=Cdigo><span lang=EN-US><a href="#_Run">Run&gt;Run</a></span></span><span
 lang=EN-US> command above, the simulation is directly executed by the computer
-operating system in background. Because the no-window simulation run is performed
-independently from LSD, the execution progress is not shown in the <a
+operating system in background. Batches also allow the execution of multi-run
+simulations in parallel, producing faster results by using the full
+capabilities of your computer. Because the no-window simulation run is
+performed independently from LSD, the execution progress is not shown in the <a
 href="log.html">Log</a> window and no <a href="runtime.html">Run-time Plot</a>
 window is created. This way, the user can continue to interact with LSD while
 the simulation is being executed, even to start additional no-window batches. </span></p>
@@ -466,7 +468,11 @@ confirmation message, telling how the results data will be handled and
 providing some options to the user. The confirmation dialog and the available
 options are similar to those available for the </span><span class=Cdigo><span
 lang=EN-US><a href="#_Run">Run&gt;Run</a></span></span><span lang=EN-US>
-command above.</span></p>
+command above. Additionally, the user can adjust the number of parallel
+simulation runs to perform. <span class=Cdigo><span style='font-family:"Arial",sans-serif;
+color:windowtext'>The default is the number of CPU (logical) cores of the
+computer. In general, this number should be less or equal to the number of
+(logical) cores available.</span></span></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The results are saved to LSD results and
 totals files (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
@@ -490,16 +496,16 @@ lang=EN-US>.log</span></span><span lang=EN-US> extension) is also created in
 the configuration file subdirectory. This file contains the output that is
 normally directed to the LSD Log window. Checking it the user can verify the
 status of the simulation running in background, any errors and warnings
-produced, and when the simulation execution is finished. After starting the
-background execution, LSD offers to launch the </span><span class=Cdigo><span
-lang=EN-US>tail</span></span><span lang=EN-US> application to follow up the
-simulation execution. Windows users need Cygwin or MSYS2 installed to access
-this application (see </span><span class=Cdigo><span lang=EN-US>readme.txt</span></span><span
-lang=EN-US> for installation instructions). Users can also follow up the log
-file in real time using the terminal command </span><span class=Cdigo><span
-lang=EN-US>tail -F YYYY/XXXX.log</span></span><span lang=EN-US>, where </span><span
-class=Cdigo><span lang=EN-US>YYYY</span></span><span lang=EN-US> is the
-configuration subdirectory and </span><span class=Cdigo><span lang=EN-US>XXXX</span></span><span
+produced, and when the simulation execution is finished. After starting the background
+execution, LSD offers to launch the </span><span class=Cdigo><span lang=EN-US>tail</span></span><span
+lang=EN-US> application to follow up the simulation execution. Windows users
+need Cygwin or MSYS2 installed to access this application (see </span><span
+class=Cdigo><span lang=EN-US>readme.txt</span></span><span lang=EN-US> for
+installation instructions). Users can also follow up the log file in real time
+using the terminal command </span><span class=Cdigo><span lang=EN-US>tail -F
+YYYY/XXXX.log</span></span><span lang=EN-US>, where </span><span class=Cdigo><span
+lang=EN-US>YYYY</span></span><span lang=EN-US> is the configuration
+subdirectory and </span><span class=Cdigo><span lang=EN-US>XXXX</span></span><span
 lang=EN-US> is the configuration name. For the same purpose, Windows users can
 also manually execute the utility </span><span class=Cdigo><span lang=EN-US>Tail.exe</span></span><span
 lang=EN-US>, included in the subdirectory </span><span class=Cdigo><span
@@ -517,7 +523,7 @@ lang=EN-US> <a href="LSD_faqs.html#modelsetting">configuration files</a> to be
 used for the simulation execution (see below). Differently from the </span><span
 class=Cdigo><span lang=EN-US><a href="#_Run">Run&gt;Run</a></span></span><span
 lang=EN-US> command above, the simulation runs in the batch are configured to
-be executed in parallel by the computer operating system, in background. Also
+be executed in parallel by the computer operating system, in background. Also,
 differently from </span><span class=Cdigo><span lang=EN-US><a
 href="#_Start_‘No_Window’">Run&gt;Start 'No Window' Batch</a></span></span><span
 lang=EN-US>, this command may not automatically start the created batch job.</span></p>
@@ -526,9 +532,9 @@ lang=EN-US>, this command may not automatically start the created batch job.</sp
 offers three alternatives to select which configuration files to include in the
 parallel batch job. If a set of configuration files was just created, using one
 of the <a href="menudata_sa.html">sensitivity analysis</a> sampling commands,
-it offers the possibility to automatically select this set. Other than this,
-the user may (1) select a continuous-numbered sequence of configuration files
-in the format </span><span class=Cdigo><span lang=EN-US>XXXX_NNN.lsd</span></span><span
+it offers the possibility to automatically select this set. Other than this, the
+user may (1) select a continuous-numbered sequence of configuration files in
+the format </span><span class=Cdigo><span lang=EN-US>XXXX_NNN.lsd</span></span><span
 lang=EN-US>, where </span><span class=Cdigo><span lang=EN-US>XXXX</span></span><span
 lang=EN-US> is the common configuration name and </span><span class=Cdigo><span
 lang=EN-US>NNN</span></span><span lang=EN-US> is the first sequential number to
@@ -544,17 +550,17 @@ lang=EN-US> in Linux/macOS) containing the required commands to run all the
 selected configuration files taking full advantage of the operating system
 multithreaded support. This means that multiple hardware CPU cores may be used
 in parallel, significantly accelerating the execution of multiple simulation
-runs, as in the case of sensitivity analysis processing. The batch file is saved
-to the subdirectory of the current configuration file (as indicated in the <a
-href="log.html">Log</a> window).</span></p>
+runs, as in the case of sensitivity analysis processing. The batch file is
+saved to the subdirectory of the current configuration file (as indicated in
+the <a href="log.html">Log</a> window).</span></p>
 
-<p class=MsoNormal><span lang=EN-US>The possibility of not starting processing
-the batch job immediately is important when the user can use another computer
-(typically a high-capacity server) to run the simulations. If this is the case,
-the user must copy the entire <a href="LSD_faqs.html#modelhome">model home
-directory</a> (including subdirectories) to the new machine and execute the
-created </span><span class=Cdigo><span lang=EN-US>XXXX.bat</span></span><span
-lang=EN-US> (Windows) or </span><span class=Cdigo><span lang=EN-US>XXXX.sh</span></span><span
+<p class=MsoNormal><span lang=EN-US>The possibility of not start processing the
+batch job immediately is important when the user can use another computer (typically
+a high-capacity server) to run the simulations. If this is the case, the user
+must copy the entire <a href="LSD_faqs.html#modelhome">model home directory</a>
+(including subdirectories) to the new machine and execute the created </span><span
+class=Cdigo><span lang=EN-US>XXXX.bat</span></span><span lang=EN-US> (Windows)
+or </span><span class=Cdigo><span lang=EN-US>XXXX.sh</span></span><span
 lang=EN-US> (Linux/macOS) in the same subdirectory as the selected
 configuration files. In Windows, a double click in this file on the file
 Explorer is sufficient to start the batch. In Linux/macOS the user typically
@@ -589,12 +595,11 @@ distributions), it has to be recompiled in the target machine. If the machine
 offers a graphical interface environment, the simplest way to recompile is
 simply installing LSD on it and use LMM as usual. If a graphical interface is
 not available (like in a server environment), or otherwise installing LSD is
-not possible, the no-window version may be recompiled in a terminal window.
-Move to the model home directory (</span><span class=Cdigo><span lang=EN-US>cd
-YYYY</span></span><span lang=EN-US>) and use the command </span><span
-class=Cdigo><span lang=EN-US>make -f makefileNW</span></span><span lang=EN-US>
-to recreate a proper no-window executable version (GCC and make must be
-installed in the machine).</span></p>
+not possible, the no-window version may be recompiled in a terminal window. Move
+to the model home directory (</span><span class=Cdigo><span lang=EN-US>cd YYYY</span></span><span
+lang=EN-US>) and use the command </span><span class=Cdigo><span lang=EN-US>make
+-f makefileNW</span></span><span lang=EN-US> to recreate a proper no-window
+executable version (GCC and make must be installed in the machine).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Irrespective of the number of simulation
 runs configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
@@ -656,8 +661,8 @@ model configuration does not use parallel object computation (see details <a
 href="menumodel.html">here</a>), this option has no effect.</span></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Skip generating results
 files</span></b></span><span lang=EN-US>: if enabled, LSD will not produce the
 time-series detailed </span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
@@ -687,8 +692,8 @@ compressed gzip format (indicated by the </span><span class=Cdigo><span
 lang=EN-US>.gz</span></span><span lang=EN-US> extension). Compressed files use
 far less disk space and are faster to save/load. LSD and many data analysis
 applications (like R) can read </span><span class=Cdigo><span lang=EN-US>.gz</span></span><span
-lang=EN-US> compressed files directly, without the need for the user
-uncompressing them before use.</span></p>
+lang=EN-US> compressed files directly, without the need for the user uncompressing
+them before use.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -696,8 +701,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><span class=Cdigo><b><span lang=EN-US>Comma-separated text format
 (.csv)</span></b></span><span lang=EN-US>: if checked, all produced files will
 be saved in comma-separated text format (extension </span><span class=Cdigo><span
-lang=EN-US>.csv</span></span><span lang=EN-US>), which can be imported by almost
-any data application. Please note that </span><span class=Cdigo><span
+lang=EN-US>.csv</span></span><span lang=EN-US>), which can be imported by
+almost any data application. Please note that </span><span class=Cdigo><span
 lang=EN-US>.csv</span></span><span lang=EN-US> files do not contain the same
 level of detail as native LSD </span><span class=Cdigo><span lang=EN-US>.res</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>.tot</span></span><span
@@ -731,8 +736,8 @@ the LSD Log window when running each configuration. Checking them the user can
 verify the status of the simulations running in background, any errors and
 warnings produced, and when each simulation execution is finished. After
 starting the background execution, LSD offers to launch the </span><span
-class=Cdigo><span lang=EN-US>multitail</span></span><span lang=EN-US>
-application to follow up the simulations execution. Users usually must install </span><span
+class=Cdigo><span lang=EN-US>multitail</span></span><span lang=EN-US> application
+to follow up the simulations execution. Users usually must install </span><span
 class=Cdigo><span lang=EN-US>multitail</span></span><span lang=EN-US> manually
 in their computers. Windows users also need Cygwin or MSYS2 installed to use
 this application. See </span><span class=Cdigo><span lang=EN-US>readme.txt</span></span><span
@@ -756,9 +761,9 @@ class=Cdigo><span lang=EN-US>Ctrl</span></span><span lang=EN-US> key).</span></p
 Carlo runs</span></h3>
 
 <p class=MsoNormal><span lang=EN-US>It is a good practice to perform multiple
-runs of a model including stochastic elements, or a Monte Carlo (MC)
-experiment. The standard way to do it in LSD is by simply selecting the
-adequate </span><span class=Cdigo><span lang=EN-US>Number of simulation runs</span></span><span
+runs of a model including stochastic elements, or a Monte Carlo (MC) experiment.
+The standard way to do it in LSD is by simply selecting the adequate </span><span
+class=Cdigo><span lang=EN-US>Number of simulation runs</span></span><span
 lang=EN-US> in </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
 Settings</span></span><span lang=EN-US> dialog box (see <a
 href="#_Simulation_Settings">below</a>). However, for models requiring long
@@ -794,11 +799,11 @@ make sure the </span><span class=Cdigo><span lang=EN-US>Number of simulation
 runs</span></span><span lang=EN-US> is set to 1, save it if required, right
 click on any parameter and choose </span><span class=Cdigo><span lang=EN-US>Sensitivity</span></span><span
 lang=EN-US> in the context menu. In the entry box simply type </span><span
-class=Cdigo><span lang=EN-US>=VAL:VAL@NUM%L</span></span><span lang=EN-US>,
-replacing </span><span class=Cdigo><span lang=EN-US>VAL</span></span><span
-lang=EN-US> (twice!) by the current value of the parameter and </span><span
-class=Cdigo><span lang=EN-US>NUM</span></span><span lang=EN-US> by the number
-of desired MC runs and press </span><span class=Cdigo><span lang=EN-US>OK</span></span><span
+class=Cdigo><span lang=EN-US>=VAL:VAL@NUM%L</span></span><span lang=EN-US>, replacing
+</span><span class=Cdigo><span lang=EN-US>VAL</span></span><span lang=EN-US>
+(twice!) by the current value of the parameter and </span><span class=Cdigo><span
+lang=EN-US>NUM</span></span><span lang=EN-US> by the number of desired MC runs
+and press </span><span class=Cdigo><span lang=EN-US>OK</span></span><span
 lang=EN-US>. Now select </span><span class=Cdigo><span lang=EN-US>Data&gt;Sensitivity
 Analysis&gt;Full (batch)</span></span><span lang=EN-US> so LSD produces </span><span
 class=Cdigo><span lang=EN-US>NUM</span></span><span lang=EN-US> similar </span><span
@@ -809,16 +814,16 @@ Batch</span></span><span lang=EN-US> and accept the suggestion to use the just
 created configuration files.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>In both approaches, then choose the batch
-name, select the number of desired cores to use (LSD suggests the maximum
-available in the current machine), untick </span><span class=Cdigo><span
-lang=EN-US>Native batch format</span></span><span lang=EN-US> only if creating
-the batch/script to be used in a different kind of computer (from a Windows
-computer to a Linux/macOS server or vice versa), and press OK. If the
-configurations are to be executed in the current computer now, simply accept
-when LSD ask if the script should be run. If you are creating the </span><span
-class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> files to be
-run in a Linux server, for instance, now copy the entire model folder to the
-server (including the </span><span class=Cdigo><span lang=EN-US>src</span></span><span
+name, select the number of desired cores to use (LSD suggests the maximum available
+in the current machine), untick </span><span class=Cdigo><span lang=EN-US>Native
+batch format</span></span><span lang=EN-US> only if creating the batch/script
+to be used in a different kind of computer (from a Windows computer to a
+Linux/macOS server or vice versa), and press OK. If the configurations are to
+be executed in the current computer now, simply accept when LSD ask if the
+script should be run. If you are creating the </span><span class=Cdigo><span
+lang=EN-US>.lsd</span></span><span lang=EN-US> files to be run in a Linux
+server, for instance, now copy the entire model folder to the server (including
+the </span><span class=Cdigo><span lang=EN-US>src</span></span><span
 lang=EN-US> subfolder), open a server terminal window in the copied model
 directory, recompile the LSD No Window executable (</span><span class=Cdigo><span
 lang=EN-US>make -f makefileNW</span></span><span lang=EN-US>), adjust the
@@ -829,8 +834,8 @@ class=Cdigo><span lang=EN-US>./SCRIPT.sh</span></span><span lang=EN-US>). If
 the paths in the server are not exactly the same as in the computer you
 generated the script, you may have to edit the lines 4 and 5 of the script file
 (be careful to not remove the </span><span class=Cdigo><span lang=EN-US>nice</span></span><span
-lang=EN-US> prefix to the LSD No Window executable path) or pass the correct
-paths as parameters to the script </span><span class=Cdigo><span lang=EN-US>(./SCRIPT.sh
+lang=EN-US> prefix to the LSD No Window executable path) or pass the correct paths
+as parameters to the script </span><span class=Cdigo><span lang=EN-US>(./SCRIPT.sh
 'nice /FULL-PATH-TO-EXEC/lsd_gnuNW' /FULL-PATH-TO-CONFIGS</span></span><span
 lang=EN-US>).</span></p>
 
@@ -895,13 +900,12 @@ window</a>.</span></p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Number of simulation runs</span></b></span><span
 lang=EN-US>: the number of <a href="LSD_faqs.html#simulationrun">simulation
-runs</a> to be sequentially executed. Each run uses the same initial <a
-href="LSD_faqs.html#modelsetting">model configuration</a> with unit-increasing
-seeds for the pseudo-random number generator. When scheduling a large number of
-simulation runs, or even a few for a time-demanding model, it may be preferable
-to schedule multiple </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
-lang=EN-US> configuration files to be processed in parallel (see <a
-href="#_Scheduling_Monte_Carlo">above</a>).</span></p>
+runs</a> to be executed (sequentially or in parallel). Each run uses the same
+initial <a href="LSD_faqs.html#modelsetting">model configuration</a> with
+unit-increasing seeds for the pseudo-random number generator. When scheduling a
+large number of simulation runs, or even a few for a time-demanding model, it
+may be processed faster in a ‘No Window’ batch (see <a
+href="#_Start_‘No_Window’">above</a>).</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span

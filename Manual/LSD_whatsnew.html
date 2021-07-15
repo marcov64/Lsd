@@ -94,7 +94,7 @@ div.WordSection1
 
 <p class=MsoTitle><span lang=EN-US>What’s new in LSD</span></p>
 
-<h1><span lang=EN-US>Version 8.0 (May 2021)</span></h1>
+<h1><span lang=EN-US>Version 8.0 (September 2021)</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>The version introduces an improved user
 interface and other improvements:</span></p>
@@ -162,6 +162,19 @@ lang=EN-US>Data&gt;Initial Values</span></a></span><span lang=EN-US> and </span>
 class=Cdigo><span lang=EN-US><a href="menudata_objn.html">Data&gt;Number of
 Objects</a></span></span><span lang=EN-US> windows. Interruptible progress
 boxes for slow operations.  Mouse snapping to default buttons (optional). </span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Parallel batch execution of multi-run simulations.</span></b><span
+lang=EN-US> When <a href="menurun.html#batch">executing a ‘No Window’ batch</a>
+of a model with a <a href="menurun.html#simsetting">number of simulation runs</a>
+larger than one, LSD will automatically offer to execute the runs in parallel,
+using up to the number of available (virtual) cores. This feature is also
+available when using the <a href="LMM.html#nowindow">command-line version of
+the model</a> (</span><span class=Cdigo><span lang=EN-US>lsdNW</span></span><span
+lang=EN-US> option </span><span class=Cdigo><span lang=EN-US>-c</span></span><span
+lang=EN-US>).</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -256,21 +269,21 @@ unlimited memory.</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Fully formed Windows executables</span></b><span
-lang=EN-US>. LSD executables in Windows can now run on any location in the computer
-storage, given Tcl/Tk and GCC (from MSYS2 or Cygwin) are included in the PATH
-variable. This was already the case in Linux and macOS versions.</span></p>
+</span></span><b><span lang=EN-US>Fully-formed Windows executables</span></b><span
+lang=EN-US>. LSD executables in Windows can now run on any location in the
+computer storage, given Tcl/Tk and GCC (from MSYS2 or Cygwin) are included in
+the PATH variable. This was already the case in Linux and macOS versions.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Removed support for legacy platforms.</span></b><span
-lang=EN-US> Windows 32-bit and Mac OS X (10.09 and below) are no longer supported
-by LSD. This was done because of the small base of those platforms nowadays
-(computers typically 10-year-old or more), and the possibility of adding new
-features not supported on them. Also, Tcl/Tk version 8.6 is now the minimum
-requirement in Linux. Users of these legacy platforms may still use LSD version
-7.2.</span></p>
+lang=EN-US> Windows 32-bit and Mac OS X (10.09 and below) are no longer
+supported by LSD. This was done because of the small base of those platforms
+nowadays (computers typically 10-year-old or more), and the possibility of
+adding new features not supported on them. Also, Tcl/Tk version 8.6 is now the
+minimum requirement in Linux. Users of these legacy platforms may still use LSD
+version 7.2.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -769,8 +782,8 @@ including save to disk. Revised lattice windows. New lattice color options
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New pseudorandom number generator.</span></b><span
-lang=EN-US> A new (default) Mersenne-Twister generator included (old Parks-Miler
-still available as option).</span></p>
+lang=EN-US> A new (default) Mersenne-Twister generator included (old
+Parks-Miler still available as option).</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -959,8 +972,8 @@ or amount of data to save.</span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Smoother installation and run under Linux.</span></b><span
-lang=EN-US> A number of problems of compatibility with different Linux distribution
-should be solved.</span></p>
+lang=EN-US> A number of problems of compatibility with different Linux
+distribution should be solved.</span></p>
 
 <p class=MsoListParagraph style='margin-left:35.7pt;text-indent:-17.85pt'><span
 lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

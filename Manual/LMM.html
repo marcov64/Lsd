@@ -1610,9 +1610,10 @@ run under two different setups: single or multiple configurations. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>The first setup uses a single configuration
 file possibly executing many simulation runs under different pseudo-random
-generator seeds. The terminal command line (for a configuration named </span><span
-class=Cdigo><span lang=EN-US>XXXXX</span></span><span lang=EN-US> and the
-current directory set to the model home) is:</span></p>
+generator seeds, sequentially (the default) or in parallel. The terminal
+command line (for a configuration named </span><span class=Cdigo><span
+lang=EN-US>XXXXX</span></span><span lang=EN-US> and the current directory set
+to the model home) is:</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Windows:</span><span class=Cdigo><span
 lang=EN-US> lsdNW -f XXXXX.lsd</span></span></p>
@@ -1688,33 +1689,40 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><span class=Cdigo><b><span lang=EN-US>-z</span></b></span><span
 lang=EN-US>: disable the generation of compressed (</span><span class=Cdigo><span
 lang=EN-US>.gz</span></span><span lang=EN-US>) result file(s), which produces
-larger (.res, .tot, .csv) files that can be directly open in text editors and
-imported in legacy software which does not support smaller/faster compressed
-files (like some statistical packages)</span></p>
+larger (</span><span class=Cdigo><span lang=EN-US>.res</span></span><span
+lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>.tot</span></span><span
+lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>.csv</span></span><span
+lang=EN-US>) files that can be directly open in text editors and imported in
+legacy software which does not support smaller/faster compressed files (like
+some statistical packages)</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>-</span>b</b></span><span
+</span></span><span class=Cdigo><b><span lang=EN-US>-b</span></b></span><span
 lang=EN-US>: display a text progress bar showing the percentage of time steps
 completed on the standard output while simulation is running</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>-c MAX_CORES</span></b></span><span
-lang=EN-US>: define the maximum number of CPU (virtual) cores to use, replacing
-the default of using all the available cores. Do not use a number larger than
-the real number of (virtual) cores of the computer, as this will slow down
-processing</span></p>
+</span></span><span class=Cdigo><b><span lang=EN-US>-c MAX_THREADS[:MAX_RUNS]</span></b></span><span
+lang=EN-US>: define the maximum number of parallel threads to use by each
+simulation run, replacing the default of using one thread per available
+(virtual) core. It is also possible to define a maximum number of simultaneous
+parallel runs, other that the default (one). Do not use a number </span><span
+class=Cdigo><b><span lang=EN-US>MAX_THREADS</span></b></span> x <span
+class=Cdigo><b><span lang=EN-US>MAX_RUNS</span></b></span><span lang=EN-US>
+larger than the real number of (virtual) cores of the computer, as this will
+just slow down processing.</span></p>
 
 <h2><a name="_Model_Info"></a><span lang=EN-US>Model Info </span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>:
 click the on i blue icon on the tool bar.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Show summary information about the model
-and allow the edition of the name and version: </span></p>
+<p class=MsoNormal><span lang=EN-US>Show summary information about the model and
+allow the edition of the name and version: </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
@@ -1969,13 +1977,13 @@ the table below. </span></p>
   <p class=MsoNormal><span lang=EN-US>Any optional </span><a
   href="LSD_faqs.html#compiler"><span lang=EN-US>compiler</span></a><span
   lang=EN-US> switch can be added to this entry. The default </span><span
-  class=Cdigo><span lang=EN-US>-ggdb3</span></span><span lang=EN-US> option includes
-  full (external) debugging information. The default </span><span class=Cdigo><span
-  lang=EN-US>-O0</span></span><span lang=EN-US> prevents code optimization to
-  ensure a better debugging experience. Options </span><span class=Cdigo><span
-  lang=EN-US>-O3</span></span><span lang=EN-US> turns on full compiler
-  optimization, slowing down compiler speed but generating faster code. See the
-  documentation for the GCC compiler for further options. The </span><span
+  class=Cdigo><span lang=EN-US>-ggdb3</span></span><span lang=EN-US> option
+  includes full (external) debugging information. The default </span><span
+  class=Cdigo><span lang=EN-US>-O0</span></span><span lang=EN-US> prevents code
+  optimization to ensure a better debugging experience. Options </span><span
+  class=Cdigo><span lang=EN-US>-O3</span></span><span lang=EN-US> turns on full
+  compiler optimization, slowing down compiler speed but generating faster
+  code. See the documentation for the GCC compiler for further options. The </span><span
   class=Cdigo><span lang=EN-US>Debug</span></span><span lang=EN-US> checkbox
   can be used to switch among the debug on/off states.</span></p>
   </td>
@@ -1996,9 +2004,9 @@ the table below. </span></p>
 
 </div>
 
-<p class=MsoNormal><span lang=EN-US style='color:white'>Other than manually
-modifying the </span><span lang=EN-US>model option entries, the dialog box
-offers options for quickly modify the configuration:</span></p>
+<p class=MsoNormal><span lang=EN-US style='color:white'>Other than manually </span><span
+lang=EN-US>modifying the model option entries, the dialog box offers options
+for quickly modify the configuration:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
@@ -2285,8 +2293,7 @@ installed in case of Linux computers) </span></p>
   <td width="42%" style='width:42.3%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span lang=EN-US style='color:black'>The Windows resource
   compiler.</span></p>
-  <p class=MsoNormal><span lang=EN-US style='color:black'>Only used for
-  Windows.</span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black'>Only used for Windows.</span></p>
   </td>
  </tr>
  <tr>
@@ -2316,10 +2323,10 @@ installed in case of Linux computers) </span></p>
   <p class=MsoNormal><span lang=EN-US style='color:black'>Compiler switches
   (options) to be used for all files (system and equations). Added to the </span><span
   style='color:black'><a href="#_Model_Options_1"><span lang=EN-US>model
-  specific switches</span></a></span><span lang=EN-US style='color:black'> for
-  the </span><span style='color:black'><a href="LSD_faqs.html#equationfile"><span
-  lang=EN-US>equation file(s)</span></a></span><span lang=EN-US
-  style='color:black'>.</span></p>
+  specific switches</span></a></span><span style='color:black'> <span
+  lang=EN-US>for the </span></span><span style='color:black'><a
+  href="LSD_faqs.html#equationfile"><span lang=EN-US>equation file(s)</span></a></span><span
+  lang=EN-US style='color:black'>.</span></p>
   <p class=MsoNormal><span lang=EN-US style='color:black'>Default switches
   produces code optimized for the compiling computer (executables may not run
   on older computers) and no optional (non-error) warnings.</span></p>
@@ -2361,11 +2368,11 @@ the most common problems.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>These options are used to create the make
 file used to compile the <a href="LSD_faqs.html#modelprogram">LSD model program</a>.
-Besides the <a href="LSD_faqs.html#equation">Equations</a>’ code, compiling a model
-program requires the exact name and location of several system files. This
-information is not standard on all operating systems and versions. Generally,
-the default values proposed should suit most cases, and are applied by using
-the </span><span class=Cdigo><span lang=EN-US>Default</span></span><span
+Besides the <a href="LSD_faqs.html#equation">Equations</a>’ code, compiling a
+model program requires the exact name and location of several system files.
+This information is not standard on all operating systems and versions.
+Generally, the default values proposed should suit most cases, and are applied
+by using the </span><span class=Cdigo><span lang=EN-US>Default</span></span><span
 lang=EN-US> button, which automatically detects the current operating system
 (among Windows, Linux, and macOS). The details about the compiler and the
 associated tools are described for each operating system in <a
@@ -2443,10 +2450,10 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 <p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>: </span><span
 class=Cdigo><span lang=EN-US>F1</span></span><span lang=EN-US>.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Access the <a href="#_top">LMM manual</a> (this
-document) in the configured web browser. If the browser is already open, the
-help page may show as an additional window or tab, according to the web browser
-configuration.</span></p>
+<p class=MsoNormal><span lang=EN-US>Access the <a href="#_top">LMM manual</a>
+(this document) in the configured web browser. If the browser is already open,
+the help page may show as an additional window or tab, according to the web
+browser configuration.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>From any help page you can navigate the
 entire LSD documentation using the top navigation bar.</span></p>
