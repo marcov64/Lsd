@@ -464,7 +464,8 @@ extern int findexSens;			// index to sequential sensitivity configuration filena
 extern int log_start;			// first period to start logging to file, if any
 extern int log_stop;			// last period to log to file, if any
 extern int macro;				// equations style (macros or C++) (bool)
-extern int max_threads;			// suggested maximum number of parallel threads 
+extern int max_runs;			// maximum number of parallel runs 
+extern int max_threads;			// maximum number of parallel threads per run
 extern int no_res;				// do not produce .res results files (bool)
 extern int overwConf;			// overwrite current configuration file on run (bool)
 extern int parallel_disable;	// flag to control parallel mode

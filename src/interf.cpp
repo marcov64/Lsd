@@ -3044,9 +3044,15 @@ case 1:
 		cmd( "ttk::label $T.f4.l2 -style hl.TLabel -text \"$totFile.$totExt$zipExt\"" );
 		
 		cmd( "set choice [ file exists \"%s%s$totFile.$totExt$zipExt\" ]", path, strlen( path ) > 0 ? "/" : "" );
-		cmd( "ttk::label $T.f4.l3 -text \"%s\"", *choice ? "(WARNING: totals file already exists)" : "" );
-		cmd( "pack $T.f4.l1 $T.f4.l2 $T.f4.l3" );
 
+		if ( *choice )
+		{
+			cmd( "ttk::label $T.f4.l3 -text \"\n(WARNING: totals file already exists)\"" );
+			cmd( "pack $T.f4.l1 $T.f4.l2 $T.f4.l3" );
+		}
+		else
+			cmd( "pack $T.f4.l1 $T.f4.l2" );
+			
 		add_to_tot = ( *choice ) ? add_to_tot : false;
 
 		cmd( "ttk::frame $T.f5" );
@@ -3103,12 +3109,8 @@ case 1:
 	{
 		if ( ! save_configuration( ) )
 		{
-			cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
-			if ( *choice == 2 )
-			{
-				*choice = 0;
-				break;
-			}
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY, or try to save to a different location.\"", simul_name );
+			break;
 		}
 		else
 			unsaved_change( false );	// signal no unsaved change
@@ -5402,14 +5404,14 @@ case 68:
 	cmd( "pack .s.t.l .s.t.e" );
 		
 	cmd( "ttk::frame .s.c" );
-	cmd( "ttk::label .s.c.l -justify center -text \"Number of parallel\nLSD processes\"" );
+	cmd( "ttk::label .s.c.l -justify center -text \"Number of parallel\nLSD runs\"" );
 	cmd( "ttk::spinbox .s.c.e -width 5 -from 1 -to 99 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".s.c.e insert 0 $cores" ); 
 	cmd( "ttk::label .s.c.w -justify center -text \"(a number higher than the\nnumber of processors/cores\nis not recommended)\"" );
 	cmd( "pack .s.c.l .s.c.e .s.c.w" );
 	
 	cmd( "ttk::frame .s.p" );
-	cmd( "ttk::label .s.p.l -justify center -text \"Number of threads\nper LSD process\"" );
+	cmd( "ttk::label .s.p.l -justify center -text \"Number of threads\nper LSD runs\"" );
 	cmd( "ttk::spinbox .s.p.e -width 5 -from 1 -to 99 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set threads %%P; return 1 } { %%W delete 0 end; %%W insert 0 $threads; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".s.p.e insert 0 $threads" ); 
 	cmd( "ttk::label .s.p.w -justify center -text \"(a number higher than 1\nis only useful when parallel\ncomputation is enabled)\"" );
@@ -5715,7 +5717,6 @@ case 69:
 
 	// Only ask to overwrite configuration if there are changes
 	overwConf = unsaved_change( ) ? true : false;
-
 	add_to_tot = false;
 	
 	cmd( "set simNum %d", sim_num );
@@ -5725,6 +5726,7 @@ case 69:
 	cmd( "set resExt %s", docsv ? "csv" : "res" );
 	cmd( "set totExt %s", docsv ? "csv" : "tot" );
 	cmd( "set zipExt %s", dozip ? ".gz" : "" );
+	cmd( "set cores %d", max_threads );
 
 	// confirm overwriting current configuration
 	cmd( "set b .batch" );
@@ -5771,18 +5773,33 @@ case 69:
 		cmd( "ttk::label $b.f3.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
 
 	cmd( "pack $b.f3.l $b.f3.w" );
-
+	
 	cmd( "ttk::frame $b.f4" );
 	cmd( "ttk::label $b.f4.l1 -text \"Totals file (last steps)\"" );
 	cmd( "ttk::label $b.f4.l2 -style hl.TLabel -text \"$totFile.$totExt$zipExt\"" );
 	
 	cmd( "set choice [ expr { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } ]", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
-	cmd( "ttk::label $b.f4.l3 -text \"\n\"", *choice ? "(WARNING: existing files in destination\nfolder will be overwritten)" : "" );
-	cmd( "pack $b.f4.l1 $b.f4.l2 $b.f4.l3" );
 	
-	cmd( "ttk::frame $b.f5" );
-	cmd( "ttk::checkbutton $b.f5.nores -text \"Skip generating results files\" -variable no_res" );
-	cmd( "ttk::checkbutton $b.f5.dozip -text \"Generate zipped files\" -variable dozip -command { \
+	if ( *choice )
+	{
+		cmd( "ttk::label $b.f4.l3 -justify center -text \"\n(WARNING: existing files in destination\nfolder will be overwritten)\"" );
+		cmd( "pack $b.f4.l1 $b.f4.l2 $b.f4.l3" );
+	}
+	else
+		cmd( "pack $b.f4.l1 $b.f4.l2" );
+	
+	if ( sim_num > 1 && max_threads > 1 )	// parallel runs case
+	{
+		cmd( "ttk::frame $b.f5" );
+		cmd( "ttk::label $b.f5.l -text \"Parallel runs\"" );
+		cmd( "ttk::spinbox $b.f5.e -width 5 -from 1 -to 99 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center" );
+		cmd( "$b.f5.e insert 0 $cores" ); 
+		cmd( "pack $b.f5.l $b.f5.e -side left -padx 2" );
+	}	
+
+	cmd( "ttk::frame $b.f6" );
+	cmd( "ttk::checkbutton $b.f6.nores -text \"Skip generating results files\" -variable no_res" );
+	cmd( "ttk::checkbutton $b.f6.dozip -text \"Generate zipped files\" -variable dozip -command { \
 			if $dozip { \
 				set zipExt .gz \
 			} else { \
@@ -5801,7 +5818,7 @@ case 69:
 				$b.f4.l3 configure -text \"\n\" \
 			} \
 		}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
-	cmd( "ttk::checkbutton $b.f5.docsv -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
+	cmd( "ttk::checkbutton $b.f6.docsv -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
 			if $docsv { set resExt csv; set totExt csv } { \
 				set resExt res; \
 				set totExt tot \
@@ -5819,10 +5836,13 @@ case 69:
 				$b.f4.l3 configure -text \"\n\" \
 			} \
 		}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
-	cmd( "ttk::checkbutton $b.f5.tosave -text \"Update configuration file\" -variable overwConf" );
-	cmd( "pack $b.f5.nores $b.f5.dozip $b.f5.docsv %s -anchor w", overwConf ? "$b.f5.tosave" : "" );
+	cmd( "ttk::checkbutton $b.f6.tosave -text \"Update configuration file\" -variable overwConf" );
+	cmd( "pack $b.f6.nores $b.f6.dozip $b.f6.docsv %s -anchor w", overwConf ? "$b.f6.tosave" : "" );
 	
-	cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f5 -padx 5 -pady 5" );
+	if ( sim_num > 1 && max_threads > 1 )	// parallel runs case
+		cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f5 $b.f6 -padx 5 -pady 5" );
+	else
+		cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f6 -padx 5 -pady 5" );
 		
 	cmd( "okhelpcancel $b b { set choice 1 } { LsdHelp menurun.html#batch } { set choice 2 }" );
 	
@@ -5833,17 +5853,22 @@ case 69:
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
 	
+	if ( sim_num > 1 && max_threads > 1 )	// parallel runs case
+		cmd( "set cores [ $b.f5.e get ]" );
+	
 	cmd( "destroytop .batch" );
+	
 	Tcl_UnlinkVar( inter, "no_res" );
 	Tcl_UnlinkVar( inter, "docsv" );
 	Tcl_UnlinkVar( inter, "dozip" );
 	Tcl_UnlinkVar( inter, "overwConf" );
 
 	if ( *choice == 2 )
-	{
-		*choice = 0;
 		break;
-	}
+
+	param = get_int( "cores" );
+	param = min( max( get_int( "cores" ), 1 ), max_threads );	// parallel runs
+	nature = max( max_threads / param, 1 );						// threads per run
 
 	for ( n = r; n->up != NULL; n = n->up );
 	reset_blueprint( n );			// update blueprint to consider last changes
@@ -5852,12 +5877,8 @@ case 69:
 	{
 		if ( ! save_configuration( ) )
 		{
-			cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name  );
-			if ( *choice == 2 )
-			{
-				*choice = 0;
-				break;
-			}
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY, or try to save to a different location.\"", simul_name  );
+			break;
 		}
 		else
 			unsaved_change( false );	// signal no unsaved change
@@ -5869,13 +5890,11 @@ case 69:
 	if ( strlen( path ) > 0 )
 		cmd( "cd $path" );
 
-	if ( *choice == 1 )							// Windows?
-		cmd( "catch { exec %s -f %s %s %s %s >& %s.log & }", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
-	else										// Unix
-		cmd( "catch { exec nice %s -f %s %s %s %s >& %s.log & }", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
+	cmd( "catch { exec %s -c %d:%d -f %s %s %s %s >& %s.log & }", lab, nature, param, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
 
 	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results and log files are being created in the folder:\n\n$path\n\nDo you want to launch the tail command now?\" ]" );
 	cmd( "switch $answer { yes { set choice 1 } no { set choice 0 } }" );
+	
 	if ( *choice )
 		switch( platform )
 		{

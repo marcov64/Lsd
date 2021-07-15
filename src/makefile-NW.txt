@@ -54,4 +54,6 @@ $(SRC_DIR)variab.o: $(SRC_DIR)variab.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	
 # remove compiled files
 clean:
-	$(RM) $(SRC_DIR)*.o $(FUN)$(SUFFIX_NW).o $(TARGET_NW)*
+	$(RM) $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o $(SRC_DIR)file.o $(SRC_DIR)nets.o \
+	$(SRC_DIR)object.o $(SRC_DIR)util.o $(SRC_DIR)variab.o $(FUN)$(SUFFIX_NW).o \
+	$(TARGET_NW) $(TARGET_NW).exe

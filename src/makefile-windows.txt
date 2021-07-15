@@ -84,4 +84,8 @@ $(SRC_DIR)decl.h.gch: $(SRC_DIR)decl.h $(SRC_DIR)common.h $(SRC_DIR)system_optio
 
 # remove compiled files
 clean:
-	$(RM) $(SRC_DIR)*.o $(SRC_DIR)*.gch $(FUN).o $(TARGET).exe
+	$(RM) $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o $(SRC_DIR)analysis.o $(SRC_DIR)debug.o \
+	$(SRC_DIR)draw.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o $(SRC_DIR)file.o \
+	$(SRC_DIR)interf.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)report.o \
+	$(SRC_DIR)runtime.o $(SRC_DIR)set_all.o $(SRC_DIR)show_eq.o $(SRC_DIR)util.o \
+	$(SRC_DIR)variab.o $(SRC_DIR)lsd_manifest.o $(SRC_DIR)decl.h.gch $(FUN).o $(TARGET).exe

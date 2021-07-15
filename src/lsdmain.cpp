@@ -121,7 +121,8 @@ int findexSens = 0;			// index to sequential sensitivity configuration filenames
 int log_start;				// first period to start logging to file
 int log_stop;				// last period to log to file, if any
 int macro;					// equations style (macros or C++) (bool)
-int max_threads = 1;		// maximum number of parallel threads 
+int max_runs = 1;			// maximum number of parallel runs 
+int max_threads = 1;		// maximum number of parallel threads per run
 int no_res = false;			// do not produce .res results files (bool)
 int parallel_disable = false;// flag to control parallel mode
 int platform = 0;			// OS platform (1=Linux, 2=Mac, 3=Windows)
@@ -180,7 +181,7 @@ worker *workers = NULL;		// multi-thread parallel worker data
 
 // command line strings
 const char lsdCmdMsg[ ] = "This is the No Window version of LSD.";
-const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-b' for showing a progress bar\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n";
+const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-b' for showing a progress bar\n'-c MAX_THREADS[:MAX_RUNS]' maximum number of parallel threads/runs to use\n";
 
 
 /*********************************
@@ -189,7 +190,7 @@ const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd' to run a sin
 int lsdmain( int argn, char **argv )
 {
 	char *str;
-	int i, j = 0, len;
+	int i, j = 0, k = 0, len;
 
 	path = new char[ strlen( "" ) + 1 ];
 	simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
@@ -300,7 +301,7 @@ int lsdmain( int argn, char **argv )
 			// read -c parameter : max number of cores
 			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'c' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
-				j = atoi( argv[ i + 1 ] );
+				sscanf( argv[ i + 1 ], "%d:%d", &j, &k );
 				continue;
 			}
 
@@ -338,8 +339,10 @@ int lsdmain( int argn, char **argv )
 	}
 
 #ifndef _NP_
-	if ( j > 0 && j < max_threads )
-		max_threads = j;
+	if ( k > 0 && k <= max_threads )
+		max_runs = k;
+	
+	max_threads = max( min( j, max_threads / max_runs ), 1 );
 #endif	
 
 #else 
@@ -353,7 +356,7 @@ int lsdmain( int argn, char **argv )
 		
 		if ( argv[ i ][ 0 ] != '-' || ( argv[ i ][ 1 ] != 'f' && argv[ i ][ 1 ] != 'i' && argv[ i ][ 1 ] != 'c' ) )
 		{
-			log_tcl_error( "Command line parameters", "Invalid option, available options: -i TCL_DIRECTORY / -f MODEL_NAME / -c MAX_CORES" );
+			log_tcl_error( "Command line parameters", "Invalid option, available options: -i TCL_DIRECTORY / -f MODEL_NAME / -c MAX_THREADS" );
 			myexit( 1 );
 		}
 		
@@ -375,7 +378,7 @@ int lsdmain( int argn, char **argv )
 		// read -c parameter : max number of cores
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'c' )
 		{
-			j = atoi( argv[ i + 1 ] );
+			sscanf( argv[ i + 1 ], "%d:%d", &j, &k );
 			continue;
 		}
 	}
