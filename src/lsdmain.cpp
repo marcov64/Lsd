@@ -876,6 +876,7 @@ void run( void )
 				break;
 
 				case 2:			// Fast button in Log window / f/F key in Runtime window
+				case 5:			// plot window DELETE_WINDOW button handler
 					set_fast( 1 );
 					debug_flag = false;
 					break;
@@ -898,13 +899,6 @@ void run( void )
 					set_fast( 0 );
 					break;
 				 
-				// plot window DELETE_WINDOW button handler
-				case 5:
-					if ( pause_run )
-						cmd( "wm title .log \"$origLogTit\"" );
-					quit = 2;
-					break;
-
 				// runtime plot events
 				case 7:  		// center button
 					center_plot( );
@@ -932,6 +926,10 @@ void run( void )
 			}
 
 			done_in = 0;
+			
+			// show run time plot if still enabled
+			if ( t == 1 && ! fast )
+				enable_plot( );
 
 			// perform scrolling if enabled
 			if ( ! pause_run )

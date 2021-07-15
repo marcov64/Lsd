@@ -288,7 +288,7 @@ proc destroytop w {
 	}
 
 	# save main windows sizes/positions
-	if { [ info exists restoreWin ] && $restoreWin && [ lsearch $wndLst $w ] >= 0 } {
+	if { [ winfo viewable $w ] && [ info exists restoreWin ] && $restoreWin && [ lsearch $wndLst $w ] >= 0 } {
 		set curGeom [ geomtosave $w ]
 
 		if { $curGeom != "" } {
@@ -689,7 +689,7 @@ proc focustop { w1 { w2 "" } { force no } } {
 proc deiconifytop { w { force no } } {
 
 	if { $force || ! [ winfo viewable $w ] } {
-		wm deiconify $w
+		wm deiconify [ winfo toplevel $w ]
 	}
 	
 	update
