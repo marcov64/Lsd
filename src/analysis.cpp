@@ -2541,9 +2541,12 @@ while ( true )
 					if ( logs )
 						cmd( "ttk::messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
 
-					cmd( "set confi 95" );
 					cmd( "set bidi 1" );
 					cmd( "set keepSeries 0" );
+					cmd( "set confi 95" );
+					cmd( "set clList [ list ]" );
+					for ( i = 0; i < T_CLEVS; ++i )
+						cmd( "lappend clList %g", 100 * t_dist_cl[ i ] );
 
 					cmd( "newtop .da.s \"Monte Carlo Options\" { set choice 2 } .da" );
 
@@ -2554,9 +2557,9 @@ while ( true )
 					cmd( "ttk::radiobutton .da.s.i.r.m -text \"Average only\" -variable bidi -value 1 -command { .da.s.ci.p configure -state disabled }" );
 					cmd( "ttk::radiobutton .da.s.i.r.z -text \"Maximum and minimum\" -variable bidi -value 13 -command { .da.s.ci.p configure -state disabled }" );
 					cmd( "ttk::radiobutton .da.s.i.r.x -text \"Average, maximum and minimum\" -variable bidi -value 15 -command { .da.s.ci.p configure -state disabled }" );
-					cmd( "ttk::radiobutton .da.s.i.r.i -text \"Confidence interval\" -variable bidi -value 11 -command { .da.s.ci.p configure -state normal }" );
-					cmd( "ttk::radiobutton .da.s.i.r.n -text \"Average and confidence interval\" -variable bidi -value 6 -command { .da.s.ci.p configure -state normal }" );
-					cmd( "ttk::radiobutton .da.s.i.r.a -text \"All the above\" -variable bidi -value 16 -command { .da.s.ci.p configure -state normal }" );
+					cmd( "ttk::radiobutton .da.s.i.r.i -text \"Confidence interval\" -variable bidi -value 11 -command { .da.s.ci.p configure -state readonly }" );
+					cmd( "ttk::radiobutton .da.s.i.r.n -text \"Average and confidence interval\" -variable bidi -value 6 -command { .da.s.ci.p configure -state readonly }" );
+					cmd( "ttk::radiobutton .da.s.i.r.a -text \"All the above\" -variable bidi -value 16 -command { .da.s.ci.p configure -state readonly }" );
 
 					cmd( "pack .da.s.i.r.m .da.s.i.r.z .da.s.i.r.x .da.s.i.r.i .da.s.i.r.n .da.s.i.r.a -anchor w" );
 					cmd( "pack .da.s.i.l .da.s.i.r" );
@@ -2568,7 +2571,7 @@ while ( true )
 
 					cmd( "ttk::frame .da.s.ci" );
 					cmd( "ttk::label .da.s.ci.l -text \"Confidence level (%%)\"" );
-					cmd( "ttk::entry .da.s.ci.p -width 3 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 80 && $n <= 99 } { set confi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $confi; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
+					cmd( "ttk::combobox .da.s.ci.p -values $clList -width 4 -justify center -state disabled" );
 					cmd( "write_disabled .da.s.ci.p $confi" ); 
 					cmd( "pack .da.s.ci.l .da.s.ci.p" );
 					
@@ -2592,10 +2595,8 @@ while ( true )
 					while ( *choice == 0 )
 						Tcl_DoOneEvent( 0 );
 
-					cmd( "if [ string is integer [ .da.s.ci.p get ] ] { set confi [ .da.s.ci.p get ] }" ); 
+					cmd( "if [ string is double -strict [ .da.s.ci.p get ] ] { set confi [ .da.s.ci.p get ] }" ); 
 					cmd( "destroytop .da.s" );
-
-					Tcl_UnlinkVar( inter, "confi" );
 
 					if ( *choice == 2 )
 						goto add_end;
@@ -7269,9 +7270,6 @@ void histograms_cs( int *choice )
 /***************************************************
 CREATE_SERIES
 ****************************************************/
-// Confidence level  0.80      0.81      0.82      0.83      0.84      0.85      0.86      0.87      0.88      0.89      0.90      0.91      0.92      0.93      0.94      0.95       0.96      0.97      0.98      0.99
-double z_star[ ] = { 1.281552, 1.310579, 1.340755, 1.372204, 1.405072, 1.439531, 1.475791, 1.514102, 1.554774, 1.598193, 1.644854, 1.695398, 1.750686, 1.811911, 1.880794, 1.959964,  2.053749, 2.170090, 2.326348, 2.575829 };
-
 // define MC series parent names for AoR
 const char *mc_par[ ] = { "(MC)", "meanMC", "maxMC", "minMC", "varMC", "sumMC", "meanMC", "countMC", "sdMC", "prodMC", "invMC", "ci+MC", "ci-MC", "maxMC", "(MC)", "meanMC", "meanMC" };
 		
@@ -7279,8 +7277,8 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 {
 	bool first, done = true;
 	char *lapp, **str, **tag;
-	double nmax = 0, nmin = 0, nmean, nvar, nn, sum, prod, thflt, z_crit, **data;
-	int i, j, k, flt, cs_long, type_series, new_series, sel_series, confi, *start, *end, *id;
+	double nmax = 0, nmin = 0, nmean, nvar, nn, sum, prod, thflt, confi, z_crit, **data;
+	int i, j, k, flt, cs_long, type_series, new_series, sel_series, *start, *end, *id;
 	store *app;
 
 	if ( ! mc )
@@ -7300,6 +7298,9 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		cmd( "set bidi 1" );
 		cmd( "set ftag 1" );
 		cmd( "set confi 95" );
+		cmd( "set clList [ list ]" );
+		for ( i = 0; i < Z_CLEVS; ++i )
+			cmd( "lappend clList %g", 100 * z_dist_cl[ i ] );
 
 		cmd( "newtop .da.s \"New Series Options\" { set choice 2 } .da" );
 
@@ -7345,10 +7346,10 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		cmd( "ttk::radiobutton .da.s.i.r.s -text \"Standard deviation\" -variable bidi -value 8 -command { .da.s.i.r.ci.p configure -state disabled; set tailname \"_sd\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end }" );
 
 		cmd( "ttk::frame .da.s.i.r.ci" );
-		cmd( "ttk::radiobutton .da.s.i.r.ci.c -text \"Confidence interval (3 series)\" -variable bidi -value 6 -command { .da.s.i.r.ci.p configure -state normal; set tailname \"\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.ci.c -text \"Confidence interval (3 series)\" -variable bidi -value 6 -command { .da.s.i.r.ci.p configure -state readonly; set tailname \"\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end }" );
 		cmd( "ttk::label .da.s.i.r.ci.x -text @" );
 		cmd( "ttk::label .da.s.i.r.ci.perc -text %%" );
-		cmd( "ttk::spinbox .da.s.i.r.ci.p -width 5 -from 80 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 80 && $n <= 99 } { set confi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $confi; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
+		cmd( "ttk::combobox .da.s.i.r.ci.p -values $clList -width 4 -justify center -state disabled" );
 		cmd( "write_disabled .da.s.i.r.ci.p $confi" ); 
 		cmd( "pack .da.s.i.r.ci.c .da.s.i.r.ci.x .da.s.i.r.ci.p .da.s.i.r.ci.perc -side left" );
 
@@ -7386,8 +7387,8 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		while ( *choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		cmd( "if [ string is double [ .da.s.f.t.th get ] ] { set thflt [ .da.s.f.t.th get ] }" ); 
-		cmd( "if [ string is integer [ .da.s.i.r.ci.p get ] ] { set confi [ .da.s.i.r.ci.p get ] }" ); 
+		cmd( "if [ string is double -strict [ .da.s.f.t.th get ] ] { set thflt [ .da.s.f.t.th get ] }" ); 
+		cmd( "if [ string is double -strict [ .da.s.i.r.ci.p get ] ] { set confi [ .da.s.i.r.ci.p get ] }" ); 
 		cmd( "destroytop .da.s" );
 
 		if ( *choice == 2 )
@@ -7410,10 +7411,10 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		sel_series = var_names.size( );
 	}
 	
-	confi = get_int( "confi" );
+	confi = get_double( "confi" );
+	z_crit = z_star( confi );
 	type_series = get_int( "bidi" );
 	new_series = 1;
-	z_crit = 0;
 	
 	// set option specific parameters
 	switch ( type_series )
@@ -7422,17 +7423,12 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 			new_series = 3;
 			
 			// first series to produce
-			cmd( "set basename $vname; set tailname \"_avg\"; set vname $basename$tailname" );
-			
-			// get the critical value to the chosen confidence level
-			z_crit = z_star[ ( int ) max( min( confi, 99 ), 80 ) - 80 ];
-			
+			cmd( "set basename $vname; set tailname \"_avg\"; set vname $basename$tailname" );			
 			break;
 			
 		case 11:						// ci+ (11), ci- (12)
 			new_series = 2;
 			cmd( "set basename $vname; set tailname \"_ci+\"; set vname $basename$tailname" );
-			z_crit = z_star[ ( int ) max( min( confi, 99 ), 80 ) - 80 ];
 			break;
 			
 		case 13:						// max (13), min (3)
@@ -7448,7 +7444,6 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		case 16:						// avg (16), ci+ (11), ci- (12), max (2), min (3)
 			new_series = 5;
 			cmd( "set basename $vname; set tailname \"_avg\"; set vname $basename$tailname" );
-			z_crit = z_star[ ( int ) max( min( confi, 99 ), 80 ) - 80 ];
 			break;
 	}
 	
@@ -7580,8 +7575,19 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 				else
 				{
 					nmean = sum / nn;
-					nvar /= nn;
-					nvar -= nmean * nmean;
+					
+					// handle sample (MC) x population variance calculation
+					if ( mc && nn >= 2 )
+					{
+						nvar *= nn;
+						nvar -= sum * sum;
+						nvar /= nn * ( nn - 1 );
+					}
+					else
+					{
+						nvar /= nn;
+						nvar -= nmean * nmean;
+					}
 				}
 			   
 				if ( type_series == 1 || type_series == 6 || type_series == 15 || type_series == 16 )
@@ -7607,10 +7613,22 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 					else
 						vs[ num_var ].data[ i - min_c ] = NAN;
 				}
-				if ( type_series == 11 )
-					vs[ num_var ].data[ i - min_c ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
-				if ( type_series == 12 )
-					vs[ num_var ].data[ i - min_c ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
+				
+				// handle sample (MC) x population variance calculation
+				if ( mc && nn >= 2 )
+				{
+					if ( type_series == 11 )
+						vs[ num_var ].data[ i - min_c ] = nmean + t_star( nn - 1, confi ) * sqrt( nvar ) / sqrt( nn );
+					if ( type_series == 12 )
+						vs[ num_var ].data[ i - min_c ] = nmean - t_star( nn - 1, confi ) * sqrt( nvar ) / sqrt( nn );
+				}
+				else
+				{
+					if ( type_series == 11 )
+						vs[ num_var ].data[ i - min_c ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
+					if ( type_series == 12 )
+						vs[ num_var ].data[ i - min_c ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
+				}
 			}
 		} 
 		else												// compute over cases
@@ -7684,7 +7702,6 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 					vs[ num_var ].data[ j ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
 				if ( type_series == 12 )
 					vs[ num_var ].data[ j ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
-					
 			}
 		}
 

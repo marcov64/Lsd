@@ -61,6 +61,9 @@ Relevant flags (when defined):
 #define MARG 0.01						// y-axis % plot clearance margin
 #define MARG_CONST 0.1					// y-axis % plot clearance margin for constant series
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
+#define NOLH_TABS 7						// number of defined NOLH tables
+#define T_CLEVS 10						// number of defined t distribution confidence levels
+#define Z_CLEVS 7						// number of defined normal distr. confidence levels
 #define SIG_DIG 10						// number of significant digits in data files
 #define SIG_MIN 1e-100					// Minimum significant value (different than zero)
 #define CSV_SEP ","						// single char string with the .csv format separator
@@ -218,6 +221,8 @@ description *change_description( char const *lab_old, char const *lab = NULL, in
 description *search_description( const char *lab, bool add_missing = true );
 double lower_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
 double upper_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
+double t_star( int df, double cl );
+double z_star( double cl );
 double *log_data( double *data, int start, int end, int ser, const char *err_msg );
 int browse( object *r, int *choice );
 int check_label( char *l, object *r );
@@ -437,8 +442,18 @@ extern char name_rep[ ];		// documentation report file name
 extern char nonavail[ ];		// string for unavailable values
 extern char path_rep[ ];		// documentation report file path
 extern description *descr;		// model description structure
+extern double t_dist_cl[ T_CLEVS ];// t-distribution table confidence levels 
+extern double t_dist_st[ T_CLEVS ][ 36 ];// t-distribution table statistics 
+extern double z_dist_cl[ Z_CLEVS ];// normal distribution table confidence levels 
+extern double z_dist_st[ Z_CLEVS ];// normal distribution table statistics 
 extern double ymax;				// runtime plot max limit
 extern double ymin;				// runtime plot min limit
+extern int NOLH_1[ ][ 7 ];		// near-orthogonal Latin hypercube tables
+extern int NOLH_2[ ][ 11 ];
+extern int NOLH_3[ ][ 16 ];
+extern int NOLH_4[ ][ 22 ];
+extern int NOLH_5[ ][ 29 ];
+extern int NOLH_6[ ][ 100 ];
 extern int actual_steps;		// number of executed time steps
 extern int add_to_tot;			// type of totals file generated (bool)
 extern int choice_g;			// Tcl menu control variable ( structure window)
@@ -467,6 +482,7 @@ extern int wr_warn_cnt;			// invalid write operations warning counter
 extern long nodesSerial;		// network node serial number global counter
 extern map< string, profile > prof;// set of saved profiling times
 extern mt19937 mt32;			// Mersenne-Twister 32 bits generator
+extern nolh NOLH[ NOLH_TABS ];	// characteristics of NOLH tables
 extern object *blueprint;   	// LSD blueprint (effective model in use )
 extern object *currObj;			// pointer to current object in browser
 extern object *wait_delete;		// LSD object waiting for deletion

@@ -162,6 +162,7 @@ const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
 // conditional variables
 #ifndef _NW_
+#include "tables.h"
 int i_values[ 4 ];			// user temporary variables copy
 double d_values[ USER_D_VARS ];
 object *o_values[ 10 ];

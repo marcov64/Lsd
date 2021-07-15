@@ -53,7 +53,7 @@ $(TARGET).app/Contents/Info.plist
 $(SRC_DIR)lsdmain.o: $(SRC_DIR)lsdmain.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.o
 
-$(SRC_DIR)analysis.o: $(SRC_DIR)analysis.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
+$(SRC_DIR)analysis.o: $(SRC_DIR)analysis.cpp $(SRC_DIR)tables.h $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)analysis.cpp -o $(SRC_DIR)analysis.o
 
 $(SRC_DIR)debug.o: $(SRC_DIR)debug.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
@@ -86,7 +86,7 @@ $(SRC_DIR)report.o: $(SRC_DIR)report.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/I
 $(SRC_DIR)runtime.o: $(SRC_DIR)runtime.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)runtime.cpp -o $(SRC_DIR)runtime.o
 
-$(SRC_DIR)set_all.o: $(SRC_DIR)set_all.cpp $(SRC_DIR)nolh.h $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
+$(SRC_DIR)set_all.o: $(SRC_DIR)set_all.cpp $(SRC_DIR)tables.h $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)set_all.cpp -o $(SRC_DIR)set_all.o
 
 $(SRC_DIR)show_eq.o: $(SRC_DIR)show_eq.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist

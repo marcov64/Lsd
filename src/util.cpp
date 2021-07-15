@@ -1823,6 +1823,62 @@ double betacdf( double alpha, double beta, double x )
 }
 
 
+#ifndef _NW_
+
+/****************************************************
+T_STAR
+Student t distribution  statistic for given 
+degrees of freedom and confidence level (in %)
+****************************************************/
+double t_star( int df, double cl )
+{
+	int i;
+	
+	for ( i = 0; i < T_CLEVS - 1; ++i )
+		if ( cl <= 100 * t_dist_cl[ i ] )
+			break;
+	
+	if ( df <= 30 )
+		return t_dist_st[ i ][ df - 1 ];
+
+	if ( df <= 40 )
+		return t_dist_st[ i ][ 30 ];
+
+	if ( df <= 60 )
+		return t_dist_st[ i ][ 31 ];
+
+	if ( df <= 80 )
+		return t_dist_st[ i ][ 32 ];
+
+	if ( df <= 100 )
+		return t_dist_st[ i ][ 33 ];
+
+	if ( df <= 1000 )
+		return t_dist_st[ i ][ 34 ];
+
+	return t_dist_st[ i ][ 35 ];
+}
+
+
+/****************************************************
+Z_STAR
+Standard normal distribution statistic for given 
+confidence level (in %)
+****************************************************/
+double z_star( double cl )
+{
+	int i;
+	
+	for ( i = 0; i < Z_CLEVS - 1; ++i )
+		if ( cl <= 100 * z_dist_cl[ i ] )
+			break;
+	
+	return z_dist_st[ i ];
+}
+
+#endif
+
+
 /****************************************************
 IS_FINITE
 function redefinition to handle GCC standard library bugs

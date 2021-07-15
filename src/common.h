@@ -474,7 +474,18 @@ struct profile							// profiled variable object
 	unsigned int comp;
 	unsigned long long ticks;
 	
-	profile( ) { ticks = 0; comp = 0; };	// constructor
+	profile( ) { ticks = 0; comp = 0; };// constructor
+};
+
+struct nolh								// near-orthogonal Latin hypercube description
+{ 	
+	int kMin; 
+	int kMax; 
+	int n1; 
+	int n2; 
+	int loLevel; 
+	int hiLevel; 
+	int *table;
 };
 
 #ifndef _NP_
