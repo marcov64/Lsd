@@ -893,8 +893,8 @@ int browse( object *r, int *choice )
 			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( ".m add cascade -label Run -menu $w -underline 0" );
 			cmd( "$w add command -label Run -underline 0 -accelerator Ctrl+R -command { set choice 1 }" );
-			cmd( "$w add command -label \"Start 'No Window' Batch...\" -underline 0 -command { set choice 69 }" );
-			cmd( "$w add command -label \"Create/Start Parallel Batch...\" -underline 11 -command { set choice 68 }" );
+			cmd( "$w add command -label \"Parallel Run...\" -underline 0 -command { set choice 69 }" );
+			cmd( "$w add command -label \"Parallel Batch...\" -underline 9 -command { set choice 68 }" );
 			cmd( "$w add separator" );
 			cmd( "$w add command -label \"Simulation Settings...\" -underline 2 -accelerator Ctrl+M -command { set choice 22 }" );
 
@@ -1003,7 +1003,7 @@ int browse( object *r, int *choice )
 		cmd( "pack .l -fill both -expand yes" );
 	}
 
-	cmd( "settop . no { if [ string equal [ discard_change ] ok ] { exit } } no yes" );
+	cmd( "settop . no { if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } { exit } } no yes" );
 
 	main_cycle:
 	
@@ -1066,10 +1066,13 @@ int browse( object *r, int *choice )
 	cmd( "set useCurrObj yes" );	// flag to select among the current or the clicked object
 
 	*choice = choice_g = 0;
+	idle_loop = true;	
 
 	// main command loop
 	while ( ! *choice && ! choice_g )
 		Tcl_DoOneEvent( 0 );
+
+	idle_loop = false;	
 
 	// coming from the structure window
 	if ( choice_g )	
@@ -1129,6 +1132,7 @@ FILE *f;
 bridge *cb;
 object *n, *cur, *cur1, *cur2;
 variable *cv, *cv1;
+vector < string > log_files;
 result *rf;					// pointer for results files (may be zipped or not)
 sense *cs;
 description *cd;
@@ -1148,7 +1152,7 @@ switch ( *choice )
 // Exit LSD
 case 11:
 
-	if ( discard_change( ) )	// unsaved configuration changes ?
+	if ( discard_change( ) && abort_run_threads( ) )
 		myexit( 0 );
 	
 break;
@@ -2971,6 +2975,7 @@ case 1:
 	}
 
 	Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "add_to_tot", ( char * ) & add_to_tot, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
@@ -3044,24 +3049,56 @@ case 1:
 		cmd( "ttk::label $T.f4.l2 -style hl.TLabel -text \"$totFile.$totExt$zipExt\"" );
 		
 		cmd( "set choice [ file exists \"%s%s$totFile.$totExt$zipExt\" ]", path, strlen( path ) > 0 ? "/" : "" );
-
-		if ( *choice )
-		{
-			cmd( "ttk::label $T.f4.l3 -text \"\n(WARNING: totals file already exists)\"" );
-			cmd( "pack $T.f4.l1 $T.f4.l2 $T.f4.l3" );
-		}
-		else
-			cmd( "pack $T.f4.l1 $T.f4.l2" );
+		cmd( "ttk::label $T.f4.l3 -text \"%s\"", *choice ? "(WARNING: totals file already exists)" : "" );
+		cmd( "pack $T.f4.l1 $T.f4.l2 $T.f4.l3" );
 			
 		add_to_tot = ( *choice ) ? add_to_tot : false;
 
 		cmd( "ttk::frame $T.f5" );
-		cmd( "ttk::checkbutton $T.f5.a -text \"Append to existing totals file\" -variable add_to_tot -state %s", *choice ? "normal" : "disabled" );
+		cmd( "ttk::checkbutton $T.f5.a -text \"Append to existing totals file\" -variable add_to_tot -state %s", ( *choice && ! no_tot ) ? "normal" : "disabled" );
 		cmd( "ttk::checkbutton $T.f5.b -text \"Skip generating results files\" -variable no_res" );
-		cmd( "ttk::checkbutton $T.f5.c -text \"Generate zipped files\" -variable dozip -command { if $dozip { set zipExt \".gz\" } { set zipExt \"\" }; $T.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; $T.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; $T.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; if [ file exists \"%s%s$totFile.$totExt$zipExt\" ] { $T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; $T.f5.a configure -state normal } { $T.f4.l3 configure -text \"\"; $T.f5.a configure -state disabled } }", path, strlen( path ) > 0 ? "/" : "" );
-		cmd( "ttk::checkbutton $T.f5.d -text \"Comma-separated text format (.csv)\" -variable docsv -command { if $docsv { set resExt csv; set totExt csv } { set resExt res; set totExt tot }; $T.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; $T.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; $T.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; if [ file exists \"%s%s$totFile.$totExt$zipExt\" ] { $T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; $T.f5.a configure -state normal } { $T.f4.l3 configure -text \"\"; $T.f5.a configure -state disabled } }", path, strlen( path ) > 0 ? "/" : "" );
+		cmd( "ttk::checkbutton $T.f5.b1 -text \"Skip generating totals file\" -variable no_tot -command { \
+					if { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+						$T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; \
+						$T.f5.a configure -state normal \
+					} else { \
+						$T.f4.l3 configure -text \"\"; \
+						$T.f5.a configure -state disabled \
+					} \
+				}", path, strlen( path ) > 0 ? "/" : "" );
+		cmd( "ttk::checkbutton $T.f5.c -text \"Generate zipped files\" -variable dozip -command { \
+				if $dozip { set zipExt \".gz\" } { \
+					set zipExt \"\" }; \
+					$T.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
+					$T.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
+					$T.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; \
+					if { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+						$T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; \
+						$T.f5.a configure -state normal \
+					} else { \
+						$T.f4.l3 configure -text \"\"; \
+						$T.f5.a configure -state disabled \
+					} \
+				}", path, strlen( path ) > 0 ? "/" : "" );
+		cmd( "ttk::checkbutton $T.f5.d -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
+				if $docsv { \
+					set resExt csv; set totExt csv \
+				} else { \
+					set resExt res; \
+					set totExt tot }; \
+					$T.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
+					$T.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
+					$T.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; \
+					if { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+						$T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; \
+						$T.f5.a configure -state normal \
+					} else { \
+						$T.f4.l3 configure -text \"\"; \
+						$T.f5.a configure -state disabled \
+					} \
+				}", path, strlen( path ) > 0 ? "/" : "" );
 		cmd( "ttk::checkbutton $T.f5.e -text \"Update configuration file\" -variable overwConf" );
-		cmd( "pack $T.f5.a $T.f5.b $T.f5.c $T.f5.d %s -anchor w", overwConf ? "$T.f5.e" : "" );
+		cmd( "pack $T.f5.a $T.f5.b $T.f5.b1 $T.f5.c $T.f5.d %s -anchor w", overwConf ? "$T.f5.e" : "" );
 		
 		cmd( "pack $T.f1 $T.f2 $T.f3 $T.f3 $T.f4 $T.f5 -padx 5 -pady 5" );
 	}
@@ -3091,16 +3128,14 @@ case 1:
 	run:
 
 	Tcl_UnlinkVar( inter, "no_res" );
+	Tcl_UnlinkVar( inter, "no_tot" );
 	Tcl_UnlinkVar( inter, "add_to_tot" );
 	Tcl_UnlinkVar( inter, "docsv" );
 	Tcl_UnlinkVar( inter, "dozip" );
 	Tcl_UnlinkVar( inter, "overwConf" );
 
 	if ( *choice == 2 )
-	{
-		*choice = 0;
 		break;
-	}
 
 	for ( n = r; n->up != NULL; n = n->up );
 	reset_blueprint( n );			    // update blueprint to consider last changes
@@ -5304,7 +5339,7 @@ case 68:
 	{
 		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
 		{
-			cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing No Window executable file is older than the current version of the current executable.\n\nPress 'OK' to continue anyway or 'Cancel' to abort. Please recompile the model using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+			cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Old executable file\" -detail \"The existing 'No Window' executable file is older than the current executable.\n\nPress 'OK' to continue anyway or 'Cancel' to abort. Please recompile the model using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
 			if ( *choice == 2 )
 				break;
 		}
@@ -5313,7 +5348,7 @@ case 68:
 	// check if serial sensitivity configuration was just created
 	*choice = 0;
 	if ( findexSens > 0 )
-		cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Script/batch created\" -detail \"A sequential sensitivity set of configuration files was just created and can be used to create the script/batch.\n\nPress 'Yes' to confirm or 'No' to select a different set of files.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" ); 
+		cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -icon question -default yes -title \"Parallel Batch\" -message \"Configuration set available\" -detail \"A sequential sensitivity set of configuration files was just produced and can be used to create the batch.\n\nPress 'Yes' to confirm or 'No' to select a different set of files.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" ); 
 	if ( *choice == 2 )
 		break;
 	
@@ -5387,15 +5422,16 @@ case 68:
 		}
 	}
 
-	Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "natBat", ( char * ) & natBat, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+	
+	cmd( "set res2 $res" );
 	cmd( "set cores %d", max_threads );
 	cmd( "set threads 1" );
 	
-	// confirm number of cores to use
-	cmd( "set res2 $res" );
 	cmd( "newtop .s \"Parallel Batch\" { set choice 2 }" );
 
 	cmd( "ttk::frame .s.t" );
@@ -5418,11 +5454,20 @@ case 68:
 	cmd( "pack .s.p.l .s.p.e .s.p.w" );
 	
 	cmd( "ttk::frame .s.o" );
-	cmd( "ttk::checkbutton .s.o.nores -text \"Skip generating results files\" -variable no_res" );
+	cmd( "ttk::checkbutton .s.o.nores -text \"Skip generating results files\" -variable no_res -command { \
+				if { $no_res && $no_tot } { \
+					set no_tot 0 \
+				} \
+			}" );
+	cmd( "ttk::checkbutton .s.o.notot -text \"Skip generating totals files\" -variable no_tot -command { \
+				if { $no_res && $no_tot } { \
+					set no_res 0 \
+				} \
+			}" );
 	cmd( "ttk::checkbutton .s.o.n -text \"Native batch format\" -variable natBat" );
 	cmd( "ttk::checkbutton .s.o.dozip -text \"Generate zipped files\" -variable dozip" );
 	cmd( "ttk::checkbutton .s.o.docsv -text \"Comma-separated text format (.csv)\" -variable docsv" );
-	cmd( "pack .s.o.nores .s.o.n .s.o.dozip .s.o.docsv -anchor w" );
+	cmd( "pack .s.o.nores .s.o.notot .s.o.n .s.o.dozip .s.o.docsv -anchor w" );
 	
 	cmd( "pack .s.t .s.c .s.p .s.o -padx 5 -pady 5" );
 
@@ -5445,6 +5490,7 @@ case 68:
 	
 	Tcl_UnlinkVar( inter, "natBat" );
 	Tcl_UnlinkVar( inter, "no_res" );
+	Tcl_UnlinkVar( inter, "no_tot" );
 	Tcl_UnlinkVar( inter, "docsv" );
 	Tcl_UnlinkVar( inter, "dozip" );
 
@@ -5538,34 +5584,27 @@ case 68:
 		fprintf( f, "echo \"Use %s.sh LSD_EXEC CONFIG_PATH to change default paths\"\n", out_bat );
 	}
 	
+	log_files.clear( );
+
 	if ( fSeq && ( fnext - ffirst ) > param )	// if possible, work in blocks
 	{
-		lab2 = new char[ param * ( strlen( out_file ) + 15 ) + 1 ];
-		strcpy( lab2, "" );
-	
 		num = ( fnext - ffirst ) / param;		// base number of cases per core
 		sl = ( fnext - ffirst ) % param;		// remaining cases per core
 		for ( i = ffirst, j = 1; j <= param; ++j )	// allocates files by the number of cores
 		{
 			sprintf( lab_old, "%s_%d.log", out_file, j );
+			log_files.push_back( lab_old );
 			
 			if ( *choice == 1 || *choice == 4 )	// Windows
-				fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s\" -s %d -e %d %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s\" 2>&1\r\n", j, nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", lab_old );
+				fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s\" -s %d -e %d%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
 			else								// Unix
-				fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s -s %d -e %d %s %s %s > \"$LSD_CONFIG_PATH\"/%s 2>&1 &\n", nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", lab_old );
+				fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s -s %d -e %d%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
 				
 			j <= sl ? i += num + 1 : i += num;
-			
-			if ( strlen( lab2 ) > 0 )
-				strcat( lab2, " " );
-			strcat( lab2, lab_old );
 		}
 	}
 	else										// if not, do one by one
 	{
-		lab2 = new char[ ( fnext - ffirst ) * ( strlen( out_file ) + 15 ) + 1 ];
-		strcpy( lab2, "" );
-	
 		for ( i = ffirst, j = 1; i < fnext; ++i, ++j )
 		{
 			if ( fSeq )
@@ -5573,9 +5612,9 @@ case 68:
 				sprintf( lab_old, "%s_%d.log", out_file, i );
 				
 				if ( *choice == 1 || *choice == 4 )	// Windows
-					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s_%d.lsd\" %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s\" 2>&1\r\n", j, nature, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", lab_old );
+					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s_%d.lsd\"%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, i, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
 				else								// Unix
-					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s_%d.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s 2>&1 &\n", nature, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", lab_old );
+					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s_%d.lsd%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, i, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
 			}
 			else
 			{	// get the selected file names, one by one
@@ -5585,14 +5624,12 @@ case 68:
 				sprintf( lab_old, "%s.log", out_file );
 				
 				if ( *choice == 1 || *choice == 4 )	// Windows
-					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s.lsd\" %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s\" 2>&1\r\n", j, nature, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", lab_old );
+					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s.lsd\"%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
 				else								// Unix
-					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s 2>&1 &\n", nature, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", lab_old );
+					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
 			}
 			
-			if ( strlen( lab2 ) > 0 )
-				strcat( lab2, " " );
-			strcat( lab2, lab_old );
+			log_files.push_back( lab_old );
 		}
 	}
 	
@@ -5624,52 +5661,23 @@ case 68:
 	plog( "\nParallel batch file created: %s", "", lab );
 	
 	if ( ! natBat )
-		goto end_68;
+		break;
 
 	// ask if script/batch should be executed right away
-	cmd( "set answer [ ttk::messageBox -parent . -type yesno -icon question -default no -title \"Run Batch\" -message \"Run created script/batch?\" -detail \"The script/batch for running the configuration files was created. Press 'Yes' if you want to start the script/batch as separated processes now.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 2 } }" ); 
+	cmd( "set answer [ ttk::messageBox -parent . -type yesno -icon question -default no -title \"Run Parallel Batch\" -message \"Run created batch?\" -detail \"The batch for running the configuration files was created.\n\nPress 'Yes' if you want to start the it as separated processes now.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 2 } }" ); 
 	if ( *choice == 2 )
-		goto end_68;
+		break;
 
 	// start the job
-	cmd( "set oldpath [pwd]" );
+	cmd( "set oldpath [ pwd ]" );
 	cmd( "set path \"%s\"", out_dir );
 	if ( strlen( out_dir ) > 0 )
 		cmd( "cd $path" );
 
 	cmd( "catch { exec %s & }", lab );
-	
-	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Run Batch\" -message \"Script/batch started\" -detail \"The script/batch was started in separated process(es). The results and log files are being created in the folder:\n\n$path\n\nDo you want to launch the multitail command now (it must be installed)?\" ]" );
-	cmd( "switch $answer { yes { set choice 1 } no { set choice 0 } }" );
-	if ( *choice )
-	{
-		// number of columns
-		--j;
-		i = j > 4 ? ( j > 8 ? ( j > 12 ? 4 : 3 ) : 2 ) : 1;
-		if ( i == 1 )
-			strcpy( lab, "" );
-		else
-			sprintf( lab, "-s %d", i );
+	show_logs( path, log_files );
 		
-		switch( platform )
-		{
-			case _LIN_:
-				cmd( "catch { exec -- $sysTerm -e multitail %s --retry-all %s & }", lab, lab2 );
-				break;
-
-			case _MAC_:
-				cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $path; clear; multitail %s --retry-all %s\\\"\" & } result", lab, lab2 );
-				break;
-
-			case _WIN_:
-				cmd( "catch { exec -- $sysTerm /k multitail %s %s & }", lab, lab2 );
-		}
-	}
-	
 	cmd( "set path $oldpath; cd $path" );
-	
-	end_68:
-	delete [ ] lab2;
 	
 break;
 
@@ -5677,10 +5685,17 @@ break;
 // Start NO WINDOW job as a separate background process
 case 69:
 
+	// check if background are not being run already
+	if ( run_monitor.joinable( ) )
+	{ 
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Parallel run already running\" -detail \"Please wait until the current background parallel run finishes.\n\nTo abort the background run, simply close LSD Browser, and confirm when requested.\"" );
+		break;
+	}
+	
 	// check a model is already loaded
 	if ( ! struct_loaded )
 	{ 
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to start a 'No Window' batch.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to start a parallel run.\"" );
 		break;
 	}
 
@@ -5704,13 +5719,14 @@ case 69:
 	{
 		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
 		{
-			cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing No Window executable file is older than the current version of the current executable.\n\nPress 'OK' to continue anyway or 'Cancel' to abort. Please recompile the model using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+			cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Old executable file\" -detail \"The existing 'No Window' executable file is older than the current executable.\n\nPress 'OK' to continue anyway or 'Cancel' to abort. Please recompile the model using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
 			if ( *choice == 2 )
 				break;
 		}
 	}
 	
 	Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
@@ -5719,6 +5735,12 @@ case 69:
 	overwConf = unsaved_change( ) ? true : false;
 	add_to_tot = false;
 	
+#ifdef _NP_
+	param = 1;
+#else
+	param = max_threads;
+#endif
+	
 	cmd( "set simNum %d", sim_num );
 	cmd( "set firstFile \"%s_%d\"", simul_name, seed );
 	cmd( "set lastFile \"%s_%d\"", simul_name, seed + sim_num - 1 );
@@ -5726,11 +5748,11 @@ case 69:
 	cmd( "set resExt %s", docsv ? "csv" : "res" );
 	cmd( "set totExt %s", docsv ? "csv" : "tot" );
 	cmd( "set zipExt %s", dozip ? ".gz" : "" );
-	cmd( "set cores %d", max_threads );
+	cmd( "set cores %d", param );
 
 	// confirm overwriting current configuration
 	cmd( "set b .batch" );
-	cmd( "newtop $b \"Start Batch\" { set choice 2 }" );
+	cmd( "newtop $b \"Parallel Run\" { set choice 2 }" );
 
 	cmd( "ttk::frame $b.f1" );
 	cmd( "ttk::label $b.f1.l -text \"Model configuration\"" );
@@ -5779,26 +5801,45 @@ case 69:
 	cmd( "ttk::label $b.f4.l2 -style hl.TLabel -text \"$totFile.$totExt$zipExt\"" );
 	
 	cmd( "set choice [ expr { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } ]", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
+	cmd( "ttk::label $b.f4.l3 -justify center -text \"%s\"", *choice ? "(WARNING: existing files in destination\nfolder will be overwritten)" : "\n" );
+	cmd( "pack $b.f4.l1 $b.f4.l2 $b.f4.l3" );
 	
-	if ( *choice )
-	{
-		cmd( "ttk::label $b.f4.l3 -justify center -text \"\n(WARNING: existing files in destination\nfolder will be overwritten)\"" );
-		cmd( "pack $b.f4.l1 $b.f4.l2 $b.f4.l3" );
-	}
-	else
-		cmd( "pack $b.f4.l1 $b.f4.l2" );
-	
-	if ( sim_num > 1 && max_threads > 1 )	// parallel runs case
-	{
-		cmd( "ttk::frame $b.f5" );
-		cmd( "ttk::label $b.f5.l -text \"Parallel runs\"" );
-		cmd( "ttk::spinbox $b.f5.e -width 5 -from 1 -to 99 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center" );
-		cmd( "$b.f5.e insert 0 $cores" ); 
-		cmd( "pack $b.f5.l $b.f5.e -side left -padx 2" );
-	}	
+	cmd( "ttk::frame $b.f5" );
+	cmd( "ttk::label $b.f5.l -text \"Parallel runs\"" );
+	cmd( "ttk::spinbox $b.f5.e -width 5 -from 1 -to %d -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center -state %s", param, ( no_tot && sim_num > 1 && param > 1 ) ? "normal" : "disabled" );
+	cmd( "write_any $b.f5.e $cores" ); 
+	cmd( "pack $b.f5.l $b.f5.e -side left -padx 2" );
 
 	cmd( "ttk::frame $b.f6" );
-	cmd( "ttk::checkbutton $b.f6.nores -text \"Skip generating results files\" -variable no_res" );
+	cmd( "ttk::checkbutton $b.f6.nores -text \"Skip generating results files\" -variable no_res -command { \
+				if { $no_res && $no_tot } { \
+					set no_tot 0; \
+					$b.f5.e configure -state disabled; \
+					if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+						$b.f4.l3 configure -text \"(WARNING: existing files in destination\nfolder will be overwritten)\" \
+					} else { \
+						$b.f4.l3 configure -text \"\n\" \
+					} \
+				} \
+			}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
+	cmd( "ttk::checkbutton $b.f6.notot -text \"Skip generating totals file\" -variable no_tot -command { \
+				if { $no_res && $no_tot } { \
+					set no_res 0 \
+				}; \
+				if { ! $no_tot } { \
+					$b.f5.e configure -state disabled; \
+					if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+						$b.f4.l3 configure -text \"(WARNING: existing files in destination\nfolder will be overwritten)\" \
+					} else { \
+						$b.f4.l3 configure -text \"\n\" \
+					} \
+				} else { \
+					if { %d > 1 && %d > 1 } { \
+						$b.f5.e configure -state normal \
+					}; \
+					$b.f4.l3 configure -text \"\n\" \
+				} \
+			}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "", sim_num, param );
 	cmd( "ttk::checkbutton $b.f6.dozip -text \"Generate zipped files\" -variable dozip -command { \
 			if $dozip { \
 				set zipExt .gz \
@@ -5837,12 +5878,9 @@ case 69:
 			} \
 		}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
 	cmd( "ttk::checkbutton $b.f6.tosave -text \"Update configuration file\" -variable overwConf" );
-	cmd( "pack $b.f6.nores $b.f6.dozip $b.f6.docsv %s -anchor w", overwConf ? "$b.f6.tosave" : "" );
+	cmd( "pack $b.f6.nores $b.f6.notot $b.f6.dozip $b.f6.docsv %s -anchor w", overwConf ? "$b.f6.tosave" : "" );
 	
-	if ( sim_num > 1 && max_threads > 1 )	// parallel runs case
-		cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f5 $b.f6 -padx 5 -pady 5" );
-	else
-		cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f6 -padx 5 -pady 5" );
+	cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f5 $b.f6 -padx 5 -pady 5" );
 		
 	cmd( "okhelpcancel $b b { set choice 1 } { LsdHelp menurun.html#batch } { set choice 2 }" );
 	
@@ -5853,12 +5891,12 @@ case 69:
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
 	
-	if ( sim_num > 1 && max_threads > 1 )	// parallel runs case
-		cmd( "set cores [ $b.f5.e get ]" );
+	cmd( "set cores [ $b.f5.e get ]" );
 	
 	cmd( "destroytop .batch" );
 	
 	Tcl_UnlinkVar( inter, "no_res" );
+	Tcl_UnlinkVar( inter, "no_tot" );
 	Tcl_UnlinkVar( inter, "docsv" );
 	Tcl_UnlinkVar( inter, "dozip" );
 	Tcl_UnlinkVar( inter, "overwConf" );
@@ -5866,9 +5904,17 @@ case 69:
 	if ( *choice == 2 )
 		break;
 
-	param = get_int( "cores" );
-	param = min( max( get_int( "cores" ), 1 ), max_threads );	// parallel runs
-	nature = max( max_threads / param, 1 );						// threads per run
+	if ( sim_num > 1 && param > 1 && no_tot )				// parallel runs case
+	{
+		param = min( get_int( "cores" ), sim_num );
+		param = min( max( param, 1 ), max_threads );		// parallel runs
+		nature = max( max_threads / param, 1 );				// threads per run
+	}
+	else
+	{
+		param = 1;
+		nature = max_threads;
+	}
 
 	for ( n = r; n->up != NULL; n = n->up );
 	reset_blueprint( n );			// update blueprint to consider last changes
@@ -5890,26 +5936,21 @@ case 69:
 	if ( strlen( path ) > 0 )
 		cmd( "cd $path" );
 
-	cmd( "catch { exec %s -c %d:%d -f %s %s %s %s >& %s.log & }", lab, nature, param, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
+#ifdef _NP_
 
-	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results and log files are being created in the folder:\n\n$path\n\nDo you want to launch the tail command now?\" ]" );
-	cmd( "switch $answer { yes { set choice 1 } no { set choice 0 } }" );
+	sprintf( lab_old, "%s.log", simul_name );
+	cmd( "catch { exec %s -f %s%s%s%s%s -l %s & }", lab, struct_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
+	log_files.clear( );
+	log_files.push_back( lab_old );	
+
+#else
 	
-	if ( *choice )
-		switch( platform )
-		{
-				
-			case _LIN_:
-				cmd( "catch { exec $sysTerm -e tail -F %s.log & }", simul_name );
-			 	break;
-			
-			case _MAC_:
-				cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $path; clear; tail -F %s.log\\\"\" & } result", simul_name );
-				break;
+	plog( "\n\nProcessing parallel background run (threads=%d runs=%d)...", "", nature, param );
+	run_parallel( false, lab, simul_name, seed, sim_num, nature, param, log_files );
+	
+#endif
 
-			case _WIN_:
-				cmd( "catch { exec $sysTerm /k tail -F %s.log & }", simul_name );
-		}
+	show_logs( path, log_files );
 	
 	cmd( "set path $oldpath; cd $path" );
 	
@@ -6234,6 +6275,23 @@ break;
 case 23:
 
 	redrawStruc = true;
+
+break;
+
+
+// present parallel run log
+case 8:
+
+#ifndef _NP_
+
+	// destroy monitor thread
+	if ( run_monitor.joinable( ) )
+		run_monitor.join( );
+
+	plog( "\n%s", "", run_log.c_str( ) );
+	plog( "\nFinished parallel background run\n" );
+	
+#endif
 
 break;
 
@@ -7278,9 +7336,10 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 	// don't stop if simulation is running
 	if ( running )
 	{
-		cmd( "set answer [ ttk::messageBox -parent . -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\" ]" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\"" );
 		return false;
 	}
+	
 	// nothing to save?
 	if ( ! unsavedData && ! unsavedChange && ! unsavedSense )
 		goto end_true;				// yes: simply discard configuration
@@ -7303,7 +7362,12 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 		cmd( ".l.s.c.son_name configure -state disabled" );
 		cmd( ".l.v.c.var_name configure -state disabled" );
 	}
-	cmd( "if [ string equal [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard data?%s%s\" -detail $question ] yes ] { set ans 1 } { set ans 0 }", strlen( title ) != 0 ? "\n\n" : "", title );  
+	
+	cmd( "if [ string equal [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard data?%s%s\" -detail $question ] yes ] { \
+			set ans 1 \
+		} else { \
+			set ans 0 \
+		}", strlen( title ) != 0 ? "\n\n" : "", title );  
 	if ( ! brCovered )
 	{
 		cmd( ".l.s.c.son_name configure -state normal" );
@@ -7318,6 +7382,46 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 	update_model_info( );	// save windows positions if appropriate
 	
 	return true;
+}
+
+
+/****************************************************
+ABORT_RUN_THREADS
+Confirm exiting when there are running threads
+Returns: 0: cancel, 1: continue with exit
+****************************************************/
+bool abort_run_threads( void )
+{
+	// confirm aborting running parallel processes
+	if ( run_monitor.joinable( ) )
+	{
+		cmd( "if [ string equal [ ttk::messageBox -parent . -type okcancel -icon warning -title Warning -message \"Exiting LSD will stop background execution\" -detail \"A parallel run is being executed in background and exiting LSD will interrupt it.\n\nIf you really want to abort the execution, press 'Ok'.\" ] ok ] { \
+				set ans 1 \
+			} else { \
+				set ans 0 \
+			}" );
+		if ( atoi( Tcl_GetVar( inter, "ans", 0 ) ) != 1 )
+			return false;
+		else
+			return true;
+	}
+	
+	return true;
+}
+
+
+/****************************************************
+ TCL_ABORT_RUN_THREADS
+ Entry point function for access from the Tcl interpreter
+ ****************************************************/
+int Tcl_abort_run_threads( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+{
+	if ( abort_run_threads( ) == 1 )
+		Tcl_SetResult( inter, ( char * ) "ok", TCL_VOLATILE );
+	else
+		Tcl_SetResult( inter, ( char * ) "cancel", TCL_VOLATILE );
+	
+	return TCL_OK;
 }
 
 

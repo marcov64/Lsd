@@ -120,9 +120,7 @@ object::delete_obj to cancel an object.
 clock_t start_profile[ 100 ], end_profile[ 100 ];
 
 #ifndef _NP_
-// semaphore to enable just a single parallel call at a time
-atomic < bool > parallel_ready( true );
-condition_variable update;
+condition_variable upd_workers;
 mutex thr_ptr_lock;
 mutex update_lock;
 mutex crash_lock;
@@ -672,7 +670,7 @@ void worker::cal_worker( void )
 				if ( ! worker_ready )
 				{
 					worker_ready = true;
-					update.notify_one( );
+					upd_workers.notify_one( );
 				}
 			}			
 		}
@@ -957,7 +955,7 @@ void parallel_update( variable *v, object* p, object *caller )
 				{
 					unique_lock< mutex > lock_update( update_lock );
 					worker_ready = false;
-					if ( ! update.wait_for ( lock_update, chrono::milliseconds( MAX_TIMEOUT ), [ ]{ return ! worker_ready; } ) )
+					if ( ! upd_workers.wait_for ( lock_update, chrono::milliseconds( MAX_TIMEOUT ), [ ]{ return ! worker_ready; } ) )
 						{
 							worker_ready = true;
 							plog( "\nWarning: workers timeout (%d millisecs.), continuing...", "", MAX_TIMEOUT );

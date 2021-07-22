@@ -194,6 +194,7 @@ FILE *create_frames( const char *path, const char *fname );
 FILE *search_data_ent( char *name, variable *v );
 FILE *search_data_str( char const *name, char const *init, char const *str );
 FILE *search_str( char const *name, char const *str );
+bool abort_run_threads( void );
 bool add_unsaved( int *choice );
 bool alloc_save_mem( object *r );
 bool alloc_save_var( variable *v );
@@ -234,8 +235,10 @@ int load_configuration( bool reload, bool quick = false );
 int load_sensitivity( FILE *f );
 int logic_op_code( char const *lop, char const *errmsg );
 int min_hborder( int *choice, int pdigits, double miny, double maxy );
+int monitor_logs( vector < string > & logs );
 int num_sensitivity_variables( sense *rsens );
 int rnd_int( int min, int max );
+int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns, vector < string > & logs );
 int shrink_gnufile( void );
 int uniform_int_0( int max );
 long num_sensitivity_points( sense *rsens );
@@ -264,6 +267,7 @@ void clean_plot( object *n );
 void clean_save( object *n );
 void close_sim( void );
 void collect_inst( object *r, o_setT &list );
+void consolidate_logs( bool nw, vector < string > logs );
 void control_tocompute(object *r, char *ch);
 void copy_descendant( object *from, object *to );
 void count( object *r, int *i );
@@ -312,6 +316,7 @@ void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int 
 void insert_object( const char *w, object *r, bool netOnly = false, object *above = NULL );
 void insert_store_mem( object *r, int *num_v, char *lab = NULL );
 void link_cells( object *root, char *lab );
+void monitor_parallel( bool nw, vector < string > logs );
 void move_obj( char const *lab, char const *dest );
 void plog_series( int *choice );
 void plot( int type, int *start, int *end, char **str, char **tag, int *choice, bool norm );
@@ -335,6 +340,7 @@ void reset_description( object *r );
 void reset_end( object *r );
 void reset_plot( void );
 void run( void );
+void run_parallel_exec( bool nw, int id, string cmd );
 void save_cells( object *r, char *lab );
 void save_data1( int *choice );
 void save_datazip( int *choice );
@@ -367,6 +373,7 @@ void show_descr( char *lab, int *choice );
 void show_eq( char *lab, int *choice );
 void show_graph( object *t = NULL );
 void show_initial( object *n );
+void show_logs( const char *path, vector < string > & logs );
 void show_neighbors( object *r, bool update );
 void show_observe( object *n );
 void show_parallel( object *n );
@@ -393,6 +400,7 @@ void uncover_browser( void );
 void unload_configuration ( bool full );
 void unlink_cells( object *r, char *lab );
 void unset_shortcuts_run( const char *window );
+void update_bar( char *bar, int done, int & last_done );
 void update_bounds( void );
 void update_descr_dict( void );
 void update_more_tab( const char *w, bool adding = false );
@@ -412,6 +420,7 @@ extern FILE *log_file;			// log file, if any
 extern bool brCovered;			// browser cover currently covered
 extern bool eq_dum;				// current equation is dummy
 extern bool error_hard_thread;	// flag to error_hard() called in worker thread
+extern bool idle_loop;			// indicates in main idle loop (no running operation)
 extern bool ignore_eq_file;		// control of configuration files equation updating
 extern bool iniShowOnce;		// prevent repeating warning on # of columns
 extern bool log_ok;				// control for log window available
@@ -467,6 +476,7 @@ extern int macro;				// equations style (macros or C++) (bool)
 extern int max_runs;			// maximum number of parallel runs 
 extern int max_threads;			// maximum number of parallel threads per run
 extern int no_res;				// do not produce .res results files (bool)
+extern int no_tot;				// do not produce .tot totals files (bool)
 extern int overwConf;			// overwrite current configuration file on run (bool)
 extern int parallel_disable;	// flag to control parallel mode
 extern int prof_aggr_time;		// show aggregate profiling times
@@ -490,14 +500,16 @@ extern object *wait_delete;		// LSD object waiting for deletion
 extern o_setT obj_list;			// list with all existing LSD objects
 extern s_vecT res_list;			// list of results files last saved
 extern sense *rsense;       	// LSD sensitivity analysis structure
+extern string run_log;			// consolidated runs log
 extern variable *cemetery;  	// LSD saved data from deleted objects
 extern variable *last_cemetery;	// LSD last saved data from deleted objects
 extern void *random_engine;		// current random number generator engine
 
 // multi-threading control 
 #ifndef _NP_
-extern atomic< bool > parallel_ready;	// flag to indicate multitasking is available
-extern map< thread::id, worker * > thr_ptr;	// worker thread pointers
+extern atomic < bool > parallel_ready;// flag to indicate multitasking is available
+extern map< thread::id, worker * > thr_ptr;// worker thread pointers
+extern thread run_monitor;			// thread monitoring parallel instances
 #endif
 
 // Tcl/Tk specific definitions (for the windowed version only)
@@ -506,6 +518,7 @@ extern map< thread::id, worker * > thr_ptr;	// worker thread pointers
 extern p_mapT par_map;			// element to parent name map for AoR
 
 // C to TCL interface functions
+int Tcl_abort_run_threads( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );

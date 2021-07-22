@@ -983,7 +983,7 @@ proc setglobkeys { w { chkChg 1 } } {
 	# soft/hard exit (check for unsaved changes or not)
 	if { $chkChg } {
 		bind $w <Control-Alt-x> { 
-			if [ string equal [ discard_change ] ok ] { 
+			if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } { 
 				exit 
 			}
 			break

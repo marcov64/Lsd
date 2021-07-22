@@ -1292,8 +1292,66 @@ char *upload_eqfile( void )
 	return eq;
 }
 
-#endif
 
+/****************************************************
+SHOW_LOGS
+Open tail/multitail to show log files dynamically
+****************************************************/
+void show_logs( const char *path, vector < string > & logs )
+{
+	char exec[ 20 ];
+	int i, j, n;
+	
+	
+	cmd( "switch [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Background run monitor\" -message \"Open the background run monitor?\" -detail \"The selected simulation runs were started as parallel background job(s). Each job progress can be monitored in a separated window results by choosing 'Yes'\n\nLog files are being created in the folder:\n\n%s\" ] { yes { set answer 1 } no { set answer 0 } }", path );
+	
+	if ( ! get_int( "answer" ) )
+		return;
+	
+	n = logs.size( );
+	for ( i = j = 0; i < n; ++i )
+		j += logs[ i ].length( );
+	
+	char logs_str[ i + j + 1 ];
+	logs_str[ 0 ] = '\0';
+	
+	for ( i = 0; i < n; ++i )
+	{
+		strcat( logs_str, logs[ i ].c_str( ) );
+		
+		if ( i < n - 1 )
+			strcat( logs_str, " " );
+	}
+	
+	if ( n == 1 )
+		strcpy( exec, "tail -n 20 -F" );
+	else
+	{
+		// number of terminal columns
+		j = n > 4 ? ( n > 8 ? ( n > 12 ? 4 : 3 ) : 2 ) : 1;
+		
+		if ( j == 1 )
+			strcpy( exec, "multitail" );
+		else
+			sprintf( exec, "multitail -s %d", j );
+	}
+	
+	switch( platform )
+	{
+		case _LIN_:
+			cmd( "catch { exec -- $sysTerm -e %s %s & }", exec, logs_str );
+			break;
+
+		case _MAC_:
+			cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd %s; clear; %s %s\\\"\" & } result", path, exec, logs_str );
+			break;
+
+		case _WIN_:
+			cmd( "catch { exec -- $sysTerm /k %s %s & }", exec, logs_str );
+	}
+}
+
+#endif
 
 /***************************************************
 RESULT

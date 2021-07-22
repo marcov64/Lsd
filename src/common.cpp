@@ -202,7 +202,11 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 	// initialize & test the tk application
 	num = Tk_Init( inter );
 	if ( num == TCL_OK )
-		cmd( "if { ! [ catch { package present Tk 8.6 } ] && [ winfo exists . ] } { set res 0 } { set res 1 }" );
+		cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
+				set res 0 \
+			} else { \
+				set res 1 \
+			}" );
 	
 	if ( num != TCL_OK || res )
 	{
@@ -308,7 +312,7 @@ bool set_env( bool set )
 				res = ! ( bool ) putenv( tcl_lib_env );
 			}
 			else
-				if ( system( TCL_FIND_EXE ) != 0 )
+				if ( windows_system( TCL_FIND_EXE ) != 0 )
 					res = false;	// just stop if Tcl/Tk is not on path
 		}
 		
@@ -742,6 +746,45 @@ int main( int argn, char **argv )
 }
 
 
+#ifdef _WIN32
+
+/****************************************************
+ WINDOWS_SYSTEM
+ executes system command in Windows without opening
+ command-prompt window
+ spaces in path/file names are not supported
+ ****************************************************/
+int windows_system( const char *cmd )
+{
+	PROCESS_INFORMATION p_info;
+	STARTUPINFO s_info;
+	DWORD res;
+	LPSTR c_line;
+	
+	memset( &s_info, 0, sizeof s_info );
+	memset( &p_info, 0, sizeof p_info );
+	s_info.cb = sizeof s_info;
+	
+	c_line = ( LPSTR ) malloc( strlen( cmd ) + 1 );
+	strcpy( c_line, cmd );
+	
+	if ( ! CreateProcess( NULL, c_line, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, & s_info, & p_info ) )
+	{
+		free( c_line );
+		return -1;
+	}
+
+	WaitForSingleObject( p_info.hProcess, INFINITE );
+	GetExitCodeProcess( p_info.hProcess, & res );
+	CloseHandle( p_info.hProcess );
+	CloseHandle( p_info.hThread );
+	
+	free( c_line );
+	return res;
+}
+
+#endif
+
 /****************************************************
  CLEAN_FILE
  remove any path prefixes to filename, if present
@@ -1116,7 +1159,9 @@ void myexit( int v )
 #ifndef _NW_
 	if ( inter != NULL )
 	{
-		cmd( "if { ! [ catch { package present Tk } ] } { destroy . }" );
+		if ( tk_ok )
+			cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { catch { destroy . } }" );
+		
 		cmd( "catch { LsdExit }" );
 		Tcl_Finalize( );
 	}
@@ -1150,8 +1195,8 @@ void handle_signals( void ( * handler )( int signum ) )
 
 /****************************************************
  SIGNAL_HANDLER
+ handle critical system signals
  ****************************************************/
-// handle critical system signals
 void signal_handler( int signum )
 {
 	char msg2[ MAX_LINE_SIZE ], msg3[ MAX_LINE_SIZE ];
@@ -1242,7 +1287,10 @@ void signal_handler( int signum )
 	}
 #endif
 	
-	cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s:\n  %s\n\n%s\"", msg, msg2, msg3 );
+	if ( tk_ok )
+		cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
+			catch { ttk::messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s:\n  %s\n\n%s\" } \
+			}", msg, msg2, msg3 );
 	
 #ifndef _LMM_
 	if ( user_exception )

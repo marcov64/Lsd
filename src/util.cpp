@@ -123,7 +123,10 @@ void plog( char const *cm, char const *tag, ... )
 	
 	if ( tag_ok )
 	{
-		cmd( "set log_ok [ winfo exists .log ]" );
+		cmd( "set log_ok 0" );
+		cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
+				catch { set log_ok [ winfo exists .log ] } \
+			}" );
 		cmd( "if $log_ok { .log.text.text.internal see [ .log.text.text.internal index insert ] }" );
 		cmd( "if $log_ok { catch { .log.text.text.internal insert end \"%s\" %s } }", message, tag );
 		cmd( "if $log_ok { .log.text.text.internal see end }" );

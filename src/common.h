@@ -554,6 +554,7 @@ int strcln( char *out, const char *str, int outSz );
 int strlf( char *out, const char *str, int outSz );
 int strtrim( char *out, const char *str, int outSz );
 int strwrap( char *out, const char *str, int outSz, int wid );
+int windows_system( const char *cmd );
 long get_long( const char *tcl_var, long *var = NULL );
 string win_path( string filepath );
 void check_option_files( bool sys );
