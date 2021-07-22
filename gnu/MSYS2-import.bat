@@ -63,7 +63,7 @@ set TCL_VER=8.6
 set DDE_VER=1.4
 set REG_VER=1.3
 set THREAD_VER=2.8.6
-set PYTHON_VER=3.8
+set PYTHON_VER=3.9
 set OPT=/D/Q/Y
 set XOPT=%OPT%/S
 
