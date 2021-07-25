@@ -149,11 +149,10 @@ object *currObj = NULL;		// pointer to current object in browser
 object *root = NULL;		// LSD root object
 object *wait_delete = NULL;	// LSD object waiting for deletion
 o_setT obj_list;			// set with all existing LSD objects
-s_vecT res_list;			// list of results files last saved
 sense *rsense = NULL;		// LSD sensitivity analysis structure
-string run_log;				// consolidated runs log
 variable *cemetery = NULL;	// LSD saved data from deleted objects
-variable *last_cemetery = NULL;	// LSD last saved data from deleted objects
+variable *last_cemetery = NULL;// LSD last saved data from deleted objects
+vector < string > res_list;	// list of results files last saved
 FILE *log_file = NULL;		// log file, if any
 
 // constant arrays
@@ -179,13 +178,15 @@ Tcl_Interp *inter = NULL;	// global Tcl interpreter in LSD
 
 #ifndef _NP_
 atomic < bool > parallel_ready( true );// flag to indicate variable worker is ready
-map < thread::id, worker * > thr_ptr;	// worker thread pointers
+map < thread::id, worker * > thr_ptr;// worker thread pointers
 mutex lock_run_status;		// lock run_status for parallel updating
+string run_log;				// consolidated runs log
 thread::id main_thread;		// LSD main thread ID
 thread run_monitor;			// thread monitoring parallel instances
-worker *workers = NULL;		// multi-thread parallel worker data
-vector < thread > run_threads;// parallel running instances
 vector < int > run_status;	// parallel running instances status
+vector < string > run_results;// parallel run results files
+vector < thread > run_threads;// parallel running instances
+worker *workers = NULL;		// multi-thread parallel worker data
 #endif
 
 // command line strings
@@ -200,7 +201,8 @@ int lsdmain( int argn, char **argv )
 {
 	char *str;
 	int i, j = 0, k = 0, len;
-
+	FILE *f;
+	
 	path = new char[ strlen( "" ) + 1 ];
 	simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
 	exec_path = new char[ MAX_PATH_LENGTH + 1 ]; 
@@ -224,8 +226,6 @@ int lsdmain( int argn, char **argv )
 	reset_blueprint( NULL );
 
 #ifdef _NW_
-	
-	FILE *f;
 	
 	no_window = true;
 	no_res = no_tot = grandTotal = false;// to preserve compatibility
@@ -430,7 +430,13 @@ int lsdmain( int argn, char **argv )
 		
 		return run_parallel( no_window, argv[ 0 ], simul_name, seed, sim_num, max_threads, max_runs, log_files );
 	}
-	
+
+				
+#else
+
+	if ( k != 0 )
+		printf( "\nMulti-run request ignored, running in sequential mode.\n" );
+
 #endif
 
 #else 
@@ -1504,9 +1510,9 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 		strcpy( dest_path, "" );
 
 	logs.clear( );
-	res_list.clear( );					// empty list of saved results files
 	run_status.clear( );
 	run_threads.clear( );
+	run_results.clear( );
 	
 	if ( runs > parruns )				// more than one run per thread?
 	{
@@ -1529,7 +1535,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 					strcat( res_file, ".gz" );
 
 				if ( ! no_res )
-					res_list.push_back( res_file );
+					run_results.push_back( res_file );
 			}
 
 			// command line
@@ -1556,7 +1562,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 				strcat( res_file, ".gz" );
 
 			if ( ! no_res )
-				res_list.push_back( res_file );
+				run_results.push_back( res_file );
 
 			// command line
 			sprintf( cmd, "%s -c %d -f %s.lsd -s %d -e 1%s%s%s%s%s%s -l %s", exec, thrrun, simname, i, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", dest_path, log_file );
@@ -1598,7 +1604,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 			if ( thr.joinable( ) )
 				thr.join( );
 		
-		consolidate_logs( nw, logs );
+		log_parallel( nw, logs );
 
 		i = 0;
 		for ( int status : run_status )
@@ -1700,15 +1706,15 @@ void monitor_parallel( bool nw, vector < string > logs )
 		if ( thr.joinable( ) )
 			thr.join( );
 	
-	consolidate_logs( nw, logs );
+	log_parallel( nw, logs );
 }
 
 
 /****************************************************
-CONSOLIDATE_LOGS
+LOG_PARALLEL
 Consolidate a set of parallel-run logs
 ****************************************************/
-void consolidate_logs( bool nw, vector < string > logs )
+void log_parallel( bool nw, vector < string > logs )
 {
 	char buf[ MAX_LINE_SIZE + 1 ];
 	FILE *f;
@@ -1744,6 +1750,7 @@ void consolidate_logs( bool nw, vector < string > logs )
 	while ( ! idle_loop )
 		msleep( 100 );
 	
+	res_list = run_results;
 	choice = 8;
 
 #endif

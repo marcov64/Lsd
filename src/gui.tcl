@@ -179,7 +179,7 @@ if [ string equal $CurPlatform mac ] {
 	# Gnuplot on path? if not, try default install folder
 	if [ catch { exec where $gnuplotExe } ] {
 		if [ file exists "C:/Program Files/gnuplot/bin/$gnuplotExe" ] {
-			set gnuplotExe "C:/Program Files/gnuplot/bin/$gnuplotExe"
+			set gnuplotExe "\"C:/Program Files/gnuplot/bin/$gnuplotExe\""
 		}
 	}
 }

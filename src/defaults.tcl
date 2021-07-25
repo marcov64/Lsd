@@ -269,9 +269,9 @@ set dbgLinux			"gdb"		;
 set dbgWindows			"gdb"		;
 
 # OS specific default browser (open=system default)
-set browserMac			"open"		; # "open", "firefox", "safari"
-set browserLinux		"firefox"	; # "open", "firefox", "chrome"
-set browserWindows		"open"		; # "open", "firefox", "chrome"
+set browserMac			"open"			; # "open", "firefox", "safari"
+set browserLinux		"x-www-browser"	; # "x-www-browser", "firefox", "chrome"
+set browserWindows		"start"			; # "start", "firefox", "chrome"
 
 # OS specific default wish utility
 set wishMac				"wish8.6"
@@ -287,7 +287,7 @@ set makeWinMingw		"mingw32-make.exe"
 # OS specific default gnuplot terminal (empty string=gnuplot default)
 set gnuplotMac			"gnuplot"
 set gnuplotLinux		"gnuplot"
-set gnuplotindows		"wgnuplot.exe"
+set gnuplotWindows		"wgnuplot.exe"
 
 # default diff application settings
 set diffApp				"tkdiff.tcl"; # command line diff application to use

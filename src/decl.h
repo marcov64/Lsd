@@ -267,7 +267,6 @@ void clean_plot( object *n );
 void clean_save( object *n );
 void close_sim( void );
 void collect_inst( object *r, o_setT &list );
-void consolidate_logs( bool nw, vector < string > logs );
 void control_tocompute(object *r, char *ch);
 void copy_descendant( object *from, object *to );
 void count( object *r, int *i );
@@ -316,6 +315,7 @@ void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int 
 void insert_object( const char *w, object *r, bool netOnly = false, object *above = NULL );
 void insert_store_mem( object *r, int *num_v, char *lab = NULL );
 void link_cells( object *root, char *lab );
+void log_parallel( bool nw, vector < string > logs );
 void monitor_parallel( bool nw, vector < string > logs );
 void move_obj( char const *lab, char const *dest );
 void plog_series( int *choice );
@@ -498,18 +498,18 @@ extern object *blueprint;   	// LSD blueprint (effective model in use )
 extern object *currObj;			// pointer to current object in browser
 extern object *wait_delete;		// LSD object waiting for deletion
 extern o_setT obj_list;			// list with all existing LSD objects
-extern s_vecT res_list;			// list of results files last saved
 extern sense *rsense;       	// LSD sensitivity analysis structure
-extern string run_log;			// consolidated runs log
 extern variable *cemetery;  	// LSD saved data from deleted objects
 extern variable *last_cemetery;	// LSD last saved data from deleted objects
+extern vector < string > res_list;// list of results files last saved
 extern void *random_engine;		// current random number generator engine
 
 // multi-threading control 
 #ifndef _NP_
 extern atomic < bool > parallel_ready;// flag to indicate multitasking is available
 extern map< thread::id, worker * > thr_ptr;// worker thread pointers
-extern thread run_monitor;			// thread monitoring parallel instances
+extern string run_log;			// consolidated runs log
+extern thread run_monitor;		// thread monitoring parallel instances
 #endif
 
 // Tcl/Tk specific definitions (for the windowed version only)

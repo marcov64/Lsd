@@ -5668,12 +5668,16 @@ break;
 // Start NO WINDOW job as a separate background process
 case 69:
 
+#ifndef _NP_
+
 	// check if background are not being run already
 	if ( run_monitor.joinable( ) )
 	{ 
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Parallel run already running\" -detail \"Please wait until the current background parallel run finishes.\n\nTo abort the background run, simply close LSD Browser, and confirm when requested.\"" );
 		break;
 	}
+	
+#endif
 	
 	// check a model is already loaded
 	if ( ! struct_loaded )
@@ -7378,6 +7382,9 @@ Returns: 0: cancel, 1: continue with exit
 ****************************************************/
 bool abort_run_threads( void )
 {
+	
+#ifndef _NP_
+
 	// confirm aborting running parallel processes
 	if ( run_monitor.joinable( ) )
 	{
@@ -7391,6 +7398,8 @@ bool abort_run_threads( void )
 		else
 			return true;
 	}
+
+#endif
 	
 	return true;
 }

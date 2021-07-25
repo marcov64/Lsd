@@ -49,25 +49,15 @@ proc LsdHtml { dir fn } {
 		set fqn "$dir/$fn"
 	}
 	
-	if { [ file exists "$fqn" ] } {
-
-		set fqn [ file nativename "$fqn" ]
-		
-		if { $CurPlatform ne "windows" } {
-			set error [ open_terminal $fqn $HtmlBrowser ]
-		} else {
-			set error [ open_terminal "start $fqn" ]
-		}
-		
-		if { $error } {
+	if { ! [ catch { set fqn [ file normalize "$fqn" ] } ] && [ file exists "$fqn" ] } {
+		if { [ open_terminal "$HtmlBrowser $fqn" ] != 0 } {
 			ttk::messageBox -parent . -type ok -icon error -title Error -message "Browser failed to launch" -detail "Please check if the web browser is set up properly.\n\nDetail:\n$termResult"
+			return 0
 		}
-		
 		return 1
-		
-	} else {
-		return 0
 	}
+	
+	return 0
 }
 
 
