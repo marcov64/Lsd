@@ -20,8 +20,9 @@
 // server execution settings
 $nice_enable = true;            // enable lower priority for simulation run
 $nice_level = 10;               // priority level (unix) used to run simulation
-$max_run = 5;                   // maximum simultaneous simulation runs on server
-$max_cores = 4;                 // maximum threads (cores) to use per simulation
+$max_run = 3;                   // maximum simultaneous simulations on server
+$max_par_run = 4;               // maximum parallel executions per simulation
+$max_thr_run = 1;               // maximum threads to use per execution
 $max_time = 30;                 // maximum execution time per simulation (minutes)
 $sleep_interval = 1;            // status update interval (seconds)
 

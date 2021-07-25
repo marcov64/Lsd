@@ -2442,8 +2442,6 @@ case 76:
 		cmd( "bind $T <Control-f> { .prop.v.o.fun invoke }; bind $T <Control-F> { .prop.v.o.fun invoke }" );
 		
 		cmd( "showtop $T" );
-		cmd( "focus $T.n.e" );
-		cmd( "$T.n.e selection range 0 end" );
 		cmd( "mousewarpto $T.b.ok" );
 
 		*choice = 0;
@@ -2700,8 +2698,6 @@ case 78:
 		cmd( "bind $T <KeyPress-Return> { set choice $lag }" );
 		
 		cmd( "showtop $T" );
-		cmd( "$T.i.e selection range 0 end" );
-		cmd( "focus $T.i.e" );
 		cmd( "mousewarpto $T.b.ok" );
 		
 		*choice = -1;
@@ -2892,8 +2888,6 @@ case 96:
 	cmd( "bind $T.f.d.e2 <KeyPress-Return> { focus $T.f.e.e2; $T.f.e.e2 selection range 0 end }" );
 	
 	cmd( "showtop $T" );
-	cmd( "$T.f.c.e2 selection range 0 end" );
-	cmd( "focus $T.f.c.e2" );
 	cmd( "mousewarpto $T.b.ok" );
 
 	*choice = 0;
@@ -3414,8 +3408,6 @@ case 22:
 	cmd( "bind $T.f.f.e2 <KeyPress-Return>  { focus $T.b.ok }" );
 
 	cmd( "showtop $T" );
-	cmd( "$T.f.c.e2 selection range 0 end" );
-	cmd( "focus $T.f.c.e2" );
 	cmd( "mousewarpto $T.b.ok" );
 
 	*choice = 0;
@@ -3937,8 +3929,6 @@ case 37:
 	cmd( "bind .n <KeyPress-Return> { set choice 1 }" );
 
 	cmd( "showtop .n" );
-	cmd( "focus .n.n.e" );
-	cmd( ".n.n.e selection range 0 end" );  
 	cmd( "mousewarpto .n.b.ok" );
 
 	while ( *choice == 0 )
@@ -4108,8 +4098,6 @@ case 48:
 	cmd( "okXhelpcancel .a b Default { set temp_var mozilla } { set choice 1 } { LsdHelp LSD_macros.html#V } { set choice 2 }" );
 
 	cmd( "showtop .a" );
-	cmd( "focus .a.v_num2" );
-	cmd( ".a.v_num2 selection range 0 end" );
 	cmd( "mousewarpto .a.b.ok" );
 
 	*choice = 0;
@@ -4623,8 +4611,6 @@ case 71:
 		cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#mcpoint } { set choice 2 }" );
 
 		cmd( "showtop .s" );
-		cmd( "focus .s.i.e" );
-		cmd( ".s.i.e selection range 0 end" );
 		cmd( "mousewarpto .s.b.ok" );
 
 		*choice = 0;
@@ -4857,8 +4843,6 @@ case 80:
 		cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#mcrange } { set choice 2 }" );
 		
 		cmd( "showtop .s" );
-		cmd( "focus .s.i.e" );
-		cmd( ".s.i.e selection range 0 end" );
 		cmd( "mousewarpto .s.b.ok" );
 		
 		*choice = 0;
@@ -4976,8 +4960,6 @@ case 81:
 		cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#ee } { set choice 2 }" );
 		
 		cmd( "showtop .s" );
-		cmd( ".s.i.e1 selection range 0 end" );
-		cmd( "focus .s.i.e1" );
 		cmd( "mousewarpto .s.b.ok" );
 		
 		*choice = 0;
@@ -5428,6 +5410,9 @@ case 68:
 	Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
 	
+	if ( no_tot )
+		no_res = false;
+	
 	cmd( "set res2 $res" );
 	cmd( "set cores %d", max_threads );
 	cmd( "set threads 1" );
@@ -5475,8 +5460,6 @@ case 68:
 	cmd( "bind .s.c.e <KeyPress-Return> { .s.b.ok invoke }" );
 	
 	cmd( "showtop .s" );
-	cmd( "focus .s.c.e" );
-	cmd( ".s.c.e selection range 0 end" );
 	cmd( "mousewarpto .s.b.ok" );
 	
 	*choice = 0;
@@ -5734,6 +5717,9 @@ case 69:
 	// Only ask to overwrite configuration if there are changes
 	overwConf = unsaved_change( ) ? true : false;
 	add_to_tot = false;
+	
+	if ( no_tot )
+		no_res = false;
 	
 #ifdef _NP_
 	param = 1;

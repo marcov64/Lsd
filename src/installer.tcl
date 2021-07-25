@@ -94,7 +94,7 @@ if { $CurPlatform eq "mac" } {
 	set notInstall [ concat $notInstall *.exe *.dll *.bat gnu/* src/installer-loader-linux.sh ]
 	
 	# make sure PATH is complete
-	if { [ string first "/usr/local/bin" env(PATH) ] < 0 } {
+	if { [ string first "/usr/local/bin" $env(PATH) ] < 0 } {
 		set env(PATH) "/usr/local/bin:$env(PATH)"
 	}
 	

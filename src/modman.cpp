@@ -1462,18 +1462,15 @@ int lsdmain( int argn, char **argv )
 
 		switch( platform )
 		{
+			case _WIN_:
+				strcat( str1, ".exe" );
 			case _LIN_:
-				sprintf( msg, "catch { exec $sysTerm -e $DbgExe $cmdbreak %s & } result", str1 );
+				sprintf( msg, "$DbgExe $cmdbreak %s", str1 );
 				break;
 
 			case _MAC_:
 				cmd( "if [ string equal $cmdbreak \"--args\" ] { set cmdbreak \"\" }" );
-				sprintf( msg, "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $fileDir; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s\\\"\" & } result", str1, str1 );
-				break;
-
-			case _WIN_:
-				strcat( str1, ".exe" );
-				sprintf( msg, "catch { exec $sysTerm /c $DbgExe $cmdbreak %s & } result", str1 );
+				sprintf( msg, "cd $fileDir; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s", str1, str1 );
 				break;
 
 			default:
@@ -1513,7 +1510,9 @@ int lsdmain( int argn, char **argv )
 			goto end_gdb;
 		}
 
-		cmd( msg );					// if all ok, run debug command
+		cmd( "if { [ open_terminal \"%s\" ] != 0 } { \
+			ttk::messageBox -parent . -title Error -icon error -type ok -message \"Debugger failed to launch\" -detail \"Please check if [ string toupper $DbgExe ] debugger is installed and set up properly.\n\nDetail:\n$termResult\" \
+			}", msg );					// if all ok, run debug command
 
 		end_gdb:
 		cmd( "cd \"$RootLsd\"" );
@@ -2003,7 +2002,6 @@ int lsdmain( int argn, char **argv )
 		cmd( "bind .a <Return> { .a.b.ok invoke }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.r.cal" );
 		cmd( "mousewarpto .a.b.ok" );
 
 		choice = 0;
@@ -2081,8 +2079,6 @@ int lsdmain( int argn, char **argv )
 		cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LSD_macros.html#Math } { set choice 2 }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.e.e.e1.e" );
-		cmd( ".a.e.e.e1.e selection range 0 end" );
 		cmd( "mousewarpto .a.b.ok" );
 
 		choice = 0;
@@ -3105,7 +3101,6 @@ int lsdmain( int argn, char **argv )
 		cmd( "bind .a <Return> { .a.b.ok invoke }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.f.r1" );
 		cmd( "mousewarpto .a.b.ok" );
 
 		choice = 0;
@@ -5070,8 +5065,6 @@ int lsdmain( int argn, char **argv )
 		cmd( "tooltip::tooltip .a.b.x \"Reset all options to defaults\"" );
 		
 		cmd( "showtop .a" );
-		cmd( "focus .a.f.c1.num.v" );
-		cmd( ".a.f.c1.num.v selection range 0 end" );
 		cmd( "mousewarpto .a.b.ok" );
 
 		choice = 0;
@@ -5918,19 +5911,19 @@ bool compile_run( bool run, bool nw )
 			cmd( "update" );
 			cmd( "set n 10" );
 			cmd( "set result \"\"" );
-
+			
 			switch ( platform )
 			{
 				case _LIN_:
-					cmd( "while { [ catch { exec ./%s & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
+					cmd( "while { [ catch { exec -- ./%s & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
 					break;
 					
 				case _MAC_:
-					cmd( "while { [ catch { exec open -F -n ./%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
+					cmd( "while { [ catch { exec -- open -F -n ./%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
 					break;
 					
 				case _WIN_:
-					cmd( "while { [ catch { exec %s.exe & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
+					cmd( "while { [ catch { exec -- %s.exe & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
 					break;
 			}
 		}

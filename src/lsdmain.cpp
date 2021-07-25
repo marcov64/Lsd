@@ -90,6 +90,7 @@ char *alt_path = NULL;		// alternative output path
 char *eq_file = NULL;		// equation file content
 char *exec_file = NULL;		// name of executable file
 char *exec_path = NULL;		// path of executable file
+char *log_filename = NULL;	// name of log file, if any
 char *rootLsd = NULL;		// path of LSD root directory
 char *path = NULL;			// path of current configuration
 char *sens_file = NULL;		// current sensitivity analysis file
@@ -252,13 +253,6 @@ int lsdmain( int argn, char **argv )
 				delete [ ] simul_name;
 				simul_name = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( simul_name, argv[ 1 + i ] );
-				strupr( simul_name );
-				str = strstr( simul_name, ".LSD" );
-				strcpy( simul_name, argv[ 1 + i ] );
-				
-				if ( str == NULL )
-					batch_sequential = true;
-				
 				continue;
 			}
 			// read -o parameter : change the path for the output of result files
@@ -270,16 +264,9 @@ int lsdmain( int argn, char **argv )
 			// read -l parameter : save all output to a (log) file
 			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'l' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
-				if ( ( f = fopen( argv[ 1 + i ] , "w+" ) ) == NULL )
-				{
-					printf( "\nCannot create log file '%s', using stdout.\n", argv[ 1 + i ] );
-					continue;
-				}
-				
-				dup2( fileno( f ), STDOUT_FILENO );
-				dup2( fileno( f ), STDERR_FILENO );
-				fclose( f );
-				
+				delete [ ] log_filename;
+				log_filename = new char[ strlen( argv[ 1 + i ] ) + 1 ];
+				strcpy( log_filename, argv[ 1 + i ] );				
 				continue;
 			}
 			// read -c parameter : max number of cores
@@ -326,7 +313,7 @@ int lsdmain( int argn, char **argv )
 			{
 				i--; 					// no parameter for this option
 				grandTotal = true;
-				printf( "\nGrand total file requested ('-g'), please don't run another instance of 'lsdNW' in this folder!\n" );
+				printf( "\nGrand total file requested ('-g'), don't run another instance of 'lsdNW' in this folder!\n" );
 				continue;
 			}
 			// read -z parameter : don't create compressed result files
@@ -348,15 +335,15 @@ int lsdmain( int argn, char **argv )
 			myexit( 6 );
 		}
 	} 
-
-	if ( ! batch_sequential )
+	
+	str = new char[ strlen( simul_name ) + 1 ];
+	strcpy( str, simul_name );
+	strupr( str );
+	
+	if ( strstr( str, ".LSD" ) == NULL )
 	{
-		struct_file = new char[ strlen( simul_name ) + 1 ];
-		strcpy( struct_file, simul_name );
-		simul_name[ str - simul_name ] = '\0';
-	} 
-	else
-	{
+		batch_sequential = true;
+		
 		if ( findex < 0 || fend < 0 || fend < findex )
 		{
 			fprintf( stderr, "\nInvalid -s and/or -e values.\n%s\n%s\n", lsdCmdMsg, lsdCmdHlp );
@@ -366,9 +353,17 @@ int lsdmain( int argn, char **argv )
 		struct_file = new char[ strlen( simul_name ) + ( int ) log10( findex ) + 7 ];
 		sprintf( struct_file, "%s_%d.lsd", simul_name, findex );
 	}
-	 
-	f = fopen( struct_file, "r" );
-	if ( f == NULL )
+	else
+	{
+		batch_sequential = false;
+		struct_file = new char[ strlen( simul_name ) + 1 ];
+		strcpy( struct_file, simul_name );
+		simul_name[ strstr( str, ".LSD" ) - str ] = '\0';
+	}
+	
+	delete [ ] str;
+				
+	if ( ( f = fopen( struct_file, "r" ) ) == NULL )
 	{
 		fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n\n", struct_file );
 		myexit( 7 );
@@ -390,6 +385,27 @@ int lsdmain( int argn, char **argv )
 		if ( fend > 0 )
 			sim_num = fend;
 	}
+	
+	if ( log_filename != NULL )
+	{
+		if ( save_alt_path && strncmp( log_filename, alt_path, strlen( alt_path ) ) != 0 )
+		{
+			str = log_filename;
+			log_filename = new char[ strlen( alt_path ) + strlen( str ) + 2 ];
+			sprintf( log_filename, "%s/%s", alt_path, str );
+			delete [ ] str;
+		}
+		
+		if ( ( f = fopen( log_filename , "w+" ) ) == NULL )
+			printf( "\nCannot create log file '%s', using stdout.\n", log_filename );
+		else
+		{
+			dup2( fileno( f ), STDOUT_FILENO );
+			dup2( fileno( f ), STDERR_FILENO );
+			fclose( f );
+		}
+	}		
+
 #ifndef _NP_
 
 	if ( k > 0 )
@@ -642,7 +658,7 @@ int lsdmain( int argn, char **argv )
 	
 	// Tcl global variables
 	cmd( "set small_character [ expr { $dim_character - $deltaSize } ]" );
-	cmd( "set gpterm $gnuplotTerm" );
+	cmd( "set gpterm \"\"" );
 
 	// configure main window
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
@@ -735,6 +751,7 @@ int lsdmain( int argn, char **argv )
 	delete [ ] exec_path;
 	delete [ ] simul_name;
 	delete [ ] struct_file;
+	delete [ ] log_filename;
 
 	return 0;
 }
@@ -1461,8 +1478,8 @@ RUN_PARALLEL
 #define INISTAT -1234
 int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns, vector < string > & logs )
 {
-	char log_file[ strlen( simname ) + ( int ) log10( fseed + runs ) + 7 ], cmd[ strlen( exec ) + 2 * strlen( simname ) + 2 * ( int ) log10( fseed + runs ) + 100 ];
-	int i, j, num, sl;
+	char *alt_name;
+	int i, j, k, num, sl;
 	
 	// check for existing running threads
 	if ( run_monitor.joinable( ) )
@@ -1472,10 +1489,25 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 		if ( thr.joinable( ) )
 			return -1;
 	
+	int path_len = save_alt_path ? strlen( alt_path ) : strlen( path );
+	int name_len = strlen( simname ) + ( int ) log10( fseed + runs ) + 2;
+	char dest_path[ path_len + 5 ];
+	char log_file[ path_len + name_len + 6 ];
+	char res_file[ path_len + name_len + 9 ];
+	char cmd[ strlen( exec ) + 2 * ( path_len + name_len ) + 50 ];
+	
+	alt_name = clean_file( simname );
+	
+	if ( save_alt_path )
+		sprintf( dest_path, " -o %s", alt_path );
+	else
+		strcpy( dest_path, "" );
+
 	logs.clear( );
+	res_list.clear( );					// empty list of saved results files
 	run_status.clear( );
 	run_threads.clear( );
-
+	
 	if ( runs > parruns )				// more than one run per thread?
 	{
 		num = runs / parruns;			// base number of cases per thread
@@ -1484,10 +1516,24 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 		// allocate runs by thread
 		for ( i = fseed, j = 1; j <= parruns; ++j )
 		{
-			sprintf( log_file, "%s_%d.log", simname, j );
+			// log file name
+			sprintf( log_file, "%s%s%s_%d.log", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, j );
 			logs.push_back( log_file );
 			
-			sprintf( cmd, "%s -c %d -f %s.lsd -s %d -e %d%s%s%s%s%s -l %s", exec, thrrun, simname, i, j <= sl ? num + 1 : num, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", log_file );
+			// results file names
+			for ( k = i; k < i + num + ( j <= sl ? 1 : 0 ); ++k )
+			{
+				sprintf( res_file, "%s%s%s_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, k, docsv ? "csv" : "res" );
+				
+				if ( dozip )
+					strcat( res_file, ".gz" );
+
+				if ( ! no_res )
+					res_list.push_back( res_file );
+			}
+
+			// command line
+			sprintf( cmd, "%s -c %d -f %s.lsd -s %d -e %d%s%s%s%s%s%s -l %s", exec, thrrun, simname, i, j <= sl ? num + 1 : num, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", dest_path, log_file );
 			
 			run_status.push_back( INISTAT );
 			run_threads.push_back( thread( run_parallel_exec, nw, run_status.size( ) - 1, string( cmd ) ) );
@@ -1499,10 +1545,22 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 	{
 		for ( i = fseed, j = 1; i < fseed + runs; ++i, ++j )
 		{
-			sprintf( log_file, "%s_%d.log", simname, i );
+			// log file name
+			sprintf( log_file, "%s%s%s_%d.log", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, i );
 			logs.push_back( log_file );
 			
-			sprintf( cmd, "%s -c %d -f %s.lsd -s %d -e 1%s%s%s%s%s -l %s", exec, thrrun, simname, i, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", log_file );
+			// results file name
+			sprintf( res_file, "%s%s%s_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, i, docsv ? "csv" : "res" );
+			
+			if ( dozip )
+				strcat( res_file, ".gz" );
+
+			if ( ! no_res )
+				res_list.push_back( res_file );
+
+			// command line
+			sprintf( cmd, "%s -c %d -f %s.lsd -s %d -e 1%s%s%s%s%s%s -l %s", exec, thrrun, simname, i, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", dest_path, log_file );
+			
 			run_status.push_back( INISTAT );
 			run_threads.push_back( thread( run_parallel_exec, nw, run_status.size( ) - 1, string( cmd ) ) );
 		}

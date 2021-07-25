@@ -2789,7 +2789,7 @@ while ( true )
 
 		// open Gnuplot
 		case 4:
-			cmd( "open_gnuplot" );
+			cmd( "open_gnuplot \"\" \"\"" );
 			break;
 
 			  
@@ -2839,8 +2839,8 @@ while ( true )
 
 			if ( *choice == 3 )
 			{
-				cmd( "set sysTermTmp $systemTerm" );
-				cmd( "set gptermTmp $gnuplotTerm" );
+				cmd( "set sysTermTmp $DefaultSysTerm" );
+				cmd( "set gptermTmp \"\"" );
 				cmd( "set gpdgrid3dTmp \"$gnuplotGrid3D\"" );
 				cmd( ".da.a.o.t delete 1.0 end; .da.a.o.t insert end \"$gnuplotOptions\"" );
 				goto gpoptions;
@@ -3068,7 +3068,6 @@ while ( true )
 			cmd( "bind .da.s.s.e1 <<ComboboxSelected>> { if { $sm == \"raw\" } { .da.s.s.e2 configure -state normal } { .da.s.s.e2 configure -state disabled } }" );
 
 			cmd( "showtop .da.s" );
-			cmd( "focus .da.s.x.e1; .da.s.x.e1 selection range 0 end" );
 			cmd( "mousewarpto .da.s.b.ok" );
 
 			set_plot:
@@ -3156,7 +3155,6 @@ while ( true )
 			cmd( "bind .da.s.y.e <KeyPress-Return> { set choice 1 }" );
 
 			cmd( "showtop .da.s" );
-			cmd( "focus .da.s.s.e; .da.s.s.e selection range 0 end" );
 			cmd( "mousewarpto .da.s.b.ok" );
 
 			set_lattice:
@@ -3258,8 +3256,6 @@ while ( true )
 			cmd( "bind $wid.format.e.sty <Return> { $wid.b.ok invoke }" );
 			
 			cmd( "showtop $wid current" );
-			cmd( "focus $wid.l.e" );
-			cmd( "$wid.l.e selection range 0 end" );
 			cmd( "mousewarpto $wid.b.ok" );
 			
 			*choice = 0;
@@ -3386,8 +3382,6 @@ while ( true )
 			cmd( "bind $wid.d.e <Return> { $wid.b.ok invoke }" );
 			
 			cmd( "showtop $wid current" );
-			cmd( "focus $wid.l.e" );
-			cmd( "$wid.l.e selection range 0 end" );
 			cmd( "mousewarpto $wid.b.ok" );
 		 
 			// enable most options for non-dotted lines
@@ -3581,8 +3575,6 @@ while ( true )
 			cmd( "bind $wid.l.e <Return> { $wid.b.ok invoke }" );
 			
 			cmd( "showtop $wid current" );
-			cmd( "focus $wid.l.e" );
-			cmd( "$wid.l.e selection range 0 end" );
 			cmd( "mousewarpto $wid.b.ok" );
 			
 			*choice = 0;
@@ -4218,7 +4210,6 @@ void set_cs_data( int *choice )
 		}" );
 
 	cmd( "showtop $p centerW no no yes 0 0 .da.s.fb.r1.add" );
-	cmd( ".da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e" );
 	cmd( "mousewarpto $p.fb.ok" );
 
 	cmd( "tooltip::tooltip $p.fb.r1.x \"Add case to selected\"" );
@@ -5376,6 +5367,11 @@ void plot_gnu( int *choice )
 
 	fprintf( f, "set output 'plot.file'\n" );
 
+	cmd( "set bordercolor [ rgb_24_color $colorsTheme(dfg) ]" );
+	app = ( char * ) Tcl_GetVar( inter, "bordercolor", 0 );
+	fprintf( f, "set border linecolor \"%s\"\n", app );
+	fprintf( f2, "set border linecolor \"%s\"\n", app );
+
 	if ( grid )
 	{
 		cmd( "set gridcolor [ rgb_24_color $colorsTheme(bg) ]" );
@@ -5398,9 +5394,9 @@ void plot_gnu( int *choice )
 	} 
 
 	if ( box == 0 )
-		sprintf( msg, "set xlabel \"%s_%s\"\n", str[ 0 ], tag[ 0 ] );
+		sprintf( msg, "set xlabel \"%s_%s\" textcolor \"%s\"\n", str[ 0 ], tag[ 0 ], app );
 	else
-		sprintf( msg, "set xlabel \"Time\"\n" );  
+		sprintf( msg, "set xlabel \"Time\" textcolor \"%s\"\n", app );  
 
 	fprintf( f, "%s", msg );
 	fprintf( f2, "%s", msg );
@@ -5408,9 +5404,9 @@ void plot_gnu( int *choice )
 	if ( ndim > 2 )
 	{
 		if ( box == 0 )
-			sprintf( msg, "set ylabel \"%s_%s\"\n", str[ 1 ], tag[ 1 ] );
+			sprintf( msg, "set ylabel \"%s_%s\" textcolor \"%s\"\n", str[ 1 ], tag[ 1 ], app );
 		else
-			sprintf( msg, "set ylabel \"Series\"\n" ); 
+			sprintf( msg, "set ylabel \"Series\" textcolor \"%s\"\n", app ); 
 		
 		fprintf( f, "%s", msg );
 		fprintf( f2, "%s", msg );
@@ -5465,7 +5461,7 @@ void plot_gnu( int *choice )
 		sprintf( msg, "plot 'data.gp' using 1:2 %s t \"%s_%s\"", str1, str[ 1 ], tag[ 1 ] );
 		
 		if ( allblack )
-			strcat( msg, str3);
+			strcat( msg, str3 );
 		
 		i = 2;
 	} 
@@ -5748,8 +5744,6 @@ void plot_cs_xy( int *choice )
 	cmd( "bind .da.s.v.e <KeyPress-Return> { focus .da.s.b.ok }" );
 
 	cmd( "showtop .da.s" );
-	cmd( "focus .da.s.i.e" );
-	cmd( ".da.s.i.e selection range 0 end" );
 	cmd( "mousewarpto .da.s.b.ok" );
 
 	*choice = 0;
@@ -5836,6 +5830,11 @@ void plot_cs_xy( int *choice )
 
 	fprintf( f, "set output 'plot.file'\n" );
 
+	cmd( "set bordercolor [ rgb_24_color $colorsTheme(dfg) ]" );
+	app = ( char * ) Tcl_GetVar( inter, "bordercolor", 0 );
+	fprintf( f, "set border linecolor \"%s\"\n", app );
+	fprintf( f2, "set border linecolor \"%s\"\n", app );
+
 	if ( grid )
 	{
 		cmd( "set gridcolor [ rgb_24_color $colorsTheme(bg) ]" );
@@ -5861,13 +5860,13 @@ void plot_cs_xy( int *choice )
 			sprintf( str2, "with lines " ); 
 	}
 
-	sprintf( msg, "set xlabel \"%s_%s\"\n", str[ 0 ], tag[ 0 ] );
+	sprintf( msg, "set xlabel \"%s_%s\" textcolor \"%s\"\n", str[ 0 ], tag[ 0 ], app );
 	fprintf( f, "%s", msg );
 	fprintf( f2, "%s", msg );
 
 	if ( ndim == 3 )
 	{
-		sprintf( msg, "set ylabel \"%s_%s\"\n", str[ block_length ], tag[ block_length ] );
+		sprintf( msg, "set ylabel \"%s_%s\" textcolor \"%s\"\n", str[ block_length ], tag[ block_length ], app );
 		fprintf( f, "%s", msg );
 		fprintf( f2, "%s", msg );
 	} 
@@ -6098,7 +6097,6 @@ void plot_phase_diagram( int *choice )
 	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 
 	cmd( "showtop .da.s" );
-	cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
 	cmd( "mousewarpto .da.s.b.ok" );
 
 	*choice = 0;
@@ -6156,6 +6154,11 @@ void plot_phase_diagram( int *choice )
 	fprintf( f, "set term tkcanvas\n" );
 	fprintf( f, "set output 'plot.file'\n" );
 
+	cmd( "set bordercolor [ rgb_24_color $colorsTheme(dfg) ]" );
+	app = ( char * ) Tcl_GetVar( inter, "bordercolor", 0 );
+	fprintf( f, "set border linecolor \"%s\"\n", app );
+	fprintf( f2, "set border linecolor \"%s\"\n", app );
+
 	if ( grid )
 	{
 		cmd( "set gridcolor [ rgb_24_color $colorsTheme(bg) ]" );
@@ -6173,7 +6176,7 @@ void plot_phase_diagram( int *choice )
 	sprintf( msg, "set yrange [%.*g:%.*g]\n", pdigits, miny, pdigits, maxy );
 	fprintf( f, "%s", msg );
 	fprintf( f2, "%s", msg );
-	sprintf( msg, "set xlabel \"%s_%s\"\n", str[ 0 ], tag[ 0 ] );
+	sprintf( msg, "set xlabel \"%s_%s\" textcolor \"%s\"\n", str[ 0 ], tag[ 0 ], app );
 	fprintf( f, "%s", msg );
 	fprintf( f2, "%s", msg );
 
@@ -6851,7 +6854,6 @@ void histograms( int *choice )
 	cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
 
 	cmd( "showtop .da.s" );
-	cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
 	cmd( "mousewarpto .da.s.b.ok" );
 
 	*choice = 0;
@@ -7104,7 +7106,6 @@ void histograms_cs( int *choice )
 	cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
 
 	cmd( "showtop .da.s" );
-	cmd( "focus .da.s.t.e; .da.s.t.e selection range 0 end" );
 	cmd( "mousewarpto .da.s.b.ok" );
 
 	*choice = 0;
@@ -7379,8 +7380,6 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 
 		cmd( "showtop .da.s" );
-		cmd( "focus .da.s.n.nv" );
-		cmd( ".da.s.n.nv selection range 0 end" );
 		cmd( "mousewarpto .da.s.b.ok" );
 		 
 		*choice = 0;
@@ -7806,8 +7805,6 @@ bool create_maverag( int *choice )
 	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 
 	cmd( "showtop .da.s" );
-	cmd( "focus .da.s.o.th" );
-	cmd( ".da.s.o.th selection range 0 end" );
 	cmd( "mousewarpto .da.s.b.ok" );
 
 	*choice = 0;

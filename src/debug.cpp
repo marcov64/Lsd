@@ -663,8 +663,6 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				cmd( "bind $e.v.l0.e <Return> { set choice 1 }" );
 
 				cmd( "showtop $e" );
-				cmd( "focus $e.v.l0.e" );
-				cmd( "$e.v.l0.e selection range 0 end" );
 				cmd( "mousewarpto $e.b.ok" );
 
 				choice = 0;
@@ -1082,8 +1080,6 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				cmd( "bind $t.t.val <Return> { set choice 1 }" );
 
 				cmd( "showtop $t" );
-				cmd( "$t.t.val selection range 0 end" );
-				cmd( "focus $t.t.val" );
 				cmd( "mousewarpto $t.b.ok" );
 
 				choice = 0;
@@ -1279,8 +1275,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 					cmd( "okhelpcancel $hk b { set choice 1 } { LsdHelp debug.html#hooks } { set choice 2 }" );
 
-					cmd( "showtop $hk" );
-					
+					cmd( "showtop $hk" );			
 					cmd( "mousewarpto $hk.b.ok" );
 
 					choice = 0;

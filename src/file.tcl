@@ -41,7 +41,7 @@ proc LsdHelp { fn } {
 # LSDHTML
 #************************************************
 proc LsdHtml { dir fn } {
-	global HtmlBrowser CurPlatform
+	global HtmlBrowser CurPlatform termResult
 	
 	if { $dir eq "" } {
 		set fqn "$fn"
@@ -54,9 +54,13 @@ proc LsdHtml { dir fn } {
 		set fqn [ file nativename "$fqn" ]
 		
 		if { $CurPlatform ne "windows" } {
-			exec $HtmlBrowser "$fqn" &
-		} {
-			exec cmd.exe /c start "$fqn" &
+			set error [ open_terminal $fqn $HtmlBrowser ]
+		} else {
+			set error [ open_terminal "start $fqn" ]
+		}
+		
+		if { $error } {
+			ttk::messageBox -parent . -type ok -icon error -title Error -message "Browser failed to launch" -detail "Please check if the web browser is set up properly.\n\nDetail:\n$termResult"
 		}
 		
 		return 1
@@ -746,30 +750,18 @@ proc browse_model { panel } {
 # OPEN_DIFF
 #************************************************
 proc open_diff { file1 file2 { file1name "" } { file2name "" } } {
-	global CurPlatform wish sysTerm RootLsd LsdSrc diffApp diffAppType diffFile1name diffFile2name diffFile1 diffFile2 diffOptions
+	global wish RootLsd LsdSrc diffApp diffAppType diffFile1name diffFile2name diffFile1 diffFile2 diffOptions termResult
 
 	set cmdline "$RootLsd/$LsdSrc/$diffApp $diffFile1 $file1 $diffFile2 $file2 $diffOptions $diffFile1name $file1name $diffFile2name $file2name"
 
 	if { $diffAppType == 0 } {
-		set cmdline [ concat $wish $cmdline ]
+		set error [ open_terminal $cmdline $wish ]
 	} elseif { $diffAppType == 1 } {
-		switch $CurPlatform {
-			linux {
-				set cmdline [ concat $sysTerm "-e" $cmdline ]
-			}
-			mac {
-				set cmdline [ concat "osascript -e tell application \"$sysTerm\" to do script \"cd [ pwd ]; $cmdline; exit\"" $cmdline ]
-			}
-			windows {
-				set cmdline [ concat $sysTerm "/c" $cmdline ]
-			}
-		}
+		set error [ open_terminal $cmdline ]
 	}
-
-	set error [ catch { exec -- {*}$cmdline & } result ]
-
+	
 	if { $error } {
-		ttk::messageBox -parent $par -type ok -icon error -title Error -message "Diff failed to launch" -detail "Diff returned error '$error'.\nDetail:\n$result\n\nPlease check if the diff appplication is set up properly and reinstall LSD if the problem persists."
+		ttk::messageBox -parent . -type ok -icon error -title Error -message "Diff failed to launch" -detail "Diff returned error '$error'.\nDetail:\n$termResult\n\nPlease check if the diff appplication is set up properly and reinstall LSD if the problem persists."
 	}
 
 	return $error
@@ -777,52 +769,64 @@ proc open_diff { file1 file2 { file1name "" } { file2name "" } } {
 
 
 #************************************************
+# OPEN_TERMINAL
+#************************************************
+proc open_terminal { cmd { term "" } } {
+	global sysTerm wish CurPlatform termResult
+	
+	if { $term eq "" } {
+		set term $sysTerm
+	}
+	
+	# separate command from options
+	if { [ llength $term ] > 1 } {
+		set opt [ lrange $term 1 end ]
+		set term [ lindex $term 0 ]
+	} else {
+		set opt [ list ]
+	}
+	
+	# whish is not system dependent
+	if { $term eq $wish } {
+		set cmdline [ concat $term $opt $cmd ]
+	} else {
+		switch $CurPlatform {
+			windows -
+			linux {
+				set cmdline [ concat $term $opt $cmd ]
+			}
+			mac {
+				set cmdline "osascript -e tell application \"$term\" to do script \"cd [ pwd ]; clear; $cmd; exit\""
+			}
+		}
+	}
+	
+	set termResult ""
+	return [ catch { exec -- {*}$cmdline & } termResult ]
+}
+
+
+#************************************************
 # OPEN_GNUPLOT
 # Open external gnuplot application
 #************************************************
-proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
-	global CurPlatform sysTerm gnuplotExe
+proc open_gnuplot { { script "" } { errmsg "" } { persist false } { par ".da" } } {
+	global CurPlatform sysTerm gnuplotExe termResult
 
-	if [ string equal $script "" ] {
-		set args ""
-	} else {
-		set args "-p $script"
-	}
+		if { $script eq "" && $CurPlatform in [ list linux mac ] } {
+			set error [ open_terminal $gnuplotExe ]
+		} elseif { $persist } {
+			set error [ open_terminal $script $gnuplotExe ]
+		} else {
+			set error [ open_terminal "-p $script" $gnuplotExe ]
+		}
 
-	switch $CurPlatform {
-		mac {
-			if { $wait } {
-				set error [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $script; exit\"" } result ]
-			} else {
-				set error [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $args; exit\"" & } result ]
-			}
-		}
-		linux {
-			if { $wait } {
-				set error [ catch { exec $sysTerm -e "gnuplot $script; exit" } result ]
-			} else {
-				set error [ catch { exec $sysTerm -e "gnuplot $args; exit" & } result ]
-			}
-		}
-		windows {
-			if [ string equal $script "" ] {
-				set error [ catch { exec $gnuplotExe & } result ]
-			} else {
-				if { $wait } {
-					set error [ catch { exec $gnuplotExe $script } result ]
-				} else {
-					set error [ catch { exec $gnuplotExe -p $script & } result ]
-				}
-			}
-		}
-	}
-
-	if { $error != 0 } {
+	if { $error } {
 		if [ string equal $errmsg "" ] {
 			set errmsg "Please check if Gnuplot is installed and set up properly."
 		}
 
-		ttk::messageBox -parent $par -type ok -icon error -title Error -message "Gnuplot failed to launch" -detail "Gnuplot returned error '$error'.\nDetail:\n$result\n\n$errmsg"
+		ttk::messageBox -parent $par -type ok -icon error -title Error -message "Gnuplot failed to launch" -detail "Gnuplot returned error '$error'.\n\nDetail:\n$termResult\n\n$errmsg"
 	}
 
 	return $error

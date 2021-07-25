@@ -76,7 +76,7 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
         1 => array ( "file", $filename_log, "a" ),   // stdout
         2 => array ( "file", $filename_log, "a" )    // stderr
     );
-    $command = $lsd_exec . " -t -z -b -c " . $max_cores . " -f " . $filename_conf . " -o " . $output_pref;
+    $command = $lsd_exec . " -t -z -p -b -c " . $max_thr_run . ":" . $max_par_run . " -f " . $filename_conf . " -o " . $output_pref;
     if ( $nice_enable && $os !== "windows" ) {
         $command = "nice -n " . $nice_level . " " . $command;
     }
@@ -152,10 +152,6 @@ $sh=array();
     // remove LSD configuration and grand total results files
     unlink( $filename_flag );
     unlink( $filename_conf );
-    $filename_total = glob( $output_pref . "run-" . $session_short_id . "_" . $seed . "_*.csv" );
-    if ( file_exists( $filename_total[ 0 ] ) ) {
-        unlink( $filename_total[ 0 ] );
-    }
 
     if ( $abort ) {
         echo "Aborted: user interruption";

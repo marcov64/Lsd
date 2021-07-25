@@ -259,9 +259,9 @@ set exeMac 				"LSD"
 set exeWindows 			"LSD"
 
 # OS specific default system terminal
-set sysTermMac			"Terminal"	; # "Terminal", "xterm"
-set sysTermLinux		"xterm"		; # "gnome-terminal", "xterm", "uxterm"
-set sysTermWindows		"cmd"		;
+set sysTermMac			"Terminal"		; # "Terminal", "xterm"
+set sysTermLinux		"xterm -e"		; # "gnome-terminal --", "xterm -e", "uxterm -e"
+set sysTermWindows		"cmd /c"		;
 
 # OS specific default debugger command
 set dbgMac				"lldb"		; # "gdb"
@@ -285,9 +285,9 @@ set makeWinCygwin		"make.exe"
 set makeWinMingw		"mingw32-make.exe"
 
 # OS specific default gnuplot terminal (empty string=gnuplot default)
-set gnuplotTermMac		""	; # "qt", "x11"
-set gnuplotTermLinux	""	; # "qt", "wxt", "x11"
-set gnuplotTermWindows	""	; # "wxt", "qt" , "windows"
+set gnuplotMac			"gnuplot"
+set gnuplotLinux		"gnuplot"
+set gnuplotindows		"wgnuplot.exe"
 
 # default diff application settings
 set diffApp				"tkdiff.tcl"; # command line diff application to use

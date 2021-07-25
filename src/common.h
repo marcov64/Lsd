@@ -539,7 +539,7 @@ bool load_model_info( const char *path );
 bool set_env( bool set );
 bool valid_label( const char *lab );
 bool strwsp( const char *str );
-char *clean_file( char *file );
+char *clean_file( const char *file );
 char *clean_path( char *path );
 char *get_str( const char *tcl_var, char *var = NULL, int var_size = 0 );
 char *search_lsd_root( char *start_path );

@@ -1331,24 +1331,14 @@ void show_logs( const char *path, vector < string > & logs )
 		j = n > 4 ? ( n > 8 ? ( n > 12 ? 4 : 3 ) : 2 ) : 1;
 		
 		if ( j == 1 )
-			strcpy( exec, "multitail" );
+			sprintf( exec, "multitail%s", platform == _WIN_ ? "" : " --retry-all" );
 		else
-			sprintf( exec, "multitail -s %d", j );
+			sprintf( exec, "multitail%s -s %d", platform == _WIN_ ? "" : " --retry-all", j );
 	}
 	
-	switch( platform )
-	{
-		case _LIN_:
-			cmd( "catch { exec -- $sysTerm -e %s %s & }", exec, logs_str );
-			break;
-
-		case _MAC_:
-			cmd( "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd %s; clear; %s %s\\\"\" & } result", path, exec, logs_str );
-			break;
-
-		case _WIN_:
-			cmd( "catch { exec -- $sysTerm /k %s %s & }", exec, logs_str );
-	}
+	cmd( "if { [ open_terminal \"%s %s\" ] != 0 } { \
+			ttk::messageBox -parent . -type ok -icon error -title Error -message \"%s failed to launch\" -detail \"Please check if %s is installed and set up properly.\n\nDetail:\n$termResult\" \
+		}", exec, logs_str, exec, exec );
 }
 
 #endif

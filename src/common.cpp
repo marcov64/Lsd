@@ -789,18 +789,18 @@ int windows_system( const char *cmd )
  CLEAN_FILE
  remove any path prefixes to filename, if present
  ****************************************************/
-char *clean_file( char *filename )
+char *clean_file( const char *filename )
 {
 	if ( filename != NULL )
 	{
 		if ( strchr( filename, '/' ) != NULL )
-			return strrchr( filename, '/' ) + 1;
+			return ( char * ) strrchr( filename, '/' ) + 1;
 		
 		if ( strchr( filename, '\\' ) != NULL )
-			return strrchr( filename, '\\' ) + 1;
+			return ( char * ) strrchr( filename, '\\' ) + 1;
 	}
 	
-	return filename;
+	return ( char * ) filename;
 }
 
 
