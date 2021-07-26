@@ -184,9 +184,17 @@ if [ string equal $CurPlatform mac ] {
 	}
 }
 
-# check incomplete terminal command
+# check old incompatible options and fix with defaults
 if { $CurPlatform in [ list linux windows ] && [ llength $sysTerm ] < 2 } { \
-	set sysTerm "$DefaultSysTerm"
+	set sysTerm $DefaultSysTerm
+}
+	
+if { $CurPlatform eq "mac" && $wish eq "wish8.6" } { \
+	set wish $wishMac
+}
+	
+if { $CurPlatform eq "windows" && $HtmlBrowser eq "open" } { \
+	set HtmlBrowser $browserWindows
 }
 	
 # detect and update OS-dependent current/default theme configurations

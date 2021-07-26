@@ -2606,15 +2606,12 @@ while ( true )
 					// check if MC results were not just created
 					if ( ! mc || res_list.size( ) <= 1 )
 					{
-						const char extRes[ ] = ".res .res.gz";
-						const char extTot[ ] = ".tot .tot.gz";
-
 						// make sure there is a path set
 						cmd( "set path \"%s\"", path );
 						if ( strlen( path ) > 0 )
 							cmd( "cd \"$path\"" );
 					
-						cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$path\" -filetypes {{{LSD result files} {%s}} {{LSD total files} {%s}} {{All files} {*}}} ]", mc ? "s" : "(s)", extRes, extTot );
+						cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$path\" -defaultextension .res.gz -filetypes {{{LSD result files} {.res .res.gz}} {{LSD total files} {.tot .tot.gz}} {{All files} {*}}} ]", mc ? "s" : "(s)" );
 						cmd( "if { ! [ fn_spaces \"$lab\" .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
 						h = *choice;		// number of files
 						

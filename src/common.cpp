@@ -783,6 +783,50 @@ int windows_system( const char *cmd )
 	return res;
 }
 
+#else
+
+/****************************************************
+ UNIX_SYSTEM
+ executes system command to avoid in Mac std lib
+ mutex in system()
+ ****************************************************/
+int unix_system( const char *cmd )
+{
+	char **args;
+	char * const env[ ] = { NULL };
+	int res;
+	pid_t pid, wpid;
+	wordexp_t p;
+	
+	if ( wordexp( cmd, & p, 0 ) != 0 )
+		return -1;
+	
+	args = p.we_wordv;
+
+	pid = fork( );
+	if ( pid == -1 )
+	{
+		wordfree( & p );
+		return -1;
+	}
+	
+	if ( pid == 0 )
+	{
+		execve( args[ 0 ], ( char ** ) args, ( char ** ) env );
+		return -1;
+	}
+	else
+	{
+ 		wpid = waitpid( pid, & res, 0 );
+		wordfree( & p );
+		
+		if ( wpid == -1 )
+			return -1;
+		else
+			return res;
+	}
+}
+
 #endif
 
 /****************************************************

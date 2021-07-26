@@ -421,7 +421,7 @@ void report( int *choice, object *r )
 		else
 			plog( "\nReport saved in file: %s\n", "", name_rep );
 		
-		cmd( "LsdHtml \"%s\" \"%s\"", path_rep, name_rep );
+		cmd( "open_browser \"%s\" \"%s\"", path_rep, name_rep );
 	}
 
 	end:
@@ -438,7 +438,7 @@ SHOW_REPORT
 **********************************/
 void show_report( int *choice, const char *par_wnd )
 {
-	cmd( "set choice [ LsdHtml \"%s\" \"%s\" ]", path_rep, name_rep );
+	cmd( "set choice [ open_browser \"%s\" \"%s\" ]", path_rep, name_rep );
 	
 	if ( *choice == 0 )
 	{
@@ -456,7 +456,7 @@ void show_report( int *choice, const char *par_wnd )
 		if ( *choice == 0 )
 			return;
 
-		cmd( "LsdHtml \"\" \"$fname\"" );
+		cmd( "open_browser \"\" \"$fname\"" );
 	}
 }
 

@@ -181,7 +181,7 @@ set cscaleLat	1.0	; # default color scale (1:1.0)
 # mouse defaults
 set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down
 set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Windows
-set mouseWarp	1	; # set to 0 to disable auto-snapping (ignored in Windows)
+set mouseWarp	0	; # set to 0 to disable auto-snapping (ignored in Windows)
 	
 # internal plot defaults
 set fontP		{ Helvetica 9 normal }; # default plot text font/size/mode
@@ -274,7 +274,7 @@ set browserLinux		"x-www-browser"	; # "x-www-browser", "firefox", "chrome"
 set browserWindows		"start"			; # "start", "firefox", "chrome"
 
 # OS specific default wish utility
-set wishMac				"wish8.6"
+set wishMac				"wish"
 set wishLinux			"wish"
 set wishWindows			"wish86.exe"
 

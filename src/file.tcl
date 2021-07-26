@@ -28,40 +28,6 @@ proc LsdExit { } {
 
 
 #************************************************
-# LSDHELP
-#************************************************
-proc LsdHelp { fn } {
-	global RootLsd
-	
-	LsdHtml "$RootLsd/Manual" "$fn"
-}
-
-
-#************************************************
-# LSDHTML
-#************************************************
-proc LsdHtml { dir fn } {
-	global HtmlBrowser CurPlatform termResult
-	
-	if { $dir eq "" } {
-		set fqn "$fn"
-	} else {
-		set fqn "$dir/$fn"
-	}
-	
-	if { ! [ catch { set fqn [ file normalize "$fqn" ] } ] && [ file exists "$fqn" ] } {
-		if { [ open_terminal "$HtmlBrowser $fqn" ] != 0 } {
-			ttk::messageBox -parent . -type ok -icon error -title Error -message "Browser failed to launch" -detail "Please check if the web browser is set up properly.\n\nDetail:\n$termResult"
-			return 0
-		}
-		return 1
-	}
-	
-	return 0
-}
-
-
-#************************************************
 # CHECK_COMPONENTS
 # Checks if required external software components
 # are available and on the proper versions
@@ -759,44 +725,6 @@ proc open_diff { file1 file2 { file1name "" } { file2name "" } } {
 
 
 #************************************************
-# OPEN_TERMINAL
-#************************************************
-proc open_terminal { cmd { term "" } } {
-	global sysTerm wish CurPlatform termResult
-	
-	if { $term eq "" } {
-		set term $sysTerm
-	}
-	
-	# separate command from options
-	if { [ llength $term ] > 1 } {
-		set opt [ lrange $term 1 end ]
-		set term [ lindex $term 0 ]
-	} else {
-		set opt [ list ]
-	}
-	
-	# whish is not system dependent
-	if { $term eq $wish } {
-		set cmdline [ concat $term $opt $cmd ]
-	} else {
-		switch $CurPlatform {
-			windows -
-			linux {
-				set cmdline [ concat $term $opt $cmd ]
-			}
-			mac {
-				set cmdline "osascript -e tell application \"$term\" to do script \"cd [ pwd ]; clear; $cmd; exit\""
-			}
-		}
-	}
-	
-	set termResult ""
-	return [ catch { exec -- {*}$cmdline & } termResult ]
-}
-
-
-#************************************************
 # OPEN_GNUPLOT
 # Open external gnuplot application
 #************************************************
@@ -820,6 +748,85 @@ proc open_gnuplot { { script "" } { errmsg "" } { persist false } { par ".da" } 
 	}
 
 	return $error
+}
+
+
+#************************************************
+# OPEN_BROWSER
+#************************************************
+proc open_browser { dir fn } {
+	global HtmlBrowser CurPlatform termResult
+	
+	if { $dir eq "" } {
+		set fqn "$fn"
+	} else {
+		set fqn "$dir/$fn"
+	}
+	
+	if { ! [ catch { set fqn [ file normalize "$fqn" ] } ] && [ file exists "$fqn" ] } {
+		if { $CurPlatform in [ list linux mac ] } {
+			set error [ open_terminal $fqn $HtmlBrowser ]
+		} else {
+			set error [ open_terminal "$HtmlBrowser $fqn" ]
+		}
+		
+		if { $error } {
+			ttk::messageBox -parent . -type ok -icon error -title Error -message "Browser failed to launch" -detail "Please check if the web browser is set up properly.\n\nDetail:\n$termResult"
+			return 0
+		}
+		
+		return 1
+	}
+	
+	return 0
+}
+
+
+#************************************************
+# OPEN_TERMINAL
+#************************************************
+proc open_terminal { cmd { term "" } } {
+	global sysTerm wish HtmlBrowser CurPlatform termResult
+	
+	if { $term eq "" } {
+		set term $sysTerm
+	}
+	
+	# separate command from options
+	if { [ llength $term ] > 1 } {
+		set opt [ lrange $term 1 end ]
+		set term [ lindex $term 0 ]
+	} else {
+		set opt [ list ]
+	}
+	
+	# whish is not system dependent
+	if { $term in [ list $wish $HtmlBrowser ] } {
+		set cmdline [ concat $term $opt $cmd ]
+	} else {
+		switch $CurPlatform {
+			windows -
+			linux {
+				set cmdline [ concat $term $opt $cmd ]
+			}
+			mac {
+				set cmdline "osascript -e \"tell application \\\"$term\\\" to do script \\\"cd [ pwd ]; clear; $cmd; exit\\\"\""
+			}
+		}
+	}
+	
+	set termResult ""
+	return [ catch { exec -- {*}$cmdline & } termResult ]
+}
+
+
+#************************************************
+# LSDHELP
+#************************************************
+proc LsdHelp { fn } {
+	global RootLsd
+	
+	open_browser "$RootLsd/Manual" "$fn"
 }
 
 

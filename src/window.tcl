@@ -1517,33 +1517,37 @@ proc mousewarpto w {
 	
 	update
 	
-	if { $mouseWarp && [ winfo exists $w ] && [ winfo viewable $w ] } {
-		set wX [ expr { [ winfo width $w ] / 2 } ]
-		set wY [ expr { [ winfo height $w ] / 2 } ]
-		set curX 0
-		set curY 0
+	if { [ winfo exists $w ] && [ winfo viewable $w ] } {
+		if { $mouseWarp } {
+			set wX [ expr { [ winfo width $w ] / 2 } ]
+			set wY [ expr { [ winfo height $w ] / 2 } ]
+			set curX 0
+			set curY 0
 		
-		bind $w <Motion> {
-			set curX %x
-			set curY %y
-		}
+			bind $w <Motion> {
+				set curX %x
+				set curY %y
+			}
 		
-		after 100
-		focus $w
+			after 100
+			focus $w
 		
-		# first move pointer to toplevel to bypass Tk bug
-		set t [ winfo toplevel $w ]
-		event generate $t <Motion> -warp 1 -x [ expr { [ winfo width $t ] / 2 } ] -y [ expr { [ winfo height $t ] / 2 } ]
-		update idletasks
-
-		# do it as required to bypass Tk bug (first warps just go to the dialog not the button)
-		for { set tries 0 } { ( $curX != $wX || $curY != $wY ) && $tries < 10 } { incr tries } {
-			event generate $w <Motion> -warp 1 -x $wX -y $wY
+			# first move pointer to toplevel to bypass Tk bug
+			set t [ winfo toplevel $w ]
+			event generate $t <Motion> -warp 1 -x [ expr { [ winfo width $t ] / 2 } ] -y [ expr { [ winfo height $t ] / 2 } ]
 			update idletasks
-		}
+
+			# do it as required to bypass Tk bug (first warps just go to the dialog not the button)
+			for { set tries 0 } { ( $curX != $wX || $curY != $wY ) && $tries < 10 } { incr tries } {
+				event generate $w <Motion> -warp 1 -x $wX -y $wY
+				update idletasks
+			}
 		
-		bind $w <Motion> { }
-		unset curX curY
+			bind $w <Motion> { }
+			unset curX curY
+		} else {
+			focus $w
+		}
 	}
 	
 	update idletasks

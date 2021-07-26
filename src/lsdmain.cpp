@@ -165,17 +165,6 @@ const char *wnd_names[ LSD_WIN_NUM ] = LSD_WIN_NAME;
 const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
 // conditional variables
-#ifndef _NW_
-#include "tables.h"
-int i_values[ 4 ];			// user temporary variables copy
-double d_values[ USER_D_VARS ];
-object *o_values[ 10 ];
-netLink *n_values[ 10 ];
-FILE *f_values[ 1 ];
-p_mapT par_map;				// variable to parent name map for AoR
-Tcl_Interp *inter = NULL;	// global Tcl interpreter in LSD
-#endif
-
 #ifndef _NP_
 atomic < bool > parallel_ready( true );// flag to indicate variable worker is ready
 map < thread::id, worker * > thr_ptr;// worker thread pointers
@@ -189,9 +178,20 @@ vector < thread > run_threads;// parallel running instances
 worker *workers = NULL;		// multi-thread parallel worker data
 #endif
 
+#ifndef _NW_
+#include "tables.h"
+double d_values[ USER_D_VARS ];
+int i_values[ 4 ];			// user temporary variables copy
+netLink *n_values[ 10 ];
+object *o_values[ 10 ];
+p_mapT par_map;				// variable to parent name map for AoR
+FILE *f_values[ 1 ];
+Tcl_Interp *inter = NULL;	// global Tcl interpreter in LSD
+#else
 // command line strings
 const char lsdCmdMsg[ ] = "This is the No Window version of LSD.";
 const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd [-s SEED] [-e RUNS] to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-l FILENAME' to save all output to a (log) file\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-p' for skipping the generation of totals file\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-b' for showing a progress bar\n'-c MAX_THREADS[:MAX_RUNS]' to set maximum parallel threads/runs to use\n";
+#endif
 
 
 /*********************************
@@ -200,8 +200,7 @@ const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd [-s SEED] [-e
 int lsdmain( int argn, char **argv )
 {
 	char *str;
-	int i, j = 0, k = 0, len;
-	FILE *f;
+	int i, j = 0, k = 0;
 	
 	path = new char[ strlen( "" ) + 1 ];
 	simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
@@ -362,7 +361,8 @@ int lsdmain( int argn, char **argv )
 	}
 	
 	delete [ ] str;
-				
+	FILE *f;
+		
 	if ( ( f = fopen( struct_file, "r" ) ) == NULL )
 	{
 		fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n\n", struct_file );
@@ -440,7 +440,7 @@ int lsdmain( int argn, char **argv )
 #endif
 
 #else 
-	
+		
 	for ( i = 1; argv[ i ] != NULL; i++ )
 	{
 		if ( exec_file == NULL || exec_path == NULL )
@@ -458,11 +458,14 @@ int lsdmain( int argn, char **argv )
 		if ( argv[ i ][ 1 ] == 'f' )
 		{
 			delete [ ] simul_name;
-			simul_name = new char[ strlen( argv[ i + 1 ] ) + 3 ];
+			simul_name = new char[ strlen( argv[ i + 1 ] ) + 5 ];
+			str = new char[ strlen( argv[ i + 1 ] ) + 1 ];
 			strcpy( simul_name, argv[ i + 1 ] );
-			len = strlen( simul_name );
-			if ( len > 4 && ! strcmp( ".lsd", simul_name + len - 4 ) )
-				*( simul_name + len - 4 ) = '\0';
+			strcpy( str, argv[ i + 1 ] );
+			strupr( str );
+			if ( strstr( str, ".LSD" ) != NULL )
+				simul_name[ strstr( str, ".LSD" ) - str ] = '\0';
+			delete [ ] str;
 			i++;
 		}
 		if ( argv[ i ][ 1 ] == 'i' )
@@ -1470,7 +1473,7 @@ void run_parallel_exec( bool nw, int id, string cmd )
 #ifdef _WIN32
 	res = windows_system( cmd.c_str( ) );
 #else
-	res = system( cmd.c_str( ) );
+	res = unix_system( cmd.c_str( ) );
 #endif
 
 	lock_guard < mutex > lock( lock_run_status );
