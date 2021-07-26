@@ -24,16 +24,16 @@ w\:* {behavior:url(#default#VML);}
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>32</o:Revision>
-  <o:TotalTime>2732</o:TotalTime>
+  <o:Revision>33</o:Revision>
+  <o:TotalTime>2735</o:TotalTime>
   <o:Created>2018-03-30T22:31:00Z</o:Created>
-  <o:LastSaved>2021-07-22T16:27:00Z</o:LastSaved>
+  <o:LastSaved>2021-07-26T23:24:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>5847</o:Words>
-  <o:Characters>31579</o:Characters>
-  <o:Lines>263</o:Lines>
+  <o:Words>5867</o:Words>
+  <o:Characters>31687</o:Characters>
+  <o:Lines>264</o:Lines>
   <o:Paragraphs>74</o:Paragraphs>
-  <o:CharactersWithSpaces>37352</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>37480</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -1555,9 +1555,9 @@ Results</a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'>.<o:p>
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>If there
 are multiple simulation runs configured in the </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>Run&gt;Simulation Settings</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> menu entry, LSD issues a
-confirmation message (see example below), telling how the results data will be
-handled and providing some options to the user. <o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> menu entry, LSD issues a confirmation
+message (see example below), telling how the results data will be handled and
+providing some options to the user. <o:p></o:p></span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US style='mso-ansi-language:
 EN-US;mso-no-proof:yes'><img border=0 width=196 height=351 id="_x0000_i1027"
@@ -1657,10 +1657,10 @@ normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Update configuration
 file</span></b></span><span lang=EN-US style='mso-ansi-language:EN-US'>: if
 selected (default), the unsaved changes will be saved to the <span class=GramE>current
 <span class=Cdigo>.<span class=SpellE>lsd</span></span></span> <a
-href="LSD_faqs.html#modelsetting">configuration file</a> before simulation is executed.
-Please note that changes will be lost if this checkbox is unmarked and the user
-press </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>OK</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>. <o:p></o:p></span></p>
+href="LSD_faqs.html#modelsetting">configuration file</a> before simulation is
+executed. Please note that changes will be lost if this checkbox is unmarked
+and the user press </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>OK</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>. <o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>When
 multiple simulation runs are configured, at the end of each simulation run the
@@ -1720,45 +1720,46 @@ the <a href="log.html">Log</a> window during the processing and no <a
 href="runtime.html">Run-time Plot</a> window is created. However, the log
 information is presented in the Log window as soon as the processing finishes.
 This way, the user can continue to interact with LSD while the simulation is
-being executed, but it is not possible to start additional no-window batches. Also,
-LSD Browser must be kept open until the background runs are finished. Quitting
-LSD Browser before that will abort the background runs.<o:p></o:p></span></p>
+being executed, but it is not possible to start additional no-window batches.
+Also, LSD Browser must be kept open until the background runs are finished.
+Quitting LSD Browser before that will abort the background runs.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>To use this
-command, the user must first create a no-window (command prompt) version of the
-model in <a href="LMM.html">LMM</a> by selecting menu </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'><a href="LMM.html">Model&gt;Create 'No
-Window' Version</a></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'>. This special version of the <a href="LSD_faqs.html#modelprogram">LSD
-model program</a> is required to process the background parallel runs. Make
-sure to update (<a href="LSD_faqs.html#compiler">recompile</a>) the no-window
-version of your model every time you change your <a
-href="LSD_faqs.html#equationfile">equation file</a> (a warning box will show if
-do not do so).<o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
+mso-ansi-language:EN-US'>This command automatically creates, as required, a
+no-window (command prompt) version of the model, equivalent to the one manually
+produced in <a href="LMM.html">LMM</a> by selecting menu </span><span
+lang=EN-US style='font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
+color:gray;mso-ansi-language:EN-US'><a href="LMM.html">Model&gt;Create 'No
+Window' Version</a></span><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
+mso-ansi-language:EN-US'>. This special version of the <a
+href="LSD_faqs.html#modelprogram">LSD model program</a> is required to process
+the background parallel runs. Make sure to accept the request to update (<a
+href="LSD_faqs.html#compiler">recompile</a>) the no-window version of your
+model every time you change the <a href="LSD_faqs.html#equationfile">equation
+file</a> (a warning box will show if you have do so).<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Irrespective
 of the number of <span class=GramE>simulation</span> runs configured in the </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Run&gt;Simulation
-Settings</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> menu
-entry, LSD will issue a confirmation message, telling how the results data will
-be handled and providing some options to the user. The confirmation dialog and
-the available options are <span class=GramE>similar to</span> those available
-for the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'><a href="#_Run">Run&gt;Run</a></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> command above. Additionally, the user can
-adjust the maximum number of parallel <span class=GramE>simulation</span> runs
-to perform. <span class=Cdigo><span style='font-family:"Arial",sans-serif;
-color:windowtext'>The default is the number of CPU (logical) cores of the
-computer. This number can be reduced to prevent the full utilization of the
-computer CPUs. If this number is set to one, the simulation runs are processed
-sequentially. Parallel processing is only available if </span>Skip generating
-totals file</span><span class=Cdigo><span style='font-family:"Arial",sans-serif;
-color:windowtext'> is checked, otherwise processing must be sequential. Also,
-it is not possible to simultaneously select both </span>Skip generating results
-files</span><span class=Cdigo><span style='font-family:"Arial",sans-serif;
-color:windowtext'> and </span>Skip generating totals file</span><span
-class=Cdigo><span style='font-family:"Arial",sans-serif;color:windowtext'>
-options.</span></span><o:p></o:p></span></p>
+Settings</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> menu entry,
+LSD will issue a confirmation message, telling how the results data will be
+handled and providing some options to the user. The confirmation dialog and the
+available options are <span class=GramE>similar to</span> those available for
+the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
+href="#_Run">Run&gt;Run</a></span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'> command above. Additionally, the user can adjust the maximum number of
+parallel <span class=GramE>simulation</span> runs to perform. <span
+class=Cdigo><span style='font-family:"Arial",sans-serif;color:windowtext'>The
+default is the number of CPU (logical) cores of the computer. This number can
+be reduced to prevent the full utilization of the computer CPUs. If this number
+is set to one, the simulation runs are processed sequentially. Parallel
+processing is only available if </span>Skip generating totals file</span><span
+class=Cdigo><span style='font-family:"Arial",sans-serif;color:windowtext'> is
+checked, otherwise processing must be sequential. Also, it is not possible to
+simultaneously select both </span>Skip generating results files</span><span
+class=Cdigo><span style='font-family:"Arial",sans-serif;color:windowtext'> and </span>Skip
+generating totals file</span><span class=Cdigo><span style='font-family:"Arial",sans-serif;
+color:windowtext'> options.</span></span><o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The results
 are saved to LSD results and totals files (</span><span class=Cdigo><span
@@ -1792,11 +1793,11 @@ lang=EN-US style='mso-ansi-language:EN-US'> extension) are also temporarily
 created in the configuration file subdirectory. There is one log file per
 parallel thread. These files contain the output that is normally directed to
 the LSD Log window while the simulation is being execute and are presented at
-one in this window when processing is complete. After presentation in the Log window,
-the log files are deleted. Checking the <span class=GramE>logs</span> the user
-can see any errors and warnings produced. After starting the background
-execution, LSD offers to launch the </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>tail</span></span><span lang=EN-US
+one in this window when processing is complete. After presentation in the Log
+window, the log files are deleted. Checking the <span class=GramE>logs</span>
+the user can see any errors and warnings produced. After starting the
+background execution, LSD offers to launch the </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>tail</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> (single/sequential runs) or </span><span
 class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>multitail</span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> (parallel runs) applications to
@@ -1824,10 +1825,10 @@ style='mso-ansi-language:EN-US'> menu command.<o:p></o:p></span></p>
 <h2><a name=parallel></a><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Parallel Batch<o:p></o:p></span></h2>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Create and optionally
-start a parallel <a href="LSD_faqs.html#simulationrun">simulation run</a>
-batch. The user has different alternatives to select <span class=GramE>the <span
-class=Cdigo>.<span class=SpellE>lsd</span></span></span> <a
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Create and
+optionally start a parallel <a href="LSD_faqs.html#simulationrun">simulation
+run</a> batch. The user has different alternatives to select <span class=GramE>the
+<span class=Cdigo>.<span class=SpellE>lsd</span></span></span> <a
 href="LSD_faqs.html#modelsetting">configuration files</a> to be used for the
 simulation execution (see below). Differently from the </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a href="#_Run">Run&gt;Run</a></span></span><span
@@ -1837,9 +1838,9 @@ operating system, in background. Also, differently from </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
 href="#_Start_‘No_Window’">Run&gt;Parallel Run</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, this command creates a batch job
-file that can be started directly using a terminal, without requiring LSD graphical
-interface to be installed, as it is frequently the case in high-performance
-servers.<o:p></o:p></span></p>
+file that can be started directly using a terminal, without requiring LSD
+graphical interface to be installed, as it is frequently the case in
+high-performance servers.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Immediately
 after issuing this command, LSD offers three alternatives to select which
@@ -1853,8 +1854,8 @@ lang=EN-US style='mso-ansi-language:EN-US'>, where </span><span class=Cdigo><spa
 lang=EN-US style='mso-ansi-language:EN-US'>XXXX</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> is the common configuration name and </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>NNN</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> is the first sequential number to
-use, or (2) use the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+lang=EN-US style='mso-ansi-language:EN-US'> is the first sequential number to use,
+or (2) use the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>Ctrl/<span class=SpellE>Cmd</span></span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> key to pick multiple </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
@@ -1879,9 +1880,9 @@ href="log.html">Log</a> window).<o:p></o:p></span></p>
 possibility of not start processing the batch job immediately is important when
 the user can use another computer (typically a high-performance server) to run
 the simulations. If this is the case, the user must copy the entire <a
-href="LSD_faqs.html#modelhome">model home directory</a> (including
-subdirectories) to the new machine and execute the created </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>XXXX.bat</span></span><span
+href="LSD_faqs.html#modelhome">model home directory</a> (including subdirectories)
+to the new machine and execute the created </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>XXXX.bat</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> (Windows) or </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>XXXX.sh</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> (Linux/macOS) in the same
@@ -1910,35 +1911,40 @@ progress cannot be shown in the Log window and no <a href="runtime.html">Run-tim
 Plot</a> window is created. This way, the user can continue to interact with
 LSD while the simulation is being executed or even close it. <o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>To use this
-command, the user must first create a no-window (command prompt) version of the
-model in <a href="LMM.html">LMM</a> by selecting menu </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'><a href="LMM.html">Model&gt;Create
-'No Window' Version</a></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'>. This special version of the <a href="LSD_faqs.html#modelprogram">LSD
-model program</a> is required to process the no-window batch. Make sure to
-update (<a href="LSD_faqs.html#compiler">recompile</a>) the no-window version
-of your model every time you change your <a href="LSD_faqs.html#equationfile">equation
-file</a> (a warning box will show if do not do so). If the no-window version
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
+mso-ansi-language:EN-US'>This command automatically creates, as required, a
+no-window (command prompt) version of the model, equivalent to the one manually
+produced in <a href="LMM.html">LMM</a> by selecting menu </span><span
+lang=EN-US style='font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
+color:gray;mso-ansi-language:EN-US'><a href="LMM.html">Model&gt;Create 'No
+Window' Version</a></span><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
+mso-ansi-language:EN-US'>. This special version of the <a
+href="LSD_faqs.html#modelprogram">LSD model program</a> is required to process
+the no-window batch. Make sure to accept the request to update (<a
+href="LSD_faqs.html#compiler">recompile</a>) the no-window version of your
+model every time you change the <a href="LSD_faqs.html#equationfile">equation
+file</a> (a warning box will show if you have do so). If the no-window version
 was created in a different operating system (including different Linux
-distributions), it <span class=GramE>has to</span> be recompiled in the target
-machine. If the machine offers a graphical interface environment, the simplest
-way to recompile is simply installing LSD on it and use LMM as usual. If a
-graphical interface is not available (like in a server environment), or
-otherwise installing LSD is not possible, the no-window version may be
-recompiled in a terminal window. Move to the model home directory (</span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>cd YYYY</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>) and use the command </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>make -f <span
-class=SpellE>makefileNW</span></span></span><span lang=EN-US style='mso-ansi-language:
+distributions), it must be recompiled in the target machine. If the machine
+offers a graphical interface environment, the simplest way to recompile is
+simply installing LSD on it and use LMM as usual. If a graphical interface is
+not available (like in a server environment), or otherwise installing LSD is
+not possible, the no-window version may be recompiled in a terminal window.
+Move to the model home directory (</span><span lang=EN-US style='font-family:
+"Courier New";mso-fareast-font-family:"Times New Roman";color:gray;mso-ansi-language:
+EN-US'>cd YYYY</span><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
+mso-ansi-language:EN-US'>) and use the command </span><span lang=EN-US
+style='font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
+color:gray;mso-ansi-language:EN-US'>make -f <span class=SpellE>makefileNW</span></span><span
+lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
 EN-US'> to recreate a proper no-window executable version (GCC and make must be
 installed in the machine).<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Irrespective
 of the number of <span class=GramE>simulation</span> runs configured in the </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Run&gt;Simulation
-Settings</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> menu entry,
-LSD will issue a confirmation message, telling how the CPU cores and the
+Settings</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> menu
+entry, LSD will issue a confirmation message, telling how the CPU cores and the
 results data will be handled and providing some options to the user, as shown
 below.<o:p></o:p></span></p>
 
@@ -1947,9 +1953,8 @@ EN-US;mso-no-proof:yes'><img border=0 width=196 height=373 id="_x0000_i1026"
 src="image/parallel_run.png"></span><span lang=EN-US style='mso-ansi-language:
 EN-US'><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
-available options are (some may not be available according to the
-circumstance):<o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The available
+options are (some may not be available according to the circumstance):<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l2 level1 lfo6'><![if !supportLists]><span
@@ -2019,9 +2024,9 @@ lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-fon
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
-normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Skip generating results
-files</span></b></span><span lang=EN-US style='mso-ansi-language:EN-US'>: if
-enabled, LSD will not produce the time-series detailed </span><span
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Skip generating
+results files</span></b></span><span lang=EN-US style='mso-ansi-language:EN-US'>:
+if enabled, LSD will not produce the time-series detailed </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.res[.<span
 class=SpellE>gz</span>]</span></span><span lang=EN-US style='mso-ansi-language:
 EN-US'> results files, generating only the <span class=GramE>summarized <span
@@ -2076,8 +2081,8 @@ lang=EN-US style='mso-ansi-language:EN-US'>: if marked (default), all the
 produced files will be saved in compressed <span class=SpellE>gzip</span>
 format (indicated by the </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>.<span class=SpellE>gz</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> extension). Compressed files use far
-less disk space and are faster to save/load. LSD and many data analysis
+lang=EN-US style='mso-ansi-language:EN-US'> extension). Compressed files use
+far less disk space and are faster to save/load. LSD and many data analysis
 applications (like R) can read </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>.<span class=SpellE>gz</span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> compressed files directly, without
@@ -2132,12 +2137,12 @@ elements at the very last time step of each simulation.<o:p></o:p></span></p>
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>One log
 text file (</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>.log</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
-extension) is also created for each configuration file being processed, in the same
-subdirectory. These files contain the output that would normally be directed to
-the LSD Log window when running each configuration. Checking them the user can
-verify the status of the simulations running in background, any errors and
-warnings produced, and when each simulation execution is finished. After
-starting the background execution, LSD offers to launch the </span><span
+extension) is also created for each configuration file being processed, in the
+same subdirectory. These files contain the output that would normally be
+directed to the LSD Log window when running each configuration. Checking them
+the user can verify the status of the simulations running in background, any
+errors and warnings produced, and when each simulation execution is finished.
+After starting the background execution, LSD offers to launch the </span><span
 class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>multitail</span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> application to follow up the <span
 class=GramE>simulations</span> execution. Users can also follow up these files
@@ -2180,8 +2185,8 @@ Settings</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> dialog
 box (see <a href="#_Simulation_Settings">below</a>). However, for models
 requiring long times to process a <a href="LSD_faqs.html#simulationrun">simulation
 run</a> this approach may be inefficient, as it does not take advantage of all
-the resources (processing cores and memory) usually available in modern
-computers, particularly for high-capacity servers. In these situations, the </span><span
+the resources (processing cores and memory) usually available in modern computers,
+particularly for high-capacity servers. In these situations, the </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Run&gt;Parallel
 Batch</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> command
 offers two alternatives to reduce the total processing time required by using
@@ -2215,8 +2220,8 @@ style='mso-ansi-language:EN-US'>Number of simulation runs</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> is set to 1, save it if required,
 right click on any parameter and choose </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>Sensitivity</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> in the context menu. In the entry
-box simply type </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+lang=EN-US style='mso-ansi-language:EN-US'> in the context menu. In the entry box
+simply type </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>=<span class=GramE>VAL:VAL</span>@NUM%L</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>, replacing </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>VAL</span></span><span lang=EN-US
@@ -2478,9 +2483,9 @@ style='mso-ansi-language:EN-US'> option. However, the </span><span class=Cdigo><
 lang=EN-US style='mso-ansi-language:EN-US'>Profile minimum time</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>Profile observed variables only</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> options also control which
-Variables are considered for the report. One common use for this option is to
-identify the computationally-heavy <a href="LSD_faqs.html#equation">Equations</a>
+lang=EN-US style='mso-ansi-language:EN-US'> options also control which Variables
+are considered for the report. One common use for this option is to identify
+the computationally-heavy <a href="LSD_faqs.html#equation">Equations</a>
 associated to multi-instanced <a href="LSD_faqs.html#variable">Variables</a>
 which can be processed in parallel (see the </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>Parallel</span></span><span
@@ -2497,9 +2502,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Disable parallel
 computation</span></b></span><span lang=EN-US style='mso-ansi-language:EN-US'>:
 if checked, temporarily disables the Variables marked to be computed in
-parallel, if any (see <a href="browser.html#changeelement">here</a>). This option
-may be useful to disable parallel processing to allow for more details in
-simulation error messages or to permit the use of the profiler.<o:p></o:p></span></p>
+parallel, if any (see <a href="browser.html#changeelement">here</a>). This
+option may be useful to disable parallel processing to allow for more details
+in simulation error messages or to permit the use of the profiler.<o:p></o:p></span></p>
 
 <p class=MsoNormal><a name="_Frequent_Lattice_Updating"></a><span lang=EN-US
 style='mso-ansi-language:EN-US'>Only the first three option fields in the
@@ -2682,8 +2687,8 @@ lang=EN-US style='mso-ansi-language:EN-US'> set on.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Print in
 the <a href="LSD_windows.html#log">LSD Log</a> the list of the <a
-href="LSD_faqs.html#variable">Variables</a> set with a special/non-default
-updating scheme, which are not computed in every time step of a <a
+href="LSD_faqs.html#variable">Variables</a> set with a special/non-default updating
+scheme, which are not computed in every time step of a <a
 href="LSD_faqs.html#simulationrun">simulation run</a>. These are the Variables
 configured using the </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'><a href="browser.html#updating">Updating</a></span></span><span
@@ -2697,9 +2702,9 @@ Analysis<o:p></o:p></span></h2>
 the <a href="LSD_windows.html#log">LSD Log</a> the list of the <a
 href="LSD_faqs.html#variable">Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a> marked to be used in <a
-href="LSD_faqs.html#sa">sensitivity analysis</a> options. These are the elements
-with the <a href="browser.html#variables">option</a> </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>Sensitivity</span></span><span
+href="LSD_faqs.html#sa">sensitivity analysis</a> options. These are the
+elements with the <a href="browser.html#variables">option</a> </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Sensitivity</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> configured to define a set or a
 range of values for the sensitivity analysis.<o:p></o:p></span></p>
 

@@ -141,7 +141,6 @@ void update_model_info( void )
 	// ensure model name is set
 	cmd( "if { ! [ info exists modelName ] } { set modelName \"\" }" );
 	cmd( "if { $modelName == \"\" } { regsub \"fun_\" \"%s\" \"\" modelName; regsub \".cpp\" \"$modelName\" \"\" modelName }", equation_name );
-	cmd( "set modelDir \"%s\"", exec_path );
 #endif
 
 	// save info to disk
@@ -312,7 +311,7 @@ bool set_env( bool set )
 				res = ! ( bool ) putenv( tcl_lib_env );
 			}
 			else
-				if ( windows_system( TCL_FIND_EXE ) != 0 )
+				if ( run_system( TCL_FIND_EXE ) != 0 )
 					res = false;	// just stop if Tcl/Tk is not on path
 		}
 		
@@ -593,7 +592,10 @@ bool get_bool( const char *tcl_var, bool *var )
 	if ( string == NULL )
 	{
 		log_tcl_error( "Invalid Tcl variable name", "Internal LSD error (get_bool). If the problem persists, please contact developers" );
-		return *var;
+		if ( var != NULL )
+			return *var;
+		else
+			return false;
 	}
 		
 	sscanf( string, "%d", &intvar );
@@ -616,7 +618,10 @@ int get_int( const char *tcl_var, int *var )
 	if ( string == NULL )
 	{
 		log_tcl_error( "Invalid Tcl variable name", "Internal LSD error (get_int). If the problem persists, please contact developers" );
-		return *var;
+		if ( var != NULL )
+			return *var;
+		else
+			return -1;
 	}
 		
 	sscanf( string, "%d", &intvar );
@@ -639,7 +644,10 @@ long get_long( const char *tcl_var, long *var )
 	if ( string == NULL )
 	{
 		log_tcl_error( "Invalid Tcl variable name", "Internal LSD error (get_long). If the problem persists, please contact developers" );
-		return *var;
+		if ( var != NULL )
+			return *var;
+		else
+			return -1;
 	}
 		
 	sscanf( string, "%ld", &longvar );
@@ -663,6 +671,10 @@ double get_double( const char *tcl_var, double *var )
 	{
 		log_tcl_error( "Invalid Tcl variable name", "Internal LSD error (get_double). If the problem persists, please contact developers" );
 		return *var;
+		if ( var != NULL )
+			return *var;
+		else
+			return -1;
 	}
 		
 	sscanf( string, "%lf", &dblvar );
@@ -698,6 +710,380 @@ char *get_str( const char *tcl_var, char *var, int var_size )
 	}
 	else
 		return strvar;
+}
+
+
+/*********************************
+ CHECK_OPTION_FILES
+ check if model ans system option 
+ files exist and create them if not
+ *********************************/
+void check_option_files( bool sys )
+{
+	int exists;
+	Tcl_LinkVar( inter, "exists", ( char * ) &exists, TCL_LINK_BOOLEAN );
+
+	if ( ! sys )
+	{
+		cmd( "set exists [ file exists \"$modelDir/$MODEL_OPTIONS\" ]" );
+
+		if ( ! exists )
+		{
+			cmd( "set dir [ glob -nocomplain \"$modelDir/fun_*.cpp\" ]" );
+			cmd( "if { $dir ne \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
+			cmd( "set a \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
+			cmd( "set f [ open \"$modelDir/$MODEL_OPTIONS\" w ]" );
+			cmd( "puts $f $a" );
+			cmd( "close $f" );
+		}
+	}
+
+	cmd( "set exists [ file exists \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\"]" );
+	if ( ! exists )
+	{
+		cmd( "if [ string equal $tcl_platform(platform) windows ] { set sysfile \"system_options-windows.txt\" } elseif [ string equal $tcl_platform(os) Darwin ] { set sysfile \"system_options-mac.txt\" } else { set sysfile \"system_options-linux.txt\" }" );
+		cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
+		cmd( "set f1 [ open \"$RootLsd/$LsdSrc/$sysfile\" r ]" );
+		cmd( "puts $f \"# LSD options\"" );
+		cmd( "puts $f \"LSDROOT=$RootLsd\"" );
+		cmd( "puts $f \"SRC=$LsdSrc\n\"" );
+		cmd( "puts $f [ string trim [ read $f1 ] ]" );
+		cmd( "close $f" );
+		cmd( "close $f1" );
+	}
+
+	Tcl_UnlinkVar( inter, "exists" );
+}
+
+
+/*********************************
+ GET_FUN_NAME
+ get current equation file name
+ *********************************/
+char *get_fun_name( char *str, bool nw )
+{
+	char buf[ MAX_PATH_LENGTH ];
+	FILE *f;
+
+	make_makefile( nw );
+
+	cmd( "set fapp [ file nativename \"$modelDir/makefile%s\" ]", nw ? "NW" : "" );
+	f = fopen( ( char * ) Tcl_GetVar( inter, "fapp", 0 ), "r" );
+	if ( f == NULL )
+		goto error;
+
+	do
+		fgets( str, MAX_LINE_SIZE - 1, f );
+	while ( strncmp( str, "FUN=", 4 ) && ! feof( f ) );
+
+	fclose( f );
+
+	if ( strncmp( str, "FUN=", 4 ) != 0 )
+		goto error;
+
+	sscanf( str + 4, "%499s", buf );
+	sprintf( str, "%s.cpp", buf );
+	return str;
+
+error:
+	cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not found or corrupted\" -detail \"Please check 'Model Options' and 'System Options' in LMM menu 'Model'.\"" );
+	return NULL;
+}
+
+
+/*********************************
+ USE_EIGEN
+ detect if Eigen library is in use
+ *********************************/
+bool use_eigen( void )
+{
+	bool nfound = true;
+	char *path, *fun_file, full_name[ MAX_PATH_LENGTH + 1 ], buf[ 2 * MAX_PATH_LENGTH ];
+	FILE *f;
+
+	path = ( char * ) Tcl_GetVar( inter, "modelDir", 0 );
+	fun_file = get_fun_name( buf, true );
+
+	if( path == NULL || fun_file == NULL )
+		return false;
+
+	snprintf( full_name, MAX_PATH_LENGTH, "%s/%s", path, fun_file );
+	f = fopen( full_name, "r" );
+	if( f == NULL )
+		return false;
+
+	while ( fgets( buf, 2 * MAX_PATH_LENGTH - 1, f ) != NULL &&
+			( nfound = strncmp( buf, EIGEN, strlen( EIGEN ) ) ) );
+
+	fclose( f );
+
+	if ( nfound )
+		return false;
+
+	return true;
+}
+
+
+/****************************************************
+ MAKE_NO_WINDOW
+ create a no-window command-line version of LSD
+ ****************************************************/
+const char *lsd_nw_src[ LSD_NW_NUM ] = LSD_NW_SRC;
+
+bool make_no_window( void )
+{
+	int i;
+	
+	cmd( "set ans 1" );
+	cmd( "if { \"[ check_sys_opt ]\" ne \"\" } { \
+			if { [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use LMM menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { \
+				set ans 0 \
+			} \
+		}" );
+	if ( get_int( "ans" ) == 0 )
+		return false;
+
+	// copy the base LSD source files to distribution directory
+	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc\" ] } { file mkdir \"$modelDir/$LsdSrc\" }" );
+	
+	for ( i = 0; i < LSD_NW_NUM; ++i )
+		cmd( "file copy -force \"$RootLsd/$LsdSrc/%s\" \"$modelDir/$LsdSrc\"", lsd_nw_src[ i ] );
+
+	// copy Eigen library files if in use, just once to save time
+	if( use_eigen( ) )
+		cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/Eigen\" ] } { file copy -force \"$RootLsd/$LsdSrc/Eigen\" \"$modelDir/$LsdSrc\" }" );
+
+	// create makefileNW and compile a local machine version of lsdNW
+	return compile_run( false, true );
+}
+
+
+/*********************************
+ MAKE_MAKEFILE
+ create makefiles to compile LSD
+ *********************************/
+void make_makefile( bool nw )
+{
+	check_option_files( );
+
+	cmd( "set f [ open \"$modelDir/$MODEL_OPTIONS\" r ]" );
+	cmd( "set a [ string trim [ read $f ] ]" );
+	cmd( "close $f" );
+
+	cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" r ]" );
+	cmd( "set d [ string trim [ read $f ] ]" );
+	cmd( "close $f" );
+
+	cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile-%s.txt\" r ]", nw ? "NW" : ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 ) );
+	
+	cmd( "set b [ string trim [ read $f ] ]" );
+	cmd( "close $f" );
+
+	cmd( "set c \"# Model compilation options\\n$a\\n\\n# System compilation options\\n$d\\n\\n# Body of makefile%s (from makefile_%s.txt)\\n$b\"", nw ? "NW" : "", nw ? "NW" : ( char * ) Tcl_GetVar( inter, "CurPlatform", 0 ) );
+	cmd( "set f [ open \"$modelDir/makefile%s\" w ]", nw ? "NW" : "" );
+	cmd( "puts $f $c" );
+	cmd( "close $f" );
+}
+
+
+/*********************************
+ COMPILE_RUN
+ compile LSD, GUI or command line
+ and optionally execute it
+ *********************************/
+bool compile_run( bool run, bool nw )
+{
+	bool ret = false;
+	char *s, str[ 2 * MAX_PATH_LENGTH ];
+	int res, max_threads = 1;
+	FILE *f;
+
+	Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
+
+	cmd( "set oldpath [ pwd ]" );
+	cmd( "cd \"$modelDir\"" );
+
+#ifdef _LMM_
+
+	cmd( "destroytop .mm" );	// close any open compilation results window
+
+	s = ( char * ) Tcl_GetVar( inter, "modelName", 0 );
+	if ( s == NULL || ! strcmp( s, "" ) )
+	{
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		goto end;
+	}
+
+	if ( ! run && ! nw )		// delete existing object file if it's just compiling
+	{							// to force recompilation
+		cmd( "set oldObj \"[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
+		cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
+	}
+		
+#endif
+	
+	// get source name
+	s = get_fun_name( str, nw );
+	if ( s == NULL || ! strcmp( s, "" ) || ( f = fopen( s, "r" ) ) == NULL )
+	{
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Equation file not found\" -detail \"File '%s' is no longer available in directory '$modelDir'.\" ", s );
+		goto end;
+	}
+	else
+		fclose( f );
+
+	cmd( "set fname \"%s\"", s );
+
+	// get target exec name
+	cmd( "set fapp [ file nativename \"$modelDir/makefile%s\" ]", nw ? "NW" : "" );
+	f = fopen( ( char * )Tcl_GetVar( inter, "fapp", 0 ), "r" );
+	fscanf( f, "%999s", str );
+	while ( strncmp( str, "TARGET=", 7 ) && fscanf( f, "%999s", str ) != EOF );
+	fclose( f );
+	if ( strncmp( str, "TARGET=", 7 ) != 0 )
+	{
+		cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Makefile%s corrupted\" -detail \"Check 'Model Options' and 'System Options' in LMM menu 'Model'.\"", nw ? "NW" : "" );
+		goto end;
+	}
+	
+	if ( nw )
+	{
+		cmd( "set mainExe %s", str + 7 );
+		strcpy( str, "TARGET=lsdNW" );		// NW version use fixed name because of batches
+	}
+
+	// show compilation banner
+	cmd( "if { ( [ info exists autoHide ] && ! $autoHide ) || ! %d } { \
+			set parWnd .; \
+			set posWnd centerW \
+		} else { \
+			set parWnd \"\"; \
+			set posWnd centerS \
+		}", run );
+		
+	cmd( "newtop .t \"Please Wait\" \"\" $parWnd" );
+
+	if ( nw )
+		cmd( "ttk::label .t.l1 -style bold.TLabel -justify center -text \"Compiling 'No Window' model...\"" );
+	else
+		cmd( "ttk::label .t.l1 -style bold.TLabel -justify center -text \"Compiling model...\"" );
+
+	if ( run )
+		cmd( "ttk::label .t.l2 -justify center -text \"Just recompiling equation file(s) changes.\nOn success, the new model program will be launched.\nOn failure, a new window will show the compilation errors.\"" );
+	else
+		if ( nw )
+#ifdef _LMM_
+			cmd( "ttk::label .t.l2 -justify center -text \"Creating command-line model program ('lsdNW').\nOn success, the model directory can be also ported to any computer.\nOn failure, a new window will show the compilation errors.\"" );
+#else
+			cmd( "ttk::label .t.l2 -justify center -text \"Creating updated command-line model program ('lsdNW').\nOn success, the requested operation will continue.\"" );
+#endif
+		else
+			cmd( "ttk::label .t.l2 -justify center -text \"Recompiling the entire model program.\nOn success, the new program will NOT be launched.\nOn failure, a new window will show the compilation errors.\"" );
+
+	cmd( "pack .t.l1 .t.l2 -padx 5 -pady 5" );
+	cmd( "cancel .t b { set res 2 }");
+	cmd( "showtop .t $posWnd" );
+
+#ifdef _LMM_
+
+	// minimize LMM if required
+	cmd( "set res $autoHide" );				// get auto hide status
+	if ( res && run )						// hide LMM?
+		cmd( "wm iconify ." );
+			
+#endif
+	
+	// number of cores for make parallelization
+	max_threads = thread::hardware_concurrency( );
+
+	// start compilation as a background task
+	res = -1;
+	cmd( "make_background %s %d %d %d", str + 7, max_threads, nw, true );
+
+	// loop to wait compilation to finish or be aborted
+	while ( res < 0 )
+		Tcl_DoOneEvent( 0 );
+
+	// close banner
+	cmd( "destroytop .t" );
+	Tcl_UnlinkVar( inter, "res" );
+
+	ret = false;
+		
+	if ( res == 2 )
+	{
+		cmd( "catch { close $makePipe }" );
+		cmd( "if [ file exists make.bat ] { file delete make.bat }" );
+		cmd( "if { [ winfo exists .f.t.t ] } { \
+				focustop .f.t.t \
+			} else { \
+				focustop . \
+			}" );
+		goto end;
+	}
+
+#ifdef _LMM_
+
+	if ( res == 0 )							// compilation failure?
+	{
+		cmd( "set res $autoHide" );			// get auto hide status
+		if ( run && res )					// auto unhide LMM if necessary
+			cmd( "focustop .f.t.t" );  		// only reopen if error
+		show_comp_result( nw );				// show errors
+	}
+	else
+	{
+		if ( nw )
+			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n$modelDir\n\nto another computer (including the subdirectory '$LsdSrc'). After the copy, use the following steps to use it:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\"" );
+
+		if ( run )							// no problem - execute
+		{
+			// create the element list file in background and try to open 10 times every 50 ms
+			cmd( "after 0 { create_elem_file $modelDir }" );
+			cmd( "update" );
+			cmd( "set n 10" );
+			cmd( "set result \"\"" );
+			
+			switch ( platform )
+			{
+				case _LIN_:
+					cmd( "while { [ catch { exec -- ./%s & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
+					break;
+					
+				case _MAC_:
+					cmd( "while { [ catch { exec -- open -F -n ./%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
+					break;
+					
+				case _WIN_:
+					cmd( "while { [ catch { exec -- %s.exe & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
+					break;
+			}
+		}
+		
+		ret = true;
+	}
+	
+#else
+	
+	if ( res == 0 )							// compilation failure?
+	{
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Compilation failed\" -detail \"The command-line model program  ('lsdNW') could not be compiled, likely due to a syntax problem.\n\nPlease go to LMM,  choose menu 'Model'/'Generate 'No Window' Version' to recompile, and check the Compilation Errors window for details on the problem(s).\"" );
+	}
+	else
+		ret = true;
+
+#endif
+	
+	// update no-window executable time if not recompiled
+	if ( nw && ret )
+		cmd( "if { [ file exists $mainExe ] && [ file exists $targetExe ] && [ file mtime $mainExe ] > [ file mtime $targetExe ] } { \
+				file mtime $targetExe [ file mtime $mainExe ] \
+			}" );
+				
+end:
+	cmd( "cd \"$oldpath\"" );
+	
+	return ret;
 }
 
 #else
@@ -749,12 +1135,12 @@ int main( int argn, char **argv )
 #ifdef _WIN32
 
 /****************************************************
- WINDOWS_SYSTEM
- executes system command in Windows without opening
- command-prompt window
+ RUN_SYSTEM (Windows)
+ executes run command in system without opening
+ command-prompt window or activating STL mutexes
  spaces in path/file names are not supported
  ****************************************************/
-int windows_system( const char *cmd )
+int run_system( const char *cmd )
 {
 	PROCESS_INFORMATION p_info;
 	STARTUPINFO s_info;
@@ -785,12 +1171,7 @@ int windows_system( const char *cmd )
 
 #else
 
-/****************************************************
- UNIX_SYSTEM
- executes system command to avoid in Mac std lib
- mutex in system()
- ****************************************************/
-int unix_system( const char *cmd )
+int run_system( const char *cmd )
 {
 	char **argv, **envp;
 	int res;

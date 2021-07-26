@@ -339,9 +339,9 @@ lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If there are multiple simulation runs
 configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
-Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation
-message (see example below), telling how the results data will be handled and
-providing some options to the user. </span></p>
+Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation message
+(see example below), telling how the results data will be handled and providing
+some options to the user. </span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=196 height=351 src="image/summary_run.png"></span></p>
@@ -460,15 +460,16 @@ being executed, but it is not possible to start additional no-window batches.
 Also, LSD Browser must be kept open until the background runs are finished.
 Quitting LSD Browser before that will abort the background runs.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>To use this command, the user must first
-create a no-window (command prompt) version of the model in <a href="LMM.html">LMM</a>
-by selecting menu </span><span class=Cdigo><span lang=EN-US><a href="LMM.html">Model&gt;Create
-'No Window' Version</a></span></span><span lang=EN-US>. This special version of
-the <a href="LSD_faqs.html#modelprogram">LSD model program</a> is required to
-process the background parallel runs. Make sure to update (<a
+<p class=MsoNormal><span lang=EN-US>This command automatically creates, as
+required, a no-window (command prompt) version of the model, equivalent to the
+one manually produced in <a href="LMM.html">LMM</a> by selecting menu </span><span
+lang=EN-US style='font-family:"Courier New";color:gray'><a href="LMM.html">Model&gt;Create
+'No Window' Version</a></span><span lang=EN-US>. This special version of the <a
+href="LSD_faqs.html#modelprogram">LSD model program</a> is required to process
+the background parallel runs. Make sure to accept the request to update (<a
 href="LSD_faqs.html#compiler">recompile</a>) the no-window version of your
-model every time you change your <a href="LSD_faqs.html#equationfile">equation
-file</a> (a warning box will show if do not do so).</span></p>
+model every time you change the <a href="LSD_faqs.html#equationfile">equation
+file</a> (a warning box will show if you have do so).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Irrespective of the number of simulation
 runs configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
@@ -500,23 +501,23 @@ subdirectory as the </span><span class=Cdigo><span lang=EN-US>.lsd</span></span>
 lang=EN-US> <a href="LSD_faqs.html#modelsetting">configuration file</a>. The
 names of the produced files are composed by the name of the current model
 configuration plus an integer number equal to the seed used for the
-pseudo-random number generator, separated by an underscore character. LSD creates
-one results file (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
+pseudo-random number generator, separated by an underscore character. LSD
+creates one results file (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
 lang=EN-US> extension) per run. A multi-run, single totals file (</span><span
 class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span lang=EN-US>
 extension) may be also produced, including as many lines as the number of runs.
-Each line of this file contains the values of the saved elements at the very last
-time step of each simulation.</span></p>
+Each line of this file contains the values of the saved elements at the very
+last time step of each simulation.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Log text files (</span><span class=Cdigo><span
 lang=EN-US>.log</span></span><span lang=EN-US> extension) are also temporarily
 created in the configuration file subdirectory. There is one log file per
 parallel thread. These files contain the output that is normally directed to
 the LSD Log window while the simulation is being execute and are presented at
-one in this window when processing is complete. After presentation in the Log
-window, the log files are deleted. Checking the logs the user can see any
-errors and warnings produced. After starting the background execution, LSD
-offers to launch the </span><span class=Cdigo><span lang=EN-US>tail</span></span><span
+one in this window when processing is complete. After presentation in the Log window,
+the log files are deleted. Checking the logs the user can see any errors and
+warnings produced. After starting the background execution, LSD offers to
+launch the </span><span class=Cdigo><span lang=EN-US>tail</span></span><span
 lang=EN-US> (single/sequential runs) or </span><span class=Cdigo><span
 lang=EN-US>multitail</span></span><span lang=EN-US> (parallel runs)
 applications to follow up the simulation execution in real time. Users can also
@@ -568,8 +569,8 @@ subdirectory.</span></p>
 <p class=MsoNormal><span lang=EN-US>This command creates an operating system
 script file (</span><span class=Cdigo><span lang=EN-US>.bat</span></span><span
 lang=EN-US> extension in Windows or </span><span class=Cdigo><span lang=EN-US>.sh</span></span><span
-lang=EN-US> in Linux/macOS) containing the required commands to run all the
-selected configuration files taking full advantage of the operating system
+lang=EN-US> in Linux/macOS) containing the required commands to run all the selected
+configuration files taking full advantage of the operating system
 multithreading support. This means that multiple hardware CPU cores may be used
 in parallel, significantly accelerating the execution of the simulation runs,
 as in the case of sensitivity analysis processing. The batch file is saved to
@@ -585,8 +586,8 @@ the created </span><span class=Cdigo><span lang=EN-US>XXXX.bat</span></span><spa
 lang=EN-US> (Windows) or </span><span class=Cdigo><span lang=EN-US>XXXX.sh</span></span><span
 lang=EN-US> (Linux/macOS) in the same subdirectory as the selected
 configuration files. In Windows, a double click in this file on the file
-Explorer is sufficient to start the batch. In Linux/macOS the user typically
-must open a terminal window and use the command </span><span class=Cdigo><span
+Explorer is sufficient to start the batch. In Linux/macOS the user typically must
+open a terminal window and use the command </span><span class=Cdigo><span
 lang=EN-US>YYYY/XXXX.sh</span></span><span lang=EN-US>, where </span><span
 class=Cdigo><span lang=EN-US>YYYY</span></span><span lang=EN-US> is the
 configurations subdirectory and </span><span class=Cdigo><span lang=EN-US>XXXX</span></span><span
@@ -603,29 +604,30 @@ Log window and no <a href="runtime.html">Run-time Plot</a> window is created.
 This way, the user can continue to interact with LSD while the simulation is
 being executed or even close it. </span></p>
 
-<p class=MsoNormal><span lang=EN-US>To use this command, the user must first
-create a no-window (command prompt) version of the model in <a href="LMM.html">LMM</a>
-by selecting menu </span><span class=Cdigo><span lang=EN-US><a href="LMM.html">Model&gt;Create
-'No Window' Version</a></span></span><span lang=EN-US>. This special version of
-the <a href="LSD_faqs.html#modelprogram">LSD model program</a> is required to
-process the no-window batch. Make sure to update (<a
+<p class=MsoNormal><span lang=EN-US>This command automatically creates, as
+required, a no-window (command prompt) version of the model, equivalent to the
+one manually produced in <a href="LMM.html">LMM</a> by selecting menu </span><span
+lang=EN-US style='font-family:"Courier New";color:gray'><a href="LMM.html">Model&gt;Create
+'No Window' Version</a></span><span lang=EN-US>. This special version of the <a
+href="LSD_faqs.html#modelprogram">LSD model program</a> is required to process
+the no-window batch. Make sure to accept the request to update (<a
 href="LSD_faqs.html#compiler">recompile</a>) the no-window version of your
-model every time you change your <a href="LSD_faqs.html#equationfile">equation
-file</a> (a warning box will show if do not do so). If the no-window version
+model every time you change the <a href="LSD_faqs.html#equationfile">equation
+file</a> (a warning box will show if you have do so). If the no-window version
 was created in a different operating system (including different Linux
-distributions), it has to be recompiled in the target machine. If the machine
+distributions), it must be recompiled in the target machine. If the machine
 offers a graphical interface environment, the simplest way to recompile is
 simply installing LSD on it and use LMM as usual. If a graphical interface is
 not available (like in a server environment), or otherwise installing LSD is
 not possible, the no-window version may be recompiled in a terminal window.
-Move to the model home directory (</span><span class=Cdigo><span lang=EN-US>cd
-YYYY</span></span><span lang=EN-US>) and use the command </span><span
-class=Cdigo><span lang=EN-US>make -f makefileNW</span></span><span lang=EN-US>
-to recreate a proper no-window executable version (GCC and make must be
-installed in the machine).</span></p>
+Move to the model home directory (</span><span lang=EN-US style='font-family:
+"Courier New";color:gray'>cd YYYY</span><span lang=EN-US>) and use the command </span><span
+lang=EN-US style='font-family:"Courier New";color:gray'>make -f makefileNW</span><span
+lang=EN-US> to recreate a proper no-window executable version (GCC and make
+must be installed in the machine).</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Irrespective of the number of simulation
-runs configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
+<p class=MsoNormal><span lang=EN-US>Irrespective of the number of simulation runs
+configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
 Settings</span></span><span lang=EN-US> menu entry, LSD will issue a
 confirmation message, telling how the CPU cores and the results data will be
 handled and providing some options to the user, as shown below.</span></p>
@@ -822,12 +824,12 @@ be performed.</span></p>
 <p class=MsoNormal><span lang=EN-US>An alternative approach, useful when the
 number of </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
 lang=EN-US> configuration files is large, is to create a “fake” <a
-href="LSD_faqs.html#sa">sensitivity analysis</a>, by changing any single
-parameter always to the same value. To do this, load your </span><span
-class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> configuration,
-make sure the </span><span class=Cdigo><span lang=EN-US>Number of simulation
-runs</span></span><span lang=EN-US> is set to 1, save it if required, right
-click on any parameter and choose </span><span class=Cdigo><span lang=EN-US>Sensitivity</span></span><span
+href="LSD_faqs.html#sa">sensitivity analysis</a>, by changing any single parameter
+always to the same value. To do this, load your </span><span class=Cdigo><span
+lang=EN-US>.lsd</span></span><span lang=EN-US> configuration, make sure the </span><span
+class=Cdigo><span lang=EN-US>Number of simulation runs</span></span><span
+lang=EN-US> is set to 1, save it if required, right click on any parameter and
+choose </span><span class=Cdigo><span lang=EN-US>Sensitivity</span></span><span
 lang=EN-US> in the context menu. In the entry box simply type </span><span
 class=Cdigo><span lang=EN-US>=VAL:VAL@NUM%L</span></span><span lang=EN-US>,
 replacing </span><span class=Cdigo><span lang=EN-US>VAL</span></span><span
@@ -908,8 +910,8 @@ below.</span></p>
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=202 height=240 src="image/simsetting.png"></span></p>
 
-<p class=MsoNormal><span lang=EN-US>The option fields in the Simulation Settings
-window are:</span></p>
+<p class=MsoNormal><span lang=EN-US>The option fields in the Simulation
+Settings window are:</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
@@ -1024,9 +1026,9 @@ Variable, irrespective of the value set for the </span><span class=Cdigo><span
 lang=EN-US>Profile up to stack level</span></span><span lang=EN-US> option.
 However, the </span><span class=Cdigo><span lang=EN-US>Profile minimum time</span></span><span
 lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>Profile observed
-variables only</span></span><span lang=EN-US> options also control which Variables
-are considered for the report. One common use for this option is to identify
-the computationally-heavy <a href="LSD_faqs.html#equation">Equations</a>
+variables only</span></span><span lang=EN-US> options also control which
+Variables are considered for the report. One common use for this option is to
+identify the computationally-heavy <a href="LSD_faqs.html#equation">Equations</a>
 associated to multi-instanced <a href="LSD_faqs.html#variable">Variables</a>
 which can be processed in parallel (see the </span><span class=Cdigo><span
 lang=EN-US>Parallel</span></span><span lang=EN-US> option in </span><span
@@ -1040,8 +1042,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 computation</span></b></span><span lang=EN-US>: if checked, temporarily
 disables the Variables marked to be computed in parallel, if any (see <a
 href="browser.html#changeelement">here</a>). This option may be useful to
-disable parallel processing to allow for more details in simulation error
-messages or to permit the use of the profiler.</span></p>
+disable parallel processing to allow for more details in simulation error messages
+or to permit the use of the profiler.</span></p>
 
 <p class=MsoNormal><a name="_Frequent_Lattice_Updating"></a><span lang=EN-US>Only
 the first three option fields in the Simulation Settings window are saved in
@@ -1148,10 +1150,10 @@ Log</a> the list of <a href="LSD_faqs.html#variable">lagged Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a> whose initial values deserve
 special attention, as marked by the modeler. These are the elements with the <a
 href="browser.html#variables">option</a> </span><span class=Cdigo><span
-lang=EN-US>Initialized</span></span><span lang=EN-US> set on. The modeler
-indicates with this option that these elements affect the results in a relevant
-manner. In fact, there are usually Parameters and lagged Variables which may
-not require particular initial values.</span></p>
+lang=EN-US>Initialized</span></span><span lang=EN-US> set on. The modeler indicates
+with this option that these elements affect the results in a relevant manner.
+In fact, there are usually Parameters and lagged Variables which may not
+require particular initial values.</span></p>
 
 <h2><a name="_Show_Elements_to_1"></a><span lang=EN-US>Show Elements to Observe
 </span></h2>
@@ -1185,8 +1187,8 @@ the Variables configured using the </span><span class=Cdigo><span lang=EN-US><a
 href="browser.html#updating">Updating</a></span></span><span lang=EN-US>
 option.</span></p>
 
-<h2><a name="_Show_Elements_to_6"></a><span lang=EN-US>Show Elements to Sensitivity
-Analysis</span></h2>
+<h2><a name="_Show_Elements_to_6"></a><span lang=EN-US>Show Elements to
+Sensitivity Analysis</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>Print in the <a href="LSD_windows.html#log">LSD
 Log</a> the list of the <a href="LSD_faqs.html#variable">Variables</a> and <a

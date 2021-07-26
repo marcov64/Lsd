@@ -442,7 +442,6 @@ proc mdelete i {
 		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ lindex $ldn $i ])?" ]
 
 		if { $answer == "yes" } {
-			set modelDir [ string range [ lindex $ldn $i ] 0 [ expr { [ string last / [ lindex $ldn $i ] ] - 1 } ] ] 
 			if { ! [ file exists "$RootLsd/trashbin" ] } {
 				file mkdir "$RootLsd/trashbin"
 			}
@@ -454,12 +453,12 @@ proc mdelete i {
 				puts $f "Folder containing deleted models.\n"
 				close $f
 			}
-			set modelName [ string range [ lindex $ldn $i ] [ expr { [ string last / [ lindex $ldn $i ] ] + 1 } ] end ]
-			if { [ file exists "$RootLsd/trashbin/$modelName" ] } {
-				catch { file delete -force "$RootLsd/trashbin/$modelName" }
+			set name [ string range [ lindex $ldn $i ] [ expr { [ string last / [ lindex $ldn $i ] ] + 1 } ] end ]
+			if { [ file exists "$RootLsd/trashbin/$name" ] } {
+				catch { file delete -force "$RootLsd/trashbin/$name" }
 			}
 			
-			if { [ catch { file rename -force [ lindex $ldn $i ] "$RootLsd/trashbin/$modelName" } ] } {
+			if { [ catch { file rename -force [ lindex $ldn $i ] "$RootLsd/trashbin/$name" } ] } {
 				ttk::messageBox -parent .l -title Error -icon error -type ok -message "Delete error" -detail "Directory [ lindex $ldn $i ] cannot be deleted now.\nYou may try again later."
 			}
 			

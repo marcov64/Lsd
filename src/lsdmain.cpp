@@ -668,6 +668,7 @@ int lsdmain( int argn, char **argv )
 	// Tcl global variables
 	cmd( "set small_character [ expr { $dim_character - $deltaSize } ]" );
 	cmd( "set gpterm \"\"" );
+	cmd( "set modelDir \"%s\"", exec_path );
 
 	// configure main window
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
@@ -1470,11 +1471,7 @@ void run_parallel_exec( bool nw, int id, string cmd )
 {
 	int res;
 
-#ifdef _WIN32
-	res = windows_system( cmd.c_str( ) );
-#else
-	res = unix_system( cmd.c_str( ) );
-#endif
+	res = run_system( cmd.c_str( ) );
 
 	lock_guard < mutex > lock( lock_run_status );
 	run_status[ id ] = res;

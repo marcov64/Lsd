@@ -5320,16 +5320,17 @@ case 68:
 			break;
 
 	// check for existing NW executable
-	sprintf( ch, "%s/lsdNW", exec_path );			// form full executable name
+	sprintf( ch, "%s/lsdNW", exec_path );				// form full executable name
 	if ( platform == _WIN_ )
 		strcat( ch, ".exe" );							// add Windows ending
 
 	if ( ( f = fopen( ch, "rb" ) ) == NULL ) 
 	{
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsdNW\\[.exe\\]' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\"" );
-		break;
+		if ( ! make_no_window( ) )
+			break;
 	}
-	fclose( f );
+	else
+		fclose( f );
 	
 	// check if NW executable file is older than running executable file
 	sprintf( lab_old, "%s/%s", exec_path, exec_file );	// form full exec name
@@ -5339,9 +5340,18 @@ case 68:
 	{
 		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
 		{
-			cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Old executable file\" -detail \"The existing 'No Window' executable file is older than the current executable.\n\nPress 'OK' to continue anyway or 'Cancel' to abort. Please recompile the model using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+			cmd( "switch [ ttk::messageBox -parent . -title Warning -icon warning -type yesnocancel -default yes -message \"Recompile 'lsdNW'?\" -detail \"The existing 'No Window' executable file ('lsdNW') is older than the current executable.\n\nPress 'Yes' to recompile, 'No' continue anyway, or 'Cancel' to abort.\" ] { \
+					yes { set choice 0 } \
+					no { set choice 1 } \
+					cancel { set choice 2 } \
+				}" );
+				
 			if ( *choice == 2 )
 				break;
+			
+			if ( *choice == 0 )
+				if ( ! make_no_window( ) )
+					break;
 		}
 	}
 	
@@ -5713,10 +5723,11 @@ case 69:
 
 	if ( ( f = fopen( lab, "rb" ) ) == NULL ) 
 	{
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsdNW\\[.exe\\]' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM.\"" );
-		break;
+		if ( ! make_no_window( ) )
+			break;
 	}
-	fclose( f );
+	else
+		fclose( f );
 	
 	// check if NW executable file is older than running executable file
 	sprintf( lab_old, "%s/%s", exec_path, exec_file );	// form full exec name
@@ -5726,9 +5737,18 @@ case 69:
 	{
 		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
 		{
-			cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Old executable file\" -detail \"The existing 'No Window' executable file is older than the current executable.\n\nPress 'OK' to continue anyway or 'Cancel' to abort. Please recompile the model using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+			cmd( "switch [ ttk::messageBox -parent . -title Warning -icon warning -type yesnocancel -default yes -message \"Recompile 'lsdNW'?\" -detail \"The existing 'No Window' executable file ('lsdNW') is older than the current executable.\n\nPress 'Yes' to recompile, 'No' continue anyway, or 'Cancel' to abort.\" ] { \
+					yes { set choice 0 } \
+					no { set choice 1 } \
+					cancel { set choice 2 } \
+				}" );
+				
 			if ( *choice == 2 )
 				break;
+			
+			if ( *choice == 0 )
+				if ( ! make_no_window( ) )
+					break;
 		}
 	}
 	
@@ -7118,7 +7138,7 @@ SENSITIVITY_CREATED
 ****************************************************/
 void sensitivity_created( void )
 {
-	cmd( "ttk::messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' menu option in LMM. This step has to be done every time you modify your equations file.\n\nSecond, start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsdNW  -f  <configuration_file>  -s  <n>\n\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to be run (usually 1). If your configuration files are in a subdirectory of your model directory, please add their relative path before the configuration file name (<path>/<configuration_file>).\"" );
+	cmd( "ttk::messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis you have to start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsdNW  -f  <configuration_file>  -s  <n>\n\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to be run (usually 1). If your configuration files are in a subdirectory of your model directory, please add their relative path before the configuration file name (<path>/<configuration_file>).\"" );
 }
 
 

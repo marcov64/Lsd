@@ -873,13 +873,13 @@ proc make_wait { } {
 # Start a makefile as a background task
 #************************************************
 proc make_background { target threads nw macPkg } {
-	global CurPlatform MakeExe RootLsd LsdGnu targetExe iniTime makePipe res
+	global CurPlatform DefaultMakeExe RootLsd LsdGnu mainExe targetExe iniTime makePipe res
 
 	if { $nw } {
 		set makeSuffix "NW"
 	} else {
 		set makeSuffix ""
-	};
+	}
 
 	if [ string equal $CurPlatform windows ] {
 		set exeSuffix ".exe"
@@ -887,11 +887,18 @@ proc make_background { target threads nw macPkg } {
 		set exeSuffix ""
 	}
 
-	if { ! $nw && $macPkg && [ string equal $CurPlatform mac ] } {
+	if { ! $nw && $macPkg && $CurPlatform eq "mac" } {
 		set targetExe "$target.app/Contents/MacOS/$target"
 	} else {
 		set targetExe "$target$exeSuffix"
-	};
+		if [ info exists mainExe ] {
+			if { $macPkg && $CurPlatform eq "mac" } {
+				set mainExe "$mainExe.app/Contents/MacOS/$mainExe"
+			} else {
+				set mainExe "$mainExe$exeSuffix"
+			}
+		}
+	}
 
 	set iniTime [ clock seconds ]
 
@@ -921,12 +928,12 @@ proc make_background { target threads nw macPkg } {
 		}
 
 		set file [ open make.bat w ]
-		puts -nonewline $file "$MakeExe -j $threads -f makefile$makeSuffix 2> makemessage.txt\n"
+		puts -nonewline $file "$DefaultMakeExe -j $threads -f makefile$makeSuffix 2> makemessage.txt\n"
 		close $file
 
 		set makePipe [ open "| make.bat" r ]
 	} else {
-		set makePipe [ open "| $MakeExe -j $threads -f makefile$makeSuffix 2> makemessage.txt" r ]
+		set makePipe [ open "| $DefaultMakeExe -j $threads -f makefile$makeSuffix 2> makemessage.txt" r ]
 	}
 
 	fconfigure $makePipe -blocking 0

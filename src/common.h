@@ -126,7 +126,11 @@
 #define MODEL_INFO_DEFAULT { "(no name)", "1.0", "[ current_date ]", \
 							 "#", "#", "#", \
 							 "#", "#", "#", \
-							 "#", "#" };
+							 "#", "#" }
+#define LSD_NW_NUM 12
+#define LSD_NW_SRC { "lsdmain.cpp", "common.cpp", "file.cpp", "nets.cpp", \
+					 "object.cpp", "util.cpp", "variab.cpp", "check.h", \
+					 "common.h", "decl.h", "fun_head.h", "fun_head_fast.h" }
 #define LSD_DIR_NUM 8
 #define LSD_DIR_NAME { "src", "gnu", "installer", "Manual", "LMM.app", "Rpkg", "lwi", "___" }
 #define LSD_MIN_NUM 3
@@ -535,14 +539,18 @@ extern int quit;						// simulation termination control flag
 #ifndef _FUN_
 
 // common standalone internal C functions/procedures (not visible to the users)
+bool compile_run( bool run, bool nw = false );
 bool get_bool( const char *tcl_var, bool *var = NULL );
 bool load_lmm_options( void );
 bool load_model_info( const char *path );
+bool make_no_window( void );
 bool set_env( bool set );
-bool valid_label( const char *lab );
 bool strwsp( const char *str );
+bool use_eigen( void );
+bool valid_label( const char *lab );
 char *clean_file( const char *file );
 char *clean_path( char *path );
+char *get_fun_name( char *str, bool nw = false );
 char *get_str( const char *tcl_var, char *var = NULL, int var_size = 0 );
 char *search_lsd_root( char *start_path );
 char *strtcl( char *out, char const *text, int outSz );
@@ -556,18 +564,19 @@ int strcln( char *out, const char *str, int outSz );
 int strlf( char *out, const char *str, int outSz );
 int strtrim( char *out, const char *str, int outSz );
 int strwrap( char *out, const char *str, int outSz, int wid );
-int unix_system( const char *cmd );
-int windows_system( const char *cmd );
+int run_system( const char *cmd );
 long get_long( const char *tcl_var, long *var = NULL );
 string win_path( string filepath );
-void check_option_files( bool sys );
+void check_option_files( bool sys = false );
 void clean_spaces( char *s );
 void cmd( const char *cm, ... );
 void handle_signals( void ( * handler )( int signum ) );
 void init_tcl_tk( const char *exec, const char *tcl_app_name );
 void log_tcl_error( const char *cm, const char *message );
+void make_makefile( bool nw = false );
 void myexit( int v );
 void print_stack( void );
+void show_comp_result( bool nw = false );
 void signal_handler( int signum );
 void update_lmm_options( bool justLmmGeom = false );
 void update_model_info( void );
