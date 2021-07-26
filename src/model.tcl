@@ -554,8 +554,7 @@ proc medit i {
 	}
 
 	showtop .l.e
-	mousewarpto .l.e.b.ok
-	
+	mousewarpto .l.e.b.ok 0
 	.l.e.t.t.text insert end "[ lindex $lmd $i ]"
 	.l.e.n.n selection range 0 end
 	focus .l.e.n.n
@@ -625,8 +624,7 @@ proc mpaste i {
 	bind .l.p.d.d <Return> { focus .l.p.t.t.text; .l.p.t.t.text mark set insert 1.0 }
 
 	showtop .l.p
-	mousewarpto .l.p.b.ok
-	
+	mousewarpto .l.p.b.ok 0
 	.l.p.t.t.text insert end "$copydscr"
 	.l.p.n.n selection range 0 end
 	focus .l.p.n.n

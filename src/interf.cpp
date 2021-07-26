@@ -2442,7 +2442,9 @@ case 76:
 		cmd( "bind $T <Control-f> { .prop.v.o.fun invoke }; bind $T <Control-F> { .prop.v.o.fun invoke }" );
 		
 		cmd( "showtop $T" );
-		cmd( "mousewarpto $T.b.ok" );
+		cmd( "mousewarpto $T.b.ok 0" );
+		cmd( "$T.n.e selection range 0 end" );
+		cmd( "focus $T.n.e" );
 
 		*choice = 0;
 	}
@@ -2698,7 +2700,9 @@ case 78:
 		cmd( "bind $T <KeyPress-Return> { set choice $lag }" );
 		
 		cmd( "showtop $T" );
-		cmd( "mousewarpto $T.b.ok" );
+		cmd( "mousewarpto $T.b.ok 0" );
+		cmd( "$T.n.e selection range 0 end" );
+		cmd( "focus $T.n.e" );
 		
 		*choice = -1;
 		while ( *choice == -1 )			// wait for user action
@@ -2888,7 +2892,9 @@ case 96:
 	cmd( "bind $T.f.d.e2 <KeyPress-Return> { focus $T.f.e.e2; $T.f.e.e2 selection range 0 end }" );
 	
 	cmd( "showtop $T" );
-	cmd( "mousewarpto $T.b.ok" );
+	cmd( "mousewarpto $T.b.ok 0" );
+	cmd( "$T.f.c.e2 selection range 0 end" );
+	cmd( "focus $T.f.c.e2" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -3408,7 +3414,9 @@ case 22:
 	cmd( "bind $T.f.f.e2 <KeyPress-Return>  { focus $T.b.ok }" );
 
 	cmd( "showtop $T" );
-	cmd( "mousewarpto $T.b.ok" );
+	cmd( "mousewarpto $T.b.ok 0" );
+	cmd( "$T.f.c.e2 selection range 0 end" );
+	cmd( "focus $T.f.c.e2" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -3929,7 +3937,9 @@ case 37:
 	cmd( "bind .n <KeyPress-Return> { set choice 1 }" );
 
 	cmd( "showtop .n" );
-	cmd( "mousewarpto .n.b.ok" );
+	cmd( "mousewarpto .n.b.ok 0" );
+	cmd( ".n.n.e selection range 0 end" );  
+	cmd( "focus .n.n.e" );
 
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
@@ -4098,7 +4108,9 @@ case 48:
 	cmd( "okXhelpcancel .a b Default { set temp_var mozilla } { set choice 1 } { LsdHelp LSD_macros.html#V } { set choice 2 }" );
 
 	cmd( "showtop .a" );
-	cmd( "mousewarpto .a.b.ok" );
+	cmd( "mousewarpto .a.b.ok 0" );
+	cmd( ".a.v_num2 selection range 0 end" );
+	cmd( "focus .a.v_num2" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -4611,7 +4623,9 @@ case 71:
 		cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#mcpoint } { set choice 2 }" );
 
 		cmd( "showtop .s" );
-		cmd( "mousewarpto .s.b.ok" );
+		cmd( "mousewarpto .s.b.ok 0" );
+		cmd( ".s.i.e selection range 0 end" );
+		cmd( "focus .s.i.e" );
 
 		*choice = 0;
 		while ( *choice == 0 )
@@ -4843,7 +4857,9 @@ case 80:
 		cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#mcrange } { set choice 2 }" );
 		
 		cmd( "showtop .s" );
-		cmd( "mousewarpto .s.b.ok" );
+		cmd( "mousewarpto .s.b.ok 0" );
+		cmd( ".s.i.e selection range 0 end" );
+		cmd( "focus .s.i.e" );
 		
 		*choice = 0;
 		while ( *choice == 0 )
@@ -4960,7 +4976,9 @@ case 81:
 		cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#ee } { set choice 2 }" );
 		
 		cmd( "showtop .s" );
-		cmd( "mousewarpto .s.b.ok" );
+		cmd( "mousewarpto .s.b.ok 0" );
+		cmd( ".s.i.e1 selection range 0 end" );
+		cmd( "focus .s.i.e1" );
 		
 		*choice = 0;
 		while ( *choice == 0 )
@@ -5460,7 +5478,9 @@ case 68:
 	cmd( "bind .s.c.e <KeyPress-Return> { .s.b.ok invoke }" );
 	
 	cmd( "showtop .s" );
-	cmd( "mousewarpto .s.b.ok" );
+	cmd( "mousewarpto .s.b.ok 0" );
+	cmd( ".s.c.e selection range 0 end" );
+	cmd( "focus .s.c.e" );
 	
 	*choice = 0;
 	while ( *choice == 0 )

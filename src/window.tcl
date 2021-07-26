@@ -1512,7 +1512,7 @@ proc abortretryignore { w fr comAbort comRetry comIgnore } {
 # Move the mouse pointer to widget (button) w
 # If disableMouseWarp is 1, does nothing
 #************************************************
-proc mousewarpto w {
+proc mousewarpto { w { foc 1 } } {
 	global mouseWarp curX curY
 	
 	update
@@ -1530,7 +1530,10 @@ proc mousewarpto w {
 			}
 		
 			after 100
-			focus $w
+			
+			if { $foc } {
+				focus $w
+			}
 		
 			# first move pointer to toplevel to bypass Tk bug
 			set t [ winfo toplevel $w ]
@@ -1545,7 +1548,7 @@ proc mousewarpto w {
 		
 			bind $w <Motion> { }
 			unset curX curY
-		} else {
+		} elseif { $foc }  {
 			focus $w
 		}
 	}

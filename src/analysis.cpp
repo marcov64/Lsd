@@ -2823,8 +2823,7 @@ while ( true )
 			cmd( "okXhelpcancel .da.a b  { Default } { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#gpoptions } { set choice 2 }" );
 
 			cmd( "showtop .da.a" );
-			cmd( "mousewarpto .da.a.b.ok" );
-
+			cmd( "mousewarpto .da.a.b.ok 0" );
 			cmd( ".da.a.o.t insert end \"$gpoptions\"" );
 			cmd( "focus .da.a.o.t" );
 
@@ -3065,7 +3064,9 @@ while ( true )
 			cmd( "bind .da.s.s.e1 <<ComboboxSelected>> { if { $sm == \"raw\" } { .da.s.s.e2 configure -state normal } { .da.s.s.e2 configure -state disabled } }" );
 
 			cmd( "showtop .da.s" );
-			cmd( "mousewarpto .da.s.b.ok" );
+			cmd( "mousewarpto .da.s.b.ok 0" );
+			cmd( ".da.s.x.e1 selection range 0 end" );
+			cmd( "focus .da.s.x.e1" );
 
 			set_plot:
 			
@@ -3152,9 +3153,12 @@ while ( true )
 			cmd( "bind .da.s.y.e <KeyPress-Return> { set choice 1 }" );
 
 			cmd( "showtop .da.s" );
-			cmd( "mousewarpto .da.s.b.ok" );
+			cmd( "mousewarpto .da.s.b.ok 0" );
+			cmd( ".da.s.s.e selection range 0 end" );
+			cmd( "focus .da.s.s.e" );
 
 			set_lattice:
+			
 			*choice = 0;
 			while ( *choice == 0 )
 				Tcl_DoOneEvent( 0 );
@@ -3253,7 +3257,9 @@ while ( true )
 			cmd( "bind $wid.format.e.sty <Return> { $wid.b.ok invoke }" );
 			
 			cmd( "showtop $wid current" );
-			cmd( "mousewarpto $wid.b.ok" );
+			cmd( "mousewarpto $wid.b.ok 0" );
+			cmd( "$wid.l.e selection range 0 end" );
+			cmd( "focus $wid.l.e" );
 			
 			*choice = 0;
 			while ( ! *choice )
@@ -3379,7 +3385,9 @@ while ( true )
 			cmd( "bind $wid.d.e <Return> { $wid.b.ok invoke }" );
 			
 			cmd( "showtop $wid current" );
-			cmd( "mousewarpto $wid.b.ok" );
+			cmd( "mousewarpto $wid.b.ok 0" );
+			cmd( "$wid.l.e selection range 0 end" );
+			cmd( "focus $wid.l.e" );
 		 
 			// enable most options for non-dotted lines
 			cmd( "if { ! $dots } { $wid.l.e  configure -state normal; $wid.c.e  configure -state normal; $wid.fall.font  configure -state normal }" );
@@ -3572,7 +3580,9 @@ while ( true )
 			cmd( "bind $wid.l.e <Return> { $wid.b.ok invoke }" );
 			
 			cmd( "showtop $wid current" );
-			cmd( "mousewarpto $wid.b.ok" );
+			cmd( "mousewarpto $wid.b.ok 0" );
+			cmd( "$wid.l.e selection range 0 end" );
+			cmd( "focus $wid.l.e" );
 			
 			*choice = 0;
 			while ( ! *choice )
@@ -4207,7 +4217,9 @@ void set_cs_data( int *choice )
 		}" );
 
 	cmd( "showtop $p centerW no no yes 0 0 .da.s.fb.r1.add" );
-	cmd( "mousewarpto $p.fb.ok" );
+	cmd( "mousewarpto $p.fb.ok 0" );
+	cmd( ".da.s.u.i.e.e selection range 0 end" );
+	cmd( "focus .da.s.u.i.e.e" );
 
 	cmd( "tooltip::tooltip $p.fb.r1.x \"Add case to selected\"" );
 	cmd( "tooltip::tooltip $p.fb.r1.y \"Remove case from selected\"" );
@@ -5741,7 +5753,9 @@ void plot_cs_xy( int *choice )
 	cmd( "bind .da.s.v.e <KeyPress-Return> { focus .da.s.b.ok }" );
 
 	cmd( "showtop .da.s" );
-	cmd( "mousewarpto .da.s.b.ok" );
+	cmd( "mousewarpto .da.s.b.ok 0" );
+	cmd( ".da.s.i.e selection range 0 end" );
+	cmd( "focus .da.s.i.e" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -6094,7 +6108,9 @@ void plot_phase_diagram( int *choice )
 	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 
 	cmd( "showtop .da.s" );
-	cmd( "mousewarpto .da.s.b.ok" );
+	cmd( "mousewarpto .da.s.b.ok 0" );
+	cmd( ".da.s.i.e selection range 0 end" );
+	cmd( "focus .da.s.i.e" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -6851,7 +6867,9 @@ void histograms( int *choice )
 	cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
 
 	cmd( "showtop .da.s" );
-	cmd( "mousewarpto .da.s.b.ok" );
+	cmd( "mousewarpto .da.s.b.ok 0" );
+	cmd( ".da.s.i.e selection range 0 end" );
+	cmd( "focus .da.s.i.e" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -7103,7 +7121,9 @@ void histograms_cs( int *choice )
 	cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
 
 	cmd( "showtop .da.s" );
-	cmd( "mousewarpto .da.s.b.ok" );
+	cmd( "mousewarpto .da.s.b.ok 0" );
+	cmd( ".da.s.t.e selection range 0 end" );
+	cmd( "focus .da.s.t.e" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -7377,7 +7397,9 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 
 		cmd( "showtop .da.s" );
-		cmd( "mousewarpto .da.s.b.ok" );
+		cmd( "mousewarpto .da.s.b.ok 0" );
+		cmd( ".da.s.n.nv selection range 0 end" );
+		cmd( "focus .da.s.n.nv" );
 		 
 		*choice = 0;
 		while ( *choice == 0 )
@@ -7802,7 +7824,9 @@ bool create_maverag( int *choice )
 	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 
 	cmd( "showtop .da.s" );
-	cmd( "mousewarpto .da.s.b.ok" );
+	cmd( "mousewarpto .da.s.b.ok 0" );
+	cmd( ".da.s.o.th selection range 0 end" );
+	cmd( "focus .da.s.o.th" );
 
 	*choice = 0;
 	while ( *choice == 0 )

@@ -297,7 +297,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "set err \"\"" );
 
 	cmd( "showtop $_w centerW" );
-	cmd( "mousewarpto $_w.b.ok" );
+	cmd( "mousewarpto $_w.b.ok 0" );
 
 	here_setall:
 
@@ -810,7 +810,7 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 	cmd( "bind .sens.fb2.ok <KeyPress-Return> { set choice 1 }" );
 
 	cmd( "showtop .sens topleftW" );
-	cmd( "mousewarpto .sens.fb2.ok" );
+	cmd( "mousewarpto .sens.fb2.ok 0" );
 
 	if ( s->entryOk )	// is there valid data from a previous data entry?
 	{
