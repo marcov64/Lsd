@@ -50,7 +50,6 @@
 #include <thread>
 #include <csetjmp>
 #include <sys/stat.h>
-#include <sys/wait.h>
 #include <zlib.h>
 
 #ifdef _WIN32
@@ -59,6 +58,8 @@
 #undef THIS
 #else
 #include <unistd.h>	
+#include <errno.h>	
+#include <sys/wait.h>
 #include <wordexp.h>
 #endif
 

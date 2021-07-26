@@ -792,16 +792,16 @@ int windows_system( const char *cmd )
  ****************************************************/
 int unix_system( const char *cmd )
 {
-	char **args;
-	char * const env[ ] = { NULL };
+	char **argv, **envp;
 	int res;
-	pid_t pid, wpid;
+	pid_t pid;
 	wordexp_t p;
 	
 	if ( wordexp( cmd, & p, 0 ) != 0 )
 		return -1;
 	
-	args = p.we_wordv;
+	argv = p.we_wordv;
+	envp = environ;
 
 	pid = fork( );
 	if ( pid == -1 )
@@ -812,18 +812,18 @@ int unix_system( const char *cmd )
 	
 	if ( pid == 0 )
 	{
-		execve( args[ 0 ], ( char ** ) args, ( char ** ) env );
-		return -1;
+		execve( argv[ 0 ], argv, envp );
+		exit ( errno );
 	}
 	else
 	{
- 		wpid = waitpid( pid, & res, 0 );
+		waitpid( pid, & res, 0 );	
 		wordfree( & p );
 		
-		if ( wpid == -1 )
-			return -1;
+		if ( res == 0 )
+			return 0;
 		else
-			return res;
+			return WEXITSTATUS( res );
 	}
 }
 
