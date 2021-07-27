@@ -259,9 +259,9 @@ set exeMac 				"LSD"
 set exeWindows 			"LSD"
 
 # OS specific default system terminal
-set sysTermMac			"Terminal"		; # "Terminal", "xterm"
-set sysTermLinux		"xterm -e"		; # "gnome-terminal --", "xterm -e", "uxterm -e"
-set sysTermWindows		"cmd /c"		;
+set sysTermMac			"Terminal"			; # "Terminal", "xterm"
+set sysTermLinux		"gnome-terminal --"	; # "gnome-terminal --", "xterm -e", "uxterm -e"
+set sysTermWindows		"cmd /c"			;
 
 # OS specific default debugger command
 set dbgMac				"lldb"		; # "gdb"

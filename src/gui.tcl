@@ -130,6 +130,11 @@ if [ string equal $CurPlatform mac ] {
 	set bvstepM $bvstepLinux
 	set borderMadj $bborderLinux
 	
+	# use xterm as alternative for missing default terminal
+	if { [ catch { exec which [ lindex $DefaultSysTerm 0 ] } ] } {
+		set DefaultSysTerm "xterm -e"
+	}
+	
 } elseif [ string equal $CurPlatform windows ] {
 	package require registry
 
