@@ -7445,7 +7445,7 @@ bool abort_run_threads( void )
 	// confirm aborting running parallel processes
 	if ( run_monitor.joinable( ) )
 	{
-		cmd( "if [ string equal [ ttk::messageBox -parent . -type okcancel -icon warning -title Warning -message \"Exiting LSD will stop background execution\" -detail \"A parallel run is being executed in background and exiting LSD will interrupt it.\n\nIf you really want to abort the execution, press 'Ok'.\" ] ok ] { \
+		cmd( "if [ string equal [ ttk::messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"Simulation running in background\" -detail \"A parallel simulation run is being executed in background and exiting LSD will not interrupt it.\n\nResults and log files will be produced in the configuration file's directory. However, no consolidated log will be produced.\" ] ok ] { \
 				set ans 1 \
 			} else { \
 				set ans 0 \
