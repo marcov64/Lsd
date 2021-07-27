@@ -1171,6 +1171,8 @@ int run_system( const char *cmd )
 
 #else
 
+extern char ** environ;
+
 int run_system( const char *cmd )
 {
 	char **argv, **envp;
