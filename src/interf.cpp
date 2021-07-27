@@ -3529,20 +3529,6 @@ case 26:
 break;
 
 
-// Remove all the debugging flags
-case 27:
-
-	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove debug flags?\" -detail \"Confirm the removal of all debugging information. Debugger will not stop in any variable update.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
-
-	if ( *choice == 1 )
-	{
-		clean_debug( root );
-		unsaved_change( true );		// signal unsaved change
-	}
-
-break;
-
-
 // Change Equation File from which to take the code to show
 case 28:
 
@@ -3577,20 +3563,6 @@ case 29:
 
 	*choice = 0;	// point . window as parent for the following window
 	show_eq( lab_old, choice );
-
-break;
-
-
-// Remove all the save flags
-case 30:
-
-	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove save flags?\" -detail \"Confirm the removal of all saving information. No data will be saved.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
-
-	if ( *choice == 1 )
-	{
-		clean_save( root );
-		unsaved_change( true );		// signal unsaved change
-	}
 
 break;
 
@@ -3704,6 +3676,21 @@ case 56:
 break;
 
 
+// Remove all the save flags
+case 30:
+
+	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove save flags?\" -detail \"Confirm the removal of all saving information. No data will be saved.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
+
+	if ( *choice == 1 )
+	{
+		clean_save( root );
+		unsaved_change( true );				// signal unsaved change
+		redrawRoot = redrawStruc = true;	// force browser/structure redraw
+	}
+
+break;
+
+
 // Remove all the plot flags
 case 31:
 
@@ -3712,7 +3699,23 @@ case 31:
 	if ( *choice == 1 )
 	{
 		clean_plot( root );
-		unsaved_change( true );		// signal unsaved change
+		unsaved_change( true );				// signal unsaved change
+		redrawRoot = redrawStruc = true;	// force browser/structure redraw
+	}
+
+break;
+
+
+// Remove all the debugging flags
+case 27:
+
+	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove debug flags?\" -detail \"Confirm the removal of all debugging information. Debugger will not stop in any variable update.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
+
+	if ( *choice == 1 )
+	{
+		clean_debug( root );
+		unsaved_change( true );				// signal unsaved change
+		redrawRoot = redrawStruc = true;	// force browser/structure redraw
 	}
 
 break;
@@ -3726,7 +3729,8 @@ case 87:
 	if ( *choice == 1 )
 	{
 		clean_parallel( root );
-		unsaved_change( true );		// signal unsaved change
+		unsaved_change( true );				// signal unsaved change
+		redrawRoot = redrawStruc = true;	// force browser/structure redraw
 	}
 
 break;
