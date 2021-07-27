@@ -101,9 +101,6 @@ void plog( char const *cm, char const *tag, ... )
 	int reqSz = vsnprintf( buffer, maxSz, cm, argptr );
 	va_end( argptr );
 	
-	if ( reqSz >= maxSz )
-		plog( "\nWarning: message truncated\n" );
-	
 	// remove invalid charaters and Tk control characters
 	message = new char[ strlen( buffer ) + 1 ];
 	for ( i = 0, j = 0; buffer[ i ] != '\0' ; ++i )
@@ -116,6 +113,10 @@ void plog( char const *cm, char const *tag, ... )
 
 #ifdef _NW_ 
 	printf( "%s", message );
+
+	if ( reqSz >= maxSz )
+		printf( "\nWarning: message truncated\n" );
+	
 	fflush( stdout );
 #else
 	if ( ! tk_ok || ! log_ok )
@@ -133,6 +134,9 @@ void plog( char const *cm, char const *tag, ... )
 	}
 	else
 		plog( "\nError: invalid tag, message ignored:\n%s\n", "", message );
+	
+	if ( reqSz >= maxSz )
+		plog( "\nWarning: message truncated\n" );
 #endif 
 	delete [ ] message;
 	

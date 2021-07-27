@@ -6322,7 +6322,20 @@ case 8:
 	if ( run_monitor.joinable( ) )
 		run_monitor.join( );
 
-	plog( "\n%s", "", run_log.c_str( ) );
+	plog( "\n" );
+	
+	j = TCL_BUFF_STR - 50;			// buffer size in cmd() in util.cpp
+	lab1 = new char[ j + 1 ];
+	lab1[ j ] = '\0';
+	
+	for ( i = 0; i < run_log.size( ); i += j )
+	{
+		strncpy( lab1, run_log.c_str( ) + i, j );
+		plog( "%s", "", lab1 );
+	}
+	
+	delete [ ] lab1;
+	
 	plog( "\nFinished parallel background run\n" );
 	
 #endif
