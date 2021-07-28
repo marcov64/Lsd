@@ -22,9 +22,9 @@ $session_short_id = substr( $session_id, -6 );
 
 require '../defaults.php';
 
-$filename_conf = $config_pref . "run-" . $session_short_id . ".lsd";
+$filename_flag = glob( $flag_pref . "run-" . $session_short_id . "-*" . ".flag" );
 
-if ( file_exists( $filename_conf ) ) {
-    $filename_abort = $config_pref . "run-" . $session_short_id . ".abt";
+if ( $filename_flag != -1 && count( $filename_flag ) > 0 && file_exists( $filename_flag[ 0 ] ) ) {
+    $filename_abort = $config_pref . "run-" . $session_short_id . ".abort";
     touch( $filename_abort );
 }

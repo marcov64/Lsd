@@ -63,6 +63,40 @@ if ( file_exists( $confgen_exec ) && file_exists( $lsd_config ) ) {
 // remove existing output files
 array_map( "unlink", glob( $output_pref . "run-" . $session_short_id . "_*.csv" ) );
 
+// kill all sons of unix process, recursively
+function kill_recursive( $ppid, $signal ) {
+    if ( is_numeric( $ppid ) ) {
+        $spids = preg_split( "/\s+/", `pgrep -P $ppid` );
+        foreach ( $spids as $spid ) {
+            kill_recursive( $spid, $signal );
+        }
+        posix_kill( $ppid, $signal );
+    }
+}
+
+// terminate a tree of processes on abort
+function proc_tree_terminate( $proc, $signal ) {
+    global $os;
+    
+    $status = proc_get_status( $proc );
+    
+    if ( ! $status[ "running" ] ) {
+        return;
+    }
+    
+    $ppid = $status[ "pid" ];
+    
+    if ( $os === "windows" ) {
+        if ( $signal === SIGKILL ) {
+            exec( "TASKKILL /F /T /PID " . $ppid );
+        } else {
+            exec( "TASKKILL /T /PID " . $ppid );
+        }
+    } else {
+        kill_recursive( $ppid, $signal );
+    }
+}
+
 // run simulation in LSD
 if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
     $filename_log = $output_pref . "run-" . $session_short_id . ".log";
@@ -95,11 +129,11 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
     touch( $filename_flag );
 
     // make sure the .abort semaphore file doesn't exist
-    $filename_abort = $config_pref . "run-" . $session_short_id . ".abt";
+    $filename_abort = $config_pref . "run-" . $session_short_id . ".abort";
     if ( file_exists( $filename_abort ) ) {
         unlink( $filename_abort );
     }
-$sh=array();
+    
     $abort = $timeout = false;
     $start = time( );
     while ( $status = proc_get_status( $lsdNW )[ "running" ] && ! $abort && ! $timeout ) {
@@ -107,32 +141,7 @@ $sh=array();
 
         // abort if semaphore file is present
         if ( file_exists( $filename_abort ) ) {
-            switch ( $os ) {
-
-                case "windows":
-                    $pid = proc_get_status( $lsdNW )[ "pid" ];
-                    // kill parent and all childs
-                    exec( "TASKKILL /F /T /PID " . $pid );
-                    break;
-
-                case "mac":
-                    // get the parent pid of the process to kill
-                    $parent_pid = proc_get_status( $lsdNW )[ "pid" ];
-                    // use pgrep to get all the children of this process, and kill them
-                    $pids = preg_split( "/\s+/", `pgrep -P $parent_pid` );
-                    foreach ( $pids as $pid ) {
-                        if ( is_numeric( $pid ) ) {
-                            posix_kill( $pid, 9 ); // 9=SIGKILL signal
-                        }
-                    }
-                    // then kill parent
-                    posix_kill( $parent_pid, 9 ); // 9=SIGKILL signal
-                    break;
-
-                default:
-                    proc_terminate( $lsdNW );
-            }
-
+            proc_tree_terminate( $lsdNW, 15 );
             unlink( $filename_abort );
             $abort = true;
         }

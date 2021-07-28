@@ -236,19 +236,27 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	# grab focus, if required, updating the grabbing list
 	if { $grab && $w != "." && [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
 
-		set parWndLst [ linsert $parWndLst 0 $w ]
-
-		if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
-			lappend grabLst "$w [ grab current $w ]"
+		# try to catch twice because of slow systems
+		if { [ catch { grab set $w } ] } {
+			after 50
+			if { [ catch { grab set $w } ] } {
+				set grab 0
+			}
 		}
+		
+		if { $grab } {
+			set parWndLst [ linsert $parWndLst 0 $w ]
 
-		grab set $w
+			if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
+				lappend grabLst "$w [ grab current $w ]"
+			}
 
-		# reposition window because of macOS bug when grabbing
-		if { [ string equal [ tk windowingsystem ] aqua ] && $gm != "" } {
-			wm geometry $w $gm
+			# reposition window because of macOS bug when grabbing
+			if { [ string equal [ tk windowingsystem ] aqua ] && $gm != "" } {
+				wm geometry $w $gm
+			}
 		}
-
+		
 		raise $w
 	}
 

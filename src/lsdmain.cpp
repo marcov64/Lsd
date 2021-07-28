@@ -411,7 +411,12 @@ int lsdmain( int argn, char **argv )
 	if ( k > 0 )
 		max_runs = min( k, max_threads );
 	else
+	{
 		max_runs = 1;
+		
+		if ( j > 0 )
+			max_threads = j;
+	}
 	
 	if ( max_runs > 1 )
 		max_threads = max( min( j, max_threads / max_runs ), 1 );
