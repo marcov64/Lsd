@@ -1132,7 +1132,6 @@ FILE *f;
 bridge *cb;
 object *n, *cur, *cur1, *cur2;
 variable *cv, *cv1;
-vector < string > log_files;
 result *rf;					// pointer for results files (may be zipped or not)
 sense *cs;
 description *cd;
@@ -5601,7 +5600,7 @@ case 68:
 		fprintf( f, "echo \"Use %s.sh LSD_EXEC CONFIG_PATH to change default paths\"\n", out_bat );
 	}
 	
-	log_files.clear( );
+	run_logs.clear( );
 
 	if ( fSeq && ( fnext - ffirst ) > param )	// if possible, work in blocks
 	{
@@ -5610,7 +5609,7 @@ case 68:
 		for ( i = ffirst, j = 1; j <= param; ++j )	// allocates files by the number of cores
 		{
 			sprintf( lab_old, "%s_%d.log", out_file, j );
-			log_files.push_back( lab_old );
+			run_logs.push_back( lab_old );
 			
 			if ( *choice == 1 || *choice == 4 )	// Windows
 				fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s\" -s %d -e %d%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
@@ -5646,7 +5645,7 @@ case 68:
 					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
 			}
 			
-			log_files.push_back( lab_old );
+			run_logs.push_back( lab_old );
 		}
 	}
 	
@@ -5692,7 +5691,7 @@ case 68:
 		cmd( "cd $path" );
 
 	cmd( "catch { exec %s & }", lab );
-	show_logs( path, log_files );
+	show_logs( out_dir );
 		
 	cmd( "set path $oldpath; cd $path" );
 	
@@ -5705,10 +5704,18 @@ case 69:
 #ifndef _NP_
 
 	// check if background are not being run already
-	if ( run_monitor.joinable( ) )
+	if ( parallel_monitor )
 	{ 
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Parallel run already running\" -detail \"Please wait until the current background parallel run finishes.\n\nTo abort the background run, simply close LSD Browser, and confirm when requested.\"" );
-		break;
+		cmd( "if { [ ttk::messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"Abort running simulation?\" -detail \"A set of parallel simulation runs is being executed in background. You may choose to interrupt it now and proceed, or wait until it finishes before running a new one.\" ] eq \"ok\" } { set choice 1 } { set choice 0 }" );
+		
+		if ( *choice == 0 )
+			break;
+		
+		if ( ! stop_parallel( ) )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Failed to abort running simulation\" -detail \"Please wait until the current parallel run finishes before trying to start a new one.\"" );
+			break;
+		}
 	}
 	
 #endif
@@ -5974,17 +5981,17 @@ case 69:
 
 	sprintf( lab_old, "%s.log", simul_name );
 	cmd( "catch { exec %s -f %s%s%s%s%s -l %s & }", lab, struct_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
-	log_files.clear( );
-	log_files.push_back( lab_old );	
+	run_logs.clear( );
+	run_logs.push_back( lab_old );	
 
 #else
 	
 	plog( "\n\nProcessing parallel background run (threads=%d runs=%d)...", "", nature, param );
-	run_parallel( false, lab, simul_name, seed, sim_num, nature, param, log_files );
+	run_parallel( false, lab, simul_name, seed, sim_num, nature, param );
 	
 #endif
 
-	show_logs( path, log_files );
+	show_logs( path );
 	
 	cmd( "set path $oldpath; cd $path" );
 	
@@ -6328,7 +6335,7 @@ case 8:
 	lab1 = new char[ j + 1 ];
 	lab1[ j ] = '\0';
 	
-	for ( i = 0; i < run_log.size( ); i += j )
+	for ( i = 0; i < ( int ) run_log.size( ); i += j )
 	{
 		strncpy( lab1, run_log.c_str( ) + i, j );
 		plog( "%s", "", lab1 );
@@ -7442,15 +7449,24 @@ bool abort_run_threads( void )
 	
 #ifndef _NP_
 
+	int ans;
+	
 	// confirm aborting running parallel processes
-	if ( run_monitor.joinable( ) )
+	if ( parallel_monitor )
 	{
-		cmd( "if [ string equal [ ttk::messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"Simulation running in background\" -detail \"A parallel simulation run is being executed in background and exiting LSD will not interrupt it.\n\nResults and log files will be produced in the configuration file's directory. However, no consolidated log will be produced.\" ] ok ] { \
-				set ans 1 \
-			} else { \
-				set ans 0 \
+		cmd( "switch [ ttk::messageBox -parent . -type yesnocancel -default yes -icon warning -title Warning -message \"Abort running simulation?\" -detail \"A set of parallel simulation runs is being executed in background. You may choose to interrupt it now, or let it to continue (results and log files will be produced in the configuration file's directory).\n\nChoose 'Yes' to abort before exiting, 'No' to exit without aborting, or 'Cancel' to just return to LSD.\" ] { \
+				yes { set ans 2 } \
+				no { set ans 1 } \
+				cancel { set ans 0 } \
 			}" );
-		if ( atoi( Tcl_GetVar( inter, "ans", 0 ) ) != 1 )
+		
+		ans = get_int( "ans" );
+		
+		if ( ans == 2 )
+			if ( ! stop_parallel( ) )
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Failed to abort running simulation\" -detail \"LSD is exiting but the parallel simulation runs will continue (results and log files will be produced in the configuration file's directory).\"" );
+		
+		if ( ans == 0 )
 			return false;
 		else
 			return true;

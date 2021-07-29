@@ -339,9 +339,9 @@ lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If there are multiple simulation runs
 configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
-Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation
-message (see example below), telling how the results data will be handled and
-providing some options to the user. </span></p>
+Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation message
+(see example below), telling how the results data will be handled and providing
+some options to the user. </span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=196 height=351 src="image/summary_run.png"></span></p>
@@ -460,10 +460,22 @@ information is presented in the Log window as soon as the processing finishes,
 if <a href="browser.html">LSD Browser</a> is kept open. This way, the user can
 continue to interact with LSD while the simulation is being executed, but it is
 not possible to start additional no-window batches. Quitting LSD Browser before
-the background runs finish will not abort them, and the requested result files
-are still going to be produced as usual. No consolidated log is generated after
-closing the LSD browser, but partial log files are still available in the same directory
-as the remaining result files.</span></p>
+the background runs finish may not abort them, and the requested result files
+may still be produced as usual, according to the user choice. In this case, no
+consolidated log is generated after closing the LSD browser, but partial log
+files would be available in the same directory as the remaining result files. </span></p>
+
+<p class=MsoNormal><span lang=EN-US>If aborting the background runs is
+required, before quitting LSD, choose the </span><span class=Cdigo><span
+lang=EN-US>Run&gt;Parallel Run</span></span><span lang=EN-US> option again and
+select </span><span class=Cdigo><span lang=EN-US>OK</span></span><span
+lang=EN-US> when the abort option appears. When exiting LSD before the
+background runs finish, the same option is also offered. In both cases, all the
+incomplete results and log files are automatically deleted. After quitting LSD,
+the only way to abort remaining background runs is using the operating system
+(end all the </span><span class=Cdigo><span lang=EN-US>lsdNW</span></span><span
+lang=EN-US> processes in Windows Task Manager, macOS Activity Monitor, or Linux
+System Monitor). In this case, partial results and log files are not deleted.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>This command automatically creates, as
 required, a no-window (command prompt) version of the model, equivalent to the
@@ -519,10 +531,10 @@ lang=EN-US>.log</span></span><span lang=EN-US> extension) are also temporarily
 created in the configuration file subdirectory. There is one log file per
 parallel thread. These files contain the output that is normally directed to
 the LSD Log window while the simulation is being execute and are presented at
-one in this window when processing is complete. After presentation in the Log window,
-the log files are deleted. Checking the logs the user can see any errors and
-warnings produced. After starting the background execution, LSD offers to
-launch the </span><span class=Cdigo><span lang=EN-US>tail</span></span><span
+one in this window when processing is complete. After presentation in the Log
+window, the log files are deleted. Checking the logs the user can see any
+errors and warnings produced. After starting the background execution, LSD
+offers to launch the </span><span class=Cdigo><span lang=EN-US>tail</span></span><span
 lang=EN-US> (single/sequential runs) or </span><span class=Cdigo><span
 lang=EN-US>multitail</span></span><span lang=EN-US> (parallel runs)
 applications to follow up the simulation execution in real time. Users can also
@@ -614,18 +626,18 @@ required, a no-window (command prompt) version of the model, equivalent to the
 one manually produced in <a href="LMM.html">LMM</a> by selecting menu </span><span
 lang=EN-US style='font-family:"Courier New";color:gray'><a href="LMM.html">Model&gt;Create
 'No Window' Version</a></span><span lang=EN-US>. This special version of the <a
-href="LSD_faqs.html#modelprogram">LSD model program</a> is required to process
-the no-window batch. Make sure to accept the request to update (<a
+href="LSD_faqs.html#modelprogram">LSD model program</a> is required to process the
+no-window batch. Make sure to accept the request to update (<a
 href="LSD_faqs.html#compiler">recompile</a>) the no-window version of your
 model every time you change the <a href="LSD_faqs.html#equationfile">equation
 file</a> (a warning box will show if you have do so). If the no-window version
-was created in a different operating system (including different Linux distributions),
-it must be recompiled in the target machine. If the machine offers a graphical
-interface environment, the simplest way to recompile is simply installing LSD
-on it and use LMM as usual. If a graphical interface is not available (like in
-a server environment), or otherwise installing LSD is not possible, the
-no-window version may be recompiled in a terminal window. Move to the model
-home directory (</span><span lang=EN-US style='font-family:"Courier New";
+was created in a different operating system (including different Linux
+distributions), it must be recompiled in the target machine. If the machine
+offers a graphical interface environment, the simplest way to recompile is
+simply installing LSD on it and use LMM as usual. If a graphical interface is
+not available (like in a server environment), or otherwise installing LSD is
+not possible, the no-window version may be recompiled in a terminal window. Move
+to the model home directory (</span><span lang=EN-US style='font-family:"Courier New";
 color:gray'>cd YYYY</span><span lang=EN-US>) and use the command </span><span
 lang=EN-US style='font-family:"Courier New";color:gray'>make -f makefileNW</span><span
 lang=EN-US> to recreate a proper no-window executable version (GCC and make
@@ -760,27 +772,27 @@ produced files are composed by the name of the originating model configuration
 plus an integer number equal to the seed used for the pseudo-random number
 generator, separated by an underscore. LSD creates one results file (</span><span
 class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span lang=EN-US>
-extension) per run of each configuration file. A multi-run, per-configuration-file,
-single totals file (</span><span class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span
-lang=EN-US> extension) is also produced, including as many lines as the number
-of runs of the corresponding configuration file. Each line of this file
-contains the values of the saved elements at the very last time step of each
-simulation.</span></p>
+extension) per run of each configuration file. A multi-run,
+per-configuration-file, single totals file (</span><span class=Cdigo><span
+lang=EN-US>.tot[.gz]</span></span><span lang=EN-US> extension) is also
+produced, including as many lines as the number of runs of the corresponding
+configuration file. Each line of this file contains the values of the saved
+elements at the very last time step of each simulation.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>One log text file (</span><span
 class=Cdigo><span lang=EN-US>.log</span></span><span lang=EN-US> extension) is
-also created for each configuration file being processed, in the same subdirectory.
-These files contain the output that would normally be directed to the LSD Log
-window when running each configuration. Checking them the user can verify the
-status of the simulations running in background, any errors and warnings
-produced, and when each simulation execution is finished. After starting the
-background execution, LSD offers to launch the </span><span class=Cdigo><span
-lang=EN-US>multitail</span></span><span lang=EN-US> application to follow up
-the simulations execution. Users can also follow up these files in real time
-using the terminal command </span><span class=Cdigo><span lang=EN-US>tail -F
-YYYY/XXXX_Z.log</span></span><span lang=EN-US>, where </span><span class=Cdigo><span
-lang=EN-US>YYYY</span></span><span lang=EN-US> is the configuration
-subdirectory, </span><span class=Cdigo><span lang=EN-US>XXXX</span></span><span
+also created for each configuration file being processed, in the same
+subdirectory. These files contain the output that would normally be directed to
+the LSD Log window when running each configuration. Checking them the user can
+verify the status of the simulations running in background, any errors and
+warnings produced, and when each simulation execution is finished. After
+starting the background execution, LSD offers to launch the </span><span
+class=Cdigo><span lang=EN-US>multitail</span></span><span lang=EN-US>
+application to follow up the simulations execution. Users can also follow up
+these files in real time using the terminal command </span><span class=Cdigo><span
+lang=EN-US>tail -F YYYY/XXXX_Z.log</span></span><span lang=EN-US>, where </span><span
+class=Cdigo><span lang=EN-US>YYYY</span></span><span lang=EN-US> is the
+configuration subdirectory, </span><span class=Cdigo><span lang=EN-US>XXXX</span></span><span
 lang=EN-US> is the configuration name, and </span><span class=Cdigo><span
 lang=EN-US>Z</span></span><span lang=EN-US> is the thread number</span><span
 class=Cdigo><span lang=EN-US> </span></span><span lang=EN-US>to follow up. The
@@ -1047,8 +1059,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 computation</span></b></span><span lang=EN-US>: if checked, temporarily
 disables the Variables marked to be computed in parallel, if any (see <a
 href="browser.html#changeelement">here</a>). This option may be useful to
-disable parallel processing to allow for more details in simulation error messages
-or to permit the use of the profiler.</span></p>
+disable parallel processing to allow for more details in simulation error
+messages or to permit the use of the profiler.</span></p>
 
 <p class=MsoNormal><a name="_Frequent_Lattice_Updating"></a><span lang=EN-US>Only
 the first three option fields in the Simulation Settings window are saved in
@@ -1155,10 +1167,10 @@ Log</a> the list of <a href="LSD_faqs.html#variable">lagged Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a> whose initial values deserve
 special attention, as marked by the modeler. These are the elements with the <a
 href="browser.html#variables">option</a> </span><span class=Cdigo><span
-lang=EN-US>Initialized</span></span><span lang=EN-US> set on. The modeler indicates
-with this option that these elements affect the results in a relevant manner.
-In fact, there are usually Parameters and lagged Variables which may not
-require particular initial values.</span></p>
+lang=EN-US>Initialized</span></span><span lang=EN-US> set on. The modeler
+indicates with this option that these elements affect the results in a relevant
+manner. In fact, there are usually Parameters and lagged Variables which may
+not require particular initial values.</span></p>
 
 <h2><a name="_Show_Elements_to_1"></a><span lang=EN-US>Show Elements to Observe
 </span></h2>
@@ -1198,10 +1210,10 @@ Sensitivity Analysis</span></h2>
 <p class=MsoNormal><span lang=EN-US>Print in the <a href="LSD_windows.html#log">LSD
 Log</a> the list of the <a href="LSD_faqs.html#variable">Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a> marked to be used in <a
-href="LSD_faqs.html#sa">sensitivity analysis</a> options. These are the
-elements with the <a href="browser.html#variables">option</a> </span><span
-class=Cdigo><span lang=EN-US>Sensitivity</span></span><span lang=EN-US>
-configured to define a set or a range of values for the sensitivity analysis.</span></p>
+href="LSD_faqs.html#sa">sensitivity analysis</a> options. These are the elements
+with the <a href="browser.html#variables">option</a> </span><span class=Cdigo><span
+lang=EN-US>Sensitivity</span></span><span lang=EN-US> configured to define a
+set or a range of values for the sensitivity analysis.</span></p>
 
 <h2><a name="_Show_Elements_Unused"></a><span lang=EN-US>Show Elements Unused</span></h2>
 
@@ -1247,8 +1259,8 @@ Debug</a></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US><a href="#_Remove_Parallel_Flags">Remove Flags
-to Parallelize</a></span></p>
+</span></span><span lang=EN-US><a href="#_Remove_Parallel_Flags">Remove Flags to
+Parallelize</a></span></p>
 
 <h2><a name=remdebug></a><a name="_Remove_Save_Flags"></a><span lang=EN-US>Remove
 Flags to Save</span></h2>

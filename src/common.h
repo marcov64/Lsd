@@ -58,6 +58,7 @@
 #undef THIS
 #else
 #include <unistd.h>	
+#include <signal.h>	
 #include <errno.h>	
 #include <sys/wait.h>
 #include <wordexp.h>
@@ -73,7 +74,7 @@
 
 // platform codes
 #define _LIN_	1
-#define _MAC_		2
+#define _MAC_	2
 #define _WIN_	3
 
 // Choose directory/file separator
@@ -166,6 +167,12 @@ typedef unordered_map < double, object * > o_mapT;
 typedef unordered_map < string, string > p_mapT;
 typedef unordered_map < string, variable * > v_mapT;
 typedef unordered_set < object * > o_setT;
+
+#ifdef _WIN32
+typedef HANDLE handleT;
+#else
+typedef pid_t handleT;
+#endif
 
 // classes definitions
 struct object
@@ -559,12 +566,13 @@ const char *signal_name( int signum );
 double get_double( const char *tcl_var, double *var = NULL );
 int deb( object *r, object *c, char const *lab, double *res, bool interact = false, const char *hl_var = "" );
 int get_int( const char *tcl_var, int *var = NULL );
+int kill_system( int id );
 int lsdmain( int argn, char **argv );
 int strcln( char *out, const char *str, int outSz );
 int strlf( char *out, const char *str, int outSz );
 int strtrim( char *out, const char *str, int outSz );
 int strwrap( char *out, const char *str, int outSz, int wid );
-int run_system( const char *cmd );
+int run_system( const char *cmd, int id = -1 );
 long get_long( const char *tcl_var, long *var = NULL );
 string win_path( string filepath );
 void check_option_files( bool sys = false );
@@ -611,7 +619,9 @@ extern const int signals[ ];			// handled system signal numbers
 
 // multi-threading control 
 #ifndef _NP_
+extern mutex lock_run_pids;				// lock run_pids for parallel updating
 extern thread::id main_thread;			// LSD main thread ID
+extern vector < handleT > run_pids;		// parallel running instances process id's
 extern worker *workers;					// multi-thread parallel worker data
 #endif
 

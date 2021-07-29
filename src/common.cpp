@@ -1140,7 +1140,7 @@ int main( int argn, char **argv )
  command-prompt window or activating STL mutexes
  spaces in path/file names are not supported
  ****************************************************/
-int run_system( const char *cmd )
+int run_system( const char *cmd, int id )
 {
 	PROCESS_INFORMATION p_info;
 	STARTUPINFO s_info;
@@ -1160,6 +1160,12 @@ int run_system( const char *cmd )
 		return -1;
 	}
 
+	if ( id >= 0 && id < run_pids.size( ) )
+	{
+		lock_guard < mutex > lock( lock_run_pids );
+		run_pids[ id ] = p_info.hProcess;
+	}
+	
 	WaitForSingleObject( p_info.hProcess, INFINITE );
 	GetExitCodeProcess( p_info.hProcess, & res );
 	CloseHandle( p_info.hProcess );
@@ -1169,11 +1175,35 @@ int run_system( const char *cmd )
 	return res;
 }
 
+
+/****************************************************
+ KILL_SYSTEM (Windows)
+ stops a running command in system
+ ****************************************************/
+int kill_system( int id )
+{
+	DWORD res;
+	
+	if ( id >= 0 && id < run_pids.size( ) && 
+		 GetExitCodeProcess( run_pids[ id ], & res ) && 
+		 res == STILL_ACTIVE && 
+		 ! TerminateProcess( run_pids[ id ], 15 ) )
+			return 0;
+
+	return 1;
+}
+
 #else
 
 extern char ** environ;
 
-int run_system( const char *cmd )
+/****************************************************
+ RUN_SYSTEM (Unix)
+ executes run command in system without opening
+ command-prompt window or activating STL mutexes
+ spaces in path/file names are not supported
+ ****************************************************/
+int run_system( const char *cmd, int id )
 {
 	char **argv, **envp;
 	int res;
@@ -1200,6 +1230,12 @@ int run_system( const char *cmd )
 	}
 	else
 	{
+		if ( id >= 0 && id < run_pids.size( ) )
+		{
+			lock_guard < mutex > lock( lock_run_pids );
+			run_pids[ id ] = pid;
+		}
+		
 		waitpid( pid, & res, 0 );	
 		wordfree( & p );
 		
@@ -1208,6 +1244,21 @@ int run_system( const char *cmd )
 		else
 			return WEXITSTATUS( res );
 	}
+}
+
+
+/****************************************************
+ KILL_SYSTEM (Unix)
+ stops a running command in system
+ ****************************************************/
+int kill_system( int id )
+{
+	if ( id < 0 || id >= run_pids.size( ) || 
+		 kill( run_pids[ id ], SIGTERM ) == 0 || 
+		 errno == ESRCH )
+		return 1;
+	
+	return 0;
 }
 
 #endif

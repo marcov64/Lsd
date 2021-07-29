@@ -70,7 +70,9 @@ bool no_window = false;		// no-window command line job
 bool no_zero_instance = true;// flag to allow deleting last object instance
 bool non_var = false;		// flag to indicate INTERACT macro condition
 bool on_bar;				// flag to indicate bar is being draw in log window
+bool parallel_abort;		// indicate parallel threads were aborted
 bool parallel_mode;			// parallel mode (multithreading) status
+bool parallel_monitor;		// parallel monitor thread status
 bool pause_run;				// pause running simulation
 bool redrawRoot;			// control for redrawing root window (.)
 bool redrawStruc;			// control for redrawing model structure window
@@ -168,11 +170,14 @@ const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 #ifndef _NP_
 atomic < bool > parallel_ready( true );// flag to indicate variable worker is ready
 map < thread::id, worker * > thr_ptr;// worker thread pointers
+mutex lock_run_pids;		// lock run_pids for parallel updating
 mutex lock_run_status;		// lock run_status for parallel updating
 string run_log;				// consolidated runs log
 thread::id main_thread;		// LSD main thread ID
 thread run_monitor;			// thread monitoring parallel instances
+vector < handleT > run_pids;// parallel running instances process id's
 vector < int > run_status;	// parallel running instances status
+vector < string > run_logs;	// list of log files produced in parallel runs
 vector < string > run_results;// parallel run results files
 vector < thread > run_threads;// parallel running instances
 worker *workers = NULL;		// multi-thread parallel worker data
@@ -424,8 +429,6 @@ int lsdmain( int argn, char **argv )
 	// if parallel execution is required, just run new instances & wait to finish
 	if ( ! batch_sequential && sim_num > 1 && max_runs > 1 )
 	{
-		vector < string > log_files;
-		
 		if ( grandTotal || ! no_tot )
 		{
 			printf( "\n(Grand) total file(s) request ignored, running in parallel mode.\n" );
@@ -433,9 +436,8 @@ int lsdmain( int argn, char **argv )
 			grandTotal = false;
 		}
 		
-		return run_parallel( no_window, argv[ 0 ], simul_name, seed, sim_num, max_threads, max_runs, log_files );
+		return run_parallel( no_window, argv[ 0 ], simul_name, seed, sim_num, max_threads, max_runs );
 	}
-
 				
 #else
 
@@ -1476,7 +1478,7 @@ void run_parallel_exec( bool nw, int id, string cmd )
 {
 	int res;
 
-	res = run_system( cmd.c_str( ) );
+	res = run_system( cmd.c_str( ), id );
 
 	lock_guard < mutex > lock( lock_run_status );
 	run_status[ id ] = res;
@@ -1487,7 +1489,7 @@ void run_parallel_exec( bool nw, int id, string cmd )
 RUN_PARALLEL
 ***************************************/
 #define INISTAT -1234
-int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns, vector < string > & logs )
+int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns )
 {
 	char *alt_name;
 	int i, j, k, num, sl;
@@ -1514,10 +1516,12 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 	else
 		strcpy( dest_path, "" );
 
-	logs.clear( );
+	run_logs.clear( );
+	run_pids.clear( );
 	run_status.clear( );
 	run_threads.clear( );
 	run_results.clear( );
+	parallel_abort = false;
 	
 	if ( runs > parruns )				// more than one run per thread?
 	{
@@ -1529,7 +1533,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 		{
 			// log file name
 			sprintf( log_file, "%s%s%s_%d.log", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, j );
-			logs.push_back( log_file );
+			run_logs.push_back( log_file );
 			
 			// results file names
 			for ( k = i; k < i + num + ( j <= sl ? 1 : 0 ); ++k )
@@ -1546,6 +1550,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 			// command line
 			sprintf( cmd, "%s -c %d -f %s.lsd -s %d -e %d%s%s%s%s%s%s -l %s", exec, thrrun, simname, i, j <= sl ? num + 1 : num, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", dest_path, log_file );
 			
+			run_pids.resize( run_pids.size( ) + 1 );
 			run_status.push_back( INISTAT );
 			run_threads.push_back( thread( run_parallel_exec, nw, run_status.size( ) - 1, string( cmd ) ) );
 			
@@ -1558,7 +1563,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 		{
 			// log file name
 			sprintf( log_file, "%s%s%s_%d.log", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, i );
-			logs.push_back( log_file );
+			run_logs.push_back( log_file );
 			
 			// results file name
 			sprintf( res_file, "%s%s%s_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, i, docsv ? "csv" : "res" );
@@ -1572,6 +1577,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 			// command line
 			sprintf( cmd, "%s -c %d -f %s.lsd -s %d -e 1%s%s%s%s%s%s -l %s", exec, thrrun, simname, i, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", dest_path, log_file );
 			
+			run_pids.resize( run_pids.size( ) + 1 );
 			run_status.push_back( INISTAT );
 			run_threads.push_back( thread( run_parallel_exec, nw, run_status.size( ) - 1, string( cmd ) ) );
 		}
@@ -1591,7 +1597,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 			{
 				msleep( 1000 );
 				
-				num = monitor_logs( logs );
+				num = monitor_logs( );
 				if ( num < 0 )
 				{
 					num = - num;
@@ -1609,7 +1615,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 			if ( thr.joinable( ) )
 				thr.join( );
 		
-		log_parallel( nw, logs );
+		log_parallel( nw );
 
 		i = 0;
 		for ( int status : run_status )
@@ -1622,7 +1628,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 		return i;
 	}
 	else
-		run_monitor = thread( monitor_parallel, nw, logs );
+		run_monitor = thread( monitor_parallel, nw );
 	
 	return 0;
 }
@@ -1631,7 +1637,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 /***************************************
 MONITOR_LOGS
 ***************************************/
-int monitor_logs( vector < string > & logs )
+int monitor_logs( void )
 {
 	int i, j, k, last, len, thr, threads, n = 0, finished = 0, sum = 0;
 	char *log = NULL, tok[ 4 ];
@@ -1644,7 +1650,7 @@ int monitor_logs( vector < string > & logs )
 			++finished;
 	
 	thr = 0;
-	for ( string logn : logs )
+	for ( string logn : run_logs )
 	{
 		// consider just running threads except if all threads are stopped
 		if ( run_status[ thr++ ] != INISTAT && finished < threads )
@@ -1703,15 +1709,66 @@ int monitor_logs( vector < string > & logs )
 
 
 /***************************************
+STOP_PARALLEL
+***************************************/
+#define WAIT_SECS 5
+bool stop_parallel( void )
+{
+	int id, res = 0, secs = 0;
+	
+	parallel_abort = true;
+	
+	if ( ! parallel_monitor )
+		return true;
+	
+	for ( id = 0; id < ( int ) run_pids.size( ); ++id )
+		res += kill_system( id );
+		
+	if ( res < run_pids.size( ) )
+		return false;
+
+	while ( parallel_monitor && secs++ < WAIT_SECS )
+		msleep( 1000 );
+	
+	if ( parallel_monitor )
+		return false;
+	
+	if ( run_monitor.joinable( ) )
+		run_monitor.join( );
+	
+	for ( string & results : run_results )
+		remove( results.c_str( ) );
+	
+	for ( string & log : run_logs )
+		remove( log.c_str( ) );
+	
+	run_results.clear( );
+	run_logs.clear( );
+	
+#ifndef _NW_
+
+	plog( "\nParallel background run aborted!\n" );
+	
+#endif
+
+	return true;
+}
+
+
+/***************************************
 MONITOR_PARALLEL
 ***************************************/
-void monitor_parallel( bool nw, vector < string > logs )
+void monitor_parallel( bool nw )
 {
+	parallel_monitor = true;
+	
 	for ( auto & thr : run_threads )
 		if ( thr.joinable( ) )
 			thr.join( );
 	
-	log_parallel( nw, logs );
+	log_parallel( nw );
+	
+	parallel_monitor = false;
 }
 
 
@@ -1719,14 +1776,17 @@ void monitor_parallel( bool nw, vector < string > logs )
 LOG_PARALLEL
 Consolidate a set of parallel-run logs
 ****************************************************/
-void log_parallel( bool nw, vector < string > logs )
+void log_parallel( bool nw )
 {
 	char buf[ MAX_LINE_SIZE + 1 ];
 	FILE *f;
 
 	run_log.clear( );
 	
-	for ( string log : logs )
+	if ( parallel_abort )
+		return;
+	
+	for ( string & log : run_logs )
 	{
 		f = fopen( log.c_str( ), "r" );
 		if ( f == NULL )
@@ -1749,13 +1809,13 @@ void log_parallel( bool nw, vector < string > logs )
 		puts( run_log.c_str( ) );
 		return;
 	}
-	
+
 #ifndef _NW_	
 
 	while ( ! idle_loop )
 		msleep( 100 );
 	
-	res_list = run_results;
+	res_list = run_results;	
 	choice = 8;
 
 #endif

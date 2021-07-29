@@ -1297,7 +1297,7 @@ char *upload_eqfile( void )
 SHOW_LOGS
 Open tail/multitail to show log files dynamically
 ****************************************************/
-void show_logs( const char *path, vector < string > & logs )
+void show_logs( const char *path )
 {
 	char exec[ 20 ];
 	int i, j, n;
@@ -1308,16 +1308,16 @@ void show_logs( const char *path, vector < string > & logs )
 	if ( ! get_int( "answer" ) )
 		return;
 	
-	n = logs.size( );
+	n = run_logs.size( );
 	for ( i = j = 0; i < n; ++i )
-		j += logs[ i ].length( );
+		j += run_logs[ i ].length( );
 	
 	char logs_str[ i + j + 1 ];
 	logs_str[ 0 ] = '\0';
 	
 	for ( i = 0; i < n; ++i )
 	{
-		strcat( logs_str, logs[ i ].c_str( ) );
+		strcat( logs_str, run_logs[ i ].c_str( ) );
 		
 		if ( i < n - 1 )
 			strcat( logs_str, " " );

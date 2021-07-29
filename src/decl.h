@@ -212,6 +212,7 @@ bool save_sensitivity( FILE *f );
 bool search_parallel( object *r );
 bool sensitivity_too_large( long numSaPts, int *choice );
 bool sort_listbox( int box, int order, object *r );
+bool stop_parallel( void );
 bool unsaved_change( bool );
 bool unsaved_change( void );
 char *NOLH_valid_tables( int k, char* ch );
@@ -235,10 +236,10 @@ int load_configuration( bool reload, bool quick = false );
 int load_sensitivity( FILE *f );
 int logic_op_code( char const *lop, char const *errmsg );
 int min_hborder( int *choice, int pdigits, double miny, double maxy );
-int monitor_logs( vector < string > & logs );
+int monitor_logs( void );
 int num_sensitivity_variables( sense *rsens );
 int rnd_int( int min, int max );
-int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns, vector < string > & logs );
+int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns );
 int shrink_gnufile( void );
 int uniform_int_0( int max );
 long num_sensitivity_points( sense *rsens );
@@ -315,8 +316,8 @@ void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int 
 void insert_object( const char *w, object *r, bool netOnly = false, object *above = NULL );
 void insert_store_mem( object *r, int *num_v, char *lab = NULL );
 void link_cells( object *root, char *lab );
-void log_parallel( bool nw, vector < string > logs );
-void monitor_parallel( bool nw, vector < string > logs );
+void log_parallel( bool nw );
+void monitor_parallel( bool nw );
 void move_obj( char const *lab, char const *dest );
 void plog_series( int *choice );
 void plot( int type, int *start, int *end, char **str, char **tag, int *choice, bool norm );
@@ -373,7 +374,7 @@ void show_descr( char *lab, int *choice );
 void show_eq( char *lab, int *choice );
 void show_graph( object *t = NULL );
 void show_initial( object *n );
-void show_logs( const char *path, vector < string > & logs );
+void show_logs( const char *path );
 void show_neighbors( object *r, bool update );
 void show_observe( object *n );
 void show_parallel( object *n );
@@ -428,6 +429,8 @@ extern bool message_logged;		// new message posted in log window
 extern bool meta_par_in[ ];		// flag meta variables for simulation settings found
 extern bool non_var;			// flag to indicate INTERACT macro condition
 extern bool on_bar;				// flag to indicate bar is being draw in log window
+extern bool parallel_abort;		// indicate parallel threads were aborted
+extern bool parallel_monitor;	// parallel monitor thread status
 extern bool redrawRoot;			// control for redrawing root window (.)
 extern bool redrawStruc;		// control for redrawing model structure window
 extern bool running;			// simulation is running
@@ -510,6 +513,7 @@ extern atomic < bool > parallel_ready;// flag to indicate multitasking is availa
 extern map< thread::id, worker * > thr_ptr;// worker thread pointers
 extern string run_log;			// consolidated runs log
 extern thread run_monitor;		// thread monitoring parallel instances
+extern vector < string > run_logs;// list of log files produced in parallel run
 #endif
 
 // Tcl/Tk specific definitions (for the windowed version only)
