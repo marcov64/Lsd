@@ -170,6 +170,7 @@ const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 #ifndef _NP_
 atomic < bool > parallel_ready( true );// flag to indicate variable worker is ready
 map < thread::id, worker * > thr_ptr;// worker thread pointers
+mutex lock_run_logs;		// lock run_logs for parallel updating
 mutex lock_run_pids;		// lock run_pids for parallel updating
 mutex lock_run_status;		// lock run_status for parallel updating
 string run_log;				// consolidated runs log
@@ -1785,24 +1786,29 @@ void log_parallel( bool nw )
 	
 	if ( parallel_abort )
 		return;
-	
-	for ( string & log : run_logs )
+	else
 	{
-		f = fopen( log.c_str( ), "r" );
-		if ( f == NULL )
+		lock_guard < mutex > lock( lock_run_logs );
+		
+		for ( string & log : run_logs )
 		{
-			sprintf( buf, "\nCannot read '%s', consolidated log is incomplete", log.c_str( ) );
-			run_log.append( buf );
-			continue;
+			f = fopen( log.c_str( ), "r" );
+			if ( f == NULL )
+			{
+				sprintf( buf, "\nCannot read '%s', consolidated log is incomplete", log.c_str( ) );
+				run_log.append( buf );
+				continue;
+			}
+			
+			while ( fgets( buf, MAX_LINE_SIZE, f ) != NULL )
+				run_log.append( buf );
+			
+			fclose( f );
+			remove( log.c_str( ) );
 		}
 		
-		while ( fgets( buf, MAX_LINE_SIZE, f ) != NULL )
-			run_log.append( buf );
-		
-		fclose( f );
-		remove( log.c_str( ) );
+		run_logs.clear( );
 	}
-	
 	
 	if ( nw )
 	{

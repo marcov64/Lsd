@@ -1135,6 +1135,7 @@ variable *cv, *cv1;
 result *rf;					// pointer for results files (may be zipped or not)
 sense *cs;
 description *cd;
+vector < string > logs;
 struct stat stExe, stMod;
 
 if ( ! redrawReq )
@@ -5600,7 +5601,7 @@ case 68:
 		fprintf( f, "echo \"Use %s.sh LSD_EXEC CONFIG_PATH to change default paths\"\n", out_bat );
 	}
 	
-	run_logs.clear( );
+	logs.clear( );
 
 	if ( fSeq && ( fnext - ffirst ) > param )	// if possible, work in blocks
 	{
@@ -5609,7 +5610,7 @@ case 68:
 		for ( i = ffirst, j = 1; j <= param; ++j )	// allocates files by the number of cores
 		{
 			sprintf( lab_old, "%s_%d.log", out_file, j );
-			run_logs.push_back( lab_old );
+			logs.push_back( lab_old );
 			
 			if ( *choice == 1 || *choice == 4 )	// Windows
 				fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s\" -s %d -e %d%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
@@ -5645,7 +5646,7 @@ case 68:
 					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
 			}
 			
-			run_logs.push_back( lab_old );
+			logs.push_back( lab_old );
 		}
 	}
 	
@@ -5691,7 +5692,7 @@ case 68:
 		cmd( "cd $path" );
 
 	cmd( "catch { exec %s & }", lab );
-	show_logs( out_dir );
+	show_logs( out_dir, logs );
 		
 	cmd( "set path $oldpath; cd $path" );
 	
@@ -5991,7 +5992,7 @@ case 69:
 	
 #endif
 
-	show_logs( path );
+	show_logs( path, run_logs );
 	
 	cmd( "set path $oldpath; cd $path" );
 	

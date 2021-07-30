@@ -372,7 +372,7 @@ void show_descr( char *lab, int *choice );
 void show_eq( char *lab, int *choice );
 void show_graph( object *t = NULL );
 void show_initial( object *n );
-void show_logs( const char *path );
+void show_logs( const char *path, vector < string > & logs );
 void show_neighbors( object *r, bool update );
 void show_observe( object *n );
 void show_parallel( object *n );
@@ -509,6 +509,7 @@ extern void *random_engine;		// current random number generator engine
 #ifndef _NP_
 extern atomic < bool > parallel_ready;// flag to indicate multitasking is available
 extern map< thread::id, worker * > thr_ptr;// worker thread pointers
+extern mutex lock_run_logs;		// lock run_logs for parallel updating
 extern string run_log;			// consolidated runs log
 extern thread run_monitor;		// thread monitoring parallel instances
 extern vector < string > run_logs;// list of log files produced in parallel run

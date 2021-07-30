@@ -1297,27 +1297,31 @@ char *upload_eqfile( void )
 SHOW_LOGS
 Open tail/multitail to show log files dynamically
 ****************************************************/
-void show_logs( const char *path )
+void show_logs( const char *path, vector < string > & logs )
 {
-	char exec[ 20 ];
+	char exec[ 30 ];
 	int i, j, n;
 	
+	cmd( "switch [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Background run monitor\" -message \"Open the background run monitor?\" -detail \"The selected simulation runs were started as parallel background job(s). Each job progress can be monitored in a separated window results by choosing 'Yes'\n\nLog files are being created in the folder:\n\n%s\" ] { yes { set ans 1 } no { set ans 0 } }", path );
 	
-	cmd( "switch [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Background run monitor\" -message \"Open the background run monitor?\" -detail \"The selected simulation runs were started as parallel background job(s). Each job progress can be monitored in a separated window results by choosing 'Yes'\n\nLog files are being created in the folder:\n\n%s\" ] { yes { set answer 1 } no { set answer 0 } }", path );
-	
-	if ( ! get_int( "answer" ) )
+	if ( ! get_int( "ans" ) || ! parallel_monitor )
 		return;
 	
-	n = run_logs.size( );
+	lock_guard < mutex > lock( lock_run_logs );
+	
+	n = logs.size( );
+	if ( n == 0 )
+		return;
+		
 	for ( i = j = 0; i < n; ++i )
-		j += run_logs[ i ].length( );
+		j += logs[ i ].length( );
 	
 	char logs_str[ i + j + 1 ];
 	logs_str[ 0 ] = '\0';
 	
 	for ( i = 0; i < n; ++i )
 	{
-		strcat( logs_str, run_logs[ i ].c_str( ) );
+		strcat( logs_str, logs[ i ].c_str( ) );
 		
 		if ( i < n - 1 )
 			strcat( logs_str, " " );
@@ -1335,7 +1339,7 @@ void show_logs( const char *path )
 		else
 			sprintf( exec, "multitail%s -s %d", platform == _WIN_ ? "" : " --retry-all", j );
 	}
-	
+
 	cmd( "if { [ open_terminal \"%s %s\" ] != 0 } { \
 			ttk::messageBox -parent . -type ok -icon error -title Error -message \"%s failed to launch\" -detail \"Please check if %s is installed and set up properly.\n\nDetail:\n$termResult\" \
 		}", exec, logs_str, exec, exec );
