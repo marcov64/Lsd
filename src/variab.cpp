@@ -237,12 +237,15 @@ EMPTY
 ****************************************************/
 void variable::empty( bool no_lock ) 
 {
+	
 #ifndef _NP_
+
 	if ( running && ! no_lock )
 	{
 		// prevent concurrent use by more than one thread
 		lock_guard < mutex > lock( parallel_comp );
 	}
+	
 #endif
 
 	if ( running && ( label == NULL || val == NULL ) )

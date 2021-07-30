@@ -69,11 +69,26 @@ used case 47
 #define HISTOGR	4
 #define HISTOCS	5
 
+struct bin
+{
+	double num;
+	double min;
+	double max;
+	double center;
+	double av;
+	double lowb;
+	double highb;
+} *histo_bins;
+
 bool avgSmplMsg;
 bool first_run = true;
 char filename[ MAX_PATH_LENGTH + 1 ];
-double maxy, maxy2;
-double miny, miny2;
+double histo_mean;
+double histo_var;
+double maxy;
+double maxy2;
+double miny;
+double miny2;
 double point_size;
 int allblack;
 int autom;
@@ -83,13 +98,16 @@ int *cdata;
 int cur_plot;
 int dir;
 int file_counter;
+int first_c;
 int grid;
 int gnu;
+int histo_cases;
+int histo_cs;
 int line_point;
 int logs;
 int max_c;
 int min_c;
-int first_c;
+int num_bins;
 int num_c;
 int num_var;
 int num_y2;
@@ -6766,21 +6784,6 @@ void plot_lattice( int *choice )
 /***************************************************
 HISTOGRAMS
 ****************************************************/
-struct bin
-{
-	double num;
-	double min;
-	double max;
-	double center;
-	double av;
-	double lowb;
-	double highb;
-};
-
-bin *bins;	
-int num_bins, cases, time_cs;
-double mean, var;
-
 void histograms( int *choice )
 {
 	bool norm;
@@ -6884,7 +6887,7 @@ void histograms( int *choice )
 	cmd( "set choice $bidi" );
 	num_bins = *choice;
 
-	mean = var = cases = 0;
+	histo_mean = histo_var = histo_cases = 0;
 	for ( i = first; i <= last; ++i )
 	{
 		if ( is_nan( data[ i - start ] ) || ! is_finite( data[ i - start ] ) )	// ignore NaNs
@@ -6901,13 +6904,13 @@ void histograms( int *choice )
 					mn = data[ i - start ];
 		}  
 		
-		mean += data[ i - start ];
-		var += data[ i - start ] * data[ i - start ];
+		histo_mean += data[ i - start ];
+		histo_var += data[ i - start ] * data[ i - start ];
 		
-		++cases;
+		++histo_cases;
 	}
 
-	if ( cases == 0 )
+	if ( histo_cases == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no valid data for the chosen cases (time steps).\"" );
 		*choice = 2;
@@ -6921,17 +6924,17 @@ void histograms( int *choice )
 		goto end;
 	}
 
-	mean = mean / cases;
-	var = var / cases - mean * mean;
+	histo_mean = histo_mean / histo_cases;
+	histo_var = histo_var / histo_cases - histo_mean * histo_mean;
 
-	bins = new bin[ num_bins ];
+	histo_bins = new bin[ num_bins ];
 	for ( i = 0; i < num_bins; ++i )
 	{
-		bins[ i ].num = 0;
-		bins[ i ].av = 0;
-		bins[ i ].min = 0;
-		bins[ i ].max = 0;
-		bins[ i ].center = 0; 
+		histo_bins[ i ].num = 0;
+		histo_bins[ i ].av = 0;
+		histo_bins[ i ].min = 0;
+		histo_bins[ i ].max = 0;
+		histo_bins[ i ].center = 0; 
 	}
 	 
 	for ( i = first; i <= last; ++i )
@@ -6939,32 +6942,32 @@ void histograms( int *choice )
 		if ( is_nan( data[ i - start ] ) || ! is_finite( data[ i - start ] ) )
 			continue;
 
-		a = floor( num_bins*( data[ i - start ] - mn ) / ( mx - mn ) );
+		a = floor( num_bins * ( data[ i - start ] - mn ) / ( mx - mn ) );
 
 		j = ( int ) a;
-		if ( j == num_bins)
+		if ( j == num_bins )
 			j--;
 
-		if ( bins[ j ].num == 0 )
-			bins[ j ].min = bins[ j ].max = data[ i - start ];
+		if ( histo_bins[ j ].num == 0 )
+			histo_bins[ j ].min = histo_bins[ j ].max = data[ i - start ];
 		else
 		{
-			if ( bins[ j ].min > data[ i - start ] )
-				bins[ j ].min = data[ i - start ];
+			if ( histo_bins[ j ].min > data[ i - start ] )
+				histo_bins[ j ].min = data[ i - start ];
 			else
-				if ( bins[ j ].max < data[ i - start ] )
-					bins[ j ].max = data[ i - start ];
+				if ( histo_bins[ j ].max < data[ i - start ] )
+					histo_bins[ j ].max = data[ i - start ];
 		}  
 		
-		bins[ j ].av += data[ i - start ];
-		bins[ j ].num++;   
+		histo_bins[ j ].av += data[ i - start ];
+		histo_bins[ j ].num++;   
 	} 
 
 	a = ( mx - mn ) / ( num_bins - 1 );
 
 	for ( i = 1; i < num_bins; ++i )
-		if ( bins[ i ].num != 0 && bins[ i - 1 ].num != 0 && bins[ i ].min - bins[ i - 1 ].max < a )
-			a = bins[ i ].min - bins[ i - 1 ].max;
+		if ( histo_bins[ i ].num != 0 && histo_bins[ i - 1 ].num != 0 && histo_bins[ i ].min - histo_bins[ i - 1 ].max < a )
+			a = histo_bins[ i ].min - histo_bins[ i - 1 ].max;
 
 	cmd( "set choice $stat" );
 	stat = *choice;
@@ -6973,26 +6976,26 @@ void histograms( int *choice )
 		plog( "\nTime series histogram statistics\n #   Boundaries(center)\t\tMin.\tAverage\tMax.\tNum.\tFreq." );
 
 	step = ( mx + a / 2 - ( mn - a / 2 ) ) / num_bins;
-	lminy = cases;
+	lminy = histo_cases;
 	lmaxy = 0;
 
 	for ( i = 0; i < num_bins; ++i )
 	{
-		if ( bins[ i ].num != 0 )
-			bins[ i ].av /= bins[ i ].num;
+		if ( histo_bins[ i ].num != 0 )
+			histo_bins[ i ].av /= histo_bins[ i ].num;
 		
-		bins[ i ].lowb = mn - a / 2 + ( double ) i * step;
-		bins[ i ].highb = mn - a / 2 + ( double ) ( i + 1 ) * step;
-		bins[ i ].center = bins[ i ].highb / 2 + bins[ i ].lowb / 2;
+		histo_bins[ i ].lowb = mn - a / 2 + ( double ) i * step;
+		histo_bins[ i ].highb = mn - a / 2 + ( double ) ( i + 1 ) * step;
+		histo_bins[ i ].center = histo_bins[ i ].highb / 2 + histo_bins[ i ].lowb / 2;
 		
 		if ( stat == 1 )
-			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", "", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, bins[ i ].min, pdigits, bins[ i ].av, pdigits, bins[ i ].max, pdigits, bins[ i ].num, pdigits, bins[ i ].num / cases );
+			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", "", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].max, pdigits, histo_bins[ i ].num, pdigits, histo_bins[ i ].num / histo_cases );
 		
-		if ( bins[ i ].num < lminy )
-			lminy = bins[ i ].num;
+		if ( histo_bins[ i ].num < lminy )
+			lminy = histo_bins[ i ].num;
 		
-		if ( bins[ i ].num > lmaxy )
-			lmaxy = bins[ i ].num;
+		if ( histo_bins[ i ].num > lmaxy )
+			lmaxy = histo_bins[ i ].num;
 	}
 
 	if ( stat == 1 )
@@ -7003,8 +7006,8 @@ void histograms( int *choice )
 
 	if ( autom || miny >= maxy )
 	{
-		maxy = lmaxy / cases;
-		miny = lminy > 0 ? ( lminy - 1 ) / cases : 0;
+		maxy = lmaxy / histo_cases;
+		miny = lminy > 0 ? ( lminy - 1 ) / histo_cases : 0;
 		update_bounds( );
 	}
 
@@ -7016,7 +7019,7 @@ void histograms( int *choice )
 
 	*choice = 0;
 
-	delete [ ] bins;
+	delete [ ] histo_bins;
 
 	end:
 
@@ -7139,81 +7142,81 @@ void histograms_cs( int *choice )
 	cmd( "set choice $bidi" );
 	num_bins = *choice;
 	cmd( "set choice $time" );
-	time_cs = *choice;
+	histo_cs = *choice;
 
-	mean = var = cases = 0;
+	histo_mean = histo_var = histo_cases = 0;
 	active_v = 0;
 	for ( i = 0; i < nv; ++i )
-		if ( start[ i ] <= time_cs && end[ i ] >= time_cs && is_finite( data[ i ][ time_cs - start[ i ] ] ) )		// ignore NaNs
+		if ( start[ i ] <= histo_cs && end[ i ] >= histo_cs && is_finite( data[ i ][ histo_cs - start[ i ] ] ) )		// ignore NaNs
 		{
 			if ( active_v == 0 )
-				mx = mn = data[ i ][ time_cs - start[ i ] ];
+				mx = mn = data[ i ][ histo_cs - start[ i ] ];
 			else
 			{
-				if ( data[ i ][ time_cs - start[ i ] ] > mx )
-					mx = data[ i ][ time_cs - start[ i ] ];
+				if ( data[ i ][ histo_cs - start[ i ] ] > mx )
+					mx = data[ i ][ histo_cs - start[ i ] ];
 				else
-					if ( data[ i ][ time_cs - start[ i ] ] < mn )
-						mn = data[ i ][ time_cs - start[ i ] ];
+					if ( data[ i ][ histo_cs - start[ i ] ] < mn )
+						mn = data[ i ][ histo_cs - start[ i ] ];
 			}  
 			
-			mean += data[ i ][ time_cs - start[ i ] ];
-			var += data[ i ][ time_cs - start[ i ] ] * data[ i ][ time_cs - start[ i ] ];
+			histo_mean += data[ i ][ histo_cs - start[ i ] ];
+			histo_var += data[ i ][ histo_cs - start[ i ] ] * data[ i ][ histo_cs - start[ i ] ];
 			
-			++cases;
+			++histo_cases;
 			++active_v;
 		}
 
-	if ( cases == 0 )
+	if ( histo_cases == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series have no valid data in the chosen cases (time steps).\"" );
 		*choice = 2;
 		goto end;
 	}
 
-	mean = mean / cases;
-	var = var / cases - mean * mean;
+	histo_mean = histo_mean / histo_cases;
+	histo_var = histo_var / histo_cases - histo_mean * histo_mean;
 
-	bins = new bin[ num_bins ];
+	histo_bins = new bin[ num_bins ];
 	for ( i = 0; i < num_bins; ++i )
 	{
-		bins[ i ].num = 0;
-		bins[ i ].av = 0;
-		bins[ i ].min = 0;
-		bins[ i ].max = 0;  
-		bins[ i ].center = 0; 
+		histo_bins[ i ].num = 0;
+		histo_bins[ i ].av = 0;
+		histo_bins[ i ].min = 0;
+		histo_bins[ i ].max = 0;  
+		histo_bins[ i ].center = 0; 
 	}
 	 
 	for ( i = 0; i < nv; ++i )
 	{
-		if ( start[ i ] > time_cs || end[ i ] < time_cs || ! is_finite( data[ i ][ time_cs - start[ i ] ] ) )
+		if ( start[ i ] > histo_cs || end[ i ] < histo_cs || ! is_finite( data[ i ][ histo_cs - start[ i ] ] ) )
 			continue;
 
-		a = floor( num_bins * ( data[ i ][ time_cs - start[ i ] ] - mn ) / ( mx - mn ) );
+		a = floor( num_bins * ( data[ i ][ histo_cs - start[ i ] ] - mn ) / ( mx - mn ) );
 			
 		j = ( int ) a;
 		if ( j == num_bins )
 			--j;
 		
-		if ( bins[ j ].num == 0 )
-			bins[ j ].min=bins[ j ].max = data[ i ][ time_cs - start[ i ] ];
+		if ( histo_bins[ j ].num == 0 )
+			histo_bins[ j ].min = histo_bins[ j ].max = data[ i ][ histo_cs - start[ i ] ];
 		else
 		{
-			if ( bins[ j ].min > data[ i ][ time_cs - start[ i ] ] )
-				bins[ j ].min = data[ i ][ time_cs - start[ i ] ];
+			if ( histo_bins[ j ].min > data[ i ][ histo_cs - start[ i ] ] )
+				histo_bins[ j ].min = data[ i ][ histo_cs - start[ i ] ];
 			else
-				if ( bins[ j ].max < data[ i ][ time_cs - start[ i ] ] )
-					bins[ j ].max = data[ i ][ time_cs - start[ i ] ];
+				if ( histo_bins[ j ].max < data[ i ][ histo_cs - start[ i ] ] )
+					histo_bins[ j ].max = data[ i ][ histo_cs - start[ i ] ];
 		}
 		
-		bins[ j ].num++;   
-		bins[ j ].av += data[ i ][ time_cs - start[ i ] ];
+		histo_bins[ j ].num++;   
+		histo_bins[ j ].av += data[ i ][ histo_cs - start[ i ] ];
 	} 
 
 	a = ( mx - mn ) / ( num_bins - 1 );
 	for ( i = 1; i < num_bins; ++i )
-		if ( bins[ i ].num != 0 && bins[ i - 1 ].num != 0 && bins[ i ].min - bins[ i - 1 ].max < a )
-			a = bins[ i ].min - bins[ i - 1 ].max;
+		if ( histo_bins[ i ].num != 0 && histo_bins[ i - 1 ].num != 0 && histo_bins[ i ].min - histo_bins[ i - 1 ].max < a )
+			a = histo_bins[ i ].min - histo_bins[ i - 1 ].max;
 
 	cmd( "set choice $stat" );
 	stat = *choice;
@@ -7227,19 +7230,19 @@ void histograms_cs( int *choice )
 
 	for ( i = 0; i < num_bins; ++i )
 	{
-		if ( bins[ i ].num != 0 )
-			bins[ i ].av /= bins[ i ].num;
-		bins[ i ].lowb = mn - a / 2 + ( double ) i * step;
-		bins[ i ].highb = mn - a / 2 + ( double ) ( i + 1 ) * step;
-		bins[ i ].center = bins[ i ].highb / 2 + bins[ i ].lowb / 2;
+		if ( histo_bins[ i ].num != 0 )
+			histo_bins[ i ].av /= histo_bins[ i ].num;
+		histo_bins[ i ].lowb = mn - a / 2 + ( double ) i * step;
+		histo_bins[ i ].highb = mn - a / 2 + ( double ) ( i + 1 ) * step;
+		histo_bins[ i ].center = histo_bins[ i ].highb / 2 + histo_bins[ i ].lowb / 2;
 		
 		if ( stat == 1 )
-			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", "", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, bins[ i ].min, pdigits, bins[ i ].av, pdigits, bins[ i ].max, pdigits, bins[ i ].num, pdigits, bins[ i ].num / cases );
+			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", "", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].max, pdigits, histo_bins[ i ].num, pdigits, histo_bins[ i ].num / histo_cases );
 		
-		if ( bins[ i ].num < lminy )
-			lminy = bins[ i ].num;
-		if ( bins[ i ].num > lmaxy )
-			lmaxy = bins[ i ].num;
+		if ( histo_bins[ i ].num < lminy )
+			lminy = histo_bins[ i ].num;
+		if ( histo_bins[ i ].num > lmaxy )
+			lmaxy = histo_bins[ i ].num;
 	}
 
 	if ( stat == 1 )
@@ -7250,8 +7253,8 @@ void histograms_cs( int *choice )
 
 	if ( autom || miny >= maxy )
 	{
-		maxy = lmaxy / cases;
-		miny = lminy > 0 ? ( lminy - 1 ) / cases : 0;
+		maxy = lmaxy / histo_cases;
+		miny = lminy > 0 ? ( lminy - 1 ) / histo_cases : 0;
 		update_bounds( );
 	}
 
@@ -7263,7 +7266,7 @@ void histograms_cs( int *choice )
 
 	*choice = 0;
 
-	delete [ ] bins;
+	delete [ ] histo_bins;
 
 	end:
 
@@ -9010,17 +9013,17 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	{
 		if ( line_point == 1 )
 		{
-			x1 = hbordsize + ( int ) floor( hsize * ( bins[ i ].lowb - bins[ 0 ].lowb ) / ( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) );
-			x2 = hbordsize + ( int ) floor( hsize * ( bins[ i ].highb - bins[ 0 ].lowb ) / ( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) );
-			y1 = ( int ) min( max( tbordsize + vsize - floor( vsize * ( bins[ i ].num / cases - miny ) / ( maxy - miny ) ), tbordsize ), tbordsize + vsize );
+			x1 = hbordsize + ( int ) floor( hsize * ( histo_bins[ i ].lowb - histo_bins[ 0 ].lowb ) / ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
+			x2 = hbordsize + ( int ) floor( hsize * ( histo_bins[ i ].highb - histo_bins[ 0 ].lowb ) / ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
+			y1 = ( int ) min( max( tbordsize + vsize - floor( vsize * ( histo_bins[ i ].num / histo_cases - miny ) / ( maxy - miny ) ), tbordsize ), tbordsize + vsize );
 			y2 = tbordsize + vsize;
 
 			cmd( "plot_bars $p %d %d %d %d p%d $c%d %lf", x1, y1, x2, y2, i, color + 1, point_size );
 		}
 		else
 		{
-			x1 = hbordsize + ( int ) floor( hsize * ( bins[ i ].center - bins[ 0 ].lowb ) / ( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) );
-			y1 = tbordsize + vsize - ( int ) floor( vsize * ( bins[ i ].num / cases - miny ) / ( maxy - miny ) );
+			x1 = hbordsize + ( int ) floor( hsize * ( histo_bins[ i ].center - histo_bins[ 0 ].lowb ) / ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
+			y1 = tbordsize + vsize - ( int ) floor( vsize * ( histo_bins[ i ].num / histo_cases - miny ) / ( maxy - miny ) );
 			if ( y1 <= tbordsize + vsize && y1 >= tbordsize )
 				cmd( "plot_points $p %d %d p%d $c%d %lf", x1, y1, i, color, point_size );
 		}
@@ -9041,33 +9044,33 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 		return;
 	}
 
-	if ( norm && var > 0 )
+	if ( norm && histo_var > 0 )
 	{
 		double a, b, s, tot_norm = 0;
 		
 		for ( i = 0; i < num_bins; ++i )
 		{
-			a = bins[ i ].lowb;
-			b = exp( - ( a - mean ) * ( a - mean ) / ( 2 * var ) ) / 
-				( sqrt( 2 * M_PI * var ) );
-			a = bins[ i ].highb;
-			s = exp( - ( a - mean ) * ( a - mean ) / ( 2 * var ) ) / 
-				 ( sqrt( 2 * M_PI * var ) );
+			a = histo_bins[ i ].lowb;
+			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) / 
+				( sqrt( 2 * M_PI * histo_var ) );
+			a = histo_bins[ i ].highb;
+			s = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) / 
+				 ( sqrt( 2 * M_PI * histo_var ) );
 			tot_norm += ( b + s ) / 2;
 		}
 
 		for ( i = 0; i < num_bins; ++i )
 		{
-			a = bins[ i ].center;  
-			b = exp( - ( a - mean ) * ( a - mean ) / ( 2 * var ) ) / 
-				( sqrt( 2 * M_PI * var ) );
+			a = histo_bins[ i ].center;  
+			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) / 
+				( sqrt( 2 * M_PI * histo_var ) );
 			b /= tot_norm;
 			y2 = ( int ) min( max( tbordsize + vsize - round( vsize * ( b - miny ) / ( maxy - miny ) ), 
 								   tbordsize ), 
 							  tbordsize + vsize );  
 
-			x2 = hbordsize + ( int ) round( hsize * ( bins[ i ].center - bins[ 0 ].lowb ) / 
-											( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) );
+			x2 = hbordsize + ( int ) round( hsize * ( histo_bins[ i ].center - histo_bins[ 0 ].lowb ) / 
+											( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
 									
 			if ( i > 0 && ( y1 > tbordsize || y2 > tbordsize ) && 
 				 ( y1 < tbordsize + vsize || y2 < tbordsize + vsize ) )
@@ -9106,18 +9109,18 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 				$w.b.c.y.v1 configure -text [ format \"%%%%.${pdigits}g\" [ expr { ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf } ] ]; \
 				$w.b.c.y.v2 configure -text \"( n=[ expr { int( ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ) } ] )\" \
 			} \
-		}", cur_plot, cur_plot, hbordsize, hbordsize + hsize, tbordsize, tbordsize + vsize, num_bins, num_bins, maxy, miny, miny, maxy * cases, miny * cases, miny * cases );
+		}", cur_plot, cur_plot, hbordsize, hbordsize + hsize, tbordsize, tbordsize + vsize, num_bins, num_bins, maxy, miny, miny, maxy * histo_cases, miny * histo_cases, miny * histo_cases );
 
 	for ( i = 0; i < num_bins; ++i )
 	{
 		switch ( type )
 		{
 			case HISTOGR:
-				sprintf( txtLab, "n=%d \u03bc=%.*g \\[%.*g,%.*g\\]", ( int ) bins[ i ].num, pdigits, bins[ i ].av, pdigits, bins[ i ].min, pdigits, bins[ i ].max );
+				sprintf( txtLab, "n=%d \u03bc=%.*g \\[%.*g,%.*g\\]", ( int ) histo_bins[ i ].num, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].max );
 				break;
 				
 			case HISTOCS:
-				sprintf( txtLab, "n=%d \u03bc=%.*g \\[%.*g,%.*g\\]", ( int ) bins[ i ].num, pdigits, bins[ i ].av, pdigits, bins[ i ].min, pdigits, bins[ i ].max );
+				sprintf( txtLab, "n=%d \u03bc=%.*g \\[%.*g,%.*g\\]", ( int ) histo_bins[ i ].num, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].max );
 				break;
 		}
 			
@@ -9192,8 +9195,8 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			nLine = 0;
 			bbordsize = 2 * lheight;
 			y2on = true;
-			cminy2 = miny * cases;
-			cmaxy2 = maxy * cases;
+			cminy2 = miny * histo_cases;
+			cmaxy2 = maxy * histo_cases;
 			break;
 			
 		case HISTOCS:
@@ -9203,8 +9206,8 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			nLine = 1;
 			bbordsize = 4 * lheight;
 			y2on = true;
-			cminy2 = miny * cases;
-			cmaxy2 = maxy * cases;
+			cminy2 = miny * histo_cases;
+			cmaxy2 = maxy * histo_cases;
 			break;
 			
 		default:
@@ -9357,7 +9360,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 		case HISTOGR:
 		case HISTOCS:
 			for ( i = 0; i < hticks + 2; ++i )
-				cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %.*g -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, pdigits, bins[ 0 ].lowb + i * ( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) / ( hticks + 1 ) );
+				cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %.*g -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, pdigits, histo_bins[ 0 ].lowb + i * ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) / ( hticks + 1 ) );
 			break;			
 	}
 
@@ -9403,7 +9406,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 				break;
 				
 			case HISTOCS:
-				sprintf( txtLab, "t = %d ", time_cs );
+				sprintf( txtLab, "t = %d ", histo_cs );
 				tOk = true;
 				break;
 				

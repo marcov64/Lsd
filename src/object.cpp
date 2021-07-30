@@ -1987,7 +1987,7 @@ void object::collect_cemetery( variable *caller )
 		}
 		else
 		{
-			cv->empty( cv == caller );		// disable lock if emptying caller
+			cv->empty( caller == NULL || cv == caller );// disable lock if emptying caller
 			delete cv;
 		}
 	}

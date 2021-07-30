@@ -29,13 +29,11 @@ Relevant flags (when defined):
 
 // standard libraries used
 #include <cstdarg>
-#include <cctype>
 #include <cfloat>
 #include <limits>
 #include <algorithm>
 #include <random>
 #include <chrono>
-#include <string>
 #include <list>
 #include <map>
 #include <set>

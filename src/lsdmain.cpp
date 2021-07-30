@@ -1724,17 +1724,11 @@ bool stop_parallel( void )
 	for ( id = 0; id < ( int ) run_pids.size( ); ++id )
 		res += kill_system( id );
 		
-	if ( res < run_pids.size( ) )
+	if ( res < ( int ) run_pids.size( ) )
 		return false;
 
 	while ( parallel_monitor && secs++ < WAIT_SECS )
 		msleep( 1000 );
-	
-	if ( parallel_monitor )
-		return false;
-	
-	if ( run_monitor.joinable( ) )
-		run_monitor.join( );
 	
 	for ( string & results : run_results )
 		remove( results.c_str( ) );
@@ -1744,6 +1738,12 @@ bool stop_parallel( void )
 	
 	run_results.clear( );
 	run_logs.clear( );
+	
+	if ( parallel_monitor )
+		return false;
+	
+	if ( run_monitor.joinable( ) )
+		run_monitor.join( );
 	
 #ifndef _NW_
 

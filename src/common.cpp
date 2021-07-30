@@ -1160,7 +1160,7 @@ int run_system( const char *cmd, int id )
 		return -1;
 	}
 
-	if ( id >= 0 && id < run_pids.size( ) )
+	if ( id >= 0 && id < ( int ) run_pids.size( ) )
 	{
 		lock_guard < mutex > lock( lock_run_pids );
 		run_pids[ id ] = p_info.hProcess;
@@ -1184,7 +1184,7 @@ int kill_system( int id )
 {
 	DWORD res;
 	
-	if ( id >= 0 && id < run_pids.size( ) && 
+	if ( id >= 0 && id < ( int ) run_pids.size( ) && 
 		 GetExitCodeProcess( run_pids[ id ], & res ) && 
 		 res == STILL_ACTIVE && 
 		 ! TerminateProcess( run_pids[ id ], 15 ) )
@@ -1230,7 +1230,7 @@ int run_system( const char *cmd, int id )
 	}
 	else
 	{
-		if ( id >= 0 && id < run_pids.size( ) )
+		if ( id >= 0 && id < ( int ) run_pids.size( ) )
 		{
 			lock_guard < mutex > lock( lock_run_pids );
 			run_pids[ id ] = pid;
@@ -1251,14 +1251,28 @@ int run_system( const char *cmd, int id )
  KILL_SYSTEM (Unix)
  stops a running command in system
  ****************************************************/
+#define WAIT_TSECS 10
 int kill_system( int id )
 {
-	if ( id < 0 || id >= run_pids.size( ) || 
-		 kill( run_pids[ id ], SIGTERM ) == 0 || 
-		 errno == ESRCH )
-		return 1;
+	int res, tsecs = 0;
 	
-	return 0;
+	if ( id >= 0 && id < ( int ) run_pids.size( ) )
+	{
+		if ( kill( run_pids[ id ], SIGKILL ) == 0 )
+		{
+			while ( ( res = kill( run_pids[ id ], 0 ) ) == 0 && 
+					tsecs++ < WAIT_TSECS )
+				msleep( 100 );
+				
+			if ( res == 0 )
+				return 0;
+		}
+		else
+			if ( errno != ESRCH )
+				return 0;
+	}
+	
+	return 1;
 }
 
 #endif
