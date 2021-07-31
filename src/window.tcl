@@ -680,7 +680,7 @@ proc focustop { w1 { w2 "" } { force no } } {
 		}
 		
 		if { $force } {
-			focus -force $w1
+			catch { focus -force $w1 }
 		} else {
 			focus $w1
 		}

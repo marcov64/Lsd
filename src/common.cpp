@@ -223,7 +223,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 	s = ( char * ) Tcl_GetVar( inter, "tcl_platform(os)", 0 );
 	if ( ! strcmp( s, "Darwin") )
 	{
-		cmd( "console hide" );
+		cmd( "catch { console hide }" );
 		cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
 
 		// close console if open (usually only in Mac)
@@ -1160,11 +1160,16 @@ int run_system( const char *cmd, int id )
 		return -1;
 	}
 
+#ifndef _NP_	
+
 	if ( id >= 0 && id < ( int ) run_pids.size( ) )
 	{
+		
 		lock_guard < mutex > lock( lock_run_pids );
 		run_pids[ id ] = p_info.hProcess;
 	}
+
+#endif
 	
 	WaitForSingleObject( p_info.hProcess, INFINITE );
 	GetExitCodeProcess( p_info.hProcess, & res );
@@ -1182,6 +1187,9 @@ int run_system( const char *cmd, int id )
  ****************************************************/
 int kill_system( int id )
 {
+	
+#ifndef _NP_
+	
 	DWORD res;
 	
 	if ( id >= 0 && id < ( int ) run_pids.size( ) && 
@@ -1189,6 +1197,8 @@ int kill_system( int id )
 		 res == STILL_ACTIVE && 
 		 ! TerminateProcess( run_pids[ id ], 15 ) )
 			return 0;
+
+#endif
 
 	return 1;
 }
@@ -1230,11 +1240,16 @@ int run_system( const char *cmd, int id )
 	}
 	else
 	{
+
+#ifndef _NP_	
+
 		if ( id >= 0 && id < ( int ) run_pids.size( ) )
 		{
 			lock_guard < mutex > lock( lock_run_pids );
 			run_pids[ id ] = pid;
 		}
+
+#endif
 		
 		waitpid( pid, & res, 0 );	
 		wordfree( & p );
@@ -1254,6 +1269,9 @@ int run_system( const char *cmd, int id )
 #define WAIT_TSECS 10
 int kill_system( int id )
 {
+	
+#ifndef _NP_
+	
 	int res, tsecs = 0;
 	
 	if ( id >= 0 && id < ( int ) run_pids.size( ) )
@@ -1271,7 +1289,9 @@ int kill_system( int id )
 			if ( errno != ESRCH )
 				return 0;
 	}
-	
+
+#endif
+		
 	return 1;
 }
 

@@ -731,13 +731,17 @@ proc open_diff { file1 file2 { file1name "" } { file2name "" } } {
 proc open_gnuplot { { script "" } { errmsg "" } { persist false } { par ".da" } } {
 	global CurPlatform sysTerm gnuplotExe termResult
 
-		if { $script eq "" && $CurPlatform in [ list linux mac ] } {
-			set error [ open_terminal $gnuplotExe ]
-		} elseif { $persist } {
-			set error [ open_terminal $script $gnuplotExe ]
-		} else {
-			set error [ open_terminal "-p $script" $gnuplotExe ]
-		}
+	if { $persist } {
+		set opt ""
+	} else {
+		set opt "-p"
+	}
+		
+	if { $script eq "" && $CurPlatform in [ list linux mac ] } {
+		set error [ open_terminal $gnuplotExe ]
+	} else {
+		set error [ open_terminal "$opt $script" $gnuplotExe ]
+	}
 
 	if { $error } {
 		if [ string equal $errmsg "" ] {
@@ -786,7 +790,7 @@ proc open_browser { dir fn } {
 # OPEN_TERMINAL
 #************************************************
 proc open_terminal { cmd { term "" } } {
-	global sysTerm wish HtmlBrowser CurPlatform termResult
+	global sysTerm CurPlatform termResult
 	
 	if { $term eq "" } {
 		set term $sysTerm
@@ -800,19 +804,12 @@ proc open_terminal { cmd { term "" } } {
 		set opt [ list ]
 	}
 	
-	# whish is not system dependent
-	if { $term in [ list $wish $HtmlBrowser ] } {
-		set cmdline [ concat $term $opt $cmd ]
+	# mac terminal can only get commands from applescript
+	if { $CurPlatform eq "mac" && [ string equal -nocase $term Terminal ] } {
+		set cmdline "osascript -e \"tell application \\\"$term\\\" to do script \\\"cd [ pwd ]; clear; $cmd; exit\\\"\""
+		set cmdline [ concat $cmdline "-e \"tell application \\\"$term\\\" to activate\"" ]
 	} else {
-		switch $CurPlatform {
-			windows -
-			linux {
-				set cmdline [ concat $term $opt $cmd ]
-			}
-			mac {
-				set cmdline "osascript -e \"tell application \\\"$term\\\" to do script \\\"cd [ pwd ]; clear; $cmd; exit\\\"\""
-			}
-		}
+		set cmdline [ concat $term $opt $cmd ]
 	}
 	
 	set termResult ""

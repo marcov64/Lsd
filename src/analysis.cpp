@@ -78,8 +78,9 @@ struct bin
 	double av;
 	double lowb;
 	double highb;
-} *histo_bins;
+};
 
+bin *histo_bins;
 bool avgSmplMsg;
 bool first_run = true;
 char filename[ MAX_PATH_LENGTH + 1 ];
@@ -2628,8 +2629,8 @@ while ( true )
 						cmd( "set path \"%s\"", path );
 						if ( strlen( path ) > 0 )
 							cmd( "cd \"$path\"" );
-					
-						cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$path\" -defaultextension .res.gz -filetypes {{{LSD result files} {.res .res.gz}} {{LSD total files} {.tot .tot.gz}} {{All files} {*}}} ]", mc ? "s" : "(s)" );
+
+						cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$path\" -defaultextension .res.gz -filetypes { %s { {All files} {*} } } -typevariable defaultFileType ]", mc ? "s" : "(s)", platform == _MAC_ ? "" : "{ {LSD result files} {.res.gz .res} } { {LSD total files} {.tot .tot.gz} }" );
 						cmd( "if { ! [ fn_spaces \"$lab\" .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
 						h = *choice;		// number of files
 						
@@ -8280,10 +8281,11 @@ void save_datazip( int *choice )
 		*choice = 0;
 	}
 
+	// handle macOS bug on double-component extensions
 	if ( type_res == 4 )
 	{
 		desc = descTxt;
-		if ( ! dozip )
+		if ( ! dozip || platform == _MAC_ )
 			ext = extTxt;
 		else
 			ext = extTxtZip;
@@ -8291,7 +8293,7 @@ void save_datazip( int *choice )
 	else
 	{
 		desc = descRes;
-		if ( ! dozip )
+		if ( ! dozip || platform == _MAC_ )
 			ext = extRes;
 		else
 			ext = extResZip;
@@ -8303,6 +8305,15 @@ void save_datazip( int *choice )
 		cmd( "cd \"$path\"" );
 
 	cmd( "set bah [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }  } ]", ext, desc, ext );
+	
+	// add the second extension in macOS only now
+	if ( platform == _MAC_ && dozip )
+		cmd( "if { [ string length [ file extension \"$bah\" ] ] > 0 } { \
+				set bah \"${bah}.gz\" \
+			} elseif { [ string length \"$bah\" ] > 0 } { \
+				set bah \"${bah}.%s.gz\" \
+			}", ext );
+
 	app = ( char * ) Tcl_GetVar( inter, "bah", 0 );
 	strcpy( msg, app );
 
@@ -8314,7 +8325,7 @@ void save_datazip( int *choice )
 	else
 		fsave = fopen( msg, "wt" );  // use text mode for Windows better compatibility
 
-	if ( del != 3 ) //Delimited files
+	if ( del != 3 ) // delimited files
 	{
 		if ( del == 2 )
 		{

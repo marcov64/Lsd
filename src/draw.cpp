@@ -519,7 +519,7 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 					wm deiconify .list; \
 					catch { raise .list }; \
 					if { $CurPlatform eq \"mac\" } { \
-						after idle { focus -force $__focus__ } \
+						after idle { catch { focus -force $__focus__ } } \
 					} \
 				} ] \
 			} \

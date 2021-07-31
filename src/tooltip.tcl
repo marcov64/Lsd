@@ -345,7 +345,8 @@ proc ::tooltip::show {w msg {i {}}} {
     raise $b
     if {[tk windowingsystem] eq "aqua" && $focus ne ""} {
 	# Aqua's help window steals focus on display
-	after idle [list focus -force $focus]
+	#after idle [list focus -force $focus]
+	after idle { catch { focus -force $focus } }
     }
 }
 

@@ -1757,6 +1757,22 @@ bool stop_parallel( void )
 
 
 /***************************************
+DETACH_PARALLEL
+***************************************/
+void detach_parallel( void )
+{
+	parallel_abort = true;
+	
+	for ( auto & thr : run_threads )
+		if ( thr.joinable( ) )
+			thr.detach( );
+	
+	if ( run_monitor.joinable( ) )
+		run_monitor.detach( );
+}
+
+
+/***************************************
 MONITOR_PARALLEL
 ***************************************/
 void monitor_parallel( bool nw )

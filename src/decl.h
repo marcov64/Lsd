@@ -281,6 +281,7 @@ void create_table_init( object *r, FILE *frep );
 void dataentry_sensitivity( int *choice, sense *s, int nval = 0 );
 void deb_show( object *r, const char *hl_var, int mode );
 void delete_bridge( object *d );
+void detach_parallel( void );
 void disable_plot( void );
 void draw_buttons( void );
 void draw_obj( object *t, object *sel, int level = 0, int center = 0, int from = 0, bool zeroinst = false );

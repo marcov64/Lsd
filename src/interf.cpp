@@ -1003,7 +1003,7 @@ int browse( object *r, int *choice )
 		cmd( "pack .l -fill both -expand yes" );
 	}
 
-	cmd( "settop . no { if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } { exit } } no yes" );
+	cmd( "settop . no { set choice 11 } no yes" );
 
 	main_cycle:
 	
@@ -7466,6 +7466,9 @@ bool abort_run_threads( void )
 		if ( ans == 2 )
 			if ( ! stop_parallel( ) )
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Failed to abort running simulation\" -detail \"LSD is exiting but the parallel simulation runs will continue (results and log files will be produced in the configuration file's directory).\"" );
+		
+		if ( ans == 1 )
+			detach_parallel( );
 		
 		if ( ans == 0 )
 			return false;
