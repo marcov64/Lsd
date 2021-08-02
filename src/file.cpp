@@ -397,6 +397,7 @@ bool load_description( char *msg, FILE *f )
 	label[ MAX_ELEM_LENGTH - 1 ] = '\0';
 	strcpy( text, "" );
 	strcpy( init, "" );
+	strcpy( str, "" );
 	
 	if ( strncmp( msg, "Object", 6 ) == 0 )
 	{
