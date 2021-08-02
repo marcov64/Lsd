@@ -469,6 +469,7 @@ extern int actual_steps;		// number of executed time steps
 extern int add_to_tot;			// type of totals file generated (bool)
 extern int choice_g;			// Tcl menu control variable ( structure window)
 extern int cur_plt;				// current graph plot number
+extern int dobar;				// output a progress bar to the log/standard output
 extern int docsv;				// produce .csv text results files (bool)
 extern int dozip;				// compressed results file flag (bool)
 extern int findexSens;			// index to sequential sensitivity configuration filenames

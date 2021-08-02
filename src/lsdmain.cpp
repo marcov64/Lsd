@@ -45,6 +45,8 @@ char nonavail[ ] = "NA";	// string for unavailable values (use R default)
 char tabs[ ] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";	// Log window tabs
 double def_res = 0;			// default equation result
 int add_to_tot = false;		// flag to append results to existing totals file (bool)
+int dobar = true;			// output a progress bar to the log/standard output
+int docsv = false;			// produce .csv text results files (bool)
 int dozip = true;			// compressed results file flag (bool)
 int max_step = 100;			// default number of simulation runs
 int overwConf = true;		// overwrite configuration on run flag (bool)
@@ -54,7 +56,6 @@ unsigned seed = 1;			// random number generator initial seed
 
 bool batch_sequential = false;// no-window multi configuration job running
 bool brCovered = false;		// browser cover currently covered
-bool dobar = false;			// output a progress bar to the log/standard output
 bool eq_dum = false;		// current equation is dummy
 bool error_hard_thread;		// flag to error_hard() called in worker thread
 bool fast;					// safe copy of fast_mode flag
@@ -116,7 +117,6 @@ int choice_g;               // Tcl menu control variable (structure window)
 int cur_plt;				// current graph plot number
 int cur_sim;				// current simulation run
 int debug_flag = false;		// debug enable control (bool)
-int docsv = false;			// produce .csv text results files (bool)
 int done_in;				// Tcl menu control variable (log window)
 int fast_mode;				// level of LOG messages & runtime plot
 int fend;					// last multi configuration job to run
@@ -232,8 +232,9 @@ int lsdmain( int argn, char **argv )
 
 #ifdef _NW_
 	
-	no_window = true;
-	no_res = no_tot = grandTotal = false;// to preserve compatibility
+	false;
+	dozip = no_window = true;			// to preserve compatibility
+	dobar = docsv = no_res = no_tot = grandTotal = false;
 	findex = -1;						// no default
 	fend = 0;							// no file number limit
 
@@ -1494,14 +1495,6 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 {
 	char *alt_name;
 	int i, j, k, num, sl;
-	
-	// check for existing running threads
-	if ( run_monitor.joinable( ) )
-		return -1;
-
-	for ( auto & thr : run_threads )
-		if ( thr.joinable( ) )
-			return -1;
 	
 	int path_len = save_alt_path ? strlen( alt_path ) : strlen( path );
 	int name_len = strlen( simname ) + ( int ) log10( fseed + runs ) + 2;

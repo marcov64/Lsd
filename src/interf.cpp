@@ -5766,6 +5766,7 @@ case 69:
 	
 	Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "dobar", ( char * ) & dobar, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
@@ -5919,8 +5920,9 @@ case 69:
 				$b.f4.l3 configure -text \"\n\" \
 			} \
 		}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
+	cmd( "ttk::checkbutton $b.f6.dobar -text \"Show progress bar in logs\" -variable dobar" );
 	cmd( "ttk::checkbutton $b.f6.tosave -text \"Update configuration file\" -variable overwConf" );
-	cmd( "pack $b.f6.nores $b.f6.notot $b.f6.dozip $b.f6.docsv %s -anchor w", overwConf ? "$b.f6.tosave" : "" );
+	cmd( "pack $b.f6.nores $b.f6.notot $b.f6.dozip $b.f6.docsv $b.f6.dobar %s -anchor w", overwConf ? "$b.f6.tosave" : "" );
 	
 	cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f5 $b.f6 -padx 5 -pady 5" );
 		
@@ -5939,6 +5941,7 @@ case 69:
 	
 	Tcl_UnlinkVar( inter, "no_res" );
 	Tcl_UnlinkVar( inter, "no_tot" );
+	Tcl_UnlinkVar( inter, "dobar" );
 	Tcl_UnlinkVar( inter, "docsv" );
 	Tcl_UnlinkVar( inter, "dozip" );
 	Tcl_UnlinkVar( inter, "overwConf" );
@@ -5981,7 +5984,7 @@ case 69:
 #ifdef _NP_
 
 	sprintf( lab_old, "%s.log", simul_name );
-	cmd( "catch { exec %s -f %s%s%s%s%s -l %s & }", lab, struct_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
+	cmd( "catch { exec %s -f %s%s%s%s%s%s -l %s & }", lab, struct_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", lab_old );
 	run_logs.clear( );
 	run_logs.push_back( lab_old );	
 
