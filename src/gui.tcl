@@ -130,9 +130,15 @@ if [ string equal $CurPlatform mac ] {
 	set bvstepM $bvstepLinux
 	set borderMadj $bborderLinux
 	
-	# use xterm as alternative for missing default terminal
+	# use xterm as alternative for missing default/alternative terminals
 	if { [ catch { exec which [ lindex $DefaultSysTerm 0 ] } ] } {
 		set DefaultSysTerm "xterm -e"
+		foreach term $sysTermLinuxAlt {
+			if { ! [ catch { exec which [ lindex $term 0 ] } ] } {
+				set DefaultSysTerm $term
+				break
+			}
+		}
 	}
 	
 } elseif [ string equal $CurPlatform windows ] {

@@ -206,7 +206,8 @@ set themeLinux			"awlight"	; # Adwaita light theme
 set themeLinuxDark		"awdark"	; # Adwaita dark theme
 set themeWindows		"vista"		; # native Windows light theme
 set themeWindowsDark	"awblack"	; # Windows dark theme
-set darkThemeSuffixes	[ list dark black obscure ]; # words identifying Linux dark themes
+set darkThemeSuffixes	[ list dark black obscure dusk nokto night inverse oxygen ]; # words identifying Linux dark themes
+set winManLinux			[ list gnome kde plasma xfce cinnamon mate lxde lxqt ]; # window managers to detect theme
 
 # OS specific monospaced font name
 set fontMac				"Monaco"			; # "Courier"
@@ -260,8 +261,9 @@ set exeWindows 			"LSD"
 
 # OS specific default system terminal
 set sysTermMac			"Terminal"			; # "Terminal", "xterm"
-set sysTermLinux		"gnome-terminal --"	; # "gnome-terminal --", "xterm -e", "uxterm -e"
 set sysTermWindows		"cmd /c"			;
+set sysTermLinux		"gnome-terminal --"	; # "gnome-terminal --", "xterm -e", "uxterm -e"
+set sysTermLinuxAlt		[ list "konsole -e" "xfce4-terminal -e" "mate-terminal -e" "lxterminal -e" "qterminal -e" ]
 
 # OS specific default debugger command
 set dbgMac				"lldb"		; # "gdb"

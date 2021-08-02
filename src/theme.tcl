@@ -25,31 +25,107 @@
 # ISDARKTHEME
 # Check for a system dark theme in use
 # Redefine standard styles when necessary
-# In Linux, only GTK themes are detected
+# In Linux, only some themes are detected
 #************************************************
 proc isDarkTheme { } {
-	global tcl_platform CurPlatform darkThemeSuffixes
+	global tcl_platform CurPlatform darkThemeSuffixes winManLinux RootLsd LsdSrc env
 
 	if [ string equal $CurPlatform mac ] {
 		update idletasks
 		if [ tk::unsupported::MacWindowStyle isdark . ] {
 			return 1
 		}
-	} elseif [ string equal $CurPlatform linux ] {
-		catch { exec gsettings get org.gnome.desktop.interface gtk-theme } results
-		foreach namePart $darkThemeSuffixes {
-			if { [ string first $namePart [ string tolower $results ] ] >= 0 } {
-				return 1
-			}
-		}
+		
 	} elseif [ string equal $CurPlatform windows ] {
 		if { ! [ catch { set AppsUseLightTheme [ registry get HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize AppsUseLightTheme ] } ] } {
 			if { ! $AppsUseLightTheme } {
 				return 1
 			}
 		}
+		
+	} elseif [ string equal $CurPlatform linux ] {
+		set wm ""
+        set theme ""
+		set desktop1 ""
+		set desktop2 ""
+		
+		if { [ info exists env(XDG_CURRENT_DESKTOP) ] } {
+			set desktop1 [ string tolower $env(XDG_CURRENT_DESKTOP) ]
+		}
+		
+		if { [ info exists env(DESKTOP_SESSION) ] } {
+			set desktop2 [ string tolower $env(DESKTOP_SESSION) ]
+		} 
+		
+		foreach m $winManLinux {
+			if { [ string first $m $desktop1 ] >= 0 || \
+				 [ string first $m $desktop2 ] >= 0 } {
+				set wm $m
+			} 
+		}
+		
+		if { ( $wm eq "" || $wm eq "gnome" ) && \
+			 ! [ catch { exec gsettings get org.gnome.desktop.interface gtk-theme } results ] } {
+			set theme $results
+
+		} elseif { ( $wm eq "" || $wm eq "kde" || $wm eq "plasma" ) && \
+				   [ file exists "~/.config/kdeglobals" ] } {
+			source "$RootLsd/$LsdSrc/ini.tcl" ;	# load config file reader
+			if { ! [ catch { set f [ ini::open "~/.config/kdeglobals" ] } ] && \
+				 ! [ catch { ini::value $f General Name } results ] } {
+				set theme $results
+			}
+		} elseif { ( $wm eq "" || $wm eq "xfce" ) && \
+				   ! [ catch { exec xfconf-query -c xsettings -p /Net/ThemeName } results ] } {
+			set theme $results
+			
+		} elseif { ( $wm eq "" || $wm eq "cinnamon" ) && \
+				   ! [ catch { exec gsettings get org.cinnamon.desktop.interface gtk-theme } results ] } {
+			set theme $results
+
+		} elseif { ( $wm eq "" || $wm eq "mate" ) && \
+				   ! [ catch { exec gsettings get org.mate.interface gtk-theme } results ] } {
+			set theme $results
+
+		} elseif { ( $wm eq "" || $wm eq "lxde" ) && \
+				   [ file exists "~/.config/openbox/lxde-rc.xml" ] } {
+			set f [ open "~/.config/openbox/lxde-rc.xml" ]
+			set rc [ string tolower [ read $f ] ]
+			close $f
+
+			set thStart [ string first "<theme>" $rc ]
+			set thEnd [ string first "</theme>" $rc ]
+			
+			if { $thStart >= 0 && $thEnd > $thStart } {
+				set nameStart [ string first "<name>" $rc $thStart ]
+				set nameEnd [ string first "</name>" $rc $thStart ]
+				if { $nameStart > $thStart && $nameStart < $thEnd && \
+					 $nameEnd > $nameStart + 6 && $nameEnd < $thEnd } {
+					catch { set theme [ string range $rc [ expr $nameStart + 6 ] [ expr $nameEnd - 1 ] ] }
+				}
+			}
+		} elseif { ( $wm eq "" || $wm eq "lxqt" ) && \
+				   [ file exists "~/.config/lxqt/lxqt.conf" ] } {
+			source "$RootLsd/$LsdSrc/ini.tcl" ;	# load config file reader
+			if { ! [ catch { set f [ ini::open "~/.config/lxqt/lxqt.conf" ] } ] && \
+				 ! [ catch { ini::value $f Qt style } results ] } {
+				set theme $results
+			}
+		}
+
+		if { $theme ne "" } {
+			foreach n $darkThemeSuffixes {
+				if { [ string first $n [ string tolower $theme ] ] >= 0 } {
+					return 1
+				}
+			}
+	   
+		    return 0
+
+		} else {
+			return -1
+		}
 	}
-	return 0
 }
 
 
@@ -67,29 +143,34 @@ proc updateTheme { } {
 	if [ string equal $CurPlatform mac ] {
 		set DefaultTheme $themeMac
 
-	} elseif [ string equal $CurPlatform linux ] {
-		if [ isDarkTheme ] {
-			set DefaultTheme $themeLinuxDark
-			if { ! [ info exists lsdTheme ] || [ string equal $lsdTheme $themeLinux ] } {
-				set lsdTheme $themeLinuxDark
-			}
-		} else {
-			set DefaultTheme $themeLinux
-			if { ! [ info exists lsdTheme ] || [ string equal $lsdTheme $themeLinuxDark ] } {
-				set lsdTheme $themeLinux
-			}
-		}
-
 	} elseif [ string equal $CurPlatform windows ] {
 		if [ isDarkTheme ] {
 			set DefaultTheme $themeWindowsDark
-			if { ! [ info exists lsdTheme ] || [ string equal $lsdTheme $themeWindows ] } {
+			if { ! [ info exists lsdTheme ] || $lsdTheme eq $themeWindows } {
 				set lsdTheme $themeWindowsDark
 			}
 		} else {
 			set DefaultTheme $themeWindows
-			if { ! [ info exists lsdTheme ] || [ string equal $lsdTheme $themeWindowsDark ] } {
+			if { ! [ info exists lsdTheme ] || $lsdTheme eq $themeWindowsDark } {
 				set lsdTheme $themeWindows
+			}
+		}
+	} elseif [ string equal $CurPlatform linux ] {
+		set dark [ isDarkTheme ]
+		if { $dark == 1 } {
+			set DefaultTheme $themeLinuxDark
+			if { ! [ info exists lsdTheme ] || $lsdTheme eq $themeLinux } {
+				set lsdTheme $themeLinuxDark
+			}
+		} elseif { $dark == 0 } {
+			set DefaultTheme $themeLinux
+			if { ! [ info exists lsdTheme ] || $lsdTheme eq $themeLinuxDark } {
+				set lsdTheme $themeLinux
+			}
+		} else {
+			set DefaultTheme $themeLinux
+			if { ! [ info exists lsdTheme ] } {
+				set lsdTheme $themeLinux
 			}
 		}
 	}
