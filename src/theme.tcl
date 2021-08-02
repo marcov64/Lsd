@@ -32,16 +32,23 @@ proc isDarkTheme { } {
 
 	if [ string equal $CurPlatform mac ] {
 		update idletasks
+		
 		if [ tk::unsupported::MacWindowStyle isdark . ] {
 			return 1
 		}
+		
+		return 0
 		
 	} elseif [ string equal $CurPlatform windows ] {
 		if { ! [ catch { set AppsUseLightTheme [ registry get HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize AppsUseLightTheme ] } ] } {
 			if { ! $AppsUseLightTheme } {
 				return 1
+			} else {
+				return 0
 			}
 		}
+		
+		return -1
 		
 	} elseif [ string equal $CurPlatform linux ] {
 		set wm ""
@@ -144,14 +151,20 @@ proc updateTheme { } {
 		set DefaultTheme $themeMac
 
 	} elseif [ string equal $CurPlatform windows ] {
-		if [ isDarkTheme ] {
+		set dark [ isDarkTheme ]
+		if { $dark == 1 } {
 			set DefaultTheme $themeWindowsDark
 			if { ! [ info exists lsdTheme ] || $lsdTheme eq $themeWindows } {
 				set lsdTheme $themeWindowsDark
 			}
-		} else {
+		} elseif { $dark == 0 } {
 			set DefaultTheme $themeWindows
 			if { ! [ info exists lsdTheme ] || $lsdTheme eq $themeWindowsDark } {
+				set lsdTheme $themeWindows
+			}
+		} else {
+			set DefaultTheme $themeWindows
+			if { ! [ info exists lsdTheme ] } {
 				set lsdTheme $themeWindows
 			}
 		}

@@ -207,7 +207,7 @@ if { $CurPlatform eq "mac" && ( ! [ info exists $wish ] || $wish eq "wish8.6" ) 
 if { $CurPlatform eq "windows" && ( ! [ info exists $HtmlBrowser ] || $HtmlBrowser eq "open" ) } { \
 	set HtmlBrowser $browserWindows
 }
-	
+
 # detect and update OS-dependent current/default theme configurations
 updateTheme
 
