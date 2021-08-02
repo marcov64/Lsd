@@ -332,6 +332,7 @@ if { [ catch { set ttfam [ font actual [ ttk::style lookup TLabel -font ] -famil
 	set ttsize [ expr { [ font actual TkDefaultFont -size ] - 1 } ]
 }
 set ttfont [ font create -family "$ttfam" -size $ttsize ]
+set ttfontB [ font create -family "$ttfam" -size $ttsize -weight bold ]
 set tooltip::labelOpts [ list -background $colorsTheme(ttip) -foreground $colorsTheme(fg) \
 	 -borderwidth 0 -highlightthickness 1 -highlightbackground $colorsTheme(fg) ]
 tooltip::tooltip delay $ttipdelay

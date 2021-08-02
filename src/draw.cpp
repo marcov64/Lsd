@@ -505,6 +505,8 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 					catch { wm attributes .list -alpha 0.99 }; \
 					wm positionfrom .list program; \
 					wm withdraw .list; \
+					label .list.t -text \"%s (#%s)\" -font \"$ttfontB\" -foreground $colorsTheme(obj) -background $colorsTheme(ttip); \
+					pack .list.t -anchor w -ipadx 1; \
 					set res_g_i 0; \
 					foreach res_g_t $tlist_%s res_g_s $slist_%s { \
 						label .list.e$res_g_i -text \"$res_g_t\" -font \"$ttfont\" -foreground $colorsTheme($res_g_s) -background $colorsTheme(ttip); \
@@ -523,7 +525,7 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 					} \
 				} ] \
 			} \
-		}", str2, str2, str2, str2, str2 );
+		}", str2, str2, str2, str, n, str2, str2 );
 
 	cmd( ".str.f.c bind %s <Leave> { \
 			if { [ info exists res_g_id ] } { \
