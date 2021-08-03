@@ -1003,7 +1003,7 @@ int browse( object *r, int *choice )
 		cmd( "pack .l -fill both -expand yes" );
 	}
 
-	cmd( "settop . no { set choice 11 } no yes" );
+	cmd( "settop . no { if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } { exit } } no yes" );
 
 	main_cycle:
 	
@@ -7394,7 +7394,7 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 	// don't stop if simulation is running
 	if ( running )
 	{
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running.\n\n Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' first.\"" );
 		return false;
 	}
 	

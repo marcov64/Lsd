@@ -296,8 +296,14 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 			case 2:								// second line objects
 				max_wid = min( 15 * h_fact, 80 * h_fact / k );
 				break;
-			default:							// all other lines
+			case 3:
 				max_wid = min( 7 * h_fact, 10 * h_fact / k );
+				break;
+			case 4:
+				max_wid = min( 4 * h_fact, 6 * h_fact / k );
+				break;
+			default:							// all other lines
+				max_wid = min( 2 * h_fact, 3 * h_fact / k );
 		}
 		
 	

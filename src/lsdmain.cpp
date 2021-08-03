@@ -918,7 +918,7 @@ void run( void )
 		for ( t = 1; quit == 0 && t <= max_step; ++t )
 		{
 			// update the percentage done bar, if needed
-			if ( dobar )
+			if ( no_window && dobar )
 				update_bar( bar_done, perc_done, last_done );	
 			
 #ifndef _NW_ 
@@ -948,7 +948,7 @@ void run( void )
 #ifndef _NW_
 			switch ( done_in )
 			{
-				case 1:			// Stop button in Log window / s/S key in Runtime window
+				case 1:			// Stop button / s/S key
 					if ( pause_run )
 					{
 						cmd( "wm title .log \"$origLogTit\"" );
@@ -957,13 +957,13 @@ void run( void )
 					quit = 2;
 				break;
 
-				case 2:			// Fast button in Log window / f/F key in Runtime window
+				case 2:			// Fast button / f/F key
 				case 5:			// plot window DELETE_WINDOW button handler
 					set_fast( 1 );
 					debug_flag = false;
 					break;
 
-				case 3:			// Debug button in Log window / d/D key in Runtime window
+				case 3:			// Debug button / d/D key
 					if ( ! pause_run )
 					{
 						when_debug = t + 1;
@@ -977,7 +977,7 @@ void run( void )
 					}
 					break;
 
-				case 4:			// Observe button in Log window / o/O key in Runtime window
+				case 4:			// Observe button / o/O key
 					set_fast( 0 );
 					break;
 				 

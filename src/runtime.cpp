@@ -239,6 +239,8 @@ INIT_PLOT
 **************************************/
 void init_plot( int num, int id_sim )
 {
+	int i;
+	
 	cmd( "if { %d > $hsizeR } { set plot_step 1 } { set plot_step [ expr { $hsizeR / %d.0 } ] }", max_step, max_step );
 	
 	cmd( "ttk::frame $activeplot.c" );
@@ -319,19 +321,41 @@ void init_plot( int num, int id_sim )
 	cmd( "$activeplot.fond create window [ expr { $sclhsizeR / 2 } ] [ expr { 3 * $botvsizeR / 4 - 2 } ] -window $activeplot.fond.go" );
 	
 	// labels
-	cmd( "for { set i 0; set j 0; set k 0 } { $i < [ expr { min( %d, $linlabR * $lablinR ) } ] } { incr i } { \
-			set l [ regsub # [ lindex $tp $i ] _ ]; \
-			set it [ $activeplot.fond create text [ expr { $sclhsizeR + $sclvmarginR + $j * $hsizeR / $lablinR } ] [ expr { $k * $linvsizeR } ] -anchor nw -text $l -fill [ set c$i ] ]; \
-			set n [ regsub #\\[0-9\\]+ [ lindex $tp $i ] \"\" ]; \
-			set_ttip_descr $activeplot.fond $n $it 0; \
-			if { $j < [ expr { $lablinR - 1 } ] } { \
-				incr j \
-			} else { \
-				incr k; \
-				set j 0 \
-			} \
-		}", num );
+	cmd( "set xlabel [ expr { $sclhsizeR + $sclvmarginR } ]" ); 
+	cmd( "set ylabel 0" );
+	cmd( "set a 0" );
+	cmd( "set b 0" );
+	for ( i = 0; i < num; ++i )
+	{
+		cmd( "set lab [ regsub # [ lindex $tp %d ] _ ]", i );
+		cmd( "set app [ font measure $fontP $lab ]" );
+		cmd( "if { $xlabel + $app + $a > $sclhsizeR + $sclvmarginR + $hsizeR + 2 * $cvhmarginR } { \
+				if { $ylabel + $lheightP + $labvpadR <= $linlabR * $lheightP } { \
+					set xlabel [ expr { $sclhsizeR + $sclvmarginR } ]; \
+					incr ylabel [ expr { $lheightP + $labvpadR } ]; \
+					if { $ylabel + $lheightP + $labvpadR > $linlabR * $lheightP } { \
+						set a [ expr [ font measure $fontP \"(000 more...)\" ] + $labhpadR ] \
+					} \
+				} else { \
+					set b 1 \
+				} \
+			}" );
 		
+		if ( get_int( "b" ) )
+			break;
+		
+		cmd( "set it [ $activeplot.fond create text $xlabel $ylabel -font $fontP -anchor nw -text $lab -fill $c%d ]", i < 1100 ? i : 0 );
+		cmd( "set xlabel [ expr { $xlabel + $app + $labhpadR } ]" );
+
+		cmd( "set_ttip_descr $activeplot.fond $n $it 0" );
+	}
+	
+	if ( i < num )
+	{
+		cmd( "set it [ $activeplot.fond create text $xlabel $ylabel -fill $colorsTheme(fg) -font $fontP -anchor nw -text \"(%d more...)\" ]", num - i );
+		cmd( "tooltip::tooltip $activeplot.fond -item  $it \"%d series labels not presented\"", num - i );
+	}
+	
 	cmd( "pack $activeplot.fond -expand yes -fill both -pady 7" );
 }
 
