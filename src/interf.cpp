@@ -5995,7 +5995,7 @@ case 69:
 	
 #endif
 
-	show_logs( path, run_logs );
+	show_logs( path, run_logs, true );
 	
 	cmd( "set path $oldpath; cd $path" );
 	

@@ -373,7 +373,7 @@ void show_descr( char *lab, int *choice );
 void show_eq( char *lab, int *choice );
 void show_graph( object *t = NULL );
 void show_initial( object *n );
-void show_logs( const char *path, vector < string > & logs );
+void show_logs( const char *path, vector < string > & logs, bool par_cntl = false );
 void show_neighbors( object *r, bool update );
 void show_observe( object *n );
 void show_parallel( object *n );
