@@ -295,6 +295,7 @@ foreach color [ array names colorsTheme ] {
 if { $darkTheme } {
 	set defcolors $defcolorsD
 	set colorsTheme(hl) $hlcolorD
+	set colorsTheme(dhl) $dhlcolorD
 	set colorsTheme(comm) $commcolorD
 	set colorsTheme(str) $strcolorD
 	set colorsTheme(prep) $prepcolorD
@@ -314,6 +315,7 @@ if { $darkTheme } {
 } else {
 	set defcolors $defcolorsL
 	set colorsTheme(hl) $hlcolorL
+	set colorsTheme(dhl) $dhlcolorL
 	set colorsTheme(comm) $commcolorL
 	set colorsTheme(str) $strcolorL
 	set colorsTheme(prep) $prepcolorL

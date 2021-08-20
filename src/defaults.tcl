@@ -21,8 +21,10 @@
 set defcolorsL	{ black red green #d0d000 #fb46bc blue DeepSkyBlue1 RoyalBlue1 PaleTurquoise2 cyan aquamarine DarkSeaGreen1 chartreuse1 OliveDrab khaki3 LightGoldenrod4 sienna1 chocolate4 firebrick3 orange1 salmon3 }
 set defcolorsD	{ white tomato green yellow2 pink "steel blue" DeepSkyBlue1 RoyalBlue1 PaleTurquoise2 cyan aquamarine DarkSeaGreen1 chartreuse1 OliveDrab khaki3 LightGoldenrod4 sienna1 chocolate4 firebrick3 orange1 salmon3 }
 
-set hlcolorL	red			; # general highlight color
-set hlcolorD	tomato		; # general highlight color
+set hlcolorL	red			; # general highlight color (light mode)
+set hlcolorD	tomato		; # general highlight color (dark mode)
+set dhlcolorL	gray		; # general disabled highlight color (light mode)
+set dhlcolorD	gray		; # general disabled highlight color (dark mode)
 set commcolorL	green4		; # color of comments (light mode)
 set commcolorD	DarkOliveGreen3	; # color of comments (dark mode)
 set strcolorL	blue4		; # color of strings (light mode)

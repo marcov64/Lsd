@@ -2532,6 +2532,8 @@ while ( true )
 					break;
 			}
 			
+			cmd( "set oldpath \"\"" );
+			
 			// process the proper case
 			cmd( "set choice $bidi" );
 			switch ( *choice )
@@ -2626,11 +2628,17 @@ while ( true )
 					if ( ! mc || res_list.size( ) <= 1 )
 					{
 						// make sure there is a path set
-						cmd( "set path \"%s\"", path );
-						if ( strlen( path ) > 0 )
-							cmd( "cd \"$path\"" );
+						if ( strlen( path_res  ) > 0 )
+							cmd( "set path_res  \"%s\"", path_res );
+						else
+							cmd( "set path_res \"%s\"", path );
+						
+						cmd( "if { [ string length $path_res ] > 0 } { \
+								set oldpath [ pwd ]; \
+								catch { cd $path_res } \
+							}" );
 
-						cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$path\" -defaultextension .res.gz -filetypes { %s { {All files} {*} } } -typevariable defaultFileType ]", mc ? "s" : "(s)", platform == _MAC_ ? "" : "{ {LSD result files} {.res.gz .res} } { {LSD total files} {.tot .tot.gz} }" );
+						cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$path_res\" -defaultextension .res.gz -filetypes { %s { {All files} {*} } } -typevariable defaultFileType ]", mc ? "s" : "(s)", platform == _MAC_ ? "" : "{ {LSD result files} {.res.gz .res} } { {LSD total files} {.tot .tot.gz} }" );
 						cmd( "if { ! [ fn_spaces \"$lab\" .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
 						h = *choice;		// number of files
 						
@@ -2796,6 +2804,7 @@ while ( true )
 			
 			add_end:
 			
+			cmd( "if { $oldpath ne \"\" } { cd $oldpath }" );
 			mc = false;
 
 		break;
@@ -6395,7 +6404,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 			set choice 11 \
 		}", n, ( char * ) Tcl_GetVar( inter, "tit", 0 ) );
 	cmd( "ttk::button $w.b.s.gnu -width $butWid -text Gnuplot -state disabled -command { \
-			set oldpath [pwd]; \
+			set oldpath [ pwd ]; \
 			cd plotxy_%d; \
 			open_gnuplot gnuplot.gp; \
 			cd $oldpath; \

@@ -106,6 +106,7 @@ Relevant flags (when defined):
 bool is_finite( double x );
 bool is_inf( double x );
 bool is_nan( double x );
+bool results_alt_path( const char * );  				// change where results are saved.
 double _abs( double a );
 double alapl( double mu, double alpha1, double alpha2 );// draw from an asymmetric laplace distribution
 double alaplcdf( double mu, double alpha1, double alpha2, double x );	// asymmetric laplace cdf
@@ -150,7 +151,6 @@ void close_lattice( void );
 void deb_log( bool on, int time = 0 );					// control debug mode
 void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "", bool defQuit = false );
 void init_random( unsigned seed );						// reset the random number generator seed
-void results_alt_path( const char * );  				// change where results are saved.
 void set_fast( int level );								// enable fast mode
 void *set_random( int gen );							// set random generator
 
@@ -197,17 +197,21 @@ bool add_unsaved( int *choice );
 bool alloc_save_mem( object *r );
 bool alloc_save_var( variable *v );
 bool check_cond( double val1, int lopc, double val2 );
+bool check_res_dir( const char *path, const char *sim_name = NULL );
 bool contains( FILE *f, char *lab, int len );
 bool create_maverag( int *choice );
+bool create_res_dir( const char *path );
 bool create_series( int *choice, bool mc, vector < string > var_names );
 bool has_descr_text( description *d );
 bool is_equation_header( char *line, char *var, char *updt_in );
 bool load_description( char *msg, FILE *f );
 bool load_prev_configuration( void );
+bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz );
 bool open_configuration( object *&r, bool reload );
-bool save_configuration( int findex = 0 );
+bool save_configuration( int findex = 0, const char *dest_path = NULL );
 bool save_sensitivity( FILE *f );
 bool search_parallel( object *r );
+bool sensitivity_clean_dir( const char *path, int *choice );
 bool sensitivity_too_large( long numSaPts, int *choice );
 bool sort_listbox( int box, int order, object *r );
 bool stop_parallel( void );
@@ -263,6 +267,7 @@ void chg_obj_num( object **c, int value, int all, int pippo[ ], int *choice, int
 void clean_debug( object *n );
 void clean_parallel( object *n );
 void clean_plot( object *n );
+void clean_res_dir( const char *path, const char *sim_name = NULL );
 void clean_save( object *n );
 void close_sim( void );
 void collect_inst( object *r, o_setT &list );
@@ -351,9 +356,9 @@ void scan_used_lab( char *lab, int *choice );
 void scan_using_lab( char *lab, int *choice );
 void scroll_plot( void );
 void search_title( object *r, char *tag, int *idx, char *lab, int *incr );
-void sensitivity_created( void );
-void sensitivity_doe( int *findex, design *doe );
-void sensitivity_sequential( int *findexSens, sense *s, double probSampl = 1.0 );
+void sensitivity_created( const char *path, const char *sim_name, int findex );
+void sensitivity_doe( int *findex, design *doe, const char *dest_path );
+void sensitivity_sequential( int *findexSens, sense *s, double probSampl, const char *dest_path );
 void sensitivity_undefined( void );
 void set_all( int *choice, object *original, char *lab, int lag );
 void set_blueprint( object *container, object *r );
@@ -452,6 +457,8 @@ extern char lsd_eq_file[ ];		// equations saved in configuration file
 extern char name_rep[ ];		// documentation report file name
 extern char nonavail[ ];		// string for unavailable values
 extern char path_rep[ ];		// documentation report file path
+extern char path_res[ ];		// path of last used results directory
+extern char path_sens[ ];		// path of last used sensitivity directory
 extern description *descr;		// model description structure
 extern double t_dist_cl[ T_CLEVS ];// t-distribution table confidence levels 
 extern double t_dist_st[ T_CLEVS ][ 36 ];// t-distribution table statistics 
@@ -471,12 +478,12 @@ extern int choice_g;			// Tcl menu control variable ( structure window)
 extern int cur_plt;				// current graph plot number
 extern int dobar;				// output a progress bar to the log/standard output
 extern int docsv;				// produce .csv text results files (bool)
+extern int doover;				// overwrite results folder (bool)
 extern int dozip;				// compressed results file flag (bool)
 extern int findexSens;			// index to sequential sensitivity configuration filenames
 extern int log_start;			// first period to start logging to file, if any
 extern int log_stop;			// last period to log to file, if any
 extern int macro;				// equations style (macros or C++) (bool)
-extern int max_runs;			// maximum number of parallel runs 
 extern int max_threads;			// maximum number of parallel threads per run
 extern int no_res;				// do not produce .res results files (bool)
 extern int no_tot;				// do not produce .tot totals files (bool)

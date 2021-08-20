@@ -340,11 +340,11 @@ lang=EN-US>.</span></p>
 <p class=MsoNormal><span lang=EN-US>If there are multiple simulation runs
 configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
 Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation
-message (see example below), telling how the results data will be handled and
+message (see example below), telling how the results data will be stored and
 providing some options to the user. </span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=196 height=351 src="image/summary_run.png"></span></p>
+width=196 height=407 src="image/summary_run.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available checkbox options are (some
 may not be available according to the circumstance):</span></p>
@@ -356,7 +356,9 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 file</span></b></span><span lang=EN-US>: if checked, appends the new results to
 the existing </span><span class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span
 lang=EN-US> totals file (produced in a previous run). This entry is enabled
-only if a totals file exists for the current configuration file.</span></p>
+only if a totals file exists for the current configuration file. It is not
+possible to use it simultaneously with the </span><span class=Cdigo><span
+lang=EN-US>Clear output path before run</span></span><span lang=EN-US> option.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -403,6 +405,17 @@ of Results</a> module. </span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Clear output path before
+run</span></b></span><span lang=EN-US>: if enabled, checking it deletes all
+previously-generated LSD files in the output subdirectory (user-created
+configuration files are preserved) before running the simulation again. This
+entry is enabled only if there are files to be deleted. It is not possible to
+use it simultaneously with the </span><span class=Cdigo><span lang=EN-US>Append
+to existing totals file</span></span><span lang=EN-US> option.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Update configuration file</span></b></span><span
 lang=EN-US>: if selected (default), the unsaved changes will be saved to the
 current </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
@@ -416,11 +429,16 @@ configured, at the end of each simulation run the results are saved to LSD
 results and totals files (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>.csv</span></span><span
-lang=EN-US> extension, according to the selected options) in the same
-subdirectory as the </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
-lang=EN-US> configuration file. The names of the produced files are composed by
-the name of the current model configuration plus an integer number equal to the
-seed used for the pseudo-random number generator, separated by an underscore.</span></p>
+lang=EN-US> extension, according to the selected options). Output files are
+created in the same subdirectory as the </span><span class=Cdigo><span
+lang=EN-US>.lsd</span></span><span lang=EN-US> configuration file if it is
+located at a location without other uncorrelated files. Otherwise, a new
+subdirectory, with the same name and location as the configuration file, is
+created to hold the produced files. The effective </span><span class=Cdigo>Output
+path</span><span lang=EN-US> is presented in the confirmation dialog (above).
+The names of the produced files are composed by the name of the current model
+configuration plus an integer number equal to the seed used for the
+pseudo-random number generator, separated by an underscore.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>In a multiple-run exercise, LSD creates one
 results file (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
@@ -462,8 +480,8 @@ continue to interact with LSD while the simulation is being executed, but it is
 not possible to start additional no-window batches. Quitting LSD Browser before
 the background runs finish may not abort them, and the requested result files
 may still be produced as usual, according to the user choice. In this case, no
-consolidated log is generated after closing the LSD browser, but partial log files
-would be available in the same directory as the remaining result files. </span></p>
+consolidated log is generated after closing the LSD browser, but partial log
+files would be available in the same directory as the remaining result files. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>If aborting the background runs is
 required, before quitting LSD, choose the </span><span class=Cdigo><span
@@ -491,12 +509,12 @@ file</a> (a warning box will show if you have do so).</span></p>
 <p class=MsoNormal><span lang=EN-US>Irrespective of the number of simulation
 runs configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
 Settings</span></span><span lang=EN-US> menu entry, LSD will issue a
-confirmation message, telling how the results data will be handled and
-providing some options to the user. The confirmation dialog and the available
-options are similar to those available for the </span><span class=Cdigo><span
-lang=EN-US><a href="#_Run">Run&gt;Run</a></span></span><span lang=EN-US>
-command above. Additionally, the user can adjust the maximum number of parallel
-simulation runs to perform. <span class=Cdigo><span style='font-family:"Arial",sans-serif;
+confirmation message, telling how the results data will be stored and providing
+some options to the user. The confirmation dialog and the available options are
+similar to those available for the </span><span class=Cdigo><span lang=EN-US><a
+href="#_Run">Run&gt;Run</a></span></span><span lang=EN-US> command above.
+Additionally, the user can adjust the maximum number of parallel simulation
+runs to perform. <span class=Cdigo><span style='font-family:"Arial",sans-serif;
 color:windowtext'>The default is the number of CPU (logical) cores of the
 computer. This number can be reduced to prevent the full utilization of the
 computer CPUs. If this number is set to one, the simulation runs are processed
@@ -516,10 +534,15 @@ presented in tail/multitail (see below), but slightly slowing down execution.</s
 totals files (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>.csv</span></span><span
-lang=EN-US> extension, according to the selected options) in the same
-subdirectory as the </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
-lang=EN-US> <a href="LSD_faqs.html#modelsetting">configuration file</a>. The
-names of the produced files are composed by the name of the current model
+lang=EN-US> extension, according to the selected options). Output files are
+created in the same subdirectory as the </span><span class=Cdigo><span
+lang=EN-US>.lsd</span></span><span lang=EN-US> <a
+href="LSD_faqs.html#modelsetting">configuration file</a> if it is located at a
+location without other uncorrelated files. Otherwise, a new subdirectory, with
+the same name and location as the configuration file, is created to hold the
+produced files. The effective </span><span class=Cdigo><span lang=EN-US>Output
+path</span></span><span lang=EN-US> is presented in the confirmation dialog.
+The names of the produced files are composed by the name of the current model
 configuration plus an integer number equal to the seed used for the
 pseudo-random number generator, separated by an underscore character. LSD
 creates one results file (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
@@ -583,7 +606,8 @@ lang=EN-US> is the common configuration name and </span><span class=Cdigo><span
 lang=EN-US>NNN</span></span><span lang=EN-US> is the first sequential number to
 use, or (2) use the </span><span class=Cdigo><span lang=EN-US>Ctrl/Cmd</span></span><span
 lang=EN-US> key to pick multiple </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
-lang=EN-US> files with any name. All configuration files must be in the same subdirectory.</span></p>
+lang=EN-US> files with any name. All configuration files must be in the same
+subdirectory.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>This command creates an operating system
 script file (</span><span class=Cdigo><span lang=EN-US>.bat</span></span><span
@@ -1206,8 +1230,8 @@ the Variables configured using the </span><span class=Cdigo><span lang=EN-US><a
 href="browser.html#updating">Updating</a></span></span><span lang=EN-US>
 option.</span></p>
 
-<h2><a name="_Show_Elements_to_6"></a><span lang=EN-US>Show Elements to
-Sensitivity Analysis</span></h2>
+<h2><a name="_Show_Elements_to_6"></a><span lang=EN-US>Show Elements to Sensitivity
+Analysis</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>Print in the <a href="LSD_windows.html#log">LSD
 Log</a> the list of the <a href="LSD_faqs.html#variable">Variables</a> and <a

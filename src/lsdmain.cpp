@@ -47,6 +47,7 @@ double def_res = 0;			// default equation result
 int add_to_tot = false;		// flag to append results to existing totals file (bool)
 int dobar = false;			// output a progress bar to the log/standard output
 int docsv = false;			// produce .csv text results files (bool)
+int doover = false;			// overwrite results folder (bool)
 int dozip = true;			// compressed results file flag (bool)
 int max_step = 100;			// default number of simulation runs
 int overwConf = true;		// overwrite configuration on run flag (bool)
@@ -107,7 +108,9 @@ char lastObj[ MAX_ELEM_LENGTH + 1 ] = "";	// last shown object for quick reload
 char lsd_eq_file[ MAX_FILE_SIZE + 1 ] = "";	// equations saved in configuration file
 char msg[ TCL_BUFF_STR + 1 ] = "";			// auxiliary Tcl buffer
 char name_rep[ MAX_PATH_LENGTH + 1 ];		// documentation report file name
-char path_rep[ MAX_PATH_LENGTH + 1 ];		// documentation report file path
+char path_rep[ MAX_PATH_LENGTH + 1 ] = "";	// documentation report file path
+char path_res[ MAX_PATH_LENGTH + 1 ] = "";	// path of last used results directory
+char path_sens[ MAX_PATH_LENGTH + 1 ] = "";	// path of last used sensitivity directory
 char tcl_dir[ MAX_PATH_LENGTH + 1 ];		// Tcl/Tk directory
 description *descr = NULL;	// model description structure
 eq_mapT eq_map;				// fast equation look-up map
@@ -234,7 +237,7 @@ int lsdmain( int argn, char **argv )
 	
 	false;
 	dozip = no_window = true;			// to preserve compatibility
-	dobar = docsv = no_res = no_tot = grandTotal = false;
+	dobar = doover = docsv = no_res = no_tot = grandTotal = false;
 	findex = -1;						// no default
 	fend = 0;							// no file number limit
 
@@ -782,7 +785,7 @@ RUN
 void run( void )
 {
 	bool batch_sequential_loop = false;
-	char bar_done[ 2 * BAR_DONE_SIZE ];
+	char *path_out = NULL, *name_out, sep_out[ 2 ], bar_done[ 2 * BAR_DONE_SIZE ];
 	int i, perc_done, last_done;
 	FILE *f;
 	clock_t start, end, last_update;
@@ -817,6 +820,7 @@ void run( void )
 
 	set_fast( 0 );			// should always start on OBSERVE and switch to FAST later
 	res_list.clear( );		// empty list of saved results files
+	strcpy( path_res, "" );	// and clear last saved path to results files
 
 	// prepare progress bar
 	on_bar = false;
@@ -1063,13 +1067,29 @@ void run( void )
 			if ( series_saved > 0 )
 			{	// remove existing path, if any, from name in case of alternative output path
 				char *alt_name = clean_file( simul_name );
-
+				
+				if ( save_alt_path )
+				{
+					path_out = alt_path;
+					name_out = alt_name;
+				}
+				else
+				{
+					path_out = path;
+					name_out = simul_name;
+				}
+				
+				if ( strlen( path_out ) == 0 )
+					strcpy( sep_out, "" );
+				else
+					strcpy( sep_out, "/" );
+				
 				if ( ! no_res )
 				{
 					if ( ! batch_sequential )
-						sprintf( msg, "%s%s%s_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, seed - 1, docsv ? "csv" : "res" );
+						sprintf( msg, "%s%s%s_%d.%s", path_out, sep_out, name_out, seed - 1, docsv ? "csv" : "res" );
 					else
-						sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - 1, docsv ? "csv" : "res" );
+						sprintf( msg, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, findex, seed - 1, docsv ? "csv" : "res" );
 
 					if ( dozip )
 						strcat( msg, ".gz" );
@@ -1088,18 +1108,18 @@ void run( void )
 						plog( "Done\n" );
 				}
 
-				if ( ! no_tot && max_runs == 1 )
+				if ( ! no_tot && ( ! no_window || max_runs == 1 ) )
 				{
 					if ( ! grandTotal || batch_sequential )		// generate partial total files?
 					{
 						if ( ! batch_sequential )
-						  sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
+						  sprintf( msg, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
 						else
-						  sprintf( msg, "%s%s%s_%d_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
+						  sprintf( msg, "%s%s%s_%d_%d_%d.%s", path_out, sep_out, name_out, findex, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
 					}
 					else										// generate single grand total file
 					{
-						sprintf( msg, "%s%s%s.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, docsv ? "csv" : "tot" );
+						sprintf( msg, "%s%s%s.%s", path_out, sep_out, name_out, docsv ? "csv" : "tot" );
 					}
 
 					if ( dozip )
@@ -1110,7 +1130,7 @@ void run( void )
 
 					if ( i == 1 && grandTotal && ! add_to_tot )
 					{
-						rf = new result( msg, "wt", dozip, docsv );	// create results file object
+						rf = new result( msg, "wt", dozip, docsv );// create results file object
 						rf->title( root, 0 );					// write header
 					}
 					else
@@ -1122,6 +1142,9 @@ void run( void )
 					if ( fast_mode < 2 && i == sim_num )		// print only for last
 						plog( "Done\n" );
 				}
+				
+				if ( i == sim_num )					  				// last run?
+					snprintf( path_res, MAX_PATH_LENGTH, "%s", path_out );
 			}
 			else
 				if ( fast_mode < 2 )
@@ -1417,15 +1440,18 @@ void reset_end( object *r )
 RESULTS_ALT_PATH
 simple tool to allow changing where results are saved.
 *********************************/
-void results_alt_path( const char *altPath )
+bool results_alt_path( const char *altPath )
 {
 	if ( save_alt_path )
+	{
 		delete [ ] alt_path;
+		alt_path = NULL;
+	}
 
 	if ( strlen( altPath ) == 0 )
 	{
 		save_alt_path = false;
-		return;
+		return false;
 	}
 	  
 	alt_path = new char[ strlen( altPath ) + 1 ];
@@ -1439,13 +1465,17 @@ void results_alt_path( const char *altPath )
 		if ( stat( alt_path, &sb ) == 0 && S_ISDIR( sb.st_mode ) )
 		{
 			save_alt_path = true;
-			return;
+			return true;
 		}
 	}
 	
 	delete [ ] alt_path;
+	alt_path = NULL;
 	save_alt_path = false;
-	plog( "\nWarning: could not open directory '%s', ignoring '-o' option.\n", "", altPath );
+	
+	plog( "\nWarning: could not open results directory '%s', ignoring.\n", "", altPath );
+	
+	return false;
 }
 
 

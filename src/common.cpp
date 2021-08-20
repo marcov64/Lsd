@@ -582,6 +582,7 @@ bool valid_label( const char *lab )
 
 /***************************************************
  GET_BOOL
+ Set var to NULL to just get the Tcl value
  ***************************************************/
 bool get_bool( const char *tcl_var, bool *var )
 {
@@ -608,6 +609,7 @@ bool get_bool( const char *tcl_var, bool *var )
 
 /***************************************************
  GET_INT
+ Set var to NULL to just get the Tcl value
  ***************************************************/
 int get_int( const char *tcl_var, int *var )
 {
@@ -634,6 +636,7 @@ int get_int( const char *tcl_var, int *var )
 
 /***************************************************
  GET_LONG
+ Set var to NULL to just get the Tcl value
  ***************************************************/
 long get_long( const char *tcl_var, long *var )
 {
@@ -660,6 +663,7 @@ long get_long( const char *tcl_var, long *var )
 
 /***************************************************
  GET_DOUBLE
+ Set var to NULL to just get the Tcl value
  ***************************************************/
 double get_double( const char *tcl_var, double *var )
 {
@@ -674,7 +678,7 @@ double get_double( const char *tcl_var, double *var )
 		if ( var != NULL )
 			return *var;
 		else
-			return -1;
+			return NAN;
 	}
 		
 	sscanf( string, "%lf", &dblvar );
@@ -687,6 +691,7 @@ double get_double( const char *tcl_var, double *var )
 
 /***************************************************
  GET_STR
+ Set var to NULL to just get the Tcl pointer
  ***************************************************/
 char *get_str( const char *tcl_var, char *var, int var_size )
 {

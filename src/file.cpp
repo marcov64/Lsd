@@ -808,21 +808,27 @@ SAVE_CONFIGURATION
 	Save current defined configuration (adding tag index if appropriate)
 	Returns: true: save ok, false: save failure
 ******************************************************************************/
-bool save_configuration( int findex )
+bool save_configuration( int findex, const char *dest_path )
 {
 	bool save_ok = false;
 	int delta, indexDig;
-	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file = NULL;
+	char ch[ MAX_PATH_LENGTH + 1 ], *save_file, *bak_file = NULL;
+	const char *save_path;
 	description *cd;
 	FILE *f; 
 	
 	delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
 	indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
 	
+	if ( dest_path == NULL )
+		save_path = path;
+	else
+		save_path = dest_path;
+	
 	if ( strlen( path ) > 0 )
 	{
-		save_file = new char[ strlen( path ) + strlen( simul_name ) + 6 + indexDig ];
-		sprintf( save_file, "%s/%s", path, simul_name );
+		save_file = new char[ strlen( save_path ) + strlen( simul_name ) + 6 + indexDig ];
+		sprintf( save_file, "%s/%s", save_path, simul_name );
 	}
 	else
 	{

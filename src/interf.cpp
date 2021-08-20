@@ -1123,8 +1123,8 @@ OPERATE
 ****************************************************/
 object *operate( object *r, int *choice )
 {
-bool saveAs, delVar, renVar, table;
-char observe, initial, *lab1, *lab2, *lab3, *lab4, lab[ TCL_BUFF_STR ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ TCL_BUFF_STR + 1 ];
+bool saveAs, delVar, renVar, table, subDir, overwDir;
+char observe, initial, *lab1, *lab2, *lab3, *lab4, lab[ TCL_BUFF_STR ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH + 1 ], out_dir[ MAX_PATH_LENGTH + 1 ], out_bat[ MAX_PATH_LENGTH + 1 ], win_dir[ MAX_PATH_LENGTH + 1 ], buf_descr[ TCL_BUFF_STR + 1 ];
 int sl, done = 0, num, i, j, k, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, temp[ 10 ];
 long nLinks;
 double fake = 0;
@@ -2956,10 +2956,7 @@ case 1:
 	{
 		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"If you proceed, there will be no data to be analyzed after the simulation is run. If this is not the intended behavior, please mark the variables and parameters to be saved before running the simulation.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } " );
 		if ( *choice == 2 )
-		{
-			*choice = 0;
 			break;
-		}
 	}
 
 	// warn missing debugger
@@ -2967,32 +2964,31 @@ case 1:
 	{
 		cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\n\nPress 'OK' to proceed and disable parallel processing settings or 'Cancel' to return to LSD Browser.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }" );
 		if ( *choice == 2 )
-		{
-			*choice = 0;
 			break;
-		}
+
 		parallel_disable = true;
 	}
-
-	Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "add_to_tot", ( char * ) & add_to_tot, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
 
 	// save the current object & cursor position for quick reload
 	save_pos( r );
 
-	// Only ask to overwrite configuration if there are changes
+	// only ask to overwrite configuration if there are changes
 	overwConf = unsaved_change( ) ? true : false;
 
 	// avoid showing dialog if configuration already saved and nothing to save to disk
 	if ( ! overwConf && sim_num == 1 )
-	{
-		*choice = 1;
 		goto run;
-	}
+
+	// remove any custom save path (save to current by default)
+	results_alt_path( "" );
+			
+	Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "add_to_tot", ( char * ) & add_to_tot, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "doover", ( char * ) & doover, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
 
 	cmd( "set firstFile \"%s_%d\"", simul_name, seed );
 	cmd( "set lastFile \"%s_%d\"", simul_name, seed + sim_num - 1 );
@@ -3000,6 +2996,7 @@ case 1:
 	cmd( "set resExt %s", docsv ? "csv" : "res" );
 	cmd( "set totExt %s", docsv ? "csv" : "tot" );
 	cmd( "set zipExt \"%s\"", dozip ? ".gz" : "" );
+	cmd( "set tot_msg_warn \"(totals file already exists)\"" );
 
 	cmd( "set T .run" );
 	cmd( "newtop $T \"Run Simulation\" { set choice 2 }" );
@@ -3018,6 +3015,10 @@ case 1:
 		
 	if ( sim_num > 1 )
 	{
+		// detect the need of a new save path and if it has results files
+		subDir = need_res_dir( path, simul_name, out_dir, MAX_PATH_LENGTH + 1 );
+		overwDir = check_res_dir( out_dir );
+		
 		cmd( "ttk::frame $T.f2.n" );
 		cmd( "ttk::label $T.f2.n.l -text \"Number of simulations:\"" );
 		cmd( "ttk::label $T.f2.n.w -text \"%d\" -style hl.TLabel", sim_num );
@@ -3026,92 +3027,118 @@ case 1:
 		cmd( "pack $T.f2.t $T.f2.n" );
 
 		cmd( "ttk::frame $T.f3" );
-		cmd( "ttk::label $T.f3.l -text \"Results files\"" );
-		
-		cmd( "ttk::frame $T.f3.w" );
-		
-		cmd( "ttk::frame $T.f3.w.l1" );
-		cmd( "ttk::label $T.f3.w.l1.l -text \"from:\"" );
-		cmd( "ttk::label $T.f3.w.l1.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
-		cmd( "pack $T.f3.w.l1.l $T.f3.w.l1.w -side left -padx 2" );
-		
-		cmd( "ttk::frame $T.f3.w.l2" );
-		cmd( "ttk::label $T.f3.w.l2.l -text \"to:\"" );
-		cmd( "ttk::label $T.f3.w.l2.w -style hl.TLabel -text \"$lastFile.$resExt$zipExt\"" );
-		cmd( "pack $T.f3.w.l2.l $T.f3.w.l2.w -side left -padx 2" );
-		
-		cmd( "pack $T.f3.w.l1 $T.f3.w.l2" );
-
+		cmd( "ttk::label $T.f3.l -text \"Output path\"" );
+		cmd( "ttk::label $T.f3.w -text [ file nativename \"%s\" ] -style hl.TLabel", out_dir );
 		cmd( "pack $T.f3.l $T.f3.w" );
-
-		cmd( "ttk::frame $T.f4" );
-		cmd( "ttk::label $T.f4.l1 -text \"Totals file (last steps)\"" );
-		cmd( "ttk::label $T.f4.l2 -style hl.TLabel -text \"$totFile.$totExt$zipExt\"" );
 		
-		cmd( "set choice [ file exists \"%s%s$totFile.$totExt$zipExt\" ]", path, strlen( path ) > 0 ? "/" : "" );
-		cmd( "ttk::label $T.f4.l3 -text \"%s\"", *choice ? "(WARNING: totals file already exists)" : "" );
-		cmd( "pack $T.f4.l1 $T.f4.l2 $T.f4.l3" );
+		cmd( "ttk::frame $T.f4" );
+		cmd( "ttk::label $T.f4.l -text \"Results files\"" );
+		
+		cmd( "ttk::frame $T.f4.w" );
+		
+		cmd( "ttk::frame $T.f4.w.l1" );
+		cmd( "ttk::label $T.f4.w.l1.l -text \"from:\"" );
+		cmd( "ttk::label $T.f4.w.l1.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
+		cmd( "pack $T.f4.w.l1.l $T.f4.w.l1.w -side left -padx 2" );
+		
+		cmd( "ttk::frame $T.f4.w.l2" );
+		cmd( "ttk::label $T.f4.w.l2.l -text \"to:\"" );
+		cmd( "ttk::label $T.f4.w.l2.w -style hl.TLabel -text \"$lastFile.$resExt$zipExt\"" );
+		cmd( "pack $T.f4.w.l2.l $T.f4.w.l2.w -side left -padx 2" );
+		
+		cmd( "pack $T.f4.w.l1 $T.f4.w.l2" );
+
+		cmd( "pack $T.f4.l $T.f4.w" );
+
+		cmd( "set choice [ expr { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } ]", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+		
+		cmd( "ttk::frame $T.f5" );
+		cmd( "ttk::label $T.f5.l1 -text \"Totals file (last steps)\"" );
+		cmd( "ttk::label $T.f5.l2 -style %s -text \"$totFile.$totExt$zipExt\"", *choice ? "hl.TLabel" : "dhl.TLabel" );
+		
+		if ( *choice )
+			cmd( "ttk::label $T.f5.l3 -text $tot_msg_warn" );
+		else
+			cmd( "ttk::label $T.f5.l3 -text \"\"" );
+
+		cmd( "pack $T.f5.l1 $T.f5.l2 $T.f5.l3" );
 			
 		add_to_tot = ( *choice ) ? add_to_tot : false;
 
-		cmd( "ttk::frame $T.f5" );
-		cmd( "ttk::checkbutton $T.f5.a -text \"Append to existing totals file\" -variable add_to_tot -state %s", ( *choice && ! no_tot ) ? "normal" : "disabled" );
-		cmd( "ttk::checkbutton $T.f5.b -text \"Skip generating results files\" -variable no_res" );
-		cmd( "ttk::checkbutton $T.f5.b1 -text \"Skip generating totals file\" -variable no_tot -command { \
-					if { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
-						$T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; \
-						$T.f5.a configure -state normal \
+		cmd( "ttk::frame $T.f6" );
+		cmd( "ttk::checkbutton $T.f6.a -text \"Append to existing totals file\" -variable add_to_tot -state %s -command { \
+				if { $add_to_tot && $doover } { \
+					set doover 0 \
+				} \
+			}", ( *choice && ! no_tot ) ? "normal" : "disabled" );
+		cmd( "ttk::checkbutton $T.f6.b -text \"Skip generating results files\" -variable no_res" );
+		cmd( "ttk::checkbutton $T.f6.b1 -text \"Skip generating totals file\" -variable no_tot -command { \
+				if { ! $no_tot } { \
+					$T.f5.l2 configure -style hl.TLabel; \
+					if { [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+						$T.f5.l3 configure -text $tot_msg_warn; \
+						$T.f6.a configure -state normal \
 					} else { \
-						$T.f4.l3 configure -text \"\"; \
-						$T.f5.a configure -state disabled \
+						$T.f5.l3 configure -text \"\"; \
 					} \
-				}", path, strlen( path ) > 0 ? "/" : "" );
-		cmd( "ttk::checkbutton $T.f5.c -text \"Generate zipped files\" -variable dozip -command { \
-				if $dozip { set zipExt \".gz\" } { \
-					set zipExt \"\" }; \
-					$T.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
-					$T.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
-					$T.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; \
-					if { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
-						$T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; \
-						$T.f5.a configure -state normal \
-					} else { \
-						$T.f4.l3 configure -text \"\"; \
-						$T.f5.a configure -state disabled \
-					} \
-				}", path, strlen( path ) > 0 ? "/" : "" );
-		cmd( "ttk::checkbutton $T.f5.d -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
-				if $docsv { \
-					set resExt csv; set totExt csv \
 				} else { \
-					set resExt res; \
-					set totExt tot }; \
-					$T.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
-					$T.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
-					$T.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; \
-					if { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
-						$T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; \
-						$T.f5.a configure -state normal \
-					} else { \
-						$T.f4.l3 configure -text \"\"; \
-						$T.f5.a configure -state disabled \
-					} \
-				}", path, strlen( path ) > 0 ? "/" : "" );
-		cmd( "ttk::checkbutton $T.f5.e -text \"Update configuration file\" -variable overwConf" );
-		cmd( "pack $T.f5.a $T.f5.b $T.f5.b1 $T.f5.c $T.f5.d %s -anchor w", overwConf ? "$T.f5.e" : "" );
+					$T.f5.l2 configure -style dhl.TLabel; \
+					$T.f5.l3 configure -text \"\"; \
+					$T.f6.a configure -state disabled \
+				} \
+			}", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+		cmd( "ttk::checkbutton $T.f6.c -text \"Generate zipped files\" -variable dozip -command { \
+			if $dozip { set zipExt \".gz\" } { \
+				set zipExt \"\" }; \
+				$T.f4.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
+				$T.f4.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
+				$T.f5.l2 configure -text \"$totFile.$totExt$zipExt\"; \
+				if { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+					$T.f5.l3 configure -text $tot_msg_warn; \
+					$T.f6.a configure -state normal \
+				} else { \
+					$T.f5.l3 configure -text \"\"; \
+					$T.f6.a configure -state disabled \
+				} \
+			}", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+		cmd( "ttk::checkbutton $T.f6.d -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
+			if $docsv { \
+				set resExt csv; set totExt csv \
+			} else { \
+				set resExt res; \
+				set totExt tot }; \
+				$T.f4.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
+				$T.f4.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
+				$T.f5.l2 configure -text \"$totFile.$totExt$zipExt\"; \
+				if { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+					$T.f5.l3 configure -text $tot_msg_warn; \
+					$T.f6.a configure -state normal \
+				} else { \
+					$T.f5.l3 configure -text \"\"; \
+					$T.f6.a configure -state disabled \
+				} \
+			}", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+		cmd( "ttk::checkbutton $T.f6.o -text \"Clear output path before run\" -variable doover -state %s -command { \
+				if { $add_to_tot && $doover } { \
+					set add_to_tot 0 \
+				} \
+			}", overwDir ? "normal" : "disabled" );
+		cmd( "ttk::checkbutton $T.f6.e -text \"Update configuration file\" -variable overwConf -state %s", overwConf ? "normal" : "disabled" );
+		cmd( "pack $T.f6.a $T.f6.b $T.f6.b1 $T.f6.c $T.f6.d $T.f6.o $T.f6.e -anchor w" );
 		
-		cmd( "pack $T.f1 $T.f2 $T.f3 $T.f3 $T.f4 $T.f5 -padx 5 -pady 5" );
+		cmd( "pack $T.f1 $T.f2 $T.f3 $T.f4 $T.f5 $T.f6 -padx 5 -pady 5" );
 	}
 	else
 	{
-		*choice = 0;
+		subDir = overwDir = false;
+		
 		cmd( "pack $T.f2.t" );
 		
-		cmd( "ttk::label $T.f3 -text \"(results will be saved in memory only)\"" );
+		cmd( "ttk::label $T.f4 -text \"(results will be saved to memory only)\"" );
 		
-		cmd( "ttk::checkbutton $T.f6 -text \"Update configuration file\" -variable overwConf" );
+		cmd( "ttk::checkbutton $T.f6 -text \"Update configuration file\" -variable overwConf -state %s", overwConf ? "normal" : "disabled" );
 		
-		cmd( "pack $T.f1 $T.f2 $T.f3 %s -padx 5 -pady 5", overwConf ? "$T.f6" : "" );
+		cmd( "pack $T.f1 $T.f2 $T.f4 $T.f6 -padx 5 -pady 5" );
 	}
 
 	cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#run } { set choice 2 }" );
@@ -3124,18 +3151,29 @@ case 1:
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .run" );
-
-	run:
-
+	
 	Tcl_UnlinkVar( inter, "no_res" );
 	Tcl_UnlinkVar( inter, "no_tot" );
 	Tcl_UnlinkVar( inter, "add_to_tot" );
 	Tcl_UnlinkVar( inter, "docsv" );
+	Tcl_UnlinkVar( inter, "doover" );
 	Tcl_UnlinkVar( inter, "dozip" );
 	Tcl_UnlinkVar( inter, "overwConf" );
 
 	if ( *choice == 2 )
 		break;
+
+	if ( subDir )
+		if ( ! create_res_dir( out_dir ) || ! results_alt_path( out_dir ) )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Subdirectory '%s' cannot be created\" -detail \"Check if the path is set READ-ONLY, or move your configuration file to a different location.\"", out_dir );
+			break;
+		}
+	
+	if ( overwDir && doover )
+		clean_res_dir( out_dir );
+
+	run:
 
 	for ( n = r; n->up != NULL; n = n->up );
 	reset_blueprint( n );			    // update blueprint to consider last changes
@@ -3144,7 +3182,7 @@ case 1:
 	{
 		if ( ! save_configuration( ) )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY, or try to save to a different location.\"", simul_name );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the file is set READ-ONLY, or try to save to a different location.\"", simul_name );
 			break;
 		}
 		else
@@ -4539,7 +4577,7 @@ case 62:
 break;
 
 
-// Create sequential sensitivity analysis configuration
+// Create batch sensitivity analysis configuration
 case 63:
 
 	if ( rsense != NULL ) 
@@ -4558,6 +4596,14 @@ case 63:
 			if ( sensitivity_too_large( ptsSa, choice ) )
 				break;
 		
+		// detect the need of a new save path and create it if required
+		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH + 1 ) )
+			create_res_dir( path_sens );
+		
+		// ask to clean existing files before proceeding if required
+		if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens, choice ) )
+			clean_res_dir( path_sens, simul_name );
+		
 		// save the current object & cursor position for quick reload
 		save_pos( r );
 		findexSens = 1;
@@ -4568,14 +4614,15 @@ case 63:
 		stop = false;
 		cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\"  %d { set stop true }", ptsSa );
 		
-		sensitivity_sequential( &findexSens, rsense, 1.0 );
+		sensitivity_sequential( &findexSens, rsense, 1.0, path_sens );
 		
 		cmd( "destroytop .psa" );
 		
 		plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );	
 		
+		// if succeeded, explain user how to proceed
 		if ( ! stop )
-			sensitivity_created( );			// explain user how to proceed
+			sensitivity_created( path_sens, clean_file( simul_name ), 1 );
 		else
 			findexSens = 0;					// don't consider for appending
 		
@@ -4657,6 +4704,14 @@ case 71:
 			if ( sensitivity_too_large( ( long ) ( sizMC * maxMC ), choice ) )
 				break;
 		
+		// detect the need of a new save path and create it if required
+		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH + 1 ) )
+			create_res_dir( path_sens );
+		
+		// ask to clean existing files before proceeding if required
+		if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens, choice ) )
+			clean_res_dir( path_sens, simul_name );
+		
 		// save the current object & cursor position for quick reload
 		save_pos( r );
 
@@ -4670,14 +4725,15 @@ case 71:
 		cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\" %ld { set stop true }", ( long ) ( sizMC * maxMC ) );
 		
 		init_random( seed );				// reset random number generator 
-		sensitivity_sequential( &findexSens, rsense, sizMC );
+		sensitivity_sequential( &findexSens, rsense, sizMC, path_sens );
 
 		cmd( "destroytop .psa" );
 		
 		plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );	
 		
+		// if succeeded, explain user how to proceed
 		if ( ! stop )
-			sensitivity_created( );			// explain user how to proceed
+			sensitivity_created( path_sens, clean_file( simul_name ), 1 );
 		else
 			findexSens = 0;					// don't consider for appending
 	
@@ -4790,6 +4846,14 @@ case 72:
 				break;
 			}
 		
+		// detect the need of a new save path and create it if required
+		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH + 1 ) )
+			create_res_dir( path_sens );
+		
+		// ask to clean existing files before proceeding if required
+		if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens, choice ) )
+			clean_res_dir( path_sens, simul_name );
+		
 		// save the current object & cursor position for quick reload
 		save_pos( r );
 		findexSens = 1;
@@ -4797,7 +4861,7 @@ case 72:
 		// create a design of experiment (DoE) for the sensitivity data
 		cmd( "focustop .log" );
 		
-		sensitivity_doe( &findexSens, NOLHdoe );
+		sensitivity_doe( &findexSens, NOLHdoe, path_sens );
 		delete NOLHdoe;
 
 		// now reload the previously existing configuration
@@ -4838,7 +4902,7 @@ case 80:
 
 		// get the number of Monte Carlo samples to produce
 		int sizMC = 10;
-		Tcl_LinkVar( inter, "sizMC", ( char * )&sizMC, TCL_LINK_INT );
+		Tcl_LinkVar( inter, "sizMC", ( char * ) & sizMC, TCL_LINK_INT );
 		
 		cmd( "set applst 1" );	// flag for appending to existing configuration files
 		
@@ -4850,13 +4914,8 @@ case 80:
 		cmd( ".s.i.e insert 0 $sizMC" ); 
 		cmd( "pack .s.i.l .s.i.e" );
 		
-		if ( findexSens > 1 )			// there are previously saved sensitivity files?
-		{
-			cmd( "ttk::checkbutton .s.c -text \"Append to existing configuration files\" -variable applst" );
-			cmd( "pack .s.i .s.c -padx 5 -pady 5" );
-		}
-		else
-			cmd( "pack .s.i -padx 5 -pady 5" );
+		cmd( "ttk::checkbutton .s.c -text \"Append to existing configuration files\" -variable applst -state %s", findexSens > 1 ? "normal" : "disabled" );
+		cmd( "pack .s.i .s.c -padx 5 -pady 5" );
 		
 		cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#mcrange } { set choice 2 }" );
 		
@@ -4890,22 +4949,24 @@ case 80:
 			if ( sensitivity_too_large( ( long ) sizMC, choice ) )
 				break;
 		
+		if ( findexSens < 1 || ( findexSens > 1 && ! get_bool( "applst" ) ) )
+			findexSens = 1;
+		
+		// detect the need of a new save path and create it if required
+		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH + 1 ) )
+			create_res_dir( path_sens );
+		
+		// ask to clean existing files before proceeding if required
+		if ( findexSens == 1 && check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens, choice ) )
+			clean_res_dir( path_sens, simul_name );
+		
 		// save the current object & cursor position for quick reload
 		save_pos( r );
 
 		// check if design file numbering should pick-up from previously generated files
-		if ( findexSens > 1 )
-		{
-			const char *applst = Tcl_GetVar( inter, "applst", 0 );
-			if ( *applst == '0' )
-				findexSens = 1;
-		}
-		else
-			findexSens = 1;
-		
 		// adjust a design of experiment (DoE) for the sensitivity data
 		design *rand_doe = new design( rsense, 2, "", findexSens, sizMC );
-		sensitivity_doe( &findexSens, rand_doe );
+		sensitivity_doe( &findexSens, rand_doe, path_sens );
 		delete rand_doe;
 		
 		// now reload the previously existing configuration
@@ -5016,13 +5077,21 @@ case 81:
 			if ( sensitivity_too_large( ( long ) ( nTraj * ( varSA + 1 ) ), choice ) )
 				break;
 		
+		// detect the need of a new save path and create it if required
+		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH + 1 ) )
+			create_res_dir( path_sens );
+		
+		// ask to clean existing files before proceeding if required
+		if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens, choice ) )
+			clean_res_dir( path_sens, simul_name );
+		
 		// save the current object & cursor position for quick reload
 		save_pos( r );
 		findexSens = 1;
 		
 		// adjust a design of experiment (DoE) for the sensitivity data
 		design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, jumpSz, nTraj );
-		sensitivity_doe( &findexSens, rand_doe );
+		sensitivity_doe( &findexSens, rand_doe, path_sens );
 		delete rand_doe;
 		
 		// now reload the previously existing configuration
@@ -5369,7 +5438,7 @@ case 68:
 	// get configuration files to use
 	if ( *choice == 1 )							// use current configuration files
 	{
-		if ( strlen( path ) == 0 || strlen( simul_name ) == 0 )
+		if ( strlen( path_sens ) == 0 || simul_name == NULL || strlen( simul_name ) == 0 )
 		{
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid simulation folder or name\" -detail \"Please try again.\"" );
 			findexSens = 0;						// no sensitivity created
@@ -5379,8 +5448,8 @@ case 68:
 		ffirst = fSeq = 1;
 		fnext = findexSens;
 		findexSens = 0;
-		strncpy( out_file, simul_name, MAX_PATH_LENGTH - 1 );
-		strncpy( out_dir, path, MAX_PATH_LENGTH - 1 );
+		strncpy( out_file, simul_name, MAX_PATH_LENGTH );
+		strncpy( out_dir, path_sens, MAX_PATH_LENGTH );
 		Tcl_SetVar( inter, "res", simul_name, 0 );
 		Tcl_SetVar( inter, "path", path, 0 );
 	}
@@ -5400,16 +5469,34 @@ case 68:
 		cmd( "set path \"%s\"", path );
 		if ( strlen( path ) > 0 )
 			cmd( "cd \"$path\"" );
+		
 		// open dialog box to get file name & folder
 		if ( fSeq )								// file sequence?
 		{
 			cmd( "set bah [ tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple no ]" );
-			cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .lsd $res ] - 1 } ]; set res [ string range $res 0 $last ]; set numpos [ expr { [ string last _ $res ] + 1 } ]; if { $numpos > 0 } { set choice [ expr { [ string range $res $numpos end ] } ]; set res [ string range $res 0 [ expr { $numpos - 2 } ] ] } { plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0 } } { set choice 0 }" );
+			cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { \
+					set res $bah; \
+					set path [ file dirname $res ]; \
+					set res [ file tail $res ]; \
+					set last [ expr { [ string last .lsd $res ] - 1 } ]; \
+					set res [ string range $res 0 $last ]; \
+					set numpos [ expr { [ string last _ $res ] + 1 } ]; \
+					if { $numpos > 0 } { \
+						set choice [ expr { [ string range $res $numpos end ] } ]; \
+						set res [ string range $res 0 [ expr { $numpos - 2 } ] ] \
+					} else { \
+						plog \"\nInvalid file name for sequential set: $res\n\"; \
+						set choice 0 \
+					} \
+				} else { \
+					set choice 0 \
+				}" );
 			if ( *choice == 0 )
 				break;
+			
 			ffirst = *choice;
-			strncpy( out_file, ( char * ) Tcl_GetVar( inter, "res", 0 ), MAX_PATH_LENGTH - 1 );
-			strncpy( out_dir, ( char * ) Tcl_GetVar( inter, "path", 0 ), MAX_PATH_LENGTH - 1 );
+			get_str( "res", out_file, MAX_PATH_LENGTH + 1 );
+			get_str( "path", out_dir, MAX_PATH_LENGTH + 1 );
 			f = NULL;
 			do									// search for all sequential files
 			{
@@ -5417,22 +5504,36 @@ case 68:
 					sprintf( lab, "%s_%d.lsd", out_file, ( *choice )++ );
 				else
 					sprintf( lab, "%s/%s_%d.lsd", out_dir, out_file, ( *choice )++ );
+				
 				if ( f != NULL ) 
 					fclose( f );
 				f = fopen( lab, "r" );
 			}
 			while ( f != NULL );
+			
 			fnext = *choice - 1;
 		}
 		else									// bunch of files?
 		{
 			cmd( "set bah [ tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple yes ]" );
-			cmd( "set choice [ llength $bah ]; if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . 1 ] } { set res [ lindex $bah 0 ]; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .lsd $res ] - 1 } ]; set res [ string range $res 0 $last ]; set numpos [ expr { [ string last _ $res ] + 1 } ]; if { $numpos > 0 } { set res [ string range $res 0 [ expr { $numpos - 2 } ] ] } }" );
+			cmd( "set choice [ llength $bah ]" );
+			cmd( "if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . 1 ] } { \
+					set res [ lindex $bah 0 ]; \
+					set path [ file dirname $res ]; \
+					set res [ file tail $res ]; \
+					set last [ expr { [ string last .lsd $res ] - 1 } ]; \
+					set res [ string range $res 0 $last ]; \
+					set numpos [ expr { [ string last _ $res ] + 1 } ]; \
+					if { $numpos > 0 } { \
+						set res [ string range $res 0 [ expr { $numpos - 2 } ] ] \
+					} \
+				}" );
 			if ( *choice == 0 )
 				break;
+			
 			ffirst = 1;
 			fnext = *choice + 1;
-			strncpy( out_dir, ( char * ) Tcl_GetVar( inter, "path", 0 ), MAX_PATH_LENGTH - 1 );
+			get_str( "path", out_dir, MAX_PATH_LENGTH + 1 );
 		}
 	}
 
