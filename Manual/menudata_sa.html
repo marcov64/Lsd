@@ -421,8 +421,12 @@ href="LSD_faqs.html#modelsetting">model configuration</a> file (menu </span><spa
 class=Cdigo><span lang=EN-US><a href="menufile.html">File&gt;Save As</a></span></span><span
 lang=EN-US>), preferably in a new folder inside your current model
 configuration folder (you can create a new folder while in the Save As dialog
-box). The SA process creates many files and it is recommended to keep them in a
-dedicated subdirectory.</span></p>
+box). The SA process creates many files, and it is recommended to keep them in
+a dedicated subdirectory. LSD will automatically create a new subdirectory for
+each set of SA configurations, with the same name as the baseline model
+configuration file in the same location of this file whenever there is more
+than one (baseline) configuration file, or other unrelated files, in this
+place. The exact file path is presented in the <a href="log.html">Log window</a>.</span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 lang=EN-US>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
@@ -456,13 +460,15 @@ href="menufile.html">File&gt;Load</a></span></span><span lang=EN-US> and </span>
 class=Cdigo><span lang=EN-US><a href="menufile.html">File&gt;Load Sensitivity</a></span></span><span
 lang=EN-US> if required), select menu </span><span class=Cdigo><span
 lang=EN-US>Data&gt;Sensitivity Analysis&gt;XXXX</span></span><span lang=EN-US>,
-replacing XXXX by the desired SA type (see options below), check the proposed
-defaults, and modify the required configuration values, if required (the
-defaults are usually adequate). When you click </span><span class=Cdigo><span
-lang=EN-US>OK</span></span><span lang=EN-US>, several new </span><span
-class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> configuration
-files will be created in your baseline configuration subdirectory (those are
-the sample points to be explored in the SA exercise).</span></p>
+replacing XXXX by the desired SA type (see options below), check the proposed defaults,
+and modify the required configuration values, if required (the defaults are
+usually adequate). When you click </span><span class=Cdigo><span lang=EN-US>OK</span></span><span
+lang=EN-US>, several new </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
+lang=EN-US> configuration files will be created in your baseline configuration
+subdirectory, or in a subdirectory therein if more than one baseline
+configuration file (or other unrelated files) exists. The exact file path is
+also presented in the Log window. Each produced new file represents one sample
+point to be explored in the SA exercise.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:72.0pt;text-indent:-18.0pt'><span lang=EN-US>a.<span
@@ -501,15 +507,17 @@ folder and subfolders to the new machine (the remaining LSD folders are not
 required), (ii) recompile LSD for the new platform, if required, and (iii)
 execute the script file (</span><span class=Cdigo><span lang=EN-US>.bat</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>.sh</span></span><span
-lang=EN-US>) in the same subdirectory as your baseline </span><span
-class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> file.</span></p>
+lang=EN-US>) in the same directory as your baseline </span><span class=Cdigo><span
+lang=EN-US>.lsd</span></span><span lang=EN-US> file, or in a subdirectory there
+with the same name as this file, according to the case.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:72.0pt;text-indent:-18.0pt'><span lang=EN-US>c.<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
 lang=EN-US>You can follow up the parallel batch processing by verifying the
 contents of the created </span><span class=Cdigo><span lang=EN-US>.log</span></span><span
-lang=EN-US> file(s) created in your baseline directory.</span></p>
+lang=EN-US> file(s) created in your baseline directory or in a segregated
+subdirectory therein.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>As soon as all the LSD </span><span
 class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span lang=EN-US> <a
@@ -570,20 +578,20 @@ width=299 height=286 src="image/sa_entry.png"></span></p>
 by the data entry area. Depending on the type of SA exercise to be performed,
 the user must enter here a set (</span><span class=Cdigo><span lang=EN-US>Full</span></span><span
 lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>MC Point Sampling</span></span><span
-lang=EN-US> options) or a range (</span><span class=Cdigo><span lang=EN-US>MC
-Range</span></span><span lang=EN-US>, </span><span class=Cdigo><span
-lang=EN-US>EE</span></span><span lang=EN-US> and </span><span class=Cdigo><span
-lang=EN-US>NOLH Sampling</span></span><span lang=EN-US> options) of values.
-Value sets may contain from two to any number of integer or float values and
-the SA is performed considering each individual value. Value ranges consist of
-two integer or float values and the SA is done in the range defined by the two
-values (included). If more than two values are supplied for a value range, only
-the first two are used. The order of the values is not relevant. Float values
-should use the point (</span><span class=Cdigo><span lang=EN-US>.</span></span><span
-lang=EN-US>) as the decimal separator. Scientific notation float numbers are
-allowed (use the “</span><span class=Cdigo><span lang=EN-US>E</span></span><span
-lang=EN-US>” or “</span><span class=Cdigo><span lang=EN-US>e</span></span><span
-lang=EN-US>” prefix to indicate the 10 exponent).</span></p>
+lang=EN-US> options) or a range (</span><span class=Cdigo><span lang=EN-US>MC Range</span></span><span
+lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>EE</span></span><span
+lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>NOLH Sampling</span></span><span
+lang=EN-US> options) of values. Value sets may contain from two to any number
+of integer or float values and the SA is performed considering each individual
+value. Value ranges consist of two integer or float values and the SA is done
+in the range defined by the two values (included). If more than two values are
+supplied for a value range, only the first two are used. The order of the
+values is not relevant. Float values should use the point (</span><span
+class=Cdigo><span lang=EN-US>.</span></span><span lang=EN-US>) as the decimal
+separator. Scientific notation float numbers are allowed (use the “</span><span
+class=Cdigo><span lang=EN-US>E</span></span><span lang=EN-US>” or “</span><span
+class=Cdigo><span lang=EN-US>e</span></span><span lang=EN-US>” prefix to
+indicate the 10 exponent).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Individual values can be separated using
 any combination of the most usual separators, including spaces, tabs, commas,
@@ -688,13 +696,13 @@ href="menufile.html">here</a> for more details on LSD file operations.</span></p
 design of experiment (DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a>
 (SA), where all combinations of the <a href="#_Configuring_values">configured
 test initialization values</a> for <a href="LSD_faqs.html#parameter">Parameters</a>
-and <a href="LSD_faqs.html#variable">lagged Variables</a> are explored. Differently
-from the other DoE methods, this one modifies the current <a
+and <a href="LSD_faqs.html#variable">lagged Variables</a> are explored.
+Differently from the other DoE methods, this one modifies the current <a
 href="LSD_faqs.html#modelstructure">model structure</a> to create a single <a
 href="LSD_faqs.html#modelsetting">model configuration</a> containing as many
 copies of the original model structure as necessary by the factorial
-combinatorics. It is appropriate to quickly analyze the SA of few elements
-without requiring more sophisticated batch/parallel processing.</span></p>
+combinatorics. It is appropriate to quickly analyze the SA of few elements without
+requiring more sophisticated batch/parallel processing.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>In the example <a href="#_SA_workflow">above</a>,
 LSD would generate 8 different instances of the entire model structure directly
@@ -784,9 +792,9 @@ consisting of a random fraction of a full factorial design (the Monte Carlo
 sample). A user-specified fraction of the combinations of the <a
 href="#_Configuring_values">configured test initialization values</a> for <a
 href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a> is explored. The selected
-combinations are taken randomly. The method creates multiple </span><span
-class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> <a
+href="LSD_faqs.html#variable">lagged Variables</a> is explored. The selected combinations
+are taken randomly. The method creates multiple </span><span class=Cdigo><span
+lang=EN-US>.lsd</span></span><span lang=EN-US> <a
 href="LSD_faqs.html#modelsetting">model configuration</a> files each one
 containing one copy of the original model structure configured using the
 selected combination of values.</span></p>
@@ -805,11 +813,11 @@ least one sample. The final number of configurations produced may be somewhat
 smaller or larger than the target number.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>In the example <a href="#_SA_workflow">above</a>,
-if you set the MC sample size to 50%, LSD would generate, in average, 4 different
-</span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US>
-configuration files (out of the 8 possible) with the same model structure. Each
-configuration file would contain different combinations for the initialization
-values of the Parameters A and B.</span></p>
+if you set the MC sample size to 50%, LSD would generate, in average, 4
+different </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
+lang=EN-US> configuration files (out of the 8 possible) with the same model
+structure. Each configuration file would contain different combinations for the
+initialization values of the Parameters A and B.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>After executing this command, a certain
 number of </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
@@ -835,11 +843,11 @@ on how to proceed.</span></p>
 <h1><a name="_MC_range_sampling"></a><a name=mcrange></a><span lang=EN-US>MC
 range sampling SA</span></h1>
 
-<p class=MsoNormal><span lang=EN-US>This command produces a design of
-experiment (DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA)
-consisting of a set of randomly selected sampling points (the Monte Carlo
-sample). The MC sample set is taken from the parametric space defined by the
-set of <a href="#_Configuring_values">configured test ranges</a> for the <a
+<p class=MsoNormal><span lang=EN-US>This command produces a design of experiment
+(DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting
+of a set of randomly selected sampling points (the Monte Carlo sample). The MC
+sample set is taken from the parametric space defined by the set of <a
+href="#_Configuring_values">configured test ranges</a> for the <a
 href="LSD_faqs.html#parameter">Parameters</a> and <a
 href="LSD_faqs.html#variable">lagged Variables</a> to be explored. The method
 creates multiple </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
@@ -955,8 +963,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US>: set the number of levels (the grid size) to explore in each
 Parameter or lagged variable defined range of values (the extremes are always
 explored). It must be an even positive integer (&gt;1). Larger values imply in
-a finer exploration of the parametric space, at the cost of more sampling
-points required (a higher computation times).</span></p>
+a finer exploration of the parametric space, at the cost of more sampling points
+required (a higher computation times).</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -1049,9 +1057,9 @@ case, this option is ignored).</span></p>
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>External design file</span></b></span><span
-lang=EN-US>: when checked allows the user to supply the experimental design file
-to be used. It is normally required only when exploring very large number of
-factors in the SA. The provided file can be named in the text box below this
+lang=EN-US>: when checked allows the user to supply the experimental design
+file to be used. It is normally required only when exploring very large number
+of factors in the SA. The provided file can be named in the text box below this
 option (the default name is </span><span class=Cdigo><span lang=EN-US>NOLH.csv</span></span><span
 lang=EN-US>). The file must be placed in the same subdirectory as the current </span><span
 class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> model
@@ -1190,7 +1198,7 @@ lang=EN-US> example in RStudio or your text editor. For the use of a polynomial
 MM for the SVD analysis, open </span><span class=Cdigo><span lang=EN-US>poly-sobol-SA.R</span></span><span
 lang=EN-US> instead. For EE SA, open </span><span class=Cdigo><span lang=EN-US>elementary-effects-SA.R</span></span><span
 lang=EN-US>. All example SA scripts are included in the LSD installation
-directory under the subdirectory </span><span class=Cdigo><span lang=EN-US>R/Example</span></span><span
+directory under the subdirectory </span><span class=Cdigo><span lang=EN-US>Rpkg/Example</span></span><span
 lang=EN-US>.</span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
@@ -1242,11 +1250,12 @@ lang=EN-US>Save the modified script, renaming if necessary, and run it in R (or
 click the </span><span class=Cdigo><span lang=EN-US>Source</span></span><span
 lang=EN-US> button in RScript), redirecting output to a file first if required.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Two examples using the LSDsensitivity R
+<p class=MsoNormal><span lang=EN-US>Several examples using the LSDsensitivity R
 package are available in a standard LSD installation: the Industrial Dynamics
-model and the Island Model. They can be loaded in <a href="modelbrowser.html">LMM
-Model Browser</a> and are found in the </span><span class=Cdigo><span
-lang=EN-US>Examples/Literature</span></span><span lang=EN-US> group.</span></p>
+model, the Island Model and several K+S Model versions. They can be loaded in <a
+href="modelbrowser.html">LMM Model Browser</a> and are found in the </span><span
+class=Cdigo><span lang=EN-US>Example Models/Sant’Anna Models</span></span><span
+lang=EN-US> group.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

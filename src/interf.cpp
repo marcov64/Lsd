@@ -5857,14 +5857,22 @@ case 69:
 		}
 	}
 	
+	// remove any custom save path (save to current by default)
+	results_alt_path( "" );
+	
+	// detect the need of a new save path and if it has results files
+	subDir = need_res_dir( path, simul_name, out_dir, MAX_PATH_LENGTH );
+	overwDir = check_res_dir( out_dir );
+			
 	Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "dobar", ( char * ) & dobar, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "doover", ( char * ) & doover, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
 
-	// Only ask to overwrite configuration if there are changes
+	// only ask to overwrite configuration if there are changes
 	overwConf = unsaved_change( ) ? true : false;
 	add_to_tot = false;
 	
@@ -5885,6 +5893,7 @@ case 69:
 	cmd( "set totExt %s", docsv ? "csv" : "tot" );
 	cmd( "set zipExt %s", dozip ? ".gz" : "" );
 	cmd( "set cores %d", param );
+	cmd( "set tot_msg_warn \"(WARNING: existing totals file(s) in\noutput path may be overwritten)\"" );
 
 	// confirm overwriting current configuration
 	cmd( "set b .batch" );
@@ -5909,115 +5918,129 @@ case 69:
 	cmd( "pack $b.f2.t $b.f2.n" );
 
 	cmd( "ttk::frame $b.f3" );
-	cmd( "ttk::label $b.f3.l -text \"Results file(s)\"" );
-	
-	if ( sim_num > 1 )	// multiple runs case
-	{
-		cmd( "ttk::frame $b.f3.w" );
-		
-		cmd( "ttk::frame $b.f3.w.l1" );
-		cmd( "ttk::label $b.f3.w.l1.l -text \"from:\"" );
-		cmd( "ttk::label $b.f3.w.l1.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
-		cmd( "pack $b.f3.w.l1.l $b.f3.w.l1.w -side left -padx 2" );
-		
-		cmd( "ttk::frame $b.f3.w.l2" );
-		cmd( "ttk::label $b.f3.w.l2.l -text \"to:\"" );
-		cmd( "ttk::label $b.f3.w.l2.w -style hl.TLabel -text \"$lastFile.$resExt$zipExt\"" );
-		cmd( "pack $b.f3.w.l2.l $b.f3.w.l2.w -side left -padx 2" );
-		
-		cmd( "pack $b.f3.w.l1 $b.f3.w.l2" );
-	}
-	else				// single run case
-		cmd( "ttk::label $b.f3.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
-
+	cmd( "ttk::label $b.f3.l -text \"Output path\"" );
+	cmd( "ttk::label $b.f3.w -text [ file nativename \"%s\" ] -style hl.TLabel", out_dir );
 	cmd( "pack $b.f3.l $b.f3.w" );
 	
 	cmd( "ttk::frame $b.f4" );
-	cmd( "ttk::label $b.f4.l1 -text \"Totals file (last steps)\"" );
-	cmd( "ttk::label $b.f4.l2 -style hl.TLabel -text \"$totFile.$totExt$zipExt\"" );
+	cmd( "ttk::label $b.f4.l -text \"Results file(s)\"" );
 	
-	cmd( "set choice [ expr { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } ]", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
-	cmd( "ttk::label $b.f4.l3 -justify center -text \"%s\"", *choice ? "(WARNING: existing files in destination\nfolder will be overwritten)" : "\n" );
-	cmd( "pack $b.f4.l1 $b.f4.l2 $b.f4.l3" );
+	if ( sim_num > 1 )	// multiple runs case
+	{
+		cmd( "ttk::frame $b.f4.w" );
+		
+		cmd( "ttk::frame $b.f4.w.l1" );
+		cmd( "ttk::label $b.f4.w.l1.l -text \"from:\"" );
+		cmd( "ttk::label $b.f4.w.l1.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
+		cmd( "pack $b.f4.w.l1.l $b.f4.w.l1.w -side left -padx 2" );
+		
+		cmd( "ttk::frame $b.f4.w.l2" );
+		cmd( "ttk::label $b.f4.w.l2.l -text \"to:\"" );
+		cmd( "ttk::label $b.f4.w.l2.w -style hl.TLabel -text \"$lastFile.$resExt$zipExt\"" );
+		cmd( "pack $b.f4.w.l2.l $b.f4.w.l2.w -side left -padx 2" );
+		
+		cmd( "pack $b.f4.w.l1 $b.f4.w.l2" );
+	}
+	else				// single run case
+		cmd( "ttk::label $b.f4.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
+
+	cmd( "pack $b.f4.l $b.f4.w" );
+	
+	cmd( "set choice [ expr { ! $no_tot && ( [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] ) } ]", out_dir, strlen( out_dir ) > 0 ? "/" : "", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
 	
 	cmd( "ttk::frame $b.f5" );
-	cmd( "ttk::label $b.f5.l -text \"Parallel runs\"" );
-	cmd( "ttk::spinbox $b.f5.e -width 5 -from 1 -to %d -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center -state %s", param, ( no_tot && sim_num > 1 && param > 1 ) ? "normal" : "disabled" );
-	cmd( "write_any $b.f5.e $cores" ); 
-	cmd( "pack $b.f5.l $b.f5.e -side left -padx 2" );
-
+	cmd( "ttk::label $b.f5.l1 -text \"Totals file (last steps)\"" );
+	cmd( "ttk::label $b.f5.l2 -style %s -text \"$totFile.$totExt$zipExt\"", choice ? "hl.TLabel" : "dhl.TLabel" );
+	
+	if ( choice )
+		cmd( "ttk::label $b.f5.l3 -justify center -text $tot_msg_warn" );
+	else
+		cmd( "ttk::label $b.f5.l3 -justify center -text \"\n\"" );
+		
+	cmd( "pack $b.f5.l1 $b.f5.l2 $b.f5.l3" );
+	
 	cmd( "ttk::frame $b.f6" );
-	cmd( "ttk::checkbutton $b.f6.nores -text \"Skip generating results files\" -variable no_res -command { \
-				if { $no_res && $no_tot } { \
-					set no_tot 0; \
-					$b.f5.e configure -state disabled; \
-					if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
-						$b.f4.l3 configure -text \"(WARNING: existing files in destination\nfolder will be overwritten)\" \
-					} else { \
-						$b.f4.l3 configure -text \"\n\" \
-					} \
-				} \
-			}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
-	cmd( "ttk::checkbutton $b.f6.notot -text \"Skip generating totals file\" -variable no_tot -command { \
-				if { $no_res && $no_tot } { \
-					set no_res 0 \
-				}; \
-				if { ! $no_tot } { \
-					$b.f5.e configure -state disabled; \
-					if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
-						$b.f4.l3 configure -text \"(WARNING: existing files in destination\nfolder will be overwritten)\" \
-					} else { \
-						$b.f4.l3 configure -text \"\n\" \
-					} \
+	cmd( "ttk::label $b.f6.l -text \"Parallel runs\"" );
+	cmd( "ttk::spinbox $b.f6.e -width 5 -from 1 -to %d -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center -state %s", param, ( no_tot && sim_num > 1 && param > 1 ) ? "normal" : "disabled" );
+	cmd( "write_any $b.f6.e $cores" ); 
+	cmd( "pack $b.f6.l $b.f6.e -side left -padx 2" );
+
+	cmd( "ttk::frame $b.f7" );
+	cmd( "ttk::checkbutton $b.f7.nores -text \"Skip generating results files\" -variable no_res -command { \
+			if { $no_res && $no_tot } { \
+				set no_tot 0; \
+				$b.f5.l2 configure -style hl.TLabel; \
+				$b.f6.e configure -state disabled; \
+				if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+					$b.f5.l3 configure -text $tot_msg_warn \
 				} else { \
-					if { %d > 1 && %d > 1 } { \
-						$b.f5.e configure -state normal \
-					}; \
-					$b.f4.l3 configure -text \"\n\" \
+					$b.f5.l3 configure -text \"\n\" \
 				} \
-			}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "", sim_num, param );
-	cmd( "ttk::checkbutton $b.f6.dozip -text \"Generate zipped files\" -variable dozip -command { \
+			} \
+		}", out_dir, strlen( out_dir ) > 0 ? "/" : "", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+	cmd( "ttk::checkbutton $b.f7.notot -text \"Skip generating totals file\" -variable no_tot -command { \
+			if { $no_res && $no_tot } { \
+				set no_res 0 \
+			}; \
+			if { ! $no_tot } { \
+				$b.f5.l2 configure -style hl.TLabel; \
+				$b.f6.e configure -state disabled; \
+				if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+					$b.f5.l3 configure -text $tot_msg_warn \
+				} else { \
+					$b.f5.l3 configure -text \"\n\" \
+				} \
+			} else { \
+				if { %d > 1 && %d > 1 } { \
+					$b.f6.e configure -state normal \
+				}; \
+				$b.f5.l2 configure -style dhl.TLabel; \
+				$b.f5.l3 configure -text \"\n\" \
+			} \
+		}", out_dir, strlen( out_dir ) > 0 ? "/" : "", out_dir, strlen( out_dir ) > 0 ? "/" : "", sim_num, param );
+	cmd( "ttk::checkbutton $b.f7.dozip -text \"Generate zipped files\" -variable dozip -command { \
 			if $dozip { \
 				set zipExt .gz \
 			} else { \
 				set zipExt \"\" \
 			}; \
 			if { $simNum > 1 } { \
-				$b.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
-				$b.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
+				$b.f4.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
+				$b.f4.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
 			} else { \
-				$b.f3.w configure -text \"$firstFile.$resExt$zipExt\"; \
+				$b.f4.w configure -text \"$firstFile.$resExt$zipExt\"; \
 			}; \
-			$b.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; \
+			$b.f5.l2 configure -text \"$totFile.$totExt$zipExt\"; \
 			if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
-				$b.f4.l3 configure -text \"(WARNING: existing files in destination\nfolder will be overwritten)\" \
+				$b.f5.l3 configure -text $tot_msg_warn \
 			} else { \
-				$b.f4.l3 configure -text \"\n\" \
+				$b.f5.l3 configure -text \"\n\" \
 			} \
-		}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
-	cmd( "ttk::checkbutton $b.f6.docsv -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
+		}", out_dir, strlen( out_dir ) > 0 ? "/" : "", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+	cmd( "ttk::checkbutton $b.f7.docsv -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
 			if $docsv { set resExt csv; set totExt csv } { \
 				set resExt res; \
 				set totExt tot \
 			}; \
 			if { $simNum > 1 } { \
-				$b.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
-				$b.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
+				$b.f4.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
+				$b.f4.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
 			} else { \
-				$b.f3.w configure -text \"$firstFile.$resExt$zipExt\"; \
+				$b.f4.w configure -text \"$firstFile.$resExt$zipExt\"; \
 			}; \
-			$b.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; \
+			$b.f5.l2 configure -text \"$totFile.$totExt$zipExt\"; \
 			if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
-				$b.f4.l3 configure -text \"(WARNING: existing files in destination\nfolder will be overwritten)\" \
+				$b.f5.l3 configure -text $tot_msg_warn \
 			} else { \
-				$b.f4.l3 configure -text \"\n\" \
+				$b.f5.l3 configure -text \"\n\" \
 			} \
-		}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
-	cmd( "ttk::checkbutton $b.f6.dobar -text \"Show progress bar in logs\" -variable dobar" );
-	cmd( "ttk::checkbutton $b.f6.tosave -text \"Update configuration file\" -variable overwConf" );
-	cmd( "pack $b.f6.nores $b.f6.notot $b.f6.dozip $b.f6.docsv $b.f6.dobar %s -anchor w", overwConf ? "$b.f6.tosave" : "" );
+		}", out_dir, strlen( out_dir ) > 0 ? "/" : "", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+	cmd( "ttk::checkbutton $b.f7.dobar -text \"Show progress bar in logs\" -variable dobar" );
+	cmd( "ttk::checkbutton $b.f7.doover -text \"Clear output path before run\" -variable doover -state %s", overwDir ? "normal" : "disabled" );
+	cmd( "ttk::checkbutton $b.f7.tosave -text \"Update configuration file\" -variable overwConf -state %s", overwConf ? "normal" : "disabled" );
+	cmd( "pack $b.f7.nores $b.f7.notot $b.f7.dozip $b.f7.docsv $b.f7.dobar $b.f7.doover $b.f7.tosave -anchor w" );
 	
-	cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f5 $b.f6 -padx 5 -pady 5" );
+	cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f5 $b.f6 $b.f7 -padx 5 -pady 5" );
 		
 	cmd( "okhelpcancel $b b { set choice 1 } { LsdHelp menurun.html#batch } { set choice 2 }" );
 	
@@ -6028,7 +6051,7 @@ case 69:
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 	
-	cmd( "set cores [ $b.f5.e get ]" );
+	cmd( "set cores [ $b.f6.e get ]" );
 	
 	cmd( "destroytop .batch" );
 	
@@ -6036,11 +6059,22 @@ case 69:
 	Tcl_UnlinkVar( inter, "no_tot" );
 	Tcl_UnlinkVar( inter, "dobar" );
 	Tcl_UnlinkVar( inter, "docsv" );
+	Tcl_UnlinkVar( inter, "doover" );
 	Tcl_UnlinkVar( inter, "dozip" );
 	Tcl_UnlinkVar( inter, "overwConf" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
+
+	if ( subDir )
+		if ( ! create_res_dir( out_dir ) || ! results_alt_path( out_dir ) )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Subdirectory '%s' cannot be created\" -detail \"Check if the path is set READ-ONLY, or move your configuration file to a different location.\"", out_dir );
+			break;
+		}
+	
+	if ( overwDir && doover )
+		clean_res_dir( out_dir );
 
 	if ( sim_num > 1 && param > 1 && no_tot )				// parallel runs case
 	{
@@ -6076,15 +6110,15 @@ case 69:
 
 #ifdef _NP_
 
-	sprintf( lab_old, "%s.log", simul_name );
-	cmd( "catch { exec %s -f %s%s%s%s%s%s -l %s & }", lab, struct_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", lab_old );
+	snprintf( lab, MAX_PATH_LENGTH, "%s.log", simul_name );
+	cmd( "catch { exec %s -f %s%s%s%s%s%s%s%s -l %s & }", nw_exe, struct_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", subDir ? " -o " : "", subDir ? out_dir : "", lab );
 	run_logs.clear( );
-	run_logs.push_back( lab_old );	
+	run_logs.push_back( lab );	
 
 #else
 	
-	run_parallel( false, lab, simul_name, seed, sim_num, nature, param );
 	plog( "\n\nProcessing parallel background run (threads=%d runs=%d)...", nature, param );
+	run_parallel( false, nw_exe, simul_name, seed, sim_num, nature, param );
 	
 #endif
 
@@ -7439,6 +7473,147 @@ object *restore_pos( object *r )
 	}
 	
 	return r;
+}
+
+
+/****************************************************
+NEED_RES_DIR
+Evaluate if a separated results directory must be  
+created according to a set of criteria
+****************************************************/
+#define RES_AVOID_PATTERN "*.cpp *.h *.txt *.R *.o *.exe *.html"
+bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz )
+{
+	bool newDir = false;
+	
+	cmd( "if { [ string length \"%s\" ] > 0 } { \
+			set f [ file normalize \"%s/%s.lsd\" ]; \
+			set s [ file normalize \"%s/%s_\\[0-9\\]+.lsd\" ] \
+		} else { \
+			set f [ file normalize \"%s.lsd\" ] \
+			set s [ file normalize \"%s_\\[0-9\\]+.lsd\" ] \
+		}", path, path, sim_name, path, sim_name, sim_name, sim_name );
+	
+	cmd( "set d [ file dirname $f ]" );
+	
+	// check if path is valid
+	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] } { set res 1 } { set res 0 }" );
+	if ( get_bool( "res" ) )
+	{
+		// check if in the main model directory
+		cmd( "if { $d eq [ file normalize \"%s\" ] } { set res 1 } { set res 0 }", exec_path );
+		if ( get_bool( "res" ) )
+			newDir = true;
+		
+		// check if we are in a code directory
+		cmd( "set l [ glob -nocomplain -directory $d %s ]", RES_AVOID_PATTERN );
+		cmd( "if { [ llength $l ] > 0 } { set res 1 } { set res 0 }" );
+		if ( get_bool( "res" ) )
+			newDir = true;
+		
+		// check if the only LSD configuration is the current one or sensitivity version
+		cmd( "set l [ glob -nocomplain -directory $d *.lsd ]" );
+		cmd( "set l [ lsearch -exact -all -inline -not $l $f ]" );
+		cmd( "set l [ lsearch -regexp -all -inline -not $l $s ]" );
+		cmd( "if { [ llength $l ] > 0 } { set res 1 } { set res 0 }" );
+		if ( get_bool( "res" ) )
+			newDir = true;
+		
+		if ( newDir )
+			cmd( "set d \"$d/[ file tail \"%s\" ]\"", sim_name );
+	}	
+	else
+		cmd( "set d \"\"" );
+	
+	get_str( "d", buf, buf_sz );
+	
+	return newDir;
+}
+
+
+/****************************************************
+CHECK_RES_DIR
+Check if the results directory exists and 
+contains files to be deleted
+****************************************************/
+#define RES_CLEAR_PATTERN "*.res *.tot *.csv *.gz *.log *.bat *.pdf *.eps *.svg *.Rdata *.bak"
+bool check_res_dir( const char *path, const char *sim_name )
+{
+	bool done;
+	
+	cmd( "set d \"%s\"", path );
+	
+	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] && [ file normalize $d ] ne [ file normalize \"%s\" ] && [ llength [ glob -nocomplain -directory $d %s ] ] > 0 } { set res 1 } { set res 0 }", exec_path, RES_CLEAR_PATTERN );
+	done = get_bool( "res" );
+
+	if ( sim_name != NULL )
+	{
+		cmd( "if { [ file exists $d ] && [ file isdirectory $d ] } { \
+				set l [ glob -nocomplain -directory $d *.lsd ]; \
+				set n [ llength $l ]; \
+				if { $n > 1 } { \
+					set res 1 \
+				} elseif { $n == 1 && [ file normalize [ lindex $l 0 ] ] ne [ file normalize \"$d/%s.lsd\" ] } { \
+					set res 1 \
+				} else { \
+					set res 0 \
+				} \
+			}", clean_file( sim_name ) );
+	
+		done |= get_bool( "res" );
+	}
+	
+	return done;
+}
+
+
+/****************************************************
+CREATE_RES_DIR
+Create the results directory, if not exists yet
+****************************************************/
+bool create_res_dir( const char *path )
+{
+	cmd( "set d \"%s\"", path );
+	
+	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] } { set res 1 } { set res 0 }" );
+	if ( ! get_bool( "res" ) )
+	{	
+		cmd( "if { [ file exists $d ] } { catch { file delete -force $d } }" );
+		cmd( "catch { file mkdir $d }" );
+		cmd( "if { ! [ file exists $d ] || ! [ file isdirectory $d ] } { set res 1 } { set res 0 }" );
+		if ( get_bool( "res" ) )
+			return false;
+	}
+	
+	return true;
+}
+
+
+/****************************************************
+CLEAN_RES_DIR
+Clear LSD produced files in the results directory,
+if existent,
+****************************************************/
+void clean_res_dir( const char *path, const char *sim_name )
+{
+	cmd( "set d \"%s\"", path );
+	
+	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] } { \
+			set l [ glob -nocomplain -directory $d %s ]; \
+			if { [ llength $l ] > 0 } { \
+				catch { file delete -force {*}$l } \
+			} \
+		}", RES_CLEAR_PATTERN );
+	
+	if ( sim_name != NULL )
+		cmd( "if { [ file exists $d ] && [ file isdirectory $d ] } { \
+				set l [ glob -nocomplain -directory $d *.lsd ]; \
+				foreach f $l { \
+					if { [ file normalize $f ] ne [ file normalize \"$d/%s.lsd\" ] } { \
+						catch { file delete -force $f } \
+					} \
+				} \
+			}", clean_file( sim_name ) );
 }
 
 

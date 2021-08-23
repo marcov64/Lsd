@@ -668,7 +668,7 @@ file. In practice, this allows for the Monte Carlo sampling of the parameter
 space, which is often necessary when the s.a. space is too big to be analyzed 
 in its entirety.
 *******************************************************************************/
-void sensitivity_sequential( int *findex, sense *s, double probSampl )
+void sensitivity_sequential( int *findex, sense *s, double probSampl, const char *dest_path )
 {
 	int i, nv;
 	sense *cs;
@@ -680,7 +680,7 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl )
 		for ( i = 0; i < s->nvalues && ! stop; ++i )
 		{
 			s->i = i;
-			sensitivity_sequential( findex, s->next, probSampl );
+			sensitivity_sequential( findex, s->next, probSampl, dest_path );
 		}
 		
 		return;
@@ -707,7 +707,7 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl )
 
 		if ( probSampl == 1.0 || ran1( ) <= probSampl )	// if required draw if point will be sampled
 		{
-			if ( ! save_configuration( *findex ) )
+			if ( ! save_configuration( *findex, dest_path ) )
 			{
 				plog( "Aborted\n" );
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
@@ -1938,9 +1938,9 @@ SENSITIVITY_DOE
 	Generate the configuration files for the 
 	Design of Experiment (DOe )
 ******************************************************************************/
-void sensitivity_doe( int *findex, design *doe )
+void sensitivity_doe( int *findex, design *doe, const char *dest_path )
 {
-	int i, j;
+	int i, j, inif = *findex;
 	object *cur;
 	variable *cvar;
 	
@@ -1964,7 +1964,7 @@ void sensitivity_doe( int *findex, design *doe )
 		}
 		
 		// generate a configuration file for the experiment
-		if ( ! save_configuration( *findex ) )
+		if ( ! save_configuration( *findex, dest_path ) )
 		{
 			plog( "Aborted\n" );
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
