@@ -20,16 +20,16 @@ commanded from the browser window, implemented as a switch in operate.
 
 The main functions contained in this file are:
 
-- object *create( )
+- object *create( void )
 The main cycle for the Browser, from which it exits only to run a simulation
 or to quit the program. The cycle is just once call to browsw followed by
 a call to operate.
 
-- int browse( object *r, int *choice );
+- int browse( object *r );
 build the browser window and waits for an action (on the form of
 values for choice or choice_g different from 0)
 
-- object *operate( int *choice, object *r );
+- object *operate( object *r );
 takes the value of choice and operate the relative command on the
 object r. See the switch for the complete list of the available commands
 
@@ -66,7 +66,7 @@ USED CASE 97
 
 bool initVal = false;				// new variable initial setting going on
 bool redrawReq = false;				// flag for asynchronous window redraw request
-char *res_g;
+const char *res_g;
 int natBat = true;					// native (Windows/Linux) batch format flag (bool)
 int next_lag;						// new variable initial setting next lag to set
 int result_loaded;
@@ -121,9 +121,10 @@ void create( void )
 		// find root and minimally check the configuration
 		if ( struct_loaded && root->v == NULL && root->b == NULL ) 
 		{
-			error_hard( "invalid model configuration loaded",
-						"corrupted configuration file or internal problem in LSD", 
-						"if error persists, please contact developers" );
+			error_hard( "corrupted configuration file or internal problem in LSD", 
+						"if error persists, please contact developers", 
+						false,
+						"invalid model configuration loaded" );
 			unload_configuration( true );
 			cur = root;
 		}
@@ -142,7 +143,7 @@ void create( void )
 
 		// browse only if not running two-cycle operations
 		if ( bsearch( & choice, redoChoices, NUM_REDO_CHOICES, sizeof ( int ), comp_ints ) == NULL )
-			choice = browse( cur, &choice );
+			choice = browse( cur );
 		
 		// check if configuration was just reloaded
 		if ( choice < 0 )
@@ -151,7 +152,7 @@ void create( void )
 			cur = currObj;				// restore pointed object
 		}
 
-		cur = operate( cur, &choice );
+		cur = operate( cur );
 	}
 
 	Tcl_UnlinkVar( inter, "strWindowOn" );
@@ -162,7 +163,7 @@ void create( void )
 /****************************************************
 BROWSE
 ****************************************************/
-int browse( object *r, int *choice )
+int browse( object *r )
 {
 	bool done, sp_upd;
 	int i, num;
@@ -777,10 +778,8 @@ int browse( object *r, int *choice )
 		cmd( "pack .l.p.tit -padx 5 -anchor w" );
 
 		// main menu - avoid redrawing the menu if it already exists and is configured
-		cmd( "set existMenu [ winfo exists .m ]" );
 		cmd( "set confMenu [ . cget -menu ]" );
-		if ( ! strcmp( Tcl_GetVar( inter, "existMenu", 0 ), "0" ) ||
-			 strcmp( Tcl_GetVar( inter, "confMenu", 0 ), ".m" ) )
+		if ( ! exists_window( ".m" ) || strcmp( get_str( "confMenu" ), ".m" ) )
 		{
 			cmd( "destroy .m" );
 			cmd( "ttk::menu .m -tearoff 0" );
@@ -1065,11 +1064,11 @@ int browse( object *r, int *choice )
 	cmd( "upd_menu_visib" );		// update active menu options
 	cmd( "set useCurrObj yes" );	// flag to select among the current or the clicked object
 
-	*choice = choice_g = 0;
+	choice = choice_g = 0;
 	idle_loop = true;	
 
 	// main command loop
-	while ( ! *choice && ! choice_g )
+	while ( ! choice && ! choice_g )
 		Tcl_DoOneEvent( 0 );
 
 	idle_loop = false;	
@@ -1077,9 +1076,9 @@ int browse( object *r, int *choice )
 	// coming from the structure window
 	if ( choice_g )	
 	{
-		*choice = choice_g;
+		choice = choice_g;
 		choice_g = 0;
-		res_g = ( char * ) Tcl_GetVar( inter, "res_g", 0 );
+		res_g = exists_var( "res_g" ) ? get_str( "res_g" ) : NULL;
 		cmd( "focus .l.v.c.var_name" );
 	}
 
@@ -1098,33 +1097,35 @@ int browse( object *r, int *choice )
 	// if simulation was started, check to see if operation is valid
 	if ( running || actual_steps > 0 )
 	 	// search the sorted list of choices that are bad with existing run data
-		if ( bsearch( choice, badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints ) != NULL )
+		if ( bsearch( & choice, badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints ) != NULL )
 		{
 			if ( discard_change( true, false, "Invalid command after a simulation run." ) )	// for sure there are changes, just get the pop-up
 			{
 				if ( open_configuration( r, true ) )
-					*choice = - *choice;	// signal the reload
+					choice = - choice;	// signal the reload
 				else
-					*choice = 20;			// reload failed, unload configuration
+					choice = 20;			// reload failed, unload configuration
 			}
 			else
 			{
-				*choice = 0;
+				choice = 0;
 				goto main_cycle;
 			}
 		}
 	 
-	return *choice;
+	return choice;
 }
 
 
 /****************************************************
 OPERATE
 ****************************************************/
-object *operate( object *r, int *choice )
+object *operate( object *r )
 {
 bool saveAs, delVar, renVar, table, subDir, overwDir;
-char observe, initial, *lab1, *lab2, *lab3, *lab4, lab[ TCL_BUFF_STR ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH + 1 ], out_dir[ MAX_PATH_LENGTH + 1 ], out_bat[ MAX_PATH_LENGTH + 1 ], win_dir[ MAX_PATH_LENGTH + 1 ], buf_descr[ TCL_BUFF_STR + 1 ];
+char observe, initial, *lab0;
+const char *lab1, *lab2, *lab3, *lab4;
+static char lab[ MAX_BUFF_SIZE ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_LINE_SIZE ], NOLHfile[ MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], nw_exe[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ MAX_BUFF_SIZE ];
 int sl, done = 0, num, i, j, k, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, temp[ 10 ];
 long nLinks;
 double fake = 0;
@@ -1146,7 +1147,7 @@ else
 	redrawReq = false;
 }
 
-switch ( *choice )
+switch ( choice )
 {
 
 // Exit LSD
@@ -1162,10 +1163,10 @@ break;
 case 2:
 
 	// check if current or pointed object and save current if needed
-	lab1 = ( char * ) Tcl_GetVar( inter, "useCurrObj", 0 );
+	lab1 = get_str( "useCurrObj" );
 	if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 	{
-		lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+		lab1 = get_str( "vname" );
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
@@ -1340,8 +1341,7 @@ case 2:
 	
 	if ( done == 1 || done == 3 )
 	{
-		lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
-		strncpy( lab, lab1, MAX_ELEM_LENGTH - 1 );
+		get_str( "lab", lab, MAX_ELEM_LENGTH );
 		sl = strlen( lab );
 		if ( sl != 0 )
 		{
@@ -1367,7 +1367,7 @@ case 2:
 			if ( done == 0 )
 			{
 				cmd( "set text_description [ .addelem.d.f.text get 1.0 end ]" );
-				add_description( lab, param, ( char * ) Tcl_GetVar( inter, "text_description", 0 ) );
+				add_description( lab, param, get_str( "text_description" ) );
 				
 				if ( param == 0 )
 					cmd( "lappend modVar %s", lab );
@@ -1437,7 +1437,7 @@ case 2:
 		
 		cmd( "set vname %s", lab );
 		next_lag = 0;						// lag to initialize
-		*choice = 77;						// change initial values for $vname
+		choice = 77;						// change initial values for $vname
 		return r;							// execute command
 	}
 
@@ -1449,10 +1449,10 @@ break;
 case 3:
 
 	// check if current or pointed object and save current if needed
-	lab1 = ( char * ) Tcl_GetVar( inter, "useCurrObj", 0 );
+	lab1 = get_str( "useCurrObj" );
 	if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 	{
-		lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+		lab1 = get_str( "vname" );
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
@@ -1512,8 +1512,7 @@ case 3:
 
 	if ( done == 1 )
 	{
-		lab1= ( char * ) Tcl_GetVar( inter, "lab", 0 );
-		strncpy( lab, lab1, MAX_ELEM_LENGTH - 1 );
+		get_str( "lab", lab, MAX_ELEM_LENGTH );
 		if ( strlen( lab ) == 0 )
 			goto here_endobject;
 	
@@ -1539,7 +1538,7 @@ case 3:
 		r->add_obj( lab, 1, 1 );
 		
 		cmd( "set text_description [ .addobj.d.f.text get 1.0 end ]" );  
-		add_description( lab, 4, ( char * ) Tcl_GetVar( inter, "text_description", 0 ) );
+		add_description( lab, 4, get_str( "text_description" ) );
 		cmd( "lappend modObj %s", lab );
 		
 		// update focus memory
@@ -1566,10 +1565,10 @@ break;
 case 32:
 
 	// check if current or pointed object and save current if needed
-	lab1 = ( char * ) Tcl_GetVar( inter, "useCurrObj", 0 );
+	lab1 = get_str( "useCurrObj" );
 	if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 	{
-		lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+		lab1 = get_str( "vname" );
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
@@ -1620,20 +1619,20 @@ case 32:
 	cmd( "$TT.v.t.lb selection set 0" );
 	cmd( "focus $TT.v.t.lb" );
 	
-	*choice = 0;
+	choice = 0;
 	
 	cmd( "if { [ $TT.v.t.lb size ] == 0 } { ttk::messageBox -parent . -type ok -title Error -icon error -message \"Cannot move single 'Root' descendant\" -detail \"Consider, if appropriate, creating additional objects under 'Root' before moving this one.\"; set choice 2 }" );
 	
-	while ( *choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "if { $choice != 2 } { set movelabel [ .objs.v.t.lb get [ .objs.v.t.lb curselection ] ] }" );
 	cmd( "destroytop .objs" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		goto endmove;
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "movelabel", 0 );
+	lab1 = get_str( "movelabel" );
 	if ( lab1 == NULL || strlen( lab1 ) == 0 )
 		goto endmove;
 		
@@ -1646,7 +1645,7 @@ case 32:
 		cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -title Warning -icon warning -message \"Different number of parents' instances\" -detail \"The original parent object '%s' has a different number of instances (%d) than the desired new parent '%s' (%d). Copying object '$vname' to parent '%s' will result in $msg.\" ]", r->up->label, i, lab1, j, lab1 );
 		cmd( "switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 		
-		if( *choice == 2 )
+		if( choice == 2 )
 			goto endmove;
 	}
 
@@ -1666,7 +1665,7 @@ break;
 // Move browser to show one of the descendant object (defined in tcl $vname)
 case 4:
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) || ! strcmp( lab1, "(none)" ) )
 		break;
 	
@@ -1678,7 +1677,7 @@ case 4:
 
 	cmd( "set listfocus 2; set itemfocus 0" );
 
-	*choice = 0;
+	choice = 0;
 	redrawRoot = redrawStruc = true;	// force browser/structure redraw
 	return n;
 
@@ -1693,7 +1692,7 @@ case 5:
 	
 	cmd( "set listfocus 2; set itemfocus %d", r->up->up == NULL ? i : i + 1 ); 
 
-	*choice = 0;
+	choice = 0;
 	redrawRoot = redrawStruc = true;	// force browser/structure redraw
 	return r->up;
 
@@ -1702,7 +1701,7 @@ case 5:
 case 6:
 
 	cmd( "if $useCurrObj { set lab %s } { if [ info exists vname ] { set lab $vname } { set lab \"\" } }; set useCurrObj yes ", r->label  );
-	lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
+	lab1 = get_str( "lab" );
 
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
@@ -1790,36 +1789,36 @@ case 6:
 	cmd( "showtop $T topleftW" );
 	cmd( "mousewarpto $T.b.ok" );
 
-	cmd( "$w.f.text insert end \"%s\"", strtcl( buf_descr, cd->text, TCL_BUFF_STR ) );
+	cmd( "$w.f.text insert end \"%s\"", strtcl( buf_descr, cd->text, MAX_BUFF_SIZE ) );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	done = *choice;
+	done = choice;
 
-	if ( *choice != 2 )
+	if ( choice != 2 )
 	{
 		unsaved_change( true );		// signal unsaved change
 
 		// save description changes
 		cmd( "set text_description \"[ .objprop.desc.f.text get 1.0 end ]\"" );
-		change_description( lab_old, NULL, -1, ( char * ) Tcl_GetVar( inter, "text_description", 0 ) );
+		change_description( lab_old, NULL, -1, get_str( "text_description" ) );
 
 		cmd( "set choice $to_compute" );
 
-		if ( *choice != r->to_compute )
+		if ( choice != r->to_compute )
 		{
 			cur = blueprint->search( r->label );
 			if ( cur != NULL )
-				cur->to_compute = *choice;
+				cur->to_compute = choice;
 			for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
-				cur->to_compute = *choice;
+				cur->to_compute = choice;
 		}   
 
 		// control for elements to save in objects to be not computed
-		if ( *choice == 0 )
-			control_tocompute( r, r->label );
+		if ( choice == 0 )
+			control_to_compute( r, r->label );
 	}
 
 	cmd( "destroytop .objprop" );
@@ -1831,10 +1830,10 @@ case 6:
 	{
 		cmd( "set vname $lab" );
 		cmd( "set useCurrObj no" );
-		*choice = done;
+		choice = done;
 	}
 	else
-		*choice = 0;
+		choice = 0;
 
 	// avoid entering into descendant
 	if ( cur2 != NULL )
@@ -1850,9 +1849,9 @@ case 74:
 // Rename object (defined in tcl $vname)
 case 83:
 
-	nature = *choice;
+	nature = choice;
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab_old );
@@ -1865,7 +1864,7 @@ case 83:
 	{
 		cmd( "set answer [ ttk::messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete object?\" -detail \"Press 'Yes' to confirm deleting '$vname'\n\nNote that all descendants will be also deleted!\" ]" );
 		cmd( "switch $answer { yes { set choice 1 } no { set choice 2 } }" );
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			break;
 
 		r = cur->up;
@@ -1898,13 +1897,13 @@ case 83:
 
 		here_newname:
 
-		*choice = 0;
-		while ( *choice == 0 )
+		choice = 0;
+		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		if ( *choice == 1 )
+		if ( choice == 1 )
 		{
-			lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+			lab1 = get_str( "vname" );
 			if ( lab1 == NULL || ! strcmp( lab1, "" ) )		
 				break;
 			sscanf( lab1, "%99s", lab );
@@ -1962,13 +1961,13 @@ case 7:
 	int savei, parallel;
 
 	cmd( "if { ! [ catch { set vname [ .l.v.c.var_name get [ .l.v.c.var_name curselection ] ] } ] && ! [ string equal $vname \"\" ] } { set choice 1 } { set choice 0 }" );
-	if ( *choice == 0 )
+	if ( choice == 0 )
 	{ 
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No element selected\" -detail \"Please select an element (variable, parameter) before using this option.\"" );
 		break;
 	}
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) || ! strcmp( lab1, "(none)" ) )		
 		break;
 	
@@ -2024,8 +2023,7 @@ case 7:
 		
 		if ( cv->data_loaded != '-' )
 		{
-			char widget[ 20 ], widgets[ 4 * 20 ];
-			strcpy ( widgets, "" );
+			strcpy ( buf_descr, "" );
 			
 			j = ( cv->param == 1 ) ? 1 : min( cv->num_lag, 4 );
 			for ( i = 0; i < j; ++i )
@@ -2041,11 +2039,11 @@ case 7:
 				else
 					cmd( "pack $T.h.i.v%d.val", i );
 				
-				sprintf( widget, " $T.h.i.v%d", i );
-				strcat( widgets, widget );
+				snprintf( lab, MAX_ELEM_LENGTH, " $T.h.i.v%d", i );
+				strcatn( buf_descr, lab, MAX_BUFF_SIZE );
 			}
 			
-			cmd( "pack $T.h.i.l %s -side left -padx 1", widgets );
+			cmd( "pack $T.h.i.l %s -side left -padx 1", buf_descr );
 		}
 		else
 		{
@@ -2244,10 +2242,10 @@ case 7:
 	cmd( "showtop $T topleftW" );
 	cmd( "mousewarpto $T.b.ok" );
 
-	cmd( "$Td.f.desc.text insert end \"%s\"", strtcl( buf_descr, cd->text, TCL_BUFF_STR ) );
+	cmd( "$Td.f.desc.text insert end \"%s\"", strtcl( buf_descr, cd->text, MAX_BUFF_SIZE ) );
 
 	if ( cv->param == 1 || cv->num_lag > 0 )
-		cmd( "$Td.i.desc.text insert end \"%s\"", strtcl( buf_descr, cd->init, TCL_BUFF_STR ) );
+		cmd( "$Td.i.desc.text insert end \"%s\"", strtcl( buf_descr, cd->init, MAX_BUFF_SIZE ) );
 
 	cycle_var:
 
@@ -2255,23 +2253,25 @@ case 7:
 	while ( done == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	*choice = 1;	// point .chgelem window as parent for the following windows
 	if ( done == 3 )
-		show_eq( lab_old, choice );
+		show_eq( lab_old, ".chgelem" );
+	
 	if ( done == 4 )
-		scan_used_lab( lab_old, choice );
+		scan_used_lab( lab_old, ".chgelem" );
+	
 	if ( done == 7 )
-		scan_using_lab( lab_old, choice );
-	*choice = 0;
+		scan_using_lab( lab_old, ".chgelem" );
+	
+	choice = 0;
 
 	if ( done == 9 ) 
 	{
 		cmd( "set text_description \"[ .chgelem.desc.f.desc.text get 1.0 end ]\"" );
-		change_description( lab_old, NULL, -1, ( char * ) Tcl_GetVar( inter, "text_description", 0 ) );
+		change_description( lab_old, NULL, -1, get_str( "text_description" ) );
 	  
-		auto_document( choice, lab_old, "ALL", true );
+		auto_document( lab_old, "ALL", true );
 		cmd( ".chgelem.desc.f.desc.text delete 1.0 end" );
-		cmd( ".chgelem.desc.f.desc.text insert end \"%s\"", strtcl( buf_descr, cd->text, TCL_BUFF_STR ) );
+		cmd( ".chgelem.desc.f.desc.text insert end \"%s\"", strtcl( buf_descr, cd->text, MAX_BUFF_SIZE ) );
 
 		unsaved_change( true );		// signal unsaved change
 	}
@@ -2287,9 +2287,9 @@ case 7:
 	else
 	{
 		cmd( "set choice $observe" );
-		*choice == 1 ? observe = 'y' : observe = 'n';
+		choice == 1 ? observe = 'y' : observe = 'n';
 		cmd( "set choice $initial" );
-		*choice == 1 ? initial = 'y' : initial = 'n';
+		choice == 1 ? initial = 'y' : initial = 'n';
 		cd->initial = initial;
 		cd->observe = observe;
 	   
@@ -2305,12 +2305,12 @@ case 7:
 		}
 		  
 		cmd( "set text_description \"[ .chgelem.desc.f.desc.text get 1.0 end ]\"" );
-		change_description( lab_old, NULL, -1, ( char * ) Tcl_GetVar( inter, "text_description", 0 ) );
+		change_description( lab_old, NULL, -1, get_str( "text_description" ) );
 		
 		if ( cv->param == 1 || cv->num_lag > 0 )
 		{
 			cmd( "set text_description \"[ .chgelem.desc.i.desc.text get 1.0 end ]\"" );
-			change_description( lab_old, NULL, -1, NULL, ( char * ) Tcl_GetVar( inter, "text_description", 0 ) );
+			change_description( lab_old, NULL, -1, NULL, get_str( "text_description" ) );
 		}
 	  
 		unsaved_change( true );		// signal unsaved change
@@ -2322,9 +2322,9 @@ case 7:
 	}
 
 	if ( done != 8 )
-		*choice = 0;
+		choice = 0;
 	else
-		*choice = 7;  
+		choice = 7;  
 
 	here_endelem:
 
@@ -2341,28 +2341,28 @@ case 7:
 	switch ( done )
 	{
 		case 5:
-			*choice = 75;			// open properties box for $vname
+			choice = 75;			// open properties box for $vname
 			break;
 		case 10:
-			*choice = 76;			// delete element in $vname
+			choice = 76;			// delete element in $vname
 			break;
 		case 11:
-			*choice = 77;			// change initial values for $vname
+			choice = 77;			// change initial values for $vname
 			break;
 		case 12:
-			*choice = 78;			// change sensitivity values for $vname
+			choice = 78;			// change sensitivity values for $vname
 			break;
 		case 13:
-			*choice = 79;			// move element in $vname
+			choice = 79;			// move element in $vname
 			break;
 		case 14:
-			*choice = 96;			// change updating scheme
+			choice = 96;			// change updating scheme
 			break;
 		default:
-			*choice = 0;
+			choice = 0;
 	}
 
-	if ( *choice != 0 )
+	if ( choice != 0 )
 	{
 		redrawRoot = redrawStruc = false;	// no redraw yet
 		return r;					// execute command
@@ -2376,7 +2376,7 @@ case 75:
 // Delete variable/parameter (defined by tcl $vname)
 case 76:
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab_old );	// get var/par name in lab_old
@@ -2384,12 +2384,12 @@ case 76:
 	if ( cv == NULL )
 		break;
 	
-	if ( *choice == 76 )
+	if ( choice == 76 )
 	{
 		delVar = renVar = true;
 
 		cmd( "set answer [ ttk::messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete element?\" -detail \"Press 'Yes' to confirm deleting '$vname'\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
-		if ( *choice == 1 )
+		if ( choice == 1 )
 			cmd( "set vname \"\"; set nature 3; set numlag 0" );	// configure to delete
 		else
 			goto here_endprop;
@@ -2446,23 +2446,23 @@ case 76:
 		cmd( "$T.n.e selection range 0 end" );
 		cmd( "focus $T.n.e" );
 
-		*choice = 0;
+		choice = 0;
 	}
 
-	while ( *choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "if [ winfo exists .prop ] { if { $nature == 0 } { set numlag [ .prop.n.lag get ] } }" );
 	cmd( "destroytop .prop" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		goto here_endprop;
 
 	cmd( "set choice $nature" );
-	nature = *choice;
+	nature = choice;
 
 	cmd( "set choice $numlag" );
-	numlag = *choice;
+	numlag = choice;
 
 	if ( ! delVar && ( nature != cv->param || numlag != cv->num_lag ) )
 	{
@@ -2508,7 +2508,7 @@ case 76:
 		}
 	}
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 != NULL && strcmp( lab1, "" ) )
 	{
 		sscanf( lab1, "%99s", lab );			// new name in lab (empty if delete)
@@ -2526,14 +2526,14 @@ case 76:
 		if ( ! delVar )
 		{
 			for ( cur = r; cur->up != NULL; cur = cur->up );
-			*choice = check_label( lab, cur );
+			choice = check_label( lab, cur );
 
-			if ( *choice == 1 )
+			if ( choice == 1 )
 			{
 				cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
 				goto here_endprop;
 			}
-			if ( *choice == 2 )
+			if ( choice == 2 )
 			{
 				cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
 				goto here_endprop;
@@ -2586,7 +2586,7 @@ break;
 // Move variable/parameter (defined by tcl $vname)
 case 79:
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab_old );	// get var/par name in lab_old
@@ -2622,17 +2622,17 @@ case 79:
 	cmd( "$TT.v.t.lb selection set 0" );
 	cmd( "focus $TT.v.t.lb" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "set movelabel [ .objs.v.t.lb get [ .objs.v.t.lb curselection ] ]" );
 	cmd( "destroytop .objs" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "movelabel", 0 );
+	lab1 = get_str( "movelabel" );
 	if ( lab1 == NULL || ! strcmp( lab1, r->label ) )		// same object?
 		break;
 		
@@ -2655,9 +2655,9 @@ case 77:
 // Change variable/parameter (defined by tcl $vname) sensitivity values
 case 78:
 
-	done = ( *choice == 77 ) ? 1 : 2;
+	done = ( choice == 77 ) ? 1 : 2;
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab_old );		// get var/par name in lab_old
@@ -2704,18 +2704,18 @@ case 78:
 		cmd( "$T.n.e selection range 0 end" );
 		cmd( "focus $T.n.e" );
 		
-		*choice = -1;
-		while ( *choice == -1 )			// wait for user action
+		choice = -1;
+		while ( choice == -1 )			// wait for user action
 			Tcl_DoOneEvent( 0 );
 			
 		cmd( "set lag [ .lag.i.e get ]" ); 
 		cmd( "destroytop .lag" );
 		
-		if ( *choice == 0 )
+		if ( choice == 0 )
 			break;
 		
 		cmd( "set choice $lag" ); 
-		lag = abs( *choice ) - 1;		// try to extract chosed lag
+		lag = abs( choice ) - 1;		// try to extract chosed lag
 		
 		// abort if necessary
 		if ( lag < 0 || lag > ( cv->num_lag - 1 ) )
@@ -2736,8 +2736,7 @@ case 78:
 		else
 			cur = r;
 		
-		*choice = 0;					// set top window as parent
-		set_all( choice, cur, cv->label, lag );
+		set_all( cur, cv->label, lag );
 		redrawRoot = true;				// redraw is needed to show new value tip
 		
 		if ( initVal )
@@ -2745,7 +2744,7 @@ case 78:
 			if ( next_lag < ( cv->num_lag - 1 ) )
 			{
 				++next_lag;
-				*choice = 77;			// execute command again
+				choice = 77;			// execute command again
 				return r;
 			}
 			else
@@ -2759,7 +2758,7 @@ case 78:
 	// edit sensitivity analysis data
 	else
 	{
-		*choice = 0;
+		choice = 0;
 		bool exist = false;
 		sense *cs, *ps = NULL;
 
@@ -2801,7 +2800,7 @@ case 78:
 		cs->param = cv->param;
 		cs->lag = lag;
 		
-		dataentry_sensitivity( choice, cs, 0 );
+		dataentry_sensitivity( cs, 0 );
 		
 		if ( ! cs->entryOk )			// data entry failed?
 		{
@@ -2822,7 +2821,7 @@ break;
 // Change variable (defined by tcl $vname) updating scheme
 case 96:
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab_old );	// get var/par name in lab_old
@@ -2896,8 +2895,8 @@ case 96:
 	cmd( "$T.f.c.e2 selection range 0 end" );
 	cmd( "focus $T.f.c.e2" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "set delay [ $T.f.c.e2 get ]" ); 
@@ -2907,7 +2906,7 @@ case 96:
 	
 	cmd( "destroytop $T" );
 
-	if ( *choice == 2 )	// Escape - revert previous values
+	if ( choice == 2 )	// Escape - revert previous values
 	{
 		cv->delay = temp[ 1 ];
 		cv->delay_range = temp[ 2 ];
@@ -2955,7 +2954,7 @@ case 1:
 	if ( series_saved == 0 )
 	{
 		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"If you proceed, there will be no data to be analyzed after the simulation is run. If this is not the intended behavior, please mark the variables and parameters to be saved before running the simulation.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } " );
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			break;
 	}
 
@@ -2963,7 +2962,7 @@ case 1:
 	if ( ! parallel_disable && search_parallel( root ) && ( when_debug > 0 || stack_info > 0 || prof_aggr_time ) )
 	{
 		cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\n\nPress 'OK' to proceed and disable parallel processing settings or 'Cancel' to return to LSD Browser.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }" );
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			break;
 
 		parallel_disable = true;
@@ -3016,7 +3015,7 @@ case 1:
 	if ( sim_num > 1 )
 	{
 		// detect the need of a new save path and if it has results files
-		subDir = need_res_dir( path, simul_name, out_dir, MAX_PATH_LENGTH + 1 );
+		subDir = need_res_dir( path, simul_name, out_dir, MAX_PATH_LENGTH );
 		overwDir = check_res_dir( out_dir );
 		
 		cmd( "ttk::frame $T.f2.n" );
@@ -3054,23 +3053,23 @@ case 1:
 		
 		cmd( "ttk::frame $T.f5" );
 		cmd( "ttk::label $T.f5.l1 -text \"Totals file (last steps)\"" );
-		cmd( "ttk::label $T.f5.l2 -style %s -text \"$totFile.$totExt$zipExt\"", *choice ? "hl.TLabel" : "dhl.TLabel" );
+		cmd( "ttk::label $T.f5.l2 -style %s -text \"$totFile.$totExt$zipExt\"", choice ? "hl.TLabel" : "dhl.TLabel" );
 		
-		if ( *choice )
+		if ( choice )
 			cmd( "ttk::label $T.f5.l3 -text $tot_msg_warn" );
 		else
 			cmd( "ttk::label $T.f5.l3 -text \"\"" );
 
 		cmd( "pack $T.f5.l1 $T.f5.l2 $T.f5.l3" );
 			
-		add_to_tot = ( *choice ) ? add_to_tot : false;
+		add_to_tot = ( choice ) ? add_to_tot : false;
 
 		cmd( "ttk::frame $T.f6" );
 		cmd( "ttk::checkbutton $T.f6.a -text \"Append to existing totals file\" -variable add_to_tot -state %s -command { \
 				if { $add_to_tot && $doover } { \
 					set doover 0 \
 				} \
-			}", ( *choice && ! no_tot ) ? "normal" : "disabled" );
+			}", ( choice && ! no_tot ) ? "normal" : "disabled" );
 		cmd( "ttk::checkbutton $T.f6.b -text \"Skip generating results files\" -variable no_res" );
 		cmd( "ttk::checkbutton $T.f6.b1 -text \"Skip generating totals file\" -variable no_tot -command { \
 				if { ! $no_tot } { \
@@ -3146,8 +3145,8 @@ case 1:
 	cmd( "showtop $T" );
 	cmd( "mousewarpto $T.b.ok" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .run" );
@@ -3160,7 +3159,7 @@ case 1:
 	Tcl_UnlinkVar( inter, "dozip" );
 	Tcl_UnlinkVar( inter, "overwConf" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 
 	if ( subDir )
@@ -3189,7 +3188,7 @@ case 1:
 			unsaved_change( false );	// signal no unsaved change
 	}
 	
-	*choice = 1; 
+	choice = 1; 
 	return n;
 
 
@@ -3199,10 +3198,10 @@ case 17:
 case 38:
 
 	if ( discard_change( ) )	// unsaved configuration changes ?
-		if ( ! open_configuration( r, *choice == 38 ? true : false ) )
+		if ( ! open_configuration( r, choice == 38 ? true : false ) )
 		{
 			unload_configuration( true );
-			*choice = 0;
+			choice = 0;
 			return root;
 		}
 	
@@ -3214,7 +3213,7 @@ case 18:
 // Save a model as different name
 case 73:
 
-	saveAs = ( *choice == 73 ) ? true : false;
+	saveAs = ( choice == 73 ) ? true : false;
 
 	if ( ! struct_loaded )
 	{
@@ -3261,14 +3260,14 @@ case 73:
 		if ( done == 2 )
 			goto save_end;
 
-		lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		lab1 = get_str( "res" );
 
 		if ( strlen( lab1 ) == 0 )
 			break;
 		delete [ ] simul_name;
 		simul_name = new char[ strlen( lab1 ) + 1 ];
 		strcpy( simul_name, lab1 );
-		lab1 = ( char * ) Tcl_GetVar( inter, "path", 0 );
+		lab1 = get_str( "path" );
 		delete [ ] path;
 		path = new char[ strlen( lab1 ) + 1 ];
 		strcpy( path, lab1 );
@@ -3316,10 +3315,10 @@ break;
 // Edit Objects' numbers
 case 19:
 	
-	strcpy( lab, r->label );
+	strcpyn( lab, r->label, MAX_BUFF_SIZE );
 	
-	*choice = 0;
-	set_obj_number( root, choice );
+	choice = 0;
+	set_obj_number( root );
 	
 	r = root->search( lab );
 
@@ -3330,10 +3329,10 @@ break;
 case 21:
 
 	// check if current or pointed object and save current if needed
-	lab1 = ( char * ) Tcl_GetVar( inter, "useCurrObj", 0 );
+	lab1 = get_str( "useCurrObj" );
 	if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 	{
-		lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+		lab1 = get_str( "vname" );
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
@@ -3349,7 +3348,7 @@ case 21:
 
 	for ( n = r; n->up != NULL; n = n->up );
 
-	edit_data( n, choice, r->label );
+	edit_data( n, r->label );
 
 	redrawRoot = true;
 	unsaved_change( true );			// signal unsaved change
@@ -3456,8 +3455,8 @@ case 22:
 	cmd( "$T.f.c.e2 selection range 0 end" );
 	cmd( "focus $T.f.c.e2" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "set sim_num [ .simset.f.a.e get ]" ); 
@@ -3469,7 +3468,7 @@ case 22:
 
 	cmd( "destroytop $T" );
 
-	if ( *choice == 2 )	// Escape - revert previous values
+	if ( choice == 2 )	// Escape - revert previous values
 	{
 		sim_num = temp[ 1 ];
 		seed = ( unsigned ) temp[ 2 ];
@@ -3504,7 +3503,7 @@ case 24:
 		break;
 
 	n = root->search( res_g );
-	*choice = 0;
+	choice = 0;
 
 	if ( n == NULL )
 	{	// check if it is not a zero-instance object
@@ -3538,10 +3537,10 @@ case 12:
 	{
 		cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -icon question -default yes -title \"Results Available\" -message \"Use set of results last created?\" -detail \"A set of results files was previously created and can be used to perform the Monte Carlo experiment analysis.\n\nAny configuration or results not saved will be discarded.\n\nPress 'Yes' to confirm, 'No' to select a different set of files, or 'Cancel' to abort.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" ); 
 	
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			break;
 		
-		if ( *choice == 0 )
+		if ( choice == 0 )
 			res_list.clear( );
 	}
 	else
@@ -3555,14 +3554,14 @@ case 12:
 		r = root;
 	}
 	
-	analysis( choice, true );
+	analysis( true );
 	
 break;
 
 // Enter the analysis of results module
 case 26:
 
-	analysis( choice, false );
+	analysis( false );
 
 break;
 
@@ -3581,10 +3580,10 @@ case 28:
 	cmd( "set res1 [ file tail [ tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ] ]", exec_path );
 	cmd( "if [ fn_spaces \"$res1\" . ] { set res1 \"\" } { set res1 [ file tail $res1 ] }" );
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "res1", 0 );
+	lab1 = get_str( "res1" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
-	sscanf( lab1, "%499s", equation_name );
+	sscanf( lab1, "%999s", equation_name );
 	
 	unsaved_change( true );		// signal unsaved change
 
@@ -3594,13 +3593,12 @@ break;
 // Shortcut to show equation window
 case 29:
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab_old );
 
-	*choice = 0;	// point . window as parent for the following window
-	show_eq( lab_old, choice );
+	show_eq( lab_old, "." );
 
 break;
 
@@ -3614,7 +3612,7 @@ case 39:
 		plog( " \nNo variable or parameter saved." );
 	else
 	{
-		plog( "\n\nVariables and parameters saved (%d):\n", "", i );
+		plog( "\n\nVariables and parameters saved (%d):\n", i );
 		show_save( root );
 	}
 
@@ -3719,7 +3717,7 @@ case 30:
 
 	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove save flags?\" -detail \"Confirm the removal of all saving information. No data will be saved.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
-	if ( *choice == 1 )
+	if ( choice == 1 )
 	{
 		clean_save( root );
 		unsaved_change( true );				// signal unsaved change
@@ -3734,7 +3732,7 @@ case 31:
 
 	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove plot flags?\" -detail \"Confirm the removal of all run-time plot information. No data will be plotted during run time.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
-	if ( *choice == 1 )
+	if ( choice == 1 )
 	{
 		clean_plot( root );
 		unsaved_change( true );				// signal unsaved change
@@ -3749,7 +3747,7 @@ case 27:
 
 	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove debug flags?\" -detail \"Confirm the removal of all debugging information. Debugger will not stop in any variable update.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
-	if ( *choice == 1 )
+	if ( choice == 1 )
 	{
 		clean_debug( root );
 		unsaved_change( true );				// signal unsaved change
@@ -3764,7 +3762,7 @@ case 87:
 
 	cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove parallel flags?\" -detail \"Confirm the removal of all parallel processing information. No parallelization will be performed.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
-	if ( *choice == 1 )
+	if ( choice == 1 )
 	{
 		clean_parallel( root );
 		unsaved_change( true );				// signal unsaved change
@@ -3779,10 +3777,10 @@ break;
 case 33:
 
 	// check if current or pointed object and save current if needed
-	lab1 = ( char * ) Tcl_GetVar( inter, "useCurrObj", 0 );
+	lab1 = get_str( "useCurrObj" );
 	if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 	{
-		lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+		lab1 = get_str( "vname" );
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
@@ -3853,16 +3851,16 @@ case 33:
 		i = 0;
 	}
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "set num [ $T.e.e.e get ]" ); 
 	cmd( "set cfrom [ $T.cp.e get ]" ); 
 
-	if ( *choice == 3 )
+	if ( choice == 3 )
 	{
-		k = compute_copyfrom( r, choice, ".numinst" );
+		k = compute_copyfrom( r, ".numinst" );
 		if ( k > 0 )
 			cmd( "set cfrom %d", k );
 
@@ -3871,14 +3869,14 @@ case 33:
 
 	cmd( "destroytop $T" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		goto endinst;
 
 	k = get_int( "cfrom" );
 	num = get_int( "num" );
 	for ( i = 0, cur = r->up; cur != NULL; ++i, cur = cur->up ); 
 
-	chg_obj_num( &r, num, i, NULL, choice, k );
+	chg_obj_num( &r, num, i, NULL, k );
 
 	unsaved_change( true );				// signal unsaved change
 	redrawRoot = redrawStruc = true;	// force browser/structure redraw
@@ -3895,10 +3893,10 @@ break;
 case 34:
 
 	// check if current or pointed object and save current if needed
-	lab1 = ( char * ) Tcl_GetVar( inter, "useCurrObj", 0 );
+	lab1 = get_str( "useCurrObj" );
 	if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 	{
-		lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+		lab1 = get_str( "vname" );
 		if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 			break;
 		sscanf( lab1, "%99s", lab_old );
@@ -3923,7 +3921,7 @@ break;
 // Create model report
 case 36:
 
-	report( choice, root );
+	report( root );
 
 break;
 
@@ -3931,7 +3929,7 @@ break;
 // See model report
 case 44:
 
-	show_report( choice, "." );
+	show_report( "." );
   
 break;
 
@@ -3939,7 +3937,7 @@ break;
 // Save result
 case 37:
 
-	*choice = 0;
+	choice = 0;
 	if ( actual_steps == 0 )
 	{
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Simulation not run, nothing to save\" -detail \"Select menu option Run>Run before using this option.\"" );
@@ -3983,7 +3981,7 @@ case 37:
 	cmd( ".n.n.e selection range 0 end" );  
 	cmd( "focus .n.n.e" );
 
-	while ( *choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "if { [ string length lab ] == 0 } { set choice 2 }" );
@@ -3994,39 +3992,38 @@ case 37:
 	Tcl_UnlinkVar( inter, "dozip" );
 	Tcl_UnlinkVar( inter, "saveConf" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 
 	cmd( "focustop .log" );
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
-	strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
+	get_str( "lab", lab, MAX_PATH_LENGTH );
 	
 	if ( saveConf )
 	{
 		if ( strlen( path ) == 0 )
 		{
 			cmd( "file copy -force %s.lsd %s.lsd", simul_name, lab );
-			plog( "\nSaved configuration to file %s.lsd", "", lab );
+			plog( "\nSaved configuration to file %s.lsd", lab );
 		}
 		else
 		{
 			cmd( "file copy -force %s/%s.lsd %s/%s.lsd", path, simul_name, path, lab );
-			plog( "\nSaved configuration to file %s/%s.lsd", "", path, lab );
+			plog( "\nSaved configuration to file %s/%s.lsd", path, lab );
 		}
 	}
 
 	if ( strlen( path ) == 0 )
-		sprintf( msg, "%s.%s", lab, docsv ? "csv" : "res" );
+		snprintf( out_file, MAX_PATH_LENGTH, "%s.%s", lab, docsv ? "csv" : "res" );
 	else
-		sprintf( msg, "%s/%s.%s", path, lab, docsv ? "csv" : "res" );
+		snprintf( out_file, MAX_PATH_LENGTH, "%s/%s.%s", path, lab, docsv ? "csv" : "res" );
 		
 	if ( dozip )
-		strcat( msg, ".gz" );
+		strcatn( out_file, ".gz", MAX_PATH_LENGTH );
 					
-	plog( "\nSaving results to file %s... ", "", msg );
+	plog( "\nSaving results to file %s... ", out_file );
 
-	rf = new result( msg, "wt", dozip, docsv );	// create results file object
+	rf = new result( out_file, "wt", dozip, docsv );// create results file object
 	rf->title( root, 1 );						// write header
 	rf->data( root, 0, actual_steps );			// write all data
 	delete rf;									// close file and delete object
@@ -4058,7 +4055,7 @@ case 43:
 	cmd( "set answer [ttk::messageBox -parent . -message \"Replace existing descriptions?\" -detail \"Automatic data will replace any previous entered descriptions. Proceed?\" -type yesno -title Confirmation -icon question -default yes]" );
 	cmd( "if { [ string compare $answer yes ] == 0 } { set choice 0 } { set choice 1 }" );
 
-	if ( *choice == 1 )
+	if ( choice == 1 )
 		break;
 
 	cmd( "set x 1" );
@@ -4082,27 +4079,21 @@ case 43:
 	cmd( "showtop .warn" );
 	cmd( "mousewarpto .warn.b.ok" );
 
-	while ( *choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .warn" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 
 	cmd( "set choice $x" );
-	if ( *choice == 1 )
-		auto_document( choice, NULL, "" );
+	if ( choice == 1 )
+		auto_document( NULL, "" );
 	else
-		auto_document( choice, NULL, "ALL" ); 
+		auto_document( NULL, "ALL" ); 
 
 	unsaved_change( true );		// signal unsaved change
-
-break;
-
-
-// (empty)
-case 45:
 
 break;
 
@@ -4110,13 +4101,12 @@ break;
 // Show the vars./pars. vname is using
 case 46:
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab );
 
-	*choice = 0;				// make . the parent window
-	scan_using_lab( lab, choice );
+	scan_using_lab( lab, "." );
 
 break;
 
@@ -4124,13 +4114,12 @@ break;
 // Show the equations where vname is used 
 case 47:
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab );
 
-	*choice = 0;				// make . the parent window
-	scan_used_lab( lab, choice );
+	scan_used_lab( lab, "." );
 
 break;
 
@@ -4154,11 +4143,11 @@ case 48:
 	cmd( ".a.v_num2 selection range 0 end" );
 	cmd( "focus .a.v_num2" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	if ( *choice == 1 )
+	if ( choice == 1 )
 		cmd( "set HtmlBrowser $temp_var" );
 
 	cmd( "destroytop .a" );
@@ -4209,23 +4198,20 @@ case 50:
 	cmd( "showtop .srch" );
 	cmd( "focus .srch.i.e" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .srch" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 
 
 // Arrive here from the list of vars used (keep together with case 50!)
 case 55:
 
-	*choice = 0;
-	lab1 = ( char * ) Tcl_GetVar( inter, "bidi", 0 );
-	strncpy( msg, lab1, MAX_ELEM_LENGTH - 1 );
-	cv = r->search_var( r, msg, true );
+	cv = r->search_var( r, get_str( "bidi" ), true );
 	if ( cv != NULL )
 	{
 		for ( i = 0, cv1 = cv->up->v; cv1 != cv; cv1 = cv1->next, ++i );
@@ -4251,7 +4237,7 @@ case 51:
 		break;
 	}
 
-	if ( !strcmp( eq_file, lsd_eq_file ) )
+	if ( ! strcmp( eq_file, lsd_eq_file ) )
 	{
 		cmd( "ttk::messageBox -parent . -title \"Upload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be uploaded differing from the current configuration file.\" -type ok" );
 		break;
@@ -4259,11 +4245,11 @@ case 51:
 
 	cmd( "set answer [ ttk::messageBox -parent . -title Confirmation -icon question -message \"Replace equations?\" -detail \"The equations associated to the configuration file are going to be replaced with the equations used for the LSD model program. Press 'OK' to confirm.\" -type okcancel -default ok ]" );
 	cmd( "if { [ string compare $answer ok ] == 0 } { set choice 1 } { set choice 0 }" );
-	if ( *choice == 0 )
+	if ( choice == 0 )
 		break;
 
-	lsd_eq_file[ MAX_FILE_SIZE ] = '\0';
-	strncpy( lsd_eq_file, eq_file, MAX_FILE_SIZE );
+	strcpyn( lsd_eq_file, eq_file, MAX_FILE_SIZE );
+
 	unsaved_change( true );		// signal unsaved change
 
 break;
@@ -4291,20 +4277,22 @@ case 52:
 	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ]", exec_path );
 
 	cmd( "if { [ string length $bah ] > 0 } { set choice 1; set res1 [ file tail $bah ] } { set choice 0 }" );
-	if ( *choice == 0 )
+	if ( choice == 0 )
 	  break;
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "res1", 0 );
-	strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
-
+	get_str( "res1", lab, MAX_PATH_LENGTH );
 	if ( strlen( lab ) == 0 )
 		break;
 	
-	f = fopen( lab, "wb" );
-	fprintf( f, "%s", lsd_eq_file );
-	fclose( f );
-	cmd( "ttk::messageBox -parent . -title \"Offload Equations\" -icon info -message \"Equation file '$res1' created\" -detail \"You need to create a new LSD model to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok" );
-
+	if ( ( f = fopen( lab, "wb" ) ) != NULL )
+	{
+		fprintf( f, "%s", lsd_eq_file );
+		fclose( f );
+		cmd( "ttk::messageBox -parent . -title \"Offload Equations\" -icon info -message \"Equation file '$res1' created\" -detail \"You need to create a new LSD model to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok" );
+	}
+	else
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '$res1' cannot be saved\" -detail \"Check if the file already exists and is set READ-ONLY, or try to save to a different location.\"" );
+		
 break;
 
 
@@ -4323,13 +4311,18 @@ case 53:
 		break;
 	}
 
-	sprintf( ch, "orig-eq_%s.tmp", simul_name);
-	f = fopen( ch, "wb" );
-	fprintf( f, "%s", lsd_eq_file );
-	fclose( f );
+	snprintf( lab_old, MAX_PATH_LENGTH, "orig-eq_%s.tmp", simul_name);
 
-	read_eq_filename( lab );
-	cmd( "open_diff %s %s %s %s.lsd", lab, ch, equation_name, simul_name  );
+	if ( ( f = fopen( lab_old, "wb" ) ) != NULL )
+	{
+		fprintf( f, "%s", lsd_eq_file );
+		fclose( f );
+
+		read_eq_filename( lab, MAX_PATH_LENGTH );
+		cmd( "open_diff %s %s %s %s.lsd", lab, lab_old, equation_name, simul_name  );
+	}
+	else
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s' cannot be saved\" -detail \"Check if the file already exists and is set READ-ONLY.\"", lab_old );
 
 break;
 
@@ -4352,8 +4345,8 @@ case 82:
 	cmd( "set res2 [ file tail $res1 ]" );
 	cmd( "if [ fn_spaces \"$res1\" . ] { set res1 \"\"; set res2 \"\" }" );
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "res1", 0 );
-	lab2 = ( char * ) Tcl_GetVar( inter, "res2", 0 );
+	lab1 = get_str( "res1" );
+	lab2 = get_str( "res2" );
 	if ( lab1 == NULL || lab2 == NULL || strlen ( lab1 ) == 0 || strlen ( lab2 ) == 0 )
 		break;
 
@@ -4376,8 +4369,8 @@ break;
 case 54:
 
 	cmd( "set choice $ignore_eq_file" );
-	ignore_eq_file = *choice;
-	plog( "\n%s equation file\n", "", ignore_eq_file ? "Ignoring" : "Not ignoring" );
+	ignore_eq_file = choice;
+	plog( "\n%s equation file\n", ignore_eq_file ? "Ignoring" : "Not ignoring" );
 
 break; 
 
@@ -4386,7 +4379,7 @@ break;
 case 57:
 case 92:
 
-	table = ( *choice == 57 ) ? true : false;
+	table = ( choice == 57 ) ? true : false;
 	
 	if ( ! struct_loaded )
 	{
@@ -4394,21 +4387,25 @@ case 92:
 		break;
 	}
 
-	sprintf( ch, "%s%s%s_%s.tex", strlen( path ) > 0 ? path : "", strlen( path ) > 0 ? "/" : "", table ? "table" : "href", simul_name );
-	cmd( "set choice [ file exists %s ]", ch );
-	if ( *choice == 1 )
+	snprintf( out_file, MAX_PATH_LENGTH, "%s%s%s_%s.tex", strlen( path ) > 0 ? path : "", strlen( path ) > 0 ? "/" : "", table ? "table" : "href", simul_name );
+	cmd( "set choice [ file exists %s ]", out_file );
+	if ( choice == 1 )
 	{
-		cmd( "set answer [ ttk::messageBox -parent . -message \"File '%s' already exists\" -detail \"Please confirm overwriting it.\" -type okcancel -title Warning -icon warning -default ok ]", ch );
+		cmd( "set answer [ ttk::messageBox -parent . -message \"File '%s' already exists\" -detail \"Please confirm overwriting it.\" -type okcancel -title Warning -icon warning -default ok ]", out_file );
 		cmd( "if [ string equal $answer ok ] { set choice 0 } { set choice 1 }" );
-		if ( *choice == 1 )
+		if ( choice == 1 )
 			break;
 	}
 
+	if ( ( f = fopen( out_file, "wt" ) ) == NULL )
+	{
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s' cannot be created\" -detail \"Check if the file already exists and is set READ-ONLY, or try to save to a different location.\"", out_file );
+		break;
+	}
+	
 	stop = false;
 	cmd( "progressbox .ptex \"Creating LaTex\" \"LaTex code generation steps\" \"Step\" 6 { set stop true }" );	
 
-	f = fopen( ch, "wt" );
-	
 	tex_report_head( f, table );
 	cmd( "prgboxupdate .ptex 1" );
 	
@@ -4449,9 +4446,9 @@ case 92:
 	fclose( f );
 	
 	if ( stop )
-		remove( ch );
+		remove( out_file );
 	else
-		plog( "\nLaTex code saved in file: %s\n", "", ch );
+		plog( "\nLaTex code saved in file: %s\n", out_file );
 
 break;
 
@@ -4459,7 +4456,7 @@ break;
 // Move variable up in the list box
 case 58:
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab_old );
@@ -4475,7 +4472,7 @@ break;
 // Move variable down in the list box
 case 59:
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab_old );
@@ -4491,7 +4488,7 @@ break;
 // Move object up in the list box
 case 60:
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab_old );
@@ -4507,7 +4504,7 @@ break;
 // Move object down in the list box
 case 61:
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+	lab1 = get_str( "vname" );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab_old );
@@ -4523,10 +4520,10 @@ break;
 // Sort current list box on the selected order
 case 94:
 	cmd( "set choice $listfocus" );
-	i = *choice;
+	i = choice;
 	cmd( "set choice $sort_order" );
 	
-	if ( sort_listbox( i, *choice, r ) )
+	if ( sort_listbox( i, choice, r ) )
 	{
 		unsaved_change( true );		// signal unsaved change
 		redrawRoot = true;			// request browser redraw
@@ -4544,14 +4541,14 @@ case 62:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );// number of variables to test
-		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 		long ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
-		plog( "\nSensitivity analysis space size: %ld", "", ptsSa );
+		plog( "\nSensitivity analysis space size: %ld", ptsSa );
 		
 		// Prevent running into too big sensitivity spaces (high computation times)
 		if ( ptsSa > max( 10, MAX_SENS_POINTS / 10 ) )
 			// ask user before proceeding
-			if ( sensitivity_too_large( ptsSa, choice ) )
+			if ( sensitivity_too_large( ptsSa ) )
 				break;
 		
 		for ( i = 1, cs = rsense; cs!=NULL; cs = cs->next )
@@ -4586,22 +4583,22 @@ case 63:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );// number of variables to test
-		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 		long ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
-		plog( "\nSensitivity analysis space size: %ld", "", ptsSa );
+		plog( "\nSensitivity analysis space size: %ld", ptsSa );
 		
 		// Prevent running into too big sensitivity spaces (high computation times)
 		if ( ptsSa > MAX_SENS_POINTS )
 			// ask user before proceeding
-			if ( sensitivity_too_large( ptsSa, choice ) )
+			if ( sensitivity_too_large( ptsSa ) )
 				break;
 		
 		// detect the need of a new save path and create it if required
-		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH + 1 ) )
+		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH ) )
 			create_res_dir( path_sens );
 		
 		// ask to clean existing files before proceeding if required
-		if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens, choice ) )
+		if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens ) )
 			clean_res_dir( path_sens, simul_name );
 		
 		// save the current object & cursor position for quick reload
@@ -4618,7 +4615,7 @@ case 63:
 		
 		cmd( "destroytop .psa" );
 		
-		plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );	
+		plog( "\nSensitivity analysis configurations produced: %d", findexSens - 1 );	
 		
 		// if succeeded, explain user how to proceed
 		if ( ! stop )
@@ -4629,7 +4626,7 @@ case 63:
 		// now reload the previously existing configuration
 		if ( ! load_prev_configuration( ) )
 		{
-			*choice = 0;
+			choice = 0;
 			return root;			
 		}
 	
@@ -4651,9 +4648,9 @@ case 71:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );// number of variables to test
-		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 		long maxMC = num_sensitivity_points( rsense );	// total number of points in sensitivity space
-		plog( "\nSensitivity analysis space size: %ld", "", maxMC );
+		plog( "\nSensitivity analysis space size: %ld", maxMC );
 
 		// get the number of Monte Carlo samples to produce
 		double sizMC = 10;
@@ -4678,15 +4675,15 @@ case 71:
 		cmd( ".s.i.e selection range 0 end" );
 		cmd( "focus .s.i.e" );
 
-		*choice = 0;
-		while ( *choice == 0 )
+		choice = 0;
+		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
 		cmd( "set sizMC [ .s.i.e get ]" ); 
 		cmd( "destroytop .s" );
 		Tcl_UnlinkVar( inter, "sizMC" );
 
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			break;
 		
 		// Check if number is valid
@@ -4694,28 +4691,28 @@ case 71:
 		if ( ( sizMC * maxMC ) < 1 || sizMC > 1.0 )
 		{
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid sample size\" -detail \"Invalid Monte Carlo sample size to perform the sensitivity analysis. Select a number between 0%% and 100%% that produces at least one sample (in average).\"" );
-			*choice = 0;
+			choice = 0;
 			break;
 		}
 
 		// Prevent running into too big sensitivity space samples (high computation times)
 		if ( ( sizMC * maxMC ) > MAX_SENS_POINTS )
 			// ask user before proceeding
-			if ( sensitivity_too_large( ( long ) ( sizMC * maxMC ), choice ) )
+			if ( sensitivity_too_large( ( long ) ( sizMC * maxMC ) ) )
 				break;
 		
 		// detect the need of a new save path and create it if required
-		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH + 1 ) )
+		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH ) )
 			create_res_dir( path_sens );
 		
 		// ask to clean existing files before proceeding if required
-		if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens, choice ) )
+		if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens ) )
 			clean_res_dir( path_sens, simul_name );
 		
 		// save the current object & cursor position for quick reload
 		save_pos( r );
 
-		plog( "\nTarget sensitivity analysis sample size: %ld (%.1f%%)", "", ( long ) ( sizMC * maxMC ), 100 * sizMC );
+		plog( "\nTarget sensitivity analysis sample size: %ld (%.1f%%)", ( long ) ( sizMC * maxMC ), 100 * sizMC );
 		findexSens = 1;
 		
 		// create a design of experiment (DoE) for the sensitivity data
@@ -4729,7 +4726,7 @@ case 71:
 
 		cmd( "destroytop .psa" );
 		
-		plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );	
+		plog( "\nSensitivity analysis configurations produced: %d", findexSens - 1 );	
 		
 		// if succeeded, explain user how to proceed
 		if ( ! stop )
@@ -4740,7 +4737,7 @@ case 71:
 		// now reload the previously existing configuration
 		if ( ! load_prev_configuration( ) )
 		{
-			*choice = 0;
+			choice = 0;
 			return root;			
 		}
 		
@@ -4762,8 +4759,8 @@ case 72:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );	// number of variables to test
-		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
-		lab1 = NOLH_valid_tables( varSA, ch );
+		plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
+		lab1 = NOLH_valid_tables( varSA, ch, 2 * MAX_LINE_SIZE );
 
 		cmd( "set extdoe 0" );	// flag for using external DoE file
 		cmd( "set NOLHfile \"NOLH.csv\"" );
@@ -4799,33 +4796,27 @@ case 72:
 		cmd( "showtop .s" );
 		cmd( "mousewarpto .s.b.ok" );
 		
-		*choice = 0;
-		while ( *choice == 0 )
+		choice = 0;
+		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 		
 		cmd( "if { [ .s.o.c get ] in $doeList } { set doesize [ .s.o.c get ] } { bell }" );
 		cmd( "destroytop .s" );
 		
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			break;
 		
-		char NOLHfile[ MAX_PATH_LENGTH ];
-		char const *extdoe = Tcl_GetVar( inter, "extdoe", 0 );
-		char const *doesize = Tcl_GetVar( inter, "doesize", 0 );
-		char const *doeext = Tcl_GetVar( inter, "doeext", 0 );
+		const char *extdoe = exists_var( "extdoe" ) ? get_str( "extdoe" ) : NULL;
+		const char *doeext = exists_var( "doeext" ) ? get_str( "doeext" ) : NULL;
+		const char *doesize = get_str( "doesize" );
 		
-		if ( *extdoe == '0' )
+		if ( extdoe == NULL || strlen( extdoe ) == 0 )
 			strcpy( NOLHfile, "" );
 		else
-		{
-			char const *fname = Tcl_GetVar( inter, "NOLHfile", 0 );
-			NOLHfile[ MAX_PATH_LENGTH - 1 ] = '\0';
-			strncpy( NOLHfile, fname, MAX_PATH_LENGTH - 1 );
-		}
+			get_str( "NOLHfile", NOLHfile, MAX_PATH_LENGTH );
 		
-		i = sscanf( doesize, "%d\u00D7", &j );
-		int doesz = ( i > 0 ) ?  j : 0;
-		int samples = ( *doeext == '0') ? 0 : -1;
+		int doesz = ( sscanf( doesize, "%d\u00D7", &j ) > 0 ) ?  j : 0;
+		int samples = ( doeext == NULL || strlen( doeext ) == 0 ) ? 0 : -1;
 
 		// adjust an NOLH design of experiment (DoE) for the sensitivity data
 		design *NOLHdoe = new design( rsense, 1, NOLHfile, 1, samples, doesz );
@@ -4840,18 +4831,18 @@ case 72:
 		// Prevent running into too big sensitivity space samples (high computation times)
 		if ( NOLHdoe -> n > MAX_SENS_POINTS )
 			// ask user before proceeding
-			if ( sensitivity_too_large( NOLHdoe -> n, choice ) )
+			if ( sensitivity_too_large( NOLHdoe -> n ) )
 			{
 				delete NOLHdoe;
 				break;
 			}
 		
 		// detect the need of a new save path and create it if required
-		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH + 1 ) )
+		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH ) )
 			create_res_dir( path_sens );
 		
 		// ask to clean existing files before proceeding if required
-		if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens, choice ) )
+		if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens ) )
 			clean_res_dir( path_sens, simul_name );
 		
 		// save the current object & cursor position for quick reload
@@ -4867,7 +4858,7 @@ case 72:
 		// now reload the previously existing configuration
 		if ( ! load_prev_configuration( ) )
 		{
-			*choice = 0;
+			choice = 0;
 			return root;			
 		}
 		
@@ -4879,7 +4870,7 @@ case 72:
 			cmd( "set answer [ ttk::messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Create out-of-main-sample set of samples?\" -detail \"An out-of-sample set allows for better meta-model selection and fit-quality evaluation.\n\nPress 'Yes' to create a Monte Carlo sample now or 'No' otherwise.\" ]" );
 			cmd( "switch $answer { yes { set choice 80 } no { set choice 0 } }" );
 			
-			if ( *choice != 0 )
+			if ( choice != 0 )
 				return r;
 		}
 	}
@@ -4898,7 +4889,7 @@ case 80:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );	// number of variables to test
-		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 
 		// get the number of Monte Carlo samples to produce
 		int sizMC = 10;
@@ -4924,40 +4915,40 @@ case 80:
 		cmd( ".s.i.e selection range 0 end" );
 		cmd( "focus .s.i.e" );
 		
-		*choice = 0;
-		while ( *choice == 0 )
+		choice = 0;
+		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 		
 		cmd( "set sizMC [ .s.i.e get ]" ); 
 		cmd( "destroytop .s" );
 		Tcl_UnlinkVar( inter, "sizMC" );
 		
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			break;
 		
 		// Check if number is valid
 		if ( sizMC < 1 )
 		{
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid sample size\" -detail \"Invalid Monte Carlo sample size to perform the sensitivity analysis. Select at least one sample.\"" );
-			*choice = 0;
+			choice = 0;
 			break;
 		}
 
 		// Prevent running into too big sensitivity space samples (high computation times)
 		if ( sizMC > MAX_SENS_POINTS )
 			// ask user before proceeding
-			if ( sensitivity_too_large( ( long ) sizMC, choice ) )
+			if ( sensitivity_too_large( ( long ) sizMC ) )
 				break;
 		
 		if ( findexSens < 1 || ( findexSens > 1 && ! get_bool( "applst" ) ) )
 			findexSens = 1;
 		
 		// detect the need of a new save path and create it if required
-		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH + 1 ) )
+		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH ) )
 			create_res_dir( path_sens );
 		
 		// ask to clean existing files before proceeding if required
-		if ( findexSens == 1 && check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens, choice ) )
+		if ( findexSens == 1 && check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens ) )
 			clean_res_dir( path_sens, simul_name );
 		
 		// save the current object & cursor position for quick reload
@@ -4972,7 +4963,7 @@ case 80:
 		// now reload the previously existing configuration
 		if ( ! load_prev_configuration( ) )
 		{
-			*choice = 0;
+			choice = 0;
 			return root;			
 		}
 		
@@ -4994,7 +4985,7 @@ case 81:
 			break;
 
 		int varSA = num_sensitivity_variables( rsense );	// number of variables to test
-		plog( "\nNumber of elements for sensitivity analysis: %d", "", varSA );
+		plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 
 		// get the number of Monte Carlo samples to produce
 		int nLevels = 4, jumpSz = 2, nTraj = 10, nSampl = 100;
@@ -5045,8 +5036,8 @@ case 81:
 		cmd( ".s.i.e1 selection range 0 end" );
 		cmd( "focus .s.i.e1" );
 		
-		*choice = 0;
-		while ( *choice == 0 )
+		choice = 0;
+		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 		
 		cmd( "set nTraj [ .s.i.e1 get ]" ); 
@@ -5060,29 +5051,29 @@ case 81:
 		Tcl_UnlinkVar( inter, "nTraj" );
 		Tcl_UnlinkVar( inter, "nSampl" );
 		
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			break;
 		
 		// Check if numbers are valid
 		if ( nLevels < 2 || nLevels % 2 != 0 || nTraj < 2 || nSampl < nTraj || jumpSz < 1 )
 		{
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid configuration\" -detail \"Invalid Elementary Effects configuration to perform the sensitivity analysis. Check Morris (1991) and Campolongo et al. (2007) for details.\"" );
-			*choice = 0;
+			choice = 0;
 			break;
 		}
 		
 		// Prevent running into too big sensitivity space samples (high computation times)
 		if ( nTraj * ( varSA + 1 ) > MAX_SENS_POINTS )
 			// ask user before proceeding
-			if ( sensitivity_too_large( ( long ) ( nTraj * ( varSA + 1 ) ), choice ) )
+			if ( sensitivity_too_large( ( long ) ( nTraj * ( varSA + 1 ) ) ) )
 				break;
 		
 		// detect the need of a new save path and create it if required
-		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH + 1 ) )
+		if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH ) )
 			create_res_dir( path_sens );
 		
 		// ask to clean existing files before proceeding if required
-		if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens, choice ) )
+		if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens ) )
 			clean_res_dir( path_sens, simul_name );
 		
 		// save the current object & cursor position for quick reload
@@ -5097,7 +5088,7 @@ case 81:
 		// now reload the previously existing configuration
 		if ( ! load_prev_configuration( ) )
 		{
-			*choice = 0;
+			choice = 0;
 			return root;			
 		}
 		
@@ -5124,7 +5115,7 @@ case 64:
 	if ( rsense != NULL ) 
 	{
 		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -icon warning -default ok -title Warning -message \"Sensitivity data already loaded\" -detail \"Press 'OK' if you want to discard the existing data before loading a new sensitivity configuration.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } }" );
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			break;
 		
 		// empty sensitivity data
@@ -5143,20 +5134,16 @@ case 64:
 	// open dialog box to get file name & folder
 	cmd( " set bah [ tk_getOpenFile -parent . -title \"Load Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile \"$res\" -initialdir \"$path\"  -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
 	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .sa $res ] - 1 } ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 	
-	lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
-	lab2 = ( char * ) Tcl_GetVar( inter, "path", 0 );
-	
 	// form full name
+	lab1 = get_str( "res" );
+	lab2 = get_str( "path" );
 	if ( sens_file != NULL )
 		delete sens_file;
-	sens_file = new char[ strlen( lab1 ) + strlen( lab2 ) + 7 ];
-	if ( strlen( lab1 ) > 0 )
-		sprintf( sens_file, "%s/%s.sa", lab2, lab1 );
-	else
-		sprintf( sens_file, "%s.sa", lab1 );
+	sens_file = new char[ strlen( lab1 ) + strlen( lab2 ) + 5 ];
+	sprintf( sens_file,"%s%s%s.sa", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
 	
 	// read sensitivity file (text mode)
 	f = fopen( sens_file, "rt" );
@@ -5191,18 +5178,18 @@ case 65:
 		cmd( "cd \"$path\"" );
 
 	// open dialog box to get file name & folder
-	*choice = 0;
+	choice = 0;
 	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir \"$path\" -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
 	cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ]; set last [ expr { [ string last .sa $res ] - 1 } ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
-	lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
-	lab2 = ( char * ) Tcl_GetVar( inter, "path", 0 );
 	
 	// form full name
+	lab1 = get_str( "res" );
+	lab2 = get_str( "path" );
 	if ( sens_file != NULL )
 		delete sens_file;
-	sens_file = new char[ strlen( lab2 ) + strlen( lab1 ) + 7 ];
+	sens_file = new char[ strlen( lab1 ) + strlen( lab2 ) + 5 ];
 	sprintf( sens_file,"%s%s%s.sa", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
 
 	// write sensitivity file (text mode)
@@ -5249,16 +5236,16 @@ case 91:
 		cmd( "cd \"$path\"" );
 
 	// open dialog box to get file name & folder
-	*choice = 0;
+	choice = 0;
 	cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Saved Elements Configuration as Comma-separated Text File\" -defaultextension \".csv\" -initialfile $res -initialdir \"$path\" -filetypes { { {Comma-separated files} {.csv} } } ]" );
 	cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ] } { set choice 2 }" );
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 	
 	// form full name
-	lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
-	lab2 = ( char * ) Tcl_GetVar( inter, "path", 0 );
-	sprintf( lab,"%s%s%s", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
+	lab1 = get_str( "res" );
+	lab2 = get_str( "path" );
+	snprintf( lab, MAX_PATH_LENGTH,"%s%s%s", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
 
 	// write export file (text mode)
 	f = fopen( lab, "wt" );  // use text mode for Windows better compatibility
@@ -5297,16 +5284,16 @@ case 90:
 		cmd( "cd \"$path\"" );
 
 	// open dialog box to get file name & folder
-	*choice = 0;
+	choice = 0;
 	cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Sensitivity Limits as Comma-separated Text File\" -defaultextension \".csv\" -initialfile $res -initialdir \"$path\" -filetypes { { {Comma-separated files} {.csv} } } ]" );
 	cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ] } { set choice 2 }" );
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 	
 	// form full name
-	lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
-	lab2 = ( char * ) Tcl_GetVar( inter, "path", 0 );
-	sprintf( lab,"%s%s%s", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
+	lab1 = get_str( "res" );
+	lab2 = get_str( "path" );
+	snprintf( lab, MAX_PATH_LENGTH,"%s%s%s", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
 
 	// write export file (text mode)
 	f = fopen( lab, "wt" );  // use text mode for Windows better compatibility
@@ -5331,7 +5318,7 @@ break;
 // Show sensitivity analysis configuration
 case 66:
 
-	*choice = 50;
+	choice = 50;
 
 	// check for existing sensitivity data loaded
 	if ( rsense == NULL ) 
@@ -5345,12 +5332,12 @@ case 66:
 	for ( cs = rsense; cs != NULL; cs = cs->next )
 	{
 		if ( cs->param == 1 )
-			plog( "Param: %s\\[%s\\]\t#%d:\t", "", cs->label, cs->integer ? "int" : "flt", cs->nvalues );
+			plog( "Param: %s\\[%s\\]\t#%d:\t", cs->label, cs->integer ? "int" : "flt", cs->nvalues );
 		else
-			plog( "Var: %s(-%d)\\[%s\\]\t#%d:\t", "", cs->label, cs->lag+1, cs->integer ? "int" : "flt", cs->nvalues );
+			plog( "Var: %s(-%d)\\[%s\\]\t#%d:\t", cs->label, cs->lag+1, cs->integer ? "int" : "flt", cs->nvalues );
 
 		for ( i = 0; i < cs->nvalues; ++i )
-			plog( "%g\t", "highlight", cs->v[ i ] );
+			plog_tag( "%g\t", "highlight", cs->v[ i ] );
 		plog( "\n" );
 	}
 	
@@ -5360,7 +5347,7 @@ break;
 // Remove sensitivity analysis configuration
 case 67:
 
-	*choice = 0;
+	choice = 0;
 
 	// check for existing sensitivity data loaded
 	if ( rsense == NULL ) 
@@ -5393,11 +5380,11 @@ case 68:
 			break;
 
 	// check for existing NW executable
-	sprintf( ch, "%s/lsdNW", exec_path );				// form full executable name
+	snprintf( nw_exe, MAX_PATH_LENGTH, "%s/lsdNW", exec_path );	// form full executable name
 	if ( platform == _WIN_ )
-		strcat( ch, ".exe" );							// add Windows ending
+		strcatn( nw_exe, ".exe", MAX_PATH_LENGTH );	// add Windows ending
 
-	if ( ( f = fopen( ch, "rb" ) ) == NULL ) 
+	if ( ( f = fopen( nw_exe, "rb" ) ) == NULL ) 
 	{
 		if ( ! make_no_window( ) )
 			break;
@@ -5406,10 +5393,10 @@ case 68:
 		fclose( f );
 	
 	// check if NW executable file is older than running executable file
-	sprintf( lab_old, "%s/%s", exec_path, exec_file );	// form full exec name
+	snprintf( lab, MAX_PATH_LENGTH, "%s/%s", exec_path, exec_file );	// form full exec name
 
 	// get OS info for files
-	if ( stat( ch, &stExe ) == 0 && stat( lab_old, &stMod ) == 0 )
+	if ( stat( nw_exe, &stExe ) == 0 && stat( lab, &stMod ) == 0 )
 	{
 		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
 		{
@@ -5419,24 +5406,24 @@ case 68:
 					cancel { set choice 2 } \
 				}" );
 				
-			if ( *choice == 2 )
+			if ( choice == 2 )
 				break;
 			
-			if ( *choice == 0 )
+			if ( choice == 0 )
 				if ( ! make_no_window( ) )
 					break;
 		}
 	}
 	
 	// check if serial sensitivity configuration was just created
-	*choice = 0;
+	choice = 0;
 	if ( findexSens > 0 )
 		cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -icon question -default yes -title \"Parallel Batch\" -message \"Configuration set available\" -detail \"A sequential sensitivity set of configuration files was just produced and can be used to create the batch.\n\nPress 'Yes' to confirm or 'No' to select a different set of files.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" ); 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 	
 	// get configuration files to use
-	if ( *choice == 1 )							// use current configuration files
+	if ( choice == 1 )							// use current configuration files
 	{
 		if ( strlen( path_sens ) == 0 || simul_name == NULL || strlen( simul_name ) == 0 )
 		{
@@ -5448,18 +5435,18 @@ case 68:
 		ffirst = fSeq = 1;
 		fnext = findexSens;
 		findexSens = 0;
-		strncpy( out_file, simul_name, MAX_PATH_LENGTH );
-		strncpy( out_dir, path_sens, MAX_PATH_LENGTH );
-		Tcl_SetVar( inter, "res", simul_name, 0 );
-		Tcl_SetVar( inter, "path", path, 0 );
+		strcpyn( out_file, simul_name, MAX_PATH_LENGTH );
+		strcpyn( out_dir, path_sens, MAX_PATH_LENGTH );
+		cmd( "set res \"%s\"", simul_name );
+		cmd( "set path \"%s\"", path );
 	}
 	else										// ask for first configuration file
 	{
 		cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Select sequence of configuration files?\" -detail \"Press 'Yes' to choose the first file of the continuous sequence (format: 'name_NNN.lsd') or 'No' to select a different set of files (use 'Ctrl' to pick multiple files).\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" ); 
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			break;
 		else
-			fSeq = *choice;
+			fSeq = choice;
 		
 		if ( fSeq && strlen( simul_name ) > 0 )	// default name
 			cmd( "set res \"%s_1.lsd\"", simul_name );
@@ -5491,19 +5478,19 @@ case 68:
 				} else { \
 					set choice 0 \
 				}" );
-			if ( *choice == 0 )
+			if ( choice == 0 )
 				break;
 			
-			ffirst = *choice;
-			get_str( "res", out_file, MAX_PATH_LENGTH + 1 );
-			get_str( "path", out_dir, MAX_PATH_LENGTH + 1 );
+			ffirst = choice;
+			get_str( "res", out_file, MAX_PATH_LENGTH );
+			get_str( "path", out_dir, MAX_PATH_LENGTH );
 			f = NULL;
 			do									// search for all sequential files
 			{
 				if ( strlen( out_dir ) == 0 )			// default path
-					sprintf( lab, "%s_%d.lsd", out_file, ( *choice )++ );
+					snprintf( lab, MAX_PATH_LENGTH, "%s_%d.lsd", out_file, choice++ );
 				else
-					sprintf( lab, "%s/%s_%d.lsd", out_dir, out_file, ( *choice )++ );
+					snprintf( lab, MAX_PATH_LENGTH, "%s/%s_%d.lsd", out_dir, out_file, choice++ );
 				
 				if ( f != NULL ) 
 					fclose( f );
@@ -5511,7 +5498,7 @@ case 68:
 			}
 			while ( f != NULL );
 			
-			fnext = *choice - 1;
+			fnext = choice - 1;
 		}
 		else									// bunch of files?
 		{
@@ -5528,12 +5515,12 @@ case 68:
 						set res [ string range $res 0 [ expr { $numpos - 2 } ] ] \
 					} \
 				}" );
-			if ( *choice == 0 )
+			if ( choice == 0 )
 				break;
 			
 			ffirst = 1;
-			fnext = *choice + 1;
-			get_str( "path", out_dir, MAX_PATH_LENGTH + 1 );
+			fnext = choice + 1;
+			get_str( "path", out_dir, MAX_PATH_LENGTH );
 		}
 	}
 
@@ -5597,8 +5584,8 @@ case 68:
 	cmd( ".s.c.e selection range 0 end" );
 	cmd( "focus .s.c.e" );
 	
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 	
 	cmd( "set cores [ .s.c.e get ]" );
@@ -5612,7 +5599,7 @@ case 68:
 	Tcl_UnlinkVar( inter, "docsv" );
 	Tcl_UnlinkVar( inter, "dozip" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 	
 	param = get_int( "cores" );
@@ -5623,32 +5610,37 @@ case 68:
 	if ( nature < 1 || nature > SRV_MAX_CORES ) 
 		nature = min( max_threads, SRV_MAX_CORES );
 	
-	strncpy( out_bat, ( char * ) Tcl_GetVar( inter, "res2", 0 ), MAX_PATH_LENGTH - 1 );
+	get_str( "res2", out_bat, MAX_PATH_LENGTH );
 	
 	// select batch format & create batch file
 	cmd( "if [ string equal $CurPlatform windows ] { if { $natBat == 1 } { set choice 1 } { set choice 2 } } { if { $natBat == 1 } { set choice 3 } { set choice 4 } }" );
 	if ( fSeq )
-		if ( *choice == 1 || *choice == 4 )
-			sprintf( lab, "%s/%s_%d_%d.bat", out_dir, out_bat, ffirst, fnext - 1 );
+		if ( choice == 1 || choice == 4 )
+			snprintf( lab, MAX_PATH_LENGTH, "%s/%s_%d_%d.bat", out_dir, out_bat, ffirst, fnext - 1 );
 		else
-			sprintf( lab, "%s/%s_%d_%d.sh", out_dir, out_bat, ffirst, fnext - 1 );
+			snprintf( lab, MAX_PATH_LENGTH, "%s/%s_%d_%d.sh", out_dir, out_bat, ffirst, fnext - 1 );
 	else
-		if ( *choice == 1 || *choice == 4 )
-			sprintf( lab, "%s/%s.bat", out_dir, out_bat );
+		if ( choice == 1 || choice == 4 )
+			snprintf( lab, MAX_PATH_LENGTH, "%s/%s.bat", out_dir, out_bat );
 		else
-			sprintf( lab, "%s/%s.sh", out_dir, out_bat );
+			snprintf( lab, MAX_PATH_LENGTH, "%s/%s.sh", out_dir, out_bat );
 		
 	f = fopen( lab, "wb" );						// binary mode to bypass CR/LF handling
+	if ( f == NULL )
+	{
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Batch file cannot be created\" -detail \"Check if LSD still has WRITE access to the model directory.\"" );
+		findexSens = 0;							// no sensitivity created
+		break;
+	}
 		
-	if ( *choice == 1 || *choice == 4 )			// Windows header
+	if ( choice == 1 || choice == 4 )			// Windows header
 	{
 		// convert to Windows folder separators (\)
-		for ( i = 0; ( unsigned ) i < strlen( ch ); ++i ) 
-			if ( ch[ i ] == '/' ) 
-				ch[ i ] = '\\';
+		for ( i = 0; ( unsigned ) i < strlen( nw_exe ); ++i ) 
+			if ( nw_exe[ i ] == '/' ) 
+				nw_exe[ i ] = '\\';
 			
-		win_dir[ MAX_PATH_LENGTH - 1 ] = '\0';
-		strcpy( win_dir, out_dir );
+		strcpyn( win_dir, out_dir, MAX_PATH_LENGTH );
 		
 		for ( i = 0; ( unsigned ) i < strlen( win_dir ); ++i ) 
 			if ( win_dir[ i ] == '/' ) 
@@ -5656,7 +5648,7 @@ case 68:
 		
 		fprintf( f, "@echo off\nrem Batch generated by LSD\r\n" );
 		fprintf( f, "echo Processing %d configuration files in up to %d parallel processes...\r\n", fnext - ffirst, param );
-		fprintf( f, "if \"%%~1\"==\"\" (set LSD_EXEC=\"%s\") else (set LSD_EXEC=\"%%~1\")\r\n", ch );
+		fprintf( f, "if \"%%~1\"==\"\" (set LSD_EXEC=\"%s\") else (set LSD_EXEC=\"%%~1\")\r\n", nw_exe );
 		fprintf( f, "if \"%%~2\"==\"\" (set LSD_CONFIG_PATH=\"%s\") else (set LSD_CONFIG_PATH=\"%%~2\")\r\n", win_dir );
 		fprintf( f, "set LSD_EXEC=%%LSD_EXEC:\"=%%\r\n" );
 		fprintf( f, "set LSD_CONFIG_PATH=%%LSD_CONFIG_PATH:\"=%%\r\n" );
@@ -5668,34 +5660,35 @@ case 68:
 	{
 		if ( ! natBat )							// Unix in Windows?
 		{
-			if ( strchr( ch, ':' ) != NULL )			// remove Windows drive letter
+			if ( strchr( nw_exe, ':' ) != NULL )	// remove Windows drive letter
 			{
-				strcpy( msg, strchr( ch, ':' ) + 1 );
-				strcpy( ch, msg );
+				strcpyn( lab_old, strchr( nw_exe, ':' ) + 1, MAX_PATH_LENGTH );
+				strcpyn( nw_exe, lab_old, MAX_PATH_LENGTH );
 			}
-			if ( strchr( out_dir, ':' ) != NULL )		// remove Windows drive letter
+			
+			if ( strchr( out_dir, ':' ) != NULL )	// remove Windows drive letter
 			{
-				strcpy( msg, strchr( out_dir, ':' ) + 1 );
-				strcpy( out_dir, msg );
+				strcpyn( lab_old, strchr( out_dir, ':' ) + 1, MAX_PATH_LENGTH );
+				strcpyn( out_dir, lab_old, MAX_PATH_LENGTH );
 			}
 
-			if ( ( lab1 = strstr( ch, ".exe" ) ) != NULL )	// remove Windows extension, if present
-				lab1[ 0 ]='\0';
+			if ( ( lab0 = strstr( nw_exe, ".exe" ) ) != NULL )	// remove Windows extension, if present
+				lab0[ 0 ]='\0';
 			else
-				if ( ( lab1 = strstr( ch, ".EXE" ) ) != NULL ) 
-					lab1[ 0 ]='\0';
+				if ( ( lab0 = strstr( nw_exe, ".EXE" ) ) != NULL ) 
+					lab0[ 0 ]='\0';
 		}
 		
 		// set background low priority in servers (cores/jobs > SRV_MIN_CORES)
 		if ( nature > SRV_MIN_CORES || ( param > SRV_MIN_CORES && fnext - ffirst > SRV_MIN_CORES ) )
 		{
-			sprintf( msg, "nice %s", ch );
-			strcpy( ch, msg );
+			snprintf( lab_old, MAX_PATH_LENGTH, "nice %s", nw_exe );
+			strcpyn( nw_exe, lab_old, MAX_PATH_LENGTH );
 		}
 		
 		fprintf( f, "#!/bin/bash\n# Script generated by LSD\n" );
 		fprintf( f, "echo \"Processing %d configuration files in up to %d parallel processes...\"\n", fnext - ffirst, param );
-		fprintf( f, "if [ \"$1\" = \"\" ]; then LSD_EXEC=\"%s\"; else LSD_EXEC=\"$1\"; fi\n", ch );
+		fprintf( f, "if [ \"$1\" = \"\" ]; then LSD_EXEC=\"%s\"; else LSD_EXEC=\"$1\"; fi\n", nw_exe );
 		fprintf( f, "if [ \"$2\" = \"\" ]; then LSD_CONFIG_PATH=\"%s\"; else LSD_CONFIG_PATH=\"$2\"; fi\n", out_dir );
 		fprintf( f, "echo \"LSD executable: $LSD_EXEC\"\n" );
 		fprintf( f, "echo \"Configuration path: $LSD_CONFIG_PATH\"\n" );
@@ -5710,10 +5703,10 @@ case 68:
 		sl = ( fnext - ffirst ) % param;		// remaining cases per core
 		for ( i = ffirst, j = 1; j <= param; ++j )	// allocates files by the number of cores
 		{
-			sprintf( lab_old, "%s_%d.log", out_file, j );
+			snprintf( lab_old, MAX_PATH_LENGTH, "%s_%d.log", out_file, j );
 			logs.push_back( lab_old );
 			
-			if ( *choice == 1 || *choice == 4 )	// Windows
+			if ( choice == 1 || choice == 4 )	// Windows
 				fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s\" -s %d -e %d%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
 			else								// Unix
 				fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s -s %d -e %d%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
@@ -5727,9 +5720,9 @@ case 68:
 		{
 			if ( fSeq )
 			{
-				sprintf( lab_old, "%s_%d.log", out_file, i );
+				snprintf( lab_old, MAX_PATH_LENGTH, "%s_%d.log", out_file, i );
 				
-				if ( *choice == 1 || *choice == 4 )	// Windows
+				if ( choice == 1 || choice == 4 )	// Windows
 					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s_%d.lsd\"%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, i, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
 				else								// Unix
 					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s_%d.lsd%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, i, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
@@ -5737,11 +5730,10 @@ case 68:
 			else
 			{	// get the selected file names, one by one
 				cmd( "set res3 [ lindex $bah %d ]; set res3 [ file tail $res3 ]; set last [ expr { [ string last .lsd $res3 ] - 1 } ]; set res3 [ string range $res3 0 $last ]", j - 1  );
-				strncpy( out_file, ( char * ) Tcl_GetVar( inter, "res3", 0 ), MAX_PATH_LENGTH - 1 );
+				get_str( "res3", out_file, MAX_PATH_LENGTH - 4 );
+				snprintf( lab_old, MAX_PATH_LENGTH, "%s.log", out_file );
 				
-				sprintf( lab_old, "%s.log", out_file );
-				
-				if ( *choice == 1 || *choice == 4 )	// Windows
+				if ( choice == 1 || choice == 4 )	// Windows
 					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s.lsd\"%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
 				else								// Unix
 					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
@@ -5752,7 +5744,7 @@ case 68:
 	}
 	
 	if ( fSeq )
-		if ( *choice == 1 || *choice == 4 )	// Windows closing
+		if ( choice == 1 || choice == 4 )	// Windows closing
 		{
 			fprintf( f, "echo %d log files being generated: %s_1.log to %s_%d.log .\r\n", j - 1, out_file, out_file, j - 1 );
 			fclose( f );
@@ -5764,7 +5756,7 @@ case 68:
 			chmod( lab, ACCESSPERMS );		// set executable perms
 		}
 	else
-		if ( *choice == 1 || *choice == 4 )	// Windows closing
+		if ( choice == 1 || choice == 4 )	// Windows closing
 		{
 			fprintf( f, "echo %d log files being generated.\r\n", j - 1 );
 			fclose( f );
@@ -5776,14 +5768,14 @@ case 68:
 			chmod( lab, ACCESSPERMS );		// set executable perms
 		}
 		
-	plog( "\nParallel batch file created: %s", "", lab );
+	plog( "\nParallel batch file created: %s", lab );
 	
 	if ( ! natBat )
 		break;
 
 	// ask if script/batch should be executed right away
 	cmd( "set answer [ ttk::messageBox -parent . -type yesno -icon question -default no -title \"Run Parallel Batch\" -message \"Run created batch?\" -detail \"The batch for running the configuration files was created.\n\nPress 'Yes' if you want to start the it as separated processes now.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 2 } }" ); 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 
 	// start the job
@@ -5810,7 +5802,7 @@ case 69:
 	{ 
 		cmd( "if { [ ttk::messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"Abort running simulation?\" -detail \"A set of parallel simulation runs is being executed in background. You may choose to interrupt it now and proceed, or wait until it finishes before running a new one.\" ] eq \"ok\" } { set choice 1 } { set choice 0 }" );
 		
-		if ( *choice == 0 )
+		if ( choice == 0 )
 			break;
 		
 		if ( ! stop_parallel( ) )
@@ -5830,11 +5822,11 @@ case 69:
 	}
 
 	// check for existing NW executable
-	sprintf( lab, "%s/lsdNW", exec_path );				// form full executable name
+	snprintf( nw_exe, MAX_PATH_LENGTH, "%s/lsdNW", exec_path );// form full executable name
 	if ( platform == _WIN_ )
-		strcat( lab, ".exe" );							// add Windows ending
+		strcatn( nw_exe, ".exe", MAX_PATH_LENGTH );	// add Windows ending
 
-	if ( ( f = fopen( lab, "rb" ) ) == NULL ) 
+	if ( ( f = fopen( nw_exe, "rb" ) ) == NULL ) 
 	{
 		if ( ! make_no_window( ) )
 			break;
@@ -5843,10 +5835,10 @@ case 69:
 		fclose( f );
 	
 	// check if NW executable file is older than running executable file
-	sprintf( lab_old, "%s/%s", exec_path, exec_file );	// form full exec name
+	snprintf( lab, MAX_PATH_LENGTH, "%s/%s", exec_path, exec_file );	// form full exec name
 
 	// get OS info for files
-	if ( stat( lab, &stExe ) == 0 && stat( lab_old, &stMod ) == 0 )
+	if ( stat( nw_exe, &stExe ) == 0 && stat( lab, &stMod ) == 0 )
 	{
 		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
 		{
@@ -5856,10 +5848,10 @@ case 69:
 					cancel { set choice 2 } \
 				}" );
 				
-			if ( *choice == 2 )
+			if ( choice == 2 )
 				break;
 			
-			if ( *choice == 0 )
+			if ( choice == 0 )
 				if ( ! make_no_window( ) )
 					break;
 		}
@@ -6032,8 +6024,8 @@ case 69:
 	cmd( "showtop $b" );
 	cmd( "mousewarpto $b.b.ok" );
 	
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 	
 	cmd( "set cores [ $b.f5.e get ]" );
@@ -6091,14 +6083,15 @@ case 69:
 
 #else
 	
-	plog( "\n\nProcessing parallel background run (threads=%d runs=%d)...", "", nature, param );
 	run_parallel( false, lab, simul_name, seed, sim_num, nature, param );
+	plog( "\n\nProcessing parallel background run (threads=%d runs=%d)...", nature, param );
 	
 #endif
 
 	show_logs( path, run_logs, true );
 	
-	cmd( "set path $oldpath; cd $path" );
+	cmd( "set path $oldpath" );
+	cmd( "cd $path" );
 	
 break;
 
@@ -6120,14 +6113,14 @@ case 88:
 		cmd( "cd \"$path\"" );
 
 	cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Network Structure File\"  -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } { {All files} {*} } } ]" );
-	*choice = 0;
+	choice = 0;
 	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr { $posExt + 1 } ] end ]; set netFile [ string range $netFile 0 [ expr { $posExt - 1 } ] ] } { set netExt \"\" } } { set choice 2 }" );
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "netPath", 0 );
-	lab2 = ( char * ) Tcl_GetVar( inter, "netFile", 0 );
-	lab3 = ( char * ) Tcl_GetVar( inter, "netExt", 0 );
+	lab1 = get_str( "netPath" );
+	lab2 = get_str( "netFile" );
+	lab3 = get_str( "netExt" );
 	if ( strlen( lab2 ) == 0 )
 		break;
 
@@ -6136,7 +6129,7 @@ case 88:
 	strcpy( lab_old, "(none)" );			// no object name yet
 	if ( ( f = fopen( lab, "r" ) ) )
 	{
-		fgets( ch, MAX_PATH_LENGTH, f );	// get first line
+		fgets( ch, MAX_LINE_SIZE, f );		// get first line
 		sscanf( ch, "%% %99s", lab_old );	// get first string after the comment char
 		fclose( f );
 	}
@@ -6179,7 +6172,7 @@ case 88:
 	if ( ! strcmp( lab_old, "(none)" ) )
 	{
 		if ( r != NULL )
-			strcpy( lab_old, r->label );
+			strcpyn( lab_old, r->label, MAX_ELEM_LENGTH );
 		else
 			strcpy( lab_old, "" );
 	}
@@ -6187,19 +6180,19 @@ case 88:
 	cmd( "$TT.v.t.lb selection set $cur" );
 	cmd( "focus $TT.v.t.lb" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "set nodeObj [ .objs.v.t.lb get [ .objs.v.t.lb curselection ] ]" );
 	cmd( "destroytop .objs" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 
-	lab4 = ( char * ) Tcl_GetVar( inter, "nodeObj", 0 );
+	lab4 = get_str( "nodeObj" );
 
-	plog( "\nLoading network on object '%s' from file %s%s%s%s%s...\n", "", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
+	plog( "\nLoading network on object '%s' from file %s%s%s%s%s...\n", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
 
 	cur = root->search( lab4 );
 	if ( cur != NULL && cur->up != NULL )
@@ -6211,7 +6204,7 @@ case 88:
 			plog( "Error: No network links created\n" );
 		}
 		else
-			plog( " %ld network links created\n", "", nLinks );
+			plog( " %ld network links created\n", nLinks );
 	}
 	else
 	{
@@ -6267,17 +6260,17 @@ case 89:
 	cmd( "$TT.v.t.lb selection set 0" );
 	cmd( "focus $TT.v.t.lb" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "set nodeObj [ .objs.v.t.lb get [ .objs.v.t.lb curselection ] ]" );
 	cmd( "destroytop .objs" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 
-	lab4 = ( char * ) Tcl_GetVar( inter, "nodeObj", 0 );
+	lab4 = get_str( "nodeObj" );
 	cur = root->search( lab4 );
 	if ( cur == NULL || cur->node == NULL || cur->up == NULL )
 	{
@@ -6292,18 +6285,18 @@ case 89:
 
 	cmd( "set bah \"%s\"", simul_name );
 	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Network Structure File\"  -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
-	*choice = 0;
+	choice = 0;
 	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr { $posExt + 1 } ] end ]; set netFile [ string range $netFile 0 [ expr { $posExt - 1 } ] ] } { set netExt \"\" } } { set choice 2 }" );
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 
-	lab1 = ( char * ) Tcl_GetVar( inter, "netPath", 0 );
-	lab2 = ( char * ) Tcl_GetVar( inter, "netFile", 0 );
-	lab3 = ( char * ) Tcl_GetVar( inter, "netExt", 0 );
+	lab1 = get_str( "netPath" );
+	lab2 = get_str( "netFile" );
+	lab3 = get_str( "netExt" );
 	if ( strlen( lab2 ) == 0 )
 		break;
 
-	plog( "\nSaving network on object '%s' to file %s%s%s%s%s...\n", "", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
+	plog( "\nSaving network on object '%s' to file %s%s%s%s%s...\n", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
 
 	nLinks = cur->up->write_file_net( lab4, lab1, lab2, -1 );
 	if ( nLinks == 0 )
@@ -6312,7 +6305,7 @@ case 89:
 		plog( "Error: No network links saved\n" );
 	}
 	else
-		plog( " %ld network links saved\n", "", nLinks );
+		plog( " %ld network links saved\n", nLinks );
 
 break;
 
@@ -6362,17 +6355,17 @@ case 93:
 	cmd( "$TT.v.t.lb selection set 0" );
 	cmd( "focus $TT.v.t.lb" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "set nodeObj [ .objs.v.t.lb get [ .objs.v.t.lb curselection ] ]" );
 	cmd( "destroytop .objs" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		break;
 
-	lab4 = ( char * ) Tcl_GetVar( inter, "nodeObj", 0 );
+	lab4 = get_str( "nodeObj" );
 	cur = root->search( lab4 );
 	if ( cur == NULL || cur->node == NULL || cur->up == NULL )
 	{
@@ -6380,7 +6373,7 @@ case 93:
 		break;
 	}
 
-	plog( "\nRemoving network on object '%s'\n", "", lab4 );
+	plog( "\nRemoving network on object '%s'\n", lab4 );
 
 	cur->up->delete_net( lab4 );
 
@@ -6390,7 +6383,7 @@ break;
 // context-menu operation: execute the command in 'ctxMenuCmd'
 case 95:
 
-	if ( Tcl_GetVar( inter, "ctxMenuCmd", 0 ) == NULL )
+	if ( get_str( "ctxMenuCmd" ) == NULL )
 		break;
 
 	cmd( "eval $ctxMenuCmd" );					// execute command
@@ -6434,21 +6427,8 @@ case 8:
 	if ( run_monitor.joinable( ) )
 		run_monitor.join( );
 
-	plog( "\n" );
-	
-	j = TCL_BUFF_STR - 50;			// buffer size in cmd() in util.cpp
-	lab1 = new char[ j + 1 ];
-	lab1[ j ] = '\0';
-	
-	for ( i = 0; i < ( int ) run_log.size( ); i += j )
-	{
-		strncpy( lab1, run_log.c_str( ) + i, j );
-		plog( "%s", "", lab1 );
-	}
-	
-	delete [ ] lab1;
-	
-	plog( "\nFinished parallel background run\n" );
+	plog( "\n%s\n", run_log.c_str( ) );
+	plog( "Finished parallel background run\n" );
 	
 #endif
 
@@ -6457,10 +6437,10 @@ break;
 
 default:
 
-	plog( "\nWarning: choice %d not recognized", "", *choice );
+	plog( "\nWarning: choice %d not recognized", choice );
 }
 
-*choice = 0;
+choice = 0;
 return r;
 }
 
@@ -6470,6 +6450,7 @@ SHOW_SAVE
 ****************************************************/
 void show_save( object *n )
 {
+	char out[ 3 * MAX_ELEM_LENGTH ];
 	bridge *cb;
 	object *co;
 	variable *cv;
@@ -6479,18 +6460,18 @@ void show_save( object *n )
 		if ( cv->save == 1 || cv->savei == 1 )
 		{
 			if ( cv->param == 1 )
-				sprintf( msg, "Object: %s \tParameter:\t", n->label );
+				snprintf( out, 3 * MAX_ELEM_LENGTH, "Object: %s \tParameter:\t", n->label );
 			else
-				sprintf( msg, "Object: %s \tVariable :\t", n->label );
+				snprintf( out, 3 * MAX_ELEM_LENGTH, "Object: %s \tVariable :\t", n->label );
 			if ( cv->savei == 1 )
 			{
 				if ( cv->save == 1 )
-				   strcat( msg, " (memory and disk)" );
+				   strcatn( out, " (memory and disk)", 3 * MAX_ELEM_LENGTH );
 				else
-				   strcat( msg, " (disk only)" );
+				   strcatn( out, " (disk only)", 3 * MAX_ELEM_LENGTH );
 			}
-			plog( msg );
-			plog( "%s\n", "highlight", cv->label );
+			plog( out );
+			plog_tag( "%s\n", "highlight", cv->label );
 			++lcount;
 		}
 	}
@@ -6522,11 +6503,11 @@ void show_observe( object *n )
 		if ( cd->observe=='y' )
 		{
 			if ( cv->param == 1 )
-				plog( "Object: %s \tParameter:\t", "", n->label );
+				plog( "Object: %s \tParameter:\t", n->label );
 			else
-				plog( "Object: %s \tVariable :\t", "", n->label );
+				plog( "Object: %s \tVariable :\t", n->label );
 
-			plog( "%s (%lf)\n", "highlight", cv->label, cv->val[ 0 ] );
+			plog_tag( "%s (%lf)\n", "highlight", cv->label, cv->val[ 0 ] );
 			++lcount;
 		}
 	}
@@ -6547,7 +6528,7 @@ SHOW_INITIAL
 ****************************************************/
 void show_initial( object *n )
 {
-	char buf_descr[ TCL_BUFF_STR + 1 ];
+	char buf_descr[ MAX_BUFF_SIZE ];
 	bridge *cb;
 	object *co;
 	description *cd;
@@ -6559,25 +6540,25 @@ void show_initial( object *n )
 		if ( cd->initial == 'y' )
 		{
 			if ( cv->param == 1 )
-				plog( "Object: %s \tParameter:\t", "", n->label );
+				plog( "Object: %s \tParameter:\t", n->label );
 			if ( cv->param == 0 )
-				plog( "Object: %s \tVariable :\t", "", n->label );
+				plog( "Object: %s \tVariable :\t", n->label );
 			if ( cv->param == 2 )
-				plog( "Object: %s \tFunction :\t", "", n->label );
+				plog( "Object: %s \tFunction :\t", n->label );
 		
 			++lcount;
-			plog( "%s \t", "highlight", cv->label );
+			plog_tag( "%s \t", "highlight", cv->label );
 			
 			if ( cd->init == NULL || strlen( cd->init ) == 0 )
 			{
 				for ( co = n; co != NULL; co = co->hyper_next( co->label ) )
 				{
 					cv1 = co->search_var( NULL, cv->label );
-					plog( " %g", "", cv1->val[ 0 ] );
+					plog( " %g", cv1->val[ 0 ] );
 				}
 			}
 			else
-				plog( "%s", "", strtcl( buf_descr, cd->init, TCL_BUFF_STR ) );
+				plog( "%s", strtcl( buf_descr, cd->init, MAX_BUFF_SIZE ) );
 
 			plog( "\n" );
 		}
@@ -6607,12 +6588,12 @@ void show_plot( object *n )
 		if ( cv->plot )
 		{
 			if ( cv->param == 1 )
-				plog( "Object: %s \tParameter:\t", "", n->label );
+				plog( "Object: %s \tParameter:\t", n->label );
 			if ( cv->param == 0 )
-				plog( "Object: %s \tVariable :\t", "", n->label );
+				plog( "Object: %s \tVariable :\t", n->label );
 			if ( cv->param == 2 )
-				plog( "Object: %s \tFunction :\t", "", n->label );
-			plog( "%s\n", "highlight", cv->label );
+				plog( "Object: %s \tFunction :\t", n->label );
+			plog_tag( "%s\n", "highlight", cv->label );
 			lcount++;
 		}
 
@@ -6640,10 +6621,10 @@ void show_debug( object *n )
 		if ( cv->debug == 'd' )
 		{
 			if ( cv->param == 0 )
-				plog( "Object: %s \tVariable:\t", "", n->label );
+				plog( "Object: %s \tVariable:\t", n->label );
 			if ( cv->param == 2 )
-				plog( "Object: %s \tFunction:\t", "", n->label );
-			plog( "%s\n", "highlight", cv->label );
+				plog( "Object: %s \tFunction:\t", n->label );
+			plog_tag( "%s\n", "highlight", cv->label );
 			lcount++;
 		}
 
@@ -6670,8 +6651,8 @@ void show_parallel( object *n )
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		if ( cv->parallel )
 		{
-			plog( "Object: %s \tVariable:\t", "", n->label );
-			plog( "%s\n", "highlight", cv->label );
+			plog( "Object: %s \tVariable:\t", n->label );
+			plog_tag( "%s\n", "highlight", cv->label );
 			lcount++;
 		}
 
@@ -6698,8 +6679,8 @@ void show_special_updat( object *n )
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		if ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 )
 		{
-			plog( "Object: %s \tVariable:\t", "", n->label );
-			plog( "%s\n", "highlight", cv->label );
+			plog( "Object: %s \tVariable:\t", n->label );
+			plog_tag( "%s\n", "highlight", cv->label );
 			lcount++;
 		}
 
@@ -6821,23 +6802,23 @@ void wipe_out( object *d )
 
 /****************************************************
 CHECK_LABEL
-Control that the label l does not already exist in the model
+Control that the label lab does not already exist in the model
 Also prevents invalid characters in the names
 ****************************************************/
-int check_label( char *l, object *r )
+int check_label( const char *lab, object *r )
 {
 	bridge *cb;
 	object *cur;
 	variable *cv;
 
-	if ( ! valid_label( l ) )
+	if ( ! valid_label( lab ) )
 		return 2;				// invalid characters (incl. spaces)
 
-	if ( ! strcmp( l, r->label ) )
+	if ( ! strcmp( lab, r->label ) )
 		return 1;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
-		if ( ! strcmp( l, cv->label ) )
+		if ( ! strcmp( lab, cv->label ) )
 			return 1;
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
@@ -6847,7 +6828,7 @@ int check_label( char *l, object *r )
 		else
 			cur = cb->head; 
 		
-		if ( check_label( l, cur ) )
+		if ( check_label( lab, cur ) )
 			return 1;
 	} 
 
@@ -6885,9 +6866,9 @@ void set_shortcuts( const char *window )
 
 
 /****************************************************
-CONTROL_TOCOMPUTE
+CONTROL_TO_COMPUTE
 ****************************************************/
-void control_tocompute( object *r, char *l )
+void control_to_compute( object *r, const char *lab )
 {
 	bridge *cb;
 	object *cur;
@@ -6897,7 +6878,7 @@ void control_tocompute( object *r, char *l )
 	{
 		if ( cv->save == 1 )
 		{
-			cmd( "set res [ ttk::messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, l );
+			cmd( "set res [ ttk::messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, lab );
 			cmd( "if [ string equal $res cancel ] { set res 1 } { set res 0 }" );
 			
 			if ( get_int( "res" ) == 1 )
@@ -6912,7 +6893,7 @@ void control_tocompute( object *r, char *l )
 		else
 			cur = cb->head; 
 		
-		control_tocompute( cur, l );
+		control_to_compute( cur, lab );
 	} 
 }
 
@@ -6945,7 +6926,7 @@ void insert_object( const char *w, object *r, bool netOnly, object *above )
 /****************************************************
 SHIFT_VAR
 ****************************************************/
-void shift_var( int direction, char *vlab, object *r )
+void shift_var( int direction, const char *vlab, object *r )
 {
 	variable *cv, *cv1 = NULL, *cv2 = NULL;
 	
@@ -7016,7 +6997,7 @@ void shift_var( int direction, char *vlab, object *r )
 /****************************************************
 SHIFT_DESC
 ****************************************************/
-void shift_desc( int direction, char *dlab, object *r )
+void shift_desc( int direction, const char *dlab, object *r )
 {
 	bridge *cb, *cb1 = NULL, *cb2 = NULL;
 	
@@ -7254,20 +7235,31 @@ bool sort_listbox( int box, int order, object *r )
 /****************************************************
 SENSITIVITY_TOO_LARGE
 ****************************************************/
-bool sensitivity_too_large( long numSaPts, int *choice )
+bool sensitivity_too_large( long numSaPts )
 {
 	cmd( "set answer [ ttk::messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"The required  number (%ld) of configuration points to perform sensitivity analysis is likely too large to be processed in reasonable time.\n\nPress 'OK' if you want to continue anyway or 'Cancel' to abort the command now.\" ]; switch -- $answer { ok { set choice 0 } cancel { set choice 1 } }", numSaPts );
 	
-		return *choice;
+		return choice;
+}
+
+
+/****************************************************
+SENSITIVITY_CLEAN
+****************************************************/
+bool sensitivity_clean_dir( const char *path )
+{
+	cmd( "set answer [ ttk::messageBox -parent . -type yesno -icon info -default yes -title \"Sensitivity Analysis\" -message \"Clean output path before proceeding?\" -detail \"The configuration files (.lsd) for sensitivity analysis will be created at:\n\n[ file nativename \"%s\" ]\n\nThis subdirectory already contains LSD produced files. Click on 'Yes' to delete the existing files before proceeding or 'No' to just continue without deleting.\" ]; switch -- $answer { no { set choice 0 } yes { set choice 1 } }", path );
+	
+		return choice;
 }
 
 
 /****************************************************
 SENSITIVITY_CREATED
 ****************************************************/
-void sensitivity_created( void )
+void sensitivity_created( const char *path, const char *sim_name, int findex )
 {
-	cmd( "ttk::messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis you have to start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsdNW  -f  <configuration_file>  -s  <n>\n\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to be run (usually 1). If your configuration files are in a subdirectory of your model directory, please add their relative path before the configuration file name (<path>/<configuration_file>).\"" );
+	cmd( "ttk::messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis you have to start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsdNW  -f  [ file nativename \"%s/%s\" ]  -s  %d\"", path, sim_name, findex );
 }
 
 
@@ -7331,7 +7323,7 @@ Open a clean configuration, either the current or not
 ****************************************************/
 bool open_configuration( object *&r, bool reload )
 {
-	char *lab1, *lab2;
+	const char *lab1, *lab2;
 	
 	if ( ! reload )
 	{									// ask user the file to use, if not reloading
@@ -7340,8 +7332,8 @@ bool open_configuration( object *&r, bool reload )
 
 		if ( get_int( "choice" ) == 0 )
 		{
-			lab1 = ( char * ) Tcl_GetVar( inter, "path", 0 );
-			lab2 = ( char * ) Tcl_GetVar( inter, "res", 0 );
+			lab1 = get_str( "path" );
+			lab2 = get_str( "res" );
 			if ( lab1 == NULL || lab2 == NULL || strlen( lab2 ) == 0 )
 				return false;
 			
@@ -7419,7 +7411,7 @@ Save user position in browser
 void save_pos( object *r )
 {
 	// save the current object & cursor position for quick reload
-	strcpy( lastObj, r->label );
+	strcpyn( lastObj, r->label, MAX_ELEM_LENGTH );
 	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { set lastList 2 } { set lastList 1 }" );
 	cmd( "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ]; set lastFirst [ lindex [ .l.v.c.var_name yview ] 0 ] } { set lastItem [ .l.s.c.son_name curselection ]; set lastFirst [ lindex [ .l.s.c.son_name yview ] 0 ] }" );
 	cmd( "if { $lastItem == \"\" } { set lastItem 0 }" );
@@ -7523,17 +7515,18 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 	}
 	
 	cmd( "if [ string equal [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard data?%s%s\" -detail $question ] yes ] { \
-			set ans 1 \
+			set res 1 \
 		} else { \
-			set ans 0 \
+			set res 0 \
 		}", strlen( title ) != 0 ? "\n\n" : "", title );  
+		
 	if ( ! brCovered )
 	{
 		cmd( ".l.s.c.son_name configure -state normal" );
 		cmd( ".l.v.c.var_name configure -state normal" );
 	}
 	
-	if ( atoi( Tcl_GetVar( inter, "ans", 0 ) ) != 1 )
+	if ( ! get_bool( "res" ) )
 		return false;
 	
 	end_true:
@@ -7608,7 +7601,7 @@ equation file(s) from Tcl
 ****************************************************/
 int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
 {
-	char vname[ MAX_ELEM_LENGTH ], desc[ 10 * MAX_LINE_SIZE ];
+	char vname[ MAX_ELEM_LENGTH ], desc[ MAX_BUFF_SIZE ];
 	
 	if ( argc != 2 )						// require 1 parameter: variable name
 		return TCL_ERROR;
@@ -7618,7 +7611,7 @@ int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char
 	else
 	{
 		sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
-		get_var_descr( vname, desc, 10 * MAX_LINE_SIZE );
+		get_var_descr( vname, desc, MAX_BUFF_SIZE );
 	}
 	
 	Tcl_SetResult( inter, desc, TCL_VOLATILE );
@@ -7797,7 +7790,7 @@ int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 			if ( ! cur1->to_compute && check_save )
 			{
 				// control for elements to save in objects to be not computed
-				control_tocompute( cur, cur->label );
+				control_to_compute( cur, cur->label );
 				check_save = false;		// do it just once
 			}
 		}

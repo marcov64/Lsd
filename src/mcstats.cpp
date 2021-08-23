@@ -92,7 +92,6 @@ void save_csv( const char *base, const char *suffix, vector < string > header, v
 const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
 const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
-char msg[ TCL_BUFF_STR ] = "";	// auxiliary Tcl buffer
 char nonavail[ ] = "NA";	// string for unavailable values (use R default)
 char **in_files = NULL;		// input .csv files
 char *out_file = NULL;		// output .csv file, if any
@@ -106,7 +105,7 @@ const char lsdCmdHlp[ ] = "Command line options:\n'-o OUTPUT' base name for the 
 /*********************************
  LSDMAIN
  *********************************/
-int lsdmain( int argn, char **argv )
+int lsdmain( int argn, const char **argv )
 {
 	char ch, *linbuf, *tok;
 	double val, sum, sumsq, maxv, minv;

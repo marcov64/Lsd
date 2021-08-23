@@ -74,10 +74,8 @@ char *sens_file = NULL;		// current sensitivity analysis file
 char *simul_name = NULL;	// name of current simulation configuration
 char *struct_file = NULL;	// name of current configuration file
 char equation_name[ MAX_PATH_LENGTH ] = "";	// equation file name
-char lsd_eq_file[ MAX_FILE_SIZE + 1 ] = "";	// equations saved in configuration file
-char msg[ TCL_BUFF_STR ] = "";				// auxiliary Tcl buffer
-char name_rep[ MAX_PATH_LENGTH + 1 ] = "";	// documentation report file name
-char path_rep[ MAX_PATH_LENGTH + 1 ] = "";	// documentation report file path
+char lsd_eq_file[ MAX_FILE_SIZE ] = "";	// equations saved in configuration file
+char name_rep[ MAX_PATH_LENGTH ] = "";	// documentation report file name
 char nonavail[ ] = "NA";	// string for unavailable values (use R default)
 int actual_steps = 0;		// number of executed time steps
 int debug_flag = false;		// debug enable control (bool)
@@ -131,7 +129,7 @@ const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd' the original
 /*********************************
  LSDMAIN
  *********************************/
-int lsdmain( int argn, char **argv )
+int lsdmain( int argn, const char **argv )
 {
 	int i, confs;
 	FILE *f;
@@ -274,7 +272,7 @@ int load_confs_csv( char *config )
 {
 	int i, j, lag;
 	double value;
-	char buf[ MAX_LINE_SIZE + 1 ], var[ MAX_ELEM_LENGTH + 1 ], *line, *tok;
+	char buf[ MAX_LINE_SIZE ], var[ MAX_ELEM_LENGTH ], *line, *tok;
 	FILE *f = fopen( config, "r" );
 	set< string > existing;
 
@@ -317,7 +315,7 @@ int load_confs_csv( char *config )
 		if ( strcmp( buf, "" ) )
 		{
 			tok = strtok( buf, SEP );
-			sscanf( tok, " %s", var );		// remove spaces
+			sscanf( tok, " %99s", var );	// remove spaces
 			if ( ! strcmp( var, "" ) )
 				continue;					// no name, go next line
 			// check if name already exists and abort if so
@@ -351,7 +349,7 @@ int load_confs_csv( char *config )
 		{
 			lag = -1;
 			tok = strtok( buf, SEP );
-			sscanf( tok, " %s %u", var, & lag );	// get name & lags
+			sscanf( tok, " %99s %u", var, & lag );	// get name & lags
 			if ( ! strcmp( var, "" ) )
 				continue;					// no name, go next line
 

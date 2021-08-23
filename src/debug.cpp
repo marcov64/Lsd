@@ -55,6 +55,8 @@ fill in all the content of the object.
 
 #include "decl.h"
 
+char inst_msg[ MAX_BUFF_SIZE ];	// instances string
+int inst_dpth;					// instance depth
 lsdstack *asl = NULL;			// debug stack
 object *debLstObj;				// last object shown
 
@@ -62,20 +64,19 @@ object *debLstObj;				// last object shown
 /*******************************************
 DEB
 ********************************************/
-int deb( object *r, object *c, char const *lab, double *res, bool interact, const char *hl_var )
+int deb( object *r, object *c, const char *lab, double *res, bool interact, const char *hl_var )
 {
 	bool pre_running, redraw;
-	char ch[ 4 * MAX_ELEM_LENGTH ], *ch1, ch2[ MAX_ELEM_LENGTH ];
+	char ch[ 4 * MAX_ELEM_LENGTH ], ch1[ MAX_ELEM_LENGTH ];
 	int i, j, k, count, cond, eff_lags;
 	double value_search, app_res, *app_values;
-	long node;
 	object *cur, *cur1, *cur2;
 	bridge *cb, *cb1;
 	variable *cv, *cv1;
 
 	// define the presentation mode ( 1 = normal debug, 2 = data browse, 3 = pause debug, 4 = error )
 	int mode = ( lab == NULL ) ? 2 : ( ! strcmp( lab, "Paused by User" ) ) ? 3 : ( strstr( lab, "(ERROR)" ) != NULL ) ? 4 : 1; 
-	Tcl_SetVar( inter, "lab", lab, 0 );
+	cmd( "set lab %s", lab );
 
 	if ( mode == 2 )
 		cover_browser( "Data Browser...", "Please exit Data Browser\nbefore using the LSD Browser.", false );
@@ -94,10 +95,8 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 		}", unsaved_change() ? "*" : " ", simul_name  );
 
 	// avoid redrawing the menu if it already exists and is configured
-	cmd( "set existMenu [ winfo exists .deb.m ]" );
 	cmd( "set confMenu [ .deb cget -menu ]" );
-	if ( ! strcmp( Tcl_GetVar( inter, "existMenu", 0 ), "0" ) ||
-		 strcmp( Tcl_GetVar( inter, "confMenu", 0 ), ".deb.m" ) )
+	if ( ! exists_window( ".deb.m" ) || strcmp( get_str( "confMenu" ), ".deb.m" ) )
 	{
 		cmd( "destroy .deb.m" );
 		cmd( "ttk::menu .deb.m -tearoff 0" );
@@ -137,8 +136,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 	}
 
 	// avoid redrawing the buttons if they already exist
-	cmd( "set existButtons [ winfo exists .deb.b ]" );
-	if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
+	if ( ! exists_window( ".deb.b" ) )
 	{ 
 		cmd( "if [ string equal $CurPlatform mac ] { \
 				set butWidD [ expr { $butWid - 1 } ] \
@@ -366,9 +364,8 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				cmd( ".deb.b.move.hook configure -state normal" );
 				
 			// update the temporary variables watch window
-			cmd( "set existVal [ winfo exists .deb.val ]" );
-			if ( ! strcmp( Tcl_GetVar( inter, "existVal", 0 ), "1" ) )
-					show_tmp_vars( r, true );
+			if ( exists_window( ".deb.val" ) )
+				show_tmp_vars( r, true );
 
 			// remove or update the network window
 			if ( r->node == NULL )
@@ -378,9 +375,9 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			}
 			else
 			{
-				cmd( "set existNet [ winfo exists .deb.net ]" );
-				if ( ! strcmp( Tcl_GetVar( inter, "existNet", 0 ), "1" ) )
+				if ( exists_window( ".deb.net" ) )
 					show_neighbors( r, true );
+				
 				cmd( ".deb.b.move.net configure -state normal" );
 			}
 			
@@ -551,12 +548,11 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				
 			// element change (click on parameter/variable)
 			case 8:
-				ch1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
 				Tcl_LinkVar( inter, "debug", ( char * ) &count, TCL_LINK_INT );
 				Tcl_LinkVar( inter, "time", ( char * ) &t, TCL_LINK_INT );
 				Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
 
-				cv = r->search_var( NULL, ch1 );
+				cv = r->search_var( NULL, get_str( "res" ) );
 				i = cv->last_update;
 				count = ( cv->debug == 'd' ) ? 1 : 0;
 				eff_lags = ( cv->last_update >= cv->num_lag ) ? cv->num_lag : cv->num_lag - 1;
@@ -605,7 +601,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				{
 					cmd( "set val%d %g", i, cv->val[ i ] );
 					app_values[ i ] = cv->val[ i ];
-					sprintf( ch, "val%d", i );
+					snprintf( ch, MAX_ELEM_LENGTH, "val%d", i );
 					Tcl_LinkVar( inter, ch, ( char * ) &( app_values[ i ] ), TCL_LINK_DOUBLE );
 
 					cmd( "ttk::frame $e.v.l$i" );
@@ -678,11 +674,12 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 					cmd( "set val%d [ $e.v.l%d.e get ]", i, i ); 
 
 					cv->val[ i ] = app_values[ i ];
-					sprintf( ch, "val%d",i);
+					snprintf( ch, MAX_ELEM_LENGTH, "val%d", i );
 
-					Tcl_UnlinkVar( inter, ch);
+					Tcl_UnlinkVar( inter, ch );
 					cmd( "unset val$i" );
 				}
+				
 				delete [ ] app_values;
 				Tcl_UnlinkVar( inter, "i");
 
@@ -761,8 +758,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 				if ( choice == 8 )
 				{
-					choice = 3;	// point .deb window as parent for the following window
-					show_eq( cv->label, &choice );
+					show_eq( cv->label, ".deb" );
 					choice = 8;
 				}
 
@@ -774,14 +770,12 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 				if ( choice == 10 )
 				{
-					ch1=( char * ) Tcl_GetVar( inter, "res", 0 );
-					strcpy( ch, ch1 );
+					get_str( "res", ch, MAX_ELEM_LENGTH );
 
 					cmd( "set choice $sa" );
 					i = choice;
 					
-					choice = 3;	// point .deb window as parent for the set_all window
-					set_all( &choice, r, ch, i );
+					set_all( r, ch, i, ".deb" );
 				} 
 
 				choice = 0;
@@ -893,8 +887,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				running = false;
 
 				cmd( "set value_search [ .deb.so.v.e get ]" ); 
-				ch1 = ( char * ) Tcl_GetVar( inter, "bidi", 0 );
-				strcpy( ch, ch1);
+				get_str( "bidi", ch, MAX_ELEM_LENGTH );
 
 				cur = NULL;
 				switch ( cond )
@@ -996,7 +989,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			case 11:
 				for ( cur = r; cur->up != NULL; cur = cur->up );
 				reset_end( cur );
-				analysis( &choice );
+				analysis( );
 				cmd( "focustop .deb" );
 				
 				choice = 0;
@@ -1110,7 +1103,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 			// change the object number of instances (click on level / object instance)
 			case 17:
 				if ( r->up != NULL )
-					entry_new_objnum( r, "", &choice );
+					entry_new_objnum( r, "" );
 
 				choice = 0;
 				break;
@@ -1182,8 +1175,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				pre_running = running;
 				running = false;
 
-				ch1 = ( char * ) Tcl_GetVar( inter, "bidi", 0 );
-				choice = deb( r, c, lab, res, interact, ch1 );
+				choice = deb( r, c, lab, res, interact, get_str( "bidi" ) );
 
 				running = pre_running;
 				break;			
@@ -1242,8 +1234,8 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 								else
 									cmd( "ttk::radiobutton $hk.t.t.h%d -text \"Hook %d to (unchecked)\" -variable hook -value %d", i, i, i );
 									
-								sprintf( ch2, " $hk.t.t.h%d", i );
-								strncat( ch, ch2, 4 * MAX_ELEM_LENGTH - strlen( ch ) - 1 );
+								snprintf( ch1, MAX_ELEM_LENGTH, " $hk.t.t.h%d", i );
+								strcatn( ch, ch1, 4 * MAX_ELEM_LENGTH );
 							}
 						}
 					
@@ -1261,12 +1253,12 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 							else
 								cmd( "ttk::radiobutton $hk.t.t.h%d -text \"Static Hook to (unchecked)\" -variable hook -value %d", i, i );
 							
-							sprintf( ch2, " $hk.t.t.h%d", i );
-							strncat( ch, ch2, 4 * MAX_ELEM_LENGTH - strlen( ch ) - 1 );
+							snprintf( ch1, MAX_ELEM_LENGTH, " $hk.t.t.h%d", i );
+							strcatn( ch, ch1, 4 * MAX_ELEM_LENGTH );
 						}
 					}
 					
-					strcat( ch, " -anchor w" );
+					strcatn( ch, " -anchor w", 4 * MAX_ELEM_LENGTH );
 					cmd( ch );
 
 					cmd( "pack $hk.t.l $hk.t.t" );
@@ -1357,9 +1349,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				
 			// double-click (change to) network node
 			case 23:
-				ch1 = ( char * ) Tcl_GetVar( inter, "nodeLab", 0 );
-				node = get_long( "nodeId" );
-				cur = root->search_node_net( ( const char * ) ch1, node );
+				cur = root->search_node_net( get_str( "nodeLab" ), get_long( "nodeId" ) );
 				if ( cur != NULL )
 					choice = deb( cur, c, lab, res, interact );
 				else
@@ -1372,9 +1362,8 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 			// double-click (change to) object pointer
 			case 24:
-				ch1 = ( char * ) Tcl_GetVar( inter, "objLab", 0 );
 				i = get_int( "objNum" );
-				cur = root->search( ( const char * ) ch1 );
+				cur = root->search( get_str( "objLab" ) );
 				for ( j = 1; j != i && cur != NULL; ++j, cur = cur->hyper_next( ) );
 				if ( cur != NULL )
 					choice = deb( cur, c, lab, res, interact );
@@ -1388,17 +1377,14 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 
 			// right-click (set all) on multi-instanced parameter or variable
 			case 25:
-				ch1 = ( char * )Tcl_GetVar( inter, "res", 0 );
-				strcpy( ch, ch1 );
-				choice = 3;	// point .deb window as parent for the set_all window
-				set_all( &choice, r, ch, 0 );
+				set_all( r, get_str( "res" ), 0, ".deb" );
 				
 				choice = 0;
 				break;
 					
 			// model Report
 			case 27:
-				show_report( &choice, ".deb" );
+				show_report( ".deb" );
 				
 				choice = 0;
 				redraw = false;
@@ -1409,7 +1395,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 				if ( asl == NULL && stacklog != NULL )
 				{
 					asl = stacklog;
-					plog( "\nVariable: %s", "", asl->label );
+					plog( "\nVariable: %s", asl->label );
 					if ( asl->vs != NULL && asl->vs->up != NULL )
 						choice = deb( asl->vs->up, c, lab, res, interact );
 					else
@@ -1424,7 +1410,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 					{
 						while ( asl->prev->prev != NULL )
 							asl = asl->prev;
-						plog( "\nVariable: %s", "", asl->label );
+						plog( "\nVariable: %s", asl->label );
 						if ( asl->vs != NULL && asl->vs->up != NULL )
 							choice = deb( asl->vs->up, c, lab, res, interact );
 						else
@@ -1436,7 +1422,7 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 					else
 					{
 						asl = asl->next;
-						plog( "\nVariable: %s", "", asl->label );
+						plog( "\nVariable: %s", asl->label );
 						if ( asl->vs != NULL && asl->vs->up != NULL )
 							choice = deb( asl->vs->up, c, lab, res, interact );
 						else
@@ -1472,7 +1458,9 @@ int deb( object *r, object *c, char const *lab, double *res, bool interact, cons
 					case 24:
 					
 						cmd( "focustop .deb" );
-						cur = root->search( ( char * )Tcl_GetVar( inter, "res_g", 0 ) );
+						
+						if ( exists_var( "res_g" ) )
+							cur = root->search(  get_str( "res_g" ) );
 						
 						// handle zero instanced objects
 						if ( cur != NULL )
@@ -1512,7 +1500,7 @@ DEB_SHOW
 ********************************************/
 void deb_show( object *r, const char *hl_var, int mode )
 {
-	char ch[ MAX_LINE_SIZE + 1 ], ch1[ MAX_LINE_SIZE + 1 ];
+	char ch[ MAX_LINE_SIZE ], ch1[ MAX_LINE_SIZE ];
 	variable *ap_v;
 	int i, j;
 	
@@ -1772,8 +1760,7 @@ void show_tmp_vars( object *r, bool update )
 	object *cur;
 	
 	cmd( "set in .deb.val" );
-	cmd( "set existVal [ winfo exists $in ]" );
-	if ( ! strcmp( Tcl_GetVar( inter, "existVal", 0 ), "0" ) )
+	if ( ! exists_window( "$in" ) )
 	{
 		cmd( "newtop $in \"v\\[...\\]\" { destroytop .deb.val } .deb" ); 
 
@@ -2072,8 +2059,7 @@ void show_neighbors( object *r, bool update )
 		return;
 
 	cmd( "set N .deb.net" );
-	cmd( "set existNet [ winfo exists $N ]" );
-	if ( ! strcmp( Tcl_GetVar( inter, "existNet", 0 ), "0" ) )
+	if ( ! exists_window( "$N" ) )
 	{
 		cmd( "newtop $N \"Network\" { destroytop .deb.net } .deb" );
 		
@@ -2172,8 +2158,6 @@ void show_neighbors( object *r, bool update )
 /*******************************************
 ATTACH_INSTANCE_NUMBER
 ********************************************/
-int depth;
-
 void attach_instance_number( char *outh, char *outv, object *r, int outSz )
 {
 	object *cur;
@@ -2193,12 +2177,12 @@ void attach_instance_number( char *outh, char *outv, object *r, int outSz )
 		}
 
 	if ( r->up == NULL )
-		sprintf( msg, "%d:%s (1/1) ", depth = 1, r->label );
+		snprintf( inst_msg, MAX_BUFF_SIZE, "%d:%s (1/1) ", inst_dpth = 1, r->label );
 	else
-		sprintf( msg, " |  %d:%s (%d/%d) ", ++depth, r->label, j, i - 1 );
+		snprintf( inst_msg, MAX_BUFF_SIZE, " |  %d:%s (%d/%d) ", ++inst_dpth, r->label, j, i - 1 );
 	
-	strncat( outh, msg, outSz - 1 - strlen( outh ) );
+	strcatn( outh, inst_msg, outSz );
 	
-	sprintf( msg, "%d:%s (%d/%d)\n", depth, r->label, j, r->up == NULL ? 1 : i - 1 );
-	strncat( outv, msg, outSz - 1 - strlen( outv ) );	
+	snprintf( inst_msg, MAX_BUFF_SIZE, "%d:%s (%d/%d)\n", inst_dpth, r->label, j, r->up == NULL ? 1 : i - 1 );
+	strcatn( outv, inst_msg, outSz );	
 }

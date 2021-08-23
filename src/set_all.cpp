@@ -19,7 +19,7 @@ values of a variable with a function, instead of inserting manually.
 
 The functions contained in this file are:
 
-- void set_all( int *choice, object *r, char *lab, int lag )
+- void set_all( object *r, const char *lab, int lag, const char *parWnd )
 it allows 5 options to set all values. It uses one value entered by the user
 in this window and, for some option, the first value for this variable in the
 model. That is, the value for this variable contained in the first object of this
@@ -43,10 +43,11 @@ standard deviation is the inserted value.
 SET_ALL
 ****************************************************/
 
-void set_all( int *choice, object *original, char *lab, int lag )
+void set_all( object *original, const char *lab, int lag, const char *parWnd )
 {
 	bool selFocus = true;
-	char *l, ch[ MAX_ELEM_LENGTH ], action[ MAX_ELEM_LENGTH ];
+	char ch[ MAX_ELEM_LENGTH ], action[ MAX_ELEM_LENGTH ], msg[ MAX_ELEM_LENGTH ];
+	const char *app;
 	double value, value1, value2, step, counter;
 	int res, i, j, kappa, to_all, update_d, cases_from, cases_to, fill, use_seed, rnd_seed, step_in;
 	description *cd; 
@@ -81,7 +82,11 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	cmd( "set update_d 1" );
 
 	// define the correct parent window
-	cmd( "switch %d { 0 { set parWnd . } 3 { set parWnd .deb } 4 { set parWnd .inid } default { set parWnd . } }", *choice );
+	if ( parWnd != NULL && strlen( parWnd ) > 0 )
+		cmd( "set parWnd %s", parWnd );
+	else
+		cmd( "set parWnd ." );
+
 	cmd( "if { [ string equal $parWnd . ] } { \
 			set _w .sa \
 		} else { \
@@ -315,22 +320,22 @@ void set_all( int *choice, object *original, char *lab, int lag )
 		selFocus = false;
 	}
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	if ( *choice == 9 )
+	if ( choice == 9 )
 	{
 		// search instance from
-		i = compute_copyfrom( original, choice, "$_w" );
+		i = compute_copyfrom( original, "$_w" );
 		cmd( "set cases_from %d", i );
 		goto here_setall;
 	}
 
-	if ( *choice == 10 )
+	if ( choice == 10 )
 	{
 		// search instance to
-		i = compute_copyfrom( original, choice, "$_w" );
+		i = compute_copyfrom( original, "$_w" );
 		cmd( "set cases_to %d", i );
 		goto here_setall;
 	}
@@ -348,7 +353,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 			set choice 0 \
 		}" );
 		
-	if ( *choice == 0 )
+	if ( choice == 0 )
 	{
 		selFocus = true;
 		goto here_setall;
@@ -360,7 +365,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 	Tcl_UnlinkVar( inter, "value2" );
 	Tcl_UnlinkVar( inter, "res" );
 	
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		return;
 
 	step_in = get_int( "step_in" );
@@ -390,7 +395,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 					++j;
 				}
 			
-			sprintf( action, "equal to %g", value1 );
+			snprintf( action, MAX_ELEM_LENGTH, "equal to %g", value1 );
 			break;
 
 		// range
@@ -415,7 +420,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 					++step; 
 			}
 			
-			sprintf( action, "ranging from %g to %g (increments of %g)", value1, value2, value );
+			snprintf( action, MAX_ELEM_LENGTH, "ranging from %g to %g (increments of %g)", value1, value2, value );
 			break;
 
 
@@ -435,7 +440,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 					++step;
 			}
 			
-			sprintf( action, "increasing from %g with step %g", value1, value2 );
+			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g", value1, value2 );
 			break;
 				
 		
@@ -454,7 +459,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 						step = 0;
 				}
 			
-			sprintf( action, "increasing from %g with step %g for each group of objects", value1, value2 );
+			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g for each group of objects", value1, value2 );
 			break;
 
 
@@ -469,7 +474,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 					++j;
 				}
 			
-			sprintf( action, "drawn from uniform distribution between %g and %g", value1, value2 );
+			snprintf( action, MAX_ELEM_LENGTH, "drawn from uniform distribution between %g and %g", value1, value2 );
 			break;
 			  
 		
@@ -484,7 +489,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 					++j;
 				}
 			
-			sprintf( action, "drawn from integer uniform distribution between %g and %g", round( value1 ), round( value2 ) );
+			snprintf( action, MAX_ELEM_LENGTH, "drawn from integer uniform distribution between %g and %g", round( value1 ), round( value2 ) );
 			break;
 			
 			
@@ -499,7 +504,7 @@ void set_all( int *choice, object *original, char *lab, int lag )
 					++j;
 				}
 			
-			sprintf( action, "drawn from normal distribution of mean %g and s.d. %g", value1, value2 );
+			snprintf( action, MAX_ELEM_LENGTH, "drawn from normal distribution of mean %g and s.d. %g", value1, value2 );
 			break;
 			
 
@@ -507,17 +512,15 @@ void set_all( int *choice, object *original, char *lab, int lag )
 		case 7:
 			cmd( "set oldpath [ pwd ]" );
 			cmd( "set filename [ tk_getOpenFile -parent . -title \"File to Import Data\" -filetypes { { {Text Files} {.txt} } { {All Files} {*} } } ]" );
-			l = ( char * ) Tcl_GetVar( inter, "filename", 0 );
-			
-			if ( l == NULL || ! strcmp( l, "" ) )
+			app = get_str( "filename" );
+			if ( app == NULL || ! strcmp( app, "" ) )
 				return;
 
 			cmd( "cd [ file dirname $filename ]" );
 			cmd( "set fn [ file tail $filename ]" );
-			l = ( char * ) Tcl_GetVar( inter, "fn", 0 );
-			f = fopen( l, "r" );
+			app = get_str( "fn" );
+			f = fopen( app, "r" );
 			cmd( "cd $oldpath" );
-			
 			if ( f == NULL )
 				return;
 
@@ -538,17 +541,17 @@ void set_all( int *choice, object *original, char *lab, int lag )
 				}
 			
 			if ( cur != NULL || kappa == EOF )
-				cmd( "ttk::messageBox -parent $_w -title Error -icon error -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", l );
+				cmd( "ttk::messageBox -parent $_w -title Error -icon error -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", app );
 			
-			sprintf( action, "set with data from file %s", l );
+			snprintf( action, MAX_ELEM_LENGTH, "set with data from file %s", app );
 			break;
 			
 
 		default:
-			error_hard( "invalid option for setting values", 
-						"internal problem in LSD", 
+			error_hard( "internal problem in LSD", 
 						"if error persists, please contact developers",
-						true );
+						true, 
+						"invalid option for setting values" );
 			myexit( 22 );
 	}
 	
@@ -557,23 +560,23 @@ void set_all( int *choice, object *original, char *lab, int lag )
 		cd = search_description( lab );
 		
 		if ( step_in > 1 )
-			sprintf( ch, " (every %d instances)", step_in );
+			snprintf( ch, MAX_ELEM_LENGTH, " (every %d instances)", step_in );
 		else
 			strcpy( ch, "" );
 		
 		if ( to_all )
 			if ( step_in > 1 )
 				if ( cd->init != NULL )
-					sprintf( msg, "%s\n%d instances %s%s", cd->init, j, action, ch );
+					snprintf( msg, MAX_ELEM_LENGTH, "%s\n%d instances %s%s", cd->init, j, action, ch );
 				else
-					sprintf( msg, "%d instances %s%s", j, action, ch );
+					snprintf( msg, MAX_ELEM_LENGTH, "%d instances %s%s", j, action, ch );
 			else
-				sprintf( msg, "All %d instances %s%s", j, action, ch );
+				snprintf( msg, MAX_ELEM_LENGTH, "All %d instances %s%s", j, action, ch );
 		else
 			if ( cd->init != NULL )
-				sprintf( msg, "%s\nInstances from %d to %d %s%s", cd->init, cases_from, cases_to, action, ch );
+				snprintf( msg, MAX_ELEM_LENGTH, "%s\nInstances from %d to %d %s%s", cd->init, cases_from, cases_to, action, ch );
 			else
-				sprintf( msg, "Instances from %d to %d %s%s", cases_from, cases_to, action, ch );  
+				snprintf( msg, MAX_ELEM_LENGTH, "Instances from %d to %d %s%s", cases_from, cases_to, action, ch );  
 								
 		change_description( lab, NULL, -1, NULL, msg );
 	}
@@ -755,11 +758,12 @@ int num_sensitivity_variables( sense *rsens )
 DATAENTRY_SENSITIVITY
 Try to get values for sensitivity analysis
 ******************************************************************************/
-void dataentry_sensitivity( int *choice, sense *s, int nval )
+void dataentry_sensitivity( sense *s, int nval )
 {
 	int i, j, nPar, samples, integerV;
 	double start, end;
 	char *sss = NULL, *tok = NULL, type;
+	const char *app;
 
 	// reset random number generator 
 	init_random( seed );
@@ -814,15 +818,16 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 
 	if ( s->entryOk )	// is there valid data from a previous data entry?
 	{
-		sss = new char[ 26 * s->nvalues + 1];	// allocate space for string
-		tok = new char[ 26 + 1 ];				
+		sss = new char[ MAX_ELEM_LENGTH * s->nvalues + 1 ];	// allocate space for string
+		tok = new char[ MAX_ELEM_LENGTH ];				
 		strcpy( sss, "" );
 		for ( i = 0; i < s->nvalues; i++ )		// pass existing data as a string
 		{
-			sprintf( tok, "%.15g ", s->v[ i ] );	// add each value
-			strcat( sss, tok );					// to the string
+			snprintf( tok, MAX_ELEM_LENGTH, "%.15g ", s->v[ i ] );	// add each value
+			strcatn( sss, tok, MAX_ELEM_LENGTH * s->nvalues + 1 );	// to the string
 		}
-		Tcl_SetVar( inter, "sss", sss, 0 ); 	// pass string to Tk window
+		
+		cmd( "set sss \"%s\"", sss );		 	// pass string to Tk window
 		cmd( ".sens.t.t insert 0.0 $sss" );		// insert string in entry window
 		delete [ ] tok; 
 		delete [ ] sss;
@@ -830,24 +835,26 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 
 	cmd( "focus .sens.t.t" );
 
-	*choice = 0;
+	choice = 0;
 
 	do										// finish only after reading all values
 	{
-		while ( *choice == 0 )
+		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 	
-		if ( *choice == 3 )					// force error to delete variable from list
+		if ( choice == 3 )					// force error to delete variable from list
 		{
 			s->entryOk = false;
-			*choice = 2; 
+			choice = 2; 
 		}
 	
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			goto end;
 	
 		cmd( "set sss [ .sens.t.t get 0.0 end ]" );
-		sss=( char* ) Tcl_GetVar( inter,"sss", 0 );
+		app = get_str( "sss" );
+		sss = new char[ strlen( app ) + 1 ];
+		strcpy( sss, app );
 	
 		if ( nval == 0 )					// undefined number of values?
 		{	
@@ -892,7 +899,7 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 			if ( tok == NULL )				// finished too early?
 			{
 				cmd( "ttk::messageBox -parent .sens -title \"Sensitivity Analysis\" -icon error -type ok -message \"Invalid or less than required values\" -detail \"Decimal numbers must use the point ('.') as the decimal separator. Insert the correct number of values.\"" );
-				*choice = 0;
+				choice = 0;
 				cmd( "focus .sens.t.t" );
 				break;
 			}
@@ -970,24 +977,24 @@ int NOLH_table( int k )
 NOLH_VALID_TABLES
 Determine the valid NOLH tables for the number of factors
 ******************************************************************************/
-char *NOLH_valid_tables( int k, char* ch )	
+char *NOLH_valid_tables( int k, char *out, int sz )	
 {
 	int min_tab = NOLH_table( k );
 	char buff[ MAX_ELEM_LENGTH ];
 	
 	if ( min_tab <= 0 )
-		strcpy( ch, "External only" );
+		snprintf( out, sz, "External only" );
 	else
 	{
-		strcpy( ch, "" );
+		strcpy( out, "" );
 		for ( int i = min_tab; ( unsigned ) i < ( ( sizeof NOLH ) / sizeof NOLH[ 0 ] ); ++i )
 		{
-			sprintf( buff, " \"%d\u00D7%d\u00D7%d\"", NOLH[ i ].kMax, NOLH[ i ].n1, NOLH[ i ].n2 );
-			strcat( ch, buff );
+			snprintf( buff, MAX_ELEM_LENGTH, " \"%d\u00D7%d\u00D7%d\"", NOLH[ i ].kMax, NOLH[ i ].n1, NOLH[ i ].n2 );
+			strcatn( out, buff, sz );
 		}
 	}
 	
-	return ch;
+	return out;
 }
 
 			
@@ -1012,7 +1019,7 @@ NOLH_LOAD
 Function to load a .csv file named NOLH.csv as table 0 ( first to be used)
 If option 'force' is used, will be used for any number of factors
 ******************************************************************************/
-bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )			
+bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )			
 {
 	int i, j, n = 1, loLevel = INT_MAX, hiLevel = 1, kFile = 0;
 	char *fileName, *lBuffer, *str, *num;
@@ -1035,9 +1042,10 @@ bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )
 	NOLHfile = fopen( fileName, "r" );
 	if ( NOLHfile == NULL )
 	{
-		sprintf( msg, "cannot open NOHL design file '%s'", fileName );
-		error_hard( msg, "problem accessing the design of experiment file", 
-					"check if the requested file exists" );
+		error_hard( "problem accessing the design of experiment file", 
+					"check if the requested file exists", 
+					false, 
+					"cannot open NOHL design file '%s'", fileName );
 		return false;
 	}
 
@@ -1084,9 +1092,10 @@ bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )
 				delete [ ] NOLH_0[ 0 ];
 				delete [ ] NOLH_0;
 				NOLH_0 = NULL;
-				sprintf( msg, "invalid format in NOHL file '%s', line=%d", fileName, i + 1 );
-				error_hard( msg, "invalid design of experiment file", 
-							"check the file contents" );
+				error_hard( "invalid design of experiment file", 
+							"check the file contents",
+							false, 
+							"invalid format in NOHL file '%s', line=%d", fileName, i + 1 );
 				goto end;
 			}
 
@@ -1109,7 +1118,7 @@ bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )
 	NOLH[ 0 ].hiLevel = hiLevel;
 	NOLH[ 0 ].table = NOLH_0[ 0 ];
 	
-	plog( "\nNOLH file loaded: %s\nk = %d, n = %d, low level = %d, high level = %d", "", fileName, kFile, n, loLevel, hiLevel );
+	plog( "\nNOLH file loaded: %s\nk = %d, n = %d, low level = %d, high level = %d", fileName, kFile, n, loLevel, hiLevel );
 	
 	ok = true;
 end:
@@ -1627,12 +1636,12 @@ DESIGN
 		samples = -1: use extended predefined sample size (n2 )
 		factors = 0: use automatic DoE size
 ******************************************************************************/
-design::design( sense *rsens, int typ, char const *fname, int findex, 
+design::design( sense *rsens, int typ, const char *fname, int findex, 
 				int samples, int factors, int jump, int trajs )
 {
 	int i , j, kTab, doeRange, poolSz;
 	double **pool;
-	char *doefname, doeName[ MAX_ELEM_LENGTH + 1 ];
+	char *doefname, doeName[ MAX_ELEM_LENGTH ];
 	FILE *f;
 	sense *cs;
 	
@@ -1653,9 +1662,10 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 			{
 				if ( factors != 0 && k > factors )	// invalid # of factors selected?
 				{
-					sprintf( msg, "number of NOLH variables selected is too small" );
-					error_hard( msg, "invalid design of experiment parameters", 
-								"check the design" );
+					error_hard( "invalid design of experiment parameters", 
+								"check the design",
+								false, 
+								"number of NOLH variables selected is too small" );
 					goto invalid;
 				}
 				// if user selected # of factors, use it to select internal table
@@ -1670,17 +1680,19 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 					tab = NOLH_table( k );	// design table to use
 					if ( tab == -1 )		// still too large?
 					{
-						error_hard( "too many variables to test for NOLH.csv size", 
-									"invalid design of experiment parameters", 
-									"check the design" );
+						error_hard( "invalid design of experiment parameters", 
+									"check the design",
+									false, 
+									"too many variables to test for NOLH.csv size" );
 						goto invalid;		// abort
 					}
 				}
 				else
 				{
-					error_hard( "too many variables to test", 
-								"invalid design of experiment parameters", 
-								"check the design" );
+					error_hard( "invalid design of experiment parameters", 
+								"check the design",
+								false,
+								"too many variables to test" );
 					goto invalid;			// abort
 				}
 			}
@@ -1688,7 +1700,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 			// get the number of samples required by the NOLH design, according to user choice (basic/extended)
 			n = ( samples != -1 ) ? NOLH[ tab ].n1 : NOLH[ tab ].n2;
 
-			plog( "\nNOLH table used: %d (%s), n = %d", "", tab, tab > 0 ? "built-in" : "from file", n );
+			plog( "\nNOLH table used: %d (%s), n = %d", tab, tab > 0 ? "built-in" : "from file", n );
 			
 			// allocate memory for data
 			par = new int[ k ];				// vector of variable type (parameter / lagged value )
@@ -1861,19 +1873,43 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 	// generate a configuration file for the experiment
 			
 	// file name for saving table
-	sprintf( doeName, "%u_%u", ( unsigned ) findex, ( unsigned ) ( findex + n - 1 ) );
+	snprintf( doeName, MAX_ELEM_LENGTH, "%u_%u", ( unsigned ) findex, ( unsigned ) ( findex + n - 1 ) );
 	
 	if ( strlen( path ) > 0 )				// non-default folder?
 	{
-		doefname = new char[ strlen( path ) + strlen( simul_name ) + strlen( doeName ) + 10 ];
+		doefname = new char[ strlen( path ) + strlen( simul_name ) + strlen( doeName ) + 7 ];
 		sprintf( doefname, "%s/%s_%s.csv", path, simul_name, doeName );
 	}
 	else
 	{
-		doefname = new char[ strlen( simul_name ) + strlen( doeName ) + 10 ];
+		doefname = new char[ strlen( simul_name ) + strlen( doeName ) + 6 ];
 		sprintf( doefname, "%s_%s.csv", simul_name, doeName );
 	}
-	f = fopen( doefname, "w" );
+	
+	if ( ( f = fopen( doefname, "w" ) ) == NULL )
+	{
+		delete [ ] par;
+		delete [ ] lag;
+		delete [ ] hi;
+		delete [ ] lo;
+		delete [ ] intg;
+		delete [ ] ptr;
+		delete [ ] lab;
+		delete [ ] doefname;
+		
+		typ = tab = n = k = 0;
+		par = lag = NULL;
+		hi = lo = NULL;
+		intg = NULL;
+		ptr = NULL;
+		lab = NULL;
+		
+		error_hard( "cannot create DoE configuration file", 
+					"check if disk is not full or set READ-ONLY",
+					false, 
+					"a disk error prevented creating the file" );
+		return;
+	}
 	
 	// write the doe table to disk
 	for ( j = 0; j < k; j++ )		// write variable labels
@@ -1891,7 +1927,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 			
 	fclose( f );
 	
-	plog( "\nDoE configuration saved: %s", "", doefname );
+	plog( "\nDoE configuration saved: %s", doefname );
 	
 	delete [ ] doefname;
 }
@@ -1938,15 +1974,16 @@ void sensitivity_doe( int *findex, design *doe )
 		if ( ( i + 2 ) % 10 == 0 )
 			cmd( "prgboxupdate .psa %d", i + 1 );
 			
-		*findex = *findex + 1;
+		++( *findex );
 	}
 	
 	cmd( "destroytop .psa" );
 	
-	plog( "\nSensitivity analysis configurations produced: %d\n", "", findexSens - 1 );
+	plog( "\nSensitivity analysis configurations produced: %d\n", findexSens - 1 );
 		
+	// if succeeded, explain user how to proceed
 	if ( ! stop )
-		sensitivity_created( );					// explain user how to proceed
+		sensitivity_created( dest_path, clean_file( simul_name ), inif );
 	else
 		*findex = 0;							// don't consider for appending
 }

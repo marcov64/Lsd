@@ -94,18 +94,12 @@ bool no_ptr_chk = true;
 	EQ_USER_VARS
 
 #define EQ_NOT_FOUND \
-	char msg[ TCL_BUFF_STR ]; \
-	sprintf( msg, "equation not found for variable '%s'", label ); \
-	error_hard( msg, "equation not found", "check your configuration (variable name) or\ncode (equation name) to prevent this situation\nPossible problems:\n- There is no equation for this variable\n- The equation name is different from the variable name (case matters!)" ); \
+	error_hard( "equation not found", "check your configuration (variable name) or\ncode (equation name) to prevent this situation\nPossible problems:\n- There is no equation for this variable\n- The equation name is different from the variable name (case matters!)", false, "equation not found for variable '%s'", label ); \
 	return res;
 	
 #define EQ_TEST_RESULT \
 	if ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) \
-	{ \
-		char msg[ TCL_BUFF_STR ]; \
-		sprintf( msg, "equation for '%s' produces the invalid value '%lf' at time %d", label, res, t ); \
-		error_hard( msg, "invalid equation result", "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation", true ); \
-	}
+		error_hard( "invalid equation result", "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation", true, "equation for '%s' produces the invalid value '%lf' at time %d", label, res, t );
 
 #ifndef _NW_
 #define DEBUG_CODE \
@@ -307,20 +301,12 @@ bool no_ptr_chk = true;
 #define LOG( ... ) \
 { \
 	if ( ! fast ) \
-	{ \
-		char msg[ TCL_BUFF_STR ]; \
-		sprintf( msg, __VA_ARGS__ ); \
-		plog( msg ); \
-	} \
+		plog( __VA_ARGS__ ); \
 }
 #define PLOG( ... ) \
 { \
 	if ( fast_mode < 2 ) \
-	{ \
-		char msg[ TCL_BUFF_STR ]; \
-		sprintf( msg, __VA_ARGS__ ); \
-		plog( msg ); \
-	} \
+		plog( __VA_ARGS__ ); \
 }
 
 #define V( X ) ( p->cal( p, ( char * ) X, 0 ) )
@@ -664,12 +650,14 @@ extern Tcl_Interp *inter;
 #endif
 
 double init_lattice( double pixW = 0, double pixH = 0, double nrow = 100, double ncol = 100, 
-					 char const lrow[ ] = "y", char const lcol[ ] = "x", char const lvar[ ] = "", 
+					 const char lrow[ ] = "y", const char lcol[ ] = "x", const char lvar[ ] = "", 
 					 object *p = NULL, int init_color = -0xffffff );
 double poidev( double xm, long *idum_loc = NULL );
-int deb( object *r, object *c, char const *lab, double *res, bool interact = false, const char *hl_var = "" );
+int deb( object *r, object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" );
 object *go_brother( object *c );
 void cmd( const char *cm, ... );
+
+char msg[ MAX_BUFF_SIZE ];							// legacy auxiliary buffer
 
 #define FUNCTION( X ) \
 	if ( ! strcmp( label, X ) ) { \

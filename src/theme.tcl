@@ -237,6 +237,7 @@ proc setstyles { } {
 	# label widget styles
 	ttk::style configure TLabel -anchor center
 	ttk::style configure hl.TLabel -foreground $colorsTheme(hl)
+	ttk::style configure dhl.TLabel -foreground $colorsTheme(dhl)
 	ttk::style configure sel.TLabel -foreground $colorsTheme(sfg) \
 		-background $colorsTheme(sbg)
 	ttk::style configure selHl.TLabel -foreground $colorsTheme(hl) \

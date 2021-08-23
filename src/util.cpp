@@ -19,7 +19,7 @@ program.
 
 The main functions contained in this file are:
 
-- void cmd( char *cc );
+- void cmd( const char *cc );
 Standard routine to send the message string cc to the TCL interpreter in order
 to execute a command for the graphical interfaces.
 It should be enough to make a call to Tcl_Eval. But there are problems due to the
@@ -29,20 +29,20 @@ but not under unix. Instead, I use Tcl_VarEval, that allows to use pieces
 of strings (including the last terminating character NULL) and  it does not
 require a writable string.
 
-- void plog( char *m );
+- void plog( const char *m );
 print  message string m in the Log screen.
 
-- FILE *search_str( char *name, char *str )
+- FILE *search_str( const char *name, const char *str )
 given a string name, returns the file corresponding to name, and the current
 position of the file is just after str. Think I don't use any longer.
 
-- FILE *search_data_str( char *name, char *init, char *str )
+- FILE *search_data_str( const char *name, char *init, char *str )
 given a string name, returns the file with that name and the current position
 placed immediately after the string str found after the string init. Needed to
 not get confused managing the data files, where the same string appears twice,
 in the structure definition and in the data section.
 
-- FILE *search_data_ent( char *name, variable *v )
+- FILE *search_data_ent( const char *name, variable *v )
 given the file name name, the routine searches for the data line for the variable
 (or parameter) v. It is not messed up by same labels for variables and objects.
 
@@ -148,14 +148,21 @@ void plog( char const *cm, char const *tag, ... )
 ERROR_HARD
 Procedure called when an unrecoverable error occurs. 
 Information about the state of the simulation when the error 
-occured is provided. Users can abort the program or analyse 
+occurred is provided. Users can abort the program or analyze 
 the results collected up the latest time step available.
 *************/
-void error_hard( const char *logText, const char *boxTitle, const char *boxText, bool defQuit )
+void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... )
 {
 	if ( quit == 2 )		// simulation already being stopped
 		return;
 		
+	static char logText[ MAX_BUFF_SIZE ];	
+	static va_list argptr;
+	
+	va_start( argptr, logFmt );
+	vsnprintf( logText, MAX_BUFF_SIZE, logFmt, argptr );
+	va_end( argptr );
+	
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
 	lock_guard < mutex > lock( error );
@@ -166,9 +173,9 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 		if ( ! error_hard_thread )	// handle just first error
 		{
 			error_hard_thread = true;
-			strcpy( error_hard_msg1, boxTitle );
-			strcpy( error_hard_msg2, logText );
-			strcpy( error_hard_msg3, boxText );
+			strcpyn( error_hard_msg1, boxTitle, MAX_BUFF_SIZE );
+			strcpyn( error_hard_msg2, logText, MAX_BUFF_SIZE );
+			strcpyn( error_hard_msg3, boxText, MAX_BUFF_SIZE );
 			throw 1;
 		}
 		else
@@ -184,19 +191,19 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 		reset_plot( );		// show & disable run-time plot
 		set_buttons_run( false );
 
-		plog( "\n\nError detected at time %d", "highlight", t );
-		plog( "\n\nError: %s\nDetails: %s", "", boxTitle, logText );
+		plog_tag( "\n\nError detected at time %d", "highlight", t );
+		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
 		if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
-			plog( "\nOffending code contained in the equation for variable: '%s'", "", stacklog->vs->label );
-		plog( "\nSuggestion: %s", "", boxText );
+			plog( "\nOffending code contained in the equation for variable: '%s'", stacklog->vs->label );
+		plog( "\nSuggestion: %s", boxText );
 		print_stack( );
 		cmd( "focustop .log" );
 		cmd( "ttk::messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\n\nSimulation cannot continue.\"", boxTitle, boxText  );
 	}
 	else
 	{
-		plog( "\n\nError: %s\nDetails: %s", "", boxTitle, logText );
-		plog( "\nSuggestion: %s\n", "", boxText );
+		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
+		plog( "\nSuggestion: %s\n", boxText );
 		cmd( "ttk::messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\"", boxTitle, boxText  );
 	}
 #endif
@@ -245,24 +252,25 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set choice $err" );
 	cmd( "destroytop .cazzo" );
 	
-	if ( choice == 3 )
+	int err = get_int( "err" );
+	
+	if ( err == 3 )
 	{
 		if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL && 
 			 stacklog->vs != NULL && stacklog->vs->label != NULL )
 		{
 			char err_msg[ MAX_LINE_SIZE ];
 			double useless = -1;
-			sprintf( err_msg, "%s (ERROR)", stacklog->vs->label );
+			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", stacklog->vs->label );
 			deb( stacklog->vs->up, NULL, err_msg, &useless );
 		}
 		
-		choice = 2;
+		err = 2;
 	}
 
-	if ( choice == 2 )
+	if ( err == 2 )
 	{
 		// do run( ) cleanup
 		empty_stack( );
@@ -320,7 +328,7 @@ void print_stack( void )
 	plog( "\n\nLevel\tVariable Label" );
 
 	for ( app = stacklog; app != NULL; app = app->prev )
-		plog( "\n%d\t%s", "", app->ns, app->label );
+		plog( "\n%d\t%s", app->ns, app->label );
 
 	plog( "\n\n(the zero-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones\nbecause necessary for completing their computation)\n" );
 }
@@ -329,7 +337,7 @@ void print_stack( void )
 /****************************************************
 SEARCH_STR
 ****************************************************/
-FILE *search_str( char const *fname, char const *str )
+FILE *search_str( const char *fname, const char *str )
 {
 	FILE *f;
 	char got[ MAX_LINE_SIZE ];
@@ -353,7 +361,7 @@ FILE *search_str( char const *fname, char const *str )
 /****************************************************
 SEARCH_DATA_STR
 ****************************************************/
-FILE *search_data_str( char const *name, char const *init, char const *str )
+FILE *search_data_str( const char *name, const char *init, const char *str )
 {
 	FILE *f;
 	char got[ MAX_LINE_SIZE ];
@@ -384,13 +392,13 @@ FILE *search_data_str( char const *name, char const *init, char const *str )
 /****************************************************
 SEARCH_DATA_ENT
 ****************************************************/
-FILE *search_data_ent( char *name, variable *v )
+FILE *search_data_ent( const char *name, variable *v )
 {
 	FILE *f;
 	char got[ MAX_LINE_SIZE ];
-	char temp[ MAX_LINE_SIZE ];
+	char temp[ MAX_ELEM_LENGTH ];
 	char temp1[ MAX_LINE_SIZE ];
-	char typ[ 20 ];
+	char typ[ MAX_ELEM_LENGTH ];
 
 	f = fopen( name, "r" );
 	if ( f == NULL )
@@ -404,13 +412,13 @@ FILE *search_data_ent( char *name, variable *v )
 	if ( strcmp( got, "DATA" ) )
 		return NULL;
 
-	strcpy( temp, ( v->up )->label );	// search for the section of the Object
+	strcpyn( temp, ( v->up )->label, MAX_ELEM_LENGTH );	// search for the section of the Object
 	fscanf( f, "%999s", temp1 );
 	fscanf( f, "%999s", got );
 
 	for ( int i = 0; ( strcmp( got, temp ) || strcmp( temp1,"Object:" ) ) && i < MAX_FILE_TRY; ++i )
 	{
-		strcpy( temp1, got );
+		strcpyn( temp1, got, MAX_LINE_SIZE );
 		if ( fscanf( f, "%999s", got ) == EOF )
 			return NULL;
 	}
@@ -432,7 +440,7 @@ FILE *search_data_ent( char *name, variable *v )
 
 	for ( int i = 0; ( strcmp( got, v->label ) || strcmp( temp1, typ ) ) && i < MAX_FILE_TRY; ++i )
 	{
-		strcpy( temp1, got );
+		strcpyn( temp1, got, MAX_LINE_SIZE );
 		if ( fscanf( f, "%999s", got ) == EOF )
 			return NULL;
 	}
@@ -484,7 +492,7 @@ lab_tit indicates the position of the object containing the variables in the mod
 void set_lab_tit( variable *var )
 {
 	bool first = true;
-	char app[ 4 * MAX_PATH_LENGTH ], app1[ TCL_BUFF_STR ];
+	char app[ MAX_LINE_SIZE ], app1[ MAX_LINE_SIZE ];
 	object *cur;
 
 	if ( var->up->up == NULL )
@@ -504,13 +512,14 @@ void set_lab_tit( variable *var )
 		// find the bridge containing the variable
 		set_counter( cur );
 		if ( ! first )
-			sprintf( app1, "%d_%s", cur->acounter, app );
+			snprintf( app1, MAX_LINE_SIZE, "%d_%s", cur->acounter, app );
 		else
 		{
 			first = false;
-			sprintf( app1, "%d", cur->acounter );
+			snprintf( app1, MAX_LINE_SIZE, "%d", cur->acounter );
 		}
-		strcpy( app, app1 );
+		
+		strcpyn( app, app1, MAX_LINE_SIZE );
 	} 
 
 	if ( var->lab_tit != NULL )
@@ -617,9 +626,9 @@ ADD_DESCRIPTION
 ***************************************************/
 const char *kwords[ ] = { BEG_INIT, END_DESCR };
 
-description *add_description( char const *lab, int type, char const *text, char const *init, char initial, char observe )
+description *add_description( const char *lab, int type, const char *text, const char *init, char initial, char observe )
 {
-	char *str, ltype [ MAX_ELEM_LENGTH + 1 ];
+	char *str, ltype[ MAX_ELEM_LENGTH ];
 	int i, j;
 	description *cd;
 
@@ -700,9 +709,9 @@ description *add_description( char const *lab, int type, char const *text, char 
 /***************************************************
 CHANGE_DESCRIPTION
 ***************************************************/
-description *change_description( char const *lab_old, char const *lab, int type, char const *text, char const *init, char initial, char observe )
+description *change_description( const char *lab_old, const char *lab, int type, const char *text, const char *init, char initial, char observe )
 {
-	char *str, ltype [ MAX_ELEM_LENGTH + 1 ];
+	char *str, ltype[ MAX_ELEM_LENGTH ];
 	int i, j;
 	description *cd, *cd1;
 
@@ -891,10 +900,10 @@ char *fmt_ttip_descr( char *out, description *d, int outSz, bool init )
 	if ( init && d != NULL && d->init != NULL && strlen( d->init ) > 0 ) 
 	{
 		if ( strlen( out ) > 0 )
-			strncat( out, "\n\u2500\u2500\u2500\n", outSz - strlen( out ) - 1 );
+			strcatn( out, "\n\u2500\u2500\u2500\n", outSz );
 		
 		strcln( out1, d->init, outSz );
-		strncat( out, out1, outSz - strlen( out ) - 1 );
+		strcatn( out, out1, outSz );
 	}
 		
 	if ( strlen( out ) > 0 )
@@ -958,7 +967,8 @@ SEARCH_ALL_SOURCES
 ****************************************************/
 FILE *search_all_sources( char *str )
 {
-	char *fname, got[ MAX_LINE_SIZE ];
+	char got[ MAX_LINE_SIZE ];
+	const char *fname;
 	int i, j, nfiles;
 	FILE *f;
 	
@@ -972,7 +982,7 @@ FILE *search_all_sources( char *str )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", i );
 		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
-		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
+		fname = get_str( "brr" );
 		if ( ( f = fopen( fname, "r" ) ) == NULL )
 			continue;
 
@@ -998,15 +1008,15 @@ FILE *search_all_sources( char *str )
 /***************************************************
 RETURN_WHERE_USED
 ***************************************************/
-void return_where_used( char *lab, char s[ ] ) 
+void return_where_used( char *lab, char *s, int sz ) 
 {
-	char *r; 
-	int choice = -1;	// make scan without window
+	const char *app; 
 
-	scan_used_lab( lab, &choice );
-	r = ( char * ) Tcl_GetVar( inter, "list_used", 0 );
-	if ( r != NULL )
-		strcpy( s, r);
+	scan_used_lab( lab, "" );	// make scan without window
+	app = get_str( "list_used" );
+	
+	if ( app != NULL )
+		strcpyn( s, app, sz );
 	else
 		strcpy( s, "" );
 }
@@ -1015,30 +1025,30 @@ void return_where_used( char *lab, char s[ ] )
 /***************************************************
 GET_VAR_DESCR
 ***************************************************/
-void get_var_descr( char const *lab, char *desc, int descr_len )
+void get_var_descr( const char *lab, char *desc, int descr_len )
 {
-	char str[ 2 * MAX_ELEM_LENGTH ], str1[ MAX_LINE_SIZE + 1 ], str2[ descr_len ];
+	char str[ 2 * MAX_ELEM_LENGTH ], str1[ MAX_LINE_SIZE ], str2[ descr_len ];
 	int i, j = 0, done = -1;
 	FILE *f;
 	
-	sprintf( str, "EQUATION(\"%s\")", lab );
+	snprintf( str, 2 * MAX_ELEM_LENGTH, "EQUATION(\"%s\")", lab );
 	f = search_all_sources( str );
 	
 	if ( f == NULL )
 	{
-		sprintf( str, "EQUATION_DUMMY(\"%s\",", lab );
+		snprintf( str, 2 * MAX_ELEM_LENGTH, "EQUATION_DUMMY(\"%s\",", lab );
 		f = search_all_sources( str );
 	}
 	
 	if ( f == NULL )
 	{
-		sprintf( str, "FUNCTION(\"%s\")", lab );
+		snprintf( str, 2 * MAX_ELEM_LENGTH, "FUNCTION(\"%s\")", lab );
 		f = search_all_sources( str );
 	}
 	
 	if ( f == NULL )
 	{
-		sprintf( str, "if (!strcmp(label,\"%s\"))", lab );
+		snprintf( str, 2 * MAX_ELEM_LENGTH, "if (!strcmp(label,\"%s\"))", lab );
 		f = search_all_sources( str );
 	}
 	
@@ -1103,10 +1113,10 @@ void get_var_descr( char const *lab, char *desc, int descr_len )
 /***************************************************
 AUTO_DOCUMENT
 ***************************************************/
-void auto_document( int *choice, char const *lab, char const *which, bool append )
+void auto_document( const char *lab, const char *which, bool append )
 {
 	bool var;
-	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ];
+	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ], text[ MAX_BUFF_SIZE ];
 	description *cd;
 
 	for ( cd = descr; cd != NULL; cd = cd->next )
@@ -1122,18 +1132,18 @@ void auto_document( int *choice, char const *lab, char const *which, bool append
 			else
 				var = false;
 	  
-			return_where_used( cd->label, str1 ); 
+			return_where_used( cd->label, str1, MAX_LINE_SIZE ); 
 			if ( ( append || ! var ) && has_descr_text ( cd ) )
 				if ( strwsp( cd->text ) )
-					sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+					snprintf( text, MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 				else
-					sprintf( msg, "%s\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
+					snprintf( text, MAX_BUFF_SIZE, "%s\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
 			else
-				sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+				snprintf( text, MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 
 			delete [ ] cd->text;
-			cd->text = new char[ strlen( msg ) + 1 ];
-			strcpy( cd->text, msg );
+			cd->text = new char[ strlen( text ) + 1 ];
+			strcpy( cd->text, text );
 		} 					// end of the label to document
 	}						// end of the for (desc)
 }
@@ -1179,8 +1189,9 @@ Create a new run time lattice having:
   If init_color < 0, the (positive) RGB equivalent to init_color is used.
   Otherwise, the lattice is homogeneously initialized to the palette color specified by init_color.
 ***************************************************/
-double init_lattice( double pixW, double pixH, double nrow, double ncol, char const lrow[ ], char const lcol[ ], char const lvar[ ], object *p, int init_color )
+double init_lattice( double pixW, double pixH, double nrow, double ncol, const char lrow[ ], const char lcol[ ], const char lvar[ ], object *p, int init_color )
 {
+	char init_color_string[ 32 ];	// the final string to be used to define tk color to use
 	int i, j, hsize, vsize, hsizeMax, vsizeMax;
 
 	// ignore invalid values
@@ -1222,13 +1233,11 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 	dimH = pixH / rows;
 	dimW = pixW / columns;
 
-	char init_color_string[ 32 ];		// the final string to be used to define tk color to use
-
 	if ( init_color < 0 && ( - init_color ) <= 0xffffff )		// RGB mode selected?
-		sprintf( init_color_string, "#%06x", - init_color );	// yes: just use the positive RGB value
+		snprintf( init_color_string, 32, "#%06x", - init_color );	// yes: just use the positive RGB value
 	else
 	{
-		sprintf( init_color_string, "$c%d", init_color );		// no: use the positive RGB value
+		snprintf( init_color_string, 32, "$c%d", init_color );		// no: use the positive RGB value
 		// create (background color) pallete entry if invalid palette in init_color
 		cmd( "if { ! [ info exist c%d ] } { set c%d $colorsTheme(bg) }", init_color, init_color  );
 	}
@@ -1342,7 +1351,7 @@ negative values of val prompt for the use of the (positive) RGB equivalent
 ***************************************************/
 double update_lattice( double line, double col, double val )
 {
-	char *latcanv, val_string[ 32 ];		// the final string to be used to define tk color to use
+	char val_string[ 32 ];		// the final string to be used to define tk color to use
 	int line_int, col_int, val_int;
 	
 	line_int = line - 1;
@@ -1376,16 +1385,14 @@ double update_lattice( double line, double col, double val )
 #ifndef _NW_
 
 	// avoid operation if canvas was closed
-	cmd( "if [ winfo exists .lat.c ] { set latcanv 1 } { set latcanv 0 }" );
-	latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
-	if ( ! strcmp( latcanv, "0" ) )
+	if ( ! exists_window( ".lat.c" ) )
 		return -1;
 	
 	if ( val < 0 && ( - ( int )  val ) <= 0xffffff )	// RGB mode selected?
-		sprintf( val_string, "#%06x", - ( int ) val );	// yes: just use the positive RGB value
+		snprintf( val_string, 32, "#%06x", - ( int ) val );	// yes: just use the positive RGB value
 	else
 	{
-		sprintf( val_string, "$c%d", val_int );			// no: use the predefined Tk color
+		snprintf( val_string, 32, "$c%d", val_int );			// no: use the predefined Tk color
 		// create (background color) pallete entry if invalid palette in val
 		cmd( "if { ! [ info exist c%d ] } { set c%d $colorsTheme(bg) }", val_int, val_int  );
 	}
@@ -1432,21 +1439,15 @@ Save the existing lattice (if any) to the specified file name.
 ***************************************************/
 double save_lattice( const char *fname )
 {
-	char *latcanv;
-
 #ifndef _NW_
-
 	// avoid operation if no canvas or no file name
-	cmd( "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
-	latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
-	if ( latcanv == NULL || strlen( fname ) == 0 )
+	if ( ! exists_window( ".lat.c" ) || fname == NULL || strlen( fname ) == 0 )
 		return -1;
 	
-	Tcl_SetVar( inter, "latname", fname, 0 );
-	cmd( "append latname \".eps\"; .lat.c postscript -colormode color -file $latname" );
-
+	cmd( "set latname \"%s\"", fname );
+	cmd( "append latname .eps" );
+	cmd( ".lat.c postscript -colormode color -file $latname" );
 #endif
-
 	return 0;
 }
 
@@ -2492,13 +2493,13 @@ void warn_distr( int *errCnt, bool *stopErr, const char *distr, const char *msg 
 {
 	if ( ++( *errCnt ) < ERR_LIM )	// prevent slow down due to I/O
 	{
-		plog( "\nWarning: %s in function '%s'", "", msg, distr );
+		plog( "\nWarning: %s in function '%s'", msg, distr );
 		*stopErr = false;
 	}
 	else
 		if ( ! *stopErr )
 		{
-			plog( "\nWarning: too many warnings in function '%s', stop reporting...\n", "", distr );
+			plog( "\nWarning: too many warnings in function '%s', stop reporting...\n", distr );
 			*stopErr = true;
 		}
 }

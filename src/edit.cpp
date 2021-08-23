@@ -26,7 +26,7 @@ or the set initial values in EDIT.CPP) or going in setting initial values.
 
 The main functions contained in this file are:
 
-- void set_obj_number( object *r, int *choice )
+- void set_obj_number( object *r )
 The main function, called from the browser. Initialize the text widget and wait
 the actions of the users to take place.
 
@@ -36,20 +36,20 @@ counts the number, prepare its index if the parent has multiple instances,
 and set the indentation. Each label is bound to return a unique integer number
 in case it is clicked. Such number is used as guide for the following function
 
-- void edit_str( object *r, char *tag, int *idx, int res, int *choice, int *done );
+- void edit_str( object *r, char *tag, int *idx, int res, int *done );
 Explore recursively the model tree giving a unique number for every group of
 objects encountered. When it finds the one clicked by user prepare the
 window to accept a new value for the number of instances. Passes this value
 to the next function
 
-- void chg_obj_num( object **c, int value, int all, int *choice );
+- void chg_obj_num( object **c, int value, int all );
 Depending on all (the flag to modify all the values of that type in the model)
 changes only the number of instances following c, or otherwise, every group of
 instances of the type of c. If it has to increase the number of instances,
 it does it directly. If it has to decrease, checks again all. If all is false,
 it activate the routine below, otherwise, it eliminates directly the surplus
 
-- void eliminate_obj( object **c, int actual, int desired , int *choice );
+- void eliminate_obj( object **c, int actual, int desired );
 Ask the user whether he wants to eliminate the last object or to choose
 individually the ones to eliminate. In this second case, it asks for a list
 numbers. The list is as long as are the instances to eliminate. Each element
@@ -67,10 +67,10 @@ int max_depth;
 /***************************************************
 SET_OBJ_NUMBER
 ****************************************************/
-void set_obj_number( object *r, int *choice )
+void set_obj_number( object *r )
 {
 	bool notShown = true;
-	char lab[ MAX_ELEM_LENGTH + 1 ];
+	char lab[ MAX_ELEM_LENGTH ];
 	int idx, res, count, done;
 
 	Tcl_LinkVar( inter, "idx", ( char * ) &idx, TCL_LINK_INT );
@@ -147,33 +147,31 @@ void set_obj_number( object *r, int *choice )
 		noredraw:
 
 		// editor command loop
-		*choice = 0;
-		while ( ! *choice )
+		choice = 0;
+		while ( ! choice )
 			Tcl_DoOneEvent( 0 );
 		
-		if ( *choice == 1 )
+		if ( choice == 1 )
 			break;
 		
 		cmd( "set ininLastY [ lindex [ $t yview ] 0 ]" );
 
-		if ( *choice == 2 )
+		if ( choice == 2 )
 		{
 			idx = 0;
 			done = 0;
-			edit_str( r, "", &idx, res, choice, &done );
-			*choice = 2;
+			edit_str( r, "", &idx, res, &done );
+			choice = 2;
 			
 			if ( done == 2 )
 				goto noredraw;
 		}
 
-		if ( *choice == 3 )
+		if ( choice == 3 )
 		{
-			if ( Tcl_GetVar( inter, "obj_name", 0 ) != NULL )
-			{
-				strncpy( lab, ( char * ) Tcl_GetVar( inter, "obj_name", 0 ), MAX_ELEM_LENGTH );
-				edit_data( r, choice, lab );
-			}
+			if ( get_str( "obj_name", lab, MAX_ELEM_LENGTH ) != NULL )
+				edit_data( r, lab );
+
 			goto noredraw;
 		}
 	}
@@ -193,7 +191,10 @@ INSERT_OBJ_NUM
 ****************************************************/
 void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int *count )
 {
-	char sInd[ ] = "    \u2219    ", newTag[ strlen( tag ) + MAX_ELEM_LENGTH + 15 ], newInd[ strlen( ind ) + strlen( sInd ) + 1 ];
+	char sInd[ ] = "    \u2219    ";
+	int tagLen = strlen( tag ) + MAX_ELEM_LENGTH + 15;
+	int indLen = strlen( ind ) + strlen( sInd ) + 1;
+	char newTag[ tagLen ], newInd[ indLen ];
 	int i, num;
 	bridge *cb; 
 	object *cur;
@@ -202,7 +203,7 @@ void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int 
 	strcpy( newInd, ind );
 
 	if ( r->up != NULL )
-		strcat( newInd, sInd );
+		strcatn( newInd, sInd, indLen );
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{  
@@ -279,9 +280,9 @@ void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int 
 				lowest_level = level > lowest_level ? level : lowest_level;
 				
 				if ( strlen( tag ) != 0 && cb->head->up != NULL )
-					sprintf( newTag, "#%d - %s %s", i, cb->head->up->label, tag );
+					snprintf( newTag, tagLen, "#%d - %s %s", i, cb->head->up->label, tag );
 				else
-					sprintf( newTag, "#%d", i );
+					snprintf( newTag, tagLen, "#%d", i );
 				
 				insert_obj_num( cur, newTag, newInd, idx, count );
 				
@@ -295,10 +296,10 @@ void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int 
 /***************************************************
 EDIT_STR
 ****************************************************/
-void edit_str( object *r, const char *tag, int *idx, int res, int *choice, int *done )
+void edit_str( object *r, const char *tag, int *idx, int res, int *done )
 {
-	char newTag[ strlen( tag ) + 10 ];
-	int i;
+	int i, sz = strlen( tag ) + 20;
+	char newTag[ sz ];
 	bridge *cb;
 	object *cur;
 
@@ -312,19 +313,19 @@ void edit_str( object *r, const char *tag, int *idx, int res, int *choice, int *
 		*idx += 1;
 		
 		if ( *idx == res )
-			*done = entry_new_objnum( cb->head, tag, choice );
+			*done = entry_new_objnum( cb->head, tag );
 
 		for ( i = 1, cur = cb->head; cur != NULL && *done == 0; ++i, cur = go_brother( cur ) )
 		{
 			if ( strlen( tag ) != 0 )
-				sprintf( newTag, "%s-%d", tag, i );
+				snprintf( newTag, sz, "%s-%d", tag, i );
 			else
-				sprintf( newTag, "%d", i );
+				snprintf( newTag, sz, "%d", i );
 			
 			if ( level < max_depth )
 			{
 				level++;
-				edit_str( cur, newTag, idx, res, choice, done );
+				edit_str( cur, newTag, idx, res, done );
 				level--;
 			} 
 		}
@@ -335,7 +336,7 @@ void edit_str( object *r, const char *tag, int *idx, int res, int *choice, int *
 /***************************************************
 ENTRY_NEW_OBJNUM
 ****************************************************/
-int entry_new_objnum( object *c, const char *tag, int *choice )
+int entry_new_objnum( object *c, const char *tag )
 {  
 	int i, j, k, num, cfrom, max_level;
 	object *cur, *first;
@@ -434,23 +435,23 @@ int entry_new_objnum( object *c, const char *tag, int *choice )
 		j = 0;
 	}
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 		  
 	cmd( "set num [ $T.e.e get ]" ); 
 	cmd( "set cfrom [ $T.cp.e get ]" ); 
 
-	k = *choice;
-	cmd( "set choice $conf" );
-	if ( *choice == 0 )
+	k = choice;
+
+	if ( ! get_bool( "conf" ) )
 		goto objec_num;
 	else
-		*choice = k;  
+		choice = k;  
 
-	if ( *choice == 3 )
+	if ( choice == 3 )
 	{
-		k = compute_copyfrom( c, choice, "$T" );
+		k = compute_copyfrom( c, "$T" );
 		if ( k > 0 )
 			cmd( "set cfrom %d", k );
 		
@@ -460,22 +461,22 @@ int entry_new_objnum( object *c, const char *tag, int *choice )
 
 	cmd( "destroytop $T" );  
 			 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		return 2;
 	
 	cfrom = get_int( "cfrom" );
 	num = get_int( "num" );
 	
-	cmd( "set choice [ lindex [ split $affect . ] 0 ]" );
-	j = *choice;
-	cmd( "set choice [ lindex [ split $affect . ] 1 ]" );
-	k = *choice;
+	cmd( "set j [ lindex [ split $affect . ] 0 ]" );
+	j = get_int( "j" );
+	cmd( "set k [ lindex [ split $affect . ] 1 ]" );
+	k = get_int( "k" );
 
 	int affected[ max_level + 1 ];
 	for ( i = 1; i <= max_level; ++i )
 		affected[ i ] = ( i == j ) ? k : -1;
 
-	chg_obj_num( &c, num, j, affected, choice, cfrom );
+	chg_obj_num( &c, num, j, affected, cfrom );
 
 	unsaved_change( true );				// signal unsaved change
 	redrawRoot = redrawStruc = true;	// update list boxes & structure
@@ -487,10 +488,10 @@ int entry_new_objnum( object *c, const char *tag, int *choice )
 /***************************************************
 COMPUTE_COPYFROM
 ****************************************************/
-int compute_copyfrom( object *c, int *choice, const char *parWnd )
+int compute_copyfrom( object *c, const char *parWnd )
 {
 	object *cur, *cur1, *cur2, *cur3;
-	int i, j, k, h, res;
+	int i, j, k, h, n, res;
 
 	if ( c == NULL || c->up == NULL )
 	{
@@ -557,14 +558,16 @@ int compute_copyfrom( object *c, int *choice, const char *parWnd )
 		k = 1;
 		for ( j = 1, cur1 = cur; cur1->up != NULL; cur1 = cur1->up, ++j )
 		{
-			cmd( "if [ string is integer -strict $num%d ] { set choice $num%d } { set choice -1 }", j, j );
-			if ( *choice < 0 )
+			cmd( "if [ string is integer -strict $num%d ] { set n $num%d } { set n -1 }", j, j );
+			n = get_int( "n" );
+			if ( n < 0 )
 				break;
 
 			for ( h = 1, cur2 = cur1->up->search( cur1->label ); cur2 != cur1; cur2 = cur2->next, ++h );   
-			if ( cur2->next == NULL && *choice > h )
-				*choice = h;
-			if ( h < *choice )
+			if ( cur2->next == NULL && n > h )
+				n = h;
+			
+			if ( h < n )
 			{
 				k = 0;
 				break;
@@ -588,18 +591,18 @@ int compute_copyfrom( object *c, int *choice, const char *parWnd )
 
 	cmd( "set ccfrom 0" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	i = *choice;
+	i = choice;
 	cmd( "set choice $cconf" );
-	if ( *choice == 0 )
+	if ( choice == 0 )
 		goto cfrom;
 	else
-		*choice = i;  
+		choice = i;  
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		goto ccompute;
 
 	cmd( "destroytop $cc" );
@@ -611,7 +614,7 @@ int compute_copyfrom( object *c, int *choice, const char *parWnd )
 /***************************************************
 CHG_OBJ_NUM
 ****************************************************/
-void chg_obj_num( object **c, int value, int level, int affected[ ], int *choice, int cfrom )
+void chg_obj_num( object **c, int value, int level, int affected[ ], int cfrom )
 {
 	int i, num;
 	object *cur, *cur1, *cur2, *first, *last, *pivot;
@@ -647,7 +650,7 @@ void chg_obj_num( object **c, int value, int level, int affected[ ], int *choice
 			{ 	// remove objects
 				if ( level == 1 ) 	// you have the option to choose the items to be removed, only if you operate on one group
 				{
-					eliminate_obj( &cur, num, value, choice );
+					eliminate_obj( &cur, num, value );
 					*c = cur;
 				} 
 				else
@@ -690,7 +693,7 @@ void chg_obj_num( object **c, int value, int level, int affected[ ], int *choice
 /***************************************************
 ELIMINATE_OBJ
 ****************************************************/
-void eliminate_obj( object **c, int actual, int desired, int *choice )
+void eliminate_obj( object **c, int actual, int desired )
 {
 	int i, idx2, val2, last, *del;
 	object *cur, *cur1;
@@ -724,16 +727,16 @@ void eliminate_obj( object **c, int actual, int desired, int *choice )
 	cmd( "showtop $d" );
 	cmd( "mousewarpto $d.b.last" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop $d" );
 	
-	if ( *choice == 3 )
+	if ( choice == 3 )
 		return;
 
-	if ( *choice == 1 )
+	if ( choice == 1 )
 	{
 		for ( i = 1, cur = *c; i < desired && cur != NULL; ++i, cur = go_brother( cur ) );
 		for ( ; go_brother( cur ) != NULL; )
@@ -777,13 +780,13 @@ void eliminate_obj( object **c, int actual, int desired, int *choice )
 				cmd( "$d.t.e selection range 0 end" );
 				cmd( "focus $d.t.e" );
 
-				*choice = 0;
-				while ( *choice == 0 )
+				choice = 0;
+				while ( choice == 0 )
 					Tcl_DoOneEvent( 0 );
 
 				cmd( "set val2 [ $d.t.e get ]" ); 
 
-				if ( *choice == 2 )
+				if ( choice == 2 )
 					goto end;
 
 				for ( i = 0; i < idx2 - 1; ++i )
@@ -813,7 +816,7 @@ void eliminate_obj( object **c, int actual, int desired, int *choice )
 		cmd( "destroytop $d" );
 		Tcl_UnlinkVar( inter, "val2" );
 		Tcl_UnlinkVar( inter, "idx2" );
-		*choice = 0;
+		choice = 0;
 	}
 }
 

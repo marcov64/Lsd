@@ -6,19 +6,19 @@
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
 
 /*************************************************************
-ANALYSIS.CPP 
+ANALYSIS.CPP
 Contains the routines to manage the data analysis module.
 
 The main functions contained here are:
 
-- void analysis( int *choice )
+- void analysis( void )
 Builds the managemen window, setting all the bindings, and enters in a cycle
 from which can make several choices:
 
@@ -32,7 +32,7 @@ to plot
 7) delete the variables selected in the list of the variables to plot
 9) plot the cross-section plot
 
-- void plot_tseries( int *choice );
+- void plot_tseries( void );
 Plot the plot with the variable indicated in the list of the variables
 to plot. If the option says to use the automatic y scaling, it makes first
 a scan of the file to spot the maximum and minimum y, then it plots. Otherwise,
@@ -43,7 +43,7 @@ Plot a plot of cross section data. The variables chosen are plotted along the ti
 steps chosen and, on request, they are sorted (descending or ascending) one one of
 time steps. To choose which time to sort on, double-click on the time step.
 
-- void set_cs_data( int *choice );
+- void set_cs_data( void );
 Interface used to determine the time steps to plot in the cross-section plots
 and the possible sorting.
 
@@ -55,7 +55,7 @@ Sort in ascending order the variables. Used in plot_cross.
 Sort in descending order the variables. Used in plot_cross.
 *************************************************************/
 
-/* 
+/*
 used case 47
 */
 
@@ -83,7 +83,8 @@ struct bin
 bin *histo_bins;
 bool avgSmplMsg;
 bool first_run = true;
-char filename[ MAX_PATH_LENGTH + 1 ];
+char filename[ MAX_PATH_LENGTH ];
+char da_tmp[ MAX_BUFF_SIZE ];
 double histo_mean;
 double histo_var;
 double maxy;
@@ -130,10 +131,10 @@ store *vs = NULL;
 /***************************************************
 ANALYSIS
 ****************************************************/
-void analysis( int *choice, bool mc )
+void analysis( bool mc )
 {
 bool gz;
-char *app, dirname[ MAX_PATH_LENGTH + 1 ], str1[ MAX_ELEM_LENGTH + 1 ], str2[ MAX_ELEM_LENGTH + 1 ], str3[ MAX_ELEM_LENGTH + 1 ];
+char dirname[ MAX_PATH_LENGTH ], str1[ MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ];
 double *datum, compvalue;
 int h, i, j, k, l, m, p, r;
 vector < string > cur_var;
@@ -234,7 +235,7 @@ cmd( "$w add command -label \"Writing LSD Models Tutorial\" -underline 0 -comman
 cmd( "$w add separator" );
 cmd( "$w add command -label \"Model Report\" -underline 0 -command { set choice 43 }" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%s} {%s} .da }", _LSD_VERSION_, _LSD_DATE_  ); 
+cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%s} {%s} .da }", _LSD_VERSION_, _LSD_DATE_  );
 
 cmd( ".da configure -menu .da.m" );
 cmd( "bind .da <F1> { .da.m.help invoke 0; break }" );
@@ -539,7 +540,7 @@ cmd( "pack .da.f.tit.chk.allblack .da.f.tit.chk.grid -anchor w" );
 cmd( "tooltip::tooltip .da.f.tit.chk.allblack \"Gray scale plots only\"" );
 cmd( "tooltip::tooltip .da.f.tit.chk.grid \"Show grid lines on plots\"" );
 
-cmd( "ttk::frame .da.f.tit.run" );			// watch/gnuplot options 
+cmd( "ttk::frame .da.f.tit.run" );			// watch/gnuplot options
 cmd( "ttk::checkbutton .da.f.tit.run.watch -text Watch -variable watch" );
 cmd( "ttk::checkbutton .da.f.tit.run.gnu -text Gnuplot -variable gnu -state disabled" );
 cmd( "pack .da.f.tit.run.watch .da.f.tit.run.gnu -anchor w" );
@@ -624,7 +625,7 @@ cmd( "bind .da <Control-w> { set choice 46 }; bind .da <Control-W> { set choice 
 cmd( "bind .da <Control-m> { set choice 47 }; bind .da <Control-M> { set choice 47 }" ); 	// create moving average from existing
 
 // grab focus when called from LSD Debugger
-Tcl_SetVar( inter, "running", running ? "1" : "0", 0 );
+cmd( "set running %d", running ? 1 : 0 );
 cmd( "if $running { showtop .da overM } { showtop .da overM 1 1 0 }" );
 
 // add time series in memory to listbox
@@ -634,7 +635,7 @@ if ( actual_steps > 0 )
 	insert_data_mem( root, &num_var );
 	min_c = max( first_c, showInit ? 0 : 1 );
 	max_c = num_c;
-} 
+}
 else
 {	// create parent map from loaded but not run configuration
 	par_map.clear( );
@@ -645,14 +646,14 @@ if ( ! mc && num_var == 0 )
 {
 	if ( first_run )
 		cmd( "ttk::messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"There are no series available\" -detail \"Click on button 'Add...' to load series from results files.\n\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"" );
-	
+
 	first_run = false;
 }
 else
 {
 	if ( ! mc && sim_num > 1 )
-	  cmd( "ttk::messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"Only series from last run are loaded\" -detail \"Click on button 'Add...' to load series from saved simulation results. You can use 'Ctrl' and 'Shift' keys to select multiple files at once. Avoid selecting the results file from last run, as data is already loaded and would be duplicated.\"" );  
-	
+	  cmd( "ttk::messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"Only series from last run are loaded\" -detail \"Click on button 'Add...' to load series from saved simulation results. You can use 'Ctrl' and 'Shift' keys to select multiple files at once. Avoid selecting the results file from last run, as data is already loaded and would be duplicated.\"" );
+
 	cmd( "selectinlist .da.vars.lb.f.v 0 1" );
 }
 
@@ -709,21 +710,21 @@ while ( true )
 	// update entry boxes with linked variables
 	update_bounds( );
 	cmd( "write_disabled .da.f.h.v.y2.f.e $num_y2" );
-	cmd( "write_any .da.f.tit.ps.e $point_size" ); 
-	cmd( "write_any .da.f.tit.pr.e $pdigits" ); 
+	cmd( "write_any .da.f.tit.ps.e $point_size" );
+	cmd( "write_any .da.f.tit.pr.e $pdigits" );
 
 	// update series on-screen statistics
 	cmd( "stat_series" );
 
 	// analysis command loop (enter loading MC experiment if needed)
-	*choice = mc ? 25 : 0;
+	choice = mc ? 25 : 0;
 	choice_g = 0;
-	while ( ! *choice && ! choice_g )
+	while ( ! choice && ! choice_g )
 		Tcl_DoOneEvent( 0 );
 
 	// coming from the structure window
 	if ( choice_g )
-		*choice = 29;
+		choice = 29;
 
 	// update linked variables with values in entry boxes
 	cmd( "if [ string is double [ .da.f.h.v.sc.min.min get ] ] { set miny [ .da.f.h.v.sc.min.min get ] }" );
@@ -731,11 +732,11 @@ while ( true )
 	cmd( "if [ string is integer [ .da.f.h.v.ft.from.mnc get ] ] { set minc [ .da.f.h.v.ft.from.mnc get ] }" );
 	cmd( "if [ string is integer [ .da.f.h.v.ft.to.mxc get ] ] { set maxc [ .da.f.h.v.ft.to.mxc get ] }" );
 	cmd( "if [ string is double [ .da.f.h.v.y2.f.e get ] ] { set num_y2 [ .da.f.h.v.y2.f.e get ] }" );
-	cmd( "if [ string is integer [ .da.f.tit.ps.e get ] ] { set point_size [ .da.f.tit.ps.e get ] }" ); 
-	cmd( "if [ string is integer [ .da.f.tit.pr.e get ] ] { set pdigits [ .da.f.tit.pr.e get ] }" ); 
-	
+	cmd( "if [ string is integer [ .da.f.tit.ps.e get ] ] { set point_size [ .da.f.tit.ps.e get ] }" );
+	cmd( "if [ string is integer [ .da.f.tit.pr.e get ] ] { set pdigits [ .da.f.tit.pr.e get ] }" );
+
 	cmd( "set nv [ .da.vars.ch.f.v size ]" );
-	
+
 	// check options consistency and fix if necessary
 	update_bounds( );
 	if ( point_size <= 0 || point_size > 10 || ( gnu && point_size < 1 ) )
@@ -743,25 +744,25 @@ while ( true )
 	if ( pdigits < 1 || pdigits > 8 )
 		pdigits = 4;
 
-	if ( *choice == 1 && time_cross == 1 && xy == 0 )	// Plot cross section
-		*choice = 9;
+	if ( choice == 1 && time_cross == 1 && xy == 0 )	// Plot cross section
+		choice = 9;
 
-	if ( *choice == 1 && time_cross == 0 && xy == 1 )	// Plot XY
-		*choice = 17;
+	if ( choice == 1 && time_cross == 0 && xy == 1 )	// Plot XY
+		choice = 17;
 
-	if ( *choice == 1 && time_cross == 1 && xy == 1 )	// Plot XY Cross section
-		*choice = 18;
+	if ( choice == 1 && time_cross == 1 && xy == 1 )	// Plot XY Cross section
+		choice = 18;
 
-	if ( *choice == 12 && time_cross == 1 )				// Statistics cross section
-		*choice = 13;
+	if ( choice == 12 && time_cross == 1 )				// Statistics cross section
+		choice = 13;
 
-	switch ( *choice )
+	switch ( choice )
 	{
 		// Exit
 		case 2:
 			cmd( "if { [ .da.vars.pl.f.v size ] != 0 } { set answer [ ttk::messageBox -parent .da -type okcancel -title Confirmation -icon question -default ok -message \"Exit Analysis of Results?\" -detail \"All the plots and series created and not saved will be lost.\"] } { set answer ok }" );
 			cmd( "if { ! [ string equal $answer ok ] } { set choice 0 }" );
-			if ( *choice == 0 )
+			if ( choice == 0 )
 				break;
 
 			delete [ ] vs;
@@ -770,7 +771,7 @@ while ( true )
 			cmd( "destroytop .dap" );
 			cmd( "destroytop .da" );
 			uncover_browser( );
-				
+
 			Tcl_UnlinkVar( inter, "auto" );
 			Tcl_UnlinkVar( inter, "auto_x" );
 			Tcl_UnlinkVar( inter, "firstc" );
@@ -797,175 +798,169 @@ while ( true )
 
 			cmd( "catch { set a [ glob -nocomplain plotxy_* ] }" ); // remove directories
 			cmd( "foreach b $a { catch { file delete -force $b } }" );
-			
+
 			return;
-		  
-		 
+
+
 		// MAIN BUTTONS OPTIONS
 
 		// Plot
 		case 1:
 			cur_plot++;
-			
-			plot_tseries( choice );
-			
-			if ( *choice == 2 )		//plot aborted
+
+			plot_tseries( );
+
+			if ( choice == 2 )		//plot aborted
 				cur_plot--;
 			else
 				cmd( "addtolist .da.vars.pl.f.v \"${cur_plot}) ${tit}\"" );
-			
+
 			break;
 
-		  
+
 		// Plot the cross-section plot. That is, the vars selected from
 		// one series for each time step selected
 		case 9:
-			set_cs_data( choice );
-			
-			if ( *choice == 2 )		//plot aborted
+			set_cs_data( );
+
+			if ( choice == 2 )		//plot aborted
 				break;
-			
+
 			cur_plot++;
-				
-			plot_cross( choice );
-			
-			if ( *choice == 2 )		//plot aborted
+
+			plot_cross( );
+
+			if ( choice == 2 )		//plot aborted
 				cur_plot--;
 			else
 				cmd( "addtolist .da.vars.pl.f.v \"${cur_plot}) ${tit}\"" );
-				
+
 			break;
 
-			
+
 		// Plot XY: plot_gnu or phase diagram, depending on how many series are selected
 		case 17:
 			cur_plot++;
-			
+
 			if ( nv > 1 )
-				plot_gnu( choice );
+				plot_gnu( );
 			else
-				plot_phase_diagram( choice );
-			
-			if ( *choice == 2 )
+				plot_phase_diagram( );
+
+			if ( choice == 2 )
 				cur_plot--;
 			else
 				cmd( "addtolist .da.vars.pl.f.v \"${cur_plot}) ${tit}\"" );
-			
+
 			break;
 
-		  
+
 		// Plot_cs_xy
 		case 18:
 			cur_plot++;
-			
-			plot_cs_xy( choice );
-			
-			if ( *choice == 2 )		//plot aborted
+
+			plot_cs_xy( );
+
+			if ( choice == 2 )		//plot aborted
 				cur_plot--;
 			else
 				cmd( "addtolist .da.vars.pl.f.v \"${cur_plot}) ${tit}\"" );
-			
+
 			break;
 
-		  
-		// plot a lattice. 
+
+		// plot a lattice.
 		// Data must be stored on a single time step organized for lines and columns in sequence
 		case 23:
 			cur_plot++;
-			
-			plot_lattice( choice );
-			
-			if ( *choice == 2 )		//plot aborted
+
+			plot_lattice( );
+
+			if ( choice == 2 )		//plot aborted
 				cur_plot--;
-			else   
+			else
 				cmd( "addtolist .da.vars.pl.f.v \"${cur_plot}) ${tit}\"" );
-			
+
 			break;
 
 
 		// plot histograms
 		case 32:
 			cur_plot++;
-			
+
 			cmd( "set choice $tc" );
-			if ( *choice == 0 )
-				histograms( choice );
+			if ( choice == 0 )
+				histograms( );
 			else
-				histograms_cs( choice );
-			
-			if ( *choice == 2 )		//plot aborted
+				histograms_cs( );
+
+			if ( choice == 2 )		//plot aborted
 				cur_plot--;
-			else   
+			else
 				cmd( "addtolist .da.vars.pl.f.v \"${cur_plot}) ${tit}\"" );
-				
+
 			break;
 
 
 		// Print the data series in the log window
-		case 36: 
-			plog_series( choice );
+		case 36:
+			plog_series( );
 			cmd( "focustop .log .da" );
-			
+
 			break;
-		   
-		   
+
+
 		// show the equation for the selected element
 		case 16:
 			cmd( "set a [ split $res ]; set b [ lindex $a 0 ]" );
-			app = ( char * ) Tcl_GetVar( inter, "b", 0 );
-			
-			*choice = 2;	// point .da window as parent for the following window
-			show_eq( app, choice );
-			
+			show_eq( get_str( "b" ), ".da" );
+
 			break;
 
 
 		// show the description for the selected element
 		case 19:
 			cmd( "set a [ split $res ]; set b [ lindex $a 0 ]" );
-			app = ( char * ) Tcl_GetVar( inter, "b", 0 );
-			
-			*choice = 2;	// point .da window as parent for the following window
-			show_descr( app, choice );
-			
+			show_descr( get_str( "b" ), ".da" );
+
 			break;
 
 
 		// Save data in the Vars. to plot listbox
 		case 10:
-			save_datazip( choice );
-			
+			save_datazip( );
+
 			break;
 
 
 		// Statistics
 		case 12:
-			statistics( choice );
+			statistics( );
 			cmd( "focustop .log .da" );
-			
+
 			break;
 
-		 
+
 		// Statistics Cross Section
 		case 13:
-			set_cs_data( choice );
-			
-			if ( *choice != 2 )
+			set_cs_data( );
+
+			if ( choice != 2 )
 			{
-				statistics_cross( choice );
+				statistics_cross( );
 				cmd( "focustop .log .da" );
 			}
-			
+
 			break;
 
 
 		// save plot to file
 		case 11:
 			cmd( "set choice $fromPlot" );
-			if ( ! *choice )
+			if ( ! choice )
 			{
 				cmd( "set choice [ .da.vars.pl.f.v size ]" );
-				if ( *choice == 0 )		 // no plots to save
+				if ( choice == 0 )		 // no plots to save
 				{
 					cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"No plot available\" -detail \"Place one or more series in the Series Selected listbox and select 'Plot' to produce a plot.\"" );
 					break;
@@ -976,47 +971,43 @@ while ( true )
 					cmd( "set iti [ .da.vars.pl.f.v curselection ]" );
 					cmd( "if { [ string length $iti ] == 0 } { set choice 1 } { set choice 0 }" );
 
-					if ( *choice == 1 )
+					if ( choice == 1 )
 					{
-						*choice = 0;
+						choice = 0;
 						cmd( "newtop .da.a \"Save Plot\" { set choice 2 } .da" );
 						cmd( "ttk::label .da.a.l -justify center -text \"Select one plot from the \nPlots listbox before clicking 'OK'\"" );
 						cmd( "pack .da.a.l -pady 10 -padx 5" );
 						cmd( "okhelpcancel .da.a b { set choice 1 } { LsdHelp menudata_res.html#postscript } { set choice 2 }" );
 						cmd( "showtop .da.a centerW 0 0 0" );
 						cmd( "mousewarpto .da.a.b.ok" );
-						
-						while ( *choice == 0 )
+
+						while ( choice == 0 )
 							Tcl_DoOneEvent( 0 );
 						cmd( "destroytop .da.a" );
 					}
 				}
-				while ( *choice == 1 );
+				while ( choice == 1 );
 
-				if ( *choice == 2 )
+				if ( choice == 2 )
 					break;
 
-				*choice = 0;
-				
+				choice = 0;
+
 				cmd( "set it [ .da.vars.pl.f.v get $iti ]" );
 			}
-			
-			cmd( "set choice [ info exists it ]" );
-			if ( ! *choice )
+
+			if ( ! exists_var( "it" ) )
 				break;
-			
+
 			cmd( "unset a" );
 			cmd( "scan $it %%d)%%s a b" );
-			cmd( "set choice [ info exists a ]" );
-			if ( ! *choice )
+			if ( ! exists_var( "a" ) )
 				break;
-			
-			cmd( "set choice [ winfo exists $daptab.tab$a ]" );
 
-			if ( *choice == 0 )
+			if ( ! exists_window( "$daptab.tab$a" ) )
 			{
 				cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Cannot save plot\" -detail \"The plot was produced in Gnuplot. Please reopen/create the plot and use the Gnuplot tools (toolbar buttons) to save it.\"" );
-				break;  
+				break;
 			}
 
 			cmd( "if { ! [ info exists pltSavFmt ] } { set pltSavFmt svg }" );
@@ -1024,7 +1015,7 @@ while ( true )
 			cmd( "if { ! [ info exists pltSavRes ] } { set pltSavRes 0 }" );
 			cmd( "if { ! [ info exists pltSavDim ] } { set pltSavDim 270 }" );
 			cmd( "if { ! [ info exists pltSavLeg ] } { set pltSavLeg 1 }" );
-			
+
 			cmd( "newtop .da.file \"Save Plot\" { set choice 2 } .da" );
 
 			cmd( "ttk::frame .da.file.l" );
@@ -1033,7 +1024,7 @@ while ( true )
 			cmd( "pack .da.file.l.l1 .da.file.l.l2" );
 
 			cmd( "ttk::frame .da.file.opt" );
-			
+
 			cmd( "ttk::frame .da.file.opt.fmt -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 			cmd( "ttk::radiobutton .da.file.opt.fmt.p1 -text SVG -variable pltSavFmt -value svg -command { \
 					.da.file.opt.pos.p1 configure -state disabled; \
@@ -1046,7 +1037,7 @@ while ( true )
 					.da.file.dim.n configure -state normal  \
 				}" );
 			cmd( "pack .da.file.opt.fmt.p1 .da.file.opt.fmt.p2 -side left -ipadx 5" );
-			
+
 			cmd( "ttk::frame .da.file.opt.col -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 			cmd( "ttk::radiobutton .da.file.opt.col.r1 -text Color -variable pltSavCmod -value color" );
 			cmd( "ttk::radiobutton .da.file.opt.col.r2 -text Grayscale -variable pltSavCmod -value gray" );
@@ -1057,7 +1048,7 @@ while ( true )
 			cmd( "ttk::radiobutton .da.file.opt.pos.p1 -text Landscape -variable pltSavRes -value 0" );
 			cmd( "ttk::radiobutton .da.file.opt.pos.p2 -text Portrait -variable pltSavRes -value 1" );
 			cmd( "pack .da.file.opt.pos.p1 .da.file.opt.pos.p2 -side left -ipadx 5" );
-			
+
 			cmd( "pack .da.file.opt.fmt .da.file.opt.col .da.file.opt.pos -pady 5" );
 
 			cmd( "ttk::frame .da.file.dim" );
@@ -1068,7 +1059,7 @@ while ( true )
 			cmd( "pack .da.file.dim.l1 .da.file.dim.n .da.file.dim.l2 -side left" );
 
 			cmd( "ttk::checkbutton .da.file.lab -text \"Include series legends\" -variable pltSavLeg -onvalue 1 -offvalue 0" );
-			
+
 			cmd( "if [ string equal $pltSavFmt eps ] { \
 					.da.file.opt.pos.p1 configure -state normal; \
 					.da.file.opt.pos.p2 configure -state normal;  \
@@ -1080,7 +1071,7 @@ while ( true )
 				}" );
 
 			cmd( "set choice $a" );
-			if ( plot_l[ *choice ] == plot_nl[ *choice ] )
+			if ( plot_l[ choice ] == plot_nl[ choice ] )
 				cmd( ".da.file.lab conf -state disabled" );
 
 			cmd( "pack .da.file.l .da.file.opt .da.file.dim .da.file.lab -pady 5 -padx 5" );
@@ -1099,14 +1090,14 @@ while ( true )
 			cmd( "tooltip::tooltip .da.file.lab \"Show names of series\"" );
 
 
-			*choice = 0;
-			while ( *choice == 0 )
+			choice = 0;
+			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			cmd( "set pltSavDim [ .da.file.dim.n get ]" ); 
+			cmd( "set pltSavDim [ .da.file.dim.n get ]" );
 			cmd( "destroytop .da.file" );
 
-			if ( *choice == 2 )
+			if ( choice == 2 )
 				break;
 
 			// make sure there is a path set
@@ -1119,34 +1110,34 @@ while ( true )
 				} else { \
 					set t \"Scalable Vector Graphics\" \
 				}" );
-					
+
 			cmd( "set fn [ tk_getSaveFile -parent .da -title \"Save Plot to File\" -defaultextension .$pltSavFmt -initialfile $b.$pltSavFmt -initialdir \"$path\" -filetypes { { {Scalable Vector Graphics} {.svg} } { {Encapsulated Postscript} {.eps} } { {All files} {*} } } -typevariable t ]; if { [ string length $fn ] == 0 } { set choice 2 }" );
-			
-			if ( *choice == 2 )
+
+			if ( choice == 2 )
 				break;
 
 			cmd( "set dd ${pltSavDim}m" );
 			cmd( "set fn [ file nativename $fn ]" );
 			cmd( "set e [ string trimleft [ file extension $fn ] . ]" );
 			cmd( "if { $e in [ list svg eps ] } { set pltSavFmt $e }" );
-			
+
 			cmd( "set bb [ $daptab.tab$a.c.f.plots bbox all ]" );
 			cmd( "set x0 [ expr { [ lindex $bb 0 ] - 2 * $tbordsizeP } ]" );
 			cmd( "set y0 [ expr { [ lindex $bb 1 ] - 2 * $tbordsizeP } ]" );
 			cmd( "set x1 [ expr { [ lindex $bb 2 ] + 4 * $tbordsizeP } ]" );
 
 			cmd( "set choice $pltSavLeg" );
-			if ( *choice == 0 )				// remove legends, if any
+			if ( choice == 0 )				// remove legends, if any
 			{
 				// check for valid boundary values
 				cmd( "set choice $a" );
-				if ( plot_l[ *choice ] > 0 && plot_l[ *choice ] > plot_nl[ *choice ] )
+				if ( plot_l[ choice ] > 0 && plot_l[ choice ] > plot_nl[ choice ] )
 				{
-					cmd( "set y1 [ expr { %d + [ font metric \"$fontP\" -descent ] } ]", plot_nl[ *choice ] );
+					cmd( "set y1 [ expr { %d + [ font metric \"$fontP\" -descent ] } ]", plot_nl[ choice ] );
 					cmd( "if [ info exists zoomLevel%d ] { \
 						set y1 [ expr { $y1 * $zoomLevel%d } ] \
-					}", *choice, *choice );
-					
+					}", choice, choice );
+
 					cmd( "if [ string equal $pltSavFmt eps ] { \
 							set y1 [ expr { $y1 + 2 * $tbordsizeP } ] \
 						} else { \
@@ -1156,13 +1147,13 @@ while ( true )
 			}
 			else
 				cmd( "set y1 [ expr { [ lindex $bb 3 ] + 4 * $tbordsizeP } ]" );
-			
+
 			cmd( "if [ string equal $pltSavFmt eps ] { \
 					$daptab.tab$a.c.f.plots postscript -x $x0 -y $y0 -width [ expr { $x1 - $x0 } ] -height [ expr { $y1 - $y0 } ] -pagewidth $dd -rotate $pltSavRes -colormode $pltSavCmod -file \"$fn\" \
 				} else { \
 					canvas2svg $daptab.tab$a.c.f.plots \"$fn\" \"$x0 $y0 $x1 $y1\" $pltSavCmod %s \
 				}", simul_name );
-				
+
 			cmd( "plog \"\nPlot saved: $fn\n\"" );
 
 			break;
@@ -1191,7 +1182,7 @@ while ( true )
 			cmd( "ttk::label .da.a.tit.s -text \"$b\" -style hl.TLabel" );
 			cmd( "pack .da.a.tit.l .da.a.tit.s" );
 			cmd( "ttk::frame .da.a.q -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-			
+
 			// select all
 			cmd( "ttk::frame .da.a.q.f1" );
 			cmd( "ttk::radiobutton .da.a.q.f1.c -text \"Select all\" -variable ssys -value 2 -command { \
@@ -1220,7 +1211,7 @@ while ( true )
 				}" );
 			cmd( "pack .da.a.q.f1.c" );
 			cmd( "pack .da.a.q.f1 -anchor w" );
-			
+
 			// select tags
 			cmd( "ttk::frame .da.a.q.f" );
 			cmd( "ttk::radiobutton .da.a.q.f.c -text \"Select by series tags\" -variable ssys -value 1 -command { \
@@ -1271,7 +1262,7 @@ while ( true )
 					bind .da.a.q.f.l.e$x <Return> { focus .da.a.b.r2.ok }" );
 			cmd( "pack .da.a.q.f.l -anchor w -padx 25" );
 			cmd( "pack .da.a.q.f -anchor w" );
-		
+
 			// select cases
 			cmd( "ttk::frame .da.a.q.f4" );
 			cmd( "ttk::radiobutton .da.a.q.f4.c -text \"Select by series cases\" -variable ssys -value 5 -command { \
@@ -1303,7 +1294,7 @@ while ( true )
 					.da.a.q.f3.s invoke \
 				}" );
 			cmd( "pack .da.a.q.f4.c -anchor w" );
-			
+
 			cmd( "ttk::frame .da.a.q.f4.l" );
 			cmd( "ttk::entry .da.a.q.f4.l.e1 -width 5 -textvariable ca1 -justify center -state disabled" );
 			cmd( "ttk::label .da.a.q.f4.l.s -text to" );
@@ -1315,9 +1306,9 @@ while ( true )
 				}" );
 			cmd( "bind .da.a.q.f4.l.e2 <Return> { focus .da.a.b.r2.ok }" );
 			cmd( "pack .da.a.q.f4.l -anchor w -padx 25" );
-			
+
 			cmd( "pack .da.a.q.f4 -anchor w" );
-			
+
 			// select by values
 			cmd( "ttk::frame .da.a.q.f3" );
 			cmd( "ttk::radiobutton .da.a.q.f3.s -text \"Select by series values\" -variable ssys -value 3 -command { \
@@ -1350,7 +1341,7 @@ while ( true )
 				}" );
 			cmd( "pack .da.a.q.f3.s -anchor w" );
 			cmd( "pack .da.a.q.f3 -anchor w" );
-			
+
 			// select by values from other series
 			cmd( "ttk::frame .da.a.q.f2" );
 			cmd( "ttk::radiobutton .da.a.q.f2.s -text \"Select by values from another series\" -variable ssys -value 4 -command { \
@@ -1402,7 +1393,7 @@ while ( true )
 			cmd( "pack .da.a.q.f2.f.l .da.a.q.f2.f.e -anchor w -side left" );
 			cmd( "pack .da.a.q.f2.f -anchor w -padx 22" );
 			cmd( "pack .da.a.q.f2 -anchor w" );
-			
+
 			cmd( "ttk::frame .da.a.c -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 			cmd( "ttk::frame .da.a.c.o" );
 			cmd( "ttk::radiobutton .da.a.c.o.eq -text \"Equal (=)\" -variable cond -value 1 -state disabled" );
@@ -1416,13 +1407,13 @@ while ( true )
 			cmd( "ttk::frame .da.a.c.v.c" );
 			cmd( "ttk::label .da.a.c.v.c.l -text \"Comparison value\"" );
 			cmd( "ttk::entry .da.a.c.v.c.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set compvalue %%P; return 1 } { %%W delete 0 end; %%W insert 0 $compvalue; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-			cmd( "write_any .da.a.c.v.c.e $compvalue" ); 
+			cmd( "write_any .da.a.c.v.c.e $compvalue" );
 			cmd( "bind .da.a.c.v.c.e <Return> {focus .da.a.c.v.t.e2; .da.a.c.v.t.e2 selection range 0 end }" );
 			cmd( "pack .da.a.c.v.c.l .da.a.c.v.c.e" );
 			cmd( "ttk::frame .da.a.c.v.t" );
 			cmd( "ttk::label .da.a.c.v.t.t -text \"Case\"" );
 			cmd( "ttk::entry .da.a.c.v.t.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set tvar %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tvar; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-			cmd( "write_any .da.a.c.v.t.e2 $tvar" ); 
+			cmd( "write_any .da.a.c.v.t.e2 $tvar" );
 			cmd( "bind .da.a.c.v.t.e2 <Return> { focus .da.a.b.r2.ok }" );
 			cmd( "pack .da.a.c.v.t.t .da.a.c.v.t.e2" );
 			cmd( "pack .da.a.c.v.c .da.a.c.v.t -ipady 10" );
@@ -1432,45 +1423,43 @@ while ( true )
 			cmd( "XYokhelpcancel .da.a b Description Equation { set choice 3 } { set choice 4 } { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
 			cmd( "showtop .da.a topleftW 0 0" );
 			cmd( "mousewarpto .da.a.b.r2.ok" );
-			
+
 			cmd( "tooltip::tooltip .da.a.b.r1.x \"Show textual description\"" );
 			cmd( "tooltip::tooltip .da.a.b.r1.y \"Show equation code\"" );
 
-			*choice = 0;
-			while ( *choice == 0 )
+			choice = 0;
+			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			cmd( "set tvar [ .da.a.c.v.t.e2 get ]" ); 
-			cmd( "set compvalue [ .da.a.c.v.c.e get ]" ); 
+			cmd( "set tvar [ .da.a.c.v.t.e2 get ]" );
+			cmd( "set compvalue [ .da.a.c.v.c.e get ]" );
 			Tcl_UnlinkVar( inter, "compvalue" );
 
-			if ( *choice == 2 )
+			if ( choice == 2 )
 			{
 				cmd( "destroytop .da.a" );
-				break;
-			}
-			
-			if ( *choice == 3 )
-			{
-				cmd( "destroytop .da.a" );
-				*choice = 2;	// point .da window as parent for the following window
-				show_descr( ( char * ) Tcl_GetVar( inter, "b", 0 ), choice );
 				break;
 			}
 
-			if ( *choice == 4 )
+			if ( choice == 3 )
 			{
 				cmd( "destroytop .da.a" );
-				*choice = 2;	// point .da window as parent for the following window
-				show_eq( ( char * ) Tcl_GetVar( inter, "b", 0 ), choice );
+				show_descr( get_str( "b" ), ".da" );
+				break;
+			}
+
+			if ( choice == 4 )
+			{
+				cmd( "destroytop .da.a" );
+				show_eq( get_str( "b" ), ".da" );
 				break;
 			}
 
 			cmd( "if { [ .da.vars.ch.f.v get 0 ] == \"\" } { set tit \"\" }" );
 			cmd( "set choice $ssys" );
-			
+
 			// select all
-			if ( *choice == 2 )
+			if ( choice == 2 )
 			{
 				cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
 				cmd( "foreach i $tot { \
@@ -1480,9 +1469,9 @@ while ( true )
 				}" );
 				cmd( "if { \"$tit\" == \"\" } { set tit [ .da.vars.ch.f.v get 0 ] }" );
 			}
-			 
+
 			// select cases
-			if ( *choice == 5 )
+			if ( choice == 5 )
 			{
 				cmd( "if { ! [ string is integer -strict $ca1 ] } { set ca1 0 }" );
 				cmd( "if { ! [ string is integer -strict $ca2 ] } { set ca2 $maxc }" );
@@ -1494,21 +1483,21 @@ while ( true )
 				}" );
 				cmd( "if { \"$tit\" == \"\" } { set tit [ .da.vars.ch.f.v get 0 ] }" );
 			}
-			 
+
 			// select tags
-			if ( *choice == 1 )
+			if ( choice == 1 )
 			{
 				cmd( "set choice $cond" );
-				i  = * choice;
+				i  = choice;
 
-				*choice = -1;
+				choice = -1;
 				cmd( "for { set x 0 } { $x < $ntag } { incr x } { \
 						if { [ .da.a.q.f.l.e$x get ] != \"\" } { \
 							set choice $x \
 						} \
 					}" );
-					
-				if ( *choice == -1 )
+
+				if ( choice == -1 )
 				{
 					cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
 					cmd( "foreach i $tot { \
@@ -1618,39 +1607,35 @@ while ( true )
 										} \
 									} \
 								}" );
-					} 
+					}
 				}
-				
-				*choice = 0;
+
+				choice = 0;
 			}
 
 			// select by values or by values from other series
-			if ( *choice == 3 || *choice == 4 )
+			if ( choice == 3 || choice == 4 )
 			{
-				l = *choice;
+				l = choice;
 				cmd( "set choice $cond" );
-				p = *choice;
+				p = choice;
 				cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
 				cmd( "set choice [ llength $tot ]" );
-				j = *choice;
+				j = choice;
 
 				if ( l == 3 )
-					app = ( char * ) Tcl_GetVar( inter, "b", 0 );
+					get_str( "b", str3, MAX_ELEM_LENGTH );
 				else
-					app = ( char * ) Tcl_GetVar( inter, "svar", 0 );
-
-				strcpy( str3, app );
+					get_str( "svar", str3, MAX_ELEM_LENGTH );
 
 				cmd( "set choice $tvar" );
-				h = *choice;
+				h = choice;
 
 				for ( i = 0; i < j; ++i )
 				{
 					cmd( "set res [ lindex $tot %d ]", i );
-					app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-					strcpy( msg, app );
-					sscanf( msg, "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
-					
+					sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
+
 					if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 					{
 						datum = vs[ k ].data;
@@ -1659,32 +1644,32 @@ while ( true )
 							r = 0;
 							switch ( p )
 							{
-								case 0: 
+								case 0:
 									if ( datum[ h - l ] != compvalue )
 										r = 1;
 									break;
-								case 1: 
+								case 1:
 									if ( datum[ h - l ] == compvalue )
 										r = 1;
 									break;
-								case 2: 
+								case 2:
 									if ( datum[ h - l ] >= compvalue )
 										r = 1;
 									break;
-								case 3: 
+								case 3:
 									if ( datum[ h - l ] > compvalue )
 										r = 1;
 									break;
-								case 4: 
+								case 4:
 									if ( datum[ h - l ] <= compvalue )
 										r = 1;
 									break;
-								case 5: 
+								case 5:
 									if ( datum[ h - l ] < compvalue )
 										r = 1;
 									break;
 							}
-							
+
 							if ( r == 1 )
 								cmd( "insert_series .da.vars.ch.f.v $res" );
 						}
@@ -1721,7 +1706,7 @@ while ( true )
 			cmd( "ttk::label .da.a.tit.s -text \"$b\" -style hl.TLabel" );
 			cmd( "pack .da.a.tit.l .da.a.tit.s" );
 			cmd( "ttk::frame .da.a.q -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-			
+
 			// unselect all
 			cmd( "ttk::frame .da.a.q.f1" );
 			cmd( "ttk::radiobutton .da.a.q.f1.c -text \"Unselect all\" -variable ssys -value 2 -command { \
@@ -1750,7 +1735,7 @@ while ( true )
 				}" );
 			cmd( "pack .da.a.q.f1.c" );
 			cmd( "pack .da.a.q.f1 -anchor w" );
-			
+
 			// unselect tags
 			cmd( "ttk::frame .da.a.q.f" );
 			cmd( "ttk::radiobutton .da.a.q.f.c -text \"Unselect by series tags\" -variable ssys -value 1 -command { \
@@ -1801,7 +1786,7 @@ while ( true )
 					bind .da.a.q.f.l.e$x <Return> { focus .da.a.b.r2.ok }" );
 			cmd( "pack .da.a.q.f.l -anchor w -padx 25" );
 			cmd( "pack .da.a.q.f -anchor w" );
-		
+
 			// unselect cases
 			cmd( "ttk::frame .da.a.q.f4" );
 			cmd( "ttk::radiobutton .da.a.q.f4.c -text \"Unselect by series cases\" -variable ssys -value 5 -command { \
@@ -1833,7 +1818,7 @@ while ( true )
 					.da.a.q.f3.s invoke \
 				}" );
 			cmd( "pack .da.a.q.f4.c -anchor w" );
-			
+
 			cmd( "ttk::frame .da.a.q.f4.l" );
 			cmd( "ttk::entry .da.a.q.f4.l.e1 -width 5 -textvariable ca1 -justify center -state disabled" );
 			cmd( "ttk::label .da.a.q.f4.l.s -text to" );
@@ -1845,9 +1830,9 @@ while ( true )
 				}" );
 			cmd( "bind .da.a.q.f4.l.e2 <Return> { focus .da.a.b.r2.ok }" );
 			cmd( "pack .da.a.q.f4.l -anchor w -padx 25" );
-			
+
 			cmd( "pack .da.a.q.f4 -anchor w" );
-			
+
 			// unselect by values
 			cmd( "ttk::frame .da.a.q.f3" );
 			cmd( "ttk::radiobutton .da.a.q.f3.s -text \"Unselect by series values\" -variable ssys -value 3 -command { \
@@ -1880,7 +1865,7 @@ while ( true )
 				}" );
 			cmd( "pack .da.a.q.f3.s -anchor w" );
 			cmd( "pack .da.a.q.f3 -anchor w" );
-			
+
 			// unselect by values from other series
 			cmd( "ttk::frame .da.a.q.f2" );
 			cmd( "ttk::radiobutton .da.a.q.f2.s -text \"Unselect by values from another series\" -variable ssys -value 4 -command { \
@@ -1945,13 +1930,13 @@ while ( true )
 			cmd( "ttk::frame .da.a.c.v.c" );
 			cmd( "ttk::label .da.a.c.v.c.l -text \"Comparison value\"" );
 			cmd( "ttk::entry .da.a.c.v.c.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set compvalue %%P; return 1 } { %%W delete 0 end; %%W insert 0 $compvalue; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-			cmd( "write_any .da.a.c.v.c.e $compvalue" ); 
+			cmd( "write_any .da.a.c.v.c.e $compvalue" );
 			cmd( "bind .da.a.c.v.c.e <Return> {focus .da.a.c.v.t.e2; .da.a.c.v.t.e2 selection range 0 end }" );
 			cmd( "pack .da.a.c.v.c.l .da.a.c.v.c.e" );
 			cmd( "ttk::frame .da.a.c.v.t" );
 			cmd( "ttk::label .da.a.c.v.t.t -text \"Case\"" );
 			cmd( "ttk::entry .da.a.c.v.t.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set tvar %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tvar; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-			cmd( "write_any .da.a.c.v.t.e2 $tvar" ); 
+			cmd( "write_any .da.a.c.v.t.e2 $tvar" );
 			cmd( "bind .da.a.c.v.t.e2 <Return> { focus .da.a.b.r2.ok }" );
 			cmd( "pack .da.a.c.v.t.t .da.a.c.v.t.e2" );
 			cmd( "pack .da.a.c.v.c .da.a.c.v.t -ipady 10" );
@@ -1968,33 +1953,31 @@ while ( true )
 			cmd( "tooltip::tooltip .da.a.b.r1.x \"Variable/Parameter textual description\"" );
 			cmd( "tooltip::tooltip .da.a.b.r1.y \"Variable equation code\"" );
 
-			*choice = 0;
-			while ( *choice == 0 )
+			choice = 0;
+			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			cmd( "set tvar [ .da.a.c.v.t.e2 get ]" ); 
-			cmd( "set compvalue [ .da.a.c.v.c.e get ]" ); 
+			cmd( "set tvar [ .da.a.c.v.t.e2 get ]" );
+			cmd( "set compvalue [ .da.a.c.v.c.e get ]" );
 			Tcl_UnlinkVar( inter, "compvalue" );
 
-			if ( *choice == 2 )
+			if ( choice == 2 )
 			{
 				cmd( "destroytop .da.a" );
 				break;
 			}
 
-			if ( *choice == 3 )
+			if ( choice == 3 )
 			{
 				cmd( "destroytop .da.a" );
-				*choice = 2;	// point .da window as parent for the following window
-				show_descr( ( char * ) Tcl_GetVar( inter, "b", 0 ), choice );
+				show_descr( get_str( "b" ), ".da" );
 				break;
 			}
 
-			if ( *choice == 4 )
+			if ( choice == 4 )
 			{
 				cmd( "destroytop .da.a" );
-				*choice = 2;	// point .da window as parent for the following window
-				show_eq( ( char * ) Tcl_GetVar( inter, "b", 0 ), choice );
+				show_eq( get_str( "b" ), ".da" );
 				break;
 			}
 
@@ -2002,7 +1985,7 @@ while ( true )
 			cmd( "set choice $ssys" );
 
 			// unselect all
-			if ( *choice == 2 )
+			if ( choice == 2 )
 			{
 				 cmd( "set tot [ .da.vars.ch.f.v get 0 end ]" );
 				 cmd( "set myc 0" );
@@ -2013,9 +1996,9 @@ while ( true )
 						incr myc \
 					}" );
 			}
-			 
+
 			// unselect cases
-			if ( *choice == 5 )
+			if ( choice == 5 )
 			{
 				cmd( "if { ! [ string is integer -strict $ca1 ] } { set ca1 0 }" );
 				cmd( "if { ! [ string is integer -strict $ca2 ] } { set ca2 $maxc }" );
@@ -2028,24 +2011,24 @@ while ( true )
 					incr myc \
 				}" );
 			}
-			 
+
 			// unselect tags
-			if ( *choice == 1 )
+			if ( choice == 1 )
 			{
 				cmd( "set choice $cond" );
-				i = *choice;
+				i = choice;
 
-				*choice = -1;
+				choice = -1;
 				cmd( "for { set x 0 } { $x < $ntag } { incr x } { \
 						if { [ .da.a.q.f.l.e$x get ] != \"\" } { \
 							set choice $x \
 						} \
 					}" );
-					
-				if ( *choice == -1 )
+
+				if ( choice == -1 )
 				{
 					cmd( "set tot [ .da.vars.ch.f.v get 0 end ]" );
-					cmd( "set myc 0" ); 
+					cmd( "set myc 0" );
 					cmd( "foreach i $tot { \
 							if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
 								.da.vars.ch.f.v selection set $myc \
@@ -2081,7 +2064,7 @@ while ( true )
 										} \
 									}; \
 									incr myc \
-								}" );  
+								}" );
 							break;
 						case 1:
 							cmd( "set myc 0; \
@@ -2098,7 +2081,7 @@ while ( true )
 										} \
 									}; \
 									incr myc \
-								}" );  
+								}" );
 							break;
 						case 2:
 							cmd( "set myc 0; \
@@ -2115,7 +2098,7 @@ while ( true )
 										} \
 									}; \
 									incr myc \
-								}" );  
+								}" );
 							break;
 						case 3:
 							cmd( "set myc 0; \
@@ -2132,7 +2115,7 @@ while ( true )
 										} \
 									}; \
 									incr myc \
-								}" );  
+								}" );
 							break;
 						case 4:
 							cmd( "set myc 0; \
@@ -2149,7 +2132,7 @@ while ( true )
 										} \
 									}; \
 									incr myc \
-								}" );  
+								}" );
 							break;
 						case 5:
 							cmd( "set myc 0; \
@@ -2166,40 +2149,36 @@ while ( true )
 										} \
 									}; \
 									incr myc \
-								}" );  
-					} 
+								}" );
+					}
 				}
-				
-				*choice = 0;
+
+				choice = 0;
 			}
 
 			// unselect by values or by values from other series
-			if ( *choice == 3 || *choice == 4 )
+			if ( choice == 3 || choice == 4 )
 			{
-				l = *choice;
+				l = choice;
 				cmd( "set choice $cond" );
-				p = *choice;
+				p = choice;
 				cmd( "set tot [ .da.vars.ch.f.v get 0 end ]" );
 				cmd( "set choice [ llength $tot ]" );
-				j = *choice;
+				j = choice;
 
 				if ( l == 3 )
-					app = ( char * ) Tcl_GetVar( inter, "b", 0 );
+					get_str( "b", str3, MAX_ELEM_LENGTH );
 				else
-					app = ( char * ) Tcl_GetVar( inter, "svar", 0 );
-
-				strcpy( str3, app );
+					get_str( "svar", str3, MAX_ELEM_LENGTH );
 
 				cmd( "set choice $tvar" );
-				h = *choice;
+				h = choice;
 
 				for ( i = 0; i < j; ++i )
 				{
 					cmd( "set res [ lindex $tot %d ]", i );
-					app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-					strcpy( msg, app );
-					sscanf( msg, "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
-					
+					sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
+
 					if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 					{
 						datum = vs[ k ].data;
@@ -2208,27 +2187,27 @@ while ( true )
 							r = 0;
 							switch ( p )
 							{
-								case 0: 
+								case 0:
 									if ( datum[ h - l ] != compvalue )
 										r = 1;
 									break;
-								case 1: 
+								case 1:
 									if ( datum[ h - l ] == compvalue )
 										r = 1;
 									break;
-								case 2: 
+								case 2:
 									if ( datum[ h - l ] >= compvalue )
 										r = 1;
 									break;
-								case 3: 
+								case 3:
 									if ( datum[ h - l ] > compvalue )
 										r = 1;
 									break;
-								case 4: 
+								case 4:
 									if ( datum[ h - l ] <= compvalue )
 										r = 1;
 									break;
-								case 5: 
+								case 5:
 									if ( datum[ h - l ] < compvalue )
 										r = 1;
 									break;
@@ -2263,10 +2242,10 @@ while ( true )
 		case 20:
 			cmd( "set answer [ ttk::messageBox -parent .da -type yesno -title Confirmation -message \"Delete plot?\" -detail \"Press 'Yes' to delete plot:\\n$tit\" -icon question -default yes ]" );
 			cmd( "if { [ string compare $answer yes ] == 0 } { set choice 1 } { set choice 0 }" );
-			
-			if ( *choice == 0 )
+
+			if ( choice == 0 )
 				break;
-			
+
 			cmd( "scan $it %%d) a" );
 			cmd( "if [ winfo exists $daptab.tab$a ] { \
 					if [ istoplevel $daptab.tab$a ] { \
@@ -2282,7 +2261,7 @@ while ( true )
 					} \
 				}" );
 			cmd( ".da.vars.pl.f.v delete $n_it" );
-				
+
 			update_more_tab( ".dap" );
 
 			break;
@@ -2306,64 +2285,64 @@ while ( true )
 				} else { \
 					set choice 1 \
 				}", MAX_TAB_LEN - 1 );
-				
-			if ( *choice == 1 )
+
+			if ( choice == 1 )
 			{
-				getcwd( dirname, MAX_PATH_LENGTH - 1 );
+				getcwd( dirname, MAX_PATH_LENGTH );
 				cmd( "set choice $a" );
-				sprintf( msg, "plotxy_%d", *choice );
-				chdir( msg );
+				snprintf( da_tmp, MAX_BUFF_SIZE, "plotxy_%d", choice );
+				chdir( da_tmp );
 				cmd( "set choice $a" );
-				show_plot_gnu( *choice, choice, 1, NULL, NULL );
+				show_plot_gnu( choice, 1, NULL, NULL );
 				chdir( dirname );
 			}
-			
+
 			miny = maxy = 0;
-			
+
 			break;
 
-		  
+
 		// SERIES TOOLBAR OPTIONS
 
 		// sort
 		case 5:
 			cmd( "sort_series .da.vars.lb.f.v increasing" );
 			break;
-		  
-		  
+
+
 		// sort (descending order)
 		case 38:
 			cmd( "sort_series .da.vars.lb.f.v decreasing" );
 			break;
-		 
+
 
 		// sort the selection in selected series list in inverse order
 		case 34:
 			cmd( "sort_series .da.vars.ch.f.v reverse" );
 			break;
 
-		   
+
 		// unsort
 		case 14:
 			cmd( "sort_series .da.vars.lb.f.v none" );
 			break;
 
-		   
+
 		// sort last updated on end
 		case 15:
 			cmd( "sort_series .da.vars.lb.f.v nice" );
 			break;
 
-		   
+
 		// find first instance of series in the available series listbox
 		case 39:
 			cmd( "set choice [ llength $DaModElem ]" );
-			if ( *choice == 0 )
+			if ( choice == 0 )
 				break;
 
 			cmd( "set srchTxt \"\"; set srchInst 1" );
 			cmd( "newtop .da.a \"Find Series\" { set choice 2 } .da" );
-			
+
 			cmd( "ttk::frame .da.a.v" );
 			cmd( "ttk::label .da.a.v.l -text \"Series name (or part)\"" );
 			cmd( "ttk::entry .da.a.v.e -textvariable srchTxt -width 20 -justify center" );
@@ -2393,37 +2372,37 @@ while ( true )
 			cmd( "showtop .da.a" );
 			cmd( "focus .da.a.v.e" );
 
-			*choice = 0;
-			while ( *choice == 0 )
+			choice = 0;
+			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
 			cmd( "destroytop .da.a" );
 
-			if ( *choice == 1 )
+			if ( choice == 1 )
 			{
 				cmd( "set choice [ string length $srchTxt ]" );
-				if ( *choice == 0 )
+				if ( choice == 0 )
 					break;
-				
+
 				cmd( "set choice [ search_series $srchTxt ]" );
-				
-				if ( *choice == 0 )
+
+				if ( choice == 0 )
 					cmd( "ttk::messageBox -parent .da -type ok -title \"Error\" -icon error -default ok -message \"Series not found\" -detail \"Check if the name was spelled correctly or use just part of the name. This command is case insensitive.\"" );
 			}
 
 			break;
-		  
-		  
+
+
 		// find subsequent instances of a series in the available series listbox
 		case 40:
 			cmd( "set choice [ search_series ]" );
 
-			if ( *choice == 0 )
+			if ( choice == 0 )
 				cmd( "ttk::messageBox -parent .da -type ok -title \"Warning\" -icon warning -default ok -message \"Series not found\" -detail \"No additional instance of series found.\"" );
 
 			break;
 
-		  
+
 		// insert the variables selected in the list of the variables to plot
 		case 6:
 			cmd( "set a [ .da.vars.lb.f.v curselection ]" );
@@ -2432,47 +2411,47 @@ while ( true )
 
 			break;
 
-		  
+
 		// remove the vars. selected from the variables to plot
 		case 7:
 			cmd( "set steps 0" );
 			cmd( "foreach i [ .da.vars.ch.f.v curselection ] { .da.vars.ch.f.v delete [ expr { $i - $steps } ]; incr steps }" );
 			cmd( "if { [ .da.vars.ch.f.v size ] == 0 } { set tit \"\" } { set tit [ .da.vars.ch.f.v get 0 ] }" );
-			
+
 			break;
 
-		  
+
 		// remove all the variables from the list of vars to plot
 		case 8:
 			cmd( ".da.vars.ch.f.v delete 0 end" );
 			cmd( "set tit \"\"" );
 
 			break;
-			
+
 
 		// add existing variables (no saved)
-		case 45: 
-			if ( *choice == 45 )
+		case 45:
+			if ( choice == 45 )
 				cmd( "set bidi 0" );
-			
+
 		// insert MC series from disk
-		case 25: 
-			if ( *choice == 25 )
+		case 25:
+			if ( choice == 25 )
 				cmd( "set bidi 3" );
-			
+
 		// add new series from existing ones
 		case 46:
-			if ( *choice == 46 )
+			if ( choice == 46 )
 				cmd( "set bidi 4" );
-			
+
 		// add moving average series from existing ones
-		case 47: 
-			if ( *choice == 47 )
+		case 47:
+			if ( choice == 47 )
 				cmd( "set bidi 5" );
-			
+
 		// insert new series ( from disk or combining existing series).
 		case 24:
-			if ( *choice == 24 )
+			if ( choice == 24 )
 			{
 				if ( num_var > 0 )
 				{
@@ -2486,14 +2465,14 @@ while ( true )
 					cmd( "ttk::radiobutton .da.s.i.e -text \"Existing unsaved element\" -underline 0 -variable bidi -value 0" );
 					cmd( "ttk::radiobutton .da.s.i.f -text \"File(s) of saved results\" -underline 0 -variable bidi -value 1" );
 					cmd( "pack .da.s.i.c .da.s.i.a .da.s.i.e .da.s.i.f -anchor w" );
-					
+
 					cmd( "bind .da.s <KeyPress-c> { set bidi 4 }; bind .da.s <KeyPress-C> { set bidi 4 }" );
 					cmd( "bind .da.s <KeyPress-m> { set bidi 5 }; bind .da.s <KeyPress-M> { set bidi 5 }" );
 					cmd( "bind .da.s <KeyPress-e> { set bidi 0 }; bind .da.s <KeyPress-E> { set bidi 0 }" );
 					cmd( "bind .da.s <KeyPress-f> { set bidi 1 }; bind .da.s <KeyPress-F> { set bidi 1 }" );
 
 					cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady 5 -padx 5" );
-					
+
 					if ( nv == 0 )
 					{
 						cmd( ".da.s.i.c configure -state disabled" );
@@ -2522,43 +2501,43 @@ while ( true )
 				cmd( "showtop .da.s" );
 				cmd( "mousewarpto .da.s.b.ok" );
 
-				*choice = 0;
-				while ( *choice == 0 )
+				choice = 0;
+				while ( choice == 0 )
 				  Tcl_DoOneEvent( 0 );
 
 				cmd( "destroytop .da.s" );
 
-				if ( *choice == 2 )
+				if ( choice == 2 )
 					break;
 			}
-			
+
 			cmd( "set oldpath \"\"" );
-			
+
 			// process the proper case
 			cmd( "set choice $bidi" );
-			switch ( *choice )
+			switch ( choice )
 			{
 				case 4:
-					if ( create_series( choice, false, cur_var ) )
+					if ( create_series( false, cur_var ) )
 						cmd( "selectinlist .da.vars.lb.f.v end" );
-					
+
 					break;
 
 				case 5:
-					if ( create_maverag( choice ) )
+					if ( create_maverag( ) )
 						cmd( "selectinlist .da.vars.lb.f.v end" );
-					
+
 					break;
-				
+
 				case 0:
-					if ( add_unsaved( choice ) )
+					if ( add_unsaved( ) )
 						cmd( "selectinlist .da.vars.lb.f.v end" );
-					
+
 					break;
-					
+
 				case 3:
 					mc = true;
-					
+
 					if ( logs )
 						cmd( "ttk::messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
 
@@ -2593,9 +2572,9 @@ while ( true )
 					cmd( "ttk::frame .da.s.ci" );
 					cmd( "ttk::label .da.s.ci.l -text \"Confidence level (%%)\"" );
 					cmd( "ttk::combobox .da.s.ci.p -values $clList -width 4 -justify center -state disabled" );
-					cmd( "write_disabled .da.s.ci.p $confi" ); 
+					cmd( "write_disabled .da.s.ci.p $confi" );
 					cmd( "pack .da.s.ci.l .da.s.ci.p" );
-					
+
 					cmd( "ttk::frame .da.s.s" );
 					cmd( "ttk::checkbutton .da.s.s.k -text \"Keep original series\" -variable keepSeries" );
 					cmd( "pack .da.s.s.k" );
@@ -2604,26 +2583,26 @@ while ( true )
 
 					cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#createmc } { set choice 2 }" );
 
-					cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
-					cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
+					cmd( "bind .da.s <KeyPress-Return> { set choice 1 }" );
+					cmd( "bind .da.s <KeyPress-Escape> { set choice 2 }" );
 
 					cmd( "showtop .da.s" );
 					cmd( "mousewarpto .da.s.b.ok" );
-					 
+
 					cmd( "tooltip::tooltip .da.s.s.k \"Preserve original series\nafter computing MC series\"" );
 
-					*choice = 0;
-					while ( *choice == 0 )
+					choice = 0;
+					while ( choice == 0 )
 						Tcl_DoOneEvent( 0 );
 
-					cmd( "if [ string is double -strict [ .da.s.ci.p get ] ] { set confi [ .da.s.ci.p get ] }" ); 
+					cmd( "if [ string is double -strict [ .da.s.ci.p get ] ] { set confi [ .da.s.ci.p get ] }" );
 					cmd( "destroytop .da.s" );
 
-					if ( *choice == 2 )
+					if ( choice == 2 )
 						goto add_end;
-					
+
 				case 1:
-				
+
 					// check if MC results were not just created
 					if ( ! mc || res_list.size( ) <= 1 )
 					{
@@ -2632,7 +2611,7 @@ while ( true )
 							cmd( "set path_res  \"%s\"", path_res );
 						else
 							cmd( "set path_res \"%s\"", path );
-						
+
 						cmd( "if { [ string length $path_res ] > 0 } { \
 								set oldpath [ pwd ]; \
 								catch { cd $path_res } \
@@ -2640,11 +2619,11 @@ while ( true )
 
 						cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$path_res\" -defaultextension .res.gz -filetypes { %s { {All files} {*} } } -typevariable defaultFileType ]", mc ? "s" : "(s)", platform == _MAC_ ? "" : "{ {LSD result files} {.res.gz .res} } { {LSD total files} {.tot .tot.gz} }" );
 						cmd( "if { ! [ fn_spaces \"$lab\" .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
-						h = *choice;		// number of files
-						
+						h = choice;		// number of files
+
 						if ( h == 0 )
 							goto add_end; 	// no file selected
-						
+
 						if ( mc && h == 1 )
 						{
 							cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid number of results files\" -detail \"Monte Carlo experiment requires two or more files. Please adjust the number of simulation runs properly and regenerate the files.\"" );
@@ -2654,52 +2633,52 @@ while ( true )
 					}
 					else
 						h = res_list.size( );
-					
+
 					var_names.resize( h );
-					
+
 					if ( mc )
 						k = get_int( "keepSeries" );
 					else
 						k = true;
-				
+
 					if ( h > 1 )
 						cmd( "progressbox .da.pas \"Add Series\" \"Loading results files\" \"File\" %d { set stop true } .da \"Case\"", h );
 					else
 						cmd( "progressbox .da.pas \"Add Series\" \"Loading series\" \"\" 1 { set stop true } .da \"Case\"" );
-					
-					for ( i = 0, stop = gz = false; i < h && ! stop; ++i )  
+
+					for ( i = 0, stop = gz = false; i < h && ! stop; ++i )
 					{
 						if ( ! mc || res_list.size( ) <= 1 )
 						{
 							cmd( "set datafile [ lindex $lab %d ]", i );
-							strncpy( filename, ( char * ) Tcl_GetVar( inter, "datafile", 0 ), MAX_PATH_LENGTH );
+							get_str( "datafile", filename, MAX_PATH_LENGTH );
 						}
 						else
-							strncpy( filename, res_list[ i ].c_str( ), MAX_PATH_LENGTH );
-						
+							strcpyn( filename, res_list[ i ].c_str( ), MAX_PATH_LENGTH );
+
 						if ( strlen( filename ) > 3 && ! strcmp( &filename[ strlen( filename ) - 3 ], ".gz" ) )
 							gz = true;
 
 						f = fopen( filename, "r" );
-					
+
 						if ( f != NULL )
 						{
 							fclose( f );
 							++file_counter;
 							insert_data_file( gz, &num_var, &var_names[ i ], k );
-							
+
 							if ( h > 1 )
 								cmd( "prgboxupdate .da.pas %d", i + 1 );
 						}
 						else
-							plog( "\nError: could not open file: %s\n", "", filename );
+							plog( "\nError: could not open file: %s\n", filename );
 					}
-					
+
 					cmd( "destroytop .da.pas" );
-					
+
 					if ( ! mc )
 						goto add_clear;
-					
+
 					if ( stop )
 					{
 						delete [ ] vs;
@@ -2707,72 +2686,72 @@ while ( true )
 						num_var = max_c = file_counter = 0;
 						goto add_clear;
 					}
-						
+
 					plog( "\nCreating MC series... " );
-					
+
 					m = num_var;
 					l = var_names[ 0 ].size( );	// number of series
-					
+
 					for ( i = 1; i < h; ++i )
 					{
 						if ( var_names[ i ].size( ) != ( unsigned ) l )
 						{
 							cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid results files\" -detail \"The number of series in the files are not the same. Results files should come from the same set of simulation runs.\"" );
 							plog( "Aborted\n" );
-							
+
 							if ( ! k )
 							{
 								delete [ ] vs;
 								vs = NULL;
 								num_var = max_c = file_counter = 0;
 							}
-							
+
 							goto add_clear;
 						}
-						
+
 						for ( j = 0; j < l; ++j )
 						{
 							if ( ! var_names[ i ][ j ].compare( var_names[ 0 ][ j ] ) )
 							{
 								cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid results files\" -detail \"The series in the files are not the same or have different number of cases or instances. Variables from objects created during the simulation may not be handled properly. Results files should come from the same set of simulation runs.\"" );
 								plog( "Aborted\n" );
-								
+
 								if ( ! k )
 								{
 									delete [ ] vs;
 									vs = NULL;
 									num_var = max_c = file_counter = 0;
 								}
-							
+
 								goto add_clear;
 							}
 						}
 					}
-					
+
 					if ( k )
 						var_num = num_var;
 					else
 						var_num = 0;
-					
+
 					cmd( "progressbox .da.pas \"Add Series\" \"Creating MC Series\" \"Series\" %d { set stop true } .da", l );
-						
+
 					for ( j = 0, stop = false; j < l && ! stop; ++j )
 					{
 						cur_var.resize( h );
-						
+
 						for ( i = 0; i < h; ++i )
 							cur_var[ i ] = var_names[ i ][ j ];
-						
+
 						cmd( "set vname [ lindex [ split \"%s\" ] 0 ]", var_names[ 0 ][ j ].c_str( ) );
 						cmd( "set ftag [ string replace [ lindex [ split \"%s\" ] 1 ] 0 3 ]", var_names[ 0 ][ j ].c_str( ) );
-						
-						create_series( choice, true, cur_var );
-						
+
+						create_series( true, cur_var );
+
 						cmd( "prgboxupdate .da.pas %d", j + 1 );
 					}
-					
+
 					cmd( "destroytop .da.pas" );
-						
+
 					if ( ! k && num_var > m )
 					{
 						store *vs_new = new store[ num_var - m ];
@@ -2781,29 +2760,29 @@ while ( true )
 							vs_new[ j ] = vs[ i ];
 							strcpy( vs_new[ j ].label, vs[ i ].label );
 							strcpy( vs_new[ j ].tag, vs[ i ].tag );
-						} 
-						
+						}
+
 						delete [ ] vs;
 						vs = vs_new;
 						num_var -= m;
 						file_counter = 0;
 					}
-					
+
 					if ( stop )
 						plog( "Interrupted\n" );
 					else
 						plog( "Done\n" );
-					
+
 					add_clear:
-					
+
 					var_names.clear( );
 					cur_var.clear( );
-					
+
 					cmd( "selectinlist .da.vars.lb.f.v 0" );
 			}
-			
+
 			add_end:
-			
+
 			cmd( "if { $oldpath ne \"\" } { cd $oldpath }" );
 			mc = false;
 
@@ -2817,13 +2796,13 @@ while ( true )
 			cmd( "open_gnuplot \"\" \"\"" );
 			break;
 
-			  
+
 		// set options for gnuplot
-		case 37: 
+		case 37:
 			cmd( "set sysTermTmp $sysTerm" );
 			cmd( "set gptermTmp $gpterm" );
 			cmd( "set gpdgrid3dTmp $gpdgrid3d" );
-			
+
 			cmd( "newtop .da.a \"Gnuplot Options\" { set choice 2 } .da" );
 			cmd( "ttk::label .da.a.l -text \"Options for invoking Gnuplot\"" );
 
@@ -2856,12 +2835,12 @@ while ( true )
 			cmd( "focus .da.a.o.t" );
 
 			gpoptions:
-			
-			*choice = 0;
-			while ( *choice == 0 )
+
+			choice = 0;
+			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			if ( *choice == 3 )
+			if ( choice == 3 )
 			{
 				cmd( "set sysTermTmp $DefaultSysTerm" );
 				cmd( "set gptermTmp \"\"" );
@@ -2869,35 +2848,35 @@ while ( true )
 				cmd( ".da.a.o.t delete 1.0 end; .da.a.o.t insert end \"$gnuplotOptions\"" );
 				goto gpoptions;
 			}
-			 
-			if ( *choice == 1 )
+
+			if ( choice == 1 )
 			{
 				cmd( "set sysTerm $sysTermTmp" );
 				cmd( "set gpterm $gptermTmp" );
 				cmd( "set gpdgrid3d $gpdgrid3dTmp" );
-				cmd( "set gpoptions [ .da.a.o.t get 0.0 end ]" ); 
+				cmd( "set gpoptions [ .da.a.o.t get 0.0 end ]" );
 			}
 
 			cmd( "destroytop .da.a" );
-			
+
 			break;
 
-			
+
 		// set colors
-		case 21:		
+		case 21:
 			for ( i = 0; i < 20; ++i )
 				cmd( "set current_c%d $c%d", i, i );
 
 			cmd( "newtop .da.a \"Colors\" { set choice 2 } .da" );
 
 			redraw_col:
-			
+
 			cmd( "ttk::label .da.a.l -text \"Pick the color to change\"" );
 
 			cmd( "ttk::frame .da.a.o" );
 
 			cmd( "ttk::frame .da.a.o.l1" );
-			
+
 			for ( i = 0; i < 10; ++i )
 			{
 				cmd( "ttk::frame .da.a.o.l1.c%d", i );
@@ -2908,9 +2887,9 @@ while ( true )
 				cmd( "pack .da.a.o.l1.c%d.n .da.a.o.l1.c%d.c -side left", i, i );
 				cmd( "pack .da.a.o.l1.c%d -anchor e", i );
 			}
-			 
+
 			cmd( "ttk::frame .da.a.o.l2" );
-			
+
 			for ( i = 0; i < 10; ++i )
 			{
 				cmd( "ttk::frame .da.a.o.l2.c%d", i );
@@ -2930,30 +2909,30 @@ while ( true )
 			cmd( "mousewarpto .da.a.b.ok" );
 
 			set_col:
-			
-			*choice = 0;
-			while ( *choice == 0 )
+
+			choice = 0;
+			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			switch ( *choice )
+			switch ( choice )
 			{
 				case 1:
 					break;
-				
+
 				case 2:
 					for ( i = 0; i < 20; ++i )
 						cmd( "set c%d $current_c%d", i, i );
 					break;
-					
+
 				case 3:
 					cmd( "init_canvas_colors" );
 					cmd( "destroy .da.a.l .da.a.o .da.a.b" );
 					goto redraw_col;
-					
+
 				case 4:
 					cmd( "set a [ tk_chooseColor -parent .da.a -title \"Choose Color\" -initialcolor $col ]" );
 					cmd( "if { $a != \"\" } { set choice 1 } { set choice 0 }" );
-					if ( *choice == 1 )
+					if ( choice == 1 )
 					{
 						cmd( "set c$n_col $a" );
 						cmd( "if { $n_col >= 10 } { \
@@ -2974,7 +2953,7 @@ while ( true )
 
 
 		// set plot parameters
-		case 22:			
+		case 22:
 			cmd( "if { ! [ info exists default_hsizeP ] } { set default_hsizeP $hsizeP }" );
 			cmd( "if { ! [ info exists default_vsizeP ] } { set default_vsizeP $vsizeP }" );
 			cmd( "if { ! [ info exists default_hsizePxy ] } { set default_hsizePxy $hsizePxy }" );
@@ -2987,50 +2966,50 @@ while ( true )
 			cmd( "if { ! [ info exists default_fontP ] } { set default_fontP $fontP }" );
 			cmd( "if { ! [ info exists default_smoothP ] } { set default_smoothP $smoothP }" );
 			cmd( "if { ! [ info exists default_splstepsP ] } { set default_splstepsP $splstepsP }" );
-				
+
 			cmd( "newtop .da.s \"Plot Parameters\" { set choice 2 } .da" );
 
 			cmd( "ttk::frame .da.s.x" );
 			cmd( "ttk::label .da.s.x.l0 -text \"Plot width:\"" );
 			cmd( "ttk::label .da.s.x.l1 -anchor e -text \"Sequence\"" );
-			cmd( "set lx1 $hsizeP" ); 
+			cmd( "set lx1 $hsizeP" );
 			cmd( "ttk::entry .da.s.x.e1 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set lx1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx1; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.s.x.e1 insert 0 $lx1" ); 
+			cmd( ".da.s.x.e1 insert 0 $lx1" );
 			cmd( "ttk::label .da.s.x.l2 -anchor e -text \"  XY\"" );
-			cmd( "set lx2 $hsizePxy" ); 
+			cmd( "set lx2 $hsizePxy" );
 			cmd( "ttk::entry .da.s.x.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set lx2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx2; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.s.x.e2 insert 0 $lx2" ); 
+			cmd( ".da.s.x.e2 insert 0 $lx2" );
 			cmd( "pack .da.s.x.l0 .da.s.x.l1 .da.s.x.e1 .da.s.x.l2 .da.s.x.e2 -side left -padx 2 -pady 2" );
 
 			cmd( "ttk::frame .da.s.y" );
 			cmd( "ttk::label .da.s.y.l0 -anchor e -text \"Plot height:\"" );
 			cmd( "ttk::label .da.s.y.l1 -anchor e -text \"Sequence\"" );
-			cmd( "set ly1 $vsizeP" ); 
+			cmd( "set ly1 $vsizeP" );
 			cmd( "ttk::entry .da.s.y.e1 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set ly1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly1; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.s.y.e1 insert 0 $ly1" ); 
+			cmd( ".da.s.y.e1 insert 0 $ly1" );
 			cmd( "ttk::label .da.s.y.l2 -anchor e -text \"  XY\"" );
-			cmd( "set ly2 $vsizePxy" ); 
+			cmd( "set ly2 $vsizePxy" );
 			cmd( "ttk::entry .da.s.y.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set ly2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly2; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.s.y.e2 insert 0 $ly2" ); 
+			cmd( ".da.s.y.e2 insert 0 $ly2" );
 			cmd( "pack .da.s.y.l0 .da.s.y.l1 .da.s.y.e1 .da.s.y.l2 .da.s.y.e2 -side left -padx 2 -pady 2" );
 
 			cmd( "ttk::frame .da.s.h" );
 			cmd( "ttk::label .da.s.h.l -anchor e -text \"Horizontal borders\"" );
-			cmd( "set hb $hmbordsizeP" ); 
+			cmd( "set hb $hmbordsizeP" );
 			cmd( "ttk::entry .da.s.h.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set hb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $hb; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.s.h.e insert 0 $hb" ); 
+			cmd( ".da.s.h.e insert 0 $hb" );
 			cmd( "pack .da.s.h.l .da.s.h.e -side left -padx 2 -pady 2" );
 
 			cmd( "ttk::frame .da.s.v" );
 			cmd( "ttk::label .da.s.v.l0 -anchor e -text \"Vertical borders:\"" );
 			cmd( "ttk::label .da.s.v.l1 -anchor e -text \"Top\"" );
-			cmd( "set tb $tbordsizeP" ); 
+			cmd( "set tb $tbordsizeP" );
 			cmd( "ttk::entry .da.s.v.e1 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set tb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tb; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.s.v.e1 insert 0 $tb" ); 
+			cmd( ".da.s.v.e1 insert 0 $tb" );
 			cmd( "ttk::label .da.s.v.l2 -anchor e -text \"  Bottom\"" );
-			cmd( "set bb $bbordsizeP" ); 
+			cmd( "set bb $bbordsizeP" );
 			cmd( "ttk::entry .da.s.v.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set bb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bb; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.s.v.e2 insert 0 $bb" ); 
+			cmd( ".da.s.v.e2 insert 0 $bb" );
 			cmd( "pack .da.s.v.l0 .da.s.v.l1 .da.s.v.e1 .da.s.v.l2 .da.s.v.e2 -side left -padx 2 -pady 2" );
 
 			cmd( "ttk::label .da.s.obs -text \"( all sizes are measured in screen pixels)\"" );
@@ -3038,38 +3017,38 @@ while ( true )
 			cmd( "ttk::frame .da.s.t" );
 			cmd( "ttk::label .da.s.t.l0 -anchor e -text \"Number of axis ticks:\"" );
 			cmd( "ttk::label .da.s.t.l1 -anchor e -text \"Horizontal\"" );
-			cmd( "set ht $hticksP" ); 
+			cmd( "set ht $hticksP" );
 			cmd( "ttk::entry .da.s.t.e1 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set ht %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ht; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.s.t.e1 insert 0 $ht" ); 
+			cmd( ".da.s.t.e1 insert 0 $ht" );
 			cmd( "ttk::label .da.s.t.l2 -anchor e -text \"  Vertical\"" );
-			cmd( "set vt $vticksP" ); 
+			cmd( "set vt $vticksP" );
 			cmd( "ttk::entry .da.s.t.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set vt %%P; return 1 } { %%W delete 0 end; %%W insert 0 $vt; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.s.t.e2 insert 0 $vt" ); 
+			cmd( ".da.s.t.e2 insert 0 $vt" );
 			cmd( "pack .da.s.t.l0 .da.s.t.l1 .da.s.t.e1 .da.s.t.l2 .da.s.t.e2 -side left -padx 2 -pady 2" );
 
 			cmd( "ttk::frame .da.s.s" );
 			cmd( "ttk::label .da.s.s.l1 -anchor e -text \"Smoothing\"" );
-			cmd( "set sm $smoothP" ); 
+			cmd( "set sm $smoothP" );
 			cmd( "ttk::combobox .da.s.s.e1 -values [ list no yes raw ] -width 5 -justify center -validate focusout -validatecommand { set n %%P; if { $n in [ list no yes raw ] } { set sm %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sm; return 0 } } -invalidcommand { bell }" );
 			cmd( "write_any .da.s.s.e1 $sm" );
 			cmd( "ttk::label .da.s.s.l2 -anchor e -text \"  Spline segments\"" );
-			cmd( "set ss $splstepsP" ); 
+			cmd( "set ss $splstepsP" );
 			cmd( "ttk::entry .da.s.s.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set ss %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ss; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 			cmd( "if { $sm == \"raw\" } { .da.s.s.e2 configure -state normal }" );
-			cmd( "write_any .da.s.s.e2 $ss" ); 
+			cmd( "write_any .da.s.s.e2 $ss" );
 			cmd( "pack .da.s.s.l1 .da.s.s.e1 .da.s.s.l2 .da.s.s.e2 -side left -padx 2 -pady 2" );
 
 			cmd( "ttk::frame .da.s.f" );
 			cmd( "ttk::label .da.s.f.l -text \"Font name, size and style\"" );
 
 			cmd( "ttk::frame .da.s.f.e" );
-			cmd( "set ifont [ lindex $fontP 0 ]" ); 
+			cmd( "set ifont [ lindex $fontP 0 ]" );
 			cmd( "ttk::combobox .da.s.f.e.font -values [ lsort -dictionary [ font families ] ] -width 15 -justify center -validate focusout -validatecommand { set n %%P; if { $n in [ font families ] } { set ifont %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ifont; return 0 } } -invalidcommand { bell }" );
 			cmd( "write_any .da.s.f.e.font $ifont" );
-			cmd( "set idim [ lindex $fontP 1 ]" ); 
+			cmd( "set idim [ lindex $fontP 1 ]" );
 			cmd( "ttk::combobox .da.s.f.e.dim -values [ list 4 6 8 9 10 11 12 14 18 24 32 48 60 ] -width 3 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 4 && $n <= 60 } { set idim %%P; return 1 } { %%W delete 0 end; %%W insert 0 $idim; return 0 } } -invalidcommand { bell }" );
 			cmd( "write_any .da.s.f.e.dim $idim" );
-			cmd( "set istyle [ lindex $fontP 2 ]" ); 
+			cmd( "set istyle [ lindex $fontP 2 ]" );
 			cmd( "ttk::combobox .da.s.f.e.sty -values [ list normal bold italic \"bold italic\" ] -width 10 -justify center -validate focusout -validatecommand { set n %%P; if { $n in [ list normal bold italic \"bold italic\" ] } { set istyle %%P; return 1 } { %%W delete 0 end; %%W insert 0 $istyle; return 0 } } -invalidcommand { bell }" );
 			cmd( "write_any .da.s.f.e.sty $istyle" );
 			cmd( "pack .da.s.f.e.font .da.s.f.e.dim .da.s.f.e.sty -padx 2 -side left" );
@@ -3097,30 +3076,30 @@ while ( true )
 			cmd( "focus .da.s.x.e1" );
 
 			set_plot:
-			
-			*choice = 0;
-			while ( *choice == 0 )
+
+			choice = 0;
+			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			if ( *choice == 1 )
+			if ( choice == 1 )
 			{
-				cmd( "set hsizeP 		[ .da.s.x.e1 get ]" ); 
-				cmd( "set hsizePxy 		[ .da.s.x.e2 get ]" ); 
-				cmd( "set vsizeP 		[ .da.s.y.e1 get ]" ); 
-				cmd( "set vsizePxy 		[ .da.s.y.e2 get ]" ); 
-				cmd( "set hmbordsizeP 	[ .da.s.h.e get ]" ); 
-				cmd( "set tbordsizeP	[ .da.s.v.e1 get ]" ); 
-				cmd( "set bbordsizeP	[ .da.s.v.e2 get ]" ); 
-				cmd( "set hticksP 		[ .da.s.t.e1 get ]" ); 
-				cmd( "set vticksP 		[ .da.s.t.e2 get ]" ); 
-				cmd( "set splstepsP 	[ .da.s.s.e2 get ]" ); 
-				cmd( "set smoothP 		[ .da.s.s.e1 get ]" ); 
+				cmd( "set hsizeP 		[ .da.s.x.e1 get ]" );
+				cmd( "set hsizePxy 		[ .da.s.x.e2 get ]" );
+				cmd( "set vsizeP 		[ .da.s.y.e1 get ]" );
+				cmd( "set vsizePxy 		[ .da.s.y.e2 get ]" );
+				cmd( "set hmbordsizeP 	[ .da.s.h.e get ]" );
+				cmd( "set tbordsizeP	[ .da.s.v.e1 get ]" );
+				cmd( "set bbordsizeP	[ .da.s.v.e2 get ]" );
+				cmd( "set hticksP 		[ .da.s.t.e1 get ]" );
+				cmd( "set vticksP 		[ .da.s.t.e2 get ]" );
+				cmd( "set splstepsP 	[ .da.s.s.e2 get ]" );
+				cmd( "set smoothP 		[ .da.s.s.e1 get ]" );
 				cmd( "set fontP 		[ list [ .da.s.f.e.font get ] [ .da.s.f.e.dim get ] [ .da.s.f.e.sty get ] ]" );
-				
+
 
 			}
 
-			if ( *choice == 3 )
+			if ( choice == 3 )
 			{
 				cmd( "write_any .da.s.x.e1  $default_hsizeP" );
 				cmd( "write_any .da.s.x.e2  $default_hsizePxy" );
@@ -3144,32 +3123,32 @@ while ( true )
 			break;
 
 		// lattice parameters
-		case 44:		
+		case 44:
 			cmd( "if { ! [ info exists default_hsizeLat ] } { set default_hsizeLat $hsizeLat }" );
 			cmd( "if { ! [ info exists default_vsizeLat ] } { set default_vsizeLat $vsizeLat }" );
 			cmd( "if { ! [ info exists default_cscaleLat ] } { set default_cscaleLat $cscaleLat }" );
-				
+
 			cmd( "newtop .da.s \"Lattice Parameters\" { set choice 2 } .da" );
 
 			cmd( "ttk::frame .da.s.s" );
 			cmd( "ttk::label .da.s.s.l -width 30 -anchor e -text \"Color scale\"" );
-			cmd( "set cs $cscaleLat" ); 
+			cmd( "set cs $cscaleLat" );
 			cmd( "ttk::entry .da.s.s.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 } { set cs %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cs; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.s.s.e insert 0 $cs" ); 
+			cmd( ".da.s.s.e insert 0 $cs" );
 			cmd( "pack .da.s.s.l .da.s.s.e -side left -anchor w -padx 2 -pady 2" );
 
 			cmd( "ttk::frame .da.s.x" );
 			cmd( "ttk::label .da.s.x.l -width 30 -anchor e -text \"Lattice width (pixels)\"" );
-			cmd( "set lx $hsizeLat" ); 
+			cmd( "set lx $hsizeLat" );
 			cmd( "ttk::entry .da.s.x.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set lx %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.s.x.e insert 0 $lx" ); 
+			cmd( ".da.s.x.e insert 0 $lx" );
 			cmd( "pack .da.s.x.l .da.s.x.e -side left -anchor w -padx 2 -pady 2" );
 
 			cmd( "ttk::frame .da.s.y" );
 			cmd( "ttk::label .da.s.y.l -width 30 -anchor e -text \"Lattice heigth (pixels)\"" );
-			cmd( "set ly $vsizeLat" ); 
+			cmd( "set ly $vsizeLat" );
 			cmd( "ttk::entry .da.s.y.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set ly %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".da.s.y.e insert 0 $ly" ); 
+			cmd( ".da.s.y.e insert 0 $ly" );
 			cmd( "pack .da.s.y.l .da.s.y.e -side left -anchor w -padx 2 -pady 2" );
 
 			cmd( "pack .da.s.s .da.s.x .da.s.y -anchor w -padx 5 -pady 5" );
@@ -3186,22 +3165,22 @@ while ( true )
 			cmd( "focus .da.s.s.e" );
 
 			set_lattice:
-			
-			*choice = 0;
-			while ( *choice == 0 )
+
+			choice = 0;
+			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			if ( *choice == 1 )
+			if ( choice == 1 )
 			{
 				cmd( "set cscaleLat [ .da.s.s.e get ]" );
 				cmd( "set hsizeLat [ .da.s.x.e get ]" );
 				cmd( "set vsizeLat [ .da.s.y.e get ]" );
 			}
 
-			if ( *choice == 3 )
+			if ( choice == 3 )
 			{
-				cmd( "write_any .da.s.s.e $default_cscaleLat" ); 
-				cmd( "write_any .da.s.x.e $default_hsizeLat" ); 
+				cmd( "write_any .da.s.s.e $default_cscaleLat" );
+				cmd( "write_any .da.s.x.e $default_hsizeLat" );
 				cmd( "write_any .da.s.y.e $default_vsizeLat" );
 				goto set_lattice;
 			}
@@ -3219,7 +3198,7 @@ while ( true )
 
 		// see model report
 		case 43:
-			show_report( choice, ".da" );
+			show_report( ".da" );
 			break;
 
 
@@ -3231,22 +3210,22 @@ while ( true )
 			cmd( "set ifont [ lindex [ $ccanvas itemcget current -font ] 0 ]" );
 			cmd( "set idim [ lindex [ $ccanvas itemcget current -font ] 1 ]" );
 			cmd( "set istyle [ lindex [ $ccanvas itemcget current -font ] 2 ]" );
-			cmd( "set icolor [ $ccanvas itemcget current -fill ]" );  
+			cmd( "set icolor [ $ccanvas itemcget current -fill ]" );
 			cmd( "set fontall 0" );
 			cmd( "set colorall 0" );
-			
+
 			cmd( "set wid $ccanvas.a" );
 			cmd( "newtop $wid \"Edit Text\" { set choice 2 } $ccanvas" );
 			cmd( "wm geometry $wid +$LX+$LY" );
-			
+
 			cmd( "ttk::frame $wid.l" );
 			cmd( "ttk::label $wid.l.t -text \"New text\"" );
 			cmd( "ttk::entry $wid.l.e -textvariable itext -width 30 -justify center" );
 			cmd( "pack $wid.l.t $wid.l.e" );
-			
+
 			cmd( "ttk::frame $wid.format" );
 			cmd( "ttk::label $wid.format.tit -text \"Font name, size and style\"" );
-			
+
 			cmd( "ttk::frame $wid.format.e" );
 			cmd( "ttk::combobox $wid.format.e.font -values [ lsort -dictionary [ font families ] ] -width 15 -justify center -validate focusout -validatecommand { set n %%P; if { $n in [ font families ] } { set ifont %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ifont; return 0 } } -invalidcommand { bell }" );
 			cmd( "write_any $wid.format.e.font $ifont" );
@@ -3255,9 +3234,9 @@ while ( true )
 			cmd( "ttk::combobox $wid.format.e.sty -values [ list normal bold italic \"bold italic\" ] -width 10 -justify center -validate focusout -validatecommand { set n %%P; if { $n in [ list normal bold italic \"bold italic\" ] } { set istyle %%P; return 1 } { %%W delete 0 end; %%W insert 0 $istyle; return 0 } } -invalidcommand { bell }" );
 			cmd( "write_any $wid.format.e.sty $istyle" );
 			cmd( "pack $wid.format.e.font $wid.format.e.dim $wid.format.e.sty -padx 2 -side left" );
-			
+
 			cmd( "pack $wid.format.tit $wid.format.e" );
-			
+
 			cmd( "ttk::frame $wid.c" );
 			cmd( "ttk::label $wid.c.l -text \"Text color\"" );
 			cmd( "ttk::style configure icolor.TButton -foreground [ invert_color $icolor ] -background $icolor" );
@@ -3269,85 +3248,85 @@ while ( true )
 					ttk::style configure icolor.TButton -foreground [ invert_color $icolor ] -background $icolor \
 				}" );
 			cmd( "pack $wid.c.l $wid.c.color -padx 2 -side left" );
-			
+
 			cmd( "ttk::frame $wid.fall" );
 			cmd( "ttk::checkbutton $wid.fall.font -text \"Apply font to all text items\" -variable fontall" );
 			cmd( "ttk::checkbutton $wid.fall.color -text \"Apply color to all text items\" -variable colorall" );
 			cmd( "pack $wid.fall.font $wid.fall.color" );
-			
+
 			cmd( "pack $wid.l $wid.format $wid.c $wid.fall -padx 5 -pady 5" );
-			
+
 			cmd( "okXhelpcancel $wid b Delete { set itext \"\"; set choice 1 } { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
-			
+
 			cmd( "bind $wid.l.e <Return> { $wid.b.ok invoke }" );
 			cmd( "bind $wid.format.e.font <Return> { $wid.b.ok invoke }" );
 			cmd( "bind $wid.format.e.dim <Return> { $wid.b.ok invoke }" );
 			cmd( "bind $wid.format.e.sty <Return> { $wid.b.ok invoke }" );
-			
+
 			cmd( "showtop $wid current" );
 			cmd( "mousewarpto $wid.b.ok 0" );
 			cmd( "$wid.l.e selection range 0 end" );
 			cmd( "focus $wid.l.e" );
-			
-			*choice = 0;
-			while ( ! *choice )
+
+			choice = 0;
+			while ( ! choice )
 				Tcl_DoOneEvent( 0 );
-			
-			if ( *choice == 1 )
+
+			if ( choice == 1 )
 			{
 				cmd( "if { $itext==\"\" } { $ccanvas delete $curitem; set choice 0 }" );
-				if ( *choice == 1 )
+				if ( choice == 1 )
 				{
 					cmd( "$ccanvas itemconf $curitem -text \"$itext\"" );
 					cmd( "set ml [ list [ $wid.format.e.font get ] [ $wid.format.e.dim get ] [ $wid.format.e.sty get ] ]" );
 					cmd( "if [ catch { $ccanvas itemconf $curitem -font \"$ml\" } ] { bell }" );
-					cmd( "if [ catch { $ccanvas itemconf $curitem -fill $icolor } ] { bell }" );  
+					cmd( "if [ catch { $ccanvas itemconf $curitem -fill $icolor } ] { bell }" );
 				}
-				
+
 				cmd( "set choice $fontall" );
-				if ( *choice == 1 )
+				if ( choice == 1 )
 					cmd( "if [ catch { $ccanvas itemconf text -font \"$ml\" } ] { bell }" );
 				cmd( "set choice $colorall" );
-				if ( *choice == 1 )
+				if ( choice == 1 )
 					cmd( "if [ catch { $ccanvas itemconf text -fill $icolor } ] { bell }" );
-			} 
-			
-			cmd( "destroytop $wid" ); 
-			
+			}
+
+			cmd( "destroytop $wid" );
+
 			break;
 
 
 		// New labels
 		case 27:
 			cmd( "set itext \"new text\"" );
-			
+
 			cmd( "set wid $ccanvas.a" );
 			cmd( "newtop $wid \"New Text\" { set choice 2 } $ccanvas" );
 			cmd( "wm geometry $wid +$LX+$LY" );
-			
+
 			cmd( "ttk::frame $wid.l" );
 			cmd( "ttk::label $wid.l.t -text \"New text\"" );
 			cmd( "ttk::entry $wid.l.e -textvariable itext -width 30 -justify center" );
 			cmd( "pack $wid.l.t $wid.l.e" );
 			cmd( "pack $wid.l -padx 5 -pady 5" );
-			
+
 			cmd( "okhelpcancel $wid b { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
-			
+
 			cmd( "bind $wid.l.e <Return> { $wid.b.ok invoke}" );
-			
+
 			cmd( "showtop $wid current" );
 			cmd( "focus $wid.l.e" );
 			cmd( "$wid.l.e selection range 0 end" );
-			
-			*choice = 0;
-			while ( ! *choice )
+
+			choice = 0;
+			while ( ! choice )
 				Tcl_DoOneEvent( 0 );
-			
-			cmd( "destroytop $wid" ); 
-			
-			if ( *choice == 1 )
+
+			cmd( "destroytop $wid" );
+
+			if ( choice == 1 )
 				cmd( "$ccanvas create text $hereX $hereY -text \"$itext\" -fill $colorsTheme(fg) -font $fontP -tags { text draw }" );
-			
+
 			break;
 
 
@@ -3367,16 +3346,16 @@ while ( true )
 			cmd( "set icolor [ $ccanvas itemcget $cline -fill ]" );
 			cmd( "set widthall 0" );
 			cmd( "set colorall 0" );
-			
+
 			cmd( "set wid $ccanvas.a" );
 			cmd( "newtop $wid \"Edit Line\" { set choice 2 } $ccanvas" );
 			cmd( "wm geometry $wid +$LX+$LY" );
-			
+
 			cmd( "ttk::frame $wid.l" );
 			cmd( "ttk::label $wid.l.t -text \"Width\"" );
 			cmd( "ttk::spinbox $wid.l.e -textvariable iwidth -width 5 -from 1.0 -to 10.0 -justify center -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 && $n < 100 } { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invalidcommand { bell }" );
 			cmd( "pack $wid.l.t $wid.l.e -padx 2 -side left" );
-			
+
 			cmd( "ttk::frame $wid.c" );
 			cmd( "ttk::label $wid.c.l -text \"Color\"" );
 			cmd( "ttk::style configure icolor.TButton -foreground [ invert_color $icolor ] -background $icolor" );
@@ -3389,44 +3368,44 @@ while ( true )
 				}" );
 			cmd( "ttk::label $wid.c.pad -width 3" );
 			cmd( "ttk::label $wid.c.t -text \"Dash pattern\"" );
-			cmd( "ttk::combobox $wid.c.e -values [ list \"\" \". \" \"- \" \"-.\" \"-..\" ] -width 3 -justify center -state disabled -validate focusout -validatecommand { set n %%P; if { $n in [ list \"\" \". \" \"- \" \"-.\" \"-..\" ] } { set idash %%P; return 1 } { %%W delete 0 end; %%W insert 0 $idash; return 0 } } -invalidcommand { bell }" ); 
+			cmd( "ttk::combobox $wid.c.e -values [ list \"\" \". \" \"- \" \"-.\" \"-..\" ] -width 3 -justify center -state disabled -validate focusout -validatecommand { set n %%P; if { $n in [ list \"\" \". \" \"- \" \"-.\" \"-..\" ] } { set idash %%P; return 1 } { %%W delete 0 end; %%W insert 0 $idash; return 0 } } -invalidcommand { bell }" );
 			cmd( "write_any $wid.c.e $idash" );
 			cmd( "pack $wid.c.l $wid.c.color $wid.c.pad $wid.c.t $wid.c.e -padx 2 -side left" );
-			
+
 			cmd( "ttk::frame $wid.d" );
 			cmd( "ttk::label $wid.d.t -text \"Line-end arrow( s)\"" );
 			cmd( "ttk::combobox $wid.d.e -values [ list none first last both ] -width 7 -justify center -state disabled -validate focusout -validatecommand { set n %%P; if { $n in [ list none first last both ] } { set iarrow %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iarrow; return 0 } } -invalidcommand { bell }" );
 			cmd( "write_any $wid.d.e $iarrow" );
 			cmd( "pack $wid.d.t $wid.d.e -padx 2 -side left" );
-			
+
 			cmd( "ttk::frame $wid.fall" );
 			cmd( "ttk::checkbutton $wid.fall.font -text \"Apply width to all line items\" -variable widthall -state disabled" );
 			cmd( "ttk::checkbutton $wid.fall.color -text \"Apply color to all line items\" -variable colorall" );
 			cmd( "pack $wid.fall.font $wid.fall.color" );
-			
+
 			cmd( "pack $wid.l $wid.c $wid.d $wid.fall -padx 5 -pady 5" );
-			
+
 			cmd( "okXhelpcancel $wid b Delete { set iwidth 0; set choice 1 } { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
-			
+
 			cmd( "bind $wid.l.e <Return> { $wid.b.ok invoke }" );
 			cmd( "bind $wid.c.e <Return> { $wid.b.ok invoke }" );
 			cmd( "bind $wid.d.e <Return> { $wid.b.ok invoke }" );
-			
+
 			cmd( "showtop $wid current" );
 			cmd( "mousewarpto $wid.b.ok 0" );
 			cmd( "$wid.l.e selection range 0 end" );
 			cmd( "focus $wid.l.e" );
-		 
+
 			// enable most options for non-dotted lines
 			cmd( "if { ! $dots } { $wid.l.e  configure -state normal; $wid.c.e  configure -state normal; $wid.fall.font  configure -state normal }" );
 			// enable dashes & arrows for drawing lines only
 			cmd( "if $draw { $wid.d.e  configure -state normal }" );
 
-			*choice = 0;
-			while ( ! *choice )
+			choice = 0;
+			while ( ! choice )
 				Tcl_DoOneEvent( 0 );
-			
-			if ( *choice == 1 )
+
+			if ( choice == 1 )
 			{
 				cmd( "if $draw { \
 						if { $iwidth == 0 } { \
@@ -3447,8 +3426,8 @@ while ( true )
 							} \
 						} \
 					}" );
-				
-				if ( *choice == 1 )	// regular line made of lines & dots
+
+				if ( choice == 1 )	// regular line made of lines & dots
 				{	// avoid changing the dots parts in regular lines
 					cmd( "$ccanvas dtag selected" );
 					cmd( "$ccanvas addtag selected withtag \"$cline&&line\"" );
@@ -3456,41 +3435,41 @@ while ( true )
 					cmd( "if [ catch { $ccanvas itemconf selected -dash \"[ $wid.c.e get ]\" } ] { bell }" );
 					cmd( "if [ catch { $ccanvas itemconf selected -arrow [ $wid.d.e get ] } ] { bell }" );
 					cmd( "$ccanvas dtag selected" );
-					
-					cmd( "$ccanvas itemconf $cline -fill $icolor" );  
+
+					cmd( "$ccanvas itemconf $cline -fill $icolor" );
 				}
-				
-				if ( *choice == 2 )	// line of dots
-					cmd( "$ccanvas itemconf $cline -fill $icolor" );  
-				
-				if ( *choice == 3 )	// draw line
+
+				if ( choice == 2 )	// line of dots
+					cmd( "$ccanvas itemconf $cline -fill $icolor" );
+
+				if ( choice == 3 )	// draw line
 				{
 					cmd( "if [ catch { $ccanvas itemconf $curitem -width [ $wid.l.e get ] } ] { bell }" );
 					cmd( "if [ catch { $ccanvas itemconf $curitem -dash \"[ $wid.c.e get ]\" } ] { bell }" );
 					cmd( "if [ catch { $ccanvas itemconf $curitem -arrow [ $wid.d.e get ] } ] { bell }" );
-					
-					cmd( "$ccanvas itemconf $curitem -fill $icolor" );  
+
+					cmd( "$ccanvas itemconf $curitem -fill $icolor" );
 				}
-				
+
 				cmd( "set choice $widthall" );
-				if ( *choice == 1 )
+				if ( choice == 1 )
 					cmd( "if [ catch { $ccanvas itemconf line -width $iwidth } ] { bell }" );
-				
+
 				cmd( "set choice $colorall" );
-				if ( *choice == 1 )
+				if ( choice == 1 )
 					cmd( "if [ catch { $ccanvas itemconf line -fill $icolor } ] { bell }" );
-			} 
-			
-			cmd( "destroytop $wid" ); 
-			
+			}
+
+			cmd( "destroytop $wid" );
+
 			break;
 
 
 		// Insert a line item
-		case 28: 
+		case 28:
 			cmd( "set choice $ncanvas" );
-			i = *choice;
-			
+			i = choice;
+
 			cmd( "bind $ccanvas <B1-Motion> { \
 					set ccanvas $daptab.tab%d.c.f.plots; \
 					if [ info exists cl ] { \
@@ -3500,7 +3479,7 @@ while ( true )
 					set ay [ $ccanvas canvasy %%y ]; \
 					set cl [ $ccanvas create line $hereX $hereY $ax $ay -fill $colorsTheme(fg) -tags { line draw selected } ] \
 				}", i );
-			
+
 			cmd( "bind $ccanvas <Shift-B1-Motion> { \
 					set ccanvas $daptab.tab%d.c.f.plots; \
 					if [ info exists cl ] { \
@@ -3515,7 +3494,7 @@ while ( true )
 					}; \
 					set cl [ $ccanvas create line $hereX $hereY $ax $ay -fill $colorsTheme(fg) -tags { line draw selected } ] \
 				}", i );
-				
+
 			cmd( "bind $ccanvas <ButtonRelease-1> { \
 					set ccanvas $daptab.tab%d.c.f.plots; \
 					$ccanvas dtag selected; \
@@ -3552,7 +3531,7 @@ while ( true )
 						unset cl \
 					} \
 				}", i, i, i, i, i );
-					
+
 			break;
 
 
@@ -3563,13 +3542,13 @@ while ( true )
 			cmd( "set icolor2 [ $ccanvas itemcget current -fill ]" );
 			cmd( "set widthall 0" );
 			cmd( "set colorall 0" );
-			
+
 			cmd( "if { ! [ string is double -strict $iwidth ] } { set iwidth 0.0 }" );
-			
+
 			cmd( "set wid $ccanvas.a" );
 			cmd( "newtop $wid \"Edit Bar\" { set choice 2 } $ccanvas" );
 			cmd( "wm geometry $wid +$LX+$LY" );
-			
+
 			cmd( "ttk::frame $wid.c" );
 			cmd( "ttk::label $wid.c.l -text \"Fill color\"" );
 			cmd( "ttk::style configure icolor2.TButton -foreground [ invert_color $icolor2 ] -background $icolor2" );
@@ -3581,7 +3560,7 @@ while ( true )
 					ttk::style configure icolor2.TButton -foreground [ invert_color $icolor2 ] -background $icolor2 \
 				}" );
 			cmd( "pack $wid.c.l $wid.c.color -padx 2 -side left" );
-			
+
 			cmd( "ttk::frame $wid.l" );
 			cmd( "ttk::label $wid.l.t -text \"Outline width\"" );
 			cmd( "ttk::spinbox $wid.l.e -textvariable iwidth -width 5 -from 0.0 -to 10.0 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n >= 0 && $n <= 10 } { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invalidcommand { bell }" );
@@ -3595,86 +3574,86 @@ while ( true )
 					ttk::style configure icolor1.TButton -foreground [ invert_color $icolor1 ] -background $icolor1 \
 				}" );
 			cmd( "pack $wid.l.t $wid.l.e $wid.l.l $wid.l.color -padx 2 -side left" );
-			
+
 			cmd( "ttk::frame $wid.fall" );
 			cmd( "ttk::checkbutton $wid.fall.color -text \"Apply fill to all bar items\" -variable colorall" );
 			cmd( "ttk::checkbutton $wid.fall.font -text \"Apply outline to all bar items\" -variable widthall" );
 			cmd( "pack $wid.fall.color $wid.fall.font" );
-			
+
 			cmd( "pack $wid.c $wid.l $wid.fall -padx 5 -pady 5" );
-			
+
 			cmd( "okXhelpcancel $wid b Delete { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
-			
+
 			cmd( "bind $wid.l.e <Return> { $wid.b.ok invoke }" );
-			
+
 			cmd( "showtop $wid current" );
 			cmd( "mousewarpto $wid.b.ok 0" );
 			cmd( "$wid.l.e selection range 0 end" );
 			cmd( "focus $wid.l.e" );
-			
-			*choice = 0;
-			while ( ! *choice )
+
+			choice = 0;
+			while ( ! choice )
 				Tcl_DoOneEvent( 0 );
-			
-			if ( *choice == 1 )
+
+			if ( choice == 1 )
 			{
 				cmd( "$ccanvas itemconf $curitem -width $iwidth" );
 				cmd( "$ccanvas itemconf $curitem -outline $icolor1" );
 				cmd( "$ccanvas itemconf $curitem -fill $icolor2" );
-				
+
 				cmd( "set choice $widthall" );
-				if ( *choice == 1 )
+				if ( choice == 1 )
 				{
 					cmd( "$ccanvas itemconf bar -width $iwidth" );
 					cmd( "$ccanvas itemconf bar -outline $icolor1" );
 				}
-				
+
 				cmd( "set choice $colorall" );
-				if ( *choice == 1 )
+				if ( choice == 1 )
 				cmd( "$ccanvas itemconf bar -fill $icolor2" );
-			} 
-			
-			if ( *choice == 3 )
+			}
+
+			if ( choice == 3 )
 				cmd( "$ccanvas delete $curitem" );
-			
-			cmd( "destroytop $wid" ); 
-			
+
+			cmd( "destroytop $wid" );
+
 			break;
-			
+
 
 		// MODEL STRUCTURE ACTIONS
 
 		case 29:
-		
+
 			switch ( choice_g )
 			{
 				// redraw model structure graph
 				case 23:
-				
+
 					show_graph( );
 					cmd( "focustop .da" );
-					
+
 					break;
-					
-					
+
+
 				// select parent filter from model structure graph
 				case 24:
-				
+
 					cmd( "focus .da.vars.lb.f.v" );
 					cmd( "if { [ info exists res_g ] } { filter_series $res_g }" );
-					
+
 					break;
-					
+
 				default:
 					break;
 			}
-		
+
 			break;
 
 		default:
 			break;
 	}
-	
+
 	cmd( "update" );
 }
 }
@@ -3692,7 +3671,7 @@ void update_bounds( void )
 		cmd( "write_any .da.f.h.v.sc.min.min -Infinity" );
 		miny = 0;
 	}
-	
+
 	if ( isfinite( maxy ) )
 		cmd( "write_any .da.f.h.v.sc.max.max [ format \"%%.${pdigits}g\" $maxy ]" );
 	else
@@ -3700,7 +3679,7 @@ void update_bounds( void )
 		cmd( "write_any .da.f.h.v.sc.max.max Infinity" );
 		maxy = 0;
 	}
-	
+
 	if ( miny == 0 && maxy == 0 )
 	{
 		miny = -1;
@@ -3708,26 +3687,26 @@ void update_bounds( void )
 		cmd( "write_any .da.f.h.v.sc.min.min $miny" );
 		cmd( "write_any .da.f.h.v.sc.max.max $maxy" );
 	}
-	
+
 	if ( ! isfinite( miny2 ) )
 		miny2 = 0;
-	
+
 	if ( ! isfinite( maxy2 ) )
-		maxy2 = 0;		
-	
+		maxy2 = 0;
+
 	if ( miny2 == 0 && maxy2 == 0 )
 	{
 		miny2 = -1;
 		maxy2 = 1;
 	}
-	
+
 	if ( min_c < first_c )
 		min_c = max( first_c, showInit ? 0 : 1 );
-	
+
 	if ( max_c <= min_c )
 	{
 		max_c = min_c + 1;
-		
+
 		if ( max_c > num_c && num_c > 0 )
 		{
 			max_c = num_c;
@@ -3738,15 +3717,15 @@ void update_bounds( void )
 	cmd( "write_any .da.f.h.v.ft.from.mnc $minc" );
 	cmd( "write_any .da.f.h.v.ft.to.mxc $maxc" );
 }
-	
+
 
 /***************************************************
  PLOT_TSERIES
  ****************************************************/
-void plot_tseries( int *choice )
+void plot_tseries( void )
 {
 	bool y2on, done;
-	char *app, **str, **tag;
+	char **str, **tag;
 	double temp, **data;
 	int i, j, *start, *end, *id;
 
@@ -3754,14 +3733,14 @@ void plot_tseries( int *choice )
 	{
 		cmd( "set answer [ ttk::messageBox -parent .da -type okcancel -title \"Too Many Series\" -icon warning -default ok -message \"You selected too many ($nv) series to plot\" -detail \"This may cause a crash of LSD, with the loss of all unsaved data.\nIf you continue the system may become slow, please be patient.\nPress 'OK' to continue anyway.\" ]" );
 		cmd( "if { [ string compare $answer ok ] == 0 } { set choice 1 } { set choice 2 }" );
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			return;
 	}
-	 
+
 	if ( nv == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-		*choice = 2;
+		choice = 2;
 		return;
 	}
 
@@ -3786,23 +3765,21 @@ void plot_tseries( int *choice )
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
-	  
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
 		// get series data and take logs if necessary
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "invalid series data", 
-							"internal problem in LSD", 
+				error_hard( "internal problem in LSD",
 							"if error persists, please contact developers",
-							true );
+							true,
+							"invalid series data" );
 				myexit( 18 );
 			}
-	   
+
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
 				data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "plot" );
 		}
@@ -3818,7 +3795,7 @@ void plot_tseries( int *choice )
 
 			if ( start[ i ] < min_c )
 				min_c = max( start[ i ], showInit ? 0 : 1 );
-			
+
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
@@ -3826,7 +3803,7 @@ void plot_tseries( int *choice )
 
 	// handle 2nd y-axis scale
 	cmd( "set choice $y2" );
-	y2on = *choice;
+	y2on = choice;
 
 	if ( y2on )
 	{
@@ -3837,8 +3814,8 @@ void plot_tseries( int *choice )
 		}
 	}
 	else
-		num_y2 = nv + 1; 
-	 
+		num_y2 = nv + 1;
+
 	// auto-find minimums and maximums
 	if ( miny >= maxy )
 		autom = true;
@@ -3853,22 +3830,22 @@ void plot_tseries( int *choice )
 					miny = maxy = data[ i ][ j - start[ i ] ];
 					done = true;
 				}
-				
+
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )		// ignore NaNs
 					miny = data[ i ][ j - start[ i ] ];
-					
+
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )		// ignore NaNs
 					maxy = data[ i ][ j - start[ i ] ];
 			}
-		
-		// condition the max and min values 
+
+		// condition the max and min values
 		temp = lower_bound( miny, maxy, MARG, MARG_CONST, pdigits );
 		maxy = upper_bound( miny, maxy, MARG, MARG_CONST, pdigits );
 		miny = temp;
 	}
 	else
 	{
-		// condition the max and min values 
+		// condition the max and min values
 		temp = lower_bound( miny, maxy, 0, MARG_CONST, pdigits );
 		maxy = upper_bound( miny, maxy, 0, MARG_CONST, pdigits );
 		miny = temp;
@@ -3883,14 +3860,14 @@ void plot_tseries( int *choice )
 				miny2 = maxy2 = data[ i ][ j - start[ i ] ];
 				done = true;
 			}
-			
+
 			if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny2 )		// ignore NaNs
 				miny2 = data[ i ][ j - start[ i ] ];
-				
+
 			if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy2 )		// ignore NaNs
 				maxy2 = data[ i ][ j - start[ i ] ];
 		}
-		
+
 	// check if not all invalid data
 	if ( miny2 == 0 && maxy2 == 0 )
 	{
@@ -3898,23 +3875,23 @@ void plot_tseries( int *choice )
 		y2on = false;
 	}
 	else
-	{			
+	{
 		// condition the max and min values (2nd axis)
 		temp = lower_bound( miny2, maxy2, MARG, MARG_CONST, pdigits );
 		maxy2 = upper_bound( miny2, maxy2, MARG, MARG_CONST, pdigits );
 		miny2 = temp;
 	}
-		
+
 	update_bounds( );
-	
+
 	// plot all series
-	plot( TSERIES, nv, data, start, end, id, str, tag, choice );
+	plot( TSERIES, nv, data, start, end, id, str, tag );
 
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
 		delete [ ] tag[ i ];
-		
+
 		if ( logs )
 			delete [ ] data[ i ];
 	}
@@ -3931,20 +3908,20 @@ void plot_tseries( int *choice )
 /***************************************************
 PLOT_CROSS
 ****************************************************/
-void plot_cross( int *choice )
+void plot_cross( void )
 {
 	bool first;
-	char *app, **str, **tag;
+	char **str, **tag;
 	double temp, **val, **data;
 	int i, j, k, nt, new_nv, *list_times, *pos, *start, *end, *id, *erase;
 
 	cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
 	nt = get_int( "nt" );
-	
+
 	if ( nv < 2 || nt <= 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"No series/cases selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one case (time step).\"" );
-		*choice = 2;
+		choice = 2;
 		return;
 	}
 
@@ -3965,7 +3942,7 @@ void plot_cross( int *choice )
 		k = get_int( "k" );
 		list_times[ i ] = k;
 	}
-	
+
 	if ( autom_x )
 	{
 		min_c = max( first_c, showInit ? 0 : 1 );
@@ -3980,10 +3957,8 @@ void plot_cross( int *choice )
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
-		
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
 		// check if series has data for all CS selected cases
 		for ( k = 0, erase[ i ] = 0; k < nt; ++k )
 			if ( list_times[ k ] < start[ i ] || list_times[ k ] > end[ i ] )
@@ -3991,30 +3966,30 @@ void plot_cross( int *choice )
 				erase[ i ] = 1;
 				break;
 			}
-		
+
 		// get series data and take logs if necessary
 		if ( erase[ i ] == 0 )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "invalid series data", 
-							"internal problem in LSD", 
+				error_hard( "internal problem in LSD",
 							"if error persists, please contact developers",
-							true );
+							true,
+							"invalid series data" );
 				myexit( 18 );
 			}
-	   
+
 			if ( logs )			// apply log to the values to show "log scale"
 				data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "plot" );
-			
+
 			val[ new_nv ] = new double[ nt ];
 			new_nv++;
 		}
 		else
 			data[ i ] = NULL;						// discard series not in all selected cases
 	}
-	 
+
 	// organize useful/valid data in 'val' matrix and find max/mins
 	if ( miny >= maxy )
 		autom = true;
@@ -4025,7 +4000,7 @@ void plot_cross( int *choice )
 			if ( erase[ j ] == 0 && is_finite( data[ j ][ list_times[ k ] - start[ j ] ] ) )		// ignore NaNs
 			{
 				val[ i ][ k ] = data[ j ][ list_times[ k ] - start[ j ] ];
-			
+
 				// auto-find minimums and maximums
 				if ( autom )
 				{
@@ -4035,10 +4010,10 @@ void plot_cross( int *choice )
 						miny = maxy = val[ i ][ k ];
 						first = false;
 					}
-					
+
 					if ( miny > val[ i ][ k ] )
 						miny = val[ i ][ k ];
-					
+
 					if ( maxy < val[ i ][ k ] )
 						maxy = val[ i ][ k ];
 				}
@@ -4048,12 +4023,12 @@ void plot_cross( int *choice )
 				if ( ! erase[ j ] )	// mark NANs
 					val[ i ][ k ] = NAN;
 			}
-		
+
 		if ( erase[ j ] == 0 )
 			++i;
 	}
 
-	// condition the max and min values 
+	// condition the max and min values
 	if ( autom )
 	{
 		temp = lower_bound( miny, maxy, MARG, MARG_CONST, pdigits );
@@ -4066,9 +4041,9 @@ void plot_cross( int *choice )
 		maxy = upper_bound( miny, maxy, 0, MARG_CONST, pdigits );
 		miny = temp;
 	}
-		
+
 	update_bounds( );
-	
+
 	// sort series if required
 	for ( k = 0; k < nt; ++k )		// find index to time reference
 		if ( list_times[ k ] == res )
@@ -4083,7 +4058,7 @@ void plot_cross( int *choice )
 	}
 
 	// plot all series
-	plot( CRSSECT, new_nv, val, list_times, &nt, id, str, tag, choice );
+	plot( CRSSECT, new_nv, val, list_times, &nt, id, str, tag );
 
 	for ( i = 0; i < nv; ++i )
 	{
@@ -4094,7 +4069,7 @@ void plot_cross( int *choice )
 	for ( i = 0; i < new_nv; ++i )
 	{
 		delete [ ] val[ i ];
-		
+
 		if ( logs )
 			delete [ ] data[ i ];
 	}
@@ -4115,15 +4090,15 @@ void plot_cross( int *choice )
 /***************************************************
 SET_CS_DATA
 ****************************************************/
-void set_cs_data( int *choice )
+void set_cs_data( void )
 {
 	if ( nv < 2 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Not enough series selected\" -detail \"Place two or more series in the Series Selected listbox.\"" );
-		*choice = 2;
+		choice = 2;
 		return;
 	}
-		
+
 	Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "dir", ( char * ) &dir, TCL_LINK_INT );
 
@@ -4131,7 +4106,7 @@ void set_cs_data( int *choice )
 	cmd( "set res $maxc" );
 	cmd( "set dir 0" );
 	cmd( "unset -nocomplain sfrom sto sskip" );
-	
+
 	cmd( "set list_times_new [ list ]" );
 	cmd( "for { set i 0 } { $i < [ llength $list_times ] } { incr i } { \
 			set x [ lindex $list_times $i ]; \
@@ -4153,7 +4128,7 @@ void set_cs_data( int *choice )
 	cmd( "ttk::entry $p.u.i.e.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= $minc && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "$p.u.i.e.e insert 0 $bidi" );
 	cmd( "pack $p.u.i.e.l $p.u.i.e.e" );
-	 
+
 	cmd( "ttk::frame $p.u.i.lb" );
 	cmd( "ttk::label $p.u.i.lb.l -text \"Selected cases\"" );
 
@@ -4253,22 +4228,22 @@ void set_cs_data( int *choice )
 	cmd( "tooltip::tooltip $p.fb.r1.y \"Remove case from selected\"" );
 	cmd( "tooltip::tooltip $p.fb.r1.z \"Remove all selected cases\"" );
 
-	*choice = 0;
-	while ( ! *choice )
+	choice = 0;
+	while ( ! choice )
 		Tcl_DoOneEvent( 0 );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		goto end;
 
 	cmd( "if { [ .da.s.u.i.lb.lb.lb size ] == 0 } { ttk::messageBox -parent .da.s -type ok -title Error -icon error -message \"No case selected\" -detail \"At least one case (time step) must be selected. Please try again.\"; set choice 2 }" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		goto end;
 
 	cmd( "set res [ $p.u.s.r.e get ]" );
 	cmd( "if { $dir != 0 && [ lsearch $list_times $res ] < 0 } { ttk::messageBox -parent .da.s -type ok -title Warning -icon warning -message \"Invalid case reference selected\" -detail \"The selected case (time step) reference is not one of the selected for the cross-section(s), no sorting will be performed.\"; set dir 0 }" );
 	cmd( "set num_t [ llength $list_times ]" );
-	*choice = 0;
+	choice = 0;
 
 	end:
 
@@ -4284,7 +4259,7 @@ void set_cs_data( int *choice )
 /***************************************************
 SORT_CS_DESC
 ****************************************************/
-void sort_cs_desc( char **s,char **t, double **v, int nv, int nt, int c )
+void sort_cs_desc( char **s, char **t, double **v, int nv, int nt, int c )
 {
 	int i, j, h;
 	double dapp;
@@ -4300,14 +4275,14 @@ void sort_cs_desc( char **s,char **t, double **v, int nv, int nt, int c )
 				v[ j ][ h ] = v[ j + 1 ][ h ];
 				v[ j + 1 ][ h ] = dapp;
 			}
-			
-			strcpy( sapp, s[ j ] );
-			strcpy( s[ j ], s[ j + 1 ] );
-			strcpy( s[ j + 1 ], sapp );
-		
-			strcpy( sapp,t[ j ] );
-			strcpy( t[ j ],t[ j + 1 ] );
-			strcpy( t[ j + 1 ], sapp );
+
+			strcpyn( sapp, s[ j ], MAX_ELEM_LENGTH );
+			strcpyn( s[ j ], s[ j + 1 ], MAX_ELEM_LENGTH );
+			strcpyn( s[ j + 1 ], sapp, MAX_ELEM_LENGTH );
+
+			strcpyn( sapp, t[ j ], MAX_ELEM_LENGTH );
+			strcpyn( t[ j ], t[ j + 1 ], MAX_ELEM_LENGTH );
+			strcpyn( t[ j + 1 ], sapp, MAX_ELEM_LENGTH );
 		}
 	}
 }
@@ -4316,7 +4291,7 @@ void sort_cs_desc( char **s,char **t, double **v, int nv, int nt, int c )
 /***************************************************
 SORT_CS_ASC
 ****************************************************/
-void sort_cs_asc( char **s,char **t, double **v, int nv, int nt, int c )
+void sort_cs_asc( char **s, char **t, double **v, int nv, int nt, int c )
 {
 	int i, j, h;
 	double dapp;
@@ -4332,14 +4307,14 @@ void sort_cs_asc( char **s,char **t, double **v, int nv, int nt, int c )
 				v[ j ][ h ] = v[ j + 1 ][ h ];
 				v[ j + 1 ][ h ] = dapp;
 			}
-			
-			strcpy( sapp, s[ j ] );
-			strcpy( s[ j ], s[ j + 1 ] );
-			strcpy( s[ j + 1 ], sapp );
-		
-			strcpy( sapp,t[ j ] );
-			strcpy( t[ j ],t[ j + 1 ] );
-			strcpy( t[ j + 1 ], sapp );
+
+			strcpyn( sapp, s[ j ], MAX_ELEM_LENGTH );
+			strcpyn( s[ j ], s[ j + 1 ], MAX_ELEM_LENGTH );
+			strcpyn( s[ j + 1 ], sapp, MAX_ELEM_LENGTH );
+
+			strcpyn( sapp, t[ j ], MAX_ELEM_LENGTH );
+			strcpyn( t[ j ], t[ j + 1 ], MAX_ELEM_LENGTH );
+			strcpyn( t[ j + 1 ], sapp, MAX_ELEM_LENGTH );
 		}
 	}
 }
@@ -4353,9 +4328,9 @@ double *log_data( double *data, int start, int end, int ser, const char *err_msg
 	bool stopErr;
 	double *logdata;
 	int i, errCnt;
-	
+
 	logdata = new double [ end - start + 1 ];
-	
+
 	for ( stopErr = false, errCnt = 0, i = 0; i <= end - start; ++i )
 		if ( ! is_nan( data[ i ] ) && data[ i ] > 0.0 )
 			logdata[ i ] = log( data[ i ] );
@@ -4364,9 +4339,9 @@ double *log_data( double *data, int start, int end, int ser, const char *err_msg
 			logdata[ i ] = NAN;
 			if ( i > 0 && ++errCnt < ERR_LIM )	// prevent slow down due to I/O
 				if ( ser >= 0 )
-					plog( "\nWarning: zero or negative values in log %s (ignored)\n         Series: %d, Case: %d", "", err_msg, ser + 1, start + i );
+					plog( "\nWarning: zero or negative values in log %s (ignored)\n         Series: %d, Case: %d", err_msg, ser + 1, start + i );
 				else
-					plog( "\nWarning: zero or negative values in log %s (ignored)\n         Case: %d", "", err_msg, start + i );
+					plog( "\nWarning: zero or negative values in log %s (ignored)\n         Case: %d", err_msg, start + i );
 			else
 				if ( i > 0 && ! stopErr )
 				{
@@ -4374,7 +4349,7 @@ double *log_data( double *data, int start, int end, int ser, const char *err_msg
 					stopErr = true;
 				}
 		}
-	
+
 	return logdata;
 }
 
@@ -4384,9 +4359,9 @@ UPDATE_DESCR_DICT
 ****************************************************/
 void update_descr_dict( void )
 {
-	char desc[ MAX_LINE_SIZE + 1 ];				
+	char desc[ MAX_LINE_SIZE + 1 ];
 	description *cd;
-	
+
 	for ( cd = descr; cd != NULL; cd = cd->next )
 		cmd( "dict set serDescrDict %s \"%s\"", cd->label, fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1, false ) );
 }
@@ -4395,33 +4370,33 @@ void update_descr_dict( void )
 /***************************************************
 INSERT_DATA_MEM
 ****************************************************/
-void insert_data_mem( object *r, int *num_v, char *lab )
+void insert_data_mem( object *r, int *num_v, const char *lab )
 {
 	int i, ini_v = *num_v;
-	
+
 	insert_labels_mem( r, num_v, lab );
 	cmd( "update_parent" );
-	
+
 	store *vs_new = new store[ *num_v ];
-	
+
 	for ( i = 0; i < ini_v; ++i )
 	{
 		vs_new[ i ] = vs[ i ];
 		strcpy( vs_new[ i ].label, vs[ i ].label );
 		strcpy( vs_new[ i ].tag, vs[ i ].tag );
 	}
-	
+
 	delete [ ] vs;
 	vs = vs_new;
-	
+
 	insert_store_mem( r, &ini_v, lab );
-	
+
 	if ( *num_v != ini_v )
 	{
-		error_hard( "invalid number of series", 
-					"internal problem in LSD", 
+		error_hard( "internal problem in LSD",
 					"if error persists, please contact developers",
-					true );
+					true,
+					"invalid number of series" );
 		myexit( 18 );
 	}
 }
@@ -4435,7 +4410,7 @@ void create_par_map( object *r )
 	bridge *cb;
 	object *cur;
 	variable *cv;
-	
+
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 		par_map.insert( make_pair < string, string > ( cv->label, r->label ) );
 
@@ -4448,7 +4423,7 @@ void create_par_map( object *r )
 /***************************************************
 INSERT_LABELS_MEM
 ****************************************************/
-void insert_labels_mem( object *r, int *num_v, char *lab )
+void insert_labels_mem( object *r, int *num_v, const char *lab )
 {
 	bool found;
 	char tag_pref[ 3 ];
@@ -4468,35 +4443,35 @@ void insert_labels_mem( object *r, int *num_v, char *lab )
 				cv->start = cv->last_update - cv->num_lag;
 				cv->end = cv->last_update;
 			}
-			
+
 			set_lab_tit( cv );
 			cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref, cv->lab_tit, cv->start, cv->end, *num_v, cv->up->label );
-			
+
 			if ( cv->end > num_c )
 				num_c = cv->end;
-			
+
 			if ( cv->start < first_c )
 				first_c = cv->start;
-			
+
 			*num_v += 1;
 		}
-	
+
 	for ( cb = r->b; cb != NULL && ! found; cb = cb->next )
 		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
 				insert_labels_mem( cur, num_v, lab );
-	 
+
 	if ( r->up == NULL && lab == NULL )
 		for ( cv = cemetery; cv != NULL; cv = cv->next )
-		{  
+		{
 			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", cv->label, cv->lab_tit, cv->start, cv->end, *num_v, par_map[ cv->label ].c_str( ) );
-			
+
 			if ( cv->end > num_c )
 				num_c = cv->end;
-			
+
 			if ( cv->start < first_c )
 				first_c = cv->start;
-			
+
 			*num_v += 1;
 		}
 }
@@ -4505,10 +4480,10 @@ void insert_labels_mem( object *r, int *num_v, char *lab )
 /***************************************************
 INSERT_STORE_MEM
 ****************************************************/
-void insert_store_mem( object *r, int *num_v, char *lab )
+void insert_store_mem( object *r, int *num_v, const char *lab )
 {
 	bool found;
-	char tag_pref[3];
+	char tag_pref[ 3 ];
 	int i;
 	object *cur;
 	variable *cv;
@@ -4523,45 +4498,36 @@ void insert_store_mem( object *r, int *num_v, char *lab )
 			{
 				found = true;
 				strcpy( tag_pref, "U_" );
-				
+
 				// use C stdlib to be able to deallocate memory for deleted objects
 				if ( cv->data == NULL )
 					cv->data = ( double * ) malloc( ( cv->num_lag + 1 ) * sizeof( double ) );
-				
-				if ( cv->data == NULL )
-				{
-					error_hard( "cannot allocate memory for unsaved series", 
-								"out of memory", 
-								"if there is memory available and the error persists,\nplease contact developers",
-								true );
-					myexit( 19 );
-				}	
-				
+
 				for ( i = 0; i <= cv->num_lag; ++i )
 					cv->data[ i ] = cv->val[ cv->num_lag - i ];
 			}
-			
+
 			set_lab_tit( cv );
-			strcpy( vs[ *num_v ].label, cv->label );
-			sprintf( vs[ *num_v ].tag, "%s%s", tag_pref, cv->lab_tit );
+			strcpyn( vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
+			snprintf( vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", tag_pref, cv->lab_tit );
 			vs[ *num_v ].start = cv->start;
 			vs[ *num_v ].end = cv->end;
 			vs[ *num_v ].rank = *num_v;
 			vs[ *num_v ].data = cv->data;
-			
+
 			*num_v += 1;
 		}
-	  
+
 	for ( cb = r->b; cb != NULL && ! found; cb = cb->next )
 		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
 				insert_store_mem( cur, num_v, lab );
-	 
+
 	if ( r->up == NULL && lab == NULL )
 		for ( cv = cemetery; cv != NULL; cv = cv->next )
 		{
-			strcpy( vs[ *num_v ].label,cv->label );
-			strcpy( vs[ *num_v ].tag,cv->lab_tit);
+			strcpyn( vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
+			strcpyn( vs[ *num_v ].tag, cv->lab_tit, MAX_ELEM_LENGTH );
 			vs[ *num_v ].start = cv->start;
 			vs[ *num_v ].end = cv->end;
 			vs[ *num_v ].rank = *num_v;
@@ -4590,7 +4556,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		fz = gzopen( filename, "rt" );
 
 	new_v = 0;
-	plog( "\nResults data from file %s (F_%d) ", "", filename, file_counter );
+	plog( "\nResults data from file %s (F_%d) ", filename, file_counter );
 
 	if ( ! gz )
 		ch = ( char ) fgetc( f );
@@ -4606,10 +4572,10 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 
 		if ( ch == '\t' )
 			new_v += 1;
-	   
+
 		if ( ch == '(' )		// check for header-less .tot files
 			header = true;
-		
+
 		linsiz++;				// count line size
 	}
 
@@ -4624,7 +4590,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	else
 		gzclose( fz );
 
-	plog( "%d series", "",  new_v );
+	plog( "%d series",  new_v );
 
 	if ( ! gz )
 		f = fopen( filename, "rt" );
@@ -4661,11 +4627,11 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 			app[ i ] = vs[ i ];
 			strcpy( app[ i ].label, vs[ i ].label );
 			strcpy( app[ i ].tag, vs[ i ].tag );
-		} 
-		
+		}
+
 		delete [ ] vs;
 		vs = app;
-	}  
+	}
 
 	if ( ! gz )
 		f = fopen( filename, "rt" );
@@ -4694,43 +4660,43 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 			plog( "\nError: invalid header, aborting file load\n" );
 			goto end;
 		}
-		
-		sscanf( tok, "%s %s (%d %d)", vs[ i ].label, vs[ i ].tag, &( vs[ i ].start ), &( vs[ i ].end ) );	
+
+		sscanf( tok, "%s %s (%d %d)", vs[ i ].label, vs[ i ].tag, &( vs[ i ].start ), &( vs[ i ].end ) );
 		vs[ i ].rank = i;
 
 		tag = new char [ strlen( vs[ i ].tag ) + 10 ];
 		sprintf( tag, "F_%d_%s", file_counter, vs[ i ].tag );
-		strncpy( vs[ i ].tag, tag, MAX_ELEM_LENGTH );
+		strcpyn( vs[ i ].tag, tag, MAX_ELEM_LENGTH );
 		delete [ ] tag;
 
 		if ( vs[ i ].start != -1 )
-			sprintf( msg, "%s %s (%d-%d) #%d", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, i );
+			snprintf( da_tmp, MAX_BUFF_SIZE, "%s %s (%d-%d) #%d", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, i );
 		else
 		{
-			sprintf( msg, "%s %s (0-%d) #%d", vs[ i ].label, vs[ i ].tag, new_c - 1, i );
+			snprintf( da_tmp, MAX_BUFF_SIZE, "%s %s (0-%d) #%d", vs[ i ].label, vs[ i ].tag, new_c - 1, i );
 			vs[ i ].start = 0;
 			vs[ i ].end = new_c - 1;
 			first_c = 0;
 		}
-		
-		var_names->push_back( msg );
+
+		var_names->push_back( da_tmp );
 		vs[ i ].data = new double[ vs[ i ].end - vs[ i ].start + 1 ];
-	 
+
 		if ( keep_vars )
 		{
 			cmd( "if { ! [ dict exists serDescrDict %s ] } { \
 					dict set serDescrDict %s \"Loaded from file\n[ file nativename %s ]\" \
 				}", vs[ i ].label, vs[ i ].label, filename );
-			
+
 			if ( par_map.find( vs[ i ].label ) == par_map.end( ) )
-				cmd( "add_series \"%s\" %s", msg, filename );
+				cmd( "add_series \"%s\" %s", da_tmp, filename );
 			else
-				cmd( "add_series \"%s\" %s", msg, par_map[ vs[ i ].label ].c_str( ) );
+				cmd( "add_series \"%s\" %s", da_tmp, par_map[ vs[ i ].label ].c_str( ) );
 		}
-	 
+
 		tok = strtok( NULL, "\t" );			// get next token, if any
 	}
-	
+
 	cmd( "update_parent" );
 
 	// read data lines
@@ -4740,9 +4706,9 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 			fgets( linbuf, linsiz, f );		// buffers one entire line
 		else
 			gzgets( fz, linbuf, linsiz );
-	 
+
 		tok = strtok( linbuf , "\t" ); 		// prepares for parsing and get first one
-		
+
 		for ( i = *num_v; i < new_v + *num_v; ++i )
 		{
 			if ( tok == NULL )
@@ -4751,7 +4717,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 				num_c += ( j > 0 ? j - 1 : 0 ) > num_c ? ( j > 0 ? j - 1 : 0 ) : 0;
 				goto end;
 			}
-			
+
 	  		// ignore not started / already ended series' column
 			if ( j >= vs[ i ].start && j <= vs[ i ].end )
 			{
@@ -4760,15 +4726,15 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 				else
 				{
 					sscanf( tok, "%lf", &( vs[ i ].data[ j - vs[ i ].start ] ) );
-					
+
 					if ( j == 0 )			// at least one lagged variable?
 						first_c = 0;
 				}
 			}
-			
+
 			tok = strtok( NULL, "\t" );		// get next token, if any
 		}
-		
+
 		if ( ( j + 2 ) % 10 == 0 )
 			cmd( "prgboxupdate .da.pas \"\" %d", j + 1 );
 	}
@@ -4778,8 +4744,8 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	if ( new_c > num_c )
 		num_c = new_c;
 	if ( new_c > max_c )
-		max_c = new_c; 
-	
+		max_c = new_c;
+
 	min_c = max( first_c, showInit ? 0 : 1 );
 
 	end:
@@ -4794,9 +4760,9 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 /************************
 STATISTICS
 ************************/
-void statistics( int *choice )
+void statistics( void )
 {
-	char *app, **str, **tag, str1[ 50 ], longmsg[ 300 ];
+	char **str, **tag, str1[ MAX_LINE_SIZE ], longmsg[ MAX_LINE_SIZE ];
 	double **data, av, var, num, ymin, ymax, sig;
 	int i, j, *start, *end, *id;
 
@@ -4825,38 +4791,36 @@ void statistics( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
-		
+
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
-		
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
 		// get series data and take logs if necessary
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
-			data[ i ] = vs[ id[ i ] ].data; 
+			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "invalid series data", 
-							"internal problem in LSD", 
+				error_hard( "internal problem in LSD",
 							"if error persists, please contact developers",
-							true );
+							true,
+							"invalid series data" );
 				myexit( 18 );
 			}
-	   
+
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
 				data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "statistics" );
 		}
 	}
 
 	if ( logs )
-		cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics (in log):\n\n\" tabel" );
+		cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics (in log):\n\n\" table" );
 	else
-		cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics:\n\n\" tabel" );
+		cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics:\n\n\" table" );
 
-	sprintf( str1, "%d Cases", max_c - min_c + 1 );
-	sprintf( longmsg, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
-	cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
+	snprintf( str1, MAX_LINE_SIZE, "%d Cases", max_c - min_c + 1 );
+	snprintf( longmsg, MAX_LINE_SIZE, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
+	cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 
 	for ( i = 0; i < nv; ++i )
 	{
@@ -4869,13 +4833,13 @@ void statistics( int *choice )
 			{
 				if ( data[ i ][ j - start[ i ] ] < ymin )
 					ymin = data[ i ][ j - start[ i ] ];
-				
+
 				if ( data[ i ][ j - start[ i ] ] > ymax )
 					ymax = data[ i ][ j - start[ i ] ];
-				
+
 				av += data[ i ][ j - start[ i ] ];
 				var += data[ i ][ j - start[ i ] ] * data[ i ][ j - start[ i ] ];
-				
+
 				++num;
 			}
 		}
@@ -4888,16 +4852,16 @@ void statistics( int *choice )
 		}
 		else
 			var = sig = 0;
-		
+
 		if ( num > 0 )
 		{
-			sprintf( msg, "%s %s (%.*g)", str[ i ], tag[ i ], pdigits, num );
-			sprintf( str1, "%-20s\t", msg );
-			cmd( ".log.text.text.internal insert end \"%s\" tabel", str1 );
-			
-			
-			sprintf( longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax);
-			cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
+			snprintf( da_tmp, MAX_BUFF_SIZE, "%s %s (%.*g)", str[ i ], tag[ i ], pdigits, num );
+			snprintf( str1, MAX_LINE_SIZE, "%-20s\t", da_tmp );
+			cmd( ".log.text.text.internal insert end \"%s\" table", str1 );
+
+
+			snprintf( longmsg, MAX_LINE_SIZE, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax);
+			cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 		}
 	}
 
@@ -4907,7 +4871,7 @@ void statistics( int *choice )
 	{
 		delete [ ] str[ i ];
 		delete [ ] tag[ i ];
-		
+
 		if ( logs )
 			delete [ ] data[ i ];
 	}
@@ -4924,10 +4888,10 @@ void statistics( int *choice )
 /************************
 STATISTICS_CROSS
 ************************/
-void statistics_cross( int *choice )
+void statistics_cross( void )
 {
 	bool first;
-	char *app, **str, **tag, str1[ 50 ], longmsg[ 300 ];
+	char **str, **tag, str1[ MAX_LINE_SIZE ], longmsg[ MAX_LINE_SIZE ];
 	double **data, av, var, num, ymin = 0, ymax = 0, sig;
 	int i, j, h, k, nt, *start, *end, *id, *list_times;
 
@@ -4938,7 +4902,7 @@ void statistics_cross( int *choice )
 	if ( nv < 2 || nt <= 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Not enough series selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one case (time step).\"" );
-		*choice = 2;
+		choice = 2;
 		return;
 	}
 
@@ -4946,13 +4910,13 @@ void statistics_cross( int *choice )
 	list_times = new int [ nt ];
 	cmd( "set k 0" );
 	Tcl_LinkVar( inter, "k", ( char * ) &k, TCL_LINK_INT );
-	
-	for ( i = 0; i < nt; ++i )    
+
+	for ( i = 0; i < nt; ++i )
 	{
 		cmd( "set k [ lindex $list_times %d ]", i );
 		list_times[ i ] = k;
 	}
-	
+
 	Tcl_UnlinkVar( inter, "k" );
 
 	data = new double *[ nv ];
@@ -4973,34 +4937,32 @@ void statistics_cross( int *choice )
 	{
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
-		
+
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
-		
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
 		{
-			error_hard( "invalid series data", 
-						"internal problem in LSD", 
+			error_hard( "internal problem in LSD",
 						"if error persists, please contact developers",
-						true );
+						true,
+						"invalid series data" );
 			myexit( 18 );
 		}
-	   
+
 		if ( logs )			// apply log to the values to show "log scale" in the y-axis
 			data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "statistics" );
 	}
 
 	if ( logs )
-		cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics (in log):\n\n\" tabel" );
+		cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics (in log):\n\n\" table" );
 	else
-		cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics:\n\n\" tabel" );
+		cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics:\n\n\" table" );
 
-	sprintf( str1, "%d Variables", nv );
-	sprintf( longmsg, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
-	cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
+	snprintf( str1, MAX_LINE_SIZE, "%d Variables", nv );
+	snprintf( longmsg, MAX_LINE_SIZE, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
+	cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 
 	for ( j = 0; j < nt; ++j )
 	{
@@ -5015,20 +4977,20 @@ void statistics_cross( int *choice )
 					ymin = ymax = data[ i ][ h - start[ i ] ];
 					first = false;
 				}
-				
+
 				if ( data[ i ][ h - start[ i ] ] < ymin )
 					ymin = data[ i ][ h - start[ i ] ];
-				
+
 				if ( data[ i ][ h - start[ i ] ] > ymax )
 					ymax = data[ i ][ h - start[ i ] ];
-				
+
 				av += data[ i ][ h - start[ i ] ];
 				var += data[ i ][ h - start[ i ] ] * data[ i ][ h - start[ i ] ];
-				
+
 				++num;
 			}
 		}
-		
+
 		if ( num > 1 )
 		{
 			av = av / num;
@@ -5040,10 +5002,10 @@ void statistics_cross( int *choice )
 
 		if ( num > 0 )
 		{
-			sprintf( str1, "Case %d (%.*g)\t", h, pdigits, num );
-			cmd( ".log.text.text.internal insert end \"%s\" tabel", str1 );
-			sprintf( longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax );
-			cmd( ".log.text.text.internal insert end \"%s\" tabel", longmsg );
+			snprintf( str1, MAX_LINE_SIZE, "Case %d (%.*g)\t", h, pdigits, num );
+			cmd( ".log.text.text.internal insert end \"%s\" table", str1 );
+			snprintf( longmsg, MAX_LINE_SIZE, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax );
+			cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 		}
 	}
 
@@ -5053,7 +5015,7 @@ void statistics_cross( int *choice )
 	{
 		delete [ ] str[ i ];
 		delete [ ] tag[ i ];
-		
+
 		if ( logs )
 			delete [ ] data[ i ];
 	}
@@ -5072,10 +5034,11 @@ void statistics_cross( int *choice )
 PLOT_GNU
 Draws the XY plots, with the first series as X and the others as Y's
 ****************************************************/
-void plot_gnu( int *choice )
+void plot_gnu( void )
 {
 	bool done;
-	char *app, **str, **tag, str1[ 50 ], str2[ 100 ], str3[ 10 ], dirname[ MAX_PATH_LENGTH ];
+	char **str, **tag, str1[ MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
+	const char *app;
 	double temp, maxx, minx, **data;
 	int i, j, box, ndim, gridd, *start, *end, *id, nanv = 0;
 	FILE *f, *f2;
@@ -5083,7 +5046,7 @@ void plot_gnu( int *choice )
 	if ( nv == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-		*choice = 2;
+		choice = 2;
 		return;
 	}
 
@@ -5132,20 +5095,20 @@ void plot_gnu( int *choice )
 		cmd( "tooltip::tooltip .da.s.o.g \"Supported only in Gnuplot\"" );
 		cmd( "tooltip::tooltip .da.s.o.p \"Supported only in Gnuplot\"" );
 
-		*choice = 0;
-		while ( *choice == 0 )
+		choice = 0;
+		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
 		cmd( "destroytop .da.s" );
 
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			return;
 
 		cmd( "set choice $ndim" );
-		ndim = *choice;
+		ndim = choice;
 	}
 	else
-		ndim = 2; 
+		ndim = 2;
 
 	data = new double *[ nv ];
 	start = new int [ nv ];
@@ -5166,22 +5129,20 @@ void plot_gnu( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
-		
+
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
-		
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
 		// get series data and take logs if necessary
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "invalid series data", 
-							"internal problem in LSD", 
+				error_hard( "internal problem in LSD",
 							"if error persists, please contact developers",
-							true );
+							true,
+							"invalid series data" );
 				myexit( 18 );
 			}
 
@@ -5189,7 +5150,7 @@ void plot_gnu( int *choice )
 				data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "Gnuplot" );
 		}
 		else
-			nanv++; 
+			nanv++;
 	}
 
 	// handle case selection
@@ -5199,10 +5160,10 @@ void plot_gnu( int *choice )
 		{
 			if ( i == 0 )
 				min_c = max_c = max( start[ i ], showInit ? 0 : 1 );
-			
+
 			if ( start[ i ] < min_c )
 				min_c = max( start[ i ], showInit ? 0 : 1 );
-			
+
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
@@ -5222,20 +5183,20 @@ void plot_gnu( int *choice )
 					miny = maxy = data[ i ][ j - start[ i ] ];
 					done = true;
 				}
-				
+
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )	// ignore NaNs
 					miny = data[ i ][ j - start[ i ] ];
-					
+
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )	// ignore NaNs
 					maxy = data[ i ][ j - start[ i ] ];
 			}
-			
-		// condition the max and min values 
+
+		// condition the max and min values
 		temp = lower_bound( miny, maxy, MARG, MARG_CONST, pdigits );
 		maxy = upper_bound( miny, maxy, MARG, MARG_CONST, pdigits );
 		miny = temp;
 	}
-	
+
 	// check x series max/mins to allow splines
 	for ( minx = maxx = 0, done = false, j = min_c; j <= max_c; ++j )
 	{
@@ -5244,28 +5205,28 @@ void plot_gnu( int *choice )
 			minx = maxx = data[ 0 ][ j - start[ 0 ] ];
 			done = true;
 		}
-		
+
 		if ( start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] < minx )	// ignore NaNs
 			minx = data[ 0 ][ j - start[ 0 ] ];
-			
+
 		if ( start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] > maxx )	// ignore NaNs
 			maxx = data[ 0 ][ j - start[ 0 ] ];
 	}
-	
+
 	cmd( "set dirxy plotxy_%d", cur_plot );
 	cmd( "file mkdir $dirxy" );
-	getcwd( dirname, MAX_PATH_LENGTH - 1 );
-	sprintf( msg, "plotxy_%d", cur_plot );
-	chdir( msg );
+	getcwd( dirname, MAX_PATH_LENGTH );
+	snprintf( da_tmp, MAX_BUFF_SIZE, "plotxy_%d", cur_plot );
+	chdir( da_tmp );
 	f = fopen( "data.gp", "w" );
 	fprintf( f, "#" );
 
 	if ( nv > 2 )
 	{
 		cmd( "set choice $box" );
-		box = *choice;
+		box = choice;
 		cmd( "set choice $gridd" );
-		gridd = *choice;
+		gridd = choice;
 	}
 	else
 		box = gridd = 0;
@@ -5274,8 +5235,8 @@ void plot_gnu( int *choice )
 	{
 		for ( i = 0; i < nv; ++i )
 			if ( start[ i ] <= max_c && end[ i ] >= min_c )
-				fprintf( f, "%s_%s\t", str[ i ], tag[ i ] ); 
-	}    
+				fprintf( f, "%s_%s\t", str[ i ], tag[ i ] );
+	}
 	else
 	{
 		if ( gridd == 0 )
@@ -5291,12 +5252,12 @@ void plot_gnu( int *choice )
 			{
 				for ( i = 0; i < nv; ++i )
 					if ( start[ i ] <= max_c && end[ i ] >= min_c )
-						fprintf( f, "%s_%s\t", str[ i ], tag[ i ] );   
+						fprintf( f, "%s_%s\t", str[ i ], tag[ i ] );
 			}
-		}    
+		}
 		else
 			fprintf( f, "Time\tRank\tVal" );
-	} 
+	}
 
 	fprintf( f, "\n" );
 
@@ -5310,7 +5271,7 @@ void plot_gnu( int *choice )
 					if ( j >= start[ i ] && i <= end[ i ] )
 						fprintf( f, "%.*g\t", pdigits, data[ i ][ j - start[ i ] ] );
 					else
-						fprintf( f, "nan\t" );  
+						fprintf( f, "nan\t" );
 				}
 			fprintf( f, "\n" );
 		}
@@ -5330,11 +5291,11 @@ void plot_gnu( int *choice )
 							if ( j >= start[ i ] && i <= end[ i ] )
 								fprintf( f, "%d\t%.*g\t", i + 1, pdigits, data[ i ][ j - start[ i ] ] );
 							else
-								fprintf( f, "%d\tnan\t", i + 1 );        
+								fprintf( f, "%d\tnan\t", i + 1 );
 						}
-						
+
 					fprintf( f, "\n" );
-				}	
+				}
 			}
 			else					// 3D with time and 1st series
 			{
@@ -5344,15 +5305,15 @@ void plot_gnu( int *choice )
 					for ( i = 0; i < nv; ++i )
 						if ( start[ i ] <= max_c && end[ i ] >= min_c )
 						{
-							if ( j >= start[ i ] && i <= end[ i ] ) 
+							if ( j >= start[ i ] && i <= end[ i ] )
 								fprintf( f, "%.*g\t", pdigits, data[ i ][ j - start[ i ] ] );
 							else
-								fprintf( f, "nan\t" );  
-						} 
-						
+								fprintf( f, "nan\t" );
+						}
+
 					fprintf( f, "\n" );
 				}
-			} 
+			}
 		}
 		else
 		{	// gridded
@@ -5366,9 +5327,9 @@ void plot_gnu( int *choice )
 							if ( j >= start[ i ] && i <= end[ i ] )
 								fprintf( f, "%d\t%d\t%.*g\n", j, i + 1, pdigits, data[ i ][ j - start[ i ] ] );
 							else
-								fprintf( f, "%d\t%d\tnan\n", j , i + 1 );         
+								fprintf( f, "%d\t%d\tnan\n", j , i + 1 );
 						}
-				}  
+				}
 			}
 			else					// 3D with time and 1st series
 			{
@@ -5380,16 +5341,16 @@ void plot_gnu( int *choice )
 							if ( j >= start[ i ] && i <= end[ i ] )
 								fprintf( f, "%d\t%.*g\n", j, pdigits, data[ i ][ j - start[ i ] ] );
 							else
-								fprintf( f, "%d\tnan\n", j );         
+								fprintf( f, "%d\tnan\n", j );
 						}
-				}  
+				}
 			}
-		} 
-	} 
+		}
+	}
 
 	fclose( f );
 
-	*choice = 0;
+	choice = 0;
 
 	f = fopen( "gnuplot.lsd", "w" );
 	f2 = fopen( "gnuplot.gp", "w" );
@@ -5397,7 +5358,7 @@ void plot_gnu( int *choice )
 	fprintf( f, "set datafile missing \"nan\" \n" );		//handle NaNs
 	fprintf( f2, "set datafile missing \"nan\" \n" );
 
-	app = ( char * ) Tcl_GetVar( inter, "gpterm", 0 );
+	app = get_str( "gpterm" );
 	fprintf( f, "set term tkcanvas\n" );
 	if ( strlen( app ) > 0 )
 		fprintf( f2, "set term %s\n", app );
@@ -5405,81 +5366,80 @@ void plot_gnu( int *choice )
 	fprintf( f, "set output 'plot.file'\n" );
 
 	cmd( "set bordercolor [ rgb_24_color $colorsTheme(dfg) ]" );
-	app = ( char * ) Tcl_GetVar( inter, "bordercolor", 0 );
+	app = get_str( "bordercolor" );
 	fprintf( f, "set border linecolor \"%s\"\n", app );
 	fprintf( f2, "set border linecolor \"%s\"\n", app );
 
 	if ( grid )
 	{
 		cmd( "set gridcolor [ rgb_24_color $colorsTheme(bg) ]" );
-		fprintf( f, "set grid linecolor \"%s\"\n", ( char * ) Tcl_GetVar( inter, "gridcolor", 0 ) );
-		fprintf( f2, "set grid linecolor \"%s\"\n", ( char * ) Tcl_GetVar( inter, "gridcolor", 0 ) );
+		fprintf( f, "set grid linecolor \"%s\"\n", get_str( "gridcolor" ) );
+		fprintf( f2, "set grid linecolor \"%s\"\n", get_str( "gridcolor" ) );
 	}
 
 	if ( line_point == 2 )
 	{
-		sprintf( str1, "set pointsize %lf\n", point_size );
+		snprintf( str1, MAX_ELEM_LENGTH, "set pointsize %lf\n", point_size );
 		fprintf( f, "%s", str1 );
 		fprintf( f2, "%s", str1 );
 	}
 
 	if ( ndim == 2 )
 	{
-		sprintf( msg, "set yrange [%.*g:%.*g]\n", pdigits, miny, pdigits, maxy );
-		fprintf( f, "%s", msg );
-		fprintf( f2, "%s", msg );
-	} 
+		snprintf( da_tmp, MAX_BUFF_SIZE, "set yrange [%.*g:%.*g]\n", pdigits, miny, pdigits, maxy );
+		fprintf( f, "%s", da_tmp );
+		fprintf( f2, "%s", da_tmp );
+	}
 
 	if ( box == 0 )
-		sprintf( msg, "set xlabel \"%s_%s\" textcolor \"%s\"\n", str[ 0 ], tag[ 0 ], app );
+		snprintf( da_tmp, MAX_BUFF_SIZE, "set xlabel \"%s_%s\" textcolor \"%s\"\n", str[ 0 ], tag[ 0 ], app );
 	else
-		sprintf( msg, "set xlabel \"Time\" textcolor \"%s\"\n", app );  
+		snprintf( da_tmp, MAX_BUFF_SIZE, "set xlabel \"Time\" textcolor \"%s\"\n", app );
 
-	fprintf( f, "%s", msg );
-	fprintf( f2, "%s", msg );
+	fprintf( f, "%s", da_tmp );
+	fprintf( f2, "%s", da_tmp );
 
 	if ( ndim > 2 )
 	{
 		if ( box == 0 )
-			sprintf( msg, "set ylabel \"%s_%s\" textcolor \"%s\"\n", str[ 1 ], tag[ 1 ], app );
+			snprintf( da_tmp, MAX_BUFF_SIZE, "set ylabel \"%s_%s\" textcolor \"%s\"\n", str[ 1 ], tag[ 1 ], app );
 		else
-			sprintf( msg, "set ylabel \"Series\" textcolor \"%s\"\n", app ); 
-		
-		fprintf( f, "%s", msg );
-		fprintf( f2, "%s", msg );
-	} 
+			snprintf( da_tmp, MAX_BUFF_SIZE, "set ylabel \"Series\" textcolor \"%s\"\n", app );
+
+		fprintf( f, "%s", da_tmp );
+		fprintf( f2, "%s", da_tmp );
+	}
 
 	if ( line_point == 1 && ndim == 2 && maxx > minx )
-		sprintf( str1, "smooth csplines" );
+		strcpy( str1, "smooth csplines" );
 	else
 		if ( line_point == 1 && ndim > 2 )
-			sprintf( str1, "with lines" );
+			strcpy( str1, "with lines" );
 		else
-			strcpy( str1, "" ); 
+			strcpy( str1, "" );
 
 	if ( ndim == 2 )
 	{
 		if ( allblack )
-			sprintf( str3, " lt -1" );
+			strcpy( str3, " lt -1" );
 		else
 			strcpy( str3, "" );
 	}
 	else
 	{
 		cmd( "set choice $gridd" );
-		if ( *choice == 1 )
+		if ( choice == 1 )
 		{
-			app = ( char * ) Tcl_GetVar( inter, "gpdgrid3d", 0 );
-			fprintf( f, "set dgrid3d %s\nset hidden3d\n", app );
-			fprintf( f2, "set dgrid3d %s\nset hidden3d\n", app );
+			fprintf( f, "set dgrid3d %s\nset hidden3d\n", get_str( "gpdgrid3d" ) );
+			fprintf( f2, "set dgrid3d %s\nset hidden3d\n", get_str( "gpdgrid3d" ) );
 		}
-		
+
 		cmd( "set choice $pm3d" );
-		if ( *choice == 1 )
+		if ( choice == 1 )
 		{
 		   fprintf( f, "set pm3d\n" );
 		   fprintf( f2, "set pm3d\n" );
-		   sprintf( str1, "with pm3d " );
+		   strcpy( str1, "with pm3d " );
 		}
 
 		if ( allblack )
@@ -5489,69 +5449,68 @@ void plot_gnu( int *choice )
 		}
 	}
 
-	app = ( char * ) Tcl_GetVar( inter, "gpoptions", 0 );
-	fprintf( f, "%s\n", app );
-	fprintf( f2, "%s\n", app );
-	 
-	if ( ndim == 2 ) 
+	fprintf( f, "%s\n", get_str( "gpoptions" ) );
+	fprintf( f2, "%s\n", get_str( "gpoptions" ) );
+
+	if ( ndim == 2 )
 	{
-		sprintf( msg, "plot 'data.gp' using 1:2 %s t \"%s_%s\"", str1, str[ 1 ], tag[ 1 ] );
-		
+		snprintf( da_tmp, MAX_BUFF_SIZE, "plot 'data.gp' using 1:2 %s t \"%s_%s\"", str1, str[ 1 ], tag[ 1 ] );
+
 		if ( allblack )
-			strcat( msg, str3 );
-		
+			strcatn( da_tmp, str3, MAX_BUFF_SIZE );
+
 		i = 2;
-	} 
+	}
 	else
 	{
 		if ( box == 0 )
 		{
-			sprintf( msg, "splot 'data.gp' using 1:2:3 %s t \"%s_%s\"", str1, str[ 2 ], tag[ 2 ] ); 
+			snprintf( da_tmp, MAX_BUFF_SIZE, "splot 'data.gp' using 1:2:3 %s t \"%s_%s\"", str1, str[ 2 ], tag[ 2 ] );
 			i = 3;
-		} 
+		}
 		else
 		{
-			i = 1;  
+			i = 1;
 			if ( box == 1 )
-				sprintf( msg, "splot 'data.gp' using 1:2:3 %s t \"\"", str1 ); 
-			else 
+				snprintf( da_tmp, MAX_BUFF_SIZE, "splot 'data.gp' using 1:2:3 %s t \"\"", str1 );
+			else
 			{
-				sprintf( msg, "splot 'data.gp' using 1:2:%d %s t \"\"", ( nv - nanv ) / 2 + 2, str1 );   
+				snprintf( da_tmp, MAX_BUFF_SIZE, "splot 'data.gp' using 1:2:%d %s t \"\"", ( nv - nanv ) / 2 + 2, str1 );
 				i = 2;
-			} 
-		} 
-	} 
+			}
+		}
+	}
 
-	fprintf( f, "%s", msg );
-	fprintf( f2, "%s", msg );
+	fprintf( f, "%s", da_tmp );
+	fprintf( f2, "%s", da_tmp );
 
 	for ( ; i < nv; ++i )
 		if ( start[ i ] <= max_c && end[ i ] >= min_c )
 		{
 			if ( ndim == 2 )
-				sprintf( str2, ", 'data.gp' using 1:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] );
+				snprintf( str2, MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] );
 			else
 			{
 				if ( box == 0 )
-					sprintf( str2, ", 'data.gp' using 1:2:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] ); 
+					snprintf( str2, MAX_ELEM_LENGTH, ", 'data.gp' using 1:2:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] );
 				else
 					if ( gridd == 0 )
 					{
 						if ( box == 1 )
-							sprintf( str2, ", 'data.gp' using 1:%d:%d %s t \"\"", 2 + 2 * i, 2 * i + 3, str1 ); 
+							snprintf( str2, MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d:%d %s t \"\"", 2 + 2 * i, 2 * i + 3, str1 );
 						else
 							if ( i <= nv / 2 )
-								sprintf( str2, ", 'data.gp' using 1:%d:%d %s t \"\"", i + 1, ( nv - nanv ) / 2 + i + 1, str1 ); 
+								snprintf( str2, MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d:%d %s t \"\"", i + 1, ( nv - nanv ) / 2 + i + 1, str1 );
 							else
-								strcpy( str2, "" );     
-					} 
+								strcpy( str2, "" );
+					}
 					else
-						strcpy( str2, "" );  
-			}  
+						strcpy( str2, "" );
+			}
 
 			if ( strlen( str2 ) > 0 && allblack )
-				strcat( str2, str3 );
-			
+				strcatn( str2, str3, MAX_ELEM_LENGTH );
+
 			fprintf( f, "%s", str2 );
 			fprintf( f2, "%s", str2 );
 		}
@@ -5563,20 +5522,20 @@ void plot_gnu( int *choice )
 	fclose( f2 );
 
 	cmd( "if { [ info exists pm3d ] } { set choice $pm3d } { set choice 0 }" );
-	if ( *choice != 0 )
-		*choice = 2;	// require filled polygons, not supported by tkcanvas terminal
+	if ( choice != 0 )
+		choice = 2;	// require filled polygons, not supported by tkcanvas terminal
 	else
-		*choice = gnu;
+		choice = gnu;
 
-	show_plot_gnu( cur_plot, choice, *choice, str, tag );
+	show_plot_gnu( cur_plot, choice, str, tag );
 
 	chdir( dirname );
-	
+
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
 		delete [ ] tag[ i ];
-		
+
 		if ( logs )
 			delete [ ] data[ i ];
 	}
@@ -5593,10 +5552,11 @@ void plot_gnu( int *choice )
 /*****************************************
 PLOT_CS_XY
 *****************************************/
-void plot_cs_xy( int *choice )
+void plot_cs_xy( void )
 {
 	bool done;
-	char *app, **str, **tag, str1[ TCL_BUFF_STR ], str2[ 5 * MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
+	char **str, **tag, str1[ 2 * MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
+	const char *app;
 	double temp, maxx, minx, **data, previous_row;
 	int i, j, time_sel, block_length, ndim, *start, *end, *id;
 	FILE *f, *f2;
@@ -5604,7 +5564,7 @@ void plot_cs_xy( int *choice )
 	if ( nv < 2 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Not enough series selected\" -detail \"Place at least two series in the Series Selected listbox.\"" );
-		*choice = 2;
+		choice = 2;
 		return;
 	}
 
@@ -5627,25 +5587,23 @@ void plot_cs_xy( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
-		
+
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
-		
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
 		// get series data and take logs if necessary
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "invalid series data", 
-							"internal problem in LSD", 
+				error_hard( "internal problem in LSD",
 							"if error persists, please contact developers",
-							true );
+							true,
+							"invalid series data" );
 				myexit( 18 );
 			}
-	   
+
 			if ( logs )		// apply log to the values to show "log scale" in the y-axis
 				data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "plot" );
 		}
@@ -5658,10 +5616,10 @@ void plot_cs_xy( int *choice )
 		{
 			if ( i == 0 )
 				min_c = max_c = max( start[ i ], showInit ? 0 : 1 );
-			
+
 			if ( start[ i ] < min_c )
 				min_c = max( start[ i ], showInit ? 0 : 1 );
-			
+
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
@@ -5670,7 +5628,7 @@ void plot_cs_xy( int *choice )
 	// auto-find minimums and maximums
 	if ( miny >= maxy )
 		autom = true;
-	
+
 	if ( autom )
 	{
 		for ( done = false, i = 1; i < nv; ++i )
@@ -5681,15 +5639,15 @@ void plot_cs_xy( int *choice )
 					miny = maxy = data[ i ][ j - start[ i ] ];
 					done = true;
 				}
-				
+
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )	// ignore NaNs
 					miny = data[ i ][ j - start[ i ] ];
-					
+
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )	// ignore NaNs
 					maxy = data[ i ][ j - start[ i ] ];
 			}
-			
-		// condition the max and min values 
+
+		// condition the max and min values
 		temp = lower_bound( miny, maxy, MARG, MARG_CONST, pdigits );
 		maxy = upper_bound( miny, maxy, MARG, MARG_CONST, pdigits );
 		miny = temp;
@@ -5703,14 +5661,14 @@ void plot_cs_xy( int *choice )
 			minx = maxx = data[ 0 ][ j - start[ 0 ] ];
 			done = true;
 		}
-		
+
 		if ( start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] < minx )	// ignore NaNs
 			minx = data[ 0 ][ j - start[ 0 ] ];
-			
+
 		if ( start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] > maxx )	// ignore NaNs
 			maxx = data[ 0 ][ j - start[ 0 ] ];
 	}
-	
+
 	cmd( "set bidi %d", end[ 0 ] );
 
 	cmd( "newtop .da.s \"XY Plot Options\" { set choice 2 } .da" );
@@ -5718,7 +5676,7 @@ void plot_cs_xy( int *choice )
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -text \"Case\"" );
 	cmd( "ttk::entry .da.s.i.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( ".da.s.i.e insert 0 $bidi" ); 
+	cmd( ".da.s.i.e insert 0 $bidi" );
 	cmd( "pack .da.s.i.l .da.s.i.e" );
 
 	cmd( "ttk::frame .da.s.d" );
@@ -5742,16 +5700,16 @@ void plot_cs_xy( int *choice )
 	cmd( "pack .da.s.o.l .da.s.o.opt" );
 
 	cmd( "set choice $ndim" );
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		cmd( "set blength %d", ( int )( nv / 2 ) );
 	else
-		cmd( "set blength %d", ( int )( nv / 3 ) ); 
+		cmd( "set blength %d", ( int )( nv / 3 ) );
 
 	cmd( "set numv 1" );
 	cmd( "ttk::frame .da.s.v" );
 	cmd( "ttk::label .da.s.v.l -text \"Dependent variables\"" );
 	cmd( "ttk::spinbox .da.s.v.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set numv %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numv; return 0 } } -invalidcommand { bell } -justify center", nv, nv );
-	cmd( ".da.s.v.e insert 0 $numv" ); 
+	cmd( ".da.s.v.e insert 0 $numv" );
 	cmd( "if { ! $gnu } { .da.s.v.e configure -state disabled } { .da.s.v.e configure -state normal }" );
 	cmd( "ttk::label .da.s.v.n -text \"Block length: $blength\"" );
 	cmd( "pack .da.s.v.l .da.s.v.e .da.s.v.n" );
@@ -5759,7 +5717,7 @@ void plot_cs_xy( int *choice )
 	cmd( "pack .da.s.i .da.s.d .da.s.o .da.s.v -padx 5 -pady 5" );
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#3dCrossSection } { set choice 2 }" );
-	
+
 	cmd( "tooltip::tooltip .da.s.o.opt.g \"Supported only in Gnuplot\"" );
 	cmd( "tooltip::tooltip .da.s.o.opt.p \"Supported only in Gnuplot\"" );
 	cmd( "tooltip::tooltip .da.s.v \"Number of groups/surfaces\nSupported only in Gnuplot\"" );
@@ -5785,55 +5743,55 @@ void plot_cs_xy( int *choice )
 	cmd( ".da.s.i.e selection range 0 end" );
 	cmd( "focus .da.s.i.e" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set bidi [ .da.s.i.e get ]" ); 
-	cmd( "set numv [ .da.s.v.e get ]" ); 
+	cmd( "set bidi [ .da.s.i.e get ]" );
+	cmd( "set numv [ .da.s.v.e get ]" );
 
 	cmd( "destroytop .da.s" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		goto end;
 
 	cmd( "set choice $ndim" );
-	ndim = *choice;
+	ndim = choice;
 
 	cmd( "set choice $bidi" );
-	time_sel = *choice;
+	time_sel = choice;
 
 	cmd( "set blength [ expr { $nnvar / ( $numv + $ndim - 1 ) } ]" );
 	cmd( "set choice $blength" );
 
-	block_length = *choice;
-	*choice = 0;
+	block_length = choice;
+	choice = 0;
 
 	if ( block_length <= 0 || nv % block_length != 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid block length\" -detail \"Block length should be an exact divisor of the number of variables. You may also try a 3D plot.\"" );
-		*choice = 2;
+		choice = 2;
 		goto end;
 	}
 
 	cmd( "set dirxy plotxy_%d", cur_plot );
 
 	cmd( "file mkdir $dirxy" );
-	getcwd( dirname, MAX_PATH_LENGTH - 1 );
-	sprintf( msg, "plotxy_%d", cur_plot );
-	chdir( msg );
+	getcwd( dirname, MAX_PATH_LENGTH );
+	snprintf( da_tmp, MAX_BUFF_SIZE, "plotxy_%d", cur_plot );
+	chdir( da_tmp );
 
 	f = fopen( "data.gp", "w" );
 
-	if ( start[ 0 ] == end[ 0 ] )  
+	if ( start[ 0 ] == end[ 0 ] )
 		previous_row = data[ 0 ][ end[ 0 ] - start[ 0 ] ];
 	else
-		previous_row = data[ 0 ][ time_sel - start[ 0 ] ];  
-	  
+		previous_row = data[ 0 ][ time_sel - start[ 0 ] ];
+
 	for ( j = 0; j < block_length; ++j )
 	{
 
-		if ( start[ 0 ] == end[ 0 ] )  
+		if ( start[ 0 ] == end[ 0 ] )
 		{
 			if ( data[ j ][ end[ j ] - start[ j ] ] != previous_row )
 				previous_row = data[ j ][ end[ j ] - start[ j ] ];
@@ -5843,9 +5801,9 @@ void plot_cs_xy( int *choice )
 			if ( data[ j ][ time_sel - start[ j ] ] != previous_row )
 				previous_row = data[ j ][ time_sel - start[ j ] ];
 		}
-		 
+
 		for ( i = 0; i < nv; i += block_length )
-			if ( start[ i + j ] == end[ i + j ] )  
+			if ( start[ i + j ] == end[ i + j ] )
 				fprintf( f, "%.*g\t", pdigits, data[ i + j ][ end[ i + j ] - start[ i + j ] ] );
 			else
 				if ( start[ i + j ] <= max_c && end[ i + j ] >= min_c && start[ i + j ] <= time_sel && end[ i + j ] >= time_sel )
@@ -5862,7 +5820,7 @@ void plot_cs_xy( int *choice )
 	fprintf( f, "set datafile missing \"nan\" \n" );		//handle NaNs
 	fprintf( f2, "set datafile missing \"nan\" \n" );
 
-	app = ( char * ) Tcl_GetVar( inter, "gpterm", 0 );
+	app = get_str( "gpterm" );
 	fprintf( f, "set term tkcanvas\n" );
 	if ( strlen( app ) > 0 )
 		fprintf( f2, "set term %s\n", app );
@@ -5870,65 +5828,64 @@ void plot_cs_xy( int *choice )
 	fprintf( f, "set output 'plot.file'\n" );
 
 	cmd( "set bordercolor [ rgb_24_color $colorsTheme(dfg) ]" );
-	app = ( char * ) Tcl_GetVar( inter, "bordercolor", 0 );
+	app = get_str( "bordercolor" );
 	fprintf( f, "set border linecolor \"%s\"\n", app );
 	fprintf( f2, "set border linecolor \"%s\"\n", app );
 
 	if ( grid )
 	{
 		cmd( "set gridcolor [ rgb_24_color $colorsTheme(bg) ]" );
-		fprintf( f, "set grid linecolor \"%s\"\n", ( char * ) Tcl_GetVar( inter, "gridcolor", 0 ) );
-		fprintf( f2, "set grid linecolor \"%s\"\n", ( char * ) Tcl_GetVar( inter, "gridcolor", 0 ) );
+		fprintf( f, "set grid linecolor \"%s\"\n", get_str( "gridcolor" ) );
+		fprintf( f2, "set grid linecolor \"%s\"\n", get_str( "gridcolor" ) );
 	}
 
 	if ( line_point == 2 )
-	{ 
+	{
 		fprintf( f, "set pointsize %lf\n", point_size );
 		fprintf( f2, "set pointsize %lf\n", point_size );
-		
+
 		if ( ndim == 2 )
 			strcpy( str2, "" );
 		else
-			sprintf( str2, "with points " );       
+			strcpy( str2, "with points " );
 	}
 	else
 	{
 		if ( ndim == 2 && maxx > minx )
-			sprintf( str2, "smooth csplines " );
+			strcpy( str2, "smooth csplines " );
 		else
-			sprintf( str2, "with lines " ); 
+			strcpy( str2, "with lines " );
 	}
 
-	sprintf( msg, "set xlabel \"%s_%s\" textcolor \"%s\"\n", str[ 0 ], tag[ 0 ], app );
-	fprintf( f, "%s", msg );
-	fprintf( f2, "%s", msg );
+	snprintf( da_tmp, MAX_BUFF_SIZE, "set xlabel \"%s_%s\" textcolor \"%s\"\n", str[ 0 ], tag[ 0 ], app );
+	fprintf( f, "%s", da_tmp );
+	fprintf( f2, "%s", da_tmp );
 
 	if ( ndim == 3 )
 	{
-		sprintf( msg, "set ylabel \"%s_%s\" textcolor \"%s\"\n", str[ block_length ], tag[ block_length ], app );
-		fprintf( f, "%s", msg );
-		fprintf( f2, "%s", msg );
-	} 
+		snprintf( da_tmp, MAX_BUFF_SIZE, "set ylabel \"%s_%s\" textcolor \"%s\"\n", str[ block_length ], tag[ block_length ], app );
+		fprintf( f, "%s", da_tmp );
+		fprintf( f2, "%s", da_tmp );
+	}
 
 	if ( allblack )
-		sprintf( str3, " lt -1" );
+		strcpy( str3, " lt -1" );
 	else
-		str3[ 0 ] = 0;
+		strcpy( str3, "" );
 
 	if ( ndim == 3 )
 	{
 		cmd( "set choice $gridd" );
-		if ( *choice == 1 )
+		if ( choice == 1 )
 		{
-			app = ( char * ) Tcl_GetVar( inter, "gpdgrid3d", 0 );
-			fprintf( f, "set dgrid3d %s\nset hidden3d\n", app );
-			fprintf( f2, "set dgrid3d %s\nset hidden3d\n", app );
+			fprintf( f, "set dgrid3d %s\nset hidden3d\n", get_str( "gpdgrid3d" ) );
+			fprintf( f2, "set dgrid3d %s\nset hidden3d\n", get_str( "gpdgrid3d" ) );
 		}
-		
+
 		cmd( "set choice $pm3d" );
-		if ( *choice == 1 )
+		if ( choice == 1 )
 		{
-			sprintf( str2, "with pm3d " );
+			strcpy( str2, "with pm3d " );
 			fprintf( f, "set pm3d\n" );
 			fprintf( f2, "set pm3d\n" );
 		}
@@ -5938,69 +5895,69 @@ void plot_cs_xy( int *choice )
 			strcpy( str3, "" );
 			fprintf( f, "set palette gray\n" );
 			fprintf( f2, "set palette gray\n" );
-		} 
+		}
 	}
-	 
+
 	if ( ndim == 2 )
 	{
-		sprintf( msg, "plot 'data.gp' using 1:2 %s t \"%s_%s(%d)\"", str2, str[ block_length ], tag[ block_length ], time_sel );
-		
+		snprintf( da_tmp, MAX_BUFF_SIZE, "plot 'data.gp' using 1:2 %s t \"%s_%s(%d)\"", str2, str[ block_length ], tag[ block_length ], time_sel );
+
 		if ( allblack )
-			strcat( msg, str3);
-		
+			strcatn( da_tmp, str3, MAX_BUFF_SIZE );
+
 		i = 2;			// init from the second variable
-	} 
+	}
 	else
 	{
-		sprintf( msg, "splot 'data.gp' using 1:2:3 %s t \"%s_%s(%d)\"", str2, str[ 2 * block_length ], tag[ 2 * block_length ], time_sel ); 
-		
+		snprintf( da_tmp, MAX_BUFF_SIZE, "splot 'data.gp' using 1:2:3 %s t \"%s_%s(%d)\"", str2, str[ 2 * block_length ], tag[ 2 * block_length ], time_sel );
+
 		i = 3;
-	}  
+	}
 
 	for ( ; i < nv / block_length; ++i )
 	{
 		j = i * block_length;
-		
+
 		if ( start[ j ] <= max_c && end[ j ] >= min_c )
 		{
 			if ( ndim == 2 )
 			{
-				sprintf( str1, ", 'data.gp' using 1:%d %s t \"%s_%s(%d)\"", i + 1, str2, str[ j ], tag[ j ], time_sel );
-				
+				snprintf( str1, 2 * MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d %s t \"%s_%s(%d)\"", i + 1, str2, str[ j ], tag[ j ], time_sel );
+
 				if ( allblack )
-					strcat( str1, str3);
-			}  
+					strcatn( str1, str3, 2 * MAX_ELEM_LENGTH );
+			}
 			else
-				sprintf( str1, ", 'data.gp' using 1:2:%d %s t \"%s_%s(%d)\"", i + 1, str2, str[ j ], tag[ j ], time_sel ); 
-			
-			strcat( msg, str1 );
+				snprintf( str1, 2 * MAX_ELEM_LENGTH, ", 'data.gp' using 1:2:%d %s t \"%s_%s(%d)\"", i + 1, str2, str[ j ], tag[ j ], time_sel );
+
+			strcatn( da_tmp, str1, MAX_BUFF_SIZE );
 		}
 	}
 
-	strcat( msg, "\n" );
-	fprintf( f, "%s", msg );
-	fprintf( f2, "%s", msg );
+	strcatn( da_tmp, "\n", MAX_BUFF_SIZE );
+	fprintf( f, "%s", da_tmp );
+	fprintf( f2, "%s", da_tmp );
 
 	fclose( f );
 	fclose( f2 );
 
 	cmd( "if { [ info exists pm3d ] } { set choice $pm3d } { set choice 0 }" );
-	if ( *choice != 0 )
-		*choice = 2;	// require filled polygons, not supported by tkcanvas terminal
+	if ( choice != 0 )
+		choice = 2;	// require filled polygons, not supported by tkcanvas terminal
 	else
-		*choice = gnu;
+		choice = gnu;
 
-	show_plot_gnu( cur_plot, choice, *choice, str, tag );
+	show_plot_gnu( cur_plot, choice, str, tag );
 
 	chdir( dirname );
 
 	end:
-	
+
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
 		delete [ ] tag[ i ];
-		
+
 		if ( logs )
 			delete [ ] data[ i ];
 	}
@@ -6017,10 +5974,11 @@ void plot_cs_xy( int *choice )
 /***************************************************
 PLOT_PHASE_DIAGRAM
 ****************************************************/
-void plot_phase_diagram( int *choice )
+void plot_phase_diagram( void )
 {
 	bool done;
-	char *app, **str, **tag, str1[ 50 ], str2[ 100 ], str3[ 100 ], dirname[ MAX_PATH_LENGTH ];
+	char **str, **tag, str1[ MAX_ELEM_LENGTH ], str2[ 2 * MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
+	const char *app;
 	double temp, maxdelta, **data;
 	int i, j, nlags, *start, *end, *id;
 	FILE *f, *f2;
@@ -6028,7 +5986,7 @@ void plot_phase_diagram( int *choice )
 	if ( nv != 1 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"One and only one series must be selected.\"" );
-		*choice = 2;
+		choice = 2;
 		return;
 	}
 
@@ -6051,25 +6009,23 @@ void plot_phase_diagram( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
-		
+
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
-		
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
 		// get series data and take logs if necessary
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "invalid series data", 
-							"internal problem in LSD", 
+				error_hard( "internal problem in LSD",
 							"if error persists, please contact developers",
-							true );
+							true,
+							"invalid series data" );
 				myexit( 18 );
 			}
-	   
+
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
 				data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "plot" );
 		}
@@ -6081,10 +6037,10 @@ void plot_phase_diagram( int *choice )
 		{
 			if ( i == 0 )
 				min_c = max_c = max( start[ i ], showInit ? 0 : 1 );
-			
+
 			if ( start[ i ] < min_c )
 				min_c = max( start[ i ], showInit ? 0 : 1 );
-			
+
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
@@ -6103,27 +6059,27 @@ void plot_phase_diagram( int *choice )
 					miny = maxy = data[ i ][ j - start[ i ] ];
 					done = true;
 				}
-				
+
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )		// ignore NaNs
 					miny = data[ i ][ j - start[ i ] ];
-					
+
 				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )		// ignore NaNs
 					maxy = data[ i ][ j - start[ i ] ];
 			}
-			
-		// condition the max and min values 
+
+		// condition the max and min values
 		temp = lower_bound( miny, maxy, MARG, MARG_CONST, pdigits );
 		maxy = upper_bound( miny, maxy, MARG, MARG_CONST, pdigits );
 		miny = temp;
 	}
-		
+
 	cmd( "newtop .da.s \"Lag Selection\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -text \"Lags\"" );
 	cmd( "set bidi 1" );
 	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to $maxc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( ".da.s.i.e insert 0 $bidi" ); 
+	cmd( ".da.s.i.e insert 0 $bidi" );
 	cmd( "pack .da.s.i.l .da.s.i.e" );
 
 	cmd( "if { ! [ info exists dia ] } { set dia 0 }" );
@@ -6132,33 +6088,33 @@ void plot_phase_diagram( int *choice )
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#phaseplot } { set choice 2 }" );
 
-	cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
-	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
+	cmd( "bind .da.s <KeyPress-Return> { set choice 1 }" );
+	cmd( "bind .da.s <KeyPress-Escape> { set choice 2 }" );
 
 	cmd( "showtop .da.s" );
 	cmd( "mousewarpto .da.s.b.ok 0" );
 	cmd( ".da.s.i.e selection range 0 end" );
 	cmd( "focus .da.s.i.e" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set bidi [ .da.s.i.e get ]" ); 
+	cmd( "set bidi [ .da.s.i.e get ]" );
 	cmd( "destroytop .da.s" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		goto end;
 
 	cmd( "set dirxy plotxy_%d", cur_plot );
 
 	cmd( "file mkdir $dirxy" );
-	getcwd( dirname, MAX_PATH_LENGTH - 1 );
-	sprintf( msg, "plotxy_%d", cur_plot );
-	chdir( msg );
+	getcwd( dirname, MAX_PATH_LENGTH );
+	snprintf( da_tmp, MAX_BUFF_SIZE, "plotxy_%d", cur_plot );
+	chdir( da_tmp );
 
 	cmd( "set choice $bidi" );
-	nlags = *choice;
+	nlags = choice;
 
 	f = fopen( "data.gp", "w" );
 
@@ -6167,7 +6123,7 @@ void plot_phase_diagram( int *choice )
 	for ( i = 0; i <= nlags; ++i )
 		if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
 			fprintf( f, "%s_%s(%d)\t", str[ 0 ], tag[ 0 ], i );
-	 
+
 	fprintf( f, "\n" );
 
 	for ( maxdelta = 0, j = min_c; j <= max_c - nlags; ++j )
@@ -6176,7 +6132,7 @@ void plot_phase_diagram( int *choice )
 			if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
 			{
 				fprintf( f, "%lf\t", data[ 0 ][ j + i - start[ 0 ] ] );
-				
+
 				if ( i > 0 )
 					maxdelta = max( maxdelta, data[ 0 ][ j + i - start[ 0 ] ] - data[ 0 ][ j + i - 1 - start[ 0 ] ] );
 			}
@@ -6186,8 +6142,8 @@ void plot_phase_diagram( int *choice )
 
 	fclose( f );
 
-	*choice = 0;
-	
+	choice = 0;
+
 	f = fopen( "gnuplot.lsd", "w" );
 	f2 = fopen( "gnuplot.gp", "w" );
 	fprintf( f, "set datafile missing \"nan\" \n" );		// handle NaNs
@@ -6196,73 +6152,73 @@ void plot_phase_diagram( int *choice )
 	fprintf( f, "set output 'plot.file'\n" );
 
 	cmd( "set bordercolor [ rgb_24_color $colorsTheme(dfg) ]" );
-	app = ( char * ) Tcl_GetVar( inter, "bordercolor", 0 );
+	app = get_str( "bordercolor" );
 	fprintf( f, "set border linecolor \"%s\"\n", app );
 	fprintf( f2, "set border linecolor \"%s\"\n", app );
 
 	if ( grid )
 	{
 		cmd( "set gridcolor [ rgb_24_color $colorsTheme(bg) ]" );
-		fprintf( f, "set grid linecolor \"%s\"\n", ( char * ) Tcl_GetVar( inter, "gridcolor", 0 ) );
-		fprintf( f2, "set grid linecolor \"%s\"\n", ( char * ) Tcl_GetVar( inter, "gridcolor", 0 ) );
+		fprintf( f, "set grid linecolor \"%s\"\n", get_str( "gridcolor" ) );
+		fprintf( f2, "set grid linecolor \"%s\"\n", get_str( "gridcolor" ) );
 	}
 
 	if ( line_point == 2 )
 	{
-		sprintf( str1, "set pointsize %lf\n", point_size );
+		snprintf( str1, MAX_ELEM_LENGTH, "set pointsize %lf\n", point_size );
 		fprintf( f, "%s", str1 );
 		fprintf( f2, "%s", str1 );
 	}
 
-	sprintf( msg, "set yrange [%.*g:%.*g]\n", pdigits, miny, pdigits, maxy );
-	fprintf( f, "%s", msg );
-	fprintf( f2, "%s", msg );
-	sprintf( msg, "set xlabel \"%s_%s\" textcolor \"%s\"\n", str[ 0 ], tag[ 0 ], app );
-	fprintf( f, "%s", msg );
-	fprintf( f2, "%s", msg );
+	snprintf( da_tmp, MAX_BUFF_SIZE, "set yrange [%.*g:%.*g]\n", pdigits, miny, pdigits, maxy );
+	fprintf( f, "%s", da_tmp );
+	fprintf( f2, "%s", da_tmp );
+	snprintf( da_tmp, MAX_BUFF_SIZE, "set xlabel \"%s_%s\" textcolor \"%s\"\n", str[ 0 ], tag[ 0 ], app );
+	fprintf( f, "%s", da_tmp );
+	fprintf( f2, "%s", da_tmp );
 
 	cmd( "set choice $dia" );
-	if ( *choice == 1 )
+	if ( choice == 1 )
 	{
 		fprintf( f, "set arrow from %.*g,%.*g to %.*g,%.*g lt -1\n", pdigits, miny, pdigits, miny, pdigits, maxy, pdigits, maxy );
 		fprintf( f2, "set arrow from %.*g,%.*g to %.*g,%.*g lt -1\n", pdigits, miny, pdigits, miny, pdigits, maxy, pdigits, maxy );
 	}
 
 	if ( line_point == 1 && maxdelta > 0 )
-		sprintf( str1, "smooth csplines" );
+		strcpy( str1, "smooth csplines" );
 	else
 		strcpy( str1, "" );
 
 	if ( allblack )
-		sprintf( str3, " lt -1" );
+		strcpy( str3, " lt -1" );
 	else
 		str3[ 0 ] = 0;
 
-	sprintf( msg, "plot 'data.gp' using 1:2 %s t \"t + 1\"", str1 );
+	snprintf( da_tmp, MAX_BUFF_SIZE, "plot 'data.gp' using 1:2 %s t \"t + 1\"", str1 );
 
 	if ( allblack )
-		strcat( msg, str3 );
+		strcatn( da_tmp, str3, MAX_BUFF_SIZE );
 
 	for ( i = 2; i <= nlags; ++i )
 		if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
 		{
-			sprintf( str2, ", 'data.gp' using 1:%d %s t \"t+%d\"", i + 1, str1, i );
-			strcat( msg, str2 );
-			
+			snprintf( str2, 2 * MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d %s t \"t+%d\"", i + 1, str1, i );
+			strcatn( da_tmp, str2, MAX_BUFF_SIZE );
+
 			if ( allblack )
-				strcat( msg, str3 );
+				strcatn( da_tmp, str3, MAX_BUFF_SIZE );
 		}
 
-	strcat( msg, "\n" );
-	fprintf( f, "%s", msg );
-	fprintf( f2, "%s", msg );
+	strcatn( da_tmp, "\n", MAX_BUFF_SIZE );
+	fprintf( f, "%s", da_tmp );
+	fprintf( f2, "%s", da_tmp );
 
 	fclose( f );
 	fclose( f2 );
 
 	cmd( "set choice $gnu" );
 
-	show_plot_gnu( cur_plot, choice, *choice, str, tag );
+	show_plot_gnu( cur_plot, choice, str, tag );
 
 	chdir( dirname );
 
@@ -6272,11 +6228,11 @@ void plot_phase_diagram( int *choice )
 	{
 		delete [ ] str[ i ];
 		delete [ ] tag[ i ];
-		
+
 		if ( logs )
 			delete [ ] data[ i ];
 	}
-	
+
 	delete [ ] str;
 	delete [ ] tag;
 	delete [ ] data;
@@ -6289,7 +6245,7 @@ void plot_phase_diagram( int *choice )
 /***************************************************
 SHOW_PLOT_GNU
 ****************************************************/
-void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
+void show_plot_gnu( int n, int type, char **str, char **tag )
 {
 	int i, hsize, vsize, sbordsize, lim[ 4 ];
 	double rang[ 4 ];
@@ -6297,30 +6253,30 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	if ( type == 2 )
 	{
 		if ( ! gnu )
-			
+
 	cmd( "ttk::messageBox -parent .da -type ok -icon warning -title Warning -message \"Unsupported options for the internal graphical window\" -detail \"Gnuplot automatically selected to support the chosen 3D plot options.\"" );
 		gnu = true;
 		type = 1;
 	}
 
 	cmd( "raise .da ." );
-		
+
 	if ( type == 1 )
 	{	// plot with external gnuplot
 		cmd( "set choice [ open_gnuplot gnuplot.gp \"Please check if you have selected an adequate configuration for the plot.\nIf the error persists please check if Gnuplot is installed and set up properly.\" ]" );
-		
-		if ( *choice != 0 )			// Gnuplot failed
+
+		if ( choice != 0 )			// Gnuplot failed
 		{
-			*choice = 2;
+			choice = 2;
 			return;
 		}
-				
+
 		type_plot[ n ] = -1; 		// external plot
 		plot_w[ n ] = -1;
 		plot_l[ n ] = -1;
-		plot_nl[ n ] = -1;   
-		
-		*choice = 0;
+		plot_nl[ n ] = -1;
+
+		choice = 0;
 		return;
 	}
 
@@ -6333,18 +6289,18 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	// generate tk canvas filling routine using Gnuplot
 	cmd( "set choice [ open_gnuplot gnuplot.lsd \"Please check if you have selected an adequate configuration for the plot and if Gnuplot is set up properly.\nIf the error persists please check if Gnuplot is installed and set up properly.\" true ]" );
 
-	if ( *choice != 0 )						// Gnuplot failed
+	if ( choice != 0 )						// Gnuplot failed
 	{
-		*choice = 2;
+		choice = 2;
 		return;
 	}
 
 	if ( shrink_gnufile( ) != 0 )			// file conversion failed
 	{
-		*choice = 2;
+		choice = 2;
 		return;
 	}
-		
+
 	cmd( "file delete plot.file; file rename plot_clean.file plot.file" );
 
 	// create plot notepad window, tab & canvas
@@ -6358,7 +6314,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "pack $w.f.vs -side right -fill y" );
 	cmd( "pack $w.f.hs -side bottom -fill x" );
 
-	cmd( "ttk::canvas $p -width %d -height %d -yscrollcommand \"$w.f.vs set\" -xscrollcommand \"$w.f.hs set\" -scrollregion \"%d %d %d %d\" -dark $darkTheme", 
+	cmd( "ttk::canvas $p -width %d -height %d -yscrollcommand \"$w.f.vs set\" -xscrollcommand \"$w.f.hs set\" -scrollregion \"%d %d %d %d\" -dark $darkTheme",
 			hsize, vsize, - sbordsize, - sbordsize, hsize + sbordsize, vsize + sbordsize  );
 
 	cmd( "pack $p -expand yes -fill both" );
@@ -6369,9 +6325,9 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "ttk::frame $w.b" );
 
 	cmd( "ttk::frame $w.b.c" );
-	
+
 	cmd( "ttk::frame $w.b.c.case" );
-	
+
 	cmd( "set labWid 15; set datWid 30" );
 
 	if ( logs )
@@ -6402,7 +6358,7 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 			set it \"%d) %s\"; \
 			set fromPlot 1; \
 			set choice 11 \
-		}", n, ( char * ) Tcl_GetVar( inter, "tit", 0 ) );
+		}", n, get_str( "tit" ) );
 	cmd( "ttk::button $w.b.s.gnu -width $butWid -text Gnuplot -state disabled -command { \
 			set oldpath [ pwd ]; \
 			cd plotxy_%d; \
@@ -6451,8 +6407,8 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 	cmd( "catch { set lim [ gnuplot_plotarea ] }" );
 	cmd( "catch { set rang [ gnuplot_axisranges ] }" );
 	cmd( "if { [ info exists lim ] && [ info exists rang ] } { set choice 1 } { set choice 0 }" );
-	
-	if ( *choice == 1 )
+
+	if ( choice == 1 )
 	{
 		cmd( "set res [ expr { int( $cmx * [ lindex $lim 0 ] / 1000.0 ) } ]" );
 		lim[ 0 ] = get_int( "res" );
@@ -6462,9 +6418,9 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 		lim[ 2 ] = get_int( "res" );
 		cmd( "set res [ expr { int( $cmy * [ lindex $lim 3 ] / 1000.0 ) } ]" );
 		lim[ 3 ] = get_int( "res" );
-		
+
 		for ( i = 0; i < 4; ++i )
-		{	
+		{
 			cmd( "set res [ lindex $rang %d ]", i );
 			rang[ i ] = get_double( "res" );
 
@@ -6501,46 +6457,46 @@ void show_plot_gnu( int n, int *choice, int type, char **str, char **tag )
 
 	// create context menu and common bindings
 	canvas_binds( n );
-	
+
 	cmd( "update idletasks" );
 
 	// save plot info
 	type_plot[ n ] = GNUPLOT; 	// Gnuplot plot
 	plot_w[ n ] = hsize;		// plot width
 	plot_l[ n ] = vsize; 		// height of plot with labels
-	plot_nl[ n ] = vsize; 		// height of plot without labels   
-	 
-	*choice = 0;
+	plot_nl[ n ] = vsize; 		// height of plot without labels
+
+	choice = 0;
 }
 
 
 /***************************************************
 PLOT_LATTICE
 ****************************************************/
-void plot_lattice( int *choice )
+void plot_lattice( void )
 {
-	char *app, **str, **tag;
+	char **str, **tag;
 	double val, color, cscale, **data;
 	int i, j, hi, le, first = 1, last, time, hsize, vsize, ncol, nlin, tot, *start, *end, *id;
 
 	if ( nv == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-		*choice = 2;
+		choice = 2;
 		return;
 	}
 
 	if ( time_cross == 0 && nv > 1 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For time series lattices select only one series.\"" );
-		*choice = 2;
+		choice = 2;
 		return;
 	}
 
 	if ( time_cross == 1 && nv < 2 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For cross-section lattices select at least two series.\"" );
-		*choice = 2;
+		choice = 2;
 		return;
 	}
 
@@ -6571,19 +6527,19 @@ void plot_lattice( int *choice )
 	cmd( "ttk::frame .da.s.t" );
 	cmd( "ttk::label .da.s.t.l -width 22 -anchor e -text \"Cross-section case\"" );
 	cmd( "ttk::entry .da.s.t.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $numc } { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( ".da.s.t.e insert 0 $time" ); 
+	cmd( ".da.s.t.e insert 0 $time" );
 	cmd( "pack .da.s.t.l .da.s.t.e -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -width 22 -anchor e -text \"Data columns\"" );
 	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center", num_c, num_c );
-	cmd( ".da.s.i.e insert 0 $bidi" ); 
+	cmd( ".da.s.i.e insert 0 $bidi" );
 	cmd( "pack .da.s.i.l .da.s.i.e -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "ttk::frame .da.s.s" );
 	cmd( "ttk::label .da.s.s.l -width 22 -anchor e -text \"Color scale\"" );
 	cmd( "ttk::entry .da.s.s.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 } { set cscale %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cscale; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( ".da.s.s.e insert 0 $cscale" ); 
+	cmd( ".da.s.s.e insert 0 $cscale" );
 	cmd( "pack .da.s.s.l .da.s.s.e -side left -anchor w -padx 2 -pady 2" );
 
 	if ( time_cross == 1 )
@@ -6600,7 +6556,7 @@ void plot_lattice( int *choice )
 
 	cmd( "bind .da.s.i.e <KeyPress-Return> { focus .da.s.s.e; .da.s.s.e selection range 0 end }" );
 	cmd( "bind .da.s.s.e <KeyPress-Return> { set choice 1 }" );
-		
+
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#lattice } { set choice 2 }" );
 
 	cmd( "showtop .da.s" );
@@ -6608,21 +6564,21 @@ void plot_lattice( int *choice )
 
 	cmd( "tooltip::tooltip .da.s.s.l \"Data multiplier values\"" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set time [ .da.s.t.e get ]" ); 
-	cmd( "set bidi [ .da.s.i.e get ]" ); 
-	cmd( "set cscale [ .da.s.s.e get ]" ); 
+	cmd( "set time [ .da.s.t.e get ]" );
+	cmd( "set bidi [ .da.s.i.e get ]" );
+	cmd( "set cscale [ .da.s.s.e get ]" );
 	cmd( "destroytop .da.s" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		goto end1;
 
 	// prepare data from selected series
 	cmd( "set choice $time" );
-	time = *choice;
+	time = choice;
 
 	for ( i = 0; i < nv; ++i )
 	{
@@ -6630,40 +6586,38 @@ void plot_lattice( int *choice )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
-	  
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
 		// check if series has data for all selected cases (cross-section only )
 		if ( time_cross == 1 && ( time < start[ i ] || time > end[ i ] ) )
 		{
 			cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid case\" -detail \"One or more of the series do not have a value associated to the selected cross-section case (time step).\"" );
-			*choice = 2;
-			
+			choice = 2;
+
 			for ( j = i + 1; j < nv; ++j )		// indicate non allocated positions
 				str[ j ] = tag[ j ] = NULL;
-			
+
 			goto end1;
 		}
-		
+
 		// get series data and take logs if necessary
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
 		{
-			error_hard( "invalid series data", 
-						"internal problem in LSD", 
+			error_hard( "internal problem in LSD",
 						"if error persists, please contact developers",
-						true );
+						true,
+						"invalid series data" );
 			myexit( 18 );
 		}
-	  
+
 		if ( logs )			// apply log to the values to show "log scale"
 			data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "lattice" );
 	}
 
 	// define lattice configuration
 	cmd( "set choice $bidi" );
-	ncol = *choice;
+	ncol = choice;
 
 	if ( time_cross == 0 )
 	{
@@ -6678,13 +6632,13 @@ void plot_lattice( int *choice )
 				first = min_c;
 			else
 				first = max( start[ 0 ], showInit ? 0 : 1 );
-			
-			if ( max_c < end[ 0 ] )  
+
+			if ( max_c < end[ 0 ] )
 				last = max_c;
 			else
 				last = end[ 0 ];
 		}
-		
+
 		for ( tot = 0, i = first; i <= last; ++i )	// count number of points excluding NaNs
 			if ( ! is_nan( data[ 0 ][ i - start[ 0 ] ] ) && is_finite( data[ 0 ][ i - start[ 0 ] ] ) )
 				tot++;
@@ -6697,7 +6651,7 @@ void plot_lattice( int *choice )
 	if ( nlin * ncol != tot )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of columns\" -detail \"The number of columns must be an exact divisor of the number (%d) of cases/time steps (time series) or selected variables (cross section).\"", tot );
-		*choice = 2;
+		choice = 2;
 		goto end2;
 	}
 
@@ -6713,7 +6667,7 @@ void plot_lattice( int *choice )
 	cmd( "ttk::canvas $p -width %d -height %d -entry 0 -dark $darkTheme", ncol * le + 1, nlin * hi + 1 );
 	cmd( "pack $p -anchor c" );
 	cmd( "pack $w.f" );
-	
+
 	// add buttons bottom bar
 	cmd( "ttk::frame $w.b -width %d", ncol * le + 1 );
 
@@ -6728,12 +6682,12 @@ void plot_lattice( int *choice )
 			set it \"%d) %s\"; \
 			set fromPlot 1; \
 			set choice 11 \
-		}", cur_plot, ( char * ) Tcl_GetVar( inter, "tit", 0 ) );
+		}", cur_plot, get_str( "tit" ) );
 	cmd( "ttk::button $w.b.s.det -width $butWid -text Detach -command { \
 			detach_tab $daptab tab%d c.b.s.det c.b.s.save .da %d \
 		}", cur_plot, MAX_TAB_LEN - 1 );
 	cmd( "pack $w.b.s.save $w.b.s.det -pady 3" );
-	
+
 	cmd( "ttk::label $w.b.pad -width 30" );
 
 	cmd( "pack $w.b.o $w.b.pad $w.b.s -padx 10 -pady 5 -side left" );
@@ -6742,14 +6696,14 @@ void plot_lattice( int *choice )
 	for ( j = 0; j < nlin; ++j )
 		for ( i = 0; i < ncol; ++i )
 		{
-			val = time_cross == 1 ? data[ ncol * j + i ][ time - start[ ncol * j + i ] ] : 
+			val = time_cross == 1 ? data[ ncol * j + i ][ time - start[ ncol * j + i ] ] :
 									data[ 0 ][ first + ncol * j + i - start[ 0 ] ];
 			color = max( 0, min( 1099, round( val * cscale ) ) );
 			if ( is_nan( color ) || ! is_finite( color ) )
 			  color = 0;
 
-			cmd( "plot_bars $p %d %d %d %d p%d_%d $c%d %lf $colorsTheme(dfg)", 
-			   i * le, j * hi, ( i + 1 ) * le, ( j + 1 ) * hi, j, i, 
+			cmd( "plot_bars $p %d %d %d %d p%d_%d $c%d %lf $colorsTheme(dfg)",
+			   i * le, j * hi, ( i + 1 ) * le, ( j + 1 ) * hi, j, i,
 			   ( int ) color, grid ? point_size : 0.0 );
 		}
 
@@ -6758,24 +6712,24 @@ void plot_lattice( int *choice )
 
 	// create context menu and common bindings
 	canvas_binds( cur_plot );
-	
+
 	cmd( "update idletasks" );
 
 	// save plot info
 	type_plot[ cur_plot ] = LATTICE;
 	plot_w[ cur_plot ] = ncol * le + 1;	// plot width
 	plot_l[ cur_plot ] = nlin * hi + 1;
-	plot_nl[ cur_plot ] = nlin * hi + 1;  
+	plot_nl[ cur_plot ] = nlin * hi + 1;
 
 	end2:
-	
-	*choice = 0;
+
+	choice = 0;
 
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
 		delete [ ] tag[ i ];
-		
+
 		if ( logs )
 			delete [ ] data[ i ];
 	}
@@ -6794,10 +6748,10 @@ void plot_lattice( int *choice )
 /***************************************************
 HISTOGRAMS
 ****************************************************/
-void histograms( int *choice )
+void histograms( void )
 {
 	bool norm;
-	char *app, **str, **tag;
+	char **str, **tag;
 	double mx = 0, mn = 0, step, a, lminy, lmaxy, *data;
 	int i, j, first, last, stat, start, end, id;
 
@@ -6807,27 +6761,25 @@ void histograms( int *choice )
 			cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one series in the Series Selected listbox.\"" );
 		else
 			cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For time series histograms select only one series.\"" );
-		*choice = 2;
+		choice = 2;
 		return;
-	} 
-	 
+	}
+
 	str = new char *[ 1 ];
 	tag = new char *[ 1 ];
 	str[ 0 ] = new char[ MAX_ELEM_LENGTH ];
 	tag[ 0 ] = new char[ MAX_ELEM_LENGTH ];
 
 	cmd( "set res [ .da.vars.ch.f.v get 0 ]" );
-	app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-	strcpy( msg, app );
-	sscanf( msg, "%s %s (%d-%d) #%d", str[ 0 ], tag[ 0 ], &start, &end, &id );
+	sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ 0 ], tag[ 0 ], &start, &end, &id );
 
 	data = vs[ id ].data;
 	if ( data == NULL )
 	{
-		error_hard( "invalid series data", 
-					"internal problem in LSD", 
+		error_hard( "internal problem in LSD",
 					"if error persists, please contact developers",
-					true );
+					true,
+					"invalid series data" );
 		myexit( 18 );
 	}
 
@@ -6845,12 +6797,12 @@ void histograms( int *choice )
 			first = min_c;
 		else
 			first = max( start, showInit ? 0 : 1 );
-		
-		if ( max_c < end )  
+
+		if ( max_c < end )
 			last = max_c;
 		else
 			last = end;
-	}  
+	}
 
 	for ( j = 0, i = first; i <= last; ++i )	// count number of points excluding NaNs
 		if ( ! is_nan( data[ i - start ] ) && is_finite( data[ i - start ] ) )
@@ -6859,13 +6811,13 @@ void histograms( int *choice )
 	cmd( "set bidi %d", j < 25 ? j : 25 );
 	cmd( "set norm 0" );
 	cmd( "set stat 0" );
-	
+
 	cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -text \"Classes/bins\"" );
 	cmd( "ttk::spinbox .da.s.i.e -width 5 -from $minc -to $maxc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= $minc && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( ".da.s.i.e insert 0 $bidi" ); 
+	cmd( ".da.s.i.e insert 0 $bidi" );
 	cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
 
 	cmd( "ttk::frame .da.s.o" );
@@ -6877,32 +6829,32 @@ void histograms( int *choice )
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#histogram } { set choice 2 }" );
 
-	cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
+	cmd( "bind .da.s.i.e <KeyPress-Return> { set choice 1 }" );
 
 	cmd( "showtop .da.s" );
 	cmd( "mousewarpto .da.s.b.ok 0" );
 	cmd( ".da.s.i.e selection range 0 end" );
 	cmd( "focus .da.s.i.e" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set bidi [ .da.s.i.e get ]" ); 
+	cmd( "set bidi [ .da.s.i.e get ]" );
 	cmd( "destroytop .da.s" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		goto end;
 
 	cmd( "set choice $bidi" );
-	num_bins = *choice;
+	num_bins = choice;
 
 	histo_mean = histo_var = histo_cases = 0;
 	for ( i = first; i <= last; ++i )
 	{
 		if ( is_nan( data[ i - start ] ) || ! is_finite( data[ i - start ] ) )	// ignore NaNs
 			continue;
-			
+
 		if ( i == first )
 			mx = mn = data[ i - start ];
 		else
@@ -6912,25 +6864,25 @@ void histograms( int *choice )
 			else
 				if ( data[ i - start ] < mn )
 					mn = data[ i - start ];
-		}  
-		
+		}
+
 		histo_mean += data[ i - start ];
 		histo_var += data[ i - start ] * data[ i - start ];
-		
+
 		++histo_cases;
 	}
 
 	if ( histo_cases == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no valid data for the chosen cases (time steps).\"" );
-		*choice = 2;
+		choice = 2;
 		goto end;
 	}
 
 	if ( mx - mn <= 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no data variation for the chosen cases (time steps).\"" );
-		*choice = 2;
+		choice = 2;
 		goto end;
 	}
 
@@ -6944,9 +6896,9 @@ void histograms( int *choice )
 		histo_bins[ i ].av = 0;
 		histo_bins[ i ].min = 0;
 		histo_bins[ i ].max = 0;
-		histo_bins[ i ].center = 0; 
+		histo_bins[ i ].center = 0;
 	}
-	 
+
 	for ( i = first; i <= last; ++i )
 	{
 		if ( is_nan( data[ i - start ] ) || ! is_finite( data[ i - start ] ) )
@@ -6967,11 +6919,11 @@ void histograms( int *choice )
 			else
 				if ( histo_bins[ j ].max < data[ i - start ] )
 					histo_bins[ j ].max = data[ i - start ];
-		}  
-		
+		}
+
 		histo_bins[ j ].av += data[ i - start ];
-		histo_bins[ j ].num++;   
-	} 
+		histo_bins[ j ].num++;
+	}
 
 	a = ( mx - mn ) / ( num_bins - 1 );
 
@@ -6980,7 +6932,7 @@ void histograms( int *choice )
 			a = histo_bins[ i ].min - histo_bins[ i - 1 ].max;
 
 	cmd( "set choice $stat" );
-	stat = *choice;
+	stat = choice;
 
 	if ( stat == 1 )
 		plog( "\nTime series histogram statistics\n #   Boundaries(center)\t\tMin.\tAverage\tMax.\tNum.\tFreq." );
@@ -6993,17 +6945,17 @@ void histograms( int *choice )
 	{
 		if ( histo_bins[ i ].num != 0 )
 			histo_bins[ i ].av /= histo_bins[ i ].num;
-		
+
 		histo_bins[ i ].lowb = mn - a / 2 + ( double ) i * step;
 		histo_bins[ i ].highb = mn - a / 2 + ( double ) ( i + 1 ) * step;
 		histo_bins[ i ].center = histo_bins[ i ].highb / 2 + histo_bins[ i ].lowb / 2;
-		
+
 		if ( stat == 1 )
-			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", "", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].max, pdigits, histo_bins[ i ].num, pdigits, histo_bins[ i ].num / histo_cases );
-		
+			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].max, pdigits, histo_bins[ i ].num, pdigits, histo_bins[ i ].num / histo_cases );
+
 		if ( histo_bins[ i ].num < lminy )
 			lminy = histo_bins[ i ].num;
-		
+
 		if ( histo_bins[ i ].num > lmaxy )
 			lmaxy = histo_bins[ i ].num;
 	}
@@ -7011,7 +6963,7 @@ void histograms( int *choice )
 	if ( stat == 1 )
 	{
 		plog( "\n\n" );
-		cmd( "focustop .log .da" ); 
+		cmd( "focustop .log .da" );
 	}
 
 	if ( autom || miny >= maxy )
@@ -7022,12 +6974,12 @@ void histograms( int *choice )
 	}
 
 	cmd( "set choice $norm" );
-	norm = *choice ? true : false;
+	norm = choice ? true : false;
 
 	// plot histogram
-	plot( HISTOGR, &start, &end, str, tag, choice, norm );
+	plot( HISTOGR, &start, &end, str, tag, norm );
 
-	*choice = 0;
+	choice = 0;
 
 	delete [ ] histo_bins;
 
@@ -7035,7 +6987,7 @@ void histograms( int *choice )
 
 	if ( logs )
 		delete [ ] data;
-	
+
 	delete [ ] str[ 0 ];
 	delete [ ] tag[ 0 ];
 	delete [ ] str;
@@ -7046,10 +6998,10 @@ void histograms( int *choice )
 /***************************************************
 HISTOGRAMS CS
 ****************************************************/
-void histograms_cs( int *choice )
+void histograms_cs( void )
 {
 	bool norm;
-	char *app, **str, **tag;
+	char **str, **tag;
 	double mx = 0, mn = 0, step, a, lminy, lmaxy, **data;
 	int i, j, stat, active_v, *start, *end, *id;
 
@@ -7059,8 +7011,8 @@ void histograms_cs( int *choice )
 			cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place two or more series in the Series Selected listbox.\"" );
 		else
 			cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For cross-section histograms select at least two series.\"" );
-		
-		*choice = 2;
+
+		choice = 2;
 		return;
 	}
 
@@ -7082,22 +7034,20 @@ void histograms_cs( int *choice )
 	{
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
-		
+
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
-		
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
 		{
-			error_hard( "invalid series data", 
-						"internal problem in LSD", 
+			error_hard( "internal problem in LSD",
 						"if error persists, please contact developers",
-						true );
+						true,
+						"invalid series data" );
 			myexit( 18 );
 		}
-	  
+
 		if ( logs )			// apply log to the values to show "log scale" in the y-axis
 			data[ i ] = log_data( data[ i ], start[ i ], end[ i ], i, "histogram" );
 	}
@@ -7106,53 +7056,53 @@ void histograms_cs( int *choice )
 	cmd( "set bidi %d", nv < 25 ? nv : 25 );
 	cmd( "set norm 0" );
 	cmd( "set stat 0" );
-	
+
 	cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.t" );
 	cmd( "ttk::label .da.s.t.l -text \"Cross-section case\"" );
 	cmd( "ttk::entry .da.s.t.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= $numc } { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( ".da.s.t.e insert 0 $time" ); 
+	cmd( ".da.s.t.e insert 0 $time" );
 	cmd( "pack .da.s.t.l .da.s.t.e -side left -padx 2" );
 
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -text \"Classes/bins\"" );
 	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center", nv, nv );
-	cmd( ".da.s.i.e insert 0 $bidi" ); 
+	cmd( ".da.s.i.e insert 0 $bidi" );
 	cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
 
 	cmd( "ttk::frame .da.s.o" );
 	cmd( "ttk::checkbutton .da.s.o.norm -text \"Fit a Normal\" -variable norm" );
 	cmd( "ttk::checkbutton .da.s.o.st -text \"Show statistics\" -variable stat" );
 	cmd( "pack .da.s.o.norm .da.s.o.st -anchor w" );
-	
+
 	cmd( "pack .da.s.t .da.s.i .da.s.o -pady 10" );
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#histogram } { set choice 2 }" );
 
 	cmd( "bind .da.s.t.e <Return> {focus .da.s.i.e; .da.s.i.e selection range 0 end}" );
-	cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
+	cmd( "bind .da.s.i.e <KeyPress-Return> { set choice 1 }" );
 
 	cmd( "showtop .da.s" );
 	cmd( "mousewarpto .da.s.b.ok 0" );
 	cmd( ".da.s.t.e selection range 0 end" );
 	cmd( "focus .da.s.t.e" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set bidi [ .da.s.i.e get ]" ); 
-	cmd( "set time [ .da.s.t.e get ]" ); 
+	cmd( "set bidi [ .da.s.i.e get ]" );
+	cmd( "set time [ .da.s.t.e get ]" );
 	cmd( "destroytop .da.s" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		goto end;
 
 	cmd( "set choice $bidi" );
-	num_bins = *choice;
+	num_bins = choice;
 	cmd( "set choice $time" );
-	histo_cs = *choice;
+	histo_cs = choice;
 
 	histo_mean = histo_var = histo_cases = 0;
 	active_v = 0;
@@ -7168,11 +7118,11 @@ void histograms_cs( int *choice )
 				else
 					if ( data[ i ][ histo_cs - start[ i ] ] < mn )
 						mn = data[ i ][ histo_cs - start[ i ] ];
-			}  
-			
+			}
+
 			histo_mean += data[ i ][ histo_cs - start[ i ] ];
 			histo_var += data[ i ][ histo_cs - start[ i ] ] * data[ i ][ histo_cs - start[ i ] ];
-			
+
 			++histo_cases;
 			++active_v;
 		}
@@ -7180,7 +7130,7 @@ void histograms_cs( int *choice )
 	if ( histo_cases == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series have no valid data in the chosen cases (time steps).\"" );
-		*choice = 2;
+		choice = 2;
 		goto end;
 	}
 
@@ -7193,21 +7143,21 @@ void histograms_cs( int *choice )
 		histo_bins[ i ].num = 0;
 		histo_bins[ i ].av = 0;
 		histo_bins[ i ].min = 0;
-		histo_bins[ i ].max = 0;  
-		histo_bins[ i ].center = 0; 
+		histo_bins[ i ].max = 0;
+		histo_bins[ i ].center = 0;
 	}
-	 
+
 	for ( i = 0; i < nv; ++i )
 	{
 		if ( start[ i ] > histo_cs || end[ i ] < histo_cs || ! is_finite( data[ i ][ histo_cs - start[ i ] ] ) )
 			continue;
 
 		a = floor( num_bins * ( data[ i ][ histo_cs - start[ i ] ] - mn ) / ( mx - mn ) );
-			
+
 		j = ( int ) a;
 		if ( j == num_bins )
 			--j;
-		
+
 		if ( histo_bins[ j ].num == 0 )
 			histo_bins[ j ].min = histo_bins[ j ].max = data[ i ][ histo_cs - start[ i ] ];
 		else
@@ -7218,10 +7168,10 @@ void histograms_cs( int *choice )
 				if ( histo_bins[ j ].max < data[ i ][ histo_cs - start[ i ] ] )
 					histo_bins[ j ].max = data[ i ][ histo_cs - start[ i ] ];
 		}
-		
-		histo_bins[ j ].num++;   
+
+		histo_bins[ j ].num++;
 		histo_bins[ j ].av += data[ i ][ histo_cs - start[ i ] ];
-	} 
+	}
 
 	a = ( mx - mn ) / ( num_bins - 1 );
 	for ( i = 1; i < num_bins; ++i )
@@ -7229,7 +7179,7 @@ void histograms_cs( int *choice )
 			a = histo_bins[ i ].min - histo_bins[ i - 1 ].max;
 
 	cmd( "set choice $stat" );
-	stat = *choice;
+	stat = choice;
 
 	if ( stat == 1 )
 		plog( "\nCross-section histogram statistics\n#    Boundaries(center)\t\tMin\tAve\tMax\tNum.\tFreq." );
@@ -7245,10 +7195,10 @@ void histograms_cs( int *choice )
 		histo_bins[ i ].lowb = mn - a / 2 + ( double ) i * step;
 		histo_bins[ i ].highb = mn - a / 2 + ( double ) ( i + 1 ) * step;
 		histo_bins[ i ].center = histo_bins[ i ].highb / 2 + histo_bins[ i ].lowb / 2;
-		
+
 		if ( stat == 1 )
-			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", "", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].max, pdigits, histo_bins[ i ].num, pdigits, histo_bins[ i ].num / histo_cases );
-		
+			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].max, pdigits, histo_bins[ i ].num, pdigits, histo_bins[ i ].num / histo_cases );
+
 		if ( histo_bins[ i ].num < lminy )
 			lminy = histo_bins[ i ].num;
 		if ( histo_bins[ i ].num > lmaxy )
@@ -7258,7 +7208,7 @@ void histograms_cs( int *choice )
 	if ( stat == 1 )
 	{
 		plog( "\n\n" );
-		cmd( "focustop .log .da" ); 
+		cmd( "focustop .log .da" );
 	}
 
 	if ( autom || miny >= maxy )
@@ -7269,12 +7219,12 @@ void histograms_cs( int *choice )
 	}
 
 	cmd( "set choice $norm" );
-	norm = *choice ? true : false;
+	norm = choice ? true : false;
 
 	// plot histogram
-	plot( HISTOCS, start, end, str, tag, choice, norm );
+	plot( HISTOCS, start, end, str, tag, norm );
 
-	*choice = 0;
+	choice = 0;
 
 	delete [ ] histo_bins;
 
@@ -7284,13 +7234,13 @@ void histograms_cs( int *choice )
 	{
 		delete [ ] str[ i ];
 		delete [ ] tag[ i ];
-		
+
 		if ( logs )
 			delete [ ] data[ i ];
 	}
-	
+
 	delete [ ] str;
-	delete [ ] tag; 
+	delete [ ] tag;
 	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
@@ -7303,11 +7253,11 @@ CREATE_SERIES
 ****************************************************/
 // define MC series parent names for AoR
 const char *mc_par[ ] = { "(MC)", "meanMC", "maxMC", "minMC", "varMC", "sumMC", "meanMC", "countMC", "sdMC", "prodMC", "invMC", "ci+MC", "ci-MC", "maxMC", "(MC)", "meanMC", "meanMC" };
-		
-bool create_series( int *choice, bool mc, vector < string > var_names )
+
+bool create_series( bool mc, vector < string > var_names )
 {
 	bool first, done = true;
-	char *lapp, **str, **tag;
+	char **str, **tag;
 	double nmax = 0, nmin = 0, nmean, nvar, nn, sum, prod, thflt, confi, z_crit, **data;
 	int i, j, k, flt, cs_long, type_series, new_series, sel_series, *start, *end, *id;
 	store *app;
@@ -7357,7 +7307,7 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		cmd( "ttk::frame .da.s.f.t" );
 		cmd( "ttk::label .da.s.f.t.l -text \"Threshold\"" );
 		cmd( "ttk::entry .da.s.f.t.th -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set thflt %%P; return 1 } { %%W delete 0 end; %%W insert 0 $thflt; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-		cmd( "write_disabled .da.s.f.t.th $thflt" ); 
+		cmd( "write_disabled .da.s.f.t.th $thflt" );
 		cmd( "pack .da.s.f.t.l .da.s.f.t.th -side left -padx 2" );
 
 		cmd( "pack .da.s.f.l .da.s.f.r .da.s.f.t" );
@@ -7381,7 +7331,7 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		cmd( "ttk::label .da.s.i.r.ci.x -text @" );
 		cmd( "ttk::label .da.s.i.r.ci.perc -text %%" );
 		cmd( "ttk::combobox .da.s.i.r.ci.p -values $clList -width 4 -justify center -state disabled" );
-		cmd( "write_disabled .da.s.i.r.ci.p $confi" ); 
+		cmd( "write_disabled .da.s.i.r.ci.p $confi" );
 		cmd( "pack .da.s.i.r.ci.c .da.s.i.r.ci.x .da.s.i.r.ci.p .da.s.i.r.ci.perc -side left" );
 
 		cmd( "pack .da.s.i.r.m .da.s.i.r.z .da.s.i.r.x .da.s.i.r.i .da.s.i.r.n .da.s.i.r.f .da.s.i.r.t .da.s.i.r.c .da.s.i.r.s .da.s.i.r.ci -anchor w" );
@@ -7406,28 +7356,28 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 
 		cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#createselection } { set choice 2 }" );
 
-		cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
-		cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
+		cmd( "bind .da.s <KeyPress-Return> { set choice 1 }" );
+		cmd( "bind .da.s <KeyPress-Escape> { set choice 2 }" );
 
 		cmd( "showtop .da.s" );
 		cmd( "mousewarpto .da.s.b.ok 0" );
 		cmd( ".da.s.n.nv selection range 0 end" );
 		cmd( "focus .da.s.n.nv" );
-		 
-		*choice = 0;
-		while ( *choice == 0 )
+
+		choice = 0;
+		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		cmd( "if [ string is double -strict [ .da.s.f.t.th get ] ] { set thflt [ .da.s.f.t.th get ] }" ); 
-		cmd( "if [ string is double -strict [ .da.s.i.r.ci.p get ] ] { set confi [ .da.s.i.r.ci.p get ] }" ); 
+		cmd( "if [ string is double -strict [ .da.s.f.t.th get ] ] { set thflt [ .da.s.f.t.th get ] }" );
+		cmd( "if [ string is double -strict [ .da.s.i.r.ci.p get ] ] { set confi [ .da.s.i.r.ci.p get ] }" );
 		cmd( "destroytop .da.s" );
 
-		if ( *choice == 2 )
+		if ( choice == 2 )
 		{
-			*choice = 0;
+			choice = 0;
 			return false;
 		}
-		
+
 		flt = get_int( "flt" );
 		thflt = get_double( "thflt" );
 		cs_long = get_int( "bido" );
@@ -7441,43 +7391,43 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		cs_long = 1;
 		sel_series = var_names.size( );
 	}
-	
+
 	confi = get_double( "confi" );
 	z_crit = z_star( confi );
 	type_series = get_int( "bidi" );
 	new_series = 1;
-	
+
 	// set option specific parameters
 	switch ( type_series )
 	{
 		case 6:							// avg (6), ci+ (11), ci- (12)
 			new_series = 3;
-			
+
 			// first series to produce
-			cmd( "set basename $vname; set tailname \"_avg\"; set vname $basename$tailname" );			
+			cmd( "set basename $vname; set tailname \"_avg\"; set vname $basename$tailname" );
 			break;
-			
+
 		case 11:						// ci+ (11), ci- (12)
 			new_series = 2;
 			cmd( "set basename $vname; set tailname \"_ci+\"; set vname $basename$tailname" );
 			break;
-			
+
 		case 13:						// max (13), min (3)
 			new_series = 2;
 			cmd( "set basename $vname; set tailname \"_max\"; set vname $basename$tailname" );
 			break;
-		
+
 		case 15:						// avg (15), max (2), min (3)
 			new_series = 3;
 			cmd( "set basename $vname; set tailname \"_avg\"; set vname $basename$tailname" );
 			break;
-		
+
 		case 16:						// avg (16), ci+ (11), ci- (12), max (2), min (3)
 			new_series = 5;
 			cmd( "set basename $vname; set tailname \"_avg\"; set vname $basename$tailname" );
 			break;
 	}
-	
+
 	data = new double *[ sel_series ];
 	start = new int [ sel_series ];
 	end = new int [ sel_series ];
@@ -7492,7 +7442,7 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		app[ i ] = vs[ i ];
 		strcpy( app[ i ].label, vs[ i ].label );
 		strcpy( app[ i ].tag, vs[ i ].tag );
-	} 
+	}
 
 	delete [ ] vs;
 	vs = app;
@@ -7510,26 +7460,25 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		data[ i ] = NULL;
 
 		if ( mc )
-			strcpy( msg, var_names[ i ].c_str( ) );
+			strcpyn( da_tmp, var_names[ i ].c_str( ), MAX_BUFF_SIZE );
 		else
 		{
 			cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-			lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
-			strcpy( msg, lapp );
+			get_str( "res", da_tmp, MAX_BUFF_SIZE );
 		}
-		
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
-		
+
+		sscanf( da_tmp, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
 				cmd( "destroytop .da.pas" );
-				error_hard( "invalid series data", 
-							"internal problem in LSD", 
+				error_hard( "internal problem in LSD",
 							"if error persists, please contact developers",
-							true );
+							true,
+							"invalid series data" );
 				myexit( 18 );
 			}
 		}
@@ -7547,11 +7496,11 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 			if ( end[ i ] < max_c )
 				max_c = end[ i ];
 		}
-		
+
 		if ( min_c >= max_c )
 		{
 			cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Series cases do not overlap\" -detail \"Two or more series in the Series Selected listbox have no common cases (time steps). Please use manual case selection if this is the desired behavior.\"" );
-			
+
 			done = false;
 			goto end_new_series;
 		}
@@ -7560,12 +7509,10 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 	// handle creation of multiple series
 	for ( k = 0; k < new_series; ++k, ++num_var, ++var_num )
 	{
-		lapp = ( char * ) Tcl_GetVar( inter, "vname", 0 );
-		strcpy( vs[ num_var ].label, lapp );
-		lapp = ( char * ) Tcl_GetVar( inter, "ftag", 0 );
-		sprintf( vs[ num_var ].tag, "%s_%s", mc ? "MC" : "C", lapp );
+		get_str( "vname", vs[ num_var ].label, MAX_ELEM_LENGTH );
+		snprintf( vs[ num_var ].tag, MAX_ELEM_LENGTH, "%s_%s", mc ? "MC" : "C", get_str( "ftag" ) );
 		vs[ num_var ].rank = var_num;
-			
+
 		if ( cs_long == 1 )									// compute over series?
 		{
 			vs[ num_var ].data = new double[ max_c - min_c + 1 ];
@@ -7582,9 +7529,9 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 					{
 						sum += data[ j ][ i - start[ j ] ];
 						nvar += data[ j ][ i - start[ j ] ] * data[ j ][ i - start[ j ] ];
-						
+
 						++nn;
-						
+
 						if ( first )
 						{
 							nmin = nmax = prod = data[ j ][ i - start[ j ] ];
@@ -7597,7 +7544,7 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 							if ( nmax < data[ j ][ i - start[ j ] ] )
 								nmax = data[ j ][ i - start[ j ] ];
 							prod *= data[ j ][ i - start[ j ] ];
-						} 
+						}
 					}
 				}
 
@@ -7606,7 +7553,7 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 				else
 				{
 					nmean = sum / nn;
-					
+
 					// handle sample (MC) x population variance calculation
 					if ( mc && nn >= 2 )
 					{
@@ -7620,7 +7567,7 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 						nvar -= nmean * nmean;
 					}
 				}
-			   
+
 				if ( type_series == 1 || type_series == 6 || type_series == 15 || type_series == 16 )
 					vs[ num_var ].data[ i - min_c ] = nmean;
 				if ( type_series == 2 || type_series == 13 )
@@ -7644,7 +7591,7 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 					else
 						vs[ num_var ].data[ i - min_c ] = NAN;
 				}
-				
+
 				// handle sample (MC) x population variance calculation
 				if ( mc && nn >= 2 )
 				{
@@ -7661,7 +7608,7 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 						vs[ num_var ].data[ i - min_c ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
 				}
 			}
-		} 
+		}
 		else												// compute over cases
 		{
 			vs[ num_var ].data = new double[ sel_series ];
@@ -7678,9 +7625,9 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 					{
 						sum += data[ j ][ i - start[ j ] ];
 						nvar += data[ j ][ i - start[ j ] ] * data[ j ][ i - start[ j ] ];
-						
+
 						++nn;
-						
+
 						if ( first )
 						{
 							nmin = nmax = prod = data[ j ][ i - start[ j ] ];
@@ -7693,7 +7640,7 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 							if ( nmax < data[ j ][ i - start[ j ] ] )
 								nmax = data[ j ][ i - start[ j ] ];
 							prod *= data[ j ][ i - start[ j ] ];
-						} 
+						}
 					}
 				}
 
@@ -7705,7 +7652,7 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 					nvar /= nn;
 					nvar -= nmean * nmean;
 				}
-				  
+
 				if ( type_series == 1 || type_series == 6 || type_series == 15 || type_series == 16 )
 					vs[ num_var ].data[ j ] = nmean;
 				if ( type_series == 2 || type_series == 13 )
@@ -7739,11 +7686,11 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 		cmd( "if { ! [ dict exists serDescrDict %s ] } { \
 				dict set serDescrDict %s \"%s\" \
 			}", vs[ num_var ].label, vs[ num_var ].label, mc ? "Monte Carlo series" : "Created from other series" );
-		
+
 		if ( mc && new_series == 1 && par_map.find( vs[ num_var ].label ) != par_map.end( ) )
-			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank, par_map[ vs[ num_var ].label ].c_str( ) ); 
+			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank, par_map[ vs[ num_var ].label ].c_str( ) );
 		else
-			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank, mc ? mc_par[ type_series ] : "(added)" ); 
+			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank, mc ? mc_par[ type_series ] : "(added)" );
 
 		// define next series options for multiple series
 		switch ( type_series )
@@ -7751,44 +7698,44 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 			case 6:					// avg (6), ci+ (11), ci- (12)
 			case 16:				// avg (16), ci+ (11), ci- (12), max (2), min (3)
 				type_series = 11;
-				cmd( "set tailname \"_ci+\"; set vname $basename$tailname" ); 
+				cmd( "set tailname \"_ci+\"; set vname $basename$tailname" );
 				break;
-			
+
 			case 11:				// ci+ (11), ci- (12)
 				type_series = 12;
-				cmd( "set tailname \"_ci-\"; set vname $basename$tailname" ); 
+				cmd( "set tailname \"_ci-\"; set vname $basename$tailname" );
 				break;
-			
+
 			case 12:				// ci- (12), max (2), min (3)
 			case 15:				// avg (15), max (2), min (3)
 				type_series = 2;
-				cmd( "set tailname \"_max\"; set vname $basename$tailname" ); 
+				cmd( "set tailname \"_max\"; set vname $basename$tailname" );
 				break;
-			
+
 			case 2:					// max (2), min (3)
 			case 13:				// max (13), min (3)
 				type_series = 3;
-				cmd( "set tailname \"_min\"; set vname $basename$tailname" ); 
+				cmd( "set tailname \"_min\"; set vname $basename$tailname" );
 		}
 	}
-	
+
 	cmd( "update_parent" );
 
 	end_new_series:
-	
+
 	for ( i = 0; i < sel_series; ++i )
 	{
 		delete [ ] str[ i ];
 		delete [ ] tag[ i ];
 	}
-	
+
 	delete [ ] str;
-	delete [ ] tag; 
-	delete [ ] data;	
+	delete [ ] tag;
+	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
 	delete [ ] id;
-	
+
 	return done;
 }
 
@@ -7796,10 +7743,10 @@ bool create_series( int *choice, bool mc, vector < string > var_names )
 /***************************************************
 CREATE_MAVERAG
 ****************************************************/
-bool create_maverag( int *choice )
+bool create_maverag( void )
 {
 	bool done = true;
-	char *lapp, **str, **tag;
+	char **str, **tag;
 	double xapp, **data;
 	int h, i, j, k, flt, ma_type, *start, *end, *id;
 	store *app;
@@ -7815,15 +7762,15 @@ bool create_maverag( int *choice )
 
 	cmd( "set bido 4" );
 	cmd( "set ma_type 0" );
-	
+
 	cmd( "newtop .da.s \"Moving Average Period\" { set choice 2 } .da" );
 
 	cmd( "ttk::frame .da.s.o" );
 	cmd( "ttk::label .da.s.o.l -text \"Period (cases)\"" );
 	cmd( "ttk::spinbox .da.s.o.th -width 5 -from 2 -to $numc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n > 1 && $n <= $numc } { set bido %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bido; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( ".da.s.o.th insert 0 $bido" ); 
+	cmd( ".da.s.o.th insert 0 $bido" );
 	cmd( "pack .da.s.o.l .da.s.o.th" );
-	
+
 	cmd( "ttk::frame .da.s.t -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 	cmd( "ttk::radiobutton .da.s.t.s -variable ma_type -value 0 -text \"Simple moving average\"" );
 	cmd( "ttk::radiobutton .da.s.t.c -variable ma_type -value 1 -text \"Central moving average\"" );
@@ -7833,27 +7780,27 @@ bool create_maverag( int *choice )
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#createmavg } { set choice 2 }" );
 
-	cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
-	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
+	cmd( "bind .da.s <KeyPress-Return> { set choice 1 }" );
+	cmd( "bind .da.s <KeyPress-Escape> { set choice 2 }" );
 
 	cmd( "showtop .da.s" );
 	cmd( "mousewarpto .da.s.b.ok 0" );
 	cmd( ".da.s.o.th selection range 0 end" );
 	cmd( "focus .da.s.o.th" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set bido [ .da.s.o.th get ]" ); 
+	cmd( "set bido [ .da.s.o.th get ]" );
 	cmd( "destroytop .da.s" );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		return false;
 
 	flt = get_int( "bido" );
 	ma_type = get_int( "ma_type" );
-	
+
 	// adjust to odd number, if required
 	if ( flt < 2 )
 	{
@@ -7864,7 +7811,7 @@ bool create_maverag( int *choice )
 	if ( ma_type == 1 && flt % 2 == 0 )
 	{
 		++flt;
-		plog( "\nRounding up the period to %d for an odd number of cases (time steps)\n", "", flt );
+		plog( "\nRounding up the period to %d for an odd number of cases (time steps)\n", flt );
 	}
 
 	data = new double *[ nv ];
@@ -7880,7 +7827,7 @@ bool create_maverag( int *choice )
 		str[ i ] = NULL;
 		tag[ i ] = NULL;
 	}
-	
+
 	// check for too short series
 	for ( i = 0; i < nv; ++i )
 	{
@@ -7888,25 +7835,24 @@ bool create_maverag( int *choice )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		sscanf( lapp, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 
 		if ( end[ i ] - start[ i ] + 1 < flt )
 		{
-			cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Insufficient series cases\" -detail \"Series '%s' has less cases (%d) than the requested moving average period (%d). Please choose a longer series or a shorter moving average period.\"", lapp, end[ i ] - start[ i ] + 1, flt );
+			cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Insufficient series cases\" -detail \"Series '%s' has less cases (%d) than the requested moving average period (%d). Please choose a longer series or a shorter moving average period.\"", get_str( "res" ), end[ i ] - start[ i ] + 1, flt );
 			done = false;
-			goto end_mvavg;			
+			goto end_mvavg;
 		}
 	}
-		
+
 	app = new store[ nv + num_var ];
 	for ( i = 0; i < num_var; ++i )
 	{
 		app[ i ] = vs[ i ];
 		strcpy( app[ i ].label, vs[ i ].label );
 		strcpy( app[ i ].tag, vs[ i ].tag );
-	} 
-	
+	}
+
 	delete [ ] vs;
 	vs = app;
 
@@ -7921,24 +7867,24 @@ bool create_maverag( int *choice )
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( ( char * ) Tcl_GetVar( inter, "res", 0 ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 
-		sprintf( vs[ num_var + i ].label, "%s_%cma%d", str[ i ], ma_type == 0 ? 's' : 'c', flt );
-		sprintf( vs[ num_var + i ].tag, "C_%s", tag[ i ] );
+		snprintf( vs[ num_var + i ].label, MAX_ELEM_LENGTH, "%s_%cma%d", str[ i ], ma_type == 0 ? 's' : 'c', flt );
+		snprintf( vs[ num_var + i ].tag, MAX_ELEM_LENGTH, "C_%s", tag[ i ] );
 		vs[ num_var + i ].start = ( ma_type == 0 ) ? start[ i ] + flt - 1 : start[ i ];
 		vs[ num_var + i ].end = end[ i ];
 		vs[ num_var + i ].rank = num_var + i;
 		vs[ num_var + i ].data = new double[ vs[ num_var + i ].end - vs[ num_var + i ].start + 1 ];
-		
+
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "invalid series data", 
-							"internal problem in LSD", 
+				error_hard( "internal problem in LSD",
 							"if error persists, please contact developers",
-							true );
+							true,
+							"invalid series data" );
 				myexit( 18 );
 			}
 
@@ -7952,12 +7898,12 @@ bool create_maverag( int *choice )
 							xapp += data[ i ][ j - start[ i ] ];
 							++h;
 						}
-						
+
 					if ( h == 0 )
 						xapp = NAN;
 					else
 						xapp /= h;
-					
+
 					vs[ num_var + i ].data[ k - vs[ num_var + i ].start ] = xapp;
 				}
 			}
@@ -7970,7 +7916,7 @@ bool create_maverag( int *choice )
 						xapp += data[ i ][ j - start[ i ] ];
 						h++;
 					}
-					
+
 				if ( h == 0 )		// no observation before first?
 					xapp = NAN;
 				else
@@ -7985,40 +7931,40 @@ bool create_maverag( int *choice )
 						xapp = xapp - data[ i ][ j - ( flt - 1 ) / 2 - start[ i ] ] / flt + data[ i ][ j + ( flt - 1 ) / 2 - start[ i ] ] / flt;
 					else
 						xapp = NAN;
-					
+
 					vs[ num_var + i ].data[ j - vs[ num_var + i ].start ] = xapp;
 				}
-				
+
 				for ( ; j <= end[ i ]; ++j )
-					vs[ num_var + i ].data[ j - vs[ num_var + i ].start ] = xapp;     
+					vs[ num_var + i ].data[ j - vs[ num_var + i ].start ] = xapp;
 			}
 		}
 
 		cmd( "if { ! [ dict exists serDescrDict %s ] } { \
 				dict set serDescrDict %s \"Moving average (%d) from '%s'\" \
 			}", vs[ num_var + i ].label, vs[ num_var + i ].label, flt, str[ i ] );
-		
-		cmd( "add_series \"%s %s (%d-%d) #%d\" \"(added)\"", vs[ num_var + i ].label, vs[ num_var + i ].tag, vs[ num_var + i ].start, vs[ num_var + i ].end, vs[ num_var + i ].rank ); 
+
+		cmd( "add_series \"%s %s (%d-%d) #%d\" \"(added)\"", vs[ num_var + i ].label, vs[ num_var + i ].tag, vs[ num_var + i ].start, vs[ num_var + i ].end, vs[ num_var + i ].rank );
 	}
 
 	cmd( "update_parent" );
-	num_var += nv; 
+	num_var += nv;
 
 	end_mvavg:
-	
+
 	for ( i = 0; i < nv; ++i )
 	{
 		delete [ ] str[ i ];
 		delete [ ] tag[ i ];
 	}
-	
+
 	delete [ ] str;
-	delete [ ] tag; 
+	delete [ ] tag;
 	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
 	delete [ ] id;
-	
+
 	return done;
 }
 
@@ -8026,10 +7972,8 @@ bool create_maverag( int *choice )
 /***************************************************
 ADD_UNSAVED
 ****************************************************/
-bool add_unsaved( int *choice )
+bool add_unsaved( void )
 {
-	char *lab;
-	
 	if ( actual_steps == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Simulation not run\" -detail \"Select menu option Run>Run before using this option.\"" );
@@ -8037,23 +7981,23 @@ bool add_unsaved( int *choice )
 	}
 
 	cmd( "set bidi \"\"" );
-	
+
 	cmd( "set unSavElem { }" );
 	cmd( "foreach b $modElem { \
 			if { [ lsearch $DaModElem $b ] < 0 } { \
 				lappend unSavElem $b \
 			} \
 		}" );
-	
+
 	cmd( "newtop .da.s \"Add Unsaved Element\" { set choice 2 } .da" );
-	
+
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -text \"Element name (or part)\"" );
 	cmd( "ttk::combobox .da.s.i.e -width 20 -justify center -values $unSavElem -validate focusout -validatecommand { set n %%P; if { $n in $unSavElem } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } }" );
 	cmd( "write_any .da.s.i.e $bidi" );
 	cmd( "pack .da.s.i.l .da.s.i.e" );
 	cmd( "pack .da.s.i -pady 5 -padx 5" );
-	
+
 	cmd( "bind .da.s.i.e <Return> { set choice 1 }" );
 	cmd( "bind .da.s.i.e <Escape> { set choice 2 }" );
 	cmd( "bind .da.s.i.e <KeyRelease> { \
@@ -8074,39 +8018,38 @@ bool add_unsaved( int *choice )
 	cmd( "okhelpcancel .da.s b  { set choice 1 } { LsdHelp menudata_res.html#add_series } { set choice 2 }" );
 	cmd( "showtop .da.s" );
 	cmd( "focus .da.s.i.e" );
-	
-	*choice = 0;
-	while( *choice == 0 )
+
+	choice = 0;
+	while( choice == 0 )
 		Tcl_DoOneEvent( 0 );
-	
+
 	cmd( "if { [ .da.s.i.e get ] in $unSavElem } { set bidi [ .da.s.i.e get ] } { bell }" );
 	cmd( "destroytop .da.s" );
-	
-	if( *choice == 2 )
+
+	if( choice == 2 )
 		return false;
-	
+
 	cmd( "set choice [ lsearch $modElem $bidi ]" );
-	if( *choice < 0 )
+	if( choice < 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid element name\" -detail \"There is no element in the model structure with the given name.\"" );
 		return false;
 	}
-	
-	lab = ( char * ) Tcl_GetVar( inter, "bidi", 0 );
-	insert_data_mem( root, &num_var, lab );
-	
+
+	insert_data_mem( root, &num_var, get_str( "bidi" ) );
+
 	return true;
 }
 
-	
+
 /************************
  SAVE_DATAzip
  ************************/
 int numcol = 16;
 
-void save_datazip( int *choice )
+void save_datazip( void )
 {
-	char *app, **str, **tag, delimiter[ 10 ], misval[ 10 ], labprefix[ MAX_ELEM_LENGTH ];
+	char **str, **tag, delimiter[ 10 ], misval[ 10 ], labprefix[ MAX_ELEM_LENGTH ];
 	const char *desc, *ext;
 	double **data;
 	int i, j, fr, typelab, del, type_res, *start, *end, *id, headprefix = 0;
@@ -8145,22 +8088,20 @@ void save_datazip( int *choice )
 	{
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
-		
+
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		app = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		strcpy( msg, app );
-		sscanf( msg, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
-		
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
 		{
-				error_hard( "invalid series data", 
-							"internal problem in LSD", 
-							"if error persists, please contact developers",
-							true );
-				myexit( 18 );
+			error_hard( "internal problem in LSD",
+						"if error persists, please contact developers",
+						true,
+						"invalid series data" );
+			myexit( 18 );
 		}
-		
+
 		if ( max_c < end[ i ] )
 			max_c = end[ i ];
 	}
@@ -8171,7 +8112,7 @@ void save_datazip( int *choice )
 	Tcl_LinkVar( inter, "deli", ( char * ) &del, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "numcol", ( char * ) &numcol, TCL_LINK_INT );
 
-	strncpy( misval, nonavail, 9 );
+	strcpyn( misval, nonavail, 10 );
 	typelab = 3;
 	fr = 1;
 	del = 1;
@@ -8200,14 +8141,14 @@ void save_datazip( int *choice )
 	cmd( "showtop .da.lab" );
 	cmd( "mousewarpto .da.lab.b.ok" );
 
-	*choice = 0;
-	while ( *choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	if ( *choice == 2 )
+	if ( choice == 2 )
 		goto end;
 
-	*choice = 0;
+	choice = 0;
 	type_res = typelab;
 	cmd( "destroytop .da.lab" );
 
@@ -8273,21 +8214,20 @@ void save_datazip( int *choice )
 		cmd( "showtop .da.lab" );
 		cmd( "mousewarpto .da.lab.b.ok" );
 
-		*choice = 0;
-		while ( *choice == 0 )
+		choice = 0;
+		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		if ( *choice == 2 )
+		if ( choice == 2 )
 			goto end;
 
-		cmd( "set numcol [ .da.lab.e.ecol get ]" ); 
+		cmd( "set numcol [ .da.lab.e.ecol get ]" );
 		cmd( "set choice $headprefix" );
-		
-		headprefix = *choice;
-		app = ( char * ) Tcl_GetVar( inter, "misval", 0 );
-		strncpy( misval, app, 9 );
 
-		*choice = 0;
+		headprefix = choice;
+		get_str( "misval", misval, 10 );
+
+		choice = 0;
 	}
 
 	// handle macOS bug on double-component extensions
@@ -8313,37 +8253,34 @@ void save_datazip( int *choice )
 	if ( strlen( path ) > 0 )
 		cmd( "cd \"$path\"" );
 
-	cmd( "set bah [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }  } ]", ext, desc, ext );
-	
+	cmd( "set res [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }  } ]", ext, desc, ext );
+
 	// add the second extension in macOS only now
 	if ( platform == _MAC_ && dozip )
-		cmd( "if { [ string length [ file extension \"$bah\" ] ] > 0 } { \
-				set bah \"${bah}.gz\" \
-			} elseif { [ string length \"$bah\" ] > 0 } { \
-				set bah \"${bah}.%s.gz\" \
+		cmd( "if { [ string length [ file extension \"$res\" ] ] > 0 } { \
+				set res \"${res}.gz\" \
+			} elseif { [ string length \"$res\" ] > 0 } { \
+				set res \"${res}.%s.gz\" \
 			}", ext );
 
-	app = ( char * ) Tcl_GetVar( inter, "bah", 0 );
-	strcpy( msg, app );
+	get_str( "res", da_tmp, MAX_BUFF_SIZE );
 
-	if ( strlen( msg ) == 0 )
+	if ( strlen( da_tmp ) == 0 )
 		goto end;
 
-	if ( dozip == 1 ) 
-		fsavez = gzopen( msg, "wt" );
+	if ( dozip == 1 )
+		fsavez = gzopen( da_tmp, "wt" );
 	else
-		fsave = fopen( msg, "wt" );  // use text mode for Windows better compatibility
+		fsave = fopen( da_tmp, "wt" );  // use text mode for Windows better compatibility
 
 	if ( del != 3 ) // delimited files
 	{
 		if ( del == 2 )
 		{
-			app = ( char * ) Tcl_GetVar( inter, "delimiter", 0 );
-			
-			if ( strlen( app ) == 0 )
+			get_str( "delimiter", delimiter, 10 );
+
+			if ( strlen( delimiter ) == 0 )
 				strcpy( delimiter, "\t" );
-			else
-				strncpy( delimiter, app, 9 );
 		}
 		else
 			strcpy( delimiter, "\t" );
@@ -8351,12 +8288,10 @@ void save_datazip( int *choice )
 
 	if ( typelab == 2 )
 	{
-		app = ( char * ) Tcl_GetVar( inter, "labprefix", 0 );
-		
-		if ( strlen( app ) == 0 )
+		get_str( "labprefix", labprefix, MAX_ELEM_LENGTH );
+
+		if ( strlen( labprefix ) == 0 )
 			strcpy( labprefix, "V" );
-		else
-			strncpy( labprefix, app, MAX_ELEM_LENGTH - 1 );
 	}
 
 	numcol = ( int ) max( 10, min( numcol, 80 ) );
@@ -8370,70 +8305,70 @@ void save_datazip( int *choice )
 				case 1:   				// Original labels
 					if ( headprefix == 1 )
 					{
-						if ( dozip == 1 ) 
+						if ( dozip == 1 )
 							gzprintf( fsavez, "#" );
 						else
 							fprintf( fsave, "#" );
-					}  
-					 
+					}
+
 					for ( i = 0; i < nv; ++i )
 					{
-						if ( dozip == 1 ) 
+						if ( dozip == 1 )
 						{
 							gzprintf( fsavez, "%s_%s", str[ i ], tag[ i ] );
-						   
-							if ( i < nv - 1 )  
+
+							if ( i < nv - 1 )
 								gzprintf( fsavez, "%s", delimiter );
-						} 
+						}
 						else
 						{
-							fprintf( fsave, "%s_%s", str[ i ], tag[ i ] ); 
-						   
-							if ( i < nv - 1 )  
+							fprintf( fsave, "%s_%s", str[ i ], tag[ i ] );
+
+							if ( i < nv - 1 )
 								fprintf( fsave, "%s", delimiter );
-						} 
-					}  
-					
+						}
+					}
+
 					break;
 
 				case 2: 				// New names for labels
 					if ( headprefix == 1 )
 					{
-						if ( dozip == 1 ) 
+						if ( dozip == 1 )
 							gzprintf( fsavez, "#" );
 						else
 							fprintf( fsave, "#" );
-					}  
-				 
+					}
+
 					for ( i = 0; i < nv; ++i )
 					{
-						if ( dozip == 1 ) 
+						if ( dozip == 1 )
 						{
 							gzprintf( fsavez, "%s%d", labprefix, i );
-					   
-							if ( i < nv - 1 )  
+
+							if ( i < nv - 1 )
 								gzprintf( fsavez, "%s", delimiter );
-						} 
+						}
 						else
 						{
-							fprintf( fsave, "%s%d", labprefix, i );  
-						   
-							if ( i < nv - 1 )  
+							fprintf( fsave, "%s%d", labprefix, i );
+
+							if ( i < nv - 1 )
 								fprintf( fsave, "%s", delimiter );
 						}
-					}   
-					
+					}
+
 					break;
 
 				case 3: 				// LSD result files
 					for ( i = 0; i < nv; ++i )
 					{
-						if ( dozip == 1 ) 
+						if ( dozip == 1 )
 							gzprintf( fsavez, "%s %s (%d %d)\t", str[ i ], tag[ i ], start[ i ], end[ i ] );
 						else
-							fprintf( fsave, "%s %s (%d %d)\t", str[ i ], tag[ i ], start[ i ], end[ i ] );  
-					}  
-					
+							fprintf( fsave, "%s %s (%d %d)\t", str[ i ], tag[ i ], start[ i ], end[ i ] );
+					}
+
 					break;
 			}
 		}
@@ -8441,38 +8376,38 @@ void save_datazip( int *choice )
 		{
 			if ( headprefix == 1 )
 			{
-				if ( dozip == 1 ) 
+				if ( dozip == 1 )
 					gzprintf( fsavez, "#" );
 				else
-					fprintf( fsave, "#" );  
-			}    
+					fprintf( fsave, "#" );
+			}
 
 			for ( i = 0; i < nv; ++i )
 			{
 				if ( typelab == 2 )
-					sprintf( msg, "%s%d", labprefix, i + 1 );
+					snprintf( da_tmp, MAX_BUFF_SIZE, "%s%d", labprefix, i + 1 );
 				else
-					sprintf( msg, "%s_%s", str[ i ], tag[ i ] );
-					
-				if ( strlen( msg ) < ( unsigned ) numcol )
-					strcat( msg, strsp );
-				
+					snprintf( da_tmp, MAX_BUFF_SIZE, "%s_%s", str[ i ], tag[ i ] );
+
+				if ( strlen( da_tmp ) < ( unsigned ) numcol )
+					strcatn( da_tmp, strsp, MAX_BUFF_SIZE );
+
 				if ( i == 0 && headprefix == 1 )
-					msg[ numcol - 1 ] = '\0';
+					da_tmp[ numcol - 1 ] = '\0';
 				else
-					msg[ numcol ] = '\0';
-					
-				if ( dozip == 1 ) 
-					gzprintf( fsavez, "%s", msg );
+					da_tmp[ numcol ] = '\0';
+
+				if ( dozip == 1 )
+					gzprintf( fsavez, "%s", da_tmp );
 				else
-					fprintf( fsave, "%s", msg ); 
+					fprintf( fsave, "%s", da_tmp );
 			}
 		}
 
-		if ( dozip == 1 ) 
+		if ( dozip == 1 )
 			gzprintf( fsavez, "\n" );
 		else
-			fprintf( fsave, "\n" );  
+			fprintf( fsave, "\n" );
 	}
 
 	if ( del != 3 ) 					// data delimited writing
@@ -8487,11 +8422,11 @@ void save_datazip( int *choice )
 						gzprintf( fsavez, "%.*G", SIG_DIG, data[ i ][ j - start[ i ] ] );
 					else
 						gzprintf( fsavez, "%s", misval );
-			  
-					if ( typelab == 3 || i < nv - 1 )  
+
+					if ( typelab == 3 || i < nv - 1 )
 						gzprintf( fsavez, "%s", delimiter );
 				}
-				
+
 				gzprintf( fsavez, "\n" );
 			}
 		}
@@ -8502,15 +8437,15 @@ void save_datazip( int *choice )
 				for ( i = 0; i < nv; ++i )
 				{
 					if ( j >= start[ i ] && j <= end[ i ] && ! is_nan( data[ i ][ j - start[ i ] ] ) )		// write NaN as n/a
-						fprintf( fsave, "%.*G", SIG_DIG, data[ i ][ j - start[ i ] ] );  
+						fprintf( fsave, "%.*G", SIG_DIG, data[ i ][ j - start[ i ] ] );
 					else
-						fprintf( fsave, "%s", misval );  
-			  
-					if ( typelab == 3 || i < nv - 1 )  
+						fprintf( fsave, "%s", misval );
+
+					if ( typelab == 3 || i < nv - 1 )
 						fprintf( fsave, "%s", delimiter );
 				}
-			   
-				fprintf( fsave, "\n" );  
+
+				fprintf( fsave, "\n" );
 			}
 		}
 	}
@@ -8522,34 +8457,34 @@ void save_datazip( int *choice )
 			{
 				if ( j >= start[ i ] && j <= end[ i ] && ! is_nan( data[ i ][ j - start[ i ] ] ) )		// write NaN as n/a
 				{
-					sprintf( msg, "%.*G", ( int ) min( numcol - 6, SIG_DIG ), data[ i ][ j - start[ i ] ] );
-					strcat( msg, str0 );
-					msg[ numcol ] = '\0';
+					snprintf( da_tmp, MAX_BUFF_SIZE, "%.*G", ( int ) min( numcol - 6, SIG_DIG ), data[ i ][ j - start[ i ] ] );
+					strcatn( da_tmp, str0, MAX_BUFF_SIZE );
+					da_tmp[ numcol ] = '\0';
 				}
 				else
 				{
-					sprintf( msg, "%s", misval );
-					strcat( msg, strsp );
-					msg[ numcol ] = '\0';
+					strcpyn( da_tmp, misval, MAX_BUFF_SIZE );
+					strcatn( da_tmp, strsp, MAX_BUFF_SIZE );
+					da_tmp[ numcol ] = '\0';
 				}
-				
-				if ( dozip == 1 ) 
-					gzprintf( fsavez, "%s", msg );
+
+				if ( dozip == 1 )
+					gzprintf( fsavez, "%s", da_tmp );
 				else
-					fprintf( fsave, "%s", msg );  
+					fprintf( fsave, "%s", da_tmp );
 			}
-			
-			if ( dozip == 1 ) 
+
+			if ( dozip == 1 )
 				gzprintf( fsavez, "\n" );
 			else
-				fprintf( fsave, "\n" );  
+				fprintf( fsave, "\n" );
 		}
 	}
 
-	if ( dozip == 1 ) 
+	if ( dozip == 1 )
 		gzclose( fsavez);
 	else
-		fclose( fsave );  
+		fclose( fsave );
 
 	end:
 
@@ -8559,8 +8494,8 @@ void save_datazip( int *choice )
 	Tcl_UnlinkVar( inter, "numcol" );
 	Tcl_UnlinkVar( inter, "deli" );
 	Tcl_UnlinkVar( inter, "fr" );
-	
-	*choice = 0;
+
+	choice = 0;
 
 	for ( i = 0; i < nv; ++i )
 	{
@@ -8580,9 +8515,9 @@ void save_datazip( int *choice )
 /************************
  PLOG_SERIES
  ************************/
-void plog_series( int *choice )
+void plog_series( void )
 {
-	char *lapp, **str, **tag;
+	char **str, **tag;
 	double **data;
 	int i, j, *start, *end, *id;
 
@@ -8607,20 +8542,19 @@ void plog_series( int *choice )
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 		data[ i ] = NULL;
-		
+
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		lapp = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		sscanf( lapp, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "invalid series data", 
-							"internal problem in LSD", 
+				error_hard( "internal problem in LSD",
 							"if error persists, please contact developers",
-							true );
+							true,
+							"invalid series data" );
 				myexit( 18 );
 			}
 		}
@@ -8632,38 +8566,38 @@ void plog_series( int *choice )
 		{
 			if ( i == 0 )
 				min_c = max_c = start[ i ];
-			
+
 			if ( start[ i ] < min_c )
 				min_c = start[ i ];
-			
+
 			if ( end[ i ] > max_c )
 			max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
 	}
 
 	plog( "\n\nTime series data\n" );
-	plog( "t\t%s_%s", "series", str[ 0 ], tag[ 0 ] );
+	plog_tag( "t\t%s_%s", "series", str[ 0 ], tag[ 0 ] );
 
 	for ( i = 1; i < nv; ++i )
-		plog( "\t%s_%s", "series", str[ i ], tag[ i ] );
+		plog_tag( "\t%s_%s", "series", str[ i ], tag[ i ] );
 
 	plog( "\n" );
 
 	for ( i = min_c; i <= max_c; ++i )
 	{
 		if ( start[ 0 ] <= i && end[ 0 ] >= i && ! is_nan( data[ 0 ][ i - start[ 0 ] ] ) )
-			plog( "%d\t%.*g", "series", i, pdigits, data[ 0 ][ i - start[ 0 ] ] );
+			plog_tag( "%d\t%.*g", "series", i, pdigits, data[ 0 ][ i - start[ 0 ] ] );
 		else
-			plog( "%d\t%s", "series", i, nonavail );		// write NaN as n/a
-		
+			plog_tag( "%d\t%s", "series", i, nonavail );		// write NaN as n/a
+
 		for ( j = 1; j < nv; ++j )
 		{
 			if ( start[ j ] <= i && end[ j ] >= i && ! is_nan( data[ j ][ i - start[ j ] ] ) )
-				plog( "\t%.*g", "series", pdigits, data[ j ][ i - start[ j ] ] );
+				plog_tag( "\t%.*g", "series", pdigits, data[ j ][ i - start[ j ] ] );
 			else
-				plog( "\t%s", "series", nonavail );		// write NaN as n/a
+				plog_tag( "\t%s", "series", nonavail );		// write NaN as n/a
 		}
-		
+
 		plog( "\n" );
 	}
 
@@ -8674,25 +8608,25 @@ void plog_series( int *choice )
 	}
 
 	delete [ ] str;
-	delete [ ] tag; 
+	delete [ ] tag;
 	delete [ ] data;
 	delete [ ] start;
 	delete [ ] end;
 	delete [ ] id;
-}    
+}
 
 
  /*****************************************
  PLOT (curves)
  Effectively create the plot in canvas
  *****************************************/
-void plot( int type, int nv, double **data, int *start, int *end, int *id, char **str, char **tag, int *choice )
+void plot( int type, int nv, double **data, const int *start, const int *end, const int *id, char **str, char **tag )
 {
 	int h, i, j, k, color, hsize, vsize, hbordsize, tbordsize, lheight, hcanvas, vcanvas, nLine, endCase, iniCase;
 	double x1, x2, *y, yVal, cminy, cmaxy, step;
 	char txtLab[ 2 * MAX_ELEM_LENGTH ];
 	bool tOk = false, y2on = ( type == TSERIES ) ? ( num_y2 <= nv ? true : false ) : false;
-	
+
 	// define type-specific parameters
 	switch ( type )
 	{
@@ -8701,25 +8635,25 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 			iniCase = min_c;
 			endCase = max_c;
 			break;
-			
+
 		case CRSSECT:
 			nLine = *end;
 			iniCase = 0;
 			endCase = nv - 1;
 			break;
-			
+
 		default:
 			return;					// invalid type, do nothing
 	}
-	
+
 	// get graphical configuration from Tk ( file defaults.tcl )
 	hsize = get_int( "hsizeP" );			// 600
 	vsize = get_int( "vsizeP" );			// 300
 	tbordsize = get_int( "tbordsizeP" );	// 5
 
-	// select gray scale or color range				
+	// select gray scale or color range
 	color = allblack ? 1001 : 0;
-	
+
 	// alert once about plotting over more timesteps than plot window pixels
 	step = hsize / ( double ) ( endCase - iniCase );
 	if ( avgSmpl && ! avgSmplMsg && step < 1 )
@@ -8728,7 +8662,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 			cmd( "set answer [ ttk::messageBox -parent .da -title Warning -icon warning -type yesno -default yes -message \"Disable Y values averaging?\" -detail \"The number of cases (time steps) to plot is larger than the physical plot width. To compute the Y values, LSD averages data from multiple cases.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
 		else
 			cmd( "set answer [ ttk::messageBox -parent .da -title Warning -icon warning -type yesno -default yes -message \"Disable series values averaging?\" -detail \"The number of series to plot is larger than the physical plot width. To compute the presented values, LSD averages data from multiple series.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
-			
+
 		cmd( "switch $answer { yes { set avgSmpl 0 } no { } }" );
 		avgSmplMsg = true;
 	}
@@ -8746,10 +8680,10 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 		for ( i = 0; i < hsize + 1; ++i )
 			pdataY[ k ][ i ] = -1;	// mark all as non plot
 	}
-	
+
 	// create the window and the canvas
-	plot_canvas( type, nv, start, end, str, tag, choice );
-	
+	plot_canvas( type, nv, start, end, str, tag );
+
 	// get graphical configuration real canvas
 	hcanvas = get_int( "hcanvasP" );
 	vcanvas = get_int( "vcanvasP" );
@@ -8763,26 +8697,26 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 		// move the x-axis pointer in discrete steps
 		x2 = x1 + ( 1 + h ) * step;
 		++h;            	// counter for the average when many values occupy one x point
-		
+
 		// fix initial x point if scale is too coarse
 		if ( i == iniCase && x2 - x1 > 1 )
 			x2 = x1 + 1;
-		
+
 		// moved to another canvas step?
 		bool xnext = ( floor( x1 ) != floor ( x2 ) );
 
 		// process each curve (series or cross-section)
-		for ( k = 0; k < nLine; ++k, ++color )	
-		{		
+		for ( k = 0; k < nLine; ++k, ++color )
+		{
 			yVal = NAN;
-			
+
 			switch ( type )
 			{
 				case TSERIES:
 					// ignore series not started/finished
 					if ( data[ k ] == NULL )
 						continue;
-					
+
 					if ( i > min( iniCase, 1 ) && start[ k ] < i && end[ k ] >= i )
 					{
 						yVal = data[ k ][ i - start[ k ] ];
@@ -8792,20 +8726,20 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 					{
 						if ( start[ k ] == i || ( i <= 1 && start[ k ] <= 0 && end[ k ] >= i ) )
 							yVal = data[ k ][ i - start[ k ] ];
-						
+
 						tOk = false;
 					}
-					
+
 					break;
-					
+
 				case CRSSECT:
 					// ignore series not started/finished
 					if ( data[ i ] == NULL )
 						continue;
-					
+
 					yVal = data[ i ][ k ];
 					tOk = true;
-					
+
 					break;
 			}
 
@@ -8820,7 +8754,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 				cminy = miny2;
 				cmaxy = maxy2;
 			}
-		  
+
 			if ( is_finite( yVal ) )
 			{
 				if ( tOk )
@@ -8828,12 +8762,12 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 					y[ k ] += yVal;
 
 					if ( xnext )
-					{	
+					{
 						if ( avgSmpl )					// average "intra" steps ?
 							y[ k ] /= h;
 						else
 							y[ k ] = yVal;
-							
+
 						if ( line_point == 1 || ( y[ k ] >= cminy && y[ k ] <= cmaxy ) )
 						{
 							// constrain to canvas virtual limits
@@ -8841,7 +8775,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 							// scale to the canvas physical y range and save to visual vertical line buffer
 							pdataY[ k ][ j ] = ( int ) round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
 						}
-						
+
 						// restart averaging
 						y[ k ] = 0;
 					}
@@ -8859,16 +8793,16 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 								y[ k ] = min( max( yVal, cminy ), cmaxy );
 								pdataY[ k ][ j ] = ( int ) round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
 							}
-							
+
 							y[ k ] = 0;
 						}
 					}
 				}
 			}
 		}
-		
+
 		if ( xnext )
-		{ 
+		{
 			x1 = x2;
 			h = 0;			// restart averaging ( more than 1 step per canvas step )
 			pdataX[ j ] = ( int ) floor( x2 );
@@ -8880,36 +8814,36 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	// transfer data to Tcl and plot it
 	cdata = pdataX;					// send series x values to Tcl
 	cmd( "get_series %d pdataX", j );
-	
+
 	color = allblack ? 1001 : 0;	// select gray scale or color range
-		
-	for ( *choice = k = 0; k < nLine; ++k, ++color )
+
+	for ( choice = k = 0; k < nLine; ++k, ++color )
 	{
 		cdata = pdataY[ k ];		// send series y values to Tcl
 		cmd( "unset -nocomplain pdataY" );
 		cmd( "get_series %d pdataY", j );
-		
+
 		int colorPlot = ( color < 1100 ) ? color : 0;	// use default foreground if out of colors
 
 		if ( line_point == 1 )
 			cmd( "plot_line $p $pdataX $pdataY p%d $c%d %lf", k, colorPlot, point_size );
 		else
 			cmd( "plot_points $p $pdataX $pdataY p%d $c%d %lf", k, colorPlot, point_size );
-		
+
 		if ( watch )
 			cmd( "update" );
-		if	( *choice == 2 ) 		// button STOP pressed
-			break;  
+		if	( choice == 2 ) 		// button STOP pressed
+			break;
 	}
-	
+
 	// garbage collection
 	cmd( "unset pdataX pdataY" );
 	for ( i = 0; i < nLine; ++i )
 		delete [ ] pdataY[ i ];
 	delete [ ] pdataY;
 	delete [ ] y;
-	
-	if	( *choice == 2 ) 			// Button STOP pressed
+
+	if	( choice == 2 ) 			// Button STOP pressed
 	{
 		cmd( "$daptab forget $daptab.tab%d", cur_plot );
 		cmd( "destroy $daptab.tab%d", cur_plot );
@@ -8918,7 +8852,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 			}" );
 		return;
 	}
-	
+
 	// enable/disable buttons
 	cmd( "$w.b.s.save configure -state normal" );
 	cmd( "$w.b.s.det configure -state normal -text Detach" );
@@ -8930,7 +8864,7 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	cmd( "$p raise p" );
 	cmd( "$p lower g" );
 	cmd( "if { [ $p find withtag draw ] != \"\" } { $p raise draw }" );
-	
+
 	// update cursor indicators at bottom window
 	if ( y2on )
 		cmd( "bind $p <Motion> { \
@@ -8976,13 +8910,13 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 		switch ( type )
 		{
 			case TSERIES:
-				sprintf( txtLab, "%s_%s (#%d)", str[ i ], tag[ i ], id[ i ] );
+				snprintf( txtLab, 2 * MAX_ELEM_LENGTH, "%s_%s (#%d)", str[ i ], tag[ i ], id[ i ] );
 				break;
 			case CRSSECT:
-				sprintf( txtLab, "t = %d ", start[ i ] );
+				snprintf( txtLab, 2 * MAX_ELEM_LENGTH, "t = %d ", start[ i ] );
 				break;
 		}
-			
+
 		cmd( "$p bind p%d <Enter> { $daptab.tab%d.c.b.c.var.v configure -text \"%s\" }", i, cur_plot, txtLab );
 		cmd( "$p bind p%d <Leave> { $daptab.tab%d.c.b.c.var.v configure -text \"\" }", i, cur_plot );
 
@@ -8993,10 +8927,10 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
 	// save plot info
 	type_plot[ cur_plot ] = type; 					// plot type
 	plot_w[ cur_plot ] = hcanvas;					// plot width
-	plot_nl[ cur_plot ] = tbordsize + vsize + lheight; // height of plot without labels  
+	plot_nl[ cur_plot ] = tbordsize + vsize + lheight; // height of plot without labels
 	plot_l[ cur_plot ] = vcanvas; 					// height of plot with labels
 
-	*choice = 0;
+	choice = 0;
 }
 
 
@@ -9004,17 +8938,17 @@ void plot( int type, int nv, double **data, int *start, int *end, int *id, char 
  PLOT (histogram)
  Effectively create the histogram in canvas
  *****************************************/
-void plot( int type, int *start, int *end, char **str, char **tag, int *choice, bool norm )
+void plot( int type, const int *start, const int *end, char **str, char **tag, bool norm )
 {
 	int i, x1, x2, y1, y2, color, hsize, vsize, hbordsize, tbordsize, lheight, hcanvas, vcanvas;
 	char txtLab[ 2 * MAX_ELEM_LENGTH ];
-	
+
 	if ( type != HISTOGR && type != HISTOCS )
 		return;								// invalid type, do nothing
-	
+
 	// create the window and the canvas
-	plot_canvas( type, 1, start, end, str, tag, choice );
-	
+	plot_canvas( type, 1, start, end, str, tag );
+
 	// get graphical configuration from Tk ( file defaults.tcl )
 	hsize = get_int( "hsizeP" );			// 600
 	vsize = get_int( "vsizeP" );			// 300
@@ -9024,11 +8958,11 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	hbordsize = get_int( "hbordsizeP" );
 	lheight = get_int( "lheightP");			// 15
 
-	// select gray or color			
-	color = allblack ? 1001 : 0;	
+	// select gray or color
+	color = allblack ? 1001 : 0;
 
 	// plot histogram
-	*choice = 0;
+	choice = 0;
 	for ( i = 0; i < num_bins; ++i )
 	{
 		if ( line_point == 1 )
@@ -9047,14 +8981,14 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 			if ( y1 <= tbordsize + vsize && y1 >= tbordsize )
 				cmd( "plot_points $p %d %d p%d $c%d %lf", x1, y1, i, color, point_size );
 		}
-			
+
 		if ( watch )
 			cmd( "update" );
-		if ( *choice == 2 ) 		// button STOP pressed
-			break;  
+		if ( choice == 2 ) 		// button STOP pressed
+			break;
 	}
 
-	if	( *choice == 2 ) 			// Button STOP pressed
+	if	( choice == 2 ) 			// Button STOP pressed
 	{
 		cmd( "$daptab forget $daptab.tab%d", cur_plot );
 		cmd( "destroy $daptab.tab%d", cur_plot );
@@ -9067,41 +9001,41 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	if ( norm && histo_var > 0 )
 	{
 		double a, b, s, tot_norm = 0;
-		
+
 		for ( i = 0; i < num_bins; ++i )
 		{
 			a = histo_bins[ i ].lowb;
-			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) / 
+			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) /
 				( sqrt( 2 * M_PI * histo_var ) );
 			a = histo_bins[ i ].highb;
-			s = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) / 
+			s = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) /
 				 ( sqrt( 2 * M_PI * histo_var ) );
 			tot_norm += ( b + s ) / 2;
 		}
 
 		for ( i = 0; i < num_bins; ++i )
 		{
-			a = histo_bins[ i ].center;  
-			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) / 
+			a = histo_bins[ i ].center;
+			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) /
 				( sqrt( 2 * M_PI * histo_var ) );
 			b /= tot_norm;
-			y2 = ( int ) min( max( tbordsize + vsize - round( vsize * ( b - miny ) / ( maxy - miny ) ), 
-								   tbordsize ), 
-							  tbordsize + vsize );  
+			y2 = ( int ) min( max( tbordsize + vsize - round( vsize * ( b - miny ) / ( maxy - miny ) ),
+								   tbordsize ),
+							  tbordsize + vsize );
 
-			x2 = hbordsize + ( int ) round( hsize * ( histo_bins[ i ].center - histo_bins[ 0 ].lowb ) / 
+			x2 = hbordsize + ( int ) round( hsize * ( histo_bins[ i ].center - histo_bins[ 0 ].lowb ) /
 											( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
-									
-			if ( i > 0 && ( y1 > tbordsize || y2 > tbordsize ) && 
+
+			if ( i > 0 && ( y1 > tbordsize || y2 > tbordsize ) &&
 				 ( y1 < tbordsize + vsize || y2 < tbordsize + vsize ) )
-				cmd( "plot_line $p { %d %d } { %d %d } p%d $c%d %lf", 
+				cmd( "plot_line $p { %d %d } { %d %d } p%d $c%d %lf",
 					 x1, x2, y1, y2, num_bins, color + 2, point_size );
-			
+
 			x1 = x2;
 			y1 = y2;
 		}
-	} 
-	
+	}
+
 	// enable/disable buttons
 	cmd( "$w.b.s.save configure -state normal" );
 	cmd( "$w.b.s.det configure -state normal -text Detach" );
@@ -9113,7 +9047,7 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	cmd( "$p raise p" );
 	cmd( "$p lower g" );
 	cmd( "if { [ $p find withtag draw ] != \"\" } { $p raise draw }" );
-	
+
 	// update cursor indicators at bottom window
 	cmd( "bind $p <Motion> { \
 			set zoom $zoomLevel%d; \
@@ -9136,14 +9070,14 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 		switch ( type )
 		{
 			case HISTOGR:
-				sprintf( txtLab, "n=%d \u03bc=%.*g \\[%.*g,%.*g\\]", ( int ) histo_bins[ i ].num, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].max );
+				snprintf( txtLab, 2 * MAX_ELEM_LENGTH, "n=%d \u03bc=%.*g \\[%.*g,%.*g\\]", ( int ) histo_bins[ i ].num, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].max );
 				break;
-				
+
 			case HISTOCS:
-				sprintf( txtLab, "n=%d \u03bc=%.*g \\[%.*g,%.*g\\]", ( int ) histo_bins[ i ].num, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].max );
+				snprintf( txtLab, 2 * MAX_ELEM_LENGTH, "n=%d \u03bc=%.*g \\[%.*g,%.*g\\]", ( int ) histo_bins[ i ].num, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].max );
 				break;
 		}
-			
+
 		cmd( "$p bind p%d <Enter> { $daptab.tab%d.c.b.c.var.v configure -text \"%s\" }", i, cur_plot, txtLab );
 		cmd( "$p bind p%d <Leave> { $daptab.tab%d.c.b.c.var.v configure -text \"\" }", i, cur_plot );
 
@@ -9154,24 +9088,24 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	// save plot info
 	type_plot[ cur_plot ] = type; 					// plot type
 	plot_w[ cur_plot ] = hcanvas;					// plot width
-	plot_nl[ cur_plot ] = tbordsize + vsize + lheight; // height of plot  
+	plot_nl[ cur_plot ] = tbordsize + vsize + lheight; // height of plot
 	plot_l[ cur_plot ] = vcanvas; 					// height of plot with labels
 
-	*choice = 0;
+	choice = 0;
 }
 
 
 /*****************************
  PLOT_CANVAS
- create the plot window & canvas 
+ create the plot window & canvas
  *****************************/
-void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag, int *choice )
+void plot_canvas( int type, int nv, const int *start, const int *end, char **str, char **tag )
 {
 	bool tOk, y2on;
 	char *txtValue, *txtCase, *txtLine, txtLab[ 2 * MAX_ELEM_LENGTH ];
 	int h, i, color, hsize, vsize, hbordsize, tbordsize, bbordsize, sbordsize, htmargin, hticks, vticks, lheight, hcanvas, vcanvas, nLine;
 	double yVal, cminy2, cmaxy2;
-	
+
 	// get graphical configuration from Tk ( file defaults.tcl )
 	hsize = get_int( "hsizeP" );			// 600
 	vsize = get_int( "vsizeP" );			// 300
@@ -9196,7 +9130,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			cminy2 = miny2;
 			cmaxy2 = maxy2;
 			break;
-			
+
 		case CRSSECT:
 			txtCase = ( char * ) "Series";
 			txtValue = ( char * ) ( logs ? "log(Y) value" : "Y value" );
@@ -9207,7 +9141,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			cminy2 = miny2;
 			cmaxy2 = maxy2;
 			break;
-			
+
 		case HISTOGR:
 			txtCase = ( char * ) "Bin number";
 			txtValue = ( char * ) "Frequency";
@@ -9218,7 +9152,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			cminy2 = miny * histo_cases;
 			cmaxy2 = maxy * histo_cases;
 			break;
-			
+
 		case HISTOCS:
 			txtCase = ( char * ) "Bin number";
 			txtValue = ( char * ) "Frequency";
@@ -9229,57 +9163,57 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			cminy2 = miny * histo_cases;
 			cmaxy2 = maxy * histo_cases;
 			break;
-			
+
 		default:
 			return;							// invalid type, do nothing
 	}
-	
+
 	// calculate horizontal borders required for legends
-	h = min_hborder( choice, pdigits, miny, maxy );
+	h = min_hborder( pdigits, miny, maxy );
 	if ( y2on )								// repeat for 2nd y axis
-		h = ( int ) max( h, min_hborder( choice, pdigits, cminy2, cmaxy2 ) );
-		
+		h = ( int ) max( h, min_hborder( pdigits, cminy2, cmaxy2 ) );
+
 	// include margins and tick size (if present)
 	hbordsize = ( int ) max( hbordsize, h ) + 2 * htmargin + 5;
 	cmd( "set hbordsizeP %d", hbordsize );
-	
+
 	// initial canvas size
-	hcanvas = hsize + hbordsize * ( y2on ? 2 : 1 ) + 
+	hcanvas = hsize + hbordsize * ( y2on ? 2 : 1 ) +
 				( y2on ? 0 : ( max_c < 1000 ? 10 : 20 ) );
 	vcanvas = vsize + tbordsize + bbordsize;
 	cmd( "set hcanvasP %d; set vcanvasP %d", hcanvas, vcanvas );
-	
+
 	// create plot notepad window, tab & canvas
 	add_da_plot_tab( ".dap", cur_plot );    // plot tab window
-	
+
 	cmd( "set p $w.f.plots" );				// plot canvas
-	
+
 	cmd( "ttk::frame $w.f" );
 	cmd( "ttk::scrollbar $w.f.vs -command \"$p yview\"" );
 	cmd( "ttk::scrollbar $w.f.hs -orient horiz -command \"$p xview\"" );
 	cmd( "pack $w.f.vs -side right -fill y" );
 	cmd( "pack $w.f.hs -side bottom -fill x" );
 
-	cmd( "ttk::canvas $p -width %d -height %d -yscrollcommand \"$w.f.vs set\" -xscrollcommand \"$w.f.hs set\" -scrollregion \"%d %d %d %d\" -dark $darkTheme", 
+	cmd( "ttk::canvas $p -width %d -height %d -yscrollcommand \"$w.f.vs set\" -xscrollcommand \"$w.f.hs set\" -scrollregion \"%d %d %d %d\" -dark $darkTheme",
 		hcanvas, vcanvas, - sbordsize, - sbordsize, hcanvas + sbordsize, vcanvas + sbordsize  );
 	cmd( "pack $p -expand yes -fill both" );
 	cmd( "pack $w.f -expand yes -fill both" );
 	cmd( "mouse_wheel $p" );
-		
+
 	// add buttons bottom bar
 	cmd( "ttk::frame $w.b" );
 
 	cmd( "ttk::frame $w.b.c" );
-	
+
 	// adjust horizontal text space usage
-	if ( y2on )							
+	if ( y2on )
 		cmd( "set labWid 15; set datWid 30; if [ string equal $CurPlatform windows ] { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
 	else
 		cmd( "set labWid 15; set datWid 25; if [ string equal $CurPlatform windows ] { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
-	
+
 	// adjust vertical text adjustment
 	cmd( "if [ string equal $CurPlatform linux ] { set pad3 0 } { if [ string equal $CurPlatform mac ] { set pad3 3 } { set pad3 -3 } }" );
-	
+
 	cmd( "ttk::frame $w.b.c.case" );
 	cmd( "ttk::label $w.b.c.case.l -text \"%s:\" -width $labWid -anchor e", txtCase );
 	cmd( "ttk::label $w.b.c.case.v -text \"\" -style hl.TLabel -width $datWid -anchor w" );
@@ -9309,7 +9243,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			set it \"%d) %s\"; \
 			set fromPlot 1; \
 			set choice 11 \
-		}", cur_plot, ( char * ) Tcl_GetVar( inter, "tit", 0 ) );
+		}", cur_plot, get_str( "tit" ) );
 	cmd( "ttk::button $w.b.s.det -width $butWid -text Detach -state disabled -command { \
 			if { [ $daptab.tab%d.c.b.s.det cget -text ] eq \"Stop\" } { \
 				set choice 2 \
@@ -9335,7 +9269,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	cmd( "pack $w.b -side right" );
 
 	cmd( "tooltip::tooltip $w.b.s.save \"Save plot to file\"" );
-	
+
 	if ( watch )
 	{
 		cmd( "$w.b.s.det configure -state normal -text Stop" );
@@ -9348,21 +9282,21 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	cmd( "if { $running && [ string equal [ tk windowingsystem ] aqua ] } { \
 			wm transient .dap \
 		}" );
-	
+
 	cmd( "$p xview moveto 0; $p yview moveto 0" );
 	cmd( "set zoomLevel%d 1.0", cur_plot );
-	
+
 	// create list with the series names+tags in Tk
 	cmd( "set series%d [ list ]", cur_plot );
 	for ( i = 0; i < nv; ++i )
 		cmd( "lappend series%d \"%s_%s\"", cur_plot, str[ i ], tag[ i ] );
-		
+
 	// axis lines, ticks & grid (adjust ticks for few horizontal cases)
 	if ( type == TSERIES && ( max_c - min_c ) / ( hticks + 1 ) < 10 )
 		for ( ; hticks > 0; --hticks )
 			if ( ( max_c - min_c ) % ( hticks + 1 ) == 0 )
 				break;
-			
+
 	cmd( "canvas_axis $p %d %d %d %d", type, grid, hticks, y2on );
 
 	// x-axis values
@@ -9372,16 +9306,16 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 			for ( i = 0; i < hticks + 2; ++i )
 				cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %d -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, min_c + ( int ) floor( i * ( double ) ( max_c - min_c ) / ( hticks + 1 ) ) );
 			break;
-			
+
 		case CRSSECT:
 			cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor nw -text \"%d series\" -tag { p text }", hbordsize, vsize + lheight, nv );
 			break;
-			
+
 		case HISTOGR:
 		case HISTOCS:
 			for ( i = 0; i < hticks + 2; ++i )
 				cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %.*g -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, pdigits, histo_bins[ 0 ].lowb + i * ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) / ( hticks + 1 ) );
-			break;			
+			break;
 	}
 
 	// y-axis values
@@ -9389,24 +9323,24 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	{
 		yVal = miny + ( vticks + 1 - i ) * ( maxy - miny ) / ( vticks + 1 );
 		yVal = ( fabs( yVal ) < ( maxy - miny ) * MARG ) ? 0 : yVal;
-		
+
 		cmd( "$p create text %d %d -fill $colorsTheme(dfg) -font $fontP -anchor e -text %.*g -tag { p text }", hbordsize - htmargin - 5, tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, yVal );
-		
+
 		// second y-axis series values ( if any )
 		if ( y2on )
 		{
 			yVal = cminy2 + ( vticks + 1 - i ) * ( cmaxy2 - cminy2 ) / ( vticks + 1 );
 			yVal = ( fabs( yVal ) < ( cmaxy2 - cminy2 ) * MARG ) ? 0 : yVal;
-		
+
 			cmd( "$p create text %d %d -fill $colorsTheme(dfg) -font $fontP -anchor w -text %.*g -tag { p text }", hbordsize + hsize + htmargin + 5, tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, yVal );
 		}
 	}
 
 	// series labels
-	cmd( "set xlabel $htmarginP" ); 
+	cmd( "set xlabel $htmarginP" );
 	cmd( "set ylabel [ expr { $tbordsizeP + $vsizeP + 2 * $lheightP } ]" );
 	color = allblack ? 1001 : 0;		// select gray scale or color range
-	
+
 	for ( i = 0; i < nLine; ++i, ++color )
 	{
 		switch ( type )
@@ -9416,25 +9350,25 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 					tOk = true;
 				else
 					tOk = false;
-				
-				sprintf( txtLab, "%s_%s", str[ i ], tag[ i ] );
+
+				snprintf( txtLab, 2 * MAX_ELEM_LENGTH, "%s_%s", str[ i ], tag[ i ] );
 				break;
-				
+
 			case CRSSECT:
-				sprintf( txtLab, "t = %d ", start[ i ] );
+				snprintf( txtLab, 2 * MAX_ELEM_LENGTH, "t = %d ", start[ i ] );
 				tOk = true;
 				break;
-				
+
 			case HISTOCS:
-				sprintf( txtLab, "t = %d ", histo_cs );
+				snprintf( txtLab, 2 * MAX_ELEM_LENGTH, "t = %d ", histo_cs );
 				tOk = true;
 				break;
-				
+
 			default:
-				tOk = false;			// don't print anything 
+				tOk = false;			// don't print anything
 				break;
 		}
-		
+
 		if ( tOk )
 		{
 			cmd( "set app [ font measure $fontP \"%s\"]", txtLab );
@@ -9444,7 +9378,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 				break;
 			cmd( "set it [ $p create text $xlabel $ylabel -font $fontP -anchor nw -text \"%s\" -tag { txt%d text legend } -fill $c%d ]", txtLab, i, ( color < 1100 ) ? color : 0 );
 			cmd( "set xlabel [ expr { $xlabel + $app + $htmarginP } ]" );
-			
+
 			if ( type == TSERIES )
 				cmd( "set_ttip_descr $p \"%s\" $it 0", str[ i ] );
 		}
@@ -9458,14 +9392,14 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 
 	// create context menu and common bindings
 	canvas_binds( cur_plot );
-	
-	cmd( "update idletasks" );	
+
+	cmd( "update idletasks" );
 }
 
 
 /*******************************************************
  CANVAS_BINDS
- create canvas context menu and common bindings 
+ create canvas context menu and common bindings
  *******************************************************/
 void canvas_binds( int n )
 {
@@ -9483,7 +9417,7 @@ void canvas_binds( int n )
 	cmd( "$p.v add command -label \"Add Text\" -command { event generate $daptab.tab%d.c.f.plots <Shift-1> -x $menuX -y $menuY }", n );
 	cmd( "$p.v add separator" );
 	cmd( "$p.v add command -label Help -accelerator F1 -command { LsdHelp menudata_res.html#graph }" );
-	
+
 	// canvas bindings
 	cmd( "bind $p <Button-2> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
@@ -9511,9 +9445,9 @@ void canvas_binds( int n )
 			tk_popup $ccanvas.v %%X %%Y \
 		}", n );
 	cmd( "bind $p <Button-3> { event generate $daptab.tab%d.c.f.plots <Button-2> -x %%x -y %%y }", n );
-	
+
 	cmd( "bind $p <Double-Button-1> { focustop .da }" );
-	
+
 	cmd( "bind $p <Alt-Button-1> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
 			set LX %%X; set LY %%Y; \
@@ -9543,7 +9477,7 @@ void canvas_binds( int n )
 			set hereY [ $ccanvas canvasy %%y ]; \
 			set choice 27 \
 		}", n );
-		
+
 	cmd( "bind $p <%s-Button-1> { \
 			set ccanvas $daptab.tab%d.c.f.plots; \
 			set ncanvas %d; \
@@ -9575,7 +9509,7 @@ void canvas_binds( int n )
 			} \
 		}", n );
 	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
-	
+
 }
 
 
@@ -9586,7 +9520,7 @@ void canvas_binds( int n )
 void add_da_plot_tab( const char *w, int id_plot )
 {
 	int n;
-		
+
 	// create notebook, if not exists
 	cmd( "set w %s", w );
 	cmd( "set daptab $w.pad" );
@@ -9602,7 +9536,7 @@ void add_da_plot_tab( const char *w, int id_plot )
 		} else { \
 			settop $w \
 		}", unsaved_change( ) ? "*" : " ", simul_name );
-		
+
 	// create tab frame with heading
 	cmd( "set t $daptab.tab%d", id_plot );
 	cmd( "if [ winfo exists $t ] { \
@@ -9618,36 +9552,36 @@ void add_da_plot_tab( const char *w, int id_plot )
 	cmd( "set w $t.c" );
 	cmd( "ttk::frame $w" );
 	cmd( "pack $w -expand yes -fill both" );
-	
+
 	cmd( "set tt [ string range [ lindex [ split $tit ] 0 ] 0 %d ]", MAX_TAB_LEN - 1 );
-	
+
 	cmd( "set n [ .da.vars.pl.f.v size ]" );
 	n = get_int( "n" ) + 1;
-	
+
 	if ( n <= MAX_PLOT_TABS )
 	{
 		cmd( "$daptab add $t -text \"$tt\"" );
 		cmd( "$daptab select $t" );
-		
+
 		cmd( "if { \"$daptab.more\" in [ $daptab tabs ] } { \
 				$daptab forget $daptab.more; \
 				destroy $daptab.more \
 			}" );
 	}
-	
+
 	if ( n == MAX_PLOT_TABS + 1 )
 	{
 		cmd( "ttk::frame $daptab.more" );
 		cmd( "pack $daptab.more" );
 		cmd( "$daptab insert 0 $daptab.more -text \"More...\" -underline 0" );
 	}
-	
-	if ( n > MAX_PLOT_TABS ) 
+
+	if ( n > MAX_PLOT_TABS )
 	{
 		cmd( "$daptab forget 1" );
 		cmd( "$daptab add $t -text \"$tt\"" );
 		cmd( "$daptab select $t" );
-		
+
 		cmd( "set addplot \"%d) $tit\"", id_plot );
 		update_more_tab( w, true );
 	}
@@ -9660,48 +9594,40 @@ void add_da_plot_tab( const char *w, int id_plot )
  *******************************************************/
 void update_more_tab( const char *w, bool adding )
 {
-	char *tt;
-	int i, j, k, m, n, cols;
-	
+	int i, j, k, n, cols;
+
 	if ( platform == _MAC_ )
 		cols = 3;
 	else
 		cols = 4;
-	
-	cmd( "if { [ info exists daptab ] && [ winfo exists $daptab.more ] } { \
-			set _tmp 1 \
-		} else { \
-			set _tmp 0 \
-		}" );
-		
-	if ( ! get_bool( "_tmp" ) )
+
+	cmd( "if { [ info exists daptab ] && [ winfo exists $daptab.more ] } { set res 1 } { set res 0 }" );
+
+	if ( ! get_bool( "res" ) )
 		return;
-	
+
 	cmd( "set plotlist [ .da.vars.pl.f.v get 0 end ]" );
-	
+
 	if ( adding )
 		cmd( "lappend plotlist \"$addplot\"" );
-	
+
 	cmd( "set n [ llength $plotlist ]" );
 	n = get_int( "n" );
-	
+
 	cmd( "destroy $daptab.more.b");
 	cmd( "ttk::frame $daptab.more.b");
-	
+
 	for ( i = 0; cols * i + 1 <= n; ++i )
 	{
 		cmd( "ttk::frame $daptab.more.b.l%d", i );
-		
+
 		for ( j = 1; j <= cols && cols * i + j <= n; ++j )
 		{
 			k = cols * i + j;
-			
+
 			cmd( "set t [ lindex $plotlist %d ]", k - 1 );
 			cmd( "set m [ string trim [ lindex [ split $t ] 0 ] \")\" ]" );
 			cmd( "set tt [ string range [ lindex [ split $t ] 1 ] 0 %d ]", MAX_TAB_LEN - 1 );
-			m = get_int( "m" );
-			tt = get_str( "tt" );
-			
 			cmd( "ttk::button $daptab.more.b.l%d.b%d -width -1 -text $t -command { \
 					set _w $daptab.tab%d; \
 					if [ istoplevel $_w ] { \
@@ -9715,48 +9641,48 @@ void update_more_tab( const char *w, bool adding )
 						}; \
 						$daptab select $_w \
 					} \
-				}", i, k, m, MAX_PLOT_TABS, tt );
+				}", i, k, get_int( "m" ), MAX_PLOT_TABS, get_str( "tt" ) );
 			cmd( "pack $daptab.more.b.l%d.b%d -side left -padx 2", i, k );
 		}
-		
+
 		cmd( "pack $daptab.more.b.l%d -anchor w -pady 2", i );
 	}
-	
+
 	cmd( "pack $daptab.more.b -padx 20 -pady 20" );
 }
 
 
 /*******************************************************
  MIN_HBORDER
- calculate horizontal borders required for legends 
+ calculate horizontal borders required for legends
  *******************************************************/
-int min_hborder( int *choice, int pdigits, double miny, double maxy )
+int min_hborder( int pdigits, double miny, double maxy )
 {
 	int vticks, largest = 0;
-	
+
 	cmd( "set choice $vticksP" );
-	vticks = *choice;
-	
+	vticks = choice;
+
 	for ( int i = 0; i < vticks + 2; ++i ) // search for the longest legend
 	{
 		cmd( "set choice [ font measure $fontP \"%.*g\" ]", pdigits, miny + ( vticks + 1 - i ) * ( maxy - miny ) / ( vticks + 1 ) );
-		if ( *choice > largest )
-			largest = *choice;
+		if ( choice > largest )
+			largest = choice;
 	}
-	
+
 	return largest;
 }
 
- 
+
 /*****************************
  TCL_UPLOAD_SERIES
- data transfer routine from C to Tcl 
+ data transfer routine from C to Tcl
  *****************************/
 int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST ov[ ] )
 {
 	int size, *data;
 
-	if ( oc != 3 ) 
+	if ( oc != 3 )
 	{
 		Tcl_WrongNumArgs( inter, 1, ov, "size data" );
 		return TCL_ERROR;
@@ -9764,7 +9690,7 @@ int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST 
 
 	if ( Tcl_GetIntFromObj( inter, ov[ 1 ], &size ) != TCL_OK )
 		return TCL_ERROR;
-	
+
 	data = ( int * ) Tcl_GetByteArrayFromObj( ov[ 2 ], NULL );
 	if ( data == NULL )
 		return TCL_ERROR;
@@ -9797,8 +9723,8 @@ int store( struct s *c, int x4 )
 		if ( app->x == x4 )
 			return 0;
 		else
-			prev = app; 
-	
+			prev = app;
+
 	if ( app == NULL && prev != NULL )
 	{
 		prev->next = new struct s;
@@ -9810,12 +9736,12 @@ int store( struct s *c, int x4 )
 		return 1;
 	}
 
-	error_hard( "invalid data structure",
-				"internal problem in LSD", 
+	error_hard( "internal problem in LSD",
 				"if error persists, please contact developers",
-				true );
+				true,
+				"invalid data structure" );
 	myexit( 14 );
-	
+
 	return 0;
 }
 
@@ -9828,29 +9754,29 @@ int store( struct s *c, int x3, int x4 )
 			return store( app->son, x4 );
 		else
 			prev = app;
-	
+
 	if ( app == NULL && prev != NULL )
 	{
 		prev->next = new struct s;
 		app = prev->next;
 		app->x = x3;
 		app->next = NULL;
-		
+
 		app->son = new struct s;
 		app = app->son;
 		app->x = x4;
 		app->next = NULL;
 		app->son = NULL;
-	
+
 		return 1;
 	 }
 
-	error_hard( "invalid data structure",
-				"internal problem in LSD", 
+	error_hard( "internal problem in LSD",
 				"if error persists, please contact developers",
-				true );
+				true,
+				"invalid data structure" );
 	myexit( 15 );
-	
+
 	return 0;
 }
 
@@ -9863,34 +9789,34 @@ int store( struct s *c, int x2, int x3, int x4 )
 			return store( app->son, x3, x4 );
 		else
 			prev = app;
-		
+
 	if ( app == NULL && prev != NULL )
 	{
 		prev->next = new struct s;
 		app = prev->next;
 		app->x = x2;
 		app->next = NULL;
-		
+
 		app->son = new struct s;
 		app = app->son;
 		app->x = x3;
 		app->next = NULL;
-		
+
 		app->son = new struct s;
 		app = app->son;
 		app->x = x4;
 		app->next = NULL;
 		app->son = NULL;
-	
+
 		return 1;
 	}
 
-	error_hard( "invalid data structure",
-				"internal problem in LSD", 
+	error_hard( "internal problem in LSD",
 				"if error persists, please contact developers",
-				true );
+				true,
+				"invalid data structure" );
 	myexit( 16 );
-	
+
 	return 0;
 }
 
@@ -9903,39 +9829,39 @@ int store( int x1, int x2, int x3, int x4 )
 			return store( app->son, x2, x3, x4 );
 		else
 			prev = app;
-	
+
 	if ( app == NULL && prev != NULL )
 	{
 		prev->next = new struct s;
 		app = prev->next;
 		app->x = x1;
 		app->next = NULL;
-		
+
 		app->son = new struct s;
 		app = app->son;
 		app->x = x2;
 		app->next = NULL;
-		
+
 		app->son = new struct s;
 		app = app->son;
 		app->x = x3;
 		app->next = NULL;
-		
+
 		app->son = new struct s;
 		app = app->son;
 		app->x = x4;
 		app->next = NULL;
 		app->son = NULL;
-		
+
 		return 1;
 	}
 
-	error_hard( "invalid data structure", 
-				"internal problem in LSD", 
+	error_hard( "internal problem in LSD",
 				"if error persists, please contact developers",
-				true );
+				true,
+				"invalid data structure" );
 	myexit( 17 );
-	
+
 	return 0;
 }
 
@@ -9943,14 +9869,14 @@ void free_storage( struct s *c )
 {
 	if ( c->next != NULL )
 		free_storage( c->next );
-	
+
 	if ( c->son != NULL )
 		free_storage( c->son );
 
 	delete c;
 }
 
-int shrink_gnufile( void ) 
+int shrink_gnufile( void )
 {
 	char str[ 2 * MAX_ELEM_LENGTH ], str1[ 2 * MAX_ELEM_LENGTH ], str2[ 2 * MAX_ELEM_LENGTH ], str3[ 2 * MAX_ELEM_LENGTH ], str4[ 2 * MAX_ELEM_LENGTH ];
 
@@ -9964,7 +9890,7 @@ int shrink_gnufile( void )
 	// wait some time for the file to be ready in macOS
 	while ( ( f = fopen( "plot.file", "r" ) ) == NULL && count++ < 10 )
 		msleep( 1000 );
-	
+
 	if ( f == NULL )
 	{
 		cmd( "ttk::messageBox -parent .da -title Error -icon error -type ok -message \"Cannot open plot\" -detail \"The plot file produced by Gnuplot is not available.\nPlease check if you have selected an adequate configuration for the plot.\nIf the error persists please check if Gnuplot is installed and set up properly.\"" );
@@ -9990,7 +9916,7 @@ int shrink_gnufile( void )
 			strncpy( str1, str + i, j - i + 1 );
 			str1[ j - i + 1 ] = '\0';
 			sscanf( str1, "[ expr { $cmx * %d / 1000 } ]", &x1 );
-		
+
 			i = strcspn( str + j + 1, "[" );
 			i += j + 1;
 			j = strcspn( str + i + 1, "]" );
@@ -9998,7 +9924,7 @@ int shrink_gnufile( void )
 			strncpy( str2, str + i, j - i + 1 );
 			str2[ j - i + 1 ]='\0';
 			sscanf( str2, "[ expr { $cmy * %d / 1000 } ]", &x2 );
-		
+
 			i = strcspn( str + j + 1, "[" );
 			i += j + 1;
 			j = strcspn( str + i + 1, "]" );
@@ -10006,7 +9932,7 @@ int shrink_gnufile( void )
 			strncpy( str3, str + i, j - i + 1 );
 			str3[ j - i + 1 ] = '\0';
 			sscanf( str3, "[ expr { $cmx * %d / 1000 } ]", &x3 );
-		
+
 			i = strcspn( str + j + 1, "[" );
 			i += j + 1;
 			j = strcspn( str + i + 1, "]" );
@@ -10014,7 +9940,7 @@ int shrink_gnufile( void )
 			strncpy( str4, str + i, j - i + 1 );
 			str4[ j - i + 1 ] = '\0';
 			sscanf( str4, "[ expr { $cmy * %d / 1000 } ]", &x4 );
-			
+
 			// if new data are stored, then add it to the cleaned file
 			if ( store( x1, x2, x3, x4 ) == 1 )
 				fprintf( f1, "%s", str );

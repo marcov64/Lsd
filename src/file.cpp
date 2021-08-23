@@ -41,7 +41,7 @@ Initialize a model by creating  one as defined
 in the data file. The model, after this stage, has only one instance for each
 object type and variables and parameters are simply labels.
 
-- int object::load_param( char *file_name, int repl )
+- int object::load_param( const char *file_name, int repl )
 It loads from the file named as specified the data
 for the object. It is made in specular way in respect of save_param.
 Called from browser in INTERF.CPP immediately after load_struct.
@@ -53,9 +53,9 @@ Called from browser in INTERF.CPP immediately after load_struct.
 /****************************************************
 OBJECT::SAVE_STRUCT
 ****************************************************/
-void object::save_struct( FILE *f, char const *tab )
+void object::save_struct( FILE *f, const char *tab )
 {
-	char tab1[ 30 ];
+	char tab1[ MAX_ELEM_LENGTH ];
 	bridge *cb;
 	object *o;
 	variable *var;
@@ -63,9 +63,9 @@ void object::save_struct( FILE *f, char const *tab )
 	if ( up == NULL )
 		fprintf( f, "\t\n" );
 
-	strcpy( tab1, tab );
+	strcpyn( tab1, tab, MAX_ELEM_LENGTH );
 	fprintf( f, "%sLabel %s\n%s{\n", tab1, label, tab1 );
-	strcat( tab1, "\t" );
+	strcatn( tab1, "\t", MAX_ELEM_LENGTH );
 	
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
@@ -183,7 +183,7 @@ void object::save_param( FILE *f )
 /****************************************************
 OBJECT::LOAD_PARAM
 ****************************************************/
-bool object::load_param( char *file_name, int repl, FILE *f )
+bool object::load_param( const char *file_name, int repl, FILE *f )
 {
 	char str[ MAX_ELEM_LENGTH ], ch, ch1, ch2;
 	int num, i;
@@ -312,7 +312,7 @@ OBJECT::LOAD_STRUCT
 ****************************************************/
 bool object::load_struct( FILE *f )
 {
-	int len, i = 0;
+	int i = 0;
 	char ch[ MAX_ELEM_LENGTH ];
 	bridge *cb;
 	variable *cv;
@@ -325,10 +325,9 @@ bool object::load_struct( FILE *f )
 		return false;
 
 	fscanf( f, "%99s", ch );
-	len = strlen( ch );
 	if ( label == NULL )
 	{
-		label = new char[ len + 1 ];
+		label = new char[ strlen( ch ) + 1 ];
 		strcpy( label, ch );
 	}
 
@@ -388,39 +387,38 @@ bool object::load_struct( FILE *f )
 /*****************************************************************************
 LOAD_DESCRIPTION
 ******************************************************************************/
-bool load_description( char *msg, FILE *f )
+bool load_description( const char *d, FILE *f )
 {
 	int j, type, ctype;
 	char label[ MAX_ELEM_LENGTH ], text[ 10 * MAX_LINE_SIZE + 1 ], init[ 10 * MAX_LINE_SIZE + 1 ], str[ 10 * MAX_LINE_SIZE + 1 ];
 	variable *cv;
 
-	label[ MAX_ELEM_LENGTH - 1 ] = '\0';
 	strcpy( text, "" );
 	strcpy( init, "" );
 	strcpy( str, "" );
 	
-	if ( strncmp( msg, "Object", 6 ) == 0 )
+	if ( strncmp( d, "Object", 6 ) == 0 )
 	{
 		type = 4;
-		strncpy( label, msg + 7, MAX_ELEM_LENGTH - 1 );
+		strcpyn( label, d + 7, MAX_ELEM_LENGTH );
 	} 
 	else
-		if ( strncmp( msg, "Variable", 8 ) == 0 )
+		if ( strncmp( d, "Variable", 8 ) == 0 )
 		{
 			type = 0;
-			strncpy( label, msg + 9, MAX_ELEM_LENGTH - 1 );
+			strcpyn( label, d + 9, MAX_ELEM_LENGTH );
 		} 
 		else
-			if ( strncmp( msg, "Parameter", 9 ) == 0 )
+			if ( strncmp( d, "Parameter", 9 ) == 0 )
 			{
 				type = 1;
-				strncpy( label, msg + 10, MAX_ELEM_LENGTH - 1 );
+				strcpyn( label, d + 10, MAX_ELEM_LENGTH );
 			} 
 			else
-				if ( strncmp( msg, "Function", 6 ) == 0 )
+				if ( strncmp( d, "Function", 6 ) == 0 )
 				{
 					type = 2;
-					strncpy( label, msg + 9, MAX_ELEM_LENGTH - 1 );
+					strcpyn( label, d + 9, MAX_ELEM_LENGTH );
 				} 
 				else
 					return false;
@@ -441,7 +439,7 @@ bool load_description( char *msg, FILE *f )
 	 
 	fgets( str, MAX_LINE_SIZE, f );		// skip first newline character
 	for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, END_DESCR, strlen( END_DESCR ) ) && strncmp( str, BEG_INIT, strlen( BEG_INIT ) ) && strlen( text ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
-		strcat( text, str );
+		strcatn( text, str, 10 * MAX_LINE_SIZE + 1 );
 
 	if ( strncmp( str, END_DESCR, strlen( END_DESCR ) ) && strncmp( str, BEG_INIT, strlen( BEG_INIT ) ) )
 		return false;
@@ -449,7 +447,7 @@ bool load_description( char *msg, FILE *f )
 	if ( ! strncmp( str, BEG_INIT, strlen( BEG_INIT ) ) )
 	{
 		for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, END_DESCR, strlen( END_DESCR ) ) && strlen( init ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
-			strcat( init, str );
+			strcatn( init, str, 10 * MAX_LINE_SIZE + 1 );
 
 		if ( strncmp( str, END_DESCR, strlen( END_DESCR ) ) )
 			return false;
@@ -578,23 +576,23 @@ int load_configuration( bool reload, bool quick )
 		goto endLoad;
 	}
 	strcpy( name, "NONE" );
-	fgets( name, MAX_PATH_LENGTH - 1, f );
+	fgets( name, MAX_PATH_LENGTH, f );
     if ( name[ strlen( name ) - 1 ] == '\n' )
 		name[ strlen( name ) - 1 ] = '\0';
     if ( name[ strlen( name ) - 1 ] == '\r' )
 		name[ strlen( name ) - 1 ] = '\0';
 
 	// use the current equation name only if the file exists
-	snprintf( full_name, 2 * MAX_PATH_LENGTH - 1, "%s/%s", exec_path, name + 1 );
+	snprintf( full_name, 2 * MAX_PATH_LENGTH, "%s/%s", exec_path, name + 1 );
 	g = fopen( full_name, "r" );
 	if ( g != NULL )
 	{
 		fclose( g );
-		strncpy( equation_name, name + 1, MAX_PATH_LENGTH - 1 );
+		strcpyn( equation_name, name + 1, MAX_PATH_LENGTH );
 	}
 	
 	fscanf( f, "%999s", msg );					// should be MODELREPORT
-	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%499s", name_rep ) ) )
+	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%999s", name_rep ) ) )
 	{
 		load = 8;
 		goto endLoad;
@@ -677,8 +675,8 @@ int load_configuration( bool reload, bool quick )
 	}
 
 	strcpy( lsd_eq_file, "" );
-	for ( j = 0; fgets( msg, MAX_LINE_SIZE - 1, f ) != NULL && strncmp( msg, "END_EQ_FILE", 11 ) && strlen( lsd_eq_file ) < MAX_FILE_SIZE - MAX_LINE_SIZE && j < MAX_FILE_TRY; ++j )
-		strcat( lsd_eq_file, msg );
+	for ( j = 0; fgets( msg, MAX_LINE_SIZE, f ) != NULL && strncmp( msg, "END_EQ_FILE", 11 ) && strlen( lsd_eq_file ) < MAX_FILE_SIZE - MAX_LINE_SIZE && j < MAX_FILE_TRY; ++j )
+		strcatn( lsd_eq_file, msg, MAX_FILE_SIZE );
 	
 	// remove extra \n and \r (Windows) at the end
     if ( lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] == '\n' )
@@ -758,7 +756,7 @@ void unload_configuration ( bool full )
 		sens_file = NULL;
 		
 		strcpy( lsd_eq_file, "" );				// reset other file names
-		sprintf( name_rep, "report_%s.html", simul_name );
+		snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
 
 #ifndef _NW_
 		cmd( "set path \"%s\"", path );
@@ -779,6 +777,7 @@ SAVE_SINGLE
 *********************************/
 void save_single( variable *v )
 {
+	char fn[ MAX_PATH_LENGTH ];
 	int i;
 	FILE *f;
 
@@ -788,8 +787,8 @@ void save_single( variable *v )
 #endif	
 
 	set_lab_tit( v );
-	sprintf( msg, "%s_%s-%d_%d_seed-%d.res", v->label, v->lab_tit, v->start, v->end, seed - 1 );
-	f = fopen( msg, "wt" );  		// use text mode for Windows better compatibility
+	snprintf( fn, MAX_PATH_LENGTH, "%s_%s-%d_%d_seed-%d.res", v->label, v->lab_tit, v->start, v->end, seed - 1 );
+	f = fopen( fn, "wt" );  		// use text mode for Windows better compatibility
 
 	fprintf( f, "%s %s (%d %d)\t\n", v->label, v->lab_tit, v->start, v->end );
 
@@ -811,8 +810,8 @@ SAVE_CONFIGURATION
 bool save_configuration( int findex, const char *dest_path )
 {
 	bool save_ok = false;
-	int delta, indexDig;
-	char ch[ MAX_PATH_LENGTH + 1 ], *save_file, *bak_file = NULL;
+	int delta, indexDig, save_len;
+	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file = NULL;
 	const char *save_path;
 	description *cd;
 	FILE *f; 
@@ -827,19 +826,21 @@ bool save_configuration( int findex, const char *dest_path )
 	
 	if ( strlen( path ) > 0 )
 	{
-		save_file = new char[ strlen( save_path ) + strlen( simul_name ) + 6 + indexDig ];
+		save_len = strlen( save_path ) + strlen( simul_name ) + 6 + indexDig;
+		save_file = new char[ save_len ];
 		sprintf( save_file, "%s/%s", save_path, simul_name );
 	}
 	else
 	{
-		save_file = new char[ strlen( simul_name ) + 6 + indexDig ];
+		save_len = strlen( simul_name ) + 6 + indexDig;
+		save_file = new char[ save_len ];
 		sprintf( save_file, "%s", simul_name );
 	}
 	
 	if ( findex > 0 )
 	{
-		sprintf( ch, "_%d.lsd", findex );
-		strcat( save_file, ch );
+		snprintf( ch, MAX_PATH_LENGTH, "_%d.lsd", findex );
+		strcatn( save_file, ch, save_len );
 	}
 	else
 	{
@@ -847,7 +848,7 @@ bool save_configuration( int findex, const char *dest_path )
 		bak_file = new char[ strlen( save_file ) + 5 ];
 		sprintf( bak_file, "%s.bak", save_file );
 		
-		strcat( save_file, ".lsd" );
+		strcatn( save_file, ".lsd", save_len );
 	
 		f = fopen( save_file, "r" );
 		if ( f != NULL )
@@ -1193,7 +1194,7 @@ SAVE_EQFILE
 void save_eqfile( FILE *f )
 {
 	if ( strlen( lsd_eq_file ) == 0 )
-		strcpy( lsd_eq_file, eq_file );
+		strcpyn( lsd_eq_file, eq_file, MAX_FILE_SIZE );
 	 
 	fprintf( f, "\nEQ_FILE\n" );
 	fprintf( f, "%s", lsd_eq_file );
@@ -1206,12 +1207,12 @@ void save_eqfile( FILE *f )
 /***************************************************
 READ_EQ_FILENAME
 ***************************************************/
-void read_eq_filename( char *s )
+void read_eq_filename( char *s, int sz )
 {
 	char lab[ MAX_PATH_LENGTH ];
 	FILE *f;
 
-	sprintf( lab, "%s/%s", exec_path, MODEL_OPTIONS );
+	snprintf( lab, MAX_PATH_LENGTH, "%s/%s", exec_path, MODEL_OPTIONS );
 	f = fopen( lab, "r" );
 	
 	if ( f == NULL )
@@ -1220,8 +1221,8 @@ void read_eq_filename( char *s )
 		return;
 	}
 	
-	fscanf( f, "%499s", lab );
-	for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%499s", lab ) != EOF && i < MAX_FILE_TRY; ++i );    
+	fscanf( f, "%999s", lab );
+	for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%999s", lab ) != EOF && i < MAX_FILE_TRY; ++i );    
 	fclose( f );
 	if ( strncmp( lab, "FUN=", 4 ) != 0 )
 	{
@@ -1229,41 +1230,10 @@ void read_eq_filename( char *s )
 		return;
 	}
 
-	strcpy( s, lab + 4 );
-	strcat( s, ".cpp" );
+	strcpyn( s, lab + 4, sz );
+	strcatn( s, ".cpp", sz );
 
 	return;
-}
-
-
-/***************************************************
-COMPARE_EQFILE
-***************************************************/
-int compare_eqfile( void )
-{
-	char *s, lab[ MAX_PATH_LENGTH + 1 ];
-	int i = MAX_FILE_SIZE;
-	FILE *f;
-
-	read_eq_filename( lab );
-	f = fopen( lab, "r" );
-	s = new char[ i + 1 ];
-	while ( fgets( msg, MAX_LINE_SIZE, f ) != NULL )
-	{
-		i -= strlen( msg );
-		if ( i < 0 )
-			break;
-		strcat( s, msg );
-	}
-	fclose( f );  
-	
-	if ( strcmp( s, lsd_eq_file ) == 0 )
-		i = 0;
-	else
-		i = 1;
-	delete [ ] s;
-
-	return i;
 }
 
 
@@ -1272,30 +1242,24 @@ UPLOAD_EQFILE
 ***************************************************/
 char *upload_eqfile( void )
 {
-	//load into the string eq_file the equation file
-	char s[ MAX_PATH_LENGTH + 1 ], *eq;
-	int i;
+	char s[ MAX_PATH_LENGTH ], line[ MAX_LINE_SIZE ], *eq;
+	int sz;
 	FILE *f;
 
-	Tcl_LinkVar( inter, "eqfiledim", ( char * ) &i, TCL_LINK_INT );
-
-	read_eq_filename( s );
-	cmd( "set eqfiledim [ file size %s ]", s );
-
-	Tcl_UnlinkVar( inter, "eqfiledim" );
-
-	eq = new char[ i + 1 ];
-	eq[ 0 ] = '\0';
-	f = fopen( s, "r");
-	while ( fgets( msg, MAX_LINE_SIZE, f ) != NULL )
-	{
-		i -= strlen( msg );
-		if ( i < 0 )
-			break;
-		strcat( eq, msg );
-	}
+	read_eq_filename( s, MAX_PATH_LENGTH );
+	if ( ( f = fopen( s, "r" ) ) == NULL )
+		return NULL;
+	
+	cmd( "set res [ file size %s ]", s );
+	sz = get_int( "res" ) + 1;
+	eq = new char[ sz ];
+	strcpy( eq, "" );
+	
+	while ( fgets( line, MAX_LINE_SIZE, f ) != NULL )
+		strcatn( eq, line, sz );
 	
 	fclose( f );
+	
 	return eq;
 }
 
@@ -1306,8 +1270,8 @@ Open tail/multitail to show log files dynamically
 ****************************************************/
 void show_logs( const char *path, vector < string > & logs, bool par_cntl )
 {
-	char exec[ 30 ];
-	int i, j, n;
+	char exec[ MAX_PATH_LENGTH  ];
+	int i, j, n, sz;
 	
 	cmd( "switch [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Background run monitor\" -message \"Open the background run monitor?\" -detail \"The selected simulation runs were started as parallel background job(s). Each job progress can be monitored in a separated window results by choosing 'Yes'\n\nLog files are being created in the folder:\n\n%s\" ] { yes { set ans 1 } no { set ans 0 } }", path );
 	
@@ -1323,15 +1287,16 @@ void show_logs( const char *path, vector < string > & logs, bool par_cntl )
 	for ( i = j = 0; i < n; ++i )
 		j += logs[ i ].length( );
 	
-	char logs_str[ i + j + 1 ];
-	logs_str[ 0 ] = '\0';
+	sz = i + j + 1;
+	char logs_str[ sz ];
+	strcpy( logs_str, "" );
 	
 	for ( i = 0; i < n; ++i )
 	{
-		strcat( logs_str, logs[ i ].c_str( ) );
+		strcatn( logs_str, logs[ i ].c_str( ), sz );
 		
 		if ( i < n - 1 )
-			strcat( logs_str, " " );
+			strcatn( logs_str, " ", sz );
 	}
 	
 	if ( n == 1 )
@@ -1342,9 +1307,9 @@ void show_logs( const char *path, vector < string > & logs, bool par_cntl )
 		j = n > 4 ? ( n > 8 ? ( n > 12 ? 4 : 3 ) : 2 ) : 1;
 		
 		if ( j == 1 )
-			sprintf( exec, "multitail%s", platform == _WIN_ ? "" : " --retry-all" );
+			snprintf( exec, MAX_PATH_LENGTH , "multitail%s", platform == _WIN_ ? "" : " --retry-all" );
 		else
-			sprintf( exec, "multitail%s -s %d", platform == _WIN_ ? "" : " --retry-all", j );
+			snprintf( exec, MAX_PATH_LENGTH , "multitail%s -s %d", platform == _WIN_ ? "" : " --retry-all", j );
 	}
 
 	cmd( "if { [ open_terminal \"%s %s\" ] != 0 } { \
@@ -1599,7 +1564,7 @@ void result::title_recursive( object *r, int header )
 CONSTRUCTOR
 Open the appropriate file for saving the results
 ***************************************************/
-result::result( char const *fname, char const *fmode, bool dozip, bool docsv )
+result::result( const char *fname, const char *fmode, bool dozip, bool docsv )
 {
 	this->docsv = docsv;
 	this->dozip = dozip;		// save local class flag

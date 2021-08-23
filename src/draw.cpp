@@ -28,13 +28,13 @@ distances among the objects. Rather rigid, but it should work nicely
 for most of the model structures. It assigns all the labels (above and below the
 symbols) and the writing bound to the mouse.
 
-- void put_node( int x1, int y1, int x2, int y2, char *str, bool sel )
+- void put_node( int x1, int y1, int x2, int y2, const char *str, bool sel )
 Draw the circle.
 
 - void put_line( int x1, int y1, int x2, int y2 )
 draw the line
 
-- void put_text( char *str, char *num, int x, int y, char *str2 );
+- void put_text( const char *str, const char *num, int x, int y, const char *str2 );
 Draw the different texts and sets the bindings
 *************************************************************/
 
@@ -68,8 +68,7 @@ void show_graph( object *t )
 
 	for ( top = t; top->up != NULL; top = top->up );
 
-	cmd( "set strExist [ winfo exists .str ]" );
-	if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only if needed
+	if ( ! exists_window( ".str" ) )			// build window only if needed
 	{
 		cmd( "newtop .str \"\" { set strWindowOn 0; set choice 23 } \"\"" );
 		cmd( "wm transient .str ." );
@@ -261,9 +260,9 @@ DRAW_OBJ
 void draw_obj( object *t, object *sel, int level, int center, int from, bool zeroinst )
 {
 	bool fit_wid;
-	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_LINE_SIZE + 1 ];
 	double h_fact, v_fact, range_fact;
 	int h, i, j, k, step_level, step_type, begin, count, max_wid, range_init;
+	char str[ MAX_LINE_SIZE ], ch[ MAX_ELEM_LENGTH ], ch1[ MAX_LINE_SIZE ];
 	object *cur;
 	bridge *cb;
 	
@@ -282,7 +281,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 	// draw node only if it is not the root
 	if ( t->up != NULL )
 	{
-		sprintf( ch, "%s", t->label );
+		strcpyn( ch, t->label, MAX_ELEM_LENGTH );
 		strcpy( ch1, "" );
 		
 		// count number of brothers and define maximum width for number string
@@ -324,7 +323,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 					for ( k = 0, cur = cb->head; cur != NULL; ++k, cur = cur->next );
 				
 					if ( k > 1 )				// handle multi-instanced parents
-						strcat( ch1, "\u2026" );
+						strcatn( ch1, "\u2026", MAX_LINE_SIZE );
 				}
 			}
 		}
@@ -335,14 +334,14 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 			{
 				if ( strlen( ch1 ) >= ( unsigned ) max_wid )
 				{
-					strcat( ch1, "\u2026" );
+					strcatn( ch1, "\u2026", MAX_LINE_SIZE );
 					fit_wid = false;
 					break;
 				}
 				
 				skip_next_obj( cur, &count );
 				snprintf( str, MAX_LINE_SIZE, "%s%d", strlen( ch1 ) > 0 ? " " : "", count );
-				strncat( ch1, str, MAX_LINE_SIZE );
+				strcatn( ch1, str, MAX_LINE_SIZE );
 				
 				for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group
 			}
@@ -354,7 +353,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 				for ( k = 0, cur = cb->head; cur != NULL; ++k, cur = cur->next );
 			
 				if ( h < k )					// found zero instanced object?
-					strcat( ch1, "\u2026" );
+					strcatn( ch1, "\u2026", MAX_LINE_SIZE );
 			}
 		}
 		
@@ -463,7 +462,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 /****************************************************
 PUT_NODE
 ****************************************************/
-void put_node( int x, int y, char *str, bool sel )
+void put_node( int x, int y, const char *str, bool sel )
 {
 	cmd( ".str.f.c create oval [ expr { %d - $nsizeM / 2 } ] [ expr { %d + $vmarginM - $nsizeM / 2 } ] [ expr { %d + $nsizeM / 2 } ] [ expr { %d + $vmarginM + $nsizeM / 2 } ] -fill $colorsTheme(%s) -outline $colorsTheme(dfg) -tags %s", x, y, x, y, sel ? "hc" : "isbg", str );
 }
@@ -481,7 +480,7 @@ void put_line( int x1, int y1, int x2 )
 /****************************************************
 PUT_TEXT
 ****************************************************/
-void put_text( char *str, char *n, int x, int y, char *str2 )
+void put_text( const char *str, const char *n, int x, int y, const char *str2 )
 {
 	cmd( ".str.f.c create text %d %d -text \"%s\" -fill $colorsTheme(hl) -tags %s", x, y - 1, str, str2 );
 

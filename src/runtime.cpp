@@ -26,7 +26,7 @@ the variables of plot. The plot window is initialized according to the id_sim na
 - void count( object *r, int *i );
 Recursive function that increments i of one for any variable to plot.
 
-- void assign( object *r, int *i, char *lab );
+- void assign( object *r, int *i, const char *lab );
 Create a list of Variables to plot and create the list of labels (adding
 the indexes if necessary) to be used in the plot.
 
@@ -95,7 +95,7 @@ void count( object *r, int *i )
 /**************************************
 ASSIGN
 **************************************/
-void assign( object *r, int *i, char *lab )
+void assign( object *r, int *i, const char *lab )
 {
 	char cur_lab[ MAX_ELEM_LENGTH ];
 	int j;
@@ -107,8 +107,7 @@ void assign( object *r, int *i, char *lab )
 		if ( a->plot == 1 )
 		{
 			list_var[ *i ] = a; 	// assigns the address of a to the list to plot
-			sprintf( msg, "%s%s", a->label, lab );
-			cmd( "lappend tp %s", msg );
+			cmd( "lappend tp \"%s%s\"", a->label, lab );
 			*i = *i + 1;
 		}
 
@@ -121,7 +120,7 @@ void assign( object *r, int *i, char *lab )
 		if ( c->next != NULL ) 		// multiple instances
 			for ( j = 1, c1 = c; c1 != NULL; c1 = go_brother( c1 ), ++j )
 			{
-				sprintf( cur_lab, "%s#%d", lab, j );
+				snprintf( cur_lab, MAX_ELEM_LENGTH, "%s#%d", lab, j );
 				assign( c1, i, cur_lab );
 			}
 		else 						// unique instance
@@ -369,13 +368,9 @@ void plot_rt( variable *v )
 	int height, p_digits;
 	double value, scale, zero_lim;
 	
-	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot.c.c.cn ] } { \
-			set e 1 \
-		} { \
-			set e 0 \
-		}" );
+	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot.c.c.cn ] } { set res 1 } { set res 0 }" );
 	
-	if ( ! get_bool( "e" ) )
+	if ( ! get_bool( "res" ) )
 		return;
 	
 	height = get_int( "vsizeR" );
