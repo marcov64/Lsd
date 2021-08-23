@@ -68,27 +68,51 @@ mutex error;
 
 /*********************************
 PLOG
+Print message on the log window
+*********************************/
+void plog( const char *cm, ... )
+{
+	static va_list argptr;
+	
+	va_start( argptr, cm );
+	plog_backend( cm, "", argptr );
+	va_end( argptr );
+}
+
+
+/*********************************
+PLOG_TAG
 The optional tag parameter has to correspond to the log window existing tags
 *********************************/
-#define NUM_TAGS 6
-const char *tags[ NUM_TAGS ] = { "", "highlight", "tabel", "series", "prof1", "prof2" };
-
-void plog( char const *cm, char const *tag, ... )
+void plog_tag( const char *cm, const char *tag, ... )
 {
-	char buffer[ TCL_BUFF_STR ], *message;
-	bool tag_ok = false;
-	int i, j;
-	va_list argptr;
-
-	for ( int i = 0; i < NUM_TAGS; ++i )
-		if ( ! strcmp( tag, tags[ i ] ) )
-			tag_ok = true;
+	static va_list argptr;
 	
-	// handle the "bar" pseudo tag
-	if ( ! strcmp( tag, "bar" ) )
-		tag_ok = true;
-	else
-		on_bar = false;
+	va_start( argptr, tag );
+	plog_backend( cm, tag, argptr );
+	va_end( argptr );
+}
+
+
+/*********************************
+PLOG_BACKEND
+Back-end to plog and plog_tag
+*********************************/
+#define NUM_TAGS 7
+const char *tags[ NUM_TAGS ] = { "", "highlight", "table", "series", "prof1", "prof2", "bar" };
+
+void plog_backend( const char *cm, const char *tag, const va_list arg )
+{
+	static bool bufdyn;
+	static char *buffer, *message, bufstat[ MAX_BUFF_SIZE ], msgstat[ MAX_BUFF_SIZE ];
+	static bool tag_ok;
+	static int i, j, reqsz, sz;
+	static va_list argcpy;
+
+#ifndef _NW_
+	if ( ! tk_ok || ! log_ok )
+		return;
+#endif
 	
 #ifndef _NP_
 	// abort if not running in main LSD thread
@@ -96,14 +120,49 @@ void plog( char const *cm, char const *tag, ... )
 		return;
 #endif
 
-	va_start( argptr, tag );
-	int maxSz = TCL_BUFF_STR - 40 - strlen( tag );
-	int reqSz = vsnprintf( buffer, maxSz, cm, argptr );
-	va_end( argptr );
+	buffer = bufstat;
+	message = msgstat;
+	va_copy( argcpy, arg );
 	
+	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, arg );
+	
+	if ( reqsz < 0 )
+	{
+#ifndef _NW_
+		log_tcl_error( "Invalid text message", "Cannot expand message '%s...'", cm );
+#else
+		fprintf( stderr, "\nCannot expand message '%s...'\n", cm );
+#endif
+		return;
+	}
+		
+	// handle very large messages
+	if ( reqsz >= MAX_BUFF_SIZE )
+	{
+		buffer = new char[ reqsz + 1 ];
+		sz = vsnprintf( buffer, reqsz + 1, cm, argcpy );
+		
+		if ( reqsz < 0 || sz > reqsz )
+		{
+#ifndef _NW_
+			log_tcl_error( "Invalid text message", "Cannot expand message '%s...'", cm );
+#else
+			fprintf( stderr, "\nCannot expand message '%s...'\n", cm );
+#endif
+			delete [ ] buffer;
+			return;
+		}
+		
+		message = new char[ reqsz + 1 ];
+		bufdyn = true;
+	}
+	else
+		bufdyn = false;
+	
+	va_end( argcpy );
+		
 	// remove invalid charaters and Tk control characters
-	message = new char[ strlen( buffer ) + 1 ];
-	for ( i = 0, j = 0; buffer[ i ] != '\0' ; ++i )
+	for ( i = 0, j = 0; buffer[ i ] != '\0' && j < reqsz; ++i )
 		if ( ( isprint( buffer[ i ] ) || buffer[ i ] == '\n' || 
 			   buffer[ i ] == '\r' || buffer[ i ] == '\t' ) &&
 			 ! ( buffer[ i ] == '\"' || 
@@ -113,14 +172,15 @@ void plog( char const *cm, char const *tag, ... )
 
 #ifdef _NW_ 
 	printf( "%s", message );
-
-	if ( reqSz >= maxSz )
-		printf( "\nWarning: message truncated\n" );
-	
 	fflush( stdout );
 #else
-	if ( ! tk_ok || ! log_ok )
-		return;
+	for ( tag_ok = false, i = 0; i < NUM_TAGS; ++i )
+		if ( ! strcmp( tag, tags[ i ] ) )
+			tag_ok = true;
+	
+	// handle the "bar" pseudo tag
+	if ( strcmp( tag, "bar" ) )
+		on_bar = false;
 	
 	if ( tag_ok )
 	{
@@ -133,14 +193,16 @@ void plog( char const *cm, char const *tag, ... )
 		cmd( "if $log_ok { .log.text.text.internal see end }" );
 	}
 	else
-		plog( "\nError: invalid tag, message ignored:\n%s\n", "", message );
-	
-	if ( reqSz >= maxSz )
-		plog( "\nWarning: message truncated\n" );
+		plog( "\nError: invalid tag, message ignored:\n%s\n", message );
 #endif 
-	delete [ ] message;
-	
+
 	message_logged = true;
+
+	if ( bufdyn )
+	{
+		delete [ ] buffer;
+		delete [ ] message;
+	}
 }
 
 
