@@ -7,13 +7,12 @@ Read one or all instances of LSD variables (time series) from a LSD results file
 This function reads the data series associated to a specific or all instances of each selected variable from a LSD results file (.res) and saves them into separated matrices (one per variable).
 }
 \usage{
-read.list.lsd(files, col.names = NULL, nrows = -1, skip = 0,
-              check.names = TRUE, instance = 0, pool = FALSE,
-			  nnodes = 1)
+read.list.lsd( files, col.names = NULL, nrows = -1, skip = 0,
+               check.names = TRUE, instance = 0, pool = FALSE, nnodes = 1 )
 }
 \arguments{
   \item{files}{
-a character vector containing the names of the LSD results files which the data are to be read from. If they do not contain an absolute path, the file names are relative to the current working directory, getwd(). These can be compressed files and must include the appropriated extension (usually .res or .res.gz).
+a character vector containing the names of the LSD results files which the data are to be read from. If they do not contain an absolute path, the file names are relative to the current working directory, \code{getwd()}. These can be compressed files and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
   \item{col.names}{
 a vector of optional names for the variables. The default is to read all variables.
@@ -31,14 +30,14 @@ logical. If TRUE then the names of the variables are checked to ensure that they
 integer: the instance of the variable to be read, for variables that exist in more than one object. This number is based on the position (column) of the variable in the results file. The default (0) is to read all instances.
 }
   \item{pool}{
-logical. If TRUE, variables instances from all files are concatenated (by colums) into a single matrix. If FALSE (the default), each file is saved as a separated matrix.
+logical. If TRUE, variables instances from all files are concatenated (by columns) into a single matrix. If FALSE (the default), each file is saved as a separated matrix.
 }
   \item{nnodes}{
-integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, nnodes = 1, means single thread processing (no parallelization). If equal to zero, creates up to one node per CPU core. Only "PSOCK" clusters are used, to ensure compatibility with any platform. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
+integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, \code{nnodes = 1}, means single thread processing (no parallel threads). If equal to zero, creates up to one node per CPU core. Only \code{PSOCK} clusters are used, to ensure compatibility with any platform. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
 }
 }
 \value{
-Returns a list containing matrices with the selected variables' time series in the results file. If 'pool = TRUE', the list contains a single, consolidated matrix (column names are not unique).
+Returns a list containing matrices with the selected variables' time series in the results file. If \code{pool = TRUE}, the list contains a single, consolidated matrix (column names are not unique).
 }
 \author{Marcelo C. Pereira}
 \note{
@@ -54,38 +53,27 @@ The returned matrices may be potentially very wide, in particular if variables a
 \code{\link{unique}}
 }
 \examples{
-# Get the examples directory
+# get the example directory and file names
 path <- system.file( "extdata", package = "LSDinterface" )
+files <- list.files( path = path, full.names = TRUE,
+                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
 
-# reads all instances of all variables from three files (one matrix each),
-# pasting the directory where the example files are (not required if in working dir)
-tableList <- read.list.lsd( c( paste0( path, "/", "Sim1_1.res" ),
-                               paste0( path, "/", "Sim1_2.res" ),
-                               paste0( path, "/", "Sim1_3.res" ) ) )
-
-# See parts of the 3D array in the data viewer (require package 'utils')
-\donttest{
-View( tableList[[ 1 ]] )
-View( tableList[[ 2 ]] )
-View( tableList[[ 3 ]] )
-}
+# read all instances of all variables from three files (one matrix each),
+tableList <- read.list.lsd( files )
+print( tableList[[ 1 ]][ 1 : 5, 1 : 7 ] )
+print( tableList[[ 2 ]][ 1 : 5, 1 : 7 ] )
+print( tableList[[ 3 ]][ 1 : 5, 1 : 7 ] )
 
 # read all instances of a set of variables named '_A1p' and '_growth1'
 # and pool data
-abTable <- read.list.lsd( c( paste0( path, "/", "Sim1_1.res.gz" ),
-                             paste0( path, "/", "Sim1_2.res.gz" ) ),
-                          c( "_A1p", "_growth1" ), pool = TRUE )
-\donttest{View( abTable )}
+abTable <- read.list.lsd( files, c( "_A1p", "_growth1" ), pool = TRUE )
+print( abTable[[ 1 ]][ 10 : 20, 5 : 9 ] )
 
-# reads instance 4 of all variables, skipping the initial 20 time steps
-# and keeping up to 50 time steps (from t = 21 up to t = 70)
-inst4List21_70 <- read.list.lsd( c( paste0( path, "/", "Sim1_1.res" ),
-                                    paste0( path, "/", "Sim1_2.res" ) ),
-                                 skip = 20, nrows = 50, instance = 4 )
-\donttest{
-View( inst4List21_70[[ 1 ]] )
-View( inst4List21_70[[ 2 ]] )
-}
+# read instance 4 of all variables, skipping the initial 20 time steps
+# and keeping up to 30 time steps (from t = 21 up to t = 30)
+inst4List21_30 <- read.list.lsd( files, skip = 20, nrows = 30, instance = 4 )
+print( inst4List21_30[[ 1 ]] )
+print( inst4List21_30[[ 2 ]] )
 }
 \keyword{ interface }
 \keyword{ file }

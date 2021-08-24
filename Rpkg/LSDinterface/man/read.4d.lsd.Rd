@@ -7,12 +7,12 @@ Read all instances of LSD variables (time series) from multiple LSD results file
 This function reads the data series associated to all instances of each selected variable from a set of LSD results files (.res) and saves them into a 4-dimensional array (time step x variable x instance x file).
 }
 \usage{
-read.4d.lsd(files, col.names = NULL, nrows = -1, skip = 0,
-            check.names = TRUE, pool = FALSE, nnodes = 1)
+read.4d.lsd( files, col.names = NULL, nrows = -1, skip = 0,
+             check.names = TRUE, pool = FALSE, nnodes = 1 )
 }
 \arguments{
   \item{files}{
-a character vector containing the names of the LSD results files which the data are to be read from. If they do not contain an absolute path, the file names are relative to the current working directory, getwd(). These can be compressed files and must include the appropriated extension (usually .res or .res.gz).
+a character vector containing the names of the LSD results files which the data are to be read from. If they do not contain an absolute path, the file names are relative to the current working directory, \code{getwd()}. These can be compressed files and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
   \item{col.names}{
 a vector of optional names for the variables. The default is to read all variables.
@@ -27,10 +27,10 @@ integer: the number of time steps (rows) of the results file to skip before begi
 logical. If TRUE then the names of the variables are checked to ensure that they are syntactically valid variable names. If necessary they are adjusted (by make.names) so that they are, and also to ensure that there are no duplicates.
 }
   \item{pool}{
-logical. If TRUE, variables instances from all files are concatenated (by colums) as a single file. If FALSE (the default), each file is saved as a separated dimension (4th) in the array.
+logical. If TRUE, variables instances from all files are concatenated (by columns) as a single file. If FALSE (the default), each file is saved as a separated dimension (fourth) in the array.
 }
   \item{nnodes}{
-integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, nnodes = 1, means single thread processing (no parallelization). If equal to zero, creates up to one node per CPU core. Only "PSOCK" clusters are used, to ensure compatibility with any platform. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
+integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, \code{nnodes = 1}, means single thread processing (no parallel threads). If equal to zero, creates up to one node per CPU core. Only \code{PSOCK} clusters are used, to ensure compatibility with any platform. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
 }
 }
 \value{
@@ -49,53 +49,34 @@ When 'pool = TRUE', the produced array is still 4-dimensional but the fourth dim
 \code{\link{read.raw.lsd}}
 }
 \examples{
-# Get the examples directory
+# get the example directory and file names
 path <- system.file( "extdata", package = "LSDinterface" )
+files <- list.files( path = path, full.names = TRUE,
+                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
 
-# reads all instances of all variables from three files,
-# pasting the directory where the example files are (not required if in working dir)
-allArray <- read.4d.lsd( c( paste0( path, "/", "Sim1_1.res" ),
-                            paste0( path, "/", "Sim1_2.res" ),
-                            paste0( path, "/", "Sim1_3.res" ) ) )
-
-# See parts of the 4D array in the data viewer (require package 'utils')
-\donttest{
-View( allArray[ , , 1, 1 ] )   # first instance of first file (all vars and times)
-View( allArray[ , 9, , 2 ] )   # all instances of ninth variable in second file (all t's)
-View( allArray[ 50, 8, , ] )   # all instances of all files of 8th variable for t=50
-}
+# read all instances of all variables from files,
+allArray <- read.4d.lsd( files )
+print( allArray[ 1 : 10, 1 : 7, 1, 1 ] ) # 1st instance of 1st file (7 vars and 10 times)
+print( allArray[ 1 : 10, 9, , 2 ] ) # all instances of 9th variable in 2nd file (10 times)
+print( allArray[ 50, 8, , ] ) # all instances of all files of 8th variable for t=50
 
 # the same, but pooling all files into a single one
-allArrayPool <- read.4d.lsd( c( paste0( path, "/", "Sim1_1.res" ),
-                                paste0( path, "/", "Sim1_2.res" ),
-                                paste0( path, "/", "Sim1_3.res" ) ),
-                             pool = TRUE )
-\donttest{
-View( allArrayPool[ , , 1, 1 ] )   # first instance of first file (all vars and times)
-View( allArrayPool[ , 9, , 1 ] )   # all instances of ninth variable in second file (all t's)
-View( allArrayPool[ 50, 8, , ] )   # all instances of all files of 8th variable for t=50
-}
+allArrayPool <- read.4d.lsd( files, pool = TRUE )
+print( allArrayPool[ 1 : 10, 1 : 7, 1, 1 ] ) # 1st instance of 1st file (7 vars and 10 times)
+print( allArrayPool[ 1 : 10, 9, 4 : 9 , 1 ] ) # 6 instances of 9th variable in 2nd file (10 times)
+print( allArrayPool[ 50, 8, 4 : 9, ] ) # 6 instances of all files of 8th variable for t=50
 
 # read instances of a set of variables named '_A1p' and '_growth1'
-abArray <- read.4d.lsd( c( paste0( path, "/", "Sim1_1.res.gz" ),
-                           paste0( path, "/", "Sim1_2.res.gz" ),
-                           paste0( path, "/", "Sim1_3.res.gz" ) ),
-                        c( "_A1p", "_growth1" ) )
-\donttest{
-View( abArray[ , , 1, 2 ] )   # first instances of second file (all vars and times)
-View( abArray[ , 2, , 3 ] )   # all instances of second variable in third file (all t's)
-View( abArray[ 50, 1, , ] )   # all instances of all files of first variable for t=50
-}
+abArray <- read.4d.lsd( files, c( "_A1p", "_growth1" ) )
+print( abArray[ 1 : 10, , 1, 2 ] ) # 1st instances of 2nd file (all vars and 10 times)
+print( abArray[ 1 : 10, 2, , 3 ] ) # all instances of 2nd variable in3rd file (10 times)
+print( abArray[ 50, 1, , ] ) # all instances of all files of 1st variable for t=50
 
-# reads all variables/variables, skipping the initial 20 time steps
-# and keeping up to 50 time steps (from t = 21 up to t = 70)
-allArray21_70 <- read.4d.lsd( c( paste0( path, "/", "Sim1_1.res" ),
-                                 paste0( path, "/", "Sim1_2.res" ) ),
-                                 skip = 20, nrows = 50 )
-\donttest{
-View( allArray21_70[ , 9, , 2 ] )   # all instances of ninth variable in second file
-View( allArray21_70[ 30, 8, , ] )   # all instances of all files of 8th variable for t=50
-}
+# read all variables/variables, skipping the initial 20 time steps
+# and keeping up to 30 time steps (from t = 21 up to t = 30)
+allArray21_30 <- read.4d.lsd( files, skip = 20, nrows = 30 )
+print( allArray21_30[ , 9, , 2 ] ) # all instances of 9th variable in 2nd file
+print( allArray21_30[ 10, 8, , ] ) # all instances of all files of 8th variable for t=30
 }
 \keyword{ interface }
 \keyword{ file }

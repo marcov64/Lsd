@@ -7,11 +7,11 @@ Read LSD results file and clean variables names
 This function reads all the data series in a LSD results file (.res).
 }
 \usage{
-read.raw.lsd(file, nrows = -1, skip = 0)
+read.raw.lsd( file, nrows = -1, skip = 0 )
 }
 \arguments{
   \item{file}{
-the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, getwd(). This can be a compressed file (see file) and must include the appropriated extension (usually .res or .res.gz).
+the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, \code{getwd()}. This can be a compressed file (see file) and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
   \item{nrows}{
 integer: the maximum number of time steps (rows) to read in. Negative and other invalid values are ignored. The default is to read all rows.
@@ -37,21 +37,19 @@ Variable names are never "cleaned", even for single instanced variables.
 \code{\link{read.4d.lsd}}
 }
 \examples{
-# Get the examples directory
+# get the example directory and file names
 path <- system.file( "extdata", package = "LSDinterface" )
+files <- list.files( path = path, full.names = TRUE,
+                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
 
-# reads all instances of all variables,
-# pasting the directory where the example files are (not required if in working dir)
-bigTable <- read.raw.lsd( paste0( path, "/", "Sim1_1.res" ) )
+# read all instances of all variables of first file,
+bigTable <- read.raw.lsd( files[ 1 ] )
+print( bigTable[ 1 : 5, 1 : 7 ] )
 
-# See matrix in the data viewer (require package 'utils')
-\donttest{View( bigTable )}
-
-# reads all instances of all variables, skipping the initial 20 time steps
-# and keeping up to 50 time steps (from t = 21 up to t = 70)
-all21_70 <- read.raw.lsd( paste0( path, "/", "Sim1_2.res.gz" ),
-                          skip = 20, nrows = 50 )
-\donttest{View( all21_70 )}
+# read all instances of all variables, skipping the initial 20 time steps
+# and keeping up to 30 time steps (from t = 21 up to t = 30)
+all21_30 <- read.raw.lsd( files[ 2 ], skip = 20, nrows = 30 )
+print( all21_30[ , 1 : 7 ] )
 }
 \keyword{ interface }
 \keyword{ file }

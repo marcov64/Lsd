@@ -7,7 +7,7 @@ Get original LSD variable name
 This function generates the original LSD variable name, as it was defined in LSD and before R adjusts the name, from a R column name (with or without position or timing information appended).
 }
 \usage{
-name.var.lsd(r.name)
+name.var.lsd( r.name )
 }
 \arguments{
   \item{r.name}{

@@ -7,11 +7,11 @@ Check a set of LSD variables names against a LSD results file
 This function checks if all variable names in a set are valid for a LSD results file (.res). If no name is provided, the function returns all the valid unique variable names in the file.
 }
 \usage{
-name.check.lsd(file, col.names = NULL, check.names = TRUE)
+name.check.lsd( file, col.names = NULL, check.names = TRUE )
 }
 \arguments{
   \item{file}{
-the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, getwd(). This can be a compressed file (see file) and must include the appropriated extension (usually .res or .res.gz).
+the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, \code{getwd()}. This can be a compressed file (see file) and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
   \item{col.names}{
 a vector of optional names for the variables. The default is to read all (unique) variables.
@@ -28,13 +28,16 @@ Returns a character vector containing the valid variable names contained in the 
 \code{\link{info.names.lsd}},
 }
 \examples{
-# Get the examples directory
+# get the example directory and file names
 path <- system.file( "extdata", package = "LSDinterface" )
+files <- list.files( path = path, full.names = TRUE,
+                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
 
-name.check.lsd( paste0( path, "/", "Sim1_1.res" ) )
+# check all variable names
+name.check.lsd( files[ 1 ] )
 
-name.check.lsd( paste0( path, "/", "Sim1_1.res" ),
-                col.names = c( "GDP", "_growth1" ) )
+# check just two names
+name.check.lsd( files[ 2 ], col.names = c( "GDP", "_growth1" ) )
 }
 \keyword{ attribute }
 \keyword{ misc }

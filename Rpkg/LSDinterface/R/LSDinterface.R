@@ -161,7 +161,9 @@ info.details.lsd <- function( file ){
 
 # ==== Compute statistics from multiple runs ====
 
-info.stats.lsd <- function( array, rows = 1, cols = 2 ){
+info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
+                            ci = "none", ci.conf = 0.95, ci.boot = NULL,
+                            boot.R = 999, na.rm = TRUE, inf.rm = TRUE ) {
 
   # Get dimension data
   dimArray <- dim( array )
@@ -187,24 +189,48 @@ info.stats.lsd <- function( array, rows = 1, cols = 2 ){
     array( as.numeric( NA ), dim = c( dimArray[ rows ], dimArray[ cols ] ),
            dimnames = list( dimNames[[ rows ]], dimNames[[ cols ]] ) )
 
-  # prepare mask for dimension selection
-  baseMask <- list( )
-  for( k in 1 : nDimArray ){
-    if( rows == k || cols == k )        # dimensions to show
-      baseMask[[ k ]] <- rep( FALSE, dimArray[ k ])
-    else
-      baseMask[[ k ]] <- rep( TRUE, dimArray[ k ])
+  if( median )
+    med <- avg
+
+  if( ! ci %in% c( "none", "mean", "median", "auto" ) ) {
+    ci <- "none"
+    warning( "Invalid confidence interval statistic, ignoring" )
   }
 
-  # Compute averages, std. deviation etc. and store in 2D arrrays
-  for( j in 1 : dimArray[ cols ] )
-    for( i in 1 : dimArray[ rows ] ){
+  if( ci == "auto" ) {
+    if( median )
+      ci <- "median"
+    else
+      ci <- "mean"
+  }
+
+  if( ! is.null( ci.boot ) &&
+      ! ci.boot %in% c( "basic", "perc", "bca" ) ) {
+    ci.boot <- NULL
+    warning( "Invalid bootstrap confidence interval type, ignoring" )
+  }
+
+  if( ci != "none" )
+    ci.lo <- ci.hi <- avg
+
+  # prepare mask for dimension selection
+  baseMask <- list( )
+  for( k in 1 : nDimArray ) {
+    if( rows == k || cols == k )        # dimensions to show
+      baseMask[[ k ]] <- rep( FALSE, dimArray[ k ] )
+    else
+      baseMask[[ k ]] <- rep( TRUE, dimArray[ k ] )
+  }
+
+  # Compute averages, std. deviation etc. and store in 2D arrays
+  for( j in 1 : dimArray[ cols ] ) {
+    for( i in 1 : dimArray[ rows ] ) {
 
       # Get the appropriate vector (3D array) or matrix (4D) for analysis
       first <- TRUE
       mask <- baseMask
       for( k in 1 : nDimArray )       # adjust the mask for (i,j)
-        if( rows == k || cols == k ){
+        if( rows == k || cols == k ) {
           if( first ){
             mask[[ k ]][ i ] <- TRUE
             first <- FALSE
@@ -218,24 +244,100 @@ info.stats.lsd <- function( array, rows = 1, cols = 2 ){
         elem <- array[ mask[[ 1 ]], mask[[ 2 ]], mask[[ 3 ]], mask[[ 4 ]] ]
 
       # calculate the statistics
-      avg[ i, j ] <- mean( elem, na.rm = TRUE )
-      sDev[ i, j ] <- stats::sd( elem, na.rm = TRUE )
-      if( is.finite( avg[ i, j ] ) ){
-        M[ i, j ] <- max( elem, na.rm = TRUE )
-        m[ i, j ] <- min( elem, na.rm = TRUE )
+      if( na.rm )
+        elem <- elem[ ! is.na( elem ) ]
+
+      if( inf.rm )
+        elem <- elem[ is.finite( elem ) ]
+
+      n = length( elem[ is.finite( elem ) ] )
+      avg[ i, j ] <- mean( elem )
+      sDev[ i, j ] <- stats::sd( elem )
+
+      if( n > 0 ) {
+        M[ i, j ] <- max( elem )
+        m[ i, j ] <- min( elem )
       }
-      else{                           # avoid Inf/-Inf when all is NA
-		avg[ i, j ] <- NA
-		sDev[ i, j ] <- NA
+      else {                           # avoid Inf/-Inf when all is NA
         M[ i, j ] <- NA
         m[ i, j ] <- NA
       }
-    }
 
-  if( ! transp )
-    return( list( avg = avg, sd = sDev, max = M, min = m ) )
-  else
-    return( list( avg = t( avg ), sd = t( sDev ), max = t( M ), min = t( m ) ) )
+      if( median )
+        med[ i, j ] <- stats::median( elem )
+
+      if( ci != "none" ) {
+        ci.lo[ i, j ] <- ci.hi[ i, j ] <- NA
+
+        if( n > 0 ) {
+          if( is.null( ci.boot ) ) {
+            if( ci == "mean" ) {
+              d = abs( stats::qt( ( 1 - ci.conf ) / 2, n - 1 ) ) * sDev[ i, j ] / sqrt( n )
+
+              if( is.finite( avg[ i, j ] ) && ! is.null( d ) && is.finite( d ) ) {
+                ci.lo[ i, j ] = avg[ i, j ] - d
+                ci.hi[ i, j ] = avg[ i, j ] + d
+              }
+            } else {
+              c <- NULL
+              try( c <- suppressWarnings( stats::wilcox.test( elem, conf.int = TRUE,
+                                                              conf.level = ci.conf,
+                                                              digits.rank = 7 )$conf.int ),
+                   silent = TRUE )
+              if( ! is.null( c ) && is.finite( c[ 1 ] ) )
+                ci.lo[ i, j ] <- c[ 1 ]
+
+              if( ! is.null( c ) && is.finite( c[ 2 ] ) )
+                ci.hi[ i, j ] <- c[ 2 ]
+            }
+          } else {
+            if( ci == "mean" )
+              f <- function( data, sel ) mean( data[ sel ] )
+            else
+              f <- function( data, sel ) stats::median( data[ sel ] )
+
+            b <- c <- NULL
+            try( invisible( utils::capture.output( b <- boot::boot( elem,
+                                                                    statistic = f,
+                                                                    R = boot.R ) ) ),
+                 silent = TRUE )
+
+            if( ! is.null( b ) ) {
+              try( invisible( utils::capture.output( c <- boot::boot.ci( b,
+                                                                         conf = ci.conf,
+                                                                         type = ci.boot ) ) ),
+                   silent = TRUE )
+            }
+
+            if( ci.boot == "perc" )
+              ci.boot = "percent"       # adjust name difference in data
+
+            if( ! is.null( c[[ ci.boot ]] ) && is.finite( c[[ ci.boot ]][ 4 ] ) )
+              ci.lo[ i, j ] <- c[[ ci.boot ]][ 4 ]
+
+            if( ! is.null( c[[ ci.boot ]] ) && is.finite( c[[ ci.boot ]][ 5 ] ) )
+              ci.hi[ i, j ] <- c[[ ci.boot ]][ 5 ]
+          }
+        }
+      }
+    }
+  }
+
+  res <- list( avg = avg, sd = sDev, max = M, min = m )
+
+  if( median )
+    res[[ "med" ]] <- med
+
+  if( ci != "none" ) {
+    res[[ "ci.lo" ]] <- ci.lo
+    res[[ "ci.hi" ]] <- ci.hi
+  }
+
+  if( transp )
+    for( i in 1 : length( res ) )
+      res[[ i ]] = t( res[[ i ]] )
+
+  return( res )
 }
 
 
@@ -276,7 +378,7 @@ select.colnames.lsd <- function( dataSet, col.names, instance = 0 ){
 
 # ==== Select a subset of a data frame (by variable attributes) ====
 
-select.colattrs.lsd <- function( dataSet, info, col.names = NA, posit = NULL,
+select.colattrs.lsd <- function( dataSet, info, col.names = NULL, posit = NULL,
                                  init.value = NA, init.time = NA, end.time = NA ){
 
   # test if files are compatible (in principle)
@@ -285,7 +387,8 @@ select.colattrs.lsd <- function( dataSet, info, col.names = NA, posit = NULL,
     stop( "Info table invalid or incompatible with provided dataSet" )
 
   # format valid names for matching
-  col.names <- make.names( name.clean.lsd( col.names ) )
+  if( ! is.null( col.names ) )
+    col.names <- make.names( name.clean.lsd( col.names ) )
 
   # check if position is not formatted as text and convert if needed
   if( ! is.null( posit ) && ! is.character( posit ) ){
@@ -304,7 +407,7 @@ select.colattrs.lsd <- function( dataSet, info, col.names = NA, posit = NULL,
   for( i in 1 : nrow( info ) ){
 
     # if column names are specified, check if belongs to the set
-    if( ! is.na( col.names ) && ! ( info$R_name[ i ] %in% col.names ) )
+    if( ! is.null( col.names ) && ! ( info$R_name[ i ] %in% col.names ) )
       next
 
     # check if value attributes match

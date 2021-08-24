@@ -7,11 +7,11 @@ Read all instances of LSD variables (time series) from a LSD results file
 This function reads the data series associated to all instances of each selected variable from a LSD results file (.res).
 }
 \usage{
-read.multi.lsd(file, col.names = NULL, nrows = -1, skip = 0, check.names = TRUE)
+read.multi.lsd( file, col.names = NULL, nrows = -1, skip = 0, check.names = TRUE )
 }
 \arguments{
   \item{file}{
-the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, getwd(). This can be a compressed file (see file) and must include the appropriated extension (usually .res or .res.gz).
+the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, \code{getwd()}. This can be a compressed file (see file) and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
   \item{col.names}{
 a vector of optional names for the variables. The default is to read all variables.
@@ -41,29 +41,23 @@ For extracting data from multiple similar files (like sensitivity analysis resul
 \code{\link{read.raw.lsd}}
 }
 \examples{
-# Get the examples directory
+# get the example directory and file names
 path <- system.file( "extdata", package = "LSDinterface" )
+files <- list.files( path = path, full.names = TRUE,
+                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
 
-# Load a sample .res file into a simple matrix (all instances),
-# pasting the directory where the example files are (not required if in working dir)
-macroList <- read.multi.lsd( paste0( path, "/", "Sim1_1.res" ) )
-
-# See matrix in the data viewer (require package 'utils')
+# load first .res file into a simple matrix (all instances),
+macroList <- read.multi.lsd( files[ 1 ] )
 length( macroList )
-\donttest{
-View( macroList[[ 1 ]] )
-View( macroList[[ 8 ]] )
-}
+print( macroList[[ 1 ]][ 1 : 5, ] )
+print( macroList[[ 8 ]][ 1 : 5, ] )
 
-# reads first instance of 2 variables, skipping the initial 20 time steps
-# and keeping up to 50 time steps (from t = 21 up to t = 70)
-varsList21_70 <- read.multi.lsd( paste0( path, "/", "Sim1_1.res" ),
-                                 c( "_A1p", "_growth1" ),
-                                 skip = 20, nrows = 50 )
-\donttest{
-View( varsList21_70[[ 1 ]] )
-View( varsList21_70[[ 2 ]] )
-}
+# read first instance of 2 variables, skipping the initial 20 time steps
+# and keeping up to 30 time steps (from t = 21 up to t = 30)
+varsList21_30 <- read.multi.lsd( files[ 2 ], c( "_A1p", "_growth1" ),
+                                 skip = 20, nrows = 30 )
+print( varsList21_30[[ 1 ]][ , 1 : 3 ] )
+print( varsList21_30[[ 2 ]][ , 1 : 3 ] )
 }
 \keyword{ interface }
 \keyword{ file }

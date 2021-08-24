@@ -7,12 +7,12 @@ Read LSD variables (time series) from a LSD results file (a single instance of e
 This function reads the data series associated to one instance of each selected variable from a LSD results file (.res). Just a single instance (time series of a single LSD object) is read at each call.
 }
 \usage{
-read.single.lsd(file, col.names = NULL, nrows = -1, skip = 0,
-                check.names = TRUE, instance = 1)
+read.single.lsd( file, col.names = NULL, nrows = -1, skip = 0,
+                 check.names = TRUE, instance = 1 )
 }
 \arguments{
   \item{file}{
-the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, getwd(). This can be a compressed file (see file) and must include the appropriated extension (usually .res or .res.gz).
+the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, \code{getwd()}. This can be a compressed file (see file) and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
   \item{col.names}{
 a vector of optional names for the variables. The default is to read all (unique) variables.
@@ -47,25 +47,23 @@ For multi-instanced variables, see \code{\link{read.multi.lsd}}. For extracting 
 \code{\link{read.raw.lsd}}
 }
 \examples{
-# Get the examples directory
+# get the example directory and file names
 path <- system.file( "extdata", package = "LSDinterface" )
+files <- list.files( path = path, full.names = TRUE,
+                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
 
-# Load a sample .res file into a simple matrix (first instances only)
-macroVar <- read.single.lsd( paste0( path, "/", "Sim1_1.res" ) )
-
-# See matrix in the data viewer (require package 'utils')
-\donttest{View( macroVar )}
+# load first .res file into a simple matrix (first instances only)
+macroVar <- read.single.lsd( files[ 1 ] )
+print( macroVar[ 1:10, ] )
 
 # read second instance of a set of variables named '_A1p' and '_growth1'
-ag2Table <- read.single.lsd( paste0( path, "/", "Sim1_2.res" ),
-                             c( "_A1p", "_growth1" ), instance = 2 )
-\donttest{View( ag2Table )}
+ag2Table <- read.single.lsd( files[ 2 ], c( "_A1p", "_growth1" ), instance = 2 )
+print( ag2Table[ 10:15, ] )
 
-# reads first instance of all variables, skipping the initial 20 time steps
-# and keeping up to 50 time steps (from t = 21 up to t = 70)
-var21_70 <- read.single.lsd( paste0( path, "/", "Sim1_1.res" ),
-                             skip = 20, nrows = 50 )
-\donttest{View( var21_70 )}
+# read first instance of all variables, skipping the initial 20 time steps
+# and keeping up to 30 time steps (from t = 21 up to t = 30)
+var21_30 <- read.single.lsd( files[ 3 ], skip = 20, nrows = 30 )
+print( var21_30[ , 1 : 7 ] )
 }
 \keyword{ interface }
 \keyword{ file }

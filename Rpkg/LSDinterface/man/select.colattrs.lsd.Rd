@@ -7,15 +7,15 @@ Select a subset of a LSD results matrix (by variable attributes)
 This function select a subset of a LSD results matrix (as produced by \code{\link{read.raw.lsd}}) by the variable attributes, considering the LSD object position and the time span.
 }
 \usage{
-select.colattrs.lsd(dataSet, info, col.names = NA, posit = NULL,
-                    init.value = NA, init.time = NA, end.time = NA)
+select.colattrs.lsd( dataSet, info, col.names = NULL, posit = NULL,
+                     init.value = NA, init.time = NA, end.time = NA )
 }
 \arguments{
   \item{dataSet}{
 matrix produced by the invocation of \code{\link{read.raw.lsd}}, \code{\link{read.single.lsd}}, \code{\link{read.multi.lsd}} or \code{\link{read.list.lsd}} (a single matrix a time) functions.
 }
   \item{info}{
-data frame produced by \code{\link{info.details.lsd}} for the same results file from where 'dataSet' was extracted.
+data frame produced by \code{\link{info.details.lsd}} for the same results file from where \code{dataSet} was extracted.
 }
   \item{col.names}{
 a vector of optional names for the variables to select from. The default is to select from all variables.
@@ -41,32 +41,32 @@ Returns a single matrix containing the selected variables' time series contained
 }
 \author{Marcelo C. Pereira}
 \note{
-If only variable names selection is needed, \code{\link{select.colnames.lsd}} is more efficient because information pre-processing (\code{\link{info.details.lsd}}) is not required.
+If only variable names selection is needed, \code{\link{select.colnames.lsd}} is more efficient because information preprocessing (\code{\link{info.details.lsd}}) is not required.
 }
 \seealso{
 \code{\link{info.details.lsd}},
 \code{\link{select.colnames.lsd}}
 }
 \examples{
-# Get the examples directory
+# get the example directory and file names
 path <- system.file( "extdata", package = "LSDinterface" )
+files <- list.files( path = path, full.names = TRUE,
+                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
 
-# reads all instances of all variables
-bigTable <- read.raw.lsd( paste0( path, "/", "Sim1_1.res" ) )
+# read all instances of all variables of first file
+bigTable <- read.raw.lsd( files[ 1 ] )
 
 # build the info table
-info <- info.details.lsd( paste0( path, "/", "Sim1_1.res" ) )
+info <- info.details.lsd( files[ 1 ] )
 
 # read some instances of a set of variables named '_A1p' and '_growth1'
 abFirst2 <- select.colattrs.lsd( bigTable, info, c( "_A1p", "_growth1" ),
                                  posit = c( "1_2", "1_5" ) )
+print( abFirst2[ 50 : 60, ] )
 
-# See matrix in the data viewer (require package 'utils')
-\donttest{View( abFirst2 )}
-
-# reads instances of variable '_A1p' that start at time step t = 1
+# read instances of variable '_A1p' that start at time step t = 1
 a50 <- select.colattrs.lsd( bigTable, info, make.names( "_A1p" ), init.time = 1 )
-\donttest{View( a50 )}
+print( a50[ 1 : 10, ] )
 }
 \keyword{ datasets }
 \keyword{ database }

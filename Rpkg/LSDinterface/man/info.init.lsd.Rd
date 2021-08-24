@@ -7,11 +7,11 @@ Read initial conditions from a LSD results file
 This function reads the initial condition values from a LSD results file (.res).
 }
 \usage{
-info.init.lsd(file)
+info.init.lsd( file )
 }
 \arguments{
   \item{file}{
-the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, getwd(). Tilde-expansion is performed where supported. This can be a compressed file (see file) and must include the appropriated extension (usually .res or .res.gz).
+the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, \code{getwd()}. Tilde-expansion is performed where supported. This can be a compressed file (see file) and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
 }
 \value{
@@ -28,14 +28,17 @@ Only variables automatically initialized automatically by LSD in t = 1 are inclu
 \code{\link{info.dimensions.lsd}}
 }
 \examples{
-# Get the examples directory
+# get the example directory and file names
 path <- system.file( "extdata", package = "LSDinterface" )
+files <- list.files( path = path, full.names = TRUE,
+                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
 
-init1 <- info.init.lsd( paste0( path, "/", "Sim1_1.res" ) )
-\donttest{View( init1 )}
+# get initialization data from first and second files
+init1 <- info.init.lsd( files[ 1 ] )
+init1[ , 4 : 8 ]
 
-init2 <- info.init.lsd( paste0( path, "/", "Sim1_2.res.gz" ) )
-\donttest{View( init2 )}
+init2 <- info.init.lsd( files[ 2 ] )
+init2[ , 4 : 8 ]
 }
 \keyword{ attribute }
 \keyword{ file }

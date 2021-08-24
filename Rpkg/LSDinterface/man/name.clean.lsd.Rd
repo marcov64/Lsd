@@ -3,7 +3,7 @@
 \title{Get clean (R) variable name}
 \description{This function produces a more appropriate variable name from R initial column name conversion.}
 \usage{
-name.clean.lsd(r.name)
+name.clean.lsd( r.name )
 }
 \arguments{
   \item{r.name}{
@@ -14,7 +14,7 @@ a character vector, or an object which can be coerced to a character vector by a
 The function removes the extra/ending '.' characters introduced by R and introduces a '_' between time span values.
 }
 \value{
-A character vector of with the same attributes as x (after possible coercion) and the format "NAME.POSITION.INI_END".
+A character vector of with the same attributes as x (after possible coercion) and the format \code{NAME.POSITION.INI_END}.
 }
 \author{Marcelo C. Pereira}
 \seealso{

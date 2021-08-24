@@ -26,8 +26,8 @@ For a complete list of exported functions, use \code{library(help = "LSDinterfac
 Maintainer: \packageMaintainer{LSDinterface}
 }
 \references{
-LSD documentation is available at \url{http://labsimdev.org}
-The latest LSD binaries and source code can be downloaded at \url{https://github.com/marcov64/Lsd}.
+LSD documentation is available at \url{https://www.labsimdev.org/}
+The latest LSD binaries and source code can be downloaded at \url{https://github.com/marcov64/Lsd/}.
 }
 \keyword{ package }
 \keyword{ interface }

@@ -7,11 +7,11 @@ Read unique variable names from a LSD results file (no duplicates)
 This function reads the variable names (columns) from a LSD results file (.res). The names returned are converted to the original LSD names whenever possible and duplicates are removed.
 }
 \usage{
-info.names.lsd(file)
+info.names.lsd( file )
 }
 \arguments{
   \item{file}{
-the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, getwd(). Tilde-expansion is performed where supported. This can be a compressed file (see file) and must include the appropriated extension (usually .res or .res.gz).
+the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, \code{getwd()}. Tilde-expansion is performed where supported. This can be a compressed file (see file) and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
 }
 \value{
@@ -27,12 +27,13 @@ Not all names can be automatically reconverted to the original LSD names. The co
 \code{\link{info.dimensions.lsd}}
 }
 \examples{
-# Get the examples directory
+# get the example directory and file names
 path <- system.file( "extdata", package = "LSDinterface" )
+files <- list.files( path = path, full.names = TRUE,
+                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
 
-info.names.lsd( paste0( path, "/", "Sim1_1.res" ) )
-
-info.names.lsd( paste0( path, "/", "Sim1_2.res.gz" ) )
+# get variable names from first file
+info.names.lsd( files[ 1 ] )
 }
 \keyword{ attribute }
 \keyword{ file }
