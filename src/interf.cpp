@@ -941,9 +941,11 @@ int browse( object *r )
 			cmd( "bind . <F1> { LsdHelp browser.html }" );
 			set_shortcuts( "." );
 			set_shortcuts( ".log" );
+		}
 
-			// Button bar
-			cmd( "destroy .bbar" );
+		// Button bar
+		if ( ! exists_window( ".bbar" ) )
+		{
 			cmd( "ttk::frame .bbar" );
 
 			cmd( "ttk::button .bbar.open -image openImg -style Toolbutton -command { set choice 17 }" );

@@ -982,6 +982,107 @@ proc enable_window { w m { args "" } } {
 
 
 #************************************************
+# DISABLE_TREE
+# Command to disable a widget tree, returning an 
+# array formatted as a list with the previous 
+# states of each disabled widget. A list of 
+# exceptions (do not disable) can be provided.
+#************************************************
+proc disable_tree { w { excpts "" } } {
+	global __states__ __excpts__
+	
+	array set __states__ [ list ]
+	set __excpts__ $excpts
+	
+	recurse_tree $w disable
+	
+	set states [ array get __states__ ]
+	array unset __states__
+	unset -nocomplain __excpts__
+	
+	return $states
+}
+
+
+#************************************************
+# ENABLE_TREE
+# Command to enable a widget tree. A list of 
+# exceptions (do not enable) and previous states
+# (returned from disable_tree) can be provided.
+#************************************************
+proc enable_tree { w { states "" } { excpts "" } } {
+	global __states__ __excpts__
+	
+	array set __states__ $states
+	set __excpts__ $excpts
+	
+	recurse_tree $w enable
+	
+	array unset __states__
+	unset -nocomplain __excpts__
+}
+
+
+#************************************************
+# RECURSE_TREE
+# Support function to disable_tree/enable_tree
+#************************************************
+proc recurse_tree { w mode } {
+	global __states__ __excpts__
+	
+	if { ! [ catch { $w cget -state } sts ] } {
+	
+		if { $mode eq "disable" } {
+			set __states__($w) $sts
+			if { $sts ne "disabled" && [ lsearch -exact $__excpts__ $w ] == -1 } {
+				catch { $w configure -state disabled }
+			}
+			
+		} elseif { $mode eq "enable" } {
+			if { [ info exists __states__($w) ] } {
+				if { $__states__($w) ne $sts } {
+					catch { $w configure -state $__states__($w) }
+				}
+			} elseif { $sts ne "normal" && [ lsearch -exact $__excpts__ $w ] == -1 } {
+				catch { $w configure -state normal }
+			}
+		}
+	}
+	
+	# handle menu widget entries
+	if { [ winfo class $w ] eq "Menu" } {
+		for { set i 0 } { $i <= [ $w index end ] } { incr i } {
+		
+			set id ${w}__${i}
+			
+			if { ! [ catch { $w entrycget $i -state } sts ] } {
+			
+				if { $mode eq "disable" } {
+					set __states__($id) $sts
+					if { $sts ne "disabled" && [ lsearch -exact $__excpts__ $id ] == -1 } {
+						catch { $w entryconfigure $i -state disabled }
+					}
+					
+				} elseif { $mode eq "enable" } {
+					if { [ info exists __states__($id) ] } {
+						if { $__states__($id) ne $sts } {
+							catch { $w entryconfigure $i -state $__states__($id) }
+						}
+					} elseif { $sts ne "normal" && [ lsearch -exact $__excpts__ $id ] == -1 } {
+						catch { $w entryconfigure $i -state normal }
+					}
+				}
+			}
+		}
+	}
+	
+	foreach child [ winfo children $w ] {
+		recurse_tree $child $mode
+	}
+}
+
+
+#************************************************
 # SETGLOBKEYS
 # Set global key mappings in all windows
 #************************************************

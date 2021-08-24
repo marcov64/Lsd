@@ -2043,7 +2043,8 @@ void cover_browser( const char *text1, const char *text2, bool run )
 	if ( brCovered )		// ignore if already covered
 		return;
 		
-	cmd( "destroy .bbar .m .l" );
+	cmd( "destroy .bbar .l" );
+	cmd( "set mainMenuStates [ disable_tree .m ]" );
 	
 	cmd( "ttk::frame .t1" );
 	cmd( "ttk::label .t1.l1 -justify center -text \"%s\" -style bold.TLabel", text1  );
@@ -2141,6 +2142,8 @@ void uncover_browser( void )
 			focustop . \
 		}" );
 
+	cmd( "if { [ info exists mainMenuStates ] } { enable_tree .m $mainMenuStates }" );
+	
 	brCovered = false;
 	redrawRoot = true;
 }
