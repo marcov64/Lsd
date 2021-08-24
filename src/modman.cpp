@@ -4417,17 +4417,20 @@ int lsdmain( int argn, const char **argv )
 	if ( choice == 42 )
 	{
 		cmd( "set in [ .f.t.t tag range sel ]" );
-		cmd( "if { [ string length $in ] == 0 } { set choice 0 } { set choice 1 }" );
-		if ( choice == 0 )
+		if ( eval_int( "[ string length $in ]" ) == 0 )
 			goto loop;
 
 		cmd( "scan $in \"%%d.%%d %%d.%%d\" line1 col1 line2 col2" );
-		cmd( "set num $line1" );
-		i = num;
 		cmd( "set num $line2" );
 
-		for ( ; i <= num; ++i )
-			cmd( ".f.t.t insert %d.0 \" \"", i );
+		for ( i = get_int( "line1" ); i <= num; ++i )
+		{
+			cmd( "set c [ .f.t.t get %d.0 ]", i );
+			if ( expr_eq( "$c", "\t" ) )
+				cmd( ".f.t.t insert %d.0 \\t", i );
+			else
+				cmd( ".f.t.t insert %d.0 \" \"", i );
+		}
 
 		choice = 0;
 		goto loop;
@@ -4437,20 +4440,16 @@ int lsdmain( int argn, const char **argv )
 	if ( choice == 43 )
 	{
 		cmd( "set in [ .f.t.t tag range sel ]" );
-		cmd( "if { [ string length $in ] == 0 } { set choice 0 } { set choice 1 }" );
-		if ( choice == 0 )
+		if ( eval_int( "[ string length $in ]" ) == 0 )
 			goto loop;
 
 		cmd( "scan $in \"%%d.%%d %%d.%%d\" line1 col1 line2 col2" );
-		cmd( "set num $line1" );
-		i = num;
 		cmd( "set num $line2" );
 
-		for ( ; i <= num; ++i )
+		for (  i = get_int( "line1" ); i <= num; ++i )
 		{
-			cmd( "set c [.f.t.t get %d.0]", i );
-			cmd( "if { $c eq \" \" } { set choice 1 } { set choice 0 }" );
-			if ( choice == 1 )
+			cmd( "set c [ .f.t.t get %d.0 ]", i );
+			if ( expr_eq( "$c", " " ) || expr_eq( "$c", "\t" ) )
 				cmd( ".f.t.t delete %d.0 ", i );
 		}
 
