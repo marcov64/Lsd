@@ -496,41 +496,41 @@ void put_text( const char *str, const char *n, int x, int y, const char *str2 )
 				after cancel $res_g_id \
 			}; \
 			destroy .list; \
-			if { [ llength $tlist_%s ] > 0 } { \
-				set res_g_id [ after $ttipdelay { \
-					destroy .list; \
-					tooltip::hide; \
-					toplevel .list -class Tooltip -background $colorsTheme(ttip) -borderwidth 0 -highlightthickness 1 -highlightbackground $colorsTheme(fg); \
-					if { $CurPlatform eq \"mac\" } { \
-						tk::unsupported::MacWindowStyle style .list help none \
-					} else { \
-						wm overrideredirect .list 1 \
-					}; \
-					catch { wm attributes .list -topmost 1 }; \
-					catch { wm attributes .list -alpha 0.99 }; \
-					wm positionfrom .list program; \
-					wm withdraw .list; \
-					label .list.t -text \"%s (#%s)\" -font \"$ttfontB\" -foreground $colorsTheme(obj) -background $colorsTheme(ttip); \
-					pack .list.t -anchor w -ipadx 1; \
-					set res_g_i 0; \
+			set res_g_id [ after $ttipdelay { \
+				destroy .list; \
+				tooltip::hide; \
+				toplevel .list -class Tooltip -background $colorsTheme(ttip) -borderwidth 0 -highlightthickness 1 -highlightbackground $colorsTheme(fg); \
+				if { $CurPlatform eq \"mac\" } { \
+					tk::unsupported::MacWindowStyle style .list help none \
+				} else { \
+					wm overrideredirect .list 1 \
+				}; \
+				catch { wm attributes .list -topmost 1 }; \
+				catch { wm attributes .list -alpha 0.99 }; \
+				wm positionfrom .list program; \
+				wm withdraw .list; \
+				label .list.t -text \"%s (#%s)\" -font \"$ttfontB\" -foreground $colorsTheme(obj) -background $colorsTheme(ttip); \
+				pack .list.t -anchor w -ipadx 1; \
+				set res_g_i 0; \
+				if { [ llength $tlist_%s ] > 0 } { \
 					foreach res_g_t $tlist_%s res_g_s $slist_%s { \
 						label .list.e$res_g_i -text \"$res_g_t\" -font \"$ttfont\" -foreground $colorsTheme($res_g_s) -background $colorsTheme(ttip); \
 						pack .list.e$res_g_i -anchor w -ipadx 1; \
 						incr res_g_i \
-					}; \
-					update idletasks; \
-					if { $CurPlatform eq \"mac\" } { \
-						set __focus__ [ focus ] \
-					}; \
-					wm geometry .list +[ expr { %%X + 5 } ]+[ expr { %%Y + 5 } ]; \
-					wm deiconify .list; \
-					catch { raise .list }; \
-					if { $CurPlatform eq \"mac\" } { \
-						after idle { catch { focus -force $__focus__ } } \
 					} \
-				} ] \
-			} \
-		}", str2, str2, str2, str, n, str2, str2 );
+				}; \
+				update idletasks; \
+				if { $CurPlatform eq \"mac\" } { \
+					set __focus__ [ focus ] \
+				}; \
+				wm geometry .list +[ expr { %%X + 5 } ]+[ expr { %%Y + 5 } ]; \
+				wm deiconify .list; \
+				catch { raise .list }; \
+				if { $CurPlatform eq \"mac\" } { \
+					after idle { catch { focus -force $__focus__ } } \
+				} \
+			} ] \
+		}", str2, str2, str, n, str2, str2, str2 );
 
 	cmd( ".str.f.c bind %s <Leave> { \
 			if { [ info exists res_g_id ] } { \
