@@ -95,8 +95,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 		}", unsaved_change() ? "*" : " ", simul_name  );
 
 	// avoid redrawing the menu if it already exists and is configured
-	cmd( "set confMenu [ .deb cget -menu ]" );
-	if ( ! exists_window( ".deb.m" ) || strcmp( get_str( "confMenu" ), ".deb.m" ) )
+	if ( ! exists_window( ".deb.m" ) || ! expr_eq( "[ .deb cget -menu ]", ".deb.m" ) )
 	{
 		cmd( "destroy .deb.m" );
 		cmd( "ttk::menu .deb.m -tearoff 0" );

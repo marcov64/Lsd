@@ -545,6 +545,8 @@ extern int quit;						// simulation termination control flag
 
 // common standalone internal C functions/procedures (not visible to the users)
 bool compile_run( bool run, bool nw = false );
+bool expr_eq( const char *tcl_exp, const char *c_str );
+bool eval_bool( const char *tcl_exp );
 bool exists_var( const char *lab );
 bool exists_window( const char *lab );
 bool get_bool( const char *tcl_var, bool *var = NULL );
@@ -557,17 +559,21 @@ bool use_eigen( void );
 bool valid_label( const char *lab );
 char *clean_file( const char *file );
 char *clean_path( char *path );
+char *eval_str( const char *tcl_exp, char *var, int var_size );
 char *get_str( const char *tcl_var, char *var, int var_size );
 char *search_lsd_root( char *start_path );
 char *strcatn( char *d, const char *s, size_t dSz );
 char *strcpyn( char *d, const char *s, size_t dSz );
 char *strtcl( char *out, const char *text, int outSz );
 char *strupr( char *s );
+const char *eval_str( const char *tcl_exp );
 const char *get_fun_name( char *str, int str_sz, bool nw = false );
 const char *get_str( const char *tcl_var );
 const char *signal_name( int signum );
+double eval_double( const char *tcl_exp );
 double get_double( const char *tcl_var, double *var = NULL );
 int deb( object *r, object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" );
+int eval_int( const char *tcl_exp );
 int get_int( const char *tcl_var, int *var = NULL );
 int kill_system( int id );
 int lsdmain( int argn, const char **argv );
@@ -576,6 +582,7 @@ int strlf( char *out, const char *str, int outSz );
 int strtrim( char *out, const char *str, int outSz );
 int strwrap( char *out, const char *str, int outSz, int wid );
 int run_system( const char *cmd, int id = -1 );
+long eval_long( const char *tcl_exp );
 long get_long( const char *tcl_var, long *var = NULL );
 string win_path( string filepath );
 void check_option_files( bool sys = false );

@@ -1878,9 +1878,8 @@ int lsdmain( int argn, const char **argv )
 		cmd( "set in [ .f.t.t index insert ]" );
 		cmd( "scan $in %%d.%%d line col" );
 		cmd( "set line [ expr { $line - 1 } ]" );
-		cmd( "set s [ .f.t.t get $line.0 $line.end ]" );
 
-		s = get_str( "s" );
+		s = eval_str( "[ .f.t.t get $line.0 $line.end ]" );
 		for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
 		  str[ i ] = s[ i ];
 
@@ -2202,7 +2201,6 @@ int lsdmain( int argn, const char **argv )
 		cmd( "if { $v_lag != 0 && $v_obj ne \"THIS\" } { .f.t.t insert insert \"VLS($v_obj, \\\"$v_label\\\", $v_lag)\" }" );
 
 		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
-
 		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
 		
 		if ( num != -1 )
@@ -2268,10 +2266,11 @@ int lsdmain( int argn, const char **argv )
 		cmd( "set in [ .f.t.t index insert ]" );
 		cmd( "scan $in %%d.%%d line col" );
 		cmd( "set line [ expr { $line -1 } ]" );
-		cmd( "set s [ .f.t.t get $line.0 $line.end ]" );
-		s = get_str( "s" );
+
+		s = eval_str( "[ .f.t.t get $line.0 $line.end ]" );
 		for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
 			str[ i ] = s[ i ];
+		
 		if ( i > 0 )
 		{
 			str[ i ] = '\0';
@@ -2358,7 +2357,6 @@ int lsdmain( int argn, const char **argv )
 		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"INCRS($v_obj, \\\"$v_label\\\", $v_val)\" } { .f.t.t insert insert \"INCR(\\\"$v_label\\\", $v_val)\" }" );
 
 		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
-
 		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
 		
 		if ( num != -1 )
@@ -2432,7 +2430,6 @@ int lsdmain( int argn, const char **argv )
 		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"MULTS($v_obj, \\\"$v_label\\\", $v_val)\" } { .f.t.t insert insert \"MULT(\\\"$v_label\\\", $v_val)\" }" );
 
 		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
-
 		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
 		
 		if ( num != -1 )
@@ -3023,7 +3020,6 @@ int lsdmain( int argn, const char **argv )
 		cmd( "if { $v_lag != 0 && $v_obj ne \"THIS\" } { .f.t.t insert insert \"SUMLS($v_obj, \\\"$v_label\\\", $v_lag)\" }" );
 
 		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
-
 		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
 		
 		if ( num != -1 )
@@ -3693,10 +3689,10 @@ int lsdmain( int argn, const char **argv )
 		cmd( "set in [ .f.t.t index insert ]" );
 		cmd( "scan $in %%d.%%d line col" );
 		cmd( "set line [ expr { $line - 1 } ]" );
-		cmd( "set s [ .f.t.t get $line.0 $line.end ]" );
-		s = get_str( "s" );
+		s = eval_str( "[ .f.t.t get $line.0 $line.end ]" );
 		for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
 			str[ i ] = s[ i ];
+		
 		if ( i > 0 )
 		{
 			str[ i ] = '\0';
@@ -4203,7 +4199,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "set cur [ .f.t.t index insert ]" );
 		cmd( ".f.t.t tag add sel $cur \"$cur + 1char\"" );
 		if ( num > 0 )
-			cmd( "set cur [.f.t.t index \"insert + 1 char\"]" );
+			cmd( "set cur [ .f.t.t index \"insert + 1 char\" ]" );
 
 		while ( num != 0 && choice != 0 )
 		{
@@ -5114,8 +5110,7 @@ int lsdmain( int argn, const char **argv )
 			make_makefile( );
 
 		choice = 0;
-		cmd( "set fapp [ file nativename \"$modelDir/$MODEL_OPTIONS\" ]" );
-		s = get_str( "fapp" );
+		s = eval_str( "[ file nativename \"$modelDir/$MODEL_OPTIONS\" ]" );
 		if ( s == NULL || ( f = fopen( s, "r" ) ) == NULL )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
@@ -5234,8 +5229,7 @@ int lsdmain( int argn, const char **argv )
 			// try to open an extra file defined by the user
 			if ( choice == 0 )
 			{	// open the configuration file
-				cmd( "set fapp [ file nativename \"$modelDir/$MODEL_OPTIONS\" ]" );
-				s = get_str( "fapp" );
+				s = eval_str( "[ file nativename \"$modelDir/$MODEL_OPTIONS\" ]" );
 				if ( s == NULL || strlen( s ) == 0 || ( f = fopen( s, "r" ) ) == NULL )
 				{
 					cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model' and then try again.\"" );

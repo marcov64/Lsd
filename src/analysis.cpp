@@ -912,16 +912,15 @@ while ( true )
 
 		// show the equation for the selected element
 		case 16:
-			cmd( "set a [ split $res ]; set b [ lindex $a 0 ]" );
-			show_eq( get_str( "b" ), ".da" );
+			show_eq( eval_str( "[ lindex [ split $res ] 0 ]", str1, MAX_ELEM_LENGTH ), ".da" );
 
 			break;
 
 
 		// show the description for the selected element
 		case 19:
-			cmd( "set a [ split $res ]; set b [ lindex $a 0 ]" );
-			show_descr( get_str( "b" ), ".da" );
+			cmd( "set a ; set b " );
+			show_descr( eval_str( "[ lindex [ split $res ] 0 ]", str1, MAX_ELEM_LENGTH ), ".da" );
 
 			break;
 

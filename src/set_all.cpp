@@ -517,8 +517,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 				return;
 
 			cmd( "cd [ file dirname $filename ]" );
-			cmd( "set fn [ file tail $filename ]" );
-			app = get_str( "fn" );
+			app = eval_str( "[ file tail $filename ]" );
 			f = fopen( app, "r" );
 			cmd( "cd $oldpath" );
 			if ( f == NULL )
@@ -851,8 +850,7 @@ void dataentry_sensitivity( sense *s, int nval )
 		if ( choice == 2 )
 			goto end;
 	
-		cmd( "set sss [ .sens.t.t get 0.0 end ]" );
-		app = get_str( "sss" );
+		app = eval_str( "[ .sens.t.t get 0.0 end ]" );
 		sss = new char[ strlen( app ) + 1 ];
 		strcpy( sss, app );
 	

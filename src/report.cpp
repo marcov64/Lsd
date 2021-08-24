@@ -86,8 +86,7 @@ void report( object *r )
 		if ( get_bool( "res" ) )
 			return;
 		
-		cmd( "set prep [ pwd ]" );
-		get_str( "prep", path_rep, MAX_PATH_LENGTH );
+		eval_str( "[ pwd ]", path_rep, MAX_PATH_LENGTH );
 	}
 	else
 		strcpyn( path_rep, path, MAX_PATH_LENGTH );
@@ -181,14 +180,12 @@ void report( object *r )
 
 	if ( choice == 2 )
 	{ 
-		cmd( "set mrep [ file tail \"$res\" ]" );
-		app = get_str( "mrep" );
+		app = eval_str( "[ file tail \"$res\" ]" );
 		if ( app == NULL || strlen( app ) == 0 )
 			goto here_create_report;
 		
 		strcpyn( name_rep, app, MAX_PATH_LENGTH );
-		cmd( "set prep [ file dirname  \"$res\" ]" );
-		get_str( "prep", path_rep, MAX_PATH_LENGTH );
+		eval_str( "[ file dirname  \"$res\" ]", path_rep, MAX_PATH_LENGTH );
 	}
 		
 	cmd( "destroytop .w" );

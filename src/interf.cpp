@@ -778,8 +778,7 @@ int browse( object *r )
 		cmd( "pack .l.p.tit -padx 5 -anchor w" );
 
 		// main menu - avoid redrawing the menu if it already exists and is configured
-		cmd( "set confMenu [ . cget -menu ]" );
-		if ( ! exists_window( ".m" ) || strcmp( get_str( "confMenu" ), ".m" ) )
+		if ( ! exists_window( ".m" ) || ! expr_eq( "[ . cget -menu ]", ".m" ) )
 		{
 			cmd( "destroy .m" );
 			cmd( "ttk::menu .m -tearoff 0" );
@@ -1368,8 +1367,7 @@ case 2:
 
 			if ( done == 0 )
 			{
-				cmd( "set text_description [ .addelem.d.f.text get 1.0 end ]" );
-				add_description( lab, param, get_str( "text_description" ) );
+				add_description( lab, param, eval_str( "[ .addelem.d.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 				
 				if ( param == 0 )
 					cmd( "lappend modVar %s", lab );
@@ -1539,8 +1537,7 @@ case 3:
 		
 		r->add_obj( lab, 1, 1 );
 		
-		cmd( "set text_description [ .addobj.d.f.text get 1.0 end ]" );  
-		add_description( lab, 4, get_str( "text_description" ) );
+		add_description( lab, 4, eval_str( "[ .addobj.d.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 		cmd( "lappend modObj %s", lab );
 		
 		// update focus memory
@@ -1804,8 +1801,7 @@ case 6:
 		unsaved_change( true );		// signal unsaved change
 
 		// save description changes
-		cmd( "set text_description \"[ .objprop.desc.f.text get 1.0 end ]\"" );
-		change_description( lab_old, NULL, -1, get_str( "text_description" ) );
+		change_description( lab_old, NULL, -1, eval_str( "[ .objprop.desc.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 		cmd( "set choice $to_compute" );
 
@@ -2268,8 +2264,7 @@ case 7:
 
 	if ( done == 9 ) 
 	{
-		cmd( "set text_description \"[ .chgelem.desc.f.desc.text get 1.0 end ]\"" );
-		change_description( lab_old, NULL, -1, get_str( "text_description" ) );
+		change_description( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 	  
 		auto_document( lab_old, "ALL", true );
 		cmd( ".chgelem.desc.f.desc.text delete 1.0 end" );
@@ -2306,14 +2301,10 @@ case 7:
 		   cv->observe = ( observe == 'y' ) ? true : false;
 		}
 		  
-		cmd( "set text_description \"[ .chgelem.desc.f.desc.text get 1.0 end ]\"" );
-		change_description( lab_old, NULL, -1, get_str( "text_description" ) );
+		change_description( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 		
 		if ( cv->param == 1 || cv->num_lag > 0 )
-		{
-			cmd( "set text_description \"[ .chgelem.desc.i.desc.text get 1.0 end ]\"" );
-			change_description( lab_old, NULL, -1, NULL, get_str( "text_description" ) );
-		}
+			change_description( lab_old, NULL, -1, NULL, eval_str( "[ .chgelem.desc.i.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 	  
 		unsaved_change( true );		// signal unsaved change
 

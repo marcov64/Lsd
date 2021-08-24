@@ -213,7 +213,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 	tk_ok = true;
 
 	// do not open/close terminal in mac
-	if ( ! strcmp( get_str( "tcl_platform(os)" ), "Darwin" ) )
+	if ( expr_eq( "$tcl_platform(os)", "Darwin" ) )
 	{
 		cmd( "catch { console hide }" );
 		cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
@@ -630,19 +630,24 @@ bool exists_window( const char *lab )
  ***************************************************/
 bool get_bool( const char *tcl_var, bool *var )
 {
-	const char *string;
+	const char *strvar;
 	int intvar;
 	
-	string = get_str( tcl_var );
-	if ( string == NULL )
+	strvar = get_str( tcl_var );
+	if ( strvar == NULL )
 	{
 		if ( var != NULL )
 			return *var;
 		else
 			return false;
 	}
+	
+	if ( Tcl_GetBoolean( inter, strvar, & intvar ) != TCL_OK )
+	{
+		log_tcl_error( "Cannot convert to boolean", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
+		return false;
+	}
 		
-	sscanf( string, "%d", &intvar );
 	if ( var != NULL )
 		*var = intvar ? true : false;
 	
@@ -656,19 +661,24 @@ bool get_bool( const char *tcl_var, bool *var )
  ***************************************************/
 int get_int( const char *tcl_var, int *var )
 {
-	const char *string;
+	const char *strvar;
 	int intvar;
 	
-	string = get_str( tcl_var );
-	if ( string == NULL )
+	strvar = get_str( tcl_var );
+	if ( strvar == NULL )
 	{
 		if ( var != NULL )
 			return *var;
 		else
-			return -1;
+			return 0;
 	}
 		
-	sscanf( string, "%d", &intvar );
+	if ( Tcl_GetInt( inter, strvar, & intvar ) != TCL_OK )
+	{
+		log_tcl_error( "Cannot convert to integer", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
+		return 0;
+	}
+		
 	if ( var != NULL )
 		*var = intvar;
 	
@@ -682,19 +692,24 @@ int get_int( const char *tcl_var, int *var )
  ***************************************************/
 long get_long( const char *tcl_var, long *var )
 {
-	const char *string;
+	const char *strvar;
 	long longvar;
 	
-	string = get_str( tcl_var );
-	if ( string == NULL )
+	strvar = get_str( tcl_var );
+	if ( strvar == NULL )
 	{
 		if ( var != NULL )
 			return *var;
 		else
-			return -1;
+			return 0;
 	}
 		
-	sscanf( string, "%ld", &longvar );
+	if ( sscanf( strvar, "%ld", & longvar ) != 1 )
+	{
+		log_tcl_error( "Cannot convert to long", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
+		return 0;
+	}
+		
 	if ( var != NULL )
 		*var = longvar;
 	
@@ -708,11 +723,11 @@ long get_long( const char *tcl_var, long *var )
  ***************************************************/
 double get_double( const char *tcl_var, double *var )
 {
-	const char *string;
+	const char *strvar;
 	double dblvar;
 	
-	string = get_str( tcl_var );
-	if ( string == NULL )
+	strvar = get_str( tcl_var );
+	if ( strvar == NULL )
 	{
 		if ( var != NULL )
 			return *var;
@@ -720,7 +735,12 @@ double get_double( const char *tcl_var, double *var )
 			return NAN;
 	}
 		
-	sscanf( string, "%lf", &dblvar );
+	if ( Tcl_GetDouble( inter, strvar, & dblvar ) != TCL_OK )
+	{
+		log_tcl_error( "Cannot convert to double", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
+		return NAN;
+	}
+		
 	if ( var != NULL )
 		*var = dblvar;
 	
@@ -751,10 +771,118 @@ char *get_str( const char *tcl_var, char *var, int var_size )
 		return ( char * ) strvar;
 }
 
-
 const char *get_str( const char *tcl_var )
 {
 	return ( const char * ) get_str( tcl_var, NULL, 0 );
+}
+
+
+/***************************************************
+ EQ_STR
+ Compare if Tcl expression, evaluating it
+ before comparison, is equal to C string
+ ***************************************************/
+bool expr_eq( const char *tcl_exp, const char *c_str )
+{
+	const char *strvar = eval_str( tcl_exp );
+	
+	if ( strvar != NULL && c_str != NULL )
+		return strcmp( strvar, c_str ) == 0;
+	else
+		return false;
+}
+
+
+/***************************************************
+ EVAL_STR
+ Evaluate Tcl expression to C string
+ ATTENTION: if var is NULL, the returned result 
+ string buffer is valid only until next Tcl invocation
+ ***************************************************/
+char *eval_str( const char *tcl_exp, char *var, int var_size )
+{
+	if ( Tcl_ExprString( inter, tcl_exp ) != TCL_OK )
+	{
+		log_tcl_error( "Cannot evaluate to string", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
+		return var;
+	}
+	
+	if ( var != NULL && var_size > 0 )
+	{
+		strcpyn( var, Tcl_GetStringResult( inter ), var_size );
+		return var;
+	}
+	else
+		return ( char * ) Tcl_GetStringResult( inter );
+}
+
+const char *eval_str( const char *tcl_exp )
+{
+	return ( const char * ) eval_str( tcl_exp, NULL, 0 );
+}
+
+
+/***************************************************
+ EVAL_BOOL
+ Evaluate Tcl expression to C boolean
+ ***************************************************/
+bool eval_bool( const char *tcl_exp )
+{
+	int intvar;
+
+	if ( Tcl_ExprBoolean( inter, tcl_exp, & intvar ) != TCL_OK )
+	{
+		log_tcl_error( "Cannot evaluate to boolean", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
+		return false;
+	}
+	
+	return intvar ? true : false;	
+}
+
+
+/***************************************************
+ EVAL_INT
+ Evaluate Tcl expression to C integer
+ ***************************************************/
+int eval_int( const char *tcl_exp )
+{
+	return ( int ) eval_long( tcl_exp );	
+}
+
+
+/***************************************************
+ EVAL_LONG
+ Evaluate Tcl expression to C long
+ ***************************************************/
+long eval_long( const char *tcl_exp )
+{
+	long longvar;
+	
+	if ( Tcl_ExprLong( inter, tcl_exp, & longvar ) != TCL_OK )
+	{
+		log_tcl_error( "Cannot evaluate to long integer", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
+		return 0;
+	}
+	
+	return longvar;	
+}
+
+
+/***************************************************
+ EVAL_DOUBLE
+ Evaluate Tcl expression to C double
+ ***************************************************/
+double eval_double( const char *tcl_exp )
+{
+	double dblvar;
+
+	if ( Tcl_ExprDouble( inter, tcl_exp, & dblvar ) != TCL_OK )
+	{
+		log_tcl_error( "Cannot evaluate to double", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
+		return NAN;
+	}
+	
+	return dblvar;	
 }
 
 
