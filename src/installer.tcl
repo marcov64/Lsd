@@ -6,10 +6,10 @@
 #
 #	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
-#	
+#
 #	See Readme.txt for copyright information of
 #	third parties' code used in LSD
-#	
+#
 #*************************************************************
 
 #*************************************************************
@@ -92,12 +92,12 @@ if { ! [ check_components ] } {
 
 if { $CurPlatform eq "mac" } {
 	set notInstall [ concat $notInstall *.exe *.dll *.bat gnu/* src/installer-loader-linux.sh ]
-	
+
 	# make sure PATH is complete
 	if { [ string first "/usr/local/bin" $env(PATH) ] < 0 } {
 		set env(PATH) "/usr/local/bin:$env(PATH)"
 	}
-	
+
 	# create temporary folder
 	try {
 		close [ file tempfile temp ]
@@ -121,16 +121,16 @@ if { $CurPlatform eq "mac" } {
 #
 
 if { [ string equal $CurPlatform mac ] || [ string equal $CurPlatform linux ] } {
-	if { [ string first " " "$homeDir" ] < 0 } { 
+	if { [ string first " " "$homeDir" ] < 0 } {
 		set RootLsd "~/$LsdDir"
 	} else {
 		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Home directory includes space(s)" -detail "The system directory '$homeDir' is invalid for installing LSD.\nLSD subdirectory must be located in a directory with no spaces in the full path name.\n\nYou may use another directory if you have write permissions to it.\n\nExiting now."
 		set homeDir "/"
 		set RootLsd "/$LsdDir"
 	}
-	
+
 } else {
-	if { [ string first " " "$homeDir" ] < 0 } { 
+	if { [ string first " " "$homeDir" ] < 0 } {
 		set RootLsd [ file normalize "~/$LsdDir" ]
 	} elseif [ file exists $winRoot ] {
 		set homeDir "$winRoot"
@@ -200,7 +200,7 @@ ttk::button .dir.choice.but.browse -text Browse -width -1 -command {
 	if { $dir != "" } {
 		set RootLsd "$dir"
 	}
-	.dir.choice.blk.where selection range 0 end 
+	.dir.choice.blk.where selection range 0 end
 	focus .dir.choice.blk.where
 }
 pack .dir.choice.but.lab .dir.choice.but.browse
@@ -243,26 +243,26 @@ set newInst 1
 
 while 1 {
 	while 1 {
-		.dir.choice.blk.where selection range 0 end 
+		.dir.choice.blk.where selection range 0 end
 		focus .dir.choice.blk.where
 
 		set done 0
 		tkwait variable done
 
-		if { $done == 2 } { 
+		if { $done == 2 } {
 			break
 		}
-		
+
 		if { [ catch { set RootLsd [ file normalize $RootLsd ] } ] || ! [ file exists [ file dirname "$RootLsd" ] ] } {
 			ttk::messageBox -type ok -title Error -icon error -message "Invalid directory path/name" -detail "The directory path '$RootLsd' is invalid.\nA valid directory path and names must be supplied. Only valid characters for directory names are accepted. The parent directory to the LSD subdirectory must exist.\n\nPlease choose another path/name."
 			continue
 		}
-		
-		if { [ string first " " "$RootLsd" ] >= 0 } { 
+
+		if { [ string first " " "$RootLsd" ] >= 0 } {
 			ttk::messageBox -type ok -title Error -icon error -message "Directory includes space(s)" -detail "The chosen directory '$RootLsd' is invalid for installing LSD.\nLSD subdirectory must be located in a directory with no spaces in the full path name.\n\nPlease choose another directory."
 			continue
 		}
-		
+
 		if { ! [ file writable [ file dirname "$RootLsd" ] ] } {
 			ttk::messageBox -type ok -title Error -icon error -message "Directory not writable" -detail "The chosen directory '[ file dirname "$RootLsd" ]' is invalid for installing LSD.\nLSD subdirectory must be located in a directory where the user has write permission.\n\nPlease choose another directory."
 		} else {
@@ -277,7 +277,7 @@ while 1 {
 			set newInst 0
 			if [ catch { file delete -force "$RootLsd/lmm" "$RootLsd/lmm.exe" "$RootLsd/lmm64.exe" "$RootLsd/run.bat" "$RootLsd/run.sh" "$RootLsd/$LsdSrc/system_options.txt" {*}[ glob -nocomplain -directory "$RootLsd/$LsdSrc" *.o ] "$env(HOME)/Desktop/lsd.desktop" } ] {
 				ttk::messageBox -type ok -title Error -icon error -message "Cannot remove old files" -detail "Cannot replace the existing LSD files by the upgraded ones.\n\nPlease try reinstalling after closing any open instance of LSD/LMM.\n\nExiting now."
-				
+
 				exit 5
 			}
 		}
@@ -312,16 +312,16 @@ set inst [ progressbox .inst "LSD Installer" "Copying files" "File" $nFiles { se
 foreach f $files {
 	try {
 		file mkdir [ file dirname "$RootLsd/$f" ]
-		file copy -force "$filesDir/$f" "$RootLsd/$f" 
+		file copy -force "$filesDir/$f" "$RootLsd/$f"
 	} on error result {
 		break
 	}
-	
+
 	incr n
 	if { ( $n + 1 ) % 20 == 0 } {
 		prgboxupdate .inst $n
 	}
-	
+
 	if { $done == 2 } {
 		if [ string equal [ ttk::messageBox -parent "" -type okcancel -title "Exit?" -icon info -default ok -message "Exit installation?" -detail "LSD installation is not complete.\n\nPress 'OK' to confirm exit." ] ok ] {
 			exit 8
@@ -348,11 +348,11 @@ if { $n != $nFiles } {
 		set result "(no information)"
 	}
 	ttk::messageBox -parent "" -type ok -title Error -icon error -message "Incomplete installation" -detail "The installation could not copy the required files to run LSD ([ expr { $nFiles - $n } ] files failed).\n\nError detail:\n$result\n\nPlease try reinstalling after closing any open instance of LSD/LMM or download again the installation package.\n\nExiting now."
-		
+
 	if { $newInst } {
 		catch { file delete -force $RootLsd }
 	}
-			
+
 	exit 9
 }
 
@@ -366,7 +366,7 @@ set issues [ list ]
 
 if [ string equal $CurPlatform windows ] {
 
-	# add LSD to user PATH environment variable if no conflict exists or 
+	# add LSD to user PATH environment variable if no conflict exists or
 	# ask about changing the system PATH if potential conflicts exist
 	set sysPath 0
 	if { [ llength $existGCC ] == 0 && [ llength $existDLL ] == 0 } {
@@ -379,7 +379,7 @@ if [ string equal $CurPlatform windows ] {
 				set res [ add_win_path "$RootLsd/gnu/bin" user begin ]
 			}
 	}
-	
+
 	if { ! $res } {
 		if [ string equal [ ttk::messageBox -parent "" -type okcancel -default ok -title Error -icon error -message "Cannot add LSD to PATH" -detail "LSD libraries folder could not be added to the user PATH environment variable.\n\nYou may try to repeat the installation or manually add the folder '$RootLsd/gnu/bin' to the PATH variable following the steps described in 'Readme.txt'.\n\nPress 'OK' if you want to continue the installation anyway or 'Cancel' to exit." ] ok ] {
 			if { $sysPath } {
@@ -391,7 +391,7 @@ if [ string equal $CurPlatform windows ] {
 			if { $newInst } {
 				catch { file delete -force $RootLsd }
 			}
-		
+
 			exit 10
 		}
 	}
@@ -403,7 +403,7 @@ if [ string equal $CurPlatform windows ] {
 			lappend issues "External compiler maybe not configured (del $comp)"
 		}
 	}
-	
+
 	if { ! $sysPath && [ llength $existDLL ] > 0 } {
 		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Potentially conflicting libraries installed" -detail "There are libraries used by LSD already installed:\n$msgDLL\n\nLSD will use them but it is not guaranteed they are updated and compatible to support LSD.\n\nYou may want to remove or update them before using LSD.\n\nInstallation will continue but you may have to fix this problem so LSD can work reliably."
 
@@ -426,7 +426,7 @@ if [ string equal $CurPlatform windows ] {
 } else {
 	ttk::messageBox -parent "" -type ok -title "LSD Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to provide the system password.\n\nA Terminal window will open and the interaction must be performed there.\n\nThis is required so LSD can be installed out of the macOS quarantine zone for new executable files."
 	set wait [ waitbox .wait "Installing..." "Installing LSD" "1. type the macOS user password and press <Return>\n2. if required, allow the Terminal to control Finder\n3. Terminal window will close/disable when done\n" 1 "" ]
-	
+
 	set scpt [ open "$env(TMPDIR)/add_shortcut.as" w ]
 	puts $scpt "tell application \"Terminal\""
 	set openMsg "clear; echo \\\"Installing LSD\\nPlease wait for this window to close/deactivate automatically.\\nType your password and press <Return>:\\\"; "
@@ -439,7 +439,7 @@ if [ string equal $CurPlatform windows ] {
 
 	file delete -force "$env(TMPDIR)/shortcut-done.tmp"
 	set res [ catch { exec osascript "$env(TMPDIR)/add_shortcut.as" } ]
-	
+
 	if { ! $res } {
 		set timeout 1800
 		set elapsed 0
@@ -449,7 +449,7 @@ if [ string equal $CurPlatform windows ] {
 			after 1000
 			incr elapsed
 		}
-		
+
 		if { $elapsed >= $timeout } {
 			set res 1
 			set result timeout
@@ -458,20 +458,20 @@ if [ string equal $CurPlatform windows ] {
 	} else {
 		set result $res
 	}
-	
+
 	file delete -force "$env(TMPDIR)/add_shortcut.as" "$env(TMPDIR)/shortcut-done.tmp"
 	destroytop .wait
 }
 
 if { $res } {
 	if [ string equal [ ttk::messageBox -parent "" -type okcancel -default cancel -title Error -icon error -message "Cannot create LSD shortcuts" -detail "The creation of LSD program shortcuts failed ($result).\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'.\n\nPress 'OK' if you want to continue the installation anyway or 'Cancel' to exit." ] ok ] {
-	
+
 		lappend issues "LSD program shortcuts missing (add-shortcut-$CurPlatform)"
 	} else {
 		if { $newInst } {
 			catch { file delete -force $RootLsd }
 		}
-		
+
 		exit 11
 	}
 }
@@ -498,7 +498,7 @@ if [ info exists xcode ] {
 #
 
 if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ info exists multitail ] ) } {
-	
+
 	if [ string equal $CurPlatform windows ] {
 
 		set res [ catch { exec $filesDir/installer/$winGnuplot /SILENT /LOADINF=wgnuplot.inf } result ]
@@ -508,7 +508,7 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 			lappend issues "Windows Gnuplot not installed ($winGnuplot)"
 		}
 	}
-	
+
 	if [ string equal $CurPlatform mac ] {
 		# check if Homebrew is installed and install if not
 		set res 0
@@ -525,7 +525,7 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 			set brewMsg1 ""
 			set brewMsg2 ""
 		}
-		
+
 		if { [ info exists gnuplot ] && [ info exists multitail ] } {
 			set pkgInsta "brew install multitail gnuplot; "
 		} elseif { [ info exists gnuplot ] } {
@@ -533,7 +533,7 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 		} else {
 			set pkgInsta "brew install multitail; "
 		}
-		
+
 		ttk::messageBox -parent "" -type ok -title "Tools Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to confirm installation of ${brewInstr}Gnuplot graphical terminal and/or MultiTail tool.\n\nA Terminal window will open and the interaction must be performed there."
 		set wait [ waitbox .wait "Installing..." "Installing ${brewInstr} Gnuplot graphical terminal\nand/or MultiTail tool.\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. if required, allow the Terminal access\n2. ${brewSteps}Terminal window will close/disable when done\n" 1 "" ]
 
@@ -548,7 +548,7 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 
 		file delete -force "$env(TMPDIR)/brew-done.tmp"
 		set res [ catch { exec osascript "$env(TMPDIR)/install_homebrew.as" } ]
-		
+
 		if { ! $res } {
 			set timeout 1800
 			set elapsed 0
@@ -558,7 +558,7 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 				after 1000
 				incr elapsed
 			}
-			
+
 			if { $elapsed >= $timeout } {
 				set res 1
 				set result timeout
@@ -567,7 +567,7 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 		} else {
 			set result $res
 		}
-		
+
 		file delete -force "$env(TMPDIR)/install_homebrew.as" "$env(TMPDIR)/brew-done.tmp"
 		destroytop .wait
 
@@ -597,20 +597,20 @@ if { [ string equal $CurPlatform linux ] && [ llength $linuxPkgMiss ] > 0 } {
 			break
 		}
 	}
-	
+
 	if { ! $found } {
 		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Cannot install required packages" -detail "The detection of the computer package manager failed and LSD cannot install the missing required packages.\n\nPlease check your distribution documentation on how to install the following missing packages:\n\n$linuxPkgMiss"
 		lappend issues "$linuxPkgMiss missing (unknown command)"
 
 	} else {
-		
+
 		set lpack [ list ]
 		foreach pack $linuxPkgMiss {
-			
+
 			set i [ lsearch -exact $linuxPkg $pack ]
 			lappend lpack [ lindex $linuxPmPkg($pm) $i ]
 		}
-	
+
 		ttk::messageBox -parent "" -type ok -title "Package Installation" -icon info -message "User interaction required" -detail "The next step of installation will try to install missing required packages. The user must confirm the installation.\n\nPlease use the same terminal window where this installer was launched. Do not close or interrupt it before installation is complete."
 		set wait [ waitbox .wait "Installing..." "Installing packages\n${lpack}.\n\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. go to the installer terminal window\n2. enter your password if asked\n3. confirm installation" 1 "" ]
 
@@ -633,7 +633,7 @@ if { [ string equal $CurPlatform linux ] && [ llength $linuxPkgMiss ] > 0 } {
 
 		file delete -force "/tmp/pack-install-done.tmp" "/tmp/pack-install-fail.tmp"
 		set res [ catch { exec /bin/bash -c /tmp/install_packages.sh & } result ]
-		
+
 		if { ! $res } {
 			set timeout 1800
 			set elapsed 0
@@ -643,7 +643,7 @@ if { [ string equal $CurPlatform linux ] && [ llength $linuxPkgMiss ] > 0 } {
 				after 1000
 				incr elapsed
 			}
-			
+
 			if [ file exists "/tmp/pack-install-fail.tmp" ] {
 				set res 1
 				set result "command failed"
@@ -674,7 +674,7 @@ if { [ string equal $CurPlatform linux ] && [ llength $linuxPkgMiss ] > 0 } {
 
 if [ string equal $CurPlatform linux ] {
 
-	if { [ llength $pathInclude ] > 1 || [ llength $pathLib ] > 1 } { 
+	if { [ llength $pathInclude ] > 1 || [ llength $pathLib ] > 1 } {
 		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Complex include/lib paths" -detail "Your computer has a complex setup of multiple include and lib file paths which cannot be configured automatically.\n\nYou may have to manually adjust the correct paths to the include/lib files in '$linuxMkFile' before compiling LMM and in LSD System Options menu."
 		lappend issues "include/lib paths not configured (nano $linuxMkFile)"
 	}
@@ -690,7 +690,7 @@ if [ string equal $CurPlatform linux ] {
 	if { [ llength $pathInclude ] > 0 } {
 		set mk [ sed "s|[ lindex $linuxInclude 0 ]|[ lindex $pathInclude 0 ]" $mk ]
 		set so [ sed "s|[ lindex $linuxInclude 0 ]|[ lindex $pathInclude 0 ]" $so]
-	} 
+	}
 
 	if { [ llength $pathLib ] > 0 } {
 		set mk [ sed "s|[ lindex $linuxLib 0 ]|[ lindex $pathLib 0 ]" $mk ]
@@ -720,7 +720,7 @@ if [ string equal $CurPlatform linux ] {
 			break
 		}
 	}
-	
+
 	if { ! $found } {
 		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Cannot recompile LMM" -detail "The detection of Linux distribution failed and LSD Model Manager (LMM) was not recompiled for your computer.\n\nYou may try to use the installed precompiled LMM or do a manual compilation following the steps described in 'Readme.txt'.\nYou may have to adjust the paths to the include/lib files in '$linuxMkFile'."
 		lappend issues "Cannot recompile LMM (make -f $linuxMkFile)"
@@ -744,7 +744,7 @@ if [ string equal $CurPlatform linux ] {
 		} else {
 			file delete -force "/tmp/lmm"
 		}
-	}	
+	}
 }
 
 
@@ -760,8 +760,8 @@ if { [ llength $issues ] == 0 } {
 	ttk::label .end.msg1 -text "LSD installation completed successfully."
 } else {
 	ttk::label .end.msg1 -justify center -text "LSD installation completed\nwith warnings, some issues remain.\n\nYou may try to repeat the installation or do a manual\ninstall following the steps described in 'Readme.txt'."
-	
-	catch { 
+
+	catch {
 		set f [ open "$RootLsd/installer.err" a ]
 		puts $f ""
 		puts $f "====================> [ clock format [ clock seconds ] -format "%Y-%m-%d %H:%M:%S" ]"
@@ -771,11 +771,11 @@ if { [ llength $issues ] == 0 } {
 		puts $f "how to solve the issues before using LSD."
 		puts $f ""
 		puts $f "Issue (failed command line operation):"
-		
+
 		foreach issue $issues {
 			puts $f ". $issue"
 		}
-		
+
 		close $f
 	}
 }
@@ -795,7 +795,7 @@ if { [ llength $issues ] > 0 } {
 		pack .end.err2.t$i
 		incr i
 	}
-	
+
 	ttk::label .end.err3 -justify center -text "Please try to solve the issues before using LSD.\nThis list is saved in 'installer.err'"
 	pack .end.err1 .end.err2 .end.err3 -pady 5
 }

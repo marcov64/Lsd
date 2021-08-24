@@ -6,10 +6,10 @@
 #
 #	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
-#	
+#
 #	See Readme.txt for copyright information of
 #	third parties' code used in LSD
-#	
+#
 #*************************************************************
 
 #*************************************************************
@@ -30,7 +30,7 @@ set rootname "Root"
 set modelGroup "$rootname"
 set result 0
 set memory 0
-set months [ list January February March April May June July August September October November December ]	
+set months [ list January February March April May June July August September October November December ]
 
 
 #************************************************
@@ -47,79 +47,79 @@ proc showmodel pippo {
 	lappend lrn
 	lappend lbn
 	lappend group
-	
+
 	if [ winfo exists .l ] {
 		.l.l.l delete 0 end
 		.l.t.text conf -state normal
 		.l.t.text delete 1.0 end
-		
+
 		# close tool tip if still showing
 		tooltip::hide
-	} else { 
+	} else {
 		newtop .l "LSD Model Browser" { .l.m.file invoke 2 }
-		
+
 		ttk::menu .l.m -tearoff 0
 
-		set m .l.m.file 
+		set m .l.m.file
 		ttk::menu $m -tearoff 0
 		.l.m add cascade -label File -menu $m -underline 0
 		$m add command -label "Select Model/Group" -underline 0 -accelerator Enter -command {
 			set result [ .l.l.l curselection ]
-			if { [ lindex $group $result ] == 0 } { 
+			if { [ lindex $group $result ] == 0 } {
 				set choiceSM 1
-			} else { 
+			} else {
 				set modelGroup "[ lindex $lmn $result ]"
 				showmodel [ lindex $ldn $result ]
-			} 
+			}
 		}
-		$m add command -label "New Model/Group..." -underline 0  -accelerator Ins -command { 
+		$m add command -label "New Model/Group..." -underline 0  -accelerator Ins -command {
 			set result -1
 			set memory 0
 			set choiceSM 14
-		} 
+		}
 		$m add command -label Quit -underline 0 -accelerator Esc -command {
 			set result -1
 			set memory 0
-			set choiceSM 2 
+			set choiceSM 2
 		}
 
-		set m .l.m.edit 
+		set m .l.m.edit
 		ttk::menu $m -tearoff 0
 		.l.m add cascade -label Edit -menu $m -underline 0
 		$m add command -label "Edit Name/Description..." -underline 0 -accelerator Ctrl+E -command {
 			set result [ .l.l.l curselection ]
-			medit $result 
+			medit $result
 		}
 		$m add command -label "Copy" -underline 0 -accelerator Ctrl+C -command {
 			set result [ .l.l.l curselection ]
-			mcopy $result 
+			mcopy $result
 		}
 		if { $memory == 0 } {
 			$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -state disabled -command {
 				set result [ .l.l.l curselection ]
-				mpaste $result 
-			} 
+				mpaste $result
+			}
 		} else {
 			$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -command {
 				set result [ .l.l.l curselection ]
-				mpaste $result 
-			} 
+				mpaste $result
+			}
 		}
 		$m add command -label "Delete..." -underline 0 -accelerator Del -command {
 			set result [ .l.l.l curselection ]
-			if { [ lindex $group $result ] != -1 } { 
-				mdelete $result 
+			if { [ lindex $group $result ] != -1 } {
+				mdelete $result
 			}
 		}
 
-		set m .l.m.help 
+		set m .l.m.help
 		ttk::menu $m -tearoff 0
 		.l.m add cascade -label Help -menu $m -underline 0
-		$m add command -label "Help" -underline 0 -accelerator F1 -command { 
-			LsdHelp modelbrowser.html 
+		$m add command -label "Help" -underline 0 -accelerator F1 -command {
+			LsdHelp modelbrowser.html
 		}
-		$m add command -label "LSD Documentation" -underline 4 -command { 
-			LsdHelp LSD_documentation.html 
+		$m add command -label "LSD Documentation" -underline 4 -command {
+			LsdHelp LSD_documentation.html
 		}
 		$m add separator
 		$m add command -label "About LSD..." -underline 0 -command { LsdAbout $_LSD_VERSION_ $_LSD_DATE_ .l }
@@ -140,10 +140,10 @@ proc showmodel pippo {
 		tooltip::tooltip .l.bbar.paste "Paste"
 		tooltip::tooltip .l.bbar.delete "Delete..."
 		tooltip::tooltip .l.bbar.help "Help"
-		
+
 		pack .l.bbar.new .l.bbar.edit .l.bbar.copy .l.bbar.paste .l.bbar.delete .l.bbar.help -side left
 		pack .l.bbar -padx 3 -anchor w -fill x
-		
+
 		ttk::frame .l.l
 
 		ttk::frame .l.l.tit
@@ -158,7 +158,7 @@ proc showmodel pippo {
 		mouse_wheel .l.l.l
 		pack .l.l.vs -side right -fill y
 		pack .l.l.l -expand yes -fill both
-		
+
 		ttk::menu .l.l.l.m -tearoff 0
 		.l.l.l.m  add command -label Select -accelerator Enter -command { .l.m.file invoke 0 }
 		.l.l.l.m  add command -label New -accelerator Ins -command { .l.m.file invoke 1 }
@@ -178,7 +178,7 @@ proc showmodel pippo {
 		mouse_wheel .l.t.text
 
 		pack .l.l .l.t -expand yes -fill both -side left
-		
+
 		bind .l <F1> { .l.m.help invoke 0 }
 		bind .l <Control-e> { .l.m.edit invoke 0 }
 		bind .l <Control-E> { .l.m.edit invoke 0 }
@@ -190,7 +190,7 @@ proc showmodel pippo {
 		bind .l <Escape> { .l.m.file invoke 2 }
 		bind .l <Insert> { .l.m.file invoke 1 }
 		bind .l <Return> { .l.m.file invoke 0 }
-		
+
 		bind .l <KeyRelease> {
 			if { ( %s & 0x20004 ) != 0 } {
 				return
@@ -209,7 +209,7 @@ proc showmodel pippo {
 					selectinlist $ll $ff
 				}
 			}
-			
+
 			break
 		}
 
@@ -218,7 +218,7 @@ proc showmodel pippo {
 			.l.t.text conf -state normal
 			.l.t.text delete 0.0 end
 			.l.t.text insert end "[ lindex $lmd $app ]"
-			.l.t.text conf -state disable 
+			.l.t.text conf -state disable
 		}
 
 		bind .l <Down> {
@@ -226,30 +226,30 @@ proc showmodel pippo {
 			.l.t.text conf -state normal
 			.l.t.text delete 0.0 end
 			.l.t.text insert end "[ lindex $lmd $app ]"
-			.l.t.text conf -state disable 
+			.l.t.text conf -state disable
 		}
-		
-		bind .l <Home> { 
+
+		bind .l <Home> {
 			set app 0
 			selectinlist .l.l.l $app
 			.l.t.text conf -state normal
 			.l.t.text delete 0.0 end
 			.l.t.text insert end "[ lindex $lmd $app ]"
 			.l.t.text conf -state disable
-			break 
+			break
 		}
-		
-		bind .l <End> { 
+
+		bind .l <End> {
 			set app end
 			selectinlist .l.l.l $app
 			.l.t.text conf -state normal
 			.l.t.text delete 0.0 end
 			.l.t.text insert end "[ lindex $lmd $app ]"
 			.l.t.text conf -state disable
-			break 
+			break
 		}
-		
-		bind .l.l.l <Double-Button-1> { set dblclk 1; .l.m.file invoke 0 } 
+
+		bind .l.l.l <Double-Button-1> { set dblclk 1; .l.m.file invoke 0 }
 
 		bind .l.l.l <Button-1> {
 			set dblclk 0
@@ -263,7 +263,7 @@ proc showmodel pippo {
 				.l.t.text conf -state disable
 			}
 		}
-		
+
 		bind .l.l.l <Button-2> {
 			.l.l.l selection clear 0 end
 			.l.l.l selection set [ .l.l.l nearest %y ]
@@ -283,11 +283,11 @@ proc showmodel pippo {
 			}
 			tk_popup .l.l.l.m %X %Y
 		}
-		
+
 		bind .l.l.l <Button-3> {
-			event generate .l.l.l <2> -x %x -y %y 
+			event generate .l.l.l <2> -x %x -y %y
 		}
-		
+
 		showtop .l centerW no no yes 0 0 "" no yes
 	}
 
@@ -320,7 +320,7 @@ proc showmodel pippo {
 		lappend lmn "$upgroup"
 		lappend group -1
 		.l.l.l insert end "$upSymbol"
-		
+
 		tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] "$upgroup"
 	}
 
@@ -348,7 +348,7 @@ proc showmodel pippo {
 			lappend group 1
 			.l.l.l insert end "$groupSymbol$app"
 			.l.l.l itemconf end -fg $colorsTheme(grp)
-			
+
 			tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] "[ file nativename $pippo/$i ]"
 		}
 	}
@@ -357,19 +357,19 @@ proc showmodel pippo {
 	foreach i $dir {
 		if [ file exists "$i/$MODEL_INFO" ] {
 			fix_info $i
-			
+
 			set f [ open "$i/$MODEL_INFO" r ]
 			set app1 "[ gets $f ]"
 			set app2 "[ gets $f ]"
 			set app3 "[ gets $f ]"
 			close $f
-			
+
 			lappend lmn "$app1"
 			lappend lver "$app2"
 			lappend ldn "$pippo/$i"
 			lappend lrn "[ pwd ]"
 			lappend lbn "$modelGroup"
-			
+
 			if [ file exists "$i/$DESCRIPTION" ] {
 				set f [ open "$i/$DESCRIPTION" ]
 				lappend lmd "[ read -nonewline $f ]"
@@ -377,11 +377,11 @@ proc showmodel pippo {
 			} else {
 				lappend lmd "Model: $app1\nin directory: $pippo/$i\n(description not available)"
 			}
-			
+
 			lappend group 0
-			.l.l.l insert end "$app1 (v. $app2)"				 
+			.l.l.l insert end "$app1 (v. $app2)"
 			.l.l.l itemconf end -fg $colorsTheme(mod)
-			
+
 			tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] "[ file nativename $pippo/$i ]"
 		}
 	}
@@ -392,7 +392,7 @@ proc showmodel pippo {
 	focus .l.l.l
 
 	cd $curdir
-	
+
 	update
 }
 
@@ -403,7 +403,7 @@ proc showmodel pippo {
 #************************************************
 proc mcopy i {
 	global copylabel copyver copydir copydscr group ldn memory lmn lver lmd
-	
+
 	if { [ lindex $group $i ] == 0 } {
 		set memory 1
 		.l.m.edit entryconf 2 -state normal
@@ -413,7 +413,7 @@ proc mcopy i {
 		set copydir [ lindex $ldn $i ]
 		set copydscr [ lindex $lmd $i ]
 	} else {
-		ttk::messageBox -parent .l -title Error -type ok -icon error -message "Cannot copy groups" -detail "Check for existing names and try again." 
+		ttk::messageBox -parent .l -title Error -type ok -icon error -message "Cannot copy groups" -detail "Check for existing names and try again."
 	}
 }
 
@@ -457,11 +457,11 @@ proc mdelete i {
 			if { [ file exists "$RootLsd/trashbin/$name" ] } {
 				catch { file delete -force "$RootLsd/trashbin/$name" }
 			}
-			
+
 			if { [ catch { file rename -force [ lindex $ldn $i ] "$RootLsd/trashbin/$name" } ] } {
 				ttk::messageBox -parent .l -title Error -icon error -type ok -message "Delete error" -detail "Directory [ lindex $ldn $i ] cannot be deleted now.\nYou may try again later."
 			}
-			
+
 			showmodel [ lindex $lrn $i ]
 		}
 	}
@@ -477,7 +477,7 @@ proc medit i {
 
 	set memory 0
 	.l.m.edit entryconf 2 -state disabled
-	
+
 	set result $i
 
 	if { [ lindex $group $i ] == 0 } {
@@ -511,7 +511,7 @@ proc medit i {
 
 	pack .l.e.tit .l.e.n .l.e.t -padx 5 -pady 5
 
-	okcancel .l.e b { 
+	okcancel .l.e b {
 		if { [ lindex $group $result ] == 0 } {
 			if [ file exists "[ lindex $ldn $result ]/$MODEL_INFO" ] {
 				set a [ list ]
@@ -525,7 +525,7 @@ proc medit i {
 			} else {
 				set i 1
 			}
-			
+
 			set f [ open "[ lindex $ldn $result ]/$MODEL_INFO" w ]
 			puts -nonewline $f "[ .l.e.n.n get ]"
 			for { set j 1 } { $j < $i } { incr j } {
@@ -541,10 +541,10 @@ proc medit i {
 		puts -nonewline $f [ .l.e.t.t.text get 0.0 end ]
 		close $f
 		destroytop .l.e
-		showmodel [ lindex $lrn $result ] 
-	} { 
+		showmodel [ lindex $lrn $result ]
+	} {
 		destroytop .l.e
-		showmodel [ lindex $lrn $result ] 
+		showmodel [ lindex $lrn $result ]
 	}
 
 	bind .l.e.n.n <Return> {
@@ -617,7 +617,7 @@ proc mpaste i {
 	pack .l.p.tit .l.p.n .l.p.v .l.p.d .l.p.t -padx 5 -pady 5
 
 	okcancel .l.p b { set choiceSM 1 } { set choiceSM 2 }
-	
+
 	bind .l.p.n.n <Return> { focus .l.p.v.v; .l.p.v.v selection range 0 end }
 	bind .l.p.v.v <Return> { focus .l.p.d.d; .l.p.d.d selection range 0 end }
 	bind .l.p.d.d <Return> { focus .l.p.t.t.text; .l.p.t.t.text mark set insert 1.0 }
@@ -630,7 +630,7 @@ proc mpaste i {
 
 	set choiceSM 0
 	tkwait variable choiceSM
-	
+
 	if { $choiceSM == 1 } {
 		set appd [ .l.p.d.d get ]
 		set appv [ .l.p.v.v get ]
@@ -641,9 +641,9 @@ proc mpaste i {
 		if { $confirm == "ok" } {
 			set app [ file exists $pastedir/$appd ]
 			if { $app == 1 } {
-				ttk::messageBox -parent .l.p -title Error -icon error -type ok -message "Copy error" -detail "Directory $pastedir/$appd already exists.\nSpecify a different directory." 
+				ttk::messageBox -parent .l.p -title Error -icon error -type ok -message "Copy error" -detail "Directory $pastedir/$appd already exists.\nSpecify a different directory."
 			} else {
-				#viable directory name 
+				#viable directory name
 				file mkdir $pastedir/$appd
 				set copylist [ glob -nocomplain $copydir/* ]
 				foreach a $copylist { catch [ file copy -force "$a" "$pastedir/$appd" ] }
@@ -656,7 +656,7 @@ proc mpaste i {
 				set frmt "%d %B, %Y"
 				puts $f "[ clock format [ clock seconds ] -format "$frmt" ]"
 				close $f
-			} 
+			}
 		}
 	}
 
@@ -672,7 +672,7 @@ proc mpaste i {
 #************************************************
 proc fix_info { fi } {
 	global MODEL_INFO MODEL_INFO_NUM DATE_FMT
-	
+
 	set f [ open "$fi/$MODEL_INFO" r ]
 	set l1 "[ gets $f ]"
 	set l2 "[ gets $f ]"
@@ -686,21 +686,21 @@ proc fix_info { fi } {
 		set newName $l1
 		set fix 0
 	}
-	
+
 	if { $l2 == "" } {
 		set newVer "1.0"
 		set fix 1
 	} else {
 		set newVer $l2
 	}
-	
+
 	if { ! [ string is print $l3 ] } {
 		set newDate ""
 		set fix 1
 	} else {
 		set newDate $l3
 	}
-	
+
 	if { $fix } {
 		set f [ open "$fi/$MODEL_INFO" w ]
 		puts $f $newName

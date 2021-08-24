@@ -9,7 +9,7 @@
 
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
 
 /*************************************************************
@@ -62,16 +62,16 @@ corresponding linked list and then follow all the chain again.
 
    object *up
 		   /\
-       ||
-       ||___________
-      |             |
-	  |char *label  |------> object *next
-      |variable *v  |
-      |_____________|
-       ||
-       ||-----> bridge *b -----> object *b->head ------> *b->head->next ----> ...
 	   ||
-       ||-----> bridge *b->next --> object *b->next->head --> *b->next->head->next --> ...
+	   ||___________
+	  |             |
+	  |char *label  |------> object *next
+	  |variable *v  |
+	  |_____________|
+	   ||
+	   ||-----> bridge *b -----> object *b->head ------> *b->head->next ----> ...
+	   ||
+	   ||-----> bridge *b->next --> object *b->next->head --> *b->next->head->next --> ...
 	   ..
 	   ..
 
@@ -139,9 +139,9 @@ maximum value of the variables lab with lag lag there contained
 - double sum( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value );
 Searches for the object having the variable lab1. From that object, it considers
 the whole group of object of the same type as the one found, and returns
-the sum of all the variables lab with lag lag in that group. If cond is true, 
-only objects satisfying the logical condition 'V( "lab2" ) lop value' will be 
-considered form summing. lab2 should be in the same object as lab1 or be the same 
+the sum of all the variables lab with lag lag in that group. If cond is true,
+only objects satisfying the logical condition 'V( "lab2" ) lop value' will be
+considered form summing. lab2 should be in the same object as lab1 or be the same
 as lab1.
 
 - double whg_av( char *lab1, char *lab2, int lag, bool cond, const char *lab2, const char *lop, double value );
@@ -484,8 +484,8 @@ object *skip_next_obj( object *tr )
 
 /****************************************************
 HYPER_NEXT
-Return the next Object in the model with the label 
-lab. The Object is searched in the whole model, 
+Return the next Object in the model with the label
+lab. The Object is searched in the whole model,
 including different branches
 ****************************************************/
 object *object::hyper_next( const char *lab )
@@ -514,7 +514,7 @@ object *object::hyper_next( void )
 
 /****************************************************
 HYPER_COUNT
-Return the total number of Object instances in the 
+Return the total number of Object instances in the
 model with the label lab. The Object is searched
 in the whole model, including different branches
 ****************************************************/
@@ -522,9 +522,9 @@ int hyper_count( const char *lab )
 {
 	int n;
 	object *cur;
-	
+
 	for ( n = 0, cur = root->search( lab ); cur != NULL; ++n, cur = cur->hyper_next( ) );
-		
+
 	return n;
 }
 
@@ -604,13 +604,13 @@ object *object::search_err( const char *lab, bool no_search, const char *errmsg 
 		if ( cur == NULL || ( no_search && strcmp( cur->up->label, this->label ) ) )
 			error_hard( "object not found",
 						"create object in model structure",
-						false, 
+						false,
 						"object '%s' is missing for %s%s", lab, errmsg, no_search && cur != NULL ? " (NO_SEARCH enabled!)" : "");
 
 		if ( no_zero_instance )
 			error_hard( "object has no instance",
 						"check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
-						true, 
+						true,
 						"all instances of '%s' were deleted", lab );
 
 		cur = NULL;									// do not return blueprint objects
@@ -733,7 +733,7 @@ double object::initturbo( const char *lab, double tot = 0 )
 	{
 		error_hard( "object not found",
 					"create object in model structure",
-					false, 
+					false,
 					"object '%s' is missing for turbo search", lab );
 		return 0;
 	}
@@ -742,7 +742,7 @@ double object::initturbo( const char *lab, double tot = 0 )
 	{
 		error_hard( "object has no instance",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"failure when initializing object '%s' for turbo search", lab );
 		return 0;
 	}
@@ -785,7 +785,7 @@ object *object::turbosearch( const char *lab, double tot, double num )
 	{
 		error_hard( "invalid search operation",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"position '%.0lf' is invalid for turbo searching object '%s'", num, lab );
 		return NULL;
 	}
@@ -795,7 +795,7 @@ object *object::turbosearch( const char *lab, double tot, double num )
 	{
 		error_hard( "object not found",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"failure when turbo searching object '%s'", lab );
 		return NULL;
 	}
@@ -804,7 +804,7 @@ object *object::turbosearch( const char *lab, double tot, double num )
 	{
 		error_hard( "invalid search operation",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"object '%s' is not initialized for turbo search", lab );
 		return NULL;
 	}
@@ -962,7 +962,7 @@ variable *object::search_var( object *caller, const char *lab, bool no_error,
 			if ( ! no_error )
 				error_hard( "variable or parameter not found",
 							"create variable or parameter in model structure",
-							false, 
+							false,
 							"element '%s' is missing", lab );
 			return NULL;
 		}
@@ -990,13 +990,13 @@ variable *object::search_var_err( object *caller, const char *lab, bool no_searc
 		if ( cur == NULL || cur->search_var( NULL, lab, true, no_search, search_sons ) == NULL )
 			error_hard( "variable or parameter not found",
 						"create variable or parameter in model structure",
-						false, 
+						false,
 						"element '%s' is missing for %s", lab, errmsg );
 
 		if ( no_zero_instance )
 			error_hard( "last object instance deleted",
 						"check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
-						true, 
+						true,
 						"all instances of the object containing '%s' were deleted", lab );
 	}
 
@@ -1025,7 +1025,7 @@ object *object::search_var_cond( const char *lab, double value, int lag )
 	for ( cur = cv->up; cur != NULL; cur = cnext )
 	{
 		cnext = no_search ? cur->next : cur->hyper_next( );	// allow object suicide
-		
+
 		res = cur->cal( lab, lag );
 		if ( res == value )
 			return cur;
@@ -1054,7 +1054,7 @@ double object::initturbo_cond( const char *lab )
 	{
 		error_hard( "invalid variable or parameter for turbo search",
 					"check your model structure to prevent this situation",
-					false, 
+					false,
 					"element '%s' is at root level (always single-instanced)", lab );
 		return 0;
 	}
@@ -1113,7 +1113,7 @@ object *object::turbosearch_cond( const char *lab, double value )
 	{
 		error_hard( "invalid variable or parameter for turbo search",
 					"check your model structure to prevent this situation",
-					false, 
+					false,
 					"element '%s' is at root level (always single-instanced)", lab );
 		return NULL;
 	}
@@ -1134,7 +1134,7 @@ object *object::turbosearch_cond( const char *lab, double value )
 	{
 		error_hard( "invalid search operation",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"element '%s' is not initialized for turbo conditional search", lab );
 		return NULL;
 	}
@@ -1159,7 +1159,7 @@ variable *object::add_empty_var( const char *lab )
 	{
 		error_hard( "variable or parameter not added",
 					"choose an unique name for the element",
-					true, 
+					true,
 					"element '%s' already exists in object '%s'", lab, label );
 		return NULL;
 	}
@@ -1200,7 +1200,7 @@ void object::add_var_from_example( variable *example )
 	{
 		error_hard( "variable or parameter not added",
 					"choose an unique name for the element",
-					true, 
+					true,
 					"element '%s' already exists in object '%s'", example->label, label );
 		return;
 	}
@@ -1244,7 +1244,7 @@ void object::add_obj( const char *lab, int num, int propagate )
 	int i;
 	bridge *cb;
 	object *cur, *cur1;
-	
+
 #ifndef _NW_
 	if ( ! valid_label( lab ) )
 	{
@@ -1283,7 +1283,7 @@ void object::add_obj( const char *lab, int num, int propagate )
 
 /****************************************************
 MOVE_OBJ
-Move object in the model structure. The lab object 
+Move object in the model structure. The lab object
 is placed below the provided dest object
 ****************************************************/
 void move_obj( const char *lab, const char *dest )
@@ -1291,19 +1291,19 @@ void move_obj( const char *lab, const char *dest )
 	bridge *cb, *cb1, *mb = NULL, *nb;
 	object *cur, *cur1, *d, *no, *o, *s;
 	variable *cv;
-	
+
 	o = root->search( lab );		// pick first model instances
 	d = root->search( dest );
-	
+
 	if ( o == NULL || d == NULL || o->search( dest ) != NULL )
 	{
 		error_hard( "missing/invalid source or destination object",
 					"choose valid object names\nand non-nested destination",
-					true, 
+					true,
 					"cannot move object '%s'", lab );
 		return;
 	}
-	
+
 	// move bridges from source parent instances to destination parent instances
 	s = o->up;
 	while ( s != NULL || d != NULL )
@@ -1312,16 +1312,16 @@ void move_obj( const char *lab, const char *dest )
 		{
 			// find bridge to object being copied in source parent
 			for ( cb1 = NULL, cb = s->b; cb != NULL && strcmp( cb->blabel, lab ) != 0; cb1 = cb, cb = cb->next );
-			
+
 			// remove from the source parent's bridge linked list
 			if ( cb1 == NULL )	// head of list?
 				s->b = cb->next;
 			else
 				cb1->next = cb->next;
-			
+
 			mb = cb;
 			mb->next = NULL;	// moved object bridge enters at the end of the new parent list
-				
+
 			s->b_map.erase( lab );	// update speedup maps
 			s = s->hyper_next( );	// next source parent
 		}
@@ -1329,12 +1329,12 @@ void move_obj( const char *lab, const char *dest )
 		{		// additional instances of destination parent
 			// clone last object bridge to insert it on unmatched destination parents
 			nb = new bridge( lab );
-			
+
 			// clone object instances and add them to the cloned bridge
 			for ( cur = mb->head, cur1 = NULL; cur != NULL; cur = cur->next )
 			{
 				no = new object;
-				
+
 				// update linked list of object instances in bridge
 				if ( cur1 == NULL )
 					nb->head = no;
@@ -1342,34 +1342,34 @@ void move_obj( const char *lab, const char *dest )
 					cur1->next = no;
 
 				cur1 = no;
-				
+
 				// clone object instance, variables and descending objects
 				cur1->init( d, lab, cur->to_compute );
-					
+
 				for ( cv = cur->v; cv != NULL; cv = cv->next )
 					cur1->add_var_from_example( cv );
 
 				copy_descendant( cur, cur1 );
 			}
-			
+
 			mb = nb;	// bridge clone to move
 		}
-		
+
 		if ( d != NULL )
 		{
 			// find tail of bridge list in destination parent
 			for ( cb1 = NULL, cb = d->b; cb != NULL; cb1 = cb, cb = cb->next );
-			
+
 			// add moved object to the end of destination's bridge list
 			if ( cb1 == NULL )	// head of list?
 				d->b = mb;
 			else
 				cb1->next = mb;
-			
+
 			// adjust instances of moved object to the new parent
 			for ( cur = mb->head; cur != NULL; cur = cur->next )
 				cur->up = d;
-				
+
 			d->b_map.insert( b_pairT ( lab, mb ) );	// update speedup maps
 			d = d->hyper_next( );					// next destination parent
 		}
@@ -1378,8 +1378,8 @@ void move_obj( const char *lab, const char *dest )
 			delete mb;		// delete unmatched object instances and the bridge
 	}
 }
-	
-	
+
+
 /****************************************************
 REPLICATE
 ****************************************************/
@@ -1514,7 +1514,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 	{
 		error_hard( "object not found",
 					"create son object in model structure",
-					false, 
+					false,
 					"object '%s' contains no son object '%s' for adding instance(s)", label, lab );
 		return NULL;
 	}
@@ -1523,7 +1523,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 	{
 		error_hard( "invalid example object",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"bad example pointer when adding object '%s'", lab );
 		return NULL;
 	}
@@ -1572,7 +1572,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 					{
 						error_hard( "cannot add object",
 									"check your equation code to prevent this situation",
-									true, 
+									true,
 									"invalid update time (%d) to set object '%s'\nvariable '%s' was updated later (%d)", t_update, lab, cv->label, cv->last_update );
 						return NULL;
 					}
@@ -1702,7 +1702,7 @@ void object::delete_obj( variable *caller )
 			{
 				error_hard( "deletion already pending",
 							"check your equation code to prevent deleting objects recursively",
-							true, 
+							true,
 							"cannot schedule the deletion of object '%s'", label );
 				return;
 			}
@@ -1750,7 +1750,7 @@ void object::delete_obj( variable *caller )
 				{
 					error_hard( "last object instance deleted",
 								"check your equation code to ensure at least one instance\nof any object is kept",
-								true, 
+								true,
 								"cannot delete all instances of '%s'", label );
 					return;
 				}
@@ -1789,7 +1789,7 @@ void object::empty( void )
 {
 	bridge *cb, *cb1;
 	variable *cv, *cv1;
-	
+
 	// remove variables if cemetery collection was not called before
 	for ( cv = v; cv != NULL; cv = cv1 )
 	{
@@ -1797,7 +1797,7 @@ void object::empty( void )
 		cv->empty( );
 		delete cv;
 	}
-		
+
 	v = NULL;
 	v_map.clear( );
 
@@ -1829,25 +1829,25 @@ Also destroy variables not requiring saving
 void object::collect_cemetery( variable *caller )
 {
 	variable *cv, *cv1;
-	
+
 	for ( cv = v; cv != NULL; cv = cv1 )	// scan all variables
 	{
 		cv1 = cv->next;						// pointer to next variable
-		
+
 		// need to save?
 		if ( ( cv->save == true || cv->savei == true ) && running && actual_steps > 0 )
 		{
 			if ( cv->savei )
 				save_single( cv );			// update file
-	
+
 			set_lab_tit( cv );				// update last lab_tit
-			
+
 			cv->end = t;					// define last period,
 			cv->data[ t - cv->start ] = cv->val[ 0 ];	// and last value
-			
+
 			// use C stdlib to be able to deallocate memory for deleted objects
 			cv->data = ( double * ) realloc( cv->data, ( t - cv->start + 1 ) * sizeof( double ) );
-			
+
 			add_cemetery( cv );				// transfer to cemetery
 		}
 		else
@@ -1856,7 +1856,7 @@ void object::collect_cemetery( variable *caller )
 			delete cv;
 		}
 	}
-	
+
 	v = NULL;
 	v_map.clear( );
 }
@@ -1876,7 +1876,7 @@ void add_cemetery( variable *v )
 		last_cemetery->next = v;
 		last_cemetery = v;
 	}
-	
+
 	last_cemetery->next = NULL;
 }
 
@@ -1887,7 +1887,7 @@ EMPTY_CEMETERY
 void empty_cemetery( void )
 {
 	variable *cv, *cv1;
-	
+
 	for ( cv = cemetery; cv !=NULL ; )
 	{
 		cv1 = cv->next;
@@ -1895,7 +1895,7 @@ void empty_cemetery( void )
 		delete cv;
 		cv = cv1;
 	}
-	
+
 	cemetery = last_cemetery = NULL;
 }
 
@@ -2145,14 +2145,14 @@ double object::sum( const char *lab1, int lag, bool cond, const char *lab2, cons
 		return 0;
 
 	if ( cond )
-	{	
+	{
 		lopc = logic_op_code( lop, "summing" );
 		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "summing" ) == NULL )
 			return 0;
 	}
 	else
 		lopc = -1;
-	
+
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
@@ -2160,7 +2160,7 @@ double object::sum( const char *lab1, int lag, bool cond, const char *lab2, cons
 	for ( tot = n = 0; cur != NULL; cur = cnext )
 	{
 		cnext = go_brother( cur );				// allow object suicide
-		
+
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			tot += cur->cal( this, lab1, lag );
@@ -2174,7 +2174,7 @@ double object::sum( const char *lab1, int lag, bool cond, const char *lab2, cons
 
 /****************************************************
 OVERALL_MAX (*)
-Compute the maximum of lab1, considering only the 
+Compute the maximum of lab1, considering only the
 objects in a single branch of the model.
 If cond is true check if expression 'V("lab2") lop value'
 is true before considering each instance of the object.
@@ -2191,14 +2191,14 @@ double object::overall_max( const char *lab1, int lag, bool cond, const char *la
 		return NAN;
 
 	if ( cond )
-	{	
+	{
 		lopc = logic_op_code( lop, "maximizing" );
 		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "maximizing" ) == NULL )
 			return NAN;
 	}
 	else
 		lopc = -1;
-	
+
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
@@ -2206,7 +2206,7 @@ double object::overall_max( const char *lab1, int lag, bool cond, const char *la
 	for ( tot = -DBL_MAX, n = 0; cur != NULL; cur = cnext )
 	{
 		cnext = go_brother( cur );				// allow object suicide
-		
+
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			if ( tot < ( temp = cur->cal( this, lab1, lag ) ) )
@@ -2224,7 +2224,7 @@ double object::overall_max( const char *lab1, int lag, bool cond, const char *la
 
 /****************************************************
 OVERALL_MIN (*)
-Compute the minimum of lab1, considering only the 
+Compute the minimum of lab1, considering only the
 objects in a single branch of the model.
 If cond is true check if expression 'V("lab2") lop value'
 is true before considering each instance of the object.
@@ -2241,14 +2241,14 @@ double object::overall_min( const char *lab1, int lag, bool cond, const char *la
 		return NAN;
 
 	if ( cond )
-	{	
+	{
 		lopc = logic_op_code( lop, "minimizing" );
 		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "minimizing" ) == NULL )
 			return NAN;
 	}
 	else
 		lopc = -1;
-	
+
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
@@ -2256,7 +2256,7 @@ double object::overall_min( const char *lab1, int lag, bool cond, const char *la
 	for ( tot = DBL_MAX, n = 0; cur != NULL; cur = cnext )
 	{
 		cnext = go_brother( cur );				// allow object suicide
-		
+
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			if ( tot > ( temp = cur->cal( this, lab1, lag ) ) )
@@ -2290,14 +2290,14 @@ double object::av( const char *lab1, int lag, bool cond, const char *lab2, const
 		return NAN;
 
 	if ( cond )
-	{	
+	{
 		lopc = logic_op_code( lop, "averaging" );
 		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "averaging" ) == NULL )
 			return NAN;
 	}
 	else
 		lopc = -1;
-	
+
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
@@ -2305,7 +2305,7 @@ double object::av( const char *lab1, int lag, bool cond, const char *lab2, const
 	for ( tot = n = 0; cur != NULL; cur = cnext )
 	{
 		cnext = go_brother( cur );				// allow object suicide
-		
+
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			tot += cur->cal( this, lab1, lag );
@@ -2342,14 +2342,14 @@ double object::whg_av( const char *lab1, const char *lab2, int lag, bool cond, c
 		return 0;
 
 	if ( cond )
-	{	
+	{
 		lopc = logic_op_code( lop, "weighted averaging" );
 		if ( lopc < 0 || search_var_err( this, lab3, no_search, true, "weighted averaging" ) == NULL )
 			return 0;
 	}
 	else
 		lopc = -1;
-	
+
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
@@ -2357,7 +2357,7 @@ double object::whg_av( const char *lab1, const char *lab2, int lag, bool cond, c
 	for ( tot = n = 0; cur != NULL; cur = cnext )
 	{
 		cnext = go_brother( cur );				// allow object suicide
-		
+
 		if ( ! cond || check_cond( cur->cal( this, lab3, lag ), lopc, value ) )
 		{
 			tot += cur->cal( this, lab1, lag ) * cur->cal( this, lab2, lag );
@@ -2399,7 +2399,7 @@ double object::perc( const char *lab1, double p, int lag, bool cond, const char 
 	{
 		error_hard( "invalid value (0 <= p <= 1 required)",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"percentile '%g' is invalid", p );
 
 		return NAN;
@@ -2410,14 +2410,14 @@ double object::perc( const char *lab1, double p, int lag, bool cond, const char 
 		return NAN;
 
 	if ( cond )
-	{	
+	{
 		lopc = logic_op_code( lop, "calculating percentile" );
 		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "calculating percentile" ) == NULL )
 			return NAN;
 	}
 	else
 		lopc = -1;
-	
+
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
@@ -2426,7 +2426,7 @@ double object::perc( const char *lab1, double p, int lag, bool cond, const char 
 	for ( n = 0; cur != NULL; cur = cnext )
 	{
 		cnext = go_brother( cur );				// allow object suicide
-		
+
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			vals.push_back( cur->cal( this, lab1, lag ) );
@@ -2469,14 +2469,14 @@ double object::sd( const char *lab1, int lag, bool cond, const char *lab2, const
 		return NAN;
 
 	if ( cond )
-	{	
+	{
 		lopc = logic_op_code( lop, "calculating s.d." );
 		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "calculating s.d." ) == NULL )
 			return NAN;
 	}
 	else
 		lopc = -1;
-	
+
 	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
@@ -2484,7 +2484,7 @@ double object::sd( const char *lab1, int lag, bool cond, const char *lab2, const
 	for ( tot = tot2 = n = 0; cur != NULL; cur = cnext )
 	{
 		cnext = go_brother( cur );				// allow object suicide
-		
+
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			tot += x = cur->cal( this, lab1, lag );
@@ -2517,18 +2517,18 @@ double object::count( const char *lab1, int lag, bool cond, const char *lab2, co
 		return 0;
 
 	if ( cond )
-	{	
+	{
 		lopc = logic_op_code( lop, "counting" );
 		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "counting" ) == NULL )
 			return NAN;
 	}
 	else
 		lopc = -1;
-	
+
 	for ( n = 0; cur != NULL; cur = cnext )
 	{
 		cnext = go_brother( cur );				// allow object suicide
-		
+
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 			++n;
 	}
@@ -2558,18 +2558,18 @@ double object::count_all( const char *lab1, int lag, bool cond, const char *lab2
 		return 0;
 
 	if ( cond )
-	{	
+	{
 		lopc = logic_op_code( lop, "counting" );
 		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "counting" ) == NULL )
 			return NAN;
 	}
 	else
 		lopc = -1;
-	
+
 	for ( n = 0; cur != NULL; cur = cnext )
 	{
 		cnext = cur->hyper_next( lab1 );				// allow object suicide
-		
+
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 			++n;
 	}
@@ -2580,7 +2580,7 @@ double object::count_all( const char *lab1, int lag, bool cond, const char *lab2
 
 /****************************************************
 STAT (*)
-Compute some basic statistics of a group of Variables or 
+Compute some basic statistics of a group of Variables or
 Paramters with label lab1 and storing the results in a vector of double.
 If cond is true check if expression 'V("lab2") lop value'
 is true before considering each instance of the object.
@@ -2615,14 +2615,14 @@ double object::stat( const char *lab1, double *r, int lag, bool cond, const char
 	}
 
 	if ( cond )
-	{	
+	{
 		lopc = logic_op_code( lop, "calculating statistics" );
 		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "calculating statistics" ) == NULL )
 			return NAN;
 	}
 	else
 		lopc = -1;
-	
+
 	cur = cv->up;
 	r[ 1 ] =  r[ 2 ] = 0;
 	r[ 3 ] = DBL_MIN;
@@ -2631,7 +2631,7 @@ double object::stat( const char *lab1, double *r, int lag, bool cond, const char
 	for ( n = 0; cur != NULL; cur = cnext )
 	{
 		cnext = go_brother( cur );				// allow object suicide
-		
+
 		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
 		{
 			val = cur->cal( lab1, lag );
@@ -2731,7 +2731,7 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 		{
 			error_hard( "variable or parameter not found",
 						"create variable or parameter in model structure",
-						false, 
+						false,
 						"element '%s' is missing (object '%s') for sorting", var, obj );
 			return NULL;
 		}
@@ -2740,7 +2740,7 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 		{
 			error_hard( "object not found",
 						"create object in model structure",
-						false, 
+						false,
 						"object '%s' is missing for sorting", obj );
 			return NULL;
 		}
@@ -2757,7 +2757,7 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 			{
 				error_hard( "invalid network object",
 							"check your equation code to add\nthe network structure before using this macro",
-							true, 
+							true,
 							"object '%s' has no network data structure", obj );
 				return NULL;
 			}
@@ -2769,7 +2769,7 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 	{
 		error_hard( "object not found",
 					"create object in model structure",
-					false, 
+					false,
 					"object '%s' is missing for sorting", obj );
 		return NULL;
 	}
@@ -2778,7 +2778,7 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 	{
 		error_hard( "object has no instance",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"all instances of object '%s' were deleted", obj );
 		return NULL;
 	}
@@ -2814,7 +2814,7 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 		{
 			error_hard( "invalid sort option ('UP' or 'DOWN' required)",
 						"check your equation code to prevent this situation",
-						true, 
+						true,
 						"direction '%s' is invalid for sorting", direction );
 			delete [ ] mylist;
 			return NULL;
@@ -2889,7 +2889,7 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 	{
 		error_hard( "object not found",
 					"create object in model structure",
-					false, 
+					false,
 					"object '%s' is missing for sorting", obj );
 		return NULL;
 	}
@@ -2898,7 +2898,7 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 	{
 		error_hard( "object has no instance",
 					"check your equation code to ensure at least one instance\nof any object is kept",
-					true, 
+					true,
 					"all instances of object '%s' were deleted", obj );
 		return NULL;
 	}
@@ -2912,7 +2912,7 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 	{
 		error_hard( "variable or parameter not found",
 					"create variable or parameter in model structure",
-					false, 
+					false,
 					"element '%s' is missing (object '%s') for sorting", var1, obj );
 		return NULL;
 	}
@@ -2921,7 +2921,7 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 	{
 		error_hard( "object not found",
 					"create object in model structure",
-					false, 
+					false,
 					"object '%s' is missing for sorting", obj );
 		return NULL;
 	}
@@ -2958,7 +2958,7 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 		{
 			error_hard( "invalid sort option ('UP' or 'DOWN' required)",
 						"check your equation code to prevent this situation",
-						true, 
+						true,
 						"direction '%s' is invalid for sorting", direction );
 			delete [ ] mylist;
 			return NULL;
@@ -3004,7 +3004,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 	{
 		error_hard( "invalid random draw option",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"element '%s' has invalid value '%g' for random drawing", lv, a );
 		return NULL;
 	}
@@ -3013,7 +3013,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 	{
 		error_hard( "invalid random draw option",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"element '%s' has only zero values for random drawing", lv );
 		return NULL;
 	}
@@ -3057,7 +3057,7 @@ object *object::draw_rnd( const char *lab )
 	{
 		error_hard( "object not found",
 					"create object in model structure",
-					false, 
+					false,
 					"object '%s' is missing for random drawing", lab );
 		return NULL;
 	}
@@ -3092,7 +3092,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag, double tot )
 	{
 		error_hard( "invalid random draw option",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"element '%s' has invalid value '%g' for random drawing", lv, tot );
 		return NULL;
 	}
@@ -3117,7 +3117,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag, double tot )
 	{
 		error_hard( "invalid random draw option",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"element '%s' has invalid value '%g' for random drawing", lv, tot );
 		return NULL;
 	}
@@ -3133,17 +3133,17 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag, double tot )
  ***************************************************/
 double object::write( const char *lab, double value, int time, int lag )
 {
-    int i, eff_lag, eff_time;
+	int i, eff_lag, eff_time;
 	variable *cv;
 
-    if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
-    {
+	if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
+	{
 		error_hard( "invalid write operation",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"value '%g' is invalid for writing to element '%s'", value, lab );
-        return NAN;
-    }
+		return NAN;
+	}
 
 	cv = search_var_err( this, lab, true, false, "writing" );
 	if ( cv == NULL )
@@ -3155,7 +3155,7 @@ double object::write( const char *lab, double value, int time, int lag )
 		{
 			error_hard( "invalid write operation",
 						"check your equation code to prevent this situation",
-						true, 
+						true,
 						"variable '%s' is under computation and cannot be written", lab );
 			return NAN;
 		}
@@ -3167,7 +3167,7 @@ double object::write( const char *lab, double value, int time, int lag )
 		{
 			error_hard( "deadlock during parallel computation",
 						"check your equation code to prevent this situation",
-						true, 
+						true,
 						"variable '%s' is under dummy computation and cannot be written", lab );
 			return NAN;
 		}
@@ -3182,7 +3182,7 @@ double object::write( const char *lab, double value, int time, int lag )
 	{
 		error_hard( "invalid write operation",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"invalid update time (%d) for variable '%s'", time, lab );
 		return NAN;
 	}
@@ -3194,7 +3194,7 @@ double object::write( const char *lab, double value, int time, int lag )
 		{
 			error_hard( "invalid write operation",
 						"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
-						false, 
+						false,
 						"invalid initial lag (%d) for variable '%s'", time, lab );
 			return NAN;
 		}
@@ -3219,11 +3219,11 @@ double object::write( const char *lab, double value, int time, int lag )
 		{
 			error_hard( "invalid write operation",
 						"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
-						false, 
+						false,
 						"invalid lag (%d) for %s '%s'", lag, cv->param != 1 ? "variable" : "parameter", lab );
 			return NAN;
 		}
-		
+
 		if ( cv->param == 1 )
 		{
 			eff_lag = 0;
@@ -3267,7 +3267,7 @@ double object::write( const char *lab, double value, int time, int lag )
 				{
 					error_hard( "invalid write operation",
 								"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
-								true, 
+								true,
 								"invalid update time (%d) and lag (%d) for variable '%s'", time, lag, lab );
 					return NAN;
 				}
@@ -3276,7 +3276,7 @@ double object::write( const char *lab, double value, int time, int lag )
 
 		cv->val[ eff_lag ] = value;
 		cv->last_update = time;
-		
+
 		if ( cv->save || cv->savei )
 		{
 			if ( eff_time >= cv->start && eff_time <= cv->end )
@@ -3300,17 +3300,17 @@ Return the new value.
 *************************************************/
 double object::increment( const char *lab, double value )
 {
-    variable *cv;
+	variable *cv;
 	double new_value;
 
-    if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
-    {
+	if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
+	{
 		error_hard( "invalid write operation",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"value '%g' is invalid for incrementing element '%s'", value, lab );
-        return NAN;
-    }
+		return NAN;
+	}
 
 	cv = search_var_err( this, lab, true, false, "incrementing" );
 	if ( cv == NULL )
@@ -3331,17 +3331,17 @@ Return the new value.
 *************************************************/
 double object::multiply( const char *lab, double value )
 {
-    variable *cv;
+	variable *cv;
 	double new_value;
 
-    if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
-    {
+	if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
+	{
 		error_hard( "invalid write operation",
 					"check your equation code to prevent this situation",
-					true, 
+					true,
 					"value '%g' is invalid for multiplying element '%s'", value, lab );
-        return NAN;
-    }
+		return NAN;
+	}
 
 	cv = search_var_err( this, lab, true, false, "multiplying" );
 	if ( cv == NULL )
@@ -3466,14 +3466,14 @@ void collect_inst( object *r, o_setT &list )
 	bridge *cb;
 	object *cur;
 	pair < o_setT::iterator, bool > res;
-	
+
 	// collect own address
 	res = list.emplace( r );
 	if ( ! res.second )
 	{
-		error_hard( "LSD internal error", 
+		error_hard( "LSD internal error",
 					"disable pointer checking by defining 'NO_POINTER_CHECK'",
-					false, 
+					false,
 					"object '%s' cannot be collected for pointer checking", r->label );
 		return;
 	}
@@ -3545,7 +3545,7 @@ double object::interact( const char *text, double v, double *tv, int i, int j,
 
 /****************************************************
 LOGIC_OP_CODE
-Check for valid relational operator and return 
+Check for valid relational operator and return
 operator code for CHECK_COND
 ****************************************************/
 const unordered_map < string, int > logic_ops = { { "==", 0 }, { "!=", 1 }, { ">", 2 }, { ">=", 3 }, { "<", 4 }, { "<=", 5 } };
@@ -3553,13 +3553,13 @@ const unordered_map < string, int > logic_ops = { { "==", 0 }, { "!=", 1 }, { ">
 int logic_op_code( const char *lop, const char *errmsg )
 {
 	auto lopp = logic_ops.find( lop );
-	
+
 	if ( lopp != logic_ops.end( ) )
 		return lopp->second;
-	
+
 	error_hard( "invalid logical relational operator",
 				"use a valid operator (== != > >= < <=)",
-				false, 
+				false,
 				"cannot compare with '%s' for %s", lop, errmsg );
 	return -1;
 }
@@ -3568,7 +3568,7 @@ int logic_op_code( const char *lop, const char *errmsg )
 /****************************************************
 CHECK_COND
 Check if logical condition defined by the logical
-operator code and the two values is true 
+operator code and the two values is true
 ****************************************************/
 bool check_cond( double val1, int lopc, double val2 )
 {

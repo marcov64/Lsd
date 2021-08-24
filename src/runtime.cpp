@@ -6,14 +6,14 @@
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
 
 /*************************************************************
-RUN_TIME.CPP 
+RUN_TIME.CPP
 Contains initialization and management of run-time plotting
 
 The main functions contained here are:
@@ -54,20 +54,20 @@ void prepare_plot( object *r, int id_sim )
 {
 	int i = 0;
 	char lab[ MAX_ELEM_LENGTH ];
-	
+
 	ymax = ymin = 0;
 	strcpy( lab, "" );
 	count( r, &i );
-	
+
 	if ( i == 0 )
 		return;
-	
+
 	cmd( "unset -nocomplain tp" );
 	list_var = new variable *[ i ];
 	old_val = new double [ i ];
 	i = 0;
 	assign( r, &i, lab );
-	
+
 	add_rt_plot_tab( ".plt", id_sim );
 	init_plot( i, id_sim );
 }
@@ -102,7 +102,7 @@ void assign( object *r, int *i, const char *lab )
 	bridge *cb;
 	object *c, *c1;
 	variable *a;
-	
+
 	for ( a = r->v; a != NULL; a = a->next )
 		if ( a->plot == 1 )
 		{
@@ -115,7 +115,7 @@ void assign( object *r, int *i, const char *lab )
 	{
 		if ( cb->head == NULL )
 			continue;
-		
+
 		c = cb->head;
 		if ( c->next != NULL ) 		// multiple instances
 			for ( j = 1, c1 = c; c1 != NULL; c1 = go_brother( c1 ), ++j )
@@ -135,7 +135,7 @@ ADD_RT_PLOT_TAB
 void add_rt_plot_tab( const char *w, int id_sim )
 {
 	int i, j, k, cols, dbut, tabs;
-		
+
 	switch ( platform )
 	{
 		case _WIN_:
@@ -155,7 +155,7 @@ void add_rt_plot_tab( const char *w, int id_sim )
 			dbut = 2;
 			break;
 	}
-	
+
 	cmd( "set w %s", w );
 	cmd( "set rtptab $w.pad" );
 	cmd( "if { ! [ winfo exists $rtptab ] } { \
@@ -167,9 +167,9 @@ void add_rt_plot_tab( const char *w, int id_sim )
 			bind $w <F1> { LsdHelp runtime.html }; \
 			set rtptab_show 0 \
 		}", unsaved_change( ) ? "*" : " ", simul_name );
-		
+
 	set_shortcuts_run( "$w" );
-		
+
 	cmd( "set activeplot $rtptab.tab%d", id_sim );
 	cmd( "if [ winfo exists $activeplot ] { \
 			if { $activeplot in [ $rtptab  tabs ] } { \
@@ -179,36 +179,36 @@ void add_rt_plot_tab( const char *w, int id_sim )
 		}" );
 	cmd( "ttk::frame $activeplot" );
 	cmd( "pack $activeplot" );
-	
+
 	if ( id_sim < tabs )
 		cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 4", id_sim );
-		
+
 	if ( id_sim == tabs )
 		cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 5", id_sim );
-		
+
 	if ( id_sim <= tabs )
 		cmd( "$rtptab select $activeplot" );
-	
+
 	if ( id_sim == tabs + 1 )
 	{
 		cmd( "ttk::frame $rtptab.more" );
 		cmd( "pack $rtptab.more" );
 		cmd( "$rtptab insert 0 $rtptab.more -text \"More...\" -underline 0" );
 	}
-	
-	if ( id_sim > tabs ) 
+
+	if ( id_sim > tabs )
 	{
 		cmd( "$rtptab forget 1" );
 		cmd( "$rtptab add $activeplot -text \"Run %d\"", id_sim );
 		cmd( "$rtptab select $activeplot" );
-		
+
 		cmd( "destroy $rtptab.more.b");
 		cmd( "ttk::frame $rtptab.more.b");
-		
+
 		for ( i = 0; cols * i + 1 <= id_sim; ++i )
 		{
 			cmd( "ttk::frame $rtptab.more.b.l%d", i );
-			
+
 			for ( j = 1; j <= cols && cols * i + j <= id_sim; ++j )
 			{
 				k = cols * i + j;
@@ -224,10 +224,10 @@ void add_rt_plot_tab( const char *w, int id_sim )
 					}", i, k, k, k, tabs, k, k, k );
 				cmd( "pack $rtptab.more.b.l%d.b%d -side left -padx 2", i, k );
 			}
-			
+
 			cmd( "pack $rtptab.more.b.l%d -anchor w -pady 2", i );
 		}
-		
+
 		cmd( "pack $rtptab.more.b -padx 20 -pady 20" );
 	}
 }
@@ -239,20 +239,20 @@ INIT_PLOT
 void init_plot( int num, int id_sim )
 {
 	int i;
-	
+
 	cmd( "if { %d > $hsizeR } { set plot_step 1 } { set plot_step [ expr { $hsizeR / %d.0 } ] }", max_step, max_step );
-	
+
 	cmd( "ttk::frame $activeplot.c" );
-	
+
 	// vertical scale values
 	cmd( "ttk::canvas $activeplot.c.yscale -width $sclhsizeR -height [ expr { $vsizeR + $sclvmarginR + $botvmarginR } ] -entry 0 -dark $darkTheme" );
 
 	cmd( "$activeplot.c.yscale create text $sclhsizeR [ expr { max( $sclvmarginR, 10 ) } ] -anchor e -justify right -text \"\" -fill $colorsTheme(dfg) -tag ymax" );
 	cmd( "$activeplot.c.yscale create text $sclhsizeR [ expr { $sclvmarginR + $vsizeR / 2 } ] -anchor e -justify right -text \"\" -fill $colorsTheme(dfg) -tag medy" );
 	cmd( "$activeplot.c.yscale create text $sclhsizeR [ expr { $sclvmarginR + $vsizeR } ] -anchor e -justify right -text \"\" -fill $colorsTheme(dfg) -tag ymin" );
-	
+
 	cmd( "pack $activeplot.c.yscale -side left -anchor nw" );
-	
+
 	// main canvas
 	cmd( "ttk::frame $activeplot.c.c  " );
 	cmd( "set p $activeplot.c.c.cn" );
@@ -260,7 +260,7 @@ void init_plot( int num, int id_sim )
 	cmd( "ttk::canvas $p -width [ expr { $hsizeR + 2 * $cvhmarginR } ] -height [ expr { $vsizeR + $sclvmarginR + $botvmarginR } ] -scrollregion \"0 0 %d [ expr { $vsizeR + $sclvmarginR + $botvmarginR } ]\" -xscrollcommand \"$activeplot.c.c.hscroll set\" -xscrollincrement 1 -yscrollincrement 1 -dark $darkTheme", max_step );
 	cmd( "pack $activeplot.c.c.hscroll -side bottom -expand yes -fill x" );
 	cmd( "mouse_wheel $p" );
-	
+
 	// horizontal grid lines
 	cmd( "for { set i 0 } { $i <= $vticksR } { incr i } { \
 			if { $i > 0 && $i < $vticksR } { \
@@ -292,18 +292,18 @@ void init_plot( int num, int id_sim )
 				set u $l \
 			} \
 	}	", max_step, max_step, max_step );
-	
+
 	cmd( "pack $p -anchor nw" );
 	cmd( "pack $activeplot.c.c -anchor nw" );
 	cmd( "pack $activeplot.c -anchor nw" );
 	cmd( "$p xview moveto 0" );
-	
+
 	// bottom part
 	cmd( "ttk::canvas $activeplot.fond -width [ expr { $sclhsizeR + $hsizeR + 2 * $cvhmarginR } ] -height $botvsizeR -entry 0 -dark $darkTheme" );
 
 	// controls
 	cmd( "set scrollB %d", scrollB );
-	cmd( "ttk::checkbutton $activeplot.fond.shift -text Scroll -variable scrollB -state disabled -command { set_c_var done_in 8 }" );	
+	cmd( "ttk::checkbutton $activeplot.fond.shift -text Scroll -variable scrollB -state disabled -command { set_c_var done_in 8 }" );
 	cmd( "if [ string equal $CurPlatform windows ] { \
 			set centerB Center; \
 			set goWid 7 \
@@ -318,9 +318,9 @@ void init_plot( int num, int id_sim )
 
 	cmd( "$activeplot.fond create window [ expr { $sclhsizeR / 2 } ] [ expr { $botvsizeR / 4 - 5 } ] -window $activeplot.fond.shift" );
 	cmd( "$activeplot.fond create window [ expr { $sclhsizeR / 2 } ] [ expr { 3 * $botvsizeR / 4 - 2 } ] -window $activeplot.fond.go" );
-	
+
 	// labels
-	cmd( "set xlabel [ expr { $sclhsizeR + $sclvmarginR } ]" ); 
+	cmd( "set xlabel [ expr { $sclhsizeR + $sclvmarginR } ]" );
 	cmd( "set ylabel 0" );
 	cmd( "set a 0" );
 	cmd( "set b 0" );
@@ -339,22 +339,22 @@ void init_plot( int num, int id_sim )
 					set b 1 \
 				} \
 			}" );
-		
+
 		if ( get_int( "b" ) )
 			break;
-		
+
 		cmd( "set it [ $activeplot.fond create text $xlabel $ylabel -font $fontP -anchor nw -text $lab -fill $c%d ]", i < 1100 ? i : 0 );
 		cmd( "set xlabel [ expr { $xlabel + $app + $labhpadR } ]" );
 
 		cmd( "set_ttip_descr $activeplot.fond $n $it 0" );
 	}
-	
+
 	if ( i < num )
 	{
 		cmd( "set it [ $activeplot.fond create text $xlabel $ylabel -fill $colorsTheme(fg) -font $fontP -anchor nw -text \"(%d more...)\" ]", num - i );
 		cmd( "tooltip::tooltip $activeplot.fond -item  $it \"%d series labels not presented\"", num - i );
 	}
-	
+
 	cmd( "pack $activeplot.fond -expand yes -fill both -pady 7" );
 }
 
@@ -367,44 +367,44 @@ void plot_rt( variable *v )
 	bool relabel = false;
 	int height, p_digits;
 	double value, scale, zero_lim;
-	
+
 	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot.c.c.cn ] } { set res 1 } { set res 0 }" );
-	
+
 	if ( ! get_bool( "res" ) )
 		return;
-	
+
 	height = get_int( "vsizeR" );
 	p_digits = get_int( "pdigitsR" );
-	
+
 	// limit the number of run-time plot variables
 	if ( cur_plt > 100 )
 		return;
 
 	if ( ymax == ymin ) 		// very initial setting
-	{ 
+	{
 		if ( v->val[ 0 ] > 0 )
 			ymax = round_digits( v->val[ 0 ] * ( 1 + MARG ), p_digits );
 		else
 			ymax = round_digits( v->val[ 0 ] * ( 1 - MARG ), p_digits );
-		
+
 		ymin = round_digits( v->val[ 0 ], p_digits );
-		
+
 		if ( ymax == ymin )
 			ymax += MARG;
-		
+
 		relabel = true;
 	}
-	
+
 	if ( v->val[ 0 ] >= ymax )
 	{
 		value = v->val[ 0 ] * ( v->val[ 0 ] > 0 ? 1 + MARG_CONST : 1 - MARG_CONST );
 		value = round_digits( value, p_digits );
-	  
+
 		scale = ( ymax - ymin ) / ( value - ymin );
-		ymax = value;	
-		
+		ymax = value;
+
 		relabel = true;
-		
+
 		cmd( "$activeplot.c.c.cn scale punto 0 $vsizeR 1 %lf", scale  < 0.01 ? 0.01 : scale  );
 	}
 
@@ -416,9 +416,9 @@ void plot_rt( variable *v )
 
 		scale = ( ymax - ymin ) / ( ymax - value );
 		ymin = value;
-		
+
 		relabel = true;
-		
+
 		cmd( "$activeplot.c.c.cn scale punto 0 0 1 %lf", scale < 0.01 ? 0.01 : scale  );
 	}
 
@@ -426,12 +426,12 @@ void plot_rt( variable *v )
 	{
 		ymed = round_digits( ( ymax - ymin ) / 2 + ymin, p_digits );
 		zero_lim = ( ymax - ymin ) * MARG;
-		
+
 		cmd( "$activeplot.c.yscale itemconf ymax -text %.*g", p_digits, fabs( ymax ) < zero_lim ? 0 : ymax );
 		cmd( "$activeplot.c.yscale itemconf medy -text %.*g", p_digits, fabs( ymed ) < zero_lim ? 0 : ymed );
 		cmd( "$activeplot.c.yscale itemconf ymin -text %.*g", p_digits, fabs( ymin ) < zero_lim ? 0 : ymin );
 	}
-		
+
 	if ( t == 1 )
 	{
 		old_val[ cur_plt ] = v->val[ 0 ];
@@ -445,7 +445,7 @@ void plot_rt( variable *v )
 	cmd( "set y2 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", old_val[ cur_plt ], ymin, ymax, ymin );
 
 	cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", cur_plt );
-	
+
 	old_val[ cur_plt ] = v->val[ 0 ];
 	++cur_plt;
 }

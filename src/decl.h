@@ -6,12 +6,12 @@
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
- 
+
 /*************************************************************
 DECL.H
 Global definitions among all LSD C++ modules
@@ -83,7 +83,7 @@ Relevant flags (when defined):
 #endif
 
 // redefine NAN to use faster non-signaling NaNs
-#if has_quiet_NaN 
+#if has_quiet_NaN
 #undef NAN
 #define NAN quiet_NaN( )
 #endif
@@ -98,7 +98,7 @@ Relevant flags (when defined):
 
 // access permissions in Linux/Mac
 #ifndef ACCESSPERMS
-#define ACCESSPERMS 0777 
+#define ACCESSPERMS 0777
 #endif
 
 // standalone C functions/procedures (visible to the users)
@@ -460,10 +460,10 @@ extern char nonavail[ ];		// string for unavailable values
 extern char path_res[ ];		// path of last used results directory
 extern char path_sens[ ];		// path of last used sensitivity directory
 extern description *descr;		// model description structure
-extern double t_dist_cl[ T_CLEVS ];// t-distribution table confidence levels 
-extern double t_dist_st[ T_CLEVS ][ 36 ];// t-distribution table statistics 
-extern double z_dist_cl[ Z_CLEVS ];// normal distribution table confidence levels 
-extern double z_dist_st[ Z_CLEVS ];// normal distribution table statistics 
+extern double t_dist_cl[ T_CLEVS ];// t-distribution table confidence levels
+extern double t_dist_st[ T_CLEVS ][ 36 ];// t-distribution table statistics
+extern double z_dist_cl[ Z_CLEVS ];// normal distribution table confidence levels
+extern double z_dist_st[ Z_CLEVS ];// normal distribution table statistics
 extern double ymax;				// runtime plot max limit
 extern double ymin;				// runtime plot min limit
 extern int NOLH_1[ ][ 7 ];		// near-orthogonal Latin hypercube tables
@@ -515,7 +515,7 @@ extern variable *last_cemetery;	// LSD last saved data from deleted objects
 extern vector < string > res_list;// list of results files last saved
 extern void *random_engine;		// current random number generator engine
 
-// multi-threading control 
+// multi-threading control
 #ifndef _NP_
 extern atomic < bool > parallel_ready;// flag to indicate multitasking is available
 extern map< thread::id, worker * > thr_ptr;// worker thread pointers

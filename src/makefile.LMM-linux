@@ -6,7 +6,7 @@
 #
 #	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
-#	
+#
 #**************************************************************
 
 #**************************************************************
@@ -18,7 +18,7 @@
 # directory "src".
 #**************************************************************
 
-CC=g++	
+CC=g++
 TARGET=LMM
 SWITCH_CC=-D_LMM_ -D_NP_ -Wno-unused-result -O3
 

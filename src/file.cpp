@@ -6,10 +6,10 @@
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
 
 /*************************************************************
@@ -24,7 +24,7 @@ The main methods of object contained in this file are:
 Saves the structure of the object (that is, the label,
 variables and parameters and descendants, not number of objects).
 This method is called first time by the browser in INTERF.CPP by the root of the
-model. 
+model.
 Calls the save_struct for all the descendant type.
 
 - void object::save_param( FILE *f )
@@ -66,7 +66,7 @@ void object::save_struct( FILE *f, const char *tab )
 	strcpyn( tab1, tab, MAX_ELEM_LENGTH );
 	fprintf( f, "%sLabel %s\n%s{\n", tab1, label, tab1 );
 	strcatn( tab1, "\t", MAX_ELEM_LENGTH );
-	
+
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		fprintf( f, "%sSon: %s\n", tab1, cb->blabel );
@@ -74,7 +74,7 @@ void object::save_struct( FILE *f, const char *tab )
 			o = blueprint->search( cb->blabel );
 		else
 			o = cb->head;
-		o->save_struct( f, tab1 );	
+		o->save_struct( f, tab1 );
 	}
 
 	for ( var = v; var != NULL; var = var->next )
@@ -84,12 +84,12 @@ void object::save_struct( FILE *f, const char *tab )
 		if ( var->param == 1 )
 			fprintf( f, "%sParam: %s\n", tab1, var->label );
 		if ( var->param == 2)
-			fprintf( f, "%sFunc: %s\n", tab1, var->label );		
-	}   
-	 
+			fprintf( f, "%sFunc: %s\n", tab1, var->label );
+	}
+
 	fprintf( f, "\n" );
 	fprintf( f, "%s}\n\n", tab );
-} 
+}
 
 
 /****************************************************
@@ -105,7 +105,7 @@ void object::save_param( FILE *f )
 	variable *cv, *cv1;
 
 	fprintf( f, "\nObject: %s", label );
-	
+
 	if ( to_compute )
 		fprintf( f, " C" );
 	else
@@ -114,7 +114,7 @@ void object::save_param( FILE *f )
 	for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
 	{
 		skip_next_obj( cur, &count );
-		fprintf( f, "\t%d", count );  
+		fprintf( f, "\t%d", count );
 		for ( ; go_brother( cur ) != NULL; cur = cur->next );
 	}
 	fprintf( f, "\n" );
@@ -143,7 +143,7 @@ void object::save_param( FILE *f )
 		ch1 = cv->savei ? toupper( ch1 ) : ch1;
 		ch2 = cv->plot ? 'p' : 'n';
 		ch2 = cv->parallel ? toupper( ch2 ) : ch2;
-	 
+
 		if ( cv->param == 0 )
 			fprintf( f, "Var: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug, ch2 );
 		if ( cv->param == 1 )
@@ -166,14 +166,14 @@ void object::save_param( FILE *f )
 					else
 						fprintf( f, "\t%c", '0' );
 		}
-		
+
 		// add optional special updating data
 		if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 ) )
 			fprintf( f, "\t<upd: %d %d %d %d>", cv->delay, cv->delay_range, cv->period, cv->period_range );
-		
+
 		fprintf( f, "\n" );
 	}
-	
+
 	for ( cb = b; cb != NULL; cb = cb->next )
 		if ( cb->head != NULL )
 			cb->head->save_param( f );
@@ -192,21 +192,21 @@ bool object::load_param( const char *file_name, int repl, FILE *f )
 	bridge *cb;
 	object *cur;
 	variable *cv, *cv1;
-	
+
 	if ( f == NULL )
-		f = search_data_str( file_name, "DATA", label ); 
+		f = search_data_str( file_name, "DATA", label );
 	else
 	{
 		fscanf( f, "%99s", str ); 		// skip the 'Object: '
-		fscanf( f, " %99s", str ); 		// skip the 'label'  
-	} 
+		fscanf( f, " %99s", str ); 		// skip the 'label'
+	}
 
 	if ( f == NULL )
 		return false;
 
 	if ( fscanf( f, " %c", &ch ) != 1 )
 		return false;
-	
+
 	if ( ch == 'C' )
 		to_compute = true;
 	else
@@ -225,7 +225,7 @@ bool object::load_param( const char *file_name, int repl, FILE *f )
 	{
 		fscanf( f, "%99s ", str ); 		// skip the 'Element: '
 		fscanf( f, "%99s ", str ); 		// skip the 'label'
-		
+
 		if ( f == NULL )
 			return false;
 
@@ -249,7 +249,7 @@ bool object::load_param( const char *file_name, int repl, FILE *f )
 			cv1->param = cv->param;
 			cv1->debug = cv->debug;
 			cv1->data_loaded = ch;
-			
+
 			if ( cv1->param == 1 )
 			{
 				if ( fscanf( f, "%lf", &app ) != 1 )
@@ -262,23 +262,23 @@ bool object::load_param( const char *file_name, int repl, FILE *f )
 				for ( i = 0; i < cv->num_lag; ++i )
 					if ( fscanf( f, "\t%lf", &app ) != 1 )
 						return false;
-					else	
+					else
 						// place values shifted one position, since they are "time 0" values
 						cv1->val[ i ] = app;
-						
+
 				cv1->val[ cv->num_lag ] = 0;
 			}
 		}
-		
+
 		// check for non-default updating scheme
 		if ( cv->param == 0 )
 		{
 			fgetpos( f, & pos );
 			num = fscanf( f, "\t<upd: %d %d %d %d>", & cv->delay, & cv->delay_range, & cv->period, & cv->period_range );
-			
+
 			if ( num > 0 && num < 4 )
 				return false;
-			
+
 			if ( num > 0 )
 				for ( cur = this; cur != NULL; repl == 1 ? cur = cur->hyper_next( label ) : cur = NULL )
 				{
@@ -302,7 +302,7 @@ bool object::load_param( const char *file_name, int repl, FILE *f )
 
 	if ( up == NULL )	// this is the root, and therefore the end of the loading
 		set_blueprint( blueprint, this );
-	 
+
 	return true;
 }
 
@@ -336,37 +336,37 @@ bool object::load_struct( FILE *f )
 	while ( strcmp( ch, "}" ) && ++i < MAX_FILE_TRY )
 	{
 		if ( ! strcmp( ch, "Son:" ) )
-		{ 
+		{
 			fscanf( f, "%*[ ]%99s", ch );
 			add_obj( ch, 1, 0 );
 			cmd( "lappend modObj %s", ch );
 
 			// find the bridge which contains the object
 			cb = search_bridge( ch );
-			
+
 			if ( cb->head == NULL || ! cb->head->load_struct( f ) )
 				return false;
 		}
-		
+
 		if ( ! strcmp( ch, "Var:" ) )
-		{ 
+		{
 			fscanf( f, "%*[ ]%99s", ch );
 			add_empty_var( ch );
 			cmd( "lappend modElem %s", ch );
 			cmd( "lappend modVar %s", ch );
 		}
-		
+
 		if ( ! strcmp( ch, "Param:" ) )
-		{ 
+		{
 			fscanf( f, "%*[ ]%99s", ch );
 			cv = add_empty_var( ch );
 			cv->param = 1;
 			cmd( "lappend modElem %s", ch );
 			cmd( "lappend modPar %s", ch );
 		}
-		
+
 		if ( ! strcmp( ch, "Func:" ) )
-		{ 
+		{
 			fscanf( f, "%*[ ]%99s", ch );
 			cv = add_empty_var( ch );
 			cv->param = 2;
@@ -396,34 +396,34 @@ bool load_description( const char *d, FILE *f )
 	strcpy( text, "" );
 	strcpy( init, "" );
 	strcpy( str, "" );
-	
+
 	if ( strncmp( d, "Object", 6 ) == 0 )
 	{
 		type = 4;
 		strcpyn( label, d + 7, MAX_ELEM_LENGTH );
-	} 
+	}
 	else
 		if ( strncmp( d, "Variable", 8 ) == 0 )
 		{
 			type = 0;
 			strcpyn( label, d + 9, MAX_ELEM_LENGTH );
-		} 
+		}
 		else
 			if ( strncmp( d, "Parameter", 9 ) == 0 )
 			{
 				type = 1;
 				strcpyn( label, d + 10, MAX_ELEM_LENGTH );
-			} 
+			}
 			else
 				if ( strncmp( d, "Function", 6 ) == 0 )
 				{
 					type = 2;
 					strcpyn( label, d + 9, MAX_ELEM_LENGTH );
-				} 
+				}
 				else
 					return false;
-				
-	// check correct type and ignore orphan entries			
+
+	// check correct type and ignore orphan entries
 	if ( root->search( label ) != NULL )
 		ctype = 4;
 	else
@@ -431,12 +431,12 @@ bool load_description( const char *d, FILE *f )
 			ctype = cv->param;
 		else
 			ctype = -1;
-	
+
 	if ( ctype < 0 )
 		return true;			// ignore orphan (old LSD bug)
 	else
 		type = ctype;			// silently fix wrong type (old LSD bug)
-	 
+
 	fgets( str, MAX_LINE_SIZE, f );		// skip first newline character
 	for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, END_DESCR, strlen( END_DESCR ) ) && strncmp( str, BEG_INIT, strlen( BEG_INIT ) ) && strlen( text ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
 		strcatn( text, str, 10 * MAX_LINE_SIZE + 1 );
@@ -454,9 +454,9 @@ bool load_description( const char *d, FILE *f )
 	}
 
 	add_description( label, type, text, init );
-	
+
 	return true;
-} 
+}
 
 
 /*****************************************************************************
@@ -470,7 +470,7 @@ void save_description( object *r, FILE *f )
 
 	cd = search_description( r->label );
 
-	if ( strwsp( cd->init ) )     
+	if ( strwsp( cd->init ) )
 		fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, END_DESCR );
 	else
 		fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, BEG_INIT, cd->init, END_DESCR );
@@ -479,7 +479,7 @@ void save_description( object *r, FILE *f )
 	{
 		cd = search_description( cv->label );
 
-		if ( ( cv->param != 1 && cv->num_lag == 0 ) || strwsp( cd->init ) )     
+		if ( ( cv->param != 1 && cv->num_lag == 0 ) || strwsp( cd->init ) )
 			fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, END_DESCR );
 		else
 			fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, BEG_INIT, cd->init, END_DESCR );
@@ -505,9 +505,9 @@ int load_configuration( bool reload, bool quick )
 	variable *cv, *cv1;
 	description *cd;
 	FILE *f, *g;
-	
+
 	unload_configuration( false );				// unload current
-	
+
 	if ( ! reload )
 	{
 		delete [ ] struct_file;
@@ -522,7 +522,7 @@ int load_configuration( bool reload, bool quick )
 			sprintf( struct_file, "%s.lsd", simul_name );
 		}
 	}
-	
+
 	f = fopen( struct_file, "rb" );
 	if ( f == NULL )
 		return 1;
@@ -533,26 +533,26 @@ int load_configuration( bool reload, bool quick )
 		load = 2;
 		goto endLoad;
 	}
-	
+
 	strcpy( msg, "" );
-    fscanf( f, "%999s", msg );					// should be DATA
+	fscanf( f, "%999s", msg );					// should be DATA
 	if ( ! ( ! strcmp( msg, "DATA" ) && root->load_param( struct_file, 1, f ) ) )
 	{
 		load = 3;
 		goto endLoad;
 	}
-	
+
 	if ( reload && quick )						// just quick reload?
 		goto endLoad;
-		
+
 	sim_num = 1;
-	fscanf( f, "%999s", msg );					// should be SIM_NUM 
+	fscanf( f, "%999s", msg );					// should be SIM_NUM
 	if ( ! ( ! strcmp( msg, "SIM_NUM" ) && fscanf( f, "%d", &sim_num ) ) )
 	{
 		load = 4;
 		goto endLoad;
 	}
-	
+
 	seed = 1;
 	fscanf( f, "%999s", msg );					// should be SEED
 	if ( ! ( ! strcmp( msg, "SEED" ) && fscanf( f, "%d", &seed ) ) )
@@ -560,7 +560,7 @@ int load_configuration( bool reload, bool quick )
 		load = 5;
 		goto endLoad;
 	}
-	
+
 	max_step = 100;
 	fscanf( f, "%999s", msg );					// should be MAX_STEP
 	if ( ! ( ! strcmp( msg, "MAX_STEP" ) && fscanf( f, "%d", &max_step ) ) )
@@ -577,9 +577,9 @@ int load_configuration( bool reload, bool quick )
 	}
 	strcpy( name, "NONE" );
 	fgets( name, MAX_PATH_LENGTH, f );
-    if ( name[ strlen( name ) - 1 ] == '\n' )
+	if ( name[ strlen( name ) - 1 ] == '\n' )
 		name[ strlen( name ) - 1 ] = '\0';
-    if ( name[ strlen( name ) - 1 ] == '\r' )
+	if ( name[ strlen( name ) - 1 ] == '\r' )
 		name[ strlen( name ) - 1 ] = '\0';
 
 	// use the current equation name only if the file exists
@@ -590,7 +590,7 @@ int load_configuration( bool reload, bool quick )
 		fclose( g );
 		strcpyn( equation_name, name + 1, MAX_PATH_LENGTH );
 	}
-	
+
 	fscanf( f, "%999s", msg );					// should be MODELREPORT
 	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%999s", name_rep ) ) )
 	{
@@ -603,24 +603,24 @@ int load_configuration( bool reload, bool quick )
 	{
 		load = 9;
 		goto endLoad;
-	}  
-	
+	}
+
 	empty_description( );						// remove existing descriptions
-	i = fscanf( f, "%999s", msg );				// should be the first description   
+	i = fscanf( f, "%999s", msg );				// should be the first description
 	for ( j = 0; strcmp( msg, "DOCUOBSERVE" ) && i == 1 && j < MAX_FILE_TRY; ++j )
-	{ 
+	{
 		i = load_description( msg, f );
-		if ( ! fscanf( f, "%999s", msg ) ) 
+		if ( ! fscanf( f, "%999s", msg ) )
 			i = 0;
 	}
-	
+
 	if ( i == 0 || j >= MAX_FILE_TRY )
 	{
 		load = 10;
 		goto endLoad;
-	} 
-	
-	fscanf( f, "%999s", msg );  
+	}
+
+	fscanf( f, "%999s", msg );
 	for ( j = 0; strcmp( msg, "END_DOCUOBSERVE" ) && j < MAX_FILE_TRY; ++j )
 	{
 		cd = search_description( msg );
@@ -638,21 +638,21 @@ int load_configuration( bool reload, bool quick )
 		}
 		fscanf( f, "%999s", msg );
 	}
-	
+
 	if ( j >= MAX_FILE_TRY )
 	{
 		load = 11;
 		goto endLoad;
-	} 
-	
+	}
+
 	fscanf( f, "%999s", msg );  				// should be the DOCUINITIAL
 	if ( strcmp( msg, "DOCUINITIAL" ) )
 	{
 		load = 12;
 		goto endLoad;
-	}  
-	
-	fscanf( f, "%999s", msg );  
+	}
+
+	fscanf( f, "%999s", msg );
 	for ( j = 0; strcmp( msg, "END_DOCUINITIAL" ) && j < MAX_FILE_TRY; ++j )
 	{
 		cd = search_description( msg );
@@ -660,13 +660,13 @@ int load_configuration( bool reload, bool quick )
 			cd->initial = 'y';
 		fscanf( f, "%999s", msg );
 	}
-	
+
 	if ( j >= MAX_FILE_TRY )
 	{
 		load = 13;
 		goto endLoad;
-	} 
-	
+	}
+
 	fscanf( f, "%999s\n", msg );				// here is the equation file
 	if ( strcmp( msg, "EQ_FILE" ) )
 	{
@@ -677,23 +677,23 @@ int load_configuration( bool reload, bool quick )
 	strcpy( lsd_eq_file, "" );
 	for ( j = 0; fgets( msg, MAX_LINE_SIZE, f ) != NULL && strncmp( msg, "END_EQ_FILE", 11 ) && strlen( lsd_eq_file ) < MAX_FILE_SIZE - MAX_LINE_SIZE && j < MAX_FILE_TRY; ++j )
 		strcatn( lsd_eq_file, msg, MAX_FILE_SIZE );
-	
+
 	// remove extra \n and \r (Windows) at the end
-    if ( lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] == '\n' )
+	if ( lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] == '\n' )
 		lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] = '\0';
-    if ( lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] == '\r' )
+	if ( lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] == '\r' )
 		lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] = '\0';
-	
+
 	if ( ! ignore_eq_file && strcmp( lsd_eq_file, eq_file ) )
 	{
 		plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
-	}  
-	
+	}
+
 endLoad:
 	fclose( f );
-	
+
 	t = 0;
-	
+
 	return load;
 }
 
@@ -710,27 +710,27 @@ void unload_configuration ( bool full )
 	root->delete_obj( );
 	root = new object;
 	root->init( NULL, "Root" );
-	add_description( "Root" );      
+	add_description( "Root" );
 	reset_blueprint( NULL );
 
 	empty_cemetery( );							// garbage collection
 	empty_sensitivity( rsense ); 				// discard sensitivity analysis data
-	
+
 	save_ok = true;								// valid structure to save
 	unsavedData = false;						// no unsaved simulation results
 	unsavedSense = false;						// no sensitivity data to save
-	rsense = NULL;								// no sense data 
-	
+	rsense = NULL;								// no sense data
+
 	actual_steps = 0;							// reset steps counter
 	findexSens = 0;								// reset sensitivity serial number
 	nodesSerial = 0;							// reset network node serial number
-	
+
 #ifndef _NW_
 	currObj = NULL;								// no current object pointer
 	unsaved_change( false );					// signal no unsaved change
 	cmd( "destroytop .lat" );					// remove lattice window
 	cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );	// no elements in model structure
-	
+
 	if ( ! running )
 		cmd( "destroytop .plt" );				// remove run-time plot window
 #endif
@@ -738,15 +738,15 @@ void unload_configuration ( bool full )
 	if ( full )									// full unload? (no new config?)
 	{
 		empty_description( );					// remove element descriptions
-		
+
 		delete [ ] path;						// reset current path
 		path = new char[ strlen( exec_path ) + 1 ];
 		strcpy( path, exec_path );
-		
+
 		delete [ ] simul_name;					// reset simulation name to default
 		simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
 		strcpy( simul_name, DEF_CONF_FILE );
-		
+
 		delete [ ] struct_file;					// reset structure
 		struct_file = new char[ strlen( simul_name ) + 5 ];
 		sprintf( struct_file, "%s.lsd", simul_name );
@@ -754,7 +754,7 @@ void unload_configuration ( bool full )
 
 		delete sens_file;						// reset sensitivity file name
 		sens_file = NULL;
-		
+
 		strcpy( lsd_eq_file, "" );				// reset other file names
 		snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
 
@@ -763,7 +763,7 @@ void unload_configuration ( bool full )
 		cmd( "set res \"%s\"", simul_name );
 		if ( strlen( path ) > 0 )
 			cmd( "cd \"$path\"" );
-		
+
 		cmd( "set listfocus 1; set itemfocus 0" ); 	// point for first var in listbox
 		strcpy( lastObj, "" );					// disable last object for reload
 		redrawRoot = redrawStruc = true;		// force browser/structure redraw
@@ -784,7 +784,7 @@ void save_single( variable *v )
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
 	lock_guard < mutex > lock( v->parallel_comp );
-#endif	
+#endif
 
 	set_lab_tit( v );
 	snprintf( fn, MAX_PATH_LENGTH, "%s_%s-%d_%d_seed-%d.res", v->label, v->lab_tit, v->start, v->end, seed - 1 );
@@ -797,8 +797,8 @@ void save_single( variable *v )
 			fprintf( f,"%lf\t\n", v->data[ i - v->start ] );
 		else
 			fprintf( f,"%s\t\n", nonavail );
-	  
-	fclose( f ); 
+
+	fclose( f );
 }
 
 
@@ -814,16 +814,16 @@ bool save_configuration( int findex, const char *dest_path )
 	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file = NULL;
 	const char *save_path;
 	description *cd;
-	FILE *f; 
-	
+	FILE *f;
+
 	delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
 	indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
-	
+
 	if ( dest_path == NULL )
 		save_path = path;
 	else
 		save_path = dest_path;
-	
+
 	if ( strlen( path ) > 0 )
 	{
 		save_len = strlen( save_path ) + strlen( simul_name ) + 6 + indexDig;
@@ -836,7 +836,7 @@ bool save_configuration( int findex, const char *dest_path )
 		save_file = new char[ save_len ];
 		sprintf( save_file, "%s", simul_name );
 	}
-	
+
 	if ( findex > 0 )
 	{
 		snprintf( ch, MAX_PATH_LENGTH, "_%d.lsd", findex );
@@ -847,14 +847,14 @@ bool save_configuration( int findex, const char *dest_path )
 		// create backup file when not indexed saving
 		bak_file = new char[ strlen( save_file ) + 5 ];
 		sprintf( bak_file, "%s.bak", save_file );
-		
+
 		strcatn( save_file, ".lsd", save_len );
-	
+
 		f = fopen( save_file, "r" );
 		if ( f != NULL )
 		{
 			fclose( f );
-			
+
 			f = fopen( bak_file, "r" );
 			if ( f != NULL )
 			{
@@ -862,12 +862,12 @@ bool save_configuration( int findex, const char *dest_path )
 				if( remove( bak_file ) )
 					goto error;
 			}
-			
+
 			if ( rename( save_file, bak_file ) )
 				goto error;
 		}
 	}
-	
+
 	f = fopen( save_file, "wb" );
 	if ( f == NULL )
 		goto error;
@@ -875,36 +875,36 @@ bool save_configuration( int findex, const char *dest_path )
 	root->save_struct( f, "" );
 	fprintf( f, "\nDATA\n" );
 	root->save_param( f );
-	
+
 	fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", sim_num, seed + delta, max_step, equation_name, name_rep );
-	
+
 	fprintf( f, "\nDESCRIPTION\n\n" );
 	save_description( root, f );
-	
+
 	fprintf( f, "\nDOCUOBSERVE\n" );
 	for ( cd = descr; cd != NULL; cd = cd->next )
-		if ( cd->observe == 'y' )   
+		if ( cd->observe == 'y' )
 			fprintf( f, "%s\n", cd->label );
 	fprintf( f, "\nEND_DOCUOBSERVE\n\n" );
-	
+
 	fprintf( f, "\nDOCUINITIAL\n" );
 	for ( cd = descr; cd != NULL; cd = cd->next )
-		if ( cd->initial == 'y' )     
+		if ( cd->initial == 'y' )
 			fprintf( f, "%s\n", cd->label );
 	fprintf( f, "\nEND_DOCUINITIAL\n\n" );
-	
+
 	save_eqfile( f );
-	
+
 	if ( ! ferror( f ) )
 		save_ok = true;
-	
+
 	fclose( f );
-	
+
 	error:
-	
+
 	delete [ ] save_file;
 	delete [ ] bak_file;
-	
+
 	return save_ok;
 }
 
@@ -920,7 +920,7 @@ int load_sensitivity( FILE *f )
 	char cc, lab[ MAX_ELEM_LENGTH ];
 	variable *cv;
 	sense *cs = rsense;
-	
+
 	// read data from file (1 line per element, '#' indicate comment)
 	while ( ! feof( f ) )
 	{	// read element by element, skipping comments
@@ -939,8 +939,8 @@ int load_sensitivity( FILE *f )
 		cv = root->search_var( root, lab );
 		if ( cv == NULL || ( cv->param != 1 && cv->num_lag == 0 ) )
 			goto error1;					// and not parameter or lagged variable
-		
-		// create memory allocation for new variable		
+
+		// create memory allocation for new variable
 		if ( rsense == NULL )				// allocate first element
 			rsense = cs = new sense;
 		else								// allocate next ones
@@ -953,11 +953,11 @@ int load_sensitivity( FILE *f )
 
 		cs->label = new char[ strlen( lab ) + 1 ];  // save element name
 		strcpy( cs->label, lab );
-		
+
 		// get lags and # of values to test
 		if ( fscanf( f, "%d %d ", &cs->lag, &cs->nvalues ) < 2 )
 			goto error2;
-					
+
 		// get variable type (newer versions)
 		if ( fscanf( f, "%c ", &cc ) < 1 )
 			goto error3;
@@ -971,8 +971,8 @@ int load_sensitivity( FILE *f )
 			if ( cc == ':' )
 				cs->integer = false;
 			else
-				goto error4;				
-		
+				goto error4;
+
 		if ( cs->lag == 0 )					// adjust type and lag #
 			cs->param = 1;
 		else
@@ -988,10 +988,10 @@ int load_sensitivity( FILE *f )
 			else
 				if ( cs->integer )
 					cs->v[ i ] = round( cs->v[ i ] );
-	}	
+	}
 
 	return 0;
-	
+
 	// error handling
 	error1:
 		if ( cv != NULL )
@@ -1014,11 +1014,11 @@ int load_sensitivity( FILE *f )
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid range value\" -detail \"Element '%s' has non-numeric range values.\"", lab );
 		i = 5;
 		goto error;
-		
+
 	error:
 	empty_sensitivity( rsense );		// discard read data
 	rsense = NULL;
-		
+
 	return i;
 }
 
@@ -1031,7 +1031,7 @@ void empty_sensitivity( sense *cs )
 {
 	if ( cs == NULL )		// prevent invalid calls (last variable)
 		return;
-	
+
 	if ( cs->next != NULL )	// recursively start from the end of the list
 		empty_sensitivity( cs->next );
 #ifndef _NW_
@@ -1060,14 +1060,14 @@ bool save_sensitivity( FILE *f )
 	for ( cs = rsense; cs != NULL; cs = cs->next )
 	{
 		if ( cs->param == 1 )
-			fprintf( f, "%s 0 %d %c:", cs->label, cs->nvalues, cs->integer ? 'i' : 'f' );	
+			fprintf( f, "%s 0 %d %c:", cs->label, cs->nvalues, cs->integer ? 'i' : 'f' );
 		else
 			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag + 1, cs->nvalues, cs->integer ? 'i' : 'f' );
 		for ( i = 0; cs->v != NULL && i < cs->nvalues; ++i )
 			fprintf( f," %g", cs->v[ i ] );
 		fprintf( f,"\n" );
 	}
-	
+
 	return ! ferror( f );
 }
 
@@ -1103,7 +1103,7 @@ void get_saved( object *n, FILE *out, const char *sep, bool all_var )
 			}
 			else
 				lab = NULL;
-		
+
 			fprintf( out, "%s%s%s%s%s%s%s\n", cv->label, sep, cv->param ? "parameter" : "variable", sep, n->label, sep, lab != NULL ? lab : "" );
 		}
 
@@ -1112,7 +1112,7 @@ void get_saved( object *n, FILE *out, const char *sep, bool all_var )
 		if ( cb->head == NULL )
 			co = blueprint->search( cb->blabel );
 		else
-			co = cb->head; 
+			co = cb->head;
 		get_saved( co, out, sep, all_var );
 	}
 }
@@ -1130,7 +1130,7 @@ void get_sa_limits( object *r, FILE *out, const char *sep )
 	variable *cv;
 	description *cd;
 	sense *cs;
-	
+
 	for ( i = 0; i < META_PAR_NUM; ++i )
 		meta_par_in[ i ] = false;
 
@@ -1138,7 +1138,7 @@ void get_sa_limits( object *r, FILE *out, const char *sep )
 	{
 		// get current value (first object)
 		cv = r->search_var( NULL, cs->label );
-		
+
 		// get element description
 		cd = search_description( cs->label, false );
 		if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
@@ -1155,7 +1155,7 @@ void get_sa_limits( object *r, FILE *out, const char *sep )
 		}
 		else
 			lab = NULL;
-		
+
 		// find max and min values
 		double min = HUGE_VAL, max = - HUGE_VAL;
 		for ( i = 0; cs->v != NULL &&  i < cs->nvalues; ++i )
@@ -1164,12 +1164,12 @@ void get_sa_limits( object *r, FILE *out, const char *sep )
 			else
 				if ( cs->v[ i ] > max )
 					max = cs->v[ i ];
-					
+
 		// check meta-parameters
 		if ( cs->param == 1 )
 		{
 			strcpy( type, "parameter" );
-			
+
 			for ( i = 0; i < META_PAR_NUM; ++i )
 				if ( ! strcmp( cs->label, meta_par_name[ i ] ) )
 				{
@@ -1181,8 +1181,8 @@ void get_sa_limits( object *r, FILE *out, const char *sep )
 		else
 			strcpy( type, "variable" );
 
-		fprintf( out, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s\"%s\"\n", cs->label, sep, type, sep, cs->param == 1 ? 0 : cs->lag + 1, sep, cs->integer ? "integer" : "real", sep, cv != NULL ? cv->val[ cs->lag ] : NAN, sep, min, sep, max, sep, lab != NULL ? lab : "" );	
-		
+		fprintf( out, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s\"%s\"\n", cs->label, sep, type, sep, cs->param == 1 ? 0 : cs->lag + 1, sep, cs->integer ? "integer" : "real", sep, cv != NULL ? cv->val[ cs->lag ] : NAN, sep, min, sep, max, sep, lab != NULL ? lab : "" );
+
 		delete [ ] lab;
 	}
 }
@@ -1195,7 +1195,7 @@ void save_eqfile( FILE *f )
 {
 	if ( strlen( lsd_eq_file ) == 0 )
 		strcpyn( lsd_eq_file, eq_file, MAX_FILE_SIZE );
-	 
+
 	fprintf( f, "\nEQ_FILE\n" );
 	fprintf( f, "%s", lsd_eq_file );
 	fprintf( f, "\nEND_EQ_FILE\n" );
@@ -1214,15 +1214,15 @@ void read_eq_filename( char *s, int sz )
 
 	snprintf( lab, MAX_PATH_LENGTH, "%s/%s", exec_path, MODEL_OPTIONS );
 	f = fopen( lab, "r" );
-	
+
 	if ( f == NULL )
 	{
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"File not found\" -detail \"File '$MODEL_OPTIONS' missing, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
 		return;
 	}
-	
+
 	fscanf( f, "%999s", lab );
-	for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%999s", lab ) != EOF && i < MAX_FILE_TRY; ++i );    
+	for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%999s", lab ) != EOF && i < MAX_FILE_TRY; ++i );
 	fclose( f );
 	if ( strncmp( lab, "FUN=", 4 ) != 0 )
 	{
@@ -1249,17 +1249,17 @@ char *upload_eqfile( void )
 	read_eq_filename( s, MAX_PATH_LENGTH );
 	if ( ( f = fopen( s, "r" ) ) == NULL )
 		return NULL;
-	
+
 	cmd( "set res [ file size %s ]", s );
 	sz = get_int( "res" ) + 1;
 	eq = new char[ sz ];
 	strcpy( eq, "" );
-	
+
 	while ( fgets( line, MAX_LINE_SIZE, f ) != NULL )
 		strcatn( eq, line, sz );
-	
+
 	fclose( f );
-	
+
 	return eq;
 }
 
@@ -1272,40 +1272,40 @@ void show_logs( const char *path, vector < string > & logs, bool par_cntl )
 {
 	char exec[ MAX_PATH_LENGTH  ];
 	int i, j, n, sz;
-	
+
 	cmd( "switch [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Background run monitor\" -message \"Open the background run monitor?\" -detail \"The selected simulation runs were started as parallel background job(s). Each job progress can be monitored in a separated window results by choosing 'Yes'\n\nLog files are being created in the folder:\n\n%s\" ] { yes { set ans 1 } no { set ans 0 } }", path );
-	
+
 	if ( ! get_int( "ans" ) || ( par_cntl && ! parallel_monitor ) )
 		return;
-	
+
 	lock_guard < mutex > lock( lock_run_logs );
-	
+
 	n = logs.size( );
 	if ( n == 0 )
 		return;
-		
+
 	for ( i = j = 0; i < n; ++i )
 		j += logs[ i ].length( );
-	
+
 	sz = i + j + 1;
 	char logs_str[ sz ];
 	strcpy( logs_str, "" );
-	
+
 	for ( i = 0; i < n; ++i )
 	{
 		strcatn( logs_str, logs[ i ].c_str( ), sz );
-		
+
 		if ( i < n - 1 )
 			strcatn( logs_str, " ", sz );
 	}
-	
+
 	if ( n == 1 )
 		strcpy( exec, "tail -n 20 -F" );
 	else
 	{
 		// number of terminal columns
 		j = n > 4 ? ( n > 8 ? ( n > 12 ? 4 : 3 ) : 2 ) : 1;
-		
+
 		if ( j == 1 )
 			snprintf( exec, MAX_PATH_LENGTH , "multitail%s", platform == _WIN_ ? "" : " --retry-all" );
 		else
@@ -1334,13 +1334,13 @@ void result::data( object *root, int initstep, int endtstep )
 	initstep = ( docsv && initstep < 1 ) ? 1 : initstep;
 	// adjust for 1 time step if needed
 	endtstep = ( endtstep == 0 ) ? initstep : endtstep;
-	
+
 	for ( int i = initstep; i <= endtstep; i++ )
 	{
 		firstCol = true;
-		
+
 		data_recursive( root, i );		// output one data line
-		
+
 		if ( dozip )					// and change line
 			gzprintf( fz, "\n" );
 		else
@@ -1392,16 +1392,16 @@ void result::data_recursive( object *r, int i )
 						fprintf( f, "%s\t", nonavail );
 				}
 			}
-			
+
 			firstCol = false;
 		}
 	}
-	 
+
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			continue;
-		
+
 		cur = cb->head;
 		if ( cur->to_compute )
 			for ( ; cur != NULL; cur = cur->next )
@@ -1446,7 +1446,7 @@ void result::data_recursive( object *r, int i )
 						fprintf(f, "%s\t", nonavail );
 				}
 			}
-						
+
 			firstCol = false;
 		}
 	}
@@ -1460,9 +1460,9 @@ Saves header to file
 void result::title( object *root, int flag )
 {
 	firstCol = true;
-	
+
 	title_recursive( root, flag );		// output header
-		
+
 	if ( dozip )						// and change line
 		gzprintf( fz, "\n" );
 	else
@@ -1483,7 +1483,7 @@ void result::title_recursive( object *r, int header )
 			set_lab_tit( cv );
 			if ( ( ! strcmp( cv->lab_tit, "1" ) || ! strcmp( cv->lab_tit, "1_1" ) || ! strcmp( cv->lab_tit, "1_1_1" ) || ! strcmp( cv->lab_tit, "1_1_1_1" ) ) && cv->up->hyper_next( ) == NULL )
 				single = true;					// prevent adding suffix to single objects
-			
+
 			if ( header )
 			{
 				if ( dozip )
@@ -1518,23 +1518,23 @@ void result::title_recursive( object *r, int header )
 						fprintf( f, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
 				}
 			}
-			
+
 			firstCol = false;
 		}
 	}
-	 
+
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			continue;
-		
+
 		cur = cb->head;
 		if ( cur->to_compute )
 		{
 			for ( ; cur != NULL; cur = cur->next )
 			title_recursive( cur, header );
-		} 
-	} 
+		}
+	}
 
 	if ( r->up == NULL )
 	{
@@ -1554,7 +1554,7 @@ void result::title_recursive( object *r, int header )
 				else
 					fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
 			}
-			
+
 			firstCol = false;
 		}
 	}

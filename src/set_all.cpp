@@ -6,10 +6,10 @@
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
 
 /*************************************************************
@@ -50,7 +50,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	const char *app;
 	double value, value1, value2, step, counter;
 	int res, i, j, kappa, to_all, update_d, cases_from, cases_to, fill, use_seed, rnd_seed, step_in;
-	description *cd; 
+	description *cd;
 	object *cur, *r;
 	variable *cv;
 	FILE *f;
@@ -62,7 +62,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 	if ( cv->param == 1 )
 		lag = 0;
-	
+
 	Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "value1", ( char * ) &value1, TCL_LINK_DOUBLE );
 	Tcl_LinkVar( inter, "value2", ( char * ) &value2, TCL_LINK_DOUBLE );
@@ -92,7 +92,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 		} else { \
 			set _w $parWnd.sa \
 		}" );
-		
+
 	cmd( "newtop $_w \"Set All Objects Initialization\" { set choice 2 } $parWnd" );
 
 	cmd( "ttk::frame $_w.head" );					// heading
@@ -105,7 +105,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 			cmd( "ttk::label $_w.head.l.c -text \"Function: \"" );
 		else
 			cmd( "ttk::label $_w.head.l.c -text \"Parameter: \"" );
-		
+
 		cmd( "ttk::label $_w.head.l.n -text \"%s\" -style hl.TLabel", lab  );
 		cmd( "pack $_w.head.l.c $_w.head.l.n -side left" );
 	}
@@ -126,7 +126,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 	cmd( "pack $_w.head.lg $_w.head.l $_w.head.lo" );
 
-	cmd( "ttk::frame $_w.m" );			
+	cmd( "ttk::frame $_w.m" );
 
 	cmd( "ttk::frame $_w.m.f1" );					// left column
 
@@ -192,7 +192,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	cmd( "bind $_w.m.f1.rd.i.r7 <Return> { $_w.m.f1.val.i.l1.e1 selection range 0 end; focus $_w.m.f1.val.i.l1.e1 }" );
 
 	cmd( "pack $_w.m.f1.rd.i.r1 $_w.m.f1.rd.i.r9 $_w.m.f1.rd.i.r2 $_w.m.f1.rd.i.r4 $_w.m.f1.rd.i.r3 $_w.m.f1.rd.i.r8 $_w.m.f1.rd.i.r5 $_w.m.f1.rd.i.r7 -anchor w" );
-	
+
 	cmd( "tooltip::tooltip $_w.m.f1.rd.i.r1 \"Every instance set to the same Value\"" );
 	cmd( "tooltip::tooltip $_w.m.f1.rd.i.r9 \"Linear range from Minimum to Maximum\"" );
 	cmd( "tooltip::tooltip $_w.m.f1.rd.i.r2 \"From Start plus Increasing for each instance\"" );
@@ -224,7 +224,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	cmd( "ttk::checkbutton $_w.m.f2.s.i.l.f -text \"Fill-in\" -variable fill" );
 	cmd( "pack  $_w.m.f2.s.i.l.a $_w.m.f2.s.i.l.f -padx 5 -side left" );
 	cmd( "pack  $_w.m.f2.s.i.l -pady 2" );
-	
+
 	cmd( "tooltip::tooltip $_w.m.f2.s.i.l.a \"Number of instances to skip from initializing\"" );
 	cmd( "tooltip::tooltip $_w.m.f2.s.i.l.f \"Fill intermediate instances with same value\"" );
 
@@ -232,7 +232,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	cmd( "ttk::radiobutton $_w.m.f2.s.i.sel.all -text \"Apply to all instances\" -variable to_all -value 1 -command { $_w.m.f2.s.i.sel2.c.to conf -state disabled; $_w.m.f2.s.i.sel2.c.from conf -state disabled; bind $_w.m.f2.s.i.sel2.c.from <Button-3> { }; bind $_w.m.f2.s.i.sel2.c.to <Button-3> { }; bind $_w.m.f2.s.i.sel2.c.from <Button-2> { }; bind $_w.m.f2.s.i.sel2.c.to <Button-2> { } }" );
 	cmd( "ttk::radiobutton $_w.m.f2.s.i.sel.sel -text \"Apply to a range of instances\" -variable to_all -value 0 -command { $_w.m.f2.s.i.sel2.c.to conf -state normal; $_w.m.f2.s.i.sel2.c.from conf -state normal; bind $_w.m.f2.s.i.sel2.c.from <Button-3> { set choice 9 }; bind $_w.m.f2.s.i.sel2.c.to <Button-3> { set choice 10 }; bind $_w.m.f2.s.i.sel2.c.from <Button-2> { set choice 9 }; bind $_w.m.f2.s.i.sel2.c.to <Button-2> { set choice 10 } }" );
 	cmd( "pack $_w.m.f2.s.i.sel.all $_w.m.f2.s.i.sel.sel -anchor w" );
-	
+
 	cmd( "tooltip::tooltip $_w.m.f2.s.i.sel.all \"Apply initialization to all instances\"" );
 	cmd( "tooltip::tooltip $_w.m.f2.s.i.sel.sel \"Apply initialization to a range of instances\"" );
 
@@ -250,7 +250,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	cmd( "ttk::label $_w.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
 	cmd( "pack $_w.m.f2.s.i.sel2.c $_w.m.f2.s.i.sel2.obs" );
 	cmd( "pack $_w.m.f2.s.i.sel2 -pady 2" );
-	
+
 	cmd( "tooltip::tooltip $_w.m.f2.s.i.sel2 \"Select first and last instance to initialize\"" );
 
 	cmd( "pack $_w.m.f2.s.tit $_w.m.f2.s.i" );
@@ -272,7 +272,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	cmd( "pack $_w.m.f2.rnd.i.le.f $_w.m.f2.rnd.i.le.s -side left -padx 5" );
 
 	cmd( "pack $_w.m.f2.rnd.i.le -pady 2" );
-	
+
 	cmd( "tooltip::tooltip $_w.m.f2.rnd.i.le.f \"Ensure the generator starts from a known condition\"" );
 	cmd( "tooltip::tooltip $_w.m.f2.rnd.i.le.s \"Choose the random number generator seed\"" );
 
@@ -298,7 +298,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	cmd( "bind $_w.m.f2.s.i.sel2.c.from <Return> { focus $_w.m.f2.s.i.sel2.c.to; $_w.m.f2.s.i.sel2.c.from selection range 0 end }" );
 	cmd( "bind $_w.m.f2.s.i.sel2.c.to <Return> { focus $_w.b.ok }" );
 	cmd( "bind $_w.m.f2.rnd.i.le.s.e1 <Return> { focus $_w.b.ok }" );
-	
+
 	cmd( "set err \"\"" );
 
 	cmd( "showtop $_w centerW" );
@@ -307,13 +307,13 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	here_setall:
 
 	// update current linked variables values
-	cmd( "write_any $_w.m.f1.val.i.l1.e1 $value1" ); 
+	cmd( "write_any $_w.m.f1.val.i.l1.e1 $value1" );
 	cmd( "write_any $_w.m.f1.val.i.l2.e2 $value2" );
-	cmd( "write_any $_w.m.f2.s.i.l.a.e $step_in" ); 
-	cmd( "write_any $_w.m.f2.s.i.sel2.c.from $cases_from" ); 
-	cmd( "write_any $_w.m.f2.s.i.sel2.c.to $cases_to" ); 
-	cmd( "write_any $_w.m.f2.rnd.i.le.s.e1 $rnd_seed" ); 
-	
+	cmd( "write_any $_w.m.f2.s.i.l.a.e $step_in" );
+	cmd( "write_any $_w.m.f2.s.i.sel2.c.from $cases_from" );
+	cmd( "write_any $_w.m.f2.s.i.sel2.c.to $cases_to" );
+	cmd( "write_any $_w.m.f2.rnd.i.le.s.e1 $rnd_seed" );
+
 	if ( selFocus )
 	{
 		cmd( "if { $err == \"\" } { $_w.m.f1.val.i.l1.e1 selection range 0 end; focus $_w.m.f1.val.i.l1.e1 } { $err selection range 0 end; focus $err; set err \"\" }" );
@@ -342,29 +342,29 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 	// save current linked variables values before closing
 	cmd( "if [ string is double -strict [ $_w.m.f1.val.i.l1.e1 get ] ] { set value1 [ $_w.m.f1.val.i.l1.e1 get ] } { set err $_w.m.f1.val.i.l1.e1 }" );
-	cmd( "if [ string is double -strict [ $_w.m.f1.val.i.l2.e2 get ] ] { set value2 [ $_w.m.f1.val.i.l2.e2 get ] } { set err $_w.m.f1.val.i.l2.e2 }" ); 
-	cmd( "if { [ string is integer -strict [ $_w.m.f2.s.i.l.a.e get ] ] && [ $_w.m.f2.s.i.l.a.e get ] > 0 } { set step_in [ $_w.m.f2.s.i.l.a.e get ] } { set err $_w.m.f2.s.i.l.a.e }" ); 
-	cmd( "if { [ string is integer -strict [ $_w.m.f2.s.i.sel2.c.from get ] ] && [ $_w.m.f2.s.i.sel2.c.from get ] > 0 } { set cases_from [ $_w.m.f2.s.i.sel2.c.from get ] } { set err $_w.m.f2.s.i.sel2.c.from }" ); 
-	cmd( "if { [ string is integer -strict [ $_w.m.f2.s.i.sel2.c.to get ] ] && [ $_w.m.f2.s.i.sel2.c.to get ] > $cases_from } { set cases_to [ $_w.m.f2.s.i.sel2.c.to get ] } { set err $_w.m.f2.s.i.sel2.c.to }" ); 
-	cmd( "if { [ string is integer -strict [ $_w.m.f2.rnd.i.le.s.e1 get ] ] && [ $_w.m.f2.rnd.i.le.s.e1 get ] > 0 } { set rnd_seed [ $_w.m.f2.rnd.i.le.s.e1 get ] } { set err $_w.m.f2.rnd.i.le.s.e1 }" ); 
+	cmd( "if [ string is double -strict [ $_w.m.f1.val.i.l2.e2 get ] ] { set value2 [ $_w.m.f1.val.i.l2.e2 get ] } { set err $_w.m.f1.val.i.l2.e2 }" );
+	cmd( "if { [ string is integer -strict [ $_w.m.f2.s.i.l.a.e get ] ] && [ $_w.m.f2.s.i.l.a.e get ] > 0 } { set step_in [ $_w.m.f2.s.i.l.a.e get ] } { set err $_w.m.f2.s.i.l.a.e }" );
+	cmd( "if { [ string is integer -strict [ $_w.m.f2.s.i.sel2.c.from get ] ] && [ $_w.m.f2.s.i.sel2.c.from get ] > 0 } { set cases_from [ $_w.m.f2.s.i.sel2.c.from get ] } { set err $_w.m.f2.s.i.sel2.c.from }" );
+	cmd( "if { [ string is integer -strict [ $_w.m.f2.s.i.sel2.c.to get ] ] && [ $_w.m.f2.s.i.sel2.c.to get ] > $cases_from } { set cases_to [ $_w.m.f2.s.i.sel2.c.to get ] } { set err $_w.m.f2.s.i.sel2.c.to }" );
+	cmd( "if { [ string is integer -strict [ $_w.m.f2.rnd.i.le.s.e1 get ] ] && [ $_w.m.f2.rnd.i.le.s.e1 get ] > 0 } { set rnd_seed [ $_w.m.f2.rnd.i.le.s.e1 get ] } { set err $_w.m.f2.rnd.i.le.s.e1 }" );
 
 	cmd( "if { $err != \"\" } { \
 			ttk::messageBox -parent $_w -title Error -icon error -type ok -message \"Invalid value\" -detail \"Values must be numeric only and decimal numbers must use the point ('.') as the decimal separator. Choose a different value and try again.\"; \
 			set choice 0 \
 		}" );
-		
+
 	if ( choice == 0 )
 	{
 		selFocus = true;
 		goto here_setall;
 	}
-	
+
 	cmd( "destroytop $_w" );
 
 	Tcl_UnlinkVar( inter, "value1" );
 	Tcl_UnlinkVar( inter, "value2" );
 	Tcl_UnlinkVar( inter, "res" );
-	
+
 	if ( choice == 2 )
 		return;
 
@@ -379,13 +379,13 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 	if ( use_seed )
 		init_random( ( unsigned ) rnd_seed );
-	
+
 	j = 0;
 
 	switch ( res )
 	{
 		// equal to
-		case 1:							
+		case 1:
 			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
@@ -394,12 +394,12 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 					cv->data_loaded = '+';
 					++j;
 				}
-			
+
 			snprintf( action, MAX_ELEM_LENGTH, "equal to %g", value1 );
 			break;
 
 		// range
-		case 9:	
+		case 9:
 			for ( i = 1, cur = r, counter = -1; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( ( ( i - cases_from ) % step_in == 0 ) ) )
 					counter++;
@@ -415,17 +415,17 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 					cv->data_loaded = '+';
 					++j;
 				}
-				
+
 				if ( i >= cases_from && ( ( i - cases_from + 1 ) % step_in ) == 0 )
-					++step; 
+					++step;
 			}
-			
+
 			snprintf( action, MAX_ELEM_LENGTH, "ranging from %g to %g (increments of %g)", value1, value2, value );
 			break;
 
 
-		// increasing	
-		case 2:  
+		// increasing
+		case 2:
 			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 			{
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
@@ -435,17 +435,17 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 					cv->data_loaded = '+';
 					++j;
 				}
-				
+
 				if ( i >= cases_from && ( ( i - cases_from + 1 ) % step_in ) == 0 )
 					++step;
 			}
-			
+
 			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g", value1, value2 );
 			break;
-				
-		
+
+
 		// increasing (groups)
-		case 4: 
+		case 4:
 			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( to_all == 1 || ( cases_from <= i && cases_to >= i ) )
 				{
@@ -453,18 +453,18 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 					cv->val[ lag ] = value1 + step * value2;
 					cv->data_loaded = '+';
 					++j;
-					++step;        
-					
+					++step;
+
 					if ( cur->next != cur->hyper_next( r->label ) )
 						step = 0;
 				}
-			
+
 			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g for each group of objects", value1, value2 );
 			break;
 
 
 		// random (uniform)
-		case 3: 
+		case 3:
 			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
@@ -473,11 +473,11 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 					cv->data_loaded = '+';
 					++j;
 				}
-			
+
 			snprintf( action, MAX_ELEM_LENGTH, "drawn from uniform distribution between %g and %g", value1, value2 );
 			break;
-			  
-		
+
+
 		// random integer (uniform)
 		case 8:
 			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
@@ -488,13 +488,13 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 					cv->data_loaded = '+';
 					++j;
 				}
-			
+
 			snprintf( action, MAX_ELEM_LENGTH, "drawn from integer uniform distribution between %g and %g", round( value1 ), round( value2 ) );
 			break;
-			
-			
+
+
 		// random (normal)
-		case 5: 
+		case 5:
 			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
@@ -503,10 +503,10 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 					cv->data_loaded = '+';
 					++j;
 				}
-			
+
 			snprintf( action, MAX_ELEM_LENGTH, "drawn from normal distribution of mean %g and s.d. %g", value1, value2 );
 			break;
-			
+
 
 		// import from data file
 		case 7:
@@ -525,44 +525,44 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 			if ( fscanf( f, "%99s", ch ) == EOF )				// the label
 				return;
-				
+
 			for ( i = 1, cur = r; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
 				if ( to_all == 1 || ( cases_from <= i && cases_to >= i ) )
 				{
 					kappa = fscanf( f, "%lf", &value );
 					if ( kappa == EOF )
 						break;
-					
+
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = value;
 					cv->data_loaded = '+';
 					++j;
 				}
-			
+
 			if ( cur != NULL || kappa == EOF )
 				cmd( "ttk::messageBox -parent $_w -title Error -icon error -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", app );
-			
+
 			snprintf( action, MAX_ELEM_LENGTH, "set with data from file %s", app );
 			break;
-			
+
 
 		default:
-			error_hard( "internal problem in LSD", 
+			error_hard( "internal problem in LSD",
 						"if error persists, please contact developers",
-						true, 
+						true,
 						"invalid option for setting values" );
 			myexit( 22 );
 	}
-	
+
 	if ( update_d )
 	{
 		cd = search_description( lab );
-		
+
 		if ( step_in > 1 )
 			snprintf( ch, MAX_ELEM_LENGTH, " (every %d instances)", step_in );
 		else
 			strcpy( ch, "" );
-		
+
 		if ( to_all )
 			if ( step_in > 1 )
 				if ( cd->init != NULL )
@@ -575,35 +575,35 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 			if ( cd->init != NULL )
 				snprintf( msg, MAX_ELEM_LENGTH, "%s\nInstances from %d to %d %s%s", cd->init, cases_from, cases_to, action, ch );
 			else
-				snprintf( msg, MAX_ELEM_LENGTH, "Instances from %d to %d %s%s", cases_from, cases_to, action, ch );  
-								
+				snprintf( msg, MAX_ELEM_LENGTH, "Instances from %d to %d %s%s", cases_from, cases_to, action, ch );
+
 		change_description( lab, NULL, -1, NULL, msg );
 	}
-	
+
 	unsaved_change( true );				// signal unsaved change
 }
 
 
 /*******************************************************************************
 SENSITIVITY_PARALLEL
-This function fills the initial values according to the sensitivity analysis 
-system performed by parallel simulations: 1 single run over many independent 
+This function fills the initial values according to the sensitivity analysis
+system performed by parallel simulations: 1 single run over many independent
 configurations descending in parallel from Root.
 
-Users can set one or more elements to be part of the sensitivity analysis. For 
-each element the user has to provide the number of values to be explored and 
-their values. When all elements involved in the sensitivity analysis are 
-configured, the user must launch the command Sensitivity from menu Data in the 
-main LSD Browser. This command generates as many copies as the product of all 
-values for all elements in the s.a. It then kicks off the initialization of all 
-elements involved so that each combination of parameters is assigned to one 
+Users can set one or more elements to be part of the sensitivity analysis. For
+each element the user has to provide the number of values to be explored and
+their values. When all elements involved in the sensitivity analysis are
+configured, the user must launch the command Sensitivity from menu Data in the
+main LSD Browser. This command generates as many copies as the product of all
+values for all elements in the s.a. It then kicks off the initialization of all
+elements involved so that each combination of parameters is assigned to one
 branch of the model.
 
 The user is supposed then to save the resulting configuration.
 
-Options concerning initialization for sensitivity analysis are not saved into 
+Options concerning initialization for sensitivity analysis are not saved into
 the model configuration files, and are therefore lost when closing the LSD model
-program if not saved in a .sa file. 
+program if not saved in a .sa file.
 *******************************************************************************/
 object *sensitivity_parallel( object *o, sense *s )
 {
@@ -619,14 +619,14 @@ object *sensitivity_parallel( object *o, sense *s )
 			s->i = i;
 			cur = sensitivity_parallel( cur, s->next );
 		}
-		
+
 		return cur;
 	}
 
 	for ( i = 0; i < s->nvalues; ++i )
 	{
 		s->i = i;
-		for ( cs = rsense; cs != NULL; cs = cs->next ) 
+		for ( cs = rsense; cs != NULL; cs = cs->next )
 		{
 			cvar = cur->search_var( cur, cs->label );
 			if ( cs->param == 0 )				// handle lags > 0
@@ -634,7 +634,7 @@ object *sensitivity_parallel( object *o, sense *s )
 			else
 				cvar->val[ 0 ] = cs->v[ cs->i ];
 		}
-		
+
 		cur = cur->hyper_next( cur->label );
 	}
 
@@ -644,27 +644,27 @@ object *sensitivity_parallel( object *o, sense *s )
 
 /*******************************************************************************
 SENSITIVITY_SEQUENTIAL
-This function fills the initial values according to the sensitivity analysis 
-system performed by sequential simulations: each run executes one configuration 
+This function fills the initial values according to the sensitivity analysis
+system performed by sequential simulations: each run executes one configuration
 labelled with sequential labels.
 
-Contrary to parallel sensitivity settings, this function initialize all elements 
+Contrary to parallel sensitivity settings, this function initialize all elements
 in the configuration with the specified label.
 
-Users can set one or more elements to be part of the sensitivity analysis. For 
-each element the user has to provide the number of values to be explored and 
-their values. When all elements involved in the sensitivity analysis are 
-configured, the user must launch the command Sensitivity from menu Data in the 
+Users can set one or more elements to be part of the sensitivity analysis. For
+each element the user has to provide the number of values to be explored and
+their values. When all elements involved in the sensitivity analysis are
+configured, the user must launch the command Sensitivity from menu Data in the
 main LSD Browser.
 
-Options concerning initialization for sensitivity analysis are saved into model 
-configuration files, to be executed with a No Window version of the LSD model. 
-One configuration file is created for each possible combination of the 
-sensitivity analysis values (parameters and initial conditions). Optionally, it 
-is possible to define the parameter "probSampl" with the (uniform) probability 
-of a given point in the sensitivity analysis space is saved as configuration 
-file. In practice, this allows for the Monte Carlo sampling of the parameter 
-space, which is often necessary when the s.a. space is too big to be analyzed 
+Options concerning initialization for sensitivity analysis are saved into model
+configuration files, to be executed with a No Window version of the LSD model.
+One configuration file is created for each possible combination of the
+sensitivity analysis values (parameters and initial conditions). Optionally, it
+is possible to define the parameter "probSampl" with the (uniform) probability
+of a given point in the sensitivity analysis space is saved as configuration
+file. In practice, this allows for the Monte Carlo sampling of the parameter
+space, which is often necessary when the s.a. space is too big to be analyzed
 in its entirety.
 *******************************************************************************/
 void sensitivity_sequential( int *findex, sense *s, double probSampl, const char *dest_path )
@@ -673,7 +673,7 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl, const char
 	sense *cs;
 	object *cur;
 	variable *cvar;
-	
+
 	if ( s->next != NULL )
 	{
 		for ( i = 0; i < s->nvalues && ! stop; ++i )
@@ -681,21 +681,21 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl, const char
 			s->i = i;
 			sensitivity_sequential( findex, s->next, probSampl, dest_path );
 		}
-		
+
 		return;
 	}
-	
+
 	for ( i = 0; i < s->nvalues && ! stop; ++i )
 	{
 		s->i = i;
-		for ( nv = 1, cs = rsense; cs != NULL; cs = cs->next ) 
+		for ( nv = 1, cs = rsense; cs != NULL; cs = cs->next )
 		{
 			nv *= cs->nvalues;
 			cvar = root->search_var( root, cs->label );
-			
+
 			for ( cur = cvar->up; cur != NULL; cur = cur->hyper_next( cur->label ) )
 			{
-				cvar = cur->search_var( cur, cs->label ); 
+				cvar = cur->search_var( cur, cs->label );
 				if ( cs->param == 1 )				// handle lags > 0
 					cvar->val[ 0 ] = cs->v[ cs->i ];
 				else
@@ -712,10 +712,10 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl, const char
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
 				return;
 			}
-			
+
 			if ( ( *findex + 1 ) % 10 == 0 )
 				cmd( "prgboxupdate .psa %d", *findex );
-			
+
 			*findex = *findex + 1;
 		}
 	}
@@ -726,11 +726,11 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl, const char
 NUM_SENSITIVITY_POINTS
 Calculate the sensitivity space size
 ******************************************************************************/
-long num_sensitivity_points( sense *rsens )	
+long num_sensitivity_points( sense *rsens )
 {
 	long nv;
 	sense *cs;
-	
+
 	for ( nv = 1, cs = rsens; cs != NULL; cs = cs->next )	// scan the linked-list
 		nv *= cs->nvalues;	// update the number of variables
 	return nv;
@@ -741,18 +741,18 @@ long num_sensitivity_points( sense *rsens )
 NUM_SENSITIVITY_VARIABLES
 Calculate the number of variables to test
 ******************************************************************************/
-int num_sensitivity_variables( sense *rsens )	
+int num_sensitivity_variables( sense *rsens )
 {
 	int nv;
 	sense *cs;
-	
-	for ( nv = 0, cs = rsens; cs != NULL; cs = cs->next)								
+
+	for ( nv = 0, cs = rsens; cs != NULL; cs = cs->next)
 		if ( cs->nvalues > 1 )				// count variables with 2 or more values
 			nv++;
 	return nv;
 }
 
-			
+
 /*****************************************************************************
 DATAENTRY_SENSITIVITY
 Try to get values for sensitivity analysis
@@ -764,7 +764,7 @@ void dataentry_sensitivity( sense *s, int nval )
 	char *sss = NULL, *tok = NULL, type;
 	const char *app;
 
-	// reset random number generator 
+	// reset random number generator
 	init_random( seed );
 
 	Tcl_LinkVar( inter, "integerV", ( char * ) &integerV, TCL_LINK_BOOLEAN );
@@ -788,11 +788,11 @@ void dataentry_sensitivity( sense *s, int nval )
 
 	cmd( "ttk::frame .sens.t" );
 	cmd( "ttk::scrollbar .sens.t.v_scroll -command \".sens.t.t yview\"" );
-	cmd( "ttk::text .sens.t.t -height 8 -width 50 -yscroll \".sens.t.v_scroll set\" -dark $darkTheme -style smallFixed.TText" ); 
-	cmd( "pack .sens.t.t .sens.t.v_scroll -side left -fill y" ); 
+	cmd( "ttk::text .sens.t.t -height 8 -width 50 -yscroll \".sens.t.v_scroll set\" -dark $darkTheme -style smallFixed.TText" );
+	cmd( "pack .sens.t.t .sens.t.v_scroll -side left -fill y" );
 	cmd( "mouse_wheel .sens.t.t" );
 	cmd( "pack .sens.t" );
-	
+
 	cmd( "ttk::frame .sens.pad" );
 	cmd( "pack .sens.pad -pady 5" );
 
@@ -803,7 +803,7 @@ void dataentry_sensitivity( sense *s, int nval )
 	cmd( "ttk::button .sens.fb.rem -width $butWid -text Remove -command { set choice 3 }" );
 	cmd( "pack .sens.fb.int .sens.fb.paste .sens.fb.del .sens.fb.rem -padx $butSpc -side left" );
 	cmd( "pack .sens.fb -padx $butPad -anchor e" );
-	
+
 	cmd( "tooltip::tooltip .sens.fb.int \"Force rounding to integer values\"" );
 	cmd( "tooltip::tooltip .sens.fb.paste \"Insert the content of clipboard\"" );
 	cmd( "tooltip::tooltip .sens.fb.del \"Delete all current values\"" );
@@ -818,17 +818,17 @@ void dataentry_sensitivity( sense *s, int nval )
 	if ( s->entryOk )	// is there valid data from a previous data entry?
 	{
 		sss = new char[ MAX_ELEM_LENGTH * s->nvalues + 1 ];	// allocate space for string
-		tok = new char[ MAX_ELEM_LENGTH ];				
+		tok = new char[ MAX_ELEM_LENGTH ];
 		strcpy( sss, "" );
 		for ( i = 0; i < s->nvalues; i++ )		// pass existing data as a string
 		{
 			snprintf( tok, MAX_ELEM_LENGTH, "%.15g ", s->v[ i ] );	// add each value
 			strcatn( sss, tok, MAX_ELEM_LENGTH * s->nvalues + 1 );	// to the string
 		}
-		
+
 		cmd( "set sss \"%s\"", sss );		 	// pass string to Tk window
 		cmd( ".sens.t.t insert 0.0 $sss" );		// insert string in entry window
-		delete [ ] tok; 
+		delete [ ] tok;
 		delete [ ] sss;
 	}
 
@@ -840,27 +840,27 @@ void dataentry_sensitivity( sense *s, int nval )
 	{
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
-	
+
 		if ( choice == 3 )					// force error to delete variable from list
 		{
 			s->entryOk = false;
-			choice = 2; 
+			choice = 2;
 		}
-	
+
 		if ( choice == 2 )
 			goto end;
-	
+
 		app = eval_str( "[ .sens.t.t get 0.0 end ]" );
 		sss = new char[ strlen( app ) + 1 ];
 		strcpy( sss, app );
-	
+
 		if ( nval == 0 )					// undefined number of values?
-		{	
+		{
 			double temp;
 			char *tss, *ss = new char[ strlen( sss ) + 1 ];
 			tss = ss;						// save original pointer to gc
 			strcpy( ss, sss );				// make a draft copy
-			
+
 			i = 0;							// count number of values
 			do
 			{
@@ -868,7 +868,7 @@ void dataentry_sensitivity( sense *s, int nval )
 				if ( tok == NULL )			// finished?
 					break;
 				ss = NULL;
-				
+
 				// is it a clause to be expanded?
 				nPar = sscanf( tok, "=%lf:%lf@%u%%%c", &start, &end, &samples, &type );
 				if ( nPar == 4 )			// all values are required
@@ -877,20 +877,20 @@ void dataentry_sensitivity( sense *s, int nval )
 					i += sscanf( tok, "%lf", &temp );	// count valid doubles only
 			}
 			while ( tok != NULL );
-			
+
 			if ( i < 2 )					// invalid number of elements?
 				i = 2;						// minimum is 2
-				
+
 			if ( s->nvalues < i )			// is there insufficient space already alloc'd?
 			{
 				delete [ ] s->v;			// free old and reallocate enough space
 				s->v = new double[ i ];
 			}
 			s->nvalues = i;					// update # of values
-			
+
 			delete [ ] tss;
 		}
-	
+
 		for ( i = 0; i < s->nvalues; )
 		{
 			tok = strtok( sss, SENS_SEP );	// accepts several separators
@@ -901,12 +901,12 @@ void dataentry_sensitivity( sense *s, int nval )
 				cmd( "focus .sens.t.t" );
 				break;
 			}
-			
+
 			sss = NULL;
-			
+
 			// is it a clause to be expanded?
 			nPar = sscanf( tok, "=%lf:%lf@%u%%%c", &start, &end, &samples, &type );
-			
+
 			if ( nPar == 4 )				// all values are required
 			{
 				if ( toupper( type ) == 'L' && samples > 0 )// linear sampling
@@ -918,7 +918,7 @@ void dataentry_sensitivity( sense *s, int nval )
 						s->v[ i ] = integerV ? round( s->v[ i ] ) : s->v[ i ];
 					}
 				}
-				if ( toupper( type ) == 'R' && samples > 0 )// random sampling 
+				if ( toupper( type ) == 'R' && samples > 0 )// random sampling
 					for ( int j = 0; j < samples; ++j, ++i )
 					{
 						s->v[ i ] = fmin( start, end ) + ran1( ) * ( fmax( start, end ) - fmin( start, end ) );
@@ -948,7 +948,7 @@ void dataentry_sensitivity( sense *s, int nval )
 NOLH_TABLE
 Calculate a Near Orthogonal Latin Hypercube (NOLH) design for sampling.
 Include tables to up to 29 variables ( sanchez 2009, Cioppa and Lucas 2007).
-Returns the number of samples (n) required for the calculated design and a 
+Returns the number of samples (n) required for the calculated design and a
 pointer 	to the matrix n x k, where k is the number of factors ( variables).
 
 It is possible to load one additional design table from disk ( file NOLH.csv in
@@ -961,12 +961,12 @@ one row per text line and no empty lines. The table can be loaded manually
 int **NOLH_0 = NULL;				// pointer to the design loaded from file
 
 // function to get the index to the default NOLH design table or -1 otherwise
-int NOLH_table( int k )				
+int NOLH_table( int k )
 {
 	for ( unsigned int i = 0; i < ( ( sizeof NOLH ) / sizeof NOLH[ 0 ] ); ++i )
 		if ( k >= NOLH[ i ].kMin && k <= NOLH[ i ].kMax )
 			return i;
-	
+
 	return -1;						// number of factors not supported by the preloaded tables
 }
 
@@ -975,11 +975,11 @@ int NOLH_table( int k )
 NOLH_VALID_TABLES
 Determine the valid NOLH tables for the number of factors
 ******************************************************************************/
-char *NOLH_valid_tables( int k, char *out, int sz )	
+char *NOLH_valid_tables( int k, char *out, int sz )
 {
 	int min_tab = NOLH_table( k );
 	char buff[ MAX_ELEM_LENGTH ];
-	
+
 	if ( min_tab <= 0 )
 		snprintf( out, sz, "External only" );
 	else
@@ -991,16 +991,16 @@ char *NOLH_valid_tables( int k, char *out, int sz )
 			strcatn( out, buff, sz );
 		}
 	}
-	
+
 	return out;
 }
 
-			
+
 /*****************************************************************************
 NOLH_CLEAR
 Function to remove table 0
 ******************************************************************************/
-void NOLH_clear( void )				
+void NOLH_clear( void )
 {
 	if ( NOLH_0 == NULL )			// table is not allocated?
 		return;
@@ -1017,16 +1017,16 @@ NOLH_LOAD
 Function to load a .csv file named NOLH.csv as table 0 ( first to be used)
 If option 'force' is used, will be used for any number of factors
 ******************************************************************************/
-bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )			
+bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )
 {
 	int i, j, n = 1, loLevel = INT_MAX, hiLevel = 1, kFile = 0;
 	char *fileName, *lBuffer, *str, *num;
 	bool ok = false;
 	FILE *NOLHfile;
-	
+
 	if ( NOLH_0 != NULL )			// table already loaded?
 		NOLH_clear( );
-	
+
 	if ( strlen( path ) > 0 )
 	{
 		fileName = new char[ strlen( path ) + strlen( baseName ) + 2 ];
@@ -1040,9 +1040,9 @@ bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )
 	NOLHfile = fopen( fileName, "r" );
 	if ( NOLHfile == NULL )
 	{
-		error_hard( "problem accessing the design of experiment file", 
-					"check if the requested file exists", 
-					false, 
+		error_hard( "problem accessing the design of experiment file",
+					"check if the requested file exists",
+					false,
 					"cannot open NOHL design file '%s'", fileName );
 		return false;
 	}
@@ -1066,13 +1066,13 @@ bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )
 		n++;
 	}
 	while ( ! feof( NOLHfile ) );
-	
+
 	// get contiguous space for the 2D table
 	NOLH_0 = new int*[ n ];
 	NOLH_0[ 0 ] = new int[ n * kFile ];
 	for ( i = 1; i < n; i++ )
 		NOLH_0[ i ] = NOLH_0[ i - 1 ] + kFile;
-	
+
 	rewind( NOLHfile );				// restart from the beginning
 	for ( i = 0; i < n ; i++ )		// read file content
 	{
@@ -1090,9 +1090,9 @@ bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )
 				delete [ ] NOLH_0[ 0 ];
 				delete [ ] NOLH_0;
 				NOLH_0 = NULL;
-				error_hard( "invalid design of experiment file", 
+				error_hard( "invalid design of experiment file",
 							"check the file contents",
-							false, 
+							false,
 							"invalid format in NOHL file '%s', line=%d", fileName, i + 1 );
 				goto end;
 			}
@@ -1103,21 +1103,21 @@ bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )
 				hiLevel = NOLH_0[ i ][ j ];
 		}
 	}
-	
+
 	// set new table characteristics
 	if ( force )
 		NOLH[ 0 ].kMin = 1;
 	else
 		NOLH[ 0 ].kMin = NOLH[ sizeof NOLH / sizeof NOLH[ 0 ] - 1 ].kMax + 1;
-	
+
 	NOLH[ 0 ].kMax = kFile;
 	NOLH[ 0 ].n1 = NOLH[ 0 ].n2 = n;
 	NOLH[ 0 ].loLevel = loLevel;
 	NOLH[ 0 ].hiLevel = hiLevel;
 	NOLH[ 0 ].table = NOLH_0[ 0 ];
-	
+
 	plog( "\nNOLH file loaded: %s\nk = %d, n = %d, low level = %d, high level = %d", fileName, kFile, n, loLevel, hiLevel );
-	
+
 	ok = true;
 end:
 	delete [ ] fileName;
@@ -1174,7 +1174,7 @@ double **mat_add_mat( double **a, int m, int n, double **b, double **c )
 	return c;
 }
 
-// multiply all positions in matrix by a scalar 
+// multiply all positions in matrix by a scalar
 double **mat_mult_scal( double **a, int m, int n, double b, double **c )
 {
 	for ( int i = 0; i < m ; ++i )	 	//rows
@@ -1240,7 +1240,7 @@ double mat_sum_dists( double **a, int m, int n, double **b )
 {
 	double sum = 0;
 	for ( int i = 0; i < m ; ++i )	 		//rows in a
-		for ( int k = 0; k < m; ++k )		//rows in b 
+		for ( int k = 0; k < m; ++k )		//rows in b
 		{
 			double dist2 = 0;
 			for ( int j = 0; j < n ; ++j )	//columns
@@ -1256,9 +1256,9 @@ MORRIS_OAT
 	Calculate a DoE for Elementary Effects (Morris 1991) analysis,
 	according to Saltelli et al 2008. Code adapted from SAlib by
 	Jon Herman.
-	
+
 	Delta is fixed at p/[2(p-1)]
-	
+
 	k: number of factors
 	r: number of trajectories
 	p: number of grid levels
@@ -1268,9 +1268,9 @@ MORRIS_OAT
 double **morris_oat( int k, int r, int p, int jump, double **X )
 {
 	int i, j, l;
-    double delta = ( double ) jump / ( p - 1 );	// grid step delta
-	
-	// reset random number generator 
+	double delta = ( double ) jump / ( p - 1 );	// grid step delta
+
+	// reset random number generator
 	init_random( seed );
 
 	// allocate all temporary matrices
@@ -1281,29 +1281,29 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 		**delta_diag = mat_new( k, k ),
 		**temp_1 = mat_new( k + 1, k ),
 		**temp_2 = mat_new( k + 1, k );
-	
-    // orientation matrix B: lower triangular (1) + upper triangular (-1)
+
+	// orientation matrix B: lower triangular (1) + upper triangular (-1)
 	for ( i = 0; i < k + 1; ++i )
 		for ( j = 0; j < k; ++j )
 			B[ i ][ j ] = ( i > j ) ? 1 : -1;
-    
-    // Create r trajectories. Each trajectory contains k+1 parameter sets.
-    // ( starts at a base point, and then changes one parameter at a time )
-	
-	cmd( "progressbox .psa \"Creating DoE\" \"Analyzing EE trajectories\" \"Trajectory\" %d", r );	
-	
+
+	// Create r trajectories. Each trajectory contains k+1 parameter sets.
+	// ( starts at a base point, and then changes one parameter at a time )
+
+	cmd( "progressbox .psa \"Creating DoE\" \"Analyzing EE trajectories\" \"Trajectory\" %d", r );
+
 	for ( l = 0; l < r; ++l )
 	{
-        // directions matrix DM - diagonal matrix of either +1 or -1
+		// directions matrix DM - diagonal matrix of either +1 or -1
 		for ( i = 0; i < k; ++i )
 			for ( j = 0; j < k; ++j )
 				DM[ i ][ j ] = ( i == j )? RND_CHOICE( -1, 1 ) : 0;
-			
-        // permutation matrix P
+
+		// permutation matrix P
 		int *perm = new int[ k ];
 		for ( i = 0; i < k; ++i )
 			perm [ i ] = i;
-		
+
 		shuffle( & perm[ 0 ], & perm[ k ], mt32 );
 
 		P = mat_copy_scal( P, k, k, 0 );
@@ -1312,7 +1312,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 
 		delete [ ] perm;
 
-        // starting point for this trajectory
+		// starting point for this trajectory
 		for ( j = 0; j < k; ++j )
 		{
 			double start = uniform_int( 0, p - delta * ( p - 1 ) - 1 ) / ( p - 1 );
@@ -1320,7 +1320,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 				X_base[ i ][ j ] = start;
 		}
 
-        // Indices to be assigned to X, corresponding to this trajectory
+		// Indices to be assigned to X, corresponding to this trajectory
 		int index_list = l * ( k + 1 );
 		for ( i = 0; i < k; ++i )
 			for ( j = 0; j < k; ++j )
@@ -1333,12 +1333,12 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 		temp_1 = mat_mult_scal( temp_2, k + 1, k, 0.5, temp_1 );
 		temp_2 = mat_add_mat( temp_1, k + 1, k, X_base, temp_2 );
 		X = mat_ins_mat( X, r * ( k + 1 ), k, temp_2, k + 1, k, index_list );
-		
+
 		cmd( "prgboxupdate .psa %d", l + 1 );
 	}
-	
+
 	cmd( "destroytop .psa" );
-	
+
 	// deallocate all temporary matrices
 	mat_del( B, k + 1, k );
 	mat_del( DM, k, k );
@@ -1347,8 +1347,8 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 	mat_del( delta_diag, k, k );
 	mat_del( temp_1, k + 1, k );
 	mat_del( temp_2, k + 1, k );
-	
-    return X;
+
+	return X;
 }
 
 
@@ -1357,7 +1357,7 @@ COMPUTE_DISTANCE_MATRIX
 	Optimize a DoE for Elementary Effects (Morris 1991) analysis,
 	according to Campolongo et al 2007 and Ruano 2012. Code adapted
 	from SAlib by Jon Herman.
-	
+
 	k: number of factors
 	pool: pool of trajectories produced by morris_oat()
 	M: number of trajectories in pool
@@ -1366,36 +1366,36 @@ COMPUTE_DISTANCE_MATRIX
 ******************************************************************************/
 double **compute_distance_matrix( double **sample, int M, int k, double **DM )
 {
-	double **input_1 = mat_new( k + 1, k ), 
+	double **input_1 = mat_new( k + 1, k ),
 		   **input_2 = mat_new( k + 1, k );
-	
+
 	DM = mat_copy_scal( DM, M, M, 0 );
-	
+
 	cmd( "progressbox .psa \"Creating DoE\" \"Compute EE distance matrix\" \"Trajectory\" %d", M );
-	
+
 	for ( int i = 0 ; i < M; ++i )
 	{
-		input_1 = mat_ext_mat( input_1, k + 1, k, 
-							   sample, M * ( k + 1 ), k, 
+		input_1 = mat_ext_mat( input_1, k + 1, k,
+							   sample, M * ( k + 1 ), k,
 							   i * ( k + 1 ) );
 		for ( int j = i + 1; j < M; ++j )
 		{
-			input_2 = mat_ext_mat( input_2, k + 1, k, 
-								   sample, M * ( k + 1 ), k, 
+			input_2 = mat_ext_mat( input_2, k + 1, k,
+								   sample, M * ( k + 1 ), k,
 								   j * ( k + 1 ) );
-			DM[ i ][ j ] = DM[ j ][ i ] = 
+			DM[ i ][ j ] = DM[ j ][ i ] =
 				mat_sum_dists( input_1, k + 1, k, input_2 );
 		}
-		
+
 		cmd( "prgboxupdate .psa %d", i + 1 );
 	}
-		
+
 	cmd( "destroytop .psa" );
-	
+
 	mat_del( input_1, k + 1, k );
 	mat_del( input_2, k + 1, k );
-	
-    return DM;
+
+	return DM;
 }
 
 
@@ -1416,38 +1416,38 @@ vector < vector < int > > combinations( list < int > indices, int r )
 	vector < bool > v( n );
 	fill( v.begin( ), v.end( ) - n + r, true );
 	// create all permutations of the selectors
-	do 
+	do
 	{
 		// set member if it is selected in the current permutation of v
 		for ( int i = 0; i < n; ++i )
-			if ( v[ i ] ) 
+			if ( v[ i ] )
 				comb.push_back( ind[ i ] );
 		combs.push_back( comb );
 		comb.clear( );
 	}
 	while ( prev_permutation( v.begin( ), v.end( ) ) );
-	
+
 	return combs;
 }
 
 
 /*****************************************************************************
 SUM_DISTANCES
-  Calculate combinatorial distance between a select group of trajectories, 
+  Calculate combinatorial distance between a select group of trajectories,
   indicated by indices
-    indices: list of candidate pairs of points = list < int >
-    DM: distance matrix = array (M,M)
+	indices: list of candidate pairs of points = list < int >
+	DM: distance matrix = array (M,M)
 ******************************************************************************/
 double sum_distances( list < int > indices, double **DM )
 {
 	// get all combination pairs of indices
 	vector < vector < int > > combs = combinations( indices, 2 );
 
-    // add distance of all points pairs
+	// add distance of all points pairs
 	double D = 0;
 	for ( unsigned int j = 0; j < combs.size( ); ++j )
 		D += DM[ combs[ j ][ 0 ] ][ combs[ j ][ 1 ] ];
-	
+
 	return D;
 }
 
@@ -1460,7 +1460,7 @@ list < int > top_idx( double *a, int n, int i )
 {
 	list < int > top;
 	vector < bool > used( n, false );
-	
+
 	for ( int k = 0; k < i; ++k )
 	{
 		int max_idx = -1;
@@ -1474,7 +1474,7 @@ list < int > top_idx( double *a, int n, int i )
 		used[ max_idx ] = true;
 		top.push_back( max_idx );
 	}
-	
+
 	return top;
 }
 
@@ -1482,35 +1482,35 @@ list < int > top_idx( double *a, int n, int i )
 /*****************************************************************************
 GET_MAX_SUM_IND
 	Get the indice that belong to the maximum distance in an array of distances
-    indices_list = list of points
-    distance = array (M)
+	indices_list = list of points
+	distance = array (M)
 ******************************************************************************/
 list < int > get_max_sum_ind( vector < list < int > > indices_list, vector < double > row_maxima_i )
 {
 	int max_idx = -1;
 	double max = -INFINITY;
-	
+
 	for ( unsigned int j = 0; j < indices_list.size( ); ++j )
 		if ( row_maxima_i[ j ] > max )
 		{
 			max_idx = j;
 			max = row_maxima_i[ j ];
 		}
-		
+
 	return indices_list[ max_idx ];
 }
 
 
 /*****************************************************************************
 ADD_INDICES
-	Adds extra indices for the combinatorial problem. 
+	Adds extra indices for the combinatorial problem.
 	For indices = (1,2 ) and M=5, the method returns [(1,2,3),(1,2,4),(1,2,5)]
 ******************************************************************************/
 vector < list < int > > add_indices( list < int > m_max_ind, int M )
 {
 	vector < list < int > > list_new_indices;
 	list < int > copy = m_max_ind;
-	
+
 	for ( int i = 0; i < M; ++i )
 		if ( find( m_max_ind.begin( ), m_max_ind.end( ), i ) == m_max_ind.end( ) )
 		{
@@ -1518,16 +1518,16 @@ vector < list < int > > add_indices( list < int > m_max_ind, int M )
 			list_new_indices.push_back( copy );
 			copy.pop_back( );
 		}
-		
+
 	return list_new_indices;
 }
 
 
 /*****************************************************************************
 OPT_TRAJECTORIES
-	An alternative by Ruano et al. (2012 ) for the brute force approach as 
-	originally proposed by Campolongo et al. (2007). The method should improve 
-	the speed with which an optimal set of trajectories is found tremendously 
+	An alternative by Ruano et al. (2012 ) for the brute force approach as
+	originally proposed by Campolongo et al. (2007). The method should improve
+	the speed with which an optimal set of trajectories is found tremendously
 	for larger sample sizes.
 ******************************************************************************/
 double **opt_trajectories( int k, double **pool, int M, int r, double **X )
@@ -1538,21 +1538,21 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 		return X;
 	}
 
- 	list < int > indices, i_max_ind, m_max_ind, tot_max; 
+	list < int > indices, i_max_ind, m_max_ind, tot_max;
 	vector < list < int > > tot_indices_list, indices_list, m_ind;
-	
+
 	double **DM = mat_new( M, M );
 	DM = compute_distance_matrix( pool, M, k, DM );
-    
+
 	vector < double > tot_max_array( r - 1, 0 );
-	
+
 	//#############Loop 'i'#############
 	// i starts at 1
 	for ( int i = 1; i < r; ++i )
 	{
 		indices_list.clear( );
 		vector < double > row_maxima_i( M, 0 );
-		
+
 		for ( int row = 0; row < M; ++row )
 		{
 			indices = top_idx( DM[ row ], M, i );
@@ -1560,22 +1560,22 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 			row_maxima_i[ row ] = sum_distances( indices, DM );
 			indices_list.push_back( indices );
 		}
-		
+
 		// Find the indices belonging to the maximum distance
 		i_max_ind = get_max_sum_ind( indices_list, row_maxima_i );
 
 		// ######### Loop 'm' ( called loop 'k' in Ruano) ############
 		m_max_ind = i_max_ind;
 		// m starts at 1
-        for ( int m = 1; m <= r - i - 1; ++m )
+		for ( int m = 1; m <= r - i - 1; ++m )
 		{
 			m_ind = add_indices( m_max_ind, M );
-            vector < double > m_maxima( m_ind.size( ), 0 );
-			
-            for ( unsigned int n = 0; n < m_ind.size( ); ++n )
-                m_maxima[ n ] = sum_distances( m_ind[ n ], DM );
-            
-            m_max_ind = get_max_sum_ind( m_ind, m_maxima );
+			vector < double > m_maxima( m_ind.size( ), 0 );
+
+			for ( unsigned int n = 0; n < m_ind.size( ); ++n )
+				m_maxima[ n ] = sum_distances( m_ind[ n ], DM );
+
+			m_max_ind = get_max_sum_ind( m_ind, m_maxima );
 		}
 		tot_indices_list.push_back( m_max_ind );
 		tot_max_array[ i - 1 ] = sum_distances( m_max_ind, DM );
@@ -1584,12 +1584,12 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 	tot_max = get_max_sum_ind( tot_indices_list, tot_max_array );
 	tot_max.sort( );
 	vector < int > max( tot_max.begin( ), tot_max.end( ) );
-	
+
 	// index the submatrix for each trajectory
 	vector < int > index_list( M, 0 );
 	for ( int i = 0; i < M; ++i )
 		index_list[ i ] = i * ( k + 1 );
-	
+
 	// move the best trajectories to caller 2D array
 	double **temp = mat_new( k + 1, k );
 	for ( int i = 0; i < r; ++i )
@@ -1597,13 +1597,13 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 		temp = mat_ext_mat( temp, k + 1, k, pool, M * ( k + 1 ), k, index_list[ max[ i ] ] );
 		X = mat_ins_mat( X, r * ( k + 1 ), k, temp, k + 1, k, index_list[ i ] );
 	}
-	
+
 	mat_del( temp, k + 1, k );
 	mat_del( DM, M, M );
-	
-    return X;
+
+	return X;
 }
-	
+
 
 /*****************************************************************************
 ~DESIGN
@@ -1616,10 +1616,10 @@ design::~design( void )
 	for ( int i = 0; i < k; i++ )		// and all variables
 		delete [ ] lab[ i ];
 	delete [ ] ptr;
-	delete [ ] lab; 
-	delete [ ] hi; 
-	delete [ ] lo; 
-	delete [ ] par; 
+	delete [ ] lab;
+	delete [ ] hi;
+	delete [ ] lo;
+	delete [ ] par;
 	delete [ ] lag;
 	delete [ ] intg;
 }
@@ -1634,7 +1634,7 @@ DESIGN
 		samples = -1: use extended predefined sample size (n2 )
 		factors = 0: use automatic DoE size
 ******************************************************************************/
-design::design( sense *rsens, int typ, const char *fname, int findex, 
+design::design( sense *rsens, int typ, const char *fname, int findex,
 				int samples, int factors, int jump, int trajs )
 {
 	int i , j, kTab, doeRange, poolSz;
@@ -1642,34 +1642,34 @@ design::design( sense *rsens, int typ, const char *fname, int findex,
 	char *doefname, doeName[ MAX_ELEM_LENGTH ];
 	FILE *f;
 	sense *cs;
-	
-	// reset random number generator 
+
+	// reset random number generator
 	init_random( seed );
 
 	if ( rsens == NULL )					// valid pointer?
 		typ = 0;							// trigger invalid design
-		
+
 	switch ( typ )
 	{
 		case 1:								// Near Orthogonal Latin Hypercube sampling
 			k = kTab = num_sensitivity_variables( rsens );	// number of factors
-			
+
 			if ( strcmp( fname, "" ) )		// if filename was specified
 				NOLH_load( fname, true );	// load file and force using it always
 			else
 			{
 				if ( factors != 0 && k > factors )	// invalid # of factors selected?
 				{
-					error_hard( "invalid design of experiment parameters", 
+					error_hard( "invalid design of experiment parameters",
 								"check the design",
-								false, 
+								false,
 								"number of NOLH variables selected is too small" );
 					goto invalid;
 				}
 				// if user selected # of factors, use it to select internal table
 				kTab = ( factors == 0 ) ? k : factors;
 			}
-				
+
 			tab = NOLH_table( kTab );		// design table to use
 			if ( tab == -1 )				// number of factors too large, try to load external table ( file )
 			{
@@ -1678,28 +1678,28 @@ design::design( sense *rsens, int typ, const char *fname, int findex,
 					tab = NOLH_table( k );	// design table to use
 					if ( tab == -1 )		// still too large?
 					{
-						error_hard( "invalid design of experiment parameters", 
+						error_hard( "invalid design of experiment parameters",
 									"check the design",
-									false, 
+									false,
 									"too many variables to test for NOLH.csv size" );
 						goto invalid;		// abort
 					}
 				}
 				else
 				{
-					error_hard( "invalid design of experiment parameters", 
+					error_hard( "invalid design of experiment parameters",
 								"check the design",
 								false,
 								"too many variables to test" );
 					goto invalid;			// abort
 				}
 			}
-				
+
 			// get the number of samples required by the NOLH design, according to user choice (basic/extended)
 			n = ( samples != -1 ) ? NOLH[ tab ].n1 : NOLH[ tab ].n2;
 
 			plog( "\nNOLH table used: %d (%s), n = %d", tab, tab > 0 ? "built-in" : "from file", n );
-			
+
 			// allocate memory for data
 			par = new int[ k ];				// vector of variable type (parameter / lagged value )
 			lag = new int[ k ];				// vector of lags
@@ -1708,50 +1708,50 @@ design::design( sense *rsens, int typ, const char *fname, int findex,
 			lo = new double[ k ];			// vector of low factor value
 			lab = new char *[ k ];			// vector of variable labels
 			ptr = new double *[ n ];		// allocate space for weighted design table
-			
+
 			// define low and high values from sensitivity data
 			for ( i = 0, cs = rsens; cs != NULL; cs = cs->next )
 			{
 				if ( cs->nvalues < 2 )		// consider only multivalue variables
 					continue;
-				
+
 				hi[ i ] = lo[ i ] = cs->v[ 0 ];
 				for ( j = 1; j < cs->nvalues; j++ )
 				{
 					hi[ i ] = fmax( cs->v[ j ], hi[ i ] );
 					lo[ i ] = fmin( cs->v[ j ], lo[ i ] );
 				}
-				
+
 				intg[ i ] = cs->integer;	// set variable format
 				par[ i ] = cs->param;		// set variable type
 				lag[ i ] = cs->lag;			// set number of lags
-				
+
 				// copy label (name )
 				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
 				strcpy( lab[ i ], cs->label );
-				
+
 				i++;
 			}
-			
+
 			// calculate the design of the experiment
 			doeRange = NOLH[ tab ].hiLevel - NOLH[ tab ].loLevel;
 			for ( i = 0; i < n; i++ )		// for all experiments
 			{
 				ptr[ i ] = new double[ k ];	// allocate 2nd level data
 				for ( j = 0; j < k; j++ )	// for all factors
-					ptr[ i ][ j ] = lo[ j ] + 
-					( *( NOLH[ tab ].table + i * NOLH[ tab ].kMax + j ) - 1 ) * 
+					ptr[ i ][ j ] = lo[ j ] +
+					( *( NOLH[ tab ].table + i * NOLH[ tab ].kMax + j ) - 1 ) *
 					( hi[ j ] - lo[ j ] ) / doeRange;
 			}
-			
-			break;	
-			
+
+			break;
+
 		case 2:								// random sampling
 			k = num_sensitivity_variables( rsens );	// number of factors
 			n = samples;					// number of samples required
 			if ( n < 1 )					// at least one sample required
 				goto invalid;
-			
+
 			// allocate memory for data
 			par = new int[ k ];				// vector of variable type (parameter / lagged value )
 			lag = new int[ k ];				// vector of lags
@@ -1760,31 +1760,31 @@ design::design( sense *rsens, int typ, const char *fname, int findex,
 			lo = new double[ k ];			// vector of low factor value
 			lab = new char *[ k ];			// vector of variable labels
 			ptr = new double *[ n ];		// allocate space for weighted design table
-			
+
 			// define low and high values from sensitivity data
 			for ( i = 0, cs = rsens; cs != NULL; cs = cs->next )
 			{
 				if ( cs->nvalues < 2 )		// consider only multivalue variables
 					continue;
-				
+
 				hi[ i ] = lo[ i ] = cs->v[ 0 ];
 				for ( j = 1; j < cs->nvalues; j++ )
 				{
 					hi[ i ] = fmax( cs->v[ j ], hi[ i ] );
 					lo[ i ] = fmin( cs->v[ j ], lo[ i ] );
 				}
-				
+
 				intg[ i ] = cs->integer;	// set variable format
 				par[ i ] = cs->param;		// set variable type
 				lag[ i ] = cs->lag;			// set number of lags
-				
+
 				// copy label (name )
 				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
 				strcpy( lab[ i ], cs->label );
-				
+
 				i++;
 			}
-			
+
 			// calculate the design of the experiment
 			for ( i = 0; i < n; i++ )		// for all experiments
 			{
@@ -1792,16 +1792,16 @@ design::design( sense *rsens, int typ, const char *fname, int findex,
 				for ( j = 0; j < k; j++ )	// for all factors
 					ptr[ i ][ j ] = lo[ j ] + ran1( ) * ( hi[ j ] - lo[ j ] );
 			}
-			
-			break;	
-			
+
+			break;
+
 		case 3:								// Elementary Effects sampling
 			k = num_sensitivity_variables( rsens );	// number of factors
 			poolSz = samples * ( k + 1 );	// larger pool to extract samples
 			n = trajs * ( k + 1 );			// number of effective samples
 			if ( n < 1 || n > poolSz )		// at least one sample required
 				goto invalid;
-			
+
 			// allocate memory for data
 			par = new int[ k ];				// vector of variable type (parameter / lagged value )
 			lag = new int[ k ];				// vector of lags
@@ -1815,48 +1815,48 @@ design::design( sense *rsens, int typ, const char *fname, int findex,
 			pool = new double *[ poolSz ];	// allocate space for weighted design table
 			for ( i = 0; i < poolSz; i++ )	// for all pool trajectories
 				pool[ i ] = new double[ k ];
-			
+
 			// define low and high values from sensitivity data
 			for ( i = 0, cs = rsens; cs != NULL; cs = cs->next )
 			{
 				if ( cs->nvalues < 2 )		// consider only multivalue variables
 					continue;
-				
+
 				hi[ i ] = lo[ i ] = cs->v[ 0 ];
 				for ( j = 1; j < cs->nvalues; j++ )
 				{
 					hi[ i ] = fmax( cs->v[ j ], hi[ i ] );
 					lo[ i ] = fmin( cs->v[ j ], lo[ i ] );
 				}
-				
+
 				intg[ i ] = cs->integer;	// set variable format
 				par[ i ] = cs->param;		// set variable type
 				lag[ i ] = cs->lag;			// set number of lags
-				
+
 				// copy label (name )
 				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
 				strcpy( lab[ i ], cs->label );
-				
+
 				i++;
 			}
-			
+
 			// calculate the Morris OAT pool of trajectories
 			pool = morris_oat( k, samples, factors, jump, pool );
-			
+
 			// select the best trajectories from pool
 			ptr = opt_trajectories( k, pool, samples, trajs, ptr );
-			
+
 			for ( i = 0; i < poolSz; i++ )	// free pool memory
 				delete [ ] pool[ i ];
 			delete [ ] pool;
-			
+
 			// scale the DoE to the sensitivity test ranges
 			for ( i = 0; i < n; i++ )		// for all experiments
 				for ( j = 0; j < k; j++ )	// for all factors
 					ptr[ i ][ j ] = lo[ j ] + ptr[ i ][ j ] * ( hi[ j ] - lo[ j ] );
-			
-			break;	
-			
+
+			break;
+
 		default:							// invalid design!
 		invalid:
 			typ = tab = n = k = 0;
@@ -1867,12 +1867,12 @@ design::design( sense *rsens, int typ, const char *fname, int findex,
 			lab = NULL;
 			return;
 	}
-	
+
 	// generate a configuration file for the experiment
-			
+
 	// file name for saving table
 	snprintf( doeName, MAX_ELEM_LENGTH, "%u_%u", ( unsigned ) findex, ( unsigned ) ( findex + n - 1 ) );
-	
+
 	if ( strlen( path ) > 0 )				// non-default folder?
 	{
 		doefname = new char[ strlen( path ) + strlen( simul_name ) + strlen( doeName ) + 7 ];
@@ -1883,7 +1883,7 @@ design::design( sense *rsens, int typ, const char *fname, int findex,
 		doefname = new char[ strlen( simul_name ) + strlen( doeName ) + 6 ];
 		sprintf( doefname, "%s_%s.csv", simul_name, doeName );
 	}
-	
+
 	if ( ( f = fopen( doefname, "w" ) ) == NULL )
 	{
 		delete [ ] par;
@@ -1894,46 +1894,46 @@ design::design( sense *rsens, int typ, const char *fname, int findex,
 		delete [ ] ptr;
 		delete [ ] lab;
 		delete [ ] doefname;
-		
+
 		typ = tab = n = k = 0;
 		par = lag = NULL;
 		hi = lo = NULL;
 		intg = NULL;
 		ptr = NULL;
 		lab = NULL;
-		
-		error_hard( "cannot create DoE configuration file", 
+
+		error_hard( "cannot create DoE configuration file",
 					"check if disk is not full or set READ-ONLY",
-					false, 
+					false,
 					"a disk error prevented creating the file" );
 		return;
 	}
-	
+
 	// write the doe table to disk
 	for ( j = 0; j < k; j++ )		// write variable labels
 		fprintf( f, "%s%c", lab[ j ], ( j == ( k - 1 ) ? '\n' : ',' ) );
-		
+
 	for ( i = 0; i < n; i++ )		// for all experiments
 		for ( j = 0; j < k; j++ )	// write variable experimental values
 		{
 			// round to integer if necessary
 			if ( intg[ j ] )
 				ptr[ i ][ j ] = round( ptr[ i ][ j ] );
-			
+
 			fprintf( f, "%lf%c", ptr[ i ][ j ], ( j == ( k - 1 ) ? '\n' : ',' ) );
 		}
-			
+
 	fclose( f );
-	
+
 	plog( "\nDoE configuration saved: %s", doefname );
-	
+
 	delete [ ] doefname;
 }
 
 
 /*****************************************************************************
 SENSITIVITY_DOE
-	Generate the configuration files for the 
+	Generate the configuration files for the
 	Design of Experiment (DOe )
 ******************************************************************************/
 void sensitivity_doe( int *findex, design *doe, const char *dest_path )
@@ -1941,10 +1941,10 @@ void sensitivity_doe( int *findex, design *doe, const char *dest_path )
 	int i, j, inif = *findex;
 	object *cur;
 	variable *cvar;
-	
+
 	stop = false;
 	cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\" %d { set stop true }", doe->n );
-	
+
 	for ( i = 0; i < doe->n && ! stop; ++i )	// run through all experiments
 	{
 		// set up the variables ( factors) with the experiment values
@@ -1953,14 +1953,14 @@ void sensitivity_doe( int *findex, design *doe, const char *dest_path )
 			cvar = root->search_var( root, doe->lab[ j ] );	// find variable to set
 			for ( cur = cvar->up; cur != NULL; cur = cur->hyper_next( cur->label ) )
 			{									// run through all objects containing var
-				cvar = cur->search_var( cur, doe->lab[ j ] ); 
+				cvar = cur->search_var( cur, doe->lab[ j ] );
 				if ( doe->par[ j ] == 1 )		// handle lags > 0
 					cvar->val[ 0 ] = doe->ptr[ i ][ j ];
 				else
 					cvar->val[ doe->lag[ j ] ] = doe->ptr[ i ][ j ];
 			}
 		}
-		
+
 		// generate a configuration file for the experiment
 		if ( ! save_configuration( *findex, dest_path ) )
 		{
@@ -1968,17 +1968,17 @@ void sensitivity_doe( int *findex, design *doe, const char *dest_path )
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
 			return;
 		}
-		
+
 		if ( ( i + 2 ) % 10 == 0 )
 			cmd( "prgboxupdate .psa %d", i + 1 );
-			
+
 		++( *findex );
 	}
-	
+
 	cmd( "destroytop .psa" );
-	
+
 	plog( "\nSensitivity analysis configurations produced: %d\n", findexSens - 1 );
-		
+
 	// if succeeded, explain user how to proceed
 	if ( ! stop )
 		sensitivity_created( dest_path, clean_file( simul_name ), inif );

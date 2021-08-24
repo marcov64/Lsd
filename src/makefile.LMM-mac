@@ -6,7 +6,7 @@
 #
 #	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
-#	
+#
 #**************************************************************
 
 #**************************************************************
@@ -42,7 +42,7 @@ INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(LSDROOT)/$(SRC)
 # adjust executable to use the provided Tcl/Tk frameworks
 TARGET_PKG=$(LSDROOT)/$(TARGET).app/Contents/MacOS/$(TARGET)
 
-$(TARGET_PKG): $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o 
+$(TARGET_PKG): $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o
 	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o \
 	-F$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(TARGET_PKG)
 	touch -c -f $(LSDROOT)/$(TARGET).app

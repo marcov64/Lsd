@@ -9,7 +9,7 @@
 #
 #	See Readme.txt for copyright information of
 #	third parties' code used in LSD
-#	
+#
 #*************************************************************
 
 #*************************************************************
@@ -28,7 +28,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
 	toplevel $w -background $colorsTheme(bg)
 
 	# workaround for bug in Tk 8.6.11 (must update before withdrawing)
-	if { [ string equal $CurPlatform mac ] } { 
+	if { [ string equal $CurPlatform mac ] } {
 		wm attributes $w -alpha 0
 		update idletasks
 	}
@@ -62,17 +62,17 @@ proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
 			}
 		}
 	}
-	
+
 	wm group $w .
 	wm title $w $name
 	wm protocol $w WM_DELETE_WINDOW $destroy
 	wm attributes $w -alpha 1
-	
+
 	if { ! $noglobkeys } {
 		setglobkeys $w
 	}
 
-	if { $logWndFn && [ info procs plog ] != "" } { 
+	if { $logWndFn && [ info procs plog ] != "" } {
 		plog "\nnewtop (w:$w, master:[ wm transient $w ], parWndLst:$parWndLst, grab:$grabLst)"
 	}
 }
@@ -90,23 +90,23 @@ proc settop { w { name no } { destroy no } { par no } { force no } } {
 			wm transient $w $par
 		}
 	}
-	
+
 	if { $name != no && $name != "" } {
 		wm title $w $name
 	}
-	
+
 	if { $destroy != no && $destroy != "" } {
 		wm protocol $w WM_DELETE_WINDOW $destroy
 	}
-	
+
 	deiconifytop $w $force
 	raise $w
 	focustop $w "" $force
-	
+
 	update
 
-	if { $logWndFn && [ info procs plog ] != "" } { 
-		plog "\nsettop (w:$w, master:[ wm transient $w ], pos:([ winfo x $w ],[ winfo y $w ]), size:[ winfo width $w ]x[ winfo height $w ], parWndLst:$parWndLst, grab:$grabLst)" 
+	if { $logWndFn && [ info procs plog ] != "" } {
+		plog "\nsettop (w:$w, master:[ wm transient $w ], pos:([ winfo x $w ],[ winfo y $w ]), size:[ winfo width $w ]x[ winfo height $w ], parWndLst:$parWndLst, grab:$grabLst)"
 	}
 }
 
@@ -180,7 +180,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 
 				set maxWid [ expr { [ winfo vrootwidth $w ] - $x - 2 * $bordsize - $hmargin } ]
 				set maxHgt [ expr { [ winfo vrootheight $w ] - $y- 2 * $bordsize - $vmargin - $tbarsize } ]
-					
+
 				if { $maxWid > 0 && $sizeX > $maxWid } {
 					set sizeX $maxWid
 					$w configure -width $sizeX
@@ -206,7 +206,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 				} else {
 					set gm +$x+$y
 				}
-				
+
 				wm geometry $w $gm
 			}
 		} else {
@@ -243,7 +243,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 				set grab 0
 			}
 		}
-		
+
 		if { $grab } {
 			set parWndLst [ linsert $parWndLst 0 $w ]
 
@@ -256,7 +256,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 				wm geometry $w $gm
 			}
 		}
-		
+
 		raise $w
 	}
 
@@ -277,9 +277,9 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	}
 
 	update
-	
-	if { $logWndFn && [ info procs plog ] != "" } { 
-		plog "\nshowtop (w:$w, master:[ wm transient $w ], pos:([ winfo x $w ],[ winfo y $w ]), size:[ winfo width $w ]x[ winfo height $w ], minsize:[ wm minsize $w ], primdisp:[ primdisp [ winfo parent $w ] ], parWndLst:$parWndLst, grab:$grabLst)" 
+
+	if { $logWndFn && [ info procs plog ] != "" } {
+		plog "\nshowtop (w:$w, master:[ wm transient $w ], pos:([ winfo x $w ],[ winfo y $w ]), size:[ winfo width $w ]x[ winfo height $w ], minsize:[ wm minsize $w ], primdisp:[ primdisp [ winfo parent $w ] ], parWndLst:$parWndLst, grab:$grabLst)"
 	}
 }
 
@@ -322,21 +322,21 @@ proc destroytop w {
 			set parWndLst [ lreplace $parWndLst 0 0 ]
 		}
 	}
-	
+
 	# handle different window default focus on destroy
 	if [ info exists defaultFocus ] {
 		focus $defaultFocus
 	} else {
 		focus [ winfo parent $w ]
 	}
-	
+
 	tooltip::tooltip clear $w.*
-	
+
 	destroy $w
 	update
 
-	if { $logWndFn && [ info procs plog ] != "" } { 
-		plog "\ndestroytop (w:$w, parWndLst:$parWndLst, grab:$grabLst)" 
+	if { $logWndFn && [ info procs plog ] != "" } {
+		plog "\ndestroytop (w:$w, parWndLst:$parWndLst, grab:$grabLst)"
 	}
 }
 
@@ -582,7 +582,7 @@ proc sizetop { { w all } } {
 					} else {
 						set debGeom "${hsizeDmin}x[ expr { max ( $height, $vsizeDmin ) } ]+${x}+${y}"
 					}
-				
+
 					wm geometry .deb [ checkgeom $debGeom $defGeom $screenWidth $screenHeight ]
 					wm minsize .deb $hsizeDmin $vsizeDmin
 					wm maxsize .deb [ winfo vrootwidth .deb ] [ winfo vrootheight .deb ]
@@ -596,7 +596,7 @@ proc sizetop { { w all } } {
 					wm maxsize .lat [ winfo vrootwidth .lat ] [ winfo vrootheight .lat ]
 					wm resizable .lat 0 0
 				}
-				
+
 				.plt {
 					set defGeom "+[ getx .plt righttoM ]+[ gety .plt righttoM ]"
 					wm geometry .plt [ checkgeom $pltGeom $defGeom $screenWidth $screenHeight ]
@@ -604,7 +604,7 @@ proc sizetop { { w all } } {
 					wm maxsize .plt [ winfo vrootwidth .plt ] [ winfo vrootheight .plt ]
 					wm resizable .plt 0 0
 				}
-				
+
 				.dap {
 					set defGeom "+[ getx .dap centerS ]+[ gety .dap centerS ]"
 					wm geometry .dap [ checkgeom $dapGeom $defGeom $screenWidth $screenHeight ]
@@ -618,7 +618,7 @@ proc sizetop { { w all } } {
 
 	update
 
-	if { $logWndFn && [ info procs plog ] != "" } { 
+	if { $logWndFn && [ info procs plog ] != "" } {
 		plog "\nsizetop (w:$w, master:[ wm transient $w ], pos:([ winfo x $w ],[ winfo y $w ]), size:[ winfo width $w ]x[ winfo height $w ], parWndLst:$parWndLst, grab:$grabLst)"
 	}
 }
@@ -637,10 +637,10 @@ proc resizetop { w sizeX { sizeY 0 } } {
 	if { $sizeY <= 0 } {
 		set sizeY [ winfo height $w ]
 	}
-	
+
 	set sizeX [ expr { min( $sizeX, [ winfo vrootwidth $w ] - [ winfo rootx $w ] - 2 * $bordsize - $hmargin ) } ]
 	set sizeY [ expr { min( $sizeY, [ winfo vrootheight $w ] - [ winfo rooty $w ] - 2 * $bordsize - $vmargin - $tbarsize ) } ]
-	
+
 	set newMinX [ expr { min( [ lindex [ wm minsize $w ] 0 ], $sizeX ) } ]
 	set newMinY [ expr { min( [ lindex [ wm minsize $w ] 1 ], $sizeY ) } ]
 	if { $newMinX != [ lindex [ wm minsize $w ] 0 ] || $newMinY != [ lindex [ wm minsize $w ] 1 ] } {
@@ -651,10 +651,10 @@ proc resizetop { w sizeX { sizeY 0 } } {
 			wm geom $w ${sizeX}x${sizeY}
 		}
 	}
-	
+
 	update
 
-	if { $logWndFn && [ info procs plog ] != "" } { 
+	if { $logWndFn && [ info procs plog ] != "" } {
 		plog "\nresizetop (w:$w, master:[ wm transient $w ], pos:([ winfo x $w ],[ winfo y $w ]), size:[ winfo width $w ]x[ winfo height $w ], parWndLst:$parWndLst, grab:$grabLst)"
 	}
 }
@@ -669,23 +669,23 @@ proc focustop { w1 { w2 "" } { force no } } {
 
 	if [ winfo exists $w1 ] {
 		update idletasks
-		
+
 		set t1 [ winfo toplevel $w1 ]
 		deiconifytop $t1 $force
-		
+
 		if { $w2 != "" && [ winfo exists $w2 ] && [ winfo toplevel $w2 ] != $t1 } {
 			raise $t1 [ winfo toplevel $w2 ]
 		} else {
 			raise $t1
 		}
-		
+
 		if { $force } {
 			catch { focus -force $w1 }
 		} else {
 			focus $w1
 		}
 	}
-	
+
 	update
 }
 
@@ -699,7 +699,7 @@ proc deiconifytop { w { force no } } {
 	if { $force || ! [ winfo viewable $w ] } {
 		wm deiconify [ winfo toplevel $w ]
 	}
-	
+
 	update
 }
 
@@ -744,7 +744,7 @@ proc placeline { slvLst widLst y hgt { relX 1 } { relY 0 } } {
 		error "\nplaceline: slave and width lists have different size"
 		return
 	}
-	
+
 	if { $relX } {
 		set xCmd -relx
 		set widCmd -relwidth
@@ -752,7 +752,7 @@ proc placeline { slvLst widLst y hgt { relX 1 } { relY 0 } } {
 		set xCmd -x
 		set widCmd -width
 	}
-	
+
 	if { $relY } {
 		set yCmd "-rely $y"
 		set hgtCmd "-relheight $hgt"
@@ -760,12 +760,12 @@ proc placeline { slvLst widLst y hgt { relX 1 } { relY 0 } } {
 		set yCmd "-y $y"
 		set hgtCmd "-height $hgt"
 	}
-	
+
 	set curX 0
-	
+
 	foreach w $slvLst wid $widLst {
 		place $w {*}$xCmd $curX {*}$widCmd $wid {*}$yCmd {*}$hgtCmd
-		
+
 		set curX [ expr { $curX + $wid } ]
 	}
 }
@@ -790,11 +790,11 @@ proc align { w1 w2 { side R } } {
 	} else {
 		set g [ expr { $c + $f + $hmargin } ]
 	}
-	
+
 	wm geometry $w1 +$g+$d
 	update
 
-	if { $logWndFn && [ info procs plog ] != "" } { 
+	if { $logWndFn && [ info procs plog ] != "" } {
 		plog "\nalign w1:$w1 w2:$w2 (w1 width:$a, w1 height:$b, w2 x:$c, w2 y:$d, w2 width:$e)"
 	}
 }
@@ -941,19 +941,19 @@ proc gety { w pos } {
 # call parameters are: container window, menu name, widgets names
 #************************************************
 proc disable_window { w m { args "" } } {
-	
+
 	if [ winfo exist $w.$m ] {
 		for { set i 0 } { $i <= [ $w.$m index last ] } { incr i } {
 			$w.$m entryconfig $i -state disabled
 		}
 	}
-	
+
 	foreach i $args {
 		if [ winfo exists $w.$i ] {
 			tk busy hold $w.$i
 		}
 	}
-	
+
 	update
 }
 
@@ -964,60 +964,60 @@ proc disable_window { w m { args "" } } {
 # call parameters are: container window, menu name, widgets names
 #************************************************
 proc enable_window { w m { args "" } } {
-	
+
 	if [ winfo exist $w.$m ] {
 		for { set i 0 } { $i <= [ $w.$m index last ] } { incr i } {
 			$w.$m entryconfig $i -state normal
 		}
 	}
-	
+
 	foreach i $args {
 		if [ winfo exists $w.$i ] {
 			tk busy forget $w.$i
 		}
 	}
-	
+
 	update
 }
 
 
 #************************************************
 # DISABLE_TREE
-# Command to disable a widget tree, returning an 
-# array formatted as a list with the previous 
-# states of each disabled widget. A list of 
+# Command to disable a widget tree, returning an
+# array formatted as a list with the previous
+# states of each disabled widget. A list of
 # exceptions (do not disable) can be provided.
 #************************************************
 proc disable_tree { w { excpts "" } } {
 	global __states__ __excpts__
-	
+
 	array set __states__ [ list ]
 	set __excpts__ $excpts
-	
+
 	recurse_tree $w disable
-	
+
 	set states [ array get __states__ ]
 	array unset __states__
 	unset -nocomplain __excpts__
-	
+
 	return $states
 }
 
 
 #************************************************
 # ENABLE_TREE
-# Command to enable a widget tree. A list of 
+# Command to enable a widget tree. A list of
 # exceptions (do not enable) and previous states
 # (returned from disable_tree) can be provided.
 #************************************************
 proc enable_tree { w { states "" } { excpts "" } } {
 	global __states__ __excpts__
-	
+
 	array set __states__ $states
 	set __excpts__ $excpts
-	
+
 	recurse_tree $w enable
-	
+
 	array unset __states__
 	unset -nocomplain __excpts__
 }
@@ -1029,15 +1029,15 @@ proc enable_tree { w { states "" } { excpts "" } } {
 #************************************************
 proc recurse_tree { w mode } {
 	global __states__ __excpts__
-	
+
 	if { ! [ catch { $w cget -state } sts ] } {
-	
+
 		if { $mode eq "disable" } {
 			set __states__($w) $sts
 			if { $sts ne "disabled" && [ lsearch -exact $__excpts__ $w ] == -1 } {
 				catch { $w configure -state disabled }
 			}
-			
+
 		} elseif { $mode eq "enable" } {
 			if { [ info exists __states__($w) ] } {
 				if { $__states__($w) ne $sts } {
@@ -1048,21 +1048,21 @@ proc recurse_tree { w mode } {
 			}
 		}
 	}
-	
+
 	# handle menu widget entries
 	if { [ winfo class $w ] eq "Menu" } {
 		for { set i 0 } { $i <= [ $w index end ] } { incr i } {
-		
+
 			set id ${w}__${i}
-			
+
 			if { ! [ catch { $w entrycget $i -state } sts ] } {
-			
+
 				if { $mode eq "disable" } {
 					set __states__($id) $sts
 					if { $sts ne "disabled" && [ lsearch -exact $__excpts__ $id ] == -1 } {
 						catch { $w entryconfigure $i -state disabled }
 					}
-					
+
 				} elseif { $mode eq "enable" } {
 					if { [ info exists __states__($id) ] } {
 						if { $__states__($id) ne $sts } {
@@ -1075,7 +1075,7 @@ proc recurse_tree { w mode } {
 			}
 		}
 	}
-	
+
 	foreach child [ winfo children $w ] {
 		recurse_tree $child $mode
 	}
@@ -1091,9 +1091,9 @@ proc setglobkeys { w { chkChg 1 } } {
 
 	# soft/hard exit (check for unsaved changes or not)
 	if { $chkChg } {
-		bind $w <Control-Alt-x> { 
-			if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } { 
-				exit 
+		bind $w <Control-Alt-x> {
+			if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } {
+				exit
 			}
 			break
 		}
@@ -1132,17 +1132,17 @@ proc selectinlist { w pos { foc 0 } } {
 		} elseif { ! ( $pos in [ list active end ] ) } {
 			return
 		}
-		
+
 		$w selection clear 0 end
 		$w selection set $pos
 		$w activate $pos
 		$w see $pos
 		$w xview moveto 0
-		
+
 		if { $foc } {
 			focus $w
 		}
-		
+
 		update idletasks
 	}
 }
@@ -1623,27 +1623,27 @@ proc abortretryignore { w fr comAbort comRetry comIgnore } {
 #************************************************
 proc mousewarpto { w { foc 1 } } {
 	global mouseWarp curX curY
-	
+
 	update
-	
+
 	if { [ winfo exists $w ] && [ winfo viewable $w ] } {
 		if { $mouseWarp } {
 			set wX [ expr { [ winfo width $w ] / 2 } ]
 			set wY [ expr { [ winfo height $w ] / 2 } ]
 			set curX 0
 			set curY 0
-		
+
 			bind $w <Motion> {
 				set curX %x
 				set curY %y
 			}
-		
+
 			after 100
-			
+
 			if { $foc } {
 				focus $w
 			}
-		
+
 			# first move pointer to toplevel to bypass Tk bug
 			set t [ winfo toplevel $w ]
 			event generate $t <Motion> -warp 1 -x [ expr { [ winfo width $t ] / 2 } ] -y [ expr { [ winfo height $t ] / 2 } ]
@@ -1654,14 +1654,14 @@ proc mousewarpto { w { foc 1 } } {
 				event generate $w <Motion> -warp 1 -x $wX -y $wY
 				update idletasks
 			}
-		
+
 			bind $w <Motion> { }
 			unset curX curY
 		} elseif { $foc }  {
 			focus $w
 		}
 	}
-	
+
 	update idletasks
 }
 
@@ -1695,7 +1695,7 @@ proc write_any { w val } {
 	if { ! [ winfo exists $w ] } {
 		return 0
 	}
-	
+
 	if [ string equal [ $w cget -state ] disabled ] {
 		return [ write_disabled $w $val ]
 	} else {
@@ -1706,7 +1706,7 @@ proc write_any { w val } {
 			return 0
 		}
 	}
-	
+
 	return 1
 }
 
@@ -1719,7 +1719,7 @@ proc write_disabled { w val } {
 	if { ! [ winfo exists $w ] } {
 		return 0
 	}
-	
+
 	if [ string equal [ $w cget -state ] disabled ] {
 		$w conf -state normal
 		write_any $w $val
@@ -1727,7 +1727,7 @@ proc write_disabled { w val } {
 	} else {
 		return 0
 	}
-	
+
 	return 1
 }
 
@@ -1746,8 +1746,8 @@ proc setwrap { w wrap } {
 
 #************************************************
 # MOUSE_WHEEL
-# Bind the mouse wheel to the y scrollbar of 
-# the window w or the first (grand) parent with 
+# Bind the mouse wheel to the y scrollbar of
+# the window w or the first (grand) parent with
 # a vertical scrollbar
 #************************************************
 proc mouse_wheel { w } {
@@ -1779,14 +1779,14 @@ proc mouse_wheel { w } {
 #************************************************
 proc scroll_wheel_windows { delta w } {
 	global winmwscale sfmwheel
-	
-	if { [ expr { abs( $delta ) } ] < $winmwscale } { 
+
+	if { [ expr { abs( $delta ) } ] < $winmwscale } {
 		set winmwscale [ expr { abs( $delta ) } ]
-		if { $winmwscale <= 0 } { 
+		if { $winmwscale <= 0 } {
 			set winmwscale 1
 		}
 	}
-	
+
 	set scrW [ find_scrollable $w ]
 	if { $scrW != "" } {
 		set wPos [ $scrW yview ]
@@ -1806,7 +1806,7 @@ proc scroll_wheel_windows { delta w } {
 #************************************************
 proc scroll_wheel_mac { delta w } {
 	global sfmwheel
-	
+
 	set scrW [ find_scrollable $w ]
 	if { $scrW != "" } {
 		set wPos [ $scrW yview ]
@@ -1826,7 +1826,7 @@ proc scroll_wheel_mac { delta w } {
 #************************************************
 proc scroll_wheel_linux { delta w dir } {
 	global sfmwheel
-	
+
 	set scrW [ find_scrollable $w ]
 	if { $scrW != "" } {
 		set wPos [ $scrW yview ]
@@ -1870,9 +1870,9 @@ proc move_canvas { c x y { x0 -1 } { y0 -1 } } {
 
 	if { [ info exists hereX ] && [ info exists hereY ] } {
 		$c move all [ expr { $x - $hereX } ] [ expr { $y - $hereY } ]
-    }
-    set hereX $x
-    set hereY $y
+	}
+	set hereX $x
+	set hereY $y
 }
 
 
@@ -1884,11 +1884,11 @@ proc scale_canvas { c type ratio } {
 	global vsizeP tbordsizeP bbordsizeP maxzoomP minzoomP
 	upvar $ratio finalRatio
 
-    if { $type == "+" } {
-        set ratio [ expr { sqrt( 2.0 ) } ]
-    } else {
-        set ratio [ expr { 1.0 / sqrt( 2.0 ) } ]
-    }
+	if { $type == "+" } {
+		set ratio [ expr { sqrt( 2.0 ) } ]
+	} else {
+		set ratio [ expr { 1.0 / sqrt( 2.0 ) } ]
+	}
 
 	set sro [ $c cget -scrollregion ]
 
@@ -1950,15 +1950,15 @@ proc canvas_axis { c type grid hticks { y2 0 } } {
 #************************************************
 proc plot_bars { c x1 y1 x2 y2 { tags "" } { fill "" } { width 1 } { outline "" } } {
 	global colorsTheme
-	
+
 	if { $fill == "" } {
 		set fill $colorsTheme(bg)
 	}
-	
+
 	if { $outline == "" } {
 		set outline $colorsTheme(fg)
 	}
-	
+
 	set size [ expr { min( [ llength $x1 ], [ llength $y1 ], [ llength $x2 ], [ llength $y2 ]  ) } ]
 	lappend tags bar series
 
@@ -2046,7 +2046,7 @@ proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
 # plot one series as a set of points on canvas
 #************************************************
 proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
-	
+
 	lappend tagsdots dots series
 
 	set size [ expr { min( [ llength $x ], [ llength $y ] ) } ]
@@ -2147,57 +2147,57 @@ proc init_canvas_colors { } {
 proc detach_tab { nb tab but1 but2 da maxLen } {
 
 	if { [ $nb.$tab.$but1 cget -text ] eq "Attach" } {
-		
+
 		set tt [ wm title $nb.$tab ]
-		
+
 		destroy .tmp
 		ttk::frame .tmp
 		set tmp [ clone_widget $nb.$tab.c .tmp ]
 		update idletasks
 		destroytop $nb.$tab
-		
+
 		ttk::labelframe $nb.$tab -text "$tt"
 		pack $nb.$tab
 		set new [ clone_widget .tmp.c $nb.$tab ]
 		update idletasks
 		destroy .tmp
-		
+
 		$nb.$tab.$but1 configure -text Detach
 		tooltip::tooltip $nb.$tab.$but1 "Move to independent window"
 		tooltip::tooltip $nb.$tab.$but2 "Save plot to file"
-		
+
 		pack $new -expand yes -fill both
 		$nb add $nb.$tab -text [ string range [ lindex [ split $tt ] 1 ] 0 $maxLen ]
-		$nb select $nb.$tab 
+		$nb select $nb.$tab
 		focustop $nb
-		
+
 	} else {
-	
+
 		set tt [ $nb.$tab cget -text ]
-		
+
 		$nb forget $nb.$tab
-		
+
 		if { [ $nb index end ] == 0 } {
 			wm withdraw [ winfo toplevel $nb ]
 		}
-			
+
 		destroy .tmp
 		ttk::frame .tmp
 		set tmp [ clone_widget $nb.$tab.c .tmp ]
 		update idletasks
 		destroy $nb.$tab
-		
+
 		newtop $nb.$tab "$tt" "$nb.$tab.$but1 invoke" ""
 		wm transient $nb.$tab $da
 		set new [ clone_widget $tmp $nb.$tab ]
 		update idletasks
 		pack $new -expand yes -fill both
 		destroy .tmp
-		
+
 		$nb.$tab.$but1 configure -text Attach
 		tooltip::tooltip $nb.$tab.$but1 "Move back to main plot window"
 		tooltip::tooltip $nb.$tab.$but2 "Save plot to file"
-		
+
 		showtop $nb.$tab current yes yes no
 		bind $nb.$tab <F1> { LsdHelp menudata_res.html#graph }
 		bind $nb.$tab <Escape> "$nb.$tab.$but1 invoke"

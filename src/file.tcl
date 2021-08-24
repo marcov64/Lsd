@@ -34,21 +34,21 @@ proc LsdExit { } {
 #************************************************
 proc check_components { } {
 	global CurPlatform RootLsd winGCC winDLL winTcl winTk linuxPkg linuxTyp inclPkg inclFile libPkg libFile linuxMissing xcode gnuplot multitail linuxPkgMiss linuxInclude linuxLib pathInclude pathLib existGCC existDLL msgGCC msgDLL winConflict gccInclude gccLib
-	
+
 	if { $CurPlatform eq "mac" } {
-	
+
 		if [ catch { exec which g++ } ] {
 			set xcode 1
 		}
 		if [ catch { exec which gnuplot } ] {
 			set gnuplot 1
-		}	
+		}
 		if [ catch { exec which multitail } ] {
 			set multitail 1
 		}
-		
+
 	} elseif { $CurPlatform eq "linux" } {
-	
+
 		set linuxPkgMiss [ list ]
 		set i 0
 		foreach pkg $linuxPkg {
@@ -59,8 +59,8 @@ proc check_components { } {
 			}
 			incr i
 		}
-		
-		if { [ lsearch $linuxPkgMiss g++ ] >= 0 || [ lsearch $linuxPkgMiss make ] >= 0 || [ lsearch $linuxPkgMiss zlib ] >= 0 } { 
+
+		if { [ lsearch $linuxPkgMiss g++ ] >= 0 || [ lsearch $linuxPkgMiss make ] >= 0 || [ lsearch $linuxPkgMiss zlib ] >= 0 } {
 			set linuxMissing 1
 		}
 
@@ -77,7 +77,7 @@ proc check_components { } {
 					break
 				}
 			}
-			
+
 			if { ! $found } {
 				foreach include $linuxInclude {
 					if [ file exists $include/$file ] {
@@ -100,7 +100,7 @@ proc check_components { } {
 			}
 		}
 
-		set pathInclude [ lsort -unique $pathInclude ] 
+		set pathInclude [ lsort -unique $pathInclude ]
 
 		# try to detect missing libraries
 		set pathLib [ list ]
@@ -112,7 +112,7 @@ proc check_components { } {
 					break
 				}
 			}
-			
+
 			if { ! $found } {
 				foreach lib $linuxLib {
 					if [ file exists $lib/$file ] {
@@ -135,10 +135,10 @@ proc check_components { } {
 			}
 		}
 
-		set pathLib [ lsort -unique $pathLib ] 
+		set pathLib [ lsort -unique $pathLib ]
 
 	} elseif { $CurPlatform eq "windows" } {
-	
+
 		# check if another compiler exists and is ahead on path
 		set existGCC [ list ]
 		set msgGCC ""
@@ -149,10 +149,10 @@ proc check_components { } {
 				} else {
 					set existGCC [ lappend existGCC $f ]
 					set msgGCC "$msgGCC\n$f"
-				}	
+				}
 			}
 		}
-		
+
 		# check for a proper compiler
 		if { [ llength $existGCC ] > 0 } {
 			set ok 0
@@ -162,12 +162,12 @@ proc check_components { } {
 					set ok 1
 				}
 			}
-			
+
 			if { ! $ok } {
 				set winConflict 1
 			}
 		}
-		
+
 		# check if required libraries exist ahead on path
 		set existDLL [ list ]
 		set msgDLL ""
@@ -183,7 +183,7 @@ proc check_components { } {
 				}
 			}
 		}
-		
+
 		# check for a proper Tcl/Tk
 		if { [ llength $existDLL ] > 0 } {
 			set ok 1
@@ -195,11 +195,11 @@ proc check_components { } {
 							set ok 1
 						}
 					}
-					
+
 					break
 				}
 			}
-			
+
 			if { $ok } {
 				foreach dll $existDLL {
 					if { [ string first tk [ string tolower $dll ] ] >= 0 } {
@@ -209,25 +209,25 @@ proc check_components { } {
 								set ok 1
 							}
 						}
-						
+
 						break
 					}
 				}
 			}
-			
+
 			if { ! $ok } {
 				set winConflict 1
 			}
 		}
-	
+
 		if { [ catch { exec where wgnuplot.exe } ] && ! [ file exists "C:/Program Files/gnuplot/bin/wgnuplot.exe" ] } {
 			set gnuplot 1
 		}
-	
+
 	} else {
 		return 0
 	}
-	
+
 	return 1
 }
 
@@ -265,9 +265,9 @@ proc fn_spaces { fn { par . } { mult 0 } } {
 # SED
 # Partial implementation of GNU sed in Tcl
 # Code by Emmanuel Frecon (https://wiki.tcl-lang.org/page/sed)
-# Extra option "e" (as in extract) and that will 
-# extract a particular (sub)group, or the text of 
-# the regular expression when no particular index 
+# Extra option "e" (as in extract) and that will
+# extract a particular (sub)group, or the text of
+# the regular expression when no particular index
 # is provided.
 #************************************************
 proc sed { script input } {
@@ -279,8 +279,8 @@ proc sed { script input } {
 		"s" {
 				set cmd regsub
 				if { [ string first "g" $flag ] >= 0 } {
-                	lappend cmd -all
-            	}
+					lappend cmd -all
+				}
 
 				if { [ string first "i" [ string tolower $flag ] ] >= 0 } {
 					lappend cmd -nocase
@@ -302,13 +302,13 @@ proc sed { script input } {
 
 		"e" {
 				set cmd regexp
-				if { $to == "" } { 
-					set to 0 
+				if { $to == "" } {
+					set to 0
 				}
 
 				if { ! [ string is integer -strict $to ] } {
 					return -code error "No proper group identifier specified for extraction"
-            	}
+				}
 
 				lappend cmd -inline -- $from $input
 				return [ lindex [ eval $cmd ] $to ]
@@ -330,7 +330,7 @@ proc sed { script input } {
 # Based on code by Joseph Bui (https://stackoverflow.com/a/448573).
 # Arguments:
 # - directory - the top directory to start looking in
-# - pattern - A pattern, as defined by the glob command, 
+# - pattern - A pattern, as defined by the glob command,
 #	that the files must match
 # - tails - option to return just the tail part of path
 #  	from the directory chosen
@@ -340,57 +340,57 @@ proc findfiles { directory pattern { tails "" } } {
 	if { $tails != "" } {
 		set tails 1
 	}
-	
-    # fix the directory name, this ensures the directory name is in the
-    # native format for the platform and contains a final directory separator
-    set directory [ string trimright [ file join [ file normalize $directory ] { } ] ]
 
-    # starting with the passed in directory, do a breadth first search for
-    # subdirectories. Avoid cycles by normalizing all file paths and checking
-    # for duplicates at each level.
-    set directories [ list ]
-    lappend parents $directory
-	
-    while { [ llength $parents ] > 0 } {
+	# fix the directory name, this ensures the directory name is in the
+	# native format for the platform and contains a final directory separator
+	set directory [ string trimright [ file join [ file normalize $directory ] { } ] ]
 
-        # find all the children at the current level
-        set children [ list ]
-        foreach parent $parents {
-            set children [ concat $children [ glob -nocomplain -types { d r } -path $parent * ] ]
+	# starting with the passed in directory, do a breadth first search for
+	# subdirectories. Avoid cycles by normalizing all file paths and checking
+	# for duplicates at each level.
+	set directories [ list ]
+	lappend parents $directory
+
+	while { [ llength $parents ] > 0 } {
+
+		# find all the children at the current level
+		set children [ list ]
+		foreach parent $parents {
+			set children [ concat $children [ glob -nocomplain -types { d r } -path $parent * ] ]
 		}
 
-        # normalize the children
-        set length [ llength $children ]
-        for { set i 0 } { $i < $length } { incr i } {
-            lset children $i [ string trimright [ file join [ file normalize [ lindex $children $i ] ] { } ] ]
-        }
+		# normalize the children
+		set length [ llength $children ]
+		for { set i 0 } { $i < $length } { incr i } {
+			lset children $i [ string trimright [ file join [ file normalize [ lindex $children $i ] ] { } ] ]
+		}
 
-        # make the list of children unique
-        set children [ lsort -unique $children ]
+		# make the list of children unique
+		set children [ lsort -unique $children ]
 
-        # find the children that are not duplicates, use them for the next level
-        set parents [ list ]
-        foreach child $children {
-            if { [ lsearch -sorted $directories $child ] == -1 } {
-                lappend parents $child
-            }
-        }
+		# find the children that are not duplicates, use them for the next level
+		set parents [ list ]
+		foreach child $children {
+			if { [ lsearch -sorted $directories $child ] == -1 } {
+				lappend parents $child
+			}
+		}
 
-        # append the next level directories to the complete list
-        set directories [ lsort -unique [ concat $directories $parents ] ]
-    }
+		# append the next level directories to the complete list
+		set directories [ lsort -unique [ concat $directories $parents ] ]
+	}
 
 	lappend directories $directory
-	
-    # get all the files in the passed in directory and all its subdirectories
-    set result [ list ]
+
+	# get all the files in the passed in directory and all its subdirectories
+	set result [ list ]
 	set basLgt [ string length $directory ]
-	
-    foreach dir $directories {
+
+	foreach dir $directories {
 		set this [ glob -nocomplain -types { f r } -path $dir -- $pattern ]
 		if { $tails } {
 			set that [ list ]
-			
+
 			foreach fil $this {
 				if [ string equal $directory "[ string range $fil 0 [ expr { $basLgt - 1 } ] ]" ] {
 					lappend that "[ string range $fil $basLgt end ]"
@@ -398,23 +398,23 @@ proc findfiles { directory pattern { tails "" } } {
 					error "Internal error in 'findfiles'"
 				}
 			}
-			
+
 			set this $that
 		}
-		
-        set result [ concat $result $this ]
-    }
 
-    # normalize the filenames
- 	if { ! $tails } {
+		set result [ concat $result $this ]
+	}
+
+	# normalize the filenames
+	if { ! $tails } {
 		set length [ llength $result ]
 		for { set i 0 } { $i < $length } { incr i } {
 			lset result $i [ file normalize [ lindex $result $i ] ]
 		}
 	}
 
-    # return only unique filenames
-    return [ lsort -unique $result ]
+	# return only unique filenames
+	return [ lsort -unique $result ]
 }
 
 
@@ -433,14 +433,14 @@ proc choose_models { curdir curfile } {
 	set ldir ""
 	set lgroup ""
 	set cgroup ""
-	
+
 	# recursive search of models and ordering
 	list_models
 	foreach mod $lmod dir $ldir group $lgroup {
 		set moddir($mod) $dir
 		set modgroup($mod) $group
 	}
-	
+
 	set lmod [ lsort -dictionary $lmod ]
 	set ldir ""
 	set lgroup ""
@@ -452,7 +452,7 @@ proc choose_models { curdir curfile } {
 	newtop .l "Compare LSD Models" { set choice -1; destroytop .l }
 
 	ttk::frame .l.t
-	
+
 	# 1st column
 	ttk::frame .l.t.l
 
@@ -469,7 +469,7 @@ proc choose_models { curdir curfile } {
 		.l.t.l.l.l insert end "$mod"
 	}
 
-	bind .l.t.l.l.l <Double-Button-1> { 
+	bind .l.t.l.l.l <Double-Button-1> {
 		.l.t.l.gt.t configure -text [ lindex $lgroup [ .l.t.l.l.l curselection ] ]
 		select_model .l.t.l.l.l 0
 	}
@@ -495,20 +495,20 @@ proc choose_models { curdir curfile } {
 			}
 			if { $first >= 0 } {
 				selectinlist .l.t.l.l.l $first
-			} 
+			}
 		}
 		.l.t.l.gt.t configure -text [ lindex $lgroup [ .l.t.l.l.l curselection ] ]
 	}
 	bind .l.t.l.l.l <Up> { .l.t.l.gt.t configure -text [ lindex $lgroup [ .l.t.l.l.l curselection ] ] }
 	bind .l.t.l.l.l <Down> { .l.t.l.gt.t configure -text [ lindex $lgroup [ .l.t.l.l.l curselection ] ] }
-	bind .l.t.l.l.l <Home> { 
+	bind .l.t.l.l.l <Home> {
 		selectinlist .l.t.l.l.l 0
-		.l.t.l.gt.t configure -text [ lindex $lgroup [ .l.t.l.l.l curselection ] ] 
+		.l.t.l.gt.t configure -text [ lindex $lgroup [ .l.t.l.l.l curselection ] ]
 		break
 	}
-	bind .l.t.l.l.l <End> { 
+	bind .l.t.l.l.l <End> {
 		selectinlist .l.t.l.l.l end
-		.l.t.l.gt.t configure -text [ lindex $lgroup [ .l.t.l.l.l curselection ] ] 
+		.l.t.l.gt.t configure -text [ lindex $lgroup [ .l.t.l.l.l curselection ] ]
 		break
 	}
 
@@ -526,7 +526,7 @@ proc choose_models { curdir curfile } {
 
 	ttk::frame .l.t.t.f1
 	ttk::label .l.t.t.f1.l -text "First model"
-	
+
 	ttk::frame .l.t.t.f1.m1
 	ttk::entry .l.t.t.f1.m1.d -width 40 -textvariable d1 -justify center
 	ttk::entry .l.t.t.f1.m1.f -width 40 -textvariable f1 -justify center
@@ -536,12 +536,12 @@ proc choose_models { curdir curfile } {
 	ttk::button .l.t.t.f1.m1.i.brw -width $butWid -text "Browse" -command { browse_model 1 }
 	pack .l.t.t.f1.m1.i.ins .l.t.t.f1.m1.i.brw -padx $butSpc -pady $butPad -side left
 
-	pack .l.t.t.f1.m1.d .l.t.t.f1.m1.f .l.t.t.f1.m1.i 
+	pack .l.t.t.f1.m1.d .l.t.t.f1.m1.f .l.t.t.f1.m1.i
 	pack .l.t.t.f1.l .l.t.t.f1.m1 -pady 3
 
 	ttk::frame .l.t.t.f2
 	ttk::label .l.t.t.f2.l -text "Second model"
-	
+
 	ttk::frame .l.t.t.f2.m2
 	ttk::entry .l.t.t.f2.m2.d -width 40 -textvariable d2 -justify center
 	ttk::entry .l.t.t.f2.m2.f -width 40 -textvariable f2 -justify center
@@ -555,9 +555,9 @@ proc choose_models { curdir curfile } {
 	pack .l.t.t.f2.l .l.t.t.f2.m2 -pady 3
 
 	pack .l.t.t.tit .l.t.t.f1 .l.t.t.f2 -pady 5
-	
+
 	pack .l.t.l .l.t.t -padx 5 -side left
-	
+
 	pack .l.t
 
 	ttk::frame .l.b
@@ -570,13 +570,13 @@ proc choose_models { curdir curfile } {
 			ttk::messageBox -parent .l -type ok -icon error -title Error -message "Model selection incomplete" -detail "Please select two models before comparing."
 		}
 	}
-	ttk::button .l.b.cnc -width $butWid -text Cancel -command { 
+	ttk::button .l.b.cnc -width $butWid -text Cancel -command {
 		destroytop .l
 		set d1 ""
 		set f1 ""
 		set d2 ""
 		set f2 ""
-		set choice -1 
+		set choice -1
 	}
 	bind .l <KeyPress-Escape> { .l.b.cnc invoke }
 	bind .l <KeyPress-Return> { .l.b.cmp invoke }
@@ -651,12 +651,12 @@ proc list_models { } {
 #************************************************
 proc select_model { w panel } {
 	global d1 d2 f1 f2 ldir
-	
+
 	set posModel [ $w curselection ]
 	if { $posModel != "" } {
 		set sd [ lindex $ldir $posModel ]
 		set sf [ file tail [ glob -nocomplain [ file join $sd *.cpp ] ] ]
-		
+
 		if { $sd != "" && $sf != "" && [ file exists "$sd/$sf" ] } {
 			if { $panel == 2 || ( $panel != 1 && $d1 != "" && $f1 != "" && [ file exists "$d1/$f1" ] ) } {
 				set d2 "$sd"
@@ -679,7 +679,7 @@ proc select_model { w panel } {
 #************************************************
 proc browse_model { panel } {
 	global d1 d2 f1 f2
-	
+
 	if { $panel == 1 } {
 		set dir $d1
 	} elseif { $panel == 2 } {
@@ -687,9 +687,9 @@ proc browse_model { panel } {
 	} else {
 		return
 	}
-	
+
 	set filename [ tk_getOpenFile -parent .l -title "Load LSD Equation File" -initialdir "$dir" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ]
-	
+
 	if { $filename != "" && ! [ fn_spaces "$filename" .l ] } {
 		if { $panel == 1 } {
 			set f1 [ file tail $filename ]
@@ -715,7 +715,7 @@ proc open_diff { file1 file2 { file1name "" } { file2name "" } } {
 	} elseif { $diffAppType == 1 } {
 		set error [ open_terminal $cmdline ]
 	}
-	
+
 	if { $error } {
 		ttk::messageBox -parent . -type ok -icon error -title Error -message "Diff failed to launch" -detail "Diff returned error '$error'.\nDetail:\n$termResult\n\nPlease check if the diff appplication is set up properly and reinstall LSD if the problem persists."
 	}
@@ -736,7 +736,7 @@ proc open_gnuplot { { script "" } { errmsg "" } { persist false } { par ".da" } 
 	} else {
 		set opt "-p"
 	}
-		
+
 	if { $script eq "" && $CurPlatform in [ list linux mac ] } {
 		set error [ open_terminal $gnuplotExe ]
 	} else {
@@ -760,28 +760,28 @@ proc open_gnuplot { { script "" } { errmsg "" } { persist false } { par ".da" } 
 #************************************************
 proc open_browser { dir fn } {
 	global HtmlBrowser CurPlatform termResult
-	
+
 	if { $dir eq "" } {
 		set fqn "$fn"
 	} else {
 		set fqn "$dir/$fn"
 	}
-	
+
 	if { ! [ catch { set fqn [ file normalize "$fqn" ] } ] && [ file exists "$fqn" ] } {
 		if { $CurPlatform in [ list linux mac ] } {
 			set error [ open_terminal $fqn $HtmlBrowser ]
 		} else {
 			set error [ open_terminal "$HtmlBrowser $fqn" ]
 		}
-		
+
 		if { $error } {
 			ttk::messageBox -parent . -type ok -icon error -title Error -message "Browser failed to launch" -detail "Please check if the web browser is set up properly.\n\nDetail:\n$termResult"
 			return 0
 		}
-		
+
 		return 1
 	}
-	
+
 	return 0
 }
 
@@ -791,11 +791,11 @@ proc open_browser { dir fn } {
 #************************************************
 proc open_terminal { cmd { term "" } } {
 	global sysTerm CurPlatform termResult
-	
+
 	if { $term eq "" } {
 		set term $sysTerm
 	}
-	
+
 	# separate command from options
 	if { [ llength $term ] > 1 } {
 		set opt [ lrange $term 1 end ]
@@ -803,7 +803,7 @@ proc open_terminal { cmd { term "" } } {
 	} else {
 		set opt [ list ]
 	}
-	
+
 	# mac terminal can only get commands from applescript
 	if { $CurPlatform eq "mac" && [ string equal -nocase $term Terminal ] } {
 		set cmdline "osascript -e \"tell application \\\"$term\\\" to do script \\\"cd [ pwd ]; clear; $cmd; exit\\\"\""
@@ -811,7 +811,7 @@ proc open_terminal { cmd { term "" } } {
 	} else {
 		set cmdline [ concat $term $opt $cmd ]
 	}
-	
+
 	set termResult ""
 	return [ catch { exec -- {*}$cmdline & } termResult ]
 }
@@ -822,7 +822,7 @@ proc open_terminal { cmd { term "" } } {
 #************************************************
 proc LsdHelp { fn } {
 	global RootLsd
-	
+
 	open_browser "$RootLsd/Manual" "$fn"
 }
 
@@ -901,7 +901,7 @@ proc make_background { target threads nw macPkg } {
 
 	# handle Windows access to open executable and empty compilation windows
 	if [ string equal $CurPlatform windows ] {
-		
+
 		if [ file exists "$target$exeSuffix" ] {
 			if [ catch {
 				close [ file tempfile targetTemp ]
@@ -918,7 +918,7 @@ proc make_background { target threads nw macPkg } {
 					puts $f $msg
 					close $f
 				}
-				
+
 				set res 0
 				return
 			}
@@ -983,7 +983,7 @@ proc get_source_files { path } {
 # CREATE_ELEM_FILE
 # Produce the element list file (elements.txt) to be used in LSD browser
 #************************************************
-# list of commands to search for parameters and objects 
+# list of commands to search for parameters and objects
 # (X_Y : X=number of macro arguments, Y=position of parameter/object)
 set cmdp_1_1 [ list V SUM MAX MIN AVE MED SD STAT RECALC LAST_CALC INIT_TSEARCH_CND ]
 set cmdp_2_1 [ list VL SUML MAXL MINL AVEL MEDL WHTAVE SDL SEARCH_CND TSEARCH_CND WRITE INCR MULT V_CHEAT ]
@@ -1180,7 +1180,7 @@ proc create_elem_file { path } {
 				lappend pars $par
 			}
 		}
-		
+
 		# get object names
 		foreach cmd $cmdo_1_1 {
 			set calls [ regexp -all -inline -- [ subst -nocommands -nobackslashes {$cmd[ \t]*?\([ \t]*?\"(\w+)\"[ \t]*?\)} ] $text ]

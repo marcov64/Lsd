@@ -9,7 +9,7 @@
 
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
 
 /*************************************************************
@@ -217,39 +217,39 @@ int lsdmain( int argn, const char **argv )
 
 		// write .csv header
 		fprintf( f, "Name%sType%sLag%sFormat%sValue%sMinimum%sMaximum%sDescription\n", sep, sep, sep, sep, sep, sep, sep );
-		
+
 		// write all parameters and initial conditions
 		get_sa_limits( root, f, sep );
-		
+
 		// write simulation setting, if not already set
 		if ( ! meta_par_in[ 0 ] )
-			fprintf( f, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n", 
+			fprintf( f, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
 				 	 sep, sep, sep, sep, max_step, sep, MIN_STEP, sep, MAX_STEP, sep, DESC_STEP );
-				 	 
+
 		if ( ! meta_par_in[ 1 ] )
-			fprintf( f, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n", 
+			fprintf( f, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
 				 	 sep, sep, sep, sep, sim_num, sep, MIN_RUNS, sep, MAX_RUNS, sep, DESC_RUNS );
-				 	 
+
 		if ( ! meta_par_in[ 2 ] )
-			fprintf( f, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n", 
+			fprintf( f, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
 				 	 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
-		
+
 		fclose( f );
 	}
 	else	// send to stdout
 	{
 		get_sa_limits( root, stdout, "\t" );
-		
+
 		if ( ! meta_par_in[ 0 ] )
-			fprintf( stdout, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n", 
+			fprintf( stdout, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
 				 	 sep, sep, sep, sep, max_step, sep, MIN_STEP, sep, MAX_STEP, sep, DESC_STEP );
-				 	 
+
 		if ( ! meta_par_in[ 1 ] )
-			fprintf( stdout, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n", 
+			fprintf( stdout, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
 				 	 sep, sep, sep, sep, sim_num, sep, MIN_RUNS, sep, MAX_RUNS, sep, DESC_RUNS );
-				 	 
+
 		if ( ! meta_par_in[ 2 ] )
-			fprintf( stdout, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n", 
+			fprintf( stdout, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
 				 	 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
 	}
 

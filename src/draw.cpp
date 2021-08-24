@@ -6,10 +6,10 @@
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
 
 /*************************************************************
@@ -51,13 +51,13 @@ void show_graph( object *t )
 {
 	object *top;
 	static object *last_t = NULL;
-	
+
 	if ( ! struct_loaded || ! strWindowOn )		// model structure window is deactivated?
 	{
 		cmd( "destroytop .str" );
 		return;
 	}
-	
+
 	if ( t == NULL )
 		if ( last_t == NULL )
 			t = root;
@@ -78,22 +78,22 @@ void show_graph( object *t )
 		cmd( "destroy .str.f" );										// or just recreate canvas
 
 	cmd( "wm title .str \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
-	
+
 	cmd( "ttk::frame .str.f" );
 	cmd( "ttk::canvas .str.f.c -xscrollincrement 1 -entry 0 -dark $darkTheme" );
 	cmd( "pack .str.f.c -expand yes -fill both" );
 	cmd( "pack .str.f -expand yes -fill both" );
 
 	cmd( "showtop .str current yes yes no 0 0 b" );
-	
+
 	draw_obj( top, t );
-	
+
 	cmd( "set hrsizeM [ winfo width .str ]" );
 	cmd( "set vrsizeM [ winfo height .str ]" );
 	cmd( ".str.f.c xview scroll [ expr { - int ( $hrsizeM / 2 ) } ] units" );
-	
+
 	draw_buttons( );
-	
+
 	cmd( "bind .str.f.c <Configure> { if { $hrsizeM != [ winfo width .str ] || $vrsizeM != [ winfo height .str ] } { set choice_g 23 } }" );
 	cmd( "bind .str.f.c <Button-1> { if { [ info exists res_g ] } { set choice_g 24 } }" );
 	cmd( "bind .str.f.c <Double-Button-1> { if { [ info exists res_g ] && [ winfo exists .m ] } { destroy .list; set choice 6 } }" );
@@ -121,7 +121,7 @@ void show_graph( object *t )
 
 	cmd( "bind .str <F1> { LsdHelp graphrep.html }" );
 	set_shortcuts( ".str" );
-	
+
 	cmd( "if { [ winfo exists .plt ] } { lower .str .plt }" );
 
 	cmd( "update" );
@@ -138,7 +138,7 @@ void draw_buttons( void )
 	cmd( "set cy1 [ .str.f.c canvasy 0 ]" );
 	cmd( "set cx2 [ .str.f.c canvasx [ winfo width .str ] ]" );
 	cmd( "set cy2 [ .str.f.c canvasy [ winfo height .str ] ]" );
-	
+
 	cmd( "if { $n == 4 } { \
 			set hratioM [ expr { ( $cx2 - $cx1 ) / ( $x2 - $x1 + 2 * $borderM ) } ]; \
 			set vratioM [ expr { ( $cy2 - $cy1 ) / ( $y2 - $y1 + 2 * $borderM ) } ] \
@@ -146,7 +146,7 @@ void draw_buttons( void )
 			set hratioM 1; \
 			set vratioM 1 \
 		}" );
-	
+
 	cmd( "ttk::button .str.f.c.hplus -text \"\u25B6\" -width 2 -style bold.Toolbutton -command { \
 			set hfactM [ round_N [ expr { $hfactM + $rstepM } ] 2 ]; \
 			set choice_g 23 \
@@ -168,23 +168,23 @@ void draw_buttons( void )
 			set vfactM [ round_N [ expr { $vfactM * $vratioM } ] 2 ]; \
 			set choice_g 23 \
 		}" );
-		
+
 	cmd( "bind .str <Control-plus> { invoke .str.f.c.hplus }" );
 	cmd( "bind .str <Control-minus> { invoke .str.f.c.hminus }" );
 	cmd( "bind .str <Alt-plus> { invoke .str.f.c.vplus }" );
 	cmd( "bind .str <Alt-minus> { invoke .str.f.c.vminus }" );
 	cmd( "bind .str <Control-a> { invoke .str.f.c.auto }; bind .str <Control-A> { invoke .str.f.c.auto }" );
 	cmd( "bind .str <Alt-a> { invoke .str.f.c.auto }; bind .str <Alt-A> { invoke .str.f.c.auto }" );
-	
+
 	cmd( "set colM [ expr { $cx2 - $borderM - $borderMadj } ]" );
 	cmd( "set rowM [ expr { $cy2 - $borderM } ]" );
-	
+
 	cmd( "set a [ .str.f.c create window $colM $rowM -window .str.f.c.auto -tags tooltip ]" );
 	cmd( "set b [ .str.f.c create window [ expr { $colM - $bhstepM } ] $rowM -window .str.f.c.hplus -tags tooltip ]" );
 	cmd( "set c [ .str.f.c create window [ expr { $colM - 2 * $bhstepM } ] $rowM -window .str.f.c.hminus -tags tooltip ]" );
 	cmd( "set d [ .str.f.c create window $colM [ expr { $rowM - $bvstepM } ] -window .str.f.c.vplus -tags tooltip ]" );
 	cmd( "set e [ .str.f.c create window $colM [ expr { $rowM - 2 * $bvstepM } ] -window .str.f.c.vminus -tags tooltip ]" );
-		
+
 	cmd( "tooltip::tooltip .str.f.c -item $a \"Automatic adjustment\"" );
 	cmd( "tooltip::tooltip .str.f.c -item $b \"Increase horizontal spacing\"" );
 	cmd( "tooltip::tooltip .str.f.c -item $c \"Decrease horizontal spacing\"" );
@@ -216,7 +216,7 @@ void create_float_list( object *t )
 
 			// set flags string
 			cmd( "set varFlags \"%s%s%s%s%s\"", ( cv->save || cv->savei ) ? "+" : "", cv->plot ? "*" : "", cv->debug == 'd' ? "!" : "", cv->parallel ? "&" : "", sp_upd ? "\u00A7" : "" );
-					
+
 			if ( cv->param == 0 )
 			{
 				if ( cv->num_lag == 0 )
@@ -230,13 +230,13 @@ void create_float_list( object *t )
 					cmd( "lappend slist_%s lvar", t->label );
 				}
 			}
-			
+
 			if ( cv->param == 1 )
 			{
 				cmd( "lappend tlist_%s \"%s (P$varFlags)\"", t->label, cv->label );
 				cmd( "lappend slist_%s par", t->label );
 			}
-			
+
 			if ( cv->param == 2 )
 			{
 				if ( cv->num_lag == 0 )
@@ -265,7 +265,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 	char str[ MAX_LINE_SIZE ], ch[ MAX_ELEM_LENGTH ], ch1[ MAX_LINE_SIZE ];
 	object *cur;
 	bridge *cb;
-	
+
 	create_float_list( t );		// create floating element list
 
 	h_fact = get_double( "hfactM" );
@@ -274,19 +274,19 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 	range_init = get_int( "rinitM" );
 	step_level = get_int( "vstepM" );
 	step_level = round( step_level * v_fact );
-	
+
 	// find current tree depth
 	for ( j = 0, cur = t; cur->up != NULL; ++j, cur = cur->up );
-	
+
 	// draw node only if it is not the root
 	if ( t->up != NULL )
 	{
 		strcpyn( ch, t->label, MAX_ELEM_LENGTH );
 		strcpy( ch1, "" );
-		
+
 		// count number of brothers and define maximum width for number string
 		for ( k = 0, cb = t->up->b; cb != NULL; ++k, cb = cb->next );
-		
+
 		switch ( j )
 		{
 			case 1:								// first line objects
@@ -304,13 +304,13 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 			default:							// all other lines
 				max_wid = min( 2 * h_fact, 3 * h_fact / k );
 		}
-		
-	
+
+
 		// format number string
 		if ( zeroinst )
 		{
 			strcpy( ch1, "0" );
-			
+
 			// if parent is multi-instanced, add ellipsis to the zero
 			if ( t->up->up != NULL )
 			{
@@ -321,7 +321,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 				{
 					cb = cur->search_bridge( t->up->label );
 					for ( k = 0, cur = cb->head; cur != NULL; ++k, cur = cur->next );
-				
+
 					if ( k > 1 )				// handle multi-instanced parents
 						strcatn( ch1, "\u2026", MAX_LINE_SIZE );
 				}
@@ -338,28 +338,28 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 					fit_wid = false;
 					break;
 				}
-				
+
 				skip_next_obj( cur, &count );
 				snprintf( str, MAX_LINE_SIZE, "%s%d", strlen( ch1 ) > 0 ? " " : "", count );
 				strcatn( ch1, str, MAX_LINE_SIZE );
-				
+
 				for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group
 			}
-			
+
 			// count number of instances of parent and check for zero instances
 			if ( fit_wid && t->up->up != NULL )	// first level cannot have multiple zero instances
 			{
 				cb = t->up->up->search_bridge( t->up->label );
 				for ( k = 0, cur = cb->head; cur != NULL; ++k, cur = cur->next );
-			
+
 				if ( h < k )					// found zero instanced object?
 					strcatn( ch1, "\u2026", MAX_LINE_SIZE );
 			}
 		}
-		
+
 		if ( t->up->up != NULL )
 			put_line( from, level, center );
-		
+
 		put_node( center, level, t->label, t == sel ? true : false );
 		put_text( ch, ch1, center, level, t->label );
 	}
@@ -369,19 +369,19 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 		level = get_int( "borderM" );
 		center = 0;
 	}
-	
+
 	// limit the maximum depth of plot
 	if ( j >= MAX_LEVEL )
 		return;
-	
+
 	// count the number of son object types
 	for ( i = 0, cb = t->b; cb != NULL; ++i, cb = cb->next );
-	
+
 	// root? adjust tree begin
-	if ( j == 0 )		
+	if ( j == 0 )
 	{
 		level -= step_level;
-		
+
 		// set the default horizontal scale factor per level
 		for ( k = 0; k < MAX_LEVEL; ++ k )
 			level_factor[ k ] = 0.3;
@@ -426,7 +426,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 				level_factor[ 2 ] = 0.3 + ( i - 5.0 ) / 30;
 				level_factor[ 3 ] = 0.5 + ( i - 5.0 ) / 40;
 		}
-		
+
 		range_type = round( level_factor[ 0 ] * range_init * h_fact );
 	}
 	else
@@ -434,7 +434,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 		// reduce object type width at each level
 		range_type = round( fabs( level_factor[ j ] * range_init / pow( 2, j + range_fact ) - pow( range_init * 2 / 3, 1 / j ) + 1 ) * h_fact );
 	}
-	
+
 	if ( i <= 1 )					// single object type son?
 	{
 		begin = center;				// adjust to print below parent
@@ -473,7 +473,7 @@ PUT_LINE
 ****************************************************/
 void put_line( int x1, int y1, int x2 )
 {
-    cmd( ".str.f.c create line %d [ expr { round ( %d - $vstepM * $vfactM + $vmarginM + $nsizeM / 2 ) } ] %d [ expr { round ( %d + $nsizeM / 2 ) } ] -fill $colorsTheme(dfg)", x1, y1, x2, y1 );
+	cmd( ".str.f.c create line %d [ expr { round ( %d - $vstepM * $vfactM + $vmarginM + $nsizeM / 2 ) } ] %d [ expr { round ( %d + $nsizeM / 2 ) } ] -fill $colorsTheme(dfg)", x1, y1, x2, y1 );
 }
 
 

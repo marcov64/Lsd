@@ -9,7 +9,7 @@
 #
 #	See Readme.txt for copyright information of
 #	third parties' code used in LSD
-#	
+#
 #*************************************************************
 
 #*************************************************************
@@ -32,13 +32,13 @@ proc isDarkTheme { } {
 
 	if [ string equal $CurPlatform mac ] {
 		update idletasks
-		
+
 		if [ tk::unsupported::MacWindowStyle isdark . ] {
 			return 1
 		}
-		
+
 		return 0
-		
+
 	} elseif [ string equal $CurPlatform windows ] {
 		if { ! [ catch { set AppsUseLightTheme [ registry get HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize AppsUseLightTheme ] } ] } {
 			if { ! $AppsUseLightTheme } {
@@ -47,30 +47,30 @@ proc isDarkTheme { } {
 				return 0
 			}
 		}
-		
+
 		return -1
-		
+
 	} elseif [ string equal $CurPlatform linux ] {
 		set wm ""
-        set theme ""
+		set theme ""
 		set desktop1 ""
 		set desktop2 ""
-		
+
 		if { [ info exists env(XDG_CURRENT_DESKTOP) ] } {
 			set desktop1 [ string tolower $env(XDG_CURRENT_DESKTOP) ]
 		}
-		
+
 		if { [ info exists env(DESKTOP_SESSION) ] } {
 			set desktop2 [ string tolower $env(DESKTOP_SESSION) ]
-		} 
-		
+		}
+
 		foreach m $winManLinux {
 			if { [ string first $m $desktop1 ] >= 0 || \
 				 [ string first $m $desktop2 ] >= 0 } {
 				set wm $m
-			} 
+			}
 		}
-		
+
 		if { ( $wm eq "" || $wm eq "gnome" ) && \
 			 ! [ catch { exec gsettings get org.gnome.desktop.interface gtk-theme } results ] } {
 			set theme $results
@@ -85,7 +85,7 @@ proc isDarkTheme { } {
 		} elseif { ( $wm eq "" || $wm eq "xfce" ) && \
 				   ! [ catch { exec xfconf-query -c xsettings -p /Net/ThemeName } results ] } {
 			set theme $results
-			
+
 		} elseif { ( $wm eq "" || $wm eq "cinnamon" ) && \
 				   ! [ catch { exec gsettings get org.cinnamon.desktop.interface gtk-theme } results ] } {
 			set theme $results
@@ -102,7 +102,7 @@ proc isDarkTheme { } {
 
 			set thStart [ string first "<theme>" $rc ]
 			set thEnd [ string first "</theme>" $rc ]
-			
+
 			if { $thStart >= 0 && $thEnd > $thStart } {
 				set nameStart [ string first "<name>" $rc $thStart ]
 				set nameEnd [ string first "</name>" $rc $thStart ]
@@ -126,7 +126,7 @@ proc isDarkTheme { } {
 					return 1
 				}
 			}
-	   
+
 		    return 0
 
 		} else {
@@ -146,7 +146,7 @@ proc isDarkTheme { } {
 proc updateTheme { } {
 	global CurPlatform DefaultTheme lsdTheme themeMac themeLinux \
 		   themeLinuxDark themeWindows themeWindowsDark
-	
+
 	if [ string equal $CurPlatform mac ] {
 		set DefaultTheme $themeMac
 
@@ -197,7 +197,7 @@ proc updateTheme { } {
 #************************************************
 proc setstyles { } {
 	global lsdTheme themeTable colorsTheme fonttype dim_character small_character
-	
+
 	# toolbutton widget styles
 	if { [ array names themeTable -exact $lsdTheme ] != "" } {
 		set tbpadh [ lindex $themeTable($lsdTheme) 4 ]
@@ -213,8 +213,8 @@ proc setstyles { } {
 		-font [ font create -size $small_character -weight bold ]
 	ttk::style map hlBold.Toolbutton -foreground [ list disabled $colorsTheme(hl) ] \
 		-background [ list disabled [ ttk::style lookup Toolbutton -background !disabled ] ] \
-		-font [ list disabled [ font create -size $small_character ] ] 
-	
+		-font [ list disabled [ font create -size $small_character ] ]
+
 	# button widget styles
 	ttk::style configure TButton -anchor center
 	ttk::style configure center.TButton -width -1
@@ -233,7 +233,7 @@ proc setstyles { } {
 		-font [ font create -family "$fonttype" -size $dim_character ]
 	ttk::style configure smallFixed.TText \
 		-font [ font create -family "$fonttype" -size $small_character ]
-	
+
 	# label widget styles
 	ttk::style configure TLabel -anchor center
 	ttk::style configure hl.TLabel -foreground $colorsTheme(hl)
@@ -262,7 +262,7 @@ proc setstyles { } {
 proc setcolor { w args } {
 	global colorsTheme
 	array set options $args
-	
+
 	foreach { element color } [ array get options ] {
 		if { [ array names colorsTheme -exact $color ] != "" && \
 			 ! [ catch { winfo rgb . $colorsTheme($color) } ] } {
@@ -295,15 +295,15 @@ proc ttk::text { w args } {
 	array unset options "-entry"
 	array unset options "-dark"
 	array unset options "-style"
-	
+
 	::text $w {*}[ array get options ]
-	
+
 	$w configure -relief flat -highlightthickness 1
 
 	if { $style != "" } {
 		catch { $w configure -font [ ttk::style lookup $style -font ] }
 	}
-	
+
 	if { $entry } {
 		$w configure -undo 1 -highlightthickness 1
 		if { $dark } {
@@ -319,7 +319,7 @@ proc ttk::text { w args } {
 			setcolor $w -background bg -foreground efg
 		}
 	}
-	
+
 	setcolor $w -selectbackground sbg \
 				-selectforeground sfg \
 				-inactiveselectbackground isbg \
@@ -341,13 +341,13 @@ proc ttk::listbox { w args } {
 	::listbox $w {*}[ array get options ]
 
 	$w configure -relief flat -borderwidth 0
-	
+
 	if { $dark } {
 		setcolor $w -background dbg
 	} else {
 		setcolor $w -background ebg
 	}
-	
+
 	setcolor $w -foreground fg \
 				-selectbackground sbg \
 				-selectforeground sfg \
@@ -371,7 +371,7 @@ proc ttk::menu { w args } {
 				-activebackground sbg \
 				-activeforeground sfg \
 				-disabledforeground dfg \
-				-selectcolor efg 
+				-selectcolor efg
 }
 
 
@@ -389,7 +389,7 @@ proc ttk::canvas { w args } {
 	::canvas $w {*}[ array get options ]
 
 	$w configure -relief flat -borderwidth 0 -highlightthickness 0
-	
+
 	if { $entry } {
 		if { $dark } {
 			setcolor $w -background dbg
@@ -403,7 +403,7 @@ proc ttk::canvas { w args } {
 			setcolor $w -background bg
 		}
 	}
-	
+
 	setcolor $w -selectbackground sbg \
 				-selectforeground sfg \
 				-highlightcolor hc \
@@ -423,64 +423,64 @@ set ttk::msgBoxValue ""
 
 proc ttk::messageBox { args } {
 	global CurPlatform
-	
+
 	if [ string equal $CurPlatform mac ] {
 		array set options $args
 		if { "-parent" in [ array names options ] && $options(-parent) == "" } {
 			array unset options "-parent"
 		}
-		
+
 		return [ tk_messageBox {*}[ array get options ] ]
 	}
-	
+
 	array set options [ concat { -default "" -detail "" -icon info -message "" -parent . -title "" -type ok } $args ]
 
 	set name [ string cat .msgBox_ [ expr { int( rand( ) * 10000 ) } ] ]
-	
+
 	foreach { option parameter } [ array get options ] {
 		switch $option {
 			-default {
 				if { ! ( $parameter in { ok yes no cancel ignore abort retry } ) } {
 					set options(-default) ""
-				}				
+				}
 			}
-			-detail { } 
+			-detail { }
 			-icon {
 				if { ! ( $parameter in { error info question warning } ) } {
 					set options(-icon) info
-				}				
-			} 
-			-message { } 
+				}
+			}
+			-message { }
 			-parent {
 				if { $parameter != "." } {
 					if [ winfo exists $parameter ] {
 						set name ${parameter}${name}
 					}
 				}
-			} 
-			-title { } 
+			}
+			-title { }
 			-type {
 				if { ! ( $parameter in { abortretryignore ok okcancel retrycancel yesno yesnocancel } ) } {
 					set options(-type) ok
-				}				
-			} 
+				}
+			}
 			default {
 				error "Unrecognized option"
 			}
 		}
 	}
-	
+
 	if { $options(-default) == "" } {
 		switch $options(-type) {
 			abortretryignore {
 				set options(-default) abort
-			} 
+			}
 			ok {
 				set options(-default) ok
-			} 
+			}
 			yesno {
 				set options(-default) no
-			} 
+			}
 			okcancel -
 			retrycancel -
 			yesnocancel {
@@ -503,16 +503,16 @@ proc ttk::messageBox_exit { value } {
 
 proc ttk::messageBox_draw { name icon title parent message detail type default } {
 	global ttk::msgBoxName ttk::msgBoxValue errorDlgImg infoDlgImg questDlgImg warnDlgImg
-	
+
 	destroytop $ttk::msgBoxName
 	set ttk::msgBoxName $name
-	
+
 	newtop $name $title "" $parent
-	
+
 	ttk::frame $name.top
-	
+
 	ttk::frame $name.top.icon
-		
+
 	switch $icon {
 		error {
 			ttk::label $name.top.icon.label -image errorDlgImg
@@ -530,9 +530,9 @@ proc ttk::messageBox_draw { name icon title parent message detail type default }
 			ttk::label $name.top.icon.label -image infoDlgImg
 		}
 	}
-	
+
 	pack $name.top.icon.label -pady 5 -anchor nw
-	
+
 	ttk::frame $name.top.text
 	ttk::label $name.top.text.message -wraplength 305 \
 				-justify left -text $message -style boldSmall.TLabel
@@ -540,11 +540,11 @@ proc ttk::messageBox_draw { name icon title parent message detail type default }
 				-justify left -text $detail
 	pack $name.top.text.message \
 		 $name.top.text.details -pady 5 -anchor nw
-		 
+
 	pack $name.top.icon $name.top.text \
 		 -padx 5 -side left -anchor nw
 	pack $name.top -padx 15 -pady 15
-	
+
 	switch $type {
 		abortretryignore {
 			abortretryignore  $name bottom { ttk::messageBox_exit abort } { ttk::messageBox_exit retry } { ttk::messageBox_exit ignore }
@@ -553,45 +553,45 @@ proc ttk::messageBox_draw { name icon title parent message detail type default }
 		ok {
 			ok $name bottom { ttk::messageBox_exit ok }
 			set close ok
-		} 
+		}
 		okcancel {
 			okcancel $name bottom { ttk::messageBox_exit ok } { ttk::messageBox_exit cancel }
 			set close cancel
-		} 
+		}
 		retrycancel {
 			retrycancel $name bottom { ttk::messageBox_exit retry } { ttk::messageBox_exit cancel }
 			set close cancel
-		} 
+		}
 		yesno {
 			yesno $name bottom { ttk::messageBox_exit yes } { ttk::messageBox_exit no }
 			set close no
-		} 
+		}
 		yesnocancel {
 			yesnocancel $name bottom { ttk::messageBox_exit yes } { ttk::messageBox_exit no } { ttk::messageBox_exit cancel }
 			set close cancel
 		}
 	}
-	
+
 	pack $name.bottom -side right
-	
+
 	wm protocol $name WM_DELETE_WINDOW "ttk::messageBox_exit $close"
-	
+
 	if { $parent == "" } {
 		showtop $name centerS no no no 0 0 "" no yes
 	} else {
 		showtop $name centerW
 	}
-	
-	
+
+
 	if [ winfo exists $name.bottom.$default ] {
 		$name.bottom.$default configure -default active
 		mousewarpto $name.bottom.$default
 	}
-	
+
 	if [ string equal $icon error ] {
 		bell
 	}
-	
+
 	vwait ttk::msgBoxValue
 	return $ttk::msgBoxValue
 }

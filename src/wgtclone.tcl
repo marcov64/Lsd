@@ -9,7 +9,7 @@
 #
 #	See Readme.txt for copyright information of
 #	third parties' code used in LSD
-#	
+#
 #*************************************************************
 
 #*************************************************************
@@ -17,7 +17,7 @@
 # Collection of procedures to clone, move, copy, save,
 # serialize Tk widgets.
 #
-# Based on code by Cjolly 
+# Based on code by Cjolly
 # https://stackoverflow.com/questions/6285648
 # Based on code Maurice Bredelet
 # https://wiki.tcl-lang.org/page/Serializing+a+canvas+widget
@@ -30,7 +30,7 @@
 #************************************************
 proc getWidgetType { w } {
 	set class [ winfo class $w ]
-	
+
 	if { [ string index $class 0 ] eq "T" &&
 		 [ string match "\[A-Z\]" [ string index $class 1 ] ] } {
 			set class [ string range [ string tolower $class ] 1 end ]
@@ -38,67 +38,67 @@ proc getWidgetType { w } {
 	} else {
 		set class [ string tolower $class ]
 	}
-	
+
 	return $class
 }
 
 proc getConfigOptions { w } {
 	set configure [ $w configure ]
 	set options { }
-	
+
 	foreach f $configure {
-		if { [ llength $f ] < 3 } { 
-			continue 
-		} 
-		
+		if { [ llength $f ] < 3 } {
+			continue
+		}
+
 		set name [ lindex $f 0 ]
 		set default [ lindex $f end-1 ]
 		set value [ lindex $f end ]
-		
+
 		if { $default ne $value } {
-			lappend options $name $value 
+			lappend options $name $value
 		}
 	}
-	
+
 	return $options
 }
 
 proc clone_widget { w  newparent { level 0 } } {
 	set type [ getWidgetType $w ]
-	set name [ string trimright $newparent.[ lindex [ split $w "." ] end ] "." ]  
+	set name [ string trimright $newparent.[ lindex [ split $w "." ] end ] "." ]
 
 	if { $type eq "canvas" } {
 		set retval [ clone_canvas $w $name ]
 	} else {
 		set retval [ $type $name {*}[ getConfigOptions $w ] ]
 	}
-	
+
 	foreach b [ bind $w ] {
-		puts "bind $retval $b [ subst { [ bind $w $b ] } ] " 
-		catch { 
+		puts "bind $retval $b [ subst { [ bind $w $b ] } ] "
+		catch {
 			bind $retval $b [ subst { [ bind $w $b ] } ]
-		} 
-	} 
-	
+		}
+	}
+
 	if { $level > 0 } {
 		if { [ catch { pack info $w } err ] == 0 } {
 			array set temp [ pack info $w ]
 			array unset temp -in
-			catch { 
-				pack $name {*}[ array get temp ] 
-			} 
+			catch {
+				pack $name {*}[ array get temp ]
+			}
 		} elseif { [ catch { grid info $w } err ] == 0 } {
 			array set temp [ grid info $w ]
 			array unset temp -in
-			catch { 
-				grid $name {*}[ array get temp ] 
-			} 
+			catch {
+				grid $name {*}[ array get temp ]
+			}
 		}
 	}
-	
-	incr level 
-	
-	if { [ pack slaves $w ] ne "" } { 
+
+	incr level
+
+	if { [ pack slaves $w ] ne "" } {
 		foreach f [ pack slaves $w ] {
 			clone_widget $f $name $level
 		}
@@ -107,7 +107,7 @@ proc clone_widget { w  newparent { level 0 } } {
 			clone_widget $f $name $level
 		}
 	}
-	
+
 	return $retval
 }
 
@@ -123,12 +123,12 @@ proc move_widget { w newparent } {
 # CLONE_CANVAS/MOVE_CANVAS
 # Clone a canvas widget
 #************************************************
-proc clone_canvas { canvas clone } { 
+proc clone_canvas { canvas clone } {
 	set retval [ restore_canvas $clone [ save_canvas $canvas ] ]
 	return $retval
 }
 
-proc move_canvas { canvas clone } { 
+proc move_canvas { canvas clone } {
 	set retval [ clone_canvas $canvas $clone ]
 	update idletasks
 	destroy $canvas
@@ -142,25 +142,25 @@ proc move_canvas { canvas clone } {
 #************************************************
 proc options { options } {
 	set res { }
-	
+
 	foreach option $options {
 		set key [ lindex $option 0 ]
 		set value [ lindex $option 4 ]
-		
+
 		if { [ llength $option ] == 5 } {
 			lappend res [ list $key $value ]
 		}
   }
-  
+
   return $res
 }
 
 proc save_canvas { w } {
-	
+
 	lappend save $w; # canvas name
 	lappend save [ options [ $w configure ] ]; # canvas option
 	lappend save [ $w focus ]; # canvas focus
-	
+
 	# canvas items
 	foreach id [ $w find all ] {
 		set item { }
@@ -168,29 +168,29 @@ proc save_canvas { w } {
 		set specifics { }
 		set type [ $w type $id ]
 		set tags [ $w gettags $id ]
-		
+
 		lappend item [ list $type $id ]; # type & id
 		lappend item [ $w coords $id ]; # coords
 		lappend item $tags; # tags
-		
-		
+
+
 		# id binds
 		set events [ $w bind $id ]
-		foreach event $events { 
-			lappend binds [ list $id $event [ $w bind $id $event ] ] 
+		foreach event $events {
+			lappend binds [ list $id $event [ $w bind $id $event ] ]
 		}
-		
+
 		# tags binds
-		foreach tag $tags { 
+		foreach tag $tags {
 			set events [ $w bind $tag ]
-			foreach event $events { 
+			foreach event $events {
 				lappend binds [ list $tag $event [ $w bind $tag $event ] ]
 			}
 		}
-		
+
 		lappend item $binds; # binds
 		lappend item [ options [ $w itemconfigure $id ] ]; # options
-		
+
 		switch $type {
 			arc -
 			bitmap -
@@ -198,33 +198,33 @@ proc save_canvas { w } {
 			oval -
 			polygon -
 			rectangle { }
-			
+
 			image {
 				set iname [ $w itemcget $id -image ]
 				lappend specifics $iname; # image name
 				lappend specifics [ image type $iname ]; # image type
 				lappend specifics [ options [ $iname configure ] ]; # image options
 			}
-			
+
 			text {
 				foreach index { insert sel.first sel.last } {
-					catch { 
+					catch {
 						lappend specifics [ $w index $id $index ]; # text indexes
 					}
 				}
 			}
-			
+
 			window {
-				
+
 				set wname [ $w itemcget $id -window ]
 				lappend specifics $wname; # window name
 				lappend specifics [ string tolower [ winfo class $wname ] ]; # window type
 				lappend specifics [ options [ $wname configure ] ]; # window options
 			}
 		}
-		
+
 		lappend item $specifics; # type specifics
-		
+
 		lappend save $item; # item in serialized canvas
 	}
 
@@ -237,51 +237,51 @@ proc save_canvas { w } {
 # Restore a serialized canvas widget
 #************************************************
 proc restore_canvas { w save } {
-	
+
 	eval canvas $w [ join [ lindex $save 1 ] ]; # create canvas with options
-	
+
 	# restore items
 	foreach item [ lrange $save 3 end ] {
 		foreach { typeid coords tags binds options specifics } $item {
-			
+
 			set type [ lindex $typeid 0 ]; # get type
-			
+
 			# create bitmap or window
 			switch $type {
 				image {
 					foreach { iname itype ioptions } $specifics {
 						break
 					}
-					
-					if { ! [ image inuse $iname] } { 
+
+					if { ! [ image inuse $iname] } {
 						eval image create $itype $iname [ join $ioptions ]
 					}
 				}
-				
+
 				window {
 					foreach { wname wtype woptions } $specifics {
 						break
 					}
-					
-					if { ! [ winfo exists $wname ] } { 
+
+					if { ! [ winfo exists $wname ] } {
 						eval $wtype $wname [ join $woptions ]
 					}
-					
+
 					raise $wname
 				}
 			}
-			
+
 			# create item
 			set id [ eval $w create $type $coords -tags "{$tags}" [ join $options ] ]
-			
-			foreach bind $binds { 
-				foreach { id event script } $bind { 
+
+			foreach bind $binds {
+				foreach { id event script } $bind {
 					catch {
 						$w bind $id $event $script; # item bindings
 					}
 				}
 			}
-			
+
 			# item specifics
 			if { $specifics != "" } {
 				switch $type {
@@ -289,9 +289,9 @@ proc restore_canvas { w save } {
 						foreach { insert sel.first sel.last } $specifics {
 							break
 						}
-						
-						$w icursor $id $insert 
-						
+
+						$w icursor $id $insert
+
 						if { ${sel.first} != "" } {
 							$w select from $id ${sel.first}
 							$w select to $id ${sel.last}
@@ -301,7 +301,7 @@ proc restore_canvas { w save } {
 			}
 		}
 	}
-	
+
 	# restore focused item
 	set focus [ lindex $save 2 ]
 	if { $focus != "" } {
@@ -319,44 +319,44 @@ proc restore_canvas { w save } {
 #************************************************
 proc dump_canvas { w } {
 	set w [ save_canvas $w ]
-	
+
 	lappend res [ lindex $w 0 ]; # canvas name
-	
-	foreach option [ lindex $w 1 ] { 
+
+	foreach option [ lindex $w 1 ] {
 		lappend res [ join $option \t ]; # canvas options
 	}
-	
+
 	lappend res [ join [ lindex $w 2 ] \t ]; # focused item
-	
+
 	# items
 	foreach item [ lrange $w 3 end ] {
 		foreach { type coords tags binds options specifics } $item {
 			lappend res [ join $type \t ]; # item type
 			lappend res \tcoords\t$coords; # item coords
 			lappend res \ttags\t$tags; # item tags
-			
+
 			lappend res \tbinds; # item bindings
-			foreach bind $binds { 
+			foreach bind $binds {
 				lappend res \t\t$bind
 			}
-			
-			
+
+
 			lappend res \toptions; # item options
 			foreach option $options {
 				set key [ lindex $option 0 ]
 				set value [ lindex $option 1 ]
 				lappend res \t\t$key\t$value
 			}
-			
+
 			# item specifics
 			if { $specifics != "" } {
 				lappend res \tspecifics
-				foreach specific $specifics { 
-					if { [ llength $specific ] == 1 }  { 
+				foreach specific $specifics {
+					if { [ llength $specific ] == 1 }  {
 						lappend res \t\t$specific
-					} else { 
-						foreach token $specific { 
-							lappend res \t\t$token 
+					} else {
+						foreach token $specific {
+							lappend res \t\t$token
 						}
 					}
 				}
@@ -372,41 +372,41 @@ proc dump_canvas { w } {
 #************************************************
 # CANVAS2SVG
 # Dump canvas contents into file
-# Based on code by Richard Suchenwirth 
+# Based on code by Richard Suchenwirth
 # (https://wiki.tcl-lang.org/page/Canvas+to+SVG)
 #************************************************
 proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
 
 	catch { set file [ open $fn w ] }
 	catch { close $file }
-	
+
 	if { ! [ winfo exists $c ] || [ winfo class $c ] ne "Canvas" || ! [ file writable $fn ] } {
 		error "Invalid canvas window or file"
 	}
-	
+
 	lassign [ concat $v 0 0 0 0 ] vx0 vy0 vx1 vy1
 
 	if { [ catch { set wid [ expr { $vx1 - $vx0 } ] } ] || \
 		 [ catch { set hgt [ expr { $vy1 - $vy0 } ] } ] } {
 		error "Invalid canvas region"
 	}
-	
+
 	set bb [ $c bbox all ]
-	
+
 	if { $wid <= 0 } {
 		set vx0 [ lindex $bb 0 ]
 		set vx1 [ lindex $bb 2 ]
 		set wid [ expr { $vx1 - $vx0 } ]
 	}
-	
+
 	if { $hgt <= 0 } {
 		set vy0 [ lindex $bb 1 ]
 		set vy1 [ lindex $bb 3 ]
 		set hgt [ expr { $vy1 - $vy0 } ]
 	}
-	
+
 	lassign [ format "%.1f %.1f %.1f %.1f %.1f %.1f" $vx0 $vy0 $vx1 $vy1 $wid $hgt ] vx0 vy0 vx1 vy1 wid hgt
-	
+
 	set res "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 	append res "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"
 	append res "<svg xmlns=\"http://www.w3.org/2000/svg\"  version=\"1.1\" width=\"$wid\" height=\"$hgt\" viewBox=\"$vx0 $vy0 $vx1 $vy1\">\n"
@@ -424,17 +424,17 @@ proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
 		catch { set outline [ rgb2xcolor [ $c itemcget $item -outline ] $cm ] }
 		catch { set dash [ dasharray [ $c itemcget $item -dash ] ] }
 		catch { set width [ expr { round( [ $c itemcget $item -width ] ) } ] }
-		
+
 		if { $width == 0 } {
 			set outline none
 		}
-		
+
 		set pts { }
 		foreach { x y } [ $c coords $item ] {
 			lassign [ format "%.1f %.1f" $x $y ] x y
 			lappend pts "$x,$y"
 		}
-		
+
 		switch -- $type {
 			line {
 				set type polyline
@@ -444,7 +444,7 @@ proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
 				append atts [ att stroke-width $width 1 ]
 				append atts [ att stroke-dasharray $dash none ]
 			}
-			
+
 			oval {
 				set type ellipse
 				append atts [ att cx [ format "%.1f" [ expr { double( $x0 + $x1 ) / 2 } ] ] ]
@@ -455,14 +455,14 @@ proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
 				append atts [ att stroke-width $width 1 ]
 				append atts [ att stroke-dasharray $dash none ]
 			}
-			
+
 			polygon {
 				append atts [ att points [ join $pts ] ]
 				append atts [ att fill $fill #000000 ][ att stroke $outline none ]
 				append atts [ att stroke-width $width 1 ]
 				append atts [ att stroke-dasharray $dash none ]
 			}
-			
+
 			rectangle {
 				set type rect
 				append atts [ att x $x0 ][ att y $y0 ]
@@ -472,12 +472,12 @@ proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
 				append atts [ att stroke-width $width 1 ]
 				append atts [ att stroke-dasharray $dash none ]
 			}
-			
+
 			text {
 				set text [ $c itemcget $item -text ]
 				set f [ $c itemcget $item -font ]
 				set anchor [ string map "center c" [ $c itemcget $item -anchor ] ]
-				
+
 				if { "n" in [ split $anchor "" ] } {
 					#append atts [ att dominant-baseline text-before-edge ]
 					set y0 [ expr { $y0 + [ font metric $f -ascent ] } ]
@@ -485,42 +485,42 @@ proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
 					#append atts [ att dominant-baseline middle ]
 					set y0 [ expr { $y0 + ( [ font metric $f -ascent ] - [ font metric $f -descent ] ) / 2 } ]
 				}
-				
+
 				append atts [ att x $x0 ][ att y $y0 ][ att fill $fill #000000 ]
 				append atts [ att font-family [ font actual $f -family ] ]
 				append atts [ att font-size [ font actual $f -size ]pt ]
-				
+
 				if { "e" in [ split $anchor "" ] } {
 					append atts [ att text-anchor end ]
 				} elseif { $anchor in { n c s } } {
 					append atts [ att text-anchor middle ]
 				}
-				
+
 				if { [ font actual $f -weight ] eq "bold" } {
 					append atts [ att font-weight bold ]
 				}
-				
-				if { [ font actual $f -slant ] eq "italic" } { 
+
+				if { [ font actual $f -slant ] eq "italic" } {
 					append atts [ att font-style italic ]
 				}
 			}
-			
-			default { 
-				error "$type not dumpable to SVG" 
+
+			default {
+				error "$type not dumpable to SVG"
 			}
 		}
-		
+
 		append res "\t<$type$atts"
-		
+
 		if { $type eq "text" } {
 			append res ">$text</$type>\n"
 		} else {
 			append res " />\n"
 		}
 	}
-	
+
 	append res "</svg>"
-	
+
 	set file [ open $fn w ]
 	puts $file $res
 	close $file
@@ -530,7 +530,7 @@ proc att { name value { default - } } {
 	if { $value eq "" && $default ne "-" } {
 		set value $default
 	}
-	
+
 	if { $value != $default } {
 		return " $name=\"$value\""
 	}
@@ -540,24 +540,24 @@ proc dasharray { pattern } {
 	if { $pattern == "" } {
 		return none
 	}
-	
+
 	switch -- $pattern {
 		". " {
 			return "3,3"
 		}
-	
+
 		"- " {
 			return "10,3"
 		}
-	
+
 		"-." {
 			return "10,3,3,3"
 		}
-	
+
 		"-.." {
 			return "10,3,3,3,3,3"
 		}
-	
+
 		default {
 			return none
 		}
@@ -568,14 +568,14 @@ proc rgb2xcolor { rgb { cm color } } {
 	if { $rgb == "" } {
 		return none
 	}
-	
+
 	foreach { r g b } [ winfo rgb . $rgb ] break
 	set col [ format #%02x%02x%02x [ expr { $r / 256 } ] [ expr { $g / 256 } ] [ expr { $b / 256 } ] ]
-	
+
 	if { [ isDarkTheme ] && $col eq "#ffffff" } {
-		set col #000000 
+		set col #000000
 	}
-	
+
 	if { $cm eq "gray" } {
 		if { $r == $g && $g == $b } {
 			return $col

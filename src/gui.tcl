@@ -9,7 +9,7 @@
 #
 #	See Readme.txt for copyright information of
 #	third parties' code used in LSD
-#	
+#
 #*************************************************************
 
 #*************************************************************
@@ -19,7 +19,7 @@
 # The module sets all the required variables, data structures
 # and code required to create and operate the LSD GUI over
 # Tk/ttk.
-# To ensure smooth operation of LSD GUI, all Tk/ttk new 
+# To ensure smooth operation of LSD GUI, all Tk/ttk new
 # windows should be created using the procedures defined
 # in WINDOW.TCL.
 #*************************************************************
@@ -90,12 +90,12 @@ if [ string equal $CurPlatform mac ] {
 	set bhstepM $bhstepMac
 	set bvstepM $bvstepMac
 	set borderMadj $bborderMac
-	
+
 	# enable Ctrl+click as replacement for right-shift
-	bind all <Control-ButtonPress-1> { 
+	bind all <Control-ButtonPress-1> {
 		event generate %W <ButtonPress-2> -x %x -y %y -rootx %X -rooty %Y -button 2
 	}
-		
+
 	# ensure homebrew local executables are on PATH
 	if { [ string first "/usr/local/bin" "$env(PATH)" ] < 0 } {
 		set env(PATH) "/usr/local/bin:$env(PATH)"
@@ -129,7 +129,7 @@ if [ string equal $CurPlatform mac ] {
 	set bhstepM $bhstepLinux
 	set bvstepM $bvstepLinux
 	set borderMadj $bborderLinux
-	
+
 	# use xterm as alternative for missing default/alternative terminals
 	if { [ catch { exec which [ lindex $DefaultSysTerm 0 ] } ] } {
 		set DefaultSysTerm "xterm -e"
@@ -140,7 +140,7 @@ if [ string equal $CurPlatform mac ] {
 			}
 		}
 	}
-	
+
 } elseif [ string equal $CurPlatform windows ] {
 	package require registry
 
@@ -172,10 +172,10 @@ if [ string equal $CurPlatform mac ] {
 	set bhstepM $bhstepWindows
 	set bvstepM $bvstepWindows
 	set borderMadj $bborderWindows
-	
+
 	# inherit OS setting
 	set mouseWarp [ ismousesnapon $CurPlatform ]
-	
+
 	# Cygwin or MSYS2?
 	if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } {
 		if { ! [ catch { exec where $makeWinMingw } ] } {
@@ -186,7 +186,7 @@ if [ string equal $CurPlatform mac ] {
 			set DefaultMakeExe $makeWinCygwin
 		}
 	}
-	
+
 	# Gnuplot on path? if not, try default install folder
 	if [ catch { exec where $gnuplotExe } ] {
 		if [ file exists "C:/Program Files/gnuplot/bin/$gnuplotExe" ] {
@@ -199,11 +199,11 @@ if [ string equal $CurPlatform mac ] {
 if { ! [ info exists sysTerm ] || ( $CurPlatform in [ list linux windows ] && [ llength $sysTerm ] < 2 ) } { \
 	set sysTerm $DefaultSysTerm
 }
-	
+
 if { $CurPlatform eq "mac" && ( ! [ info exists $wish ] || $wish eq "wish8.6" ) } { \
 	set wish $wishMac
 }
-	
+
 if { $CurPlatform eq "windows" && ( ! [ info exists $HtmlBrowser ] || $HtmlBrowser eq "open" ) } { \
 	set HtmlBrowser $browserWindows
 }

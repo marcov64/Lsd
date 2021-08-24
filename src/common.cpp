@@ -6,18 +6,18 @@
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
 
 /*************************************************************
- COMMON.CPP 
+ COMMON.CPP
  Code common between LMM and LSD Browser.
- 
+
  Relevant flags (when defined):
- 
+
  - _LMM_: Model Manager executable
  - _FUN_: user model equation file
  - _NW_: No Window executable
@@ -36,31 +36,31 @@
 bool load_lmm_options( void )
 {
 	cmd( "set res [ file exists \"$RootLsd/$LMM_OPTIONS\" ]" );
-	
+
 	if ( get_bool( "res" ) )						// file exists?
 	{
 		cmd( "set f [ open \"$RootLsd/$LMM_OPTIONS\" r ]" );
-		
+
 		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )	// read parameters, returning 1 if incomplete
 		{
 			cmd( "gets $f %s", lmm_options[ i ] );
 			cmd( "if { $%s == \"\" } { set res 0 }", lmm_options[ i ] );
 		}
-		
+
 		cmd( "close $f" );
 	}
 	else
 	{
 		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
 			cmd( "set %s \"\"", lmm_options[ i ] );
-	
+
 		// fix now missing source directory name
 		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ 4 ], lmm_options[ 4 ], lmm_defaults[ 4 ] );
 	}
-	
+
 	return get_bool( "res" );
 }
- 
+
 
 /*********************************
  UPDATE_LMM_OPTIONS
@@ -125,7 +125,7 @@ bool load_model_info( const char *path )
 void update_model_info( void )
 {
 	int i;
-	
+
 #ifdef _LMM_
 	// set undefined parameters to defaults
 	for ( i = 0; i < MODEL_INFO_NUM; ++i )
@@ -165,15 +165,15 @@ void update_model_info( void )
 void init_tcl_tk( const char *exec, const char *tcl_app_name )
 {
 	int num, res;
-	
+
 	if ( ! set_env( true ) )
 	{
 		log_tcl_error( "Set environment variables", "Environment variable setup failed, Tcl/Tk may be unavailable" );
 		myexit( 2 );
 	}
-	
+
 	// initialize the tcl/tk interpreter
-	Tcl_FindExecutable( exec ); 
+	Tcl_FindExecutable( exec );
 	inter = Tcl_CreateInterp( );
 	num = Tcl_Init( inter );
 	if ( num != TCL_OK )
@@ -200,13 +200,13 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 	num = Tk_Init( inter );
 	if ( num == TCL_OK )
 		cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { set res 0 } { set res 1 }" );
-	
+
 	if ( num != TCL_OK || res )
 	{
 		log_tcl_error( "Start Tk", "Tk failed, check the Tcl/Tk installation (version 8.6+) and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
 		myexit( 3 );
 	}
-	
+
 	cmd( "wm withdraw ." );
 	cmd( "update idletasks" );
 	cmd( "tk appname %s", tcl_app_name );
@@ -224,7 +224,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 					send $i \"destroy .\" \
 				} \
 			}" );
-			
+
 		cmd( "update idletasks" );
 	}
 
@@ -236,7 +236,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 		cmd( "ttk::messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the sources (src) directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
 		myexit( 4 );
 	}
-	
+
 	Tcl_UnlinkVar( inter, "res" );
 }
 
@@ -256,15 +256,15 @@ bool set_env( bool set )
 	if ( set )
 	{
 		lsd_root = getenv( "LSDROOT" );
-		
+
 		if ( lsd_root == NULL )
 		{
 			exec_path = new char[ MAX_PATH_LENGTH ];
 			exec_path = getcwd( exec_path, MAX_PATH_LENGTH );
 			exec_path = clean_path( exec_path );
-			
+
 			lsd_root = search_lsd_root( exec_path );
-			
+
 			if ( lsd_root != NULL )
 			{
 				delete [ ] lsd_root_env;
@@ -276,61 +276,61 @@ bool set_env( bool set )
 			else
 				res = false;
 		}
-		
+
 #ifdef _WIN32
 		char *file, *lsd_bin, *path;
 		const char *compilers[ ] = WIN_COMP_PATH;
 		int i, st;
 		struct stat info;
-		
+
 		path = getenv( "PATH" );
-		
+
 		if ( lsd_root != NULL && getenv( TCL_LIB_VAR ) == NULL )
 		{
 			lsd_root = clean_path( lsd_root );
-			
+
 			file = new char[ strlen( lsd_root ) + strlen( TCL_LIB_PATH ) + strlen( TCL_LIB_INIT ) + 3 ];
 			sprintf( file, "%s/%s/%s", lsd_root, TCL_LIB_PATH, TCL_LIB_INIT );
 			st = stat( file, &info );
 			delete [ ] file;
-			
+
 			if ( st == 0 )
 			{
 				delete [ ] tcl_lib_env;
 				tcl_lib_env = new char[ strlen( TCL_LIB_VAR ) + strlen( lsd_root ) + strlen( TCL_LIB_PATH ) + 3 ];
 				sprintf( tcl_lib_env, "%s=%s/%s", TCL_LIB_VAR, lsd_root, TCL_LIB_PATH );
-				
+
 				res = ! ( bool ) putenv( tcl_lib_env );
 			}
 			else
 				if ( run_system( TCL_FIND_EXE ) != 0 )
 					res = false;	// just stop if Tcl/Tk is not on path
 		}
-		
+
 		if ( lsd_root != NULL && path != NULL )
 		{
 			// check if not already in path and add it in the adequate order
 			lsd_bin = new char[ win_path( lsd_root ).size( ) + strlen( TCL_EXEC_PATH ) + 2 ];
 			sprintf( lsd_bin, "%s\\%s", win_path( lsd_root ).c_str( ), TCL_EXEC_PATH );
-			
+
 			if ( strstr( path, lsd_bin ) == NULL )
 			{
 				// look for known 64-bit compilers
 				for ( i = 0, st = 1; i < WIN_COMP_NUM; ++i )
 					if ( strstr( path, compilers[ i ] ) != NULL )
 						st = 0;
-				
+
 				delete [ ] path_env;
 				path_env = new char[ strlen( path ) + strlen( lsd_bin ) + 7 ];
-				
+
 				if ( st == 0 )
 					sprintf( path_env, "PATH=%s;%s", path, lsd_bin );
 				else
 					sprintf( path_env, "PATH=%s;%s", lsd_bin, path );
-				
+
 				putenv( path_env );
 			}
-			
+
 			delete [ ] lsd_bin;
 		}
 #else
@@ -344,7 +344,7 @@ bool set_env( bool set )
 		delete [ ] lsd_root_env;
 		delete [ ] path_env;
 	}
-	
+
 	return res;
 }
 
@@ -365,60 +365,60 @@ char *search_lsd_root( char *start_path )
 	last_dir = new char[ MAX_PATH_LENGTH ];
 	orig_dir = new char[ MAX_PATH_LENGTH ];
 	orig_dir = getcwd( orig_dir, MAX_PATH_LENGTH );
-	
+
 	if ( orig_dir == NULL )
 		goto err;
-	
+
 	if ( chdir( start_path ) )
 		goto end;
-	
+
 	strcpy( last_dir, "" );
-	
+
 	do
 	{
 		cur_dir = getcwd( cur_dir, MAX_PATH_LENGTH );
 		cur_dir = clean_path( cur_dir );
-		
+
 		if ( cur_dir == NULL || ! strcmp( cur_dir, last_dir ) )
 			goto end;
-		
+
 		for ( i = 0, miss = false; i < LSD_MIN_NUM; ++i )
 		{
 			file = new char[ strlen( cur_dir ) + strlen( files[ i ] ) + 2 ];
 			sprintf( file, "%s/%s", cur_dir, files[ i ] );
 			st = stat( file, &info );
 			delete [ ] file;
-			
+
 			if ( st != 0 )
 			{
 				miss = true;
 				break;
 			}
 		}
-		
+
 		if ( ! miss )
 		{
 			strcpyn( start_path, cur_dir, strlen( start_path ) + 1 );
 			found = start_path;
 			break;
 		}
-		
+
 		strcpyn( last_dir, cur_dir, MAX_PATH_LENGTH );
 	}
 	while ( ! chdir( ".." ) );
-		
+
 	end:
 	chdir( orig_dir );
-	
+
 	err:
 	delete [ ] cur_dir;
 	delete [ ] last_dir;
 	delete [ ] orig_dir;
-	
+
 	return found;
 }
-  
- 
+
+
 /****************************************************
  CMD
  ****************************************************/
@@ -428,31 +428,31 @@ void cmd( const char *cm, ... )
 	static char *buffer, bufstat[ MAX_BUFF_SIZE ];
 	static int reqsz, sz;
 	static va_list argptr;
-	
+
 #ifndef _NP_
 	// abort if not running in main LSD thread
 	if ( this_thread::get_id( ) != main_thread )
 		return;
 #endif
-	
+
 	// abort if Tcl interpreter not initialized
 	if ( inter == NULL )
 	{
 		fprintf( stderr, "\nTcl interpreter not initialized. Quitting LSD now.\n" );
 		myexit( 24 );
 	}
-	
+
 	buffer = bufstat;
 	va_start( argptr, cm );
 	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, argptr );
 	va_end( argptr );
-	
+
 	if ( reqsz < 0 )
 	{
 		log_tcl_error( "Invalid Tcl command", "Cannot expand command '%s...'", cm );
 		return;
 	}
-		
+
 	// handle very large commands
 	if ( reqsz >= MAX_BUFF_SIZE )
 	{
@@ -460,22 +460,22 @@ void cmd( const char *cm, ... )
 		va_start( argptr, cm );
 		sz = vsnprintf( buffer, reqsz + 1, cm, argptr );
 		va_end( argptr );
-		
+
 		if ( reqsz < 0 || sz > reqsz )
 		{
 			log_tcl_error( "Invalid Tcl command", "Cannot expand command '%s...'", cm );
 			delete [ ] buffer;
 			return;
 		}
-		
+
 		bufdyn = true;
 	}
 	else
 		bufdyn = false;
-	
+
 	if ( Tcl_Eval( inter, buffer ) != TCL_OK )
 		log_tcl_error( cm, Tcl_GetStringResult( inter ) );
-	
+
 	if ( bufdyn )
 		delete [ ] buffer;
 }
@@ -491,19 +491,19 @@ void log_tcl_error( const char *cm, const char *message, ... )
 	static time_t rawtime;
 	static va_list argptr;
 	static FILE *f;
-	
+
 	static bool firstCall = true;
-	
+
 #ifndef _NP_
 	// abort if not running in main LSD thread
 	if ( this_thread::get_id( ) != main_thread )
 		return;
 #endif
-	
+
 	va_start( argptr, message );
 	vsnprintf( buffer, MAX_BUFF_SIZE, message, argptr );
 	va_end( argptr );
-	
+
 #ifdef _LMM_
 	err_path = rootLsd;
 #else
@@ -531,10 +531,10 @@ void log_tcl_error( const char *cm, const char *message, ... )
 		firstCall = false;
 		fprintf( f,"\n\n====================> NEW TCL SESSION\n" );
 	}
-	
+
 	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, buffer );
 	fclose( f );
-	
+
 	show_tcl_error( "LSD error", "Internal LSD error. See file '%s'", fname );
 }
 
@@ -549,10 +549,10 @@ int Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *inter, int argc, const char
 		return TCL_ERROR;
 
 	log_tcl_error( argv[ 1 ], argv[ 2 ] );
-		
+
 	static char empty[ ] = "";
 	Tcl_SetResult( inter, empty, TCL_VOLATILE );
-	return TCL_OK;		
+	return TCL_OK;
 }
 
 
@@ -564,7 +564,7 @@ void show_tcl_error( const char *boxTitle, const char *errMsg, ... )
 {
 	static char logText[ MAX_LINE_SIZE ];
 	static va_list argptr;
-	
+
 	va_start( argptr, errMsg );
 	vsnprintf( logText, MAX_LINE_SIZE, errMsg, argptr );
 	va_end( argptr );
@@ -578,7 +578,7 @@ void show_tcl_error( const char *boxTitle, const char *errMsg, ... )
 	plog( "\n%s\n", logText );
 #endif
 }
- 
+
 
 /****************************************************
  TCL_DISCARD_CHANGE
@@ -632,7 +632,7 @@ bool get_bool( const char *tcl_var, bool *var )
 {
 	const char *strvar;
 	int intvar;
-	
+
 	strvar = get_str( tcl_var );
 	if ( strvar == NULL )
 	{
@@ -641,16 +641,16 @@ bool get_bool( const char *tcl_var, bool *var )
 		else
 			return false;
 	}
-	
+
 	if ( Tcl_GetBoolean( inter, strvar, & intvar ) != TCL_OK )
 	{
 		log_tcl_error( "Cannot convert to boolean", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
 		return false;
 	}
-		
+
 	if ( var != NULL )
 		*var = intvar ? true : false;
-	
+
 	return intvar ? true : false;
 }
 
@@ -663,7 +663,7 @@ int get_int( const char *tcl_var, int *var )
 {
 	const char *strvar;
 	int intvar;
-	
+
 	strvar = get_str( tcl_var );
 	if ( strvar == NULL )
 	{
@@ -672,16 +672,16 @@ int get_int( const char *tcl_var, int *var )
 		else
 			return 0;
 	}
-		
+
 	if ( Tcl_GetInt( inter, strvar, & intvar ) != TCL_OK )
 	{
 		log_tcl_error( "Cannot convert to integer", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
 		return 0;
 	}
-		
+
 	if ( var != NULL )
 		*var = intvar;
-	
+
 	return intvar;
 }
 
@@ -694,7 +694,7 @@ long get_long( const char *tcl_var, long *var )
 {
 	const char *strvar;
 	long longvar;
-	
+
 	strvar = get_str( tcl_var );
 	if ( strvar == NULL )
 	{
@@ -703,16 +703,16 @@ long get_long( const char *tcl_var, long *var )
 		else
 			return 0;
 	}
-		
+
 	if ( sscanf( strvar, "%ld", & longvar ) != 1 )
 	{
 		log_tcl_error( "Cannot convert to long", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
 		return 0;
 	}
-		
+
 	if ( var != NULL )
 		*var = longvar;
-	
+
 	return longvar;
 }
 
@@ -725,7 +725,7 @@ double get_double( const char *tcl_var, double *var )
 {
 	const char *strvar;
 	double dblvar;
-	
+
 	strvar = get_str( tcl_var );
 	if ( strvar == NULL )
 	{
@@ -734,16 +734,16 @@ double get_double( const char *tcl_var, double *var )
 		else
 			return NAN;
 	}
-		
+
 	if ( Tcl_GetDouble( inter, strvar, & dblvar ) != TCL_OK )
 	{
 		log_tcl_error( "Cannot convert to double", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
 		return NAN;
 	}
-		
+
 	if ( var != NULL )
 		*var = dblvar;
-	
+
 	return dblvar;
 }
 
@@ -755,13 +755,13 @@ double get_double( const char *tcl_var, double *var )
 char *get_str( const char *tcl_var, char *var, int var_size )
 {
 	const char *strvar = Tcl_GetVar( inter, tcl_var, 0 );
-	
+
 	if ( strvar == NULL )
 	{
 		log_tcl_error( "Invalid Tcl variable name", "Internal LSD error searching for variable '%s'. If the problem persists, please contact developers", tcl_var );
 		return var;
 	}
-		
+
 	if ( var != NULL && var_size > 0 )
 	{
 		strcpyn( var, strvar, var_size );
@@ -785,7 +785,7 @@ const char *get_str( const char *tcl_var )
 bool expr_eq( const char *tcl_exp, const char *c_str )
 {
 	const char *strvar = eval_str( tcl_exp );
-	
+
 	if ( strvar != NULL && c_str != NULL )
 		return strcmp( strvar, c_str ) == 0;
 	else
@@ -796,7 +796,7 @@ bool expr_eq( const char *tcl_exp, const char *c_str )
 /***************************************************
  EVAL_STR
  Evaluate Tcl expression to C string
- ATTENTION: if var is NULL, the returned result 
+ ATTENTION: if var is NULL, the returned result
  string buffer is valid only until next Tcl invocation
  ***************************************************/
 char *eval_str( const char *tcl_exp, char *var, int var_size )
@@ -806,7 +806,7 @@ char *eval_str( const char *tcl_exp, char *var, int var_size )
 		log_tcl_error( "Cannot evaluate to string", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
 		return var;
 	}
-	
+
 	if ( var != NULL && var_size > 0 )
 	{
 		strcpyn( var, Tcl_GetStringResult( inter ), var_size );
@@ -835,8 +835,8 @@ bool eval_bool( const char *tcl_exp )
 		log_tcl_error( "Cannot evaluate to boolean", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
 		return false;
 	}
-	
-	return intvar ? true : false;	
+
+	return intvar ? true : false;
 }
 
 
@@ -846,7 +846,7 @@ bool eval_bool( const char *tcl_exp )
  ***************************************************/
 int eval_int( const char *tcl_exp )
 {
-	return ( int ) eval_long( tcl_exp );	
+	return ( int ) eval_long( tcl_exp );
 }
 
 
@@ -857,14 +857,14 @@ int eval_int( const char *tcl_exp )
 long eval_long( const char *tcl_exp )
 {
 	long longvar;
-	
+
 	if ( Tcl_ExprLong( inter, tcl_exp, & longvar ) != TCL_OK )
 	{
 		log_tcl_error( "Cannot evaluate to long integer", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
 		return 0;
 	}
-	
-	return longvar;	
+
+	return longvar;
 }
 
 
@@ -881,14 +881,14 @@ double eval_double( const char *tcl_exp )
 		log_tcl_error( "Cannot evaluate to double", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
 		return NAN;
 	}
-	
-	return dblvar;	
+
+	return dblvar;
 }
 
 
 /*********************************
  CHECK_OPTION_FILES
- check if model ans system option 
+ check if model ans system option
  files exist and create them if not
  *********************************/
 void check_option_files( bool sys )
@@ -1007,7 +1007,7 @@ const char *lsd_nw_src[ LSD_NW_NUM ] = LSD_NW_SRC;
 bool make_no_window( void )
 {
 	int i;
-	
+
 	cmd( "set ans 1" );
 	cmd( "if { \"[ check_sys_opt ]\" ne \"\" } { \
 			if { [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use LMM menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { \
@@ -1019,7 +1019,7 @@ bool make_no_window( void )
 
 	// copy the base LSD source files to distribution directory
 	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc\" ] } { file mkdir \"$modelDir/$LsdSrc\" }" );
-	
+
 	for ( i = 0; i < LSD_NW_NUM; ++i )
 		cmd( "file copy -force \"$RootLsd/$LsdSrc/%s\" \"$modelDir/$LsdSrc\"", lsd_nw_src[ i ] );
 
@@ -1049,7 +1049,7 @@ void make_makefile( bool nw )
 	cmd( "close $f" );
 
 	cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile-%s.txt\" r ]", nw ? "NW" : get_str( "CurPlatform" ) );
-	
+
 	cmd( "set b [ string trim [ read $f ] ]" );
 	cmd( "close $f" );
 
@@ -1094,9 +1094,9 @@ bool compile_run( bool run, bool nw )
 		cmd( "set oldObj \"[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
 		cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
 	}
-		
+
 #endif
-	
+
 	// get source name
 	s = get_fun_name( str, 2 * MAX_PATH_LENGTH, nw );
 	if ( s == NULL || ! strcmp( s, "" ) || ( f = fopen( s, "r" ) ) == NULL )
@@ -1120,7 +1120,7 @@ bool compile_run( bool run, bool nw )
 		cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Makefile%s corrupted\" -detail \"Check 'Model Options' and 'System Options' in LMM menu 'Model'.\"", nw ? "NW" : "" );
 		goto end;
 	}
-	
+
 	if ( nw )
 	{
 		cmd( "set mainExe %s", str + 7 );
@@ -1135,7 +1135,7 @@ bool compile_run( bool run, bool nw )
 			set parWnd \"\"; \
 			set posWnd centerS \
 		}", run );
-		
+
 	cmd( "newtop .t \"Please Wait\" \"\" $parWnd" );
 
 	if ( nw )
@@ -1165,9 +1165,9 @@ bool compile_run( bool run, bool nw )
 	cmd( "set res $autoHide" );				// get auto hide status
 	if ( res && run )						// hide LMM?
 		cmd( "wm iconify ." );
-			
+
 #endif
-	
+
 	// number of cores for make parallelization
 	max_threads = thread::hardware_concurrency( );
 
@@ -1184,7 +1184,7 @@ bool compile_run( bool run, bool nw )
 	Tcl_UnlinkVar( inter, "res" );
 
 	ret = false;
-		
+
 	if ( res == 2 )
 	{
 		cmd( "catch { close $makePipe }" );
@@ -1218,28 +1218,28 @@ bool compile_run( bool run, bool nw )
 			cmd( "update" );
 			cmd( "set n 10" );
 			cmd( "set result \"\"" );
-			
+
 			switch ( platform )
 			{
 				case _LIN_:
 					cmd( "while { [ catch { exec -- ./%s & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
 					break;
-					
+
 				case _MAC_:
 					cmd( "while { [ catch { exec -- open -F -n ./%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
 					break;
-					
+
 				case _WIN_:
 					cmd( "while { [ catch { exec -- %s.exe & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
 					break;
 			}
 		}
-		
+
 		ret = true;
 	}
-	
+
 #else
-	
+
 	if ( res == 0 )							// compilation failure?
 	{
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Compilation failed\" -detail \"The command-line model program  ('lsdNW') could not be compiled, likely due to a syntax problem.\n\nPlease go to LMM,  choose menu 'Model'/'Generate 'No Window' Version' to recompile, and check the Compilation Errors window for details on the problem(s).\"" );
@@ -1248,16 +1248,16 @@ bool compile_run( bool run, bool nw )
 		ret = true;
 
 #endif
-	
+
 	// update no-window executable time if not recompiled
 	if ( nw && ret )
 		cmd( "if { [ file exists $mainExe ] && [ file exists $targetExe ] && [ file mtime $mainExe ] > [ file mtime $targetExe ] } { \
 				file mtime $targetExe [ file mtime $mainExe ] \
 			}" );
-				
+
 end:
 	cmd( "cd \"$oldpath\"" );
-	
+
 	return ret;
 }
 
@@ -1283,7 +1283,7 @@ int main( int argn, const char **argv )
 	{
 #endif
 		res = lsdmain( argn, argv );
-		
+
 #ifndef _NT_
 	}
 	catch ( bad_alloc& exc )	// out of memory conditions
@@ -1320,36 +1320,36 @@ int run_system( const char *cmd, int id )
 	STARTUPINFO s_info;
 	DWORD res;
 	LPSTR c_line;
-	
+
 	memset( &s_info, 0, sizeof s_info );
 	memset( &p_info, 0, sizeof p_info );
 	s_info.cb = sizeof s_info;
-	
+
 	c_line = ( LPSTR ) malloc( strlen( cmd ) + 1 );
 	strcpy( c_line, cmd );
-	
+
 	if ( ! CreateProcess( NULL, c_line, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, & s_info, & p_info ) )
 	{
 		free( c_line );
 		return -1;
 	}
 
-#ifndef _NP_	
+#ifndef _NP_
 
 	if ( id >= 0 && id < ( int ) run_pids.size( ) )
 	{
-		
+
 		lock_guard < mutex > lock( lock_run_pids );
 		run_pids[ id ] = p_info.hProcess;
 	}
 
 #endif
-	
+
 	WaitForSingleObject( p_info.hProcess, INFINITE );
 	GetExitCodeProcess( p_info.hProcess, & res );
 	CloseHandle( p_info.hProcess );
 	CloseHandle( p_info.hThread );
-	
+
 	free( c_line );
 	return res;
 }
@@ -1361,14 +1361,14 @@ int run_system( const char *cmd, int id )
  ****************************************************/
 int kill_system( int id )
 {
-	
+
 #ifndef _NP_
-	
+
 	DWORD res;
-	
-	if ( id >= 0 && id < ( int ) run_pids.size( ) && 
-		 GetExitCodeProcess( run_pids[ id ], & res ) && 
-		 res == STILL_ACTIVE && 
+
+	if ( id >= 0 && id < ( int ) run_pids.size( ) &&
+		 GetExitCodeProcess( run_pids[ id ], & res ) &&
+		 res == STILL_ACTIVE &&
 		 ! TerminateProcess( run_pids[ id ], 15 ) )
 			return 0;
 
@@ -1393,10 +1393,10 @@ int run_system( const char *cmd, int id )
 	int res;
 	pid_t pid;
 	wordexp_t p;
-	
+
 	if ( wordexp( cmd, & p, 0 ) != 0 )
 		return -1;
-	
+
 	argv = p.we_wordv;
 	envp = environ;
 
@@ -1406,7 +1406,7 @@ int run_system( const char *cmd, int id )
 		wordfree( & p );
 		return -1;
 	}
-	
+
 	if ( pid == 0 )
 	{
 		execve( argv[ 0 ], argv, envp );
@@ -1415,7 +1415,7 @@ int run_system( const char *cmd, int id )
 	else
 	{
 
-#ifndef _NP_	
+#ifndef _NP_
 
 		if ( id >= 0 && id < ( int ) run_pids.size( ) )
 		{
@@ -1424,10 +1424,10 @@ int run_system( const char *cmd, int id )
 		}
 
 #endif
-		
-		waitpid( pid, & res, 0 );	
+
+		waitpid( pid, & res, 0 );
 		wordfree( & p );
-		
+
 		if ( res == 0 )
 			return 0;
 		else
@@ -1443,19 +1443,19 @@ int run_system( const char *cmd, int id )
 #define WAIT_TSECS 10
 int kill_system( int id )
 {
-	
+
 #ifndef _NP_
-	
+
 	int res, tsecs = 0;
-	
+
 	if ( id >= 0 && id < ( int ) run_pids.size( ) )
 	{
 		if ( kill( run_pids[ id ], SIGKILL ) == 0 )
 		{
-			while ( ( res = kill( run_pids[ id ], 0 ) ) == 0 && 
+			while ( ( res = kill( run_pids[ id ], 0 ) ) == 0 &&
 					tsecs++ < WAIT_TSECS )
 				msleep( 100 );
-				
+
 			if ( res == 0 )
 				return 0;
 		}
@@ -1465,7 +1465,7 @@ int kill_system( int id )
 	}
 
 #endif
-		
+
 	return 1;
 }
 
@@ -1481,11 +1481,11 @@ char *clean_file( const char *filename )
 	{
 		if ( strchr( filename, '/' ) != NULL )
 			return ( char * ) strrchr( filename, '/' ) + 1;
-		
+
 		if ( strchr( filename, '\\' ) != NULL )
 			return ( char * ) strrchr( filename, '\\' ) + 1;
 	}
-	
+
 	return ( char * ) filename;
 }
 
@@ -1499,37 +1499,37 @@ char *clean_path( char *filepath )
 	int i, drvpos, pathpos;
 	const int npref = 5;
 	const char *pref[ npref ] = { "/cygdrive/", "/c/", "/d/", "/e/", "/f/" };
-	
+
 	if ( filepath == NULL )
 		return NULL;
-	
+
 	char temp[ strlen( filepath ) + 1 ];
-	
+
 	for ( i = 0; i < npref && strncmp( filepath, pref[ i ], strlen( pref[ i ] ) ); ++i );
-	
+
 	if ( i < npref )
 	{
 		if ( i == 0 )	// Cygwin
 		{
 			drvpos = strlen( pref[ i ] );				// drive letter position
 			pathpos = drvpos + 1;						// path start
-		} 
+		}
 		else			// MSYS
 		{
 			drvpos = 1;									// drive letter position
 			pathpos = 2;								// path start
-		} 
-		
+		}
+
 		temp[ 0 ] = toupper( filepath[ drvpos ] );		// copy drive letter
 		temp[ 1 ] = ':';								// insert ':' drive separator
 		strcpyn( temp + 2, filepath + pathpos, strlen( filepath ) - 1 );
 		strcpyn( filepath, temp, strlen( filepath ) + 1 );
 	}
-	
+
 	for ( i = 0; i < ( int ) strlen( filepath ); ++i )
 		if ( filepath[ i ] == '\\' )					// replace \ with /
 			filepath[ i ] = '/';
-			
+
 	return filepath;
 }
 
@@ -1540,10 +1540,10 @@ char *clean_path( char *filepath )
 void clean_spaces( char *s )
 {
 	int i, j, len;
-	
+
 	if ( s == NULL )
 		return;
-	
+
 	len = strlen( s );
 	char app[ len + 1 ];
 	app[ len ] = '\0';
@@ -1554,12 +1554,12 @@ void clean_spaces( char *s )
 			case ' ':
 			case '\t':
 				break;
-				
-			default: 
+
+			default:
 				app[ j++ ] = s[ i ];
 				break;
 		}
-		
+
 	app[ j ] = '\0';
 	strcpyn( s, app, len + 1 );
 }
@@ -1572,13 +1572,13 @@ void clean_spaces( char *s )
 string win_path( string filepath )
 {
 	string winpath;
-	
+
 	for ( auto c : filepath )
 		if ( c == '/' )
 			winpath.push_back( '\\' );
 		else
 			winpath.push_back( c );
-		
+
 	return winpath;
 }
 
@@ -1588,10 +1588,10 @@ string win_path( string filepath )
  Concatenate strings respecting total size of first one
  ****************************************************/
 char *strcatn( char *d, const char *s, size_t dSz )
-{ 
+{
 	if ( dSz <= 0 || d == NULL || strlen( d ) >= dSz - 1 || s == NULL || strlen( s ) == 0 )
 		return d;
-	
+
 	return strncat( d, s, dSz - strlen( d ) - 1 );
 }
 
@@ -1601,10 +1601,10 @@ char *strcatn( char *d, const char *s, size_t dSz )
  Copy string respecting total size of destination one
  ****************************************************/
 char *strcpyn( char *d, const char *s, size_t dSz )
-{ 
+{
 	if ( dSz <= 0 || d == NULL || s == NULL )
 		return d;
-	
+
 	if ( strlen( d ) > dSz - 1 )
 	{
 		strncpy( d, s, dSz - 1 );
@@ -1612,7 +1612,7 @@ char *strcpyn( char *d, const char *s, size_t dSz )
 	}
 	else
 		strcpy( d, s );
-	
+
 	return d;
 }
 
@@ -1623,13 +1623,13 @@ char *strcpyn( char *d, const char *s, size_t dSz )
  ****************************************************/
 #ifndef GCCLIBS
 char *strupr( char *s )
-{ 
+{
 	if ( s == NULL )
 		return NULL;
-	
+
 	for ( unsigned char *p = ( unsigned char * ) s; *p; ++p )
-		*p = toupper( *p ); 
-	
+		*p = toupper( *p );
+
 	return s;
 }
 #endif
@@ -1644,7 +1644,7 @@ bool strwsp( const char *str )
 	if ( str == NULL )
 		return true;
 
-	while ( isspace( ( unsigned char ) *str ) ) 
+	while ( isspace( ( unsigned char ) *str ) )
 		++str;
 
 	if ( *str == '\0' )  		// all spaces?
@@ -1674,7 +1674,7 @@ int strcln( char *out, const char *str, int outSz )
 int strlf( char *out, const char *str, int outSz )
 {
 	int i, j;
-	
+
 	for ( i = j = 0; str[ j ] != '\0' && i < outSz - 1; ++j )
 		if ( str[ j ] == '\r' )
 		{
@@ -1683,9 +1683,9 @@ int strlf( char *out, const char *str, int outSz )
 		}
 		else
 			out[ i++ ] = str[ j ];
-	
+
 	out[ i ] = '\0';
-	
+
 	return i;
 }
 
@@ -1701,7 +1701,7 @@ int strtrim( char *out, const char *str, int outSz )
 	if ( str == NULL || outSz <= 0 )
 		return 0;
 
-	while ( isspace( ( unsigned char ) *str ) ) 
+	while ( isspace( ( unsigned char ) *str ) )
 		++str;
 
 	if ( *str == '\0' )  		// all spaces?
@@ -1711,7 +1711,7 @@ int strtrim( char *out, const char *str, int outSz )
 	}
 
 	end = ( char * ) str + strlen( str ) - 1;
-	while ( end > str && isspace( ( unsigned char ) *end ) ) 
+	while ( end > str && isspace( ( unsigned char ) *end ) )
 		--end;
 	++end;
 
@@ -1781,19 +1781,19 @@ int strwrap( char *out, const char *str, int outSz, int wid )
 		}
 
 		end_line:
-		
+
 		++lines;
-		
+
 		if ( len > outSz - 1 )
 			len = outSz - 1;
-		
+
 		if ( len > 0 )
 		{
 			strncpy( out, str + pos, len );
 			out += len;
 			outSz -= len;
 		}
-		
+
 		out[ 0 ] = '\n';
 		++out;
 		--outSz;
@@ -1805,7 +1805,7 @@ int strwrap( char *out, const char *str, int outSz, int wid )
 	}
 
 	*( out - 1 ) = '\0';
-	
+
 	return lines;
 }
 
@@ -1817,10 +1817,10 @@ int strwrap( char *out, const char *str, int outSz, int wid )
 char *strtcl( char *out, const char *text, int outSz )
 {
 	int i, j;
-	
+
 	if ( out == NULL )
 		return NULL;
-	
+
 	if ( text == NULL )
 		j = 0;
 	else
@@ -1829,7 +1829,7 @@ char *strtcl( char *out, const char *text, int outSz )
 		{
 			if ( text[ i ] == '\r' && text[ i + 1 ] == '\n' )
 				continue;				// convert CR-LF to LF
-			
+
 			if ( text[ i ] != '[' && text[ i ] != ']' && text[ i ] != '{' && text[ i ] != '}' && text[ i ] != '\"' && text[ i ] != '\\' && text[ i ] != '$' )
 				out[ j++ ] = text[ i ];
 			else
@@ -1838,13 +1838,13 @@ char *strtcl( char *out, const char *text, int outSz )
 				out[ j++ ] = text[ i ];
 			}
 		}
-		
+
 		for ( i = 1; i <= j && isspace( ( unsigned char ) out[ j - i ] ); ++i )
 			out[ j - i ] = '\0';
 	}
-	
+
 	out[ j ] = '\0';
-	
+
 	return out;
 }
 
@@ -1881,7 +1881,7 @@ void myexit( int v )
 	{
 		if ( tk_ok )
 			cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { catch { destroy . } }" );
-		
+
 		cmd( "catch { LsdExit }" );
 		Tcl_Finalize( );
 	}
@@ -1893,13 +1893,13 @@ void myexit( int v )
 /****************************************************
  SIGNAL_NAME
  ****************************************************/
-const char *signal_name( int signum ) 
-{ 
-    int i;
-    for ( i = 0; i < REG_SIG_NUM && signals[ i ] != signum; ++i );
-    if ( i == REG_SIG_NUM )
-        return "Unknow exception";
-    return signal_names[ i ];
+const char *signal_name( int signum )
+{
+	int i;
+	for ( i = 0; i < REG_SIG_NUM && signals[ i ] != signum; ++i );
+	if ( i == REG_SIG_NUM )
+		return "Unknow exception";
+	return signal_names[ i ];
 }
 
 
@@ -1931,7 +1931,7 @@ void exception_handler( int signum, const char *what )
 {
 	static char msg1[ MAX_LINE_SIZE ], msg2[ MAX_LINE_SIZE ], msg3[ MAX_LINE_SIZE ];
 	static double useless = -1;
-	
+
 	switch ( signum )
 	{
 		case SIGINT:
@@ -1955,34 +1955,34 @@ void exception_handler( int signum, const char *what )
 			snprintf( msg1, MAX_LINE_SIZE, "SIGSTL (%s)", what != NULL && strlen( what ) > 0 ? what : "STL exception" );
 			strcpyn( msg2, "Maybe an invalid math or data operation?\n  Check your standard C++ library calls' arguments", MAX_LINE_SIZE );
 			break;
-			
+
 		case SIGMEM:
 			snprintf( msg1, MAX_LINE_SIZE, "SIGMEM (%s)", what != NULL && strlen( what ) > 0 ? what : "Out of memory" );
 			strcpyn( msg2, "Maybe too many series saved?\n  Try to reduce the number of series saved or the number of time steps", MAX_LINE_SIZE );
 			break;
-			
+
 		case SIGABRT:
 			snprintf( msg1, MAX_LINE_SIZE, "SIGABRT (%s)", signal_name( signum ) );
-			strcpyn( msg2, "Maybe an invalid call to library or Tcl/Tk?", MAX_LINE_SIZE );		
+			strcpyn( msg2, "Maybe an invalid call to library or Tcl/Tk?", MAX_LINE_SIZE );
 			break;
 
 		case SIGFPE:
 			snprintf( msg1, MAX_LINE_SIZE, "SIGFPE (%s)", signal_name( signum ) );
 			strcpyn( msg2, "Maybe a division by 0 or similar?", MAX_LINE_SIZE );
 		break;
-		
+
 		case SIGILL:
 			snprintf( msg1, MAX_LINE_SIZE, "SIGILL (%s)", signal_name( signum ) );
-			strcpyn( msg2, "Maybe executing data?", MAX_LINE_SIZE );		
+			strcpyn( msg2, "Maybe executing data?", MAX_LINE_SIZE );
 		break;
-		
+
 		case SIGSEGV:
 			snprintf( msg1, MAX_LINE_SIZE, "SIGSEGV (%s)", signal_name( signum ) );
-			strcpyn( msg2, "Maybe an invalid pointer?\n  Also ensure no group of objects has zero elements.", MAX_LINE_SIZE );		
+			strcpyn( msg2, "Maybe an invalid pointer?\n  Also ensure no group of objects has zero elements.", MAX_LINE_SIZE );
 		break;
 		default:
 			snprintf( msg1, MAX_LINE_SIZE, "Unknown signal (%s)", signal_name( signum ) );
-			strcpy( msg2, "" );			
+			strcpy( msg2, "" );
 	}
 
 #ifndef _NW_
@@ -2000,12 +2000,12 @@ void exception_handler( int signum, const char *what )
 		strcpyn( msg3, "Additional information may be obtained running the simulation using the 'Model'/'GDB Debugger' menu option", MAX_LINE_SIZE );
 		if ( quit != 2 )
 		{
-			if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL && 
+			if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL &&
 				 stacklog->vs != NULL && stacklog->vs->label != NULL )
 			{
 				strcatn( msg3, "\n\nAttempting to open the LSD Debugger.\n\nLSD will close immediately after exiting the Debugger.", MAX_LINE_SIZE );
 				plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", stacklog->vs->label );
-				print_stack( );				
+				print_stack( );
 			}
 			else
 			{
@@ -2013,21 +2013,21 @@ void exception_handler( int signum, const char *what )
 				plog( "\n\nAn unknown problem was detected while executing user's equations code" );
 				plog( "\n\nWarning: %s active, cannot open LSD Debugger", parallel_mode ? "parallel preocessing" : "fast mode" );
 			}
-				
+
 			quit = 2;
 		}
 	}
 #endif
-	
+
 	if ( tk_ok )
 		cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
 			catch { ttk::messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s:\n  %s\n\n%s\" } \
 			}", msg1, msg2, msg3 );
-	
+
 #ifndef _LMM_
 	if ( user_exception )
 	{
-		if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL && 
+		if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL &&
 			 stacklog->vs != NULL && stacklog->vs->label != NULL )
 		{
 			sprintf( msg3, "%s (ERROR)", stacklog->vs->label );
@@ -2037,11 +2037,11 @@ void exception_handler( int signum, const char *what )
 	else
 #endif
 		log_tcl_error( "FATAL ERROR", "System Signal received: %s", msg1 );
-	
+
 #else
-	
+
 	fprintf( stderr, "\nFATAL ERROR: System Signal received: %s\n", msg1 );
-	
+
 #endif
 
 	myexit( -signum );				// abort program

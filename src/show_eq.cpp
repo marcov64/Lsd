@@ -6,14 +6,14 @@
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
 
 /*************************************************************
-SHOW_EQ.CPP 
+SHOW_EQ.CPP
 Show one window containig the equation for the label clicked on.
 
 Less simple as it seems, given that it has to deal with all weird characters
@@ -62,7 +62,7 @@ void show_eq( const char *lab, const char *parWnd )
 		cmd( "set parWnd ." );
 
 	start:
-	
+
 	fname = equation_name;
 	snprintf( full_name, MAX_PATH_LENGTH, "%s/%s", exec_path, fname );
 	if ( ( f1 = fopen( full_name, "r" ) ) == NULL )
@@ -75,9 +75,9 @@ void show_eq( const char *lab, const char *parWnd )
 			app = get_str( "res" );
 			if ( app == NULL || strlen( app ) == 0 )
 				return;
-			
+
 			strcpyn( equation_name, app, MAX_PATH_LENGTH );
-			
+
 			goto start;
 		}
 		else
@@ -91,7 +91,7 @@ void show_eq( const char *lab, const char *parWnd )
 	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set i [ llength $source_files ]" );
 	i = get_int( "i" );
-	
+
 	for ( done = false, k = 0; done == false && k < i; ++k )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", k );
@@ -99,12 +99,12 @@ void show_eq( const char *lab, const char *parWnd )
 		fname = get_str( "brr" );
 		if ( ( f2 = fopen( fname, "r" ) ) == NULL )
 			continue;
-		
+
 		while ( ! done && fgets( c1_lab, MAX_LINE_SIZE - 1, f2 ) != NULL )
 			if ( is_equation_header( c1_lab, c2_lab, updt_in ) )
 				if ( ! strcmp( c2_lab, lab ) )
 					done = true;
-				
+
 		if ( ! done )
 			fclose( f2 );
 	}
@@ -122,7 +122,7 @@ void show_eq( const char *lab, const char *parWnd )
 		}", lab, lab );
 	cmd( "set _W_%s $w", lab );
 	cmd( "set s \"\"" );
-	
+
 	cmd( "newtop $w \"'%s' %s Equation (%s)\" \"destroytop $w; focus $parWnd\" $parWnd", lab, eq_dum ? "Dummy" : "", fname );
 
 	cmd( "ttk::frame $w.f" );
@@ -193,7 +193,7 @@ void show_eq( const char *lab, const char *parWnd )
 
 	cmd( "showtop $w centerW 1 1" );
 	cmd( "mousewarpto $w.b.cancel" );
-	
+
 	cmd( "tooltip::tooltip $w.b.search \"Search for text\"" );
 
 	cmd( "$w.f.text tag conf vars -foreground $colorsTheme(str)" );
@@ -212,14 +212,14 @@ void show_eq( const char *lab, const char *parWnd )
 		start = 0;
 		bra = 2;
 	}
-	
+
 	strcpyn( c3_lab, c1_lab, MAX_LINE_SIZE );			// save original first line
-			
+
 	do
-	{	
+	{
 		strcpyn( c2_lab, c1_lab, MAX_LINE_SIZE );
 		clean_spaces( c2_lab );
-		
+
 		// handle dummy equations without RESULT closing
 		if ( eq_dum && strcmp( c1_lab, c3_lab ) && ( ! strncmp( c2_lab, "EQUATION(", 9 ) || ! strncmp( c2_lab, "EQUATION_DUMMY(", 15 ) || ! strncmp( c2_lab, "FUNCTION(", 9 ) || ! strncmp( c2_lab, "MODELEND", 8 ) ) )
 		{
@@ -227,16 +227,16 @@ void show_eq( const char *lab, const char *parWnd )
 				cmd( "$w.f.text insert end \"\n(DUMMY EQUATION: variable '%s' updated in '%s')\"", lab, updt_in );
 			else
 				cmd( "$w.f.text insert end \"\n(DUMMY EQUATION: variable '%s' not updated here)\"", lab );
-				
+
 			break;
 		}
-	
+
 		if ( ! strncmp( c2_lab,"RESULT(", 7 ) )
 			bra--;
 
 		for ( i = 0; c1_lab[ i ] != 0; ++i )
 		{
-			if ( c1_lab[ i ] == '\r' ) 
+			if ( c1_lab[ i ] == '\r' )
 			i++;
 			if ( c1_lab[ i ] == '{' )
 			{
@@ -330,7 +330,7 @@ void show_eq( const char *lab, const char *parWnd )
 		}
 	}
 	while ( ( bra > 1 || start == 1 ) && fgets( c1_lab, MAX_LINE_SIZE, f2 ) != NULL  );
-	
+
 	fclose( f2 );
 
 	cmd( "$w.f.text mark set insert 1.0" );
@@ -362,7 +362,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 	{
 		if ( exists_window( "$list" ) )
 			return;
-		
+
 		cmd( "newtop $list \"Used In\" \"destroytop $list\""  );
 
 		cmd( "ttk::frame $list.lf " );
@@ -394,7 +394,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
-	
+
 	cmd( "unset -nocomplain list_used" );
 
 	for ( exist = false, k = 0; k < nfiles; ++k )
@@ -402,7 +402,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 		cmd( "set brr [ lindex $source_files %d ]", k );
 		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
 		fname = get_str( "brr" );
-		
+
 		if ( ( f = fopen( fname, "r" ) ) != NULL )
 		{
 			strcpy( c1_lab, "" );
@@ -411,23 +411,23 @@ void scan_used_lab( const char *lab, const char *parWnd )
 			for ( done = 0; fgets( c1_lab, MAX_LINE_SIZE, f ) != NULL;  )
 			{
 				clean_spaces( c1_lab ); 	// eliminate the spaces
-				
+
 				for ( i = 0; c1_lab[ i ] != '"' && c1_lab[ i ] !=  '\0' ; ++i )
 					c2_lab[ i ] = c1_lab[ i ];
-				
+
 				c2_lab[ i ] = '\0'; 			// close the string
-				
+
 				if ( ! strcmp( c2_lab, "if(!strcmp(label," ) || ! strcmp( c2_lab, "EQUATION(" ) || ! strcmp( c2_lab, "EQUATION_DUMMY(" ) || ! strcmp( c2_lab, "FUNCTION(" ) )
 				{
 					if ( ! strcmp( c2_lab, "if(!strcmp(label," ) )
 						macro = false;
 					else
 						macro = true;
-					
+
 					for ( j = 0; c1_lab[ i + 1 + j ] != '"'; ++j )
-						c2_lab[ j ] = c1_lab[ i + 1 + j ]; 	// prepare the c2_lab to store the var's label			
+						c2_lab[ j ] = c1_lab[ i + 1 + j ]; 	// prepare the c2_lab to store the var's label
 					c2_lab[ j ] = '\0';
-					
+
 					done = contains( f, lab, strlen( lab ) );
 					if ( done == 1 )
 					{
@@ -439,11 +439,11 @@ void scan_used_lab( const char *lab, const char *parWnd )
 					}
 				}
 			}
-			
+
 			fclose( f );
 		}
 	}
-	
+
 	if ( no_window )
 	{
 		cmd( "if [ info exists list_used ] { set list_used [ join $list_used \", \" ] } { set list_used \"(never used)\" }" );
@@ -508,7 +508,7 @@ void scan_using_lab( const char *lab, const char *parWnd )
 
 	cv = root->search_var( root, lab );
 	find_using( root, cv, NULL, & found );
-	
+
 	cmd( "set res [ $list.l.l size ]" );
 	if ( get_int( "res" ) != 0 )
 	{
@@ -531,7 +531,7 @@ void show_descr( const char *lab, const char *parWnd )
 	char buf_descr[ MAX_BUFF_SIZE ];
 	description *cd;
 	variable *cv;
-	
+
 	// define the correct parent window
 	if ( parWnd != NULL && strlen( parWnd ) > 0 )
 		cmd( "set parWnd %s", parWnd );
@@ -541,7 +541,7 @@ void show_descr( const char *lab, const char *parWnd )
 	cv = root->search_var( NULL, lab );
 	if ( cv == NULL )
 		return;
-	
+
 	cd = search_description( lab );
 
 	cmd( "if { [ string equal $parWnd . ] } { \
@@ -562,7 +562,7 @@ void show_descr( const char *lab, const char *parWnd )
 	cmd( "pack $w.f.d.text -expand yes -fill both" );
 	cmd( "pack $w.f.l $w.f.d" );
 	cmd( "pack $w.f -expand yes -fill both -pady 5" );
-	
+
 	if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL )
 	{
 		cmd( "ttk::frame $w.i" );
@@ -576,12 +576,12 @@ void show_descr( const char *lab, const char *parWnd )
 		cmd( "pack $w.i.l $w.i.d" );
 		cmd( "pack $w.i -expand yes -fill both -pady 5" );
 	}
-	
+
 	cmd( "done $w b \"destroytop $w; focus $parWnd\"" );
 
 	cmd( "showtop $w centerW 1 1" );
 	cmd( "mousewarpto $w.b.ok" );
-	
+
 	cmd( "$w.f.d.text insert end \"%s\"", strtcl( buf_descr, cd->text, MAX_BUFF_SIZE ) );
 	cmd( "$w.f.d.text conf -state disabled" );
 

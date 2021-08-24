@@ -6,15 +6,15 @@
 #
 #	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
-#	
+#
 #	See Readme.txt for copyright information of
 #	third parties' code used in LSD
-#	
+#
 #*************************************************************
 
 #*************************************************************
 # DEFAULTS.TCL
-# Default values for the Tk windowing system. 
+# Default values for the Tk windowing system.
 #*************************************************************
 
 # default colors in palette and other elements, according to the theme type (light/dark)
@@ -184,7 +184,7 @@ set cscaleLat	1.0	; # default color scale (1:1.0)
 set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down
 set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Windows
 set mouseWarp	0	; # set to 0 to disable auto-snapping (ignored in Windows)
-	
+
 # internal plot defaults
 set fontP		{ Helvetica 9 normal }; # default plot text font/size/mode
 set hticksP		3	; # number of horizontal plot legend ticks
@@ -296,8 +296,8 @@ set gnuplotWindows		"wgnuplot.exe"
 # default diff application settings
 set diffApp				"tkdiff.tcl"; # command line diff application to use
 set diffAppType			0			; # type of application (0=tk/1=terminal/2=graphical)
-set diffFile1			""			; # option to inform first file name		
-set diffFile2			""			; # option to inform second file name		
+set diffFile1			""			; # option to inform first file name
+set diffFile2			""			; # option to inform second file name
 set diffFile1name		"-L"		; # option for naming first file
 set diffFile2name		"-L"		; # option for naming second file
 set diffOptions			"-lsd"		; # other options

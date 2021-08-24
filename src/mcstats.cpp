@@ -9,7 +9,7 @@
 
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
 
 /*************************************************************
@@ -26,7 +26,7 @@ Generate Monte Carlo experiment statistic files.
 
 // class to handle arrays for MC data
 template < typename T >
-class vector3D 
+class vector3D
 {
 	public:
 		vector3D( size_t d1 = 0, size_t d2 = 0, size_t d3 = 0, T const & t = T( ) ) :
@@ -34,11 +34,11 @@ class vector3D
 
 		T & operator ( ) ( size_t i, size_t j, size_t k )
 		{
-			return ( i < d1 && j < d2 && k < d3 ) ? data[ i * d2 * d3 + j * d3 + k ] 
+			return ( i < d1 && j < d2 && k < d3 ) ? data[ i * d2 * d3 + j * d3 + k ]
 												  : data.at( i * d2 * d3 + j * d3 + k );
 		}
 
-		T const & operator ( ) ( size_t i, size_t j, size_t k ) const 
+		T const & operator ( ) ( size_t i, size_t j, size_t k ) const
 		{
 			return data[ i * d2 * d3 + j * d3 + k ];
 		}
@@ -50,14 +50,14 @@ class vector3D
 			d2 = _d2;
 			d3 = _d3;
 		}
-		
+
 	private:
 		size_t d1, d2, d3;
 		vector < T > data;
 };
 
 template < typename T >
-class vector2D 
+class vector2D
 {
 	public:
 		vector2D( size_t d1 = 0, size_t d2 = 0, T const & t = T( ) ) :
@@ -65,11 +65,11 @@ class vector2D
 
 		T & operator ( ) ( size_t i, size_t j )
 		{
-			return ( i < d1 && j < d2 ) ? data[ i * d2 + j ] 
+			return ( i < d1 && j < d2 ) ? data[ i * d2 + j ]
 										: data.at( i * d2 + j );
 		}
 
-		T const & operator ( ) ( size_t i, size_t j ) const 
+		T const & operator ( ) ( size_t i, size_t j ) const
 		{
 			return data[ i * d2 + j ];
 		}
@@ -80,7 +80,7 @@ class vector2D
 			d1 = _d1;
 			d2 = _d2;
 		}
-		
+
 	private:
 		size_t d1, d2;
 		vector < T > data;
@@ -112,7 +112,7 @@ int lsdmain( int argn, const char **argv )
 	int i, j, k, n, sz, linsz = 0, rows = 0, cols = 0, files = 0;
 	vector < string > vars, cur_vars;
 	FILE *f;
-	
+
 	if ( argn < 2 )
 	{
 		fprintf( stderr, "\n%s\n%s\n%s\n", lsdCmdMsg, lsdCmdDsc, lsdCmdHlp );
@@ -121,7 +121,7 @@ int lsdmain( int argn, const char **argv )
 	else
 	{
 		in_files = new char * [ argn ];
-		
+
 		for ( i = 1; i < argn; )
 		{
 			// read -f parameter : result files
@@ -134,11 +134,11 @@ int lsdmain( int argn, const char **argv )
 					++i;
 					++files;
 				}
-				
+
 				++i;
 				continue;
 			}
-			
+
 			// read -o parameter : output file name
 			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
@@ -167,25 +167,25 @@ int lsdmain( int argn, const char **argv )
 			fprintf( stderr, "\nFile '%s' not found.\n%s\nSpecify existing '-f FILENAME1.csv FILENAME2.csv ...' result files.\n\n", in_files[ i ], lsdCmdMsg );
 			myexit( 4 );
 		}
-		
+
 		// determine number of rows and columns from results file
 		j = 0;
 		while ( ! feof( f ) )
 		{
 			for ( ch = k = 0; ch != '\n' && ch != EOF; ++k )
 				ch = ( char ) fgetc( f );
-			
+
 			if ( k > 0 && ch != EOF )
 				++j;
-			
+
 			linsz = max( linsz, k );
 		}
-		
+
 		fclose( f );
-		
+
 		if ( i == 0 )
 			rows = j;
-		
+
 		if ( j < 2 || j != rows )
 		{
 			fprintf( stderr, "\nInvalid file rows (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
@@ -201,11 +201,11 @@ int lsdmain( int argn, const char **argv )
 
 	linbuf = new char[ linsz + 2 ];
 	vector3D < double > mcdata( 0, 0, 0, 0 );
-	
+
 	for ( i = 0; i < files; ++i )
 	{
 		f = fopen( in_files[ i ], "rt" );
-		
+
 		// read header line
 		cur_vars.clear( );
 		fgets( linbuf, linsz + 1, f );
@@ -218,20 +218,20 @@ int lsdmain( int argn, const char **argv )
 			cur_vars.push_back( out );
 			tok = strtok( NULL, SEP );
 		}
-		
+
 		if ( i == 0 )
 		{
 			cols = j;
 			vars = cur_vars;
 			mcdata.resize( files, rows - 1, cols );
 		}
-		
+
 		if ( j < 1 || j != cols || cur_vars != vars )
 		{
 			fprintf( stderr, "\nInvalid file header (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
 			myexit( 7 );
 		}
-		
+
 		// read data lines
 		for ( j = 0; j < rows - 1 && ! feof( f ); ++j )
 		{
@@ -250,30 +250,30 @@ int lsdmain( int argn, const char **argv )
 						fprintf( stderr, "\nInvalid file values (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
 						myexit( 8 );
 					}
-				
+
 				mcdata( i, j, k ) = val;
 				tok = strtok( NULL, SEP );
 			}
-			
+
 			if ( k < cols || tok != NULL )
 			{
 				fprintf( stderr, "\nInvalid file columns (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
 				myexit( 9 );
 			}
 		}
-		
+
 		if ( j < rows - 1 )
 		{
 			fprintf( stderr, "\nInvalid file rows (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
 			myexit( 10 );
 		}
-		
+
 		fclose( f );
 	}
-	
+
 	// compute MC statistics
 	vector2D < double > me( rows - 1, cols ), se( rows - 1, cols ), mx( rows - 1, cols ), mn( rows - 1, cols );
-	
+
 	for ( j = 0; j < rows - 1; ++j )
 		for ( k = 0; k < cols; ++k )
 		{
@@ -289,7 +289,7 @@ int lsdmain( int argn, const char **argv )
 					minv = min( minv, mcdata( i, j, k ) );
 					++n;
 				}
-			
+
 			if ( n > 0 )
 			{
 				me( j, k ) = sum / n;
@@ -302,7 +302,7 @@ int lsdmain( int argn, const char **argv )
 			else
 				me( j, k ) = se( j, k ) = mx( j, k ) = mn( j, k ) = NAN;
 		}
-	
+
 	// create MC files
 	save_csv( out_file, "mean", vars, me, rows, cols );
 	save_csv( out_file, "se", vars, se, rows, cols );
@@ -311,7 +311,7 @@ int lsdmain( int argn, const char **argv )
 
 	for ( i = 0; i < files; ++i )
 		delete [ ] in_files[ i ];
-	
+
 	delete [ ] in_files;
 	delete [ ] out_file;
 	delete [ ] linbuf;
@@ -329,7 +329,7 @@ void save_csv( const char *base, const char *suffix, vector < string > header, v
 	char fn[ strlen( base ) + strlen( suffix ) + 6 ];
 	int i, j, k;
 	FILE *f;
-	
+
 	sprintf( fn, "%s_%s.csv", base, suffix );
 	f = fopen( fn, "wt" );
 	if ( f == NULL )
@@ -337,12 +337,12 @@ void save_csv( const char *base, const char *suffix, vector < string > header, v
 		fprintf( stderr, "\nFile '%s' cannot be created.\n%s\nCheck if base name is correct.\n\n", fn, lsdCmdMsg );
 		myexit( 11 );
 	}
-	
+
 	for ( i = 0; i < ( int ) header.size( ); ++ i )
 		fprintf( f, "%s%s", i > 0 ? "," : "", header[ i ].c_str( ) );
-	
+
 	fprintf( f, "\n" );
-	
+
 	for ( j = 0; j < rows - 1; ++j )
 	{
 		for ( k = 0; k < cols; ++k )
@@ -350,10 +350,10 @@ void save_csv( const char *base, const char *suffix, vector < string > header, v
 				fprintf( f, "%s%g", k > 0 ? "," : "", data( j, k ) );
 			else
 				fprintf( f, "%s%s", k > 0 ? "," : "", nonavail );
-		
+
 		fprintf( f, "\n" );
 	}
 
 	fclose( f );
 }
-	
+
