@@ -24,16 +24,16 @@ w\:* {behavior:url(#default#VML);}
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>34</o:Revision>
-  <o:TotalTime>14423</o:TotalTime>
+  <o:Revision>35</o:Revision>
+  <o:TotalTime>14437</o:TotalTime>
   <o:Created>2018-03-16T18:08:00Z</o:Created>
-  <o:LastSaved>2021-08-22T23:49:00Z</o:LastSaved>
+  <o:LastSaved>2021-08-27T22:36:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>5712</o:Words>
-  <o:Characters>30847</o:Characters>
-  <o:Lines>257</o:Lines>
-  <o:Paragraphs>72</o:Paragraphs>
-  <o:CharactersWithSpaces>36487</o:CharactersWithSpaces>
+  <o:Words>5860</o:Words>
+  <o:Characters>31648</o:Characters>
+  <o:Lines>263</o:Lines>
+  <o:Paragraphs>74</o:Paragraphs>
+  <o:CharactersWithSpaces>37434</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -42,6 +42,7 @@ w\:* {behavior:url(#default#VML);}
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
   <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
   <w:TrackMoves>false</w:TrackMoves>
   <w:TrackFormatting/>
   <w:HyphenationZone>21</w:HyphenationZone>
@@ -762,7 +763,8 @@ p.MsoTitle, li.MsoTitle, div.MsoTitle
 	color:#254061;
 	font-weight:bold;}
 a:link, span.MsoHyperlink
-	{mso-style-priority:99;
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
 	color:blue;
 	text-decoration:underline;
 	text-underline:single;}
@@ -1143,6 +1145,9 @@ span.Cdigo
 span.SpellE
 	{mso-style-name:"";
 	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
 .MsoChpDefault
 	{mso-style-type:export-only;
 	mso-default-props:yes;
@@ -1663,10 +1668,10 @@ style='mso-ansi-language:EN-US'>7</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>,</span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>4</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>). In SA terms, this approach is our design of
-experiments (DoE) and the ensuing combinations list represents the points in
-the sampling set. In LSD, to perform the SA of your model using this DoE you
-need to generate 8 different </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
+experiments (DoE<span class=GramE>)</span> and the ensuing combinations list
+represents the points in the sampling set. In LSD, to perform the SA of your
+model using this DoE you need to generate 8 different </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> <a href="LSD_faqs.html#modelsetting">model
 configuration</a> files, each one assigned to a sampling point, <a
 href="LSD_faqs.html#simulationrun">run the simulation</a> for each
@@ -1678,12 +1683,12 @@ that, because of the “combinatorics curse”, the full exploration of the entire
 parametric space – a factorial DoE – is restricted, because of computational
 time constraints, to situations involving just a few factors and levels. For
 larger models, SA usually involves exploration of many factors (Parameters and
-lagged Variables in LSD) over a large number of levels for each factor. To
-overcome the combinatorics curse, two approaches are usually employed: sampling
-the factorial DoE or using a high-efficiency DoE.<o:p></o:p></span></p>
+lagged Variables in LSD) over <span class=GramE>a large number of</span> levels
+for each factor. To overcome the combinatorics curse, two approaches are
+usually employed: sampling the factorial DoE or using a high-efficiency DoE.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>LSD offers
-a full set of tools to perform sophisticated <a href="LSD_faqs.html#sa">sensitivity
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>LSD offers a
+full set of tools to perform sophisticated <a href="LSD_faqs.html#sa">sensitivity
 analysis</a> (SA), divided in two groups. The first one covers the sampling
 methods (DoE’s) required to collect samples of the model’s results across its
 parametric space (i.e., sets of the possible combinations of the <a
@@ -1742,21 +1747,19 @@ the Save As dialog box). The SA process creates many files, and it is
 recommended to keep them in a dedicated subdirectory. LSD will automatically
 create a new subdirectory for each set of SA configurations, with the same name
 as the baseline model configuration file in the same location of this file
-whenever there is more than one (baseline) configuration file, or other
-unrelated files, in this place. The exact file path is presented in the <a
-href="log.html">Log window</a>.<o:p></o:p></span></p>
+whenever there is more than one (baseline) configuration file, or other unrelated
+files, in this place. The exact file path is presented in the <a href="log.html">Log
+window</a>.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
 mso-list:l4 level1 lfo4'><![if !supportLists]><span lang=EN-US
 style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
 style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>(Re)load
-your baseline </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>.<span class=SpellE>lsd</span></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> configuration if it is not already loaded
-(menu </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
-href="menufile.html">File&gt;Load</a></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>)<o:p></o:p></span></p>
+your <span class=GramE>baseline <span class=Cdigo>.<span class=SpellE>lsd</span></span></span>
+configuration if it is not already loaded (menu </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'><a href="menufile.html">File&gt;Load</a></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>)<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
 mso-list:l4 level1 lfo4'><![if !supportLists]><span lang=EN-US
@@ -1776,10 +1779,9 @@ choosing all values/ranges to test, save your exploration space definition as a
 </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.<span
 class=SpellE>sa</span></span></span><span lang=EN-US style='mso-ansi-language:
 EN-US'> sensitivity analysis file using the same base name and folder as <span
-class=SpellE>your</span> </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> baseline configuration (menu </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
+class=SpellE><span class=GramE>your</span></span><span class=GramE> <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> baseline configuration
+(menu </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
 href="menufile.html">File&gt;Save Sensitivity</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>).<o:p></o:p></span></p>
 
@@ -1797,21 +1799,20 @@ class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
 href="menufile.html">File&gt;Load</a></span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'><a href="menufile.html">File&gt;Load
-Sensitivity</a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'> if
-required), select menu </span><span class=Cdigo><span lang=EN-US
+Sensitivity</a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+if required), select menu </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>Data&gt;Sensitivity Analysis&gt;XXXX</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, replacing XXXX by the desired SA
 type (see options below), check the proposed defaults, and modify the required
 configuration values, if required (the defaults are usually adequate). When you
 click </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>OK</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>, several new </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.<span
-class=SpellE>lsd</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'> configuration files will be created in your baseline configuration
-subdirectory, or in a subdirectory therein if more than one baseline
-configuration file (or other unrelated files) exists. The exact file path is
-also presented in the Log window. Each produced new file represents one sample
-point to be explored in the SA exercise.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'>, several <span class=GramE>new <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> configuration files
+will be created in your baseline configuration subdirectory, or in a
+subdirectory therein if more than one baseline configuration file (or other
+unrelated files) exists. The exact file path is also presented in the Log
+window. Each produced new file represents one sample point to be explored in
+the SA exercise.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:72.0pt;text-indent:-18.0pt;mso-list:l4 level2 lfo4'><![if !supportLists]><span
@@ -1845,10 +1846,11 @@ now or later (in the current or in another machine).<o:p></o:p></span></p>
 lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
 style='mso-list:Ignore'>a.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>If
-running later in the same machine, you just have to execute the created script
-file (</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.bat</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> or </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>.<span class=SpellE>sh</span></span></span><span
+running later in the same machine, you just <span class=GramE>have to</span>
+execute the created script file (</span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>.bat</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> or </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>.<span class=SpellE>sh</span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) inside the subdirectory where your
 baseline </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>.<span class=SpellE>lsd</span></span></span><span lang=EN-US
@@ -1916,8 +1918,8 @@ R package</a> section below, including the follow up of this workflow.<o:p></o:p
 <h1><a name="_Configuring_values"></a><a name=entry></a><span lang=EN-US
 style='mso-ansi-language:EN-US'>Configuring values<o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The first step
-to set up a sensitivity analysis (SA) consists in defining the elements (<a
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The first
+step to set up a sensitivity analysis (SA) consists in defining the elements (<a
 href="LSD_faqs.html#parameter">Parameters</a> and <a
 href="LSD_faqs.html#variable">lagged Variables</a>) and the respective <a
 href="LSD_faqs.html#modelsetting">initialization values</a> to be explored. Any
@@ -1948,9 +1950,9 @@ lang=EN-US style='mso-ansi-language:EN-US'> from the context menu.<o:p></o:p></s
 EN-US;mso-no-proof:yes'><img border=0 width=299 height=286 id="_x0000_i1029"
 src="image/sa_entry.png"></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The top part
-of the SA window is occupied by the data entry area. Depending on the type of
-SA exercise to be performed, the user must enter here a set (</span><span
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The top
+part of the SA window is occupied by the data entry area. Depending on the type
+of SA exercise to be performed, the user must enter here a set (</span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Full</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>MC Point Sampling</span></span><span
@@ -1976,13 +1978,15 @@ style='mso-ansi-language:EN-US'>” prefix to indicate the 10 exponent).<o:p></o:p
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Individual
 values can be separated using any combination of the most usual separators,
-including spaces, tabs, commas, semi-colons, colons, line-feeds etc.<o:p></o:p></span></p>
+including spaces, tabs, commas, semi-colons, colons, <span class=GramE>line-feeds</span>
+etc.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>To simplify
 the entry of some specific value sets, the user can use the special </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>=BEGIN:END@SAMPLES%TYPE</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> clause. It is interpreted by LSD as
-a set containing the number </span><span class=Cdigo><span lang=EN-US
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>=<span
+class=GramE>BEGIN:END</span>@SAMPLES%TYPE</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> clause. It is interpreted by LSD as a set
+containing the number </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>SAMPLES</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> of values. </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>TYPE</span></span><span lang=EN-US
@@ -2001,9 +2005,10 @@ instance, the clause </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>=10:20@6%L</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> produces the sampling set </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>10,12,14,16,18,20</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>. Random sets include a number </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>SAMPLES</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> of random values between </span><span
+lang=EN-US style='mso-ansi-language:EN-US'>. Random sets include a <span
+class=GramE>number</span> </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>SAMPLES</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> of random values between </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>BEGIN</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>END</span></span><span lang=EN-US
@@ -2074,24 +2079,22 @@ assumed to take integers only.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>It should
 be noted that the values set for Parameters and lagged Variables SA <b
-style='mso-bidi-font-weight:normal'>ARE NOT</b> saved in the regular </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.<span
-class=SpellE>lsd</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'> <a href="LSD_faqs.html#modelsetting">model configuration</a> files,
-because each configuration can be tested under different SA strategies. To save
-SA test values, the user should use the menu option </span><span class=Cdigo><span
+style='mso-bidi-font-weight:normal'>ARE NOT</b> saved in the <span class=GramE>regular
+<span class=Cdigo>.<span class=SpellE>lsd</span></span></span> <a
+href="LSD_faqs.html#modelsetting">model configuration</a> files, because each
+configuration can be tested under different SA strategies. To save SA test
+values, the user should use the menu option </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'><a href="menufile.html">File&gt;Save
 Sensitivity</a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
-and select a name for the SA configuration. Similarly, existing SA
-configuration data is not automatically loaded when the user loads a </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.<span
-class=SpellE>lsd</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'> configuration. The menu option </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'><a href="menufile.html">File&gt;Load
-Sensitivity</a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
-has to be used when required. Also notice that SA test values are lost whenever
-a model configuration file is (re)loaded or unloaded. Check <a
-href="menufile.html">here</a> for more details on LSD file operations.<o:p></o:p></span></p>
+and select a name for the SA configuration. Similarly, existing SA configuration
+data is not automatically loaded when the user loads <span class=GramE>a <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> configuration. The
+menu option </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'><a href="menufile.html">File&gt;Load Sensitivity</a></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> <span class=GramE>has to</span> be
+used when required. Also notice that SA test values are lost whenever a model
+configuration file is (re)loaded or unloaded. Check <a href="menufile.html">here</a>
+for more details on LSD file operations.<o:p></o:p></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
@@ -2118,17 +2121,17 @@ from the other DoE methods, this one modifies the current <a
 href="LSD_faqs.html#modelstructure">model structure</a> to create a single <a
 href="LSD_faqs.html#modelsetting">model configuration</a> containing as many
 copies of the original model structure as necessary by the factorial
-combinatorics. It is appropriate to quickly analyze the SA of few elements
-without requiring more sophisticated batch/parallel processing.<o:p></o:p></span></p>
+combinatorics. It is appropriate to quickly analyze the SA of few elements without
+requiring more sophisticated batch/parallel processing.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In the
 example <a href="#_SA_workflow">above</a>, LSD would generate 8 different
 instances of the entire model structure directly descending from the </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Root</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> Object, in a single model
-configuration. Of course, there will be now 8 instances of the <a
-href="LSD_faqs.html#object">Object(s)</a> containing the Parameters A and B,
-each copy including a different combination of their initialization values.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> Object, in a single model configuration.
+Of course, there will be now 8 instances of the <a href="LSD_faqs.html#object">Object(s)</a>
+containing the Parameters A and B, each copy including a different combination
+of their initialization values.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Please note
 that the modified model structure is not saved or renamed. After creating the
@@ -2166,18 +2169,16 @@ creates multiple </span><span class=Cdigo><span lang=EN-US style='mso-ansi-langu
 EN-US'>.<span class=SpellE>lsd</span></span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> <a href="LSD_faqs.html#modelsetting">model
 configuration</a> files, each one containing one copy of the original model
-structure configured as necessary by the factorial combinatorics. It is
-appropriate to perform the SA of larger number of elements or test values,
-benefiting from the acceleration provided by more sophisticated batch/parallel
-processing.<o:p></o:p></span></p>
+structure configured as necessary by the factorial combinatorics. It is appropriate
+to perform the SA of larger number of elements or test values, benefiting from
+the acceleration provided by more sophisticated batch/parallel processing.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In the
-example <a href="#_SA_workflow">above</a>, LSD would generate 8 different </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.<span
-class=SpellE>lsd</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'> configuration files with the same model structure. Each configuration
-file would contain different initialization values for the Parameters A and B,
-each including a different combination of their initialization values.<o:p></o:p></span></p>
+example <a href="#_SA_workflow">above</a>, LSD would generate 8 <span
+class=GramE>different <span class=Cdigo>.<span class=SpellE>lsd</span></span></span>
+configuration files with the same model structure. Each configuration file
+would contain different initialization values for the Parameters A and B, each
+including a different combination of their initialization values.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Note that
 the user can mix the two versions of the full factorial design (<a
@@ -2187,16 +2188,15 @@ generate a single new (online) configuration, then configuring the remaining
 set of elements to perform the batch full SA.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After
-executing this command, a certain number of </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> configuration files will be
-generated, as informed in the <a href="log.html">Log window</a>. Before the
-analysis can be concluded, they have to be run to produce <a
-href="LSD_faqs.html#results">simulation results</a>. Usually, the menu command </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
-href="menurun.html">Run&gt;Parallel Batch</a></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> is the more convenient way to run the entire
-set of configuration files. Please refer to the recommended <a
+executing this command, a certain number <span class=GramE>of <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> configuration files
+will be generated, as informed in the <a href="log.html">Log window</a>. Before
+the analysis can be concluded, they <span class=GramE>have to</span> be run to
+produce <a href="LSD_faqs.html#results">simulation results</a>. Usually, the
+menu command </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'><a href="menurun.html">Run&gt;Parallel Batch</a></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> is the more convenient way to run
+the entire set of configuration files. Please refer to the recommended <a
 href="#_SA_workflow">SA workflow</a> on how to proceed.<o:p></o:p></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
@@ -2220,49 +2220,54 @@ analysis</a> (SA) consisting of a random fraction of a full factorial design
 (the Monte Carlo sample). A user-specified fraction of the combinations of the <a
 href="#_Configuring_values">configured test initialization values</a> for <a
 href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a> is explored. The selected
-combinations are taken randomly. The method creates multiple </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.<span
-class=SpellE>lsd</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'> <a href="LSD_faqs.html#modelsetting">model configuration</a> files each
-one containing one copy of the original model structure configured using the
+href="LSD_faqs.html#variable">lagged Variables</a> is explored. The selected combinations
+are taken randomly. The method creates <span class=GramE>multiple <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> <a
+href="LSD_faqs.html#modelsetting">model configuration</a> files each one
+containing one copy of the original model structure configured using the
 selected combination of values.<o:p></o:p></span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US style='mso-ansi-language:
-EN-US;mso-no-proof:yes'><img border=0 width=196 height=145 id="_x0000_i1028"
+EN-US;mso-no-proof:yes'><img border=0 width=196 height=184 id="_x0000_i1028"
 src="image/sa_mc_point.png"></span><span lang=EN-US style='mso-ansi-language:
 EN-US'><o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The user
-specifies the Monte Carlo sample size as a percentage (0 to 100), in a dialog
-box like the one depicted above. Large sample sizes are only recommended when
-there are few elements and values for the SA. Note that LSD shows in the <a
+specifies the Monte Carlo sample size as a percentage (0 to 100), in a dialog box
+like the one depicted above. Large sample sizes are only recommended when there
+are few elements and values for the SA. Note that LSD shows in the <a
 href="log.html">Log window</a> the total number of combinations in a full
 factorial design, over which the provided percentage is applied to calculate
 the target number of points to sample. The provided factor should be large
 enough to produce (in average) at least one sample. The final number of
 configurations produced may be somewhat smaller or larger than the target
-number.<o:p></o:p></span></p>
+number. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The dialog
+box also presents the output path where the DoE files will be created. LSD may
+create a separated folder if multiple configurations or other unrelated files
+are present in the same location of the <span class=GramE>baseline <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> configuration.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In the
-example <a href="#_SA_workflow">above</a>, if you set the MC sample size to
-50%, LSD would generate, in average, 4 different </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> configuration files (out of the 8
-possible) with the same model structure. Each configuration file would contain
-different combinations for the initialization values of the Parameters A and B.<o:p></o:p></span></p>
+example <a href="#_SA_workflow">above</a>, if you set the MC sample size to 50%,
+LSD would generate, in average, 4 <span class=GramE>different <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> configuration files
+(out of the 8 possible) with the same model structure. Each configuration file
+would contain different combinations for the initialization values of the
+Parameters A and B.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After
-executing this command, a certain number of </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> configuration files will be
-generated, as informed in the Log window. Before the analysis can be concluded,
-they have to be run to produce <a href="LSD_faqs.html#results">simulation
-results</a>. Usually, the menu command </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'><a href="menurun.html">Run&gt;Parallel
-Batch</a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'> is the
-more convenient way to run the entire set of configuration files. Please refer
-to the recommended <a href="#_SA_workflow">SA workflow</a> on how to proceed.<o:p></o:p></span></p>
+executing this command, a certain number <span class=GramE>of <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> configuration files
+will be generated, as informed in the Log window. Before the analysis can be concluded,
+they <span class=GramE>have to</span> be run to produce <a
+href="LSD_faqs.html#results">simulation results</a>. Usually, the menu command </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
+href="menurun.html">Run&gt;Parallel Batch</a></span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> is the more convenient way to run the entire
+set of configuration files. Please refer to the recommended <a
+href="#_SA_workflow">SA workflow</a> on how to proceed.<o:p></o:p></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
@@ -2286,14 +2291,13 @@ Monte Carlo sample). The MC sample set is taken from the parametric space
 defined by the set of <a href="#_Configuring_values">configured test ranges</a>
 for the <a href="LSD_faqs.html#parameter">Parameters</a> and <a
 href="LSD_faqs.html#variable">lagged Variables</a> to be explored. The method
-creates multiple </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>.<span class=SpellE>lsd</span></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> <a href="LSD_faqs.html#modelsetting">model
-configuration</a> files each one containing one copy of the original model
-structure configured using the selected combination of values.<o:p></o:p></span></p>
+creates <span class=GramE>multiple <span class=Cdigo>.<span class=SpellE>lsd</span></span></span>
+<a href="LSD_faqs.html#modelsetting">model configuration</a> files each one
+containing one copy of the original model structure configured using the
+selected combination of values.<o:p></o:p></span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US style='mso-ansi-language:
-EN-US;mso-no-proof:yes'><img border=0 width=196 height=133 id="_x0000_i1027"
+EN-US;mso-no-proof:yes'><img border=0 width=196 height=172 id="_x0000_i1027"
 src="image/sa_mc_range.png"></span><span lang=EN-US style='mso-ansi-language:
 EN-US'><o:p></o:p></span></p>
 
@@ -2304,36 +2308,41 @@ there are few elements and values for the SA, as processing time grows linearly
 with this number. If a previous SA sample was just created, LSD will offer the
 checkbox option </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>Append to existing configuration files</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>. If checked, this option will create the new </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.<span
-class=SpellE>lsd</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'> configurations as an additional SA sample set, typically used as an
+style='mso-ansi-language:EN-US'>. If checked, this option will create the <span
+class=GramE>new <span class=Cdigo>.<span class=SpellE>lsd</span></span></span>
+configurations as an additional SA sample set, typically used as an
 out-of-sample set for the statistical analysis (see the <a href="#_SA_workflow">SA
-workflow</a> for details).<o:p></o:p></span></p>
+workflow</a> for details). <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The dialog
+box also presents the output path where the DoE files will be created. LSD may
+create a separated folder if multiple configurations or other unrelated files
+are present in the same location of the <span class=GramE>baseline <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> configuration.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In the
 example <a href="#_SA_workflow">above</a>, we could define ranges instead of
-points to perform SA with Parameters A and B. Similarly to the initial
-configuration, we could use the range 1-7 for Parameter A and 1-2 for B, taking
-care of specifying them as integers in the <a href="#_Configuring_values">SA
-data entry window</a> if necessary. In this case, if you set the MC sample size
-to 4, LSD would generate 4 different </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> configuration files with the same
-model structure. Each configuration file would (likely) contain different
-initialization values for the Parameters A and B.<o:p></o:p></span></p>
+points to perform SA with Parameters A and B. <span class=GramE>Similarly</span>
+to the initial configuration, we could use the range 1-7 for Parameter A and
+1-2 for B, taking care of specifying them as integers in the <a
+href="#_Configuring_values">SA data entry window</a> if necessary. In this
+case, if you set the MC sample size to 4, LSD would generate 4 <span
+class=GramE>different <span class=Cdigo>.<span class=SpellE>lsd</span></span></span>
+configuration files with the same model structure. Each configuration file
+would (likely) contain different initialization values for the Parameters A and
+B.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After
-executing this command, a certain number of </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> configuration files will be
-generated, as informed in the Log window. Before the analysis can be concluded,
-they have to be run to produce <a href="LSD_faqs.html#results">simulation
-results</a>. Usually, the menu command </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'><a href="menurun.html">Run&gt;Parallel
-Batch</a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'> is the
-more convenient way to run the entire set of configuration files. Please refer
-to the recommended <a href="#_SA_workflow">SA workflow</a> on how to proceed.<o:p></o:p></span></p>
+executing this command, a certain number <span class=GramE>of <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> configuration files
+will be generated, as informed in the Log window. Before the analysis can be
+concluded, they <span class=GramE>have to</span> be run to produce <a
+href="LSD_faqs.html#results">simulation results</a>. Usually, the menu command </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
+href="menurun.html">Run&gt;Parallel Batch</a></span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> is the more convenient way to run the entire
+set of configuration files. Please refer to the recommended <a
+href="#_SA_workflow">SA workflow</a> on how to proceed.<o:p></o:p></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
@@ -2358,9 +2367,8 @@ effects (EE) trajectories, i.e., random one-at-a-time changes of the values for
 href="LSD_faqs.html#variable">lagged Variables</a>. The EE sample set is taken
 from the parametric space defined by the set of <a href="#_Configuring_values">configured
 test ranges</a> for the Parameters and lagged Variables to be explored. The
-method creates multiple </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> <a href="LSD_faqs.html#modelsetting">model
+method creates <span class=GramE>multiple <span class=Cdigo>.<span
+class=SpellE>lsd</span></span></span> <a href="LSD_faqs.html#modelsetting">model
 configuration</a> files each one containing one copy of the original model
 structure configured using the selected combination of values.<o:p></o:p></span></p>
 
@@ -2375,13 +2383,14 @@ lagged Variables, potentially allowing their removal from a more in-depth SA
 investigation, like the <span class=SpellE>Sobol</span> variance decomposition.<o:p></o:p></span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US style='mso-ansi-language:
-EN-US;mso-no-proof:yes'><img border=0 width=220 height=322 id="_x0000_i1026"
+EN-US;mso-no-proof:yes'><img border=0 width=220 height=363 id="_x0000_i1026"
 src="image/sa_ee.png"></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The user specifies
-the settings for the EE algorithm in a dialog box like the one depicted above.
-The default values are usually adequate for most applications as a reasonable
-tradeoff between precision and execution time. The available options are:<o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The user
+specifies the settings for the EE algorithm in a dialog box like the one
+depicted above. The default values are usually adequate for most applications
+as a reasonable tradeoff between precision and execution time. The available
+options are:<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo8'><![if !supportLists]><span
@@ -2393,10 +2402,10 @@ normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Number of trajectories<
 lang=EN-US style='mso-ansi-language:EN-US'>: define how many times each
 Parameter or lagged variable under test will be changed. The higher the number
 of trajectories, the better of the parametric space is explored. The number of
-sampling points, with regard to this parameter, increases by a factor of the
-number of Parameters and lagged Variables under test plus 1. So, as simulation
-execution times increase linearly on this setting, large values may be
-unpractical.<o:p></o:p></span></p>
+sampling points, <span class=GramE>with regard to</span> this parameter,
+increases by a factor of the number of Parameters and lagged Variables under
+test plus 1. So, as simulation execution times increase linearly on this
+setting, large values may be unpractical.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo8'><![if !supportLists]><span
@@ -2408,11 +2417,11 @@ normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Trajectories pool size<
 lang=EN-US style='mso-ansi-language:EN-US'>: specify the size of the pool of
 possible trajectories from which the trajectories to be used are selected.
 Increasing this number over the number of trajectories to explore allows the
-algorithm to pick the best trajectories in the pool to more efficiently cover
-the parametric space. As the creation of alternative trajectories can be time
-consuming in LSD for larger values, please wait until the command completes.
-This value does not affect the produced number of sampling points or the
-simulation execution times.<o:p></o:p></span></p>
+algorithm to pick the best trajectories in the pool to <span class=GramE>more
+efficiently cover the parametric space</span>. As the creation of alternative
+trajectories can be time consuming in LSD for larger values, please wait until
+the command completes. This value does not affect the produced number of
+sampling <span class=GramE>points</span> or the simulation execution times.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo8'><![if !supportLists]><span
@@ -2438,17 +2447,23 @@ lang=EN-US style='mso-ansi-language:EN-US'>: define the number of level units
 to increase the explored value for each Parameter or lagged variable for each
 new trajectory. It normally does not have to be changed.<o:p></o:p></span></p>
 
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The dialog
+box also presents the output path where the DoE files will be created. LSD may
+create a separated folder if multiple configurations or other unrelated files
+are present in the same location of the <span class=GramE>baseline <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> configuration.<o:p></o:p></span></p>
+
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After
-executing this command, a certain number of </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> configuration files will be
-generated, as informed in the Log window. Before the analysis can be concluded,
-they have to be run to produce <a href="LSD_faqs.html#results">simulation
-results</a>. Usually, the menu command </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'><a href="menurun.html">Run&gt;Parallel
-Batch</a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'> is the
-more convenient way to run the entire set of configuration files. Please refer
-to the recommended <a href="#_SA_workflow">SA workflow</a> on how to proceed.<o:p></o:p></span></p>
+executing this command, a certain number <span class=GramE>of <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> configuration files
+will be generated, as informed in the Log window. Before the analysis can be
+concluded, they <span class=GramE>have to</span> be run to produce <a
+href="LSD_faqs.html#results">simulation results</a>. Usually, the menu command </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
+href="menurun.html">Run&gt;Parallel Batch</a></span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> is the more convenient way to run the entire
+set of configuration files. Please refer to the recommended <a
+href="#_SA_workflow">SA workflow</a> on how to proceed.<o:p></o:p></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
@@ -2472,11 +2487,10 @@ Latin hypercube (NOLH). The NOLH is specified from the parametric space defined
 by the set of <a href="#_Configuring_values">configured test ranges</a> for the
 <a href="LSD_faqs.html#parameter">Parameters</a> and <a
 href="LSD_faqs.html#variable">lagged Variables</a> to be explored. The method
-creates multiple </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>.<span class=SpellE>lsd</span></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> <a href="LSD_faqs.html#modelsetting">model
-configuration</a> files each one containing one copy of the original model
-structure configured using the selected combination of values.<o:p></o:p></span></p>
+creates <span class=GramE>multiple <span class=Cdigo>.<span class=SpellE>lsd</span></span></span>
+<a href="LSD_faqs.html#modelsetting">model configuration</a> files each one
+containing one copy of the original model structure configured using the
+selected combination of values.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This method
 was proposed by <span class=SpellE>Cioppa</span> and Lucas (2007) as a very
@@ -2489,7 +2503,7 @@ variance decomposition, as proposed in the <a href="#_LSDsensitivity_R_package">
 class=SpellE>LSDsensitivity</span> R package</a>.<o:p></o:p></span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US style='mso-ansi-language:
-EN-US;mso-no-proof:yes'><img border=0 width=196 height=242 id="_x0000_i1025"
+EN-US;mso-no-proof:yes'><img border=0 width=196 height=280 id="_x0000_i1025"
 src="image/sa_nolh.png"></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The user
@@ -2531,8 +2545,9 @@ when checked, this option increases the sampling density inside the hypercube,
 almost doubling the number of sampling points. This provides better sampling of
 the parametric space at the cost of duplicating the simulation execution time.
 Required when the output Variables being analyzed are very sensitive to some of
-the initialization values and more samples are needed to fully sampling them.
-Not all tables may support this option (in this case, this option is ignored).<o:p></o:p></span></p>
+the initialization values and more samples are needed to fully <span
+class=GramE>sampling</span> them. Not all tables may support this option (in
+this case, this option is ignored).<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l1 level1 lfo8'><![if !supportLists]><span
@@ -2547,26 +2562,30 @@ when exploring very large number of factors in the SA. The provided file can be
 named in the text box below this option (the default name is </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>NOLH.csv</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>). The file must be placed in the
-same subdirectory as the current </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> model configuration file. The file
-shall comply with the CSV (comma separated values) text format. The data should
-be organized as a table where each column is associated to a dimension (factor)
-in the NOLH and the lines provide the factor level (integer) for each sampling
-point. Empty lines are not allowed.<o:p></o:p></span></p>
+same subdirectory as the <span class=GramE>current <span class=Cdigo>.<span
+class=SpellE>lsd</span></span></span> model configuration file. The file shall
+comply with the CSV (comma separated values) text format. The data should be
+organized as a table where each column is associated to a dimension (factor) in
+the <span class=GramE>NOLH</span> and the lines provide the factor level
+(integer) for each sampling point. Empty lines are not allowed.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The dialog
+box also presents the output path where the DoE files will be created. LSD may
+create a separated folder if multiple configurations or other unrelated files
+are present in the same location of the <span class=GramE>baseline <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> configuration.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After
-executing this command, a certain number of </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>.<span class=SpellE>lsd</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> configuration files will be
-generated, as informed in the Log window. Before the analysis can be concluded,
-they have to be run to produce <a href="LSD_faqs.html#results">simulation
-results</a>. Usually, the menu command </span><span class=Cdigo><a
-href="menurun.html"><span lang=EN-US style='color:gray;mso-ansi-language:EN-US;
-text-decoration:none;text-underline:none'>Run&gt;Parallel Batch</span></a></span><span
-style='mso-ansi-language:EN-US'> <span lang=EN-US>is the more convenient way to
-run the entire set of configuration files. Please refer to the recommended <a
-href="#_SA_workflow">SA workflow</a> on how to proceed.<o:p></o:p></span></span></p>
+executing this command, a certain number <span class=GramE>of <span
+class=Cdigo>.<span class=SpellE>lsd</span></span></span> configuration files
+will be generated, as informed in the Log window. Before the analysis can be
+concluded, they <span class=GramE>have to</span> be run to produce <a
+href="LSD_faqs.html#results">simulation results</a>. Usually, the menu command </span><span
+class=Cdigo><a href="menurun.html"><span lang=EN-US style='color:gray;
+mso-ansi-language:EN-US;text-decoration:none;text-underline:none'>Run&gt;Parallel
+Batch</span></a></span><span lang=EN-US style='mso-ansi-language:EN-US'> is the
+more convenient way to run the entire set of configuration files. Please refer
+to the recommended <a href="#_SA_workflow">SA workflow</a> on how to proceed.<o:p></o:p></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
@@ -2624,12 +2643,12 @@ model. The meta-model can be fitted using different sampling strategies offered
 by LSD, being the option </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>Data&gt;Sensitivity Analysis&gt;NOLH Sampling</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> (Near Orthogonal Latin Hypercube)
-usually the most efficient. Additionally to the set of samples used to fit the
-meta-model, it is recommended to also generate another set for the
-(out-of-sample) validation of the meta-model (</span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>Data&gt;Sensitivity Analysis&gt;MC
-Range Sampling</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
-is the recommended option).<o:p></o:p></span></p>
+usually the most efficient. <span class=GramE>Additionally</span> to the set of
+samples used to fit the meta-model, it is recommended to also generate another
+set for the (out-of-sample) validation of the meta-model (</span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Data&gt;Sensitivity
+Analysis&gt;MC Range Sampling</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'> is the recommended option).<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The package
 offers two meta-modeling (MM) methods for using with SVD: Kriging and
@@ -2646,9 +2665,9 @@ lang=EN-US style='mso-ansi-language:EN-US'>). Kriging is the recommended option
 in most cases.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Additionally,
-the package offers tools for the graphical representation of the meta-models
-response surfaces (2D and 3D) (</span><span class=SpellE><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>response.surface.lsd</span></span></span><span
+the package offers tools for the graphical representation of the meta-<span
+class=GramE>models</span> response surfaces (2D and 3D) (</span><span
+class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>response.surface.lsd</span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>), to predict meta-model response in
 specific points in the factor space (</span><span class=SpellE><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>model.pred.lsd</span></span></span><span
@@ -2734,15 +2753,15 @@ style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
 style='mso-list:Ignore'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>For
 SVD SA, open the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>kriging-<span class=SpellE>sobol</span>-SA.R</span></span><span
+EN-US'>kriging-<span class=SpellE>sobol</span>-<span class=GramE>SA.R</span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> example in RStudio or your text
 editor. For the use of a polynomial MM for the SVD analysis, open </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>poly-<span
-class=SpellE>sobol</span>-SA.R</span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'> instead. For EE SA, open </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>elementary-effects-SA.R</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>. All example SA scripts are
-included in the LSD installation directory under the subdirectory </span><span
+class=SpellE>sobol</span>-<span class=GramE>SA.R</span></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> instead. For EE SA, open </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>elementary-effects-SA.R</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>. All example SA scripts are included
+in the LSD installation directory under the subdirectory </span><span
 class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Rpkg</span></span></span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/Example</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
@@ -2770,9 +2789,9 @@ style='mso-ansi-language:EN-US'>logVars</span></span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> to contain all LSD variables (included in </span><span
 class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lsdVars</span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) that require to have the log value
-used in the analysis (let the vector empty, i.e., </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>c( )</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>, if no log variable is required).<o:p></o:p></span></p>
+used in the analysis (let the vector empty, i.e., </span><span class=GramE><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>c( )</span></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>, if no log variable is required).<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
 mso-list:l0 level1 lfo10'><![if !supportLists]><span lang=EN-US
@@ -2784,9 +2803,9 @@ style='mso-ansi-language:EN-US'>newVars</span></span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> any new variable (not included in </span><span
 class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lsdVars</span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) that has to be added to the
-dataset (let the vector empty, i.e., </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>c( )</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>, if no new variable is required).<o:p></o:p></span></p>
+dataset (let the vector empty, i.e., </span><span class=GramE><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>c( )</span></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>, if no new variable is required).<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
 mso-list:l0 level1 lfo10'><![if !supportLists]><span lang=EN-US
@@ -2794,7 +2813,7 @@ style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
 style='mso-list:Ignore'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>If
 new variables are required, adapt the </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>eval.vars</span></span></span><span
+class=GramE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>eval.vars</span></span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> function to compute any new
 variable included in </span><span class=SpellE><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>newVars</span></span></span><span
@@ -2830,11 +2849,11 @@ redirecting output to a file first if required.<o:p></o:p></span></p>
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Several
 examples using the <span class=SpellE>LSDsensitivity</span> R package are
 available in a standard LSD installation: the Industrial Dynamics model, the
-Island Model and several K+S Model versions. They can be loaded in <a
-href="modelbrowser.html">LMM Model Browser</a> and are found in the </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Example Models/<span
-class=SpellE>Sant’Anna</span> Models</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> group.<o:p></o:p></span></p>
+Island <span class=GramE>Model</span> and several K+S Model versions. They can
+be loaded in <a href="modelbrowser.html">LMM Model Browser</a> and are found in
+the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Example
+Models/<span class=SpellE>Sant’Anna</span> Models</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> group.<o:p></o:p></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:

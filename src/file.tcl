@@ -233,6 +233,64 @@ proc check_components { } {
 
 
 #************************************************
+# FN_BREAK
+# Split filename string into multiple lines
+# if longer than width, removing unneeded slashes
+#************************************************
+proc fn_break { fn width } {
+
+	if { [ string range $fn 1 1 ] eq ":" } {
+		set out [ string range $fn 0 1 ]
+		set fn [ string range $fn 2 end ]
+		set pos 2
+	} else {
+		set out ""
+		set pos 0
+	}
+	
+	if { [ string first \\ $fn ] != -1 } {
+		set sep \\
+	} else {
+		set sep /
+	}
+	
+	foreach part [ split $fn "/\\" ] {
+		set len [ string length $part ]
+		
+		if { $len == 0 } {
+			continue
+		}
+
+		if { $pos + $len + 1 < $width } {
+			if { $out eq "" && [ string range $fn 0 0 ] ne $sep } {
+				set out "${part}"
+				set pos [ expr { $pos + $len } ]
+			} else {
+				set out "${out}${sep}${part}"
+				set pos [ expr { $pos + $len + 1 } ]
+			}
+		} elseif { $len + 1 <= $width } {
+			set out "${out}${sep}\n${part}"
+			set pos [ expr { $len } ]
+		} else {
+			set end [ expr { $width - $pos - 2 } ]
+			set out "${out}${sep}[ string range $part 0 $end ]"
+			set len [ expr { $len - ( $end + 2 ) } ]
+			while { $len > 0 } {
+				set start [ expr { $end + 1 } ]
+				set end [ expr { $start + min( $len, $width - 1 ) } ]
+				set out "${out}\n[ string range $part $start $end ]"
+				set pos [ expr { $end - $start - 1 } ]
+				set len [ string length [ string range $part [ expr { $end + 1 } ] end ] ]
+			}
+		}
+	}
+
+	return $out
+}
+
+
+#************************************************
 # FN_SPACES
 # Checks is a filename has spaces
 # Set 'mult' to one if multiple file names are allowed

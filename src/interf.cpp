@@ -3020,7 +3020,7 @@ object *operate( object *r )
 
 			cmd( "ttk::frame $T.f3" );
 			cmd( "ttk::label $T.f3.l -text \"Output path\"" );
-			cmd( "ttk::label $T.f3.w -text [ file nativename \"%s\" ] -style hl.TLabel", out_dir );
+			cmd( "ttk::label $T.f3.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", out_dir );
 			cmd( "pack $T.f3.l $T.f3.w" );
 
 			cmd( "ttk::frame $T.f4" );
@@ -4649,7 +4649,15 @@ object *operate( object *r )
 			double sizMC = 10;
 			Tcl_LinkVar( inter, "sizMC", ( char * )&sizMC, TCL_LINK_DOUBLE );
 
+			// detect the need of a new save path
+			subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
+
 			cmd( "newtop .s \"MC Point Sampling\" { set choice 2 }" );
+
+			cmd( "ttk::frame .s.p" );
+			cmd( "ttk::label .s.p.l -text \"Output path\"" );
+			cmd( "ttk::label .s.p.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", path_sens );
+			cmd( "pack .s.p.l .s.p.w" );
 
 			cmd( "ttk::frame .s.i" );
 			cmd( "ttk::label .s.i.l -justify center -text \"Monte Carlo sample size as\n%% of sensitivity space size\n(0 to 100)\"" );
@@ -4659,7 +4667,7 @@ object *operate( object *r )
 
 			cmd( "ttk::label .s.w -text \"(large samples are not recommended)\"" );
 
-			cmd( "pack .s.i .s.w -padx 5 -pady 5" );
+			cmd( "pack .s.p .s.i .s.w -padx 5 -pady 5" );
 
 			cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#mcpoint } { set choice 2 }" );
 
@@ -4694,8 +4702,8 @@ object *operate( object *r )
 				if ( sensitivity_too_large( ( long ) ( sizMC * maxMC ) ) )
 					break;
 
-			// detect the need of a new save path and create it if required
-			if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH ) )
+			// create a new save path if required
+			if ( subDir )
 				create_res_dir( path_sens );
 
 			// ask to clean existing files before proceeding if required
@@ -4755,6 +4763,9 @@ object *operate( object *r )
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 			lab1 = NOLH_valid_tables( varSA, ch, 2 * MAX_LINE_SIZE );
 
+			// detect the need of a new save path
+			subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
+
 			cmd( "set extdoe 0" );	// flag for using external DoE file
 			cmd( "set NOLHfile \"NOLH.csv\"" );
 			cmd( "set doeList [list %s]", lab1 );
@@ -4762,6 +4773,11 @@ object *operate( object *r )
 			cmd( "set doeext 0" );	// flag for using extended number of samples
 
 			cmd( "newtop .s \"NOLH Sampling\" { set choice 2 }" );
+
+			cmd( "ttk::frame .s.p" );
+			cmd( "ttk::label .s.p.l -text \"Output path\"" );
+			cmd( "ttk::label .s.p.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", path_sens );
+			cmd( "pack .s.p.l .s.p.w" );
 
 			cmd( "ttk::frame .s.o" );
 			cmd( "ttk::label .s.o.l1 -text \"NOLH table\"" );
@@ -4782,7 +4798,7 @@ object *operate( object *r )
 			cmd( "ttk::label .s.i.w -justify center -text \"(file must be in the same folder\nas the configuration file; CSV\nformat with NO empty lines)\"" );
 			cmd( "pack .s.i.l .s.i.e .s.i.w" );
 
-			cmd( "pack .s.o .s.e .s.d .s.i -padx 5 -pady 5" );
+			cmd( "pack .s.p .s.o .s.e .s.d .s.i -padx 5 -pady 5" );
 
 			cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#nolh } { set choice 2 }" );
 
@@ -4830,8 +4846,8 @@ object *operate( object *r )
 					break;
 				}
 
-			// detect the need of a new save path and create it if required
-			if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH ) )
+			// create a new save path if required
+			if ( subDir )
 				create_res_dir( path_sens );
 
 			// ask to clean existing files before proceeding if required
@@ -4888,9 +4904,17 @@ object *operate( object *r )
 			int sizMC = 10;
 			Tcl_LinkVar( inter, "sizMC", ( char * ) & sizMC, TCL_LINK_INT );
 
+			// detect the need of a new save path
+			subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
+
 			cmd( "set applst 1" );	// flag for appending to existing configuration files
 
 			cmd( "newtop .s \"MC Range Sampling\" { set choice 2 }" );
+
+			cmd( "ttk::frame .s.p" );
+			cmd( "ttk::label .s.p.l -text \"Output path\"" );
+			cmd( "ttk::label .s.p.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", path_sens );
+			cmd( "pack .s.p.l .s.p.w" );
 
 			cmd( "ttk::frame .s.i" );
 			cmd( "ttk::label .s.i.l -justify center -text \"Monte Carlo sample size\nas number of samples\"" );
@@ -4899,7 +4923,7 @@ object *operate( object *r )
 			cmd( "pack .s.i.l .s.i.e" );
 
 			cmd( "ttk::checkbutton .s.c -text \"Append to existing configuration files\" -variable applst -state %s", findexSens > 1 ? "normal" : "disabled" );
-			cmd( "pack .s.i .s.c -padx 5 -pady 5" );
+			cmd( "pack .s.p .s.i .s.c -padx 5 -pady 5" );
 
 			cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#mcrange } { set choice 2 }" );
 
@@ -4936,8 +4960,8 @@ object *operate( object *r )
 			if ( findexSens < 1 || ( findexSens > 1 && ! get_bool( "applst" ) ) )
 				findexSens = 1;
 
-			// detect the need of a new save path and create it if required
-			if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH ) )
+			// create a new save path if required
+			if ( subDir )
 				create_res_dir( path_sens );
 
 			// ask to clean existing files before proceeding if required
@@ -4988,7 +5012,15 @@ object *operate( object *r )
 			Tcl_LinkVar( inter, "nTraj", ( char * )&nTraj, TCL_LINK_INT );
 			Tcl_LinkVar( inter, "nSampl", ( char * )&nSampl, TCL_LINK_INT );
 
+			// detect the need of a new save path
+			subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
+
 			cmd( "newtop .s \"Elementary Effects Sampling\" { set choice 2 }" );
+
+			cmd( "ttk::frame .s.o" );
+			cmd( "ttk::label .s.o.l -text \"Output path\"" );
+			cmd( "ttk::label .s.o.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", path_sens );
+			cmd( "pack .s.o.l .s.o.w" );
 
 			cmd( "ttk::frame .s.i" );
 			cmd( "ttk::label .s.i.l1 -text \"Number of trajectories (r)\"" );
@@ -5020,7 +5052,7 @@ object *operate( object *r )
 
 			cmd( "ttk::label .s.t -justify center -text \"(for details on setting Elementary Effects\nsampling parameters see Morris (1991),\nCampolongo et al. (2007) and Ruano et al. (2012))\"" );
 
-			cmd( "pack .s.i .s.p .s.l .s.j .s.t -padx 5 -pady 5" );
+			cmd( "pack .s.o .s.i .s.p .s.l .s.j .s.t -padx 5 -pady 5" );
 
 			cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#ee } { set choice 2 }" );
 
@@ -5061,8 +5093,8 @@ object *operate( object *r )
 				if ( sensitivity_too_large( ( long ) ( nTraj * ( varSA + 1 ) ) ) )
 					break;
 
-			// detect the need of a new save path and create it if required
-			if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH ) )
+			// create a new save path if required
+			if ( subDir )
 				create_res_dir( path_sens );
 
 			// ask to clean existing files before proceeding if required
@@ -5912,7 +5944,7 @@ object *operate( object *r )
 
 		cmd( "ttk::frame $b.f3" );
 		cmd( "ttk::label $b.f3.l -text \"Output path\"" );
-		cmd( "ttk::label $b.f3.w -text [ file nativename \"%s\" ] -style hl.TLabel", out_dir );
+		cmd( "ttk::label $b.f3.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", out_dir );
 		cmd( "pack $b.f3.l $b.f3.w" );
 
 		cmd( "ttk::frame $b.f4" );

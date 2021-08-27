@@ -179,6 +179,19 @@ version</a> of the model.</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Automatic segregation of results and
+sensitivity analysis files.</span></b><span lang=EN-US> When creating results
+files from multiple simulation runs or configuration files for sensitivity
+analysis, LSD will automatically create a new subfolder to hold those files
+whenever there is risk of data from different configurations to be (improperly)
+mixed. It also prevents the user from creating such files in the main model
+directory. The subfolder is named as the respective configuration file. All
+tools, including R packages, automatically recognize the proper file locations
+without user intervention.</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Improved data aggregation Macros</span></b><span
 lang=EN-US>. All Macros performing computations over multiple Object instances
 may now operate conditionally, allowing for much finer control of data
@@ -204,7 +217,7 @@ lang=EN-US>, </span><span class=Cdigo><span lang=EN-US><a
 href="LSD_macros.html#THIS">PARENTS(…)</a></span></span><span lang=EN-US> and </span><span
 class=Cdigo><span lang=EN-US><a href="LSD_macros.html#THIS">GRANDPARENTS(…)</a></span></span><span
 lang=EN-US> allow navigating the </span><a href="LSD_faqs.html#modelstructure"><span
-lang=EN-US>model structure</span></a><span lang=EN-US> without using the C++
+lang=EN-US>model structure</span></a> <span lang=EN-US>without using the C++
 complex pointer syntax with the important benefit of full pointer checking by
 default, preventing obscure crashes and providing identification of problem
 location in code. </span><span class=Cdigo><a href="LSD_macros.html#DELETING"><span
@@ -332,12 +345,11 @@ Results</a>.</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Automatic description for new
-Variable/Function</span></b><span lang=EN-US>. When <a
-href="menumodel.html#AddAVar">adding new Variables and Functions</a> using the
-name list, <a name="_Hlk11434818">any existing description text (comments)
-existing in the equation file(s) is used to fill the Description field
-automatically</a>.</span></p>
+</span></span><b><span lang=EN-US>Automatic description for new Variable/Function</span></b><span
+lang=EN-US>. When <a href="menumodel.html#AddAVar">adding new Variables and
+Functions</a> using the name list, <a name="_Hlk11434818">any existing
+description text (comments) existing in the equation file(s) is used to fill
+the Description field automatically</a>.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -576,9 +588,9 @@ lang=EN-US> for details.</span></p>
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Smart features</span></b><span lang=EN-US>.
-Automatic detection of problems in system options (platform mismatch) and
-smarter defaults in LMM. Automatic Variable and Parameter name filling during
-model structure definition in LSD Browser.</span></p>
+Automatic detection of problems in system options (platform mismatch) and smarter
+defaults in LMM. Automatic Variable and Parameter name filling during model
+structure definition in LSD Browser.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
