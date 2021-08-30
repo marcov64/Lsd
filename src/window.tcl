@@ -672,11 +672,14 @@ proc focustop { w1 { w2 "" } { force no } } {
 
 		set t1 [ winfo toplevel $w1 ]
 		deiconifytop $t1 $force
+		update idletasks
 
-		if { $w2 != "" && [ winfo exists $w2 ] && [ winfo toplevel $w2 ] != $t1 } {
-			raise $t1 [ winfo toplevel $w2 ]
-		} else {
-			raise $t1
+		if [ winfo exists $t1 ] {
+			if { $w2 != "" && [ winfo exists $w2 ] && [ winfo toplevel $w2 ] != $t1 } {
+				raise $t1 [ winfo toplevel $w2 ]
+			} else {
+				raise $t1
+			}
 		}
 
 		if { $force } {
@@ -696,7 +699,7 @@ proc focustop { w1 { w2 "" } { force no } } {
 #************************************************
 proc deiconifytop { w { force no } } {
 
-	if { $force || ! [ winfo viewable $w ] } {
+	if { [ winfo exists $w ] && ( $force || ! [ winfo viewable $w ] ) } {
 		wm deiconify [ winfo toplevel $w ]
 	}
 

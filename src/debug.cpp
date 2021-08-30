@@ -1460,6 +1460,8 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 						if ( exists_var( "res_g" ) )
 							cur = root->search(  get_str( "res_g" ) );
+						else
+							cur = NULL;
 
 						// handle zero instanced objects
 						if ( cur != NULL )

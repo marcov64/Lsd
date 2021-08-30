@@ -46,7 +46,7 @@ SET_ALL
 void set_all( object *original, const char *lab, int lag, const char *parWnd )
 {
 	bool selFocus = true;
-	char ch[ MAX_ELEM_LENGTH ], action[ MAX_ELEM_LENGTH ], msg[ MAX_ELEM_LENGTH ];
+	char ch[ MAX_ELEM_LENGTH ], action[ MAX_ELEM_LENGTH ], msg[ MAX_LINE_SIZE ];
 	const char *app;
 	double value, value1, value2, step, counter;
 	int res, i, j, kappa, to_all, update_d, cases_from, cases_to, fill, use_seed, rnd_seed, step_in;
@@ -566,16 +566,16 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 		if ( to_all )
 			if ( step_in > 1 )
 				if ( cd->init != NULL )
-					snprintf( msg, MAX_ELEM_LENGTH, "%s\n%d instances %s%s", cd->init, j, action, ch );
+					snprintf( msg, MAX_LINE_SIZE, "%s\n%d instances %s%s", cd->init, j, action, ch );
 				else
-					snprintf( msg, MAX_ELEM_LENGTH, "%d instances %s%s", j, action, ch );
+					snprintf( msg, MAX_LINE_SIZE, "%d instances %s%s", j, action, ch );
 			else
-				snprintf( msg, MAX_ELEM_LENGTH, "All %d instances %s%s", j, action, ch );
+				snprintf( msg, MAX_LINE_SIZE, "All %d instances %s%s", j, action, ch );
 		else
 			if ( cd->init != NULL )
-				snprintf( msg, MAX_ELEM_LENGTH, "%s\nInstances from %d to %d %s%s", cd->init, cases_from, cases_to, action, ch );
+				snprintf( msg, MAX_LINE_SIZE, "%s\nInstances from %d to %d %s%s", cd->init, cases_from, cases_to, action, ch );
 			else
-				snprintf( msg, MAX_ELEM_LENGTH, "Instances from %d to %d %s%s", cases_from, cases_to, action, ch );
+				snprintf( msg, MAX_LINE_SIZE, "Instances from %d to %d %s%s", cases_from, cases_to, action, ch );
 
 		change_description( lab, NULL, -1, NULL, msg );
 	}
@@ -1631,11 +1631,11 @@ DESIGN
 		type = 1: NOLH
 		type = 2: random sampling
 		type = 3: Elementary Effects sampling (Morris, 1991)
-		samples = -1: use extended predefined sample size (n2 )
+		samples = -1: use extended predefined sample size (n2)
 		factors = 0: use automatic DoE size
 ******************************************************************************/
-design::design( sense *rsens, int typ, const char *fname, int findex,
-				int samples, int factors, int jump, int trajs )
+design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
+				int findex, int samples, int factors, int jump, int trajs )
 {
 	int i , j, kTab, doeRange, poolSz;
 	double **pool;
@@ -1873,10 +1873,10 @@ design::design( sense *rsens, int typ, const char *fname, int findex,
 	// file name for saving table
 	snprintf( doeName, MAX_ELEM_LENGTH, "%u_%u", ( unsigned ) findex, ( unsigned ) ( findex + n - 1 ) );
 
-	if ( strlen( path ) > 0 )				// non-default folder?
+	if ( strlen( dest_path ) > 0 )				// non-default folder?
 	{
-		doefname = new char[ strlen( path ) + strlen( simul_name ) + strlen( doeName ) + 7 ];
-		sprintf( doefname, "%s/%s_%s.csv", path, simul_name, doeName );
+		doefname = new char[ strlen( dest_path ) + strlen( simul_name ) + strlen( doeName ) + 7 ];
+		sprintf( doefname, "%s/%s_%s.csv", dest_path, simul_name, doeName );
 	}
 	else
 	{

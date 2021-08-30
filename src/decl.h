@@ -322,7 +322,7 @@ void link_cells( object *root, const char *lab );
 void log_parallel( bool nw );
 void monitor_parallel( bool nw );
 void move_obj( const char *lab, const char *dest );
-void plog_backend( const char *cm, const char *tag, const va_list arg );
+void plog_backend( const char *cm, const char *tag, va_list arg );
 void plog_series( void );
 void plog_tag( const char *cm, const char *tag, ... );
 void plot( int type, const int *start, const int *end, char **str, char **tag, bool norm );

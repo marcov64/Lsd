@@ -1126,10 +1126,10 @@ object *operate( object *r )
 	bool saveAs, delVar, renVar, table, subDir, overwDir;
 	char observe, initial, *lab0;
 	const char *lab1, *lab2, *lab3, *lab4;
-	static char lab[ MAX_BUFF_SIZE ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_LINE_SIZE ], NOLHfile[ MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], nw_exe[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ MAX_BUFF_SIZE ];
-	int sl, done = 0, num, i, j, k, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, temp[ 10 ];
-	long nLinks;
-	double fake = 0;
+	char lab[ MAX_BUFF_SIZE ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_LINE_SIZE ], ch1[ MAX_ELEM_LENGTH ], NOLHfile[ MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], nw_exe[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ MAX_BUFF_SIZE ];
+	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, temp[ 10 ], done = 0;
+	long nLinks, ptsSa, maxMC;
+	double fracMC, fake = 0;
 	FILE *f;
 	bridge *cb;
 	object *n, *cur, *cur1, *cur2;
@@ -1137,6 +1137,7 @@ object *operate( object *r )
 	result *rf;					// pointer for results files (may be zipped or not)
 	sense *cs;
 	description *cd;
+	design *doe;
 	vector < string > logs;
 	struct stat stExe, stMod;
 
@@ -3990,26 +3991,26 @@ object *operate( object *r )
 
 		cmd( "focustop .log" );
 
-		get_str( "lab", lab, MAX_PATH_LENGTH );
+		get_str( "lab", ch1, MAX_ELEM_LENGTH );
 
 		if ( saveConf )
 		{
 			if ( strlen( path ) == 0 )
 			{
-				cmd( "file copy -force %s.lsd %s.lsd", simul_name, lab );
-				plog( "\nSaved configuration to file %s.lsd", lab );
+				cmd( "file copy -force %s.lsd %s.lsd", simul_name, ch1 );
+				plog( "\nSaved configuration to file %s.lsd", ch1 );
 			}
 			else
 			{
-				cmd( "file copy -force %s/%s.lsd %s/%s.lsd", path, simul_name, path, lab );
-				plog( "\nSaved configuration to file %s/%s.lsd", path, lab );
+				cmd( "file copy -force %s/%s.lsd %s/%s.lsd", path, simul_name, path, ch1 );
+				plog( "\nSaved configuration to file %s/%s.lsd", path, ch1 );
 			}
 		}
 
 		if ( strlen( path ) == 0 )
-			snprintf( out_file, MAX_PATH_LENGTH, "%s.%s", lab, docsv ? "csv" : "res" );
+			snprintf( out_file, MAX_PATH_LENGTH, "%s.%s", ch1, docsv ? "csv" : "res" );
 		else
-			snprintf( out_file, MAX_PATH_LENGTH, "%s/%s.%s", path, lab, docsv ? "csv" : "res" );
+			snprintf( out_file, MAX_PATH_LENGTH, "%s/%s.%s", path, ch1, docsv ? "csv" : "res" );
 
 		if ( dozip )
 			strcatn( out_file, ".gz", MAX_PATH_LENGTH );
@@ -4304,7 +4305,7 @@ object *operate( object *r )
 			break;
 		}
 
-		snprintf( lab_old, MAX_PATH_LENGTH, "orig-eq_%s.tmp", simul_name);
+		snprintf( lab_old, 2 * MAX_PATH_LENGTH, "orig-eq_%s.tmp", simul_name);
 
 		if ( ( f = fopen( lab_old, "wb" ) ) != NULL )
 		{
@@ -4533,9 +4534,9 @@ object *operate( object *r )
 			if ( ! discard_change( false ) )	// unsaved configuration?
 				break;
 
-			int varSA = num_sensitivity_variables( rsense );// number of variables to test
+			varSA = num_sensitivity_variables( rsense );// number of variables to test
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
-			long ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
+			ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
 			plog( "\nSensitivity analysis space size: %ld", ptsSa );
 
 			// Prevent running into too big sensitivity spaces (high computation times)
@@ -4575,9 +4576,9 @@ object *operate( object *r )
 			if ( ! discard_change( false ) )	// unsaved configuration?
 				break;
 
-			int varSA = num_sensitivity_variables( rsense );// number of variables to test
+			varSA = num_sensitivity_variables( rsense );// number of variables to test
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
-			long ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
+			ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
 			plog( "\nSensitivity analysis space size: %ld", ptsSa );
 
 			// Prevent running into too big sensitivity spaces (high computation times)
@@ -4640,14 +4641,14 @@ object *operate( object *r )
 			if ( ! discard_change( false ) )	// unsaved configuration?
 				break;
 
-			int varSA = num_sensitivity_variables( rsense );// number of variables to test
+			varSA = num_sensitivity_variables( rsense );// number of variables to test
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
-			long maxMC = num_sensitivity_points( rsense );	// total number of points in sensitivity space
+			maxMC = num_sensitivity_points( rsense );	// total number of points in sensitivity space
 			plog( "\nSensitivity analysis space size: %ld", maxMC );
 
 			// get the number of Monte Carlo samples to produce
-			double sizMC = 10;
-			Tcl_LinkVar( inter, "sizMC", ( char * )&sizMC, TCL_LINK_DOUBLE );
+			fracMC = 10;
+			Tcl_LinkVar( inter, "fracMC", ( char * ) & fracMC, TCL_LINK_DOUBLE );
 
 			// detect the need of a new save path
 			subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
@@ -4661,8 +4662,8 @@ object *operate( object *r )
 
 			cmd( "ttk::frame .s.i" );
 			cmd( "ttk::label .s.i.l -justify center -text \"Monte Carlo sample size as\n%% of sensitivity space size\n(0 to 100)\"" );
-			cmd( "ttk::entry .s.i.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 && $n <= 100 } { set sizMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sizMC; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( ".s.i.e insert 0 $sizMC" );
+			cmd( "ttk::entry .s.i.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 && $n <= 100 } { set fracMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $fracMC; return 0 } } -invalidcommand { bell } -justify center" );
+			cmd( ".s.i.e insert 0 $fracMC" );
 			cmd( "pack .s.i.l .s.i.e" );
 
 			cmd( "ttk::label .s.w -text \"(large samples are not recommended)\"" );
@@ -4680,16 +4681,16 @@ object *operate( object *r )
 			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			cmd( "set sizMC [ .s.i.e get ]" );
+			cmd( "set fracMC [ .s.i.e get ]" );
 			cmd( "destroytop .s" );
-			Tcl_UnlinkVar( inter, "sizMC" );
+			Tcl_UnlinkVar( inter, "fracMC" );
 
 			if ( choice == 2 )
 				break;
 
 			// Check if number is valid
-			sizMC /= 100.0;
-			if ( ( sizMC * maxMC ) < 1 || sizMC > 1.0 )
+			fracMC /= 100.0;
+			if ( ( fracMC * maxMC ) < 1 || fracMC > 1.0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid sample size\" -detail \"Invalid Monte Carlo sample size to perform the sensitivity analysis. Select a number between 0%% and 100%% that produces at least one sample (in average).\"" );
 				choice = 0;
@@ -4697,9 +4698,9 @@ object *operate( object *r )
 			}
 
 			// Prevent running into too big sensitivity space samples (high computation times)
-			if ( ( sizMC * maxMC ) > MAX_SENS_POINTS )
+			if ( ( fracMC * maxMC ) > MAX_SENS_POINTS )
 				// ask user before proceeding
-				if ( sensitivity_too_large( ( long ) ( sizMC * maxMC ) ) )
+				if ( sensitivity_too_large( ( long ) ( fracMC * maxMC ) ) )
 					break;
 
 			// create a new save path if required
@@ -4713,17 +4714,17 @@ object *operate( object *r )
 			// save the current object & cursor position for quick reload
 			save_pos( r );
 
-			plog( "\nTarget sensitivity analysis sample size: %ld (%.1f%%)", ( long ) ( sizMC * maxMC ), 100 * sizMC );
+			plog( "\nTarget sensitivity analysis sample size: %ld (%.1f%%)", ( long ) ( fracMC * maxMC ), 100 * fracMC );
 			findexSens = 1;
 
 			// create a design of experiment (DoE) for the sensitivity data
 			cmd( "focustop .log" );
 
 			stop = false;
-			cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\" %ld { set stop true }", ( long ) ( sizMC * maxMC ) );
+			cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\" %ld { set stop true }", ( long ) ( fracMC * maxMC ) );
 
 			init_random( seed );				// reset random number generator
-			sensitivity_sequential( &findexSens, rsense, sizMC, path_sens );
+			sensitivity_sequential( &findexSens, rsense, fracMC, path_sens );
 
 			cmd( "destroytop .psa" );
 
@@ -4759,7 +4760,7 @@ object *operate( object *r )
 			if ( ! discard_change( false ) )	// unsaved configuration?
 				break;
 
-			int varSA = num_sensitivity_variables( rsense );	// number of variables to test
+			varSA = num_sensitivity_variables( rsense );	// number of variables to test
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 			lab1 = NOLH_valid_tables( varSA, ch, 2 * MAX_LINE_SIZE );
 
@@ -4815,37 +4816,6 @@ object *operate( object *r )
 			if ( choice == 2 )
 				break;
 
-			const char *extdoe = exists_var( "extdoe" ) ? get_str( "extdoe" ) : NULL;
-			const char *doeext = exists_var( "doeext" ) ? get_str( "doeext" ) : NULL;
-			const char *doesize = get_str( "doesize" );
-
-			if ( extdoe == NULL || strlen( extdoe ) == 0 )
-				strcpy( NOLHfile, "" );
-			else
-				get_str( "NOLHfile", NOLHfile, MAX_PATH_LENGTH );
-
-			int doesz = ( sscanf( doesize, "%d\u00D7", &j ) > 0 ) ?  j : 0;
-			int samples = ( doeext == NULL || strlen( doeext ) == 0 ) ? 0 : -1;
-
-			// adjust an NOLH design of experiment (DoE) for the sensitivity data
-			design *NOLHdoe = new design( rsense, 1, NOLHfile, 1, samples, doesz );
-
-			if ( NOLHdoe -> n == 0 )					// DoE configuration is not ok?
-			{
-				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration error\" -detail \"It was not possible to create a Non Orthogonal Latin Hypercube (NOLH) Design of Experiment (DoE) for the current sensitivity configuration. If the number of variables (factors) is large than 29, an external NOLH has to be provided in the file NOLH.csv (empty lines not allowed).\"" );
-				delete NOLHdoe;
-				break;
-			}
-
-			// Prevent running into too big sensitivity space samples (high computation times)
-			if ( NOLHdoe -> n > MAX_SENS_POINTS )
-				// ask user before proceeding
-				if ( sensitivity_too_large( NOLHdoe -> n ) )
-				{
-					delete NOLHdoe;
-					break;
-				}
-
 			// create a new save path if required
 			if ( subDir )
 				create_res_dir( path_sens );
@@ -4854,6 +4824,39 @@ object *operate( object *r )
 			if ( check_res_dir( path_sens, simul_name ) && sensitivity_clean_dir( path_sens ) )
 				clean_res_dir( path_sens, simul_name );
 
+			if ( ! get_bool( "extdoe" ) )
+				strcpy( NOLHfile, "" );
+			else
+				get_str( "NOLHfile", NOLHfile, MAX_PATH_LENGTH );
+
+			num = ( sscanf( get_str( "doesize" ), "%d\u00D7", & j ) > 0 ) ? j : 0;
+
+			// adjust an NOLH design of experiment (DoE) for the sensitivity data
+			doe = new design( rsense, 1, NOLHfile, path_sens, 1, get_bool( "doeext" ) ? -1 : 0, num );
+
+			if ( doe -> n == 0 )					// DoE configuration is not ok?
+			{
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration error\" -detail \"It was not possible to create a Non Orthogonal Latin Hypercube (NOLH) Design of Experiment (DoE) for the current sensitivity configuration. If the number of variables (factors) is large than 29, an external NOLH has to be provided in the file NOLH.csv (empty lines not allowed).\"" );
+
+				if ( subDir )
+					cmd( "catch { file delete -force \"%s\" }", path_sens );
+
+				delete doe;
+				break;
+			}
+
+			// Prevent running into too big sensitivity space samples (high computation times)
+			if ( doe -> n > MAX_SENS_POINTS )
+				// ask user before proceeding
+				if ( sensitivity_too_large( doe -> n ) )
+				{
+					if ( subDir )
+						cmd( "catch { file delete -force \"%s\" }", path_sens );
+
+					delete doe;
+					break;
+				}
+
 			// save the current object & cursor position for quick reload
 			save_pos( r );
 			findexSens = 1;
@@ -4861,8 +4864,8 @@ object *operate( object *r )
 			// create a design of experiment (DoE) for the sensitivity data
 			cmd( "focustop .log" );
 
-			sensitivity_doe( &findexSens, NOLHdoe, path_sens );
-			delete NOLHdoe;
+			sensitivity_doe( &findexSens, doe, path_sens );
+			delete doe;
 
 			// now reload the previously existing configuration
 			if ( ! load_prev_configuration( ) )
@@ -4897,11 +4900,11 @@ object *operate( object *r )
 			if ( ! discard_change( false ) )	// unsaved configuration?
 				break;
 
-			int varSA = num_sensitivity_variables( rsense );	// number of variables to test
+			varSA = num_sensitivity_variables( rsense );	// number of variables to test
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 
 			// get the number of Monte Carlo samples to produce
-			int sizMC = 10;
+			sizMC = 10;
 			Tcl_LinkVar( inter, "sizMC", ( char * ) & sizMC, TCL_LINK_INT );
 
 			// detect the need of a new save path
@@ -4973,9 +4976,9 @@ object *operate( object *r )
 
 			// check if design file numbering should pick-up from previously generated files
 			// adjust a design of experiment (DoE) for the sensitivity data
-			design *rand_doe = new design( rsense, 2, "", findexSens, sizMC );
-			sensitivity_doe( &findexSens, rand_doe, path_sens );
-			delete rand_doe;
+			doe = new design( rsense, 2, "", path_sens, findexSens, sizMC );
+			sensitivity_doe( &findexSens, doe, path_sens );
+			delete doe;
 
 			// now reload the previously existing configuration
 			if ( ! load_prev_configuration( ) )
@@ -5001,16 +5004,16 @@ object *operate( object *r )
 			if ( ! discard_change( false ) )	// unsaved configuration?
 				break;
 
-			int varSA = num_sensitivity_variables( rsense );	// number of variables to test
+			varSA = num_sensitivity_variables( rsense );	// number of variables to test
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 
 			// get the number of Monte Carlo samples to produce
 			int nLevels = 4, jumpSz = 2, nTraj = 10, nSampl = 100;
-			Tcl_LinkVar( inter, "varSA", ( char * )&varSA, TCL_LINK_INT );
-			Tcl_LinkVar( inter, "nLevels", ( char * )&nLevels, TCL_LINK_INT );
-			Tcl_LinkVar( inter, "jumpSz", ( char * )&jumpSz, TCL_LINK_INT );
-			Tcl_LinkVar( inter, "nTraj", ( char * )&nTraj, TCL_LINK_INT );
-			Tcl_LinkVar( inter, "nSampl", ( char * )&nSampl, TCL_LINK_INT );
+			Tcl_LinkVar( inter, "varSA", ( char * ) & varSA, TCL_LINK_INT );
+			Tcl_LinkVar( inter, "nLevels", ( char * ) & nLevels, TCL_LINK_INT );
+			Tcl_LinkVar( inter, "jumpSz", ( char * ) & jumpSz, TCL_LINK_INT );
+			Tcl_LinkVar( inter, "nTraj", ( char * ) & nTraj, TCL_LINK_INT );
+			Tcl_LinkVar( inter, "nSampl", ( char * ) & nSampl, TCL_LINK_INT );
 
 			// detect the need of a new save path
 			subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
@@ -5106,9 +5109,9 @@ object *operate( object *r )
 			findexSens = 1;
 
 			// adjust a design of experiment (DoE) for the sensitivity data
-			design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, jumpSz, nTraj );
-			sensitivity_doe( &findexSens, rand_doe, path_sens );
-			delete rand_doe;
+			doe = new design( rsense, 3, "", path_sens, findexSens, nSampl, nLevels, jumpSz, nTraj );
+			sensitivity_doe( &findexSens, doe, path_sens );
+			delete doe;
 
 			// now reload the previously existing configuration
 			if ( ! load_prev_configuration( ) )
@@ -5513,9 +5516,9 @@ object *operate( object *r )
 				do									// search for all sequential files
 				{
 					if ( strlen( out_dir ) == 0 )			// default path
-						snprintf( lab, MAX_PATH_LENGTH, "%s_%d.lsd", out_file, choice++ );
+						snprintf( lab, MAX_BUFF_SIZE, "%s_%d.lsd", out_file, choice++ );
 					else
-						snprintf( lab, MAX_PATH_LENGTH, "%s/%s_%d.lsd", out_dir, out_file, choice++ );
+						snprintf( lab, MAX_BUFF_SIZE, "%s/%s_%d.lsd", out_dir, out_file, choice++ );
 
 					if ( f != NULL )
 						fclose( f );
@@ -5564,6 +5567,11 @@ object *operate( object *r )
 
 		cmd( "newtop .s \"Parallel Batch\" { set choice 2 }" );
 
+		cmd( "ttk::frame .s.u" );
+		cmd( "ttk::label .s.u.l -text \"Output path\"" );
+		cmd( "ttk::label .s.u.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", out_dir );
+		cmd( "pack .s.u.l .s.u.w" );
+
 		cmd( "ttk::frame .s.t" );
 		cmd( "ttk::label .s.t.l -text \"Batch file base name\"" );
 		cmd( "ttk::entry .s.t.e -width 20 -textvariable res2 -justify center" );
@@ -5599,7 +5607,7 @@ object *operate( object *r )
 		cmd( "ttk::checkbutton .s.o.docsv -text \"Comma-separated text format (.csv)\" -variable docsv" );
 		cmd( "pack .s.o.nores .s.o.notot .s.o.n .s.o.dozip .s.o.docsv -anchor w" );
 
-		cmd( "pack .s.t .s.c .s.p .s.o -padx 5 -pady 5" );
+		cmd( "pack .s.u .s.t .s.c .s.p .s.o -padx 5 -pady 5" );
 
 		cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menurun.html#parallel } { set choice 2 }" );
 		cmd( "bind .s.c.e <KeyPress-Return> { .s.b.ok invoke }" );
@@ -5641,14 +5649,14 @@ object *operate( object *r )
 		cmd( "if [ string equal $CurPlatform windows ] { if { $natBat == 1 } { set choice 1 } { set choice 2 } } { if { $natBat == 1 } { set choice 3 } { set choice 4 } }" );
 		if ( fSeq )
 			if ( choice == 1 || choice == 4 )
-				snprintf( lab, MAX_PATH_LENGTH, "%s/%s_%d_%d.bat", out_dir, out_bat, ffirst, fnext - 1 );
+				snprintf( lab, MAX_BUFF_SIZE, "%s/%s_%d_%d.bat", out_dir, out_bat, ffirst, fnext - 1 );
 			else
-				snprintf( lab, MAX_PATH_LENGTH, "%s/%s_%d_%d.sh", out_dir, out_bat, ffirst, fnext - 1 );
+				snprintf( lab, MAX_BUFF_SIZE, "%s/%s_%d_%d.sh", out_dir, out_bat, ffirst, fnext - 1 );
 		else
 			if ( choice == 1 || choice == 4 )
-				snprintf( lab, MAX_PATH_LENGTH, "%s/%s.bat", out_dir, out_bat );
+				snprintf( lab, MAX_BUFF_SIZE, "%s/%s.bat", out_dir, out_bat );
 			else
-				snprintf( lab, MAX_PATH_LENGTH, "%s/%s.sh", out_dir, out_bat );
+				snprintf( lab, MAX_BUFF_SIZE, "%s/%s.sh", out_dir, out_bat );
 
 		f = fopen( lab, "wb" );						// binary mode to bypass CR/LF handling
 		if ( f == NULL )
@@ -5687,13 +5695,13 @@ object *operate( object *r )
 			{
 				if ( strchr( nw_exe, ':' ) != NULL )	// remove Windows drive letter
 				{
-					strcpyn( lab_old, strchr( nw_exe, ':' ) + 1, MAX_PATH_LENGTH );
+					strcpyn( lab_old, strchr( nw_exe, ':' ) + 1, 2 * MAX_PATH_LENGTH );
 					strcpyn( nw_exe, lab_old, MAX_PATH_LENGTH );
 				}
 
 				if ( strchr( out_dir, ':' ) != NULL )	// remove Windows drive letter
 				{
-					strcpyn( lab_old, strchr( out_dir, ':' ) + 1, MAX_PATH_LENGTH );
+					strcpyn( lab_old, strchr( out_dir, ':' ) + 1, 2 * MAX_PATH_LENGTH );
 					strcpyn( out_dir, lab_old, MAX_PATH_LENGTH );
 				}
 
@@ -5707,7 +5715,7 @@ object *operate( object *r )
 			// set background low priority in servers (cores/jobs > SRV_MIN_CORES)
 			if ( nature > SRV_MIN_CORES || ( param > SRV_MIN_CORES && fnext - ffirst > SRV_MIN_CORES ) )
 			{
-				snprintf( lab_old, MAX_PATH_LENGTH, "nice %s", nw_exe );
+				snprintf( lab_old, 2 * MAX_PATH_LENGTH, "nice %s", nw_exe );
 				strcpyn( nw_exe, lab_old, MAX_PATH_LENGTH );
 			}
 
@@ -5728,7 +5736,7 @@ object *operate( object *r )
 			sl = ( fnext - ffirst ) % param;		// remaining cases per core
 			for ( i = ffirst, j = 1; j <= param; ++j )	// allocates files by the number of cores
 			{
-				snprintf( lab_old, MAX_PATH_LENGTH, "%s_%d.log", out_file, j );
+				snprintf( lab_old, 2 * MAX_PATH_LENGTH, "%s_%d.log", out_file, j );
 				logs.push_back( lab_old );
 
 				if ( choice == 1 || choice == 4 )	// Windows
@@ -5745,7 +5753,7 @@ object *operate( object *r )
 			{
 				if ( fSeq )
 				{
-					snprintf( lab_old, MAX_PATH_LENGTH, "%s_%d.log", out_file, i );
+					snprintf( lab_old, 2 * MAX_PATH_LENGTH, "%s_%d.log", out_file, i );
 
 					if ( choice == 1 || choice == 4 )	// Windows
 						fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s_%d.lsd\"%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, i, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
@@ -5756,7 +5764,7 @@ object *operate( object *r )
 				{	// get the selected file names, one by one
 					cmd( "set res3 [ lindex $bah %d ]; set res3 [ file tail $res3 ]; set last [ expr { [ string last .lsd $res3 ] - 1 } ]; set res3 [ string range $res3 0 $last ]", j - 1  );
 					get_str( "res3", out_file, MAX_PATH_LENGTH - 4 );
-					snprintf( lab_old, MAX_PATH_LENGTH, "%s.log", out_file );
+					snprintf( lab_old, 2 * MAX_PATH_LENGTH, "%s.log", out_file );
 
 					if ( choice == 1 || choice == 4 )	// Windows
 						fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s.lsd\"%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
@@ -5907,7 +5915,7 @@ object *operate( object *r )
 	#ifdef _NP_
 		param = 1;
 	#else
-		param = max_threads;
+		param = min( sim_num, max_threads );
 	#endif
 
 		cmd( "set simNum %d", sim_num );
@@ -7307,7 +7315,7 @@ SENSITIVITY_CLEAN
 ****************************************************/
 bool sensitivity_clean_dir( const char *path )
 {
-	cmd( "set answer [ ttk::messageBox -parent . -type yesno -icon info -default yes -title \"Sensitivity Analysis\" -message \"Clean output path before proceeding?\" -detail \"The configuration files (.lsd) for sensitivity analysis will be created at:\n\n[ file nativename \"%s\" ]\n\nThis subdirectory already contains LSD produced files. Click on 'Yes' to delete the existing files before proceeding or 'No' to just continue without deleting.\" ]; switch -- $answer { no { set choice 0 } yes { set choice 1 } }", path );
+	cmd( "set answer [ ttk::messageBox -parent . -type yesno -icon info -default yes -title \"Sensitivity Analysis\" -message \"Clean output path before proceeding?\" -detail \"The configuration files (.lsd) for sensitivity analysis will be created at:\n\n[ fn_break [ file nativename \"%s\" ] 40 ]\n\nThis subdirectory already contains LSD produced files. Click on 'Yes' to delete the existing files before proceeding or 'No' to just continue without deleting.\" ]; switch -- $answer { no { set choice 0 } yes { set choice 1 } }", path );
 
 		return choice;
 }
@@ -7318,7 +7326,7 @@ SENSITIVITY_CREATED
 ****************************************************/
 void sensitivity_created( const char *path, const char *sim_name, int findex )
 {
-	cmd( "ttk::messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis you have to start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsdNW  -f  [ file nativename \"%s/%s\" ]  -s  %d\"", path, sim_name, findex );
+	cmd( "ttk::messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis you have to start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsdNW  -f  [ fn_break [ file nativename \"%s/%s\" ] 40 ]  -s  %d\"", path, sim_name, findex );
 }
 
 
@@ -7512,13 +7520,13 @@ bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz
 	bool newDir = false;
 
 	cmd( "if { [ string length \"%s\" ] > 0 } { \
-			set f [ file normalize \"%s/%s.lsd\" ]; \
-			set s [ file normalize \"%s/%s_\\[0-9\\]+.lsd\" ] \
+			set f [ file normalize \"%s/%s\" ]; \
 		} else { \
-			set f [ file normalize \"%s.lsd\" ] \
-			set s [ file normalize \"%s_\\[0-9\\]+.lsd\" ] \
-		}", path, path, sim_name, path, sim_name, sim_name, sim_name );
+			set f [ file normalize \"%s\" ]; \
+		}", path, path, sim_name, sim_name );
 
+	cmd( "set s \".*[ file tail $f ]_\\[0-9\\]+\\.lsd$\"" );
+	cmd( "set f \"$f.lsd\"" );
 	cmd( "set d [ file dirname $f ]" );
 
 	// check if path is valid
@@ -7540,6 +7548,7 @@ bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz
 		cmd( "set l [ glob -nocomplain -directory $d *.lsd ]" );
 		cmd( "set l [ lsearch -exact -all -inline -not $l $f ]" );
 		cmd( "set l [ lsearch -regexp -all -inline -not $l $s ]" );
+
 		cmd( "if { [ llength $l ] > 0 } { set res 1 } { set res 0 }" );
 		if ( get_bool( "res" ) )
 			newDir = true;

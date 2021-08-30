@@ -1045,9 +1045,9 @@ void write_list( FILE *frep, object *root, int flag_all, const char *prefix )
 
 	// distinguish the case you are compiling the initial list of element (all) or for a single Object)
 	if ( flag_all == 0 )
-		snprintf( s1, 2 * MAX_LINE_SIZE, "form_v_%s_%s", root->label, prefix );
+		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_v_%s_%s", root->label, prefix );
 	else
-		snprintf( s1, 2 * MAX_LINE_SIZE, "form_v_all_%s_%s", root->label, prefix );
+		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_v_all_%s_%s", root->label, prefix );
 
 	if ( lmenu )
 	{
@@ -1089,9 +1089,9 @@ void write_list( FILE *frep, object *root, int flag_all, const char *prefix )
 
 	//distinguish the case you are compiling the initial list of element (all) or for a single Object)
 	if ( flag_all == 0 )
-		snprintf( s1, 2 * MAX_LINE_SIZE, "form_p_%s_%s", root->label, prefix );
+		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_p_%s_%s", root->label, prefix );
 	else
-		snprintf( s1, 2 * MAX_LINE_SIZE, "form_p_all_%s_%s", root->label, prefix );
+		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_p_all_%s_%s", root->label, prefix );
 
 	if ( lmenu )
 	{
@@ -1104,7 +1104,7 @@ void write_list( FILE *frep, object *root, int flag_all, const char *prefix )
 		for ( i = 0; i < num; ++i )
 		{
 			cmd( "set app [ lindex $alphalist %d ]", i );
-			fprintf( frep, "<TT><A HREF=\"#%s%s\">%s</A></TT>",prefix, get_str( "app" ), get_str( "app" ) );
+			fprintf( frep, "<TT><A HREF=\"#%s%s\">%s</A></TT>", prefix, get_str( "app" ), get_str( "app" ) );
 
 			if ( i < num - 1 )
 				fprintf( frep, "<TT>, </TT>" );

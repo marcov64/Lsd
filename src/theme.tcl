@@ -364,8 +364,6 @@ proc ttk::listbox { w args } {
 proc ttk::menu { w args } {
 	::menu $w {*}$args
 
-	$w configure -relief flat -activeborderwidth 0
-
 	setcolor $w -background bg \
 				-foreground fg \
 				-activebackground sbg \

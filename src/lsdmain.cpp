@@ -233,7 +233,6 @@ int lsdmain( int argn, const char **argv )
 
 #ifdef _NW_
 
-	false;
 	dozip = no_window = true;			// to preserve compatibility
 	dobar = doover = docsv = no_res = no_tot = grandTotal = false;
 	findex = -1;						// no default

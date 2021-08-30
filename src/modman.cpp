@@ -9,7 +9,7 @@
 
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
 
 /*************************************************************
@@ -88,8 +88,9 @@ int lsdmain( int argn, const char **argv )
 {
 	bool found, recolor = false;
 	int i, j, num, choice, shigh, recolor_all = 0, v_counter = 0;
-	const char * s;
-	static char str[ 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], str2[ 2 * MAX_PATH_LENGTH ], tmp[ MAX_BUFF_SIZE ];
+	const char *s;
+	char str[ 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], tmp[ MAX_BUFF_SIZE ], tmp1[ MAX_BUFF_SIZE ];
+	struct stat stExe, stMod;
 	FILE *f;
 
 	// initialize tcl/tk and set global bidirectional variables
@@ -166,7 +167,7 @@ int lsdmain( int argn, const char **argv )
 			cmd( "ttk::messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 			return 6;
 		}
-		
+
 		cmd( "set env(LSDROOT) $RootLsd" );
 	}
 
@@ -184,7 +185,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "ttk::messageBox -type ok -icon error -title Error -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 		return 7;
 	}
-		
+
 	// load/check configuration files
 	i = load_lmm_options( );
 	check_option_files( true );
@@ -560,7 +561,7 @@ int lsdmain( int argn, const char **argv )
 	cmd( "pack .f.hea.info.grp .f.hea.info.pad1 .f.hea.info.mod .f.hea.info.pad2 .f.hea.info.ver .f.hea.info.pad3 .f.hea.info.file -side left" );
 
 	cmd( "pack .f.hea.info -side left -anchor w -expand yes" );
-	
+
 	cmd( "ttk::frame .f.hea.cur" );
 
 	cmd( "ttk::frame .f.hea.cur.line" );
@@ -583,7 +584,7 @@ int lsdmain( int argn, const char **argv )
 	cmd( "pack .f.t.vs -side right -fill y" );
 	cmd( "pack .f.t.t -expand yes -fill both" );
 	cmd( "pack .f.t.hs -fill x" );
-	
+
 	cmd( "tooltip::tooltip .f.hea.cur \"Go to Line...\"" );
 
 	// redefine bindings to better support new syntax highlight routine
@@ -710,7 +711,7 @@ int lsdmain( int argn, const char **argv )
 	cmd( ".v.i add command -label \"DELETE\" -command { set choice 53 } -accelerator Ctrl+D" );
 	cmd( ".v.i add command -label \"Network macros\" -command { set choice 72 } -accelerator Ctrl+K" );
 	cmd( ".v.i add command -label \"Math functions\" -command { set choice 51 } -accelerator Ctrl+H" );
-	
+
 	cmd( "tooltip::tooltip .v.i -index 0 \"Add a new LSD equation\"" );
 	cmd( "tooltip::tooltip .v.i -index 1 \"Request the value of a variable or parameter\"" );
 	cmd( "tooltip::tooltip .v.i -index 2 \"Add cycle over a set of object instances\"" );
@@ -775,8 +776,8 @@ int lsdmain( int argn, const char **argv )
 			cmd( "set fileName \"[ file tail \"$filetoload\" ]\"" );
 			cmd( "set fileDir [ file dirname \"$filetoload\" ]" );
 			cmd( "set before [ .f.t.t get 1.0 end ]" );
-			
-			sourcefile = recolor_all = is_source_file( get_str( "filetoload" ) );
+
+			recolor_all = sourcefile = is_source_file( get_str( "filetoload" ) );
 		}
 		else
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" );
@@ -826,7 +827,7 @@ int lsdmain( int argn, const char **argv )
 
 	// update status in title and info bars
 	cmd( "upd_bars" );
-	
+
 	// main command loop
 	while ( ! choice )
 	{
@@ -973,7 +974,7 @@ int lsdmain( int argn, const char **argv )
 		}
 
 		sourcefile = 0;
-		
+
 		cmd( ".f.t.t edit reset" );
 		cmd( ".f.t.t mark set insert 1.0" );
 
@@ -1272,7 +1273,7 @@ int lsdmain( int argn, const char **argv )
 
 		cmd( "ttk::frame .l.pad" );
 		cmd( "pack .l.pad -pady 5" );
-		
+
 		cmd( "ttk::frame .l.b1" );
 		cmd( "ttk::button .l.b1.repl -width $butWid -state disabled -text Replace -command { \
 				if { [ string length $cur ] > 0 } { \
@@ -1423,17 +1424,54 @@ int lsdmain( int argn, const char **argv )
 			cmd( "if [ string equal -nocase $DbgExe gdb ] { set cmdbreak \"--args\" } { set cmdbreak \"\" }" );
 
 		make_makefile( );
-		cmd( "set fapp [ file nativename \"$modelDir/makefile\" ]" );
-		s = get_str( "fapp" );
-		f = fopen( s, "r" );
+
+		// check if executable file is older than model file
+		s = get_fun_name( str, MAX_PATH_LENGTH );
+		if ( s == NULL || ! strcmp( s, "" ) )
+			goto end_gdb;
+
+		strcpyn( str, s, MAX_PATH_LENGTH );
+
+		s = get_str( "modelDir" );
+		if ( s == NULL || ! strcmp( s, "" ) )
+			goto end_gdb;
+
+		snprintf( tmp, MAX_BUFF_SIZE, "%s/%s", s, str );
+
+		if ( platform == _MAC_ )
+			snprintf( tmp1, MAX_BUFF_SIZE, "%s/%s.app/Contents/MacOS/%s", s, str1, str1 );
+		else
+			snprintf( tmp1, MAX_BUFF_SIZE, "%s/%s", s, str1 );
+
+		// get OS info for files
+		if ( stat( tmp1, & stExe ) == 0 && stat( tmp, & stMod ) == 0 )
+		{
+			if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
+			{
+				cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing executable file is older than the last version of the model.\n\nPress 'OK' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+				if ( choice == 2 )
+					goto end_gdb;
+			}
+		}
+		else
+		{
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Executable not found\" -detail \"Compile the model before running it in the [ string toupper $DbgExe ] debugger.\"" );
+			goto end_gdb;
+		}
+
+		f = fopen( eval_str( "[ file nativename \"$modelDir/makefile\" ]" ), "r" );
 		if ( f == NULL )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
 			goto end_gdb;
 		}
+
 		fscanf( f, "%999s", str );
 		while ( strncmp( str, "TARGET=", 7 ) && fscanf( f, "%999s", str ) != EOF );
-		if ( strncmp(str, "TARGET=", 7) != 0 )
+
+		fclose( f );
+
+		if ( strncmp( str, "TARGET=", 7 ) != 0 )
 		{
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
 			goto end_gdb;
@@ -1458,46 +1496,14 @@ int lsdmain( int argn, const char **argv )
 				goto end_gdb;
 		}
 
-		// check if executable file is older than model file
-		s = get_fun_name( str, MAX_PATH_LENGTH );
-		if ( s == NULL || ! strcmp( s, "" ) )
-			goto end_gdb;
-		
-		strcpyn( str, s, MAX_PATH_LENGTH );
-		s = get_str( "modelDir" );
-		if ( s != NULL && strcmp( s, "" ) )
-		{
-			snprintf( str2, MAX_PATH_LENGTH, "%s/%s", s, str );
-			
-			if ( platform == _MAC_ )
-				snprintf( str, MAX_PATH_LENGTH, "%s/%s.app/Contents/MacOS/%s", s, str1, str1 );
-			else
-				snprintf( str, MAX_PATH_LENGTH, "%s/%s", s, str1 );
-		}
-
-		// get OS info for files
-		struct stat stExe, stMod;
-		if ( stat( str, &stExe ) == 0 && stat( str2, &stMod ) == 0 )
-		{
-			if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
-			{
-				cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing executable file is older than the last version of the model.\n\nPress 'OK' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
-				if ( choice == 2 )
-					goto end_gdb;
-			}
-		}
-		else
-		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Executable not found\" -detail \"Compile the model before running it in the [ string toupper $DbgExe ] debugger.\"" );
-			goto end_gdb;
-		}
-
 		cmd( "if { [ open_terminal \"%s\" ] != 0 } { \
 			ttk::messageBox -parent . -title Error -icon error -type ok -message \"Debugger failed to launch\" -detail \"Please check if [ string toupper $DbgExe ] debugger is installed and set up properly.\n\nDetail:\n$termResult\" \
 			}", tmp );					// if all ok, run debug command
 
 		end_gdb:
+
 		cmd( "cd \"$RootLsd\"" );
+
 		choice = 0;
 		goto loop;
 	}
@@ -1522,6 +1528,7 @@ int lsdmain( int argn, const char **argv )
 						set choice 0 \
 					} \
 				}" );
+
 		if ( choice == 0 )
 			goto loop;
 
@@ -1855,9 +1862,9 @@ int lsdmain( int argn, const char **argv )
 			}" );
 		cmd( "upd_cursor" );
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
-		
-		sourcefile = recolor_all = is_source_file( get_str( "fileName" ) );
-		
+
+		recolor_all = sourcefile = is_source_file( get_str( "fileName" ) );
+
 		if ( sourcefile )
 		{
 			cmd( ".f.t.t tag add bc \"1.0\"" );
@@ -2125,7 +2132,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( ".f.t.t tag add sel insert \"insert + 7 char\"" );
 
 		v_counter = 0;
-		
+
 		cmd( ".f.t.t see insert" );
 
 		recolor_all = true;
@@ -2181,8 +2188,8 @@ int lsdmain( int argn, const char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		cmd( "set v_num [ .a.v.e get ]" ); 
-		cmd( "set v_lag [ .a.l.e get ]" ); 
+		cmd( "set v_num [ .a.v.e get ]" );
+		cmd( "set v_lag [ .a.l.e get ]" );
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2202,7 +2209,7 @@ int lsdmain( int argn, const char **argv )
 
 		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
 		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
-		
+
 		if ( num != -1 )
 			v_counter = ++num;
 
@@ -2270,7 +2277,7 @@ int lsdmain( int argn, const char **argv )
 		s = eval_str( "[ .f.t.t get $line.0 $line.end ]" );
 		for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
 			str[ i ] = s[ i ];
-		
+
 		if ( i > 0 )
 		{
 			str[ i ] = '\0';
@@ -2342,7 +2349,7 @@ int lsdmain( int argn, const char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		cmd( "set v_num [ .a.v.e get ]" ); 
+		cmd( "set v_num [ .a.v.e get ]" );
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2358,7 +2365,7 @@ int lsdmain( int argn, const char **argv )
 
 		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
 		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
-		
+
 		if ( num != -1 )
 			v_counter = ++num;
 
@@ -2415,7 +2422,7 @@ int lsdmain( int argn, const char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		cmd( "set v_num [ .a.v.e get ]" ); 
+		cmd( "set v_num [ .a.v.e get ]" );
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2431,7 +2438,7 @@ int lsdmain( int argn, const char **argv )
 
 		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
 		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
-		
+
 		if ( num != -1 )
 			v_counter = ++num;
 
@@ -2562,7 +2569,7 @@ int lsdmain( int argn, const char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		cmd( "set v_lag [ .a.l.e get ]" ); 
+		cmd( "set v_lag [ .a.l.e get ]" );
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2640,7 +2647,7 @@ int lsdmain( int argn, const char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		cmd( "set v_lag [ .a.l.e get ]" ); 
+		cmd( "set v_lag [ .a.l.e get ]" );
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2859,7 +2866,7 @@ int lsdmain( int argn, const char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		cmd( "set v_lag [ .a.l.e get ]" ); 
+		cmd( "set v_lag [ .a.l.e get ]" );
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -3000,8 +3007,8 @@ int lsdmain( int argn, const char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		cmd( "set v_num [ .a.v.e get ]" ); 
-		cmd( "set v_lag [ .a.l.e get ]" ); 
+		cmd( "set v_num [ .a.v.e get ]" );
+		cmd( "set v_lag [ .a.l.e get ]" );
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -3021,7 +3028,7 @@ int lsdmain( int argn, const char **argv )
 
 		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
 		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
-		
+
 		if ( num != -1 )
 			v_counter = ++num;
 
@@ -3524,7 +3531,7 @@ int lsdmain( int argn, const char **argv )
 				cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"V_NODEIDS($v_obj)\" }" );
 
 				cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
-				
+
 				if ( num != -1 )
 					v_counter = ++num;
 				break;
@@ -3540,7 +3547,7 @@ int lsdmain( int argn, const char **argv )
 				cmd( ".f.t.t insert insert \"V_LINK($v_obj)\"" );
 
 				cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
-				
+
 				if ( num != -1 )
 					v_counter = ++num;
 				break;
@@ -3692,7 +3699,7 @@ int lsdmain( int argn, const char **argv )
 		s = eval_str( "[ .f.t.t get $line.0 $line.end ]" );
 		for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
 			str[ i ] = s[ i ];
-		
+
 		if ( i > 0 )
 		{
 			str[ i ] = '\0';
@@ -4364,7 +4371,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "set dir [ glob -nocomplain * ]" );
 		cmd( "set num [ llength $dir ]" );
 		strcpy( str, " " );
-		
+
 		for ( i = 0; i < num && choice != 3; ++i )
 		{
 			cmd( "if [ file isdirectory [ lindex $dir %d ] ] { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
@@ -4634,7 +4641,7 @@ int lsdmain( int argn, const char **argv )
 			} { set choice 1 } { LsdHelp LMM.html#compilation_options } { set choice 2 }" );
 
 		cmd( "tooltip::tooltip .l.b.x \"Reset all options to defaults\"" );
-		
+
 		cmd( "showtop .l" );
 		cmd( "mousewarpto .l.b.ok 0" );
 		cmd( ".l.t.text insert end $a" );
@@ -4816,7 +4823,7 @@ int lsdmain( int argn, const char **argv )
 				} \
 			}" );
 		cmd( "pack .l.d.opt.debug .l.d.opt.ext .l.d.opt.def .l.d.opt.cle -padx $butSpc -side left" );
-		
+
 		cmd( "tooltip::tooltip .l.d.opt.debug \"Enable using GDB/LLDB debugger\"" );
 		cmd( "tooltip::tooltip .l.d.opt.ext \"Add extra source code files\"" );
 		cmd( "tooltip::tooltip .l.d.opt.def \"Reset all options to defaults\"" );
@@ -4903,18 +4910,18 @@ int lsdmain( int argn, const char **argv )
 	if ( choice == 60 )
 	{
 		cmd( "updateTheme" );
-		
+
 		for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
 		{
 			cmd( "set temp_var%d \"$%s\"", i, lmm_options[ i - 1 ] );
 			cmd( "set default_var%d \"%s\"", i, lmm_defaults[ i - 1 ] );
 		}
-		
+
 		cmd( "set temp_var16 \"[ dict get $themeToName $temp_var16 ]\"" );
 		cmd( "set default_var16 \"[ dict get $themeToName $default_var16 ]\"" );
-		
+
 		cmd( "newtop .a \"Options\" { set choice 2 }" );
-		
+
 		cmd( "ttk::frame .a.f" );
 
 		cmd( "ttk::frame .a.f.c1" );					// column 1
@@ -4958,7 +4965,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "pack .a.f.c1.num .a.f.c1.num13 .a.f.c1.num2 .a.f.c1.num4 .a.f.c1.num12 .a.f.c1.num5 -padx 5 -pady 5" );
 
 		cmd( "pack .a.f.c1 -padx 10 -side left" );
-		
+
 		cmd( "ttk::frame .a.f.c2" );					// column 2
 
 		cmd( "ttk::frame .a.f.c2.num16" );
@@ -4967,7 +4974,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "write_any .a.f.c2.num16.v $temp_var16" );
 		cmd( "pack .a.f.c2.num16.l .a.f.c2.num16.v" );
 		cmd( "bind .a.f.c2.num16.v <Return> { focus .a.f.c2.num3.f.v; .a.f.c2.num7.v selection range 0 end }" );
-		
+
 		cmd( "ttk::frame .a.f.c2.num3" );
 		cmd( "ttk::label .a.f.c2.num3.l -text \"Font name and size\"" );
 		cmd( "ttk::frame .a.f.c2.num3.f" );
@@ -5015,9 +5022,9 @@ int lsdmain( int argn, const char **argv )
 		cmd( "pack .a.f.c2.num16 .a.f.c2.num3 .a.f.c2.num7 .a.f.c2.num9 .a.f.c2.num8 -padx 5 -pady 5" );
 
 		cmd( "pack .a.f.c2 -padx 10 -side left" );
-		
+
 		cmd( "pack .a.f" );
-		
+
 		cmd( "proc set_defaults { } { \
 				set ::temp_var1 \"$::default_var1\"; \
 				set ::temp_var2 \"$::default_var2\"; \
@@ -5040,7 +5047,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "okXhelpcancel .a b Default { set_defaults } { set choice 1 } { LsdHelp LMM.html#SystemOpt } { set choice 2 }" );
 
 		cmd( "tooltip::tooltip .a.b.x \"Reset all options to defaults\"" );
-		
+
 		cmd( "showtop .a" );
 		cmd( "mousewarpto .a.b.ok 0" );
 		cmd( ".a.f.c1.num.v selection range 0 end" );
@@ -5146,7 +5153,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "ttk::listbox $e.l.l -listvariable extra_files -width 30 -height 15 -selectmode single -yscroll \"$e.l.v_scroll set\" -dark $darkTheme" );
 		cmd( "pack $e.l.l $e.l.v_scroll -side left -fill y" );
 		cmd( "mouse_wheel $e.l.l" );
-		
+
 		cmd( "bind $e.l.l <Home> { selectinlist .extra.l.l 0 }" );
 		cmd( "bind $e.l.l <End> { selectinlist .extra.l.l end }" );
 
@@ -5375,7 +5382,7 @@ int lsdmain( int argn, const char **argv )
 	Tcl_UnlinkVar( inter, "recolor_all");
 
 	set_env( false );
-	
+
 	delete [ ] rootLsd;
 	delete [ ] exec_path;
 
@@ -5427,21 +5434,21 @@ int strwrds( const char string[ ] )
 {
 	int i = 0, words = 0;
 	char lastC = '\0';
-	
-	if ( string == NULL ) 
+
+	if ( string == NULL )
 		return 0;
-	
-	while ( isspace( string[ i ] ) ) 
+
+	while ( isspace( string[ i ] ) )
 		++i;
-	
-	if ( string[ i ] == '\0' ) 
+
+	if ( string[ i ] == '\0' )
 		return 0;
-	
+
 	for ( ; string[ i ] != '\0'; lastC = string[ i++ ] )
-		if ( isspace( string[ i ] ) && ! isspace( lastC ) ) 
+		if ( isspace( string[ i ] ) && ! isspace( lastC ) )
 			words++;
-		
-	if ( isspace( lastC ) ) 
+
+	if ( isspace( lastC ) )
 		return words;
 
 	return words + 1;
@@ -5453,37 +5460,37 @@ int map_color( int hiLev )
 {
 	if ( ! sourcefile || hiLev == 0 )
 		return 0;
-	
+
 	if ( hiLev == 1 )
 		return 4;
-	
+
 	if ( ITEM_COUNT( cTypes ) > ITEM_COUNT( cRegex ) )
 		return ITEM_COUNT( cRegex );
-	
+
 	return ITEM_COUNT( cTypes );
 }
 
 // compare function for qsort to compare different color hits (used by color)
 int comphit(const void *p1, const void *p2)
 {
-	if ( ( ( hit * ) p1 )->iniLin < ( ( hit * ) p2 )->iniLin ) 
+	if ( ( ( hit * ) p1 )->iniLin < ( ( hit * ) p2 )->iniLin )
 		return -1;
-	
-	if ( ( ( hit * ) p1 )->iniLin > ( ( hit * ) p2 )->iniLin ) 
+
+	if ( ( ( hit * ) p1 )->iniLin > ( ( hit * ) p2 )->iniLin )
 		return 1;
-	
-	if ( ( ( hit * ) p1 )->iniCol < ( ( hit * ) p2 )->iniCol ) 
+
+	if ( ( ( hit * ) p1 )->iniCol < ( ( hit * ) p2 )->iniCol )
 		return -1;
-	
-	if ( ( ( hit * ) p1 )->iniCol > ( ( hit * ) p2 )->iniCol ) 
+
+	if ( ( ( hit * ) p1 )->iniCol > ( ( hit * ) p2 )->iniCol )
 		return 1;
-	
-	if ( ( ( hit * ) p1 )->type < ( ( hit * ) p2 )->type ) 
+
+	if ( ( ( hit * ) p1 )->type < ( ( hit * ) p2 )->type )
 		return -1;
-	
-	if ( ( ( hit * ) p1 )->type > ( ( hit * ) p2 )->type ) 
+
+	if ( ( ( hit * ) p1 )->type > ( ( hit * ) p2 )->type )
 		return 1;
-	
+
 	return 0;
 }
 
@@ -5554,7 +5561,7 @@ void color( int hiLev, long iniLin, long finLin )
 			sscanf( strtok( s, " \t" ), "%ld.%ld", &hits[ k ].iniLin, &hits[ k ].iniCol );
 			cpos = s + strlen( s );
 		}
-		
+
 		delete [ ] count[ i ];
 		delete [ ] pos[ i ];
 	}
@@ -5638,7 +5645,7 @@ void show_comp_result( bool nw )
 	cmd( "pack .mm.i" );
 
 	cmd( "tooltip::tooltip .mm.i \"File, line and column of error\"" );
-	
+
 	cmd( "ttk::frame .mm.b" );
 
 	cmd( "ttk::button .mm.b.perr -width [ expr { $butWid + 4 } ] -text \"Previous Error\" -underline 0 -command { \
@@ -5717,7 +5724,7 @@ void show_comp_result( bool nw )
 	cmd( "ttk::button .mm.b.close -width [ expr { $butWid + 4 } ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; focustop .f.t.t; set keepfocus 0 }" );
 	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx $butSpc -expand yes -fill x -side left" );
 	cmd( "pack .mm.b -padx $butPad -pady $butPad -side right" );
-	
+
 	cmd( "tooltip::tooltip .mm.b.perr \"Show previous error line\"" );
 	cmd( "tooltip::tooltip .mm.b.gerr \"Edit error line in LMM\"" );
 	cmd( "tooltip::tooltip .mm.b.ferr \"Show next error line\"" );

@@ -443,8 +443,8 @@ struct design 							// design of experiment object
 	char **lab;
 	bool *intg;
 
-	design( sense *rsens, int typ = 1, const char *fname = "", int findex = 1,
-			int samples = 0, int factors = 0, int jump = 2, int trajs = 4 );
+	design( sense *rsens, int typ, const char *fname, const char *dest_path, 
+			int findex, int samples, int factors = 0, int jump = 2, int trajs = 4 );
 										// constructor
 	~design( void );					// destructor
 };

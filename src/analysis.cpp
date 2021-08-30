@@ -4761,7 +4761,7 @@ STATISTICS
 ************************/
 void statistics( void )
 {
-	char **str, **tag, str1[ MAX_LINE_SIZE ], longmsg[ MAX_LINE_SIZE ];
+	char **str, **tag, str1[ MAX_LINE_SIZE ], longmsg[ 2 * MAX_LINE_SIZE ];
 	double **data, av, var, num, ymin, ymax, sig;
 	int i, j, *start, *end, *id;
 
@@ -4818,7 +4818,7 @@ void statistics( void )
 		cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics:\n\n\" table" );
 
 	snprintf( str1, MAX_LINE_SIZE, "%d Cases", max_c - min_c + 1 );
-	snprintf( longmsg, MAX_LINE_SIZE, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
+	snprintf( longmsg, 2 * MAX_LINE_SIZE, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
 	cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 
 	for ( i = 0; i < nv; ++i )
@@ -4854,12 +4854,12 @@ void statistics( void )
 
 		if ( num > 0 )
 		{
-			snprintf( da_tmp, MAX_BUFF_SIZE, "%s %s (%.*g)", str[ i ], tag[ i ], pdigits, num );
-			snprintf( str1, MAX_LINE_SIZE, "%-20s\t", da_tmp );
-			cmd( ".log.text.text.internal insert end \"%s\" table", str1 );
+			snprintf( str1, MAX_LINE_SIZE, "%s %s (%.*g)", str[ i ], tag[ i ], pdigits, num );
+			snprintf( longmsg, 2 * MAX_LINE_SIZE, "%-20s\t", str1 );
+			cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 
 
-			snprintf( longmsg, MAX_LINE_SIZE, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax);
+			snprintf( longmsg, 2 * MAX_LINE_SIZE, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax);
 			cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 		}
 	}
@@ -4890,7 +4890,7 @@ STATISTICS_CROSS
 void statistics_cross( void )
 {
 	bool first;
-	char **str, **tag, str1[ MAX_LINE_SIZE ], longmsg[ MAX_LINE_SIZE ];
+	char **str, **tag, str1[ MAX_LINE_SIZE ], longmsg[ 2 * MAX_LINE_SIZE ];
 	double **data, av, var, num, ymin = 0, ymax = 0, sig;
 	int i, j, h, k, nt, *start, *end, *id, *list_times;
 
@@ -4960,7 +4960,7 @@ void statistics_cross( void )
 		cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics:\n\n\" table" );
 
 	snprintf( str1, MAX_LINE_SIZE, "%d Variables", nv );
-	snprintf( longmsg, MAX_LINE_SIZE, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
+	snprintf( longmsg, 2 * MAX_LINE_SIZE, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
 	cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 
 	for ( j = 0; j < nt; ++j )
@@ -5003,7 +5003,7 @@ void statistics_cross( void )
 		{
 			snprintf( str1, MAX_LINE_SIZE, "Case %d (%.*g)\t", h, pdigits, num );
 			cmd( ".log.text.text.internal insert end \"%s\" table", str1 );
-			snprintf( longmsg, MAX_LINE_SIZE, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax );
+			snprintf( longmsg, 2 * MAX_LINE_SIZE, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax );
 			cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 		}
 	}
@@ -5036,7 +5036,7 @@ Draws the XY plots, with the first series as X and the others as Y's
 void plot_gnu( void )
 {
 	bool done;
-	char **str, **tag, str1[ MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
+	char **str, **tag, str1[ MAX_ELEM_LENGTH ], str2[ 2 * MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
 	const char *app;
 	double temp, maxx, minx, **data;
 	int i, j, box, ndim, gridd, *start, *end, *id, nanv = 0;
@@ -5487,19 +5487,19 @@ void plot_gnu( void )
 		if ( start[ i ] <= max_c && end[ i ] >= min_c )
 		{
 			if ( ndim == 2 )
-				snprintf( str2, MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] );
+				snprintf( str2, 2 * MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] );
 			else
 			{
 				if ( box == 0 )
-					snprintf( str2, MAX_ELEM_LENGTH, ", 'data.gp' using 1:2:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] );
+					snprintf( str2, 2 * MAX_ELEM_LENGTH, ", 'data.gp' using 1:2:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] );
 				else
 					if ( gridd == 0 )
 					{
 						if ( box == 1 )
-							snprintf( str2, MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d:%d %s t \"\"", 2 + 2 * i, 2 * i + 3, str1 );
+							snprintf( str2, 2 * MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d:%d %s t \"\"", 2 + 2 * i, 2 * i + 3, str1 );
 						else
 							if ( i <= nv / 2 )
-								snprintf( str2, MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d:%d %s t \"\"", i + 1, ( nv - nanv ) / 2 + i + 1, str1 );
+								snprintf( str2, 2 * MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d:%d %s t \"\"", i + 1, ( nv - nanv ) / 2 + i + 1, str1 );
 							else
 								strcpy( str2, "" );
 					}
@@ -5508,7 +5508,7 @@ void plot_gnu( void )
 			}
 
 			if ( strlen( str2 ) > 0 && allblack )
-				strcatn( str2, str3, MAX_ELEM_LENGTH );
+				strcatn( str2, str3, 2 * MAX_ELEM_LENGTH );
 
 			fprintf( f, "%s", str2 );
 			fprintf( f2, "%s", str2 );

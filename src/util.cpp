@@ -101,7 +101,7 @@ Back-end to plog and plog_tag
 #define NUM_TAGS 7
 const char *tags[ NUM_TAGS ] = { "", "highlight", "table", "series", "prof1", "prof2", "bar" };
 
-void plog_backend( const char *cm, const char *tag, const va_list arg )
+void plog_backend( const char *cm, const char *tag, va_list arg )
 {
 	static bool bufdyn;
 	static char *buffer, *message, bufstat[ MAX_BUFF_SIZE ], msgstat[ MAX_BUFF_SIZE ];
@@ -554,7 +554,7 @@ lab_tit indicates the position of the object containing the variables in the mod
 void set_lab_tit( variable *var )
 {
 	bool first = true;
-	char app[ MAX_LINE_SIZE ], app1[ MAX_LINE_SIZE ];
+	char app[ MAX_LINE_SIZE ], app1[ 2 * MAX_LINE_SIZE ];
 	object *cur;
 
 	if ( var->up->up == NULL )
@@ -574,11 +574,11 @@ void set_lab_tit( variable *var )
 		// find the bridge containing the variable
 		set_counter( cur );
 		if ( ! first )
-			snprintf( app1, MAX_LINE_SIZE, "%d_%s", cur->acounter, app );
+			snprintf( app1, 2 * MAX_LINE_SIZE, "%d_%s", cur->acounter, app );
 		else
 		{
 			first = false;
-			snprintf( app1, MAX_LINE_SIZE, "%d", cur->acounter );
+			snprintf( app1, 2 * MAX_LINE_SIZE, "%d", cur->acounter );
 		}
 
 		strcpyn( app, app1, MAX_LINE_SIZE );
@@ -1178,7 +1178,7 @@ AUTO_DOCUMENT
 void auto_document( const char *lab, const char *which, bool append )
 {
 	bool var;
-	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ], text[ MAX_BUFF_SIZE ];
+	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ], text[ 2 * MAX_BUFF_SIZE ];
 	description *cd;
 
 	for ( cd = descr; cd != NULL; cd = cd->next )
@@ -1197,11 +1197,11 @@ void auto_document( const char *lab, const char *which, bool append )
 			return_where_used( cd->label, str1, MAX_LINE_SIZE );
 			if ( ( append || ! var ) && has_descr_text ( cd ) )
 				if ( strwsp( cd->text ) )
-					snprintf( text, MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 				else
-					snprintf( text, MAX_BUFF_SIZE, "%s\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
+					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
 			else
-				snprintf( text, MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+				snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 
 			delete [ ] cd->text;
 			cd->text = new char[ strlen( text ) + 1 ];

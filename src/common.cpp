@@ -1209,7 +1209,7 @@ bool compile_run( bool run, bool nw )
 	else
 	{
 		if ( nw )
-			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n$modelDir\n\nto another computer (including the subdirectory '$LsdSrc'). After the copy, use the following steps to use it:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n[ fn_break [ file nativename \"$modelDir\" ] 40 ]\n\nto another computer (including the subdirectory '$LsdSrc'). After the copy, use the following steps to use it:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\"" );
 
 		if ( run )							// no problem - execute
 		{
@@ -1930,7 +1930,6 @@ void signal_handler( int signum )
 void exception_handler( int signum, const char *what )
 {
 	static char msg1[ MAX_LINE_SIZE ], msg2[ MAX_LINE_SIZE ], msg3[ MAX_LINE_SIZE ];
-	static double useless = -1;
 
 	switch ( signum )
 	{
@@ -2030,8 +2029,9 @@ void exception_handler( int signum, const char *what )
 		if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL &&
 			 stacklog->vs != NULL && stacklog->vs->label != NULL )
 		{
+			double useless = -1;
 			sprintf( msg3, "%s (ERROR)", stacklog->vs->label );
-			deb( stacklog->vs->up, NULL, msg3, &useless );
+			deb( stacklog->vs->up, NULL, msg3, & useless );
 		}
 	}
 	else

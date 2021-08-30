@@ -20,7 +20,7 @@
 
 CC=g++
 TARGET=LMM
-SWITCH_CC=-D_LMM_ -D_NP_ -Wno-unused-result -O3
+SWITCH_CC=-D_LMM_ -D_NP_ -O3 -Wall -Wno-unused-result
 
 # from here you should not need to modify anything
 
