@@ -129,6 +129,7 @@ double init_lattice( int init_color = -0xffffff, double nrow = 100, double ncol 
 double lnorm( double mu, double sigma );				// draw from a lognormal distribution
 double lnormcdf( double mu, double sigma, double x );	// lognormal cumulative distribution function
 double max( double a, double b );
+double median( vector < double > & v );
 double min( double a, double b );
 double norm( double mean, double dev );
 double normcdf( double mu, double sigma, double x );	// normal cumulative distribution function

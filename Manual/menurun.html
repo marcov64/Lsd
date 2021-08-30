@@ -339,9 +339,9 @@ lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If there are multiple simulation runs
 configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
-Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation
-message (see example below), telling how the results data will be stored and
-providing some options to the user. </span></p>
+Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation message
+(see example below), telling how the results data will be stored and providing
+some options to the user. </span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=196 height=407 src="image/summary_run.png"></span></p>
@@ -434,11 +434,11 @@ created in the same subdirectory as the </span><span class=Cdigo><span
 lang=EN-US>.lsd</span></span><span lang=EN-US> configuration file if it is
 located at a location without other uncorrelated files. Otherwise, a new
 subdirectory, with the same name and location as the configuration file, is
-created to hold the produced files. The effective </span><span class=Cdigo>Output
-path</span><span lang=EN-US> is presented in the confirmation dialog (above).
-The names of the produced files are composed by the name of the current model
-configuration plus an integer number equal to the seed used for the
-pseudo-random number generator, separated by an underscore.</span></p>
+created to hold the produced files. The effective </span><span class=Cdigo><span
+lang=EN-US>Output path</span></span><span lang=EN-US> is presented in the
+confirmation dialog (above). The names of the produced files are composed by
+the name of the current model configuration plus an integer number equal to the
+seed used for the pseudo-random number generator, separated by an underscore.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>In a multiple-run exercise, LSD creates one
 results file (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
@@ -676,7 +676,7 @@ confirmation message, telling how the CPU cores and the results data will be
 handled and providing some options to the user, as shown below.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=196 height=373 src="image/parallel_run.png"></span></p>
+width=196 height=409 src="image/parallel_run.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available options are (some may not be
 available according to the circumstance):</span></p>
@@ -791,19 +791,23 @@ saved to LSD results and totals files (</span><span class=Cdigo><span
 lang=EN-US>.res[.gz]</span></span><span lang=EN-US>, </span><span class=Cdigo><span
 lang=EN-US>.tot[.gz]</span></span><span lang=EN-US> or </span><span
 class=Cdigo><span lang=EN-US>.csv</span></span><span lang=EN-US> extension,
-according to the selected options) in the same subdirectory as the </span><span
-class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> <a
-href="LSD_faqs.html#modelsetting">configuration files</a>. The names of the
-produced files are composed by the name of the originating model configuration
-plus an integer number equal to the seed used for the pseudo-random number
-generator, separated by an underscore. LSD creates one results file (</span><span
-class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span lang=EN-US> extension)
-per run of each configuration file. A multi-run, per-configuration-file, single
-totals file (</span><span class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span
-lang=EN-US> extension) is also produced, including as many lines as the number
-of runs of the corresponding configuration file. Each line of this file
-contains the values of the saved elements at the very last time step of each
-simulation.</span></p>
+according to the selected options). Output files are created in the same
+subdirectory as the </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
+lang=EN-US> <a href="LSD_faqs.html#modelsetting">configuration file</a> if it
+is located at a location without other uncorrelated files. Otherwise, a new
+subdirectory, with the same name and location as the configuration file, is
+created to hold the produced files. The effective </span><span class=Cdigo><span
+lang=EN-US>Output path</span></span><span lang=EN-US> is presented in the confirmation
+dialog. The names of the produced files are composed by the name of the
+originating model configuration plus an integer number equal to the seed used
+for the pseudo-random number generator, separated by an underscore. LSD creates
+one results file (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
+lang=EN-US> extension) per run of each configuration file. A multi-run,
+per-configuration-file, single totals file (</span><span class=Cdigo><span
+lang=EN-US>.tot[.gz]</span></span><span lang=EN-US> extension) is also
+produced, including as many lines as the number of runs of the corresponding
+configuration file. Each line of this file contains the values of the saved
+elements at the very last time step of each simulation.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>One log text file (</span><span
 class=Cdigo><span lang=EN-US>.log</span></span><span lang=EN-US> extension) is
@@ -953,8 +957,8 @@ below.</span></p>
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=202 height=240 src="image/simsetting.png"></span></p>
 
-<p class=MsoNormal><span lang=EN-US>The option fields in the Simulation Settings
-window are:</span></p>
+<p class=MsoNormal><span lang=EN-US>The option fields in the Simulation
+Settings window are:</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
@@ -1019,22 +1023,21 @@ lang=EN-US>: the maximum stack level of Variables to profile in the <a
 href="LSD_windows.html#log">LSD Log</a>. The default value of 0 (zero) disables
 the profiler. The profiler is normally used to evaluate the Equations using
 most of the computation time during a simulation run, so the user can improve
-the simulation performance or even pinpoint the multi-instanced Variables
-important to enable parallel computation. Please note that any Variable
-requested to be computed cannot complete its calculation if it depends on the
-value of another Variable that still needs to be updated. In this case, the
-calculation of the first variable is interrupted while the second one finishes
-its computation, resuming thereafter. The computation of a Variable interrupted
-for this reason is said to be placed <i>on the stack</i>, to be later resumed
-used when the pending computation concludes. So, if you use this option for a
-stack level up to one, the Log will show only Variables updated because of LSD
-request, and not because any other Variable demand. As this value is increased,
-more Variables get profiled. Setting a high value almost certainly include all
-Variable computations in the simulation, more likely producing too much
-information. The profiler cannot be used if Variables are being computed in
-parallel or if simulation is running in Fast mode, please disable those
-features while using the profiler. See <a href="debug.html#crash">here</a> for
-more details.</span></p>
+the simulation performance or even pinpoint the multi-instanced Variables important
+to enable parallel computation. Please note that any Variable requested to be
+computed cannot complete its calculation if it depends on the value of another
+Variable that still needs to be updated. In this case, the calculation of the
+first variable is interrupted while the second one finishes its computation,
+resuming thereafter. The computation of a Variable interrupted for this reason
+is said to be placed <i>on the stack</i>, to be later resumed used when the
+pending computation concludes. So, if you use this option for a stack level up
+to one, the Log will show only Variables updated because of LSD request, and
+not because any other Variable demand. As this value is increased, more
+Variables get profiled. Setting a high value almost certainly include all Variable
+computations in the simulation, more likely producing too much information. The
+profiler cannot be used if Variables are being computed in parallel or if
+simulation is running in Fast mode, please disable those features while using
+the profiler. See <a href="debug.html#crash">here</a> for more details.</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
@@ -1230,8 +1233,8 @@ the Variables configured using the </span><span class=Cdigo><span lang=EN-US><a
 href="browser.html#updating">Updating</a></span></span><span lang=EN-US>
 option.</span></p>
 
-<h2><a name="_Show_Elements_to_6"></a><span lang=EN-US>Show Elements to Sensitivity
-Analysis</span></h2>
+<h2><a name="_Show_Elements_to_6"></a><span lang=EN-US>Show Elements to
+Sensitivity Analysis</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>Print in the <a href="LSD_windows.html#log">LSD
 Log</a> the list of the <a href="LSD_faqs.html#variable">Variables</a> and <a

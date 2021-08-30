@@ -1548,6 +1548,30 @@ double min ( double a, double b )
 }
 
 
+/****************************************************
+MEDIAN
+****************************************************/
+double median( vector < double > & v )
+{
+	int mid;
+	double midVal;
+	
+	if ( v.empty( ) )
+		return NAN;
+
+	mid = v.size( ) / 2;
+	
+	auto midPos = v.begin( ) + mid;
+	nth_element( v.begin( ), midPos, v.end( ) );
+	midVal = v[ mid ];
+
+	if ( v.size( ) % 2 != 0 )
+		return midVal;
+	else
+		return ( * max_element( v.begin( ), midPos ) + midVal ) / 2;
+}
+
+
 /***************************************************
 FACT
 Factorial function

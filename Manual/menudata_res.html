@@ -1307,9 +1307,8 @@ lang=EN-US>Analysis</span></span><span lang=EN-US>.</span></p>
 <p class=MsoNormal><span lang=EN-US>In any case, it is always possible to load <a
 href="LSD_faqs.html#results">results files</a> saved from previous simulation
 runs. AR does not change the data state during a <a
-href="LSD_faqs.html#simulationrun">simulation run</a>, so it is possible to
-analyze partial results during a simulation interruption or pause and then
-continue it.</span></p>
+href="LSD_faqs.html#simulationrun">simulation run</a>, so it is possible to analyze
+partial results during a simulation interruption or pause and then continue it.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The AR window shows the time series
 available for analysis in the <a href="#Vars__Available">Series available</a>
@@ -1910,10 +1909,10 @@ href="LSD_faqs.html#parameter">Parameters</a> in the <a
 href="LSD_faqs.html#modelstructure">model structure</a>, starting from the
 highest level Objects. If the <a href="LSD_faqs.html#results">simulation
 results</a> contain many elements saved, it is convenient to sort the entries
-in the <a href="#Vars__Available">Series available</a> list box for easier access
-to the desired series. Also, when there are many instances (copies) of the same
-element, it may be useful to list together all the series of elements of the
-same type. </span></p>
+in the <a href="#Vars__Available">Series available</a> list box for easier
+access to the desired series. Also, when there are many instances (copies) of
+the same element, it may be useful to list together all the series of elements
+of the same type. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>There are four options to modify the order
 in which entries are organized in the <a href="#Vars__Available">Series
@@ -2054,24 +2053,32 @@ lang=EN-US> signature at the beginning of the variable tag and can be subset by
 MC-specific <a href="#Vars__Available">filtering targets</a>. MC automatic data
 consolidation can only be performed when all results files have exactly the
 same elements saved, for the same number of cases (time steps). If data from
-elements in randomly-created Objects is present, LSD cannot automatically
+elements in randomly created Objects is present, LSD cannot automatically
 consolidate the data using this option.</span></p>
 
 <p class=MsoNormal><a name=createmc></a><span lang=EN-US>When </span><span
 class=Cdigo><span lang=EN-US>Files from Monte Carlo experiment</span></span><span
 lang=EN-US> is selected, LSD offers different consolidation options in the
-following dialog.</span></p>
+following dialog. Multiple options can be checked at once.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=196 height=250 src="image/add_mc_series.png"></span></p>
+border=0 width=196 height=235 src="image/add_mc_series.png"></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Average only</span></b></span><span
+</span></span><span class=Cdigo><b><span lang=EN-US>Average</span></b></span><span
 lang=EN-US>: each series in the results files will be averaged among every
-simulation time step, producing the MC mean series for all saved elements (no
-suffix, uses parent information for filtering, if configuration is loaded). </span></p>
+simulation time step, producing the MC mean series for all saved elements (</span><span
+class=Cdigo><span lang=EN-US>_avg</span></span><span lang=EN-US> suffix). </span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Median</span></b></span><span
+lang=EN-US>: each series in the results files will have the median computed for
+every simulation time step (</span><span class=Cdigo><span lang=EN-US>_med</span></span><span
+lang=EN-US> suffix). </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -2086,56 +2093,27 @@ lang=EN-US> suffixes).</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Averages, maximum and
-minimum</span></b></span><span lang=EN-US>: for each series in the results
-files three new time series are created, containing the MC mean and the
-absolute maximum and minimum values of every simulation time step step (</span><span
-class=Cdigo><span lang=EN-US>_avg</span></span><span lang=EN-US>,</span><span
-class=Cdigo><span lang=EN-US> _max</span></span><span lang=EN-US> and </span><span
-class=Cdigo><span lang=EN-US>_min</span></span><span lang=EN-US> suffixes).</span></p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Confidence interval</span></b></span><span
 lang=EN-US>: for each series in the results files two new time series are
 created, containing the upper and lower values of the confidence interval of
 the MC mean for every simulation time step (</span><span class=Cdigo><span
 lang=EN-US>_ci+</span></span><span lang=EN-US> and </span><span class=Cdigo><span
-lang=EN-US>_ci-</span></span><span lang=EN-US> suffixes).</span></p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Averages and confidence
-interval</span></b></span><span lang=EN-US>: for each series in the results
-files three new time series are created, containing the MC mean and the upper
-and lower values of its confidence interval for every simulation time step (</span><span
-class=Cdigo><span lang=EN-US>_avg</span></span><span lang=EN-US>,</span><span
-class=Cdigo><span lang=EN-US> _ci+</span></span><span lang=EN-US> and </span><span
-class=Cdigo><span lang=EN-US>_ci-</span></span><span lang=EN-US> suffixes). </span></p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>All the above</span></b></span><span
-lang=EN-US>: for each series in the results files five new time series are
-created, containing the MC mean, the absolute maximum and minimum values, and
-the upper and lower values of its confidence interval for every simulation time
-step (</span><span class=Cdigo><span lang=EN-US>_avg</span></span><span
-lang=EN-US>,</span><span class=Cdigo><span lang=EN-US> _max</span></span><span
-lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>_min</span></span><span
-lang=EN-US>,</span><span class=Cdigo><span lang=EN-US> _ci+</span></span><span
-lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>_ci-</span></span><span
-lang=EN-US> suffixes). </span></p>
+lang=EN-US>_ci-</span></span><span lang=EN-US> suffixes). The intervals
+computed assume normal distribution of data. Intervals can be constructed
+around the median or the mean, according to the option </span><span
+class=Cdigo><span lang=EN-US>Asymptotic median CI</span></span><span
+lang=EN-US> is checked or not, respectively.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>When the confidence interval is being
 created, there is an option to change the default </span><span class=Cdigo><span
-lang=EN-US>Confidence level</span></span><span lang=EN-US> from 95% (integer
-values from 80 to 99% are accepted). Also, there is an option to </span><span
+lang=EN-US>Confidence level</span></span><span lang=EN-US> from 95% chosen from
+the drop-down list. When medians are computed, there is the </span><span
+class=Cdigo><span lang=EN-US>Asymptotic median CI</span></span><span
+lang=EN-US> option to use asymptotic confidence intervals around the median
+(assuming normal distribution) when checked. Also, there is an option to </span><span
 class=Cdigo><span lang=EN-US>Keep original series</span></span><span
-lang=EN-US> from the MC experiment files available for the analysis, as by default
-they are not kept after data consolidation.</span></p>
+lang=EN-US> from the MC experiment files available for the analysis, as by
+default they are not kept after data consolidation.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If there are series available when clicking
 the </span><span class=Cdigo><span lang=EN-US>Add…</span></span><span
@@ -2204,7 +2182,15 @@ lang=EN-US> is chosen, the user has several choices on how to generate the new
 series:</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=220 height=490 src="image/create_series.png"></span></p>
+border=0 width=212 height=478 src="image/create_series.png"></span></p>
+
+<p class=MsoNormal><span lang=EN-US>It is possible to filter away data during
+the new series calculations by ignoring values below or above a specified
+threshold. If options </span><span class=Cdigo><span lang=EN-US>Ignore small
+values</span></span><span lang=EN-US> or </span><span class=Cdigo><span
+lang=EN-US>Ignore large values</span></span><span lang=EN-US> are selected, the
+field </span><span class=Cdigo><span lang=EN-US>Threshold</span></span><span
+lang=EN-US> must be filled properly.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The selected series can be aggregated along
 two dimensions:</span></p>
@@ -2225,18 +2211,20 @@ href="#_Series_selected">Series selected</a> list box.</span></p>
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Calculate over cases</span></b></span><span
-lang=EN-US>: the new series will have as many time steps as the number of series
-selected. Each time step value for the new series is computed elaborating over
-the values for each of the series selected across all their time steps. For
-example, when choosing </span><span class=Cdigo><span lang=EN-US>Average</span></span><span
-lang=EN-US> each time step t in the new series value will be computed as the average
-value of the series number t over all the time steps chosen, according to the
-order in the <a href="#_Series_selected">Series selected</a> list box.</span></p>
+lang=EN-US>: the new series will have as many time steps as the number of
+series selected. Each time step value for the new series is computed
+elaborating over the values for each of the series selected across all their
+time steps. For example, when choosing </span><span class=Cdigo><span
+lang=EN-US>Average</span></span><span lang=EN-US> each time step t in the new
+series value will be computed as the average value of the series number t over
+all the time steps chosen, according to the order in the <a
+href="#_Series_selected">Series selected</a> list box.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The new series can be computed as the
-average, sum, product, inverse (1/x), count, maximum, minimum, variance,
-standard deviation and confidence interval (at the specified confidence level)
-of the series. Select the desired type accordingly.</span></p>
+average, median, sum, product, inverse (1/x), count, maximum, minimum,
+variance, standard deviation, and mean and median confidence intervals (at the
+specified confidence level) of the series. Select the desired operation
+accordingly.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>Count</span></span><span lang=EN-US> option produces a maximum value
@@ -2245,24 +2233,17 @@ Series which do not have values for a certain period are not considered in the
 counting for this period.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
-lang=EN-US>Confidence interval</span></span><span lang=EN-US> option produces
-three series: the average (same as selecting </span><span class=Cdigo><span
-lang=EN-US>Average</span></span><span lang=EN-US>), and the confidence interval
-upper and lower bounds. This way, the confidence interval for a
-multi-realization variable can be conveniently plotted by selecting the three
-generated series. The user can select the desired confidence level in the range
-from </span><span class=Cdigo><span lang=EN-US>80%</span></span><span
-lang=EN-US> to </span><span class=Cdigo><span lang=EN-US>99%</span></span><span
-lang=EN-US> (integer values only), entering the value in the entry box </span><span
-class=Cdigo><span lang=EN-US>@</span></span><span lang=EN-US>.</span></p>
-
-<p class=MsoNormal><span lang=EN-US>It is possible to filter away data during
-the new series calculations by ignoring values below or above a specified
-threshold. If options </span><span class=Cdigo><span lang=EN-US>Ignore small
-values</span></span><span lang=EN-US> or </span><span class=Cdigo><span
-lang=EN-US>Ignore large values</span></span><span lang=EN-US> are selected, the
-field </span><span class=Cdigo><span lang=EN-US>Threshold</span></span><span
-lang=EN-US> must be filled properly.</span></p>
+lang=EN-US>confidence interval</span></span><span lang=EN-US> operations produce
+three series: the average or the median (same as selecting </span><span
+class=Cdigo><span lang=EN-US>Average</span></span><span lang=EN-US> or </span><span
+class=Cdigo><span lang=EN-US>Median</span></span><span lang=EN-US>), and the
+confidence interval upper and lower bounds. This way, the confidence interval
+for a multi-realization variable can be conveniently plotted by selecting the
+three generated series. The computed intervals assume normal distribution or
+otherwise may be considered as asymptotic. The </span><span class=Cdigo><span
+lang=EN-US>Confidence level</span></span><span lang=EN-US> option allows
+selecting the desired confidence for the interval, according to the value
+selected from the drop-down list.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The user may specify a label and an index
 tag or accept the proposed default. These values will be used to name the new
@@ -2402,8 +2383,8 @@ lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"
 </span></span><span class=Cdigo><b><span lang=EN-US>Select by values from
 another series</span></b></span><span lang=EN-US>: select the series in respect
 to the values of another series at a given time step (</span><span class=Cdigo><span
-lang=EN-US>Case</span></span><span lang=EN-US>). The user must also indicate the
-name of the other series (</span><span class=Cdigo><span lang=EN-US>Label</span></span><span
+lang=EN-US>Case</span></span><span lang=EN-US>). The user must also indicate
+the name of the other series (</span><span class=Cdigo><span lang=EN-US>Label</span></span><span
 lang=EN-US>), a logical criterion, and the </span><span class=Cdigo><span
 lang=EN-US>Comparison value</span></span><span lang=EN-US> to be used. </span></p>
 
@@ -2549,10 +2530,10 @@ class=Cdigo><span lang=EN-US>Y2</span></span><span lang=EN-US> </span><span
 class=Cdigo><span lang=EN-US>axis</span></span><span lang=EN-US>. The series
 are numbered according to their ordinal position in the <a
 href="#_Series_selected">Series selected</a> list box: the first series is
-numbered as 1, the second, 2, and so on. All the series after the indicated
-series will also use the secondary scale. Therefore, the order number must be
-larger or equal than 2 (at least one series must use the primary scale) and up
-to the total number of selected series.</span></p>
+numbered as 1, the second, 2, and so on. All the series after the indicated series
+will also use the secondary scale. Therefore, the order number must be larger
+or equal than 2 (at least one series must use the primary scale) and up to the
+total number of selected series.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -2907,8 +2888,8 @@ selected.</span></p>
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Number of dependent
-variables</span></b></span><span lang=EN-US>: how many dependent variables
-should be used in the plot, generating as many point groups (or surfaces) as a
+variables</span></b></span><span lang=EN-US>: how many dependent variables should
+be used in the plot, generating as many point groups (or surfaces) as a
 function of the number of independent variables. This option is only supported
 if </span><span class=Cdigo><span lang=EN-US><a href="#_Gnuplot">Gnuplot</a></span></span><span
 lang=EN-US> is checked.</span></p>
@@ -3126,9 +3107,9 @@ lang=EN-US>s </span></h2>
 created assign different colors to the series or data elements. If the </span><span
 class=Cdigo><span lang=EN-US>No colors </span></span><span lang=EN-US>check box
 is marked, the series or data are plotted using a gray scale, more appropriate
-for black-and-white printing. Users have also the option to edit line colors
-directly in the <a href="#graph">plot window</a> before saving the plot to
-file. This way the user can also use dash patterns for the plot lines.</span></p>
+for black-and-white printing. Users have also the option to edit line colors directly
+in the <a href="#graph">plot window</a> before saving the plot to file. This
+way the user can also use dash patterns for the plot lines.</span></p>
 
 <h2><a name=watch></a><a name=grids></a><a name="_Grid"></a><span lang=EN-US>Grids
 </span></h2>
@@ -3347,8 +3328,8 @@ lang=EN-US> extension) is an older format, accepted by a more limited number of
 software packages.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Color</span></b></span><span
 lang=EN-US> / </span><span class=Cdigo><b><span lang=EN-US>Grayscale</span></b></span><span
 lang=EN-US> / </span><span class=Cdigo><b><span lang=EN-US>Mono</span></b></span><span
@@ -3442,8 +3423,8 @@ unchecking this option. This is not recommended for LSD-format files, however,
 because they can be directly read in gzip format by LSD and R, without
 decompression, speeding up data reading.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>When text-format files are selected, a
-second dialog box with additional options is presented:</span></p>
+<p class=MsoNormal><span lang=EN-US>When text-format files are selected, a second
+dialog box with additional options is presented:</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=196 height=405 src="image/save_data_txt.png"></span></p>
@@ -3514,9 +3495,9 @@ lang=EN-US> option allows specifying any column-delimiter, like commas,
 semicolons, spaces etc. (see the </span><span class=Cdigo><span lang=EN-US>Custom
 delimiter</span></span><span lang=EN-US> option below), and providing support
 for importing the file in virtually any package. The </span><span class=Cdigo><span
-lang=EN-US>Fixed width</span></span><span lang=EN-US> option creates fixed-width
-columns, where each column contains exactly the same number of characters (see
-the </span><span class=Cdigo><span lang=EN-US>Column width</span></span><span
+lang=EN-US>Fixed width</span></span><span lang=EN-US> option creates
+fixed-width columns, where each column contains exactly the same number of
+characters (see the </span><span class=Cdigo><span lang=EN-US>Column width</span></span><span
 lang=EN-US> option below). </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -3564,8 +3545,8 @@ defined by the <a href="#xscaling">cases selection option</a>. <a name=lattice><
 data is organized in columns with headers indicating the names of the series. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>It is recommended to avoid showing many
-long time series at once, as this may require a significant time to print all the
-data in the Log window.</span></p>
+long time series at once, as this may require a significant time to print all
+the data in the Log window.</span></p>
 
 <h2><a name=statistics></a><a name="_Statistics"></a><span lang=EN-US>Statistics
 </span></h2>
@@ -3578,19 +3559,19 @@ statistics on the time series in the <a href="#_Series_selected">Series
 selected list box</a> and present them in the <a href="log.html">Log window</a>.
 If </span><span class=Cdigo><span lang=EN-US><a href="#ts_cs">Time series</a></span></span><span
 lang=EN-US> is checked, the time steps to be considered in the computation are
-defined by the <a href="#xscaling">cases selection option</a>. Alternatively,
-when </span><span class=Cdigo><span lang=EN-US><a href="#ts_cs">Cross-section</a></span></span><span
+defined by the <a href="#xscaling">cases selection option</a>. Alternatively, when
+</span><span class=Cdigo><span lang=EN-US><a href="#ts_cs">Cross-section</a></span></span><span
 lang=EN-US> is selected, the computation is performed across the time series
 using the time steps chosen by the user as cross-section(s). If the </span><span
 class=Cdigo><span lang=EN-US><a href="#_Series_in_logs">Series in logs</a></span></span><span
 lang=EN-US> option is set, the natural logarithm of the time series data is
-used for computation.</span></p>
+used for computation. The header indicates the total number of cases
+considered.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>The provided statistics are: average,
-standard deviation, variance, absolute minimum and maximum. The statistics are
-reported as one line for each time series, informing also the name, instance
-index and the number of cases considered. The header indicates the total number
-of cases considered. </span></p>
+<p class=MsoNormal><span lang=EN-US>The provided statistics are average (mean),
+median, standard deviation (population), and absolute minimum and maximum. The
+statistics are reported as one line for each time series, also informing the
+name, instance index and the number of cases considered. </span></p>
 
 <h2><a name="_Histogram"></a><a name=histogram></a><span lang=EN-US>Histogram</span></h2>
 
@@ -3676,8 +3657,7 @@ href="#_Series_selected">Series selected list box</a>. The data values must be
 positive values, including 0, in which just the integer part is considered. If
 the </span><span class=Cdigo><span lang=EN-US><a href="#_Series_in_logs">Series
 in logs</a></span></span><span lang=EN-US> option is set, the natural logarithm
-of the time series data is used for computation and 0 is not a valid data
-value).</span></p>
+of the time series data is used for computation and 0 is not a valid data value).</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=585 height=458 src="image/lattice_plot.png"></span></p>
@@ -3974,8 +3954,8 @@ axis values.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Vertical borders</span></b></span><span
 lang=EN-US>: heights in screen pixels of the vertical borders on the top and
-the bottom of the plotting area, respectively. The bottom border contains the
-horizontal (X) axis values and the data legends.</span></p>
+the bottom of the plotting area, respectively. The bottom border contains the horizontal
+(X) axis values and the data legends.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -4013,8 +3993,8 @@ specification can be changed at the individual legend level using the right
 mouse button on the <a href="#graph">plot window</a>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>High definition screens may require
-increasing the size-related values above to produce <a href="#graph">plot
-windows</a> of adequate size. In this case, it is recommended to use a common
+increasing the size-related values above to produce <a href="#graph">plot windows</a>
+of adequate size. In this case, it is recommended to use a common
 multiplication value to keep the adequate proportions.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Clicking the </span><span class=Cdigo><span

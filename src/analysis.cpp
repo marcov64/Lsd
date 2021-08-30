@@ -2540,9 +2540,13 @@ void analysis( bool mc )
 						if ( logs )
 							cmd( "ttk::messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
 
-						cmd( "set bidi 1" );
+						cmd( "set mean 1" );
+						cmd( "set median 0" );
+						cmd( "set minMax 0" );
+						cmd( "set cnfInt 0" );
 						cmd( "set keepSeries 0" );
 						cmd( "set confi 95" );
+						cmd( "set medCI 0" );
 						cmd( "set clList [ list ]" );
 						for ( i = 0; i < T_CLEVS; ++i )
 							cmd( "lappend clList %g", 100 * t_dist_cl[ i ] );
@@ -2553,20 +2557,53 @@ void analysis( bool mc )
 						cmd( "ttk::label .da.s.i.l -text \"Series to create\"" );
 
 						cmd( "ttk::frame .da.s.i.r -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-						cmd( "ttk::radiobutton .da.s.i.r.m -text \"Average only\" -variable bidi -value 1 -command { .da.s.ci.p configure -state disabled }" );
-						cmd( "ttk::radiobutton .da.s.i.r.z -text \"Maximum and minimum\" -variable bidi -value 13 -command { .da.s.ci.p configure -state disabled }" );
-						cmd( "ttk::radiobutton .da.s.i.r.x -text \"Average, maximum and minimum\" -variable bidi -value 15 -command { .da.s.ci.p configure -state disabled }" );
-						cmd( "ttk::radiobutton .da.s.i.r.i -text \"Confidence interval\" -variable bidi -value 11 -command { .da.s.ci.p configure -state readonly }" );
-						cmd( "ttk::radiobutton .da.s.i.r.n -text \"Average and confidence interval\" -variable bidi -value 6 -command { .da.s.ci.p configure -state readonly }" );
-						cmd( "ttk::radiobutton .da.s.i.r.a -text \"All the above\" -variable bidi -value 16 -command { .da.s.ci.p configure -state readonly }" );
+						cmd( "ttk::checkbutton .da.s.i.r.m -text \"Average\" -variable mean -command { \
+								if { $mean } { \
+									set medCI 0; \
+									if { $median && $cnfInt } { \
+										.da.s.s.c configure -state readonly \
+									} else { \
+										.da.s.s.c configure -state disabled \
+									} \
+								} else { \
+									if { $median } { \
+										set medCI 1 \
+									} else { \
+										set medCI 0 \
+									}; \
+									.da.s.s.c configure -state disabled \
+								} \
+							}" );
+						cmd( "ttk::checkbutton .da.s.i.r.d -text \"Median\" -variable median -command { \
+								if { $median } { \
+									set medCI 1; \
+									if { $mean && $cnfInt } { \
+										.da.s.s.c configure -state readonly \
+									} else { \
+										.da.s.s.c configure -state disabled \
+									} \
+								} else { \
+									set medCI 0; \
+									.da.s.s.c configure -state disabled \
+								} \
+							}" );
+						cmd( "ttk::checkbutton .da.s.i.r.x -text \"Maximum and minimum\" -variable minMax" );
+						cmd( "ttk::checkbutton .da.s.i.r.i -text \"Confidence interval\" -variable cnfInt -command { \
+								if { $cnfInt } { \
+									.da.s.ci.p configure -state readonly; \
+									if { $median && $mean } { \
+										.da.s.s.c configure -state readonly \
+									} else { \
+										.da.s.s.c configure -state disabled \
+									} \
+								} else { \
+									.da.s.ci.p configure -state disabled; \
+									.da.s.s.c configure -state disabled \
+								} \
+							}" );
 
-						cmd( "pack .da.s.i.r.m .da.s.i.r.z .da.s.i.r.x .da.s.i.r.i .da.s.i.r.n .da.s.i.r.a -anchor w" );
+						cmd( "pack .da.s.i.r.m .da.s.i.r.d .da.s.i.r.x .da.s.i.r.i -anchor w" );
 						cmd( "pack .da.s.i.l .da.s.i.r" );
-
-						cmd( "set a [ .da.vars.ch.f.v get 0 ]" );
-						cmd( "set basename [ lindex [ split $a ] 0 ]" );
-						cmd( "set tailname \"_avg\"" );
-						cmd( "set vname $basename$tailname" );
 
 						cmd( "ttk::frame .da.s.ci" );
 						cmd( "ttk::label .da.s.ci.l -text \"Confidence level (%%)\"" );
@@ -2575,8 +2612,9 @@ void analysis( bool mc )
 						cmd( "pack .da.s.ci.l .da.s.ci.p" );
 
 						cmd( "ttk::frame .da.s.s" );
+						cmd( "ttk::checkbutton .da.s.s.c -text \"Asymptotic median CI\" -variable medCI -state disabled" );
 						cmd( "ttk::checkbutton .da.s.s.k -text \"Keep original series\" -variable keepSeries" );
-						cmd( "pack .da.s.s.k" );
+						cmd( "pack .da.s.s.c .da.s.s.k" );
 
 						cmd( "pack .da.s.i .da.s.ci .da.s.s -padx 5 -pady 5" );
 
@@ -2588,6 +2626,7 @@ void analysis( bool mc )
 						cmd( "showtop .da.s" );
 						cmd( "mousewarpto .da.s.b.ok" );
 
+						cmd( "tooltip::tooltip .da.s.s.c \"Use asymptotic approximation\nto median confidence interval\"" );
 						cmd( "tooltip::tooltip .da.s.s.k \"Preserve original series\nafter computing MC series\"" );
 
 						choice = 0;
@@ -2596,6 +2635,8 @@ void analysis( bool mc )
 
 						cmd( "if [ string is double -strict [ .da.s.ci.p get ] ] { set confi [ .da.s.ci.p get ] }" );
 						cmd( "destroytop .da.s" );
+
+						cmd( "if { ! $mean && ! $median && ! $minMax && ! $cnfInt } { set choice 2 }" );
 
 						if ( choice == 2 )
 							goto add_end;
@@ -4762,8 +4803,9 @@ STATISTICS
 void statistics( void )
 {
 	char **str, **tag, str1[ MAX_LINE_SIZE ], longmsg[ 2 * MAX_LINE_SIZE ];
-	double **data, av, var, num, ymin, ymax, sig;
+	double **data, av, med, var, sd, ymin, ymax, num;
 	int i, j, *start, *end, *id;
+	vector < double > v;
 
 	if ( nv == 0 )			// no variables selected
 	{
@@ -4818,13 +4860,15 @@ void statistics( void )
 		cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics:\n\n\" table" );
 
 	snprintf( str1, MAX_LINE_SIZE, "%d Cases", max_c - min_c + 1 );
-	snprintf( longmsg, 2 * MAX_LINE_SIZE, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
+	snprintf( longmsg, 2 * MAX_LINE_SIZE, "%-20s\tAverage\tMedian\tStd.Dev.\tMin.\tMax.\n", str1 );
 	cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 
 	for ( i = 0; i < nv; ++i )
 	{
 		ymin = DBL_MAX;
 		ymax = - DBL_MAX;
+		v.clear( );
+		v.reserve( max_c - min_c + 1 );
 
 		for ( av = var = num = 0, j = min_c; j <= max_c; ++j )
 		{
@@ -4838,7 +4882,7 @@ void statistics( void )
 
 				av += data[ i ][ j - start[ i ] ];
 				var += data[ i ][ j - start[ i ] ] * data[ i ][ j - start[ i ] ];
-
+				v.push_back( data[ i ][ j - start[ i ] ] );
 				++num;
 			}
 		}
@@ -4847,19 +4891,20 @@ void statistics( void )
 		{
 			av = av / num;
 			var = fabs( var / num - av * av );
-			sig = sqrt( var * num / ( num - 1 ) );
+			sd = sqrt( var );
 		}
 		else
-			var = sig = 0;
+			var = sd = 0;
 
 		if ( num > 0 )
 		{
+			med = median( v );
+
 			snprintf( str1, MAX_LINE_SIZE, "%s %s (%.*g)", str[ i ], tag[ i ], pdigits, num );
 			snprintf( longmsg, 2 * MAX_LINE_SIZE, "%-20s\t", str1 );
 			cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 
-
-			snprintf( longmsg, 2 * MAX_LINE_SIZE, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax);
+			snprintf( longmsg, 2 * MAX_LINE_SIZE, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, med, pdigits, sd, pdigits, ymin, pdigits, ymax);
 			cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 		}
 	}
@@ -4889,10 +4934,10 @@ STATISTICS_CROSS
 ************************/
 void statistics_cross( void )
 {
-	bool first;
 	char **str, **tag, str1[ MAX_LINE_SIZE ], longmsg[ 2 * MAX_LINE_SIZE ];
-	double **data, av, var, num, ymin = 0, ymax = 0, sig;
+	double **data, av, med, var, sd, ymin, ymax, num;
 	int i, j, h, k, nt, *start, *end, *id, *list_times;
+	vector < double > v;
 
 	Tcl_LinkVar( inter, "nt", ( char * ) &nt, TCL_LINK_INT );
 	cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
@@ -4960,23 +5005,21 @@ void statistics_cross( void )
 		cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics:\n\n\" table" );
 
 	snprintf( str1, MAX_LINE_SIZE, "%d Variables", nv );
-	snprintf( longmsg, 2 * MAX_LINE_SIZE, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1 );
+	snprintf( longmsg, 2 * MAX_LINE_SIZE, "%-20s\tAverage\tMedian\tStd.Dev.\tMin.\tMax.\n", str1 );
 	cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 
 	for ( j = 0; j < nt; ++j )
 	{
 		h = list_times[ j ];
-		first = true;
-		for ( av = var = num = 0, i = 0; i < nv; ++i )
+		ymin = DBL_MAX;
+		ymax = - DBL_MAX;
+		v.clear( );
+		v.reserve( nv );
+
+		for ( av = var = num = i = 0; i < nv; ++i )
 		{
 			if ( h >= start[ i ] && h <= end[ i ] && is_finite( data[ i ][ h - start[ i ] ] ) )		// ignore NaNs
 			{
-				if ( first )
-				{
-					ymin = ymax = data[ i ][ h - start[ i ] ];
-					first = false;
-				}
-
 				if ( data[ i ][ h - start[ i ] ] < ymin )
 					ymin = data[ i ][ h - start[ i ] ];
 
@@ -4985,7 +5028,7 @@ void statistics_cross( void )
 
 				av += data[ i ][ h - start[ i ] ];
 				var += data[ i ][ h - start[ i ] ] * data[ i ][ h - start[ i ] ];
-
+				v.push_back( data[ i ][ h - start[ i ] ] );
 				++num;
 			}
 		}
@@ -4994,16 +5037,19 @@ void statistics_cross( void )
 		{
 			av = av / num;
 			var = var / num - av * av;
-			sig = sqrt( var * num / ( num-1 ) );
+			sd = sqrt( var );
 		}
 		else
-			var = sig = 0;
+			var = sd = 0;
 
 		if ( num > 0 )
 		{
+			med = median( v );
+
 			snprintf( str1, MAX_LINE_SIZE, "Case %d (%.*g)\t", h, pdigits, num );
 			cmd( ".log.text.text.internal insert end \"%s\" table", str1 );
-			snprintf( longmsg, 2 * MAX_LINE_SIZE, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax );
+
+			snprintf( longmsg, 2 * MAX_LINE_SIZE, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, med, pdigits, sd, pdigits, ymin, pdigits, ymax );
 			cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 		}
 	}
@@ -7251,15 +7297,16 @@ void histograms_cs( void )
 CREATE_SERIES
 ****************************************************/
 // define MC series parent names for AoR
-const char *mc_par[ ] = { "(MC)", "meanMC", "maxMC", "minMC", "varMC", "sumMC", "meanMC", "countMC", "sdMC", "prodMC", "invMC", "ci+MC", "ci-MC", "maxMC", "(MC)", "meanMC", "meanMC" };
+const char *mc_par[ ] = { "meanMC", "medianMC", "maxMC", "minMC", "varMC", "sumMC", "medianMC", "countMC", "sdMC", "prodMC", "invMC", "ci+MC", "ci-MC", "maxMC", "ci+MC", "medianMC", "medianMC" };
 
 bool create_series( bool mc, vector < string > var_names )
 {
-	bool first, done = true;
+	bool first, medCI = false, done = true;
 	char **str, **tag;
-	double nmax = 0, nmin = 0, nmean, nvar, nn, sum, prod, thflt, confi, z_crit, **data;
+	double nmax = 0, nmin = 0, nmean, nmed, nvar, nn, sum, prod, thflt, confi, cenCI, varCI, z_crit, **data;
 	int i, j, k, flt, cs_long, type_series, new_series, sel_series, *start, *end, *id;
 	store *app;
+	vector < double > v;
 
 	if ( ! mc )
 	{
@@ -7272,27 +7319,22 @@ bool create_series( bool mc, vector < string > var_names )
 		if ( logs )
 			cmd( "ttk::messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
 
+		cmd( "set a [ .da.vars.ch.f.v get 0 ]" );
+		cmd( "set basename [ lindex [ split $a ] 0 ]" );
+		cmd( "set vname ${basename}_avg" );
+		cmd( "set newSeries 1" );
 		cmd( "set flt 0" );
 		cmd( "set thflt 0" );
 		cmd( "set bido 1" );
-		cmd( "set bidi 1" );
+		cmd( "set bidi 100" );
 		cmd( "set ftag 1" );
 		cmd( "set confi 95" );
+		cmd( "set medCI 0" );
 		cmd( "set clList [ list ]" );
 		for ( i = 0; i < Z_CLEVS; ++i )
 			cmd( "lappend clList %g", 100 * z_dist_cl[ i ] );
 
 		cmd( "newtop .da.s \"New Series Options\" { set choice 2 } .da" );
-
-		cmd( "ttk::frame .da.s.o" );
-		cmd( "ttk::label .da.s.o.l -text \"Aggregation mode\"" );
-
-		cmd( "ttk::frame .da.s.o.r -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-		cmd( "ttk::radiobutton .da.s.o.r.m -text \"Calculate over series (same # of cases)\" -variable bido -value 1" );
-		cmd( "ttk::radiobutton .da.s.o.r.f -text \"Calculate over cases (# cases = # of series)\" -variable bido -value 2" );
-		cmd( "pack .da.s.o.r.m .da.s.o.r.f -anchor w" );
-
-		cmd( "pack .da.s.o.l .da.s.o.r" );
 
 		cmd( "ttk::frame .da.s.f" );
 		cmd( "ttk::label .da.s.f.l -text \"Filtering\"" );
@@ -7311,35 +7353,53 @@ bool create_series( bool mc, vector < string > var_names )
 
 		cmd( "pack .da.s.f.l .da.s.f.r .da.s.f.t" );
 
+		cmd( "ttk::frame .da.s.o" );
+		cmd( "ttk::label .da.s.o.l -text \"Aggregation mode\"" );
+
+		cmd( "ttk::frame .da.s.o.r -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+		cmd( "ttk::radiobutton .da.s.o.r.m -text \"Calculate over series (same # of cases)\" -variable bido -value 1" );
+		cmd( "ttk::radiobutton .da.s.o.r.f -text \"Calculate over cases (# cases = # of series)\" -variable bido -value 2" );
+		cmd( "pack .da.s.o.r.m .da.s.o.r.f -anchor w" );
+
+		cmd( "pack .da.s.o.l .da.s.o.r" );
+
 		cmd( "ttk::frame .da.s.i" );
 		cmd( "ttk::label .da.s.i.l -text \"Operation\"" );
 
 		cmd( "ttk::frame .da.s.i.r -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-		cmd( "ttk::radiobutton .da.s.i.r.m -text \"Average\" -variable bidi -value 1 -command { .da.s.i.r.ci.p configure -state disabled; set tailname \"_avg\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.z -text \"Sum\" -variable bidi -value 5 -command { .da.s.i.r.ci.p configure -state disabled; set tailname \"_sum\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end  }" );
-		cmd( "ttk::radiobutton .da.s.i.r.x -text \"Product\" -variable bidi -value 9 -command { .da.s.i.r.ci.p configure -state disabled; set tailname \"_prd\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end  }" );
-		cmd( "ttk::radiobutton .da.s.i.r.i -text \"Invert\" -variable bidi -value 10 -command { .da.s.i.r.ci.p configure -state disabled; set tailname \"_inv\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end  }" );
-		cmd( "ttk::radiobutton .da.s.i.r.n -text \"Count\" -variable bidi -value 7 -command { .da.s.i.r.ci.p configure -state disabled; set tailname \"_num\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.f -text \"Maximum\" -variable bidi -value 2 -command { .da.s.i.r.ci.p configure -state disabled; set tailname \"_max\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.t -text \"Minimum\" -variable bidi -value 3 -command { .da.s.i.r.ci.p configure -state disabled; set tailname \"_min\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c -text \"Variance\" -variable bidi -value 4 -command { .da.s.i.r.ci.p configure -state disabled; set tailname \"_var\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.s -text \"Standard deviation\" -variable bidi -value 8 -command { .da.s.i.r.ci.p configure -state disabled; set tailname \"_sd\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end }" );
 
-		cmd( "ttk::frame .da.s.i.r.ci" );
-		cmd( "ttk::radiobutton .da.s.i.r.ci.c -text \"Confidence interval (3 series)\" -variable bidi -value 6 -command { .da.s.i.r.ci.p configure -state readonly; set tailname \"\"; set vname $basename$tailname; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::label .da.s.i.r.ci.x -text @" );
-		cmd( "ttk::label .da.s.i.r.ci.perc -text %%" );
-		cmd( "ttk::combobox .da.s.i.r.ci.p -values $clList -width 4 -justify center -state disabled" );
-		cmd( "write_disabled .da.s.i.r.ci.p $confi" );
-		cmd( "pack .da.s.i.r.ci.c .da.s.i.r.ci.x .da.s.i.r.ci.p .da.s.i.r.ci.perc -side left" );
+		cmd( "ttk::frame .da.s.i.r.c" );
 
-		cmd( "pack .da.s.i.r.m .da.s.i.r.z .da.s.i.r.x .da.s.i.r.i .da.s.i.r.n .da.s.i.r.f .da.s.i.r.t .da.s.i.r.c .da.s.i.r.s .da.s.i.r.ci -anchor w" );
+		cmd( "ttk::frame .da.s.i.r.c.l" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.m -text \"Average\" -variable bidi -value 100 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_avg\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.z -text \"Sum\" -variable bidi -value 5 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_sum\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.i -text \"Invert\" -variable bidi -value 10 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_inv\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.f -text \"Maximum\" -variable bidi -value 2 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_max\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.c -text \"Variance\" -variable bidi -value 4 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_var\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "pack .da.s.i.r.c.l.m .da.s.i.r.c.l.z .da.s.i.r.c.l.i .da.s.i.r.c.l.f .da.s.i.r.c.l.c -anchor w" );
+
+		cmd( "ttk::frame .da.s.i.r.c.r" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.d -text \"Median\" -variable bidi -value 1 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_med\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.x -text \"Product\" -variable bidi -value 9 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_prd\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.n -text \"Count\" -variable bidi -value 7 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_num\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.t -text \"Minimum\" -variable bidi -value 3 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_min\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.s -text \"Standard deviation\" -variable bidi -value 8 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_sd\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "pack .da.s.i.r.c.r.d .da.s.i.r.c.r.x .da.s.i.r.c.r.n .da.s.i.r.c.r.t .da.s.i.r.c.r.s -anchor w" );
+
+		cmd( "pack .da.s.i.r.c.l .da.s.i.r.c.r -side left -ipadx 7" );
+
+		cmd( "ttk::radiobutton .da.s.i.r.cia -text \"Average confidence interval (3 series)\" -variable bidi -value 111 -command { .da.s.ci.p configure -state readonly; set vname \"${basename}\"; set newSeries 3; set medCI 0; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.cim -text \"Median confidence interval (3 series)\" -variable bidi -value 6 -command { .da.s.ci.p configure -state readonly; set vname \"${basename}\"; set newSeries 3; set medCI 1; .da.s.n.nv selection range 0 end }" );
+
+		cmd( "pack .da.s.i.r.c .da.s.i.r.cia .da.s.i.r.cim -anchor w" );
+
 		cmd( "pack .da.s.i.l .da.s.i.r" );
 
-		cmd( "set a [ .da.vars.ch.f.v get 0 ]" );
-		cmd( "set basename [ lindex [ split $a ] 0 ]" );
-		cmd( "set tailname \"_avg\"" );
-		cmd( "set vname $basename$tailname" );
+		cmd( "ttk::frame .da.s.ci" );
+		cmd( "ttk::label .da.s.ci.l -text \"Confidence level (%%)\"" );
+		cmd( "ttk::combobox .da.s.ci.p -values $clList -width 4 -justify center -state disabled" );
+		cmd( "write_disabled .da.s.ci.p $confi" );
+		cmd( "pack .da.s.ci.l .da.s.ci.p" );
 
 		cmd( "ttk::frame .da.s.n" );
 		cmd( "ttk::label .da.s.n.lnv -text \"New series name\"" );
@@ -7351,7 +7411,7 @@ bool create_series( bool mc, vector < string > var_names )
 		cmd( "ttk::entry .da.s.t.tv -width 20 -textvariable ftag -justify center" );
 		cmd( "pack .da.s.t.tnv .da.s.t.tv" );
 
-		cmd( "pack .da.s.o .da.s.f .da.s.i .da.s.n .da.s.t -padx 5 -pady 5" );
+		cmd( "pack .da.s.f .da.s.o .da.s.i .da.s.ci .da.s.n .da.s.t -padx 5 -pady 5" );
 
 		cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#createselection } { set choice 2 }" );
 
@@ -7367,8 +7427,11 @@ bool create_series( bool mc, vector < string > var_names )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
+		// adjust multi-series base name and next name for mean
+		cmd( "if { $bidi == 6 } { set basename $vname; set vname \"${basename}_med\" }" );
+		cmd( "if { $bidi == 111 } { set basename $vname; set vname \"${basename}_avg\"; set nextVname \"${basename}_ci+\" }" );
 		cmd( "if [ string is double -strict [ .da.s.f.t.th get ] ] { set thflt [ .da.s.f.t.th get ] }" );
-		cmd( "if [ string is double -strict [ .da.s.i.r.ci.p get ] ] { set confi [ .da.s.i.r.ci.p get ] }" );
+		cmd( "if [ string is double -strict [ .da.s.ci.p get ] ] { set confi [ .da.s.ci.p get ] }" );
 		cmd( "destroytop .da.s" );
 
 		if ( choice == 2 )
@@ -7380,6 +7443,7 @@ bool create_series( bool mc, vector < string > var_names )
 		flt = get_int( "flt" );
 		thflt = get_double( "thflt" );
 		cs_long = get_int( "bido" );
+		new_series = get_int( "newSeries" );
 		sel_series = nv;
 		var_num = num_var;
 	}
@@ -7389,43 +7453,55 @@ bool create_series( bool mc, vector < string > var_names )
 		thflt = 0;
 		cs_long = 1;
 		sel_series = var_names.size( );
+		cmd( "set basename $vname" );
+
+		// set option specific parameters
+		cmd( "if { $median } { \
+				set vname \"${basename}_med\"; \
+				if { $minMax && $cnfInt } { \
+					set bidi 16; \
+					set newSeries 5 \
+				} elseif { $minMax } { \
+					set bidi 15; \
+					set newSeries 3 \
+				} elseif { $cnfInt } { \
+					set bidi 6; \
+					set newSeries 3 \
+				} else { \
+					set bidi 1; \
+					set newSeries 1 \
+				} \
+			} elseif { $cnfInt } { \
+				set vname \"${basename}_ci+\"; \
+				if { $minMax } { \
+					set bidi 14; \
+					set newSeries 4 \
+				} else { \
+					set bidi 11; \
+					set newSeries 2 \
+				} \
+			} elseif { $minMax } { \
+				set vname \"${basename}_max\"; \
+				set bidi 13; \
+				set newSeries 2 \
+			} else { \
+				set bidi 0; \
+				set newSeries 0 \
+			}" );
+
+		cmd( "if { $mean } { \
+				set nextVname $vname; \
+				set vname \"${basename}_avg\"; \
+				set bidi [ expr { $bidi + 100 } ]; \
+				incr newSeries \
+			}" );
 	}
 
+	type_series = get_int( "bidi" );
+	new_series = get_int( "newSeries" );
+	medCI = get_bool( "medCI" );		// asymptotic median confidence interval?
 	confi = get_double( "confi" );
 	z_crit = z_star( confi );
-	type_series = get_int( "bidi" );
-	new_series = 1;
-
-	// set option specific parameters
-	switch ( type_series )
-	{
-		case 6:							// avg (6), ci+ (11), ci- (12)
-			new_series = 3;
-
-			// first series to produce
-			cmd( "set basename $vname; set tailname \"_avg\"; set vname $basename$tailname" );
-			break;
-
-		case 11:						// ci+ (11), ci- (12)
-			new_series = 2;
-			cmd( "set basename $vname; set tailname \"_ci+\"; set vname $basename$tailname" );
-			break;
-
-		case 13:						// max (13), min (3)
-			new_series = 2;
-			cmd( "set basename $vname; set tailname \"_max\"; set vname $basename$tailname" );
-			break;
-
-		case 15:						// avg (15), max (2), min (3)
-			new_series = 3;
-			cmd( "set basename $vname; set tailname \"_avg\"; set vname $basename$tailname" );
-			break;
-
-		case 16:						// avg (16), ci+ (11), ci- (12), max (2), min (3)
-			new_series = 5;
-			cmd( "set basename $vname; set tailname \"_avg\"; set vname $basename$tailname" );
-			break;
-	}
 
 	data = new double *[ sel_series ];
 	start = new int [ sel_series ];
@@ -7496,7 +7572,7 @@ bool create_series( bool mc, vector < string > var_names )
 				max_c = end[ i ];
 		}
 
-		if ( min_c >= max_c )
+		if ( ! mc && min_c >= max_c )
 		{
 			cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Series cases do not overlap\" -detail \"Two or more series in the Series Selected listbox have no common cases (time steps). Please use manual case selection if this is the desired behavior.\"" );
 
@@ -7521,16 +7597,13 @@ bool create_series( bool mc, vector < string > var_names )
 			for ( i = min_c; i <= max_c; ++i )
 			{
 				nn = nvar = sum = prod = 0;
-				first = true;
-				for ( j = 0; j < sel_series; ++j )
+				v.clear( );
+				v.reserve( sel_series );
+
+				for ( first = true, j = 0; j < sel_series; ++j )
 				{
 					if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i - start[ j ] ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i - start[ j ] ] > thflt ) || ( flt == 2 && data[ j ][ i - start[ j ] ] < thflt ) ) )		// ignore NaNs
 					{
-						sum += data[ j ][ i - start[ j ] ];
-						nvar += data[ j ][ i - start[ j ] ] * data[ j ][ i - start[ j ] ];
-
-						++nn;
-
 						if ( first )
 						{
 							nmin = nmax = prod = data[ j ][ i - start[ j ] ];
@@ -7544,14 +7617,20 @@ bool create_series( bool mc, vector < string > var_names )
 								nmax = data[ j ][ i - start[ j ] ];
 							prod *= data[ j ][ i - start[ j ] ];
 						}
+
+						sum += data[ j ][ i - start[ j ] ];
+						nvar += data[ j ][ i - start[ j ] ] * data[ j ][ i - start[ j ] ];
+						v.push_back( data[ j ][ i - start[ j ] ] );
+						++nn;
 					}
 				}
 
 				if ( nn == 0 )	// not a single valid value?
-					nn = nmean = nvar = nmin = nmax = sum = prod = NAN;
+					nn = nmean = nmed = nvar = nmin = nmax = sum = prod = NAN;
 				else
 				{
 					nmean = sum / nn;
+					nmed = median( v );
 
 					// handle sample (MC) x population variance calculation
 					if ( mc && nn >= 2 )
@@ -7567,8 +7646,10 @@ bool create_series( bool mc, vector < string > var_names )
 					}
 				}
 
-				if ( type_series == 1 || type_series == 6 || type_series == 15 || type_series == 16 )
+				if ( type_series >= 100 )
 					vs[ num_var ].data[ i - min_c ] = nmean;
+				if ( type_series == 1 || type_series == 6 || type_series == 15 || type_series == 16 )
+					vs[ num_var ].data[ i - min_c ] = nmed;
 				if ( type_series == 2 || type_series == 13 )
 					vs[ num_var ].data[ i - min_c ] = nmax;
 				if ( type_series == 3 )
@@ -7591,20 +7672,32 @@ bool create_series( bool mc, vector < string > var_names )
 						vs[ num_var ].data[ i - min_c ] = NAN;
 				}
 
-				// handle sample (MC) x population variance calculation
-				if ( mc && nn >= 2 )
+				// compute proper variance for confidence intervals
+				if ( medCI )
 				{
-					if ( type_series == 11 )
-						vs[ num_var ].data[ i - min_c ] = nmean + t_star( nn - 1, confi ) * sqrt( nvar ) / sqrt( nn );
-					if ( type_series == 12 )
-						vs[ num_var ].data[ i - min_c ] = nmean - t_star( nn - 1, confi ) * sqrt( nvar ) / sqrt( nn );
+					cenCI = nmed;
+					varCI = 2 * M_PI * nvar / 4;	// asymptotic variance (median with normal distribution)
 				}
 				else
 				{
-					if ( type_series == 11 )
-						vs[ num_var ].data[ i - min_c ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
+					cenCI = nmean;
+					varCI = nvar;					// sample variance (normal distribution)
+				}
+
+				// handle sample (MC) x population variance calculation
+				if ( mc && nn >= 2 )
+				{
+					if ( type_series == 11 || type_series == 14 )
+						vs[ num_var ].data[ i - min_c ] = cenCI + t_star( nn - 1, confi ) * sqrt( varCI ) / sqrt( nn );
 					if ( type_series == 12 )
-						vs[ num_var ].data[ i - min_c ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
+						vs[ num_var ].data[ i - min_c ] = cenCI - t_star( nn - 1, confi ) * sqrt( varCI ) / sqrt( nn );
+				}
+				else
+				{
+					if ( type_series == 11 || type_series == 14 )
+						vs[ num_var ].data[ i - min_c ] = cenCI + z_crit * sqrt( varCI ) / sqrt( nn );
+					if ( type_series == 12 )
+						vs[ num_var ].data[ i - min_c ] = cenCI - z_crit * sqrt( varCI ) / sqrt( nn );
 				}
 			}
 		}
@@ -7617,16 +7710,13 @@ bool create_series( bool mc, vector < string > var_names )
 			for ( j = 0; j < sel_series; ++j )
 			{
 				nn = nvar = sum = prod = 0;
-				first = true;
-				for ( i = min_c; i <= max_c; ++i )
+				v.clear( );
+				v.reserve( max_c - min_c + 1 );
+
+				for ( first = true, i = min_c; i <= max_c; ++i )
 				{
 					if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i - start[ j ] ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i - start[ j ] ] > thflt ) || ( flt == 2 && data[ j ][ i - start[ j ] ] < thflt ) ) )
 					{
-						sum += data[ j ][ i - start[ j ] ];
-						nvar += data[ j ][ i - start[ j ] ] * data[ j ][ i - start[ j ] ];
-
-						++nn;
-
 						if ( first )
 						{
 							nmin = nmax = prod = data[ j ][ i - start[ j ] ];
@@ -7640,20 +7730,28 @@ bool create_series( bool mc, vector < string > var_names )
 								nmax = data[ j ][ i - start[ j ] ];
 							prod *= data[ j ][ i - start[ j ] ];
 						}
+
+						sum += data[ j ][ i - start[ j ] ];
+						nvar += data[ j ][ i - start[ j ] ] * data[ j ][ i - start[ j ] ];
+						v.push_back( data[ j ][ i - start[ j ] ] );
+						++nn;
 					}
 				}
 
 				if ( nn == 0 )	// not a single valid value?
-					nn = nmean = nvar = nmin = nmax = sum = prod = NAN;
+					nn = nmean = nmed = nvar = nmin = nmax = sum = prod = NAN;
 				else
 				{
 					nmean = sum / nn;
+					nmed = median( v );
 					nvar /= nn;
 					nvar -= nmean * nmean;
 				}
 
-				if ( type_series == 1 || type_series == 6 || type_series == 15 || type_series == 16 )
+				if ( type_series >= 100 )
 					vs[ num_var ].data[ j ] = nmean;
+				if ( type_series == 1 || type_series == 6 || type_series == 15 || type_series == 16 )
+					vs[ num_var ].data[ j ] = nmed;
 				if ( type_series == 2 || type_series == 13 )
 					vs[ num_var ].data[ j ] = nmax;
 				if ( type_series == 3 )
@@ -7675,10 +7773,22 @@ bool create_series( bool mc, vector < string > var_names )
 					else
 						vs[ num_var ].data[ j ] = NAN;
 				}
-				if ( type_series == 11 )
-					vs[ num_var ].data[ j ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
+
+				if ( medCI )
+				{
+					cenCI = nmed;
+					varCI = 2 * M_PI * nvar / 4;	// asymptotic variance (median with normal distribution)
+				}
+				else
+				{
+					cenCI = nmean;
+					varCI = nvar;					// sample variance (normal distribution)
+				}
+
+				if ( type_series == 11 || type_series == 14 )
+					vs[ num_var ].data[ j ] = cenCI + z_crit * sqrt( varCI ) / sqrt( nn );
 				if ( type_series == 12 )
-					vs[ num_var ].data[ j ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
+					vs[ num_var ].data[ j ] = cenCI - z_crit * sqrt( varCI ) / sqrt( nn );
 			}
 		}
 
@@ -7689,32 +7799,41 @@ bool create_series( bool mc, vector < string > var_names )
 		if ( mc && new_series == 1 && par_map.find( vs[ num_var ].label ) != par_map.end( ) )
 			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank, par_map[ vs[ num_var ].label ].c_str( ) );
 		else
-			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank, mc ? mc_par[ type_series ] : "(added)" );
+			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank, mc ? mc_par[ type_series < 100 ? type_series : 0 ] : "(added)" );
 
 		// define next series options for multiple series
 		switch ( type_series )
 		{
-			case 6:					// avg (6), ci+ (11), ci- (12)
-			case 16:				// avg (16), ci+ (11), ci- (12), max (2), min (3)
+			case 6:					// med (6), ci+ (11), ci- (12)
+			case 16:				// med (16), ci+ (11), ci- (12), max (2), min (3)
 				type_series = 11;
-				cmd( "set tailname \"_ci+\"; set vname $basename$tailname" );
+				cmd( "set vname \"${basename}_ci+\"" );
 				break;
 
 			case 11:				// ci+ (11), ci- (12)
+			case 14:				// ci+ (14), ci- (12), max (2), min (3)
 				type_series = 12;
-				cmd( "set tailname \"_ci-\"; set vname $basename$tailname" );
+				cmd( "set vname \"${basename}_ci-\"" );
 				break;
 
 			case 12:				// ci- (12), max (2), min (3)
-			case 15:				// avg (15), max (2), min (3)
+			case 15:				// med (15), max (2), min (3)
 				type_series = 2;
-				cmd( "set tailname \"_max\"; set vname $basename$tailname" );
+				cmd( "set vname \"${basename}_max\"" );
 				break;
 
 			case 2:					// max (2), min (3)
 			case 13:				// max (13), min (3)
 				type_series = 3;
-				cmd( "set tailname \"_min\"; set vname $basename$tailname" );
+				cmd( "set vname \"${basename}_min\"" );
+				break;
+
+			default:				// handle > 100 - mean was prepended
+				if ( type_series > 100 )
+				{
+					type_series -= 100;
+					cmd( "set vname $nextVname" );
+				}
 		}
 	}
 
@@ -9947,7 +10066,7 @@ int shrink_gnufile( void )
 		else
 			fprintf( f1, "%s", str );
 	}
-	
+
 	fclose( f );
 	fclose( f1 );
 
