@@ -1273,7 +1273,7 @@ void show_logs( const char *path, vector < string > & logs, bool par_cntl )
 	char exec[ MAX_PATH_LENGTH  ];
 	int i, j, n, sz;
 
-	cmd( "switch [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Background run monitor\" -message \"Open the background run monitor?\" -detail \"The selected simulation runs were started as parallel background job(s). Each job progress can be monitored in a separated window results by choosing 'Yes'\n\nLog files are being created in the folder:\n\n%s\" ] { yes { set ans 1 } no { set ans 0 } }", path );
+	cmd( "switch [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Background run monitor\" -message \"Open the background run monitor?\" -detail \"The selected simulation runs were started as parallel background job(s). Each job progress can be monitored in a separated window results by choosing 'Yes'\n\nLog files are being created in the folder:\n\n[ fn_break [ file nativename \"%s\" ] 40 ]\" ] { yes { set ans 1 } no { set ans 0 } }", path );
 
 	if ( ! get_int( "ans" ) || ( par_cntl && ! parallel_monitor ) )
 		return;

@@ -64,6 +64,7 @@ USED CASE 97
 
 #include "decl.h"
 
+bool check_save;					// control saving message inside disabled objects
 bool initVal = false;				// new variable initial setting going on
 bool redrawReq = false;				// flag for asynchronous window redraw request
 const char *res_g;
@@ -1816,6 +1817,7 @@ object *operate( object *r )
 			}
 
 			// control for elements to save in objects to be not computed
+			check_save = true;
 			if ( choice == 0 )
 				control_to_compute( r, r->label );
 		}
@@ -6943,13 +6945,16 @@ void control_to_compute( object *r, const char *lab )
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
+		if ( ! check_save )
+			return;
+		
 		if ( cv->save == 1 )
 		{
 			cmd( "set res [ ttk::messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, lab );
 			cmd( "if [ string equal $res cancel ] { set res 1 } { set res 0 }" );
 
-			if ( get_int( "res" ) == 1 )
-				return;
+			if ( get_bool( "res" ) )
+				check_save = false;
 		}
 	}
 
@@ -7973,7 +7978,6 @@ Function to set object configuration from Tcl
 ****************************************************/
 int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
 {
-	bool check_save = true;
 	char vname[ MAX_ELEM_LENGTH ];
 	object *cur, *cur1;
 
@@ -7991,7 +7995,7 @@ int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 		return TCL_ERROR;
 
 	// set the appropriate value for variable (all instances)
-	for ( cur1 = cur; cur1 != NULL; cur1 = cur1->hyper_next( cur1->label ) )
+	for ( check_save = true, cur1 = cur; cur1 != NULL; cur1 = cur1->hyper_next( cur1->label ) )
 		if ( ! strcmp( argv[ 2 ], "comp" ) )
 		{
 			cur1->to_compute = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
