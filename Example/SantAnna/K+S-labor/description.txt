@@ -18,7 +18,7 @@ v5.1.1 (12/08/20) - use LSD C++11 pseudo-random generator engine
                     change capacity utilization measure to account for labor
                     fix flagGovExp operation for values less than 2 (minimum income)
                     fix L1shortMax value in example configurations
-v5.1.2 (01/04/21) - fix lag definition and initialization of some variables
+v5.1.2 (01/09/21) - fix lag definition and initialization of some variables
                     fix lagged values for taxes
                     fix firm finance statistics
                     unify new machine selection criteria (=scrapping rule)
@@ -97,8 +97,6 @@ There are several R scripts (.R extension inside R subdirectory) ready to analyz
 
 KS-aggregates.R = overall analysis of macroeconomic aggregates, including scenario comparison, time series plots, de-trended series growth stationarity, temporal correlation structure, hysteresis measures, Monte Carlo experiments comparison (distribution and performance)
 
-KS-aggregates-labor.R = analysis of labor-specific macro aggregates, including scenario statistics comparison, Beveridge, Okun, Philips, matching function and wage curves, Shimer metrics (separation, de-trended labor productivity, vacancy-unemployment to productivity and summary statistics), unemployment recovery hysteresis
-
 KS-sector-1.R = pooled and Monte Carlo firm-level analysis of the capital-good sector, including scenario statistics comparison, size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
 
 KS-sector-2-pool.R = pooled firm-level analysis of the consumption-good sector, including scenario statistics comparison, Gibrat-law and scaling-variance tests, and size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
@@ -113,9 +111,11 @@ KS-kriging-sobol-SA.R = global Sobol variance-based sensitivity analysis using a
 
 KS-polynomial-sobol-SA.R = polynomial meta-model fitting for global Sobol variance-based sensitivity analysis, including alternative meta-model order and interactive terms selection, meta-model estimation and validation, Sobol variance decomposition for direct and interactive effects, and surface response plotting (2D and 3D) of top-influential factors
 
-Other support scripts exist in the R subdirectory and are required by the above scripts. The scripts are configured to use the R subdirectory as the R working directory. Please add all the data required for the analysis (including LSD configuration files) in subdirectories inside the R working directory (the default is 'data'). There is a set of preconfigured test configurations (Sim1-Sim2.lsd in the data subdirectory) which can be executed in LSD and analyzed by the R scripts without any change. Subdiretctories 'ee' and 'sobol' contain test configurations for sensitivity analysis scripts. The sample test configurations are configured for speed but the number of Monte Carlo experiments (runs) is insufficient for reliable inference.
+Other support scripts exist in the R subdirectory and are required by the above scripts. The scripts are configured to use the R subdirectory as the R working directory. Please add all the data required for the analysis (including LSD configuration files) in subdirectories inside the R working directory (the default is 'data'). 
 
-The R scripts require the following R packages (and dependencies) to be installed from the standard repositories: LSDsensitivity, tseries, normalp, nortest, mFilter, np, matrixStats, gplots, corrplot, rmutil, plotrix, extrafont. 16GB or more of available memory is required to run some of the reports.
+There is a set of preconfigured test configurations (Sim1-Sim4.lsd in the data subdirectory) which can be executed in LSD and analyzed by the R scripts without any change. The sample test configurations are configured for speed but the number of Monte Carlo experiments (runs) is insufficient for reliable inference. See 'Configuring the K+S scripts.txt' in R subdirectory for details and recommendations.
+
+The R scripts require the following R packages (and dependencies) to be installed from the standard repositories: LSDsensitivity, tseries, normalp, nortest, mFilter, np, matrixStats, gplots, corrplot, rmutil, plotrix, textplot, extrafont. 12GB or more of available memory is required to run some of the reports. Use 'install-lsd-examples-packages.R' script in R subdirectory to install the required packages automatically.
 
 
 Model regime control

@@ -295,7 +295,7 @@ else
 		// produce as much as the available finance allows, positive but up to D1
 		v[0] = min( max( floor( ( v[3] - 1 - v[7] + v[2] ) / v[4] ), 0 ), v[1] );		
 		v[9] = v[7] - v[3] + 1;					// desired credit
-	
+		
 		if ( v[0] == 0 )
 		{
 			v[8] = 0;							// no finance

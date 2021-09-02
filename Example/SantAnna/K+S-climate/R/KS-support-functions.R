@@ -6,31 +6,40 @@
 
 # ==== User parameters ====
 
-useSubbotools <- TRUE          # use Subbotools (T) or normalp package (F)
-subboMaxSample <- 5000         # maximum sample size in Subbotin fits (speed control)
-subboMinSample <- 20           # minimum sample size in Subbotin fits (significance control)
-subboBlimit <- 5               # maximum limit for b to be considered valid (0=no limit)
-maxSample <- 10000             # maximum sample size in plots (pdf control)
-topMargin <- 0.2               # top plot margin scaling factor
-botMargin <- 0.1               # bottom plot margin scaling factor
-def.digits <- 4                # default number of digits after comma for printing
+useSubbotools   <- TRUE       # use Subbotools (T) or normalp package (F)
+subboMaxSample  <- 5000       # maximum sample size in Subbotin fits (speed control)
+subboMinSample  <- 20         # minimum sample size in Subbotin fits (signif. control)
+subboBlimit     <- 5          # maximum limit for b to be considered valid (0=no limit)
+maxSample       <- 10000      # maximum sample size in plots (pdf control)
+topMargin       <- 0.2        # top plot margin scaling factor
+botMargin       <- 0.1        # bottom plot margin scaling factor
+def.digits      <- 4          # default number of digits after comma for printing
 
 
 # ==== Required libraries (order is relevant!) ====
 
-require( abind, warn.conflicts = FALSE, quietly = TRUE )
-require( normalp, warn.conflicts = FALSE, quietly = TRUE )
-require( rmutil, warn.conflicts = FALSE, quietly = TRUE )
-require( nortest, warn.conflicts = FALSE, quietly = TRUE )
-require( gplots, warn.conflicts = FALSE, quietly = TRUE )
-require( plotrix, warn.conflicts = FALSE, quietly = TRUE )
-require( parallel, warn.conflicts = FALSE, quietly = TRUE )
-suppressPackageStartupMessages( require( corrplot, warn.conflicts = FALSE, quietly = TRUE ) )
-suppressPackageStartupMessages( require( matrixStats, warn.conflicts = FALSE, quietly = TRUE ) )
-suppressPackageStartupMessages( require( tseries, warn.conflicts = FALSE, quietly = TRUE ) )
-suppressPackageStartupMessages( require( np, warn.conflicts = FALSE, quietly = TRUE ) )
-suppressPackageStartupMessages( require( extrafont, warn.conflicts = FALSE, quietly = TRUE ) )
-suppressPackageStartupMessages( require( mFilter, warn.conflicts = FALSE, quietly = TRUE ) )
+suppressPackageStartupMessages( require( LSDinterface, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( LSDsensitivity, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( abind, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( normalp, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( rmutil, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( nortest, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( gplots, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( plotrix, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( parallel, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( textplot, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( corrplot, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( matrixStats, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( tseries, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( np, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( extrafont, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( mFilter, warn.conflicts = FALSE ) )
+
+# check minimum required versions
+if( packageVersion( "LSDinterface" ) < "1.1.0" )
+  stop( "Please update LSDinterface package to current version")
+if( packageVersion( "LSDsensitivity" ) < "1.1.0" )
+  stop( "Please update LSDsensitivity package to current version")
 
 # remove warnings for support functions
 # !diagnostics suppress = paramp
@@ -69,6 +78,23 @@ all.NA <- function( x ) {
 
 is.nan.data.frame <- function( x ) {
   do.call( cbind, lapply( x, is.nan ) )
+}
+
+
+#
+# ====== function [] = is.nan.data.frame ======
+#
+# Expand is.finite to handle data frames
+#
+# Output:
+#   TRUE/FALSE vector/matrix/data frame
+#
+# Input:
+#   x : vector/matrix/data frame to test
+#
+
+is.finite.data.frame <- function( x ) {
+  do.call( cbind, lapply( x, is.finite ) )
 }
 
 
@@ -1050,8 +1076,10 @@ plot_laplace <- function( x, xlab = "", ylab = "", tit, subtit = "",
 #
 # Input:
 #   avg: list of variable names to plot
-#	  Adata, mdata, Mdata, Sdata: lists of lists of experiments averages,
-#       min, max and std. dev. (all with the same dimensions)
+#	  Pdata, mdata, Mdata, Sdata, cdata, Cdata: lists of lists of experiments
+#     statistic (mean or median), min, max, std. dev., conf. interval low and up
+#     (all with the same dimensions)
+#   stat: type of plot statistic (mean or median)
 #   nMC: number of Monte Carlo runs
 #   CI: confidence for confidence interval
 #   log, log0: log or zero-bounded log to be applied on series
@@ -1063,19 +1091,24 @@ plot_laplace <- function( x, xlab = "", ylab = "", tit, subtit = "",
 #	  leg2: legends fot type of plots
 #
 
-plot_lists <- function( vars, Adata, mdata, Mdata, Sdata, mask = NULL,
-                        nMC = NULL, CI = 0.95, log = FALSE, log0 = FALSE,
-                        na0 = FALSE, mrk = -1, xlab = "", ylab = "", tit = "",
-                        subtit = "", leg = NULL, leg2 = NULL, col = NULL,
-                        lty = NULL ) {
+plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
+                        nMC, sdMC = NULL, statMC = "mean", mask = NULL,
+                        CI = 0.95, log = FALSE, log0 = FALSE, na0 = FALSE,
+                        mrk = -1, xlab = "", ylab = "", tit = "", subtit = "",
+                        leg = NULL, leg2 = NULL, col = NULL, lty = NULL ) {
 
   nVar <- length( vars )
-  nExp <- length( Adata )
-  zCI <- qnorm( 1 - ( 1 - CI ) / 2 )
+  nExp <- length( Pdata )
+
+  # asymptotic distribution approximation factor when no CI is available
+  if( statMC == "mean" )
+    af <- qt( ( 1 - CI ) / 2, nMC - 1 ) / sqrt( nMC )
+  else
+    af <- sqrt( pi / ( 2 * nMC ) )  # asymptotic distribution factor
 
   # fill default values
   if( is.null( mask ) )
-    mask <- 1 : length( Adata[[ 1 ]][[ 1 ]] )
+    mask <- 1 : length( Pdata[[ 1 ]][[ 1 ]] )
   if( is.null( leg ) )
     leg <- 1 : nExp
   if( is.null( leg2 ) )
@@ -1086,27 +1119,55 @@ plot_lists <- function( vars, Adata, mdata, Mdata, Sdata, mask = NULL,
     lty <- rep( "solid", nExp )
 
   # prepare all time series
-  avg <- min <- max <- CIlo <- CIhi <- list( )
+  plt <- min <- max <- CIlo <- CIhi <- list( )
   for( k in 1 : nExp ) {
 
-    avg[[ k ]] <- min[[ k ]] <- max[[ k ]] <- CIlo[[ k ]] <- CIhi[[ k ]] <- list( )
+    plt[[ k ]] <- min[[ k ]] <- max[[ k ]] <- CIlo[[ k ]] <- CIhi[[ k ]] <- list( )
     for( j in 1 : nVar ) {
-      avg[[ k ]][[ j ]] <- Adata[[ k ]][ mask, vars[ j ] ]
+      Pdata[[ k ]][ ! is.finite( Pdata[[ k ]] ) ] <- NA
+      mdata[[ k ]][ ! is.finite( mdata[[ k ]] ) ] <- NA
+      Mdata[[ k ]][ ! is.finite( Mdata[[ k ]] ) ] <- NA
+
+      if( ! is.null( cdata ) )
+        cdata[[ k ]][ ! is.finite( cdata[[ k ]] ) ] <- NA
+
+      if( ! is.null( Cdata ) )
+        Cdata[[ k ]][ ! is.finite( Cdata[[ k ]] ) ] <- NA
+
+      if( ! is.null( sdMC ) )
+        sdMC[[ k ]][ ! is.finite( sdMC[[ k ]] ) ] <- NA
+
+      plt[[ k ]][[ j ]] <- Pdata[[ k ]][ mask, vars[ j ] ]
       min[[ k ]][[ j ]] <- mdata[[ k ]][ mask, vars[ j ] ]
       max[[ k ]][[ j ]] <- Mdata[[ k ]][ mask, vars[ j ] ]
-      e <- zCI * Sdata[[ k ]][ mask, vars[ j ] ] / sqrt( nMC )
-      CIlo[[ k ]][[ j ]] <- avg[[ k ]][[ j ]] - e
-      CIhi[[ k ]][[ j ]] <- avg[[ k ]][[ j ]] + e
+
+      if( ! is.null( cdata ) )
+        CIlo[[ k ]][[ j ]] <- cdata[[ k ]][ mask, vars[ j ] ]
+      else {
+        if( ! is.null( sdMC ) )
+          CIlo[[ k ]][[ j ]] <- plt[[ k ]][[ j ]] - af * sdMC[[ k ]][ mask, vars[ j ] ]
+        else
+          CIlo[[ k ]][[ j ]] <- NA
+      }
+
+      if( ! is.null( Cdata ) )
+        CIhi[[ k ]][[ j ]] <- Cdata[[ k ]][ mask, vars[ j ] ]
+      else {
+        if( ! is.null( sdMC ) )
+          CIhi[[ k ]][[ j ]] <- plt[[ k ]][[ j ]] + af * sdMC[[ k ]][ mask, vars[ j ] ]
+        else
+          CIhi[[ k ]][[ j ]] <- NA
+      }
 
       # apply logs if required
       if( log ) {
-        avg[[ k ]][[ j ]] <- logNA( avg[[ k ]][[ j ]] )
+        plt[[ k ]][[ j ]] <- logNA( plt[[ k ]][[ j ]] )
         min[[ k ]][[ j ]] <- logNA( min[[ k ]][[ j ]] )
         max[[ k ]][[ j ]] <- logNA( max[[ k ]][[ j ]] )
         CIlo[[ k ]][[ j ]] <- logNA( CIlo[[ k ]][[ j ]] )
         CIhi[[ k ]][[ j ]] <- logNA( CIhi[[ k ]][[ j ]] )
       } else if( log0 ) {
-        avg[[ k ]][[ j ]] <- log0( avg[[ k ]][[ j ]] )
+        plt[[ k ]][[ j ]] <- log0( plt[[ k ]][[ j ]] )
         min[[ k ]][[ j ]] <- log0( min[[ k ]][[ j ]] )
         max[[ k ]][[ j ]] <- log0( max[[ k ]][[ j ]] )
         CIlo[[ k ]][[ j ]] <- log0( CIlo[[ k ]][[ j ]] )
@@ -1114,8 +1175,8 @@ plot_lists <- function( vars, Adata, mdata, Mdata, Sdata, mask = NULL,
       }
 
       # treat zeros as NAs
-      if( na0 && avg[[ k ]][[ j ]] <= 0 ) {
-        avg[[ k ]][[ j ]] <- min[[ k ]][[ j ]] <- max[[ k ]][[ j ]] <-
+      if( na0 && plt[[ k ]][[ j ]] <= 0 ) {
+        plt[[ k ]][[ j ]] <- min[[ k ]][[ j ]] <- max[[ k ]][[ j ]] <-
           CIlo[[ k ]][[ j ]] <- CIhi[[ k ]][[ j ]] <- NA
       }
     }
@@ -1127,11 +1188,11 @@ plot_lists <- function( vars, Adata, mdata, Mdata, Sdata, mask = NULL,
   xM <- xm <- yM <- ym <- array( dim = c( nExp, nVar ) )
 
   for( k in 1 : nExp )
-    for( j in 1 : length( avg[[k]] ) ){
+    for( j in 1 : length( plt[[k]] ) ){
       # find first and last valid times
       xM[k,j] <- xm[k,j] <- 1
-      for( i in 1 : length( avg[[k]][[j]] ) ){
-        if( is.finite( avg[[k]][[j]][i] ) ){
+      for( i in 1 : length( plt[[k]][[j]] ) ){
+        if( is.finite( plt[[k]][[j]][i] ) ){
           xM[k,j] <- i
         } else {
           if( xM[k,j] == 1 ){
@@ -1140,8 +1201,8 @@ plot_lists <- function( vars, Adata, mdata, Mdata, Sdata, mask = NULL,
         }
       }
 
-      yM[k,j] <- max( avg[[k]][[j]], na.rm = TRUE )
-      ym[k,j] <- min( avg[[k]][[j]], na.rm = TRUE )
+      yM[k,j] <- max( plt[[k]][[j]], na.rm = TRUE )
+      ym[k,j] <- min( plt[[k]][[j]], na.rm = TRUE )
       yMax = max( yMax, yM[k,j] )
       yMin = min( yMin, ym[k,j] )
       xMax = max( xMax, xM[k,j] )
@@ -1159,23 +1220,23 @@ plot_lists <- function( vars, Adata, mdata, Mdata, Sdata, mask = NULL,
   else
     sub <- subtit
 
-  plot( x = c( xMin : xMax ), y = avg[[1]][[1]][ xMin : xMax ], type = "l",
+  plot( x = c( xMin : xMax ), y = plt[[1]][[1]][ xMin : xMax ], type = "l",
         main = title, sub = paste( "(", sub, ")" ), xlab = xlab, ylab = ylab,
         col = col[1], lty = lty[1], ylim = ylim )
 
   if( nExp > 1 )
     for( k in 2 : nExp )
-      lines( x = c( xm[k,1] : xM[k,1] ), y = avg[[k]][[1]][ xm[k,1] : xM[k,1] ],
+      lines( x = c( xm[k,1] : xM[k,1] ), y = plt[[k]][[1]][ xm[k,1] : xM[k,1] ],
              col = col[k], lty = lty[k] )
 
   if( nVar > 1 )
     for( k in 1 : nExp )
       for( j in 2 : nVar )
         if( lty[ 1 ] == lty[ length( lty ) ] )
-          lines( x = c( xm[k,j] : xM[k,j] ), y = avg[[k]][[j]][ xm[k,j] : xM[k,j] ],
+          lines( x = c( xm[k,j] : xM[k,j] ), y = plt[[k]][[j]][ xm[k,j] : xM[k,j] ],
                  col = col[k], lty = j )
         else
-          lines( x = c( xm[k,j] : xM[k,j] ), y = avg[[k]][[j]][ xm[k,j] : xM[k,j] ],
+          lines( x = c( xm[k,j] : xM[k,j] ), y = plt[[k]][[j]][ xm[k,j] : xM[k,j] ],
                  col = col[k], lty = lty[k], lwd = j )
 
   # plot regime transition mark
@@ -1209,14 +1270,14 @@ plot_lists <- function( vars, Adata, mdata, Mdata, Sdata, mask = NULL,
     subTitle <- as.expression( bquote( paste( "( ", .(CI * 100),
                                               "% confidence band in gray, min/max values in light gray / ",
                                               .(sub), " )" ) ) )
-    plot( x = c( xMin : xMax ), y = avg[[k]][[1]][ xMin : xMax ], type = "l",
+    plot( x = c( xMin : xMax ), y = plt[[k]][[1]][ xMin : xMax ], type = "l",
           main = title, sub = subTitle, xlab = xlab, ylab = ylab, ylim = ylim )
 
     # Plot max/min area first for all series in experiment
     if( length( min ) == nExp && length( max ) == nExp )
-      for( j in 1 : length( avg[[k]] ) )
-        if( length( min[[k]][[j]] ) == length( avg[[k]][[j]] ) &&
-            length( max[[k]][[j]] ) == length( avg[[k]][[j]] ) )
+      for( j in 1 : length( plt[[k]] ) )
+        if( length( min[[k]][[j]] ) == length( plt[[k]][[j]] ) &&
+            length( max[[k]][[j]] ) == length( plt[[k]][[j]] ) )
           polygon( c( xm[k,j] : xM[k,j], xM[k,j] : xm[k,j] ),
                    c( pmin( max[[k]][[j]][ xm[k,j] : xM[k,j] ], ylim[ 2 ], na.rm = TRUE ),
                       rev( pmax( min[[k]][[j]][ xm[k,j] : xM[k,j] ], ylim[ 1 ], na.rm = TRUE ) ) ),
@@ -1224,17 +1285,17 @@ plot_lists <- function( vars, Adata, mdata, Mdata, Sdata, mask = NULL,
 
     # Then plot confidence interval area for all series
     if( length( CIlo ) == nExp && length( CIhi ) == nExp )
-      for( j in 1 : length( avg[[k]] ) )
-        if( length( CIhi[[k]][[j]] ) == length( avg[[k]][[j]] ) &&
-            length( CIlo[[k]][[j]] ) == length( avg[[k]][[j]] ) )
+      for( j in 1 : length( plt[[k]] ) )
+        if( length( CIhi[[k]][[j]] ) == length( plt[[k]][[j]] ) &&
+            length( CIlo[[k]][[j]] ) == length( plt[[k]][[j]] ) )
           polygon( c( xm[k,j] : xM[k,j], xM[k,j] : xm[k,j] ),
                    c( pmin( CIhi[[k]][[j]][ xm[k,j] : xM[k,j] ], ylim[ 2 ], na.rm = TRUE ),
                       rev( pmax( CIlo[[k]][[j]][ xm[k,j] : xM[k,j] ], ylim[ 1 ], na.rm = TRUE ) ) ),
                    col = "gray70", border = NA )
 
     # And finally plot the series lines, on top of all
-    for( j in 1 : length( avg[[k]] ) )
-		lines( x = c( xm[k,j] : xM[k,j] ), y = avg[[k]][[j]][ xm[k,j] : xM[k,j] ], lty = j )
+    for( j in 1 : length( plt[[k]] ) )
+		lines( x = c( xm[k,j] : xM[k,j] ), y = plt[[k]][[j]][ xm[k,j] : xM[k,j] ], lty = j )
 
     # plot regime transition mark
     if( mrk > 0 )
@@ -1633,7 +1694,7 @@ plot_histo <- function( times, data, bins = 10, log = 0, labVar = NULL,
 size_bins <- function( s, sLag, g, bins = 30, outLim = 0 ) {
 
   # build data analysis matrix, samples in rows
-  xx <- cbind( s, sLag, g )
+  xx <- na.omit( cbind( s, sLag, g ) )
 
   # resample, reducing number of samples
   if( nrow( xx ) > 10 * maxSample )

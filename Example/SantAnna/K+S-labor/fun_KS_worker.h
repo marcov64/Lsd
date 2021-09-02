@@ -415,7 +415,7 @@ if ( j == 0 )									// no memory?
 
 for ( v[0] = 0, i = 1; i <= j; ++i )
 	if ( T - i >= 0 )							// just go to t=0
-	v[0] += VL( "_w", i );						// sum past wages
+		v[0] += VL( "_w", i );					// sum past wages
 	else
 		break;
 

@@ -232,8 +232,8 @@ else
 		{
 			v[6] = v[0] * v[4];					// reduced production cost
 			v[7] = v[6] - v[3] + 1;				// finance the difference
-		v[3] = 1;								// keep minimum cash
-	}
+			v[3] = 1;							// keep minimum cash
+		}
 	}
 	
 	update_debt2( THIS, v[8], v[7] );			// update debt (desired/granted)

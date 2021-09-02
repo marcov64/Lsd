@@ -108,7 +108,7 @@ v[1] = V( "rAdj" );										// rate adjustment step
 // Taylor rule
 v[2] = V( "rT" ) + V( "gammaPi" ) * ( VLS( CONSECL1, "dCPIb", 1 ) - V( "piT" ) ) + 
 	   V( "gammaU" ) * ( V( "Ut" ) - VLS( LABSUPL1, "Ue", 1 ) );
-		
+
 // smooth rate adjustment
 if ( abs( v[2] - v[0] ) > 2 * v[1] )					
 	v[0] += ( v[2] > v[0] ) ? 2 * v[1] : - 2 * v[1];// big adjustment

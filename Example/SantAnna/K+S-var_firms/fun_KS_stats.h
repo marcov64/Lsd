@@ -51,9 +51,9 @@ EQUATION( "GDI" )
 Gross domestic income (nominal terms)
 */
 RESULT( VS( CAPSECL2, "W1" ) + VS( CONSECL2, "W2" ) +
-		  VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) + 
-		  VS( FINSECL2, "PiB" ) + VS( GRANDPARENT, "G" ) - 
-		  VS( GRANDPARENT, "Tax" ) + 
+		VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) + 
+		VS( FINSECL2, "PiB" ) + VS( GRANDPARENT, "G" ) - 
+		VS( GRANDPARENT, "Tax" ) + 
 		VS( CAPSECL2, "PPI" ) * VS( CONSECL2, "SI" ) / VS( CONSECL2, "m2" ) )
 
 

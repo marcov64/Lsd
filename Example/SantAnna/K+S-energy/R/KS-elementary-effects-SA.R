@@ -3,67 +3,59 @@
 # --------------- Elementary Effects DoE analysis (Morris 1991) ---------------
 #
 #	Several files are required to run:
-#		folder/basename_XX_YY.csv		  : DoE specification from LSD
-#		folder/basename_XX_YY_WWW.res : DoE response from R
-#		folder/basename.lsd			  	  : LSD configuration with default values
-#		folder/basename.sa		        : factor sensitivity test ranges from LSD
+#		folder/basename_XX_YY.csv       : DoE specification from LSD
+#		folder/basename_XX_YY_WWW.res   : DoE response from R
+#		folder/basename.lsd             : LSD configuration with default values
+#		folder/basename.sa              : factor sensitivity test ranges from LSD
 #
 #*******************************************************************************
 
 # Database files / time steps to use
-folder   <- "ee"                      # data files folder
-baseName <- "Sim1-ee"                 # data files base name (same as .lsd file)
-varName <- "Tm"                       # analysis variable name
-iniDrop <- 100                        # initial time steps to drop (0=none)
-nKeep <- -1                           # number of time steps to keep (-1=all)
+folder    <- "data"                 # data files folder
+baseName  <- "Sim3-ee"              # data files base name (same as .lsd file)
+varName   <- "Tm"                   # analysis variable name
+iniDrop   <- 100                    # initial time steps to drop (0=none)
+nKeep     <- -1                     # number of time steps to keep (-1=all)
 
 # Flags for removing outliers from DoE & validation samples (use with care!)
-remOutl <- FALSE                      # remove outliers from DoE & validation samples?
-limOutl <- 10                         # limit deviation (number of standard deviations)
+remOutl   <- FALSE                  # remove outliers from DoE & validation samples?
+limOutl   <- 10                     # limit deviation (number of standard deviations)
 
 # General flags
-conf <- 0.95                          # confidence level to use
-p <- 4                                # number of levels of the design
-jump <- 2                             # number of levels jumps when calculating EE
+conf      <- 0.95                   # confidence level to use
+p         <- 4                      # number of levels of the design
+jump      <- 2                      # number of levels jumps when calculating EE
 
 # Report output configuration
-plotRows <- 1   					            # number of plots per row in a page
-plotCols <- 1  	 					            # number of plots per column in a page
-plotW <- 10      					            # plot window width
-plotH <- 7       					            # plot window height
+plotRows  <- 1                      # number of plots per row in a page
+plotCols  <- 1                      # number of plots per column in a page
+plotW     <- 10                     # plot window width
+plotH     <- 7                      # plot window height
 
 # 3D surfaces visualization control
-surf3d <- FALSE                       # ask the user to adjust a 3D perspective of response surface
-theta3d <- 130                        # horizontal view angle
-phi3d <- 30                           # vertical view angle
+surf3d    <- FALSE                  # ask to adjust 3D perspective of response surface
+theta3d   <- 130                    # horizontal view angle
+phi3d     <- 30                     # vertical view angle
 
 
 # ==== Aggregated variables to consider ====
 
 # Aggregated variables to use
 logVars <- c( "GDP", "GDPnom", "D2", "G", "Gbail", "Tax", "Deb", "Def", "DefP",
-              "dN", "I", "EI", "A", "A1", "A2", "Ade", "Se", "S1", "S2", "DebE",
-              "Deb1", "Deb2", "NWb", "NWe", "NW1", "NW2", "We", "W1", "W2",
-              "wReal", "BadDeb", "TC", "Loans", "CD", "CS", "Aee", "Aef", "Em",
-              "EmE", "Em1", "Em2", "En" )
-aggrVars <- append( logVars, c( "dGDP", "dCPI", "dA", "dw", "CPI", "Q2u",
-                                "Fe", "F1", "F2", "entryE", "entry1", "entry2",
-                                "entryEexit", "entry1exit", "entry2exit",
-                                "exitE", "exit1", "exit2", "exitEfail",
-                                "exit1fail", "exit2fail", "imi", "inn", "innDE",
-                                "innGE", "HHe", "HH1", "HH2", "muEavg", "mu2avg",
-                                "U", "V", "r", "Bda", "Bfail", "DebGDP",
-                                "DefGDP", "DefPgdp", "CO2a", "EnGDP","Tm", "dEm",
-                                "dEn","fGE", "fKge", "pE" ) )
+              "I", "EI", "A", "A1", "A2", "S1", "S2", "Deb1", "Deb2", "NWb",
+              "NW1", "NW2", "W1", "W2", "wReal", "Loans", "Em", "Em1", "Em2",
+              "EmE", "En" )
+aggrVars <- append( logVars, c( "dGDP", "dCPI", "CPI", "Q2u", "F1", "F2",
+                                "entry1", "entry2", "entry1exit", "entry2exit",
+                                "exit1", "exit2", "imi", "inn", "U", "r",
+                                "DebGDP", "DefPgdp", "Tm", "pE" ) )
 newVars <- c( "freq_FE", "cris_llh", "GDP_sd" )
 
 
 # ====== External support functions & definitions ======
 
-require( LSDsensitivity, warn.conflicts = FALSE, quietly = TRUE )
-
-if( ! exists( "plot_norm", mode = "function" ) )             # already loaded?
-  source( "KS-support-functions.R" )
+# load support packages and functions
+source( "KS-support-functions.R" )
 
 # remove warnings for support functions
 # !diagnostics suppress = fit_subbotin, textplot, remove_outliers, log0, fmt

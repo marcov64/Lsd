@@ -193,11 +193,11 @@ CYCLES( FINSECL1, cur, "Bank" )
 	v[10] += VS( cur, "_Loans" );
 	v[11] += VS( cur, "_LoansCB" );
 	v[12] += VS( cur, "_Res" );
-	
+
 	if ( VS( cur, "_TC1free" ) + VS( cur, "_TC2free" ) > 
 		 ( 1 + TOL / 10 ) * VS( cur, "_TC" ) )
 		TCerr.push_back( cur );
-	
+		
 	++k;
 }
 

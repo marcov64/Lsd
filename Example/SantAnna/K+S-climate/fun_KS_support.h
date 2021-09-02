@@ -350,7 +350,8 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 		AtauEE = BtauEE = INIEEFF;				// initial products.
 		AtauEF = BtauEF = INIEFRI;
 		AtauLP = AtauLPmax = INIPROD;
-		BtauLP = BtauLPmax = ( 1 + mu1 ) * AtauLP / ( m1 * m2 );
+		BtauLP = BtauLPmax = ( 1 + mu1 ) * AtauLP / 
+							 ( m1 * m2 * VS( cons, "b" ) );
 
 		NW10 = VS( sector, "NW10" ); 			// initial wealth in sector 1
 		f1 = 1.0 / n;							// fair share

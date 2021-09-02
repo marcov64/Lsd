@@ -1100,7 +1100,7 @@ Var: _AtauEF 1 n + n n	0
 Var: _AtauLP 1 n + n n	0
 Var: _BtauEE 1 n + n n	0
 Var: _BtauEF 1 n + n n	0
-Var: _BtauLP 1 s + n n	0
+Var: _BtauLP 1 n + n n	0
 Var: _BC 7 n + n n	0	0	0	0	0	0	0
 Var: _C1 1 n + n n	0
 Var: _CD1 0 n + n n
@@ -1122,7 +1122,7 @@ Var: _NC 0 n + n n
 Var: _NW1 1 n + n n	0
 Var: _Pi1 0 n + n n
 Var: _Q1 0 n + n n
-Var: _Q1e 0 s + n N
+Var: _Q1e 0 n + n N
 Var: _RD 1 n + n n	0
 Var: _S1 1 n + n n	0
 Var: _Tax1 0 n + n n
@@ -1228,7 +1228,7 @@ Param: _bank2 0 n + n n	0
 Param: _pOrd2 0 n + n n	0
 Param: _t2ent 0 n + n n	0
 Func: _CS2a 0 n + n n
-Var: _A2 4 s + n n	0	0	0	0
+Var: _A2 4 n + n n	0	0	0	0
 Var: _A2e 0 n + n n
 Var: _A2ee 0 n + n n
 Var: _A2ef 0 n + n n
@@ -1258,7 +1258,7 @@ Var: _NW2 1 n + n n	0
 Var: _Pi2 0 n + n n
 Var: _Q2 0 n + n n
 Var: _Q2d 0 n + n n
-Var: _Q2e 2 s + n n	0	0
+Var: _Q2e 2 n + n n	0	0
 Var: _Q2p 0 n + n N
 Var: _Q2pe 0 n + n N
 Var: _Q2u 0 n + n n
@@ -1302,7 +1302,7 @@ Var: _Qvint 0 n + n n
 Var: _RSvint 0 n + n n
 Var: _cVint 0 n + n n
 
-Object: Stats C	1
+Object: Stats N	1
 Param: testCtIni 0 n + n n	1
 Param: testCtEnd 0 n + n n	0
 Param: testCBtIni 0 n + n n	1

@@ -8,18 +8,17 @@
 # !diagnostics suppress = log0, colSds, na.remove, rec.stats, textplot
 
 
-box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
-                       nTstat, legends, legendList, sDigits, bPlotCoef,
-                       bPlotNotc, folder, repName ) {
+box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
+                       warmUpStat, nTstat, legends, legendList, sDigits,
+                       bPlotCoef, bPlotNotc, folder, repName ) {
 
   # ======= COMPARISON OF EXPERIMENTS =======
 
   maxStats <- 99
-  statsTb <- array( dim = c( maxStats, 4, nExp ) )
-  statsBp <- array( dim = c( maxStats, 5, nExp ) )
+  statsTb <- statsBp <- array( dim = c( maxStats, 5, nExp ) )
   n <- array( dim = c( maxStats, nExp ) )
   conf <- array( dim = c( maxStats, 2, nExp ) )
-  out <- array( list( ), dim = c( maxStats, nExp ) )
+  data <- out <- array( list( ), dim = c( maxStats, nExp ) )
   temp <- matrix( nrow = TmaxStat, ncol = nSize )
   names <- units <- list( )
 
@@ -31,10 +30,11 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
       return( )
     }
 
+    data[[ stat, exper ]] <<- x
     names[[ stat ]] <<- tit
     units[[ stat ]] <<- ylab
+    statsTb[ stat, , exper ] <<- c( mean( x ), median( x ), sd( x ), min( x ), max( x ) )
     bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , exper ] <<- c( mean( x ), sd( x ), min( x ), max( x ) )
     statsBp[ stat, , exper ] <<- bPlotStats$stats
     n[ stat, exper ] <<- bPlotStats$n
     conf[ stat, , exper ] <<- bPlotStats$conf
@@ -200,11 +200,6 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
 
   # ---- Build experiments statistics table and performance comparison chart ----
 
-  table.stats <- statsTb[ , , 1 ]
-  table.names <- c( "Avg[1]", "SD[1]", "Min[1]", "Max[1]" )
-  perf.comp <- statsTb[ , 1, 1 ]
-  perf.names <- c( "Baseline[1]" )
-
   # Print whisker plots for each statistics
 
   for( stat in 1 : numStats ) {
@@ -258,6 +253,21 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
               } )
   }
 
+  if( mcStat == "mean" ) {
+    scol <- 1
+    slab <- "Avg"
+    tlab <- "t-test"
+  } else {
+    scol <- 2
+    slab <- "Med"
+    tlab <- "U-test"
+  }
+
+  table.stats <- statsTb[ , c( scol, 3, 4, 5 ), 1 ]
+  table.names <- c( paste0( slab, "[1]" ), "SD[1]", "Min[1]", "Max[1]" )
+  perf.comp <- statsTb[ , 1, 1 ]
+  perf.names <- c( "Baseline[1]" )
+
   if( nExp > 1 ){
 
     # Create 2D stats table and performance comparison table
@@ -265,20 +275,36 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     for( k in 2 : nExp ){
 
       # Stats table
-      table.stats <- cbind( table.stats, statsTb[ , , k ] )
-      table.names <- cbind( table.names, c( paste0( "Avg[", k, "]" ),
+      table.stats <- cbind( table.stats, statsTb[ , c( scol, 3, 4, 5 ), k ] )
+      table.names <- cbind( table.names, c( paste0( slab, "[", k, "]" ),
                                             paste0( "SD[", k, "]" ),
                                             paste0( "Min[", k, "]" ),
                                             paste0( "Max[", k, "]" ) ) )
 
       # Performance comparison table
-      perf.comp <- cbind( perf.comp, statsTb[ , 1, k ] / statsTb[ , 1, 1 ] )
-      t <- ( statsTb[ , 1, k ] - statsTb[ , 1, 1 ] ) /
-        sqrt( ( statsTb[ , 2, k ] ^ 2 + statsTb[ , 2, 1 ] ^ 2 ) / nSize )
-      df <- floor( ( ( statsTb[ , 2, k ] ^ 2 + statsTb[ , 2, 1 ] ^ 2 ) / nSize ) ^ 2 /
-                     ( ( 1 / ( nSize - 1 ) ) * ( ( statsTb[ , 2, k ] ^ 2 / nSize ) ^ 2 +
-                                                   ( statsTb[ , 2, 1 ] ^ 2 / nSize ) ^ 2 ) ) )
-      pval <- 2 * pt( - abs ( t ), df )
+      if( mcStat == "mean" ) {
+        perf.comp <- cbind( perf.comp, statsTb[ , 1, k ] / statsTb[ , 1, 1 ] )
+
+        # t-test
+        t <- ( statsTb[ , 1, k ] - statsTb[ , 1, 1 ] ) /
+          sqrt( ( statsTb[ , 2, k ] ^ 2 + statsTb[ , 2, 1 ] ^ 2 ) / nSize )
+        df <- floor( ( ( statsTb[ , 2, k ] ^ 2 + statsTb[ , 2, 1 ] ^ 2 ) / nSize ) ^ 2 /
+                       ( ( 1 / ( nSize - 1 ) ) * ( ( statsTb[ , 2, k ] ^ 2 / nSize ) ^ 2 +
+                                                     ( statsTb[ , 2, 1 ] ^ 2 / nSize ) ^ 2 ) ) )
+        pval <- 2 * pt( - abs ( t ), df )
+
+      } else {
+        perf.comp <- cbind( perf.comp, statsTb[ , 2, k ] / statsTb[ , 2, 1 ] )
+
+        # U-test (Mann-Whitney-Wilcoxon)
+        pval <- rep( NA, numStats )
+        for( stat in 1 : numStats ) {
+          pval[ stat ] <- suppressWarnings( wilcox.test( data[[ stat, k ]],
+                                                         data[[ stat, 1 ]],
+                                                         digits.rank = 7 )$p.value )
+        }
+      }
+
       perf.comp <- cbind( perf.comp, pval )
       perf.names <- cbind( perf.names, t( c( paste0( "Ratio[", k, "]" ),
                                              paste0( "p-val[", k, "]" ) ) ) )
@@ -306,8 +332,9 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     textplot( formatC( perf.comp, digits = sDigits, format = "g" ), cmar = 1 )
     title <- paste( "Performance comparison ( all experiments )" )
     subTitle <- paste(
-      "( numbers in brackets indicate the experiment number / H0: no difference with baseline / MC runs =",
-                       nSize, "/ period =", warmUpStat + 1, "-", nTstat, ")" )
+      "( experiment number in brackets /", tlab,
+      "H0: no difference with baseline / MC runs =",
+      nSize, "/ period =", warmUpStat + 1, "-", nTstat, ")" )
     title( main = title, sub = subTitle )
     mtext( legendList, side = 1, line = -2, outer = TRUE )
   }

@@ -284,19 +284,17 @@ WRITES( cur2, "m2", max( 1, ceil( VS( cur2, "m2" ) ) ) );
 
 // prepare data required to set initial conditions
 double m1 = VS( cur1, "m1" );					// labor output factor
-double m2 = VS( cur2, "m2" );					// machine output factor
 double mu1 = VS( cur1, "mu1" );					// mark-up in sector 1
-double mu20 = VS( cur2, "mu20" );				// initial mark-up in sector 2
-double w0min = VS( cur4, "w0min" );				// absolute/initial minimum wage
 int F1 = VS( cur1, "F1" );						// number of firms in sector 1
 int F2 = VS( cur2, "F2" );						// number of firms in sector 2
 int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 
-double Btau0 = ( 1 + mu1 ) * INIPROD / ( m1 * m2 );// initial prod. in sector 1
+double Btau0 = ( 1 + mu1 ) * INIPROD / 			// initial productivity in sec. 1
+			   ( m1 * VS( cur2, "m2" ) * VS( cur2, "b" ) );
 double c10 = INIWAGE / ( Btau0 * m1 );			// initial cost in sector 1
 double c20 = INIWAGE / INIPROD;					// initial cost in sector 2
 double p10 = ( 1 + mu1 ) * c10;					// initial price sector 1
-double p20 = ( 1 + mu20 ) * c20;				// initial price sector 2
+double p20 = ( 1 + VS( cur2, "mu20" ) ) * c20;	// initial price sector 2
 double Eavg0 = ( VS( cur2, "omega1" ) + VS( cur2, "omega2" ) ) / 2;	
 												// initial competitiveness
 double G0 = V( "gG" ) * Ls0;					// initial public spending

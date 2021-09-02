@@ -98,7 +98,7 @@ if ( v[0] < 0 && VS( GRANDPARENT, "flagCreditRule" ) == 2 )
 	
 	// remove effect of this bank net worth in the bank total average
 	if ( v[1] < 1 )
-	v[2] = ( VLS( PARENT, "NWb", 1 ) - CURRENT ) / ( 1 - v[1] );
+		v[2] = ( VLS( PARENT, "NWb", 1 ) - CURRENT ) / ( 1 - v[1] );
 	else
 		v[2] = 0;								// monopoly, use capital rule
 	
@@ -134,7 +134,7 @@ if ( k == 1 )									// deposits multiplier rule?
 else
 	if ( k == 2 )								// Basel-like credit rule?
 		v[0] = VL( "_NWb", 1 ) / ( VS( PARENT, "tauB" ) *
-						   ( 1 + VS( PARENT, "betaB" ) * V( "_Bda" ) ) );
+			   ( 1 + VS( PARENT, "betaB" ) * V( "_Bda" ) ) );
 	else
 	v[0] = -1;									// no-limit rule	
 

@@ -82,12 +82,12 @@ else
 	v[0] = v[2] * VS( LABSUPL0, "wU" );			// pay unemployment benefit
 	
 v[0] += VS( LABSUPL0, "Gtrain" );				// worker training cost
-	
+
 if ( i == 1 )
 	v[0] += ( 1 + V( "gG" ) ) * ( CURRENT - VLS( LABSUPL0, "Gtrain", 1 ) );
 	
 if ( i == 3 )									// if government has accumulated
-{											// surplus, it may spend it 
+{												// surplus, it may spend it 
 	v[3] = VL( "Deb", 1 );
 	if ( v[3] < 0 )
 	{
@@ -99,7 +99,7 @@ if ( i == 3 )									// if government has accumulated
 		}
 		else
 		{
-			v[0] += - v[3];					// spend all surplus
+			v[0] += - v[3];						// spend all surplus
 			WRITE( "Deb", 0 );					// zero debt
 		}
 		
@@ -444,11 +444,7 @@ double NW20 = VS( cur2, "NW20" );				// initial net worth in sector 2
 double alphaB = VS( cur3, "alphaB" );			// bank size distrib. parameter
 double f2trdChg = VS( cur2, "f2trdChg" );		// threshold cor post-change firms
 double m1 = VS( cur1, "m1" );					// labor output factor
-double m2 = VS( cur2, "m2" );					// machine output factor
 double mu1 = VS( cur1, "mu1" );					// mark-up in sector 1
-double mu20 = VS( cur2, "mu20" );				// initial mark-up in sector 2
-double phi = VS( cur4, "phi" );					// unemployed benefit rate
-double muBonds = VS( cur3, "muBonds" );			// interest mark-down on g. bonds
 double rT = VS( cur3, "rT" );					// prime rate target
 double tauB = VS( cur3, "tauB" );				// minimum capital adequacy rate
 double w0min = VS( cur4, "w0min" );				// absolute/initial minimum wage
@@ -460,18 +456,19 @@ int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 int Tc = VS( cur4, "Tc" );						// work-contract term
 int Tr = VS( cur4, "Tr" );						// work-life duration
 
-double Btau0 = ( 1 + mu1 ) * INIPROD / ( m1 * m2 );// initial prod. in sector 1
+double Btau0 = ( 1 + mu1 ) * INIPROD / 			// initial productivity in sec. 1
+			   ( m1 * VS( cur2, "m2" ) * VS( cur2, "b" ) );
 double c10 = INIWAGE / ( Btau0 * m1 );			// initial cost in sector 1
 double c20 = INIWAGE / INIPROD;					// initial cost in sector 2
 double p10 = ( 1 + mu1 ) * c10;					// initial price sector 1
-double p20 = ( 1 + mu20 ) * c20;				// initial price sector 2
+double p20 = ( 1 + VS( cur2, "mu20" ) ) * c20;	// initial price sector 2
 double Eavg0 = ( VS( cur2, "omega1" ) + VS( cur2, "omega2" ) + 
 				VS( cur2, "omega3" ) ) / 3;		// initial competitiveness
-double rBonds = rT * ( 1 - muBonds );			// initial interest on g. bonds
+double rBonds = rT * ( 1 - VS( cur3, "muBonds" ) );// initial interest on bonds
 double G0 = V( "gG" ) * Ls0;					// initial public spending
 double sV0 = ( V( "flagWorkerLBU" ) == 0 || V( "flagWorkerLBU" ) == 2 ) ?
 			 INISKILL : VS( cur4, "sigma" );	// initial vintage skills
-double wRes = phi * INIWAGE;					// initial reservation wage
+double wRes = VS( cur4, "phi" ) * INIWAGE;		// initial reservation wage
 
 // reserve space for country-level non-initialized vectors
 EXEC_EXT( countryE, firm2ptr, reserve, F2max );	// sector 2 firm objects

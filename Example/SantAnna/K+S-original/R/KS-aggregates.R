@@ -10,11 +10,16 @@
 #
 #******************************************************************
 
-folder   <- "data"                    # data files folder
-baseName <- "Sim"                     # data files base name (same as .lsd file)
-nExp <- 2                             # number of experiments
-iniDrop <- 0                          # initial time steps to drop (0=none)
-nKeep <- -1                           # number of time steps to keep (-1=all)
+folder    <- "data"                 # data files folder
+baseName  <- "Sim"                  # data files base name (same as .lsd file)
+nExp      <- 2                      # number of experiments
+iniDrop   <- 0                      # initial time steps to drop (0=none)
+nKeep     <- -1                     # number of time steps to keep (-1=all)
+mcStat    <- "mean"                 # Monte Carlo statistic ("mean", "median")
+CI        <- 0.95                   # confidence level
+bootR     <- 999                    # bootstrap replicates (bootCI != NULL)
+bootCI    <- NULL                   # bootstrap confidence interval method (SLOW)
+                                    # (NULL (no bootstrap), "basic", or "bca")
 
 expVal <- c( "Benchmark", "High opportunities & capabilities" )   # case parameter values
 
@@ -31,8 +36,8 @@ aggrVars <- append( logVars, c( "dGDP", "dCPI", "dA", "dw", "CPI", "Q2u",
 
 # ==== Process LSD result files ====
 
-# Package with LSD interface functions
-library( LSDinterface, verbose = FALSE, quietly = TRUE )
+# load support packages and functions
+source( "KS-support-functions.R" )
 
 # remove warnings for saved data
 # !diagnostics suppress = A, S, M, m
@@ -41,18 +46,10 @@ library( LSDinterface, verbose = FALSE, quietly = TRUE )
 
 # Function to read one experiment data (to be parallelized)
 readExp <- function( exper ) {
-  if( nExp > 1 ) {
-    myFiles <- list.files( path = folder,
-                           pattern = paste0( baseName, exper, "_[0-9]+.res" ),
-                           full.names = TRUE )
-  } else {
-    myFiles <- list.files( path = folder,
-                           pattern = paste0( baseName, "_[0-9]+.res" ),
-                           full.names = TRUE )
-  }
-
-  if( length( myFiles ) < 1 )
-    stop( "Data files not found. Check 'folder', 'baseName' and 'nExp' parameters." )
+  if( nExp > 1 )
+    myFiles <- list.files.lsd( folder, paste0( baseName, exper ) )
+  else
+    myFiles <- list.files.lsd( folder, baseName )
 
   cat( "Data files: ", myFiles, "\n" )
 
@@ -65,18 +62,26 @@ readExp <- function( exper ) {
   nSize  <- dim( mc )[ 3 ]               # Monte Carlo sample size
 
   # Compute Monte Carlo averages and std. deviation and store in 2D arrrays
-  stats <- info.stats.lsd( mc )
+  stats <- info.stats.lsd( mc, median = ( mcStat == "median" ), ci = mcStat,
+                           ci.conf = CI, ci.boot = bootCI, boot.R = bootR )
 
   # Insert a t column
   t <- as.integer( rownames( stats$avg ) )
-  A <- as.data.frame( cbind( t, stats$avg ) )
+
+  if( mcStat == "median" )
+    P <- as.data.frame( cbind( t, stats$med ) )
+  else
+    P <- as.data.frame( cbind( t, stats$avg ) )
+
   S <- as.data.frame( cbind( t, stats$sd ) )
   M <- as.data.frame( cbind( t, stats$max ) )
   m <- as.data.frame( cbind( t, stats$min ) )
+  C <- as.data.frame( cbind( t, stats$ci.hi ) )
+  c <- as.data.frame( cbind( t, stats$ci.lo ) )
 
   # Save temporary results to disk to save memory
   tmpFile <- paste0( folder, "/", baseName, exper, "_aggr.Rdata" )
-  save( mc, A, S, M, m, nTsteps, nVar, nSize, file = tmpFile )
+  save( mc, P, S, M, m, C, c, nTsteps, nVar, nSize, file = tmpFile )
 
   return( tmpFile )
 }
@@ -87,14 +92,10 @@ tmpFiles <- lapply( 1 : nExp, readExp )
 # ---- Organize data read from files ----
 
 # fill the lists to hold data
-mcData <- list()  # 3D Monte Carlo data
-Adata <- list()  # average data
-Sdata <- list()  # standard deviation data
-Mdata <- list()  # maximum data
-mdata <- list()  # minimum data
+mcData <- Pdata <- Sdata <- Mdata <- mdata <- Cdata <- cdata <- list( )
 nTsteps.1 <- nSize.1 <- 0
 
-for( k in 1 : nExp ) {                      # realocate data in separate lists
+for( k in 1 : nExp ) {                      # relocate data in separate lists
 
   load( tmpFiles[[ k ]] )                   # pick data from disk
   file.remove( tmpFiles[[ k ]] )            # and delete temporary file
@@ -104,16 +105,19 @@ for( k in 1 : nExp ) {                      # realocate data in separate lists
 
   mcData[[ k ]] <- mc
   rm( mc )
-  Adata[[ k ]] <- A
+
+  Pdata[[ k ]] <- P
   Sdata[[ k ]] <- S
   Mdata[[ k ]] <- M
   mdata[[ k ]] <- m
+  Cdata[[ k ]] <- C
+  cdata[[ k ]] <- c
   nTsteps.1 <- nTsteps
   nSize.1 <- nSize
 }
 
 # free memory
-rm( tmpFiles, A, S, M, m, nTsteps.1, nSize.1 )
+rm( tmpFiles, P, S, M, m, C, c, nTsteps.1, nSize.1 )
 invisible( gc( verbose = FALSE ) )
 
 
@@ -126,7 +130,6 @@ invisible( gc( verbose = FALSE ) )
 # ===================== User parameters =========================
 
 bCase     <- 1      # experiment to be used as base case
-CI        <- 0.95   # desired confidence interval
 nBins     <- 15     # number of bins to use in histograms
 warmUpPlot<- 100    # number of "warm-up" runs for plots
 nTplot    <- -1     # last period to consider for plots (-1=all)
@@ -159,14 +162,8 @@ pTypes <- c( 4, 4, 4, 4, 4, 4 )
 
 # ====== External support functions & definitions ======
 
-library( LSDsensitivity, verbose = FALSE, quietly = TRUE )
-if( ! exists( "log0", mode = "function" ) ||
-    ! exists( "time_plots", mode = "function" ) ||
-    ! exists( "box_plots", mode = "function" ) ) {    # already loaded?
-  source( "KS-support-functions.R" )
-  source( "KS-time-plots.R" )
-  source( "KS-box-plots.R" )
-}
+source( "KS-time-plots.R" )
+source( "KS-box-plots.R" )
 
 # remove warnings for support functions and saved data
 # !diagnostics suppress = mc, nTsteps, nKeep, nVar, nSize, log0, t.test0
@@ -211,7 +208,7 @@ critCorr <- qnorm( 1 - ( 1 - CI ) / 2 ) / sqrt( nTstat )
 
 # ==== Create PDF ====
 
-pdf( paste0( folder, "/", repName, "_aggr_plots.pdf" ),
+pdf( paste0( folder, "/", repName, "_aggr_plots_", mcStat, ".pdf" ),
      width = plotW, height = plotH )
 par( mfrow = c ( plotRows, plotCols ) )             # define plots per page
 
@@ -220,12 +217,11 @@ par( mfrow = c ( plotRows, plotCols ) )             # define plots per page
 # ====== Experiment comparison plots & statistics ======
 #
 
-time_plots( mcData, Adata, mdata, Mdata, Sdata, nExp, nSize, nTsteps, TmaskPlot,
-            CI, legends, colors, lTypes, smoothing )
+time_plots( mcData, Pdata, mdata, Mdata, Sdata, cdata, Cdata, mcStat, nExp,
+            nSize, nTsteps, TmaskPlot, CI, legends, colors, lTypes, smoothing )
 
-box_plots( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
-           nTstat, legends, legendList, sDigits, bPlotCoef,
-           bPlotNotc, folder, repName )
+box_plots( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat, warmUpStat, nTstat,
+           legends, legendList, sDigits, bPlotCoef, bPlotNotc, folder, repName )
 
 #
 # ====== Experiment-specific plots & statistics ======
@@ -284,22 +280,24 @@ for( k in 1 : nExp ) { # Experiment k
   bpfMsg <- paste0( "Baxter-King bandpass-filtered series, low =", lowP,
                     "Q / high = ", highP, "Q / order = ", bpfK )
 
-  plot_bpf( list( log0( Adata[[ k ]]$GDP ), log0( Adata[[ k ]]$D2 ),
-                  log0( Adata[[ k ]]$I ), log0( Adata[[ k ]]$A ) ),
+  plot_bpf( list( log0( Pdata[[ k ]]$GDP ), log0( Pdata[[ k ]]$D2 ),
+                  log0( Pdata[[ k ]]$I ), log0( Pdata[[ k ]]$A ) ),
             pl = lowP, pu = highP, nfix = bpfK, mask = TmaskPlot,
             col = colors, lty = lTypes,
             leg = c("GDP", "Consumption", "Investment", "Productivity" ),
             xlab = "Time", ylab = "Filtered series",
             tit = paste( "GDP cycles (", legends[ k ], ")" ),
-            subtit = paste( "(", bpfMsg, "/ MC runs =", nSize, ")" ) )
+            subtit = paste( "(", bpfMsg, "/ MC runs =", nSize,
+                            "/ MC ", mcStat, ")" ) )
 
-  plot_bpf( list( Adata[[ k ]]$U, Adata[[ k ]]$V ),
+  plot_bpf( list( Pdata[[ k ]]$U, Pdata[[ k ]]$V ),
             pl = lowP, pu = highP, nfix = bpfK, mask = TmaskPlot,
             col = colors, lty = lTypes,
             leg = c( "Productivity", "Unemployment", "Vacancy" ),
             xlab = "Time", ylab = "Filtered series",
             tit = paste( "Shimer puzzle (", legends[ k ], ")" ),
-            subtit = paste( "(", bpfMsg, "/ MC runs =", nSize, ")" ) )
+            subtit = paste( "(", bpfMsg, "/ MC runs =", nSize,
+                            "/ MC ", mcStat, ")" ) )
 
   #
   # ---- Correlation table ----

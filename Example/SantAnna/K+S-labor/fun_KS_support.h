@@ -112,7 +112,7 @@ void update_debt2( object *firm, double desired, double loan )
 	
 		object *bank = HOOKS( firm, BANK );		// firm's bank
 		double TC2free = VS( bank, "_TC2free" );// available credit at firm's bank
-	
+		
 		// if credit limit active, adjust bank's available credit
 		if ( TC2free > -0.1 )
 			WRITES( bank, "_TC2free", max( TC2free - loan, 0 ) );
@@ -224,7 +224,7 @@ void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 	double _Avint, _pVint;
 	int _ageVint, _nMach, _nVint;
 	object *cap, *cons, *cur, *suppl, *vint, *wrk;
-
+	
 	suppl = PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) );// current supplier
 	_nMach = floor( nMach );					// integer number of machines
 	
@@ -260,11 +260,11 @@ void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 		else
 		{
 			cur = suppl;						// just use current supplier
-		vint = ADDOBJS( firm, "Vint" );			// just recalculate in next t
+			vint = ADDOBJS( firm, "Vint" );		// just recalculate in next t
 		}
-		
+			
 		WRITE_SHOOKS( vint, HOOKS( firm, TOPVINT ) );// save previous vintage
-		WRITE_HOOKS( firm, TOPVINT, vint );			// save pointer to top vintage
+		WRITE_HOOKS( firm, TOPVINT, vint );		// save pointer to top vintage		
 	
 		WRITES( vint, "_IDvint", VNT( T, VS( cur, "_ID1" ) ) );// vintage ID
 		WRITES( vint, "_Avint", _Avint );		// vintage productivity
@@ -275,7 +275,7 @@ void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 		WRITELLS( vint, "_AeVint", _Avint, T, 1 );// lagged value
 	
 		wrk = SEARCHS( vint, "WrkV" );			// remove empty worker object
-		DELETE( wrk );
+			DELETE( wrk );
 		
 		_nMach -= _nVint;
 		--_ageVint;
@@ -745,7 +745,8 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 		double m2 = VS( cons, "m2" );			// machine output per period
 
 		Atau = AtauMax = INIPROD;				// initial productivities to use
-		Btau = BtauMax = ( 1 + mu1 ) * Atau / ( m1 * m2 );// and build machines
+		Btau = BtauMax = ( 1 + mu1 ) * Atau / ( m1 * m2 * VS( cons, "b" ) );
+												// and build machines (s. s.)
 		NW10 = VS( sector, "NW10" ); 			// initial wealth in sector 1
 		f1 = 1.0 / n;							// fair share
 		sV = VLS( lab, "sAvg", 1 );				// initial worker vintage skills
@@ -1007,7 +1008,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		// initial equity must pay initial capital and wages
 		NW2 = newInd ? NW2f : VS( suppl, "_p1" ) * Kd / m2 + NW2f;
 		equity += NW2 * ( 1 - Deb20ratio );		// accumulated equity (all firms)
-
+			
 		// initialize variables
 		WRITES( firm, "_ID2", ID2 );
 		WRITES( firm, "_t2ent", t2ent );

@@ -350,26 +350,23 @@ double NW10 = VS( cur1, "NW10" );				// initial net worth in sector 1
 double NW20 = VS( cur2, "NW20" );				// initial net worth in sector 2
 double alphaB = VS( cur3, "alphaB" );			// bank size distrib. parameter
 double m1 = VS( cur1, "m1" );					// labor output factor
-double m2 = VS( cur2, "m2" );					// machine output factor
 double mu1 = VS( cur1, "mu1" );					// mark-up in sector 1
-double mu20 = VS( cur2, "mu20" );				// initial mark-up in sector 2
-double muBonds = VS( cur3, "muBonds" );			// interest mark-down on g. bonds
 double rT = VS( cur3, "rT" );					// prime rate target
 double tauB = VS( cur3, "tauB" );				// minimum capital adequacy rate
-double w0min = VS( cur4, "w0min" );				// absolute/initial minimum wage
 int B = VS( cur3, "B" );						// number of banks
 int F1 = VS( cur1, "F1" );						// number of firms in sector 1
 int F2 = VS( cur2, "F2" );						// number of firms in sector 2
 int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 
-double Btau0 = ( 1 + mu1 ) * INIPROD / ( m1 * m2 );// initial prod. in sector 1
+double Btau0 = ( 1 + mu1 ) * INIPROD / 			// initial productivity in sec. 1
+			   ( m1 * VS( cur2, "m2" ) * VS( cur2, "b" ) );
 double c10 = INIWAGE / ( Btau0 * m1 );			// initial cost in sector 1
 double c20 = INIWAGE / INIPROD;					// initial cost in sector 2
 double p10 = ( 1 + mu1 ) * c10;					// initial price sector 1
-double p20 = ( 1 + mu20 ) * c20;				// initial price sector 2
+double p20 = ( 1 + VS( cur2, "mu20" ) ) * c20;	// initial price sector 2
 double Eavg0 = ( VS( cur2, "omega1" ) + VS( cur2, "omega2" ) ) / 2;	
 												// initial competitiveness
-double rBonds = rT * ( 1 - muBonds );			// initial interest on g. bonds
+double rBonds = rT * ( 1 - VS( cur3, "muBonds" ) );// initial interest on bonds
 double G0 = V( "gG" ) * Ls0;					// initial public spending
 
 // reserve space for country-level non-initialized vectors

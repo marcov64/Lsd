@@ -15,4 +15,5 @@ install.packages( c( "LSDsensitivity",
                      "corrplot",
                      "rmutil",
                      "plotrix",
+                     "textplot",
                      "extrafont" ) )

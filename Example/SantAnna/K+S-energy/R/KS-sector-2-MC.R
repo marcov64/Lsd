@@ -10,11 +10,11 @@
 #
 #******************************************************************
 
-folder   <- "data"                    # data files folder
-baseName <- "Sim"                     # data files base name (same as .lsd file)
-nExp <- 2                             # number of experiments
-iniDrop <- 0                          # initial time steps to drop from analysis (0=none)
-nKeep <- -1                           # number of time steps to keep (-1=all)
+folder    <- "data"                 # data files folder
+baseName  <- "Sim"                  # data files base name (same as .lsd file)
+nExp      <- 2                      # number of experiments
+iniDrop   <- 0                      # initial time steps to drop (0=none)
+nKeep     <- -1                     # number of time steps to keep (-1=all)
 
 expVal <- c( "Baseline", "Monopolistic power" )   # case parameter values
 
@@ -26,9 +26,8 @@ sector <- "( Consumption-goods sector )"
 
 # ==== Process LSD result files ====
 
-# Package with LSD interface functions
-library( LSDinterface, verbose = FALSE, quietly = TRUE )
-library( abind, verbose = FALSE, quietly = TRUE )
+# load support packages and functions
+source( "KS-support-functions.R" )
 
 # remove warnings for saved data
 # !diagnostics suppress = mc, nSize, nTsteps, nFirms
@@ -37,18 +36,10 @@ library( abind, verbose = FALSE, quietly = TRUE )
 
 # Function to read one experiment data (to be parallelized)
 readExp <- function( exper ) {
-  if( nExp > 1 ) {
-    myFiles <- list.files( path = folder,
-                           pattern = paste0( baseName, exper, "_[0-9]+.res"),
-                           full.names = TRUE )
-  } else {
-    myFiles <- list.files( path = folder,
-                           pattern = paste0( baseName, "_[0-9]+.res"),
-                           full.names = TRUE )
-  }
-
-  if( length( myFiles ) < 1 )
-    stop( "Data files not found. Check 'folder', 'baseName' and 'nExp' parameters." )
+  if( nExp > 1 )
+    myFiles <- list.files.lsd( folder, paste0( baseName, exper ) )
+  else
+    myFiles <- list.files.lsd( folder, baseName )
 
   cat( "Data files: ", myFiles, "\n" )
 
@@ -150,20 +141,20 @@ invisible( gc( verbose = FALSE ) )
 
 # ====== User parameters ======
 
-CI     <- 0.95      # desired confidence interval
-outLim <- 0.10      # outlier percentile (0=don't remove outliers)
-limOutl<- 0.10      # quantile extreme limits (0=none)
-warmUp <- 200       # number of "warm-up" time steps
-nTstat <- -1        # last period to consider for statistics (-1=all)
-csBeg  <- 300       # beginning step for cross-section regressions
-csEnd  <- 307       # last step for cross-section regressions
+CI        <- 0.95   # desired confidence interval
+outLim    <- 0.10   # outlier percentile (0=don't remove outliers)
+limOutl   <- 0.10   # quantile extreme limits (0=none)
+warmUp    <- 200    # number of "warm-up" runs
+nTstat    <- -1     # last period to consider for statistics (-1=all)
+csBeg     <- 300    # beginning step for cross-section regressions
+csEnd     <- 307    # last step for cross-section regressions
 
-repName <- ""       # report files base name (if "" same baseName)
-sDigits <- 4        # significant digits in tables
-plotRows <- 1       # number of plots per row in a page
-plotCols <- 1  	    # number of plots per column in a page
-plotW <- 10         # plot window width
-plotH <- 7          # plot window height
+repName   <- ""     # report files base name (if "" same baseName)
+sDigits   <- 4      # significant digits in tables
+plotRows  <- 1      # number of plots per row in a page
+plotCols  <- 1      # number of plots per column in a page
+plotW     <- 10     # plot window width
+plotH     <- 7      # plot window height
 
 # Colors assigned to each experiment's lines in graphics
 colors <- c( "black", "blue", "red", "orange", "green", "brown" )
@@ -176,10 +167,6 @@ pTypes <- c( 4, 4, 4, 4, 4, 4 )
 
 
 # ====== External support functions & definitions ======
-
-if( ! exists( "plot_norm", mode = "function" ) ) {     # already loaded?
-  source( "KS-support-functions.R" )
-}
 
 # remove warnings for support functions
 # !diagnostics suppress = logNA, log0, t.test0, se, bkfilter, adf.test, colSds

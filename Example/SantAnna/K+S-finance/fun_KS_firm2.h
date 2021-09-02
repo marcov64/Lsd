@@ -212,7 +212,7 @@ else
 		// produce as much as the available finance allows, rounded # machines
 		v[0] = floor( max( ( v[3] - 1 + v[2] ) / v[4], 0 ) / v[5] ) * v[5];
 		v[8] = v[6] - v[3] + 1;					// desired credit
-
+		
 		if ( v[0] == 0 )
 			v[7] = 0;							// no finance
 		else

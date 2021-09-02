@@ -386,16 +386,12 @@ double NW20 = VS( cur2, "NW20" );				// initial net worth in sector 2
 double alphaB = VS( cur3, "alphaB" );			// bank size distrib. parameter
 double fGE0 = VS( cur5, "fGE0" );				// initial share of green energy
 double m1 = VS( cur1, "m1" );					// labor output factor
-double m2 = VS( cur2, "m2" );					// machine output factor
 double mu1 = VS( cur1, "mu1" );					// mark-up in sector 1
-double mu20 = VS( cur2, "mu20" );				// initial mark-up in sector 2
-double muBonds = VS( cur3, "muBonds" );			// interest mark-down on g. bonds
 double muE0 = VS( cur5, "muE0" );				// initial mark-up of energy
 double pF = VS( cur5, "pF" );					// price of fossil fuel
 double rT = VS( cur3, "rT" );					// prime rate target
 double tauB = VS( cur3, "tauB" );				// minimum capital adequacy rate
 double trCO2 = V( "trCO2" );					// carbon tax rate
-double w0min = VS( cur4, "w0min" );				// absolute/initial minimum wage
 int B = VS( cur3, "B" );						// number of banks
 int Fe0 = VS( cur5, "Fe0" );					// initial energy producers
 int F10 = VS( cur1, "F10" );					// initial firms in sector 1
@@ -403,17 +399,18 @@ int F20 = VS( cur2, "F20" );					// initial firms in sector 2
 int F2max = VS( cur2, "F2max" );				// max firms in sector 2
 int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 
-double Btau0 = ( 1 + mu1 ) * INIPROD / ( m1 * m2 );// initial prod. in sector 1
+double Btau0 = ( 1 + mu1 ) * INIPROD / 			// initial productivity in sec. 1
+			   ( m1 * VS( cur2, "m2" ) * VS( cur2, "b" ) );
 double pE0 = INIWAGE * muE0 + ( fGE0 == 1 ? 0 : pF / Ade0 );// init. energy price
 double c10 = ( INIWAGE / Btau0 + ( pE0 + trCO2 * INIEFRI ) / INIEEFF ) / m1;
 												// initial unit cost in sector 1
 double c20 = INIWAGE / INIPROD + ( pE0 + trCO2 * INIEFRI ) / INIEEFF;
 												// initial unit cost in sector 2
 double p10 = ( 1 + mu1 ) * c10;					// initial price sector 1
-double p20 = ( 1 + mu20 ) * c20;				// initial price sector 2
+double p20 = ( 1 + VS( cur2, "mu20" ) ) * c20;	// initial price sector 2
 double Eavg0 = ( VS( cur2, "omega1" ) + VS( cur2, "omega2" ) ) / 2;	
 												// initial competitiveness
-double rBonds = rT * ( 1 - muBonds );			// initial interest on g. bonds
+double rBonds = rT * ( 1 - VS( cur3, "muBonds" ) );// initial interest on bonds
 double G0 = V( "gG" ) * Ls0;					// initial public spending
 
 // reserve space for country-level non-initialized vectors

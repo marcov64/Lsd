@@ -306,7 +306,8 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 		double m2 = VS( cons, "m2" );			// machine output per period
 
 		Atau = AtauMax = INIPROD;				// initial productivities to use
-		Btau = BtauMax = ( 1 + mu1 ) * Atau / ( m1 * m2 );// and build machines
+		Btau = BtauMax = ( 1 + mu1 ) * Atau / ( m1 * m2 * VS( cons, "b" ) );
+												// and build machines (s. s.)
 		NW10 = VS( sector, "NW10" ); 			// initial wealth in sector 1
 		f1 = 1.0 / n;							// fair share
 		t1ent = 0;								// entered before t=1
