@@ -44,14 +44,13 @@ Returns a single matrix containing the selected variables' time series contained
 If only variable names selection is needed, \code{\link{select.colnames.lsd}} is more efficient because information preprocessing (\code{\link{info.details.lsd}}) is not required.
 }
 \seealso{
-\code{\link{info.details.lsd}},
-\code{\link{select.colnames.lsd}}
+\code{\link{list.files.lsd}()}
+\code{\link{info.details.lsd}()},
+\code{\link{select.colnames.lsd}()}
 }
 \examples{
-# get the example directory and file names
-path <- system.file( "extdata", package = "LSDinterface" )
-files <- list.files( path = path, full.names = TRUE,
-                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
+# get the list of file names of example LSD results
+files <- list.files.lsd( system.file( "extdata", package = "LSDinterface" ) )
 
 # read all instances of all variables of first file
 bigTable <- read.raw.lsd( files[ 1 ] )

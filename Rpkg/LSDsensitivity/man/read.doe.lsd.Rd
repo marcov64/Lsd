@@ -7,15 +7,15 @@ Read a set of experimental data from a LSD model
 This function reads the sampling data produced by a LSD model design of experiment (DoE), pre-process it and saves it as a R object that can be used by the other tools provided by the LSDsensitivity package. Optionally, it can be used with a second DoE, on the same simulation model, to allow the out-of-sample (external) validation of the fitted meta-models.
 }
 \usage{
-read.doe.lsd(folder, baseName, outVar, does = 1, doeFile = NULL, respFile = NULL,
-             validFile = NULL, valRespFile = NULL, confFile = NULL, limFile = NULL,
-             iniDrop = 0, nKeep = -1, saveVars = c(), addVars = c(), eval.vars = NULL,
-             eval.run = NULL, pool = TRUE, na.rm = FALSE, rm.temp = TRUE,
-             rm.outl = FALSE, lim.outl = 10, nnodes = 1)
+read.doe.lsd( folder, baseName, outVar, does = 1, doeFile = NULL, respFile = NULL,
+              validFile = NULL, valRespFile = NULL, confFile = NULL, limFile = NULL,
+              iniDrop = 0, nKeep = -1, saveVars = c(), addVars = c(), eval.vars = NULL,
+              eval.run = NULL, pool = TRUE, na.rm = FALSE, rm.temp = TRUE,
+              rm.outl = FALSE, lim.outl = 10, nnodes = 1, quietly = TRUE )
 }
 \arguments{
   \item{folder}{
-the \emph{relative} folder path to the LSD DoE data files, using the R working directory as reference.
+the \emph{relative} folder path to the LSD DoE data files, using the R working directory as reference (see \code{\link[base]{getwd}()}).
 }
   \item{baseName}{
 the LSD data files base name, without numbering and extension suffixes (should be the same as the name of the baseline \code{.lsd} file, without the extension).
@@ -72,13 +72,16 @@ logical: if TRUE NA values are stripped before the computation proceeds.
 logical: if TRUE then remove temporary speed up files. If FALSE (default), do not remove temporary speed up files, allowing fast execution of subsequent call to this function. Please note that the user \emph{must} remove temporary files (extension \code{.Rdata}) manually whenever LSD data files are updated.
 }
   \item{rm.outl}{
-logical: if TRUE, remove outliers from dataset. Default is FALSE, no outliers removal.
+logical: if TRUE, remove outliers from data set. Default is FALSE, no outliers removal.
 }
   \item{lim.outl}{
 numeric: if \code{rm.outl = TRUE}, defines the limit for non-outliers deviation in number of standard deviations.
 }
   \item{nnodes}{
-integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, nnodes = 1, means single thread processing (no parallelization). If equal to zero, creates up to one node per CPU core. Only "PSOCK" clusters are used, to ensure compatibility with any platform. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
+integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, \code{nnodes = 1}, means single thread processing (no parallel threads). If equal to zero, creates up to one node per CPU core. Only \code{PSOCK} clusters are used, to ensure compatibility with any platform. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
+}
+  \item{quietly}{
+logical: if code{TRUE}, no message confirming file reading/information is printed. The default (\code{FALSE}) is to show details about each results file read.
 }
 }
 \details{
@@ -103,8 +106,6 @@ The function generates the required response files for the selected variable of 
 folder/baseName_XX_YY_WWW.csv    : DoE response for the selected variable (1 file)
 folder/baseName_YY+1_ZZ_WWW.csv  : validation response for variable (optional - 1 file)
 }
-
-\strong{ATTENTION}: directory names should have \emph{NO} "." character and file names should have just \emph{ONE} "." character separating the above extensions.
 }
 \value{
 The function returns an object/list of class \code{lsd-doe} containing all the experimental data and the corresponding results regarding the selected reference variable \code{outVar}, including the data for the out-of-sample (external) validation of the produced meta-models, if available, as well the DoE(s) details required by the package meta-modelling tools (\code{\link{elementary.effects.lsd}}, \code{\link{kriging.model.lsd}}, and \code{\link{polynomial.model.lsd}}).
@@ -128,18 +129,17 @@ See the note in \link[LSDsensitivity]{LSDsensitivity-package} for step-by-step i
 
 Please refer to LSD documentation about the details on the files produced by its sensitivity analysis tools, in particular when using NOLH, Elementary Effects and MC Range Sensitivity Analysis sampling:
 
-LSD documentation is available at \url{http://labsimdev.org} and the latest binaries and source code can be downloaded at \url{https://github.com/marcov64/Lsd}.
+LSD documentation is available at \url{https://www.labsimdev.org/} and the latest binaries and source code can be downloaded at \url{https://github.com/marcov64/Lsd/}.
 }
 \seealso{
-\code{\link{elementary.effects.lsd}},
-\code{\link{kriging.model.lsd}},
-\code{\link{polynomial.model.lsd}}
+\code{\link{elementary.effects.lsd}()},
+\code{\link{kriging.model.lsd}()},
+\code{\link{polynomial.model.lsd}()}
+\code{\link[LSDinterface]{list.files.lsd}()}
 }
 \examples{
-# Examples require the data files produced by LSD, please check the package
-# notes and LSD documentation on how to generate you simulation results files.
-# Please note that the full set of sensitivity analysis files must be available,
-# as detailed in the help page for the read.doe.lsd function.
+# get the example directory name
+path <- system.file( "extdata/sobol", package = "LSDsensitivity" )
 
 # Steps to use this function:
 # 1. define the variables you want to use in the analysis
@@ -147,7 +147,6 @@ LSD documentation is available at \url{http://labsimdev.org} and the latest bina
 # 3. load data from a LSD simulation saved results using read.doe.lsd
 # 4. perform the elementary effects analysis applying elementary.effects.lsd
 
-\donttest{
 # the definition of existing, to take log and to be added variables
 lsdVars <- c( "var1", "var2", "var3" )
 logVars <- c( "var1", "var3" )
@@ -156,20 +155,18 @@ newVars <- c( "var4" )
 # load data from a LSD simulation baseline configuration named "Sim1.lsd" to
 # perform sensitivity analysis on the variable named "var1"
 # there are two groups of sampled data (DoEs) created by LSD being read
-dataSet <- read.doe.lsd( ".",                  # data files relative folder
-                         "Sim1",               # data files base name (same as .lsd file)
-                         "var1",               # variable name to perform the sens. analysis
+# just use no handling functions for now, see possible examples below
+dataSet <- read.doe.lsd( path,                 # data files folder
+                         "Sim3",               # data files base name (same as .lsd file)
+                         "var3",               # variable name to perform the sens. analysis
                          does = 2,             # # of experiments (data + external validation)
                          iniDrop = 0,          # initial time steps to drop (0=none)
                          nKeep = -1,           # number of time steps to keep (-1=all)
                          saveVars = lsdVars,   # LSD variables to keep in dataset
                          addVars = newVars,    # new variables to add to the LSD dataset
-                         eval.vars = eval.vars,# function to evaluate/adjust/expand the dataset
-                         eval.run = eval.run,  # function to evaluate the DoE point response
-                         rm.temp = FALSE,      # remove temporary speedup files?
+                         rm.temp = FALSE,      # reuse temporary speedup files
                          rm.outl = FALSE,      # remove outliers from dataset
                          lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
-
 
 #### OPTIONAL HANDLING FUNCTION EXAMPLES ####
 
@@ -188,12 +185,25 @@ eval.vars <- function( dataSet, allVars ) {
     }
   }
 
-  # ---- Calculate values of new variables (added to LSD dataset) ----
+  # ---- Calculate values of new variables (added to LSD data set) ----
   dataSet[ , "var4" ] <- dataSet[ , "var1" ] + dataSet[ , "var2" ]   # example of new var
 
   return( dataSet )
 }
 
+# load data again, now using new variable v4 for analysis
+dataSet <- read.doe.lsd( path,                 # data files folder
+                         "Sim3",               # data files base name (same as .lsd file)
+                         "var4",               # variable name to perform the sens. analysis
+                         does = 2,             # # of experiments (data + external validation)
+                         iniDrop = 0,          # initial time steps to drop (0=none)
+                         nKeep = -1,           # number of time steps to keep (-1=all)
+                         saveVars = lsdVars,   # LSD variables to keep in dataset
+                         addVars = newVars,    # new variables to add to the LSD dataset
+                         eval.vars = eval.vars,# function to evaluate/adjust/expand the dataset
+                         rm.temp = TRUE,       # remove temporary speedup files
+                         rm.outl = FALSE,      # remove outliers from dataset
+                         lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
 
 # eval.vars( ) EXAMPLE 2
 # the definition of a function to compute the new variables
@@ -225,6 +235,20 @@ eval.vars <- function( data, vars ) {
   return( data )
 }
 
+# load data again, now using new variable v2 for analysis
+dataSet <- read.doe.lsd( path,                 # data files folder
+                         "Sim3",               # data files base name (same as .lsd file)
+                         "var2",               # variable name to perform the sens. analysis
+                         does = 2,             # # of experiments (data + external validation)
+                         iniDrop = 0,          # initial time steps to drop (0=none)
+                         nKeep = -1,           # number of time steps to keep (-1=all)
+                         pool = FALSE,         # don't pool MC runs
+                         saveVars = lsdVars,   # LSD variables to keep in dataset
+                         addVars = newVars,    # new variables to add to the LSD dataset
+                         eval.vars = eval.vars,# function to evaluate/adjust/expand the dataset
+                         rm.temp = TRUE,       # remove temporary speedup files
+                         rm.outl = FALSE,      # remove outliers from dataset
+                         lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
 
 # eval.run( ) EXAMPLE
 # the definition of a function to evaluate a point in the DoE, associating a result
@@ -232,36 +256,45 @@ eval.vars <- function( data, vars ) {
 # the example evaluates the fat-taildness of the distribution of the selected
 # variable, using the Subbotin distribution b parameter as metric (response)
 
+# uncomment the lines below only if nolmalp package is available
 #library( normalp )
 
-eval.run <- function( data, mcRun, varIdx, confInt ) {
+eval.run <- function( data, run, varIdx, conf ) {
 
   obs <- discards <- 0
 
   # ------ Compute Subbotin fits for each run ------
-  bSubbo <- vector( "numeric" )
+  bSubbo <- rep( NA, dim( data )[ 3 ] )
   for( i in 1 : dim( data )[ 3 ] ) {
-    x <- data[[ mcRun, varIdx, i ]]
-    sf <- paramp( x )
-    sf$p <- estimatep( x, mu = sf$mean, p = sf$p, method = "inverse" )
-    if( sf$p >= 1 )                          # use subbotools for p < 1
-      res <- c( sf$p, sf$sp, sf$mp )
-
-    # remove non significant results at the selected confidence interval
-    if( res[ 1 ] / res[ 4 ] < qt( ( 1 - conf ) / 2, length( x ),
-                                  lower.tail = FALSE ) ) {
+    x <- data[[ run, varIdx, i ]]
+#    sf <- paramp( x )
+#    sf$p <- estimatep( x, mu = sf$mean, p = sf$p, method = "inverse" )
+#    if( sf$p >= 1 ) {
+#      bSubbo[ i ] <- sf$p
+#      obs <- obs + 1
+#    } else {
+#      bSubbo[ i ] <- NA
       discards <- discards + 1
-      bSubbo[ i ] <- NA
-    } else {
-      obs <- obs + 1
-      bSubbo[ i ] <- res[ 1 ]
-    }
+#    }
   }
 
   return( list( mean( bSubbo, na.rm = TRUE ),
                 var( bSubbo, na.rm = TRUE ), obs, discards ) )
 }
-}
+
+# load data again, now using the defined evaluation function
+dataSet <- read.doe.lsd( path,                 # data files folder
+                         "Sim3",               # data files base name (same as .lsd file)
+                         "var2",               # variable name to perform the sens. analysis
+                         does = 2,             # # of experiments (data + external validation)
+                         iniDrop = 0,          # initial time steps to drop (0=none)
+                         nKeep = -1,           # number of time steps to keep (-1=all)
+                         saveVars = lsdVars,   # LSD variables to keep in dataset
+                         addVars = newVars,    # new variables to add to the LSD dataset
+                         eval.run = eval.run,  # function to evaluate the DoE point response
+                         rm.temp = TRUE,       # remove temporary speedup files
+                         rm.outl = FALSE,      # remove outliers from dataset
+                         lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
 }
 \keyword{ interface }
 \keyword{ file }

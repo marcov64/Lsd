@@ -7,9 +7,9 @@ Find optimal meta-model factor settings
 This function finds the optimal factor (parameter) settings using the estimated meta-model.
 }
 \usage{
-model.optim.lsd(model, data, lower.domain, upper.domain, starting.values = NULL,
-                minimize = TRUE, pop.size = 1000, max.generations = 30,
-                wait.generations = 10, precision = 1e-05)
+model.optim.lsd( model, data, lower.domain, upper.domain, starting.values = NULL,
+                 minimize = TRUE, pop.size = 1000, max.generations = 30,
+                 wait.generations = 10, precision = 1e-05 )
 }
 \arguments{
   \item{model}{
@@ -60,17 +60,15 @@ Sekhon JS, Walter RM (1998). \emph{Genetic optimization using derivatives: theor
 \packageAuthor{LSDsensitivity}
 }
 \seealso{
-\code{\link{read.doe.lsd}},
-\code{\link{kriging.model.lsd}},
-\code{\link{polynomial.model.lsd}}
+\code{\link{read.doe.lsd}()},
+\code{\link{kriging.model.lsd}()},
+\code{\link{polynomial.model.lsd}()}
 
 \code{\link[rgenoud]{genoud}}
 }
 \examples{
-# Examples require the data files produced by LSD, please check the package
-# notes and LSD documentation on how to generate you simulation results files.
-# Please note that the full set of sensitivity analysis files must be available,
-# as detailed in the help page for the read.doe.lsd function.
+# get the example directory name
+path <- system.file( "extdata/sobol", package = "LSDsensitivity" )
 
 # Steps to use this function:
 # 1. define the variables you want to use in the analysis
@@ -79,17 +77,16 @@ Sekhon JS, Walter RM (1998). \emph{Genetic optimization using derivatives: theor
 # 4. find the factor configuration that produce the minimum (or maximum)
 #    value for the analysis variable defined in step 2
 
-\donttest{
 lsdVars <- c( "var1", "var2", "var3" )         # the definition of existing variables
 
-dataSet <- read.doe.lsd( ".",                  # data files relative folder
-                         "Sim1",               # data files base name (same as .lsd file)
-                         "var1",               # variable name to perform the sensitivity analysis
+dataSet <- read.doe.lsd( path,                 # data files folder
+                         "Sim3",               # data files base name (same as .lsd file)
+                         "var3",               # variable name to perform the sensitivity analysis
                          does = 2,             # number of experiments (data + external validation)
                          saveVars = lsdVars )  # LSD variables to keep in dataset
 
 model <- kriging.model.lsd( dataSet )          # estimate best Kriging meta-model
-
+\donttest{
 config <- model.optim.lsd( model,              # find meta-model configuration for minimum response
                            dataSet )           # use the full range of factors and starting from
                                                # calibration

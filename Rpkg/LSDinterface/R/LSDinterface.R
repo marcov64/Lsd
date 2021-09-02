@@ -1,8 +1,107 @@
 ########### Functions to load LSD result files in R ############
 
+# ==== Find LSD results files inside a sub-directory tree ====
+list.files.lsd <- function( path = ".", conf.name = "",
+                            type = c( "res", "tot", "csv" ),
+                            compressed = NULL, recursive = FALSE,
+                            join = FALSE, full.names = FALSE,
+                            sensitivity = FALSE ) {
+
+  conf.name <- basename( trimws( conf.name ) )
+
+  path <- trimws( path )
+  if( file.exists( path ) && ! dir.exists( path ) ) {
+    if( conf.name == "" )
+      conf.name <- basename( path )
+    path <- dirname( path )
+  }
+
+  if( ! dir.exists( path ) )
+    stop( paste( "Invalid base directory path (", path, ")" ) )
+
+  conf.name <- sub( ".lsd$", "", conf.name, ignore.case = TRUE )
+
+  if( recursive )
+    dirs <- list.dirs( path = path, recursive = TRUE, full.names = TRUE )
+  else {
+    dirs <- c( )
+    if( conf.name != "" && dir.exists( paste0( path, "/", conf.name ) ) )
+      dirs <- append( dirs, paste0( path, "/", conf.name ) )
+
+    conf.base <- sub( "_[0-9]+$", "", conf.name )
+    if( conf.base != conf.name && dir.exists( paste0( path, "/", conf.base ) ) )
+      dirs <- append( dirs, paste0( path, "/", conf.base ) )
+
+    dirs <- append( dirs, path )
+  }
+
+  if( length( dirs ) == 0 )
+    stop( paste( "Invalid base directory path (", normalizePath( path ), ")" ) )
+
+  if( conf.name == "" )
+    pattern <- ".+"
+  else
+    pattern <- conf.name
+
+  if( sensitivity )
+    pattern <- paste0( pattern, "_[0-9]+_[0-9]+[.]", match.arg( type ) )
+  else
+    pattern <- paste0( pattern, "_[0-9]+[.]", match.arg( type ) )
+
+  if( is.null( compressed ) )
+    pattern <- paste0( pattern, "([.]gz)?$" )
+  else
+    if( compressed )
+      pattern <- paste0( pattern, "[.]gz$" )
+    else
+      pattern <- paste0( pattern, "$" )
+
+  res_dirs <- list( )
+  n <- 0
+  for( dir in dirs ) {
+    files <- list.files( path = dir, pattern = pattern,
+                         ignore.case = TRUE, full.names = TRUE )
+    if( length( files ) > 0 ) {
+      n <- n + 1
+      if( full.names )
+        files <- normalizePath( files, winslash = "/" )
+
+      res_dirs[[ n ]] <- list( dir = dir, files = files )
+    }
+  }
+
+  if( n == 0 ) {
+    warning( paste( "No files found under target path (", normalizePath( path ),
+                    ") and name pattern (", pattern, ")" ), call. = FALSE )
+    return( NULL )
+  }
+
+  if( ! join && n > 1 ) {
+    dirs_list <- ""
+    for( dir in res_dirs )
+      if( dirs_list != "" )
+        dirs_list <- paste0( dirs_list, ", ", normalizePath( dir$dir ) )
+      else
+        dirs_list <- normalizePath( dir$dir )
+
+    warning( paste( "Multiple paths contain files (", dirs_list,
+                    "), using first one only" ), call. = FALSE )
+  }
+
+  if( join ) {
+    files <- vector( mode = "character" )
+    for( dir in res_dirs )
+      files <- append( files, dir$files )
+
+    return( files )
+  } else
+    return( res_dirs[[ 1 ]]$files )
+}
+
+
 # ==== Get the original LSD variable name from a R column name ====
 
-name.var.lsd <- function( r.name ){
+name.var.lsd <- function( r.name ) {
   lsd.name <- gsub( "\\..+$", "", r.name )
   lsd.name <- gsub( "^X_", "_", lsd.name )
   return( lsd.name )
@@ -11,7 +110,7 @@ name.var.lsd <- function( r.name ){
 
 # ==== Get a clean (R) variable name from R initial column name conversion ====
 
-name.clean.lsd <- function( r.name ){
+name.clean.lsd <- function( r.name ) {
 
   # adjust the time span format and remove trailing points
   clean.name <- gsub( "([0-9]+)\\.([0-9]+)\\.$", "\\1_\\2", r.name )
@@ -23,7 +122,7 @@ name.clean.lsd <- function( r.name ){
 
 # ==== Get a nice variable name from R initial column name conversion ====
 
-name.nice.lsd <- function( r.name ){
+name.nice.lsd <- function( r.name ) {
 
   # adjust the time span format and remove trailing points
   nice.name <- name.clean.lsd( r.name )
@@ -36,7 +135,7 @@ name.nice.lsd <- function( r.name ){
 
 # ==== Check for missing or invalid column (variable) names ====
 
-name.check.lsd <- function( file, col.names = NULL, check.names = TRUE ){
+name.check.lsd <- function( file, col.names = NULL, check.names = TRUE ) {
 
   # if no names, get from file
   if( length( col.names ) == 0 )
@@ -61,7 +160,7 @@ name.check.lsd <- function( file, col.names = NULL, check.names = TRUE ){
 
 # ==== Read effective dimensions of results file (rows x columns) ====
 
-info.dimensions.lsd <- function( file ){
+info.dimensions.lsd <- function( file ) {
 
   # read from disk
   dataSet <- read.raw.lsd( file )
@@ -77,7 +176,7 @@ info.dimensions.lsd <- function( file ){
 
 # ==== Read variable names in results file (no duplicates) ====
 
-info.names.lsd <- function( file ){
+info.names.lsd <- function( file ) {
 
   # read header line (labels) from disk
   header <- scan( file, what = character( ), sep = "\t", quote = NULL,
@@ -96,7 +195,7 @@ info.names.lsd <- function( file ){
 
 # ==== Read initial conditions in results file ====
 
-info.init.lsd <- function( file ){
+info.init.lsd <- function( file ) {
 
   # read from disk
   dataSet <- read.raw.lsd( file, nrows = 0 )
@@ -107,14 +206,14 @@ info.init.lsd <- function( file ){
 
 # ==== Read  info from a results file ====
 
-info.details.lsd <- function( file ){
+info.details.lsd <- function( file ) {
 
   # read from disk
   dataSet <- read.raw.lsd( file, nrows = 0 )
 
   # get the most "deep" object position
   maxPosit <- 1
-  for( i in 1 : length( colnames( dataSet ) ) ){
+  for( i in 1 : length( colnames( dataSet ) ) ) {
     # break position into components
     parseName <- unlist( strsplit( colnames( dataSet )[ i ],"\\." ) )
     parsePosit <- unlist( strsplit( parseName[ 2 ], "_" ) )
@@ -127,7 +226,7 @@ info.details.lsd <- function( file ){
 
   # organize dataset with variable names in rows
   info <- data.frame( stringsAsFactors = FALSE )
-  for( i in 1 : length( colnames( dataSet ) ) ){
+  for( i in 1 : length( colnames( dataSet ) ) ) {
     # break position and time into components
     parseName <- unlist( strsplit( fullNames[ i ],"\\." ) )
     parsePosit <- unlist( strsplit( parseName[ 2 ], "_" ) )
@@ -142,7 +241,7 @@ info.details.lsd <- function( file ){
                            stringsAsFactors = FALSE )
     # add positions > 1
     iniCol <- ncol( newLine )
-    for( j in 1 : maxPosit ){
+    for( j in 1 : maxPosit ) {
       if( j > length( parsePosit ) )
         posit <- NA
       else
@@ -162,8 +261,9 @@ info.details.lsd <- function( file ){
 # ==== Compute statistics from multiple runs ====
 
 info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
-                            ci = "none", ci.conf = 0.95, ci.boot = NULL,
-                            boot.R = 999, na.rm = TRUE, inf.rm = TRUE ) {
+                            ci = c( "none", "mean", "median", "auto" ),
+                            ci.conf = 0.95, ci.boot = NULL, boot.R = 999,
+                            na.rm = TRUE, inf.rm = TRUE ) {
 
   # Get dimension data
   dimArray <- dim( array )
@@ -175,7 +275,7 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
       cols < 1 || cols > nDimArray )
     stop( "Error: invalid dimension(s) for statistics" )
 
-  if( rows > cols ){                    # has to transpose at the end?
+  if( rows > cols ) {                    # has to transpose at the end?
     dimH <- rows                        # make sure rows dim < cols dim
     rows <- cols
     cols <- dimH
@@ -192,10 +292,7 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
   if( median )
     med <- avg
 
-  if( ! ci %in% c( "none", "mean", "median", "auto" ) ) {
-    ci <- "none"
-    warning( "Invalid confidence interval statistic, ignoring" )
-  }
+  ci <- match.arg( ci )
 
   if( ci == "auto" ) {
     if( median )
@@ -207,7 +304,8 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
   if( ! is.null( ci.boot ) &&
       ! ci.boot %in% c( "basic", "perc", "bca" ) ) {
     ci.boot <- NULL
-    warning( "Invalid bootstrap confidence interval type, ignoring" )
+    warning( "Invalid bootstrap confidence interval type, ignoring",
+             call. = FALSE )
   }
 
   if( ci != "none" )
@@ -231,7 +329,7 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
       mask <- baseMask
       for( k in 1 : nDimArray )       # adjust the mask for (i,j)
         if( rows == k || cols == k ) {
-          if( first ){
+          if( first ) {
             mask[[ k ]][ i ] <- TRUE
             first <- FALSE
           }
@@ -343,14 +441,14 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
 
 # ==== Select a subset of a data frame (by column names) ====
 
-select.colnames.lsd <- function( dataSet, col.names, instance = 0 ){
+select.colnames.lsd <- function( dataSet, col.names, instance = 0 ) {
 
   # matrix to store the columns, keep rownames
   fieldData <- matrix( nrow = nrow( dataSet ), ncol = 0 )
   rownames( fieldData ) <- rownames( dataSet )
 
   # select only required columns
-  for( i in 1 : length( col.names ) ){
+  for( i in 1 : length( col.names ) ) {
 
     # extract one name at a time
     subSet <- dataSet[ , grep( paste0( "^", col.names[ i ], "\\." ),
@@ -379,7 +477,7 @@ select.colnames.lsd <- function( dataSet, col.names, instance = 0 ){
 # ==== Select a subset of a data frame (by variable attributes) ====
 
 select.colattrs.lsd <- function( dataSet, info, col.names = NULL, posit = NULL,
-                                 init.value = NA, init.time = NA, end.time = NA ){
+                                 init.value = NA, init.time = NA, end.time = NA ) {
 
   # test if files are compatible (in principle)
   if( ! is.matrix( dataSet ) || ! is.data.frame( info ) ||
@@ -391,7 +489,7 @@ select.colattrs.lsd <- function( dataSet, info, col.names = NULL, posit = NULL,
     col.names <- make.names( name.clean.lsd( col.names ) )
 
   # check if position is not formatted as text and convert if needed
-  if( ! is.null( posit ) && ! is.character( posit ) ){
+  if( ! is.null( posit ) && ! is.character( posit ) ) {
     positChr <- paste0( posit[ 1 ] )
     for( i in 2 : length( posit ) )
       positChr <- paste0( positChr, "_", posit[ i ] )
@@ -404,7 +502,7 @@ select.colattrs.lsd <- function( dataSet, info, col.names = NULL, posit = NULL,
   fieldCols <- 0
 
   # select only required columns
-  for( i in 1 : nrow( info ) ){
+  for( i in 1 : nrow( info ) ) {
 
     # if column names are specified, check if belongs to the set
     if( ! is.null( col.names ) && ! ( info$R_name[ i ] %in% col.names ) )
@@ -419,11 +517,11 @@ select.colattrs.lsd <- function( dataSet, info, col.names = NULL, posit = NULL,
       next
 
     # build position string and check it
-    if( length( posit ) > 0 ){
+    if( length( posit ) > 0 ) {
       j <- which( colnames( info ) == "Posit_1")
       positStr <- paste0( info[ i, j ] )
       j <- j + 1
-      while( j <= ncol( info ) && ! is.na( info[ i, j ] ) ){
+      while( j <= ncol( info ) && ! is.na( info[ i, j ] ) ) {
         positStr <- paste0( positStr, "_", info[ i, j ] )
         j <- j + 1
       }
@@ -448,7 +546,7 @@ select.colattrs.lsd <- function( dataSet, info, col.names = NULL, posit = NULL,
 
 # ==== Read LSD results file and clean variables names ====
 
-read.raw.lsd <- function( file, nrows = -1, skip = 0 ){
+read.raw.lsd <- function( file, nrows = -1, skip = 0 ) {
 
   # read header line (labels) from disk
   header <- scan( file, what = character( ), sep = "\t", quote = NULL,
@@ -492,7 +590,7 @@ read.raw.lsd <- function( file, nrows = -1, skip = 0 ){
 # ==== Read LSD variables (one instance of each variable only) ====
 
 read.single.lsd <- function( file, col.names = NULL, nrows = -1, skip = 0,
-                             check.names = TRUE, instance = 1 ){
+                             check.names = TRUE, instance = 1 ) {
 
   # ---- check column names to adjust to R imported column names ----
 
@@ -514,7 +612,7 @@ read.single.lsd <- function( file, col.names = NULL, nrows = -1, skip = 0,
 # ==== Read specified LSD variables (even if there are several instances) ====
 
 read.multi.lsd <- function( file, col.names = NULL, nrows = -1,
-                            skip = 0, check.names = TRUE){
+                            skip = 0, check.names = TRUE) {
 
   # ---- check column names to adjust to R imported column names ----
 
@@ -528,7 +626,7 @@ read.multi.lsd <- function( file, col.names = NULL, nrows = -1,
 
   fieldData <- list()                   # list to store each variable
 
-  for( i in 1 : length( fixedLabels ) ){
+  for( i in 1 : length( fixedLabels ) ) {
 
     # ---- Select only required columns ----
 
@@ -536,7 +634,8 @@ read.multi.lsd <- function( file, col.names = NULL, nrows = -1,
                                              instance = 0 )
 
     if( ncol( fieldData[[ i ]] ) == 0 )
-      warning( paste0( "Variable '", col.names[i],"' not found, skipping...") )
+      warning( paste0( "Variable '", col.names[i],
+                       "' not found, skipping..."), call. = FALSE )
   }
 
   return( fieldData )                   # return a list of matrices
@@ -608,7 +707,7 @@ read.3d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
 
   for ( i in 1 : n ) {
 
-    if( i == 1 ){                     # don't bind if first file
+    if( i == 1 ) {                     # don't bind if first file
       dataArray <- fileData[[ i ]]
       nrows <- nrow( fileData[[ i ]] )      # define base dimensions
       ncols <- ncol( fileData[[ i ]] )
@@ -802,7 +901,7 @@ read.4d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
 
       if( ncol( subSet ) == 0 )
         warning( paste0( "Variable '", col.names[ j ],"' not found in '",
-                         files[ i ], "', skipping...") )
+                         files[ i ], "', skipping..." ), call. = FALSE )
 
       instData <- list( )                 # list to store each instance
 

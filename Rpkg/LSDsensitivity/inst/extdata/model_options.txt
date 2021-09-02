@@ -1,0 +1,10 @@
+# LSD options
+TARGET=LSD
+FUN=fun_Rsens
+
+# Additional model files
+FUN_EXTRA=
+
+# Compiler options
+SWITCH_CC=-O0 -ggdb3
+SWITCH_CC_LNK=

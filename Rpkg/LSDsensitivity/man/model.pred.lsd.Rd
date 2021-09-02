@@ -7,7 +7,7 @@ Predict meta-model response at given point(s)
 This function predicts the meta-model response at a specific point(s) in the factor (parameter) space and provides a confidence interval for the prediction(s) at 95\% confidence.
 }
 \usage{
-model.pred.lsd(data.point, model)
+model.pred.lsd( data.point, model )
 }
 \arguments{
   \item{data.point}{
@@ -33,17 +33,15 @@ The function returns a list containing the prediction(s) and the confidence boun
 \packageAuthor{LSDsensitivity}
 }
 \seealso{
-\code{\link{kriging.model.lsd}},
-\code{\link{polynomial.model.lsd}}
+\code{\link{kriging.model.lsd}()},
+\code{\link{polynomial.model.lsd}()}
 
 \code{\link[DiceKriging]{predict.km}} in \code{\link[DiceKriging]{DiceKriging-package}},
 \code{\link[stats]{predict.lm}} in \code{\link[stats]{stats-package}}
 }
 \examples{
-# Examples require the data files produced by LSD, please check the package
-# notes and LSD documentation on how to generate you simulation results files.
-# Please note that the full set of sensitivity analysis files must be available,
-# as detailed in the help page for the read.doe.lsd function.
+# get the example directory name
+path <- system.file( "extdata/sobol", package = "LSDsensitivity" )
 
 # Steps to use this function:
 # 1. define the variables you want to use in the analysis
@@ -52,24 +50,23 @@ The function returns a list containing the prediction(s) and the confidence boun
 # 4. estimate the meta-model response at any set of points applying
 #    model.pred.lsd
 
-\donttest{
 lsdVars <- c( "var1", "var2", "var3" )         # the definition of existing variables
 
-dataSet <- read.doe.lsd( ".",                  # data files relative folder
-                         "Sim1",               # data files base name (same as .lsd file)
-                         "var1",               # variable name to perform the sensitivity analysis
+dataSet <- read.doe.lsd( path,                 # data files folder
+                         "Sim3",               # data files base name (same as .lsd file)
+                         "var3",               # variable name to perform the sensitivity analysis
                          does = 2,             # number of experiments (data + external validation)
                          saveVars = lsdVars )  # LSD variables to keep in dataset
 
 model <- kriging.model.lsd( dataSet )          # estimate best Kriging meta-model
 
-# creates a set of three random points
-points <- data.frame( var1 = rnorm( 3 ), var2 = rnorm( 3 ), var3 = rnorm( 3 ) )
+# creates a set of four random points in parameter space
+points <- data.frame( par1 = rnorm( 4 ), par2 = rnorm( 4 ), par3 = rnorm( 4 ) )
 
 response <- model.pred.lsd( points, model )    # predict model response at the 3 points
 
-print( response$lower, response$mean, response$upper )
-}
+print( points )
+print( response )
 }
 \keyword{ models }
 \keyword{ design }

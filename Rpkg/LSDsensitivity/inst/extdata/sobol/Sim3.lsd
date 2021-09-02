@@ -1,0 +1,106 @@
+	
+Label Root
+{
+	Param: par1
+	Param: par2
+	Param: par3
+	Var: var1
+	Var: var2
+	Var: var3
+
+}
+
+
+DATA
+
+Object: Root C	1
+Param: par1 0 n + n n	10
+Param: par2 0 n + n n	20
+Param: par3 0 n + n n	10
+Var: var1 0 s + n n
+Var: var2 0 s + n n
+Var: var3 0 s + n n
+
+SIM_NUM 3
+SEED 1
+MAX_STEP 100
+EQUATION fun_Rsens.cpp
+MODELREPORT report_Sim1.html
+
+DESCRIPTION
+
+Object_Root
+
+END_DESCRIPTION
+
+Parameter_par1
+
+_INIT_
+All 1 instances equal to 10
+END_DESCRIPTION
+
+Parameter_par2
+
+_INIT_
+All 1 instances equal to 20
+END_DESCRIPTION
+
+Parameter_par3
+
+_INIT_
+All 1 instances equal to 10
+END_DESCRIPTION
+
+Variable_var1
+
+END_DESCRIPTION
+
+Variable_var2
+
+END_DESCRIPTION
+
+Variable_var3
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+//#define EIGENLIB			// uncomment to use Eigen linear algebra library
+
+#include "fun_head_fast.h"
+
+// do not add Equations in this area
+
+MODELBEGIN
+
+// insert your equations here, ONLY between the MODELBEGIN and MODELEND words
+
+EQUATION("var1")
+RESULT( V( "par1" ) * RND )
+
+EQUATION("var2")
+RESULT( V( "par2" ) * RND + T )
+
+EQUATION("var3")
+RESULT( V( "par1" ) * V( "par2" ) * RND + T )
+
+MODELEND
+
+// do not add Equations in this area
+
+void close_sim( void )
+{
+	// close simulation special commands go here
+}
+
+END_EQ_FILE

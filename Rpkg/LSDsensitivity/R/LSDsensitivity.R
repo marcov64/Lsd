@@ -67,7 +67,8 @@ remove.outliers <- function( doe, resp, limit ) {
 
   removed <- origLen - nrow( doe )
   if( removed > 0.1 * origLen )
-    warning( "Too many DoE outliers (>10%), check 'limit' parameter" )
+    warning( "Too many DoE outliers (>10%), check 'limit' parameter",
+             call. = FALSE )
 
   return( list( doe, resp, removed ) )
 }
@@ -93,7 +94,7 @@ ww.test <- function( time.series, window.size ) {
   # obtained from the k processes
 
   if( window.size < 50 )
-    warning( "The window size is small (< 50))" )
+    warning( "The window size is small (< 50))", call. = FALSE )
 
   for( i in 1 : length( time.series ) ) {
     time.series[[ i ]] <- time.series[[ i ]][ ! is.na( time.series[[ i ]] ) ]
@@ -106,7 +107,7 @@ ww.test <- function( time.series, window.size ) {
   if( k > length( time.series ) - 1 )
     stop( "Insufficient series for the selected window size" )
   if( k < length( time.series ) - 1 )
-    warning( "Not all series being used (window may be too large)" )
+    warning( "Not all series being used (window may be too large)", call. = FALSE )
 
   # series have to be long to have many well estimated moments
   # divide the first series in k samples and compute the sample means
@@ -819,7 +820,7 @@ fit.poly <- function( response, doe, resp.noise = NULL,
   # calculate variance inflation factors
   fit.uwgth <- stats::lm( formula = formulas[[ order, interaction + 1 ]],
                           data = doe, na.action = stats::na.exclude )
-  inflat <- try( car::vif( fit.uwgth ), silent = TRUE )
+  inflat <- try( suppressWarnings( car::vif( fit.uwgth ) ), silent = TRUE )
 
   fit <- list( model = fit, R2 = summary( fit )$adj.r.squared,
                vif = inflat, f = summary( fit )$fstatistic,
@@ -856,7 +857,8 @@ fit.kriging <- function( response, doe, resp.noise = NULL, trend.func = ~1,
                                       noise.var = resp.noise * ( scaleFactor ^ trial ),
                                       control = list( trace = FALSE, print.level = 0 ) ),
               error = function( ex ) {
-                warning( "Model search: Problem in function 'km', trying to scale down noise..." )
+                warning( "Model search: Problem in function 'km', trying to scale down noise...",
+                         call. = FALSE )
                 trial <<- trial + 1
                 ok <<- FALSE
               } )
@@ -875,23 +877,46 @@ fit.kriging <- function( response, doe, resp.noise = NULL, trend.func = ~1,
 
 read.sens <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
-  if( is.null( fileName ) ) {
-    file <- paste0( folder, "/", baseName, ".sa" )
-  } else
-    if( is.null( folder ) ) {
-      file <- fileName
-    } else
-      file <- paste0( folder, "/", fileName )
+  if( is.null( fileName ) && is.null( baseName ) )
+    stop( "LSD sensitivity file name (or parts) missing" )
 
-  if( ! file.exists( file ) )
-    stop( "Sensitivity file does not exist" )
+  if( is.null( fileName ) )
+    file <- paste0( baseName, ".sa" )
+  else
+    file <- fileName
+
+  if( ! is.null( folder ) && file.exists( folder ) )
+    dir <- normalizePath( folder, winslash = "/", mustWork = TRUE )
+  else
+    dir <- getwd( )
+
+  par <- dirname( dir )
+
+  if( file.exists( paste0( dir, "/", file ) ) ) {
+    file <- paste0( dir, "/", file )
+  } else {
+    if( file.exists( paste0( dir, "/", file, "n" ) ) ) {    # accept .san extension (CRAN bug)
+      file <- paste0( dir, "/", file, "n" )
+    } else {
+      if( file.exists( paste0( par, "/", file ) ) ) {
+        file <- paste0( par, "/", file )
+      } else {
+        if( file.exists( paste0( par, "/", file, "n" ) ) ) {
+          file <- paste0( par, "/", file, "n" )
+        } else {
+          stop( "LSD sensitivity file does not exist" )
+        }
+      }
+    }
+  }
 
   limits <- utils::read.table( file, stringsAsFactors = FALSE )
   limits <- limits[ -2 : -3 ]
   if( ! is.numeric( limits[ 1, 2 ] ) )  # handle newer LSD versions that bring an extra column
     limits <- limits[ -2 ]
   if( length( limits[ 1, ] ) > 3 ) {
-    warning( "Too many (>2) sensitivity values for a single parameter, using the first two only!" )
+    warning( "Too many (>2) sensitivity values for a single parameter, using the first two only!",
+             call. = FALSE )
     limits <- limits[ -4 : - length( limits[ 1, ] ) ]
   }
 
@@ -911,16 +936,30 @@ read.sens <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
 read.config <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
-  if( is.null( fileName ) ) {
-    file <- paste0( folder, "/", baseName, ".lsd" )
-  } else
-    if( is.null( folder ) ) {
-      file <- fileName
-    } else
-      file <- paste0( folder, "/", fileName )
+  if( is.null( fileName ) && is.null( baseName ) )
+    stop( "LSD configuration file name missing" )
 
-  if( ! file.exists( file ) )
-    stop( "LSD configuration file does not exist" )
+  if( is.null( fileName ) )
+    file <- paste0( baseName, ".lsd" )
+  else
+    file <- fileName
+
+  if( ! is.null( folder ) && file.exists( folder ) )
+    dir <- normalizePath( folder, winslash = "/", mustWork = TRUE )
+  else
+    dir <- getwd( )
+
+  par <- dirname( dir )
+
+  if( file.exists( paste0( dir, "/", file ) ) ) {
+    file <- paste0( dir, "/", file )
+  } else {
+    if( file.exists( paste0( par, "/", file ) ) ) {
+      file <- paste0( par, "/", file )
+    } else {
+      stop( "LSD configuration file does not exist" )
+    }
+  }
 
   lsd <- readLines( file )
   config <- data.frame( stringsAsFactors = FALSE )
@@ -950,15 +989,19 @@ read.config <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
 files.doe <- function( folder, baseName ) {
 
-  doeFiles <- list.files( path = folder, pattern = paste0( baseName, "_[0-9]+_[0-9]+.csv" ) )
+  doeFiles <- LSDinterface::list.files.lsd( path = folder, conf.name = baseName,
+                                            sensitivity = TRUE, type = "csv",
+                                            compressed = FALSE )
 
   if( length( doeFiles ) < 1 )
-    stop( "Valid DoE .csv file(s) required")
+    stop( "Valid DoE .csv file(s) required" )
+
+  folder <- dirname( doeFiles[ 1 ] )
 
   for( i in 1 : length( doeFiles ) )
-    doeFiles[ i ] <- unlist( strsplit( doeFiles[ i ], split = ".", fixed = TRUE ) )[ 1 ]
+    doeFiles[ i ] <- sub( ".csv$", "", basename( doeFiles[ i ] ), ignore.case = TRUE )
 
-  return( doeFiles )
+  return( list( path = folder, files = doeFiles ) )
 }
 
 
@@ -966,16 +1009,15 @@ files.doe <- function( folder, baseName ) {
 
 size.doe <- function( doeFile ) {
 
-  # Remove extension if present
-  doeFile <- unlist( strsplit( doeFile, ".", fixed = TRUE ) )[ 1 ]
+  # Get basename and remove extension if present
+  baseName <- sub( ".csv$", "", basename( doeFile ), ignore.case = TRUE )
 
   # First file must be the a DoE (baseName_xx_yy)
-  split <- strsplit( doeFile, "_" )[[ 1 ]]
+  split <- strsplit( baseName, "_" )[[ 1 ]]
 
-  # Check paths starting with '.' or '..' or invalid format
-  if( length( split ) == 0 )
-    stop( "Characters '.' and '..' are not allowed on path name" )
-  if( is.na( as.integer( split[ length( split ) ] ) ) ||
+  # Check invalid format
+  if( length( split ) < 3 ||
+      is.na( as.integer( split[ length( split ) ] ) ) ||
       is.na( as.integer( split[ length( split ) - 1 ] ) ) )
     stop( "Invalid DoE .csv file naming/numbering (must be baseName_XX_YY)" )
 
@@ -995,7 +1037,7 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
                             pool = TRUE, iniDrop = 0, nKeep = -1, na.rm = FALSE,
                             conf = 0.95, saveVars = c(  ), addVars = c(  ),
                             eval.vars = NULL, eval.run = NULL, rm.temp = TRUE,
-                            nnodes = 1 ) {
+                            nnodes = 1, quietly = TRUE ) {
 
   # evaluate new variables (not in LSD files) names
   nVarNew <- length( addVars )           # number of new variables to add
@@ -1004,6 +1046,14 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
 
   if( nVar == 0 && nVarNew == 0 )
     stop( "No variable to be bept in the data set, at least one required" )
+
+  # check if files are in a subfolder
+  myFiles <- LSDinterface::list.files.lsd( path = folder,
+                                           conf.name = paste0( baseName, "_", iniExp ) )
+  if( length( myFiles ) == 0 || ! file.exists( myFiles[ 1 ] ) )
+    stop( "No data files  (baseName_XX_YY.res[.gz]) found on informed path" )
+
+  folder <- dirname( myFiles[ 1 ] )
 
   # first check if extraction was interrupted and continue with partial files if appropriate
   tempFile <- paste0( folder, "/", baseName, "_", iniExp,
@@ -1016,8 +1066,9 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
   # test if data files exit and are newer
   dataDate <- 0
   for( k in 1 : nExp ) {
-    myFiles <- list.files( path = folder, full.names = TRUE,
-                           pattern = paste0( baseName, "_", iniExp + k - 1, "_[0-9]+.res") )
+    myFiles <- LSDinterface::list.files.lsd( path = folder,
+                                             conf.name = paste0( baseName, "_",
+                                                                 iniExp + k - 1 ) )
     if( tempDate == 0 && length( myFiles ) < 2 )
       stop( "Not enough data files (baseName_XX_YY.res[.gz]) found" )
 
@@ -1036,7 +1087,9 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
     load( tempFile, envir = temp )
 
     if( all( temp$newNameVar == newNameVar ) ) {
-      cat( "Previously processed data found, not reading data files...\n\n" )
+      if( ! quietly )
+        cat( "Previously processed data found, not reading data files...\n\n" )
+
       noTemp <- FALSE
       load( tempFile )
     }
@@ -1052,32 +1105,40 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
 
     for( k in 1 : nExp ) {
 
-      cat( "\nSample #", iniExp + k - 1, "\n" )
+      if( ! quietly )
+        cat( "\nSample #", iniExp + k - 1, "\n" )
 
       # ---- Read data files ----
 
       # Get file names
-      myFiles <- list.files( path = folder, full.names = TRUE,
-                             pattern = paste0( baseName, "_", iniExp + k - 1, "_[0-9]+.res") )
-
-      cat( "\nData files: ", myFiles, "\n\n" )
+      myFiles <- LSDinterface::list.files.lsd( path = folder,
+                                               conf.name = paste0( baseName, "_",
+                                                                   iniExp + k - 1 ) )
+      if( ! quietly )
+        cat( "\nData files: ", myFiles, "\n\n" )
 
       # Determine the DoE sample size (repetitions on the same DoE point)
       nSize  <- length( myFiles )
+
       # Get data set details from first file
       dimData <- LSDinterface::info.dimensions.lsd( myFiles[ 1 ] )
       nTsteps <- dimData$tSteps
       origNvar <- dimData$nVars
 
-      cat( "Number of MC runs: ", nSize, "\n" )
-      cat( "Number of periods: ", nTsteps, "\n" )
+      if( ! quietly ) {
+        cat( "Number of MC runs: ", nSize, "\n" )
+        cat( "Number of periods: ", nTsteps, "\n" )
+      }
+
       nTsteps <- nTsteps - iniDrop
       if( nKeep != -1 )
         nTsteps <- min( nKeep, nTsteps )
-      cat( "Number of used periods: ", nTsteps, "\n" )
-      cat( "Number of variable instances: ", origNvar, "\n\n" )
 
-      cat( "Reading data from files...\n" )
+      if( ! quietly ) {
+        cat( "Number of used periods: ", nTsteps, "\n" )
+        cat( "Number of variable instances: ", origNvar, "\n\n" )
+        cat( "Reading data from files...\n" )
+      }
 
       if( pool ) {
 
@@ -1170,8 +1231,10 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
           }
       }
 
-      cat( "\nNumber of variables selected: ", nVar, "\n" )
-      cat( "Number of pooled samples: ", nSampl, "\n\n" )
+      if( ! quietly ) {
+        cat( "\nNumber of variables selected: ", nVar, "\n" )
+        cat( "Number of pooled samples: ", nSampl, "\n\n" )
+      }
 
       # Clean temp variables
       rm( dataSet, x )
@@ -1215,8 +1278,18 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
         obs <- obs + length( data[ ! is.na( data ) ] )
       }
 
-      resp <- list( mAc / nSize, sqrt( vAc / nSize - ( mAc / nSize) ^ 2 ),
-                    obs / nSize, 0 )
+      # avoid negative rounding errors
+      if( is.finite( vAc ) && is.finite( mAc ) ) {
+        mAc <- mAc / nSize
+        if( vAc / nSize < mAc ^ 2 )
+          sAc <- 0
+        else
+          sAc <- sqrt( vAc / nSize - mAc ^ 2 )
+      } else {
+        mAc <- vAc <- sAc <- NA
+      }
+
+      resp <- list( mAc, sAc, obs / nSize, 0 )
       rm( data )
     }
 
@@ -1233,10 +1306,12 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
                       iniExp + nExp - 1, "_", outVar, ".csv" )
   utils::write.csv( tresp, respFile, row.names = FALSE )
 
-  cat( "DoE response file saved:", respFile, "\n" )
-  cat( "Doe points =", k, "\n" )
-  cat( "Total observations =", tobs, "\n" )
-  cat( "Discarded observations =", tdiscards, "\n\n" )
+  if( ! quietly ) {
+    cat( "DoE response file saved:", respFile, "\n" )
+    cat( "Doe points =", k, "\n" )
+    cat( "Total observations =", tobs, "\n" )
+    cat( "Discarded observations =", tdiscards, "\n\n" )
+  }
 
   rm( poolData, resp, tresp )
   if( rm.temp )
@@ -1252,20 +1327,23 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
                           nKeep = -1, saveVars = c(  ), addVars = c(  ),
                           eval.vars = NULL, eval.run = NULL, pool = TRUE,
                           na.rm = FALSE, rm.temp = TRUE, rm.outl = FALSE,
-                          lim.outl = 10, nnodes = 1 ) {
+                          lim.outl = 10, nnodes = 1, quietly = TRUE ) {
 
   # ---- Process LSD result files ----
 
   # Get available DoE and response file names
-  files <- files.doe( folder, baseName )
+  does.found <- files.doe( folder, baseName )
+  files <- does.found$files
+  folder <- does.found$path
   if( is.null( doeFile ) ) {
     if( length( files ) > does )
-      warning( "Too many DoE (.csv) files, using first one(s) only" )
+      warning( "Too many DoE (.csv) files, using first one(s) only",
+               call. = FALSE )
     if( length( files ) < 1 )
       stop( "No valid DoE file" )
+
     doeFile <- paste0( folder, "/", files[ 1 ], ".csv" )
   }
-
 
   if( is.null( respFile ) ) {
     if( length( files ) < 1 )
@@ -1287,27 +1365,28 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
   }
 
   # If response files don't exist, try to create them
-  if( ! file.exists( respFile ) ) {
+  if( rm.temp || ! file.exists( respFile ) ) {
     write.response( folder, baseName, outVar = outVar,
                     iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
                     iniExp = size.doe( doeFile )[ 1 ], na.rm = na.rm,
                     nExp = size.doe( doeFile )[ 2 ], addVars = addVars,
-                    eval.vars = eval.vars, eval.run = eval.run,
-                    saveVars = saveVars, nnodes = nnodes )
+                    pool = pool, eval.vars = eval.vars, eval.run = eval.run,
+                    saveVars = saveVars, nnodes = nnodes, quietly = quietly )
   } else
-    cat( "Using existing response file...\n\n" )
+    if( ! quietly )
+      cat( paste0( "Using existing response file (", respFile, ")...\n\n" ) )
 
-  if( does > 1 && ! file.exists( valRespFile ) ) {
+  if( does > 1 && ( rm.temp || ! file.exists( valRespFile ) ) ) {
     write.response( folder, baseName, outVar = outVar,
                     iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
                     iniExp = size.doe( validFile )[ 1 ],
                     nExp = size.doe( validFile )[ 2 ], na.rm = na.rm,
                     addVars = addVars, eval.vars = eval.vars,
-                    eval.run = eval.run, saveVars = saveVars,
-                    nnodes = nnodes )
+                    pool = pool, eval.run = eval.run, saveVars = saveVars,
+                    nnodes = nnodes, quietly = quietly )
   } else
-    if( does > 1 )
-      cat( "Using existing validation response file...\n\n" )
+    if( ! quietly && does > 1 )
+      cat( paste0( "Using existing validation response file (", valRespFile, ")...\n\n" ) )
 
   # Read design of experiments definition & response
   doe <- utils::read.csv( doeFile )
@@ -1834,7 +1913,7 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
 
   # Prepare the coefficients table
   fmt <- function( x )
-    format( round( x, digits = digits ), nsmall = digits )
+    format( x, digits = digits )
 
   maxRows <- 25                                   # maximum rows per column
   fixRows <- 8                                    # fixed rows (non-coefficient ones)
@@ -1858,7 +1937,7 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
     if( nrow( coef[[ i ]] ) <= ( maxRows - fixRows ) ) {
       m.val1 <- c( coef[[ i ]][ , 1 ], modelNames[ orderModel, interactModel ],
                    fmt( fStat[ 1 ] ), fmt( R2stat ), fmt( rmseStat ), fmt( maeStat ),
-                   fmt( rmaStat ), nrow( data$resp ), format( valExtN, digits = 0 ) )
+                   fmt( rmaStat ), nrow( data$resp ), format( valExtN, digits = 1 ) )
       m.val2 <- c( coef[[ i ]][ , 2 ], "", fmt( fPval ), rep( "", length( m.val1 ) -
                                                          nrow( coef[[ i ]] ) - 2 ) )
       m.text <- c( rownames( coef[[ i ]] ), "Model specification", "f-statistic",
@@ -1887,7 +1966,7 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
       m.val3 <- c( m.val3, rep( "", rowsCol1 - rowOvFlw - fixRows ),
                    modelNames[ orderModel, interactModel ], fmt( fStat[ 1 ] ),
                    fmt( R2stat ), fmt( rmseStat ), fmt( maeStat ), fmt( rmaStat ),
-                   nrow( data$resp ), format( valExtN, digits = 0 ) )
+                   nrow( data$resp ), format( valExtN, digits = 1 ) )
       m.val4 <- c( m.val4, rep( "", rowsCol1 - rowOvFlw - fixRows + 1 ),
                    fmt( fPval ), rep( "", fixRows - 2 ) )
       m.text2 <- c( m.text2, rep( "", rowsCol1 - rowOvFlw - fixRows ),
@@ -1979,6 +2058,9 @@ elementary.effects.lsd <- function( data, p = 4, jump = 2 ) {
 
   # Call elementary effects analysis from sensitivity package
   sa$ee <- ee.oat( sa$X, sa$y )
+
+  # change the class to lsd print/plot equivalents
+  class( sa ) <- "morris.lsd"
 
   # add the standard error to the statistics
   sa$table <- as.data.frame( print( sa ) )

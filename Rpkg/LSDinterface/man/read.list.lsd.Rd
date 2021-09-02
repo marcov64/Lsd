@@ -12,7 +12,7 @@ read.list.lsd( files, col.names = NULL, nrows = -1, skip = 0,
 }
 \arguments{
   \item{files}{
-a character vector containing the names of the LSD results files which the data are to be read from. If they do not contain an absolute path, the file names are relative to the current working directory, \code{getwd()}. These can be compressed files and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
+a character vector containing the names of the LSD results files which the data are to be read from. If they do not contain an absolute path, the file names are relative to the current working directory, \code{\link[base]{getwd}()}. These can be compressed files and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
   \item{col.names}{
 a vector of optional names for the variables. The default is to read all variables.
@@ -45,18 +45,16 @@ When using the option 'pool = TRUE', columns from multiple files are consolidate
 The returned matrices may be potentially very wide, in particular if variables are not well selected(see col.names above) or if there is a large number of instances.
 }
 \seealso{
-\code{\link{read.single.lsd}},
-\code{\link{read.multi.lsd}},
-\code{\link{read.3d.lsd}},
-\code{\link{read.4d.lsd}},
-\code{\link{read.raw.lsd}},
-\code{\link{unique}}
+\code{\link{list.files.lsd}()}
+\code{\link{read.single.lsd}()},
+\code{\link{read.multi.lsd}()},
+\code{\link{read.3d.lsd}()},
+\code{\link{read.4d.lsd}()},
+\code{\link{read.raw.lsd}()},
 }
 \examples{
-# get the example directory and file names
-path <- system.file( "extdata", package = "LSDinterface" )
-files <- list.files( path = path, full.names = TRUE,
-                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
+# get the list of file names of example LSD results
+files <- list.files.lsd( system.file( "extdata", package = "LSDinterface" ) )
 
 # read all instances of all variables from three files (one matrix each),
 tableList <- read.list.lsd( files )

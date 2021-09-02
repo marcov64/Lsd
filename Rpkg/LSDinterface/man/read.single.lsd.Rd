@@ -12,7 +12,7 @@ read.single.lsd( file, col.names = NULL, nrows = -1, skip = 0,
 }
 \arguments{
   \item{file}{
-the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, \code{getwd()}. This can be a compressed file (see file) and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
+the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, \code{\link[base]{getwd}()}. This can be a compressed file (see file) and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
   \item{col.names}{
 a vector of optional names for the variables. The default is to read all (unique) variables.
@@ -40,17 +40,16 @@ For multi-instanced variables, see \code{\link{read.multi.lsd}}. For extracting 
 }
 
 \seealso{
-\code{\link{read.multi.lsd}},
-\code{\link{read.list.lsd}},
-\code{\link{read.3d.lsd}},
-\code{\link{read.4d.lsd}},
-\code{\link{read.raw.lsd}}
+\code{\link{list.files.lsd}()}
+\code{\link{read.multi.lsd}()},
+\code{\link{read.list.lsd}()},
+\code{\link{read.3d.lsd}()},
+\code{\link{read.4d.lsd}()},
+\code{\link{read.raw.lsd}()}
 }
 \examples{
-# get the example directory and file names
-path <- system.file( "extdata", package = "LSDinterface" )
-files <- list.files( path = path, full.names = TRUE,
-                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
+# get the list of file names of example LSD results
+files <- list.files.lsd( system.file( "extdata", package = "LSDinterface" ) )
 
 # load first .res file into a simple matrix (first instances only)
 macroVar <- read.single.lsd( files[ 1 ] )

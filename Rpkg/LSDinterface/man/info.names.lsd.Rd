@@ -11,7 +11,7 @@ info.names.lsd( file )
 }
 \arguments{
   \item{file}{
-the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, \code{getwd()}. Tilde-expansion is performed where supported. This can be a compressed file (see file) and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
+the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, \code{\link[base]{getwd}()}. Tilde-expansion is performed where supported. This can be a compressed file (see file) and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
 }
 \value{
@@ -22,15 +22,14 @@ Returns a character vector containing the names of all unique variables containe
 Not all names can be automatically reconverted to the original LSD names. The conversion may be incorrect if the original LSD variable is named in the format "X_...".
 }
 \seealso{
-\code{\link{info.details.lsd}},
-\code{\link{info.init.lsd}}
-\code{\link{info.dimensions.lsd}}
+\code{\link{list.files.lsd}()}
+\code{\link{info.details.lsd}()},
+\code{\link{info.init.lsd}()}
+\code{\link{info.dimensions.lsd}()}
 }
 \examples{
-# get the example directory and file names
-path <- system.file( "extdata", package = "LSDinterface" )
-files <- list.files( path = path, full.names = TRUE,
-                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
+# get the list of file names of example LSD results
+files <- list.files.lsd( system.file( "extdata", package = "LSDinterface" ) )
 
 # get variable names from first file
 info.names.lsd( files[ 1 ] )

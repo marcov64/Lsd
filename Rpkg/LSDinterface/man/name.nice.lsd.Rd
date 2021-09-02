@@ -18,9 +18,9 @@ A character vector of with the same attributes as x (after possible coercion) an
 }
 \author{Marcelo C. Pereira}
 \seealso{
-\code{\link{name.var.lsd}},
-\code{\link{name.clean.lsd}},
-\code{\link{info.names.lsd}}
+\code{\link{name.var.lsd}()},
+\code{\link{name.clean.lsd}()},
+\code{\link{info.names.lsd}()}
 }
 \examples{
 name.nice.lsd( "X_Var1.1_1..1.100." )

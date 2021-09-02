@@ -7,7 +7,7 @@ Sobol variance decomposition sensitivity analysis
 This function performs the global sensitivity analysis of a previously fitted meta-model using the Sobol variance decomposition method (Saltelli et al., 2008). If no model is supplied, uses a B-spline smoothing interpolation model.
 }
 \usage{
-sobol.decomposition.lsd(data, model = NULL, krig.sa = FALSE, sa.samp = 1000)
+sobol.decomposition.lsd( data, model = NULL, krig.sa = FALSE, sa.samp = 1000 )
 }
 \arguments{
   \item{data}{
@@ -33,7 +33,7 @@ The function returns an object/list of class \code{kriging-sa} or \code{polynomi
 
 \item{metamodel}{an object/list of class \code{\link[sensitivity]{fast99}} containing the estimated total and conditional variances for all the meta-model factors.}
 \item{sa}{a print-ready table with the Sobol indexes for each factor.}
-\item{topEffect}{a vector containing the indexes to the three most influential factors, automatically calculated (if \code{factorX = 0}) or according to the order pre selected by the user.}
+\item{topEffect}{a vector containing the indexes to the three most influential factors, automatically calculated (if \code{factorX = 0}) or according to the order preselected by the user.}
 
 If no model is supplied and a B-spline smoothing interpolation model cannot be fitted, returns \code{NULL}.
 }
@@ -47,18 +47,16 @@ Saltelli A, Ratto M, Andres T, Campolongo F, Cariboni J, Gatelli D, Saisana M, T
 See the note in \link[LSDsensitivity]{LSDsensitivity-package} for step-by-step instructions on how to perform the complete sensitivity analysis process using LSD and R.
 }
 \seealso{
-\code{\link{read.doe.lsd}},
-\code{\link{kriging.model.lsd}},
-\code{\link{polynomial.model.lsd}}
+\code{\link{read.doe.lsd}()},
+\code{\link{kriging.model.lsd}()},
+\code{\link{polynomial.model.lsd}()}
 
-\code{\link[sensitivity]{fast99}},
-\code{\link[sensitivity]{sobolGP}} in \code{\link[sensitivity]{sensitivity-package}}
+\code{\link[sensitivity]{fast99}()},
+\code{\link[sensitivity]{sobolGP}()} in \code{\link[sensitivity]{sensitivity-package}}
 }
 \examples{
-# Examples require the data files produced by LSD, please check the package
-# notes and LSD documentation on how to generate you simulation results files.
-# Please note that the full set of sensitivity analysis files must be available,
-# as detailed in the help page for the read.doe.lsd function.
+# get the example directory name
+path <- system.file( "extdata/sobol", package = "LSDsensitivity" )
 
 # Steps to use this function:
 # 1. define the variables you want to use in the analysis
@@ -66,12 +64,11 @@ See the note in \link[LSDsensitivity]{LSDsensitivity-package} for step-by-step i
 # 3. fit a Kriging (or polynomial) meta-model using kriging.model.lsd
 # 4. perform the sensitivity analysis applying sobol.decomposition.lsd
 
-\donttest{
 lsdVars <- c( "var1", "var2", "var3" )         # the definition of existing variables
 
-dataSet <- read.doe.lsd( ".",                  # data files relative folder
-                         "Sim1",               # data files base name (same as .lsd file)
-                         "var1",               # variable name to perform the sensitivity analysis
+dataSet <- read.doe.lsd( path,                 # data files folder
+                         "Sim3",               # data files base name (same as .lsd file)
+                         "var3",               # variable name to perform the sensitivity analysis
                          does = 2,             # number of experiments (data + external validation)
                          saveVars = lsdVars )  # LSD variables to keep in dataset
 
@@ -82,8 +79,7 @@ SA <- sobol.decomposition.lsd( dataSet,        # LSD experimental data set
 
 print( SA$topEffect )                          # indexes to the top 3 factors
 print( SA$sa )                                 # Sobol indexes table
-barplot( t( sSA$sa ) )                         # plot Sobol indexes chart
-}
+barplot( t( SA$sa ) )                          # plot Sobol indexes chart
 }
 \keyword{ methods }
 \keyword{ models }

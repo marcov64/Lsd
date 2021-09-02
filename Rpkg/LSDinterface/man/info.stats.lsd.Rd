@@ -8,7 +8,8 @@ This function reads a 3 or 4-dimensional array produced by \code{\link{read.3d.l
 }
 \usage{
 info.stats.lsd( array, rows = 1, cols = 2, median = FALSE,
-                ci = "none", ci.conf = 0.95, ci.boot = NULL, boot.R = 999,
+                ci = c( "none", "mean", "median", "auto" ),
+                ci.conf = 0.95, ci.boot = NULL, boot.R = 999,
                 na.rm = TRUE, inf.rm = TRUE )
 }
 \arguments{
@@ -25,7 +26,7 @@ an integer array dimension to be used as the columns for the statistics matrices
 a logical value indicating if (\code{TRUE}) the median should also be computed.
 }
   \item{ci}{
-a character string specifying the type of confidence interval to compute, must be one of \code{"none"} (default) for no confidence interval computation, \code{"mean"}, to compute a confidence interval for the mean, \code{"median"}, for the median, or \code{"auto"}, to use the option set for the \code{median} argument (above).
+a character string specifying the type of confidence interval to compute, must be one of \code{"none"} (default) for no confidence interval computation, \code{"mean"}, to compute a confidence interval for the mean, \code{"median"}, for the median, or \code{"auto"}, to use the option set for the \code{median} argument (above). This option can be abbreviated.
 }
   \item{ci.conf}{
 confidence level of the confidence interval
@@ -55,15 +56,14 @@ Returns a list containing four to seven matrices, with the original size and nam
 }
 \author{Marcelo C. Pereira}
 \seealso{
-\code{\link{read.3d.lsd}},
-\code{\link{read.4d.lsd}},
-\code{\link{info.dimensions.lsd}}
+\code{\link{list.files.lsd}()}
+\code{\link{read.3d.lsd}()},
+\code{\link{read.4d.lsd}()},
+\code{\link{info.dimensions.lsd}()}
 }
 \examples{
-# get the example directory and file names
-path <- system.file( "extdata", package = "LSDinterface" )
-files <- list.files( path = path, full.names = TRUE,
-                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
+# get the list of file names of example LSD results
+files <- list.files.lsd( system.file( "extdata", package = "LSDinterface" ) )
 
 # read first instance of all variables from MC files (3D array)
 inst1Array <- read.3d.lsd( files )
@@ -94,5 +94,5 @@ print( allStats2$med[ , 1 : 3 ] )
 print( allStats2$ci.hi[ , 1 : 3 ] )
 }
 }
-\keyword{ attribute }
+\keyword{ statistics }
 \keyword{ file }

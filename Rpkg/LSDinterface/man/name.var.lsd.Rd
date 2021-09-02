@@ -22,8 +22,8 @@ A character vector of with the same attributes as x (after possible coercion).
 }
 \author{Marcelo C. Pereira}
 \seealso{
-\code{\link{name.clean.lsd}},
-\code{\link{info.names.lsd}}
+\code{\link{name.clean.lsd}()},
+\code{\link{info.names.lsd}()}
 }
 \examples{
 name.var.lsd( "label" )

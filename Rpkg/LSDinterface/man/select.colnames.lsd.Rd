@@ -29,14 +29,13 @@ Returns a single matrix containing the selected variables' time series contained
 The variable/column names must be valid R column names (e.g., names do not start with a underscore). Use \code{\link{make.names}} if required.
 }
 \seealso{
-\code{\link{select.colattrs.lsd}},
-\code{\link{make.names}}
+\code{\link{list.files.lsd}()}
+\code{\link{select.colattrs.lsd}()},
+\code{\link{make.names}()}
 }
 \examples{
-# get the example directory and file names
-path <- system.file( "extdata", package = "LSDinterface" )
-files <- list.files( path = path, full.names = TRUE,
-                     pattern = paste0( "Sim1_[0-9]+.res.gz" ) )
+# get the list of file names of example LSD results
+files <- list.files.lsd( system.file( "extdata", package = "LSDinterface" ) )
 
 # read all instances of all variables in first file
 bigTable <- read.raw.lsd( files[ 1 ] )
