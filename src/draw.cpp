@@ -259,7 +259,7 @@ DRAW_OBJ
 ****************************************************/
 void draw_obj( object *t, object *sel, int level, int center, int from, bool zeroinst )
 {
-	bool fit_wid;
+	bool fit_wid, to_compute;
 	double h_fact, v_fact, range_fact;
 	int h, i, j, k, step_level, step_type, begin, count, max_wid, range_init;
 	char str[ MAX_LINE_SIZE ], ch[ MAX_ELEM_LENGTH ], ch1[ MAX_LINE_SIZE ];
@@ -329,7 +329,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 		}
 		else									// compute number of groups of this type
 		{
-			fit_wid = true;
+			fit_wid = to_compute = true;
 			for ( h = 0, cur = t; cur != NULL ; ++h, cur = cur->hyper_next( ) )
 			{
 				if ( strlen( ch1 ) >= ( unsigned ) max_wid )
@@ -343,6 +343,8 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 				snprintf( str, MAX_LINE_SIZE, "%s%d", strlen( ch1 ) > 0 ? " " : "", count );
 				strcatn( ch1, str, MAX_LINE_SIZE );
 
+				to_compute = cur->to_compute;
+
 				for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group
 			}
 
@@ -355,6 +357,9 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 				if ( h < k )					// found zero instanced object?
 					strcatn( ch1, "\u2026", MAX_LINE_SIZE );
 			}
+
+			if ( ! to_compute )
+				strcatn( ch1, "-", MAX_LINE_SIZE );
 		}
 
 		if ( t->up->up != NULL )
