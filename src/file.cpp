@@ -500,7 +500,7 @@ LOAD_CONFIGURATION
 int load_configuration( bool reload, bool quick )
 {
 	int i, j = 0, load = 0;
-	char msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
+	char buf[ MAX_LINE_SIZE ], msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
 	object *cur;
 	variable *cv, *cv1;
 	description *cd;
@@ -547,7 +547,7 @@ int load_configuration( bool reload, bool quick )
 
 	sim_num = 1;
 	fscanf( f, "%999s", msg );					// should be SIM_NUM
-	if ( ! ( ! strcmp( msg, "SIM_NUM" ) && fscanf( f, "%d", &sim_num ) ) )
+	if ( ! ( ! strcmp( msg, "SIM_NUM" ) && fscanf( f, "%d", & sim_num ) && sim_num > 0 ) )
 	{
 		load = 4;
 		goto endLoad;
@@ -555,30 +555,47 @@ int load_configuration( bool reload, bool quick )
 
 	seed = 1;
 	fscanf( f, "%999s", msg );					// should be SEED
-	if ( ! ( ! strcmp( msg, "SEED" ) && fscanf( f, "%d", &seed ) ) )
+	if ( ! ( ! strcmp( msg, "SEED" ) && fscanf( f, "%d", & seed ) && seed > 0 ) )
 	{
 		load = 5;
 		goto endLoad;
 	}
 
 	max_step = 100;
-	fscanf( f, "%999s", msg );					// should be MAX_STEP
-	if ( ! ( ! strcmp( msg, "MAX_STEP" ) && fscanf( f, "%d", &max_step ) ) )
+	when_debug = 0;
+	parallel_disable = 0;
+	if ( fgets( buf, MAX_LINE_SIZE, f ) == NULL )// should be MAX_STEP (1 or 3 values)
 	{
 		load = 6;
 		goto endLoad;
 	}
 
-	fscanf( f, "%999s", msg );					// should be EQUATION
+	i = sscanf( buf, "%999s %d %d %d", msg, & max_step, & when_debug, & parallel_disable );
+
+	if ( ! ( i >= 2 && ! strcmp( msg, "MAX_STEP" ) && max_step > 0 ) )
+	{
+		load = 6;
+		goto endLoad;
+	}
+
+	if ( ( i > 2 && when_debug < 0 ) || ( i > 3 && ( parallel_disable < 0 || parallel_disable > 1 ) ) )
+	{
+		load = 6;
+		goto endLoad;
+	}
+
+	fscanf( f, "%999s", msg );                    // should be EQUATION
 	if ( strcmp( msg, "EQUATION" ) )
 	{
 		load = 7;
 		goto endLoad;
 	}
+
 	strcpy( name, "NONE" );
 	fgets( name, MAX_PATH_LENGTH, f );
 	if ( name[ strlen( name ) - 1 ] == '\n' )
 		name[ strlen( name ) - 1 ] = '\0';
+
 	if ( name[ strlen( name ) - 1 ] == '\r' )
 		name[ strlen( name ) - 1 ] = '\0';
 
@@ -876,7 +893,12 @@ bool save_configuration( int findex, const char *dest_path )
 	fprintf( f, "\nDATA\n" );
 	root->save_param( f );
 
-	fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", sim_num, seed + delta, max_step, equation_name, name_rep );
+	fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d", sim_num, seed + delta, max_step );
+
+	if ( when_debug > 0 || parallel_disable != 0 )
+		fprintf( f, " %d %d", when_debug, parallel_disable == 0 ? 0 : 1 );
+
+	fprintf( f, "\nEQUATION %s\nMODELREPORT %s\n", equation_name, name_rep );
 
 	fprintf( f, "\nDESCRIPTION\n\n" );
 	save_description( root, f );
