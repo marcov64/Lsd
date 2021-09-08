@@ -3368,14 +3368,14 @@ object *operate( object *r )
 		temp[ 7 ] = prof_obs_only;
 		temp[ 8 ] = parallel_disable;
 
-		Tcl_LinkVar( inter, "sim_num", ( char * ) &sim_num, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "seed", ( char * ) &seed, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "max_step", ( char * ) &max_step, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "stack_info", ( char * ) &stack_info, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "prof_min_msecs", ( char * ) &prof_min_msecs, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "prof_obs_only", ( char * ) &prof_obs_only, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "prof_aggr_time", ( char * ) &prof_aggr_time, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "parallel_disable", ( char * ) &parallel_disable, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( inter, "sim_num", ( char * ) & sim_num, TCL_LINK_INT );
+		Tcl_LinkVar( inter, "seed", ( char * ) & seed, TCL_LINK_INT );
+		Tcl_LinkVar( inter, "max_step", ( char * ) & max_step, TCL_LINK_INT );
+		Tcl_LinkVar( inter, "stack_info", ( char * ) & stack_info, TCL_LINK_INT );
+		Tcl_LinkVar( inter, "prof_min_msecs", ( char * ) & prof_min_msecs, TCL_LINK_INT );
+		Tcl_LinkVar( inter, "prof_obs_only", ( char * ) & prof_obs_only, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( inter, "prof_aggr_time", ( char * ) & prof_aggr_time, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( inter, "parallel_disable", ( char * ) & parallel_disable, TCL_LINK_BOOLEAN );
 
 		cmd( "set tw 28" );					// text label width
 
@@ -3477,7 +3477,7 @@ object *operate( object *r )
 		}
 		else
 			// signal unsaved change if anything to be saved
-			if ( temp[ 1 ] != sim_num || ( unsigned ) temp[ 2 ] != seed || temp[ 3 ] != max_step )
+			if ( temp[ 1 ] != sim_num || ( unsigned ) temp[ 2 ] != seed || temp[ 3 ] != max_step || temp[ 4 ] != when_debug || temp[ 8 ] != parallel_disable )
 				unsaved_change( true );
 
 		Tcl_UnlinkVar( inter, "sim_num" );
@@ -6947,7 +6947,7 @@ void control_to_compute( object *r, const char *lab )
 	{
 		if ( ! check_save )
 			return;
-		
+
 		if ( cv->save == 1 )
 		{
 			cmd( "set res [ ttk::messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, lab );

@@ -500,7 +500,7 @@ LOAD_CONFIGURATION
 int load_configuration( bool reload, bool quick )
 {
 	int i, j = 0, load = 0;
-	char buf[ MAX_LINE_SIZE ], msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
+	char msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
 	object *cur;
 	variable *cv, *cv1;
 	description *cd;
@@ -564,21 +564,22 @@ int load_configuration( bool reload, bool quick )
 	max_step = 100;
 	when_debug = 0;
 	parallel_disable = 0;
-	if ( fgets( buf, MAX_LINE_SIZE, f ) == NULL )// should be MAX_STEP (1 or 3 values)
+	fscanf( f, "%999s", msg );					// should be MAX_STEP
+	if ( strcmp( msg, "MAX_STEP" ) )
 	{
 		load = 6;
 		goto endLoad;
 	}
 
-	i = sscanf( buf, "%999s %d %d %d", msg, & max_step, & when_debug, & parallel_disable );
-
-	if ( ! ( i >= 2 && ! strcmp( msg, "MAX_STEP" ) && max_step > 0 ) )
+	if ( fgets( msg, MAX_LINE_SIZE, f ) == NULL )// should be 1 or 3 values
 	{
 		load = 6;
 		goto endLoad;
 	}
 
-	if ( ( i > 2 && when_debug < 0 ) || ( i > 3 && ( parallel_disable < 0 || parallel_disable > 1 ) ) )
+	i = sscanf( msg, "%d %d %d", & max_step, & when_debug, & parallel_disable );
+
+	if ( i < 1 || max_step <= 0 || when_debug < 0 || parallel_disable < 0 || parallel_disable > 1 )
 	{
 		load = 6;
 		goto endLoad;

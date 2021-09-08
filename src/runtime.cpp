@@ -461,7 +461,7 @@ void reset_plot( void )
 			$activeplot.fond.shift conf -state disabled; \
 			tooltip::tooltip clear $activeplot.fond.go; \
 			tooltip::tooltip clear $activeplot.fond.shift; \
-			if { %d } { \
+			if { %d || ! [ info exists rtptab_show ] || ! $rtptab_show } { \
 				destroytop [ winfo toplevel $activeplot ] \
 			} else { \
 				deiconifytop $activeplot; \
