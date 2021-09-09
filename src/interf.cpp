@@ -3499,8 +3499,6 @@ object *operate( object *r )
 			break;
 
 		n = root->search( res_g );
-		choice = 0;
-
 		if ( n == NULL )
 		{	// check if it is not a zero-instance object
 			n = blueprint->search( res_g );
@@ -3516,6 +3514,7 @@ object *operate( object *r )
 			cmd( "set listfocus 1; set itemfocus 0" ); // point for first var in listbox
 		}
 
+		choice = 0;
 		return n;
 
 
@@ -4213,6 +4212,7 @@ object *operate( object *r )
 			for ( i = 0, cv1 = cv->up->v; cv1 != cv; cv1 = cv1->next, ++i );
 			cmd( "set listfocus 1; set itemfocus %d", i );
 			redrawRoot = redrawStruc = true;			// request browser redraw
+			choice = 0;
 			return cv->up;
 		}
 		else

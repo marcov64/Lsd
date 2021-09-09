@@ -2030,7 +2030,7 @@ void exception_handler( int signum, const char *what )
 			 stacklog->vs != NULL && stacklog->vs->label != NULL )
 		{
 			double useless = -1;
-			sprintf( msg3, "%s (ERROR)", stacklog->vs->label );
+			snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", stacklog->vs->label );
 			deb( stacklog->vs->up, NULL, msg3, & useless );
 		}
 	}

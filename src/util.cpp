@@ -326,7 +326,7 @@ void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const 
 			char err_msg[ MAX_LINE_SIZE ];
 			double useless = -1;
 			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", stacklog->vs->label );
-			deb( stacklog->vs->up, NULL, err_msg, &useless );
+			deb( stacklog->vs->up, NULL, err_msg, & useless );
 		}
 
 		err = 2;
@@ -1555,12 +1555,12 @@ double median( vector < double > & v )
 {
 	int mid;
 	double midVal;
-	
+
 	if ( v.empty( ) )
 		return NAN;
 
 	mid = v.size( ) / 2;
-	
+
 	auto midPos = v.begin( ) + mid;
 	nth_element( v.begin( ), midPos, v.end( ) );
 	midVal = v[ mid ];

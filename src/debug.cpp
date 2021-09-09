@@ -76,14 +76,14 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 	// define the presentation mode ( 1 = normal debug, 2 = data browse, 3 = pause debug, 4 = error )
 	int mode = ( lab == NULL ) ? 2 : ( ! strcmp( lab, "Paused by User" ) ) ? 3 : ( strstr( lab, "(ERROR)" ) != NULL ) ? 4 : 1;
-	
+
 	if ( mode == 2 )
 		cover_browser( "Data Browser...", "Please exit Data Browser\nbefore using the LSD Browser.", false );
 
 	set_buttons_run( false );
 
 	cmd( "set deb .deb" );
-	cmd( "set lab \"%s\"", lab );
+	cmd( "set lab \"%s\"", lab == NULL ? "" : lab );
 	cmd( "if { ! [ winfo exists .deb ] } { \
 			if [ string equal $lab \"\" ] { \
 				set debTitle \"LSD Data Browser\" \
@@ -311,7 +311,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						} \
 					}", mode );
 
-				cmd( ".deb.v.v1.name2 conf -text \"%s\"", lab );
+				cmd( ".deb.v.v1.name2 conf -text \"%s\"", lab == NULL ? "" : lab );
 				cmd( ".deb.v.v1.time2 conf -text \"%d      \"", t );
 			}
 
