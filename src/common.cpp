@@ -643,10 +643,11 @@ bool get_bool( const char *tcl_var, bool *var )
 	}
 
 	if ( Tcl_GetBoolean( inter, strvar, & intvar ) != TCL_OK )
-	{
-		log_tcl_error( "Cannot convert to boolean", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
-		return false;
-	}
+		if ( Tcl_GetInt( inter, strvar, & intvar ) != TCL_OK )
+		{
+			log_tcl_error( "Cannot convert to boolean", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
+			return false;
+		}
 
 	if ( var != NULL )
 		*var = intvar ? true : false;
