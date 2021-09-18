@@ -119,15 +119,17 @@
 							  "0", "0", "Work", \
 							  "$DefaultDbgExe", "1", "#", \
 							  "$DefaultTheme" }
-#define MODEL_INFO_NUM 11
+#define MODEL_INFO_NUM 16
 #define MODEL_INFO_NAME { "modelName", "modelVersion", "modelDate", \
 						  "lsdGeom", "logGeom", "strGeom", \
 						  "daGeom", "debGeom", "latGeom", \
-						  "pltGeom", "dapGeom" }
+						  "pltGeom", "dapGeom", "lastConf", \
+						  "lastObj", "lastList", "lastItem", "lastFirst" }
 #define MODEL_INFO_DEFAULT { "(no name)", "1.0", "[ current_date ]", \
 							 "#", "#", "#", \
 							 "#", "#", "#", \
-							 "#", "#" }
+							 "#", "#", "#", \
+							 "Root", "1", "0", "0" }
 #define LSD_NW_NUM 12
 #define LSD_NW_SRC { "lsdmain.cpp", "common.cpp", "file.cpp", "nets.cpp", \
 					 "object.cpp", "util.cpp", "variab.cpp", "check.h", \
@@ -443,7 +445,7 @@ struct design 							// design of experiment object
 	char **lab;
 	bool *intg;
 
-	design( sense *rsens, int typ, const char *fname, const char *dest_path, 
+	design( sense *rsens, int typ, const char *fname, const char *dest_path,
 			int findex, int samples, int factors = 0, int jump = 2, int trajs = 4 );
 										// constructor
 	~design( void );					// destructor
@@ -591,7 +593,7 @@ void cmd( const char *cm, ... );
 void exception_handler( int signum, const char *what = NULL );
 void handle_signals( void ( * handler ) ( int signum ) );
 void init_tcl_tk( const char *exec, const char *tcl_app_name );
-void log_tcl_error( const char *cm, const char *message, ... );
+void log_tcl_error( bool show, const char *cm, const char *message, ... );
 void make_makefile( bool nw = false );
 void myexit( int v );
 void print_stack( void );
@@ -599,7 +601,7 @@ void show_comp_result( bool nw = false );
 void show_tcl_error( const char *boxTitle, const char *errMsg, ... );
 void signal_handler( int signum );
 void update_lmm_options( bool justLmmGeom = false );
-void update_model_info( void );
+void update_model_info( bool fix = false );
 
 #ifdef _LMM_
 bool discard_change( void );
@@ -649,4 +651,3 @@ int Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *inter, int argc, const char
 #endif
 
 #endif
-

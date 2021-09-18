@@ -122,25 +122,35 @@ bool load_model_info( const char *path )
 /*********************************
  UPDATE_MODEL_INFO
  *********************************/
-void update_model_info( void )
+void update_model_info( bool fix )
 {
 	int i;
 
-#ifdef _LMM_
 	// set undefined parameters to defaults
-	for ( i = 0; i < MODEL_INFO_NUM; ++i )
-	{
-		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
-		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
-	}
-#else
-	// update existing windows positions
-	for ( i = 0; i < LSD_WIN_NUM; ++i )
-		cmd( "if { $restoreWin } { set curGeom [ geomtosave .%s ]; if { $curGeom != \"\" } { set %s $curGeom } }", wnd_names[ i ], model_info[ i + 3 ] );
+	if ( fix )
+		for ( i = 0; i < MODEL_INFO_NUM; ++i )
+		{
+			cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
+			cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
+		}
+
+#ifndef _LMM_
+
+	else
+		// update existing windows positions
+		for ( i = 0; i < LSD_WIN_NUM; ++i )
+			cmd( "if { $restoreWin } { \
+					set curGeom [ geomtosave .%s ]; \
+					if { $curGeom != \"\" } { \
+						set %s $curGeom \
+					} \
+				}", wnd_names[ i ], model_info[ i + 3 ] );
 
 	// ensure model name is set
-	cmd( "if { ! [ info exists modelName ] } { set modelName \"\" }" );
-	cmd( "if { $modelName == \"\" } { regsub \"fun_\" \"%s\" \"\" modelName; regsub \".cpp\" \"$modelName\" \"\" modelName }", equation_name );
+	cmd( "if { ! [ info exists modelName ] || $modelName eq \"\" || $modelName eq \"%s\" } { \
+			set modelName [ string map -nocase { fun_ \"\" .cpp \"\" } \"%s\" ] \
+		}", model_defaults[ 0 ], equation_name );
+
 #endif
 
 	// save info to disk
@@ -168,7 +178,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 
 	if ( ! set_env( true ) )
 	{
-		log_tcl_error( "Set environment variables", "Environment variable setup failed, Tcl/Tk may be unavailable" );
+		log_tcl_error( false, "Set environment variables", "Environment variable setup failed, Tcl/Tk may be unavailable" );
 		myexit( 2 );
 	}
 
@@ -178,7 +188,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 	num = Tcl_Init( inter );
 	if ( num != TCL_OK )
 	{
-		log_tcl_error( "Create Tcl interpreter", "Tcl initialization directories not found, check the Tcl/Tk installation  and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
+		log_tcl_error( false, "Create Tcl interpreter", "Tcl initialization directories not found, check the Tcl/Tk installation  and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
 		myexit( 3 );
 	}
 
@@ -192,7 +202,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 	Tcl_UpdateLinkedVar( inter, "res" );
 	if ( res != 1234567890 )
 	{
-		log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
+		log_tcl_error( false, "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
 		myexit( 3 );
 	}
 
@@ -203,7 +213,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 
 	if ( num != TCL_OK || res )
 	{
-		log_tcl_error( "Start Tk", "Tk failed, check the Tcl/Tk installation (version 8.6+) and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
+		log_tcl_error( false, "Start Tk", "Tk failed, check the Tcl/Tk installation (version 8.6+) and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
 		myexit( 3 );
 	}
 
@@ -232,8 +242,8 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 	cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set res 1 } { set res 0 }" );
 	if ( res )
 	{
-		log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
-		cmd( "ttk::messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the sources (src) directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
+		log_tcl_error( false, "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
+		cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the sources (src) directory.\n\nLSD is aborting now.\"", SYSTEM_OPTIONS );
 		myexit( 4 );
 	}
 
@@ -449,7 +459,7 @@ void cmd( const char *cm, ... )
 
 	if ( reqsz < 0 )
 	{
-		log_tcl_error( "Invalid Tcl command", "Cannot expand command '%s...'", cm );
+		log_tcl_error( true, "Invalid Tcl command", "Cannot expand command '%s...'", cm );
 		return;
 	}
 
@@ -463,7 +473,7 @@ void cmd( const char *cm, ... )
 
 		if ( reqsz < 0 || sz > reqsz )
 		{
-			log_tcl_error( "Invalid Tcl command", "Cannot expand command '%s...'", cm );
+			log_tcl_error( true, "Invalid Tcl command", "Cannot expand command '%s...'", cm );
 			delete [ ] buffer;
 			return;
 		}
@@ -474,7 +484,7 @@ void cmd( const char *cm, ... )
 		bufdyn = false;
 
 	if ( Tcl_Eval( inter, buffer ) != TCL_OK )
-		log_tcl_error( cm, Tcl_GetStringResult( inter ) );
+		log_tcl_error( true, cm, Tcl_GetStringResult( inter ) );
 
 	if ( bufdyn )
 		delete [ ] buffer;
@@ -484,7 +494,7 @@ void cmd( const char *cm, ... )
 /****************************************************
  LOG_TCL_ERROR
  ****************************************************/
-void log_tcl_error( const char *cm, const char *message, ... )
+void log_tcl_error( bool show, const char *cm, const char *message, ... )
 {
 	static char *err_path, ftime[ 80 ], fname[ MAX_PATH_LENGTH ], buffer[ MAX_BUFF_SIZE ];
 	static struct tm *timeinfo;
@@ -535,7 +545,8 @@ void log_tcl_error( const char *cm, const char *message, ... )
 	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, buffer );
 	fclose( f );
 
-	show_tcl_error( "LSD error", "Internal LSD error. See file '%s'", fname );
+	if ( show )
+		show_tcl_error( "LSD error", "Internal LSD error. See file '%s'", fname );
 }
 
 
@@ -545,10 +556,10 @@ void log_tcl_error( const char *cm, const char *message, ... )
  ****************************************************/
 int Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
 {
-	if ( argc != 3 || argv[ 1 ] == NULL || argv[ 2 ] == NULL )	// require 2 parameters
+	if ( argc != 4 || argv[ 1 ] == NULL || argv[ 2 ] == NULL || argv[ 3 ] == NULL )	// require 3 parameters
 		return TCL_ERROR;
 
-	log_tcl_error( argv[ 1 ], argv[ 2 ] );
+	log_tcl_error( strcmp( argv[ 1 ], "0" ), argv[ 2 ], argv[ 3 ] );
 
 	static char empty[ ] = "";
 	Tcl_SetResult( inter, empty, TCL_VOLATILE );
@@ -571,7 +582,11 @@ void show_tcl_error( const char *boxTitle, const char *errMsg, ... )
 
 #ifdef _LMM_
 	if ( tk_ok )
-		cmd( "ttk::messageBox -type ok -title Error -icon error -message \"%s\" -detail \"%s.\"", boxTitle, logText );
+		cmd( "if { [ llength [ info procs ttk::messageBox ] ] > 0 } { \
+				ttk::messageBox -type ok -title Error -icon error -message \"%s\" -detail \"%s.\" \
+			} else { \
+				tk_messageBox -type ok -title Error -icon error -message \"%s\" -detail \"%s.\" \
+			}", boxTitle, logText, boxTitle, logText );
 	else
 		fprintf( stderr, "\n%s\n", logText );
 #else
@@ -645,7 +660,7 @@ bool get_bool( const char *tcl_var, bool *var )
 	if ( Tcl_GetBoolean( inter, strvar, & intvar ) != TCL_OK )
 		if ( Tcl_GetInt( inter, strvar, & intvar ) != TCL_OK )
 		{
-			log_tcl_error( "Cannot convert to boolean", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
+			log_tcl_error( true, "Cannot convert to boolean", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
 			return false;
 		}
 
@@ -676,7 +691,7 @@ int get_int( const char *tcl_var, int *var )
 
 	if ( Tcl_GetInt( inter, strvar, & intvar ) != TCL_OK )
 	{
-		log_tcl_error( "Cannot convert to integer", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
+		log_tcl_error( true, "Cannot convert to integer", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
 		return 0;
 	}
 
@@ -707,7 +722,7 @@ long get_long( const char *tcl_var, long *var )
 
 	if ( sscanf( strvar, "%ld", & longvar ) != 1 )
 	{
-		log_tcl_error( "Cannot convert to long", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
+		log_tcl_error( true, "Cannot convert to long", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
 		return 0;
 	}
 
@@ -738,7 +753,7 @@ double get_double( const char *tcl_var, double *var )
 
 	if ( Tcl_GetDouble( inter, strvar, & dblvar ) != TCL_OK )
 	{
-		log_tcl_error( "Cannot convert to double", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
+		log_tcl_error( true, "Cannot convert to double", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
 		return NAN;
 	}
 
@@ -759,7 +774,7 @@ char *get_str( const char *tcl_var, char *var, int var_size )
 
 	if ( strvar == NULL )
 	{
-		log_tcl_error( "Invalid Tcl variable name", "Internal LSD error searching for variable '%s'. If the problem persists, please contact developers", tcl_var );
+		log_tcl_error( true, "Invalid Tcl variable name", "Internal LSD error searching for variable '%s'. If the problem persists, please contact developers", tcl_var );
 		return var;
 	}
 
@@ -804,7 +819,7 @@ char *eval_str( const char *tcl_exp, char *var, int var_size )
 {
 	if ( Tcl_ExprString( inter, tcl_exp ) != TCL_OK )
 	{
-		log_tcl_error( "Cannot evaluate to string", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
+		log_tcl_error( true, "Cannot evaluate to string", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
 		return var;
 	}
 
@@ -830,14 +845,18 @@ const char *eval_str( const char *tcl_exp )
 bool eval_bool( const char *tcl_exp )
 {
 	int intvar;
+	long longvar;
 
-	if ( Tcl_ExprBoolean( inter, tcl_exp, & intvar ) != TCL_OK )
+	if ( Tcl_ExprBoolean( inter, tcl_exp, & intvar ) == TCL_OK )
+		return intvar ? true : false;
+
+	if ( Tcl_ExprLong( inter, tcl_exp, & longvar ) != TCL_OK )
 	{
-		log_tcl_error( "Cannot evaluate to boolean", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
+		log_tcl_error( true, "Cannot evaluate to boolean", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
 		return false;
 	}
 
-	return intvar ? true : false;
+	return longvar ? true : false;
 }
 
 
@@ -861,7 +880,7 @@ long eval_long( const char *tcl_exp )
 
 	if ( Tcl_ExprLong( inter, tcl_exp, & longvar ) != TCL_OK )
 	{
-		log_tcl_error( "Cannot evaluate to long integer", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
+		log_tcl_error( true, "Cannot evaluate to long integer", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
 		return 0;
 	}
 
@@ -879,7 +898,7 @@ double eval_double( const char *tcl_exp )
 
 	if ( Tcl_ExprDouble( inter, tcl_exp, & dblvar ) != TCL_OK )
 	{
-		log_tcl_error( "Cannot evaluate to double", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
+		log_tcl_error( true, "Cannot evaluate to double", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
 		return NAN;
 	}
 
@@ -894,28 +913,25 @@ double eval_double( const char *tcl_exp )
  *********************************/
 void check_option_files( bool sys )
 {
-	int exists;
-	Tcl_LinkVar( inter, "exists", ( char * ) &exists, TCL_LINK_BOOLEAN );
-
-	if ( ! sys )
+	if ( ! sys && ! eval_bool( "[ file exists \"$modelDir/$MODEL_OPTIONS\" ]" ) && eval_bool( "$modelDir ne \"\"" ) && eval_bool( "$modelDir ne $RootLsd" ) )
 	{
-		cmd( "set exists [ file exists \"$modelDir/$MODEL_OPTIONS\" ]" );
-
-		if ( ! exists )
-		{
-			cmd( "set dir [ glob -nocomplain \"$modelDir/fun_*.cpp\" ]" );
-			cmd( "if { $dir ne \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
-			cmd( "set a \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
-			cmd( "set f [ open \"$modelDir/$MODEL_OPTIONS\" w ]" );
-			cmd( "puts $f $a" );
-			cmd( "close $f" );
-		}
+		cmd( "set dir [ glob -nocomplain \"$modelDir/fun_*.cpp\" ]" );
+		cmd( "if { $dir ne \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
+		cmd( "set a \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
+		cmd( "set f [ open \"$modelDir/$MODEL_OPTIONS\" w ]" );
+		cmd( "puts $f $a" );
+		cmd( "close $f" );
 	}
 
-	cmd( "set exists [ file exists \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\"]" );
-	if ( ! exists )
+	if ( ! eval_bool( "[ file exists \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" ]" ) )
 	{
-		cmd( "if [ string equal $tcl_platform(platform) windows ] { set sysfile \"system_options-windows.txt\" } elseif [ string equal $tcl_platform(os) Darwin ] { set sysfile \"system_options-mac.txt\" } else { set sysfile \"system_options-linux.txt\" }" );
+		cmd( "if [ string equal $tcl_platform(platform) windows ] { \
+				set sysfile \"system_options-windows.txt\" \
+			} elseif { [ string equal $tcl_platform(os) Darwin ] } { \
+				set sysfile \"system_options-mac.txt\" \
+			} else { \
+				set sysfile \"system_options-linux.txt\" \
+			}" );
 		cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
 		cmd( "set f1 [ open \"$RootLsd/$LsdSrc/$sysfile\" r ]" );
 		cmd( "puts $f \"# LSD options\"" );
@@ -925,8 +941,6 @@ void check_option_files( bool sys )
 		cmd( "close $f" );
 		cmd( "close $f1" );
 	}
-
-	Tcl_UnlinkVar( inter, "exists" );
 }
 
 
@@ -1883,7 +1897,6 @@ void myexit( int v )
 		if ( tk_ok )
 			cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { catch { destroy . } }" );
 
-		cmd( "catch { LsdExit }" );
 		Tcl_Finalize( );
 	}
 #endif
@@ -2037,7 +2050,7 @@ void exception_handler( int signum, const char *what )
 	}
 	else
 #endif
-		log_tcl_error( "FATAL ERROR", "System Signal received: %s", msg1 );
+		log_tcl_error( true, "FATAL ERROR", "System Signal received: %s", msg1 );
 
 #else
 

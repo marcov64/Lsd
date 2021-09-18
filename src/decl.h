@@ -42,6 +42,7 @@ Relevant flags (when defined):
 
 // global constants
 #define DEF_CONF_FILE "Sim1"			// default new configuration name
+#define NO_CONF_NAME "(no name)"		// no configuration file name yet
 #define NOLH_DEF_FILE "NOLH.csv"		// default NOLH file name
 #define MAX_SENS_POINTS 999				// default warning threshold for sensitivity analysis
 #define MAX_COLS 100					// max numbers of columns in init. editor
@@ -454,7 +455,6 @@ extern char *struct_file;		// name of current configuration file
 extern char error_hard_msg1[ ];	// buffer for parallel worker title msg
 extern char error_hard_msg2[ ];	// buffer for parallel worker log msg
 extern char error_hard_msg3[ ];	// buffer for parallel worker box msg
-extern char lastObj[ ];			// last shown object for quick reload
 extern char lsd_eq_file[ ];		// equations saved in configuration file
 extern char name_rep[ ];		// documentation report file name
 extern char nonavail[ ];		// string for unavailable values

@@ -24,28 +24,25 @@ w\:* {behavior:url(#default#VML);}
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>7</o:Revision>
-  <o:TotalTime>15</o:TotalTime>
+  <o:Revision>8</o:Revision>
+  <o:TotalTime>17</o:TotalTime>
   <o:Created>2018-04-14T19:23:00Z</o:Created>
-  <o:LastSaved>2021-07-14T21:28:00Z</o:LastSaved>
+  <o:LastSaved>2021-09-15T19:32:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>2200</o:Words>
-  <o:Characters>11880</o:Characters>
+  <o:Words>2217</o:Words>
+  <o:Characters>11974</o:Characters>
   <o:Lines>99</o:Lines>
   <o:Paragraphs>28</o:Paragraphs>
-  <o:CharactersWithSpaces>14052</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>14163</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
-<link rel=dataStoreItem href="menufile_arquivos/item0005.xml"
-target="menufile_arquivos/props006.xml">
+<link rel=dataStoreItem href="menufile_arquivos/item0007.xml"
+target="menufile_arquivos/props008.xml">
 <link rel=themeData href="menufile_arquivos/themedata.thmx">
 <link rel=colorSchemeMapping href="menufile_arquivos/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
-  <w:View>Print</w:View>
-  <w:SpellingState>Clean</w:SpellingState>
-  <w:GrammarState>Clean</w:GrammarState>
   <w:TrackMoves>false</w:TrackMoves>
   <w:TrackFormatting/>
   <w:HyphenationZone>21</w:HyphenationZone>
@@ -1145,9 +1142,6 @@ span.Cdigo
 	mso-hansi-font-family:"Courier New";
 	mso-bidi-font-family:"Courier New";
 	color:gray;}
-span.SpellE
-	{mso-style-name:"";
-	mso-spl-e:yes;}
 .MsoChpDefault
 	{mso-style-type:export-only;
 	mso-default-props:yes;
@@ -1530,13 +1524,14 @@ lang=EN-US style='mso-ansi-language:EN-US'>Ctrl+S</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> or click the blue floppy disk icon
 on the tool bar.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Save the current
-model configuration to the last used configuration file (</span><span
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Save the
+current model configuration to the last used configuration file (</span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.lsd</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> extension). If no configuration
-file name was set, the default is </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>Sim1.lsd</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>. <o:p></o:p></span></p>
+file name was set before, the default is </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>Sim1.lsd</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>. If the user wants to save the
+configuration to a different file, she must explicitly type the new name.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In general,
 users do not need to manually save a configuration since it can be
@@ -1550,9 +1545,8 @@ of closing the LSD Browser before running the simulation.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>A copy of
 the previous content of the configuration file is saved under the </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.<span
-class=SpellE>bak</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'> extension.<o:p></o:p></span></p>
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.bak</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> extension.<o:p></o:p></span></p>
 
 <h2><a name="_Save_As"></a><span lang=EN-US style='mso-fareast-font-family:
 "Times New Roman";mso-ansi-language:EN-US'>Save As<o:p></o:p></span></h2>
@@ -1564,17 +1558,17 @@ lang=EN-US style='mso-ansi-language:EN-US'> extension). If no configuration
 file name was set before, the default is </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>Sim1.lsd</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>. If the user wants to save the
-configuration to a new file, it must explicitly type the new name.<o:p></o:p></span></p>
+configuration to a new file, she must explicitly type the new name.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This
 command is frequently used to create a copy of an existing configuration before
 experimenting with some changes. Note that the configuration files do not have
 to be stored in the <a href="LSD_faqs.html#modelhome">model home directory</a>.
-In fact, they can be stored anywhere in the file system, including in
-subdirectories of the home directory. This is useful because LSD automatically
-saves <a href="LSD_faqs.html#results">simulation run results data</a> to the
-same location where the configuration file is, allowing the easy organization
-of the results of different model configurations.<o:p></o:p></span></p>
+In fact, they can be stored anywhere in the file system, including in subdirectories
+of the home directory. This is useful because LSD automatically saves <a
+href="LSD_faqs.html#results">simulation run results data</a> to the same
+location where the configuration file is, allowing the easy organization of the
+results of different model configurations.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Another
 situation in which this command may be used is after a simulation run. As in
@@ -1588,8 +1582,8 @@ span beyond the time steps originally planned. <o:p></o:p></span></p>
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>If the
 chosen configuration file already exists, a copy of its previous content is
 saved under the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>.<span class=SpellE>bak</span></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> extension.<o:p></o:p></span></p>
+EN-US'>.bak</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+extension.<o:p></o:p></span></p>
 
 <h2><a name=empty></a><a name="_Unload"></a><span lang=EN-US style='mso-fareast-font-family:
 "Times New Roman";mso-ansi-language:EN-US'>Unload <o:p></o:p></span></h2>
@@ -1763,8 +1757,8 @@ nodes in LSD. The respective Object instances <i>are not</i> deleted.<o:p></o:p>
 style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN-US'>Sensitivity
 files<o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Operations involving
-<a href="LSD_faqs.html#sa">LSD sensitivity analysis files</a>:<o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Operations
+involving <a href="LSD_faqs.html#sa">LSD sensitivity analysis files</a>:<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:42.6pt;text-indent:-24.75pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -2017,8 +2011,8 @@ generate the <a href="LSD_faqs.html#modelprogram">LSD model program</a>) with
 the snapshot stored in the <a href="LSD_faqs.html#modelsetting">model
 configuration file</a>, if any, using TkDiff text-file comparison utility.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This command
-is useful to track the changes made to the equation file since the last
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This
+command is useful to track the changes made to the equation file since the last
 snapshot with the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>File&gt;Upload Equation File</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> command (<a href="#_Upload_Equation_File">above</a>).<o:p></o:p></span></p>

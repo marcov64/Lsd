@@ -104,7 +104,6 @@ char equation_name[ MAX_PATH_LENGTH ] = "";// equation file name
 char error_hard_msg1[ MAX_BUFF_SIZE ];	// buffer for parallel worker title msg
 char error_hard_msg2[ MAX_BUFF_SIZE ];	// buffer for parallel worker log msg
 char error_hard_msg3[ MAX_BUFF_SIZE ];	// buffer for parallel worker box msg
-char lastObj[ MAX_ELEM_LENGTH ] = "";	// last shown object for quick reload
 char lsd_eq_file[ MAX_FILE_SIZE ] = "";	// equations saved in configuration file
 char name_rep[ MAX_PATH_LENGTH ] = "";	// documentation report file name
 char path_res[ MAX_PATH_LENGTH ] = "";	// path of last used results directory
@@ -209,12 +208,13 @@ int lsdmain( int argn, const char **argv )
 	char *str;
 	const char *app;
 	int i, j = 0, k = 0;
+	object *r;
 
 	path = new char[ strlen( "" ) + 1 ];
-	simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
+	simul_name = new char[ strlen( "" ) + 1 ];
 	exec_path = new char[ MAX_PATH_LENGTH ];
 	strcpy( path, "" );
-	strcpy( simul_name, DEF_CONF_FILE );
+	strcpy( simul_name, "" );
 	exec_path = getcwd( exec_path, MAX_PATH_LENGTH );
 	exec_file = clean_file( argv[ 0 ] );	// global pointer to the name of executable file
 	exec_path = clean_path( exec_path );	// global pointer to path of executable file
@@ -346,6 +346,12 @@ int lsdmain( int argn, const char **argv )
 	strcpy( str, simul_name );
 	strupr( str );
 
+	if ( strlen( str ) == 0 )
+	{
+		fprintf( stderr, "\nOption '-f' required, no configuration file(s).\n%s\n%s\n", lsdCmdMsg, lsdCmdHlp );
+		myexit( 6 );
+	}
+
 	if ( strstr( str, ".LSD" ) == NULL )
 	{
 		batch_sequential = true;
@@ -454,13 +460,13 @@ int lsdmain( int argn, const char **argv )
 	{
 		if ( exec_file == NULL || exec_path == NULL )
 		{
-			log_tcl_error( "Invalid LSD executable name or path", "Make sure the LSD directory is not too deep into the disk directory tree" );
+			log_tcl_error( true, "Invalid LSD executable name or path", "Make sure the LSD directory is not too deep into the disk directory tree" );
 			myexit( 1 );
 		}
 
 		if ( argv[ i ][ 0 ] != '-' || ( argv[ i ][ 1 ] != 'f' && argv[ i ][ 1 ] != 'i' && argv[ i ][ 1 ] != 'c' ) )
 		{
-			log_tcl_error( "Command line parameters", "Invalid option, available options: -i TCL_DIRECTORY / -f MODEL_NAME / -c MAX_THREADS" );
+			log_tcl_error( true, "Command line parameters", "Invalid option, available options: -i TCL_DIRECTORY / -f MODEL_NAME / -c MAX_THREADS" );
 			myexit( 1 );
 		}
 
@@ -472,16 +478,22 @@ int lsdmain( int argn, const char **argv )
 			strcpy( simul_name, argv[ i + 1 ] );
 			strcpy( str, argv[ i + 1 ] );
 			strupr( str );
-			if ( strstr( str, ".LSD" ) != NULL )
+
+			if ( strlen( str ) > 0 && strstr( str, ".LSD" ) != NULL )
 				simul_name[ strstr( str, ".LSD" ) - str ] = '\0';
+			else
+				strcpy( simul_name, "" );
+
 			delete [ ] str;
 			i++;
 		}
+
 		if ( argv[ i ][ 1 ] == 'i' )
 		{
 			strcpyn( tcl_dir, argv[ i + 1 ] + 2, MAX_PATH_LENGTH );
 			i++;
 		}
+
 		// read -c parameter : max number of cores
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'c' )
 		{
@@ -528,29 +540,16 @@ int lsdmain( int argn, const char **argv )
 		}
 	}
 
-	choice = 0;
-	cmd( "set path [ file normalize \"%s\" ]", exec_path );
-
 	// check if directory is ok and if executable is inside a macOS package
-	cmd( "if [ file exists \"$path/$MODEL_INFO\" ] { \
+	cmd( "set path [ file normalize \"%s\" ]", exec_path );
+	cmd( "if { $tcl_platform(os) ne \"Darwin\" } { \
 			cd \"$path\" \
-		} { \
-			if [ file exists \"$path/../../../$MODEL_INFO\" ] { \
-				cd \"$path/../../..\"; \
-				set path \"[ pwd ]\" \
-			} { \
-				set path \"\"; \
-				set choice 1 \
-			} \
+		} else { \
+			cd \"$path/../../..\"; \
+			set path \"[ pwd ]\" \
 		}" );
 
-	if ( choice )
-	{
-		log_tcl_error( "Model files check", "Required model file(s) missing or corrupted, check the model directory and recreate the model if the problem persists" );
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some model files are missing or corrupted.\nPlease recreate your model if the problem persists.\n\nLSD is aborting now.\"" );
-		myexit( 200 );
-	}
-
+	cmd( "set modelDir \"$path\"" );
 	app = get_str( "path" );
 	delete [ ] path;
 	path = new char[ strlen( app ) + 1 ];
@@ -579,8 +578,8 @@ int lsdmain( int argn, const char **argv )
 
 	if ( choice )
 	{
-		log_tcl_error( "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where LSD is installed" );
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where LSD is installed.\n\nLSD is aborting now.\"" );
+		log_tcl_error( false, "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where LSD is installed" );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where LSD is installed.\n\nLSD is aborting now.\"" );
 		myexit( 9 );
 	}
 
@@ -596,8 +595,8 @@ int lsdmain( int argn, const char **argv )
 	}
 	else
 	{
-		log_tcl_error( "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+		log_tcl_error( false, "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 		myexit( 9 );
 	}
 
@@ -618,8 +617,8 @@ int lsdmain( int argn, const char **argv )
 
 	if ( choice != 0 )
 	{
-		log_tcl_error( "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted (0x%04x), check your installation and reinstall LSD if the problem persists\n\n0x01: %s\n\n0x02: %s\n\n0x04: %s", choice, get_str( "err0x01" ), get_str( "err0x02" ), get_str( "err0x04" ) );
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
+		log_tcl_error( false, "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted (0x%04x), check your installation and reinstall LSD if the problem persists\n\n0x01: %s\n\n0x02: %s\n\n0x04: %s", choice, get_str( "err0x01" ), get_str( "err0x02" ), get_str( "err0x04" ) );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
 		myexit( 200 + choice );
 	}
 
@@ -634,10 +633,14 @@ int lsdmain( int argn, const char **argv )
 				platform = _WIN_;
 			else
 			{
-				log_tcl_error( "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
+				log_tcl_error( false, "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
 				myexit( 200 );
 			}
+
+	// fix non-existent or old options file for new options
+	if ( i == 0 )
+		update_lmm_options( ); 			// update config file
 
 	// create a Tcl command that calls the C discard_change function before killing LSD
 	Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
@@ -666,17 +669,63 @@ int lsdmain( int argn, const char **argv )
 	// Tcl command to save message to LSD log
 	Tcl_CreateCommand( inter, "log_tcl_error", Tcl_log_tcl_error, NULL, NULL );
 
-	// fix non-existent or old options file for new options
-	if ( i == 0 )
-		update_lmm_options( ); 			// update config file
-
-	// load/check model configuration file
-	i = load_model_info( exec_path );
-
 	// Tcl global variables
 	cmd( "set small_character [ expr { $dim_character - $deltaSize } ]" );
 	cmd( "set gpterm \"\"" );
-	cmd( "set modelDir \"%s\"", exec_path );
+
+	// load/check model equation file
+	read_eq_filename( equation_name, MAX_PATH_LENGTH );
+	eq_file = upload_eqfile( );
+
+	// load/check model information file and fix if required
+	if ( ! load_model_info( exec_path ) )
+		update_model_info( true );
+
+	// check model configuration file
+	if ( eval_bool( "[ info exists lastConf ] && [ file exists $lastConf ] && [ file isfile $lastConf ]" ) )
+	{
+		delete [ ] simul_name;
+		cmd( "set fn [ string map -nocase [ list [ file extension $lastConf ] \"\" ] [ file tail $lastConf ] ]" );
+		simul_name = new char[ eval_int( "[ string length $fn ]" ) + 1 ];
+		strcpy( simul_name, get_str( "fn" ) );
+
+		cmd( "set path [ file normalize [ file dirname $lastConf ] ]" );
+		if ( eval_bool( "$path ne [ pwd ]" ) )
+		{
+			delete [ ] path;
+			path = new char[ eval_int( "[ string length $path ]" ) + 1 ];
+			strcpy( path, get_str( "path" ) );
+			cmd( "cd $path" );
+		}
+	}
+
+	// try to load model configuration file
+	if ( strlen( simul_name ) > 0 )
+	{
+		struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 ];
+		sprintf( struct_file, "%s%s%s.lsd", path, strlen( path ) > 0 ? "/" : "", simul_name );
+		snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
+
+		r = NULL;
+		i = open_configuration( r, true );
+	}
+	else
+		i = 0;
+
+	// no or failed configuration
+	if ( i == 0 )
+	{
+		delete [ ] simul_name;
+		delete [ ] struct_file;
+		simul_name = new char[ strlen( "" ) + 1 ];
+		struct_file = new char[ strlen( "" ) + 1 ];
+		strcpy( simul_name, "" );
+		strcpy( struct_file, "" );
+		strcpy( name_rep, "" );
+		cmd( "cd \"%s\"", exec_path );
+	}
+
+	grandTotal = true;				// not in parallel mode: use .tot headers
 
 	// configure main window
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
@@ -687,21 +736,6 @@ int lsdmain( int argn, const char **argv )
 	cmd( "init_canvas_colors" );
 
 	create_logwindow( );
-
-	// load/check model configuration files
-	read_eq_filename( equation_name, MAX_PATH_LENGTH );
-
-	struct_file = new char[ strlen( simul_name ) + 5 ];
-	sprintf( struct_file, "%s.lsd", simul_name );
-
-	eq_file = upload_eqfile( );
-	snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
-
-	// fix model configuration file
-	if ( i == 0 )
-		update_model_info( );
-
-	grandTotal = true;				// not in parallel mode: use .tot headers
 
 #endif
 
@@ -786,6 +820,9 @@ void run( void )
 	clock_t start, end, last_update;
 	result *rf;					// pointer for results files (may be zipped or not)
 
+	if ( strlen( simul_name ) == 0 || strlen( struct_file ) == 0  )
+		return;					// it should never get here... just in case
+
 #ifndef _NP_
 	// check if there are parallel computing variables
 	if ( parallel_disable || max_threads < 2 )
@@ -810,7 +847,7 @@ void run( void )
 
 	cover_browser( "Running...", "Use the buttons to control the simulation:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables", true );
 #else
-	plog( "\nProcessing configuration file %s...\n", struct_file );
+	plog( "\nProcessing configuration file %s...\n", clean_file( struct_file ) );
 #endif
 
 	set_fast( 0 );			// should always start on OBSERVE and switch to FAST later
@@ -850,8 +887,8 @@ void run( void )
 			if ( load_configuration( true ) != 0 )
 			{
 #ifndef _NW_
-				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );
-				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
+				log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", struct_file );
 #else
 				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );
 #endif
@@ -865,8 +902,8 @@ void run( void )
 			if ( load_configuration( true, true ) != 0 )
 			{
 #ifndef _NW_
-				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );
-				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
+				log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", struct_file );
 #else
 				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );
 #endif
@@ -883,7 +920,7 @@ void run( void )
 		if ( ! alloc_save_mem( root ) )
 		{
 #ifndef _NW_
-			log_tcl_error( "Memory allocation", "Not enough memory, too many series saved for the memory available" );
+			log_tcl_error( true, "Memory allocation", "Not enough memory, too many series saved for the memory available" );
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, max_step );
 #else
 			fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step );
@@ -1129,7 +1166,7 @@ void run( void )
 						rf->title( root, 0 );					// write header
 					}
 					else
-						rf = new result( fname, "a", dozip, docsv );	// add results object to existing file
+						rf = new result( fname, "a", dozip, docsv );// add results object to existing file
 
 					rf->data( root, actual_steps );				// write current data data
 					delete rf;									// close file and delete object
@@ -1138,7 +1175,7 @@ void run( void )
 						plog( "Done\n" );
 				}
 
-				if ( i == sim_num )					  				// last run?
+				if ( i == sim_num )					  			// last run?
 					strcpyn( path_res, path_out, MAX_PATH_LENGTH );
 			}
 			else
@@ -1160,12 +1197,12 @@ void run( void )
 						if ( f != NULL )
 							fclose( f );
 						if ( fast_mode < 2 )
-							plog( "\nFinished processing %s\n", struct_file );
+							plog( "\nFinished processing %s\n", clean_file( struct_file ) );
 						break;
 					}
 
 					if ( fast_mode < 2 )
-						plog( "\nProcessing configuration file %s...\n", struct_file );
+						plog( "\nProcessing configuration file %s...\n", clean_file( struct_file ) );
 					fclose( f );  								// process next file
 
 					i = 0;   									// force restarting run count
@@ -1174,7 +1211,7 @@ void run( void )
 #ifdef _NW_
 				else
 					if ( fast_mode < 2 )
-						plog( "\nFinished processing %s\n", struct_file );
+						plog( "\nFinished processing %s\n", clean_file( struct_file ) );
 #endif
 			}
 		}
@@ -1292,7 +1329,7 @@ void empty_stack( void )
 	else
 	{
 #ifndef _NW_
-		log_tcl_error( "Internal error", "LSD trace stack corrupted" );
+		log_tcl_error( false, "Internal error", "LSD trace stack corrupted" );
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Internal LSD error\" -detail \"The LSD trace stack is corrupted.\nLSD will close now.\"" );
 #else
 		fprintf( stderr, "\nLSD trace stack corrupted.\n" );

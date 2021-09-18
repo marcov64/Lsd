@@ -197,7 +197,7 @@ void analysis( bool mc )
 
 	cmd( "init_series .da.vars.lb.flt .da.vars.lb.f.v .da.vars.lb.bh.nvar .da.vars.lb.bh.ncas .da.vars.ch.f.v .da.vars.ch.bh.sel .da.vars.pl.f.v .da.vars.pl.bh.plot" );
 
-	cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change( ) ? "*" : " ", simul_name );
+	cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
 
 	// main menu
 	cmd( "ttk::menu .da.m -tearoff 0" );
@@ -1150,8 +1150,8 @@ void analysis( bool mc )
 				cmd( "if [ string equal $pltSavFmt eps ] { \
 						$daptab.tab$a.c.f.plots postscript -x $x0 -y $y0 -width [ expr { $x1 - $x0 } ] -height [ expr { $y1 - $y0 } ] -pagewidth $dd -rotate $pltSavRes -colormode $pltSavCmod -file \"$fn\" \
 					} else { \
-						canvas2svg $daptab.tab$a.c.f.plots \"$fn\" \"$x0 $y0 $x1 $y1\" $pltSavCmod %s \
-					}", simul_name );
+						canvas2svg $daptab.tab$a.c.f.plots \"$fn\" \"$x0 $y0 $x1 $y1\" $pltSavCmod \"%s\" \
+					}", strlen( simul_name ) > 0 ? simul_name : "plot" );
 
 				cmd( "plog \"\nPlot saved: $fn\n\"" );
 
@@ -8376,9 +8376,9 @@ void save_datazip( void )
 	// add the second extension in macOS only now
 	if ( platform == _MAC_ && dozip )
 		cmd( "if { [ string length [ file extension \"$res\" ] ] > 0 } { \
-				set res \"${res}.gz\" \
+				set res \"$res.gz\" \
 			} elseif { [ string length \"$res\" ] > 0 } { \
-				set res \"${res}.%s.gz\" \
+				set res \"$res.%s.gz\" \
 			}", ext );
 
 	get_str( "res", da_tmp, MAX_BUFF_SIZE );
@@ -9653,7 +9653,7 @@ void add_da_plot_tab( const char *w, int id_plot )
 			bind $w <Escape> \"wm withdraw $w\" \
 		} else { \
 			settop $w \
-		}", unsaved_change( ) ? "*" : " ", simul_name );
+		}", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
 
 	// create tab frame with heading
 	cmd( "set t $daptab.tab%d", id_plot );

@@ -61,11 +61,11 @@ bool is_source_file( const char *fname );
 void color( int hiLev, long iniLin, long finLin );
 
 // global variables
-bool tk_ok = false;				// control for tk_ready to operate
 bool sourcefile = false;		// current file type
+bool tk_ok = false;				// control for tk_ready to operate
+char err_file[ ] = "LMM.err";	// error log file name
 char *exec_path = NULL;			// path of executable file
 char *rootLsd = NULL;			// path of LSD root directory
-char err_file[ ] = "LMM.err";	// error log file name
 int platform = 0;				// OS platform (1=Linux, 2=Mac, 3=Windows)
 int tosave = false;				// modified file flag
 Tcl_Interp *inter = NULL;		// Tcl standard interpreter pointer
@@ -137,8 +137,8 @@ int lsdmain( int argn, const char **argv )
 	}
 	else
 	{
-		log_tcl_error( "LMM executable check", "Cannot locate LSD executable on disk, check the installation of LSD and reinstall LSD if the problem persists" );
-		cmd( "ttk::messageBox -type ok -icon error -title Error -message \"LMM executable not found\" -detail \"Cannot locate the LMM executable folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+		log_tcl_error( false, "LMM executable check", "Cannot locate LSD executable on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+		cmd( "tk_messageBox -type ok -icon error -title Error -message \"LMM executable not found\" -detail \"Cannot locate the LMM executable folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 		return 5;
 	}
 
@@ -163,8 +163,8 @@ int lsdmain( int argn, const char **argv )
 			}" );
 		if ( choice )
 		{
-			log_tcl_error( "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
-			cmd( "ttk::messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+			log_tcl_error( false, "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
+			cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 			return 6;
 		}
 
@@ -181,8 +181,8 @@ int lsdmain( int argn, const char **argv )
 	}
 	else
 	{
-		log_tcl_error( "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
-		cmd( "ttk::messageBox -type ok -icon error -title Error -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+		log_tcl_error( false, "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+		cmd( "tk_messageBox -type ok -icon error -title Error -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 		return 7;
 	}
 
@@ -207,8 +207,8 @@ int lsdmain( int argn, const char **argv )
 
 	if ( choice != 0 )
 	{
-		log_tcl_error( "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted (0x%04x), check your installation and reinstall LSD if the problem persists\n\n0x01: %s\n\n0x02: %s\n\n0x04: %s\n\n0x08: %s", choice, get_str( "err0x01" ), get_str( "err0x02" ), get_str( "err0x04" ), get_str( "err0x08" ) );
-		cmd( "ttk::messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
+		log_tcl_error( false, "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted (0x%04x), check your installation and reinstall LSD if the problem persists\n\n0x01: %s\n\n0x02: %s\n\n0x04: %s\n\n0x08: %s", choice, get_str( "err0x01" ), get_str( "err0x02" ), get_str( "err0x04" ), get_str( "err0x08" ) );
+		cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
 		return 10 + choice;
 	}
 
@@ -223,7 +223,7 @@ int lsdmain( int argn, const char **argv )
 				platform = _WIN_;
 			else
 			{
-				log_tcl_error( "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
+				log_tcl_error( false, "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
 				cmd( "ttk::messageBox -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
 				return 10;
 			}
@@ -793,19 +793,19 @@ int lsdmain( int argn, const char **argv )
 	cmd( "check_components" );
 	if ( platform == _LIN_ && exists_var( "linuxMissing" ) )
 	{
-		log_tcl_error( "C++ compiler and/or tools unavailable", "g++, make and zlib packages must be installed for model compilation" );
+		log_tcl_error( false, "C++ compiler and/or tools unavailable", "g++, make and zlib packages must be installed for model compilation" );
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"C++ compiler and/or tools unavailable\" -detail \"g++, make and zlib packages must be installed for model compilation.\n\nSee 'Readme.txt' for details on how to install them manually, or run the LSD installer again and make sure the indicated steps are fully performed.\"" );
 	}
 	else
 		if ( platform == _MAC_ && exists_var( "xcode" ) )
 		{
-			log_tcl_error( "C++ compiler unavailable", "Xcode command line tools must be installed for model compilation" );
+			log_tcl_error( false, "C++ compiler unavailable", "Xcode command line tools must be installed for model compilation" );
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"C++ compiler unavailable\" -detail \"Xcode command line tools must be installed for model compilation.\n\nSee 'Readme.txt' for details on how to install it manually, or run the LSD installer again and make sure the indicated steps are fully performed.\"" );
 		}
 		else
 			if ( platform == _WIN_ && exists_var( "winConflict" ) )
 			{
-				log_tcl_error( "Potentially conflicting software installed", "Software components included in LSD were also installed by another package" );
+				log_tcl_error( false, "Potentially conflicting software installed", "Software components included in LSD were also installed by another package" );
 				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Potentially conflicting software installed\" -detail \"Software components included in LSD were also installed by another package.\n\nIf you have compilation problems, please check 'Readme.txt' for details on how to adjust the PATH environment variable manually, or run the LSD installer again and make sure accepting LSD components to be the system default.\"" );
 			}
 
@@ -1799,7 +1799,7 @@ int lsdmain( int argn, const char **argv )
 
 		// create the model options and info files
 		check_option_files( );
-		update_model_info( );
+		update_model_info( true );
 
 		cmd( ".m.file entryconf 2 -state normal" );
 		cmd( ".m.file entryconf 3 -state normal" );
@@ -4412,7 +4412,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "set modelDate \"\"" );
 
 		// create the model info file
-		update_model_info( );
+		update_model_info( true );
 
 		cmd( "ttk::messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: $modelDir\"" );
 
@@ -4476,7 +4476,7 @@ int lsdmain( int argn, const char **argv )
 		}
 
 		if ( ! load_model_info( get_str( "modelDir" ) ) )
-			update_model_info( );			// recreate the model info file
+			update_model_info( true );			// fix the model info file
 
 		cmd( "set mname $modelName" );
 		cmd( "set mver $modelVersion" );
@@ -4545,7 +4545,7 @@ int lsdmain( int argn, const char **argv )
 			cmd( "if { [ string is print -strict $mdate ] } { set modelDate \"$mdate\" } { set modelDate \"[ current_date ]\" }" );
 
 			// update the model info file
-			update_model_info( );
+			update_model_info( true );
 		}
 
 		choice = 0;
@@ -4878,7 +4878,7 @@ int lsdmain( int argn, const char **argv )
 		if ( s != NULL && strcmp( s, "" ) )
 		{
 			if ( ! load_model_info( get_str( "modelDir" ) ) )
-				update_model_info( );			// recreate the model info file
+				update_model_info( true );			// fix the model info file
 
 			s = get_fun_name( str, MAX_PATH_LENGTH );
 			if ( s != NULL && strcmp( s, "" ) )

@@ -490,6 +490,102 @@ void save_description( object *r, FILE *f )
 			save_description( cb->head, f );
 }
 
+#ifndef _NW_
+
+/****************************************************
+OPEN_CONFIGURATION
+	Open a clean configuration,
+	either the current or not
+****************************************************/
+bool open_configuration( object *&r, bool reload )
+{
+	int i;
+	const char *lab1, *lab2;
+
+	if ( ! reload || strlen( simul_name ) == 0 )
+	{									// ask user the file to use, if not reloading
+		cmd( "set fn [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model file} {.lsd} } } ]" );
+		cmd( "if { [ string length $fn ] > 0 && ! [ fn_spaces \"$fn\" . ] } { \
+				set path [ file dirname $fn ]; \
+				set fn [ string map -nocase [ list [ file extension $fn ] \"\" ] [ file tail $fn ] ]; \
+				set res 0 \
+			} else { \
+				set res 2 \
+			}" );
+
+		if ( get_int( "res" ) == 0 )
+		{
+			lab1 = get_str( "path" );
+			lab2 = get_str( "fn" );
+			if ( lab1 == NULL || lab2 == NULL || strlen( lab2 ) == 0 )
+				return false;
+
+			delete [ ] simul_name;
+			simul_name = new char[ strlen( lab2 ) + 1 ];
+			strcpy( simul_name, lab2 );
+
+			delete [ ] path;
+			path = new char[ strlen( lab1 ) + 1 ];
+			strcpy( path, lab1 );
+
+			if ( strlen( path ) > 0 )
+				cmd( "cd $path" );
+
+			cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
+			cmd( "set lastObj \"\"" );			// disable last object for reload
+		}
+		else
+			if ( struct_loaded )
+				reload = true;					// try to reload if use cancel load
+			else
+				return false;
+	}
+
+	if ( r != NULL && reload )
+		save_pos( r );							// save current position when reloading
+
+	redrawRoot = redrawStruc = true;			// force browser/structure redraw
+	iniShowOnce = false;						// show warning on # of columns in .ini
+
+	switch ( i = load_configuration( reload ) )	// try to load the configuration
+	{
+		case 1:									// file/path not found
+			if ( strlen( path ) > 0 )
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME, path );
+			else
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME  );
+			return false;
+
+		case 2:
+		case 3:
+			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file (%d)\" -detail \"Please check if a proper file was selected.\"", i );
+			return false;
+
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+		case 8:									// problem from MODELREPORT section
+		case 9:									// problem from DESCRIPTION section
+			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d)\" -detail \"Element descriptions were lost but the configuration can still be used.\n\nPlease check if the desired file was selected or re-enter the description information if needed.\"", i );
+			reset_description( r );
+
+		case 10:								// problem from DOCUOBSERVE section
+		case 11:
+		case 12:								// problem from DOCUINITIAL section
+		case 13:
+			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d)\" -detail \"Observation flags and equation file were lost but the configuration can still be used.\n\nPlease check if the desired file was selected or re-configure the lost parts if needed.\"", i );
+	}
+
+	if ( r != NULL && reload )
+		currObj = r = restore_pos( root );		// restore pointed object and variable
+	else
+		currObj = r = root;						// new structure
+
+	return true;
+}
+
+#endif
 
 /*****************************************************************************
 LOAD_CONFIGURATION
@@ -508,19 +604,14 @@ int load_configuration( bool reload, bool quick )
 
 	unload_configuration( false );				// unload current
 
-	if ( ! reload )
+	if ( strlen( simul_name ) == 0 )
+		return 1;
+
+	if ( ! reload || strlen( struct_file ) == 0 )
 	{
 		delete [ ] struct_file;
-		if ( strlen( path ) > 0 )
-		{
-			struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 ];
-			sprintf( struct_file, "%s/%s.lsd", path, simul_name );
-		}
-		else
-		{
-			struct_file = new char[ strlen( simul_name ) + 6 ];
-			sprintf( struct_file, "%s.lsd", simul_name );
-		}
+		struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 ];
+		sprintf( struct_file, "%s%s%s.lsd", path, strlen( path ) > 0 ? "/" : "", simul_name );
 	}
 
 	f = fopen( struct_file, "rb" );
@@ -609,6 +700,8 @@ int load_configuration( bool reload, bool quick )
 		strcpyn( equation_name, name + 1, MAX_PATH_LENGTH );
 	}
 
+
+	snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
 	fscanf( f, "%999s", msg );					// should be MODELREPORT
 	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%999s", name_rep ) ) )
 	{
@@ -712,6 +805,11 @@ endLoad:
 
 	t = 0;
 
+#ifndef _NW_
+	if ( load == 0 )
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
+#endif
+
 	return load;
 }
 
@@ -762,28 +860,29 @@ void unload_configuration ( bool full )
 		strcpy( path, exec_path );
 
 		delete [ ] simul_name;					// reset simulation name to default
-		simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
-		strcpy( simul_name, DEF_CONF_FILE );
+		simul_name = new char[ strlen( "" ) + 1 ];
+		strcpy( simul_name, "" );
 
 		delete [ ] struct_file;					// reset structure
-		struct_file = new char[ strlen( simul_name ) + 5 ];
-		sprintf( struct_file, "%s.lsd", simul_name );
+		struct_file = new char[ strlen( "" ) + 1 ];
+
+		strcpy( struct_file, "" );
+		strcpy( name_rep, "" );
+		strcpy( lsd_eq_file, "" );
+
 		struct_loaded = false;
 
 		delete sens_file;						// reset sensitivity file name
 		sens_file = NULL;
 
-		strcpy( lsd_eq_file, "" );				// reset other file names
-		snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
-
 #ifndef _NW_
 		cmd( "set path \"%s\"", path );
-		cmd( "set res \"%s\"", simul_name );
 		if ( strlen( path ) > 0 )
 			cmd( "cd \"$path\"" );
 
-		cmd( "set listfocus 1; set itemfocus 0" ); 	// point for first var in listbox
-		strcpy( lastObj, "" );					// disable last object for reload
+		cmd( "unset -nocomplain lastConf" );	// no last configuration to reload
+		cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
+		cmd( "set lastObj \"\"" );				// disable last object for reload
 		redrawRoot = redrawStruc = true;		// force browser/structure redraw
 #endif
 	}
@@ -841,6 +940,16 @@ bool save_configuration( int findex, const char *dest_path )
 		save_path = path;
 	else
 		save_path = dest_path;
+
+	if ( strlen( simul_name ) == 0 )
+	{
+		delete [ ] simul_name;
+		simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
+		strcpy( simul_name, DEF_CONF_FILE );
+	}
+
+	if ( strlen( name_rep ) == 0 )
+		snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
 
 	if ( strlen( path ) > 0 )
 	{
@@ -919,7 +1028,13 @@ bool save_configuration( int findex, const char *dest_path )
 	save_eqfile( f );
 
 	if ( ! ferror( f ) )
+	{
 		save_ok = true;
+
+#ifndef _NW_
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
+#endif
+	}
 
 	fclose( f );
 

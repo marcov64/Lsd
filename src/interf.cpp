@@ -116,8 +116,8 @@ void create( void )
 	// main cycle
 	while ( choice != 1 )
 	{
-		cmd( "wm title . \"%s%s - LSD Browser\"", unsaved_change( ) ? "*" : " ", simul_name  );
-		cmd( "wm title .log \"%s%s - LSD Log\"", unsaved_change( ) ? "*" : " ", simul_name  );
+		cmd( "wm title . \"%s%s - LSD Browser\"", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
+		cmd( "wm title .log \"%s%s - LSD Log\"", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
 
 		// find root and minimally check the configuration
 		if ( struct_loaded && root->v == NULL && root->b == NULL )
@@ -1104,7 +1104,7 @@ int browse( object *r )
 			if ( discard_change( true, false, "Invalid command after a simulation run." ) )	// for sure there are changes, just get the pop-up
 			{
 				if ( open_configuration( r, true ) )
-					choice = - choice;	// signal the reload
+					choice = - choice;		// signal the reload
 				else
 					choice = 20;			// reload failed, unload configuration
 			}
@@ -2937,9 +2937,9 @@ object *operate( object *r )
 	// Exit the browser and run the simulation
 	case 1:
 
-		if ( ! struct_loaded )
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to run the simulation.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to run the simulation.\"" );
 			break;
 		}
 
@@ -3209,7 +3209,7 @@ object *operate( object *r )
 	// Save a model as different name
 	case 73:
 
-		saveAs = ( choice == 73 ) ? true : false;
+		saveAs = ( choice == 73 || strlen( simul_name ) == 0 ) ? true : false;
 
 		if ( ! struct_loaded )
 		{
@@ -3237,7 +3237,7 @@ object *operate( object *r )
 		 }
 
 		done = 0;
-		cmd( "set res \"%s\"", simul_name );
+		cmd( "set res \"%s\"", strlen( simul_name ) > 0 ? simul_name : DEF_CONF_FILE );
 		cmd( "set path \"%s\"", path );
 		if ( strlen( path ) > 0 )
 			cmd( "cd \"$path\"" );
@@ -3246,39 +3246,43 @@ object *operate( object *r )
 		{
 			if ( actual_steps > 0 )
 			{
-				cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
-				cmd( "if { [ string equal -nocase [ file normalize $bah ] [ file normalize \"$path/$res.lsd\" ] ] && [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Overwrite existing configuration?\" -detail \"The original model configuration will be overwritten by the final state of the simulation run and, therefore, lost.\n\nPress 'OK' if you are sure or 'Cancel' to abort saving.\" ] eq \"cancel\" } { set bah \"\" }" );
+				cmd( "set fn [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
+				cmd( "if { [ string equal -nocase [ file normalize $fn ] [ file normalize \"$path/$res.lsd\" ] ] && [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Overwrite existing configuration?\" -detail \"The original model configuration will be overwritten by the final state of the simulation run and, therefore, lost.\n\nPress 'OK' if you are sure or 'Cancel' to abort saving.\" ] eq \"cancel\" } { set fn \"\" }" );
 			}
 			else
-				cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
+				cmd( "set fn [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
 
-			cmd( "if { [ string length $bah ] > 0 } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .lsd $res ] - 1 } ]; if { $last > 0 } { set res [ string range $res 0 $last ] } } { set done 2 }" );
+			cmd( "if { [ string length $fn ] > 0 && ! [ fn_spaces \"$fn\" . ] } { \
+						set path [ file dirname $fn ]; \
+						set fn [ string map -nocase [ list [ file extension $fn ] \"\" ] [ file tail $fn ] ]; \
+					} else { \
+						set done 2 \
+					}" );
+
 			if ( done == 2 )
 				goto save_end;
 
-			lab1 = get_str( "res" );
-
+			lab1 = get_str( "fn" );
 			if ( strlen( lab1 ) == 0 )
 				break;
+
 			delete [ ] simul_name;
 			simul_name = new char[ strlen( lab1 ) + 1 ];
 			strcpy( simul_name, lab1 );
+
 			lab1 = get_str( "path" );
 			delete [ ] path;
 			path = new char[ strlen( lab1 ) + 1 ];
 			strcpy( path, lab1 );
+
 			delete [ ] struct_file;
+			struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 ];
+			sprintf( struct_file, "%s%s%s.lsd", path, strlen( path ) > 0 ? "/" : "", simul_name );
+
 			if ( strlen( lab1 ) > 0 )
-			{
 				cmd( "cd $path" );
-				struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 ];
-				sprintf( struct_file, "%s/%s.lsd", path, simul_name );
-			}
-			else
-			{
-				struct_file = new char[ strlen( simul_name ) + 6 ];
-				sprintf( struct_file, "%s.lsd", simul_name );
-			}
+
+			redrawStruc = true;		// structure redraw because of titlebar
 		}
 
 		if ( ! save_configuration( ) )
@@ -3950,7 +3954,7 @@ object *operate( object *r )
 		timeinfo = localtime( &rawtime );
 		strftime ( ftime, 80, "%Y%m%d-%H%M%S", timeinfo );
 
-		cmd( "set lab \"%s_%s\"", simul_name, ftime );
+		cmd( "set lab \"%s_%s\"", strlen( simul_name ) > 0 ? simul_name : "results", ftime );
 
 		// choose a name
 		cmd( "newtop .n \"Save Results\" { set choice 2 }" );
@@ -3994,7 +3998,7 @@ object *operate( object *r )
 
 		get_str( "lab", ch1, MAX_ELEM_LENGTH );
 
-		if ( saveConf )
+		if ( saveConf && strlen( simul_name ) > 0 )
 		{
 			if ( strlen( path ) == 0 )
 			{
@@ -4257,9 +4261,9 @@ object *operate( object *r )
 		Used to re-generate the equations used for the current configuration file
 		*/
 
-		if ( ! struct_loaded )
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to offload an equation file.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to offload an equation file.\"" );
 			break;
 		}
 
@@ -4295,9 +4299,9 @@ object *operate( object *r )
 	// Compare equation files
 	case 53:
 
-		if ( ! struct_loaded )
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to compare equation files.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to compare equation files.\"" );
 			break;
 		}
 
@@ -4326,9 +4330,9 @@ object *operate( object *r )
 	// Compare configuration files
 	case 82:
 
-		if ( ! struct_loaded )
+		if ( ! struct_loaded || strlen( simul_name ) == 0 || strlen( struct_file ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to compare configuration files.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to compare configuration files.\"" );
 			break;
 		}
 
@@ -4377,9 +4381,9 @@ object *operate( object *r )
 
 		table = ( choice == 57 ) ? true : false;
 
-		if ( ! struct_loaded )
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to create LaTex code.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to create LaTex code.\"" );
 			break;
 		}
 
@@ -4573,6 +4577,12 @@ object *operate( object *r )
 	// Create batch sensitivity analysis configuration
 	case 63:
 
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to create a sensitivity analysis configuration.\"" );
+			break;
+		}
+
 		if ( rsense != NULL )
 		{
 			if ( ! discard_change( false ) )	// unsaved configuration?
@@ -4637,6 +4647,12 @@ object *operate( object *r )
 
 	// Create Monte Carlo (MC) random sensitivity analysis sampling configuration (over user selected point values)
 	case 71:
+
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to create a sensitivity analysis configuration.\"" );
+			break;
+		}
 
 		if ( rsense != NULL )
 		{
@@ -4756,6 +4772,12 @@ object *operate( object *r )
 
 	// Create Near Orthogonal Latin Hypercube (NOLH) sensitivity analysis sampling configuration
 	case 72:
+
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to create a sensitivity analysis configuration.\"" );
+			break;
+		}
 
 		if ( rsense != NULL )
 		{
@@ -4897,6 +4919,12 @@ object *operate( object *r )
 	// Create Monte Carlo (MC) random sensitivity analysis sampling configuration (over selected range values)
 	case 80:
 
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to create a sensitivity analysis configuration.\"" );
+			break;
+		}
+
 		if ( rsense != NULL )
 		{
 			if ( ! discard_change( false ) )	// unsaved configuration?
@@ -5000,6 +5028,12 @@ object *operate( object *r )
 
 	// Create Elementary Effects (EE) sensitivity analysis sampling configuration (over selected range values)
 	case 81:
+
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to create a sensitivity analysis configuration.\"" );
+			break;
+		}
 
 		if ( rsense != NULL )
 		{
@@ -5135,9 +5169,9 @@ object *operate( object *r )
 	case 64:
 
 		// check a model is already loaded
-		if ( ! struct_loaded )
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load one before trying to load a sensitivity analysis configuration.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to load a sensitivity analysis configuration.\"" );
 			break;
 		}
 
@@ -5194,6 +5228,13 @@ object *operate( object *r )
 	// Save a sensitivity analysis configuration
 	case 65:
 
+		// check a model is already loaded
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to save a sensitivity analysis configuration.\"" );
+			break;
+		}
+
 		// check for existing sensitivity data loaded
 		if ( rsense == NULL )
 		{
@@ -5242,9 +5283,9 @@ object *operate( object *r )
 	// export saved elements details
 	case 91:
 
-		if ( ! struct_loaded )
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration to export\" -detail \"Please load or create a configuration before trying to export the details on the elements to save.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration to export\" -detail \"Please load or create and load a configuration before trying to export the details on the elements to save.\"" );
 			break;
 		}
 
@@ -5297,6 +5338,12 @@ object *operate( object *r )
 
 	// export sensitivity configuration as a .csv file
 	case 90:
+
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to save a sensitivity analysis configuration.\"" );
+			break;
+		}
 
 		// check for existing sensitivity data loaded
 		if ( rsense == NULL )
@@ -5455,7 +5502,7 @@ object *operate( object *r )
 		// get configuration files to use
 		if ( choice == 1 )							// use current configuration files
 		{
-			if ( strlen( path_sens ) == 0 || simul_name == NULL || strlen( simul_name ) == 0 )
+			if ( strlen( path_sens ) == 0 || strlen( simul_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid simulation folder or name\" -detail \"Please try again.\"" );
 				findexSens = 0;						// no sensitivity created
@@ -5850,9 +5897,9 @@ object *operate( object *r )
 	#endif
 
 		// check a model is already loaded
-		if ( ! struct_loaded )
+		if ( ! struct_loaded || strlen( simul_name ) == 0 || strlen( struct_file ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to start a parallel run.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to start a parallel run.\"" );
 			break;
 		}
 
@@ -6168,9 +6215,9 @@ object *operate( object *r )
 	// Load network
 	case 88:
 
-		if ( ! struct_loaded )
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to load a network structure file.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and load one before trying to load a network structure file.\"" );
 			break;
 		}
 
@@ -6287,9 +6334,9 @@ object *operate( object *r )
 	// Save network
 	case 89:
 
-		if ( ! struct_loaded )
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to save a network structure file.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to save a network structure file.\"" );
 			break;
 		}
 
@@ -7390,102 +7437,31 @@ bool load_prev_configuration( void )
 
 
 /****************************************************
-OPEN_CONFIGURATION
-Open a clean configuration, either the current or not
-****************************************************/
-bool open_configuration( object *&r, bool reload )
-{
-	const char *lab1, *lab2;
-
-	if ( ! reload )
-	{									// ask user the file to use, if not reloading
-		cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model file} {.lsd} } } ]" );
-		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .lsd $res ] - 1 } ]; set res [ string range $res 0 $last ]; set choice 0 } { set choice 2 }" );
-
-		if ( get_int( "choice" ) == 0 )
-		{
-			lab1 = get_str( "path" );
-			lab2 = get_str( "res" );
-			if ( lab1 == NULL || lab2 == NULL || strlen( lab2 ) == 0 )
-				return false;
-
-			delete [ ] path;
-			path = new char[ strlen( lab1 ) + 1 ];
-			strcpy( path, lab1 );
-
-			delete [ ] simul_name;
-			simul_name = new char[ strlen( lab2 ) + 1 ];
-			strcpy( simul_name, lab2 );
-
-			if ( strlen( path ) > 0 )
-				cmd( "cd $path" );
-
-			cmd( "set listfocus 1; set itemfocus 0" ); 	// point for first var in listbox
-			strcpy( lastObj, "" );					// disable last object for reload
-		}
-		else
-			if ( struct_loaded )
-				reload = true;				// try to reload if use cancel load
-			else
-				return false;
-	}
-
-	if ( reload )
-		save_pos( r );						// save current position when reloading
-
-	redrawRoot = redrawStruc = true;		// force browser/structure redraw
-
-	switch ( load_configuration( reload ) )		// try to load the configuration
-	{
-		case 1:									// file/path not found
-			if ( strlen( path ) > 0 )
-				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", simul_name, path );
-			else
-				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", simul_name  );
-			return false;
-
-		case 2:
-		case 3:
-			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected.\"" );
-			return false;
-
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:									// problem from MODELREPORT section
-		case 9:									// problem from DESCRIPTION section
-			reset_description( r );
-
-		case 10:								// problem from DOCUOBSERVE section
-		case 11:
-		case 12:								// problem from DOCUINITIAL section
-		case 13:
-			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected and if the loaded configuration is correct.\"" );
-	}
-
-	if ( reload )
-		currObj = r = restore_pos( root );		// restore pointed object and variable
-	else
-		currObj = r = root;						// new structure
-
-	iniShowOnce = false;						// show warning on # of columns in .ini
-	redrawRoot = redrawStruc = true;			// force browser/structure redraw
-
-	return true;
-}
-
-
-/****************************************************
 SAVE_POS
 Save user position in browser
 ****************************************************/
 void save_pos( object *r )
 {
+	if ( ! eval_bool( "[ winfo exists .l.s.c.son_name ]" ) )
+		return;										// browser not drawn yet
+
 	// save the current object & cursor position for quick reload
-	strcpyn( lastObj, r->label, MAX_ELEM_LENGTH );
-	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { set lastList 2 } { set lastList 1 }" );
-	cmd( "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ]; set lastFirst [ lindex [ .l.v.c.var_name yview ] 0 ] } { set lastItem [ .l.s.c.son_name curselection ]; set lastFirst [ lindex [ .l.s.c.son_name yview ] 0 ] }" );
+	cmd( "set lastObj %s", r->label );
+
+	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { \
+				set lastList 2 \
+			} else { \
+				set lastList 1 \
+			}" );
+
+	cmd( "if { $lastList == 1 } { \
+			set lastItem [ .l.v.c.var_name curselection ]; \
+			set lastFirst [ lindex [ .l.v.c.var_name yview ] 0 ] \
+		} else { \
+			set lastItem [ .l.s.c.son_name curselection ]; \
+			set lastFirst [ lindex [ .l.s.c.son_name yview ] 0 ] \
+		}" );
+
 	cmd( "if { $lastItem == \"\" } { set lastItem 0 }" );
 }
 
@@ -7498,9 +7474,9 @@ object *restore_pos( object *r )
 {
 	object *cur;
 
-	if ( r != NULL && strlen( lastObj ) > 0 )
+	if ( r != NULL && eval_bool( "$lastObj ne \"\"" ) )
 	{
-		cur = root->search( lastObj );
+		cur = root->search( get_str( "lastObj" ) );
 		if ( cur != NULL )
 		{
 			cmd( "if [ info exists lastList ] { set listfocus $lastList }" );
@@ -7714,12 +7690,19 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 		cmd( "set question \"All data generated and not saved will be lost!\nDo you want to continue?\"" );
 	else
 		if ( ! senseOnly && unsavedChange )
-			cmd( "set question \"Recent changes to configuration '%s' are not saved!\nDo you want to discard and continue?\"", simul_name );
+		{
+			if (  strlen( simul_name ) > 0 )
+				cmd( "set question \"Recent changes to configuration '%s' are not saved!\nDo you want to discard and continue?\"", simul_name );
+			else
+				cmd( "set question \"Recent changes to current configuration are not saved!\nDo you want to discard and continue?\"" );
+		}
 		else						// there is unsaved sense data
+		{
 			if ( checkSense )
 				cmd( "set question \"Recent changes to sensitivity data are not saved!\nDo you want to discard and continue?\"" );
 			else
 				goto end_true;		// checking sensitivity data is disabled
+		}
 
 	// must disable because of a bug in Tk when open dialog
 	if ( ! brCovered )
@@ -7745,6 +7728,7 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 
 	end_true:
 
+	save_pos( currObj );	// save browser position in structure
 	update_model_info( );	// save windows positions if appropriate
 
 	return true;

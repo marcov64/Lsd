@@ -24,7 +24,7 @@
 proc bgerror { message } {
 	global errorInfo
 
-	log_tcl_error $errorInfo $message
+	log_tcl_error 1 $errorInfo $message
 }
 
 

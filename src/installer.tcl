@@ -64,8 +64,9 @@ source "$RootLsd/$LsdSrc/file.tcl"
 source "$RootLsd/$LsdSrc/util.tcl"
 
 # register the Tcl error handler
-proc log_tcl_error { errorInfo message } {
+proc log_tcl_error { show errorInfo message } {
 	ttk::messageBox -parent "" -type ok -title Error -icon error -message "Internal error" -detail "Please try again.\nIf the error persists, please contact the LSD developers.\n\nDetails:\n$errorInfo\n$message\n\nExiting now."
+
 	exit 255
 }
 

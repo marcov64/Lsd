@@ -18,16 +18,6 @@
 #*************************************************************
 
 #************************************************
-# LSDEXIT
-# Remove existing LSD temporary files
-#************************************************
-proc LsdExit { } {
-	global RootLsd
-
-}
-
-
-#************************************************
 # CHECK_COMPONENTS
 # Checks if required external software components
 # are available and on the proper versions
@@ -247,16 +237,16 @@ proc fn_break { fn width } {
 		set out ""
 		set pos 0
 	}
-	
+
 	if { [ string first \\ $fn ] != -1 } {
 		set sep \\
 	} else {
 		set sep /
 	}
-	
+
 	foreach part [ split $fn "/\\" ] {
 		set len [ string length $part ]
-		
+
 		if { $len == 0 } {
 			continue
 		}

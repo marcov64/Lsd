@@ -75,7 +75,7 @@ void report( object *r )
 		return;
 	}
 
-	snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
+	snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", strlen( simul_name ) > 0 ? simul_name : "model" );
 
 	cmd( "set mrep %s", name_rep );
 	cmd( "set res [ file exists $mrep ]" );
@@ -102,7 +102,7 @@ void report( object *r )
 	init = true;
 	code = true;
 	extra = false;
-	cmd( "set reptit %s", simul_name );
+	cmd( "set reptit \"%s\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
 	cmd( "set lmenu 1" );
 	cmd( "set html2 1" );
 	cmd( "set tit2 \"Comments\"" );
@@ -1868,7 +1868,7 @@ void tex_report_head( FILE *f, bool table )
 
 	fprintf( f, "\\setlength{\\parindent}{0cm}\n\n" );
 
-	fprintf( f, "\\title{Model: \\lsd{%s}}\n", simul_name );
+	fprintf( f, "\\title{Model: \\lsd{%s}}\n", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
 	fprintf( f, "\\author{Automatically generated LSD report}\n" );
 	fprintf( f, "\\date{}\n\n" );
 

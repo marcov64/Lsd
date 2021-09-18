@@ -1875,13 +1875,13 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 
 	if ( strlen( dest_path ) > 0 )				// non-default folder?
 	{
-		doefname = new char[ strlen( dest_path ) + strlen( simul_name ) + strlen( doeName ) + 7 ];
-		sprintf( doefname, "%s/%s_%s.csv", dest_path, simul_name, doeName );
+		doefname = new char[ strlen( dest_path ) + strlen( simul_name ) + strlen( doeName ) + 10 ];
+		sprintf( doefname, "%s/%s_%s.csv", dest_path, strlen( simul_name ) > 0 ? simul_name : "doe", doeName );
 	}
 	else
 	{
-		doefname = new char[ strlen( simul_name ) + strlen( doeName ) + 6 ];
-		sprintf( doefname, "%s_%s.csv", simul_name, doeName );
+		doefname = new char[ strlen( simul_name ) + strlen( doeName ) + 9 ];
+		sprintf( doefname, "%s_%s.csv", strlen( simul_name ) > 0 ? simul_name : "doe", doeName );
 	}
 
 	if ( ( f = fopen( doefname, "w" ) ) == NULL )
@@ -1981,7 +1981,7 @@ void sensitivity_doe( int *findex, design *doe, const char *dest_path )
 
 	// if succeeded, explain user how to proceed
 	if ( ! stop )
-		sensitivity_created( dest_path, clean_file( simul_name ), inif );
+		sensitivity_created( dest_path, clean_file( strlen( simul_name ) > 0 ? simul_name : "doe" ), inif );
 	else
 		*findex = 0;							// don't consider for appending
 }

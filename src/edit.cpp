@@ -82,7 +82,7 @@ void set_obj_number( object *r )
 	level = lowest_level = 1;
 	max_depth = 0;							// start with all levels open
 
-	cmd( "newtop .inin \"%s%s - LSD Object Number Editor\" { set choice 1; set result -1 }", unsaved_change( ) ? "*" : " ", simul_name );
+	cmd( "newtop .inin \"%s%s - LSD Object Number Editor\" { set choice 1; set result -1 }", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .inin.obj" );
 	cmd( "set f .inin.obj" );

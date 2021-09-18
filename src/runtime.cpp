@@ -166,7 +166,7 @@ void add_rt_plot_tab( const char *w, int id_sim )
 			ttk::notebook::enableTraversal $rtptab; \
 			bind $w <F1> { LsdHelp runtime.html }; \
 			set rtptab_show 0 \
-		}", unsaved_change( ) ? "*" : " ", simul_name );
+		}", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
 
 	set_shortcuts_run( "$w" );
 

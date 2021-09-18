@@ -67,7 +67,7 @@ void edit_data( object *r, const char *lab )
 	first = r->search( lab );
 	cmd( "set cwidth 11" );
 
-	cmd( "newtop .inid \"%s%s - LSD Initial Values Editor\" { set choice 1 }", unsaved_change( ) ? "*" : " ", simul_name );
+	cmd( "newtop .inid \"%s%s - LSD Initial Values Editor\" { set choice 1 }", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .inid.t" );		// top frame to pack
 

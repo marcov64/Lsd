@@ -1524,7 +1524,7 @@ double object::write_file_net( const char *lab, const char dir[ ], const char ba
 		fprintf( pajekFile, "\n*Network %s_%d_%d\n", base_name, serial, tCur );	// name network
 	}
 	else
-		fprintf( pajekFile, "%% %s objects from LSD '%s' configuration\n", lab, simul_name );
+		fprintf( pajekFile, "%% %s objects from LSD '%s' configuration\n", lab, strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
 
 	for ( numNodes = 0; cur != NULL;
 		  numNodes++, cur = go_brother( cur ) );			// count number of nodes

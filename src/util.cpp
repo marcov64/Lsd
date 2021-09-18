@@ -129,7 +129,7 @@ void plog_backend( const char *cm, const char *tag, va_list arg )
 	if ( reqsz < 0 )
 	{
 #ifndef _NW_
-		log_tcl_error( "Invalid text message", "Cannot expand message '%s...'", cm );
+		log_tcl_error( true, "Invalid text message", "Cannot expand message '%s...'", cm );
 #else
 		fprintf( stderr, "\nCannot expand message '%s...'\n", cm );
 #endif
@@ -145,7 +145,7 @@ void plog_backend( const char *cm, const char *tag, va_list arg )
 		if ( reqsz < 0 || sz > reqsz )
 		{
 #ifndef _NW_
-			log_tcl_error( "Invalid text message", "Cannot expand message '%s...'", cm );
+			log_tcl_error( true, "Invalid text message", "Cannot expand message '%s...'", cm );
 #else
 			fprintf( stderr, "\nCannot expand message '%s...'\n", cm );
 #endif
@@ -1305,7 +1305,7 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, const c
 	}
 
 	// create the window with the lattice, roughly 600 pixels as maximum dimension
-	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" { destroytop .lat } \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
+	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" { destroytop .lat } \"\"", unsaved_change() ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME, nrow, ncol );
 
 	cmd( "ttk::canvas .lat.c -height %d -width %d -entry 0 -dark $darkTheme", ( unsigned int ) pixH, ( unsigned int ) pixW );
 
@@ -1337,7 +1337,7 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, const c
 				}; \
 				plog \"\nPlot saved: $a\n\" \
 			} \
-		}", simul_name, path, simul_name );
+		}", strlen( simul_name ) > 0 ? simul_name : "plot", path );
 
 	cmd( "set rows %d", rows );
 	cmd( "set columns %d", columns );

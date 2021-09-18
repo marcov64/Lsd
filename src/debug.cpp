@@ -92,7 +92,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 			}; \
 			newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; \
 			set newDeb true \
-		}", unsaved_change() ? "*" : " ", simul_name  );
+		}", unsaved_change() ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
 
 	// avoid redrawing the menu if it already exists and is configured
 	if ( ! exists_window( ".deb.m" ) || ! expr_eq( "[ .deb cget -menu ]", ".deb.m" ) )
