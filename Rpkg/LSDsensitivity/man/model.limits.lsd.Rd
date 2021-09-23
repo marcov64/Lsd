@@ -9,7 +9,7 @@ This function identifies the maximum and minimum meta-model response values when
 \usage{
 model.limits.lsd( data, model, sa = NULL, factor1 = 1, factor2 = 2, factor3 = 3,
                   pop.size = 1000, max.generations = 30, wait.generations = 10,
-                  precision = 1e-05 )
+                  precision = 1e-05, nnodes = 1 )
 }
 \arguments{
   \item{data}{
@@ -41,6 +41,9 @@ integer: if there is no improvement in the objective function after this number 
 }
   \item{precision}{
 numeric: the tolerance level used by \code{\link[rgenoud]{genoud}}. Numbers within \code{precision} are considered to be equal. The default is 1e-5.
+}
+  \item{nnodes}{
+integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, \code{nnodes = 1}, means single thread processing (no parallel threads). If equal to zero, creates up to one node per CPU (physical) core. Only \code{Fork} clusters can be used, because \code{PSOCK} clusters are not working now, so this option is not available in Windows. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
 }
 }
 \details{

@@ -522,7 +522,8 @@ response.surface.lsd <- function( data, model, sa, gridSz = 25, defPos = 2,
 model.optim.lsd <- function( model, data = NULL, lower.domain = NULL,
                              upper.domain = NULL, starting.values = NULL,
                              minimize = TRUE, pop.size = 1000, max.generations = 30,
-                             wait.generations = 10, precision = 1e-5 ) {
+                             wait.generations = 10, precision = 1e-5,
+                             nnodes = 1 ) {
 
   if( ! is.null( data ) && class( data ) == "lsd-doe" ) {
 	if( is.null( lower.domain ) )
@@ -570,12 +571,21 @@ model.optim.lsd <- function( model, data = NULL, lower.domain = NULL,
   }
 
   # enable multiprocessing (not working in Windows)
-  if( Sys.info( )[[ "sysname" ]] == "Linux" ) {
-    cluster <- parallel::makeForkCluster( parallel::detectCores( ) / 2 )
-    parallel::setDefaultCluster( cluster )
+  if( nnodes == 0 )
+    nnodes <- parallel::detectCores( ) / 2
+
+  if( nnodes > 1 ) {
+    if( .Platform$OS.type == "unix" ) {
+      cluster <- parallel::makeForkCluster( min( nnodes,
+                                                 parallel::detectCores( ) ) )
+      parallel::setDefaultCluster( cluster )
+    } else {
+      #cluster <- parallel::makePSOCKcluster( min( nnodes,
+      #                                            parallel::detectCores( ) ) )
+      #parallel::setDefaultCluster( cluster )
+      cluster <- FALSE
+    }
   } else {
-    #cluster <- parallel::makePSOCKcluster( parallel::detectCores( ) / 2 )
-    #parallel::setDefaultCluster( cluster )
     cluster <- FALSE
   }
 
@@ -594,7 +604,8 @@ model.optim.lsd <- function( model, data = NULL, lower.domain = NULL,
                 silent = TRUE )
 
   # release multiprocessing cluster
-  try( parallel::stopCluster( cluster ), silent = TRUE )
+  if( cluster != FALSE )
+    try( parallel::stopCluster( cluster ), silent = TRUE )
 
   if( class( xStar ) == "try-error" ) return( t( rep( NA, length( lower.domain ) ) ) )
 
@@ -620,7 +631,8 @@ model.optim.lsd <- function( model, data = NULL, lower.domain = NULL,
 model.limits.lsd <- function( data, model, sa = NULL,
                               factor1 = 1, factor2 = 2, factor3 = 3,
                               pop.size = 1000, max.generations = 30,
-                              wait.generations = 10, precision = 1e-5  ) {
+                              wait.generations = 10, precision = 1e-5,
+                              nnodes = 1 ) {
 
   if( ! is.null( sa ) && ( class( sa ) == "kriging-sa" || class( sa ) == "polynomial-sa" ) ) {
     factor1 <- sa$topEffect[ 1 ]
@@ -643,7 +655,8 @@ model.limits.lsd <- function( data, model, sa = NULL,
                                     starting.values = data$facDef,
                                     minimize = TRUE, pop.size = pop.size,
                                     max.generations = max.generations,
-                                    wait.generations = wait.generations )
+                                    wait.generations = wait.generations,
+                                    nnodes = nnodes )
     if( ! is.na( min1[[ j ]][ 1 ] ) )
       minResp[ j ] <- model.pred.lsd( min1[[ j ]], model )$mean
     else
@@ -654,7 +667,8 @@ model.limits.lsd <- function( data, model, sa = NULL,
                                     starting.values = data$facDef,
                                     minimize = FALSE, pop.size = pop.size,
                                     max.generations = max.generations,
-                                    wait.generations = wait.generations )
+                                    wait.generations = wait.generations,
+                                    nnodes = nnodes )
     if( ! is.na( max1[[ j ]][ 1 ] ) )
       maxResp[ j ] <- model.pred.lsd( max1[[ j ]], model )$mean
     else
@@ -675,7 +689,8 @@ model.limits.lsd <- function( data, model, sa = NULL,
                            starting.values = data$facDef,
                            minimize = TRUE, pop.size = pop.size,
                            max.generations = max.generations,
-                           wait.generations = wait.generations )
+                           wait.generations = wait.generations,
+                           nnodes = nnodes )
   if( ! is.na( min2[ 1 ] ) )
     min2Resp <- model.pred.lsd( min2, model )$mean
   else
@@ -685,7 +700,8 @@ model.limits.lsd <- function( data, model, sa = NULL,
                            starting.values = data$facDef,
                            minimize = FALSE, pop.size = pop.size,
                            max.generations = max.generations,
-                           wait.generations = wait.generations )
+                           wait.generations = wait.generations,
+                           nnodes = nnodes )
   if( ! is.na( max2[ 1 ] ) )
     max2Resp <- model.pred.lsd( max2, model )$mean
   else
