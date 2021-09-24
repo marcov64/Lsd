@@ -653,8 +653,8 @@ int load_configuration( bool reload, bool quick )
 	}
 
 	max_step = 100;
-	when_debug = 0;
-	parallel_disable = 0;
+	when_debug = stack_info = prof_min_msecs = 0;
+	prof_obs_only = prof_aggr_time = parallel_disable = 0;
 	fscanf( f, "%999s", msg );					// should be MAX_STEP
 	if ( strcmp( msg, "MAX_STEP" ) )
 	{
@@ -662,15 +662,15 @@ int load_configuration( bool reload, bool quick )
 		goto endLoad;
 	}
 
-	if ( fgets( msg, MAX_LINE_SIZE, f ) == NULL )// should be 1 or 3 values
+	if ( fgets( msg, MAX_LINE_SIZE, f ) == NULL )// should be 1 to 7 values
 	{
 		load = 6;
 		goto endLoad;
 	}
 
-	i = sscanf( msg, "%d %d %d", & max_step, & when_debug, & parallel_disable );
+	i = sscanf( msg, "%d %d %d %d %d %d %d", & max_step, & when_debug, & stack_info, & prof_min_msecs, & prof_obs_only, & prof_aggr_time, & parallel_disable );
 
-	if ( i < 1 || max_step <= 0 || when_debug < 0 || parallel_disable < 0 || parallel_disable > 1 )
+	if ( i < 1 || max_step <= 0 || when_debug < 0 || stack_info < 0 || prof_min_msecs < 0 || prof_obs_only < 0 || prof_obs_only > 1 || prof_aggr_time < 0 || prof_aggr_time > 1 || parallel_disable < 0 || parallel_disable > 1 )
 	{
 		load = 6;
 		goto endLoad;
@@ -1005,8 +1005,8 @@ bool save_configuration( int findex, const char *dest_path )
 
 	fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d", sim_num, seed + delta, max_step );
 
-	if ( when_debug > 0 || parallel_disable != 0 )
-		fprintf( f, " %d %d", when_debug, parallel_disable == 0 ? 0 : 1 );
+	if ( when_debug > 0 || stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time || parallel_disable )
+		fprintf( f, " %d %d %d %d %d %d", when_debug, stack_info, prof_min_msecs, prof_obs_only ? 1 : 0, prof_aggr_time ? 1 : 0, parallel_disable ? 1 : 0 );
 
 	fprintf( f, "\nEQUATION %s\nMODELREPORT %s\n", equation_name, name_rep );
 

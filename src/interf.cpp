@@ -3370,7 +3370,8 @@ object *operate( object *r )
 		temp[ 5 ] = stack_info;
 		temp[ 6 ] = prof_min_msecs;
 		temp[ 7 ] = prof_obs_only;
-		temp[ 8 ] = parallel_disable;
+		temp[ 8 ] = prof_aggr_time;
+		temp[ 9 ] = parallel_disable;
 
 		Tcl_LinkVar( inter, "sim_num", ( char * ) & sim_num, TCL_LINK_INT );
 		Tcl_LinkVar( inter, "seed", ( char * ) & seed, TCL_LINK_INT );
@@ -3477,11 +3478,12 @@ object *operate( object *r )
 			stack_info = temp[ 5 ];
 			prof_min_msecs = temp[ 6 ];
 			prof_obs_only = temp[ 7 ];
-			parallel_disable = temp[ 8 ];
+			prof_aggr_time = temp[ 8 ];
+			parallel_disable = temp[ 9 ];
 		}
 		else
 			// signal unsaved change if anything to be saved
-			if ( temp[ 1 ] != sim_num || ( unsigned ) temp[ 2 ] != seed || temp[ 3 ] != max_step || temp[ 4 ] != when_debug || temp[ 8 ] != parallel_disable )
+			if ( temp[ 1 ] != sim_num || ( unsigned ) temp[ 2 ] != seed || temp[ 3 ] != max_step || temp[ 4 ] != when_debug || temp[ 5 ] != stack_info || temp[ 6 ] != prof_min_msecs || temp[ 7 ] != prof_obs_only || temp[ 8 ] != prof_aggr_time || temp[ 9 ] != parallel_disable )
 				unsaved_change( true );
 
 		Tcl_UnlinkVar( inter, "sim_num" );
