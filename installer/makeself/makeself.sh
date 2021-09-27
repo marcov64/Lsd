@@ -8,7 +8,7 @@
 # a small Shell script stub that uncompresses the archive to a temporary
 # directory and then executes a given script from withing that directory.
 #
-# Makeself home page: http://makeself.io/
+# Makeself home page: https://makeself.io/
 #
 # Version 2.0 is a rewrite of version 1.0 to make the code easier to read and maintain.
 #
@@ -71,6 +71,7 @@
 # - 2.4.2 : Add support for threads for several compressors. (M. Limber)
 #           Added zstd support.
 # - 2.4.3 : Make explicit POSIX tar archives for increased compatibility.
+# - 2.4.5 : Added --tar-format to override ustar tar archive format
 #
 # (C) 1998-2021 by Stephane Peter <megastep@megastep.org>
 #
@@ -79,7 +80,7 @@
 # Self-extracting archives created with this script are explictly NOT released under the term of the GPL
 #
 
-MS_VERSION=2.4.3
+MS_VERSION=2.4.5
 MS_COMMAND="$0"
 unset CDPATH
 
@@ -146,6 +147,7 @@ MS_Usage()
     echo "    --nooverwrite      : Do not extract the archive if the specified target directory exists"
     echo "    --current          : Files will be extracted to the current directory"
     echo "                         Both --current and --target imply --notemp"
+    echo "    --tar-format opt   : Specify a tar archive format (default is ustar)"
     echo "    --tar-extra opt    : Append more options to the tar command line"
     echo "    --untar-extra opt  : Append more options to the during the extraction of the tar archive"
     echo "    --nomd5            : Don't calculate an MD5 for archive"
@@ -158,6 +160,7 @@ MS_Usage()
     echo "    --nox11            : Disable automatic spawn of a xterm"
     echo "    --nowait           : Do not wait for user input after executing embedded"
     echo "                         program from an xterm"
+    echo "    --sign passphrase  : Signature private key to sign the package with"
     echo "    --lsm file         : LSM file describing the package"
     echo "    --license file     : Append a license file"
     echo "    --help-header file : Add a header to the archive's --help output"
@@ -201,16 +204,20 @@ NOPROGRESS=n
 COPY=none
 NEED_ROOT=n
 TAR_ARGS=rvf
+TAR_FORMAT=ustar
 TAR_EXTRA=""
 GPG_EXTRA=""
 DU_ARGS=-ks
 HEADER=`dirname "$0"`/makeself-header.sh
+SIGNATURE=""
 TARGETDIR=""
 NOOVERWRITE=n
 DATE=`LC_ALL=C date`
 EXPORT_CONF=n
 SHA256=n
 OWNERSHIP=n
+SIGN=n
+GPG_PASSPHRASE=""
 
 # LSM file stuff
 LSM_CMD="echo No LSM. >> \"\$archname\""
@@ -272,7 +279,7 @@ do
 	;;
     --gpg-extra)
 	GPG_EXTRA="$2"
-	if ! shift 2; then MS_Usage; exit 1; fi
+    shift 2 || { MS_Usage; exit 1; }
 	;;
     --ssl-encrypt)
 	ENCRYPT=openssl
@@ -280,11 +287,11 @@ do
 	;;
     --ssl-passwd)
 	PASSWD=$2
-	if ! shift 2; then MS_Usage; exit 1; fi
+    shift 2 || { MS_Usage; exit 1; }
 	;;
     --ssl-pass-src)
 	PASSWD_SRC=$2
-	if ! shift 2; then MS_Usage; exit 1; fi
+    shift 2 || { MS_Usage; exit 1; }
 	;;
     --ssl-no-md)
 	OPENSSL_NO_MD=y
@@ -296,11 +303,11 @@ do
 	;;
     --complevel)
 	COMPRESS_LEVEL="$2"
-	if ! shift 2; then MS_Usage; exit 1; fi
+    shift 2 || { MS_Usage; exit 1; }
 	;;
     --threads)
 	THREADS="$2"
-	if ! shift 2; then MS_Usage; exit 1; fi
+    shift 2 || { MS_Usage; exit 1; }
 	;;
     --nochown)
 	OWNERSHIP=n
@@ -323,19 +330,28 @@ do
 	KEEP=y
 	shift
 	;;
+    --tar-format)
+	    TAR_FORMAT="$2"
+        shift 2 || { MS_Usage; exit 1; }
+    ;;
     --tar-extra)
-	TAR_EXTRA="$2"
-        if ! shift 2; then MS_Usage; exit 1; fi
-        ;;
+	    TAR_EXTRA="$2"
+        shift 2 || { MS_Usage; exit 1; }
+    ;;
     --untar-extra)
         UNTAR_EXTRA="$2"
-        if ! shift 2; then MS_Usage; exit 1; fi
+        shift 2 || { MS_Usage; exit 1; }
         ;;
     --target)
-	TARGETDIR="$2"
-	KEEP=y
-        if ! shift 2; then MS_Usage; exit 1; fi
-	;;
+	  TARGETDIR="$2"
+	  KEEP=y
+    shift 2 || { MS_Usage; exit 1; }
+ 	  ;;
+    --sign)
+    SIGN=y
+    GPG_PASSPHRASE="$2"
+    shift 2 || { MS_Usage; exit 1; }
+    ;;
     --nooverwrite)
         NOOVERWRITE=y
 	shift
@@ -346,16 +362,16 @@ do
 	;;
     --header)
 	HEADER="$2"
-        if ! shift 2; then MS_Usage; exit 1; fi
+    shift 2 || { MS_Usage; exit 1; }
 	;;
     --cleanup)
     CLEANUP_SCRIPT="$2"
-        if ! shift 2; then MS_Usage; exit 1; fi
+    shift 2 || { MS_Usage; exit 1; }
     ;;
     --license)
         # We need to escape all characters having a special meaning in double quotes
         LICENSE=$(sed 's/\\/\\\\/g; s/"/\\\"/g; s/`/\\\`/g; s/\$/\\\$/g' "$2")
-        if ! shift 2; then MS_Usage; exit 1; fi
+        shift 2 || { MS_Usage; exit 1; }
 	;;
     --follow)
 	TAR_ARGS=rvhf
@@ -392,15 +408,15 @@ do
 	;;
     --lsm)
 	LSM_CMD="cat \"$2\" >> \"\$archname\""
-    if ! shift 2; then MS_Usage; exit 1; fi
+    shift 2 || { MS_Usage; exit 1; }
 	;;
     --packaging-date)
 	DATE="$2"
-	if ! shift 2; then MS_Usage; exit 1; fi
+    shift 2 || { MS_Usage; exit 1; }
         ;;
     --help-header)
-	HELPHEADER=`sed -e "s/'/'\\\\''/g" $2`
-    if ! shift 2; then MS_Usage; exit 1; fi
+	HELPHEADER=`sed -e "s/'/'\\\\\''/g" $2`
+    shift 2 || { MS_Usage; exit 1; }
 	[ -n "$HELPHEADER" ] && HELPHEADER="$HELPHEADER
 "
     ;;
@@ -512,6 +528,9 @@ pigz)
     ;;
 zstd)
     GZIP_CMD="zstd -$COMPRESS_LEVEL"
+    if test $THREADS -ne $DEFAULT_THREADS; then # Leave as the default if threads not indicated
+        GZIP_CMD="$GZIP_CMD --threads=$THREADS"
+    fi
     GUNZIP_CMD="zstd -cd"
     ;;
 pbzip2)
@@ -630,6 +649,10 @@ if test "$QUIET" = "n"; then
    echo "Adding files to archive named \"$archname\"..."
 fi
 
+# See if we have GNU tar
+TAR=`exec <&- 2>&-; which gtar || command -v gtar || type gtar`
+test -x "$TAR" || TAR=tar
+
 tmparch="${TMPDIR:-/tmp}/mkself$$.tar"
 (
     if test "$APPEND" = "y"; then
@@ -655,7 +678,7 @@ tmparch="${TMPDIR:-/tmp}/mkself$$.tar"
         \) -print \
         | LC_ALL=C sort \
         | sed 's/./\\&/g' \
-        | xargs tar $TAR_EXTRA --posix -$TAR_ARGS "$tmparch"
+        | xargs $TAR $TAR_EXTRA --format $TAR_FORMAT -$TAR_ARGS "$tmparch"
 ) || {
     echo "ERROR: failed to create temporary archive: $tmparch"
     rm -f "$tmparch" "$tmpfile"
@@ -739,6 +762,17 @@ else
 		fi
 	fi
 fi
+if test "$SIGN" = y; then
+    GPG_PATH=`exec <&- 2>&-; which gpg || command -v gpg || type gpg`
+    if test -x "$GPG_PATH"; then
+        SIGNATURE=`$GPG_PATH --pinentry-mode=loopback --batch --yes --passphrase "$GPG_PASSPHRASE" --output - --detach-sig $tmpfile | base64 | tr -d \\\\n`
+        if test "$QUIET" = "n"; then
+            echo "Signature: $SIGNATURE"
+        fi
+    else
+        echo "Missing gpg command" >&2
+    fi
+fi
 
 totalsize=0
 for size in $fsize;
@@ -754,6 +788,7 @@ if test "$APPEND" = y; then
     CRCsum="$crcsum"
     MD5sum="$md5sum"
     SHAsum="$shasum"
+    Signature="$SIGNATURE"
     # Generate the header
     . "$HEADER"
     # Append the new data
@@ -769,6 +804,7 @@ else
     CRCsum="$crcsum"
     MD5sum="$md5sum"
     SHAsum="$shasum"
+    Signature="$SIGNATURE"
 
     # Generate the header
     . "$HEADER"

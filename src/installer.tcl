@@ -1,6 +1,6 @@
 #*************************************************************
 #
-#	LSD 8.0 - May 2021
+#	LSD 8.0 - September 2021
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -26,7 +26,7 @@ wm withdraw .
 
 set LsdDir LSD
 set LsdSrc src
-set winGnuplot "gp541-win64-mingw.exe"
+set winGnuplot "gp542-win64-mingw.exe"
 set winRoot "C:/"
 
 set linuxPmPkg(apt)	[ list	build-essential 	make	gdb		gnuplot		xterm	multitail	zlib1g-dev		tcl-dev			tk-dev			]
