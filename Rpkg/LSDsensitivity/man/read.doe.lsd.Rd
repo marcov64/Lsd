@@ -69,7 +69,7 @@ logical: if TRUE then create a simpler data array, pooling together all non-NA M
 logical: if TRUE NA values are stripped before the computation proceeds.
 }
   \item{rm.temp}{
-logical: if TRUE then remove temporary speed up files. If FALSE (default), do not remove temporary speed up files, allowing fast execution of subsequent call to this function. Please note that the user \emph{must} remove temporary files (extension \code{.Rdata}) manually whenever LSD data files are updated.
+logical: if TRUE (default) then remove response and temporary speed up filess. If FALSE, do not remove response and temporary speed up files, allowing fast execution of subsequent call to this function. Please note that when set to FALSE, the user \emph{must} temporary files (extension \code{.Rdata}) manually whenever LSD data files are updated, so they are re-read. This can be done by simply turning \code{rm.temp} to TRUE once.
 }
   \item{rm.outl}{
 logical: if TRUE, remove outliers from data set. Default is FALSE, no outliers removal.

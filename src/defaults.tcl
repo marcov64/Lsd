@@ -59,6 +59,12 @@ set ttipcolorL	LightYellow	; # color of tooltip background (light mode)
 set ttipcolorD	SteelBlue4	; # color of tooltip background (dark mode)
 
 # OS specific minimum window sizes (horizontal & vertical) (must be even numbers)
+set hsizeLminMac		800	; # LMM window
+set vsizeLminMac		600
+set hsizeLminLinux		800
+set vsizeLminLinux		600
+set hsizeLminWindows	800
+set vsizeLminWindows	600
 set hsizeBminMac		520	; # browser window
 set vsizeBminMac		600
 set hsizeBminLinux		460
@@ -68,7 +74,7 @@ set vsizeBminWindows	600
 set hsizeGminMac		670	; # log window
 set vsizeGminMac		360
 set hsizeGminLinux		670
-set vsizeGminLinux		400
+set vsizeGminLinux		430
 set hsizeGminWindows	620
 set vsizeGminWindows	360
 set hsizeAminMac		860	; # analysis of results window
@@ -93,8 +99,6 @@ set vsizeDminWindows	400
 # main windows size (must be even numbers)
 set hsizeL		800	; # LMM horizontal size in pixels
 set vsizeL		600	; # LMM vertical size in pixels
-set hsizeLmin	800	; # LMM minimum horizontal size in pixels
-set vsizeLmin	600	; # LMM minimum vertical size in pixels
 set hsizeM 		600	; # model structure horizontal size in pixels
 set vsizeM		360	; # model structure vertical size in pixels
 set hsizeNmin	300	; # objects numbers editor minimum horizontal size in pixels

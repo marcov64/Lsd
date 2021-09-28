@@ -72,6 +72,8 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultFontSize $fontSizeMac
 	set gnuplotExe $gnuplotMac
 	set deltaSize $deltaSizeMac
+	set hsizeLmin $hsizeLminMac
+	set vsizeLmin $vsizeLminMac
 	set hsizeBmin $hsizeBminMac
 	set vsizeBmin $vsizeBminMac
 	set hsizeAmin $hsizeAminMac
@@ -111,6 +113,8 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultFontSize $fontSizeLinux
 	set gnuplotExe $gnuplotLinux
 	set deltaSize $deltaSizeLinux
+	set hsizeLmin $hsizeLminLinux
+	set vsizeLmin $vsizeLminLinux
 	set hsizeBmin $hsizeBminLinux
 	set vsizeBmin $vsizeBminLinux
 	set hsizeAmin $hsizeAminLinux
@@ -154,6 +158,8 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultFontSize $fontSizeWindows
 	set gnuplotExe $gnuplotWindows
 	set deltaSize $deltaSizeWindows
+	set hsizeLmin $hsizeLminWindows
+	set vsizeLmin $vsizeLminWindows
 	set hsizeBmin $hsizeBminWindows
 	set vsizeBmin $vsizeBminWindows
 	set hsizeAmin $hsizeAminWindows

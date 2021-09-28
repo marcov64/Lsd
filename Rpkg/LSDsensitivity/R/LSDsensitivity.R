@@ -1257,8 +1257,9 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
     }
 
     # Save data list to disk
-    save( nExp, nVar, nSize, nInsts, newNameVar, poolData,
-          compress = TRUE, file = tempFile )
+    if( ! rm.temp )
+      try( save( nExp, nVar, nSize, nInsts, newNameVar, poolData,
+                 compress = TRUE, file = tempFile ), silent = TRUE )
   }
 
   # ---- Process data in each experiment (nSize points) ----
@@ -1318,20 +1319,32 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
   # Write table to the disk as CSV file for Excel
   tresp <- as.data.frame( cbind( respAvg, respVar ) )
   colnames( tresp ) <- c( "Mean", "Variance" )
-  respFile <- paste0( folder, "/", baseName, "_", iniExp, "_",
-                      iniExp + nExp - 1, "_", outVar, ".csv" )
-  utils::write.csv( tresp, respFile, row.names = FALSE )
+
+  if( ! rm.temp ) {
+    respFile <- paste0( folder, "/", baseName, "_", iniExp, "_",
+                        iniExp + nExp - 1, "_", outVar, ".csv" )
+
+    tryCatch( suppressWarnings( utils::write.csv( tresp,
+                                                  respFile,
+                                                  row.names = FALSE ) ),
+              error = function( e )
+                stop( "Cannot write DoE response file to disk (read-only?)" ) )
+
+    if( ! quietly )
+      cat( "DoE response file saved:", respFile, "\n" )
+  }
 
   if( ! quietly ) {
-    cat( "DoE response file saved:", respFile, "\n" )
     cat( "Doe points =", k, "\n" )
     cat( "Total observations =", tobs, "\n" )
     cat( "Discarded observations =", tdiscards, "\n\n" )
   }
 
-  rm( poolData, resp, tresp )
-  if( rm.temp )
+  rm( poolData, resp )
+  if( rm.temp && file.exists( tempFile ) )
     unlink( tempFile )
+
+  return( tresp )
 }
 
 
@@ -1347,7 +1360,7 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
 
   # ---- Process LSD result files ----
 
-  # Get available DoE and response file names
+  # get available DoE and response file names
   does.found <- files.doe( folder, baseName )
   files <- does.found$files
   folder <- does.found$path
@@ -1380,48 +1393,67 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
     }
   }
 
-  # If response files don't exist, try to create them
+  # prevent recreation of existing files in read-only paths (like CRAN)
+  if( rm.temp && file.exists( respFile ) &&
+      ( does == 1 || file.exists( valRespFile ) ) ) {
+    res <- tryCatch( suppressWarnings( write( 0, paste0( folder,
+                                                         "/data.tmp" ) ) ),
+                     error = function( e ) e )
+    if( inherits( res, "error" ) )
+      rm.temp <- FALSE
+    else
+      unlink( paste0( folder, "/data.tmp" ) )
+  }
+
+  # read response files, if they don't exist, try to create them
   if( rm.temp || ! file.exists( respFile ) ) {
-    write.response( folder, baseName, outVar = outVar,
-                    iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
-                    iniExp = size.doe( doeFile )[ 1 ], na.rm = na.rm,
-                    nExp = size.doe( doeFile )[ 2 ], addVars = addVars,
-                    pool = pool, eval.vars = eval.vars, eval.run = eval.run,
-                    saveVars = saveVars, nnodes = nnodes, quietly = quietly )
-  } else
+    resp <- write.response( folder, baseName, outVar = outVar,
+                            iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
+                            iniExp = size.doe( doeFile )[ 1 ], na.rm = na.rm,
+                            nExp = size.doe( doeFile )[ 2 ], addVars = addVars,
+                            pool = pool, eval.vars = eval.vars,
+                            eval.run = eval.run, saveVars = saveVars,
+                            nnodes = nnodes, quietly = quietly )
+  } else {
+    resp <- utils::read.csv( respFile )
     if( ! quietly )
       cat( paste0( "Using existing response file (", respFile, ")...\n\n" ) )
+  }
 
   if( does > 1 && ( rm.temp || ! file.exists( valRespFile ) ) ) {
-    write.response( folder, baseName, outVar = outVar,
-                    iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
-                    iniExp = size.doe( validFile )[ 1 ],
-                    nExp = size.doe( validFile )[ 2 ], na.rm = na.rm,
-                    addVars = addVars, eval.vars = eval.vars,
-                    pool = pool, eval.run = eval.run, saveVars = saveVars,
-                    nnodes = nnodes, quietly = quietly )
-  } else
-    if( ! quietly && does > 1 )
-      cat( paste0( "Using existing validation response file (", valRespFile, ")...\n\n" ) )
+    valResp <- write.response( folder, baseName, outVar = outVar,
+                               iniDrop = iniDrop, nKeep = nKeep,
+                               rm.temp = rm.temp, na.rm = na.rm,
+                               iniExp = size.doe( validFile )[ 1 ],
+                               nExp = size.doe( validFile )[ 2 ],
+                               addVars = addVars, eval.vars = eval.vars,
+                               pool = pool, eval.run = eval.run,
+                               saveVars = saveVars, nnodes = nnodes,
+                               quietly = quietly )
+  } else {
+    if( does > 1 ) {
+      valResp <- utils::read.csv( valRespFile )
+      if( ! quietly )
+        cat( paste0( "Using existing validation response file (",
+                     valRespFile, ")...\n\n" ) )
+    } else
+      valResp <- NULL
+  }
 
-  # Read design of experiments definition & response
+  # read design of experiments and external validation experiments definitions
   doe <- utils::read.csv( doeFile )
-  resp <- utils::read.csv( respFile )
-
-  # Read external validation experiments definition & response
   if( does > 1 ) {
     valid <- utils::read.csv( validFile )
-    valResp <- utils::read.csv( valRespFile )
   } else
-    valid <- valResp <- NULL
+    valid <- NULL
 
-  # Read LSD default parameter configuration from base .lsd file
+  # read LSD default parameter configuration from base .lsd file
   if( is.null( confFile ) ) {
     config <- read.config( folder = folder, baseName = baseName )
   } else
     config <- read.config( fileName = confFile )
 
-  # Read LSD parameter limits file and join with default configuration
+  # read LSD parameter limits file and join with default configuration
   if( is.null( limFile ) ) {
     limits <- read.sens( folder = folder, baseName = baseName )
   } else
