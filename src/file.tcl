@@ -886,8 +886,10 @@ proc make_wait { } {
 	if { [ eof $makePipe ] } {
 		fileevent $makePipe readable ""
 
-		if [ file exists make.bat ] {
-			file delete make.bat
+		set t 0
+		while { t < 1000 && [ file exists make.bat ] && [ catch { file delete make.bat } ] } {
+			after 100
+			incr t 100
 		}
 
 		# check if the executable is newer than the compilation command, implying just warnings
@@ -898,8 +900,12 @@ proc make_wait { } {
 		};
 
 		if { [ file exists makemessage.txt ] && [ file size makemessage.txt ] == 0 } {
-			file delete makemessage.txt
 			set res 1
+			set t 0
+			while { t < 1000 && [ file exists makemessage.txt ] && [ catch { file delete makemessage.txt } ] } {
+				after 100
+				incr t 100
+			}
 		} elseif { $iniTime <= $exeTime } {
 			set res 1
 		} else {

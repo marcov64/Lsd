@@ -1393,18 +1393,6 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
     }
   }
 
-  # prevent recreation of existing files in read-only paths (like CRAN)
-  if( rm.temp && file.exists( respFile ) &&
-      ( does == 1 || file.exists( valRespFile ) ) ) {
-    res <- tryCatch( suppressWarnings( write( 0, paste0( folder,
-                                                         "/data.tmp" ) ) ),
-                     error = function( e ) e )
-    if( inherits( res, "error" ) )
-      rm.temp <- FALSE
-    else
-      unlink( paste0( folder, "/data.tmp" ) )
-  }
-
   # read response files, if they don't exist, try to create them
   if( rm.temp || ! file.exists( respFile ) ) {
     resp <- write.response( folder, baseName, outVar = outVar,
