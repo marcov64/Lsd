@@ -298,16 +298,8 @@ bool no_ptr_chk = true;
 #define RUN ( ( double ) cur_sim )
 #define LAST_RUN ( ( double ) sim_num )
 
-#define LOG( ... ) \
-{ \
-	if ( ! fast ) \
-		plog( __VA_ARGS__ ); \
-}
-#define PLOG( ... ) \
-{ \
-	if ( fast_mode < 2 ) \
-		plog( __VA_ARGS__ ); \
-}
+#define LOG( ... ) ( ! fast ? plog( __VA_ARGS__ ) : ( void ) NULL )
+#define PLOG( ... ) ( fast_mode < 2 ? plog( __VA_ARGS__ ) : ( void ) NULL )
 
 #define V( X ) ( p->cal( p, ( char * ) X, 0 ) )
 #define VL( X, Y ) ( p->cal( p, ( char * ) X, Y ) )
