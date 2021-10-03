@@ -13,30 +13,34 @@ Label Root
 				Son: CliE
 				Label CliE
 				{
-					Param: _IDcE
+					Param: __IDe
 
 				}
 
 				Son: Cli1
 				Label Cli1
 				{
-					Param: _IDc1
+					Param: __ID1
 
 				}
 
 				Son: Cli2
 				Label Cli2
 				{
-					Param: _IDc2
+					Param: __ID2
 
 				}
 
 				Param: _IDb
 				Param: _fD
+				Func: _cScores
 				Var: _BD
 				Var: _BadDeb
 				Var: _Bda
 				Var: _Bonds
+				Var: _CDeB
+				Var: _CD1b
+				Var: _CD2b
 				Var: _Cl
 				Var: _Depo
 				Var: _DivB
@@ -77,8 +81,6 @@ Label Root
 			Param: muD
 			Param: muDeb
 			Param: muRes
-			Param: phi1
-			Param: phi2
 			Param: piT
 			Param: rAdj
 			Param: rT
@@ -86,14 +88,17 @@ Label Root
 			Param: tauB
 			Param: thetaBonds
 			Func: banksMaps
+			Func: cScores
 			Func: pickBank
 			Var: BD
 			Var: BS
+			Var: BadDeb
 			Var: Bonds
 			Var: Cl
 			Var: Depo
 			Var: DepoG
 			Var: DivB
+			Var: ExRes
 			Var: Gbail
 			Var: Loans
 			Var: LoansCB
@@ -101,7 +106,6 @@ Label Root
 			Var: PiB
 			Var: Res
 			Var: TaxB
-			Var: cScores
 			Var: r
 			Var: rBonds
 			Var: rD
@@ -264,6 +268,7 @@ Label Root
 				Var: _emTauDE
 				Var: _fE
 				Var: _fKge
+				Var: _iE
 				Var: _innDE
 				Var: _innGE
 				Var: _muE
@@ -375,11 +380,11 @@ Label Root
 				Son: Cli
 				Label Cli
 				{
-					Param: _IDc
-					Param: _nCan
-					Param: _nOrd
-					Param: _tOrd
-					Param: _tSel
+					Param: __IDc
+					Param: __nCan
+					Param: __nOrd
+					Param: __tOrd
+					Param: __tSel
 
 				}
 
@@ -423,6 +428,7 @@ Label Root
 				Var: _c1
 				Var: _cTau
 				Var: _f1
+				Var: _i1
 				Var: _imi
 				Var: _inn
 				Var: _p1
@@ -501,28 +507,28 @@ Label Root
 				Son: Broch
 				Label Broch
 				{
-					Param: _IDs
+					Param: __IDs
 
 				}
 
 				Son: Vint
 				Label Vint
 				{
-					Param: _AeeVint
-					Param: _AefVint
-					Param: _AlpVint
-					Param: _IDvint
-					Param: _nVint
-					Param: _pVint
-					Param: _tVint
-					Param: _toUseVint
-					Var: _EmVint
-					Var: _EnVint
-					Var: _LdVint
-					Var: _Lvint
-					Var: _Qvint
-					Var: _RSvint
-					Var: _cVint
+					Param: __AeeVint
+					Param: __AefVint
+					Param: __AlpVint
+					Param: __IDvint
+					Param: __nVint
+					Param: __pVint
+					Param: __tVint
+					Param: __toUseVint
+					Var: __EmVint
+					Var: __EnVint
+					Var: __LdVint
+					Var: __Lvint
+					Var: __Qvint
+					Var: __RSvint
+					Var: __cVint
 
 				}
 
@@ -577,6 +583,7 @@ Label Root
 				Var: _dA2b
 				Var: _dNnom
 				Var: _f2
+				Var: _i2
 				Var: _l2
 				Var: _life2cycle
 				Var: _mu2
@@ -676,7 +683,6 @@ Label Root
 			{
 				Var: Aee
 				Var: Aef
-				Var: BadDeb
 				Var: BadDebAcc
 				Var: Bda
 				Var: Bfail
@@ -687,7 +693,6 @@ Label Root
 				Var: Creal
 				Var: DefGDP
 				Var: EmGDP
-				Var: ExRes
 				Var: GDI
 				Var: HHb
 				Var: HPb
@@ -723,6 +728,7 @@ Label Root
 				Var: exitEfail
 				Var: fGE
 				Var: fKge
+				Var: iE
 				Var: innDE
 				Var: innGE
 				Var: muEavg
@@ -762,6 +768,8 @@ Label Root
 				Var: dN
 				Var: exit1fail
 				Var: exit2fail
+				Var: i1
+				Var: i2
 				Var: mu2avg
 				Var: nBrochAvg
 
@@ -938,8 +946,6 @@ Param: muBonds 0 n + n n	1
 Param: muD 0 n + n n	1
 Param: muDeb 0 n + n n	0.5
 Param: muRes 0 n + n n	1
-Param: phi1 0 n + n n	0.1
-Param: phi2 0 n + n n	0.8
 Param: piT 0 n + n n	0
 Param: rAdj 0 n + n n	0.0025
 Param: rT 0 n + n n	0.025
@@ -947,14 +953,17 @@ Param: rhoBonds 0 n + n n	0
 Param: tauB 0 n + n n	0.5
 Param: thetaBonds 0 n + n n	12
 Func: banksMaps 0 n + n n
+Func: cScores 0 n + n n
 Func: pickBank 0 n + n n
 Var: BD 1 s + n n	0
 Var: BS 1 s + n n	0
+Var: BadDeb 0 s + n n
 Var: Bonds 1 s + n n	0
 Var: Cl 0 s + n n
 Var: Depo 1 s + n n	0
 Var: DepoG 1 s + n n	0
 Var: DivB 1 n + n n	0
+Var: ExRes 0 s + n n
 Var: Gbail 1 s + n n	0
 Var: Loans 0 s + n n
 Var: LoansCB 1 s + n n	0
@@ -962,7 +971,6 @@ Var: NWb 1 s + n n	0
 Var: PiB 0 s + n n
 Var: Res 1 s + n n	0
 Var: TaxB 1 n + n n	0
-Var: cScores 0 n + n n
 Var: r 1 s + n n	0
 Var: rBonds 1 s + n n	0
 Var: rD 0 s + n n
@@ -972,10 +980,14 @@ Var: rRes 0 s + n n
 Object: Bank C	1
 Param: _IDb 0 n + n n	0
 Param: _fD 0 n + n n	0
+Func: _cScores 0 n + n n
 Var: _BD 0 n + n n
 Var: _BadDeb 1 n + n n	0
 Var: _Bda 1 n + n n	0
 Var: _Bonds 1 n + n n	0
+Var: _CDeB 1 n + n n	0
+Var: _CD1b 1 n + n n	0
+Var: _CD2b 1 n + n n	0
 Var: _Cl 0 n + n n
 Var: _Depo 1 n + n n	0
 Var: _DivB 0 n + n n
@@ -994,13 +1006,13 @@ Var: _TaxB 0 n + n n
 Var: _fB 1 n + n n	0
 
 Object: CliE C	1
-Param: _IDcE 0 n + n n	0
+Param: __IDe 0 n + n n	0
 
 Object: Cli1 C	1
-Param: _IDc1 0 n + n n	0
+Param: __ID1 0 n + n n	0
 
 Object: Cli2 C	1
-Param: _IDc2 0 n + n n	0
+Param: __ID2 0 n + n n	0
 
 Object: Climate C	1
 Param: Ca0 0 n + n n	784.65
@@ -1191,6 +1203,7 @@ Var: _allocE 0 n + n n
 Var: _emTauDE 1 n + n n	0
 Var: _fE 7 n + n n	0	0	0	0	0	0	0
 Var: _fKge 1 n + n n	0
+Var: _iE 0 n + n n
 Var: _innDE 0 n + n n
 Var: _innGE 0 n + n n
 Var: _muE 1 n + n n	0
@@ -1336,17 +1349,18 @@ Var: _W1 1 n + n n	0
 Var: _c1 0 n + n n
 Var: _cTau 1 n + n n	0
 Var: _f1 1 n + n n	0
+Var: _i1 0 n + n n
 Var: _imi 0 n + n n
 Var: _inn 0 n + n n
 Var: _p1 1 n + n n	0
 Var: _qc1 1 n + n n	0
 
 Object: Cli C	1
-Param: _IDc 0 n + n n	0
-Param: _nCan 0 n + n n	0
-Param: _nOrd 0 n + n n	0
-Param: _tOrd 0 n + n n	0
-Param: _tSel 0 n + n n	0
+Param: __IDc 0 n + n n	0
+Param: __nCan 0 n + n n	0
+Param: __nOrd 0 n + n n	0
+Param: __tOrd 0 n + n n	0
+Param: __tSel 0 n + n n	0
 
 Object: Consumption C	1
 Param: Deb20ratio 0 n + n n	1
@@ -1480,6 +1494,7 @@ Var: _c2e 0 n + n n
 Var: _dA2b 1 n + n n	0
 Var: _dNnom 0 n + n n
 Var: _f2 2 n + n N	0	0
+Var: _i2 0 n + n n
 Var: _l2 1 n + n n	0
 Var: _life2cycle 0 n + n n
 Var: _mu2 1 n + n n	0
@@ -1489,24 +1504,24 @@ Var: _qc2 1 n + n n	0
 Var: _supplier 0 n + n n
 
 Object: Broch N	1
-Param: _IDs 0 n + n n	0
+Param: __IDs 0 n + n n	0
 
 Object: Vint C	1
-Param: _AeeVint 0 n + n n	0
-Param: _AefVint 0 n + n n	0
-Param: _AlpVint 0 n + n n	0
-Param: _IDvint 0 n + n n	0
-Param: _nVint 0 n + n n	0
-Param: _pVint 0 n + n n	0
-Param: _tVint 0 n + n n	0
-Param: _toUseVint 0 n + n n	0
-Var: _EmVint 0 n + n n
-Var: _EnVint 0 n + n n
-Var: _LdVint 0 n + n n
-Var: _Lvint 0 n + n n
-Var: _Qvint 0 n + n n
-Var: _RSvint 0 n + n n
-Var: _cVint 0 n + n n
+Param: __AeeVint 0 n + n n	0
+Param: __AefVint 0 n + n n	0
+Param: __AlpVint 0 n + n n	0
+Param: __IDvint 0 n + n n	0
+Param: __nVint 0 n + n n	0
+Param: __pVint 0 n + n n	0
+Param: __tVint 0 n + n n	0
+Param: __toUseVint 0 n + n n	0
+Var: __EmVint 0 n + n n
+Var: __EnVint 0 n + n n
+Var: __LdVint 0 n + n n
+Var: __Lvint 0 n + n n
+Var: __Qvint 0 n + n n
+Var: __RSvint 0 n + n n
+Var: __cVint 0 n + n n
 
 Object: Stats C	1
 Param: testCtIni 0 n + n n	1
@@ -1549,7 +1564,6 @@ Var: test2firm 0 n + n n
 Object: Mac C	1
 Var: Aee 0 s + n n
 Var: Aef 0 s + n n
-Var: BadDeb 0 s + n n
 Var: BadDebAcc 0 s + n n
 Var: Bda 0 s + n n
 Var: Bfail 0 s + n p
@@ -1560,7 +1574,6 @@ Var: CS 0 s + n n
 Var: Creal 0 s + n n
 Var: DefGDP 0 s + n n
 Var: EmGDP 0 s + n n
-Var: ExRes 0 s + n n
 Var: GDI 0 s + n n
 Var: HHb 0 s + n n
 Var: HPb 0 s + n n
@@ -1592,6 +1605,7 @@ Var: exitE 0 s + n n
 Var: exitEfail 0 s + n n
 Var: fGE 0 s + n n
 Var: fKge 0 s + n p
+Var: iE 0 s + n n
 Var: innDE 0 s + n n
 Var: innGE 0 s + n n
 Var: muEavg 0 s + n n
@@ -1627,6 +1641,8 @@ Var: age2avg 0 s + n n
 Var: dN 0 s + n n
 Var: exit1fail 0 s + n n
 Var: exit2fail 0 s + n n
+Var: i1 0 s + n n
+Var: i2 0 s + n n
 Var: mu2avg 0 s + n p
 Var: nBrochAvg 0 s + n n
 
@@ -2099,20 +2115,6 @@ _INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION
 
-Parameter_phi1
-Initial sectoral allocation of available credit to capital-good sector
-(0<phi1+phi2<1)
-_INIT_
-All 1 instances equal to 0.1.
-END_DESCRIPTION
-
-Parameter_phi2
-Initial sectoral allocation of available credit to consumption-good sector
-(0<phi1+phi2<1)
-_INIT_
-All 1 instances equal to 0.8.
-END_DESCRIPTION
-
 Parameter_piT
 Target inflation for central bank's Taylor rule
 (>0)
@@ -2160,6 +2162,10 @@ Updates the table of market share cumulative weights
 Used by firms when choosing a bank
 END_DESCRIPTION
 
+Function_cScores
+Adjust pecking order of firms according to creditworthiness ranking
+END_DESCRIPTION
+
 Function_pickBank
 Select a bank randomly with probability proportional to the desired market shares of banks
 END_DESCRIPTION
@@ -2172,6 +2178,11 @@ END_DESCRIPTION
 
 Variable_BS
 Sovereign bond supply from government
+END_DESCRIPTION
+
+Variable_BadDeb
+Bank losses from bad debt 
+(can be negative because of proceedings from healthy exiting firms)
 END_DESCRIPTION
 
 Variable_Bonds
@@ -2200,6 +2211,10 @@ Variable_DivB
 Total dividends paid by financial sector
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_ExRes
+Excess reserves (free cash) hold by financial sector
 END_DESCRIPTION
 
 Variable_Gbail
@@ -2238,10 +2253,6 @@ Variable_TaxB
 Total tax paid by financial sector
 _INIT_
 All 1 instances equal to 0.
-END_DESCRIPTION
-
-Variable_cScores
-Adjust pecking order of firms according to creditworthiness ranking
 END_DESCRIPTION
 
 Variable_r
@@ -2285,6 +2296,10 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Function__cScores
+Define the credit class for bank's clients
+END_DESCRIPTION
+
 Variable__BD
 Sovereign bonds demand from bank
 END_DESCRIPTION
@@ -2305,6 +2320,24 @@ Variable__Bonds
 Sovereign bonds stock hold by bank
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__CDeB
+Bank credit demand from energy sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable__CD1b
+Bank credit demand from capital-good sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable__CD2b
+Bank credit demand from consumption-good sector
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable__Cl
@@ -2391,7 +2424,7 @@ Client of bank in energy sector
 SHOOK: capital-good client (FirmE)
 END_DESCRIPTION
 
-Parameter__IDcE
+Parameter___IDe
 Capital-good client firm ID number
 _INIT_
 All 1 instances equal to 0.
@@ -2403,7 +2436,7 @@ Client of bank in capital-good sector
 SHOOK: capital-good client (Firm1)
 END_DESCRIPTION
 
-Parameter__IDc1
+Parameter___ID1
 Capital-good client firm ID number
 _INIT_
 All 1 instances equal to 0.
@@ -2415,7 +2448,7 @@ Client of bank in consumption-good sector
 SHOOK: consumption-good client (Firm2)
 END_DESCRIPTION
 
-Parameter__IDc2
+Parameter___ID2
 Consumer-good client firm ID number
 _INIT_
 All 10 instances equal to 0.
@@ -3464,6 +3497,10 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable__iE
+Interest paid by energy producer
+END_DESCRIPTION
+
 Variable__innDE
 Innovation success (1) or failure (0) for dirty energy innovation of energy producer
 END_DESCRIPTION
@@ -4227,6 +4264,10 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable__i1
+Interest paid by firm in capital-good sector
+END_DESCRIPTION
+
 Variable__imi
 Imitation success (1) of capital-good firm
 END_DESCRIPTION
@@ -4251,31 +4292,31 @@ Historical (previous period) client firm object
 SHOOK: customer's brochure list (Broch)
 END_DESCRIPTION
 
-Parameter__IDc
+Parameter___IDc
 ID number of client
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter__nCan
+Parameter___nCan
 Number of machine canceled from last order of client
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter__nOrd
+Parameter___nOrd
 Number of machines ordered by client
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter__tOrd
+Parameter___tOrd
 Last time of an order from client
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter__tSel
+Parameter___tSel
 Last time was selected by client
 _INIT_
 All 1 instances equal to 0.
@@ -4971,6 +5012,10 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable__i2
+Interest paid by firm in consumption-good sector
+END_DESCRIPTION
+
 Variable__l2
 Unfilled demand (real terms) of consumption-good firm
 _INIT_
@@ -5017,7 +5062,7 @@ Known machine supplier firm object
 SHOOK: supplier's customer list (Cli)
 END_DESCRIPTION
 
-Parameter__IDs
+Parameter___IDs
 ID number of supplier
 _INIT_
 All 1 instances equal to 0.
@@ -5029,82 +5074,82 @@ Machine vintage in consumption-good firm object
 SHOOK: previous vintage (Vint)
 END_DESCRIPTION
 
-Parameter__AeeVint
+Parameter___AeeVint
 Energy efficiency of vintage
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter__AefVint
+Parameter___AefVint
 Environmental friedliness of vintage
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter__AlpVint
+Parameter___AlpVint
 Notional labor productivity of vintage
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter__IDvint
+Parameter___IDvint
 ID number (TTTTSSSS format) of vintage
 (TTTT=time of introduction, SSSS=supplier ID)
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter__nVint
+Parameter___nVint
 Number of machines in vintage
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter__pVint
+Parameter___pVint
 Price of machines in vintage
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter__tVint
+Parameter___tVint
 Build time of vintage
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter__toUseVint
+Parameter___toUseVint
 Number of machines desired to use in vintage
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Variable__EmVint
+Variable___EmVint
 CO2 (carbon) emissions produced by vintage
 END_DESCRIPTION
 
-Variable__EnVint
+Variable___EnVint
 Effective energy demanded by vintage
 END_DESCRIPTION
 
-Variable__LdVint
+Variable___LdVint
 Labor required for full utilization of vintage
 END_DESCRIPTION
 
-Variable__Lvint
+Variable___Lvint
 Labor available for operation of vintage
 END_DESCRIPTION
 
-Variable__Qvint
+Variable___Qvint
 Output (real terms) with available workers of vintage
 END_DESCRIPTION
 
-Variable__RSvint
+Variable___RSvint
 Machines to scrap in vintage
 Positive: still in technical life
 Negative: out of technical life
 END_DESCRIPTION
 
-Variable__cVint
+Variable___cVint
 Planned (expected) unit production cost of vintage
 END_DESCRIPTION
 
@@ -5350,11 +5395,6 @@ Variable_Aef
 Overall environmental friendliness
 END_DESCRIPTION
 
-Variable_BadDeb
-Bank losses from bad debt
-(can be negative because of proceedings from healthy exiting firms)
-END_DESCRIPTION
-
 Variable_BadDebAcc
 Bank accumulated losses from bad debt
 END_DESCRIPTION
@@ -5393,10 +5433,6 @@ END_DESCRIPTION
 
 Variable_EmGDP
 CO2 emissions to GDP ratio
-END_DESCRIPTION
-
-Variable_ExRes
-Excess reserves (free cash) hold by financial sector
 END_DESCRIPTION
 
 Variable_GDI
@@ -5517,6 +5553,10 @@ END_DESCRIPTION
 
 Variable_fKge
 Share of green energy power plants in installed generation capacity
+END_DESCRIPTION
+
+Variable_iE
+Interest paid by energy sector
 END_DESCRIPTION
 
 Variable_innDE
@@ -5655,6 +5695,14 @@ Variable_exit2fail
 Rate of exiting bankrupt firms in consumption-good sector
 END_DESCRIPTION
 
+Variable_i1
+Interest paid by capital-good sector
+END_DESCRIPTION
+
+Variable_i2
+Interest paid by consumption-good sector
+END_DESCRIPTION
+
 Variable_mu2avg
 Weighted average mark-up of consumption-good sector
 END_DESCRIPTION
@@ -5728,14 +5776,11 @@ EQ_FILE
 
 /*======================== ADDITIONAL CODE TO INCLUDE ========================*/
 
-// define variables to use in equations
-#define EQ_USER_VARS dblVecT::iterator itd, itd1; \
-					 objVecT::iterator ito, ito1;// general purpose iterators
-
 // LSD and K+S macros and objects definition and support code
 #include <fun_head_fast.h>						// LSD definitions
 #include "fun_KS_class.h"						// K+S class/macro definitions
 #include "fun_KS_support.h"						// K+S support C++ functions
+
 
 /*============================ GENERAL EQUATIONS =============================*/
 
@@ -5777,7 +5822,7 @@ USE_SAVED;										// allow access to saved vars
 USE_ZERO_INSTANCE;								// allow zero-instance objects
 NO_SEARCH;										// don't perform variable search
 
-if ( cur_sim == 1 )								// first run only
+if ( RUN == 1 )									// first run only
 {
 #ifdef FASTMODE
 	if ( FASTMODE == 1 )						// set user selected log mode
@@ -5820,75 +5865,72 @@ EQUATION( "timeStep" )
 Execute one time-step of one country in the K+S model
 Ensure the high-level scheduling of the model equation by forcing the 
 computation of key variables in the correct order
-In principle, the sequence defined here is embedded in the equations, so
-this equation is likely unnecessary
+In principle, the sequence defined here is embedded in the equations, so this
+equation is supposedly unnecessary (but may produce slightly different results)
 */
-
-// sector 2 firms define market expectations, define new capital desired, and 
-// incorporate new and scrap old machines
-
-v[1] = VS( CONSECL0, "D2e" );					// expected demand for goods
-
-// define expected demand, desired and planned production and capital, labor 
-// demand, investment and credit required for sector 2 firms
-
-v[2] = VS( CONSECL0, "Id" );					// desired investment sector 2
-
-// sector 1 firms do R&D, set prices and send machine brochures, and sector 2  
-// firms choose suppliers
-
-v[3] = VS( CAPSECL0, "D1" );					// total demand for new machines
-
-// sector 1 define machine production, total unbounded labor demand and
-// required credit
-
-v[4] = VS( CAPSECL0, "Q1" );					// planned production sector 1
-
-// adjust labor demand, investment and production in all sectors according to 
-// the effective labor available to firms
-
-v[5] = VS( LABSUPL0, "L" );						// employed labor force
-
-// adjust investment, capital and number of employed machines in sector 2 
-// according to the finance and labor available and update productivity and 
-// cost structures
-
-v[6] = VS( CAPSECL0, "Q1e" );					// effective production sector 1
-v[7] = VS( CONSECL0, "Q2e" );					// effective production sector 2
-
-// sector 2 set prices, consumers choose suppliers and existing demand is
-// matched to available supply of goods, producing inventories or forced savings
-
-v[8] = VS( CONSECL0, "D2" );					// fulfilled demand in sector 2
-
-// firms determine profits, cash flows, taxes and net wealths, using credit
-// if possible and required
-
-v[9] = VS( CAPSECL0, "Tax1" );					// tax paid by sector 1
-v[10] = VS( CONSECL0, "Tax2" );					// tax paid by sector 2
-
-// government collects taxes and decide about expenditure, public deficit or
-// superavit form and its financed by public debt
-
-v[11] = V( "Def" );								// public total deficit
-
-// macro variables are computed by simple aggregation of micro-level data
-
-v[12] = V( "GDPnom" );							// nominal gross domestic product
-
-// entry and exit happens in both sectors, entries are not related to exits,
-// and banks adjust credit scores of firms and define the credit pecking order
-
-v[13] = V( "entryExit" );						// net entry of firms
-
-// banks compute bad debt, profits, credit available and
-
-v[14] = VS( FINSECL0, "NWb" );					// liquid assets of banks
 
 // central bank updates prime rate and the interest rate structure is adjusted
 // accordingly
+v[1] = VS( FINSECL0, "r" );					// prime interest rate
+v[2] = VS( FINSECL0, "rDeb" );					// interest rate on debt
+v[3] = VS( FINSECL0, "rBonds" );				// interest rate on bonds
 
-v[15] = VS( FINSECL0, "rDeb" );					// interest rate on debt
+// consumption-good firms define expected demand, planned production, 
+// and labor demand for sector
+v[4] = VS( CONSECL0, "D2e" );					// expected demand for goods
+v[5] = VS( CONSECL0, "Q2" );					// planned goods production
+v[6] = VS( CONSECL0, "L2d" );					// desired labor
+
+// capital-good firms do R&D, set prices, and search for new clients
+// and consumption-good firms define desired investment 
+v[7] = VS( CAPSECL0, "p1avg" );					// average machine prices
+v[8] = VS( CONSECL0, "Id" );					// desired investment
+
+// capital-good firms receive orders, define machine production, 
+// and labor demand for sector
+v[9] = VS( CAPSECL0, "D1" );					// orders for new machines
+v[10] = VS( CAPSECL0, "Q1" );					// planned machine production
+v[11] = VS( CAPSECL0, "L1d" );					// desired labor
+
+// labor market define effective employed labor, government decides expenditure 
+// investment and production is adjusted to labor available to firms
+v[12] = VS( LABSUPL0, "L" );					// employed labor
+v[13] = V( "G" );								// public total expenditures
+v[14] = VS( CAPSECL0, "Q1e" );					// effective machine production
+v[15] = VS( CONSECL0, "Q2e" );					// effective goods production
+
+// consumption-good firms set prices, existing demand is matched to 
+// available supply of goods, producing inventories or forced savings
+v[16] = VS( CONSECL0, "p2avg" );				// average goods prices
+v[17] = VS( CONSECL0, "D2" );					// fulfilled demand for goods
+v[18] = VS( CONSECL0, "N" );					// accumulated inventories
+v[19] = V( "Sav" );								// forced consumer savings
+
+// firms determine profits, taxes, cash flows, and update net wealths
+v[20] = VS( CAPSECL0, "Pi1" );					// profits of sector 1
+v[21] = VS( CONSECL0, "Pi2" );					// profits of sector 2
+v[22] = VS( FINSECL0, "PiB" );					// profits of banks
+v[23] = VS( CAPSECL0, "Tax1" );					// tax paid by sector 1
+v[24] = VS( CONSECL0, "Tax2" );					// tax paid by sector 2
+v[25] = VS( FINSECL0, "TaxB" );					// tax paid by banks
+v[26] = VS( CAPSECL0, "NW1" );					// net wealth of sector 1
+v[27] = VS( CONSECL0, "NW2" );					// net wealth of sector 2
+v[28] = VS( FINSECL0, "NWb" );					// liquid assets of banks
+
+// government collects taxes, compute public deficit or surplus form,
+// and adjust public debt accordingly
+v[29] = V( "Tax" );								// total tax income
+v[30] = V( "Def" );								// public total deficit
+v[31] = V( "Deb" );								// public accumulated debt
+
+// macro variables are computed by aggregation of micro-level data
+v[32] = V( "GDP" );								// real gross domestic product
+v[33] = V( "GDPnom" );							// nominal gross domestic product
+
+// exit and entry happens in both sectors and banks update credit scores 
+// and pecking order of client firms, and account bad debt losses
+v[34] = V( "entryExit" );						// net entry of firms
+v[35] = VS( FINSECL0, "BadDeb" );				// bad debt losses of banks
 
 RESULT( T )
 

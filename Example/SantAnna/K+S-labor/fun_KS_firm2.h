@@ -149,7 +149,7 @@ v[3] = VS( PARENT, "m2" );						// machine output per period
 
 if ( v[2] < v[3] )								// no capital yet?
 	END_EQUATION( v[1] );						// no growth threshold
-
+	
 v[4] = VS( PARENT, "kappaMin" );				// investment floor multiple
 
 // min rounded capital
@@ -240,7 +240,7 @@ else
 }
 
 WRITE( "_NW2", v[3] );							// update the firm net worth
-
+	
 RESULT( v[0] )
 
 
@@ -356,7 +356,7 @@ if ( cur == NULL )
 
 V( "_L2" );										// ensure hiring is done
 V( "_c2" );										// ensure machines are allocated
-SUM( "_dLdVint" );								// unallocate unneeded workers
+SUM( "__dLdVint" );								// unallocate unneeded workers
 
 h = VS( GRANDPARENT, "flagWorkerLBU" );			// worker-level learning mode
 bool vint_learn = ( h != 0 && h != 2 );			// learning-by-vintage in use?
@@ -364,17 +364,17 @@ bool vint_learn = ( h != 0 && h != 2 );			// learning-by-vintage in use?
 // first, allocate unallocated workers to top vintages
 // going back from newest vintage to oldest, if needed
 i = 0;											// allocations counter
-k = VS( cur, "_dLdVint" );						// addt'l labor demand of vint.
+k = VS( cur, "__dLdVint" );						// addt'l labor demand of vint.
 CYCLE( cur1, "Wrk2" )							// search for unallocated worker
 	if ( HOOKS( SHOOKS( cur1 ), VWRK ) == NULL )
 	{
 		while ( k == 0 )						// find vintage with open posit.
 		{
 			cur = SHOOKS( cur );				// so go to the previous one
-			if ( cur == NULL || VS( cur, "_toUseVint" ) == 0 )// oldest or done?
+			if ( cur == NULL || VS( cur, "__toUseVint" ) == 0 )// oldest or done?
 				goto done_alloc2;				// not possible to allocate more
 				
-			k = VS( cur, "_dLdVint" );			// addt'l labor demand of vint.
+			k = VS( cur, "__dLdVint" );			// addt'l labor demand of vint.
 		}
 		
 		move_worker( SHOOKS( cur1 ), cur, vint_learn );// move worker to vintage
@@ -395,7 +395,7 @@ CYCLE( cur1, "Vint" )							// search for unallocated worker
 			if ( cur == NULL || cur == cur1 )	// oldest or same vintage?
 				goto done_alloc2;				// not possible to allocate more
 				
-			k = VS( cur, "_dLdVint" );			// addt'l labor demand of vint.
+			k = VS( cur, "__dLdVint" );			// addt'l labor demand of vint.
 		}
 		
 		cur2 = SEARCHS( cur1, "WrkV" );			// pick old vint. first worker
@@ -431,7 +431,7 @@ v[5] = max( floor( v[2] / v[3] ) - ceil( max( v[1], v[3] ) / v[3] ), 0 );
 v[0] = v[6] = v[7] = v[8] = 0;					// accumulators
 CYCLE( cur, "Vint" )							// choose vintages to use
 {
-	v[9] = VS( cur, "_nVint" );					// number of machines in vintage
+	v[9] = VS( cur, "__nVint" );				// number of machines in vintage
 	
 	if ( v[5] >= v[9] )							// none to be used in the vint.?
 	{
@@ -440,8 +440,8 @@ CYCLE( cur, "Vint" )							// choose vintages to use
 	}
 	else
 	{
-		v[10] = VS( cur, "_Avint" );			// vintage notional productivity
-		v[11] = VLS( cur, "_AeVint", 1 );		// vintage effective product.
+		v[10] = VS( cur, "__Avint" );			// vintage notional productivity
+		v[11] = VLS( cur, "__AeVint", 1 );		// vintage effective product.
 		v[6] += v[12] = v[9] - v[5];			// add to be used machines
 		v[7] += v[12] * v[10];					// add notional productivities
 		v[8] += v[12] * v[11];					// add effective productivities
@@ -452,7 +452,7 @@ CYCLE( cur, "Vint" )							// choose vintages to use
 			v[12] = 0;							// no worker if no production
 	}
 	
-	WRITES( cur, "_toUseVint", v[12] );			// number mach. to try to use
+	WRITES( cur, "__toUseVint", v[12] );		// number mach. to try to use
 }
 
 if ( v[6] == 0 )								// no machine?
@@ -480,26 +480,26 @@ Because of entrants, market shares may add-up to more than one, so 'f2rescale'
 must be used before '_f2' is used, by calling 'CPI'
 */
 
-v[1] = VS( PARENT, "f2min" );						// minimum share to stay
+v[1] = VS( PARENT, "f2min" );					// minimum share to stay
 
-switch( ( int ) V( "_life2cycle" ) )				// entrant firm state
+switch( ( int ) V( "_life2cycle" ) )			// entrant firm state
 {
-	case 0:											// non-producing entrant
-	default:										// exiting incumbent
+	case 0:										// non-producing entrant
+	default:									// exiting incumbent
 		END_EQUATION( 0 );
 
-	case 1:											// first-period entrant
+	case 1:										// first-period entrant
 		v[0] = VL( "_K", 1 ) / VLS( PARENT, "K", 1 );// same as capital share
-		END_EQUATION( max( v[0], v[1] ) );			// but over minimum
+		END_EQUATION( max( v[0], v[1] ) );		// but over minimum
 		
-	case 2:											// 2nd-4th-period entrant
+	case 2:										// 2nd-4th-period entrant
 		// replicator equation					
 		v[0] = VL( "_f2", 1 ) * ( 1 + VS( PARENT, "chi" ) * 
 								  ( V( "_E" ) / VS( PARENT, "Eavg" ) - 1 ) );
-		v[0] = max( v[0], v[1] );					// but over minimum
+		v[0] = max( v[0], v[1] );				// but over minimum
 		break;
 		
-	case 3:											// incumbent
+	case 3:										// incumbent
 		// replicator equation					
 		v[0] = VL( "_f2", 1 ) * ( 1 + VS( PARENT, "chi" ) * 
 								  ( V( "_E" ) / VS( PARENT, "Eavg" ) - 1 ) );
@@ -570,6 +570,14 @@ switch ( fRule )
 RESULT( v[0] )
 
 
+EQUATION( "_i2" )
+/*
+Interest paid by firm in consumption-good sector
+*/
+RESULT( VL( "_Deb2", 1 ) * VS( FINSECL2, "rDeb" ) * 
+		( 1 + ( VL( "_qc2", 1 ) - 1 ) * VS( FINSECL2, "kConst" ) ) )
+
+
 EQUATION( "_mu2" )
 /*
 Mark-up of firm in consumption-good sector
@@ -636,7 +644,7 @@ CYCLE( cur, "Broch" )							// use brochures to find supplier
 
 // if supplier is found, simply update it, if not, draw a random one
 if ( cur2 != NULL && cur3 != NULL )
-	WRITES( cur2, "_tSel", T );					// update selection time
+	WRITES( cur2, "__tSel", T );				// update selection time
 else											// no brochure received
 {
 	cur1 = RNDDRAWS( CAPSECL2, "Firm1", "_Atau" );// try draw new good supplier
@@ -724,6 +732,7 @@ else
 	// search applications set (increasing wage requests) for enough workers
 	i = 0;										// workers counter
 	v[0] = 0;									// highest wage found
+	appLisT::iterator its;
 	CYCLE_EXT( its, firm2E, appl )				// run over enough applications
 	{
 		if ( its->w > v[0] )					// new high wage request?
@@ -787,8 +796,8 @@ Canceled investment of firm in consumption-good sector
 cur = HOOK( SUPPL );							// pointer to current supplier
 VS( PARENTS( SHOOKS( cur ) ), "_Q1e" );			// make sure supplier produced
 
-v[1] = VS( SHOOKS( cur ), "_nCan" );			// canceled machine number
-k = VS( SHOOKS( cur ), "_tOrd" );				// time of canceled order
+v[1] = VS( SHOOKS( cur ), "__nCan" );			// canceled machine number
+k = VS( SHOOKS( cur ), "__tOrd" );				// time of canceled order
 
 if ( k == T && v[1] > 0 )
 {	
@@ -865,7 +874,7 @@ j = T + 1;										// oldest vintage so far
 h = 0;											// oldest vintage ID
 CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 {
-	v[8] = VS( cur, "_RSvint" );				// number of machines to scrap
+	v[8] = VS( cur, "__RSvint" );				// number of machines to scrap
 	
 	if ( v[8] < 0 )								// end-of-life vintage to scrap?
 	{
@@ -877,7 +886,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 			{
 				v[8] -= v[6];					// just reduce vintage
 				v[6] = 0;						// shrinkage done
-				WRITES( cur, "_nVint", v[8] );		
+				WRITES( cur, "__nVint", v[8] );		
 			}
 			else								// scrap entire vintage
 			{
@@ -902,7 +911,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 		{
 			v[8] -= v[7];						// just reduce vintage
 			v[7] = 0;							// substitution done
-			WRITES( cur, "_nVint", v[8] );		
+			WRITES( cur, "__nVint", v[8] );		
 		}
 		else									// scrap entire vintage
 		{
@@ -914,17 +923,17 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 		}
 	}
 	
-	i = VS( cur, "_tVint" );					// time of vintage install
+	i = VS( cur, "__tVint" );					// time of vintage install
 	if ( i < j )								// oldest so far?
 	{
 		j = i;
-		h = VS( cur, "_IDvint" );				// save oldest
+		h = VS( cur, "__IDvint" );				// save oldest
 	}
 }
 
 WRITE( "_oldVint", h );
 
-RESULT( SUM( "_nVint" ) * v[1] )
+RESULT( SUM( "__nVint" ) * v[1] )
 
 
 EQUATION( "_L2" )
@@ -987,14 +996,9 @@ Profit of firm (before taxes) in consumption-good sector
 
 v[1] = V( "_S2" ) - V( "_W2" );					// gross operating margin
 v[2] = VS( FINSECL2, "rD" ) * VL( "_NW2", 1 );	// financial income
+v[3] = V( "_i2" ); 								// financial expense (interest)
 
-// firm effective interest rate on debt
-v[3] = VS( FINSECL2, "rDeb" ) * ( 1 + ( VL( "_qc2", 1 ) - 1 ) * 
-	   VS( FINSECL2, "kConst" ) ); 
-
-v[4] = v[3] * VL( "_Deb2", 1 );					// interest to pay
-
-RESULT( v[1] + v[2] - v[4] )					// firm profits before taxes
+RESULT( v[1] + v[2] - v[3] )					// firm profits before taxes
 
 
 EQUATION( "_Q2e" )
@@ -1009,7 +1013,7 @@ EQUATION( "_Q2p" )
 Potential production with current machines and workers for a firm in 
 consumption-good sector
 */
-RESULT( SUM( "_Qvint" ) )
+RESULT( SUM( "__Qvint" ) )
 
 
 EQUATION( "_Q2pe" )
@@ -1051,7 +1055,7 @@ v[1] = VS( PARENT, "m2" );						// machine output per period
 v[2] = 0;										// scrapped machine accumulator
 CYCLE( cur1, "Vint" )							// search last vintage to scrap
 {
-	v[3] = VS( cur1, "_RSvint" );				// number of machines to scrap 
+	v[3] = VS( cur1, "__RSvint" );				// number of machines to scrap 
 	
 	if ( v[3] == 0 )							// nothing else to do
 		break;

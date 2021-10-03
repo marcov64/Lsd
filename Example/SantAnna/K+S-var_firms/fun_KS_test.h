@@ -102,7 +102,7 @@ for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 for ( i = 0; i < LEN_ARR( posit ); ++i )
 	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-for ( itd = all.begin( ); itd != all.end( ); ++itd )
+for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 	
 check_error( A <= 0 || dA < - 2 * TOL, "INVALID-PRODUCTIVITY", 0, & errors );
@@ -203,6 +203,7 @@ CYCLES( FINSECL1, cur, "Bank" )
 
 double BD = VS( FINSECL1, "BD" );
 double BS = VS( FINSECL1, "BS" );
+double BadDeb = VS( FINSECL1, "BadDeb" );
 double Bonds = VS( FINSECL1, "Bonds" );
 double Cl = VS( FINSECL1, "Cl" );
 double Depo = VS( FINSECL1, "Depo" );
@@ -230,7 +231,6 @@ double CS = VS( MACSTAL1, "CS" );
 double TC = VS( MACSTAL1, "TC" );
 double Bda = VS( SECSTAL1, "Bda" );
 double Bfail = VS( SECSTAL1, "Bfail" );
-double BadDeb = VS( SECSTAL1, "BadDeb" );
 double HHb = VS( SECSTAL1, "HHb" );
 double HPb = VS( SECSTAL1, "HPb" );
 
@@ -271,7 +271,7 @@ for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 for ( i = 0; i < LEN_ARR( posit ); ++i )
 	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-for ( itd = all.begin( ); itd != all.end( ); ++itd )
+for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 check_error( rD > rRes || rD > rBonds || rRes > r || rBonds > r || r > rDeb, 
@@ -397,7 +397,7 @@ for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 for ( i = 0; i < LEN_ARR( posit ); ++i )
 	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-for ( itd = all.begin( ); itd != all.end( ); ++itd )
+for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 check_error( U > 1 || Vac > 1, "INCONSISTENT-LABOR-STATS", 0, & errors );
@@ -508,7 +508,7 @@ for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 for ( i = 0; i < LEN_ARR( posit ); ++i )
 	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-for ( itd = all.begin( ); itd != all.end( ); ++itd )
+for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", 
 				 itd - all.begin( ) + 1, & errors );
 
@@ -677,7 +677,7 @@ for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 for ( i = 0; i < LEN_ARR( posit ); ++i )
 	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-for ( itd = all.begin( ); itd != all.end( ); ++itd )
+for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 check_error( Kerr.size( ) > 0, "NO-CAPITAL-FIRMS", Kerr.size( ), & errors ); 
@@ -791,10 +791,10 @@ if ( T == v[1] )
 
 	if ( v[3] > 0 )
 		LOG( " (t=%g-%g, ID1=%g-%g, file=%s)", 
-			 v[1], v[2], v[3], v[4], TEST1FILE )
+			 v[1], v[2], v[3], v[4], TEST1FILE );
 	else
 		LOG( " (t=%g-%g, up to %g entrants, file=%s)", 
-			 v[1], v[2], v[4], TEST1FILE )
+			 v[1], v[2], v[4], TEST1FILE );
 	
 	if ( firms1 == NULL )						// don't reopen if already open
 	{
@@ -880,7 +880,7 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	for ( i = 0; i < LEN_ARR( posit ); ++i )
 		check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-	for ( itd = all.begin( ); itd != all.end( ); ++itd )
+	for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 		check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 	// innovation, productivity
@@ -968,10 +968,10 @@ if ( T == v[1] )
 	
 	if ( v[3] > 0 )
 		LOG( " (t=%g-%g, ID2=%g-%g, file=%s)", 
-			 v[1], v[2], v[3], v[4], TEST2FILE )
+			 v[1], v[2], v[3], v[4], TEST2FILE );
 	else
 		LOG( " (t=%g-%g, up to %g entrants, file=%s)", 
-			 v[1], v[2], v[4], TEST2FILE )
+			 v[1], v[2], v[4], TEST2FILE );
 	
 	if ( firms2 == NULL )						// don't reopen if already open
 	{
@@ -1023,21 +1023,21 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	cur2 = NULL;								// last vintage
 	CYCLES( cur, cur1, "Vint" )
 	{
-		v[7] += VS( cur1, "_nVint" );
-		v[8] += VS( cur1, "_Qvint" );
+		v[7] += VS( cur1, "__nVint" );
+		v[8] += VS( cur1, "__Qvint" );
 		
-		if ( VS( cur1, "_IDvint" ) < h )
+		if ( VS( cur1, "__IDvint" ) < h )
 			IDerr.push_back( cur1 );
 		
-		if ( ( h == 1 && VS( cur1, "_tVint" ) < 1 - eta ) || 
-			 ( h > 1 && VS( cur1, "_tVint" ) < h ) || VS( cur1, "_tVint" ) > T )
+		if ( ( h == 1 && VS( cur1, "__tVint" ) < 1 - eta ) || 
+			 ( h > 1 && VS( cur1, "__tVint" ) < h ) || VS( cur1, "__tVint" ) > T )
 			tVintErr.push_back( cur1 );
 		
-		if ( VS( cur1, "_Qvint" ) < 0 )
+		if ( VS( cur1, "__Qvint" ) < 0 )
 			QvintErr.push_back( cur1 );
 			
-		if ( VS( cur1, "_toUseVint" ) == 0 && ( VS( cur1, "_LdVint" ) > 0 || 
-			 VS( cur1, "_Lvint" ) > 0 ) ) 
+		if ( VS( cur1, "__toUseVint" ) == 0 && ( VS( cur1, "__LdVint" ) > 0 || 
+			 VS( cur1, "__Lvint" ) > 0 ) ) 
 			LvintErr.push_back( cur1 );
 		
 		cur2 = cur1;
@@ -1079,13 +1079,13 @@ CYCLES( CONSECL1, cur, "Firm2" )
 
 	double _Kavb = VLS( cur, "_K", 1 );
 	double _N_1 = VLS( cur, "_N", 1 );	
-	double _pVint = ( cur1 != NULL && VS( cur1, "_tVint" ) == T ) ? 
-					VS( cur1, "_pVint" ) : 0;
+	double __pVint = ( cur1 != NULL && VS( cur1, "__tVint" ) == T ) ? 
+					VS( cur1, "__pVint" ) : 0;
 	
 	double nonNeg[ ] = { _CD2, _CD2c, _CI, _CS2, _D2, _D2e, _Deb2, _Deb2max, 
 						 _EI, _EId, _K, _Kavb, _Kd, _L2, _L2d, _N, _Q2d, _Q2, 
 						 _Q2e, _S2, _SI, _SId, _W2, _c2, _c2e, _f2, 
-						 _life2cycle,  _pVint, _t2ent };
+						 _life2cycle,  __pVint, _t2ent };
 	double posit[ ] = { _mu2, _p2 };
 	double finite[ ] = { _NW2, _Pi2 };
 
@@ -1102,9 +1102,9 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	}
 	
 	LOG( "\n  ## (t=%g) ID2=%d t2ent=%d life2cycle=%g #Broch=%g #Vint=%g pVint=%g", 
-		 T, j, h, _life2cycle, v[18], v[19], round( _pVint ) );
+		 T, j, h, _life2cycle, v[18], v[19], round( __pVint ) );
 	fprintf( firms2, "%g,%d,%d,%g,%g,%g,%g", T, j, h, _life2cycle, v[18], 
-			 v[19], _pVint );
+			 v[19], __pVint );
 	
 	for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 		check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
@@ -1112,7 +1112,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	for ( i = 0; i < LEN_ARR( posit ); ++i )
 		check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-	for ( itd = all.begin( ); itd != all.end( ); ++itd )
+	for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 		check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 	check_error( v[18] == 0, "NO-BROCHURE", 0, & errors ); 

@@ -36,89 +36,6 @@ WRITE( "DepoG", v[2] );
 RESULT( v[0] )
 
 
-EQUATION( "cScores" )
-/*
-Adjust the pecking order of firms according to the bank credit scores
-Also define the credit class for the firms
-*/
-
-VS( ENESECL1, "entryEexit" );					// ensure entry-exit done
-VS( CAPSECL1, "entry1exit" );
-VS( CONSECL1, "entry2exit" );
-
-firmRank firmData;
-firmLisT rankE, rank1, rank2;
-
-CYCLES( ENESECL1, cur, "FirmE" )				// build ranking for energy sec.
-{
-	v[1] = VS( cur, "_NWe" );					// net worth
-	v[2] = VS( cur, "_Se" );					// sales
-	firmData.NWtoS = ( v[1] > 0 && v[2] > 0 ) ? v[1] / v[2] : 1;
-	firmData.firm = cur;
-	rankE.push_back( firmData );
-}
-
-CYCLES( CAPSECL1, cur, "Firm1" )				// build ranking for sector 1
-{
-	v[1] = VS( cur, "_NW1" );					// net worth
-	v[2] = VS( cur, "_S1" );					// sales
-	firmData.NWtoS = ( v[1] > 0 && v[2] > 0 ) ? v[1] / v[2] : 1;
-	firmData.firm = cur;
-	rank1.push_back( firmData );
-}
-
-CYCLES( CONSECL1, cur, "Firm2" )				// build ranking for sector 2
-{
-	v[1] = VS( cur, "_NW2" );					// net worth
-	v[2] = VS( cur, "_S2" );					// sales
-	firmData.NWtoS = ( v[1] > 0 && v[2] > 0 ) ? v[1] / v[2] : 1;
-	firmData.firm = cur;
-	rank2.push_back( firmData );
-}
-
-// order rankings in descending order
-rankE.sort( rank_desc_NWtoS );
-rank1.sort( rank_desc_NWtoS );
-rank2.sort( rank_desc_NWtoS );
-
-h = i = rankE.size( );							// # of firms in energy sector
-j = 0; 											// firm counter
-for ( firmLisT::iterator itr = rankE.begin( ); itr != rankE.end( ); ++j, ++itr )
-{
-	// find the credit class of firm
-	k = ( j < i * 0.25 ) ? 1 : ( j < i * 0.5 ) ? 2 : ( j < i * 0.75 ) ? 3 : 4; 
-	WRITES( itr->firm, "_qcE", k );				// save credit class
-	WRITES( itr->firm, "_pOrdE", j + 1 );		// save pecking order
-}
-
-h += i = rank1.size( );							// # of firms in sector 1
-j = 0; 											// firm counter
-for ( firmLisT::iterator itr = rank1.begin( ); itr != rank1.end( ); ++j, ++itr )
-{
-	// find the credit class of firm
-	k = ( j < i * 0.25 ) ? 1 : ( j < i * 0.5 ) ? 2 : ( j < i * 0.75 ) ? 3 : 4; 
-	WRITES( itr->firm, "_qc1", k );				// save credit class
-	WRITES( itr->firm, "_pOrd1", j + 1 );		// save pecking order
-}
-
-h += i = rank2.size( );							// # of firms in sector 2
-j = 0; 											// firm counter
-for ( firmLisT::iterator itr = rank2.begin( ); itr != rank2.end( ); ++j, ++itr )
-{
-    // find the credit class of firm
-	k = ( j < i * 0.25 ) ? 1 : ( j < i * 0.5 ) ? 2 : ( j < i * 0.75 ) ? 3 : 4; 
-	WRITES( itr->firm, "_qc2", k );				// save credit class
-	WRITES( itr->firm, "_pOrd2", j + 1 );		// save pecking order
-}
-
-// sort the firm objects so credit is requested first by top ranking firms
-SORTS( ENESECL1, "FirmE", "_pOrdE", "UP" );
-SORTS( CAPSECL1, "Firm1", "_pOrd1", "UP" );
-SORTS( CONSECL1, "Firm2", "_pOrd2", "UP" );
-
-RESULT( h )
-
-
 EQUATION( "r" )
 /*
 Interest rate set by the central bank (prime rate)
@@ -130,7 +47,7 @@ v[1] = V( "rAdj" );								// rate adjustment step
 // Taylor rule
 v[2] = V( "rT" ) + V( "gammaPi" ) * ( VLS( CONSECL1, "dCPIb", 1 ) - V( "piT" ) ) + 
 	   V( "gammaU" ) * ( V( "Ut" ) - VLS( LABSUPL1, "U", 1 ) );
-		
+
 // smooth rate adjustment
 if ( abs( v[2] - v[0] ) > 2 * v[1] )					
 	v[0] += ( v[2] > v[0] ) ? 2 * v[1] : - 2 * v[1];// big adjustment
@@ -197,6 +114,13 @@ V( "NWb" );										// ensure bank demand is done
 RESULT( SUM( "_BD" ) )
 
 
+EQUATION( "BadDeb" )
+/*
+Total bad debt (defaults) in financial sector
+*/
+RESULT( SUM( "_BadDeb" ) )
+
+
 EQUATION( "Bonds" )
 /*
 Total sovereign bonds stock hold by financial sector
@@ -216,23 +140,30 @@ EQUATION( "Depo" )
 Total banking sector deposits
 Net deposits from exiting and entering firms in period not considered
 */
-RESULT( SUM( "_Depo" ) )								// sum-up banks deposits
+RESULT( SUM( "_Depo" ) )						// sum-up banks deposits
 
 
 EQUATION( "DivB" )
 /*
 Total banking sector distributed dividends
 */
-V( "PiB" );												// make sure it is updated
-RESULT( SUM( "_DivB" ) )								// sum-up banks dividends	
+V( "PiB" );										// make sure it is updated
+RESULT( SUM( "_DivB" ) )						// sum-up banks dividends	
+
+
+EQUATION( "ExRes" )
+/*
+Excess reserves (free cash) hold by financial sector
+*/
+RESULT( SUM( "_ExRes" ) )
 
 
 EQUATION( "Gbail" )
 /*
 Total government bailout funds to banking sector
 */
-V( "NWb" );												// make sure it is updated
-RESULT( SUM( "_Gbail" ) )								// sum-up banks bailouts
+V( "NWb" );										// make sure it is updated
+RESULT( SUM( "_Gbail" ) )						// sum-up banks bailouts
 
 
 EQUATION( "Loans" )
@@ -254,7 +185,7 @@ EQUATION( "NWb" )
 /*
 Total banking sector net worth (liquid assets)
 */
-RESULT( SUM( "_NWb" ) )									// sum-up banks net worth
+RESULT( SUM( "_NWb" ) )							// sum-up banks net worth
 
 
 EQUATION( "PiB" )
@@ -275,7 +206,7 @@ EQUATION( "TaxB" )
 /*
 Total taxes paid by banks in financial sector
 */
-V( "PiB" );												// make sure it is updated
+V( "PiB" );										// make sure it is updated
 RESULT( SUM( "_TaxB" ) )
 
 
@@ -292,8 +223,8 @@ EXEC_EXTS( PARENT, country, bankPtr, clear );
 EXEC_EXTS( PARENT, country, bankWgtd, clear );
 
 // add-up market share
-i = 0;													// bank index in vector
-v[0] = v[1] = 0;										// cumulative market share
+i = 0;											// bank index in vector
+v[0] = v[1] = 0;								// cumulative market share
 CYCLE( cur, "Bank" )
 {
 	EXEC_EXTS( PARENT, country, bankPtr, push_back, cur );// pointer to bank
@@ -314,19 +245,80 @@ for ( j = 0; j < i; ++j )
 RESULT( i )
 
 
+EQUATION( "cScores" )
+/*
+Define the credit class for both sectors' firms and adjust the 
+pecking order of bank clients according to the credit scores
+*/
+
+firmRank firmData;
+firmLisT rankE, rank1, rank2;
+
+CYCLES( ENESECL1, cur, "FirmE" )				// rank entire energy sector
+{
+	v[1] = VLS( cur, "_NWe", 1 );				// net worth
+	v[2] = VLS( cur, "_Se", 1 );				// sales
+	firmData.NWtoS = ( v[1] > 0 && v[2] > 0 ) ? v[1] / v[2] : 0;
+	firmData.firm = cur;
+	rankE.push_back( firmData );
+}
+
+CYCLES( CAPSECL1, cur, "Firm1" )				// rank entire sector 1
+{
+	v[1] = VLS( cur, "_NW1", 1 );				// net worth
+	v[2] = VLS( cur, "_S1", 1 );				// sales
+	firmData.NWtoS = ( v[1] > 0 && v[2] > 0 ) ? v[1] / v[2] : 0;
+	firmData.firm = cur;
+	rank1.push_back( firmData );
+}
+
+CYCLES( CONSECL1, cur, "Firm2" )				// rank entire sector 2
+{
+	v[1] = VLS( cur, "_NW2", 1 );				// net worth
+	v[2] = VLS( cur, "_S2", 1 );				// sales
+	firmData.NWtoS = ( v[1] > 0 && v[2] > 0 ) ? v[1] / v[2] : 0;
+	firmData.firm = cur;
+	rank2.push_back( firmData );
+}
+
+// order global rankings in descending order
+rankE.sort( rank_desc_NWtoS );
+rank1.sort( rank_desc_NWtoS );
+rank2.sort( rank_desc_NWtoS );
+
+// attribute the pecking order in all sectors
+h = 0;
+for ( auto itr = rankE.begin( ); itr != rankE.end( ); ++h, ++itr )
+	WRITES( itr->firm, "_pOrdE", h + 1 );
+
+for ( auto itr = rank1.begin( ); itr != rank1.end( ); ++h, ++itr )
+	WRITES( itr->firm, "_pOrd1", h + 1 );		// overall sector pecking order
+
+h = 0;
+for ( auto itr = rank2.begin( ); itr != rank2.end( ); ++h, ++itr )
+	WRITES( itr->firm, "_pOrd2", h + 1 );
+	
+// sort the firm objects so credit is requested first by top ranked firms
+SORTS( ENESECL1, "FirmE", "_pOrdE", "UP" );
+SORTS( CAPSECL1, "Firm1", "_pOrd1", "UP" );
+SORTS( CONSECL1, "Firm2", "_pOrd2", "UP" );
+
+RESULT( SUM( "_cScores" ) )						// update banks' scores
+
+
 EQUATION( "pickBank" )
 /*
 Pick a bank randomly with probability proportional to the desired market shares
 of banks
 */
 
-//V( "banksMaps" );										// ensure vector updated
+//V( "banksMaps" );								// ensure vector updated
 
 dblVecT *weight = & V_EXTS( PARENT, country, bankWgtd );// bank weights
 
 // see which bank is in the RND position for accumulated market share
 // in practice, it draws banks with probability proportional to m.s.
-dblVecT::iterator bank = upper_bound( weight->begin( ), weight->end( ), RND );
+auto bank = upper_bound( weight->begin( ), weight->end( ), RND );
 
 // calculate position (index) in the vector (same as bank ID - 1)
 i = bank - weight->begin( ) + 1;

@@ -287,7 +287,7 @@ WRITE( "cExit", 0 );
 v[0] = VS( CAPSECL0, "entry1exit" ) + VS( CONSECL0, "entry2exit" );
 
 VS( FINSECL0, "cScores" );						// set the credit pecking order
-RECALCS( SECSTAL0, "BadDeb" );					// update bad debt after exits
+RECALCS( FINSECL0, "BadDeb" );					// update bad debt after exits
 
 RESULT( v[0] )
 

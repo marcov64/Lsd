@@ -443,6 +443,14 @@ CYCLE( cur, "Dirty" )							// turn on required dirty plants
 RESULT( i > 0 ? ( double ) j / i : 0 )
 
 
+EQUATION( "_iE" )
+/*
+Interest paid by energy producer
+*/
+RESULT( VL( "_DebE", 1 ) * VS( FINSECL2, "rDeb" ) * 
+		( 1 + ( VL( "_qcE", 1 ) - 1 ) * VS( FINSECL2, "kConst" ) ) )
+
+
 EQUATION( "_muE" )
 /*
 Mark-up (in absolute money terms) of energy producer
@@ -606,14 +614,9 @@ Profit (before taxes) of energy producer
 
 v[1] = V( "_Se" ) - V( "_Ce" );					// gross operating margin
 v[2] = VS( FINSECL2, "rD" ) * VL( "_NWe", 1 );	// financial income
+v[3] = V( "_iE" ); 								// financial expense 
 
-// firm effective interest rate on debt
-v[3] = VS( FINSECL2, "rDeb" ) * ( 1 + ( VL( "_qcE", 1 ) - 1 ) * 
-	   VS( FINSECL2, "kConst" ) ); 
-
-v[4] = v[3] * VL( "_DebE", 1 );					// interest to pay
-
-RESULT( v[1] + v[2] - v[4] )					// firm profits before taxes
+RESULT( v[1] + v[2] - v[3] )					// firm profits before taxes
 
 
 EQUATION( "_SIeD" )

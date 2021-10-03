@@ -226,7 +226,7 @@ v[0] = ROUND( v[0], 0, 0.001 );					// avoid rounding errors on zero
 V( "SavAcc" );									// ensure up-to-date before
 INCR( "SavAcc", v[0] );							// updating accumulated
 
-RESULT( v[0] )				
+RESULT( v[0] )
 
 
 EQUATION( "Tax" )
@@ -287,7 +287,7 @@ WRITE( "cExit", 0 );
 v[0] = VS( CAPSECL0, "entry1exit" ) + VS( CONSECL0, "entry2exit" );
 
 VS( FINSECL0, "cScores" );						// set the credit pecking order
-RECALCS( SECSTAL0, "BadDeb" );					// update bad debt after exits
+RECALCS( FINSECL0, "BadDeb" );					// update bad debt after exits
 
 RESULT( v[0] )
 
@@ -449,7 +449,7 @@ CYCLES( cur3, cur, "Bank" )
 		v[3] += VLS( SHOOKS( cur6 ), "_Deb2", 1 );// firm debt
 		v[4] += VLS( SHOOKS( cur6 ), "_NW2", 1 );// firm net wealth
 	}
-	
+
 	if ( v[4] > 0 )								// bank has clients?
 		v[5] = EqB0 * v[4];						// bank initial tier 1 capital
 	else

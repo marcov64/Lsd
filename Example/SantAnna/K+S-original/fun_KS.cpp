@@ -21,14 +21,11 @@
 
 /*======================== ADDITIONAL CODE TO INCLUDE ========================*/
 
-// define variables to use in equations
-#define EQ_USER_VARS dblVecT::iterator itd, itd1; \
-					 objVecT::iterator ito, ito1;// general purpose iterators
-
 // LSD and K+S macros and objects definition and support code
 #include <fun_head_fast.h>						// LSD definitions
 #include "fun_KS_class.h"						// K+S class/macro definitions
 #include "fun_KS_support.h"						// K+S support C++ functions
+
 
 /*============================ GENERAL EQUATIONS =============================*/
 
@@ -106,66 +103,62 @@ EQUATION( "timeStep" )
 Execute one time-step of one country in the K+S model
 Ensure the high-level scheduling of the model equation by forcing the 
 computation of key variables in the correct order
-In principle, the sequence defined here is embedded in the equations, so
-this equation is likely unnecessary
+In principle, the sequence defined here is embedded in the equations, so this
+equation is supposedly unnecessary (but may produce slightly different results)
 */
 
-// sector 2 firms define market expectations, define new capital desired, and 
-// incorporate new and scrap old machines
-
+// consumption-good firms define expected demand, planned production, 
+// and labor demand for sector
 v[1] = VS( CONSECL0, "D2e" );					// expected demand for goods
+v[2] = VS( CONSECL0, "Q2" );					// planned goods production
+v[3] = VS( CONSECL0, "L2d" );					// desired labor
 
-// define expected demand, desired and planned production and capital, labor 
-// demand, investment and credit required for sector 2 firms
+// capital-good firms do R&D, set prices, and search for new clients
+// and consumption-good firms define desired investment 
+v[4] = VS( CAPSECL0, "p1avg" );					// average machine prices
+v[5] = VS( CONSECL0, "Id" );					// desired investment
 
-v[2] = VS( CONSECL0, "Id" );					// desired investment sector 2
+// capital-good firms receive orders, define machine production, 
+// and labor demand for sector
+v[6] = VS( CAPSECL0, "D1" );					// orders for new machines
+v[7] = VS( CAPSECL0, "Q1" );					// planned machine production
+v[8] = VS( CAPSECL0, "L1d" );					// desired labor
 
-// sector 1 firms do R&D, set prices and send machine brochures, and sector 2  
-// firms choose suppliers
+// labor market define effective employed labor, government decides expenditure 
+// investment and production is adjusted to labor available to firms
+v[9] = VS( LABSUPL0, "L" );					// employed labor
+v[10] = V( "G" );								// public total expenditures
+v[11] = VS( CAPSECL0, "Q1e" );					// effective machine production
+v[12] = VS( CONSECL0, "Q2e" );					// effective goods production
 
-v[3] = VS( CAPSECL0, "D1" );					// total demand for new machines
+// consumption-good firms set prices, existing demand is matched to 
+// available supply of goods, producing inventories or forced savings
+v[13] = VS( CONSECL0, "p2avg" );				// average goods prices
+v[14] = VS( CONSECL0, "D2" );					// fulfilled demand for goods
+v[15] = VS( CONSECL0, "N" );					// accumulated inventories
+v[16] = V( "Sav" );								// forced consumer savings
 
-// sector 1 define machine production, total unbounded labor demand and
-// required credit
+// firms determine profits, taxes, cash flows, and update net wealths
+v[17] = VS( CAPSECL0, "Pi1" );					// profits of sector 1
+v[18] = VS( CONSECL0, "Pi2" );					// profits of sector 2
+v[19] = VS( CAPSECL0, "Tax1" );					// tax paid by sector 1
+v[20] = VS( CONSECL0, "Tax2" );					// tax paid by sector 2
+v[21] = VS( CAPSECL0, "NW1" );					// net wealth of sector 1
+v[22] = VS( CONSECL0, "NW2" );					// net wealth of sector 2
 
-v[4] = VS( CAPSECL0, "Q1" );					// planned production sector 1
+// government collects taxes, compute public deficit or surplus form,
+// and adjust public debt accordingly
+v[23] = V( "Tax" );								// total tax income
+v[24] = V( "Def" );								// public total deficit
+v[25] = V( "Deb" );								// public accumulated debt
 
-// adjust labor demand, investment and production in all sectors according to 
-// the effective labor available to firms
+// macro variables are computed by aggregation of micro-level data
+v[26] = V( "GDP" );								// real gross domestic product
+v[27] = V( "GDPnom" );							// nominal gross domestic product
 
-v[5] = VS( LABSUPL0, "L" );						// employed labor force
-
-// adjust investment, capital and number of employed machines in sector 2 
-// according to the finance and labor available and update productivity and 
-// cost structures
-
-v[6] = VS( CAPSECL0, "Q1e" );					// effective production sector 1
-v[7] = VS( CONSECL0, "Q2e" );					// effective production sector 2
-
-// sector 2 set prices, consumers choose suppliers and existing demand is
-// matched to available supply of goods, producing inventories or forced savings
-
-v[8] = VS( CONSECL0, "D2" );					// fulfilled demand in sector 2
-
-// firms determine profits, cash flows, taxes and net wealths, using credit
-// if possible and required
-
-v[9] = VS( CAPSECL0, "Tax1" );					// tax paid by sector 1
-v[10] = VS( CONSECL0, "Tax2" );					// tax paid by sector 2
-
-// government collects taxes and decide about expenditure, public deficit or
-// superavit form and its financed by public debt
-
-v[11] = V( "Def" );								// public total deficit
-
-// macro variables are computed by simple aggregation of micro-level data
-
-v[12] = V( "GDPnom" );							// nominal gross domestic product
-
-// entry and exit happens in both sectors, entries are not related to exits,
-// and banks adjust credit scores of firms and define the credit pecking order
-
-v[13] = V( "entryExit" );						// net entry of firms
+// exit and entry happens in both sectors and banks update credit scores 
+// and pecking order of client firms, and account bad debt losses
+v[28] = V( "entryExit" );						// net entry of firms
 
 RESULT( T )
 

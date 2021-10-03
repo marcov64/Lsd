@@ -71,9 +71,9 @@ EQUATION( "GDI" )
 Gross domestic income (nominal terms)
 */
 RESULT( VS( CAPSECL2, "W1" ) + VS( CONSECL2, "W2" ) +
-		  VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) + 
-		  VS( FINSECL2, "PiB" ) + VS( GRANDPARENT, "G" ) - 
-		  VS( GRANDPARENT, "Tax" ) + 
+		VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) + 
+		VS( FINSECL2, "PiB" ) + VS( GRANDPARENT, "G" ) - 
+		VS( GRANDPARENT, "Tax" ) + 
 		VS( CAPSECL2, "PPI" ) * VS( CONSECL2, "SI" ) / VS( CONSECL2, "m2" ) )
 
 
@@ -133,18 +133,11 @@ RESULT( VS( GRANDPARENT, "flagClimShocks" ) > 0 && T >= VS( CLIMATL2, "tA0" ) ?
 
 /*========================= FINANCIAL SECTOR STATS ===========================*/
 
-EQUATION( "BadDeb" )
-/*
-Total bad debt (defaults) in financial sector
-*/
-RESULT( SUMS( FINSECL2, "_BadDeb" ) )
-
-
 EQUATION( "BadDebAcc" )
 /*
 Accumulated losses from bad debt in financial sector
 */
-RESULT( CURRENT + V( "BadDeb" ) )
+RESULT( CURRENT + VS( FINSECL2, "BadDeb" ) )
 
 
 EQUATION( "Bda" )
@@ -162,13 +155,6 @@ Rate of failing banks
 VS( FINSECL2, "NWb" );							// make sure it is updated
 RESULT( COUNT_CNDS( FINSECL2, "Bank", "_Gbail", ">", 0 ) / 
 		COUNTS( FINSECL2, "Bank" ) )
-
-
-EQUATION( "ExRes" )
-/*
-Excess reserves (free cash) hold by financial sector
-*/
-RESULT( SUMS( FINSECL2, "_ExRes" ) )
 
 
 EQUATION( "HHb" )
@@ -299,6 +285,13 @@ Power plant (planned) scrapping rate of energy sector
 v[1] = SUMLS( ENESECL2, "_Ke", 1 );
 RESULT( T > 1 && v[1] > 0 ? ( SUMS( ENESECL2, "_SIdeD" ) + 
 							  SUMS( ENESECL2, "_SIgeD" ) ) / v[1] : 0 )
+
+
+EQUATION( "iE" )
+/*
+Interest paid by energy sector
+*/
+RESULT( SUMS( ENESECL2, "_iE" ) )
 
 
 EQUATION( "ageEavg" )
@@ -475,6 +468,13 @@ Average age of firms in capital-good sector
 RESULT( T - AVES( CAPSECL2, "_t1ent" ) )
 
 
+EQUATION( "i1" )
+/*
+Interest paid by capital-good sector
+*/
+RESULT( SUMS( CAPSECL2, "_i1" ) )
+
+
 /*======================= CONSUMER-GOOD SECTOR STATS =========================*/
 
 EQUATION( "A2ee" )
@@ -611,6 +611,13 @@ Change in total inventories (real terms)
 RESULT( VS( CONSECL2, "N" ) - VLS( CONSECL2, "N", 1 ) )
 
 
+EQUATION( "i2" )
+/*
+Interest paid by consumption-good sector
+*/
+RESULT( SUMS( CONSECL2, "_i2" ) )
+
+
 EQUATION( "mu2avg" )
 /*
 Weighted average mark-up of consumption-good sector
@@ -672,7 +679,7 @@ Number of machines to scrap of firm in consumption-good sector
 
 v[0] = 0;
 CYCLE( cur, "Vint" )
-	v[0] += abs( VS( cur, "_RSvint" ) );
+	v[0] += abs( VS( cur, "__RSvint" ) );
 	
 RESULT( v[0] )
 

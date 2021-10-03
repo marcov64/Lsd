@@ -28,7 +28,7 @@ double mu1 = VS( PARENT, "mu1" );				// mark-up in sector 1
 double pTau = VL( "_p1", 1 );					// current price w/ exist. tech.
 double w = VS( LABSUPL2, "w" );					// current wage
 double xi = VS( PARENT, "xi" );					// share of R&D for innovation
-	
+
 cImi = cInn = pImi = pInn = DBL_MAX;			// assume innov./imit. failure
 
 // normalized workers on R&D of the firm
@@ -171,7 +171,7 @@ k = V( "_HC" );									// number of historical clients
 j = V( "_ID1" );								// current firm ID
 
 CYCLE( cur, "Cli" )								// remove historical clients
-	firms.erase( ( int ) VS( cur, "_IDc" ) );
+	firms.erase( ( int ) VS( cur, "__IDc" ) );
 	
 i = ceil( VS( PARENT, "gamma" ) * k );			// new clients in period
 i = min( max( i, 1 ), min( h - k, firms.size( ) ) );// between [1, F2 - HC]
@@ -252,12 +252,12 @@ else
 		
 		// shrink or cancel all exceeding orders
 		CYCLE( cur, "Cli" )
-			if ( VS( cur, "_tOrd" ) == T )		// order in this period?
+			if ( VS( cur, "__tOrd" ) == T )		// order in this period?
 			{
 				if ( v[10] == 1 )				// bankruptcy?
-					INCRS( cur, "_nCan", VS( cur, "_nOrd" ) );
+					INCRS( cur, "__nCan", VS( cur, "__nOrd" ) );
 				else
-					INCRS( cur, "_nCan", floor( VS( cur, "_nOrd" ) * v[10] ) );
+					INCRS( cur, "__nCan", floor( VS( cur, "__nOrd" ) * v[10] ) );
 			}
 	}
 	
@@ -365,7 +365,7 @@ EQUATION( "_BC" )
 /*
 Number of buying clients for firm in capital-good sector
 */
-RESULT( COUNT_CND( "Cli", "_tOrd", "==", T ) )
+RESULT( COUNT_CND( "Cli", "__tOrd", "==", T ) )
 
 
 EQUATION( "_D1" )
@@ -373,7 +373,7 @@ EQUATION( "_D1" )
 Potential demand (orders) received by a firm in capital-good sector
 */
 VS( CONSECL2, "Id" );							// make sure all orders are sent
-RESULT( SUM_CND( "_nOrd", "_tOrd", "==", T ) )
+RESULT( SUM_CND( "__nOrd", "__tOrd", "==", T ) )
 
 
 EQUATION( "_HC" )
@@ -385,7 +385,7 @@ Also removes old, non-buying clients.
 i = 0;											// client counter
 CYCLE_SAFE( cur, "Cli" )						// remove old clients
 {
-	if ( VS( cur, "_tSel" ) < T - 1 )			// last selection is old?
+	if ( VS( cur, "__tSel" ) < T - 1 )			// last selection is old?
 	{
 		DELETE( SHOOKS( cur ) );				// remove supplier brochure entry
 		DELETE( cur );							// remove client entry
@@ -474,11 +474,11 @@ v[5] = v[2] > v[4] ? 1 - ( v[1] - v[3] ) / ( v[2] - v[4] ) : 1;
 
 // adjust all pending orders, supplying at least one machine
 CYCLE( cur, "Cli" )
-	if ( VS( cur, "_tOrd" ) == T )				// order in this period?
+	if ( VS( cur, "__tOrd" ) == T )				// order in this period?
 	{
-		v[6] = VS( cur, "_nOrd" ) - VS( cur, "_nCan" );// existing net orders
+		v[6] = VS( cur, "__nOrd" ) - VS( cur, "__nCan" );// existing net orders
 		v[0] -= v[7] = min( floor( v[6] * v[5] ), v[6] - 1 );
-		INCRS( cur, "_nCan", v[7] );
+		INCRS( cur, "__nCan", v[7] );
 	}
 	
 RESULT( max( v[0], 0 ) )						// avoid negative in part. cases

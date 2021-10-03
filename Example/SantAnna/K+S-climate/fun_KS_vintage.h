@@ -10,27 +10,27 @@
 
 /*============================== KEY EQUATIONS ===============================*/
 
-EQUATION( "_LdVint" )
+EQUATION( "__LdVint" )
 /*
 Labor required for desired utilization of vintage
 */
-RESULT( V( "_toUseVint" ) * VS( GRANDPARENT, "m2" ) / V( "_AlpVint" ) )
+RESULT( V( "__toUseVint" ) * VS( GRANDPARENT, "m2" ) / V( "__AlpVint" ) )
 
 
-EQUATION( "_RSvint" )
+EQUATION( "__RSvint" )
 /*
 Number of machines to scrap in vintage of firm in consumption-good sector
 Positive values indicate non-economical machines but still in technical life
 Negative values represent machines out of technical life to be scrapped ASAP
 */
 
-if ( V( "_tVint" ) < T - VS( GRANDPARENT, "eta" ) )// out of technical life?
-	END_EQUATION( - V( "_nVint" ) );			// scrap if not in use
+if ( V( "__tVint" ) < T - VS( GRANDPARENT, "eta" ) )// out of technical life?
+	END_EQUATION( - V( "__nVint" ) );			// scrap if not in use
 
 VS( PARENT, "_supplier" );						// ensure supplier is selected
 cur = PARENTS( SHOOKS( HOOKS( PARENT, SUPPL ) ) );// pointer to supplier
 
-v[1] = V( "_cVint" ) - VS( cur, "_cTau" );		// cost advantage of new machine
+v[1] = V( "__cVint" ) - VS( cur, "_cTau" );		// cost advantage of new machine
 
 // if new machine cost is not better in absolute terms or
 // payback period of replacing current vintage is over b
@@ -38,46 +38,46 @@ if ( v[1] <= 0 ||
 	 VS( cur, "_p1" ) / VS( GRANDPARENT, "m2" ) / v[1] > VS( GRANDPARENT, "b" ) )
 	END_EQUATION( 0 );							// nothing to scrap	
 
-RESULT( V( "_nVint" ) )							// scrap if can be replaced
+RESULT( V( "__nVint" ) )						// scrap if can be replaced
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
 
-EQUATION( "_EmVint" )
+EQUATION( "__EmVint" )
 /*
 CO2 (carbon) emissions produced by vintage
 */
-RESULT( V( "_Qvint" ) * V( "_AefVint" ) / V( "_AeeVint" ) )
+RESULT( V( "__Qvint" ) * V( "__AefVint" ) / V( "__AeeVint" ) )
 
 
-EQUATION( "_EnVint" )
+EQUATION( "__EnVint" )
 /*
 Energy consumed by vintage
 */
-RESULT( V( "_Qvint" ) / V( "_AeeVint" ) )
+RESULT( V( "__Qvint" ) / V( "__AeeVint" ) )
 
 
-EQUATION( "_Qvint" )
+EQUATION( "__Qvint" )
 /*
 Vintage production with available workers
 It is capped by the machines physical capacity
 */
 VS( PARENT, "_alloc2" );						// ensure allocation is done
-RESULT( V( "_AlpVint" ) * V( "_Lvint" ) )
+RESULT( V( "__AlpVint" ) * V( "__Lvint" ) )
 
 
-EQUATION( "_cVint" )
+EQUATION( "__cVint" )
 /*
 Planned (expected) unit production cost of vintage
 */
-RESULT( VS( LABSUPL3, "w" ) / V( "_AlpVint" ) + 
+RESULT( VS( LABSUPL3, "w" ) / V( "__AlpVint" ) + 
 	    ( VLS( ENESECL3, "pE", 1 ) + VS( PARENTS( GRANDPARENT ), "trCO2" ) * 
-		V( "_AefVint" ) ) / V( "_AeeVint" ) )
+		V( "__AefVint" ) ) / V( "__AeeVint" ) )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
 
-EQUATION_DUMMY( "_Lvint", "" )
+EQUATION_DUMMY( "__Lvint", "" )
 /*
 Labor available for operation of vintage
 Updated in '_alloc2'

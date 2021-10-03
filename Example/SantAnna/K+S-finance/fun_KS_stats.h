@@ -67,18 +67,11 @@ RESULT( v[1] > 0 ? VS( GRANDPARENT, "A" ) / v[1] - 1 : 0 )
 
 /*========================= FINANCIAL SECTOR STATS ===========================*/
 
-EQUATION( "BadDeb" )
-/*
-Total bad debt (defaults) in financial sector
-*/
-RESULT( SUMS( FINSECL2, "_BadDeb" ) )
-
-
 EQUATION( "BadDebAcc" )
 /*
 Accumulated losses from bad debt in financial sector
 */
-RESULT( CURRENT + VS( SECSTAL2, "BadDeb" ) )
+RESULT( CURRENT + VS( FINSECL2, "BadDeb" ) )
 
 
 EQUATION( "Bda" )
@@ -96,13 +89,6 @@ Rate of failing banks
 VS( FINSECL2, "NWb" );							// make sure it is updated
 RESULT( COUNT_CNDS( FINSECL2, "Bank", "_Gbail", ">", 0 ) / 
 		COUNTS( FINSECL2, "Bank" ) )
-
-
-EQUATION( "ExRes" )
-/*
-Excess reserves (free cash) hold by financial sector
-*/
-RESULT( SUMS( FINSECL2, "_ExRes" ) )
 
 
 EQUATION( "HHb" )
@@ -224,6 +210,13 @@ Average age of firms in capital-good sector
 RESULT( T - AVES( CAPSECL2, "_t1ent" ) )
 
 
+EQUATION( "i1" )
+/*
+Interest paid by capital-good sector
+*/
+RESULT( SUMS( CAPSECL2, "_i1" ) )
+
+
 /*======================= CONSUMER-GOOD SECTOR STATS =========================*/
 
 EQUATION( "A2sd" )
@@ -325,6 +318,13 @@ Change in total inventories (real terms)
 RESULT( VS( CONSECL2, "N" ) - VLS( CONSECL2, "N", 1 ) )
 
 
+EQUATION( "i2" )
+/*
+Interest paid by consumption-good sector
+*/
+RESULT( SUMS( CONSECL2, "_i2" ) )
+
+
 EQUATION( "mu2avg" )
 /*
 Weighted average mark-up of consumption-good sector
@@ -385,7 +385,7 @@ Number of machines to scrap of firm in consumption-good sector
 
 v[0] = 0;
 CYCLE( cur, "Vint" )
-	v[0] += abs( VS( cur, "_RSvint" ) );
+	v[0] += abs( VS( cur, "__RSvint" ) );
 	
 RESULT( v[0] )
 

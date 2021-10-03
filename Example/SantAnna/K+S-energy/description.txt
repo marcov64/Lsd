@@ -228,7 +228,6 @@ muBonds = sovereign bonds spread (mark-down over central bank prime rate) ([0,1]
 muD = bank spread (mark-down) on deposits (from central bank prime rate) ([0,1])
 muDeb = bank spread (mark-up) on debt (over central bank prime rate) (>=0)
 muRes = central bank spread (mark-down) on reserves ([0,1])
-phi1/phi2 = initial sectoral allocation of available credit (0<phi1+phi2<1)
 piT = target inflation rate by central bank's Taylor rule (>0)
 rAdj = prime rate minimum adjustment step (>0)
 rT = target prime interest rate set by central bank (>0)

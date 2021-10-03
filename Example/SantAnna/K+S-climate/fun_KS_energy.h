@@ -76,7 +76,7 @@ RESULT( v[0] )
 EQUATION( "Ce" )
 /*
 Total generation costs of energy producer
-Also updates '_Qde'
+Also updates '__Qde'
 */
 
 V( "IeNom" );									// ensure investment is done
@@ -92,7 +92,7 @@ v[2] = max( V( "Kde" ) - v[1], 0 );				// capacity not to use
 v[0] = 0;										// cost accumulator
 CYCLE( cur, "Dirty" )							// turn on required dirty plants
 {
-	v[3] = VS( cur, "_Kde" );					// plant notional capacity
+	v[3] = VS( cur, "__Kde" );					// plant notional capacity
 	
 	if( v[2] >= v[3] )							// no use for this plant?
 	{
@@ -102,11 +102,11 @@ CYCLE( cur, "Dirty" )							// turn on required dirty plants
 	else										// use plant (full or partial)
 	{
 		v[4] = v[3] - v[2];						// generate what is needed
-		v[5] = v[4] * VS( cur, "_cDE" );		// generation cost
+		v[5] = v[4] * VS( cur, "__cDE" );		// generation cost
 		v[2] = 0;								// no more plants not to use
 	}
 	
-	WRITES( cur, "_Qde", v[4] );				// generation for plant
+	WRITES( cur, "__Qde", v[4] );				// generation for plant
 	v[0] += v[5];								// accumulated generation costs
 }
 
@@ -188,9 +188,9 @@ if ( v[8] > 0 )									// invest in new green plants?
 	v[10] = v[4] * v[8] * ( 1 - v[1] / v[2] ) ;	// green substitution cost
 	
 	cur = ADDOBJL( "Green", T - 1 );			// create new green plant object
-	WRITES( cur, "_tGE", T );					// installation time
-	WRITES( cur, "_Kge", v[8] );				// plant generation capacity
-	WRITES( cur, "_ICge", v[0] + v[10] );		// plant installation cost
+	WRITES( cur, "__tGE", T );					// installation time
+	WRITES( cur, "__Kge", v[8] );				// plant generation capacity
+	WRITES( cur, "__ICge", v[0] + v[10] );		// plant installation cost
 }
 else
 	v[0] = v[10] = 0;							// no green plant investment
@@ -198,10 +198,10 @@ else
 if ( v[9] > 0 )									// new dirty plants?
 {
 	cur = ADDOBJL( "Dirty", T - 1 );			// create new dirty plant object
-	WRITES( cur, "_tDE", T );					// installation time
-	WRITES( cur, "_Kde", v[9] );				// plant generation capacity
-	WRITES( cur, "_Ade", v[3] );				// plant thermal efficiency
-	WRITES( cur, "_emDE", V( "emTauDE" ) );		// plant emissions
+	WRITES( cur, "__tDE", T );					// installation time
+	WRITES( cur, "__Kde", v[9] );				// plant generation capacity
+	WRITES( cur, "__Ade", v[3] );				// plant thermal efficiency
+	WRITES( cur, "__emDE", V( "emTauDE" ) );	// plant emissions
 }
 
 WRITE( "SIeNom", v[10] );						// green substitution cost
@@ -298,7 +298,7 @@ V( "Ce" );										// ensure plant allocation done
 if ( V( "De" ) <= V( "Kge" ) + 0.01 )			// just green energy produced?
 	v[1] = 0;									// no operating cost
 else
-	v[1] = MAX_CND( "_cDE", "_Qde", ">", 0 );	// higher cost among used plants
+	v[1] = MAX_CND( "__cDE", "__Qde", ">", 0 );	// higher cost among used plants
 
 RESULT( isfinite( v[1] ) ? v[1] + V( "muE" ) : V( "muE" ) )
 
@@ -317,7 +317,7 @@ EQUATION( "EmE" )
 CO2 (carbon) emissions of energy producer
 */
 V( "Ce" );										// ensure generation is assigned
-RESULT( SUM( "_EmDE" ) )
+RESULT( SUM( "__EmDE" ) )
 
 
 EQUATION( "IeNom" )
@@ -339,7 +339,7 @@ EQUATION( "Kde" )
 Total generation capacity of dirty power plants
 */
 V( "IeNom" );									// assure new plants installed
-RESULT( SUM( "_Kde" ) - SUM( "_RSde" ) )		// don't consider deferred scrap
+RESULT( SUM( "__Kde" ) - SUM( "__RSde" ) )		// don't consider deferred scrap
 
 
 EQUATION( "Kge" )
@@ -347,7 +347,7 @@ EQUATION( "Kge" )
 Total generation capacity of green power plants
 */
 V( "IeNom" );									// assure new plants installed
-RESULT( SUM( "_Kge" ) - SUM( "_RSge" ) )		// don't consider deferred scrap
+RESULT( SUM( "__Kge" ) - SUM( "__RSge" ) )		// don't consider deferred scrap
 
 
 EQUATION( "NWe" )
@@ -362,7 +362,7 @@ EQUATION( "Qe" )
 Total generation of energy producer
 */
 V( "Ce" );										// ensure dirty usage is comput.
-RESULT( SUM( "_Qde" ) + SUM( "_Qge" ) )
+RESULT( SUM( "__Qde" ) + SUM( "__Qge" ) )
 
 
 EQUATION( "PiE" )
@@ -383,14 +383,14 @@ EQUATION( "SIdeD" )
 /*
 Desired substitution investment (in capacity terms) in dirty energy
 */
-RESULT( SUM( "_RSde" ) )
+RESULT( SUM( "__RSde" ) )
 
 
 EQUATION( "SIgeD" )
 /*
 Desired substitution investment (in capacity terms) in green energy
 */
-RESULT( SUM( "_RSge" ) )
+RESULT( SUM( "__RSge" ) )
 
 
 EQUATION( "Se" )

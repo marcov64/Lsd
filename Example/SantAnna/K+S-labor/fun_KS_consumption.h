@@ -45,7 +45,7 @@ while ( v[1] > 0.01 )
 			if ( sup2[ j ] > 0 )				// product to supply?
 			{
 				v[4] = v[1] * f2[ j ];			// firm demand allocation
-			
+				
 				if ( v[4] <= sup2[ j ] )		// can supply all demanded?
 				{
 					INCRS( cur, "_D2", v[4] );	// supply all demanded
@@ -232,7 +232,8 @@ woLisT *offers = & V_EXTS( PARENT, countryE, firm2wo );
 order_offers( h, offers );
 
 // firms hire employees according to the selected hiring order
-for ( i = 0, itw = offers->begin( ); itw != offers->end( ); ++itw )
+i = 0;
+for ( auto itw = offers->begin( ); itw != offers->end( ); ++itw )
 {
 	v[3] = VS( itw->firm, "_postChg" ) ? VS( PARENT, "flagWageOfferChg" ) : 
 										 VS( PARENT, "flagWageOffer" );
@@ -337,7 +338,7 @@ CYCLES( LABSUPL1, cur, "Worker" )				// scan all workers
 	cur1 = HOOKS( cur, VWRK );					// pointer to vintage bridge
 	if ( cur1 != NULL )							// discard disalloc. unempl. s.1
 	{
-		i = VS( PARENTS( cur1 ), "_IDvint" );	// vintage ID
+		i = VS( PARENTS( cur1 ), "__IDvint" );	// vintage ID
 		v[2] = VLS( cur, "_sV", 1 ) * v[1];		// last skills (weighted)
 		EXTS( PARENT, countryE ).vintProd[ i ].sVavg += v[2];
 		EXTS( PARENT, countryE ).vintProd[ i ].workers += v[1];

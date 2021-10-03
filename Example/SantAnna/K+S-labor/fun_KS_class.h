@@ -54,7 +54,7 @@ struct countryE
 	// static global pointers to speed-up the access to individual containers
 	object *finSec, *capSec, *conSec, *labSup, *macSta, *secSta, *labSta;
 
-	// country speed-up vectors
+	// country speed-up vectors & maps
 	dblVecT bankWgtd;							// m. s. cum. weights in banking
 	dblVecT firm2wgtd;							// m. s. cum. weights in sector 2
 	objVecT bankPtr;							// pointers to banks
@@ -80,25 +80,25 @@ struct firm2E									// extensions to Firm2 object
 
 /*======================= INITIAL NOTIONAL DEFINITIONS =======================*/
 
-#define INIPROD		1			// initial notional machine productivity
-#define INIWAGE		1			// initial notional wage
-#define INISKILL	1			// initial notional worker skills
+#define INIPROD		1					// initial notional machine productivity
+#define INIWAGE		1					// initial notional wage
+#define INISKILL	1					// initial notional worker skills
 
 
 /*========================= HOOK-RELATED DEFINITIONS =========================*/
 
 // number of dynamic hooks per object type
-#define FIRM1HK		2			// Firm1
-#define FIRM2HK		4			// Firm2
-#define WORKERHK	2			// Worker
+#define FIRM1HK		2				// Firm1
+#define FIRM2HK		4				// Firm2
+#define WORKERHK	2				// Worker
 
 // dynamic hook name to number
-#define BANK		0			// from Firm1/Firm2 to Bank
-#define BCLIENT		1			// from Firm1/Firm2 to Cli1/Cli2 (in Bank)
-#define SUPPL		2			// from Firm2 to Broch (in Firm2)
-#define TOPVINT		3			// from Firm2 to Vint (in Firm2)
-#define FWRK		0			// from Worker to Wkr1/Wrkr2 (in Capital/Firm2)
-#define VWRK		1			// from Worker to WrkV (in Vint in Firm2)
+#define BANK		0				// from Firm1/Firm2 to Bank
+#define BCLIENT		1				// from Firm1/Firm2 to Cli1/Cli2 (in Bank)
+#define SUPPL		2				// from Firm2 to Broch (in Firm2)
+#define TOPVINT		3				// from Firm2 to Vint (in Firm2)
+#define FWRK		0				// from Worker to Wkr1/Wrkr2 (in Capital/Firm2)
+#define VWRK		1				// from Worker to WrkV (in Vint in Firm2)
 
 
 /*======================= OBJECT-LOCATION DEFINITIONS ========================*/
@@ -130,6 +130,14 @@ struct firm2E									// extensions to Firm2 object
 
 
 /*============================== SUPPORT MACROS ==============================*/
+
+// macro for checking if variable was already computed (used in timeStep)
+#define NEW_VS( VAL, OBJ, VAR ) \
+	if ( LAST_CALCS( OBJ, VAR ) == T ) \
+		LOG( "\n (t=%g) Variable '%s = %.4g' already computed", \
+			 T, VAR, VAL = VS( OBJ, VAR ) ); \
+	else \
+		VAL = VS( OBJ, VAR );
 
 // macro to round values too close to a reference
 #define ROUND( V, Ref, Tol ) ( abs( V - Ref ) > Tol ? V : Ref )

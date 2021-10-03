@@ -44,9 +44,9 @@ void check_error( bool cond, const char* errMsg, int errCount, int *errCounter )
 		return;
 	
 	if ( errCount == 0 )
-		LOG( " %s", errMsg )
+		LOG( " %s", errMsg );
 	else
-		LOG( " %s(%d)", errMsg, errCount )
+		LOG( " %s(%d)", errMsg, errCount );
 	
 	++( *errCounter );
 }
@@ -54,7 +54,7 @@ void check_error( bool cond, const char* errMsg, int errCount, int *errCounter )
 
 /*====================== FINANCIAL SUPPORT C FUNCTIONS =======================*/
 
-// comparison function for sort method in equation 'cScores'
+// comparison function for sort method in equation 'cScores', '_cScores'
 
 bool rank_desc_NWtoS( firmRank e1, firmRank e2 ) 
 { 
@@ -112,7 +112,7 @@ void update_debt2( object *firm, double desired, double loan )
 	
 		object *bank = HOOKS( firm, BANK );		// firm's bank
 		double TC2free = VS( bank, "_TC2free" );// available credit at firm's bank
-		
+	
 		// if credit limit active, adjust bank's available credit
 		if ( TC2free > -0.1 )
 			WRITES( bank, "_TC2free", max( TC2free - loan, 0 ) );
@@ -129,11 +129,11 @@ object *send_brochure( int supplID, object *suppl, int clientID, object *client 
 	object *broch, *cli;
 	
 	cli = ADDOBJS( suppl, "Cli" );				// add object to new client
-	WRITES( cli, "_IDc", clientID );			// update client ID
-	WRITES( cli, "_tSel", T );					// update selection time
+	WRITES( cli, "__IDc", clientID );			// update client ID
+	WRITES( cli, "__tSel", T );					// update selection time
 
 	broch = ADDOBJS( client, "Broch" );			// add brochure to client
-	WRITES( broch, "_IDs", supplID );			// update supplier ID
+	WRITES( broch, "__IDs", supplID );			// update supplier ID
 	WRITE_SHOOKS( broch, cli );					// pointer to supplier client list
 	WRITE_SHOOKS( cli, broch );					// pointer to client brochure list
 	
@@ -148,14 +148,14 @@ void send_order( object *firm, double nMach )
 	// find firm entry on supplier client list
 	object *cli = SHOOKS( HOOKS( firm, SUPPL ) );
 	
-	if ( VS( cli, "_tOrd" ) < T )				// if first order in period
+	if ( VS( cli, "__tOrd" ) < T )				// if first order in period
 	{
-		WRITES( cli, "_nOrd", nMach );			// set new order size
-		WRITES( cli, "_tOrd", T );				// set order time
-		WRITES( cli, "_nCan", 0 );				// no machine canceled yet
+		WRITES( cli, "__nOrd", nMach );			// set new order size
+		WRITES( cli, "__tOrd", T );				// set order time
+		WRITES( cli, "__nCan", 0 );				// no machine canceled yet
 	}
 	else
-		INCRS( cli, "_nOrd", nMach );			// increase existing order size
+		INCRS( cli, "__nOrd", nMach );			// increase existing order size
 }
 
 
@@ -199,8 +199,17 @@ double invest( object *firm, double desired )
 			else
 			{
 				invCost = _p1 * invest / m2;	// reduced investment cost
-				loan = invCost - _NW2 + 1;		// finance the difference
-				_NW2 = 1;						// keep minimum cash
+				
+				if ( invCost <= _NW2 - 1 )		// just own funds?
+				{
+					loan = 0;
+					_NW2 -= invCost;			// remove machines cost from cash
+				}
+				else
+				{
+					loan = invCost - _NW2 + 1;	// finance the difference
+					_NW2 = 1;					// keep minimum cash
+				}
 			}
 		}
 
@@ -221,12 +230,12 @@ double invest( object *firm, double desired )
 
 void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 {
-	double _Avint, _pVint;
-	int _ageVint, _nMach, _nVint;
+	double __Avint, __pVint;
+	int __ageVint, __nMach, __nVint;
 	object *cap, *cons, *cur, *suppl, *vint, *wrk;
 	
 	suppl = PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) );// current supplier
-	_nMach = floor( nMach );					// integer number of machines
+	__nMach = floor( nMach );					// integer number of machines
 	
 	// at t=1 firms have a mix of machines: old to new, many suppliers
 	if ( newInd )
@@ -234,20 +243,20 @@ void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 		cap = SEARCHS( GRANDPARENTS( firm ), "Capital" ); 
 		cons = SEARCHS( GRANDPARENTS( firm ), "Consumption" );
 		
-		_ageVint = VS( cons, "eta" ) + 1;		// age of oldest machine
-		_nVint = ceil( nMach / _ageVint );		// machines per vintage
-		_Avint = INIPROD;						// initial product. in sector 2
-		_pVint = VLS( cap, "p1avg", 1 );		// initial machine price
+		__ageVint = VS( cons, "eta" ) + 1;		// age of oldest machine
+		__nVint = ceil( nMach / __ageVint );	// machines per vintage
+		__Avint = INIPROD;						// initial product. in sector 2
+		__pVint = VLS( cap, "p1avg", 1 );		// initial machine price
 	}
 	else
 	{
-		_ageVint = 1 - T;
-		_nVint = _nMach;
-		_Avint = VS( suppl, "_Atau" );
-		_pVint = VS( suppl, "_p1" );
+		__ageVint = 1 - T;
+		__nVint = __nMach;
+		__Avint = VS( suppl, "_Atau" );
+		__pVint = VS( suppl, "_p1" );
 	}
 	
-	while ( _nMach > 0 )
+	while ( __nMach > 0 )
 	{
 		if ( newInd )
 		{
@@ -266,22 +275,22 @@ void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 		WRITE_SHOOKS( vint, HOOKS( firm, TOPVINT ) );// save previous vintage
 		WRITE_HOOKS( firm, TOPVINT, vint );		// save pointer to top vintage		
 	
-		WRITES( vint, "_IDvint", VNT( T, VS( cur, "_ID1" ) ) );// vintage ID
-		WRITES( vint, "_Avint", _Avint );		// vintage productivity
-		WRITES( vint, "_AeVint", _Avint );		// vintage effective product.
-		WRITES( vint, "_nVint", _nVint );		// number of machines in vintage
-		WRITES( vint, "_pVint", _pVint );		// price of machines in vintage
-		WRITES( vint, "_tVint", 1 - _ageVint );	// vintage build time
-		WRITELLS( vint, "_AeVint", _Avint, T, 1 );// lagged value
+		WRITES( vint, "__IDvint", VNT( T, VS( cur, "_ID1" ) ) );// vintage ID
+		WRITES( vint, "__Avint", __Avint );		// vintage productivity
+		WRITES( vint, "__AeVint", __Avint );	// vintage effective product.
+		WRITES( vint, "__nVint", __nVint );		// number of machines in vintage
+		WRITES( vint, "__pVint", __pVint );		// price of machines in vintage
+		WRITES( vint, "__tVint", 1 - __ageVint );// vintage build time
+		WRITELLS( vint, "__AeVint", __Avint, T, 1 );// lagged value
 	
 		wrk = SEARCHS( vint, "WrkV" );			// remove empty worker object
 			DELETE( wrk );
 		
-		_nMach -= _nVint;
-		--_ageVint;
+		__nMach -= __nVint;
+		--__ageVint;
 	
-		if ( _ageVint > 0 && _nMach % _ageVint == 0 )// exact ratio missing?
-			_nVint = _nMach / _ageVint;			// adjust machines per vintage
+		if ( __ageVint > 0 && __nMach % __ageVint == 0 )// exact ratio missing?
+			__nVint = __nMach / __ageVint;		// adjust machines per vintage
 	}
 }
 
@@ -304,13 +313,13 @@ double scrap_vintage( variable *var, object *vint )
 		if ( SHOOKS( NEXTS( vint ) ) == vint )
 			WRITE_SHOOKS( NEXTS( vint ), NULL );
 		
-		RS = abs( VS( vint, "_RSvint" ) );					
+		RS = abs( VS( vint, "__RSvint" ) );					
 		DELETE( vint );							// delete vintage
 	}
 	else
 	{
 		RS = -1;								// signal last machine
-		WRITES( vint, "_nVint", 1 );			// keep just 1 machine
+		WRITES( vint, "__nVint", 1 );			// keep just 1 machine
 	}
 	
 	return RS;
@@ -355,7 +364,7 @@ void hire_worker( object *worker, int sec, object *firm, double wage )
 		// add bridge-object between 'Wrk2' (in Firm2) to 'Worker'
 		wrk = ADDOBJS( firm, "Wrk2" );
 		WRITE_SHOOKS( wrk, worker );			// pointer to worker from firm
-		WRITES( wrk, "_IDw2", ID );				// register worker ID ID
+		WRITES( wrk, "__IDw2", ID );				// register worker ID ID
 	}
 	
 	WRITE_HOOKS( worker, FWRK, wrk );			// pointer to firm from worker
@@ -412,7 +421,7 @@ void move_worker( object *worker, object *vint, bool vint_learn )
 	
 	if ( vint_learn )							// learning-by-vintage mode?
 	{											// worker has public skills
-		IDv = VS( vint, "_IDvint" );
+		IDv = VS( vint, "__IDvint" );
 		sV = V_EXTS( GRANDPARENTS( vint ), countryE, vintProd[ IDv ].sVp );
 	}
 	else
@@ -422,7 +431,7 @@ void move_worker( object *worker, object *vint, bool vint_learn )
 	WRITE_SHOOKS( wrkV, worker );				// save pointer to work object
 	WRITE_HOOKS( worker, VWRK, wrkV );			// register vint. in worker
 	
-	WRITES( wrkV, "_IDwV", VS( worker, "_ID" ) );
+	WRITES( wrkV, "___IDwV", VS( worker, "_ID" ) );
 	WRITES( worker, "_sV", sV );				// set vintage skills
 	WRITES( worker, "_CQ", 0 );					// no cumulated production yet
 }
@@ -559,7 +568,7 @@ void order_applications( int order, appLisT *appls )
 #define OBJ_WRK2 1								// operate on sector 2 workers
 
 const char *wrkName[ ] = { "Wrk1", "Wrk2" }, 
-		   *keyName[ ] = { "_key1", "_key2" };
+		   *keyName[ ] = { "_key1", "__key2" };
 		   
 void order_workers( int order, int obj, object *firm )
 {
@@ -794,7 +803,7 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 		WRITES( firm, "_bank1", IDb );
 		WRITE_HOOKS( firm, BANK, bank );		
 		cli = ADDOBJS( bank, "Cli1" );			// add to bank client list
-		WRITES( cli, "_IDc1", ID1 );
+		WRITES( cli, "__ID1", ID1 );
 		WRITE_SHOOKS( cli, firm );				// pointer back to client
 		WRITE_HOOKS( firm, BCLIENT, cli );		// pointer to bank client list
 		
@@ -902,7 +911,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 						  p20 / n / m2 ) * m2;	// full employment K required
 		double SIr0 = n * K0 / m2 / VS( sector, "eta" );// substit. real invest.
 		double RD0 = VS( cap, "nu" ) * SIr0 * p10;// initial R&D expense
-
+		
 		// initial steady state demand under fair share
 		D20 = ( ( SIr0 * c10 + RD0 ) * ( 1 - phi - trW ) + 
 				VS( lab, "Ls0" ) * INIWAGE * phi ) / 
@@ -958,7 +967,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		WRITES( firm, "_bank2", IDb );
 		WRITE_HOOKS( firm, BANK, bank );
 		cli = ADDOBJS( bank, "Cli2" );			// add to bank client list
-		WRITES( cli, "_IDc2", ID2 );			// update object
+		WRITES( cli, "__ID2", ID2 );			// update object
 		WRITE_SHOOKS( cli, firm );				// pointer back to client
 		WRITE_HOOKS( firm, BCLIENT, cli );		// pointer to bank client list
 		
@@ -966,10 +975,10 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		suppl = RNDDRAWS( cap, "Firm1", "_Atau" );// try to draw good supplier
 		INCRS( suppl, "_NC", 1 );
 		cli = ADDOBJS( suppl, "Cli" );			// add to supplier client list
-		WRITES( cli, "_IDc", ID2 );				// update object
-		WRITES( cli, "_tSel", T );
+		WRITES( cli, "__IDc", ID2 );				// update object
+		WRITES( cli, "__tSel", T );
 		broch = SEARCHS( firm, "Broch" );		// add to firm brochure list
-		WRITES( broch, "_IDs", VS( suppl, "_ID1" ) );// update object
+		WRITES( broch, "__IDs", VS( suppl, "_ID1" ) );// update object
 		WRITE_SHOOKS( broch, cli );				// pointer to supplier cli. list
 		WRITE_SHOOKS( cli, broch );				// pointer to client broch. list
 		WRITE_HOOKS( firm, SUPPL, broch );		// pointer to current supplier
@@ -1008,7 +1017,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		// initial equity must pay initial capital and wages
 		NW2 = newInd ? NW2f : VS( suppl, "_p1" ) * Kd / m2 + NW2f;
 		equity += NW2 * ( 1 - Deb20ratio );		// accumulated equity (all firms)
-			
+
 		// initialize variables
 		WRITES( firm, "_ID2", ID2 );
 		WRITES( firm, "_t2ent", t2ent );
@@ -1031,7 +1040,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 			WRITELLS( firm, "_D2", D2e, t2ent, i );
 			WRITELLS( firm, "_D2d", D2e, t2ent, i );
 		}
-	
+
 		if ( newInd )
 		{
 			WRITELLS( firm, "_K", Kd, t2ent, 1 );

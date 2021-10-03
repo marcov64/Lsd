@@ -324,7 +324,7 @@ RESULT( v[0] )
 EQUATION( "_alloc2" )
 /*
 Allocate workers to vintages, prioritizing newer vintages
-Also updates '_Lvint'
+Also updates '__Lvint'
 */
 
 cur = HOOK( TOPVINT );							// start with top vintage
@@ -333,7 +333,7 @@ if ( cur == NULL )
 
 V( "_c2" );										// ensure machines are set
 v[1] = V( "_L2" );								// workers to allocate
-v[2] = VS( cur, "_LdVint" );					// labor demand of vintage
+v[2] = VS( cur, "__LdVint" );					// labor demand of vintage
 
 v[0] = 0;										// allocated worker counter
 while ( v[1] > 0 )								// allocate all available workers
@@ -341,22 +341,22 @@ while ( v[1] > 0 )								// allocate all available workers
 	while ( v[2] == 0 )							// find vintage with posit. dem.
 	{
 		cur = SHOOKS( cur );					// so go to the previous one
-		if ( cur == NULL || VS( cur, "_toUseVint" ) == 0 )// oldest or done?
+		if ( cur == NULL || VS( cur, "__toUseVint" ) == 0 )// oldest or done?
 			goto done_alloc2;					// not possible to allocate more
 			
-		v[2] = VS( cur, "_LdVint" );			// labor demand of vintage
+		v[2] = VS( cur, "__LdVint" );			// labor demand of vintage
 	}
 	
 	if ( v[1] >= v[2] )							// can fully fulfill demand?
 	{
-		WRITES( cur, "_Lvint", v[2] );			// update available worker counter
+		WRITES( cur, "__Lvint", v[2] );			// update available worker counter
 		v[1] -= v[2];
 		v[0] += v[2];
 		v[2] = 0;
 	}
 	else
 	{
-		WRITES( cur, "_Lvint", v[1] );			// supply what is available
+		WRITES( cur, "__Lvint", v[1] );			// supply what is available
 		v[0] += v[1];
 		v[1] = 0;
 	}
@@ -385,8 +385,8 @@ v[5] = max( floor( v[2] / v[3] ) - ceil( v[1] / v[3] ), 0 );// unused machines
 v[0] = v[6] = v[7] = 0;							// accumulators
 CYCLE( cur, "Vint" )							// choose vintages to use
 {
-	v[8] = VS( cur, "_nVint" );					// number of machines in vintage
-	v[9] = VS( cur, "_Avint" );					// vintage productivity
+	v[8] = VS( cur, "__nVint" );				// number of machines in vintage
+	v[9] = VS( cur, "__Avint" );				// vintage productivity
 	
 	v[0] += v[8] * v[4] / v[9];					// add machines cost
 	v[6] += v[8];								// add machines
@@ -403,8 +403,8 @@ CYCLE( cur, "Vint" )							// choose vintages to use
 		v[5] = 0;								// no more machine not to use
 	}
 	
-	WRITES( cur, "_toUseVint", v[10] );			// number mach. to try to use
-	WRITES( cur, "_Lvint", 0 );					// no worker allocated yet
+	WRITES( cur, "__toUseVint", v[10] );		// number mach. to try to use
+	WRITES( cur, "__Lvint", 0 );				// no worker allocated yet
 }
 
 if ( v[6] == 0 )								// no machine?
@@ -449,6 +449,14 @@ v[0] = VL( "_f2", 1 ) * ( 1 - VS( PARENT, "chi" ) *
 // lower-bounded slightly below exit threshold
 // to ensure firm sells production before leaving the market
 RESULT( max( v[0], 0.99 * v[1] ) )
+
+
+EQUATION( "_i2" )
+/*
+Interest paid by firm in consumption-good sector
+*/
+RESULT( VL( "_Deb2", 1 ) * VS( FINSECL2, "rDeb" ) * 
+		( 1 + ( VL( "_qc2", 1 ) - 1 ) * VS( FINSECL2, "kConst" ) ) )
 
 
 EQUATION( "_mu2" )
@@ -497,7 +505,7 @@ CYCLE( cur, "Broch" )							// use brochures to find supplier
 
 // if supplier is found, simply update it, if not, draw a random one
 if ( cur2 != NULL && cur3 != NULL )
-	WRITES( cur2, "_tSel", T );					// update selection time
+	WRITES( cur2, "__tSel", T );				// update selection time
 else											// no brochure received
 {
 	cur1 = RNDDRAWS( CAPSECL2, "Firm1", "_Atau" );// try draw new good supplier
@@ -522,8 +530,8 @@ Canceled investment of firm in consumption-good sector
 cur = HOOK( SUPPL );							// pointer to current supplier
 VS( PARENTS( SHOOKS( cur ) ), "_Q1e" );			// make sure supplier produced
 
-v[1] = VS( SHOOKS( cur ), "_nCan" );			// canceled machine number
-k = VS( SHOOKS( cur ), "_tOrd" );				// time of canceled order
+v[1] = VS( SHOOKS( cur ), "__nCan" );			// canceled machine number
+k = VS( SHOOKS( cur ), "__tOrd" );				// time of canceled order
 
 if ( k == T && v[1] > 0 )
 {	
@@ -594,7 +602,7 @@ j = T + 1;										// oldest vintage so far
 h = 0;											// oldest vintage ID
 CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 {
-	v[8] = VS( cur, "_RSvint" );				// number of machines to scrap
+	v[8] = VS( cur, "__RSvint" );				// number of machines to scrap
 	
 	if ( v[8] < 0 )								// end-of-life vintage to scrap?
 	{
@@ -606,7 +614,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 			{
 				v[8] -= v[6];					// just reduce vintage
 				v[6] = 0;						// shrinkage done
-				WRITES( cur, "_nVint", v[8] );		
+				WRITES( cur, "__nVint", v[8] );		
 			}
 			else								// scrap entire vintage
 			{
@@ -631,7 +639,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 		{
 			v[8] -= v[7];						// just reduce vintage
 			v[7] = 0;							// substitution done
-			WRITES( cur, "_nVint", v[8] );		
+			WRITES( cur, "__nVint", v[8] );		
 		}
 		else									// scrap entire vintage
 		{
@@ -643,17 +651,17 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 		}
 	}
 	
-	i = VS( cur, "_tVint" );					// time of vintage install
+	i = VS( cur, "__tVint" );					// time of vintage install
 	if ( i < j )								// oldest so far?
 	{
 		j = i;
-		h = VS( cur, "_IDvint" );				// save oldest
+		h = VS( cur, "__IDvint" );				// save oldest
 	}
 }
 
 WRITE( "_oldVint", h );
 
-RESULT( SUM( "_nVint" ) * v[1] )
+RESULT( SUM( "__nVint" ) * v[1] )
 
 
 EQUATION( "_L2" )
@@ -690,21 +698,16 @@ Profit of firm (before taxes) in consumption-good sector
 
 v[1] = V( "_S2" ) - V( "_W2" );					// gross operating margin
 v[2] = VS( FINSECL2, "rD" ) * VL( "_NW2", 1 );	// financial income
+v[3] = V( "_i2" ); 								// financial expense (interest)
 
-// firm effective interest rate on debt
-v[3] = VS( FINSECL2, "rDeb" ) * ( 1 + ( VL( "_qc2", 1 ) - 1 ) * 
-	   VS( FINSECL2, "kConst" ) ); 
-
-v[4] = v[3] * VL( "_Deb2", 1 );					// interest to pay
-
-RESULT( v[1] + v[2] - v[4] )					// firm profits before taxes
+RESULT( v[1] + v[2] - v[3] )					// firm profits before taxes
 
 
 EQUATION( "_Q2e" )
 /*
 Effective output of firm in consumption-good sector
 */
-RESULT( min( V( "_Q2" ), SUM( "_Qvint" ) ) )
+RESULT( min( V( "_Q2" ), SUM( "__Qvint" ) ) )
 
 
 EQUATION( "_Q2p" )
@@ -712,7 +715,7 @@ EQUATION( "_Q2p" )
 Potential production with current machines for a firm in 
 consumption-good sector
 */
-RESULT( SUM( "_nVint" ) * VS( PARENT, "m2" ) )
+RESULT( SUM( "__nVint" ) * VS( PARENT, "m2" ) )
 
 
 EQUATION( "_Q2pe" )
@@ -749,7 +752,7 @@ v[1] = VS( PARENT, "m2" );						// machine output per period
 v[2] = 0;										// scrapped machine accumulator
 CYCLE( cur1, "Vint" )							// search last vintage to scrap
 {
-	v[3] = VS( cur1, "_RSvint" );				// number of machines to scrap 
+	v[3] = VS( cur1, "__RSvint" );				// number of machines to scrap 
 	
 	if ( v[3] == 0 )							// nothing else to do
 		break;

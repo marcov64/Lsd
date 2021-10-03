@@ -237,7 +237,7 @@ Normalized Herfindahl-Hirschman index for consumption-good sector
 i = COUNTS( CONSECL2, "Firm2" );
 RESULT( i > 1 ? max( 0, ( WHTAVES( CONSECL2, "_f2", "_f2" ) - 1.0 / i ) / 
 						( 1 - 1.0 / i ) ) : 1 )
-	
+
 
 EQUATION( "HP2" )
 /*
@@ -341,7 +341,7 @@ Number of machines to scrap of firm in consumption-good sector
 
 v[0] = 0;
 CYCLE( cur, "Vint" )
-	v[0] += abs( VS( cur, "_RSvint" ) );
+	v[0] += abs( VS( cur, "__RSvint" ) );
 	
 RESULT( v[0] )
 

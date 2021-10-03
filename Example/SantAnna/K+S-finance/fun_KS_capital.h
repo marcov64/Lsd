@@ -95,7 +95,7 @@ CYCLE_SAFE( cur, "Firm1" )
 			++j;								// count exits
 			if ( VS( cur, "_NW1" ) < 0 )		// count bankruptcies
 				++v[6];
-				
+			
 			// account liquidation credit due to public, if any
 			v[2] += exit_firm1( var, cur );		// del obj & collect liq. value
 		}

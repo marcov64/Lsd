@@ -10,14 +10,14 @@
 
 /*============================== KEY EQUATIONS ===============================*/
 
-EQUATION( "_RSde" )
+EQUATION( "__RSde" )
 /*
 Capacity to scrap of dirty power plant
 */
 
-if ( T - V( "_tDE" ) > VS( PARENT, "etaE" ) )	// over technical life
+if ( T - V( "__tDE" ) > VS( PARENT, "etaE" ) )	// over technical life
 {
-	v[0] = V( "_Kde" );							// scrap entire plant
+	v[0] = V( "__Kde" );						// scrap entire plant
 	DELETE( THIS );								// delete plant object (suicide)
 }
 else
@@ -28,23 +28,23 @@ RESULT( v[0] )
 
 /*============================ SUPPORT EQUATIONS =============================*/
 
-EQUATION( "_cDE" )
+EQUATION( "__cDE" )
 /*
 Production unit cost of dirty power plant
 */
-RESULT( VS( PARENT, "pF" ) / V( "_Ade" ) )
+RESULT( VS( PARENT, "pF" ) / V( "__Ade" ) )
 
 
-EQUATION( "_EmDE" )
+EQUATION( "__EmDE" )
 /*
 CO2 emissions of dirty power plant
 */
-RESULT( V( "_Qde" ) * V( "_emDE" ) / V( "_Ade" ) )
+RESULT( V( "__Qde" ) * V( "__emDE" ) / V( "__Ade" ) )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
 
-EQUATION_DUMMY( "_Qde", "" )
+EQUATION_DUMMY( "__Qde", "" )
 /*
 Effective generation of dirty power plant
 Updated in 'Ce'

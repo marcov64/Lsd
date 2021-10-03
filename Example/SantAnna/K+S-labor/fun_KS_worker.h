@@ -91,7 +91,7 @@ while ( ( int ) targetFirms.size( ) < h - 1 )
 {
 	// see which firm is in that position for accumulated market share
 	// in practice, it draws firms with probability proportional to m.s.
-	itd = upper_bound( weight->begin( ), weight->end( ), RND );
+	auto itd = upper_bound( weight->begin( ), weight->end( ), RND );
 
 	// target firm pointer
 	cur1 = V_EXTS( GRANDPARENT, countryE, firm2ptr[ itd - weight->begin( ) ] );
@@ -455,7 +455,7 @@ Production with current worker skills and vintage
 if ( HOOK( VWRK ) == NULL )						// disalloc., unempl. or sec. 1?
     END_EQUATION( 0 );							// no production
 	
-RESULT( V( "_s" ) * VS( PARENTS( HOOK( VWRK ) ), "_Avint" ) )
+RESULT( V( "_s" ) * VS( PARENTS( HOOK( VWRK ) ), "__Avint" ) )
 
 
 EQUATION( "_Te" )
