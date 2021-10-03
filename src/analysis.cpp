@@ -3694,7 +3694,7 @@ void analysis( bool mc )
 				break;
 		}
 
-		cmd( "update" );
+		cmd( "update idletasks" );
 	}
 }
 
