@@ -63,7 +63,7 @@ proc getConfigOptions { w } {
 	return $options
 }
 
-proc clone_widget { w  newparent { level 0 } } {
+proc clone_widget { w newparent { level 0 } } {
 	set type [ getWidgetType $w ]
 	set name [ string trimright $newparent.[ lindex [ split $w "." ] end ] "." ]
 
@@ -171,8 +171,8 @@ proc save_canvas { w } {
 
 		lappend item [ list $type $id ]; # type & id
 		lappend item [ $w coords $id ]; # coords
+		lappend item [ tooltip::tooltip text $w $id ]; # tooltip
 		lappend item $tags; # tags
-
 
 		# id binds
 		set events [ $w bind $id ]
@@ -189,6 +189,7 @@ proc save_canvas { w } {
 		}
 
 		lappend item $binds; # binds
+
 		lappend item [ options [ $w itemconfigure $id ] ]; # options
 
 		switch $type {
@@ -242,7 +243,7 @@ proc restore_canvas { w save } {
 
 	# restore items
 	foreach item [ lrange $save 3 end ] {
-		foreach { typeid coords tags binds options specifics } $item {
+		foreach { typeid coords tip tags binds options specifics } $item {
 
 			set type [ lindex $typeid 0 ]; # get type
 
@@ -273,6 +274,11 @@ proc restore_canvas { w save } {
 
 			# create item
 			set id [ eval $w create $type $coords -tags "{$tags}" [ join $options ] ]
+
+			# add tooltip, if any
+			if { [ string length $tip ] > 0 } {
+				tooltip::tooltip $w -item $id $tip
+			}
 
 			foreach bind $binds {
 				foreach { id event script } $bind {
@@ -417,7 +423,7 @@ proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
 		set atts ""
 		unset -nocomplain fill outline dash width
 
-		foreach  { x0 y0 x1 y1 } [ concat [ $c coords $item ] 0 0 ] break
+		foreach	 { x0 y0 x1 y1 } [ concat [ $c coords $item ] 0 0 ] break
 		lassign [ format "%.1f %.1f %.1f %.1f" $x0 $y0 $x1 $y1 ] x0 y0 x1 y1
 
 		catch { set fill [ rgb2xcolor [ $c itemcget $item -fill ] $cm ] }
@@ -466,7 +472,7 @@ proc canvas2svg { c fn { v "0 0 0 0" } { cm color } { desc "" } } {
 			rectangle {
 				set type rect
 				append atts [ att x $x0 ][ att y $y0 ]
-				append atts [ att width  [ expr { $x1 - $x0 } ] ]
+				append atts [ att width	 [ expr { $x1 - $x0 } ] ]
 				append atts [ att height [ expr { $y1 - $y0 } ] ]
 				append atts [ att fill $fill #000000 ][ att stroke $outline none ]
 				append atts [ att stroke-width $width 1 ]

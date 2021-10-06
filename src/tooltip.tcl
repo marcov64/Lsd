@@ -1,6 +1,6 @@
 # tooltip.tcl --
 #
-#       Balloon help
+#		Balloon help
 #
 # Copyright (c) 1996-2007 Jeffrey Hobbs
 #
@@ -29,8 +29,8 @@ package require Tk 8.4
 #	Stops the specified widgets (defaults to all) from showing tooltips
 #
 # delay ?millisecs?
-#	Query or set the delay.  The delay is in milliseconds and must
-#	be at least 50.  Returns the delay.
+#	Query or set the delay.	 The delay is in milliseconds and must
+#	be at least 50.	 Returns the delay.
 #
 # disable OR off
 #	Disables all tooltips.
@@ -48,7 +48,7 @@ package require Tk 8.4
 #	If -tag is specified, then <widget> is assumed to be a text
 #	and the tagId specifies a tag.
 #	If message is {}, then the tooltip for that widget is removed.
-#	The widget must exist prior to calling tooltip.  The current
+#	The widget must exist prior to calling tooltip.	 The current
 #	tooltip message for <widget> is returned, if any.
 #
 # RETURNS: varies (see methods above)
@@ -71,14 +71,14 @@ namespace eval ::tooltip {
 
 	if {![info exists G]} {
 		array set G {
-			enabled     1
-			fade        1
-			FADESTEP    0.2
-			FADEID      {}
-			DELAY       500
-			AFTERID     {}
-			LAST        -1
-			TOPLEVEL    .__tooltip__
+			enabled		1
+			fade		1
+			FADESTEP	0.2
+			FADEID		{}
+			DELAY		500
+			AFTERID		{}
+			LAST		-1
+			TOPLEVEL	.__tooltip__
 		}
 		if {[tk windowingsystem] eq "x11"} {
 			set G(fade) 0 ; # don't fade by default on X11
@@ -100,7 +100,7 @@ namespace eval ::tooltip {
 	variable G
 	set G(LAST) -1
 	if {$G(enabled) && [info exists tooltip(%W)]} {
-	    set G(AFTERID) \
+		set G(AFTERID) \
 		[after $G(DELAY) [namespace code [list show %W $tooltip(%W) cursor]]]
 	}
 	}]
@@ -115,59 +115,77 @@ proc ::tooltip::tooltip {w args} {
 	variable tooltip
 	variable G
 	switch -- $w {
-	clear	{
-	    if {[llength $args]==0} { set args .* }
-	    clear $args
-	}
-	delay	{
-	    if {[llength $args]} {
-		if {![string is integer -strict $args] || $args<50} {
-		    return -code error "tooltip delay must be an\
-			    integer greater than 50 (delay is in millisecs)"
+		clear	{
+			if {[llength $args]==0} { set args .* }
+			clear $args
 		}
-		return [set G(DELAY) $args]
-	    } else {
-		return $G(DELAY)
-	    }
-	}
-	fade	{
-	    if {[llength $args]} {
-		set G(fade) [string is true -strict [lindex $args 0]]
-	    }
-	    return $G(fade)
-	}
-	off - disable	{
-	    set G(enabled) 0
-	    hide
-	}
-	on - enable	{
-	    set G(enabled) 1
-	}
-	default {
-	    set i $w
-	    if {[llength $args]} {
-		set i [uplevel 1 [namespace code "register [list $w] $args"]]
-	    }
-	    set b $G(TOPLEVEL)
-	    if {![winfo exists $b]} {
-		variable labelOpts
+		delay	{
+			if {[llength $args]} {
+			if {![string is integer -strict $args] || $args<50} {
+				return -code error "tooltip delay must be an\
+					integer greater than 50 (delay is in millisecs)"
+			}
+			return [set G(DELAY) $args]
+			} else {
+				return $G(DELAY)
+			}
+		}
+		fade	{
+			if {[llength $args]} {
+			set G(fade) [string is true -strict [lindex $args 0]]
+			}
+			return $G(fade)
+		}
+		off - disable	{
+			set G(enabled) 0
+			hide
+		}
+		on - enable	{
+			set G(enabled) 1
+		}
+		text {
+			if { [ llength $args ] == 1 } {
+				set i [ lindex $args 0 ]
+				if { [ info exists tooltip($i) ] } {
+					return $tooltip($i)
+				}
+			} elseif { [ llength $args ] == 2 } {
+				set i [ lindex $args 0 ]
+				set j [ lindex $args 1 ]
+				if { [ info exists tooltip($i,$j) ] } {
+					return $tooltip($i,$j)
+				} elseif { [ info exists tooltip($i,t_$j) ] } {
+					return $tooltip($i,t_$j)
+				}
+			}
+			return ""
+		}
+		default {
+			set i $w
+			if {[llength $args]} {
+				set i [uplevel 1 [namespace code "register [list $w] $args"]]
+			}
 
-		toplevel $b -class Tooltip
-		if {[tk windowingsystem] eq "aqua"} {
-		    ::tk::unsupported::MacWindowStyle style $b help none
-		} else {
-		    wm overrideredirect $b 1
+			set b $G(TOPLEVEL)
+			if {![winfo exists $b]} {
+				variable labelOpts
+
+				toplevel $b -class Tooltip
+				if {[tk windowingsystem] eq "aqua"} {
+					::tk::unsupported::MacWindowStyle style $b help none
+				} else {
+					wm overrideredirect $b 1
+				}
+				catch {wm attributes $b -topmost 1}
+				# avoid the blink issue with 1 to <1 alpha on Windows
+				catch {wm attributes $b -alpha 0.99}
+				wm positionfrom $b program
+				wm withdraw $b
+				eval [linsert $labelOpts 0 label $b.label]
+				pack $b.label -ipadx 1
+			}
+			if {[info exists tooltip($i)]} { return $tooltip($i) }
 		}
-		catch {wm attributes $b -topmost 1}
-		# avoid the blink issue with 1 to <1 alpha on Windows
-		catch {wm attributes $b -alpha 0.99}
-		wm positionfrom $b program
-		wm withdraw $b
-		eval [linsert $labelOpts 0 label $b.label]
-		pack $b.label -ipadx 1
-	    }
-	    if {[info exists tooltip($i)]} { return $tooltip($i) }
-	}
 	}
 }
 
@@ -175,32 +193,32 @@ proc ::tooltip::register {w args} {
 	variable tooltip
 	set key [lindex $args 0]
 	while {[string match -* $key]} {
-	switch -- $key {
-	    -- {
-		    set args [lreplace $args 0 0]
-		    set key [lindex $args 0]
-		    break
-		}
-	    -index {
-		if {[catch {$w entrycget 1 -label}]} {
-		    return -code error "widget \"$w\" does not seem to be a\
-			    menu, which is required for the -index switch"
-		}
-		set index [lindex $args 1]
-		set args [lreplace $args 0 1]
-	    }
-	    -item - -items {
+		switch -- $key {
+			-- {
+				set args [lreplace $args 0 0]
+				set key [lindex $args 0]
+				break
+			}
+			-index {
+				if {[catch {$w entrycget 1 -label}]} {
+					return -code error "widget \"$w\" does not seem to be a\
+						menu, which is required for the -index switch"
+				}
+				set index [lindex $args 1]
+				set args [lreplace $args 0 1]
+			}
+			-item - -items {
 				if {[winfo class $w] eq "Listbox"} {
 					set items [lindex $args 1]
 				} else {
 					set namedItem [lindex $args 1]
 					if {[catch {$w find withtag $namedItem} items]} {
 						return -code error "widget \"$w\" is not a canvas, or\
-			    item \"$namedItem\" does not exist in the canvas"
+							item \"$namedItem\" does not exist in the canvas"
 					}
 				}
-		set args [lreplace $args 0 1]
-	    }
+				set args [lreplace $args 0 1]
+			}
 			-tag {
 				set tag [lindex $args 1]
 				set r [catch {lsearch -exact [$w tag names] $tag} ndx]
@@ -210,51 +228,51 @@ proc ::tooltip::register {w args} {
 				}
 				set args [lreplace $args 0 1]
 			}
-	    default {
-		return -code error "unknown option \"$key\":\
-			should be -index, -items, -tag or --"
-	    }
-	}
-	set key [lindex $args 0]
+			default {
+				return -code error "unknown option \"$key\":\
+					should be -index, -items, -tag or --"
+			}
+		}
+		set key [lindex $args 0]
 	}
 	if {[llength $args] != 1} {
-	return -code error "wrong # args: should be \"tooltip widget\
-		?-index index? ?-items item? ?-tag tag? ?--? message\""
+		return -code error "wrong # args: should be \"tooltip widget\
+			?-index index? ?-items item? ?-tag tag? ?--? message\""
 	}
 	if {$key eq ""} {
-	clear $w
+		clear $w
 	} else {
-	if {![winfo exists $w]} {
-	    return -code error "bad window path name \"$w\""
-	}
-	if {[info exists index]} {
-	    set tooltip($w,$index) $key
-	    return $w,$index
-	} elseif {[info exists items]} {
-	    foreach item $items {
-		set tooltip($w,$item) $key
-		if {[winfo class $w] eq "Listbox"} {
-		    enableListbox $w $item
-		} else {
-		    enableCanvas $w $item
+		if {![winfo exists $w]} {
+			return -code error "bad window path name \"$w\""
 		}
-	    }
-	    # Only need to return the first item for the purposes of
-	    # how this is called
-	    return $w,[lindex $items 0]
+		if {[info exists index]} {
+			set tooltip($w,$index) $key
+			return $w,$index
+		} elseif {[info exists items]} {
+			foreach item $items {
+				set tooltip($w,$item) $key
+				if {[winfo class $w] eq "Listbox"} {
+					enableListbox $w $item
+				} else {
+					enableCanvas $w $item
+				}
+			}
+			# Only need to return the first item for the purposes of
+			# how this is called
+			return $w,[lindex $items 0]
 		} elseif {[info exists tag]} {
 			set tooltip($w,t_$tag) $key
 			enableTag $w $tag
 			return $w,$tag
-	} else {
-	    set tooltip($w) $key
-	    # Note: Add the necessary bindings only once.
-	    set tags [bindtags $w]
-	    if {[lsearch -exact $tags "Tooltip"] == -1} {
-		bindtags $w [linsert $tags end "Tooltip"]
-	    }
-	    return $w
-	}
+		} else {
+			set tooltip($w) $key
+			# Note: Add the necessary bindings only once.
+			set tags [bindtags $w]
+			if {[lsearch -exact $tags "Tooltip"] == -1} {
+				bindtags $w [linsert $tags end "Tooltip"]
+			}
+			return $w
+		}
 	}
 }
 
@@ -263,18 +281,18 @@ proc ::tooltip::clear {{pattern .*}} {
 	# cache the current widget at pointer
 	set ptrw [winfo containing [winfo pointerx .] [winfo pointery .]]
 	foreach w [array names tooltip $pattern] {
-	unset tooltip($w)
-	if {[winfo exists $w]} {
-	    set tags [bindtags $w]
-	    if {[set i [lsearch -exact $tags "Tooltip"]] != -1} {
-		bindtags $w [lreplace $tags $i $i]
-	    }
-	    ## We don't remove TooltipMenu because there
-	    ## might be other indices that use it
+		unset tooltip($w)
+		if {[winfo exists $w]} {
+			set tags [bindtags $w]
+			if {[set i [lsearch -exact $tags "Tooltip"]] != -1} {
+				bindtags $w [lreplace $tags $i $i]
+			}
+			## We don't remove TooltipMenu because there
+			## might be other indices that use it
 
-	    # Withdraw the tooltip if we clear the current contained item
-	    if {$ptrw eq $w} { hide }
-	}
+			# Withdraw the tooltip if we clear the current contained item
+			if {$ptrw eq $w} { hide }
+		}
 	}
 }
 
@@ -284,9 +302,9 @@ proc ::tooltip::show {w msg {i {}}} {
 	# Use string match to allow that the help will be shown when
 	# the pointer is in any child of the desired widget
 	if {([winfo class $w] ne "Menu")
-	&& ![string match $w* [eval [list winfo containing] \
-				   [winfo pointerxy $w]]]} {
-	return
+		&& ![string match $w* [eval [list winfo containing] \
+	   [winfo pointerxy $w]]]} {
+		return
 	}
 
 	variable G
@@ -306,37 +324,37 @@ proc ::tooltip::show {w msg {i {}}} {
 	# When adjusting for being on the screen boundary, check that we are
 	# near the "edge" already, as Tk handles multiple monitors oddly
 	if {$i eq "cursor"} {
-	set y [expr {[winfo pointery $w]+20}]
-	if {($y < $screenh) && ($y+$reqh) > $screenh} {
-	    set y [expr {[winfo pointery $w]-$reqh-5}]
-	}
+		set y [expr {[winfo pointery $w]+20}]
+		if {($y < $screenh) && ($y+$reqh) > $screenh} {
+			set y [expr {[winfo pointery $w]-$reqh-5}]
+		}
 	} elseif {$i ne ""} {
-	set y [expr {[winfo rooty $w]+[winfo vrooty $w]+[$w yposition $i]+25}]
-	if {($y < $screenh) && ($y+$reqh) > $screenh} {
-	    # show above if we would be offscreen
-	    set y [expr {[winfo rooty $w]+[$w yposition $i]-$reqh-5}]
-	}
+		set y [expr {[winfo rooty $w]+[winfo vrooty $w]+[$w yposition $i]+25}]
+		if {($y < $screenh) && ($y+$reqh) > $screenh} {
+			# show above if we would be offscreen
+			set y [expr {[winfo rooty $w]+[$w yposition $i]-$reqh-5}]
+		}
 	} else {
-	set y [expr {[winfo rooty $w]+[winfo vrooty $w]+[winfo height $w]+5}]
-	if {($y < $screenh) && ($y+$reqh) > $screenh} {
-	    # show above if we would be offscreen
-	    set y [expr {[winfo rooty $w]-$reqh-5}]
-	}
+		set y [expr {[winfo rooty $w]+[winfo vrooty $w]+[winfo height $w]+5}]
+		if {($y < $screenh) && ($y+$reqh) > $screenh} {
+			# show above if we would be offscreen
+			set y [expr {[winfo rooty $w]-$reqh-5}]
+		}
 	}
 	if {$i eq "cursor"} {
-	set x [winfo pointerx $w]
+		set x [winfo pointerx $w]
 	} else {
-	set x [expr {[winfo rootx $w]+[winfo vrootx $w]+
-		     ([winfo width $w]-$reqw)/2}]
+		set x [expr {[winfo rootx $w]+[winfo vrootx $w]+
+				 ([winfo width $w]-$reqw)/2}]
 	}
 	# only readjust when we would appear right on the screen edge
 	if {$x<0 && ($x+$reqw)>0} {
-	set x 0
+		set x 0
 	} elseif {($x < $screenw) && ($x+$reqw) > $screenw} {
-	set x [expr {$screenw-$reqw}]
+		set x [expr {$screenw-$reqw}]
 	}
 	if {[tk windowingsystem] eq "aqua"} {
-	set focus [focus]
+		set focus [focus]
 	}
 	# avoid the blink issue with 1 to <1 alpha on Windows, watch half-fading
 	catch {wm attributes $b -alpha 0.99}
@@ -344,9 +362,9 @@ proc ::tooltip::show {w msg {i {}}} {
 	wm deiconify $b
 	raise $b
 	if {[tk windowingsystem] eq "aqua" && $focus ne ""} {
-	# Aqua's help window steals focus on display
-	#after idle [list focus -force $focus]
-	after idle { catch { focus -force $focus } }
+		# Aqua's help window steals focus on display
+		#after idle [list focus -force $focus]
+		after idle { catch { focus -force $focus } }
 	}
 }
 
@@ -354,26 +372,26 @@ proc ::tooltip::menuMotion {w} {
 	variable G
 
 	if {$G(enabled)} {
-	variable tooltip
+		variable tooltip
 
 		# Menu events come from a funny path, map to the real path.
 		#set m [string map {"#" "."} [winfo name $w]]
 		set m [string map {"#" "."} "[winfo parent $w].[winfo name $w]"]
-	set cur [$w index active]
+		set cur [$w index active]
 
-	# The next two lines (all uses of LAST) are necessary until the
-	# <<MenuSelect>> event is properly coded for Unix/(Windows)?
-	if {$cur == $G(LAST)} return
-	set G(LAST) $cur
-	# a little inlining - this is :hide
-	after cancel $G(AFTERID)
-	catch {wm withdraw $G(TOPLEVEL)}
-	if {[info exists tooltip($m,$cur)] || \
-		(![catch {$w entrycget $cur -label} cur] && \
-		[info exists tooltip($m,$cur)])} {
-	    set G(AFTERID) [after $G(DELAY) \
-		    [namespace code [list show $w $tooltip($m,$cur) cursor]]]
-	}
+		# The next two lines (all uses of LAST) are necessary until the
+		# <<MenuSelect>> event is properly coded for Unix/(Windows)?
+		if {$cur == $G(LAST)} return
+		set G(LAST) $cur
+		# a little inlining - this is :hide
+		after cancel $G(AFTERID)
+		catch {wm withdraw $G(TOPLEVEL)}
+		if {[info exists tooltip($m,$cur)] || \
+			(![catch {$w entrycget $cur -label} cur] && \
+			[info exists tooltip($m,$cur)])} {
+			set G(AFTERID) [after $G(DELAY) \
+				[namespace code [list show $w $tooltip($m,$cur) cursor]]]
+		}
 	}
 }
 
@@ -383,9 +401,9 @@ proc ::tooltip::hide {{fadeOk 0}} {
 	after cancel $G(AFTERID)
 	after cancel $G(FADEID)
 	if {$fadeOk && $G(fade)} {
-	fade $G(TOPLEVEL) $G(FADESTEP)
+		fade $G(TOPLEVEL) $G(FADESTEP)
 	} else {
-	catch {wm withdraw $G(TOPLEVEL)}
+		catch {wm withdraw $G(TOPLEVEL)}
 	}
 }
 
@@ -394,7 +412,7 @@ proc ::tooltip::fade {w step} {
 		catch { wm withdraw $w }
 		catch { wm attributes $w -alpha 0.99 }
 	} else {
-	variable G
+		variable G
 		wm attributes $w -alpha [expr {$alpha-$step}]
 		set G(FADEID) [after 50 [namespace code [list fade $w $step]]]
 	}
@@ -403,12 +421,12 @@ proc ::tooltip::fade {w step} {
 proc ::tooltip::wname {{w {}}} {
 	variable G
 	if {[llength [info level 0]] > 1} {
-	# $w specified
-	if {$w ne $G(TOPLEVEL)} {
-	    hide
-	    destroy $G(TOPLEVEL)
-	    set G(TOPLEVEL) $w
-	}
+		# $w specified
+		if {$w ne $G(TOPLEVEL)} {
+			hide
+			destroy $G(TOPLEVEL)
+			set G(TOPLEVEL) $w
+		}
 	}
 	return $G(TOPLEVEL)
 }
@@ -474,8 +492,8 @@ proc ::tooltip::itemTip {w args} {
 	set G(LAST) -1
 	set item [$w find withtag current]
 	if {$G(enabled) && [info exists tooltip($w,$item)]} {
-	set G(AFTERID) [after $G(DELAY) \
-		[namespace code [list show $w $tooltip($w,$item) cursor]]]
+		set G(AFTERID) [after $G(DELAY) \
+			[namespace code [list show $w $tooltip($w,$item) cursor]]]
 	}
 }
 
