@@ -651,7 +651,7 @@ void analysis( bool mc )
 	}
 	else
 	{
-		if ( ! mc && sim_num > 1 )
+		if ( ! mc && sim_num > 1 && cur_sim > 1 )
 		  cmd( "ttk::messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"Only series from last run are loaded\" -detail \"Click on button 'Add...' to load series from saved simulation results. You can use 'Ctrl' and 'Shift' keys to select multiple files at once. Avoid selecting the results file from last run, as data is already loaded and would be duplicated.\"" );
 
 		cmd( "selectinlist .da.vars.lb.f.v 0 1" );
