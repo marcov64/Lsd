@@ -43,7 +43,7 @@ set linuxPmCmd(urp) "urpmi"
 set linuxPmCmd(apk) "apk add"
 set linuxDefPm "apt"
 
-set linuxMkFile "makefile-linux"
+set linuxMkFile "makefile-linux.txt"
 set linuxOptFile "system_options-linux.txt"
 set notInstall [ list .git/* installer/* lwi/* Rpkg/* Manual/src/* ]
 
@@ -613,7 +613,7 @@ if { [ string equal $CurPlatform linux ] && [ llength $linuxPkgMiss ] > 0 } {
 		}
 
 		ttk::messageBox -parent "" -type ok -title "Package Installation" -icon info -message "User interaction required" -detail "The next step of installation will try to install missing required packages. The user must confirm the installation.\n\nPlease use the same terminal window where this installer was launched. Do not close or interrupt it before installation is complete."
-		set wait [ waitbox .wait "Installing..." "Installing packages\n${lpack}.\n\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. go to the installer terminal window\n2. enter your password if asked\n3. confirm installation" 1 "" ]
+		set wait [ waitbox .wait "Installing..." "Installing packages\n${lpack}.\n\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. go to the installer terminal window\n2. enter your password if asked\n3. confirm installation if required" 1 "" ]
 
 		set scpt [ open "/tmp/install_packages.sh" w ]
 		puts $scpt "#!/bin/bash"
@@ -676,7 +676,7 @@ if { [ string equal $CurPlatform linux ] && [ llength $linuxPkgMiss ] > 0 } {
 if [ string equal $CurPlatform linux ] {
 
 	if { [ llength $pathInclude ] > 1 || [ llength $pathLib ] > 1 } {
-		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Complex include/lib paths" -detail "Your computer has a complex setup of multiple include and lib file paths which cannot be configured automatically.\n\nYou may have to manually adjust the correct paths to the include/lib files in '$linuxMkFile' before compiling LMM and in LSD System Options menu."
+		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Complex include/lib paths" -detail "Your computer has a complex setup of multiple include and lib file paths which cannot be configured automatically.\n\nYou may have to manually adjust the correct paths to the include/lib files in LSD System Options menu and in '$linuxMkFile' before compiling LMM."
 		lappend issues "include/lib paths not configured (nano $linuxMkFile)"
 	}
 
