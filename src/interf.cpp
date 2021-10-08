@@ -3158,7 +3158,7 @@ object *operate( object *r )
 		if ( choice == 2 )
 			break;
 
-		if ( subDir )
+		if ( ( ! no_res || ! no_tot ) && subDir )
 			if ( ! create_res_dir( out_dir ) || ! results_alt_path( out_dir ) )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Subdirectory '%s' cannot be created\" -detail \"Check if the path is set READ-ONLY, or move your configuration file to a different location.\"", out_dir );
