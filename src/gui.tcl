@@ -206,11 +206,11 @@ if { ! [ info exists sysTerm ] || ( $CurPlatform in [ list linux windows ] && [ 
 	set sysTerm $DefaultSysTerm
 }
 
-if { $CurPlatform eq "mac" && ( ! [ info exists $wish ] || $wish eq "wish8.6" ) } { \
+if { $CurPlatform eq "mac" && ( ! [ info exists wish ] || $wish eq "wish8.6" ) } { \
 	set wish $wishMac
 }
 
-if { $CurPlatform eq "windows" && ( ! [ info exists $HtmlBrowser ] || $HtmlBrowser eq "open" ) } { \
+if { $CurPlatform eq "windows" && ( ! [ info exists HtmlBrowser ] || $HtmlBrowser eq "open" ) } { \
 	set HtmlBrowser $browserWindows
 }
 
