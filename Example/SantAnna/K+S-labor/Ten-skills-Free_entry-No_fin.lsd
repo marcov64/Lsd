@@ -1155,7 +1155,7 @@ Param: kappaMax 0 n + n n	0.5
 Param: kappaMin 0 n + n n	0
 Param: lastID2 0 n + n n	0
 Param: m2 0 n + n n	40
-Param: mu20 0 n + n n	0.2
+Param: mu20 0 n + n n	0.225
 Param: mu20Chg 0 n + n n	0.2
 Param: n2 0 n + n n	1
 Param: omega1 0 n + n n	1
@@ -3770,7 +3770,7 @@ Parameter_mu20
 Initial mark-up in consumption-good sector
 (>0)
 _INIT_
-All 1 instances equal to 0.2.
+All 1 instances equal to 0.225
 END_DESCRIPTION
 
 Parameter_mu20Chg
