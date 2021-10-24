@@ -1249,6 +1249,8 @@ bool compile_run( bool run, bool nw )
 					break;
 			}
 		}
+		else
+			cmd( "create_elem_file $modelDir" );
 
 		ret = true;
 	}
@@ -1518,7 +1520,7 @@ char *clean_path( char *filepath )
 	if ( filepath == NULL )
 		return NULL;
 
-	char temp[ strlen( filepath ) + 1 ];
+	char temp[ strlen( filepath ) + 1 ] = "";
 
 	for ( i = 0; i < npref && strncmp( filepath, pref[ i ], strlen( pref[ i ] ) ); ++i );
 
