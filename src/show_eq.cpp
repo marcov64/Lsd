@@ -159,7 +159,7 @@ void show_eq( const char *lab, const char *parWnd )
 			showtop $W.s centerW; \
 			$W.s.e selection range 0 end; \
 			focus $W.s.e \
-		} { LsdHelp equation.html } \"destroytop $w; focus $parWnd\"", lab  );
+		} { LsdHelp equation.html } \"destroytop $w; focus $parWnd\"", lab	);
 	cmd( "bind $w <Control-f> { $_W_%s.b.search invoke }; bind $w <Control-F> { $_W_%s.b.search invoke }", lab, lab );
 	cmd( "bind $w <F3> { \
 			set W $_W_%s; \
@@ -262,7 +262,7 @@ void show_eq( const char *lab, const char *parWnd )
 						else
 							if ( c1_lab[ i ] == ']' )
 							{
-								cmd( "$w.f.text insert end \\]  $mytag" );
+								cmd( "$w.f.text insert end \\]	$mytag" );
 								if ( temp_var == 1 )
 								{
 									temp_var = 0;
@@ -320,7 +320,7 @@ void show_eq( const char *lab, const char *parWnd )
 														cmd( "$w.f.text insert end \"%c\"  $mytag", c1_lab[ i ] );
 													else
 													{
-														cmd( "$w.f.text insert end \\n  $mytag" );
+														cmd( "$w.f.text insert end \\n	$mytag" );
 														if ( comment_line == 1 )
 														{
 															cmd( "set mytag \"\"" );
@@ -329,7 +329,7 @@ void show_eq( const char *lab, const char *parWnd )
 													}
 		}
 	}
-	while ( ( bra > 1 || start == 1 ) && fgets( c1_lab, MAX_LINE_SIZE, f2 ) != NULL  );
+	while ( ( bra > 1 || start == 1 ) && fgets( c1_lab, MAX_LINE_SIZE, f2 ) != NULL	 );
 
 	fclose( f2 );
 
@@ -352,7 +352,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 	no_window = ( parWnd != NULL && strlen( parWnd ) == 0 ) ? true : false;
 
 	// define the correct parent window
-	cmd( "if { %s eq \".chgelem\" } { \
+	cmd( "if { \"%s\" eq \".chgelem\" } { \
 			set list .chgelem.listused_%s \
 		} else { \
 			set list .listused_%s \
@@ -408,14 +408,14 @@ void scan_used_lab( const char *lab, const char *parWnd )
 			strcpy( c1_lab, "" );
 			strcpy( c2_lab, "" );
 
-			for ( done = 0; fgets( c1_lab, MAX_LINE_SIZE, f ) != NULL;  )
+			for ( done = 0; fgets( c1_lab, MAX_LINE_SIZE, f ) != NULL;	)
 			{
-				clean_spaces( c1_lab ); 	// eliminate the spaces
+				clean_spaces( c1_lab );		// eliminate the spaces
 
 				for ( i = 0; c1_lab[ i ] != '"' && c1_lab[ i ] !=  '\0' ; ++i )
 					c2_lab[ i ] = c1_lab[ i ];
 
-				c2_lab[ i ] = '\0'; 			// close the string
+				c2_lab[ i ] = '\0';				// close the string
 
 				if ( ! strcmp( c2_lab, "if(!strcmp(label," ) || ! strcmp( c2_lab, "EQUATION(" ) || ! strcmp( c2_lab, "EQUATION_DUMMY(" ) || ! strcmp( c2_lab, "FUNCTION(" ) )
 				{
@@ -425,7 +425,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 						macro = true;
 
 					for ( j = 0; c1_lab[ i + 1 + j ] != '"'; ++j )
-						c2_lab[ j ] = c1_lab[ i + 1 + j ]; 	// prepare the c2_lab to store the var's label
+						c2_lab[ j ] = c1_lab[ i + 1 + j ];	// prepare the c2_lab to store the var's label
 					c2_lab[ j ] = '\0';
 
 					done = contains( f, lab, strlen( lab ) );
@@ -475,7 +475,7 @@ void scan_using_lab( const char *lab, const char *parWnd )
 		return;
 
 	// define the correct parent window
-	cmd( "if { %s eq \".chgelem\" } { \
+	cmd( "if { \"%s\" eq \".chgelem\" } { \
 			set list .chgelem.listusing_%s \
 		} else { \
 			set list .listusing_%s \
