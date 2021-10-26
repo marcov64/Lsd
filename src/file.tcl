@@ -381,7 +381,7 @@ proc sed { script input } {
 # - pattern - A pattern, as defined by the glob command,
 #	that the files must match
 # - tails - option to return just the tail part of path
-#  	from the directory chosen
+#	from the directory chosen
 #*************************************************************
 proc findfiles { directory pattern { tails "" } } {
 
@@ -657,7 +657,7 @@ proc list_models { } {
 			set mod "$mod (v. $ver)"
 		}
 		if { [ lsearch $lmod $mod ] >= 0 } {
-			set mod "$mod                                                                                                           #[ expr { int( rand( ) * 1000 ) } ]"
+			set mod "$mod																											#[ expr { int( rand( ) * 1000 ) } ]"
 		}
 		lappend lmod "$mod"
 		lappend lgroup $cgroup
@@ -902,7 +902,7 @@ proc make_wait { } {
 		if { [ file exists makemessage.txt ] && [ file size makemessage.txt ] == 0 } {
 			set res 1
 			set t 0
-			while { t < 1000 && [ file exists makemessage.txt ] && [ catch { file delete makemessage.txt } ] } {
+			while { $t < 1000 && [ file exists makemessage.txt ] && [ catch { file delete makemessage.txt } ] } {
 				after 100
 				incr t 100
 			}

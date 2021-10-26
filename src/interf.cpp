@@ -1098,7 +1098,7 @@ int browse( object *r )
 
 	// if simulation was started, check to see if operation is valid
 	if ( running || actual_steps > 0 )
-	 	// search the sorted list of choices that are bad with existing run data
+		// search the sorted list of choices that are bad with existing run data
 		if ( bsearch( & choice, badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints ) != NULL )
 		{
 			if ( discard_change( true, false, "Invalid command after a simulation run." ) )	// for sure there are changes, just get the pop-up
@@ -1929,7 +1929,7 @@ object *operate( object *r )
 					}
 
 					// update element list
-					cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", cur->label  );
+					cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", cur->label	);
 					cmd( "lappend modObj %s", lab );
 
 					change_description( cur->label, lab );
@@ -2121,7 +2121,7 @@ object *operate( object *r )
 		cmd( "ttk::frame $T.b1" );
 
 		cmd( "ttk::frame $T.b1.sav" );
-		cmd( "ttk::checkbutton $T.b1.sav.n -text \"Save: save the series for analysis      \" -variable save -underline 0 -command { if $save { .chgelem.b1.sav.i configure -state normal } { set savei 0; .chgelem.b1.sav.i configure -state disabled } }" );
+		cmd( "ttk::checkbutton $T.b1.sav.n -text \"Save: save the series for analysis	   \" -variable save -underline 0 -command { if $save { .chgelem.b1.sav.i configure -state normal } { set savei 0; .chgelem.b1.sav.i configure -state disabled } }" );
 		cmd( "ttk::checkbutton $T.b1.sav.i -text \"Save in separate files\" -variable savei -underline 17" );
 		cmd( "if { ! $save } { set savei 0; .chgelem.b1.sav.i configure -state disabled }" );
 		cmd( "pack $T.b1.sav.n $T.b1.sav.i -side left -anchor w" );
@@ -2179,7 +2179,7 @@ object *operate( object *r )
 		cmd( "ttk::button $Td.b.eq -width [ expr { $butWid + 2 } ] -text \"Equation\" -command { set done 3 } -underline 1" );
 		cmd( "ttk::button $Td.b.auto_doc -width [ expr { $butWid + 2 } ] -text \"Auto Desc.\" -command { set done 9 } -underline 0" );
 		cmd( "ttk::button $Td.b.us -width [ expr { $butWid + 2 } ] -text \"Using Elem.\" -command { set done 4 } -underline 0" );
-		cmd( "ttk::button $Td.b.using -width [ expr { $butWid + 2 } ] -text \"Elem. Used\" -command { set done  7} -underline 0" );
+		cmd( "ttk::button $Td.b.using -width [ expr { $butWid + 2 } ] -text \"Elem. Used\" -command { set done	7} -underline 0" );
 
 		if ( ! strcmp( cd->type, "Parameter" ) )
 			cmd( "pack $Td.b.auto_doc $Td.b.us -padx $butSpc -side left" );
@@ -2424,7 +2424,7 @@ object *operate( object *r )
 			cmd( "ttk::radiobutton $T.v.o.var -text Variable -variable nature -value 0 -underline 0 -command { $T.n.lag configure -state normal }" );
 			cmd( "ttk::radiobutton $T.v.o.par -text Parameter -variable nature -value 1 -underline 0 -command { $T.n.lag configure -state disabled }" );
 			cmd( "ttk::radiobutton $T.v.o.fun -text Function -variable nature -value 2 -underline 0 -command { $T.n.lag configure -state disabled }" );
-			cmd( "pack  $T.v.o.var $T.v.o.par $T.v.o.fun -anchor w" );
+			cmd( "pack	$T.v.o.var $T.v.o.par $T.v.o.fun -anchor w" );
 
 			cmd( "pack $T.v.l $T.v.o" );
 
@@ -2537,10 +2537,10 @@ object *operate( object *r )
 			}
 
 			// remove from element lists
-			cmd( "if [ info exists modElem ] { set pos [ lsearch -exact $modElem %s ]; if { $pos >= 0 } { set modElem [ lreplace $modElem $pos $pos ] } }", lab_old  );
-			cmd( "if [ info exists modPar ] { set pos [ lsearch -exact $modPar %s ]; if { $pos >= 0 } { set modPar [ lreplace $modPar $pos $pos ] } }", lab_old  );
-			cmd( "if [ info exists modVar ] { set pos [ lsearch -exact $modVar %s ]; if { $pos >= 0 } { set modVar [ lreplace $modVar $pos $pos ] } }", lab_old  );
-			cmd( "if [ info exists modFun ] { set pos [ lsearch -exact $modFun %s ]; if { $pos >= 0 } { set modFun [ lreplace $modFun $pos $pos ] } }", lab_old  );
+			cmd( "if [ info exists modElem ] { set pos [ lsearch -exact $modElem %s ]; if { $pos >= 0 } { set modElem [ lreplace $modElem $pos $pos ] } }", lab_old	 );
+			cmd( "if [ info exists modPar ] { set pos [ lsearch -exact $modPar %s ]; if { $pos >= 0 } { set modPar [ lreplace $modPar $pos $pos ] } }", lab_old	 );
+			cmd( "if [ info exists modVar ] { set pos [ lsearch -exact $modVar %s ]; if { $pos >= 0 } { set modVar [ lreplace $modVar $pos $pos ] } }", lab_old	 );
+			cmd( "if [ info exists modFun ] { set pos [ lsearch -exact $modFun %s ]; if { $pos >= 0 } { set modFun [ lreplace $modFun $pos $pos ] } }", lab_old	 );
 
 			if ( ! delVar )
 			{
@@ -3171,7 +3171,7 @@ object *operate( object *r )
 		run:
 
 		for ( n = r; n->up != NULL; n = n->up );
-		reset_blueprint( n );			    // update blueprint to consider last changes
+		reset_blueprint( n );				// update blueprint to consider last changes
 
 		if ( overwConf )					// save if needed
 		{
@@ -3287,7 +3287,7 @@ object *operate( object *r )
 
 		if ( ! save_configuration( ) )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"The model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", simul_name  );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"The model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", simul_name	);
 		}
 		else
 			unsaved_change( false );					// signal no unsaved change
@@ -3449,7 +3449,7 @@ object *operate( object *r )
 		cmd( "bind $T.f.b.e1 <KeyPress-Return> { focus $T.f.d.e2; $T.f.d.e2 selection range 0 end }" );
 		cmd( "bind $T.f.d.e2 <KeyPress-Return> { focus $T.f.e.e2; $T.f.e.e2 selection range 0 end }" );
 		cmd( "bind $T.f.e.e2 <KeyPress-Return> { focus $T.f.f.e2; $T.f.f.e2 selection range 0 end }" );
-		cmd( "bind $T.f.f.e2 <KeyPress-Return>  { focus $T.b.ok }" );
+		cmd( "bind $T.f.f.e2 <KeyPress-Return>	{ focus $T.b.ok }" );
 
 		cmd( "showtop $T" );
 		cmd( "mousewarpto $T.b.ok 0" );
@@ -3704,7 +3704,7 @@ object *operate( object *r )
 		cmd( "foreach var $unusVar { plog \"Variable :\t\"; plog \"$var\n\" highlight }" );
 		cmd( "foreach fun $unusFun { plog \"Function :\t\"; plog \"$fun\n\" highlight }" );
 		cmd( "foreach par $unusPar { plog \"Parameter:\t\"; plog \"$par\n\" highlight }" );
-		cmd( "foreach obj $unusObj { plog \"Object   :\t\"; plog \"$obj\n\" highlight }" );
+		cmd( "foreach obj $unusObj { plog \"Object	 :\t\"; plog \"$obj\n\" highlight }" );
 
 		cmd( "set res [ expr { [ llength $unusVar ] + [ llength $unusFun ] + [ llength $unusPar ] + [ llength $unusObj ] } ]" );
 		if ( get_int( "res" ) == 0 )
@@ -5185,7 +5185,7 @@ object *operate( object *r )
 				break;
 
 			// empty sensitivity data
-			empty_sensitivity( rsense ); 			// discard read data
+			empty_sensitivity( rsense );			// discard read data
 			rsense = NULL;
 			unsavedSense = false;					// nothing to save
 			findexSens = 0;
@@ -5321,7 +5321,7 @@ object *operate( object *r )
 		snprintf( lab, MAX_PATH_LENGTH,"%s%s%s", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
 
 		// write export file (text mode)
-		f = fopen( lab, "wt" );  // use text mode for Windows better compatibility
+		f = fopen( lab, "wt" );	 // use text mode for Windows better compatibility
 		if ( f == NULL )
 		{
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Saved elements configuration file not saved\" -detail \"Please check if the file name and path are valid.\"" );
@@ -5375,7 +5375,7 @@ object *operate( object *r )
 		snprintf( lab, MAX_PATH_LENGTH,"%s%s%s", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
 
 		// write export file (text mode)
-		f = fopen( lab, "wt" );  // use text mode for Windows better compatibility
+		f = fopen( lab, "wt" );	 // use text mode for Windows better compatibility
 		if ( f == NULL )
 		{
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity limits file not saved\" -detail \"Please check if the file name and path are valid.\"" );
@@ -5439,7 +5439,7 @@ object *operate( object *r )
 			break;
 
 		// empty sensitivity data
-		empty_sensitivity( rsense ); 			// discard read data
+		empty_sensitivity( rsense );			// discard read data
 		plog( "\nSensitivity data removed.\n" );
 		rsense = NULL;
 		unsavedSense = false;					// nothing to save
@@ -5813,7 +5813,7 @@ object *operate( object *r )
 				}
 				else
 				{	// get the selected file names, one by one
-					cmd( "set res3 [ lindex $bah %d ]; set res3 [ file tail $res3 ]; set last [ expr { [ string last .lsd $res3 ] - 1 } ]; set res3 [ string range $res3 0 $last ]", j - 1  );
+					cmd( "set res3 [ lindex $bah %d ]; set res3 [ file tail $res3 ]; set last [ expr { [ string last .lsd $res3 ] - 1 } ]; set res3 [ string range $res3 0 $last ]", j - 1	);
 					get_str( "res3", out_file, MAX_PATH_LENGTH - 4 );
 					snprintf( lab_old, 2 * MAX_PATH_LENGTH, "%s.log", out_file );
 
@@ -6179,7 +6179,7 @@ object *operate( object *r )
 		{
 			if ( ! save_configuration( ) )
 			{
-				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY, or try to save to a different location.\"", simul_name  );
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY, or try to save to a different location.\"", simul_name	);
 				break;
 			}
 			else
@@ -6230,7 +6230,7 @@ object *operate( object *r )
 		if ( strlen( path ) > 0 )
 			cmd( "cd \"$path\"" );
 
-		cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Network Structure File\"  -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } { {All files} {*} } } ]" );
+		cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Network Structure File\"	 -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } { {All files} {*} } } ]" );
 		choice = 0;
 		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr { $posExt + 1 } ] end ]; set netFile [ string range $netFile 0 [ expr { $posExt - 1 } ] ] } { set netExt \"\" } } { set choice 2 }" );
 		if ( choice == 2 )
@@ -6402,7 +6402,7 @@ object *operate( object *r )
 			cmd( "cd \"$path\"" );
 
 		cmd( "set bah \"%s\"", simul_name );
-		cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Network Structure File\"  -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
+		cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Network Structure File\"	 -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
 		choice = 0;
 		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr { $posExt + 1 } ] end ]; set netFile [ string range $netFile 0 [ expr { $posExt - 1 } ] ] } { set netExt \"\" } } { set choice 2 }" );
 		if ( choice == 2 )
@@ -6960,26 +6960,26 @@ Define keyboard shortcuts to menu items
 ****************************************************/
 void set_shortcuts( const char *window )
 {
-	cmd( "bind %s <Control-l> { set choice 17 }; bind %s <Control-L> { set choice 17 }", window, window  );
-	cmd( "bind %s <Control-s> { set choice 18 }; bind %s <Control-S> { set choice 18 }", window, window  );
-	cmd( "bind %s <Control-e> { set choice 20 }; bind %s <Control-E> { set choice 20 }", window, window  );
-	cmd( "bind %s <Control-q> { set choice 11 }; bind %s <Control-Q> { set choice 11 }", window, window  );
-	cmd( "bind %s <Control-v> { set param 0; set choice 2 }; bind %s <Control-V> { set param 0; set choice 2 }", window, window  );
-	cmd( "bind %s <Control-p> { set param 1; set choice 2 }; bind %s <Control-P> { set param 1; set choice 2 }", window, window  );
-	cmd( "bind %s <Control-n> { set param 2; set choice 2 }; bind %s <Control-N> { set param 2; set choice 2 }", window, window  );
+	cmd( "bind %s <Control-l> { set choice 17 }; bind %s <Control-L> { set choice 17 }", window, window	 );
+	cmd( "bind %s <Control-s> { set choice 18 }; bind %s <Control-S> { set choice 18 }", window, window	 );
+	cmd( "bind %s <Control-e> { set choice 20 }; bind %s <Control-E> { set choice 20 }", window, window	 );
+	cmd( "bind %s <Control-q> { set choice 11 }; bind %s <Control-Q> { set choice 11 }", window, window	 );
+	cmd( "bind %s <Control-v> { set param 0; set choice 2 }; bind %s <Control-V> { set param 0; set choice 2 }", window, window	 );
+	cmd( "bind %s <Control-p> { set param 1; set choice 2 }; bind %s <Control-P> { set param 1; set choice 2 }", window, window	 );
+	cmd( "bind %s <Control-n> { set param 2; set choice 2 }; bind %s <Control-N> { set param 2; set choice 2 }", window, window	 );
 	cmd( "bind %s <Control-d> { set choice 3 }; bind %s <Control-D> { set choice 3 }", window, window  );
-	cmd( "bind %s <Control-o> { set choice 19 }; bind %s <Control-O> { set choice 19 }", window, window  );
-	cmd( "bind %s <Control-i> { set choice 21 }; bind %s <Control-I> { set choice 21 }", window, window  );
-	cmd( "bind %s <Control-a> { set choice 26 }; bind %s <Control-A> { set choice 26 }", window, window  );
+	cmd( "bind %s <Control-o> { set choice 19 }; bind %s <Control-O> { set choice 19 }", window, window	 );
+	cmd( "bind %s <Control-i> { set choice 21 }; bind %s <Control-I> { set choice 21 }", window, window	 );
+	cmd( "bind %s <Control-a> { set choice 26 }; bind %s <Control-A> { set choice 26 }", window, window	 );
 	cmd( "bind %s <Control-r> { set choice 1 }; bind %s <Control-R> { set choice 1 }", window, window  );
-	cmd( "bind %s <Control-m> { set choice 22 }; bind %s <Control-M> { set choice 22 }", window, window  );
-	cmd( "bind %s <Control-f> { set choice 50 }; bind %s <Control-F> { set choice 50 }", window, window  );
-	cmd( "bind %s <Control-u> { set choice 28 }; bind %s <Control-U> { set choice 28 }", window, window  );
-	cmd( "bind %s <Control-g> { set choice 30 }; bind %s <Control-G> { set choice 30 }", window, window  );
-	cmd( "bind %s <Control-b> { set choice 34 }; bind %s <Control-B> { set choice 34 }", window, window  );
-	cmd( "bind %s <Control-z> { set choice 37 }; bind %s <Control-Z> { set choice 37 }", window, window  );
-	cmd( "bind %s <Control-w> { set choice 38 }; bind %s <Control-W> { set choice 38 }", window, window  );
-	cmd( "bind %s <Control-Tab> { set choice 70 }", window  );
+	cmd( "bind %s <Control-m> { set choice 22 }; bind %s <Control-M> { set choice 22 }", window, window	 );
+	cmd( "bind %s <Control-f> { set choice 50 }; bind %s <Control-F> { set choice 50 }", window, window	 );
+	cmd( "bind %s <Control-u> { set choice 28 }; bind %s <Control-U> { set choice 28 }", window, window	 );
+	cmd( "bind %s <Control-g> { set choice 30 }; bind %s <Control-G> { set choice 30 }", window, window	 );
+	cmd( "bind %s <Control-b> { set choice 34 }; bind %s <Control-B> { set choice 34 }", window, window	 );
+	cmd( "bind %s <Control-z> { set choice 37 }; bind %s <Control-Z> { set choice 37 }", window, window	 );
+	cmd( "bind %s <Control-w> { set choice 38 }; bind %s <Control-W> { set choice 38 }", window, window	 );
+	cmd( "bind %s <Control-Tab> { set choice 70 }", window	);
 }
 
 
@@ -7054,13 +7054,13 @@ void shift_var( int direction, const char *vlab, object *r )
 	if ( direction == -1 )
 	{	// shift up
 		if ( ! strcmp( vlab, r->v->label ) )
-			return; 	// variable already at the top
+			return;		// variable already at the top
 
 		if ( ! strcmp( vlab, r->v->next->label ) )
 		{	// second var, must become the head of the chain
 			cv = r->v->next->next;	// third
-			cv1 = r->v; 			// first
-			r->v = r->v->next; 		// shifted up
+			cv1 = r->v;				// first
+			r->v = r->v->next;		// shifted up
 			r->v->next = cv1;
 			cv1->next = cv;
 			return;
@@ -7086,7 +7086,7 @@ void shift_var( int direction, const char *vlab, object *r )
 		if ( ! strcmp( vlab, r->v->label ) )
 		{	// it's the first
 			if ( r->v->next == NULL )
-				return; 			// it is unique
+				return;				// it is unique
 
 			cv = r->v;				// first
 			cv1 = cv->next->next;	// third
@@ -7125,13 +7125,13 @@ void shift_desc( int direction, const char *dlab, object *r )
 	if ( direction == -1 )
 	{	// shift up
 		if ( ! strcmp( dlab, r->b->blabel ) )
-			return; 	// object already at the top
+			return;		// object already at the top
 
 		if ( ! strcmp( dlab, r->b->next->blabel ) )
 		{	// second var, must become the head of the chain
 			cb = r->b->next->next;	// third
-			cb1 = r->b; 			// first
-			r->b = r->b->next; 		// shifted up
+			cb1 = r->b;				// first
+			r->b = r->b->next;		// shifted up
 			r->b->next = cb1;
 			cb1->next = cb;
 			return;
@@ -7157,7 +7157,7 @@ void shift_desc( int direction, const char *dlab, object *r )
 		if ( ! strcmp( dlab, r->b->blabel ) )
 		{	// it's the first
 			if ( r->b->next == NULL)
-				return; 			// it is unique
+				return;				// it is unique
 
 			cb = r->b;				// first
 			cb1 = cb->next->next;	// third
@@ -7358,7 +7358,7 @@ SENSITIVITY_TOO_LARGE
 ****************************************************/
 bool sensitivity_too_large( long numSaPts )
 {
-	cmd( "set answer [ ttk::messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"The required  number (%ld) of configuration points to perform sensitivity analysis is likely too large to be processed in reasonable time.\n\nPress 'OK' if you want to continue anyway or 'Cancel' to abort the command now.\" ]; switch -- $answer { ok { set choice 0 } cancel { set choice 1 } }", numSaPts );
+	cmd( "set answer [ ttk::messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"The required	 number (%ld) of configuration points to perform sensitivity analysis is likely too large to be processed in reasonable time.\n\nPress 'OK' if you want to continue anyway or 'Cancel' to abort the command now.\" ]; switch -- $answer { ok { set choice 0 } cancel { set choice 1 } }", numSaPts );
 
 		return choice;
 }
@@ -7380,7 +7380,7 @@ SENSITIVITY_CREATED
 ****************************************************/
 void sensitivity_created( const char *path, const char *sim_name, int findex )
 {
-	cmd( "ttk::messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis you have to start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsdNW  -f  [ fn_break [ file nativename \"%s/%s\" ] 40 ]  -s  %d\"", path, sim_name, findex );
+	cmd( "ttk::messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis you have to start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsdNW	 -f	 [ fn_break [ file nativename \"%s/%s\" ] 40 ]	-s	%d\"", path, sim_name, findex );
 }
 
 

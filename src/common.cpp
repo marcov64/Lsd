@@ -239,7 +239,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 	}
 
 	// check installation directory for no spaces in name
-	cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set res 1 } { set res 0 }" );
+	cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0	} { set res 1 } { set res 0 }" );
 	if ( res )
 	{
 		log_tcl_error( false, "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
@@ -1080,7 +1080,7 @@ void make_makefile( bool nw )
  compile LSD, GUI or command line
  and optionally execute it
  *********************************/
-bool compile_run( bool run, bool nw )
+bool compile_run( int run_mode, bool nw )
 {
 	bool ret = false;
 	char str[ 2 * MAX_PATH_LENGTH ];
@@ -1104,7 +1104,7 @@ bool compile_run( bool run, bool nw )
 		goto end;
 	}
 
-	if ( ! run && ! nw )		// delete existing object file if it's just compiling
+	if ( run_mode == 0 && ! nw )// delete existing object file if it's just compiling
 	{							// to force recompilation
 		cmd( "set oldObj \"[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
 		cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
@@ -1143,13 +1143,13 @@ bool compile_run( bool run, bool nw )
 	}
 
 	// show compilation banner
-	cmd( "if { ( [ info exists autoHide ] && ! $autoHide ) || ! %d } { \
+	cmd( "if { ( [ info exists autoHide ] && ! $autoHide ) || %d == 0 } { \
 			set parWnd .; \
 			set posWnd centerW \
 		} else { \
 			set parWnd \"\"; \
 			set posWnd centerS \
-		}", run );
+		}", run_mode );
 
 	cmd( "newtop .t \"Please Wait\" \"\" $parWnd" );
 
@@ -1158,7 +1158,7 @@ bool compile_run( bool run, bool nw )
 	else
 		cmd( "ttk::label .t.l1 -style bold.TLabel -justify center -text \"Compiling model...\"" );
 
-	if ( run )
+	if ( run_mode != 0 )
 		cmd( "ttk::label .t.l2 -justify center -text \"Just recompiling equation file(s) changes.\nOn success, the new model program will be launched.\nOn failure, a new window will show the compilation errors.\"" );
 	else
 		if ( nw )
@@ -1178,7 +1178,7 @@ bool compile_run( bool run, bool nw )
 
 	// minimize LMM if required
 	cmd( "set res $autoHide" );				// get auto hide status
-	if ( res && run )						// hide LMM?
+	if ( res && run_mode != 0 )				// hide LMM?
 		cmd( "wm iconify ." );
 
 #endif
@@ -1217,40 +1217,46 @@ bool compile_run( bool run, bool nw )
 	if ( res == 0 )							// compilation failure?
 	{
 		cmd( "set res $autoHide" );			// get auto hide status
-		if ( run && res )					// auto unhide LMM if necessary
-			cmd( "focustop .f.t.t" );  		// only reopen if error
+		if ( run_mode != 0 && res )			// auto unhide LMM if necessary
+			cmd( "focustop .f.t.t" );		// only reopen if error
 		show_comp_result( nw );				// show errors
 	}
 	else
 	{
 		if ( nw )
 			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n[ fn_break [ file nativename \"$modelDir\" ] 40 ]\n\nto another computer (including the subdirectory '$LsdSrc'). After the copy, use the following steps to use it:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\"" );
-
-		if ( run )							// no problem - execute
-		{
-			// create the element list file in background and try to open 10 times every 50 ms
-			cmd( "after 0 { create_elem_file $modelDir }" );
-			cmd( "update" );
-			cmd( "set n 10" );
-			cmd( "set result \"\"" );
-
-			switch ( platform )
-			{
-				case _LIN_:
-					cmd( "while { [ catch { exec -- ./%s & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
-					break;
-
-				case _MAC_:
-					cmd( "while { [ catch { exec -- open -F -n ./%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
-					break;
-
-				case _WIN_:
-					cmd( "while { [ catch { exec -- %s.exe & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
-					break;
-			}
-		}
 		else
-			cmd( "create_elem_file $modelDir" );
+		{
+			if ( run_mode != 0 )				// no problem - execute
+			{
+				// create the element list file in background and try to open 10 times every 50 ms
+				cmd( "after 0 { create_elem_file $modelDir }" );
+				cmd( "update" );
+
+				if ( run_mode == 1 )			// run executable directly (not debugger)
+				{
+					cmd( "set n 10" );
+					cmd( "set result \"\"" );
+
+					switch ( platform )
+					{
+						case _LIN_:
+							cmd( "while { [ catch { exec -- ./%s & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
+							break;
+
+						case _MAC_:
+							cmd( "while { [ catch { exec -- open -F -n ./%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
+							break;
+
+						case _WIN_:
+							cmd( "while { [ catch { exec -- %s.exe & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
+							break;
+					}
+				}
+			}
+			else
+				cmd( "create_elem_file $modelDir" );
+		}
 
 		ret = true;
 	}
@@ -1259,7 +1265,7 @@ bool compile_run( bool run, bool nw )
 
 	if ( res == 0 )							// compilation failure?
 	{
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Compilation failed\" -detail \"The command-line model program  ('lsdNW') could not be compiled, likely due to a syntax problem.\n\nPlease go to LMM,  choose menu 'Model'/'Generate 'No Window' Version' to recompile, and check the Compilation Errors window for details on the problem(s).\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Compilation failed\" -detail \"The command-line model program	('lsdNW') could not be compiled, likely due to a syntax problem.\n\nPlease go to LMM,  choose menu 'Model'/'Generate 'No Window' Version' to recompile, and check the Compilation Errors window for details on the problem(s).\"" );
 	}
 	else
 		ret = true;
@@ -1664,7 +1670,7 @@ bool strwsp( const char *str )
 	while ( isspace( ( unsigned char ) *str ) )
 		++str;
 
-	if ( *str == '\0' )  		// all spaces?
+	if ( *str == '\0' )			// all spaces?
 		return true;
 
 	return false;
@@ -1721,7 +1727,7 @@ int strtrim( char *out, const char *str, int outSz )
 	while ( isspace( ( unsigned char ) *str ) )
 		++str;
 
-	if ( *str == '\0' )  		// all spaces?
+	if ( *str == '\0' )			// all spaces?
 	{
 		out[ 0 ] = '\0';
 		return 1;
@@ -1968,12 +1974,12 @@ void exception_handler( int signum, const char *what )
 #endif
 		case SIGSTL:
 			snprintf( msg1, MAX_LINE_SIZE, "SIGSTL (%s)", what != NULL && strlen( what ) > 0 ? what : "STL exception" );
-			strcpyn( msg2, "Maybe an invalid math or data operation?\n  Check your standard C++ library calls' arguments", MAX_LINE_SIZE );
+			strcpyn( msg2, "Maybe an invalid math or data operation?\n	Check your standard C++ library calls' arguments", MAX_LINE_SIZE );
 			break;
 
 		case SIGMEM:
 			snprintf( msg1, MAX_LINE_SIZE, "SIGMEM (%s)", what != NULL && strlen( what ) > 0 ? what : "Out of memory" );
-			strcpyn( msg2, "Maybe too many series saved?\n  Try to reduce the number of series saved or the number of time steps", MAX_LINE_SIZE );
+			strcpyn( msg2, "Maybe too many series saved?\n	Try to reduce the number of series saved or the number of time steps", MAX_LINE_SIZE );
 			break;
 
 		case SIGABRT:
@@ -1993,7 +1999,7 @@ void exception_handler( int signum, const char *what )
 
 		case SIGSEGV:
 			snprintf( msg1, MAX_LINE_SIZE, "SIGSEGV (%s)", signal_name( signum ) );
-			strcpyn( msg2, "Maybe an invalid pointer?\n  Also ensure no group of objects has zero elements.", MAX_LINE_SIZE );
+			strcpyn( msg2, "Maybe an invalid pointer?\n	 Also ensure no group of objects has zero elements.", MAX_LINE_SIZE );
 		break;
 		default:
 			snprintf( msg1, MAX_LINE_SIZE, "Unknown signal (%s)", signal_name( signum ) );

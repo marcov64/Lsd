@@ -171,7 +171,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "set env(LSDROOT) $RootLsd" );
 	}
 
-	s =  get_str( "RootLsd" );
+	s =	 get_str( "RootLsd" );
 	if ( s != NULL && strlen( s ) > 0 )
 	{
 		rootLsd = new char[ strlen( s ) + 1 ];
@@ -236,7 +236,7 @@ int lsdmain( int argn, const char **argv )
 
 	// fix non-existent or old options file for new options
 	if ( i == 0 )
-		update_lmm_options( );	 			// update config file
+		update_lmm_options( );				// update config file
 
 	// Tcl global variables
 	cmd( "set choice 0" );
@@ -783,7 +783,7 @@ int lsdmain( int argn, const char **argv )
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" );
 	}
 	else
-		choice = 33; 				// open model browser
+		choice = 33;				// open model browser
 
 	cmd( "settop . no { set choice 1 } no yes" );
 	cmd( "focus .f.t.t" );
@@ -835,7 +835,7 @@ int lsdmain( int argn, const char **argv )
 		{
 			Tcl_DoOneEvent( 0 );
 		}
-		catch ( bad_alloc& ) 		// raise memory problems
+		catch ( bad_alloc& )		// raise memory problems
 		{
 			throw;
 		}
@@ -870,11 +870,15 @@ int lsdmain( int argn, const char **argv )
 	// Run the model
 	if ( choice == 2 || choice == 6 )
 	{
-		cmd( "if { \"[ check_sys_opt ]\" ne \"\" } { if { [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
+		cmd( "if { [ check_sys_opt ] ne \"\" } { \
+				if { [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { \
+					set choice 0 \
+				} \
+			}" );
 
 		if ( choice != 0 )
 		{
-			compile_run( choice == 2 ? true : false );
+			compile_run( choice == 2 ? 1 : 0 );
 			choice = 0;
 		}
 
@@ -983,7 +987,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "lappend udi [ .f.t.t index insert ]" );
 
 		if ( choice == 50 )
-			choice = 46; 			// go to create makefile, after the model selection
+			choice = 46;			// go to create makefile, after the model selection
 		else
 			choice = 0;
 
@@ -1402,6 +1406,32 @@ int lsdmain( int argn, const char **argv )
 	// Run the model in the gdb debugger
 	if ( choice == 13 || choice == 58 )
 	{
+		cmd( "if { ! [ catch { set f [ open $modelDir/$MODEL_OPTIONS r ] } ] } { \
+				set a [ string trim [ read $f ] ]; \
+				close $f; \
+				set pos [ string first \"SWITCH_CC=\" $a ]; \
+				if { $pos == -1 || [ string first \" -g\" $a $pos ] == -1 } { \
+					if { [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Debugger switch not detected\" -detail \"The current model configuration does not seem to have the debugger switch set. To fix it, please use menu option 'Model>Model Options', mark the 'Debug' check box, and then click on 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { \
+						set choice 0 \
+					} \
+				} \
+			}" );
+
+		if ( choice == 0 )
+			goto loop;
+
+		cmd( "if { [ check_sys_opt ] ne \"\" } { \
+				if { [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { \
+					set choice 0 \
+				} \
+			}" );
+
+		if ( choice == 0 || ! compile_run( 2 ) )		// recompile if changed
+		{
+			choice = 0;
+			goto loop;
+		}
+
 		s = get_str( "modelName" );
 		if ( s == NULL || ! strcmp( s, "" ) )
 		{
@@ -2741,7 +2771,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "if { $numobj == 1 } { set choice 1 } { set choice 0 }" );
 		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
-		if ( choice  == 1 )
+		if ( choice	 == 1 )
 		{
 		cmd( "if { $v_obj eq \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\" }" );
 		cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\" }" );
@@ -3400,7 +3430,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "pack .a.d.l .a.d.e" );
 
 		cmd( "ttk::frame .a.i" );
-		cmd( "ttk::label .a.i.l" ); 			// ID or weight
+		cmd( "ttk::label .a.i.l" );				// ID or weight
 		cmd( "ttk::entry .a.i.e -width 6 -textvariable v_num -justify center" );
 		cmd( "bind .a.i.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "pack .a.i.l .a.i.e" );
@@ -3477,7 +3507,7 @@ int lsdmain( int argn, const char **argv )
 
 		cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
 		cmd( "ttk::radiobutton .a.c.b.e -text \"Node ID\" -width 8 -variable v_type -value 0 -command { .a.v.l configure -text \"Number v\\\[x\\] to assign to\"; write_any .a.v.e %d; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }", v_counter );
-		cmd( "ttk::radiobutton .a.c.b.f -text \"Node name\" -width 8 -variable v_type -value 1 -command { .a.v.l configure -text \"char  pointer to assign to\"; write_any .a.v.e \"\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }" );
+		cmd( "ttk::radiobutton .a.c.b.f -text \"Node name\" -width 8 -variable v_type -value 1 -command { .a.v.l configure -text \"char	 pointer to assign to\"; write_any .a.v.e \"\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }" );
 		cmd( "ttk::radiobutton .a.c.b.g -text \"Link weight\" -width 8 -variable v_type -value 2 -command { .a.v.l configure -text \"Number v\\\[x\\] to assign to\"; write_any .a.v.e %d; .a.o.l configure -text \"Link pointer\"; write_any .a.o.e curl }", v_counter );
 		cmd( "bind .a.c.b.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 		cmd( "bind .a.c.b.f <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
@@ -3845,7 +3875,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "ttk::frame .a.v" );
 		cmd( "ttk::label .a.v.l -text \"Link pointer\"" );
 		cmd( "ttk::entry .a.v.e -width 6 -textvariable v_obj -justify center" );
-		cmd( "bind .a.v.e <Return>  { focus .a.f.ok }" );
+		cmd( "bind .a.v.e <Return>	{ focus .a.f.ok }" );
 		cmd( "pack .a.v.l .a.v.e" );
 
 		cmd( "pack .a.c .a.d .a.v -padx 5 -pady 5" );
@@ -4260,7 +4290,7 @@ int lsdmain( int argn, const char **argv )
 
 		cmd( "set groupDir [ lindex $lrn 0 ]" );	// the group dir is the same for every element
 		if ( choice == 14 )
-			goto loop; 								// create a new model/group
+			goto loop;								// create a new model/group
 
 		cmd( "set modelDir [ lindex $ldn $result ]" );
 		cmd( "set fileDir $modelDir" );
@@ -4656,7 +4686,7 @@ int lsdmain( int argn, const char **argv )
 			cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
 			cmd( "puts $f [ string trim [ .l.t.text get 1.0 end ] ]" );
 			cmd( "close $f" );
-			choice = 46; 	//go to create makefile
+			choice = 46;	//go to create makefile
 		}
 		else
 			choice = 0;
@@ -4694,14 +4724,10 @@ int lsdmain( int argn, const char **argv )
 		cmd( "set gcc_opt \"$gcc_conf -O3\nSWITCH_CC_LNK=\"" );
 
 		cmd( "set pos [ string first \"SWITCH_CC=\" $a ]" );
-		cmd( "if { $pos == -1 } { \
-				set choice 0 \
-			} { \
-				if { [ string first \" -g\" $a $pos ] == -1 } { \
-					set debug 0 \
-				} { \
-					set debug 1 \
-				} \
+		cmd( "if { $pos == -1 || [ string first \" -g\" $a $pos ] == -1 } { \
+				set debug 0 \
+			} else { \
+				set debug 1 \
 			}" );
 
 		cmd( "newtop .l \"Model Options\" { set choice 2 }" );
@@ -5075,7 +5101,7 @@ int lsdmain( int argn, const char **argv )
 			for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
 				cmd( "set %s \"$temp_var%d\"", lmm_options[ i - 1 ], i );
 
-			update_lmm_options( ); 					// update config file
+			update_lmm_options( );					// update config file
 
 			// adjust text styles and apply
 			cmd( "ttk::style configure fixed.TText -font [ font create -family \"$fonttype\" -size $dim_character ]" );
@@ -5333,10 +5359,10 @@ int lsdmain( int argn, const char **argv )
 					}" );
 
 			// find the range of lines to reeval the coloring
-			const char *curPosIni = get_str( "curPosIni" ); 	// position before insertion
-			const char *curPosFin = get_str( "curPosFin" ); 	// position after insertion
-			const char *curSelIni = get_str( "curSelIni" ); 	// selection before insertion
-			const char *curSelFin = get_str( "curSelFin" ); 	// selection after insertion
+			const char *curPosIni = get_str( "curPosIni" );		// position before insertion
+			const char *curPosFin = get_str( "curPosFin" );		// position after insertion
+			const char *curSelIni = get_str( "curSelIni" );		// selection before insertion
+			const char *curSelFin = get_str( "curSelFin" );		// selection after insertion
 
 			// collect all selection positions, before and after change
 			float curPos[ 6 ];
@@ -5398,9 +5424,9 @@ bool is_source_file( const char *fname )
 	cmd( "set ext \"[ file extension \"%s\" ]\"", fname );
 	const char *ext = get_str( "ext" );
 
-	return ! strcmp( ext, ".cpp" ) || ! strcmp( ext, ".c" )   || ! strcmp( ext, ".C" )   || \
+	return ! strcmp( ext, ".cpp" ) || ! strcmp( ext, ".c" )	  || ! strcmp( ext, ".C" )	 || \
 		   ! strcmp( ext, ".CPP" ) || ! strcmp( ext, ".Cpp" ) || ! strcmp( ext, ".c++" ) || \
-		   ! strcmp( ext, ".C++" ) || ! strcmp( ext, ".h" )   || ! strcmp( ext, ".H" )   || \
+		   ! strcmp( ext, ".C++" ) || ! strcmp( ext, ".h" )	  || ! strcmp( ext, ".H" )	 || \
 		   ! strcmp( ext, ".hpp" ) || ! strcmp( ext, ".HPP" ) || ! strcmp( ext, ".Hpp" );
 }
 
@@ -5455,7 +5481,7 @@ int strwrds( const char string[ ] )
 }
 
 // map syntax highlight level to the number of color types to use
-#define ITEM_COUNT( ptrArray )  ( sizeof( ptrArray ) / sizeof( ptrArray[0] ) )
+#define ITEM_COUNT( ptrArray )	( sizeof( ptrArray ) / sizeof( ptrArray[0] ) )
 int map_color( int hiLev )
 {
 	if ( ! sourcefile || hiLev == 0 )
@@ -5651,7 +5677,7 @@ void show_comp_result( bool nw )
 	cmd( "ttk::button .mm.b.perr -width [ expr { $butWid + 4 } ] -text \"Previous Error\" -underline 0 -command { \
 			focus .mm.t.t; \
 			set start \"$cerr linestart\"; \
-			set errtemp [ .mm.t.t search -nocase -regexp -count errlen -backward -- $error $start 1.0];  \
+			set errtemp [ .mm.t.t search -nocase -regexp -count errlen -backward -- $error $start 1.0];	 \
 			if { [ string length $errtemp ] != 0 } { \
 				set cerr $errtemp; \
 				.mm.t.t mark set insert $errtemp; \
@@ -5669,7 +5695,7 @@ void show_comp_result( bool nw )
 				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errlin [ lindex $errdat $idxfil ] \
 				} else { \
-					set errlin  \"\" \
+					set errlin	\"\" \
 				}; \
 				incr idxfil; \
 				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
@@ -5708,7 +5734,7 @@ void show_comp_result( bool nw )
 				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errlin [ lindex $errdat $idxfil ] \
 				} else { \
-					set errlin  \"\" \
+					set errlin	\"\" \
 				}; \
 				incr idxfil; \
 				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \

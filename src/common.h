@@ -29,7 +29,7 @@
 #define _LSD_MAJOR_ 8
 #define _LSD_MINOR_ 0
 #define _LSD_VERSION_ "8.0-beta-4"
-#define _LSD_DATE_ "September 30 2021"   // __DATE__
+#define _LSD_DATE_ "September 30 2021"	 // __DATE__
 
 // standard libraries used
 #include <cstdlib>
@@ -96,10 +96,10 @@
 #define SIGSTL NSIG + 2					// standard library exception signal
 
 // Special file names/locations in Windows
-#define TCL_LIB_VAR 	"TCL_LIBRARY"
-#define TCL_LIB_PATH 	"gnu/lib/tcl8.6"// must NOT use backslashes
-#define TCL_LIB_INIT 	"init.tcl"
-#define TCL_EXEC_PATH 	"gnu\\bin"		// must use (double) backslashes
+#define TCL_LIB_VAR		"TCL_LIBRARY"
+#define TCL_LIB_PATH	"gnu/lib/tcl8.6"// must NOT use backslashes
+#define TCL_LIB_INIT	"init.tcl"
+#define TCL_EXEC_PATH	"gnu\\bin"		// must use (double) backslashes
 #define TCL_FIND_EXE	"@where wish86.exe > nul 2>&1"
 
 // Eigen library include command
@@ -401,7 +401,7 @@ struct netLink							// individual outgoing link
 
 	netLink( object *origNode, object *destNode, double linkWeight = 0, double destProb = 1 );
 										// constructor
-	~netLink( void ); 					// destructor
+	~netLink( void );					// destructor
 };
 
 struct store
@@ -438,7 +438,7 @@ struct sense
 	sense *next;
 };
 
-struct design 							// design of experiment object
+struct design							// design of experiment object
 {
 	int typ, tab, n, k, *par, *lag;		// experiment parameters
 	double *hi, *lo, **ptr;
@@ -546,7 +546,7 @@ extern int quit;						// simulation termination control flag
 #ifndef _FUN_
 
 // common standalone internal C functions/procedures (not visible to the users)
-bool compile_run( bool run, bool nw = false );
+bool compile_run( int run_mode, bool nw = false );
 bool expr_eq( const char *tcl_exp, const char *c_str );
 bool eval_bool( const char *tcl_exp );
 bool exists_var( const char *lab );
