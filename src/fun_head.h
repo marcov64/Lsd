@@ -286,6 +286,8 @@ bool no_ptr_chk = true;
 #define CURRENT ( var->val[ 0 ] )
 #define THIS ( p )
 #define CALLER ( c )
+#define NAME ( ( const char * ) p->label )
+#define NAMES( O ) ( chk_ptr( O ) ? NULL : ( const char * ) O->label )
 #define NEXT ( p->next )
 #define NEXTS( O ) ( CHK_PTR_OBJ( O ) O->next )
 #define PARENT ( p->up )
