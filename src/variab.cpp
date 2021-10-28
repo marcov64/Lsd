@@ -401,7 +401,7 @@ double variable::cal( object *caller, int lag )
 
 	// Compute the Variable's equation
 	user_exception = true;			// allow distinguishing among internal & user exceptions
-	try 							// do it while catching exceptions to avoid obscure aborts
+	try								// do it while catching exceptions to avoid obscure aborts
 	{
 		app = fun( caller );
 	}
@@ -433,6 +433,7 @@ double variable::cal( object *caller, int lag )
 
 	for ( i = 0; i < num_lag; ++i ) // scale down the past values
 		val[ num_lag - i ] = val[ num_lag - i - 1 ];
+
 	val[ 0 ] = app;
 
 	last_update = t;
@@ -618,7 +619,7 @@ void worker::cal_worker( void )
 				if ( setjmp( env ) )		// allow recovering from signals
 					return;
 #endif
-				try 						// do it while catching exceptions to avoid obscure aborts
+				try							// do it while catching exceptions to avoid obscure aborts
 				{
 					app = var->fun( NULL );
 				}
@@ -771,7 +772,7 @@ void worker::signal( int sig )
 			strcpy( signame, "Unknown signal" );
 	}
 
-	if ( var != NULL && var->label != NULL  )
+	if ( var != NULL && var->label != NULL	)
 		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'. Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, var->label, var->up->label != NULL ? var->up->label : "(none)" );
 	else
 		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread.\nDisable parallel computation to prevent this situation.", signame );

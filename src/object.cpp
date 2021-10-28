@@ -64,9 +64,9 @@ corresponding linked list and then follow all the chain again.
 		   /\
 	   ||
 	   ||___________
-	  |             |
-	  |char *label  |------> object *next
-	  |variable *v  |
+	  |				|
+	  |char *label	|------> object *next
+	  |variable *v	|
 	  |_____________|
 	   ||
 	   ||-----> bridge *b -----> object *b->head ------> *b->head->next ----> ...
@@ -355,7 +355,7 @@ void object::init( object *_up, const char *lab, bool _to_compute )
 	node = NULL;				// not part of a network yet
 	cext = NULL;				// no C++ object extension yet
 	acounter = 0;				// "fail safe" when creating labels
-	lstCntUpd = 0; 				// counter never updated
+	lstCntUpd = 0;				// counter never updated
 	del_flag = NULL;			// address of flag to signal deletion
 	deleting = false;			// not being deleted
 }
@@ -414,7 +414,7 @@ void object::update( bool recurse, bool user )
 				cv->cal( NULL, 0 );
 		}
 
-		if ( ! deleted  )
+		if ( ! deleted	)
 		{
 			if ( cv->save || cv->savei )
 				cv->data[ t - cv->start ] = cv->val[ 0 ];
@@ -2113,16 +2113,32 @@ forcing recalculation if already calculated
 ****************************************************/
 double object::recal( const char *lab )
 {
+	int i;
+	double app;
 	variable *cv;
 
 	cv = search_var_err( this, lab, no_search, false, "recalculating" );
 	if ( cv == NULL )
 		return NAN;
 
+	// don't do anything if not yet computed in t
+	if ( cv->last_update < t || cv->num_lag < 1 )
+		return( cv->val[ 0 ] );
+
+	app = cv->val[ 0 ];
+
+	for ( i = 0; i < cv->num_lag; ++i )		// scale up the past values
+		cv->val[ i ] = cv->val[ i + 1 ];
+
+	if ( ( cv->save || cv->savei ) && i + 1 <= t - cv->start )
+		cv->val[ i ] = cv->data[ t - i - 1 - cv->start ];
+	else
+		cv->val[ i ] = NAN;
+
 	cv->last_update = t - 1;
 	cv->next_update = t;
 
-	return cv->val[ 0 ];
+	return app;
 }
 
 
@@ -3022,7 +3038,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 	{
 		b = ran1( ) * a;
 	}
-	while ( b == a ); 	// avoid ran1 == 1
+	while ( b == a );	// avoid ran1 == 1
 
 	a = cur1->cal( lv, lag );
 	for ( cur = cur1, cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cnext )
@@ -3066,7 +3082,7 @@ object *object::draw_rnd( const char *lab )
 	{
 		b = ran1( ) * a;
 	}
-	while ( b == a ); 	// avoid ran1 == 1
+	while ( b == a );	// avoid ran1 == 1
 
 	for ( a = 1, cur = cur1, cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cur1->next )
 	{

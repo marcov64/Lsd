@@ -15,16 +15,16 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>42</o:Revision>
-  <o:TotalTime>1891</o:TotalTime>
+  <o:Revision>45</o:Revision>
+  <o:TotalTime>1907</o:TotalTime>
   <o:Created>2019-04-20T21:15:00Z</o:Created>
-  <o:LastSaved>2021-03-31T23:34:00Z</o:LastSaved>
+  <o:LastSaved>2021-10-27T18:05:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>27936</o:Words>
-  <o:Characters>150860</o:Characters>
-  <o:Lines>1257</o:Lines>
-  <o:Paragraphs>356</o:Paragraphs>
-  <o:CharactersWithSpaces>178440</o:CharactersWithSpaces>
+  <o:Words>27992</o:Words>
+  <o:Characters>151157</o:Characters>
+  <o:Lines>1259</o:Lines>
+  <o:Paragraphs>357</o:Paragraphs>
+  <o:CharactersWithSpaces>178792</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -34,7 +34,6 @@ target="LSD_macros_arquivos/props008.xml">
 <link rel=colorSchemeMapping href="LSD_macros_arquivos/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
-  <w:Zoom>110</w:Zoom>
   <w:SpellingState>Clean</w:SpellingState>
   <w:TrackMoves>false</w:TrackMoves>
   <w:TrackFormatting/>
@@ -3352,6 +3351,7 @@ target="LSD_macros_arquivos/props008.xml">
 	mso-font-signature:0 0 0 0 0 0;}
 @font-face
 	{font-family:Leelawadee;
+	panose-1:2 11 5 2 4 2 4 2 2 3;
 	mso-font-charset:0;
 	mso-generic-font-family:auto;
 	mso-font-pitch:auto;
@@ -3394,6 +3394,7 @@ target="LSD_macros_arquivos/props008.xml">
 	mso-font-signature:0 0 0 0 0 0;}
 @font-face
 	{font-family:"Microsoft Uighur";
+	panose-1:2 0 0 0 0 0 0 0 0 0;
 	mso-font-charset:0;
 	mso-generic-font-family:auto;
 	mso-font-pitch:auto;
@@ -7843,9 +7844,9 @@ lang=EN-US>.</span></p>
 
 <p><span lang=EN-US>Never use </span><span class=Cdigo><span lang=EN-US><a
 href="#_DELETE(_obj_)">DELETE(…)</a></span></span><span lang=EN-US> inside a </span><span
-class=Cdigo><span lang=EN-US>CYCLE(…)</span></span><span lang=EN-US> to remove
-one of the Objects being cycled at any nesting level. In fact, deleting any
-Object pointed to by </span><span class=Cdigo><span lang=EN-US><a
+class=Cdigo><span lang=EN-US>CYCLE(…)</span></span><span lang=EN-US> to remove one
+of the Objects being cycled at any nesting level. In fact, deleting any Object
+pointed to by </span><span class=Cdigo><span lang=EN-US><a
 href="#_Temporary_Object's_pointers:">cur</a></span></span><span lang=EN-US>
 prevents the </span><span class=Cdigo><span lang=EN-US>CYCLE(…)</span></span><span
 lang=EN-US>from identifying the next one in the brotherhood chain. Instead, use
@@ -8532,13 +8533,13 @@ mso-ansi-language:PT-BR'>ADDHOOK( <i>num</i> ), ADDHOOKS( <span class=SpellE><i>
 <p class=MsoNormal><span lang=EN-US>The modeler may allocate as many <a
 href="#_Hook_pointers:_HOOK(…)">dynamic hooks</a> as necessary for any Object
 by informing the desired number <i>num</i> in </span><span class=Cdigo><span
-lang=EN-US>ADDHOOK(…)</span></span><span lang=EN-US>. Dynamic hooks are
-numbered stating from zero so <i>num</i> must be an integer equal or larger
-than zero. The allocated dynamic hooks will be numbered from zero to <i>num</i>
-– 1. Hooks may be added to the current Object instance </span><span
-class=Cdigo><span lang=EN-US><a href="#_Parent_Object:_p">THIS</a></span></span><span
-lang=EN-US> (the one containing the Variable/Function being computed) or to the
-one <a href="#_Temporary_Object's_pointers:">pointed by <i>obj</i></a>.</span></p>
+lang=EN-US>ADDHOOK(…)</span></span><span lang=EN-US>. Dynamic hooks are numbered
+stating from zero so <i>num</i> must be an integer equal or larger than zero.
+The allocated dynamic hooks will be numbered from zero to <i>num</i> – 1. Hooks
+may be added to the current Object instance </span><span class=Cdigo><span
+lang=EN-US><a href="#_Parent_Object:_p">THIS</a></span></span><span lang=EN-US>
+(the one containing the Variable/Function being computed) or to the one <a
+href="#_Temporary_Object's_pointers:">pointed by <i>obj</i></a>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The always available single, un-numbered
 static hook does not need to and cannot be allocated using </span><span
@@ -8676,10 +8677,10 @@ INIT_LAT( <i>color</i>, <i>rows</i>, <i>cols</i>, <i>width</i>, <i>height</i> )<
 
 <p class=MsoNormal><span lang=EN-US>These Macros create a bi-dimensional
 lattice graphical window available for simulation run time updating. The
-lattice is formed by <i>rows</i> lines and <i>cols</i> columns, set to 100 × 100
-by default. The user can also set the physical window size as <i>width</i> × <i>height</i>
-pixels, set to 400 × 400 by default, and the background <i>color</i>, set to
-white if not explicitly defined (see the available colors in </span><span
+lattice is formed by <i>rows</i> lines and <i>cols</i> columns, set to 100 ×
+100 by default. The user can also set the physical window size as <i>width</i>
+× <i>height</i> pixels, set to 400 × 400 by default, and the background <i>color</i>,
+set to white if not explicitly defined (see the available colors in </span><span
 class=Cdigo><span lang=EN-US><a href="#_WRITE_LAT(_row,_col">WRITE_LAT(…)</a></span></span><span
 lang=EN-US>).</span></p>
 
@@ -9046,8 +9047,8 @@ class=SpellE><i>node_Lab</i></span>&quot; )<br>
 )<o:p></o:p></span></h1>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
-lang=EN-US>STAT_NET(…)</span></span><span lang=EN-US> Macros provides statistics
-of a Network composed by the Objects labelled <span class=SpellE><i>node_Lab</i></span>,
+lang=EN-US>STAT_NET(…)</span></span><span lang=EN-US> Macros provides
+statistics of a Network composed by the Objects labelled <span class=SpellE><i>node_Lab</i></span>,
 descending from the Object pointed by <i>obj</i> or the current Object </span><span
 class=Cdigo><span lang=EN-US><a href="#_Parent_Object:_p">THIS</a></span></span><span
 lang=EN-US> otherwise. The results are stored in the <a href="#_CURRENT">temporary
@@ -9092,8 +9093,8 @@ maximum out-degree</span></p>
 6.0pt;margin-left:50.15pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·</span><span lang=EN-US style='font-size:7.0pt;
 font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span><span class=Cdigo><span lang=EN-US>v[5]</span></span><span lang=EN-US>: density
-(including loops)</span></p>
+</span><span class=Cdigo><span lang=EN-US>v[5]</span></span><span lang=EN-US>:
+density (including loops)</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>STAT_NODE(…)</span></span><span lang=EN-US> Macros return the number
@@ -9128,8 +9129,8 @@ SEARCH_NODES( <i>obj</i>, &quot;<span class=SpellE><i>node_Lab</i></span>&quot;,
 class=SpellE><i>node_obj</i></span>, <i>id </i>)<o:p></o:p></span></h1>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
-lang=EN-US>SEARCH_NODE(…)</span></span><span lang=EN-US> Macros search for a Node
-from a Network composed by the Objects labelled <span class=SpellE><i>node_Lab</i></span>,
+lang=EN-US>SEARCH_NODE(…)</span></span><span lang=EN-US> Macros search for a
+Node from a Network composed by the Objects labelled <span class=SpellE><i>node_Lab</i></span>,
 descending from the Object pointed by <i>obj</i> or the current Object </span><span
 class=Cdigo><span lang=EN-US><a href="#_Parent_Object:_p">THIS</a></span></span><span
 lang=EN-US> otherwise, for the first occurrence of an ID <span class=SpellE><i>id</i></span>.
@@ -9358,8 +9359,8 @@ current Object </span><span class=Cdigo><span lang=EN-US><a
 href="#_Parent_Object:_p"><span style='color:gray;text-decoration:none;
 text-underline:none'><span style='mso-field-code:" HYPERLINK  \\l \0022_Current_Object\:_THIS\0022 "'><u><span
 style='color:blue'>THIS</span></u></span></span></a></span></span><span
-lang=EN-US>, or from Object <i>obj</i>, if supplied. The Network topology is created
-using one of the available pseudorandom network generators (see below)
+lang=EN-US>, or from Object <i>obj</i>, if supplied. The Network topology is
+created using one of the available pseudorandom network generators (see below)
 configured with parameters <i>par1</i> and <i>par2</i> to include a number <i>nodes</i>
 of Nodes. If the existing number of instances of Object <span class=SpellE><i>node_Lab</i></span>
 is less than the required number of nodes, the missing objects are
@@ -9463,8 +9464,8 @@ is 0 for 4 neighbors and 1 for 8 neighbors per cell</span></p>
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>INIT_NET(…)</span></span><span lang=EN-US> Macro return the
 effective number of directed links (arcs) of the generated network. According
-to the generator used, the Network may have to be reshuffled before use, applying
-</span><span class=Cdigo><span lang=EN-US><a
+to the generator used, the Network may have to be reshuffled before use,
+applying </span><span class=Cdigo><span lang=EN-US><a
 href="#_SHUFFLE_NET(_&quot;node_Lab&quot;_),_1">SHUFFLE_NET(…)</a></span></span><span
 lang=EN-US>.</span></p>
 
@@ -9517,10 +9518,10 @@ descendants from current Object </span><span class=Cdigo><span lang=EN-US><a
 href="#_Parent_Object:_p"><span style='color:gray;text-decoration:none;
 text-underline:none'><span style='mso-field-code:" HYPERLINK  \\l \0022_Current_Object\:_THIS\0022 "'><u><span
 style='color:blue'>THIS</span></u></span></span></a></span></span><span
-lang=EN-US>, or from Object <i>obj</i>, if supplied. The Network is not affected
-by these Macros. The filename may contain a path if saving to a particular
-directory is required. If no directory is included in filename, the file is
-saved to the current LSD model configuration directory.</span></p>
+lang=EN-US>, or from Object <i>obj</i>, if supplied. The Network is not
+affected by these Macros. The filename may contain a path if saving to a
+particular directory is required. If no directory is included in filename, the
+file is saved to the current LSD model configuration directory.</span></p>
 
 <p><span lang=EN-US>If multiple simulation runs are going on xx (the seed) is
 automatically incremented sequentially, forcing the loading from or the saving
@@ -9561,8 +9562,8 @@ that are descendants from current Object </span><span class=Cdigo><span
 lang=EN-US><a href="#_Parent_Object:_p"><span style='color:gray;text-decoration:
 none;text-underline:none'><span style='mso-field-code:" HYPERLINK  \\l \0022_Current_Object\:_THIS\0022 "'><u><span
 style='color:blue'>THIS</span></u></span></span></a></span></span><span
-lang=EN-US>, or from Object <i>obj</i>, if supplied. The Network is not affected
-by these Macros. The <i>filename</i> may contain a path if saving to a
+lang=EN-US>, or from Object <i>obj</i>, if supplied. The Network is not
+affected by these Macros. The <i>filename</i> may contain a path if saving to a
 particular directory is required. If no directory is included in filename, the
 file is saved to the current LSD model configuration directory.</span></p>
 
@@ -9824,8 +9825,8 @@ calculate the average income</span><span lang=EN-US><br>
 <h1><a name=Math></a><span lang=EN-US style='mso-fareast-font-family:"Times New Roman"'>Mathematical
 and statistical functions<o:p></o:p></span></h1>
 
-<p><span lang=EN-US>Besides the LSD specific Macros, modelers can use the several
-mathematical and statistical functions, as listed below. </span></p>
+<p><span lang=EN-US>Besides the LSD specific Macros, modelers can use the
+several mathematical and statistical functions, as listed below. </span></p>
 
 <h2><span lang=EN-US style='mso-fareast-font-family:"Times New Roman"'>Constants<o:p></o:p></span></h2>
 
@@ -9852,8 +9853,8 @@ exponential of <i>a</i></span></p>
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 lang=EN-US style='font-family:Symbol'>·</span><span lang=EN-US
 style='font-size:7.0pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span><b><span lang=EN-US>fact( <i>a</i> )</span></b><span lang=EN-US>: the factorial
-of <i>a</i></span></p>
+</span><b><span lang=EN-US>fact( <i>a</i> )</span></b><span lang=EN-US>: the
+factorial of <i>a</i></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 lang=EN-US style='font-family:Symbol'>·</span><span lang=EN-US
@@ -10009,8 +10010,8 @@ random draw from a geometric distribution with probability <i>p</i></span></p>
 lang=EN-US style='font-family:Symbol'>·</span><span lang=EN-US
 style='font-size:7.0pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span><span class=SpellE><b><span lang=EN-US>lnorm</span></b></span><b><span
-lang=EN-US>( <i>mean</i>, <i>dev</i> )</span></b><span lang=EN-US>: a random
-draw from a lognormal distribution with mean <span class=SpellE><i>mean</i></span>
+lang=EN-US>( <i>mean</i>, <i>dev</i> )</span></b><span lang=EN-US>: a random draw
+from a lognormal distribution with mean <span class=SpellE><i>mean</i></span>
 and standard deviation <i>dev</i></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
@@ -10216,8 +10217,7 @@ lang=EN-US> and so on.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>To compute the matrix determinant and to
 directly access elements in the matrix created above in a </span><span
-class=Cdigo><span lang=EN-US>Firm</span></span><span lang=EN-US> Object
-Equation:</span></p>
+class=Cdigo><span lang=EN-US>Firm</span></span><span lang=EN-US> Object Equation:</span></p>
 
 <p><span class=Cdigo><span lang=EN-US>…<br>
 v[0] = DO_EXT( <span class=SpellE>MatrixXd</span>, determinant );&nbsp; </span></span><span
@@ -10292,8 +10292,8 @@ above on Eigen usage.</span></p>
 compilation. Only enable Eigen if it is being used in the equation file.</span></p>
 
 <h2><a name="_#define_EQ_USER_VARS_var1;"></a><a name="eq_user_vars"></a><span
-style='mso-ansi-language:PT-BR'>#define EQ_USER_VARS <i style='mso-bidi-font-style:
-normal'>var1</i>; <i style='mso-bidi-font-style:normal'>var2</i>; …<o:p></o:p></span></h2>
+lang=EN-US>#define EQ_USER_VARS <i style='mso-bidi-font-style:normal'>var1</i>;
+<i style='mso-bidi-font-style:normal'>var2</i>; …</span></h2>
 
 <p><span lang=EN-US>The statement allows the definition of user temporary local
 variables which are visible in all Equations. Multiple variable definitions (<i
@@ -10320,19 +10320,19 @@ This is a recommended practice in C++ programing, considering the language does
 not check for pointers validity before they are used. Usage of non-initialized
 pointers is a common cause of models crashing LSD. However, pointer
 initialization adds overhead to the simulation execution. The definition of </span><span
-class=Cdigo><span lang=EN-US>NO_POINTER_INIT</span></span><span lang=EN-US>
-disables the default LSD pointer initialization behavior and eliminates the
-associated performance penalty.</span></p>
+class=Cdigo><span lang=EN-US>NO_POINTER_INIT</span></span><span lang=EN-US> disables
+the default LSD pointer initialization behavior and eliminates the associated
+performance penalty.</span></p>
 
 <p><span lang=EN-US>The </span><span class=Cdigo><span lang=EN-US>#define
-NO_POINTER_INIT</span></span><span lang=EN-US> statement must be placed/uncommented
-<i>before</i> the </span><span class=Cdigo><span lang=EN-US>#include <span
-class=SpellE>fun_head_fast.h</span></span></span><span lang=EN-US> line in the
-equation file.&nbsp; Please note that pointer checking is always disabled when
-the legacy LSD header file </span><span class=SpellE><span class=Cdigo><span
-lang=EN-US>fun_head.h</span></span></span><span lang=EN-US> is used instead of </span><span
-class=SpellE><span class=Cdigo><span lang=EN-US>fun_head_fast.h</span></span></span><span
-lang=EN-US>.</span></p>
+NO_POINTER_INIT</span></span><span lang=EN-US> statement must be
+placed/uncommented <i>before</i> the </span><span class=Cdigo><span lang=EN-US>#include
+<span class=SpellE>fun_head_fast.h</span></span></span><span lang=EN-US> line
+in the equation file.&nbsp; Please note that pointer checking is always
+disabled when the legacy LSD header file </span><span class=SpellE><span
+class=Cdigo><span lang=EN-US>fun_head.h</span></span></span><span lang=EN-US>
+is used instead of </span><span class=SpellE><span class=Cdigo><span
+lang=EN-US>fun_head_fast.h</span></span></span><span lang=EN-US>.</span></p>
 
 <p><span lang=EN-US>Additionally, checking for NULL (or invalid) pointers
 before their usage also add overhead to the simulation execution. To disable
@@ -10561,18 +10561,18 @@ lang=EN-US> to <i>value</i>. The standard default value is 0 (zero).</span></p>
 lang=EN-US>DELETING, DELETING( <i>obj</i> )</span></h2>
 
 <p><span lang=EN-US>Test if the current the Object instance currently under
-computation, or the one pointed by <i>obj</i>, has been already set for
-deletion but was not yet effectively deleted because one or more of its
-Variables are still under computation (see </span><span class=Cdigo><span
-lang=EN-US><a href="#_DELETE(_obj_)">DELETE(…)</a></span></span><span
-lang=EN-US> for details). A zero result (<i>true</i>) indicates the Object instance
-is not set for deletion (yet). Values different than zero (<i>false</i>) mean
-the instance is going to be deleted soon and should not normally be considered.</span></p>
+computation, or the one pointed by <i>obj</i>, has been already set for deletion
+but was not yet effectively deleted because one or more of its Variables are
+still under computation (see </span><span class=Cdigo><span lang=EN-US><a
+href="#_DELETE(_obj_)">DELETE(…)</a></span></span><span lang=EN-US> for
+details). A zero result (<i>true</i>) indicates the Object instance is not set
+for deletion (yet). Values different than zero (<i>false</i>) mean the instance
+is going to be deleted soon and should not normally be considered.</span></p>
 
 <p><span lang=EN-US>All pending computations, upstream to the one triggering
-the deletion, must account for this delay, during which the to be deleted
-instance is still present and affecting calculations. The </span><span
-class=Cdigo><span lang=EN-US><a href="#_DELETING,_DELETING(_obj">DELETING(…)</a></span></span><span
+the deletion, must account for this delay, during which the to be deleted instance
+is still present and affecting calculations. The </span><span class=Cdigo><span
+lang=EN-US><a href="#_DELETING,_DELETING(_obj">DELETING(…)</a></span></span><span
 lang=EN-US> Macros can be used to detect if an Object instance is currently
 waiting to be deleted.</span></p>
 
@@ -10947,10 +10947,19 @@ class=SpellE><i>obj</i></span>, &quot;<span class=SpellE><i>Lab</i></span>&quot;
 <p><span lang=EN-US>Mark the Variable named <i>Lab</i> contained in the Object
 currently under computation as not calculated in the current time, forcing
 recalculation if it has been already calculated. If the Variable has not been
-calculated yet or if <i>Lab</i> is a Parameter, </span><span class=Cdigo><span
+calculated yet, or if <i>Lab</i> is a Parameter, </span><span class=Cdigo><span
 lang=EN-US>RECALC(…)</span></span><span lang=EN-US> does nothing. If <a
-href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is
-supplied, Variable labelled <i>Lab</i> is supposed to be located in it.</span></p>
+href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is supplied,
+Variable labelled <i>Lab</i> is supposed to be located in it. This macro
+returns the current value of Variable <i>Lab</i>, without recalculating it if
+not already done.</span></p>
+
+<p><span lang=EN-US>For not yet computed lagged Variables, </span><span
+class=Cdigo><span lang=EN-US>RECALC(…)</span></span><span lang=EN-US> has to
+“slide back” the past values. However, the oldest lagged value cannot be
+recovered except if the Variable <i>Lab</i> is marked to be saved. Lost lagged
+values are replaced by a </span><span class=Cdigo><span lang=EN-US>NAN</span></span><span
+lang=EN-US> (not a number) value.</span></p>
 
 <p><span lang=EN-US>If Variable has a non-default updating scheme defined, </span><span
 class=Cdigo><span lang=EN-US>RECALC(…)</span></span><span lang=EN-US> also sets
@@ -11102,10 +11111,10 @@ href="#_SEARCH(_&quot;obj_Lab&quot;_),">SEARCH(…)</a></span></u></span><span
 lang=EN-US>) or a value (like </span><span class=Cdigo><u><span lang=EN-US
 style='color:blue'><a href="#_SEARCH_CND(_&quot;Lab&quot;,_value">SEARCH_CND(…)</a></span></u></span><span
 lang=EN-US>), </span><span class=Cdigo><span lang=EN-US>TSEARCH(…)</span></span><span
-lang=EN-US> family looks for the Object position (<i>pos</i>) in the
-brotherhood chain of Object instances named <span class=SpellE><i>obj_Lab</i></span>.
-<i>pos</i> can be set from 1 (first object in the chain) up to the total number
-of objects in the brotherhood. </span></p>
+lang=EN-US> family looks for the Object position (<i>pos</i>) in the brotherhood
+chain of Object instances named <span class=SpellE><i>obj_Lab</i></span>. <i>pos</i>
+can be set from 1 (first object in the chain) up to the total number of objects
+in the brotherhood. </span></p>
 
 <p><span lang=EN-US>A pointer to the instance in the <i>pos</i> position of the
 chain is returned by </span><span class=Cdigo><span lang=EN-US>TSEARCH(…)</span></span><span
@@ -11214,9 +11223,9 @@ Objects marked <a href="browser.html#changeobject">not to be computed</a> are
 not computed in this case. The defined Variable <a href="browser.html#updating">updating
 scheme</a> is always honored.</span></p>
 
-<p><span lang=EN-US>A typical application of these Macros is the updating of
-aggregate Variables before the deletion of Objects containing Variables used in
-the aggregates computation.</span></p>
+<p><span lang=EN-US>A typical application of these Macros is the updating of aggregate
+Variables before the deletion of Objects containing Variables used in the
+aggregates computation.</span></p>
 
 <h2><a name="_NO_NAN_USE_NAN"></a><a name="_V_CHEAT(_&quot;Lab&quot;,_fake_caller_2"></a><a
 name="V_CHEAT"></a><span lang=EN-US style='mso-fareast-font-family:"Times New Roman"'>V_CHEAT(
@@ -11301,17 +11310,16 @@ ADDEXT_INIT( <i>class</i><span style='mso-bidi-font-style:italic'>, <i>initializ
 
 <p><span lang=EN-US>These Macros adds an arbitrary C++ data extension of type <i>class</i>
 to the current LSD Object under computation, allocating memory space for it. If
-an <a href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is
-supplied, the data extension is added to this specific Object. The data
-extension can be from a simple scalar variable to a fully defined C++ object
-like a </span><span class=Cdigo><span lang=EN-US>class</span></span><span
-lang=EN-US> or a </span><span class=Cdigo><span lang=EN-US>struct</span></span><span
-lang=EN-US>. Data extension allocation is automatically handled by LSD, being
-destroyed when the host Object is deleted (C++ object constructor and
-destructor are called accordingly). Each LSD Object instance can have a single
-data extension; adding an extension (of the same <i style='mso-bidi-font-style:
-normal'>class</i>) when one already exists automatically destroys the previous
-one.</span></p>
+an <a href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is supplied,
+the data extension is added to this specific Object. The data extension can be
+from a simple scalar variable to a fully defined C++ object like a </span><span
+class=Cdigo><span lang=EN-US>class</span></span><span lang=EN-US> or a </span><span
+class=Cdigo><span lang=EN-US>struct</span></span><span lang=EN-US>. Data
+extension allocation is automatically handled by LSD, being destroyed when the
+host Object is deleted (C++ object constructor and destructor are called
+accordingly). Each LSD Object instance can have a single data extension; adding
+an extension (of the same <i style='mso-bidi-font-style:normal'>class</i>) when
+one already exists automatically destroys the previous one.</span></p>
 
 <p><span lang=EN-US>The </span><span class=Cdigo><span lang=EN-US>ADDEXT_INIT(…)</span></span><span
 lang=EN-US> variations allow for defining the C++ class initialization
@@ -11461,8 +11469,8 @@ containers, like vectors and arrays, have it. If you create your own container
 class, you have to explicitly define an </span><span class=Cdigo><span
 lang=EN-US>iterator</span></span><span lang=EN-US> method.</span></p>
 
-<p><span lang=EN-US>If the target LSD Object has no data extension set
-previously by </span><span class=Cdigo><u><span lang=EN-US style='color:blue'><a
+<p><span lang=EN-US>If the target LSD Object has no data extension set previously
+by </span><span class=Cdigo><u><span lang=EN-US style='color:blue'><a
 href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>CYCLE_EXT(…)</span></span><span lang=EN-US> does
 nothing.</span></p>
@@ -11545,9 +11553,9 @@ lang=EN-US> for this purpose.</span></p>
 <p><span lang=EN-US>If the target LSD Object has no data extension set
 previously by </span><span class=Cdigo><u><span lang=EN-US style='color:blue'><a
 href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span><span lang=EN-US>, </span><span
-class=Cdigo><span lang=EN-US>DO_EXT(…)</span></span><span lang=EN-US> return value
-is undefined. If unsure if the extension exists, it is advisable to check it
-before executing </span><span class=Cdigo><span lang=EN-US>DO_EXT(…)</span></span><span
+class=Cdigo><span lang=EN-US>DO_EXT(…)</span></span><span lang=EN-US> return
+value is undefined. If unsure if the extension exists, it is advisable to check
+it before executing </span><span class=Cdigo><span lang=EN-US>DO_EXT(…)</span></span><span
 lang=EN-US>, testing for a non-</span><span class=Cdigo><span lang=EN-US>NULL</span></span><span
 lang=EN-US> </span><span class=Cdigo><u><span lang=EN-US style='color:blue'><a
 href="#_P_EXT(_class_),_1">P_EXT(…)</a></span></u></span><span lang=EN-US>
@@ -11661,8 +11669,8 @@ style='color:blue'>THIS</span></u></span></span></a></span></span><span
 lang=EN-US>, or from the Object pointed by <i>obj</i>. The Macros return value
 can be assigned to any existing C++ variable of the same type. </span></p>
 
-<p><span lang=EN-US>If the target LSD Object has no data extension set previously
-by </span><span class=Cdigo><u><span lang=EN-US style='color:blue'><a
+<p><span lang=EN-US>If the target LSD Object has no data extension set
+previously by </span><span class=Cdigo><u><span lang=EN-US style='color:blue'><a
 href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>V_EXT(…)</span></span><span lang=EN-US> return
 value is undefined. If unsure if the extension exists or not, it is advisable
@@ -11716,12 +11724,11 @@ normal'>after</i> the value to be written.</span></p>
 <p><span lang=EN-US>If the target LSD Object has no data extension set
 previously by </span><span class=Cdigo><u><span lang=EN-US style='color:blue'><a
 href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span><span lang=EN-US>, </span><span
-class=Cdigo><span lang=EN-US>WRITE_EXT(…)</span></span><span lang=EN-US> do
-nothing. If the extension is not a C++ </span><span class=Cdigo><span
-lang=EN-US>class</span></span><span lang=EN-US> or </span><span class=Cdigo><span
-lang=EN-US>struct</span></span><span lang=EN-US>, or the named <i>var</i> does
-not exist inside it nor has a type incompatible with <i>value</i>, a compiler
-error message is thrown.</span></p>
+class=Cdigo><span lang=EN-US>WRITE_EXT(…)</span></span><span lang=EN-US> do nothing.
+If the extension is not a C++ </span><span class=Cdigo><span lang=EN-US>class</span></span><span
+lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>struct</span></span><span
+lang=EN-US>, or the named <i>var</i> does not exist inside it nor has a type
+incompatible with <i>value</i>, a compiler error message is thrown.</span></p>
 
 <p><span lang=EN-US>See </span><span class=Cdigo><u><span lang=EN-US
 style='color:blue'><a href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span><span
@@ -11747,9 +11754,9 @@ lang=EN-US> for more details on C++ data extensions and an example. </span></p>
 <h1><a name=C></a><span lang=EN-US style='mso-fareast-font-family:"Times New Roman"'>Basic
 C++ coding <o:p></o:p></span></h1>
 
-<p><span lang=EN-US>LSD modelers do not need to fully write programs in C++.
-They can just write basic code to compute the values of Variables. LSD Macros
-and functions are available to allow the reading of model’s values or to modify
+<p><span lang=EN-US>LSD modelers do not need to fully write programs in C++. They
+can just write basic code to compute the values of Variables. LSD Macros and
+functions are available to allow the reading of model’s values or to modify
 them. The elaboration of the Variables' Equation can use any legal C++ element
 or construction. Here we present some basic (and frequently used) commands.
 Remember that the code to compute a Variable's value is executed sequentially
@@ -11787,14 +11794,14 @@ single line comment,<br>
 <p class=MsoNormal><span lang=EN-US>Also, white space/blank characters (like
 spaces, tabs, new lines etc.) are ignored by the C++ compiler. The modeler is
 free to use them to organize the spacing and the organization of the code to
-its preference. Some general style rules, despite not require, are still recommended
-to keep the code more easily readable (at least by others).</span></p>
+its preference. Some general style rules, despite not require, are still
+recommended to keep the code more easily readable (at least by others).</span></p>
 
 <h2><span lang=EN-US style='mso-fareast-font-family:"Times New Roman"'>Assignments,
 arithmetic operations and increments<o:p></o:p></span></h2>
 
-<p class=MsoNormal><span lang=EN-US>If <i>a</i> is a (C++) variable, then the programmer
-can assign a value to it with the command “</span><span class=Cdigo><span
+<p class=MsoNormal><span lang=EN-US>If <i>a</i> is a (C++) variable, then the
+programmer can assign a value to it with the command “</span><span class=Cdigo><span
 lang=EN-US>=</span></span><span lang=EN-US>”:</span></p>
 
 <p class=MsoNormal><span class=Cdigo><span lang=EN-US>a = 4.3;</span></span></p>
